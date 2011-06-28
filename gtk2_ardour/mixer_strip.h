@@ -178,11 +178,16 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	Gtk::Label  diskstream_label;
 
 	Gtk::Button input_button;
+	Gtk::ToggleButton* midi_input_enable_button;
+	Gtk::HBox   input_button_box;
 	Gtk::Label  input_label;
 	Gtk::Button output_button;
 	Gtk::Label  output_label;
 
 	std::string longest_label;
+
+	void midi_input_status_changed ();
+	void midi_input_toggled ();
 
 	gint    mark_update_safe ();
 	guint32 mode_switch_in_progress;

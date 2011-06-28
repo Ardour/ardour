@@ -676,3 +676,46 @@ MidiTrack::send_silence () const
 {
 	return false;
 }
+
+void
+MidiTrack::set_input_active (bool yn)
+{
+	bool changed = false;
+
+	if (!_input) {
+		return;
+	}
+
+	PortSet& ports (_input->ports());
+
+	for (PortSet::iterator p = ports.begin(DataType::MIDI); p != ports.end(DataType::MIDI); ++p) {
+		MidiPort* mp = dynamic_cast<MidiPort*> (&*p);
+		if (yn != mp->input_active()) {
+			mp->set_input_active (yn);
+			changed = true;
+		}
+	}
+
+	if (changed) {
+		InputActiveChanged (); /* EMIT SIGNAL */
+	}
+}
+
+bool
+MidiTrack::input_active () const
+{
+	if (!_input) {
+		cerr << " no input\n";
+		return false;
+	} 
+
+	if (_input->ports().count().n_midi() == 0) {
+		cerr << "no input MIDI ports, " << _input->ports().count() << endl;
+		return false;
+	}
+
+	PortSet::iterator p = _input->ports().begin(DataType::MIDI);
+	MidiPort* mp = dynamic_cast<MidiPort*> (&*p);
+	cerr << "first port is active: " << mp->input_active() << endl;
+	return mp->input_active ();
+}

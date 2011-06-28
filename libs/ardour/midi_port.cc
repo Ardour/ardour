@@ -30,6 +30,7 @@ MidiPort::MidiPort (const std::string& name, Flags flags)
 	: Port (name, DataType::MIDI, flags)
 	, _has_been_mixed_down (false)
 	, _resolve_required (false)
+	, _input_active (true)
 {
 	_buffer = new MidiBuffer (AudioEngine::instance()->raw_buffer_size (DataType::MIDI));
 }
@@ -62,36 +63,42 @@ MidiPort::get_midi_buffer (pframes_t nframes)
 
 	if (receives_input ()) {
 
-		void* jack_buffer = jack_port_get_buffer (_jack_port, nframes);
-		const pframes_t event_count = jack_midi_get_event_count (jack_buffer);
+		if (_input_active) {
 
-		assert (event_count < _buffer->capacity());
+			void* jack_buffer = jack_port_get_buffer (_jack_port, nframes);
+			const pframes_t event_count = jack_midi_get_event_count (jack_buffer);
+			
+			assert (event_count < _buffer->capacity());
+			
+			/* suck all relevant MIDI events from the JACK MIDI port buffer
+			   into our MidiBuffer
+			*/
+			
+			for (pframes_t i = 0; i < event_count; ++i) {
+				
+				jack_midi_event_t ev;
+				
+				jack_midi_event_get (&ev, jack_buffer, i);
+				
+				if (ev.buffer[0] == 0xfe) {
+					/* throw away active sensing */
+					continue;
+				}
+				
+				/* check that the event is in the acceptable time range */
+				
+				if ((ev.time >= (_global_port_buffer_offset + _port_buffer_offset)) &&
+				    (ev.time < (_global_port_buffer_offset + _port_buffer_offset + nframes))) {
+					_buffer->push_back (ev);
+				} else {
+					cerr << "Dropping incoming MIDI at time " << ev.time << "; offset="
+					     << _global_port_buffer_offset << " limit="
+					     << (_global_port_buffer_offset + _port_buffer_offset + nframes) << "\n";
+				}
+			} 
 
-		/* suck all relevant MIDI events from the JACK MIDI port buffer
-		   into our MidiBuffer
-		*/
-
-		for (pframes_t i = 0; i < event_count; ++i) {
-
-			jack_midi_event_t ev;
-
-			jack_midi_event_get (&ev, jack_buffer, i);
-
-			if (ev.buffer[0] == 0xfe) {
-				/* throw away active sensing */
-				continue;
-			}
-
-			/* check that the event is in the acceptable time range */
-
-			if ((ev.time >= (_global_port_buffer_offset + _port_buffer_offset)) &&
-			    (ev.time < (_global_port_buffer_offset + _port_buffer_offset + nframes))) {
-				_buffer->push_back (ev);
-			} else {
-				cerr << "Dropping incoming MIDI at time " << ev.time << "; offset="
-				     << _global_port_buffer_offset << " limit="
-				     << (_global_port_buffer_offset + _port_buffer_offset + nframes) << "\n";
-			}
+		} else {
+			_buffer->silence (nframes);
 		}
 
 	} else {
@@ -204,4 +211,10 @@ MidiPort::reset ()
 	Port::reset ();
 	delete _buffer;
 	_buffer = new MidiBuffer (AudioEngine::instance()->raw_buffer_size (DataType::MIDI));
+}
+
+void
+MidiPort::set_input_active (bool yn)
+{
+	_input_active = yn;
 }

@@ -399,7 +399,7 @@ widget "*TimeInfoSelectionLabel" style:highest "very_small_bright_when_active"
 widget "*TimeInfoPunchTitle" style:highest "very_small_bright_when_active"
 widget "*TimeInfoPunchLabel" style:highest "very_small_bright_when_active"
 widget "*TimeInfoPunchButton" style:highest "punch_button"
-
 widget "*RouteNameEditorEntry" style:highest "text_cell_entry"
 widget "*RegionNameEditorEntry" style:highest "text_cell_entry"
+widget "*MixerMidiInputEnableButton" style:highest "mouse_mode_button"
 

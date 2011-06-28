@@ -532,6 +532,10 @@ MidiDiskstream::process (framepos_t transport_frame, pframes_t nframes, bool can
 		}
 
 		if (buf.size() != 0) {
+			/* XXX this needs fixing - realtime new() call for
+			   every time we get MIDI data in a process callback!
+			*/
+
 			/* Make a copy of this data and emit it for the GUI to see */
 			boost::shared_ptr<MidiBuffer> copy (new MidiBuffer (buf.capacity ()));
 			for (MidiBuffer::iterator i = buf.begin(); i != buf.end(); ++i) {

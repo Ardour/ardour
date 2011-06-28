@@ -40,6 +40,7 @@
 #include "ardour/route.h"
 #include "ardour/route_group.h"
 #include "ardour/audio_track.h"
+#include "ardour/midi_track.h"
 #include "ardour/pannable.h"
 #include "ardour/panner.h"
 #include "ardour/panner_shell.h"
@@ -89,6 +90,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, bool in_mixer)
 	, middle_button_table (1, 2)
 	, bottom_button_table (1, 2)
 	, meter_point_label (_("pre"))
+	, midi_input_enable_button (0)
 {
 	init ();
 
@@ -113,6 +115,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Route> rt
 	, middle_button_table (1, 2)
 	, bottom_button_table (1, 2)
 	, meter_point_label (_("pre"))
+	, midi_input_enable_button (0)
 {
 	init ();
 	set_route (rt);
@@ -153,8 +156,7 @@ MixerStrip::init ()
 	input_button.add (input_label);
 	input_button.set_name ("MixerIOButton");
 	input_label.set_name ("MixerIOButtonLabel");
-
-	Gtkmm2ext::set_size_request_to_display_given_text (input_button, longest_label.c_str(), 4, 4);
+	input_button_box.pack_start (input_button, true, true);
 
 	output_label.set_text (_("Output"));
 	ARDOUR_UI::instance()->set_tip (&output_button, _("Button 1 to choose outputs from a port matrix, button 3 to select inputs from a menu"), "");
@@ -227,7 +229,7 @@ MixerStrip::init ()
 	button_table.set_spacings (0);
 
 	button_table.attach (name_button, 0, 1, 0, 1);
-	button_table.attach (input_button, 0, 1, 1, 2);
+	button_table.attach (input_button_box, 0, 1, 1, 2);
 	button_table.attach (_invert_button_box, 0, 1, 2, 3);
 
 	middle_button_table.set_homogeneous (true);
@@ -399,6 +401,26 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		global_vpacker.pack_start (*spacer, false, false);
 	}
 
+	if (is_midi_track()) {
+		if (midi_input_enable_button == 0) {
+			Image* img = manage (new Image (get_icon (X_("midi_socket_small"))));
+			midi_input_enable_button = manage (new ToggleButton);
+			midi_input_enable_button->set_name ("MixerMidiInputEnableButton");
+			midi_input_enable_button->set_image (*img);
+			midi_input_enable_button->signal_toggled().connect (sigc::mem_fun (*this, &MixerStrip::midi_input_toggled));
+			ARDOUR_UI::instance()->set_tip (midi_input_enable_button, _("Enable/Disable MIDI input"));
+		}
+		/* get current state */
+		midi_input_status_changed ();
+		input_button_box.pack_start (*midi_input_enable_button, false, false);
+	} else {
+		if (midi_input_enable_button) {
+			/* removal from the container will delete it */
+			input_button_box.remove (*midi_input_enable_button);
+			midi_input_enable_button = 0;
+		}
+	}
+
 	if (is_audio_track()) {
 		boost::shared_ptr<AudioTrack> at = audio_track();
 		at->FreezeChange.connect (route_connections, invalidator (*this), boost::bind (&MixerStrip::map_frozen, this), gui_context());
@@ -486,8 +508,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	meter_point_label.show();
 	diskstream_button.show();
 	diskstream_label.show();
-	input_button.show();
-	input_label.show();
+	input_button_box.show_all();
 	output_button.show();
 	output_label.show();
 	name_label.show();
@@ -1890,4 +1911,27 @@ void
 MixerStrip::hide_things ()
 {
 	processor_box.hide_things ();
+}
+
+void
+MixerStrip::midi_input_toggled ()
+{
+	boost::shared_ptr<MidiTrack> mt = midi_track ();
+
+	if (!mt) {
+		return;
+	}
+
+	mt->set_input_active (midi_input_enable_button->get_active());
+}
+
+void
+MixerStrip::midi_input_status_changed ()
+{
+	if (midi_input_enable_button) {
+		boost::shared_ptr<MidiTrack> mt = midi_track ();
+		assert (mt);
+		cerr << "track input active? " << mt->input_active() << endl;
+		midi_input_enable_button->set_active (mt->input_active ());
+	}
 }

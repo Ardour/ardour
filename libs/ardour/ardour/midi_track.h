@@ -105,6 +105,10 @@ public:
 
 	PBD::Signal2<void, boost::shared_ptr<MidiBuffer>, boost::weak_ptr<MidiSource> > DataRecorded;
 
+	void set_input_active (bool);
+	bool input_active () const;
+	PBD::Signal0<void> InputActiveChanged;
+
 protected:
 	XMLNode& state (bool full);
 

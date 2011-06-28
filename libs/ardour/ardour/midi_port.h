@@ -46,6 +46,9 @@ class MidiPort : public Port {
 	void realtime_locate ();
 	void reset ();
 
+	bool input_active() const { return _input_active; }
+	void set_input_active (bool yn);
+
 	Buffer& get_buffer (pframes_t nframes) {
 		return get_midi_buffer (nframes);
 	}
@@ -59,8 +62,9 @@ class MidiPort : public Port {
 
   private:
 	MidiBuffer* _buffer;
-	bool _has_been_mixed_down;
-	bool _resolve_required;
+	bool        _has_been_mixed_down;
+	bool        _resolve_required;
+	bool        _input_active;
 
 	void resolve_notes (void* jack_buffer, MidiBuffer::TimeType when);
 };
