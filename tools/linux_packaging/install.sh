@@ -10,7 +10,7 @@ SAVED_PWD=$PWD
 PKG_PATH=$(dirname "$(readlink -f "$0")")
 cd "${PKG_PATH}"
 
-if [ -z "$TERM" ] || [ "$TERM" = "dumb" ]; then
+if [ -z "$TERM" ] || [ "$TERM" = "dumb" ] || [ -z "$PS1" ]; then
 	if which xterm > /dev/null; then
 		exec xterm -e "${PKG_PATH}/.stage2.run"
 	elif which gnome-terminal > /dev/null; then
