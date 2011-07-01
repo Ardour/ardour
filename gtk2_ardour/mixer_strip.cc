@@ -409,10 +409,14 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 			midi_input_enable_button->set_image (*img);
 			midi_input_enable_button->signal_toggled().connect (sigc::mem_fun (*this, &MixerStrip::midi_input_toggled));
 			ARDOUR_UI::instance()->set_tip (midi_input_enable_button, _("Enable/Disable MIDI input"));
+		} else {
+			input_button_box.remove (*midi_input_enable_button);
 		}
 		/* get current state */
 		midi_input_status_changed ();
 		input_button_box.pack_start (*midi_input_enable_button, false, false);
+		/* follow changes */
+		midi_track()->InputActiveChanged.connect (route_connections, invalidator (*this), boost::bind (&MixerStrip::midi_input_status_changed, this), gui_context());
 	} else {
 		if (midi_input_enable_button) {
 			/* removal from the container will delete it */
@@ -1807,7 +1811,6 @@ MixerStrip::on_key_press_event (GdkEventKey* ev)
 		break;
 
 	case GDK_r:
-                cerr << "Stole that r\n";
 		rec_enable_press (&fake);
 		return true;
 		break;
@@ -1860,7 +1863,6 @@ MixerStrip::on_key_release_event (GdkEventKey* ev)
 		break;
 
 	case GDK_r:
-		cerr << "Stole that r\n";
 		rec_enable_release (&fake);
 		return true;
 		break;
@@ -1931,7 +1933,6 @@ MixerStrip::midi_input_status_changed ()
 	if (midi_input_enable_button) {
 		boost::shared_ptr<MidiTrack> mt = midi_track ();
 		assert (mt);
-		cerr << "track input active? " << mt->input_active() << endl;
 		midi_input_enable_button->set_active (mt->input_active ());
 	}
 }

@@ -87,10 +87,28 @@ EditorRoutes::EditorRoutes (Editor* e)
 
 	rec_state_column->add_attribute(rec_col_renderer->property_state(), _columns.rec_state);
 	rec_state_column->add_attribute(rec_col_renderer->property_visible(), _columns.is_track);
+
 	rec_state_column->set_sizing(TREE_VIEW_COLUMN_FIXED);
 	rec_state_column->set_alignment(ALIGN_CENTER);
 	rec_state_column->set_expand(false);
 	rec_state_column->set_fixed_width(15);
+
+	// MIDI Input Active
+
+	CellRendererPixbufMulti* input_active_col_renderer = manage (new CellRendererPixbufMulti());
+	input_active_col_renderer->set_pixbuf (0, ::get_icon("midi_socket_small"));
+	input_active_col_renderer->set_pixbuf (1, ::get_icon("midi_socket_small"));
+	input_active_col_renderer->signal_changed().connect (sigc::mem_fun (*this, &EditorRoutes::on_input_active_changed));
+
+	TreeViewColumn* input_active_column = manage (new TreeViewColumn ("I", *input_active_col_renderer));
+
+	input_active_column->add_attribute(input_active_col_renderer->property_state(), _columns.is_input_active);
+	input_active_column->add_attribute (input_active_col_renderer->property_visible(), _columns.is_midi);
+
+	input_active_column->set_sizing(TREE_VIEW_COLUMN_FIXED);
+	input_active_column->set_alignment(ALIGN_CENTER);
+	input_active_column->set_expand(false);
+	input_active_column->set_fixed_width(20);
 
 	// Mute enable toggle
 	CellRendererPixbufMulti* mute_col_renderer = manage (new CellRendererPixbufMulti());
@@ -153,16 +171,15 @@ EditorRoutes::EditorRoutes (Editor* e)
 	solo_safe_state_column->set_expand(false);
 	solo_safe_state_column->set_fixed_width(22);
 
+	_display.append_column (*input_active_column);
 	_display.append_column (*rec_state_column);
 	_display.append_column (*mute_state_column);
 	_display.append_column (*solo_state_column);
 	_display.append_column (*solo_isolate_state_column);
 	_display.append_column (*solo_safe_state_column);
 
-        int colnum = _display.append_column (_("Name"), _columns.text);
-	TreeViewColumn* c = _display.get_column (colnum-1);
-        c->set_data ("i_am_the_tab_column", (void*) 0xfeedface);
-	_display.append_column (_("V"), _columns.visible);
+        _name_column = _display.append_column (_("Name"), _columns.text) - 1;
+	_visible_column = _display.append_column (_("V"), _columns.visible) - 1;
 
 	_display.set_headers_visible (true);
 	_display.set_name ("TrackListDisplay");
@@ -173,12 +190,12 @@ EditorRoutes::EditorRoutes (Editor* e)
 	_display.set_size_request (100, -1);
 	_display.add_object_drag (_columns.route.index(), "routes");
 
-	CellRendererText* name_cell = dynamic_cast<CellRendererText*> (_display.get_column_cell_renderer (5));
+	CellRendererText* name_cell = dynamic_cast<CellRendererText*> (_display.get_column_cell_renderer (_name_column));
 
 	assert (name_cell);
         name_cell->signal_editing_started().connect (sigc::mem_fun (*this, &EditorRoutes::name_edit_started));
 
-	TreeViewColumn* name_column = _display.get_column (5);
+	TreeViewColumn* name_column = _display.get_column (_name_column);
 
 	assert (name_column);
 
@@ -191,13 +208,13 @@ EditorRoutes::EditorRoutes (Editor* e)
 	name_cell->signal_edited().connect (sigc::mem_fun (*this, &EditorRoutes::name_edit));
 
 	// Set the visible column cell renderer to radio toggle
-	CellRendererToggle* visible_cell = dynamic_cast<CellRendererToggle*> (_display.get_column_cell_renderer (6));
+	CellRendererToggle* visible_cell = dynamic_cast<CellRendererToggle*> (_display.get_column_cell_renderer (_visible_column));
 
 	visible_cell->property_activatable() = true;
 	visible_cell->property_radio() = false;
 	visible_cell->signal_toggled().connect (sigc::mem_fun (*this, &EditorRoutes::visible_changed));
 
-	TreeViewColumn* visible_col = dynamic_cast<TreeViewColumn*> (_display.get_column (6));
+	TreeViewColumn* visible_col = dynamic_cast<TreeViewColumn*> (_display.get_column (_visible_column));
 	visible_col->set_expand(false);
 	visible_col->set_sizing(TREE_VIEW_COLUMN_FIXED);
 	visible_col->set_fixed_width(30);
@@ -288,6 +305,24 @@ EditorRoutes::set_session (Session* s)
 	if (_session) {
 		_session->SoloChanged.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::solo_changed_so_update_mute, this), gui_context());
 		_session->RecordStateChanged.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_rec_display, this), gui_context());
+	}
+}
+
+void
+EditorRoutes::on_input_active_changed (std::string const & path_string)
+{
+	// Get the model row that has been toggled.
+	Gtk::TreeModel::Row row = *_model->get_iter (Gtk::TreeModel::Path (path_string));
+
+	TimeAxisView* tv = row[_columns.tv];
+	RouteTimeAxisView *rtv = dynamic_cast<RouteTimeAxisView*> (tv);
+
+	if (rtv) {
+		boost::shared_ptr<MidiTrack> mt;
+		mt = rtv->midi_track();
+		if (mt) {
+			mt->set_input_active (!mt->input_active());
+		}
 	}
 }
 
@@ -517,6 +552,8 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 
 	for (list<RouteTimeAxisView*>::iterator x = routes.begin(); x != routes.end(); ++x) {
 
+		boost::shared_ptr<MidiTrack> midi_trk = boost::dynamic_pointer_cast<MidiTrack> ((*x)->route());
+
 		row = *(_model->append ());
 
 		row[_columns.text] = (*x)->route()->name();
@@ -524,6 +561,15 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 		row[_columns.tv] = *x;
 		row[_columns.route] = (*x)->route ();
 		row[_columns.is_track] = (boost::dynamic_pointer_cast<Track> ((*x)->route()) != 0);
+
+		if (midi_trk) {
+			row[_columns.is_input_active] = midi_trk->input_active ();
+			row[_columns.is_midi] = true;
+		} else {
+			row[_columns.is_input_active] = false;
+			row[_columns.is_midi] = false;
+		}
+
 		row[_columns.mute_state] = (*x)->route()->muted();
 		row[_columns.solo_state] = RouteUI::solo_visual_state ((*x)->route());
 		row[_columns.solo_isolate_state] = (*x)->route()->solo_isolated();
@@ -552,6 +598,7 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 		if ((*x)->is_midi_track()) {
 			boost::shared_ptr<MidiTrack> t = boost::dynamic_pointer_cast<MidiTrack> ((*x)->route());
 			t->StepEditStatusChange.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_rec_display, this), gui_context());
+			t->InputActiveChanged.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_input_active_display, this), gui_context());
 		}
 
 		(*x)->route()->mute_changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_mute_display, this), gui_context());
@@ -566,6 +613,7 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 	update_solo_display (true);
 	update_solo_isolate_display ();
 	update_solo_safe_display ();
+	update_input_active_display ();
 	resume_redisplay ();
 	_redisplay_does_not_sync_order_keys = false;
 }
@@ -911,7 +959,7 @@ EditorRoutes::key_press (GdkEventKey* ev)
                         name_editable = 0;
                 }
 
-                col = _display.get_column (5); // select&focus on name column
+                col = _display.get_column (_name_column); // select&focus on name column
 
                 if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
                         treeview_select_previous (_display, _model, col);
@@ -1233,6 +1281,25 @@ EditorRoutes::move_selected_tracks (bool up)
 	_model->reorder (neworder);
 
        _session->sync_order_keys (N_ ("editor"));
+}
+
+void
+EditorRoutes::update_input_active_display ()
+{
+	TreeModel::Children rows = _model->children();
+	TreeModel::Children::iterator i;
+
+	for (i = rows.begin(); i != rows.end(); ++i) {
+		boost::shared_ptr<Route> route = (*i)[_columns.route];
+
+		if (boost::dynamic_pointer_cast<Track> (route)) {
+			boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (route);
+			
+			if (mt) {
+				(*i)[_columns.is_input_active] = mt->input_active();
+			}
+		}
+	}
 }
 
 void

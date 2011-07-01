@@ -57,11 +57,24 @@ MidiTrack::MidiTrack (Session& sess, string name, Route::Flag flag, TrackMode mo
 	, _note_mode(Sustained)
 	, _step_editing (false)
 	, _midi_thru (true)
+	, _input_active (true)
 {
 }
 
 MidiTrack::~MidiTrack ()
 {
+}
+
+int
+MidiTrack::init ()
+{
+	if (Track::init ()) {
+		return -1;
+	}
+
+	_input->changed.connect_same_thread (*this, boost::bind (&MidiTrack::track_input_active, this, _1, _2));
+
+	return 0;
 }
 
 void
@@ -146,7 +159,11 @@ MidiTrack::_set_state (const XMLNode& node, int version, bool call_base)
 	}
 
 	if ((prop = node.property ("midi-thru")) != 0) {
-		set_midi_thru (prop->value() == "yes");
+		set_midi_thru (string_is_affirmative (prop->value()));
+	}
+
+	if ((prop = node.property ("input-active")) != 0) {
+		set_input_active (string_is_affirmative (prop->value()));
 	}
 
 	XMLNodeList nlist;
@@ -222,6 +239,7 @@ MidiTrack::state(bool full_state)
 	root.add_property ("step-editing", (_step_editing ? "yes" : "no"));
 	root.add_property ("note-mode", enum_2_string (_note_mode));
 	root.add_property ("midi-thru", (_midi_thru ? "yes" : "no"));
+	root.add_property ("input-active", (_input_active ? "yes" : "no"));
 
 	return root;
 }
@@ -677,8 +695,24 @@ MidiTrack::send_silence () const
 	return false;
 }
 
+bool
+MidiTrack::input_active () const
+{
+	return _input_active;
+}
+
 void
 MidiTrack::set_input_active (bool yn)
+{
+	if (yn != _input_active) {
+		_input_active = yn;
+		map_input_active (yn);
+		InputActiveChanged (); /* EMIT SIGNAL */
+	}
+}
+
+void
+MidiTrack::map_input_active (bool yn)
 {
 	bool changed = false;
 
@@ -695,27 +729,13 @@ MidiTrack::set_input_active (bool yn)
 			changed = true;
 		}
 	}
-
-	if (changed) {
-		InputActiveChanged (); /* EMIT SIGNAL */
-	}
 }
 
-bool
-MidiTrack::input_active () const
+void
+MidiTrack::track_input_active (IOChange change, void* /* src */)
 {
-	if (!_input) {
-		cerr << " no input\n";
-		return false;
-	} 
-
-	if (_input->ports().count().n_midi() == 0) {
-		cerr << "no input MIDI ports, " << _input->ports().count() << endl;
-		return false;
+	if (change.type & IOChange::ConfigurationChanged) {
+		map_input_active (_input_active);
 	}
-
-	PortSet::iterator p = _input->ports().begin(DataType::MIDI);
-	MidiPort* mp = dynamic_cast<MidiPort*> (&*p);
-	cerr << "first port is active: " << mp->input_active() << endl;
-	return mp->input_active ();
 }
+

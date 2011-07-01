@@ -582,6 +582,7 @@ LV2Plugin::add_state(XMLNode* root) const
 
 	if (_supports_persist) {
 		// Create state directory for this plugin instance
+		cerr << "Create statefile name from ID " << _insert_id << endl;
 		const std::string state_filename = _insert_id.to_s() + ".rdff";
 		const std::string state_path     = Glib::build_filename(
 		        _session.plugins_dir(), state_filename);

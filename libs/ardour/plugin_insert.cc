@@ -70,9 +70,7 @@ PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug)
 	/* the first is the master */
 
 	if (plug) {
-		plug->set_insert_info (this);
-		_plugins.push_back (plug);
-
+		add_plugin (plug);
 		create_automatable_parameters ();
 
 		Glib::Mutex::Lock em (_session.engine().process_lock());
@@ -884,6 +882,17 @@ PluginInsert::set_state(const XMLNode& node, int version)
 
 	uint32_t count = 1;
 
+#if 0
+	// Processor::set_state() will set this, but too late
+	// for it to be available when setting up plugin
+	// state. We can't call Processor::set_state() until
+	// the plugins themselves are created and added.
+
+	if ((prop = node.property ("id")) != 0) {
+		_id = prop->value();
+	}
+#endif
+
 	if (_plugins.empty()) {
 		/* if we are adding the first plugin, we will need to set
 		   up automatable controls.
@@ -903,6 +912,8 @@ PluginInsert::set_state(const XMLNode& node, int version)
 		}
 	}
 
+	Processor::set_state (node, version);
+
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 
 		/* find the node with the type-specific node name ("lv2", "ladspa", etc)
@@ -920,8 +931,6 @@ PluginInsert::set_state(const XMLNode& node, int version)
 			break;
 		}
 	}
-
-	Processor::set_state (node, version);
 
 	if (version < 3000) {
 

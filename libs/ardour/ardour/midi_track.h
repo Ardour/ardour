@@ -39,6 +39,8 @@ public:
 	MidiTrack (Session&, string name, Route::Flag f = Route::Flag (0), TrackMode m = Normal);
 	~MidiTrack ();
 
+	int init ();
+
 	int roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 	          int declick, bool can_record, bool rec_monitors_input, bool& need_butler);
 
@@ -129,6 +131,7 @@ protected:
 	NoteMode                  _note_mode;
 	bool                      _step_editing;
 	bool                      _midi_thru;
+	bool                      _input_active;
 
 	int no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 			bool state_changing, bool can_record, bool rec_monitors_input);
@@ -136,6 +139,9 @@ protected:
 
 	void diskstream_data_recorded (boost::shared_ptr<MidiBuffer>, boost::weak_ptr<MidiSource>);
 	PBD::ScopedConnection _diskstream_data_recorded_connection;
+
+	void track_input_active (IOChange, void*);
+	void map_input_active (bool);
 };
 
 } /* namespace ARDOUR*/

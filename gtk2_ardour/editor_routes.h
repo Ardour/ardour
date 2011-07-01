@@ -59,6 +59,7 @@ public:
 private:
 
 	void initial_display ();
+	void on_input_active_changed (std::string const &);
 	void on_tv_rec_enable_changed (std::string const &);
 	void on_tv_mute_enable_toggled (std::string const &);
 	void on_tv_solo_enable_toggled (std::string const &);
@@ -77,6 +78,7 @@ private:
 	void update_solo_display (bool);
 	void update_solo_isolate_display ();
 	void update_solo_safe_display ();
+	void update_input_active_display ();
 	void set_all_tracks_visibility (bool);
 	void set_all_audio_midi_visibility (int, bool);
 	void show_all_routes ();
@@ -111,9 +113,11 @@ private:
 			add (tv);
 			add (route);
 			add (name_editable);
+			add (is_input_active);
+			add (is_midi);
 		}
 
-		Gtk::TreeModelColumn<std::string>  text;
+		Gtk::TreeModelColumn<std::string>    text;
 		Gtk::TreeModelColumn<bool>           visible;
 		Gtk::TreeModelColumn<uint32_t>       rec_state;
 		Gtk::TreeModelColumn<uint32_t>       mute_state;
@@ -124,12 +128,16 @@ private:
 		Gtk::TreeModelColumn<TimeAxisView*>  tv;
 		Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::Route> >  route;
 		Gtk::TreeModelColumn<bool>           name_editable;
+		Gtk::TreeModelColumn<bool>           is_input_active;
+		Gtk::TreeModelColumn<bool>           is_midi;
 	};
 
 	Gtk::ScrolledWindow _scroller;
 	Gtkmm2ext::DnDTreeView<boost::shared_ptr<ARDOUR::Route> > _display;
 	Glib::RefPtr<Gtk::ListStore> _model;
 	ModelColumns _columns;
+	int _name_column;
+	int _visible_column;
 
 	bool _ignore_reorder;
 	bool _no_redisplay;
