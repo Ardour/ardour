@@ -96,8 +96,8 @@ EditorRoutes::EditorRoutes (Editor* e)
 	// MIDI Input Active
 
 	CellRendererPixbufMulti* input_active_col_renderer = manage (new CellRendererPixbufMulti());
-	input_active_col_renderer->set_pixbuf (0, ::get_icon("midi_socket_small"));
-	input_active_col_renderer->set_pixbuf (1, ::get_icon("midi_socket_small"));
+	input_active_col_renderer->set_pixbuf (0, ::get_icon("act-disabled"));
+	input_active_col_renderer->set_pixbuf (1, ::get_icon("midi-input-active"));
 	input_active_col_renderer->signal_changed().connect (sigc::mem_fun (*this, &EditorRoutes::on_input_active_changed));
 
 	TreeViewColumn* input_active_column = manage (new TreeViewColumn ("I", *input_active_col_renderer));

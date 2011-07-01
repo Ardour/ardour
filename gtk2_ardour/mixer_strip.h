@@ -37,6 +37,7 @@
 #include "gtkmm2ext/auto_spin.h"
 #include "gtkmm2ext/click_box.h"
 #include "gtkmm2ext/bindable_button.h"
+#include "gtkmm2ext/stateful_button.h"
 
 #include "pbd/stateful.h"
 
@@ -178,7 +179,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	Gtk::Label  diskstream_label;
 
 	Gtk::Button input_button;
-	Gtk::ToggleButton* midi_input_enable_button;
+	Gtkmm2ext::StatefulToggleButton* midi_input_enable_button;
 	Gtk::HBox   input_button_box;
 	Gtk::Label  input_label;
 	Gtk::Button output_button;

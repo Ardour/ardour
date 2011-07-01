@@ -404,7 +404,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	if (is_midi_track()) {
 		if (midi_input_enable_button == 0) {
 			Image* img = manage (new Image (get_icon (X_("midi_socket_small"))));
-			midi_input_enable_button = manage (new ToggleButton);
+			midi_input_enable_button = manage (new StatefulToggleButton);
 			midi_input_enable_button->set_name ("MixerMidiInputEnableButton");
 			midi_input_enable_button->set_image (*img);
 			midi_input_enable_button->signal_toggled().connect (sigc::mem_fun (*this, &MixerStrip::midi_input_toggled));
