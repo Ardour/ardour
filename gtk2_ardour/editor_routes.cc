@@ -113,7 +113,7 @@ EditorRoutes::EditorRoutes (Editor* e)
 	// Mute enable toggle
 	CellRendererPixbufMulti* mute_col_renderer = manage (new CellRendererPixbufMulti());
 
-	mute_col_renderer->set_pixbuf (0, ::get_icon("act-disabled"));
+	mute_col_renderer->set_pixbuf (0, ::get_icon("mute-disabled"));
 	mute_col_renderer->set_pixbuf (1, ::get_icon("muted-by-others"));
 	mute_col_renderer->set_pixbuf (2, ::get_icon("mute-enabled"));
 	mute_col_renderer->signal_changed().connect (sigc::mem_fun (*this, &EditorRoutes::on_tv_mute_enable_toggled));
@@ -129,7 +129,7 @@ EditorRoutes::EditorRoutes (Editor* e)
 	// Solo enable toggle
 	CellRendererPixbufMulti* solo_col_renderer = manage (new CellRendererPixbufMulti());
 
-	solo_col_renderer->set_pixbuf (0, ::get_icon("act-disabled"));
+	solo_col_renderer->set_pixbuf (0, ::get_icon("solo-disabled"));
 	solo_col_renderer->set_pixbuf (1, ::get_icon("solo-enabled"));
 	solo_col_renderer->set_pixbuf (3, ::get_icon("soloed-by-others"));
 	solo_col_renderer->signal_changed().connect (sigc::mem_fun (*this, &EditorRoutes::on_tv_solo_enable_toggled));
@@ -145,8 +145,8 @@ EditorRoutes::EditorRoutes (Editor* e)
 	// Solo isolate toggle
 	CellRendererPixbufMulti* solo_iso_renderer = manage (new CellRendererPixbufMulti());
 
-	solo_iso_renderer->set_pixbuf (0, ::get_icon("act-disabled"));
-	solo_iso_renderer->set_pixbuf (1, ::get_icon("solo-isolated"));
+	solo_iso_renderer->set_pixbuf (0, ::get_icon("solo-isolate-disabled"));
+	solo_iso_renderer->set_pixbuf (1, ::get_icon("solo-isolate-enabled"));
 	solo_iso_renderer->signal_changed().connect (sigc::mem_fun (*this, &EditorRoutes::on_tv_solo_isolate_toggled));
 
 	TreeViewColumn* solo_isolate_state_column = manage (new TreeViewColumn("SI", *solo_iso_renderer));
@@ -160,8 +160,8 @@ EditorRoutes::EditorRoutes (Editor* e)
 	// Solo safe toggle
 	CellRendererPixbufMulti* solo_safe_renderer = manage (new CellRendererPixbufMulti ());
 
-	solo_safe_renderer->set_pixbuf (0, ::get_icon("act-disabled"));
-	solo_safe_renderer->set_pixbuf (1, ::get_icon("solo-enabled"));
+	solo_safe_renderer->set_pixbuf (0, ::get_icon("solo-safe-disabled"));
+	solo_safe_renderer->set_pixbuf (1, ::get_icon("solo-safe-enabled"));
 	solo_safe_renderer->signal_changed().connect (sigc::mem_fun (*this, &EditorRoutes::on_tv_solo_safe_toggled));
 
 	TreeViewColumn* solo_safe_state_column = manage (new TreeViewColumn(_("SS"), *solo_safe_renderer));
