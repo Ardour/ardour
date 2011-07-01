@@ -68,6 +68,8 @@ EditorRoutes::EditorRoutes (Editor* e)
         , selection_countdown (0)
         , name_editable (0)
 {
+	static const int column_width = 22;
+
 	_scroller.add (_display);
 	_scroller.set_policy (POLICY_NEVER, POLICY_AUTOMATIC);
 
@@ -91,7 +93,7 @@ EditorRoutes::EditorRoutes (Editor* e)
 	rec_state_column->set_sizing(TREE_VIEW_COLUMN_FIXED);
 	rec_state_column->set_alignment(ALIGN_CENTER);
 	rec_state_column->set_expand(false);
-	rec_state_column->set_fixed_width(15);
+	rec_state_column->set_fixed_width(column_width);
 
 	// MIDI Input Active
 
@@ -108,7 +110,7 @@ EditorRoutes::EditorRoutes (Editor* e)
 	input_active_column->set_sizing(TREE_VIEW_COLUMN_FIXED);
 	input_active_column->set_alignment(ALIGN_CENTER);
 	input_active_column->set_expand(false);
-	input_active_column->set_fixed_width(20);
+	input_active_column->set_fixed_width(column_width);
 
 	// Mute enable toggle
 	CellRendererPixbufMulti* mute_col_renderer = manage (new CellRendererPixbufMulti());
@@ -140,7 +142,7 @@ EditorRoutes::EditorRoutes (Editor* e)
 	solo_state_column->set_sizing(TREE_VIEW_COLUMN_FIXED);
 	solo_state_column->set_alignment(ALIGN_CENTER);
 	solo_state_column->set_expand(false);
-	solo_state_column->set_fixed_width(15);
+	solo_state_column->set_fixed_width(column_width);
 
 	// Solo isolate toggle
 	CellRendererPixbufMulti* solo_iso_renderer = manage (new CellRendererPixbufMulti());
@@ -155,7 +157,7 @@ EditorRoutes::EditorRoutes (Editor* e)
 	solo_isolate_state_column->set_sizing(TREE_VIEW_COLUMN_FIXED);
 	solo_isolate_state_column->set_alignment(ALIGN_CENTER);
 	solo_isolate_state_column->set_expand(false);
-	solo_isolate_state_column->set_fixed_width(22);
+	solo_isolate_state_column->set_fixed_width(column_width);
 
 	// Solo safe toggle
 	CellRendererPixbufMulti* solo_safe_renderer = manage (new CellRendererPixbufMulti ());
@@ -169,7 +171,7 @@ EditorRoutes::EditorRoutes (Editor* e)
 	solo_safe_state_column->set_sizing(TREE_VIEW_COLUMN_FIXED);
 	solo_safe_state_column->set_alignment(ALIGN_CENTER);
 	solo_safe_state_column->set_expand(false);
-	solo_safe_state_column->set_fixed_width(22);
+	solo_safe_state_column->set_fixed_width(column_width);
 
 	_display.append_column (*input_active_column);
 	_display.append_column (*rec_state_column);
