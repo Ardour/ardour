@@ -3516,7 +3516,6 @@ Editor::pane_allocation_handler (Allocation &alloc, Paned* which)
 	static Pane done;
 
 	XMLNode* geometry = find_named_node (*node, "geometry");
-	assert (geometry);
 
 	if (which == static_cast<Paned*> (&edit_pane)) {
 
