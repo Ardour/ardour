@@ -2461,6 +2461,11 @@ MidiRegionView::commit_resizing (ArdourCanvas::CanvasNoteEvent* primary, bool at
 	for (std::vector<NoteResizeData *>::iterator i = _resize_data.begin(); i != _resize_data.end(); ++i) {
 		CanvasNote*  canvas_note = (*i)->canvas_note;
 		SimpleRect*  resize_rect = (*i)->resize_rect;
+
+		/* Get the new x position for this resize, which is in pixels relative
+		 * to the region position.
+		 */
+		
 		double current_x;
 
 		if (at_front) {
@@ -2477,7 +2482,10 @@ MidiRegionView::commit_resizing (ArdourCanvas::CanvasNoteEvent* primary, bool at
 			}
 		}
 
-		current_x = snap_pixel_to_frame (current_x);
+		/* Convert that to a frame within the region */
+		current_x = snap_pixel_to_frame (current_x) + _region->start ();
+
+		/* and then to beats */
 		current_x = frames_to_beats (current_x);
 
 		if (at_front && current_x < canvas_note->note()->end_time()) {
