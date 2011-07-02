@@ -487,9 +487,6 @@ EditorRegions::region_changed (boost::shared_ptr<Region> r, const PropertyChange
 				return;
 			}
 		}
-
-		/* find the region in our model and update its row */
-		TreeModel::Children rows = _model->children ();
 	}
 
 	if (what_changed.contains (ARDOUR::Properties::hidden)) {
