@@ -405,8 +405,6 @@ SndFileSource::nondestructive_write_unlocked (Sample *data, framecnt_t cnt)
 framecnt_t
 SndFileSource::destructive_write_unlocked (Sample* data, framecnt_t cnt)
 {
-	framepos_t old_file_pos;
-
 	if (!writable()) {
 		warning << string_compose (_("attempt to write a non-writable audio file source (%1)"), _path) << endmsg;
 		return 0;
@@ -482,7 +480,6 @@ SndFileSource::destructive_write_unlocked (Sample* data, framecnt_t cnt)
 		}
 	}
 
-	old_file_pos = file_pos;
 	update_length (file_pos, cnt);
 
 	if (_build_peakfiles) {

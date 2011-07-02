@@ -1936,7 +1936,6 @@ Editor::insert_route_list_drag (boost::shared_ptr<Route> route, int x, int y)
 {
 	double wx, wy;
 	double cx, cy;
-	framepos_t where;
 	RouteTimeAxisView *dest_rtv = 0;
 	RouteTimeAxisView *source_rtv = 0;
 
@@ -1949,7 +1948,7 @@ Editor::insert_route_list_drag (boost::shared_ptr<Route> route, int x, int y)
 	event.button.x = wx;
 	event.button.y = wy;
 
-	where = event_frame (&event, &cx, &cy);
+	event_frame (&event, &cx, &cy);
 
 	std::pair<TimeAxisView*, int> const tv = trackview_by_y_position (cy);
 	if (tv.first == 0) {

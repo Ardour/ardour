@@ -267,6 +267,10 @@ namespace ARDOUR {
 			  case Seconds:
 				return seconds != 0;
 			}
+
+			/* NOTREACHED */
+			assert (false);
+			return false;
 		}
 	};
 

@@ -1462,21 +1462,13 @@ Mixer_UI::pane_allocation_handler (Allocation&, Gtk::Paned* which)
 	char buf[32];
 	XMLNode* node = ARDOUR_UI::instance()->mixer_settings();
 	XMLNode* geometry;
-	int width, height;
+	int height;
 	static int32_t done[3] = { 0, 0, 0 };
 
-	width = default_width;
 	height = default_height;
 
 	if ((geometry = find_named_node (*node, "geometry")) != 0) {
 
-
-		if ((prop = geometry->property ("x_size")) == 0) {
-			prop = geometry->property ("x-size");
-		}
-		if (prop) {
-			width = atoi (prop->value());
-		}
 		if ((prop = geometry->property ("y_size")) == 0) {
 			prop = geometry->property ("y-size");
 		}

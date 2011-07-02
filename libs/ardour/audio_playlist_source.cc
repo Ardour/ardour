@@ -136,7 +136,6 @@ AudioPlaylistSource::read_unlocked (Sample* dst, framepos_t start, framecnt_t cn
 	boost::shared_ptr<gain_t> gbuf;
 	framecnt_t to_read;
 	framecnt_t to_zero;
-	pair<framepos_t,framepos_t> extent = _playlist->get_extent();
 
 	/* we must be careful not to read beyond the end of our "section" of
 	 * the playlist, because otherwise we may read data that exists, but

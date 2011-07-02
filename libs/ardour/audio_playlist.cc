@@ -190,9 +190,6 @@ AudioPlaylist::AudioPlaylist (boost::shared_ptr<const AudioPlaylist> other, fram
 
 		framecnt_t fade_in = 64;
 		framecnt_t fade_out = 64;
-		framepos_t position;
-		framecnt_t len;
-		frameoffset_t offset;
 
 		switch (region->coverage (start, end)) {
 		case OverlapNone:
@@ -212,9 +209,6 @@ AudioPlaylist::AudioPlaylist (boost::shared_ptr<const AudioPlaylist> other, fram
 		}
 
 		case OverlapStart: {
-			position = region->position() - start;
-			len = end - region->position();
-
 			if (end > region->position() + region->fade_in()->back()->when)
 				fade_in = region->fade_in()->back()->when;  //end is after fade-in, preserve the fade-in
 			if (end > region->last_frame() - region->fade_out()->back()->when)
@@ -223,10 +217,6 @@ AudioPlaylist::AudioPlaylist (boost::shared_ptr<const AudioPlaylist> other, fram
 		}
 
 		case OverlapEnd: {
-			position = 0;
-			offset = start - region->position();
-			len = region->length() - offset;
-
 			if (start < region->last_frame() - region->fade_out()->back()->when)  //start is before fade-out, preserve the fadeout
 				fade_out = region->fade_out()->back()->when;
 

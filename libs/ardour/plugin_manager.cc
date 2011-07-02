@@ -733,8 +733,7 @@ PluginManager::set_status (PluginType t, string id, PluginStatusType status)
 		return;
 	}
 
-	pair<PluginStatusList::iterator, bool> res = statuses.insert (ps);
-	//cerr << "Added " << t << " " << id << " " << status << " success ? " << res.second << endl;
+	statuses.insert (ps);
 }
 
 ARDOUR::PluginInfoList&

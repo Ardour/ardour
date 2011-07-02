@@ -823,14 +823,11 @@ ProcessorBox::processor_button_release_event (GdkEventButton *ev, ProcessorEntry
 		processor = child->processor ();
 	}
 
-	int ret = false;
-
 	if (processor && Keyboard::is_delete_event (ev)) {
 
 		Glib::signal_idle().connect (sigc::bind (
 				sigc::mem_fun(*this, &ProcessorBox::idle_delete_processor),
 				boost::weak_ptr<Processor>(processor)));
-		ret = true;
 
 	} else if (Keyboard::is_context_menu_event (ev)) {
 
@@ -849,7 +846,6 @@ ProcessorBox::processor_button_release_event (GdkEventButton *ev, ProcessorEntry
 		}
 
 		show_processor_menu (ev->time);
-		ret = true;
 
 	} else if (processor && Keyboard::is_button2_event (ev)
 #ifndef GTKOSX
@@ -864,8 +860,6 @@ ProcessorBox::processor_button_release_event (GdkEventButton *ev, ProcessorEntry
 		} else {
 			processor->activate ();
 		}
-		ret = true;
-
 	}
 
 	return false;

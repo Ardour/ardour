@@ -860,8 +860,6 @@ Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorList::ite
 	DEBUG_TRACE (DEBUG::Processors, string_compose (
 		             "%1 adding processor %2\n", name(), processor->name()));
 
-	ChanCount old_pms = processor_max_streams;
-
 	if (!_session.engine().connected() || !processor) {
 		return 1;
 	}
@@ -1018,8 +1016,6 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 		loc = _processors.end ();
 	}
 
-	ChanCount old_pms = processor_max_streams;
-
 	if (!_session.engine().connected()) {
 		return 1;
 	}
@@ -1044,7 +1040,7 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 				pi->set_count (1);
 			}
 
-			ProcessorList::iterator inserted = _processors.insert (loc, *i);
+			_processors.insert (loc, *i);
 
 			if ((*i)->active()) {
 				(*i)->activate ();
@@ -1216,8 +1212,6 @@ Route::ab_plugins (bool forward)
 void
 Route::clear_processors (Placement p)
 {
-	const ChanCount old_pms = processor_max_streams;
-
 	if (!_session.engine().connected()) {
 		return;
 	}
@@ -1297,8 +1291,6 @@ Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStream
 	if (processor == _amp || processor == _meter || processor == _main_outs) {
 		return 0;
 	}
-
-	ChanCount old_pms = processor_max_streams;
 
 	if (!_session.engine().connected()) {
 		return 1;

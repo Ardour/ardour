@@ -411,7 +411,6 @@ bool
 MidiRegionView::button_release (GdkEventButton* ev)
 {
 	double event_x, event_y;
-	framepos_t event_frame = 0;
 
 	if (ev->button != 1) {
 		return false;
@@ -422,8 +421,6 @@ MidiRegionView::button_release (GdkEventButton* ev)
 
 	group->w2i(event_x, event_y);
 	group->ungrab(ev->time);
-
-	event_frame = trackview.editor().pixel_to_frame(event_x);
 
 	switch (_mouse_state) {
 	case Pressed: // Clicked
@@ -792,7 +789,6 @@ void
 MidiRegionView::channel_edit ()
 {
 	bool first = true;
-	bool mixed = false;
 	uint8_t current_channel;
 
 	if (_selection.empty()) {
@@ -800,14 +796,9 @@ MidiRegionView::channel_edit ()
 	}
 	
 	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
-		Selection::iterator next = i;
 		if (first) {
 			current_channel = (*i)->note()->channel ();
 			first = false;
-		} else {
-			if (current_channel != (*i)->note()->channel()) {
-				mixed = true;
-			}
 		}
 	}
 

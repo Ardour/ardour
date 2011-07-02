@@ -178,8 +178,7 @@ PerThreadPool::PerThreadPool ()
 {
 	{
 		/* for some reason this appears necessary to get glib's thread private stuff to work */
-		GPrivate* key;
-		key = g_private_new (NULL);
+		g_private_new (NULL);
 	}
 
 	_key = g_private_new (free_per_thread_pool);

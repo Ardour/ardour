@@ -714,8 +714,6 @@ MidiTrack::set_input_active (bool yn)
 void
 MidiTrack::map_input_active (bool yn)
 {
-	bool changed = false;
-
 	if (!_input) {
 		return;
 	}
@@ -726,7 +724,6 @@ MidiTrack::map_input_active (bool yn)
 		MidiPort* mp = dynamic_cast<MidiPort*> (&*p);
 		if (yn != mp->input_active()) {
 			mp->set_input_active (yn);
-			changed = true;
 		}
 	}
 }

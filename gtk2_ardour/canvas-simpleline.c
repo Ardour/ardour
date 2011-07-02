@@ -177,12 +177,8 @@ gnome_canvas_simpleline_init (GnomeCanvasSimpleLine *simpleline)
 static void
 gnome_canvas_simpleline_destroy (GtkObject *object)
 {
-	GnomeCanvasSimpleLine *line;
-
 	g_return_if_fail (object != NULL);
 	g_return_if_fail (GNOME_IS_CANVAS_SIMPLELINE (object));
-
-	line = GNOME_CANVAS_SIMPLELINE (object);
 
 	if (GTK_OBJECT_CLASS (parent_class)->destroy)
 		(* GTK_OBJECT_CLASS (parent_class)->destroy) (object);
@@ -398,10 +394,6 @@ gnome_canvas_simpleline_draw (GnomeCanvasItem *item,
                               int x, int y,
                               int width, int height)
 {
-	GnomeCanvasSimpleLine *simpleline;
-
-	simpleline = GNOME_CANVAS_SIMPLELINE (item);
-
         /* XXX not implemented */
 }
 
@@ -425,8 +417,6 @@ gnome_canvas_simpleline_point (GnomeCanvasItem *item, double x, double y, int cx
 	GnomeCanvasSimpleLine *simpleline;
 	double x1, y1, x2, y2;
 	double dx, dy;
-
-	simpleline = GNOME_CANVAS_SIMPLELINE (item);
 
 	*actual_item = item;
 

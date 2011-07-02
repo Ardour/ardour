@@ -182,14 +182,8 @@ int
 Session::silent_process_routes (pframes_t nframes, bool& need_butler)
 {
 	bool record_active = actively_recording();
-	int  declick = get_transport_declick_required();
 	bool rec_monitors = get_rec_monitors_input();
 	boost::shared_ptr<RouteList> r = routes.reader ();
-
-	if (transport_sub_state & StopPendingCapture) {
-		/* force a declick out */
-		declick = -1;
-	}
 
 	const framepos_t start_frame = _transport_frame;
 	const framepos_t end_frame = _transport_frame + lrintf(nframes * _transport_speed);
@@ -705,7 +699,6 @@ Session::track_slave_state (float slave_speed, framepos_t slave_transport_frame,
 
 				memset (delta_accumulator, 0, sizeof (int32_t) * delta_accumulator_size);
 				average_slave_delta = 0L;
-				this_delta = 0;
 			}
 		}
 

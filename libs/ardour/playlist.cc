@@ -848,7 +848,6 @@ Playlist::flush_notifications (bool from_undo)
  {
 	 RegionList::iterator i;
 	 framecnt_t old_length = 0;
-	 int ret = -1;
 
 	 if (!holding_state()) {
 		 old_length = _get_extent().second;
@@ -881,7 +880,6 @@ Playlist::flush_notifications (bool from_undo)
 			 }
 
 			 notify_region_removed (region);
-			 ret = 0;
 			 break;
 		 }
 	 }

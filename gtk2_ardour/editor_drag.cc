@@ -1309,11 +1309,6 @@ RegionSpliceDrag::motion (GdkEvent* event, bool)
 
 	pair<TimeAxisView*, int> const tvp = _editor->trackview_by_y_position (_drags->current_pointer_y ());
 	RouteTimeAxisView* tv = dynamic_cast<RouteTimeAxisView*> (tvp.first);
-	layer_t layer = tvp.second;
-
-	if (tv && tv->layer_display() == Overlaid) {
-		layer = 0;
-	}
 
 	/* The region motion is only processed if the pointer is over
 	   an audio track.

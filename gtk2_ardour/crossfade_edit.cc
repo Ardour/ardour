@@ -809,8 +809,6 @@ CrossfadeEditor::_apply_to (boost::shared_ptr<Crossfade> xf)
 
 	double firstx = (*in.begin())->when;
 	double endx = (*the_end)->when;
-	double miny = in.get_min_y ();
-	double maxy = in.get_max_y ();
 
 	in.freeze ();
 	in.clear ();
@@ -818,7 +816,7 @@ CrossfadeEditor::_apply_to (boost::shared_ptr<Crossfade> xf)
 	for (list<Point*>::iterator i = fade[In].points.begin(); i != fade[In].points.end(); ++i) {
 
 		double when = firstx + ((*i)->x * (endx - firstx));
-		double value = (*i)->y; // miny + ((*i)->y * (maxy - miny));
+		double value = (*i)->y;
 		in.add (when, value);
 	}
 
@@ -829,8 +827,6 @@ CrossfadeEditor::_apply_to (boost::shared_ptr<Crossfade> xf)
 
 	firstx = (*out.begin())->when;
 	endx = (*the_end)->when;
-	miny = out.get_min_y ();
-	maxy = out.get_max_y ();
 
 	out.freeze ();
 	out.clear ();
@@ -838,7 +834,7 @@ CrossfadeEditor::_apply_to (boost::shared_ptr<Crossfade> xf)
 	for (list<Point*>::iterator i = fade[Out].points.begin(); i != fade[Out].points.end(); ++i) {
 
 		double when = firstx + ((*i)->x * (endx - firstx));
-		double value = (*i)->y; // miny + ((*i)->y * (maxy - miny));
+		double value = (*i)->y;
 		out.add (when, value);
 	}
 

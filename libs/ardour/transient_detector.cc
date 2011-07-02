@@ -128,13 +128,11 @@ TransientDetector::update_positions (Readable* src, uint32_t channel, AnalysisFe
 	Plugin::FeatureSet features;
 
 	Sample* data = 0;
-	float* bufs[1] = { 0 };
 
 	int buff_size = 1024;
 	int step_size = 64;
 
 	data = new Sample[buff_size];
-	bufs[0] = data;
 
 	AnalysisFeatureList::iterator i = positions.begin();
 

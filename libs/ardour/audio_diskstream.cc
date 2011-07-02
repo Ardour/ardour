@@ -1252,7 +1252,6 @@ AudioDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 		if (destructive()) {
 			(*chan)->capture_transition_buf->get_read_vector(&transvec);
 			size_t transcount = transvec.len[0] + transvec.len[1];
-			bool have_start = false;
 			size_t ti;
 
 			for (ti=0; ti < transcount; ++ti) {
@@ -1264,9 +1263,7 @@ AudioDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 					(*chan)->write_source->mark_capture_start (captrans.capture_val);
 					(*chan)->curr_capture_cnt = 0;
 
-					have_start = true;
-				}
-				else if (captrans.type == CaptureEnd) {
+				} else if (captrans.type == CaptureEnd) {
 
 					// capture end, the capture_val represents total frames in capture
 

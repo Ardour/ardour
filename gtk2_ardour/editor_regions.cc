@@ -369,7 +369,6 @@ EditorRegions::add_region (boost::shared_ptr<Region> region)
 	} else {
 		// find parent node, add as new child
 		TreeModel::iterator i;
-		TreeModel::Children rows = _model->children();
 
 		boost::unordered_map<string, Gtk::TreeModel::RowReference>::iterator it;
 
@@ -394,9 +393,9 @@ EditorRegions::add_region (boost::shared_ptr<Region> region)
 			*/
 
 			row = *(_model->insert (subrows.end()));
-		}
-		else {
-		  row = *(_model->append());
+			
+		} else {
+			row = *(_model->append());
 		}
 
 		row[_columns.property_toggles_visible] = true;
@@ -491,8 +490,6 @@ EditorRegions::region_changed (boost::shared_ptr<Region> r, const PropertyChange
 
 		/* find the region in our model and update its row */
 		TreeModel::Children rows = _model->children ();
-		TreeModel::iterator i = rows.begin ();
-
 	}
 
 	if (what_changed.contains (ARDOUR::Properties::hidden)) {

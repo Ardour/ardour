@@ -2130,7 +2130,7 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 {
 	const XMLProperty* prop;
 	XMLNode* geometry;
-	int x, y, xoff, yoff;
+	int x, y;
 	Gdk::Geometry g;
 
 	if ((prop = node.property ("id")) != 0) {
@@ -2141,8 +2141,6 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 	g.base_height = default_height;
 	x = 1;
 	y = 1;
-	xoff = 0;
-	yoff = 21;
 
 	if ((geometry = find_named_node (node, "geometry")) != 0) {
 
@@ -2173,19 +2171,6 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 		}
 		if (prop) {
 			y = atoi (prop->value());
-		}
-
-		if ((prop = geometry->property ("x_off")) == 0) {
-			prop = geometry->property ("x-off");
-		}
-		if (prop) {
-			xoff = atoi (prop->value());
-		}
-		if ((prop = geometry->property ("y_off")) == 0) {
-			prop = geometry->property ("y-off");
-		}
-		if (prop) {
-			yoff = atoi (prop->value());
 		}
 	}
 
@@ -2368,9 +2353,8 @@ Editor::get_state ()
 	if (is_realized()) {
 		Glib::RefPtr<Gdk::Window> win = get_window();
 
-		int x, y, xoff, yoff, width, height;
+		int x, y, width, height;
 		win->get_root_origin(x, y);
-		win->get_position(xoff, yoff);
 		win->get_size(width, height);
 
 		XMLNode* geometry = new XMLNode ("geometry");
@@ -2383,10 +2367,6 @@ Editor::get_state ()
 		geometry->add_property("x-pos", string(buf));
 		snprintf(buf, sizeof(buf), "%d", y);
 		geometry->add_property("y-pos", string(buf));
-		snprintf(buf, sizeof(buf), "%d", xoff);
-		geometry->add_property("x-off", string(buf));
-		snprintf(buf, sizeof(buf), "%d", yoff);
-		geometry->add_property("y-off", string(buf));
 		snprintf(buf,sizeof(buf), "%d",gtk_paned_get_position (static_cast<Paned*>(&edit_pane)->gobj()));
 		geometry->add_property("edit-horizontal-pane-pos", string(buf));
 		geometry->add_property("notebook-shrunk", _notebook_shrunk ? "1" : "0");
@@ -3527,7 +3507,6 @@ Editor::pane_allocation_handler (Allocation &alloc, Paned* which)
 	XMLProperty* prop;
 	char buf[32];
 	XMLNode* node = ARDOUR_UI::instance()->editor_settings();
-	int width, height;
 
 	enum Pane {
 		Horizontal = 0x1,
@@ -3536,22 +3515,8 @@ Editor::pane_allocation_handler (Allocation &alloc, Paned* which)
 
 	static Pane done;
 
-	XMLNode* geometry;
-
-	width = default_width;
-	height = default_height;
-
-	if ((geometry = find_named_node (*node, "geometry")) != 0) {
-
-		prop = geometry->property ("x-size");
-		if (prop) {
-			width = atoi (prop->value());
-		}
-		prop = geometry->property ("y-size");
-		if (prop) {
-			height = atoi (prop->value());
-		}
-	}
+	XMLNode* geometry = find_named_node (*node, "geometry");
+	assert (geometry);
 
 	if (which == static_cast<Paned*> (&edit_pane)) {
 

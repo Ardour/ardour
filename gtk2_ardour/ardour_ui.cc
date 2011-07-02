@@ -996,12 +996,8 @@ void
 ARDOUR_UI::update_buffer_load ()
 {
 	char buf[64];
-	uint32_t c, p;
 
 	if (_session) {
-		c = _session->capture_load ();
-		p = _session->playback_load ();
-
 		snprintf (buf, sizeof (buf), _("Buffers p:%" PRIu32 "%% c:%" PRIu32 "%%"),
 			  _session->playback_load(), _session->capture_load());
 		buffer_load_label.set_text (buf);

@@ -911,7 +911,6 @@ EngineControl::driver_changed ()
 {
 	string driver = driver_combo.get_active_text();
 	string::size_type maxlen = 0;
-	int maxindex = -1;
 	int n = 0;
 
 	enumerate_devices (driver);
@@ -926,7 +925,6 @@ EngineControl::driver_changed ()
 	for (vector<string>::iterator i = strings.begin(); i != strings.end(); ++i, ++n) {
 		if ((*i).length() > maxlen) {
 			maxlen = (*i).length();
-			maxindex = n;
 		}
 	}
 

@@ -905,7 +905,6 @@ MidiDiskstream::transport_stopped_wallclock (struct tm& /*when*/, time_t /*twhen
 	MidiRegion::SourceList srcs;
 	MidiRegion::SourceList::iterator src;
 	vector<CaptureInfo*>::iterator ci;
-	bool mark_write_completed = false;
 
 	finish_capture (true);
 
@@ -1075,8 +1074,6 @@ MidiDiskstream::transport_stopped_wallclock (struct tm& /*when*/, time_t /*twhen
 			}
  		}
 
-
-		mark_write_completed = true;
 	}
 
 	use_new_write_source (0);
