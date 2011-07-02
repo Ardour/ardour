@@ -240,6 +240,8 @@ protected:
 
 	void create_gain_automation_child (const Evoral::Parameter &, bool);
 
+	void setup_processor_menu_and_curves ();
+
 	boost::shared_ptr<AutomationTimeAxisView> gain_track;
 
 	StreamView*           _view;
@@ -270,6 +272,9 @@ protected:
 
 	void set_track_mode (ARDOUR::TrackMode, bool apply_to_selection = false);
 
+	/** Information about all automatable processor parameters that apply to
+	 *  this route.  The Amp processor is not included in this list.
+	 */
 	std::list<ProcessorAutomationInfo*> processor_automation;
 
 	typedef std::vector<boost::shared_ptr<AutomationLine> > ProcessorAutomationCurves;

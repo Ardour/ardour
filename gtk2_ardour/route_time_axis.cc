@@ -265,12 +265,20 @@ RouteTimeAxisView::post_construct ()
 	/* map current state of the route */
 
 	update_diskstream_display ();
+	setup_processor_menu_and_curves ();
+	reset_processor_automation_curves ();
+}
 
+/** Set up the processor menu for the current set of processors, and
+ *  display automation curves for any parameters which have data.
+ */
+void
+RouteTimeAxisView::setup_processor_menu_and_curves ()
+{
 	_subplugin_menu_map.clear ();
 	subplugin_menu.items().clear ();
 	_route->foreach_processor (sigc::mem_fun (*this, &RouteTimeAxisView::add_processor_to_subplugin_menu));
 	_route->foreach_processor (sigc::mem_fun (*this, &RouteTimeAxisView::add_existing_processor_automation_curves));
-	reset_processor_automation_curves ();
 }
 
 gint
@@ -1840,6 +1848,7 @@ RouteTimeAxisView::find_processor_automation_node (boost::shared_ptr<Processor> 
 	return 0;
 }
 
+/** Add an AutomationTimeAxisView to display automation for a processor's parameter */
 void
 RouteTimeAxisView::add_processor_automation_curve (boost::shared_ptr<Processor> processor, Evoral::Parameter what)
 {
@@ -1894,7 +1903,8 @@ RouteTimeAxisView::add_existing_processor_automation_curves (boost::weak_ptr<Pro
 {
 	boost::shared_ptr<Processor> processor (p.lock ());
 
-	if (!processor) {
+	if (!processor || boost::dynamic_pointer_cast<Amp> (processor)) {
+		/* The Amp processor is a special case and is dealt with separately */
 		return;
 	}
 
@@ -2090,11 +2100,7 @@ RouteTimeAxisView::processors_changed (RouteProcessorChange c)
 		(*i)->valid = false;
 	}
 
-	_subplugin_menu_map.clear ();
-	subplugin_menu.items().clear ();
-
-	_route->foreach_processor (sigc::mem_fun (*this, &RouteTimeAxisView::add_processor_to_subplugin_menu));
-	_route->foreach_processor (sigc::mem_fun (*this, &RouteTimeAxisView::add_existing_processor_automation_curves));
+	setup_processor_menu_and_curves ();
 
 	bool deleted_processor_automation = false;
 
