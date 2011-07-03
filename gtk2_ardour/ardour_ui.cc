@@ -985,6 +985,57 @@ ARDOUR_UI::update_sample_rate (framecnt_t)
 }
 
 void
+ARDOUR_UI::update_format ()
+{
+	if (!_session) {
+		format_label.set_text ("");
+		return;
+	}
+
+	stringstream s;
+
+	switch (_session->config.get_native_file_header_format ()) {
+	case BWF:
+		s << "BWF";
+		break;
+	case WAVE:
+		s << "WAV";
+		break;
+	case WAVE64:
+		s << "WAV64";
+		break;
+	case CAF:
+		s << "CAF";
+		break;
+	case AIFF:
+		s << "AIFF";
+		break;
+	case iXML:
+		s << "iXML";
+		break;
+	case RF64:
+		s << "RF64";
+		break;
+	}
+
+	s << " ";
+	
+	switch (_session->config.get_native_file_data_format ()) {
+	case FormatFloat:
+		s << "32-float";
+		break;
+	case FormatInt24:
+		s << "24-int";
+		break;
+	case FormatInt16:
+		s << "16-int";
+		break;
+	}
+
+	format_label.set_text (s.str ());
+}
+
+void
 ARDOUR_UI::update_cpu_load ()
 {
 	char buf[32];

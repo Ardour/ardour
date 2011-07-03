@@ -154,6 +154,7 @@ ARDOUR_UI::set_session (Session *s)
 	_session->AuditionActive.connect (_session_connections, MISSING_INVALIDATOR, ui_bind (&ARDOUR_UI::auditioning_changed, this, _1), gui_context());
 	_session->locations()->added.connect (_session_connections, MISSING_INVALIDATOR, ui_bind (&ARDOUR_UI::handle_locations_change, this, _1), gui_context());
 	_session->locations()->removed.connect (_session_connections, MISSING_INVALIDATOR, ui_bind (&ARDOUR_UI::handle_locations_change, this, _1), gui_context());
+	_session->config.ParameterChanged.connect (_session_connections, MISSING_INVALIDATOR, ui_bind (&ARDOUR_UI::session_parameter_changed, this, _1), gui_context ());
 
 #ifdef HAVE_JACK_SESSION
 	engine->JackSessionEvent.connect (*_session, MISSING_INVALIDATOR, ui_bind (&Session::jack_session_event, _session, _1), gui_context());
@@ -181,6 +182,8 @@ ARDOUR_UI::set_session (Session *s)
 	second_connection = Glib::signal_timeout().connect (sigc::mem_fun(*this, &ARDOUR_UI::every_second), 1000);
 	point_one_second_connection = Glib::signal_timeout().connect (sigc::mem_fun(*this, &ARDOUR_UI::every_point_one_seconds), 100);
 	point_zero_one_second_connection = Glib::signal_timeout().connect (sigc::mem_fun(*this, &ARDOUR_UI::every_point_zero_one_seconds), 40);
+
+	update_format ();
 }
 
 int

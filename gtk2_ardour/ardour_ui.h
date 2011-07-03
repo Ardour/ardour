@@ -520,6 +520,10 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	Gtk::EventBox sample_rate_box;
 	void update_sample_rate (ARDOUR::framecnt_t);
 
+	Gtk::Label    format_label;
+	Gtk::EventBox format_box;
+	void update_format ();
+	
 	gint every_second ();
 	gint every_point_one_seconds ();
 	gint every_point_zero_one_seconds ();
@@ -673,6 +677,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void toggle_use_osc ();
 
 	void parameter_changed (std::string);
+	void session_parameter_changed (std::string);
 
 	bool first_idle ();
 

@@ -538,6 +538,10 @@ ARDOUR_UI::build_menu_bar ()
 	sample_rate_box.set_name ("SampleRate");
 	sample_rate_label.set_name ("SampleRate");
 
+	format_box.add (format_label);
+	format_box.set_name ("Format");
+	format_label.set_name ("Format");
+
 #ifndef TOP_MENUBAR
  	menu_hbox.pack_start (*menu_bar, false, false);
 #else
@@ -555,6 +559,7 @@ ARDOUR_UI::build_menu_bar ()
 	menu_hbox.pack_end (cpu_load_box, false, false, 4);
 	menu_hbox.pack_end (buffer_load_box, false, false, 4);
 	menu_hbox.pack_end (sample_rate_box, false, false, 4);
+	menu_hbox.pack_end (format_box, false, false, 4);
 
 	menu_bar_base.set_name ("MainMenuBar");
 	menu_bar_base.add (menu_hbox);

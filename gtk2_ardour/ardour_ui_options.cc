@@ -403,6 +403,14 @@ ARDOUR_UI::parameter_changed (std::string p)
 }
 
 void
+ARDOUR_UI::session_parameter_changed (std::string p)
+{
+	if (p == "native-file-data-format" || p == "native-file-header-format") {
+		update_format ();
+	}
+}
+
+void
 ARDOUR_UI::reset_main_clocks ()
 {
 	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::reset_main_clocks)
