@@ -1247,6 +1247,8 @@ Session::use_sync_source (Slave* new_slave)
 	delete _slave;
 	_slave = new_slave;
 
+	send_full_time_code (_transport_frame);
+
 	boost::shared_ptr<RouteList> rl = routes.reader();
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
