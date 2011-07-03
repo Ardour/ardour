@@ -107,6 +107,7 @@ class IO : public SessionObject, public Latent
 	int disconnect (Port *our_port, std::string other_port, void *src);
 	int disconnect (void *src);
 	bool connected_to (boost::shared_ptr<const IO>) const;
+	bool connected_to (const std::string&) const;
 	bool connected () const;
 	bool physically_connected () const;
 

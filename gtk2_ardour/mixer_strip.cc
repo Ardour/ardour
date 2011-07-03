@@ -407,7 +407,8 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 			midi_input_enable_button = manage (new StatefulToggleButton);
 			midi_input_enable_button->set_name ("MixerMidiInputEnableButton");
 			midi_input_enable_button->set_image (*img);
-			midi_input_enable_button->signal_toggled().connect (sigc::mem_fun (*this, &MixerStrip::midi_input_toggled));
+			midi_input_enable_button->signal_button_press_event().connect (sigc::mem_fun (*this, &MixerStrip::input_active_button_press), false);
+			midi_input_enable_button->signal_button_release_event().connect (sigc::mem_fun (*this, &MixerStrip::input_active_button_release), false);
 			ARDOUR_UI::instance()->set_tip (midi_input_enable_button, _("Enable/Disable MIDI input"));
 		} else {
 			input_button_box.remove (*midi_input_enable_button);
@@ -1915,16 +1916,40 @@ MixerStrip::hide_things ()
 	processor_box.hide_things ();
 }
 
-void
-MixerStrip::midi_input_toggled ()
+bool
+MixerStrip::input_active_button_press (GdkEventButton* ev)
+{
+	/* nothing happens on press */
+	return true;
+}
+
+bool
+MixerStrip::input_active_button_release (GdkEventButton* ev)
 {
 	boost::shared_ptr<MidiTrack> mt = midi_track ();
 
 	if (!mt) {
-		return;
+		return true;
 	}
 
-	mt->set_input_active (midi_input_enable_button->get_active());
+	if (mt->input_active()) {
+		if (Keyboard::modifier_state_contains (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::SecondaryModifier))) {
+			/* turn all other tracks using this input off */
+			_session->set_exclusive_input_active (mt, false);
+		} else {
+			mt->set_input_active (false);
+		}
+
+	} else {
+		if (Keyboard::modifier_state_contains (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::SecondaryModifier))) {
+			/* turn all other tracks using this input on */
+			_session->set_exclusive_input_active (mt, true);
+		} else {
+			mt->set_input_active (true);
+		}
+	}
+
+	return true;
 }
 
 void

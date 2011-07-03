@@ -238,6 +238,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	boost::shared_ptr<Route> route_by_name (std::string);
 	boost::shared_ptr<Route> route_by_id (PBD::ID);
 	boost::shared_ptr<Route> route_by_remote_id (uint32_t id);
+	void routes_using_input_from (const std::string& str, RouteList& rl);
 
 	bool route_name_unique (std::string) const;
 	bool route_name_internal (std::string) const;
@@ -608,6 +609,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void set_listen (boost::shared_ptr<RouteList>, bool, SessionEvent::RTeventCallback after = rt_cleanup, bool group_override = false);
 	void set_record_enabled (boost::shared_ptr<RouteList>, bool, SessionEvent::RTeventCallback after = rt_cleanup, bool group_override = false);
 	void set_solo_isolated (boost::shared_ptr<RouteList>, bool, SessionEvent::RTeventCallback after = rt_cleanup, bool group_override = false);
+	void set_exclusive_input_active (boost::shared_ptr<Route> rt, bool others_on);
 
 	PBD::Signal1<void,bool> SoloActive;
 	PBD::Signal0<void> SoloChanged;

@@ -1519,6 +1519,18 @@ IO::connected_to (boost::shared_ptr<const IO> other) const
 	return false;
 }
 
+bool
+IO::connected_to (const string& str) const
+{
+	for (PortSet::const_iterator i = _ports.begin(); i != _ports.end(); ++i) {
+		if (i->connected_to (str)) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 void
 IO::process_input (boost::shared_ptr<Processor> proc, framepos_t start_frame, framepos_t end_frame, pframes_t nframes)
 {

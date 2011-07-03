@@ -2466,6 +2466,62 @@ Session::io_name_is_legal (const std::string& name)
 	return true;
 }
 
+void
+Session::set_exclusive_input_active (boost::shared_ptr<Route> rt, bool others_on)
+{
+	RouteList rl;
+	vector<string> connections;
+
+	PortSet& ps (rt->input()->ports());
+
+	for (PortSet::iterator p = ps.begin(); p != ps.end(); ++p) {
+		p->get_connections (connections);
+	}
+
+	for (vector<string>::iterator s = connections.begin(); s != connections.end(); ++s) {
+		routes_using_input_from (*s, rl);
+	}
+
+	/* scan all relevant routes to see if others are on or off */
+
+	bool others_are_already_on = false;
+
+	for (RouteList::iterator r = rl.begin(); r != rl.end(); ++r) {
+		if ((*r) != rt) {
+			boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (*r);
+			if (mt) {
+				if (mt->input_active()) {
+					others_are_already_on = true;
+					break;
+				}
+			}
+		}
+	}
+
+	/* globally reverse other routes */
+
+	for (RouteList::iterator r = rl.begin(); r != rl.end(); ++r) {
+		if ((*r) != rt) {
+			boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (*r);
+			if (mt) {
+				mt->set_input_active (!others_are_already_on);
+			}
+		}
+	}
+}
+
+void
+Session::routes_using_input_from (const string& str, RouteList& rl)
+{
+	boost::shared_ptr<RouteList> r = routes.reader ();
+
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		if ((*i)->input()->connected_to (str)) {
+			rl.push_back (*i);
+		}
+	}
+}
+
 boost::shared_ptr<Route>
 Session::route_by_name (string name)
 {
