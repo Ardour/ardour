@@ -882,7 +882,6 @@ PluginInsert::set_state(const XMLNode& node, int version)
 
 	uint32_t count = 1;
 
-#if 0
 	// Processor::set_state() will set this, but too late
 	// for it to be available when setting up plugin
 	// state. We can't call Processor::set_state() until
@@ -891,7 +890,6 @@ PluginInsert::set_state(const XMLNode& node, int version)
 	if ((prop = node.property ("id")) != 0) {
 		_id = prop->value();
 	}
-#endif
 
 	if (_plugins.empty()) {
 		/* if we are adding the first plugin, we will need to set
