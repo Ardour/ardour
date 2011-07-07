@@ -64,11 +64,15 @@ ARDOUR_UI::set_session (Session *s)
 		return;
 	}
 
-	const XMLNodeList& children = _session->extra_xml (X_("UI"))->children();
-	for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
-		if ((*i)->name() == GUIObjectState::xml_node_name) {
-			gui_object_state->load (**i);
-			break;
+	const XMLNode* node = _session->extra_xml (X_("UI"));
+
+	if (node) {
+		const XMLNodeList& children = node->children();
+		for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
+			if ((*i)->name() == GUIObjectState::xml_node_name) {
+				gui_object_state->load (**i);
+				break;
+			}
 		}
 	}
 
