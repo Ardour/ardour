@@ -219,15 +219,6 @@ TimeAxisView::~TimeAxisView()
 	delete _size_menu;
 }
 
-#if 0
-void
-TimeAxisView::show ()
-{
-	canvas_display()->show();
-	canvas_background()->show();
-}
-#endif
-
 void
 TimeAxisView::hide ()
 {
@@ -292,9 +283,6 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent)
 
 	_canvas_background->raise_to_top ();
 	_canvas_display->raise_to_top ();
-
-	// time_axis_vbox.show ();
-	// controls_ebox.show ();
 
 	_canvas_background->show ();
 	_canvas_display->show ();
