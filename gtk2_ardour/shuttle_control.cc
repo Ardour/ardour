@@ -304,20 +304,42 @@ ShuttleControl::on_scroll_event (GdkEventScroll* ev)
 		return true;
 	}
 
+	bool semis = (Config->get_shuttle_units() == Semitones);
+
 	switch (ev->direction) {
 	case GDK_SCROLL_UP:
 	case GDK_SCROLL_RIGHT:
-		shuttle_fract += 0.005;
+		if (semis) {
+			if (shuttle_fract == 0) {
+				shuttle_fract = semitones_as_fract (1, false);
+			} else {
+				bool rev;
+				int st = fract_as_semitones (shuttle_fract, rev);
+				shuttle_fract = semitones_as_fract (st + 1, rev);
+			}
+		} else {
+			shuttle_fract += 0.00125;
+		}
 		break;
 	case GDK_SCROLL_DOWN:
 	case GDK_SCROLL_LEFT:
-		shuttle_fract -= 0.005;
+		if (semis) {
+			if (shuttle_fract == 0) {
+				shuttle_fract = semitones_as_fract (1, true);
+			} else {
+				bool rev;
+				int st = fract_as_semitones (shuttle_fract, rev);
+				shuttle_fract = semitones_as_fract (st - 1, rev);
+			}
+		} else {
+			shuttle_fract -= 0.00125;
+		}
 		break;
 	default:
 		return false;
 	}
-
-	if (Config->get_shuttle_units() == Semitones) {
+	
+	if (semis) {
 
 		float lower_side_of_dead_zone = semitones_as_fract (-24, true);
 		float upper_side_of_dead_zone = semitones_as_fract (-24, false);
