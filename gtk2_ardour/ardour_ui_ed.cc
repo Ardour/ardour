@@ -602,7 +602,6 @@ ARDOUR_UI::setup_clock ()
 	big_clock_window->get()->add (*big_clock);
 
 	big_clock_window->get()->set_title (_("Big Clock"));
-	big_clock_window->get()->set_type_hint (Gdk::WINDOW_TYPE_HINT_UTILITY);
 	big_clock_window->get()->signal_realize().connect (sigc::mem_fun (*this, &ARDOUR_UI::big_clock_realized));
 	big_clock_window->get()->signal_unmap().connect (sigc::bind (sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleBigClock")));
 	big_clock_window->get()->signal_key_press_event().connect (sigc::bind (sigc::ptr_fun (relay_key_press), big_clock_window->get()), false);
