@@ -106,6 +106,7 @@ class ControlPoint;
 class CrossfadeView;
 class DragManager;
 class GroupedButtons;
+class GUIObjectState;
 class Marker;
 class MidiRegionView;
 class MixerStrip;
@@ -471,11 +472,13 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	typedef std::pair<TimeAxisView*,XMLNode*> TAVState;
 
 	struct VisualState {
+	    VisualState();
+	    ~VisualState ();
 	    double              y_position;
 	    double              frames_per_unit;
-	    framepos_t         leftmost_frame;
+	    framepos_t          leftmost_frame;
 	    Editing::ZoomFocus  zoom_focus;
-	    std::list<TAVState> track_states;
+	    GUIObjectState*     gui_state;
 	};
 
 	std::list<VisualState*> undo_visual_stack;

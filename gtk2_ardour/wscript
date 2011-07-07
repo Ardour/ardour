@@ -120,6 +120,7 @@ gtk2_ardour_sources = [
         'gtk-custom-hruler.c',
         'gtk-custom-ruler.c',
         'gtk_pianokeyboard.c',
+        'gui_object.cc',
         'insert_time_dialog.cc',
         'interthread_progress_window.cc',
         'io_selector.cc',

@@ -31,6 +31,7 @@
 #include "ardour_ui.h"
 #include "bundle_manager.h"
 #include "global_port_matrix.h"
+#include "gui_object.h"
 #include "gui_thread.h"
 #include "keyeditor.h"
 #include "location_ui.h"
@@ -61,6 +62,14 @@ ARDOUR_UI::set_session (Session *s)
 
 	if (!_session) {
 		return;
+	}
+
+	const XMLNodeList& children = _session->extra_xml (X_("UI"))->children();
+	for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
+		if ((*i)->name() == GUIObjectState::xml_node_name) {
+			gui_object_state->load (**i);
+			break;
+		}
 	}
 
 	if (location_ui->get()) {

@@ -91,6 +91,7 @@ typedef uint64_t microseconds_t;
 #include "engine_dialog.h"
 #include "gain_meter.h"
 #include "global_port_matrix.h"
+#include "gui_object.h"
 #include "gui_thread.h"
 #include "keyboard.h"
 #include "location_ui.h"
@@ -133,6 +134,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 
 	: Gtkmm2ext::UI (PROGRAM_NAME, argcp, argvp)
 
+	, gui_object_state (new GUIObjectState)
 	, primary_clock (new AudioClock (X_("primary"), false, X_("TransportClockDisplay"), true, true, false, true))
 	, secondary_clock (new AudioClock (X_("secondary"), false, X_("SecondaryClockDisplay"), true, true, false, true))
 	, preroll_clock (new AudioClock (X_("preroll"), false, X_("PreRollClock"), true, false, true))
@@ -292,7 +294,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	/* we like keyboards */
 
 	keyboard = new ArdourKeyboard(*this);
-
 
 	XMLNode* node = ARDOUR_UI::instance()->keyboard_settings();
 	if (node) {
@@ -2194,6 +2195,8 @@ ARDOUR_UI::save_state (const string & name, bool switch_to_it)
 			node->add_child_nocopy (*((*i)->get_state ()));
 		}
 	}
+
+	node->add_child_nocopy (gui_object_state->get_state());
 
 	_session->add_extra_xml (*node);
 

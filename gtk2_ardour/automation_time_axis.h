@@ -97,10 +97,8 @@ class AutomationTimeAxisView : public TimeAxisView {
 	void reset_objects (PointSelection&);
 
 	int  set_state (const XMLNode&, int version);
-	guint32 show_at (double y, int& nth, Gtk::VBox *parent);
 
-	static const std::string state_node_name;
-	XMLNode* get_state_node();
+	std::string state_id() const;
 
 	boost::shared_ptr<ARDOUR::AutomationControl> control()    { return _control; }
 	boost::shared_ptr<AutomationController>      controller() { return _controller; }
@@ -156,9 +154,6 @@ class AutomationTimeAxisView : public TimeAxisView {
 	Gtk::CheckMenuItem* mode_discrete_item;
 	Gtk::CheckMenuItem* mode_line_item;
 
-	void hide ();
-	void show ();
-
 	void add_line (boost::shared_ptr<AutomationLine>);
 
 	void clear_clicked ();
@@ -183,8 +178,6 @@ class AutomationTimeAxisView : public TimeAxisView {
 
 	PBD::ScopedConnectionList _list_connections;
 	PBD::ScopedConnectionList _route_connections;
-
-	void update_extra_xml_shown (bool editor_shown);
 
 	void entered ();
 	void exited ();

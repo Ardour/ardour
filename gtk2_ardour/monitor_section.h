@@ -44,6 +44,8 @@ class MonitorSection : public RouteUI
 
         Gtkmm2ext::TearOff& tearoff() const { return *_tearoff; }
 
+	std::string state_id() const;
+
   private:
         Gtk::VBox vpacker;
         Gtk::HBox hpacker;

@@ -750,8 +750,8 @@ ARDOUR_UI::save_ardour_state ()
 	Config->save_state();
 	ui_config->save_state ();
 
-	XMLNode enode(static_cast<Stateful*>(editor)->get_state());
-	XMLNode mnode(mixer->get_state());
+	XMLNode& enode (static_cast<Stateful*>(editor)->get_state());
+	XMLNode& mnode (mixer->get_state());
 
 	if (_session) {
 		_session->add_instant_xml (enode);

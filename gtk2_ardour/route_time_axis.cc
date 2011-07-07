@@ -104,30 +104,44 @@ RouteTimeAxisView::setup_slider_pix ()
 	}
 }
 
-RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, boost::shared_ptr<Route> rt, Canvas& canvas)
+RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, Canvas& canvas)
 	: AxisView(sess)
-	, RouteUI(rt, sess)
+	, RouteUI(sess)
 	, TimeAxisView(sess,ed,(TimeAxisView*) 0, canvas)
+	, _view (0)
 	, parent_canvas (canvas)
 	, button_table (3, 3)
 	, route_group_button (_("g"))
 	, playlist_button (_("p"))
 	, automation_button (_("a"))
+	, automation_action_menu (0)
+	, plugins_submenu_item (0)
+	, route_group_menu (0)
+	, playlist_action_menu (0)
+	, mode_menu (0)
+	, color_mode_menu (0)
 	, gm (sess, slider, true, 115)
 {
+}
+
+void
+RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
+{
+	RouteUI::set_route (rt);
+	
 	gm.set_controls (_route, _route->shared_peak_meter(), _route->amp());
 	gm.get_level_meter().set_no_show_all();
 	gm.get_level_meter().setup_meters(50);
 
-	_has_state = true;
-	playlist_action_menu = 0;
-	automation_action_menu = 0;
-	plugins_submenu_item = 0;
-	mode_menu = 0;
-	_view = 0;
+	string str = gui_property ("height");
+	if (!str.empty()) {
+		set_height (atoi (str));
+	} else {
+		set_height (preset_height (HeightNormal));
+	}
 
 	if (!_route->is_hidden()) {
-		_marked_for_display = true;
+		set_gui_property ("visible", "yes");
 	}
 
 	mute_changed (0);
@@ -213,12 +227,16 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, boost::sh
 
 	if (is_track()) {
 
+		str = gui_property ("layer-display");
+		if (!str.empty()) {
+			set_layer_display (LayerDisplay (string_2_enum (str, _view->layer_display ())));
+		}
+
 		track()->FreezeChange.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::map_frozen, this), gui_context());
 		track()->SpeedChanged.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::speed_changed, this), gui_context());
 
 		/* pick up the correct freeze state */
 		map_frozen ();
-
 	}
 
 	_editor.ZoomChanged.connect (sigc::mem_fun(*this, &RouteTimeAxisView::reset_samples_per_unit));
@@ -352,22 +370,6 @@ RouteTimeAxisView::automation_click ()
 	conditionally_add_to_selection ();
 	build_automation_action_menu (false);
 	automation_action_menu->popup (1, gtk_get_current_event_time());
-}
-
-int
-RouteTimeAxisView::set_state (const XMLNode& node, int version)
-{
-	TimeAxisView::set_state (node, version);
-
-	XMLNodeList kids = node.children();
-	XMLNodeConstIterator iter;
-	const XMLProperty* prop;
-
-	if (_view && (prop = node.property ("layer-display"))) {
-		set_layer_display (LayerDisplay (string_2_enum (prop->value(), _view->layer_display ())));
-	}
-
-	return 0;
 }
 
 void
@@ -850,15 +852,9 @@ RouteTimeAxisView::set_height (uint32_t h)
 
 	TimeAxisView::set_height (h);
 
-	ensure_xml_node ();
-
 	if (_view) {
 		_view->set_height ((double) current_height());
 	}
-
-	char buf[32];
-	snprintf (buf, sizeof (buf), "%u", height);
-	xml_node->add_property ("height", buf);
 
 	if (height >= preset_height (HeightNormal)) {
 
@@ -906,7 +902,7 @@ RouteTimeAxisView::set_height (uint32_t h)
 
 	if (height_changed && !no_redraw) {
 		/* only emit the signal if the height really changed */
-		 _route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+		request_redraw ();
 	}
 }
 
@@ -1644,14 +1640,16 @@ RouteTimeAxisView::toggle_automation_track (const Evoral::Parameter& param)
 	} else {
 		assert (menu);
 		bool yn = menu->get_active();
-		if (track->set_visibility (menu->get_active()) && yn) {
+		bool changed = false;
+
+		if ((changed = track->set_marked_for_display (menu->get_active())) && yn) {
 
 			/* we made it visible, now trigger a redisplay. if it was hidden, then automation_track_hidden()
 			   will have done that for us.
 			*/
 
-			if (!no_redraw) {
-				_route->gui_changed (X_("track_height"), (void *) 0); /* EMIT_SIGNAL */
+			if (changed && !no_redraw) {
+				request_redraw ();
 			}
 		}
 	}
@@ -1675,7 +1673,7 @@ RouteTimeAxisView::automation_track_hidden (Evoral::Parameter param)
 	}
 
 	if (_route && !no_redraw) {
-		_route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+		request_redraw ();
 	}
 }
 
@@ -1691,7 +1689,7 @@ RouteTimeAxisView::show_all_automation (bool apply_to_selection)
 		/* Show our automation */
 
 		for (AutomationTracks::iterator i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
-			i->second->set_visibility (true);
+			i->second->set_marked_for_display (true);
 
 			Gtk::CheckMenuItem* menu = automation_child_menu_item (i->first);
 
@@ -1717,7 +1715,7 @@ RouteTimeAxisView::show_all_automation (bool apply_to_selection)
 
 		/* Redraw */
 
-		_route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+		request_redraw ();
 	}
 }
 
@@ -1733,7 +1731,7 @@ RouteTimeAxisView::show_existing_automation (bool apply_to_selection)
 
 		for (AutomationTracks::iterator i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
 			if (i->second->has_automation()) {
-				i->second->set_visibility (true);
+				i->second->set_marked_for_display (true);
 
 				Gtk::CheckMenuItem* menu = automation_child_menu_item (i->first);
 				if (menu) {
@@ -1754,7 +1752,7 @@ RouteTimeAxisView::show_existing_automation (bool apply_to_selection)
 
 		no_redraw = false;
 
-		_route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+		request_redraw ();
 	}
 }
 
@@ -1769,7 +1767,7 @@ RouteTimeAxisView::hide_all_automation (bool apply_to_selection)
 		/* Hide our automation */
 
 		for (AutomationTracks::iterator i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
-			i->second->set_visibility (false);
+			i->second->set_marked_for_display (false);
 
 			Gtk::CheckMenuItem* menu = automation_child_menu_item (i->first);
 
@@ -1787,7 +1785,7 @@ RouteTimeAxisView::hide_all_automation (bool apply_to_selection)
 		}
 
 		no_redraw = false;
-		_route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+		request_redraw ();
 	}
 }
 
@@ -1894,7 +1892,7 @@ RouteTimeAxisView::processor_automation_track_hidden (RouteTimeAxisView::Process
 	}
 
 	if (!no_redraw) {
-		_route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+		request_redraw ();
 	}
 }
 
@@ -1930,26 +1928,23 @@ RouteTimeAxisView::add_automation_child (Evoral::Parameter param, boost::shared_
 {
 	using namespace Menu_Helpers;
 
-	XMLProperty* prop;
-	XMLNode* node;
-
 	add_child (track);
 
 	track->Hiding.connect (sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::automation_track_hidden), param));
 
 	_automation_tracks[param] = track;
 
-	if ((node = track->get_state_node()) != 0) {
-		if  ((prop = node->property ("shown")) != 0) {
-			/* existing state overrides "show" argument */
-			show = string_is_affirmative (prop->value());
-		}
+	/* existing state overrides "show" argument */
+	string s = track->gui_property ("visible");
+	if (!s.empty()) { 
+		show = string_is_affirmative (s);
 	}
 
-	track->set_visibility (show);
+	/* this might or might not change the visibility status, so don't rely on it */
+	track->set_marked_for_display (show);
 
-	if (!no_redraw) {
-		_route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+	if (show && !no_redraw) {
+		request_redraw ();
 	}
 
 	if (!EventTypeMap::instance().is_midi_parameter(param)) {
@@ -2076,13 +2071,12 @@ RouteTimeAxisView::processor_menu_item_toggled (RouteTimeAxisView::ProcessorAuto
 		redraw = true;
 	}
 
-	if (pan->view && showit != pan->view->marked_for_display()) {
-		pan->view->set_visibility (showit);
+	if (pan->view && pan->view->set_marked_for_display (showit)) {
 		redraw = true;
 	}
-
+	
 	if (redraw && !no_redraw) {
-		 _route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+		request_redraw ();
 	}
 }
 
@@ -2123,7 +2117,7 @@ RouteTimeAxisView::processors_changed (RouteProcessorChange c)
 	}
 
 	if (deleted_processor_automation && !no_redraw) {
-		_route->gui_changed ("track_height", this);
+		request_redraw ();
 	}
 }
 
@@ -2167,8 +2161,7 @@ RouteTimeAxisView::set_layer_display (LayerDisplay d, bool apply_to_selection)
 			_view->set_layer_display (d);
 		}
 
-		ensure_xml_node ();
-		xml_node->add_property (N_("layer-display"), enum_2_string (d));
+		set_gui_property (X_("layer-display"), enum_2_string (d));
 	}
 }
 
@@ -2317,9 +2310,9 @@ RouteTimeAxisView::add_underlay (StreamView* v, bool update_xml)
 
 		v->foreach_regionview(sigc::mem_fun(*this, &RouteTimeAxisView::add_ghost));
 
+#ifdef GUI_OBJECT_STATE_FIX_REQUIRED
 		if (update_xml) {
 			if (!underlay_xml_node) {
-				ensure_xml_node();
 				underlay_xml_node = xml_node->add_child("Underlays");
 			}
 
@@ -2327,6 +2320,7 @@ RouteTimeAxisView::add_underlay (StreamView* v, bool update_xml)
 			XMLProperty* prop = node->add_property("id");
 			prop->set_value(v->trackview().route()->id().to_s());
 		}
+#endif
 	}
 }
 
@@ -2492,3 +2486,8 @@ RouteTimeAxisView::uncombine_regions ()
 	_session->add_command (new StatefulDiffCommand (playlist));
 }
 
+string
+RouteTimeAxisView::state_id() const
+{
+	return string_compose ("rtav %1", _route->id().to_s());
+}

@@ -74,7 +74,7 @@ class StreamView;
  * This class provides the basic LHS controls and display methods. This should be
  * extended to create functional time-axis based views.
  */
-class TimeAxisView : public virtual AxisView, public PBD::Stateful
+class TimeAxisView : public virtual AxisView
 {
   private:
 	enum NamePackingBits {
@@ -86,9 +86,6 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 
 	TimeAxisView(ARDOUR::Session* sess, PublicEditor& ed, TimeAxisView* parent, ArdourCanvas::Canvas& canvas);
 	virtual ~TimeAxisView ();
-
-	XMLNode& get_state ();
-	int set_state (const XMLNode&, int version);
 
 	static PBD::Signal1<void,TimeAxisView*> CatchDeletion;
 
@@ -129,8 +126,8 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 	void show_name_label ();
 	void show_name_entry ();
 
-	virtual bool set_visibility (bool);
 	virtual guint32 show_at (double y, int& nth, Gtk::VBox *parent);
+	virtual void hide ();
 
 	void clip_to_viewport ();
 
@@ -151,6 +148,8 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 	virtual void set_height (uint32_t h);
 	void set_height_enum (Height, bool apply_to_selection = false);
 	void reset_height();
+
+	virtual void reset_visual_state ();
 
 	std::pair<TimeAxisView*, ARDOUR::layer_t> covers_y_position (double);
 
@@ -196,7 +195,6 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 
 	TimeAxisView* get_parent () { return parent; }
 	void set_parent (TimeAxisView& p);
-	bool has_state () const;
 
 	virtual LayerDisplay layer_display () const { return Overlaid; }
 	virtual StreamView* view () const { return 0; }
@@ -205,7 +203,7 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 	Children get_child_list ();
 
 	SelectionRect* get_selection_rect(uint32_t id);
-
+	
 	static uint32_t preset_height (Height);
 
   protected:
@@ -270,17 +268,11 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 
 	TimeAxisView* parent;
 
-	/** Find the parent with state */
-	TimeAxisView* get_parent_with_state();
-
 	Children children;
 	bool is_child (TimeAxisView*);
 
 	void remove_child (boost::shared_ptr<TimeAxisView>);
 	void add_child (boost::shared_ptr<TimeAxisView>);
-
-	virtual void hide ();
-	virtual void show ();
 
 	/* selection display */
 

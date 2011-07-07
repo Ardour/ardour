@@ -59,13 +59,13 @@ class StepEditor;
 class MidiTimeAxisView : public RouteTimeAxisView
 {
   public:
- 	MidiTimeAxisView (PublicEditor&, ARDOUR::Session*, boost::shared_ptr<ARDOUR::Route>, ArdourCanvas::Canvas& canvas);
+ 	MidiTimeAxisView (PublicEditor&, ARDOUR::Session*, ArdourCanvas::Canvas& canvas);
  	virtual ~MidiTimeAxisView ();
+
+	void set_route (boost::shared_ptr<ARDOUR::Route>);
 
 	MidiStreamView* midi_view();
 
-	/* overridden from parent to store display state */
-	guint32 show_at (double y, int& nth, Gtk::VBox *parent);
 	void set_height (uint32_t);
 
         void enter_internal_edit_mode ();
@@ -109,7 +109,6 @@ class MidiTimeAxisView : public RouteTimeAxisView
   private:
 	sigc::signal<void, std::string, std::string>  _midi_patch_settings_changed;
 
-	void hide ();
 	void model_changed();
 	void custom_device_mode_changed();
 

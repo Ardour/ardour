@@ -117,7 +117,7 @@ MarkerTimeAxis::set_height (uint32_t h)
 	}
 
 	// tell those interested that we have had our height changed
-	 gui_changed("track_height",(void*)0) ; /* EMIT_SIGNAL */
+	gui_changed("track_height",(void*)0) ; /* EMIT_SIGNAL */
 }
 
 /**

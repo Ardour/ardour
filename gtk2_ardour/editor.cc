@@ -77,49 +77,50 @@
 
 #include "control_protocol/control_protocol.h"
 
-#include "audio_clock.h"
-#include "editor.h"
-#include "debug.h"
-#include "keyboard.h"
-#include "marker.h"
-#include "playlist_selector.h"
-#include "audio_region_view.h"
-#include "rgb_macros.h"
-#include "selection.h"
-#include "audio_streamview.h"
-#include "time_axis_view.h"
-#include "audio_time_axis.h"
-#include "utils.h"
-#include "crossfade_view.h"
-#include "canvas-noevent-text.h"
-#include "editing.h"
-#include "public_editor.h"
-#include "crossfade_edit.h"
-#include "canvas_impl.h"
 #include "actions.h"
-#include "sfdb_ui.h"
-#include "gui_thread.h"
-#include "simpleline.h"
-#include "rhythm_ferret.h"
 #include "actions.h"
-#include "tempo_lines.h"
 #include "analysis_window.h"
+#include "audio_clock.h"
+#include "audio_region_view.h"
+#include "audio_streamview.h"
+#include "audio_time_axis.h"
+#include "automation_time_axis.h"
 #include "bundle_manager.h"
-#include "global_port_matrix.h"
+#include "canvas-noevent-text.h"
+#include "canvas_impl.h"
+#include "crossfade_edit.h"
+#include "crossfade_view.h"
+#include "debug.h"
+#include "editing.h"
+#include "editor.h"
+#include "editor_cursors.h"
 #include "editor_drag.h"
 #include "editor_group_tabs.h"
-#include "automation_time_axis.h"
-#include "editor_routes.h"
-#include "midi_time_axis.h"
-#include "mixer_strip.h"
-#include "editor_route_groups.h"
-#include "editor_regions.h"
 #include "editor_locations.h"
+#include "editor_regions.h"
+#include "editor_route_groups.h"
+#include "editor_routes.h"
 #include "editor_snapshots.h"
 #include "editor_summary.h"
-#include "region_layering_order_editor.h"
+#include "global_port_matrix.h"
+#include "gui_object.h"
+#include "gui_thread.h"
+#include "keyboard.h"
+#include "marker.h"
+#include "midi_time_axis.h"
+#include "mixer_strip.h"
 #include "mouse_cursors.h"
-#include "editor_cursors.h"
+#include "playlist_selector.h"
+#include "public_editor.h"
+#include "region_layering_order_editor.h"
+#include "rgb_macros.h"
+#include "rhythm_ferret.h"
+#include "selection.h"
+#include "sfdb_ui.h"
+#include "simpleline.h"
+#include "tempo_lines.h"
+#include "time_axis_view.h"
+#include "utils.h"
 
 #include "i18n.h"
 
@@ -4093,6 +4094,16 @@ Editor::reposition_and_zoom (framepos_t frame, double fpu)
 	}
 }
 
+Editor::VisualState::VisualState ()
+	: gui_state (new GUIObjectState)
+{
+}
+
+Editor::VisualState::~VisualState ()
+{
+	delete gui_state;
+}
+
 Editor::VisualState*
 Editor::current_visual_state (bool with_tracks)
 {
@@ -4102,10 +4113,8 @@ Editor::current_visual_state (bool with_tracks)
 	vs->leftmost_frame = leftmost_frame;
 	vs->zoom_focus = zoom_focus;
 
-	if (with_tracks) {
-		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-			vs->track_states.push_back (TAVState ((*i), &(*i)->get_state()));
-		}
+	if (with_tracks) {	
+		*(vs->gui_state) = *ARDOUR_UI::instance()->gui_object_state;
 	}
 
 	return vs;
@@ -4160,22 +4169,14 @@ Editor::use_visual_state (VisualState& vs)
 
 	set_zoom_focus (vs.zoom_focus);
 	reposition_and_zoom (vs.leftmost_frame, vs.frames_per_unit);
+	
+	*ARDOUR_UI::instance()->gui_object_state = *vs.gui_state;
 
-	for (list<TAVState>::iterator i = vs.track_states.begin(); i != vs.track_states.end(); ++i) {
-		TrackViewList::iterator t;
-
-		/* check if the track still exists - it could have been deleted */
-
-		if ((t = find (track_views.begin(), track_views.end(), i->first)) != track_views.end()) {
-			(*t)->set_state (*(i->second), Stateful::loading_state_version);
-		}
+	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {	
+		(*i)->reset_visual_state ();
 	}
 
-
-	if (!vs.track_states.empty()) {
-		_routes->update_visibility ();
-	}
-
+	_routes->update_visibility ();
 	_routes->resume_redisplay ();
 
 	no_save_visual = false;
@@ -4840,9 +4841,11 @@ Editor::handle_new_route (RouteList& routes)
 		DataType dt = route->input()->default_type();
 
 		if (dt == ARDOUR::DataType::AUDIO) {
-			rtv = new AudioTimeAxisView (*this, _session, route, *track_canvas);
+			rtv = new AudioTimeAxisView (*this, _session, *track_canvas);
+			rtv->set_route (route);
 		} else if (dt == ARDOUR::DataType::MIDI) {
-			rtv = new MidiTimeAxisView (*this, _session, route, *track_canvas);
+			rtv = new MidiTimeAxisView (*this, _session, *track_canvas);
+			rtv->set_route (route);
 		} else {
 			throw unknown_type();
 		}

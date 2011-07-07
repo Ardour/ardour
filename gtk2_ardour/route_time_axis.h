@@ -70,8 +70,10 @@ class RouteGroupMenu;
 class RouteTimeAxisView : public RouteUI, public TimeAxisView
 {
 public:
- 	RouteTimeAxisView (PublicEditor&, ARDOUR::Session*, boost::shared_ptr<ARDOUR::Route>, ArdourCanvas::Canvas& canvas);
+ 	RouteTimeAxisView (PublicEditor&, ARDOUR::Session*, ArdourCanvas::Canvas& canvas);
  	virtual ~RouteTimeAxisView ();
+
+	void set_route (boost::shared_ptr<ARDOUR::Route>);
 
 	void show_selection (TimeSelection&);
 	void set_button_names ();
@@ -136,6 +138,8 @@ public:
 	void io_changed (ARDOUR::IOChange, void *);
 	void meter_changed ();
 	void effective_gain_display () { gm.effective_gain_display(); }
+
+	std::string state_id() const;
 
 	static void setup_slider_pix ();
 

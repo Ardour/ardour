@@ -1006,3 +1006,9 @@ MonitorSection::assign_controllables ()
                 solo_boost_control->set_controllable (none);
         }
 }
+
+string
+MonitorSection::state_id() const
+{
+	return "monitor-section";
+}

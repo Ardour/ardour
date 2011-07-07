@@ -127,7 +127,6 @@ MixerStrip::init ()
 	input_selector = 0;
 	output_selector = 0;
 	group_menu = 0;
-	_marked_for_display = false;
 	route_ops_menu = 0;
 	ignore_comment_edit = false;
 	ignore_toggle = false;
@@ -527,25 +526,11 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 void
 MixerStrip::set_stuff_from_route ()
 {
-	XMLProperty *prop;
-
-	ensure_xml_node ();
-
 	/* if width is not set, it will be set by the MixerUI or editor */
 
-	if ((prop = xml_node->property ("strip-width")) != 0) {
-		set_width_enum (Width (string_2_enum (prop->value(), _width)), this);
-	}
-
-	if ((prop = xml_node->property ("shown-mixer")) != 0) {
-		if (prop->value() == "no") {
-			_marked_for_display = false;
-		} else {
-			_marked_for_display = true;
-		}
-	} else {
-		/* backwards compatibility */
-		_marked_for_display = true;
+	string str = gui_property ("strip-width");
+	if (!str.empty()) {
+		set_width_enum (Width (string_2_enum (str, _width)), this);
 	}
 }
 
@@ -561,12 +546,10 @@ MixerStrip::set_width_enum (Width w, void* owner)
 
 	_width_owner = owner;
 
-	ensure_xml_node ();
-
 	_width = w;
 
 	if (_width_owner == this) {
-		xml_node->add_property ("strip-width", enum_2_string (_width));
+		set_gui_property ("strip-width", enum_2_string (_width));
 	}
 
 	set_button_names ();
@@ -635,12 +618,10 @@ MixerStrip::set_packed (bool yn)
 {
 	_packed = yn;
 
-	ensure_xml_node ();
-
 	if (_packed) {
-		xml_node->add_property ("shown-mixer", "yes");
+		set_gui_property ("visible", "yes");
 	} else {
-		xml_node->add_property ("shown-mixer", "no");
+		set_gui_property ("visible", "no");
 	}
 }
 
@@ -1960,4 +1941,10 @@ MixerStrip::midi_input_status_changed ()
 		assert (mt);
 		midi_input_enable_button->set_active (mt->input_active ());
 	}
+}
+
+string
+MixerStrip::state_id () const
+{
+	return string_compose ("strip %1", _route->id().to_s());
 }

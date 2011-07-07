@@ -468,20 +468,17 @@ EditorRoutes::redisplay ()
 			route->set_order_key (N_ ("editor"), n);
 		}
 
-		bool visible = (*i)[_columns.visible];
+		bool visible = tv->marked_for_display ();
 
 		/* show or hide the TimeAxisView */
 		if (visible) {
-			tv->set_marked_for_display (true);
 			position += tv->show_at (position, n, &_editor->edit_controls_vbox);
 			tv->clip_to_viewport ();
+			n++;
 		} else {
-			tv->set_visibility (false);
+			tv->hide ();
 		}
-
-		n++;
 	}
-
 
 	/* whenever we go idle, update the track view list to reflect the new order.
 	   we can't do this here, because we could mess up something that is traversing
@@ -534,14 +531,16 @@ EditorRoutes::visible_changed (std::string const & path)
 		TimeAxisView* tv = (*iter)[_columns.tv];
 		if (tv) {
 			bool visible = (*iter)[_columns.visible];
-			(*iter)[_columns.visible] = !visible;
+
+			if (tv->set_marked_for_display (!visible)) {
+				_redisplay_does_not_reset_order_keys = true;
+				_session->set_remote_control_ids();
+				update_visibility ();
+				redisplay ();
+				_redisplay_does_not_reset_order_keys = false;
+			}
 		}
 	}
-
-	_redisplay_does_not_reset_order_keys = true;
-	_session->set_remote_control_ids();
-	redisplay ();
-	_redisplay_does_not_reset_order_keys = false;
 }
 
 void
@@ -700,7 +699,6 @@ EditorRoutes::update_visibility ()
 	for (i = rows.begin(); i != rows.end(); ++i) {
 		TimeAxisView *tv = (*i)[_columns.tv];
 		(*i)[_columns.visible] = tv->marked_for_display ();
-		cerr << "marked " << tv->name() << " for display = " << tv->marked_for_display() << endl;
 	}
 
 	resume_redisplay ();

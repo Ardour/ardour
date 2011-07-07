@@ -55,16 +55,21 @@ class AxisView : public virtual Selectable, public PBD::ScopedConnectionList, pu
 
 	virtual std::string name() const = 0;
 
-	virtual bool marked_for_display() const { return _marked_for_display; }
-	virtual void set_marked_for_display (bool yn) {
-		_marked_for_display = yn;
-	}
-
 	sigc::signal<void> Hiding;
-
+	
 	void set_old_order_key (uint32_t ok) { _old_order_key = ok; }
 	uint32_t old_order_key() const { return _old_order_key; }
 
+	virtual std::string state_id() const = 0;
+	std::string gui_property (const std::string& property_name) const;
+
+	void set_gui_property (const std::string& property_name, const std::string& value);
+	void set_gui_property (const std::string& property_name, int value);
+	void set_gui_property (const std::string& property_name, double value);
+
+	bool marked_for_display () const;
+	virtual bool set_marked_for_display (bool);
+	
   protected:
 
 	AxisView (ARDOUR::Session* sess);

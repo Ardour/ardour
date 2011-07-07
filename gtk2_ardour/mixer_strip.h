@@ -118,6 +118,8 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	static sigc::signal<void,boost::shared_ptr<ARDOUR::Route> > SwitchIO;
 	static PBD::Signal1<void,MixerStrip*> CatchDeletion;
 
+	std::string state_id() const;
+
   protected:
 	friend class Mixer_UI;
 	void set_packed (bool yn);

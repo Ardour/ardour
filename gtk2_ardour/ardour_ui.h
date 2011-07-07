@@ -90,6 +90,7 @@ class TimeInfoBox;
 class MidiTracer;
 class WindowProxyBase;
 class GlobalPortMatrixWindow;
+class GUIObjectState;
 
 namespace Gtkmm2ext {
 	class TearOff;
@@ -192,6 +193,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void halt_on_xrun_message ();
 	void xrun_handler (framepos_t);
 	void create_xrun_marker (framepos_t);
+
+	GUIObjectState* gui_object_state;
 
 	AudioClock* primary_clock;
 	AudioClock* secondary_clock;

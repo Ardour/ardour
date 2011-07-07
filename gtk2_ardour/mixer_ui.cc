@@ -750,7 +750,7 @@ Mixer_UI::redisplay_track_list ()
 		bool visible = (*i)[track_columns.visible];
 
 		if (visible) {
-			strip->set_marked_for_display (true);
+			strip->set_gui_property ("visible", "yes");
 			strip->route()->set_order_key (N_("signal"), order);
 
 			if (!strip_redisplay_does_not_reset_order_keys) {
@@ -778,7 +778,7 @@ Mixer_UI::redisplay_track_list ()
 
 		} else {
 
-			strip->set_marked_for_display (false);
+			strip->set_gui_property ("visible", "no");
 
 			if (strip->route()->is_master() || strip->route()->is_monitor()) {
 				/* do nothing, these cannot be hidden */

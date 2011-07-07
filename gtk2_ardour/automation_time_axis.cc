@@ -54,7 +54,6 @@ using namespace Editing;
 
 Pango::FontDescription AutomationTimeAxisView::name_font;
 bool AutomationTimeAxisView::have_name_font = false;
-const string AutomationTimeAxisView::state_node_name = "AutomationChild";
 
 
 /** \a a the automatable object this time axis is to display data for.
@@ -142,6 +141,13 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	ARDOUR_UI::instance()->set_tip(auto_button, _("automation state"));
 	ARDOUR_UI::instance()->set_tip(hide_button, _("hide track"));
 
+	string str = gui_property ("height");
+	if (!str.empty()) {
+		set_height (atoi (str));
+	} else {
+		set_height (preset_height (HeightNormal));
+	}
+
 	/* rearrange the name display */
 
 	/* we never show these for automation tracks, so make
@@ -185,12 +191,6 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	controls_base_selected_name = X_("AutomationTrackControlsBaseSelected");
 	controls_base_unselected_name = X_("AutomationTrackControlsBase");
 	controls_ebox.set_name (controls_base_unselected_name);
-
-	XMLNode* xml_node = get_state_node ();
-
-	if (xml_node) {
-		set_state (*xml_node, Stateful::loading_state_version);
-	}
 
 	/* ask for notifications of any new RegionViews */
 	if (show_regions) {
@@ -403,19 +403,8 @@ AutomationTimeAxisView::set_height (uint32_t h)
 	uint32_t const normal = preset_height (HeightNormal);
 	bool const changed_between_small_and_normal = ( (height < normal && h >= normal) || (height >= normal || h < normal) );
 
-	TimeAxisView* state_parent = get_parent_with_state ();
-	assert(state_parent);
-	XMLNode* xml_node = 0;
-
-	if (_control) {
-		xml_node = _control->extra_xml ("GUI");
-	} else {
-		/* XXX we need somewhere to store GUI info for per-region
-		 * automation 
-		 */
-	}
-
 	TimeAxisView::set_height (h);
+
 	_base_rect->property_y2() = h;
 
 	if (_line) {
@@ -425,12 +414,6 @@ AutomationTimeAxisView::set_height (uint32_t h)
 	if (_view) {
 		_view->set_height(h);
 		_view->update_contents_height();
-	}
-
-	char buf[32];
-	snprintf (buf, sizeof (buf), "%u", height);
-	if (xml_node) {
-		xml_node->add_property ("height", buf);
 	}
 
 	if (changed_between_small_and_normal || first_call_to_set_height) {
@@ -483,12 +466,12 @@ AutomationTimeAxisView::set_samples_per_unit (double spu)
 void
 AutomationTimeAxisView::hide_clicked ()
 {
-	// LAME fix for refreshing the hide button
 	hide_button.set_sensitive(false);
-
 	set_marked_for_display (false);
-	hide ();
-
+	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(parent);
+	if (rtv) {
+		rtv->request_redraw ();
+	}
 	hide_button.set_sensitive(true);
 }
 
@@ -951,59 +934,28 @@ AutomationTimeAxisView::color_handler ()
 }
 
 int
-AutomationTimeAxisView::set_state (const XMLNode& node, int version)
+AutomationTimeAxisView::set_state_2X (const XMLNode& node, int /*version*/)
 {
-	TimeAxisView::set_state (node, version);
-
-	if (version < 3000) {
-		return set_state_2X (node, version);
-	}
-
-	XMLProperty const * prop = node.property ("shown");
-
-	if (prop) {
-		set_visibility (string_is_affirmative (prop->value()));
-	} else {
-		set_visibility (false);
+	if (node.name() == X_("gain") && _parameter == Evoral::Parameter (GainAutomation)) {
+		XMLProperty const * shown = node.property (X_("shown"));
+		if (shown) {
+			bool yn = string_is_affirmative (shown->value ());
+			if (yn) {
+				_canvas_display->show (); /* FIXME: necessary? show_at? */
+			}
+			set_gui_property ("visible", (yn ? "yes" : "no"));
+		} else {
+			set_gui_property ("visible", "no");
+		}
 	}
 
 	return 0;
 }
 
 int
-AutomationTimeAxisView::set_state_2X (const XMLNode& node, int /*version*/)
+AutomationTimeAxisView::set_state (const XMLNode& node, int /*version*/)
 {
-	if (node.name() == X_("gain") && _parameter == Evoral::Parameter (GainAutomation)) {
-		XMLProperty const * shown = node.property (X_("shown"));
-		if (shown && string_is_affirmative (shown->value ())) {
-			set_marked_for_display (true);
-			_canvas_display->show (); /* FIXME: necessary? show_at? */
-		}
-	}
-
-	if (!_marked_for_display) {
-		hide ();
-	}
-
 	return 0;
-}
-
-XMLNode*
-AutomationTimeAxisView::get_state_node ()
-{
-	if (_control) {
-		return _control->extra_xml ("GUI", true);
-	}
-	return 0;
-}
-
-void
-AutomationTimeAxisView::update_extra_xml_shown (bool shown)
-{
-	XMLNode* xml_node = get_state_node();
-	if (xml_node) {
-		xml_node->add_property ("shown", shown ? "yes" : "no");
-	}
 }
 
 void
@@ -1037,35 +989,6 @@ AutomationTimeAxisView::what_has_visible_automation (const boost::shared_ptr<Aut
 	}
 }
 
-guint32
-AutomationTimeAxisView::show_at (double y, int& nth, Gtk::VBox *parent)
-{
-	if (!canvas_item_visible (_canvas_display)) {
-		update_extra_xml_shown (true);
-	}
-
-	return TimeAxisView::show_at (y, nth, parent);
-}
-
-void
-AutomationTimeAxisView::show ()
-{
-	if (!canvas_item_visible (_canvas_display)) {
-		update_extra_xml_shown (true);
-	}
-
-	return TimeAxisView::show ();
-}
-
-void
-AutomationTimeAxisView::hide ()
-{
-	if (canvas_item_visible (_canvas_display)) {
-		update_extra_xml_shown (false);
-	}
-
-	TimeAxisView::hide ();
-}
 
 /** @return true if this view has any automation data to display */
 bool
@@ -1086,4 +1009,19 @@ AutomationTimeAxisView::lines () const
 	}
 
 	return lines;
+}
+
+string
+AutomationTimeAxisView::state_id() const
+{
+	if (_control) {
+		return string_compose ("automation %1", _control->id().to_s());
+	} else {
+		assert (_parameter);
+		return string_compose ("automation %1 %2/%3/%4", 
+				       _route->id(), 
+				       _parameter.type(),
+				       _parameter.id(),
+				       _parameter.channel());
+	}
 }

@@ -103,7 +103,6 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	height = 0;
 	_effective_height = 0;
 	parent = rent;
-	_has_state = false;
 	last_name_entry_key_press_event = 0;
 	name_packing = NamePackingBits (0);
 	_resize_drag_start = -1;
@@ -220,6 +219,47 @@ TimeAxisView::~TimeAxisView()
 	delete _size_menu;
 }
 
+#if 0
+void
+TimeAxisView::show ()
+{
+	canvas_display()->show();
+	canvas_background()->show();
+}
+#endif
+
+void
+TimeAxisView::hide ()
+{
+	if (_hidden) {
+		return;
+	}
+
+	_canvas_display->hide ();
+	_canvas_background->hide ();
+
+	if (control_parent) {
+		control_parent->remove (time_axis_vbox);
+		control_parent = 0;
+	}
+
+	_y_position = -1;
+	_hidden = true;
+
+	/* now hide children */
+
+	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
+		(*i)->hide ();
+	}
+
+	/* if its hidden, it cannot be selected */
+	_editor.get_selection().remove (this);
+	/* and neither can its regions */
+	_editor.get_selection().remove_regions (this);
+
+	Hiding ();
+}
+
 /** Display this TimeAxisView as the nth component of the parent box, at y.
 *
 * @param y y position.
@@ -253,22 +293,22 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent)
 	_canvas_background->raise_to_top ();
 	_canvas_display->raise_to_top ();
 
-	if (_marked_for_display) {
-		time_axis_vbox.show ();
-		controls_ebox.show ();
-		_canvas_background->show ();
-	}
+	time_axis_vbox.show ();
+	controls_ebox.show ();
+	_canvas_background->show ();
 
 	_hidden = false;
 
 	_effective_height = current_height ();
 
-	/* now show children */
+	/* now show relevant children */
 
 	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
-		if (canvas_item_visible ((*i)->_canvas_display)) {
+		if ((*i)->marked_for_display()) {
 			++nth;
 			_effective_height += (*i)->show_at (y + _effective_height, nth, parent);
+		} else {
+			(*i)->hide ();
 		}
 	}
 
@@ -278,7 +318,7 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent)
 void
 TimeAxisView::clip_to_viewport ()
 {
-	if (_marked_for_display) {
+	if (marked_for_display()) {
 		if (_y_position + _effective_height < _editor.get_trackview_group_vertical_offset () || _y_position > _editor.get_trackview_group_vertical_offset () + _canvas_display->get_canvas()->get_height()) {
 			_canvas_background->hide ();
 			_canvas_display->hide ();
@@ -349,44 +389,6 @@ TimeAxisView::selection_click (GdkEventButton* ev)
 	_editor.set_selected_track (*this, op, false);
 }
 
-void
-TimeAxisView::show ()
-{
-	canvas_display()->show();
-	canvas_background()->show();
-}
-
-void
-TimeAxisView::hide ()
-{
-	if (_hidden) {
-		return;
-	}
-
-	_canvas_display->hide ();
-	_canvas_background->hide ();
-
-	if (control_parent) {
-		control_parent->remove (time_axis_vbox);
-		control_parent = 0;
-	}
-
-	_y_position = -1;
-	_hidden = true;
-
-	/* now hide children */
-
-	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
-		(*i)->hide ();
-	}
-
-	/* if its hidden, it cannot be selected */
-	_editor.get_selection().remove (this);
-	/* and neither can its regions */
-	_editor.get_selection().remove_regions (this);
-
-	Hiding ();
-}
 
 /** Steps through the defined heights for this TrackView.
  *  @param coarser true if stepping should decrease in size, otherwise false.
@@ -446,6 +448,10 @@ TimeAxisView::set_height (uint32_t h)
 
 	time_axis_vbox.property_height_request () = h;
 	height = h;
+
+	char buf[32];
+	snprintf (buf, sizeof (buf), "%u", height);
+	set_gui_property ("height", buf);
 
 	for (list<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
 		(*i)->set_height ();
@@ -964,84 +970,6 @@ TimeAxisView::set_parent (TimeAxisView& p)
 	parent = &p;
 }
 
-bool
-TimeAxisView::has_state () const
-{
-	return _has_state;
-}
-
-TimeAxisView*
-TimeAxisView::get_parent_with_state ()
-{
-	if (parent == 0) {
-		return 0;
-	}
-
-	if (parent->has_state()) {
-		return parent;
-	}
-
-	return parent->get_parent_with_state ();
-}
-
-
-XMLNode&
-TimeAxisView::get_state ()
-{
-	/* XXX: is this method used? */
-
-	XMLNode* node = new XMLNode ("TAV-" + name());
-	char buf[32];
-
-	snprintf (buf, sizeof(buf), "%u", height);
-	node->add_property ("height", buf);
-	node->add_property ("marked-for-display", (_marked_for_display ? "1" : "0"));
-	return *node;
-}
-
-int
-TimeAxisView::set_state (const XMLNode& node, int /*version*/)
-{
-	const XMLProperty *prop;
-
-	/* XXX: I think this might be vestigial */
-	if ((prop = node.property ("marked-for-display")) != 0) {
-		_marked_for_display = (prop->value() == "1");
-	}
-
-	if ((prop = node.property ("shown-editor")) != 0) {
-		_marked_for_display = string_is_affirmative (prop->value ());
-	}
-
-	if ((prop = node.property ("track-height")) != 0) {
-
-		if (prop->value() == "largest") {
-			set_height_enum (HeightLargest);
-		} else if (prop->value() == "large") {
-			set_height_enum (HeightLarge);
-		} else if (prop->value() == "larger") {
-			set_height_enum (HeightLarger);
-		} else if (prop->value() == "normal") {
-			set_height_enum (HeightNormal);
-		} else if (prop->value() == "smaller" || prop->value() == "small") {
-			set_height_enum (HeightSmall);
-		} else {
-			error << string_compose(_("unknown track height name \"%1\" in XML GUI information"), prop->value()) << endmsg;
-			set_height_enum (HeightNormal);
-		}
-
-	} else if ((prop = node.property ("height")) != 0) {
-
-		set_height (atoi (prop->value()));
-
-	} else {
-
-		set_height_enum (HeightNormal);
-	}
-
-	return 0;
-}
-
 void
 TimeAxisView::reset_height ()
 {
@@ -1288,24 +1216,6 @@ TimeAxisView::resizer_expose (GdkEventExpose* event)
 	return true;
 }
 
-bool
-TimeAxisView::set_visibility (bool yn)
-{
-	if (yn != marked_for_display()) {
-		if (yn) {
-			set_marked_for_display (true);
-			show ();
-		} else {
-			set_marked_for_display (false);
-			hide ();
-		}
-		return true; // things changed
-	}
-
-	return false;
-}
-
-
 uint32_t
 TimeAxisView::preset_height (Height h)
 {
@@ -1361,4 +1271,18 @@ TimeAxisView::build_size_menu ()
 	items.push_back (MenuElem (_("Large"),   sigc::bind (sigc::mem_fun (*this, &TimeAxisView::set_height_enum), HeightLarge, true)));
 	items.push_back (MenuElem (_("Normal"),  sigc::bind (sigc::mem_fun (*this, &TimeAxisView::set_height_enum), HeightNormal, true)));
 	items.push_back (MenuElem (_("Small"),   sigc::bind (sigc::mem_fun (*this, &TimeAxisView::set_height_enum), HeightSmall, true)));
+}
+
+void
+TimeAxisView::reset_visual_state ()
+{
+	/* this method is not required to trigger a global redraw */
+
+	string str = gui_property ("height");
+
+	if (!str.empty()) {
+		set_height (atoi (str));
+	} else {
+		set_height (preset_height (HeightNormal));
+	}
 }
