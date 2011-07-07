@@ -316,15 +316,19 @@ MidiTimeAxisView::set_height (uint32_t h)
 	}
 	
 	if (height >= KEYBOARD_MIN_HEIGHT) {
-		if (is_track() && _range_scroomer)
+		if (is_track() && _range_scroomer) {
 			_range_scroomer->show();
-		if (is_track() && _piano_roll_header)
+		}
+		if (is_track() && _piano_roll_header) {
 			_piano_roll_header->show();
+		}
 	} else {
-		if (is_track() && _range_scroomer)
+		if (is_track() && _range_scroomer) {
 			_range_scroomer->hide();
-		if (is_track() && _piano_roll_header)
+		}
+		if (is_track() && _piano_roll_header) {
 			_piano_roll_header->hide();
+		}
 	}
 }
 

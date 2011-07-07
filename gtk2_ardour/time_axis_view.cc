@@ -171,7 +171,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	controls_ebox.signal_button_release_event().connect (sigc::mem_fun (*this, &TimeAxisView::controls_ebox_button_release));
 	controls_ebox.signal_scroll_event().connect (sigc::mem_fun (*this, &TimeAxisView::controls_ebox_scroll), true);
 
-	controls_hbox.pack_start (controls_ebox, false, false);
+	controls_hbox.pack_start (controls_ebox, true, true);
 	controls_hbox.show ();
 
 	time_axis_vbox.pack_start (controls_hbox, true, true);
@@ -293,9 +293,11 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent)
 	_canvas_background->raise_to_top ();
 	_canvas_display->raise_to_top ();
 
-	time_axis_vbox.show ();
-	controls_ebox.show ();
+	// time_axis_vbox.show ();
+	// controls_ebox.show ();
+
 	_canvas_background->show ();
+	_canvas_display->show ();
 
 	_hidden = false;
 
