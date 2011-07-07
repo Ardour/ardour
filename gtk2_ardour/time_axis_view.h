@@ -114,11 +114,6 @@ class TimeAxisView : public virtual AxisView
 
 	uint32_t current_height() const { return height; }
 
-	bool resizer_button_press (GdkEventButton*);
-	bool resizer_button_release (GdkEventButton*);
-	bool resizer_motion (GdkEventMotion*);
-	bool resizer_expose (GdkEventExpose*);
-
 	void idle_resize (uint32_t);
 
 	void hide_name_label ();
@@ -213,8 +208,6 @@ class TimeAxisView : public virtual AxisView
 	Gtk::EventBox         controls_ebox;
 	Gtk::VBox             controls_vbox;
 	Gtk::VBox             time_axis_vbox;
-	Gtk::DrawingArea      resizer;
-	Gtk::HBox             resizer_box;
 	Gtk::HBox             name_hbox;
 	Gtk::Frame            name_frame;
  	Gtkmm2ext::FocusEntry name_entry;
@@ -242,8 +235,10 @@ class TimeAxisView : public virtual AxisView
 	 *
 	 *@ param ev the event
 	 */
-	virtual bool controls_ebox_button_release (GdkEventButton *ev);
-	virtual bool controls_ebox_scroll (GdkEventScroll *ev);
+	virtual bool controls_ebox_button_release (GdkEventButton*);
+	virtual bool controls_ebox_scroll (GdkEventScroll*);
+	virtual bool controls_ebox_button_press (GdkEventButton*);
+	virtual bool controls_ebox_motion (GdkEventMotion*);
 
 	/** Display the standard LHS control menu at when.
 	 *
@@ -309,6 +304,8 @@ private:
 	int _order;
 	uint32_t _effective_height;
 	double _resize_drag_start;
+	GdkCursor* _preresize_cursor;
+	bool       _have_preresize_cursor;
 	ArdourCanvas::Group* _ghost_group;
 
 	void compute_heights ();
@@ -316,6 +313,8 @@ private:
 	static uint32_t small_height;
 
 	static int const _max_order;
+	
+	bool maybe_set_cursor (int y);
 
 }; /* class TimeAxisView */
 

@@ -403,12 +403,13 @@ style "transport_button_alternate_two"
 
 style "transport_rec_button"
 {
-	bg[ACTIVE] = darker(@@COLPREFIX@_arm)         #the rest of these don't quite do what I expected
-  #bg[NORMAL] = mix(0.05,@@COLPREFIX@_arm,@@COLPREFIX@_bg)
+        fg[ACTIVE] = @@COLPREFIX@_darkest
+	bg[ACTIVE] = darker(@@COLPREFIX@_arm)
+        #the rest of these don't quite do what I expected
+        #bg[NORMAL] = mix(0.05,@@COLPREFIX@_arm,@@COLPREFIX@_bg)
 	#bg[SELECTED] = darker(@@COLPREFIX@_arm)
 	#bg[PRELIGHT] = lighter(mix(0.05,@@COLPREFIX@_arm,@@COLPREFIX@_bg))
   
-  fg[ACTIVE] = @@COLPREFIX@_darkest
 }
 
 style "transport_rec_button_active"
@@ -1068,3 +1069,4 @@ style "tooltip" = "medium_text"
         fg[NORMAL] = @@COLPREFIX@_fg_tooltip
         bg[NORMAL] = @@COLPREFIX@_bg_tooltip
 }
+
