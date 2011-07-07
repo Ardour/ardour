@@ -19,6 +19,7 @@
 
 #include <utility>
 #include <gtkmm2ext/barcontroller.h>
+#include <gtkmm2ext/utils.h>
 
 #include "pbd/memento_command.h"
 #include "pbd/stacktrace.h"
@@ -150,21 +151,19 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 
 	/* rearrange the name display */
 
+	controls_table.remove (name_hbox);
+	controls_table.attach (name_hbox, 1, 6, 0, 1,  Gtk::FILL|Gtk::EXPAND,  Gtk::FILL|Gtk::EXPAND, 3, 0);
+
 	/* we never show these for automation tracks, so make
 	   life easier and remove them.
 	*/
 
 	hide_name_entry();
 
-	/* keep the parameter name short */
-
-	string shortpname = _name;
-	int ignore_width;
-	shortpname = fit_to_pixels (_name, 60, name_font, ignore_width, true);
-
-	name_label.set_text (shortpname);
+	name_label.set_text (_name);
 	name_label.set_alignment (Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER);
         name_label.set_name (X_("TrackParameterName"));
+	name_label.set_ellipsize (Pango::ELLIPSIZE_END);
 
 	string tipname = nomparent;
 	if (!tipname.empty()) {
@@ -175,8 +174,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 
 	/* add the buttons */
 	controls_table.attach (hide_button, 0, 1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
-
-	controls_table.attach (auto_button, 5, 8, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+	controls_table.attach (auto_button, 6, 8, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 
 	if (_controller) {
 		/* add bar controller */
