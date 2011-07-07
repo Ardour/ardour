@@ -712,12 +712,12 @@ EditorRoutes::hide_track_in_display (TimeAxisView& tv)
 
 	for (i = rows.begin(); i != rows.end(); ++i) {
 		if ((*i)[_columns.tv] == &tv) {
+			tv.set_marked_for_display (false);
 			(*i)[_columns.visible] = false;
+			redisplay ();
 			break;
 		}
 	}
-
-	redisplay ();
 }
 
 void
@@ -726,14 +726,15 @@ EditorRoutes::show_track_in_display (TimeAxisView& tv)
 	TreeModel::Children rows = _model->children();
 	TreeModel::Children::iterator i;
 
+
 	for (i = rows.begin(); i != rows.end(); ++i) {
 		if ((*i)[_columns.tv] == &tv) {
+			tv.set_marked_for_display (true);
 			(*i)[_columns.visible] = true;
+			redisplay ();
 			break;
 		}
 	}
-
-	redisplay ();
 }
 
 void
