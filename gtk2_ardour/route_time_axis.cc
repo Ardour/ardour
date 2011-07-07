@@ -1533,51 +1533,48 @@ RouteTimeAxisView::use_playlist (RadioMenuItem *item, boost::weak_ptr<Playlist> 
 		return;
 	}
 
-	boost::shared_ptr<AudioPlaylist> apl = boost::dynamic_pointer_cast<AudioPlaylist> (pl);
+	if (track()->playlist() == pl) {
+		// exit when use_playlist is called by the creation of the playlist menu
+		// or the playlist choice is unchanged
+		return;
+	}
 
-	if (apl) {
-		if (track()->playlist() == apl) {
-                        // exit when use_playlist is called by the creation of the playlist menu
-                        // or the playlist choice is unchanged
+	track()->use_playlist (pl);
+	
+	RouteGroup* rg = route_group();
+	
+	if (rg && rg->is_active() && rg->enabled_property (ARDOUR::Properties::edit.property_id)) {
+		std::string group_string = "." + rg->name() + ".";
+		
+		std::string take_name = pl->name();
+		std::string::size_type idx = take_name.find(group_string);
+		
+		if (idx == std::string::npos)
 			return;
-		}
-		track()->use_playlist (apl);
-
-		RouteGroup* rg = route_group();
-
-		if (rg && rg->is_active() && rg->enabled_property (ARDOUR::Properties::edit.property_id)) {
-			std::string group_string = "." + rg->name() + ".";
-
-			std::string take_name = apl->name();
-			std::string::size_type idx = take_name.find(group_string);
-
-			if (idx == std::string::npos)
-				return;
-
-			take_name = take_name.substr(idx + group_string.length()); // find the bit containing the take number / name
-
-			boost::shared_ptr<RouteList> rl (rg->route_list());
-
-			for (RouteList::const_iterator i = rl->begin(); i != rl->end(); ++i) {
-				if ( (*i) == this->route()) {
-					continue;
-				}
-
-				std::string playlist_name = (*i)->name()+group_string+take_name;
-
-				boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track>(*i);
-				if (!track) {
-					continue;
-				}
-
-				boost::shared_ptr<Playlist> ipl = session()->playlists->by_name(playlist_name);
-				if (!ipl) {
-					// No playlist for this track for this take yet, make it
-					track->use_new_playlist();
-					track->playlist()->set_name(playlist_name);
-				} else {
-					track->use_playlist(ipl);
-				}
+		
+		take_name = take_name.substr(idx + group_string.length()); // find the bit containing the take number / name
+		
+		boost::shared_ptr<RouteList> rl (rg->route_list());
+		
+		for (RouteList::const_iterator i = rl->begin(); i != rl->end(); ++i) {
+			if ( (*i) == this->route()) {
+				continue;
+			}
+			
+			std::string playlist_name = (*i)->name()+group_string+take_name;
+			
+			boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track>(*i);
+			if (!track) {
+				continue;
+			}
+			
+			boost::shared_ptr<Playlist> ipl = session()->playlists->by_name(playlist_name);
+			if (!ipl) {
+				// No playlist for this track for this take yet, make it
+				track->use_new_playlist();
+				track->playlist()->set_name(playlist_name);
+			} else {
+				track->use_playlist(ipl);
 			}
 		}
 	}
