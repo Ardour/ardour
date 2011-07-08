@@ -188,6 +188,10 @@ static const char* translators[] = {
 	N_("Polish:\n\t Piotr Zaryk <pzaryk@gmail.com>\n"),
 	N_("Czech:\n\t Pavel Fric <pavelfric@seznam.cz>\n"),
 	N_("Norwegian:\n\t Eivind Ødegård\n"),
+        N_("Basque:\n\tMaider Likona <pisoni@gisa-elkartea.org>\
+\n\tAles Zabala <shagi@gisa-elkartea.org>\
+\n\tUnai Moraza <uny74@hotmail.com>\
+\n\tPablo Fernández <pablo.fbus@gmail.com>"),
 	0
 };
 
