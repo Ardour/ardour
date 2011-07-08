@@ -909,7 +909,7 @@ Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorList::ite
 
 		if ((pi = boost::dynamic_pointer_cast<PluginInsert>(processor)) != 0) {
 
-			if (pi->natural_input_streams() == ChanCount::ZERO) {
+			if (pi->has_no_inputs ()) {
 				/* generator plugin */
 				_have_internal_generator = true;
 			}
@@ -1062,7 +1062,7 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 			boost::shared_ptr<PluginInsert> pi;
 
 			if ((pi = boost::dynamic_pointer_cast<PluginInsert>(*i)) != 0) {
-				if (pi->is_generator()) {
+				if (pi->has_no_inputs ()) {
 					_have_internal_generator = true;
 					break;
 				}
@@ -1361,7 +1361,7 @@ Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStream
 			boost::shared_ptr<PluginInsert> pi;
 
 			if ((pi = boost::dynamic_pointer_cast<PluginInsert>(*i)) != 0) {
-				if (pi->is_generator()) {
+				if (pi->has_no_inputs ()) {
 					_have_internal_generator = true;
 					break;
 				}
@@ -1451,7 +1451,7 @@ Route::remove_processors (const ProcessorList& to_be_deleted, ProcessorStreams* 
 			boost::shared_ptr<PluginInsert> pi;
 
 			if ((pi = boost::dynamic_pointer_cast<PluginInsert>(*i)) != 0) {
-				if (pi->is_generator()) {
+				if (pi->has_no_inputs ()) {
 					_have_internal_generator = true;
 					break;
 				}
@@ -2432,7 +2432,7 @@ Route::set_processor_state (const XMLNode& node)
 			boost::shared_ptr<PluginInsert> pi;
 
 			if ((pi = boost::dynamic_pointer_cast<PluginInsert>(*i)) != 0) {
-				if (pi->is_generator()) {
+				if (pi->has_no_inputs ()) {
 					_have_internal_generator = true;
 					break;
 				}

@@ -72,7 +72,9 @@ class PluginInsert : public Processor
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const;
 	bool configure_io (ChanCount in, ChanCount out);
 
-	bool is_generator() const;
+	bool has_no_inputs() const;
+	bool has_no_audio_inputs() const;
+	bool is_midi_instrument() const;
 
 	void realtime_handle_transport_stopped ();
 

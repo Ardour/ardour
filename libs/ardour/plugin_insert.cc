@@ -181,13 +181,27 @@ PluginInsert::natural_input_streams() const
 }
 
 bool
-PluginInsert::is_generator() const
+PluginInsert::has_no_inputs() const
+{
+	return _plugins[0]->get_info()->n_inputs == ChanCount::ZERO;
+}
+
+bool
+PluginInsert::has_no_audio_inputs() const
+{
+	return _plugins[0]->get_info()->n_inputs.n_audio() == 0;
+}
+
+bool
+PluginInsert::is_midi_instrument() const
 {
 	/* XXX more finesse is possible here. VST plugins have a
 	   a specific "instrument" flag, for example.
 	 */
+	PluginInfoPtr pi = _plugins[0]->get_info();
 
-	return _plugins[0]->get_info()->n_inputs.n_audio() == 0;
+	return pi->n_inputs.n_midi() != 0 &&
+		pi->n_outputs.n_audio() > 0;
 }
 
 void
@@ -414,7 +428,7 @@ PluginInsert::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end
 
 	} else {
 
-		if (is_generator()) {
+		if (has_no_audio_inputs()) {
 
 			/* silence all (audio) outputs. Should really declick
 			 * at the transitions of "active"
