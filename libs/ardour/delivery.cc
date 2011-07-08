@@ -276,6 +276,7 @@ Delivery::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pf
 
 		_output->silence (nframes);
 		if (result_required) {
+			bufs.set_count (output_buffers().count ());
 			Amp::apply_simple_gain (bufs, nframes, 0.0);
 		}
 		goto out;
