@@ -1,0 +1,39 @@
+# ARDOUR2_ONGOING BASQUE TRANSLATION
+# Copyright (C) 2011 "Paul Davis"
+# This file is distributed under the same license as the Ardour package.
+# Ales Zabala <kotaktua@gisa-elkartea.org>, 2011
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: ardour2_ongoing_eu\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2011-03-08 16:49+0100\n"
+"PO-Revision-Date: 2011-03-10 10:59+0100\n"
+"Last-Translator: Pablo Fernández <pablo.fbus@gmail.com>\n"
+"Language-Team: lagunak.gisa-elkartea <kontaktua@gisa-elkartea.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: Basque\n"
+"X-Poedit-SourceCharset: utf-8\n"
+
+#: libs/gtkmm2ext/binding_proxy.cc:85
+msgid "operate controller now"
+msgstr "kontrolatzailea orain erabili"
+
+#: libs/gtkmm2ext/gtk_ui.cc:99
+msgid "Log"
+msgstr "Egunkaria"
+
+#: libs/gtkmm2ext/gtk_ui.cc:553
+msgid "Press To Exit"
+msgstr "Sakatu irtetzeko"
+
+#: libs/gtkmm2ext/gtk_ui.cc:587
+msgid "Error"
+msgstr "Errorea"
+
+#: libs/gtkmm2ext/textviewer.cc:34
+msgid "Close"
+msgstr "Itxi"
