@@ -86,6 +86,8 @@ class Selection : public sigc::trackable, public PBD::ScopedConnectionList
 	PointSelection       points;
 	MarkerSelection      markers;
 	MidiRegionSelection  midi_regions;
+
+	/** only used when this class is used as a cut buffer */
 	MidiNoteSelection    midi_notes;
 
 	Selection (PublicEditor const * e);
