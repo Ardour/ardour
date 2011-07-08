@@ -17,6 +17,7 @@
 */
 
 #include "pbd/compose.h"
+#include "pbd/error.h"
 
 #include "ardour/debug.h"
 #include "ardour/midi_ring_buffer.h"
@@ -119,19 +120,6 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, framepos_t start, framepos_t end, frame
 			continue;
 		}
 
-		/* lets see if we are going to be able to write this event into dst.
-		 */
-		uint8_t* write_loc = dst.reserve (ev_time, ev_size);
-		if (write_loc == 0) {
-			if (stop_on_overflow_in_dst) {
-				DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("MidiRingBuffer: overflow in destination MIDI buffer, stopped after %1 events\n", count));
-				break;
-			}
-			cerr << "MRB: Unable to reserve space in buffer, event skipped";
-			this->increment_read_ptr (prefix_size + ev_size); // Advance read pointer to next event
-			continue;
-		}
-
 		/* we're good to go ahead and read the data now but since we
 		 * have the prefix data already, just skip over that
 		 */
@@ -146,10 +134,24 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, framepos_t start, framepos_t end, frame
 		if (is_channel_event(status) && get_channel_mode() == FilterChannels) {
 			const uint8_t channel = status & 0x0F;
 			if (!(get_channel_mask() & (1L << channel))) {
-				// cerr << "MRB skipping event due to channel mask" << endl;
+				DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("MRB skipping event (%3 bytes) due to channel mask (mask = %1 chn = %2)\n",
+										      get_channel_mask(), (int) channel, ev_size));
 				this->increment_read_ptr (ev_size); // Advance read pointer to next event
 				continue;
 			}
+		}
+
+		/* lets see if we are going to be able to write this event into dst.
+		 */
+		uint8_t* write_loc = dst.reserve (ev_time, ev_size);
+		if (write_loc == 0) {
+			if (stop_on_overflow_in_dst) {
+				DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("MidiRingBuffer: overflow in destination MIDI buffer, stopped after %1 events\n", count));
+				break;
+			}
+			error << "MRB: Unable to reserve space in buffer, event skipped" << endmsg;
+			this->increment_read_ptr (ev_size); // Advance read pointer to next event
+			continue;
 		}
 
 		// write MIDI buffer contents
