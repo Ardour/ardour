@@ -79,10 +79,10 @@ EditorRoutes::EditorRoutes (Editor* e)
 	// Record enable toggle
 	CellRendererPixbufMulti* rec_col_renderer = manage (new CellRendererPixbufMulti());
 
-	rec_col_renderer->set_pixbuf (0, ::get_icon("act-disabled"));
-	rec_col_renderer->set_pixbuf (1, ::get_icon("rec-in-progress"));
-	rec_col_renderer->set_pixbuf (2, ::get_icon("rec-enabled"));
-	rec_col_renderer->set_pixbuf (3, ::get_icon("step-editing"));
+	rec_col_renderer->set_pixbuf (0, ::get_icon("record-normal-disabled"));
+	rec_col_renderer->set_pixbuf (1, ::get_icon("record-normal-in-progress"));
+	rec_col_renderer->set_pixbuf (2, ::get_icon("record-normal-enabled"));
+	rec_col_renderer->set_pixbuf (3, ::get_icon("record-step"));
 	rec_col_renderer->signal_changed().connect (sigc::mem_fun (*this, &EditorRoutes::on_tv_rec_enable_changed));
 
 	TreeViewColumn* rec_state_column = manage (new TreeViewColumn("R", *rec_col_renderer));
@@ -98,7 +98,7 @@ EditorRoutes::EditorRoutes (Editor* e)
 	// MIDI Input Active
 
 	CellRendererPixbufMulti* input_active_col_renderer = manage (new CellRendererPixbufMulti());
-	input_active_col_renderer->set_pixbuf (0, ::get_icon("act-disabled"));
+	input_active_col_renderer->set_pixbuf (0, ::get_icon("midi-input-inactive"));
 	input_active_col_renderer->set_pixbuf (1, ::get_icon("midi-input-active"));
 	input_active_col_renderer->signal_changed().connect (sigc::mem_fun (*this, &EditorRoutes::on_input_active_changed));
 
