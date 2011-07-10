@@ -274,11 +274,13 @@ LV2PluginUI::lv2ui_free()
 	suil_instance_free((SuilInstance*)_inst);
 #else
 	SLV2UIInstance          inst      = (SLV2UIInstance)_inst;
-	const LV2UI_Descriptor* ui_desc   = slv2_ui_instance_get_descriptor(inst);
-	LV2UI_Handle            ui_handle = slv2_ui_instance_get_handle(inst);
-
-	if (ui_desc) {
-		ui_desc->cleanup(ui_handle);
+	if (inst) {
+		const LV2UI_Descriptor* ui_desc   = slv2_ui_instance_get_descriptor(inst);
+		LV2UI_Handle            ui_handle = slv2_ui_instance_get_handle(inst);
+		
+		if (ui_desc) {
+			ui_desc->cleanup(ui_handle);
+		}
 	}
 #endif
 
