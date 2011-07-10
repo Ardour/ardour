@@ -561,6 +561,10 @@ string_is_affirmative (const std::string& str)
 {
 	/* to be used only with XML data - not intended to handle user input */
 
+	if (str.empty ()) {
+		return false;
+	}
+
 	return str == "1" || str == "y" || str == "Y" || (!g_strncasecmp(str.c_str(), "yes", str.length()));
 }
 
