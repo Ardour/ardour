@@ -1021,6 +1021,6 @@ AutomationTimeAxisView::state_id() const
 				       _route->id(), 
 				       _parameter.type(),
 				       _parameter.id(),
-				       _parameter.channel());
+				       (int) _parameter.channel());
 	}
 }
