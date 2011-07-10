@@ -227,6 +227,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 
 AutomationTimeAxisView::~AutomationTimeAxisView ()
 {
+	delete _view;
 }
 
 void
