@@ -223,9 +223,9 @@ InternalSend::set_state (const XMLNode& node, int version)
 {
 	const XMLProperty* prop;
 
-	Send::set_state (node, version);
-
 	init_gain ();
+
+	Send::set_state (node, version);
 
 	if ((prop = node.property ("target")) != 0) {
 
