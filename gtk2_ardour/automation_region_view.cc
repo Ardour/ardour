@@ -54,6 +54,10 @@ AutomationRegionView::AutomationRegionView (ArdourCanvas::Group*                
 	group->raise_to_top();
 }
 
+AutomationRegionView::~AutomationRegionView ()
+{
+}
+
 void
 AutomationRegionView::init (Gdk::Color const & basic_color, bool /*wfd*/)
 {

@@ -46,7 +46,7 @@ public:
 	                     double initial_samples_per_unit,
 	                     Gdk::Color const & basic_color);
 
-	~AutomationRegionView() {}
+	~AutomationRegionView();
 
 	void init (Gdk::Color const & basic_color, bool wfd);
 
