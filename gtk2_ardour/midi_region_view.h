@@ -258,8 +258,8 @@ public:
 	/** Convert a timestamp in frames to beats (both relative to region start) */
 	double frames_to_beats(framepos_t) const;
 
-	void goto_previous_note ();
-	void goto_next_note ();
+	void goto_previous_note (bool add_to_selection);
+	void goto_next_note (bool add_to_selection);
 	void change_note_lengths (bool, bool, Evoral::MusicalTime beats, bool start, bool end);
 	void change_velocities (bool up, bool fine, bool allow_smush);
 	void transpose (bool up, bool fine, bool allow_smush);

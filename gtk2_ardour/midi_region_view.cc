@@ -723,12 +723,25 @@ MidiRegionView::key_press (GdkEventKey* ev)
 
 	} else if (ev->keyval == GDK_Tab) {
 
-		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
-			goto_previous_note ();
+		if (Keyboard::modifier_state_contains (ev->state, Keyboard::PrimaryModifier)) {
+			goto_previous_note (Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier));
 		} else {
-			goto_next_note ();
+			goto_next_note (Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier));
 		}
 		return true;
+
+	} else if (ev->keyval == GDK_ISO_Left_Tab) {
+
+		/* Shift-TAB generates ISO Left Tab, for some reason */
+
+		if (Keyboard::modifier_state_contains (ev->state, Keyboard::PrimaryModifier)) {
+			goto_previous_note (Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier));
+		} else {
+			goto_next_note (Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier));
+		}
+		return true;
+
+
 
 	} else if (ev->keyval == GDK_Up) {
 
@@ -2054,15 +2067,6 @@ MidiRegionView::note_selected(ArdourCanvas::CanvasNoteEvent* ev, bool add, bool 
 				add_to_selection (*i);
 			}
 
-#if 0
-			/* if events were guaranteed to be time sorted, we could do this.
-			   but as of sept 10th 2009, they no longer are.
-			*/
-
-			if ((*i)->note()->time() > latest) {
-				break;
-			}
-#endif
 		}
 	}
 }
@@ -3141,9 +3145,8 @@ MidiRegionView::time_sort_events ()
 }
 
 void
-MidiRegionView::goto_next_note ()
+MidiRegionView::goto_next_note (bool add_to_selection)
 {
-	// framepos_t pos = -1;
 	bool use_next = false;
 
 	if (_events.back()->selected()) {
@@ -3157,8 +3160,11 @@ MidiRegionView::goto_next_note ()
 			use_next = true;
 			continue;
 		} else if (use_next) {
-			unique_select (*i);
-			// pos = _region->position() + beats_to_frames ((*i)->note()->time());
+			if (!add_to_selection) {
+				unique_select (*i);
+			} else {
+				note_selected (*i, true, false);
+			}
 			return;
 		}
 	}
@@ -3170,9 +3176,8 @@ MidiRegionView::goto_next_note ()
 }
 
 void
-MidiRegionView::goto_previous_note ()
+MidiRegionView::goto_previous_note (bool add_to_selection)
 {
-	// framepos_t pos = -1;
 	bool use_next = false;
 
 	if (_events.front()->selected()) {
@@ -3186,8 +3191,11 @@ MidiRegionView::goto_previous_note ()
 			use_next = true;
 			continue;
 		} else if (use_next) {
-			unique_select (*i);
-			// pos = _region->position() + beats_to_frames ((*i)->note()->time());
+			if (!add_to_selection) {
+				unique_select (*i);
+			} else {
+				note_selected (*i, true, false);
+			}
 			return;
 		}
 	}
