@@ -446,7 +446,7 @@ SMFSource::mark_streaming_write_completed ()
 bool
 SMFSource::safe_midi_file_extension (const string& file)
 {
-	return (file.rfind(".mid") != string::npos);
+	return (file.rfind(".mid") != string::npos) || (file.rfind (".MID") != string::npos);
 }
 
 void
