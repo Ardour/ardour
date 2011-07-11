@@ -159,14 +159,14 @@ AudioTimeAxisView::audio_view()
 guint32
 AudioTimeAxisView::show_at (double y, int& nth, Gtk::VBox *parent)
 {
-	set_gui_property ("visible", "yes");
+	set_gui_property ("visible", true);
 	return TimeAxisView::show_at (y, nth, parent);
 }
 
 void
 AudioTimeAxisView::hide ()
 {
-	set_gui_property ("visible", "no");
+	set_gui_property ("visible", false);
 	TimeAxisView::hide ();
 }
 
@@ -460,14 +460,14 @@ AudioTimeAxisView::build_automation_action_menu (bool for_selection)
 	automation_items.push_back (CheckMenuElem (_("Fader"), sigc::mem_fun (*this, &AudioTimeAxisView::update_gain_track_visibility)));
 	gain_automation_item = dynamic_cast<CheckMenuItem*> (&automation_items.back ());
 	gain_automation_item->set_active ((!for_selection || _editor.get_selection().tracks.size() == 1) && 
-					  string_is_affirmative (gain_track->gui_property ("visible")));
+					  (gain_track && string_is_affirmative (gain_track->gui_property ("visible"))));
 
 	_main_automation_menu_map[Evoral::Parameter(GainAutomation)] = gain_automation_item;
 
 	automation_items.push_back (CheckMenuElem (_("Pan"), sigc::mem_fun (*this, &AudioTimeAxisView::update_pan_track_visibility)));
 	pan_automation_item = dynamic_cast<CheckMenuItem*> (&automation_items.back ());
 	pan_automation_item->set_active ((!for_selection || _editor.get_selection().tracks.size() == 1) &&
-					 string_is_affirmative (pan_tracks.front()->gui_property ("visible")));
+					 (!pan_tracks.empty() && string_is_affirmative (pan_tracks.front()->gui_property ("visible"))));
 
 	set<Evoral::Parameter> const & params = _route->pannable()->what_can_be_automated ();
 	for (set<Evoral::Parameter>::iterator p = params.begin(); p != params.end(); ++p) {
