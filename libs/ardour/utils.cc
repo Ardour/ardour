@@ -565,6 +565,13 @@ string_is_affirmative (const std::string& str)
 		return false;
 	}
 
+	/* the use of g_strncasecmp() is solely to get around issues with
+	 * charsets posed by trying to use C++ for the same
+	 * comparison. switching a std::string to its lower- or upper-case
+	 * version has several issues, but handled by default
+	 * in the way we desire when doing it in C.
+	 */
+
 	return str == "1" || str == "y" || str == "Y" || (!g_strncasecmp(str.c_str(), "yes", str.length()));
 }
 
