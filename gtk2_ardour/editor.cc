@@ -2269,7 +2269,7 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 	}
 
 	if ((prop = node.property ("stationary-playhead"))) {
-		bool yn = (prop->value() == "yes");
+		bool yn = string_is_affirmative (prop->value());
 		set_stationary_playhead (yn);
 		RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-stationary-playhead"));
 		if (act) {
