@@ -30,6 +30,7 @@
 
 #include "ardour/session_handle.h"
 
+#include "gui_object.h"
 #include "prompter.h"
 #include "selectable.h"
 
@@ -61,11 +62,13 @@ class AxisView : public virtual Selectable, public PBD::ScopedConnectionList, pu
 	uint32_t old_order_key() const { return _old_order_key; }
 
 	virtual std::string state_id() const = 0;
+	/* for now, we always return properties in string form.
+	 */
 	std::string gui_property (const std::string& property_name) const;
-
-	void set_gui_property (const std::string& property_name, const std::string& value);
-	void set_gui_property (const std::string& property_name, int value);
-	void set_gui_property (const std::string& property_name, double value);
+	
+	template<typename T> void set_gui_property (const std::string& property_name, const T& value) {
+		gui_object_state().set<T> (state_id(), property_name, value);
+	}
 
 	bool marked_for_display () const;
 	virtual bool set_marked_for_display (bool);
@@ -91,6 +94,9 @@ class AxisView : public virtual Selectable, public PBD::ScopedConnectionList, pu
 
 	bool _marked_for_display;
 	uint32_t _old_order_key;
+
+  private:
+	static GUIObjectState& gui_object_state();
 
 }; /* class AxisView */
 

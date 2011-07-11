@@ -29,6 +29,11 @@
 #include "pbd/id.h"
 
 class GUIObjectState {
+  private:
+	typedef boost::variant<int64_t,std::string> Variant;
+	typedef std::map<std::string,Variant> PropertyMap;
+	typedef std::map<std::string,PropertyMap> StringPropertyMap;
+
   public:
 	GUIObjectState() {}
 	~GUIObjectState();
@@ -41,59 +46,22 @@ class GUIObjectState {
 
 	GUIObjectState& operator= (const GUIObjectState& other);
 
-  private:
-	typedef boost::variant<int64_t,std::string> Variant;
-	typedef std::map<std::string,Variant> PropertyMap;
-	typedef std::map<std::string,PropertyMap> StringPropertyMap;
-
-	StringPropertyMap _property_maps;
-
-	template<typename T> T get (const std::string& id, const std::string& prop_name, const T& type_determination_placeholder, bool* empty = 0) {
-		StringPropertyMap::iterator i = _property_maps.find (id);
-		
-		if (i == _property_maps.end()) {
-			if (empty) {
-				*empty = true;
-			}
-			return T();
-		}
-
-		const PropertyMap& pmap (i->second);
-		PropertyMap::const_iterator p = pmap.find (prop_name);
-
-		if (p == pmap.end()) {
-			return T();
-		}
-
-		return boost::get<T> (p->second);
-	}
-
-	void clear_maps ();
-
-  public:
-	int get_int (const std::string& id, const std::string& prop_name) {
-		int i = 0;
-		return get (id, prop_name, i);
-	}
-
-	std::string get_string (const std::string& id, const std::string& prop_name) {
-		std::string s;
-		return get (id, prop_name, s);
-	}
+	std::string get_string (const std::string& id, const std::string& prop_name, bool* empty = 0);
 
 	template<typename T> void set (const std::string& id, const std::string& prop_name, const T& val) {
 		StringPropertyMap::iterator i = _property_maps.find (id);
 		
 		if (i != _property_maps.end()) {
 			i->second[prop_name] = val;
-			// std::cerr << id << " REset " << prop_name << " = [" << val << "]\n";
 		} else {
 			_property_maps[id] = PropertyMap();
 			_property_maps[id][prop_name] = val;
-			// std::cerr << id << " set " << prop_name << " = [" << val << "]\n";
 		}
 	}
+  private:
+	StringPropertyMap _property_maps;
 
+	void clear_maps ();
 };
 
 

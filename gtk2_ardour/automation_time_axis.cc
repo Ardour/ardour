@@ -942,9 +942,9 @@ AutomationTimeAxisView::set_state_2X (const XMLNode& node, int /*version*/)
 			if (yn) {
 				_canvas_display->show (); /* FIXME: necessary? show_at? */
 			}
-			set_gui_property ("visible", (yn ? "yes" : "no"));
+			set_gui_property ("visible", yn);
 		} else {
-			set_gui_property ("visible", "no");
+			set_gui_property ("visible", false);
 		}
 	}
 

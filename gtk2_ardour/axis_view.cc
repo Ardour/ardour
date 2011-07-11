@@ -97,22 +97,10 @@ AxisView::unique_random_color()
 	}
 }
 
-void
-AxisView::set_gui_property (const string& property_name, const string& value)
-{
-	ARDOUR_UI::instance()->gui_object_state->set (state_id(), property_name, value);
-}
-
-void
-AxisView::set_gui_property (const string& property_name, int value)
-{
-	ARDOUR_UI::instance()->gui_object_state->set (state_id(), property_name, value);
-}
-
 string
 AxisView::gui_property (const string& property_name) const
 {
-	return ARDOUR_UI::instance()->gui_object_state->get_string (state_id(), property_name);
+	return gui_object_state().get_string (state_id(), property_name);
 }
 
 bool
@@ -126,9 +114,9 @@ AxisView::set_marked_for_display (bool yn)
 {
 	if (yn != marked_for_display()) {
 		if (yn) {
-			set_gui_property ("visible", "yes");
+			set_gui_property ("visible", true);
 		} else {
-			set_gui_property ("visible", "no");
+			set_gui_property ("visible", false);
 		}
 		return true; // things changed
 	}
@@ -136,3 +124,8 @@ AxisView::set_marked_for_display (bool yn)
 	return false;
 }
 
+GUIObjectState&
+AxisView::gui_object_state() 
+{
+	return *ARDOUR_UI::instance()->gui_object_state;
+}

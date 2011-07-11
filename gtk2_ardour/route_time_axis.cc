@@ -141,7 +141,11 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	}
 
 	if (!_route->is_hidden()) {
-		set_gui_property ("visible", "yes");
+		if (gui_property ("visible").empty()) {
+			set_gui_property ("visible", true);
+		}
+	} else {
+		set_gui_property ("visible", false);
 	}
 
 	mute_changed (0);

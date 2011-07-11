@@ -49,11 +49,6 @@ class gos_string_vistor : public boost::static_visitor<> {
     void operator() (const int64_t& i) {
 	    stream << i;
     }
-#if 0
-    void operator() (const double& d) {
-	    stream << std::setprecision (12) << d;
-    }
-#endif
 
     void operator() (const std::string& s) {
 	    stream << s;
@@ -62,6 +57,40 @@ class gos_string_vistor : public boost::static_visitor<> {
   private:
     std::ostream& stream;
 };
+
+std::string 
+GUIObjectState::get_string (const std::string& id, const std::string& prop_name, bool* empty)
+{
+	StringPropertyMap::iterator i = _property_maps.find (id);
+	
+	if (i == _property_maps.end()) {
+		if (empty) {
+			*empty = true;
+		}
+		return string();
+	}
+	
+	const PropertyMap& pmap (i->second);
+	PropertyMap::const_iterator p = pmap.find (prop_name);
+	
+	if (p == pmap.end()) {
+		if (empty) {
+			*empty = true;
+		}
+		return string();
+	}
+	
+	std::stringstream ss;
+	gos_string_vistor gsv (ss);
+
+	boost::apply_visitor (gsv, p->second);
+
+	if (empty) {
+		*empty = false;
+	}
+	
+	return ss.str ();
+}
 
 XMLNode&
 GUIObjectState::get_state () const

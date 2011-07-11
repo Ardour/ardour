@@ -619,9 +619,9 @@ MixerStrip::set_packed (bool yn)
 	_packed = yn;
 
 	if (_packed) {
-		set_gui_property ("visible", "yes");
+		set_gui_property ("visible", true);
 	} else {
-		set_gui_property ("visible", "no");
+		set_gui_property ("visible", false);
 	}
 }
 
