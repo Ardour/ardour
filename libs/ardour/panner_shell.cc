@@ -99,10 +99,7 @@ PannerShell::configure_io (ChanCount in, ChanCount out)
 	}
 
 	PannerInfo* pi = PannerManager::instance().select_panner (in, out);
-
-	if (pi == 0) {
-		abort ();
-	}
+	assert (pi);
 
 	boost::shared_ptr<Speakers> speakers = _session.get_speakers ();
 
