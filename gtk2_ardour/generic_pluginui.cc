@@ -128,6 +128,7 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 
 	bypass_button.set_active (!pi->active());
 
+	prefheight = 0;
 	build ();
 }
 
@@ -137,6 +138,55 @@ GenericPluginUI::~GenericPluginUI ()
 		screen_update_connection.disconnect();
 	}
 }
+
+// Some functions for calculating the 'similarity' of two plugin
+// control labels.
+
+static int get_number(string label) {
+static const char *digits = "0123456789";
+int value = -1;
+
+	std::size_t first_digit_pos = label.find_first_of(digits);
+	if (first_digit_pos != string::npos) {
+		// found some digits: there's a number in there somewhere
+		stringstream s;
+		s << label.substr(first_digit_pos);
+		s >> value;
+	}
+	return value;
+}
+
+static int match_or_digit(char c1, char c2) {
+	return c1 == c2 || (isdigit(c1) && isdigit(c2));
+}	
+
+static std::size_t matching_chars_at_head(const string s1, const string s2) {
+std::size_t length, n = 0;
+
+	length = min(s1.length(), s2.length());
+	while (n < length) {
+		if (!match_or_digit(s1[n], s2[n]))
+			break;
+		n++;
+	} 
+	return n;
+}
+
+static std::size_t matching_chars_at_tail(const string s1, const string s2) {
+std::size_t s1pos, s2pos, n = 0;
+
+	s1pos = s1.length();
+	s2pos = s2.length();
+	while (s1pos-- > 0 && s2pos-- > 0) {
+		if (!match_or_digit(s1[s1pos], s2[s2pos])	)
+			break;
+		n++;
+	} 
+	return n;
+}
+
+static const guint32 min_controls_per_column = 17, max_controls_per_column = 24;
+static const float default_similarity_threshold = 0.3;
 
 void
 GenericPluginUI::build ()
@@ -151,7 +201,6 @@ GenericPluginUI::build ()
 	int output_rows, output_cols;
 	int button_rows, button_cols;
 
-	prefheight = 30;
 	hpacker.set_spacing (10);
 
 	output_rows = initial_output_rows;
@@ -176,6 +225,7 @@ GenericPluginUI::build ()
 
 	bt_frame = manage (new Frame);
 	bt_frame->set_name ("BaseFrame");
+	bt_frame->set_label (_("Switches"));
 	bt_frame->add (button_table);
 	hpacker.pack_start(*bt_frame, true, true);
 
@@ -190,6 +240,7 @@ GenericPluginUI::build ()
 	hpacker.pack_start(*frame, true, true);
 
 	/* find all ports. build control elements for all appropriate control ports */
+	std::vector<ControlUI *> cui_controls_list;
 
 	for (i = 0; i < plugin->parameter_count(); ++i) {
 
@@ -203,24 +254,6 @@ GenericPluginUI::build ()
 
 			ControlUI* cui;
 
-			/* if we are scrollable, just use one long column */
-
-			if (!is_scrollable) {
-				if (x++ > 20){
-					frame = manage (new Frame);
-					frame->set_name ("BaseFrame");
-					box = manage (new VBox);
-
-					box->set_border_width (5);
-					box->set_spacing (1);
-
-					frame->add (*box);
-					hpacker.pack_start(*frame, true, true);
-
-					x = 1;
-				}
-			}
-
 			boost::shared_ptr<ARDOUR::AutomationControl> c
 				= boost::dynamic_pointer_cast<ARDOUR::AutomationControl>(
 					insert->control(Evoral::Parameter(PluginAutomation, 0, i)));
@@ -231,12 +264,12 @@ GenericPluginUI::build ()
 			}
 
 			if (cui->controller || cui->clickbox || cui->combo) {
-
-				box->pack_start (*cui, false, false);
-
+				// Get all of the controls into a list, so that
+				// we can lay them out a bit more nicely later.
+				cui_controls_list.push_back(cui);
 			} else if (cui->button) {
 
-				if (button_row == button_rows) {
+				if (!is_scrollable && button_row == button_rows) {
 					button_row = 0;
 					if (++button_col == button_cols) {
 						button_cols += 2;
@@ -259,33 +292,93 @@ GenericPluginUI::build ()
 					output_cols ++;
 					output_table.resize (output_rows, output_cols);
 				}
+			}
+		} 
+	}
 
-				/* old code, which divides meters into
-				 * columns first, rows later. New code divides into one row
+	// Iterate over the list of controls to find which adjacent controls
+	// are similar enough to be grouped together.
+	
+	string label, previous_label = "";
+	int numbers_in_labels[cui_controls_list.size()];
+	
+	float similarity_scores[cui_controls_list.size()];
+	float most_similar = 0.0, least_similar = 1.0;
+	
+	i = 0;
+	for (vector<ControlUI*>::iterator cuip = cui_controls_list.begin(); cuip != cui_controls_list.end(); ++cuip, ++i) {
+		label = (*cuip)->label.get_text();
+		numbers_in_labels[i] = get_number(label);
 
-				if (output_row == output_rows) {
-					output_row = 0;
-					if (++output_col == output_cols) {
-						output_cols += 2;
-						output_table.resize (output_rows, output_cols);
-					}
-				}
+		if (i > 0) {
+			// A hand-wavy calculation of how similar this control's
+			// label is to the previous.
+			similarity_scores[i] = 
+				(float) ( 
+					( matching_chars_at_head(label, previous_label) + 
+					  matching_chars_at_tail(label, previous_label) +
+					  1 
+					) 
+				) / (label.length() + previous_label.length());
+			if (numbers_in_labels[i] >= 0) {
+				similarity_scores[i] += (numbers_in_labels[i] == numbers_in_labels[i-1]);
+			}
+			least_similar = min(least_similar, similarity_scores[i]);
+			most_similar  = max(most_similar, similarity_scores[i]);
+		} else {
+			similarity_scores[0] = 1.0;
+		}
 
-				output_table.attach (*cui, output_col, output_col + 1, output_row, output_row+1,
-						     FILL|EXPAND, FILL);
+		// cerr << "label: " << label << " sim: " << fixed << setprecision(3) << similarity_scores[i] << " num: " << numbers_in_labels[i] << endl;
+		previous_label = label;		                       
+	}
 
-				output_row++;
-				*/
+	
+	// cerr << "most similar: " << most_similar << ", least similar: " << least_similar << endl;
+	float similarity_threshold;
+	
+	if (most_similar > 1.0) {
+		similarity_threshold = default_similarity_threshold;
+	} else {
+		similarity_threshold = most_similar - (1 - default_similarity_threshold);
+	}
+	
+	// Now iterate over the list of controls to display them, placing an
+	// HSeparator between controls of less than a certain similarity, and 
+	// starting a new column when necessary.
+	
+	i = 0;
+	for (vector<ControlUI*>::iterator cuip = cui_controls_list.begin(); cuip != cui_controls_list.end(); ++cuip, ++i) {
+
+		ControlUI* cui = *cuip;
+		
+		if (!is_scrollable) {
+			x++;
+		}
+		
+		if (x > max_controls_per_column || similarity_scores[i] <= similarity_threshold) {
+			if (x > min_controls_per_column) {
+				frame = manage (new Frame);
+				frame->set_name ("BaseFrame");
+				frame->set_label (_("Controls"));
+				box = manage (new VBox);
+				box->set_border_width (5);
+				box->set_spacing (1);
+				frame->add (*box);
+				hpacker.pack_start(*frame, true, true);
+				x = 0;
+			} else {
+				HSeparator *split = new HSeparator();
+				split->set_size_request(-1, 5);
+				box->pack_start(*split, false, false, 0);
 			}
 
-			/* HACK: ideally the preferred height would be queried from
-			   the complete hpacker, but I can't seem to get that
-			   information in time, so this is an estimation
-			*/
-
-			prefheight += 30;
-
 		}
+		box->pack_start (*cui, false, false);
+	}
+
+	if (is_scrollable) {
+		prefheight = 30 * i;
 	}
 
 	if (box->children().empty()) {
@@ -299,6 +392,7 @@ GenericPluginUI::build ()
 	if (!output_table.children().empty()) {
 		frame = manage (new Frame);
 		frame->set_name ("BaseFrame");
+		frame->set_label(_("Meters"));
 		frame->add (output_table);
 		hpacker.pack_end (*frame, true, true);
 	}
