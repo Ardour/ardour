@@ -163,6 +163,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	controls_ebox.signal_button_press_event().connect (sigc::mem_fun (*this, &TimeAxisView::controls_ebox_button_press));
 	controls_ebox.signal_button_release_event().connect (sigc::mem_fun (*this, &TimeAxisView::controls_ebox_button_release));
 	controls_ebox.signal_motion_notify_event().connect (sigc::mem_fun (*this, &TimeAxisView::controls_ebox_motion));
+	controls_ebox.signal_leave_notify_event().connect (sigc::mem_fun (*this, &TimeAxisView::controls_ebox_leave));
 	controls_ebox.show ();
 
 	controls_hbox.pack_start (controls_ebox, true, true);
@@ -389,11 +390,19 @@ TimeAxisView::controls_ebox_motion (GdkEventMotion* ev)
                 _resize_drag_start = ev->y_root;
         } else {
 		/* not dragging but ... */
-		Glib::RefPtr<Gdk::Window> win = controls_ebox.get_window();
-		
 		maybe_set_cursor (ev->y);
 	}
 
+	return true;
+}
+
+bool
+TimeAxisView::controls_ebox_leave (GdkEventCrossing* ev)
+{
+	if (_have_preresize_cursor) {
+		gdk_window_set_cursor (controls_ebox.get_window()->gobj(), _preresize_cursor);
+		_have_preresize_cursor = false;
+	}
 	return true;
 }
 
