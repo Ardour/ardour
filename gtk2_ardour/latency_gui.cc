@@ -162,29 +162,11 @@ LatencyDialog::LatencyDialog (const std::string& title, Latent& l, framepos_t sr
 	: ArdourDialog (title, false, true),
 	  lwidget (l, sr, psz)
 {
-
 	get_vbox()->pack_start (lwidget);
-	add_button (Stock::CANCEL, RESPONSE_CANCEL);
-	add_button (Stock::APPLY, RESPONSE_REJECT);
-	add_button (Stock::OK, RESPONSE_ACCEPT);
+	add_button (Stock::CLOSE, RESPONSE_CLOSE);
 
 	show_all ();
-
-	while (true) {
-		int ret = run ();
-
-		switch (ret) {
-		case RESPONSE_ACCEPT:
-			return;
-			break;
-
-		case RESPONSE_REJECT:
-			lwidget.finish ();
-			break;
-		default:
-			return;
-		}
-	}
+	run ();
 }
 
 
