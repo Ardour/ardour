@@ -60,7 +60,7 @@ LatencyBarController::get_label (double&)
 
 LatencyGUI::LatencyGUI (Latent& l, framepos_t sr, framepos_t psz)
 	: _latent (l),
-	  initial_value (_latent.signal_latency()),
+	  initial_value (_latent.user_latency()),
 	  sample_rate (sr),
 	  period_size (psz),
 	  ignored (new PBD::IgnorableControllable()),
