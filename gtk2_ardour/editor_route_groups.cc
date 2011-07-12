@@ -59,34 +59,28 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 	_model = ListStore::create (_columns);
 	_display.set_model (_model);
 
-	_display.append_column (_("Name"), _columns.text);
+	int const columns = 10;
 
+	_display.append_column (_("Name"), _columns.text);
 	_display.append_column (_("G"), _columns.gain);
-	_display.append_column (_("R"), _columns.record);
+	_display.append_column (_("Rel"), _columns.gain_relative);
 	_display.append_column (_("M"), _columns.mute);
 	_display.append_column (_("S"), _columns.solo);
+	_display.append_column (_("Rec"), _columns.record);
 	_display.append_column (_("Sel"), _columns.select);
 	_display.append_column (_("E"), _columns.edits);
-
+	_display.append_column (_("A"), _columns.active_state);
 	_display.append_column (_("Show"), _columns.is_visible);
 
-	_display.get_column (0)->set_data (X_("colnum"), GUINT_TO_POINTER(0));
-	_display.get_column (1)->set_data (X_("colnum"), GUINT_TO_POINTER(1));
-	_display.get_column (2)->set_data (X_("colnum"), GUINT_TO_POINTER(2));
-	_display.get_column (3)->set_data (X_("colnum"), GUINT_TO_POINTER(3));
-	_display.get_column (4)->set_data (X_("colnum"), GUINT_TO_POINTER(4));
-	_display.get_column (5)->set_data (X_("colnum"), GUINT_TO_POINTER(5));
-	_display.get_column (6)->set_data (X_("colnum"), GUINT_TO_POINTER(6));
-	_display.get_column (7)->set_data (X_("colnum"), GUINT_TO_POINTER(7));
+	for (int i = 0; i < columns; ++i) {
+		_display.get_column (i)->set_data (X_("colnum"), GUINT_TO_POINTER(i));
+	}
 
 	_display.get_column (0)->set_expand (true);
-	_display.get_column (1)->set_expand (false);
-	_display.get_column (2)->set_expand (false);
-	_display.get_column (3)->set_expand (false);
-	_display.get_column (4)->set_expand (false);
-	_display.get_column (5)->set_expand (false);
-	_display.get_column (6)->set_expand (false);
-	_display.get_column (7)->set_expand (false);
+	
+	for (int i = 1; i < columns; ++i) {
+		_display.get_column (i)->set_expand (false);
+	}
 
 	_display.set_headers_visible (true);
 
@@ -95,36 +89,14 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 	CellRendererText* name_cell = dynamic_cast<CellRendererText*>(_display.get_column_cell_renderer (0));
 	name_cell->property_editable() = true;
 	name_cell->signal_edited().connect (sigc::mem_fun (*this, &EditorRouteGroups::name_edit));
-
+	
 	/* use checkbox for the active + visible columns */
-
-	CellRendererToggle* active_cell = dynamic_cast<CellRendererToggle*>(_display.get_column_cell_renderer (1));
-	active_cell->property_activatable() = true;
-	active_cell->property_radio() = false;
-
-	active_cell = dynamic_cast<CellRendererToggle*>(_display.get_column_cell_renderer (2));
-	active_cell->property_activatable() = true;
-	active_cell->property_radio() = false;
-
-	active_cell = dynamic_cast<CellRendererToggle*>(_display.get_column_cell_renderer (3));
-	active_cell->property_activatable() = true;
-	active_cell->property_radio() = false;
-
-	active_cell = dynamic_cast<CellRendererToggle*>(_display.get_column_cell_renderer (4));
-	active_cell->property_activatable() = true;
-	active_cell->property_radio() = false;
-
-	active_cell = dynamic_cast<CellRendererToggle*>(_display.get_column_cell_renderer (5));
-	active_cell->property_activatable() = true;
-	active_cell->property_radio() = false;
-
-	active_cell = dynamic_cast<CellRendererToggle*>(_display.get_column_cell_renderer (6));
-	active_cell->property_activatable() = true;
-	active_cell->property_radio() = false;
-
-	active_cell = dynamic_cast<CellRendererToggle*>(_display.get_column_cell_renderer (7));
-	active_cell->property_activatable() = true;
-	active_cell->property_radio() = false;
+	
+	for (int i = 1; i < columns; ++i) {
+		CellRendererToggle* active_cell = dynamic_cast <CellRendererToggle*> (_display.get_column_cell_renderer (i));
+		active_cell->property_activatable() = true;
+		active_cell->property_radio() = false;
+	}
 
 	_model->signal_row_changed().connect (sigc::mem_fun (*this, &EditorRouteGroups::row_change));
 	/* What signal would you guess was emitted when the rows of your treeview are reordered
@@ -241,7 +213,6 @@ EditorRouteGroups::button_press_event (GdkEventButton* ev)
 		if (Keyboard::is_edit_event (ev)) {
 			if ((iter = _model->get_iter (path))) {
 				if ((group = (*iter)[_columns.routegroup]) != 0) {
-					// edit_route_group (group);
 #ifdef GTKOSX
 					_display.queue_draw();
 #endif
@@ -265,8 +236,8 @@ EditorRouteGroups::button_press_event (GdkEventButton* ev)
 
 	case 2:
 		if ((iter = _model->get_iter (path))) {
-			bool record = (*iter)[_columns.record];
-			(*iter)[_columns.record] = !record;
+			bool gain_relative = (*iter)[_columns.gain_relative];
+			(*iter)[_columns.gain_relative] = !gain_relative;
 #ifdef GTKOSX
 			_display.queue_draw();
 #endif
@@ -298,6 +269,17 @@ EditorRouteGroups::button_press_event (GdkEventButton* ev)
 
 	case 5:
 		if ((iter = _model->get_iter (path))) {
+			bool record = (*iter)[_columns.record];
+			(*iter)[_columns.record] = !record;
+#ifdef GTKOSX
+			_display.queue_draw();
+#endif
+			return true;
+		}
+		break;
+
+	case 6:
+		if ((iter = _model->get_iter (path))) {
 			bool select = (*iter)[_columns.select];
 			(*iter)[_columns.select] = !select;
 #ifdef GTKOSX
@@ -307,7 +289,7 @@ EditorRouteGroups::button_press_event (GdkEventButton* ev)
 		}
 		break;
 
-	case 6:
+	case 7:
 		if ((iter = _model->get_iter (path))) {
 			bool edits = (*iter)[_columns.edits];
 			(*iter)[_columns.edits] = !edits;
@@ -318,10 +300,10 @@ EditorRouteGroups::button_press_event (GdkEventButton* ev)
 		}
 		break;
 
-	case 7:
+	case 8:
 		if ((iter = _model->get_iter (path))) {
-			bool visible = (*iter)[_columns.is_visible];
-			(*iter)[_columns.is_visible] = !visible;
+			bool active_state = (*iter)[_columns.active_state];
+			(*iter)[_columns.active_state] = !active_state;
 #ifdef GTKOSX
 			_display.queue_draw();
 #endif
@@ -329,6 +311,17 @@ EditorRouteGroups::button_press_event (GdkEventButton* ev)
 		}
 		break;
 
+	case 9:
+		if ((iter = _model->get_iter (path))) {
+			bool is_visible = (*iter)[_columns.is_visible];
+			(*iter)[_columns.is_visible] = !is_visible;
+#ifdef GTKOSX
+			_display.queue_draw();
+#endif
+			return true;
+		}
+		break;
+		
 	default:
 		break;
 	}
@@ -350,19 +343,24 @@ EditorRouteGroups::row_change (const Gtk::TreeModel::Path&, const Gtk::TreeModel
 	}
 
 	PropertyList plist;
+	plist.add (Properties::name, string ((*iter)[_columns.text]));
+	
 	bool val = (*iter)[_columns.gain];
 	plist.add (Properties::gain, val);
-	val = (*iter)[_columns.record];
-	plist.add (Properties::recenable, val);
+	val = (*iter)[_columns.gain_relative];
+	plist.add (Properties::relative, val);
 	val = (*iter)[_columns.mute];
 	plist.add (Properties::mute, val);
 	val = (*iter)[_columns.solo];
 	plist.add (Properties::solo, val);
+	val = (*iter)[_columns.record];
+	plist.add (Properties::recenable, val);
 	val = (*iter)[_columns.select];
 	plist.add (Properties::select, val);
 	val = (*iter)[_columns.edits];
 	plist.add (Properties::edit, val);
-	plist.add (Properties::name, string ((*iter)[_columns.text]));
+	val = (*iter)[_columns.active_state];
+	plist.add (Properties::route_active, val);
 
 	group->set_hidden (!(*iter)[_columns.is_visible], this);
 
@@ -377,13 +375,15 @@ EditorRouteGroups::add (RouteGroup* group)
 
 	TreeModel::Row row = *(_model->append());
 
-	row[_columns.is_visible] = !group->is_hidden();
 	row[_columns.gain] = group->is_gain ();
-	row[_columns.record] = group->is_recenable();
+	row[_columns.gain_relative] = group->is_relative ();
 	row[_columns.mute] = group->is_mute ();
 	row[_columns.solo] = group->is_solo ();
+	row[_columns.record] = group->is_recenable();
 	row[_columns.select] = group->is_select ();
 	row[_columns.edits] = group->is_edit ();
+	row[_columns.active_state] = group->is_route_active ();
+	row[_columns.is_visible] = !group->is_hidden();
 
 	_in_row_change = true;
 
@@ -436,14 +436,16 @@ EditorRouteGroups::property_changed (RouteGroup* group, const PropertyChange& ch
 
 	for(Gtk::TreeModel::Children::iterator iter = children.begin(); iter != children.end(); ++iter) {
 		if (group == (*iter)[_columns.routegroup]) {
-			(*iter)[_columns.is_visible] = !group->is_hidden();
 			(*iter)[_columns.text] = group->name();
 			(*iter)[_columns.gain] = group->is_gain ();
-			(*iter)[_columns.record] = group->is_recenable ();
+			(*iter)[_columns.gain_relative] = group->is_relative ();
 			(*iter)[_columns.mute] = group->is_mute ();
 			(*iter)[_columns.solo] = group->is_solo ();
+			(*iter)[_columns.record] = group->is_recenable ();
 			(*iter)[_columns.select] = group->is_select ();
 			(*iter)[_columns.edits] = group->is_edit ();
+			(*iter)[_columns.active_state] = group->is_route_active ();
+			(*iter)[_columns.is_visible] = !group->is_hidden();
 		}
 	}
 

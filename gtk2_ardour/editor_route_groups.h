@@ -38,25 +38,29 @@ private:
         struct Columns : public Gtk::TreeModel::ColumnRecord {
 
                 Columns () {
-			add (is_visible);
+			add (text);
 			add (gain);
-			add (record);
+			add (gain_relative);
 			add (mute);
 			add (solo);
+			add (record);
 			add (select);
 			add (edits);
-			add (text);
+			add (active_state);
+			add (is_visible);
 			add (routegroup);
                 }
 
-	        Gtk::TreeModelColumn<bool> is_visible;
+	        Gtk::TreeModelColumn<std::string> text;
 		Gtk::TreeModelColumn<bool> gain;
-		Gtk::TreeModelColumn<bool> record;
+		Gtk::TreeModelColumn<bool> gain_relative;
 		Gtk::TreeModelColumn<bool> mute;
 		Gtk::TreeModelColumn<bool> solo;
+		Gtk::TreeModelColumn<bool> record;
 		Gtk::TreeModelColumn<bool> select;
 		Gtk::TreeModelColumn<bool> edits;
-	        Gtk::TreeModelColumn<std::string> text;
+		Gtk::TreeModelColumn<bool> active_state;
+	        Gtk::TreeModelColumn<bool> is_visible;
 	        Gtk::TreeModelColumn<ARDOUR::RouteGroup*> routegroup;
 	};
 
