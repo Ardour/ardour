@@ -51,13 +51,13 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
 	set_position (Gtk::WIN_POS_MOUSE);
 	set_name (N_("RouteGroupDialog"));
 
-	VBox* vbox = manage (new VBox);
+	VBox* main_vbox = manage (new VBox);
 	Gtk::Label* l;
 
 	get_vbox()->set_spacing (4);
 
-	vbox->set_spacing (18);
-	vbox->set_border_width (5);
+	main_vbox->set_spacing (18);
+	main_vbox->set_border_width (5);
 
 	HBox* hbox = manage (new HBox);
 	hbox->set_spacing (6);
@@ -66,17 +66,23 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
 	hbox->pack_start (*l, false, true);
 	hbox->pack_start (_name, true, true);
 
-	vbox->pack_start (*hbox, false, true);
+	VBox* top_vbox = manage (new VBox);
+	top_vbox->set_spacing (4);
 
-	VBox* options_box = manage (new VBox);
-	options_box->set_spacing (6);
+	top_vbox->pack_start (*hbox, false, true);
+	top_vbox->pack_start (_active);
 
-	l = manage (new Label (_("<b>Sharing</b>"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false ));
-	l->set_use_markup ();
-	options_box->pack_start (*l, false, true);
+	main_vbox->pack_start (*top_vbox, false, false);
 
 	_name.set_text (_group->name ());
 	_active.set_active (_group->is_active ());
+
+	VBox* options_box = manage (new VBox);
+	options_box->set_spacing (6);
+	
+	l = manage (new Label (_("<b>Sharing</b>"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false ));
+	l->set_use_markup ();
+	options_box->pack_start (*l, false, true);
 
 	_name.signal_activate ().connect (sigc::bind (sigc::mem_fun (*this, &Dialog::response), RESPONSE_OK));
 
@@ -109,7 +115,6 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
 	l->set_padding (8, 0);
 	table->attach (*l, 0, 1, 0, 8, Gtk::FILL, Gtk::FILL, 0, 0);
 
-	table->attach (_active, 1, 3, 0, 1, Gtk::FILL, Gtk::FILL, 0, 0);
 	table->attach (_gain, 1, 3, 1, 2, Gtk::FILL, Gtk::FILL, 0, 0);
 
 	l = manage (new Label ("", Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
@@ -125,9 +130,9 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
 	table->attach (_route_active, 1, 3, 8, 9, Gtk::FILL, Gtk::FILL, 0, 0);
 
 	options_box->pack_start (*table, false, true);
-	vbox->pack_start (*options_box, false, true);
+	main_vbox->pack_start (*options_box, false, true);
 
-	get_vbox()->pack_start (*vbox, false, false);
+	get_vbox()->pack_start (*main_vbox, false, false);
 
 	_gain.signal_toggled().connect(sigc::mem_fun (*this, &RouteGroupDialog::gain_toggled));
 
