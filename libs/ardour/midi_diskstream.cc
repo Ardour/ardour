@@ -528,6 +528,21 @@ MidiDiskstream::process (framepos_t transport_frame, pframes_t nframes, bool can
 		for (MidiBuffer::iterator i = buf.begin(); i != buf.end(); ++i) {
 			const Evoral::MIDIEvent<MidiBuffer::TimeType> ev(*i, false);
 			assert(ev.buffer());
+#ifndef NDEBUG
+			if (DEBUG::MidiIO & PBD::debug_bits) {
+				const uint8_t* __data = ev.buffer();
+				DEBUG_STR_DECL(a);
+				DEBUG_STR_APPEND(a, string_compose ("mididiskstream %1 capture event @ %2 + %3 sz %4 ", this, ev.time(), transport_frame, ev.size()));
+				for (size_t i=0; i < ev.size(); ++i) {
+					DEBUG_STR_APPEND(a,hex);
+					DEBUG_STR_APPEND(a,"0x");
+					DEBUG_STR_APPEND(a,(int)__data[i]);
+					DEBUG_STR_APPEND(a,' ');
+				}
+				DEBUG_STR_APPEND(a,'\n');
+				DEBUG_TRACE (DEBUG::MidiIO, DEBUG_STR(a).str());
+			}
+#endif
 			_capture_buf->write(ev.time() + transport_frame, ev.type(), ev.size(), ev.buffer());
 		}
 
