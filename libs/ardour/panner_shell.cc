@@ -99,7 +99,10 @@ PannerShell::configure_io (ChanCount in, ChanCount out)
 	}
 
 	PannerInfo* pi = PannerManager::instance().select_panner (in, out);
-	assert (pi);
+	if (!pi) {
+		cerr << "No panner found: check that panners are being discovered correctly during startup.\n";
+		assert (pi);
+	}
 
 	boost::shared_ptr<Speakers> speakers = _session.get_speakers ();
 
