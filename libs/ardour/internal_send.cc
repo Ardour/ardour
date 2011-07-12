@@ -116,6 +116,7 @@ InternalSend::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame
 	}
 	
 	if (panner && !panner->bypassed()) {
+		mixbufs.set_count (bufs.count ());
 		_panshell->run (bufs, mixbufs, start_frame, end_frame, nframes);
 	} else {
 		mixbufs.read_from (bufs, nframes);
