@@ -747,15 +747,14 @@ Mixer_UI::redisplay_track_list ()
 			continue;
 		}
 
-		bool visible = (*i)[track_columns.visible];
+		if (!strip_redisplay_does_not_reset_order_keys) {
+			strip->route()->set_order_key (N_("signal"), order);
+		}
+
+		bool const visible = (*i)[track_columns.visible];
 
 		if (visible) {
 			strip->set_gui_property ("visible", true);
-			strip->route()->set_order_key (N_("signal"), order);
-
-			if (!strip_redisplay_does_not_reset_order_keys) {
-				strip->route()->set_order_key (N_("signal"), order);
-			}
 
 			if (strip->packed()) {
 
@@ -773,7 +772,6 @@ Mixer_UI::redisplay_track_list ()
 					strip_packer.pack_start (*strip, false, false);
 				}
 				strip->set_packed (true);
-				//strip->show();
 			}
 
 		} else {
@@ -797,8 +795,9 @@ Mixer_UI::redisplay_track_list ()
 
 	// Resigc::bind all of the midi controls automatically
 
-	if (auto_rebinding)
+	if (auto_rebinding) {
 		auto_rebind_midi_controls ();
+	}
 
 	_group_tabs->set_dirty ();
 }

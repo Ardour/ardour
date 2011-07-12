@@ -474,10 +474,11 @@ EditorRoutes::redisplay ()
 		if (visible) {
 			position += tv->show_at (position, n, &_editor->edit_controls_vbox);
 			tv->clip_to_viewport ();
-			n++;
 		} else {
 			tv->hide ();
 		}
+
+		n++;
 	}
 
 	/* whenever we go idle, update the track view list to reflect the new order.
@@ -781,6 +782,8 @@ EditorRoutes::sync_order_keys (string const & src)
 		for (map<int, int>::const_iterator i = new_order.begin(); i != new_order.end(); ++i) {
 			co.push_back (i->second);
 		}
+
+		assert (co.size() == _model->children().size ());
 
 		_model->reorder (co);
 		_redisplay_does_not_reset_order_keys = false;
