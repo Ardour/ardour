@@ -225,6 +225,9 @@ LV2Plugin::init(void* c_plugin, framecnt_t rate)
 			LilvNode* def;
 			lilv_port_get_range(plugin, port, &def, NULL, NULL);
 			_defaults[i] = def ? lilv_node_as_float(def) : 0.0f;
+			if (lilv_port_has_property (plugin, port, _world.srate)) {
+				_defaults[i] *= _session.frame_rate ();
+			}
 			lilv_node_free(def);
 
 			lilv_instance_connect_port(_impl->instance, i, &_control_data[i]);
@@ -798,6 +801,11 @@ LV2Plugin::get_parameter_descriptor(uint32_t which, ParameterDescriptor& desc) c
 	desc.label        = lilv_node_as_string(lilv_port_get_name(_impl->plugin, port));
 	desc.lower        = min ? lilv_node_as_float(min) : 0.0f;
 	desc.upper        = max ? lilv_node_as_float(max) : 1.0f;
+	if (desc.sr_dependent) {
+		desc.lower *= _session.frame_rate ();
+		desc.upper *= _session.frame_rate ();
+	}
+		
 	desc.min_unbound  = false; // TODO: LV2 extension required
 	desc.max_unbound  = false; // TODO: LV2 extension required
 

@@ -225,6 +225,9 @@ LV2Plugin::init(void* c_plugin, framecnt_t rate)
 			SLV2Value def;
 			slv2_port_get_range(plugin, port, &def, NULL, NULL);
 			_defaults[i] = def ? slv2_value_as_float(def) : 0.0f;
+			if (slv2_port_has_property(_impl->plugin, port, _world.srate)) {
+				_defaults[i] *= _session.frame_rate ();
+			}
 			slv2_value_free(def);
 
 			slv2_instance_connect_port(_impl->instance, i, &_control_data[i]);
@@ -821,6 +824,11 @@ LV2Plugin::get_parameter_descriptor(uint32_t which, ParameterDescriptor& desc) c
 	desc.label        = slv2_value_as_string(slv2_port_get_name(_impl->plugin, port));
 	desc.lower        = min ? slv2_value_as_float(min) : 0.0f;
 	desc.upper        = max ? slv2_value_as_float(max) : 1.0f;
+	if (desc.sr_dependent) {
+		desc.lower *= _session.frame_rate ();
+		desc.upper *= _session.frame_rate ();
+	}
+	
 	desc.min_unbound  = false; // TODO: LV2 extension required
 	desc.max_unbound  = false; // TODO: LV2 extension required
 
