@@ -864,6 +864,8 @@ MidiDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 	int32_t ret = 0;
 	framecnt_t total;
 
+	cerr << name() << " flushing to disk\n";
+
 	_write_data_count = 0;
 
 	total = _session.transport_frame() - _last_flush_frame;
@@ -874,6 +876,11 @@ MidiDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 
 	if (total == 0 || _capture_buf->read_space() == 0
 			|| (!force_flush && (total < disk_io_chunk_frames && was_recording))) {
+		cerr << "\tFlush shortcut because total = " << total
+		     << " capture read space = " << _capture_buf->read_space()
+		     << " force flush = " << force_flush 
+		     << " was recording = " << was_recording
+		     << endl;
 		goto out;
 	}
 
@@ -905,6 +912,10 @@ MidiDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 		} else {
 			_last_flush_frame = _session.transport_frame();
 		}
+	} else {
+		cerr << "\tdidn't write to disk because recenabled = " << record_enabled()
+		     << " last flush @ " << _last_flush_frame << " disk io " << disk_io_chunk_frames << " TF @ " << _session.transport_frame()
+		     << " force = " << force_flush << endl;
 	}
 
 out:
