@@ -146,6 +146,7 @@ MidiDiskstream::non_realtime_locate (framepos_t position)
 	if (_write_source) {
 		_write_source->set_timeline_position (position);
 	}
+	cerr << name() << " Seeking to " << position << endl;
 	seek (position, false);
 }
 
@@ -864,7 +865,7 @@ MidiDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 	int32_t ret = 0;
 	framecnt_t total;
 
-	cerr << name() << " flushing to disk\n";
+	cerr << name() << " flushing to disk, bufspace = " << _capture_buf->read_space() << endl;
 
 	_write_data_count = 0;
 
