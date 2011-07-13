@@ -973,7 +973,7 @@ AutomationLine::get_selectables (
 
 	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
 		double const model_when = (*(*i)->model())->when;
-		framepos_t const session_frames_when = _time_converter.to (model_when - _offset) + _time_converter.origin_b ();
+		framepos_t const session_frames_when = _time_converter.to (model_when) + _time_converter.origin_b () - _offset;
 
 		if (session_frames_when >= start && session_frames_when <= end && (*i)->get_y() >= bot_track && (*i)->get_y() <= top_track) {
 			results.push_back (*i);
@@ -1004,8 +1004,8 @@ AutomationLine::point_selection_to_control_points (PointSelection const & s)
 
 		for (vector<ControlPoint*>::iterator j = control_points.begin(); j != control_points.end(); ++j) {
 
-			double const rstart = trackview.editor().frame_to_unit (_time_converter.to (i->start));
-			double const rend = trackview.editor().frame_to_unit (_time_converter.to (i->end));
+			double const rstart = trackview.editor().frame_to_unit (_time_converter.to (i->start) - _offset);
+			double const rend = trackview.editor().frame_to_unit (_time_converter.to (i->end) - _offset);
 
 			if ((*j)->get_x() >= rstart && (*j)->get_x() <= rend) {
 				if ((*j)->get_y() >= bot && (*j)->get_y() <= top) {
@@ -1020,7 +1020,7 @@ AutomationLine::point_selection_to_control_points (PointSelection const & s)
 }
 
 void
-AutomationLine::set_selected_points (PointSelection& points)
+AutomationLine::set_selected_points (PointSelection const & points)
 {
 	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
 		(*i)->set_selected (false);
