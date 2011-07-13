@@ -32,11 +32,14 @@ class GUIObjectState {
   private:
 	typedef boost::variant<int64_t,std::string> Variant;
 	typedef std::map<std::string,Variant> PropertyMap;
-	typedef std::map<std::string,PropertyMap> StringPropertyMap;
 
   public:
-	GUIObjectState() {}
+	typedef std::map<std::string,PropertyMap> StringPropertyMap;
+	
 	~GUIObjectState();
+
+	StringPropertyMap::const_iterator begin () const;
+	StringPropertyMap::const_iterator end () const;
 
 	XMLNode& get_state () const;
 	int set_state (const XMLNode&);

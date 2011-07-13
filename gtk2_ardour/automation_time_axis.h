@@ -99,6 +99,7 @@ class AutomationTimeAxisView : public TimeAxisView {
 	int  set_state (const XMLNode&, int version);
 
 	std::string state_id() const;
+	static bool parse_state_id (std::string const &, PBD::ID &, bool &, Evoral::Parameter &);
 
 	boost::shared_ptr<ARDOUR::AutomationControl> control()    { return _control; }
 	boost::shared_ptr<AutomationController>      controller() { return _controller; }

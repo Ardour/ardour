@@ -95,7 +95,7 @@ class AxisView : public virtual Selectable, public PBD::ScopedConnectionList, pu
 	bool _marked_for_display;
 	uint32_t _old_order_key;
 
-  private:
+protected:
 	static GUIObjectState& gui_object_state();
 
 }; /* class AxisView */

@@ -169,3 +169,18 @@ GUIObjectState::operator= (const GUIObjectState& other)
 
 	return *this;
 }
+
+/** @return begin iterator into our StringPropertyMap */
+GUIObjectState::StringPropertyMap::const_iterator
+GUIObjectState::begin () const
+{
+	return _property_maps.begin ();
+}
+
+/** @return end iterator into our StringPropertyMap */
+GUIObjectState::StringPropertyMap::const_iterator
+GUIObjectState::end () const
+{
+	return _property_maps.end ();
+}
+
