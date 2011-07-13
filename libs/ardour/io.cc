@@ -267,7 +267,7 @@ IO::remove_port (Port* port, void* src)
 
 		if (change.type != IOChange::NoChange) {
 			changed (change, src);
-			_session.set_dirty ();
+			_buffers.attach_buffers (_ports);
 		}
 	}
 
@@ -279,6 +279,8 @@ IO::remove_port (Port* port, void* src)
 		return -1;
 	}
 
+	_session.set_dirty ();
+	
 	return 0;
 }
 
@@ -332,6 +334,7 @@ IO::add_port (string destination, void* src, DataType type)
 		change.type = IOChange::ConfigurationChanged;
 		change.after = _ports.count ();
 		changed (change, src); /* EMIT SIGNAL */
+		_buffers.attach_buffers (_ports);
 	}
 
 	if (destination.length()) {
@@ -1531,6 +1534,7 @@ IO::connected_to (const string& str) const
 	return false;
 }
 
+/** Caller must hold process lock */
 void
 IO::process_input (boost::shared_ptr<Processor> proc, framepos_t start_frame, framepos_t end_frame, pframes_t nframes)
 {
