@@ -889,7 +889,7 @@ template<typename Time>
 void
 Sequence<Time>::append_note_off_unlocked (NotePtr note)
 {
-        DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 c=%2 note %3 on @ %4 v=%5\n",
+        DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 c=%2 note %3 OFF @ %4 v=%5\n",
                                                       this, (int)note->channel(), 
                                                       (int)note->note(), note->time(), (int)note->velocity()));
         assert(note->note() <= 127);
@@ -925,7 +925,7 @@ Sequence<Time>::append_note_off_unlocked (NotePtr note)
                         nn->set_off_velocity (note->velocity());
 
                         _write_notes[note->channel()].erase(n);
-                        DEBUG_TRACE (DEBUG::Sequence, string_compose ("resolved note, length: %1\n", note->length()));
+                        DEBUG_TRACE (DEBUG::Sequence, string_compose ("resolved note, length: %1\n", nn->length()));
                         resolved = true;
                         break;
                 }
