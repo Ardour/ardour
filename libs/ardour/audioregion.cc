@@ -861,7 +861,7 @@ AudioRegion::set_live_state (const XMLNode& node, Change& what_changed, bool sen
 				if (string_is_affirmative (prop->value())) {
 					set_fade_in_active (true);
 				} else {
-					set_fade_in_active (true);
+					set_fade_in_active (false);
 				}
 			}
 
