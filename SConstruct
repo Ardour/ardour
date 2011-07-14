@@ -431,7 +431,6 @@ deps = \
 	'gtk+-2.0'             : '2.8.1',
 	'libxml-2.0'           : '2.6.0',
 	'samplerate'           : '0.1.0',
-	'raptor'               : '1.4.2',
 	'lrdf'                 : '0.4.0',
 	'jack'                 : '0.109.0',
 	'libgnomecanvas-2.0'   : '2.0',
@@ -487,7 +486,10 @@ libraries = { }
 
 libraries['core'] = LibraryInfo (CCFLAGS = '-Ilibs')
 
-conf = env.Configure (custom_tests = { 'CheckPKGExists' : CheckPKGExists } )
+conf = env.Configure (custom_tests = { 'CheckPKGExists' : CheckPKGExists,
+                                       'CheckPKGVersion' : CheckPKGVersion }
+                      )
+                      
 
 if conf.CheckPKGExists ('fftw3f'):
     libraries['fftw3f'] = LibraryInfo()
@@ -500,6 +502,22 @@ if conf.CheckPKGExists ('fftw3'):
 if conf.CheckPKGExists ('aubio'):
     libraries['aubio'] = LibraryInfo()
     libraries['aubio'].ParseConfig('pkg-config --cflags --libs aubio')
+
+raptorOK = 0
+
+if conf.CheckPKGExists ('raptor2'):
+    libraries['raptor'] = LibraryInfo()
+    libraries['raptor'].ParseConfig('pkg-config --cflags --libs raptor2')
+    raptorOK = 1
+else:
+    if conf.CheckPKGExists ('raptor') and conf.CheckPKGVersion (pkg, '1.4.2'):
+        libraries['raptor'] = LibraryInfo()
+        libraries['raptor'].ParseConfig('pkg-config --cflags --libs raptor')
+        raptorOK = 1
+            
+if raptorOK == 0:
+    print "Ardour requires either raptor or raptor2 to be available at build time"
+    Exit (1)
 
 env = conf.Finish ()
 
@@ -569,9 +587,6 @@ libraries['xslt'].ParseConfig('pkg-config --cflags --libs libxslt')
 
 libraries['lrdf'] = LibraryInfo()
 libraries['lrdf'].ParseConfig('pkg-config --cflags --libs lrdf')
-
-libraries['raptor'] = LibraryInfo()
-libraries['raptor'].ParseConfig('pkg-config --cflags --libs raptor')
 
 libraries['sndfile'] = LibraryInfo()
 libraries['sndfile'].ParseConfig ('pkg-config --cflags --libs sndfile')
