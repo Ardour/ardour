@@ -372,7 +372,7 @@ Delivery::set_state (const XMLNode& node, int version)
 		// std::cerr << this << ' ' << _name << " NO ROLE INFO\n";
 	}
 
-	XMLNode* pan_node = node.child (X_("Panner"));
+	XMLNode* pan_node = node.child (X_("PannerShell"));
 
 	if (pan_node && _panshell) {
 		_panshell->set_state (*pan_node, version);
