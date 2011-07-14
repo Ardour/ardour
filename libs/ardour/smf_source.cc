@@ -240,9 +240,13 @@ SMFSource::write_unlocked (MidiRingBuffer<framepos_t>& source, framepos_t positi
 
 	Evoral::MIDIEvent<framepos_t> ev;
 
+	cerr << "SMFSource::write unlocked, begins writing from src buffer\n";
+
 	while (true) {
 		bool ret = source.peek ((uint8_t*)&time, sizeof (time));
 		if (!ret || time > _last_write_end + duration) {
+			DEBUG_TRACE (DEBUG::MidiIO, string_compose ("SMFSource::write_unlocked: dropping event @ %1 because ret %4 or it is later than %2 + %3\n",
+								    time, _last_write_end, duration, ret));
 			break;
 		}
 
@@ -277,11 +281,12 @@ SMFSource::write_unlocked (MidiRingBuffer<framepos_t>& source, framepos_t positi
 			continue;
 		}
 
+		cerr << "SMFSource:: calling append_event_unlocked_frames()\n";
 		append_event_unlocked_frames(ev, position);
 	}
 
 	Evoral::SMF::flush();
-	free(buf);
+	free (buf);
 
 	return duration;
 }
@@ -336,6 +341,7 @@ SMFSource::append_event_unlocked_frames (const Evoral::Event<framepos_t>& ev, fr
 {
 	assert(_writing);
 	if (ev.size() == 0)  {
+		cerr << "SMFSource: asked to append zero-size event\n";
 		return;
 	}
 
@@ -545,8 +551,9 @@ SMFSource::load_model (bool lock, bool force_reload)
 		have_event_id = false;
 	}
 
-	_model->end_write(false);
-	_model->set_edited(false);
+	//_model->end_write (_length_beats, false, true);
+	_model->end_write (false);
+	_model->set_edited (false);
 
 	_model_iter = _model->begin();
 
@@ -567,7 +574,7 @@ SMFSource::flush_midi ()
 		return;
 	}
 
-	Evoral::SMF::end_write();
+	Evoral::SMF::end_write ();
 	/* data in the file means its no longer removable */
 	mark_nonremovable ();
 }

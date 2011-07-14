@@ -911,6 +911,7 @@ MidiDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 			error << string_compose(_("MidiDiskstream %1: cannot write to disk"), _id) << endmsg;
 			return -1;
 		} else {
+			cerr << "didn't write, _write_source = " << _write_source << endl;
 			_last_flush_frame = _session.transport_frame();
 		}
 	} else {
