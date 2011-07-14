@@ -54,7 +54,6 @@ int
 Panner::set_state (const XMLNode& node, int version)
 {
 	const XMLProperty* prop;
-	XMLNodeConstIterator iter;
 
 	if ((prop = node.property (X_("bypassed"))) != 0) {
 		set_bypassed (string_is_affirmative (prop->value()));
