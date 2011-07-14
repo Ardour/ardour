@@ -29,6 +29,7 @@
 #include "pbd/error.h"
 #include "pbd/cartesian.h"
 #include "ardour/panner.h"
+#include "ardour/panner_shell.h"
 #include "ardour/pannable.h"
 #include "ardour/speakers.h"
 
@@ -67,17 +68,17 @@ Panner2d::Target::set_text (const char* txt)
 	text = txt;
 }
 
-Panner2d::Panner2d (boost::shared_ptr<Panner> p, int32_t h)
-	: panner (p)
+Panner2d::Panner2d (boost::shared_ptr<PannerShell> p, int32_t h)
+	: panner_shell (p)
         , position (AngularVector (0.0, 0.0), "")
         , width (0)
         , height (h)
         , last_width (0)
 {
-	panner->StateChanged.connect (connections, invalidator (*this), boost::bind (&Panner2d::handle_state_change, this), gui_context());
+	panner_shell->Changed.connect (connections, invalidator (*this), boost::bind (&Panner2d::handle_state_change, this), gui_context());
 
-        panner->pannable()->pan_azimuth_control->Changed.connect (connections, invalidator(*this), boost::bind (&Panner2d::handle_position_change, this), gui_context());
-        panner->pannable()->pan_width_control->Changed.connect (connections, invalidator(*this), boost::bind (&Panner2d::handle_position_change, this), gui_context());
+        panner_shell->pannable()->pan_azimuth_control->Changed.connect (connections, invalidator(*this), boost::bind (&Panner2d::handle_position_change, this), gui_context());
+        panner_shell->pannable()->pan_width_control->Changed.connect (connections, invalidator(*this), boost::bind (&Panner2d::handle_position_change, this), gui_context());
 
 	drag_target = 0;
 	set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::POINTER_MOTION_MASK);
@@ -95,7 +96,7 @@ Panner2d::~Panner2d()
 void
 Panner2d::reset (uint32_t n_inputs)
 {
-        uint32_t nouts = panner->out().n_audio();
+        uint32_t nouts = panner_shell->panner()->out().n_audio();
 
 	/* signals */
 
@@ -114,7 +115,7 @@ Panner2d::reset (uint32_t n_inputs)
         label_signals ();
 
         for (uint32_t i = 0; i < n_inputs; ++i) {
-                signals[i]->position = panner->signal_position (i);
+                signals[i]->position = panner_shell->panner()->signal_position (i);
         }
 
 	/* add all outputs */
@@ -135,7 +136,7 @@ Panner2d::reset (uint32_t n_inputs)
 		(*x)->visible = false;
 	}
 
-        vector<Speaker>& the_speakers (panner->get_speakers()->speakers());
+        vector<Speaker>& the_speakers (panner_shell->panner()->get_speakers()->speakers());
 
 	for (uint32_t n = 0; n < nouts; ++n) {
 		char buf[16];
@@ -204,7 +205,7 @@ Panner2d::handle_state_change ()
 void
 Panner2d::label_signals ()
 {
-        double w = panner->pannable()->pan_width_control->get_value();
+        double w = panner_shell->pannable()->pan_width_control->get_value();
         uint32_t sz = signals.size();
 
 	switch (sz) {
@@ -243,12 +244,12 @@ void
 Panner2d::handle_position_change ()
 {
 	uint32_t n;
-        double w = panner->pannable()->pan_width_control->get_value();
+        double w = panner_shell->pannable()->pan_width_control->get_value();
 
-        position.position = AngularVector (panner->pannable()->pan_azimuth_control->get_value() * 360.0, 0.0);
+        position.position = AngularVector (panner_shell->pannable()->pan_azimuth_control->get_value() * 360.0, 0.0);
 
         for (uint32_t i = 0; i < signals.size(); ++i) {
-                signals[i]->position = panner->signal_position (i);
+                signals[i]->position = panner_shell->panner()->signal_position (i);
         }
 
         if (w * last_width <= 0) {
@@ -258,7 +259,7 @@ Panner2d::handle_position_change ()
 
         last_width = w;
 
-        vector<Speaker>& the_speakers (panner->get_speakers()->speakers());
+        vector<Speaker>& the_speakers (panner_shell->panner()->get_speakers()->speakers());
 
 	for (n = 0; n < speakers.size(); ++n) {
 		speakers[n]->position = the_speakers[n].angles();
@@ -397,7 +398,7 @@ Panner2d::on_expose_event (GdkEventExpose *event)
         /* background */
 
 	cairo_rectangle (cr, event->area.x, event->area.y, event->area.width, event->area.height);
-	if (!panner->bypassed()) {
+	if (!panner_shell->bypassed()) {
 		cairo_set_source_rgba (cr, 0.1, 0.1, 0.1, 1.0);
 	} else {
 		cairo_set_source_rgba (cr, 0.1, 0.1, 0.1, 0.2);
@@ -446,8 +447,8 @@ Panner2d::on_expose_event (GdkEventExpose *event)
         if (signals.size() > 1) {
                 /* arc to show "diffusion" */
 
-                double width_angle = fabs (panner->pannable()->pan_width_control->get_value()) * 2 * M_PI;
-                double position_angle = (2 * M_PI) - panner->pannable()->pan_azimuth_control->get_value() * 2 * M_PI;
+                double width_angle = fabs (panner_shell->pannable()->pan_width_control->get_value()) * 2 * M_PI;
+                double position_angle = (2 * M_PI) - panner_shell->pannable()->pan_azimuth_control->get_value() * 2 * M_PI;
 
                 cairo_save (cr);
                 cairo_translate (cr, radius, radius);
@@ -455,7 +456,7 @@ Panner2d::on_expose_event (GdkEventExpose *event)
                 cairo_move_to (cr, 0, 0);
                 cairo_arc_negative (cr, 0, 0, radius, width_angle, 0.0);
                 cairo_close_path (cr);
-                if (panner->pannable()->pan_width_control->get_value() >= 0.0) {
+                if (panner_shell->pannable()->pan_width_control->get_value() >= 0.0) {
                         /* normal width */
                         cairo_set_source_rgba (cr, 0.282, 0.517, 0.662, 0.45);
                 } else {
@@ -466,7 +467,7 @@ Panner2d::on_expose_event (GdkEventExpose *event)
                 cairo_restore (cr);
         }
 
-	if (!panner->bypassed()) {
+	if (!panner_shell->bypassed()) {
 
 		double arc_radius;
 
@@ -607,7 +608,7 @@ Panner2d::on_button_press_event (GdkEventButton *ev)
 
 		if ((drag_target = find_closest_object (x, y, is_signal)) != 0) {
                         if (!is_signal) {
-                                panner->set_position (drag_target->position.azi/360.0);
+                                panner_shell->panner()->set_position (drag_target->position.azi/360.0);
                                 drag_target = 0;
                         } else {
                                 drag_target->set_selected (true);
@@ -705,7 +706,7 @@ Panner2d::handle_motion (gint evx, gint evy, GdkModifierType state)
 
                         if (drag_target == &position) {
                                 double degree_fract = av.azi / 360.0;
-                                panner->set_position (degree_fract);
+                                panner_shell->panner()->set_position (degree_fract);
                         }
 		}
 	}
@@ -719,12 +720,12 @@ Panner2d::on_scroll_event (GdkEventScroll* ev)
         switch (ev->direction) {
         case GDK_SCROLL_UP:
         case GDK_SCROLL_RIGHT:
-                panner->set_position (panner->pannable()->pan_azimuth_control->get_value() - 1.0/360.0);
+                panner_shell->panner()->set_position (panner_shell->pannable()->pan_azimuth_control->get_value() - 1.0/360.0);
                 break;
 
         case GDK_SCROLL_DOWN:
         case GDK_SCROLL_LEFT:
-                panner->set_position (panner->pannable()->pan_azimuth_control->get_value() + 1.0/360.0);
+                panner_shell->panner()->set_position (panner_shell->pannable()->pan_azimuth_control->get_value() + 1.0/360.0);
                 break;
         }
         return true;
@@ -773,10 +774,10 @@ Panner2d::clamp_to_circle (double& x, double& y)
 void
 Panner2d::toggle_bypass ()
 {
-	panner->set_bypassed (!panner->bypassed());
+	panner_shell->set_bypassed (!panner_shell->bypassed());
 }
 
-Panner2dWindow::Panner2dWindow (boost::shared_ptr<Panner> p, int32_t h, uint32_t inputs)
+Panner2dWindow::Panner2dWindow (boost::shared_ptr<PannerShell> p, int32_t h, uint32_t inputs)
 	: ArdourDialog (_("Panner (2D)"))
         , widget (p, h)
 	, bypass_button (_("Bypass"))
@@ -838,10 +839,10 @@ void
 Panner2dWindow::bypass_toggled ()
 {
         bool view = bypass_button.get_active ();
-        bool model = widget.get_panner()->bypassed ();
+        bool model = widget.get_panner_shell()->bypassed ();
 
         if (model != view) {
-                widget.get_panner()->set_bypassed (view);
+                widget.get_panner_shell()->set_bypassed (view);
         }
 }
 

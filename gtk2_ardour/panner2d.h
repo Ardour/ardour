@@ -37,7 +37,7 @@
 #include "ardour_dialog.h"
 
 namespace ARDOUR {
-	class Panner;
+	class PannerShell;
 }
 
 namespace Gtk {
@@ -54,7 +54,7 @@ class Panner2dWindow;
 class Panner2d : public Gtk::DrawingArea
 {
   public:
-	Panner2d (boost::shared_ptr<ARDOUR::Panner>, int32_t height);
+	Panner2d (boost::shared_ptr<ARDOUR::PannerShell>, int32_t height);
 	~Panner2d ();
 
 	void allow_target_motion (bool);
@@ -64,7 +64,7 @@ class Panner2d : public Gtk::DrawingArea
 	void move_signal (int which, const PBD::AngularVector&);
 	void reset (uint32_t n_inputs);
 
-	boost::shared_ptr<ARDOUR::Panner> get_panner() const { return panner; }
+	boost::shared_ptr<ARDOUR::PannerShell> get_panner_shell() const { return panner_shell; }
 
 	sigc::signal<void,int> PuckMoved;
 	sigc::signal<void,int> TargetMoved;
@@ -102,7 +102,7 @@ class Panner2d : public Gtk::DrawingArea
 		bool _selected;
 	};
 
-	boost::shared_ptr<ARDOUR::Panner> panner;
+	boost::shared_ptr<ARDOUR::PannerShell> panner_shell;
 	Glib::RefPtr<Pango::Layout> layout;
 
 	typedef std::vector<Target*> Targets;
@@ -146,7 +146,7 @@ class Panner2d : public Gtk::DrawingArea
 class Panner2dWindow : public ArdourDialog
 {
   public:
-	Panner2dWindow (boost::shared_ptr<ARDOUR::Panner>, int32_t height, uint32_t inputs);
+	Panner2dWindow (boost::shared_ptr<ARDOUR::PannerShell>, int32_t height, uint32_t inputs);
 
 	void reset (uint32_t n_inputs);
 

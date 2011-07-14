@@ -119,7 +119,6 @@ PannerUI::set_panner (boost::shared_ptr<PannerShell> ps, boost::shared_ptr<Panne
 	}
 
 	_panshell->Changed.connect (connections, invalidator (*this), boost::bind (&PannerUI::panshell_changed, this), gui_context());
-	_panner->StateChanged.connect (connections, invalidator (*this), boost::bind (&PannerUI::update_pan_state, this), gui_context());
 
         /* new panner object, force complete reset of panner GUI
          */
@@ -217,12 +216,6 @@ PannerUI::panshell_changed ()
 }
 
 void
-PannerUI::update_pan_state ()
-{
-	/* currently nothing to do */
-}
-
-void
 PannerUI::setup_pan ()
 {
 	if (!_panner) {
@@ -313,7 +306,7 @@ PannerUI::setup_pan ()
 	} else {
 
 		if (!twod_panner) {
-			twod_panner = new Panner2d (_panner, 61);
+			twod_panner = new Panner2d (_panshell, 61);
 			twod_panner->set_name ("MixerPanZone");
 			twod_panner->show ();
 			twod_panner->signal_button_press_event().connect (sigc::mem_fun(*this, &PannerUI::pan_button_event), false);
@@ -361,7 +354,7 @@ PannerUI::pan_button_event (GdkEventButton* ev)
 	case 1:
 		if (twod_panner && ev->type == GDK_2BUTTON_PRESS) {
 			if (!big_window) {
-				big_window = new Panner2dWindow (_panner, 400, _panner->in().n_audio());
+				big_window = new Panner2dWindow (_panshell, 400, _panner->in().n_audio());
 			}
 			big_window->show ();
 			return true;
@@ -397,7 +390,7 @@ PannerUI::build_pan_menu ()
 
 	/* set state first, connect second */
 
-	bypass_menu_item->set_active (_panner->bypassed());
+	bypass_menu_item->set_active (_panshell->bypassed());
 	bypass_menu_item->signal_toggled().connect (sigc::mem_fun(*this, &PannerUI::pan_bypass_toggle));
 
 	items.push_back (MenuElem (_("Reset"), sigc::mem_fun (*this, &PannerUI::pan_reset)));
@@ -406,8 +399,8 @@ PannerUI::build_pan_menu ()
 void
 PannerUI::pan_bypass_toggle ()
 {
-	if (bypass_menu_item && (_panner->bypassed() != bypass_menu_item->get_active())) {
-		_panner->set_bypassed (!_panner->bypassed());
+	if (bypass_menu_item && (_panshell->bypassed() != bypass_menu_item->get_active())) {
+		_panshell->set_bypassed (!_panshell->bypassed());
 	}
 }
 

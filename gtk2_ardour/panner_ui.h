@@ -123,7 +123,6 @@ class PannerUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	std::vector<MonoPanner*> pan_bars;
 
 	void pan_value_changed (uint32_t which);
-	void update_pan_state ();
 	void build_astate_menu ();
 	void build_astyle_menu ();
 

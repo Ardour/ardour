@@ -32,7 +32,6 @@ using namespace ARDOUR;
 
 Panner::Panner (boost::shared_ptr<Pannable> p)
 	: _pannable (p)
-	, _bypassed (false)
 {
 }
 
@@ -41,35 +40,10 @@ Panner::~Panner ()
 	DEBUG_TRACE(PBD::DEBUG::Destruction, string_compose ("panner @ %1 destructor, pannable is %2\n", this, _pannable));
 }
 
-void
-Panner::set_bypassed (bool yn)
-{
-	if (yn != _bypassed) {
-		_bypassed = yn;
-		StateChanged ();
-	}
-}
-
-int
-Panner::set_state (const XMLNode& node, int version)
-{
-	const XMLProperty* prop;
-
-	if ((prop = node.property (X_("bypassed"))) != 0) {
-		set_bypassed (string_is_affirmative (prop->value()));
-	}
-
-	return 0;
-}
-
 XMLNode&
 Panner::get_state ()
 {
-	XMLNode* node = new XMLNode (X_("Panner"));
-
-	node->add_property (X_("bypassed"), (bypassed() ? "yes" : "no"));
-
-	return *node;
+	return *(new XMLNode (X_("Panner")));
 }
 
 void
@@ -139,4 +113,10 @@ string
 Panner::value_as_string (boost::shared_ptr<AutomationControl> ac) const
 {
 	return _pannable->value_as_string (ac);
+}
+
+int
+Panner::set_state (XMLNode const &, int)
+{
+	return 0;
 }

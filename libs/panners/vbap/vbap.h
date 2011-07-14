@@ -58,9 +58,7 @@ public:
         std::string describe_parameter (Evoral::Parameter);
         std::string value_as_string (boost::shared_ptr<AutomationControl>) const;
 
-	XMLNode& state (bool full_state);
 	XMLNode& get_state ();
-	int set_state (const XMLNode&, int version);
 
         PBD::AngularVector signal_position (uint32_t n) const;
         boost::shared_ptr<Speakers> get_speakers() const;

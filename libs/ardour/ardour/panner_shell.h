@@ -60,20 +60,22 @@ public:
 	/// The fundamental Panner function
 	void run (BufferSet& src, BufferSet& dest, framepos_t start_frame, framepos_t end_frames, pframes_t nframes);
 
-
-	XMLNode& get_state (void);
-	XMLNode& state (bool full);
+	XMLNode& get_state ();
 	int      set_state (const XMLNode&, int version);
 
-	PBD::Signal0<void> Changed; /* panner and/or outputs count changed */
+	PBD::Signal0<void> Changed; /* panner and/or outputs count and/or bypass state changed */
 
 	boost::shared_ptr<Panner> panner() const { return _panner; }
 	boost::shared_ptr<Pannable> pannable() const { return _pannable; }
+
+	bool bypassed () const;
+	void set_bypassed (bool);
 
   private:
 	void distribute_no_automation (BufferSet& src, BufferSet& dest, pframes_t nframes, gain_t gain_coeff);
 	boost::shared_ptr<Panner> _panner;
 	boost::shared_ptr<Pannable> _pannable;
+	bool _bypassed;
 
 	static float current_automation_version_number;
 };

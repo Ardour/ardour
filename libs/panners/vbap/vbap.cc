@@ -371,21 +371,9 @@ VBAPanner::distribute_one_automated (AudioBuffer& src, BufferSet& obufs,
 XMLNode&
 VBAPanner::get_state ()
 {
-	return state (true);
-}
-
-XMLNode&
-VBAPanner::state (bool full_state)
-{
         XMLNode& node (Panner::get_state());
 	node.add_property (X_("type"), _descriptor.name);
 	return node;
-}
-
-int
-VBAPanner::set_state (const XMLNode& node, int /*version*/)
-{
-	return 0;
 }
 
 Panner*

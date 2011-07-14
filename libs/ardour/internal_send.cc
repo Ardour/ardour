@@ -109,13 +109,7 @@ InternalSend::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame
 
 	assert(mixbufs.available() >= bufs.count());
 
-	boost::shared_ptr<Panner> panner;
-	
-	if (_panshell) {
-		panner = _panshell->panner();
-	}
-	
-	if (panner && !panner->bypassed()) {
+	if (_panshell && !_panshell->bypassed()) {
 		mixbufs.set_count (_send_to->n_outputs ());
 		_panshell->run (bufs, mixbufs, start_frame, end_frame, nframes);
 	} else {
@@ -320,14 +314,8 @@ InternalSend::send_to_property_changed (const PropertyChange& what_changed)
 void
 InternalSend::set_can_pan (bool yn)
 {
-	boost::shared_ptr<Panner> panner;
-
 	if (_panshell) {
-		panner = _panshell->panner ();
-	}
-
-	if (panner) {
-		panner->set_bypassed (!yn);
+		_panshell->set_bypassed (!yn);
 	}
 }
 

@@ -66,6 +66,7 @@ using namespace PBD;
 PannerShell::PannerShell (string name, Session& s, boost::shared_ptr<Pannable> p)
 	: SessionObject (s, name)
 	, _pannable (p)
+	, _bypassed (false)
 {
 	set_name (name);
 }
@@ -124,18 +125,14 @@ PannerShell::configure_io (ChanCount in, ChanCount out)
 }
 
 XMLNode&
-PannerShell::get_state (void)
-{
-	return state (true);
-}
-
-XMLNode&
-PannerShell::state (bool full)
+PannerShell::get_state ()
 {
 	XMLNode* node = new XMLNode ("PannerShell");
 
+	node->add_property (X_("bypassed"), _bypassed ? X_("yes") : X_("no"));
+
 	if (_panner) {
-		node->add_child_nocopy (_panner->state (full));
+		node->add_child_nocopy (_panner->get_state ());
 	}
 
 	return *node;
@@ -148,6 +145,10 @@ PannerShell::set_state (const XMLNode& node, int version)
 	XMLNodeConstIterator niter;
 	const XMLProperty *prop;
 	LocaleGuard lg (X_("POSIX"));
+
+	if ((prop = node.property (X_("bypassed"))) != 0) {
+		set_bypassed (string_is_affirmative (prop->value ()));
+	}
 
 	_panner.reset ();
 
@@ -326,3 +327,19 @@ PannerShell::run (BufferSet& inbufs, BufferSet& outbufs, framepos_t start_frame,
 	}
 }
 
+void
+PannerShell::set_bypassed (bool yn)
+{
+	if (yn == _bypassed) {
+		return;
+	}
+	
+	_bypassed = yn;
+	Changed (); /* EMIT SIGNAL */
+}
+
+bool
+PannerShell::bypassed () const
+{
+	return _bypassed;
+}

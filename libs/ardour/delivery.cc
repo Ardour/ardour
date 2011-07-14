@@ -233,8 +233,6 @@ Delivery::configure_io (ChanCount in, ChanCount out)
 void
 Delivery::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pframes_t nframes, bool result_required)
 {
-        boost::shared_ptr<Panner> panner;
-
 	assert (_output);
 
 	PortSet& ports (_output->ports());
@@ -287,10 +285,6 @@ Delivery::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pf
 		Amp::apply_simple_gain (bufs, nframes, tgain);
 	}
 
-	if (_panshell) {
-		panner = _panshell->panner();
-	}
-
 #if 0
         if (_session.transport_rolling()) {
                 cerr << name() << " first value written : " << scnt << endl;
@@ -306,7 +300,7 @@ Delivery::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pf
         }
 #endif
 
-	if (panner && !panner->bypassed()) {
+	if (_panshell && !_panshell->bypassed()) {
 
 		// Use the panner to distribute audio to output port buffers
 
@@ -350,7 +344,7 @@ Delivery::state (bool full_state)
 	node.add_property("role", enum_2_string(_role));
 
 	if (_panshell) {
-		node.add_child_nocopy (_panshell->state (full_state));
+		node.add_child_nocopy (_panshell->get_state ());
 	}
 
 	return node;

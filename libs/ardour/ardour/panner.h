@@ -83,9 +83,6 @@ public:
 
 	virtual void reset() {}
 
-	virtual bool bypassed() const { return _bypassed; }
-	virtual void set_bypassed (bool yn);
-
 	void      set_automation_state (AutoState);
 	AutoState automation_state() const;
 	void      set_automation_style (AutoStyle);
@@ -140,11 +137,9 @@ public:
 	                                   framepos_t start, framepos_t end, pframes_t nframes,
 	                                   pan_t** buffers);
 
-	PBD::Signal0<void> StateChanged;
-
 	int set_state (const XMLNode&, int version);
-	virtual XMLNode& state (bool full_state) = 0;
-
+	XMLNode& get_state ();
+	
 	boost::shared_ptr<Pannable> pannable() const { return _pannable; }
 
 	//virtual std::string describe_parameter (Evoral::Parameter);
@@ -161,9 +156,6 @@ public:
 
 protected:
 	boost::shared_ptr<Pannable> _pannable;
-	bool        _bypassed;
-
-	XMLNode& get_state ();
 
 	virtual void distribute_one (AudioBuffer&, BufferSet& obufs, gain_t gain_coeff, pframes_t nframes, uint32_t which) = 0;
 	virtual void distribute_one_automated (AudioBuffer&, BufferSet& obufs,

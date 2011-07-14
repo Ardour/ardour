@@ -435,25 +435,11 @@ Panner2in2out::factory (boost::shared_ptr<Pannable> p, boost::shared_ptr<Speaker
 }
 
 XMLNode&
-Panner2in2out::get_state (void)
-{
-	return state (true);
-}
-
-XMLNode&
-Panner2in2out::state (bool /*full_state*/)
+Panner2in2out::get_state ()
 {
 	XMLNode& root (Panner::get_state ());
 	root.add_property (X_("type"), _descriptor.name);
 	return root;
-}
-
-int
-Panner2in2out::set_state (const XMLNode& node, int version)
-{
-	LocaleGuard lg (X_("POSIX"));
-	Panner::set_state (node, version);
-	return 0;
 }
 
 std::set<Evoral::Parameter> 
