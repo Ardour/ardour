@@ -537,6 +537,9 @@ IO::state (bool /*full_state*/)
 		node->add_child_nocopy (*pnode);
 	}
 
+	snprintf (buf, sizeof (buf), "%" PRId64, _user_latency);
+	node->add_property (X_("user-latency"), buf);
+	
 	return *node;
 }
 
@@ -597,6 +600,9 @@ IO::set_state (const XMLNode& node, int version)
 		ConnectingLegal.connect_same_thread (connection_legal_c, boost::bind (&IO::connecting_became_legal, this));
 	}
 
+	if ((prop = node.property ("user-latency")) != 0) {
+		_user_latency = atoi (prop->value ());
+	}
 
 	return 0;
 }
