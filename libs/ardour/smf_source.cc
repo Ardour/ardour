@@ -551,8 +551,8 @@ SMFSource::load_model (bool lock, bool force_reload)
 		have_event_id = false;
 	}
 
-	//_model->end_write (_length_beats, false, true);
-	_model->end_write (false);
+	_model->end_write (_length_beats, false, true);
+	//_model->end_write (false);
 	_model->set_edited (false);
 
 	_model_iter = _model->begin();

@@ -37,6 +37,13 @@ SessionDirectory::SessionDirectory (const path& session_path)
 
 }
 
+SessionDirectory& 
+SessionDirectory::operator= (const std::string& newpath)
+{
+	m_root_path = newpath;
+	return *this;
+}
+
 bool
 SessionDirectory::create ()
 {

@@ -2120,7 +2120,6 @@ ARDOUR_UI::snapshot_session (bool switch_to_it)
 	prompter.set_name ("Prompter");
 	prompter.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
 	prompter.set_title (_("Take Snapshot"));
-	prompter.set_title (_("Take Snapshot"));
 	prompter.set_prompt (_("Name of new snapshot"));
 
 	if (!switch_to_it) {
@@ -2177,6 +2176,73 @@ ARDOUR_UI::snapshot_session (bool switch_to_it)
 		if (do_save) {
 			save_state (snapname, switch_to_it);
 		}
+		break;
+	}
+
+	default:
+		break;
+	}
+}
+
+/** Ask the user for the name of a new shapshot and then take it.
+ */
+
+void
+ARDOUR_UI::rename_session ()
+{
+	if (!_session) {
+		return;
+	}
+
+	ArdourPrompter prompter (true);
+	string name;
+
+	prompter.set_name ("Prompter");
+	prompter.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
+	prompter.set_title (_("Rename Session"));
+	prompter.set_prompt (_("New session name"));
+
+  again:
+	switch (prompter.run()) {
+	case RESPONSE_ACCEPT:
+	{
+		prompter.get_result (name);
+
+		bool do_rename = (name.length() != 0);
+
+		if (do_rename) {
+			if (name.find ('/') != string::npos) {
+				MessageDialog msg (_("To ensure compatibility with various systems\n"
+				                     "session names may not contain a '/' character"));
+				msg.run ();
+				goto again;
+			}
+			if (name.find ('\\') != string::npos) {
+				MessageDialog msg (_("To ensure compatibility with various systems\n"
+				                     "session names may not contain a '\\' character"));
+				msg.run ();
+				goto again;
+			}
+
+			switch (_session->rename (name)) {
+			case -1: {
+				MessageDialog msg (_("That name is already in use by another directory/folder. Please try again."));
+				msg.set_position (WIN_POS_MOUSE);
+				msg.run ();
+				goto again;
+				break;
+			}
+			case 0:
+				break;
+			default: {
+				MessageDialog msg (_("Renaming this session failed.\nThings could be seriously messed up at this point"));
+				msg.set_position (WIN_POS_MOUSE);
+				msg.run ();
+				break;
+			}
+			}
+		}
+		
 		break;
 	}
 

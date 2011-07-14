@@ -265,6 +265,7 @@ framecnt_t
 MidiSource::midi_write (MidiRingBuffer<framepos_t>& source, framepos_t source_start, framecnt_t duration)
 {
 	Glib::Mutex::Lock lm (_lock);
+	cerr << "MidiSource calling write unlocked\n";
 	const framecnt_t ret = write_unlocked (source, source_start, duration);
 	_last_write_end += duration;
 	return ret;
@@ -310,7 +311,7 @@ void
 MidiSource::mark_streaming_write_completed ()
 {
 	if (_model) {
-		_model->end_write(false);
+		_model->end_write (false);
 	}
 
 	_writing = false;

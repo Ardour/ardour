@@ -578,6 +578,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	guint32  last_key_press_time;
 
 	void snapshot_session (bool switch_to_it);
+	void rename_session ();
 
 	Mixer_UI   *mixer;
 	int         create_mixer ();

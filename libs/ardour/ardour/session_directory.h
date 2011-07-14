@@ -36,6 +36,11 @@ public:
 	SessionDirectory (const PBD::sys::path& session_path);
 
 	/**
+	 * Change the root path of this SessionDirectory object
+	 */
+	SessionDirectory& operator= (const std::string& path);
+
+	/**
 	 * @return the absolute path to the root directory of the session
 	 */
 	const PBD::sys::path root_path() const { return m_root_path; }
@@ -124,7 +129,7 @@ protected:
 	const std::vector<PBD::sys::path> sub_directories () const;
 
 	/// The path to the root of the session directory.
-	const PBD::sys::path m_root_path;
+	PBD::sys::path m_root_path;
 };
 
 } // namespace ARDOUR

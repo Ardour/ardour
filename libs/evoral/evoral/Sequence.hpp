@@ -97,7 +97,7 @@ public:
 
 	void start_write();
 	bool writing() const { return _writing; }
-	void end_write(bool delete_stuck=false);
+        void end_write (Time when=0, bool delete_stuck=false, bool resolve=false);
 
 	void append(const Event<Time>& ev, Evoral::event_id_t evid);
 

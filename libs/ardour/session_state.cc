@@ -48,6 +48,8 @@
 #include <sys/mount.h>
 #endif
 
+#include <glib.h>
+
 #include <glibmm.h>
 #include <glibmm/thread.h>
 
@@ -817,7 +819,7 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 
 	} else {
 
-		if (rename (tmp_path.to_string().c_str(), xml_path.to_string().c_str()) != 0) {
+		if (::rename (tmp_path.to_string().c_str(), xml_path.to_string().c_str()) != 0) {
 			error << string_compose (_("could not rename temporary session file %1 to %2"),
 					tmp_path.to_string(), xml_path.to_string()) << endmsg;
 			sys::remove (tmp_path);
@@ -2950,7 +2952,7 @@ Session::cleanup_sources (CleanupReport& rep)
                                                          peakpath, _path, strerror (errno))
 				      << endmsg;
 				/* try to back out */
-				rename (newpath.c_str(), _path.c_str());
+				::rename (newpath.c_str(), _path.c_str());
 				goto out;
 			}
 		}
@@ -3653,4 +3655,145 @@ Session::solo_cut_control() const
         */
 
         return _solo_cut_control;
+}
+
+int
+Session::rename (const std::string& new_name)
+{
+	string legal_name = legalize_for_path (new_name);
+	string newpath;
+	string oldstr;
+	string newstr;
+	bool first = true;
+
+#define RENAME ::rename
+
+	/* Rename:
+
+	 * session directory
+	 * interchange subdirectory
+	 * session file
+	 * session history
+	 
+	 * Backup files are left unchanged and not renamed.
+	 */
+
+	/* pass one: not 100% safe check that the new directory names don't
+	 * already exist ...
+	 */
+
+	for (vector<space_and_path>::const_iterator i = session_dirs.begin(); i != session_dirs.end(); ++i) {
+		vector<string> v;
+
+		oldstr = (*i).path;
+
+		/* this is a stupid hack because Glib::path_get_dirname() is
+		 * lexical-only, and so passing it /a/b/c/ gives a different
+		 * result than passing it /a/b/c ...
+		 */
+
+		if (oldstr[oldstr.length()-1] == G_DIR_SEPARATOR) {
+			oldstr = oldstr.substr (0, oldstr.length() - 1);
+		}
+
+		string base = Glib::path_get_dirname (oldstr);
+		string p = Glib::path_get_basename (oldstr);
+
+		newstr = Glib::build_filename (base, legal_name);
+		
+		if (Glib::file_test (newstr, Glib::FILE_TEST_EXISTS)) {
+			return -1;
+		}
+	}
+
+	/* Session dirs */
+	
+	for (vector<space_and_path>::const_iterator i = session_dirs.begin(); i != session_dirs.end(); ++i) {
+		vector<string> v;
+
+		oldstr = (*i).path;
+
+		/* this is a stupid hack because Glib::path_get_dirname() is
+		 * lexical-only, and so passing it /a/b/c/ gives a different
+		 * result than passing it /a/b/c ...
+		 */
+
+		if (oldstr[oldstr.length()-1] == G_DIR_SEPARATOR) {
+			oldstr = oldstr.substr (0, oldstr.length() - 1);
+		}
+
+		string base = Glib::path_get_dirname (oldstr);
+		string p = Glib::path_get_basename (oldstr);
+
+		newstr = Glib::build_filename (base, legal_name);
+
+		cerr << "Rename " << oldstr << " => " << newstr << endl;		
+
+		if (RENAME (oldstr.c_str(), newstr.c_str()) != 0) {
+			return 1;
+		}
+
+		if (first) {
+			(*_session_dir) = newstr;
+			newpath = newstr;
+			first = 1;
+		}
+
+		/* directory below interchange */
+
+		v.push_back (newstr);
+		v.push_back (interchange_dir_name);
+		v.push_back (p);
+
+		oldstr = Glib::build_filename (v);
+
+		v.clear ();
+		v.push_back (newstr);
+		v.push_back (interchange_dir_name);
+		v.push_back (legal_name);
+
+		newstr = Glib::build_filename (v);
+		
+		cerr << "Rename " << oldstr << " => " << newstr << endl;
+		
+		if (RENAME (oldstr.c_str(), newstr.c_str()) != 0) {
+			return 1;
+		}
+	}
+
+	/* state file */
+	
+	oldstr = Glib::build_filename (newpath, _current_snapshot_name) + statefile_suffix;
+	newstr= Glib::build_filename (newpath, legal_name) + statefile_suffix;
+	
+	cerr << "Rename " << oldstr << " => " << newstr << endl;		
+
+	if (RENAME (oldstr.c_str(), newstr.c_str()) != 0) {
+		return 1;
+	}
+
+	/* history file */
+	
+	oldstr = Glib::build_filename (newpath, _current_snapshot_name) + history_suffix;
+	newstr = Glib::build_filename (newpath, legal_name) + history_suffix;
+	
+	cerr << "Rename " << oldstr << " => " << newstr << endl;		
+
+	if (RENAME (oldstr.c_str(), newstr.c_str()) != 0) {
+		return 1;
+	}
+
+	_path = newpath;
+	_current_snapshot_name = new_name;
+	_name = new_name;
+
+	set_dirty ();
+
+	/* save state again to get everything just right */
+
+	save_state (_current_snapshot_name);
+
+	return 0;
+
+#undef RENAME
 }

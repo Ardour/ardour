@@ -147,6 +147,10 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);
 
+	act = ActionManager::register_action (main_actions, X_("Rename"), _("Rename..."), sigc::mem_fun(*this, &ARDOUR_UI::rename_session));
+	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::write_sensitive_actions.push_back (act);
+
 	act = ActionManager::register_action (main_actions, X_("SaveTemplate"), _("Save Template..."),  sigc::mem_fun(*this, &ARDOUR_UI::save_template));
 	ActionManager::session_sensitive_actions.push_back (act);
 

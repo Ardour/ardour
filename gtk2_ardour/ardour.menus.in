@@ -16,6 +16,7 @@
       <separator/>
       <menuitem action='Save'/>
       <menuitem action='SaveAs'/>
+      <menuitem action='Rename'/>
       <menuitem action='Snapshot'/>
       <menuitem action='SaveTemplate'/>
       <menu name='Metadata' action='Metadata'>
