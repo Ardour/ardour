@@ -128,6 +128,9 @@ Processor::state (bool full_state)
 		}
 	}
 
+	snprintf (buf, sizeof (buf), "%" PRId64, _user_latency);
+	node->add_property("user-latency", buf);
+
 	return *node;
 }
 
@@ -229,6 +232,10 @@ Processor::set_state (const XMLNode& node, int version)
 		} else {
 			deactivate ();
 		}
+	}
+
+	if ((prop = node.property ("user-latency")) != 0) {
+		_user_latency = atoi (prop->value ());
 	}
 
 	return 0;
