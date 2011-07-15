@@ -26,7 +26,7 @@ namespace ARDOUR {
 
 class Latent {
   public:
-	Latent() : _own_latency (0), _user_latency (0) {}
+	Latent() : _user_latency (0) {}
 	virtual ~Latent() {}
 
 	virtual framecnt_t signal_latency() const = 0;
@@ -40,11 +40,9 @@ class Latent {
 		}
 	}
 
-	virtual void set_latency_delay (framecnt_t val) { _own_latency = val; }
 	virtual void set_user_latency (framecnt_t val) { _user_latency = val; }
 
   protected:
-	framecnt_t           _own_latency;
 	framecnt_t           _user_latency;
 };
 

@@ -111,7 +111,7 @@ class IO : public SessionObject, public Latent
 	bool connected () const;
 	bool physically_connected () const;
 
-	framecnt_t signal_latency () const { return _own_latency; }
+	framecnt_t signal_latency () const { return 0; }
 	framecnt_t latency () const;
 
 	PortSet& ports() { return _ports; }
