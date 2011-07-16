@@ -632,7 +632,6 @@ Sequence<Time>::end_write (Time when, bool delete_stuck, bool resolve)
 	}
 
 	if (resolve) {
-		assert (when != 0);
 		assert (!delete_stuck);
 	}
 
