@@ -330,7 +330,7 @@ Mixer_UI::add_strip (RouteList& routes)
 
 		TreeModel::Row row = *(track_model->append());
 		row[track_columns.text] = route->name();
-		row[track_columns.visible] = strip->marked_for_display();
+		row[track_columns.visible] = strip->route()->is_master() ? true : strip->marked_for_display();
 		row[track_columns.route] = route;
 		row[track_columns.strip] = strip;
 
