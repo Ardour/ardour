@@ -3235,16 +3235,32 @@ MidiRegionView::update_ghost_note (double x, double y)
 	_last_ghost_y = y;
 
 	_note_group->w2i (x, y);
-	framepos_t const f = snap_pixel_to_frame (x);
+
+	PublicEditor& editor = trackview.editor ();
+	
+	framepos_t const unsnapped_frame = editor.pixel_to_frame (x);
 
 	bool success;
-	Evoral::MusicalTime beats = trackview.editor().get_grid_type_as_beats (success, f);
+	Evoral::MusicalTime grid_beats = editor.get_grid_type_as_beats (success, unsnapped_frame);
 
 	if (!success) {
-		beats = 1;
+		grid_beats = 1;
 	}
 
-	double length = frames_to_beats (snap_frame_to_frame (f + beats_to_frames (beats)) - f);
+	framecnt_t const grid_frames = beats_to_frames (grid_beats);
+
+	framepos_t f;
+
+	if (unsnapped_frame < grid_frames / 2) {
+		f = snap_frame_to_frame (unsnapped_frame);
+	} else {
+		/* snap to half the grid spacing behind the mouse pointer;
+		   this makes the snapped note time more intuitive
+		*/
+		f = snap_frame_to_frame (unsnapped_frame - grid_frames / 2);
+	}
+
+	double length = frames_to_beats (snap_frame_to_frame (f + grid_frames) - f);
 
 	_ghost_note->note()->set_time (frames_to_beats (f + _region->start()));
 	_ghost_note->note()->set_length (length);
