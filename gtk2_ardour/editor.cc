@@ -5486,3 +5486,19 @@ Editor::notebook_tab_clicked (GdkEventButton* ev, Gtk::Widget* page)
 	return true;
 }
 
+void
+Editor::popup_control_point_context_menu (ArdourCanvas::Item* item, GdkEvent* event)
+{
+	using namespace Menu_Helpers;
+	
+	MenuList& items = _control_point_context_menu.items ();
+	items.clear ();
+	
+	items.push_back (MenuElem (_("Edit..."), sigc::bind (sigc::mem_fun (*this, &Editor::edit_control_point), item)));
+	items.push_back (MenuElem (_("Delete"), sigc::bind (sigc::mem_fun (*this, &Editor::remove_control_point), item)));
+	if (!can_remove_control_point (item)) {
+		items.back().set_sensitive (false);
+	}
+
+	_control_point_context_menu.popup (event->button.button, event->button.time);
+}

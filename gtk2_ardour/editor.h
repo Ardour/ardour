@@ -686,6 +686,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void add_selection_context_items (Gtk::Menu_Helpers::MenuList&);
 	Gtk::MenuItem* _popup_region_menu_item;
 
+	void popup_control_point_context_menu (ArdourCanvas::Item *, GdkEvent *);
+	Gtk::Menu _control_point_context_menu;
+
 	void handle_new_route (ARDOUR::RouteList&);
 	void timeaxisview_deleted (TimeAxisView *);
 
@@ -1333,8 +1336,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void region_view_item_click (AudioRegionView&, GdkEventButton*);
 
-	void remove_gain_control_point (ArdourCanvas::Item*, GdkEvent*);
-	void remove_control_point (ArdourCanvas::Item*, GdkEvent*);
+	bool can_remove_control_point (ArdourCanvas::Item *);
+	void remove_control_point (ArdourCanvas::Item *);
 
 	void mouse_brush_insert_region (RegionView*, framepos_t pos);
 
