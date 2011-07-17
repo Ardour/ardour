@@ -3890,29 +3890,11 @@ NoteDrag::total_dx () const
 	return _region->snap_frame_to_frame (st) - n;
 }
 
-/** @return Current total drag y change in notes */
+/** @return Current total drag y change in note number */
 int8_t
 NoteDrag::total_dy () const
 {
-	/* this is `backwards' to make increasing note number go in the right direction */
-	double const dy = _drags->current_pointer_y() - grab_y();
-
-	/* dy in notes */
-	int8_t ndy = 0;
-
-	if (abs (dy) >= _note_height) {
-		if (dy > 0) {
-			ndy = (int8_t) ceil (dy / _note_height / 2.0);
-		} else {
-			ndy = (int8_t) floor (dy / _note_height / 2.0);
-		}
-	}
-
-	/* more positive value = higher pitch and higher y-axis position on track,
-	   which is the inverse of the X-centric geometric universe
-	*/
-
- 	return -ndy;
+	return ((int8_t) (grab_y() / _note_height)) - ((int8_t) (_drags->current_pointer_y() / _note_height));
 }
 
 void
@@ -3920,11 +3902,11 @@ NoteDrag::motion (GdkEvent *, bool)
 {
 	/* Total change in x and y since the start of the drag */
 	frameoffset_t const dx = total_dx ();
-	int8_t const dy = -total_dy ();
+	int8_t const dy = total_dy ();
 
 	/* Now work out what we have to do to the note canvas items to set this new drag delta */
 	double const tdx = _editor->frame_to_unit (dx) - _cumulative_dx;
-	double const tdy = dy * _note_height - _cumulative_dy;
+	double const tdy = -dy * _note_height - _cumulative_dy;
 
 	if (tdx || tdy) {
 		_cumulative_dx += tdx;
