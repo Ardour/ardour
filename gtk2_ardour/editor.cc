@@ -3940,12 +3940,16 @@ Editor::maximise_editing_space ()
 		edit_pane.set_position (post_maximal_horizontal_pane_position);
 	}
 
-	if (post_maximal_editor_height) {
-		editor_summary_pane.set_position (post_maximal_vertical_pane_position -
-			abs(post_maximal_editor_height - pre_maximal_editor_height));
-	} else {
-		editor_summary_pane.set_position (post_maximal_vertical_pane_position);
-	}
+	/* Hack: we must do this in an idle handler for it to work; see comment in
+	   restore_editing_space()
+	*/
+	   
+	Glib::signal_idle().connect (
+		sigc::bind (
+			sigc::mem_fun (*this, &Editor::idle_reset_vertical_pane_position),
+			post_maximal_vertical_pane_position
+			)
+		);
 
 	if (Config->get_keep_tearoffs()) {
 		_mouse_mode_tearoff->set_visible (true);
@@ -3955,6 +3959,13 @@ Editor::maximise_editing_space ()
 		}
 	}
 
+}
+
+bool
+Editor::idle_reset_vertical_pane_position (int p)
+{
+	editor_summary_pane.set_position (p);
+	return false;
 }
 
 void
@@ -3981,7 +3992,17 @@ Editor::restore_editing_space ()
 	post_maximal_editor_height = this->get_height();
 
 	edit_pane.set_position (pre_maximal_horizontal_pane_position + abs(this->get_width() - pre_maximal_editor_width));
-	editor_summary_pane.set_position (pre_maximal_vertical_pane_position + abs(this->get_height() - pre_maximal_editor_height));
+
+	/* This is a bit of a hack, but it seems that if you set the vertical pane position
+	   here it gets reset to some wrong value after this method has finished.  Doing
+	   the setup in an idle callback seems to work.
+	*/
+	Glib::signal_idle().connect (
+		sigc::bind (
+			sigc::mem_fun (*this, &Editor::idle_reset_vertical_pane_position),
+			pre_maximal_vertical_pane_position
+			)
+		);
 }
 
 /**

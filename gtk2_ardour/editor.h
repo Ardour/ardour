@@ -538,6 +538,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtk::HPaned   edit_pane;
 	Gtk::VPaned   editor_summary_pane;
 
+	bool idle_reset_vertical_pane_position (int);
+
 	Gtk::EventBox meter_base;
 	Gtk::HBox     meter_box;
 	Gtk::EventBox marker_base;
