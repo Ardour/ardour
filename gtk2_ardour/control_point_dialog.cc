@@ -38,6 +38,7 @@ ControlPointDialog::ControlPointDialog (ControlPoint* p)
 	double const y_fraction = 1.0 - (p->get_y () / p->line().height ());
 
 	value_.set_text (p->line().fraction_to_string (y_fraction));
+	value_.set_activates_default ();
 
 	Gtk::HBox* b = Gtk::manage (new Gtk::HBox ());
 
