@@ -196,7 +196,7 @@ Session::request_play_range (list<AudioRange>* range, bool leave_rolling)
 void
 Session::realtime_stop (bool abort, bool clear_state)
 {
-	DEBUG_TRACE (DEBUG::Transport, "realtime stop\n");
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("realtime stop @ %1\n", _transport_frame));
 	PostTransportWork todo = PostTransportWork (0);
 
 	/* assume that when we start, we'll be moving forwards */
@@ -951,7 +951,8 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
 void
 Session::set_transport_speed (double speed, bool abort, bool clear_state)
 {
-	DEBUG_TRACE (DEBUG::Transport, string_compose ("Set transport speed to %1, abort = %2 clear_state = %3, current = %4\n", speed, abort, clear_state, _transport_speed));
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("@ %5 Set transport speed to %1, abort = %2 clear_state = %3, current = %4\n", 
+						       speed, abort, clear_state, _transport_speed, _transport_frame));
 
 	if (_transport_speed == speed) {
 		return;
@@ -1089,6 +1090,11 @@ Session::stop_transport (bool abort, bool clear_state)
 		   block before the actual end. we'll declick in the subsequent block,
 		   and then we'll really be stopped.
 		*/
+
+		DEBUG_TRACE (DEBUG::Transport, string_compose ("stop transport requested @ %1, scheduled for + %2 - %3 = %4, abort = %5\n",
+							       _transport_frame, _worst_input_latency, current_block_size,
+							       _transport_frame - _worst_input_latency - current_block_size,
+							       abort));
 
 		SessionEvent *ev = new SessionEvent (SessionEvent::StopOnce, SessionEvent::Replace,
 		                                     _transport_frame + _worst_input_latency - current_block_size,
