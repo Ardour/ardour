@@ -100,6 +100,7 @@
 #include "ardour/processor.h"
 #include "ardour/port.h"
 #include "ardour/proxy_controllable.h"
+#include "ardour/recent_sessions.h"
 #include "ardour/region_factory.h"
 #include "ardour/route_group.h"
 #include "ardour/send.h"
@@ -3787,6 +3788,10 @@ Session::rename (const std::string& new_name)
 		}
 	}
 
+	/* remove old name from recent sessions */
+
+	remove_recent_sessions (_path);
+
 	_path = newpath;
 	_current_snapshot_name = new_name;
 	_name = new_name;
@@ -3796,6 +3801,11 @@ Session::rename (const std::string& new_name)
 	/* save state again to get everything just right */
 
 	save_state (_current_snapshot_name);
+
+
+	/* add to recent sessions */
+
+	store_recent_sessions (new_name, _path);
 
 	return 0;
 

@@ -30,6 +30,7 @@ namespace ARDOUR {
 	int read_recent_sessions (RecentSessions& rs);
 	int store_recent_sessions (std::string name, std::string path);
 	int write_recent_sessions (RecentSessions& rs);
+	int remove_recent_sessions (const std::string& path);
 }; // namespace ARDOUR
 
 #endif // __ardour_recent_sessions_h__

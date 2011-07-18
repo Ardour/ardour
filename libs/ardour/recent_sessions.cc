@@ -137,3 +137,28 @@ ARDOUR::store_recent_sessions (string name, string path)
 	return ARDOUR::write_recent_sessions (rs);
 }
 
+int
+ARDOUR::remove_recent_sessions (const string& path)
+{
+	RecentSessions rs;
+	bool write = false;
+
+	if (ARDOUR::read_recent_sessions (rs) < 0) {
+		return -1;
+	}
+
+	for (RecentSessions::iterator i = rs.begin(); i != rs.end(); ++i) {
+		if (i->second == path) {
+			rs.erase (i);
+			write = true;
+			break;
+		}
+	}
+
+	if (write) {
+		return ARDOUR::write_recent_sessions (rs);
+	} else {
+		return 1;
+	}
+}
+
