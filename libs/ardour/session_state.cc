@@ -3773,14 +3773,18 @@ Session::rename (const std::string& new_name)
 	}
 
 	/* history file */
+
 	
 	oldstr = Glib::build_filename (newpath, _current_snapshot_name) + history_suffix;
-	newstr = Glib::build_filename (newpath, legal_name) + history_suffix;
-	
-	cerr << "Rename " << oldstr << " => " << newstr << endl;		
 
-	if (RENAME (oldstr.c_str(), newstr.c_str()) != 0) {
-		return 1;
+	if (Glib::file_test (oldstr, Glib::FILE_TEST_EXISTS))  {
+		newstr = Glib::build_filename (newpath, legal_name) + history_suffix;
+		
+		cerr << "Rename " << oldstr << " => " << newstr << endl;		
+		
+		if (RENAME (oldstr.c_str(), newstr.c_str()) != 0) {
+			return 1;
+		}
 	}
 
 	_path = newpath;
