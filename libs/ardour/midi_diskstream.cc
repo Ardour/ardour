@@ -873,10 +873,6 @@ MidiDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 
 	total = _session.transport_frame() - _last_flush_frame;
 
-	if (_last_flush_frame > _session.transport_frame() || _last_flush_frame < capture_start_frame) {
-		_last_flush_frame = _session.transport_frame();
-	}
-
 	if (total == 0 || _capture_buf->read_space() == 0
 			|| (!force_flush && (total < disk_io_chunk_frames && was_recording))) {
 		cerr << "\tFlush shortcut because total = " << total
@@ -923,6 +919,14 @@ MidiDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 	}
 
 out:
+
+	if (ret == 0) {
+		if (_last_flush_frame > _session.transport_frame() || _last_flush_frame < capture_start_frame) {
+			_last_flush_frame = _session.transport_frame();
+			cerr << name() << " set last flush frame to " << _last_flush_frame << endl;
+		}
+	}
+
 	return ret;
 }
 
