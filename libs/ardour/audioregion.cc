@@ -369,7 +369,7 @@ AudioRegion::master_read_at (Sample *buf, Sample *mixdown_buffer, float *gain_bu
 }
 
 framecnt_t
-AudioRegion::_read_at (const SourceList& /*srcs*/, framecnt_t limit,
+AudioRegion::_read_at (const SourceList& srcs, framecnt_t limit,
 		       Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 		       framepos_t position,
 		       framecnt_t cnt,
@@ -421,7 +421,7 @@ AudioRegion::_read_at (const SourceList& /*srcs*/, framecnt_t limit,
 
 	if (chan_n < n_channels()) {
 
-		boost::shared_ptr<AudioSource> src = audio_source(chan_n);
+		boost::shared_ptr<AudioSource> src = boost::dynamic_pointer_cast<AudioSource> (srcs[chan_n]);
 		if (src->read (mixdown_buffer, _start + internal_offset, to_read) != to_read) {
 			return 0; /* "read nothing" */
 		}
@@ -441,7 +441,7 @@ AudioRegion::_read_at (const SourceList& /*srcs*/, framecnt_t limit,
 			 */
 
 			uint32_t channel = n_channels() % chan_n;
-			boost::shared_ptr<AudioSource> src = audio_source (channel);
+			boost::shared_ptr<AudioSource> src = boost::dynamic_pointer_cast<AudioSource> (srcs[channel]);
 
 			if (src->read (mixdown_buffer, _start + internal_offset, to_read) != to_read) {
 				return 0; /* "read nothing" */
