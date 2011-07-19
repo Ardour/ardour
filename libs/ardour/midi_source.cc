@@ -268,6 +268,7 @@ MidiSource::midi_write (MidiRingBuffer<framepos_t>& source, framepos_t source_st
 	cerr << "MidiSource calling write unlocked\n";
 	const framecnt_t ret = write_unlocked (source, source_start, duration);
 	_last_write_end += duration;
+	cerr << name() << " last write end now @ " << _last_write_end << endl;
 	return ret;
 }
 
@@ -298,6 +299,8 @@ MidiSource::mark_write_starting_now ()
 
 	set_timeline_position (_session.transport_frame ());
 	_last_write_end = _session.transport_frame ();
+	cerr << name() << " last write set to " << _last_write_end << endl;
+
 }
 
 void

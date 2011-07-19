@@ -241,15 +241,15 @@ restart:
 		for (i = rl_with_auditioner.begin(); !transport_work_requested() && should_run && i != rl_with_auditioner.end(); ++i) {
 
 			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+
 			if (!tr) {
 				continue;
 			}
 
-			/* don't read inactive tracks */
-
 			boost::shared_ptr<IO> io = tr->input ();
 
 			if (io && !io->active()) {
+				/* don't read inactive tracks */
 				continue;
 			}
 
@@ -296,6 +296,7 @@ restart:
 			// cerr << "write behind for " << (*i)->name () << endl;
 
 			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+
 			if (!tr) {
 				continue;
 			}

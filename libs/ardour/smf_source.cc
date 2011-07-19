@@ -240,7 +240,7 @@ SMFSource::write_unlocked (MidiRingBuffer<framepos_t>& source, framepos_t positi
 
 	Evoral::MIDIEvent<framepos_t> ev;
 
-	cerr << "SMFSource::write unlocked, begins writing from src buffer\n";
+	cerr << "SMFSource::write unlocked, begins writing from src buffer with _last_write_end = " << _last_write_end << " dur = " << duration << endl;
 
 	while (true) {
 		bool ret = source.peek ((uint8_t*)&time, sizeof (time));
