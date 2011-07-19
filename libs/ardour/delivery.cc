@@ -291,6 +291,11 @@ Delivery::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pf
 
 		_panshell->run (bufs, output_buffers(), start_frame, end_frame, nframes);
 
+		// MIDI data will not have been delivered by the panner
+
+		if (bufs.count().n_midi() > 0 && ports.count().n_midi () > 0) {
+			_output->copy_to_outputs (bufs, DataType::MIDI, nframes, 0);
+		}
 
 	} else {
 
