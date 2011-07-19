@@ -865,8 +865,10 @@ MidiDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 	int32_t ret = 0;
 	framecnt_t total;
 
-	cerr << name() << " flushing to disk, bufspace = " << _capture_buf->read_space() << endl;
-
+	cerr << name() << " flushing to disk, bufspace = " << _capture_buf->read_space() 
+	     << " transport @ " << _session.transport_frame() << " last flush @ " << _last_flush_frame
+	     << endl;
+	
 	_write_data_count = 0;
 
 	total = _session.transport_frame() - _last_flush_frame;
