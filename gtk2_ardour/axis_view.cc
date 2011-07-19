@@ -106,7 +106,8 @@ AxisView::gui_property (const string& property_name) const
 bool
 AxisView::marked_for_display () const
 {
-	return string_is_affirmative (gui_property ("visible"));
+	string const v = gui_property ("visible");
+	return (v == "" || string_is_affirmative (v));
 }
 
 bool
