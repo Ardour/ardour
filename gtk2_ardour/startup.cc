@@ -1066,7 +1066,7 @@ ArdourStartup::setup_more_options_page ()
 	_connect_inputs.set_flags(Gtk::CAN_FOCUS);
 	_connect_inputs.set_relief(Gtk::RELIEF_NORMAL);
 	_connect_inputs.set_mode(true);
-	_connect_inputs.set_active(true);
+	_connect_inputs.set_active(Config->get_input_auto_connect() != ManualConnect);
 	_connect_inputs.set_border_width(0);
 
 	_limit_input_ports.set_label (_("Use only"));
@@ -1126,7 +1126,7 @@ ArdourStartup::setup_more_options_page ()
 	_connect_outputs.set_flags(Gtk::CAN_FOCUS);
 	_connect_outputs.set_relief(Gtk::RELIEF_NORMAL);
 	_connect_outputs.set_mode(true);
-	_connect_outputs.set_active(true);
+	_connect_outputs.set_active(Config->get_output_auto_connect() != ManualConnect);
 	_connect_outputs.set_border_width(0);
 	_limit_output_ports.set_label (_("Use only"));
 	_limit_output_ports.set_flags(Gtk::CAN_FOCUS);
@@ -1148,7 +1148,7 @@ ArdourStartup::setup_more_options_page ()
 	_connect_outputs_to_master.set_flags(Gtk::CAN_FOCUS);
 	_connect_outputs_to_master.set_relief(Gtk::RELIEF_NORMAL);
 	_connect_outputs_to_master.set_mode(true);
-	_connect_outputs_to_master.set_active(false);
+	_connect_outputs_to_master.set_active(Config->get_output_auto_connect() == AutoConnectMaster);
 	_connect_outputs_to_master.set_border_width(0);
 
 	_connect_outputs_to_master.set_group (connect_outputs_group);
@@ -1158,7 +1158,7 @@ ArdourStartup::setup_more_options_page ()
 	_connect_outputs_to_physical.set_flags(Gtk::CAN_FOCUS);
 	_connect_outputs_to_physical.set_relief(Gtk::RELIEF_NORMAL);
 	_connect_outputs_to_physical.set_mode(true);
-	_connect_outputs_to_physical.set_active(false);
+	_connect_outputs_to_physical.set_active(Config->get_output_auto_connect() == AutoConnectPhysical);
 	_connect_outputs_to_physical.set_border_width(0);
 
 	output_conn_vbox.pack_start(_connect_outputs, Gtk::PACK_SHRINK, 0);
