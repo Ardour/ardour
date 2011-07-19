@@ -285,22 +285,7 @@ Delivery::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pf
 		Amp::apply_simple_gain (bufs, nframes, tgain);
 	}
 
-#if 0
-        if (_session.transport_rolling()) {
-                cerr << name() << " first value written : " << scnt << endl;
-                for (BufferSet::audio_iterator b = bufs.audio_begin(); b != bufs.audio_end(); ++b) {
-                        Sample* p = b->data ();
-                        float s = (float) scnt;
-                        for (pframes_t n = 0; n < nframes; ++n) {
-                                p[n] =  s * 0.001;
-                                s += 1.0;
-                        }
-                }
-                scnt += nframes;
-        }
-#endif
-
-	if (_panshell && !_panshell->bypassed()) {
+	if (_panshell && !_panshell->bypassed() && _panshell->panner()) {
 
 		// Use the panner to distribute audio to output port buffers
 
