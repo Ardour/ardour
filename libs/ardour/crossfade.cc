@@ -315,7 +315,7 @@ Crossfade::read_raw_internal (Sample* buf, framecnt_t start, framecnt_t cnt, int
 	float* gain = new float[cnt];
 	framecnt_t ret;
 
-	ret = read_at (buf, mixdown, gain, start, cnt, channel, cnt);
+	ret = read_at (buf, mixdown, gain, start, cnt, channel);
 
 	delete [] mixdown;
 	delete [] gain;
@@ -325,8 +325,7 @@ Crossfade::read_raw_internal (Sample* buf, framecnt_t start, framecnt_t cnt, int
 
 framecnt_t
 Crossfade::read_at (Sample *buf, Sample *mixdown_buffer,
-		    float *gain_buffer, framepos_t start, framecnt_t cnt, uint32_t chan_n,
-		    framecnt_t read_frames, framecnt_t skip_frames) const
+		    float *gain_buffer, framepos_t start, framecnt_t cnt, uint32_t chan_n) const
 {
 	frameoffset_t offset;
 	framecnt_t to_write;
@@ -368,8 +367,8 @@ Crossfade::read_at (Sample *buf, Sample *mixdown_buffer,
 		memset (crossfade_buffer_in, 0, sizeof (Sample) * to_write);
 	}
 
-	_out->read_at (crossfade_buffer_out, mixdown_buffer, gain_buffer, start, to_write, chan_n, read_frames, skip_frames);
-	_in->read_at (crossfade_buffer_in, mixdown_buffer, gain_buffer, start, to_write, chan_n, read_frames, skip_frames);
+	_out->read_at (crossfade_buffer_out, mixdown_buffer, gain_buffer, start, to_write, chan_n);
+	_in->read_at (crossfade_buffer_in, mixdown_buffer, gain_buffer, start, to_write, chan_n);
 
 	float* fiv = new float[to_write];
 	float* fov = new float[to_write];

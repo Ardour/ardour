@@ -286,8 +286,6 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, fr
 	Glib::RecMutex::Lock rm (region_lock);
 
 	framepos_t const end = start + cnt - 1;
-	framecnt_t read_frames = 0;
-	framecnt_t skip_frames = 0;
 	_read_data_count = 0;
 
 	_read_data_count = 0;
@@ -345,7 +343,7 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, fr
 			boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion>(*i);
                         DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("read from region %1\n", ar->name()));
 			assert(ar);
-			ar->read_at (buf, mixdown_buffer, gain_buffer, start, cnt, chan_n, read_frames, skip_frames);
+			ar->read_at (buf, mixdown_buffer, gain_buffer, start, cnt, chan_n);
 			_read_data_count += ar->read_data_count();
 		}
 

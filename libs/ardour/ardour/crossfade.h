@@ -90,9 +90,7 @@ class Crossfade : public ARDOUR::AudioRegion
 
 	framecnt_t read_at (Sample *buf, Sample *mixdown_buffer,
 			    float *gain_buffer, framepos_t position, framecnt_t cnt,
-			    uint32_t chan_n,
-			    framecnt_t read_frames = 0,
-			    framecnt_t skip_frames = 0) const;
+			    uint32_t chan_n) const;
 
 	bool refresh ();
 
