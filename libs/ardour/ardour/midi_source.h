@@ -83,6 +83,13 @@ class MidiSource : virtual public Source, public boost::enable_shared_from_this<
 	virtual void mark_streaming_write_completed ();
 	void mark_write_starting_now ();
 
+	/* like ::mark_streaming_write_completed() but with more arguments to
+	 * allow control over MIDI-specific behaviour. Expected to be used only
+	 * when recording actual MIDI input, rather then when importing files
+	 * etc.
+	 */
+	virtual void mark_midi_streaming_write_completed (Evoral::Sequence<Evoral::MusicalTime>::StuckNoteOption, Evoral::MusicalTime when = 0);
+
 	virtual void session_saved();
 
 	std::string captured_for() const               { return _captured_for; }
@@ -90,6 +97,9 @@ class MidiSource : virtual public Source, public boost::enable_shared_from_this<
 
 	uint32_t read_data_count()  const { return _read_data_count; }
 	uint32_t write_data_count() const { return _write_data_count; }
+
+	framepos_t last_write_end() const { return _last_write_end; }
+	void set_last_write_end (framepos_t pos) { _last_write_end = pos; }
 
 	static PBD::Signal1<void,MidiSource*> MidiSourceCreated;
 

@@ -111,6 +111,7 @@ StateButton::avoid_prelight_on_style_changed (const Glib::RefPtr<Gtk::Style>& /*
                         gtk_widget_modify_style (GTK_WIDGET(child->gobj()), rcstyle);
                 }
 
+
                 g_object_unref (rcstyle);
                 style_changing = false;
         }

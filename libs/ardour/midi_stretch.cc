@@ -103,7 +103,7 @@ MidiStretch::run (boost::shared_ptr<Region> r, Progress* progress)
 		new_model->append(ev, Evoral::next_event_id());
 	}
 
-	new_model->end_write ();
+	new_model->end_write (Evoral::Sequence<Evoral::MusicalTime>::DeleteStuckNotes);
 	new_model->set_edited (true);
 
 	new_src->copy_interpolation_from (src);

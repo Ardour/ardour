@@ -243,16 +243,21 @@ SMFSource::write_unlocked (MidiRingBuffer<framepos_t>& source, framepos_t positi
 	cerr << "SMFSource::write unlocked, begins writing from src buffer with _last_write_end = " << _last_write_end << " dur = " << duration << endl;
 
 	while (true) {
-		bool ret = source.peek ((uint8_t*)&time, sizeof (time));
-		if (!ret || time > _last_write_end + duration) {
-			DEBUG_TRACE (DEBUG::MidiIO, string_compose ("SMFSource::write_unlocked: dropping event @ %1 because ret %4 or it is later than %2 + %3\n",
-								    time, _last_write_end, duration, ret));
+		bool ret;
+
+		if (!(ret = source.peek ((uint8_t*)&time, sizeof (time)))) {
+			/* no more events to consider */
 			break;
 		}
 
-		ret = source.read_prefix(&time, &type, &size);
-		if (!ret) {
-			cerr << "ERROR: Unable to read event prefix, corrupt MIDI ring buffer" << endl;
+		if ((duration != max_framecnt) && (time > (_last_write_end + duration))) {
+			DEBUG_TRACE (DEBUG::MidiIO, string_compose ("SMFSource::write_unlocked: dropping event @ %1 because it is later than %2 + %3\n",
+								    time, _last_write_end, duration));
+			break;
+		}
+
+		if (!(ret = source.read_prefix (&time, &type, &size))) {
+			error << _("Unable to read event prefix, corrupt MIDI ring buffer") << endmsg;
 			break;
 		}
 
@@ -263,7 +268,7 @@ SMFSource::write_unlocked (MidiRingBuffer<framepos_t>& source, framepos_t positi
 
 		ret = source.read_contents(size, buf);
 		if (!ret) {
-			cerr << "ERROR: Read time/size but not buffer, corrupt MIDI ring buffer" << endl;
+			error << _("Read time/size but not buffer, corrupt MIDI ring buffer") << endmsg;
 			break;
 		}
 
@@ -431,8 +436,14 @@ SMFSource::mark_streaming_midi_write_started (NoteMode mode)
 void
 SMFSource::mark_streaming_write_completed ()
 {
+	mark_midi_streaming_write_completed (Evoral::Sequence<Evoral::MusicalTime>::DeleteStuckNotes);
+}
+
+void
+SMFSource::mark_midi_streaming_write_completed (Evoral::Sequence<Evoral::MusicalTime>::StuckNoteOption stuck_notes_option, Evoral::MusicalTime when)
+{
 	Glib::Mutex::Lock lm (_lock);
-	MidiSource::mark_streaming_write_completed();
+	MidiSource::mark_midi_streaming_write_completed (stuck_notes_option, when);
 
 	if (!writable()) {
 		return;
@@ -551,8 +562,7 @@ SMFSource::load_model (bool lock, bool force_reload)
 		have_event_id = false;
 	}
 
-	_model->end_write (_length_beats, false, true);
-	//_model->end_write (false);
+	_model->end_write (Evoral::Sequence<Evoral::MusicalTime>::ResolveStuckNotes, _length_beats);
 	_model->set_edited (false);
 
 	_model_iter = _model->begin();

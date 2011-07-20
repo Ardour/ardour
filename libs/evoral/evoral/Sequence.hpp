@@ -97,7 +97,14 @@ public:
 
 	void start_write();
 	bool writing() const { return _writing; }
-        void end_write (Time when=0, bool delete_stuck=false, bool resolve=false);
+
+        enum StuckNoteOption {
+		Relax,
+		DeleteStuckNotes,
+		ResolveStuckNotes
+	};
+
+        void end_write (StuckNoteOption, Time when = 0);
 
 	void append(const Event<Time>& ev, Evoral::event_id_t evid);
 

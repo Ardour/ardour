@@ -267,7 +267,13 @@ MidiSource::midi_write (MidiRingBuffer<framepos_t>& source, framepos_t source_st
 	Glib::Mutex::Lock lm (_lock);
 	cerr << "MidiSource calling write unlocked\n";
 	const framecnt_t ret = write_unlocked (source, source_start, duration);
-	_last_write_end += duration;
+
+	if (duration == max_framecnt) {
+		_last_read_end = 0;
+	} else {
+		_last_write_end += duration;
+	}
+
 	cerr << name() << " last write end now @ " << _last_write_end << endl;
 	return ret;
 }
@@ -311,13 +317,19 @@ MidiSource::mark_streaming_write_started ()
 }
 
 void
-MidiSource::mark_streaming_write_completed ()
+MidiSource::mark_midi_streaming_write_completed (Evoral::Sequence<Evoral::MusicalTime>::StuckNoteOption option, Evoral::MusicalTime end)
 {
 	if (_model) {
-		_model->end_write (false);
+		_model->end_write (option, end);
 	}
 
 	_writing = false;
+}
+
+void
+MidiSource::mark_streaming_write_completed ()
+{
+	mark_midi_streaming_write_completed (Evoral::Sequence<Evoral::MusicalTime>::DeleteStuckNotes);
 }
 
 boost::shared_ptr<MidiSource>

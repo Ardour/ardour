@@ -623,7 +623,7 @@ Sequence<Time>::start_write()
  */
 template<typename Time>
 void
-Sequence<Time>::end_write (Time when, bool delete_stuck, bool resolve)
+Sequence<Time>::end_write (StuckNoteOption option, Time when)
 {
 	WriteLock lock(write_lock());
 
@@ -631,11 +631,7 @@ Sequence<Time>::end_write (Time when, bool delete_stuck, bool resolve)
 		return;
 	}
 
-	if (resolve) {
-		assert (!delete_stuck);
-	}
-
-	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 : end_write (%2 notes)\n", this, _notes.size()));
+	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 : end_write (%2 notes) delete stuck option %3 @ %4\n", this, _notes.size(), option, when));
 
         if (!_percussive) {
 
@@ -643,11 +639,17 @@ Sequence<Time>::end_write (Time when, bool delete_stuck, bool resolve)
                         typename Notes::iterator next = n;
                         ++next;
 			
+			cerr << "!!!!!!! note length = " << (*n)->length() << endl;
+
                         if ((*n)->length() == 0) {
-				if (delete_stuck) {
+				switch (option) {
+				case Relax:
+					break;
+				case DeleteStuckNotes:
 					cerr << "WARNING: Stuck note lost: " << (*n)->note() << endl;
 					_notes.erase(n);
-				} else if (resolve) {
+					break;
+				case ResolveStuckNotes:
 					if (when <= (*n)->time()) {
 						cerr << "WARNING: Stuck note resolution - end time @ " 
 						     << when << " is before note on: " << (**n) << endl;
@@ -656,6 +658,7 @@ Sequence<Time>::end_write (Time when, bool delete_stuck, bool resolve)
 						(*n)->set_length (when - (*n)->time());
 						cerr << "WARNING: resolved note-on with no note-off to generate " << (**n) << endl;
 					}
+					break;
 				}
 			}
 

@@ -56,6 +56,7 @@ public:
 
 	void mark_streaming_midi_write_started (NoteMode mode);
 	void mark_streaming_write_completed ();
+	void mark_midi_streaming_write_completed (Evoral::Sequence<Evoral::MusicalTime>::StuckNoteOption, Evoral::MusicalTime when = 0);
 
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
