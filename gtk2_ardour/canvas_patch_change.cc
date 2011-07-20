@@ -153,7 +153,9 @@ CanvasPatchChange::on_event (GdkEvent* ev)
 				initialize_popup_menus();
 				_popup_initialized = true;
 			}
-			_popup.popup(ev->button.button, ev->button.time);
+			if (!_popup.items().empty()) {
+				_popup.popup(ev->button.button, ev->button.time);
+			}
 			return true;
 		}
 		break;
