@@ -328,6 +328,24 @@ ARDOUR::init (bool use_vst, bool try_optimization)
 
         PannerManager::instance().discover_panners();
 
+	// Initialize parameter metadata
+	EventTypeMap::instance().new_parameter(NullAutomation);
+	EventTypeMap::instance().new_parameter(GainAutomation);
+	EventTypeMap::instance().new_parameter(PanAzimuthAutomation);
+	EventTypeMap::instance().new_parameter(PanElevationAutomation);
+	EventTypeMap::instance().new_parameter(PanWidthAutomation);
+	EventTypeMap::instance().new_parameter(PluginAutomation);
+	EventTypeMap::instance().new_parameter(SoloAutomation);
+	EventTypeMap::instance().new_parameter(MuteAutomation);
+	EventTypeMap::instance().new_parameter(MidiCCAutomation);
+	EventTypeMap::instance().new_parameter(MidiPgmChangeAutomation);
+	EventTypeMap::instance().new_parameter(MidiPitchBenderAutomation);
+	EventTypeMap::instance().new_parameter(MidiChannelPressureAutomation);
+	EventTypeMap::instance().new_parameter(FadeInAutomation);
+	EventTypeMap::instance().new_parameter(FadeOutAutomation);
+	EventTypeMap::instance().new_parameter(EnvelopeAutomation);
+	EventTypeMap::instance().new_parameter(MidiCCAutomation);
+
 	return 0;
 }
 
