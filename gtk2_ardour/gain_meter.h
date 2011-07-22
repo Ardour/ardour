@@ -201,8 +201,9 @@ class GainMeter : public GainMeterBase, public Gtk::VBox
 
 	gint meter_metrics_expose (GdkEventExpose *);
 
-	static std::map<std::string,Glib::RefPtr<Gdk::Pixmap> > metric_pixmaps;
-	static Glib::RefPtr<Gdk::Pixmap> render_metrics (Gtk::Widget &, std::vector<ARDOUR::DataType>);
+	typedef std::map<std::string,cairo_pattern_t*> MetricPatterns;
+	static  MetricPatterns metric_patterns;
+	static  cairo_pattern_t* render_metrics (Gtk::Widget &, std::vector<ARDOUR::DataType>);
 
   private:
 

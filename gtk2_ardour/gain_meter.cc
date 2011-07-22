@@ -63,7 +63,7 @@ using Gtkmm2ext::Keyboard;
 sigc::signal<void> GainMeterBase::ResetAllPeakDisplays;
 sigc::signal<void,RouteGroup*> GainMeterBase::ResetGroupPeakDisplays;
 
-map<string,Glib::RefPtr<Gdk::Pixmap> > GainMeter::metric_pixmaps;
+GainMeter::MetricPatterns GainMeter::metric_patterns;
 Glib::RefPtr<Gdk::Pixbuf> GainMeter::slider;
 
 
@@ -889,22 +889,25 @@ GainMeter::get_gm_width ()
 	return sz.width;
 }
 
-Glib::RefPtr<Gdk::Pixmap>
+cairo_pattern_t*
 GainMeter::render_metrics (Gtk::Widget& w, vector<DataType> types)
 {
 	Glib::RefPtr<Gdk::Window> win (w.get_window());
-	Glib::RefPtr<Gdk::GC> bg_gc (w.get_style()->get_bg_gc (Gtk::STATE_NORMAL));
 
 	gint width, height;
 	win->get_size (width, height);
 
-	Glib::RefPtr<Gdk::Pixmap> pixmap = Gdk::Pixmap::create (win, width, height);
+	cairo_surface_t* surface = cairo_image_surface_create (CAIRO_FORMAT_RGB24, width, height);
+	cairo_t* cr = cairo_create (surface);
+	PangoLayout* layout = gtk_widget_create_pango_layout (w.gobj(), "");
 
-	metric_pixmaps[w.get_name()] = pixmap;
-
-	pixmap->draw_rectangle (bg_gc, true, 0, 0, width, height);
-
-	Glib::RefPtr<Pango::Layout> layout = w.create_pango_layout ("");
+	cairo_move_to (cr, 0, 0);
+	cairo_rectangle (cr, 0, 0, width, height);
+	{
+		Gdk::Color c = w.get_style()->get_bg (Gtk::STATE_NORMAL);
+		cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
+	}
+	cairo_fill (cr);
 
 	for (vector<DataType>::const_iterator i = types.begin(); i != types.end(); ++i) {
 
@@ -915,14 +918,15 @@ GainMeter::render_metrics (Gtk::Widget& w, vector<DataType> types)
 			Gdk::Color c;
 			switch (*i) {
 			case DataType::AUDIO:
-				c.set_rgb_p (1, 1, 1);
+				cairo_set_source_rgb (cr, 1.0, 1.0, 1.0);
 				break;
 			case DataType::MIDI:
-				c.set_rgb_p (0.2, 0.2, 0.5);
+				cairo_set_source_rgb (cr, 0.2, 0.2, 0.5);
 				break;
 			}
-
-			fg_gc->set_rgb_fg_color (c);
+		} else {
+			Gdk::Color c = w.get_style()->get_fg (Gtk::STATE_NORMAL);
+			cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
 		}
 
 		vector<int> points;
@@ -969,56 +973,80 @@ GainMeter::render_metrics (Gtk::Widget& w, vector<DataType> types)
 
 			gint const pos = height - (gint) floor (height * fraction);
 
+			cairo_set_line_width (cr, 1.0);
+			cairo_move_to (cr, 0, pos);
+			cairo_line_to (cr, 4, pos);
+			cairo_stroke (cr);
+			
 			snprintf (buf, sizeof (buf), "%d", abs (*j));
-
-			layout->set_text (buf);
+			pango_layout_set_text (layout, buf, strlen (buf));
 
 			/* we want logical extents, not ink extents here */
 
 			int tw, th;
-			layout->get_pixel_size (tw, th);
-
-			pixmap->draw_line (fg_gc, 0, pos, 4, pos);
+			pango_layout_get_pixel_size (layout, &tw, &th);
 
 			int p = pos - (th / 2);
 			p = min (p, height - th);
 			p = max (p, 0);
 
-			pixmap->draw_layout (fg_gc, 6, p, layout);
+			cairo_move_to (cr, 6, p);
+			pango_cairo_show_layout (cr, layout);
 		}
 	}
 
-	return pixmap;
+	cairo_pattern_t* pattern = cairo_pattern_create_for_surface (surface);
+	MetricPatterns::iterator p;
+
+	if ((p = metric_patterns.find (w.get_name())) != metric_patterns.end()) {
+		cairo_pattern_destroy (p->second);
+	}
+
+	metric_patterns[w.get_name()] = pattern;
+	
+	cairo_destroy (cr);
+	cairo_surface_destroy (surface);
+	g_object_unref (layout);
+
+	return pattern;
 }
 
 gint
 GainMeter::meter_metrics_expose (GdkEventExpose *ev)
 {
 	Glib::RefPtr<Gdk::Window> win (meter_metric_area.get_window());
-	Glib::RefPtr<Gdk::GC> bg_gc (meter_metric_area.get_style()->get_bg_gc (Gtk::STATE_INSENSITIVE));
-	GdkRectangle base_rect;
-	GdkRectangle draw_rect;
-	gint width, height;
+	cairo_t* cr;
 
-	win->get_size (width, height);
+	cr = gdk_cairo_create (win->gobj());
+	
+	/* clip to expose area */
 
-	base_rect.width = width;
-	base_rect.height = height;
-	base_rect.x = 0;
-	base_rect.y = 0;
+	gdk_cairo_rectangle (cr, &ev->area);
+	cairo_clip (cr);
 
-	Glib::RefPtr<Gdk::Pixmap> pixmap;
-	std::map<string,Glib::RefPtr<Gdk::Pixmap> >::iterator i = metric_pixmaps.find (meter_metric_area.get_name());
+	cairo_pattern_t* pattern;
+	MetricPatterns::iterator i = metric_patterns.find (meter_metric_area.get_name());
 
-	if (i == metric_pixmaps.end() || style_changed || dpi_changed) {
-		pixmap = render_metrics (meter_metric_area, _types);
+	if (i == metric_patterns.end() || style_changed || dpi_changed) {
+		pattern = render_metrics (meter_metric_area, _types);
 	} else {
-		pixmap = i->second;
+		pattern = i->second;
 	}
 
-	gdk_rectangle_intersect (&ev->area, &base_rect, &draw_rect);
-	win->draw_drawable (bg_gc, pixmap, draw_rect.x, draw_rect.y, draw_rect.x, draw_rect.y, draw_rect.width, draw_rect.height);
+	cairo_move_to (cr, 0, 0);
+	cairo_set_source (cr, pattern);
+
+	gint width, height;
+	win->get_size (width, height);
+
+	cairo_rectangle (cr, 0, 0, width, height);
+	cairo_fill (cr);
+
 	style_changed = false;
+	dpi_changed = false;
+
+	cairo_destroy (cr);
+
 	return true;
 }
 
