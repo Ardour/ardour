@@ -753,7 +753,11 @@ style "audio_bus_base" = "very_small_text"
 style "send_strip_base" = "default"
 {
   font_name = "@FONT_SMALLER@"
+  # NORMAL is used for single-data type labels, or Audio
+  # ACTIVE is used for MIDI in the presence of multiple data type
   fg[NORMAL] = @@COLPREFIX@_send_fg
+  fg[ACTIVE] = darker(@@COLPREFIX@_fg)
+
   bg[NORMAL] = @@COLPREFIX@_send_bg
   bg[ACTIVE] = @@COLPREFIX@_send_bg
   bg[PRELIGHT] = @@COLPREFIX@_send_bg
@@ -764,7 +768,11 @@ style "send_strip_base" = "default"
 style "audio_track_base" = "default"
 {
   font_name = "@FONT_SMALLER@"
+  # NORMAL is used for single-data type labels, or Audio
+  # ACTIVE is used for MIDI in the presence of multiple data type
   fg[NORMAL] = @@COLPREFIX@_fg
+  fg[ACTIVE] = darker(@@COLPREFIX@_fg)
+
   bg[NORMAL] = @@COLPREFIX@_audio_track
   bg[ACTIVE] = @@COLPREFIX@_bg
   bg[PRELIGHT] = @@COLPREFIX@_bg
@@ -775,7 +783,11 @@ style "audio_track_base" = "default"
 style "midi_track_base" = "default"
 {
   font_name = "@FONT_SMALLER@"
+  # NORMAL is used for single-data type labels, or Audio
+  # ACTIVE is used for MIDI in the presence of multiple data type
   fg[NORMAL] = @@COLPREFIX@_fg
+  fg[ACTIVE] = darker(@@COLPREFIX@_fg)
+
   bg[NORMAL] = @@COLPREFIX@_midi_track
   bg[ACTIVE] = @@COLPREFIX@_bg
   bg[PRELIGHT] = @@COLPREFIX@_bg

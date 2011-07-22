@@ -911,21 +911,23 @@ GainMeter::render_metrics (Gtk::Widget& w, vector<DataType> types)
 
 	for (vector<DataType>::const_iterator i = types.begin(); i != types.end(); ++i) {
 
-		Glib::RefPtr<Gdk::GC> fg_gc (w.get_style()->get_fg_gc (Gtk::STATE_NORMAL));
+		Gdk::Color c;
 
 		if (types.size() > 1) {
 			/* we're overlaying more than 1 set of marks, so use different colours */
 			Gdk::Color c;
 			switch (*i) {
 			case DataType::AUDIO:
-				cairo_set_source_rgb (cr, 1.0, 1.0, 1.0);
+				c = w.get_style()->get_fg (Gtk::STATE_NORMAL);
+				cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
 				break;
 			case DataType::MIDI:
-				cairo_set_source_rgb (cr, 0.2, 0.2, 0.5);
+				c = w.get_style()->get_fg (Gtk::STATE_ACTIVE);
+				cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
 				break;
 			}
 		} else {
-			Gdk::Color c = w.get_style()->get_fg (Gtk::STATE_NORMAL);
+			c = w.get_style()->get_fg (Gtk::STATE_NORMAL);
 			cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
 		}
 
