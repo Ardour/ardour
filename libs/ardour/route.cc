@@ -1583,7 +1583,8 @@ Route::configure_processors_unlocked (ProcessorStreams* err)
 	}
 
 	/* make sure we have sufficient scratch buffers to cope with the new processor
-	   configuration */
+	   configuration 
+	*/
 	_session.ensure_buffers (n_process_buffers ());
 
 	DEBUG_TRACE (DEBUG::Processors, string_compose ("%1: configuration complete\n", _name));

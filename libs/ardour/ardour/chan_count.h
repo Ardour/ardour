@@ -54,6 +54,8 @@ public:
 	void     set(DataType t, uint32_t count) { assert(t != DataType::NIL); _counts[t] = count; }
 	uint32_t get(DataType t) const { assert(t != DataType::NIL); return _counts[t]; }
 
+	inline uint32_t n (DataType t) const { return _counts[t]; }
+
 	inline uint32_t n_audio() const { return _counts[DataType::AUDIO]; }
 	inline void set_audio(uint32_t a) { _counts[DataType::AUDIO] = a; }
 

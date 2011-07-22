@@ -77,10 +77,9 @@ PortSet::add(Port* port)
 	PortVec& v = _ports[port->type()];
 
 	v.push_back(port);
+
 	sort(v.begin(), v.end(), sort_ports_by_name);
-
 	_count.set(port->type(), _count.get(port->type()) + 1);
-
 	assert(_count.get(port->type()) == _ports[port->type()].size());
 }
 

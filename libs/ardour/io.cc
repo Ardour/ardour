@@ -311,7 +311,7 @@ IO::add_port (string destination, void* src, DataType type)
 			/* Create a new port */
 
 			string portname = build_legal_port_name (type);
-
+			
 			if (_direction == Input) {
 				if ((our_port = _session.engine().register_input_port (type, portname)) == 0) {
 					error << string_compose(_("IO: cannot register input port %1"), portname) << endmsg;
@@ -327,17 +327,15 @@ IO::add_port (string destination, void* src, DataType type)
 			change.before = _ports.count ();
 			_ports.add (our_port);
 		}
-
+		
 		PortCountChanged (n_ports()); /* EMIT SIGNAL */
-
-		// pan_changed (src); /* EMIT SIGNAL */
 		change.type = IOChange::ConfigurationChanged;
 		change.after = _ports.count ();
 		changed (change, src); /* EMIT SIGNAL */
 		_buffers.attach_buffers (_ports);
 	}
 
-	if (destination.length()) {
+	if (!destination.empty()) {
 		if (our_port->connect (destination)) {
 			return -1;
 		}

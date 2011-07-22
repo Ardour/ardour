@@ -1986,7 +1986,6 @@ Session::add_routes (RouteList& new_routes, bool auto_connect, bool save)
 		boost::shared_ptr<RouteList> r = writer.get_copy ();
 		r->insert (r->end(), new_routes.begin(), new_routes.end());
 
-
 		/* if there is no control out and we're not in the middle of loading,
 		   resort the graph here. if there is a control out, we will resort
 		   toward the end of this method. if we are in the middle of loading,
