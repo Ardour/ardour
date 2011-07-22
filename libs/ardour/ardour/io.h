@@ -411,8 +411,8 @@ class IO : public PBD::StatefulDestructible
 	void setup_peak_meters ();
 	void meter ();
 
-	bool ensure_inputs_locked (uint32_t, bool clear, void *src);
-	bool ensure_outputs_locked (uint32_t, bool clear, void *src);
+	int ensure_inputs_locked (uint32_t, bool clear, void *src, bool& changed);
+	int ensure_outputs_locked (uint32_t, bool clear, void *src, bool& changed);
 
 	std::string build_legal_port_name (bool for_input);
 	int32_t find_input_port_hole (const char* base);

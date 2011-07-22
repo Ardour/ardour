@@ -1063,12 +1063,13 @@ IO::disconnect_outputs (void* src)
 	return 0;
 }
 
-bool
-IO::ensure_inputs_locked (uint32_t n, bool clear, void* src)
+int
+IO::ensure_inputs_locked (uint32_t n, bool clear, void* src, bool& changed)
 {
 	Port* input_port;
-	bool changed = false;
 	bool reduced = false;
+	
+        changed = false;
 	
 	/* remove unused ports */
 
@@ -1125,7 +1126,7 @@ IO::ensure_inputs_locked (uint32_t n, bool clear, void* src)
 		}
 	}
 
-	return changed;
+	return 0;
 }
 
 int
@@ -1286,9 +1287,13 @@ IO::ensure_inputs (uint32_t n, bool clear, bool lockit, void* src)
 	if (lockit) {
 		BLOCK_PROCESS_CALLBACK ();
 		Glib::Mutex::Lock im (io_lock);
-		changed = ensure_inputs_locked (n, clear, src);
+		if (ensure_inputs_locked (n, clear, src, changed)) {
+                        return -1;
+                }
 	} else {
-		changed = ensure_inputs_locked (n, clear, src);
+		if (ensure_inputs_locked (n, clear, src, changed)) {
+                        return -1;
+                }
 	}
 
 	if (changed) {
@@ -1299,13 +1304,14 @@ IO::ensure_inputs (uint32_t n, bool clear, bool lockit, void* src)
 	return 0;
 }
 
-bool
-IO::ensure_outputs_locked (uint32_t n, bool clear, void* src)
+int
+IO::ensure_outputs_locked (uint32_t n, bool clear, void* src, bool& changed)
 {
 	Port* output_port;
-	bool changed = false;
 	bool reduced = false;
 	bool need_pan_reset;
+
+	changed = false;
 
 	if (_noutputs == n) {
 		need_pan_reset = false;
@@ -1362,7 +1368,7 @@ IO::ensure_outputs_locked (uint32_t n, bool clear, void* src)
 		}
 	}
 
-	return changed;
+	return 0;
 }
 
 int
@@ -1373,7 +1379,7 @@ IO::ensure_outputs (uint32_t n, bool clear, bool lockit, void* src)
 	if (_output_maximum >= 0) {
 		n = min (_output_maximum, (int) n);
 		if (n == _noutputs && !clear) {
-			return 0;
+			return -1;
 		}
 	}
 
@@ -1382,9 +1388,13 @@ IO::ensure_outputs (uint32_t n, bool clear, bool lockit, void* src)
 	if (lockit) {
 		BLOCK_PROCESS_CALLBACK ();
 		Glib::Mutex::Lock im (io_lock);
-		changed = ensure_outputs_locked (n, clear, src);
+                if (ensure_outputs_locked (n, clear, src, changed)) {
+                        return -1;
+                }
 	} else {
-		changed = ensure_outputs_locked (n, clear, src);
+		if (ensure_outputs_locked (n, clear, src, changed)) {
+                        return -1;
+                }
 	}
 
 	if (changed) {
