@@ -1379,7 +1379,7 @@ IO::ensure_outputs (uint32_t n, bool clear, bool lockit, void* src)
 	if (_output_maximum >= 0) {
 		n = min (_output_maximum, (int) n);
 		if (n == _noutputs && !clear) {
-			return -1;
+			return 0;
 		}
 	}
 
