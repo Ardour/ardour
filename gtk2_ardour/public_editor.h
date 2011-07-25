@@ -260,6 +260,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 	virtual framecnt_t current_page_frames() const = 0;
 	virtual double canvas_height () const = 0;
 	virtual void temporal_zoom_step (bool coarser) = 0;
+	virtual void ensure_time_axis_view_is_visible (const TimeAxisView& tav) = 0;
 	virtual void scroll_tracks_down_line () = 0;
 	virtual void scroll_tracks_up_line () = 0;
 	virtual void prepare_for_cleanup () = 0;

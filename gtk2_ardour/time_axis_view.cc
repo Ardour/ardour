@@ -581,8 +581,9 @@ TimeAxisView::name_entry_key_release (GdkEventKey* ev)
 				} while ((*i)->hidden());
 			}
 		}
-
+		
 		(*i)->name_entry.grab_focus();
+		_editor.ensure_time_axis_view_is_visible (**i);
 	}
 	return true;
 

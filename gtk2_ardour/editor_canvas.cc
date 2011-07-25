@@ -698,6 +698,22 @@ Editor::entered_track_canvas (GdkEventCrossing */*ev*/)
 }
 
 void
+Editor::ensure_time_axis_view_is_visible (const TimeAxisView& tav)
+{
+	double begin = tav.y_position();
+
+	double v = vertical_adjustment.get_value ();
+
+	if (begin < v || begin > v + _canvas_height) {
+		/* try to put the TimeAxisView roughly central */
+		if (begin >= _canvas_height/2.0) {
+			begin -= _canvas_height/2.0;
+		}
+		vertical_adjustment.set_value (begin);
+	}
+}
+
+void
 Editor::tie_vertical_scrolling ()
 {
 	scroll_canvas_vertically ();
