@@ -2331,10 +2331,16 @@ Session::route_solo_changed (bool self_solo_change, void* /*src*/, boost::weak_p
 		delta = -1;
 	}
 
+	RouteGroup* rg = route->route_group ();
+	bool leave_group_alone = (rg && rg->is_active() && rg->is_solo());
+
 	if (delta == 1 && Config->get_exclusive_solo()) {
-		/* new solo: disable all other solos */
+		
+		/* new solo: disable all other solos, but not the group if its solo-enabled */
+
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-			if ((*i) == route || (*i)->solo_isolated() || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_hidden()) {
+			if ((*i) == route || (*i)->solo_isolated() || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_hidden() ||
+			    (leave_group_alone && ((*i)->route_group() == rg))) {
 				continue;
 			}
 			(*i)->set_solo (false, this);
@@ -2349,7 +2355,8 @@ Session::route_solo_changed (bool self_solo_change, void* /*src*/, boost::weak_p
 		bool via_sends_only;
 		bool in_signal_flow;
 
-		if ((*i) == route || (*i)->solo_isolated() || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_hidden()) {
+		if ((*i) == route || (*i)->solo_isolated() || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_hidden() ||
+		    (leave_group_alone && ((*i)->route_group() == rg))) {
 			continue;
 		}
 
