@@ -23,10 +23,6 @@
 #include <algorithm>
 #include <cstring>
 
-#include <boost/scoped_array.hpp>
-
-#include <cairomm/surface.h>
-
 #include <gdkmm/rectangle.h>
 #include <gtkmm2ext/fastmeter.h>
 #include <gtkmm2ext/utils.h>
