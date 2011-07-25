@@ -20,6 +20,9 @@
 #ifndef __gtkmm2ext_fastmeter_h__
 #define __gtkmm2ext_fastmeter_h__
 
+#include <map>
+#include <cairomm/pattern.h>
+
 #include <gtkmm/drawingarea.h>
 #include <gdkmm/pixbuf.h>
 
@@ -27,6 +30,7 @@ namespace Gtkmm2ext {
 
 class FastMeter : public Gtk::DrawingArea {
   public:
+        typedef std::map<int,Cairo::RefPtr<Cairo::Pattern> > PatternMap;
 	enum Orientation { 
 		Horizontal,
 		Vertical
@@ -52,7 +56,7 @@ class FastMeter : public Gtk::DrawingArea {
 
   private:  
 
-	Glib::RefPtr<Gdk::Pixbuf> pixbuf;
+        Cairo::RefPtr<Cairo::Pattern> pattern;
 	gint pixheight;
 	gint pixwidth;
 	static int _clr0, _clr1, _clr2, _clr3;
@@ -73,17 +77,14 @@ class FastMeter : public Gtk::DrawingArea {
 	void queue_vertical_redraw (const Glib::RefPtr<Gdk::Window>&, float);
 	void queue_horizontal_redraw (const Glib::RefPtr<Gdk::Window>&, float);
 
-	static Glib::RefPtr<Gdk::Pixbuf> request_vertical_meter(int w, int h);
+        static Cairo::RefPtr<Cairo::Pattern> generate_meter_pattern (int width, int height);
+	static Cairo::RefPtr<Cairo::Pattern> request_vertical_meter (int w, int h);
+	static Cairo::RefPtr<Cairo::Pattern> request_horizontal_meter (int w, int h);
 
-	static Glib::RefPtr<Gdk::Pixbuf> *v_pixbuf_cache;
-	static int min_v_pixbuf_size;
-	static int max_v_pixbuf_size;
-
-	static Glib::RefPtr<Gdk::Pixbuf> request_horizontal_meter(int w, int h);
-
-	static Glib::RefPtr<Gdk::Pixbuf> *h_pixbuf_cache;
-	static int min_h_pixbuf_size;
-	static int max_h_pixbuf_size;
+        static PatternMap v_pattern_cache;
+        static PatternMap h_pattern_cache;
+        static int min_pattern_metric_size; // min dimension for axis that displays the meter level
+        static int max_pattern_metric_size; // max dimension for axis that displays the meter level
 };
 
 
