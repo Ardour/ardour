@@ -241,7 +241,7 @@ class IO : public SessionObject, public Latent
 
 	boost::shared_ptr<Bundle> find_possible_bundle (const std::string &desired_name);
 
-	bool ensure_ports_locked (ChanCount, bool clear, void *src);
+	int ensure_ports_locked (ChanCount, bool clear, bool& changed);
 
 	std::string build_legal_port_name (DataType type);
 	int32_t find_port_hole (const char* base);

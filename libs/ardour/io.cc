@@ -366,13 +366,14 @@ IO::disconnect (void* src)
 }
 
 /** Caller must hold process lock */
-bool
-IO::ensure_ports_locked (ChanCount count, bool clear, void* /*src*/)
+int
+IO::ensure_ports_locked (ChanCount count, bool clear, bool& changed)
 {
 	assert (!AudioEngine::instance()->process_lock().trylock());
 
 	Port* port = 0;
-	bool  changed    = false;
+
+	changed    = false;
 
 	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 
@@ -432,7 +433,7 @@ IO::ensure_ports_locked (ChanCount count, bool clear, void* /*src*/)
 		}
 	}
 
-	return changed;
+	return 0;
 }
 
 /** Caller must hold process lock */
@@ -453,7 +454,9 @@ IO::ensure_ports (ChanCount count, bool clear, void* src)
 
 	{
 		Glib::Mutex::Lock im (io_lock);
-		changed = ensure_ports_locked (count, clear, src);
+		if (ensure_ports_locked (count, clear, changed)) {
+			return -1;
+		}
 	}
 
 	if (changed) {
