@@ -563,13 +563,25 @@ TimeAxisView::name_entry_key_release (GdkEventKey* ev)
 		name_entry_changed ();
 		TrackViewList const & allviews = _editor.get_track_views ();
 		TrackViewList::const_iterator i = find (allviews.begin(), allviews.end(), this);
+
 		if (ev->keyval == GDK_Tab) {
 			if (i != allviews.end()) {
 				do {
 					if (++i == allviews.end()) {
 						return true;
 					}
-				} while((*i)->hidden());
+
+					RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*>(*i);
+
+					if (rtav && rtav->route()->record_enabled()) {
+						continue;
+					}
+
+					if (!(*i)->hidden()) {
+						break;
+					}
+
+				} while (true);
 			}
 		} else {
 			if (i != allviews.begin()) {
@@ -577,13 +589,27 @@ TimeAxisView::name_entry_key_release (GdkEventKey* ev)
 					if (i == allviews.begin()) {
 						return true;
 					}
+
 					--i;
-				} while ((*i)->hidden());
+
+					RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*>(*i);
+
+					if (rtav && rtav->route()->record_enabled()) {
+						continue;
+					}
+
+					if (!(*i)->hidden()) {
+						break;
+					}
+
+				} while (true);
 			}
 		}
-		
-		(*i)->name_entry.grab_focus();
-		_editor.ensure_time_axis_view_is_visible (**i);
+
+		if ((i != allviews.end()) && (*i != this) && !(*i)->hidden()) {
+			(*i)->name_entry.grab_focus();
+			_editor.ensure_time_axis_view_is_visible (**i);
+		}
 	}
 	return true;
 
