@@ -199,7 +199,6 @@ LevelMeter::setup_meters (int len, int initial_width)
 		if (meters[n].width != width || meters[n].length != len || color_changed) {
 			delete meters[n].meter;
 			meters[n].meter = new FastMeter ((uint32_t) floor (Config->get_meter_hold()), width, FastMeter::Vertical, len, b, m, t, c);
-			//cerr << "LevelMeter::setup_meters() w:l = " << width << ":" << len << endl;//DEBUG
 			meters[n].width = width;
 			meters[n].length = len;
 			meters[n].meter->add_events (Gdk::BUTTON_RELEASE_MASK);
