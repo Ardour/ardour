@@ -144,7 +144,6 @@ MidiDiskstream::non_realtime_locate (framepos_t position)
 	if (_write_source) {
 		_write_source->set_timeline_position (position);
 	}
-	cerr << name() << " Seeking to " << position << endl;
 	seek (position, false);
 }
 
@@ -871,10 +870,6 @@ MidiDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 
 	assert (!destructive());
 
-	cerr << name() << " flushing to disk, bufspace = " << _capture_buf->read_space() 
-	     << " transport @ " << _session.transport_frame() 
-	     << endl;
-	
 	_write_data_count = 0;
 
 	total = _session.transport_frame() - _write_source->last_write_end();
@@ -882,11 +877,6 @@ MidiDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 	if (total == 0 || 
 	    _capture_buf->read_space() == 0 || 
 	    (!force_flush && (total < disk_io_chunk_frames) && was_recording)) {
-		cerr << "\tFlush shortcut because total = " << total
-		     << " capture read space = " << _capture_buf->read_space()
-		     << " force flush = " << force_flush 
-		     << " was recording = " << was_recording
-		     << endl;
 		goto out;
 	}
 
@@ -917,10 +907,6 @@ MidiDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 			error << string_compose(_("MidiDiskstream %1: cannot write to disk"), _id) << endmsg;
 			return -1;
 		} 
-	} else {
-		cerr << "\tdidn't write to disk because recenabled = " << record_enabled()
-		     << " total = " << total << " TF @ " << _session.transport_frame()
-		     << " force = " << force_flush << endl;
 	}
 
 out:
