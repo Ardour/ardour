@@ -639,8 +639,6 @@ Sequence<Time>::end_write (StuckNoteOption option, Time when)
                         typename Notes::iterator next = n;
                         ++next;
 			
-			cerr << "!!!!!!! note length = " << (*n)->length() << endl;
-
                         if ((*n)->length() == 0) {
 				switch (option) {
 				case Relax:
