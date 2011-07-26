@@ -940,28 +940,41 @@ SoundFileOmega::reset_options ()
 	string existing_choice;
 	vector<string> action_strings;
 
-	if (selected_track_cnt > 0) {
-		if (channel_combo.get_active_text().length()) {
-			ImportDisposition id = get_channel_disposition();
+	if (chooser.get_filter() == &audio_filter) {
 
-			switch (id) {
-			case Editing::ImportDistinctFiles:
-				if (selected_track_cnt == paths.size()) {
+		/* AUDIO */
+
+		if (selected_audio_track_cnt > 0) {
+			if (channel_combo.get_active_text().length()) {
+				ImportDisposition id = get_channel_disposition();
+				
+				switch (id) {
+				case Editing::ImportDistinctFiles:
+					if (selected_audio_track_cnt == paths.size()) {
+						action_strings.push_back (importmode2string (ImportToTrack));
+					}
+					break;
+					
+				case Editing::ImportDistinctChannels:
+					/* XXX it would be nice to allow channel-per-selected track
+					   but its too hard we don't want to deal with all the
+					   different per-file + per-track channel configurations.
+					*/
+					break;
+					
+				default:
 					action_strings.push_back (importmode2string (ImportToTrack));
+					break;
 				}
-				break;
-
-			case Editing::ImportDistinctChannels:
-				/* XXX it would be nice to allow channel-per-selected track
-				   but its too hard we don't want to deal with all the
-				   different per-file + per-track channel configurations.
-				*/
-				break;
-
-			default:
-				action_strings.push_back (importmode2string (ImportToTrack));
-				break;
 			}
+		}
+
+	}  else {
+
+		/* MIDI */
+
+		if (selected_midi_track_cnt > 0) {
+			action_strings.push_back (importmode2string (ImportToTrack));
 		}
 	}
 
@@ -1225,11 +1238,15 @@ SoundFileChooser::get_filename ()
 	return paths.front();
 }
 
-SoundFileOmega::SoundFileOmega (Gtk::Window& parent, string title, ARDOUR::Session* s, int selected_tracks, bool persistent,
+SoundFileOmega::SoundFileOmega (Gtk::Window& parent, string title, ARDOUR::Session* s, 
+				uint32_t selected_audio_tracks, 
+				uint32_t selected_midi_tracks, 
+				bool persistent,
 				Editing::ImportMode mode_hint)
-	: SoundFileBrowser (parent, title, s, persistent),
-	  copy_files_btn ( _("Copy files to session")),
-	  selected_track_cnt (selected_tracks)
+	: SoundFileBrowser (parent, title, s, persistent)
+	, copy_files_btn ( _("Copy files to session"))
+	, selected_audio_track_cnt (selected_audio_tracks)
+	, selected_midi_track_cnt (selected_midi_tracks)
 {
 	VBox* vbox;
 	HBox* hbox;
@@ -1449,9 +1466,10 @@ SoundFileOmega::get_channel_disposition () const
 }
 
 void
-SoundFileOmega::reset (int selected_tracks)
+SoundFileOmega::reset (uint32_t selected_audio_tracks, uint32_t selected_midi_tracks)
 {
-	selected_track_cnt = selected_tracks;
+	selected_audio_track_cnt = selected_audio_tracks;
+	selected_midi_track_cnt = selected_midi_tracks;
 	reset_options ();
 }
 

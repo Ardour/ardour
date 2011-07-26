@@ -205,10 +205,12 @@ class SoundFileOmega : public SoundFileBrowser
 {
 
   public:
-	SoundFileOmega (Gtk::Window& parent, std::string title, ARDOUR::Session* _s, int selected_tracks, bool persistent,
+	SoundFileOmega (Gtk::Window& parent, std::string title, ARDOUR::Session* _s, 
+			uint32_t selected_audio_tracks, uint32_t selected_midi_tracks,
+			bool persistent,
 			Editing::ImportMode mode_hint = Editing::ImportAsTrack);
 
-	void reset (int selected_tracks);
+	void reset (uint32_t selected_audio_tracks, uint32_t selected_midi_tracks);
 
 	Gtk::ComboBoxText action_combo;
 	Gtk::ComboBoxText where_combo;
@@ -227,7 +229,8 @@ class SoundFileOmega : public SoundFileBrowser
 	void on_hide();
 
   private:
-	uint32_t selected_track_cnt;
+	uint32_t selected_audio_track_cnt;
+	uint32_t selected_midi_track_cnt;
 
 	typedef std::map<std::string,Editing::ImportDisposition> DispositionMap;
 	DispositionMap disposition_map;

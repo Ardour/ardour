@@ -98,7 +98,8 @@ void
 Editor::external_audio_dialog ()
 {
 	vector<string> paths;
-	uint32_t track_cnt;
+	uint32_t audio_track_cnt;
+	uint32_t midi_track_cnt;
 
 	if (_session == 0) {
 		MessageDialog msg (_("You can't import or embed an audiofile until you have a session loaded."));
@@ -106,22 +107,32 @@ Editor::external_audio_dialog ()
 		return;
 	}
 
-	track_cnt = 0;
+	audio_track_cnt = 0;
+	midi_track_cnt = 0;
 
 	for (TrackSelection::iterator x = selection->tracks.begin(); x != selection->tracks.end(); ++x) {
 		AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*>(*x);
 
-		if (!atv) {
-			continue;
-		} else if (atv->is_audio_track()) {
-			track_cnt++;
+		if (atv) {
+			if (atv->is_audio_track()) {
+				audio_track_cnt++;
+			} 
+
+		} else {
+			MidiTimeAxisView* mtv = dynamic_cast<MidiTimeAxisView*>(*x);
+
+			if (mtv) {
+				if (mtv->is_midi_track()) {
+					midi_track_cnt++;
+				}
+			}
 		}
 	}
 
 	if (sfbrowser == 0) {
-		sfbrowser = new SoundFileOmega (*this, _("Add Existing Media"), _session, track_cnt, true);
+		sfbrowser = new SoundFileOmega (*this, _("Add Existing Media"), _session, audio_track_cnt, midi_track_cnt, true);
 	} else {
-		sfbrowser->reset (track_cnt);
+		sfbrowser->reset (audio_track_cnt, midi_track_cnt);
 	}
 
 	sfbrowser->show_all ();
