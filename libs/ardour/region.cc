@@ -32,6 +32,7 @@
 #include "ardour/file_source.h"
 #include "ardour/filter.h"
 #include "ardour/playlist.h"
+#include "ardour/playlist_source.h"
 #include "ardour/profile.h"
 #include "ardour/region.h"
 #include "ardour/region_factory.h"
@@ -1481,7 +1482,16 @@ Region::uses_source (boost::shared_ptr<const Source> source) const
 		if (*i == source) {
 			return true;
 		}
+
+		boost::shared_ptr<PlaylistSource> ps = boost::dynamic_pointer_cast<PlaylistSource> (*i);
+
+		if (ps) {
+			if (ps->playlist()->uses_source (source)) {
+				return true;
+			}
+		}
 	}
+
 	return false;
 }
 

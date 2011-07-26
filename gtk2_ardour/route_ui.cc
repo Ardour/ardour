@@ -1349,11 +1349,32 @@ RouteUI::idle_remove_this_route (RouteUI *rui)
 	return false;
 }
 
+bool
+RouteUI::verify_new_route_name (const std::string& name)
+{
+	if (name.find (':')) {
+		MessageDialog colon_msg (_("The use of colons (':') is discouraged in track and bus names.\nDo you insist on using this?"));
+		colon_msg.add_button (Stock::CANCEL, RESPONSE_CANCEL);
+		switch (colon_msg.run()) {
+		case Gtk::RESPONSE_ACCEPT:
+			return true;
+			break;
+		default:
+			return false;
+			break;
+		}
+	} 
+
+	return true;
+}
+
 void
 RouteUI::route_rename ()
 {
 	ArdourPrompter name_prompter (true);
 	string result;
+	bool done = false;
+
 	if (is_track()) {
 		name_prompter.set_title (_("Rename Track"));
 	} else {
@@ -1365,13 +1386,25 @@ RouteUI::route_rename ()
 	name_prompter.set_response_sensitive (Gtk::RESPONSE_ACCEPT, false);
 	name_prompter.show_all ();
 
-	switch (name_prompter.run ()) {
-	case Gtk::RESPONSE_ACCEPT:
-                name_prompter.get_result (result);
-                if (result.length()) {
-			_route->set_name (result);
+	while (!done) {
+		switch (name_prompter.run ()) {
+		case Gtk::RESPONSE_ACCEPT:
+			name_prompter.get_result (result);
+			name_prompter.hide ();
+			if (result.length()) {
+				if (verify_new_route_name (result)) {
+					_route->set_name (result);
+					done = true;
+				} else {
+					/* back to name prompter */
+				}
+
+			} else {
+				/* nothing entered, just get out of here */
+				done = true;
+			}
+			break;
 		}
-		break;
 	}
 
 	return;

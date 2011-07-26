@@ -195,7 +195,7 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
 		rec_enable_button->set_sensitive (_session->writable());
 	}
-
+	
 	controls_hbox.pack_start(gm.get_level_meter(), false, false);
 	_route->meter_change.connect (*this, invalidator (*this), bind (&RouteTimeAxisView::meter_changed, this), gui_context());
 	_route->input()->changed.connect (*this, invalidator (*this), ui_bind (&RouteTimeAxisView::io_changed, this, _1, _2), gui_context());
@@ -1322,7 +1322,10 @@ RouteTimeAxisView::name_entry_changed ()
                                                                     PROGRAM_NAME));
 		name_entry.set_text (_route->name());
 	} else {
-		_route->set_name (x);
+
+		if (RouteUI::verify_new_route_name (x)) {
+			_route->set_name (x);
+		}
 	}
 }
 

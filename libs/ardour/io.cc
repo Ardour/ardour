@@ -1301,7 +1301,12 @@ IO::build_legal_port_name (DataType type)
 	char buf1[name_size+1];
 	char buf2[name_size+1];
 
-	snprintf (buf1, name_size+1, ("%.*s/%s"), limit, _name.val().c_str(), suffix.c_str());
+	/* colons are illegal in port names, so fix that */
+
+	string nom = _name.val();
+	replace_all (nom, ":", ";");
+
+	snprintf (buf1, name_size+1, ("%.*s/%s"), limit, nom.c_str(), suffix.c_str());
 
 	int port_number = find_port_hole (buf1);
 	snprintf (buf2, name_size+1, "%s %d", buf1, port_number);

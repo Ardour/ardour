@@ -220,6 +220,7 @@ class RouteUI : public virtual AxisView
         virtual void stop_step_editing() {}
 
         void set_invert_sensitive (bool);
+	bool verify_new_route_name (const std::string& name);
 
   private:
 	void check_rec_enable_sensitivity ();
