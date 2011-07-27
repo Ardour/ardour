@@ -1842,6 +1842,44 @@ MidiRegionView::next_patch (CanvasPatchChange& patch)
 }
 
 void
+MidiRegionView::previous_bank (CanvasPatchChange& patch)
+{
+	if (patch.patch()->program() < 127) {
+		MIDI::Name::PatchPrimaryKey key;
+		get_patch_key_at (patch.patch()->time(), patch.patch()->channel(), key);
+		if (key.lsb > 0) {
+			key.lsb--;
+			change_patch_change (patch, key);
+		} else {
+			if (key.msb > 0) {
+				key.lsb = 127;
+				key.msb--;
+				change_patch_change (patch, key);
+			}
+		}
+	}
+}
+
+void
+MidiRegionView::next_bank (CanvasPatchChange& patch)
+{
+	if (patch.patch()->program() > 0) {
+		MIDI::Name::PatchPrimaryKey key;
+		get_patch_key_at (patch.patch()->time(), patch.patch()->channel(), key);
+		if (key.lsb < 127) {
+			key.lsb++;
+			change_patch_change (patch, key);
+		} else {
+			if (key.msb < 127) {
+				key.lsb = 0;
+				key.msb++;
+				change_patch_change (patch, key);
+			}
+		}
+	}
+}
+
+void
 MidiRegionView::maybe_remove_deleted_note_from_selection (CanvasNoteEvent* cne)
 {
 	if (_selection.empty()) {
@@ -2917,7 +2955,8 @@ void
 MidiRegionView::patch_entered (ArdourCanvas::CanvasPatchChange* ev)
 {
 	ostringstream s;
-	s << ((int) ev->patch()->program() + 1) << ":" << (ev->patch()->bank() + 1);
+	/* XXX should get patch name if we can */
+	s << _("Bank:") << (ev->patch()->bank() + 1) << '\n' << _("Program:") << ((int) ev->patch()->program() + 1);
 	show_verbose_cursor (s.str(), 10, 20);
 }
 

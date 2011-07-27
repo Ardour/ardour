@@ -23,6 +23,7 @@
 
 #include "gtkmm2ext/keyboard.h"
 #include "ardour/midi_patch_manager.h"
+
 #include "ardour_ui.h"
 #include "midi_region_view.h"
 #include "canvas_patch_change.h"
@@ -31,6 +32,7 @@
 
 using namespace Gnome::Canvas;
 using namespace MIDI::Name;
+using namespace Gtkmm2ext;
 using namespace std;
 
 /** @param x x position in pixels.
@@ -118,7 +120,6 @@ CanvasPatchChange::initialize_popup_menus()
 void
 CanvasPatchChange::on_patch_menu_selected(const PatchPrimaryKey& key)
 {
-	cerr << " got patch program number " << key.program_number << endl;
 	_region.change_patch_change (*this, key);
 }
 
@@ -166,12 +167,20 @@ CanvasPatchChange::on_event (GdkEvent* ev)
 		case GDK_Up:
 		case GDK_KP_Up:
 		case GDK_uparrow:
-			_region.previous_patch (*this);
+			if (Keyboard::modifier_state_contains (ev->scroll.state, Keyboard::PrimaryModifier)) {
+				_region.previous_bank (*this);
+			} else {
+				_region.previous_patch (*this);
+			}
 			break;
 		case GDK_Down:
 		case GDK_KP_Down:
 		case GDK_downarrow:
-			_region.next_patch (*this);
+			if (Keyboard::modifier_state_contains (ev->scroll.state, Keyboard::PrimaryModifier)) {
+				_region.next_bank (*this);
+			} else {
+				_region.next_patch (*this);
+			}
 			break;
 		default:
 			break;
@@ -180,10 +189,18 @@ CanvasPatchChange::on_event (GdkEvent* ev)
 
 	case GDK_SCROLL:
 		if (ev->scroll.direction == GDK_SCROLL_UP) {
-			_region.previous_patch (*this);
+			if (Keyboard::modifier_state_contains (ev->scroll.state, Keyboard::PrimaryModifier)) {
+				_region.previous_bank (*this);
+			} else {
+				_region.previous_patch (*this);
+			}
 			return true;
 		} else if (ev->scroll.direction == GDK_SCROLL_DOWN) {
-			_region.next_patch (*this);
+			if (Keyboard::modifier_state_contains (ev->scroll.state, Keyboard::PrimaryModifier)) {
+				_region.next_bank (*this);
+			} else {
+				_region.next_patch (*this);
+			}
 			return true;
 		}
 		break;
