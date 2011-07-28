@@ -26,7 +26,7 @@
 
 using namespace Gtk;
 
-/** @param tc If non-0, a time converter for this patch change.  If 0, time and channel controls will be desensitized */
+/** @param tc If non-0, a time converter for this patch change.  If 0, time control will be desensitized */
 PatchChangeDialog::PatchChangeDialog (
 	const ARDOUR::BeatsFramesConverter* tc,
 	ARDOUR::Session* session,
@@ -41,12 +41,13 @@ PatchChangeDialog::PatchChangeDialog (
 	, _bank (*manage (new Adjustment (1, 1, 16384, 1, 64)))
 {
 	Table* t = manage (new Table (4, 2));
+	Label* l;
 	t->set_spacings (6);
 	int r = 0;
 
 	if (_time_converter) {
-
-		Label* l = manage (new Label (_("Time")));
+		
+		l = manage (new Label (_("Time")));
 		l->set_alignment (0, 0.5);
 		t->attach (*l, 0, 1, r, r + 1);
 		t->attach (_time, 1, 2, r, r + 1);
@@ -55,17 +56,17 @@ PatchChangeDialog::PatchChangeDialog (
 		_time.set_session (session);
 		_time.set_mode (AudioClock::BBT);
 		_time.set (_time_converter->to (patch.time ()), true);
-
-		l = manage (new Label (_("Channel")));
-		l->set_alignment (0, 0.5);
-		t->attach (*l, 0, 1, r, r + 1);
-		t->attach (_channel, 1, 2, r, r + 1);
-		++r;
-
-		_channel.set_value (patch.channel() + 1);
 	}
 
-	Label* l = manage (new Label (_("Program")));
+	l = manage (new Label (_("Channel")));
+	l->set_alignment (0, 0.5);
+	t->attach (*l, 0, 1, r, r + 1);
+	t->attach (_channel, 1, 2, r, r + 1);
+	++r;
+	
+	_channel.set_value (patch.channel() + 1);
+
+	l = manage (new Label (_("Program")));
 	l->set_alignment (0, 0.5);
 	t->attach (*l, 0, 1, r, r + 1);
 	t->attach (_program, 1, 2, r, r + 1);
@@ -94,6 +95,7 @@ Evoral::PatchChange<Evoral::MusicalTime>
 PatchChangeDialog::patch () const
 {
 	Evoral::MusicalTime t = 0;
+
 	if (_time_converter) {
 		t = _time_converter->from (_time.current_time ());
 	}
