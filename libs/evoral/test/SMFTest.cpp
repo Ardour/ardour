@@ -46,6 +46,6 @@ SMFTest::takeFiveTest ()
 		}
 	}
 
-	seq->end_write(false);
+	seq->end_write (Sequence<Time>::Relax, false);
 	CPPUNIT_ASSERT(!seq->empty());
 }

@@ -50,7 +50,7 @@ SequenceTest::preserveEventOrderingTest ()
 		));
 	}
 
-	seq->end_write();
+	seq->end_write (Sequence<Time>::Relax);
 
 	TestSink<Time> sink;
 	sink.writing.connect(sigc::mem_fun(&sink, &TestSink<Time>::assertLastEventTimeEarlier));
