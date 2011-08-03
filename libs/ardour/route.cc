@@ -570,6 +570,11 @@ Route::set_listen (bool yn, void* src)
 		return;
 	}
 
+	if (_route_group && src != _route_group && _route_group->is_active() && _route_group->is_solo()) {
+		_route_group->foreach_route (boost::bind (&Route::set_listen, _1, yn, _route_group));
+		return;
+	}
+
 	if (_monitor_send) {
 		if (yn != _monitor_send->active()) {
 			if (yn) {
