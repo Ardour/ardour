@@ -80,6 +80,8 @@ using namespace Editing;
 using namespace ArdourCanvas;
 using Gtkmm2ext::Keyboard;
 
+#define MIDI_BP_ZERO ((Config->get_first_midi_bank_is_zero())?0:1)
+
 MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv,
                                 boost::shared_ptr<MidiRegion> r, double spu, Gdk::Color const & basic_color)
 	: RegionView (parent, tv, r, spu, basic_color)
@@ -112,6 +114,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	_note_group->raise_to_top();
 	PublicEditor::DropDownKeys.connect (sigc::mem_fun (*this, &MidiRegionView::drop_down_keys));
 
+	Config->ParameterChanged.connect (*this, invalidator (*this), ui_bind (&MidiRegionView::parameter_changed, this, _1), gui_context());
 	connect_to_diskstream ();
 }
 
@@ -146,6 +149,16 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	PublicEditor::DropDownKeys.connect (sigc::mem_fun (*this, &MidiRegionView::drop_down_keys));
 
 	connect_to_diskstream ();
+}
+
+void
+MidiRegionView::parameter_changed (std::string const & p)
+{
+	if (p == "diplay-first-midi-bank-as-zero") {
+		if (_enable_display) {
+			redisplay_model();
+		}
+	}
 }
 
 MidiRegionView::MidiRegionView (const MidiRegionView& other)
@@ -269,6 +282,7 @@ MidiRegionView::init (Gdk::Color const & basic_color, bool wfd)
 	                                       ui_bind(&MidiRegionView::snap_changed, this),
 	                                       gui_context());
 
+	Config->ParameterChanged.connect (*this, invalidator (*this), ui_bind (&MidiRegionView::parameter_changed, this, _1), gui_context());
 	connect_to_diskstream ();
 }
 
@@ -1158,6 +1172,7 @@ MidiRegionView::display_patch_changes ()
 		if (chn_mask & (1<<i)) {
 			display_patch_changes_on_channel (i);
 		}
+		/* TODO gray-out patch instad of not displaying it */
 	}
 }
 
@@ -1180,8 +1195,8 @@ MidiRegionView::display_patch_changes_on_channel (uint8_t channel)
 			add_canvas_patch_change (*i, patch->name());
 		} else {
 			char buf[16];
-			/* program and bank numbers are zero-based: convert to one-based */
-			snprintf (buf, 16, "%d\n%d", (*i)->program() + 1, (*i)->bank() + 1);
+			/* program and bank numbers are zero-based: convert to one-based: MIDI_BP_ZERO */
+			snprintf (buf, 16, "%d %d", (*i)->program() + MIDI_BP_ZERO , (*i)->bank() + MIDI_BP_ZERO);
 			add_canvas_patch_change (*i, buf);
 		}
 	}
@@ -2956,7 +2971,7 @@ MidiRegionView::patch_entered (ArdourCanvas::CanvasPatchChange* ev)
 {
 	ostringstream s;
 	/* XXX should get patch name if we can */
-	s << _("Bank:") << (ev->patch()->bank() + 1) << '\n' << _("Program:") << ((int) ev->patch()->program() + 1);
+	s << _("Bank:") << (ev->patch()->bank() + MIDI_BP_ZERO) << '\n' << _("Program:") << ((int) ev->patch()->program()) + MIDI_BP_ZERO << '\n' << _("Channel:") << ((int) ev->patch()->channel() + 1);
 	show_verbose_cursor (s.str(), 10, 20);
 }
 

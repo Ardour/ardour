@@ -299,6 +299,8 @@ protected:
 
 	void reset_width_dependent_items (double pixel_width);
 
+	void parameter_changed (std::string const & p);
+
 private:
 
 	friend class EditNoteDialog;

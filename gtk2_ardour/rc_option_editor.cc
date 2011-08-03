@@ -1343,7 +1343,7 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mute_affects_main_outs)
 		     ));
 
-	add_option (_("MIDI control"),
+	add_option (_("MIDI"),
 		    new BoolOption (
 			    "send-midi-clock",
 			    _("Send MIDI Clock"),
@@ -1351,7 +1351,7 @@ RCOptionEditor::RCOptionEditor ()
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_send_midi_clock)
 			    ));
 
-	add_option (_("MIDI control"),
+	add_option (_("MIDI"),
 		    new BoolOption (
 			    "send-mtc",
 			    _("Send MIDI Time Code"),
@@ -1359,7 +1359,7 @@ RCOptionEditor::RCOptionEditor ()
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_send_mtc)
 			    ));
 
-	add_option (_("MIDI control"),
+	add_option (_("MIDI"),
 		    new SpinOption<int> (
 			    "mtc-qf-speed-tolerance",
 			    _("Percentage either side of normal transport speed to transmit MTC"),
@@ -1368,7 +1368,7 @@ RCOptionEditor::RCOptionEditor ()
 			    0, 20, 1, 5
 			    ));
 
-	add_option (_("MIDI control"),
+	add_option (_("MIDI"),
 		    new BoolOption (
 			    "mmc-control",
 			    _("Obey MIDI Machine Control commands"),
@@ -1376,7 +1376,7 @@ RCOptionEditor::RCOptionEditor ()
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_mmc_control)
 			    ));
 
-	add_option (_("MIDI control"),
+	add_option (_("MIDI"),
 		    new BoolOption (
 			    "send-mmc",
 			    _("Send MIDI Machine Control commands"),
@@ -1384,7 +1384,7 @@ RCOptionEditor::RCOptionEditor ()
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_send_mmc)
 			    ));
 
-	add_option (_("MIDI control"),
+	add_option (_("MIDI"),
 		    new BoolOption (
 			    "midi-feedback",
 			    _("Send MIDI control feedback"),
@@ -1392,7 +1392,7 @@ RCOptionEditor::RCOptionEditor ()
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_midi_feedback)
 			    ));
 
-	add_option (_("MIDI control"),
+	add_option (_("MIDI"),
 	     new SpinOption<uint8_t> (
 		     "mmc-receive-device-id",
 		     _("Inbound MMC device ID"),
@@ -1401,7 +1401,7 @@ RCOptionEditor::RCOptionEditor ()
 		     0, 128, 1, 10
 		     ));
 
-	add_option (_("MIDI control"),
+	add_option (_("MIDI"),
 	     new SpinOption<uint8_t> (
 		     "mmc-send-device-id",
 		     _("Outbound MMC device ID"),
@@ -1410,7 +1410,7 @@ RCOptionEditor::RCOptionEditor ()
 		     0, 128, 1, 10
 		     ));
 
-	add_option (_("MIDI control"),
+	add_option (_("MIDI"),
 	     new SpinOption<int32_t> (
 		     "initial-program-change",
 		     _("Initial program change"),
@@ -1418,6 +1418,14 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_initial_program_change),
 		     -1, 65536, 1, 10
 		     ));
+
+	add_option (_("MIDI"),
+		    new BoolOption (
+			    "diplay-first-midi-bank-as-zero",
+			    _("Display first MIDI bank/program as 0"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_first_midi_bank_is_zero),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_first_midi_bank_is_zero)
+			    ));
 
 	/* CONTROL SURFACES */
 
