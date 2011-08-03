@@ -1325,6 +1325,8 @@ RouteTimeAxisView::name_entry_changed ()
 
 		if (RouteUI::verify_new_route_name (x)) {
 			_route->set_name (x);
+		} else {
+			name_entry.grab_focus ();
 		}
 	}
 }

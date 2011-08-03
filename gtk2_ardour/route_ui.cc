@@ -1349,23 +1349,23 @@ RouteUI::idle_remove_this_route (RouteUI *rui)
 	return false;
 }
 
+/** @return true if this name should be used for the route, otherwise false */
 bool
 RouteUI::verify_new_route_name (const std::string& name)
 {
-	if (name.find (':')) {
-		MessageDialog colon_msg (_("The use of colons (':') is discouraged in track and bus names.\nDo you insist on using this?"));
-		colon_msg.add_button (Stock::CANCEL, RESPONSE_CANCEL);
-		switch (colon_msg.run()) {
-		case Gtk::RESPONSE_ACCEPT:
-			return true;
-			break;
-		default:
-			return false;
-			break;
-		}
-	} 
+	if (name.find (':') == string::npos) {
+		return true;
+	}
+	
+	MessageDialog colon_msg (
+		_("The use of colons (':') is discouraged in track and bus names.\nDo you want to use this new name?"),
+		false, MESSAGE_QUESTION, BUTTONS_NONE
+		);
+	
+	colon_msg.add_button (_("Use the new name"), Gtk::RESPONSE_ACCEPT);
+	colon_msg.add_button (_("Re-edit the name"), Gtk::RESPONSE_CANCEL);
 
-	return true;
+	return (colon_msg.run () == Gtk::RESPONSE_ACCEPT);
 }
 
 void
