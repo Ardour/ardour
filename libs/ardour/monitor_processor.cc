@@ -492,7 +492,7 @@ MonitorProcessor::ChannelRecord::ChannelRecord (uint32_t chn)
 	: current_gain (1.0)
 	, cut_ptr (new MPControl<gain_t> (1.0, string_compose (_("cut control %1"), chn), PBD::Controllable::GainLike))
 	, dim_ptr (new MPControl<bool> (false, string_compose (_("dim control"), chn), PBD::Controllable::Toggle))
-	, polarity_ptr (new MPControl<gain_t> (1.0, string_compose (_("polarity control"), chn), PBD::Controllable::Toggle))
+	, polarity_ptr (new MPControl<gain_t> (1.0, string_compose (_("polarity control"), chn), PBD::Controllable::Toggle, -1, 1))
 	, soloed_ptr (new MPControl<bool> (false, string_compose (_("solo control"), chn), PBD::Controllable::Toggle))
 
 	, cut_control (cut_ptr)
