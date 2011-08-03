@@ -704,7 +704,7 @@ Editor::ensure_time_axis_view_is_visible (const TimeAxisView& tav)
 
 	double v = vertical_adjustment.get_value ();
 
-	if (begin < v || begin > v + _canvas_height) {
+	if (begin < v || begin + tav.current_height() > v + _canvas_height - canvas_timebars_vsize) {
 		/* try to put the TimeAxisView roughly central */
 		if (begin >= _canvas_height/2.0) {
 			begin -= _canvas_height/2.0;
