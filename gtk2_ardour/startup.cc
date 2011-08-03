@@ -348,7 +348,7 @@ using the program.</span>\
 void
 ArdourStartup::default_dir_changed ()
 {
-	Config->set_default_session_parent_dir (default_dir_chooser->get_current_folder());
+	Config->set_default_session_parent_dir (default_dir_chooser->get_filename());
 	config_changed ();
 }
 
@@ -615,7 +615,7 @@ ArdourStartup::on_apply ()
 	if (config_modified) {
 
 		if (default_dir_chooser) {
-			Config->set_default_session_parent_dir (default_dir_chooser->get_current_folder());
+			Config->set_default_session_parent_dir (default_dir_chooser->get_filename());
 		}
 
 		if (monitor_via_hardware_button.get_active()) {
