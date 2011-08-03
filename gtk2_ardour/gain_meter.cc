@@ -198,6 +198,7 @@ GainMeterBase::set_controls (boost::shared_ptr<Route> r,
 		gain_adjustment.set_upper (2.0);
 		gain_adjustment.set_step_increment (0.05);
 		gain_adjustment.set_page_increment (0.1);
+		gain_slider->set_default_value (1);
 	}
 
 	if (!_route || !_route->is_hidden()) {

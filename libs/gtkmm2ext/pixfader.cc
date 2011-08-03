@@ -369,9 +369,21 @@ PixFader::set_fader_length (int l)
 {
 	if (_orien == VERT) {
 		view.height = span = l;
-		unity_loc = (int) rint (view.height - (default_value * view.height)) - 1;
 	} else {
 		view.width = span = l;
+	}
+
+	update_unity_position ();
+
+	queue_draw ();
+}
+
+void
+PixFader::update_unity_position ()
+{
+	if (_orien == VERT) {
+		unity_loc = (int) rint (view.height * (1 - (default_value / (adjustment.get_upper() - adjustment.get_lower())))) - 1;
+	} else {
 		unity_loc = (int) rint (default_value * view.width);
 	}
 
@@ -401,4 +413,11 @@ PixFader::set_adjustment_from_event (GdkEventButton* ev)
 	fract = max (0.0, fract);
 
 	adjustment.set_value (fract * (adjustment.get_upper () - adjustment.get_lower ()));
+}
+
+void
+PixFader::set_default_value (float d)
+{
+	default_value = d;
+	update_unity_position ();
 }

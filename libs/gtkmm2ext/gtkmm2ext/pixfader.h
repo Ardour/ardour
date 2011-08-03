@@ -38,6 +38,8 @@ class PixFader : public Gtk::DrawingArea
 	void set_fader_length (int);
         void set_border_colors (uint32_t rgba_left, uint32_t rgba_right);
 
+	void set_default_value (float);
+
   protected:
 	Gtk::Adjustment& adjustment;
 
@@ -82,6 +84,7 @@ class PixFader : public Gtk::DrawingArea
 	void adjustment_changed ();
 	int display_span ();
 	void set_adjustment_from_event (GdkEventButton *);
+	void update_unity_position ();
 
 	static int fine_scale_modifier;
 	static int extra_fine_scale_modifier;
