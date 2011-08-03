@@ -1299,35 +1299,27 @@ RouteTimeAxisView::playlist () const
 void
 RouteTimeAxisView::name_entry_changed ()
 {
-	string x;
-
-	x = name_entry.get_text ();
+	string x = name_entry.get_text ();
 
 	if (x == _route->name()) {
 		return;
 	}
 
-	strip_whitespace_edges(x);
+	strip_whitespace_edges (x);
 
 	if (x.length() == 0) {
 		name_entry.set_text (_route->name());
 		return;
 	}
 
-	if (!_session->route_name_unique (x)) {
-		ARDOUR_UI::instance()->popup_error (_("A track already exists with that name"));
-		name_entry.set_text (_route->name());
-	} else if (_session->route_name_internal (x)) {
+	if (_session->route_name_internal (x)) {
 		ARDOUR_UI::instance()->popup_error (string_compose (_("You cannot create a track with that name as it is reserved for %1"),
-                                                                    PROGRAM_NAME));
-		name_entry.set_text (_route->name());
+								    PROGRAM_NAME));
+		name_entry.grab_focus ();
+	} else if (RouteUI::verify_new_route_name (x)) {
+		_route->set_name (x);
 	} else {
-
-		if (RouteUI::verify_new_route_name (x)) {
-			_route->set_name (x);
-		} else {
-			name_entry.grab_focus ();
-		}
+		name_entry.grab_focus ();
 	}
 }
 
