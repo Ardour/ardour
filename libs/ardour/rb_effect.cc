@@ -355,7 +355,10 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress*)
 					  stretch,
 					  shift);
 		(*x)->set_master_sources (region->master_sources());
-		(*x)->set_length( (*x)->length() * stretch);
+		/* multiply the old (possibly previously stretched) region length by the extra
+		   stretch this time around to get its new length
+		*/
+		(*x)->set_length ((*x)->length() * tsr.time_fraction);
 	}
 
 	/* stretch region gain envelope */
