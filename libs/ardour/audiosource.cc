@@ -287,6 +287,8 @@ AudioSource::initialize_peakfile (bool newfile, string audio_path)
 framecnt_t
 AudioSource::read (Sample *dst, framepos_t start, framecnt_t cnt, int /*channel*/) const
 {
+	assert (cnt >= 0);
+	
 	Glib::Mutex::Lock lm (_lock);
 	return read_unlocked (dst, start, cnt);
 }

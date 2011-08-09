@@ -364,10 +364,13 @@ AudioRegion::master_read_at (Sample *buf, Sample *mixdown_buffer, float *gain_bu
 {
 	/* do not read gain/scaling/fades and do not count this disk i/o in statistics */
 
+	assert (cnt >= 0);
+
 	return _read_at (_master_sources, _master_sources.front()->length(_master_sources.front()->timeline_position()),
 			 buf, mixdown_buffer, gain_buffer, position, cnt, chan_n, ReadOps (0));
 }
 
+/** @param position Position within the session */
 framecnt_t
 AudioRegion::_read_at (const SourceList& srcs, framecnt_t limit,
 		       Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
@@ -376,6 +379,8 @@ AudioRegion::_read_at (const SourceList& srcs, framecnt_t limit,
 		       uint32_t chan_n,
 		       ReadOps rops) const
 {
+	assert (cnt >= 0);
+	
 	frameoffset_t internal_offset;
 	frameoffset_t buf_offset;
 	framecnt_t to_read;
@@ -394,6 +399,9 @@ AudioRegion::_read_at (const SourceList& srcs, framecnt_t limit,
 	if (position < _position) {
 		internal_offset = 0;
 		buf_offset = _position - position;
+		/* if this fails then the requested section is entirely
+		   before the position of this region */
+		assert (cnt >= buf_offset);
 		cnt -= buf_offset;
 	} else {
 		internal_offset = position - _position;

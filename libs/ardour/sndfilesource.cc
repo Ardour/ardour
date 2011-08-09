@@ -269,6 +269,8 @@ SndFileSource::sample_rate () const
 framecnt_t
 SndFileSource::read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) const
 {
+	assert (cnt >= 0);
+	
 	int32_t nread;
 	float *ptr;
 	uint32_t real_cnt;
@@ -305,6 +307,8 @@ SndFileSource::read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) con
 
 		file_cnt = cnt;
 	}
+
+	assert (file_cnt >= 0);
 
 	if (file_cnt != cnt) {
 		framepos_t delta = cnt - file_cnt;
