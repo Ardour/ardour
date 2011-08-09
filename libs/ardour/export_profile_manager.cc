@@ -738,15 +738,21 @@ ExportProfileManager::get_warnings ()
 {
 	boost::shared_ptr<Warnings> warnings (new Warnings ());
 
-	assert (!channel_configs.empty ());
-
-	ChannelConfigStatePtr channel_config_state = channel_configs.front();
+	ChannelConfigStatePtr channel_config_state;
+	if (!channel_configs.empty ()) {
+		channel_config_state = channel_configs.front();
+	}
+	
 	TimespanStatePtr timespan_state = timespans.front();
 
 	/*** Check "global" config ***/
 
 	TimespanListPtr timespans = timespan_state->timespans;
-	ExportChannelConfigPtr channel_config = channel_config_state->config;
+
+	ExportChannelConfigPtr channel_config;
+	if (channel_config_state) {
+		channel_config = channel_config_state->config;
+	}
 
 	/* Check Timespans are not empty */
 
@@ -754,22 +760,27 @@ ExportProfileManager::get_warnings ()
 		warnings->errors.push_back (_("No timespan has been selected!"));
 	}
 
-	/* Check channel config ports */
-
-	if (!channel_config->all_channels_have_ports ()) {
-		warnings->warnings.push_back (_("Some channels are empty"));
+	if (channel_config_state == 0) {
+		warnings->errors.push_back (_("No channels have been selected!"));
+	} else {
+		/* Check channel config ports */
+		if (!channel_config->all_channels_have_ports ()) {
+			warnings->warnings.push_back (_("Some channels are empty"));
+		}
 	}
 
 	/*** Check files ***/
 
-	FormatStateList::const_iterator format_it;
-	FilenameStateList::const_iterator filename_it;
-	for (format_it = formats.begin(), filename_it = filenames.begin();
-	     format_it != formats.end() && filename_it != filenames.end();
-	     ++format_it, ++filename_it) {
+	if (channel_config_state) {
+		FormatStateList::const_iterator format_it;
+		FilenameStateList::const_iterator filename_it;
+		for (format_it = formats.begin(), filename_it = filenames.begin();
+		     format_it != formats.end() && filename_it != filenames.end();
+		     ++format_it, ++filename_it) {
 			check_config (warnings, timespan_state, channel_config_state, *format_it, *filename_it);
+		}
 	}
-
+	
 	return warnings;
 }
 
