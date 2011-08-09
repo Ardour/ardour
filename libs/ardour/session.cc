@@ -985,13 +985,18 @@ Session::handle_locations_changed (Locations::LocationList& locations)
 void
 Session::enable_record ()
 {
+	if (_transport_speed < 0.0) {
+		/* no recording in reverse */
+		return;
+	}
+
 	while (1) {
 		RecordState rs = (RecordState) g_atomic_int_get (&_record_status);
 
 		if (rs == Recording) {
 			break;
 		}
-
+		
 		if (g_atomic_int_compare_and_exchange (&_record_status, rs, Recording)) {
 
 			_last_record_location = _transport_frame;

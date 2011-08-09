@@ -958,6 +958,11 @@ Session::set_transport_speed (double speed, bool abort, bool clear_state)
 		return;
 	}
 
+	if (actively_recording() && speed < 0.0) {
+		/* no reverse during recording */
+		return;
+	}
+
 	_target_transport_speed = fabs(speed);
 
 	/* 8.0 max speed is somewhat arbitrary but based on guestimates regarding disk i/o capability
