@@ -658,7 +658,11 @@ ArdourStartup::on_prepare (Gtk::Widget* page)
 			Gtk::Widget* def = wrap (gtk_window_get_default_widget (win->gobj()));
 			Gtk::Button* button;
 			if ((button = dynamic_cast<Gtk::Button*>(def)) != 0) {
-				button->set_label (_("Open"));
+				if (more_new_session_options_button.get_active()) {
+					button->set_label (_("Forward"));
+				}else{
+					button->set_label (_("Open"));
+				}
 			}
 		}
 	}
@@ -843,6 +847,10 @@ ArdourStartup::setup_new_session_page ()
 	session_hbox.pack_start (session_new_vbox, true, true);
 	set_page_title (session_vbox, _("New Session"));
 	set_page_type (session_vbox, ASSISTANT_PAGE_CONFIRM);
+
+	if (more_new_session_options_button.get_active()) {
+		set_page_type (session_vbox, ASSISTANT_PAGE_CONTENT);
+	}
 
 	new_name_entry.signal_map().connect (sigc::mem_fun (*this, &ArdourStartup::new_name_mapped));
 	new_name_entry.signal_focus_out_event().connect (sigc::ptr_fun (lost_name_entry_focus));
