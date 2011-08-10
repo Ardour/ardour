@@ -730,9 +730,11 @@ void
 GenericMidiControlProtocol::reset_controllables ()
 {
 	Glib::Mutex::Lock lm2 (controllables_lock);
-	
-	for (MIDIControllables::iterator iter = controllables.begin(); iter != controllables.end(); ++iter) {
+
+	for (MIDIControllables::iterator iter = controllables.begin(); iter != controllables.end(); ) {
 		MIDIControllable* existingBinding = (*iter);
+		MIDIControllables::iterator next = iter;
+		++next;
 
 		if (!existingBinding->learned()) {
 			ControllableDescriptor& desc (existingBinding->descriptor());
@@ -741,9 +743,21 @@ GenericMidiControlProtocol::reset_controllables ()
 				desc.set_bank_offset (_current_bank * _bank_size);
 			}
 
+			/* its entirely possible that the session doesn't have
+			 * the specified controllable (e.g. it has too few
+			 * tracks). if we find this to be the case, drop any
+			 * bindings that would be left without controllables.
+			 */
+
 			boost::shared_ptr<Controllable> c = session->controllable_by_descriptor (desc);
-			existingBinding->set_controllable (c.get());
+			if (c) {
+				existingBinding->set_controllable (c.get());
+			} else {
+				controllables.erase (iter);
+			}
 		}
+
+		iter = next;
 	}
 }
 
