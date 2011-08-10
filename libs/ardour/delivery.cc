@@ -375,22 +375,24 @@ Delivery::unpan ()
 	_panshell.reset ();
 }
 
+uint32_t
+Delivery::pan_outs () const
+{
+	if (_output) {
+		return _output->n_ports().n_audio();
+	} 
+
+	return _configured_output.n_audio();
+}
+
 void
 Delivery::reset_panner ()
 {
 	if (panners_legal) {
 		if (!no_panner_reset) {
 
-			uint32_t ntargets;
-
-			if (_output) {
-				ntargets = _output->n_ports().n_audio();
-			} else {
-				ntargets = _configured_output.n_audio();
-			}
-
 			if (_panshell) {
-				_panshell->configure_io (ChanCount (DataType::AUDIO, pans_required()), ChanCount (DataType::AUDIO, ntargets));
+				_panshell->configure_io (ChanCount (DataType::AUDIO, pans_required()), ChanCount (DataType::AUDIO, pan_outs()));
 				
 				if (_role == Main) {
 					_panshell->pannable()->set_panner (_panshell->panner());

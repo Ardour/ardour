@@ -826,7 +826,7 @@ dump_processors(const string& name, const list<boost::shared_ptr<Processor> >& p
 	cerr << name << " {" << endl;
 	for (list<boost::shared_ptr<Processor> >::const_iterator p = procs.begin();
 			p != procs.end(); ++p) {
-		cerr << "\t" << (*p)->name() << " ID = " << (*p)->id() << endl;
+		cerr << "\t" << (*p)->name() << " ID = " << (*p)->id() << " @ " << (*p) << endl;
 	}
 	cerr << "}" << endl;
 }

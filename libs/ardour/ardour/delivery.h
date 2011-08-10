@@ -101,6 +101,7 @@ public:
 	void allow_pan_reset ();
 
 	uint32_t pans_required() const { return _configured_input.n_audio(); }
+	virtual uint32_t pan_outs() const;
 
   protected:
 	Role        _role;

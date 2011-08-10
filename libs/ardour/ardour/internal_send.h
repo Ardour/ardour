@@ -54,6 +54,7 @@ class InternalSend : public Send
 	}
 
 	void set_can_pan (bool yn);
+	uint32_t pan_outs () const;
 
   private:
 	BufferSet mixbufs;
