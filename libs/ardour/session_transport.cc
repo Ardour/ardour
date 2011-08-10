@@ -958,8 +958,8 @@ Session::set_transport_speed (double speed, bool abort, bool clear_state)
 		return;
 	}
 
-	if (actively_recording() && speed < 0.0) {
-		/* no reverse during recording */
+	if (actively_recording() && speed != 1.0 && speed != 0.0) {
+		/* no varispeed during recording */
 		return;
 	}
 

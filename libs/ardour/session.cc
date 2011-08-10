@@ -985,8 +985,8 @@ Session::handle_locations_changed (Locations::LocationList& locations)
 void
 Session::enable_record ()
 {
-	if (_transport_speed < 0.0) {
-		/* no recording in reverse */
+	if (_transport_speed != 0.0 || _transport_speed != 1.0) {
+		/* no recording at anything except normal speed */
 		return;
 	}
 
@@ -2113,7 +2113,8 @@ Session::globally_add_internal_sends (boost::shared_ptr<Route> dest, Placement p
 	boost::shared_ptr<RouteList> t (new RouteList);
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		if (include_buses || boost::dynamic_pointer_cast<Track>(*i)) {
+		/* no MIDI sends because there are no MIDI busses yet */
+		if (include_buses || boost::dynamic_pointer_cast<AudioTrack>(*i)) {
 			t->push_back (*i);
 		}
 	}
