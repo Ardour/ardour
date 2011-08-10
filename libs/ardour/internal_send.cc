@@ -81,12 +81,7 @@ InternalSend::use_target (boost::shared_ptr<Route> sendto)
 	mixbufs.ensure_buffers (_send_to->internal_return()->input_streams(), _session.get_block_size());
 	mixbufs.set_count (_send_to->internal_return()->input_streams());
 
-	ChanCount n = _send_to->internal_return()->input_streams ();
-
-	if (n != _configured_output) {
-		_configured_output = n;
-		reset_panner ();
-	}
+	reset_panner ();
 
         set_name (sendto->name());
         _send_to_id = _send_to->id();
