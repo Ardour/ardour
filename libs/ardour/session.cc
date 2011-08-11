@@ -985,7 +985,7 @@ Session::handle_locations_changed (Locations::LocationList& locations)
 void
 Session::enable_record ()
 {
-	if (_transport_speed != 0.0 || _transport_speed != 1.0) {
+	if (_transport_speed != 0.0 && _transport_speed != 1.0) {
 		/* no recording at anything except normal speed */
 		return;
 	}
