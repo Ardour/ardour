@@ -95,6 +95,7 @@ def build(bld):
     obj.uselib_local   = 'libsmf libpbd'
     obj.vnum           = EVORAL_LIB_VERSION
     obj.install_path   = os.path.join(bld.env['LIBDIR'], 'ardour3')
+    obj.defines = ['PACKAGE="libevoral"' ]
 
     if bld.env['BUILD_TESTS'] and bld.env['HAVE_CPPUNIT']:
         # Static library (for unit test code coverage)
