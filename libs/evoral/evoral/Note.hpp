@@ -19,6 +19,7 @@
 #ifndef EVORAL_NOTE_HPP
 #define EVORAL_NOTE_HPP
 
+#include <algorithm>
 #include <glib.h>
 #include <stdint.h>
 #include "evoral/MIDIEvent.hpp"
@@ -61,12 +62,16 @@ public:
 	    return _on_event.channel();
 	}
 
+  private:
+        inline int clamp (int val, int low, int high) { return std::min (std::max (val, low), high); }
+
+  public:
 	inline void set_time(Time t)        { _off_event.time() = t + length(); _on_event.time() = t; }
-	inline void set_note(uint8_t n)     { _on_event.buffer()[1] = n; _off_event.buffer()[1] = n; }
-	inline void set_velocity(uint8_t n) { _on_event.buffer()[2] = n; }
-	inline void set_off_velocity(uint8_t n) { _off_event.buffer()[2] = n; }
+        inline void set_note(uint8_t n)     { uint8_t nn = clamp (n, 0, 127);  _on_event.buffer()[1] = nn; _off_event.buffer()[1] = nn; }
+        inline void set_velocity(uint8_t n) { _on_event.buffer()[2] = clamp (n, 0, 127); }
+        inline void set_off_velocity(uint8_t n) { _off_event.buffer()[2] = clamp (n, 0, 127); }
 	inline void set_length(Time l)      { _off_event.time() = _on_event.time() + l; }
-	inline void set_channel(uint8_t c)  { _on_event.set_channel(c);  _off_event.set_channel(c); }
+        inline void set_channel(uint8_t c)  { uint8_t cc = clamp (c, 0, 16); _on_event.set_channel(cc);  _off_event.set_channel(cc); }
 
 	inline       Event<Time>& on_event()        { return _on_event; }
 	inline const Event<Time>& on_event()  const { return _on_event; }
