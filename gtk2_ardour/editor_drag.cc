@@ -3916,9 +3916,17 @@ NoteDrag::motion (GdkEvent *, bool)
 
 		_region->move_selection (tdx, tdy, note_delta);
 
+		/* the new note value may be the same as the old one, but we
+		 * don't know what that means because the selection may have
+		 * involved more than one note and we might be doing something
+		 * odd with them. so show the note value anyway, always.
+		 */
+
 		char buf[12];
-		snprintf (buf, sizeof (buf), "%s (%d)", Evoral::midi_note_name (_primary->note()->note() + note_delta).c_str(),
-		          (int) floor (_primary->note()->note() + note_delta));
+		uint8_t new_note = min (max (_primary->note()->note() + note_delta, 0), 127);
+		
+		snprintf (buf, sizeof (buf), "%s (%d)", Evoral::midi_note_name (new_note).c_str(),
+		          (int) floor (new_note));
 
 		show_verbose_cursor_text (buf);
 	}
