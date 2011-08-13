@@ -112,6 +112,7 @@ def build(bld):
         obj.install_path   = ''
         obj.ccflags        = [ '-fprofile-arcs',  '-ftest-coverage' ]
         obj.cxxflags       = [ '-fprofile-arcs',  '-ftest-coverage' ]
+        obj.defines        = ['PACKAGE="libevoral"' ]
 
         # Unit tests
         obj              = bld.new_task_gen('cxx', 'program')
