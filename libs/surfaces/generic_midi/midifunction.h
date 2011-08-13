@@ -52,13 +52,14 @@ class MIDIFunction : public MIDIInvokable
 		TransportEnd,
 		TransportLoopToggle,
 		TransportRecordEnable,
-		TransportRecordDisable
+		TransportRecordDisable,
+		Select,
 	};
 
 	MIDIFunction (MIDI::Port&);
 	virtual ~MIDIFunction ();
 
-	int init (GenericMidiControlProtocol&, const std::string& function_name, MIDI::byte* sysex = 0, size_t ssize = 0);
+	int setup (GenericMidiControlProtocol&, const std::string& function_name, const std::string& argument, MIDI::byte* sysex = 0, size_t ssize = 0);
 
 	const std::string& function_name() const { return _invokable_name; }
 
@@ -67,6 +68,7 @@ class MIDIFunction : public MIDIInvokable
 
   private:
 	Function        _function;
+	std::string     _argument;
 	void execute ();
 };
 

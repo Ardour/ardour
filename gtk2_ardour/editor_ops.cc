@@ -3273,6 +3273,14 @@ Editor::freeze_thread ()
 void
 Editor::freeze_route ()
 {
+	if (!_session) {
+		return;
+	}
+
+	/* stop transport before we start. this is important */
+
+	_session->request_transport_speed (0.0);
+
 	if (clicked_routeview == 0 || !clicked_routeview->is_audio_track()) {
 		return;
 	}

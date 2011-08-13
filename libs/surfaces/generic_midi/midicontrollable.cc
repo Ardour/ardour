@@ -351,7 +351,7 @@ MIDIControllable::send_feedback ()
 {
 	byte msg[3];
 
-	if (!_learned || setting || !feedback || control_type == none) {
+	if (!_learned || setting || !feedback || control_type == none || !controllable) {
 		return;
 	}
 
@@ -370,7 +370,7 @@ MIDIControllable::send_feedback ()
 MIDI::byte*
 MIDIControllable::write_feedback (MIDI::byte* buf, int32_t& bufsize, bool /*force*/)
 {
-	if (control_type != none && feedback && bufsize > 2) {
+	if (controllable && control_type != none && feedback && bufsize > 2) {
 
 		MIDI::byte gm;
 

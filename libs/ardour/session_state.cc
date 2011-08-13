@@ -3453,11 +3453,11 @@ Session::config_changed (std::string p, bool ours)
 
 		//poke_midi_thread ();
 
-	} else if (p == "mmc-device-id" || p == "mmc-receive-id") {
+	} else if (p == "mmc-device-id" || p == "mmc-receive-id" || p == "mmc-receive-device-id") {
 
 		MIDI::Manager::instance()->mmc()->set_receive_device_id (Config->get_mmc_receive_device_id());
 
-	} else if (p == "mmc-send-id") {
+	} else if (p == "mmc-send-id" || p == "mmc-send-device-id") {
 
 		MIDI::Manager::instance()->mmc()->set_send_device_id (Config->get_mmc_send_device_id());
 

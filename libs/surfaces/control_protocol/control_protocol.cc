@@ -36,6 +36,7 @@ Signal0<void>       ControlProtocol::ZoomOut;
 Signal0<void>       ControlProtocol::ZoomIn;
 Signal0<void>       ControlProtocol::Enter;
 Signal1<void,float> ControlProtocol::ScrollTimeline;
+Signal1<void,uint32_t> ControlProtocol::SelectByRID;
 
 ControlProtocol::ControlProtocol (Session& s, string str, EventLoop* evloop)
 	: BasicUI (s),

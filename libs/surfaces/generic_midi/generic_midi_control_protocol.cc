@@ -772,6 +772,7 @@ GenericMidiControlProtocol::create_function (const XMLNode& node)
 	MIDI::eventType ev;
 	MIDI::byte* data = 0;
 	uint32_t data_size = 0;
+	string argument;
 
 	if ((prop = node.property (X_("ctl"))) != 0) {
 		ev = MIDI::controller;
@@ -843,11 +844,15 @@ GenericMidiControlProtocol::create_function (const XMLNode& node)
 		}
 	}
 
+	if ((prop = node.property (X_("arg"))) != 0) {
+		argument = prop->value ();
+	}
+
 	prop = node.property (X_("function"));
 	
 	MIDIFunction* mf = new MIDIFunction (*_input_port);
 	
-	if (mf->init (*this, prop->value(), data, data_size)) {
+	if (mf->setup (*this, prop->value(), argument, data, data_size)) {
 		delete mf;
 		return 0;
 	}
