@@ -31,6 +31,7 @@ class PortGroup;
 class PortGroupList;
 
 namespace ARDOUR {
+	class Bundle;
 	class BundleChannel;
 }
 

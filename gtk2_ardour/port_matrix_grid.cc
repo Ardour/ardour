@@ -81,7 +81,7 @@ PortMatrixGrid::render (cairo_t* cr)
 
 		if (!_matrix->show_only_bundles()) {
 			cairo_set_line_width (cr, thin_grid_line_width());
-			for (uint32_t j = 0; j < _matrix->count_of_our_type ((*i)->bundle->nchannels()); ++j) {
+			for (uint32_t j = 0; j < _matrix->count_of_our_type_min_1 ((*i)->bundle->nchannels()); ++j) {
 				x += grid_spacing ();
 				cairo_move_to (cr, x, 0);
 				cairo_line_to (cr, x, _height);
@@ -95,6 +95,12 @@ PortMatrixGrid::render (cairo_t* cr)
 		}
 
 		++N;
+	}
+
+	if (_matrix->show_only_bundles ()) {
+		cairo_move_to (cr, x, 0);
+		cairo_line_to (cr, x, _height);
+		cairo_stroke (cr);
 	}
 
 	uint32_t y = 0;
@@ -111,7 +117,7 @@ PortMatrixGrid::render (cairo_t* cr)
 
 		if (!_matrix->show_only_bundles()) {
 			cairo_set_line_width (cr, thin_grid_line_width());
-			for (uint32_t j = 0; j < _matrix->count_of_our_type ((*i)->bundle->nchannels()); ++j) {
+			for (uint32_t j = 0; j < _matrix->count_of_our_type_min_1 ((*i)->bundle->nchannels()); ++j) {
 				y += grid_spacing ();
 				cairo_move_to (cr, 0, y);
 				cairo_line_to (cr, _width, y);
@@ -127,6 +133,12 @@ PortMatrixGrid::render (cairo_t* cr)
 		++N;
 	}
 
+	if (_matrix->show_only_bundles ()) {
+		cairo_move_to (cr, 0, y);
+		cairo_line_to (cr, _width, y);
+		cairo_stroke (cr);
+	}
+	
 	/* ASSOCIATION INDICATORS and NON-CONNECTABLE INDICATORS */
 
 	/* we draw a grey square in a matrix box if the two ports that intersect at that box
@@ -173,14 +185,10 @@ PortMatrixGrid::render (cairo_t* cr)
 			for (PortGroup::BundleList::const_iterator j = row_bundles.begin(); j != row_bundles.end(); ++j) {
 
 				x = bx;
-				for (uint32_t k = 0; k < (*i)->bundle->nchannels().n_total(); ++k) {
+				for (uint32_t k = 0; k < _matrix->count_of_our_type ((*i)->bundle->nchannels()); ++k) {
 
 					y = by;
-					for (uint32_t l = 0; l < (*j)->bundle->nchannels().n_total(); ++l) {
-
-						if (!_matrix->should_show ((*i)->bundle->channel_type(k)) || !_matrix->should_show ((*j)->bundle->channel_type(l))) {
-							continue;
-						}
+					for (uint32_t l = 0; l < _matrix->count_of_our_type ((*j)->bundle->nchannels()); ++l) {
 
 						ARDOUR::BundleChannel c[2];
 						c[_matrix->column_index()] = ARDOUR::BundleChannel ((*i)->bundle, k);
@@ -209,13 +217,21 @@ PortMatrixGrid::render (cairo_t* cr)
 						y += grid_spacing();
 					}
 
+					if ((*j)->bundle->nchannels() == ARDOUR::ChanCount::ZERO) {
+						draw_non_connectable_indicator (cr, x, y);
+					}
+					
 					x += grid_spacing();
 				}
 
-				by += _matrix->count_of_our_type ((*j)->bundle->nchannels()) * grid_spacing();
+				if ((*i)->bundle->nchannels() == ARDOUR::ChanCount::ZERO) {
+					draw_non_connectable_indicator (cr, x, y);
+				}
+
+				by += _matrix->count_of_our_type_min_1 ((*j)->bundle->nchannels()) * grid_spacing();
 			}
 
-			bx += _matrix->count_of_our_type ((*i)->bundle->nchannels()) * grid_spacing();
+			bx += _matrix->count_of_our_type_min_1 ((*i)->bundle->nchannels()) * grid_spacing();
 		}
 	}
 }
@@ -402,7 +418,7 @@ PortMatrixGrid::draw_extra (cairo_t* cr)
 		double const x = component_to_parent_x (channel_to_position (i->column, _matrix->visible_columns()) * grid_spacing()) + grid_spacing() / 2;
 		double const y = component_to_parent_y (channel_to_position (i->row, _matrix->visible_rows()) * grid_spacing()) + grid_spacing() / 2;
 
-		if (i->row.bundle && i->column.bundle) {
+		if (PortMatrix::bundle_with_channels (i->row.bundle) && PortMatrix::bundle_with_channels (i->column.bundle)) {
 
 			cairo_move_to (cr, x, y);
 			if (_matrix->arrangement() == PortMatrix::LEFT_TO_BOTTOM) {

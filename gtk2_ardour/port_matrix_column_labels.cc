@@ -149,7 +149,7 @@ PortMatrixColumnLabels::render (cairo_t* cr)
 		if (_matrix->show_only_bundles()) {
 			x += grid_spacing();
 		} else {
-			x += _matrix->count_of_our_type ((*i)->bundle->nchannels()) * grid_spacing();
+			x += _matrix->count_of_our_type_min_1 ((*i)->bundle->nchannels()) * grid_spacing();
 		}
 
 		++N;
@@ -214,7 +214,7 @@ PortMatrixColumnLabels::mouseover_changed (list<PortMatrixNode> const &)
 		ARDOUR::BundleChannel c = i->column;
 		ARDOUR::BundleChannel r = i->row;
 
-		if (c.bundle && r.bundle) {
+		if (PortMatrix::bundle_with_channels (c.bundle) && PortMatrix::bundle_with_channels (r.bundle)) {
 			add_channel_highlight (c);
 		} else if (c.bundle) {
 			_body->highlight_associated_channels (_matrix->column_index(), c);
@@ -273,7 +273,7 @@ PortMatrixColumnLabels::render_bundle_name (
 	if (_matrix->show_only_bundles()) {
 		w = grid_spacing ();
 	} else {
-		w = _matrix->count_of_our_type (b->nchannels()) * grid_spacing();
+		w = _matrix->count_of_our_type_min_1 (b->nchannels()) * grid_spacing();
 	}
 
 	double x_ = xoff;

@@ -90,6 +90,10 @@ GlobalPortMatrix::get_state (BundleChannel c[2]) const
 		return PortMatrixNode::NOT_ASSOCIATED;
 	}
 
+	if (c[0].bundle->nchannels() == ChanCount::ZERO || c[1].bundle->nchannels() == ChanCount::ZERO) {
+		return PortMatrixNode::NOT_ASSOCIATED;
+	}
+
 	Bundle::PortList const & in_ports = c[IN].bundle->channel_ports (c[IN].channel);
 	Bundle::PortList const & out_ports = c[OUT].bundle->channel_ports (c[OUT].channel);
 	if (in_ports.empty() || out_ports.empty()) {

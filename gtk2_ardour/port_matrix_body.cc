@@ -458,7 +458,7 @@ PortMatrixBody::highlight_associated_channels (int dim, ARDOUR::BundleChannel h)
 	ARDOUR::BundleChannel bc[2];
 	bc[dim] = h;
 
-	if (!bc[dim].bundle) {
+	if (!PortMatrix::bundle_with_channels (bc[dim].bundle)) {
 		return;
 	}
 

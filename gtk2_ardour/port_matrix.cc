@@ -289,8 +289,8 @@ void
 PortMatrix::select_arrangement ()
 {
 	uint32_t const N[2] = {
-		count_of_our_type (_ports[0].total_channels()),
-		count_of_our_type (_ports[1].total_channels())
+		count_of_our_type_min_1 (_ports[0].total_channels()),
+		count_of_our_type_min_1 (_ports[1].total_channels())
 	};
 
 	/* XXX: shirley there's an easier way than this */
@@ -407,14 +407,11 @@ PortMatrix::popup_menu (BundleChannel column, BundleChannel row, uint32_t t)
 
 			boost::weak_ptr<Bundle> w (bc[dim].bundle);
 
-			bool can_add_or_rename = false;
-
 			/* Start off with options for the `natural' port type */
 			for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
 				if (should_show (*i)) {
 					snprintf (buf, sizeof (buf), _("Add %s %s"), (*i).to_i18n_string(), channel_noun().c_str());
 					sub.push_back (MenuElem (buf, sigc::bind (sigc::mem_fun (*this, &PortMatrix::add_channel_proxy), w, *i)));
-					can_add_or_rename = true;
 				}
 			}
 
@@ -423,7 +420,6 @@ PortMatrix::popup_menu (BundleChannel column, BundleChannel row, uint32_t t)
 				if (!should_show (*i)) {
 					snprintf (buf, sizeof (buf), _("Add %s %s"), (*i).to_i18n_string(), channel_noun().c_str());
 					sub.push_back (MenuElem (buf, sigc::bind (sigc::mem_fun (*this, &PortMatrix::add_channel_proxy), w, *i)));
-					can_add_or_rename = true;
 				}
 			}
 
@@ -438,17 +434,12 @@ PortMatrix::popup_menu (BundleChannel column, BundleChannel row, uint32_t t)
 						sigc::bind (sigc::mem_fun (*this, &PortMatrix::rename_channel_proxy), w, bc[dim].channel)
 						)
 					);
-				can_add_or_rename = true;
-			}
-
-			if (can_add_or_rename) {
-				sub.push_back (SeparatorElem ());
 			}
 
 			if (can_remove_channels (bc[dim].bundle)) {
 				if (bc[dim].channel != -1) {
 					add_remove_option (sub, w, bc[dim].channel);
-				} else {
+				} else if (bc[dim].bundle->nchannels() != ARDOUR::ChanCount::ZERO) {
 
 					snprintf (buf, sizeof (buf), _("Remove all"));
 					sub.push_back (
@@ -465,7 +456,8 @@ PortMatrix::popup_menu (BundleChannel column, BundleChannel row, uint32_t t)
 				}
 			}
 
-			if (_show_only_bundles || count_of_our_type (bc[dim].bundle->nchannels()) <= 1) {
+			uint32_t c = count_of_our_type (bc[dim].bundle->nchannels ());
+			if ((_show_only_bundles && c > 0) || c == 1) {
 				snprintf (buf, sizeof (buf), _("%s all"), disassociation_verb().c_str());
 				sub.push_back (
 					MenuElem (buf, sigc::bind (sigc::mem_fun (*this, &PortMatrix::disassociate_all_on_channel), w, bc[dim].channel, dim))
@@ -475,7 +467,7 @@ PortMatrix::popup_menu (BundleChannel column, BundleChannel row, uint32_t t)
 
 				if (bc[dim].channel != -1) {
 					add_disassociate_option (sub, w, dim, bc[dim].channel);
-				} else {
+				} else if (count_of_our_type (bc[dim].bundle->nchannels()) != 0) {
 					snprintf (buf, sizeof (buf), _("%s all"), disassociation_verb().c_str());
 					sub.push_back (
 						MenuElem (buf, sigc::bind (sigc::mem_fun (*this, &PortMatrix::disassociate_all_on_bundle), w, dim))
@@ -722,7 +714,10 @@ PortMatrix::remove_all_channels (boost::weak_ptr<Bundle> w)
 		return;
 	}
 
-	for (uint32_t i = 0; i < b->nchannels().n_total(); ++i) {
+	/* Remove channels backwards so that we don't renumber channels
+	   that we are about to remove.
+	*/
+	for (int i = (b->nchannels().n_total() - 1); i >= 0; --i) {
 		if (should_show (b->channel_type(i))) {
 			remove_channel (ARDOUR::BundleChannel (b, i));
 		}
@@ -856,7 +851,9 @@ PortMatrix::body_dimensions_changed ()
 	resize_window_to_proportion_of_monitor (_parent, m.first, m.second);
 }
 
-
+/** @return The PortGroup that is currently visible (ie selected by
+ *  the notebook) along a given axis.
+ */
 boost::shared_ptr<const PortGroup>
 PortMatrix::visible_ports (int d) const
 {
@@ -942,6 +939,20 @@ PortMatrix::count_of_our_type (ChanCount c) const
 	return c.get (_type);
 }
 
+/** @return The number of ports of our type in the given channel count,
+ *  but returning 1 if there are no ports.
+ */
+uint32_t
+PortMatrix::count_of_our_type_min_1 (ChanCount c) const
+{
+	uint32_t n = count_of_our_type (c);
+	if (n == 0) {
+		n = 1;
+	}
+
+	return n;
+}
+
 PortMatrixNode::State
 PortMatrix::get_association (PortMatrixNode node) const
 {
@@ -1007,3 +1018,9 @@ PortMatrix::get_association (PortMatrixNode node) const
 	return PortMatrixNode::NOT_ASSOCIATED;
 }
 
+/** @return true if b is a non-zero pointer and the bundle it points to has some channels */
+bool
+PortMatrix::bundle_with_channels (boost::shared_ptr<ARDOUR::Bundle> b)
+{
+	return b && b->nchannels() != ARDOUR::ChanCount::ZERO;
+}

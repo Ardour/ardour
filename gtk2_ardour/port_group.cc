@@ -389,12 +389,10 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 
 		for (list<boost::shared_ptr<IO> >::iterator j = i->ios.begin(); j != i->ios.end(); ++j) {
 			boost::shared_ptr<Bundle> b = bundle_for_type ((*j)->bundle(), type);
-			if (b->nchannels() != ChanCount::ZERO) {
-				if (tv) {
-					g->add_bundle (b, *j, tv->color ());
-				} else {
-					g->add_bundle (b, *j);
-				}
+			if (tv) {
+				g->add_bundle (b, *j, tv->color ());
+			} else {
+				g->add_bundle (b, *j);
 			}
 		}
 	}
@@ -408,18 +406,14 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 	for (BundleList::iterator i = b->begin(); i != b->end(); ++i) {
 		if (boost::dynamic_pointer_cast<UserBundle> (*i) && (*i)->ports_are_inputs() == inputs) {
 			boost::shared_ptr<Bundle> b = bundle_for_type (*i, type);
-			if (b->nchannels() != ChanCount::ZERO) {
-				system->add_bundle (b, allow_dups);
-			}
+			system->add_bundle (b, allow_dups);
 		}
 	}
 
 	for (BundleList::iterator i = b->begin(); i != b->end(); ++i) {
 		if (boost::dynamic_pointer_cast<UserBundle> (*i) == 0 && (*i)->ports_are_inputs() == inputs) {
 			boost::shared_ptr<Bundle> b = bundle_for_type (*i, type);
-			if (b->nchannels() != ChanCount::ZERO) {
-				system->add_bundle (b, allow_dups);
-			}
+			system->add_bundle (b, allow_dups);
 		}
 	}
 
@@ -427,14 +421,10 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 
 	if (!inputs) {
 		boost::shared_ptr<Bundle> b = bundle_for_type (session->the_auditioner()->output()->bundle(), type);
-		if (b->nchannels() != ChanCount::ZERO) {
-			ardour->add_bundle (b);
-		}
+		ardour->add_bundle (b);
 
 		b = bundle_for_type (session->click_io()->bundle(), type);
-		if (b->nchannels() != ChanCount::ZERO) {
-			ardour->add_bundle (b);
-		}
+		ardour->add_bundle (b);
 	}
 
 	/* Ardour's surfaces */
@@ -570,9 +560,7 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 		if (!extra_system[*i].empty()) {
 			boost::shared_ptr<Bundle> b = make_bundle_from_ports (extra_system[*i], *i, inputs);
 			boost::shared_ptr<Bundle> bt = bundle_for_type (b, type);
-			if (bt->nchannels() != ChanCount::ZERO) {
-				system->add_bundle (bt);
-			}
+			system->add_bundle (bt);
 		}
 	}
 
@@ -580,9 +568,7 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 		if (!extra_other[*i].empty()) {
 			boost::shared_ptr<Bundle> b = make_bundle_from_ports (extra_other[*i], *i, inputs);
 			boost::shared_ptr<Bundle> bt = bundle_for_type (b, type);
-			if (bt->nchannels() != ChanCount::ZERO) {
-				other->add_bundle (bt);
-			}
+			other->add_bundle (bt);
 		}
 	}
 
@@ -789,12 +775,7 @@ PortGroupList::io_from_bundle (boost::shared_ptr<ARDOUR::Bundle> b) const
 bool
 PortGroupList::empty () const
 {
-	List::const_iterator i = _groups.begin ();
-	while (i != _groups.end() && (*i)->total_channels() == ChanCount::ZERO) {
-		++i;
-	}
-
-	return (i == _groups.end());
+	return _groups.empty ();
 }
 
 /** Take a bundle, and either return it, if it contains only ports of type \a t,

@@ -126,6 +126,7 @@ public:
 
 	bool should_show (ARDOUR::DataType) const;
 	uint32_t count_of_our_type (ARDOUR::ChanCount) const;
+	uint32_t count_of_our_type_min_1 (ARDOUR::ChanCount) const;
 
 	PortMatrixNode::State get_association (PortMatrixNode) const;
 
@@ -158,6 +159,8 @@ public:
 	};
 
 	sigc::signal<void, Result> Finished;
+
+	static bool bundle_with_channels (boost::shared_ptr<ARDOUR::Bundle>);
 
 protected:
 

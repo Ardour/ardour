@@ -115,17 +115,18 @@ PortMatrixRowLabels::render (cairo_t* cr)
 		render_bundle_name (cr, background_colour (), (*i)->has_colour ? (*i)->colour : get_a_bundle_colour (N), 0, y, (*i)->bundle);
 
 		if (!_matrix->show_only_bundles()) {
-			for (uint32_t j = 0; j < (*i)->bundle->nchannels().n_total(); ++j) {
-
-				if (!_matrix->should_show ((*i)->bundle->channel_type(j))) {
-					continue;
-				}
-
+			uint32_t const N = _matrix->count_of_our_type ((*i)->bundle->nchannels());
+			for (uint32_t j = 0; j < N; ++j) {
 				Gdk::Color c = (*i)->has_colour ? (*i)->colour : get_a_bundle_colour (M);
 				render_channel_name (cr, background_colour (), c, 0, y, ARDOUR::BundleChannel ((*i)->bundle, j));
 				y += grid_spacing();
 				++M;
 			}
+
+			if (N == 0) {
+				y += grid_spacing ();
+			}
+			
 		} else {
 			y += grid_spacing();
 		}
@@ -215,7 +216,7 @@ PortMatrixRowLabels::render_bundle_name (
 {
 	double const x = bundle_name_x ();
 
-	int const n = _matrix->show_only_bundles() ? 1 : _matrix->count_of_our_type (b->nchannels());
+	int const n = _matrix->show_only_bundles() ? 1 : _matrix->count_of_our_type_min_1 (b->nchannels());
 	set_source_rgb (cr, bg_colour);
 	cairo_rectangle (cr, xoff + x, yoff, _longest_bundle_name + name_pad() * 2, grid_spacing() * n);
 	cairo_fill_preserve (cr);
@@ -244,14 +245,14 @@ PortMatrixRowLabels::render_channel_name (
 	cairo_set_line_width (cr, label_border_width ());
 	cairo_stroke (cr);
 
-	cairo_text_extents_t ext;
-	cairo_text_extents (cr, bc.bundle->channel_name(bc.channel).c_str(), &ext);
-	double const off = (grid_spacing() - ext.height) / 2;
-
 	if (_matrix->count_of_our_type (bc.bundle->nchannels()) > 1) {
 
 		/* only plot the name if the bundle has more than one channel;
 		   the name of a single channel is assumed to be redundant */
+
+		cairo_text_extents_t ext;
+		cairo_text_extents (cr, bc.bundle->channel_name(bc.channel).c_str(), &ext);
+		double const off = (grid_spacing() - ext.height) / 2;
 
 		set_source_rgb (cr, text_colour());
 		cairo_move_to (cr, port_name_x() + xoff + name_pad(), yoff + name_pad() + off);
@@ -304,7 +305,7 @@ PortMatrixRowLabels::mouseover_changed (list<PortMatrixNode> const &)
 		ARDOUR::BundleChannel c = i->column;
 		ARDOUR::BundleChannel r = i->row;
 
-		if (c.bundle && r.bundle) {
+		if (PortMatrix::bundle_with_channels (c.bundle) && PortMatrix::bundle_with_channels (r.bundle)) {
 			add_channel_highlight (r);
 		} else if (r.bundle) {
 			_body->highlight_associated_channels (_matrix->row_index(), r);
