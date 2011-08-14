@@ -1882,7 +1882,7 @@ Session::new_audio_route (int input_channels, int output_channels, RouteGroup* r
 
   failure:
 	if (!ret.empty()) {
-		add_routes (ret, true, true);
+		add_routes (ret, false, true);
 	}
 
 	return ret;
