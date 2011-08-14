@@ -1081,6 +1081,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void toggle_region_lock ();
 	void toggle_opaque_region ();
 	void toggle_record_enable ();
+	void toggle_solo ();
+	void toggle_solo_isolate ();
+	void toggle_mute ();
 	void toggle_region_lock_style ();
 	void raise_region ();
 	void raise_region_to_top ();

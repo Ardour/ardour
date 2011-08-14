@@ -4755,6 +4755,60 @@ Editor::toggle_record_enable ()
 	}
 }
 
+void
+Editor::toggle_solo ()
+{
+	bool new_state = false;
+	bool first = true;
+	boost::shared_ptr<RouteList> rl (new RouteList);
+
+	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
+		RouteTimeAxisView *rtav = dynamic_cast<RouteTimeAxisView *>(*i);
+
+		if (!rtav) {
+			continue;
+		}
+
+		if (first) {
+			new_state = !rtav->route()->soloed ();
+			first = false;
+		}
+
+		rl->push_back (rtav->route());
+	}
+
+	_session->set_solo (rl, new_state, Session::rt_cleanup, true);
+}
+
+void
+Editor::toggle_mute ()
+{
+	bool new_state = false;
+	bool first = true;
+	boost::shared_ptr<RouteList> rl (new RouteList);
+
+	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
+		RouteTimeAxisView *rtav = dynamic_cast<RouteTimeAxisView *>(*i);
+
+		if (!rtav) {
+			continue;
+		}
+
+		if (first) {
+			new_state = !rtav->route()->soloed ();
+			first = false;
+		}
+
+		rl->push_back (rtav->route());
+	}
+
+	_session->set_mute (rl, new_state, Session::rt_cleanup, true);
+}
+
+void
+Editor::toggle_solo_isolate ()
+{
+}
 
 void
 Editor::set_fade_length (bool in)
