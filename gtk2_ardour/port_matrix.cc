@@ -436,10 +436,10 @@ PortMatrix::popup_menu (BundleChannel column, BundleChannel row, uint32_t t)
 					);
 			}
 
-			if (can_remove_channels (bc[dim].bundle)) {
+			if (can_remove_channels (bc[dim].bundle) && bc[dim].bundle->nchannels() != ARDOUR::ChanCount::ZERO) {
 				if (bc[dim].channel != -1) {
 					add_remove_option (sub, w, bc[dim].channel);
-				} else if (bc[dim].bundle->nchannels() != ARDOUR::ChanCount::ZERO) {
+				} else {
 
 					snprintf (buf, sizeof (buf), _("Remove all"));
 					sub.push_back (
