@@ -122,6 +122,7 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	void set_note_range(MidiStreamView::VisibleNoteRange range);
 
 	void route_active_changed ();
+	void note_range_changed ();
 
 	bool                         _ignore_signals;
 	MidiScroomer*                _range_scroomer;

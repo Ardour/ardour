@@ -127,6 +127,10 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	subplugin_menu.set_name ("ArdourContextMenu");
 
 	_view = new MidiStreamView (*this);
+	if (!gui_property ("note-range-min").empty ()) {
+		midi_view()->apply_note_range (atoi (gui_property ("note-range-min").c_str()), atoi (gui_property ("note-range-max").c_str()), true);
+	}
+	midi_view()->NoteRangeChanged.connect (sigc::mem_fun (*this, &MidiTimeAxisView::note_range_changed));
 
 	ignore_toggle = false;
 
@@ -1162,4 +1166,11 @@ MidiTimeAxisView::get_channel_for_add () const
 	}
 
 	return channel;
+}
+
+void
+MidiTimeAxisView::note_range_changed ()
+{
+	set_gui_property ("note-range-min", (int) midi_view()->lowest_note ());
+	set_gui_property ("note-range-max", (int) midi_view()->highest_note ());
 }

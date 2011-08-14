@@ -275,12 +275,6 @@ MidiStreamView::redisplay_track ()
 		_data_note_max = 71;
 	}
 
-	// Extend visible range to show newly recorded data, if necessary
-	_lowest_note  = std::min(_lowest_note, _data_note_min);
-	_highest_note = std::max(_highest_note, _data_note_max);
-
-	veto_note_range(_lowest_note, _highest_note);
-
 	// Flag region views as invalid and disable drawing
 	for (i = region_views.begin(); i != region_views.end(); ++i) {
 		(*i)->set_valid(false);
