@@ -1456,9 +1456,9 @@ ARDOUR_UI::session_add_audio_route (
 
 			if (routes.size() != how_many) {
 				if (how_many == 1) {
-					error << _("could not create a new audio track") << endmsg;
+					error << _("could not create a new audio bus") << endmsg;
 				} else {
-					error << string_compose (_("could not create %1 new audio tracks"), how_many) << endmsg;
+					error << string_compose (_("could not create %1 new audio busses"), how_many) << endmsg;
 				}
 			}
 		}
