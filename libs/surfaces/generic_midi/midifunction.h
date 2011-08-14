@@ -53,7 +53,14 @@ class MIDIFunction : public MIDIInvokable
 		TransportLoopToggle,
 		TransportRecordEnable,
 		TransportRecordDisable,
+		/* 1 argument functions: RID */
 		Select,
+		/* 2 argument functions: RID, value */
+		TrackSetSolo, 
+		TrackSetMute,
+		TrackSetGain,
+		TrackSetRecordEnable,
+		TrackSetSoloIsolate,
 	};
 
 	MIDIFunction (MIDI::Port&);

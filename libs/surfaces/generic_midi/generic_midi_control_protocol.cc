@@ -844,7 +844,7 @@ GenericMidiControlProtocol::create_function (const XMLNode& node)
 		}
 	}
 
-	if ((prop = node.property (X_("arg"))) != 0) {
+	if ((prop = node.property (X_("arg"))) != 0 || (prop = node.property (X_("argument"))) != 0 || (prop = node.property (X_("arguments"))) != 0) {
 		argument = prop->value ();
 	}
 

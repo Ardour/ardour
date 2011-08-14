@@ -66,6 +66,16 @@ MIDIFunction::setup (GenericMidiControlProtocol& ui, const std::string& invokabl
 			return -1;
 		}
 		_function = Select;
+	} else if (strcasecmp (_invokable_name.c_str(), "track-set-solo") == 0) {
+		if (_argument.empty()) {
+			return -1;
+		}
+		_function = TrackSetSolo;
+	} else if (strcasecmp (_invokable_name.c_str(), "track-set-mute") == 0) {
+		if (_argument.empty()) {
+			return -1;
+		}
+		_function = TrackSetMute;
 	} else {
 		return -1;
 	}
@@ -123,6 +133,8 @@ MIDIFunction::execute ()
 			sscanf (_argument.c_str(), "%d", &rid);
 			_ui->SelectByRID (rid);
 		}
+	default:
+		break;
 	}
 }
 

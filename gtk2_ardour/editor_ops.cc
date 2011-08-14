@@ -4795,7 +4795,7 @@ Editor::toggle_mute ()
 		}
 
 		if (first) {
-			new_state = !rtav->route()->soloed ();
+			new_state = !rtav->route()->muted();
 			first = false;
 		}
 

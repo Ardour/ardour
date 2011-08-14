@@ -704,6 +704,7 @@ Editor::Editor ()
 	ControlProtocol::ZoomIn.connect (*this, invalidator (*this), boost::bind (&Editor::temporal_zoom_step, this, false), gui_context());
 	ControlProtocol::ZoomOut.connect (*this, invalidator (*this), boost::bind (&Editor::temporal_zoom_step, this, true), gui_context());
 	ControlProtocol::ScrollTimeline.connect (*this, invalidator (*this), ui_bind (&Editor::control_scroll, this, _1), gui_context());
+	ControlProtocol::SelectByRID.connect (*this, invalidator (*this), ui_bind (&Editor::control_select, this, _1), gui_context());
 	BasicUI::AccessAction.connect (*this, invalidator (*this), ui_bind (&Editor::access_action, this, _1, _2), gui_context());
 
 	/* problematic: has to return a value and thus cannot be x-thread */
@@ -909,6 +910,32 @@ Editor::zoom_adjustment_changed ()
 	}
 
 	temporal_zoom (fpu);
+}
+
+void
+Editor::control_select (uint32_t rid) 
+{
+	/* handles the (static) signal from the ControlProtocol class that
+	 * requests setting the selected track to a given RID
+	 */
+	 
+	if (!_session) {
+		return;
+	}
+
+	boost::shared_ptr<Route> r = _session->route_by_remote_id (rid);
+
+	if (!r) {
+		return;
+	}
+
+	TimeAxisView* tav = axis_view_from_route (r);
+
+	if (tav) {
+		selection->set (tav);
+	} else {
+		selection->clear_tracks ();
+	}
 }
 
 void
