@@ -217,15 +217,25 @@ PortMatrixGrid::render (cairo_t* cr)
 						y += grid_spacing();
 					}
 
-					if ((*j)->bundle->nchannels() == ARDOUR::ChanCount::ZERO) {
+					if (_matrix->count_of_our_type ((*j)->bundle->nchannels()) == 0) {
+						/* the *j bundle has no channels of our type, so it will have a dummy
+						   one which needs to be marked non-connectable.
+						*/
 						draw_non_connectable_indicator (cr, x, y);
 					}
 					
 					x += grid_spacing();
 				}
 
-				if ((*i)->bundle->nchannels() == ARDOUR::ChanCount::ZERO) {
-					draw_non_connectable_indicator (cr, x, y);
+				if (_matrix->count_of_our_type ((*i)->bundle->nchannels()) == 0) {
+					/* draw non-connectable indicators for the case where the *i bundle
+					   has no channels of our type (and hence has 1 dummy channel)
+					*/
+					y = by;
+					for (uint32_t l = 0; l < _matrix->count_of_our_type_min_1 ((*j)->bundle->nchannels()); ++l) {
+						draw_non_connectable_indicator (cr, x, y);
+						y += grid_spacing ();
+					}
 				}
 
 				by += _matrix->count_of_our_type_min_1 ((*j)->bundle->nchannels()) * grid_spacing();
