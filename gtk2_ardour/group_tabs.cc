@@ -244,8 +244,8 @@ GroupTabs::render (cairo_t* cr)
 
 /** Convert a click position to a tab.
  *  @param c Click position.
- *  @param prev Filled in with the previous tab to the click, or 0.
- *  @param next Filled in with the next tab after the click, or 0.
+ *  @param prev Filled in with the previous tab to the click, or _tabs.end().
+ *  @param next Filled in with the next tab after the click, or _tabs.end().
  *  @return Tab under the click, or 0.
  */
 
@@ -259,6 +259,7 @@ GroupTabs::click_to_tab (double c, list<Tab>::iterator* prev, list<Tab>::iterato
 	while (i != _tabs.end()) {
 
 		if (i->from > c) {
+			*next = i;
 			break;
 		}
 
@@ -273,14 +274,6 @@ GroupTabs::click_to_tab (double c, list<Tab>::iterator* prev, list<Tab>::iterato
 		}
 
 		++i;
-	}
-
-	if (i != _tabs.end()) {
-		*next = i;
-
-		if (under) {
-			(*next)++;
-		}
 	}
 
 	return under;
