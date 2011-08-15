@@ -212,6 +212,14 @@ Editor::typed_event (ArdourCanvas::Item* item, GdkEvent *event, ItemType type)
 		ret = leave_handler (item, event, type);
 		break;
 
+	case GDK_KEY_PRESS:
+		ret = key_press_handler (item, event, type);
+		break;
+
+	case GDK_KEY_RELEASE:
+		ret = key_release_handler (item, event, type);
+		break;
+
 	default:
 		break;
 	}
@@ -1073,4 +1081,46 @@ Editor::track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const & /*c*/, 
 	_drags->motion_handler (&event, false);
 
 	return true;
+}
+
+bool
+Editor::key_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType type)
+{
+	return false;
+}
+
+bool
+Editor::key_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType type)
+{
+
+	bool handled = false;
+
+	switch (type) {
+	case TempoMarkerItem:
+		switch (event->key.keyval) {
+		case GDK_Delete:
+			remove_tempo_marker (item);
+			handled = true;
+			break;
+		default:
+			break;
+		}
+		break;
+
+	case MeterMarkerItem:
+		switch (event->key.keyval) {
+		case GDK_Delete:
+			remove_meter_marker (item);
+			handled = true;
+			break;
+		default:
+			break;
+		}
+		break;
+
+	default:
+		break;
+	}
+
+	return handled;
 }
