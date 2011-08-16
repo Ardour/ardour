@@ -255,11 +255,23 @@ public:
 
 	ARDOUR::frameoffset_t snap_frame_to_frame (ARDOUR::frameoffset_t);
 
-	/** Convert a timestamp in beats to frames (both relative to region start) */
-	framepos_t beats_to_frames(double beats) const;
-
+	/** Convert a timestamp in beats into frames (both relative to region start) */
+	framepos_t region_beats_to_region_frames(double beats) const;
+	/** Convert a timestamp in beats into absolute frames */
+	framepos_t region_beats_to_absolute_frames(double beats) const {
+		return _region->position() + region_beats_to_region_frames (beats);
+	}
 	/** Convert a timestamp in frames to beats (both relative to region start) */
-	double frames_to_beats(framepos_t) const;
+	double region_frames_to_region_beats(framepos_t) const;
+
+	/** Convert a timestamp in beats measured from source start into absolute frames */
+	framepos_t source_beats_to_absolute_frames(double beats) const;
+	/** Convert a timestamp in beats measured from source start into region-relative frames */
+	framepos_t source_beats_to_region_frames(double beats) const {
+		return source_beats_to_absolute_frames (beats) - _region->position();
+	}
+	/** Convert a timestamp in absolute frames to beats measured from source start*/
+	double absolute_frames_to_source_beats(framepos_t) const;
 
 	void goto_previous_note (bool add_to_selection);
 	void goto_next_note (bool add_to_selection);

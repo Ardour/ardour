@@ -123,7 +123,7 @@ StepEditor::reset_step_edit_beat_pos ()
                 frames_from_start = 0;
         }
 
-        step_edit_beat_pos = step_edit_region_view->frames_to_beats (frames_from_start);
+        step_edit_beat_pos = step_edit_region_view->region_frames_to_region_beats (frames_from_start);
         step_edit_region_view->move_step_edit_cursor (step_edit_beat_pos);
 }
 
@@ -210,7 +210,7 @@ StepEditor::move_step_edit_beat_pos (Evoral::MusicalTime beats)
 {
         if (beats > 0.0) {
                 step_edit_beat_pos = min (step_edit_beat_pos + beats,
-                                          step_edit_region_view->frames_to_beats (step_edit_region->length()));
+                                          step_edit_region_view->region_frames_to_region_beats (step_edit_region->length()));
         } else if (beats < 0.0) {
                 if (-beats < step_edit_beat_pos) {
                         step_edit_beat_pos += beats; // its negative, remember
@@ -257,8 +257,7 @@ StepEditor::step_add_note (uint8_t channel, uint8_t pitch, uint8_t velocity, Evo
 
         /* make sure its visible on the horizontal axis */
 
-        framepos_t fpos = step_edit_region->position() +
-                step_edit_region_view->beats_to_frames (step_edit_beat_pos + beat_duration);
+        framepos_t fpos = step_edit_region_view->region_beats_to_absolute_frames (step_edit_beat_pos + beat_duration);
 
         if (fpos >= (_editor.leftmost_position() + _editor.current_page_frames())) {
                 _editor.reset_x_origin (fpos - (_editor.current_page_frames()/4));
@@ -378,10 +377,9 @@ StepEditor::step_edit_bar_sync ()
                 return;
         }
 
-        framepos_t fpos = step_edit_region->position() +
-                step_edit_region_view->beats_to_frames (step_edit_beat_pos);
+        framepos_t fpos = step_edit_region_view->region_beats_to_absolute_frames (step_edit_beat_pos);
         fpos = _session->tempo_map().round_to_bar (fpos, 1);
-        step_edit_beat_pos = ceil (step_edit_region_view->frames_to_beats (fpos - step_edit_region->position()));
+        step_edit_beat_pos = ceil (step_edit_region_view->region_frames_to_region_beats (fpos - step_edit_region->position()));
         step_edit_region_view->move_step_edit_cursor (step_edit_beat_pos);
 }
 

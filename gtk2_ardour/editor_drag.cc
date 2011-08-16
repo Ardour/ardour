@@ -3876,7 +3876,7 @@ NoteDrag::total_dx () const
 	frameoffset_t const dx = _editor->unit_to_frame (_drags->current_pointer_x() - grab_x());
 
 	/* primary note time */
-	frameoffset_t const n = _region->beats_to_frames (_primary->note()->time ());
+	frameoffset_t const n = _region->source_beats_to_absolute_frames (_primary->note()->time ());
 
 	/* new time of the primary note relative to the region position */
 	frameoffset_t st = n + dx;
@@ -4222,7 +4222,7 @@ PatchChangeDrag::finished (GdkEvent* ev, bool movement_occurred)
 
 	_region_view->move_patch_change (
 		*_patch_change,
-		_region_view->frames_to_beats (f - r->position() - r->start())
+		_region_view->region_frames_to_region_beats (f - r->position() - r->start())
 		);
 }
 
@@ -4236,6 +4236,6 @@ void
 PatchChangeDrag::setup_pointer_frame_offset ()
 {
 	boost::shared_ptr<Region> region = _region_view->region ();
-	_pointer_frame_offset = raw_grab_frame() - _region_view->beats_to_frames (_patch_change->patch()->time()) - region->position() + region->start();
+	_pointer_frame_offset = raw_grab_frame() - _region_view->source_beats_to_absolute_frames (_patch_change->patch()->time());
 }
 

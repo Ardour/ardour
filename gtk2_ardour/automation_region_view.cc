@@ -84,7 +84,7 @@ AutomationRegionView::create_line (boost::shared_ptr<ARDOUR::AutomationList> lis
 				trackview, *get_canvas_group(), list,
 				boost::dynamic_pointer_cast<ARDOUR::MidiRegion> (_region),
 				_parameter,
-				&_time_converter));
+				&_source_relative_time_converter));
 	_line->set_colors();
 	_line->set_height ((uint32_t)rint(trackview.current_height() - NAME_HIGHLIGHT_SIZE));
 	_line->show();

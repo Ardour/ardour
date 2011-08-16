@@ -83,7 +83,7 @@ EditNoteDialog::EditNoteDialog (MidiRegionView* rv, Gnome::Canvas::CanvasNoteEve
 
 	_time_clock.set_session (_region_view->get_time_axis_view().session ());
 	_time_clock.set_mode (AudioClock::BBT);
-	_time_clock.set (_region_view->time_converter().to (ev->note()->time ()), true);
+	_time_clock.set (_region_view->source_relative_time_converter().to (ev->note()->time ()), true);
 
 	l = manage (new Label (_("Length")));
 	l->set_alignment (0, 0.5);
@@ -93,7 +93,7 @@ EditNoteDialog::EditNoteDialog (MidiRegionView* rv, Gnome::Canvas::CanvasNoteEve
 
 	_length_clock.set_session (_region_view->get_time_axis_view().session ());
 	_length_clock.set_mode (AudioClock::BBT);
-	_length_clock.set (_region_view->time_converter().to (ev->note()->length ()), true);
+	_length_clock.set (_region_view->region_relative_time_converter().to (ev->note()->length ()), true);
 
 	get_vbox()->pack_start (*table);
 
@@ -138,14 +138,14 @@ EditNoteDialog::run ()
 		had_change = true;
 	}
 
-	double const t = _region_view->time_converter().from (_time_clock.current_time ());
+	double const t = _region_view->source_relative_time_converter().from (_time_clock.current_time ());
 
 	if (t != _event->note()->time()) {
 		_region_view->change_note_time (_event, t);
 		had_change = true;
 	}
 
-	double const d = _region_view->time_converter().from (_length_clock.current_duration ());
+	double const d = _region_view->region_relative_time_converter().from (_length_clock.current_duration ());
 
 	if (d != _event->note()->length()) {
 		_region_view->change_note_length (_event, d);
