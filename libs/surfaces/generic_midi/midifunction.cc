@@ -133,6 +133,16 @@ MIDIFunction::execute ()
 			sscanf (_argument.c_str(), "%d", &rid);
 			_ui->SelectByRID (rid);
 		}
+	case TrackSetMute:
+		break;
+	case TrackSetSolo:
+		break;
+	case TrackSetSoloIsolate:
+		break;
+	case TrackSetGain:
+		break;
+	case TrackSetRecordEnable:
+		break;
 	default:
 		break;
 	}
