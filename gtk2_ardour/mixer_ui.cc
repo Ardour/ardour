@@ -173,8 +173,8 @@ Mixer_UI::Mixer_UI ()
 #else
 	global_hpacker.pack_start (out_packer, false, false, 12);
 #endif
-	list_hpane.add1(list_vpacker);
-	list_hpane.add2(global_hpacker);
+	list_hpane.pack1(list_vpacker, true, true);
+	list_hpane.pack2(global_hpacker, true, false);
 
 	rhs_pane1.signal_size_allocate().connect (sigc::bind (sigc::mem_fun(*this, &Mixer_UI::pane_allocation_handler),
 							static_cast<Gtk::Paned*> (&rhs_pane1)));
