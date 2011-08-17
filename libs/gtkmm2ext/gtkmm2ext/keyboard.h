@@ -91,6 +91,10 @@ class Keyboard : public sigc::trackable, PBD::Stateful
 		return (ev->state & RelevantModifierKeyMask) == 0;
 	}
 
+	static bool no_modifier_keys_pressed(GdkEventKey* ev) {
+		return (ev->state & RelevantModifierKeyMask) == 0;
+	}
+
 	bool leave_window (GdkEventCrossing *ev, Gtk::Window*);
 	bool enter_window (GdkEventCrossing *ev, Gtk::Window*);
 

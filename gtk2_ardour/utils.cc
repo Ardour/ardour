@@ -599,6 +599,8 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 	GtkWidget* focus = gtk_window_get_focus (win);
 	bool special_handling_of_unmodified_accelerators = false;
 	bool allow_activating = true;
+	/* consider all relevant modifiers but not LOCK or SHIFT */
+	const guint mask = (Keyboard::RelevantModifierKeyMask & ~(Gdk::SHIFT_MASK|Gdk::LOCK_MASK));
 
 	if (focus) {
 		if (GTK_IS_ENTRY(focus) || Keyboard::some_magic_widget_has_focus()) {
@@ -654,41 +656,37 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 	*/
 
 #ifdef GTKOSX
-	if (!special_handling_of_unmodified_accelerators) {
-		if (ev->state & GDK_MOD1_MASK) {
-			/* we're not in a text entry or "magic focus" widget so we don't want OS X "special-character"
-			   text-style handling of alt-<key>. change the keyval back to what it would be without
-			   the alt key. this way, we see <alt>-v rather than <alt>-radical and so on.
-			*/
-			guint keyval_without_alt = osx_keyval_without_alt (ev->keyval);
-
-			if (keyval_without_alt != GDK_VoidSymbol) {
-                                DEBUG_TRACE (DEBUG::Accelerators, string_compose ("Remapped %1 to %2\n", gdk_keyval_name (ev->keyval), gdk_keyval_name (keyval_without_alt)));
-				ev->keyval = keyval_without_alt;
-			}
+	if (!special_handling_of_unmodified_accelerators && (ev->state & Keyboard::SecondaryModifier)) {
+		/* we're not in a text entry or "magic focus" widget so we don't want OS X "special-character"
+		   text-style handling of alt-<key>. change the keyval back to what it would be without
+		   the alt key. this way, we see <alt>-v rather than <alt>-radical and so on.
+		*/
+		guint keyval_without_alt = osx_keyval_without_alt (ev->keyval);
+		
+		if (keyval_without_alt != GDK_VoidSymbol) {
+			DEBUG_TRACE (DEBUG::Accelerators, string_compose ("Remapped %1 to %2\n", gdk_keyval_name (ev->keyval), gdk_keyval_name (keyval_without_alt)));
+			ev->keyval = keyval_without_alt;
 		}
 	}
+	
 #endif
-
-	if (!special_handling_of_unmodified_accelerators) {
+	
+	if (!special_handling_of_unmodified_accelerators || (ev->state & mask)) {
 
 		/* pretend that certain key events that GTK does not allow
 		   to be used as accelerators are actually something that
-		   it does allow.
+		   it does allow. but only where there are no modifiers.
 		*/
 
 		uint32_t fakekey = ev->keyval;
 
 		if (Gtkmm2ext::possibly_translate_keyval_to_make_legal_accelerator (fakekey)) {
 			if (allow_activating && gtk_accel_groups_activate(G_OBJECT(win), fakekey, GdkModifierType(ev->state))) {
+				DEBUG_TRACE (DEBUG::Accelerators, "\taccel group activated by fakekey\n");
 				return true;
 			}
 		}
 	}
-
-	/* consider all relevant modifiers but not LOCK or SHIFT */
-
-	guint mask = (Keyboard::RelevantModifierKeyMask & ~(Gdk::SHIFT_MASK|Gdk::LOCK_MASK));
 
 	if (!special_handling_of_unmodified_accelerators || (ev->state & mask)) {
 
@@ -700,6 +698,8 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 			if (gtk_window_activate_key (win, ev)) {
 				return true;
 			}
+		} else {
+			DEBUG_TRACE (DEBUG::Accelerators, "\tactivation skipped\n");
 		}
 
                 DEBUG_TRACE (DEBUG::Accelerators, "\tnot accelerated, now propagate\n");
@@ -715,6 +715,8 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
                 DEBUG_TRACE (DEBUG::Accelerators, "\tpropagation didn't handle, so activate\n");
 		if (allow_activating) {
 			return gtk_window_activate_key (win, ev);
+		} else {
+			DEBUG_TRACE (DEBUG::Accelerators, "\tactivation skipped\n");
 		}
 
 	} else {

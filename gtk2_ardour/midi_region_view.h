@@ -344,9 +344,9 @@ private:
 	void trim_note(ArdourCanvas::CanvasNoteEvent* ev, ARDOUR::MidiModel::TimeType start_delta,
 	               ARDOUR::MidiModel::TimeType end_delta);
 
-	void clear_selection_except(ArdourCanvas::CanvasNoteEvent* ev);
-	void clear_selection() { clear_selection_except(NULL); }
-	void update_drag_selection(double last_x, double x, double last_y, double y);
+	void clear_selection_except (ArdourCanvas::CanvasNoteEvent* ev);
+	void clear_selection() { clear_selection_except (0); }
+	void update_drag_selection (double last_x, double x, double last_y, double y, bool extend);
 
 	void add_to_selection (ArdourCanvas::CanvasNoteEvent*);
 	void remove_from_selection (ArdourCanvas::CanvasNoteEvent*);
