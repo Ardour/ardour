@@ -135,10 +135,12 @@ static const char* authors[] = {
 	N_("Gerard van Dongen"),
 	N_("Colin Fletcher"),
 	N_("Hans Fugal"),
+        N_("Robin Gareus"),
 	N_("Christopher George"),
 	N_("J. Abelardo Gutierrez"),
 	N_("Jeremy Hall"),
 	N_("Audun Halland"),
+	N_("David Halter"),
 	N_("Steve Harris"),
 	N_("Melvin Ray Herr"),
 	N_("Carl Hetherington"),
@@ -165,8 +167,8 @@ static const char* authors[] = {
 	N_("Roland Stigge"),
 	N_("Petter Sundlöf"),
 	N_("Mike Täht"),
+	N_("Roy Vegard"),
 	N_("Thorsten Wilms"),
-        N_("Robin Gareus"),
 	0
 };
 
