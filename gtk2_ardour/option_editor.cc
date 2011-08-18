@@ -756,7 +756,7 @@ OptionEditor::add_midi_port ()
 		break;
 	}
 
-	Glib::ustring mode = dialog.port_mode_combo.get_active_text();
+	std::string mode = dialog.port_mode_combo.get_active_text();
 	std::string smod;
 
 	if (mode == _("input")) {

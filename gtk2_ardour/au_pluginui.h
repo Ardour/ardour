@@ -52,7 +52,7 @@ class AUPluginUI : public PlugUIBase, public Gtk::VBox
 	void activate ();
 	void deactivate ();
 
-	bool on_window_show (const Glib::ustring&);
+	bool on_window_show (const std::string&);
 	void on_window_hide ();
 
         bool non_gtk_gui() const { return true; }

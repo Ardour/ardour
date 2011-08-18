@@ -555,7 +555,7 @@ AutomationLine::model_representation (ControlPoint& cp, ModelRepresentation& mr)
 void
 AutomationLine::determine_visible_control_points (ALPoints& points)
 {
-	uint32_t view_index, pi, n;
+	uint32_t view_index, pi;
 	AutomationList::iterator model;
 	uint32_t npoints;
 	double last_control_point_x = 0.0;

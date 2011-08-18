@@ -25,7 +25,6 @@
 #include <set>
 #include <string>
 #include <sys/time.h>
-#include <glibmm/ustring.h>
 
 #include <boost/optional.hpp>
 
@@ -897,7 +896,7 @@ class Editor : public PublicEditor
 		    add (region);
 		    add (color_);
 	    }
-	    Gtk::TreeModelColumn<Glib::ustring> name;
+	    Gtk::TreeModelColumn<std::string> name;
 	    Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::Region> > region;
 	    Gtk::TreeModelColumn<Gdk::Color> color_;
 	};
@@ -911,7 +910,7 @@ class Editor : public PublicEditor
 
 	void region_list_selection_changed ();
 	bool region_list_selection_filter (const Glib::RefPtr<Gtk::TreeModel>& model, const Gtk::TreeModel::Path& path, bool yn);
-	void region_name_edit (const Glib::ustring&, const Glib::ustring&);
+	void region_name_edit (const std::string&, const std::string&);
 	void get_regions_corresponding_to (boost::shared_ptr<ARDOUR::Region> region, std::vector<RegionView*>& regions);
 
 	Gtk::Menu          *region_list_menu;
@@ -946,8 +945,8 @@ class Editor : public PublicEditor
 		    add (visible_name);
 		    add (real_name);
 	    }
-	    Gtk::TreeModelColumn<Glib::ustring> visible_name;
-	    Gtk::TreeModelColumn<Glib::ustring> real_name;
+	    Gtk::TreeModelColumn<std::string> visible_name;
+	    Gtk::TreeModelColumn<std::string> real_name;
 	};
 
 	SnapshotDisplayModelColumns snapshot_display_columns;
@@ -958,7 +957,7 @@ class Editor : public PublicEditor
 	bool snapshot_display_button_press (GdkEventButton*);
 	void snapshot_display_selection_changed ();
 	void redisplay_snapshots();
-	void popup_snapshot_context_menu (int, int32_t, Glib::ustring);
+	void popup_snapshot_context_menu (int, int32_t, std::string);
 
 	/* named selections */
 
@@ -967,7 +966,7 @@ class Editor : public PublicEditor
 		    add (text);
 		    add (selection);
 	    }
-	    Gtk::TreeModelColumn<Glib::ustring>  text;
+	    Gtk::TreeModelColumn<std::string>  text;
 	    Gtk::TreeModelColumn<ARDOUR::NamedSelection*>    selection;
 	};
 
@@ -980,8 +979,8 @@ class Editor : public PublicEditor
 	void create_named_selection ();
 	void paste_named_selection (float times);
 	void remove_selected_named_selections ();
-	void remove_snapshot (Glib::ustring);
-	void rename_snapshot (Glib::ustring);
+	void remove_snapshot (std::string);
+	void rename_snapshot (std::string);
 
 	void handle_new_named_selection ();
 	void add_named_selection_to_named_selection_display (ARDOUR::NamedSelection&);
@@ -1160,24 +1159,24 @@ class Editor : public PublicEditor
 	void external_audio_dialog ();
 
 	int  check_whether_and_how_to_import(string, bool all_or_nothing = true);
-	bool check_multichannel_status (const std::vector<Glib::ustring>& paths);
+	bool check_multichannel_status (const std::vector<std::string>& paths);
 
 	SoundFileOmega* sfbrowser;
 	
 	void bring_in_external_audio (Editing::ImportMode mode,  nframes64_t& pos);
 
-	bool  idle_drop_paths  (std::vector<Glib::ustring> paths, nframes64_t frame, double ypos);
-	void  drop_paths_part_two  (const std::vector<Glib::ustring>& paths, nframes64_t frame, double ypos);
+	bool  idle_drop_paths  (std::vector<std::string> paths, nframes64_t frame, double ypos);
+	void  drop_paths_part_two  (const std::vector<std::string>& paths, nframes64_t frame, double ypos);
 	
-	void do_import (vector<Glib::ustring> paths, Editing::ImportDisposition, Editing::ImportMode mode, ARDOUR::SrcQuality, nframes64_t&);
-	void do_embed (vector<Glib::ustring> paths, Editing::ImportDisposition, Editing::ImportMode mode,  nframes64_t&);
+	void do_import (vector<std::string> paths, Editing::ImportDisposition, Editing::ImportMode mode, ARDOUR::SrcQuality, nframes64_t&);
+	void do_embed (vector<std::string> paths, Editing::ImportDisposition, Editing::ImportMode mode,  nframes64_t&);
 
-	int  import_sndfiles (vector<Glib::ustring> paths, Editing::ImportMode mode,  ARDOUR::SrcQuality, nframes64_t& pos,
+	int  import_sndfiles (vector<std::string> paths, Editing::ImportMode mode,  ARDOUR::SrcQuality, nframes64_t& pos,
 			      int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::AudioTrack>&, bool, uint32_t total);
-	int  embed_sndfiles (vector<Glib::ustring> paths, bool multiple_files, bool& check_sample_rate, Editing::ImportMode mode, 
+	int  embed_sndfiles (vector<std::string> paths, bool multiple_files, bool& check_sample_rate, Editing::ImportMode mode, 
 			     nframes64_t& pos, int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::AudioTrack>&);
 
-	int add_sources (vector<Glib::ustring> paths, ARDOUR::SourceList& sources, nframes64_t& pos, Editing::ImportMode,
+	int add_sources (vector<std::string> paths, ARDOUR::SourceList& sources, nframes64_t& pos, Editing::ImportMode,
 			 int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::AudioTrack>&, bool add_channel_suffix);
 	int finish_bringing_in_audio (boost::shared_ptr<ARDOUR::AudioRegion> region, uint32_t, uint32_t,  nframes64_t& pos, Editing::ImportMode mode,
 				      boost::shared_ptr<ARDOUR::AudioTrack>& existing_track);
@@ -1221,7 +1220,7 @@ class Editor : public PublicEditor
 	/* to support this ... */
 
 	void import_audio (bool as_tracks);
-	void do_import (vector<Glib::ustring> paths, bool split, bool as_tracks);
+	void do_import (vector<std::string> paths, bool split, bool as_tracks);
 
 	void move_to_start ();
 	void move_to_end ();
@@ -1735,7 +1734,7 @@ public:
 		    add (tv);
 		    add (route);
 	    }
-	    Gtk::TreeModelColumn<Glib::ustring>  text;
+	    Gtk::TreeModelColumn<std::string>  text;
 	    Gtk::TreeModelColumn<bool>           visible;
 	    Gtk::TreeModelColumn<bool>           temporary_visible;
 	    Gtk::TreeModelColumn<TimeAxisView*>  tv;
@@ -1823,7 +1822,7 @@ public:
 
 	bool in_edit_group_row_change;
 	void edit_group_row_change (const Gtk::TreeModel::Path&,const Gtk::TreeModel::iterator&);
-	void edit_group_name_edit (const Glib::ustring&, const Glib::ustring&);
+	void edit_group_name_edit (const std::string&, const std::string&);
 	void new_edit_group ();
 	void edit_group_list_button_clicked ();
 	gint edit_group_list_button_press_event (GdkEventButton* ev);
@@ -1885,7 +1884,7 @@ public:
 
 	/* Drag-n-Drop */
 
-	int convert_drop_to_paths (std::vector<Glib::ustring>& paths,
+	int convert_drop_to_paths (std::vector<std::string>& paths,
 				   const Glib::RefPtr<Gdk::DragContext>& context,
 				   gint                x,
 				   gint                y,

@@ -1152,7 +1152,7 @@ ExportDialog::start_export ()
 	*/
 	
 	if (file_entry.get_text().length() == 0) {
-		Glib::ustring export_path = session->export_dir();
+		std::string export_path = session->export_dir();
 
 		if (!wants_dir()) {
 			export_path = Glib::build_filename (export_path, "export.wav");

@@ -199,7 +199,7 @@ class TimeAxisViewItem : public Selectable
      *
      * @param new_name the new name text to display
      */
-    void set_name_text(const Glib::ustring& new_name) ;
+    void set_name_text(const std::string& new_name) ;
 
     /**
      * Set the height of this item

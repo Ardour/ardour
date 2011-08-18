@@ -77,7 +77,7 @@ class LV2PluginUI : public PlugUIBase, public Gtk::VBox
 			uint32_t         format,
 			const void*      buffer);
 	
-	void lv2ui_instantiate(const Glib::ustring& title);
+	void lv2ui_instantiate(const std::string& title);
 
 	void parameter_changed(uint32_t, float);
 	void parameter_update(uint32_t, float);
@@ -86,7 +86,7 @@ class LV2PluginUI : public PlugUIBase, public Gtk::VBox
 	void output_update();
 	bool is_update_wanted(uint32_t index);
 
-	virtual bool on_window_show(const Glib::ustring& title);
+	virtual bool on_window_show(const std::string& title);
 	virtual void on_window_hide();
 };
 #endif // HAVE_LV2

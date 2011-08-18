@@ -121,12 +121,12 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void show_about ();
 	void hide_about ();
 	
-	void idle_load (const Glib::ustring& path);
+	void idle_load (const std::string& path);
 	void finish();
 
-	int load_session (const Glib::ustring& path, const Glib::ustring& snapshot, Glib::ustring mix_template = Glib::ustring());
+	int load_session (const std::string& path, const std::string& snapshot, std::string mix_template = std::string());
 	bool session_loaded;
-	int build_session (const Glib::ustring& path, const Glib::ustring& snapshot, 
+	int build_session (const std::string& path, const std::string& snapshot, 
 			   uint32_t ctl_chns, 
 			   uint32_t master_chns,
 			   ARDOUR::AutoConnectOption input_connect,
@@ -147,10 +147,10 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	}
 
 	bool get_session_parameters (bool have_engine = false, bool should_be_new = false);
-	void parse_cmdline_path (const Glib::ustring& cmdline_path, Glib::ustring& session_name, Glib::ustring& session_path, bool& existing_session);
-	int  load_cmdline_session (const Glib::ustring& session_name, const Glib::ustring& session_path, bool& existing_session);
-	int  build_session_from_nsd (const Glib::ustring& session_name, const Glib::ustring& session_path);
-	bool ask_about_loading_existing_session (const Glib::ustring& session_path);
+	void parse_cmdline_path (const std::string& cmdline_path, std::string& session_name, std::string& session_path, bool& existing_session);
+	int  load_cmdline_session (const std::string& session_name, const std::string& session_path, bool& existing_session);
+	int  build_session_from_nsd (const std::string& session_name, const std::string& session_path);
+	bool ask_about_loading_existing_session (const std::string& session_path);
 	int  unload_session (bool hide_stuff = false);
 	void close_session(); 
 
@@ -492,8 +492,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 		    add (visible_name);
 		    add (fullpath);
 	    }
-	    Gtk::TreeModelColumn<Glib::ustring> visible_name;
-	    Gtk::TreeModelColumn<Glib::ustring> fullpath;
+	    Gtk::TreeModelColumn<std::string> visible_name;
+	    Gtk::TreeModelColumn<std::string> fullpath;
 	};
 
 	RecentSessionModelColumns    recent_session_columns;

@@ -29,7 +29,7 @@
 
 using namespace std;
 
-Glib::ustring ARDOUR_COMMAND_LINE::session_name = "";
+std::string ARDOUR_COMMAND_LINE::session_name = "";
 string ARDOUR_COMMAND_LINE::jack_client_name = "ardour";
 bool  ARDOUR_COMMAND_LINE::show_key_actions = false;
 bool ARDOUR_COMMAND_LINE::no_splash = true;
@@ -38,8 +38,8 @@ bool ARDOUR_COMMAND_LINE::use_vst = true;
 bool ARDOUR_COMMAND_LINE::new_session = false;
 char* ARDOUR_COMMAND_LINE::curvetest_file = 0;
 bool ARDOUR_COMMAND_LINE::try_hw_optimization = true;
-Glib::ustring ARDOUR_COMMAND_LINE::keybindings_path = ""; /* empty means use builtin default */
-Glib::ustring ARDOUR_COMMAND_LINE::menus_file = "ardour.menus";
+std::string ARDOUR_COMMAND_LINE::keybindings_path = ""; /* empty means use builtin default */
+std::string ARDOUR_COMMAND_LINE::menus_file = "ardour.menus";
 bool ARDOUR_COMMAND_LINE::finder_invoked_ardour = false;
 
 using namespace ARDOUR_COMMAND_LINE;

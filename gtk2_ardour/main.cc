@@ -24,7 +24,6 @@
 
 #include <sigc++/bind.h>
 #include <gtkmm/settings.h>
-#include <glibmm/ustring.h>
 
 #include <pbd/error.h>
 #include <pbd/textreceiver.h>
@@ -88,9 +87,9 @@ fixup_bundle_environment (int argc, char* argv[])
 
 	_NSGetExecutablePath (execpath, &pathsz);
 
-	Glib::ustring exec_path (execpath);
-	Glib::ustring dir_path = Glib::path_get_dirname (exec_path);
-	Glib::ustring path;
+	std::string exec_path (execpath);
+	std::string dir_path = Glib::path_get_dirname (exec_path);
+	std::string path;
 	const char *cstr = getenv ("PATH");
 
 	/* ensure that we find any bundled executables (e.g. JACK),
@@ -217,7 +216,7 @@ fixup_bundle_environment (int argc, char* argv[])
 			error << string_compose (_("cannot open pango.rc file %1") , path) << endmsg;
 		} else {
 			pangorc << "[Pango]\nModuleFiles=";
-			Glib::ustring mpath;
+			std::string mpath;
 
 			mpath = dir_path;
 			mpath += "/../Resources/pango.modules";
@@ -268,9 +267,9 @@ fixup_bundle_environment (int argc, char* argv[])
 
         EnvironmentalProtectionAgency::set_global_epa (new EnvironmentalProtectionAgency (true, "PREBUNDLE_ENV"));
 	
-	Glib::ustring exec_path = argv[0];
-	Glib::ustring dir_path = Glib::path_get_dirname (Glib::path_get_dirname (exec_path));
-	Glib::ustring path;
+	std::string exec_path = argv[0];
+	std::string dir_path = Glib::path_get_dirname (Glib::path_get_dirname (exec_path));
+	std::string path;
 	const char *cstr = getenv ("PATH");
 
 	/* ensure that we find any bundled executables (e.g. JACK),
@@ -377,7 +376,7 @@ fixup_bundle_environment (int argc, char* argv[])
 		      << endmsg;
 	} else {
 
-                Glib::ustring mpath;
+                std::string mpath;
 
 		path = Glib::build_filename (ARDOUR::get_user_ardour_path(), "pango.rc");
 
@@ -465,7 +464,7 @@ int ardour_main (int argc, char *argv[])
 int main (int argc, char* argv[])
 #endif
 {
-	vector<Glib::ustring> null_file_list;
+	vector<std::string> null_file_list;
 
 	fixup_bundle_environment (argc, argv);
 

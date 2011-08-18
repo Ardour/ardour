@@ -7,7 +7,6 @@
 #include <gtkmm/treeview.h>
 #include <gtkmm/treestore.h>
 #include <gtkmm/scrolledwindow.h>
-#include <glibmm/ustring.h>
 
 #include "ardour_dialog.h"
 
@@ -30,7 +29,7 @@ class KeyEditor : public ArdourDialog
 		    add (path);
 		    add (bindable);
 	    }
-	    Gtk::TreeModelColumn<Glib::ustring> action;
+	    Gtk::TreeModelColumn<std::string> action;
 	    Gtk::TreeModelColumn<std::string> binding;
 	    Gtk::TreeModelColumn<std::string> path;
 	    Gtk::TreeModelColumn<bool> bindable;

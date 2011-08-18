@@ -66,7 +66,7 @@ class ConnectionEditor : public ArdourDialog {
 		    add (name);
 		    add (connection);
 	    }
-	    Gtk::TreeModelColumn<Glib::ustring> name;
+	    Gtk::TreeModelColumn<std::string> name;
 	    Gtk::TreeModelColumn<ARDOUR::Connection*> connection;
 	};
 

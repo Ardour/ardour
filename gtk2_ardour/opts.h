@@ -21,11 +21,10 @@
 #define __ardour_opts_h__
 
 #include <string>
-#include <glibmm/ustring.h>
 
 namespace ARDOUR_COMMAND_LINE {
 
-extern Glib::ustring session_name;
+extern std::string session_name;
 extern bool   show_key_actions;
 extern bool   no_splash;
 extern bool   just_version;
@@ -35,8 +34,8 @@ extern bool   new_session;
 extern char*  curvetest_file;
 extern bool   try_hw_optimization;
 extern bool   use_gtk_theme;
-extern Glib::ustring keybindings_path;
-extern Glib::ustring menus_file;
+extern std::string keybindings_path;
+extern std::string menus_file;
 extern bool   finder_invoked_ardour;
 
 extern int32_t parse_opts (int argc, char *argv[]);

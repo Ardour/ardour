@@ -123,8 +123,8 @@ class PluginSelector : public ArdourDialog
 	bool show_this_plugin (const ARDOUR::PluginInfoPtr&, const std::string&);
 	void setup_filter_string (std::string&);
 
-	void favorite_changed (const Glib::ustring& path);
-	void hidden_changed (const Glib::ustring& path);
+	void favorite_changed (const std::string& path);
+	void hidden_changed (const std::string& path);
 	bool in_row_change;
 
 	void plugin_chosen_from_menu (const ARDOUR::PluginInfoPtr&);

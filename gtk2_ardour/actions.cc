@@ -136,7 +136,7 @@ ActionManager::register_toggle_action (RefPtr<ActionGroup> group, const char * n
 }
 
 bool 
-ActionManager::lookup_entry (const ustring accel_path, Gtk::AccelKey& key)
+ActionManager::lookup_entry (const string accel_path, Gtk::AccelKey& key)
 {
 	GtkAccelKey gkey;
 	bool known = gtk_accel_map_lookup_entry (accel_path.c_str(), &gkey);
@@ -152,8 +152,8 @@ ActionManager::lookup_entry (const ustring accel_path, Gtk::AccelKey& key)
 
 struct SortActionsByLabel {
     bool operator() (Glib::RefPtr<Gtk::Action> a, Glib::RefPtr<Gtk::Action> b) {
-	    ustring astr = a->get_accel_path();
-	    ustring bstr = b->get_accel_path();
+	    string astr = a->get_accel_path();
+	    string bstr = b->get_accel_path();
 	    return astr < bstr;
     }
 };
@@ -235,7 +235,8 @@ ActionManager::get_all_actions (vector<string>& names, vector<string>& paths, ve
 		for (action_list::iterator a = the_acts.begin(); a != the_acts.end(); ++a) {
 
 			string accel_path = (*a)->get_accel_path ();
-			ustring label = (*a)->property_label();
+			Glib::ustring sl = (*a)->property_label();
+			string label = sl;
 
 			names.push_back (label);
 			paths.push_back (accel_path);

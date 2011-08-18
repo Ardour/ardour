@@ -65,7 +65,7 @@ make_action (Glib::RefPtr<ActionGroup> group, string name, string label)
 }
 
 bool 
-lookup_entry (const ustring accel_path, Gtk::AccelKey& key)
+lookup_entry (const string accel_path, Gtk::AccelKey& key)
 {
 	GtkAccelKey gkey;
 	bool known = gtk_accel_map_lookup_entry (accel_path.c_str(), &gkey);

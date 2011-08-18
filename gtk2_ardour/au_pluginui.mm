@@ -172,7 +172,12 @@ AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> insert)
 
 	if (test_cocoa_view_support()) {
 	        cerr << insert->name() << " creating cocoa view\n";
-		create_cocoa_view ();
+		if (create_cocoa_view () != 0) {
+			if (test_carbon_view_support()) {
+				cerr << insert->name() << " falling back to carbon view\n";
+				create_carbon_view ();
+			}
+		}
 	} else if (test_carbon_view_support()) {
 	        cerr << insert->name() << " creating carbon view\n";
 		create_carbon_view ();
@@ -302,7 +307,12 @@ AUPluginUI::create_cocoa_view ()
 			
 			// we only take the first view in this example.
 			factoryClassName	= (NSString *)cocoaViewInfo->mCocoaAUViewClass[0];
-	                cerr << insert->name() << " fetching cocoa UI via factory called " << factoryClassName << '\n';
+			if (factoryClassName) {
+				cerr << insert->name() << " no factory name class name provided\n";
+			} else {
+				const char* fcn = [factoryClassName UTF8String];
+				cerr << insert->name() << " fetching cocoa UI via factory called " << fcn << '\n';
+			}
 
 		} else {
 
@@ -326,6 +336,7 @@ AUPluginUI::create_cocoa_view ()
 			Class factoryClass = [viewBundle classNamed:factoryClassName];
 			if (!factoryClass) {
 				error << _("AUPluginUI: error getting AU view's factory class from bundle") << endmsg;
+				cerr << _("AUPluginUI: error getting AU view's factory class from bundle") << endl;
 				return -1;
 			}
 			
@@ -635,7 +646,7 @@ AUPluginUI::on_window_hide ()
 }
 
 bool
-AUPluginUI::on_window_show (const Glib::ustring& title)
+AUPluginUI::on_window_show (const string& title)
 {
 	/* this is idempotent so just call it every time we show the window */
 

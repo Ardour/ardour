@@ -316,7 +316,7 @@ Editor::group_flags_changed (void* src, RouteGroup* group)
 }
 
 void
-Editor::edit_group_name_edit (const Glib::ustring& path, const Glib::ustring& new_text)
+Editor::edit_group_name_edit (const string& path, const string& new_text)
 {
 	RouteGroup* group;
 	TreeIter iter;

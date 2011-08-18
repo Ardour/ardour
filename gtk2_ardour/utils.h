@@ -26,7 +26,6 @@
 #include <ardour/types.h>
 #include <libgnomecanvasmm/line.h>
 #include <gdkmm/types.h>
-#include <glibmm/ustring.h>
 
 #include "canvas.h"
 #include "public_editor.h"
@@ -53,8 +52,8 @@ slider_position_to_gain (double pos)
 	return pow (2.0,(sqrt(sqrt(sqrt(pos)))*198.0-192.0)/6.0);
 }
 
-Glib::ustring fit_to_pixels (const Glib::ustring&, int pixel_width, Pango::FontDescription& font, int& actual_width, bool with_ellipses = false);
-int pixel_width (const Glib::ustring& str, Pango::FontDescription& font);
+std::string fit_to_pixels (const std::string&, int pixel_width, Pango::FontDescription& font, int& actual_width, bool with_ellipses = false);
+int pixel_width (const std::string& str, Pango::FontDescription& font);
 
 gint   just_hide_it (GdkEventAny*, Gtk::Window*);
 void   allow_keyboard_focus (bool);
@@ -94,7 +93,7 @@ void convert_bgra_to_rgba (guint8 const* src,
 		      guint8*       dst,
 		      int           width,
 		      int           height);
-Glib::RefPtr<Gdk::Pixbuf> pixbuf_from_ustring (const Glib::ustring& name,
+Glib::RefPtr<Gdk::Pixbuf> pixbuf_from_string (const std::string& name,
 					       Pango::FontDescription* font,
 					       uint32_t rgba,
 					       int clip_width,

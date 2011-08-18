@@ -85,8 +85,8 @@ class IOSelector : public Gtk::VBox {
 		    add (full_name);
 	    }
 
-	    Gtk::TreeModelColumn<Glib::ustring>       displayed_name;
-	    Gtk::TreeModelColumn<Glib::ustring>       full_name;
+	    Gtk::TreeModelColumn<std::string>       displayed_name;
+	    Gtk::TreeModelColumn<std::string>       full_name;
 	};
 
 	PortDisplayModelColumns port_display_columns;

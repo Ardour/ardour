@@ -52,7 +52,7 @@ using namespace PBD;
 sigc::signal<void>  DPIReset;
 
 int
-pixel_width (const ustring& str, Pango::FontDescription& font)
+pixel_width (const string& str, Pango::FontDescription& font)
 {
 	if (str.empty()) {
 		return 0;
@@ -69,20 +69,20 @@ pixel_width (const ustring& str, Pango::FontDescription& font)
 	return width;
 }
 
-ustring
-fit_to_pixels (const ustring& str, int pixel_width, Pango::FontDescription& font, int& actual_width, bool with_ellipses)
+string
+fit_to_pixels (const string& str, int pixel_width, Pango::FontDescription& font, int& actual_width, bool with_ellipses)
 {
 	Label foo;
 	Glib::RefPtr<Pango::Layout> layout = foo.create_pango_layout ("");
-	ustring::size_type shorter_by = 0;
-	ustring txt;
+	string::size_type shorter_by = 0;
+	string txt;
 
 	layout->set_font_description (font);
 
 	actual_width = 0;
 
-	ustring ustr = str;
-	ustring::iterator last = ustr.end();
+	string ustr = str;
+	string::iterator last = ustr.end();
 	--last; /* now points at final entry */
 
 	txt = ustr;
@@ -910,7 +910,7 @@ convert_bgra_to_rgba (guint8 const* src,
 }
 
 Glib::RefPtr<Gdk::Pixbuf>
-pixbuf_from_ustring(const ustring& name, Pango::FontDescription* font, uint32_t rgba, int clip_width, int clip_height)
+pixbuf_from_string(const string& name, Pango::FontDescription* font, uint32_t rgba, int clip_width, int clip_height)
 {
 	Glib::RefPtr<Gdk::Pixbuf> buf = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, true, 8, clip_width, clip_height);
 	cairo_surface_t* surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, clip_width, clip_height);

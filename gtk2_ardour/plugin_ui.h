@@ -82,7 +82,7 @@ class PlugUIBase : public virtual sigc::trackable
 
 	virtual void update_presets ();
 
-	virtual bool on_window_show(const Glib::ustring& title) { return true; }
+	virtual bool on_window_show(const std::string& title) { return true; }
 	virtual void on_window_hide() {}
 
 	virtual void forward_key_event (GdkEventKey*) {}
@@ -239,10 +239,10 @@ class PluginUIWindow : public Gtk::Window
 	void on_hide ();
 	void on_map ();
 
-	void set_title(const Glib::ustring& title);
+	void set_title(const std::string& title);
 
   private:
-	Glib::ustring _title;
+	std::string _title;
 	PlugUIBase* _pluginui;
 	sigc::connection death_connection;
 	Gtk::Window* parent;
@@ -288,7 +288,7 @@ class VSTPluginUI : public PlugUIBase, public Gtk::VBox
 		    add (name);
 		    add (number);
 	    }
-	    Gtk::TreeModelColumn<Glib::ustring> name;
+	    Gtk::TreeModelColumn<std::string> name;
 	    Gtk::TreeModelColumn<int> number;
 	};
 

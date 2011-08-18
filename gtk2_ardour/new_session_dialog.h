@@ -65,8 +65,8 @@ public:
 
 	int run ();
 
-	void set_session_name(const Glib::ustring& name);
-	void set_session_folder(const Glib::ustring& folder);
+	void set_session_name(const std::string& name);
+	void set_session_folder(const std::string& folder);
 
 	std::string session_name() const;
 	std::string session_folder() const;
@@ -215,8 +215,8 @@ protected:
 
 	bool on_new_session_page;
 	bool have_engine;
-	Glib::ustring engine_page_session_folder;
-	Glib::ustring engine_page_session_name;
+	std::string engine_page_session_folder;
+	std::string engine_page_session_name;
 
 	sigc::connection ic_connection;
 	void engine_interface_chosen();

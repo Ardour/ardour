@@ -509,7 +509,7 @@ IOSelector::port_selection_changed (GdkEventButton *ev, TreeView* treeview)
 		return 0;
 	}
 
-	ustring other_port_name = (*i)[port_display_columns.full_name];
+	string other_port_name = (*i)[port_display_columns.full_name];
 	
 	if (for_input) {
 		if ((status = io->connect_input (selected_port, other_port_name, this)) == 0) {
@@ -614,7 +614,7 @@ IOSelector::connection_button_release (GdkEventButton *ev, TreeView *treeview)
 	if ((iter = treeview->get_model()->get_iter (path.to_string()))) {
 
 		/* path is valid */
-		ustring connected_port_name = (*iter)[port_display_columns.full_name];
+		string connected_port_name = (*iter)[port_display_columns.full_name];
 		Port *port = reinterpret_cast<Port *> (treeview->get_data (X_("port")));
 		
 		if (for_input) {

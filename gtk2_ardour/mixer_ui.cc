@@ -1211,7 +1211,7 @@ Mixer_UI::group_flags_changed (void* src, RouteGroup* group)
 }
 
 void
-Mixer_UI::mix_group_name_edit (const Glib::ustring& path, const Glib::ustring& new_text)
+Mixer_UI::mix_group_name_edit (const std::string& path, const std::string& new_text)
 {
 	RouteGroup* group;
 	TreeIter iter;
@@ -1258,7 +1258,7 @@ Mixer_UI::mix_group_row_change (const Gtk::TreeModel::Path& path,const Gtk::Tree
 	bool active = (*iter)[group_columns.active];
 	group->set_active (active, this);
 
-	Glib::ustring name = (*iter)[group_columns.text];
+	std::string name = (*iter)[group_columns.text];
 
 	if (name != group->name()) {
 		group->set_name (name);

@@ -444,14 +444,14 @@ Editor::track_canvas_drag_data_received (const RefPtr<Gdk::DragContext>& context
 }
 
 bool
-Editor::idle_drop_paths (vector<ustring> paths, nframes64_t frame, double ypos)
+Editor::idle_drop_paths (vector<string> paths, nframes64_t frame, double ypos)
 {
 	drop_paths_part_two (paths, frame, ypos);
 	return false;
 }
 
 void
-Editor::drop_paths_part_two (const vector<ustring>& paths, nframes64_t frame, double ypos)
+Editor::drop_paths_part_two (const vector<string>& paths, nframes64_t frame, double ypos)
 {
 	TimeAxisView* tvp;
 	AudioTimeAxisView* tv;
@@ -491,7 +491,7 @@ Editor::drop_paths (const RefPtr<Gdk::DragContext>& context,
 		    const SelectionData& data,
 		    guint info, guint time)
 {
-	vector<ustring> paths;
+	vector<string> paths;
 	GdkEvent ev;
 	nframes64_t frame;
 	double wx;

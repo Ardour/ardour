@@ -201,7 +201,7 @@ class Mixer_UI : public Gtk::Window
 	void hide_all_mix_groups ();
 	void add_mix_group (ARDOUR::RouteGroup *);
 	void mix_groups_changed ();
-	void mix_group_name_edit (const Glib::ustring&, const Glib::ustring&);
+	void mix_group_name_edit (const std::string&, const std::string&);
 	void mix_group_row_change (const Gtk::TreeModel::Path& path,const Gtk::TreeModel::iterator& iter);
 
 	Gtk::Menu *track_menu;
@@ -224,7 +224,7 @@ class Mixer_UI : public Gtk::Window
 		    add (strip);
 	    }
 	    Gtk::TreeModelColumn<bool>           visible;
-	    Gtk::TreeModelColumn<Glib::ustring>  text;
+	    Gtk::TreeModelColumn<std::string>  text;
 	    Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::Route> > route;
 	    Gtk::TreeModelColumn<MixerStrip*>    strip;
 	};
@@ -238,7 +238,7 @@ class Mixer_UI : public Gtk::Window
 	    }
 	    Gtk::TreeModelColumn<bool>                active;
 	    Gtk::TreeModelColumn<bool>  visible;
-	    Gtk::TreeModelColumn<Glib::ustring>       text;
+	    Gtk::TreeModelColumn<std::string>       text;
 	    Gtk::TreeModelColumn<ARDOUR::RouteGroup*> group;
 	};
 

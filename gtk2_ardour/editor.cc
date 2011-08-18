@@ -3145,7 +3145,7 @@ Editor::setup_toolbar ()
 }
 
 int
-Editor::convert_drop_to_paths (vector<ustring>& paths, 
+Editor::convert_drop_to_paths (vector<string>& paths, 
 			       const RefPtr<Gdk::DragContext>& context,
 			       gint                x,
 			       gint                y,
@@ -3158,7 +3158,7 @@ Editor::convert_drop_to_paths (vector<ustring>& paths,
 		return -1;
 	}
 
-	vector<ustring> uris = data.get_uris();
+	vector<string> uris = data.get_uris();
 
 	if (uris.empty()) {
 
@@ -3176,7 +3176,7 @@ Editor::convert_drop_to_paths (vector<ustring>& paths,
 		   THERE MAY BE NO NULL TERMINATING CHAR!!!
 		*/
 
-		ustring txt = data.get_text();
+		string txt = data.get_text();
 		const char* p;
 		const char* q;
 
@@ -3204,7 +3204,7 @@ Editor::convert_drop_to_paths (vector<ustring>& paths,
 					
 					if (q > p)
 					{
-						uris.push_back (ustring (p, q - p + 1));
+						uris.push_back (string (p, q - p + 1));
 					}
 				}
 			}
@@ -3220,19 +3220,19 @@ Editor::convert_drop_to_paths (vector<ustring>& paths,
 		}
 	}
 	
-	for (vector<ustring>::iterator i = uris.begin(); i != uris.end(); ++i) {
+	for (vector<string>::iterator i = uris.begin(); i != uris.end(); ++i) {
 
 		if ((*i).substr (0,7) == "file://") {
 
 			
-			ustring p = *i;
+			string p = *i;
                         PBD::url_decode (p);
 
 			// scan forward past three slashes
 			
-			ustring::size_type slashcnt = 0;
-			ustring::size_type n = 0;
-			ustring::iterator x = p.begin();
+			string::size_type slashcnt = 0;
+			string::size_type n = 0;
+			string::iterator x = p.begin();
 
 			while (slashcnt < 3 && x != p.end()) {
 				if ((*x) == '/') {
@@ -4091,7 +4091,7 @@ Editor::snapshot_display_selection_changed ()
 
 		TreeModel::iterator i = snapshot_display.get_selection()->get_selected();
 		
-		Glib::ustring snap_name = (*i)[snapshot_display_columns.real_name];
+		string snap_name = (*i)[snapshot_display_columns.real_name];
 
 		if (snap_name.length() == 0) {
 			return;
@@ -4135,7 +4135,7 @@ Editor::snapshot_display_button_press (GdkEventButton* ev)
  */
 
 void
-Editor::popup_snapshot_context_menu (int button, int32_t time, Glib::ustring snapshot_name)
+Editor::popup_snapshot_context_menu (int button, int32_t time, string snapshot_name)
 {
 	using namespace Menu_Helpers;
 
@@ -4158,7 +4158,7 @@ Editor::popup_snapshot_context_menu (int button, int32_t time, Glib::ustring sna
 }
 
 void
-Editor::rename_snapshot (Glib::ustring old_name)
+Editor::rename_snapshot (string old_name)
 {
 	ArdourPrompter prompter(true);
 
@@ -4180,7 +4180,7 @@ Editor::rename_snapshot (Glib::ustring old_name)
 
 
 void
-Editor::remove_snapshot (Glib::ustring name)
+Editor::remove_snapshot (string name)
 {
 	vector<string> choices;
 

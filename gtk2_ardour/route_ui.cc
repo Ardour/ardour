@@ -1176,8 +1176,8 @@ RouteUI::map_frozen ()
 void
 RouteUI::save_as_template ()
 {
-	Glib::ustring path;
-	Glib::ustring safe_name;
+	std::string path;
+	std::string safe_name;
 	std::string name;
 	
 	path = Session::route_template_dir();

@@ -595,7 +595,7 @@ EngineControl::setup_engine ()
 		return 1; // try again
 	}
 
-	Glib::ustring jackdrc_path = Glib::get_home_dir();
+	std::string jackdrc_path = Glib::get_home_dir();
 	jackdrc_path += "/.jackdrc";
 
 	ofstream jackdrc (jackdrc_path.c_str());
@@ -928,7 +928,7 @@ EngineControl::redisplay_latency ()
 void
 EngineControl::audio_mode_changed ()
 {
-	Glib::ustring str = audio_mode_combo.get_active_text();
+	std::string str = audio_mode_combo.get_active_text();
 
 	if (str == _("Playback/Recording on 1 Device")) {
 		input_device_combo.set_sensitive (false);
@@ -1064,7 +1064,7 @@ EngineControl::get_state ()
 {
 	XMLNode* root = new XMLNode ("AudioSetup");
 	XMLNode* child;
-	Glib::ustring path;
+	std::string path;
 
 	child = new XMLNode ("periods");
 	child->add_property ("val", to_string (periods_adjustment.get_value(), std::dec));

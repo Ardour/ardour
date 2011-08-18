@@ -5544,7 +5544,7 @@ Editor::split_region_at_points (boost::shared_ptr<Region> r, AnalysisFeatureList
 
 
 	if (positions.size() > 20) {
-		Glib::ustring msgstr = string_compose (_("You are about to split\n%1\ninto %2 pieces.\nThis could take a long time."), ar->name(), positions.size() + 1);
+		std::string msgstr = string_compose (_("You are about to split\n%1\ninto %2 pieces.\nThis could take a long time."), ar->name(), positions.size() + 1);
 		MessageDialog msg (msgstr,
 				   false,
 				   Gtk::MESSAGE_INFO,

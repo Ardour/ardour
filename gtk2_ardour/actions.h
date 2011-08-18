@@ -95,7 +95,7 @@ class ActionManager
 	static Glib::RefPtr<Gtk::Action> register_toggle_action (Glib::RefPtr<Gtk::ActionGroup> group, 
 							  const char * name, const char * label, sigc::slot<void> sl);
 
-	static bool lookup_entry (const Glib::ustring accel_path, Gtk::AccelKey& key);
+	static bool lookup_entry (const std::string accel_path, Gtk::AccelKey& key);
 
 	static void get_all_actions (std::vector<std::string>& labels, 
 				     std::vector<std::string>& paths, 

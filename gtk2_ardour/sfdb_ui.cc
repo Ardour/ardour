@@ -67,9 +67,9 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace Editing;
 
-using Glib::ustring;
+using std::string;
 
-ustring SoundFileBrowser::persistent_folder;
+string SoundFileBrowser::persistent_folder;
 
 static ImportMode
 string2importmode (string str)
@@ -218,7 +218,7 @@ SoundFileBox::set_session(Session* s)
 }
 
 bool
-SoundFileBox::setup_labels (const ustring& filename) 
+SoundFileBox::setup_labels (const string& filename) 
 {
 	if (!path.empty()) {
 		// save existing tags
@@ -655,7 +655,7 @@ SoundFileBrowser::found_list_view_selected ()
 	if (!reset_options ()) {
 		set_response_sensitive (RESPONSE_OK, false);
 	} else {
-		ustring file;
+		string file;
 
 		TreeView::Selection::ListHandle_Path rows = found_list_view.get_selection()->get_selected_rows ();
 		
@@ -678,7 +678,7 @@ SoundFileBrowser::freesound_list_view_selected ()
 	if (!reset_options ()) {
 		set_response_sensitive (RESPONSE_OK, false);
 	} else {
-		ustring file;
+		string file;
 
 		TreeView::Selection::ListHandle_Path rows = freesound_list_view.get_selection()->get_selected_rows ();
 		
@@ -801,16 +801,16 @@ SoundFileBrowser::freesound_search_thread()
 #endif
 }
 
-vector<ustring>
+vector<string>
 SoundFileBrowser::get_paths ()
 {
-	vector<ustring> results;
+	vector<string> results;
 	
 	int n = notebook.get_current_page ();
 	
 	if (n == 0) {
-		vector<ustring> filenames = chooser.get_filenames();
-		vector<ustring>::iterator i;
+		vector<string> filenames = chooser.get_filenames();
+		vector<string>::iterator i;
 
 		for (i = filenames.begin(); i != filenames.end(); ++i) {
 			struct stat buf;
@@ -826,7 +826,7 @@ SoundFileBrowser::get_paths ()
 		ListPath rows = found_list_view.get_selection()->get_selected_rows ();
 		for (ListPath::iterator i = rows.begin() ; i != rows.end(); ++i) {
 			TreeIter iter = found_list->get_iter(*i);
-			ustring str = (*iter)[found_list_columns.pathname];
+			string str = (*iter)[found_list_columns.pathname];
 			
 			results.push_back (str);
 		}
@@ -837,7 +837,7 @@ SoundFileBrowser::get_paths ()
 		ListPath rows = freesound_list_view.get_selection()->get_selected_rows ();
 		for (ListPath::iterator i = rows.begin() ; i != rows.end(); ++i) {
 			TreeIter iter = freesound_list->get_iter(*i);
-			ustring str = (*iter)[freesound_list_columns.pathname];
+			string str = (*iter)[freesound_list_columns.pathname];
 			
 			results.push_back (str);
 		}
@@ -857,7 +857,7 @@ SoundFileOmega::reset_options_noret ()
 bool
 SoundFileOmega::reset_options ()
 {
-	vector<ustring> paths = get_paths ();
+	vector<string> paths = get_paths ();
 
 	if (paths.empty()) {
 
@@ -897,7 +897,7 @@ SoundFileOmega::reset_options ()
 		return false;
 	}
 
-	ustring existing_choice;
+	string existing_choice;
 	vector<string> action_strings;
 
 	if (selected_track_cnt > 0) {
@@ -1059,7 +1059,7 @@ SoundFileOmega::bad_file_message()
 }
 
 bool
-SoundFileOmega::check_info (const vector<ustring>& paths, bool& same_size, bool& src_needed, bool& multichannel)
+SoundFileOmega::check_info (const vector<string>& paths, bool& same_size, bool& src_needed, bool& multichannel)
 {
 	SoundFileInfo info;
 	nframes64_t sz = 0;
@@ -1070,7 +1070,7 @@ SoundFileOmega::check_info (const vector<ustring>& paths, bool& same_size, bool&
 	src_needed = false;
 	multichannel = false;
 
-	for (vector<ustring>::const_iterator i = paths.begin(); i != paths.end(); ++i) {
+	for (vector<string>::const_iterator i = paths.begin(); i != paths.end(); ++i) {
 
 		if (!AudioFileSource::get_soundfile_info (*i, info, errmsg)) {
 			err = true;
@@ -1098,7 +1098,7 @@ SoundFileOmega::check_info (const vector<ustring>& paths, bool& same_size, bool&
 
 
 bool
-SoundFileOmega::check_link_status (const Session& s, const vector<ustring>& paths)
+SoundFileOmega::check_link_status (const Session& s, const vector<string>& paths)
 {
 	string tmpdir = s.sound_dir();
 	bool ret = false;
@@ -1111,7 +1111,7 @@ SoundFileOmega::check_link_status (const Session& s, const vector<ustring>& path
 		}
 	}
 	
-	for (vector<ustring>::const_iterator i = paths.begin(); i != paths.end(); ++i) {
+	for (vector<string>::const_iterator i = paths.begin(); i != paths.end(); ++i) {
 
 		char tmpc[MAXPATHLEN+1];
 
@@ -1152,19 +1152,19 @@ SoundFileChooser::on_hide ()
 	}
 }
 
-ustring
+string
 SoundFileChooser::get_filename ()
 {
-	vector<ustring> paths;
+	vector<string> paths;
 
 	paths = get_paths ();
 
 	if (paths.empty()) {
-		return ustring ();
+		return string ();
 	}
 	
 	if (!Glib::file_test (paths.front(), Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_REGULAR)) {
-		return ustring();
+		return string();
 	}
 
 	return paths.front();
@@ -1286,15 +1286,15 @@ SoundFileOmega::SoundFileOmega (Gtk::Window& parent, string title, ARDOUR::Sessi
 
 	/* setup disposition map */
 
-	disposition_map.insert (pair<ustring,ImportDisposition>(_("one track per file"), ImportDistinctFiles));
-	disposition_map.insert (pair<ustring,ImportDisposition>(_("one track per channel"), ImportDistinctChannels));
-	disposition_map.insert (pair<ustring,ImportDisposition>(_("merge files"), ImportMergeFiles));
-	disposition_map.insert (pair<ustring,ImportDisposition>(_("sequence files"), ImportSerializeFiles));
+	disposition_map.insert (pair<string,ImportDisposition>(_("one track per file"), ImportDistinctFiles));
+	disposition_map.insert (pair<string,ImportDisposition>(_("one track per channel"), ImportDistinctChannels));
+	disposition_map.insert (pair<string,ImportDisposition>(_("merge files"), ImportMergeFiles));
+	disposition_map.insert (pair<string,ImportDisposition>(_("sequence files"), ImportSerializeFiles));
 
-	disposition_map.insert (pair<ustring,ImportDisposition>(_("one region per file"), ImportDistinctFiles));
-	disposition_map.insert (pair<ustring,ImportDisposition>(_("one region per channel"), ImportDistinctChannels));
-	disposition_map.insert (pair<ustring,ImportDisposition>(_("all files in one region"), ImportMergeFiles));
-	disposition_map.insert (pair<ustring,ImportDisposition>(_("all files in one track"), ImportSerializeFiles));
+	disposition_map.insert (pair<string,ImportDisposition>(_("one region per file"), ImportDistinctFiles));
+	disposition_map.insert (pair<string,ImportDisposition>(_("one region per channel"), ImportDistinctChannels));
+	disposition_map.insert (pair<string,ImportDisposition>(_("all files in one region"), ImportMergeFiles));
+	disposition_map.insert (pair<string,ImportDisposition>(_("all files in one track"), ImportSerializeFiles));
 
 	chooser.signal_selection_changed().connect (mem_fun (*this, &SoundFileOmega::file_selection_changed));
 
@@ -1342,7 +1342,7 @@ SoundFileOmega::on_hide ()
 ImportPosition
 SoundFileOmega::get_position() const
 {
-	ustring str = where_combo.get_active_text();
+	string str = where_combo.get_active_text();
 
 	if (str == _("use file timestamp")) {
 		return ImportAtTimestamp;
@@ -1358,7 +1358,7 @@ SoundFileOmega::get_position() const
 SrcQuality
 SoundFileOmega::get_src_quality() const
 {
-	ustring str = where_combo.get_active_text();
+	string str = where_combo.get_active_text();
 
 	if (str == _("Best")) {
 		return SrcBest;
@@ -1381,7 +1381,7 @@ SoundFileOmega::get_channel_disposition () const
 	   and the ImportDisposition enum that corresponds to it.
 	*/
 
-	ustring str = channel_combo.get_active_text();
+	string str = channel_combo.get_active_text();
 	DispositionMap::const_iterator x = disposition_map.find (str);
 
 	if (x == disposition_map.end()) {

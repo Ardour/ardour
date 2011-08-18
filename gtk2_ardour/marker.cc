@@ -355,7 +355,7 @@ Marker::set_name (const string& new_name)
 	int name_width = pixel_width (new_name, *name_font) + 2;
 
 	_annotation = new_name;
-	name_pixbuf->property_pixbuf() = pixbuf_from_ustring(new_name, name_font, 
+	name_pixbuf->property_pixbuf() = pixbuf_from_string(new_name, name_font, 
 							     ARDOUR_UI::config()->canvasvar_MarkerLabel.get(), 
 							     name_width, name_height);
 

@@ -562,16 +562,16 @@ NewSessionDialog::set_existing_session (bool yn)
 }
 
 void
-NewSessionDialog::set_session_name (const Glib::ustring& name)
+NewSessionDialog::set_session_name (const std::string& name)
 {
 	m_name->set_text (name);
 	engine_page_session_name = name;
 }
 
 void
-NewSessionDialog::set_session_folder(const Glib::ustring& dir)
+NewSessionDialog::set_session_folder(const std::string& dir)
 {
-	Glib::ustring realdir = dir;
+	std::string realdir = dir;
 
 	/* this little tangled mess is a result of 4 things:
 

@@ -548,7 +548,7 @@ TimeAxisViewItem::get_time_axis_view()
  * @param new_name the new name text to display
  */
 void
-TimeAxisViewItem::set_name_text(const ustring& new_name)
+TimeAxisViewItem::set_name_text(const string& new_name)
 {
 	if (!name_pixbuf) {
 		return;
@@ -558,7 +558,7 @@ TimeAxisViewItem::set_name_text(const ustring& new_name)
 
 	last_item_width = trackview.editor.frame_to_pixel(item_duration);
 	name_pixbuf_width = pixel_width (new_name, *NAME_FONT) + 2;
-	name_pixbuf->property_pixbuf() = pixbuf_from_ustring(new_name, NAME_FONT, 
+	name_pixbuf->property_pixbuf() = pixbuf_from_string(new_name, NAME_FONT, 
 							     ARDOUR_UI::config()->canvasvar_TimeAxisViewItemName.get(),
 							     name_pixbuf_width, NAME_HEIGHT);
 }
@@ -931,7 +931,7 @@ TimeAxisViewItem::reset_name_width (double pix_width)
 		name_pixbuf->show();
 	}
 
-	name_pixbuf->property_pixbuf() = pixbuf_from_ustring(item_name, NAME_FONT, 
+	name_pixbuf->property_pixbuf() = pixbuf_from_string(item_name, NAME_FONT, 
 							     ARDOUR_UI::config()->canvasvar_TimeAxisViewItemName.get(),
 							     pb_width, NAME_HEIGHT);
 }

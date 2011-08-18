@@ -114,7 +114,9 @@ Editor::add_audio_region_to_region_display (boost::shared_ptr<AudioRegion> regio
 
 		} else {
 
-			if ((*iter)[region_list_columns.name] != _("Hidden")) {
+			string name = (*iter)[region_list_columns.name];
+
+			if (name != _("Hidden")) {
 
 				parent = *(region_list_model->insert(iter));
 				parent[region_list_columns.name] = _("Hidden");
@@ -476,8 +478,8 @@ Editor::region_list_sorter (TreeModel::iterator a, TreeModel::iterator b)
 	boost::shared_ptr<AudioRegion> region2 = boost::dynamic_pointer_cast<AudioRegion> (r2);
 
 	if (region1 == 0 || region2 == 0) {
-		Glib::ustring s1;
-		Glib::ustring s2;
+		std::string s1;
+		std::string s2;
 		switch (region_list_sort_type) {
 		case ByName:
 			s1 = (*a)[region_list_columns.name];
@@ -623,7 +625,7 @@ Editor::region_list_display_drag_data_received (const RefPtr<Gdk::DragContext>& 
 						const SelectionData& data,
 						guint info, guint time)
 {
-	vector<ustring> paths;
+	vector<string> paths;
 
 	if (data.get_target() == "GTK_TREE_MODEL_ROW") {
 		region_list_display.on_drag_data_received (context, x, y, data, info, time);
@@ -659,7 +661,7 @@ Editor::region_list_selection_filter (const RefPtr<TreeModel>& model, const Tree
 }
 
 void
-Editor::region_name_edit (const Glib::ustring& path, const Glib::ustring& new_text)
+Editor::region_name_edit (const string& path, const string& new_text)
 {
 	boost::shared_ptr<Region> region;
 	TreeIter iter;
