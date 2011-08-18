@@ -2554,7 +2554,7 @@ Session::get_route_templates (vector<RouteTemplateInfo>& template_names)
 int
 Session::read_favorite_dirs (FavoriteDirs & favs)
 {
-	Glib::ustring path = Glib::build_filename (get_user_ardour_path(), "favorite_dirs");
+	std::string path = Glib::build_filename (get_user_ardour_path(), "favorite_dirs");
 
 	ifstream fav (path.c_str());
 
@@ -2588,7 +2588,7 @@ Session::read_favorite_dirs (FavoriteDirs & favs)
 int
 Session::write_favorite_dirs (FavoriteDirs & favs)
 {
-	Glib::ustring path = Glib::build_filename (get_user_ardour_path(), "favorite_dirs");
+	std::string path = Glib::build_filename (get_user_ardour_path(), "favorite_dirs");
 
 	ofstream fav (path.c_str());
 
@@ -2653,7 +2653,7 @@ Session::find_all_sources (string path, set<string>& result)
 
 		bool is_new;
 		uint16_t chan;
-		Glib::ustring path;
+		std::string path;
 		std::string name;
 		
 		if (AudioFileSource::find (prop->value(), true, false, is_new, chan, path, name)) {

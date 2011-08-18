@@ -46,7 +46,7 @@ namespace ARDOUR {
 class AudioSource : public Source, public boost::enable_shared_from_this<ARDOUR::AudioSource>
 {
   public:
-	AudioSource (Session&, Glib::ustring name);
+	AudioSource (Session&, std::string name);
 	AudioSource (Session&, const XMLNode&);
 	virtual ~AudioSource ();
 
@@ -85,8 +85,8 @@ class AudioSource : public Source, public boost::enable_shared_from_this<ARDOUR:
 
 	virtual bool can_truncate_peaks() const { return true; }
 
-	void set_captured_for (Glib::ustring str) { _captured_for = str; }
-	Glib::ustring captured_for() const { return _captured_for; }
+	void set_captured_for (std::string str) { _captured_for = str; }
+	std::string captured_for() const { return _captured_for; }
 
 	uint32_t read_data_count() const { return _read_data_count; }
 	uint32_t write_data_count() const { return _write_data_count; }
@@ -103,7 +103,7 @@ class AudioSource : public Source, public boost::enable_shared_from_this<ARDOUR:
 	XMLNode& get_state ();
 	int set_state (const XMLNode&);
 
-	int rename_peakfile (Glib::ustring newpath);
+	int rename_peakfile (std::string newpath);
 	void touch_peakfile ();
 
 	static void set_build_missing_peakfiles (bool yn) {
@@ -138,13 +138,13 @@ class AudioSource : public Source, public boost::enable_shared_from_this<ARDOUR:
 	mutable Glib::Mutex  _lock;
 	mutable Glib::Mutex  _peaks_ready_lock;
 	nframes_t            _length;
-	Glib::ustring         peakpath;
-	Glib::ustring        _captured_for;
+	std::string         peakpath;
+	std::string        _captured_for;
 
 	mutable uint32_t _read_data_count;  // modified in read()
 	mutable uint32_t _write_data_count; // modified in write()
 
-	int initialize_peakfile (bool newfile, Glib::ustring path);
+	int initialize_peakfile (bool newfile, std::string path);
 	int build_peaks_from_scratch ();
 	int compute_and_write_peaks (Sample* buf, nframes_t first_frame, nframes_t cnt, bool force, bool intermediate_peaks_ready_signal);
 	void truncate_peakfile();
@@ -153,8 +153,8 @@ class AudioSource : public Source, public boost::enable_shared_from_this<ARDOUR:
 
 	virtual nframes_t read_unlocked (Sample *dst, nframes_t start, nframes_t cnt) const = 0;
 	virtual nframes_t write_unlocked (Sample *dst, nframes_t cnt) = 0;
-	virtual Glib::ustring peak_path(Glib::ustring audio_path) = 0;
-	virtual Glib::ustring find_broken_peakfile (Glib::ustring missing_peak_path, Glib::ustring audio_path) = 0;
+	virtual std::string peak_path(std::string audio_path) = 0;
+	virtual std::string find_broken_peakfile (std::string missing_peak_path, std::string audio_path) = 0;
 	
 	void update_length (nframes_t pos, nframes_t cnt);
 
@@ -173,7 +173,7 @@ class AudioSource : public Source, public boost::enable_shared_from_this<ARDOUR:
 	Sample* peak_leftovers;
 	nframes_t peak_leftover_frame;
 
-	bool file_changed (Glib::ustring path);
+	bool file_changed (std::string path);
 };
 
 }

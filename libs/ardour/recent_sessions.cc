@@ -39,7 +39,7 @@ using namespace PBD;
 int
 ARDOUR::read_recent_sessions (RecentSessions& rs)
 {
-	Glib::ustring path = Glib::build_filename (get_user_ardour_path(), "recent");
+	std::string path = Glib::build_filename (get_user_ardour_path(), "recent");
 
 	ifstream recent (path.c_str());
 	
@@ -81,7 +81,7 @@ ARDOUR::read_recent_sessions (RecentSessions& rs)
 int
 ARDOUR::write_recent_sessions (RecentSessions& rs)
 {
-	Glib::ustring path = Glib::build_filename (get_user_ardour_path(), "recent");
+	std::string path = Glib::build_filename (get_user_ardour_path(), "recent");
 
 	ofstream recent (path.c_str());
 

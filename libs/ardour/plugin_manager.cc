@@ -569,7 +569,7 @@ PluginManager::get_status (const PluginInfoPtr& pi)
 void
 PluginManager::save_statuses ()
 {
-	Glib::ustring path = Glib::build_filename (get_user_ardour_path (), "plugin_statuses");
+	std::string path = Glib::build_filename (get_user_ardour_path (), "plugin_statuses");
 	ofstream ofs;
 
 	ofs.open (path.c_str(), ios_base::openmode (ios::out|ios::trunc));
@@ -621,7 +621,7 @@ PluginManager::save_statuses ()
 void
 PluginManager::load_statuses ()
 {
-	Glib::ustring path = Glib::build_filename (get_user_ardour_path (),"plugin_statuses");
+	std::string path = Glib::build_filename (get_user_ardour_path (),"plugin_statuses");
 
 	ifstream ifs (path.c_str());
 

@@ -61,8 +61,8 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Glib;
 
-ustring AudioFileSource::peak_dir = "";
-ustring AudioFileSource::search_path;
+string AudioFileSource::peak_dir = "";
+string AudioFileSource::search_path;
 
 sigc::signal<void> AudioFileSource::HeaderPositionOffsetChanged;
 uint64_t           AudioFileSource::header_position_offset = 0;
@@ -85,7 +85,7 @@ struct SizedSampleBuffer {
 
 Glib::StaticPrivate<SizedSampleBuffer> thread_interleave_buffer = GLIBMM_STATIC_PRIVATE_INIT;
 
-AudioFileSource::AudioFileSource (Session& s, ustring path, Flag flags)
+AudioFileSource::AudioFileSource (Session& s, string path, Flag flags)
 	: AudioSource (s, path), _flags (flags),
 	  _channel (0)
 {
@@ -100,7 +100,7 @@ AudioFileSource::AudioFileSource (Session& s, ustring path, Flag flags)
 	fix_writable_flags ();
 }
 
-AudioFileSource::AudioFileSource (Session& s, ustring path, Flag flags, SampleFormat samp_format, HeaderFormat hdr_format)
+AudioFileSource::AudioFileSource (Session& s, string path, Flag flags, SampleFormat samp_format, HeaderFormat hdr_format)
 	: AudioSource (s, path), _flags (flags),
 	  _channel (0)
 {
@@ -169,7 +169,7 @@ AudioFileSource::fix_writable_flags ()
 }
 
 bool
-AudioFileSource::determine_embeddedness (ustring path)
+AudioFileSource::determine_embeddedness (string path)
 {
 	return (path.find("/") == 0);
 }
@@ -187,7 +187,7 @@ AudioFileSource::writable() const
 }
 
 int
-AudioFileSource::init (ustring pathstr, bool must_exist)
+AudioFileSource::init (string pathstr, bool must_exist)
 {
 	_length = 0;
 	timeline_position = 0;
@@ -209,10 +209,10 @@ AudioFileSource::init (ustring pathstr, bool must_exist)
 }
 
 
-ustring
-AudioFileSource::peak_path (ustring audio_path)
+string
+AudioFileSource::peak_path (string audio_path)
 {
-	ustring base;
+	string base;
 
 	base = PBD::basename_nosuffix (audio_path);
 	base += '%';
@@ -221,10 +221,10 @@ AudioFileSource::peak_path (ustring audio_path)
 	return _session.peak_path (base);
 }
 
-ustring
-AudioFileSource::find_broken_peakfile (ustring peak_path, ustring audio_path)
+string
+AudioFileSource::find_broken_peakfile (string peak_path, string audio_path)
 {
-	ustring str;
+	string str;
 
 	/* check for the broken location in use by 2.0 for several months */
 	
@@ -262,21 +262,21 @@ AudioFileSource::find_broken_peakfile (ustring peak_path, ustring audio_path)
 	return peak_path;
 }
 
-ustring
-AudioFileSource::broken_peak_path (ustring audio_path)
+string
+AudioFileSource::broken_peak_path (string audio_path)
 {
 	return Glib::build_filename(_session.peak_dir (), PBD::basename_nosuffix (audio_path) + ".peak");
 }
 
-ustring
-AudioFileSource::old_peak_path (ustring audio_path)
+string
+AudioFileSource::old_peak_path (string audio_path)
 {
 	/* XXX hardly bombproof! fix me */
 
 	struct stat stat_file;
 	struct stat stat_mount;
 
-	ustring mp = mountpoint (audio_path);
+	string mp = mountpoint (audio_path);
 
 	stat (audio_path.c_str(), &stat_file);
 	stat (mp.c_str(), &stat_mount);
@@ -288,14 +288,14 @@ AudioFileSource::old_peak_path (ustring audio_path)
 	snprintf (buf, sizeof (buf), "%ld-%ld-%d.peak", stat_mount.st_ino, stat_file.st_ino, _channel);
 #endif
 
-	ustring res = peak_dir;
+	string res = peak_dir;
 	res += buf;
 
 	return res;
 }
 
 bool
-AudioFileSource::get_soundfile_info (ustring path, SoundFileInfo& _info, string& error_msg)
+AudioFileSource::get_soundfile_info (string path, SoundFileInfo& _info, string& error_msg)
 {
 	/* try sndfile first because it gets timecode info from .wav (BWF) if it exists,
 	   which at present, ExtAudioFile from Apple seems unable to do.
@@ -396,7 +396,7 @@ AudioFileSource::mark_streaming_write_completed ()
 }
 
 void
-AudioFileSource::mark_take (ustring id)
+AudioFileSource::mark_take (string id)
 {
 	if (writable()) {
 		_take_id = id;
@@ -404,14 +404,14 @@ AudioFileSource::mark_take (ustring id)
 }
 
 int
-AudioFileSource::move_to_trash (const ustring& trash_dir_name)
+AudioFileSource::move_to_trash (const string& trash_dir_name)
 {
 	if (is_embedded()) {
 		cerr << "tried to move an embedded region to trash" << endl;
 		return -1;
 	}
 
-	ustring newpath;
+	string newpath;
 
 	if (!writable()) {
 		return -1;
@@ -440,7 +440,7 @@ AudioFileSource::move_to_trash (const ustring& trash_dir_name)
 		
 		char buf[PATH_MAX+1];
 		int version = 1;
-		ustring newpath_v;
+		string newpath_v;
 
 		snprintf (buf, sizeof (buf), "%s.%d", newpath.c_str(), version);
 		newpath_v = buf;
@@ -492,11 +492,11 @@ AudioFileSource::move_to_trash (const ustring& trash_dir_name)
 }
 
 bool
-AudioFileSource::find (ustring pathstr, bool must_exist, bool embedded,
+AudioFileSource::find (string pathstr, bool must_exist, bool embedded,
 		       bool& isnew, uint16_t& chan, 
-		       ustring& path, std::string& name)
+		       string& path, std::string& name)
 {
-	ustring::size_type pos;
+	string::size_type pos;
 	bool ret = false;
 
 	isnew = false;
@@ -505,10 +505,10 @@ AudioFileSource::find (ustring pathstr, bool must_exist, bool embedded,
 
 		/* non-absolute pathname: find pathstr in search path */
 
-		vector<ustring> dirs;
+		vector<string> dirs;
 		int cnt;
-		ustring fullpath;
-		ustring keeppath;
+		string fullpath;
+		string keeppath;
 
 		if (search_path.length() == 0) {
 			error << _("FileSource: search path not set") << endmsg;
@@ -519,7 +519,7 @@ AudioFileSource::find (ustring pathstr, bool must_exist, bool embedded,
 
 		cnt = 0;
 		
-		for (vector<ustring>::iterator i = dirs.begin(); i != dirs.end(); ++i) {
+		for (vector<string>::iterator i = dirs.begin(); i != dirs.end(); ++i) {
 
 			fullpath = Glib::build_filename (*i, pathstr);
 
@@ -527,7 +527,7 @@ AudioFileSource::find (ustring pathstr, bool must_exist, bool embedded,
 			   Ardour 0.99 .. this hack tries to make things sort of work.
 			*/
 			
-			if ((pos = pathstr.find_last_of (':')) != ustring::npos) {
+			if ((pos = pathstr.find_last_of (':')) != string::npos) {
 				
 				if (Glib::file_test (fullpath, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_REGULAR)) {
 
@@ -544,7 +544,7 @@ AudioFileSource::find (ustring pathstr, bool must_exist, bool embedded,
 						   without the :suffix exists
 						 */
 						
-						ustring shorter = pathstr.substr (0, pos);
+						string shorter = pathstr.substr (0, pos);
 						fullpath = Glib::build_filename (*i, shorter);
 
 						if (Glib::file_test (pathstr, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_REGULAR)) {
@@ -595,9 +595,9 @@ AudioFileSource::find (ustring pathstr, bool must_exist, bool embedded,
 
 		/* ugh, handle ':' situation */
 
-		if ((pos = pathstr.find_last_of (':')) != ustring::npos) {
+		if ((pos = pathstr.find_last_of (':')) != string::npos) {
 			
-			ustring shorter = pathstr.substr (0, pos);
+			string shorter = pathstr.substr (0, pos);
 
 			if (Glib::file_test (shorter, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_REGULAR)) {
 				chan = atoi (pathstr.substr (pos+1));
@@ -646,7 +646,7 @@ AudioFileSource::find (ustring pathstr, bool must_exist, bool embedded,
 }
 
 void
-AudioFileSource::set_search_path (ustring p)
+AudioFileSource::set_search_path (string p)
 {
 	search_path = p;
 }
@@ -681,11 +681,11 @@ AudioFileSource::set_allow_remove_if_empty (bool yn)
 }
 
 int
-AudioFileSource::set_name (ustring newname, bool destructive)
+AudioFileSource::set_name (string newname, bool destructive)
 {
 	Glib::Mutex::Lock lm (_lock);
-	ustring oldpath = _path;
-	ustring newpath = Session::change_audio_path_by_name (oldpath, _name, newname, destructive);
+	string oldpath = _path;
+	string newpath = Session::change_audio_path_by_name (oldpath, _name, newname, destructive);
 
 	if (newpath.empty()) {
 		error << string_compose (_("programming error: %1"), "cannot generate a changed audio path") << endmsg;
@@ -710,7 +710,7 @@ AudioFileSource::set_name (ustring newname, bool destructive)
 }
 
 bool
-AudioFileSource::is_empty (Session& s, ustring path)
+AudioFileSource::is_empty (Session& s, string path)
 {
 	SoundFileInfo info;
 	string err;
@@ -734,7 +734,7 @@ AudioFileSource::setup_peakfile ()
 }
 
 bool
-AudioFileSource::safe_file_extension(ustring file)
+AudioFileSource::safe_file_extension(string file)
 {
 	const char* suffixes[] = {
 		".aif", ".AIF",

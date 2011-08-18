@@ -267,7 +267,7 @@ class Session : public PBD::StatefulDestructible
 	
 	int ensure_subdirs ();
 
-	Glib::ustring peak_path (Glib::ustring) const;
+	std::string peak_path (std::string) const;
 
 	static string suffixed_search_path (std::string suffix, bool data);
 	static string control_protocol_path ();
@@ -617,7 +617,7 @@ class Session : public PBD::StatefulDestructible
 	    uint32_t count;
 	    SrcQuality quality;
 	    volatile bool freeze;
-	    std::vector<Glib::ustring> paths;
+	    std::vector<std::string> paths;
 	    bool replace_existing_source;
 	    
 	    /* result */
@@ -681,7 +681,7 @@ class Session : public PBD::StatefulDestructible
 	boost::shared_ptr<AudioFileSource> create_audio_source_for_session (ARDOUR::AudioDiskstream&, uint32_t which_channel, bool destructive);
 
 	boost::shared_ptr<Source> source_by_id (const PBD::ID&);
-	boost::shared_ptr<Source> source_by_path_and_channel (const Glib::ustring&, uint16_t);
+	boost::shared_ptr<Source> source_by_path_and_channel (const std::string&, uint16_t);
 
 	/* playlist management */
 

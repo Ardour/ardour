@@ -39,7 +39,7 @@
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
-using Glib::ustring;
+using std::string;
 
 gain_t* SndFileSource::out_coefficient = 0;
 gain_t* SndFileSource::in_coefficient = 0;
@@ -74,7 +74,7 @@ SndFileSource::SndFileSource (Session& s, const XMLNode& node)
 	}
 }
 
-SndFileSource::SndFileSource (Session& s, ustring path, int chn, Flag flags)
+SndFileSource::SndFileSource (Session& s, string path, int chn, Flag flags)
           /* files created this way are never writable or removable */
 	: AudioFileSource (s, path, Flag (flags & ~(Writable|Removable|RemovableIfEmpty|RemoveAtDestroy)))
 {
@@ -87,7 +87,7 @@ SndFileSource::SndFileSource (Session& s, ustring path, int chn, Flag flags)
 	}
 }
 
-SndFileSource::SndFileSource (Session& s, ustring path, SampleFormat sfmt, HeaderFormat hf, nframes_t rate, Flag flags)
+SndFileSource::SndFileSource (Session& s, string path, SampleFormat sfmt, HeaderFormat hf, nframes_t rate, Flag flags)
 	: AudioFileSource (s, path, flags, sfmt, hf)
 {
 	int fmt = 0;
@@ -193,7 +193,7 @@ SndFileSource::SndFileSource (Session& s, ustring path, SampleFormat sfmt, Heade
 void 
 SndFileSource::init ()
 {
-	ustring file;
+	string file;
 
 	// lets try to keep the object initalizations here at the top
 	xfade_buf = 0;
@@ -859,7 +859,7 @@ SndFileSource::set_timeline_position (int64_t pos)
 }
 
 int
-SndFileSource::get_soundfile_info (const ustring& path, SoundFileInfo& info, string& error_msg)
+SndFileSource::get_soundfile_info (const string& path, SoundFileInfo& info, string& error_msg)
 {
 	SNDFILE *sf;
 	SF_INFO sf_info;

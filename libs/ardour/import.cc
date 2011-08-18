@@ -66,6 +66,8 @@ open_importable_source (const string& path, nframes_t samplerate, ARDOUR::SrcQua
 	   logic the same as in SourceFactory::create() 
 	 */
 
+	cerr << "Trying to open " << path << endl;
+
 	try { 
 		boost::shared_ptr<SndFileImportableSource> source(new SndFileImportableSource(path));
 		
@@ -75,12 +77,18 @@ open_importable_source (const string& path, nframes_t samplerate, ARDOUR::SrcQua
 		
 		/* rewrap as a resampled source */
 		
-		return boost::shared_ptr<ImportableSource>(new ResampledImportableSource(source, samplerate, quality));
+		boost::shared_ptr<ImportableSource> r(new ResampledImportableSource(source, samplerate, quality));
+		cerr << "sndfile returns " << r << endl;
+		return r;
 	}
 
 	catch (...) {
 
+		cerr << "\topen failed\n";
+
 #ifdef HAVE_COREAUDIO
+
+		cerr << "trying to use coreaudio to open " << path << endl;
 
 		/* libsndfile failed, see if we can use CoreAudio to handle the IO */
 		
@@ -93,7 +101,9 @@ open_importable_source (const string& path, nframes_t samplerate, ARDOUR::SrcQua
 		
 		/* rewrap as a resampled source */
 		
-		return boost::shared_ptr<ImportableSource>(new ResampledImportableSource(source, samplerate, quality));
+		 boost::shared_ptr<ImportableSource> r(new ResampledImportableSource(source, samplerate, quality));
+		 cerr << "coreaudio returns " << r << endl;
+		 return r;
 
 #else
 		throw; // rethrow
@@ -149,12 +159,16 @@ get_paths_for_new_sources (const bool allow_replacing, const string& import_file
 	vector<string> new_paths;
 	const string basename = basename_nosuffix (import_file_path);
 
+	cerr << "Getting paths for new sources based on " << import_file_path << " => " << basename << endl;
+
 	for (uint n = 0; n < channels; ++n) {
 
 		std::string filepath;
 
 		filepath = Glib::build_filename (session_dir, 
                                                  get_non_existent_filename (allow_replacing, session_dir, basename, n, channels));
+
+		cerr << "\t" << filepath << endl;
 
 		new_paths.push_back (filepath);
 	}
@@ -193,8 +207,8 @@ create_mono_sources_for_writing (const vector<string>& new_paths, Session& sess,
 	{
 		boost::shared_ptr<Source> source;
 
-		try
-		{
+		try {
+			cerr << "Try to create " << *i << endl;
 			source = SourceFactory::createWritable (
 				sess,
 				i->c_str(),
@@ -208,6 +222,7 @@ create_mono_sources_for_writing (const vector<string>& new_paths, Session& sess,
 			return false;
 		}
 
+		cerr << "\thave new file\n";
 		afs = boost::dynamic_pointer_cast<AudioFileSource>(source);
 		afs->set_timeline_position(timeline_position);
 		newfiles.push_back(afs);
@@ -215,7 +230,7 @@ create_mono_sources_for_writing (const vector<string>& new_paths, Session& sess,
 	return true;
 }
 
-static Glib::ustring
+static std::string
 compose_status_message (const string& path,
 			uint file_samplerate,
 			uint session_samplerate,
@@ -302,9 +317,7 @@ Session::import_audiofiles (import_status& status)
 
 	status.sources.clear ();
 	
-	for (vector<Glib::ustring>::iterator p = status.paths.begin();
-			p != status.paths.end() && !status.cancel;
-			++p)
+	for (vector<string>::iterator p = status.paths.begin(); p != status.paths.end() && !status.cancel; ++p)
 	{
 		status.count++;
 

@@ -136,7 +136,7 @@ _get_transport_state_callback (void*     userData,
 
 
 static int 
-save_property_list (CFPropertyListRef propertyList, Glib::ustring path)
+save_property_list (CFPropertyListRef propertyList, std::string path)
 
 {
 	CFDataRef xmlData;
@@ -184,7 +184,7 @@ save_property_list (CFPropertyListRef propertyList, Glib::ustring path)
  
 
 static CFPropertyListRef 
-load_property_list (Glib::ustring path) 
+load_property_list (std::string path) 
 {
 	int fd;
 	CFPropertyListRef propertyList = 0;
@@ -359,7 +359,7 @@ AUPlugin::AUPlugin (AudioEngine& engine, Session& session, boost::shared_ptr<CAC
 	, last_transport_speed (0.0)
 {			
 	if (!preset_search_path_initialized) {
-		Glib::ustring p = Glib::get_home_dir();
+		std::string p = Glib::get_home_dir();
 		p += "/Library/Audio/Presets:";
 		p += preset_search_path;
 		preset_search_path = p;
@@ -1643,7 +1643,7 @@ AUPlugin::load_preset (const string preset_label)
 #ifdef AU_STATE_SUPPORT
 	bool ret = false;
 	CFPropertyListRef propertyList;
-	Glib::ustring path;
+	std::string path;
 	UserPresetMap::iterator ux;
 	FactoryPresetMap::iterator fx;
 
@@ -1704,8 +1704,8 @@ AUPlugin::save_preset (string preset_name)
 {
 #ifdef AU_STATE_SUPPORT
 	CFPropertyListRef propertyList;
-	vector<Glib::ustring> v;
-	Glib::ustring user_preset_path;
+	vector<std::string> v;
+	std::string user_preset_path;
 	bool ret = true;
 
 	std::string m = maker();
@@ -2041,7 +2041,7 @@ AUPluginInfo::load (Session& session)
 	}
 }
 
-Glib::ustring
+std::string
 AUPluginInfo::au_cache_path ()
 {
 	return Glib::build_filename (ARDOUR::get_user_ardour_path(), "au_cache");
@@ -2304,7 +2304,7 @@ AUPluginInfo::save_cached_info ()
 
 	}
 
-	Glib::ustring path = au_cache_path ();
+	std::string path = au_cache_path ();
 	XMLTree tree;
 
 	tree.set_root (node);
@@ -2318,7 +2318,7 @@ AUPluginInfo::save_cached_info ()
 int
 AUPluginInfo::load_cached_info ()
 {
-	Glib::ustring path = au_cache_path ();
+	std::string path = au_cache_path ();
 	XMLTree tree;
 	
 	if (!Glib::file_test (path, Glib::FILE_TEST_EXISTS)) {
@@ -2416,7 +2416,7 @@ AUPluginInfo::load_cached_info ()
 }
 
 void
-AUPluginInfo::get_names (CAComponentDescription& comp_desc, std::string& name, Glib::ustring& maker)
+AUPluginInfo::get_names (CAComponentDescription& comp_desc, std::string& name, std::string& maker)
 {
 	CFStringRef itemName = NULL;
 

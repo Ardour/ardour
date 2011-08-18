@@ -56,8 +56,8 @@ class PluginInfo {
 
 	string name;
 	string category;
- 	Glib::ustring creator;
- 	Glib::ustring path;
+ 	std::string creator;
+ 	std::string path;
 	int32_t n_inputs;
 	int32_t n_outputs;
 	ARDOUR::PluginType type;

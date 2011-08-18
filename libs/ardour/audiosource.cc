@@ -47,14 +47,14 @@
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
-using Glib::ustring;
+using std::string;
 
 bool AudioSource::_build_missing_peakfiles = false;
 bool AudioSource::_build_peakfiles = false;
 
 #define _FPP 256
 
-AudioSource::AudioSource (Session& s, ustring name)
+AudioSource::AudioSource (Session& s, string name)
 	: Source (s, name)
 {
 	_peaks_built = false;
@@ -167,11 +167,11 @@ AudioSource::touch_peakfile ()
 }
 
 int
-AudioSource::rename_peakfile (ustring newpath)
+AudioSource::rename_peakfile (string newpath)
 {
 	/* caller must hold _lock */
 
-	ustring oldpath = peakpath;
+	string oldpath = peakpath;
 
 	if (access (oldpath.c_str(), F_OK) == 0) {
 		if (rename (oldpath.c_str(), newpath.c_str()) != 0) {
@@ -186,7 +186,7 @@ AudioSource::rename_peakfile (ustring newpath)
 }
 
 int
-AudioSource::initialize_peakfile (bool newfile, ustring audio_path)
+AudioSource::initialize_peakfile (bool newfile, string audio_path)
 {
 	struct stat statbuf;
 
@@ -895,7 +895,7 @@ AudioSource::truncate_peakfile ()
 }
 
 bool
-AudioSource::file_changed (ustring path)
+AudioSource::file_changed (string path)
 {
 	struct stat stat_file;
 	struct stat stat_peak;

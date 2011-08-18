@@ -56,19 +56,19 @@ class AudioFileSource : public AudioSource {
 
 	virtual ~AudioFileSource ();
 
-	int set_name (Glib::ustring newname, bool destructive);
+	int set_name (std::string newname, bool destructive);
 	
-	Glib::ustring path() const { return _path; }
-	Glib::ustring peak_path (Glib::ustring audio_path);
-	Glib::ustring find_broken_peakfile (Glib::ustring missing_peak_path, Glib::ustring audio_path);
+	std::string path() const { return _path; }
+	std::string peak_path (std::string audio_path);
+	std::string find_broken_peakfile (std::string missing_peak_path, std::string audio_path);
 
 	uint16_t channel() const { return _channel; }
 
-	static void set_peak_dir (Glib::ustring dir) { peak_dir = dir; }
+	static void set_peak_dir (std::string dir) { peak_dir = dir; }
 
-	static bool get_soundfile_info (Glib::ustring path, SoundFileInfo& _info, std::string& error);
+	static bool get_soundfile_info (std::string path, SoundFileInfo& _info, std::string& error);
 
-	static bool safe_file_extension (Glib::ustring path);
+	static bool safe_file_extension (std::string path);
 
 	void set_allow_remove_if_empty (bool yn);
 	void mark_for_remove();
@@ -86,19 +86,19 @@ class AudioFileSource : public AudioSource {
 	virtual int update_header (nframes_t when, struct tm&, time_t) = 0;
 	virtual int flush_header () = 0;
 
-	int move_to_trash (const Glib::ustring& trash_dir_name);
+	int move_to_trash (const std::string& trash_dir_name);
 
-	static bool is_empty (Session&, Glib::ustring path);
+	static bool is_empty (Session&, std::string path);
 	void mark_streaming_write_completed ();
 
-	void   mark_take (Glib::ustring);
-	Glib::ustring take_id() const { return _take_id; }
+	void   mark_take (std::string);
+	std::string take_id() const { return _take_id; }
 
 	bool is_embedded() const { return _is_embedded; }
 
 	static void set_bwf_serial_number (int);
 	
-	static void set_search_path (Glib::ustring string);
+	static void set_search_path (std::string string);
 	static void set_header_position_offset (nframes_t offset );
 
 	int setup_peakfile ();
@@ -127,38 +127,38 @@ class AudioFileSource : public AudioSource {
 
 	virtual void set_timeline_position (int64_t pos);
 
-	static bool find (Glib::ustring path, bool must_exist, bool embedded, bool& is_new, uint16_t& chan,
-			  Glib::ustring& found_path, std::string& found_name);
+	static bool find (std::string path, bool must_exist, bool embedded, bool& is_new, uint16_t& chan,
+			  std::string& found_path, std::string& found_name);
 
   protected:
 	
 	/* constructor to be called for existing external-to-session files */
 
-	AudioFileSource (Session&, Glib::ustring path, Flag flags);
+	AudioFileSource (Session&, std::string path, Flag flags);
 
 	/* constructor to be called for new in-session files */
 
-	AudioFileSource (Session&, Glib::ustring path, Flag flags,
+	AudioFileSource (Session&, std::string path, Flag flags,
 			 SampleFormat samp_format, HeaderFormat hdr_format);
 
 	/* constructor to be called for existing in-session files */
 
 	AudioFileSource (Session&, const XMLNode&, bool must_exit = true);
 
-	int init (Glib::ustring idstr, bool must_exist);
+	int init (std::string idstr, bool must_exist);
 
-	Glib::ustring _path;
+	std::string _path;
 	Flag          _flags;
-	Glib::ustring _take_id;
+	std::string _take_id;
 	int64_t       timeline_position;
 	bool           file_is_new;
 	uint16_t      _channel;
 
 	bool          _is_embedded;
-	static bool determine_embeddedness(Glib::ustring path);
+	static bool determine_embeddedness(std::string path);
 
-	static Glib::ustring peak_dir;
-	static Glib::ustring search_path;
+	static std::string peak_dir;
+	static std::string search_path;
 
 	static char bwf_country_code[3];
 	static char bwf_organization_code[4];
@@ -174,8 +174,8 @@ class AudioFileSource : public AudioSource {
 	static Sample* get_interleave_buffer (nframes_t size);
 	
   private:
-	Glib::ustring old_peak_path (Glib::ustring audio_path);
-	Glib::ustring broken_peak_path (Glib::ustring audio_path);
+	std::string old_peak_path (std::string audio_path);
+	std::string broken_peak_path (std::string audio_path);
 
 	void fix_writable_flags ();
 	void prevent_deletion ();

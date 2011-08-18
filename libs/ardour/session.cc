@@ -3135,7 +3135,7 @@ Session::source_by_id (const PBD::ID& id)
 
 
 boost::shared_ptr<Source>
-Session::source_by_path_and_channel (const Glib::ustring& path, uint16_t chn)
+Session::source_by_path_and_channel (const string& path, uint16_t chn)
 {
 	Glib::Mutex::Lock lm (audio_source_lock);
 
@@ -3150,10 +3150,10 @@ Session::source_by_path_and_channel (const Glib::ustring& path, uint16_t chn)
 	return boost::shared_ptr<Source>();
 }
 
-Glib::ustring
-Session::peak_path (Glib::ustring base) const
+string
+Session::peak_path (string base) const
 {
-	return Glib::build_filename(peak_dir (), base + ".peak");
+	return Glib::build_filename (peak_dir (), base + ".peak");
 }
 
 string
@@ -3589,7 +3589,7 @@ Session::remove_empty_sounds ()
 
 			unlink ((*i)->c_str());
 			
-			Glib::ustring peakpath = peak_path (PBD::basename_nosuffix (**i));
+			std::string peakpath = peak_path (PBD::basename_nosuffix (**i));
 			unlink (peakpath.c_str());
 		}
 
