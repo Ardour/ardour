@@ -30,7 +30,7 @@ using namespace PBD;
 using namespace std;
 
 int
-PBD::copy_file (Glib::ustring from, Glib::ustring to)
+PBD::copy_file (const string& from, const string& to)
 {
 	ifstream in (from.c_str());
 	ofstream out (to.c_str());

@@ -22,26 +22,25 @@
 
 #include <stdint.h>
 
-using namespace Glib;
-using namespace std;
+using std::string;
 
-ustring
-short_path (const Glib::ustring& path, ustring::size_type target_characters)
+string
+short_path (const std::string& path, string::size_type target_characters)
 {
-	ustring::size_type last_sep;
-	ustring::size_type len = path.length();
+	string::size_type last_sep;
+	string::size_type len = path.length();
 	const char separator = '/';
 
 	if (len <= target_characters) {
 		return path;
 	}
 
-	if ((last_sep = path.find_last_of (separator)) == ustring::npos) {
+	if ((last_sep = path.find_last_of (separator)) == string::npos) {
 
 		/* just a filename, but its too long anyway */
 
 		if (target_characters > 3) {
-			return path.substr (0, target_characters - 3) + ustring ("...");
+			return path.substr (0, target_characters - 3) + string ("...");
 		} else {
 			/* stupid caller, just hand back the whole thing */
 			return path;
@@ -53,7 +52,7 @@ short_path (const Glib::ustring& path, ustring::size_type target_characters)
 		/* even the filename itself is too long */
 
 		if (target_characters > 3) {
-			return path.substr (last_sep+1, target_characters - 3) + ustring ("...");
+			return path.substr (last_sep+1, target_characters - 3) + string ("...");
 		} else {
 			/* stupid caller, just hand back the whole thing */
 			return path;
@@ -64,12 +63,12 @@ short_path (const Glib::ustring& path, ustring::size_type target_characters)
 	uint32_t space_for = target_characters - so_far;
 
 	if (space_for >= 3) {
-		ustring res = "...";
+		string res = "...";
 		res += path.substr (last_sep - space_for);
 		return res;
 	} else {
 		/* remove part of the end */
-		ustring res = "...";
+		string res = "...";
 		res += path.substr (last_sep - space_for, len - last_sep + space_for - 3);
 		res += "...";
 		return res;

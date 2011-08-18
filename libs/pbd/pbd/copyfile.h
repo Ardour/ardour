@@ -17,9 +17,9 @@
 
 */
 
-#include <glibmm/ustring.h>
+#include <string>
 
 namespace PBD {
 
-	int copy_file (Glib::ustring from, Glib::ustring to);
+	int copy_file (const std::string& from, const std::string& to);
 }

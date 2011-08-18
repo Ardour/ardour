@@ -78,13 +78,4 @@ strip_whitespace_edges (string& str)
 	}
 }
 
-void
-strip_whitespace_edges (Glib::ustring& str)
-{   
-	string copy (str.raw());
-	strip_whitespace_edges (copy);
-	str = copy;
-}
-
-
 } // namespace PBD

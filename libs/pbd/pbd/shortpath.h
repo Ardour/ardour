@@ -20,8 +20,8 @@
 #ifndef __pbd_shortpath_h__
 #define __pbd_shortpath_h__
 
-#include <glibmm/ustring.h>
+#include <string>
 
-Glib::ustring short_path (const Glib::ustring& path, Glib::ustring::size_type target_characters);
+std::string short_path (const std::string& path, std::string::size_type target_characters);
 
 #endif /* __pbd_shortpath_h__ */

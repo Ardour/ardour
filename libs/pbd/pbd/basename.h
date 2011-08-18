@@ -20,12 +20,12 @@
 #ifndef __stupid_basename_h__
 #define __stupid_basename_h__
 
-#include <glibmm/ustring.h>
+#include <string>
 
 namespace PBD
 {
 	
-Glib::ustring basename_nosuffix (Glib::ustring);
+std::string basename_nosuffix (const std::string&);
 
 } 
 
