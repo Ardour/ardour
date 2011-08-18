@@ -1373,7 +1373,7 @@ gtk_application_add_app_menu_item (GtkApplicationMenuGroup *group,
 namespace Gtk {
 	namespace Application {
 		sigc::signal<void,bool> ActivationChanged;
-		sigc::signal<void,const Glib::ustring&> ShouldLoad;
+		sigc::signal<void,const std::string&> ShouldLoad;
 		sigc::signal<void> ShouldQuit;
 	}
 }
@@ -1420,7 +1420,7 @@ namespace Gtk {
 @implementation GtkApplicationDelegate
 -(BOOL) application:(NSApplication*) theApplication openFile:(NSString*) file
 {
-	Glib::ustring utf8_path ([file UTF8String]);
+	std::string utf8_path ([file UTF8String]);
 	Gtkmm2ext::Application::instance()->ShouldLoad (utf8_path);
 	return 1;
 }

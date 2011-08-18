@@ -22,16 +22,13 @@
 #ifndef __GTK_APPLICATION_MM_H__
 #define __GTK_APPLICATION_MM_H__
 
+#include <string>
 #include <gtkmm2ext/gtkapplication.h> // for GtkApplicationGroup typedef
 #include <sigc++/signal.h>
 
 namespace Gtk {
 	class MenuItem;
 	class MenuShell;
-}
-
-namespace Glib {
-	class ustring;
 }
 
 namespace Gtkmm2ext {
@@ -49,7 +46,7 @@ public:
     void                     add_app_menu_item (GtkApplicationMenuGroup*, Gtk::MenuItem*);
 
     sigc::signal<void,bool>                 ActivationChanged;
-    sigc::signal<void,const Glib::ustring&> ShouldLoad;
+    sigc::signal<void,const std::string&>   ShouldLoad;
     sigc::signal<void>                      ShouldQuit;
 
 private:
