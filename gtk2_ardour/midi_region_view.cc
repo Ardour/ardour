@@ -3327,7 +3327,7 @@ MidiRegionView::update_ghost_note (double x, double y)
 
 	PublicEditor& editor = trackview.editor ();
 	
-	framepos_t const unsnapped_frame = editor.pixel_to_frame (x);
+	framepos_t unsnapped_frame = editor.pixel_to_frame (x);
 	bool success;
 	Evoral::MusicalTime grid_beats = editor.get_grid_type_as_beats (success, unsnapped_frame);
 
@@ -3336,7 +3336,16 @@ MidiRegionView::update_ghost_note (double x, double y)
 	}
 
 	framecnt_t const grid_frames = region_beats_to_region_frames (grid_beats);
+
+	/* Hack so that we always snap to the note that we are over, instead of snapping
+	   to the next one if we're more than halfway through the one we're over.
+	*/
+	if (unsnapped_frame >= grid_frames / 2) {
+		unsnapped_frame -= grid_frames / 2;
+	}
+	
 	framepos_t f = snap_frame_to_frame (unsnapped_frame);
+	
 	/* use region_frames... because we are converting a delta within the region
 	*/
 	 
