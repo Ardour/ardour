@@ -671,7 +671,23 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 	
 #endif
 	
-	if (!special_handling_of_unmodified_accelerators || (ev->state & mask)) {
+	if (!special_handling_of_unmodified_accelerators) {
+
+		/* XXX note that for a brief moment, the conditional above
+		 * included "|| (ev->state & mask)" so as to enforce the
+		 * implication of special_handling_of_UNMODIFIED_accelerators.
+		 * however, this forces any key that GTK doesn't allow and that
+		 * we have an alternative (see next comment) for to be
+		 * automatically sent through the accel groups activation
+		 * pathway, which prevents individual widgets & canvas items
+		 * from ever seeing it if is used by a key binding.
+		 * 
+		 * specifically, this hid Ctrl-down-arrow from MIDI region
+		 * views because it is also bound to an action.
+		 *
+		 * until we have a robust, clean binding system, this
+		 * quirk will have to remain in place.
+		 */
 
 		/* pretend that certain key events that GTK does not allow
 		   to be used as accelerators are actually something that
