@@ -82,6 +82,10 @@ BundleEditorMatrix::set_state (BundleChannel c[2], bool s)
 PortMatrixNode::State
 BundleEditorMatrix::get_state (BundleChannel c[2]) const
 {
+	if (c[0].bundle->nchannels() == ChanCount::ZERO || c[1].bundle->nchannels() == ChanCount::ZERO) {
+		return PortMatrixNode::NOT_ASSOCIATED;
+	}
+
 	Bundle::PortList const& pl = c[OTHER].bundle->channel_ports (c[OTHER].channel);
 	if (pl.empty ()) {
 		return PortMatrixNode::NOT_ASSOCIATED;
