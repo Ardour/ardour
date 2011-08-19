@@ -186,20 +186,13 @@ GainMeterBase::set_controls (boost::shared_ptr<Route> r,
  	level_meter->set_meter (pm.get());
 	gain_slider->set_controllable (amp->gain_control());
 
-	if (!_route || _route->output()->n_ports().n_midi() == 0) {
-		_is_midi = false;
-		gain_adjustment.set_lower (0.0);
-		gain_adjustment.set_upper (1.0);
-		gain_adjustment.set_step_increment (0.01);
-		gain_adjustment.set_page_increment (0.1);
-	} else {
-		_is_midi = true;
-		gain_adjustment.set_lower (0.0);
-		gain_adjustment.set_upper (2.0);
-		gain_adjustment.set_step_increment (0.05);
-		gain_adjustment.set_page_increment (0.1);
-		gain_slider->set_default_value (1);
+	if (amp) {
+		amp->ConfigurationChanged.connect (
+			model_connections, invalidator (*this), ui_bind (&GainMeterBase::setup_gain_adjustment, this), gui_context ()
+			);
 	}
+
+	setup_gain_adjustment ();
 
 	if (!_route || !_route->is_hidden()) {
 
@@ -236,6 +229,42 @@ GainMeterBase::set_controls (boost::shared_ptr<Route> r,
 	gain_changed ();
 	show_gain ();
 	update_gain_sensitive ();
+}
+
+void
+GainMeterBase::setup_gain_adjustment ()
+{
+	if (!_amp) {
+		return;
+	}
+
+	if (_previous_amp_output_streams == _amp->output_streams ()) {
+		return;
+	}
+
+	ignore_toggle = true;
+
+	if (_amp->output_streams().n_midi() == 0) {
+		_is_midi = false;
+		gain_adjustment.set_lower (0.0);
+		gain_adjustment.set_upper (1.0);
+		gain_adjustment.set_step_increment (0.01);
+		gain_adjustment.set_page_increment (0.1);
+		gain_slider->set_default_value (gain_to_slider_position (1));
+	} else {
+		_is_midi = true;
+		gain_adjustment.set_lower (0.0);
+		gain_adjustment.set_upper (2.0);
+		gain_adjustment.set_step_increment (0.05);
+		gain_adjustment.set_page_increment (0.1);
+		gain_slider->set_default_value (1);
+	}
+
+	ignore_toggle = false;
+
+	effective_gain_display ();
+	
+	_previous_amp_output_streams = _amp->output_streams ();
 }
 
 void
@@ -413,9 +442,9 @@ GainMeterBase::gain_adjusted ()
 void
 GainMeterBase::effective_gain_display ()
 {
-	gfloat value;
+	float value;
 
-	if (!_route || _route->output()->n_ports().n_midi() == 0) {
+	if (!_is_midi) {
 		value = gain_to_slider_position_with_max (_amp->gain(), Config->get_max_gain());
 	} else {
 		value = _amp->gain ();

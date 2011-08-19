@@ -123,6 +123,8 @@ class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 	void gain_automation_state_changed();
 	void gain_automation_style_changed();
 
+	void setup_gain_adjustment ();
+
 	std::string astate_string (ARDOUR::AutoState);
 	std::string short_astate_string (ARDOUR::AutoState);
 	std::string _astate_string (ARDOUR::AutoState, bool);
@@ -179,6 +181,7 @@ class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 	bool color_changed;
 	void color_handler(bool);
 	bool _is_midi;
+	ARDOUR::ChanCount _previous_amp_output_streams;
 };
 
 class GainMeter : public GainMeterBase, public Gtk::VBox
