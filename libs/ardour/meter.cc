@@ -126,6 +126,8 @@ void
 PeakMeter::reflect_inputs (const ChanCount& in)
 {
 	current_meters = in;
+
+	ConfigurationChanged (in, in); /* EMIT SIGNAL */
 }
 
 void
