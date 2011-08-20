@@ -472,7 +472,7 @@ MidiRegionView::button_release (GdkEventButton* ev)
 						beats = 1;
 					}
 
-					create_note_at (event_x, event_y, beats, true);
+					create_note_at (event_x, event_y, beats, true, true);
 				}
 
 				break;
@@ -486,7 +486,7 @@ MidiRegionView::button_release (GdkEventButton* ev)
 					beats = 1;
 				}
 
-				create_note_at (event_x, event_y, beats, true);
+				create_note_at (event_x, event_y, beats, true, true);
 
 				break;
 			}
@@ -515,7 +515,7 @@ MidiRegionView::button_release (GdkEventButton* ev)
 				const double x  = _drag_rect->property_x1();
 				const double length = trackview.editor().pixel_to_frame (_drag_rect->property_x2() - _drag_rect->property_x1());
 
-				create_note_at (x, _drag_rect->property_y1(), region_frames_to_region_beats(length), true);
+				create_note_at (x, _drag_rect->property_y1(), region_frames_to_region_beats(length), true, false);
 			}
 		}
 
@@ -541,25 +541,28 @@ MidiRegionView::motion (GdkEventMotion* ev)
 	event_y = ev->y;
 	group->w2i(event_x, event_y);
 
+	PublicEditor& editor = trackview.editor ();
+	
 	// convert event_x to global frame
-	event_frame = snap_pixel_to_frame (event_x);
+	framecnt_t grid_frames;
+	event_frame = snap_frame_to_grid_underneath (editor.pixel_to_frame (event_x), grid_frames);
 
-	if (!_ghost_note && trackview.editor().current_mouse_mode() != MouseRange
+	if (!_ghost_note && editor.current_mouse_mode() != MouseRange
 	    && Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier())
 	    && _mouse_state != AddDragging) {
 
 		create_ghost_note (ev->x, ev->y);
-	} else if (_ghost_note && trackview.editor().current_mouse_mode() != MouseRange
+	} else if (_ghost_note && editor.current_mouse_mode() != MouseRange
 	           && Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier())) {
 
 		update_ghost_note (ev->x, ev->y);
-	} else if (_ghost_note && trackview.editor().current_mouse_mode() != MouseRange) {
+	} else if (_ghost_note && editor.current_mouse_mode() != MouseRange) {
 
 		delete _ghost_note;
 		_ghost_note = 0;
 
-		trackview.editor().verbose_cursor()->hide ();
-	} else if (_ghost_note && trackview.editor().current_mouse_mode() == MouseRange) {
+		editor.verbose_cursor()->hide ();
+	} else if (_ghost_note && editor.current_mouse_mode() == MouseRange) {
 		update_ghost_note (ev->x, ev->y);
 	}
 
@@ -577,7 +580,7 @@ MidiRegionView::motion (GdkEventMotion* ev)
 			return false;
 		}
 
-		if (_pressed_button == 1 && trackview.editor().current_mouse_mode() == MouseObject
+		if (_pressed_button == 1 && editor.current_mouse_mode() == MouseObject
 		    && !Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier())) {
 			// Select drag start
 
@@ -603,7 +606,7 @@ MidiRegionView::motion (GdkEventMotion* ev)
 			_mouse_state = SelectRectDragging;
 			return true;
 
-		} else if (trackview.editor().internal_editing()) {
+		} else if (editor.internal_editing()) {
 			// Add note drag start
 
 			group->grab(GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK,
@@ -615,11 +618,12 @@ MidiRegionView::motion (GdkEventMotion* ev)
 			_drag_start_y = event_y;
 
 			_drag_rect = new ArdourCanvas::SimpleRect(*group);
-			_drag_rect->property_x1() = trackview.editor().frame_to_pixel(event_frame);
+			_drag_rect->property_x1() = editor.frame_to_pixel(event_frame);
 
 			_drag_rect->property_y1() = midi_stream_view()->note_to_y(
 				midi_stream_view()->y_to_note(event_y));
-			_drag_rect->property_x2() = trackview.editor().frame_to_pixel(event_frame);
+			_drag_rect->property_x2() = editor.frame_to_pixel(event_frame);
+			
 			_drag_rect->property_y2() = _drag_rect->property_y1()
 				+ floor(midi_stream_view()->note_height());
 			_drag_rect->property_outline_what() = 0xFF;
@@ -631,7 +635,7 @@ MidiRegionView::motion (GdkEventMotion* ev)
 			delete _ghost_note;
 			_ghost_note = 0;
 
-			trackview.editor().verbose_cursor()->hide ();
+			editor.verbose_cursor()->hide ();
 
 			return true;
 		}
@@ -651,7 +655,17 @@ MidiRegionView::motion (GdkEventMotion* ev)
 		}
 
 		if (_mouse_state == AddDragging) {
-			event_x = trackview.editor().frame_to_pixel(event_frame);
+			event_x = editor.frame_to_pixel(event_frame);
+
+			if (editor.snap_mode() == SnapNormal) {
+				/* event_frame will have been snapped to the start of the note we are under;
+				   it's more intuitive if we use the end of that note here
+				*/
+				event_x = editor.frame_to_pixel (event_frame + grid_frames);
+			} else {
+				event_x = editor.frame_to_pixel (event_frame);
+			}
+			
 		}
 
 		if (_drag_rect) {
@@ -872,9 +886,10 @@ MidiRegionView::show_list_editor ()
  * \param y vertical position in pixels
  * \param length duration of the note in beats, which will be snapped to the grid
  * \param sh true to make the note 1 frame shorter than the snapped version of \a length.
+ * \param snap_x true to snap x to the grid, otherwise false.
  */
 void
-MidiRegionView::create_note_at(double x, double y, double length, bool sh)
+MidiRegionView::create_note_at (double x, double y, double length, bool sh, bool snap_x)
 {
 	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
 	MidiStreamView* const view = mtv->midi_view();
@@ -885,7 +900,11 @@ MidiRegionView::create_note_at(double x, double y, double length, bool sh)
 	assert(note <= 127.0);
 
 	// Start of note in frames relative to region start
-	framepos_t const start_frames = snap_pixel_to_frame (x);
+	framepos_t start_frames = trackview.editor().pixel_to_frame (x);
+	if (snap_x) {
+		framecnt_t grid_frames;
+		start_frames = snap_frame_to_grid_underneath (start_frames, grid_frames);
+	}
 	assert(start_frames >= 0);
 
 	// Snap length
@@ -2346,7 +2365,7 @@ MidiRegionView::snap_pixel_to_frame(double x)
  *  @return Snapped frame offset from this region's position.
  */
 frameoffset_t
-MidiRegionView::snap_frame_to_frame (frameoffset_t x)
+MidiRegionView::snap_frame_to_frame (frameoffset_t x) const
 {
 	PublicEditor& editor = trackview.editor();
 
@@ -3327,24 +3346,9 @@ MidiRegionView::update_ghost_note (double x, double y)
 
 	PublicEditor& editor = trackview.editor ();
 	
-	framepos_t unsnapped_frame = editor.pixel_to_frame (x);
-	bool success;
-	Evoral::MusicalTime grid_beats = editor.get_grid_type_as_beats (success, unsnapped_frame);
-
-	if (!success) {
-		grid_beats = 1;
-	}
-
-	framecnt_t const grid_frames = region_beats_to_region_frames (grid_beats);
-
-	/* Hack so that we always snap to the note that we are over, instead of snapping
-	   to the next one if we're more than halfway through the one we're over.
-	*/
-	if (unsnapped_frame >= grid_frames / 2) {
-		unsnapped_frame -= grid_frames / 2;
-	}
-	
-	framepos_t f = snap_frame_to_frame (unsnapped_frame);
+	framepos_t const unsnapped_frame = editor.pixel_to_frame (x);
+	framecnt_t grid_frames;
+	framepos_t const f = snap_frame_to_grid_underneath (unsnapped_frame, grid_frames);
 	
 	/* use region_frames... because we are converting a delta within the region
 	*/
@@ -3626,4 +3630,32 @@ MidiRegionView::show_verbose_cursor (string const & text, double xoffset, double
 
 	trackview.editor().verbose_cursor()->set (text, wx, wy);
 	trackview.editor().verbose_cursor()->show ();
+}
+
+/** @param p A session framepos.
+ *  @param grid_frames Filled in with the number of frames that a grid interval is at p.
+ *  @return p snapped to the grid subdivision underneath it.
+ */
+framepos_t
+MidiRegionView::snap_frame_to_grid_underneath (framepos_t p, framecnt_t& grid_frames) const
+{
+	PublicEditor& editor = trackview.editor ();
+	
+	bool success;
+	Evoral::MusicalTime grid_beats = editor.get_grid_type_as_beats (success, p);
+
+	if (!success) {
+		grid_beats = 1;
+	}
+	
+	grid_frames = region_beats_to_region_frames (grid_beats);
+
+	/* Hack so that we always snap to the note that we are over, instead of snapping
+	   to the next one if we're more than halfway through the one we're over.
+	*/
+	if (editor.snap_mode() == SnapNormal && p >= grid_frames / 2) {
+		p -= grid_frames / 2;
+	}
+
+	return snap_frame_to_frame (p);
 }

@@ -169,8 +169,6 @@ public:
 	void end_write();
 	void extend_active_notes();
 
-	void create_note_at(double x, double y, double length, bool);
-
 	void display_model(boost::shared_ptr<ARDOUR::MidiModel> model);
 
 	void start_note_diff_command (std::string name = "midi edit");
@@ -253,7 +251,7 @@ public:
 	 */
 	framepos_t snap_pixel_to_frame(double x);
 
-	ARDOUR::frameoffset_t snap_frame_to_frame (ARDOUR::frameoffset_t);
+	ARDOUR::frameoffset_t snap_frame_to_frame (ARDOUR::frameoffset_t) const;
 
 	/** Convert a timestamp in beats into frames (both relative to region start) */
 	framepos_t region_beats_to_region_frames(double beats) const;
@@ -316,6 +314,8 @@ protected:
 private:
 
 	friend class EditNoteDialog;
+
+	void create_note_at(double x, double y, double length, bool, bool);
 
 	/** Play the NoteOn event of the given note immediately
 	 * and schedule the playback of the corresponding NoteOff event.
@@ -460,6 +460,8 @@ private:
 	double _last_event_x;
 	double _last_event_y;
 
+	framepos_t snap_frame_to_grid_underneath (framepos_t p, framecnt_t &) const;
+	
 	PBD::ScopedConnection _mouse_mode_connection;
 
 	Gdk::Cursor* _pre_enter_cursor;
