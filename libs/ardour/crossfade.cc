@@ -586,8 +586,8 @@ Crossfade::compute (boost::shared_ptr<AudioRegion> a, boost::shared_ptr<AudioReg
 			} else {
 				_position = top->last_frame() - short_xfade_length;
 			}
-
-			_length = min (short_xfade_length, top->length());
+			
+			set_xfade_length (min (short_xfade_length, top->length()));
 			_follow_overlap = false;
 			_anchor_point = EndOfIn;
 			_active = true;
@@ -621,7 +621,7 @@ Crossfade::compute (boost::shared_ptr<AudioRegion> a, boost::shared_ptr<AudioReg
 			_in = top;
 			_out = bottom;
 			_position = top->first_frame();
-			_length = min (short_xfade_length, top->length());
+			set_xfade_length (min (short_xfade_length, top->length()));
 			_follow_overlap = false;
 			_anchor_point = StartOfIn;
 			_active = true;
@@ -670,11 +670,11 @@ Crossfade::compute (boost::shared_ptr<AudioRegion> a, boost::shared_ptr<AudioReg
 
 			if (model == FullCrossfade) {
 				_position = bottom->first_frame(); // "{"
-				_length = _out->first_frame() + _out->length() - _in->first_frame();
+				set_xfade_length (_out->first_frame() + _out->length() - _in->first_frame());
 				/* leave active alone */
 				_follow_overlap = true;
 			} else {
-				_length = min (short_xfade_length, top->length());
+				set_xfade_length (min (short_xfade_length, top->length()));
 				_position = top->last_frame() - _length;  // "]" - length
 				_active = true;
 				_follow_overlap = false;
@@ -694,11 +694,11 @@ Crossfade::compute (boost::shared_ptr<AudioRegion> a, boost::shared_ptr<AudioReg
 			_anchor_point = StartOfIn;
 
 			if (model == FullCrossfade) {
-				_length = _out->first_frame() + _out->length() - _in->first_frame();
+				set_xfade_length (_out->first_frame() + _out->length() - _in->first_frame());
 				/* leave active alone */
 				_follow_overlap = true;
 			} else {
-				_length = min (short_xfade_length, top->length());
+				set_xfade_length (min (short_xfade_length, top->length()));
 				_active = true;
 				_follow_overlap = false;
 
