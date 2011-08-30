@@ -171,31 +171,30 @@ RouteGroup::remove (boost::shared_ptr<Route> r)
 
 
 gain_t
-RouteGroup::get_min_factor(gain_t factor)
+RouteGroup::get_min_factor (gain_t factor)
 {
-	gain_t g;
-
 	for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
-		g = (*i)->amp()->gain();
+		gain_t const g = (*i)->amp()->gain();
 
-		if ( (g+g*factor) >= 0.0f)
+		if ((g + g * factor) >= 0.0f) {
 			continue;
+		}
 
-		if ( g <= 0.0000003f )
+		if (g <= 0.0000003f) {
 			return 0.0f;
+		}
 
-		factor = 0.0000003f/g - 1.0f;
+		factor = 0.0000003f / g - 1.0f;
 	}
+	
 	return factor;
 }
 
 gain_t
-RouteGroup::get_max_factor(gain_t factor)
+RouteGroup::get_max_factor (gain_t factor)
 {
-	gain_t g;
-
 	for (RouteList::iterator i = routes->begin(); i != routes->end(); i++) {
-		g = (*i)->amp()->gain();
+		gain_t const g = (*i)->amp()->gain();
 
 		// if the current factor woulnd't raise this route above maximum
 		if ((g + g * factor) <= 1.99526231f) {
