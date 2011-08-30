@@ -28,7 +28,7 @@ namespace ARDOUR {
 
 class Editor;
 
-/** Parent class for tabs which represent route groups as coloured tabs;
+/** Parent class for tabs which represent route groups as colored tabs;
  *  Currently used on the left-hand side of the editor and at the top of the mixer.
  */
 class GroupTabs : public CairoWidget, public ARDOUR::SessionHandlePtr
@@ -46,6 +46,10 @@ public:
 
 	void run_new_group_dialog (ARDOUR::RouteList const &);
 
+	static void set_group_color (ARDOUR::RouteGroup *, Gdk::Color);
+	static std::string group_gui_id (ARDOUR::RouteGroup *);
+	static Gdk::Color group_color (ARDOUR::RouteGroup *);
+
 protected:
 
 	struct Tab {
@@ -53,7 +57,7 @@ protected:
 
 		double from;
 		double to;
-		Gdk::Color colour; ///< colour
+		Gdk::Color color; ///< color
 		ARDOUR::RouteGroup* group; ///< route group
 	};
 
@@ -117,4 +121,7 @@ private:
 	double _drag_min; ///< minimum position for drag
 	double _drag_max; ///< maximum position for drag
 	double _drag_first; ///< first mouse pointer position during drag
+
+	/** colors that have been used for new route group tabs */
+	static std::list<Gdk::Color> _used_colors;
 };

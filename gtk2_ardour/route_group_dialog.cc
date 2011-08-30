@@ -23,6 +23,7 @@
 #include "ardour/route_group.h"
 #include "ardour/session.h"
 #include "route_group_dialog.h"
+#include "group_tabs.h"
 #include "i18n.h"
 #include <iostream>
 
@@ -94,6 +95,7 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
 	_select.set_active (_group->is_select());
 	_edit.set_active (_group->is_edit());
 	_route_active.set_active (_group->is_route_active());
+	_color.set_color (GroupTabs::group_color (_group));
 
 	_name.signal_changed().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
 	_active.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
@@ -105,10 +107,11 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
  	_select.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
  	_edit.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
  	_route_active.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
+	_color.signal_color_set().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
 
 	gain_toggled ();
 
-	Table* table = manage (new Table (8, 3, false));
+	Table* table = manage (new Table (11, 4, false));
 	table->set_row_spacings	(6);
 
 	l = manage (new Label ("", Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
@@ -128,6 +131,12 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
 	table->attach (_select, 1, 3, 6, 7, Gtk::FILL, Gtk::FILL, 0, 0);
 	table->attach (_edit, 1, 3, 7, 8, Gtk::FILL, Gtk::FILL, 0, 0);
 	table->attach (_route_active, 1, 3, 8, 9, Gtk::FILL, Gtk::FILL, 0, 0);
+
+	HBox* b = manage (new HBox);
+	l = manage (new Label (_("Color"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	b->pack_start (*l, Gtk::SHRINK, Gtk::SHRINK);
+	b->pack_start (_color, Gtk::FILL, Gtk::FILL);
+	table->attach (*b, 1, 3, 10, 11, Gtk::FILL, Gtk::FILL, 0, 0);
 
 	options_box->pack_start (*table, false, true);
 	main_vbox->pack_start (*options_box, false, true);
@@ -196,6 +205,8 @@ RouteGroupDialog::update ()
 	plist.add (Properties::active, _active.get_active());
 	plist.add (Properties::name, string (_name.get_text()));
 
+	GroupTabs::set_group_color (_group, _color.get_color ());
+	
 	_group->apply_changes (plist);
 }
 

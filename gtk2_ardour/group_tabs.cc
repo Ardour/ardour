@@ -27,11 +27,15 @@
 #include "group_tabs.h"
 #include "keyboard.h"
 #include "i18n.h"
+#include "ardour_ui.h"
+#include "utils.h"
 
 using namespace std;
 using namespace Gtk;
 using namespace ARDOUR;
 using Gtkmm2ext::Keyboard;
+
+list<Gdk::Color> GroupTabs::_used_colors;
 
 GroupTabs::GroupTabs ()
 	: _menu (0)
@@ -501,3 +505,61 @@ GroupTabs::remove_group (RouteGroup* g)
 {
 	_session->remove_route_group (*g);
 }
+
+/** Set the color of the tab of a route group */
+void
+GroupTabs::set_group_color (RouteGroup* group, Gdk::Color color)
+{
+	assert (group);
+	
+	GUIObjectState& gui_state = *ARDOUR_UI::instance()->gui_object_state;
+
+	char buf[64];
+	snprintf (buf, sizeof (buf), "%d:%d:%d", color.get_red(), color.get_green(), color.get_blue());
+	gui_state.set (group_gui_id (group), "color", buf);
+}
+
+/** @return the ID string to use for the GUI state of a route group */
+string
+GroupTabs::group_gui_id (RouteGroup* group)
+{
+	assert (group);
+
+	char buf[64];
+	snprintf (buf, sizeof (buf), "route_group %s", group->id().to_s().c_str ());
+
+	return buf;
+}
+
+/** @return the color to use for a route group tab */
+Gdk::Color
+GroupTabs::group_color (RouteGroup* group)
+{
+	assert (group);
+	
+	GUIObjectState& gui_state = *ARDOUR_UI::instance()->gui_object_state;
+
+	string const gui_id = group_gui_id (group);
+
+	bool empty;
+	string const color = gui_state.get_string (gui_id, "color", &empty);
+	if (empty) {
+		/* no color has yet been set, so use a random one */
+		Gdk::Color const color = unique_random_color (_used_colors);
+		set_group_color (group, color);
+		return color;
+	}
+
+	Gdk::Color c;
+
+	int r, g, b;
+
+	sscanf (color.c_str(), "%d:%d:%d", &r, &g, &b);
+
+	c.set_red (r);
+	c.set_green (g);
+	c.set_blue (b);
+	
+	return c;
+}
+

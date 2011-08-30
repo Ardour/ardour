@@ -91,4 +91,6 @@ void resize_window_to_proportion_of_monitor (Gtk::Window*, int, int);
 
 std::string escape_underscores (std::string const &);
 
+Gdk::Color unique_random_color (std::list<Gdk::Color> &);
+
 #endif /* __ardour_gtk_utils_h__ */

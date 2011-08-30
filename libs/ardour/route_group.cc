@@ -213,9 +213,13 @@ RouteGroup::get_max_factor(gain_t factor)
 }
 
 XMLNode&
-RouteGroup::get_state (void)
+RouteGroup::get_state ()
 {
 	XMLNode *node = new XMLNode ("RouteGroup");
+
+	char buf[64];
+	id().print (buf, sizeof (buf));
+	node->add_property ("id", buf);
 
 	add_properties (*node);
 
@@ -239,9 +243,13 @@ RouteGroup::set_state (const XMLNode& node, int version)
 		return set_state_2X (node, version);
 	}
 
-	set_values (node);
-
 	const XMLProperty *prop;
+
+	if ((prop = node.property ("id")) != 0) {
+		_id = prop->value();
+	}
+
+	set_values (node);
 
 	if ((prop = node.property ("routes")) != 0) {
 		stringstream str (prop->value());

@@ -38,6 +38,7 @@
 #include "ardour_ui.h"
 #include "gui_object.h"
 #include "axis_view.h"
+#include "utils.h"
 #include "i18n.h"
 
 using namespace std;
@@ -60,41 +61,7 @@ AxisView::~AxisView()
 Gdk::Color
 AxisView::unique_random_color()
 {
-  	Gdk::Color newcolor;
-
-	while (1) {
-
-		/* avoid neon/glowing tones by limiting them to the
-		   "inner section" (paler) of a color wheel/circle.
-		*/
-
-		const int32_t max_saturation = 48000; // 65535 would open up the whole color wheel
-
-		newcolor.set_red (random() % max_saturation);
-		newcolor.set_blue (random() % max_saturation);
-		newcolor.set_green (random() % max_saturation);
-
-		if (used_colors.size() == 0) {
-			used_colors.push_back (newcolor);
-			return newcolor;
-		}
-
-		for (list<Gdk::Color>::iterator i = used_colors.begin(); i != used_colors.end(); ++i) {
-		  Gdk::Color c = *i;
-			float rdelta, bdelta, gdelta;
-
-			rdelta = newcolor.get_red() - c.get_red();
-			bdelta = newcolor.get_blue() - c.get_blue();
-			gdelta = newcolor.get_green() - c.get_green();
-
-			if (sqrt (rdelta*rdelta + bdelta*bdelta + gdelta*gdelta) > 25.0) {
-				used_colors.push_back (newcolor);
-				return newcolor;
-			}
-		}
-
-		/* XXX need throttle here to make sure we don't spin for ever */
-	}
+	return ::unique_random_color (used_colors);
 }
 
 string

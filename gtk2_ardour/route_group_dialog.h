@@ -23,6 +23,7 @@
 #include <gtkmm/dialog.h>
 #include <gtkmm/entry.h>
 #include <gtkmm/checkbutton.h>
+#include <gtkmm/colorbutton.h>
 
 #include "ardour_dialog.h"
 
@@ -48,6 +49,7 @@ private:
 	Gtk::CheckButton _edit;
 	Gtk::CheckButton _route_active;
 	Gtk::Button* _ok;
+	Gtk::ColorButton _color;
 
 	void gain_toggled ();
 	void update ();

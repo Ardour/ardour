@@ -61,7 +61,9 @@ EditorGroupTabs::compute_tabs () const
 
 			tab.from = y;
 			tab.group = g;
-			tab.colour = (*i)->color ();
+			if (g) {
+				tab.color = group_color (g);
+			}
 		}
 
 		y += (*i)->effective_height ();
@@ -81,7 +83,7 @@ EditorGroupTabs::draw_tab (cairo_t* cr, Tab const & tab) const
 	double const arc_radius = _width;
 
 	if (tab.group && tab.group->is_active()) {
-		cairo_set_source_rgba (cr, tab.colour.get_red_p (), tab.colour.get_green_p (), tab.colour.get_blue_p (), 1);
+		cairo_set_source_rgba (cr, tab.color.get_red_p (), tab.color.get_green_p (), tab.color.get_blue_p (), 1);
 	} else {
 		cairo_set_source_rgba (cr, 1, 1, 1, 0.2);
 	}
