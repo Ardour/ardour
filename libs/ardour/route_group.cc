@@ -198,15 +198,17 @@ RouteGroup::get_max_factor(gain_t factor)
 		g = (*i)->amp()->gain();
 
 		// if the current factor woulnd't raise this route above maximum
-		if ( (g+g*factor) <= 1.99526231f)
+		if ((g + g * factor) <= 1.99526231f) {
 			continue;
+		}
 
 		// if route gain is already at peak, return 0.0f factor
-	    if (g>=1.99526231f)
+		if (g >= 1.99526231f) {
 			return 0.0f;
+		}
 
 		// factor is calculated so that it would raise current route to max
-		factor = 1.99526231f/g - 1.0f;
+		factor = 1.99526231f / g - 1.0f;
 	}
 
 	return factor;
