@@ -918,7 +918,6 @@ EngineControl::driver_changed ()
 	vector<string>& strings = devices[driver];
 
 	if (strings.empty() && driver != "FreeBoB" && driver != "FFADO" && driver != "Dummy") {
-		error << string_compose (_("No devices found for driver \"%1\""), driver) << endmsg;
 		return;
 	}
 
