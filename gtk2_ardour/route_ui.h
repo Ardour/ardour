@@ -222,10 +222,15 @@ class RouteUI : public virtual AxisView
         void set_invert_sensitive (bool);
 	bool verify_new_route_name (const std::string& name);
 
+	void route_gui_changed (std::string);
+	virtual void route_color_changed () {}
+
   private:
 	void check_rec_enable_sensitivity ();
 	void parameter_changed (std::string const &);
 	void relabel_solo_button ();
+
+	std::string route_state_id () const;
 
 	struct SoloMuteRelease {
 	    SoloMuteRelease (bool was_active)

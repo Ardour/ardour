@@ -911,10 +911,8 @@ RouteTimeAxisView::set_height (uint32_t h)
 }
 
 void
-RouteTimeAxisView::set_color (Gdk::Color const & c)
+RouteTimeAxisView::route_color_changed ()
 {
-	RouteUI::set_color (c);
-
 	if (_view) {
 		_view->apply_color (_color, StreamView::RegionColor);
 	}

@@ -45,12 +45,8 @@ namespace ARDOUR {
 class AxisView : public virtual Selectable, public PBD::ScopedConnectionList, public ARDOUR::SessionHandlePtr
 {
   public:
-	/**
-	 * Returns the current 'Track' Color
-	 *
-	 * @return the current Track Color
-	 */
-	Gdk::Color color() const { return _color; }
+	/** @return the track's own color */
+	Gdk::Color color () const { return _color; }
 
 	ARDOUR::Session* session() const { return _session; }
 

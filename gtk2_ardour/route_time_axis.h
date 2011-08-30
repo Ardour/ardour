@@ -212,8 +212,6 @@ protected:
 	void reset_samples_per_unit ();
 	void horizontal_position_changed ();
 
-	void set_color (Gdk::Color const &);
-
 	virtual void build_automation_action_menu (bool);
 	virtual void append_extra_display_menu_items () {}
 	void         build_display_menu ();
@@ -245,6 +243,8 @@ protected:
 	void create_gain_automation_child (const Evoral::Parameter &, bool);
 
 	void setup_processor_menu_and_curves ();
+
+	void route_color_changed ();
 
 	boost::shared_ptr<AutomationTimeAxisView> gain_track;
 
