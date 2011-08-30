@@ -73,6 +73,13 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
 	top_vbox->pack_start (*hbox, false, true);
 	top_vbox->pack_start (_active);
 
+	l = manage (new Label (_("Color"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	hbox = manage (new HBox);
+	hbox->set_spacing (12);
+	hbox->pack_start (*l, false, false);
+	hbox->pack_start (_color, false, false);
+	top_vbox->pack_start (*hbox, false, false);
+	
 	main_vbox->pack_start (*top_vbox, false, false);
 
 	_name.set_text (_group->name ());
@@ -132,11 +139,6 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
 	table->attach (_edit, 1, 3, 7, 8, Gtk::FILL, Gtk::FILL, 0, 0);
 	table->attach (_route_active, 1, 3, 8, 9, Gtk::FILL, Gtk::FILL, 0, 0);
 
-	HBox* b = manage (new HBox);
-	l = manage (new Label (_("Color"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
-	b->pack_start (*l, Gtk::SHRINK, Gtk::SHRINK);
-	b->pack_start (_color, Gtk::FILL, Gtk::FILL);
-	table->attach (*b, 1, 3, 10, 11, Gtk::FILL, Gtk::FILL, 0, 0);
 
 	options_box->pack_start (*table, false, true);
 	main_vbox->pack_start (*options_box, false, true);
