@@ -205,8 +205,9 @@ GroupTabs::on_button_release_event (GdkEventButton* ev)
 				for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 
 					if (find (routes.begin(), routes.end(), *i) == routes.end()) {
-						/* this route is not on the list of those that should be in _dragging's group */
-						if ((*i)->route_group() == _dragging->group) {
+						/* this route is not contained in the tab we are dragging ... */
+						if ((*i)->route_group() != _dragging->group) {
+							/* and it's not in the dragged tab's group either */
 							_dragging->group->remove (*i);
 						}
 					} else {
