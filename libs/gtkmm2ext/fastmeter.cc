@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2003-2006 Paul Davis 
+    Copyright (C) 2003-2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -35,17 +35,11 @@ using namespace Glib;
 using namespace Gtkmm2ext;
 using namespace std;
 
-
 int FastMeter::min_pattern_metric_size = 10;
 int FastMeter::max_pattern_metric_size = 1024;
 
 FastMeter::PatternMap FastMeter::v_pattern_cache;
 FastMeter::PatternMap FastMeter::h_pattern_cache;
-
-int FastMeter::_clr0 = 0;
-int FastMeter::_clr1 = 0;
-int FastMeter::_clr2 = 0;
-int FastMeter::_clr3 = 0;
 
 FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o, int len, int clr0, int clr1, int clr2, int clr3)
 {
@@ -70,14 +64,14 @@ FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o, int len, in
 		if (!len) {
 			len = 250;
 		}
-		pattern = request_vertical_meter(dimen, len);
+		pattern = request_vertical_meter(dimen, len, clr0, clr1, clr2, clr3);
 		pixheight = len;
 		pixwidth = dimen;
 	} else {
 		if (!len) {
 			len = 186; // interesting size, eh?
 		}
-		pattern = request_horizontal_meter(len, dimen);
+		pattern = request_horizontal_meter(len, dimen, clr0, clr1, clr2, clr3);
 		pixheight = dimen;
 		pixwidth = len;
 	}
@@ -95,20 +89,21 @@ FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o, int len, in
 }
 
 Cairo::RefPtr<Cairo::Pattern>
-FastMeter::generate_meter_pattern (int width, int height)
+FastMeter::generate_meter_pattern (
+		int width, int height, int clr0, int clr1, int clr2, int clr3)
 {
 	guint8 r0,g0,b0,r1,g1,b1,r2,g2,b2,r3,g3,b3,a;
 
-	/* clr0: color at top of the meter 
+	/* clr0: color at top of the meter
 	      1: color at the knee
               2: color half-way between bottom and knee
 	      3: color at the bottom of the meter
 	*/
 
-	UINT_TO_RGBA (_clr0, &r0, &g0, &b0, &a);
-	UINT_TO_RGBA (_clr1, &r1, &g1, &b1, &a);
-	UINT_TO_RGBA (_clr2, &r2, &g2, &b2, &a);
-	UINT_TO_RGBA (_clr3, &r3, &g3, &b3, &a);
+	UINT_TO_RGBA (clr0, &r0, &g0, &b0, &a);
+	UINT_TO_RGBA (clr1, &r1, &g1, &b1, &a);
+	UINT_TO_RGBA (clr2, &r2, &g2, &b2, &a);
+	UINT_TO_RGBA (clr3, &r3, &g3, &b3, &a);
 
 	// fake log calculation copied from log_meter.h
 	// actual calculation:
@@ -121,8 +116,8 @@ FastMeter::generate_meter_pattern (int width, int height)
 
 	/* cairo coordinate space goes downwards as y value goes up, so invert
 	 * knee-based positions by using (1.0 - y)
-	 * 
-	 * also, double-stop the knee point, so that we get a hard transition 
+	 *
+	 * also, double-stop the knee point, so that we get a hard transition
 	 */
 
 	cairo_pattern_add_color_stop_rgb (_p, 0.0, r3/255.0, g3/255.0, b3/255.0); // bottom
@@ -137,42 +132,46 @@ FastMeter::generate_meter_pattern (int width, int height)
 }
 
 Cairo::RefPtr<Cairo::Pattern>
-FastMeter::request_vertical_meter(int width, int height)
+FastMeter::request_vertical_meter(
+		int width, int height, int clr0, int clr1, int clr2, int clr3)
 {
 	if (height < min_pattern_metric_size)
 		height = min_pattern_metric_size;
 	if (height > max_pattern_metric_size)
 		height = max_pattern_metric_size;
-	
-	PatternMap::iterator i;
 
-	if ((i = v_pattern_cache.find (height)) != v_pattern_cache.end()) {
+	const PatternMapKey key (width, height, clr0, clr1, clr2, clr3);
+	PatternMap::iterator i;
+	if ((i = v_pattern_cache.find (key)) != v_pattern_cache.end()) {
 		return i->second;
 	}
 
-	Cairo::RefPtr<Cairo::Pattern> p = generate_meter_pattern (width, height);
-	v_pattern_cache[height] = p;
+	Cairo::RefPtr<Cairo::Pattern> p = generate_meter_pattern (
+		width, height, clr0, clr1, clr2, clr3);
+	v_pattern_cache[key] = p;
 
 	return p;
 }
 
 Cairo::RefPtr<Cairo::Pattern>
-FastMeter::request_horizontal_meter(int width, int height)
+FastMeter::request_horizontal_meter(
+		int width, int height, int clr0, int clr1, int clr2, int clr3)
 {
 	if (width < min_pattern_metric_size)
 		width = min_pattern_metric_size;
 	if (width > max_pattern_metric_size)
 		width = max_pattern_metric_size;
-	
-	PatternMap::iterator i;
 
-	if ((i = h_pattern_cache.find (height)) != h_pattern_cache.end()) {
+	const PatternMapKey key (width, height, clr0, clr1, clr2, clr3);
+	PatternMap::iterator i;
+	if ((i = h_pattern_cache.find (key)) != h_pattern_cache.end()) {
 		return i->second;
 	}
 
 	/* flip height/width so that we get the right pattern */
 
-	Cairo::RefPtr<Cairo::Pattern> p = generate_meter_pattern (height, width);
+	Cairo::RefPtr<Cairo::Pattern> p = generate_meter_pattern (
+		height, width, clr0, clr1, clr2, clr3);
 
 	/* rotate to make it horizontal */
 
@@ -180,7 +179,7 @@ FastMeter::request_horizontal_meter(int width, int height)
 	cairo_matrix_init_rotate (&m, -M_PI/2.0);
 	cairo_pattern_set_matrix (p->cobj(), &m);
 
-	h_pattern_cache[width] = p;
+	h_pattern_cache[key] = p;
 
 	return p;
 }
@@ -195,11 +194,11 @@ FastMeter::set_hold_count (long val)
 	if (val < 1) {
 		val = 1;
 	}
-	
+
 	hold_cnt = val;
 	hold_state = 0;
 	current_peak = 0;
-	
+
 	queue_draw ();
 }
 
@@ -237,13 +236,14 @@ FastMeter::on_size_allocate (Gtk::Allocation &alloc)
 		int h = alloc.get_height();
 		h = max (h, min_pattern_metric_size);
 		h = min (h, max_pattern_metric_size);
-		
+
 		if (h != alloc.get_height()) {
 			alloc.set_height (h);
 		}
 
 		if (pixheight != h) {
-			pattern = request_vertical_meter (request_width, h);
+			pattern = request_vertical_meter (
+				request_width, h, _clr0, _clr1, _clr2, _clr3);
 			pixheight = h;
 			pixwidth  = request_width;
 		}
@@ -263,7 +263,8 @@ FastMeter::on_size_allocate (Gtk::Allocation &alloc)
 		}
 
 		if (pixwidth != w) {
-			pattern = request_horizontal_meter (w, request_height);
+			pattern = request_horizontal_meter (
+				w, request_height, _clr0, _clr1, _clr2, _clr3);
 			pixheight = request_height;
 			pixwidth  = w;
 		}
@@ -295,7 +296,7 @@ FastMeter::vertical_expose (GdkEventExpose* ev)
 	cairo_clip (cr);
 
 	top_of_meter = (gint) floor (pixheight * current_level);
-	
+
 	/* reset the height & origin of the rect that needs to show the pixbuf
 	 */
 
@@ -308,7 +309,7 @@ FastMeter::vertical_expose (GdkEventExpose* ev)
 	background.height = pixheight - top_of_meter;
 
 	if (gdk_rectangle_intersect (&background, &ev->area, &intersection)) {
-		cairo_set_source_rgb (cr, 0, 0, 0); // black 
+		cairo_set_source_rgb (cr, 0, 0, 0); // black
 		cairo_rectangle (cr, intersection.x, intersection.y, intersection.width, intersection.height);
 		cairo_fill (cr);
 	}
@@ -320,7 +321,7 @@ FastMeter::vertical_expose (GdkEventExpose* ev)
 		cairo_fill (cr);
 	}
 
-	// draw peak bar 
+	// draw peak bar
 
 	if (hold_state) {
 		last_peak_rect.x = 0;
@@ -363,7 +364,7 @@ FastMeter::horizontal_expose (GdkEventExpose* ev)
 	background.height = pixrect.height;
 
 	if (gdk_rectangle_intersect (&background, &ev->area, &intersection)) {
-		cairo_set_source_rgb (cr, 0, 0, 0); // black 
+		cairo_set_source_rgb (cr, 0, 0, 0); // black
 		cairo_rectangle (cr, intersection.x + right_of_meter, intersection.y, intersection.width, intersection.height);
 		cairo_fill (cr);
 	}
@@ -378,7 +379,7 @@ FastMeter::horizontal_expose (GdkEventExpose* ev)
 		cairo_fill (cr);
 	}
 
-	// draw peak bar 
+	// draw peak bar
 	// XXX: peaks don't work properly
 	/*
 	if (hold_state && intersection.height > 0) {
@@ -393,7 +394,7 @@ FastMeter::horizontal_expose (GdkEventExpose* ev)
 	*/
 
 	cairo_destroy (cr);
-	
+
 	return true;
 }
 
@@ -404,12 +405,12 @@ FastMeter::set (float lvl)
 	float old_peak = current_peak;
 
 	current_level = lvl;
-	
+
 	if (lvl > current_peak) {
 		current_peak = lvl;
 		hold_state = hold_cnt;
 	}
-	
+
 	if (hold_state > 0) {
 		if (--hold_state == 0) {
 			current_peak = lvl;
@@ -439,9 +440,9 @@ void
 FastMeter::queue_vertical_redraw (const Glib::RefPtr<Gdk::Window>& win, float old_level)
 {
 	GdkRectangle rect;
-	
+
 	gint new_top = (gint) floor (pixheight * current_level);
-	
+
 	rect.x = 0;
 	rect.width = pixwidth;
 	rect.height = new_top;
@@ -470,7 +471,7 @@ FastMeter::queue_vertical_redraw (const Glib::RefPtr<Gdk::Window>& win, float ol
 	if (rect.height != 0) {
 
 		/* ok, first region to draw ... */
-		
+
 		region = gdk_region_rectangle (&rect);
 		queue = true;
 	}
@@ -479,14 +480,14 @@ FastMeter::queue_vertical_redraw (const Glib::RefPtr<Gdk::Window>& win, float ol
 	   the next expose will draw the new one whether its part of
 	   expose region or not.
 	*/
-	
+
 	if (last_peak_rect.width * last_peak_rect.height != 0) {
 		if (!queue) {
 			region = gdk_region_new ();
-			queue = true; 
+			queue = true;
 		}
 		gdk_region_union_with_rect (region, &last_peak_rect);
-	} 
+	}
 
 	if (queue) {
 		gdk_window_invalidate_region (win->gobj(), region, true);
