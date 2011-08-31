@@ -94,10 +94,16 @@ FastMeter::generate_meter_pattern (
 {
 	guint8 r0,g0,b0,r1,g1,b1,r2,g2,b2,r3,g3,b3,a;
 
-	/* clr0: color at top of the meter
-	      1: color at the knee
-              2: color half-way between bottom and knee
-	      3: color at the bottom of the meter
+	/*
+	  The knee is the hard transition point (e.g. at 0dB where the colors
+	  change dramatically to make clipping apparent). Thus there are two
+	  gradients in the pattern, the "normal range" and the "clip range", which
+	  are separated at the knee point.
+
+	  clr0: color at bottom of normal range gradient
+	  clr1: color at top of normal range gradient
+	  clr2: color at bottom of clip range gradient
+	  clr3: color at top of clip range gradient
 	*/
 
 	UINT_TO_RGBA (clr0, &r0, &g0, &b0, &a);
@@ -112,18 +118,30 @@ FastMeter::generate_meter_pattern (
 	//  return def / 115.0f
 
 	const int knee = (int)floor((float)height * 100.0f / 115.0f);
-	cairo_pattern_t* _p = cairo_pattern_create_linear (0.0, 0.0, width, height);
+	cairo_pattern_t* pat = cairo_pattern_create_linear (0.0, 0.0, width, height);
 
-	/* cairo coordinate space goes downwards as y value goes up, so invert
-	 * knee-based positions by using (1.0 - y)
-	 */
+	/*
+	  Cairo coordinate space goes downwards as y value goes up, so invert
+	  knee-based positions by using (1.0 - y)
+	*/
 
-	cairo_pattern_add_color_stop_rgb (_p, 0.0, r3/255.0, g3/255.0, b3/255.0); // bottom
-	cairo_pattern_add_color_stop_rgb (_p, 1.0 - (knee/(double)height), r2/255.0, g2/255.0, b2/255.0); // mid-point to knee
-	cairo_pattern_add_color_stop_rgb (_p, 1.0 - (knee/(2.0 * height)), r1/255.0, g1/255.0, b1/255.0); // knee to top
-	cairo_pattern_add_color_stop_rgb (_p, 1.0, r0/255.0, g0/255.0, b0/255.0); // top
+	// Clip range top
+	cairo_pattern_add_color_stop_rgb (pat, 0.0,
+	                                  r3/255.0, g3/255.0, b3/255.0);
 
-	Cairo::RefPtr<Cairo::Pattern> p (new Cairo::Pattern (_p, false));
+	// Clip range bottom
+	cairo_pattern_add_color_stop_rgb (pat, 1.0 - (knee/(double)height),
+	                                  r2/255.0, g2/255.0, b2/255.0);
+
+	// Normal range top (double-stop at knee)
+	cairo_pattern_add_color_stop_rgb (pat, 1.0 - (knee/(double)height),
+	                                  r1/255.0, g1/255.0, b1/255.0);
+
+	// Normal range bottom
+	cairo_pattern_add_color_stop_rgb (pat, 1.0,
+	                                  r0/255.0, g0/255.0, b0/255.0); // top
+
+	Cairo::RefPtr<Cairo::Pattern> p (new Cairo::Pattern (pat, false));
 
 	return p;
 }
