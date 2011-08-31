@@ -57,6 +57,8 @@ class RouteUI : public virtual AxisView
 
 	virtual ~RouteUI();
 
+	Gdk::Color color () const;
+
 	virtual void set_route (boost::shared_ptr<ARDOUR::Route>);
 	virtual void set_button_names () = 0;
 

@@ -45,6 +45,7 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
 	, _select (_("Selection"))
 	, _edit (_("Editing"))
 	, _route_active (_("Route active state"))
+	, _share_color (_("Color"))
 {
 	set_modal (true);
 	set_skip_taskbar_hint (true);
@@ -84,6 +85,7 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
 
 	_name.set_text (_group->name ());
 	_active.set_active (_group->is_active ());
+	_color.set_color (GroupTabs::group_color (_group));
 
 	VBox* options_box = manage (new VBox);
 	options_box->set_spacing (6);
@@ -102,10 +104,11 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
 	_select.set_active (_group->is_select());
 	_edit.set_active (_group->is_edit());
 	_route_active.set_active (_group->is_route_active());
-	_color.set_color (GroupTabs::group_color (_group));
+	_share_color.set_active (_group->is_color());
 
 	_name.signal_changed().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
 	_active.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
+	_color.signal_color_set().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
 	_gain.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
  	_relative.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
  	_mute.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
@@ -114,8 +117,8 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
  	_select.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
  	_edit.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
  	_route_active.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
-	_color.signal_color_set().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
-
+	_share_color.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
+	
 	gain_toggled ();
 
 	Table* table = manage (new Table (11, 4, false));
@@ -138,7 +141,7 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
 	table->attach (_select, 1, 3, 6, 7, Gtk::FILL, Gtk::FILL, 0, 0);
 	table->attach (_edit, 1, 3, 7, 8, Gtk::FILL, Gtk::FILL, 0, 0);
 	table->attach (_route_active, 1, 3, 8, 9, Gtk::FILL, Gtk::FILL, 0, 0);
-
+	table->attach (_share_color, 1, 3, 9, 10, Gtk::FILL, Gtk::FILL, 0, 0);
 
 	options_box->pack_start (*table, false, true);
 	main_vbox->pack_start (*options_box, false, true);
@@ -206,10 +209,11 @@ RouteGroupDialog::update ()
 	plist.add (Properties::relative, _relative.get_active());
 	plist.add (Properties::active, _active.get_active());
 	plist.add (Properties::name, string (_name.get_text()));
+	plist.add (Properties::color, _share_color.get_active());
 
-	GroupTabs::set_group_color (_group, _color.get_color ());
-	
 	_group->apply_changes (plist);
+	
+	GroupTabs::set_group_color (_group, _color.get_color ());
 }
 
 void

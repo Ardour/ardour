@@ -89,7 +89,7 @@ public:
 	};
 
 	Gdk::Color get_region_color () const { return region_color; }
-	void       apply_color (Gdk::Color&, ColorTarget t);
+	void       apply_color (Gdk::Color, ColorTarget t);
 
 	uint32_t     num_selected_regionviews () const;
 

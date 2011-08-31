@@ -44,6 +44,7 @@
 #include "mixer_strip.h"
 #include "automation_time_axis.h"
 #include "route_time_axis.h"
+#include "group_tabs.h"
 
 #include "ardour/route.h"
 #include "ardour/event_type_map.h"
@@ -1808,4 +1809,19 @@ RouteUI::route_gui_changed (string what_changed)
 			route_color_changed ();
 		}
 	}
+}
+
+/** @return the color that this route should use; it maybe its own,
+    or it maybe that of its route group.
+*/
+Gdk::Color
+RouteUI::color () const
+{
+	RouteGroup* g = _route->route_group ();
+	
+	if (g && g->is_color()) {
+		return GroupTabs::group_color (g);
+	}
+
+	return _color;
 }

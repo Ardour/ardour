@@ -357,7 +357,7 @@ StreamView::diskstream_changed ()
 }
 
 void
-StreamView::apply_color (Gdk::Color& color, ColorTarget target)
+StreamView::apply_color (Gdk::Color color, ColorTarget target)
 {
 	list<RegionView *>::iterator i;
 

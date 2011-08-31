@@ -517,6 +517,15 @@ GroupTabs::set_group_color (RouteGroup* group, Gdk::Color color)
 	char buf[64];
 	snprintf (buf, sizeof (buf), "%d:%d:%d", color.get_red(), color.get_green(), color.get_blue());
 	gui_state.set (group_gui_id (group), "color", buf);
+
+	/* This is a bit of a hack, but this might change
+	   our route's effective color, so emit gui_changed
+	   for our routes.
+	*/
+
+	for (RouteList::iterator i = group->route_list()->begin(); i != group->route_list()->end(); ++i) {
+		(*i)->gui_changed (X_("color"), 0);
+	}
 }
 
 /** @return the ID string to use for the GUI state of a route group */

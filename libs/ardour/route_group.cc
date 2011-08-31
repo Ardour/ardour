@@ -51,6 +51,7 @@ namespace ARDOUR {
 		PropertyDescriptor<bool> select;
 		PropertyDescriptor<bool> edit;
 		PropertyDescriptor<bool> route_active;
+		PropertyDescriptor<bool> color;
 	}
 }
 
@@ -77,6 +78,8 @@ RouteGroup::make_property_quarks ()
         DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for edit = %1\n", 	Properties::edit.property_id));
 	Properties::route_active.property_id = g_quark_from_static_string (X_("route-active"));
         DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for route-active = %1\n", Properties::route_active.property_id));
+	Properties::color.property_id = g_quark_from_static_string (X_("color"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for color = %1\n",       Properties::color.property_id));
 }
 
 #define ROUTE_GROUP_DEFAULT_PROPERTIES  _relative (Properties::relative, false) \
@@ -88,7 +91,8 @@ RouteGroup::make_property_quarks ()
 	, _recenable (Properties::recenable, false) \
 	, _select (Properties::select, false) \
 	, _edit (Properties::edit, false) \
-	, _route_active (Properties::route_active, false)
+	, _route_active (Properties::route_active, false) \
+	, _color (Properties::color, false)
 
 RouteGroup::RouteGroup (Session& s, const string &n)
 	: SessionObject (s, n)
@@ -107,6 +111,7 @@ RouteGroup::RouteGroup (Session& s, const string &n)
 	add_property (_select);
 	add_property (_edit);
 	add_property (_route_active);
+	add_property (_color);
 }
 
 RouteGroup::~RouteGroup ()
@@ -282,6 +287,7 @@ RouteGroup::set_state_2X (const XMLNode& node, int /*version*/)
 		_recenable = true;
 		_edit = false;
 		_route_active = true;
+		_color = false;
 	} else if (node.name() == "EditGroup") {
 		_gain = false;
 		_mute = false;
@@ -289,6 +295,7 @@ RouteGroup::set_state_2X (const XMLNode& node, int /*version*/)
 		_recenable = false;
 		_edit = true;
 		_route_active = false;
+		_color = false;
 	}
 
 	return 0;
@@ -358,6 +365,24 @@ RouteGroup::set_route_active (bool yn)
 }
 
 void
+RouteGroup::set_color (bool yn)
+{
+	if (is_color() == yn) {
+		return;
+	}
+	_color = yn;
+
+	/* This is a bit of a hack, but this might change
+	   our route's effective color, so emit gui_changed
+	   for our routes.
+	*/
+
+	for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
+		(*i)->gui_changed (X_("color"), this);
+	}
+}
+
+void
 RouteGroup::set_active (bool yn, void* /*src*/)
 {
 	if (is_active() == yn) {
@@ -399,7 +424,7 @@ RouteGroup::set_hidden (bool yn, void* /*src*/)
 		}
 	}
 
-	PropertyChanged (Properties::hidden); /* EMIT SIGNAL */
+	send_change (Properties::hidden);
 
 	_session.set_dirty ();
 }

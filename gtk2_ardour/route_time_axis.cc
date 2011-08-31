@@ -914,7 +914,7 @@ void
 RouteTimeAxisView::route_color_changed ()
 {
 	if (_view) {
-		_view->apply_color (_color, StreamView::RegionColor);
+		_view->apply_color (color(), StreamView::RegionColor);
 	}
 }
 
@@ -2487,3 +2487,4 @@ RouteTimeAxisView::state_id() const
 {
 	return string_compose ("rtav %1", _route->id().to_s());
 }
+

@@ -375,10 +375,6 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 
 	revert_to_default_display ();
 
-	if (set_color_from_route()) {
-		set_color (unique_random_color());
-	}
-
 	if (route()->is_master()) {
 		solo_button->hide ();
 		below_panner_box.hide ();
