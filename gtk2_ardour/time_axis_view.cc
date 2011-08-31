@@ -67,8 +67,8 @@ using namespace ArdourCanvas;
 using Gtkmm2ext::Keyboard;
 
 const double trim_handle_size = 6.0; /* pixels */
-uint32_t TimeAxisView::extra_height;
-uint32_t TimeAxisView::small_height;
+uint32_t TimeAxisView::button_height = 0;
+uint32_t TimeAxisView::extra_height = 0;
 int const TimeAxisView::_max_order = 512;
 PBD::Signal1<void,TimeAxisView*> TimeAxisView::CatchDeletion;
 
@@ -1092,7 +1092,8 @@ TimeAxisView::compute_heights ()
 	Button* buttons[5];
 	const int border_width = 2;
 
-	extra_height = (2 * border_width);
+	const int separator_height = 2;
+	extra_height = (2 * border_width) + separator_height;
 
 	window.add (one_row_table);
 
@@ -1117,8 +1118,7 @@ TimeAxisView::compute_heights ()
 	Gtk::Requisition req(one_row_table.size_request ());
 
 	// height required to show 1 row of buttons
-
-	small_height = req.height + (2 * border_width);
+	button_height = req.height;
 }
 
 void
@@ -1241,15 +1241,15 @@ TimeAxisView::preset_height (Height h)
 {
 	switch (h) {
 	case HeightLargest:
-		return extra_height + 48 + 250;
+		return (button_height * 2) + extra_height + 250;
 	case HeightLarger:
-		return extra_height + 48 + 150;
+		return (button_height * 2) + extra_height + 150;
 	case HeightLarge:
-		return extra_height + 48 + 50;
+		return (button_height * 2) + extra_height + 50;
 	case HeightNormal:
-		return extra_height + 48;
+		return (button_height * 2) + extra_height;
 	case HeightSmall:
-		return small_height;
+		return button_height + extra_height;
 	}
 
 	/* NOTREACHED */

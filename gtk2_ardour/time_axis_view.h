@@ -310,8 +310,8 @@ private:
 	ArdourCanvas::Group* _ghost_group;
 
 	void compute_heights ();
+	static uint32_t button_height;
 	static uint32_t extra_height;
-	static uint32_t small_height;
 
 	static int const _max_order;
 	
