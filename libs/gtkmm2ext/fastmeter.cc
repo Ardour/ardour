@@ -116,14 +116,11 @@ FastMeter::generate_meter_pattern (
 
 	/* cairo coordinate space goes downwards as y value goes up, so invert
 	 * knee-based positions by using (1.0 - y)
-	 *
-	 * also, double-stop the knee point, so that we get a hard transition
 	 */
 
 	cairo_pattern_add_color_stop_rgb (_p, 0.0, r3/255.0, g3/255.0, b3/255.0); // bottom
-	cairo_pattern_add_color_stop_rgb (_p, 1.0 - (knee/(2.0 * height)), r2/255.0, g2/255.0, b2/255.0); // mid-point to knee
-	cairo_pattern_add_color_stop_rgb (_p, 1.0 - (knee/(double)height), r0/255.0, g0/255.0, b0/255.0); // knee
-	cairo_pattern_add_color_stop_rgb (_p, 1.0 - (knee/(double)height), r1/255.0, g1/255.0, b1/255.0); // double-stop @ knee
+	cairo_pattern_add_color_stop_rgb (_p, 1.0 - (knee/(double)height), r2/255.0, g2/255.0, b2/255.0); // mid-point to knee
+	cairo_pattern_add_color_stop_rgb (_p, 1.0 - (knee/(2.0 * height)), r1/255.0, g1/255.0, b1/255.0); // knee to top
 	cairo_pattern_add_color_stop_rgb (_p, 1.0, r0/255.0, g0/255.0, b0/255.0); // top
 
 	Cairo::RefPtr<Cairo::Pattern> p (new Cairo::Pattern (_p, false));
