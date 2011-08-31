@@ -104,6 +104,7 @@ GroupTabs::on_button_press_event (GdkEventButton* ev)
 
 		} else {
 			_dragging_new_tab = false;
+			_initial_dragging_routes = routes_for_tab (t);
 		}
 
 		_dragging = t;
@@ -204,13 +205,15 @@ GroupTabs::on_button_release_event (GdkEventButton* ev)
 				boost::shared_ptr<RouteList> r = _session->get_routes ();
 				for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 
-					if (find (routes.begin(), routes.end(), *i) == routes.end()) {
-						/* this route is not contained in the tab we are dragging ... */
-						if ((*i)->route_group() != _dragging->group) {
-							/* and it's not in the dragged tab's group either */
-							_dragging->group->remove (*i);
-						}
-					} else {
+					bool const was_in_tab = find (
+						_initial_dragging_routes.begin(), _initial_dragging_routes.end(), *i
+						) != _initial_dragging_routes.end ();
+
+					bool const now_in_tab = find (routes.begin(), routes.end(), *i) != routes.end();
+
+					if (was_in_tab && !now_in_tab) {
+						_dragging->group->remove (*i);
+					} else if (!was_in_tab && now_in_tab) {
 						_dragging->group->add (*i);
 					}
 				}
@@ -222,6 +225,7 @@ GroupTabs::on_button_release_event (GdkEventButton* ev)
 	}
 
 	_dragging = 0;
+	_initial_dragging_routes.clear ();
 
 	return true;
 }

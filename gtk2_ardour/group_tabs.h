@@ -113,6 +113,8 @@ private:
 	Gtk::Menu* _menu;
 	std::list<Tab> _tabs; ///< current list of tabs
 	Tab* _dragging; ///< tab being dragged, or 0
+	/** routes that were in the tab that is being dragged when the drag started */
+	ARDOUR::RouteList _initial_dragging_routes;
 	bool _dragging_new_tab; ///< true if we're dragging a new tab
 	bool _drag_moved; ///< true if there has been movement during any current drag
 	double _drag_fixed; ///< the position of the fixed end of the tab being dragged
