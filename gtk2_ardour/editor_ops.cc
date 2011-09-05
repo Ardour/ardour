@@ -56,6 +56,7 @@
 #include "ardour/strip_silence.h"
 #include "ardour/route_group.h"
 #include "ardour/operations.h"
+#include "ardour/session_playlists.h"
 
 #include "ardour_ui.h"
 #include "debug.h"
@@ -6177,6 +6178,7 @@ Editor::do_insert_time ()
 		get_preferred_edit_position(),
 		d.distance(),
 		opt,
+		d.all_playlists(),
 		d.move_glued(),
 		d.move_markers(),
 		d.move_glued_markers(),
@@ -6186,8 +6188,10 @@ Editor::do_insert_time ()
 }
 
 void
-Editor::insert_time (framepos_t pos, framecnt_t frames, InsertTimeOption opt,
-		     bool ignore_music_glue, bool markers_too, bool glued_markers_too, bool locked_markers_too, bool tempo_too)
+Editor::insert_time (
+	framepos_t pos, framecnt_t frames, InsertTimeOption opt,
+	bool all_playlists, bool ignore_music_glue, bool markers_too, bool glued_markers_too, bool locked_markers_too, bool tempo_too
+	)
 {
 	bool commit = false;
 
@@ -6198,25 +6202,37 @@ Editor::insert_time (framepos_t pos, framecnt_t frames, InsertTimeOption opt,
 	begin_reversible_command (_("insert time"));
 
 	for (TrackSelection::iterator x = selection->tracks.begin(); x != selection->tracks.end(); ++x) {
+
 		/* regions */
-		boost::shared_ptr<Playlist> pl = (*x)->playlist();
 
-		if (pl) {
+		vector<boost::shared_ptr<Playlist> > pl;
+		if (all_playlists) {
+			RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*> (*x);
+			if (rtav) {
+				pl = _session->playlists->playlists_for_track (rtav->track ());
+			}
+		} else {
+			if ((*x)->playlist ()) {
+				pl.push_back ((*x)->playlist ());
+			}
+		}
 
-			pl->clear_changes ();
-			pl->clear_owned_changes ();
+		for (vector<boost::shared_ptr<Playlist> >::iterator i = pl.begin(); i != pl.end(); ++i) {
+
+			(*i)->clear_changes ();
+			(*i)->clear_owned_changes ();
 
 			if (opt == SplitIntersected) {
-				pl->split (pos);
+				(*i)->split (pos);
 			}
 
-			pl->shift (pos, frames, (opt == MoveIntersected), ignore_music_glue);
+			(*i)->shift (pos, frames, (opt == MoveIntersected), ignore_music_glue);
 
 			vector<Command*> cmds;
-			pl->rdiff (cmds);
+			(*i)->rdiff (cmds);
 			_session->add_commands (cmds);
 
-			_session->add_command (new StatefulDiffCommand (pl));
+			_session->add_command (new StatefulDiffCommand (*i));
 			commit = true;
 		}
 

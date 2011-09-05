@@ -42,6 +42,7 @@ class Region;
 class Source;
 class Session;
 class Crossfade;
+class Track;
 
 class SessionPlaylists : public PBD::ScopedConnectionList
 {
@@ -53,11 +54,12 @@ public:
 	uint32_t source_use_count (boost::shared_ptr<const Source> src) const;
 	uint32_t region_use_count (boost::shared_ptr<Region> region) const;
 	template<class T> void foreach (T *obj, void (T::*func)(boost::shared_ptr<Playlist>));
-	void get (std::vector<boost::shared_ptr<Playlist> >&);
+	void get (std::vector<boost::shared_ptr<Playlist> >&) const;
 	void unassigned (std::list<boost::shared_ptr<Playlist> > & list);
 	void destroy_region (boost::shared_ptr<Region>);
 	boost::shared_ptr<Crossfade> find_crossfade (const PBD::ID &);
 	void sync_all_regions_with_regions ();
+	std::vector<boost::shared_ptr<Playlist> > playlists_for_track (boost::shared_ptr<Track>) const;
 
 private:
 	friend class Session;

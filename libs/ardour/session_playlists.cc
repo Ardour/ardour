@@ -27,6 +27,7 @@
 #include "ardour/playlist_factory.h"
 #include "ardour/session.h"
 #include "ardour/source.h"
+#include "ardour/track.h"
 #include "i18n.h"
 
 using namespace std;
@@ -219,7 +220,7 @@ SessionPlaylists::unassigned (std::list<boost::shared_ptr<Playlist> > & list)
 }
 
 void
-SessionPlaylists::get (vector<boost::shared_ptr<Playlist> >& s)
+SessionPlaylists::get (vector<boost::shared_ptr<Playlist> >& s) const
 {
 	Glib::Mutex::Lock lm (lock);
 
@@ -449,4 +450,22 @@ SessionPlaylists::region_use_count (boost::shared_ptr<Region> region) const
 	}
 
 	return cnt;
+}
+
+/** @return list of Playlists that are associated with a track */
+vector<boost::shared_ptr<Playlist> >
+SessionPlaylists::playlists_for_track (boost::shared_ptr<Track> tr) const
+{
+	vector<boost::shared_ptr<Playlist> > pl;
+	get (pl);
+	
+	vector<boost::shared_ptr<Playlist> > pl_tr;
+
+	for (vector<boost::shared_ptr<Playlist> >::iterator i = pl.begin(); i != pl.end(); ++i) {
+		if (((*i)->get_orig_diskstream_id() == tr->diskstream_id()) || (tr->playlist()->id() == (*i)->id())) {
+			pl_tr.push_back (*i);
+		}
+	}
+
+	return pl_tr;
 }
