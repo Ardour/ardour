@@ -1839,11 +1839,13 @@ Editor::clear_ranges ()
 
 		Location * looploc = _session->locations()->auto_loop_location();
 		Location * punchloc = _session->locations()->auto_punch_location();
+		Location * sessionloc = _session->locations()->session_range_location();
 
 		_session->locations()->clear_ranges ();
 		// re-add these
 		if (looploc) _session->locations()->add (looploc);
 		if (punchloc) _session->locations()->add (punchloc);
+		if (sessionloc) _session->locations()->add (sessionloc);
 
 		XMLNode &after = _session->locations()->get_state();
 		_session->add_command(new MementoCommand<Locations>(*(_session->locations()), &before, &after));
