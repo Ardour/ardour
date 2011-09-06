@@ -402,4 +402,4 @@ widget "*TimeInfoPunchButton" style:highest "punch_button"
 widget "*RouteNameEditorEntry" style:highest "text_cell_entry"
 widget "*RegionNameEditorEntry" style:highest "text_cell_entry"
 widget "*MixerMidiInputEnableButton" style:highest "mouse_mode_button"
-
+widget "*InsertTimeClock" style:highest "default_clock_display"
