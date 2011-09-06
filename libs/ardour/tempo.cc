@@ -1672,7 +1672,7 @@ void
 TempoMap::insert_time (framepos_t where, framecnt_t amount)
 {
 	for (Metrics::iterator i = metrics->begin(); i != metrics->end(); ++i) {
-		if ((*i)->frame() >= where && (*i)->frame() != 0) {
+		if ((*i)->frame() >= where && (*i)->movable ()) {
 			(*i)->set_frame ((*i)->frame() + amount);
 		}
 	}
