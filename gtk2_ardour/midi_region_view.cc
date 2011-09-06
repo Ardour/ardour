@@ -2360,32 +2360,6 @@ MidiRegionView::snap_pixel_to_frame(double x)
 	return snap_frame_to_frame (editor.pixel_to_frame (x));
 }
 
-/** Snap a frame offset within our region using the current snap settings.
- *  @param x Frame offset from this region's position.
- *  @return Snapped frame offset from this region's position.
- */
-frameoffset_t
-MidiRegionView::snap_frame_to_frame (frameoffset_t x) const
-{
-	PublicEditor& editor = trackview.editor();
-
-	/* x is region relative, convert it to global absolute frames */
-	framepos_t const session_frame = x + _region->position();
-
-	/* try a snap in either direction */
-	framepos_t frame = session_frame;
-	editor.snap_to (frame, 0);
-
-	/* if we went off the beginning of the region, snap forwards */
-	if (frame < _region->position ()) {
-		frame = session_frame;
-		editor.snap_to (frame, 1);
-	}
-
-	/* back to region relative */
-	return frame - _region->position();
-}
-
 double
 MidiRegionView::snap_to_pixel(double x)
 {

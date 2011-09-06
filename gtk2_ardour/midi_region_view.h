@@ -251,8 +251,6 @@ public:
 	 */
 	framepos_t snap_pixel_to_frame(double x);
 
-	ARDOUR::frameoffset_t snap_frame_to_frame (ARDOUR::frameoffset_t) const;
-
 	/** Convert a timestamp in beats into frames (both relative to region start) */
 	framepos_t region_beats_to_region_frames(double beats) const;
 	/** Convert a timestamp in beats into absolute frames */

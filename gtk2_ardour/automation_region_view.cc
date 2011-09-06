@@ -147,6 +147,10 @@ AutomationRegionView::add_automation_event (GdkEvent *, framepos_t when, double 
 	const double h = trackview.current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 2;
 	y = 1.0 - (y / h);
 
+	/* snap frame */
+
+	when = snap_frame_to_frame (when - _region->start ());
+
 	/* map using line */
 
 	double when_d = when;

@@ -120,6 +120,8 @@ class RegionView : public TimeAxisViewItem
         void drop_silent_frames ();
         void hide_silent_frames ();
 
+	ARDOUR::frameoffset_t snap_frame_to_frame (ARDOUR::frameoffset_t) const;
+	
   protected:
 
 	/** Allows derived types to specify their visibility requirements
