@@ -117,6 +117,10 @@ class AutomationTimeAxisView : public TimeAxisView {
 		return _route;
 	}
 
+	bool show_regions () const {
+		return _show_regions;
+	}
+
 	static void what_has_visible_automation (const boost::shared_ptr<ARDOUR::Automatable>& automatable, std::set<Evoral::Parameter>& visible);
 
   protected:
@@ -154,6 +158,8 @@ class AutomationTimeAxisView : public TimeAxisView {
 
 	Gtk::CheckMenuItem* mode_discrete_item;
 	Gtk::CheckMenuItem* mode_line_item;
+
+	bool _show_regions;
 
 	void add_line (boost::shared_ptr<AutomationLine>);
 

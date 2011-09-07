@@ -87,6 +87,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	, _view (show_regions ? new AutomationStreamView (*this) : 0)
 	, _name (nom)
 	, auto_button (X_("")) /* force addition of a label */
+	, _show_regions (show_regions)
 {
 	if (!have_name_font) {
 		name_font = get_font_for_style (X_("AutomationTrackName"));

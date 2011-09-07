@@ -881,7 +881,9 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			case AutomationTrackItem:
 			{
 				TimeAxisView* parent = clicked_axisview->get_parent ();
-				if (parent && dynamic_cast<MidiTimeAxisView*> (parent)) {
+				AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*> (clicked_axisview);
+				assert (atv);
+				if (parent && dynamic_cast<MidiTimeAxisView*> (parent) && atv->show_regions ()) {
 					/* create a MIDI region so that we have somewhere to put automation */
 					_drags->set (new RegionCreateDrag (this, item, parent), event);
 				} else {
