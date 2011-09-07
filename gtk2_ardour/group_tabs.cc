@@ -525,6 +525,11 @@ void
 GroupTabs::set_group_color (RouteGroup* group, Gdk::Color color)
 {
 	assert (group);
+
+	/* Hack to disallow black route groups; force a dark grey instead */
+	if (color.get_red() == 0 && color.get_green() == 0 && color.get_blue() == 0) {
+		color.set_grey_p (0.1);
+	}
 	
 	GUIObjectState& gui_state = *ARDOUR_UI::instance()->gui_object_state;
 
