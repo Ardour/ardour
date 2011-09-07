@@ -186,9 +186,7 @@ Mixer_UI::Mixer_UI ()
 	add (global_vpacker);
 	set_name ("MixerWindow");
 
-	WindowTitle title(Glib::get_application_name());
-	title += _("Mixer");
-	set_title (title.get_string());
+	update_title ();
 
 	set_wmclass (X_("ardour_mixer"), PROGRAM_NAME);
 
@@ -479,11 +477,7 @@ Mixer_UI::set_session (Session* sess)
 	XMLNode* node = ARDOUR_UI::instance()->mixer_settings();
 	set_state (*node);
 
-	WindowTitle title(_session->name());
-	title += _("Mixer");
-	title += Glib::get_application_name();
-
-	set_title (title.get_string());
+	update_title ();
 
 	initial_track_display ();
 
@@ -492,6 +486,8 @@ Mixer_UI::set_session (Session* sess)
 	_session->route_group_removed.connect (_session_connections, invalidator (*this), boost::bind (&Mixer_UI::route_groups_changed, this), gui_context());
 	_session->route_groups_reordered.connect (_session_connections, invalidator (*this), boost::bind (&Mixer_UI::route_groups_changed, this), gui_context());
 	_session->config.ParameterChanged.connect (_session_connections, invalidator (*this), ui_bind (&Mixer_UI::parameter_changed, this, _1), gui_context());
+	_session->DirtyChanged.connect (_session_connections, invalidator (*this), boost::bind (&Mixer_UI::update_title, this), gui_context());
+	_session->StateSaved.connect (_session_connections, invalidator (*this), ui_bind (&Mixer_UI::update_title, this), gui_context());
 
 	Config->ParameterChanged.connect (*this, invalidator (*this), ui_bind (&Mixer_UI::parameter_changed, this, _1), gui_context ());
 
@@ -526,13 +522,12 @@ Mixer_UI::session_going_away ()
 
 	strips.clear ();
 
-	WindowTitle title(Glib::get_application_name());
-	title += _("Mixer");
-	set_title (title.get_string());
-
 	stop_updating ();
 
 	SessionHandlePtr::session_going_away ();
+
+	_session = 0;
+	update_title ();
 }
 
 void
@@ -1677,3 +1672,34 @@ Mixer_UI::new_track_or_bus ()
 	ARDOUR_UI::instance()->add_route (this);
 }
 
+
+void
+Mixer_UI::update_title ()
+{
+	if (_session) {
+		string n;
+		
+		if (_session->snap_name() != _session->name()) {
+			n = _session->snap_name ();
+		} else {
+			n = _session->name ();
+		}
+
+		if (_session->dirty ()) {
+			n = "*" + n;
+		}
+		
+		WindowTitle title (n);
+		title += _("Mixer");
+		title += Glib::get_application_name ();
+		set_title (title.get_string());
+
+	} else {
+		
+		WindowTitle title (X_("Mixer"));
+		title += Glib::get_application_name ();
+		set_title (title.get_string());
+	}
+}
+
+		

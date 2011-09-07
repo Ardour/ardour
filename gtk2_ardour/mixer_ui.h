@@ -264,6 +264,8 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 	*/
 	bool _in_group_rebuild_or_clear;
 
+	void update_title ();
+
 	friend class MixerGroupTabs;
 };
 
