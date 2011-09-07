@@ -74,6 +74,10 @@ Scroomer::on_motion_notify_event (GdkEventMotion* ev)
 		return true;
 	}
 
+	if (ev->y < 0 || ev->y > get_height ()) {
+		return true;
+	}
+
 	grab_y = ev->y;
 
 	if (ev->state & Keyboard::PrimaryModifier) {
@@ -138,10 +142,11 @@ Scroomer::on_motion_notify_event (GdkEventMotion* ev)
 
 	/* Then we handle zoom, which is dragging horizontally. We zoom around the area that is
 	 * the current y pointer value, not from the area that was the start of the drag.
-	 * the point of zoom must have the same 
+	 * We don't start doing zoom until we are at least one scroomer width outside the scroomer's
+	 * area.
 	 */
 	
-	if (ev->x > get_width()) {
+	if (ev->x > (get_width() * 2)) {
 		zoom = ev->x - get_width();
 		
 		double higher = unzoomed_val + unzoomed_page - half_min_page - val_at_pointer;
@@ -194,9 +199,10 @@ Scroomer::on_motion_notify_event (GdkEventMotion* ev)
 		val = unzoomed_val;
 		page = unzoomed_page;
 	}
-	
-	adj.set_page_size(page);
-	adj.set_value(val);
+
+	/* Round these values to stop the scroomer handlers quivering about during drags */
+	adj.set_page_size (rint (page));
+	adj.set_value (rint (val));
 	adj.value_changed();
 	
 	return true;
