@@ -481,7 +481,6 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 
 	control_ui = manage (new ControlUI ());
 	control_ui->combo = 0;
-	control_ui->combo_map = 0;
 	control_ui->control = mcontrol;
 	control_ui->update_pending = false;
 	control_ui->label.set_text (desc.label);
@@ -497,13 +496,15 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 
 		/* Build a combo box */
 
-		boost::shared_ptr<ARDOUR::Plugin::ScalePoints> points
-			= plugin->get_scale_points(port_index);
+		control_ui->combo_map = plugin->get_scale_points (port_index);
 
-		if (points) {
+		if (control_ui->combo_map) {
 			std::vector<std::string> labels;
-			for (ARDOUR::Plugin::ScalePoints::const_iterator i = points->begin();
-			     i != points->end(); ++i) {
+			for (
+				ARDOUR::Plugin::ScalePoints::const_iterator i = control_ui->combo_map->begin();
+				i != control_ui->combo_map->end();
+				++i) {
+				
 				labels.push_back(i->first);
 			}
 
@@ -744,8 +745,7 @@ GenericPluginUI::update_control_display (ControlUI* cui)
 	cui->ignore_change++;
 
 	if (cui->combo && cui->combo_map) {
-		std::map<string,float>::iterator it;
-		for (it = cui->combo_map->begin(); it != cui->combo_map->end(); ++it) {
+		for (ARDOUR::Plugin::ScalePoints::iterator it = cui->combo_map->begin(); it != cui->combo_map->end(); ++it) {
 			if (it->second == val) {
 				cui->combo->set_active_text(it->first);
 				break;
@@ -789,8 +789,7 @@ GenericPluginUI::control_combo_changed (ControlUI* cui)
 {
 	if (!cui->ignore_change && cui->combo_map) {
 		string value = cui->combo->get_active_text();
-		std::map<string,float> mapping = *cui->combo_map;
-		insert->automation_control(cui->parameter())->set_value(mapping[value]);
+		insert->automation_control (cui->parameter())->set_value ((*cui->combo_map)[value]);
 	}
 }
 

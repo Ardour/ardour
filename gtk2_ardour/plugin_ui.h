@@ -212,7 +212,7 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 		/* input */
 
 		Gtk::ComboBoxText*                      combo;
-		std::map<std::string, float>*           combo_map;
+		boost::shared_ptr<ARDOUR::Plugin::ScalePoints> combo_map;
 		Gtk::ToggleButton*                      button;
 		boost::shared_ptr<AutomationController> controller;
 		Gtkmm2ext::ClickBox*                    clickbox;
