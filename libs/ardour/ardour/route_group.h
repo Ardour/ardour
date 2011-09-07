@@ -123,8 +123,10 @@ class RouteGroup : public SessionObject
 
 	boost::shared_ptr<RouteList> route_list() { return routes; }
 
-	/** Emitted when a route has been added to or removed from this group */
-	PBD::Signal0<void> MembershipChanged;
+	/** Emitted when a route has been added to this group */
+	PBD::Signal2<void, RouteGroup *, boost::weak_ptr<ARDOUR::Route> > RouteAdded;
+	/** Emitted when a route has been removed from this group */
+	PBD::Signal2<void, RouteGroup *, boost::weak_ptr<ARDOUR::Route> > RouteRemoved;
 
 	XMLNode& get_state ();
 

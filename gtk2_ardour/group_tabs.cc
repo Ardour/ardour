@@ -56,7 +56,16 @@ GroupTabs::set_session (Session* s)
 	SessionHandlePtr::set_session (s);
 
 	if (_session) {
-		_session->RouteGroupChanged.connect (_session_connections, invalidator (*this), boost::bind (&GroupTabs::set_dirty, this), gui_context());
+		_session->RouteGroupPropertyChanged.connect (
+			_session_connections, invalidator (*this), boost::bind (&GroupTabs::route_group_property_changed, this, _1), gui_context()
+			);
+		_session->RouteAddedToRouteGroup.connect (
+			_session_connections, invalidator (*this), boost::bind (&GroupTabs::route_added_to_route_group, this, _1, _2), gui_context()
+			);
+		_session->RouteRemovedFromRouteGroup.connect (
+			_session_connections, invalidator (*this), boost::bind (&GroupTabs::route_removed_from_route_group, this, _1, _2), gui_context()
+			);
+		
 		_session->route_group_removed.connect (_session_connections, invalidator (*this), boost::bind (&GroupTabs::set_dirty, this), gui_context());
 	}
 }
@@ -528,9 +537,7 @@ GroupTabs::set_group_color (RouteGroup* group, Gdk::Color color)
 	   for our routes.
 	*/
 
-	for (RouteList::iterator i = group->route_list()->begin(); i != group->route_list()->end(); ++i) {
-		(*i)->gui_changed (X_("color"), 0);
-	}
+	emit_gui_changed_for_members (group);
 }
 
 /** @return the ID string to use for the GUI state of a route group */
@@ -577,3 +584,49 @@ GroupTabs::group_color (RouteGroup* group)
 	return c;
 }
 
+void
+GroupTabs::route_group_property_changed (RouteGroup* rg)
+{
+	/* This is a bit of a hack, but this might change
+	   our route's effective color, so emit gui_changed
+	   for our routes.
+	*/
+
+	emit_gui_changed_for_members (rg);
+	
+	set_dirty ();
+}
+
+void
+GroupTabs::route_added_to_route_group (RouteGroup* rg, boost::weak_ptr<Route> w)
+{
+	/* Similarly-spirited hack as in route_group_property_changed */
+	
+	boost::shared_ptr<Route> r = w.lock ();
+	if (!r) {
+		return;
+	}
+
+	r->gui_changed (X_("color"), 0);
+}
+
+void
+GroupTabs::route_removed_from_route_group (RouteGroup* rg, boost::weak_ptr<Route> w)
+{
+	/* Similarly-spirited hack as in route_group_property_changed */
+
+	boost::shared_ptr<Route> r = w.lock ();
+	if (!r) {
+		return;
+	}
+
+	r->gui_changed (X_("color"), 0);
+}
+
+void
+GroupTabs::emit_gui_changed_for_members (RouteGroup* rg)
+{
+	for (RouteList::iterator i = rg->route_list()->begin(); i != rg->route_list()->end(); ++i) {
+		(*i)->gui_changed (X_("color"), 0);
+	}
+}

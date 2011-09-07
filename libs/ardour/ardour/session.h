@@ -289,8 +289,18 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	PBD::Signal0<void> Located;
 
 	PBD::Signal1<void,RouteList&> RouteAdded;
-	/** Emitted when anything about any of our route groups changes */
-	PBD::Signal0<void> RouteGroupChanged;
+	/** Emitted when a property of one of our route groups changes.
+	 *  The parameter is the RouteGroup that has changed.
+	 */
+	PBD::Signal1<void, RouteGroup *> RouteGroupPropertyChanged;
+	/** Emitted when a route is added to one of our route groups.
+	 *  First parameter is the RouteGroup, second is the route.
+	 */
+	PBD::Signal2<void, RouteGroup *, boost::weak_ptr<Route> > RouteAddedToRouteGroup;
+	/** Emitted when a route is removed from one of our route groups.
+	 *  First parameter is the RouteGroup, second is the route.
+	 */
+	PBD::Signal2<void, RouteGroup *, boost::weak_ptr<Route> > RouteRemovedFromRouteGroup;
 
 	/* Step Editing status changed */
 	PBD::Signal1<void,bool> StepEditStatusChange;
@@ -1234,7 +1244,9 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	int load_regions (const XMLNode& node);
 	int load_compounds (const XMLNode& node);
 
-	void route_group_changed ();
+	void route_added_to_route_group (RouteGroup *, boost::weak_ptr<Route>);
+	void route_removed_from_route_group (RouteGroup *, boost::weak_ptr<Route>);
+	void route_group_property_changed (RouteGroup *);
 
 	/* SOURCES */
 

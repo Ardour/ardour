@@ -30,6 +30,10 @@ class Editor;
 
 /** Parent class for tabs which represent route groups as colored tabs;
  *  Currently used on the left-hand side of the editor and at the top of the mixer.
+ *
+ *  This class also contains a fair bit of code to handle changes to route
+ *  group colours; it seems a bit out of place, but I could not really think
+ *  of a better place to put it.
  */
 class GroupTabs : public CairoWidget, public ARDOUR::SessionHandlePtr
 {
@@ -62,6 +66,8 @@ protected:
 	};
 
 private:
+	static void emit_gui_changed_for_members (ARDOUR::RouteGroup *);
+	
 	/** Compute all the tabs for this widget.
 	 *  @return Tabs.
 	 */
@@ -109,6 +115,10 @@ private:
 	bool on_button_release_event (GdkEventButton *);
 
 	Tab * click_to_tab (double, std::list<Tab>::iterator *, std::list<Tab>::iterator *);
+
+	void route_group_property_changed (ARDOUR::RouteGroup *);
+	void route_added_to_route_group (ARDOUR::RouteGroup *, boost::weak_ptr<ARDOUR::Route>);
+	void route_removed_from_route_group (ARDOUR::RouteGroup *, boost::weak_ptr<ARDOUR::Route>);
 
 	Gtk::Menu* _menu;
 	std::list<Tab> _tabs; ///< current list of tabs

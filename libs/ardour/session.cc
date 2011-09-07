@@ -4033,11 +4033,25 @@ Session::solo_control_mode_changed ()
 	}
 }
 
-/** Called when anything about any of our route groups changes (membership, state etc.) */
+/** Called when a property of one of our route groups changes */
 void
-Session::route_group_changed ()
+Session::route_group_property_changed (RouteGroup* rg)
 {
-	RouteGroupChanged (); /* EMIT SIGNAL */
+	RouteGroupPropertyChanged (rg); /* EMIT SIGNAL */
+}
+
+/** Called when a route is added to one of our route groups */
+void
+Session::route_added_to_route_group (RouteGroup* rg, boost::weak_ptr<Route> r)
+{
+	RouteAddedToRouteGroup (rg, r);
+}
+
+/** Called when a route is removed from one of our route groups */
+void
+Session::route_removed_from_route_group (RouteGroup* rg, boost::weak_ptr<Route> r)
+{
+	RouteRemovedFromRouteGroup (rg, r);
 }
 
 vector<SyncSource>

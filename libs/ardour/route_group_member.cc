@@ -31,13 +31,14 @@ RouteGroupMember::join_route_group (RouteGroup *rg)
 	}
 
 	_route_group = rg;
-	route_group_changed (); /* EMIT SIGNAL */
+	route_group_changed (rg); /* EMIT SIGNAL */
 }
 
 void
 RouteGroupMember::leave_route_group ()
 {
+	RouteGroup* rg = _route_group;
 	_route_group = 0;
-	route_group_changed (); /* EMIT SIGNAL */
+	route_group_changed (rg); /* EMIT SIGNAL */
 }
 
