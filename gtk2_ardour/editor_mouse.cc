@@ -589,26 +589,42 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		return true;
 
 	case TempoMarkerItem:
-		_drags->set (
-			new TempoMarkerDrag (
-				this,
-				item,
-				Keyboard::modifier_state_contains (event->button.state, Keyboard::CopyModifier)
-				),
-			event
-			);
-		return true;
+	{
+		TempoMarker* m = reinterpret_cast<TempoMarker*> (item->get_data ("marker"));
+		assert (m);
+		if (m->tempo().movable ()) {
+			_drags->set (
+				new TempoMarkerDrag (
+					this,
+					item,
+					Keyboard::modifier_state_contains (event->button.state, Keyboard::CopyModifier)
+					),
+				event
+				);
+			return true;
+		} else {
+			return false;
+		}
+	}
 
 	case MeterMarkerItem:
-		_drags->set (
-			new MeterMarkerDrag (
-				this,
-				item,
-				Keyboard::modifier_state_contains (event->button.state, Keyboard::CopyModifier)
-				),
-			event
-			);
-		return true;
+	{
+		MeterMarker* m = reinterpret_cast<MeterMarker*> (item->get_data ("marker"));
+		assert (m);
+		if (m->meter().movable ()) {
+			_drags->set (
+				new MeterMarkerDrag (
+					this,
+					item,
+					Keyboard::modifier_state_contains (event->button.state, Keyboard::CopyModifier)
+					),
+				event
+				);
+			return true;
+		} else {
+			return false;
+		}
+	}
 
 	case MarkerBarItem:
 	case TempoBarItem:
