@@ -172,9 +172,7 @@ RouteUI::reset ()
 void
 RouteUI::self_delete ()
 {
-	/* This may be called from a non-GUI thread. Keep it safe */
-
-	delete_when_idle (this);
+	delete this;
 }
 
 void
