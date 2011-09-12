@@ -311,7 +311,7 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 		/* XXX: audio only */
 		Sample const * mono = bufs.get_audio (in_map.get (DataType::AUDIO, 0)).data (offset);
 		for (uint32_t i = input_streams().n_audio(); i < natural_input_streams().n_audio(); ++i) {
-			memcpy (bufs.get_audio (in_map.get (DataType::AUDIO, i)).data() + offset, mono + offset, sizeof (Sample) * (nframes - offset));
+			memcpy (bufs.get_audio (in_map.get (DataType::AUDIO, i)).data (offset), mono, sizeof (Sample) * nframes);
 		}
 	}
 
