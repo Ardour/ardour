@@ -409,16 +409,8 @@ Delivery::reset_panner ()
 int
 Delivery::panners_became_legal ()
 {
-	uint32_t ntargets;
-
-	if (_output) {
-		ntargets = _output->n_ports().n_audio();
-	} else {
-		ntargets = _configured_output.n_audio();
-	}
-
 	if (_panshell) {
-		_panshell->configure_io (ChanCount (DataType::AUDIO, pans_required()), ChanCount (DataType::AUDIO, ntargets));
+		_panshell->configure_io (ChanCount (DataType::AUDIO, pans_required()), ChanCount (DataType::AUDIO, pan_outs()));
 		
 		if (_role == Main) {
 			_panshell->pannable()->set_panner (_panshell->panner());
