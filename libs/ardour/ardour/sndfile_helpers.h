@@ -44,10 +44,9 @@ extern const char * const sndfile_endian_formats_strings[SNDFILE_ENDIAN_FORMATS+
 
 extern int sndfile_endian_formats[SNDFILE_ENDIAN_FORMATS];
 
-int sndfile_bitdepth_format_from_string(string);
-int sndfile_header_format_from_string(string);
-int sndfile_endian_format_from_string(string);
-string sndfile_file_ending_from_string(string);
+int sndfile_bitdepth_format_by_index(int);
+int sndfile_header_format_by_index(int);
+int sndfile_endian_format_by_index(int);
 
 int sndfile_data_width (int format);
 

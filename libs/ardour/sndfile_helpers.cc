@@ -92,53 +92,30 @@ int sndfile_endian_formats[SNDFILE_ENDIAN_FORMATS] = {
 };
 
 int
-sndfile_header_format_from_string (string str)
+sndfile_header_format_by_index (int index)
 {
-	for (int n = 0; sndfile_header_formats_strings[n]; ++n) {
-		if (str == sndfile_header_formats_strings[n]) {
-			return sndfile_header_formats[n];
-		}
+        if (index >= 0 && index < SNDFILE_HEADER_FORMATS) {
+                return sndfile_header_formats[index];
 	}
 	return -1;
 }
 
 int
-sndfile_bitdepth_format_from_string (string str)
+sndfile_bitdepth_format_by_index (int index)
 {
-	for (int n = 0; sndfile_bitdepth_formats_strings[n]; ++n) {
-		if (str == sndfile_bitdepth_formats_strings[n]) {
-			return sndfile_bitdepth_formats[n];
-		}
+        if (index >= 0 && index < SNDFILE_BITDEPTH_FORMATS) {
+                return sndfile_bitdepth_formats[index];
 	}
 	return -1;
 }
 
 int
-sndfile_endian_format_from_string (string str)
+sndfile_endian_format_by_index (int index)
 {
-	for (int n = 0; sndfile_endian_formats_strings[n]; ++n) {
-		if (str == sndfile_endian_formats_strings[n]) {
-			return sndfile_endian_formats[n];
-		}
+        if (index >= 0 && index < SNDFILE_ENDIAN_FORMATS) {
+                return sndfile_endian_formats[index];
 	}
 	return -1;
-}
-
-string
-sndfile_file_ending_from_string (string str)
-{
-	static vector<string> file_endings;
-
-	if (file_endings.empty()) {
-		file_endings = I18N((const char **) sndfile_file_endings_strings);
-	}
-
-	for (int n = 0; sndfile_header_formats_strings[n]; ++n) {
-		if (str == sndfile_header_formats_strings[n]) {
-			return file_endings[n];
-		}
-	}
-	return 0;
 }
 
 int

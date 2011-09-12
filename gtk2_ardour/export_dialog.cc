@@ -845,16 +845,16 @@ ExportDialog::export_cue_file (Locations::LocationList& locations, const string&
 		For all other formats we just make up our own file type.  MP3 is not supported 
 		at the moment.
 	*/
-	int file_format = sndfile_header_format_from_string (header_format_combo.get_active_text ());
+	int file_format = sndfile_header_format_by_index (header_format_combo.get_active_row_number ());
 	if ((file_format & SF_FORMAT_TYPEMASK) == SF_FORMAT_WAV) {
 		out << "WAVE";
 	} else if ((file_format & SF_FORMAT_TYPEMASK) == SF_FORMAT_AIFF) {
 		out << "AIFF";
 	} else if ( ((file_format & SF_FORMAT_TYPEMASK) == SF_FORMAT_RAW) 
-				&& (sndfile_bitdepth_format_from_string(bitdepth_format_combo.get_active_text()) == SF_FORMAT_PCM_16)
+				&& (sndfile_bitdepth_format_by_index (bitdepth_format_combo.get_active_row_number()) == SF_FORMAT_PCM_16)
 				&& (sample_rate_combo.get_active_text() == _("44.1kHz")) ) {
 		/* raw audio, 16 Bit, 44.1 kHz */
-		if (sndfile_endian_format_from_string(endian_format_combo.get_active_text()) == SF_ENDIAN_LITTLE) {
+		if (sndfile_endian_format_by_index (endian_format_combo.get_active_row_number()) == SF_ENDIAN_LITTLE) {
 			out << "BINARY";
 		} else {
 			out << "MOTOROLA";
@@ -996,7 +996,7 @@ ExportDialog::get_suffixed_filepath ()
 	
 	/* maybe add suffix */
 	
-	int file_format = sndfile_header_format_from_string (header_format_combo.get_active_text ());
+	int file_format = sndfile_header_format_by_index (header_format_combo.get_active_row_number ());
 	
 	if ((file_format & SF_FORMAT_TYPEMASK) == SF_FORMAT_WAV) {
 		if (filepath.find (".wav") != filepath.length() - 4) {
@@ -1177,7 +1177,7 @@ ExportDialog::start_export ()
 void
 ExportDialog::header_chosen ()
 {
-        int fmt = sndfile_header_format_from_string (header_format_combo.get_active_text ());
+        int fmt = sndfile_header_format_by_index (header_format_combo.get_active_row_number ());
 	
 	if ((fmt & SF_FORMAT_TYPEMASK) == SF_FORMAT_OGG) {
 		endian_format_combo.set_sensitive (false);
@@ -1202,7 +1202,7 @@ ExportDialog::header_chosen ()
 void
 ExportDialog::bitdepth_chosen ()
 {
-	int format = sndfile_bitdepth_format_from_string (bitdepth_format_combo.get_active_text ());	
+	int format = sndfile_bitdepth_format_by_index (bitdepth_format_combo.get_active_row_number ());	
 	switch (format) {
 	case SF_FORMAT_PCM_24:
 	case SF_FORMAT_PCM_32:
@@ -1391,7 +1391,7 @@ ExportDialog::initSpec(string &filepath)
 
 	spec.format = 0;
 
-	spec.format |= sndfile_header_format_from_string (header_format_combo.get_active_text ());
+	spec.format |= sndfile_header_format_by_index (header_format_combo.get_active_row_number ());
 
 	/* if they picked Ogg, give them Ogg/Vorbis */
 
@@ -1402,12 +1402,12 @@ ExportDialog::initSpec(string &filepath)
 	if (!Profile->get_sae()) {
                 if ((spec.format & SF_FORMAT_TYPEMASK) != SF_FORMAT_OGG) {
 			/* O/V has no concept of endianness */
-			spec.format |= sndfile_endian_format_from_string (endian_format_combo.get_active_text ());
+			spec.format |= sndfile_endian_format_by_index (endian_format_combo.get_active_row_number ());
 		}
 	}
 
 	if ((spec.format & SF_FORMAT_TYPEMASK) != SF_FORMAT_OGG) {
-                spec.format |= sndfile_bitdepth_format_from_string (bitdepth_format_combo.get_active_text ());
+                spec.format |= sndfile_bitdepth_format_by_index (bitdepth_format_combo.get_active_row_number ());
 	}
 
 	string sr_str = sample_rate_combo.get_active_text();
