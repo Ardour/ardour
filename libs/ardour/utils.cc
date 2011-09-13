@@ -33,6 +33,8 @@
 #include <wordexp.h>
 #endif
 
+#include <glibmm/ustring.h>
+
 #include <pbd/error.h>
 #include <pbd/stacktrace.h>
 #include <pbd/xml++.h>
@@ -93,8 +95,12 @@ legalize_for_path (string str)
 {
 	string::size_type pos;
 	string legal_chars = "abcdefghijklmnopqrtsuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_+=: ";
-	string legal;
+        Glib::ustring legal;
 	
+	/* this is the one place in Ardour where we need to iterate across
+	 * potential multibyte characters, and thus we need Glib::ustring
+	 */
+
 	legal = str;
 	pos = 0;
 
@@ -103,7 +109,7 @@ legalize_for_path (string str)
 		pos += 1;
 	}
 
-	return legal;
+	return string (legal);
 }
 
 string bump_name_once(std::string name)
