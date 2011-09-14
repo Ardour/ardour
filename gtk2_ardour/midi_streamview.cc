@@ -315,7 +315,8 @@ MidiStreamView::draw_note_lines()
 
 	_note_lines->clear();
 
-	if (child_height() < 140){
+	if (child_height() < 140 || note_height() < 3) {
+		/* track is too small for note lines, or there are too many */
 		return;
 	}
 
