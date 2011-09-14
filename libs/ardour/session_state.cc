@@ -1271,16 +1271,30 @@ Session::set_state (const XMLNode& node, int version)
 		}
 	}
 
+        if ((child = find_named_node (node, X_("Speakers"))) != 0) {
+                _speakers->set_state (*child, version);
+        }
+
+	if ((child = find_named_node (node, "Sources")) == 0) {
+		error << _("Session: XML state has no sources section") << endmsg;
+		goto out;
+	} else if (load_sources (*child)) {
+		goto out;
+	}
+
+	if ((child = find_named_node (node, "TempoMap")) == 0) {
+		error << _("Session: XML state has no Tempo Map section") << endmsg;
+		goto out;
+	} else if (_tempo_map->set_state (*child, version)) {
+		goto out;
+	}
+
 	if ((child = find_named_node (node, "Locations")) == 0) {
 		error << _("Session: XML state has no locations section") << endmsg;
 		goto out;
 	} else if (_locations->set_state (*child, version)) {
 		goto out;
 	}
-
-        if ((child = find_named_node (node, X_("Speakers"))) != 0) {
-                _speakers->set_state (*child, version);
-        }
 
 	Location* location;
 
@@ -1299,20 +1313,6 @@ Session::set_state (const XMLNode& node, int version)
 
 	if (_session_range_location) {
 		AudioFileSource::set_header_position_offset (_session_range_location->start());
-	}
-
-	if ((child = find_named_node (node, "Sources")) == 0) {
-		error << _("Session: XML state has no sources section") << endmsg;
-		goto out;
-	} else if (load_sources (*child)) {
-		goto out;
-	}
-
-	if ((child = find_named_node (node, "TempoMap")) == 0) {
-		error << _("Session: XML state has no Tempo Map section") << endmsg;
-		goto out;
-	} else if (_tempo_map->set_state (*child, version)) {
-		goto out;
 	}
 
 	if ((child = find_named_node (node, "Regions")) == 0) {
