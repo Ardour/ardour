@@ -661,7 +661,7 @@ EditorSummary::set_editor_x (pair<double, double> x)
 	}
 
 	if (x.second < 0) {
-		x.second = 1;
+		x.second = x.first + 1;
 	}
 	
 	_editor->reset_x_origin (x.first / _x_scale + _start);
