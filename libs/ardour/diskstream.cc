@@ -70,7 +70,7 @@ using namespace PBD;
  * default from configuration_vars.h).  0 is not a good value for
  * allocating buffer sizes..
  */
-ARDOUR::framecnt_t Diskstream::disk_io_chunk_frames = 1024 * 256;
+ARDOUR::framecnt_t Diskstream::disk_io_chunk_frames = 1024 * 256 / sizeof (Sample);
 
 PBD::Signal0<void>                Diskstream::DiskOverrun;
 PBD::Signal0<void>                Diskstream::DiskUnderrun;

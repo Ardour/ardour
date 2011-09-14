@@ -1021,6 +1021,10 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 
 	   at higher speeds, just do it because the sync between butler
 	   and audio thread may not be good enough.
+
+	   Note: it is a design assumption that disk_io_chunk_frames is smaller
+	   than the playback buffer size, so this check should never trip when
+	   the playback buffer is empty.
 	*/
 
 	if ((total_space < disk_io_chunk_frames) && fabs (_actual_speed) < 2.0f) {
