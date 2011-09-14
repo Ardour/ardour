@@ -425,6 +425,12 @@ Session::non_realtime_locate ()
 			tr->non_realtime_locate (_transport_frame);
 		}
 	}
+
+	/* XXX: it would be nice to generate the new clicks here (in the non-RT thread)
+	   rather than clearing them so that the RT thread has to spend time constructing
+	   them (in Session::click).
+	 */
+	clear_clicks ();
 }
 
 
