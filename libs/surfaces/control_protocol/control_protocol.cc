@@ -95,7 +95,7 @@ ControlProtocol::prev_track (uint32_t initial_id)
 {
 	uint32_t limit = session->nroutes();
 	boost::shared_ptr<Route> cr = route_table[0];
-	int32_t id;
+	uint32_t id;
 
 	if (cr) {
 		id = cr->remote_control_id ();
