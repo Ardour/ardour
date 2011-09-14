@@ -432,7 +432,7 @@ deps = \
 	'libxml-2.0'           : '2.6.0',
 	'samplerate'           : '0.1.0',
 	'lrdf'                 : '0.4.0',
-	'jack'                 : '0.109.0',
+	'jack'                 : '0.120.0',
 	'libgnomecanvas-2.0'   : '2.0',
 	'sndfile'              : '1.0.18',
         'aubio'                : '0.3.0'
