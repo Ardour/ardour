@@ -352,13 +352,18 @@ AutomationList::rt_add (double when, double value)
 
         if (lm.locked()) {
                 assert (!nascent.empty());
-                if (nascent.back()->events.empty() ){
- 					nascent.back()->events.push_back (point_factory (when, value));
-				} else if (when > nascent.back()->events.back()->when) {
-					nascent.back()->events.push_back (point_factory (when, value));
-                 }
+		/* we don't worry about adding events out of time order as we will
+		   sort them in merge_nascent.
+		*/
+                nascent.back()->events.push_back (point_factory (when, value));
         }
 }
+
+struct ControlEventTimeComparator {
+    bool operator() (ControlEvent* a, ControlEvent* b) {
+            return a->when < b->when;
+    }
+};
 
 void
 AutomationList::merge_nascent (double when)
@@ -370,41 +375,41 @@ AutomationList::merge_nascent (double when)
                         return;
                 }
 
-               //thin automation data in each nascent packet
-				for (list<NascentInfo*>::iterator n = nascent.begin(); n != nascent.end(); ++n) {
-					ControlEvent *next = NULL;
-					ControlEvent *cur = NULL;
-					ControlEvent *prev = NULL;
-					int counter = 0;
-					AutomationEventList delete_list;
-					for (AutomationEventList::iterator x = (*n)->events.begin(); x != (*n)->events.end(); x++) {
-						next = *x;
-						counter++;
-						if (counter > 2) {  //wait for the third iteration so "cur" & "prev" are initialized
+                //thin automation data in each nascent packet
+                for (list<NascentInfo*>::iterator n = nascent.begin(); n != nascent.end(); ++n) {
+                        ControlEvent *next = NULL;
+                        ControlEvent *cur = NULL;
+                        ControlEvent *prev = NULL;
+                        int counter = 0;
+                        AutomationEventList delete_list;
+                        for (AutomationEventList::iterator x = (*n)->events.begin(); x != (*n)->events.end(); x++) {
+                                next = *x;
+                                counter++;
+                                if (counter > 2) {  //wait for the third iteration so "cur" & "prev" are initialized
 	
-							float area = fabs(
-								0.5 * (
-								prev->when*(cur->value - next->value) + 
-								cur->when*(next->value - prev->value) + 
-								next->when*(prev->value - cur->value) ) 
-							);
+                                        float area = fabs(
+                                                0.5 * (
+                                                        prev->when*(cur->value - next->value) + 
+                                                        cur->when*(next->value - prev->value) + 
+                                                        next->when*(prev->value - cur->value) ) 
+                                                );
 							 
 //printf( "area: %3.16f\n", area);
-							if (area < ( Config->get_automation_thinning_strength() ) )
-								delete_list.push_back(cur);
-						}
-						prev = cur;
-						cur = next;
-					}
+                                        if (area < ( Config->get_automation_thinning_strength() ) )
+                                                delete_list.push_back(cur);
+                                }
+                                prev = cur;
+                                cur = next;
+                        }
 					
-					for (AutomationEventList::iterator x = delete_list.begin(); x != delete_list.end(); ++x) {
-						(*n)->events.remove(*x);
-						delete *x;
-					}
+                        for (AutomationEventList::iterator x = delete_list.begin(); x != delete_list.end(); ++x) {
+                                (*n)->events.remove(*x);
+                                delete *x;
+                        }
 					
-				}
+                }
 				
-				for (list<NascentInfo*>::iterator n = nascent.begin(); n != nascent.end(); ++n) {
+                for (list<NascentInfo*>::iterator n = nascent.begin(); n != nascent.end(); ++n) {
 
                         NascentInfo* ninfo = *n;
                         AutomationEventList& nascent_events (ninfo->events);
@@ -416,6 +421,8 @@ AutomationList::merge_nascent (double when)
                                 continue;
                         }
                         
+			nascent_events.sort (ControlEventTimeComparator ());
+			
                         if (ninfo->start_time < 0.0) {
                                 ninfo->start_time = nascent_events.front()->when;
                         }
@@ -424,7 +431,7 @@ AutomationList::merge_nascent (double when)
                                 ninfo->end_time = nascent_events.back()->when;
                         }
 
-						bool preexisting = !events.empty();
+                        bool preexisting = !events.empty();
 
                         if (!preexisting) {
                                 
@@ -482,23 +489,23 @@ AutomationList::merge_nascent (double when)
                                         }
                                 }
  
-								//if you write past the end of existing automation,
-								//then treat it as virgin territory
+                                //if you write past the end of existing automation,
+                                //then treat it as virgin territory
                                 if (range_end == events.end()) {
-									need_adjacent_end_clamp = false;
-								}
+                                        need_adjacent_end_clamp = false;
+                                }
 
-								/* clamp point before */
-								if (need_adjacent_start_clamp) {
-									   events.insert (range_begin, point_factory (ninfo->start_time-1, start_value));
-								}
+                                /* clamp point before */
+                                if (need_adjacent_start_clamp) {
+                                        events.insert (range_begin, point_factory (ninfo->start_time-1, start_value));
+                                }
 
-								events.insert (range_begin, nascent_events.begin(), nascent_events.end());
+                                events.insert (range_begin, nascent_events.begin(), nascent_events.end());
 
-								/* clamp point after */
-								if (need_adjacent_end_clamp) {
-									   events.insert (range_begin, point_factory (ninfo->end_time+1, end_value));
-								}
+                                /* clamp point after */
+                                if (need_adjacent_end_clamp) {
+                                        events.insert (range_begin, point_factory (ninfo->end_time+1, end_value));
+                                }
 						
                                 events.erase (range_begin, range_end);
                         }
