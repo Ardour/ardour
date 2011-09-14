@@ -608,7 +608,7 @@ EditorSummary::set_editor (double const x, double const y)
  *  x and y parameters are specified in summary coordinates.
  */
 void
-EditorSummary::set_editor (pair<double,double> const & x, double const y)
+EditorSummary::set_editor (pair<double,double> const x, double const y)
 {
 	if (_editor->pending_visual_change.idle_handler_id >= 0) {
 		/* see comment in other set_editor () */
@@ -624,7 +624,7 @@ EditorSummary::set_editor (pair<double,double> const & x, double const y)
  *  x and y parameters are specified in summary coordinates.
  */
 void
-EditorSummary::set_editor (pair<double,double> const & x, pair<double, double> const & y)
+EditorSummary::set_editor (pair<double,double> const x, pair<double, double> const y)
 {
 	if (_editor->pending_visual_change.idle_handler_id >= 0) {
 		/* see comment in other set_editor () */
@@ -640,8 +640,12 @@ EditorSummary::set_editor (pair<double,double> const & x, pair<double, double> c
  *  @param x new x left position in summary coordinates.
  */
 void
-EditorSummary::set_editor_x (double const x)
+EditorSummary::set_editor_x (double x)
 {
+	if (x < 0) {
+		x = 0;
+	}
+	
 	_editor->reset_x_origin (x / _x_scale + _start);
 }
 
@@ -650,8 +654,16 @@ EditorSummary::set_editor_x (double const x)
  *  @param x new x range in summary coordinates.
  */
 void
-EditorSummary::set_editor_x (pair<double, double> const & x)
+EditorSummary::set_editor_x (pair<double, double> x)
 {
+	if (x.first < 0) {
+		x.first = 0;
+	}
+
+	if (x.second < 0) {
+		x.second = 1;
+	}
+	
 	_editor->reset_x_origin (x.first / _x_scale + _start);
 
 	double const nx = (
@@ -694,7 +706,7 @@ EditorSummary::set_editor_y (double const y)
  *  @param y new editor range in summary coodinates.
  */
 void
-EditorSummary::set_editor_y (pair<double, double> const & y)
+EditorSummary::set_editor_y (pair<double, double> const y)
 {
 	/* Compute current height of tracks between y.first and y.second.  We add up
 	   the total height into `total_height' and the height of complete tracks into

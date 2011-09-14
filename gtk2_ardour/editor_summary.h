@@ -70,12 +70,12 @@ private:
 	void render_region (RegionView*, cairo_t*, double) const;
 	void get_editor (std::pair<double, double> *, std::pair<double, double> *) const;
 	void set_editor (double, double);
-	void set_editor (std::pair<double, double> const &, double);
-	void set_editor (std::pair<double, double> const &, std::pair<double, double> const &);
+	void set_editor (std::pair<double, double>, double);
+	void set_editor (std::pair<double, double>, std::pair<double, double>);
 	void set_editor_x (double);
-	void set_editor_x (std::pair<double, double> const &);
+	void set_editor_x (std::pair<double, double>);
 	void set_editor_y (double);
-	void set_editor_y (std::pair<double, double> const &);
+	void set_editor_y (std::pair<double, double>);
 	void playhead_position_changed (framepos_t);
 	double summary_y_to_editor (double) const;
 	double editor_y_to_summary (double) const;
