@@ -293,6 +293,15 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_bwf_organization_code),
 			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_bwf_organization_code)
 			    ));
+
+	add_option (_("Misc"), new OptionEditorHeading (_("Glue to bars and beats")));
+
+	add_option (_("Misc"), new BoolOption (
+			    "glue-new-markers-to-bars-and-beats",
+			    _("Glue new markers to bars and beats"),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_glue_new_markers_to_bars_and_beats),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_glue_new_markers_to_bars_and_beats)
+			    ));
 }
 
 void

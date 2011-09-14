@@ -54,6 +54,7 @@ Location::Location (Session& s)
 	assert (_end >= 0);
 }
 
+/** Construct a new Location, giving it the position lock style determined by glue-new-markers-to-bars-and-beats */
 Location::Location (Session& s, framepos_t sample_start, framepos_t sample_end, const std::string &name, Flags bits)
 	: SessionHandleRef (s)
 	, _name (name)
@@ -61,7 +62,7 @@ Location::Location (Session& s, framepos_t sample_start, framepos_t sample_end, 
 	, _end (sample_end)
 	, _flags (bits)
 	, _locked (false)
-	, _position_lock_style (AudioTime)
+	, _position_lock_style (s.config.get_glue_new_markers_to_bars_and_beats() ? MusicTime : AudioTime)
 {
 	recompute_bbt_from_frames ();
 
