@@ -2491,48 +2491,139 @@ Route::set_meter_point (MeterPoint p, void *src)
 }
 
 nframes_t
-Route::update_total_latency ()
+Route::update_port_latencies (vector<Port*>& from, vector<Port*>& to, bool playback, nframes_t our_latency) const
 {
-	_own_latency = 0;
+	/* we assume that all our input ports feed all our output ports. its not
+	   universally true, but the alternative is way too corner-case to worry about.
+	*/
 
-	for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
+	jack_latency_range_t all_connections;
+
+	all_connections.min = ~((jack_nframes_t) 0);
+	all_connections.max = 0;
+
+	/* iterate over all "from" ports and determine the latency range for all of their
+	   connections to the "outside" (outside of this Route).
+	*/
+
+	for (vector<Port*>::const_iterator p = from.begin(); p != from.end(); ++p) {
+
+		jack_latency_range_t range;
+
+		(*p)->get_connected_latency_range (range, playback);
+
+                // cerr << "***** for " << (*p)->name() << " CLR = " << range.min << " - " << range.max << endl;
+
+		all_connections.min = min (all_connections.min, range.min);
+		all_connections.max = max (all_connections.max, range.max);
+	}
+
+	/* set the "from" port latencies to the max/min range of all their connections */
+
+	for (vector<Port*>::iterator p = from.begin(); p != from.end(); ++p) {
+		(*p)->set_private_latency_range (all_connections, playback);
+	}
+
+	/* set the ports "in the direction of the flow" to the same value as above plus our own signal latency */
+
+	all_connections.min += our_latency;
+	all_connections.max += our_latency;
+
+	for (vector<Port*>::iterator p = to.begin(); p != to.end(); ++p) {
+		(*p)->set_private_latency_range (all_connections, playback);
+	}
+
+        return all_connections.max;
+}
+
+nframes_t
+Route::set_private_port_latencies (bool playback)
+{
+	nframes_t own_latency = 0;
+
+	/* Processor list not protected by lock: MUST BE CALLED FROM PROCESS THREAD
+	   OR LATENCY CALLBACK.
+
+	   This is called (early) from the latency callback. It computes the REAL
+	   latency associated with each port and stores the result as the "private"
+	   latency of the port. A later call to Route::set_public_port_latencies()
+	   sets all ports to the same value to reflect the fact that we do latency
+	   compensation and so all signals are delayed by the same amount as they
+	   flow through ardour.
+	*/
+
+	for (RedirectList::const_iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
 		if ((*i)->active ()) {
-			_own_latency += (*i)->latency ();
+			own_latency += (*i)->latency ();
 		}
 	}
 
-#undef DEBUG_LATENCY
-#ifdef DEBUG_LATENCY
-	cerr << _name << ": internal redirect latency = " << _own_latency << endl;
-#endif
-
-	set_port_latency (_own_latency);
-
-	/* this (virtual) function is used for pure Routes,
-	   not derived classes like AudioTrack.  this means
-	   that the data processed here comes from an input
-	   port, not prerecorded material, and therefore we
-	   have to take into account any input latency.
-	*/
-
-	_own_latency += input_latency ();
-
-#ifdef DEBUG_LATENCY
-	cerr << _name << ": input latency = " << input_latency() << " total = "
-	     << _own_latency << endl;
-#endif
-
-	return _own_latency;
+	if (playback) {
+		/* playback: propagate latency from "outside the route" to outputs to inputs */
+		return update_port_latencies (outputs (), inputs (), true, own_latency);
+	} else {
+		/* capture: propagate latency from "outside the route" to inputs to outputs */
+		return update_port_latencies (inputs (), outputs (), false, own_latency);
+	}
 }
 
 void
-Route::set_latency_delay (nframes_t longest_session_latency)
+Route::set_public_port_latencies (nframes_t value, bool playback)
 {
-	_initial_delay = longest_session_latency - _own_latency;
+	/* this is called to set the JACK-visible port latencies, which take
+	   latency compensation into account.
+	*/
+
+	jack_latency_range_t range;
+
+	range.min = value;
+	range.max = value;
+
+	{
+		vector<Port*>& ports (inputs());
+		for (vector<Port*>::iterator p = ports.begin(); p != ports.end(); ++p) {
+			(*p)->set_public_latency_range (range, playback);
+		}
+	}
+
+	{
+		vector<Port*>& ports (outputs());
+		for (vector<Port*>::iterator p = ports.begin(); p != ports.end(); ++p) {
+			(*p)->set_public_latency_range (range, playback);
+		}
+	}
+}
+
+void
+Route::set_latency_compensation (nframes_t longest_session_latency)
+{
+	if (_own_latency < longest_session_latency) {
+		_initial_delay = longest_session_latency - _own_latency;
+	} else {
+		_initial_delay = 0;
+	}
 
 	if (_session.transport_stopped()) {
 		_roll_delay = _initial_delay;
 	}
+}
+
+nframes_t
+Route::update_own_latency ()
+{
+	nframes_t l = 0;
+
+	for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
+		if ((*i)->active ()) {
+			l += (*i)->latency ();
+		}
+	}
+
+	if (_own_latency != l) {
+		_own_latency = l;
+	}
+
+	return _own_latency;
 }
 
 void
@@ -2602,7 +2693,7 @@ Route::set_block_size (nframes_t nframes)
 void
 Route::redirect_active_proxy (Redirect* ignored, void* ignored_src)
 {
-	_session.update_latency_compensation (false, false);
+	_session.update_latency_compensation (false);
 }
 
 void
@@ -2717,7 +2808,6 @@ Route::set_name (string str, void* src)
 		if (_control_outs) {
 			string coutname = _name;
 			coutname += _("[control]");
-			cerr << _name << " reset control outs to " << coutname << endl;
 			return _control_outs->set_name (coutname, src);
 		}
 		return 0;

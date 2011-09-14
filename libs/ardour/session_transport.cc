@@ -405,7 +405,11 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	}	
 	
 	if (_engine.running()) {
-		update_latency_compensation (true, abort);
+		PostTransportWork ptw = post_transport_work;
+		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+			(*i)->handle_transport_stopped (abort, (ptw & PostTransportLocate), (!(ptw & PostTransportLocate) || pending_locate_flush));
+		}
+		update_latency_compensation ();
 	}
 
 	if ((Config->get_slave_source() == None && Config->get_auto_return()) || 
@@ -1351,71 +1355,9 @@ Session::xrun_recovery ()
 }
 
 void
-Session::update_latency_compensation (bool with_stop, bool abort)
-{
-	bool update_jack = false;
-
-	if (_state_of_the_state & Deletion) {
-		return;
-	}
-
-	_worst_track_latency = 0;
-
-#undef DEBUG_LATENCY
-#ifdef DEBUG_LATENCY
-	cerr << "\n---------------------------------\nUPDATE LATENCY\n";
-#endif
-
-	boost::shared_ptr<RouteList> r = routes.reader ();
-
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		if (with_stop) {
-			(*i)->handle_transport_stopped (abort, (post_transport_work & PostTransportLocate), 
-							(!(post_transport_work & PostTransportLocate) || pending_locate_flush));
-		}
-
-		nframes_t old_latency = (*i)->signal_latency ();
-		nframes_t track_latency = (*i)->update_total_latency ();
-
-		if (old_latency != track_latency) {
-			update_jack = true;
-		}
-		
-		if (!(*i)->hidden() && ((*i)->active())) {
-			_worst_track_latency = max (_worst_track_latency, track_latency);
-		}
-	}
-
-#ifdef DEBUG_LATENCY
-	cerr << "\tworst was " << _worst_track_latency << endl;
-#endif
-
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		(*i)->set_latency_delay (_worst_track_latency);
-	}
-
-	/* tell JACK to play catch up */
-
-	if (update_jack) {
-		_engine.update_total_latencies ();
-	}
-
-	set_worst_io_latencies ();
-
-	/* reflect any changes in latencies into capture offsets
-	*/
-	
-	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
-
-	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
-		(*i)->set_capture_offset ();
-	}
-}
-
-void
 Session::route_redirects_changed (void* ignored)
 {
-	update_latency_compensation (false, false);
+	update_latency_compensation ();
 	resort_routes ();
 }
 

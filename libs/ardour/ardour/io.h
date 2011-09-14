@@ -139,7 +139,6 @@ class IO : public PBD::StatefulDestructible
 
 	nframes_t output_latency() const;
 	nframes_t input_latency() const;
-	void           set_port_latency (nframes_t);
 
 	Port *output (uint32_t n) const {
 		if (n < _noutputs) {
@@ -156,6 +155,9 @@ class IO : public PBD::StatefulDestructible
 			return 0;
 		}
 	}
+
+        std::vector<Port*>& outputs() { return _outputs; }
+        std::vector<Port*>& inputs()  { return _inputs; }
 
 	uint32_t n_inputs () const { return _ninputs; }
 	uint32_t n_outputs () const { return _noutputs; }

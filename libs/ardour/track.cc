@@ -91,28 +91,6 @@ Track::toggle_monitor_input ()
 	}
 }
 
-nframes_t
-Track::update_total_latency ()
-{
-	_own_latency = 0;
-
-	for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
-		if ((*i)->active ()) {
-			_own_latency += (*i)->latency ();
-		}
-	}
-
-#undef DEBUG_LATENCY
-#ifdef DEBUG_LATENCY
-	cerr << _name << ": internal redirect (final) latency = " << _own_latency << endl;
-#endif
-
-	set_port_latency (_own_latency);
-
-	return _own_latency;
-}
-
-
 Track::FreezeRecord::~FreezeRecord ()
 {
 	for (vector<FreezeRecordInsertInfo*>::iterator i = insert_info.begin(); i != insert_info.end(); ++i) {
@@ -218,9 +196,9 @@ Track::set_name (string str, void *src)
 }
 
 void
-Track::set_latency_delay (nframes_t longest_session_latency)
+Track::set_latency_compensation (nframes_t longest_session_latency)
 {
-	Route::set_latency_delay (longest_session_latency);
+	Route::set_latency_compensation (longest_session_latency);
 	_diskstream->set_roll_delay (_roll_delay);
 }
 

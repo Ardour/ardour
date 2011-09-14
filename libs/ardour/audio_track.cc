@@ -612,7 +612,6 @@ AudioTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame,
 	if ((dret = diskstream->process (transport_frame, nframes, can_record, rec_monitors_input)) != 0) {
 		
 		silence (nframes);
-
 		return dret;
 	}
 
@@ -668,7 +667,7 @@ AudioTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame,
 				/* first time through just copy a channel into 
 				   the output buffer.
 				*/
-				
+                                
 				for (nframes_t xx = 0; xx < nframes; ++xx) {
 					bufs[i][xx] = b[xx] * scaling;
 				}
@@ -686,7 +685,7 @@ AudioTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame,
 				/* for all remaining channels, sum with existing
 				   data in the output buffers 
 				*/
-				
+
 				Session::mix_buffers_with_gain (bufs[i%blimit], b, nframes, scaling);
 
 				if (n < diskstream->n_channels()) {
@@ -727,6 +726,7 @@ AudioTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame,
 	} else {
 		/* problem with the diskstream; just be quiet for a bit */
 		silence (nframes);
+                
 	}
 
 	return 0;

@@ -2210,16 +2210,6 @@ IO::set_output_maximum (int n)
 	_output_maximum = n;
 }
 
-void
-IO::set_port_latency (nframes_t nframes)
-{
-	Glib::Mutex::Lock lm (io_lock);
-
-	for (vector<Port *>::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
-		(*i)->set_latency (nframes);
-	}
-}
-
 nframes_t
 IO::output_latency () const
 {
@@ -2231,7 +2221,7 @@ IO::output_latency () const
 	/* io lock not taken - must be protected by other means */
 
 	for (vector<Port *>::const_iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
-		if ((latency = _session.engine().get_port_total_latency (*(*i))) > max_latency) {
+		if ((latency = (*i)->private_latency_range (true).max) > max_latency) {
 			max_latency = latency;
 		}
 	}
@@ -2250,7 +2240,7 @@ IO::input_latency () const
 	/* io lock not taken - must be protected by other means */
 
 	for (vector<Port *>::const_iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
-		if ((latency = _session.engine().get_port_total_latency (*(*i))) > max_latency) {
+		if ((latency = (*i)->private_latency_range (false).max) > max_latency) {
 			max_latency = latency;
 		}
 	}

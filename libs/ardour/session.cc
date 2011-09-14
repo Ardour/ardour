@@ -649,24 +649,6 @@ Session::destroy ()
 }
 
 void
-Session::set_worst_io_latencies ()
-{
-	_worst_output_latency = 0;
-	_worst_input_latency = 0;
-
-	if (!_engine.connected()) {
-		return;
-	}
-
-	boost::shared_ptr<RouteList> r = routes.reader ();
-	
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		_worst_output_latency = max (_worst_output_latency, (*i)->output_latency());
-		_worst_input_latency = max (_worst_input_latency, (*i)->input_latency());
-	}
-}
-
-void
 Session::when_engine_running ()
 {
 	/* we don't want to run execute this again */
@@ -682,7 +664,7 @@ Session::when_engine_running ()
 
 	/* every time we reconnect, recompute worst case output latencies */
 
-	_engine.Running.connect (mem_fun (*this, &Session::set_worst_io_latencies));
+	_engine.Running.connect (mem_fun (*this, &Session::initialize_latencies));
 
 	if (synced_to_jack()) {
 		_engine.transport_stop ();
@@ -738,8 +720,6 @@ Session::when_engine_running ()
 	}
 
 	BootMessage (_("Compute I/O Latencies"));
-
-	set_worst_io_latencies ();
 
 	if (_clicking) {
 		// XXX HOW TO ALERT UI TO THIS ? DO WE NEED TO?
@@ -895,6 +875,10 @@ Session::when_engine_running ()
 
 	BootMessage (_("Connect to engine"));
 
+        /* update latencies */
+
+        initialize_latencies ();
+        
 	_engine.set_session (this);
 
 #ifdef HAVE_LIBLO
@@ -974,6 +958,7 @@ Session::hookup_io ()
 
 	/* Tell all IO objects to connect themselves together */
 
+	cerr << "Enable IO connections, state = " << _state_of_the_state << endl;
 	IO::enable_connecting ();
 
 	/* Now reset all panners */
@@ -985,7 +970,6 @@ Session::hookup_io ()
 	IOConnectionsComplete (); /* EMIT SIGNAL */
 
 	_state_of_the_state = StateOfTheState (_state_of_the_state & ~InitialConnecting);
-
 
 	/* now handle the whole enchilada as if it was one
 	   graph reorder event.
@@ -2279,7 +2263,7 @@ Session::remove_route (shared_ptr<Route> route)
 	route->disconnect_inputs (0);
 	route->disconnect_outputs (0);
 	
-	update_latency_compensation (false, false);
+	update_latency_compensation ();
 	set_dirty();
 
 	/* get rid of it from the dead wood collection in the route list manager */
@@ -4427,3 +4411,175 @@ Session::sync_order_keys (const char* base)
 
 	Route::SyncOrderKeys (base); // EMIT SIGNAL
 }
+
+void
+Session::update_latency (bool playback)
+{
+	if (_state_of_the_state & (InitialConnecting|Deletion)) {
+		return;
+	}
+
+	boost::shared_ptr<RouteList> r = routes.reader ();
+	nframes_t max_latency = 0;
+
+	if (playback) {
+		/* reverse the list so that we work backwards from the last route to run to the first */
+		reverse (r->begin(), r->end());
+	}
+
+	/* compute actual latency values for the given direction and store them all in per-port
+	   structures. this will also publish the same values (to JACK) so that computation of latency
+	   for routes can consistently use public latency values.
+	*/
+
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		max_latency = max (max_latency, (*i)->set_private_port_latencies (playback));
+	}
+
+        /* because we latency compensate playback, our published playback latencies should
+           be the same for all output ports - all material played back by ardour has
+           the same latency, whether its caused by plugins or by latency compensation. since
+           these may differ from the values computed above, reset all playback port latencies
+           to the same value.
+        */
+
+        for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+                (*i)->set_public_port_latencies (max_latency, playback);
+        }
+
+	if (playback) {
+
+		post_playback_latency ();
+
+	} else {
+
+		post_capture_latency ();
+	}
+}
+
+void
+Session::post_playback_latency ()
+{
+	set_worst_playback_latency ();
+
+	boost::shared_ptr<RouteList> r = routes.reader ();
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		if (!(*i)->hidden() && ((*i)->active())) {
+			_worst_track_latency = max (_worst_track_latency, (*i)->update_own_latency ());
+		}
+        }
+
+        for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+                (*i)->set_latency_compensation (_worst_track_latency);
+        }
+}
+
+void
+Session::post_capture_latency ()
+{
+	set_worst_capture_latency ();
+
+	/* reflect any changes in capture latencies into capture offsets
+	 */
+
+	boost::shared_ptr<RouteList> rl = routes.reader();
+
+	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+		if (tr) {
+                        boost::shared_ptr<Diskstream> ds = tr->diskstream();
+                        if (ds) {
+                                ds->set_capture_offset ();
+                        }
+		}
+	}
+}
+
+void
+Session::initialize_latencies ()
+{
+        {
+                Glib::Mutex::Lock lm (_engine.process_lock());
+                update_latency (false);
+                update_latency (true);
+        }
+
+        set_worst_io_latencies ();
+}
+
+void
+Session::set_worst_io_latencies ()
+{
+	set_worst_playback_latency ();
+	set_worst_capture_latency ();
+}
+
+void
+Session::set_worst_playback_latency ()
+{
+	if (_state_of_the_state & (InitialConnecting|Deletion)) {
+		return;
+	}
+
+	_worst_output_latency = 0;
+
+	if (!_engine.connected()) {
+		return;
+	}
+
+	boost::shared_ptr<RouteList> r = routes.reader ();
+
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		_worst_output_latency = max (_worst_output_latency, (*i)->output_latency());
+	}
+
+        cerr << "Session: worst output latency = " << _worst_output_latency << endl;
+}
+
+void
+Session::set_worst_capture_latency ()
+{
+	if (_state_of_the_state & (InitialConnecting|Deletion)) {
+		return;
+	}
+
+	_worst_input_latency = 0;
+
+	if (!_engine.connected()) {
+		return;
+	}
+
+	boost::shared_ptr<RouteList> r = routes.reader ();
+
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		_worst_input_latency = max (_worst_input_latency, (*i)->input_latency());
+	}
+
+        cerr << "Session: worst input latency = " << _worst_input_latency << endl;
+}
+
+void
+Session::update_latency_compensation (bool force_whole_graph)
+{
+        bool some_track_latency_changed = false;
+
+	if (_state_of_the_state & Deletion) {
+		return;
+	}
+
+	_worst_track_latency = 0;
+
+	boost::shared_ptr<RouteList> r = routes.reader ();
+
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		if (!(*i)->hidden() && ((*i)->active())) {
+			nframes_t tl;
+                        nframes_t ol = (*i)->signal_latency();
+			if (ol != (tl = (*i)->update_own_latency ())) {
+				some_track_latency_changed = true;
+			}
+			_worst_track_latency = max (tl, _worst_track_latency);
+		}
+	}
+}
+

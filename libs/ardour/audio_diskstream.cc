@@ -409,11 +409,26 @@ AudioDiskstream::check_record_status (nframes_t transport_frame, nframes_t nfram
                 
 		capture_start_frame = _session.transport_frame();
 		first_recordable_frame = capture_start_frame + _capture_offset;
+                // cerr << "SET FRF to " << first_recordable_frame << " from CSF + CO\n";
 		last_recordable_frame = max_frames;
 
                 if (_alignment_style == ExistingMaterial) {
                         first_recordable_frame += existing_material_offset;
+                        // cerr << "RESET FRF to " << first_recordable_frame << " from EMO\n";
                 }
+
+#if 0
+                cerr << name() << " transitioned to recording, capture starts at " << capture_start_frame
+                     << " align to " << (_alignment_style == ExistingMaterial ? "existing" : "capture-time")
+                     << " first recordable = " << first_recordable_frame
+                     << " roll_delay " << _roll_delay 
+                     << " capture offset " << _capture_offset
+                     << " EMO " << existing_material_offset
+                     << " worst input " << _session.worst_input_latency()
+                     << " worst output " << _session.worst_output_latency()
+                     << " worst track " << _session.worst_track_latency()
+                     << endl;
+#endif
 
 		if (recordable() && destructive()) {
 			boost::shared_ptr<ChannelList> c = channels.reader();
@@ -454,6 +469,8 @@ AudioDiskstream::check_record_status (nframes_t transport_frame, nframes_t nfram
                                         last_recordable_frame += existing_material_offset;
                                 }
                         }
+
+                        // cerr << name() << " transitioned out of recording, last recordable = " << last_recordable_frame << endl;
                 }
         }
 
@@ -493,9 +510,11 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can
 	check_record_status (transport_frame, nframes, can_record);
 
 #if 0
-        cerr << _name << " can record " << can_record << " re " << record_enabled() 
-             << " FRF " << first_recordable_frame << " LRF " << last_recordable_frame
-             << endl;
+        if (record_enabled()) {
+                cerr << '@' << transport_frame << ' ' << _name << " can record " << can_record << " re " << record_enabled() 
+                     << " FRF " << first_recordable_frame << " LRF " << last_recordable_frame
+                     << endl;
+        }
 #endif
 
 	if (nframes == 0) {
@@ -578,7 +597,13 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can
                 
 	if (can_record && !_last_capture_regions.empty()) {
 		_last_capture_regions.clear ();
-	}
+        }
+
+#if 0        
+        if (record_enabled()) {
+                cerr << "coverage = " << enum_2_string (ot) << " rec_nframes = " << rec_nframes << endl;
+        }
+#endif
 
 	if (rec_nframes) {
 
@@ -1680,7 +1705,7 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 
 			_session.region_name (region_name, whole_file_region_name, false);
 			
-			// cerr << _name << ": based on ci of " << (*ci)->start << " for " << (*ci)->frames << " add region " << region_name << endl;
+			// cerr << _name << ": add region @ " << (*ci)->start << " internal buffer offset = " << buffer_position << " length " << (*ci)->frames << " name" << region_name << endl;
 			
 			try {
 				boost::shared_ptr<Region> rx (RegionFactory::create (srcs, buffer_position, (*ci)->frames, region_name));

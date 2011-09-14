@@ -1001,7 +1001,7 @@ class Session : public PBD::StatefulDestructible
   protected:
 	friend class Route;
 	void schedule_curve_reallocation ();
-	void update_latency_compensation (bool, bool);
+	void update_latency_compensation (bool force_whole_graph = false);
 	
   private:
 	int  create (bool& new_session, const string& mix_template, nframes_t initial_length);
@@ -1066,10 +1066,15 @@ class Session : public PBD::StatefulDestructible
 	bool                    _end_location_is_free;
 	bool                    _was_seamless;
 
+        void initialize_latencies ();
 	void set_worst_io_latencies ();
-	void set_worst_io_latencies_x (IOChange asifwecare, void *ignored) {
+	void set_worst_playback_latency ();
+	void set_worst_capture_latency ();
+	void set_worst_io_latencies_x (IOChange, void *) {
 		set_worst_io_latencies ();
 	}
+	void post_capture_latency ();
+	void post_playback_latency ();
 
 	void route_redirects_changed (void* ignored);
 
@@ -1686,6 +1691,8 @@ class Session : public PBD::StatefulDestructible
 	int  jack_sync_callback (jack_transport_state_t, jack_position_t*);
 	void reset_jack_connection (jack_client_t* jack);
 	void record_enable_change_all (bool yn);
+
+	void  update_latency (bool playback);
 
 	XMLNode& state(bool);
 

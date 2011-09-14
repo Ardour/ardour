@@ -148,14 +148,12 @@ class AudioEngine : public sigc::trackable
 		return get_nth_physical_audio (n, JackPortIsOutput);
 	}
 
-	nframes_t get_port_total_latency (const Port&);
-	void update_total_latencies ();
-
 	/* the caller may not delete the object pointed to by 
-	   the return value
+	   the return value for either of these functions.
 	*/
 
 	Port *get_port_by_name (const std::string& name, bool keep = true);
+        Port *get_ardour_port_by_name_unlocked (const string& portname);
 
 	enum TransportState {
 		TransportStopped = JackTransportStopped,
@@ -205,6 +203,7 @@ _	   the regular process() call to session->process() is not made.
 
 	std::string make_port_name_relative (std::string);
 	std::string make_port_name_non_relative (std::string);
+        bool port_is_mine (const std::string& portname) const;
 
 	static AudioEngine* instance() { return _instance; }
 	void died ();
@@ -256,7 +255,9 @@ _	   the regular process() call to session->process() is not made.
 	static void _jack_timebase_callback (jack_transport_state_t, nframes_t, jack_position_t*, int, void*);
 	static int  _jack_sync_callback (jack_transport_state_t, jack_position_t*, void *arg);
 	static void _freewheel_callback (int , void *arg);
-
+        static void _latency_callback (jack_latency_callback_mode_t mode, void* arg);
+        
+        void jack_latency_callback (jack_latency_callback_mode_t mode);
 	void jack_timebase_callback (jack_transport_state_t, nframes_t, jack_position_t*, int);
 	int  jack_sync_callback (jack_transport_state_t, jack_position_t*);
 	int  jack_bufsize_callback (nframes_t);

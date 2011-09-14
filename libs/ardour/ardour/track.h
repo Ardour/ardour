@@ -62,8 +62,7 @@ class Track : public Route
 	virtual int use_diskstream (string name) = 0;
 	virtual int use_diskstream (const PBD::ID& id) = 0;
 
-	nframes_t update_total_latency();
-	void           set_latency_delay (nframes_t);
+	void      set_latency_compensation (nframes_t);
 
 	enum FreezeState {
 		NoFreeze,

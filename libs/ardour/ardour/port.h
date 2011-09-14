@@ -82,6 +82,8 @@ class Port : public sigc::trackable {
 		return jack_port_get_connections (_port);
 	}
 
+        int get_connections (std::vector<std::string> & c) const;
+
 	void reset_overs () {
 		_short_overs = 0;
 		_long_overs = 0;
@@ -168,12 +170,23 @@ class Port : public sigc::trackable {
 		_silent = yn;
 	}
 
+	void get_connected_latency_range (jack_latency_range_t& range, bool playback) const;
+
+	void set_private_latency_range (jack_latency_range_t& range, bool playback);
+	const jack_latency_range_t&  private_latency_range (bool playback) const;
+
+	void set_public_latency_range (jack_latency_range_t& range, bool playback) const;
+	jack_latency_range_t public_latency_range (bool playback) const;
+
   private:
 	friend class AudioEngine;
 
 	Port (jack_port_t *port);
+
 	void reset ();
 	
+	static AudioEngine* _engine; ///< the AudioEngine
+
 	/* engine isn't supposed to use anything below here */
 
 	/* cache these 3 from JACK so that we can
@@ -200,6 +213,9 @@ class Port : public sigc::trackable {
 	static nframes_t _port_offset;
 	static nframes_t _buffer_size;
 
+	jack_latency_range_t _private_playback_latency;
+	jack_latency_range_t _private_capture_latency;
+
   private:
 	friend class IO;      // get_(input|output)_buffer
 	friend class Session; // session_export.cc
@@ -212,8 +228,6 @@ class Port : public sigc::trackable {
 
 		return (Sample *) jack_port_get_buffer (_port, _buffer_size) + _port_offset;
 	}
-
-
 };
  
 } // namespace ARDOUR

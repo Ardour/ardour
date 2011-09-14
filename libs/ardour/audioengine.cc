@@ -25,6 +25,7 @@
 #include <boost/scoped_ptr.hpp>
 
 #include <glibmm/timer.h>
+#include <jack/weakjack.h>
 #include <pbd/pthread_utils.h>
 #include <pbd/stacktrace.h>
 #include <pbd/epa.h>
@@ -96,6 +97,8 @@ AudioEngine::AudioEngine (string client_name)
 	if (connect_to_jack (client_name)) {
 		throw NoBackendAvailable ();
 	}
+
+        Port::_engine = this;
 }
 
 AudioEngine::~AudioEngine ()
@@ -175,6 +178,10 @@ AudioEngine::start ()
 		if (Config->get_jack_time_master()) {
 			jack_set_timebase_callback (_priv_jack, 0, _jack_timebase_callback, this);
 		}
+
+                if (jack_set_latency_callback) {
+                        jack_set_latency_callback (_priv_jack, _latency_callback, this);
+                }
 
 		if (jack_activate (_priv_jack) == 0) {
 			_running = true;
@@ -296,6 +303,20 @@ void
 AudioEngine::_freewheel_callback (int onoff, void *arg)
 {
 	static_cast<AudioEngine*>(arg)->_freewheeling = onoff;
+}
+
+void
+AudioEngine::_latency_callback (jack_latency_callback_mode_t mode, void* arg)
+{
+	return static_cast<AudioEngine *> (arg)->jack_latency_callback (mode);
+}
+
+void
+AudioEngine::jack_latency_callback (jack_latency_callback_mode_t mode)
+{
+        if (session) {
+                session->update_latency (mode == JackPlaybackLatency);
+        }
 }
 
 int
@@ -546,6 +567,8 @@ AudioEngine::port_registration_failure (const std::string& portname)
 		reason = string_compose (_("No more JACK ports are available. You will need to stop %1 and restart JACK with ports if you need this many tracks."),
 					 PROGRAM_NAME);
 	}
+
+        cerr << " port reg failed: " << reason << endl;
 	
 	throw PortRegistrationFailure (string_compose (_("AudioEngine: cannot register port \"%1\": %2"), portname, reason).c_str());
 }	
@@ -819,6 +842,35 @@ AudioEngine::get_port_by_name (const string& portname, bool keep)
 	}
 }
 
+Port *
+AudioEngine::get_ardour_port_by_name_unlocked (const string& portname)
+{
+	if (!_running) {
+		if (!_has_run) {
+			fatal << _("get_port_by_name() called before engine was started") << endmsg;
+			/*NOTREACHED*/
+		} else {
+			return 0;
+		}
+	}
+
+        if (!port_is_mine (portname)) {
+                return 0;
+        }
+        
+        std::string const rel = make_port_name_relative (portname);
+
+	boost::shared_ptr<Ports> pr = ports.reader();
+	
+	for (Ports::iterator i = pr->begin(); i != pr->end(); ++i) {
+		if (rel == (*i)->name()) {
+			return (*i);
+		}
+	}
+
+        return 0;
+}
+
 const char **
 AudioEngine::get_ports (const string& port_name_pattern, const string& type_name_pattern, uint32_t flags)
 {
@@ -1004,14 +1056,6 @@ AudioEngine::get_nth_physical_audio (uint32_t n, int flag)
 	free (ports);
 
 	return ret;
-}
-
-nframes_t
-AudioEngine::get_port_total_latency (const Port& port)
-{
-        GET_PRIVATE_JACK_POINTER_RET (_jack,0);
-
-	return jack_port_get_total_latency (_priv_jack, port._port);
 }
 
 void
@@ -1284,6 +1328,10 @@ AudioEngine::reconnect_to_jack ()
 		jack_set_timebase_callback (_priv_jack, 0, _jack_timebase_callback, this);
 	} 
 	
+        if (jack_set_latency_callback) {
+                jack_set_latency_callback (_priv_jack, _latency_callback, this);
+        }
+
 	if (jack_activate (_priv_jack) == 0) {
 		_running = true;
 		_has_run = true;
@@ -1330,15 +1378,6 @@ AudioEngine::request_buffer_size (nframes_t nframes)
 	return jack_set_buffer_size (_priv_jack, nframes);
 }
 
-void
-AudioEngine::update_total_latencies ()
-{
-#ifdef HAVE_JACK_RECOMPUTE_LATENCIES
-        GET_PRIVATE_JACK_POINTER (_jack);
-	jack_recompute_total_latencies (_priv_jack);
-#endif
-}
-		
 string
 AudioEngine::make_port_name_relative (string portname)
 {
@@ -1381,4 +1420,15 @@ AudioEngine::is_realtime () const
 {
         GET_PRIVATE_JACK_POINTER_RET (_jack,false);
 	return jack_is_realtime (_priv_jack);
+}
+
+bool
+AudioEngine::port_is_mine (const string& portname) const
+{
+	if (portname.find_first_of (':') != string::npos) {
+		if (portname.substr (0, jack_client_name.length ()) != jack_client_name) {
+                        return false;
+                }
+        }
+        return true;
 }

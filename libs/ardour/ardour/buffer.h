@@ -19,6 +19,10 @@
 #ifndef __ardour_buffer_h__
 #define __ardour_buffer_h__
 
+#ifdef _XOPEN_SOURCE
+#undef _XOPEN_SOURCE
+#endif
+
 #define _XOPEN_SOURCE 600
 #include <cstdlib> // for posix_memalign
 #include <cassert>

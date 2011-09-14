@@ -182,9 +182,12 @@ class Route : public IO
 	void all_redirects_flip();
 	void all_redirects_active (Placement, bool state);
 
-	virtual nframes_t update_total_latency();
+	nframes_t set_private_port_latencies (bool playback);
+	void      set_public_port_latencies (nframes_t, bool playback);
+
 	nframes_t signal_latency() const { return _own_latency; }
-	virtual void set_latency_delay (nframes_t);
+	virtual void set_latency_compensation (nframes_t);
+        nframes_t update_own_latency ();
 
 	sigc::signal<void,void*> solo_changed;
 	sigc::signal<void,void*> solo_safe_changed;
@@ -371,6 +374,8 @@ class Route : public IO
 	void set_deferred_state ();
 	void add_redirect_from_xml (const XMLNode&);
 	void redirect_active_proxy (Redirect*, void*);
+
+	nframes_t update_port_latencies (std::vector<Port*>& ports, std::vector<Port*>& feeders, bool playback, nframes_t) const;
 };
 
 } // namespace ARDOUR
