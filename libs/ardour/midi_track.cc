@@ -405,9 +405,9 @@ MidiTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame
 
 int
 MidiTrack::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
-		    bool state_changing, bool can_record, bool rec_monitors_input)
+		    bool state_changing, bool can_record)
 {
-	int ret = Track::no_roll (nframes, start_frame, end_frame, state_changing, can_record, rec_monitors_input);
+	int ret = Track::no_roll (nframes, start_frame, end_frame, state_changing, can_record);
 
 	if (ret == 0 && _step_editing) {
 		push_midi_input_to_step_edit_ringbuffer (nframes);

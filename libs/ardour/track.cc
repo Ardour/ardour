@@ -208,7 +208,7 @@ Track::zero_diskstream_id_in_xml (XMLNode& node)
 
 int
 Track::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
-		bool session_state_changing, bool can_record, bool /*rec_monitors_input*/)
+		bool session_state_changing, bool can_record)
 {
 	Glib::RWLock::ReaderLock lm (_processor_lock, Glib::TRY_LOCK);
 	if (!lm.locked()) {

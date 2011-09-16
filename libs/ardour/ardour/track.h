@@ -49,7 +49,7 @@ class Track : public Route, public PublicDiskstream
 	PBD::Signal0<void> TrackModeChanged;
 
 	virtual int no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
-	                     bool state_changing, bool can_record, bool rec_monitors_input);
+	                     bool state_changing, bool can_record);
 
 	int silent_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 	                 bool can_record, bool rec_monitors_input, bool& need_butler);

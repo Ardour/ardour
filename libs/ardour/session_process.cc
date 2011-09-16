@@ -120,7 +120,7 @@ Session::no_roll (pframes_t nframes)
 			(*i)->set_pending_declick (declick);
 
 			if ((*i)->no_roll (nframes, _transport_frame, end_frame, non_realtime_work_pending(),
-			                   actively_recording(), declick)) {
+			                   actively_recording())) {
 				error << string_compose(_("Session: error in no roll for %1"), (*i)->name()) << endmsg;
 				ret = -1;
 				break;
