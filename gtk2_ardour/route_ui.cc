@@ -1368,14 +1368,10 @@ RouteUI::idle_remove_this_route (RouteUI *rui)
 bool
 RouteUI::verify_new_route_name (const std::string& name)
 {
-	string::size_type colon = name.find (':');
-
-	if (colon == string::npos) {
+	if (name.find (':') == string::npos) {
 		return true;
 	}
 	
-	cerr << "There is a colon in " << name << " at pos " << colon << endl;
-
 	MessageDialog colon_msg (
 		_("The use of colons (':') is discouraged in track and bus names.\nDo you want to use this new name?"),
 		false, MESSAGE_QUESTION, BUTTONS_NONE
