@@ -88,6 +88,42 @@ class ConfigVariable : public ConfigVariableBase
 	T value;
 };
 
+/** Specialisation of ConfigVariable for std::string to cope with whitespace properly */
+template<>
+class ConfigVariable<std::string> : public ConfigVariableBase
+{
+  public:
+
+	ConfigVariable (std::string str) : ConfigVariableBase (str) {}
+	ConfigVariable (std::string str, std::string val) : ConfigVariableBase (str), value (val) {}
+
+	std::string get() const {
+		return value;
+	}
+
+	std::string get_as_string () const {
+		return value;
+	}
+
+	virtual bool set (std::string val) {
+		if (val == value) {
+			miss ();
+			return false;
+		}
+		value = val;
+		notify ();
+		return true;
+	}
+
+	virtual void set_from_string (std::string const & s) {
+		value = s;
+	}
+
+  protected:
+	virtual std::string get_for_save() { return value; }
+	std::string value;
+};
+
 template<>
 class ConfigVariable<bool> : public ConfigVariableBase
 {
