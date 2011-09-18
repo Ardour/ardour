@@ -171,7 +171,7 @@ class AudioDiskstream : public Diskstream
   protected:
 	friend class AudioTrack;
 
-	int  process (framepos_t transport_frame, pframes_t nframes, bool can_record, bool rec_monitors_input, bool& need_butler);
+	int  process (framepos_t transport_frame, pframes_t nframes, bool can_record, bool& need_butler);
 	bool commit  (framecnt_t nframes);
 
   private:
@@ -237,7 +237,7 @@ class AudioDiskstream : public Diskstream
 	          framepos_t& start, framecnt_t cnt,
 	          ChannelInfo* channel_info, int channel, bool reversed);
 
-	void finish_capture (bool rec_monitors_input, boost::shared_ptr<ChannelList>);
+	void finish_capture (boost::shared_ptr<ChannelList>);
 	void transport_stopped_wallclock (struct tm&, time_t, bool abort);
 	void transport_looped (framepos_t transport_frame);
 

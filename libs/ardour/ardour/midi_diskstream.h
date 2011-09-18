@@ -142,7 +142,7 @@ class MidiDiskstream : public Diskstream
   protected:
 	friend class MidiTrack;
 
-	int  process (framepos_t transport_frame, pframes_t nframes, bool can_record, bool rec_monitors_input, bool& need_butler);
+	int  process (framepos_t transport_frame, pframes_t nframes, bool can_record, bool& need_butler);
 	bool commit  (framecnt_t nframes);
 	static framecnt_t midi_readahead;
 
@@ -156,7 +156,7 @@ class MidiDiskstream : public Diskstream
 
 	int read (framepos_t& start, framecnt_t cnt, bool reversed);
 
-	void finish_capture (bool rec_monitors_input);
+	void finish_capture ();
 	void transport_stopped_wallclock (struct tm&, time_t, bool abort);
 	void transport_looped (framepos_t transport_frame);
 

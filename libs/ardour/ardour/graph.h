@@ -74,10 +74,10 @@ public:
 	void main_thread();
 
 	int silent_process_routes (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
-	                           bool can_record, bool rec_monitors_input, bool& need_butler);
+	                           bool can_record, bool& need_butler);
 
 	int process_routes (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick,
-	                    bool can_record, bool rec_monitors_input, bool& need_butler);
+	                    bool can_record, bool& need_butler);
 
 	int routes_no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 	                    bool non_rt_pending, bool can_record, int declick);
@@ -131,7 +131,6 @@ private:
 	framepos_t _process_start_frame;
 	framepos_t _process_end_frame;
 	bool	   _process_can_record;
-	bool	   _process_rec_monitors_input;
 	bool	   _process_non_rt_pending;
 	int        _process_declick;
 

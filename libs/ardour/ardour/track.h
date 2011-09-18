@@ -52,10 +52,10 @@ class Track : public Route, public PublicDiskstream
 	                     bool state_changing, bool can_record);
 
 	int silent_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
-	                 bool can_record, bool rec_monitors_input, bool& need_butler);
+	                 bool can_record, bool& need_butler);
 
 	virtual int roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
-	                  int declick, bool can_record, bool rec_monitors_input, bool& need_butler) = 0;
+	                  int declick, bool can_record, bool& need_butler) = 0;
 
 	bool needs_butler() const { return _needs_butler; }
 	void toggle_monitor_input ();

@@ -354,7 +354,7 @@ AudioTrack::set_state_part_two ()
 
 int
 AudioTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick,
-		  bool can_record, bool rec_monitors_input, bool& need_butler)
+		  bool can_record, bool& need_butler)
 {
 	Glib::RWLock::ReaderLock lm (_processor_lock, Glib::TRY_LOCK);
 	if (!lm.locked()) {
@@ -386,13 +386,13 @@ AudioTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_fram
 		   playback distance to zero, thus causing diskstream::commit
 		   to do nothing.
 		*/
-		return diskstream->process (transport_frame, 0, can_record, rec_monitors_input, need_butler);
+		return diskstream->process (transport_frame, 0, can_record, need_butler);
 	}
 
 	_silent = false;
 	_amp->apply_gain_automation(false);
 
-	if ((dret = diskstream->process (transport_frame, nframes, can_record, rec_monitors_input, need_butler)) != 0) {
+	if ((dret = diskstream->process (transport_frame, nframes, can_record, need_butler)) != 0) {
 		silence (nframes);
 		return dret;
 	}

@@ -963,18 +963,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	int  process_routes (pframes_t, bool& need_butler);
 	int  silent_process_routes (pframes_t, bool& need_butler);
 
-	bool get_rec_monitors_input () {
-		if (actively_recording()) {
-			return true;
-		} else {
-			if (config.get_auto_input()) {
-				return false;
-			} else {
-				return true;
-			}
-		}
-	}
-
 	int get_transport_declick_required () {
 		if (transport_sub_state & PendingDeclickIn) {
 			transport_sub_state &= ~PendingDeclickIn;

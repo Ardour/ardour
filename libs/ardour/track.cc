@@ -285,7 +285,7 @@ Track::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 
 int
 Track::silent_roll (pframes_t nframes, framepos_t /*start_frame*/, framepos_t /*end_frame*/,
-		    bool can_record, bool rec_monitors_input, bool& need_butler)
+		    bool can_record, bool& need_butler)
 {
 	Glib::RWLock::ReaderLock lm (_processor_lock, Glib::TRY_LOCK);
 	if (!lm.locked()) {
@@ -306,7 +306,7 @@ Track::silent_roll (pframes_t nframes, framepos_t /*start_frame*/, framepos_t /*
 
 	silence (nframes);
 
-	return _diskstream->process (_session.transport_frame(), nframes, can_record, rec_monitors_input, need_butler);
+	return _diskstream->process (_session.transport_frame(), nframes, can_record, need_butler);
 }
 
 void

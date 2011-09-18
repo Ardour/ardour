@@ -223,7 +223,7 @@ Auditioner::play_audition (framecnt_t nframes)
 
 	this_nframes = min (nframes, length - current_frame);
 
-	if ((ret = roll (this_nframes, current_frame, current_frame + nframes, false, false, false, need_butler)) != 0) {
+	if ((ret = roll (this_nframes, current_frame, current_frame + nframes, false, false, need_butler)) != 0) {
 		silence (nframes);
 		return ret;
 	}

@@ -405,7 +405,7 @@ AudioDiskstream::prepare_record_status(framepos_t capture_start_frame)
 }
 
 int
-AudioDiskstream::process (framepos_t transport_frame, pframes_t nframes, bool can_record, bool rec_monitors_input, bool& need_butler)
+AudioDiskstream::process (framepos_t transport_frame, pframes_t nframes, bool can_record, bool& need_butler)
 {
 	uint32_t n;
 	boost::shared_ptr<ChannelList> c = channels.reader();
@@ -520,7 +520,7 @@ AudioDiskstream::process (framepos_t transport_frame, pframes_t nframes, bool ca
 	} else {
 
 		if (was_recording) {
-			finish_capture (rec_monitors_input, c);
+			finish_capture (c);
 		}
 
 	}
@@ -1349,7 +1349,7 @@ AudioDiskstream::transport_stopped_wallclock (struct tm& when, time_t twhen, boo
 	uint32_t n = 0;
 	bool mark_write_completed = false;
 
-	finish_capture (true, c);
+	finish_capture (c);
 
 	/* butler is already stopped, but there may be work to do
 	   to flush remaining data to disk.
@@ -1548,7 +1548,7 @@ AudioDiskstream::transport_looped (framepos_t transport_frame)
 			}
 		}
 
-		finish_capture (true, c);
+		finish_capture (c);
 
 		// the next region will start recording via the normal mechanism
 		// we'll set the start position to the current transport pos
@@ -1581,7 +1581,7 @@ AudioDiskstream::transport_looped (framepos_t transport_frame)
 }
 
 void
-AudioDiskstream::finish_capture (bool /*rec_monitors_input*/, boost::shared_ptr<ChannelList> c)
+AudioDiskstream::finish_capture (boost::shared_ptr<ChannelList> c)
 {
 	was_recording = false;
 	first_recordable_frame = max_framepos;

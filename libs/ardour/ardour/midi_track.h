@@ -42,7 +42,7 @@ public:
 	int init ();
 
 	int roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
-	          int declick, bool can_record, bool rec_monitors_input, bool& need_butler);
+	          int declick, bool can_record, bool& need_butler);
 
 	void realtime_handle_transport_stopped ();
 	void realtime_locate ();

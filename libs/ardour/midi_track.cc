@@ -311,7 +311,7 @@ MidiTrack::set_state_part_two ()
 
 int
 MidiTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick,
-		 bool can_record, bool rec_monitors_input, bool& needs_butler)
+		 bool can_record, bool& needs_butler)
 {
 	Glib::RWLock::ReaderLock lm (_processor_lock, Glib::TRY_LOCK);
 	if (!lm.locked()) {
@@ -339,12 +339,12 @@ MidiTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame
 		   playback distance to zero, thus causing diskstream::commit
 		   to do nothing.
 		   */
-		return diskstream->process (transport_frame, 0, can_record, rec_monitors_input, needs_butler);
+		return diskstream->process (transport_frame, 0, can_record, needs_butler);
 	}
 
 	_silent = false;
 
-	if ((dret = diskstream->process (transport_frame, nframes, can_record, rec_monitors_input, needs_butler)) != 0) {
+	if ((dret = diskstream->process (transport_frame, nframes, can_record, needs_butler)) != 0) {
 		silence (nframes);
 		return dret;
 	}
