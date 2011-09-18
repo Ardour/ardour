@@ -80,6 +80,9 @@ public:
 		t->attach (*b, 2, 3, 1, 2, FILL);
 
 		_box->pack_start (*t, false, false);
+
+		_click_path_entry.signal_activate().connect (sigc::mem_fun (*this, &ClickOptions::click_changed));	
+		_click_emphasis_path_entry.signal_activate().connect (sigc::mem_fun (*this, &ClickOptions::click_emphasis_changed));
 	}
 
 	void parameter_changed (string const & p)
@@ -117,6 +120,11 @@ private:
 		_rc_config->set_click_sound (path);
 	}
 
+	void click_changed ()
+	{
+		click_chosen (_click_path_entry.get_text ());
+	}
+	
 	void click_emphasis_browse_clicked ()
 	{
 		SoundFileChooser sfdb (*_parent, _("Choose Click Emphasis"));
@@ -133,6 +141,11 @@ private:
 	{
 		_click_emphasis_path_entry.set_text (path);
 		_rc_config->set_click_emphasis_sound (path);
+	}
+
+	void click_emphasis_changed ()
+	{
+		click_emphasis_chosen (_click_emphasis_path_entry.get_text ());
 	}
 
 	RCConfiguration* _rc_config;
