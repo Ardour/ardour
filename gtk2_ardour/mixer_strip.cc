@@ -456,7 +456,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	_route->meter_change.connect (route_connections, invalidator (*this), bind (&MixerStrip::meter_changed, this), gui_context());
 	_route->route_group_changed.connect (route_connections, invalidator (*this), boost::bind (&MixerStrip::route_group_changed, this), gui_context());
 
-	if (_route->panner()) {
+	if (_route->panner_shell()) {
 		_route->panner_shell()->Changed.connect (route_connections, invalidator (*this), boost::bind (&MixerStrip::connect_to_pan, this), gui_context());
 	}
 
