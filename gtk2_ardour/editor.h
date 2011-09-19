@@ -1603,7 +1603,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	Gtk::HBox                panic_box;
 	Gtk::Button              midi_panic_button;
-	Gtk::ToggleButton        midi_sound_notes;
+	Gtkmm2ext::StatefulToggleButton midi_sound_notes;
 	void                     midi_panic ();
 	bool                     sound_notes () const { return midi_sound_notes.get_active(); }
 

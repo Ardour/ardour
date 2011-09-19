@@ -20,6 +20,7 @@
 #ifndef __gtkardour_port_insert_ui_h__
 #define __gtkardour_port_insert_ui_h__
 
+#include "gtkmm2ext/stateful_button.h"
 #include "ardour_dialog.h"
 #include "io_selector.h"
 
@@ -39,7 +40,7 @@ class PortInsertUI : public Gtk::VBox
         boost::shared_ptr<ARDOUR::PortInsert> _pi;
 
         Gtk::Notebook notebook;
-        Gtk::ToggleButton latency_button;
+	Gtkmm2ext::StatefulToggleButton latency_button;
 	IOSelector input_selector;
 	IOSelector output_selector;
         Gtk::Label latency_display;

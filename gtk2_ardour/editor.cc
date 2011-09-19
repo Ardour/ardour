@@ -3016,6 +3016,7 @@ Editor::setup_midi_toolbar ()
 	/* Midi sound notes */
 	midi_sound_notes.add (*(manage (new Image (::get_icon("midi_sound_notes")))));
 	midi_sound_notes.unset_flags (CAN_FOCUS);
+	midi_sound_notes.set_name (X_("MidiSoundNotesButton"));
 
 	/* Panic */
 

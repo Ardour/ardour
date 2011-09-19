@@ -17,6 +17,7 @@
 
 */
 
+#include "gtkmm2ext/stateful_button.h"
 #include "editor_component.h"
 
 class EditorRouteGroups : public EditorComponent, public ARDOUR::SessionHandlePtr
@@ -31,7 +32,7 @@ public:
 	}
 
 	void clear ();
-        Gtk::ToggleButton& all_group_active_button() { return _all_group_active_button; }
+	Gtkmm2ext::StatefulToggleButton& all_group_active_button() { return _all_group_active_button; }
 
 private:
 
@@ -84,7 +85,7 @@ private:
 	Gtk::TreeView _display;
 	Gtk::ScrolledWindow _scroller;
 	Gtk::VBox _display_packer;
-        Gtk::ToggleButton _all_group_active_button;
+        Gtkmm2ext::StatefulToggleButton _all_group_active_button;
 	bool _in_row_change;
 	bool _in_rebuild;
 	PBD::ScopedConnectionList _property_changed_connections;

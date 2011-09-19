@@ -38,6 +38,7 @@
 #include "route_time_axis.h"
 #include "editor_routes.h"
 #include "editor_route_groups.h"
+#include "ardour_ui.h"
 
 #include "ardour/route.h"
 #include "ardour/session.h"
@@ -146,6 +147,8 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 	_display_packer.pack_start (*button_box, false, false);
 
 	_all_group_active_button.signal_toggled().connect (sigc::mem_fun (*this, &EditorRouteGroups::all_group_toggled));
+	_all_group_active_button.set_name (X_("EditorRouteGroupsAllGroupButton"));
+	ARDOUR_UI::instance()->set_tip (_all_group_active_button, _("Activate this button to operate on all tracks when none are selected."));
 }
 
 void

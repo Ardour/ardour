@@ -1082,3 +1082,8 @@ style "tooltip" = "medium_text"
         bg[NORMAL] = @@COLPREFIX@_bg_tooltip
 }
 
+style "default_toggle_button"
+{
+	bg[ACTIVE] = @@COLPREFIX@_contrasting_indicator
+	fg[ACTIVE] = @@COLPREFIX@_darkest
+}

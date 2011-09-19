@@ -50,6 +50,7 @@ PortInsertUI::PortInsertUI (Gtk::Window* parent, ARDOUR::Session* sess, boost::s
 {
         latency_hbox.pack_start (latency_button, false, false);
         latency_hbox.pack_start (latency_display, false, false);
+	latency_hbox.set_spacing (4);
 
 	output_selector.set_min_height_divisor (2);
 	input_selector.set_min_height_divisor (2);
@@ -66,6 +67,7 @@ PortInsertUI::PortInsertUI (Gtk::Window* parent, ARDOUR::Session* sess, boost::s
         update_latency_display ();
 
         latency_button.signal_toggled().connect (mem_fun (*this, &PortInsertUI::latency_button_toggled));
+	latency_button.set_name (X_("MeasureLatencyButton"));
 }
 
 void
