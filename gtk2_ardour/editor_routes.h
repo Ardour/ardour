@@ -69,6 +69,7 @@ private:
 	void show_menu ();
 	void route_deleted (Gtk::TreeModel::Path const &);
 	void visible_changed (std::string const &);
+	void active_changed (std::string const &);
 	void reordered (Gtk::TreeModel::Path const &, Gtk::TreeModel::iterator const &, int *);
 	bool button_press (GdkEventButton *);
 	void route_property_changed (const PBD::PropertyChange&, boost::weak_ptr<ARDOUR::Route>);
@@ -79,6 +80,7 @@ private:
 	void update_solo_isolate_display ();
 	void update_solo_safe_display ();
 	void update_input_active_display ();
+	void update_active_display ();
 	void set_all_tracks_visibility (bool);
 	void set_all_audio_midi_visibility (int, bool);
 	void show_all_routes ();
@@ -115,6 +117,7 @@ private:
 			add (name_editable);
 			add (is_input_active);
 			add (is_midi);
+			add (active);
 		}
 
 		Gtk::TreeModelColumn<std::string>    text;
@@ -130,6 +133,7 @@ private:
 		Gtk::TreeModelColumn<bool>           name_editable;
 		Gtk::TreeModelColumn<bool>           is_input_active;
 		Gtk::TreeModelColumn<bool>           is_midi;
+		Gtk::TreeModelColumn<bool>           active;
 	};
 
 	Gtk::ScrolledWindow _scroller;
@@ -138,6 +142,7 @@ private:
 	ModelColumns _columns;
 	int _name_column;
 	int _visible_column;
+	int _active_column;
 
 	bool _ignore_reorder;
 	bool _no_redisplay;

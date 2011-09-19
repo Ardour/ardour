@@ -182,6 +182,7 @@ EditorRoutes::EditorRoutes (Editor* e)
 
         _name_column = _display.append_column (_("Name"), _columns.text) - 1;
 	_visible_column = _display.append_column (_("V"), _columns.visible) - 1;
+	_active_column = _display.append_column (_("A"), _columns.active) - 1;
 
 	_display.set_headers_visible (true);
 	_display.set_name ("TrackListDisplay");
@@ -222,6 +223,18 @@ EditorRoutes::EditorRoutes (Editor* e)
 	visible_col->set_fixed_width(30);
 	visible_col->set_alignment(ALIGN_CENTER);
 
+	CellRendererToggle* active_cell = dynamic_cast<CellRendererToggle*> (_display.get_column_cell_renderer (_active_column));
+
+	active_cell->property_activatable() = true;
+	active_cell->property_radio() = false;
+	active_cell->signal_toggled().connect (sigc::mem_fun (*this, &EditorRoutes::active_changed));
+
+	TreeViewColumn* active_col = dynamic_cast<TreeViewColumn*> (_display.get_column (_active_column));
+	active_col->set_expand (false);
+	active_col->set_sizing (TREE_VIEW_COLUMN_FIXED);
+	active_col->set_fixed_width (30);
+	active_col->set_alignment (ALIGN_CENTER);
+	
 	_model->signal_row_deleted().connect (sigc::mem_fun (*this, &EditorRoutes::route_deleted));
 	_model->signal_rows_reordered().connect (sigc::mem_fun (*this, &EditorRoutes::reordered));
 
@@ -545,6 +558,19 @@ EditorRoutes::visible_changed (std::string const & path)
 }
 
 void
+EditorRoutes::active_changed (std::string const & path)
+{
+	if (_session && _session->deletion_in_progress ()) {
+		return;
+	}
+
+	Gtk::TreeModel::Row row = *_model->get_iter (path);
+	boost::shared_ptr<Route> route = row[_columns.route];
+	bool const active = row[_columns.active];
+	route->set_active (!active, this);
+}
+
+void
 EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 {
 	TreeModel::Row row;
@@ -560,6 +586,7 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 
 		row[_columns.text] = (*x)->route()->name();
 		row[_columns.visible] = (*x)->marked_for_display();
+		row[_columns.active] = (*x)->route()->active ();
 		row[_columns.tv] = *x;
 		row[_columns.route] = (*x)->route ();
 		row[_columns.is_track] = (boost::dynamic_pointer_cast<Track> ((*x)->route()) != 0);
@@ -608,6 +635,7 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 		(*x)->route()->listen_changed.connect (*this, MISSING_INVALIDATOR, ui_bind (&EditorRoutes::update_solo_display, this, _1), gui_context());
 		(*x)->route()->solo_isolated_changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_solo_isolate_display, this), gui_context());
 		(*x)->route()->solo_safe_changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_solo_safe_display, this), gui_context());
+		(*x)->route()->active_changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_active_display, this), gui_context ());
 	}
 
 	update_rec_display ();
@@ -616,6 +644,7 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 	update_solo_isolate_display ();
 	update_solo_safe_display ();
 	update_input_active_display ();
+	update_active_display ();
 	resume_redisplay ();
 	_redisplay_does_not_sync_order_keys = false;
 }
@@ -686,6 +715,18 @@ EditorRoutes::route_property_changed (const PropertyChange& what_changed, boost:
 			(*i)[_columns.text] = route->name();
 			break;
 		}
+	}
+}
+
+void
+EditorRoutes::update_active_display ()
+{
+	TreeModel::Children rows = _model->children();
+	TreeModel::Children::iterator i;
+
+	for (i = rows.begin(); i != rows.end(); ++i) {
+		boost::shared_ptr<Route> route = (*i)[_columns.route];
+		(*i)[_columns.active] = route->active ();
 	}
 }
 
