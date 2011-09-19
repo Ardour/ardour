@@ -289,6 +289,8 @@ private:
 	void control_list_interpolation_changed (Evoral::Parameter, Evoral::ControlList::InterpolationStyle);
 	void automation_list_automation_state_changed (Evoral::Parameter, AutoState);
 
+	void control_list_marked_dirty ();
+
 	PBD::ScopedConnectionList _midi_source_connections;
 
 	// We cannot use a boost::shared_ptr here to avoid a retain cycle

@@ -1946,3 +1946,9 @@ MidiModel::transpose (TimeType from, TimeType to, int semitones)
 
 	apply_command (s->session (), c);
 }
+
+void
+MidiModel::control_list_marked_dirty ()
+{
+	ContentsChanged (); /* EMIT SIGNAL */
+}

@@ -313,7 +313,7 @@ private:
 	void get_notes_by_pitch (Notes&, NoteOperator, uint8_t val, int chan_mask = 0) const;
 	void get_notes_by_velocity (Notes&, NoteOperator, uint8_t val, int chan_mask = 0) const;
 
-	void control_list_marked_dirty ();
+	virtual void control_list_marked_dirty ();
 
 	const TypeMap& _type_map;
 
