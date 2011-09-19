@@ -1551,7 +1551,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	Gtk::VBox                automation_box;
 	Gtk::Button              automation_mode_button;
-	Gtk::ToggleButton        global_automation_button;
 
 	Gtk::ComboBoxText edit_mode_selector;
 	Gtk::VBox         edit_mode_box;

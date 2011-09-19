@@ -267,7 +267,6 @@ Editor::Editor ()
 	, toolbar_selection_clock_table (2,3)
 
 	, automation_mode_button (_("mode"))
-	, global_automation_button (_("automation"))
 
 	, _toolbar_viewport (*manage (new Gtk::Adjustment (0, 0, 1e10)), *manage (new Gtk::Adjustment (0, 0, 1e10)))
 	, midi_panic_button (_("Panic"))
