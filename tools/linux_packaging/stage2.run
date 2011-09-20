@@ -183,6 +183,16 @@ esac
 # Check disk space
 ####################
 
+if [ ! -d ${INSTALL_DEST_BASE} ];
+then
+	echo ""
+	echo "!!! ERROR !!! - Installation location ${INSTALL_DEST_BASE} does not exist!"
+	echo "Installation will not complete."
+	echo ""
+	read -p "Press ENTER to exit installer:" BLAH
+	exit 1
+fi
+
 # We have to check the current folder and the INSTALL_DEST_BASE just
 # in case they are on different devices
 echo "Checking for required disk space"
@@ -325,16 +335,6 @@ MENU_FILE_PATH="${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/share"
 ################################
 # Install bundle and Menu/Link
 ################################
-
-if [ ! -d ${INSTALL_DEST_BASE} ];
-then
-	echo ""
-	echo "!!! ERROR !!! - Installation location ${INSTALL_DEST_BASE} does not exist!"
-	echo "Installation will not complete."
-	echo ""
-	read -p "Press ENTER to exit installer:" BLAH
-	exit 1
-fi
 
 # uninstall any older versions
 UNINSTALLERS=$(find ${INSTALL_DEST_BASE} -maxdepth 1 -type f -name "${PGM_NAME}*.uninstall.sh")
