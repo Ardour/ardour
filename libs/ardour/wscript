@@ -396,6 +396,11 @@ def build(bld):
         obj.source += [ 'vst_plugin.cc', 'session_vst.cc' ]
         obj.includes += [ '../fst' ]
         obj.defines += [ 'VST_SUPPORT' ]
+	
+    if bld.env['LXVST_SUPPORT']:
+        obj.source += [ 'lxvst_plugin.cc', 'session_lxvst.cc', 'vstfx.cc', 'vstfxwin.cc', 'vstfxinfofile.cc' ]
+        obj.defines += [ 'LXVST_SUPPORT' ]	
+	
 
     if bld.env['COREAUDIO']:
         obj.source += [ 'coreaudiosource.cc', 'caimportable.cc' ]

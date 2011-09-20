@@ -139,6 +139,12 @@ ARDOUR::find_plugin(Session& session, string identifier, PluginType type)
 		break;
 #endif
 
+#ifdef LXVST_SUPPORT
+	case ARDOUR::LXVST:
+		plugs = mgr->lxvst_plugin_info();
+		break;
+#endif
+
 #ifdef HAVE_AUDIOUNITS
 	case ARDOUR::AudioUnit:
 		plugs = mgr->au_plugin_info();
@@ -158,6 +164,19 @@ ARDOUR::find_plugin(Session& session, string identifier, PluginType type)
 	}
 
 #ifdef VST_SUPPORT
+	/* hmm, we didn't find it. could be because in older versions of Ardour.
+	   we used to store the name of a VST plugin, not its unique ID. so try
+	   again.
+	*/
+
+	for (i = plugs.begin(); i != plugs.end(); ++i) {
+		if (identifier == (*i)->name){
+			return (*i)->load (session);
+		}
+	}
+#endif
+
+#ifdef LXVST_SUPPORT
 	/* hmm, we didn't find it. could be because in older versions of Ardour.
 	   we used to store the name of a VST plugin, not its unique ID. so try
 	   again.

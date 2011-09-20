@@ -240,6 +240,9 @@ PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& 
 			case VST:
 				compstr = X_("VST");
 				break;
+			case LXVST:
+				compstr = X_("LXVST");
+				break;
 			}
 
 		} else if (mode == _("Author contains")) {
@@ -285,6 +288,7 @@ PluginSelector::refill ()
 	ladspa_refiller (filterstr);
 	lv2_refiller (filterstr);
 	vst_refiller (filterstr);
+	lxvst_refiller (filterstr);
 	au_refiller (filterstr);
 
 	in_row_change = false;
@@ -354,6 +358,18 @@ PluginSelector::vst_refiller (const std::string&)
 {
 #ifdef VST_SUPPORT
 	refiller (manager->vst_plugin_info(), filterstr, "VST");
+#endif
+}
+
+void
+#ifdef LXVST_SUPPORT
+PluginSelector::lxvst_refiller (const std::string& filterstr)
+#else
+PluginSelector::lxvst_refiller (const std::string&)
+#endif
+{
+#ifdef LXVST_SUPPORT
+	refiller (manager->lxvst_plugin_info(), filterstr, "LXVST");
 #endif
 }
 
@@ -584,6 +600,9 @@ PluginSelector::build_plugin_menu ()
 	all_plugs.insert (all_plugs.end(), manager->ladspa_plugin_info().begin(), manager->ladspa_plugin_info().end());
 #ifdef VST_SUPPORT
 	all_plugs.insert (all_plugs.end(), manager->vst_plugin_info().begin(), manager->vst_plugin_info().end());
+#endif
+#ifdef LXVST_SUPPORT
+	all_plugs.insert (all_plugs.end(), manager->lxvst_plugin_info().begin(), manager->lxvst_plugin_info().end());
 #endif
 #ifdef HAVE_AUDIOUNITS
 	all_plugs.insert (all_plugs.end(), manager->au_plugin_info().begin(), manager->au_plugin_info().end());

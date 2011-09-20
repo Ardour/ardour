@@ -685,6 +685,8 @@ Session::hookup_io ()
 
 	/* Tell all IO objects to connect themselves together */
 
+	cerr << "Enable IO connections, state = " << _state_of_the_state << endl;
+
 	IO::enable_connecting ();
 	MIDI::Port::MakeConnections ();
 
@@ -4336,6 +4338,7 @@ Session::update_latency (bool playback)
 	if (playback) {
 		/* reverse the list so that we work backwards from the last route to run to the first */
 		reverse (r->begin(), r->end());
+		cerr << "\n!!! I JUST REVERSED THE ROUTE LIST (" << r->size() << ")!!!\n\n";
 	}
 
 	/* compute actual latency values for the given direction and store them all in per-port
@@ -4378,14 +4381,15 @@ Session::post_playback_latency ()
 	set_worst_playback_latency ();
 
 	boost::shared_ptr<RouteList> r = routes.reader ();
+
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if (!(*i)->is_hidden() && ((*i)->active())) {
 			_worst_track_latency = max (_worst_track_latency, (*i)->update_signal_latency ());
 		}
+	}
 
-		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-			(*i)->set_latency_compensation (_worst_track_latency);
-		}
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		(*i)->set_latency_compensation (_worst_track_latency);
 	}
 }
 
@@ -4484,15 +4488,6 @@ Session::update_latency_compensation (bool force_whole_graph)
 
 	DEBUG_TRACE (DEBUG::Latency, string_compose ("worst signal processing latency: %1 (changed ? %2)\n", _worst_track_latency,
 	                                             (some_track_latency_changed ? "yes" : "no")));
-
-	if (force_whole_graph || some_track_latency_changed) {
-		/* trigger a full recompute of latency numbers for the graph.
-		   everything else that we need to do will be done in the latency
-		   callback.
-		*/
-		_engine.update_total_latencies ();
-		return; // everything else will be done in the latency callback
-	}
 
 	DEBUG_TRACE(DEBUG::Latency, "---------------------------- DONE update latency compensation\n\n")
 }

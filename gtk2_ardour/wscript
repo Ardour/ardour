@@ -305,6 +305,7 @@ def build(bld):
     obj.includes     = ['.']
     obj.source       = gtk2_ardour_sources
     obj.name         = 'gtk2_ardour'
+    obj.linkflags    = []
     if bld.env['VST_SUPPORT']:
         obj.target = 'gtk2_ardour'
         obj.includes += ['../libs/fst']
@@ -343,6 +344,12 @@ def build(bld):
     if bld.env['VST_SUPPORT']:
         obj.source += [ 'vst_pluginui.cc' ]
         obj.defines += [ 'VST_SUPPORT' ]
+        bld.env.append ('LINKFLAGS', '-lX11')
+
+    if bld.env['LXVST_SUPPORT']:
+        obj.source += [ 'lxvst_pluginui.cc' ]
+        obj.defines += [ 'LXVST_SUPPORT' ]
+        obj.linkflags += [ '-lX11' ]
 
     if bld.env['PHONE_HOME']:
         obj.defines += [ 'PHONE_HOME' ]
@@ -365,7 +372,7 @@ def build(bld):
         '''
         obj.includes = '../libs/fst'
         obj.target = 'ardour-3.0-vst'
-        obj.linkflags = ['-mwindows', '-Wl,--export-dynamic', '-lpthread']
+        obj.linkflags += ['-mwindows', '-Wl,--export-dynamic', '-lpthread']
         obj.defines = ['_POSIX_SOURCE', 'USE_WS_PREFIX']
         obj.uselib = 'ALSA'
         obj.uselib_local = ['libpbd','libmidipp','libtaglib','libardour',

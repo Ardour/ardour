@@ -1414,13 +1414,6 @@ AudioEngine::request_buffer_size (pframes_t nframes)
 	return jack_set_buffer_size (_priv_jack, nframes);
 }
 
-void
-AudioEngine::update_total_latencies ()
-{
-	GET_PRIVATE_JACK_POINTER (_jack);
-	jack_recompute_total_latencies (_priv_jack);
-}
-
 string
 AudioEngine::make_port_name_relative (string portname) const
 {

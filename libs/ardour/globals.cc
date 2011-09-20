@@ -33,6 +33,10 @@
 #include <fst.h>
 #endif
 
+#ifdef LXVST_SUPPORT
+#include "ardour/vstfx.h"
+#endif
+
 #ifdef HAVE_AUDIOUNITS
 #include "ardour/audio_unit.h"
 #endif
@@ -290,12 +294,21 @@ ARDOUR::init (bool use_vst, bool try_optimization)
 	}
 
 	Config->set_use_vst (use_vst);
+#ifdef LXVST_SUPPORT
+	Config->set_use_lxvst(true);
+#endif
 
 	Profile = new RuntimeProfile;
 
 
 #ifdef VST_SUPPORT
 	if (Config->get_use_vst() && fst_init (0)) {
+		return -1;
+	}
+#endif
+
+#ifdef LXVST_SUPPORT
+	if (Config->get_use_lxvst() && vstfx_init (0)) {
 		return -1;
 	}
 #endif
@@ -371,6 +384,10 @@ ARDOUR::cleanup ()
 	delete &ControlProtocolManager::instance();
 #ifdef VST_SUPPORT
 	fst_exit ();
+#endif
+
+#ifdef LXVST_SUPPOR
+	vstfx_exit();
 #endif
 	return 0;
 }

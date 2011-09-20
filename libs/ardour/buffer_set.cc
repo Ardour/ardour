@@ -41,6 +41,10 @@
 #include "vestige/aeffectx.h"
 #endif
 
+#ifdef LXVST_SUPPORT
+#include "ardour/vestige/aeffectx.h"
+#endif
+
 namespace ARDOUR {
 
 /** Create a new, empty BufferSet */
@@ -77,13 +81,14 @@ BufferSet::clear()
 	_count.reset();
 	_available.reset();
 
-#ifdef VST_SUPPORT
+#if defined VST_SUPPORT || defined LXVST_SUPPORT 
 	for (VSTBuffers::iterator i = _vst_buffers.begin(); i != _vst_buffers.end(); ++i) {
 		delete *i;
 	}
 
 	_vst_buffers.clear ();
 #endif
+
 }
 
 /** Set up this BufferSet so that its data structures mirror a PortSet's buffers.
@@ -192,7 +197,7 @@ BufferSet::ensure_buffers(DataType type, size_t num_buffers, size_t buffer_capac
 	}
 #endif
 
-#ifdef VST_SUPPORT
+#if defined VST_SUPPORT || defined LXVST_SUPPORT
 	// As above but for VST
 	if (type == DataType::MIDI) {
 		while (_vst_buffers.size() < _buffers[type].size()) {
@@ -299,7 +304,7 @@ BufferSet::flush_lv2_midi(bool input, size_t i)
 
 #endif /* LV2_SUPPORT */
 
-#ifdef VST_SUPPORT
+#if defined VST_SUPPORT || defined LXVST_SUPPORT
 
 VstEvents*
 BufferSet::get_vst_midi (size_t b)

@@ -246,7 +246,14 @@ def set_compiler_flags (conf,opt):
         print("\nIt is theoretically possible to build a 32 bit host on a 64 bit system.")
         print("However, this is tricky and not recommended for beginners.")
         sys.exit (-1)
-
+		
+    if conf.env['build_target'] == 'x86_64' and opt.lxvst:
+        print("\n\n********************************************************")
+        print("* Building with 64Bit linuxVST support is experimental *")
+        print("********************************************************\n\n")
+        conf.env.append_value('CXXFLAGS', "-DLXVST_64BIT")
+    else:
+        conf.env.append_value('CXXFLAGS', "-DLXVST_32BIT")
     #
     # a single way to test if we're on OS X
     #
@@ -362,6 +369,8 @@ def set_options(opt):
                     help='Compile for use with gprofile')
     opt.add_option('--lv2', action='store_true', default=False, dest='lv2',
                     help='Compile with support for LV2 (if SLV2 or Lilv+Suil is available)')
+    opt.add_option('--lxvst', action='store_true', default=False, dest='lxvst',
+                    help='Compile with support for linuxVST plugins')
     opt.add_option('--nls', action='store_true', default=True, dest='nls',
                     help='Enable i18n (native language support) (default)')
     opt.add_option('--no-nls', action='store_false', dest='nls')
@@ -531,6 +540,9 @@ def configure(conf):
         conf.define('VST_SUPPORT', 1)
         conf.env.append_value('CPPPATH', Options.options.wine_include)
         autowaf.check_header(conf, 'windows.h', mandatory = True)
+    if opts.lxvst:
+        conf.define('LXVST_SUPPORT', 1)
+        conf.env['LXVST_SUPPORT'] = True
     if bool(conf.env['JACK_SESSION']):
         conf.define ('HAVE_JACK_SESSION', 1)
     if opts.wiimote:
@@ -572,6 +584,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('JACK session support',  bool(conf.env['JACK_SESSION']))
     write_config_text('LV2 UI embedding',      bool(conf.env['HAVE_SUIL']))
     write_config_text('LV2 support',           bool(conf.env['LV2_SUPPORT']))
+    write_config_text('LXVST support',         bool(conf.env['LXVST_SUPPORT']))
     write_config_text('OGG',                   bool(conf.env['HAVE_OGG']))
     write_config_text('Phone home',            bool(conf.env['PHONE_HOME']))
     write_config_text('Program name',          opts.program_name)

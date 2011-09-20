@@ -449,7 +449,8 @@ namespace ARDOUR {
 		AudioUnit,
 		LADSPA,
 		LV2,
-		VST
+		VST,
+		LXVST,
 	};
 
 	enum RunContext {

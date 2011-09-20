@@ -45,6 +45,10 @@
 #include "ardour/vst_plugin.h"
 #endif
 
+#ifdef LXVST_SUPPORT
+#include "ardour/lxvst_plugin.h"
+#endif
+
 #ifdef HAVE_AUDIOUNITS
 #include "ardour/audio_unit.h"
 #endif
@@ -570,6 +574,9 @@ PluginInsert::plugin_factory (boost::shared_ptr<Plugin> other)
 #ifdef VST_SUPPORT
 	boost::shared_ptr<VSTPlugin> vp;
 #endif
+#ifdef LXVST_SUPPORT
+	boost::shared_ptr<LXVSTPlugin> lxvp;
+#endif
 #ifdef HAVE_AUDIOUNITS
 	boost::shared_ptr<AUPlugin> ap;
 #endif
@@ -583,6 +590,10 @@ PluginInsert::plugin_factory (boost::shared_ptr<Plugin> other)
 #ifdef VST_SUPPORT
 	} else if ((vp = boost::dynamic_pointer_cast<VSTPlugin> (other)) != 0) {
 		return boost::shared_ptr<Plugin> (new VSTPlugin (*vp));
+#endif
+#ifdef LXVST_SUPPORT
+	} else if ((lxvp = boost::dynamic_pointer_cast<LXVSTPlugin> (other)) != 0) {
+		return boost::shared_ptr<Plugin> (new LXVSTPlugin (*lxvp));
 #endif
 #ifdef HAVE_AUDIOUNITS
 	} else if ((ap = boost::dynamic_pointer_cast<AUPlugin> (other)) != 0) {
@@ -852,6 +863,8 @@ PluginInsert::set_state(const XMLNode& node, int version)
 		type = ARDOUR::LV2;
 	} else if (prop->value() == X_("vst")) {
 		type = ARDOUR::VST;
+	} else if (prop->value() == X_("lxvst")) {
+		type = ARDOUR::LXVST;
 	} else if (prop->value() == X_("audiounit")) {
 		type = ARDOUR::AudioUnit;
 	} else {
@@ -869,6 +882,14 @@ PluginInsert::set_state(const XMLNode& node, int version)
 		 */
 
 		if (type == ARDOUR::VST) {
+			prop = node.property ("id");
+		}
+#endif
+
+#ifdef LXVST_SUPPORT
+		/*There shouldn't be any older sessions with linuxVST support.. but anyway..*/
+
+		if (type == ARDOUR::LXVST) {
 			prop = node.property ("id");
 		}
 #endif

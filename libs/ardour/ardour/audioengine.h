@@ -189,8 +189,6 @@ public:
 	void get_physical_outputs (DataType type, std::vector<std::string>&);
 	void get_physical_inputs (DataType type, std::vector<std::string>&);
 
-	void update_total_latencies ();
-
 	Port *get_port_by_name (const std::string &);
 
 	enum TransportState {

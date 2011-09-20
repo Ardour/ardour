@@ -140,6 +140,7 @@ CONFIG_VARIABLE (bool, hiding_groups_deactivates_groups, "hiding-groups-deactiva
 CONFIG_VARIABLE (bool, verify_remove_last_capture, "verify-remove-last-capture", true)
 CONFIG_VARIABLE (bool, no_new_session_dialog, "no-new-session-dialog", false)
 CONFIG_VARIABLE (bool, use_vst, "use-vst", true)
+CONFIG_VARIABLE (bool, use_lxvst, "use-lxvst", true)
 CONFIG_VARIABLE (bool, save_history, "save-history", true)
 CONFIG_VARIABLE (int32_t, saved_history_depth, "save-history-depth", 20)
 CONFIG_VARIABLE (int32_t, history_depth, "history-depth", 20)

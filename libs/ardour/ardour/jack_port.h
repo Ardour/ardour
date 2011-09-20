@@ -104,7 +104,6 @@ class JackPort : public virtual Port, public PortConnectableByName {
 	jack_port_t*  _port;
 
 	int disconnect ();
-	void recompute_total_latency() const;
 
 	std::set<std::string> _named_connections;
 };

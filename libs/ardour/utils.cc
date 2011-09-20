@@ -75,7 +75,7 @@ legalize_for_path (const string& str)
 		pos += 1;
 	}
 
-	return legal;
+	return string (legal);
 }
 
 string
