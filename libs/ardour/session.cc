@@ -958,7 +958,6 @@ Session::hookup_io ()
 
 	/* Tell all IO objects to connect themselves together */
 
-	cerr << "Enable IO connections, state = " << _state_of_the_state << endl;
 	IO::enable_connecting ();
 
 	/* Now reset all panners */
@@ -1656,7 +1655,6 @@ Session::resort_routes ()
 		resort_routes_using (r);
 		/* writer goes out of scope and forces update */
 	}
-
 }
 
 void
@@ -4419,13 +4417,17 @@ Session::update_latency (bool playback)
 		return;
 	}
 
-	boost::shared_ptr<RouteList> r = routes.reader ();
+	boost::shared_ptr<RouteList> r;
 	nframes_t max_latency = 0;
 
 	if (playback) {
 		/* reverse the list so that we work backwards from the last route to run to the first */
+                RouteList* rl = routes.reader().get();
+                r.reset (new RouteList (*rl));
 		reverse (r->begin(), r->end());
-	}
+	} else {
+                r = routes.reader ();
+        }
 
 	/* compute actual latency values for the given direction and store them all in per-port
 	   structures. this will also publish the same values (to JACK) so that computation of latency
