@@ -74,12 +74,11 @@ LXVSTPlugin::LXVSTPlugin (AudioEngine& e, Session& session, VSTFXHandle* h)
 
 	/*Instantiate the plugin and return a VSTFX* */
 
-	if ((_vstfx = vstfx_instantiate (handle, Session::lxvst_callback, this)) == 0)
-	{
+	if ((_vstfx = vstfx_instantiate (handle, Session::lxvst_callback, this)) == 0) {
 		throw failed_constructor();
 	}
 
-	/*Call into vstfx to get a pointer to the instance of the VST plugin*/
+	/* Call into vstfx to get a pointer to the instance of the VST plugin*/
 
 	_plugin = _vstfx->plugin;
 	_plugin->user = this;
@@ -102,8 +101,7 @@ LXVSTPlugin::LXVSTPlugin (const LXVSTPlugin &other)
 {
 	handle = other.handle;
 
-	if ((_vstfx = vstfx_instantiate (handle, Session::lxvst_callback, this)) == 0)
-	{
+	if ((_vstfx = vstfx_instantiate (handle, Session::lxvst_callback, this)) == 0) {
 		throw failed_constructor();
 	}
 	_plugin = _vstfx->plugin;
@@ -117,25 +115,27 @@ LXVSTPlugin::~LXVSTPlugin ()
 	vstfx_close (_vstfx);
 }
 
-int LXVSTPlugin::set_block_size (pframes_t nframes)
+int 
+LXVSTPlugin::set_block_size (pframes_t nframes)
 {
 	deactivate ();
 	_plugin->dispatcher (_plugin, effSetBlockSize, 0, nframes, NULL, 0.0f);
 	activate ();
-    return 0;
+	return 0;
 }
 
-float LXVSTPlugin::default_value (uint32_t port)
+float 
+LXVSTPlugin::default_value (uint32_t port)
 {
 	return 0;
 }
 
-void LXVSTPlugin::set_parameter (uint32_t which, float val)
+void 
+LXVSTPlugin::set_parameter (uint32_t which, float val)
 {
 	_plugin->setParameter (_plugin, which, val);
 	
-	if (_vstfx->want_program == -1 && _vstfx->want_chunk == 0)
-	{
+	if (_vstfx->want_program == -1 && _vstfx->want_chunk == 0) {
 		/* Heinous hack: Plugin::set_parameter below updates the `modified' status of the
 		   current preset, but if _vstfx->want_program is not -1 then there is a preset
 		   setup pending or in progress, which we don't want any `modified' updates
@@ -145,13 +145,15 @@ void LXVSTPlugin::set_parameter (uint32_t which, float val)
 	}
 }
 
-float LXVSTPlugin::get_parameter (uint32_t which) const
+float 
+LXVSTPlugin::get_parameter (uint32_t which) const
 {
 	return _plugin->getParameter (_plugin, which);
 
 }
 
-uint32_t LXVSTPlugin::nth_parameter (uint32_t n, bool& ok) const
+uint32_t 
+LXVSTPlugin::nth_parameter (uint32_t n, bool& ok) const
 {
 	ok = true;
 	return n;
@@ -165,8 +167,8 @@ gchar *LXVSTPlugin::get_chunk (bool single) const
 {
 	guchar* data;
 	int32_t data_size = _plugin->dispatcher (_plugin, 23 /* effGetChunk */, single ? 1 : 0, 0, &data, 0);
-	if (data_size == 0)
-	{
+
+	if (data_size == 0) {
 		return 0;
 	}
 
@@ -178,7 +180,8 @@ gchar *LXVSTPlugin::get_chunk (bool single) const
  *  @param single true for single program, false for all programs.
  *  @return 0 on success, non-0 on failure
  */
-int LXVSTPlugin::set_chunk (gchar const * data, bool single)
+int 
+LXVSTPlugin::set_chunk (gchar const * data, bool single)
 {
 	gsize size = 0;
 	guchar* raw_data = g_base64_decode (data, &size);
@@ -187,22 +190,21 @@ int LXVSTPlugin::set_chunk (gchar const * data, bool single)
 	return r;
 }
 
-void LXVSTPlugin::add_state (XMLNode* root) const
+void 
+LXVSTPlugin::add_state (XMLNode* root) const
 {
 	LocaleGuard lg (X_("POSIX"));
 
-	if (_vstfx->current_program != -1)
-	{
+	if (_vstfx->current_program != -1) {
 		char buf[32];
 		snprintf (buf, sizeof (buf), "%d", _vstfx->current_program);
 		root->add_property ("current-program", buf);
 	}
 
-	if (_plugin->flags & 32 /* effFlagsProgramsChunks */)
-	{
+	if (_plugin->flags & 32 /* effFlagsProgramsChunks */) {
 		gchar* data = get_chunk (false);
-		if (data == 0)
-		{
+
+		if (data == 0) {
 			return;
 		}
 
@@ -215,13 +217,10 @@ void LXVSTPlugin::add_state (XMLNode* root) const
 
 		root->add_child_nocopy (*chunk_node);
 
-	}
-	else
-	{
+	} else {
 		XMLNode* parameters = new XMLNode ("parameters");
 
-		for (int32_t n = 0; n < _plugin->numParams; ++n)
-		{
+		for (int32_t n = 0; n < _plugin->numParams; ++n) {
 			char index[64];
 			char val[32];
 			snprintf (index, sizeof (index), "param_%d", n);
@@ -233,36 +232,32 @@ void LXVSTPlugin::add_state (XMLNode* root) const
 	}
 }
 
-int LXVSTPlugin::set_state (const XMLNode& node, int version)
+int 
+LXVSTPlugin::set_state (const XMLNode& node, int version)
 {
 	LocaleGuard lg (X_("POSIX"));
 
-	if (node.name() != state_node_name())
-	{
+	if (node.name() != state_node_name()) {
 		error << _("Bad node sent to VSTPlugin::set_state") << endmsg;
 		return 0;
 	}
 
 	const XMLProperty* prop;
 
-	if ((prop = node.property ("current-program")) != 0)
-	{
+	if ((prop = node.property ("current-program")) != 0) {
 		_vstfx->want_program = atoi (prop->value().c_str());
 	}
 
 	XMLNode* child;
 	int ret = -1;
 
-	if ((child = find_named_node (node, X_("chunk"))) != 0)
-	{
+	if ((child = find_named_node (node, X_("chunk"))) != 0) {
 		XMLPropertyList::const_iterator i;
 		XMLNodeList::const_iterator n;
 		int ret = -1;
 
-		for (n = child->children ().begin (); n != child->children ().end (); ++n)
-		{
-			if ((*n)->is_content ())
-			{
+		for (n = child->children ().begin (); n != child->children ().end (); ++n) {
+			if ((*n)->is_content ()) {
 				/* XXX: this may be dubious for the same reasons that we delay
 				   execution of load_preset.
 				*/
@@ -270,13 +265,10 @@ int LXVSTPlugin::set_state (const XMLNode& node, int version)
 			}
 		}
 
-	}
-	else if ((child = find_named_node (node, X_("parameters"))) != 0)
-	{
+	} else if ((child = find_named_node (node, X_("parameters"))) != 0) {
 		XMLPropertyList::const_iterator i;
 
-		for (i = child->properties().begin(); i != child->properties().end(); ++i)
-		{
+		for (i = child->properties().begin(); i != child->properties().end(); ++i) {
 			int32_t param;
 			float val;
 
@@ -297,7 +289,8 @@ int LXVSTPlugin::set_state (const XMLNode& node, int version)
 	return ret;
 }
 
-int LXVSTPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& desc) const
+int 
+LXVSTPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& desc) const
 {
 	VstParameterProperties prop;
 
@@ -326,28 +319,27 @@ int LXVSTPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& 
 	return 0;
 }
 
-bool LXVSTPlugin::load_preset (PresetRecord r)
+bool 
+LXVSTPlugin::load_preset (PresetRecord r)
 {
 	bool s;
 
-	if (r.user)
-	{
+	if (r.user) {
 		s = load_user_preset (r);
 	}
-	else
-	{
+	else {
 		s = load_plugin_preset (r);
 	}
 
-	if (s)
-	{
+	if (s) {
 		Plugin::load_preset (r);
 	}
 
 	return s;
 }
 
-bool LXVSTPlugin::load_plugin_preset (PresetRecord r)
+bool 
+LXVSTPlugin::load_plugin_preset (PresetRecord r)
 {
 	/* This is a plugin-provided preset.
 	   We can't dispatch directly here; too many plugins expects only one GUI thread.
@@ -363,47 +355,41 @@ bool LXVSTPlugin::load_plugin_preset (PresetRecord r)
 	return true;
 }
 
-bool LXVSTPlugin::load_user_preset (PresetRecord r)
+bool 
+LXVSTPlugin::load_user_preset (PresetRecord r)
 {
 	/* This is a user preset; we load it, and this code also knows about the
 	   non-direct-dispatch thing.
 	*/
 
 	boost::shared_ptr<XMLTree> t (presets_tree ());
-	if (t == 0)
-	{
+	if (t == 0) {
 		return false;
 	}
 
 	XMLNode* root = t->root ();
 
-	for (XMLNodeList::const_iterator i = root->children().begin(); i != root->children().end(); ++i)
-	{
+	for (XMLNodeList::const_iterator i = root->children().begin(); i != root->children().end(); ++i) {
 		XMLProperty* uri = (*i)->property (X_("uri"));
 		XMLProperty* label = (*i)->property (X_("label"));
 
 		assert (uri);
 		assert (label);
 
-		if (label->value() != r.label)
-		{
+		if (label->value() != r.label) {
 			continue;
 		}
 
-		if (_plugin->flags & 32 /* effFlagsProgramsChunks */)
-		{
+		if (_plugin->flags & 32 /* effFlagsProgramsChunks */) {
 
 			/* Load a user preset chunk from our XML file and send it via a circuitous route to the plugin */
 
-			if (_vstfx->wanted_chunk)
-			{
+			if (_vstfx->wanted_chunk) {
 				g_free (_vstfx->wanted_chunk);
 			}
 
-			for (XMLNodeList::const_iterator j = (*i)->children().begin(); j != (*i)->children().end(); ++j)
-			{
-				if ((*j)->is_content ())
-				{
+			for (XMLNodeList::const_iterator j = (*i)->children().begin(); j != (*i)->children().end(); ++j) {
+				if ((*j)->is_content ()) {
 					/* we can't dispatch directly here; too many plugins expect only one GUI thread */
 					gsize size = 0;
 					guchar* raw_data = g_base64_decode ((*j)->content().c_str(), &size);
@@ -417,12 +403,9 @@ bool LXVSTPlugin::load_user_preset (PresetRecord r)
 			return false;
 
 		}
-		else
-		{
-			for (XMLNodeList::const_iterator j = (*i)->children().begin(); j != (*i)->children().end(); ++j)
-			{
-				if ((*j)->name() == X_("Parameter"))
-				{
+		else {
+			for (XMLNodeList::const_iterator j = (*i)->children().begin(); j != (*i)->children().end(); ++j) {
+				if ((*j)->name() == X_("Parameter")) {
 						XMLProperty* index = (*j)->property (X_("index"));
 						XMLProperty* value = (*j)->property (X_("value"));
 
@@ -438,11 +421,11 @@ bool LXVSTPlugin::load_user_preset (PresetRecord r)
 	return false;
 }
 
-string LXVSTPlugin::do_save_preset (string name)
+string 
+LXVSTPlugin::do_save_preset (string name)
 {
 	boost::shared_ptr<XMLTree> t (presets_tree ());
-	if (t == 0)
-	{
+	if (t == 0) {
 		return "";
 	}
 
@@ -450,8 +433,7 @@ string LXVSTPlugin::do_save_preset (string name)
 	/* XXX: use of _presets.size() + 1 for the unique ID here is dubious at best */
 	string const uri = string_compose (X_("VST:%1:%2"), unique_id (), _presets.size() + 1);
 
-	if (_plugin->flags & 32 /* effFlagsProgramsChunks */)
-	{
+	if (_plugin->flags & 32 /* effFlagsProgramsChunks */) {
 
 		p = new XMLNode (X_("ChunkPreset"));
 		p->add_property (X_("uri"), uri);
@@ -461,17 +443,14 @@ string LXVSTPlugin::do_save_preset (string name)
 		g_free (data);
 
 	}
-	else
-	{
+	else {
 
 		p = new XMLNode (X_("Preset"));
 		p->add_property (X_("uri"), uri);
 		p->add_property (X_("label"), name);
 
-		for (uint32_t i = 0; i < parameter_count(); ++i)
-		{
-			if (parameter_is_input (i))
-			{
+		for (uint32_t i = 0; i < parameter_count(); ++i) {
+			if (parameter_is_input (i)) {
 				XMLNode* c = new XMLNode (X_("Parameter"));
 				c->add_property (X_("index"), string_compose ("%1", i));
 				c->add_property (X_("value"), string_compose ("%1", get_parameter (i)));
@@ -490,11 +469,11 @@ string LXVSTPlugin::do_save_preset (string name)
 	return uri;
 }
 
-void LXVSTPlugin::do_remove_preset (string name)
+void 
+LXVSTPlugin::do_remove_preset (string name)
 {
 	boost::shared_ptr<XMLTree> t (presets_tree ());
-	if (t == 0)
-	{
+	if (t == 0) {
 		return;
 	}
 
@@ -507,17 +486,18 @@ void LXVSTPlugin::do_remove_preset (string name)
 	t->write (f.to_string ());
 }
 
-string LXVSTPlugin::describe_parameter (Evoral::Parameter param)
+string 
+LXVSTPlugin::describe_parameter (Evoral::Parameter param)
 {
 	char name[64] = "Unkown";
 	_plugin->dispatcher (_plugin, effGetParamName, param.id(), 0, name, 0);
 	return name;
 }
 
-framecnt_t LXVSTPlugin::signal_latency () const
+framecnt_t 
+LXVSTPlugin::signal_latency () const
 {
-	if (_user_latency)
-	{
+	if (_user_latency) {
 		return _user_latency;
 	}
 
@@ -528,21 +508,22 @@ framecnt_t LXVSTPlugin::signal_latency () const
 #endif
 }
 
-set<Evoral::Parameter> LXVSTPlugin::automatable () const
+set<Evoral::Parameter> 
+LXVSTPlugin::automatable () const
 {
 	set<Evoral::Parameter> ret;
 
-	for (uint32_t i = 0; i < parameter_count(); ++i)
-	{
+	for (uint32_t i = 0; i < parameter_count(); ++i) {
 		ret.insert (ret.end(), Evoral::Parameter(PluginAutomation, 0, i));
 	}
 
 	return ret;
 }
 
-int LXVSTPlugin::connect_and_run (BufferSet& bufs,
-		ChanMapping in_map, ChanMapping out_map,
-		pframes_t nframes, framecnt_t offset)
+int
+LXVSTPlugin::connect_and_run (BufferSet& bufs,
+			      ChanMapping in_map, ChanMapping out_map,
+			      pframes_t nframes, framecnt_t offset)
 {
 	Plugin::connect_and_run (bufs, in_map, out_map, nframes, offset);
 
@@ -553,21 +534,18 @@ int LXVSTPlugin::connect_and_run (BufferSet& bufs,
 	const uint32_t nbufs = bufs.count().n_audio();
 
 	int in_index = 0;
-	for (i = 0; i < (int32_t) _plugin->numInputs; ++i)
-	{
+	for (i = 0; i < (int32_t) _plugin->numInputs; ++i) {
 		ins[i] = bufs.get_audio(min((uint32_t) in_index, nbufs - 1)).data() + offset;
 		in_index++;
 	}
 
 	int out_index = 0;
-	for (i = 0; i < (int32_t) _plugin->numOutputs; ++i)
-	{
+	for (i = 0; i < (int32_t) _plugin->numOutputs; ++i) {
 		outs[i] = bufs.get_audio(min((uint32_t) out_index, nbufs - 1)).data() + offset;
 		out_index++;
 	}
 
-	if (bufs.count().n_midi() > 0)
-	{
+	if (bufs.count().n_midi() > 0) {
 		VstEvents* v = bufs.get_vst_midi (0);
 		_plugin->dispatcher (_plugin, effProcessEvents, 0, 0, v, 0);
 	}
@@ -580,22 +558,23 @@ int LXVSTPlugin::connect_and_run (BufferSet& bufs,
 
 #if defined LXVST_64BIT && defined VESTIGE_HEADER
 
-	/*Vestige doesn't work for 64Bit - some of the AEffect struct member types
-	appear not to be correct which throws the data alignment.  We have two choices
-	
-	1) Fix Vestige - preferable from a technical standpoint, but perhaps
-	not viable without affecting its 'clean room' status
-	
-	2) Correct for the alignment error - a bit of a kludge, but it can work,
-	assuming the following data types / sizes on x86-64
-	
-	char		1Byte  : Byte aligned
-	int			4Bytes : 4Byte aligned
-	long		8Bytes : 8Byte aligned
-	pointers	8Bytes : 8Byte aligned
-	
-	This gives an offset of 8 Bytes - inclusive of padding
-	to translate to the correct address for processReplacing*/
+	/* Vestige doesn't work for 64Bit - some of the AEffect struct member types
+	   appear not to be correct which throws the data alignment.  We have two choices
+	   
+	   1) Fix Vestige - preferable from a technical standpoint, but perhaps
+	   not viable without affecting its 'clean room' status
+	   
+	   2) Correct for the alignment error - a bit of a kludge, but it can work,
+	   assuming the following data types / sizes on x86-64
+	   
+	   char		1Byte  : Byte aligned
+	   int	        4Bytes : 4Byte aligned
+	   long		8Bytes : 8Byte aligned
+	   pointers	8Bytes : 8Byte aligned
+	   
+	   This gives an offset of 8 Bytes - inclusive of padding
+	   to translate to the correct address for processReplacing
+	*/
 
 	((AEffect*)(((char*)(_plugin)) + 8))->processReplacing(_plugin, ins, outs, nframes);
 	
@@ -608,17 +587,20 @@ int LXVSTPlugin::connect_and_run (BufferSet& bufs,
 	return 0;
 }
 
-void LXVSTPlugin::deactivate ()
+void 
+LXVSTPlugin::deactivate ()
 {
 	_plugin->dispatcher (_plugin, effMainsChanged, 0, 0, NULL, 0.0f);
 }
 
-void LXVSTPlugin::activate ()
+void 
+LXVSTPlugin::activate ()
 {
 	_plugin->dispatcher (_plugin, effMainsChanged, 0, 1, NULL, 0.0f);
 }
 
-string LXVSTPlugin::unique_id() const
+string 
+LXVSTPlugin::unique_id() const
 {
 	char buf[32];
 	
@@ -644,77 +626,78 @@ string LXVSTPlugin::unique_id() const
 }
 
 
-const char * LXVSTPlugin::name () const
+const char * 
+LXVSTPlugin::name () const
 {
 	return handle->name;
 }
 
-const char * LXVSTPlugin::maker () const
+const char * 
+LXVSTPlugin::maker () const
 {
 	return _info->creator.c_str();
 }
 
-const char * LXVSTPlugin::label () const
+const char * 
+LXVSTPlugin::label () const
 {
 	return handle->name;
 }
 
-uint32_t LXVSTPlugin::parameter_count() const
+uint32_t 
+LXVSTPlugin::parameter_count() const
 {
 	return _plugin->numParams;
 }
 
-bool LXVSTPlugin::has_editor () const
+bool 
+LXVSTPlugin::has_editor () const
 {
 	return _plugin->flags & effFlagsHasEditor;
 }
 
-void LXVSTPlugin::print_parameter (uint32_t param, char *buf, uint32_t len) const
+void 
+LXVSTPlugin::print_parameter (uint32_t param, char *buf, uint32_t len) const
 {
 	char *first_nonws;
 
 	_plugin->dispatcher (_plugin, 7 /* effGetParamDisplay */, param, 0, buf, 0);
 
-	if (buf[0] == '\0')
-	{
+	if (buf[0] == '\0') {
 		return;
 	}
 
 	first_nonws = buf;
-	while (*first_nonws && isspace (*first_nonws))
-	{
+	while (*first_nonws && isspace (*first_nonws)) {
 		first_nonws++;
 	}
-	if (*first_nonws == '\0')
-	{
+
+	if (*first_nonws == '\0') {
 		return;
 	}
 
 	memmove (buf, first_nonws, strlen (buf) - (first_nonws - buf) + 1);
 }
 
-PluginPtr LXVSTPluginInfo::load (Session& session)
+PluginPtr 
+LXVSTPluginInfo::load (Session& session)
 {
 	try {
 		PluginPtr plugin;
 
-		if (Config->get_use_lxvst())
-		{
+		if (Config->get_use_lxvst()) {
 			VSTFXHandle* handle;
 
 			handle = vstfx_load(path.c_str());
 
-			if (handle == NULL)
-			{
+			if (handle == NULL) {
 				error << string_compose(_("LXVST: cannot load module from \"%1\""), path) << endmsg;
 			}
-			else
-			{
+			else {
 				plugin.reset (new LXVSTPlugin (session.engine(), session, handle));
 			}
 		}
-		else
-		{
+		else {
 			error << _("You asked ardour to not use any LXVST plugins") << endmsg;
 			return PluginPtr ((Plugin*) 0);
 		}
@@ -723,35 +706,29 @@ PluginPtr LXVSTPluginInfo::load (Session& session)
 		return plugin;
 	}
 
-	catch (failed_constructor &err)
-	{
+	catch (failed_constructor &err) {
 		return PluginPtr ((Plugin*) 0);
 	}
 }
 
-void LXVSTPlugin::find_presets ()
+void 
+LXVSTPlugin::find_presets ()
 {
 	/* Built-in presets */
 
 	int const vst_version = _plugin->dispatcher (_plugin, effGetVstVersion, 0, 0, NULL, 0);
-	for (int i = 0; i < _plugin->numPrograms; ++i)
-	{
+
+	for (int i = 0; i < _plugin->numPrograms; ++i) {
 		PresetRecord r (string_compose (X_("LXVST:%1:%2"), unique_id (), i), "", false);
 
-		if (vst_version >= 2)
-		{
+		if (vst_version >= 2) {
 			char buf[256];
-			if (_plugin->dispatcher (_plugin, 29, i, 0, buf, 0) == 1)
-			{
+			if (_plugin->dispatcher (_plugin, 29, i, 0, buf, 0) == 1) {
 				r.label = buf;
-			}
-			else
-			{
+			} else {
 				r.label = string_compose (_("Preset %1"), i);
 			}
-		}
-		else
-		{
+		} else {
 			r.label = string_compose (_("Preset %1"), i);
 		}
 
@@ -762,11 +739,9 @@ void LXVSTPlugin::find_presets ()
 
 	boost::shared_ptr<XMLTree> t (presets_tree ());
 
-	if (t)
-	{
+	if (t) {
 		XMLNode* root = t->root ();
-		for (XMLNodeList::const_iterator i = root->children().begin(); i != root->children().end(); ++i)
-		{
+		for (XMLNodeList::const_iterator i = root->children().begin(); i != root->children().end(); ++i) {
 			XMLProperty* uri = (*i)->property (X_("uri"));
 			XMLProperty* label = (*i)->property (X_("label"));
 
@@ -782,29 +757,27 @@ void LXVSTPlugin::find_presets ()
 /** @return XMLTree with our user presets; could be a new one if no existing
  *  one was found, or 0 if one was present but badly-formatted.
  */
-XMLTree * LXVSTPlugin::presets_tree () const
+XMLTree * 
+LXVSTPlugin::presets_tree () const
 {
 	XMLTree* t = new XMLTree;
 
 	sys::path p = ARDOUR::user_config_directory ();
 	p /= "presets";
 
-	if (!is_directory (p))
-	{
+	if (!is_directory (p)) {
 		create_directory (p);
 	}
 
 	p /= presets_file ();
 
-	if (!exists (p))
-	{
+	if (!exists (p)) {
 		t->set_root (new XMLNode (X_("LXVSTPresets")));
 		return t;
 	}
 
 	t->set_filename (p.to_string ());
-	if (!t->read ())
-	{
+	if (!t->read ()) {
 		delete t;
 		return 0;
 	}
@@ -813,7 +786,8 @@ XMLTree * LXVSTPlugin::presets_tree () const
 }
 
 /** @return Index of the first user preset in our lists */
-int LXVSTPlugin::first_user_preset_index () const
+int 
+LXVSTPlugin::first_user_preset_index () const
 {
 	return _plugin->numPrograms;
 }

@@ -247,13 +247,15 @@ def set_compiler_flags (conf,opt):
         print("However, this is tricky and not recommended for beginners.")
         sys.exit (-1)
 		
-    if conf.env['build_target'] == 'x86_64' and opt.lxvst:
-        print("\n\n********************************************************")
-        print("* Building with 64Bit linuxVST support is experimental *")
-        print("********************************************************\n\n")
-        conf.env.append_value('CXXFLAGS', "-DLXVST_64BIT")
-    else:
-        conf.env.append_value('CXXFLAGS', "-DLXVST_32BIT")
+    if opt.lxvst:
+        if conf.env['build_target'] == 'x86_64':
+            print("\n\n********************************************************")
+            print("* Building with 64Bit linuxVST support is experimental *")
+            print("********************************************************\n\n")
+            conf.env.append_value('CXXFLAGS', "-DLXVST_64BIT")
+        else:
+            conf.env.append_value('CXXFLAGS', "-DLXVST_32BIT")
+
     #
     # a single way to test if we're on OS X
     #

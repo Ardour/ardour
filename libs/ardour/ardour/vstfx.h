@@ -64,43 +64,40 @@ struct _VSTFXHandle
     char*    name;
     char*    nameptr; /* ptr returned from strdup() etc. */
 	
-    //struct AEffect* (*main_entry)(audioMasterCallback);
-    
-	main_entry_t main_entry;
+    main_entry_t main_entry;
 
     int plugincnt;
 };
 
 /*No key forwarding enabled in vstfx at the moment - maybe
-not required*/
-
+  not required*/
 
 struct _VSTFXKey
 {
-	/** virtual-key code, or 0 if this _VSTFXKey is a `character' key */
-	int special;
-	/** `character' key, or 0 if this _VSTFXKey is a virtual-key */
-	int character;
+    /** virtual-key code, or 0 if this _VSTFXKey is a `character' key */
+    int special;
+    /** `character' key, or 0 if this _VSTFXKey is a virtual-key */
+    int character;
 };
 
 
 
 /*Structure used to describe the instance of VSTFX responsible for
-a particular plugin instance.  These are connected together in a 
-linked list*/
+  a particular plugin instance.  These are connected together in a 
+  linked list*/
 
 struct _VSTFX 
 {
     struct AEffect*    plugin;
-    int      	window;				/* The plugin's parent X11 XWindow */
-	int			plugin_ui_window;	/*The ID of the plugin UI window created by the plugin*/
-    int         xid;				/* X11 XWindow */
+    int      	window;            /* The plugin's parent X11 XWindow */
+    int         plugin_ui_window;  /*The ID of the plugin UI window created by the plugin*/
+    int         xid;               /* X11 XWindow */
 	
-	int			want_resize;		/*Set to signal the plugin resized its UI*/
-	void*		extra_data;			/*Pointer to any extra data*/
+    int         want_resize;       /*Set to signal the plugin resized its UI*/
+    void*       extra_data;        /*Pointer to any extra data*/
 	
-	void* event_callback_thisptr;
-	void (*eventProc) (void* event);
+    void* event_callback_thisptr;
+    void (*eventProc) (void* event);
 	
     VSTFXHandle*  handle;
 	
@@ -109,20 +106,20 @@ struct _VSTFX
     int		wantIdle;
     int		destroy;
     int		vst_version;
-	int 	has_editor;
+    int 	has_editor;
 	
-	int		program_set_without_editor;
+    int		program_set_without_editor;
 
     int		want_program;
-	int 	want_chunk;
-	int		n_pending_keys;
-unsigned char* wanted_chunk;
-	int 	wanted_chunk_size;
+    int 	want_chunk;
+    int		n_pending_keys;
+    unsigned char* wanted_chunk;
+    int 	wanted_chunk_size;
     int		current_program;
     float	*want_params;
     float	*set_params;
 	
-	VSTFXKey	pending_keys[16];
+    VSTFXKey	pending_keys[16];
 
     int		dispatcher_wantcall;
     int		dispatcher_opcode;
@@ -136,33 +133,30 @@ unsigned char* wanted_chunk;
     pthread_mutex_t lock;
     pthread_cond_t  window_status_change;
     pthread_cond_t  plugin_dispatcher_called;
-	pthread_cond_t	window_created;
+    pthread_cond_t  window_created;
     int             been_activated;
 };
 
 /*API to vstfx*/
 
-extern int			vstfx_launch_editor(VSTFX* vstfx);
-
-extern int        	vstfx_init (void* possible_hmodule);
-extern void       	vstfx_exit ();
-
+extern int	    vstfx_launch_editor(VSTFX* vstfx);
+extern int          vstfx_init (void* possible_hmodule);
+extern void         vstfx_exit ();
 extern VSTFXHandle* vstfx_load (const char*);
-extern int        	vstfx_unload (VSTFXHandle*);
-
+extern int          vstfx_unload (VSTFXHandle*);
 extern VSTFX*       vstfx_instantiate (VSTFXHandle*, audioMasterCallback amc, void* userptr);
-extern void       	vstfx_close (VSTFX*);
+extern void         vstfx_close (VSTFX*);
 
-extern int 			vstfx_create_editor (VSTFX* vstfx);
-extern int  		vstfx_run_editor (VSTFX*);
-extern void  		vstfx_destroy_editor (VSTFX*);
-extern int  		vstfx_get_XID (VSTFX*);
-extern void 		vstfx_move_window_into_view (VSTFX*);
+extern int          vstfx_create_editor (VSTFX* vstfx);
+extern int          vstfx_run_editor (VSTFX*);
+extern void         vstfx_destroy_editor (VSTFX*);
+extern int          vstfx_get_XID (VSTFX*);
+extern void         vstfx_move_window_into_view (VSTFX*);
 
-extern VSTFXInfo* 	vstfx_get_info (char *dllpathname);
-extern void 		vstfx_free_info (VSTFXInfo *info);
-extern void 		vstfx_event_loop_remove_plugin (VSTFX* fst);
-extern int 			vstfx_call_dispatcher(VSTFX *vstfx, int opcode, int index, int val, void *ptr, float opt );
+extern VSTFXInfo*   vstfx_get_info (char *dllpathname);
+extern void         vstfx_free_info (VSTFXInfo *info);
+extern void         vstfx_event_loop_remove_plugin (VSTFX* fst);
+extern int          vstfx_call_dispatcher(VSTFX *vstfx, int opcode, int index, int val, void *ptr, float opt );
 
 /** Load a plugin state from a file.**/
 

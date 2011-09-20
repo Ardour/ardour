@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-#include <ardour/vstfx.h>
+#include "ardour/vstfx.h"
+#include "pbd/error.h"
 
 /***********************************************************/
 /* VSTFX - A set of modules for managing linux VST plugins */
@@ -26,7 +27,7 @@ void vstfx_error (const char *fmt, ...)
 
 void default_vstfx_error_callback (const char *desc)
 {
-	fprintf(stderr, "%s\n", desc);
+	PBD::error << desc << endmsg;
 }
 
 void (*vstfx_error_callback)(const char *desc) = &default_vstfx_error_callback;

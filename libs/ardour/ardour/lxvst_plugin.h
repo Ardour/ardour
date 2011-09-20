@@ -102,9 +102,9 @@ private:
 	void add_state (XMLNode *) const;
 
 	VSTFXHandle* handle;
-	VSTFX*       _vstfx;
-	AEffect*   _plugin;
-	bool        been_resumed;
+	VSTFX*      _vstfx;
+	AEffect*    _plugin;
+	bool         been_resumed;
 };
 
 class LXVSTPluginInfo : public PluginInfo
