@@ -74,7 +74,7 @@ ExportRangeMarkersDialog::process_range_markers_export(Locations::LocationList& 
 			string filepath = get_target_filepath(
 				get_selected_file_name(),
 				currentLocation->name(),
-				get_selected_header_format());
+                                sndfile_file_endings_strings[get_selected_header_format()]);
 			
 			initSpec(filepath);
 			

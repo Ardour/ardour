@@ -89,8 +89,7 @@ class ExportDialog : public ArdourDialog
 			progress_bar.set_fraction (progress); }
 	
 	ARDOUR::Session& getSession() { return *session; };
-	string get_selected_header_format() {
-		return header_format_combo.get_active_text(); };
+	int get_selected_header_format() { return header_format_combo.get_active_row_number(); }
 	string get_selected_file_name() { return file_entry.get_text(); };
 	
   private:
