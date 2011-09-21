@@ -149,7 +149,7 @@ AutomationRegionView::add_automation_event (GdkEvent *, framepos_t when, double 
 
 	/* snap frame */
 
-	when = snap_frame_to_frame (when - _region->start ());
+	when = snap_frame_to_frame (when - _region->start ()) + _region->start ();
 
 	/* map using line */
 
