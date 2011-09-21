@@ -245,7 +245,6 @@ FileSource::find (Session& s, DataType type, const string& path, bool must_exist
         if (!Glib::path_is_absolute (path)) {
                 vector<string> dirs;
                 vector<string> hits;
-                int cnt;
                 string fullpath;
 
                 string search_path = s.source_search_path (type);
@@ -257,7 +256,6 @@ FileSource::find (Session& s, DataType type, const string& path, bool must_exist
 
                 split (search_path, dirs, ':');
 
-                cnt = 0;
                 hits.clear ();
 
                 for (vector<string>::iterator i = dirs.begin(); i != dirs.end(); ++i) {
@@ -267,21 +265,55 @@ FileSource::find (Session& s, DataType type, const string& path, bool must_exist
                         if (Glib::file_test (fullpath, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_REGULAR)) {
                                 keeppath = fullpath;
                                 hits.push_back (fullpath);
-                                ++cnt;
                         }
                 }
 
-                if (cnt > 1) {
+		/* Remove duplicate inodes from the list of ambiguous files, since if there are symlinks
+		   in the session path it is possible to arrive at the same file via more than one path.
+		*/
 
-                        int which = FileSource::AmbiguousFileName (path, search_path, hits).get_value_or (-1);
+		vector<string> de_duped_hits;
+
+		for (vector<string>::iterator i = hits.begin(); i != hits.end(); ++i) {
+
+			vector<string>::iterator j = i;
+			++j;
+			
+			while (j != hits.end()) {
+
+				struct stat bufA;
+				int const rA = stat (i->c_str(), &bufA);
+				struct stat bufB;
+				int const rB = stat (j->c_str(), &bufB);
+
+				if (rA == 0 && rB == 0 && bufA.st_ino == bufB.st_ino) {
+					/* *i and *j are the same file; break out of the loop early */
+					break;
+				}
+
+				++j;
+			}
+
+			if (j == hits.end ()) {
+				de_duped_hits.push_back (*i);
+			}
+		}
+
+                if (de_duped_hits.size() > 1) {
+
+			/* more than one match: ask the user */
+
+                        int which = FileSource::AmbiguousFileName (path, search_path, de_duped_hits).get_value_or (-1);
 
                         if (which < 0) {
                                 goto out;
                         } else {
-                                keeppath = hits[which];
+                                keeppath = de_duped_hits[which];
                         }
 
-                } else if (cnt == 0) {
+                } else if (de_duped_hits.size() == 0) {
+
+			/* no match: error */
 
                         if (must_exist) {
                                 error << string_compose(
@@ -291,7 +323,13 @@ FileSource::find (Session& s, DataType type, const string& path, bool must_exist
                         } else {
                                 isnew = true;
                         }
-                }
+                } else {
+
+			/* only one match: happy days */
+			
+			keeppath = de_duped_hits[0];
+		}
+						  
         } else {
                 keeppath = path;
         }
