@@ -33,7 +33,7 @@ public:
 	MidiAutomationListBinder (boost::shared_ptr<ARDOUR::MidiSource>, Evoral::Parameter);
 	MidiAutomationListBinder (XMLNode *, ARDOUR::Session::SourceMap const &);
 
-	ARDOUR::AutomationList* get ();
+	ARDOUR::AutomationList* get () const;
 	void add_state (XMLNode *);
 
 private:

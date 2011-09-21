@@ -34,20 +34,32 @@
 /** A class that can return a Stateful object which is the subject of a MementoCommand.
  *
  *  The existence of this class means that the undo record can refer to objects which
- *  don't exist in the session file.  Currently this is just used for MIDI automation;
- *  when MIDI automation is edited, undo records are written for the AutomationList being
- *  changed.  However this AutomationList is a temporary structure, built by a MidiModel,
- *  which doesn't get written to the session file.  Hence we need to be able to go from
- *  a MidiSource and Parameter to an AutomationList.  This Binder mechanism allows this
- *  through MidiAutomationListBinder; the undo record stores the source and parameter,
+ *  don't exist in the session file.  Currently this is used for
+ *
+ *  1.  MIDI automation; when MIDI automation is edited, undo records are
+ *  written for the AutomationList being changed.  However this AutomationList
+ *  is a temporary structure, built by a MidiModel, which doesn't get written
+ *  to the session file.  Hence we need to be able to go from a MidiSource and
+ *  Parameter to an AutomationList.  This Binder mechanism allows this through
+ *  MidiAutomationListBinder; the undo record stores the source and parameter,
  *  and these are bound to an AutomationList by the Binder.
+ *
+ *  2.  Crossfades; unlike regions, these are completely removed from a session
+ *  when they are deleted.  This means that the undo record can contain
+ *  references to non-existant crossfades.  To get around this, CrossfadeBinder
+ *  can do `just-in-time' binding from the crossfade ID.
  */
 template <class obj_T>
 class MementoCommandBinder : public PBD::Destructible
 {
 public:
 	/** @return Stateful object to operate on */
-	virtual obj_T* get () = 0;
+	virtual obj_T* get () const = 0;
+
+	/** @return Name of our type */
+	virtual std::string type_name () const {
+		return PBD::demangled_name (*get ());
+	}
 
 	/** Add our own state to an XMLNode */
 	virtual void add_state (XMLNode *) = 0;
@@ -64,7 +76,7 @@ public:
 		_object.Destroyed.connect_same_thread (_object_death_connection, boost::bind (&SimpleMementoCommandBinder::object_died, this));
 	}
 
-	obj_T* get () {
+	obj_T* get () const {
 		return &_object;
 	}
 
@@ -140,7 +152,7 @@ public:
 		XMLNode* node = new XMLNode(name);
 		_binder->add_state (node);
 		
-		node->add_property("type_name", demangled_name (*_binder->get()));
+		node->add_property ("type_name", _binder->type_name ());
 
 		if (before) {
 			node->add_child_copy(*before);

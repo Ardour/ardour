@@ -71,6 +71,7 @@ libardour_sources = [
         'control_protocol_manager.cc',
         'control_protocol_search_path.cc',
         'crossfade.cc',
+        'crossfade_binder.cc',
         'cycle_timer.cc',
         'data_type.cc',
         'default_click.cc',

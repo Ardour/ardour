@@ -49,7 +49,7 @@ MidiAutomationListBinder::MidiAutomationListBinder (XMLNode* node, Session::Sour
 }
 
 AutomationList*
-MidiAutomationListBinder::get ()
+MidiAutomationListBinder::get () const
 {
 	boost::shared_ptr<MidiModel> model = _source->model ();
 	assert (model);
