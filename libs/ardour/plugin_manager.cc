@@ -628,13 +628,14 @@ PluginManager::vst_discover (string path)
 void
 PluginManager::lxvst_refresh ()
 {
-	if (_lxvst_plugin_info)
+	if (_lxvst_plugin_info) {
 		_lxvst_plugin_info->clear ();
-	else
+	} else {
 		_lxvst_plugin_info = new ARDOUR::PluginInfoList();
+	}
 
 	if (lxvst_path.length() == 0) {
-		lxvst_path = "/usr/local/lib/lxvst:/usr/lib/lxvst";
+		lxvst_path = "/usr/local/lib64/lxvst:/usr/local/lib/lxvst:/usr/lib64/lxvst:/usr/lib/lxvst";
 	}
 
 	lxvst_discover_from_path (lxvst_path);
