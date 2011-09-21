@@ -108,6 +108,20 @@ echo ""
 echo "Welcome to the ${PGM_NAME} installer"
 echo ""
 
+###############################
+# Check for install destination
+###############################
+
+if [ ! -d ${INSTALL_DEST_BASE} ];
+then
+	echo ""
+	echo "!!! ERROR !!! - Installation location ${INSTALL_DEST_BASE} does not exist!"
+	echo "Installation will not complete."
+	echo ""
+	read -p "Press ENTER to exit installer:" BLAH
+	exit 1
+fi
+
 #############################
 # Check for root privileges
 #############################
@@ -325,16 +339,6 @@ MENU_FILE_PATH="${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/share"
 ################################
 # Install bundle and Menu/Link
 ################################
-
-if [ ! -d ${INSTALL_DEST_BASE} ];
-then
-	echo ""
-	echo "!!! ERROR !!! - Installation location ${INSTALL_DEST_BASE} does not exist!"
-	echo "Installation will not complete."
-	echo ""
-	read -p "Press ENTER to exit installer:" BLAH
-	exit 1
-fi
 
 # uninstall any older versions
 UNINSTALLERS=$(find ${INSTALL_DEST_BASE} -maxdepth 1 -type f -name "${PGM_NAME}*.uninstall.sh")
