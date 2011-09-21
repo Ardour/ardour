@@ -205,6 +205,8 @@ public:
 
 	int  reset_timebase ();
 
+        void update_latencies ();
+
 	/* start/stop freewheeling */
 
 	int freewheel (bool onoff);

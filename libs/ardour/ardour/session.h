@@ -904,6 +904,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	bool                    _writable;
 	bool                    _was_seamless;
 
+	void initialize_latencies ();
 	void set_worst_io_latencies ();
 	void set_worst_playback_latency ();
 	void set_worst_capture_latency ();

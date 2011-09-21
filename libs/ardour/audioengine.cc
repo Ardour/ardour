@@ -1522,3 +1522,12 @@ AudioEngine::ensure_monitor_input (const std::string& portname, bool yn) const
 
         jack_port_request_monitor (port, yn);
 }
+
+void
+AudioEngine::update_latencies ()
+{
+        if (jack_recompute_total_latencies) {
+                GET_PRIVATE_JACK_POINTER (_jack);
+                jack_recompute_total_latencies (_priv_jack);
+        }
+}

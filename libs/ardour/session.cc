@@ -346,7 +346,7 @@ Session::when_engine_running ()
 
 	/* every time we reconnect, recompute worst case output latencies */
 
-	_engine.Running.connect_same_thread (*this, boost::bind (&Session::set_worst_io_latencies, this));
+	_engine.Running.connect_same_thread (*this, boost::bind (&Session::initialize_latencies, this));
 
 	if (synced_to_jack()) {
 		_engine.transport_stop ();
@@ -640,12 +640,14 @@ Session::when_engine_running ()
 
 	_state_of_the_state = StateOfTheState (_state_of_the_state & ~(CannotSave|Dirty));
 
+        /* update latencies */
+
+        initialize_latencies ();
+
 	/* hook us up to the engine */
 
 	BootMessage (_("Connect to engine"));
 	_engine.set_session (this);
-
-	update_latency_compensation (true);
 }
 
 void
@@ -684,8 +686,6 @@ Session::hookup_io ()
 	}
 
 	/* Tell all IO objects to connect themselves together */
-
-	cerr << "Enable IO connections, state = " << _state_of_the_state << endl;
 
 	IO::enable_connecting ();
 	MIDI::Port::MakeConnections ();
@@ -4337,8 +4337,9 @@ Session::update_latency (bool playback)
 
 	if (playback) {
 		/* reverse the list so that we work backwards from the last route to run to the first */
+                RouteList* rl = routes.reader().get();
+                r.reset (new RouteList (*rl));
 		reverse (r->begin(), r->end());
-		cerr << "\n!!! I JUST REVERSED THE ROUTE LIST (" << r->size() << ")!!!\n\n";
 	}
 
 	/* compute actual latency values for the given direction and store them all in per-port
@@ -4408,6 +4409,18 @@ Session::post_capture_latency ()
 			tr->set_capture_offset ();
 		}
 	}
+}
+
+void
+Session::initialize_latencies ()
+{
+        {
+                Glib::Mutex::Lock lm (_engine.process_lock());
+                update_latency (false);
+                update_latency (true);
+        }
+
+        set_worst_io_latencies ();
 }
 
 void
@@ -4489,6 +4502,19 @@ Session::update_latency_compensation (bool force_whole_graph)
 	DEBUG_TRACE (DEBUG::Latency, string_compose ("worst signal processing latency: %1 (changed ? %2)\n", _worst_track_latency,
 	                                             (some_track_latency_changed ? "yes" : "no")));
 
-	DEBUG_TRACE(DEBUG::Latency, "---------------------------- DONE update latency compensation\n\n")
+	DEBUG_TRACE(DEBUG::Latency, "---------------------------- DONE update latency compensation\n\n");
+	
+	if (some_track_latency_changed || force_whole_graph)  {
+		_engine.update_latencies ();
+	}
+
+
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+		if (!tr) {
+			continue;
+		}
+		tr->set_capture_offset ();
+	}
 }
 

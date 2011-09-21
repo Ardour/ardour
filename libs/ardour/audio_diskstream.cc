@@ -491,20 +491,8 @@ AudioDiskstream::process (framepos_t transport_frame, pframes_t nframes, bool ca
 				assert(ap);
 				assert(rec_nframes <= (framecnt_t) ap->get_audio_buffer(nframes).capacity());
 
-				Sample *bbuf = ap->get_audio_buffer (nframes).data(rec_offset);
-
-
-                                for (jack_nframes_t _xx = 0; _xx != rec_nframes; ++_xx) {
-                                        if (bbuf[_xx] != 0.0) {
-                                                cerr << name() << " @ " << transport_frame << " + " << _xx << " = " << bbuf[_xx]
-                                                     << endl;
-                                                break;
-                                        }
-                                }
-
-
+				Sample *bbuf = ap->get_audio_buffer (nframes).data (rec_offset);
 				memcpy (chaninfo->current_capture_buffer, bbuf, sizeof (Sample) * rec_nframes);
-
 
 			} else {
 
