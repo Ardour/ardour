@@ -302,6 +302,20 @@ Crossfade::read_at (Sample *buf, Sample *mixdown_buffer,
 		
 	}
 
+	/*
+         * Sometimes a Crossfade is created that doesn't correspont to a real 
+         * overlap between regions. Obviously this shouldn't happen, but 
+         * somehow it does, so check here that the crossfade lies within both
+         * the _in and _out regions to avoid read_at() below going crazy.
+         */
+        
+        if (_out->coverage(start, start+to_write-1) == OverlapNone) {
+                return 0;
+        }
+        if (_in->coverage(start, start+to_write-1) == OverlapNone) {
+                return 0;
+        }
+
 	offset = start - _position;
 
 	/* Prevent data from piling up inthe crossfade buffers when reading a transparent region */
