@@ -135,9 +135,9 @@ PluginManager::PluginManager ()
 	}
 
 	if ((s = getenv ("LXVST_PATH"))) {
-		vst_path = s;
+		lxvst_path = s;
 	} else if ((s = getenv ("LXVST_PLUGINS"))) {
-		vst_path = s;
+		lxvst_path = s;
 	}
 
 	if (_manager == 0) {
