@@ -4413,6 +4413,8 @@ Session::sync_order_keys (const char* base)
 void
 Session::update_latency (bool playback)
 {
+        // cerr << "::update latency (playback = " << playback << ")\n";
+
 	if (_state_of_the_state & (InitialConnecting|Deletion)) {
 		return;
 	}
@@ -4535,7 +4537,7 @@ Session::set_worst_playback_latency ()
 		_worst_output_latency = max (_worst_output_latency, (*i)->output_latency());
 	}
 
-        cerr << "Session: worst output latency = " << _worst_output_latency << endl;
+        // cerr << "Session: worst output latency = " << _worst_output_latency << endl;
 }
 
 void
@@ -4557,7 +4559,7 @@ Session::set_worst_capture_latency ()
 		_worst_input_latency = max (_worst_input_latency, (*i)->input_latency());
 	}
 
-        cerr << "Session: worst input latency = " << _worst_input_latency << endl;
+        // cerr << "Session: worst input latency = " << _worst_input_latency << endl;
 }
 
 void
@@ -4583,5 +4585,20 @@ Session::update_latency_compensation (bool force_whole_graph)
 			_worst_track_latency = max (tl, _worst_track_latency);
 		}
 	}
+
+        if (some_track_latency_changed || force_whole_graph) {
+                _engine.update_latencies ();
+        }
+
+        set_worst_io_latencies ();
+
+        /* reflect any changes in latencies into capture offsets
+         */
+        
+        boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
+        
+        for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
+                (*i)->set_capture_offset ();
+        }
 }
 

@@ -1432,3 +1432,12 @@ AudioEngine::port_is_mine (const string& portname) const
         }
         return true;
 }
+
+void
+AudioEngine::update_latencies ()
+{
+        if (jack_recompute_total_latencies) {
+                GET_PRIVATE_JACK_POINTER (_jack);
+                jack_recompute_total_latencies (_priv_jack);
+        }
+}
