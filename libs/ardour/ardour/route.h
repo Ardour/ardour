@@ -292,7 +292,7 @@ class Route : public IO
 	gain_t                    desired_solo_gain;
 	gain_t                    desired_mute_gain;
 
-	nframes_t            check_initial_delay (nframes_t, nframes_t&);
+	virtual nframes_t check_initial_delay (nframes_t nframes, nframes_t&);
 
 	nframes_t           _initial_delay;
 	nframes_t           _roll_delay;

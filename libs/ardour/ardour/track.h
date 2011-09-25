@@ -144,6 +144,8 @@ class Track : public Route
 	    Track& track;
 	};
 
+	nframes_t check_initial_delay (nframes_t nframes, nframes_t&);
+
 	//virtual void diskstream_record_enable_changed (void *src) = 0;
 	//virtual void diskstream_input_channel_changed (void *src) = 0;
 

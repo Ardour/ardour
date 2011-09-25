@@ -209,3 +209,34 @@ Track::zero_diskstream_id_in_xml (XMLNode& node)
 		node.add_property ("diskstream-id", "0");
 	}
 }
+
+nframes_t
+Track::check_initial_delay (nframes_t nframes, nframes_t& transport_frame)
+{
+	if (_roll_delay > nframes) {
+
+		_roll_delay -= nframes;
+		silence (nframes);
+		/* transport frame is not legal for caller to use */
+		return 0;
+
+	} else if (_roll_delay > 0) {
+
+		nframes -= _roll_delay;
+
+		silence (_roll_delay);
+
+		/* we've written _roll_delay of samples into the 
+		   output ports, so make a note of that for
+		   future reference.
+		*/
+
+		increment_output_offset (_roll_delay);
+
+		transport_frame += _roll_delay;
+
+		_roll_delay = 0;
+	}
+
+	return nframes;
+}
