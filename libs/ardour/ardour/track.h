@@ -208,6 +208,8 @@ class Track : public Route, public PublicDiskstream
 	virtual bool send_silence () const;
 
 	boost::shared_ptr<RecEnableControllable> _rec_enable_control;
+	
+	framecnt_t check_initial_delay (framecnt_t nframes, framecnt_t&);
 
 private:
 	void diskstream_playlist_changed ();

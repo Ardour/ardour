@@ -693,3 +693,40 @@ Track::maybe_declick (BufferSet& bufs, framecnt_t nframes, int declick)
 		Amp::declick (bufs, nframes, declick);
 	}
 }
+
+framecnt_t
+Track::check_initial_delay (framecnt_t nframes, framecnt_t& transport_frame)
+{
+	if (_roll_delay > nframes) {
+
+		_roll_delay -= nframes;
+		silence_unlocked (nframes);
+		/* transport frame is not legal for caller to use */
+		return 0;
+
+	} else if (_roll_delay > 0) {
+
+		nframes -= _roll_delay;
+		silence_unlocked (_roll_delay);
+		transport_frame += _roll_delay;
+
+		/* shuffle all the port buffers for things that lead "out" of this Route
+		   to reflect that we just wrote _roll_delay frames of silence.
+		*/
+
+		Glib::RWLock::ReaderLock lm (_processor_lock);
+		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+			boost::shared_ptr<IOProcessor> iop = boost::dynamic_pointer_cast<IOProcessor> (*i);
+			if (iop) {
+				iop->increment_port_buffer_offset (_roll_delay);
+			}
+		}
+		_output->increment_port_buffer_offset (_roll_delay);
+
+		_roll_delay = 0;
+
+	}
+
+	return nframes;
+}
+

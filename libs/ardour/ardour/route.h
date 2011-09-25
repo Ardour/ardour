@@ -414,7 +414,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	virtual void set_block_size (pframes_t nframes);
 
   protected:
-	framecnt_t check_initial_delay (framecnt_t, framecnt_t&);
+	virtual framecnt_t check_initial_delay (framecnt_t nframes, framecnt_t&) { return nframes; }
 
 	void passthru (framepos_t start_frame, framepos_t end_frame,
 			pframes_t nframes, int declick);
