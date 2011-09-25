@@ -258,6 +258,8 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	gm.get_gain_slider().signal_scroll_event().connect(sigc::mem_fun(*this, &RouteTimeAxisView::controls_ebox_scroll), false);
 	gm.get_gain_slider().set_name ("TrackGainFader");
 
+	gm.get_level_meter().signal_scroll_event().connect (sigc::mem_fun (*this, &RouteTimeAxisView::controls_ebox_scroll), false);
+
 	show_name_entry ();
 	hide_name_label ();
 }
