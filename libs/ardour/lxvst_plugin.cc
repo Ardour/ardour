@@ -502,7 +502,7 @@ LXVSTPlugin::signal_latency () const
 	}
 
 #ifdef VESTIGE_HEADER
-	return *((framecnt_t *) (((char *) &_plugin->flags) + 12)); /* initialDelay */
+	return *((int32_t *) (((char *) &_plugin->flags) + 12)); /* initialDelay */
 #else
 	return _plugin->initial_delay;
 #endif
