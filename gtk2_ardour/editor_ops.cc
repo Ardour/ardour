@@ -4930,7 +4930,7 @@ Editor::toggle_selected_region_fades (int dir)
 	RegionSelection rs;
 	RegionSelection::iterator i;
 	boost::shared_ptr<AudioRegion> ar;
-	bool yn;
+	bool yn = false;
 
 	get_regions_for_action (rs);
 	
