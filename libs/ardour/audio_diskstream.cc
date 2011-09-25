@@ -491,8 +491,8 @@ AudioDiskstream::process (framepos_t transport_frame, pframes_t nframes, bool ca
 				assert(ap);
 				assert(rec_nframes <= (framecnt_t) ap->get_audio_buffer(nframes).capacity());
 
-				Sample *bbuf = ap->get_audio_buffer (nframes).data (rec_offset);
-				memcpy (chaninfo->current_capture_buffer, bbuf, sizeof (Sample) * rec_nframes);
+				Sample *buf = ap->get_audio_buffer (nframes).data (rec_offset);
+				memcpy (chaninfo->current_capture_buffer, buf, sizeof (Sample) * rec_nframes);
 
 			} else {
 
@@ -506,7 +506,7 @@ AudioDiskstream::process (framepos_t transport_frame, pframes_t nframes, bool ca
 				AudioPort* const ap = _io->audio (n);
 				assert(ap);
 
-				Sample* buf = ap->get_audio_buffer(nframes).data();
+				Sample* buf = ap->get_audio_buffer(nframes).data (rec_offset);
 				framecnt_t first = chaninfo->capture_vector.len[0];
 
 				memcpy (chaninfo->capture_wrap_buffer, buf, sizeof (Sample) * first);
