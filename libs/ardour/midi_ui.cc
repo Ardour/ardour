@@ -130,9 +130,9 @@ MidiControlUI::reset_ports ()
 {
 	clear_ports ();
 
-	MIDI::Manager::PortList plist = MIDI::Manager::instance()->get_midi_ports ();
+	boost::shared_ptr<const MIDI::Manager::PortList> plist = MIDI::Manager::instance()->get_midi_ports ();
 
-	for (MIDI::Manager::PortList::iterator i = plist.begin(); i != plist.end(); ++i) {
+	for (MIDI::Manager::PortList::const_iterator i = plist->begin(); i != plist->end(); ++i) {
 		int fd;
 
 		if ((fd = (*i)->selectable ()) >= 0) {

@@ -117,8 +117,8 @@ MidiTracer::ports_changed ()
 	string const c = _port_combo.get_active_text ();
 	_port_combo.clear ();
 
-	Manager::PortList const & p = Manager::instance()->get_midi_ports ();
-	for (Manager::PortList::const_iterator i = p.begin(); i != p.end(); ++i) {
+	boost::shared_ptr<const Manager::PortList> p = Manager::instance()->get_midi_ports ();
+	for (Manager::PortList::const_iterator i = p->begin(); i != p->end(); ++i) {
 		_port_combo.append_text ((*i)->name());
 	}
 

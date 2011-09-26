@@ -35,7 +35,8 @@ using namespace PBD;
 
 Manager *Manager::theManager = 0;
 
-Manager::Manager (jack_client_t* jack) 
+Manager::Manager (jack_client_t* jack)
+	: _ports (new PortList)
 {
 	_mmc = new MachineControl (this, jack);
 	
@@ -52,7 +53,9 @@ Manager::~Manager ()
 	delete _mmc;
 	
 	/* This will delete our MTC etc. ports */
-	for (PortList::iterator p = _ports.begin(); p != _ports.end(); ++p) {
+
+	boost::shared_ptr<PortList> pr = _ports.reader ();
+	for (PortList::iterator p = pr->begin(); p != pr->end(); ++p) {
 		delete *p;
 	}
 
@@ -64,7 +67,9 @@ Manager::~Manager ()
 Port *
 Manager::add_port (Port* p)
 {
-	_ports.push_back (p);
+	RCUWriter<PortList> writer (_ports);
+	boost::shared_ptr<PortList> pw = writer.get_copy ();
+	pw->push_back (p);
 
 	PortsChanged (); /* EMIT SIGNAL */
 
@@ -74,7 +79,9 @@ Manager::add_port (Port* p)
 void
 Manager::cycle_start (pframes_t nframes)
 {
-	for (PortList::iterator p = _ports.begin(); p != _ports.end(); ++p) {
+	boost::shared_ptr<PortList> pr = _ports.reader ();
+	
+	for (PortList::iterator p = pr->begin(); p != pr->end(); ++p) {
 		(*p)->cycle_start (nframes);
 	}
 }
@@ -82,7 +89,9 @@ Manager::cycle_start (pframes_t nframes)
 void
 Manager::cycle_end()
 {
-	for (PortList::iterator p = _ports.begin(); p != _ports.end(); ++p) {
+	boost::shared_ptr<PortList> pr = _ports.reader ();
+	
+	for (PortList::iterator p = pr->begin(); p != pr->end(); ++p) {
 		(*p)->cycle_end ();
 	}
 }
@@ -91,7 +100,9 @@ Manager::cycle_end()
 void
 Manager::reestablish (jack_client_t* jack)
 {
-	for (PortList::const_iterator p = _ports.begin(); p != _ports.end(); ++p) {
+	boost::shared_ptr<PortList> pr = _ports.reader ();
+
+	for (PortList::const_iterator p = pr->begin(); p != pr->end(); ++p) {
 		(*p)->reestablish (jack);
 	}
 }
@@ -100,7 +111,9 @@ Manager::reestablish (jack_client_t* jack)
 void
 Manager::reconnect ()
 {
-	for (PortList::const_iterator p = _ports.begin(); p != _ports.end(); ++p) {
+	boost::shared_ptr<PortList> pr = _ports.reader ();
+
+	for (PortList::const_iterator p = pr->begin(); p != pr->end(); ++p) {
 		(*p)->reconnect ();
 	}
 }
@@ -108,12 +121,14 @@ Manager::reconnect ()
 Port*
 Manager::port (string const & n)
 {
-	PortList::const_iterator p = _ports.begin();
-	while (p != _ports.end() && (*p)->name() != n) {
+	boost::shared_ptr<PortList> pr = _ports.reader ();
+	
+	PortList::const_iterator p = pr->begin();
+	while (p != pr->end() && (*p)->name() != n) {
 		++p;
 	}
 
-	if (p == _ports.end()) {
+	if (p == pr->end()) {
 		return 0;
 	}
 
@@ -130,8 +145,10 @@ Manager::create (jack_client_t* jack)
 void
 Manager::set_port_states (list<XMLNode*> s)
 {
+	boost::shared_ptr<PortList> pr = _ports.reader ();
+	
 	for (list<XMLNode*>::iterator i = s.begin(); i != s.end(); ++i) {
-		for (PortList::const_iterator j = _ports.begin(); j != _ports.end(); ++j) {
+		for (PortList::const_iterator j = pr->begin(); j != pr->end(); ++j) {
 			(*j)->set_state (**i);
 		}
 	}
