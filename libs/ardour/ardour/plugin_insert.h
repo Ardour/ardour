@@ -120,13 +120,25 @@ class PluginInsert : public Processor
 	void collect_signal_for_analysis (framecnt_t nframes);
 
 	bool splitting () const {
-		return _splitting;
+		return _matching_method == Split;
 	}
 
 	PBD::Signal2<void,BufferSet*, BufferSet*> AnalysisDataGathered;
 	/** Emitted when the return value of splitting () has changed */
 	PBD::Signal0<void> SplittingChanged;
 
+	/** Enumeration of the ways in which we can match our insert's
+	 *  IO to that of the plugin(s).
+	 */
+	enum MatchingMethod {
+		Impossible,  ///< we can't
+		Delegate,    ///< we are delegating to the plugin, and it can handle it
+		NoInputs,    ///< plugin has no inputs, so anything goes
+		ExactMatch,  ///< the insert's inputs are the same as the plugin's
+		Replicate,   ///< we have multiple instances of the plugin
+		Split,       ///< we copy one of the insert's inputs to multiple plugin inputs
+	};
+	
   private:
 	/* disallow copy construction */
 	PluginInsert (const PluginInsert&);
@@ -149,10 +161,10 @@ class PluginInsert : public Processor
 	BufferSet _signal_analysis_inputs;
 	BufferSet _signal_analysis_outputs;
 
-	/** true if we are splitting one processor input to >1 plugin inputs */
-	bool _splitting;
+	std::pair<MatchingMethod, int32_t> private_can_support_io_configuration (ChanCount const &, ChanCount &) const;
 
-	void set_splitting (bool);
+	/** matching method currently being used */
+	MatchingMethod _matching_method;
 
 	void automation_run (BufferSet& bufs, pframes_t nframes);
 	void connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t offset, bool with_auto, framepos_t now = 0);
@@ -161,8 +173,6 @@ class PluginInsert : public Processor
 	void control_list_automation_state_changed (Evoral::Parameter, AutoState);
 	void set_parameter_state_2X (const XMLNode& node, int version);
 	void set_control_ids (const XMLNode&, int version);
-
-	int32_t count_for_configuration (ChanCount in, ChanCount out) const;
 
 	boost::shared_ptr<Plugin> plugin_factory (boost::shared_ptr<Plugin>);
 	void add_plugin_with_activation (boost::shared_ptr<Plugin>);
