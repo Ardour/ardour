@@ -307,6 +307,9 @@ class MackieControlProtocol
 	Mackie::Strip & master_strip();
 
   private:
+
+	void port_connected_or_disconnected (std::string, std::string, bool);
+	
 	boost::shared_ptr<Mackie::RouteSignal> master_route_signal;
 	
 	static const char * default_port_name;
@@ -323,7 +326,8 @@ class MackieControlProtocol
 	
 	/// protects the port list
 	Glib::Mutex update_mutex;
-  
+
+	PBD::ScopedConnectionList audio_engine_connections;
 	PBD::ScopedConnectionList session_connections;
 	PBD::ScopedConnectionList port_connections;
 	PBD::ScopedConnectionList route_connections;

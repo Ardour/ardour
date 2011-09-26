@@ -334,7 +334,7 @@ MixerStrip::init ()
 	SwitchIO.connect (sigc::mem_fun (*this, &MixerStrip::switch_io));
 
 	AudioEngine::instance()->PortConnectedOrDisconnected.connect (
-		*this, invalidator (*this), boost::bind (&MixerStrip::port_connected_or_disconnected, this, _1, _2), gui_context ()
+		*this, invalidator (*this), boost::bind (&MixerStrip::port_connected_or_disconnected, this, _1, _3), gui_context ()
 		);
 }
 

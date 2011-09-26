@@ -249,9 +249,10 @@ _	   the regular process() call to session->process() is not made.
 
 	/** Emitted if a JACK port is connected or disconnected.
 	 *  The Port parameters are the ports being connected / disconnected, or 0 if they are not known to Ardour.
+	 *  The std::string parameters are the (long) port names.
 	 *  The bool parameter is true if ports were connected, or false for disconnected.
 	 */
-	PBD::Signal3<void, Port *, Port *, bool> PortConnectedOrDisconnected;
+	PBD::Signal5<void, Port *, std::string, Port *, std::string, bool> PortConnectedOrDisconnected;
 
 	std::string make_port_name_relative (std::string) const;
 	std::string make_port_name_non_relative (std::string) const;

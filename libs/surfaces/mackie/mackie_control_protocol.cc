@@ -86,6 +86,11 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 	, _gui (0)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::MackieControlProtocol\n");
+
+	AudioEngine::instance()->PortConnectedOrDisconnected.connect (
+		audio_engine_connections, MISSING_INVALIDATOR, ui_bind (&MackieControlProtocol::port_connected_or_disconnected, this, _2, _4, _5),
+		midi_ui_context ()
+		);
 }
 
 MackieControlProtocol::~MackieControlProtocol()
@@ -1741,4 +1746,32 @@ MackieControlProtocol::bundles ()
 	b.push_back (_input_bundle);
 	b.push_back (_output_bundle);
 	return b;
+}
+
+void
+MackieControlProtocol::port_connected_or_disconnected (string a, string b, bool connected)
+{
+	/* If something is connected to one of our output ports, send MIDI to update the surface
+	   to whatever state it should have.
+	*/
+
+	if (!connected) {
+		return;
+	}
+
+	MackiePorts::const_iterator i = _ports.begin();
+	while (i != _ports.end()) {
+
+		string const n = AudioEngine::instance()->make_port_name_non_relative ((*i)->output_port().name ());
+
+		if (a == n || b == n) {
+			break;
+		}
+
+		++i;
+	}
+
+	if (i != _ports.end ()) {
+		update_surface ();
+	}
 }

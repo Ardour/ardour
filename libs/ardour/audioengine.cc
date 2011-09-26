@@ -402,7 +402,11 @@ AudioEngine::_connect_callback (jack_port_id_t id_a, jack_port_id_t id_b, int co
 		++i;
 	}
 
-	ae->PortConnectedOrDisconnected (port_a, port_b, conn == 0 ? false : true); /* EMIT SIGNAL */
+	ae->PortConnectedOrDisconnected (
+		port_a, jack_port_name (jack_port_a),
+		port_b, jack_port_name (jack_port_b),
+		conn == 0 ? false : true
+		); /* EMIT SIGNAL */
 }
 
 void
