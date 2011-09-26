@@ -120,7 +120,7 @@ class PluginInsert : public Processor
 	void collect_signal_for_analysis (framecnt_t nframes);
 
 	bool splitting () const {
-		return _matching_method == Split;
+		return _match.method == Split;
 	}
 
 	PBD::Signal2<void,BufferSet*, BufferSet*> AnalysisDataGathered;
@@ -134,9 +134,10 @@ class PluginInsert : public Processor
 		Impossible,  ///< we can't
 		Delegate,    ///< we are delegating to the plugin, and it can handle it
 		NoInputs,    ///< plugin has no inputs, so anything goes
-		ExactMatch,  ///< the insert's inputs are the same as the plugin's
+		ExactMatch,  ///< our insert's inputs are the same as the plugin's
 		Replicate,   ///< we have multiple instances of the plugin
-		Split,       ///< we copy one of the insert's inputs to multiple plugin inputs
+		Split,       ///< we copy one of our insert's inputs to multiple plugin inputs
+		Hide,        ///< we `hide' some of the plugin's inputs by feeding them silence
 	};
 	
   private:
@@ -161,10 +162,20 @@ class PluginInsert : public Processor
 	BufferSet _signal_analysis_inputs;
 	BufferSet _signal_analysis_outputs;
 
-	std::pair<MatchingMethod, int32_t> private_can_support_io_configuration (ChanCount const &, ChanCount &) const;
+	/** Description of how we can match our plugin's IO to our own insert IO */
+	struct Match {
+		Match () : method (Impossible), plugins (0) {}
+		Match (MatchingMethod m, int32_t p, ChanCount h = ChanCount ()) : method (m), plugins (p), hide (h) {}
+		
+		MatchingMethod method; ///< method to employ
+		int32_t plugins;       ///< number of copies of the plugin that we need
+		ChanCount hide;        ///< number of channels to hide
+	};
 
-	/** matching method currently being used */
-	MatchingMethod _matching_method;
+	Match private_can_support_io_configuration (ChanCount const &, ChanCount &) const;
+
+	/** details of the match currently being used */
+	Match _match;
 
 	void automation_run (BufferSet& bufs, pframes_t nframes);
 	void connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t offset, bool with_auto, framepos_t now = 0);

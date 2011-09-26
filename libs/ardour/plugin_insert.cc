@@ -69,7 +69,6 @@ PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug)
 	: Processor (s, (plug ? plug->name() : string ("toBeRenamed")))
 	, _signal_analysis_collected_nframes(0)
 	, _signal_analysis_collect_nframes_max(0)
-	, _matching_method (Impossible)
 {
 	/* the first is the master */
 
@@ -151,7 +150,7 @@ PluginInsert::input_streams() const
 {
 	ChanCount in = _plugins[0]->get_info()->n_inputs;
 
-	if (_matching_method == Split) {
+	if (_match.method == Split) {
 
 		/* we are splitting 1 processor input to multiple plugin inputs,
 		   so we have a maximum of 1 stream of each type.
@@ -163,14 +162,22 @@ PluginInsert::input_streams() const
 		}
 		return in;
 
+	} else if (_match.method == Hide) {
+
+		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+			in.set (*t, in.get (*t) - _match.hide.get (*t));
+		}
+		return in;
+
 	} else if (in == ChanCount::INFINITE) {
 		
 		return _plugins[0]->input_streams ();
-		
+
 	} else {
 		
-		in.set_audio (in.n_audio() * _plugins.size());
-		in.set_midi (in.n_midi() * _plugins.size());
+		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+			in.set (*t, in.get (*t) * _plugins.size ());
+		}
 		return in;
 		
 	}
@@ -308,18 +315,30 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 		collect_signal_nframes = nframes;
 	}
 
-	ChanMapping in_map(input_streams());
-	ChanMapping out_map(output_streams());
+	ChanCount const in_streams = input_streams ();
+	ChanCount const out_streams = output_streams ();
 
-	if (_matching_method == Split) {
+	ChanMapping in_map (in_streams);
+	ChanMapping out_map (out_streams);
+
+	if (_match.method == Split) {
 		/* fix the input mapping so that we have maps for each of the plugin's inputs */
 		in_map = ChanMapping (natural_input_streams ());
 
 		/* copy the first stream's buffer contents to the others */
 		/* XXX: audio only */
 		Sample const * mono = bufs.get_audio (in_map.get (DataType::AUDIO, 0)).data (offset);
-		for (uint32_t i = input_streams().n_audio(); i < natural_input_streams().n_audio(); ++i) {
+		for (uint32_t i = in_streams.n_audio(); i < natural_input_streams().n_audio(); ++i) {
 			memcpy (bufs.get_audio (in_map.get (DataType::AUDIO, i)).data (offset), mono, sizeof (Sample) * nframes);
+		}
+	}
+
+	if (_match.method == Hide) {
+		/* Silence the hidden input buffers */
+		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+			for (uint32_t i = in_streams.get(*t); i < (in_streams.get(*t) + _match.hide.get(*t)); ++i) {
+				bufs.get(*t, i).silence (nframes);
+			}
 		}
 	}
 
@@ -412,7 +431,7 @@ PluginInsert::silence (framecnt_t nframes)
 	ChanMapping in_map(input_streams());
 	ChanMapping out_map(output_streams());
 
-	if (_matching_method == Split) {
+	if (_match.method == Split) {
 		/* fix the input mapping so that we have maps for each of the plugin's inputs */
 		in_map = ChanMapping (natural_input_streams ());
 	}
@@ -615,23 +634,23 @@ PluginInsert::plugin_factory (boost::shared_ptr<Plugin> other)
 bool
 PluginInsert::configure_io (ChanCount in, ChanCount out)
 {
-	MatchingMethod old_matching_method = _matching_method;
+	Match old_match = _match;
 
 	/* set the matching method and number of plugins that we will use to meet this configuration */
-	pair<MatchingMethod, int32_t> const r = private_can_support_io_configuration (in, out);
-	_matching_method = r.first;
-	if (set_count (r.second) == false) {
+	_match = private_can_support_io_configuration (in, out);
+	if (set_count (_match.plugins) == false) {
 		return false;
 	}
 
 	/* a signal needs emitting if we start or stop splitting */
-	if (old_matching_method != _matching_method && (old_matching_method == Split || _matching_method == Split)) {
+	if (old_match.method != _match.method && (old_match.method == Split || _match.method == Split)) {
 		SplittingChanged (); /* EMIT SIGNAL */
 	}
 
 	/* configure plugins */
-	switch (_matching_method) {
+	switch (_match.method) {
 	case Split:
+	case Hide:
 		if (_plugins.front()->configure_io (_plugins.front()->get_info()->n_inputs, out)) {
 			return false;
 		}
@@ -670,24 +689,24 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 bool
 PluginInsert::can_support_io_configuration (const ChanCount& in, ChanCount& out) const
 {
-	return private_can_support_io_configuration (in, out).first != Impossible;
+	return private_can_support_io_configuration (in, out).method != Impossible;
 }
 
 /** A private version of can_support_io_configuration which returns the method
  *  by which the configuration can be matched, rather than just whether or not
  *  it can be.
  */
-pair<PluginInsert::MatchingMethod, int32_t>
+PluginInsert::Match
 PluginInsert::private_can_support_io_configuration (ChanCount const & in, ChanCount& out) const
 {
 	if (_plugins.front()->reconfigurable_io()) {
 		/* Plugin has flexible I/O, so delegate to it */
 		bool const r = _plugins.front()->can_support_io_configuration (in, out);
 		if (!r) {
-			return make_pair (Impossible, 0);
+			return Match (Impossible, 0);
 		}
 
-		return make_pair (Delegate, 1);
+		return Match (Delegate, 1);
 	}
 
 	ChanCount inputs  = _plugins[0]->get_info()->n_inputs;
@@ -704,13 +723,13 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & in, ChanCo
 	if (no_inputs) {
 		/* no inputs so we can take any input configuration since we throw it away */
 		out = outputs;
-		return make_pair (NoInputs, 1);
+		return Match (NoInputs, 1);
 	}
 
 	/* Plugin inputs match requested inputs exactly */
 	if (inputs == in) {
 		out = outputs;
-		return make_pair (ExactMatch, 1);
+		return Match (ExactMatch, 1);
 	}
 
 	/* We may be able to run more than one copy of the plugin within this insert
@@ -751,7 +770,7 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & in, ChanCo
 		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 			out.set (*t, outputs.get(*t) * f);
 		}
-		return make_pair (Replicate, f);
+		return Match (Replicate, f);
 	}
 
 	/* If the processor has exactly one input of a given type, and
@@ -775,10 +794,29 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & in, ChanCo
 
 	if (can_split) {
 		out = outputs;
-		return make_pair (Split, 1);
+		return Match (Split, 1);
 	}
 
-	return make_pair (Impossible, 0);
+	/* If the plugin has more inputs than we want, we can `hide' some of them
+	   by feeding them silence.
+	*/
+
+	bool can_hide = false;
+	ChanCount hide_channels;
+	
+	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+		if (inputs.get(*t) > in.get(*t)) {
+			hide_channels.set (*t, inputs.get(*t) - in.get(*t));
+			can_hide = true;
+		}
+	}
+
+	if (can_hide) {
+		out = outputs;
+		return Match (Hide, 1, hide_channels);
+	}
+
+	return Match (Impossible, 0);
 }
 
 XMLNode&
