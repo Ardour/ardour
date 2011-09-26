@@ -20,8 +20,9 @@
 #include "mackie_control_exception.h"
 #include "controls.h"
 
-#include <midi++/types.h>
-#include <midi++/port.h>
+#include "midi++/types.h"
+#include "midi++/port.h"
+#include "midi++/manager.h"
 #include <sigc++/sigc++.h>
 #include <boost/shared_array.hpp>
 
@@ -40,6 +41,10 @@ SurfacePort::SurfacePort()
 {
 }
 
+/** @param input_port Input MIDI::Port; this object takes responsibility for removing it from
+ *  the MIDI::Manager and destroying it.
+ *  @param output_port Output MIDI::Port; responsibility similarly taken.
+ */
 SurfacePort::SurfacePort (MIDI::Port & input_port, MIDI::Port & output_port, int number)
 	: _input_port (&input_port), _output_port (&output_port), _number (number), _active (false)
 {
@@ -53,6 +58,19 @@ SurfacePort::~SurfacePort()
 	// make sure another thread isn't reading or writing as we close the port
 	Glib::RecMutex::Lock lock( _rwlock );
 	_active = false;
+
+	MIDI::Manager* mm = MIDI::Manager::instance ();
+	
+	if (_input_port) {
+		mm->remove_port (_input_port);
+		delete _input_port;
+	}
+
+	if (_output_port) {
+		mm->remove_port (_output_port);
+		delete _output_port;
+	}
+	
 #ifdef PORT_DEBUG
 	cout << "~SurfacePort::SurfacePort() finished" << endl;
 #endif

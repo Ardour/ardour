@@ -59,6 +59,7 @@ class Manager {
 	Port *midi_clock_output_port() const { return _midi_clock_output_port; }
 
 	Port* add_port (Port *);
+	void remove_port (Port *);
 
 	Port* port (std::string const &);
 

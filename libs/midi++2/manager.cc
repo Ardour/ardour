@@ -77,6 +77,16 @@ Manager::add_port (Port* p)
 }
 
 void
+Manager::remove_port (Port* p)
+{
+	RCUWriter<PortList> writer (_ports);
+	boost::shared_ptr<PortList> pw = writer.get_copy ();
+	pw->remove (p);
+
+	PortsChanged (); /* EMIT SIGNAL */
+}
+
+void
 Manager::cycle_start (pframes_t nframes)
 {
 	boost::shared_ptr<PortList> pr = _ports.reader ();
