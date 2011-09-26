@@ -254,7 +254,6 @@ LXVSTPlugin::set_state (const XMLNode& node, int version)
 	if ((child = find_named_node (node, X_("chunk"))) != 0) {
 		XMLPropertyList::const_iterator i;
 		XMLNodeList::const_iterator n;
-		int ret = -1;
 
 		for (n = child->children ().begin (); n != child->children ().end (); ++n) {
 			if ((*n)->is_content ()) {
@@ -292,11 +291,8 @@ LXVSTPlugin::set_state (const XMLNode& node, int version)
 int 
 LXVSTPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& desc) const
 {
-	VstParameterProperties prop;
-
 	desc.min_unbound = false;
 	desc.max_unbound = false;
-	prop.flags = 0;
 
 	/* old style */
 
