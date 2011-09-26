@@ -506,13 +506,14 @@ MackieControlProtocol::update_surface()
 	// _current_initial_bank is initialised by set_state
 	switch_banks (_current_initial_bank);
 	
-	// create a RouteSignal for the master route
-	
-	boost::shared_ptr<Route> mr = master_route ();
-	if (mr) {
-		master_route_signal = boost::shared_ptr<RouteSignal> (new RouteSignal (mr, *this, master_strip(), mcu_port()));
-		// update strip from route
-		master_route_signal->notify_all();
+	/* Create a RouteSignal for the master route, if we don't already have one */
+	if (!master_route_signal) {
+		boost::shared_ptr<Route> mr = master_route ();
+		if (mr) {
+			master_route_signal = boost::shared_ptr<RouteSignal> (new RouteSignal (mr, *this, master_strip(), mcu_port()));
+			// update strip from route
+			master_route_signal->notify_all();
+		}
 	}
 	
 	// sometimes the jog wheel is a pot
