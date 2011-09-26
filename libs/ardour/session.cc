@@ -4467,6 +4467,9 @@ Session::post_playback_latency ()
 	set_worst_playback_latency ();
 
 	boost::shared_ptr<RouteList> r = routes.reader ();
+
+        _worst_track_latency = 0;
+
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if (!(*i)->hidden() && ((*i)->active())) {
 			_worst_track_latency = max (_worst_track_latency, (*i)->update_own_latency ());
