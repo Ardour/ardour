@@ -67,9 +67,11 @@ Manager::~Manager ()
 Port *
 Manager::add_port (Port* p)
 {
-	RCUWriter<PortList> writer (_ports);
-	boost::shared_ptr<PortList> pw = writer.get_copy ();
-	pw->push_back (p);
+	{
+		RCUWriter<PortList> writer (_ports);
+		boost::shared_ptr<PortList> pw = writer.get_copy ();
+		pw->push_back (p);
+	}
 
 	PortsChanged (); /* EMIT SIGNAL */
 
@@ -79,9 +81,11 @@ Manager::add_port (Port* p)
 void
 Manager::remove_port (Port* p)
 {
-	RCUWriter<PortList> writer (_ports);
-	boost::shared_ptr<PortList> pw = writer.get_copy ();
-	pw->remove (p);
+	{
+		RCUWriter<PortList> writer (_ports);
+		boost::shared_ptr<PortList> pw = writer.get_copy ();
+		pw->remove (p);
+	}
 
 	PortsChanged (); /* EMIT SIGNAL */
 }
