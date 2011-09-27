@@ -59,6 +59,25 @@ using namespace std;
 
 using PBD::atoi;
 
+static void
+pane_size_watcher (Paned* pane)
+{
+	/* if the handle of a pane vanishes into (at least) the tabs of a notebook,
+	   it is no longer accessible. so stop that. this doesn't happen on X11,
+	   just the quartz backend.
+	   
+	   ugh.
+	*/
+
+	gint pos = pane->get_position ();
+
+	if (pos < 22) {
+		pane->set_position (22);
+	}
+}
+
+
+
 Mixer_UI::Mixer_UI ()
 	: Window (Gtk::WINDOW_TOPLEVEL)
 {
@@ -218,6 +237,10 @@ Mixer_UI::Mixer_UI ()
 							static_cast<Gtk::Paned*> (&rhs_pane1)));
 	list_hpane.signal_size_allocate().connect (bind (mem_fun(*this, &Mixer_UI::pane_allocation_handler), 
 							 static_cast<Gtk::Paned*> (&list_hpane)));
+
+	Glib::PropertyProxy<int> proxy = list_hpane.property_position();
+	proxy.signal_changed().connect (bind (sigc::ptr_fun (pane_size_watcher), static_cast<Paned*> (&list_hpane)));
+
 	
 	global_vpacker.pack_start (list_hpane, true, true);
 

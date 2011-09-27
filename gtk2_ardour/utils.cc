@@ -485,7 +485,7 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 	bool special_handling_of_unmodified_accelerators = false;
 	bool allow_activating = true;
 
-//#define DEBUG_ACCELERATOR_HANDLING
+// #define DEBUG_ACCELERATOR_HANDLING
 #ifdef  DEBUG_ACCELERATOR_HANDLING
 	//bool debug = (getenv ("ARDOUR_DEBUG_ACCELERATOR_HANDLING") != 0);
 	bool debug=true;
@@ -510,7 +510,8 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 	if (debug) {
 		cerr << "Win = " << win << " Key event: code = " << ev->keyval << " name = " << gdk_keyval_name (ev->keyval) << " state = " << hex << ev->state << dec 
 		     << " ctrl " << ((ev->state & GDK_CONTROL_MASK) ? 1 : 0)
-		     << " alt " << ((ev->state & GDK_MOD1_MASK) ? 1 : 0)
+		     << " alt/mod1 " << ((ev->state & GDK_MOD1_MASK) ? 1 : 0)
+		     << " mod2 " << ((ev->state & GDK_MOD2_MASK) ? 1 : 0)
 		     << " shift " << ((ev->state & GDK_SHIFT_MASK) ? 1 : 0)
 		     << " cmd/meta " << ((ev->state & GDK_META_MASK) ? 1 : 0)
 		     << " lock " << ((ev->state & GDK_LOCK_MASK) ? 1 : 0)
@@ -568,7 +569,9 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 #ifdef DEBUG_ACCELERATOR_HANDLING
 				cerr << "Remapped " << gdk_keyval_name (ev->keyval) << " to " << gdk_keyval_name (keyval_without_alt) << endl;
 
-#endif				ev->keyval = keyval_without_alt;
+#endif
+				ev->keyval = keyval_without_alt;
+				ev->group = 0;
 			}
 		}
 	}

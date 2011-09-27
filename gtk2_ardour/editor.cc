@@ -197,7 +197,6 @@ DragInfo::clear_copied_locations ()
 	copied_locations.clear ();
 }
 
-#ifdef GTKOSX
 static void
 pane_size_watcher (Paned* pane)
 {
@@ -208,7 +207,7 @@ pane_size_watcher (Paned* pane)
 	   ugh.
 	*/
 
-	int max_width_of_lhs = GTK_WIDGET(pane->gobj())->allocation.width - 25;
+	int max_width_of_lhs = GTK_WIDGET(pane->gobj())->allocation.width - 62;
 
 	gint pos = pane->get_position ();
 
@@ -216,7 +215,6 @@ pane_size_watcher (Paned* pane)
 		pane->set_position (max_width_of_lhs);
 	}
 }
-#endif
 
 Editor::Editor ()
 	: 
@@ -747,10 +745,9 @@ Editor::Editor ()
 	edit_pane.pack2 (the_notebook, false, true);
 	
 	edit_pane.signal_size_allocate().connect (bind (mem_fun(*this, &Editor::pane_allocation_handler), static_cast<Paned*> (&edit_pane)));
-#ifdef GTKOSX
+
 	Glib::PropertyProxy<int> proxy = edit_pane.property_position();
 	proxy.signal_changed().connect (bind (sigc::ptr_fun (pane_size_watcher), static_cast<Paned*> (&edit_pane)));
-#endif
 
 	top_hbox.pack_start (toolbar_frame, true, true);
 
