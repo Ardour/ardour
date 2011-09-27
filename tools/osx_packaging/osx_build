@@ -4,6 +4,28 @@
 
 GTKQUARTZ_ROOT=$HOME/gtk/inst
 
+if pkg-config --modversion gtk+-2.0 | grep -s 2.22 ; then
+    # older GTK
+    GDKPIXBUF_LOADERS=$GTKQUARTZ_ROOT/lib/gtk-2.0/2.10.0/loaders
+    echo 
+    echo
+    echo "*****************************************************"
+    echo "You are building with the OLD GTK stack. I hope that is ok"
+    echo "*****************************************************"
+    echo
+    echo
+else
+    # newer GTK
+    GDKPIXBUF_LOADERS=$GTKQUARTZ_ROOT/lib/gdk-pixbuf-2.0/2.10.0/loaders
+    echo 
+    echo
+    echo "*****************************************************"
+    echo "You are building with the NEW GTK stack. I hope that is ok"
+    echo "*****************************************************"
+    echo
+    echo
+fi
+
 SAE=
 MIXBUS=
 INTERNAL_JACK=1
@@ -249,7 +271,7 @@ cp -R $GTKQUARTZ_ROOT/etc/* $Etc
 echo "Copying all Pango modules ..."
 cp -R $GTKQUARTZ_ROOT/lib/pango/1.6.0/modules/*.so $Frameworks/modules
 echo "Copying all GDK Pixbuf loaders ..."
-cp -R $GTKQUARTZ_ROOT/lib/gdk-pixbuf-2.0/2.10.0/loaders/*.so $Frameworks/modules
+cp -R $GDKPIXBUF_LOADERS/*.so $Frameworks/modules
 # charset alias file
 cp -R $GTKQUARTZ_ROOT/lib/charset.alias $Resources
 
@@ -276,7 +298,7 @@ env PANGO_RC_FILE=pangorc $GTKQUARTZ_ROOT/bin/pango-querymodules | sed "s?$GTKQU
 rm pangorc
 
 # generate a new GDK pixbufs loaders file
-gdk-pixbuf-query-loaders | sed "s?$GTKQUARTZ_ROOT/lib/gdk-pixbuf-2.0/2.10.0/loaders/?@executable_path/../Frameworks/modules/?" > $Resources/gdk-pixbuf.loaders
+gdk-pixbuf-query-loaders | sed "s?$GDKPIXBUF_LOADERS/?@executable_path/../Frameworks/modules/?" > $Resources/gdk-pixbuf.loaders
 
 # this one is special - we will set GTK_PATH to $Frameworks/clearlooks
 cp ../../libs/clearlooks-newer/libclearlooks.dylib $Frameworks
