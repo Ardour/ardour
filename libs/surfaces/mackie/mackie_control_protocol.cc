@@ -75,8 +75,12 @@ MackieMidiBuilder builder;
 #define midi_ui_context() MidiControlUI::instance() /* a UICallback-derived object that specifies the event loop for signal handling */
 #define ui_bind(f, ...) boost::protect (boost::bind (f, __VA_ARGS__))
 
+extern PBD::EventLoop::InvalidationRecord* __invalidator (sigc::trackable& trackable, const char*, int);
+#define invalidator(x) __invalidator ((x), __FILE__, __LINE__)
+
 MackieControlProtocol::MackieControlProtocol (Session& session)
 	: ControlProtocol (session, X_("Mackie"), MidiControlUI::instance())
+	, AbstractUI<MackieControlUIRequest> ("mackie")
 	, _current_initial_bank (0)
 	, _surface (0)
 	, _jog_wheel (*this)
@@ -88,7 +92,7 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::MackieControlProtocol\n");
 
 	AudioEngine::instance()->PortConnectedOrDisconnected.connect (
-		audio_engine_connections, MISSING_INVALIDATOR, ui_bind (&MackieControlProtocol::port_connected_or_disconnected, this, _2, _4, _5),
+		audio_engine_connections, invalidator (*this), ui_bind (&MackieControlProtocol::port_connected_or_disconnected, this, _2, _4, _5),
 		midi_ui_context ()
 		);
 }
@@ -715,7 +719,7 @@ MackieControlProtocol::get_state()
 
 	// add name of protocol
 	XMLNode* node = new XMLNode (X_("Protocol"));
-	node->add_property (X_("name"), _name);
+	node->add_property (X_("name"), ARDOUR::ControlProtocol::_name);
 
 	// add current bank
 	ostringstream os;
@@ -1695,4 +1699,25 @@ MackieControlProtocol::port_connected_or_disconnected (string a, string b, bool 
 	if (i != _ports.end ()) {
 		update_surface ();
 	}
+}
+
+void
+MackieControlProtocol::do_request (MackieControlUIRequest* req)
+{
+	if (req->type == CallSlot) {
+
+		call_slot (MISSING_INVALIDATOR, req->the_slot);
+
+	} else if (req->type == Quit) {
+
+		stop ();
+	}
+}
+
+int
+MackieControlProtocol::stop ()
+{
+	BaseUI::quit ();
+
+	return 0;
 }
