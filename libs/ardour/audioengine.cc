@@ -25,7 +25,6 @@
 #include <boost/scoped_ptr.hpp>
 
 #include <glibmm/timer.h>
-#include <jack/weakjack.h>
 #include <pbd/pthread_utils.h>
 #include <pbd/stacktrace.h>
 #include <pbd/epa.h>

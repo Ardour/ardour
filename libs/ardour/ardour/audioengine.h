@@ -30,11 +30,13 @@
 
 #include <glibmm/thread.h>
 
+#include <jack/weakjack.h>
+#include <jack/jack.h>
+#include <jack/transport.h>
+
 #include <pbd/rcu.h>
 
 #include <ardour/ardour.h>
-#include <jack/jack.h>
-#include <jack/transport.h>
 #include <ardour/types.h>
 #include <ardour/data_type.h>
 
