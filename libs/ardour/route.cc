@@ -2478,24 +2478,32 @@ Route::update_port_latencies (vector<Port*>& from, vector<Port*>& to, bool playb
 
 	jack_latency_range_t all_connections;
 
-	all_connections.min = ~((jack_nframes_t) 0);
-	all_connections.max = 0;
+        if (from.empty()) {
 
-	/* iterate over all "from" ports and determine the latency range for all of their
-	   connections to the "outside" (outside of this Route).
-	*/
+                all_connections.min = 0;
+                all_connections.max = 0;
 
-	for (vector<Port*>::const_iterator p = from.begin(); p != from.end(); ++p) {
+        } else {
 
-		jack_latency_range_t range;
-
-		(*p)->get_connected_latency_range (range, playback);
-
-                // cerr << "***** for " << (*p)->name() << " CLR = " << range.min << " - " << range.max << endl;
-
-		all_connections.min = min (all_connections.min, range.min);
-		all_connections.max = max (all_connections.max, range.max);
-	}
+                all_connections.min = ~((jack_nframes_t) 0);
+                all_connections.max = 0;
+                
+                /* iterate over all "from" ports and determine the latency range for all of their
+                   connections to the "outside" (outside of this Route).
+                */
+                
+                for (vector<Port*>::const_iterator p = from.begin(); p != from.end(); ++p) {
+                        
+                        jack_latency_range_t range;
+                        
+                        (*p)->get_connected_latency_range (range, playback);
+                        
+                        // cerr << "***** for " << (*p)->name() << " CLR = " << range.min << " - " << range.max << endl;
+                        
+                        all_connections.min = min (all_connections.min, range.min);
+                        all_connections.max = max (all_connections.max, range.max);
+                }
+        }
 
 	/* set the "from" port latencies to the max/min range of all their connections */
 
