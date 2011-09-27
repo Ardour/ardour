@@ -1950,5 +1950,7 @@ MidiModel::transpose (TimeType from, TimeType to, int semitones)
 void
 MidiModel::control_list_marked_dirty ()
 {
+	AutomatableSequence<Evoral::MusicalTime>::control_list_marked_dirty ();
+	
 	ContentsChanged (); /* EMIT SIGNAL */
 }
