@@ -398,7 +398,7 @@ MidiSource::session_saved()
 		   try to update it.
 		*/
 
-		boost::shared_ptr<MidiModel> mm = _model ;
+		boost::shared_ptr<MidiModel> mm = _model;
 		_model.reset ();
 
 		/* flush model contents to disk
