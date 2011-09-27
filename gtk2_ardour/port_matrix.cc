@@ -379,11 +379,21 @@ PortMatrix::visible_rows () const
 	return visible_ports (_row_index);
 }
 
+/** @param column Column; its bundle may be 0 if we are over a row heading.
+ *  @param row Row; its bundle may be 0 if we are over a column heading.
+ */
 void
 PortMatrix::popup_menu (BundleChannel column, BundleChannel row, uint32_t t)
 {
 	using namespace Menu_Helpers;
 
+	if ((row.bundle && row.bundle->nchannels().n_total() == 0) || (column.bundle && column.bundle->nchannels().n_total() == 0)) {
+		/* One of the bundles has no channels, which means that it has none of the appropriate type,
+		   and is only being displayed to look pretty.  So we don't need to do anything.
+		*/
+		return;
+	}
+	
 	delete _menu;
 
 	_menu = new Menu;

@@ -328,6 +328,13 @@ PortMatrixGrid::button_press (double x, double y, int b, uint32_t t, guint)
 void
 PortMatrixGrid::set_association (PortMatrixNode node, bool s)
 {
+	if (node.row.bundle->nchannels().n_total() == 0 || node.column.bundle->nchannels().n_total() == 0) {
+		/* One of the bundles has no channels, which means that it has none of the appropriate type,
+		   and is only being displayed to look pretty.  So we don't need to do anything.
+		*/
+		return;
+	}
+	
 	if (_matrix->show_only_bundles()) {
 
 		for (uint32_t i = 0; i < node.column.bundle->nchannels().n_total(); ++i) {
