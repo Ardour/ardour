@@ -857,12 +857,10 @@ AudioEngine::get_ardour_port_by_name_unlocked (const string& portname)
                 return 0;
         }
         
-        std::string const rel = make_port_name_relative (portname);
-
 	boost::shared_ptr<Ports> pr = ports.reader();
 	
 	for (Ports::iterator i = pr->begin(); i != pr->end(); ++i) {
-		if (rel == (*i)->name()) {
+		if (portname == (*i)->name()) {
 			return (*i);
 		}
 	}
