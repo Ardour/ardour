@@ -454,8 +454,8 @@ ExportHandler::write_track_info_cue (CDMarkerStatus & status)
 		status.out << "    PERFORMER \"" <<  status.marker->cd_info["performer"] << "\"" << endl;
 	}
 
-	if (status.marker->cd_info.find("string_composer") != status.marker->cd_info.end()) {
-		status.out << "    SONGWRITER \"" << status.marker->cd_info["string_composer"]  << "\"" << endl;
+	if (status.marker->cd_info.find("composer") != status.marker->cd_info.end()) {
+		status.out << "    SONGWRITER \"" << status.marker->cd_info["composer"]  << "\"" << endl;
 	}
 
 	if (status.track_position != status.track_start_frame) {
@@ -496,8 +496,8 @@ ExportHandler::write_track_info_toc (CDMarkerStatus & status)
 	if (status.marker->cd_info.find("performer") != status.marker->cd_info.end()) {
 		status.out << "     PERFORMER \"" << status.marker->cd_info["performer"]  << "\"" << endl;
 	}
-	if (status.marker->cd_info.find("string_composer") != status.marker->cd_info.end()) {
-		status.out  << "     COMPOSER \"" << status.marker->cd_info["string_composer"] << "\"" << endl;
+	if (status.marker->cd_info.find("composer") != status.marker->cd_info.end()) {
+		status.out  << "     COMPOSER \"" << status.marker->cd_info["composer"] << "\"" << endl;
 	}
 
 	if (status.marker->cd_info.find("isrc") != status.marker->cd_info.end()) {
