@@ -310,7 +310,7 @@ if ardour['COREAUDIO']:
 if env['CONFIG_ARCH'] == 'apple':
     # this next line avoids issues with circular dependencies between libardour and libardour_cp.
     #
-    ardour.Append(LINKFLAGS='-undefined suppress -flat_namespace') 
+    ardour.Append(LINKFLAGS='-undefined dynamic_lookup -flat_namespace') 
 
 ardour = conf.Finish ()
 
