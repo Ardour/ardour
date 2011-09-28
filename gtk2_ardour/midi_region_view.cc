@@ -719,6 +719,13 @@ MidiRegionView::scroll (GdkEventScroll* ev)
 		return false;
 	}
 
+	if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+		/* XXX: bit of a hack; allow PrimaryModifier scroll through so that
+		   it still works for zoom.
+		*/
+		return false;
+	}
+
 	trackview.editor().verbose_cursor()->hide ();
 
 	bool fine = !Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier);
