@@ -1562,8 +1562,6 @@ MidiRegionView::update_note (CanvasNote* ev, bool update_ghost_regions)
 		ev->property_x2() = trackview.editor().frame_to_pixel (_region->length());
 	}
 
-	cerr << ev->property_x2() << endl;
-
 	ev->property_y2() = y1 + floor(midi_stream_view()->note_height());
 
 	if (note->length() == 0) {
@@ -3332,9 +3330,9 @@ MidiRegionView::update_ghost_note (double x, double y)
 	double length = region_frames_to_region_beats (snap_frame_to_frame (f + grid_frames) - f);
 
 	/* note that this sets the time of the ghost note in beats relative to
-	   the start of the region.
+	   the start of the source; that is how all note times are stored.
 	*/
-	_ghost_note->note()->set_time (region_frames_to_region_beats (f));
+	_ghost_note->note()->set_time (absolute_frames_to_source_beats (f + _region->position ()));
 	_ghost_note->note()->set_length (length);
 	_ghost_note->note()->set_note (midi_stream_view()->y_to_note (y));
 	_ghost_note->note()->set_channel (mtv->get_channel_for_add ());
