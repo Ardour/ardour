@@ -3544,21 +3544,26 @@ Route::update_port_latencies (PortSet& from, PortSet& to, bool playback, framecn
 
 	jack_latency_range_t all_connections;
 
-	all_connections.min = ~((jack_nframes_t) 0);
-	all_connections.max = 0;
-
-	/* iterate over all "from" ports and determine the latency range for all of their
-	   connections to the "outside" (outside of this Route).
-	*/
-
-	for (PortSet::iterator p = from.begin(); p != from.end(); ++p) {
-
-		jack_latency_range_t range;
-
-		p->get_connected_latency_range (range, playback);
-
-		all_connections.min = min (all_connections.min, range.min);
-		all_connections.max = max (all_connections.max, range.max);
+	if (from.empty()) {
+		all_connections.min = 0;
+		all_connections.max = 0;
+	} else {
+		all_connections.min = ~((jack_nframes_t) 0);
+		all_connections.max = 0;
+		
+		/* iterate over all "from" ports and determine the latency range for all of their
+		   connections to the "outside" (outside of this Route).
+		*/
+		
+		for (PortSet::iterator p = from.begin(); p != from.end(); ++p) {
+			
+			jack_latency_range_t range;
+			
+			p->get_connected_latency_range (range, playback);
+			
+			all_connections.min = min (all_connections.min, range.min);
+			all_connections.max = max (all_connections.max, range.max);
+		}
 	}
 
 	/* set the "from" port latencies to the max/min range of all their connections */
