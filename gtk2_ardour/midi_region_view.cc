@@ -80,6 +80,8 @@ using namespace Editing;
 using namespace ArdourCanvas;
 using Gtkmm2ext::Keyboard;
 
+PBD::Signal1<void, MidiRegionView *> MidiRegionView::SelectionCleared;
+
 #define MIDI_BP_ZERO ((Config->get_first_midi_bank_is_zero())?0:1)
 
 MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv,
@@ -116,6 +118,8 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 
 	Config->ParameterChanged.connect (*this, invalidator (*this), ui_bind (&MidiRegionView::parameter_changed, this, _1), gui_context());
 	connect_to_diskstream ();
+
+	SelectionCleared.connect (_selection_cleared_connection, invalidator (*this), ui_bind (&MidiRegionView::selection_cleared, this, _1), gui_context ());
 }
 
 MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv,
@@ -149,6 +153,8 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	PublicEditor::DropDownKeys.connect (sigc::mem_fun (*this, &MidiRegionView::drop_down_keys));
 
 	connect_to_diskstream ();
+
+	SelectionCleared.connect (_selection_cleared_connection, invalidator (*this), ui_bind (&MidiRegionView::selection_cleared, this, _1), gui_context ());
 }
 
 void
@@ -284,6 +290,8 @@ MidiRegionView::init (Gdk::Color const & basic_color, bool wfd)
 
 	Config->ParameterChanged.connect (*this, invalidator (*this), ui_bind (&MidiRegionView::parameter_changed, this, _1), gui_context());
 	connect_to_diskstream ();
+
+	SelectionCleared.connect (_selection_cleared_connection, invalidator (*this), ui_bind (&MidiRegionView::selection_cleared, this, _1), gui_context ());
 }
 
 void
@@ -1960,7 +1968,7 @@ MidiRegionView::delete_note (boost::shared_ptr<NoteType> n)
 }
 
 void
-MidiRegionView::clear_selection_except (ArdourCanvas::CanvasNoteEvent* ev)
+MidiRegionView::clear_selection_except (ArdourCanvas::CanvasNoteEvent* ev, bool signal)
 {
 	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ) {
 		if ((*i) != ev) {
@@ -1980,6 +1988,10 @@ MidiRegionView::clear_selection_except (ArdourCanvas::CanvasNoteEvent* ev)
 	/* this does not change the status of this regionview w.r.t the editor
 	   selection.
 	*/
+
+	if (signal) {
+		SelectionCleared (this); /* EMIT SIGNAL */
+	}
 }
 
 void
@@ -3626,4 +3638,18 @@ MidiRegionView::snap_frame_to_grid_underneath (framepos_t p, framecnt_t& grid_fr
 	}
 
 	return snap_frame_to_frame (p);
+}
+
+/** Called when the selection has been cleared in any MidiRegionView.
+ *  @param rv MidiRegionView that the selection was cleared in.
+ */
+void
+MidiRegionView::selection_cleared (MidiRegionView* rv)
+{
+	if (rv == this) {
+		return;
+	}
+
+	/* Clear our selection in sympathy; but don't signal the fact */
+	clear_selection (false);
 }

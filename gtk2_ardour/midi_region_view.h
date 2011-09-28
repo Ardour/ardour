@@ -311,6 +311,11 @@ protected:
 
 private:
 
+	/** Emitted when the selection has been cleared in one MidiRegionView */
+	static PBD::Signal1<void, MidiRegionView*> SelectionCleared;
+	PBD::ScopedConnection _selection_cleared_connection;
+	void selection_cleared (MidiRegionView *);
+
 	friend class EditNoteDialog;
 
 	void create_note_at(double x, double y, double length, bool, bool);
@@ -342,8 +347,8 @@ private:
 	void trim_note(ArdourCanvas::CanvasNoteEvent* ev, ARDOUR::MidiModel::TimeType start_delta,
 	               ARDOUR::MidiModel::TimeType end_delta);
 
-	void clear_selection_except (ArdourCanvas::CanvasNoteEvent* ev);
-	void clear_selection() { clear_selection_except (0); }
+	void clear_selection_except (ArdourCanvas::CanvasNoteEvent* ev, bool signal = true);
+	void clear_selection (bool signal = true) { clear_selection_except (0, signal); }
 	void update_drag_selection (double last_x, double x, double last_y, double y, bool extend);
 
 	void add_to_selection (ArdourCanvas::CanvasNoteEvent*);
