@@ -182,7 +182,7 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 	static void invalidate_point (ALPoints&, uint32_t index);
 	static bool invalid_point (ALPoints&, uint32_t index);
 
-	void determine_visible_control_points (ALPoints&);
+	void determine_visible_control_points (ALPoints &, int);
 	void sync_model_with_view_point (ControlPoint&, bool, int64_t);
 	void sync_model_with_view_points (std::list<ControlPoint*>, bool, int64_t);
 	void start_drag_common (double, float);

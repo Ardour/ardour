@@ -340,11 +340,19 @@ AutomationLine::model_representation (ControlPoint& cp, ModelRepresentation& mr)
 	}
 }
 
+/** @param points AutomationLine points to consider.  These will correspond 1-to-1 to
+ *  points in the AutomationList, but will have been transformed so that they are in pixels;
+ *  the x coordinate being the pixel distance from the start of the line (0, or the start
+ *  of the AutomationRegionView if we are in one).
+ *
+ *  @param skipped Number of points in the AutomationList that were skipped before
+ *  `points' starts.
+ */
+
 void
-AutomationLine::determine_visible_control_points (ALPoints& points)
+AutomationLine::determine_visible_control_points (ALPoints& points, int skipped)
 {
 	uint32_t view_index, pi, n;
-	AutomationList::iterator model;
 	uint32_t npoints;
 	uint32_t this_rx = 0;
 	uint32_t prev_rx = 0;
@@ -383,8 +391,16 @@ AutomationLine::determine_visible_control_points (ALPoints& points)
 
 	view_index = 0;
 
-	for (model = alist->begin(), pi = 0; pi < npoints; ++model, ++pi) {
+	/* skip over unused AutomationList points before we start */
 
+	AutomationList::iterator model = alist->begin ();
+	for (int i = 0; i < skipped; ++i) {
+		++model;
+	}
+
+	for (pi = 0; pi < npoints; ++model, ++pi) {
+
+		/* If this line is in an AutomationRegionView, this is an offset from the region position, in pixels */
 		double tx = points[pi].x;
 		double ty = points[pi].y;
 
@@ -973,7 +989,12 @@ AutomationLine::get_selectables (
 
 	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
 		double const model_when = (*(*i)->model())->when;
-		framepos_t const session_frames_when = _time_converter.to (model_when) + _time_converter.origin_b () - _offset;
+
+		/* model_when is relative to the start of the source, so we just need to add on the origin_b here
+		   (as it is the session frame position of the start of the source)
+		*/
+		
+		framepos_t const session_frames_when = _time_converter.to (model_when) + _time_converter.origin_b ();
 
 		if (session_frames_when >= start && session_frames_when <= end && (*i)->get_y() >= bot_track && (*i)->get_y() <= top_track) {
 			results.push_back (*i);
@@ -1066,6 +1087,7 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 	}
 
 	AutomationList::const_iterator ai;
+	int skipped = 0;
 
 	for (ai = events.begin(); ai != events.end(); ++ai) {
 
@@ -1078,10 +1100,12 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 						      trackview.editor().frame_to_unit (translated_x),
 						      _height - (translated_y * _height))
 				);
+		} else if (translated_x < 0) {
+			++skipped;
 		}
 	}
 
-	determine_visible_control_points (tmp_points);
+	determine_visible_control_points (tmp_points, skipped);
 }
 
 void
