@@ -36,10 +36,12 @@
 #include "pbd/rcu.h"
 #include "pbd/signals.h"
 
-#include "ardour/ardour.h"
 #include <jack/weakjack.h>
 #include <jack/jack.h>
 #include <jack/transport.h>
+#include <jack/thread.h>
+
+#include "ardour/ardour.h"
 
 #include "ardour/data_type.h"
 #include "ardour/session_handle.h"

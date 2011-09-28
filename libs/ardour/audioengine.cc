@@ -31,6 +31,8 @@
 #include "pbd/unknown_type.h"
 #include "pbd/epa.h"
 
+#include <jack/weakjack.h>
+
 #include "midi++/port.h"
 #include "midi++/mmc.h"
 #include "midi++/manager.h"
