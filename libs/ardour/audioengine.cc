@@ -25,9 +25,6 @@
 #include <sstream>
 
 #include <glibmm/timer.h>
-#include <jack/weakjack.h>
-#include <jack/jack.h>
-#include <jack/thread.h>
 
 #include "pbd/pthread_utils.h"
 #include "pbd/stacktrace.h"

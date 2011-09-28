@@ -37,6 +37,7 @@
 #include "pbd/signals.h"
 
 #include "ardour/ardour.h"
+#include <jack/weakjack.h>
 #include <jack/jack.h>
 #include <jack/transport.h>
 
