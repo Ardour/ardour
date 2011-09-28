@@ -1547,15 +1547,11 @@ MidiRegionView::update_note (CanvasNote* ev, bool update_ghost_regions)
 {
 	boost::shared_ptr<NoteType> note = ev->note();
 
-	cerr << "Note " << *note << " @ region frames " << source_beats_to_region_frames (note->time()) << endl;
-
 	const double x = trackview.editor().frame_to_pixel (source_beats_to_region_frames (note->time()));
 	const double y1 = midi_stream_view()->note_to_y(note->note());
 
 	ev->property_x1() = x;
 	ev->property_y1() = y1;
-
-	cerr << "\t" << x << " ... ";
 
 	/* trim note display to not overlap the end of its region */
 
