@@ -2567,6 +2567,12 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 
 			session_name = _startup->session_name (likely_new);
 
+			string::size_type suffix = session_name.find (statefile_suffix);
+
+			if (suffix != string::npos) {
+				session_name = session_name.substr (0, suffix);
+			}
+
 			/* this shouldn't happen, but we catch it just in case it does */
 
 			if (session_name.empty()) {

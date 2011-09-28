@@ -132,6 +132,7 @@ PBD::Signal0<void> Session::Quit;
 static void clean_up_session_event (SessionEvent* ev) { delete ev; }
 const SessionEvent::RTeventCallback Session::rt_cleanup (clean_up_session_event);
 
+/** @param snapshot_name Snapshot name, without .ardour prefix */
 Session::Session (AudioEngine &eng,
                   const string& fullpath,
                   const string& snapshot_name,

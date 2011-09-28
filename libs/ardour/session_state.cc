@@ -134,7 +134,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-
+/** @param snapshot_name Snapshot name, without the .ardour prefix */
 void
 Session::first_stage_init (string fullpath, string snapshot_name)
 {
