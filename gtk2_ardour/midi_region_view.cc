@@ -2332,12 +2332,6 @@ MidiRegionView::note_dropped(CanvasNoteEvent *, frameoffset_t dt, int8_t dnote)
 		// keep notes in standard midi range
 		clamp_to_0_127(new_pitch);
 
-		// keep original pitch if note is dragged outside valid midi range
-		if ((original_pitch != 0 && new_pitch == 0)
-		    || (original_pitch != 127 && new_pitch == 127)) {
-			new_pitch = original_pitch;
-		}
-
 		lowest_note_in_selection  = std::min(lowest_note_in_selection,  new_pitch);
 		highest_note_in_selection = std::max(highest_note_in_selection, new_pitch);
 
