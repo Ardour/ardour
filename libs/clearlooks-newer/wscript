@@ -1,14 +1,14 @@
 #!/usr/bin/env python
-import autowaf
+from waflib.extras import autowaf as autowaf
 import os
 import sys
 
-srcdir = '.'
-blddir = 'build'
+top = '.'
+out = 'build'
 
 path_prefix = 'libs/clearlooks-newer'
 
-def set_options(opt):
+def options(opt):
     autowaf.set_options(opt)
 
 def configure(conf):
@@ -16,7 +16,7 @@ def configure(conf):
     conf.check_tool('compiler_cc')
 
 def build(bld):
-    obj = bld.new_task_gen('cc', 'shlib')
+    obj = bld(features = 'c cshlib')
     obj.source = '''
     animation.c
     cairo-support.c
@@ -40,7 +40,7 @@ def build(bld):
     if sys.platform == 'darwin':
         # Bit of a hack: make a symlink to the .dylib that meets GTK's criteria for finding it (namely that the library must be a *.so
         # and that it must reside in a directory called `engines')
-        obj = bld.new_task_gen(target = 'engines', rule = 'mkdir -p ${TGT} && rm -f ${TGT}/libclearlooks.so && ln -s ../libclearlooks.dylib ${TGT}/libclearlooks.so')
+        obj = bld(target = 'engines', rule = 'mkdir -p ${TGT} && rm -f ${TGT}/libclearlooks.so && ln -s ../libclearlooks.dylib ${TGT}/libclearlooks.so')
 
 
 def shutdown():

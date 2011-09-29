@@ -1,20 +1,19 @@
 #!/usr/bin/env python
-import autowaf
+from waflib.extras import autowaf as autowaf
 import Options
 import os
 import re
 import string
 import subprocess
 import sys
-import glob
 
 # Variables for 'waf dist'
 VERSION = '3.0alpha10'
 APPNAME = 'Ardour'
 
 # Mandatory variables
-srcdir = '.'
-blddir = 'build'
+top = '.'
+out = 'build'
 
 children = [
         'libs/pbd',
@@ -139,22 +138,22 @@ def set_compiler_flags (conf,opt):
         if config[config_arch] == 'apple':
             # The [.] matches to the dot after the major version, "." would match any character
             if re.search ("darwin[0-7][.]", config[config_kernel]) != None:
-                conf.define ('build_target', 'panther')
+                conf.env['build_target'] = 'panther'
             elif re.search ("darwin8[.]", config[config_kernel]) != None:
-                conf.define ('build_target', 'tiger')
+                conf.env['build_target'] = 'tiger'
             else:
-                conf.define ('build_target', 'leopard')
+                conf.env['build_target'] = 'leopard'
         else:
             if re.search ("x86_64", config[config_cpu]) != None:
-                conf.define ('build_target', 'x86_64')
+                conf.env['build_target'] = 'x86_64'
             elif re.search("i[0-5]86", config[config_cpu]) != None:
-                conf.define ('build_target', 'i386')
+                conf.env['build_target'] = 'i386'
             elif re.search("powerpc", config[config_cpu]) != None:
-                conf.define ('build_target', 'powerpc')
+                conf.env['build_target'] = 'powerpc'
             else:
-                conf.define ('build_target', 'i686')
+                conf.env['build_target'] = 'i686'
     else:
-        conf.define ('build_target', opt.dist_target)
+        conf.env['build_target'] = opt.dist_target
 
     if config[config_cpu] == 'powerpc' and conf.env['build_target'] != 'none':
         #
@@ -246,7 +245,7 @@ def set_compiler_flags (conf,opt):
         print("\nIt is theoretically possible to build a 32 bit host on a 64 bit system.")
         print("However, this is tricky and not recommended for beginners.")
         sys.exit (-1)
-		
+
     if opt.lxvst:
         if conf.env['build_target'] == 'x86_64':
             print("\n\n********************************************************")
@@ -264,7 +263,7 @@ def set_compiler_flags (conf,opt):
         conf.define ('IS_OSX', 1)
         # force tiger or later, to avoid issues on PPC which defaults
         # back to 10.1 if we don't tell it otherwise.
-        conf.env.append_value('CCFLAGS', "-DMAC_OS_X_VERSION_MIN_REQUIRED=1040")
+        conf.env.append_value('CFLAGS', "-DMAC_OS_X_VERSION_MIN_REQUIRED=1040")
 
     else:
         conf.define ('IS_OSX', 0)
@@ -294,11 +293,11 @@ def set_compiler_flags (conf,opt):
             ]
 
     if opt.debug:
-        conf.env.append_value('CCFLAGS', debug_flags)
+        conf.env.append_value('CFLAGS', debug_flags)
         conf.env.append_value('CXXFLAGS', debug_flags)
         conf.env.append_value('LINKFLAGS', debug_flags)
     else:
-        conf.env.append_value('CCFLAGS', optimization_flags)
+        conf.env.append_value('CFLAGS', optimization_flags)
         conf.env.append_value('CXXFLAGS', optimization_flags)
         conf.env.append_value('LINKFLAGS', optimization_flags)
 
@@ -306,12 +305,12 @@ def set_compiler_flags (conf,opt):
         conf.env.append_value('CXXFLAGS', "-D_GLIBCXX_DEBUG")
 
     if conf.env['DEBUG_RT_ALLOC']:
-        conf.env.append_value('CCFLAGS', '-DDEBUG_RT_ALLOC')
+        conf.env.append_value('CFLAGS', '-DDEBUG_RT_ALLOC')
         conf.env.append_value('CXXFLAGS', '-DDEBUG_RT_ALLOC')
         conf.env.append_value('LINKFLAGS', '-ldl')
 
     if opt.universal:
-        conf.env.append_value('CCFLAGS', "-arch i386 -arch ppc")
+        conf.env.append_value('CFLAGS', "-arch i386 -arch ppc")
         conf.env.append_value('CXXFLAGS', "-arch i386 -arch ppc")
         conf.env.append_value('LINKFLAGS', "-arch i386 -arch ppc")
 
@@ -319,21 +318,21 @@ def set_compiler_flags (conf,opt):
     # warnings flags
     #
 
-    conf.env.append_value('CCFLAGS', "-Wall")
+    conf.env.append_value('CFLAGS', "-Wall")
     conf.env.append_value('CXXFLAGS', [ '-Wall', '-Woverloaded-virtual'])
 
     if opt.extra_warn:
         flags = [ '-Wextra' ]
-        conf.env.append_value('CCFLAGS', flags )
-        conf.env.append_value('CXXFLAGS', flags )
+        conf.env.append_value('CFLAGS', flags)
+        conf.env.append_value('CXXFLAGS', flags)
 
 
     #
     # more boilerplate
     #
 
-    conf.env.append_value('CCFLAGS', '-D_LARGEFILE64_SOURCE')
-    conf.env.append_value('CCFLAGS', '-D_FILE_OFFSET_BITS=64')
+    conf.env.append_value('CFLAGS', '-D_LARGEFILE64_SOURCE')
+    conf.env.append_value('CFLAGS', '-D_FILE_OFFSET_BITS=64')
     conf.env.append_value('CXXFLAGS', '-D_LARGEFILE64_SOURCE')
     conf.env.append_value('CXXFLAGS', '-D_FILE_OFFSET_BITS=64')
 
@@ -342,13 +341,15 @@ def set_compiler_flags (conf,opt):
 
     if opt.nls:
         conf.env.append_value('CXXFLAGS', '-DENABLE_NLS')
-        conf.env.append_value('CCFLAGS', '-DENABLE_NLS')
+        conf.env.append_value('CFLAGS', '-DENABLE_NLS')
 
 #----------------------------------------------------------------
 
 # Waf stages
 
-def set_options(opt):
+def options(opt):
+    opt.load('compiler_c')
+    opt.load('compiler_cxx')
     autowaf.set_options(opt)
     opt.add_option('--program-name', type='string', action='store', default='Ardour', dest='program_name',
                     help='The user-visible name of the program being built')
@@ -410,6 +411,8 @@ def sub_config_and_use(conf, name, has_objects = True):
     autowaf.set_local_lib(conf, name, has_objects)
 
 def configure(conf):
+    conf.load('compiler_c')
+    conf.load('compiler_cxx')
     if not Options.options.noconfirm:
         print ('\n\nThis is an alpha version of Ardour 3.0.\n\n' +
                'You are respectfully requested NOT to ask for assistance with build issues\n' +
@@ -446,20 +449,20 @@ def configure(conf):
         #       on Darwin to add all applicable flags at once
         #
         conf.env.append_value('CXXFLAGS_OSX', '-DMAC_OS_X_VERSION_MIN_REQUIRED=1040')
-        conf.env.append_value('CCFLAGS_OSX', '-DMAC_OS_X_VERSION_MIN_REQUIRED=1040')
+        conf.env.append_value('CFLAGS_OSX', '-DMAC_OS_X_VERSION_MIN_REQUIRED=1040')
         conf.env.append_value('CXXFLAGS_OSX', '-mmacosx-version-min=10.4')
-        conf.env.append_value('CCFLAGS_OSX', '-mmacosx-version-min=10.4')
+        conf.env.append_value('CFLAGS_OSX', '-mmacosx-version-min=10.4')
 
         #conf.env.append_value('CXXFLAGS_OSX', "-isysroot /Developer/SDKs/MacOSX10.4u.sdk")
-        #conf.env.append_value('CCFLAGS_OSX', "-isysroot /Developer/SDKs/MacOSX10.4u.sdk")
+        #conf.env.append_value('CFLAGS_OSX', "-isysroot /Developer/SDKs/MacOSX10.4u.sdk")
         #conf.env.append_value('LINKFLAGS_OSX', "-isysroot /Developer/SDKs/MacOSX10.4u.sdk")
 
         #conf.env.append_value('LINKFLAGS_OSX', "-sysroot /Developer/SDKs/MacOSX10.4u.sdk")
 
         conf.env.append_value('CXXFLAGS_OSX', "-msse")
-        conf.env.append_value('CCFLAGS_OSX', "-msse")
+        conf.env.append_value('CFLAGS_OSX', "-msse")
         conf.env.append_value('CXXFLAGS_OSX', "-msse2")
-        conf.env.append_value('CCFLAGS_OSX', "-msse2")
+        conf.env.append_value('CFLAGS_OSX', "-msse2")
         #
         #       TODO: The previous sse flags NEED to be based
         #       off processor type.  Need to add in a check
@@ -486,14 +489,14 @@ def configure(conf):
     if Options.options.boost_include != '':
         conf.env.append_value('CPPPATH', Options.options.boost_include)
 
-    autowaf.check_header(conf, 'boost/signals2.hpp', mandatory = True)
+    autowaf.check_header(conf, 'cxx', 'boost/signals2.hpp', mandatory = True)
 
     if Options.options.boost_sp_debug:
         conf.env.append_value('CXXFLAGS', '-DBOOST_SP_ENABLE_DEBUG_HOOKS')
 
-    autowaf.check_header(conf, 'jack/session.h', define="JACK_SESSION", mandatory = False)
+    autowaf.check_header(conf, 'cxx', 'jack/session.h', define="JACK_SESSION", mandatory = False)
 
-    conf.check_cc(fragment = "#include <boost/version.hpp>\nint main(void) { return (BOOST_VERSION >= 103900 ? 0 : 1); }\n",
+    conf.check_cxx(fragment = "#include <boost/version.hpp>\nint main(void) { return (BOOST_VERSION >= 103900 ? 0 : 1); }\n",
                   execute = "1",
                   mandatory = True,
                   msg = 'Checking for boost library >= 1.39',
@@ -512,43 +515,47 @@ def configure(conf):
         sub_config_and_use(conf, i)
 
     # Fix utterly braindead FLAC include path to not smash assert.h
-    conf.env['CPPPATH_FLAC'] = []
+    conf.env['INCLUDES_FLAC'] = []
 
     conf.check_cc(function_name='dlopen', header_name='dlfcn.h', linkflags='-ldl', uselib_store='DL')
     conf.check_cc(function_name='curl_global_init', header_name='curl/curl.h', linkflags='-lcurl', uselib_store='CURL')
 
     # Tell everyone that this is a waf build
 
-    conf.env.append_value('CCFLAGS', '-DWAF_BUILD')
+    conf.env.append_value('CFLAGS', '-DWAF_BUILD')
     conf.env.append_value('CXXFLAGS', '-DWAF_BUILD')
 
-    # Set up waf environment
+    # Set up waf environment and C defines
     opts = Options.options
     if opts.debug:
         opts.phone_home = False;   # debug builds should not call home
     if opts.phone_home:
         conf.env['PHONE_HOME'] = opts.phone_home
     if opts.fpu_optimization:
-        conf.define('FPU_OPTIMIZATION', 1)
+        conf.env['FPU_OPTIMIZATION'] = True
     if opts.freesound:
         conf.define('FREESOUND',1)
+        conf.env['FREESOUND'] = True
     if opts.nls:
-        conf.define ('ENABLE_NLS', 1)
+        conf.define('ENABLE_NLS', 1)
+        conf.env['ENABLE_NLS'] = True
     if opts.build_tests:
         conf.env['BUILD_TESTS'] = opts.build_tests
     if opts.tranzport:
-        conf.define('TRANZPORT', 1)
+        conf.env['TRANZPORT'] = 1
     if opts.vst:
         conf.define('VST_SUPPORT', 1)
+        conf.env['VST_SUPPORT'] = True
         conf.env.append_value('CPPPATH', Options.options.wine_include)
-        autowaf.check_header(conf, 'windows.h', mandatory = True)
+        autowaf.check_header(conf, 'cxx', 'windows.h', mandatory = True)
     if opts.lxvst:
         conf.define('LXVST_SUPPORT', 1)
         conf.env['LXVST_SUPPORT'] = True
     if bool(conf.env['JACK_SESSION']):
         conf.define ('HAVE_JACK_SESSION', 1)
     if opts.wiimote:
-        conf.define('WIIMOTE',1)
+        conf.define('WIIMOTE', 1)
+        conf.env['WIIMOTE'] = True
     conf.define('WINDOWS_KEY', opts.windows_key)
     conf.env['PROGRAM_NAME'] = opts.program_name
     if opts.rt_alloc_debug:
@@ -601,7 +608,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('Wiimote support',       opts.wiimote)
     write_config_text('Windows key',           opts.windows_key)
 
-    write_config_text('C compiler flags',      conf.env['CCFLAGS'])
+    write_config_text('C compiler flags',      conf.env['CFLAGS'])
     write_config_text('C++ compiler flags',    conf.env['CXXFLAGS'])
 
     config_text.write ('";\n}\n')
@@ -644,11 +651,11 @@ def build(bld):
                 'JACK_INPUT' : 'auditioner'
                 }
 
-    obj              = bld.new_task_gen('subst')
+    obj              = bld(features = 'subst')
     obj.source       = 'ardour.rc.in'
     obj.target       = 'ardour_system.rc'
     obj.dict         = rc_subst_dict
-    obj.install_path = '${CONFIGDIR}/ardour3'
+    obj.install_path = '${SYSCONF}/ardour3'
 
 def i18n(bld):
     bld.recurse (i18n_children)

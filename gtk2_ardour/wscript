@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-import autowaf
+from waflib.extras import autowaf as autowaf
+import waflib.Logs as Logs, waflib.Utils as Utils
 import os
-import glob
 import Options
 import sys
 import TaskGen
@@ -18,8 +18,8 @@ APPNAME = 'gtk2_ardour'
 VERSION = GTK2_ARDOUR_VERSION
 
 # Mandatory variables
-srcdir = '.'
-blddir = 'build'
+top = '.'
+out = 'build'
 
 path_prefix = 'gtk2_ardour/'
 
@@ -233,10 +233,11 @@ gtk2_ardour_sources = [
         'window_proxy.cc'
 ]
 
-def set_options(opt):
+def options(opt):
     autowaf.set_options(opt)
 
 def configure(conf):
+    conf.load('misc')
     autowaf.build_version_files(
         path_prefix + 'version.h',
         path_prefix + 'version.cc',
@@ -261,13 +262,11 @@ def configure(conf):
                       uselib_store='GNOMECANVASMM', atleast_version='2.16')
     autowaf.check_pkg(conf, 'ogg', uselib_store='OGG', atleast_version='1.1.2')
 
-    conf.check_tool('misc') # subst tool
-
-    conf.write_config_header('gtk2ardour-config.h')
+    conf.write_config_header('gtk2ardour-config.h', remove=False)
 
     # Boost headers
-    autowaf.check_header(conf, 'boost/shared_ptr.hpp')
-    autowaf.check_header(conf, 'boost/weak_ptr.hpp')
+    autowaf.check_header(conf, 'cxx', 'boost/shared_ptr.hpp')
+    autowaf.check_header(conf, 'cxx', 'boost/weak_ptr.hpp')
 
 # Add a waf `feature' to allow compilation of things using winegcc
 from TaskGen import feature
@@ -305,12 +304,13 @@ def _doPyp(infileName):
             outStr += _doPyp(incName)
         else:
             outStr += line
+
     # done
     return outStr
     
 def include_processor(task):
-    infileName = task.inputs[0].srcpath(task.env)
-    outfileName = task.outputs[0].bldpath(task.env)
+    infileName = task.inputs[0].srcpath()
+    outfileName = os.path.join(out, task.outputs[0].bldpath())
     fdOut = file (outfileName, "w")
     fdOut.write (_doPyp(infileName))
     fdOut.close ()
@@ -338,9 +338,9 @@ def build(bld):
     # GTK front-end; if we're using VST we build this as a shared library,
     # otherwise it's a normal executabale
     if bld.env['VST_SUPPORT']:
-        obj = bld.new_task_gen(features = 'cxx cc cshlib')
+        obj = bld(features = 'cxx c cxxshlib')
     else:
-        obj = bld.new_task_gen(features = 'cxx cc cprogram')
+        obj = bld(features = 'cxx c cxxprogram')
 
     obj.includes     = ['.']
     obj.source       = gtk2_ardour_sources
@@ -355,15 +355,15 @@ def build(bld):
     obj.uselib       = 'UUID FLAC GLIBMM GTHREAD GTK OGG ALSA CURL DL'
     obj.uselib       += ' GTKMM GNOMECANVASMM '
     obj.uselib       += ' AUDIOUNITS OSX GTKOSX '
-    obj.uselib_local = '''libpbd libmidipp libtaglib libardour libardour_cp
+    obj.use          = '''libpbd libmidipp libtaglib libardour libardour_cp
                           libgtkmm2ext libtaglib libgnomecanvas-2'''
     if sys.platform == 'darwin':
-        obj.uselib_local + ' libappleutility'
+        obj.use += ' libappleutility'
     obj.defines     = [
         'PACKAGE="gtk2_ardour"',
         'VERSIONSTRING="' + bld.env['VERSION'] + '"',
         'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
-        'CONFIG_DIR="' + os.path.normpath(bld.env['CONFIGDIR']) + '"',
+        'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
         'MODULE_DIR="' + os.path.normpath(bld.env['LIBDIR']) + '"',
         'LOCALEDIR="' + os.path.join(os.path.normpath(bld.env['DATADIR']),
                                      'locale') + '"',
@@ -397,12 +397,12 @@ def build(bld):
     if bld.env['COREAUDIO']:
         TaskGen.task_gen.mappings['.mm'] = TaskGen.task_gen.mappings['.cc']
         obj.source += [ 'cocoacarbon.mm', 'au_pluginui.mm' ]
-        obj.uselib_local += ' libappleutility '
+        obj.use += ' libappleutility '
 
     if bld.env['VST_SUPPORT']:
         # If we require VST support we build a stub main() and the FST library
         # here using winegcc, and link it to the GTK front-end library
-        obj = bld.new_task_gen (features = 'cxx cc cprogram wine')
+        obj = bld(features = 'cxx c cxxprogram wine')
         obj.source = '''
                 ../libs/fst/fst.c
                 ../libs/fst/fstinfofile.c
@@ -415,7 +415,7 @@ def build(bld):
         obj.linkflags += ['-mwindows', '-Wl,--export-dynamic', '-lpthread']
         obj.defines = ['_POSIX_SOURCE', 'USE_WS_PREFIX']
         obj.uselib = 'ALSA'
-        obj.uselib_local = ['libpbd','libmidipp','libtaglib','libardour',
+        obj.use = ['libpbd','libmidipp','libtaglib','libardour',
                             'libardour_cp','libgtkmm2ext','libtaglib',
                             'gtk2_ardour']
 
@@ -423,24 +423,30 @@ def build(bld):
 
     wrapper_subst_dict = {
             'INSTALL_PREFIX' : bld.env['PREFIX'],
-            'LIBDIR'         : os.path.normpath(bld.env['LIBDIRNAME']),
-            'LIBS'           : 'build/default/libs',
+            'LIBDIR'         : os.path.normpath(bld.env['LIBDIR']),
+            'LIBS'           : 'build/libs',
             'VERSION'        : '3.0',
-            'EXECUTABLE'     : 'build/default/gtk2_ardour/ardour-3.0'
+            'EXECUTABLE'     : 'build/gtk2_ardour/ardour-3.0'
     }
 
-    obj              = bld.new_task_gen('subst')
+    def set_subst_dict(obj, dict):
+        for i in dict:
+            setattr(obj, i, dict[i])
+
+    obj              = bld(features = 'subst', rule= 'chmod 0755 ${TGT}')
     obj.source       = 'ardev_common.sh.in'
     obj.target       = 'ardev_common_waf.sh'
-    obj.chmod        = 0755
+    obj.chmod        = Utils.O755
     obj.dict         = wrapper_subst_dict
+    set_subst_dict(obj, wrapper_subst_dict)
 
-    obj              = bld.new_task_gen('subst')
+    obj              = bld(features = 'subst')
     obj.source       = 'ardour.sh.in'
     obj.target       = 'ardour3'
-    obj.chmod        = 0755
+    obj.chmod        = Utils.O755
     obj.dict         = wrapper_subst_dict
     obj.install_path = bld.env['BINDIR']
+    set_subst_dict(obj, wrapper_subst_dict)
 
     # Font configuration
 
@@ -507,48 +513,46 @@ def build(bld):
         'gtk2_ardour/ardour3_ui_light.rc.in', 'ARDOUR_LIGHT')
     light_rc_subst_dict['COLPREFIX'] = 'ARDOUR_LIGHT'
 
-    obj              = bld.new_task_gen('subst')
+    obj              = bld(features = 'subst')
     obj.source       = [ 'ardour3_ui_dark.rc.in' ]
     obj.target       = 'ardour3_ui_dark.rc.pre'
-    obj.dict         = dark_rc_subst_dict
     obj.install_path = None
+    set_subst_dict(obj, dark_rc_subst_dict)
 
-    obj              = bld.new_task_gen('subst')
+    obj              = bld(features = 'subst')
     obj.source       = [ 'ardour3_ui_light.rc.in' ]
     obj.target       = 'ardour3_ui_light.rc.pre'
-    obj.dict         = light_rc_subst_dict
     obj.install_path = None
+    set_subst_dict(obj, light_rc_subst_dict)
 
-    obj              = bld.new_task_gen('subst')
+    obj              = bld(features = 'subst')
     obj.source       = [ 'ardour3_styles.rc.in' ]
     obj.target       = 'ardour3_dark_styles.rc'
-    obj.dict         = dark_rc_subst_dict
     obj.install_path = None
+    set_subst_dict(obj, dark_rc_subst_dict)
 
-    obj              = bld.new_task_gen('subst')
+    obj              = bld(features = 'subst')
     obj.source       = [ 'ardour3_styles.rc.in' ]
     obj.target       = 'ardour3_light_styles.rc'
-    obj.dict         = light_rc_subst_dict
     obj.install_path = None
+    set_subst_dict(obj, light_rc_subst_dict)
 
-    obj              = bld.new_task_gen('subst')
+    obj              = bld(features = 'subst')
     obj.source       = [ 'ardour3_fonts.rc.in' ]
     obj.target       = 'ardour3_dark_fonts.rc'
-    obj.dict         = dark_rc_subst_dict
     obj.install_path = None
+    set_subst_dict(obj, dark_rc_subst_dict)
 
-    obj              = bld.new_task_gen('subst')
+    obj              = bld(features = 'subst')
     obj.source       = [ 'ardour3_fonts.rc.in' ]
     obj.target       = 'ardour3_light_fonts.rc'
-    obj.dict         = light_rc_subst_dict
     obj.install_path = None
+    set_subst_dict(obj, light_rc_subst_dict)
 
-    obj              = bld.new_task_gen('copy')
+    obj              = bld(rule = 'cp ${SRC} ${TGT}')
     obj.source       = [ 'ardour3_widget_list.rc' ]
     obj.target       = 'ardour3_widgets.rc'
     obj.install_path = None
-
-    bld.use_the_magic()
 
     bld (
         rule   = include_processor,
@@ -568,14 +572,14 @@ def build(bld):
         menus_argv = [ '-E', '-P', '-DGTKOSX' ]
     else:
         menus_argv = [ '-E', '-P' ]
-    obj = bld.new_task_gen('command-output')
+    obj = bld(features = 'command-output')
     obj.command = 'cpp'
     obj.command_is_external = True
     obj.no_inputs = True
     obj.argv = menus_argv
     obj.stdin = 'ardour.menus.in'
     obj.stdout = 'ardour.menus'
-    bld.install_files(os.path.join(bld.env['CONFIGDIR'], 'ardour3'),
+    bld.install_files(os.path.join(bld.env['SYSCONFDIR'], 'ardour3'),
                       'ardour.menus')
 
     # Keybindings
@@ -584,15 +588,15 @@ def build(bld):
     # 'SAE-us-nokeypad', 'ergonomic-us'
 
     for b in [ 'mnemonic-us' ] :
-        obj = bld.new_task_gen (
+        obj = bld(
             target = b + '.bindings',
             source = b + '.bindings.in',
             rule = '../tools/fmt-bindings --winkey="%s" --accelmap <${SRC} >${TGT}' % bld.env['WINDOWS_KEY']
             )
-        obj.install_path = os.path.join(bld.env['CONFIGDIR'], 'ardour3')
+        obj.install_path = os.path.join(bld.env['SYSCONFDIR'], 'ardour3')
 
     # not modified at present
-    bld.install_files(os.path.join(bld.env['CONFIGDIR'], 'ardour3'),
+    bld.install_files(os.path.join(bld.env['SYSCONFDIR'], 'ardour3'),
                       'step_editing.bindings')
 
     # Icons/Images
@@ -601,16 +605,16 @@ def build(bld):
     bld.install_files('${DATADIR}/ardour3', 'splash.png')
 
     # Default UI configuration
-    bld.install_files('${CONFIGDIR}/ardour3', 'ardour3_ui_default.conf')
+    bld.install_files('${SYSCONFDIR}/ardour3', 'ardour3_ui_default.conf')
     # Generic widget style mappings
-    bld.install_files('${CONFIGDIR}/ardour3', 'ardour3_widgets.rc')
+    bld.install_files('${SYSCONFDIR}/ardour3', 'ardour3_widgets.rc')
     
     # Default export stuff
-    bld.install_files('${CONFIGDIR}/ardour3/export', 'export/*.format')
+    bld.install_files('${SYSCONFDIR}/ardour3/export', 'export/*.format')
 
     # i18n
     if bld.env['ENABLE_NLS']:
-        mo_files = glob.glob (os.path.join (bld.get_curdir(), 'po/*.mo'))
+        mo_files = bld.path.ant_glob ('po/*.mo')
         for mo in mo_files:
             lang = os.path.basename (mo).replace ('.mo', '')
             bld.install_as (os.path.join(bld.env['PREFIX'], 'share', 'locale',

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import autowaf
+from waflib.extras import autowaf as autowaf
 import os
 
 # Version of this package (even if built as a child)
@@ -16,10 +16,10 @@ APPNAME = 'libvamp'
 VERSION = LIBVAMP_VERSION
 
 # Mandatory variables
-srcdir = '.'
-blddir = 'build'
+top = '.'
+out = 'build'
 
-def set_options(opt):
+def options(opt):
     autowaf.set_options(opt)
 
 def configure(conf):
@@ -31,7 +31,7 @@ def configure(conf):
 
 def build(bld):
     # Host Library
-    obj = bld.new_task_gen('cxx', 'shlib')
+    obj = bld(features = 'cxx cxxshlib')
     obj.source = '''
             src/vamp-hostsdk/PluginHostAdapter.cpp
             src/vamp-hostsdk/PluginBufferingAdapter.cpp
@@ -41,7 +41,7 @@ def build(bld):
             src/vamp-hostsdk/PluginWrapper.cpp
             src/vamp-hostsdk/RealTime.cpp
     '''
-    obj.export_incdirs = ['.']
+    obj.export_includes = ['.']
     obj.includes     = ['.']
     obj.name         = 'libvamphost'
     obj.target       = 'vamphost'
@@ -50,12 +50,12 @@ def build(bld):
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
 
     # Plugin Library
-    obj = bld.new_task_gen('cxx', 'shlib')
+    obj = bld(features = 'cxx cxxshlib')
     obj.source = '''
             src/vamp-sdk/PluginAdapter.cpp
             src/vamp-sdk/RealTime.cpp
     '''
-    obj.export_incdirs = ['.']
+    obj.export_includes = ['.']
     obj.includes     = ['.']
     obj.name         = 'libvampplugin'
     obj.target       = 'vampplugin'

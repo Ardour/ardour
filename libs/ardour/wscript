@@ -1,7 +1,6 @@
 #!/usr/bin/env python
-import autowaf
+from waflib.extras import autowaf as autowaf
 import os
-import glob
 import Options
 import re
 import subprocess
@@ -26,8 +25,8 @@ APPNAME = 'libardour'
 VERSION = LIBARDOUR_VERSION
 
 # Mandatory variables
-srcdir = '.'
-blddir = 'build'
+top = '.'
+out = 'build'
 
 path_prefix = 'libs/ardour/'
 
@@ -233,7 +232,7 @@ def ogg_supported():
     out = cmd.communicate()[0].decode('utf-8');
     return re.search ('unknown format', out) == None
 
-def set_options(opt):
+def options(opt):
     autowaf.set_options(opt)
 
 def configure(conf):
@@ -292,7 +291,7 @@ def configure(conf):
 
     conf.check_cc(fragment = '''
 #include <jack/jack.h>
-void callback(int code, const char* reason, void* arg) { return; }
+void callback(jack_status_t code, const char* reason, void* arg) { return; }
 int main(int argc, char **argv) {
     jack_client_t* c;
     jack_on_info_shutdown(c, callback, (void*) 0);
@@ -341,27 +340,27 @@ int main(int argc, char **argv) {
     if conf.env['HAVE_LILV'] or conf.env['HAVE_SLV2']:
         conf.define ('LV2_SUPPORT', 1)
 
-    conf.write_config_header('libardour-config.h')
+    conf.write_config_header('libardour-config.h', remove=False)
 
     # Boost headers
-    autowaf.check_header(conf, 'boost/shared_ptr.hpp')
-    autowaf.check_header(conf, 'boost/weak_ptr.hpp')
-    autowaf.check_header(conf, 'boost/scoped_ptr.hpp')
-    autowaf.check_header(conf, 'boost/ptr_container/ptr_list.hpp')
+    autowaf.check_header(conf, 'cxx', 'boost/shared_ptr.hpp')
+    autowaf.check_header(conf, 'cxx', 'boost/weak_ptr.hpp')
+    autowaf.check_header(conf, 'cxx', 'boost/scoped_ptr.hpp')
+    autowaf.check_header(conf, 'cxx', 'boost/ptr_container/ptr_list.hpp')
 
 
 def build(bld):
     # Library
-    obj              = bld.new_task_gen('cxx', 'shlib')
+    obj              = bld(features = 'c cxx cshlib cxxshlib')
     obj.source       = libardour_sources
-    obj.export_incdirs = ['.']
+    obj.export_includes = ['.']
     obj.includes     = ['.', '../surfaces/control_protocol', '..']
     obj.name         = 'libardour'
     obj.target       = 'ardour'
     obj.uselib       = ['GLIBMM','GTHREAD','AUBIO','SIGCPP','XML','UUID',
                         'JACK','SNDFILE','SAMPLERATE','LRDF','AUDIOUNIT',
                         'OSX','BOOST','CURL','DL']
-    obj.uselib_local = ['libpbd','libmidipp','libevoral','libvamphost',
+    obj.use          = ['libpbd','libmidipp','libevoral','libvamphost',
                         'libvampplugin','libtaglib','librubberband',
                         'libaudiographer']
     obj.vnum         = LIBARDOUR_LIB_VERSION
@@ -369,7 +368,7 @@ def build(bld):
     obj.defines      = [
         'PACKAGE="libardour3"',
         'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
-        'CONFIG_DIR="' + os.path.normpath(bld.env['CONFIGDIR']) + '"',
+        'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
         'MODULE_DIR="' + os.path.normpath(bld.env['LIBDIR']) + '"',
         'LOCALEDIR="' + os.path.join(
             os.path.normpath(bld.env['DATADIR']), 'locale') + '"',
@@ -405,7 +404,7 @@ def build(bld):
 
     if bld.env['COREAUDIO']:
         obj.source += [ 'coreaudiosource.cc', 'caimportable.cc' ]
-        obj.uselib_local += ['libappleutility']
+        obj.use    += ['libappleutility']
         obj.source += [ 'audio_unit.cc' ]
 
     if bld.env['FPU_OPTIMIZATION']:
@@ -417,7 +416,7 @@ def build(bld):
 
     # i18n
     if bld.env['ENABLE_NLS']:
-        mo_files = glob.glob(os.path.join(bld.get_curdir(), 'po/*.mo'))
+        mo_files = bld.path.ant_glob('po/*.mo')
         for mo in mo_files:
             lang = os.path.basename(mo).replace('.mo', '')
             bld.install_as(os.path.join(bld.env['PREFIX'], 'share', 'locale',
@@ -426,7 +425,7 @@ def build(bld):
 
     if bld.env['BUILD_TESTS'] and bld.env['HAVE_CPPUNIT']:
         # Unit tests
-        testobj              = bld.new_task_gen('cxx', 'program')
+        testobj              = bld(features = 'cxx cxxprogram')
         testobj.source       = '''
                 test/bbt_test.cpp
                 test/interpolation_test.cpp
@@ -438,14 +437,14 @@ def build(bld):
         testobj.includes     = obj.includes + ['test', '../pbd']
         testobj.uselib       = ['CPPUNIT','SIGCPP','JACK','GLIBMM','GTHREAD',
                                 'SAMPLERATE','XML','LRDF','COREAUDIO']
-        testobj.uselib_local = ['libpbd','libmidipp','libardour']
+        testobj.use          = ['libpbd','libmidipp','libardour']
         testobj.name         = 'libardour-tests'
         testobj.target       = 'run-tests'
         testobj.install_path = ''
         testobj.defines      = [
             'PACKAGE="libardour3test"',
             'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
-            'CONFIG_DIR="' + os.path.normpath(bld.env['CONFIGDIR']) + '"',
+            'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
             'MODULE_DIR="' + os.path.normpath(bld.env['LIBDIR']) + '"',
             'LOCALEDIR="' + os.path.join(
                 os.path.normpath(bld.env['DATADIR']), 'locale') + '"',

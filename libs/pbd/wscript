@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import autowaf
+from waflib.extras import autowaf as autowaf
 import os
 import sys
 import TaskGen
@@ -21,12 +21,12 @@ APPNAME = 'libpbd'
 VERSION = LIBPBD_VERSION
 
 # Mandatory variables
-srcdir = '.'
-blddir = 'build'
+top = '.'
+out = 'build'
 
 path_prefix = 'libs/pbd/'
 
-def set_options(opt):
+def options(opt):
     autowaf.set_options(opt)
 
 def configure(conf):
@@ -42,19 +42,19 @@ def configure(conf):
     conf.check(function_name='getmntent', header_name='mntent.h', define_name='HAVE_GETMNTENT')
     conf.check(header_name='execinfo.h', define_name='HAVE_EXECINFO')
     conf.check(header_name='unistd.h', define_name='HAVE_UNISTD')
-    if conf.check_cc(function_name='posix_memalign', header_name='stdlib.h', ccflags='-D_XOPEN_SOURCE=600') == False:
+    if conf.check_cc(function_name='posix_memalign', header_name='stdlib.h', cflags='-D_XOPEN_SOURCE=600') == False:
         conf.define ('NO_POSIX_MEMALIGN',1)
 
-    conf.write_config_header('libpbd-config.h')
+    conf.write_config_header('libpbd-config.h', remove=False)
 
     # Boost headers
-    autowaf.check_header(conf, 'boost/shared_ptr.hpp')
-    autowaf.check_header(conf, 'boost/weak_ptr.hpp')
-    # autowaf.check_header(conf, 'boost/uuid/uuid.hpp')
+    autowaf.check_header(conf, 'cxx', 'boost/shared_ptr.hpp')
+    autowaf.check_header(conf, 'cxx', 'boost/weak_ptr.hpp')
+    # autowaf.check_header(conf, 'cxx', 'boost/uuid/uuid.hpp')
 
 def build(bld):
     # Library
-    obj = bld.new_task_gen('cxx', 'shlib')
+    obj = bld(features = 'cxx cxxshlib')
     obj.source = '''
             basename.cc
             base_ui.cc
@@ -111,7 +111,7 @@ def build(bld):
     if bld.env['DEBUG_RT_ALLOC']:
         obj.source += 'debug_rt_alloc.c'
 
-    obj.export_incdirs = ['.']
+    obj.export_includes = ['.']
     obj.includes     = ['.']
     obj.name         = 'libpbd'
     obj.target       = 'pbd'
@@ -129,7 +129,7 @@ def build(bld):
 
     if bld.env['BUILD_TESTS'] and bld.env['HAVE_CPPUNIT']:
         # Unit tests
-        testobj              = bld.new_task_gen('cxx', 'program')
+        testobj              = bld(features = 'cxx cxxprogram')
         testobj.source       = '''
                 test/testrunner.cc
                 test/xpath.cc
@@ -139,7 +139,7 @@ def build(bld):
         testobj.target       = 'run-tests'
         testobj.includes     = obj.includes + ['test', '../pbd']
         testobj.uselib       = 'CPPUNIT XML SNDFILE'
-        testobj.uselib_local = 'libpbd'
+        testobj.use          = 'libpbd'
 
 
 def shutdown():

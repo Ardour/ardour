@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import autowaf
+from waflib.extras import autowaf as autowaf
 import os
 
 # Library version (UNIX style major, minor, micro)
@@ -9,10 +9,10 @@ import os
 LIBARDOUR_OSC_LIB_VERSION = '4.1.0'
 
 # Mandatory variables
-srcdir = '.'
-blddir = 'build'
+top = '.'
+out = 'build'
 
-def set_options(opt):
+def options(opt):
     autowaf.set_options(opt)
 
 def configure(conf):
@@ -20,20 +20,20 @@ def configure(conf):
     autowaf.check_pkg(conf, 'liblo', uselib_store='LO', linkflags='-llo')
 
 def build(bld):
-    obj = bld.new_task_gen('cxx', 'shlib')
+    obj = bld(features = 'cxx cxxshlib')
     obj.source = '''
             osc.cc
             osc_controllable.cc
             osc_route_observer.cc
             interface.cc
     '''
-    obj.export_incdirs = ['.']
+    obj.export_includes = ['.']
     obj.cxxflags     = '-DPACKAGE="ardour_cp"'
     obj.includes     = ['.', './osc']
     obj.name         = 'libardour_osc'
     obj.target       = 'ardour_osc'
     obj.uselib       = ' LO '
-    obj.uselib_local = 'libardour libardour_cp libpbd'
+    obj.use          = 'libardour libardour_cp libpbd'
     obj.vnum         = LIBARDOUR_OSC_LIB_VERSION
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3', 'surfaces')
 

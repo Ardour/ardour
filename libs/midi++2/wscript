@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import autowaf
+from waflib.extras import autowaf as autowaf
 import os
 import sys
 
@@ -20,12 +20,12 @@ APPNAME = 'libmidipp'
 VERSION = LIBMIDIPP_VERSION
 
 # Mandatory variables
-srcdir = '.'
-blddir = 'build'
+top = '.'
+out = 'build'
 
 path_prefix = 'libs/midi++2/'
 
-def set_options(opt):
+def options(opt):
     autowaf.set_options(opt)
 
 def configure(conf):
@@ -38,12 +38,12 @@ def configure(conf):
     autowaf.check_pkg(conf, 'sigc++-2.0', uselib_store='SIGCPP', atleast_version='2.0')
 
     # Boost headers
-    autowaf.check_header(conf, 'boost/shared_ptr.hpp')
-    autowaf.check_header(conf, 'boost/weak_ptr.hpp')
+    autowaf.check_header(conf, 'cxx', 'boost/shared_ptr.hpp')
+    autowaf.check_header(conf, 'cxx', 'boost/weak_ptr.hpp')
 
 def build(bld):
     # Library
-    obj = bld.new_task_gen('cxx', 'shlib')
+    obj = bld(features = 'cxx cxxshlib')
     obj.source = '''
             midi.cc
             channel.cc
@@ -57,12 +57,12 @@ def build(bld):
     '''
     # everybody loves JACK
     obj.cxxflags = [ '-DWITH_JACK_MIDI' ]
-    obj.export_incdirs = ['.']
+    obj.export_includes = ['.']
     obj.includes     = ['.', '../surfaces/control_protocol']
     obj.name         = 'libmidipp'
     obj.target       = 'midipp'
     obj.uselib       = 'GLIBMM SIGCPP XML JACK OSX'
-    obj.uselib_local = 'libpbd libevoral libtimecode'
+    obj.use          = 'libpbd libevoral libtimecode'
     obj.vnum         = LIBMIDIPP_LIB_VERSION
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
 

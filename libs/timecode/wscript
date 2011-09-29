@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import autowaf
+from waflib.extras import autowaf as autowaf
 import Options
 import os
 
@@ -19,10 +19,10 @@ APPNAME = 'timecode'
 VERSION = TIMECODE_VERSION
 
 # Mandatory variables
-srcdir = '.'
-blddir = 'build'
+top = '.'
+out = 'build'
 
-def set_options(opt):
+def options(opt):
     autowaf.set_options(opt)
 
 def configure(conf):
@@ -32,9 +32,9 @@ def configure(conf):
 
 def build(bld):
     # Library
-    obj = bld.new_task_gen('cxx', 'shlib')
+    obj = bld(features = 'cxx cxxshlib')
     obj.source         = [ 'src/time.cc', 'src/bbt_time.cc' ]
-    obj.export_incdirs = ['.']
+    obj.export_includes = ['.']
     obj.includes       = ['.', './src']
     obj.name           = 'libtimecode'
     obj.target         = 'timecode'

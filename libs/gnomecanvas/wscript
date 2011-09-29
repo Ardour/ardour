@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import autowaf
+from waflib.extras import autowaf as autowaf
 import os
 
 # Version of this package (even if built as a child)
@@ -19,8 +19,8 @@ APPNAME = 'libgnomecanvas'
 VERSION = LIBGNOMECANVAS_VERSION
 
 # Mandatory variables
-srcdir = '.'
-blddir = 'build'
+top = '.'
+out = 'build'
 
 path_prefix = 'libs/gnomecanvas/'
 
@@ -41,7 +41,7 @@ libgnomecanvas_sources = [
         'libgnomecanvas/libgnomecanvastypes.c'
         ]
 
-def set_options(opt):
+def options(opt):
     autowaf.set_options(opt)
 
 def configure(conf):
@@ -52,9 +52,9 @@ def configure(conf):
 
 def build(bld):
     # Library
-    obj              = bld.new_task_gen('cc', 'shlib')
+    obj              = bld(features = 'c cshlib')
     obj.source       = libgnomecanvas_sources
-    obj.export_incdirs = ['.']
+    obj.export_includes = ['.']
     obj.includes     = ['.']
     obj.name         = 'libgnomecanvas-2'
     obj.target       = 'gnomecanvas-2'

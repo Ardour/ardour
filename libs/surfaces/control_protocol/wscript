@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import autowaf
+from waflib.extras import autowaf as autowaf
 import os
 
 # Library version (UNIX style major, minor, micro)
@@ -10,27 +10,27 @@ APPNAME = 'libardour_cp'
 LIBARDOUR_CP_LIB_VERSION = '4.1.0'
 
 # Mandatory variables
-srcdir = '.'
-blddir = 'build'
+top = '.'
+out = 'build'
 
-def set_options(opt):
+def options(opt):
     autowaf.set_options(opt)
 
 def configure(conf):
     autowaf.configure(conf)
 
 def build(bld):
-    obj = bld.new_task_gen('cxx', 'shlib')
+    obj = bld(features = 'cxx cxxshlib')
     obj.source = '''
             basic_ui.cc
             control_protocol.cc
     '''
-    obj.export_incdirs = ['.', './control_protocol' ]
+    obj.export_includes = ['.', './control_protocol' ]
     obj.cxxflags     = '-DPACKAGE="ardour_cp"'
     obj.includes     = ['.', './control_protocol']
     obj.name         = 'libardour_cp'
     obj.target       = 'ardourcp'
-    obj.uselib_local = 'libardour libtimecode'
+    obj.use          = 'libardour libtimecode'
     obj.vnum         = LIBARDOUR_CP_LIB_VERSION
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
 

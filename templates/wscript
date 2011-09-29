@@ -1,10 +1,9 @@
 #!/usr/bin/python
 
 import os
-import glob
 
-srcdir = '.'
-blddir = 'build'
+top = '.'
+out = 'build'
 
 def configure(conf):
     pass
@@ -19,14 +18,13 @@ def build(bld):
         subst_dict['%JACK_INPUT%'] = 'alsa_pcm:playback_'
         subst_dict['%JACK_OUTPUT%'] = 'alsa_pcm:capture_'
 
-    templates = glob.glob(os.path.join(bld.get_curdir(), '*.template.in'))
+    templates = bld.path.ant_glob('*.template.in')
     for t in templates:
-        b = os.path.basename(t)
-        obj = bld.new_task_gen('subst')
-        obj.source = [ b ]
-        obj.target = [ b.replace('.in', '') ]
+        obj = bld(features = 'subst')
+        obj.source = [ t ]
+        obj.target = [ os.path.basename(t.srcpath()).replace('.in', '') ]
         obj.dict = subst_dict
         obj.install_path = os.path.join(bld.env['DATADIR'], 'ardour3', 'templates')
 
-def set_options(opt):
+def options(opt):
     pass

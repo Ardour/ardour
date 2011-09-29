@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import autowaf
+from waflib.extras import autowaf as autowaf
 import os
 
 # Version of this package (even if built as a child)
@@ -19,10 +19,10 @@ APPNAME = 'audiographer'
 VERSION = AUDIOGRAPHER_VERSION
 
 # Mandatory variables
-srcdir = '.'
-blddir = 'build'
+top = '.'
+out = 'build'
 
-def set_options(opt):
+def options(opt):
     autowaf.set_options(opt)
 
 def configure(conf):
@@ -39,8 +39,8 @@ def configure(conf):
     autowaf.check_pkg(conf, 'sndfile', uselib_store='SNDFILE', atleast_version='1.0.18', mandatory=False)
 
     # Boost headers
-    autowaf.check_header(conf, 'boost/shared_ptr.hpp')
-    autowaf.check_header(conf, 'boost/format.hpp')
+    autowaf.check_header(conf, 'cxx', 'boost/shared_ptr.hpp')
+    autowaf.check_header(conf, 'cxx', 'boost/format.hpp')
 
 def build(bld):
 
@@ -53,7 +53,7 @@ def build(bld):
     #bld.env['BUILD_TESTS'] = True
     bld.env['HAVE_ALL_GTHREAD'] = bld.env['HAVE_GLIB'] and bld.env['HAVE_GLIBMM'] and bld.env['HAVE_GTHREAD']
 
-    audiographer = bld.new_task_gen('cxx', 'shlib')
+    audiographer = bld(features = 'cxx cxxshlib')
     audiographer.source = '''
             private/gdither/gdither.cc
             src/general/sample_format_converter.cc
@@ -69,17 +69,17 @@ def build(bld):
 
     audiographer.name           = 'libaudiographer'
     audiographer.target         = 'audiographer'
-    audiographer.export_incdirs = ['.', './src']
+    audiographer.export_includes = ['.', './src']
     audiographer.includes       = ['.', './src']
     audiographer.uselib         = 'GLIB GLIBMM GTHREAD SAMPLERATE SNDFILE'
-    audiographer.uselib_local   = 'libpbd'
+    audiographer.use            = 'libpbd'
     audiographer.vnum           = AUDIOGRAPHER_LIB_VERSION
     audiographer.install_path   = os.path.join(bld.env['LIBDIR'], 'ardour3')
 
 
     if bld.env['BUILD_TESTS'] and bld.env['HAVE_CPPUNIT']:
         # Unit tests
-        obj              = bld.new_task_gen('cxx', 'program')
+        obj              = bld(features = 'cxx cxxprogram')
         obj.source       = '''
                 tests/test_runner.cc
                 tests/type_utils_test.cc
@@ -109,7 +109,7 @@ def build(bld):
                     tests/general/sr_converter_test.cc
             '''
 
-        obj.uselib_local = 'libaudiographer'
+        obj.use          = 'libaudiographer'
         obj.uselib       = 'CPPUNIT GLIBMM'
         obj.target       = 'run-tests'
         obj.install_path = ''

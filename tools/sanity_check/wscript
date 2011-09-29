@@ -1,13 +1,13 @@
 #!/usr/bin/env python
-import autowaf
+from waflib.extras import autowaf as autowaf
 import Options
 import os
 
 # Mandatory variables
-srcdir = '.'
-blddir = 'build'
+top = '.'
+out = 'build'
 
-def set_options(opt):
+def options(opt):
     autowaf.set_options(opt)
 
 def configure(conf):
@@ -15,7 +15,7 @@ def configure(conf):
     conf.check_tool('compiler_cxx')
 
 def build(bld):
-    obj = bld.new_task_gen(features = 'cxx cprogram')
+    obj = bld(features = 'cxx cxxprogram')
     obj.includes = [ '.' ]
     obj.source = [ 'main.cpp', 'systemtest.cpp' ]
     obj.target = 'sanityCheck'

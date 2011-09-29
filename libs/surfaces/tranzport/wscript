@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import autowaf
+from waflib.extras import autowaf as autowaf
 import os
 
 # Library version (UNIX style major, minor, micro)
@@ -9,17 +9,17 @@ import os
 LIBARDOUR_TRANZPORT_LIB_VERSION = '4.1.0'
 
 # Mandatory variables
-srcdir = '.'
-blddir = 'build'
+top = '.'
+out = 'build'
 
-def set_options(opt):
+def options(opt):
     autowaf.set_options(opt)
 
 def configure(conf):
     autowaf.configure(conf)
 
 def build(bld):
-    obj = bld.new_task_gen('cxx', 'shlib')
+    obj = bld(features = 'cxx cxxshlib')
     obj.source = '''
             button_events.cc
             buttons.cc
@@ -38,12 +38,12 @@ def build(bld):
             wheel.cc
             wheel_modes.cc
     '''
-    obj.export_incdirs = ['./tranzport']
+    obj.export_includes = ['./tranzport']
     obj.cxxflags     = '-DPACKAGE="ardour_tranzport"'
     obj.includes     = ['.', './tranzport']
     obj.name         = 'libardour_tranzport'
     obj.target       = 'ardour_tranzport'
-    obj.uselib_local = 'libardour libardour_cp'
+    obj.use          = 'libardour libardour_cp'
     obj.vnum         = LIBARDOUR_TRANZPORT_LIB_VERSION
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3', 'surfaces')
 

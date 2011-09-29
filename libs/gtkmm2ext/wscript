@@ -1,7 +1,6 @@
 #!/usr/bin/env python
-import autowaf
+from waflib.extras import autowaf as autowaf
 import os
-import glob
 
 # Version of this package (even if built as a child)
 MAJOR = '0'
@@ -60,12 +59,12 @@ gtkmm2ext_sources = [
 ]
 
 # Mandatory variables
-srcdir = '.'
-blddir = 'build'
+top = '.'
+out = 'build'
 
 path_prefix = 'libs/gtkmm2ext/'
 
-def set_options(opt):
+def options(opt):
     autowaf.set_options(opt)
 
 def configure(conf):
@@ -78,20 +77,20 @@ def configure(conf):
 
 
 def build(bld):
-    obj = bld.new_task_gen(features = 'cc cxx cshlib')
+    obj = bld(features = 'c cxx cxxshlib cshlib')
     obj.source = gtkmm2ext_sources
-    obj.export_incdirs = ['.']
+    obj.export_includes = ['.']
     obj.includes     = ['.']
     obj.name         = 'libgtkmm2ext'
     obj.target       = 'gtkmm2ext'
     obj.uselib       = 'GTKMM GTK GTKOSX OSX GDK'
-    obj.uselib_local = 'libpbd'
+    obj.use          = 'libpbd'
     obj.vnum         = GTKMM2EXT_LIB_VERSION
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
     obj.cxxflags     = [
                     '-DPACKAGE="libgtkmm2ext"',
                     '-DLOCALEDIR="' + os.path.join(
-                            os.path.normpath(bld.env['DATADIRNAME']), 'locale') + '"']
+                            os.path.normpath(bld.env['DATADIR']), 'locale') + '"']
     if bld.env['GTKOSX']:
         obj.source += ['gtkapplication_quartz.mm']
     else:
@@ -99,7 +98,7 @@ def build(bld):
 
     # i18n
     if bld.env['ENABLE_NLS']:
-        mo_files = glob.glob (os.path.join (bld.get_curdir(), 'po/*.mo'))
+        mo_files = bld.path.ant_glob ('po/*.mo')
         for mo in mo_files:
             lang = os.path.basename (mo).replace ('.mo', '')
             bld.install_as (os.path.join(bld.env['PREFIX'], 'share', 'locale',

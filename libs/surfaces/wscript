@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import autowaf
+from waflib.extras import autowaf as autowaf
 import Options
 
 # Version of this package (even if built as a child)
@@ -16,8 +16,8 @@ APPNAME = 'libsurfaces'
 VERSION = LIBSURFACES_VERSION
 
 # Mandatory variables
-srcdir = '.'
-blddir = 'build'
+top = '.'
+out = 'build'
 
 children = [
         'control_protocol',
@@ -30,7 +30,7 @@ children = [
         'wiimote'
 ]
 
-def set_options(opt):
+def options(opt):
     autowaf.set_options(opt)
 
 def sub_config_and_use(conf, name, has_objects = True):
@@ -44,7 +44,11 @@ def configure(conf):
     for i in children:
         sub_config_and_use(conf, i)
 
-    conf.check_cc (lib='libusb', header_name='libusb.h', function_name='usb_interrupt_write', define_name='BUILD_TRANZPORT')
+    autowaf.check_pkg(conf, 'libusb-1.0', uselib_store='USB', mandatory=False)
+    if conf.env['HAVE_USB']:
+        conf.define('BUILD_TRANZPORT', 1)
+
+    #conf.check_cc (lib='libusb', header_name='libusb.h', function_name='usb_interrupt_write', define_name='BUILD_TRANZPORT')
     conf.check_cc (header_name='linux/input.h', define_name='BUILD_POWERMATE')
     conf.check_cc (lib='lo', header_name='lo/lo.h', function_name='lo_server_new', define_name='BUILD_OSC')
 

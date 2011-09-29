@@ -1,4 +1,5 @@
-import autowaf
+#!/usr/bin/env python
+from waflib.extras import autowaf as autowaf
 import os
 
 libappleutility_sources = [
@@ -20,17 +21,17 @@ libappleutility_sources = [
         'CAXException.cpp'
 ]
 
-def set_options(opt):
+def options(opt):
     autowaf.set_options(opt)
 
 def configure(conf):
     autowaf.configure(conf)
 
 def build(bld):
-    obj                = bld.new_task_gen('cxx', 'shlib')
+    obj                = bld(features = 'cxx cxxshlib')
     obj.uselib         = 'AUDIOUNITS OSX'
     obj.source         = libappleutility_sources
-    obj.export_incdirs = ['.']
+    obj.export_includes = ['.']
     obj.includes       = ['.']
     obj.name           = 'libappleutility'
     obj.target         = 'appleutility'
