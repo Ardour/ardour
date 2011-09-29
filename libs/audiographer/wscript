@@ -44,10 +44,10 @@ def configure(conf):
 def build(bld):
 
     # Headers
-    #bld.install_files('${INCLUDEDIR}/audiographer', 'audiographer/*.h')
-    #bld.install_files('${INCLUDEDIR}/audiographer/general', 'audiographer/general/*.h')
-    #bld.install_files('${INCLUDEDIR}/audiographer/sndfile', 'audiographer/sndfile/*.h')
-    #bld.install_files('${INCLUDEDIR}/audiographer/utils', 'audiographer/utils/*.h')
+    #bld.install_files('${INCLUDEDIR}/audiographer', bld.path.ant_glob('audiographer/*.h'))
+    #bld.install_files('${INCLUDEDIR}/audiographer/general', bld.path.ant_glob('audiographer/general/*.h'))
+    #bld.install_files('${INCLUDEDIR}/audiographer/sndfile', bld.path.ant_glob('audiographer/sndfile/*.h'))
+    #bld.install_files('${INCLUDEDIR}/audiographer/utils', bld.path.ant_glob('audiographer/utils/*.h'))
 
     #bld.env['BUILD_TESTS'] = True
     bld.env['HAVE_ALL_GTHREAD'] = (bld.is_defined('HAVE_GLIB')

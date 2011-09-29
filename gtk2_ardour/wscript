@@ -599,8 +599,8 @@ def build(bld):
                       'step_editing.bindings')
 
     # Icons/Images
-    bld.install_files('${DATADIR}/ardour3/icons', 'icons/*.png')
-    bld.install_files('${DATADIR}/ardour3/pixmaps', 'pixmaps/*.xpm')
+    bld.install_files('${DATADIR}/ardour3/icons', bld.path.ant_glob('icons/*.png'))
+    bld.install_files('${DATADIR}/ardour3/pixmaps', bld.path.ant_glob('pixmaps/*.xpm'))
     bld.install_files('${DATADIR}/ardour3', 'splash.png')
 
     # Default UI configuration
@@ -609,7 +609,7 @@ def build(bld):
     bld.install_files('${SYSCONFDIR}/ardour3', 'ardour3_widgets.rc')
 
     # Default export stuff
-    bld.install_files('${SYSCONFDIR}/ardour3/export', 'export/*.format')
+    bld.install_files('${SYSCONFDIR}/ardour3/export', bld.path.ant_glob('export/*.format'))
 
     # i18n
     if bld.env['ENABLE_NLS']:
