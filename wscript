@@ -230,7 +230,7 @@ def set_compiler_flags (conf,opt):
             print("\nWarning: you are building Ardour with SSE support even though your system does not support these instructions. (This may not be an error, especially if you are a package maintainer)")
 
     # check this even if we aren't using FPU optimization
-    if not conf.env['HAVE_POSIX_MEMALIGN']:
+    if not conf.is_defined('HAVE_POSIX_MEMALIGN'):
         optimization_flags.append("-DNO_POSIX_MEMALIGN")
 
     # end optimization section
@@ -552,7 +552,7 @@ def configure(conf):
         conf.define('LXVST_SUPPORT', 1)
         conf.env['LXVST_SUPPORT'] = True
     if bool(conf.env['JACK_SESSION']):
-        conf.define ('HAVE_JACK_SESSION', 1)
+        conf.define('HAVE_JACK_SESSION', 1)
     if opts.wiimote:
         conf.define('WIIMOTE', 1)
         conf.env['WIIMOTE'] = True
@@ -560,7 +560,7 @@ def configure(conf):
     conf.env['PROGRAM_NAME'] = opts.program_name
     if opts.rt_alloc_debug:
         conf.define('DEBUG_RT_ALLOC', 1)
-    if not conf.env['HAVE_CPPUNIT']:
+    if not conf.is_defined('HAVE_CPPUNIT'):
         conf.env['BUILD_TESTS'] = False
 
     set_compiler_flags (conf, Options.options)

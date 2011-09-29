@@ -50,7 +50,9 @@ def build(bld):
     #bld.install_files('${INCLUDEDIR}/audiographer/utils', 'audiographer/utils/*.h')
 
     #bld.env['BUILD_TESTS'] = True
-    bld.env['HAVE_ALL_GTHREAD'] = bld.env['HAVE_GLIB'] and bld.env['HAVE_GLIBMM'] and bld.env['HAVE_GTHREAD']
+    bld.env['HAVE_ALL_GTHREAD'] = (bld.is_defined('HAVE_GLIB')
+                                   and bld.is_defined('HAVE_GLIBMM')
+                                   and bld.is_defined('HAVE_GTHREAD'))
 
     audiographer = bld(features = 'cxx cxxshlib')
     audiographer.source = '''

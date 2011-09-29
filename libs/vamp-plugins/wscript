@@ -46,7 +46,7 @@ def build(bld):
     obj.target       = 'ardourvampplugins'
     obj.uselib       = 'FFTW3F'
     obj.use          = 'libvampplugin libqmdsp'
-    if bld.env['HAVE_AUBIO']:
+    if bld.is_defined('HAVE_AUBIO'):
         obj.source += ' Onset.cpp '
         obj.uselib += ' AUBIO '
     obj.vnum         = LIBARDOURVAMPPLUGINS_LIB_VERSION

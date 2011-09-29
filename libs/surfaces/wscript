@@ -45,7 +45,7 @@ def configure(conf):
         sub_config_and_use(conf, i)
 
     autowaf.check_pkg(conf, 'libusb-1.0', uselib_store='USB', mandatory=False)
-    if conf.env['HAVE_USB']:
+    if conf.is_defined('HAVE_USB'):
         conf.define('BUILD_TRANZPORT', 1)
 
     #conf.check_cc (lib='libusb', header_name='libusb.h', function_name='usb_interrupt_write', define_name='BUILD_TRANZPORT')
@@ -53,12 +53,12 @@ def configure(conf):
     conf.check_cc (lib='lo', header_name='lo/lo.h', function_name='lo_server_new', define_name='BUILD_OSC')
 
     if Options.options.wiimote:
-        conf.check_cc (header_name='cwiid.h',define_name='HAVE_CWIID_H')
-        if not conf.env['HAVE_CWIID_H']:
+        conf.check_cc (header_name='cwiid.h', define_name='HAVE_CWIID_H')
+        if not conf.is_defined('HAVE_CWIID_H'):
             print('WIIMOTE configured but you are missing libcwiid!')
             sys.exit(1)
-        conf.check_cc (header_name='bluetooth/bluetooth.h',define_name='HAVE_BLUETOOTH_H')
-        if not conf.env['HAVE_BLUETOOTH_H']:
+        conf.check_cc (header_name='bluetooth/bluetooth.h', define_name='HAVE_BLUETOOTH_H')
+        if not conf.is_defined('HAVE_BLUETOOTH_H'):
             print('WIIMOTE configured but you are missing the libbluetooth headers needed to compile wiimote support!')
             sys.exit(1)
         conf.define ('BUILD_WIIMOTE', 1)

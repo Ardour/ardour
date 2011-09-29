@@ -370,10 +370,10 @@ def build(bld):
         ]
     obj.includes += ['../libs']
 
-    if bld.env['HAVE_SUIL']:
+    if bld.is_defined('HAVE_SUIL'):
         obj.source += [ 'lv2_plugin_ui.cc' ]
         obj.uselib += ' SUIL '
-    elif bld.env['HAVE_SLV2']:
+    elif bld.is_defined('HAVE_SLV2'):
         obj.source += [ 'lv2_plugin_ui.cc' ]
         obj.uselib += ' SLV2 '
 

@@ -256,13 +256,13 @@ def configure(conf):
                       atleast_version='2.0')
     autowaf.check_pkg(conf, 'lilv-0', uselib_store='LILV',
                       atleast_version='0.0.0', mandatory=False)
-    if conf.env['HAVE_LILV']:
+    if conf.is_defined('HAVE_LILV'):
         autowaf.check_pkg(conf, 'suil-0', uselib_store='SUIL',
                           atleast_version='0.2.0', mandatory=False)
     else:
         autowaf.check_pkg(conf, 'slv2', uselib_store='SLV2',
                           atleast_version='0.6.4', mandatory=False)
-        if conf.env['HAVE_SLV2']:
+        if conf.is_defined('HAVE_SLV2'):
             autowaf.check_pkg(conf, 'rasqal', uselib_store='RASQAL',
                               atleast_version='0.9.14', mandatory=False)
     autowaf.check_pkg(conf, 'soundtouch-1.0', uselib_store='SOUNDTOUCH',
@@ -338,7 +338,7 @@ int main(int argc, char **argv) {
     if ogg_supported():
         conf.define ('HAVE_OGG', 1)
 
-    if conf.env['HAVE_LILV'] or conf.env['HAVE_SLV2']:
+    if conf.is_defined('HAVE_LILV') or conf.is_defined('HAVE_SLV2'):
         conf.define ('LV2_SUPPORT', 1)
 
     conf.write_config_header('libardour-config.h', remove=False)
@@ -382,13 +382,13 @@ def build(bld):
     #obj.uselib += ' SOUNDTOUCH '
     #obj.add_objects = 'default/libs/surfaces/control_protocol/smpte_1.o'
 
-    if bld.env['HAVE_LILV']:
+    if bld.is_defined('HAVE_LILV') :
         obj.source += [ 'lv2_plugin_lilv.cc', 'lv2_event_buffer.cc',
                         'uri_map.cc', 'rdff.c' ]
         obj.uselib += ['LILV']
-        if bld.env['HAVE_SUIL']:
+        if bld.is_defined('HAVE_SUIL'):
             obj.uselib += ['SUIL']
-    elif bld.env['HAVE_SLV2']:
+    elif bld.is_defined('HAVE_SLV2'):
         obj.source += [ 'lv2_plugin.cc', 'lv2_event_buffer.cc',
                         'uri_map.cc', 'rdff.c' ]
         obj.uselib += ['SLV2','RASQAL']
@@ -424,7 +424,7 @@ def build(bld):
                                         lang, 'LC_MESSAGES', 'libardour3.mo'),
                            mo)
 
-    if bld.env['BUILD_TESTS'] and bld.env['HAVE_CPPUNIT']:
+    if bld.env['BUILD_TESTS'] and bld.is_defined('HAVE_CPPUNIT'):
         # Unit tests
         testobj              = bld(features = 'cxx cxxprogram')
         testobj.source       = '''
