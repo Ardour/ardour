@@ -289,7 +289,7 @@ def _doPyp(infileName):
     if infileName == '-':
         fd = sys.stdin
     else:
-        fd = file(infileName)
+        fd = open(infileName)
     inLines = fd.readlines()
     if fd != sys.stdin:
         fd.close()
@@ -310,7 +310,7 @@ def _doPyp(infileName):
 def include_processor(task):
     infileName = task.inputs[0].srcpath()
     outfileName = os.path.join(out, task.outputs[0].bldpath())
-    fdOut = file (outfileName, "w")
+    fdOut = open (outfileName, "w")
     fdOut.write (_doPyp(infileName))
     fdOut.close ()
 
