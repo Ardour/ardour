@@ -1,0 +1,7 @@
+Download waf (http://code.google.com/p/waf/)
+Download autowaf (http://svn.drobilla.net/autowaf)
+
+From within the waf source tree, run:
+
+./waf-light -v --make-waf --tools=misc,/path/to/autowaf.py --prelude=''
+cp ./waf /path/to/ardour/3.0/waf
