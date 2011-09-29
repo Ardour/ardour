@@ -45,8 +45,8 @@ def options(opt):
     autowaf.set_options(opt)
 
 def configure(conf):
+    conf.load('compiler_c')
     autowaf.configure(conf)
-    conf.check_tool('compiler_cc')
     autowaf.check_pkg(conf, 'gtk+-2.0', uselib_store='GTK', atleast_version='2.18')
     autowaf.check_pkg(conf, 'libart-2.0', uselib_store='LIBART', atleast_version='2.3')
 

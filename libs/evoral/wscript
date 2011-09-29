@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from waflib.extras import autowaf as autowaf
-import Options
+from waflib import Options
 import os
 
 # Version of this package (even if built as a child)
@@ -28,10 +28,10 @@ def options(opt):
                     help="Build unit tests")
 
 def configure(conf):
+    conf.load('compiler_cxx')
     autowaf.configure(conf)
     #autowaf.display_header('Evoral Configuration')
 
-    conf.check_tool('compiler_cxx')
     autowaf.check_pkg(conf, 'cppunit', uselib_store='CPPUNIT', atleast_version='1.12.0', mandatory=False)
     autowaf.check_pkg(conf, 'glib-2.0', uselib_store='GLIB', atleast_version='2.2')
     autowaf.check_pkg(conf, 'glibmm-2.4', uselib_store='GLIBMM', atleast_version='2.14.0')

@@ -12,7 +12,7 @@ def options(opt):
     autowaf.set_options(opt)
 
 def sub_config_and_use(conf, name, has_objects = True):
-    conf.sub_config(name)
+    conf.recurse(name)
     autowaf.set_local_lib(conf, name, has_objects)
 
 def configure(conf):
@@ -24,4 +24,4 @@ def configure(conf):
 
 def build(bld):
     for i in panners:
-        bld.add_subdirs(i)
+        bld.recurse(i)

@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 from waflib.extras import autowaf as autowaf
+from waflib import TaskGen
 import os
 import sys
-import TaskGen
 
 # Version of this package (even if built as a child)
 MAJOR = '4'
@@ -30,10 +30,10 @@ def options(opt):
     autowaf.set_options(opt)
 
 def configure(conf):
+    conf.load('compiler_cxx')
     autowaf.build_version_files(path_prefix+'pbd/version.h', path_prefix+'version.cc',
                     'libpbd', MAJOR, MINOR, MICRO)
     autowaf.configure(conf)
-    conf.check_tool('compiler_cxx')
     autowaf.check_pkg(conf, 'libxml-2.0', uselib_store='XML')
     autowaf.check_pkg(conf, 'sigc++-2.0', uselib_store='SIGCPP', atleast_version='2.0')
     if sys.platform != 'darwin':

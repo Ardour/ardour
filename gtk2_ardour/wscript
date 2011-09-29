@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 from waflib.extras import autowaf as autowaf
+from waflib import Options, TaskGen
 import waflib.Logs as Logs, waflib.Utils as Utils
 import os
-import Options
 import sys
-import TaskGen
 import re
 
 # Version of this package (even if built as a child)
@@ -238,12 +237,12 @@ def options(opt):
 
 def configure(conf):
     conf.load('misc')
+    conf.load('compiler_cxx')
     autowaf.build_version_files(
         path_prefix + 'version.h',
         path_prefix + 'version.cc',
         'gtk2_ardour', MAJOR, MINOR, MICRO)
     autowaf.configure(conf)
-    conf.check_tool('compiler_cxx')
 
     if re.search ("linux", sys.platform) != None:
         autowaf.check_pkg(conf, 'alsa', uselib_store='ALSA')
@@ -252,7 +251,7 @@ def configure(conf):
 
     autowaf.check_pkg(conf, 'flac', uselib_store='FLAC',
                       atleast_version='1.2.1')
-    autowaf.check_pkg(conf, 'gthread', uselib_store='GTHREAD',
+    autowaf.check_pkg(conf, 'gthread-2.0', uselib_store='GTHREAD',
                       atleast_version='2.10.1')
     autowaf.check_pkg(conf, 'gtk+-2.0', uselib_store='GTK',
                       atleast_version='2.18')
@@ -269,7 +268,7 @@ def configure(conf):
     autowaf.check_header(conf, 'cxx', 'boost/weak_ptr.hpp')
 
 # Add a waf `feature' to allow compilation of things using winegcc
-from TaskGen import feature
+from waflib.TaskGen import feature
 @feature("wine")
 def set_winegcc(self):
     self.env.LINK_CXX = self.env.LINK_CC = 'wineg++'

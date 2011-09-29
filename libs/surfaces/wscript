@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from waflib.extras import autowaf as autowaf
-import Options
+from waflib import Options
 
 # Version of this package (even if built as a child)
 LIBSURFACES_VERSION = '4.1.0'
@@ -34,7 +34,7 @@ def options(opt):
     autowaf.set_options(opt)
 
 def sub_config_and_use(conf, name, has_objects = True):
-    conf.sub_config(name)
+    conf.recurse(name)
     autowaf.set_local_lib(conf, name, has_objects)
 
 def configure(conf):
@@ -64,9 +64,9 @@ def configure(conf):
         conf.define ('BUILD_WIIMOTE', 1)
 
 def build(bld):
-    bld.add_subdirs('control_protocol')
-    bld.add_subdirs('generic_midi')
-    bld.add_subdirs('mackie')
+    bld.recurse('control_protocol')
+    bld.recurse('generic_midi')
+    bld.recurse('mackie')
     if bld.env['BUILD_OSC']:
         bld.add_subdirs('osc')
     if bld.env['BUILD_POWERMATE']:

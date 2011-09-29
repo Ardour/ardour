@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from waflib.extras import autowaf as autowaf
-import Options
+from waflib import Options
 import os
 import re
 import string
@@ -404,10 +404,10 @@ def options(opt):
     opt.add_option('--noconfirm', action='store_true', default=False, dest='noconfirm',
                     help='Do not ask questions that require confirmation during the build')
     for i in children:
-        opt.sub_options(i)
+        opt.recurse(i)
 
 def sub_config_and_use(conf, name, has_objects = True):
-    conf.sub_config(name)
+    conf.recurse(name)
     autowaf.set_local_lib(conf, name, has_objects)
 
 def configure(conf):
@@ -583,26 +583,26 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('Strict compiler flags', conf.env['STRICT'])
 
     write_config_text('Architecture flags',    opts.arch)
-    write_config_text('Aubio',                 bool(conf.env['HAVE_AUBIO']))
+    write_config_text('Aubio',                 conf.is_defined('HAVE_AUBIO'))
     write_config_text('Build target',          conf.env['build_target'])
-    write_config_text('CoreAudio',             bool(conf.env['HAVE_COREAUDIO']))
-    write_config_text('FLAC',                  bool(conf.env['HAVE_FLAC']))
+    write_config_text('CoreAudio',             conf.is_defined('HAVE_COREAUDIO'))
+    write_config_text('FLAC',                  conf.is_defined('HAVE_FLAC'))
     write_config_text('FPU optimization',      opts.fpu_optimization)
     write_config_text('Freedesktop files',     opts.freedesktop)
     write_config_text('Freesound',             opts.freesound)
-    write_config_text('JACK session support',  bool(conf.env['JACK_SESSION']))
-    write_config_text('LV2 UI embedding',      bool(conf.env['HAVE_SUIL']))
-    write_config_text('LV2 support',           bool(conf.env['LV2_SUPPORT']))
-    write_config_text('LXVST support',         bool(conf.env['LXVST_SUPPORT']))
-    write_config_text('OGG',                   bool(conf.env['HAVE_OGG']))
-    write_config_text('Phone home',            bool(conf.env['PHONE_HOME']))
+    write_config_text('JACK session support',  conf.is_defined('JACK_SESSION'))
+    write_config_text('LV2 UI embedding',      conf.is_defined('HAVE_SUIL'))
+    write_config_text('LV2 support',           conf.is_defined('LV2_SUPPORT'))
+    write_config_text('LXVST support',         conf.is_defined('LXVST_SUPPORT'))
+    write_config_text('OGG',                   conf.is_defined('HAVE_OGG'))
+    write_config_text('Phone home',            conf.is_defined('PHONE_HOME'))
     write_config_text('Program name',          opts.program_name)
-    write_config_text('Rubberband',            bool(conf.env['HAVE_RUBBERBAND']))
-    write_config_text('Samplerate',            bool(conf.env['HAVE_SAMPLERATE']))
-    write_config_text('Soundtouch',            bool(conf.env['HAVE_SOUNDTOUCH']))
+    write_config_text('Rubberband',            conf.is_defined('HAVE_RUBBERBAND'))
+    write_config_text('Samplerate',            conf.is_defined('HAVE_SAMPLERATE'))
+    write_config_text('Soundtouch',            conf.is_defined('HAVE_SOUNDTOUCH'))
     write_config_text('Translation',           opts.nls)
     write_config_text('Tranzport',             opts.tranzport)
-    write_config_text('Unit tests',            bool(conf.env['BUILD_TESTS']))
+    write_config_text('Unit tests',            conf.is_defined('BUILD_TESTS'))
     write_config_text('Universal binary',      opts.universal)
     write_config_text('VST support',           opts.vst)
     write_config_text('Wiimote support',       opts.wiimote)
@@ -632,7 +632,7 @@ def build(bld):
     if sys.platform == 'darwin':
         bld.add_subdirs('libs/appleutility')
     for i in children:
-        bld.add_subdirs(i)
+        bld.recurse(i)
 
     # ideally, we'd like to use the OS-provided MIDI API
     # for default ports. that doesn't work on at least
