@@ -282,7 +282,7 @@ def _doPyp(infileName):
     Does the main work of preprocessing.
     Takes 'infileName' as a filename, opens and processes it,
     and returns the processed file as a string
-    
+
     Note - this works recursively.
     """
     outStr = ''
@@ -293,7 +293,7 @@ def _doPyp(infileName):
     inLines = fd.readlines()
     if fd != sys.stdin:
         fd.close()
-    
+
     for line in inLines:
         bits = re_spaces.split(line)
         if bits[0] == '##include':
@@ -306,7 +306,7 @@ def _doPyp(infileName):
 
     # done
     return outStr
-    
+
 def include_processor(task):
     infileName = task.inputs[0].srcpath()
     outfileName = os.path.join(out, task.outputs[0].bldpath())
@@ -561,7 +561,7 @@ def build(bld):
 
     bld (
         rule   = include_processor,
-        source = 'ardour3_ui_light.rc.pre', 
+        source = 'ardour3_ui_light.rc.pre',
         target = 'ardour3_ui_light.rc'
         )
 
@@ -607,7 +607,7 @@ def build(bld):
     bld.install_files('${SYSCONFDIR}/ardour3', 'ardour3_ui_default.conf')
     # Generic widget style mappings
     bld.install_files('${SYSCONFDIR}/ardour3', 'ardour3_widgets.rc')
-    
+
     # Default export stuff
     bld.install_files('${SYSCONFDIR}/ardour3/export', 'export/*.format')
 
