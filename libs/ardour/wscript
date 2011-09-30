@@ -282,13 +282,13 @@ def configure(conf):
 
     conf.define('CURRENT_SESSION_FILE_VERSION', CURRENT_SESSION_FILE_VERSION)
 
-    conf.check(header_name='sys/vfs.h', define_name='HAVE_SYS_VFS_H')
-    conf.check(header_name='wordexp.h', define_name='HAVE_WORDEXP')
+    conf.check(header_name='sys/vfs.h', define_name='HAVE_SYS_VFS_H',mandatory=False)
+    conf.check(header_name='wordexp.h', define_name='HAVE_WORDEXP',mandatory=False)
 
     conf.check(header_name='jack/session.h', uselib = [ 'JACK' ],
                define_name='HAVE_JACK_SESSION')
 
-    conf.check(header_name='unistd.h', define_name='HAVE_UNISTD')
+    conf.check(header_name='unistd.h', define_name='HAVE_UNISTD',mandatory=False)
 
     conf.check_cc(fragment = '''
 #include <jack/jack.h>
@@ -303,9 +303,7 @@ int main(int argc, char **argv) {
                   define_name = 'HAVE_JACK_ON_INFO_SHUTDOWN',
                   okmsg = 'present')
 
-    missing_jack_message = '''missing - a version of JACK that supports \
-jack_port_set_latency_range() is required to compile Ardour3.  Currently this\
-means using JACK version 0.120.1 from http://www.jackaudio.org/download'''
+    missing_jack_message = 'missing - a version of JACK that supports jack_port_set_latency_range() is required to compile Ardour3.'
 
     conf.check_cc(fragment = '''
 #include <jack/jack.h>
