@@ -406,7 +406,7 @@ def build(bld):
         obj.use    += ['libappleutility']
         obj.source += [ 'audio_unit.cc' ]
 
-    if bld.is_defined('FPU_OPTIMIZATION'):
+    if Options.options.fpu_optimization:
         if (bld.env['build_target'] == 'i386'
             or bld.env['build_target'] == 'i686'):
             obj.source += [ 'sse_functions_xmm.cc', 'sse_functions.s' ]
