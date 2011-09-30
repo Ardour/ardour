@@ -35,9 +35,6 @@ children = [
         'gtk2_ardour',
         'templates',
         'export',
-# this needs to be conditional at some point, since
-# we will not build it or use it on OS X
-        'tools/sanity_check'
 ]
 
 i18n_children = [
@@ -45,6 +42,11 @@ i18n_children = [
         'libs/ardour',
         'libs/gtkmm2ext',
 ]
+
+if sys.platform != 'darwin':
+    children += [ 'tools/sanity_check' ]
+else:
+    children += [ 'libs/appleutility' ]
 
 # Version stuff
 
@@ -510,8 +512,6 @@ def configure(conf):
     autowaf.check_pkg(conf, 'glibmm-2.4', uselib_store='GLIBMM', atleast_version='2.14.0')
     autowaf.check_pkg(conf, 'sndfile', uselib_store='SNDFILE', atleast_version='1.0.18')
 
-    if sys.platform == 'darwin':
-        sub_config_and_use(conf, 'libs/appleutility')
     for i in children:
         sub_config_and_use(conf, i)
 
@@ -630,8 +630,7 @@ def build(bld):
     bld.path.find_dir ('libs/pbd/pbd')
 
     autowaf.set_recursive()
-    if sys.platform == 'darwin':
-        bld.add_subdirs('libs/appleutility')
+
     for i in children:
         bld.recurse(i)
 
