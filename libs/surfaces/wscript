@@ -45,7 +45,7 @@ def configure(conf):
         sub_config_and_use(conf, i)
 
     autowaf.check_pkg(conf, 'libusb-1.0', uselib_store='USB', mandatory=False)
-    if conf.is_defined('HAVE_USB'):
+    if Options.options.tranzport and conf.is_defined('HAVE_USB'):
         conf.define('BUILD_TRANZPORT', 1)
 
     #conf.check_cc (lib='libusb', header_name='libusb.h', function_name='usb_interrupt_write', define_name='BUILD_TRANZPORT')
