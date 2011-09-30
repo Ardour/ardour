@@ -450,7 +450,7 @@ def build(bld):
             'VAMP_DIR="' + os.path.join(
                 os.path.normpath(bld.env['LIBDIR']), 'ardour3', 'vamp') + '"'
             ]
-        if bld.is_defined('FPU_OPTIMIZATION'):
+        if bld.env['FPU_OPTIMIZATION']:
             testobj.source += [ 'sse_functions_xmm.cc' ]
             if (bld.env['build_target'] == 'i386'
                 or bld.env['build_target'] == 'i686'):
