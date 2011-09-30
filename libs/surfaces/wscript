@@ -49,8 +49,8 @@ def configure(conf):
         conf.define('BUILD_TRANZPORT', 1)
 
     #conf.check_cc (lib='libusb', header_name='libusb.h', function_name='usb_interrupt_write', define_name='BUILD_TRANZPORT')
-    conf.check_cc (header_name='linux/input.h', define_name='BUILD_POWERMATE')
-    conf.check_cc (lib='lo', header_name='lo/lo.h', function_name='lo_server_new', define_name='BUILD_OSC')
+    conf.check_cc (header_name='linux/input.h', define_name='BUILD_POWERMATE',mandatory=False)
+    conf.check_cc (lib='lo', header_name='lo/lo.h', function_name='lo_server_new', define_name='BUILD_OSC',mandatory=False)
 
     if Options.options.wiimote:
         conf.check_cc (header_name='cwiid.h', define_name='HAVE_CWIID_H')
