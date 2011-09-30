@@ -336,7 +336,7 @@ def build_color_scheme(path, prefix):
 def build(bld):
     # GTK front-end; if we're using VST we build this as a shared library,
     # otherwise it's a normal executabale
-    if bld.env['VST_SUPPORT']:
+    if bld.is_defined('VST_SUPPORT'):
         obj = bld(features = 'cxx c cxxshlib')
     else:
         obj = bld(features = 'cxx c cxxprogram')
@@ -345,7 +345,7 @@ def build(bld):
     obj.source       = gtk2_ardour_sources
     obj.name         = 'gtk2_ardour'
     obj.linkflags    = []
-    if bld.env['VST_SUPPORT']:
+    if bld.is_defined('VST_SUPPORT'):
         obj.target = 'gtk2_ardour'
         obj.includes += ['../libs/fst']
     else:
@@ -377,28 +377,28 @@ def build(bld):
         obj.source += [ 'lv2_plugin_ui.cc' ]
         obj.uselib += ' SLV2 '
 
-    if bld.env['FREESOUND']:
+    if bld.is_defined('FREESOUND'):
         obj.source +=  [ 'sfdb_freesound_mootcher.cc' ]
 
-    if bld.env['VST_SUPPORT']:
+    if bld.is_defined('VST_SUPPORT'):
         obj.source += [ 'vst_pluginui.cc' ]
         obj.defines += [ 'VST_SUPPORT' ]
         bld.env.append ('LINKFLAGS', '-lX11')
 
-    if bld.env['LXVST_SUPPORT']:
+    if bld.is_defined('LXVST_SUPPORT'):
         obj.source += [ 'lxvst_pluginui.cc' ]
         obj.defines += [ 'LXVST_SUPPORT' ]
         obj.linkflags += [ '-lX11' ]
 
-    if bld.env['PHONE_HOME']:
+    if bld.is_defined('PHONE_HOME'):
         obj.defines += [ 'PHONE_HOME' ]
 
-    if bld.env['COREAUDIO']:
+    if bld.is_defined('COREAUDIO'):
         TaskGen.task_gen.mappings['.mm'] = TaskGen.task_gen.mappings['.cc']
         obj.source += [ 'cocoacarbon.mm', 'au_pluginui.mm' ]
         obj.use += ' libappleutility '
 
-    if bld.env['VST_SUPPORT']:
+    if bld.is_defined('VST_SUPPORT'):
         # If we require VST support we build a stub main() and the FST library
         # here using winegcc, and link it to the GTK front-end library
         obj = bld(features = 'cxx c cxxprogram wine')
@@ -455,7 +455,7 @@ def build(bld):
     base_font       = ""
 
     # Set up font sizes
-    if bld.env['IS_OSX']: # OS X fonts
+    if bld.is_defined('GTKOSX'): # OS X fonts
         basefont = "Lucida Grande"
         font_sizes = {
                 'TINY' : '7',
@@ -567,7 +567,7 @@ def build(bld):
 
     # Menus
     menus_argv = []
-    if bld.env['GTKOSX']:
+    if bld.is_defined('GTKOSX'):
         menus_argv = [ '-E', '-P', '-DGTKOSX' ]
     else:
         menus_argv = [ '-E', '-P' ]
@@ -612,7 +612,7 @@ def build(bld):
     bld.install_files('${SYSCONFDIR}/ardour3/export', bld.path.ant_glob('export/*.format'))
 
     # i18n
-    if bld.env['ENABLE_NLS']:
+    if bld.is_defined('ENABLE_NLS'):
         mo_files = bld.path.ant_glob ('po/*.mo')
         for mo in mo_files:
             lang = os.path.basename (mo).replace ('.mo', '')

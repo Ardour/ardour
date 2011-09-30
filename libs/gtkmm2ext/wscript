@@ -91,13 +91,13 @@ def build(bld):
                     '-DPACKAGE="libgtkmm2ext"',
                     '-DLOCALEDIR="' + os.path.join(
                             os.path.normpath(bld.env['DATADIR']), 'locale') + '"']
-    if bld.env['GTKOSX']:
+    if bld.is_defined('GTKOSX'):
         obj.source += ['gtkapplication_quartz.mm']
     else:
         obj.source += ['gtkapplication_x11.c']
 
     # i18n
-    if bld.env['ENABLE_NLS']:
+    if bld.is_defined('ENABLE_NLS'):
         mo_files = bld.path.ant_glob ('po/*.mo')
         for mo in mo_files:
             lang = os.path.basename (mo).replace ('.mo', '')

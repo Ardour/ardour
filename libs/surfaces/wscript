@@ -67,14 +67,14 @@ def build(bld):
     bld.recurse('control_protocol')
     bld.recurse('generic_midi')
     bld.recurse('mackie')
-    if bld.env['BUILD_OSC']:
-        bld.add_subdirs('osc')
-    if bld.env['BUILD_POWERMATE']:
-        bld.add_subdirs('powermate')
-    if bld.env['BUILD_WIIMOTE']:
-        bld.add_subdirs('wiimote')
-    if bld.env['BUILD_TRANZPORT']:
-        bld.add_subdirs('tranzport')
+    if bld.is_defined ('BUILD_OSC'):
+        bld.recurse('osc')
+    if bld.is_defined('BUILD_POWERMATE'):
+        bld.recurse('powermate')
+    if bld.is_defined('BUILD_WIIMOTE'):
+        bld.recurse('wiimote')
+    if bld.is_defined('BUILD_TRANZPORT'):
+        bld.recurse('tranzport')
 
 def shutdown():
     autowaf.shutdown()

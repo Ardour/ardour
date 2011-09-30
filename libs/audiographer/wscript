@@ -78,7 +78,7 @@ def build(bld):
     audiographer.install_path   = os.path.join(bld.env['LIBDIR'], 'ardour3')
 
 
-    if bld.env['BUILD_TESTS'] and bld.is_defined('HAVE_CPPUNIT'):
+    if bld.is_defined('BUILD_TESTS') and bld.is_defined('HAVE_CPPUNIT'):
         # Unit tests
         obj              = bld(features = 'cxx cxxprogram')
         obj.source       = '''
@@ -95,7 +95,7 @@ def build(bld):
                 tests/general/silence_trimmer_test.cc
         '''
 
-        if bld.env['HAVE_ALL_GTHREAD']:
+        if bld.is_defined('HAVE_ALL_GTHREAD'):
             obj.source += '''
                     tests/general/threader_test.cc
             '''

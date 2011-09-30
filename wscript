@@ -37,6 +37,9 @@ children = [
         'export',
 ]
 
+#if config[config_arch] != 'apple':
+#  children += [ 'tools/sanity_check' ]
+
 i18n_children = [
         'gtk2_ardour',
         'libs/ardour',

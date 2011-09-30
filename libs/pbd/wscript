@@ -108,7 +108,7 @@ def build(bld):
             xml++.cc
     '''
 
-    if bld.env['DEBUG_RT_ALLOC']:
+    if bld.is_defined('DEBUG_RT_ALLOC'):
         obj.source += 'debug_rt_alloc.c'
 
     obj.export_includes = ['.']
@@ -127,7 +127,7 @@ def build(bld):
     if bld.env['build_target'] == 'x86_64':
         obj.cxxflags += [ '-DUSE_X86_64_ASM' ]
 
-    if bld.env['BUILD_TESTS'] and bld.is_defined('HAVE_CPPUNIT'):
+    if bld.is_defined ('BUILD_TESTS') and bld.is_defined('HAVE_CPPUNIT'):
         # Unit tests
         testobj              = bld(features = 'cxx cxxprogram')
         testobj.source       = '''

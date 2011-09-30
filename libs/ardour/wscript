@@ -391,22 +391,22 @@ def build(bld):
                         'uri_map.cc', 'rdff.c' ]
         obj.uselib += ['SLV2','RASQAL']
 
-    if bld.env['VST_SUPPORT']:
+    if bld.is_defined('VST_SUPPORT'):
         obj.source += [ 'vst_plugin.cc', 'session_vst.cc' ]
         obj.includes += [ '../fst' ]
         obj.defines += [ 'VST_SUPPORT' ]
 
-    if bld.env['LXVST_SUPPORT']:
+    if bld.is_defined('LXVST_SUPPORT'):
         obj.source += [ 'lxvst_plugin.cc', 'session_lxvst.cc', 'vstfx.cc', 'vstfxwin.cc', 'vstfxinfofile.cc' ]
         obj.defines += [ 'LXVST_SUPPORT' ]
 
 
-    if bld.env['COREAUDIO']:
+    if bld.is_defined('COREAUDIO'):
         obj.source += [ 'coreaudiosource.cc', 'caimportable.cc' ]
         obj.use    += ['libappleutility']
         obj.source += [ 'audio_unit.cc' ]
 
-    if bld.env['FPU_OPTIMIZATION']:
+    if bld.is_defined('FPU_OPTIMIZATION'):
         if (bld.env['build_target'] == 'i386'
             or bld.env['build_target'] == 'i686'):
             obj.source += [ 'sse_functions_xmm.cc', 'sse_functions.s' ]
@@ -414,7 +414,7 @@ def build(bld):
             obj.source += [ 'sse_functions_xmm.cc', 'sse_functions_64bit.s' ]
 
     # i18n
-    if bld.env['ENABLE_NLS']:
+    if bld.is_defined('ENABLE_NLS'):
         mo_files = bld.path.ant_glob('po/*.mo')
         for mo in mo_files:
             lang = os.path.basename(mo).replace('.mo', '')
@@ -422,7 +422,7 @@ def build(bld):
                                         lang, 'LC_MESSAGES', 'libardour3.mo'),
                            mo)
 
-    if bld.env['BUILD_TESTS'] and bld.is_defined('HAVE_CPPUNIT'):
+    if bld.is_defined('BUILD_TESTS') and bld.is_defined('HAVE_CPPUNIT'):
         # Unit tests
         testobj              = bld(features = 'cxx cxxprogram')
         testobj.source       = '''
@@ -450,7 +450,7 @@ def build(bld):
             'VAMP_DIR="' + os.path.join(
                 os.path.normpath(bld.env['LIBDIR']), 'ardour3', 'vamp') + '"'
             ]
-        if bld.env['FPU_OPTIMIZATION']:
+        if bld.is_defined('FPU_OPTIMIZATION'):
             testobj.source += [ 'sse_functions_xmm.cc' ]
             if (bld.env['build_target'] == 'i386'
                 or bld.env['build_target'] == 'i686'):

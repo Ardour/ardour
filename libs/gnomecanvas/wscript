@@ -49,6 +49,8 @@ def configure(conf):
     autowaf.configure(conf)
     autowaf.check_pkg(conf, 'gtk+-2.0', uselib_store='GTK', atleast_version='2.18')
     autowaf.check_pkg(conf, 'libart-2.0', uselib_store='LIBART', atleast_version='2.3')
+    autowaf.check_pkg(conf, 'pango', uselib_store='PANGO', atleast_version='1.28')
+    autowaf.check_pkg(conf, 'pangoft2', uselib_store='PANGOFT2', atleast_version='1.28')
 
 def build(bld):
     # Library
@@ -58,7 +60,7 @@ def build(bld):
     obj.includes     = ['.']
     obj.name         = 'libgnomecanvas-2'
     obj.target       = 'gnomecanvas-2'
-    obj.uselib       = 'GLIB GTK LIBART'
+    obj.uselib       = 'GLIB GTK LIBART PANGO PANGOFT2'
     obj.vnum         = LIBGNOMECANVAS_LIB_VERSION
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
 
