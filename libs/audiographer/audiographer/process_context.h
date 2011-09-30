@@ -43,7 +43,7 @@ public:
 	
 	/// Normal copy constructor
 	ProcessContext (ProcessContext<T> const & other)
-		: _data (other._data), _frames (other._frames), _channels (other._channels), _flags (other._flags)
+	: _data (other._data), _frames (other._frames), _channels (other._channels), _flags (other._flags)
 	{ /* No need to validate data */ }
 	
 	/// "Copy constructor" with unique data, frame and channel count, but copies flags

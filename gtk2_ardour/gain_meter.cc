@@ -634,7 +634,7 @@ GainMeterBase::gain_slider_button_press (GdkEventButton* ev)
 }
 
 bool
-GainMeterBase::gain_slider_button_release (GdkEventButton* ev)
+GainMeterBase::gain_slider_button_release (GdkEventButton*)
 {
 	_amp->gain_control()->stop_touch (false, _amp->session().transport_frame());
 	return true;

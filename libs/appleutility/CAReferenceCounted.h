@@ -70,12 +70,12 @@ public:
 			}
 
 protected:
-    virtual	~CAReferenceCounted() { }
-	
+	virtual	~CAReferenceCounted() { }
+	CAReferenceCounted(const CAReferenceCounted &) : mRefCount(0) { }
+
 private:
 	SInt32		mRefCount;
 
-	CAReferenceCounted(const CAReferenceCounted &) : mRefCount(0) { }
 	CAReferenceCounted operator=(const CAReferenceCounted &) { return *this; }
 };
 

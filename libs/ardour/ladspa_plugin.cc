@@ -761,7 +761,7 @@ LadspaPlugin::load_preset (PresetRecord r)
 
 /* XXX: should be in liblrdf */
 static void
-lrdf_remove_preset (const char *source, const char *setting_uri)
+lrdf_remove_preset (const char* /*source*/, const char *setting_uri)
 {
 	lrdf_statement p;
 	lrdf_statement *q;

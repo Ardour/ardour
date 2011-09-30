@@ -1230,7 +1230,7 @@ Editor::select_all_in_track (Selection::Operation op)
 }
 
 void
-Editor::select_all_internal_edit (Selection::Operation op)
+Editor::select_all_internal_edit (Selection::Operation)
 {
         /* currently limited to MIDI only */
 

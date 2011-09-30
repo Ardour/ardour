@@ -352,7 +352,7 @@ bind_keys_azerty(PianoKeyboard *pk)
 }
 
 static gint
-keyboard_event_handler(GtkWidget *mk, GdkEventKey *event, gpointer notused)
+keyboard_event_handler(GtkWidget *mk, GdkEventKey *event, gpointer ignored)
 {
 	int		note;
 	char		*key;
@@ -433,7 +433,7 @@ get_note_for_xy(PianoKeyboard *pk, int x, int y)
 }
 
 static gboolean
-mouse_button_event_handler(PianoKeyboard *pk, GdkEventButton *event, gpointer notused)
+mouse_button_event_handler(PianoKeyboard *pk, GdkEventButton *event, gpointer ignored)
 {
 	int		x = event->x;
 	int		y = event->y;
@@ -473,7 +473,7 @@ mouse_button_event_handler(PianoKeyboard *pk, GdkEventButton *event, gpointer no
 }
 
 static gboolean
-mouse_motion_event_handler(PianoKeyboard *pk, GdkEventMotion *event, gpointer notused)
+mouse_motion_event_handler(PianoKeyboard *pk, GdkEventMotion *event, gpointer ignored)
 {
 	int		note;
 

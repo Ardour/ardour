@@ -180,7 +180,7 @@ void DFProcess::removeDCNormalize( double *src, double*dst )
 
     MathUtilities::getAlphaNorm( src, m_length, m_alphaNormParam, &DFAlphaNorm );
 
-    for( unsigned int i = 0; i< m_length; i++)
+    for(int i = 0; i< m_length; i++)
     {
 	dst[ i ] = ( src[ i ] - DFMin ) / DFAlphaNorm; 
     }

@@ -131,7 +131,7 @@ AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> insert)
 
 	smaller_hbox->set_spacing (6);
 	smaller_hbox->pack_start (preset_label, false, false, 4);
-	smaller_hbox->pack_start (preset_combo, false, false);
+	smaller_hbox->pack_start (_preset_combo, false, false);
 	smaller_hbox->pack_start (save_button, false, false);
 #if 0
 	/* one day these might be useful with an AU plugin, but not yet */
@@ -158,7 +158,7 @@ AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> insert)
 	pack_start (low_box, false, false);
 
 	preset_label.show ();
-	preset_combo.show ();
+	_preset_combo.show ();
 	automation_mode_label.show ();
 	automation_mode_selector.show ();
 	bypass_button.show ();
@@ -276,7 +276,7 @@ AUPluginUI::create_cocoa_view ()
 	UInt32     dataSize;
 	Boolean    isWritable;
 	NSString*	    factoryClassName = 0;
-	NSURL*	            CocoaViewBundlePath;
+	NSURL*	            CocoaViewBundlePath = NULL;
 
 	OSStatus result = AudioUnitGetPropertyInfo (*au->get_au(),
 						    kAudioUnitProperty_CocoaUI,

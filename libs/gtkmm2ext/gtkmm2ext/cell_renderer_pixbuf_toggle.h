@@ -17,13 +17,6 @@
 
 */
 
-#ifdef GTKOSX
-#include <MacTypes.h>
-#if defined(Style)
-#undef style
-#endif
-#endif
-
 #ifndef __gtkmm2ext_cell_renderer_pixbuf_toggle_h__ 
 #define __gtkmm2ext_cell_renderer_pixbuf_toggle_h__
 

@@ -121,7 +121,7 @@ MonoPanner::value_change ()
 }
 
 bool
-MonoPanner::on_expose_event (GdkEventExpose* ev)
+MonoPanner::on_expose_event (GdkEventExpose*)
 {
 	Glib::RefPtr<Gdk::Window> win (get_window());
 	Glib::RefPtr<Gdk::GC> gc (get_style()->get_base_gc (get_state()));
@@ -469,13 +469,13 @@ MonoPanner::on_key_press_event (GdkEventKey* ev)
 }
 
 bool
-MonoPanner::on_key_release_event (GdkEventKey* ev)
+MonoPanner::on_key_release_event (GdkEventKey*)
 {
         return false;
 }
 
 bool
-MonoPanner::on_enter_notify_event (GdkEventCrossing* ev)
+MonoPanner::on_enter_notify_event (GdkEventCrossing*)
 {
 	grab_focus ();
 	Keyboard::magic_widget_grab_focus ();

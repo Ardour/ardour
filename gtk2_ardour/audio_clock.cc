@@ -1006,7 +1006,7 @@ AudioClock::button_press (GdkEventButton *ev, CairoCell* cell)
 }
 
 bool
-AudioClock::button_release (GdkEventButton *ev, CairoCell* cell)
+AudioClock::button_release (GdkEventButton *ev, CairoCell*)
 {
 	if (editable) {
 		if (dragging) {

@@ -224,7 +224,7 @@ RegionView::~RegionView ()
 }
 
 void
-RegionView::set_silent_frames (const AudioIntervalResult& silences, double threshold)
+RegionView::set_silent_frames (const AudioIntervalResult& silences, double /*threshold*/)
 {
         framecnt_t shortest = max_framecnt;
 

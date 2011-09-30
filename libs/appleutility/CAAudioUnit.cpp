@@ -191,7 +191,7 @@ private:
 private:
 		// get the compiler to tell us when we do a bad thing!!!
 	AUState () {}
-	AUState (const AUState&) {}
+        AUState (const AUState& other) : CAReferenceCounted (other) {}
 	AUState& operator= (const AUState&) { return *this; } 
 };						
 						
@@ -1084,13 +1084,13 @@ bool		CAAudioUnit::HasCustomView () const
 OSStatus		CAAudioUnit::GetParameter(AudioUnitParameterID inID, AudioUnitScope scope, AudioUnitElement element,
 											Float32 &outValue) const
 {
-	return mDataPtr ? mDataPtr->GetParameter (inID, scope, element, outValue) : paramErr;
+	return mDataPtr ? (OSStatus) mDataPtr->GetParameter (inID, scope, element, outValue) : paramErr;
 }
 
 OSStatus		CAAudioUnit::SetParameter(AudioUnitParameterID inID, AudioUnitScope scope, AudioUnitElement element,
 											Float32 value, UInt32 bufferOffsetFrames)
 {
-	return mDataPtr ? mDataPtr->SetParameter (inID, scope, element, value, bufferOffsetFrames) : paramErr;
+	return mDataPtr ? (OSStatus) mDataPtr->SetParameter (inID, scope, element, value, bufferOffsetFrames) : paramErr;
 }
 
 OSStatus		CAAudioUnit::MIDIEvent (UInt32			inStatus,
@@ -1098,7 +1098,7 @@ OSStatus		CAAudioUnit::MIDIEvent (UInt32			inStatus,
 								UInt32					inData2,
 								UInt32					inOffsetSampleFrame)
 {
-	return mDataPtr ? mDataPtr->MIDIEvent (inStatus, inData1, inData2, inOffsetSampleFrame) : paramErr;
+	return mDataPtr ? (OSStatus) mDataPtr->MIDIEvent (inStatus, inData1, inData2, inOffsetSampleFrame) : paramErr;
 }
 
 OSStatus	CAAudioUnit::StartNote (MusicDeviceInstrumentID		inInstrument,
@@ -1107,15 +1107,15 @@ OSStatus	CAAudioUnit::StartNote (MusicDeviceInstrumentID		inInstrument,
 									UInt32						inOffsetSampleFrame,
 									const MusicDeviceNoteParams * inParams)
 {
-	return mDataPtr ? mDataPtr->StartNote (inInstrument, inGroupID, outNoteInstanceID, inOffsetSampleFrame, inParams) 
-					: paramErr;
+	return mDataPtr ? (OSStatus) mDataPtr->StartNote (inInstrument, inGroupID, outNoteInstanceID, inOffsetSampleFrame, inParams) 
+		: paramErr;
 }
 
 OSStatus	CAAudioUnit::StopNote (MusicDeviceGroupID		inGroupID,
 									NoteInstanceID				inNoteInstanceID,
 									UInt32						inOffsetSampleFrame)
 {
-	return mDataPtr ? mDataPtr->StopNote (inGroupID, inNoteInstanceID, inOffsetSampleFrame) : paramErr;
+	return mDataPtr ? (OSStatus) mDataPtr->StopNote (inGroupID, inNoteInstanceID, inOffsetSampleFrame) : paramErr;
 }
 
 #pragma mark __Render
@@ -1126,7 +1126,7 @@ OSStatus		CAAudioUnit::Render (AudioUnitRenderActionFlags 			* ioActionFlags,
 												UInt32						inNumberFrames,
 												AudioBufferList				* ioData)
 {
-	return mDataPtr ? mDataPtr->Render (ioActionFlags, inTimeStamp, inOutputBusNumber, inNumberFrames, ioData) : paramErr;
+	return mDataPtr ? (OSStatus) mDataPtr->Render (ioActionFlags, inTimeStamp, inOutputBusNumber, inNumberFrames, ioData) : paramErr;
 }
 
 static AURenderCallbackStruct sRenderCallback;

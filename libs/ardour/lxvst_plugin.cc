@@ -125,7 +125,7 @@ LXVSTPlugin::set_block_size (pframes_t nframes)
 }
 
 float 
-LXVSTPlugin::default_value (uint32_t port)
+LXVSTPlugin::default_value (uint32_t)
 {
 	return 0;
 }
@@ -346,7 +346,7 @@ LXVSTPlugin::load_plugin_preset (PresetRecord r)
 	int index;
 	int const p = sscanf (r.uri.c_str(), "VST:%d:%d", &id, &index);
 	assert (p == 2);
-
+	
 	_vstfx->want_program = index;
 	return true;
 }
@@ -653,7 +653,7 @@ LXVSTPlugin::has_editor () const
 }
 
 void 
-LXVSTPlugin::print_parameter (uint32_t param, char *buf, uint32_t len) const
+LXVSTPlugin::print_parameter (uint32_t param, char *buf, uint32_t /*len*/) const
 {
 	char *first_nonws;
 

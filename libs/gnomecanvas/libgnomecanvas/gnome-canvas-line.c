@@ -1125,7 +1125,7 @@ gnome_canvas_line_unrealize (GnomeCanvasItem *item)
 }
 
 static void
-item_to_canvas (GnomeCanvas *canvas, double *item_coords, GdkPoint *canvas_coords, int num_points,
+item_to_canvas (GnomeCanvas * canvas, double *item_coords, GdkPoint *canvas_coords, int num_points,
 		int *num_drawn_points, double i2c[6], int x, int y)
 {
 	int i;

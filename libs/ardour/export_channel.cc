@@ -241,13 +241,13 @@ RouteExportChannel::read (Sample const *& data, framecnt_t frames) const
 }
 
 void
-RouteExportChannel::get_state (XMLNode * node) const
+RouteExportChannel::get_state (XMLNode *) const
 {
 	// TODO
 }
 
 void
-RouteExportChannel::set_state (XMLNode * node, Session & session)
+RouteExportChannel::set_state (XMLNode *, Session &)
 {
 	// TODO
 }

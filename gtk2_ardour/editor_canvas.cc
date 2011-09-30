@@ -890,7 +890,7 @@ Editor::set_canvas_cursor (Gdk::Cursor* cursor, bool save)
 }
 
 bool
-Editor::track_canvas_key_press (GdkEventKey* event)
+Editor::track_canvas_key_press (GdkEventKey*)
 {
 	/* XXX: event does not report the modifier key pressed down, AFAICS, so use the Keyboard object instead */
 	if (mouse_mode == Editing::MouseZoom && Keyboard::the_keyboard().key_is_down (GDK_Control_L)) {
@@ -901,7 +901,7 @@ Editor::track_canvas_key_press (GdkEventKey* event)
 }
 
 bool
-Editor::track_canvas_key_release (GdkEventKey* event)
+Editor::track_canvas_key_release (GdkEventKey*)
 {
 	if (mouse_mode == Editing::MouseZoom && !Keyboard::the_keyboard().key_is_down (GDK_Control_L)) {
 		set_canvas_cursor (_cursors->zoom_in, true);

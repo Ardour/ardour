@@ -71,6 +71,7 @@ Speakers::Speakers ()
 }
 
 Speakers::Speakers (const Speakers& s)
+	: Stateful ()
 {
         _speakers = s._speakers;
 }

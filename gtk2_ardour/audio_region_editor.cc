@@ -96,10 +96,9 @@ AudioRegionEditor::AudioRegionEditor (Session* s, boost::shared_ptr<AudioRegion>
 
 AudioRegionEditor::~AudioRegionEditor ()
 {
-	pthread_cancel_one (_peak_amplitude_thread_handle);
 	void* v;
-	int const r = pthread_join (_peak_amplitude_thread_handle, &v);
-	assert (r == 0);
+	pthread_cancel_one (_peak_amplitude_thread_handle);
+	pthread_join (_peak_amplitude_thread_handle, &v);
 }
 
 void

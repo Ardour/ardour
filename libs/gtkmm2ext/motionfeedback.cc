@@ -253,14 +253,14 @@ MotionFeedback::pixwin_motion_notify_event (GdkEventMotion *ev)
 }
 
 bool
-MotionFeedback::pixwin_enter_notify_event (GdkEventCrossing *ev) 
+MotionFeedback::pixwin_enter_notify_event (GdkEventCrossing*) 
 {
 	pixwin.grab_focus();
 	return false;
 }
 
 bool
-MotionFeedback::pixwin_leave_notify_event (GdkEventCrossing *ev) 
+MotionFeedback::pixwin_leave_notify_event (GdkEventCrossing*) 
 {
 	pixwin.unset_flags (HAS_FOCUS);
 	return false;
@@ -316,7 +316,7 @@ MotionFeedback::pixwin_key_press_event (GdkEventKey *ev)
 }
 
 bool
-MotionFeedback::pixwin_expose_event (GdkEventExpose* ev)
+MotionFeedback::pixwin_expose_event (GdkEventExpose*)
 {
 	if (!_controllable) {
 		return true;

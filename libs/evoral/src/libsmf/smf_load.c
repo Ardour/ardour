@@ -275,7 +275,8 @@ is_escape_byte(const unsigned char status)
 static int32_t
 expected_sysex_length(const unsigned char status, const unsigned char *second_byte, const size_t buffer_length, int32_t *consumed_bytes)
 {
-	uint32_t sysex_length, len;
+	uint32_t sysex_length = 0;
+	uint32_t len = 0;
 
 	assert(status == 0xF0);
 
@@ -424,7 +425,8 @@ extract_escaped_event(const unsigned char *buf, const size_t buffer_length, smf_
 	(void) last_status;
 	
 	int status;
-	int32_t message_length, vlq_length;
+	int32_t message_length = 0;
+	int32_t vlq_length = 0;
 	const unsigned char *c = buf;
 
 	status = *buf;
@@ -645,7 +647,8 @@ smf_event_is_textual(const smf_event_t *event)
 char *
 smf_event_extract_text(const smf_event_t *event)
 {
-	uint32_t string_length, length_length;
+	uint32_t string_length = 0;
+	uint32_t length_length = 0;
 
 	if (!smf_event_is_textual(event))
 		return (NULL);

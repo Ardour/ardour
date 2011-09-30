@@ -297,12 +297,12 @@ static VSTFXInfo* vstfx_info_from_plugin(VSTFX *vstfx)
 /* A simple 'dummy' audiomaster callback which should be ok,
 we will only be instantiating the plugin in order to get its info*/
 
-static long simple_master_callback(struct AEffect *fx, long opcode, long index, long value, void *ptr, float opt)
+static long simple_master_callback(struct AEffect *, long opcode, long, long, void *, float)
 {
 
-	if(opcode == audioMasterVersion)
+	if (opcode == audioMasterVersion)
 		return 2;
-    else
+	else
 		return 0;
 }
 

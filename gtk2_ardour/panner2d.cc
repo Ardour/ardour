@@ -853,7 +853,7 @@ Panner2dWindow::on_key_press_event (GdkEventKey* event)
 }
 
 bool
-Panner2dWindow::on_key_release_event (GdkEventKey *event)
+Panner2dWindow::on_key_release_event (GdkEventKey*)
 {
         return true;
 }

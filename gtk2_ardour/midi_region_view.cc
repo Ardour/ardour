@@ -388,7 +388,7 @@ MidiRegionView::enter_notify (GdkEventCrossing* ev)
 }
 
 bool
-MidiRegionView::leave_notify (GdkEventCrossing* ev)
+MidiRegionView::leave_notify (GdkEventCrossing*)
 {
 	_mouse_mode_connection.disconnect ();
 
@@ -850,7 +850,7 @@ void
 MidiRegionView::channel_edit ()
 {
 	bool first = true;
-	uint8_t current_channel;
+	uint8_t current_channel = 0;
 
 	if (_selection.empty()) {
 		return;

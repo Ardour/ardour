@@ -24,6 +24,15 @@
  * Boston, MA 02111-1307, USA.
  */
 
+#include <sigc++/signal.h>
+#include <sigc++/slot.h>
+
+#include <string.h>
+#include <gtk/gtk.h>
+#include <gdk/gdkkeysyms.h>
+#include <gtkmm2ext/gtkapplication.h>
+#include <gtkmm2ext/gtkapplication-private.h>
+
 #import <AppKit/NSMenu.h>
 #import <AppKit/NSMenuItem.h>
 #import <AppKit/NSCell.h>
@@ -31,12 +40,6 @@
 #import <AppKit/NSApplication.h>
 #import <Foundation/NSString.h>
 #import <Foundation/NSNotification.h>
-
-#include <string.h>
-#include <gtk/gtk.h>
-#include <gdk/gdkkeysyms.h>
-#include <gtkmm2ext/gtkapplication.h>
-#include <gtkmm2ext/gtkapplication-private.h>
 
 #define UNUSED_PARAMETER(a) (void) (a)
 

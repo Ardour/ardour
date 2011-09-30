@@ -762,7 +762,7 @@ MonitorSection::setup_knob_images ()
 void
 MonitorSection::update_solo_model ()
 {
-        const char* action_name;
+        const char* action_name = 0;
         Glib::RefPtr<Action> act;
 
         if (Config->get_solo_control_is_listen_control()) {

@@ -1875,7 +1875,7 @@ RouteTimeAxisView::add_processor_automation_curve (boost::shared_ptr<Processor> 
 }
 
 void
-RouteTimeAxisView::processor_automation_track_hidden (RouteTimeAxisView::ProcessorAutomationNode* pan, boost::shared_ptr<Processor> i)
+RouteTimeAxisView::processor_automation_track_hidden (RouteTimeAxisView::ProcessorAutomationNode* pan, boost::shared_ptr<Processor>)
 {
 	if (!_hidden) {
 		pan->menu_item->set_active (false);
@@ -2281,7 +2281,7 @@ RouteTimeAxisView::set_underlay_state()
 }
 
 void
-RouteTimeAxisView::add_underlay (StreamView* v, bool update_xml)
+RouteTimeAxisView::add_underlay (StreamView* v, bool /*update_xml*/)
 {
 	if (!v) {
 		return;

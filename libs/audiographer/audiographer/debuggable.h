@@ -44,6 +44,7 @@ class Debuggable
 
 	bool debug_level (DebugLevel level) {
 		#ifdef NDEBUG
+		level = DEFAULT_DEBUG_LEVEL; /* stop pedantic gcc complaints about unused parameter */
 		return false;
 		#else
 		return L >= level;

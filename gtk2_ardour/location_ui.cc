@@ -593,7 +593,7 @@ LocationEditRow::preemph_toggled ()
 }
 
 void
-LocationEditRow::end_changed (ARDOUR::Location *loc)
+LocationEditRow::end_changed (ARDOUR::Location *)
 {
 	ENSURE_GUI_THREAD (*this, &LocationEditRow::end_changed, loc)
 

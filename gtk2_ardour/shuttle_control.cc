@@ -483,7 +483,7 @@ ShuttleControl::use_shuttle_fract (bool force)
 }
 
 bool
-ShuttleControl::on_expose_event (GdkEventExpose* event)
+ShuttleControl::on_expose_event (GdkEventExpose*)
 {
 	cairo_text_extents_t extents;
 	Glib::RefPtr<Gdk::Window> win (get_window());

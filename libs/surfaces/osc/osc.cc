@@ -576,7 +576,7 @@ OSC::_catchall (const char *path, const char *types, lo_arg **argv, int argc, vo
 }
 
 int
-OSC::catchall (const char *path, const char *types, lo_arg **argv, int argc, lo_message msg) 
+OSC::catchall (const char *path, const char* /*types*/, lo_arg **argv, int argc, lo_message msg) 
 {
 	size_t len;
 	int ret = 1; /* unhandled */

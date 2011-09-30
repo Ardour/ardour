@@ -217,7 +217,7 @@ Bindings::set_action_map (ActionMap& am)
 bool
 Bindings::activate (KeyboardKey kb, Operation op)
 {
-        KeybindingMap* kbm;
+        KeybindingMap* kbm = 0;
 
         switch (op) {
         case Press:
@@ -244,7 +244,7 @@ Bindings::activate (KeyboardKey kb, Operation op)
 void
 Bindings::add (KeyboardKey kb, Operation op, RefPtr<Action> what)
 {
-        KeybindingMap* kbm;
+        KeybindingMap* kbm = 0;
 
         switch (op) {
         case Press:
@@ -269,7 +269,7 @@ Bindings::add (KeyboardKey kb, Operation op, RefPtr<Action> what)
 void
 Bindings::remove (KeyboardKey kb, Operation op)
 {
-        KeybindingMap* kbm;
+        KeybindingMap* kbm = 0;
 
         switch (op) {
         case Press:
@@ -290,7 +290,7 @@ Bindings::remove (KeyboardKey kb, Operation op)
 bool
 Bindings::activate (MouseButton bb, Operation op)
 {
-        MouseButtonBindingMap* bbm;
+        MouseButtonBindingMap* bbm = 0;
 
         switch (op) {
         case Press:
@@ -317,7 +317,7 @@ Bindings::activate (MouseButton bb, Operation op)
 void
 Bindings::add (MouseButton bb, Operation op, RefPtr<Action> what)
 {
-        MouseButtonBindingMap* bbm;
+        MouseButtonBindingMap* bbm = 0;
 
         switch (op) {
         case Press:
@@ -342,7 +342,7 @@ Bindings::add (MouseButton bb, Operation op, RefPtr<Action> what)
 void
 Bindings::remove (MouseButton bb, Operation op)
 {
-        MouseButtonBindingMap* bbm;
+        MouseButtonBindingMap* bbm = 0;
 
         switch (op) {
         case Press:

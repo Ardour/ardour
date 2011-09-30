@@ -232,13 +232,13 @@ CairoEditableText::on_scroll_event (GdkEventScroll* ev)
 }
 
 bool
-CairoEditableText::on_focus_in_event (GdkEventFocus* ev)
+CairoEditableText::on_focus_in_event (GdkEventFocus*)
 {
 	return false;
 }
 
 bool
-CairoEditableText::on_focus_out_event (GdkEventFocus* ev)
+CairoEditableText::on_focus_out_event (GdkEventFocus*)
 {
 	if (editing_cell) {
 		queue_draw_cell (editing_cell);

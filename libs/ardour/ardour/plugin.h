@@ -136,8 +136,7 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 
 	typedef std::map<const std::string, const float> ScalePoints;
 
-	virtual boost::shared_ptr<ScalePoints>
-	get_scale_points(uint32_t port_index) const {
+	virtual boost::shared_ptr<ScalePoints> get_scale_points(uint32_t /*port_index*/) const {
 		return boost::shared_ptr<ScalePoints>();
 	}
 

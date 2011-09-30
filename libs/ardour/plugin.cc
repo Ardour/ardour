@@ -236,7 +236,7 @@ Plugin::preset_by_uri (const string& uri)
 
 int
 Plugin::connect_and_run (BufferSet& bufs,
-			 ChanMapping in_map, ChanMapping out_map,
+			 ChanMapping /*in_map*/, ChanMapping /*out_map*/,
 			 pframes_t nframes, framecnt_t offset)
 {
 	if (bufs.count().n_midi() > 0) {
@@ -306,7 +306,7 @@ Plugin::set_parameter (uint32_t which, float val)
 }
 
 int
-Plugin::set_state (const XMLNode& node, int version)
+Plugin::set_state (const XMLNode& node, int /*version*/)
 {
 	XMLProperty const * p = node.property (X_("last-preset-uri"));
 	if (p) {

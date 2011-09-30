@@ -200,6 +200,7 @@ RubberBandStretcher::Impl::processChunks(size_t c, bool &any, bool &last)
         if (!cd.draining) {
             size_t got = cd.inbuf->peek(cd.fltbuf, m_windowSize);
             assert(got == m_windowSize || cd.inputSize >= 0);
+            got = 0;
             cd.inbuf->skip(m_increment);
             analyseChunk(c);
         }
@@ -230,6 +231,7 @@ RubberBandStretcher::Impl::processOneChunk()
         ChannelData &cd = *m_channelData[c];
         if (!cd.draining) {
             size_t got = cd.inbuf->peek(cd.fltbuf, m_windowSize);
+            got = 0;
             assert(got == m_windowSize || cd.inputSize >= 0);
             cd.inbuf->skip(m_increment);
             analyseChunk(c);

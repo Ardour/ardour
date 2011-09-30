@@ -1880,7 +1880,7 @@ MixerStrip::hide_things ()
 }
 
 bool
-MixerStrip::input_active_button_press (GdkEventButton* ev)
+MixerStrip::input_active_button_press (GdkEventButton*)
 {
 	/* nothing happens on press */
 	return true;

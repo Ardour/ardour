@@ -182,7 +182,7 @@ Pannable::get_state ()
 }
 
 XMLNode&
-Pannable::state (bool full)
+Pannable::state (bool /*full*/)
 {
 	XMLNode* node = new XMLNode (X_("Pannable"));
 

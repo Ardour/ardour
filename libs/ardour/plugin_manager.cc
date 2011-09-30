@@ -652,7 +652,7 @@ PluginManager::add_lxvst_directory (string path)
 	return -1;
 }
 
-static bool lxvst_filter (const string& str, void *arg)
+static bool lxvst_filter (const string& str, void *)
 {
 	/* Not a dotfile, has a prefix before a period, suffix is "so" */
 

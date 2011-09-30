@@ -5006,7 +5006,7 @@ void
 Editor::toggle_region_fades (int dir)
 {
 	boost::shared_ptr<AudioRegion> ar;
-	bool yn;
+	bool yn = false;
 
 	RegionSelection rs = get_regions_from_selection_and_entered ();
 

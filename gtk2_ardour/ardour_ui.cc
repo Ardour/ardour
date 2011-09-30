@@ -3796,7 +3796,7 @@ ARDOUR_UI::missing_file (Session*s, std::string str, DataType type)
 }
 
 int
-ARDOUR_UI::ambiguous_file (std::string file, std::string path, std::vector<std::string> hits)
+ARDOUR_UI::ambiguous_file (std::string file, std::string /*path*/, std::vector<std::string> hits)
 {
 	AmbiguousFileDialog dialog (file, hits);
 

@@ -108,7 +108,7 @@ gnome_canvas_bpath_class_init (GnomeCanvasBpathClass *class)
 }
 
 static void
-gnome_canvas_bpath_init (GnomeCanvasBpath *bpath)
+gnome_canvas_bpath_init (GnomeCanvasBpath* bpath)
 {
 
 }

@@ -20,13 +20,6 @@
 #ifndef __gtkmm2ext_cell_renderer_pixbuf_multi_h__ 
 #define __gtkmm2ext_cell_renderer_pixbuf_multi_h__
 
-#ifdef GTKOSX
-#include <MacTypes.h>
-#if defined(Style)
-#undef style
-#endif
-#endif
-
 #include <map>
 #include <stdint.h>
 

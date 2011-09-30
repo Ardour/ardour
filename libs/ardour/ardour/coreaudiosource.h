@@ -54,7 +54,7 @@ class CoreAudioSource : public AudioFileSource {
 	uint16_t n_channels;
 
 	void init_cafile ();
-	int safe_read (Sample*, nframes_t start, framecnt_t cnt, AudioBufferList&) const;
+	int safe_read (Sample*, framepos_t start, framecnt_t cnt, AudioBufferList&) const;
 };
 
 }; /* namespace ARDOUR */

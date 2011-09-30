@@ -619,13 +619,13 @@ StereoPanner::on_key_press_event (GdkEventKey* ev)
 }
 
 bool
-StereoPanner::on_key_release_event (GdkEventKey* ev)
+StereoPanner::on_key_release_event (GdkEventKey*)
 {
 	return false;
 }
 
 bool
-StereoPanner::on_enter_notify_event (GdkEventCrossing* ev)
+StereoPanner::on_enter_notify_event (GdkEventCrossing*)
 {
 	grab_focus ();
 	Keyboard::magic_widget_grab_focus ();

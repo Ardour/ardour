@@ -1746,7 +1746,7 @@ Editor::set_samples_ruler_scale (framepos_t lower, framepos_t upper)
 }
 
 gint
-Editor::metric_get_samples (GtkCustomRulerMark **marks, gdouble lower, gdouble upper, gint /*maxchars*/)
+Editor::metric_get_samples (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upper*/, gint /*maxchars*/)
 {
 	framepos_t pos;
 	framepos_t const ilower = (framepos_t) floor (lower);

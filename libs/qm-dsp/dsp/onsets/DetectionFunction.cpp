@@ -100,12 +100,12 @@ double DetectionFunction::process( const double *TDomain )
     // data directly), we will have to use the next smallest power of
     // two from the block size.  Results may vary accordingly!
 
-    int actualLength = MathUtilities::previousPowerOfTwo(m_dataLength);
+    unsigned int actualLength = MathUtilities::previousPowerOfTwo(m_dataLength);
 
     if (actualLength != m_dataLength) {
         // Pre-fill mag and phase vectors with zero, as the FFT output
         // will not fill the arrays
-        for (int i = actualLength/2; i < m_dataLength/2; ++i) {
+        for (unsigned int i = actualLength/2; i < m_dataLength/2; ++i) {
             m_magnitude[i] = 0;
             m_thetaAngle[0] = 0;
         }

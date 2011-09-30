@@ -97,7 +97,6 @@ class AUPlugin : public ARDOUR::Plugin
 
 	int set_state(const XMLNode& node, int);
 
-	PresetRecord save_preset (std::string name);
 	bool load_preset (PresetRecord);
 	std::string current_preset() const;
 
@@ -139,6 +138,10 @@ class AUPlugin : public ARDOUR::Plugin
 					       Float64*  outCycleEndBeat);
 
 	static std::string maybe_fix_broken_au_id (const std::string&);
+
+  protected:
+	std::string do_save_preset (std::string name);
+	void do_remove_preset (std::string);
 
   private:
 	void find_presets ();

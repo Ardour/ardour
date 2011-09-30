@@ -80,7 +80,7 @@ void PeakPicking::process( double* src, unsigned int len, vector<int> &onsets )
 	
     quadEval( m_maxima, onsets );
 
-    for( int b = 0; b <  m_maxima.size(); b++)
+    for(unsigned int b = 0; b <  m_maxima.size(); b++)
     {
 	src[ b ] = m_maxima[ b ];
     }
@@ -131,10 +131,7 @@ int PeakPicking::quadEval( vector<double> &src, vector<int> &idx )
 	p = TPolyFit::PolyFit2( m_err, m_maxFit, m_poly);
 
 	double f = m_poly[0];
-	double g = m_poly[1];
 	double h = m_poly[2];
-
-	int kk = m_poly.size();
 
 	if (h < -Qfilta || f > Qfiltc)
 	{

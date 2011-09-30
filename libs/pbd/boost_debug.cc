@@ -328,35 +328,35 @@ boost_debug_list_ptrs ()
 
 namespace boost {
 
-void sp_scalar_constructor_hook( void * object, std::size_t size, void * pn )
+void sp_scalar_constructor_hook( void *, std::size_t, void *)
 {
 }
 
-void sp_scalar_destructor_hook( void * object, std::size_t size, void * pn )
+void sp_scalar_destructor_hook( void *, std::size_t, void *)
 {
 }
 
-void sp_counter_ref_hook (void* pn, long use_count)
+void sp_counter_ref_hook (void* /*pn*/, long /* use count */)
 {
 }
 
-void sp_counter_release_hook (void* pn, long use_count) 
+void sp_counter_release_hook (void* /*pn*/, long /*use_count*/) 
 {
 }
 
-void sp_array_constructor_hook(void * p)
+void sp_array_constructor_hook(void *)
 {
 }
 
-void sp_array_destructor_hook(void * p)
+void sp_array_destructor_hook(void *)
 {
 }
 
-void sp_scalar_constructor_hook(void * p)
+void sp_scalar_constructor_hook(void *)
 {
 }
 
-void sp_scalar_destructor_hook(void * p)
+void sp_scalar_destructor_hook(void *)
 {
 }
 

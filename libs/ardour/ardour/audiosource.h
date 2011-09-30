@@ -145,7 +145,7 @@ class AudioSource : virtual public Source,
 	virtual framecnt_t read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) const = 0;
 	virtual framecnt_t write_unlocked (Sample *dst, framecnt_t cnt) = 0;
 	virtual std::string peak_path(std::string audio_path) = 0;
-	virtual std::string find_broken_peakfile (std::string missing_peak_path,
+	virtual std::string find_broken_peakfile (std::string /* missing_peak_path */,
 	                                          std::string audio_path) { return peak_path (audio_path); }
 
 	virtual int read_peaks_with_fpp (PeakData *peaks,

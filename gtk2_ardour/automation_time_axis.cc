@@ -955,7 +955,7 @@ AutomationTimeAxisView::set_state_2X (const XMLNode& node, int /*version*/)
 }
 
 int
-AutomationTimeAxisView::set_state (const XMLNode& node, int /*version*/)
+AutomationTimeAxisView::set_state (const XMLNode&, int /*version*/)
 {
 	return 0;
 }

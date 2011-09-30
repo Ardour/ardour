@@ -1249,7 +1249,7 @@ template<typename Time>
 void
 Sequence<Time>::dump (ostream& str) const
 {
-	Sequence<Time>::const_iterator i;
+	typename Sequence<Time>::const_iterator i;
 	str << "+++ dump\n";
 	for (i = begin(); i != end(); ++i) {
 		str << *i << endl;

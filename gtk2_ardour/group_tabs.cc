@@ -603,7 +603,7 @@ GroupTabs::route_group_property_changed (RouteGroup* rg)
 }
 
 void
-GroupTabs::route_added_to_route_group (RouteGroup* rg, boost::weak_ptr<Route> w)
+GroupTabs::route_added_to_route_group (RouteGroup*, boost::weak_ptr<Route> w)
 {
 	/* Similarly-spirited hack as in route_group_property_changed */
 	
@@ -616,7 +616,7 @@ GroupTabs::route_added_to_route_group (RouteGroup* rg, boost::weak_ptr<Route> w)
 }
 
 void
-GroupTabs::route_removed_from_route_group (RouteGroup* rg, boost::weak_ptr<Route> w)
+GroupTabs::route_removed_from_route_group (RouteGroup*, boost::weak_ptr<Route> w)
 {
 	/* Similarly-spirited hack as in route_group_property_changed */
 

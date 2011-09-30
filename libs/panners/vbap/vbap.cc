@@ -33,7 +33,7 @@ static PanPluginDescriptor _descriptor = {
 
 extern "C" { PanPluginDescriptor* panner_descriptor () { return &_descriptor; } }
 
-VBAPanner::Signal::Signal (Session& session, VBAPanner& p, uint32_t n, uint32_t n_speakers)
+VBAPanner::Signal::Signal (Session&, VBAPanner&, uint32_t, uint32_t n_speakers)
 {
         resize_gains (n_speakers);
 
@@ -363,9 +363,11 @@ VBAPanner::distribute_one (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_co
 }
 
 void 
-VBAPanner::distribute_one_automated (AudioBuffer& src, BufferSet& obufs,
-                                     framepos_t start, framepos_t end, pframes_t nframes, pan_t** buffers, uint32_t which)
+VBAPanner::distribute_one_automated (AudioBuffer& /*src*/, BufferSet& /*obufs*/,
+                                     framepos_t /*start*/, framepos_t /*end*/, 
+				     pframes_t /*nframes*/, pan_t** /*buffers*/, uint32_t /*which*/)
 {
+	/* XXX to be implemented */
 }
 
 XMLNode&

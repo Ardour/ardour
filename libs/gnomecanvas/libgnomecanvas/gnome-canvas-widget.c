@@ -365,7 +365,7 @@ gnome_canvas_widget_set_property (GObject            *object,
 		break;
 
 	case PROP_ANCHOR:
-	        if (witem->anchor != g_value_get_enum (value))
+	        if (witem->anchor != (unsigned int) g_value_get_enum (value))
 		{
 		        witem->anchor = g_value_get_enum (value);
 			update = TRUE;
@@ -469,8 +469,8 @@ gnome_canvas_widget_update (GnomeCanvasItem *item, double *affine, ArtSVP *clip_
 }
 
 static void
-gnome_canvas_widget_render (GnomeCanvasItem *item,
-			    GnomeCanvasBuf *buf)
+gnome_canvas_widget_render (GnomeCanvasItem * item,
+			    GnomeCanvasBuf * buf)
 {
 #if 0
 	GnomeCanvasWidget *witem;
@@ -484,8 +484,8 @@ gnome_canvas_widget_render (GnomeCanvasItem *item,
 }
 
 static void
-gnome_canvas_widget_draw (GnomeCanvasItem *item,
-			  GdkDrawable *drawable,
+gnome_canvas_widget_draw (GnomeCanvasItem * item,
+			  GdkDrawable * drawable,
 			  int x, int y,
 			  int width, int height)
 {

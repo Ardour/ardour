@@ -44,7 +44,7 @@ using namespace ARDOUR;
 using namespace PBD;
 
 PlaylistSource::PlaylistSource (Session& s, const ID& orig, const std::string& name, boost::shared_ptr<Playlist> p, DataType type,
-				frameoffset_t begin, framecnt_t len, Source::Flag flags)
+				frameoffset_t begin, framecnt_t len, Source::Flag /*flags*/)
 	: Source (s, type, name)
 	, _playlist (p)
 	, _original (orig)
@@ -92,7 +92,7 @@ PlaylistSource::add_state (XMLNode& node)
 }
 
 int
-PlaylistSource::set_state (const XMLNode& node, int version)
+PlaylistSource::set_state (const XMLNode& node, int /*version*/)
 {
 	/* check that we have a playlist ID */
 

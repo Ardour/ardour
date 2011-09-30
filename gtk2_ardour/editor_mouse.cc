@@ -1806,7 +1806,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 }
 
 bool
-Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
+Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 {
 	AutomationLine* al;
 	ControlPoint* cp;
@@ -2417,7 +2417,7 @@ Editor::track_height_step_timeout ()
 }
 
 void
-Editor::add_region_drag (ArdourCanvas::Item* item, GdkEvent* event, RegionView* region_view)
+Editor::add_region_drag (ArdourCanvas::Item* item, GdkEvent*, RegionView* region_view)
 {
 	assert (region_view);
 
@@ -2439,7 +2439,7 @@ Editor::add_region_drag (ArdourCanvas::Item* item, GdkEvent* event, RegionView* 
 }
 
 void
-Editor::add_region_copy_drag (ArdourCanvas::Item* item, GdkEvent* event, RegionView* region_view)
+Editor::add_region_copy_drag (ArdourCanvas::Item* item, GdkEvent*, RegionView* region_view)
 {
 	assert (region_view);
 
@@ -2454,7 +2454,7 @@ Editor::add_region_copy_drag (ArdourCanvas::Item* item, GdkEvent* event, RegionV
 }
 
 void
-Editor::add_region_brush_drag (ArdourCanvas::Item* item, GdkEvent* event, RegionView* region_view)
+Editor::add_region_brush_drag (ArdourCanvas::Item* item, GdkEvent*, RegionView* region_view)
 {
 	assert (region_view);
 
@@ -2584,7 +2584,7 @@ Editor::set_internal_edit (bool yn)
  *  used by the `join object/range' tool mode.
  */
 void
-Editor::update_join_object_range_location (double x, double y)
+Editor::update_join_object_range_location (double /*x*/, double y)
 {
 	/* XXX: actually, this decides based on whether the mouse is in the top or bottom half of a RouteTimeAxisView;
 	   entered_{track,regionview} is not always setup (e.g. if the mouse is over a TimeSelection), and to get a Region

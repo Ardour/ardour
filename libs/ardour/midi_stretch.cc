@@ -42,7 +42,7 @@ MidiStretch::~MidiStretch ()
 }
 
 int
-MidiStretch::run (boost::shared_ptr<Region> r, Progress* progress)
+MidiStretch::run (boost::shared_ptr<Region> r, Progress*)
 {
 	SourceList nsrcs;
 	char suffix[32];

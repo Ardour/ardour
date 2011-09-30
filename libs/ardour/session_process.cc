@@ -617,7 +617,7 @@ Session::calculate_moving_average_of_slave_delta (int dir, framecnt_t this_delta
 }
 
 void
-Session::track_slave_state (float slave_speed, framepos_t slave_transport_frame, framecnt_t this_delta)
+Session::track_slave_state (float slave_speed, framepos_t slave_transport_frame, framecnt_t /*this_delta*/)
 {
 	if (slave_speed != 0.0f) {
 

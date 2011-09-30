@@ -73,10 +73,10 @@ class LXVSTPlugin : public ARDOUR::Plugin
 	std::string state_node_name() const { return "lxvst"; }
 	void print_parameter (uint32_t, char*, uint32_t len) const;
 
-	bool parameter_is_audio(uint32_t i) const { return false; }
-	bool parameter_is_control(uint32_t i) const { return true; }
-	bool parameter_is_input(uint32_t i) const { return true; }
-	bool parameter_is_output(uint32_t i) const { return false; }
+	bool parameter_is_audio(uint32_t) const { return false; }
+	bool parameter_is_control(uint32_t) const { return true; }
+	bool parameter_is_input(uint32_t) const { return true; }
+	bool parameter_is_output(uint32_t) const { return false; }
 
 	bool load_preset (PresetRecord);
 	int first_user_preset_index () const;

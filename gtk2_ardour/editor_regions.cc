@@ -214,7 +214,7 @@ EditorRegions::focus_out (GdkEventFocus*)
 }
 
 bool
-EditorRegions::enter_notify (GdkEventCrossing* ev)
+EditorRegions::enter_notify (GdkEventCrossing*)
 {
 	if (name_editable) {
 		return true;
@@ -743,7 +743,7 @@ EditorRegions::populate_row (boost::shared_ptr<Region> region, TreeModel::Row co
 #endif
 
 void
-EditorRegions::populate_row_used (boost::shared_ptr<Region> region, TreeModel::Row const& row, uint32_t used)
+EditorRegions::populate_row_used (boost::shared_ptr<Region>, TreeModel::Row const& row, uint32_t used)
 {
 	char buf[8];
 	snprintf (buf, sizeof (buf), "%4d" , used);

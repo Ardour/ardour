@@ -388,7 +388,7 @@ gnome_canvas_item_unmap (GnomeCanvasItem *item)
 
 /* Update handler for canvas items */
 static void
-gnome_canvas_item_update (GnomeCanvasItem *item, double *affine, ArtSVP *clip_path, int flags)
+gnome_canvas_item_update (GnomeCanvasItem *item, double *affine, ArtSVP * clip_path, int flags)
 {
 	GTK_OBJECT_UNSET_FLAGS (item, GNOME_CANVAS_ITEM_NEED_UPDATE);
 	GTK_OBJECT_UNSET_FLAGS (item, GNOME_CANVAS_ITEM_NEED_AFFINE);
@@ -1423,7 +1423,7 @@ gnome_canvas_group_class_init (GnomeCanvasGroupClass *class)
 
 /* Object initialization function for GnomeCanvasGroup */
 static void
-gnome_canvas_group_init (GnomeCanvasGroup *group)
+gnome_canvas_group_init (GnomeCanvasGroup * group)
 {
 #if 0
 	group->xpos = 0.0;

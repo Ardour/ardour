@@ -69,7 +69,7 @@ const char* Keyboard::primary_modifier_name() { return _("Command"); }
 const char* Keyboard::secondary_modifier_name() { return _("Option"); }
 const char* Keyboard::tertiary_modifier_name() { return _("Shift"); }
 const char* Keyboard::level4_modifier_name() { return _("Control"); }
-const char* Keyboard::copy_modifier_name() { return _("Mod1";    ); }
+const char* Keyboard::copy_modifier_name() { return _("Mod1"); }
 const char* Keyboard::rangeselect_modifier_name() { return _("Shift"); }
 
 #else

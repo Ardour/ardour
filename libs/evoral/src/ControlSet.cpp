@@ -32,7 +32,7 @@ ControlSet::ControlSet()
 {
 }
 
-ControlSet::ControlSet (const ControlSet& other)
+ControlSet::ControlSet (const ControlSet&)
         : noncopyable ()
 {
         /* derived class must copy controls */

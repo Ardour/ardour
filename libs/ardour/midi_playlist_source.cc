@@ -58,7 +58,7 @@ on other ways to approach this issue.
 ********************************************************************************/
 
 MidiPlaylistSource::MidiPlaylistSource (Session& s, const ID& orig, const std::string& name, boost::shared_ptr<MidiPlaylist> p,
-					uint32_t chn, frameoffset_t begin, framecnt_t len, Source::Flag flags)
+					uint32_t /*chn*/, frameoffset_t begin, framecnt_t len, Source::Flag flags)
 	: Source (s, DataType::MIDI, name)
 	, MidiSource (s, name, flags)
 	, PlaylistSource (s, orig, name, p, DataType::MIDI, begin, len, flags)
@@ -128,9 +128,9 @@ MidiPlaylistSource::length (framepos_t)  const
 
 framepos_t
 MidiPlaylistSource::read_unlocked (Evoral::EventSink<framepos_t>& dst,
-				   framepos_t position,
+				   framepos_t /*position*/,
 				   framepos_t start, framecnt_t cnt,
-				   MidiStateTracker* tracker) const
+				   MidiStateTracker*) const
 {
 	boost::shared_ptr<MidiPlaylist> mp = boost::dynamic_pointer_cast<MidiPlaylist> (_playlist);
 
@@ -143,8 +143,8 @@ MidiPlaylistSource::read_unlocked (Evoral::EventSink<framepos_t>& dst,
 
 framepos_t
 MidiPlaylistSource::write_unlocked (MidiRingBuffer<framepos_t>& dst,
-				    framepos_t position,
-				    framecnt_t cnt)
+				    framepos_t,
+				    framecnt_t)
 {
 	fatal << string_compose (_("programming error: %1"), "MidiPlaylistSource::write_unlocked() called - should be impossible") << endmsg;
 	/*NOTREACHED*/
@@ -159,7 +159,7 @@ MidiPlaylistSource::append_event_unlocked_beats(const Evoral::Event<Evoral::Musi
 }
 
 void
-MidiPlaylistSource::append_event_unlocked_frames(const Evoral::Event<framepos_t>& ev, framepos_t source_start)
+MidiPlaylistSource::append_event_unlocked_frames(const Evoral::Event<framepos_t>& /* ev */, framepos_t /*source_start*/)
 {
 	fatal << string_compose (_("programming error: %1"), "MidiPlaylistSource::append_event_unlocked_frames() called - should be impossible") << endmsg;
 	/*NOTREACHED*/

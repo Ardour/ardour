@@ -2511,7 +2511,7 @@ Session::io_name_is_legal (const std::string& name)
 }
 
 void
-Session::set_exclusive_input_active (boost::shared_ptr<Route> rt, bool others_on)
+Session::set_exclusive_input_active (boost::shared_ptr<Route> rt, bool /*others_on*/)
 {
 	RouteList rl;
 	vector<string> connections;

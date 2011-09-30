@@ -53,7 +53,7 @@ AudioPort::cycle_start (pframes_t nframes)
 }
 
 void
-AudioPort::cycle_end (pframes_t nframes)
+AudioPort::cycle_end (pframes_t)
 {
         if (sends_output() && !_buffer->written()) {
                 /* we can't use nframes here because the current buffer capacity may

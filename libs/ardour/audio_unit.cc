@@ -1341,7 +1341,7 @@ AUPlugin::get_beat_and_tempo_callback (Float64* outCurrentBeat,
 		float beat;
 		beat = metric.meter().beats_per_bar() * bbt.bars;
 		beat += bbt.beats;
-		beat += bbt.ticks / BBT_Time::ticks_per_beat;
+		beat += bbt.ticks / Timecode::BBT_Time::ticks_per_beat;
 		*outCurrentBeat = beat;
 	}
 
@@ -1381,8 +1381,9 @@ AUPlugin::get_musical_time_location_callback (UInt32*   outDeltaSampleOffsetToNe
 			/* on the beat */
 			*outDeltaSampleOffsetToNextBeat = 0;
 		} else {
-			*outDeltaSampleOffsetToNextBeat = (UInt32) floor (((BBT_Time::ticks_per_beat - bbt.ticks)/BBT_Time::ticks_per_beat) * // fraction of a beat to next beat
-									  metric.tempo().frames_per_beat(_session.frame_rate(), metric.meter())); // frames per beat
+			*outDeltaSampleOffsetToNextBeat = (UInt32) 
+				floor (((Timecode::BBT_Time::ticks_per_beat - bbt.ticks)/Timecode::BBT_Time::ticks_per_beat) * // fraction of a beat to next beat
+				       metric.tempo().frames_per_beat(_session.frame_rate(), metric.meter())); // frames per beat
 		}
 	}
 
@@ -1473,7 +1474,7 @@ AUPlugin::get_transport_state_callback (Boolean*  outIsPlaying,
 					float beat;
 					beat = metric.meter().beats_per_bar() * bbt.bars;
 					beat += bbt.beats;
-					beat += bbt.ticks / BBT_Time::ticks_per_beat;
+					beat += bbt.ticks / Timecode::BBT_Time::ticks_per_beat;
 
 					*outCycleStartBeat = beat;
 				}
@@ -1485,7 +1486,7 @@ AUPlugin::get_transport_state_callback (Boolean*  outIsPlaying,
 					float beat;
 					beat = metric.meter().beats_per_bar() * bbt.bars;
 					beat += bbt.beats;
-					beat += bbt.ticks / BBT_Time::ticks_per_beat;
+					beat += bbt.ticks / Timecode::BBT_Time::ticks_per_beat;
 
 					*outCycleEndBeat = beat;
 				}
@@ -1554,7 +1555,7 @@ AUPlugin::parameter_is_output (uint32_t) const
 }
 
 void
-AUPlugin::add_state (XMLNode* root)
+AUPlugin::add_state (XMLNode* root) const
 {
 	LocaleGuard lg (X_("POSIX"));
 
@@ -1573,7 +1574,7 @@ AUPlugin::add_state (XMLNode* root)
 
 	if (!xmlData) {
 		error << _("Could not create XML version of property list") << endmsg;
-		return *root;
+		return;
 	}
 
 	/* re-parse XML bytes to create a libxml++ XMLTree that we can merge into
@@ -1662,7 +1663,7 @@ AUPlugin::set_state(const XMLNode& node, int version)
 }
 
 bool
-AUPlugin::load_preset (PluginRecord r)
+AUPlugin::load_preset (PresetRecord r)
 {
 	Plugin::load_preset (r);
 
@@ -1675,7 +1676,7 @@ AUPlugin::load_preset (PluginRecord r)
 
 	/* look first in "user" presets */
 
-	if ((ux = user_preset_map.find (preset_label)) != user_preset_map.end()) {
+	if ((ux = user_preset_map.find (r.label)) != user_preset_map.end()) {
 
 		if ((propertyList = load_property_list (ux->second)) != 0) {
 			TRACE_API ("set preset from user presets\n");
@@ -1692,7 +1693,7 @@ AUPlugin::load_preset (PluginRecord r)
 			CFRelease(propertyList);
 		}
 
-	} else if ((fx = factory_preset_map.find (preset_label)) != factory_preset_map.end()) {
+	} else if ((fx = factory_preset_map.find (r.label)) != factory_preset_map.end()) {
 
 		AUPreset preset;
 
@@ -1725,8 +1726,13 @@ AUPlugin::load_preset (PluginRecord r)
 #endif
 }
 
-PresetRecord
-AUPlugin::save_preset (string preset_name)
+void
+AUPlugin::do_remove_preset (std::string) 
+{
+}
+
+string
+AUPlugin::do_save_preset (string preset_name)
 {
 #ifdef AU_STATE_SUPPORT
 	CFPropertyListRef propertyList;
@@ -1776,7 +1782,7 @@ AUPlugin::save_preset (string preset_name)
 
 	CFRelease(propertyList);
 
-	return ret;
+	return string ("file:///") + user_preset_path;
 #else
 	if (!seen_saving_message) {
 		info << string_compose (_("Saving AudioUnit presets is not supported in this build of %1. Consider paying for a newer version"),
@@ -1784,7 +1790,7 @@ AUPlugin::save_preset (string preset_name)
 		     << endmsg;
 		seen_saving_message = true;
 	}
-	return false;
+	return string();
 #endif
 }
 
@@ -2006,7 +2012,7 @@ AUPlugin::find_presets ()
 	/* now fill the vector<string> with the names we have */
 
 	for (UserPresetMap::iterator i = user_preset_map.begin(); i != user_preset_map.end(); ++i) {
-		_presets.insert (i->second, Plugin::PresetRecord (i->second, i->first));
+		_presets.insert (make_pair (i->second, Plugin::PresetRecord (i->second, i->first)));
 	}
 
 	/* add factory presets */
@@ -2014,7 +2020,7 @@ AUPlugin::find_presets ()
 	for (FactoryPresetMap::iterator i = factory_preset_map.begin(); i != factory_preset_map.end(); ++i) {
 		/* XXX: dubious */
 		string const uri = string_compose ("%1", _presets.size ());
-		_presets.push_back (uri, Plugin::PresetRecord (uri, i->first));
+		_presets.insert (make_pair (uri, Plugin::PresetRecord (uri, i->first)));
 	}
 
 #endif
@@ -2082,10 +2088,12 @@ AUPluginInfo::discover ()
 
 	PluginInfoList* plugs = new PluginInfoList;
 
+#if 0
 	discover_fx (*plugs);
 	discover_music (*plugs);
 	discover_generators (*plugs);
 	discover_instruments (*plugs);
+#endif
 
 	return plugs;
 }

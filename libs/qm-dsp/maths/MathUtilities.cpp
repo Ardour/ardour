@@ -155,7 +155,7 @@ double MathUtilities::mean(const std::vector<double> &src,
 {
     double sum = 0.;
 	
-    for (int i = 0; i < count; ++i)
+    for (unsigned int i = 0; i < count; ++i)
     {
         sum += src[start + i];
     }
@@ -167,7 +167,6 @@ void MathUtilities::getFrameMinMax(const double *data, unsigned int len, double 
 {
     unsigned int i;
     double temp = 0.0;
-    double a=0.0;
 
     if (len == 0) {
         *min = *max = 0;
@@ -317,9 +316,9 @@ void MathUtilities::normalise(std::vector<double> &data, NormaliseType type)
     case NormaliseUnitSum:
     {
         double sum = 0.0;
-        for (int i = 0; i < data.size(); ++i) sum += data[i];
+        for (unsigned int i = 0; i < data.size(); ++i) sum += data[i];
         if (sum != 0.0) {
-            for (int i = 0; i < data.size(); ++i) data[i] /= sum;
+            for (unsigned int i = 0; i < data.size(); ++i) data[i] /= sum;
         }
     }
     break;
@@ -327,11 +326,11 @@ void MathUtilities::normalise(std::vector<double> &data, NormaliseType type)
     case NormaliseUnitMax:
     {
         double max = 0.0;
-        for (int i = 0; i < data.size(); ++i) {
+        for (unsigned int i = 0; i < data.size(); ++i) {
             if (fabs(data[i]) > max) max = fabs(data[i]);
         }
         if (max != 0.0) {
-            for (int i = 0; i < data.size(); ++i) data[i] /= max;
+            for (unsigned int i = 0; i < data.size(); ++i) data[i] /= max;
         }
     }
     break;

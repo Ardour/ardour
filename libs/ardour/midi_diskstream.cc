@@ -291,6 +291,7 @@ MidiDiskstream::use_copy_playlist ()
 int
 MidiDiskstream::set_destructive (bool yn)
 {
+	yn = 0; // stop pedantic gcc complaints about unused parameter
 	assert( ! destructive());
 	assert( ! yn);
 	return -1;

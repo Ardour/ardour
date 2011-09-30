@@ -47,7 +47,7 @@ class ExportChannel : public boost::less_than_comparable<ExportChannel>
 
 	virtual ~ExportChannel () {}
 
-	virtual void set_max_buffer_size(framecnt_t frames) { }
+	virtual void set_max_buffer_size(framecnt_t) { }
 
 	virtual void read (Sample const *& data, framecnt_t frames) const = 0;
 	virtual bool empty () const = 0;

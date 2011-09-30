@@ -283,7 +283,7 @@ private:
 	}
 
 	/* Draw the drag icon */
-	bool icon_expose (GdkEventExpose* ev)
+	bool icon_expose (GdkEventExpose*)
 	{
 		/* Just grab the child's widget and use that */
 
@@ -307,7 +307,7 @@ private:
 	}
 	
 	void drag_data_received (
-		Glib::RefPtr<Gdk::DragContext> const & context, int x, int y, Gtk::SelectionData const & selection_data, guint /*info*/, guint time
+		Glib::RefPtr<Gdk::DragContext> const & context, int /*x*/, int y, Gtk::SelectionData const & selection_data, guint /*info*/, guint time
 		)
 	{
 		/* work out where it was dropped */
@@ -374,7 +374,7 @@ private:
 		}
 	}
 
-	bool drag_motion (Glib::RefPtr<Gdk::DragContext> const &, int x, int y, guint)
+	bool drag_motion (Glib::RefPtr<Gdk::DragContext> const &, int /*x*/, int y, guint)
 	{
 		if (_children.empty ()) {
 			return false;

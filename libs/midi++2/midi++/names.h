@@ -220,8 +220,11 @@ inline static const char* midi_name(uint8_t status)
 	case MIDI_CTL_POLY:
 		return "Polyphonic Mode"; break;
 	default:
-		return "Unnamed"; break;
+		break;
 	}
+
+	return "Unnamed";
+	
 }
 
 #endif /* __midinames_h__ */

@@ -25,8 +25,8 @@ using namespace Glib;
 using namespace Gtk;
 
 void
-Gtkmm2ext::treeview_select_one (RefPtr<TreeSelection> selection, RefPtr<TreeModel> model, TreeView& view,
-                                TreeIter iter, TreePath path, TreeViewColumn* col)
+Gtkmm2ext::treeview_select_one (RefPtr<TreeSelection> selection, RefPtr<TreeModel> /*model*/, TreeView& view,
+                                TreeIter /*iter*/, TreePath path, TreeViewColumn* col)
 {
         if (!view.row_expanded (path)) {
                 // cerr << "!! selecting a row that isn't expanded! " << path.to_string() << endl;

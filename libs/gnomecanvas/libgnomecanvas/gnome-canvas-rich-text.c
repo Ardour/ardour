@@ -806,15 +806,15 @@ gnome_canvas_rich_text_move_cursor(GnomeCanvasRichText *text,
 } /* gnome_canvas_rich_text_move_cursor */
 
 static gboolean
-whitespace(gunichar ch, gpointer user_data)
+whitespace(gunichar ch, gpointer ignored)
 {
 	return (ch == ' ' || ch == '\t');
 } /* whitespace */
 
 static gboolean
-not_whitespace(gunichar ch, gpointer user_data)
+not_whitespace(gunichar ch, gpointer ignored)
 {
-	return !whitespace(ch, user_data);
+	return !whitespace(ch, ignored);
 } /* not_whitespace */
 
 static gboolean
@@ -911,7 +911,7 @@ gnome_canvas_rich_text_delete_from_cursor(GnomeCanvasRichText *text,
 
 static gint
 selection_motion_event_handler(GnomeCanvasRichText *text, GdkEvent *event,
-			       gpointer data)
+			       gpointer ignored)
 {
 	GtkTextIter newplace;
 	GtkTextMark *mark;
@@ -936,7 +936,7 @@ selection_motion_event_handler(GnomeCanvasRichText *text, GdkEvent *event,
 static void
 gnome_canvas_rich_text_start_selection_drag(GnomeCanvasRichText *text,
 					    const GtkTextIter *iter,
-					    GdkEventButton *button)
+					    GdkEventButton * button)
 {
 	GtkTextIter newplace;
 
@@ -958,7 +958,7 @@ gnome_canvas_rich_text_start_selection_drag(GnomeCanvasRichText *text,
 
 static gboolean
 gnome_canvas_rich_text_end_selection_drag(GnomeCanvasRichText *text,
-					  GdkEventButton *event)
+					  GdkEventButton * event)
 {
 	if (text->_priv->selection_drag_handler == 0)
 		return FALSE;
@@ -1216,7 +1216,7 @@ gnome_canvas_rich_text_key_press_event(GnomeCanvasItem *item,
 } /* gnome_canvas_rich_text_key_press_event */
 
 static gint
-gnome_canvas_rich_text_key_release_event(GnomeCanvasItem *item, 
+gnome_canvas_rich_text_key_release_event(GnomeCanvasItem * item, 
 					 GdkEventKey *event)
 {
 	return FALSE;
@@ -1403,7 +1403,7 @@ gnome_canvas_rich_text_button_release_event(GnomeCanvasItem *item,
 
 static gint
 gnome_canvas_rich_text_focus_in_event(GnomeCanvasItem *item,
-				      GdkEventFocus *event)
+				      GdkEventFocus * event)
 {
 	GnomeCanvasRichText *text = GNOME_CANVAS_RICH_TEXT(item);
 
@@ -1417,7 +1417,7 @@ gnome_canvas_rich_text_focus_in_event(GnomeCanvasItem *item,
 
 static gint
 gnome_canvas_rich_text_focus_out_event(GnomeCanvasItem *item,
-				       GdkEventFocus *event)
+				       GdkEventFocus * event)
 {
 	GnomeCanvasRichText *text = GNOME_CANVAS_RICH_TEXT(item);
 
@@ -1685,7 +1685,7 @@ request_update(gpointer data)
 } /* request_update */
 
 static void
-invalidated_handler(GtkTextLayout *layout, gpointer data)
+invalidated_handler(GtkTextLayout * layout, gpointer data)
 {
 	GnomeCanvasRichText *text = GNOME_CANVAS_RICH_TEXT(data);
 
@@ -1714,7 +1714,7 @@ scale_fonts(GtkTextTag *tag, gpointer data)
 } /* scale_fonts */
 
 static void
-changed_handler(GtkTextLayout *layout, gint start_y, 
+changed_handler(GtkTextLayout * layout, gint start_y, 
 		gint old_height, gint new_height, gpointer data)
 {
 	GnomeCanvasRichText *text = GNOME_CANVAS_RICH_TEXT(data);
@@ -1864,7 +1864,7 @@ gnome_canvas_rich_text_get_iter_at_location (GnomeCanvasRichText *text,
 
 
 static void
-gnome_canvas_rich_text_set_attributes_from_style(GnomeCanvasRichText *text,
+gnome_canvas_rich_text_set_attributes_from_style(GnomeCanvasRichText * text,
 						 GtkTextAttributes *values,
 						 GtkStyle *style)
 {

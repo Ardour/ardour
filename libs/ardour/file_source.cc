@@ -235,7 +235,7 @@ FileSource::move_to_trash (const string& trash_dir_name)
  */
 bool
 FileSource::find (Session& s, DataType type, const string& path, bool must_exist,
-		  bool& isnew, uint16_t& chan, string& found_path)
+		  bool& isnew, uint16_t& /* chan */, string& found_path)
 {
 	bool ret = false;
         string keeppath;

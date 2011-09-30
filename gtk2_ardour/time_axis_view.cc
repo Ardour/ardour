@@ -397,7 +397,7 @@ TimeAxisView::controls_ebox_motion (GdkEventMotion* ev)
 }
 
 bool
-TimeAxisView::controls_ebox_leave (GdkEventCrossing* ev)
+TimeAxisView::controls_ebox_leave (GdkEventCrossing*)
 {
 	if (_have_preresize_cursor) {
 		gdk_window_set_cursor (controls_ebox.get_window()->gobj(), _preresize_cursor);

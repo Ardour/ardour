@@ -230,7 +230,7 @@ Port::reset ()
 }
 
 void
-Port::cycle_start (pframes_t nframes)
+Port::cycle_start (pframes_t)
 {
         _port_buffer_offset = 0;
 }
@@ -307,7 +307,7 @@ Port::private_latency_range (bool playback) const
 }
 
 jack_latency_range_t
-Port::public_latency_range (bool playback) const
+Port::public_latency_range (bool /*playback*/) const
 {
 	jack_latency_range_t r;
 

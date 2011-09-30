@@ -77,7 +77,7 @@ Wavelet::createDecompositionFilters(Type wavelet,
     lpd.clear();
     hpd.clear();
 
-    int flength = 0;
+    unsigned int flength = 0;
 	
     switch (wavelet) {
 

@@ -105,13 +105,13 @@ double TPolyFit::PolyFit2 (const vector<double> &x,
 // nterms = coefs.size()
 // npoints = x.size()
 {
-    int i, j;
+    unsigned int i, j;
     double xi, yi, yc, srs, sum_y, sum_y2;
     Matrix xmatr;        // Data matrix
     Matrix a;
     vector<double> g;      // Constant vector
-    const int npoints(x.size());
-    const int nterms(coefs.size());
+    const unsigned int npoints(x.size());
+    const unsigned int nterms(coefs.size());
     double correl_coef;
     zeroise(g, nterms);
     zeroise(a, nterms, nterms);
@@ -278,7 +278,8 @@ bool TPolyFit::GaussJordan2(Matrix &b,
     double big, t;
     double pivot;
     double determ;
-    int irow, icol;
+    int irow = 0;
+    int icol = 0;
     int ncol(b.size());
     int nv = 1;                  // single constant vector
     for(int i = 0; i < ncol; ++i)
