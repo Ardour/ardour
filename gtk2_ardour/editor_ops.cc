@@ -2193,7 +2193,7 @@ Editor::rename_region ()
 	d.set_size_request (300, -1);
 	d.set_position (Gtk::WIN_POS_MOUSE);
 
-	entry.set_text (selection->regions.front()->region()->name());
+	entry.set_text (rs.front()->region()->name());
 	entry.select_region (0, -1);
 
 	entry.signal_activate().connect (sigc::bind (sigc::mem_fun (d, &Dialog::response), RESPONSE_OK));
