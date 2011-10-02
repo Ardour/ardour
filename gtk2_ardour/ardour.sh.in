@@ -1,8 +1,8 @@
 #!/bin/sh
 
-export GTK_PATH=@INSTALL_PREFIX@/@LIBDIR@/ardour3${GTK_PATH:+:$GTK_PATH}
+export GTK_PATH=@LIBDIR@/ardour3${GTK_PATH:+:$GTK_PATH}
 
-export LD_LIBRARY_PATH=@INSTALL_PREFIX@/@LIBDIR@/ardour3${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+export LD_LIBRARY_PATH=@LIBDIR@/ardour3${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 # DYLD_LIBRARY_PATH is for Darwin
 export DYLD_LIBRARY_PATH=$LD_LIBRARY_PATH
 
@@ -20,7 +20,7 @@ fi
 
 ## Glib atomic test
 
-GLIB=$(ldd @INSTALL_PREFIX@/@LIBDIR@/ardour3/ardour-@VERSION@ 2> /dev/null | grep glib-2.0 | sed 's/.*=> \([^ ]*\) .*/\1/')
+GLIB=$(ldd @LIBDIR@/ardour3/ardour-@VERSION@ 2> /dev/null | grep glib-2.0 | sed 's/.*=> \([^ ]*\) .*/\1/')
 
 if [ "$GLIB" = "" ]; then
 	echo "WARNING: Could not check your glib-2.0 for mutex locking atomic operations."
@@ -36,6 +36,6 @@ elif [ $(nm -D --radix=dec --defined-only -S $GLIB | grep -w g_atomic_int_add | 
 	echo ""
 fi
 
-exec @INSTALL_PREFIX@/@LIBDIR@/ardour3/ardour-@VERSION@ "$@"
+exec @LIBDIR@/ardour3/ardour-@VERSION@ "$@"
 
 
