@@ -33,6 +33,10 @@ using namespace Gtk;
 using namespace ARDOUR;
 using namespace PBD;
 
+#define NS_UI "http://lv2plug.in/ns/extensions/ui#"
+
+static SuilHost* ui_host = NULL;
+
 void
 LV2PluginUI::lv2_ui_write(LV2UI_Controller controller,
              uint32_t         port_index,
@@ -75,14 +79,9 @@ LV2PluginUI::parameter_update (uint32_t port_index, float val)
 		return;
 	}
 
-        ENSURE_GUI_THREAD(bind (mem_fun (*this, &LV2PluginUI::parameter_update), port_index, val));
+	ENSURE_GUI_THREAD(bind (mem_fun (*this, &LV2PluginUI::parameter_update), port_index, val));
 
-	const LV2UI_Descriptor* ui_desc = slv2_ui_instance_get_descriptor(_inst);
-	LV2UI_Handle ui_handle = slv2_ui_instance_get_handle(_inst);
-	if (ui_desc->port_event) {
-		//cout << "port_event " << port_index << ":" << val << endl;
-		ui_desc->port_event(ui_handle, port_index, 4, 0, &val);
-  }
+	suil_instance_port_event(_inst, port_index, 4, 0, &val);
 	_values[port_index] = val;
 }
 
@@ -175,15 +174,30 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 		features_dst = (LV2_Feature**)_lv2->features();
 	}
 
-	_inst = slv2_ui_instantiate(
-			_lv2->slv2_plugin(), _lv2->slv2_ui(), LV2PluginUI::lv2_ui_write, this,
-			features_dst);
+	if (!ui_host) {
+		ui_host = suil_host_new(LV2PluginUI::lv2_ui_write, NULL, NULL, NULL);
+	}
+	const char* container_type = (is_external_ui)
+		? NS_UI "external"
+		: NS_UI "GtkUI";
+
+	const LilvUI* ui = _lv2->lilv_ui();
+	_inst = suil_instance_new(
+		ui_host,
+		this,
+		container_type,
+		_lv2->uri(),
+		lilv_node_as_uri(lilv_ui_get_uri(ui)),
+		lilv_node_as_uri(_lv2->ui_type()),
+		lilv_uri_to_path(lilv_node_as_uri(lilv_ui_get_bundle_uri(ui))),
+		lilv_uri_to_path(lilv_node_as_uri(lilv_ui_get_binary_uri(ui))),
+		features_dst);
 
 	if (is_external_ui) {
 		free(features_dst);
 	}
 			
-	uint32_t num_ports = slv2_plugin_get_num_ports(_lv2->slv2_plugin());
+	uint32_t num_ports = lilv_plugin_get_num_ports(_lv2->lilv_plugin());
 	for (uint32_t i = 0; i < num_ports; ++i) {
 		if (_lv2->parameter_is_output(i) && _lv2->parameter_is_control(i) && is_update_wanted(i)) {
 			_output_ports.push_back(i);
@@ -193,12 +207,12 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 	_external_ui_ptr = NULL;
 	if (_inst) {
 		if (!is_external_ui) {
-			GtkWidget* c_widget = (GtkWidget*)slv2_ui_instance_get_widget(_inst);
+			GtkWidget* c_widget = (GtkWidget*)suil_instance_get_widget(_inst);
 			_gui_widget = Glib::wrap(c_widget);
 			_gui_widget->show_all();
 			pack_start(*_gui_widget, true, true);
 		} else {
-			_external_ui_ptr = (struct lv2_external_ui *)slv2_ui_instance_get_widget(_inst);
+			_external_ui_ptr = (struct lv2_external_ui *)suil_instance_get_widget(_inst);
 		}
 	}
 	
@@ -224,20 +238,13 @@ LV2PluginUI::~LV2PluginUI ()
 	if (_values) {
 		delete[] _values;
 	}
-	
-        
-        const LV2UI_Descriptor* ui_desc = slv2_ui_instance_get_descriptor(_inst);
-        LV2UI_Handle ui_handle = slv2_ui_instance_get_handle(_inst);
-		
-        /*Call cleanup to tell the plugin to close its GUI and delete it*/
-		
-        if (ui_desc) {
-                ui_desc->cleanup(ui_handle);
-        }
-		
-        _screen_update_connection.disconnect();		
 
-        if (_lv2->is_external_ui()) {
+	suil_instance_free(_inst);
+	_inst = NULL;
+		
+	_screen_update_connection.disconnect();		
+
+	if (_lv2->is_external_ui()) {
 		/*external UI is no longer valid - on_window_hide() will not try to use it if is NULL*/
 		_external_ui_ptr = NULL;
 	}
@@ -318,7 +325,7 @@ LV2PluginUI::on_window_hide()
 
 	if (_external_ui_ptr) {
 		LV2_EXTERNAL_UI_HIDE(_external_ui_ptr);
-		//slv2_ui_instance_get_descriptor(_inst)->cleanup(_inst);
+		//suil_instance_get_descriptor(_inst)->cleanup(_inst);
 		//_external_ui_ptr = NULL;
 		//_screen_update_connection.disconnect();
 	}

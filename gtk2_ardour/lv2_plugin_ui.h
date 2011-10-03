@@ -32,8 +32,11 @@
 #include <ardour/types.h>
 #include "plugin_ui.h"
 
-#ifdef HAVE_LV2
+#ifdef HAVE_SUIL
 
+#include <suil/suil.h>
+
+#include "lv2_ui.h"
 #include "lv2_external_ui.h"
 
 namespace ARDOUR {
@@ -56,12 +59,12 @@ class LV2PluginUI : public PlugUIBase, public Gtk::VBox
 
   private:
 	boost::shared_ptr<ARDOUR::LV2Plugin> _lv2;
-	std::vector<int> _output_ports;
-	sigc::connection _screen_update_connection;
-        pthread_t        _current_ui_thread;
-	Gtk::Widget*     _gui_widget;
-	SLV2UIInstance   _inst;
-	float*           _values;
+	std::vector<int>                     _output_ports;
+	sigc::connection                     _screen_update_connection;
+	pthread_t                            _current_ui_thread;
+	Gtk::Widget*                         _gui_widget;
+	SuilInstance*                        _inst;
+	float*                               _values;
         
 	struct lv2_external_ui_host _external_ui_host;
 	LV2_Feature _external_ui_feature;
@@ -89,7 +92,7 @@ class LV2PluginUI : public PlugUIBase, public Gtk::VBox
 	virtual bool on_window_show(const std::string& title);
 	virtual void on_window_hide();
 };
-#endif // HAVE_LV2
+#endif // HAVE_SUIL
 
 #endif /* __ardour_lv2_plugin_ui_h__ */
 

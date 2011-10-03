@@ -41,8 +41,8 @@
 #include <ardour/plugin.h>
 #include <ardour/ladspa_plugin.h>
 
-#ifdef HAVE_SLV2
-#include <slv2/slv2.h>
+#ifdef HAVE_LILV
+#include <lilv/lilv.h>
 #include <ardour/lv2_plugin.h>
 #endif
 
@@ -123,7 +123,7 @@ PluginManager::PluginManager ()
 		ladspa_plugin_whitelist.push_back (2150); // tap pitch shifter
 	} 
 
-#ifdef HAVE_SLV2
+#ifdef HAVE_LILV
 	_lv2_world = new LV2World();
 #endif
 
@@ -136,7 +136,7 @@ void
 PluginManager::refresh ()
 {
 	ladspa_refresh ();
-#ifdef HAVE_SLV2
+#ifdef HAVE_LILV
 	lv2_refresh ();
 #endif
 #ifdef VST_SUPPORT
@@ -422,7 +422,7 @@ PluginManager::get_ladspa_category (uint32_t plugin_id)
 	return label;
 }
 
-#ifdef HAVE_SLV2
+#ifdef HAVE_LILV
 void
 PluginManager::lv2_refresh ()
 {

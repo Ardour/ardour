@@ -418,8 +418,8 @@ GenericPluginUI::build_control_ui (guint32 port_index, PBD::Controllable* mcontr
 #ifdef HAVE_LV2
 		} else if ((lv2p = boost::dynamic_pointer_cast<LV2Plugin>(plugin)) != 0) {
 
-			SLV2Port port = lv2p->slv2_port(port_index);
-			SLV2ScalePoints points = slv2_port_get_scale_points(lv2p->slv2_plugin(), port);
+			const LilvPort* port = lv2p->lilv_port(port_index);
+			LilvScalePoints* points = lilv_port_get_scale_points(lv2p->lilv_plugin(), port);
 
 			if (points) {
 				control_ui->combo = new Gtk::ComboBoxText;
@@ -432,7 +432,7 @@ GenericPluginUI::build_control_ui (guint32 port_index, PBD::Controllable* mcontr
 				
 				update_control_display(control_ui);
 				
-				slv2_scale_points_free(points);
+				lilv_scale_points_free(points);
 				return control_ui;
 			}
 #endif
@@ -815,24 +815,24 @@ GenericPluginUI::setup_scale_values(guint32 port_index, ControlUI* cui)
 #ifdef HAVE_LV2
 	} else if ((lv2p = boost::dynamic_pointer_cast<LV2Plugin>(plugin)) != 0) {
 
-		SLV2Port port = lv2p->slv2_port(port_index);
-		SLV2ScalePoints points = slv2_port_get_scale_points(lv2p->slv2_plugin(), port);
+		const LilvPort* port = lv2p->lilv_port(port_index);
+		LilvScalePoints* points = lilv_port_get_scale_points(lv2p->lilv_plugin(), port);
 		cui->combo_map = new std::map<string, float>;
-	
-		for (unsigned i=0; i < slv2_scale_points_size(points); ++i) {
-			SLV2ScalePoint p = slv2_scale_points_get_at(points, i);
-			SLV2Value label = slv2_scale_point_get_label(p);
-			SLV2Value value = slv2_scale_point_get_value(p);
-			if (label && (slv2_value_is_float(value) || slv2_value_is_int(value))) {
-				enums.push_back(slv2_value_as_string(label));
+
+		LILV_FOREACH(scale_points, i, points) {
+			const LilvScalePoint* p = lilv_scale_points_get(points, i);
+			const LilvNode* label = lilv_scale_point_get_label(p);
+			const LilvNode* value = lilv_scale_point_get_value(p);
+			if (label && (lilv_node_is_float(value) || lilv_node_is_int(value))) {
+				enums.push_back(lilv_node_as_string(label));
 				pair<string, float> newpair;
-				newpair.first = slv2_value_as_string(label);
-				newpair.second = slv2_value_as_float(value);
+				newpair.first = lilv_node_as_string(label);
+				newpair.second = lilv_node_as_float(value);
 				cui->combo_map->insert(newpair);
 			}
 		}
 
-		slv2_scale_points_free(points);
+		lilv_scale_points_free(points);
 #endif
 	}
 	

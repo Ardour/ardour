@@ -125,7 +125,11 @@ if ardour['VST']:
 
 if ardour['LV2']:
 	extra_sources += lv2_files
-	ardour.Append(CCFLAGS="-DHAVE_SLV2")
+	ardour.Append(CCFLAGS="-DHAVE_LILV")
+
+if ardour['LV2_UI']:
+    ardour.Append(CCFLAGS="-DHAVE_SUIL")
+    ardour.Merge ([ libraries['suil'] ])
 
 if ardour['LIBLO']:
     extra_sources += osc_files
@@ -340,8 +344,7 @@ else:
 	timefx_sources += [ 'st_stretch.cc', 'st_pitch.cc' ]
 	
 if ardour['LV2']:
-	ardour.Merge ([ libraries['slv2'] ])
-	ardour.Merge ([ libraries['rasqal'] ])
+	ardour.Merge ([ libraries['lilv'] ])
 
 if ardour['LIBLO']:
 	ardour.Merge ([ libraries['lo'] ])

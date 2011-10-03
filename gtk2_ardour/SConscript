@@ -288,11 +288,13 @@ if env['VST']:
 lv2_files = [ 'lv2_plugin_ui.cc' ]
 
 if env['LV2']:
-	extra_sources += lv2_files
 	gtkardour.Append (CCFLAGS="-DHAVE_LV2")
-	gtkardour.Merge ([libraries['slv2']])
-	gtkardour.Merge ([libraries['rasqal']])
+	gtkardour.Merge ([libraries['lilv']])
 
+if env['LV2_UI']:
+	extra_sources += lv2_files
+	gtkardour.Append (CCFLAGS="-DHAVE_SUIL")
+	gtkardour.Merge ([libraries['suil']])
 
 if gtkardour['GTKOSX']:
 	extra_sources += gtkosx_files

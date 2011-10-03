@@ -32,7 +32,7 @@
 #include <ardour/route.h>
 #include <ardour/ladspa_plugin.h>
 
-#ifdef HAVE_SLV2
+#ifdef HAVE_LILV
 #include <ardour/lv2_plugin.h>
 #endif
 
@@ -539,7 +539,7 @@ boost::shared_ptr<Plugin>
 PluginInsert::plugin_factory (boost::shared_ptr<Plugin> other)
 {
 	boost::shared_ptr<LadspaPlugin> lp;
-#ifdef HAVE_SLV2
+#ifdef HAVE_LILV
 	boost::shared_ptr<LV2Plugin> lv2p;
 #endif
 #ifdef VST_SUPPORT
@@ -551,7 +551,7 @@ PluginInsert::plugin_factory (boost::shared_ptr<Plugin> other)
 
 	if ((lp = boost::dynamic_pointer_cast<LadspaPlugin> (other)) != 0) {
 		return boost::shared_ptr<Plugin> (new LadspaPlugin (*lp));
-#ifdef HAVE_SLV2
+#ifdef HAVE_LILV
 	} else if ((lv2p = boost::dynamic_pointer_cast<LV2Plugin> (other)) != 0) {
 		return boost::shared_ptr<Plugin> (new LV2Plugin (*lv2p));
 #endif
@@ -640,7 +640,7 @@ PluginInsert::state (bool full)
 		snprintf(buf, sizeof(buf), "%" PRIu32, *x);
 		child->add_property("number", string(buf));
 
-#ifdef HAVE_SLV2
+#ifdef HAVE_LILV
 		LV2Plugin* lv2p = dynamic_cast<LV2Plugin*>(_plugins[0].get());
 		if (lv2p) {
 			child->add_property("symbol", string(lv2p->port_symbol(*x)));

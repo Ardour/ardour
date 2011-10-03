@@ -57,7 +57,8 @@ opts.AddVariables(
     BoolVariable('UNIVERSAL', 'Compile as universal binary.  Requires that external libraries are already universal.', 0),
     BoolVariable('VERSIONED', 'Add revision information to ardour/gtk executable name inside the build directory', 0),
     BoolVariable('VST', 'Compile with support for VST', 0),
-    BoolVariable('LV2', 'Compile with support for LV2 (if slv2 is available)', 1),
+    BoolVariable('LV2', 'Compile with support for LV2 (if Lilv is available)', 1),
+    BoolVariable('LV2_UI', 'Compile with support for LV2 UIs (if Suil is available)', 1),
     BoolVariable('GPROFILE', 'Compile with support for gprofile (Developers only)', 0),
     BoolVariable('FREEDESKTOP', 'Install MIME type, icons and .desktop file as per the freedesktop.org spec (requires xdg-utils and shared-mime-info). "scons uninstall" removes associations in desktop database', 0),
     BoolVariable('TRANZPORT', 'Compile with support for Frontier Designs (if libusb is available)', 1),
@@ -554,23 +555,27 @@ else:
 if env['LV2']:
 	conf = env.Configure(custom_tests = { 'CheckPKGVersion' : CheckPKGVersion})
 	
-	if conf.CheckPKGVersion('slv2', '0.6.1'):
-		libraries['slv2'] = LibraryInfo()
-		libraries['slv2'].ParseConfig('pkg-config --cflags --libs slv2')
-                env.Append (CCFLAGS="-DHAVE_LV2")
+	if conf.CheckPKGVersion('lilv-0', '0.4.0'):
+		libraries['lilv'] = LibraryInfo()
+		libraries['lilv'].ParseConfig('pkg-config --cflags --libs lilv-0')
+		env.Append (CCFLAGS="-DHAVE_LV2")
 	else:
-		print 'LV2 support is not enabled (SLV2 not found or older than 0.6.0)'
+		print 'LV2 support is not enabled (Lilv not found or older than 0.4.0)'
 		env['LV2'] = 0
 
-	if conf.CheckPKGVersion('rasqal', '0.9.14'):
-		libraries['rasqal'] = LibraryInfo()
-		libraries['rasqal'].ParseConfig('pkg-config --cflags --libs rasqal')
-	else:
-		print 'LV2 support is not enabled (Rasqal, required by SLV2, not found)'
-		env['LV2'] = 0
+	if env['LV2_UI']:
+		if conf.CheckPKGVersion('suil-0', '0.4.0'):
+			libraries['suil'] = LibraryInfo()
+			libraries['suil'].ParseConfig('pkg-config --cflags --libs suil-0')
+			env.Append (CCFLAGS="-DHAVE_SUIL")
+			env['LV2_UI'] = 1
+		else:
+			print 'LV2 UI support is not enabled (Suil not found or older than 0.4.0'
+			env['LV2_UI'] = 0
 
 	conf.Finish()
 else:
+	env['LV2_UI'] = 0
 	print 'LV2 support is not enabled.  Build with \'scons LV2=1\' to enable.'
 
 if not env['WIIMOTE']:
@@ -1105,7 +1110,7 @@ if env['SYSLIBS']:
 
 #    libraries['flowcanvas'] = LibraryInfo(LIBS='flowcanvas', LIBPATH='#/libs/flowcanvas', CPPPATH='#libs/flowcanvas')
     libraries['soundtouch'] = LibraryInfo()
-    libraries['soundtouch'].ParseConfig ('pkg-config --cflags --libs soundtouch-1.0')
+    libraries['soundtouch'].ParseConfig ('pkg-config --cflags --libs soundtouch')
     # Comment the previous line and uncomment this for old versions of Debian:
     #libraries['soundtouch'].ParseConfig ('pkg-config --cflags --libs libSoundTouch')
 

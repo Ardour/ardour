@@ -28,7 +28,7 @@
 #include <ardour/types.h>
 #include <ardour/plugin.h>
 
-#ifdef HAVE_SLV2
+#ifdef HAVE_LILV
 #include <ardour/lv2_plugin.h>
 #endif
 
@@ -96,7 +96,7 @@ class PluginManager {
 	ARDOUR::PluginInfoList _lv2_plugin_info;
 	ARDOUR::PluginInfoList _au_plugin_info;
 
-#ifdef HAVE_SLV2
+#ifdef HAVE_LILV
 	LV2World* _lv2_world;
 #endif
 	

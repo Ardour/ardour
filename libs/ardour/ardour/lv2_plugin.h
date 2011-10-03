@@ -1,6 +1,6 @@
 /*
     Copyright (C) 2008 Paul Davis
-    Author: Dave Robillard
+    Author: David Robillard
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
 #include <pbd/stateful.h> 
 
 #include <jack/types.h>
-#include <slv2/slv2.h>
+#include <lilv/lilv.h>
 #include <ardour/plugin.h>
 
 namespace ARDOUR {
@@ -42,17 +42,18 @@ struct LV2World;
 class LV2Plugin : public ARDOUR::Plugin
 {
   public:
-	LV2Plugin (ARDOUR::AudioEngine&, ARDOUR::Session&, ARDOUR::LV2World&, SLV2Plugin plugin, nframes_t sample_rate);
+	LV2Plugin (ARDOUR::AudioEngine&, ARDOUR::Session&, ARDOUR::LV2World&, LilvPlugin* plugin, nframes_t sample_rate);
 	LV2Plugin (const LV2Plugin &);
 	~LV2Plugin ();
 
 	/* Plugin interface */
 	
 	std::string unique_id() const;
-	const char* label() const           { return slv2_value_as_string(_name); }
-	const char* name() const            { return slv2_value_as_string(_name); }
-	const char* maker() const           { return _author ? slv2_value_as_string(_author) : "Unknown"; }
-	uint32_t    parameter_count() const { return slv2_plugin_get_num_ports(_plugin); }
+	const char* uri() const             { return lilv_node_as_string(lilv_plugin_get_uri(_plugin)); }
+	const char* label() const           { return lilv_node_as_string(_name); }
+	const char* name() const            { return lilv_node_as_string(_name); }
+	const char* maker() const           { return _author ? lilv_node_as_string(_author) : "Unknown"; }
+	uint32_t    parameter_count() const { return lilv_plugin_get_num_ports(_plugin); }
 	float       default_value (uint32_t port);
 	nframes_t   latency() const;
 	void        set_parameter (uint32_t port, float val);
@@ -62,10 +63,11 @@ class LV2Plugin : public ARDOUR::Plugin
 
 	const void* extension_data(const char* uri) { return _instance->lv2_descriptor->extension_data(uri); }
 
-	SLV2Plugin slv2_plugin()         { return _plugin; }
-	SLV2UI     slv2_ui()             { return _ui; }
-	bool       is_external_ui() const;
-	SLV2Port   slv2_port(uint32_t i) { return slv2_plugin_get_port_by_index(_plugin, i); }
+	LilvPlugin*     lilv_plugin()         { return _plugin; }
+	const LilvUI*   lilv_ui()             { return _ui; }
+	const LilvNode* ui_type()             { return _ui_type; }
+	bool            is_external_ui() const;
+	const LilvPort* lilv_port(uint32_t i) { return lilv_plugin_get_port_by_index(_plugin, i); }
 
 	const char* port_symbol(uint32_t port);
 	
@@ -75,14 +77,14 @@ class LV2Plugin : public ARDOUR::Plugin
 
 	void activate () { 
 		if (!_was_activated) {
-			slv2_instance_activate(_instance);
+			lilv_instance_activate(_instance);
 			_was_activated = true;
 		}
 	}
 
 	void deactivate () {
 		if (_was_activated) {
-			slv2_instance_deactivate(_instance);
+			lilv_instance_deactivate(_instance);
 			_was_activated = false;
 		}
 	}
@@ -90,7 +92,7 @@ class LV2Plugin : public ARDOUR::Plugin
 	void cleanup () {
 		activate();
 		deactivate();
-		slv2_instance_free(_instance);
+		lilv_instance_free(_instance);
 		_instance = NULL;
 	}
 
@@ -114,34 +116,35 @@ class LV2Plugin : public ARDOUR::Plugin
 	bool has_editor() const;
 
   private:
-	void*                    _module;
-	LV2World&                _world;
-	LV2_Feature**            _features;
-	SLV2Plugin               _plugin;
-	SLV2UI                   _ui;
-	SLV2Value                _name;
-	SLV2Value                _author;
-	SLV2Instance             _instance;
-	nframes_t                _sample_rate;
-	float*                   _control_data;
-	float*                   _shadow_data;
-	float*                   _defaults;
-	float*                   _latency_control_port;
-	bool                     _was_activated;
-	vector<bool>             _port_is_input;
+	void*           _module;
+	LV2World&       _world;
+	LV2_Feature**   _features;
+	LilvPlugin*     _plugin;
+	const LilvUI*   _ui;
+	const LilvNode* _ui_type;
+	LilvNode*       _name;
+	LilvNode*       _author;
+	LilvInstance*   _instance;
+	nframes_t       _sample_rate;
+	float*          _control_data;
+	float*          _shadow_data;
+	float*          _defaults;
+	float*          _latency_control_port;
+	bool            _was_activated;
+	vector<bool>    _port_is_input;
 
 	typedef struct { const void* (*extension_data)(const char* uri); } LV2_DataAccess;
 	LV2_DataAccess _data_access_extension_data;
 	LV2_Feature _data_access_feature;
 	LV2_Feature _instance_access_feature;
 
-	void init (LV2World& world, SLV2Plugin plugin, nframes_t rate);
+	void init (LV2World& world, LilvPlugin* plugin, nframes_t rate);
 	void run (nframes_t nsamples);
 	void latency_compute_run ();
 };
 
 
-/** The SLV2World, and various cached (as symbols, fast) URIs.
+/** The LilvWorld, and various cached (as symbols, fast) URIs.
  *
  * This object represents everything ardour 'knows' about LV2
  * (ie understood extensions/features/etc)
@@ -150,31 +153,31 @@ struct LV2World {
 	LV2World();
 	~LV2World();
 
-	SLV2World world;
-	SLV2Value input_class;
-	SLV2Value output_class;
-	SLV2Value audio_class;
-	SLV2Value control_class;
-	SLV2Value in_place_broken;
-	SLV2Value integer;
-	SLV2Value toggled;
-	SLV2Value srate;
-	SLV2Value gtk_gui;
-	SLV2Value external_gui;
-	SLV2Value logarithmic;
+	LilvWorld* world;
+	LilvNode* input_class;
+	LilvNode* output_class;
+	LilvNode* audio_class;
+	LilvNode* control_class;
+	LilvNode* in_place_broken;
+	LilvNode* integer;
+	LilvNode* toggled;
+	LilvNode* srate;
+	LilvNode* gtk_gui;
+	LilvNode* external_gui;
+	LilvNode* logarithmic;
 };
 
 
 class LV2PluginInfo : public PluginInfo {
 public:	
-	LV2PluginInfo (void* slv2_world, void* slv2_plugin);;
+	LV2PluginInfo (void* lilv_world, const void* lilv_plugin);;
 	~LV2PluginInfo ();;
-	static PluginInfoList discover (void* slv2_world);
+	static PluginInfoList discover (void* lilv_world);
 
 	PluginPtr load (Session& session);
 
-	void* _lv2_world;
-	void* _slv2_plugin;
+	void*       _lv2_world;
+	const void* _lilv_plugin;
 };
 
 typedef boost::shared_ptr<LV2PluginInfo> LV2PluginInfoPtr;
