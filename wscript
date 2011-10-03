@@ -658,7 +658,7 @@ def build(bld):
     obj.source       = 'ardour.rc.in'
     obj.target       = 'ardour_system.rc'
     obj.dict         = rc_subst_dict
-    obj.install_path = '${SYSCONF}/ardour3'
+    obj.install_path = '${SYSCONFDIR}/ardour3'
 
 def i18n(bld):
     bld.recurse (i18n_children)
