@@ -249,22 +249,7 @@ static VSTFXInfo* vstfx_info_from_plugin(VSTFX *vstfx)
       info->creator = strdup (creator);
     }
 
-#if defined LXVST_64BIT && defined VESTIGE_HEADER
-
-	/*On 64Bit the data alignment in AEffect struct is
-	incorrect using vestige.  see lxvst_plugin.cc*/
-	
-	info->UniqueID = *((int32_t *) &((AEffect*)(((char*)(plugin)) + 12))->unused_id);
-	
-#elif defined LXVST_32BIT && defined VESTIGE_HEADER
-
-    info->UniqueID = *((int32_t *) &plugin->unused_id);
-
-#else
-
     info->UniqueID = plugin->uniqueID;
-
-#endif
 
     info->Category = strdup("None");          // FIXME:  
     info->numInputs = plugin->numInputs;
@@ -288,7 +273,8 @@ static VSTFXInfo* vstfx_info_from_plugin(VSTFX *vstfx)
 		plugin->dispatcher (plugin, effGetParamName, i, 0, name, 0);
 		info->ParamNames[i] = strdup(name);
 		
-		plugin->dispatcher (plugin, effGetParamLabel, i, 0, label, 0);
+		//NOTE: 'effGetParamLabel' is no longer defined in vestige headers
+		//plugin->dispatcher (plugin, effGetParamLabel, i, 0, label, 0);
 		info->ParamLabels[i] = strdup(label);
     }
     return info;
@@ -297,7 +283,7 @@ static VSTFXInfo* vstfx_info_from_plugin(VSTFX *vstfx)
 /* A simple 'dummy' audiomaster callback which should be ok,
 we will only be instantiating the plugin in order to get its info*/
 
-static long simple_master_callback(struct AEffect *, long opcode, long, long, void *, float)
+static long simple_master_callback(struct AEffect *, int32_t opcode, int32_t, intptr_t, void *, float)
 {
 
 	if (opcode == audioMasterVersion)

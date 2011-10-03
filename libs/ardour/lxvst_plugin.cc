@@ -40,7 +40,7 @@
 #include <lrdf.h>
 
 /*Include for the new native vst engine - vstfx.h*/
-
+#include <stdint.h>
 #include <ardour/vstfx.h>
 
 #include "pbd/compose.h"
@@ -547,38 +547,8 @@ LXVSTPlugin::connect_and_run (BufferSet& bufs,
 	}
 
 	/* we already know it can support processReplacing */
-	
-#ifdef LXVST_32BIT
+
 	_plugin->processReplacing (_plugin, ins, outs, nframes);
-#endif
-
-#if defined LXVST_64BIT && defined VESTIGE_HEADER
-
-	/* Vestige doesn't work for 64Bit - some of the AEffect struct member types
-	   appear not to be correct which throws the data alignment.  We have two choices
-	   
-	   1) Fix Vestige - preferable from a technical standpoint, but perhaps
-	   not viable without affecting its 'clean room' status
-	   
-	   2) Correct for the alignment error - a bit of a kludge, but it can work,
-	   assuming the following data types / sizes on x86-64
-	   
-	   char		1Byte  : Byte aligned
-	   int	        4Bytes : 4Byte aligned
-	   long		8Bytes : 8Byte aligned
-	   pointers	8Bytes : 8Byte aligned
-	   
-	   This gives an offset of 8 Bytes - inclusive of padding
-	   to translate to the correct address for processReplacing
-	*/
-
-	((AEffect*)(((char*)(_plugin)) + 8))->processReplacing(_plugin, ins, outs, nframes);
-	
-#elif defined LXVST_64BIT
-
-	_plugin->processReplacing(_plugin, ins, outs, nframes);
-	
-#endif
 
 	return 0;
 }
@@ -600,23 +570,9 @@ LXVSTPlugin::unique_id() const
 {
 	char buf[32];
 	
-#if defined LXVST_64BIT && defined VESTIGE_HEADER
 
-	/*The vestige header appears not to have correct data
-	alignment in AEffect struct for 64Bit, possibly due
-	to incorrect data types - see previous comments*/
-		
-	snprintf (buf, sizeof (buf), "%d", *((int32_t*) &((AEffect*)(((char*)(_plugin)) + 12))->unused_id));
-
-#elif defined LXVST_32BIT && defined VESTIGE_HEADER
-	
-	snprintf (buf, sizeof (buf), "%d", *((int32_t*) &_plugin->unused_id));
-	
-#else
-	
 	snprintf (buf, sizeof (buf), "%d", _plugin->uniqueID);
 
-#endif
 	
 	return string (buf);
 }

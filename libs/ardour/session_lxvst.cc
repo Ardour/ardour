@@ -24,7 +24,7 @@
 
 #include <stdbool.h>
 #include <cstdio>
-
+#include <stdint.h>
 #include <ardour/vstfx.h>
 #include <ardour/vestige/aeffectx.h>
 
@@ -45,10 +45,10 @@ static int debug_callbacks = -1;
 
 using namespace ARDOUR;
 
-long Session::lxvst_callback (AEffect* effect,
-			    long opcode,
-			    long index,
-			    long value,
+intptr_t Session::lxvst_callback (AEffect* effect,
+			    int32_t opcode,
+			    int32_t index,
+			    intptr_t value,
 			    void* ptr,
 			    float opt)
 {
@@ -65,13 +65,13 @@ long Session::lxvst_callback (AEffect* effect,
 	{
 	    plug = (LXVSTPlugin*) (effect->user);
 		session = &plug->session();
-		SHOW_CALLBACK ("am callback 0x%x, opcode = %ld, plugin = \"%s\" ", (unsigned int)pthread_self(), opcode, plug->name());
+		SHOW_CALLBACK ("am callback 0x%x, opcode = %d, plugin = \"%s\" ", (unsigned int)pthread_self(), opcode, plug->name());
 	}
 	else
 	{
 		plug = 0;
 		session = 0;
-		SHOW_CALLBACK ("am callback 0x%x, opcode = %ld", (unsigned int)pthread_self(), opcode);
+		SHOW_CALLBACK ("am callback 0x%x, opcode = %d", (unsigned int)pthread_self(), opcode);
 	}
 
 	switch(opcode){
@@ -136,12 +136,13 @@ long Session::lxvst_callback (AEffect* effect,
 				_timeInfo.tempo = t.beats_per_minute ();
 				_timeInfo.flags |= (kVstTempoValid);
 			}
-			if (value & (kVstBarsValid)) {
+			// NOTE: 'kVstBarsValid' is no longer defined in vestige headers -- I have no idea how important this is
+			/*if (value & (kVstBarsValid)) {
 				const Meter& m (session->tempo_map().meter_at (session->transport_frame()));
 				_timeInfo.timeSigNumerator = m.beats_per_bar ();
 				_timeInfo.timeSigDenominator = m.note_divisor ();
 				_timeInfo.flags |= (kVstBarsValid);
-			}
+			}*/
 			
 			if (session->transport_speed() != 0.0f) {
 				_timeInfo.flags |= kVstTransportPlaying;

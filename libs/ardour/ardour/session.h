@@ -744,10 +744,10 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 			
 	/*Native linuxVST support*/
 	
-	static long lxvst_callback (AEffect* effect,
-				  long opcode,
-				  long index,
-				  long value,
+	static intptr_t lxvst_callback (AEffect* effect,
+				  int32_t opcode,
+				  int32_t index,
+				  intptr_t value,
 				  void* ptr,
 				  float opt);
 
