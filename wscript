@@ -376,7 +376,7 @@ def options(opt):
     opt.add_option('--gprofile', action='store_true', default=False, dest='gprofile',
                     help='Compile for use with gprofile')
     opt.add_option('--lv2', action='store_true', default=False, dest='lv2',
-                    help='Compile with support for LV2 (if SLV2 or Lilv+Suil is available)')
+                    help='Compile with support for LV2 (if Lilv+Suil is available)')
     opt.add_option('--lxvst', action='store_true', default=False, dest='lxvst',
                     help='Compile with support for linuxVST plugins')
     opt.add_option('--nls', action='store_true', default=True, dest='nls',

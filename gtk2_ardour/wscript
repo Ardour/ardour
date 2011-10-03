@@ -373,9 +373,6 @@ def build(bld):
     if bld.is_defined('HAVE_SUIL'):
         obj.source += [ 'lv2_plugin_ui.cc' ]
         obj.uselib += ' SUIL '
-    elif bld.is_defined('HAVE_SLV2'):
-        obj.source += [ 'lv2_plugin_ui.cc' ]
-        obj.uselib += ' SLV2 '
 
     if bld.is_defined('FREESOUND'):
         obj.source +=  [ 'sfdb_freesound_mootcher.cc' ]

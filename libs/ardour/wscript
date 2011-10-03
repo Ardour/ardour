@@ -259,12 +259,6 @@ def configure(conf):
     if conf.is_defined('HAVE_LILV'):
         autowaf.check_pkg(conf, 'suil-0', uselib_store='SUIL',
                           atleast_version='0.2.0', mandatory=False)
-    else:
-        autowaf.check_pkg(conf, 'slv2', uselib_store='SLV2',
-                          atleast_version='0.6.4', mandatory=False)
-        if conf.is_defined('HAVE_SLV2'):
-            autowaf.check_pkg(conf, 'rasqal', uselib_store='RASQAL',
-                              atleast_version='0.9.14', mandatory=False)
     autowaf.check_pkg(conf, 'soundtouch-1.0', uselib_store='SOUNDTOUCH',
                       mandatory=False)
     autowaf.check_pkg(conf, 'cppunit', uselib_store='CPPUNIT',
@@ -336,7 +330,7 @@ int main(int argc, char **argv) {
     if ogg_supported():
         conf.define ('HAVE_OGG', 1)
 
-    if conf.is_defined('HAVE_LILV') or conf.is_defined('HAVE_SLV2'):
+    if conf.is_defined('HAVE_LILV'):
         conf.define ('LV2_SUPPORT', 1)
 
     conf.write_config_header('libardour-config.h', remove=False)
@@ -386,10 +380,6 @@ def build(bld):
         obj.uselib += ['LILV']
         if bld.is_defined('HAVE_SUIL'):
             obj.uselib += ['SUIL']
-    elif bld.is_defined('HAVE_SLV2'):
-        obj.source += [ 'lv2_plugin.cc', 'lv2_event_buffer.cc',
-                        'uri_map.cc', 'rdff.c' ]
-        obj.uselib += ['SLV2','RASQAL']
 
     if bld.is_defined('VST_SUPPORT'):
         obj.source += [ 'vst_plugin.cc', 'session_vst.cc' ]
