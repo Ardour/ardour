@@ -553,13 +553,15 @@ def build(bld):
     bld (
         rule   = include_processor,
         source = 'ardour3_ui_dark.rc.pre',
-        target = 'ardour3_ui_dark.rc'
+        target = 'ardour3_ui_dark.rc',
+        install_path = '${SYSCONFDIR}/ardour3'
         )
 
     bld (
         rule   = include_processor,
         source = 'ardour3_ui_light.rc.pre',
-        target = 'ardour3_ui_light.rc'
+        target = 'ardour3_ui_light.rc',
+        install_path = '${SYSCONFDIR}/ardour3'
         )
 
     # Menus
