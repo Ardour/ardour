@@ -271,6 +271,14 @@ PannerShell::distribute_no_automation (BufferSet& inbufs, BufferSet& outbufs, pf
 void
 PannerShell::run (BufferSet& inbufs, BufferSet& outbufs, framepos_t start_frame, framepos_t end_frame, pframes_t nframes)
 {
+	if (inbufs.count().n_audio() == 0) {
+		/* Input has no audio buffers (e.g. Aux Send in a MIDI track at a
+		   point with no audio because there is no preceding instrument
+		*/
+		outbufs.silence(nframes, 0);
+		return;
+	}
+
 	if (outbufs.count().n_audio() == 0) {
 		// Failing to deliver audio we were asked to deliver is a bug
 		assert(inbufs.count().n_audio() == 0);
