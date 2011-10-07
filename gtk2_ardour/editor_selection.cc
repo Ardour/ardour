@@ -51,9 +51,9 @@ using namespace Editing;
 
 struct TrackViewByPositionSorter
 {
-    bool operator() (const TimeAxisView* a, const TimeAxisView *b) {
-	    return a->y_position() < b->y_position();
-    }
+	bool operator() (const TimeAxisView* a, const TimeAxisView *b) {
+		return a->y_position() < b->y_position();
+	}
 };
 
 bool
@@ -184,20 +184,20 @@ Editor::set_selected_track_as_side_effect (Selection::Operation op, bool /*force
 	}
 
 #if 1
-        if (!clicked_routeview) {
-                return;
-        }
+	if (!clicked_routeview) {
+		return;
+	}
 
-        bool had_tracks = !selection->tracks.empty();
-        RouteGroup* group = clicked_routeview->route()->route_group();
-        RouteGroup& arg (_session->all_route_group());
+	bool had_tracks = !selection->tracks.empty();
+	RouteGroup* group = clicked_routeview->route()->route_group();
+	RouteGroup& arg (_session->all_route_group());
 
 	switch (op) {
 	case Selection::Toggle:
 		if (selection->selected (clicked_axisview)) {
 			if (arg.is_select() && arg.is_active()) {
 				for (TrackViewList::iterator i = track_views.begin(); i != track_views.end (); ++i) {
-                                        selection->remove(*i);
+					selection->remove(*i);
 				}
 			} else if (group && group->is_active()) {
 				for (TrackViewList::iterator i = track_views.begin(); i != track_views.end (); ++i) {
@@ -206,64 +206,64 @@ Editor::set_selected_track_as_side_effect (Selection::Operation op, bool /*force
 				}
 			} else {
 				selection->remove (clicked_axisview);
-                        }
+			}
 		} else {
 			if (arg.is_select() && arg.is_active()) {
 				for (TrackViewList::iterator i = track_views.begin(); i != track_views.end (); ++i) {
-						selection->add(*i);
+					selection->add(*i);
 				}
 			} else if (group && group->is_active()) {
 				for (TrackViewList::iterator i = track_views.begin(); i != track_views.end (); ++i) {
 					if ( (*i)->route_group() == group)
 						selection->add(*i);
 				}
-                        } else {
-                                selection->add (clicked_axisview);
-                        }
+			} else {
+				selection->add (clicked_axisview);
+			}
 		}
-                break;
+		break;
 
 	case Selection::Add:
 		if (!had_tracks && arg.is_select() && arg.is_active()) {
-                        /* nothing was selected already, and all group is active etc. so use
-                           all tracks.
-                        */
+			/* nothing was selected already, and all group is active etc. so use
+			   all tracks.
+			*/
 			for (TrackViewList::iterator i = track_views.begin(); i != track_views.end (); ++i) {
-					selection->add(*i);
+				selection->add(*i);
 			}
 		} else if (group && group->is_active()) {
 			for (TrackViewList::iterator i  = track_views.begin(); i != track_views.end (); ++i) {
 				if ((*i)->route_group() == group)
 					selection->add(*i);
 			}
-                } else {
+		} else {
 			selection->add (clicked_axisview);
-                }
-                break;
+		}
+		break;
 
 	case Selection::Set:
-                selection->clear();
+		selection->clear();
 		if (!had_tracks && arg.is_select() && arg.is_active()) {
-                        /* nothing was selected already, and all group is active etc. so use
-                           all tracks.
-                        */
+			/* nothing was selected already, and all group is active etc. so use
+			   all tracks.
+			*/
 			for (TrackViewList::iterator i = track_views.begin(); i != track_views.end (); ++i) {
-					selection->add(*i);
+				selection->add(*i);
 			}
 		} else if (group && group->is_active()) {
 			for (TrackViewList::iterator i  = track_views.begin(); i != track_views.end (); ++i) {
 				if ((*i)->route_group() == group)
 					selection->add(*i);
 			}
-                } else {
+		} else {
 			selection->set (clicked_axisview);
-                }
-                break;
+		}
+		break;
 
 	case Selection::Extend:
 		selection->clear();
 		cerr << ("Editor::set_selected_track_as_side_effect  case  Selection::Add  not yet implemented\n");
-                break;
+		break;
 	}
 
 #else // the older version
@@ -351,11 +351,11 @@ Editor::set_selected_control_point_from_click (Selection::Operation op, bool /*n
 void
 Editor::get_onscreen_tracks (TrackViewList& tvl)
 {
- 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
- 		if ((*i)->y_position() < _canvas_height) {
- 			tvl.push_back (*i);
- 		}
- 	}
+	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+		if ((*i)->y_position() < _canvas_height) {
+			tvl.push_back (*i);
+		}
+	}
 }
 
 /** Call a slot for a given `basis' track and also for any track that is in the same
@@ -451,8 +451,7 @@ Editor::get_equivalent_regions (RegionSelection & basis, PBD::PropertyID prop) c
 
 		mapover_tracks (
 			sigc::bind (sigc::mem_fun (*this, &Editor::mapped_get_equivalent_regions), *i, &eq),
-			&(*i)->get_time_axis_view(), prop
-			);
+			&(*i)->get_time_axis_view(), prop);
 
 		for (vector<RegionView*>::iterator j = eq.begin(); j != eq.end(); ++j) {
 			equivalent.add (*j);
@@ -765,8 +764,8 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 									*/
 
 									if (find (already_in_selection.begin(),
-										  already_in_selection.end(),
-										  artv) == already_in_selection.end()) {
+									          already_in_selection.end(),
+									          artv) == already_in_selection.end()) {
 
 										relevant_tracks.insert (artv);
 									}
@@ -779,7 +778,7 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 		}
 
 		/* 3. find all selectable objects (regionviews in this case) between that one and the end of the
-			   one that was clicked.
+		   one that was clicked.
 		*/
 
 		for (set<RouteTimeAxisView*>::iterator t = relevant_tracks.begin(); t != relevant_tracks.end(); ++t) {
@@ -804,7 +803,7 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 		}
 	}
 
-  out:
+out:
 	return commit;
 }
 
@@ -885,23 +884,23 @@ Editor::track_selection_changed ()
 
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 
-                bool yn = (find (selection->tracks.begin(), selection->tracks.end(), *i) != selection->tracks.end());
+		bool yn = (find (selection->tracks.begin(), selection->tracks.end(), *i) != selection->tracks.end());
 
-                (*i)->set_selected (yn);
+		(*i)->set_selected (yn);
 
-                TimeAxisView::Children c = (*i)->get_child_list ();
-                for (TimeAxisView::Children::iterator j = c.begin(); j != c.end(); ++j) {
-                        (*j)->set_selected (find (selection->tracks.begin(), selection->tracks.end(), j->get()) != selection->tracks.end());
-                }
+		TimeAxisView::Children c = (*i)->get_child_list ();
+		for (TimeAxisView::Children::iterator j = c.begin(); j != c.end(); ++j) {
+			(*j)->set_selected (find (selection->tracks.begin(), selection->tracks.end(), j->get()) != selection->tracks.end());
+		}
 
-                if (yn &&
-                    ((mouse_mode == MouseRange) ||
-                     ((mouse_mode == MouseObject) && (_join_object_range_state == JOIN_OBJECT_RANGE_OBJECT)))) {
-                        (*i)->reshow_selection (selection->time);
-                } else {
-                        (*i)->hide_selection ();
-                }
-        }
+		if (yn &&
+		    ((mouse_mode == MouseRange) ||
+		     ((mouse_mode == MouseObject) && (_join_object_range_state == JOIN_OBJECT_RANGE_OBJECT)))) {
+			(*i)->reshow_selection (selection->time);
+		} else {
+			(*i)->hide_selection ();
+		}
+	}
 
 	ActionManager::set_sensitive (ActionManager::track_selection_sensitive_actions, !selection->tracks.empty());
 }
@@ -1037,18 +1036,18 @@ Editor::sensitize_the_right_region_actions ()
 		}
 
 		if (ar) {
-                        /* its a bit unfortunate that "envelope visible" is a view-only
-                           property. we have to find the regionview to able to check
-                           its current setting.
-                        */
+			/* its a bit unfortunate that "envelope visible" is a view-only
+			   property. we have to find the regionview to able to check
+			   its current setting.
+			*/
 
-                        have_envelope_invisible = true;
+			have_envelope_invisible = true;
 
-                        if (*i) {
-                                AudioRegionView* arv = dynamic_cast<AudioRegionView*> (*i);
-                                if (arv && arv->envelope_visible()) {
-                                        have_envelope_visible = true;
-                                }
+			if (*i) {
+				AudioRegionView* arv = dynamic_cast<AudioRegionView*> (*i);
+				if (arv && arv->envelope_visible()) {
+					have_envelope_visible = true;
+				}
 			}
 
 			if (ar->envelope_active()) {
@@ -1104,13 +1103,13 @@ Editor::sensitize_the_right_region_actions ()
 		if (have_envelope_visible && !have_envelope_invisible) {
 			Glib::RefPtr<ToggleAction>::cast_dynamic (_region_actions->get_action("toggle-region-gain-envelope-visible"))->set_active ();
 		} else if (have_envelope_visible && have_envelope_invisible) {
-//			_region_actions->get_action("toggle-region-gain-envelope-visible")->set_inconsistent ();
+			// _region_actions->get_action("toggle-region-gain-envelope-visible")->set_inconsistent ();
 		}
 
 		if (have_envelope_active && !have_envelope_inactive) {
 			Glib::RefPtr<ToggleAction>::cast_dynamic (_region_actions->get_action("toggle-region-gain-envelope-active"))->set_active ();
 		} else if (have_envelope_active && have_envelope_inactive) {
-//			_region_actions->get_action("toggle-region-gain-envelope-active")->set_inconsistent ();
+			// _region_actions->get_action("toggle-region-gain-envelope-active")->set_inconsistent ();
 		}
 
 	} else {
@@ -1129,23 +1128,23 @@ Editor::sensitize_the_right_region_actions ()
 
 	Glib::RefPtr<ToggleAction>::cast_dynamic (_region_actions->get_action("toggle-region-lock"))->set_active (have_locked && !have_unlocked);
 	if (have_locked && have_unlocked) {
-//		_region_actions->get_action("toggle-region-lock")->set_inconsistent ();
+		// _region_actions->get_action("toggle-region-lock")->set_inconsistent ();
 	}
 
 	Glib::RefPtr<ToggleAction>::cast_dynamic (_region_actions->get_action("toggle-region-lock-style"))->set_active (have_position_lock_style_music && !have_position_lock_style_audio);
 
 	if (have_position_lock_style_music && have_position_lock_style_audio) {
-//		_region_actions->get_action("toggle-region-lock-style")->set_inconsistent ();
+		// _region_actions->get_action("toggle-region-lock-style")->set_inconsistent ();
 	}
 
 	Glib::RefPtr<ToggleAction>::cast_dynamic (_region_actions->get_action("toggle-region-mute"))->set_active (have_muted && !have_unmuted);
 	if (have_muted && have_unmuted) {
-//		_region_actions->get_action("toggle-region-mute")->set_inconsistent ();
+		// _region_actions->get_action("toggle-region-mute")->set_inconsistent ();
 	}
 
 	Glib::RefPtr<ToggleAction>::cast_dynamic (_region_actions->get_action("toggle-opaque-region"))->set_active (have_opaque && !have_non_opaque);
 	if (have_opaque && have_non_opaque) {
-//			_region_actions->get_action("toggle-opaque-region")->set_inconsistent ();
+		// _region_actions->get_action("toggle-opaque-region")->set_inconsistent ();
 	}
 
 	if (!have_not_at_natural_position) {
@@ -1179,9 +1178,9 @@ Editor::region_selection_changed ()
 		(*i)->set_selected_regionviews (selection->regions);
 	}
 
-        if (_region_selection_change_updates_region_list) {
-                _regions->set_selected (selection->regions);
-        }
+	if (_region_selection_change_updates_region_list) {
+		_regions->set_selected (selection->regions);
+	}
 
 	_regions->block_change_connection (false);
 	editor_regions_selection_changed_connection.block(false);
@@ -1232,13 +1231,13 @@ Editor::select_all_in_track (Selection::Operation op)
 void
 Editor::select_all_internal_edit (Selection::Operation)
 {
-        /* currently limited to MIDI only */
+	/* currently limited to MIDI only */
 
 	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
 		MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(*i);
-                if (mrv) {
-                        mrv->select_all_notes ();
-                }
+		if (mrv) {
+			mrv->select_all_notes ();
+		}
 	}
 }
 
@@ -1247,10 +1246,10 @@ Editor::select_all (Selection::Operation op)
 {
 	list<Selectable *> touched;
 
-        if (_internal_editing) {
-                select_all_internal_edit (op);
-                return;
-        }
+	if (_internal_editing) {
+		select_all_internal_edit (op);
+		return;
+	}
 
 	for (TrackViewList::iterator iter = track_views.begin(); iter != track_views.end(); ++iter) {
 		if ((*iter)->hidden()) {
@@ -1311,9 +1310,7 @@ Editor::invert_selection ()
  *  within the region are already selected.
  */
 void
-Editor::select_all_within (
-	framepos_t start, framepos_t end, double top, double bot, const TrackViewList& tracklist, Selection::Operation op, bool preserve_if_selected
-	)
+Editor::select_all_within (framepos_t start, framepos_t end, double top, double bot, const TrackViewList& tracklist, Selection::Operation op, bool preserve_if_selected)
 {
 	list<Selectable*> found;
 
@@ -1510,7 +1507,7 @@ Editor::select_all_selectables_using_loop()
 void
 Editor::select_all_selectables_using_cursor (EditorCursor *cursor, bool after)
 {
-        framepos_t start;
+	framepos_t start;
 	framepos_t end;
 	list<Selectable *> touched;
 
@@ -1550,7 +1547,7 @@ Editor::select_all_selectables_using_cursor (EditorCursor *cursor, bool after)
 void
 Editor::select_all_selectables_using_edit (bool after)
 {
-        framepos_t start;
+	framepos_t start;
 	framepos_t end;
 	list<Selectable *> touched;
 
@@ -1590,7 +1587,7 @@ Editor::select_all_selectables_using_edit (bool after)
 void
 Editor::select_all_selectables_between (bool /*within*/)
 {
-        framepos_t start;
+	framepos_t start;
 	framepos_t end;
 	list<Selectable *> touched;
 
@@ -1619,12 +1616,12 @@ Editor::select_all_selectables_between (bool /*within*/)
 void
 Editor::select_range_between ()
 {
-        framepos_t start;
+	framepos_t start;
 	framepos_t end;
 
-        if (mouse_mode == MouseRange && !selection->time.empty()) {
-                selection->clear_time ();
-        }
+	if (mouse_mode == MouseRange && !selection->time.empty()) {
+		selection->clear_time ();
+	}
 
 	if (!get_edit_op_range (start, end)) {
 		return;
@@ -1652,7 +1649,7 @@ Editor::get_edit_op_range (framepos_t& start, framepos_t& end) const
 	if (!mouse_frame (m, ignored)) {
 		/* mouse is not in a canvas, try playhead+selected marker.
 		   this is probably most true when using menus.
-		 */
+		*/
 
 		if (selection->markers.empty()) {
 			return false;
@@ -1692,9 +1689,9 @@ Editor::get_edit_op_range (framepos_t& start, framepos_t& end) const
 			if (selection->markers.empty()) {
 
 				MessageDialog win (_("No edit range defined"),
-						   false,
-						   MESSAGE_INFO,
-						   BUTTONS_OK);
+				                   false,
+				                   MESSAGE_INFO,
+				                   BUTTONS_OK);
 
 				win.set_secondary_text (
 					_("the edit point is Selected Marker\nbut there is no selected marker."));
