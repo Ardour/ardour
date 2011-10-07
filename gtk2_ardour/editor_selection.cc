@@ -1231,8 +1231,6 @@ Editor::select_all_in_track (Selection::Operation op)
 void
 Editor::select_all_internal_edit (Selection::Operation)
 {
-	/* currently limited to MIDI only */
-
 	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
 		MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(*i);
 		if (mrv) {
@@ -1274,6 +1272,7 @@ Editor::select_all (Selection::Operation op)
 	}
 	commit_reversible_command ();
 }
+
 void
 Editor::invert_selection_in_track ()
 {
@@ -1291,6 +1290,16 @@ void
 Editor::invert_selection ()
 {
 	list<Selectable *> touched;
+
+	if (_internal_editing) {
+		for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+			MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(*i);
+			if (mrv) {
+				mrv->invert_selection ();
+			}
+		}
+		return;
+	}
 
 	for (TrackViewList::iterator iter = track_views.begin(); iter != track_views.end(); ++iter) {
 		if ((*iter)->hidden()) {

@@ -192,6 +192,7 @@ public:
 	void   delete_note (boost::shared_ptr<NoteType>);
 	size_t selection_size() { return _selection.size(); }
 	void   select_all_notes ();
+	void   invert_selection ();
 
 	void move_selection(double dx, double dy, double cumulative_dy);
 	void note_dropped (ArdourCanvas::CanvasNoteEvent* ev, ARDOUR::frameoffset_t, int8_t d_note);
