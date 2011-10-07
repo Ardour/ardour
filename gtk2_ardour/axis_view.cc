@@ -80,12 +80,9 @@ AxisView::marked_for_display () const
 bool
 AxisView::set_marked_for_display (bool yn)
 {
-	if (yn != marked_for_display()) {
-		if (yn) {
-			set_gui_property ("visible", true);
-		} else {
-			set_gui_property ("visible", false);
-		}
+	string const v = gui_property ("visible");
+	if (v == "" || yn != string_is_affirmative (v)) {
+		set_gui_property ("visible", yn);
 		return true; // things changed
 	}
 
