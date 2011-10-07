@@ -3368,6 +3368,10 @@ Editor::bounce_range_selection (bool replace, bool enable_processing)
 
 		boost::shared_ptr<Region> r = rtv->track()->bounce_range (start, start+cnt, itt, enable_processing);
 
+		if (!r) {
+			continue;
+		}
+
 		if (replace) {
 			list<AudioRange> ranges;
 			ranges.push_back (AudioRange (start, start+cnt, 0));

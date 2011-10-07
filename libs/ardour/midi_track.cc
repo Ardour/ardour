@@ -508,9 +508,7 @@ MidiTrack::export_stuff (BufferSet& /*bufs*/, framecnt_t /*nframes*/, framepos_t
 boost::shared_ptr<Region>
 MidiTrack::bounce (InterThreadInfo& /*itt*/)
 {
-	throw;
-	// vector<MidiSource*> srcs;
-	// return _session.write_one_track (*this, 0, _session.current_end_frame(), false, srcs, itt);
+	std::cerr << "MIDI bounce currently unsupported" << std::endl;
 	return boost::shared_ptr<Region> ();
 }
 
@@ -518,15 +516,14 @@ MidiTrack::bounce (InterThreadInfo& /*itt*/)
 boost::shared_ptr<Region>
 MidiTrack::bounce_range (framepos_t /*start*/, framepos_t /*end*/, InterThreadInfo& /*itt*/, bool /*enable_processing*/)
 {
-	throw;
-	//vector<MidiSource*> srcs;
-	//return _session.write_one_track (*this, start, end, false, srcs, itt);
+	std::cerr << "MIDI bounce range currently unsupported" << std::endl;
 	return boost::shared_ptr<Region> ();
 }
 
 void
 MidiTrack::freeze_me (InterThreadInfo& /*itt*/)
 {
+	std::cerr << "MIDI freeze currently unsupported" << std::endl;
 }
 
 void
