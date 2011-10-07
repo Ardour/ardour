@@ -270,9 +270,6 @@ private:
 		Glib::RefPtr<Gdk::Colormap const> c = s->get_rgba_colormap ();
 		if (c) {
 			_drag_icon->set_colormap (c);
-			_have_alpha = true;
-		} else {
-			_have_alpha = false;
 		}
 
 		int w, h;
@@ -312,8 +309,6 @@ private:
 	{
 		/* work out where it was dropped */
 		std::pair<T*, double> const drop = get_child_at_position (y);
-
-		
 		
 		if (_drag_source == this) {
 
@@ -577,8 +572,6 @@ private:
 	Gtk::Label* _drag_placeholder;
 	/** Our child being dragged, or 0 */
 	T* _drag_child;
-	/** true if we can have an alpha-blended drag icon */
-	bool _have_alpha;
 	
 	static DnDVBox* _drag_source;
 	
