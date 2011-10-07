@@ -1521,12 +1521,10 @@ Editor::select_all_selectables_using_cursor (EditorCursor *cursor, bool after)
 	list<Selectable *> touched;
 
 	if (after) {
-		begin_reversible_command (_("select all after cursor"));
 		start = cursor->current_frame;
 		end = _session->current_end_frame();
 	} else {
 		if (cursor->current_frame > 0) {
-			begin_reversible_command (_("select all before cursor"));
 			start = 0;
 			end = cursor->current_frame - 1;
 		} else {
@@ -1534,6 +1532,21 @@ Editor::select_all_selectables_using_cursor (EditorCursor *cursor, bool after)
 		}
 	}
 
+	if (_internal_editing) {
+		for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+			MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(*i);
+			if (mrv) {
+				mrv->select_range (start, end);
+			}
+		}
+		return;
+	}
+
+	if (after) {
+		begin_reversible_command (_("select all after cursor"));
+	} else {
+		begin_reversible_command (_("select all before cursor"));
+	}
 
 	TrackViewList* ts;
 
@@ -1561,12 +1574,10 @@ Editor::select_all_selectables_using_edit (bool after)
 	list<Selectable *> touched;
 
 	if (after) {
-		begin_reversible_command (_("select all after edit"));
 		start = get_preferred_edit_position();
 		end = _session->current_end_frame();
 	} else {
 		if ((end = get_preferred_edit_position()) > 1) {
-			begin_reversible_command (_("select all before edit"));
 			start = 0;
 			end -= 1;
 		} else {
@@ -1574,6 +1585,19 @@ Editor::select_all_selectables_using_edit (bool after)
 		}
 	}
 
+	if (_internal_editing) {
+		for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+			MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(*i);
+			mrv->select_range (start, end);
+		}
+		return;
+	}
+
+	if (after) {
+		begin_reversible_command (_("select all after edit"));
+	} else {
+		begin_reversible_command (_("select all before edit"));
+	}
 
 	TrackViewList* ts;
 
@@ -1601,6 +1625,14 @@ Editor::select_all_selectables_between (bool /*within*/)
 	list<Selectable *> touched;
 
 	if (!get_edit_op_range (start, end)) {
+		return;
+	}
+
+	if (_internal_editing) {
+		for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+			MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(*i);
+			mrv->select_range (start, end);
+		}
 		return;
 	}
 

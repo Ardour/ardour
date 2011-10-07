@@ -2028,6 +2028,19 @@ MidiRegionView::select_all_notes ()
 }
 
 void
+MidiRegionView::select_range (framepos_t start, framepos_t end)
+{
+	clear_selection ();
+
+	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
+		framepos_t t = source_beats_to_absolute_frames((*i)->note()->time());
+		if (t >= start && t <= end) {
+			add_to_selection (*i);
+		}
+	}
+}
+
+void
 MidiRegionView::invert_selection ()
 {
 	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {

@@ -192,6 +192,7 @@ public:
 	void   delete_note (boost::shared_ptr<NoteType>);
 	size_t selection_size() { return _selection.size(); }
 	void   select_all_notes ();
+	void   select_range(framepos_t start, framepos_t end);
 	void   invert_selection ();
 
 	void move_selection(double dx, double dy, double cumulative_dy);
