@@ -719,6 +719,22 @@ PluginManager::lxvst_discover (string path)
 	info->n_outputs.set_audio (finfo->numOutputs);
 	info->n_inputs.set_midi (finfo->wantMidi ? 1 : 0);
 	info->type = ARDOUR::LXVST;
+
+        /* Make sure we don't find the same plugin in more than one place along
+	   the LXVST_PATH We can't use a simple 'find' because the path is included
+	   in the PluginInfo, and that is the one thing we can be sure MUST be
+	   different if a duplicate instance is found.  So we just compare the type
+	   and unique ID (which for some VSTs isn't actually unique...)
+	*/
+	
+	if (!_lxvst_plugin_info->empty()) {
+		for (PluginInfoList::iterator i =_lxvst_plugin_info->begin(); i != _lxvst_plugin_info->end(); ++i) {
+			if ((info->type == (*i)->type)&&(info->unique_id == (*i)->unique_id)) {
+				vstfx_free_info(finfo);
+				return 0;
+			}
+		}
+	}
 	
 	_lxvst_plugin_info->push_back (info);
 	vstfx_free_info (finfo);
