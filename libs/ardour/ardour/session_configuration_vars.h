@@ -62,3 +62,4 @@ CONFIG_VARIABLE (InsertMergePolicy, insert_merge_policy, "insert-merge-policy", 
 CONFIG_VARIABLE (framecnt_t, timecode_offset, "timecode-offset", 0)
 CONFIG_VARIABLE (bool, timecode_offset_negative, "timecode-offset-negative", true)
 CONFIG_VARIABLE (bool, glue_new_markers_to_bars_and_beats, "glue-new-markers-to-bars-and-beats", false)
+CONFIG_VARIABLE (bool, midi_copy_is_fork, "midi-copy-is-fork", false)

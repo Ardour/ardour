@@ -260,6 +260,15 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 
 	add_option (_("Misc"), lm);
 
+	add_option (_("Misc"), new OptionEditorHeading (_("MIDI Options")));
+
+        add_option (_("Misc"), new BoolOption (
+			    "midi-copy-is-fork",
+			    _("MIDI region copies are independent"),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_midi_copy_is_fork),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_midi_copy_is_fork)
+			    ));
+
 	add_option (_("Misc"), new OptionEditorHeading (_("MIDI Note Overlaps")));
 
 	ComboOption<InsertMergePolicy>* li = new ComboOption<InsertMergePolicy> (

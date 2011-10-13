@@ -118,7 +118,7 @@ MidiRegion::~MidiRegion ()
 /** Create a new MidiRegion that has its own version of some/all of the Source used by another.
  */
 boost::shared_ptr<MidiRegion>
-MidiRegion::clone ()
+MidiRegion::clone () const
 {
 	BeatsFramesConverter bfc (_session.tempo_map(), _position);
 	Evoral::MusicalTime const bbegin = bfc.from (_start);

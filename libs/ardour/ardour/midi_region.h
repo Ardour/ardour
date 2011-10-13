@@ -63,7 +63,7 @@ class MidiRegion : public Region
 
 	~MidiRegion();
 
-	boost::shared_ptr<MidiRegion> clone ();
+	boost::shared_ptr<MidiRegion> clone () const;
 
 	boost::shared_ptr<MidiSource> midi_source (uint32_t n=0) const;
 

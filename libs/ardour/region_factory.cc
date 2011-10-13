@@ -58,7 +58,11 @@ RegionFactory::create (boost::shared_ptr<const Region> region, bool announce)
 
 	} else if ((mr = boost::dynamic_pointer_cast<const MidiRegion>(region)) != 0) {
 
-		ret = boost::shared_ptr<Region> (new MidiRegion (mr, 0));
+		if (mr->session().config.get_midi_copy_is_fork()) {
+			ret = mr->clone ();
+		} else {
+			ret = boost::shared_ptr<Region> (new MidiRegion (mr, 0));
+		}
 
 	} else {
 		fatal << _("programming error: RegionFactory::create() called with unknown Region type")
