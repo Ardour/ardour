@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ArdourMIDIBindings version="1.0.0" name="Xboard 61">
+
+<!--    
+		EMU Xboard61
+		 __________________________________________________
+		|                                                  |
+		|  ||         o o o o o o o o    = = = = = = = =   |
+		|  ||         o o o o o o o o    = = = = = = = =   |
+		|                                                  |
+		| || ||   _____________________________________    |
+		| || ||  | | | | | | | | | | | | | | | | | | | |   |
+		|_______ | | | | | | | | | | | | | | | | | | | |___|
+		          - - - - - - - - - - - - - - - - - - -  
+
+NOTE:	I have assumed that the top row knobs are mapped to midi 
+		cc numbers 21-28 and the bottom row to midi cc numbers 
+		31-38. However, the knobs can be arbitrarily mapped to any
+		midi cc controller numbers and hence may be different 
+		on your keyboard. It's easy to change them - see Xboard 
+		manual. Alternatively, edit this file with the correct 
+		cc numbers.
+-->
+
+	<DeviceInfo bank-size="16" />
+	<Binding channel="1" note="24" function="prev-bank"/>
+	<Binding channel="1" note="26" function="next-bank"/>
+
+<!--
+	Xboard data entry slider / master vol  #!! or FF/REV? bank select?
+-->
+	<!--Binding sysex="f0 7f 7f 4 1 75 2b f7" uri="/bus/gain master" /-->
+
+<!-- 
+-->
+	<Binding channel="1" ctl="1" uri="/bus/gain master" />
+
+<!-- 
+	Xboard knobs 1-8 top row
+-->
+	<Binding channel="1" ctl="21" uri="/route/gain B2" />
+	<Binding channel="1" ctl="22" uri="/route/gain B3" />
+	<Binding channel="1" ctl="23" uri="/route/gain B4" />
+	<Binding channel="1" ctl="24" uri="/route/gain B5" />
+	<Binding channel="1" ctl="25" uri="/route/gain B6" />
+	<Binding channel="1" ctl="26" uri="/route/gain B7" />
+	<Binding channel="1" ctl="27" uri="/route/gain B8" />
+	<Binding channel="1" ctl="28" uri="/route/gain B9" />
+
+<!-- 
+	Xboard knobs 9-16 bottom row
+-->
+	<Binding channel="1" ctl="31" uri="/route/gain B10" />
+	<Binding channel="1" ctl="32" uri="/route/gain B11" />
+	<Binding channel="1" ctl="33" uri="/route/gain B12" />
+	<Binding channel="1" ctl="34" uri="/route/gain B13" />
+	<Binding channel="1" ctl="35" uri="/route/gain B14" />
+	<Binding channel="1" ctl="36" uri="/route/gain B15" />
+	<Binding channel="1" ctl="37" uri="/route/gain B16" />
+	<Binding channel="1" ctl="38" uri="/route/gain B17" />
+
+<!-- 
+	keyboard keys
+-->
+	<Binding channel="1" note="32" function="rec-disable"/>
+	<Binding channel="1" note="34" function="rec-enable"/>
+	<Binding channel="1" note="36" function="loop-toggle"/>
+	<Binding channel="1" note="38" function="transport-roll"/>
+	<Binding channel="1" note="40" function="transport-stop"/>
+	<Binding channel="1" note="37" function="transport-start"/>
+	<Binding channel="1" note="39" function="transport-end"/>
+
+</ArdourMIDIBindings>
