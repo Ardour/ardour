@@ -765,7 +765,7 @@ Editor::marker_context_menu (GdkEventButton* ev, ArdourCanvas::Item* item)
 	if (loc == transport_loop_location() || loc == transport_punch_location() || loc->is_session_range ()) {
 
 		if (transport_marker_menu == 0) {
-			build_range_marker_menu (true);
+			build_range_marker_menu (loc == transport_loop_location() || loc == transport_punch_location(), loc->is_session_range());
 		}
 
 		marker_menu_item = item;
@@ -795,7 +795,7 @@ Editor::marker_context_menu (GdkEventButton* ev, ArdourCanvas::Item* item)
 
 	} else if (loc->is_range_marker()) {
 		if (range_marker_menu == 0) {
-			build_range_marker_menu (false);
+			build_range_marker_menu (false, false);
 		}
 		marker_menu_item = item;
 		range_marker_menu->popup (1, ev->time);
@@ -811,16 +811,6 @@ Editor::new_transport_marker_context_menu (GdkEventButton* ev, ArdourCanvas::Ite
 
 	new_transport_marker_menu->popup (1, ev->time);
 
-}
-
-void
-Editor::transport_marker_context_menu (GdkEventButton* ev, ArdourCanvas::Item*)
-{
-	if (transport_marker_menu == 0) {
-		build_range_marker_menu (true);
-	}
-
-	transport_marker_menu->popup (1, ev->time);
 }
 
 void
@@ -863,9 +853,11 @@ Editor::build_marker_menu (Location* loc)
 }
 
 void
-Editor::build_range_marker_menu (bool loop_or_punch_or_session)
+Editor::build_range_marker_menu (bool loop_or_punch, bool session)
 {
 	using namespace Menu_Helpers;
+
+	bool const loop_or_punch_or_session = loop_or_punch | session;
 
 	Menu *markerMenu = new Menu;
 	if (loop_or_punch_or_session) {
@@ -894,10 +886,16 @@ Editor::build_range_marker_menu (bool loop_or_punch_or_session)
 	if (!loop_or_punch_or_session) {
 		items.push_back (MenuElem (_("Hide Range"), sigc::mem_fun(*this, &Editor::marker_menu_hide)));
 		items.push_back (MenuElem (_("Rename Range"), sigc::mem_fun(*this, &Editor::marker_menu_rename)));
-		items.push_back (MenuElem (_("Remove Range"), sigc::mem_fun(*this, &Editor::marker_menu_remove)));
-		items.push_back (SeparatorElem());
 	}
 
+	if (!session) {
+		items.push_back (MenuElem (_("Remove Range"), sigc::mem_fun(*this, &Editor::marker_menu_remove)));
+	}
+
+	if (loop_or_punch_or_session) {
+		items.push_back (SeparatorElem());
+	}
+	
 	items.push_back (MenuElem (_("Separate Regions in Range"), sigc::mem_fun(*this, &Editor::marker_menu_separate_regions_using_location)));
 	items.push_back (MenuElem (_("Select All in Range"), sigc::mem_fun(*this, &Editor::marker_menu_select_all_selectables_using_range)));
 	if (!Profile->get_sae()) {
