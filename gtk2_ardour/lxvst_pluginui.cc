@@ -47,6 +47,12 @@ LXVSTPluginUI::LXVSTPluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_
 
 	vstfx_run_editor (lxvst->vstfx());
 
+	if (lxvst->vstfx()->current_program != -1) {
+		lxvst_preset_combo.set_active (lxvst->vstfx()->current_program);
+	} else {
+		lxvst_preset_combo.set_active (0);
+	}
+	
 	preset_box.set_spacing (6);
 	preset_box.set_border_width (6);
 	preset_box.pack_end (bypass_button, false, false, 10);
@@ -245,12 +251,6 @@ LXVSTPluginUI::create_preset_store ()
 	CellRenderer* renderer = manage (new CellRendererText());
 	lxvst_preset_combo.pack_start (*renderer, true);
 	lxvst_preset_combo.add_attribute (*renderer, "text", 0);
-
-	if (lxvst->vstfx()->current_program != -1) {
-		lxvst_preset_combo.set_active (lxvst->vstfx()->current_program);
-	} else {
-		lxvst_preset_combo.set_active (0);
-	}
 }
 
 typedef int (*error_handler_t)( Display *, XErrorEvent *);
