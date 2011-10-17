@@ -123,6 +123,7 @@ public:
 #endif
 
 	void read_from(const BufferSet& in, framecnt_t nframes);
+	void read_from(const BufferSet& in, framecnt_t nframes, DataType);
 	void merge_from(const BufferSet& in, framecnt_t nframes);
 
 	template <typename BS, typename B>

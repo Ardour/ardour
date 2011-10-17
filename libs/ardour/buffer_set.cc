@@ -383,6 +383,21 @@ BufferSet::VSTBuffer::push_back (Evoral::MIDIEvent<framepos_t> const & ev)
 
 #endif /* VST_SUPPORT */
 
+/** Copy buffers of one type from `in' to this BufferSet */
+void
+BufferSet::read_from (const BufferSet& in, framecnt_t nframes, DataType type)
+{
+	assert (available().get (type) >= in.count().get (type));
+
+	BufferSet::iterator o = begin (type);
+	for (BufferSet::const_iterator i = in.begin (type); i != in.end (type); ++i, ++o) {
+		o->read_from (*i, nframes);
+	}
+
+	_count.set (type, in.count().get (type));
+}
+
+/** Copy buffers of all types from `in' to this BufferSet */
 void
 BufferSet::read_from (const BufferSet& in, framecnt_t nframes)
 {
@@ -390,13 +405,8 @@ BufferSet::read_from (const BufferSet& in, framecnt_t nframes)
 
 	// Copy all buffers 1:1
 	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
-		BufferSet::iterator o = begin(*t);
-		for (BufferSet::const_iterator i = in.begin(*t); i != in.end(*t); ++i, ++o) {
-			o->read_from (*i, nframes);
-		}
+		read_from (in, nframes, *t);
 	}
-
-	set_count(in.count());
 }
 
 void

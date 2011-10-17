@@ -116,8 +116,14 @@ InternalSend::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame
 	if (_panshell && !_panshell->bypassed()) {
 		_panshell->run (bufs, mixbufs, start_frame, end_frame, nframes);
 	} else {
-		assert (mixbufs.available() >= bufs.count());
-		mixbufs.read_from (bufs, nframes);
+		if (role() == Listen) {
+			/* We're going to the monitor bus, so discard MIDI data */
+			assert (mixbufs.available().get (DataType::AUDIO) >= bufs.count().get (DataType::AUDIO));
+			mixbufs.read_from (bufs, nframes, DataType::AUDIO);
+		} else {
+			assert (mixbufs.available() >= bufs.count());
+			mixbufs.read_from (bufs, nframes);
+		}
 	}
 
 	/* gain control */
