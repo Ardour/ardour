@@ -596,7 +596,7 @@ def build(bld):
         obj = bld(
             target = b + '.bindings',
             source = b + '.bindings.in',
-            rule = '../tools/fmt-bindings --winkey="%s" --accelmap <${SRC} >${TGT}' % bld.env['WINDOWS_KEY']
+            rule = '../tools/fmt-bindings --platform="%s" --winkey="%s" --accelmap <${SRC} >${TGT}' % (sys.platform, bld.env['WINDOWS_KEY'] )
             )
         obj.install_path = os.path.join(bld.env['SYSCONFDIR'], 'ardour3')
 
