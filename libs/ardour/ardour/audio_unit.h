@@ -94,6 +94,8 @@ class AUPlugin : public ARDOUR::Plugin
 	bool parameter_is_control (uint32_t) const;
 	bool parameter_is_input (uint32_t) const;
 	bool parameter_is_output (uint32_t) const;
+	
+	void set_info (PluginInfoPtr);
 
 	int set_state(const XMLNode& node, int);
 
@@ -104,6 +106,8 @@ class AUPlugin : public ARDOUR::Plugin
 
 	bool reconfigurable_io() const { return true; }
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const;
+	ChanCount output_streams() const;
+	ChanCount input_streams() const;
 	bool configure_io (ChanCount in, ChanCount out);
 	bool requires_fixed_size_buffers() const;
 

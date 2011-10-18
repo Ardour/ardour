@@ -40,10 +40,6 @@
 #include "ardour/session.h"
 
 #ifdef  HAVE_COREAUDIO
-#define USE_COREAUDIO_FOR_FILES
-#endif
-
-#ifdef USE_COREAUDIO_FOR_FILES
 #include "ardour/coreaudiosource.h"
 #endif
 
@@ -188,7 +184,7 @@ SourceFactory::create (Session& s, const XMLNode& node, bool defer_peaks)
 
 			catch (failed_constructor& err) {
 
-#ifdef USE_COREAUDIO_FOR_FILES
+#ifdef HAVE_COREAUDIO
 
 				/* this is allowed to throw */
 
@@ -252,7 +248,7 @@ SourceFactory::createReadable (DataType type, Session& s, const string& path,
 			}
 
 			catch (failed_constructor& err) {
-#ifdef USE_COREAUDIO_FOR_FILES
+#ifdef HAVE_COREAUDIO
 
 				Source* src = new CoreAudioSource (s, path, chn, flags);
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
@@ -350,7 +346,7 @@ SourceFactory::createWritable (DataType type, Session& s, const std::string& pat
 }
 
 boost::shared_ptr<Source>
-SourceFactory::createFromPlaylist (DataType type, Session& s, boost::shared_ptr<Playlist> p, const ID& orig, const std::string& name,
+SourceFactory::createFromPlaylist (DataType type, Session& s, boost::shared_ptr<Playlist> p, const PBD::ID& orig, const std::string& name,
 				   uint32_t chn, frameoffset_t start, framecnt_t len, bool copy, bool defer_peaks)
 {
 	if (type == DataType::AUDIO) {

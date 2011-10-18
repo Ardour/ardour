@@ -38,6 +38,7 @@
 #include "ardour/ardour.h"
 #include "ardour/audioengine.h"
 #include "ardour/audio_buffer.h"
+#include "ardour/debug.h"
 #include "ardour/midi_buffer.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/io.h"
@@ -60,13 +61,6 @@ using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
 
-//#define TRACE_AU_API
-#ifdef TRACE_AU_API
-#define TRACE_API(fmt,...) fprintf (stderr, fmt, ## __VA_ARGS__)
-#else
-#define TRACE_API(fmt,...)
-#endif
-
 #ifndef AU_STATE_SUPPORT
 static bool seen_get_state_message = false;
 static bool seen_set_state_message = false;
@@ -79,7 +73,6 @@ AUPluginInfo::CachedInfoMap AUPluginInfo::cached_info;
 static string preset_search_path = "/Library/Audio/Presets:/Network/Library/Audio/Presets";
 static string preset_suffix = ".aupreset";
 static bool preset_search_path_initialized = false;
-static bool debug_io_config = true;
 
 static OSStatus
 _render_callback(void *userData,
@@ -392,7 +385,7 @@ AUPlugin::AUPlugin (const AUPlugin& other)
 AUPlugin::~AUPlugin ()
 {
 	if (unit) {
-		TRACE_API ("about to call uninitialize in plugin destructor\n");
+		DEBUG_TRACE (DEBUG::AudioUnits, "about to call uninitialize in plugin destructor\n");
 		unit->Uninitialize ();
 	}
 
@@ -408,7 +401,7 @@ AUPlugin::discover_factory_presets ()
 	UInt32 dataSize = sizeof (presets);
 	OSStatus err;
 
-	TRACE_API ("get property FactoryPresets in global scope\n");
+	DEBUG_TRACE (DEBUG::AudioUnits, "get property FactoryPresets in global scope\n");
 	if ((err = unit->GetProperty (kAudioUnitProperty_FactoryPresets, kAudioUnitScope_Global, 0, (void*) &presets, &dataSize)) != 0) {
 		cerr << "cannot get factory preset info: " << err << endl;
 		return;
@@ -435,8 +428,15 @@ AUPlugin::init ()
 {
 	OSErr err;
 
+	/* these keep track of *configured* channel set up,
+	   not potential set ups.
+	*/
+
+	input_channels = -1;
+	output_channels = -1;
+
 	try {
-		TRACE_API ("opening AudioUnit\n");
+		DEBUG_TRACE (DEBUG::AudioUnits, "opening AudioUnit\n");
 		err = CAAudioUnit::Open (*(comp.get()), *unit);
 	} catch (...) {
 		error << _("Exception thrown during AudioUnit plugin loading - plugin ignored") << endmsg;
@@ -448,11 +448,11 @@ AUPlugin::init ()
 		throw failed_constructor ();
 	}
 
-	TRACE_API ("count global elements\n");
+	DEBUG_TRACE (DEBUG::AudioUnits, "count global elements\n");
 	unit->GetElementCount (kAudioUnitScope_Global, global_elements);
-	TRACE_API ("count input elements\n");
+	DEBUG_TRACE (DEBUG::AudioUnits, "count input elements\n");
 	unit->GetElementCount (kAudioUnitScope_Input, input_elements);
-	TRACE_API ("count output elements\n");
+	DEBUG_TRACE (DEBUG::AudioUnits, "count output elements\n");
 	unit->GetElementCount (kAudioUnitScope_Output, output_elements);
 
 	if (input_elements > 0) {
@@ -461,7 +461,7 @@ AUPlugin::init ()
 		renderCallbackInfo.inputProc = _render_callback;
 		renderCallbackInfo.inputProcRefCon = this;
 
-		TRACE_API ("set render callback in input scope\n");
+		DEBUG_TRACE (DEBUG::AudioUnits, "set render callback in input scope\n");
 		if ((err = unit->SetProperty (kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Input,
 		                              0, (void*) &renderCallbackInfo, sizeof(renderCallbackInfo))) != 0) {
 			cerr << "cannot install render callback (err = " << err << ')' << endl;
@@ -479,28 +479,17 @@ AUPlugin::init ()
 	info.transportStateProc = _get_transport_state_callback;
 
 	//ignore result of this - don't care if the property isn't supported
-	TRACE_API ("set host callbacks in global scope\n");
+	DEBUG_TRACE (DEBUG::AudioUnits, "set host callbacks in global scope\n");
 	unit->SetProperty (kAudioUnitProperty_HostCallbacks,
 			   kAudioUnitScope_Global,
 			   0, //elementID
 			   &info,
 			   sizeof (HostCallbackInfo));
 
-	/* these keep track of *configured* channel set up,
-	   not potential set ups.
-	*/
-
-	input_channels = -1;
-	output_channels = -1;
-
 	if (set_block_size (_session.get_block_size())) {
 		error << _("AUPlugin: cannot set processing block size") << endmsg;
 		throw failed_constructor();
 	}
-
-	AUPluginInfoPtr pinfo = boost::dynamic_pointer_cast<AUPluginInfo>(get_info());
-	_has_midi_input = pinfo->needs_midi_input ();
-	_has_midi_output = false;
 
 	discover_parameters ();
 	discover_factory_presets ();
@@ -770,7 +759,7 @@ AUPlugin::set_parameter (uint32_t which, float val)
 	}
 
 	const AUParameterDescriptor& d (descriptors[which]);
-	TRACE_API ("set parameter %d in scope %d element %d to %f\n", d.id, d.scope, d.element, val);
+	DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("set parameter %1 in scope %2 element %3 to %4\n", d.id, d.scope, d.element, val));
 	unit->SetParameter (d.id, d.scope, d.element, val);
 
 	/* tell the world what we did */
@@ -783,7 +772,7 @@ AUPlugin::set_parameter (uint32_t which, float val)
 	theEvent.mArgument.mParameter.mScope = d.scope;
 	theEvent.mArgument.mParameter.mElement = d.element;
 
-	TRACE_API ("notify about parameter change\n");
+	DEBUG_TRACE (DEBUG::AudioUnits, "notify about parameter change\n");
 	AUEventListenerNotify (NULL, NULL, &theEvent);
 
 	Plugin::set_parameter (which, val);
@@ -795,7 +784,7 @@ AUPlugin::get_parameter (uint32_t which) const
 	float val = 0.0;
 	if (which < descriptors.size()) {
 		const AUParameterDescriptor& d (descriptors[which]);
-		TRACE_API ("get value of parameter %d in scope %d element %d\n", d.id, d.scope, d.element);
+		DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("get value of parameter %1 in scope %2 element %3\n", d.id, d.scope, d.element));
 		unit->GetParameter(d.id, d.scope, d.element, val);
 	}
 	return val;
@@ -827,7 +816,7 @@ AUPlugin::activate ()
 {
 	if (!initialized) {
 		OSErr err;
-		TRACE_API ("call Initialize in activate()\n");
+		DEBUG_TRACE (DEBUG::AudioUnits, "call Initialize in activate()\n");
 		if ((err = unit->Initialize()) != noErr) {
 			error << string_compose (_("AUPlugin: %1 cannot initialize plugin (err = %2)"), name(), err) << endmsg;
 		} else {
@@ -840,7 +829,7 @@ AUPlugin::activate ()
 void
 AUPlugin::deactivate ()
 {
-	TRACE_API ("call Uninitialize in deactivate()\n");
+	DEBUG_TRACE (DEBUG::AudioUnits, "call Uninitialize in deactivate()\n");
 	unit->Uninitialize ();
 	initialized = false;
 }
@@ -848,7 +837,7 @@ AUPlugin::deactivate ()
 void
 AUPlugin::flush ()
 {
-	TRACE_API ("call Reset in flush()\n");
+	DEBUG_TRACE (DEBUG::AudioUnits, "call Reset in flush()\n");
 	unit->GlobalReset ();
 }
 
@@ -870,7 +859,7 @@ AUPlugin::set_block_size (pframes_t nframes)
 		deactivate ();
 	}
 
-	TRACE_API ("set MaximumFramesPerSlice in global scope to %u\n", numFrames);
+	DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("set MaximumFramesPerSlice in global scope to %1\n", numFrames));
 	if ((err = unit->SetProperty (kAudioUnitProperty_MaximumFramesPerSlice, kAudioUnitScope_Global,
 				      0, &numFrames, sizeof (numFrames))) != noErr) {
 		cerr << "cannot set max frames (err = " << err << ')' << endl;
@@ -893,6 +882,8 @@ AUPlugin::configure_io (ChanCount in, ChanCount out)
 	bool was_initialized = initialized;
 	int32_t audio_in = in.n_audio();
 	int32_t audio_out = out.n_audio();
+
+	DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("configure %1 for %2 in %3 out\n", name(), in, out));
 
 	if (initialized) {
 		//if we are already running with the requested i/o config, bail out here
@@ -934,11 +925,53 @@ AUPlugin::configure_io (ChanCount in, ChanCount out)
 		return -1;
 	}
 
+	/* reset plugin info to show currently configured state */
+	
+	_info->n_inputs = in;
+	_info->n_outputs = out;
+
 	if (was_initialized) {
 		activate ();
 	}
 
 	return 0;
+}
+
+ChanCount
+AUPlugin::input_streams() const
+{
+	ChanCount c;
+
+	c.set (DataType::AUDIO, 1);
+	c.set (DataType::MIDI, 0);
+
+	if (input_channels < 0) {
+		warning << string_compose (_("AUPlugin: %1 input_streams() called without any format set!"), name()) << endmsg;
+	} else {
+		c.set (DataType::AUDIO, input_channels);
+		c.set (DataType::MIDI, _has_midi_input ? 1 : 0);
+	}
+
+	return c;
+}
+
+
+ChanCount
+AUPlugin::output_streams() const
+{
+	ChanCount c;
+
+	c.set (DataType::AUDIO, 1);
+	c.set (DataType::MIDI, 0);
+
+	if (output_channels < 0) {
+		warning << string_compose (_("AUPlugin: %1 output_streams() called without any format set!"), name()) << endmsg;
+	} else {
+		c.set (DataType::AUDIO, output_channels);
+		c.set (DataType::MIDI, _has_midi_output ? 1 : 0);
+	}
+
+	return c;
 }
 
 bool
@@ -962,9 +995,7 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out) con
 
 	vector<pair<int,int> >& io_configs = pinfo->cache.io_configs;
 
-	if (debug_io_config) {
-		cerr << name() << " has " << io_configs.size() << " IO Configurations\n";
-	}
+	DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("%1 has %2 IO configurations\n", name(), io_configs.size()));
 
 	//Ardour expects the plugin to tell it the output configuration
 	//but AU plugins can have multiple I/O configurations
@@ -977,8 +1008,8 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out) con
 		int32_t possible_in = i->first;
 		int32_t possible_out = i->second;
 
-		if (possible_in == audio_in && possible_out== audio_out) {
-			cerr << "\tCHOSEN: in " << in << " out " << out << endl;
+		if (possible_in == audio_in && possible_out == audio_out) {
+			DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("\tCHOSEN: in %1 out %2\n", in, out));
 			return 1;
 		}
 	}
@@ -990,9 +1021,7 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out) con
 		int32_t possible_in = i->first;
 		int32_t possible_out = i->second;
 
-		if (debug_io_config) {
-			cerr << "\tin " << possible_in << " out " << possible_out << endl;
-		}
+		DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("\tpossible in %1 possible out %2\n", possible_in, possible_out));
 
 		if (possible_out == 0) {
 			warning << string_compose (_("AU %1 has zero outputs - configuration ignored"), name()) << endmsg;
@@ -1124,12 +1153,10 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out) con
 
 	}
 
-	if (debug_io_config) {
-		if (plugcnt > 0) {
-			cerr << "\tCHOSEN: in " << in << " out " << out << " plugcnt will be " << plugcnt << endl;
-		} else {
-			cerr << "\tFAIL: no configs match requested in " << in << endl;
-		}
+	if (plugcnt > 0) {
+		DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("\tCHOSEN: in %1 out %2 plugcnt %3\n", in, out, plugcnt));
+	} else {
+		DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("\FAIL: no io configs match %1\n", in));
 	}
 
 	out.set (DataType::MIDI, 0);
@@ -1159,9 +1186,6 @@ AUPlugin::set_output_format (AudioStreamBasicDescription& fmt)
 	buffers = (AudioBufferList *) malloc (offsetof(AudioBufferList, mBuffers) +
 					      fmt.mChannelsPerFrame * sizeof(::AudioBuffer));
 
-	Glib::Mutex::Lock em (_session.engine().process_lock());
-	IO::PortCountChanged (ChanCount(DataType::AUDIO, fmt.mChannelsPerFrame));
-
 	return 0;
 }
 
@@ -1171,9 +1195,9 @@ AUPlugin::set_stream_format (int scope, uint32_t cnt, AudioStreamBasicDescriptio
 	OSErr result;
 
 	for (uint32_t i = 0; i < cnt; ++i) {
-		TRACE_API ("set stream format for %s, scope = %d element %d\n",
-			   (scope == kAudioUnitScope_Input ? "input" : "output"),
-			   scope, cnt);
+		DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("set stream format for %1, scope = %2 element %3\n",
+								(scope == kAudioUnitScope_Input ? "input" : "output"),
+								scope, cnt));
 		if ((result = unit->SetFormat (scope, i, fmt)) != 0) {
 			error << string_compose (_("AUPlugin: could not set stream format for %1/%2 (err = %3)"),
 						 (scope == kAudioUnitScope_Input ? "input" : "output"), i, result) << endmsg;
@@ -1322,7 +1346,7 @@ AUPlugin::get_beat_and_tempo_callback (Float64* outCurrentBeat,
 {
 	TempoMap& tmap (_session.tempo_map());
 
-	TRACE_API ("AU calls ardour beat&tempo callback\n");
+	DEBUG_TRACE (DEBUG::AudioUnits, "AU calls ardour beat&tempo callback\n");
 
 	/* more than 1 meter or more than 1 tempo means that a simplistic computation
 	   (and interpretation) of a beat position will be incorrect. So refuse to
@@ -1361,7 +1385,7 @@ AUPlugin::get_musical_time_location_callback (UInt32*   outDeltaSampleOffsetToNe
 {
 	TempoMap& tmap (_session.tempo_map());
 
-	TRACE_API ("AU calls ardour music time location callback\n");
+	DEBUG_TRACE (DEBUG::AudioUnits, "AU calls ardour music time location callback\n");
 
 	/* more than 1 meter or more than 1 tempo means that a simplistic computation
 	   (and interpretation) of a beat position will be incorrect. So refuse to
@@ -1420,7 +1444,7 @@ AUPlugin::get_transport_state_callback (Boolean*  outIsPlaying,
 	bool rolling;
 	float speed;
 
-	TRACE_API ("AU calls ardour transport state callback\n");
+	DEBUG_TRACE (DEBUG::AudioUnits, "AU calls ardour transport state callback\n");
 
 	rolling = _session.transport_rolling();
 	speed = _session.transport_speed ();
@@ -1563,7 +1587,7 @@ AUPlugin::add_state (XMLNode* root) const
 	CFDataRef xmlData;
 	CFPropertyListRef propertyList;
 
-	TRACE_API ("get preset state\n");
+	DEBUG_TRACE (DEBUG::AudioUnits, "get preset state\n");
 	if (unit->GetAUPreset (propertyList) != noErr) {
 		return;
 	}
@@ -1636,7 +1660,7 @@ AUPlugin::set_state(const XMLNode& node, int version)
 	CFRelease (xmlData);
 
 	if (propertyList) {
-		TRACE_API ("set preset\n");
+		DEBUG_TRACE (DEBUG::AudioUnits, "set preset\n");
 		if (unit->SetAUPreset (propertyList) == noErr) {
 			ret = 0;
 
@@ -1679,7 +1703,7 @@ AUPlugin::load_preset (PresetRecord r)
 	if ((ux = user_preset_map.find (r.label)) != user_preset_map.end()) {
 
 		if ((propertyList = load_property_list (ux->second)) != 0) {
-			TRACE_API ("set preset from user presets\n");
+			DEBUG_TRACE (DEBUG::AudioUnits, "set preset from user presets\n");
 			if (unit->SetAUPreset (propertyList) == noErr) {
 				ret = true;
 
@@ -1700,7 +1724,7 @@ AUPlugin::load_preset (PresetRecord r)
 		preset.presetNumber = fx->second;
 		preset.presetName = CFStringCreateWithCString (kCFAllocatorDefault, fx->first.c_str(), kCFStringEncodingUTF8);
 
-		TRACE_API ("set preset from factory presets\n");
+		DEBUG_TRACE (DEBUG::AudioUnits, "set preset from factory presets\n");
 
 		if (unit->SetPresentPreset (preset) == 0) {
 			ret = true;
@@ -1760,7 +1784,7 @@ AUPlugin::do_save_preset (string preset_name)
 		return false;
 	}
 
-	TRACE_API ("get current preset\n");
+	DEBUG_TRACE (DEBUG::AudioUnits, "get current preset\n");
 	if (unit->GetAUPreset (propertyList) != noErr) {
 		return false;
 	}
@@ -1961,7 +1985,7 @@ AUPlugin::current_preset() const
 #ifdef AU_STATE_SUPPORT
 	CFPropertyListRef propertyList;
 
-	TRACE_API ("get current preset for current_preset()\n");
+	DEBUG_TRACE (DEBUG::AudioUnits, "get current preset for current_preset()\n");
 	if (unit->GetAUPreset (propertyList) == noErr) {
 		preset_name = get_preset_name_in_plist (propertyList);
 		CFRelease(propertyList);
@@ -2051,7 +2075,7 @@ AUPluginInfo::load (Session& session)
 	try {
 		PluginPtr plugin;
 
-		TRACE_API ("load AU as a component\n");
+		DEBUG_TRACE (DEBUG::AudioUnits, "load AU as a component\n");
 		boost::shared_ptr<CAComponent> comp (new CAComponent(*descriptor));
 
 		if (!comp->IsValid()) {
@@ -2061,12 +2085,14 @@ AUPluginInfo::load (Session& session)
 		}
 
 		AUPluginInfo *aup = new AUPluginInfo (*this);
+		DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("plugin info for %1 = %2\n", this, aup));
 		plugin->set_info (PluginInfoPtr (aup));
 		boost::dynamic_pointer_cast<AUPlugin> (plugin)->set_fixed_size_buffers (aup->creator == "Universal Audio");
 		return plugin;
 	}
 
 	catch (failed_constructor &err) {
+		DEBUG_TRACE (DEBUG::AudioUnits, "failed to load component/plugin\n");
 		return PluginPtr ();
 	}
 }
@@ -2088,12 +2114,12 @@ AUPluginInfo::discover ()
 
 	PluginInfoList* plugs = new PluginInfoList;
 
-#if 0
 	discover_fx (*plugs);
 	discover_music (*plugs);
 	discover_generators (*plugs);
 	discover_instruments (*plugs);
-#endif
+
+	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("AU: discovered %1 plugins\n", plugs->size()));
 
 	return plugs;
 }
@@ -2227,7 +2253,8 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 			info->n_inputs.set (DataType::AUDIO, info->cache.io_configs.front().first);
 			info->n_outputs.set (DataType::AUDIO, info->cache.io_configs.front().second);
 
-			cerr << "detected AU: " << info->name.c_str() << "  (" << info->cache.io_configs.size() << " i/o configurations) - " << info->unique_id << endl;
+			DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("detected AU %1 with %2 i/o configurations - %3\n",
+									info->name.c_str(), info->cache.io_configs.size(), info->unique_id));
 
 			plugs.push_back (info);
 
@@ -2282,20 +2309,20 @@ AUPluginInfo::cached_io_configuration (const std::string& unique_id,
 	} catch (...) {
 
 		warning << string_compose (_("Could not load AU plugin %1 - ignored"), name) << endmsg;
-		cerr << string_compose (_("Could not load AU plugin %1 - ignored"), name) << endl;
 		return false;
 
 	}
 
-	TRACE_API ("get AU channel info\n");
+	DEBUG_TRACE (DEBUG::AudioUnits, "get AU channel info\n");
 	if ((ret = unit.GetChannelInfo (&channel_info, cnt)) < 0) {
 		return false;
 	}
 
 	if (ret > 0) {
-		/* no explicit info available */
 
-		cinfo.io_configs.push_back (pair<int,int> (-1, -1));
+		/* no explicit info available, so default to 1in/1out */
+
+		cinfo.io_configs.push_back (pair<int,int> (1, 1));
 
 	} else {
 
@@ -2562,4 +2589,15 @@ bool
 AUPluginInfo::is_instrument () const
 {
 	return descriptor->IsMusicDevice();
+}
+
+void
+AUPlugin::set_info (PluginInfoPtr info)
+{
+	Plugin::set_info (info);
+
+	AUPluginInfoPtr pinfo = boost::dynamic_pointer_cast<AUPluginInfo>(get_info());
+
+	_has_midi_input = pinfo->needs_midi_input ();
+	_has_midi_output = false;
 }

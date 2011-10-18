@@ -76,7 +76,7 @@
 
 #include "i18n.h"
 
-#ifdef HAVE_AUDIOUNITS
+#ifdef AUDIOUNIT_SUPPORT
 class AUPluginUI;
 #endif
 

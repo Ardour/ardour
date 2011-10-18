@@ -30,6 +30,7 @@
 #include "ardour/audio_buffer.h"
 #include "ardour/automation_list.h"
 #include "ardour/buffer_set.h"
+#include "ardour/debug.h"
 #include "ardour/event_type_map.h"
 #include "ardour/ladspa_plugin.h"
 #include "ardour/plugin.h"
@@ -49,7 +50,7 @@
 #include "ardour/lxvst_plugin.h"
 #endif
 
-#ifdef HAVE_AUDIOUNITS
+#ifdef AUDIOUNIT_SUPPORT
 #include "ardour/audio_unit.h"
 #endif
 
@@ -133,6 +134,8 @@ PluginInsert::output_streams() const
 {
 	ChanCount out = _plugins.front()->get_info()->n_outputs;
 
+	DEBUG_TRACE (DEBUG::Processors, string_compose ("Plugin insert, static output streams = %1\n", out));
+
 	if (out == ChanCount::INFINITE) {
 		return _plugins.front()->output_streams ();
 	} else {
@@ -147,6 +150,8 @@ PluginInsert::input_streams() const
 {
 	ChanCount in = _plugins[0]->get_info()->n_inputs;
 
+	DEBUG_TRACE (DEBUG::Processors, string_compose ("Plugin insert, static input streams = %1, match using %2\n", in, _match.method));
+	
 	if (_match.method == Split) {
 
 		/* we are splitting 1 processor input to multiple plugin inputs,
@@ -597,7 +602,7 @@ PluginInsert::plugin_factory (boost::shared_ptr<Plugin> other)
 #ifdef LXVST_SUPPORT
 	boost::shared_ptr<LXVSTPlugin> lxvp;
 #endif
-#ifdef HAVE_AUDIOUNITS
+#ifdef AUDIOUNIT_SUPPORT
 	boost::shared_ptr<AUPlugin> ap;
 #endif
 
@@ -615,7 +620,7 @@ PluginInsert::plugin_factory (boost::shared_ptr<Plugin> other)
 	} else if ((lxvp = boost::dynamic_pointer_cast<LXVSTPlugin> (other)) != 0) {
 		return boost::shared_ptr<Plugin> (new LXVSTPlugin (*lxvp));
 #endif
-#ifdef HAVE_AUDIOUNITS
+#ifdef AUDIOUNIT_SUPPORT
 	} else if ((ap = boost::dynamic_pointer_cast<AUPlugin> (other)) != 0) {
 		return boost::shared_ptr<Plugin> (new AUPlugin (*ap));
 #endif
@@ -1011,13 +1016,6 @@ PluginInsert::set_state(const XMLNode& node, int version)
 		} else {
 			(*i)->deactivate ();
 		}
-	}
-
-	/* catch up on I/O */
-
-	{
-		Glib::Mutex::Lock em (_session.engine().process_lock());
-		IO::PortCountChanged (max(input_streams(), output_streams()));
 	}
 
 	return 0;

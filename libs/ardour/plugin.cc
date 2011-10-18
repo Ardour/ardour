@@ -45,7 +45,7 @@
 #include "ardour/ladspa_plugin.h"
 #include "ardour/plugin_manager.h"
 
-#ifdef HAVE_AUDIOUNITS
+#ifdef AUDIOUNIT_SUPPORT
 #include "ardour/audio_unit.h"
 #endif
 
@@ -145,7 +145,7 @@ ARDOUR::find_plugin(Session& session, string identifier, PluginType type)
 		break;
 #endif
 
-#ifdef HAVE_AUDIOUNITS
+#ifdef AUDIOUNIT_SUPPORT
 	case ARDOUR::AudioUnit:
 		plugs = mgr->au_plugin_info();
 		break;
@@ -237,7 +237,7 @@ Plugin::preset_by_uri (const string& uri)
 int
 Plugin::connect_and_run (BufferSet& bufs,
 			 ChanMapping /*in_map*/, ChanMapping /*out_map*/,
-			 pframes_t nframes, framecnt_t offset)
+			 pframes_t /* nframes */, framecnt_t /*offset*/)
 {
 	if (bufs.count().n_midi() > 0) {
 
@@ -338,4 +338,10 @@ Plugin::get_state ()
 
 	add_state (root);
 	return *root;
+}
+
+void
+Plugin::set_info (PluginInfoPtr info)
+{
+	_info = info;
 }

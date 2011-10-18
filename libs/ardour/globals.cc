@@ -37,7 +37,7 @@
 #include "ardour/vstfx.h"
 #endif
 
-#ifdef HAVE_AUDIOUNITS
+#ifdef AUDIOUNIT_SUPPORT
 #include "ardour/audio_unit.h"
 #endif
 
@@ -313,7 +313,7 @@ ARDOUR::init (bool use_vst, bool try_optimization)
 	}
 #endif
 
-#ifdef HAVE_AUDIOUNITS
+#ifdef AUDIOUNIT_SUPPORT
 	AUPluginInfo::load_cached_info ();
 #endif
 

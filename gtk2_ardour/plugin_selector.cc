@@ -374,13 +374,13 @@ PluginSelector::lxvst_refiller (const std::string&)
 }
 
 void
-#ifdef HAVE_AUDIOUNITS
+#ifdef AUDIOUNIT_SUPPORT
 PluginSelector::au_refiller (const std::string& filterstr)
 #else
 PluginSelector::au_refiller (const std::string&)
 #endif
 {
-#ifdef HAVE_AUDIOUNITS
+#ifdef AUDIOUNIT_SUPPORT
 	refiller (manager->au_plugin_info(), filterstr, "AU");
 #endif
 }
@@ -604,7 +604,7 @@ PluginSelector::build_plugin_menu ()
 #ifdef LXVST_SUPPORT
 	all_plugs.insert (all_plugs.end(), manager->lxvst_plugin_info().begin(), manager->lxvst_plugin_info().end());
 #endif
-#ifdef HAVE_AUDIOUNITS
+#ifdef AUDIOUNIT_SUPPORT
 	all_plugs.insert (all_plugs.end(), manager->au_plugin_info().begin(), manager->au_plugin_info().end());
 #endif
 #ifdef LV2_SUPPORT

@@ -11,7 +11,7 @@ def configure(conf):
 def build(bld):
 
     subst_dict = {}
-    if bld.is_defined('COREAUDIO'):
+    if bld.is_defined('COREAUDIO_SUPPORT'):
         subst_dict['%JACK_INPUT%'] = 'coreaudio:Built-in Audio:in'
         subst_dict['%JACK_OUTPUT%'] = 'coreaudio:Built-in Audio:out'
     else:

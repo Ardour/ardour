@@ -47,12 +47,13 @@
 #include "pbd/pathscanner.h"
 #include "pbd/whitespace.h"
 
-#include "ardour/ladspa.h"
-#include "ardour/session.h"
-#include "ardour/plugin_manager.h"
-#include "ardour/plugin.h"
-#include "ardour/ladspa_plugin.h"
+#include "ardour/debug.h"
 #include "ardour/filesystem_paths.h"
+#include "ardour/ladspa.h"
+#include "ardour/ladspa_plugin.h"
+#include "ardour/plugin.h"
+#include "ardour/plugin_manager.h"
+#include "ardour/session.h"
 
 #ifdef LV2_SUPPORT
 #include "ardour/lv2_plugin.h"
@@ -66,7 +67,7 @@
 #include "ardour/lxvst_plugin.h"
 #endif
 
-#ifdef HAVE_AUDIOUNITS
+#ifdef AUDIOUNIT_SUPPORT
 #include "ardour/audio_unit.h"
 #include <Carbon/Carbon.h>
 #endif
@@ -93,14 +94,6 @@ PluginManager::PluginManager ()
 	string lrdf_path;
 
 	load_statuses ();
-
-#ifdef HAVE_AUDIOUNITS
-	ProcessSerialNumber psn = { 0, kCurrentProcess };
-	OSStatus returnCode = TransformProcessType(& psn, kProcessTransformToForegroundApplication);
-	if( returnCode != 0) {
-		error << _("Cannot become GUI app") << endmsg;
-	}
-#endif
 
 	if ((s = getenv ("LADSPA_RDF_PATH"))){
 		lrdf_path = s;
@@ -168,6 +161,8 @@ PluginManager::~PluginManager()
 void
 PluginManager::refresh ()
 {
+	DEBUG_TRACE (DEBUG::PluginManager, "PluginManager::refresh\n");
+
 	ladspa_refresh ();
 #ifdef LV2_SUPPORT
 	lv2_refresh ();
@@ -184,7 +179,7 @@ PluginManager::refresh ()
 	}
 #endif //Native linuxVST SUPPORT
 
-#ifdef HAVE_AUDIOUNITS
+#ifdef AUDIOUNIT_SUPPORT
 	au_refresh ();
 #endif
 
@@ -235,6 +230,8 @@ PluginManager::ladspa_refresh ()
 		ladspa_path += standard_paths[i];
 
 	}
+
+	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("LADSPA: search along: [%1]\n", ladspa_path));
 
 	ladspa_discover_from_path (ladspa_path);
 }
@@ -509,10 +506,11 @@ PluginManager::lv2_refresh ()
 }
 #endif
 
-#ifdef HAVE_AUDIOUNITS
+#ifdef AUDIOUNIT_SUPPORT
 void
 PluginManager::au_refresh ()
 {
+	DEBUG_TRACE (DEBUG::PluginManager, "AU: refresh\n");
 	delete _au_plugin_info;
 	_au_plugin_info = AUPluginInfo::discover();
 }
@@ -947,7 +945,7 @@ PluginManager::lv2_plugin_info ()
 ARDOUR::PluginInfoList&
 PluginManager::au_plugin_info ()
 {
-#ifdef HAVE_AUDIOUNITS
+#ifdef AUDIOUNIT_SUPPORT
 	if (!_au_plugin_info)
 		au_refresh();
 	return *_au_plugin_info;

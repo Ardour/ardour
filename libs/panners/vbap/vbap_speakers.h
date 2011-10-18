@@ -50,7 +50,7 @@ public:
 	~VBAPSpeakers ();
 
 private:
-	static const double MIN_VOL_P_SIDE_LGTH = 0.01;
+	static const double MIN_VOL_P_SIDE_LGTH;
 	int   _dimension;  
         boost::shared_ptr<Speakers> _parent;
 	std::vector<Speaker> _speakers;

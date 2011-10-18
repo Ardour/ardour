@@ -304,7 +304,7 @@ class PluginUIWindow : public Gtk::Window
 	bool create_lv2_editor (boost::shared_ptr<ARDOUR::PluginInsert>);
 };
 
-#ifdef AUDIOUNITS
+#ifdef AUDIOUNIT_SUPPORT
 /* this function has to be in a .mm file */
 extern PlugUIBase* create_au_gui (boost::shared_ptr<ARDOUR::PluginInsert>, Gtk::VBox**);
 #endif

@@ -236,6 +236,7 @@ def set_compiler_flags (conf,opt):
     # check this even if we aren't using FPU optimization
     if not conf.is_defined('HAVE_POSIX_MEMALIGN'):
         optimization_flags.append("-DNO_POSIX_MEMALIGN")
+	debug_flags.append("-DNO_POSIX_MEMALIGN")
 
     # end optimization section
 
@@ -289,7 +290,7 @@ def set_compiler_flags (conf,opt):
     #
 
     optimization_flags[:0] = [
-            "-O3",
+            "-g", "-O2",
             "-fomit-frame-pointer",
             "-ffast-math",
             "-fstrength-reduce",
@@ -441,9 +442,9 @@ def configure(conf):
 
     if sys.platform == 'darwin':
 
-        conf.define ('AUDIOUNITS', 1)
+        conf.define ('HAVE_COREAUDIO', 1)
+        conf.define ('AUDIOUNIT_SUPPORT', 1)
         conf.define ('AU_STATE_SUPPORT', 1)
-        conf.define ('COREAUDIO', 1)
         conf.define ('GTKOSX', 1)
         conf.define ('TOP_MENUBAR',1)
         conf.define ('GTKOSX',1)
@@ -486,9 +487,9 @@ def configure(conf):
 
         conf.env.append_value('LINKFLAGS_GTKOSX', [ '-Xlinker', '-headerpad'])
         conf.env.append_value('LINKFLAGS_GTKOSX', ['-Xlinker', '2048'])
-        conf.env.append_value('CPPPATH_GTKOSX', "/System/Library/Frameworks/CoreServices.framework/Frameworks/CarbonCore.framework/Headers/")
 
-        conf.env.append_value('CXXFLAGS_AUDIOUNITS', "-DHAVE_AUDIOUNITS")
+        conf.env.append_value('CXXFLAGS_AUDIOUNITS', "-DAUDIOUNIT_SUPPORT")
+        conf.env.append_value('CXXFLAGS_AUDIOUNITS', "-DAU_STATE_SUPPORT")
         conf.env.append_value('LINKFLAGS_AUDIOUNITS', ['-framework', 'Audiotoolbox', '-framework', 'AudioUnit'])
 
     if Options.options.boost_include != '':
@@ -587,6 +588,8 @@ const char* const ardour_config_info = "\\n\\
 
     write_config_text('Architecture flags',    opts.arch)
     write_config_text('Aubio',                 conf.is_defined('HAVE_AUBIO'))
+    write_config_text('AudioUnits',            conf.is_defined('AUDIOUNIT_SUPPORT'))
+    write_config_text('AU state support',      conf.is_defined('AU_STATE_SUPPORT'))
     write_config_text('Build target',          conf.env['build_target'])
     write_config_text('CoreAudio',             conf.is_defined('HAVE_COREAUDIO'))
     write_config_text('FLAC',                  conf.is_defined('HAVE_FLAC'))

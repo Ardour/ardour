@@ -397,7 +397,7 @@ def build(bld):
     if bld.is_defined('PHONE_HOME'):
         obj.defines += [ 'PHONE_HOME' ]
 
-    if bld.is_defined('COREAUDIO'):
+    if bld.is_defined('HAVE_COREAUDIO'):
         TaskGen.task_gen.mappings['.mm'] = TaskGen.task_gen.mappings['.cc']
         obj.source += [ 'cocoacarbon.mm', 'au_pluginui.mm' ]
         obj.use += ' libappleutility '

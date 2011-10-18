@@ -18,7 +18,11 @@
 */
 
 #include <iostream>
+
+#include "pbd/compose.h"
+
 #include "ardour/buffer_manager.h"
+#include "ardour/debug.h"
 #include "ardour/thread_buffers.h"
 
 using namespace ARDOUR;
@@ -69,7 +73,10 @@ BufferManager::ensure_buffers (ChanCount howmany)
 {
         /* this is protected by the audioengine's process lock: we do not  */
 
+	DEBUG_TRACE (DEBUG::Processors, string_compose ("BufferManager::ensure_buffers (%1)\n", howmany));
+
 	for (ThreadBufferList::iterator i = thread_buffers_list->begin(); i != thread_buffers_list->end(); ++i) {
+		DEBUG_TRACE (DEBUG::Processors, string_compose ("BufferManager::ensure_buffers, thread buffers @ %1\n", (*i)));
 		(*i)->ensure_buffers (howmany);
 	}
 }

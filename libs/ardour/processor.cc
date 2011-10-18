@@ -42,7 +42,7 @@
 #include "ardour/vst_plugin.h"
 #endif
 
-#ifdef HAVE_AUDIOUNITS
+#ifdef AUDIOUNIT_SUPPORT
 #include "ardour/audio_unit.h"
 #endif
 

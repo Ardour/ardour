@@ -391,7 +391,7 @@ def build(bld):
         obj.defines += [ 'LXVST_SUPPORT' ]
 
 
-    if bld.is_defined('COREAUDIO'):
+    if bld.is_defined('HAVE_COREAUDIO'):
         obj.source += [ 'coreaudiosource.cc', 'caimportable.cc' ]
         obj.use    += ['libappleutility']
         obj.source += [ 'audio_unit.cc' ]
