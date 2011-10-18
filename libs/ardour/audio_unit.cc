@@ -1305,6 +1305,31 @@ AUPlugin::connect_and_run (BufferSet& bufs, ChanMapping in_map, ChanMapping out_
 		buffers->mBuffers[i].mData = 0;
 	}
 
+	if (_has_midi_input) {
+
+		for (uint32_t i = 0; i < bufs.count().n_midi(); ++i) {
+			
+			/* one MIDI port/buffer only */
+			
+			MidiBuffer& m = bufs.get_midi (i);
+			
+			for (MidiBuffer::iterator i = m.begin(); i != m.end(); ++i) {
+				Evoral::MIDIEvent<framepos_t> ev (*i);
+				
+				if (ev.is_channel_event()) {
+					DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("%1: MIDI event %2\n",
+											name(), ev));
+					unit->MIDIEvent (ev.type() << 8 | ev.channel(),
+							 ev.buffer()[1],
+							 ev.buffer()[2],
+							 ev.time());
+				}
+
+				/* XXX need to handle sysex and other message types */
+			}
+		}
+	}
+
 	ts.mSampleTime = frames_processed;
 	ts.mFlags = kAudioTimeStampSampleTimeValid;
 
