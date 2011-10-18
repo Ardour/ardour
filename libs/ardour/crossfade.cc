@@ -778,9 +778,7 @@ Crossfade::set_state (const XMLNode& node, int /*version*/)
 	PropertyChange what_changed;
 	framepos_t val;
 
-	if ((prop = node.property (X_("id")))) {
-		_id = prop->value();
-	}
+	set_id (node);
 
 	if ((prop = node.property ("position")) != 0) {
 		sscanf (prop->value().c_str(), "%" PRId64, &val);

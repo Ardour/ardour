@@ -419,10 +419,8 @@ Location::set_state (const XMLNode& node, int /*version*/)
 		return -1;
 	}
 
-	if ((prop = node.property ("id")) == 0) {
+	if (!set_id (node)) {
 		warning << _("XML node for Location has no ID information") << endmsg;
-	} else {
-		_id = prop->value ();
 	}
 
 	if ((prop = node.property ("name")) == 0) {

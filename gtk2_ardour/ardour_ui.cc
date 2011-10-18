@@ -3702,12 +3702,6 @@ ARDOUR_UI::TransportControllable::get_value (void) const
 }
 
 void
-ARDOUR_UI::TransportControllable::set_id (const string& str)
-{
-	_id = str;
-}
-
-void
 ARDOUR_UI::setup_profile ()
 {
 	if (gdk_screen_width() < 1200) {

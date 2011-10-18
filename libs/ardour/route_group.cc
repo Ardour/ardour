@@ -251,10 +251,7 @@ RouteGroup::set_state (const XMLNode& node, int version)
 
 	const XMLProperty *prop;
 
-	if ((prop = node.property ("id")) != 0) {
-		_id = prop->value();
-	}
-
+	set_id (node);
 	set_values (node);
 
 	if ((prop = node.property ("routes")) != 0) {

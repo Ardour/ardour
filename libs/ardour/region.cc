@@ -1167,7 +1167,7 @@ Region::state ()
 
 	add_properties (*node);
 
-	_id.print (buf, sizeof (buf));
+	id().print (buf, sizeof (buf));
 	node->add_property ("id", buf);
 	node->add_property ("type", _type.to_string());
 
@@ -1259,9 +1259,7 @@ Region::_set_state (const XMLNode& node, int /*version*/, PropertyChange& what_c
 
 	what_changed = set_values (node);
 
-	if ((prop = node.property (X_("id")))) {
-		_id = prop->value();
-	}
+	set_id (node);
 
 	if (_position_lock_style == MusicTime) {
 		if ((prop = node.property ("bbt-position")) == 0) {

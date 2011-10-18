@@ -44,8 +44,7 @@ ID::init ()
 
 ID::ID ()
 {
-	Glib::Mutex::Lock lm (*counter_lock);
-	_id = _counter++;
+	reset ();
 }
 
 ID::ID (const ID& other)
@@ -57,6 +56,13 @@ ID::ID (string str)
 {
 	string_assign (str);
 }
+
+void
+ID::reset ()
+{
+	Glib::Mutex::Lock lm (*counter_lock);
+	_id = _counter++;
+}	
 
 int
 ID::string_assign (string str)

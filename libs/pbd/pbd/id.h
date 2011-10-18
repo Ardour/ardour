@@ -33,6 +33,8 @@ class ID {
 	ID (std::string);
 	ID (const ID&);
 
+	void reset ();
+
 	bool operator== (const ID& other) const {
 		return _id == other._id; 
 	}

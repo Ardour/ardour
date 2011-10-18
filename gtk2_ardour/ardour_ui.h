@@ -401,8 +401,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	    void set_value (double);
 	    double get_value (void) const;
 
-	    void set_id (const std::string&);
-
 	    ARDOUR_UI& ui;
 	    ToggleType type;
 	};

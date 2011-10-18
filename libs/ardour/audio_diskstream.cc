@@ -773,7 +773,7 @@ AudioDiskstream::overwrite_existing_buffers ()
 
 		if (read ((*chan)->playback_buf->buffer() + overwrite_offset, mixdown_buffer, gain_buffer, start, to_read, *chan, n, reversed)) {
 			error << string_compose(_("AudioDiskstream %1: when refilling, cannot read %2 from playlist at frame %3"),
-					 _id, size, playback_sample) << endmsg;
+						id(), size, playback_sample) << endmsg;
 			goto out;
 		}
 
@@ -784,7 +784,7 @@ AudioDiskstream::overwrite_existing_buffers ()
 			if (read ((*chan)->playback_buf->buffer(), mixdown_buffer, gain_buffer,
 				  start, cnt, *chan, n, reversed)) {
 				error << string_compose(_("AudioDiskstream %1: when refilling, cannot read %2 from playlist at frame %3"),
-						 _id, size, playback_sample) << endmsg;
+							id(), size, playback_sample) << endmsg;
 				goto out;
 			}
 		}
@@ -933,7 +933,7 @@ AudioDiskstream::read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer,
 		this_read = min(cnt,this_read);
 
 		if (audio_playlist()->read (buf+offset, mixdown_buffer, gain_buffer, start, this_read, channel) != this_read) {
-			error << string_compose(_("AudioDiskstream %1: cannot read %2 from playlist at frame %3"), _id, this_read,
+			error << string_compose(_("AudioDiskstream %1: cannot read %2 from playlist at frame %3"), id(), this_read,
 					 start) << endmsg;
 			return -1;
 		}
@@ -1302,7 +1302,7 @@ AudioDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 		}
 
 		if ((!(*chan)->write_source) || (*chan)->write_source->write (vector.buf[0], to_write) != to_write) {
-			error << string_compose(_("AudioDiskstream %1: cannot write to disk"), _id) << endmsg;
+			error << string_compose(_("AudioDiskstream %1: cannot write to disk"), id()) << endmsg;
 			return -1;
 		}
 
@@ -1319,7 +1319,7 @@ AudioDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 			to_write = min ((framecnt_t)(disk_io_chunk_frames - to_write), (framecnt_t) vector.len[1]);
 
 			if ((*chan)->write_source->write (vector.buf[1], to_write) != to_write) {
-				error << string_compose(_("AudioDiskstream %1: cannot write to disk"), _id) << endmsg;
+				error << string_compose(_("AudioDiskstream %1: cannot write to disk"), id()) << endmsg;
 				return -1;
 			}
 

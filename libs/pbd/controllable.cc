@@ -107,7 +107,7 @@ Controllable::get_state ()
 	char buf[64];
 
 	node->add_property (X_("name"), _name); // not reloaded from XML state, just there to look at
-	_id.print (buf, sizeof (buf));
+	id().print (buf, sizeof (buf));
 	node->add_property (X_("id"), buf);
 	node->add_property (X_("flags"), enum_2_string (_flags));
 	snprintf (buf, sizeof (buf), "%2.12f", get_value());
@@ -129,9 +129,7 @@ Controllable::set_state (const XMLNode& node, int /*version*/)
 
 	Stateful::save_extra_xml (node);
 
-	if ((prop = node.property (X_("id"))) != 0) {
-		_id = prop->value();
-	} else {
+	if (!set_id (node)) {
 		error << _("Controllable state node has no ID property") << endmsg;
 		return -1;
 	}

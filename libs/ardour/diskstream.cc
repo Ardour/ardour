@@ -495,13 +495,9 @@ Diskstream::set_state (const XMLNode& node, int /*version*/)
 	}
 
 	if (deprecated_io_node) {
-		if ((prop = deprecated_io_node->property ("id")) != 0) {
-			_id = prop->value ();
-		}
+		set_id (*deprecated_io_node);
 	} else {
-		if ((prop = node.property ("id")) != 0) {
-			_id = prop->value ();
-		}
+		set_id (node);
 	}
 
 	if ((prop = node.property ("flags")) != 0) {

@@ -369,5 +369,29 @@ Stateful::clear_owned_changes ()
 	}
 }
   
+bool
+Stateful::set_id (const XMLNode& node) 
+{
+	const XMLProperty* prop;
+
+	if ((prop = node.property ("id")) != 0) {
+		_id = prop->value ();
+		return true;
+	} 
+
+	return false;
+}
+
+void
+Stateful::reset_id ()
+{
+	_id = ID ();
+}
+
+void
+Stateful::set_id (const string& str)
+{
+	_id = str;
+}
 
 } // namespace PBD

@@ -100,7 +100,7 @@ Source::get_state ()
 	node->add_property ("name", name());
 	node->add_property ("type", _type.to_string());
 	node->add_property (X_("flags"), enum_2_string (_flags));
-	_id.print (buf, sizeof (buf));
+	id().print (buf, sizeof (buf));
 	node->add_property ("id", buf);
 
 	if (_timestamp != 0) {
@@ -122,9 +122,7 @@ Source::set_state (const XMLNode& node, int version)
 		return -1;
 	}
 
-	if ((prop = node.property ("id")) != 0) {
-		_id = prop->value ();
-	} else {
+	if (!set_id (node)) {
 		return -1;
 	}
 
@@ -221,7 +219,7 @@ Source::get_transients_path () const
 	s = _session.analysis_dir ();
 	parts.push_back (s);
 
-	s = _id.to_s();
+	s = id().to_s();
 	s += '.';
 	s += TransientDetector::operational_identifier();
 	parts.push_back (s);

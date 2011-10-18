@@ -1244,7 +1244,7 @@ Editor::set_session (Session *t)
 	}
 
 	/* register for undo history */
-	_session->register_with_memento_command_factory(_id, this);
+	_session->register_with_memento_command_factory(id(), this);
 
 	ActionManager::ui_manager->signal_pre_activate().connect (sigc::mem_fun (*this, &Editor::action_pre_activated));
 
@@ -2160,9 +2160,7 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 	int x, y;
 	Gdk::Geometry g;
 
-	if ((prop = node.property ("id")) != 0) {
-		_id = prop->value ();
-	}
+	set_id (node);
 
 	g.base_width = default_width;
 	g.base_height = default_height;
@@ -2374,7 +2372,7 @@ Editor::get_state ()
 	XMLNode* node = new XMLNode ("Editor");
 	char buf[32];
 
-	_id.print (buf, sizeof (buf));
+	id().print (buf, sizeof (buf));
 	node->add_property ("id", buf);
 
 	if (is_realized()) {

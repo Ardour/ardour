@@ -2213,6 +2213,8 @@ Playlist::flush_notifications (bool from_undo)
 
 	 plist = node.properties();
 
+	 set_id (node);
+
 	 for (piter = plist.begin(); piter != plist.end(); ++piter) {
 
 		 prop = *piter;
@@ -2220,8 +2222,6 @@ Playlist::flush_notifications (bool from_undo)
 		 if (prop->name() == X_("name")) {
 			 _name = prop->value();
 			 _set_sort_id ();
-		 } else if (prop->name() == X_("id")) {
-			 _id = prop->value();
 		 } else if (prop->name() == X_("orig-diskstream-id")) {
 			 _orig_diskstream_id = prop->value ();
 		 } else if (prop->name() == X_("frozen")) {

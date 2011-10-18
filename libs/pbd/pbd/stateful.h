@@ -65,7 +65,10 @@ class Stateful {
 	void save_extra_xml (const XMLNode&);
 
 	const PBD::ID& id() const { return _id; }
-        
+	bool set_id (const XMLNode&);
+	void set_id (const std::string&);
+	void reset_id ();
+
         /* history management */
 
 	void clear_changes ();
@@ -106,7 +109,6 @@ class Stateful {
 
 	XMLNode *_extra_xml;
 	XMLNode *_instant_xml;
-	PBD::ID  _id;
         int32_t  _frozen;
 	PBD::PropertyChange     _pending_changed;
         Glib::Mutex _lock;
@@ -120,6 +122,9 @@ class Stateful {
         */
         virtual void mid_thaw (const PropertyChange&) { }
         bool property_changes_suspended() const { return g_atomic_int_get (&_frozen) > 0; }
+
+  private:
+	PBD::ID  _id;
 };
 
 } // namespace PBD

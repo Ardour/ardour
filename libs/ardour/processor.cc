@@ -150,9 +150,7 @@ Processor::set_state_2X (const XMLNode & node, int /*version*/)
 				set_name (prop->value ());
 			}
 
-			if ((prop = (*i)->property ("id")) != 0) {
-				_id = prop->value ();
-			}
+			set_id (**i);
 
 			if ((prop = (*i)->property ("active")) != 0) {
 				bool const a = string_is_affirmative (prop->value ());
@@ -188,10 +186,7 @@ Processor::set_state (const XMLNode& node, int version)
 		Processor::set_name (prop->value());
 	}
 
-	// may not exist for legacy 3.0 sessions
-	if ((prop = node.property ("id")) != 0) {
-		_id = prop->value();
-	}
+	set_id (node);
 
 	XMLNodeList nlist = node.children();
 	XMLNodeIterator niter;

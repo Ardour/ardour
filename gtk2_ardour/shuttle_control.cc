@@ -612,12 +612,6 @@ ShuttleControl::ShuttleControllable::ShuttleControllable (ShuttleControl& s)
 }
 
 void
-ShuttleControl::ShuttleControllable::set_id (const std::string& str)
-{
-	_id = str;
-}
-
-void
 ShuttleControl::ShuttleControllable::set_value (double val)
 {
 	double fract;

@@ -575,9 +575,7 @@ IO::set_state (const XMLNode& node, int version)
 		assert(_default_type != DataType::NIL);
 	}
 
-	if ((prop = node.property ("id")) != 0) {
-		_id = prop->value ();
-	}
+	set_id (node);
 
 	if ((prop = node.property ("direction")) != 0) {
 		_direction = (Direction) string_2_enum (prop->value(), _direction);
@@ -633,9 +631,7 @@ IO::set_state_2X (const XMLNode& node, int version, bool in)
 		assert(_default_type != DataType::NIL);
 	}
 
-	if ((prop = node.property ("id")) != 0) {
-		_id = prop->value ();
-	}
+	set_id (node);
 
 	_direction = in ? Input : Output;
 

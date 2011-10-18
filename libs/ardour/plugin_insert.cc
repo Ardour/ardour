@@ -75,9 +75,6 @@ PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug)
 	if (plug) {
 		add_plugin (plug);
 		create_automatable_parameters ();
-
-		Glib::Mutex::Lock em (_session.engine().process_lock());
-		IO::PortCountChanged (max(input_streams(), output_streams()));
 	}
 }
 
@@ -950,9 +947,7 @@ PluginInsert::set_state(const XMLNode& node, int version)
 	// state. We can't call Processor::set_state() until
 	// the plugins themselves are created and added.
 
-	if ((prop = node.property ("id")) != 0) {
-		_id = prop->value();
-	}
+	set_id (node);
 
 	if (_plugins.empty()) {
 		/* if we are adding the first plugin, we will need to set

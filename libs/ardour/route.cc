@@ -1886,9 +1886,7 @@ Route::_set_state (const XMLNode& node, int version, bool /*call_base*/)
 		Route::set_name (prop->value());
 	}
 
-	if ((prop = node.property ("id")) != 0) {
-		_id = prop->value ();
-	}
+	set_id (node);
 
 	if ((prop = node.property (X_("flags"))) != 0) {
 		_flags = Flag (string_2_enum (prop->value(), _flags));
@@ -2216,9 +2214,7 @@ Route::_set_state_2X (const XMLNode& node, int version)
 				Route::set_name (prop->value ());
 			}
 
-			if ((prop = child->property (X_("id"))) != 0) {
-				_id = prop->value ();
-			}
+			set_id (*child);
 
 			if ((prop = child->property (X_("active"))) != 0) {
 				bool yn = string_is_affirmative (prop->value());

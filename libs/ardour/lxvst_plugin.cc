@@ -366,10 +366,8 @@ LXVSTPlugin::load_user_preset (PresetRecord r)
 	XMLNode* root = t->root ();
 
 	for (XMLNodeList::const_iterator i = root->children().begin(); i != root->children().end(); ++i) {
-		XMLProperty* uri = (*i)->property (X_("uri"));
 		XMLProperty* label = (*i)->property (X_("label"));
 
-		assert (uri);
 		assert (label);
 
 		if (label->value() != r.label) {

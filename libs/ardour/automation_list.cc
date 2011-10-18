@@ -270,7 +270,7 @@ AutomationList::state (bool full)
 
 	root->add_property ("automation-id", EventTypeMap::instance().to_symbol(_parameter));
 
-	root->add_property ("id", _id.to_s());
+	root->add_property ("id", id().to_s());
 
 	snprintf (buf, sizeof (buf), "%.12g", _default_value);
 	root->add_property ("default", buf);
@@ -437,8 +437,7 @@ AutomationList::set_state (const XMLNode& node, int version)
 		return -1;
 	}
 
-	if ((prop = node.property ("id")) != 0) {
-		_id = prop->value ();
+	if (set_id (node)) {
 		/* update session AL list */
 		AutomationListCreated(this);
 	}

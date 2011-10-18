@@ -49,8 +49,6 @@ class ShuttleControl : public Gtk::DrawingArea, public ARDOUR::SessionHandlePtr
 		void set_value (double);
 		double get_value (void) const;
 
-		void set_id (const std::string&);
-
 		ShuttleControl& sc;
 	};
 
