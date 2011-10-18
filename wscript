@@ -377,7 +377,7 @@ def options(opt):
                     help='Compile for use with gprofile')
     opt.add_option('--lv2', action='store_true', default=False, dest='lv2',
                     help='Compile with support for LV2 (if Lilv+Suil is available)')
-    opt.add_option('--lxvst', action='store_true', default=False, dest='lxvst',
+    opt.add_option('--lxvst', action='store_true', default=True, dest='lxvst',
                     help='Compile with support for linuxVST plugins')
     opt.add_option('--nls', action='store_true', default=True, dest='nls',
                     help='Enable i18n (native language support) (default)')
