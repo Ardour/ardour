@@ -326,12 +326,6 @@ ExportTimespanSelectorSingle::ExportTimespanSelectorSingle (ARDOUR::Session * se
 	range_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_NEVER);
 	range_view.append_column_editable (_("Range"), range_cols.name);
 
-	// Adjust selector height
-	int x_offset, y_offset, width, height;
-	Gtk::CellRenderer * renderer = *range_view.get_column(0)->get_cell_renderers().begin();
-	renderer->get_size (range_view, x_offset, y_offset, width, height);
-	range_scroller.set_size_request (-1, height);
-
 	if (Gtk::CellRendererText * renderer = dynamic_cast<Gtk::CellRendererText *> (range_view.get_column_cell_renderer (0))) {
 		renderer->signal_edited().connect (sigc::mem_fun (*this, &ExportTimespanSelectorSingle::update_range_name));
 	}
