@@ -146,7 +146,6 @@ class ExportFormatBase {
 	virtual ~ExportFormatBase ();
 
 	boost::shared_ptr<ExportFormatBase> get_intersection (ExportFormatBase const & other) const;
-	boost::shared_ptr<ExportFormatBase> get_difference (ExportFormatBase const & other) const;
 	boost::shared_ptr<ExportFormatBase> get_union (ExportFormatBase const & other) const;
 
 	bool endiannesses_empty () const { return endiannesses.empty (); }
@@ -189,7 +188,6 @@ class ExportFormatBase {
 
 	enum SetOperation {
 		SetUnion,
-		SetDifference,
 		SetIntersection
 	};
 

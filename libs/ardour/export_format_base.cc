@@ -71,12 +71,6 @@ ExportFormatBase::get_intersection (ExportFormatBase const & other) const
 }
 
 boost::shared_ptr<ExportFormatBase>
-ExportFormatBase::get_difference (ExportFormatBase const & other) const
-{
-	return do_set_operation (other, SetDifference);
-}
-
-boost::shared_ptr<ExportFormatBase>
 ExportFormatBase::get_union (ExportFormatBase const & other) const
 {
 	return do_set_operation (other, SetUnion);
@@ -101,9 +95,6 @@ ExportFormatBase::do_set_operation (ExportFormatBase const & other, SetOperation
 		  case SetIntersection:
 			std::set_intersection (start1, end1, start2, end2, insert);
 			break;
-		  case SetDifference:
-			std::set_difference (start1, end1, start2, end2, insert);
-			break;
 		  case SetUnion:
 			std::set_union (start1, end1, start2, end2, insert);
 			break;
@@ -121,9 +112,6 @@ ExportFormatBase::do_set_operation (ExportFormatBase const & other, SetOperation
 		switch (operation) {
 		  case SetIntersection:
 			std::set_intersection (start1, end1, start2, end2, insert);
-			break;
-		  case SetDifference:
-			std::set_difference (start1, end1, start2, end2, insert);
 			break;
 		  case SetUnion:
 			std::set_union (start1, end1, start2, end2, insert);
@@ -144,9 +132,6 @@ ExportFormatBase::do_set_operation (ExportFormatBase const & other, SetOperation
 		  case SetIntersection:
 			std::set_intersection (start1, end1, start2, end2, insert);
 			break;
-		  case SetDifference:
-			std::set_difference (start1, end1, start2, end2, insert);
-			break;
 		  case SetUnion:
 			std::set_union (start1, end1, start2, end2, insert);
 			break;
@@ -165,9 +150,6 @@ ExportFormatBase::do_set_operation (ExportFormatBase const & other, SetOperation
 		  case SetIntersection:
 			std::set_intersection (start1, end1, start2, end2, insert);
 			break;
-		  case SetDifference:
-			std::set_difference (start1, end1, start2, end2, insert);
-			break;
 		  case SetUnion:
 			std::set_union (start1, end1, start2, end2, insert);
 			break;
@@ -185,9 +167,6 @@ ExportFormatBase::do_set_operation (ExportFormatBase const & other, SetOperation
 		switch (operation) {
 		  case SetIntersection:
 			std::set_intersection (start1, end1, start2, end2, insert);
-			break;
-		  case SetDifference:
-			std::set_difference (start1, end1, start2, end2, insert);
 			break;
 		  case SetUnion:
 			std::set_union (start1, end1, start2, end2, insert);
