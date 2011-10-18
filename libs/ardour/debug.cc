@@ -48,4 +48,6 @@ uint64_t PBD::DEBUG::AudioPlayback = PBD::new_debug_bit ("audioplayback");
 uint64_t PBD::DEBUG::Panning = PBD::new_debug_bit ("panning");
 uint64_t PBD::DEBUG::LV2 = PBD::new_debug_bit ("lv2");
 uint64_t PBD::DEBUG::CaptureAlignment = PBD::new_debug_bit ("capturealignment");
+uint64_t PBD::DEBUG::PluginManager = PBD::new_debug_bit ("pluginmanager");
+uint64_t PBD::DEBUG::AudioUnits = PBD::new_debug_bit ("audiounits");
 

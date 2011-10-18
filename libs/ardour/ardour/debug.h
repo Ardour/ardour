@@ -51,6 +51,8 @@ namespace PBD {
 		extern uint64_t Panning;
 		extern uint64_t LV2;
 		extern uint64_t CaptureAlignment;
+		extern uint64_t PluginManager;
+		extern uint64_t AudioUnits;
 	}
 }
 
