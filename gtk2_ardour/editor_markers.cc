@@ -831,7 +831,7 @@ Editor::build_marker_menu (Location* loc)
 	items.push_back (MenuElem (_("Create Range to Next Marker"), sigc::mem_fun(*this, &Editor::marker_menu_range_to_next)));
 
 	items.push_back (MenuElem (_("Hide"), sigc::mem_fun(*this, &Editor::marker_menu_hide)));
-	items.push_back (MenuElem (_("Rename"), sigc::mem_fun(*this, &Editor::marker_menu_rename)));
+	items.push_back (MenuElem (_("Rename..."), sigc::mem_fun(*this, &Editor::marker_menu_rename)));
 
 	items.push_back (CheckMenuElem (_("Lock")));
 	CheckMenuItem* lock_item = static_cast<CheckMenuItem*> (&items.back());
@@ -880,12 +880,12 @@ Editor::build_range_marker_menu (bool loop_or_punch, bool session)
 	}
 
 	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Export Range"), sigc::mem_fun(*this, &Editor::export_range)));
+	items.push_back (MenuElem (_("Export Range..."), sigc::mem_fun(*this, &Editor::export_range)));
 	items.push_back (SeparatorElem());
 
 	if (!loop_or_punch_or_session) {
 		items.push_back (MenuElem (_("Hide Range"), sigc::mem_fun(*this, &Editor::marker_menu_hide)));
-		items.push_back (MenuElem (_("Rename Range"), sigc::mem_fun(*this, &Editor::marker_menu_rename)));
+		items.push_back (MenuElem (_("Rename Range..."), sigc::mem_fun(*this, &Editor::marker_menu_rename)));
 	}
 
 	if (!session) {
