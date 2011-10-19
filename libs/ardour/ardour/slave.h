@@ -23,7 +23,6 @@
 #include <vector>
 
 #include <glibmm/thread.h>
-#include <boost/signals2.hpp>
 
 #include <jack/jack.h>
 

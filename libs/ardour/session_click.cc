@@ -21,11 +21,12 @@
 #include <cerrno>
 
 #include "ardour/ardour.h"
+#include "ardour/audio_buffer.h"
+#include "ardour/buffer_set.h"
+#include "ardour/click.h"
+#include "ardour/io.h"
 #include "ardour/session.h"
 #include "ardour/tempo.h"
-#include "ardour/io.h"
-#include "ardour/buffer_set.h"
-#include "ardour/audio_buffer.h"
 
 #include <sndfile.h>
 

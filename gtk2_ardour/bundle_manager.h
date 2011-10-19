@@ -20,9 +20,12 @@
 #ifndef __ardour_ui_bundle_manager_h__
 #define __ardour_ui_bundle_manager_h__
 
-#include <gtkmm/treeview.h>
-#include <gtkmm/liststore.h>
 #include <gtkmm/entry.h>
+#include <gtkmm/liststore.h>
+#include <gtkmm/treeview.h>
+
+#include "ardour/user_bundle.h"
+
 #include "ardour_dialog.h"
 #include "port_matrix.h"
 

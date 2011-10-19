@@ -24,8 +24,9 @@
 #include "ardour/audio_diskstream.h"
 #include "ardour/session.h"
 
-#include "pbd/failed_constructor.h"
+#include "pbd/controllable.h"
 #include "pbd/convert.h"
+#include "pbd/failed_constructor.h"
 
 #include <sstream>
 #include <algorithm>

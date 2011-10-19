@@ -18,23 +18,28 @@
 
 */
 
-#include <set>
-#include <iostream>
 #include <algorithm>
+#include <iostream>
+#include <set>
 #include <stdexcept>
 #include <stdint.h>
-#include "pbd/error.h"
-#include "pbd/enumwriter.h"
+
 #include "pbd/compose.h"
+#include "pbd/enumwriter.h"
+#include "pbd/error.h"
+
+#include "evoral/Control.hpp"
+
 #include "midi++/events.h"
 
+#include "ardour/automation_control.h"
+#include "ardour/midi_automation_list_binder.h"
 #include "ardour/midi_model.h"
 #include "ardour/midi_source.h"
 #include "ardour/midi_state_tracker.h"
+#include "ardour/session.h"
 #include "ardour/smf_source.h"
 #include "ardour/types.h"
-#include "ardour/session.h"
-#include "ardour/midi_automation_list_binder.h"
 
 #include "i18n.h"
 

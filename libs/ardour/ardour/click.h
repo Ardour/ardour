@@ -28,7 +28,8 @@
 
 namespace ARDOUR {
 
-struct Click {
+class Click {
+public:
 	framepos_t start;
 	framecnt_t duration;
 	framecnt_t offset;
@@ -47,8 +48,6 @@ struct Click {
 private:
 	static Pool pool;
 };
-
-typedef std::list<Click*> Clicks;
 
 class ClickIO : public IO
 {

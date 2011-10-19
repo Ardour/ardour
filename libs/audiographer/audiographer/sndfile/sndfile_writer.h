@@ -1,9 +1,9 @@
 #ifndef AUDIOGRAPHER_SNDFILE_WRITER_H
 #define AUDIOGRAPHER_SNDFILE_WRITER_H
 
-#include <boost/signals2.hpp>
-#include <boost/format.hpp>
 #include <string>
+
+#include <boost/format.hpp>
 
 #include "audiographer/flag_debuggable.h"
 #include "audiographer/sink.h"

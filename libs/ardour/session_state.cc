@@ -116,6 +116,7 @@
 #include "ardour/sndfile_helpers.h"
 #include "ardour/sndfilesource.h"
 #include "ardour/source_factory.h"
+#include "ardour/speakers.h"
 #include "ardour/template_utils.h"
 #include "ardour/tempo.h"
 #include "ardour/ticker.h"

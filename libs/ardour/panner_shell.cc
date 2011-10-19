@@ -53,6 +53,7 @@
 #include "ardour/panner_shell.h"
 #include "ardour/runtime_functions.h"
 #include "ardour/session.h"
+#include "ardour/speakers.h"
 #include "ardour/utils.h"
 
 #include "i18n.h"

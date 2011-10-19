@@ -40,6 +40,7 @@
 #include "ardour/audioengine.h"
 #include "ardour/auditioner.h"
 #include "ardour/butler.h"
+#include "ardour/click.h"
 #include "ardour/debug.h"
 #include "ardour/location.h"
 #include "ardour/session.h"

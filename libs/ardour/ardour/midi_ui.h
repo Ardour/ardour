@@ -2,7 +2,7 @@
 #define __libardour_midi_ui_h__
 
 #include <list>
-#include <boost/signals2.hpp>
+
 #include "pbd/abstract_ui.h"
 #include "pbd/signals.h"
 
