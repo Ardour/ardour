@@ -180,7 +180,7 @@ class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 	bool dpi_changed;
 	bool color_changed;
 	void color_handler(bool);
-	bool _is_midi;
+	ARDOUR::DataType _data_type;
 	ARDOUR::ChanCount _previous_amp_output_streams;
 };
 

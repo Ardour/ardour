@@ -84,7 +84,7 @@ GainMeterBase::GainMeterBase (Session* s,
 	, gain_automation_state_button ("")
 	, style_changed (false)
 	, dpi_changed (false)
-	, _is_midi (false)
+	, _data_type (DataType::AUDIO)
 
 {
 	using namespace Menu_Helpers;
@@ -245,14 +245,14 @@ GainMeterBase::setup_gain_adjustment ()
 	ignore_toggle = true;
 
 	if (_amp->output_streams().n_midi() == 0) {
-		_is_midi = false;
+		_data_type = DataType::AUDIO;
 		gain_adjustment.set_lower (0.0);
 		gain_adjustment.set_upper (1.0);
 		gain_adjustment.set_step_increment (0.01);
 		gain_adjustment.set_page_increment (0.1);
 		gain_slider->set_default_value (gain_to_slider_position (1));
 	} else {
-		_is_midi = true;
+		_data_type = DataType::MIDI;
 		gain_adjustment.set_lower (0.0);
 		gain_adjustment.set_upper (2.0);
 		gain_adjustment.set_step_increment (0.05);
@@ -408,14 +408,17 @@ GainMeterBase::show_gain ()
 
 	float v = gain_adjustment.get_value();
 
-	if (!_is_midi) {
+	switch (_data_type) {
+	case DataType::AUDIO:
 		if (v == 0.0) {
 			strcpy (buf, _("-inf"));
 		} else {
 			snprintf (buf, sizeof (buf), "%.1f", accurate_coefficient_to_dB (slider_position_to_gain_with_max (v, Config->get_max_gain())));
 		}
-	} else {
+		break;
+	case DataType::MIDI:
 		snprintf (buf, sizeof (buf), "%.1f", v);
+		break;
 	}
 
 	gain_display.set_text (buf);
@@ -426,10 +429,13 @@ GainMeterBase::gain_adjusted ()
 {
 	if (!ignore_toggle) {
 		if (_route && _route->amp() == _amp) {
-			if (_is_midi) {
+			switch (_data_type) {
+			case DataType::MIDI:
 				_route->set_gain (gain_adjustment.get_value(), this);
-			} else {
+				break;
+			case DataType::AUDIO:
 				_route->set_gain (slider_position_to_gain_with_max (gain_adjustment.get_value(), Config->get_max_gain()), this);
+				break;
 			}
 		} else {
 			_amp->set_gain (slider_position_to_gain_with_max (gain_adjustment.get_value(), Config->get_max_gain()), this);
@@ -444,10 +450,13 @@ GainMeterBase::effective_gain_display ()
 {
 	float value;
 
-	if (!_is_midi) {
+	switch (_data_type) {
+	case DataType::AUDIO:
 		value = gain_to_slider_position_with_max (_amp->gain(), Config->get_max_gain());
-	} else {
+		break;
+	case DataType::MIDI:
 		value = _amp->gain ();
+		break;
 	}
 
 	if (gain_adjustment.get_value() != value) {
