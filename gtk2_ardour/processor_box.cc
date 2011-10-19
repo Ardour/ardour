@@ -497,7 +497,7 @@ ProcessorBox::ProcessorBox (ARDOUR::Session* sess, boost::function<PluginSelecto
 	, _owner_is_mixer (owner_is_mixer)
 	, ab_direction (true)
 	, _get_plugin_selector (get_plugin_selector)
-	, _placement(PreFader)
+	, _placement (-1)
 	, _rr_selection(rsel)
 {
 	set_session (sess);
@@ -684,10 +684,11 @@ ProcessorBox::new_send ()
 }
 
 void
-ProcessorBox::show_processor_menu (gint arg)
+ProcessorBox::show_processor_menu (int arg)
 {
 	if (processor_menu == 0) {
 		processor_menu = build_processor_menu ();
+		processor_menu->signal_unmap().connect (sigc::mem_fun (*this, &ProcessorBox::processor_menu_unmapped));
 	}
 
 	Gtk::MenuItem* plugin_menu_item = dynamic_cast<Gtk::MenuItem*>(ActionManager::get_widget("/ProcessorMenu/newplugin"));
@@ -714,6 +715,13 @@ ProcessorBox::show_processor_menu (gint arg)
 	paste_action->set_sensitive (!_rr_selection.processors.empty());
 
 	processor_menu->popup (1, arg);
+
+	/* Add a placeholder gap to the processor list to indicate where a processor would be
+	   inserted were one chosen from the menu.
+	*/
+	int x, y;
+	processor_display.get_pointer (x, y);
+	_placement = processor_display.add_placeholder (y);
 }
 
 bool
@@ -884,20 +892,6 @@ ProcessorBox::processor_button_release_event (GdkEventButton *ev, ProcessorEntry
 
 	} else if (Keyboard::is_context_menu_event (ev)) {
 
-		/* figure out if we are above or below the fader/amp processor,
-		   and set the next insert position appropriately.
-		*/
-
-		if (processor) {
-			if (_route->processor_is_prefader (processor)) {
-				_placement = PreFader;
-			} else {
-				_placement = PostFader;
-			}
-		} else {
-			_placement = PostFader;
-		}
-
 		show_processor_menu (ev->time);
 
 	} else if (processor && Keyboard::is_button2_event (ev)
@@ -977,7 +971,7 @@ ProcessorBox::use_plugins (const SelectedPlugins& plugins)
 
 		Route::ProcessorStreams err_streams;
 
-		if (_route->add_processor (processor, _placement, &err_streams, Config->get_new_plugins_active ())) {
+		if (_route->add_processor_by_index (processor, _placement, &err_streams, Config->get_new_plugins_active ())) {
 			weird_plugin_dialog (**p, err_streams);
 			return true;
 			// XXX SHAREDPTR delete plugin here .. do we even need to care?
@@ -1042,7 +1036,7 @@ void
 ProcessorBox::choose_insert ()
 {
 	boost::shared_ptr<Processor> processor (new PortInsert (*_session, _route->pannable(), _route->mute_master()));
-	_route->add_processor (processor, _placement);
+	_route->add_processor_by_index (processor, _placement);
 }
 
 /* Caller must not hold process lock */
@@ -1104,7 +1098,7 @@ ProcessorBox::send_io_finished (IOSelector::Result r, boost::weak_ptr<Processor>
 		break;
 
 	case IOSelector::Accepted:
-		_route->add_processor (processor, _placement);
+		_route->add_processor_by_index (processor, _placement);
 		if (Profile->get_sae()) {
 			processor->activate ();
 		}
@@ -1132,7 +1126,7 @@ ProcessorBox::return_io_finished (IOSelector::Result r, boost::weak_ptr<Processo
 		break;
 
 	case IOSelector::Accepted:
-		_route->add_processor (processor, _placement);
+		_route->add_processor_by_index (processor, _placement);
 		if (Profile->get_sae()) {
 			processor->activate ();
 		}
@@ -2399,6 +2393,12 @@ ProcessorBox::hide_things ()
 	for (list<ProcessorEntry*>::iterator i = c.begin(); i != c.end(); ++i) {
 		(*i)->hide_things ();
 	}
+}
+
+void
+ProcessorBox::processor_menu_unmapped ()
+{
+	processor_display.remove_placeholder ();
 }
 
 ProcessorWindowProxy::ProcessorWindowProxy (

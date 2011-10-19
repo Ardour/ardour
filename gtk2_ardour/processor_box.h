@@ -240,7 +240,10 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 
 	boost::shared_ptr<ARDOUR::Processor> _processor_being_created;
 
-	ARDOUR::Placement _placement;
+	/** Index at which to place a new plugin (based on where the menu was opened), or -1 to
+	 *  put at the end of the plugin list.
+	 */
+	int _placement;
 
 	RouteRedirectSelection& _rr_selection;
 
@@ -265,7 +268,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	gint processor_menu_map_handler (GdkEventAny *ev);
 	Gtk::Menu * build_processor_menu ();
 	void build_processor_tooltip (Gtk::EventBox&, std::string);
-	void show_processor_menu (gint arg);
+	void show_processor_menu (int);
 	Gtk::Menu* build_possible_aux_menu();
 
 	void choose_aux (boost::weak_ptr<ARDOUR::Route>);
@@ -289,6 +292,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	void reordered ();
 	void report_failed_reorder ();
 	void route_processors_changed (ARDOUR::RouteProcessorChange);
+	void processor_menu_unmapped ();
 
 	void processors_reordered (const Gtk::TreeModel::Path&, const Gtk::TreeModel::iterator&, int*);
 	void compute_processor_sort_keys ();

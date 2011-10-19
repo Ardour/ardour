@@ -853,6 +853,34 @@ Route::add_processor (boost::shared_ptr<Processor> processor, Placement placemen
 }
 
 
+/** Add a processor to a route such that it ends up with a given index into the visible processors.
+ *  @param index Index to add the processor at, or -1 to add at the end of the list.
+ */
+
+int
+Route::add_processor_by_index (boost::shared_ptr<Processor> processor, int index, ProcessorStreams* err, bool activation_allowed)
+{
+	/* XXX this is not thread safe - we don't hold the lock across determining the iter
+	   to add before and actually doing the insertion. dammit.
+	*/
+
+	if (index == -1) {
+		return add_processor (processor, _processors.end(), err, activation_allowed);
+	}
+	
+	ProcessorList::iterator i = _processors.begin ();
+	int j = 0;
+	while (i != _processors.end() && j < index) {
+		if ((*i)->display_to_user()) {
+			++j;
+		}
+		
+		++i;
+	}
+	
+	return add_processor (processor, i, err, activation_allowed);
+}
+
 /** Add a processor to the route.
  *  @param iter an iterator in _processors; the new processor will be inserted immediately before this location.
  */

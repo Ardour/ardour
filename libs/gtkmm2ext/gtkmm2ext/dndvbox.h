@@ -45,7 +45,7 @@ template <class T>
 class DnDVBox : public Gtk::EventBox
 {
 public:
-	DnDVBox () : _active (0), _drag_icon (0), _expecting_unwanted_button_event (false), _drag_placeholder (0)
+	DnDVBox () : _active (0), _drag_icon (0), _expecting_unwanted_button_event (false), _placeholder (0)
 	{
 		_targets.push_back (Gtk::TargetEntry ("processor"));
 
@@ -165,6 +165,59 @@ public:
 		SelectionChanged (); /* EMIT SIGNAL */
 	}
 
+	/** @param y y coordinate.
+	 *  @return Pair consisting of the child under y (or 0) and the (fractional) index of the child under y (or -1)
+	 */
+	std::pair<T*, double> get_child_at_position (int y) const
+	{
+		T* before;
+		T* after;
+
+		std::pair<T*, double> r;
+		
+		r.second = get_children_around_position (y, &before, &r.first, &after);
+
+		return r;
+	}
+
+	void set_spacing (int s) {
+		_internal_vbox.set_spacing (s);
+	}
+
+	void remove_placeholder ()
+	{
+		if (_placeholder) {
+			_internal_vbox.remove (*_placeholder);
+			_placeholder = 0;
+		}
+	}
+
+	/** Add a placeholder where a child would be put if it were added at the given y position.
+	 *  @param y y position within the DnDVBox.
+	 *  @return index of child that the placeholder represents, or -1 if it is at the end of all children.
+	 */
+	int add_placeholder (double y)
+	{
+		return create_or_update_placeholder (get_child_at_position (y).second);
+	}
+	
+	/** Children have been reordered by a drag */
+	sigc::signal<void> Reordered;
+
+	/** A button has been pressed over the widget */
+	sigc::signal<bool, GdkEventButton*, T*> ButtonPress;
+
+	/** A button has been release over the widget */
+	sigc::signal<bool, GdkEventButton*, T*> ButtonRelease;
+
+	/** A child has been dropped onto this DnDVBox from another one;
+	 *  Parameters are the source DnDVBox, our child which the other one was dropped on (or 0) and the DragContext.
+	 */
+	sigc::signal<void, DnDVBox*, T*, Glib::RefPtr<Gdk::DragContext> const & > DropFromAnotherBox;
+	sigc::signal<void> SelectionChanged;
+
+private:
+	
 	/** Look at a y coordinate and find the children below y, and the ones either side.
 	 *  @param y y position.
 	 *  @param before Filled in with the child before, or 0.
@@ -188,7 +241,8 @@ public:
 		/* top of current child */
 		double top = 0;
 		/* bottom of current child */
-		double bottom = (*j)->widget().get_allocation().get_height ();
+		Gtk::Allocation const a = (*j)->widget().get_allocation();
+		double bottom = a.get_y() + a.get_height();
 
 		while (y >= bottom && j != _children.end()) {
 
@@ -199,7 +253,8 @@ public:
 			++j;
 
 			if (j != _children.end()) {
-				bottom += (*j)->widget().get_allocation().get_height ();
+				Gtk::Allocation const a = (*j)->widget().get_allocation();
+				bottom = a.get_y() + a.get_height();
 			}
 		}
 
@@ -217,41 +272,6 @@ public:
 		return i + ((y - top) / (*at)->widget().get_allocation().get_height());
 	}
 
-	/** @param y y coordinate.
-	 *  @return Pair consisting of the child under y (or 0) and the (fractional) index of the child under y (or -1)
-	 */
-	std::pair<T*, double> get_child_at_position (int y) const
-	{
-		T* before;
-		T* after;
-
-		std::pair<T*, double> r;
-		
-		r.second = get_children_around_position (y, &before, &r.first, &after);
-
-		return r;
-	}
-
-	void set_spacing (int s) {
-		_internal_vbox.set_spacing (s);
-	}
- 
-	/** Children have been reordered by a drag */
-	sigc::signal<void> Reordered;
-
-	/** A button has been pressed over the widget */
-	sigc::signal<bool, GdkEventButton*, T*> ButtonPress;
-
-	/** A button has been release over the widget */
-	sigc::signal<bool, GdkEventButton*, T*> ButtonRelease;
-
-	/** A child has been dropped onto this DnDVBox from another one;
-	 *  Parameters are the source DnDVBox, our child which the other one was dropped on (or 0) and the DragContext.
-	 */
-	sigc::signal<void, DnDVBox*, T*, Glib::RefPtr<Gdk::DragContext> const & > DropFromAnotherBox;
-	sigc::signal<void> SelectionChanged;
-
-private:
 	void drag_begin (Glib::RefPtr<Gdk::DragContext> const & context, T* child)
 	{
 		_drag_child = child;
@@ -356,17 +376,27 @@ private:
 		_drag_icon = 0;
 		
 		_drag_child = 0;
-		remove_drag_placeholder ();
+		remove_placeholder ();
 
 		Reordered (); /* EMIT SIGNAL */
 	}
 
-	void remove_drag_placeholder ()
+	/** Insert a placeholder at a given fractional child position, creating it if necessary.
+	 *  @param c Fractional child position.
+	 *  @return index of child that the placeholder represents, or -1 if it is at the end of all children.
+	 */
+	int create_or_update_placeholder (double c)
 	{
-		if (_drag_placeholder) {
-			_internal_vbox.remove (*_drag_placeholder);
-			_drag_placeholder = 0;
+		if (_placeholder == 0) {
+			_placeholder = manage (new Gtk::Label (""));
+			_internal_vbox.pack_start (*_placeholder, false, false);
+			_placeholder->show ();
 		}
+
+		/* round up the index, unless we're off the end of the children */
+		int const n = c < 0 ? -1 : int (c + 0.5);
+		_internal_vbox.reorder_child (*_placeholder, n);
+		return n;
 	}
 
 	bool drag_motion (Glib::RefPtr<Gdk::DragContext> const &, int /*x*/, int y, guint)
@@ -387,37 +417,23 @@ private:
 
 		if (top_half && (before == _drag_child || at == _drag_child)) {
 			/* dropping here would have no effect, so remove the visual cue */
-			remove_drag_placeholder ();
+			remove_placeholder ();
 			return false;
 		}
 
 		if (!top_half && (at == _drag_child || after == _drag_child)) {
 			/* dropping here would have no effect, so remove the visual cue */
-			remove_drag_placeholder ();
+			remove_placeholder ();
 			return false;
 		}
 
-		/* the index that the placeholder should be put at */
-		int const n = int (c + 0.5);
-		
-		if (_drag_placeholder == 0) {
-			_drag_placeholder = manage (new Gtk::Label (""));
-			_internal_vbox.pack_start (*_drag_placeholder, false, false);
-			_drag_placeholder->show ();
-		}
-
-		if (c < 0) {
-			_internal_vbox.reorder_child (*_drag_placeholder, -1);
-		} else {
-			_internal_vbox.reorder_child (*_drag_placeholder, n);
-		}
-
+		create_or_update_placeholder (c);
 		return false;
 	}
 
 	void drag_leave (Glib::RefPtr<Gdk::DragContext> const &, guint)
 	{
-		remove_drag_placeholder ();
+		remove_placeholder ();
 	}
 
 	bool button_press (GdkEventButton* ev, T* child)
@@ -488,7 +504,6 @@ private:
 				}
 			}
 		}
-
 
 		return ButtonPress (ev, child); /* EMIT SIGNAL */
 	}
@@ -566,10 +581,10 @@ private:
 	T* _active;
 	Gtk::Window* _drag_icon;
 	bool _expecting_unwanted_button_event;
-	/** A blank label used as a placeholder to indicate where a dragged item would
-	 *  go if it were dropped now.
+	/** A blank label used as a placeholder to indicate where an item would
+	 *  go if it were dropped or inserted "now".
 	 */
-	Gtk::Label* _drag_placeholder;
+	Gtk::Label* _placeholder;
 	/** Our child being dragged, or 0 */
 	T* _drag_child;
 	
