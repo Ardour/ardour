@@ -398,7 +398,12 @@ MidiTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame
 		                        (!diskstream->record_enabled() && !_session.transport_stopped()));
 	}
 
-	_main_outs->flush_buffers (nframes, end_frame - start_frame - 1);
+	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+		boost::shared_ptr<Delivery> d = boost::dynamic_pointer_cast<Delivery> (*i);
+		if (d) {
+			d->flush_buffers (nframes, end_frame - start_frame - 1);
+		}
+	}
 
 	return 0;
 }
