@@ -110,6 +110,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, Canvas& c
 	, TimeAxisView(sess,ed,(TimeAxisView*) 0, canvas)
 	, _view (0)
 	, parent_canvas (canvas)
+	, no_redraw (false)
 	, button_table (3, 3)
 	, route_group_button (_("g"))
 	, playlist_button (_("p"))
