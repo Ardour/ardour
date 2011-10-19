@@ -331,6 +331,7 @@ AudioEngine::_graph_order_callback (void *arg)
 	if (ae->connected() && !ae->port_remove_in_progress) {
 		ae->GraphReordered (); /* EMIT SIGNAL */
 	}
+	
 	return 0;
 }
 

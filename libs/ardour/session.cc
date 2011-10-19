@@ -3332,13 +3332,18 @@ Session::graph_reordered ()
 		return;
 	}
 
+	cerr << "Session begins graph reorder\n";
+
 	/* every track/bus asked for this to be handled but it was deferred because
 	   we were connecting. do it now.
 	*/
 
 	request_input_change_handling ();
 
+	cerr << "Session graph reorder 2\n";
 	resort_routes ();
+
+	cerr << "Session graph reorder 3\n";
 
 	/* force all diskstreams to update their capture offset values to
 	   reflect any changes in latencies within the graph.
@@ -3351,6 +3356,8 @@ Session::graph_reordered ()
 			tr->set_capture_offset ();
 		}
 	}
+
+	cerr << "Session graph reorder 4\n";
 }
 
 framecnt_t
