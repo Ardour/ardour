@@ -1633,21 +1633,15 @@ Route::all_processors_active (Placement p, bool state)
 	if (_processors.empty()) {
 		return;
 	}
+	
 	ProcessorList::iterator start, end;
 	placement_range(p, start, end);
 
-	bool before_amp = true;
-	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		if ((*i) == _amp) {
-			before_amp = false;
-			continue;
-		}
-		if (p == PreFader && before_amp) {
-			if (state) {
-				(*i)->activate ();
-			} else {
-				(*i)->deactivate ();
-			}
+	for (ProcessorList::iterator i = start; i != end; ++i) {
+		if (state) {
+			(*i)->activate ();
+		} else {
+			(*i)->deactivate ();
 		}
 	}
 
