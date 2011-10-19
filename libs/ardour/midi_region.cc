@@ -33,6 +33,7 @@
 #include "ardour/automation_control.h"
 #include "ardour/dB.h"
 #include "ardour/gain.h"
+#include "ardour/midi_model.h"
 #include "ardour/midi_region.h"
 #include "ardour/midi_ring_buffer.h"
 #include "ardour/midi_source.h"
@@ -295,6 +296,30 @@ MidiRegion::separate_by_channel (ARDOUR::Session&, vector< boost::shared_ptr<Reg
 {
 	// TODO
 	return -1;
+}
+
+boost::shared_ptr<Evoral::Control>
+MidiRegion::control (const Evoral::Parameter& id, bool create)
+{
+	return model()->control(id, create);
+}
+
+boost::shared_ptr<const Evoral::Control>
+MidiRegion::control (const Evoral::Parameter& id) const
+{
+	return model()->control(id);
+}
+
+boost::shared_ptr<MidiModel>
+MidiRegion::model()
+{
+	return midi_source()->model();
+}
+
+boost::shared_ptr<const MidiModel>
+MidiRegion::model() const
+{
+	return midi_source()->model();
 }
 
 int

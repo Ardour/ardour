@@ -29,10 +29,12 @@
 
 #include "gtkmm2ext/utils.h"
 
-#include "ardour/session.h"
+#include "ardour/audioregion.h"
 #include "ardour/dB.h"
-#include "ardour/region_factory.h"
+#include "ardour/midi_region.h"
 #include "ardour/operations.h"
+#include "ardour/region_factory.h"
+#include "ardour/session.h"
 
 #include "editor.h"
 #include "i18n.h"

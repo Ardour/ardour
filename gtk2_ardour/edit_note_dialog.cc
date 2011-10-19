@@ -20,6 +20,7 @@
 #include <gtkmm/stock.h>
 #include <gtkmm/table.h>
 #include "ardour/midi_model.h"
+#include "ardour/midi_region.h"
 #include "edit_note_dialog.h"
 #include "canvas-note-event.h"
 #include "midi_region_view.h"

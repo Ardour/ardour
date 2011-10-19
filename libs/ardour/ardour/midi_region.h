@@ -23,14 +23,7 @@
 
 #include <vector>
 
-#include "pbd/fastlog.h"
-#include "pbd/undo.h"
-
 #include "ardour/ardour.h"
-#include "ardour/gain.h"
-#include "ardour/logcurve.h"
-#include "ardour/midi_model.h"
-#include "ardour/midi_source.h"
 #include "ardour/region.h"
 
 class XMLNode;
@@ -46,12 +39,17 @@ namespace ARDOUR {
 	}
 }
 
+namespace Evoral {
+template<typename Time> class EventSink;
+}
+
 namespace ARDOUR {
 
 class Route;
 class Playlist;
 class Session;
 class MidiFilter;
+class MidiModel;
 class MidiSource;
 class MidiStateTracker;
 template<typename T> class MidiRingBuffer;
@@ -91,22 +89,16 @@ class MidiRegion : public Region
 
 	/* automation */
 
-	boost::shared_ptr<Evoral::Control>
-	control(const Evoral::Parameter& id, bool create=false) {
-		return model()->control(id, create);
-	}
+	boost::shared_ptr<Evoral::Control> control(const Evoral::Parameter& id, bool create=false);
 
-	virtual boost::shared_ptr<const Evoral::Control>
-	control(const Evoral::Parameter& id) const {
-		return model()->control(id);
-	}
+	virtual boost::shared_ptr<const Evoral::Control> control(const Evoral::Parameter& id) const;
 
 	/* export */
 
 	int exportme (ARDOUR::Session&, ARDOUR::ExportSpecification&);
 
-	boost::shared_ptr<MidiModel> model()             { return midi_source()->model(); }
-	boost::shared_ptr<const MidiModel> model() const { return midi_source()->model(); }
+	boost::shared_ptr<MidiModel> model();
+	boost::shared_ptr<const MidiModel> model() const;
 
 	void fix_negative_start ();
 	void transpose (int);

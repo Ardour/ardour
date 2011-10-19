@@ -36,6 +36,7 @@
 
 using namespace ARDOUR;
 using namespace PBD;
+using namespace std;
 
 PBD::Signal1<void,boost::shared_ptr<Region> > RegionFactory::CheckNewRegion;
 Glib::StaticMutex                             RegionFactory::region_map_lock;

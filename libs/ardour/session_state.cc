@@ -90,6 +90,7 @@
 #include "ardour/io_processor.h"
 #include "ardour/location.h"
 #include "ardour/midi_diskstream.h"
+#include "ardour/midi_model.h"
 #include "ardour/midi_patch_manager.h"
 #include "ardour/midi_playlist.h"
 #include "ardour/midi_region.h"

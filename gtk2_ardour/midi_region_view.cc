@@ -294,6 +294,12 @@ MidiRegionView::init (Gdk::Color const & basic_color, bool wfd)
 	SelectionCleared.connect (_selection_cleared_connection, invalidator (*this), ui_bind (&MidiRegionView::selection_cleared, this, _1), gui_context ());
 }
 
+const boost::shared_ptr<ARDOUR::MidiRegion>
+MidiRegionView::midi_region() const
+{
+	return boost::dynamic_pointer_cast<ARDOUR::MidiRegion>(_region);
+}
+
 void
 MidiRegionView::connect_to_diskstream ()
 {

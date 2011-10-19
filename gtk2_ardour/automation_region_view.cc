@@ -17,21 +17,24 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <utility>
+
 #include "pbd/memento_command.h"
+
 #include "ardour/automation_control.h"
 #include "ardour/event_type_map.h"
-#include "ardour/session.h"
-#include "ardour/source.h"
 #include "ardour/midi_automation_list_binder.h"
 #include "ardour/midi_region.h"
+#include "ardour/session.h"
+#include "ardour/source.h"
 
 #include "automation_region_view.h"
-#include "gui_thread.h"
-#include "public_editor.h"
-#include "midi_automation_line.h"
-#include "editor_drag.h"
-#include "editor.h"
 #include "editing.h"
+#include "editor.h"
+#include "editor_drag.h"
+#include "gui_thread.h"
+#include "midi_automation_line.h"
+#include "public_editor.h"
 
 #include "i18n.h"
 
@@ -116,8 +119,8 @@ AutomationRegionView::canvas_event (GdkEvent* ev)
 		automation_view()->canvas_display()->w2i (x, y);
 
 		/* clamp y */
-		y = max (y, 0.0);
-		y = min (y, _height - NAME_HIGHLIGHT_SIZE);
+		y = std::max (y, 0.0);
+		y = std::min (y, _height - NAME_HIGHLIGHT_SIZE);
 
 		add_automation_event (ev, trackview.editor().pixel_to_frame (x) - _region->position() + _region->start(), y);
 	}
