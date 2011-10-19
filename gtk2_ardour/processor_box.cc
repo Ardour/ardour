@@ -1761,7 +1761,8 @@ ProcessorBox::for_selected_processors (void (ProcessorBox::*method)(boost::share
 void
 ProcessorBox::all_processors_active (bool state)
 {
-	_route->all_processors_active (_placement, state);
+	_route->all_processors_active (PreFader, state);
+	_route->all_processors_active (PostFader, state);
 }
 
 void
