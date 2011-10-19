@@ -298,11 +298,12 @@ ProcessorEntry::name () const
 }
 
 SendProcessorEntry::SendProcessorEntry (boost::shared_ptr<Send> s, Width w)
-	: ProcessorEntry (s, w),
-	  _send (s),
-	  _adjustment (gain_to_slider_position_with_max (1.0, Config->get_max_gain()), 0, 1, 0.01, 0.1),
-	  _fader (_slider, &_adjustment, 0, false),
-	  _ignore_gain_change (false)
+	: ProcessorEntry (s, w)
+	, _send (s)
+	, _adjustment (gain_to_slider_position_with_max (1.0, Config->get_max_gain()), 0, 1, 0.01, 0.1)
+	, _fader (_slider, &_adjustment, 0, false)
+	, _ignore_gain_change (false)
+	, _data_type (DataType::AUDIO)
 {
 	_fader.set_name ("SendFader");
 	_fader.set_controllable (_send->amp()->gain_control ());
@@ -311,8 +312,37 @@ SendProcessorEntry::SendProcessorEntry (boost::shared_ptr<Send> s, Width w)
 	_fader.show ();
 
 	_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &SendProcessorEntry::gain_adjusted));
-	_send->amp()->gain_control()->Changed.connect (send_gain_connection, invalidator (*this), boost::bind (&SendProcessorEntry::show_gain, this), gui_context());
+
+	_send->amp()->gain_control()->Changed.connect (
+		_send_connections, invalidator (*this), boost::bind (&SendProcessorEntry::show_gain, this), gui_context()
+		);
+	
+	_send->amp()->ConfigurationChanged.connect (
+		_send_connections, invalidator (*this), ui_bind (&SendProcessorEntry::setup_gain_adjustment, this), gui_context ()
+		);
+
+	setup_gain_adjustment ();
 	show_gain ();
+}
+
+void
+SendProcessorEntry::setup_gain_adjustment ()
+{
+	if (_send->amp()->output_streams().n_midi() == 0) {
+		_data_type = DataType::AUDIO;
+		_adjustment.set_lower (0);
+		_adjustment.set_upper (1);
+		_adjustment.set_step_increment (0.01);
+		_adjustment.set_page_increment (0.1);
+		_fader.set_default_value (gain_to_slider_position (1));
+	} else {
+		_data_type = DataType::MIDI;
+		_adjustment.set_lower (0);
+		_adjustment.set_upper (2);
+		_adjustment.set_step_increment (0.05);
+		_adjustment.set_page_increment (0.1);
+		_fader.set_default_value (1);
+	}
 }
 
 void
@@ -325,7 +355,16 @@ SendProcessorEntry::setup_slider_pix ()
 void
 SendProcessorEntry::show_gain ()
 {
-	float const value = gain_to_slider_position_with_max (_send->amp()->gain (), Config->get_max_gain());
+	gain_t value = 0;
+	
+	switch (_data_type) {
+	case DataType::AUDIO:
+		value = gain_to_slider_position_with_max (_send->amp()->gain (), Config->get_max_gain());
+		break;
+	case DataType::MIDI:
+		value = _send->amp()->gain ();
+		break;
+	}
 
 	if (_adjustment.get_value() != value) {
 		_ignore_gain_change = true;
@@ -335,7 +374,11 @@ SendProcessorEntry::show_gain ()
 		stringstream s;
 		s.precision (1);
 		s.setf (ios::fixed, ios::floatfield);
-		s << accurate_coefficient_to_dB (_send->amp()->gain ()) << _("dB");
+		s << accurate_coefficient_to_dB (_send->amp()->gain ());
+		if (_data_type == DataType::AUDIO) {
+			s << _("dB");
+		}
+		
 		_fader.set_tooltip_text (s.str ());
 	}
 }
@@ -347,7 +390,17 @@ SendProcessorEntry::gain_adjusted ()
 		return;
 	}
 
-	_send->amp()->set_gain (slider_position_to_gain_with_max (_adjustment.get_value(), Config->get_max_gain()), this);
+	gain_t value = 0;
+
+	switch (_data_type) {
+	case DataType::AUDIO:
+		value = slider_position_to_gain_with_max (_adjustment.get_value(), Config->get_max_gain());
+		break;
+	case DataType::MIDI:
+		value = _adjustment.get_value ();
+	}
+	
+	_send->amp()->set_gain (value, this);
 }
 
 void

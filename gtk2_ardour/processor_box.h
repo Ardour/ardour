@@ -161,12 +161,14 @@ public:
 private:
 	void show_gain ();
 	void gain_adjusted ();
+	void setup_gain_adjustment ();
 
 	boost::shared_ptr<ARDOUR::Send> _send;
 	Gtk::Adjustment _adjustment;
 	Gtkmm2ext::HSliderController _fader;
 	bool _ignore_gain_change;
-	PBD::ScopedConnection send_gain_connection;
+	PBD::ScopedConnectionList _send_connections;
+	ARDOUR::DataType _data_type;
 
 	static Glib::RefPtr<Gdk::Pixbuf> _slider;
 };

@@ -427,18 +427,22 @@ GainMeterBase::show_gain ()
 void
 GainMeterBase::gain_adjusted ()
 {
+	gain_t value = 0;
+
+	switch (_data_type) {
+	case DataType::AUDIO:
+		value = slider_position_to_gain_with_max (gain_adjustment.get_value(), Config->get_max_gain());
+		break;
+	case DataType::MIDI:
+		value = gain_adjustment.get_value ();
+		break;
+	}
+	
 	if (!ignore_toggle) {
 		if (_route && _route->amp() == _amp) {
-			switch (_data_type) {
-			case DataType::MIDI:
-				_route->set_gain (gain_adjustment.get_value(), this);
-				break;
-			case DataType::AUDIO:
-				_route->set_gain (slider_position_to_gain_with_max (gain_adjustment.get_value(), Config->get_max_gain()), this);
-				break;
-			}
+			_route->set_gain (value, this);
 		} else {
-			_amp->set_gain (slider_position_to_gain_with_max (gain_adjustment.get_value(), Config->get_max_gain()), this);
+			_amp->set_gain (value, this);
 		}
 	}
 
