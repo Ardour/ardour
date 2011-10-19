@@ -398,12 +398,19 @@ void
 AUPlugin::discover_factory_presets ()
 {
 	CFArrayRef presets;
-	UInt32 dataSize = sizeof (presets);
+	UInt32 dataSize;
+	Boolean isWritable;
 	OSStatus err;
 
-	DEBUG_TRACE (DEBUG::AudioUnits, "get property FactoryPresets in global scope\n");
+	if ((err = unit->GetPropertyInfo (kAudioUnitProperty_FactoryPresets, kAudioUnitScope_Global, 0, &dataSize, &isWritable)) != 0) {
+		DEBUG_TRACE (DEBUG::AudioUnits, "no factory presets for AU\n");
+		return;
+	}
+
+	assert (dataSize == sizeof (presets));
+
 	if ((err = unit->GetProperty (kAudioUnitProperty_FactoryPresets, kAudioUnitScope_Global, 0, (void*) &presets, &dataSize)) != 0) {
-		cerr << "cannot get factory preset info: " << err << endl;
+		error << string_compose (_("cannot get factory preset info: errcode %1"), err) << endmsg;
 		return;
 	}
 
@@ -456,14 +463,17 @@ AUPlugin::init ()
 	unit->GetElementCount (kAudioUnitScope_Output, output_elements);
 
 	if (input_elements > 0) {
+		/* setup render callback: the plugin calls this to get input data 
+		 */
+		
 		AURenderCallbackStruct renderCallbackInfo;
-
+		
 		renderCallbackInfo.inputProc = _render_callback;
 		renderCallbackInfo.inputProcRefCon = this;
-
+		
 		DEBUG_TRACE (DEBUG::AudioUnits, "set render callback in input scope\n");
 		if ((err = unit->SetProperty (kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Input,
-		                              0, (void*) &renderCallbackInfo, sizeof(renderCallbackInfo))) != 0) {
+					      0, (void*) &renderCallbackInfo, sizeof(renderCallbackInfo))) != 0) {
 			cerr << "cannot install render callback (err = " << err << ')' << endl;
 			throw failed_constructor();
 		}
@@ -977,12 +987,11 @@ AUPlugin::output_streams() const
 bool
 AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out) const
 {
-	// XXX as of May 13th 2008, AU plugin support returns a count of either 1 or -1. We never
-	// attempt to multiply-instantiate plugins to meet io configurations.
+	// Note: We never attempt to multiply-instantiate plugins to meet io configurations.
 
 	int32_t audio_in = in.n_audio();
 	int32_t audio_out;
-	int32_t plugcnt = -1;
+	bool found = false;
 	AUPluginInfoPtr pinfo = boost::dynamic_pointer_cast<AUPluginInfo>(get_info());
 
 	/* lets check MIDI first */
@@ -997,25 +1006,28 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out) con
 
 	DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("%1 has %2 IO configurations\n", name(), io_configs.size()));
 
-	//Ardour expects the plugin to tell it the output configuration
-	//but AU plugins can have multiple I/O configurations
-	//in most cases (since we don't allow special routing like sidechains in A2, we want to preserve the number of streams
-	//so first lets see if there's a configuration that keeps out==in
+	//Ardour expects the plugin to tell it the output
+	//configuration but AU plugins can have multiple I/O
+	//configurations in most cases. so first lets see
+	//if there's a configuration that keeps out==in
 
 	audio_out = audio_in;
 
 	for (vector<pair<int,int> >::iterator i = io_configs.begin(); i != io_configs.end(); ++i) {
+
 		int32_t possible_in = i->first;
 		int32_t possible_out = i->second;
 
-		if (possible_in == audio_in && possible_out == audio_out) {
+		if ((possible_in == audio_in) && (possible_out == audio_out)) {
 			DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("\tCHOSEN: in %1 out %2\n", in, out));
 			return 1;
 		}
 	}
 
 	/* now allow potentially "imprecise" matches */
+
 	audio_out = -1;
+
 	for (vector<pair<int,int> >::iterator i = io_configs.begin(); i != io_configs.end(); ++i) {
 
 		int32_t possible_in = i->first;
@@ -1025,6 +1037,7 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out) con
 
 		if (possible_out == 0) {
 			warning << string_compose (_("AU %1 has zero outputs - configuration ignored"), name()) << endmsg;
+			/* XXX surely this is just a send? (e.g. AUNetSend) */
 			continue;
 		}
 
@@ -1034,21 +1047,23 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out) con
 			*/
 
 			if (possible_out == -1) {
-				/* out much match in (UNLIKELY!!) */
-				audio_out = audio_in;
-				plugcnt = 1;
+				/* any configuration possible, provide stereo output */
+				audio_out = 2;
+				found = true;
 			} else if (possible_out == -2) {
-				/* any configuration possible, pick matching */
-				audio_out = audio_in;
-				plugcnt = 1;
+				/* plugins shouldn't really use (0,-2) but might. 
+				   any configuration possible, provide stereo output 
+				*/
+				audio_out = 2;
+				found = true;
 			} else if (possible_out < -2) {
-				/* explicit variable number of outputs, pick maximum */
+				/* explicitly variable number of outputs, pick maximum */
 				audio_out = -possible_out;
-				plugcnt = 1;
+				found = true;
 			} else {
 				/* exact number of outputs */
 				audio_out = possible_out;
-				plugcnt = 1;
+				found = true;
 			}
 		}
 
@@ -1059,19 +1074,19 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out) con
 			if (possible_out == -1) {
 				/* out much match in */
 				audio_out = audio_in;
-				plugcnt = 1;
+				found = true;
 			} else if (possible_out == -2) {
 				/* any configuration possible, pick matching */
 				audio_out = audio_in;
-				plugcnt = 1;
+				found = true;
 			} else if (possible_out < -2) {
-				/* explicit variable number of outputs, pick maximum */
+				/* explicitly variable number of outputs, pick maximum */
 				audio_out = -possible_out;
-				plugcnt = 1;
+				found = true;
 			} else {
 				/* exact number of outputs */
 				audio_out = possible_out;
-				plugcnt = 1;
+				found = true;
 			}
 		}
 
@@ -1080,19 +1095,21 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out) con
 			if (possible_out == -1) {
 				/* any configuration possible, pick matching */
 				audio_out = audio_in;
-				plugcnt = 1;
+				found = true;
 			} else if (possible_out == -2) {
-				error << string_compose (_("AU plugin %1 has illegal IO configuration (-2,-2)"), name())
-				      << endmsg;
-				plugcnt = -1;
+				/* plugins shouldn't really use (-2,-2) but might. 
+				   interpret as (-1,-1).
+				*/
+				audio_out = audio_in;
+				found = true;
 			} else if (possible_out < -2) {
-				/* explicit variable number of outputs, pick maximum */
+				/* explicitly variable number of outputs, pick maximum */
 				audio_out = -possible_out;
-				plugcnt = 1;
+				found = true;
 			} else {
 				/* exact number of outputs */
 				audio_out = possible_out;
-				plugcnt = 1;
+				found = true;
 			}
 		}
 
@@ -1102,67 +1119,72 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out) con
 
 			if (audio_in > -possible_in) {
 				/* request is too large */
-				plugcnt = -1;
 			}
 
 			if (possible_out == -1) {
-				/* out must match in */
-				audio_out = audio_in;
-				plugcnt = 1;
+				/* any output configuration possible, provide stereo out */
+				audio_out = 2;
+				found = true;
 			} else if (possible_out == -2) {
-				error << string_compose (_("AU plugin %1 has illegal IO configuration (-2,-2)"), name())
-				      << endmsg;
-				plugcnt = -1;
+				/* plugins shouldn't really use (<-2,-2) but might. 
+				   interpret as (<-2,-1): any configuration possible, provide stereo output 
+				*/
+				audio_out = 2;
+				found = true;
 			} else if (possible_out < -2) {
-				/* explicit variable number of outputs, pick maximum */
+				/* explicitly variable number of outputs, pick maximum */
 				audio_out = -possible_out;
-				plugcnt = 1;
+				found = true;
 			} else {
 				/* exact number of outputs */
 				audio_out = possible_out;
-				plugcnt = 1;
+				found = true;
 			}
 		}
 
-		if (possible_in == audio_in) {
+		if (possible_in && (possible_in == audio_in)) {
 
 			/* exact number of inputs ... must match obviously */
 
 			if (possible_out == -1) {
-				/* out must match in */
-				audio_out = audio_in;
-				plugcnt = 1;
+				/* any output configuration possible, provide stereo output */
+				audio_out = 2;
+				found = true;
 			} else if (possible_out == -2) {
-				/* any output configuration, pick matching */
-				audio_out = audio_in;
-				plugcnt = -1;
+				/* plugins shouldn't really use (>0,-2) but might. 
+				   interpret as (>0,-1): 
+				   any output configuration possible, provide stereo output
+				*/
+				audio_out = 2;
+				found = true;
 			} else if (possible_out < -2) {
-				/* explicit variable number of outputs, pick maximum */
+				/* explicitly variable number of outputs, pick maximum */
 				audio_out = -possible_out;
-				plugcnt = 1;
+				found = true;
 			} else {
 				/* exact number of outputs */
 				audio_out = possible_out;
-				plugcnt = 1;
+				found = true;
 			}
 		}
 
-		if (plugcnt == 1) {
+		if (found) {
 			break;
 		}
 
 	}
 
-	if (plugcnt > 0) {
-		DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("\tCHOSEN: in %1 out %2 plugcnt %3\n", in, out, plugcnt));
+	if (found) {
+		DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("\tCHOSEN: in %1 out %2\n", in, out));
 	} else {
-		DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("\FAIL: no io configs match %1\n", in));
+		DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("\tFAIL: no io configs match %1\n", in));
+		return false;
 	}
 
 	out.set (DataType::MIDI, 0);
 	out.set (DataType::AUDIO, audio_out);
 
-	return plugcnt;
+	return true;
 }
 
 int
@@ -1221,38 +1243,10 @@ AUPlugin::render_callback(AudioUnitRenderActionFlags*,
 			  UInt32       inNumberFrames,
 			  AudioBufferList*       ioData)
 {
-	if (_has_midi_input) {
-		assert (current_buffers->count().n_midi() > 0);
-
-		/* deliver the first (and assumed only) MIDI buffer's data
-		   to the plugin
-		*/
-
-		MidiBuffer& mb (current_buffers->get_midi(0));
-
-		for (MidiBuffer::iterator i = mb.begin(); i != mb.end(); ++i) {
-			Evoral::MIDIEvent<MidiBuffer::TimeType> ev = *i;
-			switch (ev.type()) {
-			case MIDI_CMD_NOTE_ON:
-			case MIDI_CMD_NOTE_OFF:
-			case MIDI_CMD_CONTROL:
-			case MIDI_CMD_BENDER:
-			case MIDI_CMD_PGM_CHANGE:
-			case MIDI_CMD_CHANNEL_PRESSURE:
-			{
-				const uint8_t* b = ev.buffer();
-				unit->MIDIEvent (b[0], b[1], b[2], ev.time());
-				break;
-			}
-
-			default:
-				/* plugins do not get other stuff by default */
-				break;
-			};
-		}
-	}
-
 	/* not much to do with audio - the data is already in the buffers given to us in connect_and_run() */
+
+	DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("%1: render callback, frames %2 bufs %3\n",
+							name(), inNumberFrames, ioData->mNumberBuffers));
 
 	if (current_maxbuf == 0) {
 		error << _("AUPlugin: render callback called illegally!") << endmsg;
@@ -1285,29 +1279,44 @@ AUPlugin::connect_and_run (BufferSet& bufs, ChanMapping in_map, ChanMapping out_
 	AudioUnitRenderActionFlags flags = 0;
 	AudioTimeStamp ts;
 	OSErr err;
-	uint32_t maxbuf = bufs.count().n_audio();
 
 	if (requires_fixed_size_buffers() && (nframes != _last_nframes)) {
 		unit->GlobalReset();
 		_last_nframes = nframes;
 	}
 
+	/* the apparent number of buffers matches our input configuration, but we know that the bufferset
+	   has the capacity to handle our outputs.
+	*/
+	assert (bufs.available() >= ChanCount (DataType::AUDIO, output_channels));
+
 	current_buffers = &bufs;
-	current_maxbuf = maxbuf;
+	current_maxbuf = bufs.count().n_audio(); // number of input audio buffers
 	current_offset = offset;
 	cb_offset = 0;
 
-	buffers->mNumberBuffers = min ((uint32_t) output_channels, maxbuf);
+	DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("%1 in %2 out %3 MIDI %4 bufs %5 (available %6)\n",
+							name(), input_channels, output_channels, _has_midi_input,
+							bufs.count(), bufs.available()));
 
-	for (uint32_t i = 0; i < buffers->mNumberBuffers; ++i) {
+	buffers->mNumberBuffers = output_channels;
+
+	for (uint32_t i = 0; i < output_channels; ++i) {
 		buffers->mBuffers[i].mNumberChannels = 1;
 		buffers->mBuffers[i].mDataByteSize = nframes * sizeof (Sample);
+		/* setting this to 0 indicates to the AU that it can provide buffers here
+		   if necessary. if it can process in-place, it will use the buffers provided
+		   as input by ::render_callback() above. no documentation on what setting it
+		   to a non-null value means.
+		*/
 		buffers->mBuffers[i].mData = 0;
 	}
 
 	if (_has_midi_input) {
 
-		for (uint32_t i = 0; i < bufs.count().n_midi(); ++i) {
+		uint32_t nmidi = bufs.count().n_midi();
+
+		for (uint32_t i = 0; i < nmidi; ++i) {
 			
 			/* one MIDI port/buffer only */
 			
@@ -1317,12 +1326,9 @@ AUPlugin::connect_and_run (BufferSet& bufs, ChanMapping in_map, ChanMapping out_
 				Evoral::MIDIEvent<framepos_t> ev (*i);
 				
 				if (ev.is_channel_event()) {
-					DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("%1: MIDI event %2\n",
-											name(), ev));
-					unit->MIDIEvent (ev.type() << 8 | ev.channel(),
-							 ev.buffer()[1],
-							 ev.buffer()[2],
-							 ev.time());
+					const uint8_t* b = ev.buffer();
+					DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("%1: MIDI event %2\n", name(), ev));
+					unit->MIDIEvent (b[0], b[1], b[2], ev.time());
 				}
 
 				/* XXX need to handle sysex and other message types */
@@ -1330,21 +1336,31 @@ AUPlugin::connect_and_run (BufferSet& bufs, ChanMapping in_map, ChanMapping out_
 		}
 	}
 
+	/* does this really mean anything ? 
+	 */
+
 	ts.mSampleTime = frames_processed;
 	ts.mFlags = kAudioTimeStampSampleTimeValid;
+
+	// DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("%1 render flags=%2 time=%3 nframes=%4 buffers=%5\n",
+	// name(), flags, frames_processed, nframes, buffers->mNumberBuffers));
 
 	if ((err = unit->Render (&flags, &ts, 0, nframes, buffers)) == noErr) {
 
 		current_maxbuf = 0;
 		frames_processed += nframes;
 
-		uint32_t limit = min ((uint32_t) buffers->mNumberBuffers, maxbuf);
-		uint32_t i;
+		DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("%1 rendered %2 buffers of %3\n",
+								name(), buffers->mNumberBuffers, output_channels));
+
+		int32_t limit = min ((int32_t) buffers->mNumberBuffers, output_channels);
+		int32_t i;
 
 		for (i = 0; i < limit; ++i) {
 			Sample* expected_buffer_address= bufs.get_audio (i).data (offset);
 			if (expected_buffer_address != buffers->mBuffers[i].mData) {
-				// cerr << "chn " << i << " rendered into " << bufs[i]+offset << endl;
+				/* plugin provided its own buffer for output so copy it back to where we want it
+				 */
 				memcpy (expected_buffer_address, buffers->mBuffers[i].mData, nframes * sizeof (Sample));
 			}
 		}
@@ -1353,9 +1369,8 @@ AUPlugin::connect_and_run (BufferSet& bufs, ChanMapping in_map, ChanMapping out_
 		   did not fill/touch/use.
 		*/
 
-		for (;i < maxbuf; ++i) {
-			Sample* buffer_address= bufs.get_audio (i).data (offset);
-			memset (buffer_address, 0, nframes * sizeof (Sample));
+		for (;i < output_channels; ++i) {
+			memset (bufs.get_audio (i).data (offset), 0, nframes * sizeof (Sample));
 		}
 
 		return 0;
@@ -2273,10 +2288,29 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 			   of values. in ::can_do() we use the whole system, but here
 			   we need a single pair of values. XXX probably means we should
 			   remove any use of these values.
+
+			   for now, if the plugin provides a wildcard, treat it as 1. we really
+			   don't care much, because whether we can handle an i/o configuration
+			   depends upon ::can_support_io_configuration(), not these counts.
+
+			   they exist because other parts of ardour try to present i/o configuration
+			   info to the user, which should perhaps be revisited.
 			*/
 
-			info->n_inputs.set (DataType::AUDIO, info->cache.io_configs.front().first);
-			info->n_outputs.set (DataType::AUDIO, info->cache.io_configs.front().second);
+			int32_t possible_in = info->cache.io_configs.front().first;
+			int32_t possible_out = info->cache.io_configs.front().second;
+			
+			if (possible_in > 0) {
+				info->n_inputs.set (DataType::AUDIO, possible_in);
+			} else {
+				info->n_inputs.set (DataType::AUDIO, 1);
+			}
+
+			if (possible_out > 0) {
+				info->n_outputs.set (DataType::AUDIO, possible_out);
+			} else {
+				info->n_outputs.set (DataType::AUDIO, 1);
+			}
 
 			DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("detected AU %1 with %2 i/o configurations - %3\n",
 									info->name.c_str(), info->cache.io_configs.size(), info->unique_id));
@@ -2347,7 +2381,9 @@ AUPluginInfo::cached_io_configuration (const std::string& unique_id,
 
 		/* no explicit info available, so default to 1in/1out */
 
-		cinfo.io_configs.push_back (pair<int,int> (1, 1));
+		/* XXX this is wrong. we should be indicating wildcard values */
+
+		cinfo.io_configs.push_back (pair<int,int> (-1, -1));
 
 	} else {
 
