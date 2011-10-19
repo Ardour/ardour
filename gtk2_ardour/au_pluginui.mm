@@ -131,7 +131,7 @@ AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> insert)
 
 	smaller_hbox->set_spacing (6);
 	smaller_hbox->pack_start (preset_label, false, false, 4);
-	smaller_hbox->pack_start (_preset_combo, false, false);
+	smaller_hbox->pack_start (_preset_box, false, false);
 	smaller_hbox->pack_start (save_button, false, false);
 #if 0
 	/* one day these might be useful with an AU plugin, but not yet */
