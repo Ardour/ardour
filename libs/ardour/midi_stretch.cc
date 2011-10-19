@@ -99,7 +99,7 @@ MidiStretch::run (boost::shared_ptr<Region> r, Progress*)
 
 		// FIXME: double copy
 		Evoral::Event<MidiModel::TimeType> ev(*i, true);
-		ev.time() = new_time;
+		ev.set_time(new_time);
 		new_model->append(ev, Evoral::next_event_id());
 	}
 

@@ -19,11 +19,12 @@
 #ifndef EVORAL_EVENT_HPP
 #define EVORAL_EVENT_HPP
 
-#include <stdint.h>
+#include <assert.h>
 #include <cstdlib>
 #include <cstring>
 #include <sstream>
-#include <assert.h>
+#include <stdint.h>
+
 #include "evoral/types.hpp"
 
 /** If this is not defined, all methods of MidiEvent are RT safe
@@ -36,7 +37,7 @@ namespace Evoral {
 
 event_id_t event_id_counter();
 event_id_t next_event_id();
-void init_event_id_counter (event_id_t n);
+void init_event_id_counter(event_id_t n);
 
 /** An event (much like a type generic jack_midi_event_t)
  *
@@ -57,43 +58,9 @@ struct Event {
 
 	~Event();
 
-	inline const Event& operator=(const Event& copy) {
-		_id = copy.id(); // XXX is this right? do we want ID copy semantics?
-		_type = copy._type;
-		_original_time = copy._original_time;
-		_nominal_time = copy._nominal_time;
-		if (_owns_buf) {
-			if (copy._buf) {
-				if (copy._size > _size) {
-					_buf = (uint8_t*)::realloc(_buf, copy._size);
-				}
-				memcpy(_buf, copy._buf, copy._size);
-			} else {
-				free(_buf);
-				_buf = NULL;
-			}
-		} else {
-			_buf = copy._buf;
-		}
+	const Event& operator=(const Event& copy);
 
-		_size = copy._size;
-		return *this;
-	}
-
-	inline void set(uint8_t* buf, uint32_t size, Time t) {
-		if (_owns_buf) {
-			if (_size < size) {
-				_buf = (uint8_t*) ::realloc(_buf, size);
-			}
-			memcpy (_buf, buf, size);
-		} else {
-			_buf = buf;
-		}
-
-		_original_time = t;
-		_nominal_time = t;
-		_size = size;
-	}
+	void set(uint8_t* buf, uint32_t size, Time t);
 
 	inline bool operator==(const Event& other) const {
 		if (_type != other._type)
@@ -158,35 +125,31 @@ struct Event {
 
 #endif // EVORAL_EVENT_ALLOC
 
-	inline EventType   event_type()            const { return _type; }
-	inline void        set_event_type(EventType t)   { _type = t; }
-	inline Time        time()                  const { return _nominal_time; }
-	inline Time&       time()                        { return _nominal_time; }
-	inline Time        original_time()         const { return _original_time; }
-	inline Time&       original_time()               { return _original_time; }
-	inline uint32_t    size()                  const { return _size; }
-	inline uint32_t&   size()                        { return _size; }
+	inline EventType      event_type()    const { return _type; }
+	inline Time           time()          const { return _nominal_time; }
+	inline Time           original_time() const { return _original_time; }
+	inline uint32_t       size()          const { return _size; }
+	inline const uint8_t* buffer()        const { return _buf; }
+	inline uint8_t*       buffer()              { return _buf; }
 
-	inline const uint8_t* buffer()             const { return _buf; }
-	inline uint8_t*&      buffer()                   { return _buf; }
+	inline void set_event_type(EventType t) { _type = t; }
 
-	void set_time (Time);
-	void set_original_time (Time);
+	void set_time(Time);
+	void set_original_time(Time);
 
-	inline event_id_t id() const { return _id; }
-	inline void set_id (event_id_t n) { _id = n; }
+	inline event_id_t id() const           { return _id; }
+	inline void       set_id(event_id_t n) { _id = n; }
 
 protected:
-	EventType _type; /**< Type of event (application relative, NOT MIDI 'type') */
-	Time      _original_time; /**< Sample index (or beat time) at which event is valid */
-	Time      _nominal_time; /**< Quantized version of _time, used in preference */
-	uint32_t  _size; /**< Number of uint8_ts of data in \a buffer */
-	uint8_t*  _buf;  /**< Raw MIDI data */
-
+	EventType  _type; /**< Type of event (application relative, NOT MIDI 'type') */
+	Time       _original_time; /**< Sample index (or beat time) at which event is valid */
+	Time       _nominal_time; /**< Quantized version of _time, used in preference */
+	uint32_t   _size; /**< Number of uint8_ts of data in \a buffer */
+	uint8_t*   _buf;  /**< Raw MIDI data */
+	event_id_t _id; /** UUID for each event, should probably be 64bit or at least unsigned */
 #ifdef EVORAL_EVENT_ALLOC
-	bool      _owns_buf; /**< Whether buffer is locally allocated */
+	bool       _owns_buf; /**< Whether buffer is locally allocated */
 #endif
-	event_id_t  _id; /** UUID for each event, should probably be 64bit or at least unsigned */
 };
 
 } // namespace Evoral

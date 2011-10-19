@@ -497,7 +497,7 @@ SMFSource::load_model (bool lock, bool force_reload)
 	uint64_t time = 0; /* in SMF ticks */
 	Evoral::Event<double> ev;
 
-	size_t scratch_size = 0; // keep track of scratch and minimize reallocs
+	uint32_t scratch_size = 0; // keep track of scratch and minimize reallocs
 
 	uint32_t delta_t = 0;
 	uint32_t size    = 0;
@@ -547,11 +547,9 @@ SMFSource::load_model (bool lock, bool force_reload)
 
 			_model->append (ev, event_id);
 
-			if (ev.size() > scratch_size) {
-				scratch_size = ev.size();
-			}
-
-			ev.size() = scratch_size; // ensure read_event only allocates if necessary
+			// Set size to max capacity to minimize allocs in read_event
+			scratch_size = std::max(size, scratch_size);
+			size = scratch_size;
 
 			_length_beats = max(_length_beats, ev.time());
 		}

@@ -26,32 +26,32 @@ static event_id_t _event_id_counter = 0;
 event_id_t
 event_id_counter()
 {
-        return g_atomic_int_get (&_event_id_counter); 
+	return g_atomic_int_get (&_event_id_counter); 
 }
 
 void 
 init_event_id_counter(event_id_t n) 
 { 
-        g_atomic_int_set (&_event_id_counter, n); 
+	g_atomic_int_set (&_event_id_counter, n); 
 }
 
 event_id_t
 next_event_id ()
 {
-        return g_atomic_int_exchange_and_add (&_event_id_counter, 1);
+	return g_atomic_int_exchange_and_add (&_event_id_counter, 1);
 }
 
 #ifdef EVORAL_EVENT_ALLOC
 
 template<typename Timestamp>
 Event<Timestamp>::Event(EventType type, Timestamp time, uint32_t size, uint8_t* buf, bool alloc)
-        : _type(type)
+	: _type(type)
 	, _original_time(time)
 	, _nominal_time(time)
 	, _size(size)
 	, _buf(buf)
+	, _id(-1)
 	, _owns_buf(alloc)
-        , _id (-1)
 {
 	if (alloc) {
 		_buf = (uint8_t*)malloc(_size);
@@ -70,8 +70,8 @@ Event<Timestamp>::Event(const Event& copy, bool owns_buf)
 	, _nominal_time(copy._nominal_time)
 	, _size(copy._size)
 	, _buf(copy._buf)
+	, _id(copy.id())
 	, _owns_buf(owns_buf)
-        , _id (copy.id())
 {
 	if (owns_buf) {
 		_buf = (uint8_t*)malloc(_size);
@@ -88,6 +88,50 @@ Event<Timestamp>::~Event() {
 	if (_owns_buf) {
 		free(_buf);
 	}
+}
+
+template<typename Timestamp>
+const Event<Timestamp>&
+Event<Timestamp>::operator=(const Event& copy)
+{
+	_id = copy.id(); // XXX is this right? do we want ID copy semantics?
+	_type = copy._type;
+	_original_time = copy._original_time;
+	_nominal_time = copy._nominal_time;
+	if (_owns_buf) {
+		if (copy._buf) {
+			if (copy._size > _size) {
+				_buf = (uint8_t*)::realloc(_buf, copy._size);
+			}
+			memcpy(_buf, copy._buf, copy._size);
+		} else {
+			free(_buf);
+			_buf = NULL;
+		}
+	} else {
+		_buf = copy._buf;
+	}
+
+	_size = copy._size;
+	return *this;
+}
+
+template<typename Timestamp>
+void
+Event<Timestamp>::set(uint8_t* buf, uint32_t size, Timestamp t)
+{
+	if (_owns_buf) {
+		if (_size < size) {
+			_buf = (uint8_t*) ::realloc(_buf, size);
+		}
+		memcpy (_buf, buf, size);
+	} else {
+		_buf = buf;
+	}
+
+	_original_time = t;
+	_nominal_time = t;
+	_size = size;
 }
 
 template<typename Timestamp>

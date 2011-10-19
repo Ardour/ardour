@@ -539,7 +539,7 @@ Sequence<Time>::control_to_midi_event(
 		assert(iter.list->parameter().id() <= INT8_MAX);
 		assert(iter.y <= INT8_MAX);
 
-		ev->time() = iter.x;
+		ev->set_time(iter.x);
 		ev->realloc(3);
 		ev->buffer()[0] = MIDI_CMD_CONTROL + iter.list->parameter().channel();
 		ev->buffer()[1] = (uint8_t)iter.list->parameter().id();
@@ -551,7 +551,7 @@ Sequence<Time>::control_to_midi_event(
 		assert(iter.list->parameter().channel() < 16);
 		assert(iter.y <= INT8_MAX);
 
-		ev->time() = iter.x;
+		ev->set_time(iter.x);
 		ev->realloc(2);
 		ev->buffer()[0] = MIDI_CMD_PGM_CHANGE + iter.list->parameter().channel();
 		ev->buffer()[1] = (uint8_t)iter.y;
@@ -562,7 +562,7 @@ Sequence<Time>::control_to_midi_event(
 		assert(iter.list->parameter().channel() < 16);
 		assert(iter.y < (1<<14));
 
-		ev->time() = iter.x;
+		ev->set_time(iter.x);
 		ev->realloc(3);
 		ev->buffer()[0] = MIDI_CMD_BENDER + iter.list->parameter().channel();
 		ev->buffer()[1] = uint16_t(iter.y) & 0x7F; // LSB
@@ -574,7 +574,7 @@ Sequence<Time>::control_to_midi_event(
 		assert(iter.list->parameter().channel() < 16);
 		assert(iter.y <= INT8_MAX);
 
-		ev->time() = iter.x;
+		ev->set_time(iter.x);
 		ev->realloc(2);
 		ev->buffer()[0] = MIDI_CMD_CHANNEL_PRESSURE + iter.list->parameter().channel();
 		ev->buffer()[1] = (uint8_t)iter.y;
