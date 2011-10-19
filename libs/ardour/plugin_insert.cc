@@ -803,17 +803,22 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & in, ChanCo
 	   by feeding them silence.
 	*/
 
-	bool can_hide = false;
+	bool could_hide = false;
+	bool cannot_hide = false;
 	ChanCount hide_channels;
 	
 	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 		if (inputs.get(*t) > in.get(*t)) {
+			/* there is potential to hide, since the plugin has more inputs of type t than the insert */
 			hide_channels.set (*t, inputs.get(*t) - in.get(*t));
-			can_hide = true;
+			could_hide = true;
+		} else if (inputs.get(*t) < in.get(*t)) {
+			/* we definitely cannot hide, since the plugin has fewer inputs of type t than the insert */
+			cannot_hide = true;
 		}
 	}
 
-	if (can_hide) {
+	if (could_hide && !cannot_hide) {
 		out = outputs;
 		return Match (Hide, 1, hide_channels);
 	}
