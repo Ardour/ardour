@@ -143,6 +143,17 @@ class AUPlugin : public ARDOUR::Plugin
 
 	static std::string maybe_fix_broken_au_id (const std::string&);
 
+        /* this MUST be called from thread in which you want to receive notifications
+	   about parameter changes.
+	*/
+	int create_parameter_listener (AUEventListenerProc callback, void *arg, float interval_secs);
+        /* these can be called from any thread but SHOULD be called from the same thread
+	   that will receive parameter change notifications.
+	*/
+	int listen_to_parameter (uint32_t param_id);
+	int end_listen_to_parameter (uint32_t param_id);
+
+
   protected:
 	std::string do_save_preset (std::string name);
 	void do_remove_preset (std::string);
@@ -187,20 +198,26 @@ class AUPlugin : public ARDOUR::Plugin
 	void discover_parameters ();
 	void add_state (XMLNode *) const;
 
-	std::vector<std::pair<uint32_t, uint32_t> > parameter_map;
-	uint32_t current_maxbuf;
-	framecnt_t current_offset;
+	typedef std::map<uint32_t, uint32_t> ParameterMap;
+	ParameterMap parameter_map;
+	uint32_t   input_maxbuf;
+	framecnt_t input_offset;
 	framecnt_t cb_offset;
-	BufferSet* current_buffers;
+	BufferSet* input_buffers;
 	framecnt_t frames_processed;
 
 	std::vector<AUParameterDescriptor> descriptors;
+	AUEventListenerRef _parameter_listener;
+	void * _parameter_listener_arg;
 	void init ();
 
 	void discover_factory_presets ();
 
 	bool      last_transport_rolling;
 	float     last_transport_speed;
+
+	static void _parameter_change_listener (void* /*arg*/, void* /*src*/, const AudioUnitEvent* event, UInt64 host_time, Float32 new_value);
+	void parameter_change_listener (void* /*arg*/, void* /*src*/, const AudioUnitEvent* event, UInt64 host_time, Float32 new_value);
 };
 
 typedef boost::shared_ptr<AUPlugin> AUPluginPtr;

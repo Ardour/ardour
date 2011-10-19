@@ -345,10 +345,12 @@ AUPlugin::AUPlugin (AudioEngine& engine, Session& session, boost::shared_ptr<CAC
 	, _current_block_size (0)
 	, _requires_fixed_size_buffers (false)
 	, buffers (0)
-	, current_maxbuf (0)
-	, current_offset (0)
-	, current_buffers (0)
+	, input_maxbuf (0)
+	, input_offset (0)
+	, input_buffers (0)
 	, frames_processed (0)
+	, _parameter_listener (0)
+	, _parameter_listener_arg (0)
 	, last_transport_rolling (false)
 	, last_transport_speed (0.0)
 {
@@ -373,10 +375,12 @@ AUPlugin::AUPlugin (const AUPlugin& other)
 	, _last_nframes (0)
 	, _requires_fixed_size_buffers (false)
 	, buffers (0)
-	, current_maxbuf (0)
-	, current_offset (0)
-	, current_buffers (0)
+	, input_maxbuf (0)
+	, input_offset (0)
+	, input_buffers (0)
 	, frames_processed (0)
+	, _parameter_listener (0)
+	, _parameter_listener_arg (0)
 
 {
 	init ();
@@ -384,6 +388,11 @@ AUPlugin::AUPlugin (const AUPlugin& other)
 
 AUPlugin::~AUPlugin ()
 {
+	if (_parameter_listener) {
+		AUListenerDispose (_parameter_listener);
+		_parameter_listener = 0;
+	}
+	
 	if (unit) {
 		DEBUG_TRACE (DEBUG::AudioUnits, "about to call uninitialize in plugin destructor\n");
 		unit->Uninitialize ();
@@ -501,6 +510,7 @@ AUPlugin::init ()
 		throw failed_constructor();
 	}
 
+	create_parameter_listener (AUPlugin::_parameter_change_listener, this, 0.05);
 	discover_parameters ();
 	discover_factory_presets ();
 
@@ -616,6 +626,10 @@ AUPlugin::discover_parameters ()
 			d.max_unbound = 0; // upper is bound
 
 			descriptors.push_back (d);
+
+			uint32_t last_param = descriptors.size() - 1;
+			parameter_map.insert (pair<uint32_t,uint32_t> (d.id, last_param));
+			listen_to_parameter (last_param);
 		}
 	}
 }
@@ -1248,11 +1262,11 @@ AUPlugin::render_callback(AudioUnitRenderActionFlags*,
 	DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("%1: render callback, frames %2 bufs %3\n",
 							name(), inNumberFrames, ioData->mNumberBuffers));
 
-	if (current_maxbuf == 0) {
+	if (input_maxbuf == 0) {
 		error << _("AUPlugin: render callback called illegally!") << endmsg;
 		return kAudioUnitErr_CannotDoInCurrentContext;
 	}
-	uint32_t limit = min ((uint32_t) ioData->mNumberBuffers, current_maxbuf);
+	uint32_t limit = min ((uint32_t) ioData->mNumberBuffers, input_maxbuf);
 
 	for (uint32_t i = 0; i < limit; ++i) {
 		ioData->mBuffers[i].mNumberChannels = 1;
@@ -1263,7 +1277,7 @@ AUPlugin::render_callback(AudioUnitRenderActionFlags*,
 		   passed to PluginInsert::connect_and_run()
 		*/
 
-		ioData->mBuffers[i].mData = current_buffers->get_audio (i).data (cb_offset + current_offset);
+		ioData->mBuffers[i].mData = input_buffers->get_audio (i).data (cb_offset + input_offset);
 	}
 
 	cb_offset += inNumberFrames;
@@ -1290,9 +1304,9 @@ AUPlugin::connect_and_run (BufferSet& bufs, ChanMapping in_map, ChanMapping out_
 	*/
 	assert (bufs.available() >= ChanCount (DataType::AUDIO, output_channels));
 
-	current_buffers = &bufs;
-	current_maxbuf = bufs.count().n_audio(); // number of input audio buffers
-	current_offset = offset;
+	input_buffers = &bufs;
+	input_maxbuf = bufs.count().n_audio(); // number of input audio buffers
+	input_offset = offset;
 	cb_offset = 0;
 
 	DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("%1 in %2 out %3 MIDI %4 bufs %5 (available %6)\n",
@@ -1347,7 +1361,7 @@ AUPlugin::connect_and_run (BufferSet& bufs, ChanMapping in_map, ChanMapping out_
 
 	if ((err = unit->Render (&flags, &ts, 0, nframes, buffers)) == noErr) {
 
-		current_maxbuf = 0;
+		input_maxbuf = 0;
 		frames_processed += nframes;
 
 		DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("%1 rendered %2 buffers of %3\n",
@@ -1398,8 +1412,8 @@ AUPlugin::get_beat_and_tempo_callback (Float64* outCurrentBeat,
 	}
 
 	Timecode::BBT_Time bbt;
-	TempoMetric metric = tmap.metric_at (_session.transport_frame() + current_offset);
-	tmap.bbt_time_with_metric (_session.transport_frame() + current_offset, bbt, metric);
+	TempoMetric metric = tmap.metric_at (_session.transport_frame() + input_offset);
+	tmap.bbt_time_with_metric (_session.transport_frame() + input_offset, bbt, metric);
 
 	if (outCurrentBeat) {
 		float beat;
@@ -1437,8 +1451,8 @@ AUPlugin::get_musical_time_location_callback (UInt32*   outDeltaSampleOffsetToNe
 	}
 
 	Timecode::BBT_Time bbt;
-	TempoMetric metric = tmap.metric_at (_session.transport_frame() + current_offset);
-	tmap.bbt_time_with_metric (_session.transport_frame() + current_offset, bbt, metric);
+	TempoMetric metric = tmap.metric_at (_session.transport_frame() + input_offset);
+	tmap.bbt_time_with_metric (_session.transport_frame() + input_offset, bbt, metric);
 
 	if (outDeltaSampleOffsetToNextBeat) {
 		if (bbt.ticks == 0) {
@@ -1505,9 +1519,9 @@ AUPlugin::get_transport_state_callback (Boolean*  outIsPlaying,
 
 	if (outCurrentSampleInTimeLine) {
 		/* this assumes that the AU can only call this host callback from render context,
-		   where current_offset is valid.
+		   where input_offset is valid.
 		*/
-		*outCurrentSampleInTimeLine = _session.transport_frame() + current_offset;
+		*outCurrentSampleInTimeLine = _session.transport_frame() + input_offset;
 	}
 
 	if (outIsCycling) {
@@ -1532,7 +1546,7 @@ AUPlugin::get_transport_state_callback (Boolean*  outIsPlaying,
 				Timecode::BBT_Time bbt;
 
 				if (outCycleStartBeat) {
-					TempoMetric metric = tmap.metric_at (loc->start() + current_offset);
+					TempoMetric metric = tmap.metric_at (loc->start() + input_offset);
 					_session.tempo_map().bbt_time_with_metric (loc->start(), bbt, metric);
 
 					float beat;
@@ -1544,7 +1558,7 @@ AUPlugin::get_transport_state_callback (Boolean*  outIsPlaying,
 				}
 
 				if (outCycleEndBeat) {
-					TempoMetric metric = tmap.metric_at (loc->end() + current_offset);
+					TempoMetric metric = tmap.metric_at (loc->end() + input_offset);
 					_session.tempo_map().bbt_time_with_metric (loc->end(), bbt, metric);
 
 					float beat;
@@ -2661,4 +2675,79 @@ AUPlugin::set_info (PluginInfoPtr info)
 
 	_has_midi_input = pinfo->needs_midi_input ();
 	_has_midi_output = false;
+}
+
+int
+AUPlugin::create_parameter_listener (AUEventListenerProc cb, void* arg, float interval_secs)
+{
+	CFRunLoopRef run_loop = (CFRunLoopRef) GetCFRunLoopFromEventLoop(GetCurrentEventLoop()); 
+	CFStringRef  loop_mode = kCFRunLoopDefaultMode;
+
+	if (AUEventListenerCreate (cb, arg, run_loop, loop_mode, interval_secs, interval_secs, &_parameter_listener) != noErr) {
+		return -1;
+	}
+
+	_parameter_listener_arg = arg;
+
+	return 0;
+}
+
+int
+AUPlugin::listen_to_parameter (uint32_t param_id)
+{
+	AudioUnitEvent      event;
+
+	if (!_parameter_listener || param_id >= descriptors.size()) {
+		return -2;
+	}
+
+	event.mEventType = kAudioUnitEvent_ParameterValueChange;
+	event.mArgument.mParameter.mAudioUnit = unit->AU();
+	event.mArgument.mParameter.mParameterID = descriptors[param_id].id;
+	event.mArgument.mParameter.mScope = descriptors[param_id].scope;
+	event.mArgument.mParameter.mElement = descriptors[param_id].element;
+
+	if (AUEventListenerAddEventType (_parameter_listener, _parameter_listener_arg, &event) != noErr) {
+		return -1;
+	} 
+
+	return 0;
+}
+
+int
+AUPlugin::end_listen_to_parameter (uint32_t param_id)
+{
+	AudioUnitEvent      event;
+
+	if (!_parameter_listener || param_id >= descriptors.size()) {
+		return -2;
+	}
+
+	event.mEventType = kAudioUnitEvent_ParameterValueChange;
+	event.mArgument.mParameter.mAudioUnit = unit->AU();
+	event.mArgument.mParameter.mParameterID = descriptors[param_id].id;
+	event.mArgument.mParameter.mScope = descriptors[param_id].scope;
+	event.mArgument.mParameter.mElement = descriptors[param_id].element;
+
+	if (AUEventListenerRemoveEventType (_parameter_listener, _parameter_listener_arg, &event) != noErr) {
+		return -1;
+	} 
+
+	return 0;
+}
+
+void
+AUPlugin::_parameter_change_listener (void* arg, void* src, const AudioUnitEvent* event, UInt64 host_time, Float32 new_value)
+{
+	((AUPlugin*) arg)->parameter_change_listener (arg, src, event, host_time, new_value);
+}
+
+void
+AUPlugin::parameter_change_listener (void* /*arg*/, void* /*src*/, const AudioUnitEvent* event, UInt64 host_time, Float32 new_value)
+{
+	ParameterMap::iterator i = parameter_map.find (event->mArgument.mParameter.mParameterID);
+
+	if (i != parameter_map.end()) {
+		ParameterChanged (i->second, new_value);
+	}
 }
