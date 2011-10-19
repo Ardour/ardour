@@ -66,7 +66,7 @@ public:
 
 	gain_t         gain () const { return _gain_control->get_value(); }
 
-	virtual void   set_gain (gain_t g, void *src);
+	void           set_gain (gain_t g, void *src);
 	void           inc_gain (gain_t delta, void *src);
 
 	static void update_meters();
