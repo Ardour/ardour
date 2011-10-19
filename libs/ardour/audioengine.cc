@@ -176,7 +176,7 @@ AudioEngine::set_jack_callbacks ()
                 jack_set_latency_callback (_priv_jack, _latency_callback, this);
         }
 
-        jack_set_error_function (ardour_jack_error);
+        // jack_set_error_function (ardour_jack_error);
 }
 
 int
