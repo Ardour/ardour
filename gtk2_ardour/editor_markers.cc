@@ -1505,3 +1505,15 @@ Editor::remove_sorted_marker (Marker* m)
 		i->second.remove (m);
 	}
 }
+
+Marker *
+Editor::find_marker_from_location_id (PBD::ID const & id, bool is_start) const
+{
+	for (LocationMarkerMap::const_iterator i = location_markers.begin(); i != location_markers.end(); ++i) {
+		if (i->first->id() == id) {
+			return is_start ? i->second->start : i->second->end;
+		}
+	}
+
+	return 0;
+}

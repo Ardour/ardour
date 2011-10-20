@@ -590,6 +590,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	LocationMarkers  *find_location_markers (ARDOUR::Location *) const;
 	ARDOUR::Location* find_location_from_marker (Marker *, bool& is_start) const;
+	Marker* find_marker_from_location_id (PBD::ID const &, bool) const;
 	Marker* entered_marker;
 	bool _show_marker_lines;
 

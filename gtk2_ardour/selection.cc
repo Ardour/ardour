@@ -1141,6 +1141,16 @@ Selection::get_state () const
 		}
 	}
 
+	for (MarkerSelection::const_iterator i = markers.begin(); i != markers.end(); ++i) {
+		XMLNode* t = node->add_child (X_("Marker"));
+
+		bool is_start;
+		Location* loc = editor->find_location_from_marker (*i, is_start);
+
+		t->add_property (X_("id"), atoi (loc->id().to_s().c_str()));
+		t->add_property (X_("start"), is_start ? X_("yes") : X_("no"));
+	}
+
 	return *node;
 }
 
@@ -1186,7 +1196,22 @@ Selection::set_state (XMLNode const & node, int)
 					add (atv.get());
 				}
 			}
+
+		} else if ((*i)->name() == X_("Marker")) {
+
+			XMLProperty* prop_id = (*i)->property (X_("id"));
+			XMLProperty* prop_start = (*i)->property (X_("start"));
+			assert (prop_id);
+			assert (prop_start);
+
+			PBD::ID id (prop_id->value ());
+			Marker* m = editor->find_marker_from_location_id (id, string_is_affirmative (prop_start->value ()));
+			if (m) {
+				add (m);
+			}
+			
 		}
+		
 	}
 
 	return 0;

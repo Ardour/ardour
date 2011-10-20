@@ -384,6 +384,9 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 
 	virtual void get_pointer_position (double &, double &) const = 0;
 
+	virtual ARDOUR::Location* find_location_from_marker (Marker *, bool &) const = 0;
+	virtual Marker* find_marker_from_location_id (PBD::ID const &, bool) const = 0;
+
 	/// Singleton instance, set up by Editor::Editor()
 
 	static PublicEditor* _instance;

@@ -1137,6 +1137,44 @@ Editor::set_session (Session *t)
 
 	compute_fixed_ruler_scale ();
 
+	/* Make sure we have auto loop and auto punch ranges */
+
+	Location* loc = _session->locations()->auto_loop_location();
+	if (loc == 0) {
+		loc = new Location (*_session, 0, _session->current_end_frame(), _("Loop"),(Location::Flags) (Location::IsAutoLoop | Location::IsHidden));
+
+		if (loc->start() == loc->end()) {
+			loc->set_end (loc->start() + 1);
+		}
+
+		_session->locations()->add (loc, false);
+		_session->set_auto_loop_location (loc);
+	} else {
+		// force name
+		loc->set_name (_("Loop"));
+	}
+
+	loc = _session->locations()->auto_punch_location();
+
+	if (loc == 0) {
+		loc = new Location (*_session, 0, _session->current_end_frame(), _("Punch"), (Location::Flags) (Location::IsAutoPunch | Location::IsHidden));
+
+		if (loc->start() == loc->end()) {
+			loc->set_end (loc->start() + 1);
+		}
+
+		_session->locations()->add (loc, false);
+		_session->set_auto_punch_location (loc);
+	} else {
+		// force name
+		loc->set_name (_("Punch"));
+	}
+
+	refresh_location_display ();
+
+	/* This must happen after refresh_location_display(), as (amongst other things) we restore
+	   the selected Marker; this needs the LocationMarker list to be available.
+	*/
 	XMLNode* node = ARDOUR_UI::instance()->editor_settings();
 	set_state (*node, Stateful::loading_state_version);
 
@@ -1182,42 +1220,9 @@ Editor::set_session (Session *t)
 
 	playhead_cursor->canvas_item.show ();
 
-	Location* loc = _session->locations()->auto_loop_location();
-	if (loc == 0) {
-		loc = new Location (*_session, 0, _session->current_end_frame(), _("Loop"),(Location::Flags) (Location::IsAutoLoop | Location::IsHidden));
-
-		if (loc->start() == loc->end()) {
-			loc->set_end (loc->start() + 1);
-		}
-
-		_session->locations()->add (loc, false);
-		_session->set_auto_loop_location (loc);
-	} else {
-		// force name
-		loc->set_name (_("Loop"));
-	}
-
-	loc = _session->locations()->auto_punch_location();
-
-	if (loc == 0) {
-		loc = new Location (*_session, 0, _session->current_end_frame(), _("Punch"), (Location::Flags) (Location::IsAutoPunch | Location::IsHidden));
-
-		if (loc->start() == loc->end()) {
-			loc->set_end (loc->start() + 1);
-		}
-
-		_session->locations()->add (loc, false);
-		_session->set_auto_punch_location (loc);
-	} else {
-		// force name
-		loc->set_name (_("Punch"));
-	}
-
 	boost::function<void (string)> pc (boost::bind (&Editor::parameter_changed, this, _1));
 	Config->map_parameters (pc);
 	_session->config.map_parameters (pc);
-
-	refresh_location_display ();
 
 	restore_ruler_visibility ();
 	//tempo_map_changed (PropertyChange (0));
