@@ -46,7 +46,7 @@ class Route;
 	
 /* this is mostly a placeholder because I suspect that at some
    point we will want to add more members to accomodate
-   certain types of requests to the MIDI UI
+   certain types of requests to the OSC UI
 */
 
 struct OSCUIRequest : public BaseUI::BaseRequestObject {
