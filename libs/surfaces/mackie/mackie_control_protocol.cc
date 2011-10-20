@@ -70,6 +70,8 @@ using namespace PBD;
 
 #include "i18n.h"
 
+#include "pbd/abstract_ui.cc" // instantiate template
+
 MackieMidiBuilder builder;
 
 #define midi_ui_context() MidiControlUI::instance() /* a UICallback-derived object that specifies the event loop for signal handling */
