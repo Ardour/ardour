@@ -452,7 +452,7 @@ GainMeterBase::gain_adjusted ()
 void
 GainMeterBase::effective_gain_display ()
 {
-	float value;
+	float value = 0.0;
 
 	switch (_data_type) {
 	case DataType::AUDIO:
