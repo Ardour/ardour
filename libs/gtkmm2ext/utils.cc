@@ -488,3 +488,26 @@ Gtkmm2ext::window_to_draw_on (Gtk::Widget& w, Gtk::Widget** parent)
 	return Glib::RefPtr<Gdk::Window> ();
 }
 
+#if 0
+string
+fit_to_pixels (const string& str, int pixel_width, Pango::FontDescription& font, int& actual_width, bool with_ellipses)
+{
+	Label foo;
+	Glib::RefPtr<Pango::Layout> layout = foo.create_pango_layout (str);
+	Glib::RefPtr<Pango::LayoutLine> line;
+
+	layout->set_font_description (font);
+	layout->set_width (pixel_width * PANGO_SCALE);
+
+	if (with_ellipsis)
+        	layout->set_ellipsize (PANGO_ELLIPSIZE_END);
+        else
+        	layout->set_wrap_mode (PANGO_WRAP_CHAR);
+
+	line = layout->get_line_readonly (0);
+
+	/* XXX: might need special care to get the ellipsis character, not sure
+           how that works */	
+	return strdup (layout->get_text () + line->start_index, line->length);
+}
+#endif
