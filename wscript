@@ -36,9 +36,6 @@ children = [
         'export',
 ]
 
-#if config[config_arch] != 'apple':
-#  children += [ 'tools/sanity_check' ]
-
 i18n_children = [
         'gtk2_ardour',
         'libs/ardour',
@@ -290,7 +287,7 @@ def set_compiler_flags (conf,opt):
     #
 
     optimization_flags[:0] = [
-            "-g", "-O2",
+            "-O3",
             "-fomit-frame-pointer",
             "-ffast-math",
             "-fstrength-reduce",
