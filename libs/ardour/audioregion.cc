@@ -402,12 +402,7 @@ AudioRegion::_read_at (const SourceList& srcs, framecnt_t limit,
 		/* if this fails then the requested section is entirely
 		   before the position of this region 
 		*/
-		if (cnt < buf_offset) {
-			error << "trying to read region " << name() << " @ " << position << " which is outside region bounds " 
-			      << _position << " .. " << last_frame() << " (len = " << length() << ')'
-			      << endmsg;
-			return 0; // read nothing
-		}
+		assert (cnt >= buf_offset);
 		cnt -= buf_offset;
 	} else {
 		internal_offset = position - _position;

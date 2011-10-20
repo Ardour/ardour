@@ -311,12 +311,14 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, fr
 	DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("Checking %1 xfades\n", _crossfades.size()));
 
 	for (Crossfades::iterator i = _crossfades.begin(); i != _crossfades.end(); ++i) {
-		DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("%1 check xfade between %2 and %3 ...\n",
-								   name(), (*i)->out()->name(), (*i)->in()->name()));
+		DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("%1 check xfade between %2 and %3 ... [ %4 ... %5 | %6 ... %7]\n",
+								   name(), (*i)->out()->name(), (*i)->in()->name(), 
+								   (*i)->first_frame(), (*i)->last_frame(),
+								   start, end));
 		if ((*i)->coverage (start, end) != OverlapNone) {
 			relevant_xfades[(*i)->upper_layer()].push_back (*i);
-			DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("\t\txfade is relevant, place on layer %1\n",
-									   (*i)->upper_layer()));
+			DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("\t\txfade is relevant (coverage = %2), place on layer %1\n",
+									   (*i)->upper_layer(), enum_2_string ((*i)->coverage (start, end))));
 		}
 	}
 
@@ -579,7 +581,8 @@ AudioPlaylist::check_dependents (boost::shared_ptr<Region> r, bool norefresh)
 
 				if (top_region_at (top->first_frame()) == top) {
 
-					xfade = boost::shared_ptr<Crossfade> (new Crossfade (top, bottom, xfade_length, top->first_frame(), StartOfIn));
+					xfade = boost::shared_ptr<Crossfade> (new Crossfade (top, bottom, xfade_length, StartOfIn));
+					xfade->set_position (top->first_frame());
 					add_crossfade (xfade);
 				}
 
@@ -590,7 +593,8 @@ AudioPlaylist::check_dependents (boost::shared_ptr<Region> r, bool norefresh)
 					   would cover it).
 					*/
 
-					xfade = boost::shared_ptr<Crossfade> (new Crossfade (bottom, top, xfade_length, top->last_frame() - xfade_length, EndOfOut));
+					xfade = boost::shared_ptr<Crossfade> (new Crossfade (bottom, top, xfade_length, EndOfOut));
+					xfade->set_position (top->last_frame() - xfade_length);
 					add_crossfade (xfade);
 				}
 				break;

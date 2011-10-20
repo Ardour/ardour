@@ -85,9 +85,8 @@ Crossfade::operator== (const Crossfade& other)
 
 Crossfade::Crossfade (boost::shared_ptr<AudioRegion> in, boost::shared_ptr<AudioRegion> out,
 		      framecnt_t length,
-		      framepos_t position,
 		      AnchorPoint ap)
-	: AudioRegion (in->session(), position, length, in->name() + string ("<>") + out->name())
+	: AudioRegion (in->session(), 0, length, in->name() + string ("<>") + out->name())
 	, CROSSFADE_DEFAULT_PROPERTIES
 	, _fade_in (Evoral::Parameter(FadeInAutomation)) // linear (gain coefficient) => -inf..+6dB
 	, _fade_out (Evoral::Parameter(FadeOutAutomation)) // linear (gain coefficient) => -inf..+6dB

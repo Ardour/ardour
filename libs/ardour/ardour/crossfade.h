@@ -59,7 +59,6 @@ class Crossfade : public ARDOUR::AudioRegion
 	/* constructor for "fixed" xfades at each end of an internal overlap */
 
 	Crossfade (boost::shared_ptr<ARDOUR::AudioRegion> in, boost::shared_ptr<ARDOUR::AudioRegion> out,
-		   framepos_t position,
 		   framecnt_t initial_length,
 		   AnchorPoint);
 
@@ -113,10 +112,6 @@ class Crossfade : public ARDOUR::AudioRegion
 	framecnt_t overlap_length() const;
 
 	PBD::Signal1<void,boost::shared_ptr<Region> > Invalidated;
-
-	bool covers (framepos_t frame) const {
-		return _position <= frame && frame < _position + _length;
-	}
 
 	OverlapType coverage (framepos_t start, framepos_t end) const;
 
