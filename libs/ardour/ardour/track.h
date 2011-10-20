@@ -48,6 +48,10 @@ class Track : public Route, public PublicDiskstream
 	virtual bool can_use_mode (TrackMode /*m*/, bool& /*bounce_required*/) { return false; }
 	PBD::Signal0<void> TrackModeChanged;
 
+	virtual void set_monitoring (MonitorChoice);
+	MonitorChoice monitoring() const { return _monitoring; }
+	PBD::Signal0<void> MonitoringChanged;
+
 	virtual int no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 	                     bool state_changing, bool can_record);
 
@@ -161,9 +165,10 @@ class Track : public Route, public PublicDiskstream
 	virtual XMLNode& state (bool full) = 0;
 
 	boost::shared_ptr<Diskstream> _diskstream;
-	MeterPoint  _saved_meter_point;
-	TrackMode   _mode;
-	bool        _needs_butler;
+	MeterPoint    _saved_meter_point;
+	TrackMode     _mode;
+	bool          _needs_butler;
+	MonitorChoice _monitoring;
 
 	//private: (FIXME)
 	struct FreezeRecordProcessorInfo {

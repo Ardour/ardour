@@ -87,7 +87,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, bool in_mixer)
 	, panners (sess)
 	, button_table (3, 1)
 	, solo_led_table (2, 2)
-	, middle_button_table (1, 2)
+	, middle_button_table (2, 2)
 	, bottom_button_table (1, 2)
 	, meter_point_label (_("pre"))
 	, midi_input_enable_button (0)
@@ -112,7 +112,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Route> rt
 	, gpm (sess, 250)
 	, panners (sess)
 	, button_table (3, 1)
-	, middle_button_table (1, 2)
+	, middle_button_table (2, 2)
 	, bottom_button_table (1, 2)
 	, meter_point_label (_("pre"))
 	, midi_input_enable_button (0)
@@ -184,6 +184,9 @@ MixerStrip::init ()
 	mute_button->set_name ("MixerMuteButton");
 	solo_button->set_name ("MixerSoloButton");
 
+	monitor_input_button->set_name ("MixerMonitorInputButton");
+	monitor_disk_button->set_name ("MixerMonitorInputButton");
+
         solo_isolated_led = manage (new LED);
         solo_isolated_led->show ();
         solo_isolated_led->set_diameter (6);
@@ -235,6 +238,8 @@ MixerStrip::init ()
 	middle_button_table.set_spacings (0);
 	middle_button_table.attach (*mute_button, 0, 1, 0, 1);
         middle_button_table.attach (*solo_button, 1, 2, 0, 1);
+	middle_button_table.attach (*monitor_input_button, 0, 1, 1, 2);
+        middle_button_table.attach (*monitor_disk_button, 1, 2, 1, 2);
 
 	bottom_button_table.set_col_spacings (0);
 	bottom_button_table.set_homogeneous (true);
@@ -394,6 +399,14 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		spacer = manage (new EventBox);
 		spacer->set_size_request (-1, scrollbar_height);
 		global_vpacker.pack_start (*spacer, false, false);
+	}
+
+	if (is_track()) {
+		monitor_input_button->show ();
+		monitor_disk_button->show ();
+	} else {
+		monitor_input_button->hide();
+		monitor_disk_button->hide ();
 	}
 
 	if (is_midi_track()) {
@@ -1643,6 +1656,8 @@ MixerStrip::drop_send ()
 	rec_enable_button->set_sensitive (true);
 	solo_isolated_led->set_sensitive (true);
 	solo_safe_led->set_sensitive (true);
+	monitor_input_button->set_sensitive (true);
+	monitor_disk_button->set_sensitive (true);
 }
 
 void
@@ -1679,6 +1694,8 @@ MixerStrip::show_send (boost::shared_ptr<Send> send)
 	rec_enable_button->set_sensitive (false);
 	solo_isolated_led->set_sensitive (false);
 	solo_safe_led->set_sensitive (false);
+	monitor_input_button->set_sensitive (false);
+	monitor_disk_button->set_sensitive (false);
 
 	if (boost::dynamic_pointer_cast<InternalSend>(send)) {
 		output_button.set_sensitive (false);
@@ -1714,6 +1731,8 @@ MixerStrip::set_button_names ()
 	case Wide:
 		rec_enable_button_label.set_text (_("Rec"));
 		mute_button_label.set_text (_("Mute"));
+		monitor_input_button_label.set_text (_("In"));
+		monitor_disk_button_label.set_text (_("Disk"));
 		if (_route && _route->solo_safe()) {
 			solo_button_label.set_text (X_("!"));
 		} else {
@@ -1735,6 +1754,8 @@ MixerStrip::set_button_names ()
 	default:
 		rec_enable_button_label.set_text (_("R"));
 		mute_button_label.set_text (_("M"));
+		monitor_input_button_label.set_text (_("I"));
+		monitor_disk_button_label.set_text (_("D"));
 		if (_route && _route->solo_safe()) {
 			solo_button_label.set_text (X_("!"));
 			if (!Config->get_solo_control_is_listen_control()) {

@@ -148,6 +148,27 @@ style "mixer_track_rec_enable_button_active" = "track_rec_enable_button_active"
 	ythickness = 0
 }
 
+style "monitor_input_button" = "small_button"
+{
+        fg[NORMAL] = darker(@@COLPREFIX@_fg)
+        fg[PRELIGHT] = darker(@@COLPREFIX@_fg)
+        bg[NORMAL] = mix(0.1,@@COLPREFIX@_bright_indicator,darker(@@COLPREFIX@_bg))
+        bg[PRELIGHT] = mix(0.1,@@COLPREFIX@_bright_indicator,darker(@@COLPREFIX@_bg))
+        
+	fg[ACTIVE] = @@COLPREFIX@_fg
+	bg[ACTIVE] = @@COLPREFIX@_bright_indicator
+}
+
+style "monitor_disk_button" = "small_button"
+{
+        fg[NORMAL] = darker(@@COLPREFIX@_fg)
+        fg[PRELIGHT] = darker(@@COLPREFIX@_fg)
+        bg[NORMAL] = mix(0.1,@@COLPREFIX@_bright_indicator,darker(@@COLPREFIX@_bg))
+        bg[PRELIGHT] = mix(0.1,@@COLPREFIX@_bright_indicator,darker(@@COLPREFIX@_bg))
+        
+	fg[ACTIVE] = @@COLPREFIX@_fg
+	bg[ACTIVE] = @@COLPREFIX@_bright_indicator
+}
 
 style "solo_button" = "small_button"
 {
@@ -242,6 +263,18 @@ style "mixer_solo_button_alternate2" = "solo_button_alternate2"
 
 
 style "mixer_solo_button_active" = "solo_button_active"
+{
+	xthickness = 0
+	ythickness = 0
+}
+
+style "mixer_monitor_input_button" = "monitor_input_button"
+{
+	xthickness = 0
+	ythickness = 0
+}
+
+style "mixer_monitor_disk_button" = "monitor_disk_button"
 {
 	xthickness = 0
 	ythickness = 0

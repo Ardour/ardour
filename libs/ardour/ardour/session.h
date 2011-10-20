@@ -37,6 +37,7 @@
 #include <glibmm/thread.h>
 
 #include "pbd/error.h"
+#include "pbd/event_loop.h"
 #include "pbd/rcu.h"
 #include "pbd/statefuldestructible.h"
 #include "pbd/signals.h"
@@ -622,6 +623,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void set_record_enabled (boost::shared_ptr<RouteList>, bool, SessionEvent::RTeventCallback after = rt_cleanup, bool group_override = false);
 	void set_solo_isolated (boost::shared_ptr<RouteList>, bool, SessionEvent::RTeventCallback after = rt_cleanup, bool group_override = false);
 	void set_exclusive_input_active (boost::shared_ptr<Route> rt, bool others_on);
+	void set_monitoring (boost::shared_ptr<RouteList>, MonitorChoice, SessionEvent::RTeventCallback after = rt_cleanup, bool group_override = false);
 
 	PBD::Signal1<void,bool> SoloActive;
 	PBD::Signal0<void> SoloChanged;
@@ -1454,10 +1456,16 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	static int ask_about_playlist_deletion (boost::shared_ptr<Playlist>);
 
 	/* realtime "apply to set of routes" operations */
-	SessionEvent* get_rt_event (
-		boost::shared_ptr<RouteList> rl, bool yn,
-		SessionEvent::RTeventCallback after, bool group_override,
-		void (Session::*method) (boost::shared_ptr<RouteList>, bool, bool));
+	template<typename T> SessionEvent*
+		get_rt_event (boost::shared_ptr<RouteList> rl, T targ, SessionEvent::RTeventCallback after, bool group_override,
+			      void (Session::*method) (boost::shared_ptr<RouteList>, T, bool)) {
+		SessionEvent* ev = new SessionEvent (SessionEvent::RealTimeOperation, SessionEvent::Add, SessionEvent::Immediate, 0, 0.0);
+		ev->rt_slot = boost::bind (method, this, rl, targ, group_override);
+		ev->rt_return = after;
+		ev->event_loop = PBD::EventLoop::get_event_loop_for_thread ();
+		
+		return ev;
+	}
 
 	void rt_set_solo (boost::shared_ptr<RouteList>, bool yn, bool group_override);
 	void rt_set_just_one_solo (boost::shared_ptr<RouteList>, bool yn, bool /* ignored*/ );
@@ -1465,6 +1473,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void rt_set_listen (boost::shared_ptr<RouteList>, bool yn, bool group_override);
 	void rt_set_solo_isolated (boost::shared_ptr<RouteList>, bool yn, bool group_override);
 	void rt_set_record_enabled (boost::shared_ptr<RouteList>, bool yn, bool group_override);
+	void rt_set_monitoring (boost::shared_ptr<RouteList>, MonitorChoice, bool group_override);
 
 	/** temporary list of Diskstreams used only during load of 2.X sessions */
 	std::list<boost::shared_ptr<Diskstream> > _diskstreams_2X;

@@ -43,6 +43,7 @@ Track::Track (Session& sess, string name, Route::Flag flag, TrackMode mode, Data
 	: Route (sess, name, flag, default_type)
         , _saved_meter_point (_meter_point)
         , _mode (mode)
+	, _monitoring (MonitorAuto)
 	, _rec_enable_control (new RecEnableControllable(*this))
 {
 	_freeze_record.state = NoFreeze;
@@ -640,36 +641,31 @@ Track::adjust_capture_buffering ()
 bool
 Track::send_silence () const
 {
-        /*
-          ADATs work in a strange way..
-          they monitor input always when stopped.and auto-input is engaged.
-
-          Other machines switch to input on stop if the track is record enabled,
-          regardless of the auto input setting (auto input only changes the
-          monitoring state when the transport is rolling)
-        */
-
         bool send_silence;
 
-        if (!Config->get_tape_machine_mode()) {
-                /*
-                  ADATs work in a strange way..
-                  they monitor input always when stopped.and auto-input is engaged.
+        if (Config->get_tape_machine_mode()) {
+
+                /* ADATs work in a strange way..
+		   they monitor input always when stopped.and auto-input is engaged.
                 */
+		
                 if ((Config->get_monitoring_model() == SoftwareMonitoring)
-                    && (_session.config.get_auto_input () || _diskstream->record_enabled())) {
-                        send_silence = false;
+                    && ((_monitoring & MonitorInput) || (_diskstream->record_enabled()))) {
+			send_silence = false;
                 } else {
                         send_silence = true;
                 }
+		
+		
         } else {
-                /*
-                  Other machines switch to input on stop if the track is record enabled,
-                  regardless of the auto input setting (auto input only changes the
-                  monitoring state when the transport is rolling)
+		
+                /* Other machines switch to input on stop if the track is record enabled,
+		   regardless of the auto input setting (auto input only changes the
+		   monitoring state when the transport is rolling)
                 */
+		
                 if ((Config->get_monitoring_model() == SoftwareMonitoring)
-                    && _diskstream->record_enabled()) {
+                    && (!(_monitoring & MonitorDisk) && (_session.config.get_auto_input () || _diskstream->record_enabled()))) {
                         send_silence = false;
                 } else {
                         send_silence = true;
@@ -732,6 +728,14 @@ Track::check_initial_delay (framecnt_t nframes, framecnt_t& transport_frame)
 
 	}
 
-	return nframes;
+	return nframes; 
 }
 
+void
+Track::set_monitoring (MonitorChoice mc)
+{
+	if (mc !=  _monitoring) {
+		_monitoring = mc;
+		MonitoringChanged (); /* EMIT SIGNAL */
+	}
+}

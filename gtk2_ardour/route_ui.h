@@ -94,6 +94,8 @@ class RouteUI : public virtual AxisView
 	BindableToggleButton* solo_button;
 	BindableToggleButton* rec_enable_button; /* audio tracks */
 	BindableToggleButton* show_sends_button; /* busses */
+	BindableToggleButton* monitor_input_button;
+	BindableToggleButton* monitor_disk_button;
 
         LED* solo_safe_led;
         LED* solo_isolated_led;
@@ -101,6 +103,8 @@ class RouteUI : public virtual AxisView
 	Gtk::Label solo_button_label;
 	Gtk::Label mute_button_label;
 	Gtk::Label rec_enable_button_label;
+	Gtk::Label monitor_input_button_label;
+	Gtk::Label monitor_disk_button_label;
 
 	void send_blink (bool);
 	sigc::connection send_blink_connection;
@@ -120,6 +124,13 @@ class RouteUI : public virtual AxisView
 	bool rec_enable_release(GdkEventButton*);
 	bool show_sends_press(GdkEventButton*);
 	bool show_sends_release(GdkEventButton*);
+
+	bool monitor_release(GdkEventButton*, ARDOUR::MonitorChoice);
+	bool monitor_input_press(GdkEventButton*);
+	bool monitor_input_release(GdkEventButton*);
+	bool monitor_disk_press(GdkEventButton*);
+	bool monitor_disk_release(GdkEventButton*);
+	void monitoring_changed ();
 
 	void step_gain_up ();
 	void step_gain_down ();

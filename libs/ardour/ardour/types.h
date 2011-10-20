@@ -358,6 +358,13 @@ namespace ARDOUR {
 		ExternalMonitoring
 	};
 
+	enum MonitorChoice {
+		MonitorAuto = 0,
+		MonitorInput = 0x1,
+		MonitorDisk = 0x2,
+		MonitorCue = 0x4,
+	};
+
 	enum PFLPosition {
 		/** PFL signals come from before pre-fader processors */
 		PFLFromBeforeProcessors,

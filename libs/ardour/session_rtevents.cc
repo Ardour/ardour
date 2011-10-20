@@ -32,16 +32,25 @@ using namespace PBD;
 using namespace ARDOUR;
 using namespace Glib;
 
-SessionEvent*
-Session::get_rt_event (boost::shared_ptr<RouteList> rl, bool yn, SessionEvent::RTeventCallback after, bool group_override,
-		       void (Session::*method) (boost::shared_ptr<RouteList>, bool, bool))
+void
+Session::set_monitoring (boost::shared_ptr<RouteList> rl, MonitorChoice mc, SessionEvent::RTeventCallback after, bool group_override)
 {
-	SessionEvent* ev = new SessionEvent (SessionEvent::RealTimeOperation, SessionEvent::Add, SessionEvent::Immediate, 0, 0.0);
-	ev->rt_slot = boost::bind (method, this, rl, yn, group_override);
-	ev->rt_return = after;
-	ev->event_loop = EventLoop::get_event_loop_for_thread ();
+	queue_event (get_rt_event (rl, mc, after, group_override, &Session::rt_set_monitoring));
+}
 
-	return ev;
+void
+Session::rt_set_monitoring (boost::shared_ptr<RouteList> rl, MonitorChoice mc, bool /* group_override */)
+{
+	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+		if (!(*i)->is_hidden()) {
+			boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (*i);
+			if (t) {
+				t->set_monitoring (mc);
+			}
+		}
+	}
+
+	set_dirty();
 }
 
 void
