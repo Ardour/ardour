@@ -665,7 +665,8 @@ Track::send_silence () const
                 */
 		
                 if ((Config->get_monitoring_model() == SoftwareMonitoring)
-                    && (!(_monitoring & MonitorDisk) && (_session.config.get_auto_input () || _diskstream->record_enabled()))) {
+                    && ((_monitoring & MonitorInput) || 
+			(!(_monitoring & MonitorDisk) && (_session.config.get_auto_input () || _diskstream->record_enabled())))){
                         send_silence = false;
                 } else {
                         send_silence = true;
