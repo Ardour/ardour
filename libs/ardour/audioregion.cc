@@ -400,9 +400,18 @@ AudioRegion::_read_at (const SourceList& srcs, framecnt_t limit,
 		internal_offset = 0;
 		buf_offset = _position - position;
 		/* if this fails then the requested section is entirely
-		   before the position of this region 
+		   before the position of this region. An error in xfade
+		   construction that was fixed in oct 2011 (rev 10259)
+		   led to this being the case. We don't want to crash
+		   when this error is encountered, so just settle
+		   on displaying an error.
 		*/
-		assert (cnt >= buf_offset);
+		if (cnt < buf_offset) {
+			error << "trying to read region " << name() << " @ " << position << " which is outside region bounds " 
+			      << _position << " .. " << last_frame() << " (len = " << length() << ')'
+			      << endmsg;
+			return 0; // read nothing
+		}
 		cnt -= buf_offset;
 	} else {
 		internal_offset = position - _position;
