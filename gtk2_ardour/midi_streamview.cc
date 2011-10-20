@@ -103,32 +103,6 @@ MidiStreamView::~MidiStreamView ()
 {
 }
 
-static void
-veto_note_range(uint8_t& min, uint8_t& max)
-{
-	/* Legal notes, thanks */
-	clamp_to_0_127(min);
-	clamp_to_0_127(max);
-
-	/* Always display at least one octave in [0, 127] */
-	if (max == 127) {
-		if (min > (127 - 11)) {
-			min = 127 - 11;
-		}
-	} else if (max < min + 11) {
-		uint8_t d = 11 - (max - min);
-		if (max + d/2 > 127) {
-			min -= d;
-		} else {
-			min -= d / 2;
-			max += d / 2;
-		}
-	}
-	assert(max - min >= 11);
-	assert(max <= 127);
-	assert(min <= 127);
-}
-
 RegionView*
 MidiStreamView::create_region_view (boost::shared_ptr<Region> r, bool /*wfd*/, bool)
 {
