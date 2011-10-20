@@ -26,6 +26,8 @@
 
 #include <glibmm/thread.h>
 
+#include "pbd/abstract_ui.h"
+
 #include "ardour/types.h"
 #include "ardour/midi_ui.h"
 #include "midi++/types.h"
