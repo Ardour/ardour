@@ -233,7 +233,7 @@ def set_compiler_flags (conf,opt):
     # check this even if we aren't using FPU optimization
     if not conf.is_defined('HAVE_POSIX_MEMALIGN'):
         optimization_flags.append("-DNO_POSIX_MEMALIGN")
-	debug_flags.append("-DNO_POSIX_MEMALIGN")
+        debug_flags.append("-DNO_POSIX_MEMALIGN")
 
     # end optimization section
 
