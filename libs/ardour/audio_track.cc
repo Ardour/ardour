@@ -403,15 +403,14 @@ AudioTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_fram
 		_input->process_input (_meter, start_frame, end_frame, nframes);
 	}
 
-	if ((_monitoring & MonitorInput) || 
-	    (!(_monitoring & MonitorDisk) && 
-	     (diskstream->record_enabled() && !can_record && !_session.config.get_auto_input()))) {
+	if ((_monitoring & MonitorInput) || (!(_monitoring & MonitorDisk) && 
+					     (diskstream->record_enabled() && 
+					      !can_record && 
+					      !_session.config.get_auto_input()))) {
 		
 		/* not actually recording, but we want to hear the input material anyway,
 		   at least potentially (depending on monitoring options)
 		 */
-
-		cerr << name() << " do the passthru thing with monitoring = " << enum_2_string (_monitoring) << endl;
 
 		passthru (start_frame, end_frame, nframes, false);
 

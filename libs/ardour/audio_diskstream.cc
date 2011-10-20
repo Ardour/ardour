@@ -56,6 +56,7 @@
 #include "ardour/send.h"
 #include "ardour/session.h"
 #include "ardour/source_factory.h"
+#include "ardour/track.h"
 #include "ardour/utils.h"
 #include "ardour/session_playlists.h"
 #include "ardour/route.h"
@@ -566,7 +567,7 @@ AudioDiskstream::process (framepos_t transport_frame, pframes_t nframes, bool ca
 		collect_playback = true;
 	}
 
-	if (collect_playback) {
+	if ((_track->monitoring() & MonitorDisk) || collect_playback) {
 
 		/* we're doing playback */
 
