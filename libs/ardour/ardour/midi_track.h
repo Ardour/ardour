@@ -41,8 +41,7 @@ public:
 
 	int init ();
 
-	int roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
-	          int declick, bool can_record, bool& need_butler);
+	int roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick, bool& need_butler);
 
 	void realtime_handle_transport_stopped ();
 	void realtime_locate ();
@@ -133,8 +132,7 @@ protected:
 	bool                      _midi_thru;
 	bool                      _input_active;
 
-	int no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
-		     bool state_changing, bool can_record);
+	int no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, bool state_changing);
 	void push_midi_input_to_step_edit_ringbuffer (framecnt_t nframes);
 
 	void diskstream_data_recorded (boost::shared_ptr<MidiBuffer>, boost::weak_ptr<MidiSource>);

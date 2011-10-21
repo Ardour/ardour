@@ -241,13 +241,14 @@ Track::zero_diskstream_id_in_xml (XMLNode& node)
 }
 
 int
-Track::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
-		bool session_state_changing, bool can_record)
+Track::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, bool session_state_changing)
 {
 	Glib::RWLock::ReaderLock lm (_processor_lock, Glib::TRY_LOCK);
 	if (!lm.locked()) {
 		return 0;
 	}
+
+	bool can_record = _session.actively_recording ();
 
 	if (n_outputs().n_total() == 0) {
 		return 0;
@@ -323,8 +324,7 @@ Track::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 }
 
 int
-Track::silent_roll (pframes_t nframes, framepos_t /*start_frame*/, framepos_t /*end_frame*/,
-		    bool can_record, bool& need_butler)
+Track::silent_roll (pframes_t nframes, framepos_t /*start_frame*/, framepos_t /*end_frame*/, bool& need_butler)
 {
 	Glib::RWLock::ReaderLock lm (_processor_lock, Glib::TRY_LOCK);
 	if (!lm.locked()) {
@@ -345,7 +345,7 @@ Track::silent_roll (pframes_t nframes, framepos_t /*start_frame*/, framepos_t /*
 
 	silence (nframes);
 
-	return _diskstream->process (_session.transport_frame(), nframes, can_record, need_butler);
+	return _diskstream->process (_session.transport_frame(), nframes, need_butler);
 }
 
 void
@@ -774,12 +774,47 @@ Track::set_monitoring (MonitorChoice mc)
 	}
 }
 
-bool
-Track::should_monitor_input () 
+MonitorState
+Track::monitoring_state ()
 {
-	return (_monitoring & MonitorInput) || 
-		(!(_monitoring & MonitorDisk) && 
-		 (diskstream->record_enabled() && 
-		  !can_record && 
-		  !_session.config.get_auto_input()));
+	MonitorState ms = MonitoringSilence;
+
+	if (_session.transport_rolling()) {
+		
+		/* roll case */
+
+		if ((_monitoring & MonitorInput) || // explicitly requested input monitoring
+		    (!(_monitoring & MonitorDisk) && // disk monitoring not requested
+		     (_diskstream->record_enabled() && // record-enabled BUT
+		      !_session.actively_recording() &&  // session NOT rec-armed
+		      !_session.config.get_auto_input()))) { // and auto-input is off
+
+			ms = MonitoringInput;
+
+		} else {
+
+			ms = MonitorState (0);
+		}
+		
+		if ((_monitoring & MonitorDisk) || // explicitly requested disk monitoring
+		    (!(_monitoring & MonitorInput) && // input monitoring not requested
+		     (_diskstream->record_enabled() && // record-enabled BUT
+		      (_session.actively_recording() || // session rec-armed OR 
+		       _session.config.get_auto_input())))) { // auto-input is ON (mon-input while rec-rolling
+		     
+			ms = MonitorState (ms | MonitoringDisk);
+		}
+
+	} else {
+
+		/* no-roll case */
+
+		if (send_silence()) {
+			ms = MonitoringSilence;
+		} else {
+			ms = MonitoringInput;
+		}
+	}
+
+	return ms;
 }

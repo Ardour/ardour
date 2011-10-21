@@ -157,6 +157,7 @@ RouteUI::init ()
 	_session->TransportStateChange.connect (_session_connections, invalidator (*this), boost::bind (&RouteUI::check_rec_enable_sensitivity, this), gui_context());
 	_session->RecordStateChanged.connect (_session_connections, invalidator (*this), boost::bind (&RouteUI::session_rec_enable_changed, this), gui_context());
 
+	_session->config.ParameterChanged.connect (*this, invalidator (*this), ui_bind (&RouteUI::parameter_changed, this, _1), gui_context());
 	Config->ParameterChanged.connect (*this, invalidator (*this), ui_bind (&RouteUI::parameter_changed, this, _1), gui_context());
 
 	rec_enable_button->signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::rec_enable_press), false);
@@ -593,22 +594,34 @@ RouteUI::monitoring_changed ()
 void
 RouteUI::update_monitoring_display ()
 {
+	if (!_route) {
+		return;
+	}
+
 	boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track>(_route);
 
 	if (!t) {
 		return;
 	}
 
-	MonitorChoice mc = t->monitoring();
+	MonitorState ms = t->monitoring_state();
 
-	if (mc & MonitorInput) {
-		monitor_input_button->set_visual_state (1);
+	if (ms & MonitoringInput) {
+		if (t->monitoring_choice() & MonitorInput) {
+			monitor_input_button->set_visual_state (1);
+		} else {
+			monitor_input_button->set_visual_state (2);
+		}
 	} else {
 		monitor_input_button->set_visual_state (0);
 	}
 
-	if (mc & MonitorDisk) {
-		monitor_disk_button->set_visual_state (1);
+	if (ms & MonitoringDisk) {
+		if (t->monitoring_choice() & MonitorDisk) {
+			monitor_disk_button->set_visual_state (1);
+		} else {
+			monitor_disk_button->set_visual_state (2);
+		}
 	} else {
 		monitor_disk_button->set_visual_state (0);
 	}
@@ -659,11 +672,11 @@ RouteUI::monitor_release (GdkEventButton* ev, MonitorChoice monitor_choice)
 	   signal together, which requires yet more buffers.
 	*/
 
-	if (t->monitoring() & monitor_choice) {
-		mc = MonitorChoice (t->monitoring() & ~monitor_choice);
+	if (t->monitoring_choice() & monitor_choice) {
+		mc = MonitorChoice (t->monitoring_choice() & ~monitor_choice);
 	} else {
 		/* this line will change when the options are non-orthogonal */
-		// mc = MonitorChoice (t->monitoring() | monitor_choice);
+		// mc = MonitorChoice (t->monitoring_choice() | monitor_choice);
 		mc = monitor_choice;
 	}
 
@@ -1129,12 +1142,14 @@ void
 RouteUI::route_rec_enable_changed ()
 {
         update_rec_display ();
+	update_monitoring_display ();
 }
 
 void
 RouteUI::session_rec_enable_changed ()
 {
         update_rec_display ();
+	update_monitoring_display ();
 }
 
 void
@@ -1722,15 +1737,21 @@ RouteUI::check_rec_enable_sensitivity ()
 	} else {
 		rec_enable_button->set_sensitive (true);
 	}
+
+	update_monitoring_display ();
 }
 
 void
 RouteUI::parameter_changed (string const & p)
 {
+	/* this handles RC and per-session parameter changes */
+
 	if (p == "disable-disarm-during-roll") {
 		check_rec_enable_sensitivity ();
 	} else if (p == "use-monitor-bus" || p == "solo-control-is-listen-control" || p == "listen-position") {
 		set_button_names ();
+	} else if (p == "auto-input") {
+		update_monitoring_display ();
 	}
 }
 

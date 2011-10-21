@@ -109,13 +109,13 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	/* these are the core of the API of a Route. see the protected sections as well */
 
 	virtual int roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
-	                  int declick, bool can_record, bool& need_butler);
+	                  int declick, bool& need_butler);
 
 	virtual int no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
-	                     bool state_changing, bool can_record);
+	                     bool state_changing);
 
 	virtual int silent_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
-	                         bool can_record, bool& need_butler);
+	                         bool& need_butler);
 
 	virtual void toggle_monitor_input ();
 	virtual bool can_record() { return false; }

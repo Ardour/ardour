@@ -74,13 +74,13 @@ public:
 	void main_thread();
 
 	int silent_process_routes (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
-	                           bool can_record, bool& need_butler);
+	                           bool& need_butler);
 
 	int process_routes (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick,
-	                    bool can_record, bool& need_butler);
+	                    bool& need_butler);
 
 	int routes_no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
-	                    bool non_rt_pending, bool can_record, int declick);
+	                    bool non_rt_pending, int declick);
 
 	void process_one_route (Route * route);
 

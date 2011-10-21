@@ -512,13 +512,11 @@ Graph::dump (int chain)
 }
 
 int
-Graph::silent_process_routes (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
-                              bool can_record, bool& need_butler)
+Graph::silent_process_routes (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, bool& need_butler)
 {
         _process_nframes = nframes;
         _process_start_frame = start_frame;
         _process_end_frame = end_frame;
-        _process_can_record = can_record;
 
         _process_silent = true;
         _process_noroll = false;
@@ -537,15 +535,13 @@ Graph::silent_process_routes (pframes_t nframes, framepos_t start_frame, framepo
 }
 
 int
-Graph::process_routes (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick,
-                       bool can_record, bool& need_butler)
+Graph::process_routes (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick, bool& need_butler)
 {
 	DEBUG_TRACE (DEBUG::ProcessThreads, string_compose ("graph execution from %1 to %2 = %3\n", start_frame, end_frame, nframes));
 
         _process_nframes = nframes;
         _process_start_frame = start_frame;
         _process_end_frame = end_frame;
-        _process_can_record = can_record;
         _process_declick = declick;
 
         _process_silent = false;
@@ -566,14 +562,13 @@ Graph::process_routes (pframes_t nframes, framepos_t start_frame, framepos_t end
 
 int
 Graph::routes_no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
-                       bool non_rt_pending, bool can_record, int declick)
+                       bool non_rt_pending, int declick)
 {
 	DEBUG_TRACE (DEBUG::ProcessThreads, string_compose ("no-roll graph execution from %1 to %2 = %3\n", start_frame, end_frame, nframes));
 
         _process_nframes = nframes;
         _process_start_frame = start_frame;
         _process_end_frame = end_frame;
-        _process_can_record = can_record;
         _process_declick = declick;
         _process_non_rt_pending = non_rt_pending;
 
@@ -599,13 +594,13 @@ Graph::process_one_route (Route* route)
         DEBUG_TRACE (DEBUG::ProcessThreads, string_compose ("%1 runs route %2\n", pthread_self(), route->name()));
 
         if (_process_silent) {
-                retval = route->silent_roll (_process_nframes, _process_start_frame, _process_end_frame, _process_can_record, need_butler);
+                retval = route->silent_roll (_process_nframes, _process_start_frame, _process_end_frame, need_butler);
         } else if (_process_noroll) {
                 route->set_pending_declick (_process_declick);
-                retval = route->no_roll (_process_nframes, _process_start_frame, _process_end_frame, _process_non_rt_pending, _process_can_record);
+                retval = route->no_roll (_process_nframes, _process_start_frame, _process_end_frame, _process_non_rt_pending);
         } else {
                 route->set_pending_declick (_process_declick);
-                retval = route->roll (_process_nframes, _process_start_frame, _process_end_frame, _process_declick, _process_can_record, need_butler);
+                retval = route->roll (_process_nframes, _process_start_frame, _process_end_frame, _process_declick, need_butler);
         }
 
         if (retval) {

@@ -168,8 +168,8 @@ style "monitor_input_button_alternate" = "small_button"
 {
 	fg[NORMAL] = @@COLPREFIX@_fg
 	fg[PRELIGHT] = @@COLPREFIX@_fg
-        bg[NORMAL] = mix(0.3,@@COLPREFIX@_bright_indicator,darker(@@COLPREFIX@_bg))
-        bg[PRELIGHT] = mix(0.3,@@COLPREFIX@_bright_indicator,darker(@@COLPREFIX@_bg))
+        bg[NORMAL] = mix(0.5,@@COLPREFIX@_bright_indicator,darker(@@COLPREFIX@_bg))
+        bg[PRELIGHT] = mix(0.5,@@COLPREFIX@_bright_indicator,darker(@@COLPREFIX@_bg))
 }
 
 style "monitor_disk_button" = "small_button"
@@ -192,8 +192,8 @@ style "monitor_disk_button_alternate" = "small_button"
 {
 	fg[NORMAL] = @@COLPREFIX@_fg
 	fg[PRELIGHT] = @@COLPREFIX@_fg
-        bg[NORMAL] = mix(0.3,@@COLPREFIX@_bright_indicator,darker(@@COLPREFIX@_bg))
-        bg[PRELIGHT] = mix(0.3,@@COLPREFIX@_bright_indicator,darker(@@COLPREFIX@_bg))
+        bg[NORMAL] = mix(0.5,@@COLPREFIX@_bright_indicator,darker(@@COLPREFIX@_bg))
+        bg[PRELIGHT] = mix(0.5,@@COLPREFIX@_bright_indicator,darker(@@COLPREFIX@_bg))
 }
 
 style "solo_button" = "small_button"

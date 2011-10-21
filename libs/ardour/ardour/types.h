@@ -365,6 +365,12 @@ namespace ARDOUR {
 		MonitorCue = 0x4,
 	};
 
+	enum MonitorState {
+		MonitoringSilence = 0x1,
+		MonitoringInput = 0x2,
+		MonitoringDisk = 0x4,
+	};
+
 	enum PFLPosition {
 		/** PFL signals come from before pre-fader processors */
 		PFLFromBeforeProcessors,

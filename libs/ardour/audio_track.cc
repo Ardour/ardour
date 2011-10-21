@@ -353,10 +353,10 @@ AudioTrack::set_state_part_two ()
 }
 
 int
-AudioTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick,
-		  bool can_record, bool& need_butler)
+AudioTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick, bool& need_butler)
 {
 	Glib::RWLock::ReaderLock lm (_processor_lock, Glib::TRY_LOCK);
+
 	if (!lm.locked()) {
 		return 0;
 	}
@@ -386,13 +386,13 @@ AudioTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_fram
 		   playback distance to zero, thus causing diskstream::commit
 		   to do nothing.
 		*/
-		return diskstream->process (transport_frame, 0, can_record, need_butler);
+		return diskstream->process (transport_frame, 0, need_butler);
 	}
 
 	_silent = false;
 	_amp->apply_gain_automation(false);
 
-	if ((dret = diskstream->process (transport_frame, nframes, can_record, need_butler)) != 0) {
+	if ((dret = diskstream->process (transport_frame, nframes, need_butler)) != 0) {
 		silence (nframes);
 		return dret;
 	}
@@ -403,14 +403,7 @@ AudioTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_fram
 		_input->process_input (_meter, start_frame, end_frame, nframes);
 	}
 
-	if ((_monitoring & MonitorInput) || (!(_monitoring & MonitorDisk) && 
-					     (diskstream->record_enabled() && 
-					      !can_record && 
-					      !_session.config.get_auto_input()))) {
-		
-		/* not actually recording, but we want to hear the input material anyway,
-		   at least potentially (depending on monitoring options)
-		 */
+	if (monitoring_state() == MonitoringInput) {
 
 		passthru (start_frame, end_frame, nframes, false);
 

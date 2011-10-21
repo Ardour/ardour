@@ -109,7 +109,7 @@ Session::no_roll (pframes_t nframes)
 
 	if (route_graph->threads_in_use() > 0) {
 		DEBUG_TRACE(DEBUG::ProcessThreads,"calling graph/no-roll\n");
-		route_graph->routes_no_roll( nframes, _transport_frame, end_frame, non_realtime_work_pending(), actively_recording(), declick);
+		route_graph->routes_no_roll( nframes, _transport_frame, end_frame, non_realtime_work_pending(), declick);
 	} else {
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 
@@ -119,8 +119,7 @@ Session::no_roll (pframes_t nframes)
 
 			(*i)->set_pending_declick (declick);
 
-			if ((*i)->no_roll (nframes, _transport_frame, end_frame, non_realtime_work_pending(),
-			                   actively_recording())) {
+			if ((*i)->no_roll (nframes, _transport_frame, end_frame, non_realtime_work_pending())) {
 				error << string_compose(_("Session: error in no roll for %1"), (*i)->name()) << endmsg;
 				ret = -1;
 				break;
@@ -134,7 +133,6 @@ Session::no_roll (pframes_t nframes)
 int
 Session::process_routes (pframes_t nframes, bool& need_butler)
 {
-	bool record_active;
 	int  declick = get_transport_declick_required();
 	boost::shared_ptr<RouteList> r = routes.reader ();
 
@@ -142,8 +140,6 @@ Session::process_routes (pframes_t nframes, bool& need_butler)
 		/* force a declick out */
 		declick = -1;
 	}
-
-	record_active = actively_recording(); // || (get_record_enabled() && get_punch_in());
 
 	const framepos_t start_frame = _transport_frame;
 	const framepos_t end_frame = _transport_frame + floor (nframes * _transport_speed);
@@ -154,7 +150,7 @@ Session::process_routes (pframes_t nframes, bool& need_butler)
 	*/
 	if (1 || route_graph->threads_in_use() > 0) {
 		DEBUG_TRACE(DEBUG::ProcessThreads,"calling graph/process-routes\n");
-		route_graph->process_routes (nframes, start_frame, end_frame, declick, record_active, need_butler);
+		route_graph->process_routes (nframes, start_frame, end_frame, declick, need_butler);
 	} else {
 
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
@@ -167,7 +163,7 @@ Session::process_routes (pframes_t nframes, bool& need_butler)
 
 			(*i)->set_pending_declick (declick);
 
-			if ((ret = (*i)->roll (nframes, start_frame, end_frame, declick, record_active, need_butler)) < 0) {
+			if ((ret = (*i)->roll (nframes, start_frame, end_frame, declick, need_butler)) < 0) {
 				stop_transport ();
 				return -1;
 			}
@@ -180,7 +176,6 @@ Session::process_routes (pframes_t nframes, bool& need_butler)
 int
 Session::silent_process_routes (pframes_t nframes, bool& need_butler)
 {
-	bool record_active = actively_recording();
 	boost::shared_ptr<RouteList> r = routes.reader ();
 
 	const framepos_t start_frame = _transport_frame;
@@ -191,7 +186,7 @@ Session::silent_process_routes (pframes_t nframes, bool& need_butler)
 	   tracks, the graph never gets updated.
 	*/
 	if (1 || route_graph->threads_in_use() > 0) {
-		route_graph->silent_process_routes (nframes, start_frame, end_frame, record_active, need_butler);
+		route_graph->silent_process_routes (nframes, start_frame, end_frame, need_butler);
 	} else {
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 
@@ -201,7 +196,7 @@ Session::silent_process_routes (pframes_t nframes, bool& need_butler)
 				continue;
 			}
 
-			if ((ret = (*i)->silent_roll (nframes, start_frame, end_frame, record_active, need_butler)) < 0) {
+			if ((ret = (*i)->silent_roll (nframes, start_frame, end_frame, need_butler)) < 0) {
 				stop_transport ();
 				return -1;
 			}

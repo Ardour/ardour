@@ -2782,8 +2782,7 @@ Route::pans_required () const
 }
 
 int
-Route::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
-		bool session_state_changing, bool /*can_record*/)
+Route::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, bool session_state_changing)
 {
 	Glib::RWLock::ReaderLock lm (_processor_lock, Glib::TRY_LOCK);
 	if (!lm.locked()) {
@@ -2820,8 +2819,7 @@ Route::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 }
 
 int
-Route::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick,
-	     bool /*can_record*/, bool& /* need_butler */)
+Route::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick, bool& /* need_butler */)
 {
 	Glib::RWLock::ReaderLock lm (_processor_lock, Glib::TRY_LOCK);
 	if (!lm.locked()) {
@@ -2853,8 +2851,7 @@ Route::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, in
 }
 
 int
-Route::silent_roll (pframes_t nframes, framepos_t /*start_frame*/, framepos_t /*end_frame*/,
-		    bool /*can_record*/, bool& /* need_butler */)
+Route::silent_roll (pframes_t nframes, framepos_t /*start_frame*/, framepos_t /*end_frame*/, bool& /* need_butler */)
 {
 	silence (nframes);
 	return 0;

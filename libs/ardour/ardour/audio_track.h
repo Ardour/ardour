@@ -40,7 +40,7 @@ class AudioTrack : public Track
 	bool can_use_mode (TrackMode m, bool& bounce_required);
 
 	int roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
-	          int declick, bool can_record, bool& need_butler);
+	          int declick, bool& need_butler);
 
 	void use_new_diskstream ();
 	void set_diskstream (boost::shared_ptr<Diskstream>);

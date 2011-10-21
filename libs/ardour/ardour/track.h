@@ -49,17 +49,18 @@ class Track : public Route, public PublicDiskstream
 	PBD::Signal0<void> TrackModeChanged;
 
 	virtual void set_monitoring (MonitorChoice);
-	MonitorChoice monitoring() const { return _monitoring; }
+	MonitorChoice monitoring_choice() const { return _monitoring; }
+	MonitorState monitoring_state();
 	PBD::Signal0<void> MonitoringChanged;
 
 	virtual int no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
-	                     bool state_changing, bool can_record);
+	                     bool state_changing);
 
 	int silent_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
-	                 bool can_record, bool& need_butler);
+	                 bool& need_butler);
 
 	virtual int roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
-	                  int declick, bool can_record, bool& need_butler) = 0;
+	                  int declick, bool& need_butler) = 0;
 
 	bool needs_butler() const { return _needs_butler; }
 	void toggle_monitor_input ();
