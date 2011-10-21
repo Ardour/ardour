@@ -761,9 +761,11 @@ Track::maybe_declick (BufferSet& bufs, framecnt_t nframes, int declick)
 {
         /* never declick if there is an internal generator - we just want it to
            keep generating sound without interruption.
+
+	   ditto if we are monitoring inputs.
         */
 
-        if (_have_internal_generator) {
+        if (_have_internal_generator || monitoring_choice() == MonitorInput) {
                 return;
         }
 
