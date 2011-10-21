@@ -799,7 +799,7 @@ Track::monitoring_state ()
 		if ((_monitoring & MonitorDisk) || // explicitly requested disk monitoring
 		    (!(_monitoring & MonitorInput) && // input monitoring not requested
 		     (!_diskstream->record_enabled() || // NOT record-enabled OR
-		      (_session.actively_recording() || // session rec-armed OR 
+		      (!_session.actively_recording() || // session rec-armed OR 
 		       _session.config.get_auto_input())))) { // auto-input is ON (mon-input while rec-rolling
 		     
 			ms = MonitorState (ms | MonitoringDisk);
