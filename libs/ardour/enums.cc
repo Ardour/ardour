@@ -67,6 +67,7 @@ setup_enum_writer ()
 	Placement _Placement;
 	MonitorModel _MonitorModel;
 	MonitorChoice _MonitorChoice;
+	MonitorState _MonitorState;
 	PFLPosition _PFLPosition;
 	AFLPosition _AFLPosition;
 	RemoteModel _RemoteModel;
@@ -234,6 +235,11 @@ setup_enum_writer ()
 	REGISTER_ENUM (MonitorAuto);
 	REGISTER_ENUM (MonitorCue);
 	REGISTER_BITS (_MonitorChoice);
+
+	REGISTER_ENUM (MonitoringInput);
+	REGISTER_ENUM (MonitoringDisk);
+	REGISTER_ENUM (MonitoringSilence);
+	REGISTER_BITS (_MonitorState);
 
 	REGISTER_ENUM (PFLFromBeforeProcessors);
 	REGISTER_ENUM (PFLFromAfterProcessors);
