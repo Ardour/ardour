@@ -64,13 +64,46 @@ Track::init ()
 
         return 0;
 }
+
 XMLNode&
 Track::get_state ()
 {
 	return state (true);
 }
 
+XMLNode&
+Track::state (bool full)
+{
+	XMLNode& root (Route::state (full));
+	root.add_property (X_("monitoring"), enum_2_string (_monitoring));
+	return root;
+}	
 
+int
+Track::set_state (const XMLNode& node, int version)
+{
+	return _set_state (node, version, true);
+}
+
+int
+Track::_set_state (const XMLNode& node, int version, bool call_base)
+{
+	if (call_base) {
+		if (Route::_set_state (node, version, call_base)) {
+			return -1;
+		}
+	}
+
+	const XMLProperty* prop;
+
+	if ((prop = node.property (X_("monitoring"))) != 0) {
+		_monitoring = MonitorChoice (string_2_enum (prop->value(), _monitoring));
+	} else {
+		_monitoring = MonitorAuto;
+	}
+
+	return 0;
+}
 
 XMLNode&
 Track::get_template ()
@@ -739,4 +772,14 @@ Track::set_monitoring (MonitorChoice mc)
 		_monitoring = mc;
 		MonitoringChanged (); /* EMIT SIGNAL */
 	}
+}
+
+bool
+Track::should_monitor_input () 
+{
+	return (_monitoring & MonitorInput) || 
+		(!(_monitoring & MonitorDisk) && 
+		 (diskstream->record_enabled() && 
+		  !can_record && 
+		  !_session.config.get_auto_input()));
 }

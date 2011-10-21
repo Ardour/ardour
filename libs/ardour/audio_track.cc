@@ -212,7 +212,7 @@ AudioTrack::_set_state (const XMLNode& node, int version, bool call_base)
 	XMLNode *child;
 
 	if (call_base) {
-		if (Route::_set_state (node, version, call_base)) {
+		if (Track::_set_state (node, version, call_base)) {
 			return -1;
 		}
 	}
@@ -263,7 +263,7 @@ AudioTrack::_set_state (const XMLNode& node, int version, bool call_base)
 XMLNode&
 AudioTrack::state (bool full_state)
 {
-	XMLNode& root (Route::state(full_state));
+	XMLNode& root (Track::state(full_state));
 	XMLNode* freeze_node;
 	char buf[64];
 

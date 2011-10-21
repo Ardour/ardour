@@ -145,8 +145,10 @@ MidiTrack::_set_state (const XMLNode& node, int version, bool call_base)
 	const XMLProperty *prop;
 	XMLNodeConstIterator iter;
 
-	if (Route::_set_state (node, version, call_base)) {
-		return -1;
+	if (call_base) {
+		if (Track::_set_state (node, version, call_base)) {
+			return -1;
+		}
 	}
 
 	// No destructive MIDI tracks (yet?)
@@ -209,7 +211,7 @@ MidiTrack::_set_state (const XMLNode& node, int version, bool call_base)
 XMLNode&
 MidiTrack::state(bool full_state)
 {
-	XMLNode& root (Route::state(full_state));
+	XMLNode& root (Track::state(full_state));
 	XMLNode* freeze_node;
 	char buf[64];
 
@@ -355,7 +357,7 @@ MidiTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame
 		_input->process_input (_meter, start_frame, end_frame, nframes);
 	}
 
-	if (diskstream->record_enabled() && !can_record && !_session.config.get_auto_input()) {
+	if (should_monitor_input ()) { 
 
 		/* not actually recording, but we want to hear the input material anyway,
 		   at least potentially (depending on monitoring options)
