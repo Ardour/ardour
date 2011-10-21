@@ -1051,6 +1051,8 @@ Session::step_back_from_record ()
 		if (Config->get_monitoring_model() == HardwareMonitoring && config.get_auto_input()) {
 			set_track_monitor_input_status (false);
 		}
+
+		RecordStateChanged (); /* emit signal */
 	}
 }
 
