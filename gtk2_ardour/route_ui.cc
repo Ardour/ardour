@@ -606,24 +606,24 @@ RouteUI::update_monitoring_display ()
 
 	MonitorState ms = t->monitoring_state();
 
-	if (ms & MonitoringInput) {
-		if (t->monitoring_choice() & MonitorInput) {
-			monitor_input_button->set_visual_state (1);
-		} else {
-			monitor_input_button->set_visual_state (2);
-		}
+	if (t->monitoring_choice() & MonitorInput) {
+		monitor_input_button->set_visual_state (1);
 	} else {
-		monitor_input_button->set_visual_state (0);
+		if (ms & MonitoringInput) {
+			monitor_input_button->set_visual_state (2);
+		} else {
+			monitor_input_button->set_visual_state (0);
+		}
 	}
 
-	if (ms & MonitoringDisk) {
-		if (t->monitoring_choice() & MonitorDisk) {
-			monitor_disk_button->set_visual_state (1);
-		} else {
-			monitor_disk_button->set_visual_state (2);
-		}
+	if (t->monitoring_choice() & MonitorDisk) {
+		monitor_disk_button->set_visual_state (1);
 	} else {
-		monitor_disk_button->set_visual_state (0);
+		if (ms & MonitoringDisk) {
+			monitor_disk_button->set_visual_state (2);
+		} else {
+			monitor_disk_button->set_visual_state (0);
+		}
 	}
 }
 
