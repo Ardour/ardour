@@ -41,12 +41,19 @@ ChanMapping::ChanMapping(ChanCount identity)
 }
 
 uint32_t
-ChanMapping::get(DataType t, uint32_t from)
+ChanMapping::get(DataType t, uint32_t from, bool* valid)
 {
 	Mappings::iterator tm = _mappings.find(t);
-	assert(tm != _mappings.end());
+	if (tm == _mappings.end()) {
+		*valid = false;
+		return -1;
+	}
 	TypeMapping::iterator m = tm->second.find(from);
-	assert(m != tm->second.end());
+	if (m == tm->second.end()) {
+		*valid = false;
+		return -1;
+	}
+	*valid = true;
 	return m->second;
 }
 

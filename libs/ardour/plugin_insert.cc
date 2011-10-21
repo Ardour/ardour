@@ -322,16 +322,16 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 
 	ChanMapping in_map (in_streams);
 	ChanMapping out_map (out_streams);
-
+	bool valid;
 	if (_match.method == Split) {
 		/* fix the input mapping so that we have maps for each of the plugin's inputs */
 		in_map = ChanMapping (natural_input_streams ());
 
 		/* copy the first stream's buffer contents to the others */
 		/* XXX: audio only */
-		Sample const * mono = bufs.get_audio (in_map.get (DataType::AUDIO, 0)).data (offset);
+		Sample const * mono = bufs.get_audio (in_map.get (DataType::AUDIO, 0, &valid)).data (offset);
 		for (uint32_t i = in_streams.n_audio(); i < natural_input_streams().n_audio(); ++i) {
-			memcpy (bufs.get_audio (in_map.get (DataType::AUDIO, i)).data (offset), mono, sizeof (Sample) * nframes);
+			memcpy (bufs.get_audio (in_map.get (DataType::AUDIO, i, &valid)).data (offset), mono, sizeof (Sample) * nframes);
 		}
 	}
 

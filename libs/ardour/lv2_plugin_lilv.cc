@@ -908,31 +908,54 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 
 	cycles_t then = get_cycles();
 
+	ChanCount bufs_count;
+	bufs_count.set(DataType::AUDIO, 1);
+	bufs_count.set(DataType::MIDI, 1);
+	BufferSet& silent_bufs  = _session.get_silent_buffers(bufs_count);
+	BufferSet& scratch_bufs = _session.get_silent_buffers(bufs_count);
+
 	uint32_t audio_in_index  = 0;
 	uint32_t audio_out_index = 0;
 	uint32_t midi_in_index   = 0;
 	uint32_t midi_out_index  = 0;
+	bool valid;
 	for (uint32_t port_index = 0; port_index < parameter_count(); ++port_index) {
 		if (parameter_is_audio(port_index)) {
 			if (parameter_is_input(port_index)) {
-				const uint32_t buf_index = in_map.get(DataType::AUDIO, audio_in_index++);
+				const uint32_t buf_index = in_map.get(DataType::AUDIO, audio_in_index++, &valid);
 				lilv_instance_connect_port(_impl->instance, port_index,
-				                           bufs.get_audio(buf_index).data(offset));
+				                           valid ? bufs.get_audio(buf_index).data(offset)
+				                                 : silent_bufs.get_audio(0).data(offset));
 			} else if (parameter_is_output(port_index)) {
-				const uint32_t buf_index = out_map.get(DataType::AUDIO, audio_out_index++);
+				const uint32_t buf_index = out_map.get(DataType::AUDIO, audio_out_index++, &valid);
 				//cerr << port_index << " : " << " AUDIO OUT " << buf_index << endl;
 				lilv_instance_connect_port(_impl->instance, port_index,
-				                           bufs.get_audio(buf_index).data(offset));
+				                           valid ? bufs.get_audio(buf_index).data(offset)
+				                                 : scratch_bufs.get_audio(0).data(offset));
 			}
 		} else if (parameter_is_midi(port_index)) {
+			/* FIXME: The checks here for bufs.count().n_midi() > buf_index shouldn't
+			   be necessary, but the mapping is illegal in some cases.  Ideally
+			   that should be fixed, but this is easier...
+			*/
 			if (parameter_is_input(port_index)) {
-				const uint32_t buf_index = in_map.get(DataType::MIDI, midi_in_index++);
-				lilv_instance_connect_port(_impl->instance, port_index,
-				                           bufs.get_lv2_midi(true, buf_index).data());
+				const uint32_t buf_index = in_map.get(DataType::MIDI, midi_in_index++, &valid);
+				if (valid && bufs.count().n_midi() > buf_index) {
+					lilv_instance_connect_port(_impl->instance, port_index,
+					                           bufs.get_lv2_midi(true, buf_index).data());
+				} else {
+					lilv_instance_connect_port(_impl->instance, port_index,
+					                           silent_bufs.get_lv2_midi(true, 0).data());
+				}
 			} else if (parameter_is_output(port_index)) {
-				const uint32_t buf_index = out_map.get(DataType::MIDI, midi_out_index++);
-				lilv_instance_connect_port(_impl->instance, port_index,
-				                           bufs.get_lv2_midi(false, buf_index).data());
+				const uint32_t buf_index = out_map.get(DataType::MIDI, midi_out_index++, &valid);
+				if (valid && bufs.count().n_midi() > buf_index) {
+					lilv_instance_connect_port(_impl->instance, port_index,
+					                           bufs.get_lv2_midi(false, buf_index).data());
+				} else {
+					lilv_instance_connect_port(_impl->instance, port_index,
+					                           scratch_bufs.get_lv2_midi(true, 0).data());
+				}
 			}
 		} else if (!parameter_is_control(port_index)) {
 			// Optional port (it'd better be if we've made it this far...)
@@ -945,8 +968,10 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 	midi_out_index = 0;
 	for (uint32_t port_index = 0; port_index < parameter_count(); ++port_index) {
 		if (parameter_is_midi(port_index) && parameter_is_output(port_index)) {
-			const uint32_t buf_index = out_map.get(DataType::MIDI, midi_out_index++);
-			bufs.flush_lv2_midi(true, buf_index);
+			const uint32_t buf_index = out_map.get(DataType::MIDI, midi_out_index++, &valid);
+			if (valid) {
+				bufs.flush_lv2_midi(true, buf_index);
+			}
 		}
 	}
 

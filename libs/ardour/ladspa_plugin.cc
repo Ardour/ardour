@@ -548,16 +548,24 @@ LadspaPlugin::connect_and_run (BufferSet& bufs,
 	cycles_t now;
 	cycles_t then = get_cycles ();
 
+	BufferSet& silent_bufs  = _session.get_silent_buffers(ChanCount(DataType::AUDIO, 1));
+	BufferSet& scratch_bufs = _session.get_silent_buffers(ChanCount(DataType::AUDIO, 1));
+
 	uint32_t audio_in_index  = 0;
 	uint32_t audio_out_index = 0;
+	bool valid;
 	for (uint32_t port_index = 0; port_index < parameter_count(); ++port_index) {
 		if (LADSPA_IS_PORT_AUDIO(port_descriptor(port_index))) {
 			if (LADSPA_IS_PORT_INPUT(port_descriptor(port_index))) {
-				const uint32_t buf_index = in_map.get(DataType::AUDIO, audio_in_index++);
-				connect_port(port_index, bufs.get_audio(buf_index).data(offset));
+				const uint32_t buf_index = in_map.get(DataType::AUDIO, audio_in_index++, &valid);
+				connect_port(port_index,
+				             valid ? bufs.get_audio(buf_index).data(offset)
+				                   : silent_bufs.get_audio(0).data(offset));
 			} else if (LADSPA_IS_PORT_OUTPUT(port_descriptor(port_index))) {
-				const uint32_t buf_index = out_map.get(DataType::AUDIO, audio_out_index++);
-				connect_port(port_index, bufs.get_audio(buf_index).data(offset));
+				const uint32_t buf_index = out_map.get(DataType::AUDIO, audio_out_index++, &valid);
+				connect_port(port_index,
+				             valid ? bufs.get_audio(buf_index).data(offset)
+				                   : scratch_bufs.get_audio(0).data(offset));
 			}
 		}
 	}
