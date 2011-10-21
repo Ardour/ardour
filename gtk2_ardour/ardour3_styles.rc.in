@@ -153,15 +153,15 @@ style "monitor_input_button" = "small_button"
         fg[NORMAL] = darker(@@COLPREFIX@_fg)
         fg[PRELIGHT] = darker(@@COLPREFIX@_fg)
         bg[NORMAL] = mix(0.1,@@COLPREFIX@_monitor,darker(@@COLPREFIX@_bg))
-        bg[PRELIGHT] = mix(0.1,@@COLPREFIX@_monitor,darker(@@COLPREFIX@_bg))
+        bg[PRELIGHT] = mix(0.1,@@COLPREFIX@_somewhat_bright_indicator,darker(@@COLPREFIX@_bg))
 }
 
 style "monitor_input_button_active" = "small_button"
 {
 	fg[NORMAL] = @@COLPREFIX@_fg
 	fg[PRELIGHT] = @@COLPREFIX@_fg
-	bg[NORMAL] = @@COLPREFIX@_monitor
-	bg[PRELIGHT] = @@COLPREFIX@_monitor
+	bg[NORMAL] = mix (0.8, @@COLPREFIX@_monitor, darker (@@COLPREFIX@_bg))
+	bg[PRELIGHT] = mix (0.8, @@COLPREFIX@_monitor, darker (@@COLPREFIX@_bg))
 }
 
 style "monitor_input_button_alternate" = "small_button"
