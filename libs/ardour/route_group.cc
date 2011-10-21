@@ -52,6 +52,7 @@ namespace ARDOUR {
 		PropertyDescriptor<bool> edit;
 		PropertyDescriptor<bool> route_active;
 		PropertyDescriptor<bool> color;
+		PropertyDescriptor<bool> monitoring;
 	}
 }
 
@@ -80,6 +81,8 @@ RouteGroup::make_property_quarks ()
         DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for route-active = %1\n", Properties::route_active.property_id));
 	Properties::color.property_id = g_quark_from_static_string (X_("color"));
         DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for color = %1\n",       Properties::color.property_id));
+	Properties::monitoring.property_id = g_quark_from_static_string (X_("monitoring"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for monitoring = %1\n",       Properties::monitoring.property_id));
 }
 
 #define ROUTE_GROUP_DEFAULT_PROPERTIES  _relative (Properties::relative, false) \
@@ -92,7 +95,8 @@ RouteGroup::make_property_quarks ()
 	, _select (Properties::select, false) \
 	, _edit (Properties::edit, false) \
 	, _route_active (Properties::route_active, false) \
-	, _color (Properties::color, false)
+	, _color (Properties::color, false) \
+	, _monitoring (Properties::monitoring, false)
 
 RouteGroup::RouteGroup (Session& s, const string &n)
 	: SessionObject (s, n)
@@ -112,6 +116,7 @@ RouteGroup::RouteGroup (Session& s, const string &n)
 	add_property (_edit);
 	add_property (_route_active);
 	add_property (_color);
+	add_property (_monitoring);
 }
 
 RouteGroup::~RouteGroup ()
@@ -377,6 +382,19 @@ RouteGroup::set_color (bool yn)
 	for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
 		(*i)->gui_changed (X_("color"), this);
 	}
+}
+
+void
+RouteGroup::set_monitoring (bool yn) 
+{
+	if (is_monitoring() == yn) {
+		return;
+	}
+
+	_monitoring = yn;
+	send_change (PropertyChange (Properties::monitoring));
+
+	_session.set_dirty ();
 }
 
 void

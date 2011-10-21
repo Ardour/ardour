@@ -49,6 +49,7 @@ private:
 	Gtk::CheckButton _edit;
 	Gtk::CheckButton _route_active;
 	Gtk::CheckButton _share_color;
+	Gtk::CheckButton _share_monitoring;
 	Gtk::Button* _ok;
 	Gtk::ColorButton _color;
 

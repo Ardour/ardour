@@ -46,6 +46,7 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
 	, _edit (_("Editing"))
 	, _route_active (_("Route active state"))
 	, _share_color (_("Color"))
+	, _share_monitoring (_("Monitoring"))
 {
 	set_modal (true);
 	set_skip_taskbar_hint (true);
@@ -105,6 +106,7 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
 	_edit.set_active (_group->is_edit());
 	_route_active.set_active (_group->is_route_active());
 	_share_color.set_active (_group->is_color());
+	_share_monitoring.set_active (_group->is_monitoring());
 
 	_name.signal_changed().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
 	_active.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
@@ -118,10 +120,11 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
  	_edit.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
  	_route_active.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
 	_share_color.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
+	_share_monitoring.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
 	
 	gain_toggled ();
 
-	Table* table = manage (new Table (11, 4, false));
+	Table* table = manage (new Table (12, 4, false));
 	table->set_row_spacings	(6);
 
 	l = manage (new Label ("", Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
@@ -142,6 +145,7 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
 	table->attach (_edit, 1, 3, 7, 8, Gtk::FILL, Gtk::FILL, 0, 0);
 	table->attach (_route_active, 1, 3, 8, 9, Gtk::FILL, Gtk::FILL, 0, 0);
 	table->attach (_share_color, 1, 3, 9, 10, Gtk::FILL, Gtk::FILL, 0, 0);
+	table->attach (_share_monitoring, 1, 3, 10, 11, Gtk::FILL, Gtk::FILL, 0, 0);
 
 	options_box->pack_start (*table, false, true);
 	main_vbox->pack_start (*options_box, false, true);
@@ -210,6 +214,7 @@ RouteGroupDialog::update ()
 	plist.add (Properties::active, _active.get_active());
 	plist.add (Properties::name, string (_name.get_text()));
 	plist.add (Properties::color, _share_color.get_active());
+	plist.add (Properties::monitoring, _share_monitoring.get_active());
 
 	_group->apply_changes (plist);
 	

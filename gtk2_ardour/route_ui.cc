@@ -683,6 +683,13 @@ RouteUI::monitor_release (GdkEventButton* ev, MonitorChoice monitor_choice)
 	if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {	
 		rl = _session->get_routes ();
 
+	} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+		if (_route->route_group() && _route->route_group()->is_monitoring()) {
+			rl = _route->route_group()->route_list();
+		} else {
+			rl.reset (new RouteList);
+			rl->push_back (route());
+		}
 	} else {
 		rl.reset (new RouteList);
 		rl->push_back (route());

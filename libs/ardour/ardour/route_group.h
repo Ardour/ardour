@@ -45,6 +45,7 @@ namespace Properties {
 	extern PBD::PropertyDescriptor<bool> edit;
 	extern PBD::PropertyDescriptor<bool> route_active;
 	extern PBD::PropertyDescriptor<bool> color;
+	extern PBD::PropertyDescriptor<bool> monitoring;
 	/* we use this, but its declared in region.cc */
 	extern PBD::PropertyDescriptor<bool> hidden;
 };
@@ -73,6 +74,7 @@ class RouteGroup : public SessionObject
 	bool is_edit () const { return _edit.val(); }
 	bool is_route_active () const { return _route_active.val(); }
 	bool is_color () const { return _color.val(); }
+	bool is_monitoring() const { return _monitoring.val(); }
 
 	bool empty() const {return routes->empty();}
 	size_t size() const { return routes->size();}
@@ -92,6 +94,7 @@ class RouteGroup : public SessionObject
 	void set_edit (bool yn);
 	void set_route_active (bool yn);
 	void set_color (bool yn);
+	void set_monitoring (bool yn);
 
 	bool enabled_property (PBD::PropertyID);
 
@@ -147,6 +150,7 @@ private:
 	PBD::Property<bool> _edit;
 	PBD::Property<bool> _route_active;
 	PBD::Property<bool> _color;
+	PBD::Property<bool> _monitoring;
 
 	void remove_when_going_away (boost::weak_ptr<Route>);
 	int set_state_2X (const XMLNode&, int);
