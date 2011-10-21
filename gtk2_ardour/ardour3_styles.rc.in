@@ -154,9 +154,22 @@ style "monitor_input_button" = "small_button"
         fg[PRELIGHT] = darker(@@COLPREFIX@_fg)
         bg[NORMAL] = mix(0.1,@@COLPREFIX@_bright_indicator,darker(@@COLPREFIX@_bg))
         bg[PRELIGHT] = mix(0.1,@@COLPREFIX@_bright_indicator,darker(@@COLPREFIX@_bg))
-        
-	fg[ACTIVE] = @@COLPREFIX@_fg
-	bg[ACTIVE] = @@COLPREFIX@_bright_indicator
+}
+
+style "monitor_input_button_active" = "small_button"
+{
+	fg[NORMAL] = @@COLPREFIX@_fg
+	fg[PRELIGHT] = @@COLPREFIX@_fg
+	bg[NORMAL] = @@COLPREFIX@_bright_indicator
+	bg[PRELIGHT] = @@COLPREFIX@_bright_indicator
+}
+
+style "monitor_input_button_alternate" = "small_button"
+{
+	fg[NORMAL] = @@COLPREFIX@_fg
+	fg[PRELIGHT] = @@COLPREFIX@_fg
+        bg[NORMAL] = mix(0.3,@@COLPREFIX@_bright_indicator,darker(@@COLPREFIX@_bg))
+        bg[PRELIGHT] = mix(0.3,@@COLPREFIX@_bright_indicator,darker(@@COLPREFIX@_bg))
 }
 
 style "monitor_disk_button" = "small_button"
@@ -165,9 +178,22 @@ style "monitor_disk_button" = "small_button"
         fg[PRELIGHT] = darker(@@COLPREFIX@_fg)
         bg[NORMAL] = mix(0.1,@@COLPREFIX@_bright_indicator,darker(@@COLPREFIX@_bg))
         bg[PRELIGHT] = mix(0.1,@@COLPREFIX@_bright_indicator,darker(@@COLPREFIX@_bg))
-        
-	fg[ACTIVE] = @@COLPREFIX@_fg
-	bg[ACTIVE] = @@COLPREFIX@_bright_indicator
+}
+
+style "monitor_disk_button_active" = "small_button"
+{
+	fg[NORMAL] = @@COLPREFIX@_fg
+	fg[PRELIGHT] = @@COLPREFIX@_fg
+	bg[NORMAL] = @@COLPREFIX@_bright_indicator
+	bg[PRELIGHT] = @@COLPREFIX@_bright_indicator
+}
+
+style "monitor_disk_button_alternate" = "small_button"
+{
+	fg[NORMAL] = @@COLPREFIX@_fg
+	fg[PRELIGHT] = @@COLPREFIX@_fg
+        bg[NORMAL] = mix(0.3,@@COLPREFIX@_bright_indicator,darker(@@COLPREFIX@_bg))
+        bg[PRELIGHT] = mix(0.3,@@COLPREFIX@_bright_indicator,darker(@@COLPREFIX@_bg))
 }
 
 style "solo_button" = "small_button"
@@ -268,13 +294,37 @@ style "mixer_solo_button_active" = "solo_button_active"
 	ythickness = 0
 }
 
-style "mixer_monitor_input_button" = "monitor_input_button"
+style "mixer_monitor_input" = "monitor_input_button"
 {
 	xthickness = 0
 	ythickness = 0
 }
 
-style "mixer_monitor_disk_button" = "monitor_disk_button"
+style "mixer_monitor_input_active" = "monitor_input_button_active"
+{
+	xthickness = 0
+	ythickness = 0
+}
+
+style "mixer_monitor_input_alternate" = "monitor_input_button_alternate"
+{
+	xthickness = 0
+	ythickness = 0
+}
+
+style "mixer_monitor_disk" = "monitor_disk_button"
+{
+	xthickness = 0
+	ythickness = 0
+}
+
+style "mixer_monitor_disk_active" = "monitor_disk_button_active"
+{
+	xthickness = 0
+	ythickness = 0
+}
+
+style "mixer_monitor_disk_alternate" = "monitor_disk_button_alternate"
 {
 	xthickness = 0
 	ythickness = 0

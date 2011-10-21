@@ -131,6 +131,7 @@ class RouteUI : public virtual AxisView
 	bool monitor_disk_press(GdkEventButton*);
 	bool monitor_disk_release(GdkEventButton*);
 	void monitoring_changed ();
+	void update_monitoring_display ();
 
 	void step_gain_up ();
 	void step_gain_down ();

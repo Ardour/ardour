@@ -249,6 +249,8 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	if (is_track()) {
 		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track>(_route);
 		t->MonitoringChanged.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::monitoring_changed, this), gui_context());
+
+		update_monitoring_display ();
 	}
 
 	mute_button->unset_flags (Gtk::CAN_FOCUS);
@@ -585,6 +587,12 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 void
 RouteUI::monitoring_changed ()
 {
+	update_monitoring_display ();
+}
+
+void
+RouteUI::update_monitoring_display ()
+{
 	boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track>(_route);
 
 	if (!t) {
@@ -594,15 +602,15 @@ RouteUI::monitoring_changed ()
 	MonitorChoice mc = t->monitoring();
 
 	if (mc & MonitorInput) {
-		monitor_input_button->set_active (true);
+		monitor_input_button->set_visual_state (1);
 	} else {
-		monitor_input_button->set_active (false);
+		monitor_input_button->set_visual_state (0);
 	}
 
 	if (mc & MonitorDisk) {
-		monitor_disk_button->set_active (true);
+		monitor_disk_button->set_visual_state (1);
 	} else {
-		monitor_disk_button->set_active (false);
+		monitor_disk_button->set_visual_state (0);
 	}
 }
 
