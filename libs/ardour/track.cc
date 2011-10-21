@@ -700,8 +700,20 @@ Track::send_silence () const
                 if ((Config->get_monitoring_model() == SoftwareMonitoring)
                     && ((_monitoring & MonitorInput) || 
 			(!(_monitoring & MonitorDisk) && (_session.config.get_auto_input () || _diskstream->record_enabled())))){
+
+			DEBUG_TRACE (DEBUG::Monitor, 
+				     string_compose ("%1: no roll, use silence = FALSE,  monitoring choice %2 recenable %3 sRA %4 autoinput %5\n",
+						     name(), enum_2_string (_monitoring), 
+						     _diskstream->record_enabled(), _session.actively_recording(),
+						     _session.config.get_auto_input()));
+
                         send_silence = false;
                 } else {
+			DEBUG_TRACE (DEBUG::Monitor, 
+				     string_compose ("%1: no roll, use silence = TRUE,  monitoring choice %2 recenable %3 sRA %4 autoinput %5\n",
+						     name(), enum_2_string (_monitoring), 
+						     _diskstream->record_enabled(), _session.actively_recording(),
+						     _session.config.get_auto_input()));
                         send_silence = true;
                 }
         }
@@ -717,29 +729,27 @@ Track::monitoring_state ()
 	if (_session.transport_rolling()) {
 		
 		/* roll case */
-
-		if ((_monitoring & MonitorInput) || // explicitly requested input monitoring
-		    (!(_monitoring & MonitorDisk) && // disk monitoring not requested
-		     (_diskstream->record_enabled() && // record-enabled BUT
-		      !_session.actively_recording() &&  // session NOT rec-armed
-		      !_session.config.get_auto_input()))) { // and auto-input is off
-
+		
+		if (_monitoring & MonitorInput) { // explicitly requested input monitoring
+			
 			ms = MonitoringInput;
 
-		} else {
+		} else if (_monitoring & MonitorDisk) { // explicitly requested disk monitoring
+			
+			ms = MonitoringDisk;
 
-			ms = MonitorState (0);
-		}
+		} else if (_diskstream->record_enabled() && _session.actively_recording()) { // Track actually recording
+			
+			ms = MonitoringInput;
 
-		/* basically we're looking for monitor_disk || !recording
-		 */
-		
-		if ((_monitoring & MonitorDisk) || // explicitly requested disk monitoring
-		    (!(_monitoring & MonitorInput) && // input monitoring not requested
-		     (!_diskstream->record_enabled() || // NOT record-enabled OR
-		      !_session.actively_recording()))) { // session rec-armed OR 
-		     
-			ms = MonitorState (ms | MonitoringDisk);
+		} else if (_diskstream->record_enabled() && !_session.actively_recording() && _session.config.get_auto_input()) { // Track armed but not recording, with auto input enabled
+			
+			ms = MonitoringInput;
+
+		} else { // Every other state
+			
+			ms = MonitoringDisk; 
+
 		}
 
 	} else {
@@ -747,8 +757,10 @@ Track::monitoring_state ()
 		/* no-roll case */
 
 		if (send_silence()) {
+			
 			ms = MonitoringSilence;
 		} else {
+			
 			ms = MonitoringInput;
 		}
 	}
