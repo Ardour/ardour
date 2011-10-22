@@ -560,7 +560,7 @@ PluginManager::vst_discover_from_path (string path)
 	vector<string *>::iterator x;
 	int ret = 0;
 
-	info << "detecting VST plugins along " << path << endmsg;
+	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("detecting VST plugins along %1\n", path));
 
 	plugin_objects = scanner (vst_path, vst_filter, 0, true, true);
 
@@ -665,7 +665,7 @@ PluginManager::lxvst_discover_from_path (string path)
 	vector<string *>::iterator x;
 	int ret = 0;
 
-	info << "Discovering linuxVST plugins along " << path << endmsg;
+	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("Discovering linuxVST plugins along %1\n", path));
 
 	plugin_objects = scanner (lxvst_path, lxvst_filter, 0, true, true);
 
@@ -674,8 +674,6 @@ PluginManager::lxvst_discover_from_path (string path)
 			lxvst_discover (**x);
 		}
 	}
-
-	info << "Done linuxVST discover" << endmsg;
 
 	vector_delete (plugin_objects);
 	return ret;

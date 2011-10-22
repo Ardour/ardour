@@ -18,6 +18,8 @@
 #include "pbd/xml++.h"
 #include "pbd/error.h"
 
+#include "ardour/debug.h"
+
 #include "powermate.h"
 #include "i18n.h"
 
@@ -105,9 +107,9 @@ PowermateControlProtocol::probe ()
 
 	if (port < 0) {
 		if (errno == ENOENT) {
-			info << "Powermate device not found; perhaps you have no powermate connected" << endmsg;
+			DEBUG_TRACE (DEBUG::ControlProtocols, "Powermate device not found; perhaps you have no powermate connected");
 		} else {
-			printf ("powermate: Opening of powermate failed - %s\n", strerror(errno));
+			DEBUG_TRACE (DEBUG::ControlProtocols, string_compose ("powermate: Opening of powermate failed - %1\n", strerror(errno)));
 		}
 		return false;
 	}

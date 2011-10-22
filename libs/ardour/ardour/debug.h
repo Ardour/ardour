@@ -53,6 +53,7 @@ namespace PBD {
 		extern uint64_t CaptureAlignment;
 		extern uint64_t PluginManager;
 		extern uint64_t AudioUnits;
+		extern uint64_t ControlProtocols;
 	}
 }
 

@@ -25,6 +25,7 @@
 
 #include "control_protocol/control_protocol.h"
 
+#include "ardour/debug.h"
 #include "ardour/session.h"
 #include "ardour/control_protocol_manager.h"
 #include "ardour/control_protocol_search_path.h"
@@ -176,7 +177,8 @@ ControlProtocolManager::load_mandatory_protocols ()
 
 	for (list<ControlProtocolInfo*>::iterator i = control_protocol_info.begin(); i != control_protocol_info.end(); ++i) {
 		if ((*i)->mandatory && ((*i)->protocol == 0)) {
-			info << string_compose (_("Instantiating mandatory control protocol %1"), (*i)->name) << endmsg;
+			DEBUG_TRACE (DEBUG::ControlProtocols,
+				     string_compose (_("Instantiating mandatory control protocol %1"), (*i)->name));
 			instantiate (**i);
 		}
 	}
@@ -196,8 +198,9 @@ ControlProtocolManager::discover_control_protocols ()
 	find_matching_files_in_search_path (control_protocol_search_path (),
 			dylib_extension_pattern, cp_modules);
 
-	info << string_compose (_("looking for control protocols in %1"), control_protocol_search_path().to_string()) << endmsg;
-
+	DEBUG_TRACE (DEBUG::ControlProtocols, 
+		     string_compose (_("looking for control protocols in %1"), control_protocol_search_path().to_string()));
+	
 	for (vector<sys::path>::iterator i = cp_modules.begin(); i != cp_modules.end(); ++i) {
 		control_protocol_discover ((*i).to_string());
 	}
@@ -211,7 +214,8 @@ ControlProtocolManager::control_protocol_discover (string path)
 	if ((descriptor = get_descriptor (path)) != 0) {
 
 		if (!descriptor->probe (descriptor)) {
-			info << string_compose (_("Control protocol %1 not usable"), descriptor->name) << endmsg;
+			DEBUG_TRACE (DEBUG::ControlProtocols,
+				     string_compose (_("Control protocol %1 not usable"), descriptor->name));
 		} else {
 
 			ControlProtocolInfo* cpi = new ControlProtocolInfo ();
@@ -227,7 +231,8 @@ ControlProtocolManager::control_protocol_discover (string path)
 
 			control_protocol_info.push_back (cpi);
 
-			info << string_compose(_("Control surface protocol discovered: \"%1\""), cpi->name) << endmsg;
+			DEBUG_TRACE (DEBUG::ControlProtocols, 
+				     string_compose(_("Control surface protocol discovered: \"%1\""), cpi->name));
 		}
 
 		dlclose (descriptor->module);
