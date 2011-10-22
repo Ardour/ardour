@@ -66,6 +66,8 @@ class Panner2in2out : public Panner
 
         void update ();
 
+	void reset ();
+
   protected:
 	float left[2];
 	float right[2];

@@ -34,6 +34,7 @@
 
 #include "ardour/panner.h"
 #include "ardour/panner.h"
+#include "ardour/pannable.h"
 
 #include "ardour_ui.h"
 #include "global_signals.h"
@@ -55,8 +56,9 @@ static const int top_step = 2;
 MonoPanner::ColorScheme MonoPanner::colors;
 bool MonoPanner::have_colors = false;
 
-MonoPanner::MonoPanner (boost::shared_ptr<PBD::Controllable> position)
-        : position_control (position)
+MonoPanner::MonoPanner (boost::shared_ptr<ARDOUR::Panner> panner)
+	: _panner (panner)
+	, position_control (_panner->pannable()->pan_azimuth_control)
         , dragging (false)
         , drag_start_x (0)
         , last_drag_x (0)
@@ -64,7 +66,7 @@ MonoPanner::MonoPanner (boost::shared_ptr<PBD::Controllable> position)
         , detented (false)
         , drag_data_window (0)
         , drag_data_label (0)
-        , position_binder (position)
+        , position_binder (position_control)
 {
         if (!have_colors) {
                 set_colors ();
@@ -333,8 +335,7 @@ MonoPanner::on_button_release_event (GdkEventButton* ev)
         }
 
         if (Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier)) {
-                /* reset to default */
-                position_control->set_value (0.5);
+		_panner->reset ();
         } else {
                 StopGesture ();
         }

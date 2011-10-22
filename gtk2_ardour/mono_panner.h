@@ -34,7 +34,7 @@ namespace PBD {
 class MonoPanner : public Gtk::DrawingArea
 {
   public:
-	MonoPanner (boost::shared_ptr<PBD::Controllable> pos);
+	MonoPanner (boost::shared_ptr<ARDOUR::Panner>);
 	~MonoPanner ();
 
         boost::shared_ptr<PBD::Controllable> get_controllable() const { return position_control; }
@@ -54,6 +54,7 @@ class MonoPanner : public Gtk::DrawingArea
         bool on_leave_notify_event (GdkEventCrossing* ev);
 
   private:
+	boost::shared_ptr<ARDOUR::Panner> _panner;
         boost::shared_ptr<PBD::Controllable> position_control;
         PBD::ScopedConnectionList connections;
         bool dragging;

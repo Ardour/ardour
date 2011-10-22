@@ -58,6 +58,8 @@ class Panner1in2out : public Panner
 
 	XMLNode& get_state ();
 
+	void reset ();
+
   protected:
 	float left;
 	float right;

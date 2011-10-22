@@ -283,7 +283,7 @@ PannerUI::setup_pan ()
                         boost::shared_ptr<Pannable> pannable = _panner->pannable();
                         boost::shared_ptr<AutomationControl> ac = pannable->pan_azimuth_control;
 
-                        mp = new MonoPanner (ac);
+                        mp = new MonoPanner (_panner);
 
                         mp->StartGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::start_touch),
                                                                       boost::weak_ptr<AutomationControl> (ac)));

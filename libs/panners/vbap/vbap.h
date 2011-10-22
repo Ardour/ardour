@@ -63,6 +63,8 @@ public:
         PBD::AngularVector signal_position (uint32_t n) const;
         boost::shared_ptr<Speakers> get_speakers() const;
 
+	void reset ();
+
 private:
         struct Signal {
             PBD::AngularVector direction;

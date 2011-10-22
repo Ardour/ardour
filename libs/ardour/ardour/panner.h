@@ -81,7 +81,7 @@ public:
 
 	virtual PBD::AngularVector signal_position (uint32_t) const { return PBD::AngularVector(); }
 
-	virtual void reset() {}
+	virtual void reset () = 0;
 
 	void      set_automation_state (AutoState);
 	AutoState automation_state() const;

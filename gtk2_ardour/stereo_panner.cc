@@ -418,7 +418,7 @@ StereoPanner::on_button_release_event (GdkEventButton* ev)
 		return false;
 	}
 
-	bool dp = dragging_position;
+	bool const dp = dragging_position;
 
 	dragging = false;
 	dragging_position = false;
@@ -432,9 +432,7 @@ StereoPanner::on_button_release_event (GdkEventButton* ev)
 	}
 
 	if (Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier)) {
-		/* reset to default */
-		position_control->set_value (0.5);
-		width_control->set_value (1.0);
+		_panner->reset ();
 	} else {
 		if (dp) {
 			StopPositionGesture ();

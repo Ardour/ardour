@@ -373,3 +373,10 @@ Panner1in2out::value_as_string (boost::shared_ptr<AutomationControl> ac) const
                 return _pannable->value_as_string (ac);
         }
 }
+
+void
+Panner1in2out::reset ()
+{
+	set_position (0.5);
+	update ();
+}

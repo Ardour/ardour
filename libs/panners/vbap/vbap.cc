@@ -473,3 +473,12 @@ VBAPanner::set_width (double w)
 {
         _pannable->pan_width_control->set_value (min (1.0, max (-1.0, w)));
 }
+
+void
+VBAPanner::reset ()
+{
+	set_position (0);
+	set_width (1);
+
+	update ();
+}
