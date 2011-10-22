@@ -94,7 +94,13 @@ SessionDirectory::old_sound_path () const
 const path
 SessionDirectory::sources_root () const
 {
-	const string legalized_root(legalize_for_path(m_root_path.leaf()));
+	path p = m_root_path;
+
+	if (p.leaf() == ".") {
+		p = PBD::sys::get_absolute_path (m_root_path);
+	}
+	
+	const string legalized_root (legalize_for_path (p.leaf ()));
 
 	return m_root_path / interchange_dir_name / legalized_root;
 }
