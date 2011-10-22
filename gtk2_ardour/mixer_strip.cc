@@ -113,7 +113,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Route> rt
 	, gpm (sess, 250)
 	, panners (sess)
 	, button_table (3, 1)
-	, middle_button_table (2, 2)
+	, middle_button_table (1, 2)
 	, bottom_button_table (1, 2)
 	, meter_point_label (_("pre"))
 	, midi_input_enable_button (0)
