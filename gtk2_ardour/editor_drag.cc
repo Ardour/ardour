@@ -3858,13 +3858,11 @@ NoteDrag::total_dx () const
 	/* primary note time */
 	frameoffset_t const n = _region->source_beats_to_absolute_frames (_primary->note()->time ());
 
-	/* new time of the primary note relative to the region position */
+	/* new time of the primary note in session frames */
 	frameoffset_t st = n + dx;
 
 	/* prevent the note being dragged earlier than the region's position */
-	if (st < 0) {
-		st = 0;
-	}
+	st = max (st, _region->region()->position ());
 
 	/* snap and return corresponding delta */
 	return _region->snap_frame_to_frame (st) - n;
