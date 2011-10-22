@@ -523,8 +523,21 @@ StreamView::get_selectables (framepos_t start, framepos_t end, double top, doubl
 
 	if (_layer_display == Stacked) {
 		double const c = child_height ();
-		min_layer = _layers - ((bottom - _trackview.y_position()) / c);
-		max_layer = _layers - ((top - _trackview.y_position()) / c);
+
+		int const mi = _layers - ((bottom - _trackview.y_position()) / c);
+		if (mi < 0) {
+			min_layer = 0;
+		} else {
+			min_layer = mi;
+		}
+
+		int const ma = _layers - ((top - _trackview.y_position()) / c);
+		if (ma > _layers) {
+			max_layer = _layers - 1;
+		} else {
+			max_layer = ma;
+		}
+
 	}
 
 	for (list<RegionView*>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
