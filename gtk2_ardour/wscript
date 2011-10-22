@@ -557,19 +557,15 @@ def build(bld):
     obj.target       = 'ardour3_widgets.rc'
     obj.install_path = None
 
-    bld (
-        rule   = include_processor,
-        source = 'ardour3_ui_dark.rc.pre',
-        target = 'ardour3_ui_dark.rc',
-        install_path = '${SYSCONFDIR}/ardour3'
-        )
+    obj = bld (rule = include_processor)
+    obj.source = [ 'ardour3_ui_dark.rc.pre' ]
+    obj.target = 'ardour3_ui_dark.rc'
+    obj.install_path = '${SYSCONFDIR}/ardour3'
 
-    bld (
-        rule   = include_processor,
-        source = 'ardour3_ui_light.rc.pre',
-        target = 'ardour3_ui_light.rc',
-        install_path = '${SYSCONFDIR}/ardour3'
-        )
+    obj = bld (rule = include_processor)
+    obj.source = [ 'ardour3_ui_light.rc.pre' ]
+    obj.target = 'ardour3_ui_light.rc'
+    obj.install_path = '${SYSCONFDIR}/ardour3'
 
     # Menus
     menus_argv = []
