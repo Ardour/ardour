@@ -3861,11 +3861,13 @@ NoteDrag::total_dx () const
 	/* new time of the primary note in session frames */
 	frameoffset_t st = n + dx;
 
+	framepos_t const rp = _region->region()->position ();
+
 	/* prevent the note being dragged earlier than the region's position */
-	st = max (st, _region->region()->position ());
+	st = max (st, rp);
 
 	/* snap and return corresponding delta */
-	return _region->snap_frame_to_frame (st) - n;
+	return _region->snap_frame_to_frame (st - rp) + rp - n;
 }
 
 /** @return Current total drag y change in note number */
