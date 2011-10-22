@@ -115,7 +115,7 @@ def build(bld):
     obj.includes     = ['.']
     obj.name         = 'libpbd'
     obj.target       = 'pbd'
-    obj.uselib       = 'GLIBMM SIGCPP XML UUID SNDFILE'
+    obj.uselib       = 'GLIBMM SIGCPP XML UUID SNDFILE GIOMM'
     if sys.platform == 'darwin':
         TaskGen.task_gen.mappings['.mm'] = TaskGen.task_gen.mappings['.cc']
         obj.source += 'cocoa_open_uri.mm'

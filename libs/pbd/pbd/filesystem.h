@@ -197,6 +197,8 @@ std::string basename (const path& p);
  */
 std::string extension (const path& p);
 
+path get_absolute_path (const path &);
+
 } // namespace sys
 
 } // namespace PBD

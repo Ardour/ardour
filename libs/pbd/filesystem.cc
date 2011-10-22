@@ -21,6 +21,8 @@
 #include <glib.h>
 #include <glib/gstdio.h>
 
+#include <giomm/file.h>
+
 #include <cerrno>
 #include <fstream>
 
@@ -220,6 +222,14 @@ extension (const path & p)
 
 	return string();
 
+}
+
+/** Take a (possibly) relative path and make it absolute */
+path
+get_absolute_path (const path & p)
+{
+	Glib::RefPtr<Gio::File> f = Gio::File::create_for_path (p.to_string ());
+	return f->get_path ();
 }
 
 } // namespace sys
