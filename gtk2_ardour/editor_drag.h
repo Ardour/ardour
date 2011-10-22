@@ -245,7 +245,9 @@ struct DraggingView
 	DraggingView (RegionView *, RegionDrag *);
 
 	RegionView* view; ///< the view
-	/** index into RegionDrag::_time_axis_views of the view that this region is currently beind displayed on */
+	/** index into RegionDrag::_time_axis_views of the view that this region is currently being displayed on,
+	 *  or -1 if it is not visible.
+	 */
 	int time_axis_view;
 	/** layer that this region is currently being displayed on */
 	ARDOUR::layer_t layer;
