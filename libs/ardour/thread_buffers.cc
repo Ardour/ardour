@@ -28,40 +28,45 @@ using namespace ARDOUR;
 using namespace std;
 
 ThreadBuffers::ThreadBuffers ()
-        : silent_buffers (new BufferSet)
-        , scratch_buffers (new BufferSet)
-        , mix_buffers (new BufferSet)
-        , gain_automation_buffer (0)
-        , pan_automation_buffer (0)
-        , npan_buffers (0)
+	: silent_buffers (new BufferSet)
+	, scratch_buffers (new BufferSet)
+	, mix_buffers (new BufferSet)
+	, gain_automation_buffer (0)
+	, pan_automation_buffer (0)
+	, npan_buffers (0)
 {
 }
 
 void
 ThreadBuffers::ensure_buffers (ChanCount howmany)
 {
-        // std::cerr << "ThreadBuffers " << this << " resize buffers with count = " << howmany << std::endl;
+	// std::cerr << "ThreadBuffers " << this << " resize buffers with count = " << howmany << std::endl;
 
-        /* this is all protected by the process lock in the Session
-         */
+	/* this is all protected by the process lock in the Session
+	 */
 
-        if (howmany.n_total() == 0) {
-                return;
-        }
+	/* we always need at least 1 midi buffer */
+	if (howmany.n_midi() < 1) {
+		howmany.set_midi(1);
+	}
 
-        AudioEngine* _engine = AudioEngine::instance ();
+	if (howmany.n_audio() == 0 && howmany.n_midi() == 1) {
+		return;
+	}
+
+	AudioEngine* _engine = AudioEngine::instance ();
 
 	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 		size_t count = std::max (scratch_buffers->available().get(*t), howmany.get(*t));
-                size_t size = _engine->raw_buffer_size (*t);
+		size_t size = _engine->raw_buffer_size (*t);
 
 		scratch_buffers->ensure_buffers (*t, count, size);
 		mix_buffers->ensure_buffers (*t, count, size);
-                silent_buffers->ensure_buffers (*t, count, size);
+		silent_buffers->ensure_buffers (*t, count, size);
 	}
 
-        delete [] gain_automation_buffer;
-        gain_automation_buffer = new gain_t[_engine->raw_buffer_size (DataType::AUDIO)];
+	delete [] gain_automation_buffer;
+	gain_automation_buffer = new gain_t[_engine->raw_buffer_size (DataType::AUDIO)];
 
 	allocate_pan_automation_buffers (_engine->raw_buffer_size (DataType::AUDIO), howmany.n_audio(), false);
 }
@@ -69,9 +74,9 @@ ThreadBuffers::ensure_buffers (ChanCount howmany)
 void
 ThreadBuffers::allocate_pan_automation_buffers (framecnt_t nframes, uint32_t howmany, bool force)
 {
-        /* we always need at least 2 pan buffers */
+	/* we always need at least 2 pan buffers */
 
-        howmany = max (2U, howmany);
+	howmany = max (2U, howmany);
 
 	if (!force && howmany <= npan_buffers) {
 		return;
