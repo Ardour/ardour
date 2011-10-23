@@ -508,8 +508,8 @@ MidiModel::NoteDiffCommand::unmarshal_note (XMLNode *xml_note)
 	unsigned int note;
 	XMLProperty* prop;
 	unsigned int channel;
-	unsigned int time;
-	unsigned int length;
+	MidiModel::TimeType time;
+	MidiModel::TimeType length;
 	unsigned int velocity;
 	gint id;
 
