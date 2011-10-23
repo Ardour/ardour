@@ -535,11 +535,13 @@ ARDOUR_UI::build_menu_bar ()
 	cpu_load_box.set_name ("CPULoad");
 	cpu_load_label.set_name ("CPULoad");
 	cpu_load_label.set_use_markup ();
+	set_size_request_to_display_given_text (cpu_load_label, "DSP: 100.0%", 2, 2);
 
 	buffer_load_box.add (buffer_load_label);
 	buffer_load_box.set_name ("BufferLoad");
 	buffer_load_label.set_name ("BufferLoad");
 	buffer_load_label.set_use_markup ();
+	set_size_request_to_display_given_text (buffer_load_label, "Buffers: p:100% c:100%", 2, 2);
 
 	sample_rate_box.add (sample_rate_label);
 	sample_rate_box.set_name ("SampleRate");

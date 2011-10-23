@@ -1044,6 +1044,10 @@ ARDOUR_UI::update_cpu_load ()
 {
 	char buf[64];
 
+	/* If this text is changed, the set_size_request_to_display_given_text call in ARDOUR_UI::build_menu_bar
+	   should also be changed.
+	*/
+
 	float const c = engine->get_cpu_load ();
 	snprintf (buf, sizeof (buf), _("DSP: <span foreground=\"%s\">%5.1f%%</span>"), c >= 90 ? X_("red") : X_("green"), c);
 	cpu_load_label.set_markup (buf);
@@ -1057,6 +1061,10 @@ ARDOUR_UI::update_buffer_load ()
 	uint32_t const playback = _session ? _session->playback_load () : 100;
 	uint32_t const capture = _session ? _session->capture_load () : 100;
 
+	/* If this text is changed, the set_size_request_to_display_given_text call in ARDOUR_UI::build_menu_bar
+	   should also be changed.
+	*/
+	
 	if (_session) {
 		snprintf (
 			buf, sizeof (buf),
