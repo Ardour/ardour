@@ -1045,7 +1045,7 @@ ARDOUR_UI::update_cpu_load ()
 	char buf[64];
 
 	float const c = engine->get_cpu_load ();
-	snprintf (buf, sizeof (buf), _("DSP: <span foreground=\"%s\">%5.1f%%</span>"), c >= 90 ? X_("red") : X_("green"), c_);
+	snprintf (buf, sizeof (buf), _("DSP: <span foreground=\"%s\">%5.1f%%</span>"), c >= 90 ? X_("red") : X_("green"), c);
 	cpu_load_label.set_markup (buf);
 }
 
