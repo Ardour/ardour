@@ -532,7 +532,7 @@ StreamView::get_selectables (framepos_t start, framepos_t end, double top, doubl
 		}
 
 		int const ma = _layers - ((top - _trackview.y_position()) / c);
-		if (ma > _layers) {
+		if (ma > (int) _layers) {
 			max_layer = _layers - 1;
 		} else {
 			max_layer = ma;
