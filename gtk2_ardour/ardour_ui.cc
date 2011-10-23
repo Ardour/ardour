@@ -959,7 +959,7 @@ ARDOUR_UI::every_point_zero_one_seconds ()
 void
 ARDOUR_UI::update_sample_rate (framecnt_t)
 {
-	char buf[32];
+	char buf[64];
 
 	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::update_sample_rate, ignored)
 
@@ -972,17 +972,17 @@ ARDOUR_UI::update_sample_rate (framecnt_t)
 		framecnt_t rate = engine->frame_rate();
 
 		if (fmod (rate, 1000.0) != 0.0) {
-			snprintf (buf, sizeof (buf), _("%.1f kHz / %4.1f ms"),
+			snprintf (buf, sizeof (buf), _("JACK: <span foreground=\"green\">%.1f kHz / %4.1f ms</span>"),
 				  (float) rate/1000.0f,
 				  (engine->frames_per_cycle() / (float) rate) * 1000.0f);
 		} else {
-			snprintf (buf, sizeof (buf), _("%" PRId64 " kHz / %4.1f ms"),
+			snprintf (buf, sizeof (buf), _("JACK: <span foreground=\"green\">%" PRId64 " kHz / %4.1f ms</span>"),
 				  rate/1000,
 				  (engine->frames_per_cycle() / (float) rate) * 1000.0f);
 		}
 	}
 
-	sample_rate_label.set_text (buf);
+	sample_rate_label.set_markup (buf);
 }
 
 void
@@ -994,6 +994,7 @@ ARDOUR_UI::update_format ()
 	}
 
 	stringstream s;
+	s << "File: <span foreground=\"green\">";
 
 	switch (_session->config.get_native_file_header_format ()) {
 	case BWF:
@@ -1033,26 +1034,41 @@ ARDOUR_UI::update_format ()
 		break;
 	}
 
-	format_label.set_text (s.str ());
+	s << "</span>";
+
+	format_label.set_markup (s.str ());
 }
 
 void
 ARDOUR_UI::update_cpu_load ()
 {
-	char buf[32];
-	snprintf (buf, sizeof (buf), _("DSP: %5.1f%%"), engine->get_cpu_load());
-	cpu_load_label.set_text (buf);
+	char buf[64];
+
+	float const c = engine->get_cpu_load ();
+	snprintf (buf, sizeof (buf), _("DSP: <span foreground=\"%s\">%5.1f%%</span>"), c >= 90 ? X_("red") : X_("green"), c_);
+	cpu_load_label.set_markup (buf);
 }
 
 void
 ARDOUR_UI::update_buffer_load ()
 {
-	char buf[64];
+	char buf[256];
+
+	uint32_t const playback = _session ? _session->playback_load () : 100;
+	uint32_t const capture = _session ? _session->capture_load () : 100;
 
 	if (_session) {
-		snprintf (buf, sizeof (buf), _("Buffers p:%" PRIu32 "%% c:%" PRIu32 "%%"),
-			  _session->playback_load(), _session->capture_load());
-		buffer_load_label.set_text (buf);
+		snprintf (
+			buf, sizeof (buf),
+			_("Buffers: <span foreground=\"green\">p:</span><span foreground=\"%s\">%" PRIu32 "%%</span> "
+			           "<span foreground=\"green\">c:</span><span foreground=\"%s\">%" PRIu32 "%%</span>"),
+			playback <= 5 ? X_("red") : X_("green"),
+			playback,
+			capture <= 5 ? X_("red") : X_("green"),
+			capture
+			);
+
+		buffer_load_label.set_markup (buf);
 	} else {
 		buffer_load_label.set_text ("");
 	}
@@ -1079,7 +1095,7 @@ ARDOUR_UI::update_disk_space()
 	framecnt_t fr = _session->frame_rate();
 
 	if (frames == max_framecnt) {
-		strcpy (buf, _("Disk: 24hrs+"));
+		snprintf (buf, sizeof (buf), _("Disk: <span foreground=\"green\">24hrs+</span>"));
 	} else {
 		rec_enabled_streams = 0;
 		_session->foreach_route (this, &ARDOUR_UI::count_recenabled_streams);
@@ -1098,10 +1114,17 @@ ARDOUR_UI::update_disk_space()
 		frames -= mins * fr * 60;
 		secs = frames / fr;
 
-		snprintf (buf, sizeof(buf), _("Disk: %02dh:%02dm:%02ds"), hrs, mins, secs);
+		bool const low = (hrs == 0 && mins <= 30);
+
+		snprintf (
+			buf, sizeof(buf),
+			_("Disk: <span foreground=\"%s\">%02dh:%02dm:%02ds</span>"),
+			low ? X_("red") : X_("green"),
+			hrs, mins, secs
+			);
 	}
 
-	disk_space_label.set_text (buf);
+	disk_space_label.set_markup (buf);
 
 	// An attempt to make the disk space label flash red when space has run out.
 

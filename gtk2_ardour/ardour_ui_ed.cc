@@ -529,22 +529,27 @@ ARDOUR_UI::build_menu_bar ()
 	disk_space_box.add (disk_space_label);
 	disk_space_box.set_name ("WallClock");
 	disk_space_label.set_name ("WallClock");
+	disk_space_label.set_use_markup ();
 
 	cpu_load_box.add (cpu_load_label);
 	cpu_load_box.set_name ("CPULoad");
 	cpu_load_label.set_name ("CPULoad");
+	cpu_load_label.set_use_markup ();
 
 	buffer_load_box.add (buffer_load_label);
 	buffer_load_box.set_name ("BufferLoad");
 	buffer_load_label.set_name ("BufferLoad");
+	buffer_load_label.set_use_markup ();
 
 	sample_rate_box.add (sample_rate_label);
 	sample_rate_box.set_name ("SampleRate");
 	sample_rate_label.set_name ("SampleRate");
+	sample_rate_label.set_use_markup ();
 
 	format_box.add (format_label);
 	format_box.set_name ("Format");
 	format_label.set_name ("Format");
+	format_label.set_use_markup ();
 
 #ifndef TOP_MENUBAR
  	menu_hbox.pack_start (*menu_bar, false, false);

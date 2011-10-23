@@ -241,6 +241,7 @@ ARDOUR_UI::unload_session (bool hide_stuff)
 	Blink.clear ();
 
 	delete _session;
+	_session = 0;
 
 	update_buffer_load ();
 
