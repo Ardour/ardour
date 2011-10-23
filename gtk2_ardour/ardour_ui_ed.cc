@@ -522,6 +522,13 @@ ARDOUR_UI::build_menu_bar ()
 	// so use this instead ...
 	gtk_settings_set_long_property (gtk_settings_get_default(), "gtk-can-change-accels", 1, "Ardour:designers");
 
+	EventBox* ev = manage (new EventBox);
+	ev->show ();
+	HBox* hbox = manage (new HBox);
+	hbox->show ();
+	
+	ev->add (*hbox);
+
 	wall_clock_box.add (wall_clock_label);
 	wall_clock_box.set_name ("WallClock");
 	wall_clock_label.set_name ("WallClock");
@@ -562,18 +569,119 @@ ARDOUR_UI::build_menu_bar ()
  	if (!Profile->get_small_screen()) {
 #ifndef GTKOSX
 		// OSX provides its own wallclock, thank you very much
- 		menu_hbox.pack_end (wall_clock_box, false, false, 2);
+		_status_bar_visiblity = (StatusBarComponent) (_status_bar_visiblity | StatusWallClock);
 #endif
- 		menu_hbox.pack_end (disk_space_box, false, false, 4);
+		_status_bar_visiblity = (StatusBarComponent) (_status_bar_visiblity | StatusDiskSpace);
 	}
+	
+	hbox->pack_end (wall_clock_box, false, false, 2);
+	hbox->pack_end (disk_space_box, false, false, 4);
+	hbox->pack_end (cpu_load_box, false, false, 4);
+	hbox->pack_end (buffer_load_box, false, false, 4);
+	hbox->pack_end (sample_rate_box, false, false, 4);
+	hbox->pack_end (format_box, false, false, 4);
 
-	menu_hbox.pack_end (cpu_load_box, false, false, 4);
-	menu_hbox.pack_end (buffer_load_box, false, false, 4);
-	menu_hbox.pack_end (sample_rate_box, false, false, 4);
-	menu_hbox.pack_end (format_box, false, false, 4);
+	menu_hbox.pack_end (*ev, false, false);
 
 	menu_bar_base.set_name ("MainMenuBar");
 	menu_bar_base.add (menu_hbox);
+
+	ev->signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::status_bar_button_press_event));
+}
+
+bool
+ARDOUR_UI::status_bar_button_press_event (GdkEventButton* ev)
+{
+	if (ev->button != 3) {
+		return false;
+	}
+
+	using namespace Menu_Helpers;
+	
+	Menu* m = manage (new Menu);
+
+	MenuList& items = m->items ();
+
+	items.push_back (CheckMenuElem (_("Wall Clock")));
+	CheckMenuItem* i = dynamic_cast<CheckMenuItem*> (&items.back ());
+	i->set_active (_status_bar_visiblity & StatusWallClock);
+	i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::toggle_status_bar_visibility), StatusWallClock));
+
+	items.push_back (CheckMenuElem (_("Disk Space")));
+	i = dynamic_cast<CheckMenuItem*> (&items.back ());
+	i->set_active (_status_bar_visiblity & StatusDiskSpace);
+	i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::toggle_status_bar_visibility), StatusDiskSpace));
+
+	items.push_back (CheckMenuElem (_("DSP")));
+	i = dynamic_cast<CheckMenuItem*> (&items.back ());
+	i->set_active (_status_bar_visiblity & StatusCPULoad);
+	i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::toggle_status_bar_visibility), StatusCPULoad));
+
+	items.push_back (CheckMenuElem (_("Buffers")));
+	i = dynamic_cast<CheckMenuItem*> (&items.back ());
+	i->set_active (_status_bar_visiblity & StatusBufferLoad);
+	i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::toggle_status_bar_visibility), StatusBufferLoad));
+
+	items.push_back (CheckMenuElem (_("JACK Sampling Rate and Latency")));
+	i = dynamic_cast<CheckMenuItem*> (&items.back ());
+	i->set_active (_status_bar_visiblity & StatusSampleRate);
+	i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::toggle_status_bar_visibility), StatusSampleRate));
+
+	items.push_back (CheckMenuElem (_("File Format")));
+	i = dynamic_cast<CheckMenuItem*> (&items.back ());
+	i->set_active (_status_bar_visiblity & StatusFormat);
+	i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::toggle_status_bar_visibility), StatusFormat));
+
+	m->popup (1, ev->time);
+
+	return true;
+}
+
+void
+ARDOUR_UI::update_status_bar_visibility ()
+{
+	if (_status_bar_visiblity & StatusWallClock) {
+		wall_clock_box.show ();
+	} else {
+		wall_clock_box.hide ();
+	}
+
+	if (_status_bar_visiblity & StatusDiskSpace) {
+		disk_space_box.show ();
+	} else {
+		disk_space_box.hide ();
+	}
+
+	if (_status_bar_visiblity & StatusCPULoad) {
+		cpu_load_box.show ();
+	} else {
+		cpu_load_box.hide ();
+	}
+
+	if (_status_bar_visiblity & StatusBufferLoad) {
+		buffer_load_box.show ();
+	} else {
+		buffer_load_box.hide ();
+	}
+
+	if (_status_bar_visiblity & StatusSampleRate) {
+		sample_rate_box.show ();
+	} else {
+		sample_rate_box.hide ();
+	}
+
+	if (_status_bar_visiblity & StatusFormat) {
+		format_box.show ();
+	} else {
+		format_box.hide ();
+	}
+}
+
+void
+ARDOUR_UI::toggle_status_bar_visibility (StatusBarComponent c)
+{
+	_status_bar_visiblity = (StatusBarComponent) (_status_bar_visiblity ^ c);
+	update_status_bar_visibility ();
 }
 
 void
@@ -721,6 +829,7 @@ ARDOUR_UI::save_ardour_state ()
 	Config->add_extra_xml (get_transport_controllable_state());
 
 	XMLNode* window_node = new XMLNode (X_("UI"));
+	window_node->add_property (X_("status-bar-visibility"), enum_2_string (_status_bar_visiblity));
 
 	for (list<WindowProxyBase*>::iterator i = _window_proxies.begin(); i != _window_proxies.end(); ++i) {
 		if ((*i)->rc_configured()) {

@@ -67,6 +67,7 @@
 #include "editing.h"
 #include "ui_config.h"
 #include "window_proxy.h"
+#include "enums.h"
 
 class About;
 class AddRouteDialog;
@@ -720,6 +721,11 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
         int ambiguous_file (std::string file, std::string path, std::vector<std::string> hits);
 
 	bool click_button_clicked (GdkEventButton *);
+
+	bool status_bar_button_press_event (GdkEventButton *);
+	void update_status_bar_visibility ();
+	void toggle_status_bar_visibility (StatusBarComponent);
+	StatusBarComponent _status_bar_visiblity;
 };
 
 #endif /* __ardour_gui_h__ */
