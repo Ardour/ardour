@@ -127,8 +127,6 @@ SMFSource::read_unlocked (Evoral::EventSink<framepos_t>& destination, framepos_t
 
 	DEBUG_TRACE (DEBUG::MidiSourceIO, string_compose ("SMF read_unlocked: start %1 duration %2\n", start, duration));
 
-	_read_data_count = 0;
-
 	// Output parameters for read_event (which will allocate scratch in buffer as needed)
 	uint32_t ev_delta_t = 0;
 	uint32_t ev_type    = 0;
@@ -203,8 +201,6 @@ SMFSource::read_unlocked (Evoral::EventSink<framepos_t>& destination, framepos_t
 			break;
 		}
 
-		_read_data_count += ev_size;
-
 		if (ev_size > scratch_size) {
 			scratch_size = ev_size;
 		}
@@ -224,8 +220,6 @@ SMFSource::write_unlocked (MidiRingBuffer<framepos_t>& source, framepos_t positi
         if (!_writing) {
                 mark_streaming_write_started ();
         }
-
-	_write_data_count = 0;
 
 	framepos_t        time;
 	Evoral::EventType type;
@@ -335,9 +329,6 @@ SMFSource::append_event_unlocked_beats (const Evoral::Event<double>& ev)
 
 	Evoral::SMF::append_event_delta(delta_time_ticks, ev.size(), ev.buffer(), event_id);
 	_last_ev_time_beats = ev.time();
-
-	_write_data_count += ev.size();
-
 }
 
 /** Append an event with a timestamp in frames (framepos_t) */
@@ -385,9 +376,6 @@ SMFSource::append_event_unlocked_frames (const Evoral::Event<framepos_t>& ev, fr
 
 	Evoral::SMF::append_event_delta(delta_time_ticks, ev.size(), ev.buffer(), event_id);
 	_last_ev_time_frames = ev.time();
-
-	_write_data_count += ev.size();
-
 }
 
 XMLNode&

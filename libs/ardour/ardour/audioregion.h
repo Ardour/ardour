@@ -102,8 +102,7 @@ class AudioRegion : public Region
 		ReadOpsNone = 0x0,
 		ReadOpsOwnAutomation = 0x1,
 		ReadOpsOwnScaling = 0x2,
-		ReadOpsCount = 0x4,
-		ReadOpsFades = 0x8
+		ReadOpsFades = 0x4
 	};
 
 	virtual framecnt_t read (Sample*, framepos_t pos, framecnt_t cnt, int channel) const;

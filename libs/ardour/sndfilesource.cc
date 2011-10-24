@@ -327,7 +327,6 @@ SndFileSource::read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) con
 
 		if (_info.channels == 1) {
 			framecnt_t ret = sf_read_float (sf, dst, file_cnt);
-			_read_data_count = ret * sizeof(float);
 			if (ret != file_cnt) {
 				char errbuf[256];
 				sf_error_str (0, errbuf, sizeof (errbuf) - 1);
@@ -352,8 +351,6 @@ SndFileSource::read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) con
 		dst[n] = *ptr;
 		ptr += _info.channels;
 	}
-
-	_read_data_count = cnt * sizeof(float);
 
 	_descriptor->release ();
 	return nread;
@@ -400,8 +397,6 @@ SndFileSource::nondestructive_write_unlocked (Sample *data, framecnt_t cnt)
 	if (_build_peakfiles) {
 		compute_and_write_peaks (data, frame_pos, cnt, false, true);
 	}
-
-	_write_data_count = cnt;
 
 	return cnt;
 }

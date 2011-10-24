@@ -43,8 +43,6 @@ public:
 	virtual float capture_buffer_load () const = 0;
 	virtual int do_refill () = 0;
 	virtual int do_flush (RunContext, bool force = false) = 0;
-	virtual uint32_t read_data_count() const = 0;
-	virtual uint32_t write_data_count() const = 0;
 	virtual void set_pending_overwrite (bool) = 0;
 	virtual int seek (framepos_t, bool complete_refill = false) = 0;
 	virtual bool hidden () const = 0;

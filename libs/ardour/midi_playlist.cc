@@ -102,8 +102,6 @@ MidiPlaylist::read (Evoral::EventSink<framepos_t>& dst, framepos_t start, framec
 
 	framepos_t end = start + dur - 1;
 
-	_read_data_count = 0;
-
 	// relevent regions overlapping start <--> end
 	vector< boost::shared_ptr<Region> > regs;
 	typedef pair<MidiStateTracker*,framepos_t> TrackerInfo;
@@ -181,8 +179,6 @@ MidiPlaylist::read (Evoral::EventSink<framepos_t>& dst, framepos_t start, framec
 				_note_trackers.insert (newpair);
 				DEBUG_TRACE (DEBUG::MidiPlaylistIO, "\tadded tracker to trackers\n");
 			}
-
-			_read_data_count += mr->read_data_count();
 		}
 
 	} else {
@@ -234,7 +230,6 @@ MidiPlaylist::read (Evoral::EventSink<framepos_t>& dst, framepos_t start, framec
 
 
 			mr->read_at (evlist, start, dur, chan_n, _note_mode, tracker);
-			_read_data_count += mr->read_data_count();
 
 #ifndef NDEBUG
 			DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("After %1 (%2 .. %3) we now have %4\n", mr->name(), mr->position(), mr->last_frame(), evlist.size()));

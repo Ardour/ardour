@@ -769,8 +769,6 @@ MidiDiskstream::read (framepos_t& start, framecnt_t dur, bool reversed)
 
 		g_atomic_int_add(&_frames_written_to_ringbuffer, this_read);
 
-		_read_data_count = _playlist->read_data_count();
-
 		if (reversed) {
 
 			// Swap note ons with note offs here.  etc?
@@ -872,8 +870,6 @@ MidiDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 	}
 
 	assert (!destructive());
-
-	_write_data_count = 0;
 
 	total = _session.transport_frame() - _write_source->last_write_end();
 

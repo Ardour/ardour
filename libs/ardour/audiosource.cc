@@ -68,8 +68,6 @@ AudioSource::AudioSource (Session& s, string name)
 	_peaks_built = false;
 	_peak_byte_max = 0;
 	_peakfile_descriptor = 0;
-	_read_data_count = 0;
-	_write_data_count = 0;
 	peak_leftover_cnt = 0;
 	peak_leftover_size = 0;
 	peak_leftovers = 0;
@@ -83,8 +81,6 @@ AudioSource::AudioSource (Session& s, const XMLNode& node)
 	_peaks_built = false;
 	_peak_byte_max = 0;
 	_peakfile_descriptor = 0;
-	_read_data_count = 0;
-	_write_data_count = 0;
 	peak_leftover_cnt = 0;
 	peak_leftover_size = 0;
 	peak_leftovers = 0;
@@ -948,18 +944,6 @@ AudioSource::available_peaks (double zoom_factor) const
 	off_t end = _peak_byte_max;
 
 	return (end/sizeof(PeakData)) * _FPP;
-}
-
-void
-AudioSource::dec_read_data_count (framecnt_t cnt)
-{
-        uint32_t val = cnt * sizeof (Sample);
-
-        if (val < _read_data_count) {
-                _read_data_count -= val;
-        } else {
-                _read_data_count = 0;
-        }
 }
 
 void

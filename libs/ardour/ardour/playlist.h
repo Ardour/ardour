@@ -201,8 +201,6 @@ public:
 	void raise_region_to_top (boost::shared_ptr<Region>);
 	void lower_region_to_bottom (boost::shared_ptr<Region>);
 
-	uint32_t read_data_count() const { return _read_data_count; }
-
 	/* XXX: use of diskstream here is a little unfortunate */
 	const PBD::ID& get_orig_diskstream_id () const { return _orig_diskstream_id; }
 	void set_orig_diskstream_id (const PBD::ID& did) { _orig_diskstream_id = did; }
@@ -292,7 +290,6 @@ public:
 	bool             in_partition;
 	bool            _frozen;
 	uint32_t         subcnt;
-	uint32_t        _read_data_count;
 	PBD::ID         _orig_diskstream_id;
 	uint64_t         layer_op_counter;
 	framecnt_t       freeze_length;

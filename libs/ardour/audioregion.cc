@@ -433,19 +433,11 @@ AudioRegion::_read_at (const SourceList& srcs, framecnt_t limit,
 		mixdown_buffer += buf_offset;
 	}
 
-	if (rops & ReadOpsCount) {
-		_read_data_count = 0;
-	}
-
 	if (chan_n < n_channels()) {
 
 		boost::shared_ptr<AudioSource> src = boost::dynamic_pointer_cast<AudioSource> (srcs[chan_n]);
 		if (src->read (mixdown_buffer, _start + internal_offset, to_read) != to_read) {
 			return 0; /* "read nothing" */
-		}
-
-		if (rops & ReadOpsCount) {
-			_read_data_count += src->read_data_count();
 		}
 
 	} else {
@@ -465,8 +457,6 @@ AudioRegion::_read_at (const SourceList& srcs, framecnt_t limit,
 				return 0; /* "read nothing" */
 			}
 
-			/* adjust read data count appropriately since this was a duplicate read */
-			src->dec_read_data_count (to_read);
 		} else {
 			memset (mixdown_buffer, 0, sizeof (Sample) * cnt);
 		}

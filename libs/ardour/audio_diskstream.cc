@@ -940,8 +940,6 @@ AudioDiskstream::read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer,
 			return -1;
 		}
 
-		_read_data_count = _playlist->read_data_count();
-
 		if (reversed) {
 
 			swap_by_ptr (buf, buf + this_read - 1);
@@ -1218,8 +1216,6 @@ AudioDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 	RingBufferNPT<CaptureTransition>::rw_vector transvec;
 	framecnt_t total;
 
-	_write_data_count = 0;
-
 	transvec.buf[0] = 0;
 	transvec.buf[1] = 0;
 	vector.buf[0] = 0;
@@ -1324,8 +1320,6 @@ AudioDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 				error << string_compose(_("AudioDiskstream %1: cannot write to disk"), id()) << endmsg;
 				return -1;
 			}
-
-			_write_data_count += (*chan)->write_source->write_data_count();
 
 			(*chan)->capture_buf->increment_read_ptr (to_write);
 			(*chan)->curr_capture_cnt += to_write;

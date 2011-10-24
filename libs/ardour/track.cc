@@ -618,12 +618,6 @@ Track::use_new_playlist ()
 	return _diskstream->use_new_playlist ();
 }
 
-uint32_t
-Track::read_data_count () const
-{
-	return _diskstream->read_data_count ();
-}
-
 void
 Track::set_align_style (AlignStyle s, bool force)
 {
@@ -634,12 +628,6 @@ void
 Track::set_align_choice (AlignChoice s, bool force)
 {
 	_diskstream->set_align_choice (s, force);
-}
-
-uint32_t
-Track::write_data_count () const
-{
-	return _diskstream->write_data_count ();
 }
 
 PBD::ID const &

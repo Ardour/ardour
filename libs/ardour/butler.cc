@@ -35,9 +35,6 @@
 
 using namespace PBD;
 
-static float _read_data_rate;
-static float _write_data_rate;
-
 namespace ARDOUR {
 
 Butler::Butler(Session& s)
@@ -144,9 +141,6 @@ void *
 Butler::thread_work ()
 {
 	uint32_t err = 0;
-	int32_t bytes;
-	bool compute_io;
-	microseconds_t begin, end;
 
 	struct pollfd pfd[1];
 	bool disk_work_outstanding = false;
@@ -217,17 +211,12 @@ Butler::thread_work ()
 		}
 
 
-		bytes = 0;
-		compute_io = true;
-
 restart:
 		disk_work_outstanding = false;
 
 		if (transport_work_requested()) {
 			_session.butler_transport_work ();
 		}
-
-		begin = get_microseconds();
 
 		boost::shared_ptr<RouteList> rl = _session.get_routes();
 
@@ -254,16 +243,11 @@ restart:
 			}
 
 			switch (tr->do_refill ()) {
-			case 0:
-				bytes += tr->read_data_count();
-				break;
 			case 1:
-				bytes += tr->read_data_count();
 				disk_work_outstanding = true;
 				break;
 
 			default:
-				compute_io = false;
 				error << string_compose(_("Butler read ahead failure on dstream %1"), (*i)->name()) << endmsg;
 				break;
 			}
@@ -279,19 +263,6 @@ restart:
 			goto restart;
 		}
 
-		if (compute_io) {
-			end = get_microseconds();
-			if (end - begin > 0) {
-				_read_data_rate = (float) bytes / (float) (end - begin);
-			} else {
-				_read_data_rate = 0; // infinity better
-			}
-		}
-
-		bytes = 0;
-		compute_io = true;
-		begin = get_microseconds();
-
 		for (i = rl->begin(); !transport_work_requested() && should_run && i != rl->end(); ++i) {
 			// cerr << "write behind for " << (*i)->name () << endl;
 
@@ -305,17 +276,12 @@ restart:
 			 */
 
 			switch (tr->do_flush (ButlerContext)) {
-			case 0:
-				bytes += tr->write_data_count();
-				break;
 			case 1:
-				bytes += tr->write_data_count();
 				disk_work_outstanding = true;
 				break;
 
 			default:
 				err++;
-				compute_io = false;
 				error << string_compose(_("Butler write-behind failure on dstream %1"), (*i)->name()) << endmsg;
 				/* don't break - try to flush all streams in case they
 				   are split across disks.
@@ -337,16 +303,6 @@ restart:
 
 		if (!err && transport_work_requested()) {
 			goto restart;
-		}
-
-		if (compute_io) {
-			// there are no apparent users for this calculation?
-			end = get_microseconds();
-			if (end - begin > 0) {
-				_write_data_rate = (float) bytes / (float) (end - begin);
-			} else {
-				_write_data_rate = 0; // Well, infinity would be better
-			}
 		}
 
 		if (!disk_work_outstanding) {
@@ -412,24 +368,6 @@ bool
 Butler::transport_work_requested () const
 {
 	return g_atomic_int_get(&should_do_transport_work);
-}
-
-float
-Butler::read_data_rate () const
-{
-	/* disk i/o in excess of 10000MB/sec indicate the buffer cache
-	   in action. ignore it.
-	*/
-	return _read_data_rate > 10485.7600000f ? 0.0f : _read_data_rate;
-}
-
-float
-Butler::write_data_rate () const
-{
-	/* disk i/o in excess of 10000MB/sec indicate the buffer cache
-	   in action. ignore it.
-	*/
-	return _write_data_rate > 10485.7600000f ? 0.0f : _write_data_rate;
 }
 
 void

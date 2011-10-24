@@ -67,10 +67,6 @@ class AudioSource : virtual public Source,
 	void set_captured_for (std::string str) { _captured_for = str; }
 	std::string captured_for() const { return _captured_for; }
 
-	uint32_t read_data_count() const { return _read_data_count; }
-	uint32_t write_data_count() const { return _write_data_count; }
-	void dec_read_data_count (framecnt_t);
-
 	int read_peaks (PeakData *peaks, framecnt_t npeaks,
 			framepos_t start, framecnt_t cnt, double samples_per_visual_peak) const;
 
@@ -130,9 +126,6 @@ class AudioSource : virtual public Source,
 	framecnt_t           _length;
 	std::string         peakpath;
 	std::string        _captured_for;
-
-	mutable uint32_t _read_data_count;  // modified in read()
-	mutable uint32_t _write_data_count; // modified in write()
 
 	int initialize_peakfile (bool newfile, std::string path);
 	int build_peaks_from_scratch ();

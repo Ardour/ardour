@@ -222,8 +222,6 @@ MidiRegion::_read_at (const SourceList& /*srcs*/, Evoral::EventSink<framepos_t>&
 		return 0; /* read nothing */
 	}
 
-	_read_data_count = 0;
-
 	boost::shared_ptr<MidiSource> src = midi_source(chan_n);
 	src->set_note_mode(mode);
 
@@ -247,8 +245,6 @@ MidiRegion::_read_at (const SourceList& /*srcs*/, Evoral::EventSink<framepos_t>&
 		    ) != to_read) {
 		return 0; /* "read nothing" */
 	}
-
-	_read_data_count += src->read_data_count();
 
 	return to_read;
 }

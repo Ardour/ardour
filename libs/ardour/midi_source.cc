@@ -55,8 +55,6 @@ PBD::Signal1<void,MidiSource*> MidiSource::MidiSourceCreated;
 
 MidiSource::MidiSource (Session& s, string name, Source::Flag flags)
 	: Source(s, DataType::MIDI, name, flags)
-	, _read_data_count(0)
-	, _write_data_count(0)
 	, _writing(false)
 	, _model_iter_valid(false)
 	, _length_beats(0.0)
@@ -67,17 +65,12 @@ MidiSource::MidiSource (Session& s, string name, Source::Flag flags)
 
 MidiSource::MidiSource (Session& s, const XMLNode& node)
 	: Source(s, node)
-	, _read_data_count(0)
-	, _write_data_count(0)
 	, _writing(false)
 	, _model_iter_valid(false)
 	, _length_beats(0.0)
 	, _last_read_end(0)
 	, _last_write_end(0)
 {
-	_read_data_count = 0;
-	_write_data_count = 0;
-
 	if (set_state (node, Stateful::loading_state_version)) {
 		throw failed_constructor();
 	}

@@ -185,7 +185,6 @@ Playlist::Playlist (boost::shared_ptr<const Playlist> other, string namestr, boo
 	in_flush = false;
 	in_partition = false;
 	subcnt = 0;
-	_read_data_count = 0;
 	_frozen = other->_frozen;
 
 	layer_op_counter = other->layer_op_counter;
@@ -319,7 +318,6 @@ Playlist::init (bool hide)
 	in_flush = false;
 	in_partition = false;
 	subcnt = 0;
-	_read_data_count = 0;
 	_frozen = false;
 	layer_op_counter = 0;
 	freeze_length = 0;

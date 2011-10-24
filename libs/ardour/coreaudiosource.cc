@@ -174,7 +174,6 @@ CoreAudioSource::read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) c
 
 		if (n_channels == 1) {
 			if (safe_read (dst, start, file_cnt, abl) == 0) {
-				_read_data_count = cnt * sizeof (Sample);
 				return cnt;
 			}
 			return 0;
@@ -186,8 +185,6 @@ CoreAudioSource::read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) c
 	if (safe_read (interleave_buf, start, file_cnt, abl) != 0) {
 		return 0;
 	}
-
-	_read_data_count = cnt * sizeof(float);
 
 	Sample *ptr = interleave_buf + _channel;
 

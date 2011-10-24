@@ -217,7 +217,6 @@ Region::Region (Session& s, framepos_t start, framecnt_t length, const string& n
 	, _last_length (length)
 	, _last_position (0)
 	, _first_edit (EditChangesNothing)
-	, _read_data_count(0)
 	, _last_layer_op(0)
 	, _pending_explicit_relayer (false)
 {
@@ -234,7 +233,6 @@ Region::Region (const SourceList& srcs)
 	, _last_length (0)
 	, _last_position (0)
 	, _first_edit (EditChangesNothing)
-	, _read_data_count(0)
 	, _last_layer_op (0)
 	, _pending_explicit_relayer (false)
 {
@@ -256,7 +254,6 @@ Region::Region (boost::shared_ptr<const Region> other)
 	, _last_length (other->_last_length)
 	, _last_position(other->_last_position) \
 	, _first_edit (EditChangesNothing)
-	, _read_data_count(0)
 	, _last_layer_op (0)
 	, _pending_explicit_relayer (false)
 
@@ -329,7 +326,6 @@ Region::Region (boost::shared_ptr<const Region> other, frameoffset_t offset)
 	, _last_length (other->_last_length)
 	, _last_position(other->_last_position) \
 	, _first_edit (EditChangesNothing)
-	, _read_data_count(0)
 	, _last_layer_op (0)
 	, _pending_explicit_relayer (false)
 
@@ -387,7 +383,6 @@ Region::Region (boost::shared_ptr<const Region> other, const SourceList& srcs)
 	, _last_length (other->_last_length)
 	, _last_position (other->_last_position)
 	, _first_edit (EditChangesID)
-	, _read_data_count (0)
 	, _last_layer_op (other->_last_layer_op)
 	, _pending_explicit_relayer (false)
 {

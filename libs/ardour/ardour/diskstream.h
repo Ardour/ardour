@@ -175,9 +175,6 @@ class Diskstream : public SessionObject, public PublicDiskstream
 	virtual void reset_write_sources (bool, bool force = false) = 0;
 	virtual void non_realtime_input_change () = 0;
 
-	uint32_t read_data_count() const { return _read_data_count; }
-	uint32_t write_data_count() const { return _write_data_count; }
-
   protected:
 	friend class Auditioner;
 	virtual int  seek (framepos_t which_sample, bool complete_refill = false) = 0;
@@ -289,9 +286,6 @@ class Diskstream : public SessionObject, public PublicDiskstream
 	framepos_t     file_frame;
 	framepos_t     playback_sample;
 	framecnt_t     playback_distance;
-
-	uint32_t     _read_data_count;
-	uint32_t     _write_data_count;
 
 	bool          in_set_state;
 

@@ -286,9 +286,6 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, fr
 	Glib::RecMutex::Lock rm (region_lock);
 
 	framepos_t const end = start + cnt - 1;
-	_read_data_count = 0;
-
-	_read_data_count = 0;
 
 	RegionList* rlist = regions_to_read (start, start+cnt);
 
@@ -346,16 +343,11 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, fr
                         DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("read from region %1\n", ar->name()));
 			assert(ar);
 			ar->read_at (buf, mixdown_buffer, gain_buffer, start, cnt, chan_n);
-			_read_data_count += ar->read_data_count();
 		}
 
 		for (vector<boost::shared_ptr<Crossfade> >::iterator i = x.begin(); i != x.end(); ++i) {
                         DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("read from xfade between %1 & %2\n", (*i)->out()->name(), (*i)->in()->name()));
 			(*i)->read_at (buf, mixdown_buffer, gain_buffer, start, cnt, chan_n);
-
-			/* don't JACK up _read_data_count, since its the same data as we just
-			   read from the regions, and the OS should handle that for us.
-			*/
 		}
 	}
 

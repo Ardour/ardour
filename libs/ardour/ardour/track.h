@@ -120,8 +120,6 @@ class Track : public Route, public PublicDiskstream
 	float capture_buffer_load () const;
 	int do_refill ();
 	int do_flush (RunContext, bool force = false);
-	uint32_t read_data_count() const;
-	uint32_t write_data_count() const;
 	void set_pending_overwrite (bool);
 	int seek (framepos_t, bool complete_refill = false);
 	bool hidden () const;

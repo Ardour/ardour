@@ -95,9 +95,6 @@ class MidiSource : virtual public Source, public boost::enable_shared_from_this<
 	std::string captured_for() const               { return _captured_for; }
 	void        set_captured_for (std::string str) { _captured_for = str; }
 
-	uint32_t read_data_count()  const { return _read_data_count; }
-	uint32_t write_data_count() const { return _write_data_count; }
-
 	framepos_t last_write_end() const { return _last_write_end; }
 	void set_last_write_end (framepos_t pos) { _last_write_end = pos; }
 
@@ -155,8 +152,6 @@ class MidiSource : virtual public Source, public boost::enable_shared_from_this<
 					   framecnt_t cnt) = 0;
 
 	std::string      _captured_for;
-	mutable uint32_t _read_data_count;  ///< modified in read()
-	mutable uint32_t _write_data_count; ///< modified in write()
 
 	boost::shared_ptr<MidiModel> _model;
 	bool                         _writing;

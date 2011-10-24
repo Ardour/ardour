@@ -221,8 +221,6 @@ class Region
 
 	int apply (Filter &, Progress* progress = 0);
 
-	virtual uint64_t read_data_count () const { return _read_data_count; }
-
 	boost::shared_ptr<ARDOUR::Playlist> playlist () const { return _playlist.lock(); }
 	virtual void set_playlist (boost::weak_ptr<ARDOUR::Playlist>);
 
@@ -385,7 +383,6 @@ class Region
 	Timecode::BBT_Time      _bbt_time;
 	AnalysisFeatureList     _transients;
 
-	mutable uint64_t        _read_data_count;  ///< modified in read()
 	uint64_t                _last_layer_op;  ///< timestamp
 	SourceList              _sources;
 	/** Used when timefx are applied, so we can always use the original source */
