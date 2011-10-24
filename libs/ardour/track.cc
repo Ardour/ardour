@@ -76,6 +76,7 @@ Track::state (bool full)
 {
 	XMLNode& root (Route::state (full));
 	root.add_property (X_("monitoring"), enum_2_string (_monitoring));
+	root.add_property (X_("saved-meter-point"), enum_2_string (_saved_meter_point));
 	root.add_child_nocopy (_rec_enable_control->get_state());
 	root.add_child_nocopy (_diskstream->get_state ());
 	return root;
@@ -126,6 +127,12 @@ Track::_set_state (const XMLNode& node, int version)
 		_monitoring = MonitorChoice (string_2_enum (prop->value(), _monitoring));
 	} else {
 		_monitoring = MonitorAuto;
+	}
+
+	if ((prop = node.property (X_("saved-meter-point"))) != 0) {
+		_saved_meter_point = MeterPoint (string_2_enum (prop->value(), _saved_meter_point));
+	} else {
+		_saved_meter_point = _meter_point;
 	}
 
 	return 0;
