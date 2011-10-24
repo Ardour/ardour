@@ -243,6 +243,9 @@ restart:
 			}
 
 			switch (tr->do_refill ()) {
+			case 0:
+				break;
+				
 			case 1:
 				disk_work_outstanding = true;
 				break;
@@ -276,6 +279,9 @@ restart:
 			 */
 
 			switch (tr->do_flush (ButlerContext)) {
+			case 0:
+				break;
+				
 			case 1:
 				disk_work_outstanding = true;
 				break;
