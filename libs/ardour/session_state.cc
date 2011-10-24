@@ -28,8 +28,6 @@
 #include <fstream>
 #include <string>
 #include <cerrno>
-
-
 #include <cstdio> /* snprintf(3) ... grrr */
 #include <cmath>
 #include <unistd.h>
@@ -52,6 +50,8 @@
 
 #include <glibmm.h>
 #include <glibmm/thread.h>
+
+#include <boost/algorithm/string.hpp>
 
 #include "midi++/mmc.h"
 #include "midi++/port.h"
@@ -3670,6 +3670,8 @@ Session::rename (const std::string& new_name)
 	string newstr;
 	bool first = true;
 
+	string const old_sources_root = _session_dir->sources_root().to_string ();
+
 #define RENAME ::rename
 
 	/* Rename:
@@ -3788,6 +3790,17 @@ Session::rename (const std::string& new_name)
 		
 		if (RENAME (oldstr.c_str(), newstr.c_str()) != 0) {
 			return 1;
+		}
+	}
+
+	/* update file source paths */
+	
+	for (SourceMap::iterator i = sources.begin(); i != sources.end(); ++i) {
+		boost::shared_ptr<FileSource> fs = boost::dynamic_pointer_cast<FileSource> (i->second);
+		if (fs) {
+			string p = fs->path ();
+			boost::replace_all (p, old_sources_root, _session_dir->sources_root().to_string ());
+			fs->set_path (p);
 		}
 	}
 
