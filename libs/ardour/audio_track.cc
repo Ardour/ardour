@@ -208,8 +208,6 @@ int
 AudioTrack::_set_state (const XMLNode& node, int version)
 {
 	const XMLProperty *prop;
-	XMLNodeConstIterator iter;
-	XMLNode *child;
 
 	if (Track::_set_state (node, version)) {
 		return -1;
@@ -219,32 +217,6 @@ AudioTrack::_set_state (const XMLNode& node, int version)
 		_mode = TrackMode (string_2_enum (prop->value(), _mode));
 	} else {
 		_mode = Normal;
-	}
-
-	if (version >= 3000) {
-		if ((child = find_named_node (node, X_("Diskstream"))) != 0) {
-			boost::shared_ptr<AudioDiskstream> ds (new AudioDiskstream (_session, *child));
-			ds->do_refill_with_alloc ();
-			set_diskstream (ds);
-		}
-	}
-
-	/* set rec-enable control *AFTER* setting up diskstream, because it may want to operate
-	   on the diskstream as it sets its own state
-	*/
-
-	XMLNodeList nlist;
-	XMLNodeConstIterator niter;
-
-	nlist = node.children();
-	for (niter = nlist.begin(); niter != nlist.end(); ++niter){
-		child = *niter;
-
-		if (child->name() == Controllable::xml_node_name && (prop = child->property ("name")) != 0) {
-			if (prop->value() == X_("recenable")) {
-				_rec_enable_control->set_state (*child, version);
-			}
-		}
 	}
 
 	pending_state = const_cast<XMLNode*> (&node);
@@ -285,8 +257,6 @@ AudioTrack::state (bool full_state)
 	}
 
 	root.add_property (X_("mode"), enum_2_string (_mode));
-	root.add_child_nocopy (_rec_enable_control->get_state());
-	root.add_child_nocopy (_diskstream->get_state ());
 
 	return root;
 }
@@ -729,4 +699,8 @@ AudioTrack::bounceable () const
 	return n_inputs().n_audio() >= n_outputs().n_audio();
 }
 
-	
+boost::shared_ptr<Diskstream>
+AudioTrack::diskstream_factory (XMLNode const & node)
+{
+	return boost::shared_ptr<Diskstream> (new AudioDiskstream (_session, node));
+}

@@ -76,6 +76,8 @@ Track::state (bool full)
 {
 	XMLNode& root (Route::state (full));
 	root.add_property (X_("monitoring"), enum_2_string (_monitoring));
+	root.add_child_nocopy (_rec_enable_control->get_state());
+	root.add_child_nocopy (_diskstream->get_state ());
 	return root;
 }	
 
@@ -92,6 +94,32 @@ Track::_set_state (const XMLNode& node, int version)
 		return -1;
 	}
 
+	XMLNode* child;
+
+	if (version >= 3000) {
+		if ((child = find_named_node (node, X_("Diskstream"))) != 0) {
+			boost::shared_ptr<Diskstream> ds = diskstream_factory (*child);
+			ds->do_refill_with_alloc ();
+			set_diskstream (ds);
+		}
+	}
+
+	/* set rec-enable control *AFTER* setting up diskstream, because it may
+	   want to operate on the diskstream as it sets its own state
+	*/
+
+	XMLNodeList nlist = node.children();
+	for (XMLNodeConstIterator niter = nlist.begin(); niter != nlist.end(); ++niter) {
+		child = *niter;
+
+		XMLProperty* prop;
+		if (child->name() == Controllable::xml_node_name && (prop = child->property ("name")) != 0) {
+			if (prop->value() == X_("recenable")) {
+				_rec_enable_control->set_state (*child, version);
+			}
+		}
+	}
+	
 	const XMLProperty* prop;
 
 	if ((prop = node.property (X_("monitoring"))) != 0) {

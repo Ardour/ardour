@@ -143,7 +143,6 @@ int
 MidiTrack::_set_state (const XMLNode& node, int version)
 {
 	const XMLProperty *prop;
-	XMLNodeConstIterator iter;
 
 	if (Track::_set_state (node, version)) {
 		return -1;
@@ -164,34 +163,6 @@ MidiTrack::_set_state (const XMLNode& node, int version)
 
 	if ((prop = node.property ("input-active")) != 0) {
 		set_input_active (string_is_affirmative (prop->value()));
-	}
-
-	XMLNodeList nlist;
-	XMLNodeConstIterator niter;
-	XMLNode *child;
-
-	nlist = node.children();
-
-	if (version >= 3000) {
-		if ((child = find_named_node (node, X_("Diskstream"))) != 0) {
-			boost::shared_ptr<MidiDiskstream> ds (new MidiDiskstream (_session, *child));
-			ds->do_refill_with_alloc ();
-			set_diskstream (ds);
-		}
-	}
-
-	/* set rec-enable control *AFTER* setting up diskstream, because it may
-	   want to operate on the diskstream as it sets its own state
-	*/
-
-	for (niter = nlist.begin(); niter != nlist.end(); ++niter){
-		child = *niter;
-
-		if (child->name() == Controllable::xml_node_name && (prop = child->property ("name")) != 0) {
-			if (prop->value() == X_("recenable")) {
-				_rec_enable_control->set_state (*child, version);
-			}
-		}
 	}
 
 	pending_state = const_cast<XMLNode*> (&node);
@@ -233,8 +204,6 @@ MidiTrack::state(bool full_state)
 	}
 
 	root.add_property (X_("note-mode"), enum_2_string (_note_mode));
-	root.add_child_nocopy (_rec_enable_control->get_state());
-	root.add_child_nocopy (_diskstream->get_state ());
 
 	root.add_property ("step-editing", (_step_editing ? "yes" : "no"));
 	root.add_property ("note-mode", enum_2_string (_note_mode));
@@ -736,3 +705,8 @@ MidiTrack::track_input_active (IOChange change, void* /* src */)
 	}
 }
 
+boost::shared_ptr<Diskstream>
+MidiTrack::diskstream_factory (XMLNode const & node)
+{
+	return boost::shared_ptr<Diskstream> (new MidiDiskstream (_session, node));
+}

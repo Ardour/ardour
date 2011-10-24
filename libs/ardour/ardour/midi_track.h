@@ -118,6 +118,9 @@ protected:
 	bool send_silence () const;
 
   private:
+
+	virtual boost::shared_ptr<Diskstream> diskstream_factory (XMLNode const &);
+	
 	boost::shared_ptr<MidiDiskstream> midi_diskstream () const;
 
 	void write_out_of_band_data (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, framecnt_t nframes);
