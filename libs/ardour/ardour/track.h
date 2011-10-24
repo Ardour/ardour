@@ -162,7 +162,7 @@ class Track : public Route, public PublicDiskstream
 
   protected:
 	XMLNode& state (bool full);
-	int _set_state (const XMLNode&, int version, bool);
+	int _set_state (const XMLNode&, int version);
 
 	boost::shared_ptr<Diskstream> _diskstream;
 	MeterPoint    _saved_meter_point;

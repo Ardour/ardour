@@ -1884,11 +1884,11 @@ Route::state(bool full_state)
 int
 Route::set_state (const XMLNode& node, int version)
 {
-	return _set_state (node, version, true);
+	return _set_state (node, version);
 }
 
 int
-Route::_set_state (const XMLNode& node, int version, bool /*call_base*/)
+Route::_set_state (const XMLNode& node, int version)
 {
 	if (version < 3000) {
 		return _set_state_2X (node, version);

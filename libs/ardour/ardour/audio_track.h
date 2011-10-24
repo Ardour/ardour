@@ -67,7 +67,7 @@ class AudioTrack : public Track
 	boost::shared_ptr<AudioDiskstream> audio_diskstream () const;
 	XMLNode& state (bool full);
 
-	int _set_state (const XMLNode&, int, bool call_base);
+	int _set_state (const XMLNode&, int);
 
   private:
 	int  deprecated_use_diskstream_connections ();

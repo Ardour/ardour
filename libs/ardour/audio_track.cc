@@ -201,20 +201,18 @@ AudioTrack::deprecated_use_diskstream_connections ()
 int
 AudioTrack::set_state (const XMLNode& node, int version)
 {
-	return _set_state (node, version, true);
+	return _set_state (node, version);
 }
 
 int
-AudioTrack::_set_state (const XMLNode& node, int version, bool call_base)
+AudioTrack::_set_state (const XMLNode& node, int version)
 {
 	const XMLProperty *prop;
 	XMLNodeConstIterator iter;
 	XMLNode *child;
 
-	if (call_base) {
-		if (Track::_set_state (node, version, call_base)) {
-			return -1;
-		}
+	if (Track::_set_state (node, version)) {
+		return -1;
 	}
 
 	if ((prop = node.property (X_("mode"))) != 0) {

@@ -491,7 +491,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	virtual bool should_monitor () const;
 	virtual void maybe_declick (BufferSet&, framecnt_t, int);
 
-	virtual int  _set_state (const XMLNode&, int, bool call_base);
+	virtual int  _set_state (const XMLNode&, int);
 
 	boost::shared_ptr<Amp>       _amp;
 	boost::shared_ptr<PeakMeter> _meter;

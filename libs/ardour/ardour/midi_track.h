@@ -113,7 +113,7 @@ public:
 protected:
 	XMLNode& state (bool full);
 
-	int _set_state (const XMLNode&, int, bool call_base);
+	int _set_state (const XMLNode&, int);
 	bool should_monitor () const;
 	bool send_silence () const;
 

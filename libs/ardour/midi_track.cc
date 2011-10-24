@@ -136,19 +136,17 @@ MidiTrack::midi_diskstream() const
 int
 MidiTrack::set_state (const XMLNode& node, int version)
 {
-	return _set_state (node, version, true);
+	return _set_state (node, version);
 }
 
 int
-MidiTrack::_set_state (const XMLNode& node, int version, bool call_base)
+MidiTrack::_set_state (const XMLNode& node, int version)
 {
 	const XMLProperty *prop;
 	XMLNodeConstIterator iter;
 
-	if (call_base) {
-		if (Track::_set_state (node, version, call_base)) {
-			return -1;
-		}
+	if (Track::_set_state (node, version)) {
+		return -1;
 	}
 
 	// No destructive MIDI tracks (yet?)
