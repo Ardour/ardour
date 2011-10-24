@@ -76,6 +76,8 @@ public:
 
 	const std::string& origin() const { return _origin; }
 
+	virtual void set_path (const std::string&);
+	
 	static PBD::Signal3<int,std::string,std::string,std::vector<std::string> > AmbiguousFileName;
 
 protected:
@@ -88,7 +90,6 @@ protected:
 
 	virtual int init (const std::string& idstr, bool must_exist);
 
-	virtual void set_path (const std::string&);
 	virtual int move_dependents_to_trash() { return 0; }
 	void set_within_session_from_path (const std::string&);
 
