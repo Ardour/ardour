@@ -108,20 +108,20 @@ public:
 	 */
 	bool create ();
 
-protected:
-
-	/**
-	 * @return The path to the old style sound directory.
-	 * It isn't created by create().
-	 */
-	const PBD::sys::path old_sound_path () const;
-
 	/**
 	 * @return The path to the directory under which source directories
 	 * are created for different source types.
 	 * i.e root_path()/interchange/session_name
 	 */
 	const PBD::sys::path sources_root() const;
+
+private:
+
+	/**
+	 * @return The path to the old style sound directory.
+	 * It isn't created by create().
+	 */
+	const PBD::sys::path old_sound_path () const;
 
 	/**
 	 * @return a vector containing the fullpath of all subdirectories.
