@@ -117,7 +117,7 @@ PortExportChannelSelector::fill_route_list ()
 	channel_view.add_route (master);
 
 	for (RouteList::iterator it = routes.begin(); it != routes.end(); ++it) {
-		if ((*it)->output().get() == master) {
+		if ((*it)->is_master () || (*it)->is_monitor ()) {
 			continue;
 		}
 		channel_view.add_route ((*it)->output().get());
