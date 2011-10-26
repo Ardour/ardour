@@ -21,10 +21,12 @@
 #include "gui_thread.h"
 
 CairoWidget::CairoWidget ()
-	: _width (1),
-	  _height (1),
-	  _dirty (true),
-	  _pixmap (0)
+	: _width (1)
+	, _height (1)
+	, _state (CairoWidget::State (0))
+	, _dirty (true)
+	, _pixmap (0)
+	  
 {
 
 }
@@ -108,4 +110,38 @@ CairoWidget::on_size_allocate (Gtk::Allocation& alloc)
 	_height = alloc.get_height ();
 
 	set_dirty ();
+}
+
+Gdk::Color
+CairoWidget::get_parent_bg ()
+{
+        Widget* parent;
+
+	parent = get_parent ();
+
+        while (parent && !parent->get_has_window()) {
+                parent = parent->get_parent();
+        }
+
+        if (parent && parent->get_has_window()) {
+		return parent->get_style ()->get_bg (parent->get_state());
+        } 
+
+	return get_style ()->get_bg (get_state());
+}
+
+void
+CairoWidget::set_state (CairoWidget::State s, bool yn)
+{
+	if (yn) {
+		if (!(_state & s)) {
+			_state = CairoWidget::State (_state|s);
+			StateChanged ();
+		}
+	} else {
+		if (_state & s) {
+			_state = CairoWidget::State (_state & ~s);
+			StateChanged ();
+		}
+	}
 }

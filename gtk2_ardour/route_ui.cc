@@ -34,7 +34,7 @@
 #include "ardour_ui.h"
 #include "editor.h"
 #include "route_ui.h"
-#include "led.h"
+#include "ardour_button.h"
 #include "keyboard.h"
 #include "utils.h"
 #include "prompter.h"
@@ -81,6 +81,7 @@ RouteUI::~RouteUI()
 	delete sends_menu;
         delete record_menu;
 	delete _invert_menu;
+	delete solo_safe_image;
 }
 
 void
@@ -107,6 +108,7 @@ RouteUI::init ()
 	multiple_mute_change = false;
 	multiple_solo_change = false;
 	_i_am_the_modifier = 0;
+	solo_safe_image = 0;
 
 	setup_invert_buttons ();
 
@@ -137,19 +139,15 @@ RouteUI::init ()
 	// show_sends_button->set_self_managed (true);
 	UI::instance()->set_tip (show_sends_button, _("make mixer strips show sends to this bus"), "");
 
-	monitor_input_button = manage (new BindableToggleButton ());
-	// monitor_input_button->set_self_managed (true);
-	monitor_input_button->set_name ("MonitorInputButton");
-	monitor_input_button->add (monitor_input_button_label);
-	monitor_input_button_label.show ();
+	monitor_input_button = manage (new ArdourButton ());
+	monitor_input_button->set_name ("monitor");
+	monitor_input_button->set_text (_("In"));
 	UI::instance()->set_tip (monitor_input_button, _("Monitor input"), "");
 	monitor_input_button->set_no_show_all (true);
 
-	monitor_disk_button = manage (new BindableToggleButton ());
-	// monitor_disk_button->set_self_managed (true);
-	monitor_disk_button->set_name ("MonitorDiskButton");
-	monitor_disk_button->add (monitor_disk_button_label);
-	monitor_disk_button_label.show ();
+	monitor_disk_button = manage (new ArdourButton ());
+	monitor_disk_button->set_name ("monitor");
+	monitor_disk_button->set_text (_("Disk"));
 	UI::instance()->set_tip (monitor_disk_button, _("Monitor playback"), "");
 	monitor_disk_button->set_no_show_all (true);
 
@@ -170,12 +168,15 @@ RouteUI::init ()
 	solo_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::solo_release), false);
 	mute_button->signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::mute_press), false);
 	mute_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::mute_release), false);
+	
+	monitor_input_button->set_distinct_led_click (false);
+	monitor_disk_button->set_distinct_led_click (false);
 
-	monitor_input_button->signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::monitor_input_press), false);
-	monitor_input_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::monitor_input_release), false);
+	monitor_input_button->signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::monitor_input_press));
+	monitor_input_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::monitor_input_release));
 
-	monitor_disk_button->signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::monitor_disk_press), false);
-	monitor_disk_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::monitor_disk_release), false);
+	monitor_disk_button->signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::monitor_disk_press));
+	monitor_disk_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::monitor_disk_release));
 }
 
 void
@@ -607,22 +608,26 @@ RouteUI::update_monitoring_display ()
 	MonitorState ms = t->monitoring_state();
 
 	if (t->monitoring_choice() & MonitorInput) {
-		monitor_input_button->set_visual_state (1);
+		monitor_input_button->set_state (CairoWidget::Active, true);
+		monitor_input_button->set_state (CairoWidget::Mid, false);
 	} else {
 		if (ms & MonitoringInput) {
-			monitor_input_button->set_visual_state (2);
+			monitor_input_button->set_state (CairoWidget::Mid, true);
+			monitor_input_button->set_state (CairoWidget::Active, false);
 		} else {
-			monitor_input_button->set_visual_state (0);
+			monitor_input_button->set_state (CairoWidget::State (CairoWidget::Active|CairoWidget::Mid), false);
 		}
 	}
 
 	if (t->monitoring_choice() & MonitorDisk) {
-		monitor_disk_button->set_visual_state (1);
+		monitor_disk_button->set_state (CairoWidget::Active, true);
+			monitor_disk_button->set_state (CairoWidget::Mid, false);
 	} else {
 		if (ms & MonitoringDisk) {
-			monitor_disk_button->set_visual_state (2);
+			monitor_disk_button->set_state (CairoWidget::Mid, true);
+			monitor_disk_button->set_state (CairoWidget::Active, false);
 		} else {
-			monitor_disk_button->set_visual_state (0);
+			monitor_disk_button->set_state (CairoWidget::State (CairoWidget::Active|CairoWidget::Mid), false);
 		}
 	}
 }
@@ -1061,11 +1066,11 @@ RouteUI::update_solo_display ()
         set_button_names ();
 
         if (solo_isolated_led) {
-                solo_isolated_led->set_visual_state (_route->solo_isolated() ? 1 : 0);
+                solo_isolated_led->set_state (CairoWidget::Active, _route->solo_isolated());
         }
 
         if (solo_safe_led) {
-                solo_safe_led->set_visual_state (_route->solo_safe() ? 1 : 0);
+                solo_safe_led->set_state (CairoWidget::Active, _route->solo_safe());
         }
 
 	solo_button->set_visual_state (solo_visual_state (_route));
@@ -1335,7 +1340,7 @@ RouteUI::solo_isolate_button_release (GdkEventButton* ev)
                 return true;
         }
 
-        bool view = (solo_isolated_led->visual_state() != 0);
+        bool view = (solo_isolated_led->state() & (CairoWidget::Active|CairoWidget::Mid));
         bool model = _route->solo_isolated();
 
         /* called BEFORE the view has changed */
@@ -1366,7 +1371,7 @@ RouteUI::solo_isolate_button_release (GdkEventButton* ev)
 bool
 RouteUI::solo_safe_button_release (GdkEventButton*)
 {
-        _route->set_solo_safe (!(solo_safe_led->visual_state() > 0), this);
+        _route->set_solo_safe (!(solo_safe_led->state() & (CairoWidget::Active|CairoWidget::Mid)), this);
         return true;
 }
 

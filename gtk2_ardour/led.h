@@ -30,6 +30,8 @@ class LED : public CairoWidget
 	LED ();
 	virtual ~LED ();
 
+	void set_active (bool yn);
+	bool active () const { return _active; }
         void set_visual_state (int32_t s);
         int32_t visual_state() const { return _visual_state; }
         void set_diameter (float);

@@ -101,63 +101,38 @@ ProcessorEntry::ProcessorEntry (boost::shared_ptr<Processor> p, Width w)
 	, _width (w)
 	, _visual_state (Gtk::STATE_NORMAL)
 {
-	_hbox.pack_start (_active, false, false);
-	_event_box.add (_name);
-	_hbox.pack_start (_event_box, true, true);
-	_vbox.pack_start (_hbox);
-	_frame.add (_vbox);
-
-	/* without this, the border is mis-drawn on some systems */
-	_vbox.set_border_width (1);
-
-	_name.set_alignment (0, 0.5);
-	_name.set_text (name ());
-	_name.set_padding (2, 2);
-
-	if (boost::dynamic_pointer_cast<Amp> (p)) {
-		/* Fader processor gets a special look */
-		_event_box.set_name ("ProcessorFader");
-		_frame.set_name ("ProcessorFaderFrame");
-		_name.set_padding (2, 4);
-	}
-
-	_active.set_active (_processor->active ());
-	_active.signal_toggled().connect (sigc::mem_fun (*this, &ProcessorEntry::active_toggled));
-
-	_frame.show ();
+	_vbox.pack_start (_button, true, true);
 	_vbox.show ();
-	_hbox.show ();
-	_event_box.show ();
-	_name.show ();
-	_active.show ();
+	
+	_button.set_state (CairoWidget::Active, _processor->active());
+	_button.set_diameter (3);
+	_button.signal_clicked.connect (sigc::mem_fun (*this, &ProcessorEntry::led_clicked));
+	_button.set_text (name());
+	_button.set_led_left (true);
+	_button.show ();
 
 	_processor->ActiveChanged.connect (active_connection, invalidator (*this), boost::bind (&ProcessorEntry::processor_active_changed, this), gui_context());
 	_processor->PropertyChanged.connect (name_connection, invalidator (*this), ui_bind (&ProcessorEntry::processor_property_changed, this, _1), gui_context());
+
+	setup_visuals ();
 }
 
 EventBox&
 ProcessorEntry::action_widget ()
 {
-	return _event_box;
+	return _button;
 }
 
 Gtk::Widget&
 ProcessorEntry::widget ()
 {
-	return _frame;
+	return _vbox;
 }
 
 string
 ProcessorEntry::drag_text () const
 {
 	return name ();
-}
-
-void
-ProcessorEntry::set_visual_state (Gtk::StateType t)
-{
-	_visual_state = t;
-	setup_visuals ();
 }
 
 void
@@ -168,46 +143,41 @@ ProcessorEntry::set_position (Position p)
 }
 
 void
+ProcessorEntry::set_visual_state (Gtk::StateType t)
+{
+	/* map from GTK state to CairoWidget */
+
+	switch (t) {
+	case Gtk::STATE_ACTIVE:
+		_button.set_state (CairoWidget::Active, true);
+		break;
+
+	case Gtk::STATE_SELECTED:
+		_button.set_state (CairoWidget::Selected, true);
+		break;
+
+	case Gtk::STATE_NORMAL:
+	default:
+		_button.set_state (CairoWidget::Selected, false);
+		_button.set_state (CairoWidget::Active, false);
+		break;
+	}
+}
+
+void
 ProcessorEntry::setup_visuals ()
 {
 	switch (_position) {
 	case PreFader:
-		_event_box.set_name ("ProcessorPreFader");
-		if (_visual_state == Gtk::STATE_NORMAL) {
-			_frame.set_name ("ProcessorPreFaderFrame");
-		}
+		_button.set_name ("processor prefader");
 		break;
 
 	case Fader:
-		_event_box.set_name ("ProcessorFader");
-		if (_visual_state == Gtk::STATE_NORMAL) {
-			_frame.set_name ("ProcessorFaderFrame");
-		}
+		_button.set_name ("processor fader");
 		break;
 
 	case PostFader:
-		_event_box.set_name ("ProcessorPostFader");
-		if (_visual_state == Gtk::STATE_NORMAL) {
-			_frame.set_name ("ProcessorPostFaderFrame");
-		}
-		break;
-	}
-
-	switch (_visual_state) {
-	case Gtk::STATE_NORMAL:
-		/* _frame has been set up above */
-		_event_box.set_state (Gtk::STATE_NORMAL);
-		break;
-	case Gtk::STATE_SELECTED:
-		_frame.set_name ("ProcessorFrameSelected");
-		/* don't change the background of the box when it is selected */
-		_event_box.set_state (Gtk::STATE_NORMAL);
-		break;
-	case Gtk::STATE_ACTIVE:
-		_frame.set_name ("ProcessorFrameActiveSend");
-		_event_box.set_state (Gtk::STATE_ACTIVE);
-		break;
-	default:
+		_button.set_name ("processor postfader");
 		break;
 	}
 }
@@ -226,32 +196,26 @@ ProcessorEntry::set_enum_width (Width w)
 }
 
 void
-ProcessorEntry::active_toggled ()
+ProcessorEntry::led_clicked()
 {
-	if (_active.get_active ()) {
-		if (!_processor->active ()) {
-			_processor->activate ();
-		}
+	if (!_processor->active ()) {
+		_processor->activate ();
 	} else {
-		if (_processor->active ()) {
-			_processor->deactivate ();
-		}
+		_processor->deactivate ();
 	}
 }
 
 void
 ProcessorEntry::processor_active_changed ()
 {
-	if (_active.get_active () != _processor->active ()) {
-		_active.set_active (_processor->active ());
-	}
+	_button.set_state (CairoWidget::Active, _processor->active());
 }
 
 void
 ProcessorEntry::processor_property_changed (const PropertyChange& what_changed)
 {
 	if (what_changed.contains (ARDOUR::Properties::name)) {
-		_name.set_text (name ());
+		_button.set_text (name ());
 	}
 }
 

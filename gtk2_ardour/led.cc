@@ -70,15 +70,15 @@ LED::render (cairo_t* cr)
                 c = style->get_bg (get_state());
         }
 
-
+#if 0
         cairo_rectangle(cr, 0, 0, _width, _height);
         cairo_stroke_preserve(cr);
         cairo_set_source_rgb(cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
         cairo_fill(cr);
+#endif
 
 	cairo_translate(cr, _width/2, _height/2);
 
-#if 0
 	//inset
 	cairo_pattern_t *pat = cairo_pattern_create_linear (0.0, 0.0, 0.0, _diameter);
 	cairo_pattern_add_color_stop_rgba (pat, 0, 0,0,0, 0.4);
@@ -107,13 +107,16 @@ LED::render (cairo_t* cr)
 	cairo_set_source (cr, pat2);
 	cairo_fill (cr);
 	cairo_pattern_destroy (pat2);
-#endif
-
-	cairo_set_source_rgba (cr, _red, _green, _blue,  1.0);
-	cairo_arc (cr, 0, 0, _diameter/2-5, 0, 2 * M_PI);
-	cairo_fill(cr);
 
 	cairo_stroke (cr);
+}
+
+void
+LED::set_active (bool yn) 
+{
+	_active = yn;
+	_visual_state = (yn ? 1 : 0);
+	set_colors_from_style ();
 }
 
 void

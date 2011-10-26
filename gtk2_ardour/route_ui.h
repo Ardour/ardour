@@ -47,7 +47,7 @@ namespace Gtk {
 }
 
 class BindableToggleButton;
-class LED;
+class ArdourButton;
 
 class RouteUI : public virtual AxisView
 {
@@ -94,11 +94,13 @@ class RouteUI : public virtual AxisView
 	BindableToggleButton* solo_button;
 	BindableToggleButton* rec_enable_button; /* audio tracks */
 	BindableToggleButton* show_sends_button; /* busses */
-	BindableToggleButton* monitor_input_button;
-	BindableToggleButton* monitor_disk_button;
+	ArdourButton* monitor_input_button;
+	ArdourButton* monitor_disk_button;
 
-        LED* solo_safe_led;
-        LED* solo_isolated_led;
+	Gtk::Image* solo_safe_image;
+
+        ArdourButton* solo_safe_led;
+        ArdourButton* solo_isolated_led;
 
 	Gtk::Label solo_button_label;
 	Gtk::Label mute_button_label;

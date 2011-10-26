@@ -27,6 +27,7 @@
 #@color solo #A8F730
 #@color midi_channel_selector #A8F730
 #@color isolate #B9ECF2
+#@color solo_lock #3593DA
 #@color mute #FFFA87
 #@color mono #DEC
 #@color monitor #FFAB34
@@ -41,7 +42,7 @@
 #@color send_bg #C4C4B8
 
 #@color processor_frame_selected #E2CC33
-#@color processor_fader_bg #666666
+#@color processor_fader #666666
 #@color processor_fader_frame #7F7F7F
 #@color processor_prefader #4D0000
 #@color processor_prefader_frame #7F0000

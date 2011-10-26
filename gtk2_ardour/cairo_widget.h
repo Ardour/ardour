@@ -35,14 +35,33 @@ public:
 
 	void set_dirty ();
 
+	/* widget states: unlike GTK, these OR-together so that
+	   a widget can be both Active *and* Selected, rather than
+	   each one being orthogonal.
+	*/
+
+	enum State {
+		Active = 0x1,
+		Mid = 0x2,
+		Selected = 0x4,
+		Prelight = 0x8,
+		Insensitive = 0x10,
+	};
+
+	State state() const { return _state; }
+	virtual void set_state (State, bool);
+	sigc::signal<void> StateChanged;
+
 protected:
 	/** Render the widget to the given Cairo context */
 	virtual void render (cairo_t *) = 0;
 	virtual bool on_expose_event (GdkEventExpose *);
 	void on_size_allocate (Gtk::Allocation &);
+	Gdk::Color get_parent_bg ();
 
 	int _width; ///< pixmap width
 	int _height; ///< pixmap height
+	State _state;
 
 private:
 	bool _dirty; ///< true if the pixmap requires re-rendering

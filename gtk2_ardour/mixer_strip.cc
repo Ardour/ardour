@@ -56,7 +56,7 @@
 #include "mixer_strip.h"
 #include "mixer_ui.h"
 #include "keyboard.h"
-#include "led.h"
+#include "ardour_button.h"
 #include "public_editor.h"
 #include "send_ui.h"
 #include "io_selector.h"
@@ -86,7 +86,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, bool in_mixer)
 	, gpm (sess, 250)
 	, panners (sess)
 	, button_table (3, 1)
-	, solo_led_table (2, 2)
+	, rec_solo_table (2, 2)
 	, top_button_table (1, 2)
 	, middle_button_table (1, 2)
 	, bottom_button_table (1, 2)
@@ -185,54 +185,42 @@ MixerStrip::init ()
 	mute_button->set_name ("MixerMuteButton");
 	solo_button->set_name ("MixerSoloButton");
 
-	monitor_input_button->set_name ("MixerMonitorInputButton");
-	monitor_disk_button->set_name ("MixerMonitorInputButton");
+	monitor_input_button->set_diameter (3);
+	monitor_disk_button->set_diameter (3);
 
-        solo_isolated_led = manage (new LED);
+        solo_isolated_led = manage (new ArdourButton);
         solo_isolated_led->show ();
-        solo_isolated_led->set_diameter (6);
+        solo_isolated_led->set_diameter (3);
         solo_isolated_led->set_no_show_all (true);
-        solo_isolated_led->set_name (X_("SoloIsolatedLED"));
+        solo_isolated_led->set_name (X_("solo isolate"));
         solo_isolated_led->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
         solo_isolated_led->signal_button_release_event().connect (sigc::mem_fun (*this, &RouteUI::solo_isolate_button_release));
 	UI::instance()->set_tip (solo_isolated_led, _("Isolate Solo"), "");
 
-        solo_safe_led = manage (new LED);
+        solo_safe_led = manage (new ArdourButton);
         solo_safe_led->show ();
-        solo_safe_led->set_diameter (6);
+        solo_safe_led->set_diameter (3);
         solo_safe_led->set_no_show_all (true);
-        solo_safe_led->set_name (X_("SoloSafeLED"));
+        solo_safe_led->set_name (X_("solo safe"));
         solo_safe_led->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
         solo_safe_led->signal_button_release_event().connect (sigc::mem_fun (*this, &RouteUI::solo_safe_button_release));
 	UI::instance()->set_tip (solo_safe_led, _("Lock Solo Status"), "");
 
-	_iso_label = manage (new Label (_("iso")));
-	_safe_label = manage (new Label (_("lock")));
-
-	_iso_label->set_name (X_("SoloLEDLabel"));
-	_safe_label->set_name (X_("SoloLEDLabel"));
-
-	_iso_label->show ();
-	_safe_label->show ();
-
-        solo_led_table.set_spacings (0);
-        solo_led_table.set_border_width (1);
-	solo_led_table.attach (*_iso_label, 0, 1, 0, 1, Gtk::FILL, Gtk::FILL);
-        solo_led_table.attach (*solo_isolated_led, 1, 2, 0, 1, Gtk::FILL, Gtk::FILL);
-	solo_led_table.attach (*_safe_label, 0, 1, 1, 2, Gtk::FILL, Gtk::FILL);
-        solo_led_table.attach (*solo_safe_led, 1, 2, 1, 2, Gtk::FILL, Gtk::FILL);
-        solo_led_table.show ();
+	solo_safe_led->set_text (_("lock"));
+	solo_isolated_led->set_text (_("iso"));
 
 	top_button_table.set_homogeneous (true);
-	top_button_table.set_spacings (0);
+	top_button_table.set_spacings (2);
 	top_button_table.attach (*monitor_input_button, 0, 1, 0, 1);
         top_button_table.attach (*monitor_disk_button, 1, 2, 0, 1);
 	top_button_table.show ();
 
-	below_panner_box.set_border_width (2);
-	below_panner_box.set_spacing (2);
-        below_panner_box.pack_end (solo_led_table, false, false);
-        below_panner_box.show ();
+	rec_solo_table.set_homogeneous (true);
+	rec_solo_table.set_row_spacings (2);
+	rec_solo_table.set_col_spacings (2);
+        rec_solo_table.attach (*solo_isolated_led, 1, 2, 0, 1);
+        rec_solo_table.attach (*solo_safe_led, 1, 2, 1, 2);
+        rec_solo_table.show ();
 
 	button_table.set_homogeneous (true);
 	button_table.set_spacings (0);
@@ -281,9 +269,9 @@ MixerStrip::init ()
 	global_vpacker.pack_start (button_table, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (processor_box, true, true);
 	global_vpacker.pack_start (panners, Gtk::PACK_SHRINK);
-	global_vpacker.pack_start (top_button_table, Gtk::PACK_SHRINK);
-	global_vpacker.pack_start (below_panner_box, Gtk::PACK_SHRINK);
-	global_vpacker.pack_start (middle_button_table, Gtk::PACK_SHRINK);
+	global_vpacker.pack_start (top_button_table, Gtk::PACK_SHRINK, 2);
+	global_vpacker.pack_start (rec_solo_table, Gtk::PACK_SHRINK, 2);
+	global_vpacker.pack_start (middle_button_table, Gtk::PACK_SHRINK, 2);
 	global_vpacker.pack_start (gpm, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (bottom_button_table, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (output_button, Gtk::PACK_SHRINK);
@@ -362,11 +350,11 @@ void
 MixerStrip::set_route (boost::shared_ptr<Route> rt)
 {
 	if (rec_enable_button->get_parent()) {
-		below_panner_box.remove (*rec_enable_button);
+		rec_solo_table.remove (*rec_enable_button);
 	}
 
 	if (show_sends_button->get_parent()) {
-		below_panner_box.remove (*show_sends_button);
+		rec_solo_table.remove (*show_sends_button);
 	}
 
 	processor_box.set_route (rt);
@@ -388,10 +376,10 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 
 	if (route()->is_master()) {
 		solo_button->hide ();
-		below_panner_box.hide ();
+		rec_solo_table.hide ();
 	} else {
 		solo_button->show ();
-		below_panner_box.show ();
+		rec_solo_table.show ();
 	}
 
 	if (_mixer_owned && (route()->is_master() || route()->is_monitor())) {
@@ -453,7 +441,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 
 	if (is_track ()) {
 
-		below_panner_box.pack_start (*rec_enable_button);
+		rec_solo_table.attach (*rec_enable_button, 0, 1, 0, 2);
 		rec_enable_button->set_sensitive (_session->writable());
 		rec_enable_button->show();
 
@@ -462,7 +450,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		/* non-master bus */
 
 		if (!_route->is_master()) {
-			below_panner_box.pack_start (*show_sends_button);
+			rec_solo_table.attach (*show_sends_button, 0, 1, 0, 2);
 			show_sends_button->show();
 		}
 	}
@@ -586,8 +574,8 @@ MixerStrip::set_width_enum (Width w, void* owner)
 					panners.astate_string(_route->panner()->automation_state()));
 		}
 
-		_iso_label->show ();
-		_safe_label->show ();
+		solo_isolated_led->set_text (_("iso"));
+		solo_safe_led->set_text (_("lock"));
 
 		Gtkmm2ext::set_size_request_to_display_given_text (name_button, "long", 2, 2);
 		set_size_request (-1, -1);
@@ -609,9 +597,9 @@ MixerStrip::set_width_enum (Width w, void* owner)
 			((Gtk::Label*)panners.pan_automation_state_button.get_child())->set_text (
 			panners.short_astate_string(_route->panner()->automation_state()));
 		}
-
-		_iso_label->hide ();
-		_safe_label->hide ();
+		
+		solo_isolated_led->set_text ("");
+		solo_safe_led->set_text ("");
 
 		Gtkmm2ext::set_size_request_to_display_given_text (name_button, longest_label.c_str(), 2, 2);
 		set_size_request (max (50, gpm.get_gm_width()), -1);
@@ -1737,11 +1725,20 @@ MixerStrip::set_button_names ()
 	case Wide:
 		rec_enable_button_label.set_text (_("Rec"));
 		mute_button_label.set_text (_("Mute"));
-		monitor_input_button_label.set_text (_("In"));
-		monitor_disk_button_label.set_text (_("Disk"));
+		monitor_input_button->set_text (_("In"));
+		monitor_disk_button->set_text (_("Disk"));
+
 		if (_route && _route->solo_safe()) {
-			solo_button_label.set_text (X_("!"));
+			solo_button->remove ();
+			if (solo_safe_image == 0) {
+				solo_safe_image = new Gtk::Image (::get_icon("solo-safe-enabled"));
+				solo_safe_image->show ();
+			}
+			solo_button->add (*solo_safe_image);
 		} else {
+			solo_button->remove ();
+			solo_button->add (solo_button_label);
+			solo_button_label.show ();
 			if (!Config->get_solo_control_is_listen_control()) {
 				solo_button_label.set_text (_("Solo"));
 			} else {
@@ -1760,10 +1757,19 @@ MixerStrip::set_button_names ()
 	default:
 		rec_enable_button_label.set_text (_("R"));
 		mute_button_label.set_text (_("M"));
-		monitor_input_button_label.set_text (_("I"));
-		monitor_disk_button_label.set_text (_("D"));
+		monitor_input_button->set_text (_("I"));
+		monitor_disk_button->set_text (_("D"));
 		if (_route && _route->solo_safe()) {
-			solo_button_label.set_text (X_("!"));
+			solo_button->remove ();
+			if (solo_safe_image == 0) {
+				solo_safe_image = new Gtk::Image (::get_icon("solo-safe-enabled"));
+				solo_safe_image->show ();
+			}
+			solo_button->add (*solo_safe_image);
+		} else {
+			solo_button->remove ();
+			solo_button->add (solo_button_label);
+			solo_button_label.show ();
 			if (!Config->get_solo_control_is_listen_control()) {
 				solo_button_label.set_text (_("S"));
 			} else {

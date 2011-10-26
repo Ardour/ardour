@@ -148,52 +148,16 @@ style "mixer_track_rec_enable_button_active" = "track_rec_enable_button_active"
 	ythickness = 0
 }
 
-style "monitor_input_button" = "small_button"
+style "monitor" = "small_button"
 {
-        fg[NORMAL] = darker(@@COLPREFIX@_fg)
-        fg[PRELIGHT] = darker(@@COLPREFIX@_fg)
-        bg[NORMAL] = mix(0.1,@@COLPREFIX@_monitor,darker(@@COLPREFIX@_bg))
-        bg[PRELIGHT] = mix(0.1,@@COLPREFIX@_somewhat_bright_indicator,darker(@@COLPREFIX@_bg))
 }
 
-style "monitor_input_button_active" = "small_button"
+style "solo_isolate" = "very_small_text"
 {
-	fg[NORMAL] = @@COLPREFIX@_fg
-	fg[PRELIGHT] = @@COLPREFIX@_fg
-	bg[NORMAL] = mix (0.8, @@COLPREFIX@_monitor, darker (@@COLPREFIX@_bg))
-	bg[PRELIGHT] = mix (0.8, @@COLPREFIX@_monitor, darker (@@COLPREFIX@_bg))
 }
 
-style "monitor_input_button_alternate" = "small_button"
+style "solo_safe" = "very_small_text"
 {
-	fg[NORMAL] = @@COLPREFIX@_fg
-	fg[PRELIGHT] = @@COLPREFIX@_fg
-        bg[NORMAL] = mix(0.5,@@COLPREFIX@_monitor,darker(@@COLPREFIX@_bg))
-        bg[PRELIGHT] = mix(0.5,@@COLPREFIX@_monitor,darker(@@COLPREFIX@_bg))
-}
-
-style "monitor_disk_button" = "small_button"
-{
-        fg[NORMAL] = darker(@@COLPREFIX@_fg)
-        fg[PRELIGHT] = darker(@@COLPREFIX@_fg)
-        bg[NORMAL] = mix(0.1,@@COLPREFIX@_monitor,darker(@@COLPREFIX@_bg))
-        bg[PRELIGHT] = mix(0.1,@@COLPREFIX@_monitor,darker(@@COLPREFIX@_bg))
-}
-
-style "monitor_disk_button_active" = "small_button"
-{
-	fg[NORMAL] = @@COLPREFIX@_fg
-	fg[PRELIGHT] = @@COLPREFIX@_fg
-	bg[NORMAL] = @@COLPREFIX@_monitor
-	bg[PRELIGHT] = @@COLPREFIX@_monitor
-}
-
-style "monitor_disk_button_alternate" = "small_button"
-{
-	fg[NORMAL] = @@COLPREFIX@_fg
-	fg[PRELIGHT] = @@COLPREFIX@_fg
-        bg[NORMAL] = mix(0.5,@@COLPREFIX@_monitor,darker(@@COLPREFIX@_bg))
-        bg[PRELIGHT] = mix(0.5,@@COLPREFIX@_monitor,darker(@@COLPREFIX@_bg))
 }
 
 style "solo_button" = "small_button"
@@ -201,18 +165,6 @@ style "solo_button" = "small_button"
   bg[NORMAL] = mix(0.1,@@COLPREFIX@_solo,@@COLPREFIX@_bg)
   bg[ACTIVE] = @@COLPREFIX@_solo
   fg[ACTIVE] = @@COLPREFIX@_darkest
-}
-
-style "solo_isolate_led"
-{
-  fg[NORMAL] = mix(0.2,@@COLPREFIX@_isolate, @@COLPREFIX@_darkest)
-  fg[ACTIVE] = @@COLPREFIX@_isolate
-}
-
-style "solo_safe_led"
-{
-  fg[NORMAL] = mix(0.2,@@COLPREFIX@_isolate, @@COLPREFIX@_darkest)
-  fg[ACTIVE] = @@COLPREFIX@_isolate
 }
 
 style "solo_button_alternate" = "small_button"
@@ -263,6 +215,10 @@ style "solo_button_active" = "small_button"
 	fg[PRELIGHT] = @@COLPREFIX@_darkest
 }
 
+style "processor" = "small_text"
+{
+}
+
 style "mixer_invert_button" = "small_button"
 {
 	bg[ACTIVE] = @@COLPREFIX@_not_so_bright_indicator
@@ -289,42 +245,6 @@ style "mixer_solo_button_alternate2" = "solo_button_alternate2"
 
 
 style "mixer_solo_button_active" = "solo_button_active"
-{
-	xthickness = 0
-	ythickness = 0
-}
-
-style "mixer_monitor_input" = "monitor_input_button"
-{
-	xthickness = 0
-	ythickness = 0
-}
-
-style "mixer_monitor_input_active" = "monitor_input_button_active"
-{
-	xthickness = 0
-	ythickness = 0
-}
-
-style "mixer_monitor_input_alternate" = "monitor_input_button_alternate"
-{
-	xthickness = 0
-	ythickness = 0
-}
-
-style "mixer_monitor_disk" = "monitor_disk_button"
-{
-	xthickness = 0
-	ythickness = 0
-}
-
-style "mixer_monitor_disk_active" = "monitor_disk_button_active"
-{
-	xthickness = 0
-	ythickness = 0
-}
-
-style "mixer_monitor_disk_alternate" = "monitor_disk_button_alternate"
 {
 	xthickness = 0
 	ythickness = 0
@@ -985,56 +905,12 @@ style "processor_list" = "very_small_text"
 	bg[NORMAL] = @@COLPREFIX@_darkest
         bg[ACTIVE] = shade (1.8, @@COLPREFIX@_fg_selected)
         fg[ACTIVE] = @@COLPREFIX@_darkest
-	GtkCheckButton::indicator-size = 10
-	GtkCheckButton::indicator-spacing = 0
-}
-
-# Colour of a processor frame when it is selected
-style "processor_frame_selected"
-{
-	bg[NORMAL] = @@COLPREFIX@_fg_selected
 }
 
 # Colour of a processor frame when it is a send whose level is being controller by the fader
 style "processor_frame_active_send"
 {
 	bg[NORMAL] = @@COLPREFIX@_send_fg
-}
-
-# Fader processor's background
-style "processor_fader"
-{
-	bg[NORMAL] = @@COLPREFIX@_processor_fader_bg
-}
-
-# Fader processor's frame
-style "processor_fader_frame" 
-{
-bg[NORMAL] = @@COLPREFIX@_processor_fader_frame
-}
-
-# Pre-fader processor's background
-style "processor_prefader"
-{
-	bg[NORMAL] = @@COLPREFIX@_processor_prefader
-}
-
-# Pre-fader processor's frame
-style "processor_prefader_frame"
-{
-	bg[NORMAL] = @@COLPREFIX@_processor_prefader_frame
-}
-
-# Post-fader processor's background
-style "processor_postfader"
-{
-	bg[NORMAL] = @@COLPREFIX@_processor_postfader
-}
-
-# Post-fader processor's frame
-style "processor_postfader_frame"
-{
-	bg[NORMAL] = @@COLPREFIX@_processor_postfader_frame
 }
 
 # MixerPanZone:

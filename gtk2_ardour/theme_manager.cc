@@ -163,6 +163,7 @@ ThemeManager::button_press_event (GdkEventButton* ev)
 
 				ccvar = (*iter)[columns.pVar];
 				ccvar->set(rgba);
+				ARDOUR_UI::config()->set_dirty ();
 
 				//ColorChanged (rgba);
 				ColorsChanged();//EMIT SIGNAL
@@ -227,6 +228,7 @@ ThemeManager::on_dark_theme_button_toggled()
 	} else {
 		ARDOUR_UI::config()->ui_rc_file.set("ardour3_ui_dark.rc");
 	}
+	ARDOUR_UI::config()->set_dirty ();
 
 	load_rc_file (ARDOUR_UI::config()->ui_rc_file.get(), true);
 }
@@ -251,19 +253,20 @@ ThemeManager::setup_theme ()
 	int r, g, b, a;
 	color_list->clear();
 
-	for (std::vector<UIConfigVariable<uint32_t> *>::iterator i = ARDOUR_UI::config()->canvas_colors.begin(); i != ARDOUR_UI::config()->canvas_colors.end(); i++) {
+	for (std::map<std::string,UIConfigVariable<uint32_t> *>::iterator i = ARDOUR_UI::config()->canvas_colors.begin(); i != ARDOUR_UI::config()->canvas_colors.end(); i++) {
 
 		TreeModel::Row row = *(color_list->append());
 
 		Gdk::Color col;
-		uint32_t rgba = (*i)->get();
+		UIConfigVariable<uint32_t>* var = i->second;
+		uint32_t rgba = var->get();
 		UINT_TO_RGBA (rgba, &r, &g, &b, &a);
 		//cerr << (*i)->name() << " == " << hex << rgba << ": " << hex << r << " " << hex << g << " " << hex << b << endl;
 		col.set_rgb_p (r / 255.0, g / 255.0, b / 255.0);
 
-		row[columns.name] = (*i)->name();
+		row[columns.name] = var->name();
 		row[columns.color] = "";
-		row[columns.pVar] = *i;
+		row[columns.pVar] = var;
 		row[columns.rgba] = rgba;
 		row[columns.gdkcolor] = col;
 

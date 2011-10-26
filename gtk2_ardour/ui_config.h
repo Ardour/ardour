@@ -74,7 +74,10 @@ class UIConfiguration : public PBD::Stateful
 	UIConfiguration();
 	~UIConfiguration();
 
-	std::vector<UIConfigVariable<uint32_t> *> canvas_colors;
+	std::map<std::string,UIConfigVariable<uint32_t> *> canvas_colors;
+
+	bool dirty () const;
+	void set_dirty ();
 
 	int load_state ();
 	int save_state ();
@@ -85,6 +88,8 @@ class UIConfiguration : public PBD::Stateful
 	XMLNode& get_variables (std::string);
 	void set_variables (const XMLNode&);
 	void pack_canvasvars ();
+
+	uint32_t color_by_name (const std::string&);
 
 	sigc::signal<void,const char*> ParameterChanged;
 
@@ -99,7 +104,7 @@ class UIConfiguration : public PBD::Stateful
 
   private:
 	XMLNode& state ();
-	bool hack;
+	bool _dirty;
 };
 
 #endif /* __ardour_ui_configuration_h__ */

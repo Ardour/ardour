@@ -2350,8 +2350,16 @@ RouteTimeAxisView::set_button_names ()
 	rec_enable_button_label.set_text (_("r"));
 
         if (_route && _route->solo_safe()) {
-                solo_button_label.set_text (X_("!"));
+		solo_button->remove ();
+		if (solo_safe_image == 0) {
+			solo_safe_image = new Gtk::Image (::get_icon("solo-safe-enabled"));
+			solo_safe_image->show ();
+		}
+		solo_button->add (*solo_safe_image);
         } else {
+		solo_button->remove ();
+		solo_button->add (solo_button_label);
+		solo_button_label.show ();
                 if (Config->get_solo_control_is_listen_control()) {
                         switch (Config->get_listen_position()) {
                         case AfterFaderListen:

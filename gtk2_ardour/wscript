@@ -29,6 +29,7 @@ gtk2_ardour_sources = [
         'add_route_dialog.cc',
         'ambiguous_file_dialog.cc',
         'analysis_window.cc',
+        'ardour_button.cc',
         'ardour_dialog.cc',
         'ardour_ui.cc',
         'ardour_ui2.cc',

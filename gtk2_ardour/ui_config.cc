@@ -18,6 +18,7 @@
 */
 
 #include <unistd.h>
+#include <cstdlib>
 #include <cstdio> /* for snprintf, grrr */
 
 #include <glibmm/miscutils.h>
@@ -27,6 +28,8 @@
 #include "pbd/filesystem.h"
 #include "pbd/file_utils.h"
 #include "pbd/error.h"
+
+#include "gtkmm2ext/rgb_macros.h"
 
 #include "ardour/ardour.h"
 #include "ardour/filesystem_paths.h"
@@ -49,7 +52,7 @@ UIConfiguration::UIConfiguration ()
 #include "canvas_vars.h"
 #undef  UI_CONFIG_VARIABLE
 #undef  CANVAS_VARIABLE
-	hack(true)
+	_dirty (false)
 {
 	load_state();
 }
@@ -73,8 +76,7 @@ UIConfiguration::load_defaults ()
 	}
 
 	if (find_file_in_search_path (ardour_search_path() + system_config_search_path(),
-				      rcfile, default_ui_rc_file) )
-	{
+				      rcfile, default_ui_rc_file) ) {
 		XMLTree tree;
 		found = 1;
 
@@ -91,6 +93,8 @@ UIConfiguration::load_defaults ()
 			error << string_compose(_("default ui configuration file \"%1\" not loaded successfully."), rcfile) << endmsg;
 			return -1;
 		}
+
+		_dirty = false;
 	}
 
 	return found;
@@ -104,8 +108,7 @@ UIConfiguration::load_state ()
 	sys::path default_ui_rc_file;
 
 	if ( find_file_in_search_path (ardour_search_path() + system_config_search_path(),
-			"ardour3_ui_default.conf", default_ui_rc_file) )
-	{
+			"ardour3_ui_default.conf", default_ui_rc_file) ) {
 		XMLTree tree;
 		found = true;
 
@@ -127,8 +130,7 @@ UIConfiguration::load_state ()
 	sys::path user_ui_rc_file;
 
 	if (find_file_in_search_path (ardour_search_path() + user_config_directory(),
-			"ardour3_ui.conf", user_ui_rc_file))
-	{
+			"ardour3_ui.conf", user_ui_rc_file)) {
 		XMLTree tree;
 		found = true;
 
@@ -145,12 +147,15 @@ UIConfiguration::load_state ()
 			error << string_compose(_("user ui configuration file \"%1\" not loaded successfully."), rcfile) << endmsg;
 			return -1;
 		}
+
+		_dirty = false;
 	}
 
 	if (!found)
 		error << _("could not find any ui configuration file, canvas will look broken.") << endmsg;
 
 	pack_canvasvars();
+
 	return 0;
 }
 
@@ -180,6 +185,8 @@ UIConfiguration::save_state()
 			return -1;
 		}
 	}
+
+	_dirty = false;
 
 	return 0;
 }
@@ -244,6 +251,7 @@ UIConfiguration::set_state (const XMLNode& root, int /*version*/)
 
 		}
 	}
+
 	return 0;
 }
 
@@ -270,9 +278,38 @@ void
 UIConfiguration::pack_canvasvars ()
 {
 #undef  CANVAS_VARIABLE
-#define CANVAS_VARIABLE(var,name) canvas_colors.push_back(&var);
+#define CANVAS_VARIABLE(var,name) canvas_colors.insert (std::pair<std::string,UIConfigVariable<uint32_t>* >(name,&var));
 #include "canvas_vars.h"
 #undef  CANVAS_VARIABLE
 }
 
+static bool can_abort = false;
 
+uint32_t
+UIConfiguration::color_by_name (const std::string& name)
+{
+	map<std::string,UIConfigVariable<uint32_t>* >::iterator i = canvas_colors.find (name);
+
+	if (name == "processor fader led") {
+		can_abort = true;
+	}
+
+	if (i != canvas_colors.end()) {
+		return i->second->get();
+	}
+
+	// cerr << string_compose (_("Color %1 not found"), name) << endl;
+	return RGBA_TO_UINT (random()%256,random()%256,random()%256,0xff);
+}
+
+void
+UIConfiguration::set_dirty ()
+{
+	_dirty = true;
+}
+
+bool
+UIConfiguration::dirty () const
+{
+	return _dirty;
+}

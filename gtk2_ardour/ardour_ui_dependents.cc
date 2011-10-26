@@ -53,7 +53,9 @@ using namespace ARDOUR;
 void
 ARDOUR_UI::shutdown ()
 {
-	ui_config->save_state();
+	if (ui_config->dirty()) {
+		ui_config->save_state();
+	}
 }
 
 void
