@@ -62,8 +62,6 @@ Session::pre_export ()
 {
 	get_export_status (); // Init export_status
 
-	_butler->wait_until_finished ();
-
 	/* take everyone out of awrite to avoid disasters */
 
 	{
@@ -95,12 +93,20 @@ Session::pre_export ()
 	return 0;
 }
 
+/** Called for each range that is being exported */
 int
 Session::start_audio_export (framepos_t position, bool /* realtime */)
 {
 	if (!_exporting) {
 		pre_export ();
 	}
+
+	/* We're about to call Track::seek, so the butler must have finished everything
+	   up otherwise it could be doing do_refill in its thread while we are doing
+	   it here.
+	*/
+	
+	_butler->wait_until_finished ();
 
 	/* get everyone to the right position */
 
