@@ -5,6 +5,8 @@ import waflib.Logs as Logs, waflib.Utils as Utils
 import os
 import sys
 import re
+import time
+from waflib.Task import Task
 
 # Version of this package (even if built as a child)
 MAJOR = '3'
@@ -277,18 +279,11 @@ def set_winegcc(self):
     self.env.LINK_CXX = self.env.LINK_CC = 'wineg++'
     self.env.CC = 'winegcc'
 
-#pre-processor-like operation to merge GTK RC files
-re_spaces = re.compile("\s+")
-
-def _doPyp(infileName):
-    """
-    Does the main work of preprocessing.
-    Takes 'infileName' as a filename, opens and processes it,
-    and returns the processed file as a string
-
-    Note - this works recursively.
-    """
+def _doPyp(infileName, deps = False):
     outStr = ''
+    out = []
+    re_spaces = re.compile("\s+")
+
     if infileName == '-':
         fd = sys.stdin
     else:
@@ -296,19 +291,27 @@ def _doPyp(infileName):
     inLines = fd.readlines()
     if fd != sys.stdin:
         fd.close()
+        
 
     for line in inLines:
         bits = re_spaces.split(line)
         if bits[0] == '##include':
             incName = bits[1]
-            # assume included file comes from same place as source file
-            incName = os.path.join (os.path.dirname (infileName), incName);
-            outStr += _doPyp(incName)
+            if (deps):
+                out += [ incName ]
+            else:
+                # assume included file comes from same place as source file
+                incName = os.path.join (os.path.dirname (infileName), incName);
+                outStr += _doPyp(incName)
         else:
-            outStr += line
+            if not deps:
+                outStr += line
 
     # done
-    return outStr
+    if deps:
+        return out
+    else:
+        return outStr
 
 def include_processor(task):
     infileName = task.inputs[0].srcpath()
@@ -334,7 +337,6 @@ def build_color_scheme(path, prefix):
             color_scheme += words[2]
     f.close()
     return color_scheme
-
 
 def build(bld):
     # GTK front-end; if we're using VST we build this as a shared library,
@@ -560,11 +562,15 @@ def build(bld):
 
     obj = bld (rule = include_processor)
     obj.source = [ 'ardour3_ui_dark.rc.pre' ]
+    # find and add all ##include dependencies as sources
+    obj.source += _doPyp (bld.path.find_resource ('ardour3_ui_dark.rc.in').srcpath(), True)
     obj.target = 'ardour3_ui_dark.rc'
     obj.install_path = '${SYSCONFDIR}/ardour3'
 
     obj = bld (rule = include_processor)
     obj.source = [ 'ardour3_ui_light.rc.pre' ]
+    # find and add all ##include dependencies as sources
+    obj.source += _doPyp (bld.path.find_resource ('ardour3_ui_light.rc.in').srcpath(), True)
     obj.target = 'ardour3_ui_light.rc'
     obj.install_path = '${SYSCONFDIR}/ardour3'
 
