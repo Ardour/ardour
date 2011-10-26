@@ -283,16 +283,10 @@ UIConfiguration::pack_canvasvars ()
 #undef  CANVAS_VARIABLE
 }
 
-static bool can_abort = false;
-
 uint32_t
 UIConfiguration::color_by_name (const std::string& name)
 {
 	map<std::string,UIConfigVariable<uint32_t>* >::iterator i = canvas_colors.find (name);
-
-	if (name == "processor fader led") {
-		can_abort = true;
-	}
 
 	if (i != canvas_colors.end()) {
 		return i->second->get();
