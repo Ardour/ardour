@@ -1327,10 +1327,11 @@ void
 Session::resort_routes ()
 {
 	/* don't do anything here with signals emitted
-	   by Routes while we are being destroyed.
+	   by Routes during initial setup or while we
+	   are being destroyed.
 	*/
 
-	if (_state_of_the_state & Deletion) {
+	if (_state_of_the_state & (InitialConnecting | Deletion)) {
 		return;
 	}
 
