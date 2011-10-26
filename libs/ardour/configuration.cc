@@ -69,9 +69,6 @@ ConfigVariableBase::set_from_node (XMLNode const & node)
 				if ((prop = child->property ("name")) != 0) {
 					if (prop->value() == _name) {
 						if ((prop = child->property ("value")) != 0) {
-                                                        if (_name == "audio-search-path") {
-                                                                sleep (1);
-                                                        }
 							set_from_string (prop->value());
 							return true;
 						}
