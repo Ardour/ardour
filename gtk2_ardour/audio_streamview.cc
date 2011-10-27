@@ -337,7 +337,6 @@ AudioStreamView::add_crossfade (boost::weak_ptr<Crossfade> wc)
 					       *lview, *rview);
 	cv->set_valid (true);
 	crossfade->Invalidated.connect (*this, invalidator (*this), ui_bind (&AudioStreamView::remove_crossfade, this, _1), gui_context());
-	crossfade->DropReferences.connect (*this, invalidator (*this), ui_bind (&AudioStreamView::remove_crossfade, this, crossfade), gui_context());
 	crossfade_views[cv->crossfade] = cv;
 	if (!crossfades_visible) {
 		cv->hide ();
