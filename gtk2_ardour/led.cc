@@ -28,12 +28,11 @@ using namespace Gtk;
 using namespace Glib;
 
 LED::LED()
-        : _diameter (0.0)
-        , _fixed_diameter (false)
-        , _red (0.0)
-        , _green (1.0)
-        , _blue (0.0)
-
+	: _diameter (0.0)
+	, _red (0.0)
+	, _green (1.0)
+	, _blue (0.0)
+	, _fixed_diameter (false)
 {
 }
 
@@ -44,35 +43,35 @@ LED::~LED()
 void
 LED::render (cairo_t* cr)
 {
-        if (!_fixed_diameter) {
-                _diameter = std::min (_width, _height);
-        }
+	if (!_fixed_diameter) {
+		_diameter = std::min (_width, _height);
+	}
 
-        //background
+	//background
 
-        Widget* parent;
-        RefPtr<Style> style;
-        Color c;
+	Widget* parent;
+	RefPtr<Style> style;
+	Color c;
 
-        parent = get_parent ();
+	parent = get_parent ();
 
-        while (parent && !parent->get_has_window()) {
-                parent = parent->get_parent();
-        }
+	while (parent && !parent->get_has_window()) {
+		parent = parent->get_parent();
+	}
 
-        if (parent && parent->get_has_window()) {
-                style = parent->get_style ();
-                c = style->get_bg (parent->get_state());
-        } else {
-                style = get_style ();
-                c = style->get_bg (get_state());
-        }
+	if (parent && parent->get_has_window()) {
+		style = parent->get_style ();
+		c = style->get_bg (parent->get_state());
+	} else {
+		style = get_style ();
+		c = style->get_bg (get_state());
+	}
 
 #if 0
-        cairo_rectangle(cr, 0, 0, _width, _height);
-        cairo_stroke_preserve(cr);
-        cairo_set_source_rgb(cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
-        cairo_fill(cr);
+	cairo_rectangle(cr, 0, 0, _width, _height);
+	cairo_stroke_preserve(cr);
+	cairo_set_source_rgb(cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
+	cairo_fill(cr);
 #endif
 
 	cairo_translate(cr, _width/2, _height/2);
@@ -112,51 +111,51 @@ LED::render (cairo_t* cr)
 void
 LED::set_diameter (float d)
 {
-        _diameter = (d*2) + 5.0;
+	_diameter = (d*2) + 5.0;
 
-        if (_diameter != 0.0) {
-                _fixed_diameter = true;
-        }
+	if (_diameter != 0.0) {
+		_fixed_diameter = true;
+	}
 
-        set_dirty ();
+	set_dirty ();
 }
 
 void
 LED::on_realize ()
 {
-        set_colors_from_style ();
-        CairoWidget::on_realize ();
+	set_colors_from_style ();
+	CairoWidget::on_realize ();
 }
 
 void
 LED::on_size_request (Gtk::Requisition* req)
 {
-        if (_fixed_diameter) {
-                req->width = _diameter;
-                req->height = _diameter;
-        } else {
-                CairoWidget::on_size_request (req);
-        }
+	if (_fixed_diameter) {
+		req->width = _diameter;
+		req->height = _diameter;
+	} else {
+		CairoWidget::on_size_request (req);
+	}
 }
 
 void
 LED::set_colors_from_style ()
 {
-        RefPtr<Style> style = get_style();
-        Color c;
+	RefPtr<Style> style = get_style();
+	Color c;
 
-        switch (_visual_state) {
-        case 0:
-                c = style->get_fg (STATE_NORMAL);
-                break;
-        default:
-                c = style->get_fg (STATE_ACTIVE);
-                break;
-        }
+	switch (_visual_state) {
+	case 0:
+		c = style->get_fg (STATE_NORMAL);
+		break;
+	default:
+		c = style->get_fg (STATE_ACTIVE);
+		break;
+	}
 
-        _red = c.get_red_p ();
-        _green = c.get_green_p ();
-        _blue = c.get_blue_p ();
+	_red = c.get_red_p ();
+	_green = c.get_green_p ();
+	_blue = c.get_blue_p ();
 
-        set_dirty ();
+	set_dirty ();
 }

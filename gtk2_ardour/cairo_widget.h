@@ -73,8 +73,8 @@ protected:
 	VisualState _visual_state;
 
 private:
-	bool _dirty; ///< true if the pixmap requires re-rendering
 	GdkPixmap* _pixmap; ///< our pixmap
+	bool _dirty; ///< true if the pixmap requires re-rendering
 };
 
 #endif

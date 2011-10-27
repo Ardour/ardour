@@ -42,19 +42,18 @@ ArdourButton::Element ArdourButton::default_elements = ArdourButton::Element (Ar
 ArdourButton::Element ArdourButton::led_default_elements = ArdourButton::Element (ArdourButton::default_elements|ArdourButton::Indicator);
 
 ArdourButton::ArdourButton (Element e)
-        : _elements (e)
+	: _elements (e)
 	, _text_width (0)
 	, _text_height (0)
-	, _led_left (false)
-        , _diameter (0.0)
-        , _fixed_diameter (false)
-	, _distinct_led_click (true)
+	, _diameter (0.0)
 	, _corner_radius (9)
 	, edge_pattern (0)
 	, fill_pattern (0)
 	, led_inset_pattern (0)
 	, reflection_pattern (0)
-	  
+	, _led_left (false)
+	, _fixed_diameter (false)
+	, _distinct_led_click (true)
 {
 	ColorsChanged.connect (sigc::mem_fun (*this, &ArdourButton::color_handler));
 	StateChanged.connect (sigc::mem_fun (*this, &ArdourButton::state_handler));
@@ -94,19 +93,19 @@ ArdourButton::set_markup (const std::string& str)
 void
 ArdourButton::render (cairo_t* cr)
 {
-        if (!_fixed_diameter) {
-                _diameter = std::min (_width, _height);
-        }
+	if (!_fixed_diameter) {
+		_diameter = std::min (_width, _height);
+	}
 
 	/* background fill. use parent window style, so that we fit in nicely.
 	 */
 	
 	Color c = get_parent_bg ();
-	
-        cairo_rectangle (cr, 0, 0, _width, _height);
-        cairo_stroke_preserve (cr);
-        cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
-        cairo_fill (cr);
+
+	cairo_rectangle (cr, 0, 0, _width, _height);
+	cairo_stroke_preserve (cr);
+	cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
+	cairo_fill (cr);
 
 	if (_elements & Edge) {
 		Gtkmm2ext::rounded_rectangle (cr, 0, 0, _width, _height, _corner_radius);
@@ -185,11 +184,11 @@ ArdourButton::state_handler ()
 void
 ArdourButton::set_diameter (float d)
 {
-        _diameter = (d*2) + 5.0;
+	_diameter = (d*2) + 5.0;
 
-        if (_diameter != 0.0) {
-                _fixed_diameter = true;
-        }
+	if (_diameter != 0.0) {
+		_fixed_diameter = true;
+	}
 
 	set_colors ();
 }
@@ -211,13 +210,13 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 		_layout->get_pixel_size (_text_width, _text_height);
 		xpad += 6;
 	}
-		
-        if (_fixed_diameter) {
-                req->width = _text_width + (int) _diameter + xpad;
-                req->height = max (_text_height, (int) _diameter) + ypad;
-        } else {
-                CairoWidget::on_size_request (req);
-        }
+
+	if (_fixed_diameter) {
+		req->width = _text_width + (int) _diameter + xpad;
+		req->height = max (_text_height, (int) _diameter) + ypad;
+	} else {
+		CairoWidget::on_size_request (req);
+	}
 }
 
 void
@@ -322,7 +321,7 @@ ArdourButton::set_colors ()
 	led_b = b/255.0;
 	led_a = a/255.0;
 
-        set_dirty ();
+	set_dirty ();
 }
 
 void
