@@ -118,22 +118,15 @@ IO::silence (framecnt_t nframes)
 	}
 }
 
+/** Set _bundles_connected to those bundles that are connected such that every
+ *  port on every bundle channel x is connected to port x in _ports.
+ */
 void
 IO::check_bundles_connected ()
 {
-	check_bundles (_bundles_connected, ports());
-}
-
-/** Check the bundles in list to see which are connected to a given PortSet,
- *  and update list with those that are connected such that every port on every
- *  bundle channel x is connected to port x in ports.
- */
-void
-IO::check_bundles (std::vector<UserBundleInfo*>& list, const PortSet& ports)
-{
 	std::vector<UserBundleInfo*> new_list;
 
-	for (std::vector<UserBundleInfo*>::iterator i = list.begin(); i != list.end(); ++i) {
+	for (std::vector<UserBundleInfo*>::iterator i = _bundles_connected.begin(); i != _bundles_connected.end(); ++i) {
 
 		uint32_t const N = (*i)->bundle->nchannels().n_total();
 
@@ -147,7 +140,7 @@ IO::check_bundles (std::vector<UserBundleInfo*>& list, const PortSet& ports)
 			/* Every port on bundle channel j must be connected to our input j */
 			Bundle::PortList const pl = (*i)->bundle->channel_ports (j);
 			for (uint32_t k = 0; k < pl.size(); ++k) {
-				if (ports.port(j)->connected_to (pl[k]) == false) {
+				if (_ports.port(j)->connected_to (pl[k]) == false) {
 					ok = false;
 					break;
 				}
@@ -165,7 +158,7 @@ IO::check_bundles (std::vector<UserBundleInfo*>& list, const PortSet& ports)
 		}
 	}
 
-	list = new_list;
+	_bundles_connected = new_list;
 }
 
 
@@ -481,7 +474,7 @@ IO::ensure_io (ChanCount count, bool clear, void* src)
 }
 
 XMLNode&
-IO::get_state (void)
+IO::get_state ()
 {
 	return state (true);
 }
@@ -1258,7 +1251,7 @@ IO::enable_connecting ()
 void
 IO::bundle_changed (Bundle::Change /*c*/)
 {
-	//XXX
+	/* XXX */
 //	connect_input_ports_to_bundle (_input_bundle, this);
 }
 

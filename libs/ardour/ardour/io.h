@@ -170,12 +170,10 @@ class IO : public SessionObject, public Latent
 	 */
 	PBD::Signal1<bool, ChanCount, BoolCombiner> PortCountChanging;
 
-	static int  disable_connecting (void);
-	static int  enable_connecting (void);
-	static int  disable_ports (void);
-	static int  enable_ports (void);
+	static int disable_connecting ();
+	static int enable_connecting ();
 
-	static PBD::Signal1<void,ChanCount> PortCountChanged; // emitted when the number of ports changes
+	static PBD::Signal1<void, ChanCount> PortCountChanged; // emitted when the number of ports changes
 
 	static std::string name_from_state (const XMLNode&);
 	static void set_name_in_state (XMLNode&, const std::string&);
@@ -216,9 +214,9 @@ class IO : public SessionObject, public Latent
 	boost::shared_ptr<Bundle> _bundle; ///< a bundle representing our ports
 
 	struct UserBundleInfo {
-	    UserBundleInfo (IO*, boost::shared_ptr<UserBundle> b);
-	    boost::shared_ptr<UserBundle> bundle;
-	    PBD::ScopedConnection changed;
+		UserBundleInfo (IO*, boost::shared_ptr<UserBundle> b);
+		boost::shared_ptr<UserBundle> bundle;
+		PBD::ScopedConnection changed;
 	};
 
 	std::vector<UserBundleInfo*> _bundles_connected; ///< user bundles connected to our ports
@@ -229,7 +227,6 @@ class IO : public SessionObject, public Latent
 	int ensure_ports (ChanCount, bool clear, void *src);
 
 	void check_bundles_connected ();
-	void check_bundles (std::vector<UserBundleInfo*>&, const PortSet&);
 
 	void bundle_changed (Bundle::Change);
 

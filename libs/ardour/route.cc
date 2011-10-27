@@ -2673,7 +2673,7 @@ Route::clear_fed_by ()
 }
 
 bool
-Route::feeds (boost::shared_ptr<Route> other, bool* via_sends_only)
+Route::sub_feeds (Fedby const & fed_by, boost::shared_ptr<Route> other, bool* via_sends_only)
 {
 	const FedBy& fed_by (other->fed_by());
 
@@ -2694,42 +2694,15 @@ Route::feeds (boost::shared_ptr<Route> other, bool* via_sends_only)
 }
 
 bool
-Route::direct_feeds (boost::shared_ptr<Route> other, bool* only_send)
+Route::feeds (boost::shared_ptr<Route> other, bool* via_sends_only)
 {
-	DEBUG_TRACE (DEBUG::Graph, string_compose ("Feeds? %1\n", _name));
+	return sub_feeds (other->fed_by (), other, via_sends_only);
+}
 
-	if (_output->connected_to (other->input())) {
-		DEBUG_TRACE (DEBUG::Graph, string_compose ("\tdirect FEEDS %2\n", other->name()));
-		if (only_send) {
-			*only_send = false;
-		}
-
-		return true;
-	}
-
-
-	for (ProcessorList::iterator r = _processors.begin(); r != _processors.end(); ++r) {
-
-		boost::shared_ptr<IOProcessor> iop;
-
-		if ((iop = boost::dynamic_pointer_cast<IOProcessor>(*r)) != 0) {
-			if (iop->feeds (other)) {
-				DEBUG_TRACE (DEBUG::Graph,  string_compose ("\tIOP %1 does feed %2\n", iop->name(), other->name()));
-				if (only_send) {
-					*only_send = true;
-				}
-				return true;
-			} else {
-				DEBUG_TRACE (DEBUG::Graph,  string_compose ("\tIOP %1 does NOT feed %2\n", iop->name(), other->name()));
-			}
-		} else {
-			DEBUG_TRACE (DEBUG::Graph,  string_compose ("\tPROC %1 is not an IOP\n", (*r)->name()));
-		}
-
-	}
-
-	DEBUG_TRACE (DEBUG::Graph,  string_compose ("\tdoes NOT feed %1\n", other->name()));
-	return false;
+bool
+Route::direct_feeds (boost::shared_ptr<Route> other, bool* via_sends_only)
+{
+	return sub_feeds (other->direct_fed_by (), other, via_sends_only);
 }
 
 /** Called from the (non-realtime) butler thread when the transport is stopped */
