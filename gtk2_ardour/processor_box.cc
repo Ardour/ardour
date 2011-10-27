@@ -96,7 +96,8 @@ RefPtr<Action> ProcessorBox::controls_action;
 Glib::RefPtr<Gdk::Pixbuf> SendProcessorEntry::_slider;
 
 ProcessorEntry::ProcessorEntry (boost::shared_ptr<Processor> p, Width w)
-	: _position (PreFader)
+	: _button (ArdourButton::led_default_elements)
+	, _position (PreFader)
 	, _processor (p)
 	, _width (w)
 	, _visual_state (Gtk::STATE_NORMAL)
@@ -108,9 +109,10 @@ ProcessorEntry::ProcessorEntry (boost::shared_ptr<Processor> p, Width w)
 		_button.set_active_state (CairoWidget::Active);
 	}
 	_button.set_diameter (3);
-	_button.signal_clicked.connect (sigc::mem_fun (*this, &ProcessorEntry::led_clicked));
-	_button.set_text (name());
+	_button.set_distinct_led_click (true);
 	_button.set_led_left (true);
+	_button.signal_led_clicked.connect (sigc::mem_fun (*this, &ProcessorEntry::led_clicked));
+	_button.set_text (name());
 	_button.show ();
 
 	_processor->ActiveChanged.connect (active_connection, invalidator (*this), boost::bind (&ProcessorEntry::processor_active_changed, this), gui_context());

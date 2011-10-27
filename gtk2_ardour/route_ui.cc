@@ -139,13 +139,13 @@ RouteUI::init ()
 	// show_sends_button->set_self_managed (true);
 	UI::instance()->set_tip (show_sends_button, _("make mixer strips show sends to this bus"), "");
 
-	monitor_input_button = manage (new ArdourButton ());
+	monitor_input_button = manage (new ArdourButton (ArdourButton::led_default_elements));
 	monitor_input_button->set_name ("monitor");
 	monitor_input_button->set_text (_("In"));
 	UI::instance()->set_tip (monitor_input_button, _("Monitor input"), "");
 	monitor_input_button->set_no_show_all (true);
 
-	monitor_disk_button = manage (new ArdourButton ());
+	monitor_disk_button = manage (new ArdourButton (ArdourButton::led_default_elements));
 	monitor_disk_button->set_name ("monitor");
 	monitor_disk_button->set_text (_("Disk"));
 	UI::instance()->set_tip (monitor_disk_button, _("Monitor playback"), "");

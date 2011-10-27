@@ -188,7 +188,7 @@ MixerStrip::init ()
 	monitor_input_button->set_diameter (3);
 	monitor_disk_button->set_diameter (3);
 
-        solo_isolated_led = manage (new ArdourButton);
+        solo_isolated_led = manage (new ArdourButton (ArdourButton::led_default_elements));
         solo_isolated_led->show ();
         solo_isolated_led->set_diameter (3);
         solo_isolated_led->set_no_show_all (true);
@@ -197,7 +197,7 @@ MixerStrip::init ()
         solo_isolated_led->signal_button_release_event().connect (sigc::mem_fun (*this, &RouteUI::solo_isolate_button_release));
 	UI::instance()->set_tip (solo_isolated_led, _("Isolate Solo"), "");
 
-        solo_safe_led = manage (new ArdourButton);
+        solo_safe_led = manage (new ArdourButton (ArdourButton::led_default_elements));
         solo_safe_led->show ();
         solo_safe_led->set_diameter (3);
         solo_safe_led->set_no_show_all (true);

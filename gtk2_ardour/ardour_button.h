@@ -29,9 +29,24 @@
 class ArdourButton : public CairoWidget, Gtk::Activatable
 {
   public:
-	ArdourButton ();
+	enum Element {
+		Edge = 0x1,
+		Body = 0x2,
+		Text = 0x4,
+		Indicator = 0x8,
+		Image = 0x16
+	};
+	
+	static Element default_elements;
+	static Element led_default_elements;
+
+	ArdourButton (Element e = default_elements);
 	virtual ~ArdourButton ();
 
+	void set_elements (Element);
+	Element elements() const { return _elements; }
+
+	void set_corner_radius (float);
         void set_diameter (float);
 
 	void set_text (const std::string&);
@@ -40,16 +55,17 @@ class ArdourButton : public CairoWidget, Gtk::Activatable
 	void set_led_left (bool yn);
 	void set_distinct_led_click (bool yn);
 
-	sigc::signal<void> signal_clicked;
+	sigc::signal<void> signal_led_clicked;
 
   protected:
 	void render (cairo_t *);
         void on_size_request (Gtk::Requisition* req);
-        void on_realize ();
+	void on_size_allocate (Gtk::Allocation&);
 	bool on_button_press_event (GdkEventButton*);
 	bool on_button_release_event (GdkEventButton*);
 
   private:
+	Element _elements;
 	Glib::RefPtr<Pango::Layout> _layout;
 	std::string _text;
 	int     _text_width;
@@ -58,6 +74,7 @@ class ArdourButton : public CairoWidget, Gtk::Activatable
         float   _diameter;
         bool    _fixed_diameter;
 	bool    _distinct_led_click;
+	float   _corner_radius;
 
 	cairo_pattern_t* edge_pattern;
 	cairo_pattern_t* fill_pattern;
