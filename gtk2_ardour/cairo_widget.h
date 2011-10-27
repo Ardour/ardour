@@ -22,9 +22,7 @@
 
 #include <gtkmm/eventbox.h>
 
-/** A parent class for widgets that are made up of a pixmap rendered using Cairo.
- *  The pixmap is painted to screen on GTK expose events, but the rendering
- *  is only done after set_dirty() has been called.
+/** A parent class for widgets that are rendered using Cairo.
  */
 
 class CairoWidget : public Gtk::EventBox
