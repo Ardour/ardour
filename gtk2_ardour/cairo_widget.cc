@@ -25,7 +25,6 @@ CairoWidget::CairoWidget ()
 	, _height (1)
 	, _active_state (CairoWidget::ActiveState (0))
 	, _visual_state (CairoWidget::VisualState (0))
-	, _dirty (true)
 {
 
 }

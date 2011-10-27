@@ -72,7 +72,6 @@ protected:
 
 private:
 	GdkPixmap* _pixmap; ///< our pixmap
-	bool _dirty; ///< true if the pixmap requires re-rendering
 };
 
 #endif
