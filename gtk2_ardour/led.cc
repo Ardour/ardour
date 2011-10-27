@@ -28,9 +28,7 @@ using namespace Gtk;
 using namespace Glib;
 
 LED::LED()
-        : _visual_state (0)
-        , _active (false)
-        , _diameter (0.0)
+        : _diameter (0.0)
         , _fixed_diameter (false)
         , _red (0.0)
         , _green (1.0)
@@ -94,14 +92,14 @@ LED::render (cairo_t* cr)
 	cairo_fill(cr);
 
 	//knob color
-	cairo_set_source_rgba (cr, _red, _green, _blue, _active ? 0.8 : 0.2);
+	cairo_set_source_rgba (cr, _red, _green, _blue, (active_state() == Active) ? 0.8 : 0.2);
 	cairo_arc (cr, 0, 0, _diameter/2-3, 0, 2 * M_PI);
 	cairo_fill(cr);
 
 	//reflection
 	cairo_scale(cr, 0.7, 0.7);
 	cairo_pattern_t *pat2 = cairo_pattern_create_linear (0.0, 0.0, 0.0, _diameter/2-3);
-	cairo_pattern_add_color_stop_rgba (pat2, 0, 1,1,1, _active ? 0.4 : 0.2);
+	cairo_pattern_add_color_stop_rgba (pat2, 0, 1,1,1, active_state() ? 0.4 : 0.2);
 	cairo_pattern_add_color_stop_rgba (pat2, 1, 1,1,1, 0.0);
 	cairo_arc (cr, 0, 0, _diameter/2-3, 0, 2 * M_PI);
 	cairo_set_source (cr, pat2);
@@ -109,24 +107,6 @@ LED::render (cairo_t* cr)
 	cairo_pattern_destroy (pat2);
 
 	cairo_stroke (cr);
-}
-
-void
-LED::set_active (bool yn) 
-{
-	_active = yn;
-	_visual_state = (yn ? 1 : 0);
-	set_colors_from_style ();
-}
-
-void
-LED::set_visual_state (int32_t s)
-{
-        if (s != _visual_state) {
-
-                _visual_state = s;
-                set_colors_from_style ();
-        }
 }
 
 void

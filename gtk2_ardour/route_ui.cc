@@ -608,26 +608,22 @@ RouteUI::update_monitoring_display ()
 	MonitorState ms = t->monitoring_state();
 
 	if (t->monitoring_choice() & MonitorInput) {
-		monitor_input_button->set_state (CairoWidget::Active, true);
-		monitor_input_button->set_state (CairoWidget::Mid, false);
+		monitor_input_button->set_active_state (CairoWidget::Active);
 	} else {
 		if (ms & MonitoringInput) {
-			monitor_input_button->set_state (CairoWidget::Mid, true);
-			monitor_input_button->set_state (CairoWidget::Active, false);
+			monitor_input_button->set_active_state (CairoWidget::Mid);
 		} else {
-			monitor_input_button->set_state (CairoWidget::State (CairoWidget::Active|CairoWidget::Mid), false);
+			monitor_input_button->unset_active_state ();
 		}
 	}
 
 	if (t->monitoring_choice() & MonitorDisk) {
-		monitor_disk_button->set_state (CairoWidget::Active, true);
-			monitor_disk_button->set_state (CairoWidget::Mid, false);
+		monitor_disk_button->set_active_state (CairoWidget::Active);
 	} else {
 		if (ms & MonitoringDisk) {
-			monitor_disk_button->set_state (CairoWidget::Mid, true);
-			monitor_disk_button->set_state (CairoWidget::Active, false);
+			monitor_disk_button->set_active_state (CairoWidget::Mid);
 		} else {
-			monitor_disk_button->set_state (CairoWidget::State (CairoWidget::Active|CairoWidget::Mid), false);
+			monitor_disk_button->unset_active_state ();
 		}
 	}
 }
@@ -1066,11 +1062,19 @@ RouteUI::update_solo_display ()
         set_button_names ();
 
         if (solo_isolated_led) {
-                solo_isolated_led->set_state (CairoWidget::Active, _route->solo_isolated());
+		if (_route->solo_isolated()) {
+			solo_isolated_led->set_active_state (CairoWidget::Active);
+		} else {
+			solo_isolated_led->unset_active_state ();
+		}
         }
 
         if (solo_safe_led) {
-                solo_safe_led->set_state (CairoWidget::Active, _route->solo_safe());
+		if (_route->solo_safe()) {
+			solo_safe_led->set_active_state (CairoWidget::Active);
+		} else {
+			solo_safe_led->unset_active_state ();
+		}
         }
 
 	solo_button->set_visual_state (solo_visual_state (_route));
@@ -1340,7 +1344,7 @@ RouteUI::solo_isolate_button_release (GdkEventButton* ev)
                 return true;
         }
 
-        bool view = (solo_isolated_led->state() & (CairoWidget::Active|CairoWidget::Mid));
+        bool view = solo_isolated_led->active_state();
         bool model = _route->solo_isolated();
 
         /* called BEFORE the view has changed */
@@ -1371,7 +1375,7 @@ RouteUI::solo_isolate_button_release (GdkEventButton* ev)
 bool
 RouteUI::solo_safe_button_release (GdkEventButton*)
 {
-        _route->set_solo_safe (!(solo_safe_led->state() & (CairoWidget::Active|CairoWidget::Mid)), this);
+        _route->set_solo_safe (!solo_safe_led->active_state(), this);
         return true;
 }
 

@@ -37,8 +37,6 @@ using namespace Gtk;
 using namespace Glib;
 using std::max;
 using std::min;
-using std::cerr;
-using std::endl;
 
 ArdourButton::ArdourButton()
         : _text_width (0)
@@ -54,6 +52,7 @@ ArdourButton::ArdourButton()
 	  
 {
 	ColorsChanged.connect (sigc::mem_fun (*this, &ArdourButton::color_handler));
+	StateChanged.connect (sigc::mem_fun (*this, &ArdourButton::state_handler));
 }
 
 ArdourButton::~ArdourButton()
@@ -160,9 +159,8 @@ ArdourButton::render (cairo_t* cr)
 }
 
 void
-ArdourButton::set_state (CairoWidget::State s, bool yn)
+ArdourButton::state_handler ()
 {
-	CairoWidget::set_state (s, yn);
 	set_colors ();
 }
 
@@ -222,7 +220,7 @@ ArdourButton::set_colors ()
 	}
 
 	edge_pattern = cairo_pattern_create_linear (0.0, 0.0, 0.0, _height);
-	if (_state & CairoWidget::Selected) {
+	if (visual_state() & CairoWidget::Selected) {
 		start_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1 border start selected", get_name()));
 		end_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1 border end selected", get_name()));
 	} else {
@@ -242,10 +240,11 @@ ArdourButton::set_colors ()
 	}
 
 	fill_pattern = cairo_pattern_create_linear (0.0, 0.0, 0.0, _height);
-	if (_state & Mid) {
+
+	if (active_state() == Mid) {
 		start_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1 fill start mid", get_name()));
 		end_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1 fill end mid", get_name()));
-	} else if (_state & Active) {
+	} else if (active_state() == Active) {
 		start_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1 fill start active", get_name()));
 		end_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1 fill end active", get_name()));
 	} else {
@@ -270,14 +269,14 @@ ArdourButton::set_colors ()
 	}
 
 	reflection_pattern = cairo_pattern_create_linear (0.0, 0.0, 0.0, _diameter/2-3);
-	cairo_pattern_add_color_stop_rgba (reflection_pattern, 0, 1,1,1, (_state & Active) ? 0.4 : 0.2);
+	cairo_pattern_add_color_stop_rgba (reflection_pattern, 0, 1,1,1, active_state() ? 0.4 : 0.2);
 	cairo_pattern_add_color_stop_rgba (reflection_pattern, 1, 1,1,1, 0.0);
 
 	/* text and LED colors depend on Active/Normal/Mid */
-	if (_state & Active) {
+	if (active_state() == Active) {
 		text_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1 text active", get_name()));
 		led_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1 led active", get_name()));
-	} else if (_state & Mid) {
+	} else if (active_state() == Mid) {
 		text_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1 text mid", get_name()));
 		led_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1 led active", get_name()));
 	} else {

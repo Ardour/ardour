@@ -35,21 +35,29 @@ public:
 
 	void set_dirty ();
 
-	/* widget states: unlike GTK, these OR-together so that
-	   a widget can be both Active *and* Selected, rather than
-	   each one being orthogonal.
+	/* widget states: unlike GTK, visual states like "Selected" or "Prelight"
+	   are orthogonal to active states. 
 	*/
 
-	enum State {
-		Active = 0x1,
-		Mid = 0x2,
-		Selected = 0x4,
-		Prelight = 0x8,
-		Insensitive = 0x10,
+	enum ActiveState {
+		Active = 1,
+		Mid,
+	};
+	
+	enum VisualState {
+		/* these can be OR-ed together */
+		Selected = 0x1,
+		Prelight = 0x2,
+		Insensitive = 0x4,
 	};
 
-	State state() const { return _state; }
-	virtual void set_state (State, bool);
+	ActiveState active_state() const { return _active_state; }
+	VisualState visual_state() const { return _visual_state; }
+	virtual void set_active_state (ActiveState);
+	virtual void set_visual_state (VisualState);
+	virtual void unset_active_state () { set_active_state (ActiveState (0)); }
+	virtual void unset_visual_state () { set_visual_state (VisualState (0)); }
+
 	sigc::signal<void> StateChanged;
 
 protected:
@@ -61,7 +69,8 @@ protected:
 
 	int _width; ///< pixmap width
 	int _height; ///< pixmap height
-	State _state;
+	ActiveState _active_state;
+	VisualState _visual_state;
 
 private:
 	bool _dirty; ///< true if the pixmap requires re-rendering

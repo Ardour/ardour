@@ -104,7 +104,9 @@ ProcessorEntry::ProcessorEntry (boost::shared_ptr<Processor> p, Width w)
 	_vbox.pack_start (_button, true, true);
 	_vbox.show ();
 	
-	_button.set_state (CairoWidget::Active, _processor->active());
+	if (_processor->active()) {
+		_button.set_active_state (CairoWidget::Active);
+	}
 	_button.set_diameter (3);
 	_button.signal_clicked.connect (sigc::mem_fun (*this, &ProcessorEntry::led_clicked));
 	_button.set_text (name());
@@ -149,17 +151,18 @@ ProcessorEntry::set_visual_state (Gtk::StateType t)
 
 	switch (t) {
 	case Gtk::STATE_ACTIVE:
-		_button.set_state (CairoWidget::Active, true);
+		_button.set_active_state (CairoWidget::Active);
+		_button.unset_visual_state ();
 		break;
 
 	case Gtk::STATE_SELECTED:
-		_button.set_state (CairoWidget::Selected, true);
+		_button.set_visual_state (CairoWidget::Selected);
 		break;
 
 	case Gtk::STATE_NORMAL:
 	default:
-		_button.set_state (CairoWidget::Selected, false);
-		_button.set_state (CairoWidget::Active, false);
+		_button.unset_visual_state ();
+		_button.unset_active_state ();
 		break;
 	}
 }
@@ -208,7 +211,11 @@ ProcessorEntry::led_clicked()
 void
 ProcessorEntry::processor_active_changed ()
 {
-	_button.set_state (CairoWidget::Active, _processor->active());
+	if (_processor->active()) {
+		_button.set_active_state (CairoWidget::Active);
+	} else {
+		_button.unset_active_state ();
+	}
 }
 
 void

@@ -23,7 +23,8 @@
 CairoWidget::CairoWidget ()
 	: _width (1)
 	, _height (1)
-	, _state (CairoWidget::State (0))
+	, _active_state (CairoWidget::ActiveState (0))
+	, _visual_state (CairoWidget::VisualState (0))
 	, _dirty (true)
 	, _pixmap (0)
 	  
@@ -131,17 +132,19 @@ CairoWidget::get_parent_bg ()
 }
 
 void
-CairoWidget::set_state (CairoWidget::State s, bool yn)
+CairoWidget::set_active_state (CairoWidget::ActiveState s)
 {
-	if (yn) {
-		if (!(_state & s)) {
-			_state = CairoWidget::State (_state|s);
-			StateChanged ();
-		}
-	} else {
-		if (_state & s) {
-			_state = CairoWidget::State (_state & ~s);
-			StateChanged ();
-		}
+	if (_active_state != s) {
+		_active_state = s;
+		StateChanged ();
+	}
+}
+
+void
+CairoWidget::set_visual_state (CairoWidget::VisualState s)
+{
+	if (_visual_state != s) {
+		_visual_state = s;
+		StateChanged ();
 	}
 }

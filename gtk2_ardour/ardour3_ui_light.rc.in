@@ -26,8 +26,6 @@
 #@color arm #F33
 #@color solo #A8F730
 #@color midi_channel_selector #A8F730
-#@color isolate #B9ECF2
-#@color solo_lock #3593DA
 #@color mute #FFFA87
 #@color mono #DEC
 #@color monitor #7596DE

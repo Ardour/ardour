@@ -42,8 +42,6 @@ class ArdourButton : public CairoWidget, Gtk::Activatable
 
 	sigc::signal<void> signal_clicked;
 
-	void set_state (State s, bool);
-
   protected:
 	void render (cairo_t *);
         void on_size_request (Gtk::Requisition* req);
@@ -78,6 +76,7 @@ class ArdourButton : public CairoWidget, Gtk::Activatable
 
         void set_colors ();
 	void color_handler ();
+	void state_handler ();
 };
 
 #endif /* __gtk2_ardour_ardour_button_h__ */
