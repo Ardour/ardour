@@ -25,7 +25,6 @@
 #include "pbd/stateful.h"
 
 #include "ardour/ardour.h"
-#include "ardour/audioengine.h"
 #include "ardour/delivery.h"
 
 namespace ARDOUR {

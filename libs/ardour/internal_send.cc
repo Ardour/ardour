@@ -29,6 +29,7 @@
 #include "ardour/panner_shell.h"
 #include "ardour/route.h"
 #include "ardour/session.h"
+#include "ardour/audioengine.h"
 
 #include "i18n.h"
 

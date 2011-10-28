@@ -31,6 +31,7 @@
 #include "ardour/return.h"
 #include "ardour/session.h"
 #include "ardour/mute_master.h"
+#include "ardour/audioengine.h"
 
 #include "i18n.h"
 
