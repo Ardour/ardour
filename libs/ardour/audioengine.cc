@@ -135,12 +135,6 @@ _thread_init_callback (void * /*arg*/)
 	MIDI::Port::set_process_thread (pthread_self());
 }
 
-static void
-ardour_jack_error (const char* msg)
-{
-	error << "JACK: " << msg << endmsg;
-}
-
 void
 AudioEngine::set_jack_callbacks ()
 {
