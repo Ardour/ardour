@@ -65,11 +65,6 @@ class AudioEngine : public SessionHandlePtr
 public:
 	typedef std::set<Port*> Ports;
 
-	class disconnected_exception : public std::exception {
-	public:
-		virtual const char *what() const throw() { return "AudioEngine is disconnected"; }
-	};
-
 	AudioEngine (std::string client_name, std::string session_uuid);
 	virtual ~AudioEngine ();
 
@@ -84,9 +79,6 @@ public:
 
 	int reconnect_to_jack ();
 	int disconnect_from_jack();
-
-	bool will_reconnect_at_halt ();
-	void set_reconnect_at_halt (bool);
 
 	int stop (bool forever = false);
 	int start ();
@@ -286,9 +278,6 @@ private:
 	/// the number of frames processed since start() was called
 	framecnt_t                _processed_frames;
 	bool                      _freewheeling;
-	bool                      _freewheel_pending;
-	boost::function<int(framecnt_t)>  freewheel_action;
-	bool                       reconnect_on_halt;
 	int                       _usecs_per_cycle;
 	bool                       port_remove_in_progress;
 
