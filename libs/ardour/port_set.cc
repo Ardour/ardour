@@ -32,7 +32,7 @@ PortSet::PortSet()
 		_ports.push_back( PortVec() );
 }
 
-static bool sort_ports_by_name (Port* a, Port* b)
+static bool sort_ports_by_name (boost::shared_ptr<Port> a, boost::shared_ptr<Port> b)
 {
 	string aname (a->name());
 	string bname (b->name());
@@ -72,7 +72,7 @@ static bool sort_ports_by_name (Port* a, Port* b)
 }
 
 void
-PortSet::add(Port* port)
+PortSet::add (boost::shared_ptr<Port> port)
 {
 	PortVec& v = _ports[port->type()];
 
@@ -84,7 +84,7 @@ PortSet::add(Port* port)
 }
 
 bool
-PortSet::remove(Port* port)
+PortSet::remove (boost::shared_ptr<Port> port)
 {
 	for (std::vector<PortVec>::iterator l = _ports.begin(); l != _ports.end(); ++l) {
 		PortVec::iterator i = find(l->begin(), l->end(), port);
@@ -112,16 +112,16 @@ PortSet::num_ports() const
 }
 
 bool
-PortSet::contains(const Port* port) const
+PortSet::contains (boost::shared_ptr<const Port> port) const
 {
 	for (std::vector<PortVec>::const_iterator l = _ports.begin(); l != _ports.end(); ++l)
-		if (find((*l).begin(), (*l).end(), port) != (*l).end())
+		if (find (l->begin(), l->end(), port) != l->end())
 			return true;
 
 	return false;
 }
 
-Port*
+boost::shared_ptr<Port>
 PortSet::port(size_t n) const
 {
 	// This is awesome.  Awesomely slow.
@@ -129,16 +129,17 @@ PortSet::port(size_t n) const
 	size_t size_so_far = 0;
 
 	for (std::vector<PortVec>::const_iterator l = _ports.begin(); l != _ports.end(); ++l) {
-		if (n < size_so_far + (*l).size())
+		if (n < size_so_far + l->size()) {
 			return (*l)[n - size_so_far];
-		else
-			size_so_far += (*l).size();
+		} else {
+			size_so_far += l->size();
+		}
 	}
 
-	return NULL; // n out of range
+	return boost::shared_ptr<Port> (); // n out of range
 }
 
-Port*
+boost::shared_ptr<Port>
 PortSet::port(DataType type, size_t n) const
 {
 	if (type == DataType::NIL) {
@@ -150,16 +151,16 @@ PortSet::port(DataType type, size_t n) const
 	}
 }
 
-AudioPort*
+boost::shared_ptr<AudioPort>
 PortSet::nth_audio_port(size_t n) const
 {
-	return dynamic_cast<AudioPort*>(port(DataType::AUDIO, n));
+	return boost::dynamic_pointer_cast<AudioPort> (port (DataType::AUDIO, n));
 }
 
-MidiPort*
+boost::shared_ptr<MidiPort>
 PortSet::nth_midi_port(size_t n) const
 {
-	return dynamic_cast<MidiPort*>(port(DataType::MIDI, n));
+	return boost::dynamic_pointer_cast<MidiPort> (port (DataType::MIDI, n));
 }
 
 } // namepace ARDOUR

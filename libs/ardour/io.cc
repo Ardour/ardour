@@ -163,7 +163,7 @@ IO::check_bundles_connected ()
 
 
 int
-IO::disconnect (Port* our_port, string other_port, void* src)
+IO::disconnect (boost::shared_ptr<Port> our_port, string other_port, void* src)
 {
 	if (other_port.length() == 0 || our_port == 0) {
 		return 0;
@@ -196,7 +196,7 @@ IO::disconnect (Port* our_port, string other_port, void* src)
 }
 
 int
-IO::connect (Port* our_port, string other_port, void* src)
+IO::connect (boost::shared_ptr<Port> our_port, string other_port, void* src)
 {
 	if (other_port.length() == 0 || our_port == 0) {
 		return 0;
@@ -223,7 +223,7 @@ IO::connect (Port* our_port, string other_port, void* src)
 }
 
 int
-IO::remove_port (Port* port, void* src)
+IO::remove_port (boost::shared_ptr<Port> port, void* src)
 {
 	ChanCount before = _ports.count ();
 	ChanCount after = before;
@@ -251,7 +251,7 @@ IO::remove_port (Port* port, void* src)
 					change.type = IOChange::Type (change.type | IOChange::ConnectionsChanged);
 				}
 
-				_session.engine().unregister_port (*port);
+				_session.engine().unregister_port (port);
 				check_bundles_connected ();
 			}
 		}
@@ -286,7 +286,7 @@ IO::remove_port (Port* port, void* src)
 int
 IO::add_port (string destination, void* src, DataType type)
 {
-	Port* our_port;
+	boost::shared_ptr<Port> our_port;
 
 	if (type == DataType::NIL) {
 		type = _default_type;
@@ -364,7 +364,7 @@ IO::ensure_ports_locked (ChanCount count, bool clear, bool& changed)
 {
 	assert (!AudioEngine::instance()->process_lock().trylock());
 
-	Port* port = 0;
+	boost::shared_ptr<Port> port;
 
 	changed    = false;
 
@@ -378,7 +378,7 @@ IO::ensure_ports_locked (ChanCount count, bool clear, bool& changed)
 
 			assert(port);
 			_ports.remove(port);
-			_session.engine().unregister_port (*port);
+			_session.engine().unregister_port (port);
 
 			changed = true;
 		}
@@ -894,7 +894,7 @@ IO::make_connections (const XMLNode& node, int version, bool in)
 				continue;
 			}
 
-			Port* p = port_by_name (prop->value());
+			boost::shared_ptr<Port> p = port_by_name (prop->value());
 
 			if (p) {
 				for (XMLNodeConstIterator c = (*i)->children().begin(); c != (*i)->children().end(); ++c) {
@@ -1337,14 +1337,14 @@ IO::find_port_hole (const char* base)
 }
 
 
-AudioPort*
+boost::shared_ptr<AudioPort>
 IO::audio(uint32_t n) const
 {
 	return _ports.nth_audio_port (n);
 
 }
 
-MidiPort*
+boost::shared_ptr<MidiPort>
 IO::midi(uint32_t n) const
 {
 	return _ports.nth_midi_port (n);
@@ -1599,21 +1599,19 @@ IO::copy_to_outputs (BufferSet& bufs, DataType type, pframes_t nframes, framecnt
 	}
 }
 
-Port*
+boost::shared_ptr<Port>
 IO::port_by_name (const std::string& str) const
 {
 	/* to be called only from ::set_state() - no locking */
 
 	for (PortSet::const_iterator i = _ports.begin(); i != _ports.end(); ++i) {
 
-		const Port& p(*i);
-
-		if (p.name() == str) {
-			return const_cast<Port*>(&p);
+		if (i->name() == str) {
+			return boost::const_pointer_cast<Port> (*i);
 		}
 	}
 
-	return 0;
+	return boost::shared_ptr<Port> ();
 }
 
 bool
@@ -1629,7 +1627,7 @@ IO::physically_connected () const
 }
 
 bool
-IO::has_port (Port* p) const
+IO::has_port (boost::shared_ptr<Port> p) const
 {
 	Glib::Mutex::Lock lm (io_lock);
 	return _ports.contains (p);

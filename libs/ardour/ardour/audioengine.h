@@ -63,7 +63,7 @@ class ProcessThread;
 class AudioEngine : public SessionHandlePtr
 {
 public:
-	typedef std::set<Port*> Ports;
+	typedef std::set<boost::shared_ptr<Port> > Ports;
 
 	AudioEngine (std::string client_name, std::string session_uuid);
 	virtual ~AudioEngine ();
@@ -161,9 +161,9 @@ public:
 		virtual const char *what() const throw() { return "could not connect to engine backend"; }
 	};
 
-	Port *register_input_port (DataType, const std::string& portname);
-	Port *register_output_port (DataType, const std::string& portname);
-	int   unregister_port (Port &);
+	boost::shared_ptr<Port> register_input_port (DataType, const std::string& portname);
+	boost::shared_ptr<Port> register_output_port (DataType, const std::string& portname);
+	int unregister_port (boost::shared_ptr<Port>);
 
 	bool port_is_physical (const std::string&) const;
 	void ensure_monitor_input (const std::string&, bool) const;
@@ -172,7 +172,7 @@ public:
 
 	int connect (const std::string& source, const std::string& destination);
 	int disconnect (const std::string& source, const std::string& destination);
-	int disconnect (Port &);
+	int disconnect (boost::shared_ptr<Port>);
 
 	const char ** get_ports (const std::string& port_name_pattern, const std::string& type_name_pattern, uint32_t flags);
 
@@ -184,7 +184,7 @@ public:
 	void get_physical_outputs (DataType type, std::vector<std::string>&);
 	void get_physical_inputs (DataType type, std::vector<std::string>&);
 
-	Port *get_port_by_name (const std::string &);
+	boost::shared_ptr<Port> get_port_by_name (const std::string &);
 
 	enum TransportState {
 		TransportStopped = JackTransportStopped,
@@ -247,7 +247,7 @@ _	   the regular process() call to session->process() is not made.
 	 *  The std::string parameters are the (long) port names.
 	 *  The bool parameter is true if ports were connected, or false for disconnected.
 	 */
-	PBD::Signal5<void, Port *, std::string, Port *, std::string, bool> PortConnectedOrDisconnected;
+	PBD::Signal5<void, boost::weak_ptr<Port>, std::string, boost::weak_ptr<Port>, std::string, bool> PortConnectedOrDisconnected;
 
 	std::string make_port_name_relative (std::string) const;
 	std::string make_port_name_non_relative (std::string) const;
@@ -283,7 +283,7 @@ private:
 
 	SerializedRCUManager<Ports> ports;
 
-	Port* register_port (DataType type, const std::string& portname, bool input);
+	boost::shared_ptr<Port> register_port (DataType type, const std::string& portname, bool input);
 
 	int    process_callback (pframes_t nframes);
 	void*  process_thread ();

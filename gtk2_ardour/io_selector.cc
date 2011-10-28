@@ -139,7 +139,7 @@ IOSelector::set_state (ARDOUR::BundleChannel c[2], bool s)
 	for (ARDOUR::Bundle::PortList::const_iterator i = our_ports.begin(); i != our_ports.end(); ++i) {
 		for (ARDOUR::Bundle::PortList::const_iterator j = other_ports.begin(); j != other_ports.end(); ++j) {
 
-			Port* f = _session->engine().get_port_by_name (*i);
+			boost::shared_ptr<Port> f = _session->engine().get_port_by_name (*i);
 			if (!f) {
 				return;
 			}
@@ -172,7 +172,7 @@ IOSelector::get_state (ARDOUR::BundleChannel c[2]) const
 	for (ARDOUR::Bundle::PortList::const_iterator i = our_ports.begin(); i != our_ports.end(); ++i) {
 		for (ARDOUR::Bundle::PortList::const_iterator j = other_ports.begin(); j != other_ports.end(); ++j) {
 
-			Port* f = _session->engine().get_port_by_name (*i);
+			boost::shared_ptr<Port> f = _session->engine().get_port_by_name (*i);
 
 			/* since we are talking about an IO, our ports should all have an associated Port *,
 			   so the above call should never fail */

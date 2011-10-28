@@ -62,15 +62,17 @@ PortExportChannel::read (Sample const *& data, framecnt_t frames) const
 	assert(frames <= buffer_size);
 
 	if (ports.size() == 1) {
-		data = (*ports.begin())->get_audio_buffer(frames).data();
+		boost::shared_ptr<AudioPort> p = ports.begin()->lock ();
+		data = p->get_audio_buffer(frames).data();
 		return;
 	}
 
 	memset (buffer.get(), 0, frames * sizeof (Sample));
 
 	for (PortSet::const_iterator it = ports.begin(); it != ports.end(); ++it) {
-		if (*it != 0) {
-			Sample* port_buffer = (*it)->get_audio_buffer(frames).data();
+		boost::shared_ptr<AudioPort> p = it->lock ();
+		if (p) {
+			Sample* port_buffer = p->get_audio_buffer(frames).data();
 
 			for (uint32_t i = 0; i < frames; ++i) {
 				buffer[i] += (float) port_buffer[i];
@@ -86,8 +88,9 @@ PortExportChannel::get_state (XMLNode * node) const
 {
 	XMLNode * port_node;
 	for (PortSet::const_iterator it = ports.begin(); it != ports.end(); ++it) {
-		if ((port_node = node->add_child ("Port"))) {
-			port_node->add_property ("name", (*it)->name());
+		boost::shared_ptr<Port> p = it->lock ();
+		if (p && (port_node = node->add_child ("Port"))) {
+			port_node->add_property ("name", p->name());
 		}
 	}
 }
@@ -100,7 +103,7 @@ PortExportChannel::set_state (XMLNode * node, Session & session)
 	for (XMLNodeList::iterator it = xml_ports.begin(); it != xml_ports.end(); ++it) {
 		if ((prop = (*it)->property ("name"))) {
 			std::string const & name = prop->value();
-			AudioPort * port = dynamic_cast<AudioPort *> (session.engine().get_port_by_name (name));
+			boost::shared_ptr<AudioPort> port = boost::dynamic_pointer_cast<AudioPort> (session.engine().get_port_by_name (name));
 			if (port) {
 				ports.insert (port);
 			} else {

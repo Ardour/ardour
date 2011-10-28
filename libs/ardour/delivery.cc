@@ -461,7 +461,7 @@ Delivery::flush_buffers (framecnt_t nframes, framepos_t time)
 	PortSet& ports (_output->ports());
 
 	for (PortSet::iterator i = ports.begin(); i != ports.end(); ++i) {
-		(*i).flush_buffers (nframes, time);
+		i->flush_buffers (nframes, time);
 	}
 }
 
@@ -478,7 +478,7 @@ Delivery::transport_stopped (framepos_t now)
                 PortSet& ports (_output->ports());
 
                 for (PortSet::iterator i = ports.begin(); i != ports.end(); ++i) {
-                        (*i).transport_stopped ();
+                        i->transport_stopped ();
                 }
         }
 }
@@ -490,7 +490,7 @@ Delivery::realtime_locate ()
                 PortSet& ports (_output->ports());
 
                 for (PortSet::iterator i = ports.begin(); i != ports.end(); ++i) {
-                        (*i).realtime_locate ();
+                        i->realtime_locate ();
                 }
         }
 }

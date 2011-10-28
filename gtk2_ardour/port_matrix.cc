@@ -700,7 +700,7 @@ PortMatrix::remove_channel (ARDOUR::BundleChannel b)
 	boost::shared_ptr<IO> io = io_from_bundle (b.bundle);
 
 	if (io) {
-		Port* p = io->nth (b.channel);
+		boost::shared_ptr<Port> p = io->nth (b.channel);
 		if (p) {
 			int const r = io->remove_port (p, this);
 			if (r == -1) {

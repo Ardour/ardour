@@ -74,7 +74,6 @@ MidiDiskstream::MidiDiskstream (Session &sess, const string &name, Diskstream::F
 	: Diskstream(sess, name, flag)
 	, _playback_buf(0)
 	, _capture_buf(0)
-	, _source_port(0)
 	, _note_mode(Sustained)
 	, _frames_written_to_ringbuffer(0)
 	, _frames_read_from_ringbuffer(0)
@@ -94,7 +93,6 @@ MidiDiskstream::MidiDiskstream (Session& sess, const XMLNode& node)
 	: Diskstream(sess, node)
 	, _playback_buf(0)
 	, _capture_buf(0)
-	, _source_port(0)
 	, _note_mode(Sustained)
 	, _frames_written_to_ringbuffer(0)
 	, _frames_read_from_ringbuffer(0)
@@ -171,7 +169,7 @@ MidiDiskstream::non_realtime_input_change ()
 			}
 
 			if (ni == 0) {
-				_source_port = 0;
+				_source_port.reset ();
 			} else {
 				_source_port = _io->midi(0);
 			}
@@ -496,7 +494,9 @@ MidiDiskstream::process (framepos_t transport_frame, pframes_t nframes, bool& ne
 		return 0;
 	}
 
-	if (_source_port == 0) {
+	boost::shared_ptr<MidiPort> sp = _source_port.lock ();
+
+	if (sp == 0) {
 		return 1;
 	}
 
@@ -527,7 +527,7 @@ MidiDiskstream::process (framepos_t transport_frame, pframes_t nframes, bool& ne
 	if (nominally_recording || rec_nframes) {
 
 		// Pump entire port buffer into the ring buffer (FIXME: split cycles?)
-		MidiBuffer& buf = _source_port->get_midi_buffer(nframes);
+		MidiBuffer& buf = sp->get_midi_buffer(nframes);
 		for (MidiBuffer::iterator i = buf.begin(); i != buf.end(); ++i) {
 			const Evoral::MIDIEvent<MidiBuffer::TimeType> ev(*i, false);
 			assert(ev.buffer());
@@ -1196,8 +1196,10 @@ MidiDiskstream::engage_record_enable ()
 
 	g_atomic_int_set (&_record_enabled, 1);
 
-	if (_source_port && Config->get_monitoring_model() == HardwareMonitoring) {
-		_source_port->request_monitor_input (!(_session.config.get_auto_input() && rolling));
+	boost::shared_ptr<MidiPort> sp = _source_port.lock ();
+	
+	if (sp && Config->get_monitoring_model() == HardwareMonitoring) {
+		sp->request_monitor_input (!(_session.config.get_auto_input() && rolling));
 	}
 
 	RecordEnableChanged (); /* EMIT SIGNAL */
@@ -1372,8 +1374,11 @@ MidiDiskstream::allocate_temporary_buffers ()
 void
 MidiDiskstream::monitor_input (bool yn)
 {
-	if (_source_port)
-		_source_port->ensure_monitor_input (yn);
+	boost::shared_ptr<MidiPort> sp = _source_port.lock ();
+	
+	if (sp) {
+		sp->ensure_monitor_input (yn);
+	}
 }
 
 void

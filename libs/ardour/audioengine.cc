@@ -382,8 +382,8 @@ AudioEngine::_connect_callback (jack_port_id_t id_a, jack_port_id_t id_b, int co
 	jack_port_t* jack_port_a = jack_port_by_id (_priv_jack, id_a);
 	jack_port_t* jack_port_b = jack_port_by_id (_priv_jack, id_b);
 
-	Port* port_a = 0;
-	Port* port_b = 0;
+	boost::shared_ptr<Port> port_a;
+	boost::shared_ptr<Port> port_b;
 
 	boost::shared_ptr<Ports> pr = ae->ports.reader ();
 	Ports::iterator i = pr->begin ();
@@ -530,15 +530,14 @@ AudioEngine::process_callback (pframes_t nframes)
 
 		for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
 
-			Port *port = (*i);
 			bool x;
 
-			if (port->last_monitor() != (x = port->monitoring_input ())) {
-				port->set_last_monitor (x);
+			if ((*i)->last_monitor() != (x = (*i)->monitoring_input ())) {
+				(*i)->set_last_monitor (x);
 				/* XXX I think this is dangerous, due to
 				   a likely mutex in the signal handlers ...
 				*/
-				 port->MonitorInputChanged (x); /* EMIT SIGNAL */
+				(*i)->MonitorInputChanged (x); /* EMIT SIGNAL */
 			}
 		}
 		last_monitor_check = next_processed_frames;
@@ -550,10 +549,8 @@ AudioEngine::process_callback (pframes_t nframes)
 
 		for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
 
-			Port *port = (*i);
-
-			if (port->sends_output()) {
-				port->get_buffer(nframes).silence(nframes);
+			if ((*i)->sends_output()) {
+				(*i)->get_buffer(nframes).silence(nframes);
 			}
 		}
 	}
@@ -774,16 +771,16 @@ AudioEngine::port_registration_failure (const std::string& portname)
 	throw PortRegistrationFailure (string_compose (_("AudioEngine: cannot register port \"%1\": %2"), portname, reason).c_str());
 }
 
-Port*
+boost::shared_ptr<Port>
 AudioEngine::register_port (DataType dtype, const string& portname, bool input)
 {
-	Port* newport;
+	boost::shared_ptr<Port> newport;
 
 	try {
 		if (dtype == DataType::AUDIO) {
-			newport = new AudioPort (portname, (input ? Port::IsInput : Port::IsOutput));
+			newport.reset (new AudioPort (portname, (input ? Port::IsInput : Port::IsOutput)));
 		} else if (dtype == DataType::MIDI) {
-			newport = new MidiPort (portname, (input ? Port::IsInput : Port::IsOutput));
+			newport.reset (new MidiPort (portname, (input ? Port::IsInput : Port::IsOutput)));
 		} else {
 			throw PortRegistrationFailure("unable to create port (unknown type)");
 		}
@@ -807,20 +804,20 @@ AudioEngine::register_port (DataType dtype, const string& portname, bool input)
 	}
 }
 
-Port *
+boost::shared_ptr<Port>
 AudioEngine::register_input_port (DataType type, const string& portname)
 {
 	return register_port (type, portname, true);
 }
 
-Port *
+boost::shared_ptr<Port>
 AudioEngine::register_output_port (DataType type, const string& portname)
 {
 	return register_port (type, portname, false);
 }
 
 int
-AudioEngine::unregister_port (Port& port)
+AudioEngine::unregister_port (boost::shared_ptr<Port> port)
 {
 	/* caller must hold process lock */
 
@@ -834,17 +831,12 @@ AudioEngine::unregister_port (Port& port)
 	{
 		RCUWriter<Ports> writer (ports);
 		boost::shared_ptr<Ports> ps = writer.get_copy ();
-
-		for (Ports::iterator i = ps->begin(); i != ps->end(); ++i) {
-			if ((*i) == &port) {
-				delete *i;
-				ps->erase (i);
-				break;
-			}
-		}
+		ps->erase (port);
 
 		/* writer goes out of scope, forces update */
 	}
+
+	ports.flush ();
 
 	return 0;
 }
@@ -867,8 +859,8 @@ AudioEngine::connect (const string& source, const string& destination)
 	string d = make_port_name_non_relative (destination);
 
 
-	Port* src = get_port_by_name (s);
-	Port* dst = get_port_by_name (d);
+	boost::shared_ptr<Port> src = get_port_by_name (s);
+	boost::shared_ptr<Port> dst = get_port_by_name (d);
 
 	if (src) {
 		ret = src->connect (d);
@@ -907,8 +899,8 @@ AudioEngine::disconnect (const string& source, const string& destination)
 	string s = make_port_name_non_relative (source);
 	string d = make_port_name_non_relative (destination);
 
-	Port* src = get_port_by_name (s);
-	Port* dst = get_port_by_name (d);
+	boost::shared_ptr<Port> src = get_port_by_name (s);
+	boost::shared_ptr<Port> dst = get_port_by_name (d);
 
 	if (src) {
 			ret = src->disconnect (d);
@@ -922,7 +914,7 @@ AudioEngine::disconnect (const string& source, const string& destination)
 }
 
 int
-AudioEngine::disconnect (Port& port)
+AudioEngine::disconnect (boost::shared_ptr<Port> port)
 {
 	GET_PRIVATE_JACK_POINTER_RET (_jack,-1);
 
@@ -935,7 +927,7 @@ AudioEngine::disconnect (Port& port)
 		}
 	}
 
-	return port.disconnect_all ();
+	return port->disconnect_all ();
 }
 
 ARDOUR::framecnt_t
@@ -968,10 +960,10 @@ AudioEngine::frames_per_cycle () const
 }
 
 /** @param name Full or short name of port
- *  @return Corresponding Port* or 0. This object remains the property of the AudioEngine
- *  so must not be deleted.
+ *  @return Corresponding Port or 0.
  */
-Port*
+
+boost::shared_ptr<Port>
 AudioEngine::get_port_by_name (const string& portname)
 {
 	if (!_running) {
@@ -979,13 +971,13 @@ AudioEngine::get_port_by_name (const string& portname)
 			fatal << _("get_port_by_name() called before engine was started") << endmsg;
 			/*NOTREACHED*/
 		} else {
-			return 0;
+			boost::shared_ptr<Port> ();
 		}
 	}
 
         if (!port_is_mine (portname)) {
                 /* not an ardour port */
-                return 0;
+                return boost::shared_ptr<Port> ();
         }
 
 	std::string const rel = make_port_name_relative (portname);
@@ -998,7 +990,7 @@ AudioEngine::get_port_by_name (const string& portname)
 		}
 	}
 
-        return 0;
+        return boost::shared_ptr<Port> ();
 }
 
 const char **
@@ -1241,28 +1233,15 @@ AudioEngine::remove_all_ports ()
 	/* process lock MUST be held by caller
 	*/
 
-	vector<Port*> to_be_deleted;
-
 	{
 		RCUWriter<Ports> writer (ports);
 		boost::shared_ptr<Ports> ps = writer.get_copy ();
-		for (Ports::iterator i = ps->begin(); i != ps->end(); ++i) {
-			to_be_deleted.push_back (*i);
-		}
 		ps->clear ();
 	}
 
 	/* clear dead wood list in RCU */
 
 	ports.flush ();
-
-	/* now do the actual deletion, given that "ports" is now empty, thus
-	   preventing anyone else from getting a handle on a Port
-	*/
-
-	for (vector<Port*>::iterator p = to_be_deleted.begin(); p != to_be_deleted.end(); ++p) {
-		delete *p;
-	}
 
 	port_remove_in_progress = false;
 }

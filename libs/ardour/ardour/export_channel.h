@@ -65,7 +65,7 @@ class ExportChannel : public boost::less_than_comparable<ExportChannel>
 class PortExportChannel : public ExportChannel
 {
   public:
-	typedef std::set<AudioPort *> PortSet;
+	typedef std::set<boost::weak_ptr<AudioPort> > PortSet;
 
 	PortExportChannel ();
 	void set_max_buffer_size(framecnt_t frames);
@@ -78,7 +78,7 @@ class PortExportChannel : public ExportChannel
 
 	bool operator< (ExportChannel const & other) const;
 
-	void add_port (AudioPort * port) { ports.insert (port); }
+	void add_port (boost::weak_ptr<AudioPort> port) { ports.insert (port); }
 	PortSet const & get_ports () { return ports; }
 
   private:

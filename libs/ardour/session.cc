@@ -546,7 +546,7 @@ Session::when_engine_running ()
 			uint32_t limit = _master_out->n_outputs().n_total();
 
 			for (uint32_t n = 0; n < limit; ++n) {
-				Port* p = _master_out->output()->nth (n);
+				boost::shared_ptr<Port> p = _master_out->output()->nth (n);
 				string connect_to;
 				if (outputs[p->type()].size() > n) {
 					connect_to = outputs[p->type()][n];
@@ -576,8 +576,8 @@ Session::when_engine_running ()
 
 			if (_master_out) {
 				for (uint32_t n = 0; n < limit; ++n) {
-					AudioPort* p = _monitor_out->input()->ports().nth_audio_port (n);
-					AudioPort* o = _master_out->output()->ports().nth_audio_port (n);
+					boost::shared_ptr<AudioPort> p = _monitor_out->input()->ports().nth_audio_port (n);
+					boost::shared_ptr<AudioPort> o = _master_out->output()->ports().nth_audio_port (n);
 
 					if (o) {
 						string connect_to = o->name();
@@ -617,7 +617,7 @@ Session::when_engine_running ()
 
 						for (uint32_t n = 0; n < limit; ++n) {
 
-							Port* p = _monitor_out->output()->ports().port(DataType::AUDIO, n);
+							boost::shared_ptr<Port> p = _monitor_out->output()->ports().port(DataType::AUDIO, n);
 							string connect_to;
 							if (outputs[DataType::AUDIO].size() > (n % mod)) {
 								connect_to = outputs[DataType::AUDIO][n % mod];

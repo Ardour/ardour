@@ -218,21 +218,21 @@ PortExportChannelSelector::ChannelTreeView::set_config (ChannelConfigPtr c)
 			}
 
 			Glib::RefPtr<Gtk::ListStore> port_list = r_it->get_value (route_cols.port_list_col);
-			std::set<AudioPort *> route_ports;
-			std::set<AudioPort *> intersection;
-			std::map<AudioPort *, string> port_labels;
+			std::set<boost::weak_ptr<AudioPort> > route_ports;
+			std::set<boost::weak_ptr<AudioPort> > intersection;
+			std::map<boost::weak_ptr<AudioPort>, string> port_labels;
 
 			for (Gtk::ListStore::Children::const_iterator p_it = port_list->children().begin(); p_it != port_list->children().end(); ++p_it) {
 				route_ports.insert ((*p_it)->get_value (route_cols.port_cols.port));
-				port_labels.insert (std::pair<AudioPort*, string> ((*p_it)->get_value (route_cols.port_cols.port),
-				                                                    (*p_it)->get_value (route_cols.port_cols.label)));
+				port_labels.insert (make_pair ((*p_it)->get_value (route_cols.port_cols.port),
+							       (*p_it)->get_value (route_cols.port_cols.label)));
 			}
 
 			std::set_intersection (pec->get_ports().begin(), pec->get_ports().end(),
 			                       route_ports.begin(), route_ports.end(),
-			                       std::insert_iterator<std::set<AudioPort *> > (intersection, intersection.begin()));
+			                       std::insert_iterator<std::set<boost::weak_ptr<AudioPort> > > (intersection, intersection.begin()));
 
-			intersection.erase (0); // Remove "none" selection
+			intersection.erase (boost::weak_ptr<AudioPort> ()); // Remove "none" selection
 
 			if (intersection.empty()) {
 				continue;
@@ -244,13 +244,13 @@ PortExportChannelSelector::ChannelTreeView::set_config (ChannelConfigPtr c)
 				/* Set previous channels (if any) to none */
 
 				for (uint32_t chn = 1; chn < i; ++chn) {
-					r_it->set_value (route_cols.get_channel (chn).port, (AudioPort *) 0);
+					r_it->set_value (route_cols.get_channel (chn).port, boost::weak_ptr<AudioPort> ());
 					r_it->set_value (route_cols.get_channel (chn).label, string ("(none)"));
 				}
 			}
 
-			AudioPort * port = *intersection.begin();
-			std::map<AudioPort *, string>::iterator label_it = port_labels.find (port);
+			boost::weak_ptr<AudioPort> port = *intersection.begin();
+			std::map<boost::weak_ptr<AudioPort>, string>::iterator label_it = port_labels.find (port);
 			string label = label_it != port_labels.end() ? label_it->second : "error";
 
 			r_it->set_value (route_cols.get_channel (i).port, port);
@@ -294,7 +294,7 @@ PortExportChannelSelector::ChannelTreeView::add_route (ARDOUR::IO * io)
 	row = *iter;
 
 	row[route_cols.port_cols.selected] = false;
-	row[route_cols.port_cols.port] = 0;
+	row[route_cols.port_cols.port] = boost::weak_ptr<AudioPort> ();
 	row[route_cols.port_cols.label] = "(none)";
 
 }
@@ -331,7 +331,7 @@ PortExportChannelSelector::ChannelTreeView::set_channel_count (uint32_t channels
 		for (Gtk::ListStore::Children::iterator it = route_list->children().begin(); it != route_list->children().end(); ++it) {
 			std::string label = it->get_value(route_cols.selected) ? "(none)" : "";
 			it->set_value (route_cols.get_channel (n_channels).label, label);
-			it->set_value (route_cols.get_channel (n_channels).port, (AudioPort *) 0);
+			it->set_value (route_cols.get_channel (n_channels).port, boost::weak_ptr<AudioPort> ());
 		}
 
 		/* set column width */
@@ -355,7 +355,6 @@ PortExportChannelSelector::ChannelTreeView::set_channel_count (uint32_t channels
 void
 PortExportChannelSelector::ChannelTreeView::update_config ()
 {
-
 	if (!config) { return; }
 
 	config->clear_channels();
@@ -372,7 +371,8 @@ PortExportChannelSelector::ChannelTreeView::update_config ()
 				continue;
 			}
 
-			AudioPort * port = row[route_cols.get_channel (i).port];
+			boost::weak_ptr<AudioPort> weak_port = row[route_cols.get_channel (i).port];
+			boost::shared_ptr<AudioPort> port = weak_port.lock ();
 			if (port) {
 				pec->add_port (port);
 			}
@@ -398,7 +398,7 @@ PortExportChannelSelector::ChannelTreeView::update_toggle_selection (std::string
 		}
 
 		iter->set_value (route_cols.get_channel (i).label, std::string("(none)"));
-		iter->set_value (route_cols.get_channel (i).port, (AudioPort *) 0);
+		iter->set_value (route_cols.get_channel (i).port, boost::weak_ptr<AudioPort> ());
 
 		Glib::RefPtr<Gtk::ListStore> port_list = iter->get_value (route_cols.port_list_col);
 		Gtk::ListStore::Children::iterator port_it;
@@ -407,7 +407,7 @@ PortExportChannelSelector::ChannelTreeView::update_toggle_selection (std::string
 		for (port_it = port_list->children().begin(); port_it != port_list->children().end(); ++port_it) {
 			if (port_number == i) {
 				iter->set_value (route_cols.get_channel (i).label, (std::string) (*port_it)->get_value (route_cols.port_cols.label));
-				iter->set_value (route_cols.get_channel (i).port, (AudioPort *) (*port_it)->get_value (route_cols.port_cols.port));
+				iter->set_value (route_cols.get_channel (i).port, (*port_it)->get_value (route_cols.port_cols.port));
 			}
 
 			++port_number;
@@ -429,7 +429,8 @@ PortExportChannelSelector::ChannelTreeView::update_selection_text (std::string c
 	for (port_it = port_list->children().begin(); port_it != port_list->children().end(); ++port_it) {
 		std::string label = port_it->get_value (route_cols.port_cols.label);
 		if (label == new_text) {
-			iter->set_value (route_cols.get_channel (channel).port, (AudioPort *) (*port_it)[route_cols.port_cols.port]);
+			boost::weak_ptr<AudioPort> w = (*port_it)[route_cols.port_cols.port];
+			iter->set_value (route_cols.get_channel (channel).port, w);
 		}
 	}
 

@@ -42,20 +42,20 @@ public:
 	size_t num_ports() const;
 	size_t num_ports(DataType type) const { return _ports[type].size(); }
 
-	void add(Port* port);
-	bool remove(Port* port);
+	void add (boost::shared_ptr<Port> port);
+	bool remove (boost::shared_ptr<Port> port);
 
 	/** nth port */
-	Port* port(size_t index) const;
+	boost::shared_ptr<Port> port(size_t index) const;
 
 	/** nth port of type @a t, or nth port if t = NIL */
-	Port* port(DataType t, size_t index) const;
+	boost::shared_ptr<Port> port(DataType t, size_t index) const;
 
-	AudioPort* nth_audio_port(size_t n) const;
+	boost::shared_ptr<AudioPort> nth_audio_port(size_t n) const;
 
-	MidiPort* nth_midi_port(size_t n) const;
+	boost::shared_ptr<MidiPort> nth_midi_port(size_t n) const;
 
-	bool contains(const Port* port) const;
+	bool contains (boost::shared_ptr<const Port> port) const;
 
 	/** Remove all ports from the PortSet.  Ports are not deregistered with
 	 * the engine, it's the caller's responsibility to not leak here!
@@ -69,8 +69,8 @@ public:
 	template<typename PS, typename P>
 	class iterator_base {
 	public:
-		P& operator*()  { return *_set.port(_type, _index); }
-		P* operator->() { return _set.port(_type, _index); }
+		boost::shared_ptr<P> operator*()  { return _set.port(_type, _index); }
+		boost::shared_ptr<P> operator->() { return _set.port(_type, _index); }
 		iterator_base<PS,P>& operator++() { ++_index; return *this; } // yes, prefix only
 		bool operator==(const iterator_base<PS,P>& other) { return (_index == other._index); }
 		bool operator!=(const iterator_base<PS,P>& other) { return (_index != other._index); }
@@ -109,8 +109,8 @@ public:
 
 	class audio_iterator {
 	public:
-		AudioPort& operator*()  { return *_set.nth_audio_port(_index); }
-		AudioPort* operator->() { return _set.nth_audio_port(_index); }
+		boost::shared_ptr<AudioPort> operator*()  { return _set.nth_audio_port(_index); }
+		boost::shared_ptr<AudioPort> operator->() { return _set.nth_audio_port(_index); }
 		audio_iterator& operator++() { ++_index; return *this; } // yes, prefix only
 		bool operator==(const audio_iterator& other) { return (_index == other._index); }
 		bool operator!=(const audio_iterator& other) { return (_index != other._index); }
@@ -128,7 +128,7 @@ public:
 	audio_iterator audio_end()   { return audio_iterator(*this, _count.n_audio()); }
 
 private:
-	typedef std::vector<Port*> PortVec;
+	typedef std::vector<boost::shared_ptr<Port> > PortVec;
 
 	// Vector of vectors, indexed by DataType::to_index()
 	std::vector<PortVec> _ports;

@@ -690,7 +690,7 @@ MidiTrack::map_input_active (bool yn)
 	PortSet& ports (_input->ports());
 
 	for (PortSet::iterator p = ports.begin(DataType::MIDI); p != ports.end(DataType::MIDI); ++p) {
-		MidiPort* mp = dynamic_cast<MidiPort*> (&*p);
+		boost::shared_ptr<MidiPort> mp = boost::dynamic_pointer_cast<MidiPort> (*p);
 		if (yn != mp->input_active()) {
 			mp->set_input_active (yn);
 		}

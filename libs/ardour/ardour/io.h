@@ -102,9 +102,9 @@ class IO : public SessionObject, public Latent
 	boost::shared_ptr<Bundle> bundle () { return _bundle; }
 
 	int add_port (std::string connection, void *src, DataType type = DataType::NIL);
-	int remove_port (Port *, void *src);
-	int connect (Port *our_port, std::string other_port, void *src);
-	int disconnect (Port *our_port, std::string other_port, void *src);
+	int remove_port (boost::shared_ptr<Port>, void *src);
+	int connect (boost::shared_ptr<Port> our_port, std::string other_port, void *src);
+	int disconnect (boost::shared_ptr<Port> our_port, std::string other_port, void *src);
 	int disconnect (void *src);
 	bool connected_to (boost::shared_ptr<const IO>) const;
 	bool connected_to (const std::string&) const;
@@ -117,20 +117,20 @@ class IO : public SessionObject, public Latent
 	PortSet& ports() { return _ports; }
 	const PortSet& ports() const { return _ports; }
 
-	bool has_port (Port *) const;
+	bool has_port (boost::shared_ptr<Port>) const;
 
-	Port *nth (uint32_t n) const {
+	boost::shared_ptr<Port> nth (uint32_t n) const {
 		if (n < _ports.num_ports()) {
 			return _ports.port(n);
 		} else {
-			return 0;
+			return boost::shared_ptr<Port> ();
 		}
 	}
 
-	Port* port_by_name (const std::string& str) const;
+	boost::shared_ptr<Port> port_by_name (const std::string& str) const;
 
-	AudioPort* audio(uint32_t n) const;
-	MidiPort*  midi(uint32_t n) const;
+	boost::shared_ptr<AudioPort> audio(uint32_t n) const;
+	boost::shared_ptr<MidiPort>  midi(uint32_t n) const;
 
 	const ChanCount& n_ports ()  const { return _ports.count(); }
 

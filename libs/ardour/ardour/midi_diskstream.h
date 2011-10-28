@@ -184,7 +184,7 @@ class MidiDiskstream : public Diskstream
 
 	MidiRingBuffer<framepos_t>*  _playback_buf;
 	MidiRingBuffer<framepos_t>*  _capture_buf;
-	MidiPort*                    _source_port;
+	boost::weak_ptr<MidiPort>    _source_port;
 	boost::shared_ptr<SMFSource> _write_source;
 	NoteMode                     _note_mode;
 	volatile gint                _frames_written_to_ringbuffer;

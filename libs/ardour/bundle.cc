@@ -421,8 +421,8 @@ Bundle::connected_to (boost::shared_ptr<Bundle> other, AudioEngine & engine)
 		for (uint32_t j = 0; j < A.size(); ++j) {
 			for (uint32_t k = 0; k < B.size(); ++k) {
 
-				Port* p = engine.get_port_by_name (A[j]);
-				Port* q = engine.get_port_by_name (B[k]);
+				boost::shared_ptr<Port> p = engine.get_port_by_name (A[j]);
+				boost::shared_ptr<Port> q = engine.get_port_by_name (B[k]);
 
 				if (!p && !q) {
 					return false;

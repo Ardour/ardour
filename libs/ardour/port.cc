@@ -383,7 +383,7 @@ Port::get_connected_latency_range (jack_latency_range_t& range, bool playback) c
                                    latency compensation.
                                 */
 
-                                Port* remote_port = AudioEngine::instance()->get_port_by_name (*c);
+                                boost::shared_ptr<Port> remote_port = AudioEngine::instance()->get_port_by_name (*c);
                                 if (remote_port) {
                                         lr = remote_port->private_latency_range ((playback ? JackPlaybackLatency : JackCaptureLatency));
                                         DEBUG_TRACE (DEBUG::Latency, string_compose (

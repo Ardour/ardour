@@ -993,7 +993,7 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width widt
 {
 	uint32_t io_count;
 	uint32_t io_index;
-	Port *port;
+	boost::shared_ptr<Port> port;
 	vector<string> port_connections;
 
 	uint32_t total_connection_count = 0;
@@ -1185,8 +1185,15 @@ MixerStrip::diskstream_changed ()
 }
 
 void
-MixerStrip::port_connected_or_disconnected (Port* a, Port* b)
+MixerStrip::port_connected_or_disconnected (boost::weak_ptr<Port> wa, boost::weak_ptr<Port> wb)
 {
+	boost::shared_ptr<Port> a = wa.lock ();
+	boost::shared_ptr<Port> b = wb.lock ();
+
+	if (!a || !b) {
+		return;
+	}
+	
 	if (_route->input()->has_port (a) || _route->input()->has_port (b)) {
 		update_input_display ();
 		set_width_enum (_width, this);

@@ -129,8 +129,8 @@ class PortExportChannelSelector : public ExportChannelSelector
 		  public:
 			Channel (RouteCols & cols) { cols.add (port); cols.add (label); }
 
-			Gtk::TreeModelColumn<ARDOUR::AudioPort *>  port;
-			Gtk::TreeModelColumn<std::string>        label;
+			Gtk::TreeModelColumn<boost::weak_ptr<ARDOUR::AudioPort> > port;
+			Gtk::TreeModelColumn<std::string> label;
 		};
 		std::list<Channel> channels;
 
@@ -144,11 +144,11 @@ class PortExportChannelSelector : public ExportChannelSelector
 		class PortCols : public Gtk::TreeModel::ColumnRecord
 		{
 		  public:
-			PortCols () { add (selected); add(port); add(label); }
+			PortCols () { add(selected); add(port); add(label); }
 
-			Gtk::TreeModelColumn<bool>                  selected;  // not used ATM
-			Gtk::TreeModelColumn<ARDOUR::AudioPort *>   port;
-			Gtk::TreeModelColumn<std::string>         label;
+			Gtk::TreeModelColumn<bool> selected;  // not used ATM
+			Gtk::TreeModelColumn<boost::weak_ptr<ARDOUR::AudioPort> > port;
+			Gtk::TreeModelColumn<std::string> label;
 		};
 		PortCols port_cols;
 	};

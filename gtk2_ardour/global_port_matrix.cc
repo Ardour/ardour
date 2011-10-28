@@ -56,8 +56,8 @@ GlobalPortMatrix::set_state (BundleChannel c[2], bool s)
 	for (Bundle::PortList::const_iterator i = in_ports.begin(); i != in_ports.end(); ++i) {
 		for (Bundle::PortList::const_iterator j = out_ports.begin(); j != out_ports.end(); ++j) {
 
-			Port* p = _session->engine().get_port_by_name (*i);
-			Port* q = _session->engine().get_port_by_name (*j);
+			boost::shared_ptr<Port> p = _session->engine().get_port_by_name (*i);
+			boost::shared_ptr<Port> q = _session->engine().get_port_by_name (*j);
 
 			if (p) {
 				if (s) {
@@ -105,8 +105,8 @@ GlobalPortMatrix::get_state (BundleChannel c[2]) const
 	for (Bundle::PortList::const_iterator i = in_ports.begin(); i != in_ports.end(); ++i) {
 		for (Bundle::PortList::const_iterator j = out_ports.begin(); j != out_ports.end(); ++j) {
 
-			Port* p = _session->engine().get_port_by_name (*i);
-			Port* q = _session->engine().get_port_by_name (*j);
+			boost::shared_ptr<Port> p = _session->engine().get_port_by_name (*i);
+			boost::shared_ptr<Port> q = _session->engine().get_port_by_name (*j);
 
 			if (!p && !q) {
 				/* two non-Ardour ports; things are slightly more involved */

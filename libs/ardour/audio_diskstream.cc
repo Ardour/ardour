@@ -489,7 +489,7 @@ AudioDiskstream::process (framepos_t transport_frame, pframes_t nframes, bool& n
 				   for recording, and use rec_offset
 				*/
 
-				AudioPort* const ap = _io->audio (n);
+				boost::shared_ptr<AudioPort> const ap = _io->audio (n);
 				assert(ap);
 				assert(rec_nframes <= (framecnt_t) ap->get_audio_buffer(nframes).capacity());
 
@@ -505,7 +505,7 @@ AudioDiskstream::process (framepos_t transport_frame, pframes_t nframes, bool& n
 					goto out;
 				}
 
-				AudioPort* const ap = _io->audio (n);
+				boost::shared_ptr<AudioPort> const ap = _io->audio (n);
 				assert(ap);
 
 				Sample* buf = ap->get_audio_buffer(nframes).data (rec_offset);
