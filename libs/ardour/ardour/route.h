@@ -468,7 +468,6 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	bool           _solo_safe;
 	DataType       _default_type;
 	FedBy          _fed_by;
-	FedBy          _direct_fed_by;
 
 	virtual ChanCount input_streams () const;
 
@@ -500,7 +499,6 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
   private:
 	int _set_state_2X (const XMLNode&, int);
 	void set_processor_state_2X (XMLNodeList const &, int);
-	bool sub_feeds (FedBy const &, boost::shared_ptr<Route>, bool* via_send_only = 0);
 
 	static uint32_t order_key_cnt;
 
