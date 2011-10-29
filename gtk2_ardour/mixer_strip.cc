@@ -93,6 +93,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, bool in_mixer)
 	, bottom_button_table (1, 2)
 	, meter_point_label (_("pre"))
 	, midi_input_enable_button (0)
+	, _comment_button (_("Comments"))
 	, _visibility (X_("mixer-strip-visibility"))
 {
 	init ();
@@ -119,6 +120,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Route> rt
 	, bottom_button_table (1, 2)
 	, meter_point_label (_("pre"))
 	, midi_input_enable_button (0)
+	, _comment_button (_("Comments"))
 	, _visibility (X_("mixer-strip-visibility"))
 {
 	init ();
@@ -252,6 +254,9 @@ MixerStrip::init ()
 	Gtkmm2ext::set_size_request_to_display_given_text (group_button, "Group", 2, 2);
 	group_label.set_name ("MixerGroupButtonLabel");
 
+	_comment_button.set_name (X_("MixerCommentButton"));
+	_comment_button.signal_clicked().connect (sigc::mem_fun (*this, &MixerStrip::toggle_comment));
+
 	global_vpacker.set_border_width (0);
 	global_vpacker.set_spacing (0);
 
@@ -278,6 +283,7 @@ MixerStrip::init ()
 	global_vpacker.pack_start (gpm, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (bottom_button_table, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (output_button, Gtk::PACK_SHRINK);
+	global_vpacker.pack_start (_comment_button, Gtk::PACK_SHRINK);
 
 	global_frame.add (global_vpacker);
 	global_frame.set_shadow_type (Gtk::SHADOW_IN);
@@ -320,10 +326,11 @@ MixerStrip::init ()
 	   in update_diskstream_display().
 	*/
 
-	if (is_midi_track())
+	if (is_midi_track()) {
 		set_name ("MidiTrackStripBase");
-	else
+	} else {
 		set_name ("AudioTrackStripBase");
+	}
 
 	add_events (Gdk::BUTTON_RELEASE_MASK|
 		    Gdk::ENTER_NOTIFY_MASK|
@@ -346,6 +353,7 @@ MixerStrip::init ()
 	_visibility.add (&_invert_button_box, X_("PhaseInvert"), _("Phase Invert"));
 	_visibility.add (solo_safe_led, X_("SoloSafe"), _("Solo Safe"));
 	_visibility.add (solo_isolated_led, X_("SoloIsolated"), _("Solo Isolated"));
+	_visibility.add (&_comment_button, X_("Comments"), _("Comments"));
 
 	parameter_changed (X_("mixer-strip-visibility"));
 
@@ -534,6 +542,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	output_label.show();
 	name_label.show();
 	name_button.show();
+	_comment_button.show();
 	group_button.show();
 	group_label.show();
 
@@ -627,6 +636,7 @@ MixerStrip::set_width_enum (Width w, void* owner)
 
 	update_input_display ();
 	update_output_display ();
+	setup_comment_button ();
 	route_group_changed ();
 	name_changed ();
 	WidthChanged ();
@@ -1223,18 +1233,46 @@ MixerStrip::port_connected_or_disconnected (boost::weak_ptr<Port> wa, boost::wea
 }
 
 void
+MixerStrip::setup_comment_button ()
+{
+	switch (_width) {
+
+	case Wide:
+		if (_route->comment().empty ()) {
+			_comment_button.unset_bg (STATE_NORMAL);
+			((Gtk::Label *) _comment_button.get_child ())->set_text (_("Comments"));
+		} else {
+			_comment_button.modify_bg (STATE_NORMAL, color ());
+			((Gtk::Label *) _comment_button.get_child ())->set_text (_("*Comments*"));
+		}
+		break;
+
+	case Narrow:
+		if (_route->comment().empty ()) {
+			_comment_button.unset_bg (STATE_NORMAL);
+			((Gtk::Label *) _comment_button.get_child ())->set_text (_("Cmt"));
+		} else {
+			_comment_button.modify_bg (STATE_NORMAL, color ());
+			((Gtk::Label *) _comment_button.get_child ())->set_text (_("*Cmt*"));
+		}
+		break;
+	}
+
+	ARDOUR_UI::instance()->set_tip (
+		_comment_button, _route->comment().empty() ? _("Click to Add/Edit Comments") : _route->comment()
+		);
+}
+
+void
 MixerStrip::comment_editor_done_editing ()
 {
-	ignore_toggle = true;
-	_comment_menu_item->set_active (false);
-	ignore_toggle = false;
-
 	string const str = comment_area->get_buffer()->get_text();
 	if (str == _route->comment ()) {
 		return;
 	}
 
 	_route->set_comment (str, this);
+	setup_comment_button ();
 }
 
 void
@@ -1367,14 +1405,15 @@ MixerStrip::build_route_ops_menu ()
 	MenuList& items = route_ops_menu->items();
 
 	items.push_back (CheckMenuElem (_("Comments..."), sigc::mem_fun (*this, &MixerStrip::toggle_comment)));
-	_comment_menu_item = dynamic_cast<CheckMenuItem*> (&items.back ());
+	CheckMenuItem* i = dynamic_cast<CheckMenuItem*> (&items.back ());
+	i->set_active (comment_window && comment_window->is_visible ());
 	items.push_back (MenuElem (_("Save As Template..."), sigc::mem_fun(*this, &RouteUI::save_as_template)));
 	items.push_back (MenuElem (_("Rename..."), sigc::mem_fun(*this, &RouteUI::route_rename)));
 	rename_menu_item = &items.back();
 
 	items.push_back (SeparatorElem());
 	items.push_back (CheckMenuElem (_("Active")));
-	CheckMenuItem* i = dynamic_cast<CheckMenuItem *> (&items.back());
+	i = dynamic_cast<CheckMenuItem *> (&items.back());
 	i->set_active (_route->active());
 	i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::set_route_active), !_route->active(), false));
 
@@ -1677,6 +1716,7 @@ MixerStrip::drop_send ()
 	solo_safe_led->set_sensitive (true);
 	monitor_input_button->set_sensitive (true);
 	monitor_disk_button->set_sensitive (true);
+	_comment_button.set_sensitive (true);
 }
 
 void
@@ -1715,6 +1755,7 @@ MixerStrip::show_send (boost::shared_ptr<Send> send)
 	solo_safe_led->set_sensitive (false);
 	monitor_input_button->set_sensitive (false);
 	monitor_disk_button->set_sensitive (false);
+	_comment_button.set_sensitive (false);
 
 	if (boost::dynamic_pointer_cast<InternalSend>(send)) {
 		output_button.set_sensitive (false);

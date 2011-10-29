@@ -1528,6 +1528,7 @@ RCOptionEditor::RCOptionEditor ()
 	_mixer_strip_visibility.add (0, X_("PhaseInvert"), _("Phase Invert"));
 	_mixer_strip_visibility.add (0, X_("SoloSafe"), _("Solo Safe"));
 	_mixer_strip_visibility.add (0, X_("SoloIsolated"), _("Solo Isolated"));
+	_mixer_strip_visibility.add (0, X_("Comments"), _("Comments"));
 	
 	add_option (
 		_("Interface"),
