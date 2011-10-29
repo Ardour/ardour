@@ -263,6 +263,8 @@ Mixer_UI::show_window ()
 		for (ri = rows.begin(); ri != rows.end(); ++ri) {
 			ms = (*ri)[track_columns.strip];
 			ms->set_width_enum (ms->get_width_enum (), ms->width_owner());
+			/* Fix visibility of mixer strip stuff */
+			ms->parameter_changed (X_("mixer-strip-visibility"));
 		}
 	}
 	_visible = true;

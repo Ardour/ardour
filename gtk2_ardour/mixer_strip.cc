@@ -24,6 +24,7 @@
 #include "pbd/convert.h"
 #include "pbd/enumwriter.h"
 #include "pbd/replace_all.h"
+#include "pbd/stacktrace.h"
 
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/utils.h>
@@ -92,6 +93,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, bool in_mixer)
 	, bottom_button_table (1, 2)
 	, meter_point_label (_("pre"))
 	, midi_input_enable_button (0)
+	, _visibility (X_("mixer-strip-visibility"))
 {
 	init ();
 
@@ -117,6 +119,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Route> rt
 	, bottom_button_table (1, 2)
 	, meter_point_label (_("pre"))
 	, midi_input_enable_button (0)
+	, _visibility (X_("mixer-strip-visibility"))
 {
 	init ();
 	set_route (rt);
@@ -222,7 +225,7 @@ MixerStrip::init ()
         rec_solo_table.attach (*solo_safe_led, 1, 2, 1, 2);
         rec_solo_table.show ();
 
-	button_table.set_homogeneous (true);
+	button_table.set_homogeneous (false);
 	button_table.set_spacings (0);
 
 	button_table.attach (name_button, 0, 1, 0, 1);
@@ -335,6 +338,18 @@ MixerStrip::init ()
 	AudioEngine::instance()->PortConnectedOrDisconnected.connect (
 		*this, invalidator (*this), boost::bind (&MixerStrip::port_connected_or_disconnected, this, _1, _3), gui_context ()
 		);
+
+	/* Add the widgets under visibility control to the VisibilityGroup; the names used here
+	   must be the same as those used in RCOptionEditor so that the configuration changes
+	   are recognised when they occur.
+	*/
+	_visibility.add (&_invert_button_box, X_("PhaseInvert"), _("Phase Invert"));
+	_visibility.add (solo_safe_led, X_("SoloSafe"), _("Solo Safe"));
+	_visibility.add (solo_isolated_led, X_("SoloIsolated"), _("Solo Isolated"));
+
+	parameter_changed (X_("mixer-strip-visibility"));
+
+	Config->ParameterChanged.connect (_config_connection, MISSING_INVALIDATOR, ui_bind (&MixerStrip::parameter_changed, this, _1), gui_context());
 }
 
 MixerStrip::~MixerStrip ()
@@ -521,6 +536,8 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	name_button.show();
 	group_button.show();
 	group_label.show();
+
+	parameter_changed ("mixer-strip-visibility");
 
 	show ();
 }
@@ -1354,6 +1371,7 @@ MixerStrip::build_route_ops_menu ()
 	items.push_back (MenuElem (_("Save As Template..."), sigc::mem_fun(*this, &RouteUI::save_as_template)));
 	items.push_back (MenuElem (_("Rename..."), sigc::mem_fun(*this, &RouteUI::route_rename)));
 	rename_menu_item = &items.back();
+
 	items.push_back (SeparatorElem());
 	items.push_back (CheckMenuElem (_("Active")));
 	CheckMenuItem* i = dynamic_cast<CheckMenuItem *> (&items.back());
@@ -1969,4 +1987,15 @@ string
 MixerStrip::state_id () const
 {
 	return string_compose ("strip %1", _route->id().to_s());
+}
+
+void
+MixerStrip::parameter_changed (string p)
+{
+	if (p == _visibility.get_state_name()) {
+		/* The user has made changes to the mixer strip visibility, so get
+		   our VisibilityGroup to reflect these changes in our widgets.
+		*/
+		_visibility.set_state (Config->get_mixer_strip_visibility ());
+	}
 }

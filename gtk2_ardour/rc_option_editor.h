@@ -18,6 +18,7 @@
 */
 
 #include "option_editor.h"
+#include "visibility_group.h"
 
 /** @file rc_option_editor.h
  *  @brief Editing of options which are obtained from and written back to one of the .rc files.
@@ -39,4 +40,5 @@ private:
 	ARDOUR::RCConfiguration* _rc_config;
 	BoolOption* _solo_control_is_listen_control;
 	ComboOption<ARDOUR::ListenPosition>* _listen_position;
+	VisibilityGroup _mixer_strip_visibility;
 };

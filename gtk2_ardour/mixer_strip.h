@@ -53,6 +53,7 @@
 #include "enums.h"
 #include "processor_box.h"
 #include "ardour_dialog.h"
+#include "visibility_group.h"
 
 namespace ARDOUR {
 	class Route;
@@ -119,6 +120,8 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	static PBD::Signal1<void,MixerStrip*> CatchDeletion;
 
 	std::string state_id() const;
+
+	void parameter_changed (std::string);
 
   protected:
 	friend class Mixer_UI;
@@ -289,6 +292,17 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 
 	void update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width width, bool input_button);
 	void port_connected_or_disconnected (boost::weak_ptr<ARDOUR::Port>, boost::weak_ptr<ARDOUR::Port>);
+
+	/** A VisibilityGroup to manage the visibility of some of our controls.
+	 *  We fill it with the controls that are being managed, using the same names
+	 *  as those used with _mixer_strip_visibility in RCOptionEditor.  Then
+	 *  this VisibilityGroup is configured by changes to the RC variable
+	 *  mixer-strip-visibility, which happen when the user makes changes in
+	 *  the RC option editor.
+	 */
+	VisibilityGroup _visibility;
+
+	PBD::ScopedConnection _config_connection;
 
 	static std::string meter_point_string (ARDOUR::MeterPoint);
 };

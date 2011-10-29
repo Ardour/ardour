@@ -173,6 +173,7 @@ CONFIG_VARIABLE (gain_t, max_gain, "max-gain", 2.0) /* +6.0dB */
 CONFIG_VARIABLE (bool, denormal_protection, "denormal-protection", false)
 CONFIG_VARIABLE (DenormalModel, denormal_model, "denormal-model", DenormalNone)
 
-/* visibility of toolbar components */
+/* visibility of various things */
 
 CONFIG_VARIABLE (bool, show_zoom_tools, "show-zoom-tools", true)
+CONFIG_VARIABLE (std::string, mixer_strip_visibility, "mixer-strip-visibility", "PhaseInvert,SoloSafe,SoloIsolated")
