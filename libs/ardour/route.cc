@@ -1965,6 +1965,14 @@ Route::_set_state (const XMLNode& node, int version)
 		}
 	}
 
+	if ((prop = node.property (X_("meter-point"))) != 0) {
+		MeterPoint mp = MeterPoint (string_2_enum (prop->value (), _meter_point));
+		set_meter_point (mp, true);
+		if (_meter) {
+			_meter->set_display_to_user (_meter_point == MeterCustom);
+		}
+	}
+
 	set_processor_state (processor_state);
 
 	if ((prop = node.property ("self-solo")) != 0) {
@@ -2001,14 +2009,6 @@ Route::_set_state (const XMLNode& node, int version)
 		bool yn = string_is_affirmative (prop->value());
 		_active = !yn; // force switch
 		set_active (yn, this);
-	}
-
-	if ((prop = node.property (X_("meter-point"))) != 0) {
-		MeterPoint mp = MeterPoint (string_2_enum (prop->value (), _meter_point));
-		set_meter_point (mp, true);
-		if (_meter) {
-			_meter->set_display_to_user (_meter_point == MeterCustom);
-		}
 	}
 
 	if ((prop = node.property (X_("order-keys"))) != 0) {
@@ -2360,6 +2360,7 @@ Route::set_processor_state (const XMLNode& node)
 			new_order.push_back (_amp);
 		} else if (prop->value() == "meter") {
 			_meter->set_state (**niter, Stateful::current_state_version);
+			new_order.push_back (_meter);
 		} else if (prop->value() == "main-outs") {
 			_main_outs->set_state (**niter, Stateful::current_state_version);
 		} else if (prop->value() == "intreturn") {
@@ -2401,7 +2402,7 @@ Route::set_processor_state (const XMLNode& node)
 				} else if (prop->value() == "ladspa" || prop->value() == "Ladspa" ||
 				           prop->value() == "lv2" ||
 				           prop->value() == "vst" ||
-						   prop->value() == "lxvst" ||
+					   prop->value() == "lxvst" ||
 				           prop->value() == "audiounit") {
 
 					processor.reset (new PluginInsert(_session));
