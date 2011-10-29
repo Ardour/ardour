@@ -64,6 +64,7 @@ PannerUI::PannerUI (Session* s)
 	pan_astyle_menu = 0;
 	in_pan_update = false;
         _stereo_panner = 0;
+	_mono_panner = 0;
         _ignore_width_change = false;
         _ignore_position_change = false;
 
