@@ -178,6 +178,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 
 	, error_log_button (_("Errors"))
 
+	, _status_bar_visibility (X_("status-bar"))
+
 {
 	using namespace Gtk::Menu_Helpers;
 
@@ -330,16 +332,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	starting.connect (sigc::mem_fun(*this, &ARDOUR_UI::startup));
 	stopping.connect (sigc::mem_fun(*this, &ARDOUR_UI::shutdown));
 
-	{
-		_status_bar_visiblity = (StatusBarComponent) (StatusCPULoad | StatusBufferLoad | StatusSampleRate | StatusFormat);
-		XMLNode* n = Config->extra_xml (X_("UI"));
-		if (n) {
-			XMLProperty* p = n->property (X_("status-bar-visibility"));
-			if (p) {
-				_status_bar_visiblity = (StatusBarComponent) string_2_enum (p->value(), _status_bar_visiblity);
-			}
-		}
-	}
 }
 
 /** @return true if a session was chosen and `apply' clicked, otherwise false if `cancel' was clicked */
@@ -420,6 +412,12 @@ ARDOUR_UI::post_engine ()
 		throw failed_constructor ();
 	}
 
+	/* Do this after setup_windows (), as that's when the _status_bar_visibility is created */
+	XMLNode* n = Config->extra_xml (X_("UI"));
+	if (n) {
+		_status_bar_visibility.set_state (*n);
+	}
+	
 	check_memory_locking();
 
 	/* this is the first point at which all the keybindings are available */
@@ -726,7 +724,7 @@ ARDOUR_UI::startup ()
 	/* We have to do this here since goto_editor_window() ends up calling show_all() on the
 	 * editor window, and we may want stuff to be hidden.
 	 */
-	update_status_bar_visibility ();
+	_status_bar_visibility.update ();
 
 	BootMessage (string_compose (_("%1 is ready for use"), PROGRAM_NAME));
 }

@@ -53,15 +53,6 @@ enum Height {
 	HeightSmall
 };
 
-enum StatusBarComponent {
-	StatusWallClock = 0x1,
-	StatusDiskSpace = 0x2,
-	StatusCPULoad = 0x4,
-	StatusBufferLoad = 0x8,
-	StatusSampleRate = 0x10,
-	StatusFormat = 0x20
-};
-
 extern void setup_gtk_ardour_enums ();
 
 #endif /* __ardour_gtk_enums_h__ */

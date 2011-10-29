@@ -41,7 +41,6 @@ setup_gtk_ardour_enums ()
 	EditPoint edit_point;
 	LayerDisplay layer_display;
 	RegionListSortType region_list_sort_type;
-	StatusBarComponent status_bar_component;
 
 #define REGISTER(e) enum_writer.register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_BITS(e) enum_writer.register_bits (typeid(e).name(), i, s); i.clear(); s.clear()
@@ -84,12 +83,4 @@ setup_gtk_ardour_enums ()
 	REGISTER_ENUM (ByStartInFile);
 	REGISTER_ENUM (ByTimestamp);
 	REGISTER (region_list_sort_type);
-
-	REGISTER_ENUM (StatusWallClock);
-	REGISTER_ENUM (StatusDiskSpace);
-	REGISTER_ENUM (StatusCPULoad);
-	REGISTER_ENUM (StatusBufferLoad);
-	REGISTER_ENUM (StatusSampleRate);
-	REGISTER_ENUM (StatusFormat);
-	REGISTER_BITS (status_bar_component);
 }

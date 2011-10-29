@@ -68,6 +68,7 @@
 #include "ui_config.h"
 #include "window_proxy.h"
 #include "enums.h"
+#include "visibility_group.h"
 
 class About;
 class AddRouteDialog;
@@ -722,10 +723,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	bool click_button_clicked (GdkEventButton *);
 
-	bool status_bar_button_press_event (GdkEventButton *);
-	void update_status_bar_visibility ();
-	void toggle_status_bar_visibility (StatusBarComponent);
-	StatusBarComponent _status_bar_visiblity;
+	VisibilityGroup _status_bar_visibility;
 };
 
 #endif /* __ardour_gui_h__ */
