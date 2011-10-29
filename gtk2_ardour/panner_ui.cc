@@ -205,8 +205,8 @@ PannerUI::~PannerUI ()
 	delete pan_astyle_menu;
 	delete pan_astate_menu;
         delete _stereo_panner;
+        delete _mono_panner;
 }
-
 
 void
 PannerUI::panshell_changed ()
@@ -279,23 +279,22 @@ PannerUI::setup_pan ()
                 } else if (nins == 1) {
                         /* 1-in/2out */
 
-                        MonoPanner* mp;
                         boost::shared_ptr<Pannable> pannable = _panner->pannable();
                         boost::shared_ptr<AutomationControl> ac = pannable->pan_azimuth_control;
 
-                        mp = new MonoPanner (_panner);
-
-                        mp->StartGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::start_touch),
+                        _mono_panner = new MonoPanner (_panner);
+			
+                        _mono_panner->StartGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::start_touch),
                                                                       boost::weak_ptr<AutomationControl> (ac)));
-                        mp->StopGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::stop_touch),
+                        _mono_panner->StopGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::stop_touch),
                                                              boost::weak_ptr<AutomationControl>(ac)));
 
-                        mp->signal_button_release_event().connect (sigc::mem_fun(*this, &PannerUI::pan_button_event));
+                        _mono_panner->signal_button_release_event().connect (sigc::mem_fun(*this, &PannerUI::pan_button_event));
 
-                        mp->set_size_request (-1, pan_bar_height);
+                        _mono_panner->set_size_request (-1, pan_bar_height);
 
                         update_pan_sensitive ();
-                        pan_vbox.pack_start (*mp, false, false);
+                        pan_vbox.pack_start (*_mono_panner, false, false);
 
                 } else {
                         warning << string_compose (_("No panner user interface is currently available for %1-in/2out tracks/busses"),
