@@ -91,10 +91,8 @@ VisibilityGroup::update ()
 	for (vector<Member>::iterator i = _members.begin(); i != _members.end(); ++i) {
 		if (i->widget) {
 			if (i->visible) {
-				cout << "VG show " << i->name << "\n";
 				i->widget->show ();
 			} else {
-				cout << "VG hide " << i->name << "\n";
 				i->widget->hide ();
 			}
 		}
