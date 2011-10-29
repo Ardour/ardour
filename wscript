@@ -603,7 +603,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('Program name',          opts.program_name)
     write_config_text('Rubberband',            conf.is_defined('HAVE_RUBBERBAND'))
     write_config_text('Samplerate',            conf.is_defined('HAVE_SAMPLERATE'))
-    write_config_text('Soundtouch',            conf.is_defined('HAVE_SOUNDTOUCH'))
+#    write_config_text('Soundtouch',            conf.is_defined('HAVE_SOUNDTOUCH'))
     write_config_text('Translation',           opts.nls)
     write_config_text('Tranzport',             opts.tranzport)
     write_config_text('Unit tests',            conf.is_defined('BUILD_TESTS'))
