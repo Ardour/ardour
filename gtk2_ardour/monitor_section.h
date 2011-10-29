@@ -22,6 +22,7 @@
 
 #include "gtkmm2ext/bindable_button.h"
 
+#include "ardour_button.h"
 #include "axis_view.h"
 #include "level_meter.h"
 #include "route_ui.h"
@@ -50,15 +51,16 @@ class MonitorSection : public RouteUI
         Gtk::VBox vpacker;
         Gtk::HBox hpacker;
         Gtk::Table main_table;
+	Gtk::ScrolledWindow main_table_scroller;
         Gtk::VBox upper_packer;
         Gtk::VBox lower_packer;
         Gtkmm2ext::TearOff* _tearoff;
 
         struct ChannelButtonSet {
-            BindableToggleButton cut;
-            BindableToggleButton dim;
-            BindableToggleButton solo;
-            BindableToggleButton invert;
+            ArdourButton cut;
+            ArdourButton dim;
+            ArdourButton solo;
+            ArdourButton invert;
 
             ChannelButtonSet ();
         };
@@ -107,14 +109,14 @@ class MonitorSection : public RouteUI
         void solo_use_afl ();
         void solo_use_pfl ();
 
-        BindableToggleButton cut_all_button;
-        BindableToggleButton dim_all_button;
-        BindableToggleButton mono_button;
-        BindableToggleButton rude_solo_button;
-        BindableToggleButton rude_iso_button;
-        BindableToggleButton rude_audition_button;
-        BindableToggleButton exclusive_solo_button;
-        BindableToggleButton solo_mute_override_button;
+        ArdourButton cut_all_button;
+        ArdourButton dim_all_button;
+        ArdourButton mono_button;
+        ArdourButton rude_solo_button;
+        ArdourButton rude_iso_button;
+        ArdourButton rude_audition_button;
+        ArdourButton exclusive_solo_button;
+        ArdourButton solo_mute_override_button;
 
         void do_blink (bool);
         void solo_blink (bool);

@@ -44,14 +44,11 @@ MonitorSection::MonitorSection (Session* s)
         , solo_in_place_button (solo_model_group, _("SiP"))
         , afl_button (solo_model_group, _("AFL"))
         , pfl_button (solo_model_group, _("PFL"))
-        , cut_all_button (_("MUTE"))
-        , dim_all_button (_("dim"))
-        , mono_button (_("mono"))
-        , rude_solo_button (_("soloing"))
-        , rude_iso_button (_("isolated"))
-        , rude_audition_button (_("auditioning"))
-        , exclusive_solo_button (_("Exclusive"))
-        , solo_mute_override_button (_("Solo/Mute"))
+	, cut_all_button (ArdourButton::led_default_elements)
+	, dim_all_button (ArdourButton::led_default_elements)
+	, mono_button (ArdourButton::led_default_elements)
+	, exclusive_solo_button (ArdourButton::led_default_elements)
+	, solo_mute_override_button (ArdourButton::led_default_elements)
 {
         Glib::RefPtr<Action> act;
 
@@ -87,24 +84,27 @@ MonitorSection::MonitorSection (Session* s)
 
         /* Rude Solo */
 
-	rude_solo_button.set_name ("TransportSoloAlert");
+	rude_solo_button.set_text (_("soloing"));
+	rude_solo_button.set_name ("rude solo");
         rude_solo_button.show ();
 
-	rude_iso_button.set_name ("MonitorIsoAlert");
+	rude_iso_button.set_text (_("isolated"));
+	rude_iso_button.set_name ("rude isolate");
         rude_iso_button.show ();
 
-	rude_audition_button.set_name ("TransportAuditioningAlert");
+	rude_audition_button.set_text (_("auditioning"));
+	rude_audition_button.set_name ("rude audition");
         rude_audition_button.show ();
 
         ARDOUR_UI::Blink.connect (sigc::mem_fun (*this, &MonitorSection::do_blink));
 
-	rude_solo_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MonitorSection::cancel_solo), false);
+	rude_solo_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MonitorSection::cancel_solo));
         UI::instance()->set_tip (rude_solo_button, _("When active, something is soloed.\nClick to de-solo everything"));
 
-	rude_iso_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MonitorSection::cancel_isolate), false);
+	rude_iso_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MonitorSection::cancel_isolate));
         UI::instance()->set_tip (rude_iso_button, _("When active, something is solo-isolated.\nClick to de-isolate everything"));
 
-	rude_audition_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MonitorSection::cancel_audition), false);
+	rude_audition_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MonitorSection::cancel_audition));
         UI::instance()->set_tip (rude_audition_button, _("When active, auditioning is active.\nClick to stop the audition"));
 
         solo_model_box.set_spacing (6);
@@ -162,20 +162,22 @@ MonitorSection::MonitorSection (Session* s)
 
         solo_packer->pack_start (*spin_packer, false, true);
 
-        exclusive_solo_button.set_name (X_("MonitorOptButton"));
+	exclusive_solo_button.set_text (_("Exclusive"));
+        exclusive_solo_button.set_name (X_("monitor solo exclusive"));
         ARDOUR_UI::instance()->set_tip (&exclusive_solo_button, _("Exclusive solo means that only 1 solo is active at a time"));
 
         act = ActionManager::get_action (X_("Monitor"), X_("toggle-exclusive-solo"));
         if (act) {
-                act->connect_proxy (exclusive_solo_button);
+		exclusive_solo_button.set_related_action (act);
         }
 
-        solo_mute_override_button.set_name (X_("MonitorOptButton"));
+	solo_mute_override_button.set_text (_("Solo/Mute"));
+        solo_mute_override_button.set_name (X_("monitor solo override"));
         ARDOUR_UI::instance()->set_tip (&solo_mute_override_button, _("If enabled, solo will override mute\n(a soloed & muted track or bus will be audible)"));
 
         act = ActionManager::get_action (X_("Monitor"), X_("toggle-mute-overrides-solo"));
         if (act) {
-                act->connect_proxy (solo_mute_override_button);
+		solo_mute_override_button.set_related_action (act);
         }
 
         HBox* solo_opt_box = manage (new HBox);
@@ -197,36 +199,38 @@ MonitorSection::MonitorSection (Session* s)
         upper_packer.pack_start (*solo_opt_box, false, false);
         upper_packer.pack_start (*solo_packer, false, false);
 
-        act = ActionManager::get_action (X_("Monitor"), X_("monitor-cut-all"));
-        if (act) {
-                act->connect_proxy (cut_all_button);
-        }
-
-        act = ActionManager::get_action (X_("Monitor"), X_("monitor-dim-all"));
-        if (act) {
-                act->connect_proxy (dim_all_button);
-        }
-
-        act = ActionManager::get_action (X_("Monitor"), X_("monitor-mono"));
-        if (act) {
-                act->connect_proxy (mono_button);
-        }
-
-        cut_all_button.set_name (X_("MonitorMuteButton"));
-        cut_all_button.unset_flags (Gtk::CAN_FOCUS);
+        cut_all_button.set_text (_("MUTE"));
+	cut_all_button.set_name ("monitor section cut");
+        cut_all_button.set_name (X_("monitor section cut"));
         cut_all_button.set_size_request (50,50);
         cut_all_button.show ();
+
+        act = ActionManager::get_action (X_("Monitor"), X_("monitor-cut-all"));
+        if (act) {
+		cut_all_button.set_related_action (act);
+        }
+
+	dim_all_button.set_text (_("dim"));
+	dim_all_button.set_name ("monitor section dim");
+        // dim_all_button.set_size_request (50,50);
+        act = ActionManager::get_action (X_("Monitor"), X_("monitor-dim-all"));
+        if (act) {
+		dim_all_button.set_related_action (act);
+        }
+
+	mono_button.set_text (_("mono"));
+	mono_button.set_name ("monitor section mono");
+        // mono_button.set_size_request (50,50);
+        act = ActionManager::get_action (X_("Monitor"), X_("monitor-mono"));
+        if (act) {
+		mono_button.set_related_action (act);
+        }
 
         HBox* bbox = manage (new HBox);
 
         bbox->set_spacing (12);
         bbox->pack_start (mono_button, true, true);
         bbox->pack_start (dim_all_button, true, true);
-
-        dim_all_button.set_name (X_("MonitorDimButton"));
-        dim_all_button.unset_flags (Gtk::CAN_FOCUS);
-        mono_button.set_name (X_("MonitorMonoButton"));
-        mono_button.unset_flags (Gtk::CAN_FOCUS);
 
         lower_packer.set_spacing (12);
         lower_packer.pack_start (*bbox, false, false);
@@ -245,11 +249,17 @@ MonitorSection::MonitorSection (Session* s)
 
         lower_packer.pack_start (*spin_packer, true, true);
 
+	main_table_scroller.add (main_table);
+	main_table_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+	main_table_scroller.set_size_request (-1, 150);
+	main_table_scroller.set_shadow_type (Gtk::SHADOW_NONE);
+	main_table_scroller.show ();
+
         vpacker.set_border_width (12);
         vpacker.set_spacing (12);
         vpacker.pack_start (upper_packer, false, false);
         vpacker.pack_start (*dim_packer, false, false);
-        vpacker.pack_start (main_table, false, false);
+        vpacker.pack_start (main_table_scroller, false, false);
         vpacker.pack_start (lower_packer, false, false);
 
         hpacker.set_border_width (12);
@@ -321,28 +331,28 @@ MonitorSection::set_session (Session* s)
                 _monitor.reset ();
                 _route.reset ();
                 control_connections.drop_connections ();
-                rude_iso_button.set_active (false);
-                rude_solo_button.set_active (false);
+                rude_iso_button.unset_active_state ();
+                rude_solo_button.unset_active_state ();
 
                 assign_controllables ();
         }
 }
 
 MonitorSection::ChannelButtonSet::ChannelButtonSet ()
-        : cut (X_(""))
-        , dim (X_(""))
-        , solo (X_(""))
-        , invert (X_(""))
+	: cut (ArdourButton::just_led_default_elements)
+	, dim (ArdourButton::just_led_default_elements)
+	, solo (ArdourButton::just_led_default_elements)
+	, invert (ArdourButton::just_led_default_elements)
 {
-        cut.set_name (X_("MonitorMuteButton"));
-        dim.set_name (X_("MonitorDimButton"));
-        solo.set_name (X_("MixerSoloButton"));
-        invert.set_name (X_("MonitorInvertButton"));
+	cut.set_diameter (3);
+	dim.set_diameter (3);
+	solo.set_diameter (3);
+	invert.set_diameter (3);
 
-        gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (cut.gobj()), false);
-        gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (dim.gobj()), false);
-        gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (invert.gobj()), false);
-        gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (solo.gobj()), false);
+        cut.set_name (X_("monitor section cut"));
+        dim.set_name (X_("monitor section dim"));
+        solo.set_name (X_("monitor section solo"));
+        invert.set_name (X_("monitor section invert"));
 
         cut.unset_flags (Gtk::CAN_FOCUS);
         dim.unset_flags (Gtk::CAN_FOCUS);
@@ -410,25 +420,25 @@ MonitorSection::populate_buttons ()
                 snprintf (buf, sizeof (buf), "monitor-cut-%u", i+1);
                 act = ActionManager::get_action (X_("Monitor"), buf);
                 if (act) {
-                        act->connect_proxy (cbs->cut);
+			cbs->cut.set_related_action (act);
                 }
 
                 snprintf (buf, sizeof (buf), "monitor-dim-%u", i+1);
                 act = ActionManager::get_action (X_("Monitor"), buf);
                 if (act) {
-                        act->connect_proxy (cbs->dim);
+			cbs->dim.set_related_action (act);
                 }
 
                 snprintf (buf, sizeof (buf), "monitor-solo-%u", i+1);
                 act = ActionManager::get_action (X_("Monitor"), buf);
                 if (act) {
-                        act->connect_proxy (cbs->solo);
+			cbs->solo.set_related_action (act);
                 }
 
                 snprintf (buf, sizeof (buf), "monitor-invert-%u", i+1);
                 act = ActionManager::get_action (X_("Monitor"), buf);
                 if (act) {
-                        act->connect_proxy (cbs->invert);
+			cbs->invert.set_related_action (act);
                 }
         }
 
@@ -727,8 +737,13 @@ MonitorSection::solo_use_pfl ()
 void
 MonitorSection::setup_knob_images ()
 {
+	
         try {
-
+		uint32_t c = ARDOUR_UI::config()->color_by_name ("monitor knob");
+		char buf[16];
+		snprintf (buf, 16, "#%x", (c >> 8));
+		cerr << "Motion feedback using " << buf << endl;
+		MotionFeedback::set_lamp_color (buf);
                 big_knob_pixbuf = MotionFeedback::render_pixbuf (80);
 
         }  catch (...) {
@@ -884,13 +899,12 @@ MonitorSection::audition_blink (bool onoff)
 
 	if (_session->is_auditioning()) {
 		if (onoff) {
-			rude_audition_button.set_state (STATE_ACTIVE);
+			rude_audition_button.set_active_state (CairoWidget::Active);
 		} else {
-			rude_audition_button.set_state (STATE_NORMAL);
+			rude_audition_button.unset_active_state ();
 		}
 	} else {
-		rude_audition_button.set_active (false);
-		rude_audition_button.set_state (STATE_NORMAL);
+		rude_audition_button.unset_active_state ();
 	}
 }
 
@@ -903,19 +917,21 @@ MonitorSection::solo_blink (bool onoff)
 
 	if (_session->soloing() || _session->listening()) {
 		if (onoff) {
-			rude_solo_button.set_state (STATE_ACTIVE);
+			rude_solo_button.set_active_state (CairoWidget::Active);
 		} else {
-			rude_solo_button.set_state (STATE_NORMAL);
+			rude_solo_button.unset_active_state ();
 		}
 
                 if (_session->soloing()) {
-                        rude_iso_button.set_active (_session->solo_isolated());
+			if (_session->solo_isolated()) {
+				rude_iso_button.set_active_state (CairoWidget::Active);
+			}
                 }
 
 	} else {
 		// rude_solo_button.set_active (false);
-		rude_solo_button.set_state (STATE_NORMAL);
-                rude_iso_button.set_active (false);
+		rude_solo_button.unset_active_state ();
+                rude_iso_button.unset_active_state ();
 	}
 }
 

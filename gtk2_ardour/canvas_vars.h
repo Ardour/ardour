@@ -136,6 +136,7 @@ CANVAS_VARIABLE(canvasvar_WaveFormClip, "clipped waveform")
 CANVAS_VARIABLE(canvasvar_WaveFormFill, "waveform fill")
 CANVAS_VARIABLE(canvasvar_ZeroLine, "zero line")
 CANVAS_VARIABLE(canvasvar_ZoomRect, "zoom rect")
+CANVAS_VARIABLE(canvasvar_MonitorSectionKnob, "monitor knob")
 
 #define BUTTON_VARS(root,name) \
 CANVAS_VARIABLE(canvasvar_ ## root ## BorderStart, name " border start") \
@@ -161,3 +162,14 @@ BUTTON_VARS(ProcessorPostFader, "processor postfader")
 BUTTON_VARS(MonitorButton, "monitor")
 BUTTON_VARS(SoloIsolateButton, "solo isolate")
 BUTTON_VARS(SoloSafeButton, "solo safe")
+BUTTON_VARS(MonitorSectionCutButton, "monitor section cut")
+BUTTON_VARS(MonitorSectionDimButton, "monitor section dim")
+BUTTON_VARS(MonitorSectionSoloButton, "monitor section solo")
+BUTTON_VARS(MonitorSectionInvertButton, "monitor section invert")
+BUTTON_VARS(MonitorSectionMonoButton, "monitor section mono")
+BUTTON_VARS(MonitorSectionSoloOverrideButton, "monitor solo override")
+BUTTON_VARS(MonitorSectionSoloExclusiveButton, "monitor solo exclusive")
+BUTTON_VARS(RudeSolo, "rude solo")
+BUTTON_VARS(RudeIsolate, "rude isolate")
+BUTTON_VARS(RudeAudition, "rude audition")
+

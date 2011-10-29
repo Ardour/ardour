@@ -24,36 +24,44 @@
 #include <pangomm/layout.h>
 
 #include "pbd/compose.h"
+#include "pbd/error.h"
 
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/rgb_macros.h"
+#include "gtkmm2ext/gui_thread.h"
 
 #include "ardour_button.h"
 #include "ardour_ui.h"
 #include "global_signals.h"
 
+#include "i18n.h"
+
 using namespace Gdk;
 using namespace Gtk;
 using namespace Glib;
+using namespace PBD;
 using std::max;
 using std::min;
+using namespace std;
 
 ArdourButton::Element ArdourButton::default_elements = ArdourButton::Element (ArdourButton::Edge|ArdourButton::Body|ArdourButton::Text);
 ArdourButton::Element ArdourButton::led_default_elements = ArdourButton::Element (ArdourButton::default_elements|ArdourButton::Indicator);
+ArdourButton::Element ArdourButton::just_led_default_elements = ArdourButton::Element (ArdourButton::Edge|ArdourButton::Body|ArdourButton::Indicator);
 
 ArdourButton::ArdourButton (Element e)
 	: _elements (e)
+	, _act_on_release (true)
 	, _text_width (0)
 	, _text_height (0)
-	, _diameter (0.0)
-	, _corner_radius (9)
+	, _diameter (11.0)
+	, _corner_radius (9.0)
 	, edge_pattern (0)
 	, fill_pattern (0)
 	, led_inset_pattern (0)
 	, reflection_pattern (0)
 	, _led_left (false)
-	, _fixed_diameter (false)
-	, _distinct_led_click (true)
+	, _fixed_diameter (true)
+	, _distinct_led_click (false)
 {
 	ColorsChanged.connect (sigc::mem_fun (*this, &ArdourButton::color_handler));
 	StateChanged.connect (sigc::mem_fun (*this, &ArdourButton::state_handler));
@@ -115,9 +123,9 @@ ArdourButton::render (cairo_t* cr)
 
 	if (_elements & Body) {
 		if (_elements & Edge) {
-			Gtkmm2ext::rounded_rectangle (cr, 1, 1, _width-2, _height-2, _corner_radius);
+			Gtkmm2ext::rounded_rectangle (cr, 1, 1, _width-2, _height-2, _corner_radius - 1.0);
 		} else {
-			Gtkmm2ext::rounded_rectangle (cr, 0, 0, _width, _height, _corner_radius);
+			Gtkmm2ext::rounded_rectangle (cr, 0, 0, _width, _height, _corner_radius - 1.0);
 		}
 		cairo_set_source (cr, fill_pattern);
 		cairo_fill (cr);
@@ -145,11 +153,17 @@ ArdourButton::render (cairo_t* cr)
 	if (_elements & Indicator) {
 
 		/* move to the center of the indicator/led */
-		
-		if (_led_left) {
-			cairo_translate (cr, 3 + (_diameter/2.0), _height/2.0);
+
+		cairo_save (cr);
+
+		if (_elements & Text) {
+			if (_led_left) {
+				cairo_translate (cr, 3 + (_diameter/2.0), _height/2.0);
+			} else {
+				cairo_translate (cr, _width - ((_diameter/2.0) + 4.0), _height/2.0);
+			}
 		} else {
-			cairo_translate (cr, _width - ((_diameter/2.0) + 4.0), _height/2.0);
+			cairo_translate (cr, _width/2.0, _height/2.0);
 		}
 		
 		//inset
@@ -171,6 +185,17 @@ ArdourButton::render (cairo_t* cr)
 		cairo_scale(cr, 0.7, 0.7);
 		cairo_arc (cr, 0, 0, _diameter/2-3, 0, 2 * M_PI);
 		cairo_set_source (cr, reflection_pattern);
+		cairo_fill (cr);
+
+		cairo_restore (cr);
+
+	}
+
+	/* a partially transparent gray layer to indicate insensitivity */
+
+	if ((visual_state() & Insensitive)) {
+		cairo_rectangle (cr, 0, 0, _width, _height);
+		cairo_set_source_rgba (cr, 0.905, 0.917, 0.925, 0.5);
 		cairo_fill (cr);
 	}
 }
@@ -206,16 +231,22 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 	int xpad = 0;
 	int ypad = 6;
 
-	if (!_text.empty()) {
+	CairoWidget::on_size_request (req);
+
+	if ((_elements & Text) && !_text.empty()) {
 		_layout->get_pixel_size (_text_width, _text_height);
 		xpad += 6;
+	} else {
+		_text_width = 0;
+		_text_height = 0;
 	}
 
-	if (_fixed_diameter) {
-		req->width = _text_width + (int) _diameter + xpad;
-		req->height = max (_text_height, (int) _diameter) + ypad;
-	} else {
-		CairoWidget::on_size_request (req);
+        if ((_elements & Indicator) && _fixed_diameter) {
+                req->width = _text_width + lrint (_diameter) + xpad;
+                req->height = max (_text_height, (int) lrint (_diameter)) + ypad;
+        } else {
+                req->width = _text_width + xpad;
+                req->height = _text_height + ypad;
 	}
 }
 
@@ -341,15 +372,31 @@ ArdourButton::on_button_press_event (GdkEventButton *ev)
 		int left;
 		int right;
 		
-		if (_led_left) {
-			left = 4;
-			right = left + _diameter;
+		if (_elements & Text) {
+			if (_led_left) {
+				left = 4;
+				right = left + _diameter;
+			} else {
+				left = lrint (_width - 4 - _diameter/2.0);
+				right = left + _diameter;
+			}
 		} else {
-			left = lrint (_width - 4 - _diameter/2.0);
-			right = left + _diameter;
+			left = _width/2.0 - (_diameter/2.0);
+			right = _width/2.0 + (_diameter/2.0);
 		}
 
 		if (ev->x >= left && ev->x <= right && ev->y <= bottom && ev->y >= top) {
+			return true;
+		}
+	}
+
+	if (binding_proxy.button_press_handler (ev)) {
+		return true;
+	}
+
+	if (!_act_on_release) {
+		if (_action) {
+			_action->activate ();
 			return true;
 		}
 	}
@@ -360,7 +407,6 @@ ArdourButton::on_button_press_event (GdkEventButton *ev)
 bool
 ArdourButton::on_button_release_event (GdkEventButton *ev)
 {
-
 	if ((_elements & Indicator) && _distinct_led_click) {
 
 		/* if within LED, emit signal */
@@ -379,6 +425,13 @@ ArdourButton::on_button_release_event (GdkEventButton *ev)
 		
 		if (ev->x >= left && ev->x <= right && ev->y <= bottom && ev->y >= top) {
 			signal_led_clicked(); /* EMIT SIGNAL */
+			return true;
+		}
+	}
+
+	if (_act_on_release) {
+		if (_action) {
+			_action->activate ();
 			return true;
 		}
 	}
@@ -405,3 +458,60 @@ ArdourButton::on_size_allocate (Allocation& alloc)
 	CairoWidget::on_size_allocate (alloc);
 	set_colors ();
 }
+
+void
+ArdourButton::set_controllable (boost::shared_ptr<Controllable> c)
+{
+        watch_connection.disconnect ();
+        binding_proxy.set_controllable (c);
+}
+
+void
+ArdourButton::watch ()
+{
+        boost::shared_ptr<Controllable> c (binding_proxy.get_controllable ());
+
+        if (!c) {
+                warning << _("button cannot watch state of non-existing Controllable\n") << endmsg;
+                return;
+        }
+
+        c->Changed.connect (watch_connection, invalidator(*this), boost::bind (&ArdourButton::controllable_changed, this), gui_context());
+}
+
+void
+ArdourButton::controllable_changed ()
+{
+        float val = binding_proxy.get_controllable()->get_value();
+
+	if (fabs (val) >= 0.5f) {
+		set_active_state (CairoWidget::Active);
+	} else {
+		unset_active_state ();
+	}
+}
+
+void
+ArdourButton::set_related_action (RefPtr<Action> act)
+{
+	_action = act;
+
+	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (_action);
+	if (tact) {
+		tact->signal_toggled().connect (sigc::mem_fun (*this, &ArdourButton::action_toggled));
+	}
+}
+
+void
+ArdourButton::action_toggled ()
+{
+	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (_action);
+
+	if (tact) {
+		if (tact->get_active()) {
+			set_active_state (CairoWidget::Active);
+		} else {
+			unset_active_state ();
+		}
+	}
+}	
