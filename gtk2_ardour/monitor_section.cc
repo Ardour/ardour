@@ -162,7 +162,7 @@ MonitorSection::MonitorSection (Session* s)
 
         solo_packer->pack_start (*spin_packer, false, true);
 
-	exclusive_solo_button.set_text (_("Exclusive"));
+	exclusive_solo_button.set_text (_("excl. solo"));
         exclusive_solo_button.set_name (X_("monitor solo exclusive"));
         ARDOUR_UI::instance()->set_tip (&exclusive_solo_button, _("Exclusive solo means that only 1 solo is active at a time"));
 
@@ -171,7 +171,7 @@ MonitorSection::MonitorSection (Session* s)
 		exclusive_solo_button.set_related_action (act);
         }
 
-	solo_mute_override_button.set_text (_("Solo/Mute"));
+	solo_mute_override_button.set_text (_("solo » mute"));
         solo_mute_override_button.set_name (X_("monitor solo override"));
         ARDOUR_UI::instance()->set_tip (&solo_mute_override_button, _("If enabled, solo will override mute\n(a soloed & muted track or bus will be audible)"));
 
@@ -199,10 +199,10 @@ MonitorSection::MonitorSection (Session* s)
         upper_packer.pack_start (*solo_opt_box, false, false);
         upper_packer.pack_start (*solo_packer, false, false);
 
-        cut_all_button.set_text (_("MUTE"));
+        cut_all_button.set_text (_("mute"));
 	cut_all_button.set_name ("monitor section cut");
         cut_all_button.set_name (X_("monitor section cut"));
-        cut_all_button.set_size_request (50,50);
+        cut_all_button.set_size_request (-1,50);
         cut_all_button.show ();
 
         act = ActionManager::get_action (X_("Monitor"), X_("monitor-cut-all"));
@@ -212,7 +212,6 @@ MonitorSection::MonitorSection (Session* s)
 
 	dim_all_button.set_text (_("dim"));
 	dim_all_button.set_name ("monitor section dim");
-        // dim_all_button.set_size_request (50,50);
         act = ActionManager::get_action (X_("Monitor"), X_("monitor-dim-all"));
         if (act) {
 		dim_all_button.set_related_action (act);
@@ -220,7 +219,6 @@ MonitorSection::MonitorSection (Session* s)
 
 	mono_button.set_text (_("mono"));
 	mono_button.set_name ("monitor section mono");
-        // mono_button.set_size_request (50,50);
         act = ActionManager::get_action (X_("Monitor"), X_("monitor-mono"));
         if (act) {
 		mono_button.set_related_action (act);
@@ -249,6 +247,10 @@ MonitorSection::MonitorSection (Session* s)
 
         lower_packer.pack_start (*spin_packer, true, true);
 
+	HBox* hb = manage (new HBox);
+	hb->pack_start (main_table_scroller, false, false);
+	hb->show ();
+
 	main_table_scroller.add (main_table);
 	main_table_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 	main_table_scroller.set_size_request (-1, 150);
@@ -259,7 +261,7 @@ MonitorSection::MonitorSection (Session* s)
         vpacker.set_spacing (12);
         vpacker.pack_start (upper_packer, false, false);
         vpacker.pack_start (*dim_packer, false, false);
-        vpacker.pack_start (main_table_scroller, false, false);
+        vpacker.pack_start (*hb, false, false);
         vpacker.pack_start (lower_packer, false, false);
 
         hpacker.set_border_width (12);
