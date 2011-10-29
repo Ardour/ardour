@@ -20,6 +20,7 @@
 #include "pbd/error.h"
 #include "pbd/convert.h"
 #include "pbd/compose.h"
+#include "pbd/boost_debug.h"
 
 #include "ardour/debug.h"
 #include "ardour/automation_control.h"
@@ -48,6 +49,8 @@ Pannable::Pannable (Session& s)
 	, _has_state (false)
 	, _responding_to_control_auto_state_change (0)
 {
+	//boost_debug_shared_ptr_mark_interesting (this, "pannable");
+	
 	add_control (pan_azimuth_control);
 	add_control (pan_elevation_control);
 	add_control (pan_width_control);

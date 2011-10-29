@@ -1497,7 +1497,7 @@ Session::new_midi_track (TrackMode mode, RouteGroup* route_group, uint32_t how_m
 			track->use_new_diskstream();
 
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
-			boost_debug_shared_ptr_mark_interesting (track.get(), "Track");
+			// boost_debug_shared_ptr_mark_interesting (track.get(), "Track");
 #endif
 			{
 				Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
@@ -1724,7 +1724,7 @@ Session::new_audio_track (
 			track->use_new_diskstream();
 
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
-			boost_debug_shared_ptr_mark_interesting (track.get(), "Track");
+			// boost_debug_shared_ptr_mark_interesting (track.get(), "Track");
 #endif
 			{
 				Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
@@ -1839,7 +1839,7 @@ Session::new_audio_route (int input_channels, int output_channels, RouteGroup* r
 			}
 
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
-			boost_debug_shared_ptr_mark_interesting (bus.get(), "Route");
+			// boost_debug_shared_ptr_mark_interesting (bus.get(), "Route");
 #endif
 			{
 				Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());

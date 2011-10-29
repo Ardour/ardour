@@ -570,7 +570,7 @@ Session::create (const string& mix_template, BusProfile* bus_profile)
                                 return -1;
                         }
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
-			boost_debug_shared_ptr_mark_interesting (r.get(), "Route");
+			// boost_debug_shared_ptr_mark_interesting (r.get(), "Route");
 #endif
 			{
 				Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
@@ -587,7 +587,7 @@ Session::create (const string& mix_template, BusProfile* bus_profile)
                                         return -1;
                                 }
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
-                                boost_debug_shared_ptr_mark_interesting (r.get(), "Route");
+                                // boost_debug_shared_ptr_mark_interesting (r.get(), "Route");
 #endif
 				{
 					Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
@@ -1500,7 +1500,7 @@ Session::XMLRouteFactory (const XMLNode& node, int version)
                 }
 
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
-                boost_debug_shared_ptr_mark_interesting (track.get(), "Track");
+                // boost_debug_shared_ptr_mark_interesting (track.get(), "Track");
 #endif
                 ret = track;
 
@@ -1509,7 +1509,7 @@ Session::XMLRouteFactory (const XMLNode& node, int version)
 
                 if (r->init () == 0 && r->set_state (node, version) == 0) {
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
-                        boost_debug_shared_ptr_mark_interesting (r.get(), "Route");
+                        // boost_debug_shared_ptr_mark_interesting (r.get(), "Route");
 #endif
                         ret = r;
                 }
@@ -1572,7 +1572,7 @@ Session::XMLRouteFactory_2X (const XMLNode& node, int version)
 		track->set_diskstream (*i);
 
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
-                boost_debug_shared_ptr_mark_interesting (track.get(), "Track");
+                // boost_debug_shared_ptr_mark_interesting (track.get(), "Track");
 #endif
                 ret = track;
 
@@ -1581,7 +1581,7 @@ Session::XMLRouteFactory_2X (const XMLNode& node, int version)
 
                 if (r->init () == 0 && r->set_state (node, version) == 0) {
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
-                        boost_debug_shared_ptr_mark_interesting (r.get(), "Route");
+                        // boost_debug_shared_ptr_mark_interesting (r.get(), "Route");
 #endif
                         ret = r;
                 }

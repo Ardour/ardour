@@ -74,7 +74,7 @@ PannerShell::PannerShell (string name, Session& s, boost::shared_ptr<Pannable> p
 
 PannerShell::~PannerShell ()
 {
-	DEBUG_TRACE(DEBUG::Destruction, string_compose ("panner shell for %1 destructor, pannable is %2\n", _name, _pannable));
+	DEBUG_TRACE(DEBUG::Destruction, string_compose ("panner shell %3 for %1 destructor, panner is %4, pannable is %2\n", _name, _pannable, this, _panner));
 }
 
 void
@@ -118,7 +118,7 @@ PannerShell::configure_io (ChanCount in, ChanCount out)
 	}
 
 	Panner* p = pi->descriptor.factory (_pannable, speakers);
-	boost_debug_shared_ptr_mark_interesting (p, "Panner");
+	// boost_debug_shared_ptr_mark_interesting (p, "Panner");
 	_panner.reset (p);
 	_panner->configure_io (in, out);
 

@@ -17,6 +17,8 @@
 
 */
 
+#include "pbd/boost_debug.h"
+
 #include "ardour/audio_buffer.h"
 #include "ardour/buffer_set.h"
 #include "ardour/debug.h"
@@ -31,13 +33,14 @@ using namespace std;
 using namespace ARDOUR;
 
 Panner::Panner (boost::shared_ptr<Pannable> p)
-	: _pannable (p)
 {
+	// boost_debug_shared_ptr_mark_interesting (this, "panner");
+	_pannable = p;
 }
 
 Panner::~Panner ()
 {
-	DEBUG_TRACE(PBD::DEBUG::Destruction, string_compose ("panner @ %1 destructor, pannable is %2\n", this, _pannable));
+	DEBUG_TRACE(PBD::DEBUG::Destruction, string_compose ("panner @ %1 destructor, pannable is %2 @ %3\n", this, _pannable, &_pannable));
 }
 
 XMLNode&
