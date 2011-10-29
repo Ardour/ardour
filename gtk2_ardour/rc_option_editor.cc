@@ -1350,8 +1350,8 @@ RCOptionEditor::RCOptionEditor ()
 		sigc::mem_fun (*_rc_config, &RCConfiguration::set_afl_position)
 		);
 
-	pa->add (AFLFromBeforeProcessors, _("post-fader but before post-fader processors"));
-	pa->add (AFLFromAfterProcessors, _("after post-fader processors"));
+	pa->add (AFLFromBeforeProcessors, _("immediately post-fader"));
+	pa->add (AFLFromAfterProcessors, _("after post-fader processors (before pan)"));
 
 	add_option (_("Solo / mute"), pa);
 
