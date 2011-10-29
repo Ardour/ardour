@@ -63,7 +63,7 @@ class MotionFeedback : public Gtk::VBox
         boost::shared_ptr<PBD::Controllable> controllable() const;
 	virtual void set_controllable (boost::shared_ptr<PBD::Controllable> c);
 
-        void set_lamp_color (const Gdk::Color&);
+        static void set_lamp_color (const std::string&);
         
         static Glib::RefPtr<Gdk::Pixbuf> render_pixbuf (int size);
 
@@ -111,6 +111,7 @@ class MotionFeedback : public Gtk::VBox
         Gtk::EventBox*     value_packer;
 	Glib::RefPtr<Gdk::Pixbuf> pixbuf;
         BindingProxy       binding_proxy;
+	static Gdk::Color* base_color;
 
 	void (*print_func) (char buf[32], const boost::shared_ptr<PBD::Controllable>&, void *);
 	void *print_arg;

@@ -39,6 +39,8 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace sigc;
 
+Gdk::Color* MotionFeedback::base_color;
+
 MotionFeedback::MotionFeedback (Glib::RefPtr<Gdk::Pixbuf> pix,
 				Type t,
 				boost::shared_ptr<PBD::Controllable> c,
@@ -60,6 +62,10 @@ MotionFeedback::MotionFeedback (Glib::RefPtr<Gdk::Pixbuf> pix,
         , subwidth (subw)
         , subheight (subh)
 {
+	if (!base_color) {
+		base_color = new Gdk::Color ("#1a5274");
+	}
+
 	char value_name[1024];
 
 	print_func = default_printer;
@@ -467,12 +473,11 @@ MotionFeedback::render_pixbuf (int size)
         
 	GdkColor col2 = {0,0,0,0};
 	GdkColor col3 = {0,0,0,0};
-        Gdk::Color base ("#b9feff");
         GdkColor dark;
         GdkColor bright;
         ProlooksHSV* hsv;
 
-	hsv = prolooks_hsv_new_for_gdk_color (base.gobj());
+	hsv = prolooks_hsv_new_for_gdk_color (base_color->gobj());
 	bright = (prolooks_hsv_to_gdk_color (hsv, &col2), col2);
 	prolooks_hsv_set_saturation (hsv, 0.66);
 	prolooks_hsv_set_value (hsv, 0.67);
@@ -728,4 +733,14 @@ MotionFeedback::core_draw (cairo_t* cr, int phase, double size, double progress_
 	cairo_stroke (cr);
 
 	cairo_pattern_destroy (knob_ripples);
+}
+
+void
+MotionFeedback::set_lamp_color (const std::string& str)
+{
+	if (base_color) {
+		*base_color = Gdk::Color (str);
+	} else {
+		base_color = new Gdk::Color (str);
+	}
 }
