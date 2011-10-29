@@ -169,7 +169,6 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	bool denormal_protection() const;
 
 	void         set_meter_point (MeterPoint, bool force = false);
-	void         infer_meter_point () const;
 	MeterPoint   meter_point() const { return _meter_point; }
 	void         meter ();
 
@@ -205,8 +204,6 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 
 	boost::shared_ptr<Processor> nth_plugin (uint32_t n);
 	boost::shared_ptr<Processor> nth_send (uint32_t n);
-
-	bool processor_is_prefader (boost::shared_ptr<Processor> p);
 
 	bool has_io_processor_named (const std::string&);
 	ChanCount max_processor_streams () const { return processor_max_streams; }
@@ -249,7 +246,6 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	void disable_plugins ();
 	void ab_plugins (bool forward);
 	void clear_processors (Placement);
-	void all_processors_flip();
 	void all_processors_active (Placement, bool state);
 
 	framecnt_t set_private_port_latencies (bool playback) const;
@@ -411,7 +407,6 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	void mod_solo_by_others_downstream (int32_t);
 	bool has_external_redirects() const;
 	void curve_reallocate ();
-	void just_meter_input (framepos_t start_frame, framepos_t end_frame, pframes_t nframes);
 	virtual void set_block_size (pframes_t nframes);
 
   protected:

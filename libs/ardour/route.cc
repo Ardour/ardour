@@ -1627,28 +1627,6 @@ Route::configure_processors_unlocked (ProcessorStreams* err)
 	return 0;
 }
 
-void
-Route::all_processors_flip ()
-{
-	Glib::RWLock::ReaderLock lm (_processor_lock);
-
-	if (_processors.empty()) {
-		return;
-	}
-
-	bool first_is_on = _processors.front()->active();
-
-	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		if (first_is_on) {
-			(*i)->deactivate ();
-		} else {
-			(*i)->activate ();
-		}
-	}
-
-	_session.set_dirty ();
-}
-
 /** Set all processors with a given placement to a given active state.
  * @param p Placement of processors to change.
  * @param state New active state for those processors.
@@ -1674,31 +1652,6 @@ Route::all_processors_active (Placement p, bool state)
 	}
 
 	_session.set_dirty ();
-}
-
-bool
-Route::processor_is_prefader (boost::shared_ptr<Processor> p)
-{
-	bool pre_fader = true;
-	Glib::RWLock::ReaderLock lm (_processor_lock);
-
-	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-
-		/* semantic note: if p == amp, we want to return true, so test
-		   for equality before checking if this is the amp
-		*/
-
-		if ((*i) == p) {
-			break;
-		}
-
-		if ((*i) == _amp) {
-			pre_fader = false;
-			break;
-		}
-	}
-
-	return pre_fader;
 }
 
 int
