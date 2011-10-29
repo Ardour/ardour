@@ -239,6 +239,8 @@ PannerUI::setup_pan ()
         twod_panner = 0;
         delete _stereo_panner;
         _stereo_panner = 0;
+	delete _mono_panner;
+	_mono_panner = 0;
 
 	if (nouts == 0 || nouts == 1) {
 
