@@ -133,14 +133,23 @@ ArdourButton::render (cairo_t* cr)
 
 	/* text, if any */
 
+	float text_margin;
+
+	if (_width < 75) {
+		text_margin = 3;
+	} else {
+		text_margin = 10;
+	}
+
 	if ((_elements & Text) && !_text.empty()) {
+
 		cairo_set_source_rgba (cr, text_r, text_g, text_b, text_a);
 
 		if (_elements & Indicator) {
 			if (_led_left) {
-				cairo_move_to (cr, _diameter + 3 + 4, _height/2.0 - _text_height/2.0);
+				cairo_move_to (cr, _width - text_margin - 4, _height/2.0 - _text_height/2.0);
 			} else {
-				cairo_move_to (cr, 3, _height/2.0 - _text_height/2.0);
+				cairo_move_to (cr, text_margin, _height/2.0 - _text_height/2.0);
 			}
 		} else {
 			/* center text */
@@ -148,7 +157,7 @@ ArdourButton::render (cairo_t* cr)
 		}
 
 		pango_cairo_show_layout (cr, _layout->gobj());
-	}
+	} 
 
 	if (_elements & Indicator) {
 
@@ -158,7 +167,7 @@ ArdourButton::render (cairo_t* cr)
 
 		if (_elements & Text) {
 			if (_led_left) {
-				cairo_translate (cr, 3 + (_diameter/2.0), _height/2.0);
+				cairo_translate (cr, text_margin + (_diameter/2.0), _height/2.0);
 			} else {
 				cairo_translate (cr, _width - ((_diameter/2.0) + 4.0), _height/2.0);
 			}
@@ -235,7 +244,11 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 
 	if ((_elements & Text) && !_text.empty()) {
 		_layout->get_pixel_size (_text_width, _text_height);
-		xpad += 6;
+		if (_text_width + _diameter < 75) {
+			xpad = 7;
+		} else {
+			xpad = 20;
+		}
 	} else {
 		_text_width = 0;
 		_text_height = 0;
