@@ -1110,6 +1110,8 @@ RCOptionEditor::RCOptionEditor ()
 		sigc::mem_fun (*_rc_config, &RCConfiguration::set_monitoring_model)
 		);
 
+	add_option (_("Audio"), mm);
+
 #ifndef __APPLE__
         /* no JACK monitoring on CoreAudio */
         if (AudioEngine::instance()->can_request_hardware_monitoring()) {
@@ -1118,32 +1120,6 @@ RCOptionEditor::RCOptionEditor ()
 #endif
 	mm->add (SoftwareMonitoring, _("ardour"));
 	mm->add (ExternalMonitoring, _("audio hardware"));
-
-	add_option (_("Audio"), mm);
-
-	ComboOption<PFLPosition>* pp = new ComboOption<PFLPosition> (
-		"pfl-position",
-		_("PFL signals come from"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_pfl_position),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_pfl_position)
-		);
-
-	pp->add (PFLFromBeforeProcessors, _("before pre-fader processors"));
-	pp->add (PFLFromAfterProcessors, _("pre-fader but after pre-fader processors"));
-
-	add_option (_("Audio"), pp);
-
-	ComboOption<AFLPosition>* pa = new ComboOption<AFLPosition> (
-		"afl-position",
-		_("AFL signals come from"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_afl_position),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_afl_position)
-		);
-
-	pa->add (AFLFromBeforeProcessors, _("post-fader but before post-fader processors"));
-	pa->add (AFLFromAfterProcessors, _("after post-fader processors"));
-
-	add_option (_("Audio"), pa);
 
 	add_option (_("Audio"),
 	     new BoolOption (
@@ -1291,10 +1267,34 @@ RCOptionEditor::RCOptionEditor ()
 		sigc::mem_fun (*_rc_config, &RCConfiguration::set_listen_position)
 		);
 
-	_listen_position->add (AfterFaderListen, _("after-fader listen"));
-	_listen_position->add (PreFaderListen, _("pre-fader listen"));
+	_listen_position->add (AfterFaderListen, _("after-fader (AFL)"));
+	_listen_position->add (PreFaderListen, _("pre-fader (PFL)"));
 
 	add_option (_("Solo / mute"), _listen_position);
+
+	ComboOption<PFLPosition>* pp = new ComboOption<PFLPosition> (
+		"pfl-position",
+		_("PFL signals come from"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_pfl_position),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_pfl_position)
+		);
+
+	pp->add (PFLFromBeforeProcessors, _("before pre-fader processors"));
+	pp->add (PFLFromAfterProcessors, _("pre-fader but after pre-fader processors"));
+
+	add_option (_("Solo / mute"), pp);
+
+	ComboOption<AFLPosition>* pa = new ComboOption<AFLPosition> (
+		"afl-position",
+		_("AFL signals come from"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_afl_position),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_afl_position)
+		);
+
+	pa->add (AFLFromBeforeProcessors, _("post-fader but before post-fader processors"));
+	pa->add (AFLFromAfterProcessors, _("after post-fader processors"));
+
+	add_option (_("Solo / mute"), pa);
 
 	parameter_changed ("use-monitor-bus");
 
