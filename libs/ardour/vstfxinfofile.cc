@@ -4,13 +4,12 @@
 /*name, creator etc etc                                    */
 /***********************************************************/
 
-/*This is largely unmodified from the original (C code) FST vstinfofile module*/
-
-#include "ardour/vstfx.h"
+#include <iostream>
 
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <errno.h>
 
 #include <stdlib.h>
 #include <stddef.h>
@@ -18,10 +17,12 @@
 #include <string.h>
 #include <libgen.h>
 
-#define MAX_STRING_LEN 256
+#include <glib.h>
+#include <glib/gstdio.h>
 
-#define FALSE 0
-#define TRUE !FALSE
+#include "ardour/vstfx.h"
+
+#define MAX_STRING_LEN 256
 
 static char* read_string(FILE *fp)
 {
@@ -42,74 +43,63 @@ static char* read_string(FILE *fp)
     }
 }
 
-static VSTFXInfo* load_vstfx_info_file(char *filename)
+static VSTFXInfo* load_vstfx_info_file(FILE* fp)
 {
-	VSTFXInfo *info = (VSTFXInfo*) malloc(sizeof(VSTFXInfo));
-    FILE *fp;
-    int i;
+	VSTFXInfo *info;
+	int i;
 	
-    if(info == NULL)
+	if ((info = (VSTFXInfo*) malloc(sizeof(VSTFXInfo))) == NULL) {
 		return NULL;
+	}
 
-    fp = fopen(filename, "r");
-    
-    if(fp == NULL)
-	{
-		free( info );
-		return NULL;
-    }
+	if((info->name = read_string(fp)) == NULL) goto error;
+	if((info->creator = read_string(fp)) == NULL) goto error;
+	if(1 != fscanf(fp, "%d\n", &info->UniqueID)) goto error;
+	if((info->Category = read_string(fp)) == NULL) goto error;
+	if(1 != fscanf(fp, "%d\n", &info->numInputs)) goto error;
+	if(1 != fscanf(fp, "%d\n", &info->numOutputs)) goto error;
+	if(1 != fscanf(fp, "%d\n", &info->numParams)) goto error;
+	if(1 != fscanf(fp, "%d\n", &info->wantMidi)) goto error;
+	if(1 != fscanf(fp, "%d\n", &info->hasEditor)) goto error;
+	if(1 != fscanf(fp, "%d\n", &info->canProcessReplacing)) goto error;
+	
+	if((info->ParamNames = (char **) malloc(sizeof(char*)*info->numParams)) == NULL) {
+		goto error;
+	}
 
-    if((info->name = read_string(fp)) == NULL) goto error;
-    if((info->creator = read_string(fp)) == NULL) goto error;
-    if(1 != fscanf(fp, "%d\n", &info->UniqueID)) goto error;
-    if((info->Category = read_string(fp)) == NULL) goto error;
-    if(1 != fscanf(fp, "%d\n", &info->numInputs)) goto error;
-    if(1 != fscanf(fp, "%d\n", &info->numOutputs)) goto error;
-    if(1 != fscanf(fp, "%d\n", &info->numParams)) goto error;
-    if(1 != fscanf(fp, "%d\n", &info->wantMidi)) goto error;
-    if(1 != fscanf(fp, "%d\n", &info->hasEditor)) goto error;
-    if(1 != fscanf(fp, "%d\n", &info->canProcessReplacing)) goto error;
-
-    if((info->ParamNames = (char **) malloc(sizeof(char*)*info->numParams)) == NULL) goto error;
-    for(i=0; i<info->numParams; i++)
-	{
+	for (i=0; i<info->numParams; i++) {
 		if((info->ParamNames[i] = read_string(fp)) == NULL) goto error;
-    }
-    if((info->ParamLabels = (char **) malloc(sizeof(char*)*info->numParams)) == NULL) goto error;
-    
-	for(i=0; i < info->numParams; i++)
-	{
-		if((info->ParamLabels[i] = read_string(fp)) == NULL) goto error;
-    }
-	
-    fclose( fp );
-    return info;
+	}
 
-error:
-    fclose( fp );
-    free( info );
-    return NULL;
+	if ((info->ParamLabels = (char **) malloc(sizeof(char*)*info->numParams)) == NULL) {
+		goto error;
+	}
+	
+	for (i=0; i < info->numParams; i++) {
+		if((info->ParamLabels[i] = read_string(fp)) == NULL) goto error;
+	}
+	
+	return info;
+	
+  error:
+	free( info );
+	return NULL;
 }
 
-static int save_vstfx_info_file(VSTFXInfo *info, char *filename)
+static int save_vstfx_info_file(VSTFXInfo *info, FILE* fp)
 {
-    FILE *fp;
     int i;
 
-    if(info == NULL)
-	{
-		vstfx_error("** ERROR ** VSTFXinfofile : info ptr is NULL\n");
-		return TRUE;
+    if (info == NULL) {
+	    vstfx_error("** ERROR ** VSTFXinfofile : info ptr is NULL\n");
+	    return -1;
     }
 
-    fp = fopen(filename, "w");
+    if (fp == NULL) {
+	    vstfx_error("** ERROR ** VSTFXinfofile : file ptr is NULL\n");
+	    return -1;
+    }
     
-    if(fp == NULL)
-	{
-		vstfx_error("** WARNING ** VSTFX : Can't write info file %s\n", filename);
-		return TRUE;
-    }
-
     fprintf( fp, "%s\n", info->name );
     fprintf( fp, "%s\n", info->creator );
     fprintf( fp, "%d\n", info->UniqueID );
@@ -121,72 +111,149 @@ static int save_vstfx_info_file(VSTFXInfo *info, char *filename)
     fprintf( fp, "%d\n", info->hasEditor );
     fprintf( fp, "%d\n", info->canProcessReplacing );
 
-    for(i=0; i < info->numParams; i++)
-	{
+    for (i=0; i < info->numParams; i++) {
 		fprintf(fp, "%s\n", info->ParamNames[i]);
     }
 	
-    for(i=0; i < info->numParams; i++)
-	{
+    for (i=0; i < info->numParams; i++) {
 		fprintf(fp, "%s\n", info->ParamLabels[i]);
     }
 	
-    fclose( fp );
-
-    return FALSE;
+    return 0;
 }
 
-static char* vstfx_dllpath_to_infopath(char *dllpath)
+static char* vstfx_infofile_stat (char *dllpath, struct stat* statbuf, int personal)
 {
-    char* retval;
+	char* path;
 	char* dir_path;
-	char* base_name;
-	
-    if(strstr(dllpath, ".so" ) == NULL)
-		return NULL;
-    
-	/*Allocate space for the filename - need strlen + 1 for the terminating'0', +1 because .so is three
-	chars, and .fsi is four chars and +1 because we have a '.' at the beginning*/
-	
-	retval = (char*)malloc(strlen(dllpath) + 3);
-	
-	dir_path = strdup(dllpath);
-	base_name = strdup(dllpath);
-	
-	sprintf(retval, "%s/.%s", dirname(dir_path), basename(base_name));
-	sprintf(retval + strlen(retval) - 3, ".fsi");
-	
-	free(dir_path);
-	free(base_name);
-	
-    return retval;
-}
+	char* basename;
+	char* base;
+	size_t blen;
 
-static int vstfx_info_file_is_valid(char *dllpath)
-{
-    struct stat dllstat;
-	struct stat vstfxstat;
-	
-    char *vstfxpath = vstfx_dllpath_to_infopath(dllpath);
-	
-    if(!vstfxpath)
-		return FALSE;
-    
-    if(stat(dllpath, &dllstat))
-	{
-		vstfx_error( "** ERROR ** VSTFXinfofile : .so path %s invalid\n", dllpath );
-			return TRUE;
+	if (strstr (dllpath, ".so" ) == NULL) {
+		return NULL;
 	}
 	
-    if(stat(vstfxpath, &vstfxstat))
-		return FALSE;
-
-    free(vstfxpath);
+	if (personal) {
+		dir_path = g_build_filename (g_get_home_dir(), ".fst", NULL);
+	} else {
+		dir_path = g_path_get_dirname (dllpath);
+	}
 	
-    if(dllstat.st_mtime > vstfxstat.st_mtime)
-		return FALSE;
-    else 
-		return TRUE;
+	base = g_path_get_basename (dllpath);
+	blen = strlen (base) + 2; // null char and '.'
+	basename = (char*) g_malloc (blen);
+	snprintf (basename, blen, ".%s.fsi", base);
+	g_free (base);
+
+	path = g_build_filename (dir_path, basename, NULL);
+
+	g_free (dir_path);
+	g_free (basename);
+
+
+	if (g_file_test (path, GFileTest (G_FILE_TEST_EXISTS|G_FILE_TEST_IS_REGULAR))) {
+
+		/* info file exists in same location as the shared object, so
+		   check if its current and up to date
+		*/
+
+
+		struct stat dllstat;
+		
+		if (stat (dllpath, &dllstat) == 0) {
+			if (stat(path, statbuf) == 0) {
+				if (dllstat.st_mtime <= statbuf->st_mtime) {
+					/* plugin is older than info file */
+					return path;
+				}
+			}
+		} 
+	}
+
+	g_free (path);
+
+	return NULL;
+}
+
+
+static FILE* vstfx_infofile_for_read (char* dllpath)
+{
+	struct stat own_statbuf;
+	struct stat sys_statbuf;
+	char *own_info;
+	char *sys_info;
+	
+	own_info = vstfx_infofile_stat (dllpath, &own_statbuf, 1);
+	sys_info = vstfx_infofile_stat (dllpath, &sys_statbuf, 0);
+
+	if (own_info) {
+		if (sys_info) {
+			if (own_statbuf.st_mtime <= sys_statbuf.st_mtime) {
+				/* system info file is newer, use it */
+				return fopen (sys_info, "r");
+			}
+		} else {
+			return fopen (own_info, "r");
+		}
+	}
+
+	return NULL;
+}
+
+static FILE* vstfx_infofile_create (char* dllpath, int personal)
+{
+	char* path;
+	char* dir_path;
+	char* basename;
+	char* base;
+	size_t blen;
+
+	if (strstr (dllpath, ".so" ) == NULL) {
+		return NULL;
+	}
+	
+	if (personal) {
+		dir_path = g_build_filename (g_get_home_dir(), ".fst", NULL);
+
+		/* if the directory doesn't yet exist, try to create it */
+
+		if (!g_file_test (dir_path, G_FILE_TEST_IS_DIR)) {
+			if (g_mkdir (dir_path, 0700)) {
+				return NULL;
+			}
+		}
+
+	} else {
+		dir_path = g_path_get_dirname (dllpath);
+	}
+	
+	base = g_path_get_basename (dllpath);
+	blen = strlen (base) + 2; // null char and '.'
+	basename = (char*) g_malloc (blen);
+	snprintf (basename, blen, ".%s.fsi", base);
+	g_free (base);
+
+	path = g_build_filename (dir_path, basename, NULL);
+
+	g_free (dir_path);
+	g_free (basename);
+
+	FILE* f = fopen (path, "w");
+	g_free (path);
+
+	return f;
+}
+
+static FILE* vstfx_infofile_for_write (char* dllpath)
+{
+	FILE* f;
+
+	if ((f = vstfx_infofile_create (dllpath, 0)) == NULL) {
+		f = vstfx_infofile_create (dllpath, 1);
+	}
+	
+	return f;
 }
 
 static int vstfx_can_midi(VSTFX *vstfx)
@@ -200,9 +267,9 @@ static int vstfx_can_midi(VSTFX *vstfx)
 		/* should we send it VST events (i.e. MIDI) */
 		
 		if ((plugin->flags & effFlagsIsSynth) || (plugin->dispatcher (plugin, effCanDo, 0, 0,(void*) "receiveVstEvents", 0.0f) > 0))
-		    return TRUE;
+		    return -1;
 	}
-	return FALSE;
+	return false;
 }
 
 static VSTFXInfo* vstfx_info_from_plugin(VSTFX *vstfx)
@@ -210,58 +277,55 @@ static VSTFXInfo* vstfx_info_from_plugin(VSTFX *vstfx)
 
 	VSTFXInfo* info = (VSTFXInfo*) malloc(sizeof(VSTFXInfo));
 	
-    struct AEffect *plugin;
-    int i;
-
-	/*We need to init the creator because some plugins
-	fail to implement getVendorString, and so won't stuff the
-	string with any name*/
+	struct AEffect *plugin;
+	int i;
 	
-    char creator[65] = "Unknown\0";
-
-    if(!vstfx)
+	/*We need to init the creator because some plugins
+	  fail to implement getVendorString, and so won't stuff the
+	  string with any name*/
+	
+	char creator[65] = "Unknown\0";
+	
+	if(!vstfx)
 	{
 		vstfx_error( "** ERROR ** VSTFXinfofile : vstfx ptr is NULL\n" );
 		return NULL;
-    }
-
-    if(!info)
-		return NULL;
-    
-    plugin = vstfx->plugin;
+	}
 	
-    info->name = strdup(vstfx->handle->name ); 
+	if(!info)
+		return NULL;
+	
+	plugin = vstfx->plugin;
+	
+	info->name = strdup(vstfx->handle->name ); 
 	
 	/*If the plugin doesn't bother to implement GetVendorString we will
-	have pre-stuffed the string with 'Unkown' */
+	  have pre-stuffed the string with 'Unkown' */
 	
-    plugin->dispatcher (plugin, effGetVendorString, 0, 0, creator, 0);
+	plugin->dispatcher (plugin, effGetVendorString, 0, 0, creator, 0);
 	
 	/*Some plugins DO implement GetVendorString, but DON'T put a name in it
-	so if its just a zero length string we replace it with 'Unknown' */
+	  so if its just a zero length string we replace it with 'Unknown' */
 	
-    if (strlen(creator) == 0)
-	{
-      info->creator = strdup("Unknown");
-    }
-	else
-	{
-      info->creator = strdup (creator);
-    }
+	if (strlen(creator) == 0) {
+		info->creator = strdup("Unknown");
+	} else {
+		info->creator = strdup (creator);
+	}
+	
+	info->UniqueID = plugin->uniqueID;
+	
+	info->Category = strdup("None");          // FIXME:  
+	info->numInputs = plugin->numInputs;
+	info->numOutputs = plugin->numOutputs;
+	info->numParams = plugin->numParams;
+	info->wantMidi = vstfx_can_midi(vstfx); 
+	info->hasEditor = plugin->flags & effFlagsHasEditor ? true : false;
+	info->canProcessReplacing = plugin->flags & effFlagsCanReplacing ? true : false;
+	info->ParamNames = (char **) malloc(sizeof(char*)*info->numParams);
+	info->ParamLabels = (char **) malloc(sizeof(char*)*info->numParams);
 
-    info->UniqueID = plugin->uniqueID;
-
-    info->Category = strdup("None");          // FIXME:  
-    info->numInputs = plugin->numInputs;
-    info->numOutputs = plugin->numOutputs;
-    info->numParams = plugin->numParams;
-    info->wantMidi = vstfx_can_midi(vstfx); 
-	info->hasEditor = plugin->flags & effFlagsHasEditor ? TRUE : FALSE;
-    info->canProcessReplacing = plugin->flags & effFlagsCanReplacing ? TRUE : FALSE;
-    info->ParamNames = (char **) malloc(sizeof(char*)*info->numParams);
-    info->ParamLabels = (char **) malloc(sizeof(char*)*info->numParams);
-    for(i=0; i < info->numParams; i++)
-	{
+	for(i=0; i < info->numParams; i++) {
 		char name[64];
 		char label[64];
 		
@@ -276,8 +340,8 @@ static VSTFXInfo* vstfx_info_from_plugin(VSTFX *vstfx)
 		//NOTE: 'effGetParamLabel' is no longer defined in vestige headers
 		//plugin->dispatcher (plugin, effGetParamLabel, i, 0, label, 0);
 		info->ParamLabels[i] = strdup(label);
-    }
-    return info;
+	}
+	return info;
 }
 
 /* A simple 'dummy' audiomaster callback which should be ok,
@@ -297,55 +361,45 @@ then cache it for future ref*/
 
 VSTFXInfo *vstfx_get_info(char *dllpath)
 {
-	if( vstfx_info_file_is_valid(dllpath))
-	{
-		VSTFXInfo *info;
-		char *vstfxpath = vstfx_dllpath_to_infopath(dllpath);
+	FILE* infofile;
+	VSTFXHandle *h;
+	VSTFX *vstfx;
+	VSTFXInfo *info;
 
-		info = load_vstfx_info_file(vstfxpath);
-		free(vstfxpath);
-		
-		return info;
-    }
-	else
-	{
-		VSTFXHandle *h;
-		VSTFX *vstfx;
+	if ((infofile = vstfx_infofile_for_read (dllpath)) != NULL) {
 		VSTFXInfo *info;
-		
-		char *vstfxpath;
-		
-		if(!(h = vstfx_load(dllpath)))
-			return NULL;
-							
-		if(!(vstfx = vstfx_instantiate(h, simple_master_callback, NULL)))
-		{
+		info = load_vstfx_info_file (infofile);
+		fclose (infofile);
+		return info;
+	} 
+	
+	if(!(h = vstfx_load(dllpath)))
+		return NULL;
+	
+	if(!(vstfx = vstfx_instantiate(h, simple_master_callback, NULL))) {
 	    	vstfx_unload(h);
 	    	vstfx_error( "** ERROR ** VSTFXinfofile : Instantiate failed\n" );
 	    	return NULL;
-		}
-		
-		vstfxpath = vstfx_dllpath_to_infopath(dllpath);
-		
-		if(!vstfxpath)
-		{
-	    	vstfx_close(vstfx);
-	    	vstfx_unload(h);
-	    	vstfx_error( "** ERROR ** VSTFXinfofile : get vstfx filename failed\n" );
-	    	return NULL;
-		}
-		
-		info = vstfx_info_from_plugin(vstfx);
-		
-		save_vstfx_info_file(info, vstfxpath);
-
-		free(vstfxpath);
-		
+	}
+	
+	infofile = vstfx_infofile_for_write (dllpath);
+	
+	if(!infofile) {
 		vstfx_close(vstfx);
 		vstfx_unload(h);
-		
-		return info;
-    }
+		vstfx_error("cannot create new FST info file for plugin");
+		return NULL;
+	}
+	
+	info = vstfx_info_from_plugin(vstfx);
+	
+	save_vstfx_info_file(info, infofile);
+	fclose (infofile);
+	
+	vstfx_close(vstfx);
+	vstfx_unload(h);
+	
+	return info;
 }
 
 void vstfx_free_info(VSTFXInfo *info )
