@@ -2292,7 +2292,6 @@ AudioDiskstream::ChannelSource::ensure_monitor_input (bool yn) const
 
 AudioDiskstream::ChannelInfo::ChannelInfo (framecnt_t playback_bufsize, framecnt_t capture_bufsize, framecnt_t speed_size, framecnt_t wrap_size)
 {
-	peak_power = 0.0f;
 	current_capture_buffer = 0;
 	current_playback_buffer = 0;
 	curr_capture_cnt = 0;

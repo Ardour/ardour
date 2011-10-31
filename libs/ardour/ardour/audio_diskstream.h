@@ -77,18 +77,6 @@ class AudioDiskstream : public Diskstream
 	int set_non_layered (bool yn);
 	bool can_become_destructive (bool& requires_bounce) const;
 
-	float peak_power(uint32_t n = 0) {
-		boost::shared_ptr<ChannelList> c = channels.reader();
-		ChannelInfo* chaninfo = (*c)[n];
-		float x = chaninfo->peak_power;
-		chaninfo->peak_power = 0.0f;
-		if (x > 0.0f) {
-			return 20.0f * fast_log10(x);
-		} else {
-			return minus_infinity();
-		}
-	}
-
 	boost::shared_ptr<AudioPlaylist> audio_playlist () { return boost::dynamic_pointer_cast<AudioPlaylist>(_playlist); }
 
 	int use_playlist (boost::shared_ptr<Playlist>);
@@ -193,8 +181,6 @@ class AudioDiskstream : public Diskstream
 		Sample     *playback_wrap_buffer;
 		Sample     *capture_wrap_buffer;
 		Sample     *speed_buffer;
-
-		float       peak_power;
 
 		boost::shared_ptr<AudioFileSource> write_source;
 
