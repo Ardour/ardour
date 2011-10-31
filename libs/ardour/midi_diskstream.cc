@@ -1409,43 +1409,34 @@ MidiDiskstream::use_pending_capture_data (XMLNode& /*node*/)
 	return 0;
 }
 
-/** Writes playback events in the given range to \a dst, translating time stamps
- * so that an event at \a start has time = 0
+/** Writes playback events from playback_sample for nframes to dst, translating time stamps
+ *  so that an event at playback_sample has time = 0
  */
 void
-MidiDiskstream::get_playback (MidiBuffer& dst, framepos_t start, framepos_t end)
+MidiDiskstream::get_playback (MidiBuffer& dst, framecnt_t nframes)
 {
 	dst.clear();
 	assert(dst.size() == 0);
 
-	// Reverse.  ... We just don't do reverse, ok?  Back off.
-	if (end <= start) {
-		return;
-	}
-
-	// Translate stamps to be relative to start
-
-
 #ifndef NDEBUG
 	DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose (
 		             "%1 MDS pre-read read %4..%5 from %2 write to %3\n", _name,
-		             _playback_buf->get_read_ptr(), _playback_buf->get_write_ptr(), start, end));
+		             _playback_buf->get_read_ptr(), _playback_buf->get_write_ptr(), playback_sample, playback_sample + nframes));
 //        cerr << "================\n";
 //        _playback_buf->dump (cerr);
 //        cerr << "----------------\n";
 
-	const size_t events_read = _playback_buf->read(dst, start, end);
+	const size_t events_read = _playback_buf->read (dst, playback_sample, playback_sample + nframes);
 	DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose (
 		             "%1 MDS events read %2 range %3 .. %4 rspace %5 wspace %6 r@%7 w@%8\n",
-		             _name, events_read, start, end,
+		             _name, events_read, playback_sample, playback_sample + nframes,
 		             _playback_buf->read_space(), _playback_buf->write_space(),
-	                 _playback_buf->get_read_ptr(), _playback_buf->get_write_ptr()));
+			     _playback_buf->get_read_ptr(), _playback_buf->get_write_ptr()));
 #else
-	_playback_buf->read(dst, start, end);
+	_playback_buf->read (dst, playback_sample, playback_sample + nframes);
 #endif
 
-	gint32 frames_read = end - start;
-	g_atomic_int_add(&_frames_read_from_ringbuffer, frames_read);
+	g_atomic_int_add (&_frames_read_from_ringbuffer, nframes);
 }
 
 bool

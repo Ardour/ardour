@@ -62,7 +62,7 @@ class MidiDiskstream : public Diskstream
 	float playback_buffer_load() const;
 	float capture_buffer_load() const;
 
-	void get_playback(MidiBuffer& dst, framepos_t start, framepos_t end);
+	void get_playback (MidiBuffer& dst, framecnt_t);
 
 	void set_record_enabled (bool yn);
 
