@@ -150,10 +150,9 @@ void
 ProcessorEntry::set_visual_state (Gtk::StateType t)
 {
 	/* map from GTK state to CairoWidget */
-
+	
 	switch (t) {
 	case Gtk::STATE_ACTIVE:
-		_button.set_active_state (CairoWidget::Active);
 		_button.unset_visual_state ();
 		break;
 
@@ -164,7 +163,6 @@ ProcessorEntry::set_visual_state (Gtk::StateType t)
 	case Gtk::STATE_NORMAL:
 	default:
 		_button.unset_visual_state ();
-		_button.unset_active_state ();
 		break;
 	}
 }
@@ -819,6 +817,8 @@ ProcessorBox::processor_key_release_event (GdkEventKey *ev)
 bool
 ProcessorBox::processor_button_press_event (GdkEventButton *ev, ProcessorEntry* child)
 {
+	cerr << "PBPE\n";
+
 	boost::shared_ptr<Processor> processor;
 	if (child) {
 		processor = child->processor ();
