@@ -22,6 +22,7 @@
 #include <algorithm>
 
 #include <pangomm/layout.h>
+#include "gtkmm/style.h"
 
 #include "pbd/compose.h"
 #include "pbd/error.h"
