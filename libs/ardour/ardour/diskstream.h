@@ -256,7 +256,6 @@ class Diskstream : public SessionObject, public PublicDiskstream
 	bool         _buffer_reallocation_required;
 	bool         _seek_required;
 
-	bool          force_refill;
 	/** Start of currently running capture in session frames */
 	framepos_t    capture_start_frame;
 	framecnt_t    capture_captured;
