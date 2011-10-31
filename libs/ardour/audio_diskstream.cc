@@ -673,6 +673,10 @@ AudioDiskstream::process (framepos_t transport_frame, pframes_t nframes, bool& n
 	return ret;
 }
 
+/** Update various things including playback_sample, read pointer on each channel's playback_buf
+ *  and write pointer on each channel's capture_buf.  Also wout whether the butler is needed.
+ *  @return true if the butler is required.
+ */
 bool
 AudioDiskstream::commit (framecnt_t playback_distance)
 {
