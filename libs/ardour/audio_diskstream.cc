@@ -426,7 +426,7 @@ AudioDiskstream::process (framepos_t transport_frame, pframes_t nframes, bool& n
 	bool collect_playback = false;
 	bool can_record = _session.actively_recording ();
 
-	playback_distance = 0;
+	framecnt_t playback_distance = 0;
 
 	if (!_io || !_io->active()) {
 		return 0;
@@ -643,7 +643,19 @@ AudioDiskstream::process (framepos_t transport_frame, pframes_t nframes, bool& n
 		}
 
 		if (rec_nframes == 0 && _actual_speed != 1.0f && _actual_speed != -1.0f) {
-			process_varispeed_playback(nframes, c);
+
+			interpolation.set_speed (_target_speed);
+
+			int channel = 0;
+			for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan, ++channel) {
+				ChannelInfo* chaninfo (*chan);
+				
+				playback_distance = interpolation.interpolate (
+					channel, nframes, chaninfo->current_playback_buffer, chaninfo->speed_buffer);
+				
+				chaninfo->current_playback_buffer = chaninfo->speed_buffer;
+			}
+			
 		} else {
 			playback_distance = nframes;
 		}
@@ -653,7 +665,7 @@ AudioDiskstream::process (framepos_t transport_frame, pframes_t nframes, bool& n
 
 	ret = 0;
 
-	if (commit (nframes)) {
+	if (commit (playback_distance)) {
 		need_butler = true;
 	}
 
@@ -661,26 +673,8 @@ AudioDiskstream::process (framepos_t transport_frame, pframes_t nframes, bool& n
 	return ret;
 }
 
-void
-AudioDiskstream::process_varispeed_playback (pframes_t nframes, boost::shared_ptr<ChannelList> c)
-{
-	ChannelList::iterator chan;
-
-	interpolation.set_speed (_target_speed);
-
-	int channel = 0;
-	for (chan = c->begin(); chan != c->end(); ++chan, ++channel) {
-		ChannelInfo* chaninfo (*chan);
-
-		playback_distance = interpolation.interpolate (
-				channel, nframes, chaninfo->current_playback_buffer, chaninfo->speed_buffer);
-
-		chaninfo->current_playback_buffer = chaninfo->speed_buffer;
-	}
-}
-
 bool
-AudioDiskstream::commit (framecnt_t /* nframes */)
+AudioDiskstream::commit (framecnt_t playback_distance)
 {
 	bool need_butler = false;
 

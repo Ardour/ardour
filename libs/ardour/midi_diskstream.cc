@@ -483,8 +483,7 @@ MidiDiskstream::process (framepos_t transport_frame, pframes_t nframes, bool& ne
 	bool      nominally_recording;
 	bool      re = record_enabled ();
 	bool      can_record = _session.actively_recording ();
-
-	playback_distance = 0;
+	framecnt_t playback_distance = 0;
 
 	check_record_status (transport_frame, can_record);
 
@@ -599,7 +598,7 @@ MidiDiskstream::process (framepos_t transport_frame, pframes_t nframes, bool& ne
 
 	ret = 0;
 
-	if (commit (nframes)) {
+	if (commit (playback_distance)) {
 		need_butler = true;
 	}
 
@@ -607,7 +606,7 @@ MidiDiskstream::process (framepos_t transport_frame, pframes_t nframes, bool& ne
 }
 
 bool
-MidiDiskstream::commit (framecnt_t nframes)
+MidiDiskstream::commit (framecnt_t playback_distance)
 {
 	bool need_butler = false;
 
@@ -624,7 +623,7 @@ MidiDiskstream::commit (framecnt_t nframes)
 
 	uint32_t frames_read = g_atomic_int_get(&_frames_read_from_ringbuffer);
 	uint32_t frames_written = g_atomic_int_get(&_frames_written_to_ringbuffer);
-	if ((frames_written - frames_read) + nframes < midi_readahead) {
+	if ((frames_written - frames_read) + playback_distance < midi_readahead) {
 		need_butler = true;
 	}
 

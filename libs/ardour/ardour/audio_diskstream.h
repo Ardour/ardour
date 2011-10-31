@@ -152,7 +152,7 @@ class AudioDiskstream : public Diskstream
 	friend class AudioTrack;
 
 	int  process (framepos_t transport_frame, pframes_t nframes, bool& need_butler);
-	bool commit  (framecnt_t nframes);
+	bool commit  (framecnt_t);
 
   private:
 	struct ChannelSource {
@@ -205,8 +205,6 @@ class AudioDiskstream : public Diskstream
 	};
 
 	typedef std::vector<ChannelInfo*> ChannelList;
-
-	void process_varispeed_playback (pframes_t nframes, boost::shared_ptr<ChannelList> c);
 
 	/* The two central butler operations */
 	int do_flush (RunContext context, bool force = false);
