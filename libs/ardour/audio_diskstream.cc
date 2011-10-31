@@ -773,7 +773,7 @@ AudioDiskstream::overwrite_existing_buffers ()
 
 		framecnt_t to_read = size - overwrite_offset;
 
-		if (read ((*chan)->playback_buf->buffer() + overwrite_offset, mixdown_buffer, gain_buffer, start, to_read, *chan, n, reversed)) {
+		if (read ((*chan)->playback_buf->buffer() + overwrite_offset, mixdown_buffer, gain_buffer, start, to_read, n, reversed)) {
 			error << string_compose(_("AudioDiskstream %1: when refilling, cannot read %2 from playlist at frame %3"),
 						id(), size, playback_sample) << endmsg;
 			goto out;
@@ -783,8 +783,7 @@ AudioDiskstream::overwrite_existing_buffers ()
 
 			cnt -= to_read;
 
-			if (read ((*chan)->playback_buf->buffer(), mixdown_buffer, gain_buffer,
-				  start, cnt, *chan, n, reversed)) {
+			if (read ((*chan)->playback_buf->buffer(), mixdown_buffer, gain_buffer, start, cnt, n, reversed)) {
 				error << string_compose(_("AudioDiskstream %1: when refilling, cannot read %2 from playlist at frame %3"),
 							id(), size, playback_sample) << endmsg;
 				goto out;
@@ -869,7 +868,7 @@ AudioDiskstream::internal_playback_seek (framecnt_t distance)
 int
 AudioDiskstream::read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer,
                        framepos_t& start, framecnt_t cnt,
-                       ChannelInfo* /*channel_info*/, int channel, bool reversed)
+                       int channel, bool reversed)
 {
 	framecnt_t this_read = 0;
 	bool reloop = false;
@@ -1158,7 +1157,7 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 
 		if (to_read) {
 
-			if (read (buf1, mixdown_buffer, gain_buffer, file_frame_tmp, to_read, chan, chan_n, reversed)) {
+			if (read (buf1, mixdown_buffer, gain_buffer, file_frame_tmp, to_read, chan_n, reversed)) {
 				ret = -1;
 				goto out;
 			}
@@ -1175,7 +1174,7 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 			   so read some or all of vector.len[1] as well.
 			*/
 
-			if (read (buf2, mixdown_buffer, gain_buffer, file_frame_tmp, to_read, chan, chan_n, reversed)) {
+			if (read (buf2, mixdown_buffer, gain_buffer, file_frame_tmp, to_read, chan_n, reversed)) {
 				ret = -1;
 				goto out;
 			}

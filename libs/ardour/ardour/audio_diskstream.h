@@ -221,7 +221,7 @@ class AudioDiskstream : public Diskstream
 
 	int read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer,
 	          framepos_t& start, framecnt_t cnt,
-	          ChannelInfo* channel_info, int channel, bool reversed);
+	          int channel, bool reversed);
 
 	void finish_capture (boost::shared_ptr<ChannelList>);
 	void transport_stopped_wallclock (struct tm&, time_t, bool abort);
