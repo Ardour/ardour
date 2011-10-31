@@ -263,6 +263,9 @@ class Diskstream : public SessionObject, public PublicDiskstream
 	bool          was_recording;
 	framecnt_t    adjust_capture_position;
 	framecnt_t   _capture_offset;
+	/** The number of frames by which this diskstream's output should be delayed
+	    with respect to the transport frame.  This is used for latency compensation.
+	*/
 	framecnt_t   _roll_delay;
 	framepos_t    first_recordable_frame;
 	framepos_t    last_recordable_frame;
