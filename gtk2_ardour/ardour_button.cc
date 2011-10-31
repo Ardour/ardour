@@ -22,7 +22,6 @@
 #include <algorithm>
 
 #include <pangomm/layout.h>
-#include "gtkmm/style.h"
 
 #include "pbd/compose.h"
 #include "pbd/error.h"
@@ -530,7 +529,7 @@ ArdourButton::action_toggled ()
 }	
 
 void
-ArdourButton::on_style_changed (const RefPtr<Style>&)
+ArdourButton::on_style_changed (const RefPtr<Gtk::Style>&)
 {
 	set_colors ();
 }
