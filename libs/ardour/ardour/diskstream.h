@@ -283,8 +283,12 @@ class Diskstream : public SessionObject, public PublicDiskstream
 	double        _speed;
 	double        _target_speed;
 
+	/** The next frame position that we should be reading from in our playlist */
 	framepos_t     file_frame;
 	framepos_t     playback_sample;
+	/** The number of frames that have been played back this time around the process/commit
+	 *  cycle, accounting for varispeed.
+	 */
 	framecnt_t     playback_distance;
 
 	bool          in_set_state;

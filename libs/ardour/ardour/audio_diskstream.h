@@ -162,6 +162,7 @@ class AudioDiskstream : public Diskstream
 		void ensure_monitor_input (bool) const;
 	};
 
+	/** Information about one of our channels */
 	struct ChannelInfo : public boost::noncopyable {
 
 		ChannelInfo (framecnt_t playback_buffer_size,
@@ -176,13 +177,15 @@ class AudioDiskstream : public Diskstream
 
 		boost::shared_ptr<AudioFileSource> write_source;
 
-		/// information the Port that our audio data comes from
-
+		/** Information about the Port that our audio data comes from */
 		ChannelSource source;
 
 		Sample       *current_capture_buffer;
 		Sample       *current_playback_buffer;
 
+		/** A ringbuffer for data to be played back, written to in the
+		    butler thread, read from in the process thread.
+		*/
 		PBD::RingBufferNPT<Sample> *playback_buf;
 		PBD::RingBufferNPT<Sample> *capture_buf;
 

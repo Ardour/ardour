@@ -405,6 +405,15 @@ AudioDiskstream::prepare_record_status(framepos_t capture_start_frame)
 	}
 }
 
+
+/** Do some record stuff [not described in this comment!]
+ *
+ *  Also:
+ *    - Setup playback_distance with the nframes, or nframes adjusted
+ *      for current varispeed, if appropriate.
+ *    - Setup current_playback_buffer in each ChannelInfo to point to data
+ *      that someone can read playback_distance worth of data from.
+ */
 int
 AudioDiskstream::process (framepos_t transport_frame, pframes_t nframes, bool& need_butler)
 {
@@ -588,12 +597,17 @@ AudioDiskstream::process (framepos_t transport_frame, pframes_t nframes, bool& n
 
 		n = 0;
 
+		/* Setup current_playback_buffer in each ChannelInfo to point to data that someone
+		   can read necessary_samples (== nframes at a transport speed of 1) worth of data
+		   from right now.
+		*/
+
 		for (chan = c->begin(); chan != c->end(); ++chan, ++n) {
 
 			ChannelInfo* chaninfo (*chan);
 
 			if (necessary_samples <= (framecnt_t) chaninfo->playback_vector.len[0]) {
-
+				/* There are enough samples in the first part of the ringbuffer */
 				chaninfo->current_playback_buffer = chaninfo->playback_vector.buf[0];
 
 			} else {
@@ -607,9 +621,17 @@ AudioDiskstream::process (framepos_t transport_frame, pframes_t nframes, bool& n
 
 				} else {
 
+					/* We have enough samples, but not in one lump.  Coalesce the two parts
+					   into one in playback_wrap_buffer in our ChannelInfo, and specify that
+					   as our current_playback_buffer.
+					*/
+
+					/* Copy buf[0] from playback_buf */
 					memcpy ((char *) chaninfo->playback_wrap_buffer,
 							chaninfo->playback_vector.buf[0],
 							chaninfo->playback_vector.len[0] * sizeof (Sample));
+					
+					/* Copy buf[1] from playback_buf */
 					memcpy (chaninfo->playback_wrap_buffer + chaninfo->playback_vector.len[0],
 							chaninfo->playback_vector.buf[1],
 							(necessary_samples - chaninfo->playback_vector.len[0])
@@ -627,7 +649,6 @@ AudioDiskstream::process (framepos_t transport_frame, pframes_t nframes, bool& n
 		}
 
 		_speed = _target_speed;
-
 	}
 
 	ret = 0;
@@ -865,6 +886,13 @@ AudioDiskstream::internal_playback_seek (framecnt_t distance)
 	return 0;
 }
 
+/** Read some data for 1 channel from our playlist into a buffer.
+ *  @param buf Buffer to write to.
+ *  @param start Session frame to start reading from; updated to where we end up
+ *         after the read.
+ *  @param cnt Count of samples to read.
+ *  @param reversed true if we are running backwards, otherwise false.
+ */
 int
 AudioDiskstream::read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer,
                        framepos_t& start, framecnt_t cnt,
@@ -902,17 +930,17 @@ AudioDiskstream::read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer,
 		*/
 
 		if (loc && start >= loop_end) {
-			//cerr << "start adjusted from " << start;
 			start = loop_start + ((start - loop_start) % loop_length);
-			//cerr << "to " << start << endl;
 		}
-
-		//cerr << "start is " << start << "  loopstart: " << loop_start << "  loopend: " << loop_end << endl;
 	}
 
 	if (reversed) {
 		start -= cnt;
 	}
+
+	/* We need this while loop in case we hit a loop boundary, in which case our read from
+	   the playlist must be split into more than one section.
+	*/
 
 	while (cnt) {
 
@@ -920,7 +948,6 @@ AudioDiskstream::read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer,
 
 		if (loc && (loop_end - start < cnt)) {
 			this_read = loop_end - start;
-			//cerr << "reloop true: thisread: " << this_read << "  cnt: " << cnt << endl;
 			reloop = true;
 		} else {
 			reloop = false;
@@ -975,13 +1002,16 @@ AudioDiskstream::do_refill_with_alloc ()
 	return ret;
 }
 
+/** Get some more data from disk and put it in our channels' playback_bufs,
+ *  if there is suitable space in them.
+ */
 int
 AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 {
 	int32_t ret = 0;
 	framecnt_t to_read;
 	RingBufferNPT<Sample>::rw_vector vector;
-	bool reversed = (_visible_speed * _session.transport_speed()) < 0.0f;
+	bool const reversed = (_visible_speed * _session.transport_speed()) < 0.0f;
 	framecnt_t total_space;
 	framecnt_t zero_fill;
 	uint32_t chan_n;
@@ -1004,6 +1034,7 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 	c->front()->playback_buf->get_write_vector (&vector);
 
 	if ((total_space = vector.len[0] + vector.len[1]) == 0) {
+		/* nowhere to write to */
 		return 0;
 	}
 
@@ -1012,7 +1043,7 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 	   for us to be called again, ASAP.
 	*/
 
-	if (total_space >= (_slaved?3:2) * disk_io_chunk_frames) {
+	if (total_space >= (_slaved ? 3 : 2) * disk_io_chunk_frames) {
 		ret = 1;
 	}
 
@@ -1183,7 +1214,7 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 		}
 
 		if (zero_fill) {
-			/* do something */
+			/* XXX: do something */
 		}
 
 	}
@@ -1939,11 +1970,13 @@ AudioDiskstream::allocate_temporary_buffers ()
 		boost::shared_ptr<ChannelList> c = channels.reader();
 
 		for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
-			if ((*chan)->playback_wrap_buffer)
+			if ((*chan)->playback_wrap_buffer) {
 				delete [] (*chan)->playback_wrap_buffer;
+			}
 			(*chan)->playback_wrap_buffer = new Sample[required_wrap_size];
-			if ((*chan)->capture_wrap_buffer)
+			if ((*chan)->capture_wrap_buffer) {
 				delete [] (*chan)->capture_wrap_buffer;
+			}
 			(*chan)->capture_wrap_buffer = new Sample[required_wrap_size];
 		}
 
