@@ -108,7 +108,9 @@ class ArdourButton : public CairoWidget
 	bool _led_left;
 	bool _fixed_diameter;
 	bool _distinct_led_click;
+	cairo_rectangle_t* _led_rect;
 
+	void setup_led_rect ();
 	void set_colors ();
 	void color_handler ();
 	void state_handler ();

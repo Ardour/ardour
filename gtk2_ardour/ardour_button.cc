@@ -62,6 +62,7 @@ ArdourButton::ArdourButton (Element e)
 	, _led_left (false)
 	, _fixed_diameter (true)
 	, _distinct_led_click (false)
+	, _led_rect (0)
 {
 	ColorsChanged.connect (sigc::mem_fun (*this, &ArdourButton::color_handler));
 	StateChanged.connect (sigc::mem_fun (*this, &ArdourButton::state_handler));
@@ -69,6 +70,7 @@ ArdourButton::ArdourButton (Element e)
 
 ArdourButton::~ArdourButton()
 {
+	delete _led_rect;
 }
 
 void
@@ -133,7 +135,7 @@ ArdourButton::render (cairo_t* cr)
 
 	/* text, if any */
 
-	float text_margin;
+	int text_margin;
 
 	if (_width < 75) {
 		text_margin = 3;
@@ -147,7 +149,7 @@ ArdourButton::render (cairo_t* cr)
 
 		if (_elements & Indicator) {
 			if (_led_left) {
-				cairo_move_to (cr, _width - text_margin - 4, _height/2.0 - _text_height/2.0);
+				cairo_move_to (cr, text_margin + _diameter + 4, _height/2.0 - _text_height/2.0);
 			} else {
 				cairo_move_to (cr, text_margin, _height/2.0 - _text_height/2.0);
 			}
@@ -377,28 +379,9 @@ ArdourButton::set_led_left (bool yn)
 bool
 ArdourButton::on_button_press_event (GdkEventButton *ev)
 {
-	if ((_elements & Indicator) && _distinct_led_click) {
-		/* if within LED, swallow event */
-		
-		int top = lrint (_height/2.0 - _diameter/2.0);
-		int bottom = lrint (_height/2.0 + _diameter/2.0);
-		int left;
-		int right;
-		
-		if (_elements & Text) {
-			if (_led_left) {
-				left = 4;
-				right = left + _diameter;
-			} else {
-				left = lrint (_width - 4 - _diameter/2.0);
-				right = left + _diameter;
-			}
-		} else {
-			left = _width/2.0 - (_diameter/2.0);
-			right = _width/2.0 + (_diameter/2.0);
-		}
-
-		if (ev->x >= left && ev->x <= right && ev->y <= bottom && ev->y >= top) {
+	if ((_elements & Indicator) && _led_rect) {
+		if (ev->x >= _led_rect->x && ev->x < _led_rect->x + _led_rect->width && 
+		    ev->y >= _led_rect->y && ev->y < _led_rect->y + _led_rect->height) {
 			return true;
 		}
 	}
@@ -470,6 +453,7 @@ void
 ArdourButton::set_distinct_led_click (bool yn)
 {
 	_distinct_led_click = yn;
+	setup_led_rect ();
 }
 
 void
@@ -483,6 +467,7 @@ void
 ArdourButton::on_size_allocate (Allocation& alloc)
 {
 	CairoWidget::on_size_allocate (alloc);
+	setup_led_rect ();
 	set_colors ();
 }
 
@@ -548,3 +533,30 @@ ArdourButton::on_style_changed (const RefPtr<Style>&)
 {
 	set_colors ();
 }
+
+void
+ArdourButton::setup_led_rect ()
+{
+	if (_elements & Indicator) {
+		_led_rect = new cairo_rectangle_t;
+		
+		if (_elements & Text) {
+			if (_led_left) {
+				_led_rect->x = 4;
+			} else {
+				_led_rect->x = lrint (_width - 4 - _diameter/2.0);
+			}
+		} else {
+			_led_rect->x = _width/2.0 - (_diameter/2.0);
+		}
+
+		_led_rect->y = _height/2.0 - _diameter/2.0;
+		_led_rect->width = _diameter;
+		_led_rect->height = _diameter;
+
+	} else {
+		delete _led_rect;
+		_led_rect = 0;
+	}
+}
+
