@@ -151,7 +151,7 @@ class AudioDiskstream : public Diskstream
   protected:
 	friend class AudioTrack;
 
-	int  process (framepos_t transport_frame, pframes_t nframes, bool& need_butler);
+	int  process (framepos_t transport_frame, pframes_t nframes, framecnt_t &);
 	bool commit  (framecnt_t);
 
   private:

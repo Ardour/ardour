@@ -378,7 +378,10 @@ Track::silent_roll (pframes_t nframes, framepos_t /*start_frame*/, framepos_t /*
 
 	silence (nframes);
 
-	return _diskstream->process (_session.transport_frame(), nframes, need_butler);
+	framecnt_t playback_distance;
+	int const dret = _diskstream->process (_session.transport_frame(), nframes, playback_distance);
+	need_butler = _diskstream->commit (playback_distance);
+	return dret;
 }
 
 void

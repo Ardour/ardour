@@ -279,14 +279,13 @@ MidiTrack::set_state_part_two ()
 }
 
 int
-MidiTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick, bool& needs_butler)
+MidiTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick, bool& need_butler)
 {
 	Glib::RWLock::ReaderLock lm (_processor_lock, Glib::TRY_LOCK);
 	if (!lm.locked()) {
 		return 0;
 	}
 
-	int dret;
 	boost::shared_ptr<MidiDiskstream> diskstream = midi_diskstream();
 
 	automation_snapshot (start_frame);
@@ -302,17 +301,23 @@ MidiTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame
 
 	framepos_t transport_frame = _session.transport_frame();
 
+	int dret;
+	framecnt_t playback_distance;
+
 	if ((nframes = check_initial_delay (nframes, transport_frame)) == 0) {
 		/* need to do this so that the diskstream sets its
 		   playback distance to zero, thus causing diskstream::commit
 		   to do nothing.
 		   */
-		return diskstream->process (transport_frame, 0, needs_butler);
+		dret = diskstream->process (transport_frame, 0, playback_distance);
+		need_butler = diskstream->commit (playback_distance);
+		return dret;
 	}
 
 	_silent = false;
 
-	if ((dret = diskstream->process (transport_frame, nframes, needs_butler)) != 0) {
+	if ((dret = diskstream->process (transport_frame, nframes, playback_distance)) != 0) {
+		need_butler = diskstream->commit (playback_distance);
 		silence (nframes);
 		return dret;
 	}
@@ -373,6 +378,8 @@ MidiTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame
 		}
 	}
 
+	need_butler = diskstream->commit (playback_distance);
+	
 	return 0;
 }
 

@@ -142,7 +142,7 @@ class MidiDiskstream : public Diskstream
   protected:
 	friend class MidiTrack;
 
-	int  process (framepos_t transport_frame, pframes_t nframes, bool& need_butler);
+	int  process (framepos_t transport_frame, pframes_t nframes, framecnt_t &);
 	bool commit  (framecnt_t nframes);
 	static framecnt_t midi_readahead;
 

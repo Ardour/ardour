@@ -182,7 +182,7 @@ class Diskstream : public SessionObject, public PublicDiskstream
   protected:
 	friend class Track;
 
-	virtual int  process (framepos_t transport_frame, pframes_t nframes, bool& need_butler) = 0;
+	virtual int  process (framepos_t transport_frame, pframes_t nframes, framecnt_t &) = 0;
 	virtual bool commit  (framecnt_t) = 0;
 
 	//private:

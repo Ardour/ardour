@@ -329,7 +329,6 @@ AudioTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_fram
 		return 0;
 	}
 
-	int dret;
 	Sample* b;
 	Sample* tmpb;
 	framepos_t transport_frame;
@@ -348,19 +347,26 @@ AudioTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_fram
 
 	transport_frame = _session.transport_frame();
 
+	int dret;
+	framecnt_t playback_distance;
+	
 	if ((nframes = check_initial_delay (nframes, transport_frame)) == 0) {
 
 		/* need to do this so that the diskstream sets its
 		   playback distance to zero, thus causing diskstream::commit
 		   to do nothing.
 		*/
-		return diskstream->process (transport_frame, 0, need_butler);
+
+		dret = diskstream->process (transport_frame, 0, playback_distance);
+		need_butler = diskstream->commit (playback_distance);
+		return dret;
 	}
 
 	_silent = false;
 	_amp->apply_gain_automation(false);
 
-	if ((dret = diskstream->process (transport_frame, nframes, need_butler)) != 0) {
+	if ((dret = diskstream->process (transport_frame, nframes, playback_distance)) != 0) {
+		need_butler = diskstream->commit (playback_distance);
 		silence (nframes);
 		return dret;
 	}
@@ -478,6 +484,8 @@ AudioTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_fram
 		/* problem with the diskstream; just be quiet for a bit */
 		silence (nframes);
 	}
+
+	need_butler = diskstream->commit (playback_distance);
 
 	return 0;
 }

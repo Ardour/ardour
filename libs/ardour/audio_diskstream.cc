@@ -415,18 +415,17 @@ AudioDiskstream::prepare_record_status(framepos_t capture_start_frame)
  *      that someone can read playback_distance worth of data from.
  */
 int
-AudioDiskstream::process (framepos_t transport_frame, pframes_t nframes, bool& need_butler)
+AudioDiskstream::process (framepos_t transport_frame, pframes_t nframes, framecnt_t& playback_distance)
 {
 	uint32_t n;
 	boost::shared_ptr<ChannelList> c = channels.reader();
 	ChannelList::iterator chan;
-	int ret = -1;
 	framecnt_t rec_offset = 0;
 	framecnt_t rec_nframes = 0;
 	bool collect_playback = false;
 	bool can_record = _session.actively_recording ();
 
-	framecnt_t playback_distance = 0;
+	playback_distance = 0;
 
 	if (!_io || !_io->active()) {
 		return 0;
@@ -511,7 +510,7 @@ AudioDiskstream::process (framepos_t transport_frame, pframes_t nframes, bool& n
 
 				if (rec_nframes > total) {
 					DiskOverrun ();
-					goto out;
+					return -1;
 				}
 
 				boost::shared_ptr<AudioPort> const ap = _io->audio (n);
@@ -617,7 +616,7 @@ AudioDiskstream::process (framepos_t transport_frame, pframes_t nframes, bool& n
 					cerr << _name << " Need " << necessary_samples << " total = " << total << endl;
 					cerr << "underrun for " << _name << endl;
 					DiskUnderrun ();
-					goto out;
+					return -1;
 
 				} else {
 
@@ -663,14 +662,7 @@ AudioDiskstream::process (framepos_t transport_frame, pframes_t nframes, bool& n
 		_speed = _target_speed;
 	}
 
-	ret = 0;
-
-	if (commit (playback_distance)) {
-		need_butler = true;
-	}
-
-  out:
-	return ret;
+	return 0;
 }
 
 /** Update various things including playback_sample, read pointer on each channel's playback_buf
