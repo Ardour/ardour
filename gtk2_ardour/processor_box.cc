@@ -203,10 +203,10 @@ ProcessorEntry::set_enum_width (Width w)
 void
 ProcessorEntry::led_clicked()
 {
-	if (!_processor->active ()) {
-		_processor->activate ();
-	} else {
+	if (_button.active_state() == CairoWidget::Active) {
 		_processor->deactivate ();
+	} else {
+		_processor->activate ();
 	}
 }
 

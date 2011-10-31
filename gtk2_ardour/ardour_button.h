@@ -73,6 +73,7 @@ class ArdourButton : public CairoWidget
 	void on_size_allocate (Gtk::Allocation&);
 	bool on_button_press_event (GdkEventButton*);
 	bool on_button_release_event (GdkEventButton*);
+	void on_style_changed (const Glib::RefPtr<Gtk::Style>&);
 
         void controllable_changed ();
         PBD::ScopedConnection watch_connection;

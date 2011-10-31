@@ -423,19 +423,33 @@ ArdourButton::on_button_release_event (GdkEventButton *ev)
 	if ((_elements & Indicator) && _distinct_led_click) {
 
 		/* if within LED, emit signal */
-
+		
+		float text_margin;
 		int top = lrint (_height/2.0 - _diameter/2.0);
 		int bottom = lrint (_height/2.0 + _diameter/2.0);
 		int left;
 		int right;
-		if (_led_left) {
-			left = 4;
-			right = left + _diameter;
+	
+		if (_width < 75) {
+			text_margin = 3;
 		} else {
-			left = lrint (_width - 4 - _diameter/2.0);
-			right = left + _diameter;
+			text_margin = 10;
 		}
+
+		top = _height/2.0;
 		
+		if (_elements & Text) {
+			if (_led_left) {
+				left = text_margin;
+			} else {
+				left = _width - ((_diameter/2.0) + 4.0);
+			}
+		} else {
+			left = _width/2.0 - _diameter/2.0;
+		}
+
+		right = left + _diameter;
+
 		if (ev->x >= left && ev->x <= right && ev->y <= bottom && ev->y >= top) {
 			signal_led_clicked(); /* EMIT SIGNAL */
 			return true;
@@ -528,3 +542,9 @@ ArdourButton::action_toggled ()
 		}
 	}
 }	
+
+void
+ArdourButton::on_style_changed (const RefPtr<Style>&)
+{
+	set_colors ();
+}
