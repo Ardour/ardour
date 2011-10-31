@@ -379,10 +379,19 @@ ArdourButton::set_led_left (bool yn)
 bool
 ArdourButton::on_button_press_event (GdkEventButton *ev)
 {
-	if ((_elements & Indicator) && _led_rect) {
+#if 0
+	cerr << "OBPE, rect = " << _led_rect << ' ' << _led_rect->x << ' ' << _led_rect->y << ' ' << _led_rect->width << ' ' << _led_rect->height
+	     << " event at " << ev->x << ", " << ev->y 
+	     << endl;
+#endif
+
+	if ((_elements & Indicator) && _led_rect && _distinct_led_click) {
 		if (ev->x >= _led_rect->x && ev->x < _led_rect->x + _led_rect->width && 
 		    ev->y >= _led_rect->y && ev->y < _led_rect->y + _led_rect->height) {
+			cerr << "LED PRESS\n";
 			return true;
+		} else {
+			cerr << "missed LED\n";
 		}
 	}
 
@@ -403,37 +412,9 @@ ArdourButton::on_button_press_event (GdkEventButton *ev)
 bool
 ArdourButton::on_button_release_event (GdkEventButton *ev)
 {
-	if ((_elements & Indicator) && _distinct_led_click) {
-
-		/* if within LED, emit signal */
-		
-		float text_margin;
-		int top = lrint (_height/2.0 - _diameter/2.0);
-		int bottom = lrint (_height/2.0 + _diameter/2.0);
-		int left;
-		int right;
-	
-		if (_width < 75) {
-			text_margin = 3;
-		} else {
-			text_margin = 10;
-		}
-
-		top = _height/2.0;
-		
-		if (_elements & Text) {
-			if (_led_left) {
-				left = text_margin;
-			} else {
-				left = _width - ((_diameter/2.0) + 4.0);
-			}
-		} else {
-			left = _width/2.0 - _diameter/2.0;
-		}
-
-		right = left + _diameter;
-
-		if (ev->x >= left && ev->x <= right && ev->y <= bottom && ev->y >= top) {
+	if ((_elements & Indicator) && _led_rect && _distinct_led_click) {
+		if (ev->x >= _led_rect->x && ev->x < _led_rect->x + _led_rect->width && 
+		    ev->y >= _led_rect->y && ev->y < _led_rect->y + _led_rect->height) {
 			signal_led_clicked(); /* EMIT SIGNAL */
 			return true;
 		}
@@ -537,17 +518,26 @@ ArdourButton::on_style_changed (const RefPtr<Gtk::Style>&)
 void
 ArdourButton::setup_led_rect ()
 {
+	int text_margin;
+
+	if (_width < 75) {
+		text_margin = 3;
+	} else {
+		text_margin = 10;
+	}
+
 	if (_elements & Indicator) {
 		_led_rect = new cairo_rectangle_t;
 		
 		if (_elements & Text) {
 			if (_led_left) {
-				_led_rect->x = 4;
+				_led_rect->x = text_margin;
 			} else {
-				_led_rect->x = lrint (_width - 4 - _diameter/2.0);
+				_led_rect->x = _width - text_margin - _diameter/2.0;
 			}
 		} else {
-			_led_rect->x = _width/2.0 - (_diameter/2.0);
+			/* centered */
+			_led_rect->x = _width/2.0 - _diameter/2.0;
 		}
 
 		_led_rect->y = _height/2.0 - _diameter/2.0;
