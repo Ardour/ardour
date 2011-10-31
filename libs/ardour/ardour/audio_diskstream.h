@@ -124,14 +124,6 @@ class AudioDiskstream : public Diskstream
 		}
 	}
 
-	static void swap_by_ptr (Sample *first, Sample *last, framecnt_t n) {
-		while (n--) {
-			Sample tmp = *first;
-			*first++ = *last;
-			*last-- = tmp;
-		}
-	}
-
 	CubicInterpolation interpolation;
 
   protected:
