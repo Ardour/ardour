@@ -26,7 +26,6 @@
 
 #include "ardour/ardour.h"
 #include "ardour/audioengine.h"
-#include "ardour/audio_diskstream.h"
 #include "ardour/audio_track.h"
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"

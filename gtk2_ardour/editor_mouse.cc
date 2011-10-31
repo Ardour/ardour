@@ -66,8 +66,6 @@
 #include "ardour/profile.h"
 #include "ardour/route.h"
 #include "ardour/audio_track.h"
-#include "ardour/audio_diskstream.h"
-#include "ardour/midi_diskstream.h"
 #include "ardour/playlist.h"
 #include "ardour/audioplaylist.h"
 #include "ardour/audioregion.h"

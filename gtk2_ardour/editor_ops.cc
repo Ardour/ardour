@@ -38,11 +38,7 @@
 #include <gtkmm2ext/choice.h>
 #include <gtkmm2ext/popup.h>
 
-#include "ardour/audio_diskstream.h"
 #include "ardour/audio_track.h"
-#include "ardour/audioengine.h"
-#include "ardour/audioplaylist.h"
-#include "ardour/audioplaylist.h"
 #include "ardour/audioregion.h"
 #include "ardour/dB.h"
 #include "ardour/location.h"
