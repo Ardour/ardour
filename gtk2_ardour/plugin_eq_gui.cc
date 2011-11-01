@@ -317,6 +317,9 @@ PluginEqGui::signal_collect_callback(ARDOUR::BufferSet *in, ARDOUR::BufferSet *o
 void
 PluginEqGui::run_impulse_analysis()
 {
+	/* Allocate some thread-local buffers so that Plugin::connect_and_run can use them */
+	ARDOUR_UI::instance()->get_process_buffers ();
+	
 	uint32_t inputs  = _plugin->get_info()->n_inputs.n_audio();
 	uint32_t outputs = _plugin->get_info()->n_outputs.n_audio();
 
@@ -406,6 +409,8 @@ PluginEqGui::run_impulse_analysis()
 
 	// This signals calls expose_analysis_area()
 	_analysis_area->queue_draw();
+
+	ARDOUR_UI::instance()->drop_process_buffers ();
 }
 
 bool

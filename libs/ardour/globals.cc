@@ -337,7 +337,7 @@ ARDOUR::init (bool use_vst, bool try_optimization)
 	new PluginManager ();
 
         ProcessThread::init ();
-        BufferManager::init (10); // XX should be num_processors_for_dsp
+        BufferManager::init (10); // XX should be num_processors_for_dsp + 1 for the GUI thread
 
         PannerManager::instance().discover_panners();
 

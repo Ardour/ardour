@@ -105,6 +105,7 @@ namespace ARDOUR {
 	class Route;
 	class RouteGroup;
 	class Location;
+	class ProcessThread;
 }
 
 class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
@@ -265,6 +266,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	void add_window_proxy (WindowProxyBase *);
 	void remove_window_proxy (WindowProxyBase *);
+
+	void get_process_buffers ();
+	void drop_process_buffers ();
 
   protected:
 	friend class PublicEditor;
@@ -724,6 +728,11 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	bool click_button_clicked (GdkEventButton *);
 
 	VisibilityGroup _status_bar_visibility;
+
+	/** A ProcessThread so that we have some thread-local buffers for use by
+	 *  PluginEqGui::impulse_analysis ().
+	 */
+	ARDOUR::ProcessThread* _process_thread;
 };
 
 #endif /* __ardour_gui_h__ */

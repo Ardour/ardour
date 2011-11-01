@@ -78,6 +78,7 @@
 #include "ardour/midi_track.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/filename_extensions.h"
+#include "ardour/process_thread.h"
 
 typedef uint64_t microseconds_t;
 
@@ -332,6 +333,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	starting.connect (sigc::mem_fun(*this, &ARDOUR_UI::startup));
 	stopping.connect (sigc::mem_fun(*this, &ARDOUR_UI::shutdown));
 
+	_process_thread = new ProcessThread ();
+	_process_thread->init ();
 }
 
 /** @return true if a session was chosen and `apply' clicked, otherwise false if `cancel' was clicked */
@@ -3850,4 +3853,18 @@ ARDOUR_UI::ambiguous_file (std::string file, std::string /*path*/, std::vector<s
 
 	dialog.run ();
 	return dialog.get_which ();
+}
+
+/** Allocate our thread-local buffers */
+void
+ARDOUR_UI::get_process_buffers ()
+{
+	_process_thread->get_buffers ();
+}
+
+/** Drop our thread-local buffers */
+void
+ARDOUR_UI::drop_process_buffers ()
+{
+	_process_thread->drop_buffers ();
 }
