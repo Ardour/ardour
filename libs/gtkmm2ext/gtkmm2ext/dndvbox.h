@@ -18,6 +18,7 @@
 */
 
 #include <gtkmm/box.h>
+#include "gtkmm2ext/widget_state.h"
 
 namespace Gtkmm2ext {
 
@@ -37,7 +38,7 @@ public:
 	virtual std::string drag_text () const = 0;
 
 	/** Set the child's visual state */
-	virtual void set_visual_state (Gtk::StateType) = 0;
+	virtual void set_visual_state (VisualState, bool onoff) = 0;
 };
 
 /** A VBox whose contents can be dragged and dropped */
@@ -526,14 +527,7 @@ private:
 	void setup_child_state (T* c)
 	{
 		assert (c);
-		
-		if (c == _active) {
-			c->set_visual_state (Gtk::STATE_ACTIVE);
-		} else if (selected (c)) {
-			c->set_visual_state (Gtk::STATE_SELECTED);
-		} else {
-			c->set_visual_state (Gtk::STATE_NORMAL);
-		}
+		c->set_visual_state (Selected, selected (c));
 	}
 
 	void clear_selection ()
