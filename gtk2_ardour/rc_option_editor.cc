@@ -1146,6 +1146,14 @@ RCOptionEditor::RCOptionEditor ()
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_color_regions_using_track_color)
 			    ));
 
+	add_option (_("Editor"),
+		    new BoolOption (
+			    "update-editor-during-summary-drag",
+			    _("Update editor window during drags of the summary"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_update_editor_during_summary_drag),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_update_editor_during_summary_drag)
+			    ));
+
 	/* AUDIO */
 
 	add_option (_("Audio"), new OptionEditorHeading (_("Buffering")));

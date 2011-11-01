@@ -167,6 +167,7 @@ CONFIG_VARIABLE (bool, allow_special_bus_removal, "allow-special-bus-removal", f
 CONFIG_VARIABLE (int32_t, processor_usage, "processor-usage", -1)
 CONFIG_VARIABLE (bool, color_regions_using_track_color, "color-regions-using-track-color", false)
 CONFIG_VARIABLE (gain_t, max_gain, "max-gain", 2.0) /* +6.0dB */
+CONFIG_VARIABLE (bool, update_editor_during_summary_drag, "update-editor-during-summary-drag", true)
 
 /* denormal management */
 

@@ -323,6 +323,11 @@ EditorSummary::on_button_press_event (GdkEventButton* ev)
 			_old_follow_playhead = _editor->follow_playhead ();
 			_editor->set_follow_playhead (false);
 
+			if (suspending_editor_updates ()) {
+				get_editor (&_pending_editor_x, &_pending_editor_y);
+				_pending_editor_changed = false;
+			}
+			
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
 
 			/* secondary-modifier-click: locate playhead */
@@ -338,6 +343,10 @@ EditorSummary::on_button_press_event (GdkEventButton* ev)
 
 			/* start a move drag */
 
+			/* get the editor's state in case we are suspending updates */
+			get_editor (&_pending_editor_x, &_pending_editor_y);
+			_pending_editor_changed = false;
+
 			_move_dragging = true;
 			_moved = false;
 			_editor->_dragging_playhead = true;
@@ -349,6 +358,15 @@ EditorSummary::on_button_press_event (GdkEventButton* ev)
 	return true;
 }
 
+/** @return true if we are currently suspending updates to the editor's viewport,
+ *  which we do if configured to do so, and if in a drag of some kind.
+ */
+bool
+EditorSummary::suspending_editor_updates () const
+{
+	return (!Config->get_update_editor_during_summary_drag () && (_zoom_dragging || _move_dragging));
+}
+
 /** Fill in x and y with the editor's current viewable area in summary coordinates */
 void
 EditorSummary::get_editor (pair<double, double>* x, pair<double, double>* y) const
@@ -356,11 +374,25 @@ EditorSummary::get_editor (pair<double, double>* x, pair<double, double>* y) con
 	assert (x);
 	assert (y);
 
-	x->first = (_editor->leftmost_position () - _start) * _x_scale;
-	x->second = x->first + _editor->current_page_frames() * _x_scale;
+	if (suspending_editor_updates ()) {
 
-	y->first = editor_y_to_summary (_editor->vertical_adjustment.get_value ());
-	y->second = editor_y_to_summary (_editor->vertical_adjustment.get_value () + _editor->canvas_height() - _editor->get_canvas_timebars_vsize());
+		/* We are dragging, and configured not to update the editor window during drags,
+		   so just return where the editor will be when the drag finishes.
+		*/
+		   
+		*x = _pending_editor_x;
+		*y = _pending_editor_y;
+
+	} else {
+
+		/* Otherwise query the editor for its actual position */
+
+		x->first = (_editor->leftmost_position () - _start) * _x_scale;
+		x->second = x->first + _editor->current_page_frames() * _x_scale;
+		
+		y->first = editor_y_to_summary (_editor->vertical_adjustment.get_value ());
+		y->second = editor_y_to_summary (_editor->vertical_adjustment.get_value () + _editor->canvas_height() - _editor->get_canvas_timebars_vsize());
+	}
 }
 
 /** Get an expression of the position of a point with respect to the view rectangle */
@@ -521,11 +553,17 @@ EditorSummary::on_motion_notify_event (GdkEventMotion* ev)
 bool
 EditorSummary::on_button_release_event (GdkEventButton*)
 {
+	bool const was_suspended = suspending_editor_updates ();
+	
 	_move_dragging = false;
 	_zoom_dragging = false;
 	_editor->_dragging_playhead = false;
 	_editor->set_follow_playhead (_old_follow_playhead, false);
 
+	if (was_suspended && _pending_editor_changed) {
+		set_editor (_pending_editor_x, _pending_editor_y);
+	}
+		
 	return true;
 }
 
@@ -645,8 +683,16 @@ EditorSummary::set_editor_x (double x)
 	if (x < 0) {
 		x = 0;
 	}
-	
-	_editor->reset_x_origin (x / _x_scale + _start);
+
+	if (suspending_editor_updates ()) {
+		double const w = _pending_editor_x.second - _pending_editor_x.first;
+		_pending_editor_x.first = x;
+		_pending_editor_x.second = x + w;
+		_pending_editor_changed = true;
+		set_dirty ();
+	} else {
+		_editor->reset_x_origin (x / _x_scale + _start);
+	}
 }
 
 /** Set the x range visible in the editor.
@@ -663,16 +709,22 @@ EditorSummary::set_editor_x (pair<double, double> x)
 	if (x.second < 0) {
 		x.second = x.first + 1;
 	}
-	
-	_editor->reset_x_origin (x.first / _x_scale + _start);
 
-	double const nx = (
-		((x.second - x.first) / _x_scale) /
-		_editor->frame_to_unit (_editor->current_page_frames())
-		);
-
-	if (nx != _editor->get_current_zoom ()) {
-		_editor->reset_zoom (nx);
+	if (suspending_editor_updates ()) {
+		_pending_editor_x = x;
+		_pending_editor_changed = true;
+		set_dirty ();
+	} else {
+		_editor->reset_x_origin (x.first / _x_scale + _start);
+		
+		double const nx = (
+			((x.second - x.first) / _x_scale) /
+			_editor->frame_to_unit (_editor->current_page_frames())
+			);
+		
+		if (nx != _editor->get_current_zoom ()) {
+			_editor->reset_zoom (nx);
+		}
 	}
 }
 
@@ -697,7 +749,15 @@ EditorSummary::set_editor_y (double const y)
 		y1 = 0;
 	}
 
-	_editor->reset_y_origin (y1);
+	if (suspending_editor_updates ()) {
+		double const h = _pending_editor_y.second - _pending_editor_y.first;
+		_pending_editor_y.first = y;
+		_pending_editor_y.second = y + h;
+		_pending_editor_changed = true;
+		set_dirty ();
+	} else {
+		_editor->reset_y_origin (y1);
+	}
 }
 
 /** Set the y range visible in the editor.  This is achieved by scaling track heights,
@@ -708,6 +768,13 @@ EditorSummary::set_editor_y (double const y)
 void
 EditorSummary::set_editor_y (pair<double, double> const y)
 {
+	if (suspending_editor_updates ()) {
+		_pending_editor_y = y;
+		_pending_editor_changed = true;
+		set_dirty ();
+		return;
+	}
+	
 	/* Compute current height of tracks between y.first and y.second.  We add up
 	   the total height into `total_height' and the height of complete tracks into
 	   `scale height'.
