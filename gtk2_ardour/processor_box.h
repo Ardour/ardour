@@ -107,7 +107,7 @@ public:
 	Gtk::EventBox& action_widget ();
 	Gtk::Widget& widget ();
 	std::string drag_text () const;
-	void set_visual_state (Gtk::StateType);
+	void set_visual_state (Gtkmm2ext::VisualState, bool);
 
 	enum Position {
 		PreFader,

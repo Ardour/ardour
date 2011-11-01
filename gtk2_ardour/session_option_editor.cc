@@ -269,8 +269,6 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_midi_copy_is_fork)
 			    ));
 
-	add_option (_("Misc"), new OptionEditorHeading (_("MIDI Note Overlaps")));
-
 	ComboOption<InsertMergePolicy>* li = new ComboOption<InsertMergePolicy> (
 		"insert-merge-policy",
 		_("Policy for handling same note\nand channel overlaps"),

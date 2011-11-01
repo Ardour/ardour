@@ -23,8 +23,8 @@
 CairoWidget::CairoWidget ()
 	: _width (1)
 	, _height (1)
-	, _active_state (CairoWidget::ActiveState (0))
-	, _visual_state (CairoWidget::VisualState (0))
+	, _active_state (Gtkmm2ext::ActiveState (0))
+	, _visual_state (Gtkmm2ext::VisualState (0))
 {
 
 }
@@ -89,7 +89,7 @@ CairoWidget::get_parent_bg ()
 }
 
 void
-CairoWidget::set_active_state (CairoWidget::ActiveState s)
+CairoWidget::set_active_state (Gtkmm2ext::ActiveState s)
 {
 	if (_active_state != s) {
 		_active_state = s;
@@ -98,7 +98,7 @@ CairoWidget::set_active_state (CairoWidget::ActiveState s)
 }
 
 void
-CairoWidget::set_visual_state (CairoWidget::VisualState s)
+CairoWidget::set_visual_state (Gtkmm2ext::VisualState s)
 {
 	if (_visual_state != s) {
 		_visual_state = s;

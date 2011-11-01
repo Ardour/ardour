@@ -21,6 +21,7 @@
 #define __gtk2_ardour_cairo_widget_h__
 
 #include <gtkmm/eventbox.h>
+#include "gtkmm2ext/widget_state.h"
 
 /** A parent class for widgets that are rendered using Cairo.
  */
@@ -33,28 +34,12 @@ public:
 
 	void set_dirty ();
 
-	/* widget states: unlike GTK, visual states like "Selected" or "Prelight"
-	   are orthogonal to active states. 
-	*/
-
-	enum ActiveState {
-		Active = 1,
-		Mid,
-	};
-	
-	enum VisualState {
-		/* these can be OR-ed together */
-		Selected = 0x1,
-		Prelight = 0x2,
-		Insensitive = 0x4,
-	};
-
-	ActiveState active_state() const { return _active_state; }
-	VisualState visual_state() const { return _visual_state; }
-	virtual void set_active_state (ActiveState);
-	virtual void set_visual_state (VisualState);
-	virtual void unset_active_state () { set_active_state (ActiveState (0)); }
-	virtual void unset_visual_state () { set_visual_state (VisualState (0)); }
+	Gtkmm2ext::ActiveState active_state() const { return _active_state; }
+	Gtkmm2ext::VisualState visual_state() const { return _visual_state; }
+	virtual void set_active_state (Gtkmm2ext::ActiveState);
+	virtual void set_visual_state (Gtkmm2ext::VisualState);
+	virtual void unset_active_state () { set_active_state (Gtkmm2ext::ActiveState (0)); }
+	virtual void unset_visual_state () { set_visual_state (Gtkmm2ext::VisualState (0)); }
 
 	sigc::signal<void> StateChanged;
 
@@ -67,8 +52,8 @@ protected:
 
 	int _width; ///< pixmap width
 	int _height; ///< pixmap height
-	ActiveState _active_state;
-	VisualState _visual_state;
+	Gtkmm2ext::ActiveState _active_state;
+	Gtkmm2ext::VisualState _visual_state;
 
 private:
 	GdkPixmap* _pixmap; ///< our pixmap

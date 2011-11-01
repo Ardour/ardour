@@ -204,7 +204,7 @@ ArdourButton::render (cairo_t* cr)
 
 	/* a partially transparent gray layer to indicate insensitivity */
 
-	if ((visual_state() & Insensitive)) {
+	if ((visual_state() & Gtkmm2ext::Insensitive)) {
 		cairo_rectangle (cr, 0, 0, _width, _height);
 		cairo_set_source_rgba (cr, 0.905, 0.917, 0.925, 0.5);
 		cairo_fill (cr);
@@ -285,7 +285,7 @@ ArdourButton::set_colors ()
 	if (_elements & Edge) {
 
 		edge_pattern = cairo_pattern_create_linear (0.0, 0.0, 0.0, _height);
-		if (visual_state() & CairoWidget::Selected) {
+		if (visual_state() & Gtkmm2ext::Selected) {
 			start_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1 border start selected", get_name()));
 			end_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1 border end selected", get_name()));
 		} else {
@@ -309,10 +309,10 @@ ArdourButton::set_colors ()
 	if (_elements & Body) {
 		fill_pattern = cairo_pattern_create_linear (0.0, 0.0, 0.0, _height);
 		
-		if (active_state() == Mid) {
+		if (active_state() == Gtkmm2ext::Mid) {
 			start_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1 fill start mid", get_name()));
 			end_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1 fill end mid", get_name()));
-		} else if (active_state() == Active) {
+		} else if (active_state() == Gtkmm2ext::Active) {
 			start_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1 fill start active", get_name()));
 			end_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1 fill end active", get_name()));
 		} else {
@@ -345,10 +345,10 @@ ArdourButton::set_colors ()
 	
 	/* text and LED colors depend on Active/Normal/Mid */
 
-	if (active_state() == Active) {
+	if (active_state() == Gtkmm2ext::Active) {
 		text_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1 text active", get_name()));
 		led_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1 led active", get_name()));
-	} else if (active_state() == Mid) {
+	} else if (active_state() == Gtkmm2ext::Mid) {
 		text_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1 text mid", get_name()));
 		led_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1 led active", get_name()));
 	} else {
@@ -379,19 +379,10 @@ ArdourButton::set_led_left (bool yn)
 bool
 ArdourButton::on_button_press_event (GdkEventButton *ev)
 {
-#if 0
-	cerr << "OBPE, rect = " << _led_rect << ' ' << _led_rect->x << ' ' << _led_rect->y << ' ' << _led_rect->width << ' ' << _led_rect->height
-	     << " event at " << ev->x << ", " << ev->y 
-	     << endl;
-#endif
-
 	if ((_elements & Indicator) && _led_rect && _distinct_led_click) {
 		if (ev->x >= _led_rect->x && ev->x < _led_rect->x + _led_rect->width && 
 		    ev->y >= _led_rect->y && ev->y < _led_rect->y + _led_rect->height) {
-			cerr << "LED PRESS\n";
 			return true;
-		} else {
-			cerr << "missed LED\n";
 		}
 	}
 
@@ -478,7 +469,7 @@ ArdourButton::controllable_changed ()
         float val = binding_proxy.get_controllable()->get_value();
 
 	if (fabs (val) >= 0.5f) {
-		set_active_state (CairoWidget::Active);
+		set_active_state (Gtkmm2ext::Active);
 	} else {
 		unset_active_state ();
 	}
@@ -502,7 +493,7 @@ ArdourButton::action_toggled ()
 
 	if (tact) {
 		if (tact->get_active()) {
-			set_active_state (CairoWidget::Active);
+			set_active_state (Gtkmm2ext::Active);
 		} else {
 			unset_active_state ();
 		}

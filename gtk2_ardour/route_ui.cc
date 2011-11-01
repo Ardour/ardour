@@ -608,20 +608,20 @@ RouteUI::update_monitoring_display ()
 	MonitorState ms = t->monitoring_state();
 
 	if (t->monitoring_choice() & MonitorInput) {
-		monitor_input_button->set_active_state (CairoWidget::Active);
+		monitor_input_button->set_active_state (Gtkmm2ext::Active);
 	} else {
 		if (ms & MonitoringInput) {
-			monitor_input_button->set_active_state (CairoWidget::Mid);
+			monitor_input_button->set_active_state (Gtkmm2ext::Mid);
 		} else {
 			monitor_input_button->unset_active_state ();
 		}
 	}
 
 	if (t->monitoring_choice() & MonitorDisk) {
-		monitor_disk_button->set_active_state (CairoWidget::Active);
+		monitor_disk_button->set_active_state (Gtkmm2ext::Active);
 	} else {
 		if (ms & MonitoringDisk) {
-			monitor_disk_button->set_active_state (CairoWidget::Mid);
+			monitor_disk_button->set_active_state (Gtkmm2ext::Mid);
 		} else {
 			monitor_disk_button->unset_active_state ();
 		}
@@ -1063,7 +1063,7 @@ RouteUI::update_solo_display ()
 
         if (solo_isolated_led) {
 		if (_route->solo_isolated()) {
-			solo_isolated_led->set_active_state (CairoWidget::Active);
+			solo_isolated_led->set_active_state (Gtkmm2ext::Active);
 		} else {
 			solo_isolated_led->unset_active_state ();
 		}
@@ -1071,7 +1071,7 @@ RouteUI::update_solo_display ()
 
         if (solo_safe_led) {
 		if (_route->solo_safe()) {
-			solo_safe_led->set_active_state (CairoWidget::Active);
+			solo_safe_led->set_active_state (Gtkmm2ext::Active);
 		} else {
 			solo_safe_led->unset_active_state ();
 		}

@@ -26,6 +26,7 @@
 using namespace Gdk;
 using namespace Gtk;
 using namespace Glib;
+using namespace Gtkmm2ext;
 
 LED::LED()
 	: _diameter (0.0)

@@ -106,7 +106,7 @@ ProcessorEntry::ProcessorEntry (boost::shared_ptr<Processor> p, Width w)
 	_vbox.show ();
 	
 	if (_processor->active()) {
-		_button.set_active_state (CairoWidget::Active);
+		_button.set_active_state (Gtkmm2ext::Active);
 	}
 	_button.set_diameter (3);
 	_button.set_distinct_led_click (true);
@@ -147,23 +147,12 @@ ProcessorEntry::set_position (Position p)
 }
 
 void
-ProcessorEntry::set_visual_state (Gtk::StateType t)
+ProcessorEntry::set_visual_state (Gtkmm2ext::VisualState s, bool yn)
 {
-	/* map from GTK state to CairoWidget */
-	
-	switch (t) {
-	case Gtk::STATE_ACTIVE:
-		_button.unset_visual_state ();
-		break;
-
-	case Gtk::STATE_SELECTED:
-		_button.set_visual_state (CairoWidget::Selected);
-		break;
-
-	case Gtk::STATE_NORMAL:
-	default:
-		_button.unset_visual_state ();
-		break;
+	if (yn) {
+		_button.set_visual_state (Gtkmm2ext::VisualState (_button.visual_state() | s));
+	} else {
+		_button.set_visual_state (Gtkmm2ext::VisualState (_button.visual_state() & ~s));
 	}
 }
 
@@ -201,7 +190,7 @@ ProcessorEntry::set_enum_width (Width w)
 void
 ProcessorEntry::led_clicked()
 {
-	if (_button.active_state() == CairoWidget::Active) {
+	if (_button.active_state() == Gtkmm2ext::Active) {
 		_processor->deactivate ();
 	} else {
 		_processor->activate ();
@@ -212,7 +201,7 @@ void
 ProcessorEntry::processor_active_changed ()
 {
 	if (_processor->active()) {
-		_button.set_active_state (CairoWidget::Active);
+		_button.set_active_state (Gtkmm2ext::Active);
 	} else {
 		_button.unset_active_state ();
 	}
@@ -817,8 +806,6 @@ ProcessorBox::processor_key_release_event (GdkEventKey *ev)
 bool
 ProcessorBox::processor_button_press_event (GdkEventButton *ev, ProcessorEntry* child)
 {
-	cerr << "PBPE\n";
-
 	boost::shared_ptr<Processor> processor;
 	if (child) {
 		processor = child->processor ();

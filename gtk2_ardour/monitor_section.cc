@@ -35,7 +35,6 @@ Glib::RefPtr<Gdk::Pixbuf> MonitorSection::little_knob_pixbuf;
 MonitorSection::MonitorSection (Session* s)
         : AxisView (s)
         , RouteUI (s)
-        , main_table (2, 3)
         , _tearoff (0)
         , gain_control (0)
         , dim_control (0)
@@ -901,7 +900,7 @@ MonitorSection::audition_blink (bool onoff)
 
 	if (_session->is_auditioning()) {
 		if (onoff) {
-			rude_audition_button.set_active_state (CairoWidget::Active);
+			rude_audition_button.set_active_state (Gtkmm2ext::Active);
 		} else {
 			rude_audition_button.unset_active_state ();
 		}
@@ -919,14 +918,14 @@ MonitorSection::solo_blink (bool onoff)
 
 	if (_session->soloing() || _session->listening()) {
 		if (onoff) {
-			rude_solo_button.set_active_state (CairoWidget::Active);
+			rude_solo_button.set_active_state (Gtkmm2ext::Active);
 		} else {
 			rude_solo_button.unset_active_state ();
 		}
 
                 if (_session->soloing()) {
 			if (_session->solo_isolated()) {
-				rude_iso_button.set_active_state (CairoWidget::Active);
+				rude_iso_button.set_active_state (Gtkmm2ext::Active);
 			}
                 }
 
