@@ -404,15 +404,6 @@ Route::process_output_buffers (BufferSet& bufs,
 
 	bufs.is_silent (false);
 
-#if 0
-	cerr << name() << " POB, buffers: count: " << bufs.count() << " avail " << bufs.available() << endl;
-	int na = bufs.count().n_audio();
-	for (int nn = 0; nn < na; ++nn) {
-		AudioBuffer& ab (bufs.get_audio (nn));
-		cerr << "\tAudio buffer " << nn << " @ " << &ab << " data @ " << ab.data() << endl;
-	}
-#endif
-
 	/* figure out if we're going to use gain automation */
 	if (gain_automation_ok) {
 		_amp->setup_gain_automation (start_frame, end_frame, nframes);
@@ -563,6 +554,7 @@ void
 Route::passthru_silence (framepos_t start_frame, framepos_t end_frame, pframes_t nframes, int declick)
 {
 	BufferSet& bufs (_session.get_silent_buffers (n_process_buffers()));
+
 	bufs.set_count (_input->n_ports());
 	write_out_of_band_data (bufs, start_frame, end_frame, nframes);
 	process_output_buffers (bufs, start_frame, end_frame, nframes, true, declick, false);
