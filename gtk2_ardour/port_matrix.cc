@@ -878,9 +878,18 @@ PortMatrix::visible_ports (int d) const
 	PortGroupList const & p = _ports[d];
 	PortGroupList::List::const_iterator j = p.begin ();
 
+	/* The logic to compute the index here is a bit twisty because for
+	   the TOP_TO_RIGHT arrangement we reverse the order of the vertical
+	   tabs in setup_notebooks ().
+	*/
+	   
 	int n = 0;
 	if (d == _row_index) {
-		n = p.size() - _vnotebook.get_current_page () - 1;
+		if (_arrangement == LEFT_TO_BOTTOM) {
+			n = p.size() - _vnotebook.get_current_page () - 1;
+		} else {
+			n = _vnotebook.get_current_page ();
+		}
 	} else {
 		n = _hnotebook.get_current_page ();
 	}
