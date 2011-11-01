@@ -561,8 +561,8 @@ style "info_message" = "medium_text"
 
 style "warning_message" = "medium_text"
 {
-   fg[ACTIVE] = @@COLPREFIX@_somewhat_bright_indicator
-   fg[NORMAL] = @@COLPREFIX@_somewhat_bright_indicator
+   fg[ACTIVE] = @@COLPREFIX@_bright_color
+   fg[NORMAL] = @@COLPREFIX@_bright_color
    bg[ACTIVE]   = @@COLPREFIX@_base
    bg[NORMAL]   = @@COLPREFIX@_base
    base[NORMAL] = @@COLPREFIX@_base
