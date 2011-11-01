@@ -132,13 +132,15 @@ PluginInsert::control_list_automation_state_changed (Evoral::Parameter which, Au
 ChanCount
 PluginInsert::output_streams() const
 {
-	ChanCount out = _plugins.front()->get_info()->n_outputs;
+	assert (!_plugins.empty());
 
-	DEBUG_TRACE (DEBUG::Processors, string_compose ("Plugin insert, static output streams = %1\n", out));
-
-	if (out == ChanCount::INFINITE) {
-		return _plugins.front()->output_streams ();
+	if (_plugins.front()->reconfigurable_io()) {
+		ChanCount out = _plugins.front()->output_streams ();
+		DEBUG_TRACE (DEBUG::Processors, string_compose ("Plugin insert, reconfigur(able) output streams = %1\n", out));
+		return out;
 	} else {
+		ChanCount out = _plugins.front()->get_info()->n_outputs;
+		DEBUG_TRACE (DEBUG::Processors, string_compose ("Plugin insert, static output streams = %1 for %2 plugins\n", out, _plugins.size()));
 		out.set_audio (out.n_audio() * _plugins.size());
 		out.set_midi (out.n_midi() * _plugins.size());
 		return out;
@@ -148,9 +150,18 @@ PluginInsert::output_streams() const
 ChanCount
 PluginInsert::input_streams() const
 {
-	ChanCount in = _plugins[0]->get_info()->n_inputs;
+	assert (!_plugins.empty());
 
-	DEBUG_TRACE (DEBUG::Processors, string_compose ("Plugin insert, static input streams = %1, match using %2\n", in, _match.method));
+	ChanCount in;
+
+	if (_plugins.front()->reconfigurable_io()) {
+		assert (_plugins.size() == 1);
+		in = _plugins.front()->input_streams();
+	} else {
+		in = _plugins[0]->get_info()->n_inputs;
+	}
+
+	DEBUG_TRACE (DEBUG::Processors, string_compose ("Plugin insert, input streams = %1, match using %2\n", in, _match.method));
 	
 	if (_match.method == Split) {
 
@@ -171,17 +182,13 @@ PluginInsert::input_streams() const
 		}
 		return in;
 
-	} else if (in == ChanCount::INFINITE) {
-		
-		return _plugins[0]->input_streams ();
-
 	} else {
 		
 		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 			in.set (*t, in.get (*t) * _plugins.size ());
 		}
+
 		return in;
-		
 	}
 }
 
@@ -463,7 +470,7 @@ PluginInsert::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end
 			 * at the transitions of "active"
 			 */
 
-			uint32_t out = _plugins[0]->get_info()->n_outputs.n_audio();
+			uint32_t out = output_streams().n_audio ();
 
 			for (uint32_t n = 0; n < out; ++n) {
 				bufs.get_audio (n).silence (nframes);
@@ -475,8 +482,8 @@ PluginInsert::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end
 
 			/* does this need to be done with MIDI? it appears not */
 
-			uint32_t in = _plugins[0]->get_info()->n_inputs.n_audio();
-			uint32_t out = _plugins[0]->get_info()->n_outputs.n_audio();
+			uint32_t in = input_streams ().n_audio ();
+			uint32_t out = output_streams().n_audio ();
 
 			if (out > in) {
 

@@ -2670,9 +2670,8 @@ void
 AUPlugin::set_info (PluginInfoPtr info)
 {
 	Plugin::set_info (info);
-
+	
 	AUPluginInfoPtr pinfo = boost::dynamic_pointer_cast<AUPluginInfo>(get_info());
-
 	_has_midi_input = pinfo->needs_midi_input ();
 	_has_midi_output = false;
 }
