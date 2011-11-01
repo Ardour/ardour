@@ -1219,16 +1219,12 @@ MixerStrip::port_connected_or_disconnected (boost::weak_ptr<Port> wa, boost::wea
 	boost::shared_ptr<Port> a = wa.lock ();
 	boost::shared_ptr<Port> b = wb.lock ();
 
-	if (!a || !b) {
-		return;
-	}
-	
-	if (_route->input()->has_port (a) || _route->input()->has_port (b)) {
+	if ((a && _route->input()->has_port (a)) || (b && _route->input()->has_port (b))) {
 		update_input_display ();
 		set_width_enum (_width, this);
 	}
 
-	if (_route->output()->has_port (a) || _route->output()->has_port (b)) {
+	if ((a && _route->output()->has_port (a)) || (b && _route->output()->has_port (b))) {
 		update_output_display ();
 		set_width_enum (_width, this);
 	}
