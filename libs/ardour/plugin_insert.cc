@@ -481,9 +481,9 @@ PluginInsert::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end
 			if (out > in) {
 
 				/* not active, but something has make up for any channel count increase */
-
+				
 				for (uint32_t n = out - in; n < out; ++n) {
-					memcpy (bufs.get_audio(n).data(), bufs.get_audio(in - 1).data(), sizeof (Sample) * nframes);
+					memcpy (bufs.get_audio (n).data(), bufs.get_audio(in - 1).data(), sizeof (Sample) * nframes);
 				}
 			}
 
@@ -492,6 +492,12 @@ PluginInsert::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end
 	}
 
 	_active = _pending_active;
+
+	/* we have no idea whether the plugin generated silence or not, so mark
+	 * all buffers appropriately.
+	 */
+
+	bufs.is_silent (false);
 }
 
 void

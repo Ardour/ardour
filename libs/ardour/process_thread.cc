@@ -84,10 +84,6 @@ ProcessThread::get_silent_buffers (ChanCount count)
 
 	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 		for (size_t i= 0; i < count.get(*t); ++i) {
-			/* every call to get_silent_buffers() by a given thread
-			 * requires that we re-silence them.
-			 */
-			sb->get(*t, i).is_silent(false);
 			sb->get(*t, i).clear();
 		}
 	}
