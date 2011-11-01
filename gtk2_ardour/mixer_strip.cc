@@ -354,6 +354,8 @@ MixerStrip::init ()
 	_visibility.add (solo_safe_led, X_("SoloSafe"), _("Solo Safe"));
 	_visibility.add (solo_isolated_led, X_("SoloIsolated"), _("Solo Isolated"));
 	_visibility.add (&_comment_button, X_("Comments"), _("Comments"));
+	_visibility.add (&group_button, X_("Group"), _("Group"));
+	_visibility.add (&meter_point_button, X_("MeterPoint"), _("Meter Point"));
 
 	parameter_changed (X_("mixer-strip-visibility"));
 
