@@ -35,7 +35,6 @@
 #include "ardour/source_factory.h"
 #include "ardour/sndfilesource.h"
 #include "ardour/silentfilesource.h"
-#include "ardour/rc_configuration.h"
 #include "ardour/smf_source.h"
 #include "ardour/session.h"
 
