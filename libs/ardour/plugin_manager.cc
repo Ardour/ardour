@@ -263,7 +263,7 @@ PluginManager::ladspa_discover_from_path (string /*path*/)
 	vector<string *>::iterator x;
 	int ret = 0;
 
-	plugin_objects = scanner (ladspa_path, ladspa_filter, 0, true, true);
+	plugin_objects = scanner (ladspa_path, ladspa_filter, 0, false, true);
 
 	if (plugin_objects) {
 		for (x = plugin_objects->begin(); x != plugin_objects->end (); ++x) {
@@ -316,7 +316,7 @@ PluginManager::add_presets(string domain)
 	}
 
 	string path = string_compose("%1/.%2/rdf", envvar, domain);
-	presets = scanner (path, rdf_filter, 0, true, true);
+	presets = scanner (path, rdf_filter, 0, false, true);
 
 	if (presets) {
 		for (x = presets->begin(); x != presets->end (); ++x) {
@@ -337,7 +337,7 @@ PluginManager::add_lrdf_data (const string &path)
 	vector<string *>* rdf_files;
 	vector<string *>::iterator x;
 
-	rdf_files = scanner (path, rdf_filter, 0, true, true);
+	rdf_files = scanner (path, rdf_filter, 0, false, true);
 
 	if (rdf_files) {
 		for (x = rdf_files->begin(); x != rdf_files->end (); ++x) {
@@ -562,7 +562,7 @@ PluginManager::vst_discover_from_path (string path)
 
 	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("detecting VST plugins along %1\n", path));
 
-	plugin_objects = scanner (vst_path, vst_filter, 0, true, true);
+	plugin_objects = scanner (vst_path, vst_filter, 0, false, true);
 
 	if (plugin_objects) {
 		for (x = plugin_objects->begin(); x != plugin_objects->end (); ++x) {
@@ -667,7 +667,7 @@ PluginManager::lxvst_discover_from_path (string path)
 
 	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("Discovering linuxVST plugins along %1\n", path));
 
-	plugin_objects = scanner (lxvst_path, lxvst_filter, 0, true, true);
+	plugin_objects = scanner (lxvst_path, lxvst_filter, 0, false, true);
 
 	if (plugin_objects) {
 		for (x = plugin_objects->begin(); x != plugin_objects->end (); ++x) {
