@@ -387,13 +387,6 @@ PortMatrix::popup_menu (BundleChannel column, BundleChannel row, uint32_t t)
 {
 	using namespace Menu_Helpers;
 
-	if ((row.bundle && row.bundle->nchannels().n_total() == 0) || (column.bundle && column.bundle->nchannels().n_total() == 0)) {
-		/* One of the bundles has no channels, which means that it has none of the appropriate type,
-		   and is only being displayed to look pretty.  So we don't need to do anything.
-		*/
-		return;
-	}
-	
 	delete _menu;
 
 	_menu = new Menu;
@@ -468,16 +461,23 @@ PortMatrix::popup_menu (BundleChannel column, BundleChannel row, uint32_t t)
 
 			uint32_t c = count_of_our_type (bc[dim].bundle->nchannels ());
 			if ((_show_only_bundles && c > 0) || c == 1) {
+
+				/* we're looking just at bundles, or our bundle has only one channel, so just offer
+				   to disassociate all on the bundle.
+				*/
+				
 				snprintf (buf, sizeof (buf), _("%s all"), disassociation_verb().c_str());
 				sub.push_back (
-					MenuElem (buf, sigc::bind (sigc::mem_fun (*this, &PortMatrix::disassociate_all_on_channel), w, bc[dim].channel, dim))
+					MenuElem (buf, sigc::bind (sigc::mem_fun (*this, &PortMatrix::disassociate_all_on_bundle), w, dim))
 					);
-
-			} else {
+					
+			} else if (c != 0) {
 
 				if (bc[dim].channel != -1) {
+					/* specific channel under the menu, so just offer to disassociate that */
 					add_disassociate_option (sub, w, dim, bc[dim].channel);
-				} else if (count_of_our_type (bc[dim].bundle->nchannels()) != 0) {
+				} else {
+					/* no specific channel; offer to disassociate all, or any one in particular */
 					snprintf (buf, sizeof (buf), _("%s all"), disassociation_verb().c_str());
 					sub.push_back (
 						MenuElem (buf, sigc::bind (sigc::mem_fun (*this, &PortMatrix::disassociate_all_on_bundle), w, dim))
@@ -562,7 +562,7 @@ PortMatrix::disassociate_all_on_channel (boost::weak_ptr<Bundle> bundle, uint32_
 	for (PortGroup::BundleList::iterator i = a.begin(); i != a.end(); ++i) {
 		for (uint32_t j = 0; j < (*i)->bundle->nchannels().n_total(); ++j) {
 
-			if (should_show ((*i)->bundle->channel_type(j))) {
+			if (!should_show ((*i)->bundle->channel_type(j))) {
 				continue;
 			}
 
