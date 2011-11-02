@@ -50,11 +50,16 @@ class MonitorSection : public RouteUI
   private:
         Gtk::VBox vpacker;
         Gtk::HBox hpacker;
-        Gtk::Table main_table;
-	Gtk::ScrolledWindow main_table_scroller;
         Gtk::VBox upper_packer;
         Gtk::VBox lower_packer;
         Gtkmm2ext::TearOff* _tearoff;
+
+	Gtk::HBox  channel_table_packer;
+	Gtk::HBox  table_hpacker;
+        Gtk::Table channel_table;
+        Gtk::Table channel_table_header;
+	Gtk::ScrolledWindow channel_table_scroller;
+	Glib::RefPtr<Gtk::SizeGroup> channel_size_group;
 
         struct ChannelButtonSet {
             ArdourButton cut;

@@ -246,32 +246,48 @@ MonitorSection::MonitorSection (Session* s)
 
         lower_packer.pack_start (*spin_packer, true, true);
 
-	HBox* hb = manage (new HBox);
-	hb->pack_start (main_table_scroller, false, false);
-	hb->show ();
+	channel_table_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+	channel_table_scroller.set_size_request (-1, 150);
+	channel_table_scroller.set_shadow_type (Gtk::SHADOW_NONE);
+	channel_table_scroller.show ();
+	
+	channel_size_group  = SizeGroup::create (SIZE_GROUP_HORIZONTAL);
+	channel_size_group->add_widget (channel_table_header);
+	channel_size_group->add_widget (channel_table);
 
-	main_table_scroller.add (main_table);
-	main_table_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
-	main_table_scroller.set_size_request (-1, 150);
-	main_table_scroller.set_shadow_type (Gtk::SHADOW_NONE);
-	main_table_scroller.show ();
+	channel_table_header.resize (1, 5);
+        Label* l1 = manage (new Label (X_("out")));
+        channel_table_header.attach (*l1, 0, 1, 0, 1, EXPAND|FILL);
+        l1 = manage (new Label (X_("cut")));
+        channel_table_header.attach (*l1, 1, 2, 0, 1, EXPAND|FILL);
+        l1 = manage (new Label (X_("dim")));
+        channel_table_header.attach (*l1, 2, 3, 0, 1, EXPAND|FILL);
+        l1 = manage (new Label (X_("solo")));
+        channel_table_header.attach (*l1, 3, 4, 0, 1, EXPAND|FILL);
+        l1 = manage (new Label (X_("inv")));
+        channel_table_header.attach (*l1, 4, 5, 0, 1, EXPAND|FILL);
+	channel_table_header.show ();
+
+	table_hpacker.pack_start (channel_table, true, true);
+
+	/* note that we don't pack the table_hpacker till later
+	 */
 
         vpacker.set_border_width (12);
         vpacker.set_spacing (12);
         vpacker.pack_start (upper_packer, false, false);
         vpacker.pack_start (*dim_packer, false, false);
-        vpacker.pack_start (*hb, false, false);
+        vpacker.pack_start (channel_table_header, false, false);
+        vpacker.pack_start (channel_table_packer, false, false);
         vpacker.pack_start (lower_packer, false, false);
 
-        hpacker.set_border_width (12);
-        hpacker.set_spacing (12);
         hpacker.pack_start (vpacker, true, true);
 
         gain_control->show_all ();
         dim_control->show_all ();
         solo_boost_control->show_all ();
 
-        main_table.show ();
+        channel_table.show ();
         hpacker.show ();
         upper_packer.show ();
         lower_packer.show ();
@@ -326,6 +342,40 @@ MonitorSection::set_session (Session* s)
                         _route.reset ();
                 }
 
+		if (channel_table_scroller.get_parent()) {
+			/* scroller is packed, so remove it */
+			channel_table_packer.remove (channel_table_scroller);
+			/* remove the table_hpacker from the scroller */
+			channel_table_scroller.remove ();
+		} 
+
+		if (table_hpacker.get_parent ()) {
+			/* this occurs when the table hpacker is directly
+			   packed, so remove it.
+			*/
+			channel_table_packer.remove (table_hpacker);
+		}
+		
+		if (_monitor->output_streams().n_audio() > 7) {
+			/* put the table into a scrolled window, and then put
+			 * that into the channel vpacker, after the table header
+			 */
+			channel_table_scroller.add (table_hpacker);
+			channel_table_packer.pack_start (channel_table_scroller, true, true);
+			channel_table_scroller.show ();
+
+		} else {
+			/* just put the channel table itself into the channel
+			 * vpacker, after the table header
+			 */
+			 
+			channel_table_packer.pack_start (table_hpacker, true, true);
+			channel_table_scroller.hide ();
+		}
+
+		table_hpacker.show ();
+		channel_table.show ();
+
         } else {
                 /* no session */
 
@@ -371,23 +421,12 @@ MonitorSection::populate_buttons ()
         Glib::RefPtr<Action> act;
         uint32_t nchans = _monitor->output_streams().n_audio();
 
-        main_table.resize (nchans+1, 5);
-        main_table.set_col_spacings (6);
-        main_table.set_row_spacings (6);
-        main_table.set_homogeneous (true);
+        channel_table.resize (nchans, 5);
+        channel_table.set_col_spacings (6);
+        channel_table.set_row_spacings (6);
+        channel_table.set_homogeneous (true);
 
-        Label* l1 = manage (new Label (X_("out")));
-        main_table.attach (*l1, 0, 1, 0, 1, SHRINK|FILL, SHRINK|FILL);
-        l1 = manage (new Label (X_("cut")));
-        main_table.attach (*l1, 1, 2, 0, 1, SHRINK|FILL, SHRINK|FILL);
-        l1 = manage (new Label (X_("dim")));
-        main_table.attach (*l1, 2, 3, 0, 1, SHRINK|FILL, SHRINK|FILL);
-        l1 = manage (new Label (X_("solo")));
-        main_table.attach (*l1, 3, 4, 0, 1, SHRINK|FILL, SHRINK|FILL);
-        l1 = manage (new Label (X_("inv")));
-        main_table.attach (*l1, 4, 5, 0, 1, SHRINK|FILL, SHRINK|FILL);
-
-        const uint32_t row_offset = 1;
+        const uint32_t row_offset = 0;
 
         for (uint32_t i = 0; i < nchans; ++i) {
 
@@ -407,16 +446,16 @@ MonitorSection::populate_buttons ()
                 }
 
                 Label* label = manage (new Label (l));
-                main_table.attach (*label, 0, 1, i+row_offset, i+row_offset+1, SHRINK|FILL, SHRINK|FILL);
+                channel_table.attach (*label, 0, 1, i+row_offset, i+row_offset+1, EXPAND|FILL);
 
                 ChannelButtonSet* cbs = new ChannelButtonSet;
 
                 _channel_buttons.push_back (cbs);
 
-                main_table.attach (cbs->cut, 1, 2, i+row_offset, i+row_offset+1, SHRINK|FILL, SHRINK|FILL);
-                main_table.attach (cbs->dim, 2, 3, i+row_offset, i+row_offset+1, SHRINK|FILL, SHRINK|FILL);
-                main_table.attach (cbs->solo, 3, 4, i+row_offset, i+row_offset+1, SHRINK|FILL, SHRINK|FILL);
-                main_table.attach (cbs->invert, 4, 5, i+row_offset, i+row_offset+1, SHRINK|FILL, SHRINK|FILL);
+                channel_table.attach (cbs->cut, 1, 2, i+row_offset, i+row_offset+1, EXPAND|FILL);
+                channel_table.attach (cbs->dim, 2, 3, i+row_offset, i+row_offset+1, EXPAND|FILL);
+                channel_table.attach (cbs->solo, 3, 4, i+row_offset, i+row_offset+1, EXPAND|FILL);
+                channel_table.attach (cbs->invert, 4, 5, i+row_offset, i+row_offset+1, EXPAND|FILL);
 
                 snprintf (buf, sizeof (buf), "monitor-cut-%u", i+1);
                 act = ActionManager::get_action (X_("Monitor"), buf);
@@ -443,7 +482,7 @@ MonitorSection::populate_buttons ()
                 }
         }
 
-        main_table.show_all ();
+        channel_table.show_all ();
 }
 
 void
@@ -743,7 +782,6 @@ MonitorSection::setup_knob_images ()
 		uint32_t c = ARDOUR_UI::config()->color_by_name ("monitor knob");
 		char buf[16];
 		snprintf (buf, 16, "#%x", (c >> 8));
-		cerr << "Motion feedback using " << buf << endl;
 		MotionFeedback::set_lamp_color (buf);
                 big_knob_pixbuf = MotionFeedback::render_pixbuf (80);
 
