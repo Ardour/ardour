@@ -64,23 +64,6 @@ MonitorSection::MonitorSection (Session* s)
         VBox* spin_packer;
         Label* spin_label;
 
-        /* Dim */
-
-        dim_control = new VolumeController (little_knob_pixbuf, boost::shared_ptr<Controllable>(), 0.0, 0.01, 0.1, true, 30, 30, true);
-
-        HBox* dim_packer = manage (new HBox);
-        dim_packer->show ();
-
-        spin_label = manage (new Label (_("Dim")));
-        spin_packer = manage (new VBox);
-        spin_packer->show ();
-        spin_packer->set_spacing (6);
-        spin_packer->pack_start (*dim_control, false, false);
-        spin_packer->pack_start (*spin_label, false, false);
-
-        dim_packer->set_spacing (12);
-        dim_packer->pack_start (*spin_packer, true, false);
-
         /* Rude Solo */
 
 	rude_solo_button.set_text (_("soloing"));
@@ -107,9 +90,9 @@ MonitorSection::MonitorSection (Session* s)
         UI::instance()->set_tip (rude_audition_button, _("When active, auditioning is active.\nClick to stop the audition"));
 
         solo_model_box.set_spacing (6);
-        solo_model_box.pack_start (solo_in_place_button, false, false);
-        solo_model_box.pack_start (afl_button, false, false);
-        solo_model_box.pack_start (pfl_button, false, false);
+        solo_model_box.pack_start (solo_in_place_button, true, false);
+        solo_model_box.pack_start (afl_button, true, false);
+        solo_model_box.pack_start (pfl_button, true, false);
 
         solo_in_place_button.show ();
         afl_button.show ();
@@ -117,16 +100,19 @@ MonitorSection::MonitorSection (Session* s)
         solo_model_box.show ();
 
         act = ActionManager::get_action (X_("Solo"), X_("solo-use-in-place"));
+	ARDOUR_UI::instance()->tooltips().set_tip (solo_in_place_button, _("Solo controls affect solo-in-place"));
         if (act) {
                 act->connect_proxy (solo_in_place_button);
         }
 
         act = ActionManager::get_action (X_("Solo"), X_("solo-use-afl"));
+	ARDOUR_UI::instance()->tooltips().set_tip (afl_button, _("Solo controls toggle after-fader-listen"));
         if (act) {
                 act->connect_proxy (afl_button);
         }
 
         act = ActionManager::get_action (X_("Solo"), X_("solo-use-pfl"));
+	ARDOUR_UI::instance()->tooltips().set_tip (pfl_button, _("Solo controls toggle pre-fader-listen"));
         if (act) {
                 act->connect_proxy (pfl_button);
         }
@@ -134,9 +120,10 @@ MonitorSection::MonitorSection (Session* s)
         /* Solo Boost */
 
         solo_boost_control = new VolumeController (little_knob_pixbuf, boost::shared_ptr<Controllable>(), 0.0, 0.01, 0.1, true, 30, 30, true);
+	ARDOUR_UI::instance()->tooltips().set_tip (*solo_boost_control, _("Gain increase for soloed signals (0dB is normal)"));
 
         HBox* solo_packer = manage (new HBox);
-        solo_packer->set_spacing (12);
+        solo_packer->set_spacing (6);
         solo_packer->show ();
 
         spin_label = manage (new Label (_("Solo Boost")));
@@ -146,11 +133,12 @@ MonitorSection::MonitorSection (Session* s)
         spin_packer->pack_start (*solo_boost_control, false, false);
         spin_packer->pack_start (*spin_label, false, false);
 
-        solo_packer->pack_start (*spin_packer, false, true);
+        solo_packer->pack_start (*spin_packer, true, false);
 
         /* Solo (SiP) cut */
 
         solo_cut_control = new VolumeController (little_knob_pixbuf, boost::shared_ptr<Controllable>(), 0.0, 0.1, 0.5, true, 30, 30, true);
+	ARDOUR_UI::instance()->tooltips().set_tip (*solo_cut_control, _("Gain reduction non-soloed signals\nA value above -inf dB causes \"solo-in-front\""));
 
         spin_label = manage (new Label (_("SiP Cut")));
         spin_packer = manage (new VBox);
@@ -159,7 +147,24 @@ MonitorSection::MonitorSection (Session* s)
         spin_packer->pack_start (*solo_cut_control, false, false);
         spin_packer->pack_start (*spin_label, false, false);
 
-        solo_packer->pack_start (*spin_packer, false, true);
+        solo_packer->pack_start (*spin_packer, true, false);
+
+        /* Dim */
+
+        dim_control = new VolumeController (little_knob_pixbuf, boost::shared_ptr<Controllable>(), 0.0, 0.01, 0.1, true, 30, 30, true);
+	ARDOUR_UI::instance()->tooltips().set_tip (*dim_control, _("Gain reduction to use when dimming monitor outputs"));
+
+        HBox* dim_packer = manage (new HBox);
+        dim_packer->show ();
+
+        spin_label = manage (new Label (_("Dim")));
+        spin_packer = manage (new VBox);
+        spin_packer->show ();
+        spin_packer->set_spacing (6);
+        spin_packer->pack_start (*dim_control, false, false);
+        spin_packer->pack_start (*spin_label, false, false);
+
+        dim_packer->pack_start (*spin_packer, true, false);
 
 	exclusive_solo_button.set_text (_("excl. solo"));
         exclusive_solo_button.set_name (X_("monitor solo exclusive"));
@@ -186,7 +191,7 @@ MonitorSection::MonitorSection (Session* s)
         solo_opt_box->pack_start (solo_mute_override_button);
         solo_opt_box->show ();
 
-        upper_packer.set_spacing (12);
+        upper_packer.set_spacing (6);
 
         Gtk::HBox* rude_box = manage (new HBox);
         rude_box->pack_start (rude_solo_button, true, true);
@@ -194,9 +199,9 @@ MonitorSection::MonitorSection (Session* s)
 
         upper_packer.pack_start (*rude_box, false, false);
         upper_packer.pack_start (rude_audition_button, false, false);
-        upper_packer.pack_start (solo_model_box, false, false);
+        upper_packer.pack_start (solo_model_box, false, false, 12);
         upper_packer.pack_start (*solo_opt_box, false, false);
-        upper_packer.pack_start (*solo_packer, false, false);
+        upper_packer.pack_start (*solo_packer, false, false, 12);
 
         cut_all_button.set_text (_("mute"));
 	cut_all_button.set_name ("monitor section cut");
@@ -257,14 +262,19 @@ MonitorSection::MonitorSection (Session* s)
 
 	channel_table_header.resize (1, 5);
         Label* l1 = manage (new Label (X_("out")));
+	l1->set_name (X_("MonitorSectionLabel"));
         channel_table_header.attach (*l1, 0, 1, 0, 1, EXPAND|FILL);
         l1 = manage (new Label (X_("cut")));
+	l1->set_name (X_("MonitorSectionLabel"));
         channel_table_header.attach (*l1, 1, 2, 0, 1, EXPAND|FILL);
         l1 = manage (new Label (X_("dim")));
+	l1->set_name (X_("MonitorSectionLabel"));
         channel_table_header.attach (*l1, 2, 3, 0, 1, EXPAND|FILL);
         l1 = manage (new Label (X_("solo")));
+	l1->set_name (X_("MonitorSectionLabel"));
         channel_table_header.attach (*l1, 3, 4, 0, 1, EXPAND|FILL);
         l1 = manage (new Label (X_("inv")));
+	l1->set_name (X_("MonitorSectionLabel"));
         channel_table_header.attach (*l1, 4, 5, 0, 1, EXPAND|FILL);
 	channel_table_header.show ();
 
@@ -273,7 +283,7 @@ MonitorSection::MonitorSection (Session* s)
 	/* note that we don't pack the table_hpacker till later
 	 */
 
-        vpacker.set_border_width (12);
+        vpacker.set_border_width (6);
         vpacker.set_spacing (12);
         vpacker.pack_start (upper_packer, false, false);
         vpacker.pack_start (*dim_packer, false, false);
