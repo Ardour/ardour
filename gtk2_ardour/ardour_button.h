@@ -67,12 +67,13 @@ class ArdourButton : public CairoWidget
 
 	void set_related_action (Glib::RefPtr<Gtk::Action>);
 
+	bool on_button_press_event (GdkEventButton*);
+	bool on_button_release_event (GdkEventButton*);
+
   protected:
 	void render (cairo_t *);
 	void on_size_request (Gtk::Requisition* req);
 	void on_size_allocate (Gtk::Allocation&);
-	bool on_button_press_event (GdkEventButton*);
-	bool on_button_release_event (GdkEventButton*);
 	void on_style_changed (const Glib::RefPtr<Gtk::Style>&);
 
         void controllable_changed ();

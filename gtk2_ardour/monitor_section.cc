@@ -496,14 +496,6 @@ MonitorSection::populate_buttons ()
 }
 
 void
-MonitorSection::set_button_names ()
-{
-        rec_enable_button_label.set_text ("rec");
-        mute_button_label.set_text ("rec");
-        solo_button_label.set_text ("rec");
-}
-
-void
 MonitorSection::toggle_exclusive_solo ()
 {
         if (!_monitor) {

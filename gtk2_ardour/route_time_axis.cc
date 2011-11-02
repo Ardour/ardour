@@ -62,6 +62,7 @@
 #include "evoral/Parameter.hpp"
 
 #include "ardour_ui.h"
+#include "ardour_button.h"
 #include "debug.h"
 #include "global_signals.h"
 #include "route_time_axis.h"
@@ -2373,7 +2374,7 @@ RouteTimeAxisView::set_button_names ()
                         solo_button_label.set_text (_("s"));
                 }
         }
-	mute_button_label.set_text (_("m"));
+	mute_button->set_text (_("m"));
 }
 
 Gtk::CheckMenuItem*

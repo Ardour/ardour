@@ -112,30 +112,27 @@ RouteUI::init ()
 
 	setup_invert_buttons ();
 
-	mute_button = manage (new BindableToggleButton ());
+	mute_button = manage (new ArdourButton);
 	// mute_button->set_self_managed (true);
-	mute_button->set_name ("MuteButton");
-	mute_button->add (mute_button_label);
-	mute_button_label.show ();
+	mute_button->set_name ("mute button");
 	UI::instance()->set_tip (mute_button, _("Mute this track"), "");
 
-	solo_button = manage (new BindableToggleButton ());
+	solo_button = manage (new BindableToggleButton);
 	// solo_button->set_self_managed (true);
-	solo_button->set_name ("SoloButton");
+	solo_button->set_name ("solo button");
 	solo_button->add (solo_button_label);
 	solo_button_label.show ();
 	UI::instance()->set_tip (solo_button, _("Mute other (non-soloed) tracks"), "");
 	solo_button->set_no_show_all (true);
 
-	rec_enable_button = manage (new BindableToggleButton ());
-	rec_enable_button->set_name ("RecordEnableButton");
-	// rec_enable_button->set_self_managed (true);
+	rec_enable_button = manage (new BindableToggleButton);
+	rec_enable_button->set_name ("record enable button");
 	rec_enable_button->add (rec_enable_button_label);
 	rec_enable_button_label.show ();
 	UI::instance()->set_tip (rec_enable_button, _("Enable recording on this track"), "");
 
-	show_sends_button = manage (new BindableToggleButton (""));
-	show_sends_button->set_name ("SendAlert");
+	show_sends_button = manage (new ArdourButton);
+	show_sends_button->set_name ("send alert button");
 	// show_sends_button->set_self_managed (true);
 	UI::instance()->set_tip (show_sends_button, _("make mixer strips show sends to this bus"), "");
 
@@ -898,11 +895,11 @@ RouteUI::show_sends_press(GdkEventButton* ev)
 
 			/* change button state */
 
-			show_sends_button->set_active (!show_sends_button->get_active());
+			show_sends_button->set_active_state (Active);
 
 			/* start blinking */
 
-			if (show_sends_button->get_active()) {
+			if (show_sends_button->active_state()) {
 				/* show sends to this bus */
 				MixerStrip::SwitchIO (_route);
 				send_blink_connection = ARDOUR_UI::instance()->Blink.connect (sigc::mem_fun(*this, &RouteUI::send_blink));
@@ -1097,11 +1094,11 @@ RouteUI::mute_changed(void* /*src*/)
 	update_mute_display ();
 }
 
-int
-RouteUI::mute_visual_state (Session* s, boost::shared_ptr<Route> r)
+ActiveState
+RouteUI::mute_active_state (Session* s, boost::shared_ptr<Route> r)
 {
 	if (r->is_master() || r->is_monitor()) {
-		return 0;
+		return ActiveState(0);
 	}
 
 
@@ -1109,26 +1106,26 @@ RouteUI::mute_visual_state (Session* s, boost::shared_ptr<Route> r)
 
 		if (r->muted ()) {
 			/* full mute */
-			return 2;
+			return Active;
 		} else if (s->soloing() && !r->soloed() && !r->solo_isolated()) {
-			return 1;
+			return Mid;
 		} else {
 			/* no mute at all */
-			return 0;
+			return ActiveState(0);
 		}
 
 	} else {
 
 		if (r->muted()) {
 			/* full mute */
-			return 2;
+			return Active;
 		} else {
 			/* no mute at all */
-			return 0;
+			return ActiveState(0);
 		}
 	}
 
-	return 0;
+	return ActiveState(0);
 }
 
 void
@@ -1138,20 +1135,7 @@ RouteUI::update_mute_display ()
                 return;
         }
 
-	bool model = _route->muted();
-	bool view = mute_button->get_active();
-
-	/* first make sure the button's "depressed" visual
-	   is correct.
-	*/
-
-	if (model != view) {
-		++_i_am_the_modifier;
-		mute_button->set_active (model);
-		--_i_am_the_modifier;
-	}
-
-        mute_button->set_visual_state (mute_visual_state (_session, _route));
+        mute_button->set_active_state (mute_active_state (_session, _route));
 }
 
 void

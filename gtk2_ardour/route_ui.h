@@ -25,6 +25,8 @@
 #include "pbd/xml++.h"
 #include "pbd/signals.h"
 
+#include "gtkmm2ext/widget_state.h"
+
 #include "ardour/ardour.h"
 #include "ardour/mute_master.h"
 #include "ardour/session_event.h"
@@ -90,10 +92,10 @@ class RouteUI : public virtual AxisView
 	bool multiple_solo_change;
 
 	Gtk::HBox _invert_button_box;
-	BindableToggleButton* mute_button;
+	ArdourButton* mute_button;
 	BindableToggleButton* solo_button;
 	BindableToggleButton* rec_enable_button; /* audio tracks */
-	BindableToggleButton* show_sends_button; /* busses */
+	ArdourButton* show_sends_button; /* busses */
 	ArdourButton* monitor_input_button;
 	ArdourButton* monitor_disk_button;
 
@@ -103,7 +105,6 @@ class RouteUI : public virtual AxisView
         ArdourButton* solo_isolated_led;
 
 	Gtk::Label solo_button_label;
-	Gtk::Label mute_button_label;
 	Gtk::Label rec_enable_button_label;
 	Gtk::Label monitor_input_button_label;
 	Gtk::Label monitor_disk_button_label;
@@ -222,7 +223,7 @@ class RouteUI : public virtual AxisView
 	static int solo_visual_state_with_isolate (boost::shared_ptr<ARDOUR::Route>);
 	static int solo_isolate_visual_state (boost::shared_ptr<ARDOUR::Route>);
 	static int solo_safe_visual_state (boost::shared_ptr<ARDOUR::Route>);
-	static int mute_visual_state (ARDOUR::Session*, boost::shared_ptr<ARDOUR::Route>);
+	static Gtkmm2ext::ActiveState mute_active_state (ARDOUR::Session*, boost::shared_ptr<ARDOUR::Route>);
 
    protected:
 	PBD::ScopedConnectionList route_connections;

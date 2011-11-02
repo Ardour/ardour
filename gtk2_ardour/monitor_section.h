@@ -79,7 +79,6 @@ class MonitorSection : public RouteUI
         VolumeController* solo_cut_control;
 
         void populate_buttons ();
-	void set_button_names ();
         void map_state ();
 
         boost::shared_ptr<ARDOUR::MonitorProcessor> _monitor;
@@ -99,6 +98,7 @@ class MonitorSection : public RouteUI
         void cut_all ();
         void mono ();
         void toggle_exclusive_solo ();
+	void set_button_names () {}
         void toggle_mute_overrides_solo ();
         void dim_level_changed ();
         void solo_boost_changed ();

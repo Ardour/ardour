@@ -50,6 +50,7 @@
 #include "ardour/session_playlist.h"
 #include "ardour/utils.h"
 
+#include "ardour_button.h"
 #include "ardour_ui.h"
 #include "audio_time_axis.h"
 #include "automation_line.h"
@@ -97,7 +98,7 @@ AudioTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
 	ignore_toggle = false;
 
-	mute_button->set_active (false);
+	mute_button->unset_active_state ();
 	solo_button->set_active (false);
 
 	if (is_audio_track()) {

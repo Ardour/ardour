@@ -172,4 +172,8 @@ BUTTON_VARS(MonitorSectionSoloExclusiveButton, "monitor solo exclusive")
 BUTTON_VARS(RudeSolo, "rude solo")
 BUTTON_VARS(RudeIsolate, "rude isolate")
 BUTTON_VARS(RudeAudition, "rude audition")
+BUTTON_VARS(MuteButton, "mute button")
+BUTTON_VARS(SoloButton, "solo button")
+BUTTON_VARS(RecEnableButton, "record enable button")
+BUTTON_VARS(SendButton, "send alert button")
 

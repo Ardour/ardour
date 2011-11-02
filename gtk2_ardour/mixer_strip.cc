@@ -187,7 +187,7 @@ MixerStrip::init ()
 
 	hide_button.set_events (hide_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
 
-	mute_button->set_name ("MixerMuteButton");
+	// mute_button->set_name ("MixerMuteButton");
 	solo_button->set_name ("MixerSoloButton");
 
 	monitor_input_button->set_diameter (3);
@@ -587,7 +587,7 @@ MixerStrip::set_width_enum (Width w, void* owner)
 	switch (w) {
 	case Wide:
 		if (show_sends_button)  {
-			((Gtk::Label*)show_sends_button->get_child())->set_text (_("Sends"));
+			show_sends_button->set_text (_("Sends"));
 		}
 
 		((Gtk::Label*)gpm.gain_automation_style_button.get_child())->set_text (
@@ -611,7 +611,7 @@ MixerStrip::set_width_enum (Width w, void* owner)
 
 	case Narrow:
 		if (show_sends_button) {
-			((Gtk::Label*)show_sends_button->get_child())->set_text (_("Snd"));
+			show_sends_button->set_text (_("Snd"));
 		}
 
 		((Gtk::Label*)gpm.gain_automation_style_button.get_child())->set_text (
@@ -1673,8 +1673,7 @@ MixerStrip::switch_io (boost::shared_ptr<Route> target)
 		   since we're not the target.
 		*/
 		send_blink_connection.disconnect ();
-		show_sends_button->set_active (false);
-		show_sends_button->set_state (STATE_NORMAL);
+		show_sends_button->unset_active_state ();
 	}
 
 	if (!target) {
@@ -1766,7 +1765,7 @@ void
 MixerStrip::revert_to_default_display ()
 {
 	if (show_sends_button) {
-		show_sends_button->set_active (false);
+		show_sends_button->unset_active_state ();
 	}
 
 	drop_send ();
@@ -1788,7 +1787,7 @@ MixerStrip::set_button_names ()
 	switch (_width) {
 	case Wide:
 		rec_enable_button_label.set_text (_("Rec"));
-		mute_button_label.set_text (_("Mute"));
+		mute_button->set_text (_("Mute"));
 		monitor_input_button->set_text (_("In"));
 		monitor_disk_button->set_text (_("Disk"));
 
@@ -1820,7 +1819,7 @@ MixerStrip::set_button_names ()
 
 	default:
 		rec_enable_button_label.set_text (_("R"));
-		mute_button_label.set_text (_("M"));
+		mute_button->set_text (_("M"));
 		monitor_input_button->set_text (_("I"));
 		monitor_disk_button->set_text (_("D"));
 		if (_route && _route->solo_safe()) {
