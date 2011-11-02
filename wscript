@@ -34,6 +34,7 @@ children = [
         'gtk2_ardour',
         'templates',
         'export',
+        'midi_maps'
 ]
 
 i18n_children = [
