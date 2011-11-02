@@ -37,7 +37,6 @@ class ArdourButton : public CairoWidget
 		Body = 0x2,
 		Text = 0x4,
 		Indicator = 0x8,
-		Image = 0x16
 	};
 	
 	static Element default_elements;
@@ -70,6 +69,8 @@ class ArdourButton : public CairoWidget
 	bool on_button_press_event (GdkEventButton*);
 	bool on_button_release_event (GdkEventButton*);
 
+	void set_image (const Glib::RefPtr<Gdk::Pixbuf>&);
+
   protected:
 	void render (cairo_t *);
 	void on_size_request (Gtk::Requisition* req);
@@ -81,6 +82,7 @@ class ArdourButton : public CairoWidget
 
   private:
 	Glib::RefPtr<Pango::Layout> _layout;
+	Glib::RefPtr<Gdk::Pixbuf>   _pixbuf;
 	std::string                 _text;
 	Element                     _elements;
 	BindingProxy binding_proxy;

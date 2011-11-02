@@ -133,6 +133,17 @@ ArdourButton::render (cairo_t* cr)
 		cairo_fill (cr);
 	}
 
+	if (_pixbuf) {
+
+		double x,y;
+		x = (_width - _pixbuf->get_width())/2.0;
+		y = (_height - _pixbuf->get_height())/2.0;
+
+		cairo_rectangle (cr, x, y, _pixbuf->get_width(), _pixbuf->get_height());
+		gdk_cairo_set_source_pixbuf (cr, _pixbuf->gobj(), x, y);
+		cairo_fill (cr);
+	}
+
 	/* text, if any */
 
 	int text_margin;
@@ -202,10 +213,11 @@ ArdourButton::render (cairo_t* cr)
 
 	}
 
+
 	/* a partially transparent gray layer to indicate insensitivity */
 
 	if ((visual_state() & Gtkmm2ext::Insensitive)) {
-		cairo_rectangle (cr, 0, 0, _width, _height);
+		Gtkmm2ext::rounded_rectangle (cr, 0, 0, _width, _height, _corner_radius);
 		cairo_set_source_rgba (cr, 0.905, 0.917, 0.925, 0.5);
 		cairo_fill (cr);
 	}
@@ -541,3 +553,9 @@ ArdourButton::setup_led_rect ()
 	}
 }
 
+void
+ArdourButton::set_image (const RefPtr<Gdk::Pixbuf>& img)
+{
+	_pixbuf = img;
+	queue_draw ();
+}
