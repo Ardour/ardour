@@ -350,7 +350,7 @@ ArdourButton::set_colors ()
 		led_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1 led active", get_name()));
 	} else if (active_state() == Gtkmm2ext::Mid) {
 		text_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1 text mid", get_name()));
-		led_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1 led active", get_name()));
+		led_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1 led mid", get_name()));
 	} else {
 		text_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1 text", get_name()));
 		led_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1 led", get_name()));
