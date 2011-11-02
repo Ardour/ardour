@@ -56,6 +56,7 @@ MidiTracer::MidiTracer ()
 	Manager::instance()->PortsChanged.connect (_manager_connection, invalidator (*this), boost::bind (&MidiTracer::ports_changed, this), gui_context());
 
 	HBox* pbox = manage (new HBox);
+	pbox->set_spacing (6);
 	pbox->pack_start (*manage (new Label (_("Port:"))), false, false);
 
 	_port_combo.signal_changed().connect (sigc::mem_fun (*this, &MidiTracer::port_changed));
