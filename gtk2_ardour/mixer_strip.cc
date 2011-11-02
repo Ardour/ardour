@@ -187,9 +187,6 @@ MixerStrip::init ()
 
 	hide_button.set_events (hide_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
 
-	// mute_button->set_name ("MixerMuteButton");
-	solo_button->set_name ("MixerSoloButton");
-
 	monitor_input_button->set_diameter (3);
 	monitor_disk_button->set_diameter (3);
 
@@ -1792,25 +1789,22 @@ MixerStrip::set_button_names ()
 		monitor_disk_button->set_text (_("Disk"));
 
 		if (_route && _route->solo_safe()) {
-			solo_button->remove ();
-			if (solo_safe_image == 0) {
-				solo_safe_image = new Gtk::Image (::get_icon("solo-safe-enabled"));
-				solo_safe_image->show ();
+			if (solo_safe_pixbuf == 0) {
+				solo_safe_pixbuf = ::get_icon("solo-safe-icon");
 			}
-			solo_button->add (*solo_safe_image);
+			solo_button->set_image (solo_safe_pixbuf);
+			solo_button->set_text (string());
 		} else {
-			solo_button->remove ();
-			solo_button->add (solo_button_label);
-			solo_button_label.show ();
+			solo_button->set_image (Glib::RefPtr<Gdk::Pixbuf>());
 			if (!Config->get_solo_control_is_listen_control()) {
-				solo_button_label.set_text (_("Solo"));
+				solo_button->set_text (_("Solo"));
 			} else {
 				switch (Config->get_listen_position()) {
 				case AfterFaderListen:
-					solo_button_label.set_text (_("AFL"));
+					solo_button->set_text (_("AFL"));
 					break;
 				case PreFaderListen:
-					solo_button_label.set_text (_("PFL"));
+					solo_button->set_text (_("PFL"));
 					break;
 				}
 			}
@@ -1824,24 +1818,22 @@ MixerStrip::set_button_names ()
 		monitor_disk_button->set_text (_("D"));
 		if (_route && _route->solo_safe()) {
 			solo_button->remove ();
-			if (solo_safe_image == 0) {
-				solo_safe_image = new Gtk::Image (::get_icon("solo-safe-enabled"));
-				solo_safe_image->show ();
+			if (solo_safe_pixbuf == 0) {
+				solo_safe_pixbuf =::get_icon("solo-safe-icon");
 			}
-			solo_button->add (*solo_safe_image);
+			solo_button->set_image (solo_safe_pixbuf);
+			solo_button->set_text (string());
 		} else {
-			solo_button->remove ();
-			solo_button->add (solo_button_label);
-			solo_button_label.show ();
+			solo_button->set_image (Glib::RefPtr<Gdk::Pixbuf>());
 			if (!Config->get_solo_control_is_listen_control()) {
-				solo_button_label.set_text (_("S"));
+				solo_button->set_text (_("S"));
 			} else {
 				switch (Config->get_listen_position()) {
 				case AfterFaderListen:
-					solo_button_label.set_text (_("A"));
+					solo_button->set_text (_("A"));
 					break;
 				case PreFaderListen:
-					solo_button_label.set_text (_("P"));
+					solo_button->set_text (_("P"));
 					break;
 				}
 			}

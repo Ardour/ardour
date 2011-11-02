@@ -2352,26 +2352,23 @@ RouteTimeAxisView::set_button_names ()
 
         if (_route && _route->solo_safe()) {
 		solo_button->remove ();
-		if (solo_safe_image == 0) {
-			solo_safe_image = new Gtk::Image (::get_icon("solo-safe-enabled"));
-			solo_safe_image->show ();
+		if (solo_safe_pixbuf == 0) {
+			solo_safe_pixbuf = ::get_icon("solo-safe-icon");
 		}
-		solo_button->add (*solo_safe_image);
+		solo_button->set_image (solo_safe_pixbuf);
+		solo_button->set_text (string());
         } else {
-		solo_button->remove ();
-		solo_button->add (solo_button_label);
-		solo_button_label.show ();
                 if (Config->get_solo_control_is_listen_control()) {
                         switch (Config->get_listen_position()) {
                         case AfterFaderListen:
-                                solo_button_label.set_text (_("A"));
+                                solo_button->set_text (_("A"));
                                 break;
                         case PreFaderListen:
-                                solo_button_label.set_text (_("P"));
+                                solo_button->set_text (_("P"));
                                 break;
                         }
                 } else {
-                        solo_button_label.set_text (_("s"));
+                        solo_button->set_text (_("s"));
                 }
         }
 	mute_button->set_text (_("m"));

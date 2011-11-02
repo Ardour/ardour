@@ -93,18 +93,17 @@ class RouteUI : public virtual AxisView
 
 	Gtk::HBox _invert_button_box;
 	ArdourButton* mute_button;
-	BindableToggleButton* solo_button;
+	ArdourButton* solo_button;
 	BindableToggleButton* rec_enable_button; /* audio tracks */
 	ArdourButton* show_sends_button; /* busses */
 	ArdourButton* monitor_input_button;
 	ArdourButton* monitor_disk_button;
 
-	Gtk::Image* solo_safe_image;
+	Glib::RefPtr<Gdk::Pixbuf> solo_safe_pixbuf;
 
         ArdourButton* solo_safe_led;
         ArdourButton* solo_isolated_led;
 
-	Gtk::Label solo_button_label;
 	Gtk::Label rec_enable_button_label;
 	Gtk::Label monitor_input_button_label;
 	Gtk::Label monitor_disk_button_label;
@@ -219,10 +218,9 @@ class RouteUI : public virtual AxisView
 	void save_as_template ();
 	void open_remote_control_id_dialog ();
 
-	static int solo_visual_state (boost::shared_ptr<ARDOUR::Route>);
-	static int solo_visual_state_with_isolate (boost::shared_ptr<ARDOUR::Route>);
-	static int solo_isolate_visual_state (boost::shared_ptr<ARDOUR::Route>);
-	static int solo_safe_visual_state (boost::shared_ptr<ARDOUR::Route>);
+	static Gtkmm2ext::ActiveState solo_active_state (boost::shared_ptr<ARDOUR::Route>);
+	static Gtkmm2ext::ActiveState solo_isolate_active_state (boost::shared_ptr<ARDOUR::Route>);
+	static Gtkmm2ext::ActiveState solo_safe_active_state (boost::shared_ptr<ARDOUR::Route>);
 	static Gtkmm2ext::ActiveState mute_active_state (ARDOUR::Session*, boost::shared_ptr<ARDOUR::Route>);
 
    protected:

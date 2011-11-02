@@ -124,7 +124,7 @@ private:
 		Gtk::TreeModelColumn<std::string>    text;
 		Gtk::TreeModelColumn<bool>           visible;
 		Gtk::TreeModelColumn<uint32_t>       rec_state;
-		Gtk::TreeModelColumn<Gtkmm2ext::ActiveState>  mute_state;
+		Gtk::TreeModelColumn<uint32_t>       mute_state;
 		Gtk::TreeModelColumn<uint32_t>       solo_state;
 		Gtk::TreeModelColumn<uint32_t>       solo_isolate_state;
 		Gtk::TreeModelColumn<uint32_t>       solo_safe_state;

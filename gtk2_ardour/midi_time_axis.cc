@@ -137,7 +137,7 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	ignore_toggle = false;
 
 	mute_button->unset_active_state ();
-	solo_button->set_active (false);
+	solo_button->unset_active_state ();
 
 	if (is_midi_track()) {
 		controls_ebox.set_name ("MidiTimeAxisViewControlsBaseUnselected");

@@ -81,7 +81,6 @@ RouteUI::~RouteUI()
 	delete sends_menu;
         delete record_menu;
 	delete _invert_menu;
-	delete solo_safe_image;
 }
 
 void
@@ -108,20 +107,15 @@ RouteUI::init ()
 	multiple_mute_change = false;
 	multiple_solo_change = false;
 	_i_am_the_modifier = 0;
-	solo_safe_image = 0;
 
 	setup_invert_buttons ();
 
 	mute_button = manage (new ArdourButton);
-	// mute_button->set_self_managed (true);
 	mute_button->set_name ("mute button");
 	UI::instance()->set_tip (mute_button, _("Mute this track"), "");
 
-	solo_button = manage (new BindableToggleButton);
-	// solo_button->set_self_managed (true);
+	solo_button = manage (new ArdourButton);
 	solo_button->set_name ("solo button");
-	solo_button->add (solo_button_label);
-	solo_button_label.show ();
 	UI::instance()->set_tip (solo_button, _("Mute other (non-soloed) tracks"), "");
 	solo_button->set_no_show_all (true);
 
@@ -133,7 +127,6 @@ RouteUI::init ()
 
 	show_sends_button = manage (new ArdourButton);
 	show_sends_button->set_name ("send alert button");
-	// show_sends_button->set_self_managed (true);
 	UI::instance()->set_tip (show_sends_button, _("make mixer strips show sends to this bus"), "");
 
 	monitor_input_button = manage (new ArdourButton (ArdourButton::led_default_elements));
@@ -935,89 +928,59 @@ RouteUI::send_blink (bool onoff)
 	}
 }
 
-int
-RouteUI::solo_visual_state (boost::shared_ptr<Route> r)
+Gtkmm2ext::ActiveState
+RouteUI::solo_active_state (boost::shared_ptr<Route> r)
 {
 	if (r->is_master() || r->is_monitor()) {
-		return 0;
+		return ActiveState (0);
 	}
 
 	if (Config->get_solo_control_is_listen_control()) {
 
 		if (r->listening_via_monitor()) {
-			return 1;
+			return Active;
 		} else {
-			return 0;
+			return ActiveState (0);
 		}
 
 	}
 
 	if (r->soloed()) {
                 if (!r->self_soloed()) {
-                        return 3;
+                        return Mid;
                 } else {
-                        return 1;
+                        return Active;
                 }
 	} else {
-		return 0;
+		return ActiveState(0);
 	}
 }
 
-int
-RouteUI::solo_visual_state_with_isolate (boost::shared_ptr<Route> r)
+Gtkmm2ext::ActiveState
+RouteUI::solo_isolate_active_state (boost::shared_ptr<Route> r)
 {
 	if (r->is_master() || r->is_monitor()) {
-		return 0;
-	}
-
-	if (Config->get_solo_control_is_listen_control()) {
-
-		if (r->listening_via_monitor()) {
-			return 1;
-		} else {
-                        return 0;
-		}
-
+		return ActiveState (0);
 	}
 
 	if (r->solo_isolated()) {
-		return 2;
-	} else if (r->soloed()) {
-                if (!r->self_soloed()) {
-                        return 3;
-                } else {
-                        return 1;
-                }
+		return Active;
 	} else {
-		return 0;
+		return ActiveState(0);
 	}
 }
 
-int
-RouteUI::solo_isolate_visual_state (boost::shared_ptr<Route> r)
+Gtkmm2ext::ActiveState
+RouteUI::solo_safe_active_state (boost::shared_ptr<Route> r)
 {
 	if (r->is_master() || r->is_monitor()) {
-		return 0;
-	}
-
-	if (r->solo_isolated()) {
-		return 1;
-	} else {
-		return 0;
-	}
-}
-
-int
-RouteUI::solo_safe_visual_state (boost::shared_ptr<Route> r)
-{
-	if (r->is_master() || r->is_monitor()) {
-		return 0;
+		return ActiveState (0);
 	}
 
 	if (r->solo_safe()) {
-		return 1;
+		return Active;
 	} else {
-		return 0;
+		return ActiveState (0);
 	}
 }
 
@@ -1028,17 +991,21 @@ RouteUI::update_solo_display ()
 
 	if (Config->get_solo_control_is_listen_control()) {
 
-		if (solo_button->get_active() != (x = _route->listening_via_monitor())) {
+		if ((solo_button->active_state() == Active)!= (x = _route->listening_via_monitor())) {
 			++_i_am_the_modifier;
-			solo_button->set_active(x);
+			solo_button->set_active_state (Active);
 			--_i_am_the_modifier;
 		}
 
 	} else {
 
-		if (solo_button->get_active() != (x = _route->soloed())) {
+		if ((solo_button->active_state() == Active) != (x = _route->soloed())) {
 			++_i_am_the_modifier;
-			solo_button->set_active (x);
+			if (x) {
+				solo_button->set_active_state (Active);
+			} else {
+				solo_button->unset_active_state();
+			}
 			--_i_am_the_modifier;
 		}
 
@@ -1074,7 +1041,7 @@ RouteUI::update_solo_display ()
 		}
         }
 
-	solo_button->set_visual_state (solo_visual_state (_route));
+	solo_button->set_active_state (solo_active_state (_route));
 
         /* some changes to solo status can affect mute display, so catch up
          */
