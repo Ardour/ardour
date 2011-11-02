@@ -302,12 +302,6 @@ MixerStrip::init ()
 	input_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MixerStrip::input_press), false);
 	output_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MixerStrip::output_press), false);
 
-	/* we don't need this if its not an audio track, but we don't know that yet and it doesn't
-	   hurt (much).
-	*/
-
-	rec_enable_button->set_name ("MixerRecordEnableButton");
-
 	/* ditto for this button and busses */
 
 	name_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MixerStrip::name_button_button_press), false);
@@ -1783,7 +1777,7 @@ MixerStrip::set_button_names ()
 {
 	switch (_width) {
 	case Wide:
-		rec_enable_button_label.set_text (_("Rec"));
+		rec_enable_button->set_text (_("Rec"));
 		mute_button->set_text (_("Mute"));
 		monitor_input_button->set_text (_("In"));
 		monitor_disk_button->set_text (_("Disk"));
@@ -1812,7 +1806,7 @@ MixerStrip::set_button_names ()
 		break;
 
 	default:
-		rec_enable_button_label.set_text (_("R"));
+		rec_enable_button->set_text (_("R"));
 		mute_button->set_text (_("M"));
 		monitor_input_button->set_text (_("I"));
 		monitor_disk_button->set_text (_("D"));

@@ -119,10 +119,8 @@ RouteUI::init ()
 	UI::instance()->set_tip (solo_button, _("Mute other (non-soloed) tracks"), "");
 	solo_button->set_no_show_all (true);
 
-	rec_enable_button = manage (new BindableToggleButton);
+	rec_enable_button = manage (new ArdourButton);
 	rec_enable_button->set_name ("record enable button");
-	rec_enable_button->add (rec_enable_button_label);
-	rec_enable_button_label.show ();
 	UI::instance()->set_tip (rec_enable_button, _("Enable recording on this track"), "");
 
 	show_sends_button = manage (new ArdourButton);
@@ -541,6 +539,10 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
                 }
         }
 
+	cerr << name() << " re button press, i am " << _i_am_the_modifier << " active state = " 
+	     << rec_enable_button->active_state()
+	     << endl;
+
 	if (!_i_am_the_modifier && is_track() && rec_enable_button) {
 
 		if (Keyboard::is_button2_event (ev)) {
@@ -550,7 +552,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
 
-			_session->set_record_enabled (_session->get_routes(), !rec_enable_button->get_active());
+			_session->set_record_enabled (_session->get_routes(), !rec_enable_button->active_state());
 
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 
@@ -558,7 +560,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 			   NOTE: Primary-button2 is MIDI learn.
 			*/
 			if (ev->button == 1 && _route->route_group()) {
-				_session->set_record_enabled (_route->route_group()->route_list(), !rec_enable_button->get_active(), Session::rt_cleanup, true);
+				_session->set_record_enabled (_route->route_group()->route_list(), !rec_enable_button->active_state(), Session::rt_cleanup, true);
 			}
 
 		} else if (Keyboard::is_context_menu_event (ev)) {
@@ -569,7 +571,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 
 			boost::shared_ptr<RouteList> rl (new RouteList);
 			rl->push_back (route());
-			_session->set_record_enabled (rl, !rec_enable_button->get_active());
+			_session->set_record_enabled (rl, !rec_enable_button->active_state());
 		}
 	}
 
@@ -734,7 +736,7 @@ RouteUI::step_edit_changed (bool yn)
 {
         if (yn) {
                 if (rec_enable_button) {
-                        rec_enable_button->set_visual_state (3);
+                        rec_enable_button->set_active_state (Active);
                 }
 
                 start_step_editing ();
@@ -746,7 +748,7 @@ RouteUI::step_edit_changed (bool yn)
         } else {
 
                 if (rec_enable_button) {
-                        rec_enable_button->set_visual_state (0);
+                        rec_enable_button->unset_active_state ();
                 }
 
                 stop_step_editing ();
@@ -1126,30 +1128,15 @@ RouteUI::update_rec_display ()
 		return;
 	}
 
-	bool model = _route->record_enabled();
-	bool view = rec_enable_button->get_active();
-
-	/* first make sure the button's "depressed" visual
-	   is correct.
-	*/
-
-	if (model != view) {
-		++_i_am_the_modifier;
-		rec_enable_button->set_active (model);
-		--_i_am_the_modifier;
-	}
-
-	/* now make sure its color state is correct */
-
-	if (model) {
+	if (_route->record_enabled()) {
                 switch (_session->record_status ()) {
                 case Session::Recording:
-                        rec_enable_button->set_visual_state (1);
+                        rec_enable_button->set_active_state (Active);
                         break;
 
                 case Session::Disabled:
                 case Session::Enabled:
-                        rec_enable_button->set_visual_state (2);
+                        rec_enable_button->set_active_state (Mid);
                         break;
 
                 }
@@ -1159,7 +1146,7 @@ RouteUI::update_rec_display ()
                 }
 
 	} else {
-		rec_enable_button->set_visual_state (0);
+		rec_enable_button->unset_active_state ();
 
                 if (step_edit_item) {
                         step_edit_item->set_sensitive (true);
@@ -1699,7 +1686,7 @@ RouteUI::save_as_template ()
 void
 RouteUI::check_rec_enable_sensitivity ()
 {
-	if (_session->transport_rolling() && rec_enable_button->get_active() && Config->get_disable_disarm_during_roll()) {
+	if (_session->transport_rolling() && rec_enable_button->active_state() && Config->get_disable_disarm_during_roll()) {
 		rec_enable_button->set_sensitive (false);
 	} else {
 		rec_enable_button->set_sensitive (true);

@@ -179,10 +179,10 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		switch (track()->mode()) {
 		case ARDOUR::Normal:
 		case ARDOUR::NonLayered:
-			rec_enable_button->add (*(manage (new Image (::get_icon (X_("record_normal_red"))))));
+			rec_enable_button->set_image (::get_icon (X_("record_normal_red")));
 			break;
 		case ARDOUR::Destructive:
-			rec_enable_button->add (*(manage (new Image (::get_icon (X_("record_tape_red"))))));
+			rec_enable_button->set_image (::get_icon (X_("record_tape_red")));
 			break;
 		}
 		rec_enable_button->show_all ();
@@ -754,10 +754,10 @@ RouteTimeAxisView::set_track_mode (TrackMode mode, bool apply_to_selection)
 		switch (mode) {
 		case ARDOUR::NonLayered:
 		case ARDOUR::Normal:
-			rec_enable_button->add (*(manage (new Image (::get_icon (X_("record_normal_red"))))));
+			rec_enable_button->set_image (::get_icon (X_("record_normal_red")));
 			break;
 		case ARDOUR::Destructive:
-			rec_enable_button->add (*(manage (new Image (::get_icon (X_("record_tape_red"))))));
+			rec_enable_button->set_image (::get_icon (X_("record_tape_red")));
 			break;
 		}
 
@@ -2348,7 +2348,7 @@ RouteTimeAxisView::remove_underlay (StreamView* v)
 void
 RouteTimeAxisView::set_button_names ()
 {
-	rec_enable_button_label.set_text (_("r"));
+	rec_enable_button->set_text (_("r"));
 
         if (_route && _route->solo_safe()) {
 		solo_button->remove ();

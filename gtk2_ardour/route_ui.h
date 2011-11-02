@@ -94,7 +94,7 @@ class RouteUI : public virtual AxisView
 	Gtk::HBox _invert_button_box;
 	ArdourButton* mute_button;
 	ArdourButton* solo_button;
-	BindableToggleButton* rec_enable_button; /* audio tracks */
+	ArdourButton* rec_enable_button; /* audio tracks */
 	ArdourButton* show_sends_button; /* busses */
 	ArdourButton* monitor_input_button;
 	ArdourButton* monitor_disk_button;
@@ -104,15 +104,11 @@ class RouteUI : public virtual AxisView
         ArdourButton* solo_safe_led;
         ArdourButton* solo_isolated_led;
 
-	Gtk::Label rec_enable_button_label;
 	Gtk::Label monitor_input_button_label;
 	Gtk::Label monitor_disk_button_label;
 
 	void send_blink (bool);
 	sigc::connection send_blink_connection;
-
-	virtual std::string solo_button_name () const { return "SoloButton"; }
-	virtual std::string safe_solo_button_name () const { return "SafeSoloButton"; }
 
 	Gtk::Menu* mute_menu;
 	Gtk::Menu* solo_menu;
