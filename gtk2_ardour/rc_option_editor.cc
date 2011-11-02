@@ -1177,8 +1177,6 @@ RCOptionEditor::RCOptionEditor ()
 		sigc::mem_fun (*_rc_config, &RCConfiguration::set_monitoring_model)
 		);
 
-	add_option (_("Audio"), mm);
-
 #ifndef __APPLE__
         /* no JACK monitoring on CoreAudio */
         if (AudioEngine::instance()->can_request_hardware_monitoring()) {
@@ -1187,6 +1185,8 @@ RCOptionEditor::RCOptionEditor ()
 #endif
 	mm->add (SoftwareMonitoring, _("ardour"));
 	mm->add (ExternalMonitoring, _("audio hardware"));
+
+	add_option (_("Audio"), mm);
 
 	add_option (_("Audio"),
 	     new BoolOption (
