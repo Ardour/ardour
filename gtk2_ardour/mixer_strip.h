@@ -121,6 +121,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	std::string state_id() const;
 
 	void parameter_changed (std::string);
+	void route_active_changed ();
 
   protected:
 	friend class Mixer_UI;
