@@ -73,7 +73,7 @@ AudioStreamView::AudioStreamView (AudioTimeAxisView& tv)
 AudioStreamView::~AudioStreamView ()
 {
 	for (CrossfadeViewList::iterator xi = crossfade_views.begin(); xi != crossfade_views.end(); ++xi) {
-		delete xi->second;
+		delete (*xi);
 	}
 }
 
