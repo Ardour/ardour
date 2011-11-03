@@ -81,8 +81,10 @@ ArdourButton::set_text (const std::string& str)
 	if (!_layout && !_text.empty()) {
 		_layout = Pango::Layout::create (get_pango_context());
 	} 
-	
-	_layout->set_text (str);
+
+	if (_layout) {
+		_layout->set_text (str);
+	}
 
 	queue_resize ();
 }
@@ -559,3 +561,4 @@ ArdourButton::set_image (const RefPtr<Gdk::Pixbuf>& img)
 	_pixbuf = img;
 	queue_draw ();
 }
+
