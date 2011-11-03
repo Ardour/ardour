@@ -527,7 +527,7 @@ private:
 	void setup_child_state (T* c)
 	{
 		assert (c);
-		c->set_visual_state (Selected, _active == c);
+		c->set_visual_state (Selected, (selected (c) || (_active == c)));
 	}
 
 	void clear_selection ()
