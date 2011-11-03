@@ -1780,7 +1780,7 @@ ProcessorBox::processor_can_be_edited (boost::shared_ptr<Processor> processor)
 	}
 
 	if (
-		boost::dynamic_pointer_cast<Send> (processor) ||
+		(boost::dynamic_pointer_cast<Send> (processor) && !boost::dynamic_pointer_cast<InternalSend> (processor))||
 		boost::dynamic_pointer_cast<Return> (processor) ||
 		boost::dynamic_pointer_cast<PluginInsert> (processor) ||
 		boost::dynamic_pointer_cast<PortInsert> (processor)
@@ -1824,20 +1824,6 @@ ProcessorBox::toggle_edit_processor (boost::shared_ptr<Processor> processor)
 
 		if (_parent_strip) {
 			_parent_strip->revert_to_default_display ();
-		}
-
-	} else if ((internal_send = boost::dynamic_pointer_cast<InternalSend> (processor)) != 0) {
-
-		if (!_session->engine().connected()) {
-			return;
-		}
-
-		if (_parent_strip) {
-			if (boost::dynamic_pointer_cast<Send> (_parent_strip->current_delivery()) == internal_send) {
-				_parent_strip->revert_to_default_display ();
-			} else {
-				_parent_strip->show_send (internal_send);
-			}
 		}
 
 	} else if ((send = boost::dynamic_pointer_cast<Send> (processor)) != 0) {
