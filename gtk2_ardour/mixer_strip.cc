@@ -73,8 +73,6 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace std;
 
-sigc::signal<void,boost::shared_ptr<Route> > MixerStrip::SwitchIO;
-
 int MixerStrip::scrollbar_height = 0;
 PBD::Signal1<void,MixerStrip*> MixerStrip::CatchDeletion;
 
@@ -330,8 +328,6 @@ MixerStrip::init ()
 		    Gdk::KEY_RELEASE_MASK);
 
 	set_flags (get_flags() | Gtk::CAN_FOCUS);
-
-	SwitchIO.connect (sigc::mem_fun (*this, &MixerStrip::switch_io));
 
 	AudioEngine::instance()->PortConnectedOrDisconnected.connect (
 		*this, invalidator (*this), boost::bind (&MixerStrip::port_connected_or_disconnected, this, _1, _3), gui_context ()
@@ -1647,36 +1643,21 @@ MixerStrip::meter_changed ()
 	gpm.reset_peak_display();
 }
 
+/** The bus that we are displaying sends to has changed, or been turned off.
+ *  @param send_to New bus that we are displaying sends to, or 0.
+ */
 void
-MixerStrip::switch_io (boost::shared_ptr<Route> target)
+MixerStrip::bus_send_display_changed (boost::shared_ptr<Route> send_to)
 {
-	/* don't respond to switch IO signal outside of the mixer window */
+	RouteUI::bus_send_display_changed (send_to);
 
-	if (!_mixer_owned) {
-		return;
-	}
-
-	if (_route == target || _route->is_master()) {
-		/* don't change the display for the target or the master bus */
-		return;
-	} else if (!is_track() && show_sends_button) {
-		/* make sure our show sends button is inactive, and we no longer blink,
-		   since we're not the target.
-		*/
-		send_blink_connection.disconnect ();
-		show_sends_button->unset_active_state ();
-	}
-
-	if (!target) {
-		/* switch back to default */
-		revert_to_default_display ();
-		return;
-	}
-
-	boost::shared_ptr<Send> send = _route->internal_send_for (target);
-
-	if (send) {
-		show_send (send);
+	if (send_to) {
+		boost::shared_ptr<Send> send = _route->internal_send_for (send_to);
+		if (send) {
+			show_send (send);
+		} else {
+			revert_to_default_display ();
+		}
 	} else {
 		revert_to_default_display ();
 	}
@@ -1755,10 +1736,6 @@ MixerStrip::show_send (boost::shared_ptr<Send> send)
 void
 MixerStrip::revert_to_default_display ()
 {
-	if (show_sends_button) {
-		show_sends_button->unset_active_state ();
-	}
-
 	drop_send ();
 
 	set_current_delivery (_route->main_outs ());

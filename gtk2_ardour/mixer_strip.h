@@ -116,7 +116,6 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	/** The delivery that we are handling the level for with our fader has changed */
 	PBD::Signal1<void, boost::weak_ptr<ARDOUR::Delivery> > DeliveryChanged;
 
-	static sigc::signal<void,boost::shared_ptr<ARDOUR::Route> > SwitchIO;
 	static PBD::Signal1<void,MixerStrip*> CatchDeletion;
 
 	std::string state_id() const;
@@ -279,7 +278,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void engine_running();
 	void engine_stopped();
 
-	void switch_io (boost::shared_ptr<ARDOUR::Route>);
+	virtual void bus_send_display_changed (boost::shared_ptr<ARDOUR::Route>);
 
 	void set_current_delivery (boost::shared_ptr<ARDOUR::Delivery>);
 	boost::shared_ptr<ARDOUR::Delivery> _current_delivery;

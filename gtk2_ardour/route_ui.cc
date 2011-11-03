@@ -64,6 +64,8 @@ using namespace ARDOUR;
 using namespace PBD;
 
 uint32_t RouteUI::_max_invert_buttons = 3;
+sigc::signal<void, boost::shared_ptr<Route> > RouteUI::BusSendDisplayChanged;
+boost::weak_ptr<Route> RouteUI::_showing_sends_to;
 
 RouteUI::RouteUI (ARDOUR::Session* sess)
 	: AxisView(sess)
@@ -165,6 +167,8 @@ RouteUI::init ()
 
 	monitor_disk_button->signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::monitor_disk_press));
 	monitor_disk_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::monitor_disk_release));
+
+	BusSendDisplayChanged.connect (sigc::mem_fun (*this, &RouteUI::bus_send_display_changed));
 }
 
 void
@@ -258,6 +262,9 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 
 	setup_invert_buttons ();
 	set_invert_button_state ();
+
+	boost::shared_ptr<Route> s = _showing_sends_to.lock ();
+	bus_send_display_changed (s);
 }
 
 void
@@ -888,22 +895,13 @@ RouteUI::show_sends_press(GdkEventButton* ev)
 
 		} else {
 
-			/* change button state */
+			boost::shared_ptr<Route> s = _showing_sends_to.lock ();
 
-			show_sends_button->set_active_state (Active);
-
-			/* start blinking */
-
-			if (show_sends_button->active_state()) {
-				/* show sends to this bus */
-				MixerStrip::SwitchIO (_route);
-				send_blink_connection = ARDOUR_UI::instance()->Blink.connect (sigc::mem_fun(*this, &RouteUI::send_blink));
+			if (s == _route) {
+				set_showing_sends_to (boost::shared_ptr<Route> ());
 			} else {
-				/* everybody back to normal */
-				send_blink_connection.disconnect ();
-				MixerStrip::SwitchIO (boost::shared_ptr<Route>());
+				set_showing_sends_to (_route);
 			}
-
 		}
 	}
 
@@ -924,9 +922,9 @@ RouteUI::send_blink (bool onoff)
 	}
 
 	if (onoff) {
-		show_sends_button->set_state (STATE_ACTIVE);
+		show_sends_button->set_active_state (Gtkmm2ext::Active);
 	} else {
-		show_sends_button->set_state (STATE_NORMAL);
+		show_sends_button->unset_active_state ();
 	}
 }
 
@@ -1922,4 +1920,23 @@ RouteUI::color () const
 	}
 
 	return _color;
+}
+
+void
+RouteUI::set_showing_sends_to (boost::shared_ptr<Route> send_to)
+{
+	_showing_sends_to = send_to;
+	BusSendDisplayChanged (send_to); /* EMIT SIGNAL */
+}
+
+void
+RouteUI::bus_send_display_changed (boost::shared_ptr<Route> send_to)
+{
+	if (_route == send_to) {
+		show_sends_button->set_active_state (Gtkmm2ext::Active);
+		send_blink_connection = ARDOUR_UI::instance()->Blink.connect (sigc::mem_fun (*this, &RouteUI::send_blink));
+	} else {
+		show_sends_button->unset_active_state ();
+		send_blink_connection.disconnect ();
+	}
 }

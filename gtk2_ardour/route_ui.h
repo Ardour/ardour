@@ -219,6 +219,12 @@ class RouteUI : public virtual AxisView
 	static Gtkmm2ext::ActiveState solo_safe_active_state (boost::shared_ptr<ARDOUR::Route>);
 	static Gtkmm2ext::ActiveState mute_active_state (ARDOUR::Session*, boost::shared_ptr<ARDOUR::Route>);
 
+	/** Emitted when a bus has been set or unset from `display sends to this bus' mode
+	 *  by a click on the `Sends' button.  The parameter is the route that the sends are
+	 *  to, or 0 if no route is now in this mode.
+	 */
+	static sigc::signal<void, boost::shared_ptr<ARDOUR::Route> > BusSendDisplayChanged;
+
    protected:
 	PBD::ScopedConnectionList route_connections;
 	bool self_destruct;
@@ -235,6 +241,8 @@ class RouteUI : public virtual AxisView
 
 	void route_gui_changed (std::string);
 	virtual void route_color_changed () {}
+
+	virtual void bus_send_display_changed (boost::shared_ptr<ARDOUR::Route>);
 
   private:
 	void check_rec_enable_sensitivity ();
@@ -269,6 +277,9 @@ class RouteUI : public virtual AxisView
 	std::list<BindableToggleButton*> _invert_buttons;
 	Gtk::Menu* _invert_menu;
 
+	static void set_showing_sends_to (boost::shared_ptr<ARDOUR::Route>);
+	static boost::weak_ptr<ARDOUR::Route> _showing_sends_to;
+	
 	static uint32_t _max_invert_buttons;
 };
 
