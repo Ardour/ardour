@@ -674,6 +674,16 @@ MixerStrip::output_press (GdkEventButton *ev)
 		output_menu_bundles.clear ();
 
 		citems.push_back (MenuElem (_("Disconnect"), sigc::mem_fun (*(static_cast<RouteUI*>(this)), &RouteUI::disconnect_output)));
+
+		for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
+			citems.push_back (
+				MenuElem (
+					string_compose ("Add %1 port", (*i).to_i18n_string()),
+					sigc::bind (sigc::mem_fun (*this, &MixerStrip::add_output_port), *i)
+					)
+				);
+		}
+		
 		citems.push_back (SeparatorElem());
 
 		ARDOUR::BundleList current = _route->output()->bundles_connected ();
@@ -785,6 +795,16 @@ MixerStrip::input_press (GdkEventButton *ev)
 	case 3:
 	{
 		citems.push_back (MenuElem (_("Disconnect"), sigc::mem_fun (*(static_cast<RouteUI*>(this)), &RouteUI::disconnect_input)));
+
+		for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
+			citems.push_back (
+				MenuElem (
+					string_compose ("Add %1 port", (*i).to_i18n_string()),
+					sigc::bind (sigc::mem_fun (*this, &MixerStrip::add_input_port), *i)
+					)
+				);
+		}
+
 		citems.push_back (SeparatorElem());
 		input_menu_bundles.clear ();
 
@@ -2014,4 +2034,16 @@ MixerStrip::override_solo_visibility () const
 	}
 	
 	return boost::optional<bool> ();
+}
+
+void
+MixerStrip::add_input_port (DataType t)
+{
+	_route->input()->add_port ("", this, t);
+}
+
+void
+MixerStrip::add_output_port (DataType t)
+{
+	_route->output()->add_port ("", this, t);
 }
