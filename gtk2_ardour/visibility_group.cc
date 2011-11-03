@@ -95,7 +95,7 @@ VisibilityGroup::should_actually_be_visible (Member const & m) const
 	if (m.override) {
 		boost::optional<bool> o = m.override ();
 		if (o) {
-			return o;
+			return o.get ();
 		}
 	}
 
