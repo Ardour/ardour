@@ -606,13 +606,15 @@ void
 GroupTabs::route_added_to_route_group (RouteGroup*, boost::weak_ptr<Route> w)
 {
 	/* Similarly-spirited hack as in route_group_property_changed */
-	
+
 	boost::shared_ptr<Route> r = w.lock ();
 	if (!r) {
 		return;
 	}
 
 	r->gui_changed (X_("color"), 0);
+
+	set_dirty ();
 }
 
 void
@@ -626,6 +628,8 @@ GroupTabs::route_removed_from_route_group (RouteGroup*, boost::weak_ptr<Route> w
 	}
 
 	r->gui_changed (X_("color"), 0);
+
+	set_dirty ();
 }
 
 void
