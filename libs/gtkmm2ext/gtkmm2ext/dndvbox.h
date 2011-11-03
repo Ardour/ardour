@@ -113,8 +113,8 @@ public:
 		return _selection;
 	}
 
-	/** Set the `active' child; this is simply a child which is set to have the Gtk
-	 *  STATE_ACTIVE for whatever purposes the client may have.
+	/** Set the `active' child; this is simply a child which is set to have the 
+	 *  visual state "active" for whatever purposes the client may have.
 	 *  @param c Child, or 0 for none.
 	 */
 	void set_active (T* c) {
@@ -523,11 +523,11 @@ private:
 		return ButtonRelease (ev, child); /* EMIT SIGNAL */
 	}
 
-	/** Setup a child's GTK state correctly */
+	/** Setup a child's visual state correctly */
 	void setup_child_state (T* c)
 	{
 		assert (c);
-		c->set_visual_state (Selected, selected (c));
+		c->set_visual_state (Selected, _active == c);
 	}
 
 	void clear_selection ()
