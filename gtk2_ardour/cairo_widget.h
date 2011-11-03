@@ -48,6 +48,7 @@ protected:
 	virtual void render (cairo_t *) = 0;
 	virtual bool on_expose_event (GdkEventExpose *);
 	void on_size_allocate (Gtk::Allocation &);
+	void on_state_changed (Gtk::StateType);
 	Gdk::Color get_parent_bg ();
 
 	int _width; ///< pixmap width
