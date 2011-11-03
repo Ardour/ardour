@@ -20,6 +20,7 @@
 #ifndef __gtk2_ardour_ardour_button_h__
 #define __gtk2_ardour_ardour_button_h__
 
+#include <list>
 #include <stdint.h>
 
 #include <gtkmm/action.h>
@@ -44,7 +45,11 @@ class ArdourButton : public CairoWidget
 	static Element just_led_default_elements;
 
 	ArdourButton (Element e = default_elements);
+	ArdourButton (const std::string&, Element e = default_elements);
 	virtual ~ArdourButton ();
+
+	void set_active_state (Gtkmm2ext::ActiveState);
+	void set_visual_state (Gtkmm2ext::VisualState);
 
 	void set_elements (Element);
 	Element elements() const { return _elements; }
@@ -116,7 +121,6 @@ class ArdourButton : public CairoWidget
 	void setup_led_rect ();
 	void set_colors ();
 	void color_handler ();
-	void state_handler ();
 
 	Glib::RefPtr<Gtk::Action> _action;
 	void action_activated ();

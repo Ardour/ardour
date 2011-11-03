@@ -40,9 +40,9 @@ MonitorSection::MonitorSection (Session* s)
         , dim_control (0)
         , solo_boost_control (0)
         , solo_cut_control (0)
-        , solo_in_place_button (solo_model_group, _("SiP"))
-        , afl_button (solo_model_group, _("AFL"))
-        , pfl_button (solo_model_group, _("PFL"))
+        , solo_in_place_button (_("SiP"), ArdourButton::led_default_elements)
+        , afl_button (_("AFL"), ArdourButton::led_default_elements)
+	, pfl_button (_("PFL"), ArdourButton::led_default_elements)
 	, cut_all_button (ArdourButton::led_default_elements)
 	, dim_all_button (ArdourButton::led_default_elements)
 	, mono_button (ArdourButton::led_default_elements)
@@ -89,6 +89,16 @@ MonitorSection::MonitorSection (Session* s)
 	rude_audition_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MonitorSection::cancel_audition));
         UI::instance()->set_tip (rude_audition_button, _("When active, auditioning is active.\nClick to stop the audition"));
 
+	solo_in_place_button.set_name ("monitor section solo model");
+	afl_button.set_name ("monitor section solo model");
+	pfl_button.set_name ("monitor section solo model");
+
+#if 0
+	solo_model_group.add (solo_in_place_button);
+	solo_model_group.add (afl_button);
+	solo_model_group.add (afl_button);
+#endif
+
         solo_model_box.set_spacing (6);
         solo_model_box.pack_start (solo_in_place_button, true, false);
         solo_model_box.pack_start (afl_button, true, false);
@@ -102,19 +112,19 @@ MonitorSection::MonitorSection (Session* s)
         act = ActionManager::get_action (X_("Solo"), X_("solo-use-in-place"));
 	ARDOUR_UI::instance()->tooltips().set_tip (solo_in_place_button, _("Solo controls affect solo-in-place"));
         if (act) {
-                act->connect_proxy (solo_in_place_button);
+		solo_in_place_button.set_related_action (act);
         }
 
         act = ActionManager::get_action (X_("Solo"), X_("solo-use-afl"));
 	ARDOUR_UI::instance()->tooltips().set_tip (afl_button, _("Solo controls toggle after-fader-listen"));
         if (act) {
-                act->connect_proxy (afl_button);
+		afl_button.set_related_action (act);
         }
 
         act = ActionManager::get_action (X_("Solo"), X_("solo-use-pfl"));
 	ARDOUR_UI::instance()->tooltips().set_tip (pfl_button, _("Solo controls toggle pre-fader-listen"));
         if (act) {
-                act->connect_proxy (pfl_button);
+		pfl_button.set_related_action (act);
         }
 
         /* Solo Boost */
@@ -749,8 +759,8 @@ MonitorSection::solo_use_afl ()
                 Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic (act);
                 if (ract) {
                         if (ract->get_active()) {
-                                Config->set_listen_position (AfterFaderListen);
                                 Config->set_solo_control_is_listen_control (true);
+                                Config->set_listen_position (AfterFaderListen);
                         }
                 }
         }
@@ -764,13 +774,13 @@ MonitorSection::solo_use_pfl ()
 	   active.
 	*/
 
-        Glib::RefPtr<Action> act = ActionManager::get_action (X_("Solo"), X_("solo-use-afl"));
+        Glib::RefPtr<Action> act = ActionManager::get_action (X_("Solo"), X_("solo-use-pfl"));
         if (act) {
                 Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic (act);
                 if (ract) {
                         if (ract->get_active()) {
-                                Config->set_listen_position (PreFaderListen);
                                 Config->set_solo_control_is_listen_control (true);
+                                Config->set_listen_position (PreFaderListen);
                         }
                 }
         }
@@ -1013,8 +1023,9 @@ MonitorSection::cancel_audition (GdkEventButton*)
 void
 MonitorSection::parameter_changed (std::string name)
 {
-        if (name == "solo-control-is-listen-control" ||
-            name == "listen-position") {
+        if (name == "solo-control-is-listen-control") {
+                update_solo_model ();
+	} else if (name == "listen-position") {
                 update_solo_model ();
         }
 }

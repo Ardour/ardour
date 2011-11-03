@@ -65,7 +65,25 @@ ArdourButton::ArdourButton (Element e)
 	, _led_rect (0)
 {
 	ColorsChanged.connect (sigc::mem_fun (*this, &ArdourButton::color_handler));
-	StateChanged.connect (sigc::mem_fun (*this, &ArdourButton::state_handler));
+}
+
+ArdourButton::ArdourButton (const std::string& str, Element e)
+	: _elements (e)
+	, _act_on_release (true)
+	, _text_width (0)
+	, _text_height (0)
+	, _diameter (11.0)
+	, _corner_radius (9.0)
+	, edge_pattern (0)
+	, fill_pattern (0)
+	, led_inset_pattern (0)
+	, reflection_pattern (0)
+	, _led_left (false)
+	, _fixed_diameter (true)
+	, _distinct_led_click (false)
+	, _led_rect (0)
+{
+	set_text (str);
 }
 
 ArdourButton::~ArdourButton()
@@ -223,12 +241,6 @@ ArdourButton::render (cairo_t* cr)
 		cairo_set_source_rgba (cr, 0.905, 0.917, 0.925, 0.5);
 		cairo_fill (cr);
 	}
-}
-
-void
-ArdourButton::state_handler ()
-{
-	set_colors ();
 }
 
 void
@@ -427,6 +439,7 @@ ArdourButton::on_button_release_event (GdkEventButton *ev)
 
 	if (_act_on_release) {
 		if (_action) {
+			Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (_action);
 			_action->activate ();
 			return true;
 		}
@@ -497,7 +510,7 @@ ArdourButton::set_related_action (RefPtr<Action> act)
 	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (_action);
 	if (tact) {
 		tact->signal_toggled().connect (sigc::mem_fun (*this, &ArdourButton::action_toggled));
-	}
+	} 
 }
 
 void
@@ -562,3 +575,23 @@ ArdourButton::set_image (const RefPtr<Gdk::Pixbuf>& img)
 	queue_draw ();
 }
 
+void
+ArdourButton::set_active_state (Gtkmm2ext::ActiveState s)
+{
+	bool changed = (_active_state != s);
+	CairoWidget::set_active_state (s);
+	if (changed) {
+		set_colors ();
+	}
+}
+	
+void
+ArdourButton::set_visual_state (Gtkmm2ext::VisualState s)
+{
+	bool changed = (_visual_state != s);
+	CairoWidget::set_visual_state (s);
+	if (changed) {
+		set_colors ();
+	}
+}
+	

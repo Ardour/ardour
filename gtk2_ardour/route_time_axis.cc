@@ -94,6 +94,7 @@ using namespace Gtkmm2ext;
 using namespace Gtk;
 using namespace Editing;
 using namespace std;
+using std::list;
 
 Glib::RefPtr<Gdk::Pixbuf> RouteTimeAxisView::slider;
 

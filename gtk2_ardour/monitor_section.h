@@ -104,10 +104,9 @@ class MonitorSection : public RouteUI
         void solo_boost_changed ();
         void gain_value_changed ();
 
-        Gtk::RadioButtonGroup solo_model_group;
-        Gtk::RadioButton solo_in_place_button;
-        Gtk::RadioButton afl_button;
-        Gtk::RadioButton pfl_button;
+        ArdourButton solo_in_place_button;
+        ArdourButton afl_button;
+        ArdourButton pfl_button;
         Gtk::HBox        solo_model_box;
 
         void solo_use_in_place ();
