@@ -133,8 +133,10 @@ Editor::remove_route (TimeAxisView *tv)
 	boost::shared_ptr<Route> route;
 	TimeAxisView* next_tv = 0;
 
-	if (tv == entered_track) {
-		entered_track = 0;
+	if (entered_track) {
+		if (tv == entered_track || tv == entered_track->get_parent()) {
+			entered_track = 0;
+		}
 	}
 
 	/* the core model has changed, there is no need to sync 

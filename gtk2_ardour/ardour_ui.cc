@@ -410,6 +410,10 @@ ARDOUR_UI::~ARDOUR_UI ()
 	if (new_session_dialog) {
 		delete new_session_dialog;
 	}
+	
+	if (splash) {
+		delete splash;
+	}
 }
 
 void

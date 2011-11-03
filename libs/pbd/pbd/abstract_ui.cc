@@ -73,6 +73,7 @@ AbstractUI<RequestObject>::unregister_thread (pthread_t thread_id)
 		Glib::Mutex::Lock lm (request_buffer_map_lock);
 		typename RequestBufferMap::iterator x = request_buffers.find (thread_id);
 		if (x != request_buffers.end()) {
+			delete (*x).second;
 			request_buffers.erase (x);
 		}
 	}

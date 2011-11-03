@@ -1074,22 +1074,22 @@ SoundFileOmega::check_info (const vector<string>& paths, bool& same_size, bool& 
 
 		if (!AudioFileSource::get_soundfile_info (*i, info, errmsg)) {
 			err = true;
-		}
-		
-		if (info.channels > 1) {
-			multichannel = true;
-		}
-		
-		if (sz == 0) {
-			sz = info.length;
 		} else {
-			if (sz != info.length) {
-				same_size = false;
+			if (info.channels > 1) {
+				multichannel = true;
 			}
-		}
+			
+			if (sz == 0) {
+				sz = info.length;
+			} else {
+				if (sz != info.length) {
+					same_size = false;
+				}
+			}
 
-		if ((nframes_t) info.samplerate != session->frame_rate()) {
-			src_needed = true;
+			if ((nframes_t) info.samplerate != session->frame_rate()) {
+				src_needed = true;
+			}
 		}
 	}
 
