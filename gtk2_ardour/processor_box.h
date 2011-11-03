@@ -306,6 +306,8 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	void delete_processors ();
 	void paste_processors ();
 	void paste_processors (boost::shared_ptr<ARDOUR::Processor> before);
+	void processors_up ();
+	void processors_down ();
 
 	void delete_dragged_processors (const std::list<boost::shared_ptr<ARDOUR::Processor> >&);
 	void clear_processors ();

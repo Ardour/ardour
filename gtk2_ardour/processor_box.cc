@@ -708,10 +708,23 @@ ProcessorBox::leave_notify (GdkEventCrossing* ev)
 }
 
 bool
-ProcessorBox::processor_key_press_event (GdkEventKey *)
+ProcessorBox::processor_key_press_event (GdkEventKey *ev)
 {
-	/* do real stuff on key release */
-	return false;
+	switch (ev->keyval) {
+	case GDK_a:
+	case GDK_c:
+	case GDK_x:
+	case GDK_v:
+	case GDK_Up:
+	case GDK_Down:
+	case GDK_Delete:
+	case GDK_BackSpace:
+	case GDK_Return:
+	case GDK_slash:
+		/* do real stuff on key release */
+		return false;
+	}
+	return forward_key_press (ev);
 }
 
 bool
@@ -769,9 +782,13 @@ ProcessorBox::processor_key_release_event (GdkEventKey *ev)
 		break;
 
 	case GDK_Up:
+		processors_down ();
+		ret = true;
 		break;
 
 	case GDK_Down:
+		processors_up ();
+		ret = true;
 		break;
 
 	case GDK_Delete:
@@ -1453,6 +1470,19 @@ ProcessorBox::copy_processors (const ProcSelection& to_be_copied)
 
 	_rr_selection.set (node);
 }
+
+void
+ProcessorBox::processors_up ()
+{
+	/* unimplemented */
+}
+
+void
+ProcessorBox::processors_down ()
+{
+	/* unimplemented */
+}
+	
 
 void
 ProcessorBox::delete_processors ()
