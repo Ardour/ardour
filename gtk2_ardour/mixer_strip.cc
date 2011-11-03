@@ -84,6 +84,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, bool in_mixer)
 	, processor_box (sess, boost::bind (&MixerStrip::plugin_selector, this), mx.selection(), this, in_mixer)
 	, gpm (sess, 250)
 	, panners (sess)
+	, button_size_group (Gtk::SizeGroup::create (Gtk::SIZE_GROUP_HORIZONTAL))
 	, button_table (3, 1)
 	, rec_solo_table (2, 2)
 	, top_button_table (1, 2)
@@ -113,6 +114,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Route> rt
 	, processor_box (sess, sigc::mem_fun(*this, &MixerStrip::plugin_selector), mx.selection(), this, in_mixer)
 	, gpm (sess, 250)
 	, panners (sess)
+	, button_size_group (Gtk::SizeGroup::create (Gtk::SIZE_GROUP_HORIZONTAL))
 	, button_table (3, 1)
 	, middle_button_table (1, 2)
 	, bottom_button_table (1, 2)
@@ -225,12 +227,34 @@ MixerStrip::init ()
 	button_table.set_homogeneous (false);
 	button_table.set_spacings (0);
 
+	if (solo_button) {
+		button_size_group->add_widget (*solo_button);
+	}
+	if (mute_button) {
+		button_size_group->add_widget (*mute_button);
+	}
+	if (solo_isolated_led) {
+		button_size_group->add_widget (*solo_isolated_led);
+	}
+	if (solo_safe_led) {
+		button_size_group->add_widget (*solo_safe_led);
+	}
+	if (rec_enable_button) {
+		button_size_group->add_widget (*rec_enable_button);
+	}
+	if (monitor_disk_button) {
+		button_size_group->add_widget (*monitor_disk_button);
+	}
+	if (monitor_input_button) {
+		button_size_group->add_widget (*monitor_input_button);
+	}
+
 	button_table.attach (name_button, 0, 1, 0, 1);
 	button_table.attach (input_button_box, 0, 1, 1, 2);
 	button_table.attach (_invert_button_box, 0, 1, 2, 3);
 
 	middle_button_table.set_homogeneous (true);
-	middle_button_table.set_spacings (0);
+	middle_button_table.set_spacings (2);
 	middle_button_table.attach (*mute_button, 0, 1, 0, 1);
         middle_button_table.attach (*solo_button, 1, 2, 0, 1);
 

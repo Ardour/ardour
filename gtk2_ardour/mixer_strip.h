@@ -163,6 +163,8 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	GainMeter    gpm;
 	PannerUI     panners;
 
+	Glib::RefPtr<Gtk::SizeGroup> button_size_group;
+
 	Gtk::Table button_table;
 	Gtk::Table rec_solo_table;
 	Gtk::Table top_button_table;
