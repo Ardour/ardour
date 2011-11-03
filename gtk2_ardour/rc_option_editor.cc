@@ -878,49 +878,9 @@ RCOptionEditor::RCOptionEditor ()
                 add_option (_("Misc"), procs);
         }
 
-	add_option (_("Misc"), new OptionEditorHeading (_("Metering")));
-
-	ComboOption<float>* mht = new ComboOption<float> (
-		"meter-hold",
-		_("Meter hold time"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_hold),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_hold)
-		);
-
-	mht->add (MeterHoldOff, _("off"));
-	mht->add (MeterHoldShort, _("short"));
-	mht->add (MeterHoldMedium, _("medium"));
-	mht->add (MeterHoldLong, _("long"));
-
-	add_option (_("Misc"), mht);
-
-	ComboOption<float>* mfo = new ComboOption<float> (
-		"meter-falloff",
-		_("Meter fall-off"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_falloff),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_falloff)
-		);
-
-	mfo->add (METER_FALLOFF_OFF, _("off"));
-	mfo->add (METER_FALLOFF_SLOWEST, _("slowest"));
-	mfo->add (METER_FALLOFF_SLOW, _("slow"));
-	mfo->add (METER_FALLOFF_MEDIUM, _("medium"));
-	mfo->add (METER_FALLOFF_FAST, _("fast"));
-	mfo->add (METER_FALLOFF_FASTER, _("faster"));
-	mfo->add (METER_FALLOFF_FASTEST, _("fastest"));
-
-	add_option (_("Misc"), mfo);
-
 	add_option (_("Misc"), new OptionEditorHeading (_("Undo")));
 
 	add_option (_("Misc"), new UndoOptions (_rc_config));
-
-	add_option (_("Misc"), new OptionEditorHeading (_("Misc")));
-
-#ifndef GTKOSX
-	/* font scaling does nothing with GDK/Quartz */
-	add_option (_("Misc"), new FontScalingOptions (_rc_config));
-#endif
 
 	add_option (_("Misc"),
 	     new BoolOption (
@@ -938,13 +898,7 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_periodic_safety_backups)
 		     ));
 
-	add_option (_("Misc"),
-	     new BoolOption (
-		     "sync-all-route-ordering",
-		     _("Synchronise editor and mixer track order"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_sync_all_route_ordering),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_sync_all_route_ordering)
-		     ));
+	add_option (_("Misc"), new OptionEditorHeading (_("Misc")));
 
 	add_option (_("Misc"),
 	     new BoolOption (
@@ -952,22 +906,6 @@ RCOptionEditor::RCOptionEditor ()
 		     _("Always copy imported files"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_only_copy_imported_files),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_only_copy_imported_files)
-		     ));
-
-	add_option (_("Misc"),
-	     new BoolOption (
-		     "default-narrow_ms",
-		     _("Use narrow mixer strips"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_default_narrow_ms),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_default_narrow_ms)
-		     ));
-
-	add_option (_("Misc"),
-	     new BoolOption (
-		     "name-new-markers",
-		     _("Name new markers"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_name_new_markers),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_name_new_markers)
 		     ));
 
 	add_option (_("Misc"), new OptionEditorHeading (_("Click")));
@@ -1153,6 +1091,22 @@ RCOptionEditor::RCOptionEditor ()
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_update_editor_during_summary_drag),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_update_editor_during_summary_drag)
 			    ));
+
+	add_option (_("Editor"),
+	     new BoolOption (
+		     "sync-all-route-ordering",
+		     _("Synchronise editor and mixer track order"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_sync_all_route_ordering),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_sync_all_route_ordering)
+		     ));
+
+	add_option (_("Editor"),
+	     new BoolOption (
+		     "name-new-markers",
+		     _("Name new markers"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_name_new_markers),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_name_new_markers)
+		     ));
 
 	/* AUDIO */
 
@@ -1507,9 +1461,15 @@ RCOptionEditor::RCOptionEditor ()
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_first_midi_bank_is_zero)
 			    ));
 
-	/* CONTROL SURFACES */
+	/* USER INTERACTION */
 
-	add_option (_("Control surfaces"), new ControlSurfacesOptions (*this));
+	add_option (_("User interaction"), new OptionEditorHeading (_("Keyboard")));
+
+	add_option (_("User interaction"), new KeyboardOptions);
+
+	add_option (_("User interaction"), new OptionEditorHeading (_("Control surfaces")));
+
+	add_option (_("User interaction"), new ControlSurfacesOptions (*this));
 
 	ComboOption<RemoteModel>* rm = new ComboOption<RemoteModel> (
 		"remote-model",
@@ -1522,13 +1482,14 @@ RCOptionEditor::RCOptionEditor ()
 	rm->add (MixerOrdered, _("follows order of mixer"));
 	rm->add (EditorOrdered, _("follows order of editor"));
 
-	add_option (_("Control surfaces"), rm);
-
-	/* KEYBOARD */
-
-	add_option (_("Keyboard"), new KeyboardOptions);
+	add_option (_("User interaction"), rm);
 
 	/* INTERFACE */
+
+#ifndef GTKOSX
+	/* font scaling does nothing with GDK/Quartz */
+	add_option (_("Interface"), new FontScalingOptions (_rc_config));
+#endif
 
 	/* The names of these controls must be the same as those given in MixerStrip
 	   for the actual widgets being controlled.
@@ -1549,6 +1510,47 @@ RCOptionEditor::RCOptionEditor ()
 			sigc::mem_fun (*_rc_config, &RCConfiguration::set_mixer_strip_visibility)
 			)
 		);
+
+	add_option (_("Interface"),
+	     new BoolOption (
+		     "default-narrow_ms",
+		     _("Use narrow mixer strips by default"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_default_narrow_ms),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_default_narrow_ms)
+		     ));
+
+	add_option (_("Interface"), new OptionEditorHeading (_("Metering")));
+
+	ComboOption<float>* mht = new ComboOption<float> (
+		"meter-hold",
+		_("Meter hold time"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_hold),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_hold)
+		);
+
+	mht->add (MeterHoldOff, _("off"));
+	mht->add (MeterHoldShort, _("short"));
+	mht->add (MeterHoldMedium, _("medium"));
+	mht->add (MeterHoldLong, _("long"));
+
+	add_option (_("Interface"), mht);
+
+	ComboOption<float>* mfo = new ComboOption<float> (
+		"meter-falloff",
+		_("Meter fall-off"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_falloff),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_falloff)
+		);
+
+	mfo->add (METER_FALLOFF_OFF, _("off"));
+	mfo->add (METER_FALLOFF_SLOWEST, _("slowest"));
+	mfo->add (METER_FALLOFF_SLOW, _("slow"));
+	mfo->add (METER_FALLOFF_MEDIUM, _("medium"));
+	mfo->add (METER_FALLOFF_FAST, _("fast"));
+	mfo->add (METER_FALLOFF_FASTER, _("faster"));
+	mfo->add (METER_FALLOFF_FASTEST, _("fastest"));
+
+	add_option (_("Interface"), mfo);
 }
 
 void
