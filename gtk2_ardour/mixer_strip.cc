@@ -884,7 +884,7 @@ MixerStrip::maybe_add_bundle_to_input_menu (boost::shared_ptr<Bundle> b, ARDOUR:
 {
 	using namespace Menu_Helpers;
 
- 	if (b->ports_are_outputs() == false || b->nchannels() != _route->n_inputs()) {
+ 	if (b->ports_are_outputs() == false || b->nchannels() != _route->n_inputs() || *b == *_route->output()->bundle()) {
  		return;
  	}
 
@@ -918,7 +918,7 @@ MixerStrip::maybe_add_bundle_to_output_menu (boost::shared_ptr<Bundle> b, ARDOUR
 {
 	using namespace Menu_Helpers;
 
- 	if (b->ports_are_inputs() == false || b->nchannels() != _route->n_outputs()) {
+ 	if (b->ports_are_inputs() == false || b->nchannels() != _route->n_outputs() || *b == *_route->input()->bundle()) {
  		return;
  	}
 

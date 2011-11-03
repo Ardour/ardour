@@ -511,3 +511,9 @@ operator<< (ostream& os, Bundle const & b)
 
 	return os;
 }
+
+bool
+Bundle::operator== (Bundle const & other)
+{
+	return _channel == other._channel;
+}

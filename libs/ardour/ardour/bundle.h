@@ -114,6 +114,8 @@ class Bundle : public PBD::ScopedConnectionList
 	void suspend_signals ();
 	void resume_signals ();
 
+	bool operator== (Bundle const & other);
+
 	/** Things that might change about this bundle */
 	enum Change {
 		NameChanged = 0x1, ///< the bundle name or a channel name has changed
