@@ -722,9 +722,10 @@ ProcessorBox::processor_key_press_event (GdkEventKey *ev)
 	case GDK_Return:
 	case GDK_slash:
 		/* do real stuff on key release */
-		return false;
+		return true;
 	}
-	return forward_key_press (ev);
+	
+	return false;
 }
 
 bool
