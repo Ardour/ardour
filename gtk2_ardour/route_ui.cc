@@ -546,10 +546,6 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
                 }
         }
 
-	cerr << name() << " re button press, i am " << _i_am_the_modifier << " active state = " 
-	     << rec_enable_button->active_state()
-	     << endl;
-
 	if (!_i_am_the_modifier && is_track() && rec_enable_button) {
 
 		if (Keyboard::is_button2_event (ev)) {
@@ -991,7 +987,7 @@ RouteUI::update_solo_display ()
 
 	if (Config->get_solo_control_is_listen_control()) {
 
-		if ((solo_button->active_state() == Active)!= (x = _route->listening_via_monitor())) {
+		if ((bool) solo_button->active_state() != (x = _route->listening_via_monitor())) {
 			++_i_am_the_modifier;
 			solo_button->set_active_state (Active);
 			--_i_am_the_modifier;
@@ -999,7 +995,7 @@ RouteUI::update_solo_display ()
 
 	} else {
 
-		if ((solo_button->active_state() == Active) != (x = _route->soloed())) {
+		if ((bool) solo_button->active_state() != (x = _route->soloed())) {
 			++_i_am_the_modifier;
 			if (x) {
 				solo_button->set_active_state (Active);
