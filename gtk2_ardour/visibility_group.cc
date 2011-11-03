@@ -40,16 +40,20 @@ VisibilityGroup::VisibilityGroup (std::string const & name)
  *  @param id Some single-word ID to be used for the state of this member in XML.
  *  @param name User-visible name for the widget.
  *  @param visible true to default to visible, otherwise false.
+ *  @param override A functor to decide whether the visibility specified by the member should be
+ *  overridden by some external factor; if the returned optional value is given, it will be used
+ *  to override whatever visibility setting the member has.
  */
 
 void
-VisibilityGroup::add (Gtk::Widget* widget, string const & id, string const & name, bool visible)
+VisibilityGroup::add (Gtk::Widget* widget, string const & id, string const & name, bool visible, boost::function<boost::optional<bool> ()> override)
 {
 	Member m;
 	m.widget = widget;
 	m.id = id;
 	m.name = name;
 	m.visible = visible;
+	m.override = override;
 	
 	_members.push_back (m);
 }
@@ -84,13 +88,27 @@ VisibilityGroup::menu ()
 	return m;
 }
 
+/** @return true if the member should be visible, even taking into account any override functor */
+bool
+VisibilityGroup::should_actually_be_visible (Member const & m) const
+{
+	if (m.override) {
+		boost::optional<bool> o = m.override ();
+		if (o) {
+			return o;
+		}
+	}
+
+	return m.visible;
+}
+
 /** Update visible consequences of any changes to our _members vector */
 void
 VisibilityGroup::update ()
 {
 	for (vector<Member>::iterator i = _members.begin(); i != _members.end(); ++i) {
 		if (i->widget) {
-			if (i->visible) {
+			if (should_actually_be_visible (*i)) {
 				i->widget->show ();
 			} else {
 				i->widget->hide ();

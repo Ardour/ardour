@@ -37,7 +37,14 @@ class VisibilityGroup
 public:
 	VisibilityGroup (std::string const &);
 	
-	void add (Gtk::Widget *, std::string const &, std::string const &, bool visible = true);
+	void add (
+		Gtk::Widget *,
+		std::string const &,
+		std::string const &,
+		bool visible = 0,
+		boost::function<boost::optional<bool> ()> = 0
+		);
+	
 	Gtk::Menu* menu ();
 	Gtk::Widget* list_view ();
 	bool button_press_event (GdkEventButton *);
@@ -56,6 +63,7 @@ private:
 		std::string  id;
 		std::string  name;
 		bool         visible;
+		boost::function<boost::optional<bool> ()> override;
 	};
 
 	class ModelColumns : public Gtk::TreeModelColumnRecord {
@@ -74,6 +82,7 @@ private:
 	void toggle (std::vector<Member>::iterator);
 	void list_view_visible_changed (std::string const &);
 	void update_list_view ();
+	bool should_actually_be_visible (Member const &) const;
 
 	std::vector<Member> _members;
 	std::string _xml_property_name;

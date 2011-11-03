@@ -301,6 +301,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	 *  the RC option editor.
 	 */
 	VisibilityGroup _visibility;
+	boost::optional<bool> override_solo_visibility () const;
 
 	PBD::ScopedConnection _config_connection;
 
