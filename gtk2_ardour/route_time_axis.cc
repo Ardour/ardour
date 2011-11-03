@@ -2355,6 +2355,7 @@ RouteTimeAxisView::set_button_names ()
 		solo_button->set_image (solo_safe_pixbuf);
 		solo_button->set_text (string());
         } else {
+		solo_button->set_image (Glib::RefPtr<Gdk::Pixbuf>());
                 if (Config->get_solo_control_is_listen_control()) {
                         switch (Config->get_listen_position()) {
                         case AfterFaderListen:
