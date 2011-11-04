@@ -1,0 +1,519 @@
+#!/bin/bash
+
+# script for pulling together a MacOSX app bundle.
+
+GTKQUARTZ_ROOT=$HOME/gtk/inst
+
+if pkg-config --modversion gtk+-2.0 | grep -s 2.22 ; then
+    # older GTK
+    GDKPIXBUF_LOADERS=$GTKQUARTZ_ROOT/lib/gtk-2.0/2.10.0/loaders
+    echo 
+    echo
+    echo "*****************************************************"
+    echo "You are building with the OLD GTK stack. I hope that is ok"
+    echo "*****************************************************"
+    echo
+    echo
+else
+    # newer GTK
+    GDKPIXBUF_LOADERS=$GTKQUARTZ_ROOT/lib/gdk-pixbuf-2.0/2.10.0/loaders
+    echo 
+    echo
+    echo "*****************************************************"
+    echo "You are building with the NEW GTK stack. I hope that is ok"
+    echo "*****************************************************"
+    echo
+    echo
+fi
+
+SAE=
+MIXBUS=
+INTERNAL_JACK=1
+WITH_LADSPA=1
+STRIP=1
+PRINT_SYSDEPS=
+WITH_NLS=
+EXTERNAL_JACK=
+
+while [ $# -gt 0 ] ; do
+    echo "arg = $1"
+    case $1 in
+
+	#
+	# top level build targets
+	#
+
+	--sae) WITH_NLS= ; 
+               SAE=1 ; 
+	       INTERNAL_JACK=1; 
+	       WITH_LADSPA=1; 
+               STRIP= ; 
+	       PRODUCT_PKG_DIR=ArdourSAE ; 
+	       APPNAME=Ardour ;
+	       shift ;;
+	--mixbus) MIXBUS=1; 
+	          WITH_NLS=1 ; 
+                  SAE= ; 
+                  INTERNAL_JACK=; 
+                  WITH_LADSPA=; 
+                  STRIP= ; 
+		  PRODUCT_PKG_DIR=MixBus;
+		  APPNAME=Mixbus ;
+                  shift ;;
+	--public) WITH_NLS= ; 
+	          SAE= ; 
+		  INTERNAL_JACK=; 
+                  WITH_LADSPA=1; 
+                  STRIP= ; 
+		  PRODUCT_PKG_DIR=Ardour;
+		  APPNAME=Ardour ;
+		  shift ;;
+	--allinone) SAE= ; 
+	            WITH_NLS= ; 
+		    INTERNAL_JACK=1; 
+		    WITH_LADSPA=1; 
+		    STRIP= ; 
+		    PRODUCT_PKG_DIR=Ardour ;
+		    shift ;;
+	--test) SAE= ; INTERNAL_JACK=; WITH_LADSPA=; STRIP= ; shift ;;
+
+	#
+	# specific build flags
+	#
+
+	--nojack) INTERNAL_JACK= ; shift ;;
+	--noladspa) WITH_LADSPA= ; shift ;;
+	--nostrip) STRIP= ; shift ;;
+	--sysdeps) PRINT_SYSDEPS=1; shift ;;
+	--nls) WITH_NLS=1 ; shift ;;
+	--external_jack) EXTERNAL_JACK=$2; shift ; shift ;;
+    esac
+done
+
+if [ x$EXTERNAL_JACK != x -a x$INTERNAL_JACK != x ] ; then
+    echo "It makes no sense to package JACK internally and externally. Please pick one."
+fi
+
+BUILD_ROOT=../../build
+
+#release_version=`grep -m 1 '^VERSION' ../../wscript | cut -d' ' -f 3 | sed "s/'//g"`
+release_version=3.0
+svn_version=`grep -m 1 'svn_revision =' ../../libs/ardour/svn_revision.cc | cut -d' ' -f 8 | sed 's/[^0-9]//g'`
+echo "Version is $release_version / $svn_version"
+info_string="$release_version/$svn_version built on `hostname` by `whoami` on `date`"
+echo "Info string is $info_string"
+
+# setup directory structure
+
+APPDIR=${APPNAME}.app
+APPROOT=$APPDIR/Contents
+Frameworks=$APPROOT/Frameworks
+Resources=$APPROOT/Resources
+Plugins=$APPROOT/Plugins
+Surfaces=$APPROOT/Surfaces
+Panners=$APPROOT/Panners
+MidiMaps=$APPROOT/MidiMaps
+ExportFormats=$APPROOT/ExportFormats
+Templates=$APPROOT/Templates
+Shared=$Resources/share
+Etc=$Resources/etc
+Locale=$Resources/locale
+
+if [ x$PRINT_SYSDEPS != x ] ; then
+#
+# print system dependencies
+#
+
+    for file in $APPROOT/MacOS/* $Frameworks/* $Frameworks/modules/* $Plugins/*.so ; do 
+	if ! file $file | grep -qs Mach-O ; then
+	    continue
+	fi
+	otool -L $file | awk '{print $1}' | egrep -v "(^@executable_path|^Ardour[0-9][.0-9]*.app)" 
+    done | sort | uniq
+    exit 0
+fi
+
+echo "Removing old $APPDIR tree ..."
+
+rm -rf $APPDIR
+
+echo "Building new app directory structure ..."
+
+# only bother to make the longest paths
+
+mkdir -p $APPROOT/MacOS
+mkdir -p $APPROOT/Resources
+mkdir -p $Plugins
+mkdir -p $Surfaces
+mkdir -p $Panners
+mkdir -p $MidiMaps
+mkdir -p $ExportFormats
+mkdir -p $Templates
+mkdir -p $Frameworks/modules
+mkdir -p $Shared/templates
+mkdir -p $Etc
+
+# maybe set variables
+env=""
+if test x$SAE != x ; then
+    appname="Ardour3/SAE"
+    env="$env<key>ARDOUR_SAE</key><string>true</string>"
+    #
+    # current default for SAE version is German keyboard layout without a keypad
+    #
+    env="$env<key>ARDOUR_KEYBOARD_LAYOUT</key><string>de-nokeypad</string>"
+    env="$env<key>ARDOUR_UI_CONF</key><string>ardour3_ui_sae.conf</string>"
+    env="$env<key>ARDOUR3_UI_RC</key><string>ardour3_ui_dark_sae.rc</string>"
+elif test x$MIXBUS != x ; then
+    appname="Ardour3/Mixbus"
+    env="$env<key>ARDOUR_MIXBUS</key><string>true</string>"
+    #
+    # current default for MIXBUS version is US keyboard layout without a keypad
+    #
+    env="$env<key>ARDOUR_KEYBOARD_LAYOUT</key><string>us-nokeypad</string>"
+    env="$env<key>ARDOUR_UI_CONF</key><string>ardour3_ui.conf</string>"
+    env="$env<key>ARDOUR3_UI_RC</key><string>ardour3_ui_dark.rc</string>"
+else
+    appname="Ardour3"
+fi
+
+#
+# if we're not going to bundle JACK, make sure we can find
+# jack in the places where it might be
+#
+
+if test x$INTERNAL_JACK != x ; then
+    env="$env<key>ARDOUR_INTERNAL_JACK</key><string>true</string>"
+else
+    env="$env<key>PATH</key><string>/usr/local/bin:/opt/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>"
+    env="$env<key>DYLIB_FALLBACK_LIBRARY_PATH</key><string>/usr/local/lib:/opt/lib</string>"
+fi
+
+env="<key>LSEnvironment</key><dict>$env<key>ARDOUR_BUNDLED</key><string>true</string></dict>"
+
+# edit plist
+sed -e "s?@ENV@?$env?g" \
+    -e "s?@VERSION@?$release_version/$svn_version?g" \
+    -e "s?@INFOSTRING@?$info_string?g" < Info.plist.in > Info.plist
+# and plist strings
+sed -e "s?@APPNAME@?$appname?" \
+    -e "s?@ENV@?$env?g" \
+    -e "s?@VERSION@?$release_version/$svn_version?g" \
+    -e "s?@INFOSTRING@?$info_string?g" < InfoPlist.strings.in > Resources/InfoPlist.strings || exit 1
+
+# copy static files
+
+cp Info.plist $APPROOT
+cp -R Resources $APPROOT
+
+#
+# if we build a bundle without jack, then
+# make the Ardour3 executable a helper
+# script that checks to see if JACK is
+# installed.
+#
+
+if test x$INTERNAL_JACK != x ; then
+    MAIN_EXECUTABLE=Ardour3
+else
+    cp startup_script $APPROOT/MacOS/Ardour3
+    chmod 775 $APPROOT/MacOS/Ardour3
+    MAIN_EXECUTABLE=Ardour3.bin
+fi
+
+echo "Copying ardour executable ...."
+cp $BUILD_ROOT/gtk2_ardour/ardour-$release_version $APPROOT/MacOS/$MAIN_EXECUTABLE
+if test x$SAE != x ; then
+    # cp $BUILD_ROOT/gtk2_ardour/evtest $APPROOT/MacOS/gtkevents
+    cp  Ardour3-SAE.icns $Resources/appIcon.icns
+elif test x$MIXBUS != x ; then
+    cp  Mixbus.icns $Resources/appIcon.icns
+else
+    cp  Ardour3.icns $Resources/appIcon.icns
+fi
+if test x$STRIP != x ; then
+    strip $APPROOT/MacOS/Ardour3
+fi
+if test x$INTERNAL_JACK != x ; then
+    if [ -f /usr/local/lib/jack/jack_coreaudio.so ] ; then 
+	cp /usr/local/lib/jack/jack_coreaudio.so $Frameworks
+	cp /usr/local/bin/jackd $APPROOT/MacOS
+	JACK_SHARED_OBJECTS="$Frameworks/*.so"
+    fi
+fi
+
+# copy locale files
+if test x$WITH_NLS != x ; then
+    echo "NLS support ..."
+    echo "I hope you remembered to run scons msgupdate!"
+    LINGUAS=
+    for file in $BUILD_ROOT/gtk2_ardour/*.mo 
+    do
+	lang=`basename $file | sed 's/\.mo//'`
+	mkdir -p $Locale/$lang/LC_MESSAGES
+	cp $file $Locale/$lang/LC_MESSAGES/gtk2_ardour.mo
+	LINGUAS="$LINGUAS $lang"
+    done
+    for file in $BUILD_ROOT/libs/ardour/*.mo 
+    do
+	lang=`basename $file | sed 's/\.mo//'`
+	mkdir -p $Locale/$lang/LC_MESSAGES
+	cp $file $Locale/$lang/LC_MESSAGES/libardour.mo
+    done
+    for l in $LINGUAS
+    do
+      if [ -d $GTKQUARTZ_ROOT/share/locale/$l ] ; then
+	  echo "Copying GTK i18n files for $l..."
+	  cp -r $GTKQUARTZ_ROOT/share/locale/$l $Locale
+      else
+	  # try with just the language spec
+	  just_lang=`echo $l | sed 's/_[A-Z][A-Z]$//'`
+	  if [ -d $GTKQUARTZ_ROOT/share/locale/$just_lang ] ; then
+	      echo "Copying GTK i18n files for $l..."
+	      cp -r $GTKQUARTZ_ROOT/share/locale/$just_lang $Locale
+	  fi
+      fi
+    done
+else
+    echo "Skipping NLS support"
+fi
+
+cp -R $GTKQUARTZ_ROOT/etc/* $Etc
+echo "Copying all Pango modules ..."
+cp -R $GTKQUARTZ_ROOT/lib/pango/1.6.0/modules/*.so $Frameworks/modules
+echo "Copying all GDK Pixbuf loaders ..."
+cp -R $GDKPIXBUF_LOADERS/*.so $Frameworks/modules
+# charset alias file
+cp -R $GTKQUARTZ_ROOT/lib/charset.alias $Resources
+
+pwd=`pwd`
+
+if test x$WITH_LADSPA != x ; then
+    if test x$SAE != x ; then
+	plugdir=sae_ladspa
+    elif test x$MIXBUS != x ; then
+	plugdir=mixbus_ladspa
+    else
+	plugdir=ladspa
+    fi
+    echo "Copying `ls $plugdir | wc -l` plugins ..."
+    cp -r $plugdir/* $Plugins
+fi
+
+# generate new Pango module file
+cat > pangorc <<EOF 
+[Pango]
+ModulesPath=$GTKQUARTZ_ROOT/lib/pango/1.6.0/modules
+EOF
+env PANGO_RC_FILE=pangorc $GTKQUARTZ_ROOT/bin/pango-querymodules | sed "s?$GTKQUARTZ_ROOT/lib/pango/1.6.0/modules/?@executable_path/../Frameworks/modules/?" > $Resources/pango.modules
+rm pangorc
+
+# generate a new GDK pixbufs loaders file
+gdk-pixbuf-query-loaders | sed "s?$GDKPIXBUF_LOADERS/?@executable_path/../Frameworks/modules/?" > $Resources/gdk-pixbuf.loaders
+
+# this one is special - we will set GTK_PATH to $Frameworks/clearlooks
+cp $BUILD_ROOT/libs/clearlooks-newer/libclearlooks.dylib $Frameworks
+mkdir -p $Frameworks/clearlooks/engines
+(cd $Frameworks/clearlooks/engines && ln -s $BUILD_ROOT/libclearlooks.dylib libclearlooks.dylib && ln -s ../../libclearlooks.dylib libclearlooks.so)
+
+cp $BUILD_ROOT/libs/surfaces/*/libardour_*.dylib $Surfaces
+cp $BUILD_ROOT/libs/panners/*/lib*.dylib $Panners
+(cd ../../export && 
+    for f in *.preset ; do 
+	echo ExportFormat: $f; cp "$f" ../tools/osx_packaging/$ExportFormats ; 
+done)
+(cd $BUILD_ROOT/templates && \
+    for f in *.template ; do 
+	echo Template: $f ; cp "$f" ../../tools/osx_packaging/$Templates ; 
+done)
+
+# MIDI maps
+cp ../../midi_maps/*.map $MidiMaps
+
+# VAMP plugins that we use
+cp $BUILD_ROOT/libs/vamp-plugins/libardourvampplugins.dylib $Frameworks
+
+while [ true ] ; do 
+    missing=false
+    for file in $APPROOT/MacOS/* $Frameworks/* $Frameworks/modules/* $Plugins/*.so ; do 
+	if ! file $file | grep -qs Mach-O ; then
+	    continue
+	fi
+	if test x$INTERNAL_JACK != x ; then
+	    deps=`otool -L $file | awk '{print $1}' | egrep "($GTKQUARTZ_ROOT|/opt/|/local/|libs/)"`
+	else
+	    # do not include libjack
+	    deps=`otool -L $file | awk '{print $1}' | egrep "($GTKQUARTZ_ROOT|/opt/|/local/|libs/)" | grep -v 'libjack\.'`
+	fi
+	echo -n "."
+	for dep in $deps ; do
+	    base=`basename $dep`
+	    if ! test -f $Frameworks/$base; then
+		if echo $dep | grep -sq '^libs' ; then
+		    cp $BUILD_ROOT/$dep $Frameworks
+		else
+		    cp $dep $Frameworks
+		fi
+		missing=true
+	    fi
+	done
+    done
+    if test x$missing = xfalse ; then
+	# everything has been found
+	break
+    fi
+done
+echo
+
+echo "Copying other stuff to $APPDIR  ..."
+
+#cp $BUILD_ROOT/gtk2_ardour/ergonomic-us.bindings  $Resources
+cp $BUILD_ROOT/gtk2_ardour/mnemonic-us.bindings  $Resources
+cp $BUILD_ROOT/gtk2_ardour/ardour.menus $Resources
+if test x$SAE != x ; then
+    cp $BUILD_ROOT/gtk2_ardour/SAE-de-keypad.bindings  $Resources
+    cp $BUILD_ROOT/gtk2_ardour/SAE-de-nokeypad.bindings  $Resources
+    cp $BUILD_ROOT/gtk2_ardour/SAE-us-keypad.bindings  $Resources
+    cp $BUILD_ROOT/gtk2_ardour/SAE-us-nokeypad.bindings  $Resources
+    cp $BUILD_ROOT/ardour_system_sae.rc $Resources/ardour_system.rc
+    echo cp $BUILD_ROOT/ardour_system_sae.rc $Resources/ardour_system.rc
+    cp $BUILD_ROOT/instant.xml.sae $Resources/instant.xml
+    echo cp $BUILD_ROOT/instant.xml.sae $Resources/instant.xml
+else
+#    cp $BUILD_ROOT/ardour_system.rc $Resources/ardour_system.rc
+#    echo FOO cp $BUILD_ROOT/ardour_system.rc $Resources/ardour_system.rc
+    cp ../../instant.xml $Resources/instant.xml
+    echo cp ../../instant.xml $Resources/instant.xml
+fi
+cp ../../gtk2_ardour/ardour3_ui_default.conf $Resources
+cp ../../gtk2_ardour/ardour3_ui_default.conf $Resources/ardour3_ui.conf
+cp $BUILD_ROOT/gtk2_ardour/ardour3_ui_light.rc $Resources
+cp $BUILD_ROOT/gtk2_ardour/ardour3_ui_dark.rc $Resources
+
+cp -r ../../gtk2_ardour/icons $Resources
+cp -r ../../gtk2_ardour/pixmaps $Resources
+
+# go through and recursively remove any .svn dirs in the bundle
+for svndir in `find $APPDIR -name .svn -type dir`; do
+    rm -rf $svndir
+done
+
+# now fix up the executables
+echo "Fixing up executable dependency names ..."
+executables=$MAIN_EXECUTABLE
+if test x$INTERNAL_JACK != x ; then
+    executables="$executables jackd"
+fi
+if test x$SAE != x ; then
+    executables="$executables"
+fi
+
+for exe in $executables; do
+    EXE=$APPROOT/MacOS/$exe
+    changes=""
+    if test x$INTERNAL_JACK != x ; then
+	for lib in `otool -L $EXE | egrep "($GTKQUARTZ_ROOT|/opt/|/local/|libs/)" | awk '{print $1}'` ; do
+	    base=`basename $lib`
+	    changes="$changes -change $lib @executable_path/../Frameworks/$base"
+	done
+    else
+	for lib in `otool -L $EXE | egrep "($GTKQUARTZ_ROOT|/opt/|/local/|libs/)" | awk '{print $1}' | grep -v 'libjack\.'` ; do
+	    base=`basename $lib`
+	    changes="$changes -change $lib @executable_path/../Frameworks/$base"
+	done
+    fi
+    if test "x$changes" != "x" ; then
+	install_name_tool $changes $EXE
+    fi
+done
+
+echo "Fixing up library names ..."
+# now do the same for all the libraries we include
+for dylib in $JACK_SHARED_OBJECTS $Frameworks/*.dylib $Frameworks/modules/*.so $Surfaces/*.dylib ; do
+    # skip symlinks
+    if test ! -L $dylib ; then
+	
+	# change all the dependencies
+
+	changes=""
+	if test x$INTERNAL_JACK != x ; then
+	    for lib in `otool -L $dylib | egrep "($GTKQUARTZ_ROOT|/opt/|/local/|libs/)" | awk '{print $1}'` ; do
+		base=`basename $lib`
+		changes="$changes -change $lib @executable_path/../Frameworks/$base"
+	    done
+	else
+	    for lib in `otool -L $dylib | egrep "($GTKQUARTZ_ROOT|/opt/|/local/|libs/)" | awk '{print $1}' | grep -v 'libjack\.'` ; do
+		base=`basename $lib`
+		changes="$changes -change $lib @executable_path/../Frameworks/$base"
+	    done
+	fi
+
+	if test "x$changes" != x ; then
+	    if  install_name_tool $changes $dylib ; then
+		:
+	    else
+		exit 1
+	    fi
+	fi
+
+	# now the change what the library thinks its own name is
+
+	base=`basename $dylib`
+	install_name_tool -id @executable_path/../Frameworks/$base $dylib
+    fi
+done
+
+#
+# and now ... the DMG
+# 
+
+rm -rf $PRODUCT_PKG_DIR
+mkdir $PRODUCT_PKG_DIR
+
+if [ x$SAE != x ] ; then
+	
+    # SAE packaging
+    
+    echo "Creating SAE packaging directory"
+    mv $APPDIR $PRODUCT_PKG_DIR/Ardour3-SAE.app
+    cp HowToInstallArdourSAE.pdf "$PRODUCT_PKG_DIR/How To Install Ardour SAE.pdf"
+    cp SAE-de-keypad.pdf "$PRODUCT_PKG_DIR/Ardour SAE Shortcuts (keypad).pdf"
+    cp SAE-de-nokeypad.pdf "$PRODUCT_PKG_DIR/Ardour SAE Shortcuts.pdf"
+    
+elif [ x$MIXBUS != x ] ; then
+
+     # Mixbus packaging
+
+    echo "Creating Mixbus packaging directory"
+    mv $APPDIR $PRODUCT_PKG_DIR/
+    cp MixBus_Install_QuickStart.pdf "$PRODUCT_PKG_DIR/Mixbus Install & Quick Start Guide.pdf"
+    
+    if [ -x $EXTERNAL_JACK != x ] ; then
+	cp $EXTERNAL_JACK $PRODUCT_PKG_DIR
+    fi
+    
+	# create dmg
+else 
+
+    echo "Creating $APPNAME packaging directory"
+    mv $APPDIR $PRODUCT_PKG_DIR/
+
+fi
+
+echo "Building DMG ..."
+
+# UC_DMG=$APPNAME-${release_version}-${svn_version}-UC.dmg
+# FINAL_DMG=$APPNAME-${release_version}-${svn_version}.dmg
+UC_DMG=$APPNAME-${release_version}-${svn_version}.dmg
+
+rm -f $UC_DMG
+echo hdiutil create $UC_DMG -volname $APPNAME-$release_version -fs HFS+ -srcfolder $PRODUCT_PKG_DIR
+hdiutil create $UC_DMG -volname $APPNAME-$release_version -fs HFS+ -srcfolder $PRODUCT_PKG_DIR
+
+# compress it
+# echo "Compressing DMG ..."
+# rm -f $FINAL_DMG
+# hdiutil convert $UC_DMG -format UDBZ -o $FINAL_DMG
+
+echo "Done."
+
