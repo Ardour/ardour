@@ -44,15 +44,7 @@ using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
 
-static const char* track_mode_names[] = {
-	N_("Normal"),
-	N_("Non Layered"),
-	N_("Tape"),
-	0
-};
-
 std::vector<std::string> AddRouteDialog::channel_combo_strings;
-std::vector<std::string> AddRouteDialog::track_mode_strings;
 
 AddRouteDialog::AddRouteDialog (Session* s)
 	: ArdourDialog (_("Add Track or Bus"))
@@ -61,18 +53,6 @@ AddRouteDialog::AddRouteDialog (Session* s)
 	, mode_label (_("Track mode:"))
 {
 	set_session (s);
-
-	if (track_mode_strings.empty()) {
-		track_mode_strings = I18N (track_mode_names);
-
-		if (ARDOUR::Profile->get_sae()) {
-			/* remove all but the first track mode (Normal) */
-
-			while (track_mode_strings.size() > 1) {
-				track_mode_strings.pop_back();
-			}
-		}
-	}
 
 	set_name ("AddRouteDialog");
 	set_position (Gtk::WIN_POS_MOUSE);
@@ -87,10 +67,9 @@ AddRouteDialog::AddRouteDialog (Session* s)
 
 	refill_channel_setups ();
 	refill_route_groups ();
-	set_popdown_strings (mode_combo, track_mode_strings, true);
+	refill_track_modes ();
 
 	channel_combo.set_active_text (channel_combo_strings.front());
-	mode_combo.set_active_text (track_mode_strings.front());
 
 	track_bus_combo.append_text (_("tracks"));
 	track_bus_combo.append_text (_("busses"));
@@ -168,7 +147,7 @@ AddRouteDialog::AddRouteDialog (Session* s)
 	get_vbox()->pack_start (*vbox, false, false);
 
 	track_bus_combo.signal_changed().connect (sigc::mem_fun (*this, &AddRouteDialog::track_type_chosen));
-	channel_combo.signal_changed().connect (sigc::mem_fun (*this, &AddRouteDialog::maybe_update_name_template_entry));
+	channel_combo.signal_changed().connect (sigc::mem_fun (*this, &AddRouteDialog::channel_combo_changed));
 	channel_combo.set_row_separator_func (sigc::mem_fun (*this, &AddRouteDialog::channel_separator));
 	route_group_combo.set_row_separator_func (sigc::mem_fun (*this, &AddRouteDialog::route_separator));
 	route_group_combo.signal_changed ().connect (sigc::mem_fun (*this, &AddRouteDialog::group_changed));
@@ -187,6 +166,13 @@ AddRouteDialog::AddRouteDialog (Session* s)
 
 AddRouteDialog::~AddRouteDialog ()
 {
+}
+
+void
+AddRouteDialog::channel_combo_changed ()
+{
+	maybe_update_name_template_entry ();
+	refill_track_modes ();
 }
 
 void
@@ -242,6 +228,25 @@ int
 AddRouteDialog::count ()
 {
 	return (int) floor (routes_adjustment.get_value ());
+}
+
+void
+AddRouteDialog::refill_track_modes ()
+{
+	vector<string> s;
+	
+	s.push_back (_("Normal"));
+
+	if (!ARDOUR::Profile->get_sae ()) {
+		s.push_back (_("Non Layered"));
+
+		if (type() != DataType::MIDI) {
+			s.push_back (_("Tape"));
+		}
+	}
+
+	set_popdown_strings (mode_combo, s, true);
+	mode_combo.set_active_text (s.front());
 }
 
 ARDOUR::TrackMode

@@ -71,8 +71,10 @@ class AddRouteDialog : public ArdourDialog
 	void track_type_chosen ();
 	void refill_channel_setups ();
 	void refill_route_groups ();
+	void refill_track_modes ();
 	void add_route_group (ARDOUR::RouteGroup *);
 	void group_changed ();
+	void channel_combo_changed ();
 	bool channel_separator (const Glib::RefPtr<Gtk::TreeModel> &m, const Gtk::TreeModel::iterator &i);
 	bool route_separator (const Glib::RefPtr<Gtk::TreeModel> &m, const Gtk::TreeModel::iterator &i);
 	void maybe_update_name_template_entry ();
@@ -91,7 +93,6 @@ class AddRouteDialog : public ArdourDialog
 	ChannelSetups channel_setups;
 
 	static std::vector<std::string> channel_combo_strings;
-	static std::vector<std::string> track_mode_strings;
 	static std::vector<std::string> bus_mode_strings;
 };
 
