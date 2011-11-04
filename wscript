@@ -45,8 +45,10 @@ i18n_children = [
 
 if sys.platform != 'darwin':
     children += [ 'tools/sanity_check' ]
+    lxvst_default = True
 else:
     children += [ 'libs/appleutility' ]
+    lxvst_default = False
 
 # Version stuff
 
@@ -251,9 +253,6 @@ def set_compiler_flags (conf,opt):
 
     if opt.lxvst:
         if conf.env['build_target'] == 'x86_64':
-            print("\n\n********************************************************")
-            print("* Building with 64Bit linuxVST support is experimental *")
-            print("********************************************************\n\n")
             conf.env.append_value('CXXFLAGS', "-DLXVST_64BIT")
         else:
             conf.env.append_value('CXXFLAGS', "-DLXVST_32BIT")
@@ -375,7 +374,7 @@ def options(opt):
                     help='Compile for use with gprofile')
     opt.add_option('--lv2', action='store_true', default=False, dest='lv2',
                     help='Compile with support for LV2 (if Lilv+Suil is available)')
-    opt.add_option('--lxvst', action='store_true', default=True, dest='lxvst',
+    opt.add_option('--lxvst', action='store_true', default=lxvst_default, dest='lxvst',
                     help='Compile with support for linuxVST plugins')
     opt.add_option('--nls', action='store_true', default=True, dest='nls',
                     help='Enable i18n (native language support) (default)')
