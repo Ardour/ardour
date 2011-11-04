@@ -403,6 +403,8 @@ def options(opt):
                     'Multiple modifiers must be separated by \'><\'')
     opt.add_option('--boost-include', type='string', action='store', dest='boost_include', default='',
                     help='directory where Boost header files can be found')
+    opt.add_option('--also-include', type='string', action='store', dest='also_include', default='',
+                    help='additional include directory where header files can be found')
     opt.add_option('--wine-include', type='string', action='store', dest='wine_include', default='/usr/include/wine/windows',
                     help='directory where Wine\'s Windows header files can be found')
     opt.add_option('--noconfirm', action='store_true', default=False, dest='noconfirm',
@@ -491,7 +493,11 @@ def configure(conf):
         conf.env.append_value('LINKFLAGS_AUDIOUNITS', ['-framework', 'Audiotoolbox', '-framework', 'AudioUnit'])
 
     if Options.options.boost_include != '':
-        conf.env.append_value('CPPPATH', Options.options.boost_include)
+        conf.env.append_value('CXXFLAGS', '-I' + Options.options.boost_include)
+
+    if Options.options.also_include != '':
+        conf.env.append_value('CXXFLAGS', '-I' + Options.options.also_include)
+        conf.env.append_value('CFLAGS', '-I' + Options.options.also_include)
 
     autowaf.check_header(conf, 'cxx', 'boost/signals2.hpp', mandatory = True)
 
