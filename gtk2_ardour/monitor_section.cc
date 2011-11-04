@@ -93,12 +93,6 @@ MonitorSection::MonitorSection (Session* s)
 	afl_button.set_name ("monitor section solo model");
 	pfl_button.set_name ("monitor section solo model");
 
-#if 0
-	solo_model_group.add (solo_in_place_button);
-	solo_model_group.add (afl_button);
-	solo_model_group.add (afl_button);
-#endif
-
         solo_model_box.set_spacing (6);
         solo_model_box.pack_start (solo_in_place_button, true, false);
         solo_model_box.pack_start (afl_button, true, false);
@@ -846,10 +840,19 @@ MonitorSection::update_solo_model ()
 
         act = ActionManager::get_action (X_("Solo"), action_name);
         if (act) {
+
                 Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic (act);
                 if (ract) {
+			/* because these are radio buttons, one of them will be
+			   active no matter what. to trigger a change in the
+			   action so that the view picks it up, toggle it.
+			*/
+			if (ract->get_active()) {
+				ract->set_active (false);
+			}
                         ract->set_active (true);
                 }
+		
         }
 }
 
