@@ -141,8 +141,10 @@ RouteGroup::add (boost::shared_ptr<Route> r)
 		return 0;
 	}
 
-	r->leave_route_group ();
-
+	if (r->route_group()) {
+		r->route_group()->remove (r);
+	}
+	
 	routes->push_back (r);
 
 	r->join_route_group (this);
