@@ -377,6 +377,22 @@ private:
 	sigc::slot<bool, ARDOUR::framecnt_t> _set;
 };
 
+class DirectoryOption : public Option
+{
+public:
+	DirectoryOption (std::string const &, std::string const &, sigc::slot<std::string>, sigc::slot<bool, std::string>);
+
+	void set_state_from_config ();
+	void add_to_page (OptionEditorPage *);
+
+private:
+	void file_set ();
+	
+	sigc::slot<std::string> _get; ///< slot to get the configuration variable's value
+	sigc::slot<bool, std::string> _set;  ///< slot to set the configuration variable's value
+	Gtk::FileChooserButton _file_chooser;
+};
+
 /** Class to represent a single page in an OptionEditor's notebook.
  *  Pages are laid out using a 3-column table; the 1st column is used
  *  to indent non-headings, and the 2nd and 3rd for actual content.

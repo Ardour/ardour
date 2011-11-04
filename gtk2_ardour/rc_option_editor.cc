@@ -908,6 +908,13 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_only_copy_imported_files)
 		     ));
 
+	add_option (_("Misc"), new DirectoryOption (
+			    X_("default-session-parent-dir"),
+			    _("Default folder for new sessions:"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_default_session_parent_dir),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_default_session_parent_dir)
+			    ));
+
 	add_option (_("Misc"), new OptionEditorHeading (_("Click")));
 
 	add_option (_("Misc"), new ClickOptions (_rc_config, this));
