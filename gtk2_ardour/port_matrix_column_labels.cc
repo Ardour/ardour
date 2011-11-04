@@ -39,7 +39,7 @@ PortMatrixColumnLabels::PortMatrixColumnLabels (PortMatrix* m, PortMatrixBody* b
 void
 PortMatrixColumnLabels::compute_dimensions ()
 {
-	GdkPixmap* pm = gdk_pixmap_new (NULL, 1, 1, 24);
+	GdkPixmap* pm = gdk_pixmap_new (NULL, 1, 1, gdk_visual_get_depth (gdk_visual_get_system ()));
 	gdk_drawable_set_colormap (pm, gdk_colormap_get_system());
 	cairo_t* cr = gdk_cairo_create (pm);
 
