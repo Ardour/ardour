@@ -305,7 +305,7 @@ MidiRegionView::connect_to_diskstream ()
 {
 	midi_view()->midi_track()->DataRecorded.connect(
 		*this, invalidator(*this),
-		ui_bind(&MidiRegionView::data_recorded, this, _1, _2),
+		ui_bind(&MidiRegionView::data_recorded, this, _1),
 		gui_context());
 }
 
@@ -3525,11 +3525,10 @@ MidiRegionView::set_step_edit_cursor_width (Evoral::MusicalTime beats)
 }
 
 /** Called when a diskstream on our track has received some data.  Update the view, if applicable.
- *  @param buf Data that has been recorded.
- *  @param w Source that this data will end up in.
+ *  @param w Source that the data will end up in.
  */
 void
-MidiRegionView::data_recorded (boost::shared_ptr<MidiBuffer> buf, boost::weak_ptr<MidiSource> w)
+MidiRegionView::data_recorded (boost::weak_ptr<MidiSource> w)
 {
 	if (!_active_notes) {
 		/* we aren't actively being recorded to */
@@ -3543,6 +3542,9 @@ MidiRegionView::data_recorded (boost::shared_ptr<MidiBuffer> buf, boost::weak_pt
 	}
 
 	MidiTimeAxisView* mtv = dynamic_cast<MidiTimeAxisView*> (&trackview);
+
+	boost::shared_ptr<MidiBuffer> buf = mtv->midi_track()->get_gui_feed_buffer ();
+
 	BeatsFramesConverter converter (trackview.session()->tempo_map(), mtv->midi_track()->get_capture_start_frame (0));
 
 	framepos_t back = max_framepos;

@@ -77,6 +77,7 @@ MidiDiskstream::MidiDiskstream (Session &sess, const string &name, Diskstream::F
 	, _note_mode(Sustained)
 	, _frames_written_to_ringbuffer(0)
 	, _frames_read_from_ringbuffer(0)
+	, _gui_feed_buffer(AudioEngine::instance()->raw_buffer_size (DataType::MIDI))
 {
 	in_set_state = true;
 
@@ -96,6 +97,7 @@ MidiDiskstream::MidiDiskstream (Session& sess, const XMLNode& node)
 	, _note_mode(Sustained)
 	, _frames_written_to_ringbuffer(0)
 	, _frames_read_from_ringbuffer(0)
+	, _gui_feed_buffer(AudioEngine::instance()->raw_buffer_size (DataType::MIDI))
 {
 	in_set_state = true;
 
@@ -549,17 +551,23 @@ MidiDiskstream::process (framepos_t transport_frame, pframes_t nframes, framecnt
 		}
 
 		if (buf.size() != 0) {
-			/* XXX this needs fixing - realtime new() call for
-			   every time we get MIDI data in a process callback!
-			*/
+			Glib::Mutex::Lock lm (_gui_feed_buffer_mutex, Glib::TRY_LOCK);
 
-			/* Make a copy of this data and emit it for the GUI to see */
-			boost::shared_ptr<MidiBuffer> copy (new MidiBuffer (buf.capacity ()));
-			for (MidiBuffer::iterator i = buf.begin(); i != buf.end(); ++i) {
-				copy->push_back ((*i).time() + transport_frame, (*i).size(), (*i).buffer());
+			if (lm.locked ()) {
+				/* Copy this data into our GUI feed buffer and tell the GUI
+				   that it can read it if it likes.
+				*/
+				_gui_feed_buffer.clear ();
+				
+				for (MidiBuffer::iterator i = buf.begin(); i != buf.end(); ++i) {
+					/* This may fail if buf is larger than _gui_feed_buffer, but it's not really
+					   the end of the world if it does.
+					*/
+					_gui_feed_buffer.push_back ((*i).time() + transport_frame, (*i).size(), (*i).buffer());
+				}
 			}
 
-			DataRecorded (copy, _write_source); /* EMIT SIGNAL */
+			DataRecorded (_write_source); /* EMIT SIGNAL */
 		}
 
 	} else {
@@ -1450,3 +1458,12 @@ MidiDiskstream::set_name (string const & name)
 	return true;
 }
 
+boost::shared_ptr<MidiBuffer>
+MidiDiskstream::get_gui_feed_buffer () const
+{
+	boost::shared_ptr<MidiBuffer> b (new MidiBuffer (AudioEngine::instance()->raw_buffer_size (DataType::MIDI)));
+	
+	Glib::Mutex::Lock lm (_gui_feed_buffer_mutex);
+	b->copy (_gui_feed_buffer);
+	return b;
+}

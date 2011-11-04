@@ -456,7 +456,7 @@ private:
 	void display_patch_changes_on_channel (uint8_t);
 
 	void connect_to_diskstream ();
-	void data_recorded (boost::shared_ptr<ARDOUR::MidiBuffer>, boost::weak_ptr<ARDOUR::MidiSource>);
+	void data_recorded (boost::weak_ptr<ARDOUR::MidiSource>);
 
 	void remove_ghost_note ();
 	void mouse_mode_changed ();

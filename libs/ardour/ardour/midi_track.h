@@ -104,7 +104,8 @@ public:
 		return false;
 	}
 
-	PBD::Signal2<void, boost::shared_ptr<MidiBuffer>, boost::weak_ptr<MidiSource> > DataRecorded;
+	PBD::Signal1<void, boost::weak_ptr<MidiSource> > DataRecorded;
+	boost::shared_ptr<MidiBuffer> get_gui_feed_buffer () const;
 
 	void set_input_active (bool);
 	bool input_active () const;
@@ -138,7 +139,7 @@ protected:
 	int no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, bool state_changing);
 	void push_midi_input_to_step_edit_ringbuffer (framecnt_t nframes);
 
-	void diskstream_data_recorded (boost::shared_ptr<MidiBuffer>, boost::weak_ptr<MidiSource>);
+	void diskstream_data_recorded (boost::weak_ptr<MidiSource>);
 	PBD::ScopedConnection _diskstream_data_recorded_connection;
 
 	void track_input_active (IOChange, void*);

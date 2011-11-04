@@ -110,10 +110,12 @@ class MidiDiskstream : public Diskstream
 	}
 
 	/** Emitted when some MIDI data has been received for recording.
-	 *  First parameter is the data.
-	 *  Second parameter is the source that it is destined for.
+	 *  Parameter is the source that it is destined for.
+	 *  A caller can get a copy of the data with get_gui_feed_buffer ()
 	 */
-	PBD::Signal2<void, boost::shared_ptr<MidiBuffer>, boost::weak_ptr<MidiSource> > DataRecorded;
+	PBD::Signal1<void, boost::weak_ptr<MidiSource> > DataRecorded;
+
+	boost::shared_ptr<MidiBuffer> get_gui_feed_buffer () const;
 
   protected:
 	friend class Session;
@@ -189,6 +191,12 @@ class MidiDiskstream : public Diskstream
 	NoteMode                     _note_mode;
 	volatile gint                _frames_written_to_ringbuffer;
 	volatile gint                _frames_read_from_ringbuffer;
+
+	/** A buffer that we use to put newly-arrived MIDI data in for
+	    the GUI to read (so that it can update itself).
+	*/
+	MidiBuffer                   _gui_feed_buffer;
+	mutable Glib::Mutex          _gui_feed_buffer_mutex;
 };
 
 }; /* namespace ARDOUR */
