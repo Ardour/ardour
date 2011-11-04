@@ -112,12 +112,13 @@ ProcessorEntry::ProcessorEntry (boost::shared_ptr<Processor> p, Width w)
 	_button.set_distinct_led_click (true);
 	_button.set_led_left (true);
 	_button.signal_led_clicked.connect (sigc::mem_fun (*this, &ProcessorEntry::led_clicked));
-	_button.set_text (name());
+	_button.set_text (name (_width));
 	_button.show ();
 
 	_processor->ActiveChanged.connect (active_connection, invalidator (*this), boost::bind (&ProcessorEntry::processor_active_changed, this), gui_context());
 	_processor->PropertyChanged.connect (name_connection, invalidator (*this), ui_bind (&ProcessorEntry::processor_property_changed, this, _1), gui_context());
 
+	setup_tooltip ();
 	setup_visuals ();
 }
 
@@ -136,7 +137,7 @@ ProcessorEntry::widget ()
 string
 ProcessorEntry::drag_text () const
 {
-	return name ();
+	return name (Wide);
 }
 
 void
@@ -211,12 +212,19 @@ void
 ProcessorEntry::processor_property_changed (const PropertyChange& what_changed)
 {
 	if (what_changed.contains (ARDOUR::Properties::name)) {
-		_button.set_text (name ());
+		_button.set_text (name (_width));
+		setup_tooltip ();
 	}
 }
 
+void
+ProcessorEntry::setup_tooltip ()
+{
+	ARDOUR_UI::instance()->set_tip (_button, name (Wide));
+}
+
 string
-ProcessorEntry::name () const
+ProcessorEntry::name (Width w) const
 {
 	boost::shared_ptr<Send> send;
 	string name_display;
@@ -232,7 +240,7 @@ ProcessorEntry::name () const
 		lbracket = send->name().find ('[');
 		rbracket = send->name().find (']');
 
-		switch (_width) {
+		switch (w) {
 		case Wide:
 			name_display += send->name().substr (lbracket+1, lbracket-rbracket-1);
 			break;
@@ -243,7 +251,7 @@ ProcessorEntry::name () const
 
 	} else {
 
-		switch (_width) {
+		switch (w) {
 		case Wide:
 			name_display += _processor->display_name();
 			break;

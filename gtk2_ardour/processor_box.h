@@ -134,7 +134,8 @@ private:
 	void led_clicked();
 	void processor_active_changed ();
 	void processor_property_changed (const PBD::PropertyChange&);
-	std::string name () const;
+	std::string name (Width) const;
+	void setup_tooltip ();
 
 	boost::shared_ptr<ARDOUR::Processor> _processor;
 	Width _width;
