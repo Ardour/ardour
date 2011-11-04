@@ -17,6 +17,8 @@
 
 */
 
+#include <boost/foreach.hpp>
+
 #include "ardour/route_group.h"
 #include "ardour/session.h"
 #include "mixer_group_tabs.h"
@@ -177,7 +179,12 @@ RouteList
 MixerGroupTabs::selected_routes () const
 {
 	RouteList rl;
-	/* XXX need a foreach here */
+	BOOST_FOREACH (RouteUI* r, _mixer->selection().routes) {
+		boost::shared_ptr<Route> rp = r->route();
+		if (rp) {
+			rl.push_back (rp);
+		}
+	}
 	return rl;
 }
 
