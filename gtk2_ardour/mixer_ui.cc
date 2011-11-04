@@ -68,6 +68,9 @@ using PBD::atoi;
 Mixer_UI::Mixer_UI ()
 	: Window (Gtk::WINDOW_TOPLEVEL)
 {
+	/* allow this window to become the key focus window */
+	set_flags (CAN_FOCUS);
+
 	_strip_width = Config->get_default_narrow_ms() ? Narrow : Wide;
 	track_menu = 0;
         _monitor_section = 0;
@@ -80,6 +83,7 @@ Mixer_UI::Mixer_UI ()
 
 	Route::SyncOrderKeys.connect (*this, invalidator (*this), ui_bind (&Mixer_UI::sync_order_keys, this, _1), gui_context());
 
+	scroller_base.set_flags (Gtk::CAN_FOCUS);
 	scroller_base.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 	scroller_base.set_name ("MixerWindow");
 	scroller_base.signal_button_release_event().connect (sigc::mem_fun(*this, &Mixer_UI::strip_scroller_button_release));
@@ -190,14 +194,10 @@ Mixer_UI::Mixer_UI ()
 
 	set_wmclass (X_("ardour_mixer"), PROGRAM_NAME);
 
-	add_accel_group (ActionManager::ui_manager->get_accel_group());
-
 	signal_delete_event().connect (sigc::mem_fun (*this, &Mixer_UI::hide_window));
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
 
 	signal_configure_event().connect (sigc::mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::configure_handler));
-
-	_selection.RoutesChanged.connect (sigc::mem_fun(*this, &Mixer_UI::follow_strip_selection));
 
 	route_group_display_button_box->show();
 	route_group_add_button->show();
@@ -267,6 +267,10 @@ Mixer_UI::show_window ()
 			ms->parameter_changed (X_("mixer-strip-visibility"));
 		}
 	}
+	
+	/* force focus into main area */
+	scroller_base.grab_focus ();
+
 	_visible = true;
 }
 
@@ -361,8 +365,6 @@ Mixer_UI::remove_strip (MixerStrip* strip)
 
 	ENSURE_GUI_THREAD (*this, &Mixer_UI::remove_strip, strip);
 
-	cerr << "Mixer UI removing strip for " << strip << endl;
-
 	TreeModel::Children rows = track_model->children();
 	TreeModel::Children::iterator ri;
 	list<MixerStrip *>::iterator i;
@@ -429,31 +431,76 @@ Mixer_UI::sync_order_keys (string const & src)
 	}
 }
 
-void
-Mixer_UI::follow_strip_selection ()
+MixerStrip*
+Mixer_UI::strip_by_route (boost::shared_ptr<Route> r)
 {
 	for (list<MixerStrip *>::iterator i = strips.begin(); i != strips.end(); ++i) {
-		(*i)->set_selected (_selection.selected ((*i)->route()));
+		if ((*i)->route() == r) {
+			return (*i);
+		}
 	}
+
+	return 0;
 }
 
 bool
 Mixer_UI::strip_button_release_event (GdkEventButton *ev, MixerStrip *strip)
 {
 	if (ev->button == 1) {
-
-		/* this allows the user to click on the strip to terminate comment
-		   editing. XXX it needs improving so that we don't select the strip
-		   at the same time.
-		*/
-
-		if (_selection.selected (strip->route())) {
-			_selection.remove (strip->route());
+		if (_selection.selected (strip)) {
+			/* primary-click: toggle selection state of strip */
+			if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+				_selection.remove (strip);
+			} 
 		} else {
-			if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
-				_selection.add (strip->route());
+			if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+				_selection.add (strip);
+			} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::RangeSelectModifier)) {
+
+				if (!_selection.selected(strip)) {
+				
+					/* extend selection */
+					
+					vector<MixerStrip*> tmp;
+					bool accumulate = false;
+					
+					tmp.push_back (strip);
+
+					for (list<MixerStrip*>::iterator i = strips.begin(); i != strips.end(); ++i) {
+						if ((*i) == strip) {
+							/* hit clicked strip, start accumulating till we hit the first 
+							   selected strip
+							*/
+							if (accumulate) {
+								/* done */
+								break;
+							} else {
+								accumulate = true;
+							}
+						} else if (_selection.selected (*i)) {
+							/* hit selected strip. if currently accumulating others,
+							   we're done. if not accumulating others, start doing so.
+							*/
+							if (accumulate) {
+								/* done */
+								break;
+							} else {
+								accumulate = true;
+							}
+						} else {
+							if (accumulate) {
+								tmp.push_back (*i);
+							}
+						}
+					}
+
+					for (vector<MixerStrip*>::iterator i = tmp.begin(); i != tmp.end(); ++i) {
+						_selection.add (*i);
+					}
+				}
+
 			} else {
-				_selection.set (strip->route());
+				_selection.set (strip);
 			}
 		}
 	}
@@ -1527,29 +1574,40 @@ Mixer_UI::scroll_right ()
 bool
 Mixer_UI::on_key_press_event (GdkEventKey* ev)
 {
-	switch (ev->keyval) {
-	case GDK_Left:
-		scroll_left ();
-		return true;
+        /* focus widget gets first shot, then bindings, otherwise
+           forward to main window
+        */
 
-	case GDK_Right:
-		scroll_right ();
+	if (gtk_window_propagate_key_event (GTK_WINDOW(gobj()), ev)) {
 		return true;
-
-	default:
-		break;
 	}
-
-	return key_press_focus_accelerator_handler (*this, ev);
+	
+	KeyboardKey k (ev->state, ev->keyval);
+	
+	if (bindings.activate (k, Bindings::Press)) {
+		return true;
+	}
+		
+        return forward_key_press (ev);
 }
 
 bool
 Mixer_UI::on_key_release_event (GdkEventKey* ev)
 {
-	return Gtk::Window::on_key_release_event (ev);
-	// return key_press_focus_accelerator_handler (*this, ev);
-}
+	if (gtk_window_propagate_key_event (GTK_WINDOW(gobj()), ev)) {
+		return true;
+	}
 
+	KeyboardKey k (ev->state, ev->keyval);
+	
+	if (bindings.activate (k, Bindings::Release)) {
+		return true;
+	}
+
+        /* don't forward releases */
+
+        return true;
+}
 
 bool
 Mixer_UI::on_scroll_event (GdkEventScroll* ev)
@@ -1704,4 +1762,41 @@ Mixer_UI::update_title ()
 	}
 }
 
-		
+MixerStrip*
+Mixer_UI::strip_by_x (int x)
+{
+	for (list<MixerStrip*>::iterator i = strips.begin(); i != strips.end(); ++i) {
+		int x1, x2, y;
+
+		(*i)->translate_coordinates (*this, 0, 0, x1, y);
+		x2 = x1 + (*i)->get_width();
+
+		if (x >= x1 && x <= x2) {
+			return (*i);
+		}
+	}
+
+	return 0;
+}
+
+void
+Mixer_UI::set_route_targets_for_operation ()
+{
+	_route_targets.clear ();
+
+	if (!_selection.empty()) {
+		_route_targets = _selection.routes;
+		return;
+	}
+
+	/* try to get mixer strip at mouse */
+
+	int x, y;
+	get_pointer (x, y);
+	
+	MixerStrip* ms = strip_by_x (x);
+	
+	if (ms) {
+		_route_targets.insert (ms);
+	}
+}

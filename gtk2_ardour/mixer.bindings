@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Bindings name="ardour">
+  <Press>
+     <Binding key="s" action="Mixer/solo"/>
+     <Binding key="m" action="Mixer/mute"/>
+     <Binding key="r" action="Mixer/recenable"/>
+     <Binding key="0" action="Mixer/unity-gain"/>
+     <Binding key="Up" action="Mixer/increment-gain"/>
+     <Binding key="Down" action="Mixer/decrement-gain"/>
+     <Binding key="Left" action="Mixer/scroll-left"/>
+     <Binding key="Right" action="Mixer/scroll-right"/>
+     <Binding key="Primary-x" action="Mixer/cut-processors"/>
+     <Binding key="Primary-c" action="Mixer/copy-processors"/>
+     <Binding key="Primary-v" action="Mixer/paste-processors"/>
+     <Binding key="Delete" action="Mixer/delete-processors"/>
+     <Binding key="Return" action="Mixer/toggle-processors"/>
+     <Binding key="Primary-a" action="Mixer/select-all-processors"/>
+     <Binding key="Slash" action="Mixer/ab-plugins"/>
+  </Press>
+</Bindings>

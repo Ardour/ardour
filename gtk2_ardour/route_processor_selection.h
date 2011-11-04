@@ -24,13 +24,13 @@
 #include "pbd/signals.h"
 
 #include "processor_selection.h"
-#include "route_selection.h"
+#include "route_ui_selection.h"
 
 class RouteRedirectSelection : public PBD::ScopedConnectionList, public sigc::trackable
 {
   public:
 	ProcessorSelection processors;
-	RouteSelection     routes;
+	RouteUISelection     routes;
 
 	RouteRedirectSelection() {}
 
@@ -45,17 +45,17 @@ class RouteRedirectSelection : public PBD::ScopedConnectionList, public sigc::tr
 	void set (XMLNode* node);
 	void add (XMLNode* node);
 
-	void set (boost::shared_ptr<ARDOUR::Route>);
-	void add (boost::shared_ptr<ARDOUR::Route>);
-	void remove (boost::shared_ptr<ARDOUR::Route>);
+	void set (RouteUI*);
+	void add (RouteUI*);
+	void remove (RouteUI*);
 
 	void clear_processors ();
 	void clear_routes ();
 
-	bool selected (boost::shared_ptr<ARDOUR::Route>);
+	bool selected (RouteUI*);
 
   private:
-	void removed (boost::weak_ptr<ARDOUR::Route>);
+	void removed (RouteUI*);
 
 };
 

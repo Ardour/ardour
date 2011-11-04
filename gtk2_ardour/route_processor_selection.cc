@@ -25,8 +25,10 @@
 #include "ardour/processor.h"
 #include "ardour/route.h"
 
-#include "route_processor_selection.h"
 #include "gui_thread.h"
+#include "mixer_strip.h"
+#include "route_processor_selection.h"
+#include "route_ui.h"
 
 #include "i18n.h"
 
@@ -68,6 +70,9 @@ RouteRedirectSelection::clear_processors ()
 void
 RouteRedirectSelection::clear_routes ()
 {
+	for (RouteUISelection::iterator i = routes.begin(); i != routes.end(); ++i) {
+		(*i)->set_selected (false);
+	}
 	routes.clear ();
 	drop_connections ();
 	RoutesChanged ();
@@ -90,48 +95,45 @@ RouteRedirectSelection::set (XMLNode* node)
 }
 
 void
-RouteRedirectSelection::add (boost::shared_ptr<Route> r)
+RouteRedirectSelection::add (RouteUI* r)
 {
 	if (find (routes.begin(), routes.end(), r) == routes.end()) {
-		routes.push_back (r);
-		r->DropReferences.connect (*this, MISSING_INVALIDATOR, boost::bind (&RouteRedirectSelection::removed, this, boost::weak_ptr<Route>(r)), gui_context());
-		RoutesChanged();
+		if (routes.insert (r).second) {
+			r->set_selected (true);
+
+			MixerStrip* ms = dynamic_cast<MixerStrip*> (r);
+			
+			if (ms) {
+				ms->CatchDeletion.connect (*this, invalidator (*this), ui_bind (&RouteRedirectSelection::remove, this, _1), gui_context());
+			}
+
+			RoutesChanged();
+		}
 	}
 }
 
 void
-RouteRedirectSelection::removed (boost::weak_ptr<Route> wr)
-{
-	boost::shared_ptr<Route> r (wr.lock());
-
-	if (!r) {
-		return;
-	}
-
-	remove (r);
-}
-
-void
-RouteRedirectSelection::remove (boost::shared_ptr<Route> r)
+RouteRedirectSelection::remove (RouteUI* r)
 {
 	ENSURE_GUI_THREAD (*this, &RouteRedirectSelection::remove, r);
 
-	list<boost::shared_ptr<Route> >::iterator i;
+	RouteUISelection::iterator i;
 	if ((i = find (routes.begin(), routes.end(), r)) != routes.end()) {
 		routes.erase (i);
+		(*i)->set_selected (false);
 		RoutesChanged ();
 	}
 }
 
 void
-RouteRedirectSelection::set (boost::shared_ptr<Route> r)
+RouteRedirectSelection::set (RouteUI* r)
 {
 	clear_routes ();
 	add (r);
 }
 
 bool
-RouteRedirectSelection::selected (boost::shared_ptr<Route> r)
+RouteRedirectSelection::selected (RouteUI* r)
 {
 	return find (routes.begin(), routes.end(), r) != routes.end();
 }

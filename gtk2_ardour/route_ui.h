@@ -36,6 +36,7 @@
 #include "ardour/track.h"
 
 #include "axis_view.h"
+#include "selectable.h"
 
 namespace ARDOUR {
 	class AudioTrack;
@@ -70,6 +71,7 @@ class RouteUI : public virtual AxisView
 	bool has_audio_outputs () const;
 
 	boost::shared_ptr<ARDOUR::Route> route() const { return _route; }
+	ARDOUR::RouteGroup* route_group() const;
 
 	boost::shared_ptr<ARDOUR::Track>      track() const;
 	boost::shared_ptr<ARDOUR::AudioTrack> audio_track() const;

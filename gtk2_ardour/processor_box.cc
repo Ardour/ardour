@@ -488,9 +488,6 @@ ProcessorBox::ProcessorBox (ARDOUR::Session* sess, boost::function<PluginSelecto
 	processor_display.signal_enter_notify_event().connect (sigc::mem_fun(*this, &ProcessorBox::enter_notify), false);
 	processor_display.signal_leave_notify_event().connect (sigc::mem_fun(*this, &ProcessorBox::leave_notify), false);
 
-	processor_display.signal_key_press_event().connect (sigc::mem_fun(*this, &ProcessorBox::processor_key_press_event));
-	processor_display.signal_key_release_event().connect (sigc::mem_fun(*this, &ProcessorBox::processor_key_release_event));
-
 	processor_display.ButtonPress.connect (sigc::mem_fun (*this, &ProcessorBox::processor_button_press_event));
 	processor_display.ButtonRelease.connect (sigc::mem_fun (*this, &ProcessorBox::processor_button_release_event));
 
@@ -696,49 +693,19 @@ bool
 ProcessorBox::enter_notify (GdkEventCrossing*)
 {
 	_current_processor_box = this;
-	Keyboard::magic_widget_grab_focus ();
-	processor_display.grab_focus ();
-
 	return false;
 }
 
 bool
 ProcessorBox::leave_notify (GdkEventCrossing* ev)
 {
-	switch (ev->detail) {
-	case GDK_NOTIFY_INFERIOR:
-		break;
-	default:
-		Keyboard::magic_widget_drop_focus ();
-	}
-
 	return false;
 }
 
-bool
-ProcessorBox::processor_key_press_event (GdkEventKey *ev)
+void
+ProcessorBox::processor_operation (ProcessorOperation op) 
 {
-	switch (ev->keyval) {
-	case GDK_a:
-	case GDK_c:
-	case GDK_x:
-	case GDK_v:
-	case GDK_Up:
-	case GDK_Down:
-	case GDK_Delete:
-	case GDK_BackSpace:
-	case GDK_Return:
-	case GDK_slash:
-		/* do real stuff on key release */
-		return true;
-	}
-	
-	return false;
-}
 
-bool
-ProcessorBox::processor_key_release_event (GdkEventKey *ev)
-{
 	bool ret = false;
 	ProcSelection targets;
 
@@ -756,57 +723,32 @@ ProcessorBox::processor_key_release_event (GdkEventKey *ev)
 		}
 	}
 
+	switch (op) {
+	case ProcessorsSelectAll:
+		processor_display.select_all ();
+		break;
 
-	switch (ev->keyval) {
-	case GDK_a:
-		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
-			processor_display.select_all ();
-			ret = true;
+	case ProcessorsCopy:
+		copy_processors (targets);
+		break;
+
+	case ProcessorsCut:
+		cut_processors (targets);
+		break;
+
+	case ProcessorsPaste:
+		if (targets.empty()) {
+			paste_processors ();
+		} else {
+			paste_processors (targets.front());
 		}
 		break;
 
-	case GDK_c:
-		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
-			copy_processors (targets);
-			ret = true;
-		}
-		break;
-
-	case GDK_x:
-		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
-			cut_processors (targets);
-			ret = true;
-		}
-		break;
-
-	case GDK_v:
-		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
-			if (targets.empty()) {
-				paste_processors ();
-			} else {
-				paste_processors (targets.front());
-			}
-			ret = true;
-		}
-		break;
-
-	case GDK_Up:
-		processors_down ();
-		ret = true;
-		break;
-
-	case GDK_Down:
-		processors_up ();
-		ret = true;
-		break;
-
-	case GDK_Delete:
-	case GDK_BackSpace:
+	case ProcessorsDelete:
 		delete_processors (targets);
-		ret = true;
 		break;
 
-	case GDK_Return:
+	case ProcessorsToggleActive:
 		for (ProcSelection::iterator i = targets.begin(); i != targets.end(); ++i) {
 			if ((*i)->active()) {
 				(*i)->deactivate ();
@@ -817,16 +759,13 @@ ProcessorBox::processor_key_release_event (GdkEventKey *ev)
 		ret = true;
 		break;
 
-	case GDK_slash:
+	case ProcessorsAB:
 		ab_plugins ();
-		ret = true;
 		break;
 
 	default:
 		break;
 	}
-
-	return ret;
 }
 
 bool
@@ -1403,14 +1342,6 @@ ProcessorBox::can_cut () const
 }
 
 void
-ProcessorBox::cut_processors ()
-{
-	ProcSelection to_be_removed;
-
-	get_selected_processors (to_be_removed);
-}
-
-void
 ProcessorBox::cut_processors (const ProcSelection& to_be_removed)
 {
 	if (to_be_removed.empty()) {
@@ -1452,14 +1383,6 @@ ProcessorBox::cut_processors (const ProcSelection& to_be_removed)
 }
 
 void
-ProcessorBox::copy_processors ()
-{
-	ProcSelection to_be_copied;
-	get_selected_processors (to_be_copied);
-	copy_processors (to_be_copied);
-}
-
-void
 ProcessorBox::copy_processors (const ProcSelection& to_be_copied)
 {
 	if (to_be_copied.empty()) {
@@ -1492,14 +1415,6 @@ ProcessorBox::processors_down ()
 	/* unimplemented */
 }
 	
-
-void
-ProcessorBox::delete_processors ()
-{
-	ProcSelection to_be_deleted;
-	get_selected_processors (to_be_deleted);
-	delete_processors (to_be_deleted);
-}
 
 void
 ProcessorBox::delete_processors (const ProcSelection& targets)
@@ -2136,7 +2051,7 @@ ProcessorBox::rb_cut ()
 		return;
 	}
 
-	_current_processor_box->cut_processors ();
+	_current_processor_box->processor_operation (ProcessorsCut);
 }
 
 void
@@ -2146,7 +2061,7 @@ ProcessorBox::rb_delete ()
 		return;
 	}
 
-	_current_processor_box->delete_processors ();
+	_current_processor_box->processor_operation (ProcessorsDelete);
 }
 
 void
@@ -2155,7 +2070,7 @@ ProcessorBox::rb_copy ()
 	if (_current_processor_box == 0) {
 		return;
 	}
-	_current_processor_box->copy_processors ();
+	_current_processor_box->processor_operation (ProcessorsCopy);
 }
 
 void
@@ -2165,7 +2080,7 @@ ProcessorBox::rb_paste ()
 		return;
 	}
 
-	_current_processor_box->paste_processors ();
+	_current_processor_box->processor_operation (ProcessorsPaste);
 }
 
 void
@@ -2184,7 +2099,7 @@ ProcessorBox::rb_select_all ()
 		return;
 	}
 
-	_current_processor_box->select_all_processors ();
+	_current_processor_box->processor_operation (ProcessorsSelectAll);
 }
 
 void

@@ -17,17 +17,14 @@
 
 */
 
-#ifndef __ardour_gtk_route_selection_h__
-#define __ardour_gtk_route_selection_h__
+#ifndef __ardour_gtk_route_ui_selection_h__
+#define __ardour_gtk_route_ui_selection_h__
 
 
-#include <boost/shared_ptr.hpp>
-#include <list>
+#include <set>
 
-namespace ARDOUR {
-	class Route;
-}
+class RouteUI;
 
-struct RouteSelection : std::list<boost::shared_ptr<ARDOUR::Route> > {};
+struct RouteUISelection : std::set<RouteUI*> {};
 
-#endif /* __ardour_gtk_route_selection_h__ */
+#endif /* __ardour_gtk_route_ui_selection_h__ */

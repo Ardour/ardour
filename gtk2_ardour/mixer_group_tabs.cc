@@ -176,7 +176,9 @@ MixerGroupTabs::order_key () const
 RouteList
 MixerGroupTabs::selected_routes () const
 {
-	return _mixer->selection().routes;
+	RouteList rl;
+	/* XXX need a foreach here */
+	return rl;
 }
 
 void

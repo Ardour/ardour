@@ -1936,3 +1936,9 @@ RouteUI::bus_send_display_changed (boost::shared_ptr<Route> send_to)
 		send_blink_connection.disconnect ();
 	}
 }
+
+RouteGroup*
+RouteUI::route_group() const
+{
+	return _route->route_group();
+}

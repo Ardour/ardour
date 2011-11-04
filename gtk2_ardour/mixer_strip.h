@@ -92,7 +92,6 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void fast_update ();
 	void set_embedded (bool);
 
-	ARDOUR::RouteGroup* route_group() const;
 	void set_route (boost::shared_ptr<ARDOUR::Route>);
 	void set_button_names ();
 	void show_send (boost::shared_ptr<ARDOUR::Send>);
@@ -123,6 +122,14 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void parameter_changed (std::string);
 	void route_active_changed ();
 
+	void copy_processors ();
+	void cut_processors ();
+	void paste_processors ();
+	void select_all_processors ();
+	void delete_processors ();
+	void toggle_processors ();
+	void ab_plugins ();
+
   protected:
 	friend class Mixer_UI;
 	void set_packed (bool yn);
@@ -130,11 +137,6 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 
 	void set_selected(bool yn);
 	void set_stuff_from_route ();
-
-	bool on_leave_notify_event (GdkEventCrossing* ev);
-	bool on_enter_notify_event (GdkEventCrossing* ev);
-	bool on_key_press_event (GdkEventKey* ev);
-	bool on_key_release_event (GdkEventKey* ev);
 
   private:
 	Mixer_UI& _mixer;

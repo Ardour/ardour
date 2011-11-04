@@ -39,8 +39,8 @@
 #include "ardour/ardour.h"
 #include "ardour/session_handle.h"
 
-#include "route_processor_selection.h"
 #include "enums.h"
+#include "mixer_actor.h"
 
 namespace ARDOUR {
 	class Route;
@@ -52,7 +52,7 @@ class PluginSelector;
 class MixerGroupTabs;
 class MonitorSection;
 
-class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public ARDOUR::SessionHandlePtr
+class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public ARDOUR::SessionHandlePtr, public MixerActor
 {
   public:
 	Mixer_UI ();
@@ -80,8 +80,10 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 	void toggle_auto_rebinding ();
 	void set_auto_rebinding(bool);
 
-	RouteRedirectSelection& selection() { return _selection; }
         MonitorSection* monitor_section() const { return _monitor_section; }
+
+  protected:
+	void set_route_targets_for_operation ();
 
   private:
 	bool					_visible;
@@ -127,6 +129,8 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 
 	void add_strip (ARDOUR::RouteList&);
 	void remove_strip (MixerStrip *);
+
+	MixerStrip* strip_by_route (boost::shared_ptr<ARDOUR::Route>);
 
 	void hide_all_strips (bool with_select);
 	void unselect_all_strips();
@@ -241,8 +245,6 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 
 	bool strip_button_release_event (GdkEventButton*, MixerStrip*);
 
-	RouteRedirectSelection _selection;
-
 	Width _strip_width;
 
 	void sync_order_keys (std::string const &);
@@ -265,6 +267,7 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 	bool _in_group_rebuild_or_clear;
 
 	void update_title ();
+	MixerStrip* strip_by_x (int x);
 
 	friend class MixerGroupTabs;
 };

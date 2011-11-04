@@ -1634,11 +1634,6 @@ MixerStrip::reset_strip_style ()
 	}
 }
 
-RouteGroup*
-MixerStrip::route_group() const
-{
-	return _route->route_group();
-}
 
 void
 MixerStrip::engine_stopped ()
@@ -1858,117 +1853,6 @@ MixerStrip::set_button_names ()
 	}
 }
 
-bool
-MixerStrip::on_key_press_event (GdkEventKey* ev)
-{
-	GdkEventButton fake;
-	fake.type = GDK_BUTTON_PRESS;
-	fake.button = 1;
-	fake.state = ev->state;
-
-	switch (ev->keyval) {
-	case GDK_m:
-		mute_press (&fake);
-		return true;
-		break;
-
-	case GDK_s:
-		solo_press (&fake);
-		return true;
-		break;
-
-	case GDK_r:
-		rec_enable_press (&fake);
-		return true;
-		break;
-
-	case GDK_e:
-		show_sends_press (&fake);
-		return true;
-		break;
-
-	case GDK_g:
-		if (ev->state & Keyboard::PrimaryModifier) {
-			step_gain_down ();
-		} else {
-			step_gain_up ();
-		}
-		return true;
-		break;
-
-	case GDK_0:
-		if (_route) {
-			_route->set_gain (1.0, this);
-		}
-		return true;
-
-	default:
-		break;
-	}
-
-	return false;
-}
-
-
-bool
-MixerStrip::on_key_release_event (GdkEventKey* ev)
-{
-	GdkEventButton fake;
-	fake.type = GDK_BUTTON_RELEASE;
-	fake.button = 1;
-	fake.state = ev->state;
-
-	switch (ev->keyval) {
-	case GDK_m:
-		mute_release (&fake);
-		return true;
-		break;
-
-	case GDK_s:
-		solo_release (&fake);
-		return true;
-		break;
-
-	case GDK_r:
-		rec_enable_release (&fake);
-		return true;
-		break;
-
-	case GDK_e:
-		show_sends_release (&fake);
-		return true;
-		break;
-
-	case GDK_g:
-		return true;
-		break;
-
-	default:
-		break;
-	}
-
-	return false;
-}
-
-bool
-MixerStrip::on_enter_notify_event (GdkEventCrossing*)
-{
-	Keyboard::magic_widget_grab_focus ();
-	return false;
-}
-
-bool
-MixerStrip::on_leave_notify_event (GdkEventCrossing* ev)
-{
-	switch (ev->detail) {
-	case GDK_NOTIFY_INFERIOR:
-		break;
-	default:
-		Keyboard::magic_widget_drop_focus ();
-	}
-
-	return false;
-}
 
 PluginSelector*
 MixerStrip::plugin_selector()
@@ -2077,3 +1961,46 @@ MixerStrip::route_active_changed ()
 {
 	reset_strip_style ();
 }
+
+void
+MixerStrip::copy_processors ()
+{
+	processor_box.processor_operation (ProcessorBox::ProcessorsCopy);
+}
+
+void
+MixerStrip::cut_processors ()
+{
+	processor_box.processor_operation (ProcessorBox::ProcessorsCut);
+}
+
+void
+MixerStrip::paste_processors ()
+{
+	processor_box.processor_operation (ProcessorBox::ProcessorsPaste);
+}
+
+void
+MixerStrip::select_all_processors ()
+{
+	processor_box.processor_operation (ProcessorBox::ProcessorsSelectAll);
+}
+
+void
+MixerStrip::delete_processors ()
+{
+	processor_box.processor_operation (ProcessorBox::ProcessorsDelete);
+}
+
+void
+MixerStrip::toggle_processors ()
+{
+	processor_box.processor_operation (ProcessorBox::ProcessorsToggleActive);
+}
+
+void
+MixerStrip::ab_plugins ()
+{
+	processor_box.processor_operation (ProcessorBox::ProcessorsAB);
+}
+
