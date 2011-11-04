@@ -23,22 +23,14 @@
 
 using namespace ARDOUR;
 
+/** Set the route group; it can be set to 0 for `none' */
 void
-RouteGroupMember::join_route_group (RouteGroup *rg)
+RouteGroupMember::set_route_group (RouteGroup *rg)
 {
 	if (rg == _route_group) {
 		return;
 	}
 
 	_route_group = rg;
-	route_group_changed (rg); /* EMIT SIGNAL */
+	route_group_changed (); /* EMIT SIGNAL */
 }
-
-void
-RouteGroupMember::leave_route_group ()
-{
-	RouteGroup* rg = _route_group;
-	_route_group = 0;
-	route_group_changed (rg); /* EMIT SIGNAL */
-}
-

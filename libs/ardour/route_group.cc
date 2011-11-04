@@ -125,7 +125,7 @@ RouteGroup::~RouteGroup ()
 		RouteList::iterator tmp = i;
 		++tmp;
 
-		(*i)->leave_route_group ();
+		(*i)->set_route_group (0);
 
 		i = tmp;
 	}
@@ -147,7 +147,7 @@ RouteGroup::add (boost::shared_ptr<Route> r)
 	
 	routes->push_back (r);
 
-	r->join_route_group (this);
+	r->set_route_group (this);
 	r->DropReferences.connect_same_thread (*this, boost::bind (&RouteGroup::remove_when_going_away, this, boost::weak_ptr<Route> (r)));
 
 	_session.set_dirty ();
@@ -171,7 +171,7 @@ RouteGroup::remove (boost::shared_ptr<Route> r)
 	RouteList::iterator i;
 
 	if ((i = find (routes->begin(), routes->end(), r)) != routes->end()) {
-		r->leave_route_group ();
+		r->set_route_group (0);
 		routes->erase (i);
 		_session.set_dirty ();
 		RouteRemoved (this, boost::weak_ptr<Route> (r)); /* EMIT SIGNAL */

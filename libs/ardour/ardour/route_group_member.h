@@ -34,7 +34,7 @@ class RouteGroupMember
 	RouteGroup* route_group () const { return _route_group; }
 
 	/** Emitted when this member joins or leaves a route group */
-	PBD::Signal1<void, RouteGroup *> route_group_changed;
+	PBD::Signal0<void> route_group_changed;
 
   protected:
 	RouteGroup* _route_group;
@@ -42,8 +42,7 @@ class RouteGroupMember
   private:
 	friend class RouteGroup;
 
-	void join_route_group (RouteGroup*);
-	void leave_route_group ();
+	void set_route_group (RouteGroup *);
 };
 
 }
