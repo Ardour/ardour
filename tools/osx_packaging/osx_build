@@ -368,8 +368,12 @@ echo
 echo "Copying other stuff to $APPDIR  ..."
 
 #cp $BUILD_ROOT/gtk2_ardour/ergonomic-us.bindings  $Resources
+
 cp $BUILD_ROOT/gtk2_ardour/mnemonic-us.bindings  $Resources
+cp ../../gtk2_ardour/mixer.bindings $Resources
+cp ../../gtk2_ardour/step_editing.bindings $Resources
 cp $BUILD_ROOT/gtk2_ardour/ardour.menus $Resources
+
 if test x$SAE != x ; then
     cp $BUILD_ROOT/gtk2_ardour/SAE-de-keypad.bindings  $Resources
     cp $BUILD_ROOT/gtk2_ardour/SAE-de-nokeypad.bindings  $Resources
