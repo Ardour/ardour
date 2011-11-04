@@ -260,7 +260,7 @@ Bindings::add (KeyboardKey kb, Operation op, RefPtr<Action> what)
         if (k == kbm->end()) {
                 pair<KeyboardKey,RefPtr<Action> > newpair (kb, what);
                 kbm->insert (newpair);
-                cerr << "Bindings added " << kb.key() << " w/ " << kb.state() << " => " << what->get_name() << endl;
+                // cerr << "Bindings added " << kb.key() << " w/ " << kb.state() << " => " << what->get_name() << endl;
         } else {
                 k->second = what;
         }
@@ -333,7 +333,7 @@ Bindings::add (MouseButton bb, Operation op, RefPtr<Action> what)
         if (b == bbm->end()) {
                 pair<MouseButton,RefPtr<Action> > newpair (bb, what);
                 bbm->insert (newpair);
-                cerr << "Bindings added mouse button " << bb.button() << " w/ " << bb.state() << " => " << what->get_name() << endl;
+                // cerr << "Bindings added mouse button " << bb.button() << " w/ " << bb.state() << " => " << what->get_name() << endl;
         } else {
                 b->second = what;
         }
