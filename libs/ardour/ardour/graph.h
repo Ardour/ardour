@@ -48,7 +48,6 @@ class Route;
 class Session;
 
 typedef boost::shared_ptr<GraphNode> node_ptr_t;
-typedef boost::shared_ptr<Graph> graph_ptr_t;
 
 typedef std::list< node_ptr_t > node_list_t;
 typedef std::set< node_ptr_t > node_set_t;

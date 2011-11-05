@@ -24,7 +24,7 @@
 
 using namespace ARDOUR;
 
-GraphNode::GraphNode (graph_ptr_t graph)
+GraphNode::GraphNode (boost::shared_ptr<Graph> graph)
         : _graph(graph)
 {
 }
