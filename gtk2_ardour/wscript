@@ -624,12 +624,13 @@ def build(bld):
 
     # i18n
     if bld.is_defined('ENABLE_NLS'):
-        mo_files = bld.path.ant_glob ('po/*.mo')
+        mo_files = bld.path.ant_glob('po/*.mo')
         for mo in mo_files:
-            lang = os.path.basename (mo).replace ('.mo', '')
-            bld.install_as (os.path.join(bld.env['PREFIX'], 'share', 'locale',
-                                         lang, 'LC_MESSAGES', APPNAME + '.mo'),
-                            mo)
+            lang = os.path.basename(mo.srcpath()).replace('.mo', '')
+            bld.install_as(os.path.join(bld.env['PREFIX'], 'share', 'locale',
+                                        lang, 'LC_MESSAGES', APPNAME + '.mo'),
+                           mo)
 
 def i18n(bld):
-    autowaf.build_i18n(bld, srcdir, 'gtk2_ardour', APPNAME, gtk2_ardour_sources)
+    autowaf.build_i18n(bld, top, 'gtk2_ardour', APPNAME, gtk2_ardour_sources,
+                       'Paul Davis')

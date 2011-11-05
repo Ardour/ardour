@@ -407,7 +407,7 @@ def build(bld):
     if bld.is_defined('ENABLE_NLS'):
         mo_files = bld.path.ant_glob('po/*.mo')
         for mo in mo_files:
-            lang = os.path.basename(mo).replace('.mo', '')
+            lang = os.path.basename(mo.srcpath()).replace('.mo', '')
             bld.install_as(os.path.join(bld.env['PREFIX'], 'share', 'locale',
                                         lang, 'LC_MESSAGES', 'libardour3.mo'),
                            mo)
@@ -452,4 +452,5 @@ def shutdown():
     autowaf.shutdown()
 
 def i18n(bld):
-    autowaf.build_i18n (bld, '.', 'libs/ardour', APPNAME, libardour_sources)
+    autowaf.build_i18n(bld, top, 'libs/ardour', APPNAME, libardour_sources,
+                       'Paul Davis')
