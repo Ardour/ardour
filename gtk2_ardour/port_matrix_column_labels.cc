@@ -39,9 +39,8 @@ PortMatrixColumnLabels::PortMatrixColumnLabels (PortMatrix* m, PortMatrixBody* b
 void
 PortMatrixColumnLabels::compute_dimensions ()
 {
-	GdkPixmap* pm = gdk_pixmap_new (NULL, 1, 1, gdk_visual_get_depth (gdk_visual_get_system ()));
-	gdk_drawable_set_colormap (pm, gdk_colormap_get_system());
-	cairo_t* cr = gdk_cairo_create (pm);
+	cairo_surface_t* surface = cairo_image_surface_create (CAIRO_FORMAT_RGB24, 200, 200);
+	cairo_t* cr = cairo_create (surface);
 
 	/* width of the longest bundle name */
 	_longest_bundle_name = 0;
@@ -95,7 +94,7 @@ PortMatrixColumnLabels::compute_dimensions ()
 	}
 
 	cairo_destroy (cr);
-	g_object_unref (pm);
+	cairo_surface_destroy (surface);
 
 	/* height of the whole thing */
 
