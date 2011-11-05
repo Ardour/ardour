@@ -238,8 +238,9 @@ Graph::dec_ref()
 {
         if (g_atomic_int_dec_and_test (&_finished_refcount)) {
 
-                // ok... this cycle is finished now.
-                // we are the only thread alive.
+		/* We have run all the nodes that are at the `output' end of
+		   the graph, so there is nothing more to do this time around.
+		*/
 
                 this->restart_cycle();
         }
@@ -306,11 +307,19 @@ Graph::rechain (boost::shared_ptr<RouteList> routelist)
         DEBUG_TRACE (DEBUG::Graph, string_compose ("============== setup %1\n", chain));
         // set all refcounts to 0;
 
+	/* This will become the number of nodes that do not feed any other node;
+	   once we have processed this number of those nodes, we have finished.
+	*/
         _init_finished_refcount[chain] = 0;
+
+	/* This will become a list of nodes that are not fed by another node, ie
+	   those at the `input' end.
+	*/
         _init_trigger_list[chain].clear();
 
         _nodes_rt[chain].clear();
 
+	/* Clear things out, and make _nodes_rt[chain] a copy of routelist */
         for (RouteList::iterator ri=routelist->begin(); ri!=routelist->end(); ri++) {
                 node_ptr_t n = boost::dynamic_pointer_cast<GraphNode> (*ri);
 
@@ -322,8 +331,20 @@ Graph::rechain (boost::shared_ptr<RouteList> routelist)
         // now add refs for the connections.
 
         for (ni=_nodes_rt[chain].begin(); ni!=_nodes_rt[chain].end(); ni++) {
+
+		/* We will set this to true if the node *ni is directly or
+		   indirectly fed by anything (without feedback)
+		*/
                 bool has_input  = false;
+
+		/* We will set this to true if the node *ni directly feeds
+		   anything (without feedback)
+		*/
                 bool has_output = false;
+
+		/* We will also set up *ni's _activation_set to contain any nodes
+		   that it directly feeds.
+		*/
 
                 boost::shared_ptr<Route> rp = boost::dynamic_pointer_cast<Route>( *ni);
 
@@ -346,6 +367,7 @@ Graph::rechain (boost::shared_ptr<RouteList> routelist)
                         }
                 }
 
+		/* Increment the refcount of any route that we directly feed */
                 for (node_set_t::iterator ai=(*ni)->_activation_set[chain].begin(); ai!=(*ni)->_activation_set[chain].end(); ai++) {
                         (*ai)->_init_refcount[chain] += 1;
                 }

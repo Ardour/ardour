@@ -58,6 +58,7 @@ GraphNode::finish (int chain)
         }
 
         if (!feeds_somebody) {
+		/* This node does not feed anybody, so decrement the graph's finished count */
                 _graph->dec_ref();
         }
 }
