@@ -223,7 +223,7 @@ Graph::prep()
 
 	/* Trigger the initial nodes for processing, which are the ones at the `input' end */
         for (i=_init_trigger_list[chain].begin(); i!=_init_trigger_list[chain].end(); i++) {
-                this->trigger( i->get() );
+                trigger (i->get ());
         }
 }
 
@@ -247,7 +247,7 @@ Graph::dec_ref()
 		   the graph, so there is nothing more to do this time around.
 		*/
 
-                this->restart_cycle();
+		restart_cycle ();
         }
 }
 
@@ -266,7 +266,7 @@ Graph::restart_cycle()
                 return;
         }
 
-        this->prep();
+	prep ();
 
         if (_graph_empty) {
                 goto again;
@@ -280,12 +280,14 @@ static bool
 is_feedback (boost::shared_ptr<RouteList> routelist, Route* from, boost::shared_ptr<Route> to)
 {
         for (RouteList::iterator ri=routelist->begin(); ri!=routelist->end(); ri++) {
-                if ((*ri).get() == from)
+                if ((*ri).get() == from) {
                         return false;
-                if ((*ri) == to)
+		}
+                if ((*ri) == to) {
                         return true;
+		}
         }
-        assert(0);
+
         return false;
 }
 
@@ -293,12 +295,14 @@ static bool
 is_feedback (boost::shared_ptr<RouteList> routelist, boost::shared_ptr<Route> from, Route* to)
 {
         for (RouteList::iterator ri=routelist->begin(); ri!=routelist->end(); ri++) {
-                if ((*ri).get() == to)
+                if ((*ri).get() == to) {
                         return true;
-                if ((*ri) == from)
+		}
+                if ((*ri) == from) {
                         return false;
+		}
         }
-        assert(0);
+
         return false;
 }
 
@@ -377,11 +381,13 @@ Graph::rechain (boost::shared_ptr<RouteList> routelist)
                         (*ai)->_init_refcount[chain] += 1;
                 }
 
-                if (!has_input)
+                if (!has_input) {
                         _init_trigger_list[chain].push_back (*ni);
+		}
 
-                if (!has_output)
+                if (!has_output) {
                         _init_finished_refcount[chain] += 1;
+		}
         }
 
         _pending_chain = chain;
@@ -502,7 +508,7 @@ Graph::main_thread()
                 return;
         }
 
-        this->prep();
+	prep ();
 
         if (_graph_empty && !_quit_threads) {
                 _callback_done_sem.signal ();
