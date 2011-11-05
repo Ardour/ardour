@@ -705,8 +705,6 @@ ProcessorBox::leave_notify (GdkEventCrossing* ev)
 void
 ProcessorBox::processor_operation (ProcessorOperation op) 
 {
-
-	bool ret = false;
 	ProcSelection targets;
 
 	get_selected_processors (targets);
@@ -756,7 +754,6 @@ ProcessorBox::processor_operation (ProcessorOperation op)
 				(*i)->activate ();
 			}
 		}
-		ret = true;
 		break;
 
 	case ProcessorsAB:
