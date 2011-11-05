@@ -108,12 +108,16 @@ private:
 
 	PBD::ProcessSemaphore _execution_sem;
 
+	/** Signalled to start a run of the graph for a process callback */
 	PBD::ProcessSemaphore _callback_start_sem;
 	PBD::ProcessSemaphore _callback_done_sem;
 	PBD::ProcessSemaphore _cleanup_sem;
 
+	/** The number of processing threads that are asleep */
 	volatile gint _execution_tokens;
+	/** The number of unprocessed nodes that do not feed any other node; updated during processing */
 	volatile gint _finished_refcount;
+	/** The initial number of nodes that do not feed any other node (for each chain) */
 	volatile gint _init_finished_refcount[2];
 
 	bool _graph_empty;
@@ -135,7 +139,7 @@ private:
 
 	bool _process_silent;
 	bool _process_noroll;
-	int	 _process_retval;
+	int  _process_retval;
 	bool _process_need_butler;
 };
 

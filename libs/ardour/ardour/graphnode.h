@@ -53,6 +53,7 @@ class GraphNode
     private:
 	friend class Graph;
 
+	/** Nodes that we directly feed */
 	node_set_t  _activation_set[2];
 
 	boost::shared_ptr<Graph> _graph;

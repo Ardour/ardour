@@ -93,6 +93,7 @@ Graph::parameter_changed (std::string param)
         }
 }
 
+/** Set up threads for running the graph */
 void
 Graph::reset_thread_list ()
 {
@@ -220,6 +221,7 @@ Graph::prep()
         }
         _finished_refcount = _init_finished_refcount[chain];
 
+	/* Trigger the initial nodes for processing, which are the ones at the `input' end */
         for (i=_init_trigger_list[chain].begin(); i!=_init_trigger_list[chain].end(); i++) {
                 this->trigger( i->get() );
         }
@@ -233,6 +235,9 @@ Graph::trigger (GraphNode* n)
         pthread_mutex_unlock (&_trigger_mutex);
 }
 
+/** Called when a node at the `output' end of the chain (ie one that has no-one to feed)
+ *  is finished.
+ */
 void
 Graph::dec_ref()
 {
@@ -254,7 +259,7 @@ Graph::restart_cycle()
   again:
         _callback_done_sem.signal ();
 
-        // block until we are triggered.
+        /* Block until the a process callback triggers us */
         _callback_start_sem.wait();
 
         if (_quit_threads) {
@@ -383,6 +388,9 @@ Graph::rechain (boost::shared_ptr<RouteList> routelist)
         dump(chain);
 }
 
+/** Called by both the main thread and all helpers.
+ *  @return true to quit, false to carry on.
+ */
 bool
 Graph::run_one()
 {
@@ -396,10 +404,14 @@ Graph::run_one()
                 to_run = 0;
         }
 
+	/* the number of threads that are asleep */
 	int et = _execution_tokens;
+	/* the number of nodes that need to be run */
 	int ts = _trigger_queue.size();
 
+	/* hence how many threads to wake up */
         int wakeup = min (et, ts);
+	/* update the number of threads that will still be sleeping */
         _execution_tokens -= wakeup;
 
         DEBUG_TRACE(DEBUG::ProcessThreads, string_compose ("%1 signals %2\n", pthread_self(), wakeup));
@@ -470,6 +482,7 @@ Graph::helper_thread()
         pt->drop_buffers();
 }
 
+/** Here's the main graph thread */
 void
 Graph::main_thread()
 {
@@ -482,6 +495,7 @@ Graph::main_thread()
 
   again:
         _callback_start_sem.wait ();
+	
 	DEBUG_TRACE(DEBUG::ProcessThreads, "main thread is awake\n");
 
         if (_quit_threads) {
@@ -492,10 +506,11 @@ Graph::main_thread()
 
         if (_graph_empty && !_quit_threads) {
                 _callback_done_sem.signal ();
-                DEBUG_TRACE(DEBUG::ProcessThreads, "main thread sees graph done, goes back to slee\n");
+                DEBUG_TRACE(DEBUG::ProcessThreads, "main thread sees graph done, goes back to sleep\n");
                 goto again;
         }
 
+	/* This loop will run forever */
         while (1) {
 		DEBUG_TRACE(DEBUG::ProcessThreads, "main thread runs one graph node\n");
                 if (run_one()) {

@@ -36,14 +36,22 @@ GraphNode::~GraphNode()
 void
 GraphNode::prep (int chain)
 {
+	/* This is the number of nodes that directly feed us */
         _refcount = _init_refcount[chain];
 }
 
+/** Called by another node to tell us that one of the nodes that feed us
+ *  has been processed.
+ */
 void
 GraphNode::dec_ref()
 {
-        if (g_atomic_int_dec_and_test (&_refcount))
+        if (g_atomic_int_dec_and_test (&_refcount)) {
+		/* All the nodes that feed us are done, so we can queue this node
+		   for processing.
+		*/
                 _graph->trigger (this);
+	}
 }
 
 void
@@ -52,6 +60,7 @@ GraphNode::finish (int chain)
         node_set_t::iterator i;
         bool feeds_somebody = false;
 
+	/* Tell the nodes that we feed that we've finished */
         for (i=_activation_set[chain].begin(); i!=_activation_set[chain].end(); i++) {
                 (*i)->dec_ref();
                 feeds_somebody = true;
