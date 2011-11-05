@@ -608,6 +608,8 @@ def build(bld):
     # not modified at present
     bld.install_files(os.path.join(bld.env['SYSCONFDIR'], 'ardour3'),
                       'step_editing.bindings')
+    bld.install_files(os.path.join(bld.env['SYSCONFDIR'], 'ardour3'),
+                      'mixer.bindings')
 
     # Icons/Images
     bld.install_files('${DATADIR}/ardour3/icons', bld.path.ant_glob('icons/*.png'))
