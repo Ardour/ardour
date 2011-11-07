@@ -318,10 +318,20 @@ ARDOUR_UI::setup_transport ()
 
 	// transport_tearoff_hbox.pack_start (*svbox, false, false, 3);
 
+	Glib::RefPtr<SizeGroup> transport_button_size_group1 = SizeGroup::create (SIZE_GROUP_HORIZONTAL);
+	transport_button_size_group1->add_widget (goto_start_button);
+	transport_button_size_group1->add_widget (goto_end_button);
+	transport_button_size_group1->add_widget (auto_loop_button);
+	transport_button_size_group1->add_widget (rec_button);
+
 	if (Profile->get_sae()) {
 		tbox->pack_start (auto_loop_button);
 		tbox->pack_start (roll_button);
+		transport_button_size_group1->add_widget (play_selection_button);
+		transport_button_size_group1->add_widget (roll_button);
+
 	} else {
+
 		tbox->pack_start (auto_loop_button, false, false);
 
 		Frame* jpframe = manage (new Frame);
@@ -335,7 +345,13 @@ ARDOUR_UI::setup_transport ()
 		jpbox->pack_start (roll_button, false, false);
 
 		tbox->pack_start (*jpframe, false, false);
+
+		Glib::RefPtr<SizeGroup> transport_button_size_group2 = SizeGroup::create (SIZE_GROUP_HORIZONTAL);
+		transport_button_size_group2->add_widget (play_selection_button);
+		transport_button_size_group2->add_widget (join_play_range_button);
+		transport_button_size_group2->add_widget (roll_button);
 	}
+
 	tbox->pack_start (stop_button, false, false);
 	tbox->pack_start (rec_button, false, false, 6);
 
