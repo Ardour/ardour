@@ -31,23 +31,23 @@ GetOptions ("platform=s" => \$platform,
 
 if ($platform eq "darwin") {
 
-    $gtk_modifier_map{'PRIMARY'} = 'meta';
-    $gtk_modifier_map{'SECONDARY'} = 'Mod1';
+    $gtk_modifier_map{'PRIMARY'} = 'Meta';
+    $gtk_modifier_map{'SECONDARY'} = 'Control';
     $gtk_modifier_map{'TERTIARY'} = 'Shift';
-    $gtk_modifier_map{'LEVEL4'} = 'Control';
-    $gtk_modifier_map{'WINDOW'} = 'Mod1';
+    $gtk_modifier_map{'LEVEL4'} = 'Mod1';
+    $gtk_modifier_map{'WINDOW'} = 'Control';
 
     $cs_modifier_map{'PRIMARY'} = 'Command';
-    $cs_modifier_map{'SECONDARY'} = 'Opt';
+    $cs_modifier_map{'SECONDARY'} = 'Control';
     $cs_modifier_map{'TERTIARY'} = 'Shift';
-    $cs_modifier_map{'LEVEL4'} = 'Control';
-    $cs_modifier_map{'WINDOW'} = 'Opt';
+    $cs_modifier_map{'LEVEL4'} = 'Mod1';
+    $cs_modifier_map{'WINDOW'} = 'Control';
 
     $mouse_modifier_map{'PRIMARY'} = 'Cmd';
-    $mouse_modifier_map{'SECONDARY'} = 'Opt';
+    $mouse_modifier_map{'SECONDARY'} = 'Ctrl';
     $mouse_modifier_map{'TERTIARY'} = 'Shift';
-    $mouse_modifier_map{'LEVEL4'} = 'Control';
-    $mouse_modifier_map{'WINDOW'} = 'Opt';
+    $mouse_modifier_map{'LEVEL4'} = 'Opt';
+    $mouse_modifier_map{'WINDOW'} = 'Ctrl';
 
 } else {
 

@@ -57,19 +57,19 @@ guint Keyboard::snap_mod = GDK_MOD3_MASK;
 
 #ifdef GTKOSX
 
-guint Keyboard::PrimaryModifier = GDK_META_MASK;   // Command
-guint Keyboard::SecondaryModifier = GDK_MOD1_MASK; // Alt/Option
+uint Keyboard::PrimaryModifier = GDK_META_MASK;   // Command
+guint Keyboard::SecondaryModifier = GDK_CONTROL_MASK; // Alt/Option
 guint Keyboard::TertiaryModifier = GDK_SHIFT_MASK; // Shift
-guint Keyboard::Level4Modifier = GDK_CONTROL_MASK; // Control
-guint Keyboard::CopyModifier = GDK_MOD1_MASK;      // Alt/Option
+guint Keyboard::Level4Modifier = GDK_MOD1_MASK; // Control
+guint Keyboard::CopyModifier = GDK_CONTROL_MASK;      // Control
 guint Keyboard::RangeSelectModifier = GDK_SHIFT_MASK;
 guint Keyboard::button2_modifiers = Keyboard::SecondaryModifier|Keyboard::Level4Modifier;
 
 const char* Keyboard::primary_modifier_name() { return _("Command"); }
-const char* Keyboard::secondary_modifier_name() { return _("Option"); }
+const char* Keyboard::secondary_modifier_name() { return _("Control"); }
 const char* Keyboard::tertiary_modifier_name() { return _("Shift"); }
-const char* Keyboard::level4_modifier_name() { return _("Control"); }
-const char* Keyboard::copy_modifier_name() { return _("Mod1"); }
+const char* Keyboard::level4_modifier_name() { return _("Option"); }
+const char* Keyboard::copy_modifier_name() { return _("Control"); }
 const char* Keyboard::rangeselect_modifier_name() { return _("Shift"); }
 
 #else
