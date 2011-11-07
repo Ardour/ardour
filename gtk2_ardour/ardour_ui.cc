@@ -138,13 +138,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	, gui_object_state (new GUIObjectState)
 	, primary_clock (new AudioClock (X_("primary"), false, X_("TransportClockDisplay"), true, true, false, true))
 	, secondary_clock (new AudioClock (X_("secondary"), false, X_("SecondaryClockDisplay"), true, true, false, true))
-	, preroll_clock (new AudioClock (X_("preroll"), false, X_("PreRollClock"), true, false, true))
-	, postroll_clock (new AudioClock (X_("postroll"), false, X_("PostRollClock"), true, false, true))
-
-	  /* preroll stuff */
-
-	, preroll_button (_("pre\nroll"))
-	, postroll_button (_("post\nroll"))
 
 	  /* big clock */
 
@@ -159,14 +152,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	, auto_loop_controllable (new TransportControllable ("transport auto loop", *this, TransportControllable::AutoLoop))
 	, play_selection_controllable (new TransportControllable ("transport play selection", *this, TransportControllable::PlaySelection))
 	, rec_controllable (new TransportControllable ("transport rec-enable", *this, TransportControllable::RecordEnable))
-
-	, roll_button (roll_controllable)
-	, stop_button (stop_controllable)
-	, goto_start_button (goto_start_controllable)
-	, goto_end_button (goto_end_controllable)
-	, auto_loop_button (auto_loop_controllable)
-	, play_selection_button (play_selection_controllable)
-	, rec_button (rec_controllable)
 
 	, auto_return_button (_("Auto Return"))
 	, auto_play_button (_("Auto Play"))
@@ -235,14 +220,22 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	original_big_clock_height = -1;
 	original_big_clock_font_size = 0;
 
-	roll_button.unset_flags (Gtk::CAN_FOCUS);
-	stop_button.unset_flags (Gtk::CAN_FOCUS);
-	goto_start_button.unset_flags (Gtk::CAN_FOCUS);
-	goto_end_button.unset_flags (Gtk::CAN_FOCUS);
-	auto_loop_button.unset_flags (Gtk::CAN_FOCUS);
-	play_selection_button.unset_flags (Gtk::CAN_FOCUS);
-	rec_button.unset_flags (Gtk::CAN_FOCUS);
-	join_play_range_button.unset_flags (Gtk::CAN_FOCUS);
+	roll_button.set_controllable (roll_controllable);
+	stop_button.set_controllable (stop_controllable);
+	goto_start_button.set_controllable (goto_start_controllable);
+	goto_end_button.set_controllable (goto_end_controllable);
+	auto_loop_button.set_controllable (auto_loop_controllable);
+	play_selection_button.set_controllable (play_selection_controllable);
+	rec_button.set_controllable (rec_controllable);
+
+	roll_button.set_name ("transport button");
+	stop_button.set_name ("transport button");
+	goto_start_button.set_name ("transport button");
+	goto_end_button.set_name ("transport button");
+	auto_loop_button.set_name ("transport button");
+	play_selection_button.set_name ("transport button");
+	rec_button.set_name ("transport recenable button");
+
 	last_configure_time= 0;
 	last_peak_grab = 0;
 
@@ -1714,12 +1707,12 @@ ARDOUR_UI::transport_roll ()
 		if (!Config->get_seamless_loop()) {
 			_session->request_play_loop (false, true);
 		}
-	} else if (_session->get_play_range () && !join_play_range_button.get_active()) {
+	} else if (_session->get_play_range () && !join_play_range_button.active_state()) {
 		/* stop playing a range if we currently are */
 		_session->request_play_range (0, true);
 	}
 
-	if (join_play_range_button.get_active()) {
+	if (join_play_range_button.active_state()) {
 		_session->request_play_range (&editor->get_selection().time, true);
 	}
 
@@ -1778,7 +1771,7 @@ ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 		if (rolling) {
 			_session->request_stop (with_abort, true);
 		} else {
-			if (join_play_range_button.get_active()) {
+			if (join_play_range_button.active_state()) {
 				_session->request_play_range (&editor->get_selection().time, true);
 			}
 
@@ -1909,10 +1902,10 @@ void
 ARDOUR_UI::map_transport_state ()
 {
 	if (!_session) {
-		auto_loop_button.set_visual_state (0);
-		play_selection_button.set_visual_state (0);
-		roll_button.set_visual_state (0);
-		stop_button.set_visual_state (1);
+		auto_loop_button.unset_active_state ();
+		play_selection_button.unset_active_state ();
+		roll_button.unset_active_state ();
+		stop_button.set_active_state (Gtkmm2ext::Active);
 		return;
 	}
 
@@ -1926,37 +1919,37 @@ ARDOUR_UI::map_transport_state ()
 
 		if (_session->get_play_range()) {
 
-			play_selection_button.set_visual_state (1);
-			roll_button.set_visual_state (0);
-			auto_loop_button.set_visual_state (0);
+			play_selection_button.set_active_state (Gtkmm2ext::Active);
+			roll_button.unset_active_state ();
+			auto_loop_button.unset_active_state ();
 
 		} else if (_session->get_play_loop ()) {
 
-			auto_loop_button.set_visual_state (1);
-			play_selection_button.set_visual_state (0);
-			roll_button.set_visual_state (0);
+			auto_loop_button.set_active_state (Gtkmm2ext::Active);
+			play_selection_button.unset_active_state ();
+			roll_button.unset_active_state ();
 
 		} else {
 
-			roll_button.set_visual_state (1);
-			play_selection_button.set_visual_state (0);
-			auto_loop_button.set_visual_state (0);
+			roll_button.set_active_state (Gtkmm2ext::Active);
+			play_selection_button.unset_active_state ();
+			auto_loop_button.unset_active_state ();
 		}
 
-		if (join_play_range_button.get_active()) {
+		if (join_play_range_button.active_state()) {
 			/* light up both roll and play-selection if they are joined */
-			roll_button.set_visual_state (1);
-			play_selection_button.set_visual_state (1);
+			roll_button.set_active_state (Gtkmm2ext::Active);
+			play_selection_button.set_active_state (Gtkmm2ext::Active);
 		}
 
-		stop_button.set_visual_state (0);
+		stop_button.unset_active_state ();
 
 	} else {
 
-		stop_button.set_visual_state (1);
-		roll_button.set_visual_state (0);
-		play_selection_button.set_visual_state (0);
-		auto_loop_button.set_visual_state (0);
+		stop_button.set_active_state (Gtkmm2ext::Active);
+		roll_button.unset_active_state ();
+		play_selection_button.unset_active_state ();
+		auto_loop_button.unset_active_state ();
 		update_disk_space ();
 	}
 }
@@ -2382,14 +2375,14 @@ ARDOUR_UI::transport_rec_enable_blink (bool onoff)
 
 	if (r == Session::Enabled || (r == Session::Recording && !h)) {
 		if (onoff) {
-			rec_button.set_visual_state (2);
+			rec_button.set_active_state (Active);
 		} else {
-			rec_button.set_visual_state (0);
+			rec_button.set_active_state (Mid);
 		}
 	} else if (r == Session::Recording && h) {
-		rec_button.set_visual_state (1);
+		rec_button.set_active_state (Mid);
 	} else {
-		rec_button.set_visual_state (0);
+		rec_button.unset_active_state ();
 	}
 }
 
@@ -3607,10 +3600,10 @@ ARDOUR_UI::step_edit_status_change (bool yn)
 	// we make insensitive
 
 	if (yn) {
-		rec_button.set_visual_state (3);
+		rec_button.set_active_state (Mid);
 		rec_button.set_sensitive (false);
 	} else {
-		rec_button.set_visual_state (0);
+		rec_button.unset_active_state ();;
 		rec_button.set_sensitive (true);
 	}
 }

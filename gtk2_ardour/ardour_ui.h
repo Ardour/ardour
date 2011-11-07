@@ -64,6 +64,7 @@
 #include "ardour/session_handle.h"
 
 #include "ardour_dialog.h"
+#include "ardour_button.h"
 #include "editing.h"
 #include "ui_config.h"
 #include "window_proxy.h"
@@ -201,8 +202,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	AudioClock* primary_clock;
 	AudioClock* secondary_clock;
-	AudioClock* preroll_clock;
-	AudioClock* postroll_clock;
 
 	TimeInfoBox* time_info_box;
 
@@ -300,9 +299,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void                goto_mixer_window ();
 	void                toggle_mixer_window ();
 	void                toggle_mixer_on_top ();
-
-	Gtk::ToggleButton   preroll_button;
-	Gtk::ToggleButton   postroll_button;
 
 	int  setup_windows ();
 	void setup_transport ();
@@ -424,14 +420,14 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void set_transport_controllable_state (const XMLNode&);
 	XMLNode& get_transport_controllable_state ();
 
-	BindableButton roll_button;
-	BindableButton stop_button;
-	BindableButton goto_start_button;
-	BindableButton goto_end_button;
-	BindableButton auto_loop_button;
-	BindableButton play_selection_button;
-	BindableButton rec_button;
-	BindableToggleButton join_play_range_button;
+	ArdourButton roll_button;
+	ArdourButton stop_button;
+	ArdourButton goto_start_button;
+	ArdourButton goto_end_button;
+	ArdourButton auto_loop_button;
+	ArdourButton play_selection_button;
+	ArdourButton rec_button;
+	ArdourButton join_play_range_button;
 
 	void toggle_external_sync ();
 	void toggle_time_master ();
