@@ -161,7 +161,7 @@ This mode provides many different operations on both regions and control points,
 @sess|Main/Open|<@PRIMARY@>o|open an existing session
 @sess|Main/Recent|<@PRIMARY@><@TERTIARY@>o|open a recent session
 @wvis|Common/ToggleOptionsEditor|<@WINDOW@>o|toggle preferences dialog
-@rop|Region/naturalize-region|<@LEVEL4@>o|move to original position
+@rop|Region/naturalize-region|<@SECONDARY@>o|move to original position
 @trans|Editor/set-playhead|p|toggle auto-punch status
 @select|Editor/select-all-before-playhead|<@PRIMARY@>p|all before playhead
 @wvis|Common/toggle-audio-connection-manager|<@WINDOW@>p|toggle global audio patchbay
