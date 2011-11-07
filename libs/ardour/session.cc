@@ -1347,7 +1347,7 @@ Session::resort_routes_using (boost::shared_ptr<RouteList> r)
 		trace_terminal (*i, *i);
 	}
 
-	boost::shared_ptr<RouteList> sorted_routes = topographical_sort (r, edges);
+	boost::shared_ptr<RouteList> sorted_routes = topological_sort (r, edges);
 	route_graph->rechain (sorted_routes);
 
 #ifndef NDEBUG

@@ -148,7 +148,7 @@ struct RouteRecEnabledComparator
 
 		
 boost::shared_ptr<RouteList>
-ARDOUR::topographical_sort (
+ARDOUR::topological_sort (
 	boost::shared_ptr<RouteList> routes,
 	DAGEdges edges
 	)
@@ -165,7 +165,10 @@ ARDOUR::topographical_sort (
 		}
 	}
 
-	/* Sort the initial queue so that non-rec-enabled routes are run first */
+	/* Sort the initial queue so that non-rec-enabled routes are run first.
+	   This is so that routes can record things coming from other routes
+	   via external connections.
+	*/
 	queue.sort (RouteRecEnabledComparator ());
 
 	/* Do the sort: algorithm is Kahn's from Wikipedia.

@@ -47,7 +47,7 @@ private:
 	EdgeMap _to_from;
 };
 
-boost::shared_ptr<RouteList> topographical_sort (
+boost::shared_ptr<RouteList> topological_sort (
 	boost::shared_ptr<RouteList>,
 	DAGEdges
 	);
