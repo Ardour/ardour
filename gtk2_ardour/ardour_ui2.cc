@@ -314,12 +314,13 @@ ARDOUR_UI::setup_transport ()
 	alert_box.pack_start (solo_alert_button, false, false);
 	alert_box.pack_start (auditioning_alert_button, false, false);
 
-	HBox* transport_hbox = manage (new HBox);
+	HBox* tbox = manage (new HBox);
+	tbox->set_spacing (2);
 
 	transport_tearoff_hbox.set_border_width (3);
 
-	transport_hbox->pack_start (goto_start_button, false, false);
-	transport_hbox->pack_start (goto_end_button, false, false);
+	tbox->pack_start (goto_start_button, false, false);
+	tbox->pack_start (goto_end_button, false, false);
 
 	/* translators: Egternal is "External" with a descender character */
 	set_size_request_to_display_given_text (sync_button, X_("Egternal"), 4, 10);
@@ -327,25 +328,25 @@ ARDOUR_UI::setup_transport ()
 	// transport_tearoff_hbox.pack_start (*svbox, false, false, 3);
 
 	if (Profile->get_sae()) {
-		transport_hbox->pack_start (auto_loop_button);
-		transport_hbox->pack_start (roll_button);
+		tbox->pack_start (auto_loop_button);
+		tbox->pack_start (roll_button);
 	} else {
-		transport_hbox->pack_start (auto_loop_button, false, false);
+		tbox->pack_start (auto_loop_button, false, false);
 
 		Frame* jpframe = manage (new Frame);
 		HBox* jpbox = manage (new HBox);
 
 		jpframe->add (*jpbox);
 		jpframe->set_shadow_type (SHADOW_NONE);
-
+		
 		jpbox->pack_start (play_selection_button, false, false);
 		jpbox->pack_start (join_play_range_button, false, false);
 		jpbox->pack_start (roll_button, false, false);
 
-		transport_hbox->pack_start (*jpframe, false, false);
+		tbox->pack_start (*jpframe, false, false);
 	}
-	transport_hbox->pack_start (stop_button, false, false);
-	transport_hbox->pack_start (rec_button, false, false, 6);
+	tbox->pack_start (stop_button, false, false);
+	tbox->pack_start (rec_button, false, false, 6);
 
 	HBox* clock_box = manage (new HBox);
 	clock_box->set_border_width (2);
@@ -364,7 +365,7 @@ ARDOUR_UI::setup_transport ()
 	transport_vbox->set_name ("TransportBase");
 	transport_vbox->set_border_width (3);
 	transport_vbox->set_spacing (3);
-	transport_vbox->pack_start (*transport_hbox, true, true, 0);
+	transport_vbox->pack_start (*tbox, true, true, 0);
 	transport_vbox->pack_start (*shuttle_box, false, false, 0);
 
 	transport_tearoff_hbox.pack_start (*transport_vbox, false, false, 0);
