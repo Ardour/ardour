@@ -43,6 +43,7 @@ AmbiguousFileDialog::AmbiguousFileDialog (const string& file, const vector<strin
 	get_vbox()->pack_start (*manage (new Label (_("\n\nPlease select the path that you want to get the file from."))));
 
 	add_button (_("Done"), RESPONSE_OK);
+	set_default_response (RESPONSE_OK);
 
 	show_all ();
 }
