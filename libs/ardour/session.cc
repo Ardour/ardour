@@ -86,6 +86,7 @@
 #include "ardour/recent_sessions.h"
 #include "ardour/region_factory.h"
 #include "ardour/return.h"
+#include "ardour/route_dag.h"
 #include "ardour/route_group.h"
 #include "ardour/send.h"
 #include "ardour/session.h"
@@ -1222,56 +1223,6 @@ Session::set_block_size (pframes_t nframes)
 	}
 }
 
-struct RouteSorter {
-    /** @return true to run r1 before r2, otherwise false */
-    bool sort_by_rec_enabled (const boost::shared_ptr<Route>& r1, const boost::shared_ptr<Route>& r2) {
-            if (r1->record_enabled()) {
-                    if (r2->record_enabled()) {
-                            /* both rec-enabled, just use signal order */
-                            return r1->order_key(N_("signal")) < r2->order_key(N_("signal"));
-                    } else {
-                            /* r1 rec-enabled, r2 not rec-enabled, run r2 early */
-                            return false;
-                    }
-            } else {
-                    if (r2->record_enabled()) {
-                            /* r2 rec-enabled, r1 not rec-enabled, run r1 early */
-                            return true;
-                    } else {
-                            /* neither rec-enabled, use signal order */
-                            return r1->order_key(N_("signal")) < r2->order_key(N_("signal"));
-                    }
-            }
-    }
-
-    bool operator() (boost::shared_ptr<Route> r1, boost::shared_ptr<Route> r2) {
-	    if (r2->feeds (r1)) {
-		    /* r1 fed by r2; run r2 early */
-		    return false;
-	    } else if (r1->feeds (r2)) {
-		    /* r2 fed by r1; run r1 early */
-		    return true;
-	    } else {
-		    if (r1->not_fed ()) {
-			    if (r2->not_fed ()) {
-				    /* no ardour-based connections inbound to either route. */
-                                    return sort_by_rec_enabled (r1, r2);
-			    } else {
-				    /* r2 has connections, r1 does not; run r1 early */
-				    return true;
-			    }
-		    } else {
-			    if (r2->not_fed()) {
-				    /* r1 has connections, r2 does not; run r2 early */
-				    return false;
-			    } else {
-				    /* both r1 and r2 have connections, but not to each other. just use signal order */
-				    return r1->order_key(N_("signal")) < r2->order_key(N_("signal"));
-			    }
-		    }
-	    }
-    }
-};
 
 static void
 trace_terminal (boost::shared_ptr<Route> r1, boost::shared_ptr<Route> rbase)
@@ -1361,16 +1312,17 @@ Session::resort_routes ()
 #endif
 
 }
+
 void
 Session::resort_routes_using (boost::shared_ptr<RouteList> r)
 {
-	RouteList::iterator i, j;
+	DAGEdges edges;
 
-	for (i = r->begin(); i != r->end(); ++i) {
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 
 		(*i)->clear_fed_by ();
 
-		for (j = r->begin(); j != r->end(); ++j) {
+		for (RouteList::iterator j = r->begin(); j != r->end(); ++j) {
 
 			/* although routes can feed themselves, it will
 			   cause an endless recursive descent if we
@@ -1385,23 +1337,22 @@ Session::resort_routes_using (boost::shared_ptr<RouteList> r)
 			bool via_sends_only;
 
 			if ((*j)->direct_feeds (*i, &via_sends_only)) {
+				edges.add (*j, *i);
 				(*i)->add_fed_by (*j, via_sends_only);
 			}
 		}
 	}
 
-	for (i = r->begin(); i != r->end(); ++i) {
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		trace_terminal (*i, *i);
 	}
 
-	RouteSorter cmp;
-	r->sort (cmp);
-
-	route_graph->rechain (r);
+	boost::shared_ptr<RouteList> sorted_routes = topographical_sort (r, edges);
+	route_graph->rechain (sorted_routes);
 
 #ifndef NDEBUG
 	DEBUG_TRACE (DEBUG::Graph, "Routes resorted, order follows:\n");
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+	for (RouteList::iterator i = sorted_routes->begin(); i != sorted_routes->end(); ++i) {
 		DEBUG_TRACE (DEBUG::Graph, string_compose ("\t%1 signal order %2\n",
 		                                           (*i)->name(), (*i)->order_key ("signal")));
 	}
