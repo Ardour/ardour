@@ -19,8 +19,8 @@
 
 #include <stdint.h>
 #include <iostream>
-#include "lv2ext/lv2_event.h"
-#include "lv2ext/lv2_event_helpers.h"
+#include "lv2/lv2plug.in/ns/ext/event/event.h"
+#include "lv2/lv2plug.in/ns/ext/event/event-helpers.h"
 #include "ardour/lv2_event_buffer.h"
 
 using namespace std;

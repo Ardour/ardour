@@ -29,7 +29,7 @@
 #include "pbd/error.h"
 
 #include "ardour/uri_map.h"
-#include "lv2ext/lv2_persist.h"
+#include "lv2/lv2plug.in/ns/ext/persist/persist.h"
 #include "rdff.h"
 
 namespace ARDOUR {

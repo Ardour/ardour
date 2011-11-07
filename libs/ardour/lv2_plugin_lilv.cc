@@ -51,8 +51,8 @@
 
 #include <lilv/lilv.h>
 
-#include "lv2ext/lv2_files.h"
-#include "lv2ext/lv2_persist.h"
+#include "lv2/lv2plug.in/ns/ext/files/files.h"
+#include "lv2/lv2plug.in/ns/ext/persist/persist.h"
 #include "rdff.h"
 #ifdef HAVE_SUIL
 #include <suil/suil.h>

@@ -27,8 +27,8 @@
 #include <boost/utility.hpp>
 
 #include "lv2.h"
-#include "lv2ext/lv2_uri_map.h"
-#include "lv2ext/lv2_uri_unmap.h"
+#include "lv2/lv2plug.in/ns/ext/uri-map/uri-map.h"
+#include "lv2/lv2plug.in/ns/ext/uri-unmap/uri-unmap.h"
 
 namespace ARDOUR {
 

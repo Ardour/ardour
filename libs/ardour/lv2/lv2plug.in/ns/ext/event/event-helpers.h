@@ -25,7 +25,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
-#include "lv2_event.h"
+#include "lv2/lv2plug.in/ns/ext/event/event.h"
 
 /** @file
  * This header defines some helper functions for the the LV2 events extension

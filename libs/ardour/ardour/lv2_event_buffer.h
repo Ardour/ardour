@@ -20,8 +20,8 @@
 #ifndef __ardour_lv2_event_buffer_h__
 #define __ardour_lv2_event_buffer_h__
 
-#include "lv2ext/lv2_event.h"
-#include "lv2ext/lv2_event_helpers.h"
+#include "lv2/lv2plug.in/ns/ext/event/event.h"
+#include "lv2/lv2plug.in/ns/ext/event/event-helpers.h"
 
 namespace ARDOUR {
 
