@@ -243,18 +243,9 @@ ARDOUR_UI::setup_transport ()
 	time_master_button.set_name ("TransportButton");
 	sync_button.set_name ("TransportSyncButton");
 
-	stop_button.set_size_request(29, -1);
-	roll_button.set_size_request(29, -1);
-	auto_loop_button.set_size_request(29, -1);
-	play_selection_button.set_size_request(29, -1);
-	goto_start_button.set_size_request(29, -1);
-	goto_end_button.set_size_request(29, -1);
-	rec_button.set_size_request(29, -1);
-
 	Widget* w;
 
 	stop_button.set_active_state (Active);
-
 
 	goto_start_button.set_image (get_icon (X_("transport_start")));
 	goto_end_button.set_image (get_icon (X_("transport_end")));

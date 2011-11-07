@@ -235,7 +235,18 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	auto_loop_button.set_name ("transport button");
 	play_selection_button.set_name ("transport button");
 	rec_button.set_name ("transport recenable button");
+	join_play_range_button.set_name ("transport button");
 
+	roll_button.set_tweaks (ArdourButton::ShowHover);
+	stop_button.set_tweaks (ArdourButton::ShowHover);
+	auto_loop_button.set_tweaks (ArdourButton::ShowHover);
+	play_selection_button.set_tweaks (ArdourButton::ShowHover);
+	rec_button.set_tweaks (ArdourButton::ShowHover);
+	join_play_range_button.set_tweaks (ArdourButton::ShowHover);
+
+	goto_start_button.set_tweaks (ArdourButton::Tweaks(ArdourButton::ShowClick|ArdourButton::ShowHover));
+	goto_end_button.set_tweaks (ArdourButton::Tweaks(ArdourButton::ShowClick|ArdourButton::ShowHover));
+	
 	last_configure_time= 0;
 	last_peak_grab = 0;
 
