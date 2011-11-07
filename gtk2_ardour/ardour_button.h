@@ -39,7 +39,7 @@ class ArdourButton : public CairoWidget
 		Text = 0x4,
 		Indicator = 0x8,
 	};
-	
+
 	static Element default_elements;
 	static Element led_default_elements;
 	static Element just_led_default_elements;
@@ -47,6 +47,15 @@ class ArdourButton : public CairoWidget
 	ArdourButton (Element e = default_elements);
 	ArdourButton (const std::string&, Element e = default_elements);
 	virtual ~ArdourButton ();
+
+	enum Tweaks {
+		ShowClick = 0x1,
+		ShowHover = 0x2,
+		NoModel = 0x4,
+	};
+
+	Tweaks tweaks() const { return _tweaks; }
+	void set_tweaks (Tweaks);
 
 	void set_active_state (Gtkmm2ext::ActiveState);
 	void set_visual_state (Gtkmm2ext::VisualState);
@@ -81,6 +90,8 @@ class ArdourButton : public CairoWidget
 	void on_size_request (Gtk::Requisition* req);
 	void on_size_allocate (Gtk::Allocation&);
 	void on_style_changed (const Glib::RefPtr<Gtk::Style>&);
+	bool on_enter_notify_event (GdkEventCrossing*);
+	bool on_leave_notify_event (GdkEventCrossing*);
 
         void controllable_changed ();
         PBD::ScopedConnection watch_connection;
@@ -90,6 +101,7 @@ class ArdourButton : public CairoWidget
 	Glib::RefPtr<Gdk::Pixbuf>   _pixbuf;
 	std::string                 _text;
 	Element                     _elements;
+	Tweaks                      _tweaks;
 	BindingProxy binding_proxy;
 	bool    _act_on_release;
 
@@ -117,6 +129,7 @@ class ArdourButton : public CairoWidget
 	bool _fixed_diameter;
 	bool _distinct_led_click;
 	cairo_rectangle_t* _led_rect;
+	bool _hovering;
 
 	void setup_led_rect ();
 	void set_colors ();

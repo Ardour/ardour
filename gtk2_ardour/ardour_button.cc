@@ -50,6 +50,7 @@ ArdourButton::Element ArdourButton::just_led_default_elements = ArdourButton::El
 
 ArdourButton::ArdourButton (Element e)
 	: _elements (e)
+	, _tweaks (Tweaks (0))
 	, _act_on_release (true)
 	, _text_width (0)
 	, _text_height (0)
@@ -63,6 +64,7 @@ ArdourButton::ArdourButton (Element e)
 	, _fixed_diameter (true)
 	, _distinct_led_click (false)
 	, _led_rect (0)
+	, _hovering (false)
 {
 	ColorsChanged.connect (sigc::mem_fun (*this, &ArdourButton::color_handler));
 }
@@ -241,6 +243,16 @@ ArdourButton::render (cairo_t* cr)
 		cairo_set_source_rgba (cr, 0.905, 0.917, 0.925, 0.5);
 		cairo_fill (cr);
 	}
+
+	/* if requested, show hovering */
+	
+	if ((_tweaks & ShowHover)) {
+		if (_hovering) {
+			Gtkmm2ext::rounded_rectangle (cr, 0, 0, _width, _height, _corner_radius);
+			cairo_set_source_rgba (cr, 0.905, 0.917, 0.925, 0.2);
+			cairo_fill (cr);
+		}
+	}
 }
 
 void
@@ -282,12 +294,26 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 		_text_height = 0;
 	}
 
+	if (_pixbuf) {
+		xpad = 6;
+	}
+
         if ((_elements & Indicator) && _fixed_diameter) {
-                req->width = _text_width + lrint (_diameter) + xpad;
-                req->height = max (_text_height, (int) lrint (_diameter)) + ypad;
+		if (_pixbuf) {
+			req->width = _pixbuf->get_width() + lrint (_diameter) + xpad;
+			req->height = max (_pixbuf->get_height(), (int) lrint (_diameter)) + ypad;
+		} else {
+			req->width = _text_width + lrint (_diameter) + xpad;
+			req->height = max (_text_height, (int) lrint (_diameter)) + ypad;
+		}
         } else {
-                req->width = _text_width + xpad;
-                req->height = _text_height + ypad;
+		if (_pixbuf) {
+			req->width = _pixbuf->get_width() + xpad;
+			req->height = _pixbuf->get_height() + ypad;
+		}  else {
+			req->width = _text_width + xpad;
+			req->height = _text_height + ypad;
+		}
 	}
 }
 
@@ -412,6 +438,10 @@ ArdourButton::on_button_press_event (GdkEventButton *ev)
 		}
 	}
 
+	if (_tweaks & ShowClick) {
+		set_active_state (Gtkmm2ext::Active);
+	}
+
 	if (binding_proxy.button_press_handler (ev)) {
 		return true;
 	}
@@ -435,6 +465,10 @@ ArdourButton::on_button_release_event (GdkEventButton *ev)
 			signal_led_clicked(); /* EMIT SIGNAL */
 			return true;
 		}
+	}
+
+	if (_tweaks & ShowClick) {
+		unset_active_state ();
 	}
 
 	if (_act_on_release) {
@@ -595,3 +629,35 @@ ArdourButton::set_visual_state (Gtkmm2ext::VisualState s)
 	}
 }
 	
+bool
+ArdourButton::on_enter_notify_event (GdkEventCrossing* ev)
+{
+	_hovering = true;
+
+	if (_tweaks & ShowHover) {
+		queue_draw ();
+	}
+
+	return CairoWidget::on_enter_notify_event (ev);
+}
+
+bool
+ArdourButton::on_leave_notify_event (GdkEventCrossing* ev)
+{
+	_hovering = false;
+
+	if (_tweaks & ShowHover) {
+		queue_draw ();
+	}
+
+	return CairoWidget::on_leave_notify_event (ev);
+}
+
+void
+ArdourButton::set_tweaks (Tweaks t)
+{
+	if (_tweaks != t) {
+		_tweaks = t;
+		queue_draw ();
+	}
+}
