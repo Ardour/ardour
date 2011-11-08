@@ -18,6 +18,8 @@ INSTALL_DEST_BASE="/opt"
 
 PGM_NAME_LOWER=$(echo $PGM_NAME | tr '[:upper:]' '[:lower:]')
 
+USER_NAME=$(logname)
+
 #### Global Variables ####
 HAS_XDG="T"
 
@@ -107,12 +109,29 @@ cd "${PKG_PATH}"
 echo ""
 echo "Welcome to the ${PGM_NAME} installer"
 echo ""
+echo "${PGM_NAME} will be installed for user ${USER_NAME} in ${INSTALL_DEST_BASE}"
+echo ""
+
+###############################
+# Check for install destination
+###############################
+
+if [ ! -d ${INSTALL_DEST_BASE} ];
+then
+	echo ""
+	echo "!!! ERROR !!! - Installation location ${INSTALL_DEST_BASE} does not exist!"
+	echo "Installation will not complete."
+	echo ""
+	read -p "Press ENTER to exit installer:" BLAH
+	exit 1
+fi
 
 #############################
 # Check for root privileges
 #############################
 
 SUPER=""
+NORM_USER=""
 
 if [ "$(id -u)" != "0" ]; then
 
@@ -121,11 +140,11 @@ if [ "$(id -u)" != "0" ]; then
 		echo ""
 		echo "!!! ERROR !!!"
 		echo ""
-		echo "The installer requires root privileges. It is currently not"
+		echo "This installer requires root privileges. It is currently not"
 		echo "running as root AND the program sudo is missing from this system."
 		echo ""
 		echo "Please correct this by installing and configuring sudo or running"
-		echo "the installer as root."
+		echo "the installer as root (su -c)."
 		echo ""
 		read -p "Press ENTER to exit installer:" BLAH
 		exit 1
@@ -136,25 +155,22 @@ if [ "$(id -u)" != "0" ]; then
 		echo ""
 		echo "!!! ERROR !!!"
 		echo ""
-		echo "Either you don't know the root password or the user is not allowed to sudo"
-		echo "Please correct this and run the installer again"
-		echo "(hint: use visudo to edit sudoers file)"
+		echo "This installer requires root privileges. It is currently not"
+		echo "running as root AND an attempt to use sudo failed."
+		echo ""
+		echo "Please correct this by installing and configuring sudo or running"
+		echo "the installer as root (su -c)."
 		echo ""
 		read -p "Press ENTER to exit installer:" BLAH
 		exit 1
 	fi
 	SUPER="sudo"
-else
-	echo ""
-	echo "!!! Warning !!!"
-	echo ""
-	echo "The installer is running as the root user which is not the prefered method."
-	echo "There are checks run at the end of the installer to help ensure proper operation"
-	echo "of ${PGM_NAME} (realtime priviledges, memory locking, frequency scaling)."
-	echo "Running as root will invalidate these tests."
-	echo ""
-	read -p "Press ENTER to continue:" BLAH
 	
+	# The quoting reqired for the su sanityCheck method does not work when used without
+	# su. Using sh -c in the normal case gets around that, but is a bit of a hack.
+	NORM_USER="sh -c"
+else
+	NORM_USER="su -l $USER_NAME -c" 
 fi
 
 ############################
@@ -183,16 +199,6 @@ esac
 # Check disk space
 ####################
 
-if [ ! -d ${INSTALL_DEST_BASE} ];
-then
-	echo ""
-	echo "!!! ERROR !!! - Installation location ${INSTALL_DEST_BASE} does not exist!"
-	echo "Installation will not complete."
-	echo ""
-	read -p "Press ENTER to exit installer:" BLAH
-	exit 1
-fi
-
 # We have to check the current folder and the INSTALL_DEST_BASE just
 # in case they are on different devices
 echo "Checking for required disk space"
@@ -200,10 +206,15 @@ echo "Checking for required disk space"
 if [ ! -e .${PGM_NAME}_${ARCH}-*.size ]; then
 	echo ""
 	echo "!!! ERROR !!! Can't locate .size file for ${ARCH} bundle."
+	echo "This package is broken or does not support ${ARCH}."
 	echo ""
+	read -p "Press ENTER to exit installer:" BLAH
 	exit 1
 else
 	REQUIRED_BYTES=$(cat .${PGM_NAME}_${ARCH}-*.size)
+
+	#Installer needs 2x the space since the bundle is unpacked locally and then copied
+	REQUIRED_BYTES=$(($REQUIRED_BYTES + $REQUIRED_BYTES))
 
 	#Check space in current folder
 	FREE_BYTES=$(df -P -B 1 "${PKG_PATH}" | grep / | awk '{print $4}')
@@ -211,7 +222,10 @@ else
 	if [ ${FREE_BYTES} -le ${REQUIRED_BYTES} ] ; then
 		echo ""
 		echo "!!! ERROR !!! - Insufficient disk space in ${PKG_PATH}"
+		echo "Install requires ${REQUIRED_BYTES} bytes and
+		echo "there is only ${FREE_BYTES} bytes of free space"
 		echo ""
+		read -p "Press ENTER to exit installer:" BLAH
 		exit 1
 	fi
 
@@ -221,7 +235,10 @@ else
 	if [ ${FREE_BYTES} -le ${REQUIRED_BYTES} ] ; then
 		echo ""
 		echo "!!! ERROR !!! - Insufficient disk space in ${INSTALL_DEST_BASE}"
+		echo "Install requires ${REQUIRED_BYTES} bytes and
+		echo "there is only ${FREE_BYTES} bytes of free space"
 		echo ""
+		read -p "Press ENTER to exit installer:" BLAH
 		exit 1
 	fi
 fi
@@ -237,6 +254,7 @@ if [ ! -e ${PGM_NAME}_${ARCH}-*.tar.bz2 ]; then
 	echo ""
 	echo "!!! ERROR !!! Can't locate ${ARCH} bundle file."
 	echo ""
+	read -p "Press ENTER to exit installer:" BLAH
 	exit 1
 fi
 
@@ -247,6 +265,19 @@ BUNDLE_DIR=$(basename `find -maxdepth 1 -type d -name "${PGM_NAME}_${ARCH}-*"`)
 #######################
 # Check for xdg utils
 #######################
+
+#load the file that contains the translated names of the users directories
+if [ -e /home/${USER_NAME}/.config/user-dirs.dirs ]; then
+	. /home/${USER_NAME}/.config/user-dirs.dirs
+fi
+
+if [ "$(id -u)" != "0" ]; then
+	USER_DESKTOP_DIR=${XDG_DESKTOP_DIR:-$HOME/Desktop}
+else
+	#running as root with su makes this more difficult
+	DESKTOP_FOLDER=$(echo ${XDG_DESKTOP_DIR:-$HOME/Desktop} | awk -F/ '{print $NF}')
+	USER_DESKTOP_DIR="/home/${USER_NAME}/${DESKTOP_FOLDER}"
+fi
 
 XDG_MENU_VER=$(xdg-desktop-menu --version 2> /dev/null)
 if [ -z "$XDG_MENU_VER" ];
@@ -330,8 +361,6 @@ PGM_EXEC_PATH="${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/bin/${PGM_EXEC_FILE}"
 ICON_PATH="${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/etc/icons"
 MENU_FILE_PATH="${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/share"
 
-	
-
 ################################
 # Install bundle and Menu/Link
 ################################
@@ -406,14 +435,14 @@ then
 	${SUPER} xdg-desktop-menu forceupdate --mode system			# Some systems need an extra kick
 	
 	echo ""
-	echo "Creating a desktop link for ${PGM_NAME}"
-	cp ${MENU_FILE_PATH}/${MENU_FILE} ~/Desktop/${DESKTOP_LINK_FILE}
-	chmod ugo+rx ~/Desktop/${DESKTOP_LINK_FILE}
+	echo "Creating a desktop link for ${PGM_NAME} in ${USER_DESKTOP_DIR}"
+	cp ${MENU_FILE_PATH}/${MENU_FILE} ${USER_DESKTOP_DIR}/${DESKTOP_LINK_FILE}
+	chmod ugo+rwx ${USER_DESKTOP_DIR}/${DESKTOP_LINK_FILE}
 else
 	echo ""
-	echo "Creating a desktop link for ${PGM_NAME}"
-	cp ${MENU_FILE_PATH}/${MENU_FILE} ~/Desktop/${DESKTOP_LINK_FILE}
-	chmod ugo+rx ~/Desktop/${DESKTOP_LINK_FILE}
+	echo "Creating a desktop link for ${PGM_NAME} in ${USER_DESKTOP_DIR}"
+	cp ${MENU_FILE_PATH}/${MENU_FILE} ${USER_DESKTOP_DIR}/${DESKTOP_LINK_FILE}
+	chmod ugo+rwx ${USER_DESKTOP_DIR}/${DESKTOP_LINK_FILE}
 fi
 
 echo ""
@@ -484,19 +513,19 @@ fi
 
 USER_GROUP_ADJUSTED="f"
 
-if ! ./${BUNDLE_DIR}/bin/sanityCheck -a > /dev/null;
+if ! ${NORM_USER} "${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/bin/sanityCheck -a > /dev/null";
 then
 	echo ""
 	echo "System failed the quick sanity check... Looking for the cause"
 
-	if ! ./${BUNDLE_DIR}/bin/sanityCheck -rt > /dev/null;
+	if ! ${NORM_USER} "${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/bin/sanityCheck -rt > /dev/null";
 	then
 		echo ""
 		echo "System does not allow realtime for the current user... Looking for a solution"		
 		
-		if ./${BUNDLE_DIR}/bin/sanityCheck -hasaudiogroup > /dev/null;
+		if ${NORM_USER} "${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/bin/sanityCheck -hasaudiogroup > /dev/null";
 		then
-			if ./${BUNDLE_DIR}/bin/sanityCheck -memberaudiogroup > /dev/null 2>&1;
+			if ${NORM_USER} "${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/bin/sanityCheck -memberaudiogroup > /dev/null 2>&1";
 			then
 				## This is an odd case. We have an audio group and are a member.
 				echo ""
@@ -512,17 +541,16 @@ then
 			else
 				# Not a member of an audio group. Try to fix it.
 				
-				if ./${BUNDLE_DIR}/bin/sanityCheck -hasgroup audio > /dev/null && find /etc/security -type f -name "*.conf" | xargs grep -q "^@audio.*rtprio";
+				if ${NORM_USER} "${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/bin/sanityCheck -hasgroup audio > /dev/null && find /etc/security -type f -name "*.conf" | xargs grep -q "^@audio.*rtprio" ";
 				then
 					# add user to audio group
 					echo ""
-					echo "Adding user `whoami` to the audio group."
+					echo "Adding user ${USER_NAME} to the audio group."
 					echo "This should allow you to run realtime tasks. Please re-login for this change to take affect."
 					echo ""
 					read -p "Press ENTER to continue:" BLAH
 
-					user=`whoami`
-					if ${SUPER} usermod -a -G audio $user;
+					if ${SUPER} usermod -a -G audio ${USER_NAME};
 					then
 						USER_GROUP_ADJUSTED="t"
 					else
@@ -534,17 +562,16 @@ then
 						read -p "Press ENTER to continue:" BLAH
 					fi
 
-				elif ./${BUNDLE_DIR}/bin/sanityCheck -hasgroup jackuser > /dev/null && find /etc/security -type f -name "*.conf" | xargs grep -q "^@jackuser.*rtprio";
+				elif ${NORM_USER} "${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/bin/sanityCheck -hasgroup jackuser > /dev/null && find /etc/security -type f -name "*.conf" | xargs grep -q "^@jackuser.*rtprio" ";
 				then
 					# add user to jackuser group
 					echo ""
-					echo "Adding user `whoami` to the jackuser group."
+					echo "Adding user ${USER_NAME} to the jackuser group."
 					echo "This should allow you to run realtime tasks. Please re-login for this change to take affect."
 					echo ""
 					read -p "Press ENTER to continue:" BLAH
 
-					user=`whoami`
-					if ${SUPER} usermod -a -G jackuser $user;
+					if ${SUPER} usermod -a -G jackuser ${USER_NAME};
 					then
 						USER_GROUP_ADJUSTED="t"
 					else
@@ -571,7 +598,7 @@ then
 		fi
 	fi
 
-	if ! ./${BUNDLE_DIR}/bin/sanityCheck -freqscaling > /dev/null;
+	if ! ${NORM_USER} "${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/bin/sanityCheck -freqscaling > /dev/null";
 	then
 		echo ""
 		echo "!!! WARNING !!! - Your system seems to use frequency scaling."
@@ -585,7 +612,7 @@ then
 
 	if [ "f" = $USER_GROUP_ADJUSTED ];
 	then
-		if ! ./${BUNDLE_DIR}/bin/sanityCheck -memlock > /dev/null;
+		if ! ${NORM_USER} "${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/bin/sanityCheck -memlock > /dev/null";
 		then
 			echo ""
 			echo "!!! WARNING !!! - You are not allowed to lock memory."

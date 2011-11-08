@@ -10,7 +10,10 @@ SAVED_PWD=$PWD
 PKG_PATH=$(dirname "$(readlink -f "$0")")
 cd "${PKG_PATH}"
 
-if [ -z "$TERM" ] || [ "$TERM" = "dumb" ] || [ -z "$PS1" ]; then
+# check for an interactive terminal
+# -t fd - Returns true if file descriptor fd is open and refers to a terminal. 
+# fd 1 is stdout
+if [ ! -t 1 ]; then
 	if which xterm > /dev/null; then
 		exec xterm -e "${PKG_PATH}/.stage2.run"
 	elif which gnome-terminal > /dev/null; then

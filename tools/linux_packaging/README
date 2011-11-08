@@ -7,8 +7,10 @@ to the folder and run:
 	
 	./install.sh
 	
-The installer will ask for your root password, and copy the contents of
-the appropriate bundle (32-bit or 64-bit) to your /opt folder.
+The installer will ask for your root password (sudo), and copy the 
+contents of the appropriate bundle (32-bit or 64-bit) to your /opt
+folder. If your distro does not provide sudo, then run install.sh
+as root (su -c ./install.sh).
 
 
 * Links and Menu entries:
