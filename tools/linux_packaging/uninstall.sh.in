@@ -16,6 +16,8 @@ PGM_BUILDTYPE="%REPLACE_TYPE%"
 
 INSTALL_DEST_BASE=/opt
 
+USER_NAME=$(logname)
+
 
 #### Derived Variables ####
 if [ -z "${PGM_BUILDTYPE}" ]; then
@@ -76,6 +78,19 @@ fi
 #######################
 HAS_XDG="T"
 
+#load the file that contains the translated names of the users directories
+if [ -e /home/${USER_NAME}/.config/user-dirs.dirs ]; then
+	. /home/${USER_NAME}/.config/user-dirs.dirs
+fi
+
+if [ "$(id -u)" != "0" ]; then
+	USER_DESKTOP_DIR=${XDG_DESKTOP_DIR:-$HOME/Desktop}
+else
+	#running as root with su makes this more difficult
+	DESKTOP_FOLDER=$(echo ${XDG_DESKTOP_DIR:-$HOME/Desktop} | awk -F/ '{print $NF}')
+	USER_DESKTOP_DIR="/home/${USER_NAME}/${DESKTOP_FOLDER}"
+fi
+
 XDG_MENU_VER=$(xdg-desktop-menu --version 2> /dev/null)
 if [ -z "$XDG_MENU_VER" ];
 then
@@ -115,9 +130,9 @@ then
 		fi
 	fi
 
-	if [ -e ~/Desktop/${DESKTOP_LINK_FILE} ];
+	if [ -e ${USER_DESKTOP_DIR}/${DESKTOP_LINK_FILE} ];
 	then
-		${SUPER} rm -f ~/Desktop/${DESKTOP_LINK_FILE}
+		${SUPER} rm -f ${USER_DESKTOP_DIR}/${DESKTOP_LINK_FILE}
 	fi
 
 	# delete the old package
