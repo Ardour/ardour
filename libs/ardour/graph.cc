@@ -330,11 +330,9 @@ Graph::rechain (boost::shared_ptr<RouteList> routelist)
 
 	/* Clear things out, and make _nodes_rt[chain] a copy of routelist */
         for (RouteList::iterator ri=routelist->begin(); ri!=routelist->end(); ri++) {
-                node_ptr_t n = boost::dynamic_pointer_cast<GraphNode> (*ri);
-
-                n->_init_refcount[chain] = 0;
-                n->_activation_set[chain].clear();
-                _nodes_rt[chain].push_back(n);
+                (*ri)->_init_refcount[chain] = 0;
+                (*ri)->_activation_set[chain].clear();
+                _nodes_rt[chain].push_back (*ri);
         }
 
         // now add refs for the connections.
@@ -364,7 +362,7 @@ Graph::rechain (boost::shared_ptr<RouteList> routelist)
                                 }
 
                                 has_output = true;
-                                (*ni)->_activation_set[chain].insert (boost::dynamic_pointer_cast<GraphNode> (*ri) );
+                                (*ni)->_activation_set[chain].insert (*ri);
                         }
                 }
 
