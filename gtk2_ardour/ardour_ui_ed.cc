@@ -591,10 +591,10 @@ ARDOUR_UI::build_menu_bar ()
 
 	_status_bar_visibility.add (&wall_clock_box,  X_("WallClock"), _("Wall Clock"), wall_clock);
 	_status_bar_visibility.add (&disk_space_box,  X_("Disk"),      _("Disk Space"), disk_space);
-	_status_bar_visibility.add (&cpu_load_box,    X_("DSP"),       _("DSP"));
-	_status_bar_visibility.add (&buffer_load_box, X_("Buffers"),   _("Buffers"));
-	_status_bar_visibility.add (&sample_rate_box, X_("JACK"),      _("JACK Sampling Rate and Latency"));
-	_status_bar_visibility.add (&format_box,      X_("Format"),    _("File Format"));
+	_status_bar_visibility.add (&cpu_load_box,    X_("DSP"),       _("DSP"), true);
+	_status_bar_visibility.add (&buffer_load_box, X_("Buffers"),   _("Buffers"), true);
+	_status_bar_visibility.add (&sample_rate_box, X_("JACK"),      _("JACK Sampling Rate and Latency"), true);
+	_status_bar_visibility.add (&format_box,      X_("Format"),    _("File Format"), true);
 
 	ev->signal_button_press_event().connect (sigc::mem_fun (_status_bar_visibility, &VisibilityGroup::button_press_event));
 }
