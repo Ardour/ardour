@@ -244,9 +244,6 @@ PannerUI::setup_pan ()
 
 	if (nouts == 0 || nouts == 1) {
 
-                delete _stereo_panner;
-                delete twod_panner;
-
 		/* stick something into the panning viewport so that it redraws */
 
 		EventBox* eb = manage (new EventBox());
