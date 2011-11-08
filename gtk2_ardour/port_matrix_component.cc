@@ -197,7 +197,7 @@ PortMatrixComponent::position_to_channel (double p, double, boost::shared_ptr<co
 
 			uint32_t const s = _matrix->count_of_our_type_min_1 ((*j)->bundle->nchannels());
 			if (p < s) {
-				return ARDOUR::BundleChannel ((*j)->bundle, p);
+				return ARDOUR::BundleChannel ((*j)->bundle, (*j)->bundle->type_channel_to_overall (_matrix->type (), p));
 			} else {
 				p -= s;
 			}

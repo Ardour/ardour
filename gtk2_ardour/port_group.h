@@ -146,7 +146,6 @@ class PortGroupList : public sigc::trackable
 	void maybe_add_processor_to_list (
 		boost::weak_ptr<ARDOUR::Processor>, std::list<boost::shared_ptr<ARDOUR::IO> > *, bool, std::set<boost::shared_ptr<ARDOUR::IO> > &
 		);
-	boost::shared_ptr<ARDOUR::Bundle> bundle_for_type (boost::shared_ptr<ARDOUR::Bundle>, ARDOUR::DataType) const;
 
 	mutable PortGroup::BundleList _bundles;
 	List _groups;

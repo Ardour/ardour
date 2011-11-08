@@ -191,8 +191,16 @@ PortMatrixGrid::render (cairo_t* cr)
 					for (uint32_t l = 0; l < _matrix->count_of_our_type ((*j)->bundle->nchannels()); ++l) {
 
 						ARDOUR::BundleChannel c[2];
-						c[_matrix->column_index()] = ARDOUR::BundleChannel ((*i)->bundle, k);
-						c[_matrix->row_index()] = ARDOUR::BundleChannel ((*j)->bundle, l);
+
+						c[_matrix->column_index()] = ARDOUR::BundleChannel (
+							(*i)->bundle,
+							(*i)->bundle->type_channel_to_overall (_matrix->type (), k)
+							);
+
+						c[_matrix->row_index()] = ARDOUR::BundleChannel (
+							(*j)->bundle,
+							(*j)->bundle->type_channel_to_overall (_matrix->type (), l)
+							);
 
 						if (c[0].bundle->channel_type (c[0].channel) != c[1].bundle->channel_type (c[1].channel)) {
 							/* these two channels are of different types */
@@ -328,13 +336,6 @@ PortMatrixGrid::button_press (double x, double y, int b, uint32_t t, guint)
 void
 PortMatrixGrid::set_association (PortMatrixNode node, bool s)
 {
-	if (node.row.bundle->nchannels().n_total() == 0 || node.column.bundle->nchannels().n_total() == 0) {
-		/* One of the bundles has no channels, which means that it has none of the appropriate type,
-		   and is only being displayed to look pretty.  So we don't need to do anything.
-		*/
-		return;
-	}
-	
 	if (_matrix->show_only_bundles()) {
 
 		for (uint32_t i = 0; i < node.column.bundle->nchannels().n_total(); ++i) {
@@ -358,6 +359,7 @@ PortMatrixGrid::set_association (PortMatrixNode node, bool s)
 			ARDOUR::BundleChannel c[2];
 			c[_matrix->row_index()] = node.row;
 			c[_matrix->column_index()] = node.column;
+
 			_matrix->set_state (c, s);
 		}
 	}

@@ -100,6 +100,7 @@ class Bundle : public PBD::ScopedConnectionList
 	void disconnect (boost::shared_ptr<Bundle>, AudioEngine &);
 	bool connected_to (boost::shared_ptr<Bundle>, AudioEngine &);
 	bool has_same_ports (boost::shared_ptr<Bundle>) const;
+	uint32_t type_channel_to_overall (DataType, uint32_t) const;
 
 	void set_name (std::string const &);
 

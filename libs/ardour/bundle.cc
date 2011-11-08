@@ -517,3 +517,44 @@ Bundle::operator== (Bundle const & other)
 {
 	return _channel == other._channel;
 }
+
+/** Given an index of a channel as the nth channel of a particular type,
+ *  return an index of that channel when considering channels of all types.
+ *
+ *  e.g. given a bundle with channels:
+ *          fred   [audio]
+ *          jim    [audio]
+ *          sheila [midi]
+ *
+ * If t == MIDI and c == 0, then we would return 2, as 2 is the index of the
+ * 0th MIDI channel.
+ */
+
+uint32_t
+Bundle::type_channel_to_overall (DataType t, uint32_t c) const
+{
+	Glib::Mutex::Lock lm (_channel_mutex);
+
+	vector<Channel>::const_iterator i = _channel.begin ();
+
+	uint32_t o = 0;
+
+	while (1) {
+
+		assert (i != _channel.end ());
+
+		if (i->type != t) {
+			++i;
+		} else {
+			if (c == 0) {
+				return o;
+			}
+			--c;
+		}
+
+		++o;
+	}
+
+	/* NOTREACHED */
+	return -1;
+}

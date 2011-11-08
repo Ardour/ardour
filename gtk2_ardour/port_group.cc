@@ -388,11 +388,10 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 		}
 
 		for (list<boost::shared_ptr<IO> >::iterator j = i->ios.begin(); j != i->ios.end(); ++j) {
-			boost::shared_ptr<Bundle> b = bundle_for_type ((*j)->bundle(), type);
 			if (tv) {
-				g->add_bundle (b, *j, tv->color ());
+				g->add_bundle ((*j)->bundle(), *j, tv->color ());
 			} else {
-				g->add_bundle (b, *j);
+				g->add_bundle ((*j)->bundle(), *j);
 			}
 		}
 	}
@@ -405,26 +404,21 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 
 	for (BundleList::iterator i = b->begin(); i != b->end(); ++i) {
 		if (boost::dynamic_pointer_cast<UserBundle> (*i) && (*i)->ports_are_inputs() == inputs) {
-			boost::shared_ptr<Bundle> b = bundle_for_type (*i, type);
-			system->add_bundle (b, allow_dups);
+			system->add_bundle (*i, allow_dups);
 		}
 	}
 
 	for (BundleList::iterator i = b->begin(); i != b->end(); ++i) {
 		if (boost::dynamic_pointer_cast<UserBundle> (*i) == 0 && (*i)->ports_are_inputs() == inputs) {
-			boost::shared_ptr<Bundle> b = bundle_for_type (*i, type);
-			system->add_bundle (b, allow_dups);
+			system->add_bundle (*i, allow_dups);
 		}
 	}
 
 	/* Ardour stuff */
 
 	if (!inputs) {
-		boost::shared_ptr<Bundle> b = bundle_for_type (session->the_auditioner()->output()->bundle(), type);
-		ardour->add_bundle (b);
-
-		b = bundle_for_type (session->click_io()->bundle(), type);
-		ardour->add_bundle (b);
+		ardour->add_bundle (session->the_auditioner()->output()->bundle());
+		ardour->add_bundle (session->click_io()->bundle());
 	}
 
 	/* Ardour's surfaces */
@@ -559,16 +553,14 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 	for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
 		if (!extra_system[*i].empty()) {
 			boost::shared_ptr<Bundle> b = make_bundle_from_ports (extra_system[*i], *i, inputs);
-			boost::shared_ptr<Bundle> bt = bundle_for_type (b, type);
-			system->add_bundle (bt);
+			system->add_bundle (b);
 		}
 	}
 
 	for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
 		if (!extra_other[*i].empty()) {
 			boost::shared_ptr<Bundle> b = make_bundle_from_ports (extra_other[*i], *i, inputs);
-			boost::shared_ptr<Bundle> bt = bundle_for_type (b, type);
-			other->add_bundle (bt);
+			other->add_bundle (b);
 		}
 	}
 
@@ -780,30 +772,3 @@ PortGroupList::empty () const
 	return _groups.empty ();
 }
 
-/** Take a bundle, and either return it, if it contains only ports of type \a t,
- *  or return a new bundle with those ports from \a b which are of type \a t.
- *  Note that t == NIL is taken to mean "all types".
- */
-boost::shared_ptr<Bundle>
-PortGroupList::bundle_for_type (boost::shared_ptr<Bundle> b, DataType t) const
-{
-	/* We are asked for a bundle with all types, so that's easy */
-	if (t == DataType::NIL) {
-		return b;
-	}
-
-	if (b->nchannels().get(t) == b->nchannels().n_total()) {
-		/* All channels on b are of the correct type, so just return b */
-		return b;
-	}
-
-	/* We must build a new bundle */
-	boost::shared_ptr<Bundle> n (new ARDOUR::Bundle (b->name(), b->ports_are_inputs()));
-	for (uint32_t i = 0; i < b->nchannels().n_total(); ++i) {
-		if (b->channel_type(i) == t) {
-			n->add_channel (b->channel_name (i), t, b->channel_ports (i));
-		}
-	}
-
-	return n;
-}

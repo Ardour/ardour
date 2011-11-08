@@ -117,7 +117,12 @@ PortMatrixRowLabels::render (cairo_t* cr)
 			uint32_t const N = _matrix->count_of_our_type ((*i)->bundle->nchannels());
 			for (uint32_t j = 0; j < N; ++j) {
 				Gdk::Color c = (*i)->has_colour ? (*i)->colour : get_a_bundle_colour (M);
-				render_channel_name (cr, background_colour (), c, 0, y, ARDOUR::BundleChannel ((*i)->bundle, j));
+				ARDOUR::BundleChannel bc (
+					(*i)->bundle,
+					(*i)->bundle->type_channel_to_overall (_matrix->type (), j)
+					);
+				
+				render_channel_name (cr, background_colour (), c, 0, y, bc);
 				y += grid_spacing();
 				++M;
 			}
@@ -334,8 +339,7 @@ PortMatrixRowLabels::motion (double x, double y)
 			list<PortMatrixNode> n;
 
 			for (uint32_t i = 0; i < w.bundle->nchannels().n_total(); ++i) {
-
-				if (!_matrix->should_show (w.bundle->channel_type(i))) {
+				if (!_matrix->should_show (w.bundle->channel_type (i))) {
 					continue;
 				}
 
