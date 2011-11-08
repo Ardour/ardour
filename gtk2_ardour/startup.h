@@ -39,6 +39,8 @@
 #include <gtkmm/liststore.h>
 #include <gtkmm/combobox.h>
 
+#include "pbd/filesystem.h"
+
 #include "ardour/utils.h"
 
 class EngineControl;
@@ -84,6 +86,8 @@ class ArdourStartup : public Gtk::Assistant {
 	bool config_modified;
 	bool new_user;
 	bool new_only;
+
+	PBD::sys::path been_here_before_path () const;
 
 	void on_apply ();
 	void on_cancel ();

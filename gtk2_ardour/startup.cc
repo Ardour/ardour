@@ -121,9 +121,7 @@ Ardour will play NO role in monitoring"))
 		set_default_icon_list (window_icons);
 	}
 
-	sys::path been_here_before = user_config_directory();
-	been_here_before /= ".a3"; // XXXX use more specific version so we can catch upgrades
-	new_user = !exists (been_here_before);
+	new_user = !exists (been_here_before_path ());
 
 	bool need_audio_setup = !EngineControl::engine_running();
 
@@ -141,8 +139,6 @@ Ardour will play NO role in monitoring"))
 			error << "Could not create user configuration directory" << endmsg;
 		}
 		
-		/* "touch" the file */
-		ofstream fout (been_here_before.to_string().c_str());
 		setup_new_user_page ();
 		setup_first_time_config_page ();
 		setup_monitoring_choice_page ();
@@ -645,6 +641,9 @@ ArdourStartup::on_apply ()
 
 		Config->set_use_monitor_bus (use_monitor_section_button.get_active());
 
+		/* "touch" the been-here-before path now that we're about to save Config */
+		ofstream fout (been_here_before_path().to_string().c_str());
+		
 		Config->save_state ();
 	}
 
@@ -1378,3 +1377,12 @@ ArdourStartup::existing_session_selected ()
 	set_page_complete (session_vbox, true);
 	move_along_now ();
 }
+
+sys::path
+ArdourStartup::been_here_before_path () const
+{
+	sys::path b = user_config_directory();
+	b /= ".a3"; // XXXX use more specific version so we can catch upgrades
+	return b;
+}
+
