@@ -140,7 +140,7 @@ PortMatrixComponent::group_size (boost::shared_ptr<const PortGroup> g) const
 }
 
 /** @param bc Channel.
- *  @param groups List of groups.
+ *  @param group Group.
  *  @return Position of bc in groups in grid units, taking show_only_bundles into account.
  */
 uint32_t
@@ -159,7 +159,7 @@ PortMatrixComponent::channel_to_position (ARDOUR::BundleChannel bc, boost::share
 			if (_matrix->show_only_bundles()) {
 				return p;
 			} else {
-				return p + bc.channel;
+				return p + bc.bundle->overall_channel_to_type (_matrix->type (), bc.channel);
 			}
 
 		}
@@ -195,9 +195,15 @@ PortMatrixComponent::position_to_channel (double p, double, boost::shared_ptr<co
 
 		} else {
 
-			uint32_t const s = _matrix->count_of_our_type_min_1 ((*j)->bundle->nchannels());
+			ARDOUR::ChanCount const N = (*j)->bundle->nchannels ();
+
+			uint32_t const s = _matrix->count_of_our_type_min_1 (N);
 			if (p < s) {
-				return ARDOUR::BundleChannel ((*j)->bundle, (*j)->bundle->type_channel_to_overall (_matrix->type (), p));
+				if (p < _matrix->count_of_our_type (N)) {
+					return ARDOUR::BundleChannel ((*j)->bundle, (*j)->bundle->type_channel_to_overall (_matrix->type (), p));
+				} else {
+					return ARDOUR::BundleChannel (boost::shared_ptr<ARDOUR::Bundle> (), -1);
+				}
 			} else {
 				p -= s;
 			}

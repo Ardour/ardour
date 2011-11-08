@@ -528,11 +528,17 @@ Bundle::operator== (Bundle const & other)
  *
  * If t == MIDI and c == 0, then we would return 2, as 2 is the index of the
  * 0th MIDI channel.
+ *
+ * If t == NIL, we just return c.
  */
 
 uint32_t
 Bundle::type_channel_to_overall (DataType t, uint32_t c) const
 {
+	if (t == DataType::NIL) {
+		return c;
+	}
+	
 	Glib::Mutex::Lock lm (_channel_mutex);
 
 	vector<Channel>::const_iterator i = _channel.begin ();
@@ -557,4 +563,27 @@ Bundle::type_channel_to_overall (DataType t, uint32_t c) const
 
 	/* NOTREACHED */
 	return -1;
+}
+
+/** Perform the reverse of type_channel_to_overall */
+uint32_t
+Bundle::overall_channel_to_type (DataType t, uint32_t c) const
+{
+	if (t == DataType::NIL) {
+		return c;
+	}
+	
+	Glib::Mutex::Lock lm (_channel_mutex);
+
+	uint32_t s = 0;
+	
+	vector<Channel>::const_iterator i = _channel.begin ();
+	for (uint32_t j = 0; j < c; ++j) {
+		if (i->type == t) {
+			++s;
+		}
+		++i;
+	}
+
+	return s;
 }

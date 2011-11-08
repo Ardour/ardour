@@ -156,10 +156,12 @@ PortMatrixColumnLabels::render (cairo_t* cr)
 
 			for (uint32_t j = 0; j < C; ++j) {
 				Gdk::Color c = (*i)->has_colour ? (*i)->colour : get_a_bundle_colour (N);
+
 				ARDOUR::BundleChannel bc (
 					(*i)->bundle,
 					(*i)->bundle->type_channel_to_overall (_matrix->type (), j)
 					);
+				
 				render_channel_name (cr, background_colour (), c, x, 0, bc);
 				x += grid_spacing();
 			}
