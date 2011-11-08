@@ -1414,7 +1414,7 @@ Session::count_existing_track_channels (ChanCount& in, ChanCount& out)
 }
 
 /** Caller must not hold process lock
- *  @param name_template string to use for the start of the name, or "" to use "Midi".
+ *  @param name_template string to use for the start of the name, or "" to use "MIDI".
  */
 list<boost::shared_ptr<MidiTrack> >
 Session::new_midi_track (TrackMode mode, RouteGroup* route_group, uint32_t how_many, string name_template)
@@ -1428,10 +1428,10 @@ Session::new_midi_track (TrackMode mode, RouteGroup* route_group, uint32_t how_m
 
 	control_id = ntracks() + nbusses();
 
-	bool const use_number = (how_many != 1) || name_template.empty () || name_template == _("Midi");
+	bool const use_number = (how_many != 1) || name_template.empty () || name_template == _("MIDI");
 
 	while (how_many) {
-		if (!find_route_name (name_template.empty() ? _("Midi") : name_template, ++track_id, track_name, sizeof(track_name), use_number)) {
+		if (!find_route_name (name_template.empty() ? _("MIDI") : name_template, ++track_id, track_name, sizeof(track_name), use_number)) {
 			error << "cannot find name for new midi track" << endmsg;
 			goto failed;
 		}
