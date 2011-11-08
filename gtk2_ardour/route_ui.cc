@@ -1060,7 +1060,7 @@ RouteUI::mute_changed(void* /*src*/)
 ActiveState
 RouteUI::mute_active_state (Session* s, boost::shared_ptr<Route> r)
 {
-	if (r->is_master() || r->is_monitor()) {
+	if (r->is_monitor()) {
 		return ActiveState(0);
 	}
 
