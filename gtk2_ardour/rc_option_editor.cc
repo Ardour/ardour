@@ -1222,7 +1222,7 @@ RCOptionEditor::RCOptionEditor ()
 	}
 
 	if (fpu.has_flush_to_zero() && fpu.has_denormals_are_zero()) {
-		dm->add (DenormalFTZDAZ, _("use FlushToZero and DenormalsAreZerO"));
+		dm->add (DenormalFTZDAZ, _("use FlushToZero and DenormalsAreZero"));
 	}
 
 	add_option (_("Audio"), dm);
