@@ -102,6 +102,25 @@ Ardour will play NO role in monitoring"))
 		throw failed_constructor();
 	}
 
+	list<Glib::RefPtr<Gdk::Pixbuf> > window_icons;
+	Glib::RefPtr<Gdk::Pixbuf> icon;
+
+	if ((icon = ::get_icon ("ardour_icon_16px")) != 0) {
+		window_icons.push_back (icon);
+	}
+	if ((icon = ::get_icon ("ardour_icon_22px")) != 0) {
+		window_icons.push_back (icon);
+	}
+	if ((icon = ::get_icon ("ardour_icon_32px")) != 0) {
+		window_icons.push_back (icon);
+	}
+	if ((icon = ::get_icon ("ardour_icon_48px")) != 0) {
+		window_icons.push_back (icon);
+	}
+	if (!window_icons.empty ()) {
+		set_default_icon_list (window_icons);
+	}
+
 	sys::path been_here_before = user_config_directory();
 	been_here_before /= ".a3"; // XXXX use more specific version so we can catch upgrades
 	new_user = !exists (been_here_before);
