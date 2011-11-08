@@ -249,6 +249,9 @@ PannerUI::setup_pan ()
 		EventBox* eb = manage (new EventBox());
 		pan_vbox.pack_start (*eb, false, false);
 
+		delete big_window;
+		big_window = 0;
+
 	} else if (nouts == 2) {
 
                 if (nins == 2) {
@@ -301,6 +304,8 @@ PannerUI::setup_pan ()
                                                    nins) << endmsg;
                 }
 
+		delete big_window;
+		big_window = 0;
 
 	} else {
 
