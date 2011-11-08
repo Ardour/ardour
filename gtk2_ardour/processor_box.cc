@@ -493,7 +493,6 @@ ProcessorBox::ProcessorBox (ARDOUR::Session* sess, boost::function<PluginSelecto
 
 	processor_display.Reordered.connect (sigc::mem_fun (*this, &ProcessorBox::reordered));
 	processor_display.DropFromAnotherBox.connect (sigc::mem_fun (*this, &ProcessorBox::object_drop));
-	processor_display.SelectionChanged.connect (sigc::mem_fun (*this, &ProcessorBox::selection_changed));
 
 	processor_scroller.show ();
 	processor_display.show ();
@@ -656,11 +655,15 @@ ProcessorBox::show_processor_menu (int arg)
 		processor_menu->signal_unmap().connect (sigc::mem_fun (*this, &ProcessorBox::processor_menu_unmapped));
 	}
 
+	/* Sort out the plugin submenu */
+
 	Gtk::MenuItem* plugin_menu_item = dynamic_cast<Gtk::MenuItem*>(ActionManager::get_widget("/ProcessorMenu/newplugin"));
 
 	if (plugin_menu_item) {
 		plugin_menu_item->set_submenu (*_get_plugin_selector()->plugin_menu());
 	}
+
+	/* And the aux submenu */
 
 	Gtk::MenuItem* aux_menu_item = dynamic_cast<Gtk::MenuItem*>(ActionManager::get_widget("/ProcessorMenu/newaux"));
 
@@ -676,8 +679,30 @@ ProcessorBox::show_processor_menu (int arg)
 		}
 	}
 
+	/* Sensitise actions as approprioate */
+
         cut_action->set_sensitive (can_cut());
 	paste_action->set_sensitive (!_rr_selection.processors.empty());
+
+	const bool sensitive = !processor_display.selection().empty();
+	ActionManager::set_sensitive (ActionManager::plugin_selection_sensitive_actions, sensitive);
+	edit_action->set_sensitive (one_processor_can_be_edited ());
+
+	boost::shared_ptr<Processor> single_selection;
+	if (processor_display.selection().size() == 1) {
+		single_selection = processor_display.selection().front()->processor ();
+	}
+
+	boost::shared_ptr<PluginInsert> pi;
+	if (single_selection) {
+		pi = boost::dynamic_pointer_cast<PluginInsert> (single_selection);
+	}
+
+	/* enable gui for plugin inserts with editors */
+	controls_action->set_sensitive(pi && pi->plugin()->has_editor());
+
+	/* disallow rename for multiple selections, for plugin inserts and for the fader */
+	rename_action->set_sensitive (single_selection && !pi && !boost::dynamic_pointer_cast<Amp> (single_selection));
 
 	processor_menu->popup (1, arg);
 
@@ -840,29 +865,6 @@ ProcessorBox::build_processor_menu ()
 	processor_menu = dynamic_cast<Gtk::Menu*>(ActionManager::get_widget("/ProcessorMenu") );
 	processor_menu->set_name ("ArdourContextMenu");
 	return processor_menu;
-}
-
-void
-ProcessorBox::selection_changed ()
-{
-	const bool sensitive = !processor_display.selection().empty();
-	ActionManager::set_sensitive(ActionManager::plugin_selection_sensitive_actions,
-	                             sensitive);
-	edit_action->set_sensitive(one_processor_can_be_edited());
-
-	const bool single_selection = (processor_display.selection().size() == 1);
-
-	boost::shared_ptr<PluginInsert> pi;
-	if (single_selection) {
-		pi = boost::dynamic_pointer_cast<PluginInsert>(
-			processor_display.selection().front()->processor());
-	}
-
-	/* enable gui for plugin inserts with editors */
-	controls_action->set_sensitive(pi && pi->plugin()->has_editor());
-
-	/* disallow rename for multiple selections and for plugin inserts */
-	rename_action->set_sensitive(single_selection && pi);
 }
 
 void

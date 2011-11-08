@@ -257,8 +257,6 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 
 	void route_going_away ();
 
-	void selection_changed ();
-
 	Gtkmm2ext::DnDVBox<ProcessorEntry> processor_display;
 	Gtk::ScrolledWindow    processor_scroller;
 
