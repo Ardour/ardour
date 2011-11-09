@@ -17,6 +17,7 @@
 */
 
 #include <cmath>
+#include <list>
 #include <algorithm>
 
 #include <sigc++/bind.h>
@@ -227,12 +228,6 @@ MixerStrip::init ()
 	button_table.set_homogeneous (false);
 	button_table.set_spacings (0);
 
-	if (solo_button) {
-		button_size_group->add_widget (*solo_button);
-	}
-	if (mute_button) {
-		button_size_group->add_widget (*mute_button);
-	}
 	if (solo_isolated_led) {
 		button_size_group->add_widget (*solo_isolated_led);
 	}
@@ -255,8 +250,6 @@ MixerStrip::init ()
 
 	middle_button_table.set_homogeneous (true);
 	middle_button_table.set_spacings (2);
-	middle_button_table.attach (*mute_button, 0, 1, 0, 1);
-        middle_button_table.attach (*solo_button, 1, 2, 0, 1);
 
 	bottom_button_table.set_col_spacings (0);
 	bottom_button_table.set_homogeneous (true);
@@ -410,10 +403,23 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 
 	revert_to_default_display ();
 
+	if (solo_button->get_parent()) {
+		middle_button_table.remove (*solo_button);
+	}
+
+	if (mute_button->get_parent()) {
+		middle_button_table.remove (*mute_button);
+	}
+
 	if (route()->is_master()) {
+		middle_button_table.attach (*mute_button, 0, 2, 0, 1);
 		solo_button->hide ();
+		mute_button->show ();
 		rec_solo_table.hide ();
 	} else {
+		middle_button_table.attach (*mute_button, 0, 1, 0, 1);
+		middle_button_table.attach (*solo_button, 1, 2, 0, 1);
+		mute_button->show ();
 		solo_button->show ();
 		rec_solo_table.show ();
 	}
