@@ -1785,8 +1785,10 @@ ProcessorBox::toggle_edit_processor (boost::shared_ptr<Processor> processor)
 			return;
 		}
 
-		SendUIWindow* w = new SendUIWindow (send, _session);
-		w->show ();
+		if (boost::dynamic_pointer_cast<InternalSend> (processor) == 0) {
+			SendUIWindow* w = new SendUIWindow (send, _session);
+			w->show ();
+		}
 
 	} else if ((retrn = boost::dynamic_pointer_cast<Return> (processor)) != 0) {
 
