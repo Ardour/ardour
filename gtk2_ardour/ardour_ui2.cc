@@ -212,6 +212,9 @@ ARDOUR_UI::setup_transport ()
 {
 	RefPtr<Action> act;
 
+	transport_tearoff_hbox.set_border_width (3);
+	transport_tearoff_hbox.set_spacing (3);
+
 	transport_tearoff = manage (new TearOff (transport_tearoff_hbox));
 	transport_tearoff->set_name ("TransportBase");
 	transport_tearoff->tearoff_window().signal_key_press_event().connect (sigc::bind (sigc::ptr_fun (relay_key_press), &transport_tearoff->tearoff_window()), false);
@@ -313,21 +316,17 @@ ARDOUR_UI::setup_transport ()
 	auditioning_alert_button.set_name ("TransportAuditioningAlert");
 	auditioning_alert_button.signal_button_press_event().connect (sigc::mem_fun(*this,&ARDOUR_UI::audition_alert_press), false);
 
-	alert_box.pack_start (solo_alert_button, false, false);
-	alert_box.pack_start (auditioning_alert_button, false, false);
+	alert_box.pack_start (solo_alert_button, true, false);
+	alert_box.pack_start (auditioning_alert_button, true, false);
 
 	HBox* tbox = manage (new HBox);
 	tbox->set_spacing (2);
-
-	transport_tearoff_hbox.set_border_width (3);
 
 	tbox->pack_start (goto_start_button, false, false);
 	tbox->pack_start (goto_end_button, false, false);
 
 	/* translators: Egternal is "External" with a descender character */
 	set_size_request_to_display_given_text (sync_button, X_("Egternal"), 4, 10);
-
-	// transport_tearoff_hbox.pack_start (*svbox, false, false, 3);
 
 	Glib::RefPtr<SizeGroup> transport_button_size_group1 = SizeGroup::create (SIZE_GROUP_HORIZONTAL);
 	transport_button_size_group1->add_widget (goto_start_button);
@@ -386,7 +385,7 @@ ARDOUR_UI::setup_transport ()
 	transport_vbox->pack_start (*tbox, true, true, 0);
 	transport_vbox->pack_start (*shuttle_box, false, false, 0);
 
-	transport_tearoff_hbox.pack_start (*transport_vbox, false, false, 0);
+	transport_tearoff_hbox.pack_start (*transport_vbox, false, false);
 
 	/* transport related toggle controls */
 
@@ -401,13 +400,7 @@ ARDOUR_UI::setup_transport ()
         if (!Profile->get_small_screen()) {
                 toggle_box->pack_start (*auto_box, false, false);
         }
-	//VBox* io_box = manage (new VBox);
-	//io_box->pack_start (auto_input_button, false, false);
-	//io_box->pack_start (click_button, false, false);
-        //if (!Profile->get_small_screen()) {
-	// toggle_box->pack_start (*io_box, false, false);
-        //}
-	transport_tearoff_hbox.pack_start (*toggle_box, false, false, 4);
+	transport_tearoff_hbox.pack_start (*toggle_box, false, false);
 
 	Table* time_controls_table = manage (new Table (2, 2));
 	time_controls_table->set_col_spacings (6);
@@ -417,20 +410,20 @@ ARDOUR_UI::setup_transport ()
 	time_controls_table->attach (click_button, 1, 2, 0, 2, Gtk::AttachOptions(FILL|EXPAND), FILL);
 
 	transport_tearoff_hbox.pack_start (*clock_box, false, false);
-	transport_tearoff_hbox.pack_start (*time_controls_table, false, false, 4);
+	transport_tearoff_hbox.pack_start (*time_controls_table, false, false);
 
 	time_info_box = manage (new TimeInfoBox);
 	transport_tearoff_hbox.pack_start (*time_info_box, false, false);
 
 
         if (Profile->get_small_screen()) {
-                transport_tearoff_hbox.pack_start (_editor_transport_box, false, false, 4);
+                transport_tearoff_hbox.pack_start (_editor_transport_box, false, false);
         }
 	transport_tearoff_hbox.pack_start (alert_box, false, false);
 
 	if (Profile->get_sae()) {
 		Image* img = manage (new Image ((::get_icon (X_("sae")))));
-		transport_tearoff_hbox.pack_end (*img, false, false, 6);
+		transport_tearoff_hbox.pack_end (*img, false, false);
 	}
 
 	/* desensitize */

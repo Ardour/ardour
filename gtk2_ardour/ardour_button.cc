@@ -338,11 +338,11 @@ ArdourButton::set_colors ()
 
 		edge_pattern = cairo_pattern_create_linear (0.0, 0.0, 0.0, _height);
 		if (visual_state() & Gtkmm2ext::Selected) {
-			start_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1 border start selected", get_name()));
-			end_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1 border end selected", get_name()));
+			start_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: border start selected", get_name()));
+			end_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: border end selected", get_name()));
 		} else {
-			start_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1 border start", get_name()));
-			end_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1 border end", get_name()));
+			start_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: border start", get_name()));
+			end_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: border end", get_name()));
 		}
 		UINT_TO_RGBA (start_color, &r, &g, &b, &a);
 		cairo_pattern_add_color_stop_rgba (edge_pattern, 0, r/255.0,g/255.0,b/255.0, 0.7);
@@ -362,14 +362,14 @@ ArdourButton::set_colors ()
 		fill_pattern = cairo_pattern_create_linear (0.0, 0.0, 0.0, _height);
 		
 		if (active_state() == Gtkmm2ext::Mid) {
-			start_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1 fill start mid", get_name()));
-			end_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1 fill end mid", get_name()));
+			start_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: fill start mid", get_name()));
+			end_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: fill end mid", get_name()));
 		} else if (active_state() == Gtkmm2ext::Active) {
-			start_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1 fill start active", get_name()));
-			end_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1 fill end active", get_name()));
+			start_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: fill start active", get_name()));
+			end_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: fill end active", get_name()));
 		} else {
-			start_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1 fill start", get_name()));
-			end_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1 fill end", get_name()));
+			start_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: fill start", get_name()));
+			end_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: fill end", get_name()));
 		}
 		UINT_TO_RGBA (start_color, &r, &g, &b, &a);
 		cairo_pattern_add_color_stop_rgba (fill_pattern, 0, r/255.0,g/255.0,b/255.0, a/255.0);
@@ -398,14 +398,14 @@ ArdourButton::set_colors ()
 	/* text and LED colors depend on Active/Normal/Mid */
 
 	if (active_state() == Gtkmm2ext::Active) {
-		text_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1 text active", get_name()));
-		led_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1 led active", get_name()));
+		text_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: text active", get_name()));
+		led_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: led active", get_name()));
 	} else if (active_state() == Gtkmm2ext::Mid) {
-		text_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1 text mid", get_name()));
-		led_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1 led mid", get_name()));
+		text_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: text mid", get_name()));
+		led_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: led mid", get_name()));
 	} else {
-		text_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1 text", get_name()));
-		led_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1 led", get_name()));
+		text_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: text", get_name()));
+		led_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: led", get_name()));
 	}
 
 	UINT_TO_RGBA (text_color, &r, &g, &b, &a);

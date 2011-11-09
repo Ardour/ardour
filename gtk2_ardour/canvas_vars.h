@@ -139,22 +139,22 @@ CANVAS_VARIABLE(canvasvar_ZoomRect, "zoom rect")
 CANVAS_VARIABLE(canvasvar_MonitorSectionKnob, "monitor knob")
 
 #define BUTTON_VARS(root,name) \
-CANVAS_VARIABLE(canvasvar_ ## root ## BorderStart, name " border start") \
-CANVAS_VARIABLE(canvasvar_ ## root ## BorderEnd, name " border end") \
-CANVAS_VARIABLE(canvasvar_ ## root ## BorderStartSelected, name " border start selected") \
-CANVAS_VARIABLE(canvasvar_ ## root ## BorderEndSelected, name " border end selected") \
-CANVAS_VARIABLE(canvasvar_ ## root ## FillStart, name " fill start") \
-CANVAS_VARIABLE(canvasvar_ ## root ## FillEnd, name " fill end") \
-CANVAS_VARIABLE(canvasvar_ ## root ## FillStartActive, name " fill start active") \
-CANVAS_VARIABLE(canvasvar_ ## root ## FillEndActive, name " fill end active") \
-CANVAS_VARIABLE(canvasvar_ ## root ## FillStartMid, name " fill start mid") \
-CANVAS_VARIABLE(canvasvar_ ## root ## FillEndMid, name " fill end mid") \
-CANVAS_VARIABLE(canvasvar_ ## root ## LED, name " led") \
-CANVAS_VARIABLE(canvasvar_ ## root ## LEDActive, name " led active") \
-CANVAS_VARIABLE(canvasvar_ ## root ## LEDMid, name " led mid") \
-CANVAS_VARIABLE(canvasvar_ ## root ## Text, name " text") \
-CANVAS_VARIABLE(canvasvar_ ## root ## TextActive, name " text active") \
-CANVAS_VARIABLE(canvasvar_ ## root ## TextMid, name " text mid") 
+CANVAS_VARIABLE(canvasvar_ ## root ## BorderStart, name ": border start") \
+CANVAS_VARIABLE(canvasvar_ ## root ## BorderEnd, name ": border end") \
+CANVAS_VARIABLE(canvasvar_ ## root ## BorderStartSelected, name ": border start selected") \
+CANVAS_VARIABLE(canvasvar_ ## root ## BorderEndSelected, name ": border end selected") \
+CANVAS_VARIABLE(canvasvar_ ## root ## FillStart, name ": fill start") \
+CANVAS_VARIABLE(canvasvar_ ## root ## FillEnd, name ": fill end") \
+CANVAS_VARIABLE(canvasvar_ ## root ## FillStartActive, name ": fill start active") \
+CANVAS_VARIABLE(canvasvar_ ## root ## FillEndActive, name ": fill end active") \
+CANVAS_VARIABLE(canvasvar_ ## root ## FillStartMid, name ": fill start mid") \
+CANVAS_VARIABLE(canvasvar_ ## root ## FillEndMid, name ": fill end mid") \
+CANVAS_VARIABLE(canvasvar_ ## root ## LED, name ": led") \
+CANVAS_VARIABLE(canvasvar_ ## root ## LEDActive, name ": led active") \
+CANVAS_VARIABLE(canvasvar_ ## root ## LEDMid, name ": led mid") \
+CANVAS_VARIABLE(canvasvar_ ## root ## Text, name ": text") \
+CANVAS_VARIABLE(canvasvar_ ## root ## TextActive, name ": text active") \
+CANVAS_VARIABLE(canvasvar_ ## root ## TextMid, name ": text mid") 
 
 BUTTON_VARS(ProcessorPreFader, "processor prefader")
 BUTTON_VARS(ProcessorFader, "processor fader")
