@@ -388,6 +388,27 @@ ARDOUR_UI::setup_transport ()
 
 	transport_tearoff_hbox.pack_start (*transport_vbox, false, false, 0);
 
+	/* transport related toggle controls */
+
+	HBox* toggle_box = manage(new HBox);
+	VBox* auto_box = manage (new VBox);
+	auto_box->set_spacing (2);
+	auto_box->set_homogeneous (true);
+	toggle_box->set_spacing (2);
+	toggle_box->set_homogeneous (true);
+	auto_box->pack_start (auto_play_button, true, false);
+	auto_box->pack_start (auto_return_button, true, false);
+        if (!Profile->get_small_screen()) {
+                toggle_box->pack_start (*auto_box, false, false);
+        }
+	//VBox* io_box = manage (new VBox);
+	//io_box->pack_start (auto_input_button, false, false);
+	//io_box->pack_start (click_button, false, false);
+        //if (!Profile->get_small_screen()) {
+	// toggle_box->pack_start (*io_box, false, false);
+        //}
+	transport_tearoff_hbox.pack_start (*toggle_box, false, false, 4);
+
 	Table* time_controls_table = manage (new Table (2, 2));
 	time_controls_table->set_col_spacings (6);
 	time_controls_table->attach (sync_button, 0, 1, 0, 1, Gtk::AttachOptions(FILL|EXPAND), Gtk::AttachOptions(0));
@@ -401,27 +422,7 @@ ARDOUR_UI::setup_transport ()
 	time_info_box = manage (new TimeInfoBox);
 	transport_tearoff_hbox.pack_start (*time_info_box, false, false);
 
-	HBox* toggle_box = manage(new HBox);
 
-	VBox* auto_box = manage (new VBox);
-	auto_box->pack_start (auto_play_button, false, false);
-	auto_box->pack_start (auto_return_button, false, false);
-        if (!Profile->get_small_screen()) {
-                toggle_box->pack_start (*auto_box, false, false);
-        }
-
-	VBox* io_box = manage (new VBox);
-	io_box->pack_start (auto_input_button, false, false);
-	//io_box->pack_start (click_button, false, false);
-        if (!Profile->get_small_screen()) {
-                toggle_box->pack_start (*io_box, false, false);
-        }
-
-	/* desensitize */
-
-	set_transport_sensitivity (false);
-
-	transport_tearoff_hbox.pack_start (*toggle_box, false, false, 4);
         if (Profile->get_small_screen()) {
                 transport_tearoff_hbox.pack_start (_editor_transport_box, false, false, 4);
         }
@@ -431,6 +432,10 @@ ARDOUR_UI::setup_transport ()
 		Image* img = manage (new Image ((::get_icon (X_("sae")))));
 		transport_tearoff_hbox.pack_end (*img, false, false, 6);
 	}
+
+	/* desensitize */
+
+	set_transport_sensitivity (false);
 
 	XMLNode* tnode = tearoff_settings ("transport");
 	if (tnode) {

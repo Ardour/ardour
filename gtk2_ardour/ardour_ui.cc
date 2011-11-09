@@ -1138,19 +1138,24 @@ ARDOUR_UI::update_disk_space()
 		int secs;
 
 		hrs  = frames / (fr * 3600);
-		frames -= hrs * fr * 3600;
-		mins = frames / (fr * 60);
-		frames -= mins * fr * 60;
-		secs = frames / fr;
 
-		bool const low = (hrs == 0 && mins <= 30);
-
-		snprintf (
-			buf, sizeof(buf),
-			_("Disk: <span foreground=\"%s\">%02dh:%02dm:%02ds</span>"),
-			low ? X_("red") : X_("green"),
-			hrs, mins, secs
-			);
+		if (hrs > 24) {
+			snprintf (buf, sizeof (buf), _("Disk: <span foreground=\"green\">&gt;24 hrs</span>"));
+		} else {
+			frames -= hrs * fr * 3600;
+			mins = frames / (fr * 60);
+			frames -= mins * fr * 60;
+			secs = frames / fr;
+			
+			bool const low = (hrs == 0 && mins <= 30);
+			
+			snprintf (
+				buf, sizeof(buf),
+				_("Disk: <span foreground=\"%s\">%02dh:%02dm:%02ds</span>"),
+				low ? X_("red") : X_("green"),
+				hrs, mins, secs
+				);
+		}
 	}
 
 	disk_space_label.set_markup (buf);

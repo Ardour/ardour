@@ -243,6 +243,15 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 
         add_option (_("Media"), spo);
 
+	/* Monitoring */
+
+        add_option (_("Monitoring"), new BoolOption (
+			    "auto-input",
+			    _("Monitoring automatically follows transport state (\"auto-input\")"),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_auto_input),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_auto_input)
+			    ));
+
         /* Misc */
 
 	add_option (_("Misc"), new OptionEditorHeading (_("Layering (in overlaid mode)")));
