@@ -210,6 +210,8 @@ ARDOUR_UI::tearoff_settings (const char* name) const
 void
 ARDOUR_UI::setup_transport ()
 {
+	RefPtr<Action> act;
+
 	transport_tearoff = manage (new TearOff (transport_tearoff_hbox));
 	transport_tearoff->set_name ("TransportBase");
 	transport_tearoff->tearoff_window().signal_key_press_event().connect (sigc::bind (sigc::ptr_fun (relay_key_press), &transport_tearoff->tearoff_window()), false);
@@ -236,14 +238,22 @@ ARDOUR_UI::setup_transport ()
 	transport_tearoff->Visible.connect (sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::reattach_tearoff), static_cast<Box*> (&top_packer),
 						  static_cast<Widget*> (&transport_frame), 1));
 
-	auto_return_button.set_name ("TransportButton");
-	auto_play_button.set_name ("TransportButton");
-	auto_input_button.set_name ("TransportButton");
-	click_button.set_name ("TransportButton");
+	auto_return_button.set_text(_("Auto Return"));
+	auto_play_button.set_text(_("Auto Play"));
+	auto_input_button.set_text (_("Auto Input"));
+
+	click_button.set_image (get_icon (X_("metronome")));
+	act = ActionManager::get_action ("Transport", "ToggleClick");
+	click_button.set_related_action (act);
+	click_button.signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::click_button_clicked), false);
+
+	auto_return_button.set_name ("transport option button");
+	auto_play_button.set_name ("transport option button");
+	auto_input_button.set_name ("transport option button");
+	click_button.set_name ("transport option button");
+
 	time_master_button.set_name ("TransportButton");
 	sync_button.set_name ("TransportSyncButton");
-
-	Widget* w;
 
 	stop_button.set_active_state (Active);
 
@@ -255,8 +265,6 @@ ARDOUR_UI::setup_transport ()
 	rec_button.set_image (get_icon (X_("transport_record")));
 	auto_loop_button.set_image (get_icon (X_("transport_loop")));
 	join_play_range_button.set_image (get_icon (X_("tool_object_range")));
-
-	RefPtr<Action> act;
 
 	act = ActionManager::get_action (X_("Transport"), X_("Stop"));
 	stop_button.set_related_action (act);
@@ -289,9 +297,12 @@ ARDOUR_UI::setup_transport ()
 	secondary_clock->ValueChanged.connect (sigc::mem_fun(*this, &ARDOUR_UI::secondary_clock_value_changed));
 	big_clock->ValueChanged.connect (sigc::mem_fun(*this, &ARDOUR_UI::big_clock_value_changed));
 
-	ActionManager::get_action ("Transport", "ToggleAutoReturn")->connect_proxy (auto_return_button);
-	ActionManager::get_action ("Transport", "ToggleAutoPlay")->connect_proxy (auto_play_button);
-	ActionManager::get_action ("Transport", "ToggleAutoInput")->connect_proxy (auto_input_button);
+	act = ActionManager::get_action ("Transport", "ToggleAutoReturn");
+	auto_return_button.set_related_action (act);
+	act = ActionManager::get_action ("Transport", "ToggleAutoPlay");
+	auto_play_button.set_related_action (act);
+	act = ActionManager::get_action ("Transport", "ToggleAutoInput");
+	auto_input_button.set_related_action (act);
 
 	/* alerts */
 
@@ -382,14 +393,6 @@ ARDOUR_UI::setup_transport ()
 	time_controls_table->attach (sync_button, 0, 1, 0, 1, Gtk::AttachOptions(FILL|EXPAND), Gtk::AttachOptions(0));
 	time_controls_table->attach (time_master_button, 0, 1, 1, 2, Gtk::AttachOptions(FILL|EXPAND), Gtk::AttachOptions(0));
 
-	w = manage (new Image (get_icon (X_("metronome"))));
-	w->show ();
-	click_button.add (*w);
-
-	ActionManager::get_action ("Transport", "ToggleClick")->connect_proxy (click_button);
-
-	click_button.signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::click_button_clicked), false);
-	
 	time_controls_table->attach (click_button, 1, 2, 0, 2, Gtk::AttachOptions(FILL|EXPAND), FILL);
 
 	transport_tearoff_hbox.pack_start (*clock_box, false, false);

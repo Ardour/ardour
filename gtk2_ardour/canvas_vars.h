@@ -179,4 +179,5 @@ BUTTON_VARS(RecEnableButton, "record enable button")
 BUTTON_VARS(SendButton, "send alert button")
 BUTTON_VARS(TransportButton, "transport button")
 BUTTON_VARS(TransportRecenableButton, "transport recenable button")
+BUTTON_VARS(TransportOptionButton, "transport option button")
 

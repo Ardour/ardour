@@ -153,10 +153,10 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	, play_selection_controllable (new TransportControllable ("transport play selection", *this, TransportControllable::PlaySelection))
 	, rec_controllable (new TransportControllable ("transport rec-enable", *this, TransportControllable::RecordEnable))
 
-	, auto_return_button (_("Auto Return"))
-	, auto_play_button (_("Auto Play"))
-	, auto_input_button (_("Auto Input"))
-	  // , click_button (_("Click"))
+	, auto_return_button (ArdourButton::led_default_elements)
+	, auto_play_button (ArdourButton::led_default_elements)
+	, auto_input_button (ArdourButton::led_default_elements)
+
 	, time_master_button (_("time\nmaster"))
 
 	, auditioning_alert_button (_("AUDITION"))
