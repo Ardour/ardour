@@ -86,7 +86,7 @@
 #include "ardour/recent_sessions.h"
 #include "ardour/region_factory.h"
 #include "ardour/return.h"
-#include "ardour/route_dag.h"
+#include "ardour/route_graph.h"
 #include "ardour/route_group.h"
 #include "ardour/send.h"
 #include "ardour/session.h"
@@ -129,6 +129,7 @@ PBD::Signal0<void> Session::AutoBindingOff;
 PBD::Signal2<void,std::string, std::string> Session::Exported;
 PBD::Signal1<int,boost::shared_ptr<Playlist> > Session::AskAboutPlaylistDeletion;
 PBD::Signal0<void> Session::Quit;
+PBD::Signal0<void> Session::FeedbackDetected;
 
 static void clean_up_session_event (SessionEvent* ev) { delete ev; }
 const SessionEvent::RTeventCallback Session::rt_cleanup (clean_up_session_event);
@@ -149,7 +150,7 @@ Session::Session (AudioEngine &eng,
 	, _post_transport_work (0)
 	, _send_timecode_update (false)
 	, _all_route_group (new RouteGroup (*this, "all"))
-	, route_graph (new Graph(*this))
+	, _process_graph (new Graph (*this))
 	, routes (new RouteList)
 	, _total_free_4k_blocks (0)
 	, _bundles (new BundleList)
@@ -1293,7 +1294,7 @@ Session::resort_routes ()
 		/* writer goes out of scope and forces update */
 	}
 
-	//route_graph->dump(1);
+	//_process_graph->dump(1);
 
 #ifndef NDEBUG
 	boost::shared_ptr<RouteList> rl = routes.reader ();
@@ -1313,50 +1314,94 @@ Session::resort_routes ()
 
 }
 
+/** This is called whenever we need to rebuild the graph of how we will process
+ *  routes.
+ *  @param r List of routes, in any order.
+ */
+
 void
 Session::resort_routes_using (boost::shared_ptr<RouteList> r)
 {
-	DAGEdges edges;
+	/* We are going to build a directed graph of our routes;
+	   this is where the edges of that graph are put.
+	*/
+	
+	GraphEdges edges;
 
+	/* Go through all routes doing two things:
+	 *
+	 * 1. Collect the edges of the route graph.  Each of these edges
+	 *    is a pair of routes, one of which directly feeds the other
+	 *    either by a JACK connection or by an internal send.
+	 *
+	 * 2. Begin the process of making routes aware of which other
+	 *    routes directly or indirectly feed them.  This information
+	 *    is used by the solo code.
+	 */
+	   
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 
+		/* Clear out the route's list of direct or indirect feeds */
 		(*i)->clear_fed_by ();
 
 		for (RouteList::iterator j = r->begin(); j != r->end(); ++j) {
 
-			/* although routes can feed themselves, it will
-			   cause an endless recursive descent if we
-			   detect it. so don't bother checking for
-			   self-feeding.
-			*/
-
-			if (*j == *i) {
-				continue;
-			}
-
 			bool via_sends_only;
 
-			if ((*j)->direct_feeds (*i, &via_sends_only)) {
-				edges.add (*j, *i);
+			/* See if this *j feeds *i according to the current state of the JACK
+			   connections and internal sends.
+			*/
+			if ((*j)->direct_feeds_according_to_reality (*i, &via_sends_only)) {
+				/* add the edge to the graph (part #1) */
+				edges.add (*j, *i, via_sends_only);
+				/* tell the route (for part #2) */
 				(*i)->add_fed_by (*j, via_sends_only);
 			}
 		}
 	}
 
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		trace_terminal (*i, *i);
-	}
-
+	/* Attempt a topological sort of the route graph */
 	boost::shared_ptr<RouteList> sorted_routes = topological_sort (r, edges);
-	route_graph->rechain (sorted_routes);
+	
+	if (sorted_routes) {
+		/* We got a satisfactory topological sort, so there is no feedback;
+		   use this new graph.
+
+		   Note: the process graph rechain does not require a
+		   topologically-sorted list, but hey ho.
+		*/
+		_process_graph->rechain (sorted_routes, edges);
+		_current_route_graph = edges;
+
+		/* Complete the building of the routes' lists of what directly
+		   or indirectly feeds them.
+		*/
+		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+			trace_terminal (*i, *i);
+		}
+
+		r = sorted_routes;
 
 #ifndef NDEBUG
-	DEBUG_TRACE (DEBUG::Graph, "Routes resorted, order follows:\n");
-	for (RouteList::iterator i = sorted_routes->begin(); i != sorted_routes->end(); ++i) {
-		DEBUG_TRACE (DEBUG::Graph, string_compose ("\t%1 signal order %2\n",
-		                                           (*i)->name(), (*i)->order_key ("signal")));
-	}
+		DEBUG_TRACE (DEBUG::Graph, "Routes resorted, order follows:\n");
+		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+			DEBUG_TRACE (DEBUG::Graph, string_compose ("\t%1 signal order %2\n",
+								   (*i)->name(), (*i)->order_key ("signal")));
+		}
 #endif
+
+	} else {
+		/* The topological sort failed, so we have a problem.  Tell everyone
+		   and stick to the old graph; this will continue to be processed, so
+		   until the feedback is fixed, what is played back will not quite
+		   reflect what is actually connected.  Note also that we do not
+		   do trace_terminal here, as it would fail due to an endless recursion,
+		   so the solo code will think that everything is still connected
+		   as it was before.
+		*/
+		
+		FeedbackDetected (); /* EMIT SIGNAL */
+	}
 
 }
 
@@ -2174,7 +2219,7 @@ Session::remove_route (boost::shared_ptr<Route> route)
 	 */
 
 	resort_routes ();
-	route_graph->clear_other_chain ();
+	_process_graph->clear_other_chain ();
 
 	/* get rid of it from the dead wood collection in the route list manager */
 

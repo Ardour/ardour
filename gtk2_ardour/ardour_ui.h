@@ -729,6 +729,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	 *  PluginEqGui::impulse_analysis ().
 	 */
 	ARDOUR::ProcessThread* _process_thread;
+
+	void feedback_detected ();
 };
 
 #endif /* __ardour_gui_h__ */

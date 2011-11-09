@@ -46,6 +46,7 @@ class Graph;
 
 class Route;
 class Session;
+class GraphEdges;	
 
 typedef boost::shared_ptr<GraphNode> node_ptr_t;
 
@@ -61,7 +62,7 @@ public:
 
 	void prep();
 	void trigger (GraphNode * n);
-	void rechain (boost::shared_ptr<RouteList> r);
+	void rechain (boost::shared_ptr<RouteList>, GraphEdges const &);
 
 	void dump (int chain);
 	void process();

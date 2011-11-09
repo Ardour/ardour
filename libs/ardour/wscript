@@ -170,7 +170,7 @@ libardour_sources = [
         'return.cc',
         'reverse.cc',
         'route.cc',
-        'route_dag.cc',
+        'route_graph.cc',
         'route_group.cc',
         'route_group_member.cc',
         'rb_effect.cc',

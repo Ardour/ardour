@@ -81,7 +81,7 @@ PBD::Signal0<void> Route::RemoteControlIDChange;
 Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	: SessionObject (sess, name)
 	, Automatable (sess)
-	, GraphNode (sess.route_graph)
+	, GraphNode (sess._process_graph)
 	, _active (true)
 	, _signal_latency (0)
 	, _initial_delay (0)
@@ -744,7 +744,7 @@ Route::set_solo_isolated (bool yn, void *src)
 		}
 
 		bool sends_only;
-		bool does_feed = direct_feeds (*i, &sends_only); // we will recurse anyway, so don't use ::feeds()
+		bool does_feed = direct_feeds_according_to_graph (*i, &sends_only); // we will recurse anyway, so don't use ::feeds()
 
 		if (does_feed && !sends_only) {
 			(*i)->set_solo_isolated (yn, (*i)->route_group());
@@ -2644,14 +2644,14 @@ Route::feeds (boost::shared_ptr<Route> other, bool* via_sends_only)
 }
 
 bool
-Route::direct_feeds (boost::shared_ptr<Route> other, bool* only_send)
+Route::direct_feeds_according_to_reality (boost::shared_ptr<Route> other, bool* via_send_only)
 {
 	DEBUG_TRACE (DEBUG::Graph, string_compose ("Feeds? %1\n", _name));
 
 	if (_output->connected_to (other->input())) {
 		DEBUG_TRACE (DEBUG::Graph, string_compose ("\tdirect FEEDS %2\n", other->name()));
-		if (only_send) {
-			*only_send = false;
+		if (via_send_only) {
+			*via_send_only = false;
 		}
 
 		return true;
@@ -2665,8 +2665,8 @@ Route::direct_feeds (boost::shared_ptr<Route> other, bool* only_send)
 		if ((iop = boost::dynamic_pointer_cast<IOProcessor>(*r)) != 0) {
 			if (iop->feeds (other)) {
 				DEBUG_TRACE (DEBUG::Graph,  string_compose ("\tIOP %1 does feed %2\n", iop->name(), other->name()));
-				if (only_send) {
-					*only_send = true;
+				if (via_send_only) {
+					*via_send_only = true;
 				}
 				return true;
 			} else {
@@ -2680,6 +2680,12 @@ Route::direct_feeds (boost::shared_ptr<Route> other, bool* only_send)
 
 	DEBUG_TRACE (DEBUG::Graph,  string_compose ("\tdoes NOT feed %1\n", other->name()));
 	return false;
+}
+
+bool
+Route::direct_feeds_according_to_graph (boost::shared_ptr<Route> other, bool* via_send_only)
+{
+	return _session._current_route_graph.has (shared_from_this (), other, via_send_only);
 }
 
 /** Called from the (non-realtime) butler thread when the transport is stopped */

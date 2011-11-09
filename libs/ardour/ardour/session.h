@@ -56,6 +56,7 @@
 #include "ardour/session_event.h"
 #include "ardour/location.h"
 #include "ardour/interpolation.h"
+#include "ardour/route_graph.h"
 
 #ifdef HAVE_JACK_SESSION
 #include <jack/session.h>
@@ -826,6 +827,12 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	std::list<std::string> unknown_processors () const;
 
+	/** Emitted when a feedback cycle has been detected within Ardour's signal
+	    processing path.  Until it is fixed (by the user) some (unspecified)
+	    routes will not be run.
+	*/
+	static PBD::Signal0<void> FeedbackDetected;
+
 	/* handlers can return an integer value:
 	   0: config.set_audio_search_path() or config.set_midi_search_path() was used
 	   to modify the search path and we should try to find it again.
@@ -1206,7 +1213,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	/* routes stuff */
 
-	boost::shared_ptr<Graph> route_graph;
+	boost::shared_ptr<Graph> _process_graph;
 
 	SerializedRCUManager<RouteList>  routes;
 
@@ -1500,6 +1507,11 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	boost::shared_ptr<Speakers> _speakers;
 	void load_nested_sources (const XMLNode& node);
+
+	/** The directed graph of routes that is currently being used for audio processing
+	    and solo/mute computations.
+	*/
+	GraphEdges _current_route_graph;
 };
 
 } // namespace ARDOUR

@@ -19,7 +19,7 @@
 */
 
 #include "ardour/route.h"
-#include "ardour/route_dag.h"
+#include "ardour/route_graph.h"
 
 #include "i18n.h"
 
@@ -27,35 +27,71 @@ using namespace std;
 using namespace ARDOUR;
 
 void
-DAGEdges::add (DAGVertex from, DAGVertex to)
+GraphEdges::add (GraphVertex from, GraphVertex to, bool via_sends_only)
 {
 	insert (_from_to, from, to);
 	insert (_to_from, to, from);
-	
-	EdgeMap::iterator i = _from_to.find (from);
-	if (i != _from_to.end ()) {
-		i->second.insert (to);
+
+	EdgeMapWithSends::iterator i = find_in_from_to_with_sends (from, to);
+	if (i != _from_to_with_sends.end ()) {
+		i->second.second = via_sends_only;
 	} else {
-		set<DAGVertex> v;
-		v.insert (to);
-		_from_to.insert (make_pair (from, v));
+		_from_to_with_sends.insert (
+			make_pair (from, make_pair (to, via_sends_only))
+			);
 	}
-	
 }
 
-set<DAGVertex>
-DAGEdges::from (DAGVertex r) const
+/** Find a from/to pair in the _from_to_with_sends map.
+ *  @return iterator to the edge, or _from_to_with_sends.end().
+ */
+GraphEdges::EdgeMapWithSends::iterator
+GraphEdges::find_in_from_to_with_sends (GraphVertex from, GraphVertex to)
+{
+	typedef EdgeMapWithSends::iterator Iter;
+	pair<Iter, Iter> r = _from_to_with_sends.equal_range (from);
+	for (Iter i = r.first; i != r.second; ++i) {
+		if (i->second.first == to) {
+			return i;
+		}
+	}
+
+	return _from_to_with_sends.end ();
+}
+
+/** @param via_sends_only if non-0, filled in with true if the edge is a
+ *  path via a send only.
+ *  @return true if the given edge is present.
+ */
+bool
+GraphEdges::has (GraphVertex from, GraphVertex to, bool* via_sends_only)
+{
+	EdgeMapWithSends::iterator i = find_in_from_to_with_sends (from, to);
+	if (i == _from_to_with_sends.end ()) {
+		return false;
+	}
+	
+	if (via_sends_only) {
+		*via_sends_only = i->second.second;
+	}
+
+	return true;
+}
+
+/** @return the vertices that are fed from `r' */
+set<GraphVertex>
+GraphEdges::from (GraphVertex r) const
 {
 	EdgeMap::const_iterator i = _from_to.find (r);
 	if (i == _from_to.end ()) {
-		return set<DAGVertex> ();
+		return set<GraphVertex> ();
 	}
 	
 	return i->second;
 }
 
 void
-DAGEdges::remove (DAGVertex from, DAGVertex to)
+GraphEdges::remove (GraphVertex from, GraphVertex to)
 {
 	EdgeMap::iterator i = _from_to.find (from);
 	assert (i != _from_to.end ());
@@ -70,6 +106,10 @@ DAGEdges::remove (DAGVertex from, DAGVertex to)
 	if (j->second.empty ()) {
 		_to_from.erase (j);
 	}
+
+	EdgeMapWithSends::iterator k = find_in_from_to_with_sends (from, to);
+	assert (k != _from_to_with_sends.end ());
+	_from_to_with_sends.erase (k);
 }
 
 /** @param to `To' route.
@@ -77,24 +117,24 @@ DAGEdges::remove (DAGVertex from, DAGVertex to)
  */
 
 bool
-DAGEdges::has_none_to (DAGVertex to) const
+GraphEdges::has_none_to (GraphVertex to) const
 {
 	return _to_from.find (to) == _to_from.end ();
 }
 
 bool
-DAGEdges::empty () const
+GraphEdges::empty () const
 {
 	assert (_from_to.empty () == _to_from.empty ());
 	return _from_to.empty ();
 }
 
 void
-DAGEdges::dump () const
+GraphEdges::dump () const
 {
 	for (EdgeMap::const_iterator i = _from_to.begin(); i != _from_to.end(); ++i) {
 		cout << "FROM: " << i->first->name() << " ";
-		for (set<DAGVertex>::const_iterator j = i->second.begin(); j != i->second.end(); ++j) {
+		for (set<GraphVertex>::const_iterator j = i->second.begin(); j != i->second.end(); ++j) {
 			cout << (*j)->name() << " ";
 		}
 		cout << "\n";
@@ -102,21 +142,22 @@ DAGEdges::dump () const
 	
 	for (EdgeMap::const_iterator i = _to_from.begin(); i != _to_from.end(); ++i) {
 		cout << "TO: " << i->first->name() << " ";
-		for (set<DAGVertex>::const_iterator j = i->second.begin(); j != i->second.end(); ++j) {
+		for (set<GraphVertex>::const_iterator j = i->second.begin(); j != i->second.end(); ++j) {
 			cout << (*j)->name() << " ";
 		}
 		cout << "\n";
 	}
 }
-	
+
+/** Insert an edge into one of the EdgeMaps */
 void
-DAGEdges::insert (EdgeMap& e, DAGVertex a, DAGVertex b)
+GraphEdges::insert (EdgeMap& e, GraphVertex a, GraphVertex b)
 {
 	EdgeMap::iterator i = e.find (a);
 	if (i != e.end ()) {
 		i->second.insert (b);
 	} else {
-		set<DAGVertex> v;
+		set<GraphVertex> v;
 		v.insert (b);
 		e.insert (make_pair (a, v));
 	}
@@ -124,7 +165,7 @@ DAGEdges::insert (EdgeMap& e, DAGVertex a, DAGVertex b)
 
 struct RouteRecEnabledComparator
 {
-	bool operator () (DAGVertex r1, DAGVertex r2) const
+	bool operator () (GraphVertex r1, GraphVertex r2) const
 	{
 		if (r1->record_enabled()) {
 			if (r2->record_enabled()) {
@@ -152,7 +193,7 @@ struct RouteRecEnabledComparator
 boost::shared_ptr<RouteList>
 ARDOUR::topological_sort (
 	boost::shared_ptr<RouteList> routes,
-	DAGEdges edges
+	GraphEdges edges
 	)
 {
 	boost::shared_ptr<RouteList> sorted_routes (new RouteList);
@@ -162,7 +203,7 @@ ARDOUR::topological_sort (
 
 	/* initial queue has routes that are not fed by anything */
 	for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
-		if ((*i)->not_fed ()) {
+		if (edges.has_none_to (*i)) {
 			queue.push_back (*i);
 		}
 	}
@@ -178,11 +219,11 @@ ARDOUR::topological_sort (
 	*/
 	
 	while (!queue.empty ()) {
-		DAGVertex r = queue.front ();
+		GraphVertex r = queue.front ();
 		queue.pop_front ();
 		sorted_routes->push_back (r);
-		set<DAGVertex> e = edges.from (r);
-		for (set<DAGVertex>::iterator i = e.begin(); i != e.end(); ++i) {
+		set<GraphVertex> e = edges.from (r);
+		for (set<GraphVertex>::iterator i = e.begin(); i != e.end(); ++i) {
 			edges.remove (r, *i);
 			if (edges.has_none_to (*i)) {
 				queue.push_back (*i);
@@ -191,6 +232,7 @@ ARDOUR::topological_sort (
 	}
 
 	if (!edges.empty ()) {
+		edges.dump ();
 		/* There are cycles in the graph, so we can't do a topological sort */
 		return boost::shared_ptr<RouteList> ();
 	}

@@ -276,45 +276,18 @@ Graph::restart_cycle()
         // starting with waking up the others.
 }
 
-static bool
-is_feedback (boost::shared_ptr<RouteList> routelist, Route* from, boost::shared_ptr<Route> to)
-{
-        for (RouteList::iterator ri=routelist->begin(); ri!=routelist->end(); ri++) {
-                if ((*ri).get() == from) {
-                        return false;
-		}
-                if ((*ri) == to) {
-                        return true;
-		}
-        }
-
-        return false;
-}
-
-static bool
-is_feedback (boost::shared_ptr<RouteList> routelist, boost::shared_ptr<Route> from, Route* to)
-{
-        for (RouteList::iterator ri=routelist->begin(); ri!=routelist->end(); ri++) {
-                if ((*ri).get() == to) {
-                        return true;
-		}
-                if ((*ri) == from) {
-                        return false;
-		}
-        }
-
-        return false;
-}
+/** Rechain our stuff using a list of routes (which can be in any order) and
+ *  a directed graph of their interconnections, which is guaranteed to be
+ *  acyclic.
+ */
 
 void
-Graph::rechain (boost::shared_ptr<RouteList> routelist)
+Graph::rechain (boost::shared_ptr<RouteList> routelist, GraphEdges const & edges)
 {
-        node_list_t::iterator ni;
         Glib::Mutex::Lock ls (_swap_mutex);
 
         int chain = _setup_chain;
         DEBUG_TRACE (DEBUG::Graph, string_compose ("============== setup %1\n", chain));
-        // set all refcounts to 0;
 
 	/* This will become the number of nodes that do not feed any other node;
 	   once we have processed this number of those nodes, we have finished.
@@ -337,53 +310,38 @@ Graph::rechain (boost::shared_ptr<RouteList> routelist)
 
         // now add refs for the connections.
 
-        for (ni=_nodes_rt[chain].begin(); ni!=_nodes_rt[chain].end(); ni++) {
+        for (node_list_t::iterator ni = _nodes_rt[chain].begin(); ni != _nodes_rt[chain].end(); ni++) {
 
-		/* We will set this to true if the node *ni is directly or
-		   indirectly fed by anything (without feedback)
-		*/
-                bool has_input  = false;
+                boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (*ni);
 
-		/* We will set this to true if the node *ni directly feeds
-		   anything (without feedback)
-		*/
-                bool has_output = false;
+		/* The routes that are directly fed by r */
+		set<GraphVertex> fed_from_r = edges.from (r);
 
-		/* We will also set up *ni's _activation_set to contain any nodes
-		   that it directly feeds.
-		*/
+		/* Hence whether r has an output */
+		bool const has_output = !fed_from_r.empty ();
 
-                boost::shared_ptr<Route> rp = boost::dynamic_pointer_cast<Route>( *ni);
+		/* Set up r's activation set */
+		for (set<GraphVertex>::iterator i = fed_from_r.begin(); i != fed_from_r.end(); ++i) {
+			r->_activation_set[chain].insert (*i);
+		}
 
-                for (RouteList::iterator ri=routelist->begin(); ri!=routelist->end(); ri++) {
-                        if (rp->direct_feeds (*ri)) {
-                                if (is_feedback (routelist, rp.get(), *ri)) {
-                                        continue;
-                                }
-
-                                has_output = true;
-                                (*ni)->_activation_set[chain].insert (*ri);
-                        }
-                }
-
-                for (Route::FedBy::iterator fi=rp->fed_by().begin(); fi!=rp->fed_by().end(); fi++) {
-                        if (boost::shared_ptr<Route> r = fi->r.lock()) {
-                                if (!is_feedback (routelist, r, rp.get())) {
-                                        has_input = true;
-                                }
-                        }
-                }
+		/* r has an input if there are some incoming edges to r in the graph */
+		bool const has_input = !edges.has_none_to (r);
 
 		/* Increment the refcount of any route that we directly feed */
-                for (node_set_t::iterator ai=(*ni)->_activation_set[chain].begin(); ai!=(*ni)->_activation_set[chain].end(); ai++) {
+                for (node_set_t::iterator ai = r->_activation_set[chain].begin(); ai != r->_activation_set[chain].end(); ai++) {
                         (*ai)->_init_refcount[chain] += 1;
                 }
 
                 if (!has_input) {
+			/* no input, so this node needs to be triggered initially to get things going */
                         _init_trigger_list[chain].push_back (*ni);
 		}
 
                 if (!has_output) {
+			/* no output, so this is one of the nodes that we can count off to decide
+			   if we've finished
+			*/
                         _init_finished_refcount[chain] += 1;
 		}
         }

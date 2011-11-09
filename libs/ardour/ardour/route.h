@@ -310,9 +310,17 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 
 	/**
 	 * return true if this route feeds the first argument directly, via
-	 * either its main outs or a send.
+	 * either its main outs or a send.  This is checked by the actual
+	 * connections, rather than by what the graph is currently doing.
 	 */
-	bool direct_feeds (boost::shared_ptr<Route>, bool* via_send_only = 0);
+	bool direct_feeds_according_to_reality (boost::shared_ptr<Route>, bool* via_send_only = 0);
+
+	/**
+	 * return true if this route feeds the first argument directly, via
+	 * either its main outs or a send, according to the graph that
+	 * is currently being processed.
+	 */
+	bool direct_feeds_according_to_graph (boost::shared_ptr<Route>, bool* via_send_only = 0);
 
 	struct FeedRecord {
 		boost::weak_ptr<Route> r;
@@ -334,7 +342,6 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	const FedBy& fed_by() const { return _fed_by; }
 	void clear_fed_by ();
 	bool add_fed_by (boost::shared_ptr<Route>, bool sends_only);
-	bool not_fed() const { return _fed_by.empty(); }
 
 	/* Controls (not all directly owned by the Route */
 

@@ -269,6 +269,10 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 
 	ARDOUR::Session::Quit.connect (forever_connections, MISSING_INVALIDATOR, ui_bind (&ARDOUR_UI::finish, this), gui_context ());
 
+	/* tell the user about feedback */
+
+	ARDOUR::Session::FeedbackDetected.connect (forever_connections, MISSING_INVALIDATOR, ui_bind (&ARDOUR_UI::feedback_detected, this), gui_context ());
+
 	/* handle requests to deal with missing files */
 
 	ARDOUR::Session::MissingFile.connect_same_thread (forever_connections, boost::bind (&ARDOUR_UI::missing_file, this, _1, _2, _3));
@@ -3876,4 +3880,16 @@ void
 ARDOUR_UI::drop_process_buffers ()
 {
 	_process_thread->drop_buffers ();
+}
+
+void
+ARDOUR_UI::feedback_detected ()
+{
+	MessageDialog d (
+		_("Something you have just done has generated a feedback path within Ardour's "
+		  "routing.  Until this feedback is removed, Ardour's output will be as it was "
+                  "before you made the feedback-generating connection.")
+		);
+
+	d.run ();
 }

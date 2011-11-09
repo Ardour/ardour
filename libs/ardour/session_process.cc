@@ -107,9 +107,9 @@ Session::no_roll (pframes_t nframes)
 		_click_io->silence (nframes);
 	}
 
-	if (route_graph->threads_in_use() > 0) {
+	if (_process_graph->threads_in_use() > 0) {
 		DEBUG_TRACE(DEBUG::ProcessThreads,"calling graph/no-roll\n");
-		route_graph->routes_no_roll( nframes, _transport_frame, end_frame, non_realtime_work_pending(), declick);
+		_process_graph->routes_no_roll( nframes, _transport_frame, end_frame, non_realtime_work_pending(), declick);
 	} else {
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 
@@ -148,9 +148,9 @@ Session::process_routes (pframes_t nframes, bool& need_butler)
 	   using 1 thread. its needed because otherwise when we remove
 	   tracks, the graph never gets updated.
 	*/
-	if (1 || route_graph->threads_in_use() > 0) {
+	if (1 || _process_graph->threads_in_use() > 0) {
 		DEBUG_TRACE(DEBUG::ProcessThreads,"calling graph/process-routes\n");
-		route_graph->process_routes (nframes, start_frame, end_frame, declick, need_butler);
+		_process_graph->process_routes (nframes, start_frame, end_frame, declick, need_butler);
 	} else {
 
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
@@ -185,8 +185,8 @@ Session::silent_process_routes (pframes_t nframes, bool& need_butler)
 	   using 1 thread. its needed because otherwise when we remove
 	   tracks, the graph never gets updated.
 	*/
-	if (1 || route_graph->threads_in_use() > 0) {
-		route_graph->silent_process_routes (nframes, start_frame, end_frame, need_butler);
+	if (1 || _process_graph->threads_in_use() > 0) {
+		_process_graph->silent_process_routes (nframes, start_frame, end_frame, need_butler);
 	} else {
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 
