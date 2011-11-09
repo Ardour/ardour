@@ -32,6 +32,7 @@ MissingPluginDialog::MissingPluginDialog (Session * s, list<string> const & plug
         set_session (s);
 
         add_button (_("OK"), RESPONSE_OK);
+        set_default_response (RESPONSE_OK);
 
 	Label* m = manage (new Label);
 

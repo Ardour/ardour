@@ -43,6 +43,7 @@ MissingFileDialog::MissingFileDialog (Session* s, const std::string& path, DataT
         set_session (s);
 
         add_button (_("Done"), RESPONSE_OK);
+        set_default_response (RESPONSE_OK);
 
         string typestr;
 

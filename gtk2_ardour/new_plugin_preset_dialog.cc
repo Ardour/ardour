@@ -41,6 +41,8 @@ NewPluginPresetDialog::NewPluginPresetDialog (boost::shared_ptr<ARDOUR::Plugin> 
 
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);
 	_add = add_button (Stock::ADD, RESPONSE_ACCEPT);
+	set_default_response (RESPONSE_ACCEPT);
+	_name.set_activates_default(true);
 
 	show_all ();
 
