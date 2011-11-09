@@ -18,7 +18,7 @@ $group_number = 0;
 %merge_bindings;
 
 $platform = linux;
-$winkey = 'Mod4><Super';
+$winkey = 'Mod4\>\<Super';
 $make_cheatsheet = 1;
 $make_accelmap = 0;
 $merge_from = "";

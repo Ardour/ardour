@@ -30,6 +30,8 @@
 #include "gtkmm2ext/rgb_macros.h"
 #include "gtkmm2ext/gui_thread.h"
 
+#include "ardour/rc_configuration.h" // for widget prelight preference
+
 #include "ardour_button.h"
 #include "ardour_ui.h"
 #include "global_signals.h"
@@ -246,7 +248,7 @@ ArdourButton::render (cairo_t* cr)
 
 	/* if requested, show hovering */
 	
-	if ((_tweaks & ShowHover)) {
+	if (ARDOUR::Config->get_widget_prelight()) {
 		if (_hovering) {
 			Gtkmm2ext::rounded_rectangle (cr, 0, 0, _width, _height, _corner_radius);
 			cairo_set_source_rgba (cr, 0.905, 0.917, 0.925, 0.2);
@@ -634,7 +636,7 @@ ArdourButton::on_enter_notify_event (GdkEventCrossing* ev)
 {
 	_hovering = true;
 
-	if (_tweaks & ShowHover) {
+	if (ARDOUR::Config->get_widget_prelight()) {
 		queue_draw ();
 	}
 
@@ -646,7 +648,7 @@ ArdourButton::on_leave_notify_event (GdkEventCrossing* ev)
 {
 	_hovering = false;
 
-	if (_tweaks & ShowHover) {
+	if (ARDOUR::Config->get_widget_prelight()) {
 		queue_draw ();
 	}
 

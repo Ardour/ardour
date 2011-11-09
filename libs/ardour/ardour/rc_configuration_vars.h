@@ -177,4 +177,5 @@ CONFIG_VARIABLE (DenormalModel, denormal_model, "denormal-model", DenormalNone)
 /* visibility of various things */
 
 CONFIG_VARIABLE (bool, show_zoom_tools, "show-zoom-tools", true)
+CONFIG_VARIABLE (bool, widget_prelight, "widget-prelight", true)
 CONFIG_VARIABLE (std::string, mixer_strip_visibility, "mixer-strip-visibility", "PhaseInvert,SoloSafe,SoloIsolated,Group,MeterPoint")

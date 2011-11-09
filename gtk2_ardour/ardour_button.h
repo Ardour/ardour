@@ -50,7 +50,6 @@ class ArdourButton : public CairoWidget
 
 	enum Tweaks {
 		ShowClick = 0x1,
-		ShowHover = 0x2,
 		NoModel = 0x4,
 	};
 

@@ -1493,6 +1493,14 @@ RCOptionEditor::RCOptionEditor ()
 
 	/* INTERFACE */
 
+	add_option (_("Interface"),
+	     new BoolOption (
+		     "widget_prelight",
+		     _("Graphically indicate mouse pointer hovering over various widgets"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_widget_prelight),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_widget_prelight)
+		     ));
+
 #ifndef GTKOSX
 	/* font scaling does nothing with GDK/Quartz */
 	add_option (_("Interface"), new FontScalingOptions (_rc_config));
