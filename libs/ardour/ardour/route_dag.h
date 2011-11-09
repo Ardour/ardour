@@ -23,21 +23,23 @@
 
 namespace ARDOUR {
 
+typedef boost::shared_ptr<Route> DAGVertex;
+
 /** A list of edges for a directed acyclic graph for routes */	
 class DAGEdges
 {
 public:
-	typedef std::map<boost::shared_ptr<Route>, std::set<boost::shared_ptr<Route> > > EdgeMap;
+	typedef std::map<DAGVertex, std::set<DAGVertex> > EdgeMap;
 	
-	void add (boost::shared_ptr<Route> from, boost::shared_ptr<Route> to);
-	std::set<boost::shared_ptr<Route> > from (boost::shared_ptr<Route> r) const;
-	void remove (boost::shared_ptr<Route> from, boost::shared_ptr<Route> to);
-	bool has_none_to (boost::shared_ptr<Route> to) const;
+	void add (DAGVertex from, DAGVertex to);
+	std::set<DAGVertex> from (DAGVertex r) const;
+	void remove (DAGVertex from, DAGVertex to);
+	bool has_none_to (DAGVertex to) const;
 	bool empty () const;
 	void dump () const;
 	
 private:
-	void insert (EdgeMap& e, boost::shared_ptr<Route> a, boost::shared_ptr<Route> b);
+	void insert (EdgeMap& e, DAGVertex a, DAGVertex b);
 
 	/* Keep a map in both directions to speed lookups */
 

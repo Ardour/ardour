@@ -27,7 +27,7 @@ using namespace std;
 using namespace ARDOUR;
 
 void
-DAGEdges::add (boost::shared_ptr<Route> from, boost::shared_ptr<Route> to)
+DAGEdges::add (DAGVertex from, DAGVertex to)
 {
 	insert (_from_to, from, to);
 	insert (_to_from, to, from);
@@ -36,26 +36,26 @@ DAGEdges::add (boost::shared_ptr<Route> from, boost::shared_ptr<Route> to)
 	if (i != _from_to.end ()) {
 		i->second.insert (to);
 	} else {
-		set<boost::shared_ptr<Route> > v;
+		set<DAGVertex> v;
 		v.insert (to);
 		_from_to.insert (make_pair (from, v));
 	}
 	
 }
 
-set<boost::shared_ptr<Route> >
-DAGEdges::from (boost::shared_ptr<Route> r) const
+set<DAGVertex>
+DAGEdges::from (DAGVertex r) const
 {
 	EdgeMap::const_iterator i = _from_to.find (r);
 	if (i == _from_to.end ()) {
-		return set<boost::shared_ptr<Route> > ();
+		return set<DAGVertex> ();
 	}
 	
 	return i->second;
 }
 
 void
-DAGEdges::remove (boost::shared_ptr<Route> from, boost::shared_ptr<Route> to)
+DAGEdges::remove (DAGVertex from, DAGVertex to)
 {
 	EdgeMap::iterator i = _from_to.find (from);
 	assert (i != _from_to.end ());
@@ -77,7 +77,7 @@ DAGEdges::remove (boost::shared_ptr<Route> from, boost::shared_ptr<Route> to)
  */
 
 bool
-DAGEdges::has_none_to (boost::shared_ptr<Route> to) const
+DAGEdges::has_none_to (DAGVertex to) const
 {
 	return _to_from.find (to) == _to_from.end ();
 }
@@ -94,7 +94,7 @@ DAGEdges::dump () const
 {
 	for (EdgeMap::const_iterator i = _from_to.begin(); i != _from_to.end(); ++i) {
 		cout << "FROM: " << i->first->name() << " ";
-		for (set<boost::shared_ptr<Route> >::const_iterator j = i->second.begin(); j != i->second.end(); ++j) {
+		for (set<DAGVertex>::const_iterator j = i->second.begin(); j != i->second.end(); ++j) {
 			cout << (*j)->name() << " ";
 		}
 		cout << "\n";
@@ -102,7 +102,7 @@ DAGEdges::dump () const
 	
 	for (EdgeMap::const_iterator i = _to_from.begin(); i != _to_from.end(); ++i) {
 		cout << "TO: " << i->first->name() << " ";
-		for (set<boost::shared_ptr<Route> >::const_iterator j = i->second.begin(); j != i->second.end(); ++j) {
+		for (set<DAGVertex>::const_iterator j = i->second.begin(); j != i->second.end(); ++j) {
 			cout << (*j)->name() << " ";
 		}
 		cout << "\n";
@@ -110,13 +110,13 @@ DAGEdges::dump () const
 }
 	
 void
-DAGEdges::insert (EdgeMap& e, boost::shared_ptr<Route> a, boost::shared_ptr<Route> b)
+DAGEdges::insert (EdgeMap& e, DAGVertex a, DAGVertex b)
 {
 	EdgeMap::iterator i = e.find (a);
 	if (i != e.end ()) {
 		i->second.insert (b);
 	} else {
-		set<boost::shared_ptr<Route> > v;
+		set<DAGVertex> v;
 		v.insert (b);
 		e.insert (make_pair (a, v));
 	}
@@ -124,7 +124,7 @@ DAGEdges::insert (EdgeMap& e, boost::shared_ptr<Route> a, boost::shared_ptr<Rout
 
 struct RouteRecEnabledComparator
 {
-	bool operator () (boost::shared_ptr<Route> r1, boost::shared_ptr<Route> r2) const
+	bool operator () (DAGVertex r1, DAGVertex r2) const
 	{
 		if (r1->record_enabled()) {
 			if (r2->record_enabled()) {
@@ -176,11 +176,11 @@ ARDOUR::topological_sort (
 	*/
 	
 	while (!queue.empty ()) {
-		boost::shared_ptr<Route> r = queue.front ();
+		DAGVertex r = queue.front ();
 		queue.pop_front ();
 		sorted_routes->push_back (r);
-		set<boost::shared_ptr<Route> > e = edges.from (r);
-		for (set<boost::shared_ptr<Route> >::iterator i = e.begin(); i != e.end(); ++i) {
+		set<DAGVertex> e = edges.from (r);
+		for (set<DAGVertex>::iterator i = e.begin(); i != e.end(); ++i) {
 			edges.remove (r, *i);
 			if (edges.has_none_to (*i)) {
 				queue.push_back (*i);
