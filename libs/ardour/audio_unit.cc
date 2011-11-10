@@ -483,7 +483,7 @@ AUPlugin::init ()
 		DEBUG_TRACE (DEBUG::AudioUnits, "set render callback in input scope\n");
 		if ((err = unit->SetProperty (kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Input,
 					      0, (void*) &renderCallbackInfo, sizeof(renderCallbackInfo))) != 0) {
-			cerr << "cannot install render callback (err = " << err << ')' << endl;
+			error << string_compose (_("cannot install render callback (err = %1)"), err) << endmsg;
 			throw failed_constructor();
 		}
 	}
@@ -680,7 +680,6 @@ AUPlugin::maybe_fix_broken_au_id (const std::string& id)
 
 				/* too close to the end for \xNN parsing: treat as literal characters */
 
-				cerr << "Parse " << cstr << " as a literal \\" << endl;
 				nascent[in] = *cstr;
 				++cstr;
 				++in;
@@ -699,7 +698,6 @@ AUPlugin::maybe_fix_broken_au_id (const std::string& id)
 				} else {
 
 					/* treat as literal characters */
-					cerr << "Parse " << cstr << " as a literal \\" << endl;
 					nascent[in] = *cstr;
 					++cstr;
 					++in;
@@ -886,7 +884,7 @@ AUPlugin::set_block_size (pframes_t nframes)
 	DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("set MaximumFramesPerSlice in global scope to %1\n", numFrames));
 	if ((err = unit->SetProperty (kAudioUnitProperty_MaximumFramesPerSlice, kAudioUnitScope_Global,
 				      0, &numFrames, sizeof (numFrames))) != noErr) {
-		cerr << "cannot set max frames (err = " << err << ')' << endl;
+		error << string_compose (_("AU: cannot set max frames (err = %1)"), err) << endmsg;
 		return -1;
 	}
 
@@ -1315,7 +1313,7 @@ AUPlugin::connect_and_run (BufferSet& bufs, ChanMapping in_map, ChanMapping out_
 
 	buffers->mNumberBuffers = output_channels;
 
-	for (uint32_t i = 0; i < output_channels; ++i) {
+	for (int32_t i = 0; i < output_channels; ++i) {
 		buffers->mBuffers[i].mNumberChannels = 1;
 		buffers->mBuffers[i].mDataByteSize = nframes * sizeof (Sample);
 		/* setting this to 0 indicates to the AU that it can provide buffers here
@@ -1390,7 +1388,7 @@ AUPlugin::connect_and_run (BufferSet& bufs, ChanMapping in_map, ChanMapping out_
 		return 0;
 	}
 
-	cerr << name() << " render status " << err << endl;
+	error << string_compose (_("AU: render error for %1, status = %2"), name(), err) << endmsg;
 	return -1;
 }
 
@@ -2742,7 +2740,7 @@ AUPlugin::_parameter_change_listener (void* arg, void* src, const AudioUnitEvent
 }
 
 void
-AUPlugin::parameter_change_listener (void* /*arg*/, void* /*src*/, const AudioUnitEvent* event, UInt64 host_time, Float32 new_value)
+AUPlugin::parameter_change_listener (void* /*arg*/, void* /*src*/, const AudioUnitEvent* event, UInt64 /*host_time*/, Float32 new_value)
 {
 	ParameterMap::iterator i = parameter_map.find (event->mArgument.mParameter.mParameterID);
 
