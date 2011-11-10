@@ -56,7 +56,7 @@ ThemeManager::ThemeManager()
 {
 	set_title (_("Theme Manager"));
 
-	color_list = ListStore::create (columns);
+	color_list = TreeStore::create (columns);
 	color_display.set_model (color_list);
 	color_display.append_column (_("Object"), columns.name);
 	color_display.append_column (_("Color"), columns.color);
@@ -132,6 +132,12 @@ ThemeManager::button_press_event (GdkEventButton* ev)
 	case 1: /* color */
 		if ((iter = color_list->get_iter (path))) {
 
+			UIConfigVariable<uint32_t>* var = (*iter)[columns.pVar];
+			if (!var) {
+				/* parent row, do nothing */
+				return false;
+			}
+
 			int r,g, b, a;
 			uint32_t rgba = (*iter)[columns.rgba];
 			Gdk::Color color;
@@ -156,8 +162,6 @@ ThemeManager::button_press_event (GdkEventButton* ev)
 				b = (int) floor (color.get_blue_p() * 255.0);
 
 				rgba = RGBA_TO_UINT(r,g,b,a>>8);
-				//cerr << (*iter)[columns.name] << " == " << hex << rgba << endl;
-				//cerr << "a = " << a << endl;
 				(*iter)[columns.rgba] = rgba;
 				(*iter)[columns.gdkcolor] = color;
 
@@ -165,8 +169,7 @@ ThemeManager::button_press_event (GdkEventButton* ev)
 				ccvar->set(rgba);
 				ARDOUR_UI::config()->set_dirty ();
 
-				//ColorChanged (rgba);
-				ColorsChanged();//EMIT SIGNAL
+				ColorsChanged(); //EMIT SIGNAL
 				break;
 
 			default:
@@ -251,25 +254,65 @@ void
 ThemeManager::setup_theme ()
 {
 	int r, g, b, a;
+
 	color_list->clear();
 
 	for (std::map<std::string,UIConfigVariable<uint32_t> *>::iterator i = ARDOUR_UI::config()->canvas_colors.begin(); i != ARDOUR_UI::config()->canvas_colors.end(); i++) {
 
-		TreeModel::Row row = *(color_list->append());
+
+		UIConfigVariable<uint32_t>* var = i->second;
+
+		TreeModel::Children rows = color_list->children();
+		TreeModel::Row row;
+		string::size_type colon;
+
+		if ((colon = var->name().find (':')) != string::npos) {
+
+			/* this is supposed to be a child node, so find the
+			 * parent 
+			 */
+
+			string parent = var->name().substr (0, colon);
+			TreeModel::iterator ri;
+
+			for (ri = rows.begin(); ri != rows.end(); ++ri) {
+				string s = (*ri)[columns.name];
+				if (s == parent) {
+					break;
+				}
+			}
+
+			if (ri == rows.end()) {
+				/* not found, add the parent as new top level row */
+				row = *(color_list->append());
+				row[columns.name] = parent;
+				row[columns.pVar] = 0;
+				
+				/* now add the child as a child of this one */
+
+				row = *(color_list->insert (row->children().end()));
+				row[columns.name] = var->name().substr (colon+1);
+			} else {
+				row = *(color_list->insert ((*ri)->children().end()));
+				row[columns.name] = var->name().substr (colon+1);
+			}
+
+		} else {
+			/* add as a child */
+			row = *(color_list->append());
+			row[columns.name] = var->name();
+		}
 
 		Gdk::Color col;
-		UIConfigVariable<uint32_t>* var = i->second;
 		uint32_t rgba = var->get();
 		UINT_TO_RGBA (rgba, &r, &g, &b, &a);
 		//cerr << (*i)->name() << " == " << hex << rgba << ": " << hex << r << " " << hex << g << " " << hex << b << endl;
 		col.set_rgb_p (r / 255.0, g / 255.0, b / 255.0);
 
-		row[columns.name] = var->name();
 		row[columns.color] = "";
 		row[columns.pVar] = var;
 		row[columns.rgba] = rgba;
 		row[columns.gdkcolor] = col;
-
 	}
 
 	ColorsChanged.emit();

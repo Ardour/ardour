@@ -21,7 +21,7 @@
 #define __ardour_gtk_color_manager_h__
 
 #include <gtkmm/treeview.h>
-#include <gtkmm/liststore.h>
+#include <gtkmm/treestore.h>
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/colorselection.h>
 #include <gtkmm/radiobutton.h>
@@ -62,7 +62,7 @@ class ThemeManager : public ArdourDialog
 
 	ColorDisplayModelColumns columns;
 	Gtk::TreeView color_display;
-	Glib::RefPtr<Gtk::ListStore> color_list;
+	Glib::RefPtr<Gtk::TreeStore> color_list;
 	Gtk::ColorSelectionDialog color_dialog;
 	Gtk::ScrolledWindow scroller;
 	Gtk::HBox theme_selection_hbox;
