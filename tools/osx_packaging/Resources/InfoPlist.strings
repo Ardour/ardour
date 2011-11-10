@@ -1,4 +1,4 @@
 CFBundleName = "Ardour3";
-CFBundleShortVersionString = "3.0/10446";
-CFBundleGetInfoString = "Ardour3 v 3.0/10446 Copyright 2001-2008 Paul Davis";
+CFBundleShortVersionString = "3.0/10489";
+CFBundleGetInfoString = "Ardour3 v 3.0/10489 Copyright 2001-2011 Paul Davis";
 NSHumanReadableCopyright = "Copyright 2001-20011 Paul Davis.";

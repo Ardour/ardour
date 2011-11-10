@@ -231,6 +231,7 @@ elif test x$MIXBUS != x ; then
 else
     cp  Ardour3.icns $Resources/appIcon.icns
 fi
+cp  typeArdour.icns $Resources/
 if test x$STRIP != x ; then
     strip $APPROOT/MacOS/Ardour3
 fi
