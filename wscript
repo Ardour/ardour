@@ -484,13 +484,13 @@ def configure(conf):
         conf.env.append_value('LINKFLAGS_OSX', ['-framework', 'CoreFoundation'])
         conf.env.append_value('LINKFLAGS_OSX', ['-framework', 'CoreServices'])
 
-        conf.env.append_value('LINKFLAGS_OSX', ['-undefined', 'dynamic_lookup' ])
-        conf.env.append_value('LINKFLAGS_OSX', '-flat_namespace')
-        conf.env.append_value('LINKFLAGS_OSX', ['-bind_at_load'])
+	conf.env.append_value('LINKFLAGS_OSX', ['-undefined', 'dynamic_lookup' ])
+	conf.env.append_value('LINKFLAGS_OSX', ['-flat_namespace'])
 
         conf.env.append_value('CXXFLAGS_AUDIOUNITS', "-DAUDIOUNIT_SUPPORT")
         conf.env.append_value('CXXFLAGS_AUDIOUNITS', "-DAU_STATE_SUPPORT")
-        conf.env.append_value('LINKFLAGS_AUDIOUNITS', ['-framework', 'Carbon', '-framework', 'Audiotoolbox', '-framework', 'AudioUnit'])
+        conf.env.append_value('LINKFLAGS_AUDIOUNITS', ['-framework', 'Carbon', 
+		'-framework', 'Audiotoolbox', '-framework', 'AudioUnit'])
 
     if Options.options.boost_include != '':
         conf.env.append_value('CXXFLAGS', '-I' + Options.options.boost_include)
