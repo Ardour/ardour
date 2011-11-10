@@ -25,6 +25,7 @@
 
 #include <cstdio> /* for sprintf */
 #include <cstring>
+#include <cstdlib>
 #include <cmath>
 #include <cctype>
 #include <cstring>
@@ -285,9 +286,27 @@ path_expand (string path)
 	string ret = path;
 
 	wordexp_t expansion;
-	switch (wordexp (path.c_str(), &expansion, WRDE_NOCMD|WRDE_UNDEF)) {
+	
+	/* force field expansion to avoid use whitespace, since we know this is
+	 * a path
+	 */
+
+	char *oifs = getenv ("IFS");
+	setenv ("IFS", "/", 1);
+	int result = wordexp (path.c_str(), &expansion, WRDE_NOCMD|WRDE_UNDEF);
+	if (oifs) {
+		setenv ("IFS", oifs, 1);
+	} else {
+		unsetenv ("IFS");
+	}
+
+	switch (result) {
 	case 0:
 		break;
+	case WRDE_NOSPACE:
+		/* see docs on wordexp() */
+		wordfree (&expansion);
+		/* fallthru */
 	default:
 		error << string_compose (_("illegal or badly-formed string used for path (%1)"), path) << endmsg;
 		goto out;
