@@ -5,7 +5,9 @@
 
 #include "pbd/convert.h"
 #include "pbd/error.h"
+
 #include "ardour/audio_unit.h"
+#include "ardour/debug.h"
 #include "ardour/plugin_insert.h"
 
 #undef check // stupid gtk, stupid apple
@@ -286,10 +288,14 @@ AUPluginUI::create_cocoa_view ()
 						    &isWritable );
 
 	numberOfClasses = (dataSize - sizeof(CFURLRef)) / sizeof(CFStringRef);
-	
+
 	// Does view have custom Cocoa UI?
 	
 	if ((result == noErr) && (numberOfClasses > 0) ) {
+
+		DEBUG_TRACE(DEBUG::AudioUnits,
+			    string_compose ( "based on %1, there are %2 cocoa UI classes\n", dataSize, numberOfClasses));
+
 		cocoaViewInfo = (AudioUnitCocoaViewInfo *)malloc(dataSize);
 		if(AudioUnitGetProperty(*au->get_au(),
 					kAudioUnitProperty_CocoaUI,
@@ -299,11 +305,16 @@ AUPluginUI::create_cocoa_view ()
 					&dataSize) == noErr) {
 
 			CocoaViewBundlePath	= (NSURL *)cocoaViewInfo->mCocoaAUViewBundleLocation;
-			
+				
 			// we only take the first view in this example.
 			factoryClassName	= (NSString *)cocoaViewInfo->mCocoaAUViewClass[0];
+			
+			DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("the factory name is %1 bundle is %2\n",
+									factoryClassName, CocoaViewBundlePath));
 
 		} else {
+
+			DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("No cocoaUI property cocoaViewInfo = %1\n", cocoaViewInfo));
 
 			if (cocoaViewInfo != NULL) {
 				free (cocoaViewInfo);
@@ -318,11 +329,15 @@ AUPluginUI::create_cocoa_view ()
 
 	if (CocoaViewBundlePath && factoryClassName) {
 		NSBundle *viewBundle  	= [NSBundle bundleWithPath:[CocoaViewBundlePath path]];
+
+		DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("tried to create bundle, result = %1\n", viewBundle));
+
 		if (viewBundle == nil) {
 			error << _("AUPluginUI: error loading AU view's bundle") << endmsg;
 			return -1;
 		} else {
 			Class factoryClass = [viewBundle classNamed:factoryClassName];
+			DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("tried to create factory class, result = %1\n", factoryClass));
 			if (!factoryClass) {
 				error << _("AUPluginUI: error getting AU view's factory class from bundle") << endmsg;
 				return -1;
@@ -340,8 +355,12 @@ AUPluginUI::create_cocoa_view ()
 				return -1;
 			}
 
+			DEBUG_TRACE (DEBUG::AudioUnits, "got a factory instance\n");
+
 			// make a view
 			au_view = [factoryInstance uiViewForAudioUnit:*au->get_au() withSize:crect.size];
+
+			DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("view created @ %1\n", au_view));
 			
 			// cleanup
 			[CocoaViewBundlePath release];
@@ -358,7 +377,10 @@ AUPluginUI::create_cocoa_view ()
 
 	if (!wasAbleToLoadCustomView) {
 		// load generic Cocoa view
+		DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("Loading generic view using %1 -> %2\n", au,
+								au->get_au()));
 		au_view = [[AUGenericView alloc] initWithAudioUnit:*au->get_au()];
+		DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("view created @ %1\n", au_view));
 		[(AUGenericView *)au_view setShowsExpertParameters:YES];
 	}
 
