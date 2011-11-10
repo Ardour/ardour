@@ -29,6 +29,8 @@
 #include "ardour/ardour.h"
 #include "ardour/session_handle.h"
 
+#include "ardour_button.h"
+
 namespace ARDOUR {
 	class Session;
         class Location;
@@ -69,8 +71,8 @@ class TimeInfoBox : public Gtk::HBox, public ARDOUR::SessionHandlePtr
     PBD::ScopedConnectionList punch_connections;
     PBD::ScopedConnectionList editor_connections;
 
-    Gtkmm2ext::StatefulToggleButton punch_in_button;
-    Gtkmm2ext::StatefulToggleButton punch_out_button;
+    ArdourButton punch_in_button;
+    ArdourButton punch_out_button;
 
     void selection_changed ();
 

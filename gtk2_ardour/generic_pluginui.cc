@@ -126,7 +126,11 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 
 	pi->ActiveChanged.connect (active_connection, invalidator (*this), boost::bind (&GenericPluginUI::processor_active_changed, this, boost::weak_ptr<Processor>(pi)), gui_context());
 
-	bypass_button.set_active (!pi->active());
+	if (!pi->active()) {
+		bypass_button.set_active_state (Gtkmm2ext::Active);
+	} else {
+		bypass_button.unset_active_state ();
+	}
 
 	prefheight = 0;
 	build ();
@@ -791,16 +795,6 @@ GenericPluginUI::control_combo_changed (ControlUI* cui)
 		string value = cui->combo->get_active_text();
 		insert->automation_control (cui->parameter())->set_value ((*cui->combo_map)[value]);
 	}
-}
-
-void
-GenericPluginUI::processor_active_changed (boost::weak_ptr<Processor> weak_processor)
-{
-	ENSURE_GUI_THREAD (*this, &GenericPluginUI::processor_active_changed, weak_processor)
-
-	boost::shared_ptr<Processor> processor = weak_processor.lock();
-
-	bypass_button.set_active (!processor || !processor->active());
 }
 
 bool

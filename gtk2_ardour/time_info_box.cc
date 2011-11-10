@@ -45,8 +45,6 @@ TimeInfoBox::TimeInfoBox ()
 	, right (2, 4)
 	, syncing_selection (false)
 	, syncing_punch (false)
-	, punch_in_button (_("In"))
-	, punch_out_button (_("Out"))
 {
 	selection_start = new AudioClock ("selection-start", false, "SelectionClockDisplay", false, false, false, false);
 	selection_end = new AudioClock ("selection-end", false, "SelectionClockDisplay", false, false, false, false);
@@ -116,20 +114,24 @@ TimeInfoBox::TimeInfoBox ()
         left.attach (*l, 0, 1, 3, 4, FILL);
         left.attach (*selection_length, 1, 2, 3, 4);
 
-	punch_in_button.set_name ("TimeInfoPunchButton");
-	punch_out_button.set_name ("TimeInfoPunchButton");
+	punch_in_button.set_name ("punch button");
+	punch_out_button.set_name ("punch button");
+	punch_in_button.set_text (_("In"));
+	punch_out_button.set_text (_("Out"));
 
-	ActionManager::get_action ("Transport", "TogglePunchIn")->connect_proxy (punch_in_button);
-	ActionManager::get_action ("Transport", "TogglePunchOut")->connect_proxy (punch_out_button);
+	Glib::RefPtr<Action> act = ActionManager::get_action ("Transport", "TogglePunchIn");
+	punch_in_button.set_related_action (act);
+	act = ActionManager::get_action ("Transport", "TogglePunchOut");
+	punch_out_button.set_related_action (act);
 
 	Gtkmm2ext::UI::instance()->set_tip (punch_in_button, _("Start recording at auto-punch start"));
 	Gtkmm2ext::UI::instance()->set_tip (punch_out_button, _("Stop recording at auto-punch end"));
 
 	punch_title.set_name ("TimeInfoSelectionTitle");
 	right.attach (punch_title, 2, 4, 0, 1);
-        right.attach (punch_in_button, 2, 3, 1, 2, FILL);
+        right.attach (punch_in_button, 2, 3, 1, 2, FILL, SHRINK);
         right.attach (*punch_start, 3, 4, 1, 2);
-        right.attach (punch_out_button, 2, 3, 2, 3, FILL);
+        right.attach (punch_out_button, 2, 3, 2, 3, FILL, SHRINK);
         right.attach (*punch_end, 3, 4, 2, 3);
 
         show_all ();
@@ -360,7 +362,7 @@ TimeInfoBox::on_expose_event (GdkEventExpose* ev)
 #endif
 			translate_coordinates (*window_parent, 0, 0, x, y);
 			context->set_source_rgba (0.149, 0.149, 0.149, 1.0);
-			Gtkmm2ext::rounded_rectangle (context, x, y, get_allocation().get_width(), get_allocation().get_height(), 5);
+			Gtkmm2ext::rounded_rectangle (context, x, y, get_allocation().get_width(), get_allocation().get_height(), 9);
 			context->fill ();
 		}
 	}

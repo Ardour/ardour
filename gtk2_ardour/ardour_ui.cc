@@ -157,8 +157,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	, auto_play_button (ArdourButton::led_default_elements)
 	, auto_input_button (ArdourButton::led_default_elements)
 
-	, time_master_button (_("time\nmaster"))
-
 	, auditioning_alert_button (_("AUDITION"))
 	, solo_alert_button (_("SOLO"))
 

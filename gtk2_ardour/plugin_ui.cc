@@ -455,7 +455,7 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	, add_button (_("Add"))
 	, save_button (_("Save"))
 	, delete_button (_("Delete"))
-	, bypass_button (_("Bypass"))
+	, bypass_button (ArdourButton::led_default_elements)
 	, latency_gui (0)
 	, latency_dialog (0)
 	, plugin_analysis_expander (_("Plugin analysis"))
@@ -464,6 +464,11 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	_preset_combo.set_size_request (100, -1);
 	_preset_modified.set_size_request (16, -1);
 	_preset_combo.signal_changed().connect(sigc::mem_fun(*this, &PlugUIBase::preset_selected));
+	ARDOUR_UI::instance()->set_tip (_preset_combo, _("Presets (if any) for this plugin\n(Both factory and user-created)"));
+	ARDOUR_UI::instance()->set_tip (add_button, _("Save a new preset"));
+	ARDOUR_UI::instance()->set_tip (save_button, _("Save the current preset"));
+	ARDOUR_UI::instance()->set_tip (delete_button, _("Delete the current preset"));
+	ARDOUR_UI::instance()->set_tip (bypass_button, _("Disable signal processing by the plugin"));
 	_no_load_preset = 0;
 
 	_preset_box.pack_start (_preset_combo);
@@ -483,10 +488,16 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 
 	insert->ActiveChanged.connect (active_connection, invalidator (*this), boost::bind (&PlugUIBase::processor_active_changed, this,  boost::weak_ptr<Processor>(insert)), gui_context());
 
-	bypass_button.set_active (!pi->active());
+	bypass_button.set_name ("plugin bypass button");
+	bypass_button.set_text (_("Bypass"));
 
-	bypass_button.set_name ("PluginBypassButton");
-	bypass_button.signal_toggled().connect (sigc::mem_fun(*this, &PlugUIBase::bypass_toggled));
+	if (!pi->active()) {
+		bypass_button.set_active_state (Gtkmm2ext::Active);
+	} else {
+		bypass_button.unset_active_state ();
+	}
+
+	bypass_button.signal_button_release_event().connect (sigc::mem_fun(*this, &PlugUIBase::bypass_button_release));
 	focus_button.add_events (Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK);
 
 	focus_button.signal_button_release_event().connect (sigc::mem_fun(*this, &PlugUIBase::focus_toggled));
@@ -561,10 +572,15 @@ PlugUIBase::latency_button_clicked ()
 void
 PlugUIBase::processor_active_changed (boost::weak_ptr<Processor> weak_p)
 {
-	ENSURE_GUI_THREAD (*this, &PlugUIBase::processor_active_changed, weak_p)
-	boost::shared_ptr<Processor> p (weak_p);
+	ENSURE_GUI_THREAD (*this, &PlugUIBase::processor_active_changed, weak_p);
+	boost::shared_ptr<Processor> p (weak_p.lock());
+
 	if (p) {
-		bypass_button.set_active (!p->active());
+		if (!p->active()) {
+			bypass_button.set_active_state (Gtkmm2ext::Active);
+		} else {
+			bypass_button.unset_active_state ();
+		}
 	}
 }
 
@@ -626,18 +642,20 @@ PlugUIBase::delete_plugin_setting ()
 	plugin->remove_preset (_preset_combo.get_active_text ());
 }
 
-void
-PlugUIBase::bypass_toggled ()
+bool
+PlugUIBase::bypass_button_release (GdkEventButton*)
 {
-	bool x;
-
-	if ((x = bypass_button.get_active()) == insert->active()) {
-		if (x) {
-			insert->deactivate ();
-		} else {
+	bool view_says_bypassed = (bypass_button.active_state() != 0);
+	
+	if (view_says_bypassed != insert->active()) {
+		if (view_says_bypassed) {
 			insert->activate ();
+		} else {
+			insert->deactivate ();
 		}
 	}
+
+	return false;
 }
 
 bool

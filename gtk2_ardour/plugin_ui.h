@@ -48,6 +48,7 @@
 #include "ardour/types.h"
 
 #include "automation_controller.h"
+#include "ardour_button.h"
 
 namespace ARDOUR {
 	class PluginInsert;
@@ -110,7 +111,7 @@ class PlugUIBase : public virtual sigc::trackable, public PBD::ScopedConnectionL
 	Gtk::Button add_button;
 	Gtk::Button save_button;
 	Gtk::Button delete_button;
-	Gtk::ToggleButton bypass_button;
+	ArdourButton bypass_button;
 	Gtk::EventBox focus_button;
 
 	Gtk::Label latency_label;
@@ -133,7 +134,7 @@ class PlugUIBase : public virtual sigc::trackable, public PBD::ScopedConnectionL
 	void save_plugin_setting ();
 	void delete_plugin_setting ();
 	bool focus_toggled(GdkEventButton*);
-	void bypass_toggled();
+	bool bypass_button_release(GdkEventButton*);
 	void toggle_plugin_analysis ();
 	void processor_active_changed (boost::weak_ptr<ARDOUR::Processor> p);
 	void plugin_going_away ();
@@ -247,8 +248,6 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 	void update_control_display (ControlUI* cui);
 	void control_port_toggled (ControlUI* cui);
 	void control_combo_changed (ControlUI* cui);
-
-	void processor_active_changed (boost::weak_ptr<ARDOUR::Processor>);
 
 	void astate_clicked (ControlUI*, uint32_t parameter);
 	void automation_state_changed (ControlUI*);

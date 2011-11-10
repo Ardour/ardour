@@ -1655,17 +1655,21 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
                 break;
 
 	case StartSelectionTrimItem:
-	case EndSelectionTrimItem:
-
 #ifdef WITH_CMT
 	case ImageFrameHandleStartItem:
-	case ImageFrameHandleEndItem:
 	case MarkerViewHandleStartItem:
+#endif
+		if (is_drawable()) {
+			set_canvas_cursor (_cursors->left_side_trim);
+		}
+		break;
+	case EndSelectionTrimItem:
+#ifdef WITH_CMT
+	case ImageFrameHandleEndItem:
 	case MarkerViewHandleEndItem:
 #endif
-
 		if (is_drawable()) {
-			set_canvas_cursor (_cursors->trimmer);
+			set_canvas_cursor (_cursors->right_side_trim);
 		}
 		break;
 
@@ -2549,8 +2553,7 @@ Editor::set_internal_edit (bool yn)
 	_internal_editing = yn;
 
 	if (yn) {
-		mouse_select_button.set_image (*(manage (new Image (::get_icon("midi_tool_pencil")))));
-		mouse_select_button.get_image ()->show ();
+		mouse_select_button.set_image (::get_icon("midi_tool_pencil"));
 		ARDOUR_UI::instance()->set_tip (mouse_select_button, _("Draw/Edit MIDI Notes"));
 		mouse_mode_toggled (mouse_mode);
 
@@ -2562,8 +2565,7 @@ Editor::set_internal_edit (bool yn)
 
 	} else {
 
-		mouse_select_button.set_image (*(manage (new Image (::get_icon("tool_range")))));
-		mouse_select_button.get_image ()->show ();
+		mouse_select_button.set_image (::get_icon("tool_range"));
 		ARDOUR_UI::instance()->set_tip (mouse_select_button, _("Select/Move Ranges"));
 		mouse_mode_toggled (mouse_mode); // sets cursor
 

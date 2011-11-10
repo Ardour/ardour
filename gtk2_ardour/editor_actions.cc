@@ -397,62 +397,46 @@ Editor::register_actions ()
 	RadioAction::Group mouse_mode_group;
 
 	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-object", _("Object Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseObject));
-	act->connect_proxy (mouse_move_button);
-	mouse_move_button.set_image (*(manage (new Image (::get_icon("tool_object")))));
-	mouse_move_button.set_label ("");
-	mouse_move_button.set_name ("MouseModeButton");
-	mouse_move_button.get_image ()->show ();
+	mouse_move_button.set_related_action (act);
+	mouse_move_button.set_image (::get_icon("tool_object"));
+	mouse_move_button.set_name ("mouse mode button");
 
-	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-range", _("Range Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseRange));
-	act->connect_proxy (mouse_select_button);
-	mouse_select_button.set_image (*(manage (new Image (::get_icon("tool_range")))));
-	mouse_select_button.set_label ("");
-	mouse_select_button.set_name ("MouseModeButton");
-	mouse_select_button.get_image ()->show ();
+	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-range", _("Range Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseRange));	
+	mouse_select_button.set_related_action (act);
+	mouse_select_button.set_image (::get_icon("tool_range"));
+	mouse_select_button.set_name ("mouse mode button");
 
-	act = ActionManager::register_toggle_action (mouse_mode_actions, "set-mouse-mode-object-range", _("Link Object / Range Tools"), sigc::mem_fun (*this, &Editor::mouse_mode_object_range_toggled));
-	act->connect_proxy (join_object_range_button);
-	join_object_range_button.set_image (*(manage (new Image (::get_icon ("tool_object_range")))));
-	join_object_range_button.set_label ("");
-	join_object_range_button.set_name ("MouseModeButton");
-	join_object_range_button.get_image ()->show ();
+	act = ActionManager::register_toggle_action (mouse_mode_actions, "set-mouse-mode-object-range", _("Link Object / Range Tools"), sigc::mem_fun (*this, &Editor::mouse_mode_object_range_toggled));	
+	join_object_range_button.set_related_action (act);
+	join_object_range_button.set_image (::get_icon ("tool_object_range"));
+	join_object_range_button.set_name ("mouse mode button");
 
-	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-gain", _("Gain Tool"), sigc::bind (mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseGain));
-	act->connect_proxy (mouse_gain_button);
-	mouse_gain_button.set_image (*(manage (new Image (::get_icon("tool_gain")))));
-	mouse_gain_button.set_label ("");
-	mouse_gain_button.set_name ("MouseModeButton");
-	mouse_gain_button.get_image ()->show ();
+	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-gain", _("Gain Tool"), sigc::bind (mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseGain));	
+	mouse_gain_button.set_related_action (act);
+	mouse_gain_button.set_image (::get_icon("tool_gain"));
+	mouse_gain_button.set_name ("mouse mode button");
 
-	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-zoom", _("Zoom Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseZoom));
-	act->connect_proxy (mouse_zoom_button);
-	mouse_zoom_button.set_image (*(manage (new Image (::get_icon("tool_zoom")))));
-	mouse_zoom_button.set_label ("");
-	mouse_zoom_button.set_name ("MouseModeButton");
-	mouse_zoom_button.get_image ()->show ();
+	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-zoom", _("Zoom Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseZoom));	
+	mouse_zoom_button.set_related_action (act);
+	mouse_zoom_button.set_image (::get_icon("tool_zoom"));
+	mouse_zoom_button.set_name ("mouse mode button");
 
-	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-audition", _("Audition Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseAudition));
-	act->connect_proxy (mouse_audition_button);
-	mouse_audition_button.set_image (*(manage (new Image (::get_icon("tool_audition")))));
-	mouse_audition_button.set_label ("");
-	mouse_audition_button.set_name ("MouseModeButton");
-	mouse_audition_button.get_image ()->show ();
+	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-audition", _("Audition Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseAudition));	
+	mouse_audition_button.set_related_action (act);
+	mouse_audition_button.set_image (::get_icon("tool_audition"));
+	mouse_audition_button.set_name ("mouse mode button");
 
-	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-timefx", _("Time FX Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseTimeFX));
-	act->connect_proxy (mouse_timefx_button);
-	mouse_timefx_button.set_image (*(manage (new Image (::get_icon("tool_stretch")))));
-	mouse_timefx_button.set_label ("");
-	mouse_timefx_button.set_name ("MouseModeButton");
-	mouse_timefx_button.get_image ()->show ();
+	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-timefx", _("Time FX Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseTimeFX));	
+	mouse_timefx_button.set_related_action (act);
+	mouse_timefx_button.set_image (::get_icon("tool_stretch"));
+	mouse_timefx_button.set_name ("mouse mode button");
 
 	ActionManager::register_action (editor_actions, "step-mouse-mode", _("Step Mouse Mode"), sigc::bind (sigc::mem_fun(*this, &Editor::step_mouse_mode), true));
 
 	act = ActionManager::register_toggle_action (mouse_mode_actions, "toggle-internal-edit", _("Edit MIDI"), sigc::mem_fun(*this, &Editor::toggle_internal_editing));
-	act->connect_proxy (internal_edit_button);
-	internal_edit_button.set_image (*(manage (new Image (::get_icon("tool_note")))));
-	internal_edit_button.set_label ("");
-	internal_edit_button.set_name ("MouseModeButton");
-	internal_edit_button.get_image ()->show ();
+	internal_edit_button.set_related_action (act);
+	internal_edit_button.set_image (::get_icon("tool_note"));
+	internal_edit_button.set_name ("mouse mode button");
 
 	RadioAction::Group edit_point_group;
 	ActionManager::register_radio_action (editor_actions, edit_point_group, X_("edit-at-playhead"), _("Playhead"), (sigc::bind (sigc::mem_fun(*this, &Editor::edit_point_chosen), Editing::EditAtPlayhead)));

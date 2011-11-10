@@ -61,7 +61,11 @@ LXVSTPluginUI::LXVSTPluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_
 
 	lxvst_preset_combo.signal_changed().connect (mem_fun (*this, &LXVSTPluginUI::preset_chosen));
 
-	bypass_button.set_active (!insert->active());
+	if (!insert->active()) {
+		bypass_button.set_active_state (Gtkmm2ext::Active);
+	} else {
+		bypass_button.unset_active_state ();
+	}
 	
 	pack_start (preset_box, false, false);
 	pack_start (socket, true, true);

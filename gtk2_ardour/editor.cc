@@ -2759,6 +2759,7 @@ Editor::setup_toolbar ()
 	/* table containing mode buttons */
 
 	HBox* mouse_mode_button_box = manage (new HBox ());
+	mouse_mode_button_box->set_spacing (2);
 
 	if (Profile->get_sae()) {
 		mouse_mode_button_box->pack_start (mouse_move_button);
@@ -2807,32 +2808,6 @@ Editor::setup_toolbar ()
 	                                                 &_mouse_mode_tearoff->tearoff_window()));
 	_mouse_mode_tearoff->Visible.connect (sigc::bind (sigc::mem_fun(*this, &Editor::reattach_tearoff), static_cast<Box*> (&toolbar_hbox),
 	                                                  &_mouse_mode_tearoff->tearoff_window(), 1));
-
-	mouse_move_button.set_mode (false);
-	mouse_select_button.set_mode (false);
-	mouse_gain_button.set_mode (false);
-	mouse_zoom_button.set_mode (false);
-	mouse_timefx_button.set_mode (false);
-	mouse_audition_button.set_mode (false);
-	join_object_range_button.set_mode (false);
-
-	mouse_move_button.set_name ("MouseModeButton");
-	mouse_select_button.set_name ("MouseModeButton");
-	mouse_gain_button.set_name ("MouseModeButton");
-	mouse_zoom_button.set_name ("MouseModeButton");
-	mouse_timefx_button.set_name ("MouseModeButton");
-	mouse_audition_button.set_name ("MouseModeButton");
-	internal_edit_button.set_name ("MouseModeButton");
-	join_object_range_button.set_name ("MouseModeButton");
-
-	mouse_move_button.unset_flags (CAN_FOCUS);
-	mouse_select_button.unset_flags (CAN_FOCUS);
-	mouse_gain_button.unset_flags (CAN_FOCUS);
-	mouse_zoom_button.unset_flags (CAN_FOCUS);
-	mouse_timefx_button.unset_flags (CAN_FOCUS);
-	mouse_audition_button.unset_flags (CAN_FOCUS);
-	internal_edit_button.unset_flags (CAN_FOCUS);
-	join_object_range_button.unset_flags (CAN_FOCUS);
 
 	/* Zoom */
 
