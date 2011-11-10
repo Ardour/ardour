@@ -294,7 +294,14 @@ path_expand (string path)
 	}
 
 	if (expansion.we_wordc > 1) {
-		error << string_compose (_("path (%1) is ambiguous"), path) << endmsg;
+		string all;
+		for (unsigned int i = 0; i < expansion.we_wordc; ++i) {
+			if (i > 0) {
+				all += " | ";
+			} 
+			all += expansion.we_wordv[i];
+		}
+		error << string_compose (_("path (%1) is ambiguous: %2"), path, all) << endmsg;
 		goto out;
 	}
 
