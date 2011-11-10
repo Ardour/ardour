@@ -613,11 +613,11 @@ ARDOUR_UI::use_menubar_as_top_menubar ()
 
 	GtkApplicationMenuGroup* group = app->add_app_menu_group ();
 
-	if ((widget = ActionManager::get_widget ("/ui/Main/Help/About"))) {
+	if ((widget = ActionManager::get_widget ("/ui/Main/Session/About"))) {
 		app->add_app_menu_item (group, dynamic_cast<MenuItem*>(widget));
 	}
 
-	if ((widget = ActionManager::get_widget ("/ui/Main/WindowMenu/ToggleOptionsEditor"))) {
+	if ((widget = ActionManager::get_widget ("/ui/Main/Session/ToggleRCOptionsEditor"))) {
 		app->add_app_menu_item (group, dynamic_cast<MenuItem*>(widget));
 	}
 
