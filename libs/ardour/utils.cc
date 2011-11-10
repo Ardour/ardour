@@ -51,6 +51,7 @@
 #include "pbd/xml++.h"
 #include "pbd/basename.h"
 #include "pbd/strsplit.h"
+#include "pbd/replace_all.h"
 
 #include "ardour/utils.h"
 #include "ardour/rc_configuration.h"
@@ -284,23 +285,24 @@ path_expand (string path)
 #ifdef HAVE_WORDEXP
 	/* Handle tilde and environment variable expansion in session path */
 	string ret = path;
-
+	string quoted;
 	wordexp_t expansion;
-	
-	/* force field expansion to avoid use whitespace, since we know this is
-	 * a path
-	 */
 
-	char *oifs = getenv ("IFS");
-	setenv ("IFS", "/", 1);
-	int result = wordexp (path.c_str(), &expansion, WRDE_NOCMD|WRDE_UNDEF);
-	if (oifs) {
-		setenv ("IFS", oifs, 1);
-	} else {
-		unsetenv ("IFS");
-	}
+	/* wordexp cannot be forced (it appears) into either
+	   
+           (1) NOT doing field splitting
+	   (2) splitting based on something other than whitespace
+	   
+	   (despite the documentation claiming that it obeys IFS etc).
 
-	switch (result) {
+	   so, quote the most likely spaces to occur in a path, and that should
+	   be about as much as we can do.
+	*/
+
+	quoted = path;
+        replace_all (quoted, " ", "\\ ");
+
+	switch (wordexp (quoted.c_str(), &expansion, WRDE_NOCMD|WRDE_UNDEF)) {
 	case 0:
 		break;
 	case WRDE_NOSPACE:
