@@ -132,6 +132,7 @@ ARDOUR_UI::setup_tooltips ()
 	set_tip (goto_start_button, _("Go to start of session"));
 	set_tip (goto_end_button, _("Go to end of session"));
 	set_tip (auto_loop_button, _("Play loop range"));
+	set_tip (midi_panic_button, _("MIDI Panic\nSend note off and reset controller messages on all MIDI channels"));
 
 	set_tip (auto_return_button, _("Return to last playback start when stopped"));
 	set_tip (auto_play_button, _("Start playback after any locate"));
@@ -253,11 +254,11 @@ ARDOUR_UI::setup_transport ()
 	auto_return_button.set_name ("transport option button");
 	auto_play_button.set_name ("transport option button");
 	auto_input_button.set_name ("transport option button");
+	time_master_button.set_name ("transport option button");
 
 	/* these have to provide a clear indication of active state */
 
 	click_button.set_name ("transport active option button");
-	time_master_button.set_name ("transport active option button");
 	sync_button.set_name ("transport active option button");
 
 	time_master_button.set_text (_("time master"));
@@ -273,6 +274,10 @@ ARDOUR_UI::setup_transport ()
 	auto_loop_button.set_image (get_icon (X_("transport_loop")));
 	join_play_range_button.set_image (get_icon (X_("tool_object_range")));
 
+	midi_panic_button.set_image (get_icon (X_("midi_panic")));
+	/* the icon for this has an odd aspect ratio, so fatten up the button */
+	midi_panic_button.set_size_request (25, -1);
+	
 	act = ActionManager::get_action (X_("Transport"), X_("Stop"));
 	stop_button.set_related_action (act);
 	act = ActionManager::get_action (X_("Transport"), X_("Roll"));
@@ -287,7 +292,8 @@ ARDOUR_UI::setup_transport ()
 	auto_loop_button.set_related_action (act);
 	act = ActionManager::get_action (X_("Transport"), X_("PlaySelection"));
 	play_selection_button.set_related_action (act);
-
+	act = ActionManager::get_action (X_("MIDI"), X_("panic"));
+	midi_panic_button.set_related_action (act);
 
 	act = ActionManager::get_action (X_("Transport"), X_("ToggleTimeMaster"));
 	time_master_button.set_related_action (act);
@@ -325,6 +331,7 @@ ARDOUR_UI::setup_transport ()
 	HBox* tbox = manage (new HBox);
 	tbox->set_spacing (2);
 
+	tbox->pack_start (midi_panic_button, false, false);
 	tbox->pack_start (goto_start_button, false, false);
 	tbox->pack_start (goto_end_button, false, false);
 

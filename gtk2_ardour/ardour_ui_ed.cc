@@ -444,12 +444,18 @@ ARDOUR_UI::install_actions ()
 		}
 	}
 
+	/* MIDI */
+
+	Glib::RefPtr<ActionGroup> midi_actions = ActionGroup::create (X_("MIDI"));
+	ActionManager::register_action (midi_actions, X_("panic"), _("Panic"), sigc::mem_fun(*this, &ARDOUR_UI::midi_panic));
+
 	ActionManager::add_action_group (shuttle_actions);
 	ActionManager::add_action_group (option_actions);
 	ActionManager::add_action_group (jack_actions);
 	ActionManager::add_action_group (transport_actions);
 	ActionManager::add_action_group (main_actions);
 	ActionManager::add_action_group (common_actions);
+	ActionManager::add_action_group (midi_actions);
 }
 
 void

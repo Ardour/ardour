@@ -608,18 +608,12 @@ Editor::register_actions ()
 	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
 	tact->set_active (true);
 
-	/* MIDI */
-
-	Glib::RefPtr<ActionGroup> midi_actions = ActionGroup::create (X_("MIDI"));
-	ActionManager::register_action (midi_actions, X_("panic"), _("Panic"), sigc::mem_fun(*this, &Editor::midi_panic));
-
 	ActionManager::add_action_group (rl_actions);
 	ActionManager::add_action_group (ruler_actions);
 	ActionManager::add_action_group (zoom_actions);
 	ActionManager::add_action_group (mouse_mode_actions);
 	ActionManager::add_action_group (snap_actions);
 	ActionManager::add_action_group (editor_actions);
-	ActionManager::add_action_group (midi_actions);
 }
 
 void

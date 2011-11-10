@@ -268,7 +268,6 @@ Editor::Editor ()
 	, automation_mode_button (_("mode"))
 
 	, _toolbar_viewport (*manage (new Gtk::Adjustment (0, 0, 1e10)), *manage (new Gtk::Adjustment (0, 0, 1e10)))
-	, midi_panic_button (_("Panic"))
 
 #ifdef WITH_CMT
 	, image_socket_listener(0)
@@ -2814,17 +2813,25 @@ Editor::setup_toolbar ()
 	_zoom_box.set_spacing (1);
 	_zoom_box.set_border_width (0);
 
-	zoom_in_button.set_name ("EditorTimeButton");
-	zoom_in_button.set_image (*(manage (new Image (::get_icon ("zoom_in")))));
-	zoom_in_button.signal_clicked().connect (sigc::bind (sigc::mem_fun(*this, &Editor::temporal_zoom_step), false));
+	RefPtr<Action> act;
 
-	zoom_out_button.set_name ("EditorTimeButton");
-	zoom_out_button.set_image (*(manage (new Image (::get_icon ("zoom_out")))));
-	zoom_out_button.signal_clicked().connect (sigc::bind (sigc::mem_fun(*this, &Editor::temporal_zoom_step), true));
+	zoom_in_button.set_name ("zoom button");
+	zoom_in_button.set_image (::get_icon ("zoom_in"));
+	zoom_in_button.set_tweaks (ArdourButton::ShowClick);
+	act = ActionManager::get_action (X_("Editor"), X_("temporal-zoom-in"));
+	zoom_in_button.set_related_action (act);
 
-	zoom_out_full_button.set_name ("EditorTimeButton");
-	zoom_out_full_button.set_image (*(manage (new Image (::get_icon ("zoom_full")))));
-	zoom_out_full_button.signal_clicked().connect (sigc::mem_fun(*this, &Editor::temporal_zoom_session));
+	zoom_out_button.set_name ("zoom button");
+	zoom_out_button.set_image (::get_icon ("zoom_out"));
+	zoom_out_button.set_tweaks (ArdourButton::ShowClick);
+	act = ActionManager::get_action (X_("Editor"), X_("temporal-zoom-out"));
+	zoom_out_button.set_related_action (act);
+
+	zoom_out_full_button.set_name ("zoom button");
+	zoom_out_full_button.set_image (::get_icon ("zoom_full"));
+	zoom_out_full_button.set_tweaks (ArdourButton::ShowClick);
+	act = ActionManager::get_action (X_("Editor"), X_("zoom-to-session"));
+	zoom_out_full_button.set_related_action (act);
 
 	zoom_focus_selector.set_name ("ZoomFocusSelector");
 	set_popdown_strings (zoom_focus_selector, zoom_focus_strings, true);
@@ -2840,7 +2847,7 @@ Editor::setup_toolbar ()
 	tav_expand_button.set_name ("TrackHeightButton");
 	tav_expand_button.set_size_request (-1, 20);
 	tav_expand_button.add (*(manage (new Image (::get_icon ("tav_exp")))));
-	RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("expand-tracks"));
+	act = ActionManager::get_action (X_("Editor"), X_("expand-tracks"));
 	act->connect_proxy (tav_expand_button);
 
 	tav_shrink_button.set_name ("TrackHeightButton");
@@ -2972,19 +2979,9 @@ Editor::setup_tooltips ()
 	ARDOUR_UI::instance()->set_tip (snap_mode_selector, _("Snap/Grid Mode"));
 	ARDOUR_UI::instance()->set_tip (edit_point_selector, _("Edit point"));
 	ARDOUR_UI::instance()->set_tip (midi_sound_notes, _("Sound Notes"));
-	ARDOUR_UI::instance()->set_tip (midi_panic_button, _("Send note off and reset controller messages on all MIDI channels"));
 	ARDOUR_UI::instance()->set_tip (edit_mode_selector, _("Edit Mode"));
 }
 
-void
-Editor::midi_panic ()
-{
-	cerr << "MIDI panic\n";
-
-	if (_session) {
-		_session->midi_panic();
-	}
-}
 
 void
 Editor::setup_midi_toolbar ()
@@ -2998,12 +2995,8 @@ Editor::setup_midi_toolbar ()
 
 	/* Panic */
 
-	act = ActionManager::get_action (X_("MIDI"), X_("panic"));
-	midi_panic_button.set_name("MidiPanicButton");
-	act->connect_proxy (midi_panic_button);
-
 	panic_box.pack_start (midi_sound_notes , true, true);
-	panic_box.pack_start (midi_panic_button, true, true);
+	// panic_box.pack_start (midi_panic_button, true, true);
 }
 
 int

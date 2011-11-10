@@ -143,6 +143,10 @@ class ArdourButton : public CairoWidget
 	Glib::RefPtr<Gtk::Action> _action;
 	void action_activated ();
 	void action_toggled ();
+
+	void action_sensitivity_changed ();
+	void action_visibility_changed ();
+	void action_tooltip_changed ();
 };
 
 #endif /* __gtk2_ardour_ardour_button_h__ */

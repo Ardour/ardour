@@ -481,6 +481,7 @@ ArdourButton::on_button_release_event (GdkEventButton *ev)
 		}
 	}
 
+
 	return false;
 }
 
@@ -543,10 +544,22 @@ ArdourButton::set_related_action (RefPtr<Action> act)
 {
 	_action = act;
 
-	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (_action);
-	if (tact) {
-		tact->signal_toggled().connect (sigc::mem_fun (*this, &ArdourButton::action_toggled));
-	} 
+	if (_action) {
+
+		string str = _action->property_tooltip().get_value();
+		if (!str.empty()) {
+			ARDOUR_UI::instance()->set_tip (*this, str);
+		}
+
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (_action);
+		if (tact) {
+			tact->signal_toggled().connect (sigc::mem_fun (*this, &ArdourButton::action_toggled));
+		} 
+
+		_action->connect_property_changed ("sensitive", sigc::mem_fun (*this, &ArdourButton::action_sensitivity_changed));
+		_action->connect_property_changed ("visible", sigc::mem_fun (*this, &ArdourButton::action_visibility_changed));
+		_action->connect_property_changed ("tooltip", sigc::mem_fun (*this, &ArdourButton::action_tooltip_changed));
+	}
 }
 
 void
@@ -677,3 +690,33 @@ ArdourButton::set_tweaks (Tweaks t)
 		queue_draw ();
 	}
 }
+
+void
+ArdourButton::action_sensitivity_changed ()
+{
+	if (_action->property_sensitive ()) {
+		set_visual_state (Gtkmm2ext::VisualState (visual_state() & ~Gtkmm2ext::Insensitive));
+	} else {
+		set_visual_state (Gtkmm2ext::VisualState (visual_state() | Gtkmm2ext::Insensitive));
+	}
+	
+}
+
+
+void
+ArdourButton::action_visibility_changed ()
+{
+	if (_action->property_visible ()) {
+		show ();
+	} else {
+		hide ();
+	}
+}
+
+void
+ArdourButton::action_tooltip_changed ()
+{
+	string str = _action->property_tooltip().get_value();
+	ARDOUR_UI::instance()->set_tip (*this, str);
+}
+

@@ -43,9 +43,6 @@ MonitorSection::MonitorSection (Session* s)
         , solo_in_place_button (_("SiP"), ArdourButton::led_default_elements)
         , afl_button (_("AFL"), ArdourButton::led_default_elements)
 	, pfl_button (_("PFL"), ArdourButton::led_default_elements)
-	, cut_all_button (ArdourButton::led_default_elements)
-	, dim_all_button (ArdourButton::led_default_elements)
-	, mono_button (ArdourButton::led_default_elements)
 	, exclusive_solo_button (ArdourButton::led_default_elements)
 	, solo_mute_override_button (ArdourButton::led_default_elements)
 {
@@ -404,10 +401,6 @@ MonitorSection::set_session (Session* s)
 }
 
 MonitorSection::ChannelButtonSet::ChannelButtonSet ()
-	: cut (ArdourButton::just_led_default_elements)
-	, dim (ArdourButton::just_led_default_elements)
-	, solo (ArdourButton::just_led_default_elements)
-	, invert (ArdourButton::just_led_default_elements)
 {
 	cut.set_diameter (3);
 	dim.set_diameter (3);

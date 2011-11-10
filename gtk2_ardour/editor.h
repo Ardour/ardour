@@ -1519,10 +1519,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void editor_list_button_toggled ();
 
 	AudioClock*               zoom_range_clock;
-	Gtk::Button              zoom_in_button;
-	Gtk::Button              zoom_out_button;
-	Gtk::Button              zoom_out_full_button;
-	Gtk::Button              zoom_onetoone_button;
+	ArdourButton              zoom_in_button;
+	ArdourButton              zoom_out_button;
+	ArdourButton              zoom_out_full_button;
 
 	Gtk::Button              tav_expand_button;
 	Gtk::Button              tav_shrink_button;
@@ -1603,9 +1602,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	/* midi toolbar */
 
 	Gtk::HBox                panic_box;
-	Gtk::Button              midi_panic_button;
 	Gtkmm2ext::StatefulToggleButton midi_sound_notes;
-	void                     midi_panic ();
 	bool                     sound_notes () const { return midi_sound_notes.get_active(); }
 
 	void setup_midi_toolbar ();

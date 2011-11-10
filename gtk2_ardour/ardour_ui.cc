@@ -157,6 +157,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	, auto_play_button (ArdourButton::led_default_elements)
 	, auto_input_button (ArdourButton::led_default_elements)
 
+	, time_master_button (ArdourButton::led_default_elements)
+
 	, auditioning_alert_button (_("AUDITION"))
 	, solo_alert_button (_("SOLO"))
 
@@ -234,9 +236,11 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	play_selection_button.set_name ("transport button");
 	rec_button.set_name ("transport recenable button");
 	join_play_range_button.set_name ("transport button");
+	midi_panic_button.set_name ("transport button");
 
 	goto_start_button.set_tweaks (ArdourButton::ShowClick);
 	goto_end_button.set_tweaks (ArdourButton::ShowClick);
+	midi_panic_button.set_tweaks (ArdourButton::ShowClick);
 	
 	last_configure_time= 0;
 	last_peak_grab = 0;
@@ -3883,4 +3887,12 @@ ARDOUR_UI::feedback_detected ()
 		);
 
 	d.run ();
+}
+
+void
+ARDOUR_UI::midi_panic ()
+{
+	if (_session) {
+		_session->midi_panic();
+	}
 }
