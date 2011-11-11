@@ -337,6 +337,8 @@ path_expand (string path)
 		 */
 	}
 
+	regfree (&compiled_pattern);
+
 	/* canonicalize */
 
 	char buf[PATH_MAX+1];
