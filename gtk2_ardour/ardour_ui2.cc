@@ -339,9 +339,6 @@ ARDOUR_UI::setup_transport ()
 	tbox->pack_start (goto_start_button, false, false);
 	tbox->pack_start (goto_end_button, false, false);
 
-	/* translators: Egternal is "External" with a descender character */
-	set_size_request_to_display_given_text (sync_button, X_("Egternal"), 4, 10);
-
 	Glib::RefPtr<SizeGroup> transport_button_size_group1 = SizeGroup::create (SIZE_GROUP_HORIZONTAL);
 	transport_button_size_group1->add_widget (goto_start_button);
 	transport_button_size_group1->add_widget (goto_end_button);
@@ -403,27 +400,25 @@ ARDOUR_UI::setup_transport ()
 
 	/* transport related toggle controls */
 
-	HBox* toggle_box = manage(new HBox);
 	VBox* auto_box = manage (new VBox);
-	auto_box->set_spacing (2);
 	auto_box->set_homogeneous (true);
-	toggle_box->set_spacing (2);
-	toggle_box->set_homogeneous (true);
-	auto_box->pack_start (auto_play_button, true, false);
-	auto_box->pack_start (auto_return_button, true, false);
+	auto_box->set_spacing (2);
+	auto_box->pack_start (sync_button, false, false);
+	auto_box->pack_start (auto_play_button, false, false);
+	auto_box->pack_start (auto_return_button, false, false);
         if (!Profile->get_small_screen()) {
-                toggle_box->pack_start (*auto_box, false, false);
+		transport_tearoff_hbox.pack_start (*auto_box, false, false);
         }
-	transport_tearoff_hbox.pack_start (*toggle_box, false, false);
 
+/*
 	VBox* time_controls = manage (new VBox);
 	time_controls->set_spacing (2);
 	time_controls->set_homogeneous (true);
 	time_controls->pack_start (sync_button, true, false);
 	time_controls->pack_start (time_master_button, true, false);
+*/
 
 	transport_tearoff_hbox.pack_start (*clock_box, false, false);
-	transport_tearoff_hbox.pack_start (*time_controls, false, false);
 	transport_tearoff_hbox.pack_start (click_button, false, false);
 
 	time_info_box = manage (new TimeInfoBox);
