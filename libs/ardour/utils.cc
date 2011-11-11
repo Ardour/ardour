@@ -307,8 +307,6 @@ path_expand (string path)
 
 	while (true) { 
 
-                cerr << "working on " << path << endl;
-
 		if (regexec (&compiled_pattern, path.c_str(), nmatches, matches, 0)) {
 			break;
 		}
