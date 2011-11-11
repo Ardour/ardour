@@ -385,12 +385,8 @@ gnome_canvas_waveview_init (GnomeCanvasWaveView *waveview)
 static void
 gnome_canvas_waveview_destroy (GtkObject *object)
 {
-	GnomeCanvasWaveView *waveview;
-
 	g_return_if_fail (object != NULL);
 	g_return_if_fail (GNOME_IS_CANVAS_WAVEVIEW (object));
-
-	waveview = GNOME_CANVAS_WAVEVIEW (object);
 
 	if (GTK_OBJECT_CLASS (parent_class)->destroy)
 		(* GTK_OBJECT_CLASS (parent_class)->destroy) (object);
@@ -1642,7 +1638,6 @@ gnome_canvas_waveview_draw (GnomeCanvasItem *item,
 	int cache_index;
 	gboolean rectify;
 	double origin;
-	double clip_length;
 	double xoff;
 	double yoff = 0.0;
 	double ulx;
@@ -1706,8 +1701,6 @@ gnome_canvas_waveview_draw (GnomeCanvasItem *item,
 	} else {
 		rectify = FALSE;
 	}
-
-	clip_length = MIN(5,(waveview->height/4));
 
 	cr = gdk_cairo_create (drawable);
 	cairo_set_line_width (cr, 0.5);
