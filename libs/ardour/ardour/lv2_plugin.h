@@ -129,7 +129,7 @@ class LV2Plugin : public ARDOUR::Plugin
 	float*            _defaults;
 	float*            _latency_control_port;
 	bool              _was_activated;
-	bool              _supports_persist;
+	bool              _has_state_interface;
 	std::vector<bool> _port_is_input;
 
 	std::map<std::string,uint32_t> _port_indices;
@@ -145,22 +145,25 @@ class LV2Plugin : public ARDOUR::Plugin
 	LV2_Feature    _instance_access_feature;
 	LV2_Feature    _path_support_feature;
 	LV2_Feature    _new_file_support_feature;
-	LV2_Feature    _persist_feature;
 
 	static URIMap   _uri_map;
 	static uint32_t _midi_event_type;
 
-	static int lv2_persist_store_callback (void*       host_data,
-	                                       uint32_t    key,
-	                                       const void* value,
-	                                       size_t      size,
-	                                       uint32_t    type,
-	                                       uint32_t    flags);
-	static const void* lv2_persist_retrieve_callback (void*     host_data,
-	                                                  uint32_t  key,
-	                                                  size_t*   size,
-	                                                  uint32_t* type,
-	                                                  uint32_t* flags);
+	static int
+	lv2_state_store_callback (void*       handle,
+	                          uint32_t    key,
+	                          const void* value,
+	                          size_t      size,
+	                          uint32_t    type,
+	                          uint32_t    flags);
+
+	static const void*
+	lv2_state_retrieve_callback (void*     handle,
+	                             uint32_t  key,
+	                             size_t*   size,
+	                             uint32_t* type,
+	                             uint32_t* flags);
+
 	static char* lv2_files_abstract_path (void*       host_data,
 	                                      const char* absolute_path);
 	static char* lv2_files_absolute_path (void*       host_data,

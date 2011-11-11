@@ -52,16 +52,17 @@
 #include <lilv/lilv.h>
 
 #include "lv2/lv2plug.in/ns/ext/files/files.h"
-#include "lv2/lv2plug.in/ns/ext/persist/persist.h"
+#include "lv2/lv2plug.in/ns/ext/state/state.h"
 #include "rdff.h"
 #ifdef HAVE_SUIL
 #include <suil/suil.h>
 #endif
 
-#define NS_DC   "http://dublincore.org/documents/dcmi-namespace/"
-#define NS_LV2  "http://lv2plug.in/ns/lv2core#"
-#define NS_PSET "http://lv2plug.in/ns/dev/presets#"
-#define NS_UI   "http://lv2plug.in/ns/extensions/ui#"
+#define NS_DC    "http://dublincore.org/documents/dcmi-namespace/"
+#define NS_LV2   "http://lv2plug.in/ns/lv2core#"
+#define NS_STATE "http://lv2plug.in/ns/ext/state#"
+#define NS_PSET  "http://lv2plug.in/ns/dev/presets#"
+#define NS_UI    "http://lv2plug.in/ns/extensions/ui#"
 
 using namespace std;
 using namespace ARDOUR;
@@ -148,23 +149,31 @@ LV2Plugin::init(void* c_plugin, framecnt_t rate)
 	_data_access_feature.URI      = "http://lv2plug.in/ns/ext/data-access";
 	_path_support_feature.URI     = LV2_FILES_PATH_SUPPORT_URI;
 	_new_file_support_feature.URI = LV2_FILES_NEW_FILE_SUPPORT_URI;
-	_persist_feature.URI          = "http://lv2plug.in/ns/ext/persist";
-	_persist_feature.data         = NULL;
 
 	LilvPlugin* plugin = _impl->plugin;
 
-	LilvNode* persist_uri = lilv_new_uri(_world.world, _persist_feature.URI);
-	_supports_persist = lilv_plugin_has_feature(plugin, persist_uri);
-	lilv_node_free(persist_uri);
+	LilvNode* state_iface_uri = lilv_new_uri(_world.world, NS_STATE "Interface");
+#ifdef lilv_plugin_has_extension_data
+	_has_state_interface = lilv_plugin_has_extension_data(plugin, state_iface_uri);
+	lilv_node_free(state_iface_uri);
+#else
+	LilvNode* lv2_extensionData = lilv_new_uri(_world.world, NS_LV2 "extensionData");
+	LilvNodes* extdatas = lilv_plugin_get_value(plugin, lv2_extensionData);
+	LILV_FOREACH(nodes, i, extdatas) {
+		if (lilv_node_equals(lilv_nodes_get(extdatas, i), state_iface_uri)) {
+			_has_state_interface = true;
+			break;
+		}
+	}
+#endif
 
-	_features    = (LV2_Feature**)malloc(sizeof(LV2_Feature*) * 7);
+	_features    = (LV2_Feature**)malloc(sizeof(LV2_Feature*) * 6);
 	_features[0] = &_instance_access_feature;
 	_features[1] = &_data_access_feature;
 	_features[2] = &_path_support_feature;
 	_features[3] = &_new_file_support_feature;
-	_features[4] = &_persist_feature;
-	_features[5] = _uri_map.feature();
-	_features[6] = NULL;
+	_features[4] = _uri_map.feature();
+	_features[5] = NULL;
 
 	LV2_Files_Path_Support* path_support = (LV2_Files_Path_Support*)malloc(
 		sizeof(LV2_Files_Path_Support));
@@ -444,34 +453,34 @@ LV2Plugin::c_ui_type ()
 }
 
 int
-LV2Plugin::lv2_persist_store_callback(void*       host_data,
-                                      uint32_t    key,
-                                      const void* value,
-                                      size_t      size,
-                                      uint32_t    type,
-                                      uint32_t    flags)
+LV2Plugin::lv2_state_store_callback(LV2_State_Handle handle,
+                                    uint32_t         key,
+                                    const void*      value,
+                                    size_t           size,
+                                    uint32_t         type,
+                                    uint32_t         flags)
 {
 	DEBUG_TRACE(DEBUG::LV2, string_compose(
-		            "persist store %1 (size: %2, type: %3)\n",
+		            "state store %1 (size: %2, type: %3)\n",
 		            _uri_map.id_to_uri(NULL, key),
 		            size,
 		            _uri_map.id_to_uri(NULL, type)));
 
-	LV2PersistState* state = (LV2PersistState*)host_data;
+	LV2State* state = (LV2State*)handle;
 	state->add_uri(key,  _uri_map.id_to_uri(NULL, key));
 	state->add_uri(type, _uri_map.id_to_uri(NULL, type));
 	return state->add_value(key, value, size, type, flags);
 }
 
 const void*
-LV2Plugin::lv2_persist_retrieve_callback(void*     host_data,
-                                         uint32_t  key,
-                                         size_t*   size,
-                                         uint32_t* type,
-                                         uint32_t* flags)
+LV2Plugin::lv2_state_retrieve_callback(LV2_State_Handle host_data,
+                                       uint32_t         key,
+                                       size_t*          size,
+                                       uint32_t*        type,
+                                       uint32_t*        flags)
 {
-	LV2PersistState* state = (LV2PersistState*)host_data;
-	LV2PersistState::Values::const_iterator i = state->values.find(key);
+	LV2State* state = (LV2State*)host_data;
+	LV2State::Values::const_iterator i = state->values.find(key);
 	if (i == state->values.end()) {
 		warning << "LV2 plugin attempted to retrieve nonexistent key: "
 		        << _uri_map.id_to_uri(NULL, key) << endmsg;
@@ -479,9 +488,9 @@ LV2Plugin::lv2_persist_retrieve_callback(void*     host_data,
 	}
 	*size = i->second.size;
 	*type = i->second.type;
-	*flags = LV2_PERSIST_IS_POD | LV2_PERSIST_IS_PORTABLE; // FIXME
+	*flags = LV2_STATE_IS_POD | LV2_STATE_IS_PORTABLE; // FIXME
 	DEBUG_TRACE(DEBUG::LV2, string_compose(
-		            "persist retrieve %1 = %2 (size: %3, type: %4)\n",
+		            "state retrieve %1 = %2 (size: %3, type: %4)\n",
 		            _uri_map.id_to_uri(NULL, key),
 		            i->second.value, *size, *type));
 	return i->second.value;
@@ -583,7 +592,7 @@ LV2Plugin::add_state(XMLNode* root) const
 		}
 	}
 
-	if (_supports_persist) {
+	if (_has_state_interface) {
 		// Create state directory for this plugin instance
 		cerr << "Create statefile name from ID " << _insert_id << endl;
 		const std::string state_filename = _insert_id.to_s() + ".rdff";
@@ -592,21 +601,23 @@ LV2Plugin::add_state(XMLNode* root) const
 
 		cout << "Saving LV2 plugin state to " << state_path << endl;
 
-		// Get LV2 Persist extension data from plugin instance
-		LV2_Persist* persist = (LV2_Persist*)extension_data(
-			"http://lv2plug.in/ns/ext/persist");
-		if (!persist) {
+		// Get LV2 State extension data from plugin instance
+		LV2_State_Interface* state_iface = (LV2_State_Interface*)extension_data(
+			"http://lv2plug.in/ns/ext/state#Interface");
+		if (!state_iface) {
 			warning << string_compose(
-			    _("Plugin \"%1\% failed to return LV2 persist data"),
+			    _("Plugin \"%1\% failed to return LV2 state interface"),
 			    unique_id());
 			return;
 		}
 
 		// Save plugin state to state object
-		LV2PersistState state(_uri_map);
-		persist->save(_impl->instance->lv2_handle,
-		              &LV2Plugin::lv2_persist_store_callback,
-		              &state);
+		LV2State state(_uri_map);
+		state_iface->save(_impl->instance->lv2_handle,
+		                  &LV2Plugin::lv2_state_store_callback,
+		                  &state,
+		                  LV2_STATE_IS_POD|LV2_STATE_IS_PORTABLE,
+		                  NULL);
 
 		// Write state object to RDFF file
 		RDFF file = rdff_open(state_path.c_str(), true);
@@ -762,21 +773,23 @@ LV2Plugin::set_state(const XMLNode& node, int version)
 
 		cout << "LV2 state path " << state_path << endl;
 
-		// Get LV2 Persist extension data from plugin instance
-		LV2_Persist* persist = (LV2_Persist*)extension_data(
-			"http://lv2plug.in/ns/ext/persist");
-		if (persist) {
+		// Get LV2 State extension data from plugin instance
+		LV2_State_Interface* state_iface = (LV2_State_Interface*)extension_data(
+			"http://lv2plug.in/ns/ext/state#Interface");
+		if (state_iface) {
 			cout << "Loading LV2 state from " << state_path << endl;
-			RDFF            file = rdff_open(state_path.c_str(), false);
-			LV2PersistState state(_uri_map);
+			RDFF     file = rdff_open(state_path.c_str(), false);
+			LV2State state(_uri_map);
 			state.read(file);
-			persist->restore(_impl->instance->lv2_handle,
-			                 &LV2Plugin::lv2_persist_retrieve_callback,
-			                 &state);
+			state_iface->restore(_impl->instance->lv2_handle,
+			                     &LV2Plugin::lv2_state_retrieve_callback,
+			                     &state,
+			                     LV2_STATE_IS_POD|LV2_STATE_IS_PORTABLE,
+			                     NULL);
 			rdff_close(file);
 		} else {
 			warning << string_compose(
-			    _("Plugin \"%1\% failed to return LV2 persist data"),
+			    _("Plugin \"%1\% failed to return LV2 state interface"),
 			    unique_id());
 		}
 	}
