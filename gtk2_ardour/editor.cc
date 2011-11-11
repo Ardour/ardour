@@ -2810,8 +2810,8 @@ Editor::setup_toolbar ()
 
 	/* Zoom */
 
-	_zoom_box.set_spacing (1);
-	_zoom_box.set_border_width (0);
+	_zoom_box.set_spacing (2);
+	_zoom_box.set_border_width (2);
 
 	RefPtr<Action> act;
 
@@ -2892,7 +2892,7 @@ Editor::setup_toolbar ()
 	/* Nudge */
 
 	HBox *nudge_box = manage (new HBox);
-	nudge_box->set_spacing(1);
+	nudge_box->set_spacing (2);
 	nudge_box->set_border_width (2);
 
 	nudge_forward_button.signal_button_release_event().connect (sigc::mem_fun(*this, &Editor::nudge_forward_release), false);
