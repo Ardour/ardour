@@ -161,10 +161,12 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 
 	, auditioning_alert_button (_("AUDITION"))
 	, solo_alert_button (_("SOLO"))
+	, feedback_alert_button (_("FEEDBACK"))
 
 	, error_log_button (_("Errors"))
 
 	, _status_bar_visibility (X_("status-bar"))
+	, _feedback_exists (false)
 
 {
 	using namespace Gtk::Menu_Helpers;
@@ -267,6 +269,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	/* tell the user about feedback */
 
 	ARDOUR::Session::FeedbackDetected.connect (forever_connections, MISSING_INVALIDATOR, ui_bind (&ARDOUR_UI::feedback_detected, this), gui_context ());
+	ARDOUR::Session::SuccessfulGraphSort.connect (forever_connections, MISSING_INVALIDATOR, ui_bind (&ARDOUR_UI::successful_graph_sort, this), gui_context ());
 
 	/* handle requests to deal with missing files */
 
@@ -3880,13 +3883,13 @@ ARDOUR_UI::drop_process_buffers ()
 void
 ARDOUR_UI::feedback_detected ()
 {
-	MessageDialog d (
-		_("Something you have just done has generated a feedback path within Ardour's "
-		  "routing.  Until this feedback is removed, Ardour's output will be as it was "
-                  "before you made the feedback-generating connection.")
-		);
+	_feedback_exists = true;
+}
 
-	d.run ();
+void
+ARDOUR_UI::successful_graph_sort ()
+{
+	_feedback_exists = false;
 }
 
 void

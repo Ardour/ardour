@@ -833,6 +833,11 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	*/
 	static PBD::Signal0<void> FeedbackDetected;
 
+	/** Emitted when a graph sort has successfully completed, which means
+	    that it has no feedback cycles.
+	*/
+	static PBD::Signal0<void> SuccessfulGraphSort;
+
 	/* handlers can return an integer value:
 	   0: config.set_audio_search_path() or config.set_midi_search_path() was used
 	   to modify the search path and we should try to find it again.

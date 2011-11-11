@@ -130,6 +130,7 @@ PBD::Signal2<void,std::string, std::string> Session::Exported;
 PBD::Signal1<int,boost::shared_ptr<Playlist> > Session::AskAboutPlaylistDeletion;
 PBD::Signal0<void> Session::Quit;
 PBD::Signal0<void> Session::FeedbackDetected;
+PBD::Signal0<void> Session::SuccessfulGraphSort;
 
 static void clean_up_session_event (SessionEvent* ev) { delete ev; }
 const SessionEvent::RTeventCallback Session::rt_cleanup (clean_up_session_event);
@@ -1389,6 +1390,8 @@ Session::resort_routes_using (boost::shared_ptr<RouteList> r)
 								   (*i)->name(), (*i)->order_key ("signal")));
 		}
 #endif
+
+		SuccessfulGraphSort (); /* EMIT SIGNAL */
 
 	} else {
 		/* The topological sort failed, so we have a problem.  Tell everyone

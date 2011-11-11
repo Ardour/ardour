@@ -141,6 +141,7 @@ ARDOUR_UI::setup_tooltips ()
 	set_tip (time_master_button, string_compose (_("Does %1 control the time?"), PROGRAM_NAME));
 	set_tip (solo_alert_button, _("When active, something is soloed.\nClick to de-solo everything"));
 	set_tip (auditioning_alert_button, _("When active, auditioning is taking place\nClick to stop the audition"));
+	set_tip (feedback_alert_button, _("When active, there is a feedback loop."));
 	set_tip (primary_clock, _("Primary Clock"));
 	set_tip (secondary_clock, _("Secondary Clock"));
 
@@ -324,9 +325,12 @@ ARDOUR_UI::setup_transport ()
 	solo_alert_button.signal_button_press_event().connect (sigc::mem_fun(*this,&ARDOUR_UI::solo_alert_press), false);
 	auditioning_alert_button.set_name ("rude audition");
 	auditioning_alert_button.signal_button_press_event().connect (sigc::mem_fun(*this,&ARDOUR_UI::audition_alert_press), false);
+	feedback_alert_button.set_name ("feedback alert");
+	feedback_alert_button.signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::feedback_alert_press), false);
 
 	alert_box.pack_start (solo_alert_button, true, false);
 	alert_box.pack_start (auditioning_alert_button, true, false);
+	alert_box.pack_start (feedback_alert_button, true, false);
 
 	HBox* tbox = manage (new HBox);
 	tbox->set_spacing (2);
@@ -512,6 +516,12 @@ ARDOUR_UI::solo_alert_press (GdkEventButton*)
 	return true;
 }
 
+bool
+ARDOUR_UI::feedback_alert_press (GdkEventButton *)
+{
+	return true;
+}
+
 void
 ARDOUR_UI::solo_blink (bool onoff)
 {
@@ -569,6 +579,20 @@ ARDOUR_UI::audition_blink (bool onoff)
 		}
 	} else {
 		auditioning_alert_button.unset_active_state ();
+	}
+}
+
+void
+ARDOUR_UI::feedback_blink (bool onoff)
+{
+	if (_feedback_exists) {
+		if (onoff) {
+			feedback_alert_button.set_active (true);
+		} else {
+			feedback_alert_button.set_active (false);
+		}
+	} else {
+		feedback_alert_button.set_active (false);
 	}
 }
 

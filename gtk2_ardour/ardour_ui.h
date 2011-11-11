@@ -444,12 +444,14 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	ArdourButton auditioning_alert_button;
 	ArdourButton solo_alert_button;
+	ArdourButton feedback_alert_button;
 
 	Gtk::VBox alert_box;
 
 	void solo_blink (bool);
 	void sync_blink (bool);
 	void audition_blink (bool);
+	void feedback_blink (bool);
 
 	void soloing_changed (bool);
 	void auditioning_changed (bool);
@@ -457,6 +459,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	bool solo_alert_press (GdkEventButton* ev);
 	bool audition_alert_press (GdkEventButton* ev);
+	bool feedback_alert_press (GdkEventButton *);
 
 	void big_clock_value_changed ();
 	void primary_clock_value_changed ();
@@ -734,6 +737,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	ArdourButton             midi_panic_button;
 	void                     midi_panic ();
+
+	void successful_graph_sort ();
+	bool _feedback_exists;
 };
 
 #endif /* __ardour_gui_h__ */
