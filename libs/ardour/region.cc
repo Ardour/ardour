@@ -672,7 +672,7 @@ Region::modify_end (nframes_t new_endpoint, bool reset_fade, void *src)
 	}
 
 	if (new_endpoint > _position) {
-		trim_to_internal (_position, new_endpoint - _position +1, this);
+		trim_to_internal (_position, new_endpoint - _position, this);
 		if (reset_fade) {
 			_flags = Flag (_flags | LeftOfSplit); /* force reset of fade out */
 		}
