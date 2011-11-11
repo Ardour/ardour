@@ -132,10 +132,9 @@ static void
 gtk_custom_hruler_draw_ticks (GtkCustomRuler * ruler)
 {
 	GtkWidget *widget;
-	GdkGC *gc, *bg_gc;
+	GdkGC *gc;
 	gint i;
 	GtkCustomRulerMark *marks;
-	gint xthickness;
 	gint ythickness;
 	gint nmarks;
 	gint max_chars;
@@ -152,14 +151,12 @@ gtk_custom_hruler_draw_ticks (GtkCustomRuler * ruler)
 	widget = GTK_WIDGET (ruler);
 
 	gc = widget->style->fg_gc[GTK_STATE_NORMAL];
-	bg_gc = widget->style->bg_gc[GTK_STATE_NORMAL];
 
 	layout = gtk_widget_create_pango_layout (widget, "012456789");
 	pango_layout_get_extents (layout, &ink_rect, &logical_rect);
 
 	digit_offset = ink_rect.y;
 
-	xthickness = widget->style->xthickness;
 	ythickness = widget->style->ythickness;
 
 	gtk_paint_box (widget->style, ruler->backing_store,
