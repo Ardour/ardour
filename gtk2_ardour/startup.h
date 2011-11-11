@@ -292,7 +292,7 @@ class ArdourStartup : public Gtk::Assistant {
 	void move_along_now ();
 
 	bool _existing_session_chooser_used; ///< set to true when the existing session chooser has been used
-        void setup_alpha_page ();
+        void setup_prerelease_page ();
 };
 
 #endif /* __gtk2_ardour_startup_h__ */

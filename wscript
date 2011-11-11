@@ -8,7 +8,7 @@ import subprocess
 import sys
 
 # Variables for 'waf dist'
-VERSION = '3.0alpha10'
+VERSION = '3.0beta1'
 APPNAME = 'Ardour'
 
 # Mandatory variables

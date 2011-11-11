@@ -125,7 +125,7 @@ Ardour will play NO role in monitoring"))
 
 	bool need_audio_setup = !EngineControl::engine_running();
 
-        setup_alpha_page ();
+        setup_prerelease_page ();
 
 	if (new_user) {
 
@@ -172,12 +172,12 @@ ArdourStartup::~ArdourStartup ()
 }
 
 void
-ArdourStartup::setup_alpha_page ()
+ArdourStartup::setup_prerelease_page ()
 {
         VBox* vbox = manage (new VBox);
         Label* label = manage (new Label);
-        label->set_markup (_("<b>Welcome to this ALPHA release of Ardour 3.0</b>\n\n\
-There are still many issues and bugs to be worked on,\n\
+        label->set_markup (_("<b>Welcome to this BETA release of Ardour 3.0</b>\n\n\
+There are still several issues and bugs to be worked on,\n\
 as well as general workflow improvements, before this can be considered\n\
 release software. So, a few guidelines:\n\
 \n\
@@ -202,7 +202,7 @@ Full information on all the above can be found on the support page at\n\
 
         append_page (*vbox);
         set_page_type (*vbox, ASSISTANT_PAGE_CONTENT);
-        set_page_title (*vbox, _("This is an ALPHA RELEASE"));
+        set_page_title (*vbox, _("This is an BETA RELEASE"));
 	set_page_complete (*vbox, true);
 }
 
