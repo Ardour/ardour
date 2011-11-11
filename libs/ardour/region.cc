@@ -842,7 +842,7 @@ Region::modify_end (framepos_t new_endpoint, bool reset_fade)
 	}
 
 	if (new_endpoint > _position) {
-		trim_to_internal (_position, new_endpoint - _position +1);
+		trim_to_internal (_position, new_endpoint - _position);
 		if (reset_fade) {
 			_left_of_split = true;
 		}
