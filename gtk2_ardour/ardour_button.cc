@@ -86,6 +86,7 @@ ArdourButton::ArdourButton (const std::string& str, Element e)
 	, _fixed_diameter (true)
 	, _distinct_led_click (false)
 	, _led_rect (0)
+	, _hovering (false)
 {
 	set_text (str);
 }
