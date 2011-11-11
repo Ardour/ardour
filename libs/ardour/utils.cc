@@ -25,6 +25,7 @@
 
 #include <cstdio> /* for sprintf */
 #include <cstring>
+#include <climits>
 #include <cstdlib>
 #include <cmath>
 #include <cctype>
@@ -37,13 +38,10 @@
 #include <fcntl.h>
 #include <dirent.h>
 #include <errno.h>
+#include <regex.h>
 
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>
-
-#ifdef HAVE_WORDEXP
-#include <wordexp.h>
-#endif
 
 #include "pbd/cpus.h"
 #include "pbd/error.h"
@@ -282,58 +280,68 @@ path_expand (string path)
                 return path;
         }
 
-#ifdef HAVE_WORDEXP
-	/* Handle tilde and environment variable expansion in session path */
-	string ret = path;
-	string quoted;
-	wordexp_t expansion;
+        /* tilde expansion */
 
-	/* wordexp cannot be forced (it appears) into either
-	   
-           (1) NOT doing field splitting
-	   (2) splitting based on something other than whitespace
-	   
-	   (despite the documentation claiming that it obeys IFS etc).
+        if (path[0] == '~') {
+                if (path.length() == 1) {
+                        return Glib::get_home_dir();
+                }
 
-	   so, quote the most likely spaces to occur in a path, and that should
-	   be about as much as we can do.
-	*/
+                if (path[1] == '/') {
+                        path.replace (0, 1, Glib::get_home_dir());
+                } else {
+                        /* can't handle ~roger, so just leave it */
+                }
+        }
 
-	quoted = path;
-        replace_all (quoted, " ", "\\ ");
+	/* now do $VAR substitution, since wordexp isn't reliable */
 
-	switch (wordexp (quoted.c_str(), &expansion, WRDE_NOCMD|WRDE_UNDEF)) {
-	case 0:
-		break;
-	case WRDE_NOSPACE:
-		/* see docs on wordexp() */
-		wordfree (&expansion);
-		/* fallthru */
-	default:
-		error << string_compose (_("illegal or badly-formed string used for path (%1)"), path) << endmsg;
-		goto out;
-	}
+	regex_t compiled_pattern;
+	const int nmatches = 100;
+	regmatch_t matches[nmatches];
+	
+	if (regcomp (&compiled_pattern, "\\$([a-zA-Z_][a-zA-Z0-9_]*|\\{[a-zA-Z_][a-zA-Z0-9_]*\\})", REG_EXTENDED)) {
+                cerr << "bad regcomp\n";
+                return path;
+        }
 
-	if (expansion.we_wordc > 1) {
-		string all;
-		for (unsigned int i = 0; i < expansion.we_wordc; ++i) {
-			if (i > 0) {
-				all += " | ";
-			} 
-			all += expansion.we_wordv[i];
+	while (true) { 
+
+                cerr << "working on " << path << endl;
+
+		if (regexec (&compiled_pattern, path.c_str(), nmatches, matches, 0)) {
+			break;
 		}
-		error << string_compose (_("path (%1) is ambiguous: %2"), path, all) << endmsg;
-		goto out;
+		
+		/* matches[0] gives the entire match */
+		
+		string match = path.substr (matches[0].rm_so, matches[0].rm_eo - matches[0].rm_so);
+		
+		/* try to get match from the environment */
+
+                if (match[1] == '{') {
+                        /* ${FOO} form */
+                        match = match.substr (2, match.length() - 3);
+                }
+
+		char* matched_value = getenv (match.c_str());
+
+		if (matched_value) {
+			path.replace (matches[0].rm_so, matches[0].rm_eo - matches[0].rm_so, matched_value);
+		} else {
+			path.replace (matches[0].rm_so, matches[0].rm_eo - matches[0].rm_so, string());
+                }
+
+		/* go back and do it again with whatever remains after the
+		 * substitution 
+		 */
 	}
 
-	ret = expansion.we_wordv[0];
-  out:
-	wordfree (&expansion);
-	return ret;
+	/* canonicalize */
 
-#else
-	return path;
-#endif
+	char buf[PATH_MAX+1];
+	realpath (path.c_str(), buf);
+	return buf;
 }
 
 #if __APPLE__
