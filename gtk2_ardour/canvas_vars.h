@@ -186,4 +186,5 @@ BUTTON_VARS(PluginBypassButton, "plugin bypass button")
 BUTTON_VARS(PunchButton, "punch button")
 BUTTON_VARS(MouseModeButton, "mouse mode button")
 BUTTON_VARS(ZoomButton, "zoom button")
+BUTTON_VARS(RouteButton, "route button")
 

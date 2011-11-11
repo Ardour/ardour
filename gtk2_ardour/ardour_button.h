@@ -78,6 +78,7 @@ class ArdourButton : public CairoWidget
 	void set_distinct_led_click (bool yn);
 
 	sigc::signal<void> signal_led_clicked;
+	sigc::signal<void> signal_clicked;
 
 	boost::shared_ptr<PBD::Controllable> get_controllable() { return binding_proxy.get_controllable(); }
  	void set_controllable (boost::shared_ptr<PBD::Controllable> c);

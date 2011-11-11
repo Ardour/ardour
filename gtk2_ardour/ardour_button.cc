@@ -473,6 +473,8 @@ ArdourButton::on_button_release_event (GdkEventButton *ev)
 		unset_active_state ();
 	}
 
+	signal_clicked ();
+
 	if (_act_on_release) {
 		if (_action) {
 			Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (_action);

@@ -38,6 +38,7 @@
 #include "ardour/playlist.h"
 #include "ardour/types.h"
 
+#include "ardour_button.h"
 #include "ardour_dialog.h"
 #include "route_ui.h"
 #include "enums.h"
@@ -254,10 +255,9 @@ protected:
 
 	Gtk::HBox   other_button_hbox;
 	Gtk::Table  button_table;
-	Gtk::Button processor_button;
-	Gtk::Button route_group_button;
-	Gtk::Button playlist_button;
-	Gtk::Button automation_button;
+	ArdourButton route_group_button;
+	ArdourButton playlist_button;
+	ArdourButton automation_button;
 
 	Gtk::Menu           subplugin_menu;
 	Gtk::Menu*          automation_action_menu;
