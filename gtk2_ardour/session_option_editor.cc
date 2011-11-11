@@ -55,7 +55,6 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 
 	add_option (_("Timecode"), new OptionEditorHeading (_("Timecode Settings")));
 
-
 	ComboOption<TimecodeFormat>* smf = new ComboOption<TimecodeFormat> (
 		"timecode-format",
 		_("Timecode frames-per-second"),
@@ -130,6 +129,15 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 			    _("Timecode Offset Negative"),
 			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_timecode_offset_negative),
 			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_timecode_offset_negative)
+			    ));
+
+	add_option (_("Timecode"), new OptionEditorHeading (_("JACK Transport/Time Settings")));
+
+	add_option (_("Timecode"), new BoolOption (
+			    "jack-time-master",
+			    _("Ardour is JACK Time Master (provides Bar|Beat|Tick and other information to JACK)"),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_jack_time_master),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_jack_time_master)
 			    ));
 
 	/* FADES */

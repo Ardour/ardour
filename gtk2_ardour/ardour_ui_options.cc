@@ -359,8 +359,6 @@ ARDOUR_UI::parameter_changed (std::string p)
 		}
 	} else if (p == "clicking") {
 		ActionManager::map_some_state ("Transport", "ToggleClick", &RCConfiguration::get_clicking);
-	} else if (p == "jack-time-master") {
-		ActionManager::map_some_state ("Transport",  "ToggleTimeMaster", sigc::mem_fun (_session->config, &SessionConfiguration::get_jack_time_master));
 	} else if (p == "use-video-sync") {
 		ActionManager::map_some_state ("Transport",  "ToggleVideoSync", sigc::mem_fun (_session->config, &SessionConfiguration::get_use_video_sync));
 	} else if (p == "video-pullup" || p == "timecode-format") {

@@ -138,7 +138,6 @@ ARDOUR_UI::setup_tooltips ()
 	set_tip (auto_play_button, _("Start playback after any locate"));
 	set_tip (auto_input_button, _("Be sensible about input monitoring"));
 	set_tip (click_button, _("Enable/Disable audio click"));
-	set_tip (time_master_button, string_compose (_("Does %1 control the time?"), PROGRAM_NAME));
 	set_tip (solo_alert_button, _("When active, something is soloed.\nClick to de-solo everything"));
 	set_tip (auditioning_alert_button, _("When active, auditioning is taking place\nClick to stop the audition"));
 	set_tip (feedback_alert_button, _("When active, there is a feedback loop."));
@@ -255,14 +254,11 @@ ARDOUR_UI::setup_transport ()
 	auto_return_button.set_name ("transport option button");
 	auto_play_button.set_name ("transport option button");
 	auto_input_button.set_name ("transport option button");
-	time_master_button.set_name ("transport option button");
 
 	/* these have to provide a clear indication of active state */
 
 	click_button.set_name ("transport active option button");
 	sync_button.set_name ("transport active option button");
-
-	time_master_button.set_text (_("time master"));
 
 	stop_button.set_active_state (Active);
 
@@ -295,9 +291,6 @@ ARDOUR_UI::setup_transport ()
 	play_selection_button.set_related_action (act);
 	act = ActionManager::get_action (X_("MIDI"), X_("panic"));
 	midi_panic_button.set_related_action (act);
-
-	act = ActionManager::get_action (X_("Transport"), X_("ToggleTimeMaster"));
-	time_master_button.set_related_action (act);
 	act = ActionManager::get_action (X_("Transport"), X_("ToggleExternalSync"));
 	sync_button.set_related_action (act);
 
@@ -409,14 +402,6 @@ ARDOUR_UI::setup_transport ()
         if (!Profile->get_small_screen()) {
 		transport_tearoff_hbox.pack_start (*auto_box, false, false);
         }
-
-/*
-	VBox* time_controls = manage (new VBox);
-	time_controls->set_spacing (2);
-	time_controls->set_homogeneous (true);
-	time_controls->pack_start (sync_button, true, false);
-	time_controls->pack_start (time_master_button, true, false);
-*/
 
 	transport_tearoff_hbox.pack_start (*clock_box, false, false);
 	transport_tearoff_hbox.pack_start (click_button, false, false);

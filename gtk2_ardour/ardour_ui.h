@@ -439,7 +439,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	ArdourButton auto_play_button;
 	ArdourButton auto_input_button;
 	ArdourButton click_button;
-	ArdourButton time_master_button;
 	ArdourButton sync_button;
 
 	ArdourButton auditioning_alert_button;
