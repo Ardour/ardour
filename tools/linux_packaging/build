@@ -127,7 +127,7 @@ fi
 
 # the waf build tree to use when copying built/generated files
 
-BUILD_ROOT=../../build/default
+BUILD_ROOT=../../build
 
 # setup directory structure
 
