@@ -29,7 +29,7 @@
 #include "pbd/error.h"
 
 #include "ardour/uri_map.h"
-#include "lv2/lv2plug.in/ns/ext/persist/persist.h"
+#include "lv2/lv2plug.in/ns/ext/state/state.h"
 #include "rdff.h"
 
 namespace ARDOUR {
@@ -105,7 +105,7 @@ struct LV2State {
 				          body->object,
 				          body->object_size,
 				          body->object_type,
-				          LV2_PERSIST_IS_POD | LV2_PERSIST_IS_PORTABLE);
+				          LV2_STATE_IS_POD | LV2_STATE_IS_PORTABLE);
 			}
 		}
 		free(chunk);
