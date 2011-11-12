@@ -439,7 +439,7 @@ done
 
 # ExportFormats
 # got to be careful with names here
-for x in $BUILD_ROOT/../../export/*.preset $BUILD_ROOT/../../export/*.format ; do
+for x in $BUILD_ROOT/../export/*.preset $BUILD_ROOT/../export/*.format ; do
     cp "$x" $ExportFormats
 done
 
