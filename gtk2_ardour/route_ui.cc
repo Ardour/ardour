@@ -385,7 +385,8 @@ RouteUI::solo_press(GdkEventButton* ev)
 
 		if (Keyboard::is_context_menu_event (ev)) {
 
-                        if (!solo_isolated_led) {
+                        if (! (solo_isolated_led && solo_isolated_led->is_visible()) ||
+			    ! (solo_safe_led && solo_safe_led->is_visible())) {
 
                                 if (solo_menu == 0) {
                                         build_solo_menu ();
