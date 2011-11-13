@@ -806,10 +806,18 @@ RegionMoveDrag::finished (GdkEvent *, bool movement_occurred)
 
 	assert (!_views.empty ());
 
+	/* We might have hidden region views so that they weren't visible during the drag
+	   (when they have been reparented).  Now everything can be shown again, as region
+	   views are back in their track parent groups.
+	*/
+	for (list<DraggingView>::iterator i = _views.begin(); i != _views.end(); ++i) {
+		i->view->get_canvas_group()->show ();
+	}
+	
 	bool const changed_position = (_last_frame_position != _primary->region()->position());
 	bool const changed_tracks = (_time_axis_views[_views.front().time_axis_view] != &_views.front().view->get_time_axis_view());
 	framecnt_t const drag_delta = _primary->region()->position() - _last_frame_position;
-
+	
 	_editor->update_canvas_now ();
 
 	if (_copy) {
