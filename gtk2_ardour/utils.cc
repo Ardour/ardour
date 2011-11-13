@@ -526,73 +526,6 @@ forward_key_press (GdkEventKey* ev)
         return PublicEditor::instance().on_key_press_event(ev);
 }
 
-#ifdef GTKOSX
-static guint
-osx_keyval_without_alt (guint accent_keyval)
-{
-	switch (accent_keyval) {
-	case GDK_oe:
-		return GDK_q;
-	case GDK_registered:
-		return GDK_r;
-	case GDK_dagger:
-		return GDK_t;
-	case GDK_yen:
-		return GDK_y;
-	case GDK_diaeresis:
-		return GDK_u;
-	case GDK_oslash:
-		return GDK_o;
-	case GDK_Greek_pi:
-		return GDK_p;
-	case GDK_leftdoublequotemark:
-		return GDK_bracketleft;
-	case GDK_leftsinglequotemark:
-		return GDK_bracketright;
-	case GDK_guillemotleft:
-		return GDK_backslash;
-	case GDK_aring:
-		return GDK_a;
-	case GDK_ssharp:
-		return GDK_s;
-	case GDK_partialderivative:
-		return GDK_d;
-	case GDK_function:
-		return GDK_f;
-	case GDK_copyright:
-		return GDK_g;
-	case GDK_abovedot:
-		return GDK_h;
-	case GDK_notsign:
-		return GDK_l;
-	case GDK_ellipsis:
-		return GDK_semicolon;
-	case GDK_ae:
-		return GDK_apostrophe;
-	case GDK_Greek_OMEGA:
-		return GDK_z;
-	case GDK_ccedilla:
-		return GDK_c;
-	case GDK_radical:
-		return GDK_v;
-	case GDK_integral:
-		return GDK_b;
-	case GDK_mu:
-		return GDK_m;
-	case GDK_lessthanequal:
-		return GDK_comma;
-	case GDK_greaterthanequal:
-		return GDK_period;
-	case GDK_division:
-		return GDK_slash;
-	default:
-		break;
-	}
-
-	return GDK_VoidSymbol;
-}
-#endif
-
 bool
 key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 {
@@ -656,22 +589,6 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 	   all "normal text" accelerators.
 	*/
 
-#ifdef GTKOSX
-	if (!special_handling_of_unmodified_accelerators && (ev->state & Keyboard::SecondaryModifier)) {
-		/* we're not in a text entry or "magic focus" widget so we don't want OS X "special-character"
-		   text-style handling of alt-<key>. change the keyval back to what it would be without
-		   the alt key. this way, we see <alt>-v rather than <alt>-radical and so on.
-		*/
-		guint keyval_without_alt = osx_keyval_without_alt (ev->keyval);
-		
-		if (keyval_without_alt != GDK_VoidSymbol) {
-			DEBUG_TRACE (DEBUG::Accelerators, string_compose ("Remapped %1 to %2\n", gdk_keyval_name (ev->keyval), gdk_keyval_name (keyval_without_alt)));
-			ev->keyval = keyval_without_alt;
-		}
-	}
-	
-#endif
-	
 	if (!special_handling_of_unmodified_accelerators) {
 
 		/* XXX note that for a brief moment, the conditional above
