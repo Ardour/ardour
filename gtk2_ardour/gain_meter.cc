@@ -110,6 +110,10 @@ GainMeterBase::GainMeterBase (Session* s,
 
 	level_meter = new LevelMeter(_session);
 
+	level_meter->ButtonPress.connect_same_thread (_level_meter_connection, boost::bind (&GainMeterBase::level_meter_button_press, this, _1));
+	meter_metric_area.signal_button_press_event().connect (sigc::mem_fun (*this, &GainMeterBase::level_meter_button_press));
+	meter_metric_area.add_events (Gdk::BUTTON_PRESS_MASK);
+
 	gain_slider->signal_button_press_event().connect (sigc::mem_fun(*this, &GainMeter::gain_slider_button_press));
 	gain_slider->signal_button_release_event().connect (sigc::mem_fun(*this, &GainMeter::gain_slider_button_release));
 	gain_slider->set_name ("GainFader");
@@ -1105,6 +1109,12 @@ GainMeterBase::get_controllable()
 	}
 }
 
+bool
+GainMeterBase::level_meter_button_press (GdkEventButton* ev)
+{
+	return LevelMeterButtonPress (ev); /* EMIT SIGNAL */
+}
+
 void
 GainMeter::meter_configuration_changed (ChanCount c)
 {
@@ -1119,3 +1129,4 @@ GainMeter::meter_configuration_changed (ChanCount c)
 	style_changed = true;
 	meter_metric_area.queue_draw ();
 }
+

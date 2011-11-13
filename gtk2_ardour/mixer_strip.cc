@@ -364,6 +364,8 @@ MixerStrip::init ()
 	parameter_changed (X_("mixer-strip-visibility"));
 
 	Config->ParameterChanged.connect (_config_connection, MISSING_INVALIDATOR, ui_bind (&MixerStrip::parameter_changed, this, _1), gui_context());
+
+	gpm.LevelMeterButtonPress.connect_same_thread (_level_meter_connection, boost::bind (&MixerStrip::level_meter_button_press, this, _1));
 }
 
 MixerStrip::~MixerStrip ()
@@ -2010,3 +2012,48 @@ MixerStrip::ab_plugins ()
 	processor_box.processor_operation (ProcessorBox::ProcessorsAB);
 }
 
+bool
+MixerStrip::level_meter_button_press (GdkEventButton* ev)
+{
+	if (ev->button == 3) {
+		popup_level_meter_menu (ev);
+		return true;
+	}
+
+	return false;
+}
+
+void
+MixerStrip::popup_level_meter_menu (GdkEventButton* ev)
+{
+	using namespace Gtk::Menu_Helpers;
+
+	Gtk::Menu* m = manage (new Menu);
+	MenuList& items = m->items ();
+
+	RadioMenuItem::Group group;
+
+	add_level_meter_item (items, group, _("Input"), MeterInput);
+	add_level_meter_item (items, group, _("Pre-fader"), MeterPreFader);
+	add_level_meter_item (items, group, _("Post-fader"), MeterPostFader);
+	add_level_meter_item (items, group, _("Output"), MeterOutput);
+	add_level_meter_item (items, group, _("Custom"), MeterCustom);
+
+	m->popup (ev->button, ev->time);
+}
+
+void
+MixerStrip::add_level_meter_item (Menu_Helpers::MenuList& items, RadioMenuItem::Group& group, string const & name, MeterPoint point)
+{
+	using namespace Menu_Helpers;
+	
+	items.push_back (RadioMenuElem (group, name, sigc::bind (sigc::mem_fun (*this, &MixerStrip::set_meter_point), point)));
+	RadioMenuItem* i = dynamic_cast<RadioMenuItem *> (&items.back ());
+	i->set_active (_route->meter_point() == point);
+}
+
+void
+MixerStrip::set_meter_point (MeterPoint p)
+{
+	_route->set_meter_point (p);
+}

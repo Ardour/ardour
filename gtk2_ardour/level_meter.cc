@@ -201,8 +201,9 @@ LevelMeter::setup_meters (int len, int initial_width)
 			meters[n].meter = new FastMeter ((uint32_t) floor (Config->get_meter_hold()), width, FastMeter::Vertical, len, b, m, t, c);
 			meters[n].width = width;
 			meters[n].length = len;
-			meters[n].meter->add_events (Gdk::BUTTON_RELEASE_MASK);
-			meters[n].meter->signal_button_release_event().connect (sigc::bind (sigc::mem_fun(*this, &LevelMeter::meter_button_release), n));
+			meters[n].meter->add_events (Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK);
+			meters[n].meter->signal_button_press_event().connect (sigc::mem_fun (*this, &LevelMeter::meter_button_press));
+			meters[n].meter->signal_button_release_event().connect (sigc::mem_fun (*this, &LevelMeter::meter_button_release));
 		}
 
 		pack_end (*meters[n].meter, false, false);
@@ -213,12 +214,19 @@ LevelMeter::setup_meters (int len, int initial_width)
 	color_changed = false;
 }
 
-gint
-LevelMeter::meter_button_release (GdkEventButton* ev, uint32_t /*which*/)
+bool
+LevelMeter::meter_button_press (GdkEventButton* ev)
+{
+	return ButtonPress (ev); /* EMIT SIGNAL */
+}
+
+bool
+LevelMeter::meter_button_release (GdkEventButton* ev)
 {
 	if (ev->button == 1) {
-		clear_meters();
+		clear_meters ();
 	}
+
 	return true;
 }
 

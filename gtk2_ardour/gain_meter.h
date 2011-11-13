@@ -88,6 +88,11 @@ class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 	LevelMeter& get_level_meter() const { return *level_meter; }
 	Gtkmm2ext::SliderController& get_gain_slider() const { return *gain_slider; }
 
+	/** Emitted in the GUI thread when a button is pressed over the level meter;
+	 *  return true if the event is handled.
+	 */
+	PBD::Signal1<bool, GdkEventButton *> LevelMeterButtonPress;
+
   protected:
 
 	friend class MixerStrip;
@@ -182,6 +187,11 @@ class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 	void color_handler(bool);
 	ARDOUR::DataType _data_type;
 	ARDOUR::ChanCount _previous_amp_output_streams;
+
+private:
+
+	bool level_meter_button_press (GdkEventButton *);
+	PBD::ScopedConnection _level_meter_connection;
 };
 
 class GainMeter : public GainMeterBase, public Gtk::VBox
