@@ -28,12 +28,10 @@ fi
 
 SAE=
 MIXBUS=
-INTERNAL_JACK=1
 WITH_LADSPA=1
 STRIP=1
 PRINT_SYSDEPS=
 WITH_NLS=
-EXTERNAL_JACK=
 
 while [ $# -gt 0 ] ; do
     echo "arg = $1"
@@ -45,7 +43,6 @@ while [ $# -gt 0 ] ; do
 
 	--sae) WITH_NLS= ; 
                SAE=1 ; 
-	       INTERNAL_JACK=1; 
 	       WITH_LADSPA=1; 
                STRIP= ; 
 	       PRODUCT_PKG_DIR=ArdourSAE ; 
@@ -54,7 +51,6 @@ while [ $# -gt 0 ] ; do
 	--mixbus) MIXBUS=1; 
 	          WITH_NLS=1 ; 
                   SAE= ; 
-                  INTERNAL_JACK=; 
                   WITH_LADSPA=; 
                   STRIP= ; 
 		  PRODUCT_PKG_DIR=MixBus;
@@ -62,7 +58,6 @@ while [ $# -gt 0 ] ; do
                   shift ;;
 	--public) WITH_NLS= ; 
 	          SAE= ; 
-		  INTERNAL_JACK=; 
                   WITH_LADSPA=1; 
                   STRIP= ; 
 		  PRODUCT_PKG_DIR=Ardour;
@@ -70,29 +65,22 @@ while [ $# -gt 0 ] ; do
 		  shift ;;
 	--allinone) SAE= ; 
 	            WITH_NLS= ; 
-		    INTERNAL_JACK=1; 
 		    WITH_LADSPA=1; 
 		    STRIP= ; 
 		    PRODUCT_PKG_DIR=Ardour ;
 		    shift ;;
-	--test) SAE= ; INTERNAL_JACK=; WITH_LADSPA=; STRIP= ; shift ;;
+	--test) SAE= ; WITH_LADSPA=; STRIP= ; shift ;;
 
 	#
 	# specific build flags
 	#
 
-	--nojack) INTERNAL_JACK= ; shift ;;
 	--noladspa) WITH_LADSPA= ; shift ;;
 	--nostrip) STRIP= ; shift ;;
 	--sysdeps) PRINT_SYSDEPS=1; shift ;;
 	--nls) WITH_NLS=1 ; shift ;;
-	--external_jack) EXTERNAL_JACK=$2; shift ; shift ;;
     esac
 done
-
-if [ x$EXTERNAL_JACK != x -a x$INTERNAL_JACK != x ] ; then
-    echo "It makes no sense to package JACK internally and externally. Please pick one."
-fi
 
 BUILD_ROOT=../../build
 
@@ -182,12 +170,8 @@ fi
 # jack in the places where it might be
 #
 
-if test x$INTERNAL_JACK != x ; then
-    env="$env<key>ARDOUR_INTERNAL_JACK</key><string>true</string>"
-else
-    env="$env<key>PATH</key><string>/usr/local/bin:/opt/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>"
-    env="$env<key>DYLIB_FALLBACK_LIBRARY_PATH</key><string>/usr/local/lib:/opt/lib</string>"
-fi
+env="$env<key>PATH</key><string>/usr/local/bin:/opt/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>"
+env="$env<key>DYLIB_FALLBACK_LIBRARY_PATH</key><string>/usr/local/lib:/opt/lib</string>"
 
 env="<key>LSEnvironment</key><dict>$env<key>ARDOUR_BUNDLED</key><string>true</string></dict>"
 
@@ -213,13 +197,9 @@ cp -R Resources $APPROOT
 # installed.
 #
 
-if test x$INTERNAL_JACK != x ; then
-    MAIN_EXECUTABLE=Ardour3
-else
-    cp startup_script $APPROOT/MacOS/Ardour3
-    chmod 775 $APPROOT/MacOS/Ardour3
-    MAIN_EXECUTABLE=Ardour3.bin
-fi
+cp startup_script $APPROOT/MacOS/Ardour3
+chmod 775 $APPROOT/MacOS/Ardour3
+MAIN_EXECUTABLE=Ardour3.bin
 
 echo "Copying ardour executable ...."
 cp $BUILD_ROOT/gtk2_ardour/ardour-$release_version $APPROOT/MacOS/$MAIN_EXECUTABLE
@@ -234,13 +214,6 @@ fi
 cp  typeArdour.icns $Resources/
 if test x$STRIP != x ; then
     strip $APPROOT/MacOS/Ardour3
-fi
-if test x$INTERNAL_JACK != x ; then
-    if [ -f /usr/local/lib/jack/jack_coreaudio.so ] ; then 
-	cp /usr/local/lib/jack/jack_coreaudio.so $Frameworks
-	cp /usr/local/bin/jackd $APPROOT/MacOS
-	JACK_SHARED_OBJECTS="$Frameworks/*.so"
-    fi
 fi
 
 # copy locale files
@@ -336,24 +309,21 @@ cp $BUILD_ROOT/libs/vamp-plugins/libardourvampplugins.dylib $Frameworks
 
 while [ true ] ; do 
     missing=false
-    for file in $APPROOT/MacOS/* $Frameworks/* $Frameworks/modules/* $Plugins/*.so ; do 
+    for file in $APPROOT/MacOS/* $Frameworks/* $Frameworks/modules/* $Panners/*.dylib $Plugins/*.so ; do 
 	if ! file $file | grep -qs Mach-O ; then
 	    continue
 	fi
-	if test x$INTERNAL_JACK != x ; then
-	    deps=`otool -L $file | awk '{print $1}' | egrep "($GTKQUARTZ_ROOT|/opt/|/local/|libs/)"`
-	else
-	    # do not include libjack
-	    deps=`otool -L $file | awk '{print $1}' | egrep "($GTKQUARTZ_ROOT|/opt/|/local/|libs/)" | grep -v 'libjack\.'`
-	fi
-	echo -n "."
+	deps=`otool -L $file | awk '{print $1}' | egrep "($GTKQUARTZ_ROOT|/opt/|/local/|libs/)" | grep -v 'libjack\.'`
+	# echo -n "."
 	for dep in $deps ; do
 	    base=`basename $dep`
 	    if ! test -f $Frameworks/$base; then
 		if echo $dep | grep -sq '^libs' ; then
 		    cp $BUILD_ROOT/$dep $Frameworks
+		    echo "$BUILD_ROOT/$dep => $Frameworks"
 		else
 		    cp $dep $Frameworks
+		    echo "$dep => $Frameworks"
 		fi
 		missing=true
 	    fi
@@ -406,9 +376,6 @@ done
 # now fix up the executables
 echo "Fixing up executable dependency names ..."
 executables=$MAIN_EXECUTABLE
-if test x$INTERNAL_JACK != x ; then
-    executables="$executables jackd"
-fi
 if test x$SAE != x ; then
     executables="$executables"
 fi
@@ -416,17 +383,10 @@ fi
 for exe in $executables; do
     EXE=$APPROOT/MacOS/$exe
     changes=""
-    if test x$INTERNAL_JACK != x ; then
-	for lib in `otool -L $EXE | egrep "($GTKQUARTZ_ROOT|/opt/|/local/|libs/)" | awk '{print $1}'` ; do
-	    base=`basename $lib`
-	    changes="$changes -change $lib @executable_path/../Frameworks/$base"
-	done
-    else
-	for lib in `otool -L $EXE | egrep "($GTKQUARTZ_ROOT|/opt/|/local/|libs/)" | awk '{print $1}' | grep -v 'libjack\.'` ; do
-	    base=`basename $lib`
-	    changes="$changes -change $lib @executable_path/../Frameworks/$base"
-	done
-    fi
+    for lib in `otool -L $EXE | egrep "($GTKQUARTZ_ROOT|/opt/|/local/|libs/)" | awk '{print $1}' | grep -v 'libjack\.'` ; do
+      base=`basename $lib`
+      changes="$changes -change $lib @executable_path/../Frameworks/$base"
+    done
     if test "x$changes" != "x" ; then
 	install_name_tool $changes $EXE
     fi
@@ -434,25 +394,30 @@ done
 
 echo "Fixing up library names ..."
 # now do the same for all the libraries we include
-for dylib in $JACK_SHARED_OBJECTS $Frameworks/*.dylib $Frameworks/modules/*.so $Surfaces/*.dylib ; do
-    # skip symlinks
-    if test ! -L $dylib ; then
+for libdir in $Frameworks $Frameworks/modules $Surfaces $Panners ; do
+
+    echo "Now working on libraries in $libdir ..."
+
+    libbase=`basename $libdir`
+
+    for dylib in $libdir/*.dylib $libdir/*.so ; do
 	
-	# change all the dependencies
+       # skip symlinks
+	
+	if test -L $dylib ; then
+	    continue
+	fi
+	
+        # change all the dependencies
+	
+	echo "Looking at " $dylib
 
 	changes=""
-	if test x$INTERNAL_JACK != x ; then
-	    for lib in `otool -L $dylib | egrep "($GTKQUARTZ_ROOT|/opt/|/local/|libs/)" | awk '{print $1}'` ; do
-		base=`basename $lib`
-		changes="$changes -change $lib @executable_path/../Frameworks/$base"
-	    done
-	else
-	    for lib in `otool -L $dylib | egrep "($GTKQUARTZ_ROOT|/opt/|/local/|libs/)" | awk '{print $1}' | grep -v 'libjack\.'` ; do
-		base=`basename $lib`
-		changes="$changes -change $lib @executable_path/../Frameworks/$base"
-	    done
-	fi
-
+	for lib in `otool -L $dylib | egrep "($GTKQUARTZ_ROOT|/opt/|/local/|libs/)" | awk '{print $1}' | grep -v 'libjack\.'` ; do
+	    base=`basename $lib`
+	    changes="$changes -change $lib @executable_path/../$libbase/$base"
+	done
+	
 	if test "x$changes" != x ; then
 	    if  install_name_tool $changes $dylib ; then
 		:
@@ -460,12 +425,13 @@ for dylib in $JACK_SHARED_OBJECTS $Frameworks/*.dylib $Frameworks/modules/*.so $
 		exit 1
 	    fi
 	fi
-
+	
 	# now the change what the library thinks its own name is
-
+	
 	base=`basename $dylib`
-	install_name_tool -id @executable_path/../Frameworks/$base $dylib
-    fi
+	install_name_tool -id @executable_path/../$libdir/$base $dylib
+	echo "Updated linkage to self in $dylib to @executable_path/../$libbase/$base"
+    done
 done
 
 #
@@ -492,12 +458,7 @@ elif [ x$MIXBUS != x ] ; then
     echo "Creating Mixbus packaging directory"
     mv $APPDIR $PRODUCT_PKG_DIR/
     cp MixBus_Install_QuickStart.pdf "$PRODUCT_PKG_DIR/Mixbus Install & Quick Start Guide.pdf"
-    
-    if [ -x $EXTERNAL_JACK != x ] ; then
-	cp $EXTERNAL_JACK $PRODUCT_PKG_DIR
-    fi
-    
-	# create dmg
+
 else 
 
     echo "Creating $APPNAME packaging directory"
