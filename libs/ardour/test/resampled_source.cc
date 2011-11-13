@@ -9,7 +9,7 @@ using namespace ARDOUR;
 void
 ResampledSourceTest::seekTest ()
 {
-	boost::shared_ptr<SndFileImportableSource> s (new SndFileImportableSource ("../../libs/ardour/test/data/test.wav"));
+	boost::shared_ptr<SndFileImportableSource> s (new SndFileImportableSource ("../libs/ardour/test/data/test.wav"));
 	ResampledImportableSource r (s, 48000, SrcBest);
 
 	/* Make sure that seek (0) has the desired effect, ie that

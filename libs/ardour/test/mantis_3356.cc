@@ -30,7 +30,7 @@ Mantis3356Test::test ()
 	MIDI::Manager::create (engine.jack ());
 	CPPUNIT_ASSERT (engine.start () == 0);
 
-	Session session (engine, "../../libs/ardour/test/data/mantis_3356", "mantis_3356");
+	Session session (engine, "../libs/ardour/test/data/mantis_3356", "mantis_3356");
 	engine.set_session (&session);
 
 	Session::SourceMap sources = session.get_sources ();
@@ -47,7 +47,7 @@ Mantis3356Test::test ()
 		result << *i << "\n";
 	}
 
-	ifstream ref ("../../libs/ardour/test/data/mantis_3356.ref");
+	ifstream ref ("../libs/ardour/test/data/mantis_3356.ref");
 
 	while (1) {
 		string a;

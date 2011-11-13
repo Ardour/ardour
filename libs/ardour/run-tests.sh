@@ -9,7 +9,7 @@ if [ ! -f './tempo.cc' ]; then
 fi
 
 srcdir=`pwd`
-cd ../../build/default
+cd ../../build
 
 libs='libs'
 
