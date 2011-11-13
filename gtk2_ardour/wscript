@@ -267,6 +267,7 @@ def configure(conf):
     autowaf.check_pkg(conf, 'libgnomecanvasmm-2.6',
                       uselib_store='GNOMECANVASMM', atleast_version='2.16')
     autowaf.check_pkg(conf, 'ogg', uselib_store='OGG', atleast_version='1.1.2')
+    autowaf.check_pkg(conf, 'x11', uselib_store='X11', atleast_version='1.4', mandatory=False)
 
     conf.write_config_header('gtk2ardour-config.h', remove=False)
 
@@ -392,12 +393,12 @@ def build(bld):
     if bld.is_defined('VST_SUPPORT'):
         obj.source += [ 'vst_pluginui.cc' ]
         obj.defines += [ 'VST_SUPPORT' ]
-        bld.env.append ('LINKFLAGS', '-lX11')
+        obj.uselib += ' X11 '
 
     if bld.is_defined('LXVST_SUPPORT'):
         obj.source += [ 'lxvst_pluginui.cc' ]
         obj.defines += [ 'LXVST_SUPPORT' ]
-        obj.linkflags += [ '-lX11' ]
+        obj.uselib += ' X11 '
 
     if bld.is_defined('PHONE_HOME'):
         obj.defines += [ 'PHONE_HOME' ]

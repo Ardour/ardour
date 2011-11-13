@@ -26,6 +26,8 @@ def options(opt):
     autowaf.set_options(opt)
     opt.add_option('--test', action='store_true', default=False, dest='build_tests',
                     help="Build unit tests")
+    opt.add_option('--test-coverage', action='store_true', default=False, dest='test_coverage',
+                    help="Use gcov to test for code coverage")
 
 def configure(conf):
     conf.load('compiler_cxx')
@@ -42,6 +44,7 @@ def configure(conf):
     autowaf.check_header(conf, 'cxx', 'boost/weak_ptr.hpp')
 
     conf.env['BUILD_TESTS'] = Options.options.build_tests
+    conf.env['TEST_COVERAGE'] = Options.options.test_coverage
 
     #autowaf.display_msg(conf, "Unit tests", str(conf.env['BUILD_TESTS']))
     #print
@@ -97,7 +100,7 @@ def build(bld):
     obj.install_path   = os.path.join(bld.env['LIBDIR'], 'ardour3')
     obj.defines = ['PACKAGE="libevoral"' ]
 
-    if bld.is_defined('BUILD_TESTS') and bld.is_defined('HAVE_CPPUNIT'):
+    if bld.env['BUILD_TESTS'] and bld.is_defined('HAVE_CPPUNIT'):
         # Static library (for unit test code coverage)
         obj = bld(features = 'cxx cstlib')
         obj.source       = lib_source
@@ -110,8 +113,10 @@ def build(bld):
         obj.use            = 'libsmf libpbd'
         obj.vnum           = EVORAL_LIB_VERSION
         obj.install_path   = ''
-        obj.cflags         = [ '-fprofile-arcs',  '-ftest-coverage' ]
-        obj.cxxflags       = [ '-fprofile-arcs',  '-ftest-coverage' ]
+        if bld.env['TEST_COVERAGE']:
+            obj.linkflags      = '-lgcov'
+            obj.cflags         = [ '-fprofile-arcs',  '-ftest-coverage' ]
+            obj.cxxflags       = [ '-fprofile-arcs',  '-ftest-coverage' ]
         obj.defines        = ['PACKAGE="libevoral"' ]
 
         # Unit tests
@@ -124,12 +129,13 @@ def build(bld):
         obj.includes     = ['.', './src']
         obj.use          = 'libevoral_static'
         obj.uselib       = 'CPPUNIT SNDFILE'
-        obj.libs         = 'gcov'
         obj.target       = 'run-tests'
         obj.name         = 'libevoral-tests'
         obj.install_path = ''
-        obj.cflags       = [ '-fprofile-arcs',  '-ftest-coverage' ]
-        obj.cxxflags     = [ '-fprofile-arcs',  '-ftest-coverage' ]
+        if bld.env['TEST_COVERAGE']:
+            obj.linkflags      = '-lgcov'
+            obj.cflags         = [ '-fprofile-arcs',  '-ftest-coverage' ]
+            obj.cxxflags       = [ '-fprofile-arcs',  '-ftest-coverage' ]
 
 def shutdown():
     autowaf.shutdown()

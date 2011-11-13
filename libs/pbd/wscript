@@ -127,7 +127,7 @@ def build(bld):
     if bld.env['build_target'] == 'x86_64':
         obj.cxxflags += [ '-DUSE_X86_64_ASM' ]
 
-    if bld.is_defined ('BUILD_TESTS') and bld.is_defined('HAVE_CPPUNIT'):
+    if bld.env['BUILD_TESTS'] and bld.is_defined('HAVE_CPPUNIT'):
         # Unit tests
         testobj              = bld(features = 'cxx cxxprogram')
         testobj.source       = '''

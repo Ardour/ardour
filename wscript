@@ -613,7 +613,7 @@ const char* const ardour_config_info = "\\n\\
 #    write_config_text('Soundtouch',            conf.is_defined('HAVE_SOUNDTOUCH'))
     write_config_text('Translation',           opts.nls)
     write_config_text('Tranzport',             opts.tranzport)
-    write_config_text('Unit tests',            conf.is_defined('BUILD_TESTS'))
+    write_config_text('Unit tests',            conf.env['BUILD_TESTS'])
     write_config_text('Universal binary',      opts.universal)
     write_config_text('VST support',           opts.vst)
     write_config_text('Wiimote support',       opts.wiimote)

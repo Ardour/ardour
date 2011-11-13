@@ -269,6 +269,8 @@ def configure(conf):
                       atleast_version='1.2.1')
     autowaf.check_pkg(conf, 'libcurl', uselib_store='CURL',
                       atleast_version='7.0.0')
+    autowaf.check_pkg(conf, 'x11', uselib_store='X11',
+                      atleast_version='1.4', mandatory=False)
 
     # we don't try to detect this, since its part of our source tree
 
@@ -389,7 +391,7 @@ def build(bld):
     if bld.is_defined('LXVST_SUPPORT'):
         obj.source += [ 'lxvst_plugin.cc', 'session_lxvst.cc', 'vstfx.cc', 'vstfxwin.cc', 'vstfxinfofile.cc' ]
         obj.defines += [ 'LXVST_SUPPORT' ]
-
+        obj.uselib += ['X11']
 
     if bld.is_defined('HAVE_COREAUDIO'):
         obj.source += [ 'coreaudiosource.cc', 'caimportable.cc' ]
@@ -412,7 +414,7 @@ def build(bld):
                                         lang, 'LC_MESSAGES', 'libardour3.mo'),
                            mo)
 
-    if bld.is_defined('BUILD_TESTS') and bld.is_defined('HAVE_CPPUNIT'):
+    if bld.env['BUILD_TESTS'] and bld.is_defined('HAVE_CPPUNIT'):
         # Unit tests
         testobj              = bld(features = 'cxx cxxprogram')
         testobj.source       = '''

@@ -78,7 +78,7 @@ def build(bld):
     audiographer.install_path   = os.path.join(bld.env['LIBDIR'], 'ardour3')
 
 
-    if bld.is_defined('BUILD_TESTS') and bld.is_defined('HAVE_CPPUNIT'):
+    if bld.env['BUILD_TESTS'] and bld.is_defined('HAVE_CPPUNIT'):
         # Unit tests
         obj              = bld(features = 'cxx cxxprogram')
         obj.source       = '''
