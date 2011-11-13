@@ -558,7 +558,7 @@ AutomationTimeAxisView::build_display_menu ()
 }
 
 void
-AutomationTimeAxisView::add_automation_event (ArdourCanvas::Item* /*item*/, GdkEvent* /*event*/, framepos_t when, double y)
+AutomationTimeAxisView::add_automation_event (GdkEvent* event, framepos_t when, double y)
 {
 	if (!_line) {
 		return;
@@ -577,6 +577,8 @@ AutomationTimeAxisView::add_automation_event (ArdourCanvas::Item* /*item*/, GdkE
 	_line->view_to_model_coord (x, y);
 
 	boost::shared_ptr<AutomationList> list = _line->the_list ();
+
+	_editor.snap_to_with_modifier (when, event);
 
 	_session->begin_reversible_command (_("add automation event"));
 	XMLNode& before = list->get_state();

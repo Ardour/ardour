@@ -72,7 +72,7 @@ class AutomationTimeAxisView : public TimeAxisView {
 	void set_samples_per_unit (double);
 	std::string name() const { return _name; }
 
-	void add_automation_event (ArdourCanvas::Item *item, GdkEvent *event, framepos_t, double);
+	void add_automation_event (GdkEvent *, framepos_t, double);
 
 	void clear_lines ();
 
