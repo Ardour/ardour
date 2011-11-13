@@ -164,6 +164,7 @@ static const char* authors[] = {
 	N_("Sampo Savolainen"),
 	N_("Per Sigmond"),
 	N_("Lincoln Spiteri"),
+	N_("Mike Start"),
 	N_("Mark Stewart"),
 	N_("Roland Stigge"),
 	N_("Petter Sundlöf"),
