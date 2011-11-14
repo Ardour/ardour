@@ -124,7 +124,7 @@ QuantizeDialog::QuantizeDialog (PublicEditor& e)
 	show_all ();
 
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);
-	add_button (Stock::OK, RESPONSE_OK);
+	add_button (_("Quantize"), RESPONSE_OK);
 }
 
 QuantizeDialog::~QuantizeDialog()
