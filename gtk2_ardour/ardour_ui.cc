@@ -339,6 +339,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 
 	_process_thread = new ProcessThread ();
 	_process_thread->init ();
+
+	DPIReset.connect (sigc::mem_fun (*this, &ARDOUR_UI::resize_text_widgets));
 }
 
 /** @return true if a session was chosen and `apply' clicked, otherwise false if `cancel' was clicked */
@@ -1065,7 +1067,7 @@ ARDOUR_UI::update_cpu_load ()
 {
 	char buf[64];
 
-	/* If this text is changed, the set_size_request_to_display_given_text call in ARDOUR_UI::build_menu_bar
+	/* If this text is changed, the set_size_request_to_display_given_text call in ARDOUR_UI::resize_text_widgets
 	   should also be changed.
 	*/
 
@@ -1082,7 +1084,7 @@ ARDOUR_UI::update_buffer_load ()
 	uint32_t const playback = _session ? _session->playback_load () : 100;
 	uint32_t const capture = _session ? _session->capture_load () : 100;
 
-	/* If this text is changed, the set_size_request_to_display_given_text call in ARDOUR_UI::build_menu_bar
+	/* If this text is changed, the set_size_request_to_display_given_text call in ARDOUR_UI::resize_text_widgets
 	   should also be changed.
 	*/
 	
