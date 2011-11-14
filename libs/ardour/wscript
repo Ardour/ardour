@@ -415,6 +415,7 @@ def build(bld):
         # Unit tests
         testobj              = bld(features = 'cxx cxxprogram')
         testobj.source       = '''
+                test/dummy_lxvst.cc
                 test/bbt_test.cpp
                 test/interpolation_test.cpp
                 test/midi_clock_slave_test.cpp
