@@ -1377,7 +1377,7 @@ Editor::register_region_actions ()
 		sigc::mem_fun (*this, &Editor::toggle_gain_envelope_active)
 		);
 
-	reg_sens (_region_actions, "quantize-region", _("Quantize"), sigc::mem_fun (*this, &Editor::quantize_region));
+	reg_sens (_region_actions, "quantize-region", _("Quantize..."), sigc::mem_fun (*this, &Editor::quantize_region));
 	reg_sens (_region_actions, "insert-patch-change", _("Insert Patch Change..."), sigc::mem_fun (*this, &Editor::insert_patch_change));
 	reg_sens (_region_actions, "fork-region", _("Fork"), sigc::mem_fun (*this, &Editor::fork_region));
 	reg_sens (_region_actions, "strip-region-silence", _("Strip Silence..."), sigc::mem_fun (*this, &Editor::strip_region_silence));
