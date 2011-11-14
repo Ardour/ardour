@@ -462,10 +462,8 @@ ARDOUR_UI::soloing_changed (bool onoff)
 void
 ARDOUR_UI::_auditioning_changed (bool onoff)
 {
-	if (auditioning_alert_button.get_active() != onoff) {
-		auditioning_alert_button.set_active (onoff);
-		set_transport_sensitivity (!onoff);
-	}
+	auditioning_alert_button.set_active (onoff);
+	set_transport_sensitivity (!onoff);
 }
 
 void
