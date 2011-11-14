@@ -557,7 +557,7 @@ ARDOUR_UI::audition_blink (bool onoff)
 			auditioning_alert_button.set_active (false);
 		}
 	} else {
-		auditioning_alert_button.set_active (true);
+		auditioning_alert_button.set_active (false);
 	}
 }
 
