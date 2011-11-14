@@ -421,7 +421,7 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 	  preview (persistent),
 	  found_search_btn (_("Search")),
 	  found_list_view (found_list),
-	  freesound_search_btn (_("Start Downloading")),
+	  freesound_search_btn (_("Search")),
 	  freesound_list_view (freesound_list)
 {
 	resetting_ourselves = false;
@@ -516,33 +516,53 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 		passbox->set_spacing (6);
 
 		label = manage (new Label);
-		label->set_text (_("User:"));
-		passbox->pack_start (*label, false, false);
-		passbox->pack_start (freesound_name_entry);
-		label = manage (new Label);
-		label->set_text (_("Password:"));
-		passbox->pack_start (*label, false, false);
-		passbox->pack_start (freesound_pass_entry);
-		label = manage (new Label);
 		label->set_text (_("Tags:"));
 		passbox->pack_start (*label, false, false);
 		passbox->pack_start (freesound_entry, false, false);
-		passbox->pack_start (freesound_search_btn, false, false);
 
+		label = manage (new Label);
+		label->set_text (_("Sort:"));
+		passbox->pack_start (*label, false, false);
+		passbox->pack_start (freesound_sort, false, false);
+		freesound_sort.clear_items();
+		
+		// Order of the following must correspond with enum sortMethod
+		// in sfdb_freesound_mootcher.h	
+		freesound_sort.append_text(_("None"));
+		freesound_sort.append_text(_("Longest"));
+		freesound_sort.append_text(_("Shortest"));
+		freesound_sort.append_text(_("Newest"));
+		freesound_sort.append_text(_("Oldest"));
+		freesound_sort.append_text(_("Most downloaded"));
+		freesound_sort.append_text(_("Least downloaded"));
+		freesound_sort.append_text(_("Highest rated"));
+		freesound_sort.append_text(_("Lowest rated"));
+		freesound_sort.set_active(0);
+
+		label = manage (new Label);
+		label->set_text (_("Page:"));
+		passbox->pack_start (*label, false, false);
+		passbox->pack_start (freesound_page, false, false);
+		freesound_page.set_range(1, 1000);
+		freesound_page.set_increments(1, 10);
+		
+		passbox->pack_start (freesound_search_btn, false, false);
+		passbox->pack_start (progress_bar);
+		
 		Gtk::ScrolledWindow *scroll = manage(new ScrolledWindow);
 		scroll->add(freesound_list_view);
 		scroll->set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 
 		vbox = manage(new VBox);
 		vbox->pack_start (*passbox, PACK_SHRINK);
-		vbox->pack_start(*scroll);
+		vbox->pack_start (*scroll);
 
-		//vbox->pack_start (freesound_list_view);
-
-		freesound_list_view.append_column(_("Paths"), freesound_list_columns.pathname);
+		freesound_list_view.append_column(_("ID")      , freesound_list_columns.id);
+		freesound_list_view.append_column(_("Filename"), freesound_list_columns.filename);
+		freesound_list_view.append_column(_("URI")     , freesound_list_columns.uri);
 		freesound_list_view.get_selection()->signal_changed().connect(sigc::mem_fun(*this, &SoundFileBrowser::freesound_list_view_selected));
 
-		//freesound_list_view.get_selection()->set_mode (SELECTION_MULTIPLE);
+		freesound_list_view.get_selection()->set_mode (SELECTION_MULTIPLE);
 		freesound_list_view.signal_row_activated().connect (sigc::mem_fun (*this, &SoundFileBrowser::freesound_list_view_activated));
 		freesound_search_btn.signal_clicked().connect(sigc::mem_fun(*this, &SoundFileBrowser::freesound_search_clicked));
 		freesound_entry.signal_activate().connect(sigc::mem_fun(*this, &SoundFileBrowser::freesound_search_clicked));
@@ -712,13 +732,33 @@ SoundFileBrowser::freesound_list_view_selected ()
 	if (!reset_options ()) {
 		set_response_sensitive (RESPONSE_OK, false);
 	} else {
+
+		string path;
+		path = Glib::get_home_dir();
+		path += "/Freesound/";
+		Mootcher theMootcher(path.c_str()); // XXX should be a member of SoundFileBrowser
+
 		string file;
 
 		TreeView::Selection::ListHandle_Path rows = freesound_list_view.get_selection()->get_selected_rows ();
 
 		if (!rows.empty()) {
 			TreeIter iter = freesound_list->get_iter(*rows.begin());
-			file = (*iter)[freesound_list_columns.pathname];
+
+			string id  = (*iter)[freesound_list_columns.id];
+			string uri = (*iter)[freesound_list_columns.uri];
+			string ofn = (*iter)[freesound_list_columns.filename];
+
+			// download the sound file			
+			GdkCursor *prev_cursor;
+			prev_cursor = gdk_window_get_cursor (get_window()->gobj());
+			gdk_window_set_cursor (get_window()->gobj(), gdk_cursor_new(GDK_WATCH));
+			gdk_flush();
+
+			file = theMootcher.getAudioFile(ofn, id, uri, &progress_bar);
+
+			gdk_window_set_cursor (get_window()->gobj(), prev_cursor);
+
 			chooser.set_filename (file);
 			set_response_sensitive (RESPONSE_OK, true);
 		} else {
@@ -753,43 +793,16 @@ SoundFileBrowser::found_search_clicked ()
 	}
 }
 
-void*
-freesound_search_thread_entry (void* arg)
-{
-	SessionEvent::create_per_thread_pool ("freesound events", 64);
-
-	static_cast<SoundFileBrowser*>(arg)->freesound_search_thread ();
-
-	return 0;
-}
-
-bool searching = false;
-bool canceling = false;
-
 void
 SoundFileBrowser::freesound_search_clicked ()
 {
-	if (canceling)  //already canceling, button does nothing
-		return;
-
-	if ( searching ) {
-		freesound_search_btn.set_label(_("Cancelling.."));
-		canceling = true;
-	} else {
-		searching = true;
-		freesound_search_btn.set_label(_("Cancel"));
-		pthread_t freesound_thr;
-		pthread_create_and_store ("freesound_search", &freesound_thr, freesound_search_thread_entry, this);
-	}
+	freesound_search();
 }
 
+
 void
-SoundFileBrowser::freesound_search_thread()
+SoundFileBrowser::freesound_search()
 {
-#if 0
-
-	THIS IS ALL TOTALLY THREAD-ILLEGAL ... YOU CANNOT DO GTK STUFF IN THIS THREAD
-
 #ifdef FREESOUND
 	freesound_list->clear();
 
@@ -798,47 +811,80 @@ SoundFileBrowser::freesound_search_thread()
 	path += "/Freesound/";
 	Mootcher theMootcher(path.c_str());
 
-	string name_string = freesound_name_entry.get_text ();
-	string pass_string = freesound_pass_entry.get_text ();
 	string search_string = freesound_entry.get_text ();
+	enum sortMethod sort_method = (enum sortMethod) freesound_sort.get_active_row_number();
+	int page = freesound_page.get_value_as_int();
 
-	if ( theMootcher.doLogin( name_string, pass_string ) ) {
+	GdkCursor *prev_cursor;
+	prev_cursor = gdk_window_get_cursor (get_window()->gobj());
+	gdk_window_set_cursor (get_window()->gobj(), gdk_cursor_new(GDK_WATCH));
+	gdk_flush();
 
-		string theString = theMootcher.searchText(search_string);
+	string theString = theMootcher.searchText(
+		search_string, 
+		page,
+		"", // filter, could do, e.g. "type:wav"
+		sort_method
+	);
 
-		XMLTree doc;
-		doc.read_buffer( theString );
-		XMLNode *root = doc.root();
+	gdk_window_set_cursor (get_window()->gobj(), prev_cursor);
 
-		if (root==NULL) return;
+	XMLTree doc;
+	doc.read_buffer( theString );
+	XMLNode *root = doc.root();
 
-		if ( strcmp(root->name().c_str(), "freesound") == 0) {
-
-			XMLNode *node = 0;
-			XMLNodeList children = root->children();
-			XMLNodeConstIterator niter;
-			for (niter = children.begin(); niter != children.end() && !canceling; ++niter) {
-				node = *niter;
-				if( strcmp( node->name().c_str(), "sample") == 0 ){
-					XMLProperty *prop=node->property ("id");
-					string filename = theMootcher.getFile( prop->value().c_str() );
-					if ( filename != "" ) {
-						TreeModel::iterator new_row = freesound_list->append();
-						TreeModel::Row row = *new_row;
-						string path = Glib::filename_from_uri (string ("file:") + filename);
-						row[freesound_list_columns.pathname] = path;
-					}
-				}
-			}
-		}
+	if (!root) {
+		cerr << "no root XML node!" << endl;
+		return;
 	}
 
-	searching = false;
-	canceling = false;
-	freesound_search_btn.set_label(_("Start Downloading"));
-#endif
-#endif
+	if ( strcmp(root->name().c_str(), "response") != 0) {
+		cerr << "root node name == " << root->name() << ", != \"response\"!" << endl;
+		return;
+	}
 
+	XMLNode *sounds_root = root->child("sounds");
+	
+	if (!sounds_root) {
+		cerr << "no child node \"sounds\" found!" << endl;
+		return;
+	}
+	
+	XMLNodeList sounds = sounds_root->children();
+	XMLNodeConstIterator niter;
+	XMLNode *node;
+	for (niter = sounds.begin(); niter != sounds.end(); ++niter) {
+		node = *niter;
+		if( strcmp( node->name().c_str(), "resource") != 0 ){
+			cerr << "node->name()=" << node->name() << ",!= \"resource\"!" << endl;
+			continue; // return;
+		}
+
+		// node->dump(cerr, "node:");
+		
+		XMLNode *id_node  = node->child ("id");
+		XMLNode *uri_node = node->child ("serve");
+		XMLNode *ofn_node = node->child ("original_filename");
+
+		if (id_node && uri_node && ofn_node) {
+			
+			std::string  id =  id_node->child("text")->content();
+			std::string uri = uri_node->child("text")->content();
+			std::string ofn = ofn_node->child("text")->content();
+
+			std::string r;
+			// cerr << "id=" << id << ",uri=" << uri << ",ofn=" << ofn << endl;
+
+			TreeModel::iterator new_row = freesound_list->append();
+			TreeModel::Row row = *new_row;
+			
+			row[freesound_list_columns.id      ] = id;
+			row[freesound_list_columns.uri     ] = uri;
+			row[freesound_list_columns.filename] = ofn;
+
+		}
+	}
+#endif
 }
 
 vector<string>
@@ -874,12 +920,29 @@ SoundFileBrowser::get_paths ()
 
 		typedef TreeView::Selection::ListHandle_Path ListPath;
 
+		string path;
+		path = Glib::get_home_dir();
+		path += "/Freesound/";
+		Mootcher theMootcher(path.c_str()); // XXX should be a member of SoundFileBrowser
+
+
 		ListPath rows = freesound_list_view.get_selection()->get_selected_rows ();
 		for (ListPath::iterator i = rows.begin() ; i != rows.end(); ++i) {
 			TreeIter iter = freesound_list->get_iter(*i);
-			string str = (*iter)[freesound_list_columns.pathname];
+			string id  = (*iter)[freesound_list_columns.id];
+			string uri = (*iter)[freesound_list_columns.uri];
+			string ofn = (*iter)[freesound_list_columns.filename];
 
+			GdkCursor *prev_cursor;
+			prev_cursor = gdk_window_get_cursor (get_window()->gobj());
+			gdk_window_set_cursor (get_window()->gobj(), gdk_cursor_new(GDK_WATCH));
+			gdk_flush();
+
+			string str = theMootcher.getAudioFile(ofn, id, uri, &progress_bar);
 			results.push_back (str);
+			
+			gdk_window_set_cursor (get_window()->gobj(), prev_cursor);
+
 		}
 	}
 

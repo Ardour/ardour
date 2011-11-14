@@ -389,6 +389,7 @@ def build(bld):
 
     if bld.is_defined('FREESOUND'):
         obj.source +=  [ 'sfdb_freesound_mootcher.cc' ]
+        obj.defines += [ 'FREESOUND' ]
 
     if bld.is_defined('VST_SUPPORT'):
         obj.source += [ 'vst_pluginui.cc' ]

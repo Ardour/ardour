@@ -114,11 +114,23 @@ class SoundFileBrowser : public ArdourDialog
 		FoundTagColumns() { add(pathname); }
 	};
 
+	class FreesoundColumns : public Gtk::TreeModel::ColumnRecord
+	{
+	  public:
+		Gtk::TreeModelColumn<std::string> id;
+		Gtk::TreeModelColumn<std::string> uri;
+		Gtk::TreeModelColumn<std::string> filename;
+
+		FreesoundColumns() { add(id); add(filename); add(uri); }
+	};
+
 	FoundTagColumns found_list_columns;
 	Glib::RefPtr<Gtk::ListStore> found_list;
 
-	FoundTagColumns freesound_list_columns;
+	FreesoundColumns freesound_list_columns;
 	Glib::RefPtr<Gtk::ListStore> freesound_list;
+
+	Gtk::ProgressBar progress_bar;
 
   public:
 	SoundFileBrowser (Gtk::Window& parent, std::string title, ARDOUR::Session* _s, bool persistent);
@@ -137,13 +149,14 @@ class SoundFileBrowser : public ArdourDialog
 	Gtk::Button found_search_btn;
 	Gtk::TreeView found_list_view;
 
-	Gtk::Entry freesound_name_entry;
-	Gtk::Entry freesound_pass_entry;
 	Gtk::Entry freesound_entry;
+	Gtk::ComboBoxText freesound_sort;
+	Gtk::SpinButton freesound_page;
+	
 	Gtk::Button freesound_search_btn;
 	Gtk::TreeView freesound_list_view;
 
-	void freesound_search_thread();
+	void freesound_search();
 
   protected:
 	bool resetting_ourselves;
