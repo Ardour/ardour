@@ -569,6 +569,7 @@ ARDOUR_UI::build_menu_bar ()
 #ifndef TOP_MENUBAR
  	menu_hbox.pack_start (*menu_bar, false, false);
 #else
+	cerr << "PUSHING MENUBAR TO GLOBAL MENU\n";
 	use_menubar_as_top_menubar ();
 #endif
 
