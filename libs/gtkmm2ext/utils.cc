@@ -94,7 +94,7 @@ Gtkmm2ext::set_size_request_to_display_given_text (Gtk::Widget &w,
         }
 	
         if (i == strings.end()) {
-                /* make a copy of the strings then add one that has a descener */
+                /* make a copy of the strings then add one that has a descender */
                 copy = strings;
                 copy.push_back ("g");
                 to_use = &copy;
