@@ -320,10 +320,8 @@ while [ true ] ; do
 	    if ! test -f $Frameworks/$base; then
 		if echo $dep | grep -sq '^libs' ; then
 		    cp $BUILD_ROOT/$dep $Frameworks
-		    echo "$BUILD_ROOT/$dep => $Frameworks"
 		else
 		    cp $dep $Frameworks
-		    echo "$dep => $Frameworks"
 		fi
 		missing=true
 	    fi
@@ -396,10 +394,8 @@ echo "Fixing up library names ..."
 # now do the same for all the libraries we include
 for libdir in $Frameworks $Frameworks/modules $Surfaces $Panners ; do
 
-    echo "Now working on libraries in $libdir ..."
-
     libbase=`basename $libdir`
-
+    
     for dylib in $libdir/*.dylib $libdir/*.so ; do
 	
        # skip symlinks
@@ -410,12 +406,14 @@ for libdir in $Frameworks $Frameworks/modules $Surfaces $Panners ; do
 	
         # change all the dependencies
 	
-	echo "Looking at " $dylib
-
 	changes=""
 	for lib in `otool -L $dylib | egrep "($GTKQUARTZ_ROOT|/opt/|/local/|libs/)" | awk '{print $1}' | grep -v 'libjack\.'` ; do
 	    base=`basename $lib`
-	    changes="$changes -change $lib @executable_path/../$libbase/$base"
+	    if echo $lib | grep -s libbase; then
+		changes="$changes -change $lib @executable_path/../$libbase/$base"
+	    else
+		changes="$changes -change $lib @executable_path/../Frameworks/$base"
+	    fi
 	done
 	
 	if test "x$changes" != x ; then
@@ -429,8 +427,7 @@ for libdir in $Frameworks $Frameworks/modules $Surfaces $Panners ; do
 	# now the change what the library thinks its own name is
 	
 	base=`basename $dylib`
-	install_name_tool -id @executable_path/../$libdir/$base $dylib
-	echo "Updated linkage to self in $dylib to @executable_path/../$libbase/$base"
+	install_name_tool -id @executable_path/../$libbase/$base $dylib
     done
 done
 
