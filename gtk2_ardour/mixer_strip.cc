@@ -717,6 +717,7 @@ MixerStrip::output_press (GdkEventButton *ev)
 		}
 		
 		citems.push_back (SeparatorElem());
+		uint32_t const n_with_separator = citems.size ();
 
 		ARDOUR::BundleList current = _route->output()->bundles_connected ();
 
@@ -743,7 +744,7 @@ MixerStrip::output_press (GdkEventButton *ev)
 			maybe_add_bundle_to_output_menu ((*i)->input()->bundle(), current);
 		}
 
-		if (citems.size() == 2) {
+		if (citems.size() == n_with_separator) {
 			/* no routes added; remove the separator */
 			citems.pop_back ();
 		}
@@ -838,6 +839,8 @@ MixerStrip::input_press (GdkEventButton *ev)
 		}
 
 		citems.push_back (SeparatorElem());
+		uint32_t const n_with_separator = citems.size ();
+		
 		input_menu_bundles.clear ();
 
 		ARDOUR::BundleList current = _route->input()->bundles_connected ();
@@ -865,7 +868,7 @@ MixerStrip::input_press (GdkEventButton *ev)
 			maybe_add_bundle_to_input_menu ((*i)->output()->bundle(), current);
 		}
 
-		if (citems.size() == 2) {
+		if (citems.size() == n_with_separator) {
 			/* no routes added; remove the separator */
 			citems.pop_back ();
 		}
