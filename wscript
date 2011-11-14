@@ -368,6 +368,8 @@ def options(opt):
     opt.add_option('--no-fpu-optimization', action='store_false', dest='fpu_optimization')
     opt.add_option('--freedesktop', action='store_true', default=False, dest='freedesktop',
                     help='Install MIME type, icons and .desktop file as per freedesktop.org standards')
+    opt.add_option('--freebie', action='store_true', default=False, dest='freebie',
+                    help='Build a version suitable for distribution as a zero-cost binary')
     opt.add_option('--freesound', action='store_true', default=False, dest='freesound',
                     help='Include Freesound database lookup')
     opt.add_option('--gprofile', action='store_true', default=False, dest='gprofile',
@@ -445,7 +447,8 @@ def configure(conf):
 
         conf.define ('HAVE_COREAUDIO', 1)
         conf.define ('AUDIOUNIT_SUPPORT', 1)
-        conf.define ('AU_STATE_SUPPORT', 1)
+        if not Options.options.freebie:
+            conf.define ('AU_STATE_SUPPORT', 1)
         conf.define ('GTKOSX', 1)
         conf.define ('TOP_MENUBAR',1)
         conf.define ('GTKOSX',1)
