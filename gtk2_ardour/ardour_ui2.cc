@@ -552,12 +552,12 @@ ARDOUR_UI::audition_blink (bool onoff)
 
 	if (_session->is_auditioning()) {
 		if (onoff) {
-			auditioning_alert_button.set_active_state (Gtkmm2ext::Active);
+			auditioning_alert_button.set_active (true);
 		} else {
-			auditioning_alert_button.unset_active_state();
+			auditioning_alert_button.set_active (false);
 		}
 	} else {
-		auditioning_alert_button.unset_active_state ();
+		auditioning_alert_button.set_active (true);
 	}
 }
 
