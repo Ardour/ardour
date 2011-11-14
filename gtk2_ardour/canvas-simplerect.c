@@ -232,12 +232,8 @@ gnome_canvas_simplerect_init (GnomeCanvasSimpleRect *simplerect)
 static void
 gnome_canvas_simplerect_destroy (GtkObject *object)
 {
-	GnomeCanvasSimpleRect *rect;
-
 	g_return_if_fail (object != NULL);
 	g_return_if_fail (GNOME_IS_CANVAS_SIMPLERECT (object));
-
-	rect = GNOME_CANVAS_SIMPLERECT (object);
 
 	/* remember, destroy can be run multiple times! */
 
@@ -847,11 +843,8 @@ gnome_canvas_simplerect_point (GnomeCanvasItem *item, double x, double y, int cx
 	(void) cx;
 	(void) cy;
 
-	GnomeCanvasSimpleRect *simplerect;
 	double x1, y1, x2, y2;
 	double dx, dy;
-
-	simplerect = GNOME_CANVAS_SIMPLERECT (item);
 
 	*actual_item = item;
 
