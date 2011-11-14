@@ -747,6 +747,10 @@ AudioClock::edit_next_field ()
 bool
 AudioClock::on_key_press_event (GdkEventKey* ev)
 {
+	if (editing_field == 0) {
+		return false;
+	}
+	
 	/* return true for keys that we MIGHT use 
 	   at release
 	*/
@@ -2015,4 +2019,3 @@ AudioClock::set_off (bool yn)
 	
 	set (_canonical_time, true);
 }
-

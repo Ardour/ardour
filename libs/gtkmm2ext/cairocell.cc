@@ -211,7 +211,6 @@ CairoEditableText::CairoEditableText (boost::shared_ptr<CairoFontDescription> fo
 	set_flags (Gtk::CAN_FOCUS);
 
 	set_can_default (true);
-	set_receives_default (true);
 }
 
 CairoEditableText::~CairoEditableText ()
