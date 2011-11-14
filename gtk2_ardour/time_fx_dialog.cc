@@ -114,18 +114,20 @@ TimeFXDialog::TimeFXDialog (Editor& e, bool pitch)
 		l = manage (new Label (_("Octaves:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
 		table->attach (*l, 1, 2, 0, 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
 		table->attach (pitch_octave_spinner, 2, 3, 0, 1, Gtk::FILL, Gtk::EXPAND & Gtk::FILL, 0, 0);
+		pitch_octave_spinner.set_activates_default ();
 
 		l = manage (new Label (_("Semitones:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
 		table->attach (*l, 1, 2, 1, 2, Gtk::FILL, Gtk::EXPAND, 0, 0);
 		table->attach (pitch_semitone_spinner, 2, 3, 1, 2, Gtk::FILL, Gtk::EXPAND & Gtk::FILL, 0, 0);
+		pitch_semitone_spinner.set_activates_default ();
 
 		l = manage (new Label (_("Cents:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
 		pitch_cent_spinner.set_digits (1);
 		table->attach (*l, 1, 2, 2, 3, Gtk::FILL, Gtk::EXPAND, 0, 0);
 		table->attach (pitch_cent_spinner, 2, 3, 2, 3, Gtk::FILL, Gtk::EXPAND & Gtk::FILL, 0, 0);
+		pitch_cent_spinner.set_activates_default ();
 
 		table->attach (preserve_formants_button, 1, 3, 3, 4, Gtk::FILL, Gtk::EXPAND, 0, 0);
-
 
 		add_button (_("Shift"), Gtk::RESPONSE_ACCEPT);
 
@@ -164,6 +166,8 @@ TimeFXDialog::TimeFXDialog (Editor& e, bool pitch)
 		upper_button_box.pack_start (*table, false, true);
 	}
 
+	set_default_response (Gtk::RESPONSE_ACCEPT);
+	
 	VBox* progress_box = manage (new VBox);
 	progress_box->set_spacing (6);
 
@@ -178,7 +182,6 @@ TimeFXDialog::TimeFXDialog (Editor& e, bool pitch)
 	vbox->pack_start (*progress_box, false, true);
 
 	get_vbox()->pack_start (*vbox, false, false);
-
 
 	show_all_children ();
 }
