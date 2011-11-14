@@ -729,6 +729,7 @@ SoundFileBrowser::found_list_view_selected ()
 void
 SoundFileBrowser::freesound_list_view_selected ()
 {
+#ifdef FREESOUND
 	if (!reset_options ()) {
 		set_response_sensitive (RESPONSE_OK, false);
 	} else {
@@ -767,6 +768,7 @@ SoundFileBrowser::freesound_list_view_selected ()
 
 		preview.setup_labels (file);
 	}
+#endif
 }
 
 void
@@ -917,7 +919,7 @@ SoundFileBrowser::get_paths ()
 			results.push_back (str);
 		}
 	} else {
-
+#ifdef FREESOUND
 		typedef TreeView::Selection::ListHandle_Path ListPath;
 
 		string path;
@@ -944,6 +946,7 @@ SoundFileBrowser::get_paths ()
 			gdk_window_set_cursor (get_window()->gobj(), prev_cursor);
 
 		}
+#endif
 	}
 
 	return results;
