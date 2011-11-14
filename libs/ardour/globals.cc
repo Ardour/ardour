@@ -334,7 +334,7 @@ ARDOUR::init (bool use_vst, bool try_optimization)
 	Analyser::init ();
 
 	/* singleton - first object is "it" */
-	new PluginManager ();
+	(void) PluginManager::instance();
 
         ProcessThread::init ();
         BufferManager::init (10); // XX should be num_processors_for_dsp + 1 for the GUI thread
@@ -374,6 +374,10 @@ ARDOUR::init_post_engine ()
 	if ((node = Config->control_protocol_state()) != 0) {
 		ControlProtocolManager::instance().set_state (*node, Stateful::loading_state_version);
 	}
+
+	/* find plugins */
+
+	ARDOUR::PluginManager::instance().refresh ();
 }
 
 int

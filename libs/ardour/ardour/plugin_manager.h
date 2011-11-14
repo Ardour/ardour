@@ -39,7 +39,8 @@ class Plugin;
 
 class PluginManager : public boost::noncopyable {
   public:
-	PluginManager ();
+	static PluginManager& instance();
+
 	~PluginManager ();
 
 	ARDOUR::PluginInfoList &vst_plugin_info ();
@@ -53,8 +54,6 @@ class PluginManager : public boost::noncopyable {
 	int add_ladspa_directory (std::string dirpath);
 	int add_vst_directory (std::string dirpath);
 	int add_lxvst_directory (std::string dirpath);
-
-	static PluginManager* the_manager() { return _manager; }
 
 	enum PluginStatusType {
 		Normal = 0,
@@ -134,7 +133,8 @@ class PluginManager : public boost::noncopyable {
 	std::string get_ladspa_category (uint32_t id);
 	std::vector<uint32_t> ladspa_plugin_whitelist;
 
-	static PluginManager* _manager; // singleton
+	static PluginManager* _instance; // singleton
+	PluginManager ();
 };
 
 } /* namespace ARDOUR */

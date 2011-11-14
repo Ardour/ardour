@@ -230,7 +230,7 @@ Mixer_UI::Mixer_UI ()
         MonitorSection::setup_knob_images ();
 
 #ifndef DEFER_PLUGIN_SELECTOR_LOAD
-	_plugin_selector = new PluginSelector (PluginManager::the_manager ());
+	_plugin_selector = new PluginSelector (PluginManager::instance ());
 #endif
 }
 
@@ -1668,7 +1668,7 @@ Mixer_UI::plugin_selector()
 {
 #ifdef DEFER_PLUGIN_SELECTOR_LOAD
 	if (!_plugin_selector)
-		_plugin_selector = new PluginSelector (PluginManager::the_manager ());
+		_plugin_selector = new PluginSelector (PluginManager::instance());
 #endif
 
 	return _plugin_selector;

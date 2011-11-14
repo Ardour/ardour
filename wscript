@@ -519,7 +519,6 @@ def configure(conf):
     autowaf.check_pkg(conf, 'glibmm-2.4', uselib_store='GLIBMM', atleast_version='2.14.0')
     autowaf.check_pkg(conf, 'sndfile', uselib_store='SNDFILE', atleast_version='1.0.18')
     autowaf.check_pkg(conf, 'giomm-2.4', uselib_store='GIOMM', atleast_version='2.2')
-    autowaf.check_pkg(conf, 'x11', uselib_store='X11', atleast_version='1.3', mandatory=False)
 
     for i in children:
         sub_config_and_use(conf, i)

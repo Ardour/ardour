@@ -81,7 +81,16 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace std;
 
-PluginManager* PluginManager::_manager = 0;
+PluginManager* PluginManager::_instance = 0;
+
+PluginManager&
+PluginManager::instance() 
+{
+	if (!_instance) {
+		_instance = new PluginManager;
+	}
+	return *_instance;
+}
 
 PluginManager::PluginManager ()
 	: _vst_plugin_info(0)
@@ -133,8 +142,8 @@ PluginManager::PluginManager ()
 		lxvst_path = s;
 	}
 
-	if (_manager == 0) {
-		_manager = this;
+	if (_instance == 0) {
+		_instance = this;
 	}
 
 	/* the plugin manager is constructed too early to use Profile */

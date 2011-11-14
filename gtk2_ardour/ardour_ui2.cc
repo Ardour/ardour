@@ -81,7 +81,6 @@ ARDOUR_UI::setup_windows ()
 
 	/* all other dialogs are created conditionally */
 
-	cerr << "WE HAVE DEPENDENTS\n";
 	we_have_dependents ();
 
 	theme_manager->signal_unmap().connect (sigc::bind (sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleThemeManager")));
@@ -116,7 +115,6 @@ ARDOUR_UI::setup_windows ()
 
 	setup_transport();
 
-	cerr << "BUILD MENU BAR\n";
 	build_menu_bar ();
 
 	setup_tooltips ();

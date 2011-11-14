@@ -62,19 +62,20 @@ static const char* _filter_mode_strings[] = {
 	0
 };
 
-PluginSelector::PluginSelector (PluginManager *mgr)
-	: ArdourDialog (_("Plugin Manager"), true, false),
-	  filter_button (Stock::CLEAR)
+PluginSelector::PluginSelector (PluginManager& mgr)
+	: ArdourDialog (_("Plugin Manager"), true, false)
+	, filter_button (Stock::CLEAR)
+	, manager (mgr)
+	  
 {
 	set_position (Gtk::WIN_POS_MOUSE);
 	set_name ("PluginSelectorWindow");
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
 
 	_plugin_menu = 0;
-	manager = mgr;
 	in_row_change = false;
 
-	manager->PluginListChanged.connect (plugin_list_changed_connection, invalidator (*this), boost::bind (&PluginSelector::build_plugin_menu, this), gui_context());
+	manager.PluginListChanged.connect (plugin_list_changed_connection, invalidator (*this), boost::bind (&PluginSelector::build_plugin_menu, this), gui_context());
 	build_plugin_menu ();
 
 	plugin_model = Gtk::ListStore::create (plugin_columns);
@@ -212,11 +213,11 @@ PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& 
 	std::string mode = filter_mode.get_active_text ();
 
 	if (mode == _("Favorites only")) {
-		return manager->get_status (info) == PluginManager::Favorite;
+		return manager.get_status (info) == PluginManager::Favorite;
 	}
 
 	if (mode == _("Hidden only")) {
-		return manager->get_status (info) == PluginManager::Hidden;
+		return manager.get_status (info) == PluginManager::Hidden;
 	}
 
 	if (!filterstr.empty()) {
@@ -304,8 +305,8 @@ PluginSelector::refiller (const PluginInfoList& plugs, const::std::string& filte
 		if (show_this_plugin (*i, filterstr)) {
 
 			TreeModel::Row newrow = *(plugin_model->append());
-			newrow[plugin_columns.favorite] = (manager->get_status (*i) == PluginManager::Favorite);
-			newrow[plugin_columns.hidden] = (manager->get_status (*i) == PluginManager::Hidden);
+			newrow[plugin_columns.favorite] = (manager.get_status (*i) == PluginManager::Favorite);
+			newrow[plugin_columns.hidden] = (manager.get_status (*i) == PluginManager::Hidden);
 			newrow[plugin_columns.name] = (*i)->name;
 			newrow[plugin_columns.type_name] = type;
 			newrow[plugin_columns.category] = (*i)->category;
@@ -338,14 +339,14 @@ PluginSelector::refiller (const PluginInfoList& plugs, const::std::string& filte
 void
 PluginSelector::ladspa_refiller (const std::string& filterstr)
 {
-	refiller (manager->ladspa_plugin_info(), filterstr, "LADSPA");
+	refiller (manager.ladspa_plugin_info(), filterstr, "LADSPA");
 }
 
 void
 PluginSelector::lv2_refiller (const std::string& filterstr)
 {
 #ifdef LV2_SUPPORT
-	refiller (manager->lv2_plugin_info(), filterstr, "LV2");
+	refiller (manager.lv2_plugin_info(), filterstr, "LV2");
 #endif
 }
 
@@ -357,7 +358,7 @@ PluginSelector::vst_refiller (const std::string&)
 #endif
 {
 #ifdef VST_SUPPORT
-	refiller (manager->vst_plugin_info(), filterstr, "VST");
+	refiller (manager.vst_plugin_info(), filterstr, "VST");
 #endif
 }
 
@@ -369,7 +370,7 @@ PluginSelector::lxvst_refiller (const std::string&)
 #endif
 {
 #ifdef LXVST_SUPPORT
-	refiller (manager->lxvst_plugin_info(), filterstr, "LXVST");
+	refiller (manager.lxvst_plugin_info(), filterstr, "LXVST");
 #endif
 }
 
@@ -381,7 +382,7 @@ PluginSelector::au_refiller (const std::string&)
 #endif
 {
 #ifdef AUDIOUNIT_SUPPORT
-	refiller (manager->au_plugin_info(), filterstr, "AU");
+	refiller (manager.au_plugin_info(), filterstr, "AU");
 #endif
 }
 
@@ -429,7 +430,7 @@ PluginSelector::btn_remove_clicked()
 void
 PluginSelector::btn_update_clicked()
 {
-	manager->refresh ();
+	manager.refresh ();
 	refill();
 }
 
@@ -597,18 +598,18 @@ PluginSelector::build_plugin_menu ()
 {
 	PluginInfoList all_plugs;
 
-	all_plugs.insert (all_plugs.end(), manager->ladspa_plugin_info().begin(), manager->ladspa_plugin_info().end());
+	all_plugs.insert (all_plugs.end(), manager.ladspa_plugin_info().begin(), manager.ladspa_plugin_info().end());
 #ifdef VST_SUPPORT
-	all_plugs.insert (all_plugs.end(), manager->vst_plugin_info().begin(), manager->vst_plugin_info().end());
+	all_plugs.insert (all_plugs.end(), manager.vst_plugin_info().begin(), manager.vst_plugin_info().end());
 #endif
 #ifdef LXVST_SUPPORT
-	all_plugs.insert (all_plugs.end(), manager->lxvst_plugin_info().begin(), manager->lxvst_plugin_info().end());
+	all_plugs.insert (all_plugs.end(), manager.lxvst_plugin_info().begin(), manager.lxvst_plugin_info().end());
 #endif
 #ifdef AUDIOUNIT_SUPPORT
-	all_plugs.insert (all_plugs.end(), manager->au_plugin_info().begin(), manager->au_plugin_info().end());
+	all_plugs.insert (all_plugs.end(), manager.au_plugin_info().begin(), manager.au_plugin_info().end());
 #endif
 #ifdef LV2_SUPPORT
-	all_plugs.insert (all_plugs.end(), manager->lv2_plugin_info().begin(), manager->lv2_plugin_info().end());
+	all_plugs.insert (all_plugs.end(), manager.lv2_plugin_info().begin(), manager.lv2_plugin_info().end());
 #endif
 
 	using namespace Menu_Helpers;
@@ -646,7 +647,7 @@ PluginSelector::create_favs_menu (PluginInfoList& all_plugs)
 	all_plugs.sort (cmp_by_name);
 
 	for (PluginInfoList::const_iterator i = all_plugs.begin(); i != all_plugs.end(); ++i) {
-		if (manager->get_status (*i) == PluginManager::Favorite) {
+		if (manager.get_status (*i) == PluginManager::Favorite) {
 			favs->items().push_back (MenuElem ((*i)->name, (sigc::bind (sigc::mem_fun (*this, &PluginSelector::plugin_chosen_from_menu), *i))));
 		}
 	}
@@ -670,7 +671,7 @@ PluginSelector::create_by_creator_menu (ARDOUR::PluginInfoList& all_plugs)
 
 	for (PluginInfoList::const_iterator i = all_plugs.begin(); i != all_plugs.end(); ++i) {
 
-		if (manager->get_status (*i) == PluginManager::Hidden) continue;
+		if (manager.get_status (*i) == PluginManager::Hidden) continue;
 
 		string creator = (*i)->creator;
 
@@ -711,7 +712,7 @@ PluginSelector::create_by_category_menu (ARDOUR::PluginInfoList& all_plugs)
 
 	for (PluginInfoList::const_iterator i = all_plugs.begin(); i != all_plugs.end(); ++i) {
 
-		if (manager->get_status (*i) == PluginManager::Hidden) continue;
+		if (manager.get_status (*i) == PluginManager::Hidden) continue;
 
 		string category = (*i)->category;
 
@@ -771,9 +772,9 @@ PluginSelector::favorite_changed (const std::string& path)
 
 		pi = (*iter)[plugin_columns.plugin];
 
-		manager->set_status (pi->type, pi->unique_id, status);
+		manager.set_status (pi->type, pi->unique_id, status);
 
-		manager->save_statuses ();
+		manager.save_statuses ();
 
 		build_plugin_menu ();
 	}
@@ -807,9 +808,9 @@ PluginSelector::hidden_changed (const std::string& path)
 
 		pi = (*iter)[plugin_columns.plugin];
 
-		manager->set_status (pi->type, pi->unique_id, status);
+		manager.set_status (pi->type, pi->unique_id, status);
 
-		manager->save_statuses ();
+		manager.save_statuses ();
 	}
 	in_row_change = false;
 }

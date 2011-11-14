@@ -119,35 +119,35 @@ Plugin::save_preset (string name)
 PluginPtr
 ARDOUR::find_plugin(Session& session, string identifier, PluginType type)
 {
-	PluginManager *mgr = PluginManager::the_manager();
+	PluginManager& mgr (PluginManager::instance());
 	PluginInfoList plugs;
 
 	switch (type) {
 	case ARDOUR::LADSPA:
-		plugs = mgr->ladspa_plugin_info();
+		plugs = mgr.ladspa_plugin_info();
 		break;
 
 #ifdef LV2_SUPPORT
 	case ARDOUR::LV2:
-		plugs = mgr->lv2_plugin_info();
+		plugs = mgr.lv2_plugin_info();
 		break;
 #endif
 
 #ifdef VST_SUPPORT
 	case ARDOUR::VST:
-		plugs = mgr->vst_plugin_info();
+		plugs = mgr.vst_plugin_info();
 		break;
 #endif
 
 #ifdef LXVST_SUPPORT
 	case ARDOUR::LXVST:
-		plugs = mgr->lxvst_plugin_info();
+		plugs = mgr.lxvst_plugin_info();
 		break;
 #endif
 
 #ifdef AUDIOUNIT_SUPPORT
 	case ARDOUR::AudioUnit:
-		plugs = mgr->au_plugin_info();
+		plugs = mgr.au_plugin_info();
 		break;
 #endif
 

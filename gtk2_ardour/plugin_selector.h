@@ -37,7 +37,7 @@ namespace ARDOUR {
 class PluginSelector : public ArdourDialog
 {
   public:
-	PluginSelector (ARDOUR::PluginManager *);
+	PluginSelector (ARDOUR::PluginManager&);
 	~PluginSelector ();
 
 	void set_interested_object (PluginInterestedObject&);
@@ -116,7 +116,7 @@ class PluginSelector : public ArdourDialog
 	void au_refiller (const std::string&);
 
 	Gtk::Menu* _plugin_menu;
-	ARDOUR::PluginManager *manager;
+	ARDOUR::PluginManager& manager;
 
 	void row_clicked(GdkEventButton *);
 	void btn_add_clicked();

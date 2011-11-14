@@ -78,18 +78,12 @@ RCConfiguration::~RCConfiguration ()
 int
 RCConfiguration::load_state ()
 {
-	bool found = false;
-
 	sys::path system_rc_file;
 	struct stat statbuf;
 
 	/* load system configuration first */
 
-	if (find_file_in_search_path (ardour_search_path() + system_config_search_path(),
-			"ardour_system.rc", system_rc_file) )
-	{
-		found = true;
-
+	if (find_file_in_search_path (ardour_search_path() + system_config_search_path(), "ardour_system.rc", system_rc_file)) {
 		string rcfile = system_rc_file.to_string();
 
 		/* stupid XML Parser hates empty files */
@@ -120,11 +114,7 @@ RCConfiguration::load_state ()
 
 	sys::path user_rc_file;
 
-	if (find_file_in_search_path (ardour_search_path() + user_config_directory(),
-			"ardour.rc", user_rc_file))
-	{
-		found = true;
-
+	if (find_file_in_search_path (ardour_search_path() + user_config_directory(), "ardour.rc", user_rc_file)) {
 		string rcfile = user_rc_file.to_string();
 
 		/* stupid XML parser hates empty files */
@@ -150,9 +140,6 @@ RCConfiguration::load_state ()
 			warning << string_compose (_("your %1 configuration file is empty. This is not normal."), PROGRAM_NAME) << endmsg;
 		}
 	}
-
-	if (!found)
-		error << string_compose (_("%1: could not find configuration file (ardour.rc), canvas will look broken."), PROGRAM_NAME) << endmsg;
 
 	return 0;
 }

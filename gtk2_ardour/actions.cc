@@ -68,9 +68,9 @@ vector<RefPtr<Gtk::Action> > ActionManager::edit_point_in_region_sensitive_actio
 void
 ActionManager::init ()
 {
-	ui_manager = UIManager::create ();
-
 	sys::path ui_file;
+
+	ui_manager = UIManager::create ();
 
 	SearchPath spath = ardour_search_path() + user_config_directory() + system_config_search_path();
 

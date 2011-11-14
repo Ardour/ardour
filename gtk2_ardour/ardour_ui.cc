@@ -62,6 +62,7 @@
 #include "ardour/ardour.h"
 #include "ardour/callback.h"
 #include "ardour/profile.h"
+#include "ardour/plugin_manager.h"
 #include "ardour/session_directory.h"
 #include "ardour/session_route.h"
 #include "ardour/session_state_utils.h"
@@ -414,7 +415,10 @@ ARDOUR_UI::post_engine ()
 
 	ARDOUR::init_post_engine ();
 
+	/* load up the UI manager */
+
 	ActionManager::init ();
+
 	_tooltips.enable();
 
 	if (setup_windows ()) {
