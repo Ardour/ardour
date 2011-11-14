@@ -416,13 +416,19 @@ private:
 		/* whether we're in the top or bottom half of the child that we're over */
 		bool top_half = (c - int (c)) < 0.5;
 
-		if (top_half && (before == _drag_child || at == _drag_child)) {
+		/* Note that when checking on whether to remove a placeholder, we never do
+		   so if _drag_child is 0 as this means that the child being dragged is
+		   coming from a different DnDVBox, so it will never be the same as any
+		   of our children.
+		*/
+
+		if (top_half && _drag_child && (before == _drag_child || at == _drag_child)) {
 			/* dropping here would have no effect, so remove the visual cue */
 			remove_placeholder ();
 			return false;
 		}
 
-		if (!top_half && (at == _drag_child || after == _drag_child)) {
+		if (!top_half && _drag_child && (at == _drag_child || after == _drag_child)) {
 			/* dropping here would have no effect, so remove the visual cue */
 			remove_placeholder ();
 			return false;
