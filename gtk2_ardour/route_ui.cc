@@ -1071,7 +1071,8 @@ RouteUI::mute_active_state (Session* s, boost::shared_ptr<Route> r)
 		if (r->muted ()) {
 			/* full mute */
 			return Active;
-		} else if (s->soloing() && !r->soloed() && !r->solo_isolated()) {
+		} else if (!r->is_master() && s->soloing() && !r->soloed() && !r->solo_isolated()) {
+			/* master is NEVER muted by others */
 			return Mid;
 		} else {
 			/* no mute at all */
