@@ -511,13 +511,12 @@ ARDOUR_UI::solo_blink (bool onoff)
 
 	if (_session->soloing() || _session->listening()) {
 		if (onoff) {
-			solo_alert_button.set_state (STATE_ACTIVE);
+			solo_alert_button.set_active (true);
 		} else {
-			solo_alert_button.set_state (STATE_NORMAL);
+			solo_alert_button.set_active (false);
 		}
 	} else {
 		solo_alert_button.set_active (false);
-		solo_alert_button.set_state (STATE_NORMAL);
 	}
 }
 
@@ -526,7 +525,7 @@ ARDOUR_UI::sync_blink (bool onoff)
 {
 	if (_session == 0 || !_session->config.get_external_sync()) {
 		/* internal sync */
-		sync_button.unset_active_state ();
+		sync_button.set_active (false);
 		return;
 	}
 
@@ -534,13 +533,13 @@ ARDOUR_UI::sync_blink (bool onoff)
 		/* not locked, so blink on and off according to the onoff argument */
 
 		if (onoff) {
-			sync_button.set_active_state (Gtkmm2ext::Active); // "-active"
+			sync_button.set_active (true);
 		} else {
-			sync_button.unset_active_state (); // normal
+			sync_button.set_active (false);
 		}
 	} else {
 		/* locked */
-		  sync_button.set_active_state (Gtkmm2ext::Active); // "-active"
+		sync_button.set_active (true);
 	}
 }
 
