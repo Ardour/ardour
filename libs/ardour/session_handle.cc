@@ -85,7 +85,7 @@ SessionHandleRef::insanity_check ()
 {
 	cerr << string_compose (
 	        _("programming error: %1"),
-	        string_compose("SessionHandleRef exists across sesssion deletion! Dynamic type: %1 @ %2",
+	        string_compose("SessionHandleRef exists across session deletion! Dynamic type: %1 @ %2",
 	                       PBD::demangled_name (*this), this))
 	     << endl;
 }
