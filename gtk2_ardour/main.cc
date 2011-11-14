@@ -140,8 +140,7 @@ fixup_bundle_environment (int, char* [])
 
 	_NSGetExecutablePath (execpath, &pathsz);
 
-	std::string exec_path (execpath);
-	std::string dir_path = Glib::path_get_dirname (exec_path);
+	std::string dir_path = Glib::path_get_dirname (execpath);
 	std::string path;
 	const char *cstr = getenv ("PATH");
 
@@ -169,9 +168,9 @@ fixup_bundle_environment (int, char* [])
 	path = dir_path;
 	path += "/../Resources";
 	path += dir_path;
-	path += "/../Resources/Surfaces";
+	path += "/../Surfaces";
 	path += dir_path;
-	path += "/../Resources/Panners";
+	path += "/../Panners";
 
 	setenv ("ARDOUR_MODULE_PATH", path.c_str(), 1);
 
@@ -296,8 +295,7 @@ fixup_bundle_environment (int /*argc*/, char* argv[])
 
 	EnvironmentalProtectionAgency::set_global_epa (new EnvironmentalProtectionAgency (true, "PREBUNDLE_ENV"));
 
-	Glib::ustring exec_path = argv[0];
-	Glib::ustring dir_path = Glib::path_get_dirname (Glib::path_get_dirname (exec_path));
+	Glib::ustring dir_path = Glib::path_get_dirname (Glib::path_get_dirname (argv[0]));
 	Glib::ustring path;
 	Glib::ustring userconfigdir = user_config_directory().to_string();
 
