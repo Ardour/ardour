@@ -103,7 +103,7 @@ EditorRegions::EditorRegions (Editor* e)
 	//_display.set_grid_lines (TREE_VIEW_GRID_LINES_BOTH);
 
 	/* show path as the row tooltip */
-	_display.set_tooltip_column (15); /* path */
+	_display.set_tooltip_column (14); /* path */
 
 	CellRendererText* region_name_cell = dynamic_cast<CellRendererText*>(_display.get_column_cell_renderer (0));
 	region_name_cell->property_editable() = true;
