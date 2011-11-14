@@ -76,6 +76,7 @@ StripSilenceDialog::StripSilenceDialog (Session* s, list<RegionView*> const & v)
 	_threshold.set_increments (1, 10);
 	_threshold.set_range (-120, 0);
 	_threshold.set_value (-60);
+	_threshold.set_activates_default ();
 
 	table->attach (*Gtk::manage (new Gtk::Label (_("Minimum length"), 1, 0.5)), 0, 1, n, n + 1, Gtk::FILL);
 	table->attach (*_minimum_length, 1, 2, n, n + 1, Gtk::FILL);
@@ -99,6 +100,7 @@ StripSilenceDialog::StripSilenceDialog (Session* s, list<RegionView*> const & v)
 
 	add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 	add_button (Gtk::Stock::APPLY, Gtk::RESPONSE_OK);
+	set_default_response (Gtk::RESPONSE_OK);
 
 	get_vbox()->pack_start (_progress_bar, true, true, 12);
 
