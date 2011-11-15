@@ -1085,12 +1085,10 @@ Editor::sensitize_the_right_region_actions ()
 	}
 
 	if (_edit_point == EditAtMouse) {
-#if 0
 		_region_actions->get_action("set-region-sync-position")->set_sensitive (false);
 		_region_actions->get_action("trim-front")->set_sensitive (false);
 		_region_actions->get_action("trim-back")->set_sensitive (false);
 		_region_actions->get_action("split-region")->set_sensitive (false);
-#endif
 		_region_actions->get_action("place-transient")->set_sensitive (false);
 	}
 
@@ -1187,7 +1185,12 @@ Editor::region_selection_changed ()
 	_regions->block_change_connection (false);
 	editor_regions_selection_changed_connection.block(false);
 
-	sensitize_the_right_region_actions ();
+	if (!_all_region_actions_sensitized) {
+		/* This selection change might have changed what region actions
+		   are allowed, so sensitize them all in case a key is pressed.
+		*/
+		sensitize_all_region_actions (true);
+	}
 }
 
 void
