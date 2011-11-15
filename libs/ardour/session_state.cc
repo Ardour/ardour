@@ -2663,16 +2663,10 @@ Session::cleanup_regions ()
 
 	for (RegionFactory::RegionMap::const_iterator i = regions.begin(); i != regions.end(); ++i) {
 
-		boost::shared_ptr<AudioRegion> audio_region = boost::dynamic_pointer_cast<AudioRegion>( i->second);
+		uint32_t used = playlists->region_use_count (i->second);
 
-		if (!audio_region) {
-			continue;
-		}
-
-		uint32_t used = playlists->region_use_count (audio_region);
-
-		if (used == 0 && !audio_region->automatic()) {
-			RegionFactory::map_remove(i->second);
+		if (used == 0 && !i->second->automatic ()) {
+			RegionFactory::map_remove (i->second);
 		}
 	}
 
