@@ -280,7 +280,6 @@ SMFSource::write_unlocked (MidiRingBuffer<framepos_t>& source, framepos_t positi
 			continue;
 		}
 
-		cerr << "SMFSource:: calling append_event_unlocked_frames()\n";
 		append_event_unlocked_frames(ev, position);
 	}
 
