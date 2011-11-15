@@ -66,6 +66,9 @@ ARDOUR_UI::we_have_dependents ()
 	keyboard->setup_keybindings ();
 	editor->setup_tooltips ();
 	editor->UpdateAllTransportClocks.connect (sigc::mem_fun (*this, &ARDOUR_UI::update_transport_clocks));
+
+	editor->track_mixer_selection ();
+	mixer->track_editor_selection ();
 }
 
 void

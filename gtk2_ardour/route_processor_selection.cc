@@ -36,8 +36,13 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-RouteRedirectSelection&
-RouteRedirectSelection::operator= (const RouteRedirectSelection& other)
+RouteProcessorSelection::RouteProcessorSelection()
+	: _no_route_change_signal (false)
+{
+}
+
+RouteProcessorSelection&
+RouteProcessorSelection::operator= (const RouteProcessorSelection& other)
 {
 	if (&other != this) {
 		processors = other.processors;
@@ -47,39 +52,41 @@ RouteRedirectSelection::operator= (const RouteRedirectSelection& other)
 }
 
 bool
-operator== (const RouteRedirectSelection& a, const RouteRedirectSelection& b)
+operator== (const RouteProcessorSelection& a, const RouteProcessorSelection& b)
 {
 	// XXX MUST TEST PROCESSORS SOMEHOW
 	return a.routes == b.routes;
 }
 
 void
-RouteRedirectSelection::clear ()
+RouteProcessorSelection::clear ()
 {
 	clear_processors ();
 	clear_routes ();
 }
 
 void
-RouteRedirectSelection::clear_processors ()
+RouteProcessorSelection::clear_processors ()
 {
 	processors.clear ();
 	ProcessorsChanged ();
 }
 
 void
-RouteRedirectSelection::clear_routes ()
+RouteProcessorSelection::clear_routes ()
 {
 	for (RouteUISelection::iterator i = routes.begin(); i != routes.end(); ++i) {
 		(*i)->set_selected (false);
 	}
 	routes.clear ();
 	drop_connections ();
-	RoutesChanged ();
+	if (!_no_route_change_signal) {
+		RoutesChanged ();
+	}
 }
 
 void
-RouteRedirectSelection::add (XMLNode* node)
+RouteProcessorSelection::add (XMLNode* node)
 {
 	// XXX check for duplicate
 	processors.add (node);
@@ -87,7 +94,7 @@ RouteRedirectSelection::add (XMLNode* node)
 }
 
 void
-RouteRedirectSelection::set (XMLNode* node)
+RouteProcessorSelection::set (XMLNode* node)
 {
 	clear_processors ();
 	processors.set (node);
@@ -95,7 +102,7 @@ RouteRedirectSelection::set (XMLNode* node)
 }
 
 void
-RouteRedirectSelection::add (RouteUI* r)
+RouteProcessorSelection::add (RouteUI* r)
 {
 	if (find (routes.begin(), routes.end(), r) == routes.end()) {
 		if (routes.insert (r).second) {
@@ -104,43 +111,52 @@ RouteRedirectSelection::add (RouteUI* r)
 			MixerStrip* ms = dynamic_cast<MixerStrip*> (r);
 			
 			if (ms) {
-				ms->CatchDeletion.connect (*this, invalidator (*this), ui_bind (&RouteRedirectSelection::remove, this, _1), gui_context());
+				ms->CatchDeletion.connect (*this, invalidator (*this), ui_bind (&RouteProcessorSelection::remove, this, _1), gui_context());
 			}
-
-			RoutesChanged();
+			
+			if (!_no_route_change_signal) {
+				RoutesChanged();
+			}
 		}
 	}
 }
 
 void
-RouteRedirectSelection::remove (RouteUI* r)
+RouteProcessorSelection::remove (RouteUI* r)
 {
-	ENSURE_GUI_THREAD (*this, &RouteRedirectSelection::remove, r);
+	ENSURE_GUI_THREAD (*this, &RouteProcessorSelection::remove, r);
 
 	RouteUISelection::iterator i;
 	if ((i = find (routes.begin(), routes.end(), r)) != routes.end()) {
 		routes.erase (i);
 		(*i)->set_selected (false);
-		RoutesChanged ();
+		if (!_no_route_change_signal) {
+			RoutesChanged ();
+		}
 	}
 }
 
 void
-RouteRedirectSelection::set (RouteUI* r)
+RouteProcessorSelection::set (RouteUI* r)
 {
 	clear_routes ();
 	add (r);
 }
 
 bool
-RouteRedirectSelection::selected (RouteUI* r)
+RouteProcessorSelection::selected (RouteUI* r)
 {
 	return find (routes.begin(), routes.end(), r) != routes.end();
 }
 
 bool
-RouteRedirectSelection::empty ()
+RouteProcessorSelection::empty ()
 {
 	return processors.empty () && routes.empty ();
 }
 
+void
+RouteProcessorSelection::block_routes_changed (bool yn)
+{
+	_no_route_change_signal = yn;
+}

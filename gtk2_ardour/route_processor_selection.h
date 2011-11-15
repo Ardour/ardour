@@ -26,18 +26,20 @@
 #include "processor_selection.h"
 #include "route_ui_selection.h"
 
-class RouteRedirectSelection : public PBD::ScopedConnectionList, public sigc::trackable
+class RouteProcessorSelection : public PBD::ScopedConnectionList, public sigc::trackable
 {
   public:
 	ProcessorSelection processors;
 	RouteUISelection     routes;
 
-	RouteRedirectSelection() {}
+	RouteProcessorSelection();
 
-	RouteRedirectSelection& operator= (const RouteRedirectSelection& other);
+	RouteProcessorSelection& operator= (const RouteProcessorSelection& other);
 
 	sigc::signal<void> ProcessorsChanged;
 	sigc::signal<void> RoutesChanged;
+
+	void block_routes_changed (bool);
 
 	void clear ();
 	bool empty();
@@ -56,9 +58,10 @@ class RouteRedirectSelection : public PBD::ScopedConnectionList, public sigc::tr
 
   private:
 	void removed (RouteUI*);
+	bool _no_route_change_signal;
 
 };
 
-bool operator==(const RouteRedirectSelection& a, const RouteRedirectSelection& b);
+bool operator==(const RouteProcessorSelection& a, const RouteProcessorSelection& b);
 
 #endif /* __ardour_gtk_route_processor_selection_h__ */

@@ -35,7 +35,7 @@ ARDOUR_UI::create_mixer ()
 
 {
 	try {
-		mixer = new Mixer_UI ();
+		mixer = Mixer_UI::instance ();
 	}
 
 	catch (failed_constructor& err) {

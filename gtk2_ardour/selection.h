@@ -104,6 +104,8 @@ class Selection : public sigc::trackable, public PBD::ScopedConnectionList
 	sigc::signal<void> MidiNotesChanged;
 	sigc::signal<void> MidiRegionsChanged;
 
+	void block_tracks_changed (bool);
+
 	void clear ();
 	bool empty (bool internal_selection = false);
 
@@ -204,6 +206,7 @@ class Selection : public sigc::trackable, public PBD::ScopedConnectionList
 
 	PublicEditor const * editor;
 	uint32_t next_time_id;
+	bool _no_tracks_changed;
 };
 
 bool operator==(const Selection& a, const Selection& b);

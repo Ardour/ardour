@@ -58,7 +58,7 @@
 class MotionController;
 class PluginSelector;
 class PluginUIWindow;
-class RouteRedirectSelection;
+class RouteProcessorSelection;
 class MixerStrip;
 
 namespace ARDOUR {
@@ -205,7 +205,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	};
 
 	ProcessorBox (ARDOUR::Session*, boost::function<PluginSelector*()> get_plugin_selector,
-		      RouteRedirectSelection&, MixerStrip* parent, bool owner_is_mixer = false);
+		      RouteProcessorSelection&, MixerStrip* parent, bool owner_is_mixer = false);
 	~ProcessorBox ();
 
 	void set_route (boost::shared_ptr<ARDOUR::Route>);
@@ -253,7 +253,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	 */
 	int _placement;
 
-	RouteRedirectSelection& _rr_selection;
+	RouteProcessorSelection& _rr_selection;
 
 	void route_going_away ();
 

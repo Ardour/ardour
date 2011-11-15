@@ -35,14 +35,14 @@ class MixerActor : virtual public sigc::trackable
 	MixerActor ();
 	virtual ~MixerActor ();
 
-	RouteRedirectSelection& selection() { return _selection; }
+	RouteProcessorSelection& selection() { return _selection; }
 	void register_actions ();
 
         void load_bindings ();
         Gtkmm2ext::Bindings  bindings;
 
   protected:
-	RouteRedirectSelection _selection;
+	RouteProcessorSelection _selection;
 	RouteUISelection _route_targets;
         Gtkmm2ext::ActionMap myactions;
 

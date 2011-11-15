@@ -108,6 +108,7 @@
 #include "marker.h"
 #include "midi_time_axis.h"
 #include "mixer_strip.h"
+#include "mixer_ui.h"
 #include "mouse_cursors.h"
 #include "playlist_selector.h"
 #include "public_editor.h"
@@ -282,6 +283,7 @@ Editor::Editor ()
 	, _last_cut_copy_source_track (0)
 
 	, _region_selection_change_updates_region_list (true)
+	, _following_mixer_selection (false)
 {
 	constructed = false;
 
@@ -5005,7 +5007,7 @@ Editor::foreach_time_axis_view (sigc::slot<void,TimeAxisView&> theslot)
 
 /** Find a RouteTimeAxisView by the ID of its route */
 RouteTimeAxisView*
-Editor::get_route_view_by_route_id (PBD::ID& id) const
+Editor::get_route_view_by_route_id (const PBD::ID& id) const
 {
 	RouteTimeAxisView* v;
 
@@ -5499,3 +5501,4 @@ Editor::popup_control_point_context_menu (ArdourCanvas::Item* item, GdkEvent* ev
 
 	_control_point_context_menu.popup (event->button.button, event->button.time);
 }
+

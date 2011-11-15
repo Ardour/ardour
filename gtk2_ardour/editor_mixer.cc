@@ -27,6 +27,8 @@
 
 #include "pbd/enumwriter.h"
 
+#include "ardour/rc_configuration.h"
+
 #include "actions.h"
 #include "ardour_ui.h"
 #include "audio_time_axis.h"
@@ -38,6 +40,7 @@
 #include "gui_thread.h"
 #include "midi_time_axis.h"
 #include "mixer_strip.h"
+#include "mixer_ui.h"
 #include "selection.h"
 
 #include "i18n.h"
@@ -250,4 +253,36 @@ Editor::mixer_strip_width_changed ()
 #endif
 
 	editor_mixer_strip_width = current_mixer_strip->get_width_enum ();
+}
+
+void
+Editor::track_mixer_selection ()
+{
+	Mixer_UI::instance()->selection().RoutesChanged.connect (sigc::mem_fun (*this, &Editor::follow_mixer_selection));
+}
+
+void
+Editor::follow_mixer_selection ()
+{
+	if (!ARDOUR::Config->get_link_editor_and_mixer_selection() || _following_mixer_selection) {
+		return;
+	}
+
+	_following_mixer_selection = true;
+	selection->block_tracks_changed (true);
+
+	RouteUISelection& s (Mixer_UI::instance()->selection().routes);
+
+	selection->clear_tracks ();
+
+	for (RouteUISelection::iterator i = s.begin(); i != s.end(); ++i) {
+		TimeAxisView* tav = get_route_view_by_route_id ((*i)->route()->id());
+		if (tav) {
+			selection->add (tav);
+		}
+	}
+
+	_following_mixer_selection = false;
+	selection->block_tracks_changed (false);
+	selection->TracksChanged (); /* EMIT SIGNAL */
 }

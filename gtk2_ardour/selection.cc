@@ -51,6 +51,7 @@ Selection::Selection (const PublicEditor* e)
 	: tracks (e)
 	, editor (e)
 	, next_time_id (0)
+	, _no_tracks_changed (false)
 {
 	clear ();
 
@@ -129,7 +130,9 @@ Selection::clear_tracks ()
 {
 	if (!tracks.empty()) {
 		tracks.clear ();
-		TracksChanged();
+		if (!_no_tracks_changed) {
+			TracksChanged();
+		}
 	}
 }
 
@@ -231,7 +234,9 @@ Selection::toggle (TimeAxisView* track)
 		tracks.erase (i);
 	}
 
-	TracksChanged();
+	if (!_no_tracks_changed) {
+		TracksChanged();
+	}
 }
 
 void
@@ -353,7 +358,9 @@ Selection::add (const TrackViewList& track_list)
 	TrackViewList added = tracks.add (track_list);
 
 	if (!added.empty()) {
-		TracksChanged ();
+		if (!_no_tracks_changed) {
+			TracksChanged ();
+		}
 	}
 }
 
@@ -519,7 +526,9 @@ Selection::remove (TimeAxisView* track)
 	list<TimeAxisView*>::iterator i;
 	if ((i = find (tracks.begin(), tracks.end(), track)) != tracks.end()) {
 		tracks.erase (i);
-		TracksChanged();
+		if (!_no_tracks_changed) {
+			TracksChanged();
+		}
 	}
 }
 
@@ -538,7 +547,9 @@ Selection::remove (const TrackViewList& track_list)
 	}
 
 	if (changed) {
-		TracksChanged();
+		if (!_no_tracks_changed) {
+			TracksChanged();
+		}
 	}
 }
 
@@ -1231,4 +1242,10 @@ Selection::remove_regions (TimeAxisView* t)
 
 		i = tmp;
 	}
+}
+
+void
+Selection::block_tracks_changed (bool yn)
+{
+	_no_tracks_changed = yn;
 }

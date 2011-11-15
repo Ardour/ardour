@@ -73,6 +73,7 @@ CONFIG_VARIABLE (bool, use_osc, "use-osc", false)
 
 CONFIG_VARIABLE (EditMode, edit_mode, "edit-mode", Slide)
 CONFIG_VARIABLE (bool, link_region_and_track_selection, "link-region-and-track-selection", false)
+CONFIG_VARIABLE (bool, link_editor_and_mixer_selection, "link-editor-and-mixer-selection", false)
 CONFIG_VARIABLE (std::string, keyboard_layout_name, "keyboard-layout-name", "ansi")
 CONFIG_VARIABLE (bool, automation_follows_regions, "automation-follows-regions", true)
 CONFIG_VARIABLE (bool, region_boundaries_from_selected_tracks, "region-boundaries-from-selected-tracks", true)

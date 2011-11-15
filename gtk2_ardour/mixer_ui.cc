@@ -47,6 +47,7 @@
 #include "mixer_strip.h"
 #include "monitor_section.h"
 #include "plugin_selector.h"
+#include "public_editor.h"
 #include "ardour_ui.h"
 #include "prompter.h"
 #include "utils.h"
@@ -65,8 +66,21 @@ using namespace std;
 
 using PBD::atoi;
 
+Mixer_UI* Mixer_UI::_instance = 0;
+
+Mixer_UI*
+Mixer_UI::instance () 
+{
+	if (!_instance) {
+		_instance  = new Mixer_UI;
+	} 
+
+	return _instance;
+}
+
 Mixer_UI::Mixer_UI ()
 	: Window (Gtk::WINDOW_TOPLEVEL)
+	, _following_editor_selection (false)
 {
 	/* allow this window to become the key focus window */
 	set_flags (CAN_FOCUS);
@@ -237,6 +251,13 @@ Mixer_UI::Mixer_UI ()
 Mixer_UI::~Mixer_UI ()
 {
 }
+
+void
+Mixer_UI::track_editor_selection ()
+{
+	PublicEditor::instance().get_selection().TracksChanged.connect (sigc::mem_fun (*this, &Mixer_UI::follow_editor_selection));
+}
+
 
 void
 Mixer_UI::ensure_float (Window& win)
@@ -430,6 +451,35 @@ Mixer_UI::sync_order_keys (string const & src)
 		strip_redisplay_does_not_reset_order_keys = false;
 	}
 }
+
+void
+Mixer_UI::follow_editor_selection ()
+{
+	if (!Config->get_link_editor_and_mixer_selection() || _following_editor_selection) {
+		return;
+	}
+
+	_following_editor_selection = true;
+	_selection.block_routes_changed (true);
+	
+	TrackSelection& s (PublicEditor::instance().get_selection().tracks);
+
+	_selection.clear_routes ();
+
+	for (TrackViewList::iterator i = s.begin(); i != s.end(); ++i) {
+		RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*> (*i);
+		if (rtav) {
+			MixerStrip* ms = strip_by_route (rtav->route());
+			if (ms) {
+				_selection.add (ms);
+			}
+		}
+	}
+
+	_following_editor_selection = false;
+	_selection.block_routes_changed (false);
+}
+
 
 MixerStrip*
 Mixer_UI::strip_by_route (boost::shared_ptr<Route> r)

@@ -123,7 +123,7 @@ class RouteParams_UI : public ArdourDialog, public PBD::ScopedConnectionList
 	IOSelector     * _output_iosel;
 
 	PluginSelector    *_plugin_selector;
-	RouteRedirectSelection  _rr_selection;
+	RouteProcessorSelection  _rr_selection;
 
 	boost::shared_ptr<ARDOUR::Route> _route;
 	PBD::ScopedConnection _route_processors_connection;

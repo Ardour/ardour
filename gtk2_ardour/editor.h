@@ -201,7 +201,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void foreach_time_axis_view (sigc::slot<void,TimeAxisView&>);
 	void add_to_idle_resize (TimeAxisView*, int32_t);
 
-	RouteTimeAxisView* get_route_view_by_route_id (PBD::ID& id) const;
+	RouteTimeAxisView* get_route_view_by_route_id (const PBD::ID& id) const;
 
 	void consider_auditioning (boost::shared_ptr<ARDOUR::Region>);
 	void hide_a_region (boost::shared_ptr<ARDOUR::Region>);
@@ -269,6 +269,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	Selection& get_selection() const { return *selection; }
 	Selection& get_cut_buffer() const { return *cut_buffer; }
+	void track_mixer_selection ();
 
 	bool extend_selection_to_track (TimeAxisView&);
 
@@ -2064,6 +2065,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	MouseCursors* _cursors;
 
 	void resize_text_widgets ();
+
+	void follow_mixer_selection ();
+	bool _following_mixer_selection;
 
 	friend class Drag;
 	friend class RegionDrag;

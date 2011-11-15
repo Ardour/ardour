@@ -460,7 +460,7 @@ PluginInsertProcessorEntry::SplittingIcon::on_expose_event (GdkEventExpose* ev)
 }
 
 ProcessorBox::ProcessorBox (ARDOUR::Session* sess, boost::function<PluginSelector*()> get_plugin_selector,
-			    RouteRedirectSelection& rsel, MixerStrip* parent, bool owner_is_mixer)
+			    RouteProcessorSelection& rsel, MixerStrip* parent, bool owner_is_mixer)
 	: _parent_strip (parent)
 	, _owner_is_mixer (owner_is_mixer)
 	, ab_direction (true)

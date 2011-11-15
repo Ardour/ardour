@@ -55,10 +55,11 @@ class MonitorSection;
 class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public ARDOUR::SessionHandlePtr, public MixerActor
 {
   public:
-	Mixer_UI ();
+	static Mixer_UI* instance();
 	~Mixer_UI();
 
 	void set_session (ARDOUR::Session *);
+	void track_editor_selection ();
 
 	PluginSelector* plugin_selector();
 
@@ -86,6 +87,9 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 	void set_route_targets_for_operation ();
 
   private:
+	Mixer_UI ();
+	static Mixer_UI* _instance;
+
 	bool					_visible;
 
 	Gtk::HBox				global_hpacker;
@@ -145,8 +149,6 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 
 	void strip_select_op (bool audiotrack, bool select);
 	void select_strip_op (MixerStrip*, bool select);
-
-	void follow_strip_selection ();
 
 	gint start_updating ();
 	gint stop_updating ();
@@ -270,6 +272,9 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 	MixerStrip* strip_by_x (int x);
 
 	friend class MixerGroupTabs;
+
+	void follow_editor_selection ();
+	bool _following_editor_selection;
 };
 
 #endif /* __ardour_mixer_ui_h__ */
