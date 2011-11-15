@@ -88,7 +88,7 @@ def build(bld):
     obj.vnum         = GTKMM2EXT_LIB_VERSION
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
     obj.cxxflags     = [
-                    '-DPACKAGE="libgtkmm2ext"',
+                    '-DPACKAGE="libgtkmm2ext3"',
                     '-DLOCALEDIR="' + os.path.join(
                             os.path.normpath(bld.env['DATADIR']), 'locale') + '"']
     if bld.is_defined('GTKOSX'):
