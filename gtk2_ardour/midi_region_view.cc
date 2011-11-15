@@ -3302,7 +3302,7 @@ MidiRegionView::goto_next_note (bool add_to_selection)
 
 	/* use the first one */
 
-	if (!_event.empty() && (channel_mask & (1 << _events.front()->note()->channel ()))) {
+	if (!_events.empty() && (channel_mask & (1 << _events.front()->note()->channel ()))) {
 		unique_select (_events.front());
 	}
 }
