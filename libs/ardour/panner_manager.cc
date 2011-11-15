@@ -63,7 +63,7 @@ PannerManager::panner_discover (string path)
 
 	if ((pinfo = get_descriptor (path)) != 0) {
 		panner_info.push_back (pinfo);
-		info << string_compose(_("Panner discovered: \"%1\""), pinfo->descriptor.name) << endmsg;
+		info << string_compose(_("Panner discovered: \"%1\" in %2"), pinfo->descriptor.name, path) << endmsg;
 	}
 
 	return 0;
