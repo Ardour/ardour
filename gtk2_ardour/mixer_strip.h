@@ -208,7 +208,8 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 
 	void comment_editor_done_editing ();
 	void setup_comment_editor ();
-	void toggle_comment ();
+	void open_comment_editor ();
+	void toggle_comment_editor ();
 	void setup_comment_button ();
 
 	Gtk::Button   group_button;

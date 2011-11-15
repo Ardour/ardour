@@ -267,7 +267,7 @@ MixerStrip::init ()
 	group_label.set_name ("MixerGroupButtonLabel");
 
 	_comment_button.set_name (X_("MixerCommentButton"));
-	_comment_button.signal_clicked().connect (sigc::mem_fun (*this, &MixerStrip::toggle_comment));
+	_comment_button.signal_clicked().connect (sigc::mem_fun (*this, &MixerStrip::toggle_comment_editor));
 
 	global_vpacker.set_border_width (0);
 	global_vpacker.set_spacing (0);
@@ -1316,19 +1316,24 @@ MixerStrip::comment_editor_done_editing ()
 }
 
 void
-MixerStrip::toggle_comment ()
+MixerStrip::toggle_comment_editor ()
 {
 	if (ignore_toggle) {
 		return;
 	}
 
+	if (comment_window && comment_window->is_visible ()) {
+		comment_window->hide ();
+	} else {
+		open_comment_editor ();
+	}
+}
+
+void
+MixerStrip::open_comment_editor ()
+{
 	if (comment_window == 0) {
 		setup_comment_editor ();
-	}
-
-	if (comment_window->is_visible ()) {
-		comment_window->hide ();
-		return;
 	}
 
 	string title;
@@ -1444,16 +1449,14 @@ MixerStrip::build_route_ops_menu ()
 
 	MenuList& items = route_ops_menu->items();
 
-	items.push_back (CheckMenuElem (_("Comments..."), sigc::mem_fun (*this, &MixerStrip::toggle_comment)));
-	CheckMenuItem* i = dynamic_cast<CheckMenuItem*> (&items.back ());
-	i->set_active (comment_window && comment_window->is_visible ());
+	items.push_back (MenuElem (_("Comments..."), sigc::mem_fun (*this, &MixerStrip::open_comment_editor)));
 	items.push_back (MenuElem (_("Save As Template..."), sigc::mem_fun(*this, &RouteUI::save_as_template)));
 	items.push_back (MenuElem (_("Rename..."), sigc::mem_fun(*this, &RouteUI::route_rename)));
 	rename_menu_item = &items.back();
 
 	items.push_back (SeparatorElem());
 	items.push_back (CheckMenuElem (_("Active")));
-	i = dynamic_cast<CheckMenuItem *> (&items.back());
+	CheckMenuItem* i = dynamic_cast<CheckMenuItem *> (&items.back());
 	i->set_active (_route->active());
 	i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::set_route_active), !_route->active(), false));
 
