@@ -63,7 +63,7 @@ PannerManager::discover_panners ()
 {
 	vector<sys::path> panner_modules;
 
-	Glib::PatternSpec so_extension_pattern("*.so");
+	Glib::PatternSpec so_extension_pattern("*.so*");
 	Glib::PatternSpec dylib_extension_pattern("*.dylib");
 
 	find_matching_files_in_search_path (panner_search_path (),
