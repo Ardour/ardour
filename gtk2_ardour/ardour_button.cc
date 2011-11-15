@@ -378,6 +378,9 @@ ArdourButton::set_colors ()
 		cairo_pattern_add_color_stop_rgba (fill_pattern, 0, r/255.0,g/255.0,b/255.0, a/255.0);
 		UINT_TO_RGBA (end_color, &r, &g, &b, &a);
 		cairo_pattern_add_color_stop_rgba (fill_pattern, 1, r/255.0,g/255.0,b/255.0, a/255.0);
+
+		cerr << "Button color for " << get_name() << ": " << hex << start_color << " .. " << end_color << dec << endl;
+
 	}
 
 	if (led_inset_pattern) {
