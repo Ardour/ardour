@@ -3281,24 +3281,30 @@ MidiRegionView::goto_next_note (bool add_to_selection)
 
 	time_sort_events ();
 
+	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
+	uint16_t const channel_mask = mtv->channel_selector().get_selected_channels ();
+
 	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
 		if ((*i)->selected()) {
 			use_next = true;
 			continue;
 		} else if (use_next) {
-			if (!add_to_selection) {
-				unique_select (*i);
-			} else {
-				note_selected (*i, true, false);
+			if (channel_mask & (1 << (*i)->note()->channel())) {
+				if (!add_to_selection) {
+					unique_select (*i);
+				} else {
+					note_selected (*i, true, false);
+				}
+				return;
 			}
-			return;
 		}
 	}
 
 	/* use the first one */
 
-	unique_select (_events.front());
-
+	if (!_event.empty() && (channel_mask & (1 << _events.front()->note()->channel ()))) {
+		unique_select (_events.front());
+	}
 }
 
 void
@@ -3312,23 +3318,30 @@ MidiRegionView::goto_previous_note (bool add_to_selection)
 
 	time_sort_events ();
 
+	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
+	uint16_t const channel_mask = mtv->channel_selector().get_selected_channels ();
+
 	for (Events::reverse_iterator i = _events.rbegin(); i != _events.rend(); ++i) {
 		if ((*i)->selected()) {
 			use_next = true;
 			continue;
 		} else if (use_next) {
-			if (!add_to_selection) {
-				unique_select (*i);
-			} else {
-				note_selected (*i, true, false);
+			if (channel_mask & (1 << (*i)->note()->channel())) {
+				if (!add_to_selection) {
+					unique_select (*i);
+				} else {
+					note_selected (*i, true, false);
+				}
+				return;
 			}
-			return;
 		}
 	}
 
 	/* use the last one */
 
-	unique_select (*(_events.rbegin()));
+	if (!_events.empty() && (channel_mask & (1 << (*_events.rbegin())->note()->channel ()))) {
+		unique_select (*(_events.rbegin()));
+	}
 }
 
 void
