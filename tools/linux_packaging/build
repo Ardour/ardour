@@ -432,7 +432,7 @@ mv $Surfaces/libardourcp.so* $Libraries
 
 # MidiMaps
 # got to be careful with names here
-for x in $BUILD_ROOT/../../midi_maps/*.map ; do
+for x in $BUILD_ROOT/../midi_maps/*.map ; do
     cp "$x" $MidiMaps
     echo Copied MIDI map $x 
 done
