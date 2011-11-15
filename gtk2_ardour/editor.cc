@@ -4696,15 +4696,16 @@ Editor::show_rhythm_ferret ()
 void
 Editor::first_idle ()
 {
+	MessageDialog* dialog = 0;
+	
 	if (track_views.size() > 1) {
-		MessageDialog* dialog = manage (
-			new MessageDialog (*this,
-					   string_compose (_("Please wait while %1 loads visual data."), PROGRAM_NAME),
-					   true)
+		dialog = new MessageDialog (
+			*this,
+			string_compose (_("Please wait while %1 loads visual data."), PROGRAM_NAME),
+			true
 			);
 		dialog->present ();
 		ARDOUR_UI::instance()->flush_pending ();
-		delete dialog;
 	}
 
 	for (TrackViewList::iterator t = track_views.begin(); t != track_views.end(); ++t) {
@@ -4714,6 +4715,7 @@ Editor::first_idle ()
 	// first idle adds route children (automation tracks), so we need to redisplay here
 	_routes->redisplay ();
 
+	delete dialog;
 	_have_idled = true;
 }
 
