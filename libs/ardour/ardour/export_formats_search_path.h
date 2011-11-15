@@ -26,11 +26,6 @@ namespace ARDOUR {
 	/**
 	 * return a SearchPath containing directories in which to look for
 	 * export_formats.
-	 *
-	 * If ARDOUR_EXPORT_FORMATS_PATH is defined then the SearchPath returned
-	 * will contain only those directories specified in it, otherwise it will
-	 * contain the user and system directories which may contain export
-	 * formats.
 	 */
 	PBD::SearchPath export_formats_search_path ();
 

@@ -35,15 +35,9 @@ SearchPath
 export_formats_search_path ()
 {
 	bool export_path_defined = false;
-	SearchPath spath_env (Glib::getenv(export_env_variable_name, export_path_defined));
+	SearchPath spath (Glib::getenv (export_env_variable_name, export_path_defined));
 
-	if (export_path_defined) {
-		return spath_env;
-	}
-
-	SearchPath spath (user_config_directory ());
-
-	spath += ardour_module_directory ();
+	spath += user_config_directory ();
 	spath.add_subdirectory_to_paths (export_formats_dir_name);
 
 	return spath;
