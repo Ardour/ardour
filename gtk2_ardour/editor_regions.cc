@@ -409,7 +409,7 @@ EditorRegions::add_region (boost::shared_ptr<Region> region)
 }
 
 void
-EditorRegions::delete_unused_regions ()
+EditorRegions::remove_unused_regions ()
 {
 	vector<string> choices;
 	string prompt;
@@ -1543,7 +1543,7 @@ EditorRegions::show_action () const
 }
 
 RefPtr<Action>
-EditorRegions::delete_unused_regions_action () const
+EditorRegions::remove_unused_regions_action () const
 {
 	return ActionManager::get_action (X_("RegionList"), X_("removeUnusedRegions"));
 }

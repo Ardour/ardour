@@ -68,7 +68,7 @@ public:
 		_display.get_selection()->unselect_all ();
 	}
 
-	void delete_unused_regions();
+	void remove_unused_regions ();
 
 	XMLNode& get_state () const;
 	void set_state (const XMLNode &);
@@ -182,7 +182,7 @@ private:
 
 	Glib::RefPtr<Gtk::Action> hide_action () const;
 	Glib::RefPtr<Gtk::Action> show_action () const;
-	Glib::RefPtr<Gtk::Action> delete_unused_regions_action() const;
+	Glib::RefPtr<Gtk::Action> remove_unused_regions_action () const;
 	Glib::RefPtr<Gtk::ToggleAction> toggle_full_action () const;
 	Glib::RefPtr<Gtk::ToggleAction> toggle_show_auto_regions_action () const;
 

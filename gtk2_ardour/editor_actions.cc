@@ -583,7 +583,7 @@ Editor::register_actions ()
 	ActionManager::register_radio_action (rl_actions, sort_type_group, X_("SortBySourceFilesystem"),  _("By Source Filesystem"),
 			sigc::bind (sigc::mem_fun (*_regions, &EditorRegions::reset_sort_type), BySourceFileFS, false));
 
-	ActionManager::register_action (rl_actions, X_("removeUnusedRegions"), _("Delete Unused"), sigc::mem_fun(*_regions, &EditorRegions::delete_unused_regions));
+	ActionManager::register_action (rl_actions, X_("removeUnusedRegions"), _("Remove Unused"), sigc::mem_fun (*_regions, &EditorRegions::remove_unused_regions));
 
 	/* the next two are duplicate items with different names for use in two different contexts */
 
