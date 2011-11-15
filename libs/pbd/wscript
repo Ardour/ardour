@@ -99,6 +99,7 @@ def build(bld):
             stateful.cc
             strreplace.cc
             strsplit.cc
+            symlink.cc
             textreceiver.cc
             transmitter.cc
             undo.cc
