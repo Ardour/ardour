@@ -1400,15 +1400,25 @@ MidiDiskstream::set_align_style_from_io ()
 float
 MidiDiskstream::playback_buffer_load () const
 {
-	return (float) ((double) _playback_buf->read_space()/
-			(double) _playback_buf->capacity());
+	/* For MIDI it's not trivial to differentiate the following two cases:
+	   
+	   1.  The playback buffer is empty because the system has run out of time to fill it.
+	   2.  The playback buffer is empty because there is no more data on the playlist.
+
+	   If we use a simple buffer load computation, we will report that the MIDI diskstream
+	   cannot keep up when #2 happens, when in fact it can.  Since MIDI data rates
+	   are so low compared to audio, just give a pretend answer here.
+	*/
+	
+	return 1;
 }
 
 float
 MidiDiskstream::capture_buffer_load () const
 {
-	return (float) ((double) _capture_buf->write_space()/
-			(double) _capture_buf->capacity());
+	/* We don't report playback buffer load, so don't report capture load either */
+	
+	return 1;
 }
 
 int
