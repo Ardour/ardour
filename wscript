@@ -420,7 +420,7 @@ def configure(conf):
     conf.load('compiler_c')
     conf.load('compiler_cxx')
     if not Options.options.noconfirm:
-        print ('\n\nThis is an alpha version of Ardour 3.0.\n\n' +
+        print ('\n\nThis is a beta version of Ardour 3.0.\n\n' +
                'You are respectfully requested NOT to ask for assistance with build issues\n' +
                'and not to report issues with Ardour 3.0 on the forums at ardour.org.\n\n' +
                'Please use IRC, the bug tracker and/or the ardour mailing lists (-dev or -user)\n\n' +
