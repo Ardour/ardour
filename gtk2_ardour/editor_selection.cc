@@ -1185,12 +1185,7 @@ Editor::region_selection_changed ()
 	_regions->block_change_connection (false);
 	editor_regions_selection_changed_connection.block(false);
 
-	if (!_all_region_actions_sensitized) {
-		/* This selection change might have changed what region actions
-		   are allowed, so sensitize them all in case a key is pressed.
-		*/
-		sensitize_all_region_actions (true);
-	}
+	sensitize_the_right_region_actions ();
 }
 
 void
