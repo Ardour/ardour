@@ -461,15 +461,17 @@ again:
 				
 				/*scheduled call to dispatcher*/
 				
-				if(vstfx->dispatcher_wantcall)
-				{
-					vstfx->dispatcher_retval = vstfx->plugin->dispatcher( vstfx->plugin, 
-											  								vstfx->dispatcher_opcode,
-											  								vstfx->dispatcher_index,
-											  								vstfx->dispatcher_val,
-											  								vstfx->dispatcher_ptr,
-											  								vstfx->dispatcher_opt );
-																			vstfx->dispatcher_wantcall = 0;
+				if (vstfx->dispatcher_wantcall) {
+					vstfx->dispatcher_retval = vstfx->plugin->dispatcher (
+						vstfx->plugin, 
+						vstfx->dispatcher_opcode,
+						vstfx->dispatcher_index,
+						vstfx->dispatcher_val,
+						vstfx->dispatcher_ptr,
+						vstfx->dispatcher_opt
+						);
+					
+					vstfx->dispatcher_wantcall = 0;
 					pthread_cond_signal (&vstfx->plugin_dispatcher_called);
 				}
 				
@@ -659,15 +661,17 @@ int vstfx_create_editor (VSTFX* vstfx)
 	
 	/*Create an XWindow for the plugin to inhabit*/
 	
-	parent_window = XCreateSimpleWindow(LXVST_XDisplay,
-										DefaultRootWindow(LXVST_XDisplay),
-										0,
-										0,
-										x_size,
-										y_size,
-										0,
-										0,
-										0);
+	parent_window = XCreateSimpleWindow (
+		LXVST_XDisplay,
+		DefaultRootWindow(LXVST_XDisplay),
+		0,
+		0,
+		x_size,
+		y_size,
+		0,
+		0,
+		0
+		);
 										
 	/*Select the events we are interested in receiving - we need Substructure notify so that
 	if the plugin resizes its window - e.g. Loomer Manifold then we get a message*/
