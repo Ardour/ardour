@@ -246,10 +246,6 @@ LXVSTPluginUI::create_preset_store ()
 		row[preset_columns.number] = i;
 	}
 	
-	if (vstfx->plugin->numPrograms > 0) {
-		vstfx->plugin->dispatcher( vstfx->plugin, effSetProgram, 0, 0, NULL, 0.0 );
-	}
-	
 	lxvst_preset_combo.set_model (preset_model);
 
 	CellRenderer* renderer = manage (new CellRendererText());
