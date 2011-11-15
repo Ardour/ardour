@@ -63,7 +63,11 @@ PannerManager::discover_panners ()
 {
 	vector<sys::path> panner_modules;
 
+	/* We reject symlinked panner .so files below, so we must find the unlinked
+	   (versioned) names here.
+	*/
 	Glib::PatternSpec so_extension_pattern("*.so*");
+	
 	Glib::PatternSpec dylib_extension_pattern("*.dylib");
 
 	find_matching_files_in_search_path (panner_search_path (),
