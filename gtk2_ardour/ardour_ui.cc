@@ -2511,8 +2511,6 @@ ARDOUR_UI::build_session_from_nsd (const std::string& session_path, const std::s
 			bus_profile.input_ac = AutoConnectOption (0);
 		}
 
-		/// @todo some minor tweaks.
-
 		bus_profile.output_ac = AutoConnectOption (0);
 
 		if (_startup->connect_outputs ()) {

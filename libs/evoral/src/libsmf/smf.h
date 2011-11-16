@@ -33,7 +33,7 @@
 
 /**
  *
- * \mainpage libsmf - general usage instructions
+ * \page libsmf libsmf - general usage instructions
  *
  * An smf_t structure represents a "song".  Every valid smf contains one or more tracks.
  * Tracks contain zero or more events.  Libsmf doesn't care about actual MIDI data, as long

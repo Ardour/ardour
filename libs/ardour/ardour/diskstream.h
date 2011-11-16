@@ -50,6 +50,9 @@ class Session;
 class Track;
 class Location;
 
+/** Parent class for classes which can stream data to and from disk.
+ *  These are used by Tracks to get playback and put recorded data.
+ */
 class Diskstream : public SessionObject, public PublicDiskstream
 {
   public:
@@ -69,6 +72,10 @@ class Diskstream : public SessionObject, public PublicDiskstream
 	boost::shared_ptr<ARDOUR::IO> io() const { return _io; }
 	void set_track (ARDOUR::Track *);
 
+	/** @return A number between 0 and 1, where 0 indicates that the playback buffer
+	 *  is dry (ie the disk subsystem could not keep up) and 1 indicates that the
+	 *  buffer is full.
+	 */
 	virtual float playback_buffer_load() const = 0;
 	virtual float capture_buffer_load() const = 0;
 
