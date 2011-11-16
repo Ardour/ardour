@@ -64,7 +64,7 @@ public:
 			framepos_t start, framepos_t end, InterThreadInfo&, bool enable_processing
 		);
 
-	int set_state(const XMLNode&, int version);
+	int set_state (const XMLNode&, int version);
 
 	void midi_panic(void);
 	bool write_immediate_event(size_t size, const uint8_t* buf);
@@ -114,7 +114,6 @@ public:
 protected:
 	XMLNode& state (bool full);
 
-	int _set_state (const XMLNode&, int);
 	bool should_monitor () const;
 	bool send_silence () const;
 

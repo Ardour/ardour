@@ -85,13 +85,7 @@ Track::state (bool full)
 int
 Track::set_state (const XMLNode& node, int version)
 {
-	return _set_state (node, version);
-}
-
-int
-Track::_set_state (const XMLNode& node, int version)
-{
-	if (Route::_set_state (node, version)) {
+	if (Route::set_state (node, version)) {
 		return -1;
 	}
 

@@ -57,7 +57,7 @@ class AudioTrack : public Track
 	boost::shared_ptr<Region> bounce (InterThreadInfo&);
 	boost::shared_ptr<Region> bounce_range (framepos_t start, framepos_t end, InterThreadInfo&, bool enable_processing);
 
-	int set_state(const XMLNode&, int version);
+	int set_state (const XMLNode&, int version);
 
 	boost::shared_ptr<AudioFileSource> write_source (uint32_t n = 0);
 
@@ -66,8 +66,6 @@ class AudioTrack : public Track
   protected:
 	boost::shared_ptr<AudioDiskstream> audio_diskstream () const;
 	XMLNode& state (bool full);
-
-	int _set_state (const XMLNode&, int);
 
   private:
 

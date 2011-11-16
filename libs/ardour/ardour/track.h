@@ -90,7 +90,7 @@ class Track : public Route, public PublicDiskstream
 
 	XMLNode&    get_state();
 	XMLNode&    get_template();
-	int set_state (const XMLNode&, int version);
+	virtual int set_state (const XMLNode&, int version);
 	static void zero_diskstream_id_in_xml (XMLNode&);
 
 	boost::shared_ptr<PBD::Controllable> rec_enable_control() { return _rec_enable_control; }
@@ -162,7 +162,6 @@ class Track : public Route, public PublicDiskstream
 
   protected:
 	XMLNode& state (bool full);
-	int _set_state (const XMLNode&, int version);
 
 	boost::shared_ptr<Diskstream> _diskstream;
 	MeterPoint    _saved_meter_point;

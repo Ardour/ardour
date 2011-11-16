@@ -1848,14 +1848,8 @@ Route::state(bool full_state)
 int
 Route::set_state (const XMLNode& node, int version)
 {
-	return _set_state (node, version);
-}
-
-int
-Route::_set_state (const XMLNode& node, int version)
-{
 	if (version < 3000) {
-		return _set_state_2X (node, version);
+		return set_state_2X (node, version);
 	}
 
 	XMLNodeList nlist;
@@ -2055,7 +2049,7 @@ Route::_set_state (const XMLNode& node, int version)
 }
 
 int
-Route::_set_state_2X (const XMLNode& node, int version)
+Route::set_state_2X (const XMLNode& node, int version)
 {
 	XMLNodeList nlist;
 	XMLNodeConstIterator niter;

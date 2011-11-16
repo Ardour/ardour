@@ -136,15 +136,9 @@ MidiTrack::midi_diskstream() const
 int
 MidiTrack::set_state (const XMLNode& node, int version)
 {
-	return _set_state (node, version);
-}
-
-int
-MidiTrack::_set_state (const XMLNode& node, int version)
-{
 	const XMLProperty *prop;
 
-	if (Track::_set_state (node, version)) {
+	if (Track::set_state (node, version)) {
 		return -1;
 	}
 

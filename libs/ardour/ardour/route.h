@@ -288,7 +288,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	/* stateful */
 
 	XMLNode& get_state();
-	int set_state (const XMLNode&, int version);
+	virtual int set_state (const XMLNode&, int version);
 	virtual XMLNode& get_template();
 
 	XMLNode& get_processor_state ();
@@ -493,13 +493,11 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	virtual bool should_monitor () const;
 	virtual void maybe_declick (BufferSet&, framecnt_t, int);
 
-	virtual int  _set_state (const XMLNode&, int);
-
 	boost::shared_ptr<Amp>       _amp;
 	boost::shared_ptr<PeakMeter> _meter;
 
   private:
-	int _set_state_2X (const XMLNode&, int);
+	int set_state_2X (const XMLNode&, int);
 	void set_processor_state_2X (XMLNodeList const &, int);
 
 	static uint32_t order_key_cnt;
