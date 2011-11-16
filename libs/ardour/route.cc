@@ -103,6 +103,8 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	, _default_type (default_type)
 	, _remote_control_id (0)
 	, _in_configure_processors (false)
+	, _custom_meter_position_noted (false)
+	, _last_custom_meter_was_at_end (false)
 {
 	processor_max_streams.reset();
 	order_keys[N_("signal")] = order_key_cnt++;
@@ -1718,6 +1720,9 @@ Route::reorder_processors (const ProcessorList& new_order, ProcessorStreams* err
 
 		_processors.insert (oiter, as_it_will_be.begin(), as_it_will_be.end());
 
+		/* If the meter is in a custom position, find it and make a rough note of its position */
+		maybe_note_meter_position ();
+
 		{
 			Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 
@@ -1823,8 +1828,18 @@ Route::state(bool full_state)
 		node->add_child_nocopy((*i)->state (full_state));
 	}
 
-	if (_extra_xml){
+	if (_extra_xml) {
 		node->add_child_copy (*_extra_xml);
+	}
+
+	if (_custom_meter_position_noted) {
+		boost::shared_ptr<Processor> after = _processor_after_last_custom_meter.lock ();
+		if (after) {
+			after->id().print (buf, sizeof (buf));
+			node->add_property (X_("processor-after-last-custom-meter"), buf);
+		}
+
+		node->add_property (X_("last-custom-meter-was-at-end"), _last_custom_meter_was_at_end ? "yes" : "no");
 	}
 
 	return *node;
@@ -1989,6 +2004,24 @@ Route::_set_state (const XMLNode& node, int version)
 				break;
 			}
 		}
+	}
+
+	if ((prop = node.property (X_("processor-after-last-custom-meter"))) != 0) {
+		PBD::ID id (prop->value ());
+		Glib::RWLock::ReaderLock lm (_processor_lock);
+		ProcessorList::const_iterator i = _processors.begin ();
+		while (i != _processors.end() && (*i)->id() != id) {
+			++i;
+		}
+
+		if (i != _processors.end ()) {
+			_processor_after_last_custom_meter = *i;
+			_custom_meter_position_noted = true;
+		}
+	}
+
+	if ((prop = node.property (X_("last-custom-meter-was-at-end"))) != 0) {
+		_last_custom_meter_was_at_end = string_is_affirmative (prop->value ());
 	}
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter){
@@ -2872,12 +2905,14 @@ Route::set_meter_point (MeterPoint p, bool force)
 		return;
 	}
 
-	_meter_point = p;
-
 	bool meter_was_visible_to_user = _meter->display_to_user ();
 
 	{
 		Glib::RWLock::WriterLock lm (_processor_lock);
+
+		maybe_note_meter_position ();
+
+		_meter_point = p;
 
 		if (_meter_point != MeterCustom) {
 
@@ -2885,32 +2920,48 @@ Route::set_meter_point (MeterPoint p, bool force)
 
 			setup_invisible_processors ();
 
-			ProcessorList::iterator loc = find (_processors.begin(), _processors.end(), _meter);
-
-			ChanCount m_in;
-
-			if (loc == _processors.begin()) {
-				m_in = _input->n_ports();
-			} else {
-				ProcessorList::iterator before = loc;
-				--before;
-				m_in = (*before)->output_streams ();
-			}
-
-			_meter->reflect_inputs (m_in);
-
-			/* we do not need to reconfigure the processors, because the meter
-			   (a) is always ready to handle processor_max_streams
-			   (b) is always an N-in/N-out processor, and thus moving
-			   it doesn't require any changes to the other processors.
-			*/
-
 		} else {
 
-			// just make it visible and let the user move it
-
 			_meter->set_display_to_user (true);
+
+			/* If we have a previous position for the custom meter, try to put it there */
+			if (_custom_meter_position_noted) {
+				boost::shared_ptr<Processor> after = _processor_after_last_custom_meter.lock ();
+				
+				if (after) {
+					ProcessorList::iterator i = find (_processors.begin(), _processors.end(), after);
+					if (i != _processors.end ()) {
+						_processors.remove (_meter);
+						_processors.insert (i, _meter);
+					}
+				} else if (_last_custom_meter_was_at_end) {
+					_processors.remove (_meter);
+					_processors.push_back (_meter);
+				}
+			}
 		}
+
+		/* Set up the meter for its new position */
+
+		ProcessorList::iterator loc = find (_processors.begin(), _processors.end(), _meter);
+		
+		ChanCount m_in;
+		
+		if (loc == _processors.begin()) {
+			m_in = _input->n_ports();
+		} else {
+			ProcessorList::iterator before = loc;
+			--before;
+			m_in = (*before)->output_streams ();
+		}
+		
+		_meter->reflect_inputs (m_in);
+		
+		/* we do not need to reconfigure the processors, because the meter
+		   (a) is always ready to handle processor_max_streams
+		   (b) is always an N-in/N-out processor, and thus moving
+		   it doesn't require any changes to the other processors.
+		*/
 	}
 
 	meter_change (); /* EMIT SIGNAL */
@@ -3800,6 +3851,35 @@ Route::unpan ()
 		boost::shared_ptr<Delivery> d = boost::dynamic_pointer_cast<Delivery>(*i);
 		if (d) {
 			d->unpan ();
+		}
+	}
+}
+
+/** If the meter point is `Custom', make a note of where the meter is.
+ *  This is so that if the meter point is subsequently set to something else,
+ *  and then back to custom, we can put the meter back where it was last time
+ *  custom was enabled.
+ *
+ *  Must be called with the _processor_lock held.
+ */
+void
+Route::maybe_note_meter_position ()
+{
+	if (_meter_point != MeterCustom) {
+		return;
+	}
+	
+	_custom_meter_position_noted = true;
+	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+		if (boost::dynamic_pointer_cast<PeakMeter> (*i)) {
+			ProcessorList::iterator j = i;
+			++j;
+			if (j != _processors.end ()) {
+				_processor_after_last_custom_meter = *j;
+				_last_custom_meter_was_at_end = false;
+			} else {
+				_last_custom_meter_was_at_end = true;
+			}
 		}
 	}
 }

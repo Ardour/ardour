@@ -562,6 +562,17 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 
 	/* no copy construction */
 	Route (Route const &);
+
+	void maybe_note_meter_position ();
+	
+	/** true if we've made a note of a custom meter position in these variables */
+	bool _custom_meter_position_noted;
+	/** the processor that came after the meter when it was last set to a custom position,
+	    or 0.
+	*/
+	boost::weak_ptr<Processor> _processor_after_last_custom_meter;
+	/** true if the last custom meter position was at the end of the processor list */
+	bool _last_custom_meter_was_at_end;
 };
 
 } // namespace ARDOUR
