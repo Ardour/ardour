@@ -202,7 +202,7 @@ Full information on all the above can be found on the support page at\n\
 
         append_page (*vbox);
         set_page_type (*vbox, ASSISTANT_PAGE_CONTENT);
-        set_page_title (*vbox, _("This is an BETA RELEASE"));
+        set_page_title (*vbox, _("This is a BETA RELEASE"));
 	set_page_complete (*vbox, true);
 }
 
