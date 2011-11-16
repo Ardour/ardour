@@ -104,7 +104,7 @@ AutomationRegionView::canvas_event (GdkEvent* ev)
 	if (ev->type == GDK_BUTTON_PRESS && e.current_mouse_mode() == Editing::MouseObject) {
 
 		/* XXX: icky dcast to Editor */
-		e.drags()->set (new RubberbandSelectDrag (dynamic_cast<Editor*> (&e), group), ev);
+		e.drags()->set (new EditorRubberbandSelectDrag (dynamic_cast<Editor*> (&e), group), ev);
 
 	} else if (ev->type == GDK_BUTTON_RELEASE) {
 

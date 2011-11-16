@@ -792,7 +792,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		if (Keyboard::modifier_state_contains (event->button.state, Keyboard::ModifierMask(Keyboard::PrimaryModifier|Keyboard::SecondaryModifier)) &&
 		    event->type == GDK_BUTTON_PRESS) {
 
-			_drags->set (new RubberbandSelectDrag (this, item), event);
+			_drags->set (new EditorRubberbandSelectDrag (this, item), event);
 
 		} else if (event->type == GDK_BUTTON_PRESS) {
 
@@ -888,7 +888,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 					}
 					return true;
 				} else {
-					_drags->set (new RubberbandSelectDrag (this, item), event);
+					_drags->set (new EditorRubberbandSelectDrag (this, item), event);
 				}
 				break;
 
@@ -902,7 +902,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 					_drags->set (new RegionCreateDrag (this, item, parent), event);
 				} else {
 					/* rubberband drag to select automation points */
-					_drags->set (new RubberbandSelectDrag (this, item), event);
+					_drags->set (new EditorRubberbandSelectDrag (this, item), event);
 				}
 				break;
 			}

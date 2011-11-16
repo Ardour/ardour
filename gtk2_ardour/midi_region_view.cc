@@ -51,6 +51,7 @@
 #include "canvas_patch_change.h"
 #include "debug.h"
 #include "editor.h"
+#include "editor_drag.h"
 #include "ghostregion.h"
 #include "gui_thread.h"
 #include "keyboard.h"
@@ -462,10 +463,12 @@ MidiRegionView::button_release (GdkEventButton* ev)
 	group->w2i(event_x, event_y);
 	group->ungrab(ev->time);
 
+	PublicEditor& editor = trackview.editor ();
+
 	switch (_mouse_state) {
 	case Pressed: // Clicked
 
-		switch (trackview.editor().current_mouse_mode()) {
+		switch (editor.current_mouse_mode()) {
 		case MouseObject:
 		case MouseTimeFX:
 			{
@@ -480,7 +483,7 @@ MidiRegionView::button_release (GdkEventButton* ev)
 					group->w2i(event_x, event_y);
 
 					bool success;
-					Evoral::MusicalTime beats = trackview.editor().get_grid_type_as_beats (success, trackview.editor().pixel_to_frame (event_x));
+					Evoral::MusicalTime beats = editor.get_grid_type_as_beats (success, editor.pixel_to_frame (event_x));
 
 					if (!success) {
 						beats = 1;
@@ -494,7 +497,7 @@ MidiRegionView::button_release (GdkEventButton* ev)
 		case MouseRange:
 			{
 				bool success;
-				Evoral::MusicalTime beats = trackview.editor().get_grid_type_as_beats (success, trackview.editor().pixel_to_frame (event_x));
+				Evoral::MusicalTime beats = editor.get_grid_type_as_beats (success, editor.pixel_to_frame (event_x));
 
 				if (!success) {
 					beats = 1;
@@ -512,10 +515,8 @@ MidiRegionView::button_release (GdkEventButton* ev)
 		break;
 
 	case SelectRectDragging: // Select drag done
-
+		editor.drags()->end_grab ((GdkEvent *) ev);
 		_mouse_state = None;
-		delete _drag_rect;
-		_drag_rect = 0;
 		break;
 
 	case AddDragging: // Add drag done
@@ -596,27 +597,8 @@ MidiRegionView::motion (GdkEventMotion* ev)
 
 		if (_pressed_button == 1 && editor.current_mouse_mode() == MouseObject
 		    && !Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier())) {
-			// Select drag start
 
-			group->grab(GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK,
-			            Gdk::Cursor(Gdk::FLEUR), ev->time);
-
-			_last_x = event_x;
-			_last_y = event_y;
-			_drag_start_x = event_x;
-			_drag_start_y = event_y;
-
-			_drag_rect = new ArdourCanvas::SimpleRect(*group);
-			_drag_rect->property_x1() = event_x;
-			_drag_rect->property_y1() = event_y;
-			_drag_rect->property_x2() = event_x;
-			_drag_rect->property_y2() = event_y;
-			_drag_rect->property_outline_what() = 0xFF;
-			_drag_rect->property_outline_color_rgba()
-				= ARDOUR_UI::config()->canvasvar_MidiSelectRectOutline.get();
-			_drag_rect->property_fill_color_rgba()
-				= ARDOUR_UI::config()->canvasvar_MidiSelectRectFill.get();
-
+			editor.drags()->set (new MidiRubberbandSelectDrag (dynamic_cast<Editor *> (&editor), this), (GdkEvent *) ev);
 			_mouse_state = SelectRectDragging;
 			return true;
 
@@ -656,7 +638,10 @@ MidiRegionView::motion (GdkEventMotion* ev)
 
 		return false;
 
-	case SelectRectDragging: // Select drag motion
+	case SelectRectDragging:
+		editor.drags()->motion_handler ((GdkEvent *) ev, false);
+		break;
+		
 	case AddDragging: // Add note drag motion
 
 		if (ev->is_hint) {
@@ -690,18 +675,6 @@ MidiRegionView::motion (GdkEventMotion* ev)
 			else {
 				_drag_rect->property_x1() = event_x;
 			}
-		}
-
-		if (_drag_rect && _mouse_state == SelectRectDragging) {
-
-			if (event_y > _drag_start_y) {
-				_drag_rect->property_y2() = event_y;
-			}
-			else {
-				_drag_rect->property_y1() = event_y;
-			}
-
-			update_drag_selection(_drag_start_x, event_x, _drag_start_y, event_y, Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier));
 		}
 
 		_last_x = event_x;

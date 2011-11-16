@@ -761,6 +761,43 @@ public:
 	std::pair<ARDOUR::framecnt_t, int> move_threshold () const {
 		return std::make_pair (8, 1);
 	}
+
+	void do_select_things (GdkEvent *, bool);
+
+	/** Select some things within a rectangle.
+	 *  @param button_state The button state from the GdkEvent.
+	 *  @param x1 The left-hand side of the rectangle in session frames.
+	 *  @param x2 The right-hand side of the rectangle in session frames.
+	 *  @param y1 The top of the rectangle in trackview coordinates.
+	 *  @param y2 The bottom of the rectangle in trackview coordinates.
+	 *  @param drag_in_progress true if the drag is currently happening.
+	 */
+	virtual void select_things (int button_state, framepos_t x1, framepos_t x2, double y1, double y2, bool drag_in_progress) = 0;
+	
+	virtual void deselect_things () = 0;
+};
+
+/** A general editor RubberbandSelectDrag (for regions, automation points etc.) */
+class EditorRubberbandSelectDrag : public RubberbandSelectDrag
+{
+public:
+	EditorRubberbandSelectDrag (Editor *, ArdourCanvas::Item *);
+
+	void select_things (int, framepos_t, framepos_t, double, double, bool);
+	void deselect_things ();
+};
+
+/** A RubberbandSelectDrag for selecting MIDI notes */
+class MidiRubberbandSelectDrag : public RubberbandSelectDrag
+{
+public:
+	MidiRubberbandSelectDrag (Editor *, MidiRegionView *);
+
+	void select_things (int, framepos_t, framepos_t, double, double, bool);
+	void deselect_things ();
+
+private:
+	MidiRegionView* _region_view;
 };
 
 /** Region drag in time-FX mode */
