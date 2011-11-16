@@ -422,6 +422,16 @@ XMLNode::remove_property(const string& n)
 	}
 }
 
+/** Remove any property with the given name from this node and its children */
+void
+XMLNode::remove_property_recursively(const string& n)
+{
+	remove_property (n);
+	for (XMLNodeIterator i = _children.begin(); i != _children.end(); ++i) {
+		(*i)->remove_property_recursively (n);
+	}
+}
+
 void
 XMLNode::remove_nodes(const string& n)
 {

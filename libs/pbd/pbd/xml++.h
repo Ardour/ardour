@@ -102,6 +102,7 @@ public:
 	XMLProperty* add_property(const char* name, const long value);
 
 	void remove_property(const std::string&);
+	void remove_property_recursively(const std::string&);
 
 	/** Remove all nodes with the name passed to remove_nodes */
 	void remove_nodes(const std::string&);

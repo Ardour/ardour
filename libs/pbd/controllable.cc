@@ -129,10 +129,7 @@ Controllable::set_state (const XMLNode& node, int /*version*/)
 
 	Stateful::save_extra_xml (node);
 
-	if (!set_id (node)) {
-		error << _("Controllable state node has no ID property") << endmsg;
-		return -1;
-	}
+	set_id (node);
 
 	if ((prop = node.property (X_("flags"))) != 0) {
 		_flags = (Flag) string_2_enum (prop->value(), _flags);

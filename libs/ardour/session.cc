@@ -1897,7 +1897,6 @@ Session::new_audio_route (int input_channels, int output_channels, RouteGroup* r
 RouteList
 Session::new_route_from_template (uint32_t how_many, const std::string& template_path)
 {
-	char name[32];
 	RouteList ret;
 	uint32_t control_id;
 	XMLTree tree;
@@ -1913,27 +1912,35 @@ Session::new_route_from_template (uint32_t how_many, const std::string& template
 
 	while (how_many) {
 
-		XMLNode node_copy (*node); // make a copy so we can change the name if we need to
+		XMLNode node_copy (*node);
 
-		std::string node_name = IO::name_from_state (*node_copy.children().front());
-
-		/* generate a new name by adding a number to the end of the template name */
-		if (!find_route_name (node_name.c_str(), ++number, name, sizeof(name), true)) {
-			fatal << _("Session: UINT_MAX routes? impossible!") << endmsg;
-			/*NOTREACHED*/
-		}
-
-		/* set IO children to use the new name */
-		XMLNodeList const & children = node_copy.children ();
-		for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
-			if ((*i)->name() == IO::state_node_name) {
-				IO::set_name_in_state (**i, name);
-			}
-		}
-
-		Track::zero_diskstream_id_in_xml (node_copy);
+		/* Remove IDs of everything so that new ones are used */
+		node_copy.remove_property_recursively (X_("id"));
 
 		try {
+			string const route_name = node_copy.property(X_("name"))->value ();
+			
+			/* generate a new name by adding a number to the end of the template name */
+			char name[32];
+			if (!find_route_name (route_name.c_str(), ++number, name, sizeof(name), true)) {
+				fatal << _("Session: UINT_MAX routes? impossible!") << endmsg;
+				/*NOTREACHED*/
+			}
+
+			/* set this name in the XML description that we are about to use */
+			Route::set_name_in_state (node_copy, name);
+
+			/* trim bitslots from listen sends so that new ones are used */
+			XMLNodeList children = node_copy.children ();
+			for (XMLNodeList::iterator i = children.begin(); i != children.end(); ++i) {
+				if ((*i)->name() == X_("Processor")) {
+					XMLProperty* role = (*i)->property (X_("role"));
+					if (role && role->value() == X_("Listen")) {
+						(*i)->remove_property (X_("bitslot"));
+					}
+				}
+			}
+			
 			boost::shared_ptr<Route> route (XMLRouteFactory (node_copy, 3000));
 
 			if (route == 0) {

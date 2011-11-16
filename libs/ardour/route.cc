@@ -3286,6 +3286,38 @@ Route::set_name (const string& str)
 	return ret;
 }
 
+/** Set the name of a route in an XML description.
+ *  @param node XML <Route> node to set the name in.
+ *  @param name New name.
+ */
+void
+Route::set_name_in_state (XMLNode& node, string const & name)
+{
+	node.add_property (X_("name"), name);
+
+	XMLNodeList children = node.children();
+	for (XMLNodeIterator i = children.begin(); i != children.end(); ++i) {
+		
+		if ((*i)->name() == X_("IO")) {
+
+			IO::set_name_in_state (**i, name);
+
+		} else if ((*i)->name() == X_("Processor")) {
+
+			XMLProperty* role = (*i)->property (X_("role"));
+			if (role && role->value() == X_("Main")) {
+				(*i)->add_property (X_("name"), name);
+			}
+			
+		} else if ((*i)->name() == X_("Diskstream")) {
+
+			(*i)->add_property (X_("playlist"), string_compose ("%1.1", name).c_str());
+			(*i)->add_property (X_("name"), name);
+			
+		}
+	}
+}
+
 boost::shared_ptr<Send>
 Route::internal_send_for (boost::shared_ptr<const Route> target) const
 {

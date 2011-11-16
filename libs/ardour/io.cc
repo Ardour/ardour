@@ -1478,10 +1478,14 @@ IO::name_from_state (const XMLNode& node)
 void
 IO::set_name_in_state (XMLNode& node, const string& new_name)
 {
-	const XMLProperty* prop;
-
-	if ((prop = node.property ("name")) != 0) {
-		node.add_property ("name", new_name);
+	node.add_property (X_("name"), new_name);
+	XMLNodeList children = node.children ();
+	for (XMLNodeIterator i = children.begin(); i != children.end(); ++i) {
+		if ((*i)->name() == X_("Port")) {
+			string const old_name = (*i)->property(X_("name"))->value();
+			string const old_name_second_part = old_name.substr (old_name.find_first_of ("/") + 1);
+			(*i)->add_property (X_("name"), string_compose ("%1/%2", new_name, old_name_second_part));
+		}
 	}
 }
 
