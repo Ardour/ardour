@@ -558,7 +558,8 @@ def configure(conf):
     if opts.vst:
         conf.define('VST_SUPPORT', 1)
         conf.env['VST_SUPPORT'] = True
-        conf.env.append_value('CPPPATH', Options.options.wine_include)
+        conf.env.append_value('CFLAGS', Options.options.wine_include)
+        conf.env.append_value('CXXFLAGS', Options.options.wine_include)
         autowaf.check_header(conf, 'cxx', 'windows.h', mandatory = True)
     if opts.lxvst:
         conf.define('LXVST_SUPPORT', 1)
