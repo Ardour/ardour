@@ -151,11 +151,13 @@ MixerStrip::init ()
 	img->show ();
 
 	width_button.add (*img);
+	ARDOUR_UI::instance()->set_tip (&width_button, _("Toggle the width of this mixer strip"));
 
 	img = manage (new Gtk::Image (::get_icon("hide")));
 	img->show ();
 
 	hide_button.add (*img);
+	ARDOUR_UI::instance()->set_tip (&hide_button, _("Hide this mixer strip"));
 
 	input_label.set_text (_("Input"));
 	ARDOUR_UI::instance()->set_tip (&input_button, _("Button 1 to choose inputs from a port matrix, button 3 to select inputs from a menu"), "");
