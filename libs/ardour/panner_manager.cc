@@ -20,11 +20,11 @@
 #include <unistd.h>
 
 #include <glibmm/pattern.h>
+#include <glibmm/fileutils.h>
 
 #include "pbd/error.h"
 #include "pbd/compose.h"
 #include "pbd/file_utils.h"
-#include "pbd/symlink.h"
 
 #include "ardour/panner_manager.h"
 #include "ardour/panner_search_path.h"
@@ -87,17 +87,20 @@ PannerManager::panner_discover (string path)
 {
 	PannerInfo* pinfo;
 
-	/* don't look in symlinks, because otherwise we find too many versions
-	 * of the same library.
-	 */
-
-	if (PBD::is_symlink (path)) {
-		return 0;
-	}
-
 	if ((pinfo = get_descriptor (path)) != 0) {
-		panner_info.push_back (pinfo);
-		info << string_compose(_("Panner discovered: \"%1\" in %2"), pinfo->descriptor.name, path) << endmsg;
+
+		list<PannerInfo*>::iterator i;
+
+		for (i = panner_info.begin(); i != panner_info.end(); ++i) {
+			if (pinfo->descriptor.name == (*i)->descriptor.name) {
+				break;
+			}
+		}
+
+		if (i == panner_info.end()) {
+			panner_info.push_back (pinfo);
+			info << string_compose(_("Panner discovered: \"%1\" in %2"), pinfo->descriptor.name, path) << endmsg;
+		}
 	}
 
 	return 0;
