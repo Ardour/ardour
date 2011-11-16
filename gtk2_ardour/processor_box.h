@@ -301,8 +301,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	void processors_reordered (const Gtk::TreeModel::Path&, const Gtk::TreeModel::iterator&, int*);
 	void compute_processor_sort_keys ();
 
-	void all_processors_active(bool state);
-	void all_plugins_active(bool state);
+	void all_visible_processors_active(bool state);
 	void ab_plugins ();
 
 	typedef std::vector<boost::shared_ptr<ARDOUR::Processor> > ProcSelection;

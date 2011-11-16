@@ -246,7 +246,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	void disable_plugins ();
 	void ab_plugins (bool forward);
 	void clear_processors (Placement);
-	void all_processors_active (Placement, bool state);
+	void all_visible_processors_active (bool);
 
 	framecnt_t set_private_port_latencies (bool playback) const;
 	void       set_public_port_latencies (framecnt_t, bool playback) const;

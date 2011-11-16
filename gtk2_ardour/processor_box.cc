@@ -1666,10 +1666,9 @@ ProcessorBox::for_selected_processors (void (ProcessorBox::*method)(boost::share
 }
 
 void
-ProcessorBox::all_processors_active (bool state)
+ProcessorBox::all_visible_processors_active (bool state)
 {
-	_route->all_processors_active (PreFader, state);
-	_route->all_processors_active (PostFader, state);
+	_route->all_visible_processors_active (state);
 }
 
 void
@@ -1946,9 +1945,9 @@ ProcessorBox::register_actions ()
 
 	/* activation etc. */
 
-	ActionManager::register_action (popup_act_grp, X_("activate_all"), _("Activate all"),
+	ActionManager::register_action (popup_act_grp, X_("activate_all"), _("Activate All"),
 			sigc::ptr_fun (ProcessorBox::rb_activate_all));
-	ActionManager::register_action (popup_act_grp, X_("deactivate_all"), _("Deactivate all"),
+	ActionManager::register_action (popup_act_grp, X_("deactivate_all"), _("Deactivate All"),
 			sigc::ptr_fun (ProcessorBox::rb_deactivate_all));
 	ActionManager::register_action (popup_act_grp, X_("ab_plugins"), _("A/B Plugins"),
 			sigc::ptr_fun (ProcessorBox::rb_ab_plugins));
@@ -2120,7 +2119,7 @@ ProcessorBox::rb_activate_all ()
 		return;
 	}
 
-	_current_processor_box->all_processors_active (true);
+	_current_processor_box->all_visible_processors_active (true);
 }
 
 void
@@ -2129,7 +2128,7 @@ ProcessorBox::rb_deactivate_all ()
 	if (_current_processor_box == 0) {
 		return;
 	}
-	_current_processor_box->all_processors_active (false);
+	_current_processor_box->all_visible_processors_active (false);
 }
 
 void

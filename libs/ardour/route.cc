@@ -1625,12 +1625,11 @@ Route::configure_processors_unlocked (ProcessorStreams* err)
 	return 0;
 }
 
-/** Set all processors with a given placement to a given active state.
- * @param p Placement of processors to change.
- * @param state New active state for those processors.
+/** Set all visible processors to a given active state (except Fader, whose state is not changed)
+ *  @param state New active state for those processors.
  */
 void
-Route::all_processors_active (Placement p, bool state)
+Route::all_visible_processors_active (bool state)
 {
 	Glib::RWLock::ReaderLock lm (_processor_lock);
 
@@ -1638,10 +1637,11 @@ Route::all_processors_active (Placement p, bool state)
 		return;
 	}
 	
-	ProcessorList::iterator start, end;
-	placement_range(p, start, end);
-
-	for (ProcessorList::iterator i = start; i != end; ++i) {
+	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+		if (!(*i)->display_to_user() || boost::dynamic_pointer_cast<Amp> (*i)) {
+			continue;
+		}
+		
 		if (state) {
 			(*i)->activate ();
 		} else {
