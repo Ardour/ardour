@@ -645,8 +645,8 @@ MixerStrip::set_width_enum (Width w, void* owner)
 			panners.short_astate_string(_route->panner()->automation_state()));
 		}
 		
-		solo_isolated_led->set_text ("");
-		solo_safe_led->set_text ("");
+		solo_isolated_led->set_text ("i");
+		solo_safe_led->set_text ("l");
 
 		Gtkmm2ext::set_size_request_to_display_given_text (name_button, longest_label.c_str(), 2, 2);
 		set_size_request (max (50, gpm.get_gm_width()), -1);
