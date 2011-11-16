@@ -134,11 +134,17 @@ GroupTabs::on_button_press_event (GdkEventButton* ev)
 	} else if (ev->button == 3) {
 
 		RouteGroup* g = t ? t->group : 0;
-		Menu* m = get_menu (g);
-		if (m) {
-			m->popup (ev->button, ev->time);
+		
+		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier) && g) {
+			/* edit */
+			RouteGroupDialog d (g, false);
+			d.do_run ();
+		} else {
+			Menu* m = get_menu (g);
+			if (m) {
+				m->popup (ev->button, ev->time);
+			}
 		}
-
 	}
 
 	return true;
@@ -179,29 +185,18 @@ GroupTabs::on_button_release_event (GdkEventButton* ev)
 	if (_dragging == 0) {
 		return false;
 	}
-
+	
 	if (!_drag_moved) {
-
+		
 		if (_dragging->group) {
-
-			if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
-
-				/* edit */
-				RouteGroupDialog d (_dragging->group, false);
-				d.do_run ();
-
-			} else {
-
-				/* toggle active state */
-				_dragging->group->set_active (!_dragging->group->is_active (), this);
-
-			}
+			/* toggle active state */
+			_dragging->group->set_active (!_dragging->group->is_active (), this);
 		}
-
+		
 	} else {
 		/* finish drag */
 		RouteList routes = routes_for_tab (_dragging);
-
+		
 		if (!routes.empty()) {
 			if (_dragging_new_tab) {
 				RouteGroup* g = create_and_add_group ();
@@ -213,13 +208,13 @@ GroupTabs::on_button_release_event (GdkEventButton* ev)
 			} else {
 				boost::shared_ptr<RouteList> r = _session->get_routes ();
 				for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-
+					
 					bool const was_in_tab = find (
 						_initial_dragging_routes.begin(), _initial_dragging_routes.end(), *i
 						) != _initial_dragging_routes.end ();
-
+					
 					bool const now_in_tab = find (routes.begin(), routes.end(), *i) != routes.end();
-
+					
 					if (was_in_tab && !now_in_tab) {
 						_dragging->group->remove (*i);
 					} else if (!was_in_tab && now_in_tab) {
@@ -228,11 +223,11 @@ GroupTabs::on_button_release_event (GdkEventButton* ev)
 				}
 			}
 		}
-
+		
 		set_dirty ();
 		queue_draw ();
 	}
-
+	
 	_dragging = 0;
 	_initial_dragging_routes.clear ();
 
