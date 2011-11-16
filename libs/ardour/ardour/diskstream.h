@@ -271,7 +271,6 @@ class Diskstream : public SessionObject, public PublicDiskstream
 	int           last_possibly_recording;
 	AlignStyle   _alignment_style;
 	AlignChoice  _alignment_choice;
-	bool         _scrubbing;
 	bool         _slaved;
 	Location*     loop_location;
 	framepos_t    overwrite_frame;
