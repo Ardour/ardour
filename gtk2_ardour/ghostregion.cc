@@ -306,6 +306,7 @@ MidiGhostRegion::clear_events()
 	}
 
 	events.clear();
+	_optimization_iterator = events.end ();
 }
 
 /** Update the x positions of our representation of a parent's note.
@@ -328,13 +329,26 @@ MidiGhostRegion::update_note (ArdourCanvas::CanvasNote* parent)
 	}
 }
 
+void
+MidiGhostRegion::remove_note (ArdourCanvas::CanvasNoteEvent* note)
+{
+	Event* ev = find_event (note);
+	if (!ev) {
+		return;
+	}
+
+	events.remove (ev);
+	delete ev;
+	_optimization_iterator = events.end ();
+}
+
 /** Given a note in our parent region (ie the actual MidiRegionView), find our
  *  representation of it.
  *  @return Our Event, or 0 if not found.
  */
 
 MidiGhostRegion::Event *
-MidiGhostRegion::find_event (ArdourCanvas::CanvasNote* parent)
+MidiGhostRegion::find_event (ArdourCanvas::CanvasNoteEvent* parent)
 {
 	/* we are using _optimization_iterator to speed up the common case where a caller
 	   is going through our notes in order.

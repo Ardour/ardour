@@ -1156,8 +1156,17 @@ MidiRegionView::redisplay_model()
 
 	for (Events::iterator i = _events.begin(); i != _events.end(); ) {
 		if (!(*i)->valid ()) {
+
+			for (vector<GhostRegion*>::iterator j = ghosts.begin(); j != ghosts.end(); ++j) {
+				MidiGhostRegion* gr = dynamic_cast<MidiGhostRegion*> (*j);
+				if (gr) {
+					gr->remove_note (*i);
+				}
+			}
+			
 			delete *i;
 			i = _events.erase (i);
+			
 		} else {
 			++i;
 		}

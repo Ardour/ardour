@@ -105,12 +105,13 @@ public:
 
 	void add_note(ArdourCanvas::CanvasNote*);
 	void update_note (ArdourCanvas::CanvasNote *);
+	void remove_note (ArdourCanvas::CanvasNoteEvent *);
 
 	void clear_events();
 
 private:
 
-	MidiGhostRegion::Event* find_event (ArdourCanvas::CanvasNote *);
+	MidiGhostRegion::Event* find_event (ArdourCanvas::CanvasNoteEvent *);
 
 	typedef std::list<MidiGhostRegion::Event*> EventList;
 	EventList events;
