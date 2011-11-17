@@ -463,9 +463,18 @@ EditorRoutes::redisplay ()
 	TreeModel::Children rows = _model->children();
 	TreeModel::Children::iterator i;
 	uint32_t position;
+
+	/* n will be the count of tracks plus children (updated by TimeAxisView::show_at),
+	   so we will use that to know where to put things.
+	*/
 	int n;
 
-	for (n = 0, position = 0, i = rows.begin(); i != rows.end(); ++i) {
+	/* Order keys must not take children into account, so use a separate counter
+	   for that.
+	*/
+	int order_key;
+
+	for (n = 0, order_key = 0, position = 0, i = rows.begin(); i != rows.end(); ++i) {
 		TimeAxisView *tv = (*i)[_columns.tv];
 		boost::shared_ptr<Route> route = (*i)[_columns.route];
 
@@ -478,7 +487,7 @@ EditorRoutes::redisplay ()
 			/* this reorder is caused by user action, so reassign sort order keys
 			   to tracks.
 			*/
-			route->set_order_key (N_ ("editor"), n);
+			route->set_order_key (N_ ("editor"), order_key);
 		}
 
 		bool visible = tv->marked_for_display ();
@@ -492,6 +501,7 @@ EditorRoutes::redisplay ()
 		}
 
 		n++;
+		order_key++;
 	}
 
 	/* whenever we go idle, update the track view list to reflect the new order.
@@ -1323,9 +1333,15 @@ EditorRoutes::move_selected_tracks (bool up)
 		neworder.push_back (leading->second->order_key (N_ ("editor")));
 	}
 
+#ifndef NDEBUG
+	for (vector<int>::iterator i = neworder.begin(); i != neworder.end(); ++i) {
+		assert (*i < (int) neworder.size ());
+	}
+#endif	
+
 	_model->reorder (neworder);
 
-       _session->sync_order_keys (N_ ("editor"));
+	_session->sync_order_keys (N_ ("editor"));
 }
 
 void
