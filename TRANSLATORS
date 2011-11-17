@@ -16,8 +16,8 @@ Here is the best workflow for existing translations.
 3. Open a PO file in you PO editor of choice (see below)
 4. Open Ardour, find something untranslated, locate this phrase in PO file, translate 
 5. Repeat previous step several times, save the PO file
-6. In gtk_ardour/po/ run 'msgfmt -o gtk2_ardour.mo LANG.po' where LANG.po is your PO file
-7. Run 'sudo cp gtk2_ardour.mo /usr/local/share/locale/LANG/LC_MESSAGES/' where LANG is two- or four letter code (see above)
+6. In gtk_ardour/po/ run 'msgfmt -o gtk2_ardour3.mo LANG.po' where LANG.po is your PO file
+7. Run 'sudo cp gtk2_ardour3.mo /usr/local/share/locale/LANG/LC_MESSAGES/' where LANG is two- or four letter code (see above)
 8. Restart Ardour to see what your translation looks like and whether it needs fixes, e.g. has to be shorter
 
 When you are done, save the file and submit it to the tracker.
