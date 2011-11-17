@@ -1159,11 +1159,6 @@ style "location_row_button" = "default_button"
 	font_name = "%FONT_NORMAL%"
 }
 
-style "location_rows_clock" = "default_clock_display"
-{
-	font_name = "%FONT_BIG%"
-}
-
 style "pan_slider" 
 {
  	font_name = "%FONT_NORMAL%"
@@ -1341,15 +1336,6 @@ widget "*AudioClockSMPTEUpperInfo" style:highest "tempo_meter_clock_display"
 widget "*AudioClockSMPTELowerInfo" style:highest "tempo_meter_clock_display"
 widget "*AudioClockBBTUpperInfo" style:highest "tempo_meter_clock_display"
 widget "*AudioClockBBTLowerInfo" style:highest "tempo_meter_clock_display"
-widget "*SelectionStartClock" style:highest "default_clock_display"
-widget "*SelectionEndClock" style:highest "default_clock_display"
-widget "*EditPointClock" style:highest "default_clock_display"
-widget "*PreRollClock" style:highest "default_clock_display"
-widget "*PostRollClock" style:highest "default_clock_display"
-widget "*NudgeClock" style:highest "default_clock_display"
-widget "*InsertTimeClock" style:highest "default_clock_display"
-widget "*ZoomRangeClock" style:highest "default_clock_display"
-widget "*SMPTEOffsetClock" style:highest "default_clock_display"
 widget "*TransportLabel" style:highest "small_bold_text"
 widget "*TakeLabel" style:highest "small_bold_text"
 widget "*LocationLabel" style:highest "small_bold_text"

@@ -44,11 +44,11 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog) :
   silence_table (2, 4),
   trim_start_checkbox (_("Trim silence at start")),
   silence_start_checkbox (_("Add silence at start:")),
-  silence_start_clock ("silence_start", true, "PreRollClock", true, false, true),
+  silence_start_clock ("silence_start", true, "", true, false, true),
 
   trim_end_checkbox (_("Trim silence at end")),
   silence_end_checkbox (_("Add silence at end:")),
-  silence_end_clock ("silence_end", true, "PreRollClock", true, false, true),
+  silence_end_clock ("silence_end", true, "", true, false, true),
 
   format_table (3, 4),
   compatibility_label (_("Compatibility"), Gtk::ALIGN_LEFT),

@@ -38,8 +38,8 @@ EditNoteDialog::EditNoteDialog (MidiRegionView* rv, Gnome::Canvas::CanvasNoteEve
 	: ArdourDialog (_("Note"))
 	, _region_view (rv)
 	, _event (ev)
-	, _time_clock (X_("notetime"), true, X_("NoteTimeClock"), true, false)
-	, _length_clock (X_("notelength"), true, X_("NoteLengthClock"), true, false, true)
+	, _time_clock (X_("notetime"), true, "", true, false)
+	, _length_clock (X_("notelength"), true, "", true, false, true)
 {
 	Table* table = manage (new Table (4, 2));
 	table->set_spacings (6);

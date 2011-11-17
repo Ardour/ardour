@@ -371,13 +371,13 @@ ARDOUR_UI::setup_transport ()
 	tbox->pack_start (rec_button, false, false, 6);
 
 	HBox* clock_box = manage (new HBox);
+
 	primary_clock->set_border_width (2);
 	clock_box->pack_start (*primary_clock, false, false);
 	if (!ARDOUR::Profile->get_small_screen()) {
 		secondary_clock->set_border_width (2);
 		clock_box->pack_start (*secondary_clock, false, false);
 	}
-
 
 	shuttle_box = new ShuttleControl;
 	shuttle_box->show ();

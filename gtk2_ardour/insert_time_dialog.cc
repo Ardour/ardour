@@ -31,7 +31,7 @@ using namespace Editing;
 InsertTimeDialog::InsertTimeDialog (PublicEditor& e)
 	: ArdourDialog (_("Insert Time"))
 	, _editor (e)
-	, _clock ("insertTimeClock", true, X_("InsertTimeClock"), true, false, true, false)
+	, _clock ("insertTimeClock", true, "", true, false, true, false)
 {
 	set_session (_editor.session ());
 

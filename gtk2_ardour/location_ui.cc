@@ -47,9 +47,9 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
 	: SessionHandlePtr (0) /* explicitly set below */
         , location(0)
         , item_table (1, 6, false)
-        , start_clock (X_("locationstart"), true, X_("LocationEditRowClock"), true, false)
-        , end_clock (X_("locationend"), true, X_("LocationEditRowClock"), true, false)
-        , length_clock (X_("locationlength"), true, X_("LocationEditRowClock"), true, false, true)
+        , start_clock (X_("locationstart"), true, "", true, false)
+        , end_clock (X_("locationend"), true, "", true, false)
+        , length_clock (X_("locationlength"), true, "", true, false, true)
         , cd_check_button (_("CD"))
         , hide_check_button (_("Hide"))
         , lock_check_button (_("Lock"))
@@ -136,7 +136,6 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
          start_go_button.signal_clicked().connect(sigc::bind (sigc::mem_fun (*this, &LocationEditRow::go_button_pressed), LocStart));
 	 start_to_playhead_button->signal_clicked().connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::to_playhead_button_pressed), LocStart));
          start_clock.ValueChanged.connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::clock_changed), LocStart));
-         start_clock.ChangeAborted.connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::change_aborted), LocStart));
 
          end_hbox.pack_start (end_go_button, false, false);
          end_hbox.pack_start (end_clock, false, false);
@@ -145,10 +144,8 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
          end_go_button.signal_clicked().connect(sigc::bind (sigc::mem_fun (*this, &LocationEditRow::go_button_pressed), LocEnd));
 	 end_to_playhead_button->signal_clicked().connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::to_playhead_button_pressed), LocEnd));
          end_clock.ValueChanged.connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::clock_changed), LocEnd));
-         end_clock.ChangeAborted.connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::change_aborted), LocEnd));
 
          length_clock.ValueChanged.connect (sigc::bind ( sigc::mem_fun(*this, &LocationEditRow::clock_changed), LocLength));
-         length_clock.ChangeAborted.connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::change_aborted), LocLength));
 
          cd_check_button.signal_toggled().connect(sigc::mem_fun(*this, &LocationEditRow::cd_toggled));
          hide_check_button.signal_toggled().connect(sigc::mem_fun(*this, &LocationEditRow::hide_toggled));
@@ -454,14 +451,6 @@ LocationEditRow::clock_changed (LocationPart part)
 	default:
 		break;
 	}
-}
-
-void
-LocationEditRow::change_aborted (LocationPart /*part*/)
-{
-	if (i_am_the_modifier || !location) return;
-
-	set_location(location);
 }
 
 void

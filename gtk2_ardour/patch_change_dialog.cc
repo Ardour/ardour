@@ -35,7 +35,7 @@ PatchChangeDialog::PatchChangeDialog (
 	)
 	: ArdourDialog (_("Patch Change"), true)
 	, _time_converter (tc)
-	, _time (X_("patchchangetime"), true, X_("PatchChangeTimeClock"), true, false)
+	, _time (X_("patchchangetime"), true, "", true, false)
 	, _channel (*manage (new Adjustment (1, 1, 16, 1, 4)))
 	, _program (*manage (new Adjustment (1, 1, 128, 1, 16)))
 	, _bank (*manage (new Adjustment (1, 1, 16384, 1, 64)))

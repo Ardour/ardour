@@ -21,6 +21,9 @@
 #define __audio_clock_h__
 
 #include <map>
+#include <vector>
+
+#include <pangomm.h>
 
 #include <gtkmm/alignment.h>
 #include <gtkmm/box.h>
@@ -30,15 +33,13 @@
 #include "ardour/ardour.h"
 #include "ardour/session_handle.h"
 
-class CairoEditableText;
-class CairoCell;
-class CairoTextCell;
+#include "cairo_widget.h"
 
 namespace ARDOUR {
 	class Session;
 }
 
-class AudioClock : public Gtk::VBox, public ARDOUR::SessionHandlePtr
+class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 {
   public:
 	enum Mode {
@@ -55,6 +56,8 @@ class AudioClock : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 	Mode mode() const { return _mode; }
 	void set_off (bool yn);
 	bool off() const { return _off; }
+	void set_widget_name (const std::string& name);
+	void set_active_state (Gtkmm2ext::ActiveState s);
 
 	void focus ();
 
@@ -64,8 +67,7 @@ class AudioClock : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 	void set_mode (Mode);
 	void set_bbt_reference (framepos_t);
         void set_is_duration (bool);
-
-	void set_widget_name (const std::string&);
+	void set_draw_background (bool yn);
 
 	std::string name() const { return _name; }
 
@@ -80,15 +82,11 @@ class AudioClock : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 	static sigc::signal<void> ModeChanged;
 	static std::vector<AudioClock*> clocks;
 
-	static bool has_focus() { return _has_focus; }
-
-	CairoEditableText& main_display () const { return *display; }
-	CairoEditableText* supplemental_left_display () const { return supplemental_left; }
-	CairoEditableText* supplemental_right_display () const { return supplemental_right; }
+  protected:
+	void render (cairo_t*);
 
   private:
 	Mode             _mode;
-	uint32_t          key_entry_state;
 	std::string      _name;
 	bool              is_transient;
 	bool              is_duration;
@@ -96,13 +94,31 @@ class AudioClock : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 	/** true if this clock follows the playhead, meaning that certain operations are redundant */
 	bool             _follows_playhead;
 	bool             _off;
+	bool             _need_bg;
 
 	Gtk::Menu  *ops_menu;
 
-	CairoEditableText* display;
+	Glib::RefPtr<Pango::Layout> _layout;
+	Glib::RefPtr<Pango::Layout> _left_layout;
+	Glib::RefPtr<Pango::Layout> _right_layout;
+
+	Pango::AttrColor*    editing_attr;
+	Pango::AttrColor*    background_attr;
+	Pango::AttrColor*    foreground_attr;
+
+	Pango::AttrList normal_attributes;
+	Pango::AttrList editing_attributes;
+	Pango::AttrList info_attributes;
+
+	int layout_height;
+	int layout_width;
+	int info_height;
+	int upper_height;
+	double mode_based_info_ratio;
+	static const double info_font_scale_factor;
+	static const double separator_height;
 
 	enum Field {
-		Timecode_Sign,
 		Timecode_Hours,
 		Timecode_Minutes,
 		Timecode_Seconds,
@@ -115,54 +131,26 @@ class AudioClock : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 		Beats,
 		Ticks,
 		AudioFrames,
-
-		Colon1,
-		Colon2,
-		Colon3,
-		Bar1,
-		Bar2,
-
-		LowerLeft1,
-		LowerLeft2,
-		LowerRight1,
-		LowerRight2,
 	};
 
-	/** CairoCells of various kinds for each of our non-text Fields */
-	std::map<Field,CairoCell*> _fixed_cells;
-	/** CairoTextCells for each of our text Fields */
-	std::map<Field, CairoTextCell*> _text_cells;
-	CairoTextCell* label (Field) const;
+	Field index_to_field (int index) const;
 
-	Gtk::HBox      off_hbox;
-	
-	CairoEditableText* supplemental_left;
-	CairoEditableText* supplemental_right;
-
-	Gtk::HBox top;
-	Gtk::HBox bottom;
-
-	Field editing_field;
+	bool editing;
+	std::string edit_string;
+	std::string pre_edit_string;
+	std::string input_string;
+	std::string::size_type insert_max; 
+			   
 	framepos_t bbt_reference_time;
 	framepos_t last_when;
 	bool last_pdelta;
 	bool last_sdelta;
 
-	uint32_t last_hrs;
-	uint32_t last_mins;
-	uint32_t last_secs;
-	uint32_t last_frames;
-	bool last_negative;
-
-	long  ms_last_hrs;
-	long  ms_last_mins;
-	int   ms_last_secs;
-	int   ms_last_millisecs;
-
 	bool dragging;
 	double drag_start_y;
 	double drag_y;
 	double drag_accum;
+	Field  drag_field;
 
 	/** true if the time of this clock is the one displayed in its widgets.
 	 *  if false, the time in the widgets is an approximation of _canonical_time,
@@ -172,32 +160,26 @@ class AudioClock : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 	framepos_t _canonical_time;
 
 	void on_realize ();
-
-	bool key_press (GdkEventKey *);
-	bool key_release (GdkEventKey *);
-
-	/* proxied from CairoEditableText */
-
-	bool scroll (GdkEventScroll *ev, CairoCell*);
-	bool button_press (GdkEventButton *ev, CairoCell*);
-	bool button_release (GdkEventButton *ev, CairoCell*);
-	sigc::connection scroll_connection;
-	sigc::connection button_press_connection;
-	sigc::connection button_release_connection;
-
-	bool field_motion_notify_event (GdkEventMotion *ev, Field);
-	bool field_focus_in_event (GdkEventFocus *, Field);
-	bool field_focus_out_event (GdkEventFocus *, Field);
-	bool drop_focus_handler (GdkEventFocus*);
+	bool on_key_press_event (GdkEventKey *);
+	bool on_key_release_event (GdkEventKey *);
+	bool on_scroll_event (GdkEventScroll *ev);
+	bool on_button_press_event (GdkEventButton *ev);
+	bool on_button_release_event(GdkEventButton *ev);
+	void on_style_changed (const Glib::RefPtr<Gtk::Style>&);
+	void on_size_request (Gtk::Requisition* req);
+	bool on_motion_notify_event (GdkEventMotion *ev);
+	void on_size_allocate (Gtk::Allocation&);
 
 	void set_timecode (framepos_t, bool);
 	void set_bbt (framepos_t, bool);
 	void set_minsec (framepos_t, bool);
 	void set_frames (framepos_t, bool);
 
-	framepos_t get_frames (Field, framepos_t pos = 0, int dir = 1);
+	framepos_t get_frame_step (Field, framepos_t pos = 0, int dir = 1);
 
-	void timecode_sanitize_display();
+	bool timecode_validate_edit (const std::string&);
+	bool bbt_validate_edit (const std::string&);
+
 	framepos_t timecode_frame_from_display () const;
 	framepos_t bbt_frame_from_display (framepos_t) const;
 	framepos_t bbt_frame_duration_from_display (framepos_t) const;
@@ -208,20 +190,19 @@ class AudioClock : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 
 	void session_configuration_changed (std::string);
 
-	static uint32_t field_length[];
-	static bool _has_focus;
+	Field index_to_field () const;
 
-	void on_style_changed (const Glib::RefPtr<Gtk::Style>&);
-	bool on_key_press_event (GdkEventKey*);
-	bool on_key_release_event (GdkEventKey*);
-
-	void end_edit ();
+	void start_edit ();
+	void end_edit (bool);
 	void edit_next_field ();
 
-	void connect_signals ();
-	void disconnect_signals ();
+	void set_font ();
+	void set_colors ();
+	void show_edit_status (int length);
 
-	void set_theme ();
+	void timecode_tester ();
+
+	double bg_r, bg_g, bg_b, bg_a;
 };
 
 #endif /* __audio_clock_h__ */

@@ -59,12 +59,6 @@ class ArdourButton : public CairoWidget
 	void set_active_state (Gtkmm2ext::ActiveState);
 	void set_visual_state (Gtkmm2ext::VisualState);
 
-	/* this is an API simplification for buttons
-	   that only use the Active and Normal active states.
-	*/
-	void set_active (bool);
-	bool get_active () { return active_state() != Gtkmm2ext::ActiveState (0); }
-
 	void set_elements (Element);
 	Element elements() const { return _elements; }
 

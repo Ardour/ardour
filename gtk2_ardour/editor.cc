@@ -262,7 +262,7 @@ Editor::Editor ()
 
 	  /* tool bar related */
 
-	, zoom_range_clock (new AudioClock (X_("zoomrange"), false, X_("ZoomRangeClock"), true, false, true))
+	, zoom_range_clock (new AudioClock (X_("zoomrange"), false, X_("zoom range"), true, false, true))
 
 	, toolbar_selection_clock_table (2,3)
 
@@ -276,7 +276,7 @@ Editor::Editor ()
 
 	  /* nudge */
 
-	, nudge_clock (new AudioClock (X_("nudge"), false, X_("NudgeClock"), true, false, true))
+	, nudge_clock (new AudioClock (X_("nudge"), false, X_("nudge"), true, false, true))
 	, meters_running(false)
 	, _pending_locate_request (false)
 	, _pending_initial_locate (false)

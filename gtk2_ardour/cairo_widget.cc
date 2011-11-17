@@ -107,6 +107,20 @@ CairoWidget::set_visual_state (Gtkmm2ext::VisualState s)
 }
 
 void
+CairoWidget::set_active (bool yn)
+{
+	/* this is an API simplification for buttons
+	   that only use the Active and Normal states.
+	*/
+
+	if (yn) {
+		set_active_state (Gtkmm2ext::Active);
+	} else {
+		unset_active_state ();
+	}
+}
+
+void
 CairoWidget::on_state_changed (Gtk::StateType)
 {
 	/* this will catch GTK-level state changes from calls like

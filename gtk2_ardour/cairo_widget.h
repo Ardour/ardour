@@ -36,10 +36,22 @@ public:
 
 	Gtkmm2ext::ActiveState active_state() const { return _active_state; }
 	Gtkmm2ext::VisualState visual_state() const { return _visual_state; }
+	
+	/* derived widgets can override these two to catch 
+	   changes in active & visual state
+	*/
+	
 	virtual void set_active_state (Gtkmm2ext::ActiveState);
 	virtual void set_visual_state (Gtkmm2ext::VisualState);
-	virtual void unset_active_state () { set_active_state (Gtkmm2ext::ActiveState (0)); }
-	virtual void unset_visual_state () { set_visual_state (Gtkmm2ext::VisualState (0)); }
+
+	void unset_active_state () { set_active_state (Gtkmm2ext::ActiveState (0)); }
+	void unset_visual_state () { set_visual_state (Gtkmm2ext::VisualState (0)); }
+
+	/* this is an API simplification for widgets
+	   that only use the Active and Normal active states.
+	*/
+	void set_active (bool);
+	bool get_active () { return active_state() != Gtkmm2ext::ActiveState (0); }
 
 	sigc::signal<void> StateChanged;
 

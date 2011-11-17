@@ -637,6 +637,7 @@ ARDOUR_UI::setup_clock ()
 
 	big_clock_window->set (new Window (WINDOW_TOPLEVEL), false);
 
+	big_clock_window->get()->set_resizable (true);
 	big_clock_window->get()->set_keep_above (true);
 	big_clock_window->get()->set_border_width (0);
 	big_clock_window->get()->add (*big_clock);
@@ -684,7 +685,7 @@ ARDOUR_UI::float_big_clock (Gtk::Window* parent)
 }
 
 void
-ARDOUR_UI::big_clock_size_allocate (Gtk::Allocation&)
+ARDOUR_UI::big_clock_size_allocate (Gtk::Allocation& alloc)
 {
 	if (!big_clock_resize_in_progress) {
 		Glib::signal_idle().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::idle_big_clock_text_resizer), 0, 0));

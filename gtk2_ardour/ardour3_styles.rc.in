@@ -60,15 +60,6 @@ style "very_small_red_active_and_selected_button" = "very_small_button"
 	bg[SELECTED] = @@COLPREFIX@_bright_indicator
 }
 
-style "punch_button" = "very_small_red_active_and_selected_button"
-{
- 	font_name = "@FONT_SMALLER@"
-
-	fg[ACTIVE] = @@COLPREFIX@_darkest
-	bg[ACTIVE] = @@COLPREFIX@_bright_indicator
-	bg[SELECTED] = @@COLPREFIX@_bright_indicator
-}
-
 style "small_red_active_and_selected_button" = "small_button"
 {
 	fg[ACTIVE] = @@COLPREFIX@_darkest
@@ -648,99 +639,6 @@ style "small_red_on_black_entry"  = "small_bold_text"
        bg[ACTIVE] = @@COLPREFIX@_base
 }
 
-#
-# Clocks: "text" is the clock digits; "base" is the bg
-#
-
-style "non_recording_big_clock_display" = "medium_entry"
-{
-	font_name = "@FONT_MASSIVE@"
-
-	text[NORMAL] = @@COLPREFIX@_control_text
-	text[ACTIVE] = @@COLPREFIX@_bright_indicator
-	text[SELECTED] = @@COLPREFIX@_bright_indicator
-	text[PRELIGHT] = @@COLPREFIX@_bright_indicator
-	text[INSENSITIVE] = @@COLPREFIX@_bright_indicator
-	
-	base[NORMAL] = @@COLPREFIX@_control_base
-	base[ACTIVE] = shade(0.5,@@COLPREFIX@_bright_indicator)
-}
-
-style "recording_big_clock_display" = "non_recording_big_clock_display"
-{
-	text[NORMAL] = darker(@@COLPREFIX@_arm)
-}
-
-style "transport_clock_display"
-{
-	font_name = "@FONT_BOLD_BIG@"
-
-        text[NORMAL] = darker (@@COLPREFIX@_contrasting_indicator)
-        text[ACTIVE] = darker (@@COLPREFIX@_bright_indicator)
-	text[SELECTED] = darker(@@COLPREFIX@_bright_indicator)
-	text[PRELIGHT] = darker(@@COLPREFIX@_bright_indicator)
-        text[INSENSITIVE] = darker(@@COLPREFIX@_bright_indicator)
-
-	base[NORMAL] = @@COLPREFIX@_darkest
-	base[ACTIVE] = @@COLPREFIX@_darkest
-	bg[NORMAL] = @@COLPREFIX@_darkest
-	bg[ACTIVE] = @@COLPREFIX@_darkest
-}
-
-style "transport_clock_display_delta" = "transport_clock_display"
-{
-        text[NORMAL] = @@COLPREFIX@_bright_color
-}
-
-style "tempo_meter_clock_display" = "very_small_text"
-{
-	text[NORMAL] = @@COLPREFIX@_fg
-        text[ACTIVE] = @@COLPREFIX@_somewhat_bright_indicator
-	text[SELECTED] = @@COLPREFIX@_bright_indicator
-	base[NORMAL] = @@COLPREFIX@_base
-	base[ACTIVE] = @@COLPREFIX@_contrasting_indicator
-}
-
-style "default_clock_display" = "medium_text"
-{
-        text[NORMAL] = @@COLPREFIX@_contrasting_indicator
-	text[ACTIVE] = @@COLPREFIX@_bright_indicator
-	text[SELECTED] = @@COLPREFIX@_bright_indicator
-	base[NORMAL] = @@COLPREFIX@_darkest
-	base[ACTIVE] = @@COLPREFIX@_darkest
-}
-
-style "selection_clock_display" 
-{
-        font_name = "@FONT_SMALLER@"
-
-        text[NORMAL] = @@COLPREFIX@_contrasting_indicator
-	text[ACTIVE] = @@COLPREFIX@_bright_indicator
-	text[SELECTED] = @@COLPREFIX@_bright_indicator
-	base[NORMAL] = @@COLPREFIX@_darkest
-	base[ACTIVE] = @@COLPREFIX@_darkest
-}
-
-style "punch_clock_display" = "very_small_text"
-{
-        font_name = "@FONT_SMALLER@"
-
-        text[NORMAL] = @@COLPREFIX@_contrasting_indicator
-	text[ACTIVE] = @@COLPREFIX@_bright_indicator
-	text[SELECTED] = @@COLPREFIX@_bright_indicator
-	base[NORMAL] = @@COLPREFIX@_darkest
-	base[ACTIVE] = @@COLPREFIX@_darkest
-}
-
-style "white_on_black_clock_display" = "medium_text"
-{
-	text[NORMAL] = @@COLPREFIX@_fg
-	text[ACTIVE] = @@COLPREFIX@_bright_indicator
-        base[SELECTED] = @@COLPREFIX@_bright_indicator
-	base[NORMAL] = @@COLPREFIX@_darkest
-	base[ACTIVE] = @@COLPREFIX@_darkest
-}
-
 style "editor_time_ruler" = "small_text"
 {
 	fg[NORMAL] = @@COLPREFIX@_fg
@@ -1019,10 +917,6 @@ style "location_row_button" = "default_button"
 	font_name = "@FONT_NORMAL@"
 }
 
-style "location_rows_clock" = "default_clock_display"
-{
-	font_name = "@FONT_NORMAL@"
-}
 
 style "ardour_button" ="default_button"
 {

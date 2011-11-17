@@ -628,20 +628,6 @@ ArdourButton::set_image (const RefPtr<Gdk::Pixbuf>& img)
 }
 
 void
-ArdourButton::set_active (bool yn)
-{
-	/* this is an API simplification for buttons
-	   that only use the Active and Normal states.
-	*/
-
-	if (yn) {
-		set_active_state (Gtkmm2ext::Active);
-	} else {
-		unset_active_state ();
-	}
-}
-
-void
 ArdourButton::set_active_state (Gtkmm2ext::ActiveState s)
 {
 	bool changed = (_active_state != s);

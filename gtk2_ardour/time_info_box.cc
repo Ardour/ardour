@@ -46,27 +46,18 @@ TimeInfoBox::TimeInfoBox ()
 	, syncing_selection (false)
 	, syncing_punch (false)
 {
-	selection_start = new AudioClock ("selection-start", false, "SelectionClockDisplay", false, false, false, false);
-	selection_end = new AudioClock ("selection-end", false, "SelectionClockDisplay", false, false, false, false);
-	selection_length = new AudioClock ("selection-length", false, "SelectionClockDisplay", false, false, true, false);
+	selection_start = new AudioClock ("selection-start", false, "selection", false, false, false, false);
+	selection_end = new AudioClock ("selection-end", false, "selection", false, false, false, false);
+	selection_length = new AudioClock ("selection-length", false, "selection", false, false, true, false);
 
-	punch_start = new AudioClock ("punch-start", false, "PunchClockDisplay", false, false, false, false);
-	punch_end = new AudioClock ("punch-end", false, "PunchClockDisplay", false, false, false, false);
+	punch_start = new AudioClock ("punch-start", false, "punch", false, false, false, false);
+	punch_end = new AudioClock ("punch-end", false, "punch", false, false, false, false);
 
-	CairoEditableText& ss (selection_start->main_display());
-	ss.set_corner_radius (0);
-
-	CairoEditableText& se (selection_end->main_display());
-	se.set_corner_radius (0);
-
-	CairoEditableText& sl (selection_length->main_display());
-	sl.set_corner_radius (0);
-
-	CairoEditableText& ps (punch_start->main_display());
-	ps.set_corner_radius (0);
-
-	CairoEditableText& pe (punch_end->main_display());
-	pe.set_corner_radius (0);
+	selection_start->set_draw_background (false);
+	selection_end->set_draw_background (false);
+	selection_length->set_draw_background (false);
+	punch_start->set_draw_background (false);
+	punch_end->set_draw_background (false);
 
 	selection_title.set_text (_("Selection"));
 	punch_title.set_text (_("Punch"));
@@ -87,7 +78,6 @@ TimeInfoBox::TimeInfoBox ()
 	right.set_spacings (0);
 	right.set_border_width (2);
 	right.set_col_spacings (2);
-
 
 	Gtk::Label* l;
 

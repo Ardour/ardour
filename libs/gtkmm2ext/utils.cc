@@ -391,14 +391,6 @@ Gtkmm2ext::container_clear (Gtk::Container& c)
 void
 Gtkmm2ext::rounded_rectangle (Cairo::RefPtr<Cairo::Context> context, double x, double y, double w, double h, double r)
 {
-        /* renders small shapes better than most others */
-
-/*    A****BQ
-      H    C
-      *    *
-      G    D
-      F****E
-*/
 	rounded_rectangle (context->cobj(), x, y, w, h, r);
 }
 

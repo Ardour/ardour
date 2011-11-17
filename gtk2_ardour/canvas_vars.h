@@ -188,3 +188,19 @@ BUTTON_VARS(MouseModeButton, "mouse mode button")
 BUTTON_VARS(ZoomButton, "zoom button")
 BUTTON_VARS(RouteButton, "route button")
 
+#define CLOCK_VARS(root,name) \
+	CANVAS_VARIABLE(canvasvar_ ## root ## Background, name ": background") \
+	CANVAS_VARIABLE(canvasvar_ ## root ## Text, name ": text") \
+	CANVAS_VARIABLE(canvasvar_ ## root ## EditedText, name ": edited text") \
+	CANVAS_VARIABLE(canvasvar_ ## root ## Cursor, name ": cursor") 
+
+CLOCK_VARS(TransportClock, "transport clock")
+CLOCK_VARS(SecondaryClock, "secondary clock")
+CLOCK_VARS(TransportDeltaClock, "transport delta clock")
+CLOCK_VARS(SecondaryDeltaClock, "secondary delta clock")
+CLOCK_VARS(BigClock, "big clock")
+CLOCK_VARS(BigClockActive, "big clock active")
+CLOCK_VARS(PunchClock, "punch clock")
+CLOCK_VARS(SelectionClock, "selection clock")
+CLOCK_VARS(NudgeClock, "nudge clock")
+CLOCK_VARS(GenericClock, "clock")

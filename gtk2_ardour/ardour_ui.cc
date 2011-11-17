@@ -137,12 +137,12 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	: Gtkmm2ext::UI (PROGRAM_NAME, argcp, argvp)
 
 	, gui_object_state (new GUIObjectState)
-	, primary_clock (new AudioClock (X_("primary"), false, X_("TransportClockDisplay"), true, true, false, true))
-	, secondary_clock (new AudioClock (X_("secondary"), false, X_("SecondaryClockDisplay"), true, true, false, true))
+	, primary_clock (new AudioClock (X_("primary"), false, X_("transport"), true, true, false, true))
+	, secondary_clock (new AudioClock (X_("secondary"), false, X_("secondary"), true, true, false, true))
 
 	  /* big clock */
 
-	, big_clock (new AudioClock (X_("bigclock"), false, "BigClockNonRecording", true, true, false, false))
+	, big_clock (new AudioClock (X_("bigclock"), false, "big", true, true, false, false))
 
 	  /* transport */
 
@@ -3638,13 +3638,10 @@ ARDOUR_UI::record_state_changed ()
 		return;
 	}
 
-	Session::RecordState const r = _session->record_status ();
-	bool const h = _session->have_rec_enabled_track ();
-
-	if (r == Session::Recording && h)  {
-		big_clock->set_widget_name ("BigClockRecording");
+	if (_session->record_status () == Session::Recording && _session->have_rec_enabled_track ()) {
+		big_clock->set_active (true);
 	} else {
-		big_clock->set_widget_name ("BigClockNonRecording");
+		big_clock->set_active (false);
 	}
 }
 

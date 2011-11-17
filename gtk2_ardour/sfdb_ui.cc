@@ -118,8 +118,8 @@ importmode2string (ImportMode mode)
 
 SoundFileBox::SoundFileBox (bool persistent)
 	: table (6, 2),
-	  length_clock ("sfboxLengthClock", !persistent, "EditCursorClock", false, false, true, false),
-	  timecode_clock ("sfboxTimecodeClock", !persistent, "EditCursorClock", false, false, false, false),
+	  length_clock ("sfboxLengthClock", !persistent, "", false, false, true, false),
+	  timecode_clock ("sfboxTimecodeClock", !persistent, "", false, false, false, false),
 	  main_box (false, 6),
 	  autoplay_btn (_("Auto-play"))
 

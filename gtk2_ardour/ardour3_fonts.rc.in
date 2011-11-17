@@ -55,6 +55,11 @@ style "larger_text"
  	font_name = "@FONT_LARGE@"
 }
 
+style "massive_text"
+{
+ 	font_name = "@FONT_MASSIVE@"
+}
+
 style "larger_bold_text"
 {
  	font_name = "bold @FONT_LARGE@"
