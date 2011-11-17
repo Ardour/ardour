@@ -77,17 +77,10 @@ class MidiGhostRegion : public GhostRegion {
 public:
 	class Event : public sigc::trackable {
 	public:
-		Event(ArdourCanvas::CanvasNoteEvent*);
-		virtual ~Event() {}
+		Event(ArdourCanvas::CanvasNoteEvent *, ArdourCanvas::Group *);
+		~Event ();
 
 		ArdourCanvas::CanvasNoteEvent* event;
-	};
-
-	class Note : public Event {
-	public:
-		Note(ArdourCanvas::CanvasNote*, ArdourCanvas::Group*);
-		~Note();
-
 		ArdourCanvas::SimpleRect* rect;
 	};
 

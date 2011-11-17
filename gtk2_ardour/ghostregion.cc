@@ -189,20 +189,15 @@ MidiGhostRegion::~MidiGhostRegion()
 	clear_events ();
 }
 
-MidiGhostRegion::Event::Event(ArdourCanvas::CanvasNoteEvent* e)
-	: event(e)
+MidiGhostRegion::Event::Event (ArdourCanvas::CanvasNoteEvent* e, ArdourCanvas::Group* g)
+	: event (e)
 {
-
+	rect = new ArdourCanvas::SimpleRect (*g, e->x1(), e->y1(), e->x2(), e->y2());
 }
 
-MidiGhostRegion::Note::Note(ArdourCanvas::CanvasNote* n, ArdourCanvas::Group* g)
-	: Event(n)
+MidiGhostRegion::Event::~Event ()
 {
-	rect = new ArdourCanvas::SimpleRect(*g, n->x1(), n->y1(), n->x2(), n->y2());
-}
-
-MidiGhostRegion::Note::~Note()
-{
+	/* event is not ours to delete */
 	delete rect;
 }
 
@@ -233,16 +228,13 @@ MidiGhostRegion::set_height ()
 void
 MidiGhostRegion::set_colors()
 {
-	MidiGhostRegion::Note* note;
 	guint fill = source_track_color(200);
 
 	GhostRegion::set_colors();
 
 	for (EventList::iterator it = events.begin(); it != events.end(); ++it) {
-		if ((note = dynamic_cast<MidiGhostRegion::Note*>(*it)) != 0) {
-			note->rect->property_fill_color_rgba() = fill;
-			note->rect->property_outline_color_rgba() =  ARDOUR_UI::config()->canvasvar_GhostTrackMidiOutline.get();
-		}
+		(*it)->rect->property_fill_color_rgba() = fill;
+		(*it)->rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_GhostTrackMidiOutline.get();
 	}
 }
 
@@ -255,21 +247,18 @@ MidiGhostRegion::update_range ()
 		return;
 	}
 
-	MidiGhostRegion::Note* note;
 	double const h = trackview.current_height() / double (mv->contents_note_range ());
 
 	for (EventList::iterator it = events.begin(); it != events.end(); ++it) {
-		if ((note = dynamic_cast<MidiGhostRegion::Note*>(*it)) != 0) {
-			uint8_t const note_num = note->event->note()->note();
+		uint8_t const note_num = (*it)->event->note()->note();
 
-			if (note_num < mv->lowest_note() || note_num > mv->highest_note()) {
-				note->rect->hide();
-			} else {
-				note->rect->show();
-				double const y = trackview.current_height() - (note_num + 1 - mv->lowest_note()) * h + 1;
-				note->rect->property_y1() = y;
-				note->rect->property_y2() = y + h;
-			}
+		if (note_num < mv->lowest_note() || note_num > mv->highest_note()) {
+			(*it)->rect->hide();
+		} else {
+			(*it)->rect->show();
+			double const y = trackview.current_height() - (note_num + 1 - mv->lowest_note()) * h + 1;
+			(*it)->rect->property_y1() = y;
+			(*it)->rect->property_y2() = y + h;
 		}
 	}
 }
@@ -277,11 +266,11 @@ MidiGhostRegion::update_range ()
 void
 MidiGhostRegion::add_note(ArdourCanvas::CanvasNote* n)
 {
-	Note* note = new Note(n, group);
-	events.push_back(note);
+	Event* event = new Event (n, group);
+	events.push_back (event);
 
-	note->rect->property_fill_color_rgba() = source_track_color(200);
-	note->rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_GhostTrackMidiOutline.get();
+	event->rect->property_fill_color_rgba() = source_track_color(200);
+	event->rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_GhostTrackMidiOutline.get();
 
 	MidiStreamView* mv = midi_view();
 
@@ -289,11 +278,11 @@ MidiGhostRegion::add_note(ArdourCanvas::CanvasNote* n)
 		const uint8_t note_num = n->note()->note();
 
 		if (note_num < mv->lowest_note() || note_num > mv->highest_note()) {
-			note->rect->hide();
+			event->rect->hide();
 		} else {
 			const double y = mv->note_to_y(note_num);
-			note->rect->property_y1() = y;
-			note->rect->property_y2() = y + mv->note_height();
+			event->rect->property_y1() = y;
+			event->rect->property_y2() = y + mv->note_height();
 		}
 	}
 }
@@ -320,13 +309,10 @@ MidiGhostRegion::update_note (ArdourCanvas::CanvasNote* parent)
 		return;
 	}
 
-	Note* note = dynamic_cast<Note *> (ev);
-	if (note) {
-		double const x1 = parent->property_x1 ();
-		double const x2 = parent->property_x2 ();
-		note->rect->property_x1 () = x1;
-		note->rect->property_x2 () = x2;
-	}
+	double const x1 = parent->property_x1 ();
+	double const x2 = parent->property_x2 ();
+	ev->rect->property_x1 () = x1;
+	ev->rect->property_x2 () = x2;
 }
 
 void
