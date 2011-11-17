@@ -164,7 +164,7 @@ extern int vstfx_load_state (VSTFX* vstfx, char * filename);
 
 /** Save a plugin state to a file.**/
 
-extern int vstfx_save_state (VSTFX* vstfx, char * filename);
+extern bool vstfx_save_state (VSTFX* vstfx, char * filename);
 
 
 #endif /* __vstfx_h__ */
