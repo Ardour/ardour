@@ -186,7 +186,7 @@ release software. So, a few guidelines:\n\
 2) Please see http://ardour.org/a3_features for a guide to new features.\n\
 3) <b>Please do NOT use the forums at ardour.org to report issues</b>.\n\
 4) Please <b>DO</b> use the bugtracker at http://tracker.ardour.org/ to report issues\n\
-   making sure to note the product version number as 3.0-alpha.\n\
+   making sure to note the product version number as 3.0-beta.\n\
 5) Please <b>DO</b> use the ardour-users mailing list to discuss ideas and pass on comments.\n\
 6) Please <b>DO</b> join us on IRC for real time discussions about ardour3. You\n\
    can get there directly from Ardour via the Help->Chat menu option.\n\
