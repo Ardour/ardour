@@ -280,6 +280,19 @@ AudioClock::render (cairo_t* cr)
 			Gtkmm2ext::rounded_rectangle (cr, 0, upper_height + separator_height, _width, h, 9);
 		}
 	}
+
+	if (editing) {
+		Pango::Rectangle cursor = _layout->get_cursor_strong_pos (edit_string.length() - input_string.length() - 1);
+		cerr << "index at " << edit_string.length() - input_string.length() - 1 
+		     << " cursor at " << cursor.get_x()/PANGO_SCALE << ", " << cursor.get_y()/PANGO_SCALE
+		     << " " << cursor.get_width()/PANGO_SCALE
+		     << " .. " << cursor.get_height()/PANGO_SCALE
+		     << endl;
+		cairo_set_source_rgba (cr, 0.9, 0.1, 0.1, 0.3);
+		cairo_rectangle (cr, 6 + cursor.get_x()/PANGO_SCALE, cursor.get_y()/PANGO_SCALE, 
+				 10, cursor.get_height()/PANGO_SCALE);
+		cairo_fill (cr);
+	}
 }
 
 void
@@ -371,7 +384,6 @@ AudioClock::start_edit ()
 	input_string.clear ();
 	editing = true;
 
-	show_edit_status (1);
 	queue_draw ();
 
 	Keyboard::magic_widget_grab_focus ();
