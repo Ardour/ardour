@@ -33,6 +33,7 @@
 #include "ardour/session.h"
 #include "ardour/tempo.h"
 #include "ardour/profile.h"
+#include "ardour/slave.h"
 #include <sigc++/bind.h>
 
 #include "ardour_ui.h"
@@ -672,6 +673,11 @@ AudioClock::end_edit_relative (bool add)
 void
 AudioClock::session_configuration_changed (std::string p)
 {
+	if (p == "sync-source" || p == "external-sync") {
+		set (current_time(), true);
+		return;
+	}
+
 	if (p != "timecode-offset" && p != "timecode-offset-negative") {
 		return;
 	}
@@ -728,10 +734,7 @@ AudioClock::set (framepos_t when, bool force, framecnt_t offset)
 		}
 	}
 
-	if (when != last_when || force) {
-		queue_draw ();
-	}
-
+	queue_draw ();
 	last_when = when;
 }
 
@@ -868,7 +871,24 @@ AudioClock::set_timecode (framepos_t when, bool force)
 
 	_layout->set_text (buf);
 
-	if (_right_layout) {
+	if (_left_layout) {
+
+		if (_session->config.get_external_sync()) {
+			switch (_session->config.get_sync_source()) {
+			case JACK:
+				_left_layout->set_text ("JACK");
+				break;
+			case MTC:
+				_left_layout->set_text ("MTC");
+				break;
+			case MIDIClock:
+				_left_layout->set_text ("M-Clock");
+				break;
+			}
+		} else {
+			_left_layout->set_text ("INT");
+		}
+
 		double timecode_frames = _session->timecode_frames_per_second();
 	
 		if (fmod(timecode_frames, 1.0) == 0.0) {
@@ -1300,7 +1320,7 @@ AudioClock::on_scroll_event (GdkEventScroll *ev)
 	int index;
 	int trailing;
 
-	if (_session == 0 || !editable || _off) {
+	if (editing || _session == 0 || !editable || _off) {
 		return false;
 	}
 
@@ -1363,7 +1383,7 @@ AudioClock::on_scroll_event (GdkEventScroll *ev)
 bool
 AudioClock::on_motion_notify_event (GdkEventMotion *ev)
 {
-	if (_session == 0 || !dragging) {
+	if (editing || _session == 0 || !dragging) {
 		return false;
 	}
 
