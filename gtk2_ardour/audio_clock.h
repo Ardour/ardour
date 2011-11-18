@@ -135,11 +135,18 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 
 	Field index_to_field (int index) const;
 
+	/* this maps the number of input characters/digits when editing
+	   to a cursor position. insert_map[N] = index of character/digit
+	   where the cursor should be after N chars/digits. it is 
+	   mode specific and so it is filled during set_mode().
+	*/
+
+	std::vector<int> insert_map;
+
 	bool editing;
 	std::string edit_string;
 	std::string pre_edit_string;
 	std::string input_string;
-	std::string::size_type insert_max; 
 
 	framepos_t bbt_reference_time;
 	framepos_t last_when;

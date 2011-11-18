@@ -279,6 +279,30 @@ AudioClock::render (cairo_t* cr)
 			}
 		}
 	}
+
+	if (editing) {
+		const double cursor_width = 16.0; /* need em width here, not 16 */
+
+		if (!insert_map.empty()) {
+			Pango::Rectangle cursor = _layout->get_cursor_strong_pos (insert_map[input_string.length()]);
+			
+			cairo_set_source_rgba (cr, 0.9, 0.1, 0.1, 0.4);
+			cairo_rectangle (cr, 
+					 x_leading_padding + cursor.get_x()/PANGO_SCALE, 
+					 (upper_height - layout_height)/2.0, 
+					 cursor_width, cursor.get_height()/PANGO_SCALE);
+			cairo_fill (cr);	
+		} else {
+			if (input_string.empty()) {
+				cairo_set_source_rgba (cr, 0.9, 0.1, 0.1, 0.4);
+				cairo_rectangle (cr, 
+						 (get_width()/2.0) - cursor_width,
+						 (upper_height - layout_height)/2.0, 
+						 cursor_width, upper_height);
+				cairo_fill (cr);
+			}
+		}
+	}
 }
 
 void
@@ -316,7 +340,7 @@ AudioClock::on_size_request (Gtk::Requisition* req)
 	   where we printf a fractional value (XXX or should)
 	*/
 
-	tmp->set_text (" 88|88:88:88,88"); 
+	tmp->set_text (" 88|88:88:88,888"); 
 
 	tmp->get_pixel_size (req->width, req->height);
 
@@ -368,8 +392,13 @@ AudioClock::show_edit_status (int length)
 void
 AudioClock::start_edit ()
 {
-	edit_string = _layout->get_text ();
-	pre_edit_string = edit_string;
+	pre_edit_string = _layout->get_text ();
+	if (!insert_map.empty()) {
+		edit_string = pre_edit_string;
+	} else {
+		edit_string.clear ();
+		_layout->set_text ("");
+	}
 	input_string.clear ();
 	editing = true;
 
@@ -590,7 +619,7 @@ AudioClock::parse_as_distance (const std::string& instr)
 	string str = instr;
 
 	/* the input string is in reverse order */
-
+	
 	std::reverse (str.begin(), str.end());
 
 	switch (_mode) {
@@ -710,6 +739,7 @@ void
 AudioClock::set_frames (framepos_t when, bool /*force*/)
 {
 	char buf[32];
+	bool negative = false;
 
 	if (_off) {
 		_layout->set_text ("\u2012\u2012\u2012\u2012\u2012\u2012\u2012\u2012\u2012\u2012");
@@ -722,16 +752,26 @@ AudioClock::set_frames (framepos_t when, bool /*force*/)
 		return;
 	}
 	
-	snprintf (buf, sizeof (buf), "%10" PRId64, when);
+	if (when < 0) {
+		when = -when;
+		negative = true;
+	}
+
+	if (negative) {
+		snprintf (buf, sizeof (buf), "-%10" PRId64, when);
+	} else {
+		snprintf (buf, sizeof (buf), " %10" PRId64, when);
+	}
+
 	_layout->set_text (buf);
 
 	if (_left_layout) {
 		framecnt_t rate = _session->frame_rate();
 
-		if (fmod (rate, 1000.0) == 0.000) {
-			sprintf (buf, "%" PRId64 "K", rate/1000);
+		if (fmod (rate, 100.0) == 0.0) {
+			sprintf (buf, "SR %.1fkHz", rate/1000.0);
 		} else {
-			sprintf (buf, "%" PRId64, rate);
+			sprintf (buf, "SR %" PRId64, rate);
 		}
 
 		_left_layout->set_text (buf);
@@ -739,9 +779,9 @@ AudioClock::set_frames (framepos_t when, bool /*force*/)
 		float vid_pullup = _session->config.get_video_pullup();
 
 		if (vid_pullup == 0.0) {
-			_right_layout->set_text (_("none"));
+			_right_layout->set_text (_("pullup: \u2012"));
 		} else {
-			sprintf (buf, "%-6.4f", vid_pullup);
+			sprintf (buf, _("pullup %-6.4f"), vid_pullup);
 			_right_layout->set_text (buf);
 		}
 	}
@@ -797,14 +837,14 @@ AudioClock::set_timecode (framepos_t when, bool force)
 {
 	char buf[32];
 	Timecode::Time TC;
-	bool negative; 
+	bool negative = false;
 
 	if (_off) {
 		_layout->set_text ("\u2012\u2012:\u2012\u2012:\u2012\u2012:\u2012\u2012");
 		if (_left_layout) {
 			_left_layout->set_text ("");
 			_right_layout->set_text ("");
-}
+		}
 		
 		return;
 	}
@@ -846,10 +886,10 @@ AudioClock::set_bbt (framepos_t when, bool force)
 {
 	char buf[16];
 	Timecode::BBT_Time BBT;
-	bool negative;
+	bool negative = false;
 
 	if (_off) {
-		_layout->set_text ("\u2012\u2012|\u2012\u2012|\u2012\u2012\u2012\u2012");
+		_layout->set_text ("\u2012\u2012\u2012|\u2012\u2012|\u2012\u2012\u2012\u2012");
 		if (_left_layout) {
 			_left_layout->set_text ("");
 			_right_layout->set_text ("");
@@ -878,9 +918,9 @@ AudioClock::set_bbt (framepos_t when, bool force)
 	}
 
 	if (negative) {
-		snprintf (buf, sizeof (buf), "-%02" PRIu32 "|%02" PRIu32 "|%04" PRIu32, BBT.bars, BBT.beats, BBT.ticks);
+		snprintf (buf, sizeof (buf), "-%03" PRIu32 "|%02" PRIu32 "|%04" PRIu32, BBT.bars, BBT.beats, BBT.ticks);
 	} else {
-		snprintf (buf, sizeof (buf), " %02" PRIu32 "|%02" PRIu32 "|%04" PRIu32, BBT.bars, BBT.beats, BBT.ticks);
+		snprintf (buf, sizeof (buf), " %03" PRIu32 "|%02" PRIu32 "|%04" PRIu32, BBT.bars, BBT.beats, BBT.ticks);
 	}
 
 	_layout->set_text (buf);
@@ -1061,7 +1101,7 @@ AudioClock::on_key_release_event (GdkEventKey *ev)
 		return false;
 	}
 
-	if (input_string.length() >= insert_max) {
+	if (!insert_map.empty() && (input_string.length() >= insert_map.size())) {
 		/* eat the key event, but do no nothing with it */
 		return true;
 	}
@@ -1071,12 +1111,18 @@ AudioClock::on_key_release_event (GdkEventKey *ev)
 	string::reverse_iterator ri;
 	vector<int> insert_at;
 	int highlight_length;
-	
+	char buf[32];
+	framepos_t pos;
+
 	/* merge with pre-edit-string into edit string */
 	
 	switch (_mode) {
 	case Frames:
-		edit_string = input_string;
+		/* get this one in the right order, and to the right width */
+		edit_string.push_back (new_char);
+		sscanf (edit_string.c_str(), "%" PRId64, &pos);
+		snprintf (buf, sizeof (buf), " %10" PRId64, pos);
+		edit_string = buf;
 		highlight_length = edit_string.length();
 		break;
 		
@@ -1511,7 +1557,10 @@ AudioClock::frames_from_timecode_string (const string& str) const
 	Timecode::Time TC;
 	framepos_t sample;
 
-	sscanf (str.c_str(), "%d:%d:%d:%d", &TC.hours, &TC.minutes, &TC.seconds, &TC.frames);
+	if (sscanf (str.c_str(), "%d:%d:%d:%d", &TC.hours, &TC.minutes, &TC.seconds, &TC.frames) != 4) {
+		error << string_compose (_("programming error: %1 %2"), "badly formatted timecode clock string", str) << endmsg;
+		return 0;
+	}
 
 	TC.rate = _session->timecode_frames_per_second();
 	TC.drop= _session->timecode_drop_frames();
@@ -1533,7 +1582,11 @@ AudioClock::frames_from_minsec_string (const string& str) const
 	int hrs, mins, secs, millisecs;
 	framecnt_t sr = _session->frame_rate();
 
-	sscanf (str.c_str(), "%d:%d:%d:%d", &hrs, &mins, &secs, &millisecs);
+	if (sscanf (str.c_str(), "%d:%d:%d.%d", &hrs, &mins, &secs, &millisecs) != 4) {
+		error << string_compose (_("programming error: %1 %2"), "badly formatted minsec clock string", str) << endmsg;
+		return 0;
+	}
+
 	return (framepos_t) floor ((hrs * 60.0f * 60.0f * sr) + (mins * 60.0f * sr) + (secs * sr) + (millisecs * sr / 1000.0));
 }
 
@@ -1549,7 +1602,7 @@ AudioClock::frames_from_bbt_string (framepos_t pos, const string& str) const
 	any.type = AnyTime::BBT;
 
 	sscanf (str.c_str(), "%" PRId32 "|%" PRId32 "|%" PRId32, &any.bbt.bars, &any.bbt.beats, &any.bbt.ticks);
-
+	
 	if (is_duration) {
 		any.bbt.bars++;
 		any.bbt.beats++;
@@ -1635,25 +1688,56 @@ AudioClock::set_mode (Mode m)
 
 	_mode = m;
 
+	insert_map.clear();
+
+	_layout->set_text ("");
+
+	if (_left_layout) {
+		_left_layout->set_text ("");
+		_right_layout->set_text ("");
+	}
+
 	switch (_mode) {
 	case Timecode:
-		insert_max = 9; // 8 digits + sign [-]2:2:2:2
 		mode_based_info_ratio = 0.5;
+		insert_map.push_back (11);
+		insert_map.push_back (10);
+		insert_map.push_back (8);
+		insert_map.push_back (7);
+		insert_map.push_back (5);
+		insert_map.push_back (4);
+		insert_map.push_back (2);
+		insert_map.push_back (1);
 		break;
 		
 	case BBT:
-		insert_max = 8; // 8 digits, 2|2|4
 		mode_based_info_ratio = 0.5;
+		insert_map.push_back (11);
+		insert_map.push_back (10);
+		insert_map.push_back (9);
+		insert_map.push_back (8);
+		insert_map.push_back (6);
+		insert_map.push_back (5);	
+		insert_map.push_back (3);	
+		insert_map.push_back (2);	
+		insert_map.push_back (1);	
 		break;
 		
 	case MinSec:
-		insert_max = 9; // 7 digits 2:2:2.3
 		mode_based_info_ratio = 1.0;
+		insert_map.push_back (12);
+		insert_map.push_back (11);
+		insert_map.push_back (10);
+		insert_map.push_back (8);
+		insert_map.push_back (7);
+		insert_map.push_back (5);
+		insert_map.push_back (4);
+		insert_map.push_back (2);	
+		insert_map.push_back (1);	
 		break;
 		
 	case Frames:
-		insert_max = INT_MAX;
-		mode_based_info_ratio = 1.0;
+		mode_based_info_ratio = 0.5;
 		break;
 	}
 
