@@ -756,6 +756,7 @@ AudioClock::set_minsec (framepos_t when, bool force)
 	int mins;
 	int secs;
 	int millisecs;
+	bool negative = false;
 
 	if (_off) {
 		_layout->set_text ("\u2012\u2012:\u2012\u2012:\u2012\u2012.\u2012\u2012\u2012");
@@ -768,6 +769,11 @@ AudioClock::set_minsec (framepos_t when, bool force)
 		return;
 	}	
 
+	if (when < 0) {
+		when = -when;
+		negative = true;
+	}
+
 	left = when;
 	hrs = (int) floor (left / (_session->frame_rate() * 60.0f * 60.0f));
 	left -= (framecnt_t) floor (hrs * _session->frame_rate() * 60.0f * 60.0f);
@@ -776,8 +782,13 @@ AudioClock::set_minsec (framepos_t when, bool force)
 	secs = (int) floor (left / (float) _session->frame_rate());
 	left -= (framecnt_t) floor (secs * _session->frame_rate());
 	millisecs = floor (left * 1000.0 / (float) _session->frame_rate());
+	
+	if (negative) {
+		snprintf (buf, sizeof (buf), "-%02" PRId32 ":%02" PRId32 ":%02" PRId32 ".%03" PRId32, hrs, mins, secs, millisecs);
+	} else {
+		snprintf (buf, sizeof (buf), " %02" PRId32 ":%02" PRId32 ":%02" PRId32 ".%03" PRId32, hrs, mins, secs, millisecs);
+	}
 
-	snprintf (buf, sizeof (buf), "%02" PRId32 ":%02" PRId32 ":%02" PRId32 ".%03" PRId32, hrs, mins, secs, millisecs);
 	_layout->set_text (buf);
 }
 
@@ -798,10 +809,9 @@ AudioClock::set_timecode (framepos_t when, bool force)
 		return;
 	}
 
-	negative = when < 0;
-
-	if (negative) {
+	if (when < 0) {
 		when = -when;
+		negative = true;
 	}
 
 	if (is_duration) {
@@ -847,10 +857,9 @@ AudioClock::set_bbt (framepos_t when, bool force)
 		return;
 	}
 
-	negative = when < 0;
-
-	if (negative) {
+	if (when < 0) {
 		when = -when;
+		negative = true;
 	}
 
 	/* handle a common case */
@@ -1183,7 +1192,7 @@ AudioClock::on_button_press_event (GdkEventButton *ev)
 			 * x and y. 
 			 */
 
-			y = ev->y - ((get_height() - layout_height)/2);
+			y = ev->y - ((upper_height - layout_height)/2);
 			x = ev->x - x_leading_padding;
 			
 			if (_layout->xy_to_index (x * PANGO_SCALE, y * PANGO_SCALE, index, trailing)) {			
@@ -1262,7 +1271,7 @@ AudioClock::on_scroll_event (GdkEventScroll *ev)
 	 * x and y. 
 	 */
 
-	y = ev->y - ((get_height() - layout_height)/2);
+	y = ev->y - ((upper_height - layout_height)/2);
 	x = ev->x - x_leading_padding;
 
 	if (!_layout->xy_to_index (x * PANGO_SCALE, y * PANGO_SCALE, index, trailing)) {
