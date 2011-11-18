@@ -34,7 +34,6 @@
 #include "audio_time_axis.h"
 #include "automation_time_axis.h"
 #include "editor.h"
-#include "editor_routes.h"
 #include "editor_route_groups.h"
 #include "editor_regions.h"
 #include "gui_thread.h"
