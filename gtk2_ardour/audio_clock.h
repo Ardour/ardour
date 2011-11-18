@@ -58,6 +58,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	bool off() const { return _off; }
 	void set_widget_name (const std::string& name);
 	void set_active_state (Gtkmm2ext::ActiveState s);
+	void set_editable (bool yn);
 
 	void focus ();
 
@@ -112,6 +113,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	int info_height;
 	int upper_height;
 	double mode_based_info_ratio;
+
 	static const double info_font_scale_factor;
 	static const double separator_height;
 	static const double x_leading_padding;

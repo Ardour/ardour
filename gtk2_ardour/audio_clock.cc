@@ -1655,6 +1655,12 @@ AudioClock::on_style_changed (const Glib::RefPtr<Gtk::Style>& old_style)
 }
 
 void
+AudioClock::set_editable (bool yn)
+{
+	editable = yn;
+}
+
+void
 AudioClock::set_is_duration (bool yn)
 {
 	if (yn == is_duration) {

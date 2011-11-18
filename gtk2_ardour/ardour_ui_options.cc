@@ -373,9 +373,25 @@ ARDOUR_UI::parameter_changed (std::string p)
 	} else if (p == "show-track-meters") {
 		editor->toggle_meter_updating();
 	} else if (p == "primary-clock-delta-edit-cursor") {
-		primary_clock->set_is_duration (Config->get_primary_clock_delta_edit_cursor());
+		if (Config->get_primary_clock_delta_edit_cursor()) {
+			primary_clock->set_is_duration (true);
+			primary_clock->set_editable (false);
+			primary_clock->set_widget_name ("transport delta");
+		} else {
+			primary_clock->set_is_duration (false);
+			primary_clock->set_editable (true);
+			primary_clock->set_widget_name ("transport");
+		}
 	} else if (p == "secondary-clock-delta-edit-cursor") {
-		secondary_clock->set_is_duration (Config->get_secondary_clock_delta_edit_cursor());
+		if (Config->get_secondary_clock_delta_edit_cursor()) {
+			secondary_clock->set_is_duration (true);
+			secondary_clock->set_editable (false);
+			secondary_clock->set_widget_name ("secondary delta");
+		} else {
+			secondary_clock->set_is_duration (false);
+			secondary_clock->set_editable (true);
+			secondary_clock->set_widget_name ("secondary");
+		}
 	}
 }
 
