@@ -848,7 +848,7 @@ AudioClock::set_bbt (framepos_t when, bool force)
 	Timecode::BBT_Time BBT;
 
 	if (_off) {
-		_layout->set_text ("\u2012\u2012|\u2012\u2012|\u2012\u2012");
+		_layout->set_text ("\u2012\u2012|\u2012\u2012|\u2012\u2012\u2012\u2012");
 		if (_left_layout) {
 			_left_layout->set_text ("");
 			_right_layout->set_text ("");
