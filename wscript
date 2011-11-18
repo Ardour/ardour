@@ -323,11 +323,6 @@ def set_compiler_flags (conf,opt):
     conf.env.append_value('CFLAGS', "-Wall")
     conf.env.append_value('CXXFLAGS', [ '-Wall', '-Woverloaded-virtual'])
 
-    if opt.extra_warn:
-        flags = [ '-Wextra' ]
-        conf.env.append_value('CFLAGS', flags)
-        conf.env.append_value('CXXFLAGS', flags)
-
 
     #
     # more boilerplate
@@ -361,8 +356,6 @@ def options(opt):
                     help='Compile with Boost shared pointer debugging')
     opt.add_option('--dist-target', type='string', default='auto', dest='dist_target',
                     help='Specify the target for cross-compiling [auto,none,x86,i386,i686,x86_64,powerpc,tiger,leopard]')
-    opt.add_option('--extra-warn', action='store_true', default=False, dest='extra_warn',
-                    help='Build with even more compiler warning flags')
     opt.add_option('--fpu-optimization', action='store_true', default=True, dest='fpu_optimization',
                     help='Build runtime checked assembler code (default)')
     opt.add_option('--no-fpu-optimization', action='store_false', dest='fpu_optimization')
