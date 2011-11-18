@@ -37,7 +37,6 @@
 
 #include "ardour/ardour.h"
 
-#include "io_selector.h"
 #include "ardour_dialog.h"
 #include "processor_box.h"
 #include "route_processor_selection.h"
@@ -54,6 +53,7 @@ namespace ARDOUR {
 }
 
 class PluginSelector;
+class IOSelector;
 
 class RouteParams_UI : public ArdourDialog, public PBD::ScopedConnectionList
 {

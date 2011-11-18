@@ -21,7 +21,7 @@
 #define __gtkardour_io_selector_h__
 
 #include "port_matrix.h"
-#include "ardour_dialog.h"
+#include "ardour_window.h"
 
 class IOSelector : public PortMatrix
 {
@@ -67,7 +67,7 @@ class IOSelector : public PortMatrix
 	PBD::ScopedConnection _io_connection;
 };
 
-class IOSelectorWindow : public ArdourDialog
+class IOSelectorWindow : public ArdourWindow
 {
   public:
 	IOSelectorWindow (ARDOUR::Session *, boost::shared_ptr<ARDOUR::IO>, bool can_cancel = false);

@@ -17,7 +17,6 @@
 
 */
 
-#include <gtkmm/messagedialog.h>
 #include <glibmm/objectbase.h>
 
 #include <gtkmm2ext/doi.h>
@@ -221,12 +220,12 @@ IOSelector::channel_noun () const
 }
 
 IOSelectorWindow::IOSelectorWindow (ARDOUR::Session* session, boost::shared_ptr<ARDOUR::IO> io, bool /*can_cancel*/)
-	: ArdourDialog (_("I/O selector"))
-        , _selector (this, session, io)
+	: ArdourWindow (_("I/O selector"))
+	, _selector (this, session, io)
 {
 	set_name ("IOSelectorWindow2");
 
-	get_vbox()->pack_start (_selector);
+	add (_selector);
 
 	set_position (Gtk::WIN_POS_MOUSE);
 

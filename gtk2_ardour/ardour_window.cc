@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002 Paul Davis
+    Copyright (C) 2002-2011 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -22,74 +22,54 @@
 
 #include <gtkmm2ext/doi.h>
 
-#include "ardour_dialog.h"
+#include "ardour_window.h"
 #include "keyboard.h"
-#include "splash.h"
 
 using namespace std;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 
-sigc::signal<void> ArdourDialog::CloseAllDialogs;
-
-ArdourDialog::ArdourDialog (string title, bool modal, bool use_seperator)
-	: Dialog (title, modal, use_seperator)
+ArdourWindow::ArdourWindow (string title)
+	: Window ()
 {
+	set_title (title);
 	init ();
 }
 
-ArdourDialog::ArdourDialog (Gtk::Window& parent, string title, bool modal, bool use_seperator)
-	: Dialog (title, parent, modal, use_seperator)
+ArdourWindow::ArdourWindow (Gtk::Window& parent, string title)
+	: Window ()
 {
 	init ();
 	set_position (Gtk::WIN_POS_CENTER_ON_PARENT);
 }
 
-ArdourDialog::~ArdourDialog ()
+ArdourWindow::~ArdourWindow ()
 {
 }
 
 bool
-ArdourDialog::on_enter_notify_event (GdkEventCrossing *ev)
+ArdourWindow::on_enter_notify_event (GdkEventCrossing *ev)
 {
 	Keyboard::the_keyboard().enter_window (ev, this);
-	return Dialog::on_enter_notify_event (ev);
+	return Window::on_enter_notify_event (ev);
 }
 
 bool
-ArdourDialog::on_leave_notify_event (GdkEventCrossing *ev)
+ArdourWindow::on_leave_notify_event (GdkEventCrossing *ev)
 {
 	Keyboard::the_keyboard().leave_window (ev, this);
-	return Dialog::on_leave_notify_event (ev);
+	return Window::on_leave_notify_event (ev);
 }
 
 void
-ArdourDialog::on_unmap ()
+ArdourWindow::on_unmap ()
 {
 	Keyboard::the_keyboard().leave_window (0, this);
-	Dialog::on_unmap ();
+	Window::on_unmap ();
 }
 
 void
-ArdourDialog::on_show ()
+ArdourWindow::init ()
 {
-	// never allow the splash screen to obscure any dialog
-
-	Splash* spl = Splash::instance();
-
-	if (spl) {
-		spl->pop_back ();
-	}
-
-	Dialog::on_show ();
-}
-
-void
-ArdourDialog::init ()
-{
-	set_type_hint(Gdk::WINDOW_TYPE_HINT_DIALOG);
 	set_border_width (10);
-	CloseAllDialogs.connect (
-		sigc::bind (sigc::mem_fun (*this, &ArdourDialog::response),
-		            RESPONSE_CANCEL));
 }
