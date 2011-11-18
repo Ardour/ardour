@@ -773,7 +773,7 @@ AudioClock::set_minsec (framepos_t when, bool force)
 	int millisecs;
 
 	if (_off) {
-		_layout->set_text ("\u2012\u2012:\u2012\u2012:\u2012\u2012.\u2012\u2012\u2012\u2012");
+		_layout->set_text ("\u2012\u2012:\u2012\u2012:\u2012\u2012.\u2012\u2012\u2012");
 
 		if (_left_layout) {
 			_left_layout->set_text ("");
