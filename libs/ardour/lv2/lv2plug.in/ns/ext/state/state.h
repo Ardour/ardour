@@ -35,6 +35,8 @@ extern "C" {
 
 #define LV2_STATE_URI "http://lv2plug.in/ns/ext/state"
 
+#define LV2_STATE_INTERFACE_URI LV2_STATE_URI "#Interface"
+
 typedef void* LV2_State_Handle;
 
 /**

@@ -152,7 +152,7 @@ LV2Plugin::init(void* c_plugin, framecnt_t rate)
 
 	LilvPlugin* plugin = _impl->plugin;
 
-	LilvNode* state_iface_uri = lilv_new_uri(_world.world, NS_STATE "Interface");
+	LilvNode* state_iface_uri = lilv_new_uri(_world.world, LV2_STATE_INTERFACE_URI);
 #ifdef lilv_plugin_has_extension_data
 	_has_state_interface = lilv_plugin_has_extension_data(plugin, state_iface_uri);
 	lilv_node_free(state_iface_uri);
@@ -603,7 +603,7 @@ LV2Plugin::add_state(XMLNode* root) const
 
 		// Get LV2 State extension data from plugin instance
 		LV2_State_Interface* state_iface = (LV2_State_Interface*)extension_data(
-			"http://lv2plug.in/ns/ext/state#Interface");
+			LV2_STATE_INTERFACE_URI);
 		if (!state_iface) {
 			warning << string_compose(
 			    _("Plugin \"%1\% failed to return LV2 state interface"),
@@ -775,7 +775,7 @@ LV2Plugin::set_state(const XMLNode& node, int version)
 
 		// Get LV2 State extension data from plugin instance
 		LV2_State_Interface* state_iface = (LV2_State_Interface*)extension_data(
-			"http://lv2plug.in/ns/ext/state#Interface");
+			LV2_STATE_INTERFACE_URI);
 		if (state_iface) {
 			cout << "Loading LV2 state from " << state_path << endl;
 			RDFF     file = rdff_open(state_path.c_str(), false);
