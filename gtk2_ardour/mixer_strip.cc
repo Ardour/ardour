@@ -545,6 +545,8 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		hide_button.show();
 	}
 
+	gpm.reset_peak_display ();
+
 	width_button.show();
 	width_hide_box.show();
 	whvbox.show ();

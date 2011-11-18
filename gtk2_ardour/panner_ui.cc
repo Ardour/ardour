@@ -219,14 +219,10 @@ PannerUI::panshell_changed ()
 void
 PannerUI::setup_pan ()
 {
-	if (!_panner) {
-		return;
-	}
+	int const nouts = _panner ? _panner->out().n_audio() : -1;
+	int const nins = _panner ? _panner->in().n_audio() : -1;
 
-	uint32_t const nouts = _panner->out().n_audio();
-	uint32_t const nins = _panner->in().n_audio();
-
-	if (int32_t (nouts) == _current_nouts && int32_t (nins) == _current_nins) {
+	if (nouts == _current_nouts && nins == _current_nins) {
 		return;
 	}
 
@@ -241,6 +237,10 @@ PannerUI::setup_pan ()
         _stereo_panner = 0;
 	delete _mono_panner;
 	_mono_panner = 0;
+
+	if (!_panner) {
+		return;
+	}
 
 	if (nouts == 0 || nouts == 1) {
 
