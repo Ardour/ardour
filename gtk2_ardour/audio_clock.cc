@@ -1225,7 +1225,9 @@ AudioClock::on_focus_out_event (GdkEventFocus* ev)
 {
 	bool ret = CairoWidget::on_focus_out_event (ev);
 
-	end_edit (false);
+	if (editing) {
+		end_edit (false);
+	}
 
 	return ret;
 }
