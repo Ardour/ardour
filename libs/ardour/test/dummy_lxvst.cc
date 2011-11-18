@@ -31,3 +31,9 @@ vstfx_unload (VSTFXHandle* fhandle)
 {
 	return -1;
 }
+
+void
+vstfx_destroy_editor (VSTFX *)
+{
+
+}
