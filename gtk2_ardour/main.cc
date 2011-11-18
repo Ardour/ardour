@@ -74,9 +74,9 @@ void
 gui_jack_error ()
 {
 	MessageDialog win (string_compose (_("%1 could not connect to JACK."), PROGRAM_NAME),
-		     false,
-		     Gtk::MESSAGE_INFO,
-		     (Gtk::ButtonsType)(Gtk::BUTTONS_NONE));
+	                   false,
+	                   Gtk::MESSAGE_INFO,
+	                   Gtk::BUTTONS_NONE);
 win.set_secondary_text(_("There are several possible reasons:\n\
 \n\
 1) JACK is not running.\n\
@@ -405,7 +405,7 @@ tell_about_jack_death (void* /* ignored */)
 {
 	if (AudioEngine::instance()->processed_frames() == 0) {
 		/* died during startup */
-		MessageDialog msg (_("JACK exited"), false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK);
+		MessageDialog msg (_("JACK exited"), false);
 		msg.set_position (Gtk::WIN_POS_CENTER);
 		msg.set_secondary_text (string_compose (_(
 "JACK exited unexpectedly, and without notifying %1.\n\
@@ -421,7 +421,7 @@ Click OK to exit %1."), PROGRAM_NAME));
 
 		/* engine has already run, so this is a mid-session JACK death */
 
-		MessageDialog* msg = manage (new MessageDialog (_("JACK exited"), false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_NONE));
+		MessageDialog* msg = manage (new MessageDialog (_("JACK exited"), false));
 		msg->set_secondary_text (string_compose (_(
 "JACK exited unexpectedly, and without notifying %1.\n\
 \n\

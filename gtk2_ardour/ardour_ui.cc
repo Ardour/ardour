@@ -3050,7 +3050,7 @@ ARDOUR_UI::display_cleanup_results (ARDOUR::CleanupReport& rep, const gchar* lis
 				    _("No files were ready for clean-up"),
 				    true,
 				    Gtk::MESSAGE_INFO,
-				    (Gtk::ButtonsType)(Gtk::BUTTONS_OK)  );
+				    Gtk::BUTTONS_OK);
 		msgd.set_title (_("Clean-up"));
 		msgd.set_secondary_text (_("If this seems suprising, \n\
 check for any existing snapshots.\n\
@@ -3176,7 +3176,7 @@ ARDOUR_UI::cleanup ()
 	MessageDialog checker (_("Are you sure you want to clean-up?"),
 				true,
 				Gtk::MESSAGE_QUESTION,
-				(Gtk::ButtonsType)(Gtk::BUTTONS_NONE));
+				Gtk::BUTTONS_NONE);
 
 	checker.set_title (_("Clean-up"));
 
