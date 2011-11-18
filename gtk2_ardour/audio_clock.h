@@ -152,13 +152,6 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	double drag_accum;
 	Field  drag_field;
 
-	/** true if the time of this clock is the one displayed in its widgets.
-	 *  if false, the time in the widgets is an approximation of _canonical_time,
-	 *  and _canonical_time should be returned as the `current' time of the clock.
-	 */
-	bool _canonical_time_is_displayed;
-	framepos_t _canonical_time;
-
 	void on_realize ();
 	bool on_key_press_event (GdkEventKey *);
 	bool on_key_release_event (GdkEventKey *);
@@ -181,11 +174,11 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	bool timecode_validate_edit (const std::string&);
 	bool bbt_validate_edit (const std::string&);
 
-	framepos_t timecode_frame_from_display () const;
-	framepos_t bbt_frame_from_display (framepos_t) const;
-	framepos_t bbt_frame_duration_from_display (framepos_t) const;
-	framepos_t minsec_frame_from_display () const;
-	framepos_t audio_frame_from_display () const;
+	framepos_t frames_from_timecode_string (const std::string&) const;
+	framepos_t frames_from_bbt_string (framepos_t, const std::string&) const;
+	framepos_t frame_duration_from_bbt_string (framepos_t, const std::string&) const;
+	framepos_t frames_from_minsec_string (const std::string&) const;
+	framepos_t frames_from_audioframes_string (const std::string&) const;
 
 	void build_ops_menu ();
 
@@ -208,8 +201,8 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	void set_colors ();
 	void show_edit_status (int length);
 
-	void timecode_tester ();
-
+	void drop_focus ();
+	
 	double bg_r, bg_g, bg_b, bg_a;
 };
 

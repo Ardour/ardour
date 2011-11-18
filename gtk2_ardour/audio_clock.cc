@@ -75,8 +75,6 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	, last_sdelta (0)
 	, dragging (false)
 	, drag_field (Field (0))
-	, _canonical_time_is_displayed (true)
-	, _canonical_time (0)
 
 {
 	set_flags (CAN_FOCUS);
@@ -407,8 +405,36 @@ AudioClock::end_edit (bool modify)
 			edit_string = pre_edit_string;
 			input_string.clear ();
 			_layout->set_text (edit_string);
+			show_edit_status (1);
+			/* edit attributes remain in use */
 		} else {
+
 			editing = false;
+			framepos_t pos;
+
+			switch (_mode) {
+			case Timecode:
+				pos = frames_from_timecode_string (edit_string);
+				break;
+				
+			case BBT:
+				if (is_duration) {
+					pos = frame_duration_from_bbt_string (0, edit_string);
+				} else {
+					pos = frames_from_bbt_string (0, edit_string);
+				}
+				break;
+				
+			case MinSec:
+				pos = frames_from_minsec_string (edit_string);
+				break;
+				
+			case Frames:
+				pos = frames_from_audioframes_string (edit_string);
+				break;
+			}
+
+			set (pos, true);
 			_layout->set_attributes (normal_attributes);
 			ValueChanged(); /* EMIT_SIGNAL */
 		}
@@ -422,17 +448,20 @@ AudioClock::end_edit (bool modify)
 	queue_draw ();
 
 	if (!editing) {
+		drop_focus ();
+	}
+}
 
-		/* move focus back to the default widget in the top level window */
-		
-		Keyboard::magic_widget_drop_focus ();
-		
-		Widget* top = get_toplevel();
-		
-		if (top->is_toplevel ()) {
-			Window* win = dynamic_cast<Window*> (top);
-			win->grab_focus ();
-		}
+void
+AudioClock::drop_focus ()
+{
+	/* move focus back to the default widget in the top level window */
+	
+	Keyboard::magic_widget_drop_focus ();
+	Widget* top = get_toplevel();
+	if (top->is_toplevel ()) {
+		Window* win = dynamic_cast<Window*> (top);
+		win->grab_focus ();
 	}
 }
 
@@ -451,12 +480,99 @@ AudioClock::parse_as_frames_distance (const std::string& str)
 framecnt_t 
 AudioClock::parse_as_minsec_distance (const std::string& str)
 {
+	framecnt_t sr = _session->frame_rate();
+	int msecs;
+	int secs;
+	int mins;
+	int hrs;
+
+	switch (str.length()) {
+	case 0:
+		return 0;
+	case 1:
+	case 2:
+	case 3:
+	case 4:
+		sscanf (str.c_str(), "%" PRId32, &msecs);
+		return msecs * (sr / 1000);
+		
+	case 5:
+		sscanf (str.c_str(), "%1" PRId32 "%" PRId32, &secs, &msecs);
+		return (secs * sr) + (msecs * (sr/1000));
+
+	case 6:
+		sscanf (str.c_str(), "%2" PRId32 "%" PRId32, &secs, &msecs);
+		return (secs * sr) + (msecs * (sr/1000));
+
+	case 7:
+		sscanf (str.c_str(), "%1" PRId32 "%2" PRId32 "%" PRId32, &mins, &secs, &msecs);
+		return (mins * 60 * sr) + (secs * sr) + (msecs * (sr/1000));
+
+	case 8:
+		sscanf (str.c_str(), "%2" PRId32 "%2" PRId32 "%" PRId32, &mins, &secs, &msecs);
+		return (mins * 60 * sr) + (secs * sr) + (msecs * (sr/1000));
+
+	case 9:
+		sscanf (str.c_str(), "%1" PRId32 "%2" PRId32 "%2" PRId32 "%" PRId32, &hrs, &mins, &secs, &msecs);
+		return (hrs * 3600 * sr) + (mins * 60 * sr) + (secs * sr) + (msecs * (sr/1000));
+
+	case 10:
+		sscanf (str.c_str(), "%1" PRId32 "%2" PRId32 "%2" PRId32 "%" PRId32, &hrs, &mins, &secs, &msecs);
+		return (hrs * 3600 * sr) + (mins * 60 * sr) + (secs * sr) + (msecs * (sr/1000));
+	
+	default:
+		break;
+	}
+
 	return 0;
 }
 
 framecnt_t 
 AudioClock::parse_as_timecode_distance (const std::string& str)
 {
+	double fps = _session->timecode_frames_per_second();
+	framecnt_t sr = _session->frame_rate();
+	int frames;
+	int secs;
+	int mins;
+	int hrs;
+	
+	switch (str.length()) {
+	case 0:
+		return 0;
+	case 1:
+	case 2:
+		sscanf (str.c_str(), "%" PRId32, &frames);
+		return lrint ((frames/(float)fps) * sr);
+
+	case 3:
+		sscanf (str.c_str(), "%1" PRId32 "%" PRId32, &secs, &frames);
+		return (secs * sr) + lrint ((frames/(float)fps) * sr);
+
+	case 4:
+		sscanf (str.c_str(), "%2" PRId32 "%" PRId32, &secs, &frames);
+		return (secs * sr) + lrint ((frames/(float)fps) * sr);
+		
+	case 5:
+		sscanf (str.c_str(), "%1" PRId32 "%2" PRId32 "%" PRId32, &mins, &secs, &frames);
+		return (mins * 60 * sr) + (secs * sr) + lrint ((frames/(float)fps) * sr);
+
+	case 6:
+		sscanf (str.c_str(), "%2" PRId32 "%2" PRId32 "%" PRId32, &mins, &secs, &frames);
+		return (mins * 60 * sr) + (secs * sr) + lrint ((frames/(float)fps) * sr);
+
+	case 7:
+		sscanf (str.c_str(), "%1" PRId32 "%2" PRId32 "%2" PRId32 "%" PRId32, &hrs, &mins, &secs, &frames);
+		return (hrs * 3600 * sr) + (mins * 60 * sr) + (secs * sr) + lrint ((frames/(float)fps) * sr);
+
+	case 8:
+		sscanf (str.c_str(), "%2" PRId32 "%2" PRId32 "%2" PRId32 "%" PRId32, &hrs, &mins, &secs, &frames);
+		return (hrs * 3600 * sr) + (mins * 60 * sr) + (secs * sr) + lrint ((frames/(float)fps) * sr);
+	
+	default:
+		break;
+	}
+
 	return 0;
 }
 
@@ -467,8 +583,14 @@ AudioClock::parse_as_bbt_distance (const std::string& str)
 }
 
 framecnt_t 
-AudioClock::parse_as_distance (const std::string& str)
+AudioClock::parse_as_distance (const std::string& instr)
 {
+	string str = instr;
+
+	/* the input string is in reverse order */
+
+	std::reverse (str.begin(), str.end());
+
 	switch (_mode) {
 	case Timecode:
 		return parse_as_timecode_distance (str);
@@ -493,6 +615,9 @@ AudioClock::end_edit_relative (bool add)
 
 	editing = false;
 
+	editing = false;
+	_layout->set_attributes (normal_attributes);
+
 	if (frames != 0) {
 		if (add) {
 			set (current_time() + frames, true);
@@ -505,18 +630,12 @@ AudioClock::end_edit_relative (bool add)
 				set (0, true);
 			}
 		}
+		ValueChanged (); /* EMIT SIGNAL */
 	}
 
-	/* move focus back to the default widget in the top level window */
-	
-	Keyboard::magic_widget_drop_focus ();
-	
-	Widget* top = get_toplevel();
-	
-	if (top->is_toplevel ()) {
-		Window* win = dynamic_cast<Window*> (top);
-		win->grab_focus ();
-	}
+	input_string.clear ();
+	queue_draw ();
+	drop_focus ();
 }
 
 void
@@ -602,10 +721,6 @@ AudioClock::set (framepos_t when, bool force, framecnt_t offset, char which)
 	}
 
 	last_when = when;
-
-	/* we're setting the time from a frames value, so keep it as the canonical value */
-	_canonical_time = when;
-	_canonical_time_is_displayed = false;
 }
 
 void
@@ -912,11 +1027,13 @@ AudioClock::on_key_release_event (GdkEventKey *ev)
 	case GDK_minus:
 	case GDK_KP_Subtract:
 		end_edit_relative (false);
+		return true;
 		break;
 
 	case GDK_plus:
 	case GDK_KP_Add:
 		end_edit_relative (true);
+		return true;
 		break;
 
 	case GDK_Tab:
@@ -1287,30 +1404,7 @@ AudioClock::get_frame_step (Field field, framepos_t pos, int dir)
 framepos_t
 AudioClock::current_time (framepos_t pos) const
 {
-	// if (!_canonical_time_is_displayed) {
-	// return _canonical_time;
-        //}
-
-	framepos_t ret = 0;
-
-	switch (_mode) {
-	case Timecode:
-		ret = timecode_frame_from_display ();
-		break;
-	case BBT:
-		ret = bbt_frame_from_display (pos);
-		break;
-
-	case MinSec:
-		ret = minsec_frame_from_display ();
-		break;
-
-	case Frames:
-		ret = audio_frame_from_display ();
-		break;
-	}
-
-	return ret;
+	return last_when;
 }
 
 framepos_t
@@ -1320,18 +1414,18 @@ AudioClock::current_duration (framepos_t pos) const
 
 	switch (_mode) {
 	case Timecode:
-		ret = timecode_frame_from_display ();
+		ret = last_when;
 		break;
 	case BBT:
-		ret = bbt_frame_duration_from_display (pos);
+		ret = frame_duration_from_bbt_string (pos, _layout->get_text());
 		break;
 
 	case MinSec:
-		ret = minsec_frame_from_display ();
+		ret = last_when;
 		break;
 
 	case Frames:
-		ret = audio_frame_from_display ();
+		ret = last_when;
 		break;
 	}
 
@@ -1384,7 +1478,7 @@ AudioClock::timecode_validate_edit (const string& str)
 }
 
 framepos_t
-AudioClock::timecode_frame_from_display () const
+AudioClock::frames_from_timecode_string (const string& str) const
 {
 	if (_session == 0) {
 		return 0;
@@ -1393,7 +1487,7 @@ AudioClock::timecode_frame_from_display () const
 	Timecode::Time TC;
 	framepos_t sample;
 
-	sscanf (_layout->get_text().c_str(), "%d:%d:%d:%d", &TC.hours, &TC.minutes, &TC.seconds, &TC.frames);
+	sscanf (str.c_str(), "%d:%d:%d:%d", &TC.hours, &TC.minutes, &TC.seconds, &TC.frames);
 
 	TC.rate = _session->timecode_frames_per_second();
 	TC.drop= _session->timecode_drop_frames();
@@ -1406,7 +1500,7 @@ AudioClock::timecode_frame_from_display () const
 }
 
 framepos_t
-AudioClock::minsec_frame_from_display () const
+AudioClock::frames_from_minsec_string (const string& str) const
 {
 	if (_session == 0) {
 		return 0;
@@ -1415,12 +1509,12 @@ AudioClock::minsec_frame_from_display () const
 	int hrs, mins, secs, millisecs;
 	framecnt_t sr = _session->frame_rate();
 
-	sscanf (_layout->get_text().c_str(), "%d:%d:%d:%d", &hrs, &mins, &secs, &millisecs);
+	sscanf (str.c_str(), "%d:%d:%d:%d", &hrs, &mins, &secs, &millisecs);
 	return (framepos_t) floor ((hrs * 60.0f * 60.0f * sr) + (mins * 60.0f * sr) + (secs * sr) + (millisecs * sr / 1000.0));
 }
 
 framepos_t
-AudioClock::bbt_frame_from_display (framepos_t pos) const
+AudioClock::frames_from_bbt_string (framepos_t pos, const string& str) const
 {
 	if (_session == 0) {
 		error << "AudioClock::current_time() called with BBT mode but without session!" << endmsg;
@@ -1430,7 +1524,7 @@ AudioClock::bbt_frame_from_display (framepos_t pos) const
 	AnyTime any;
 	any.type = AnyTime::BBT;
 
-	sscanf (_layout->get_text().c_str(), "%" PRId32 "|%" PRId32 "|%" PRId32, &any.bbt.bars, &any.bbt.beats, &any.bbt.ticks);
+	sscanf (str.c_str(), "%" PRId32 "|%" PRId32 "|%" PRId32, &any.bbt.bars, &any.bbt.beats, &any.bbt.ticks);
 
 	if (is_duration) {
 		any.bbt.bars++;
@@ -1443,7 +1537,7 @@ AudioClock::bbt_frame_from_display (framepos_t pos) const
 
 
 framepos_t
-AudioClock::bbt_frame_duration_from_display (framepos_t pos) const
+AudioClock::frame_duration_from_bbt_string (framepos_t pos, const string& str) const
 {
 	if (_session == 0) {
 		error << "AudioClock::current_time() called with BBT mode but without session!" << endmsg;
@@ -1452,16 +1546,16 @@ AudioClock::bbt_frame_duration_from_display (framepos_t pos) const
 
 	Timecode::BBT_Time bbt;
 
-	sscanf (_layout->get_text().c_str(), "%" PRIu32 "|%" PRIu32 "|%" PRIu32, &bbt.bars, &bbt.beats, &bbt.ticks);
+	sscanf (str.c_str(), "%" PRIu32 "|%" PRIu32 "|%" PRIu32, &bbt.bars, &bbt.beats, &bbt.ticks);
 
 	return _session->tempo_map().bbt_duration_at(pos,bbt,1);
 }
 
 framepos_t
-AudioClock::audio_frame_from_display () const
+AudioClock::frames_from_audioframes_string (const string& str) const
 {
 	framepos_t f;
-	sscanf (_layout->get_text().c_str(), "%" PRId64, &f);
+	sscanf (str.c_str(), "%" PRId64, &f);
 	return f;
 }
 
@@ -1582,16 +1676,11 @@ AudioClock::set_off (bool yn)
 
 	_off = yn;
 
-	if (_off) {
-		_canonical_time = current_time ();
-		_canonical_time_is_displayed = false;
-	} else {
-		_canonical_time_is_displayed = true;
-	}
-
-	/* force a possible redraw */
+	/* force a redraw. last_when will be preserved, but the clock text will
+	 * change 
+	 */
 	
-	set (_canonical_time, true);
+	set (last_when, true);
 }
 
 void
