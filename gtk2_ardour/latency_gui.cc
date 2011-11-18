@@ -22,6 +22,7 @@
 #include <iomanip>
 #include "ardour/latent.h"
 #include "pbd/convert.h"
+#include "pbd/error.h"
 #include <gtkmm2ext/utils.h>
 
 #include "latency_gui.h"

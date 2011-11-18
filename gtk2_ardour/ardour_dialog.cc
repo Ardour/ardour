@@ -56,14 +56,14 @@ bool
 ArdourDialog::on_enter_notify_event (GdkEventCrossing *ev)
 {
 	Keyboard::the_keyboard().enter_window (ev, this);
-	return false;
+	return Dialog::on_enter_notify_event (ev);
 }
 
 bool
 ArdourDialog::on_leave_notify_event (GdkEventCrossing *ev)
 {
 	Keyboard::the_keyboard().leave_window (ev, this);
-	return false;
+	return Dialog::on_leave_notify_event (ev);
 }
 
 void
@@ -93,10 +93,4 @@ ArdourDialog::init ()
 	set_type_hint(Gdk::WINDOW_TYPE_HINT_DIALOG);
 	set_border_width (10);
 	CloseAllDialogs.connect (sigc::bind (sigc::mem_fun (*this, &ArdourDialog::response), RESPONSE_CANCEL));
-}
-
-bool
-ArdourDialog::on_key_press_event (GdkEventKey* key)
-{
-	return Gtk::Dialog::on_key_press_event (key);
 }
