@@ -1132,8 +1132,6 @@ AudioClock::index_to_field (int index) const
 			return Timecode_Seconds;
 		} else if (index < 13) {
 			return Timecode_Frames;
-		} else {
-			return Field (0);
 		}
 		break;
 	case BBT:
@@ -1143,11 +1141,8 @@ AudioClock::index_to_field (int index) const
 			return Beats;
 		} else if (index < 12) {
 			return Ticks;
-		} else {
-			return Field (0);
 		}
 		break;
-
 	case MinSec:
 		if (index < 3) {
 			return Timecode_Hours;
@@ -1157,15 +1152,14 @@ AudioClock::index_to_field (int index) const
 			return MS_Seconds;
 		} else if (index < 12) {
 			return MS_Milliseconds;
-		} else {
-			return Field (0);
 		}
 		break;
-
 	case Frames:
 		return AudioFrames;
 		break;
 	}
+
+	return Field (0);
 }
 
 bool
