@@ -777,7 +777,7 @@ AudioClock::set_minsec (framepos_t when, bool force)
 	left -= (framecnt_t) floor (secs * _session->frame_rate());
 	millisecs = floor (left * 1000.0 / (float) _session->frame_rate());
 
-	snprintf (buf, sizeof (buf), "%02" PRIu32 ":%02" PRIu32 ":%02" PRIu32 ".%03" PRIu32, hrs, mins, secs, millisecs);
+	snprintf (buf, sizeof (buf), "%02" PRId32 ":%02" PRId32 ":%02" PRId32 ".%03" PRId32, hrs, mins, secs, millisecs);
 	_layout->set_text (buf);
 }
 
@@ -786,15 +786,22 @@ AudioClock::set_timecode (framepos_t when, bool force)
 {
 	char buf[32];
 	Timecode::Time TC;
-	
+	bool negative; 
+
 	if (_off) {
 		_layout->set_text ("\u2012\u2012:\u2012\u2012:\u2012\u2012:\u2012\u2012");
 		if (_left_layout) {
 			_left_layout->set_text ("");
 			_right_layout->set_text ("");
-		}
+}
 		
 		return;
+	}
+
+	negative = when < 0;
+
+	if (negative) {
+		when = -when;
 	}
 
 	if (is_duration) {
@@ -803,7 +810,7 @@ AudioClock::set_timecode (framepos_t when, bool force)
 		_session->timecode_time (when, TC);
 	}
 	
-	if (TC.negative) {
+	if (TC.negative || negative) {
 		snprintf (buf, sizeof (buf), "-%02" PRIu32 ":%02" PRIu32 ":%02" PRIu32 ":%02" PRIu32, TC.hours, TC.minutes, TC.seconds, TC.frames);
 	} else {
 		snprintf (buf, sizeof (buf), " %02" PRIu32 ":%02" PRIu32 ":%02" PRIu32 ":%02" PRIu32, TC.hours, TC.minutes, TC.seconds, TC.frames);
@@ -829,6 +836,7 @@ AudioClock::set_bbt (framepos_t when, bool force)
 {
 	char buf[16];
 	Timecode::BBT_Time BBT;
+	bool negative;
 
 	if (_off) {
 		_layout->set_text ("\u2012\u2012|\u2012\u2012|\u2012\u2012\u2012\u2012");
@@ -837,6 +845,12 @@ AudioClock::set_bbt (framepos_t when, bool force)
 			_right_layout->set_text ("");
 		}
 		return;
+	}
+
+	negative = when < 0;
+
+	if (negative) {
+		when = -when;
 	}
 
 	/* handle a common case */
@@ -854,7 +868,12 @@ AudioClock::set_bbt (framepos_t when, bool force)
 		_session->tempo_map().bbt_time (when, BBT);
 	}
 
-	snprintf (buf, sizeof (buf), "%02" PRIu32 "|%02" PRIu32 "|%04" PRIu32, BBT.bars, BBT.beats, BBT.ticks);
+	if (negative) {
+		snprintf (buf, sizeof (buf), "-%02" PRIu32 "|%02" PRIu32 "|%04" PRIu32, BBT.bars, BBT.beats, BBT.ticks);
+	} else {
+		snprintf (buf, sizeof (buf), " %02" PRIu32 "|%02" PRIu32 "|%04" PRIu32, BBT.bars, BBT.beats, BBT.ticks);
+	}
+
 	_layout->set_text (buf);
 		 
 	if (_right_layout) {
