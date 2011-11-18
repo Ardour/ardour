@@ -110,6 +110,7 @@ private:
 			add (rec_state);
 			add (mute_state);
 			add (solo_state);
+			add (solo_visible);
 			add (solo_isolate_state);
 			add (solo_safe_state);
 			add (is_track);
@@ -126,6 +127,8 @@ private:
 		Gtk::TreeModelColumn<uint32_t>       rec_state;
 		Gtk::TreeModelColumn<uint32_t>       mute_state;
 		Gtk::TreeModelColumn<uint32_t>       solo_state;
+		/** true if the solo buttons are visible for this route, otherwise false */
+		Gtk::TreeModelColumn<bool>           solo_visible;
 		Gtk::TreeModelColumn<uint32_t>       solo_isolate_state;
 		Gtk::TreeModelColumn<uint32_t>       solo_safe_state;
 		Gtk::TreeModelColumn<bool>           is_track;

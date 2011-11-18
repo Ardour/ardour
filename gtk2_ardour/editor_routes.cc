@@ -139,6 +139,7 @@ EditorRoutes::EditorRoutes (Editor* e)
 	TreeViewColumn* solo_state_column = manage (new TreeViewColumn("S", *solo_col_renderer));
 
 	solo_state_column->add_attribute(solo_col_renderer->property_state(), _columns.solo_state);
+	solo_state_column->add_attribute(solo_col_renderer->property_visible(), _columns.solo_visible);
 	solo_state_column->set_sizing(TREE_VIEW_COLUMN_FIXED);
 	solo_state_column->set_alignment(ALIGN_CENTER);
 	solo_state_column->set_expand(false);
@@ -154,6 +155,7 @@ EditorRoutes::EditorRoutes (Editor* e)
 	TreeViewColumn* solo_isolate_state_column = manage (new TreeViewColumn("SI", *solo_iso_renderer));
 
 	solo_isolate_state_column->add_attribute(solo_iso_renderer->property_state(), _columns.solo_isolate_state);
+	solo_isolate_state_column->add_attribute(solo_iso_renderer->property_visible(), _columns.solo_visible);
 	solo_isolate_state_column->set_sizing(TREE_VIEW_COLUMN_FIXED);
 	solo_isolate_state_column->set_alignment(ALIGN_CENTER);
 	solo_isolate_state_column->set_expand(false);
@@ -168,6 +170,7 @@ EditorRoutes::EditorRoutes (Editor* e)
 
 	TreeViewColumn* solo_safe_state_column = manage (new TreeViewColumn(_("SS"), *solo_safe_renderer));
 	solo_safe_state_column->add_attribute(solo_safe_renderer->property_state(), _columns.solo_safe_state);
+	solo_safe_state_column->add_attribute(solo_safe_renderer->property_visible(), _columns.solo_visible);
 	solo_safe_state_column->set_sizing(TREE_VIEW_COLUMN_FIXED);
 	solo_safe_state_column->set_alignment(ALIGN_CENTER);
 	solo_safe_state_column->set_expand(false);
@@ -611,6 +614,7 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 
 		row[_columns.mute_state] = (*x)->route()->muted() ? Active : ActiveState (0);
 		row[_columns.solo_state] = RouteUI::solo_active_state ((*x)->route());
+		row[_columns.solo_visible] = !(*x)->route()->is_master ();
 		row[_columns.solo_isolate_state] = (*x)->route()->solo_isolated();
 		row[_columns.solo_safe_state] = (*x)->route()->solo_safe();
 		row[_columns.name_editable] = true;
