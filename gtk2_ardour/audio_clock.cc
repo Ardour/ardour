@@ -727,9 +727,7 @@ AudioClock::set_frames (framepos_t when, bool /*force*/)
 	char buf[32];
 
 	if (_off) {
-		/* XXX with cairo, we can do better, surely? */
-
-		_layout->set_text ("-----------");
+		_layout->set_text ("\u2012\u2012\u2012\u2012\u2012\u2012\u2012\u2012\u2012\u2012");
 
 		if (_left_layout) {
 			_left_layout->set_text ("");
