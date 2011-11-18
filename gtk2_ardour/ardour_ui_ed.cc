@@ -637,7 +637,6 @@ ARDOUR_UI::setup_clock ()
 
 	big_clock_window->set (new Window (WINDOW_TOPLEVEL), false);
 
-	big_clock_window->get()->set_resizable (true);
 	big_clock_window->get()->set_keep_above (true);
 	big_clock_window->get()->set_border_width (0);
 	big_clock_window->get()->add (*big_clock);

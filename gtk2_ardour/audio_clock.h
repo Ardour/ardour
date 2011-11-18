@@ -169,6 +169,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	void on_size_request (Gtk::Requisition* req);
 	bool on_motion_notify_event (GdkEventMotion *ev);
 	void on_size_allocate (Gtk::Allocation&);
+	bool on_focus_out_event (GdkEventFocus*);
 
 	void set_timecode (framepos_t, bool);
 	void set_bbt (framepos_t, bool);
@@ -194,8 +195,15 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 
 	void start_edit ();
 	void end_edit (bool);
+	void end_edit_relative (bool);
 	void edit_next_field ();
+	ARDOUR::framecnt_t parse_as_distance (const std::string&);
 
+	ARDOUR::framecnt_t parse_as_timecode_distance (const std::string&);
+	ARDOUR::framecnt_t parse_as_minsec_distance (const std::string&);
+	ARDOUR::framecnt_t parse_as_bbt_distance (const std::string&);
+	ARDOUR::framecnt_t parse_as_frames_distance (const std::string&);
+	
 	void set_font ();
 	void set_colors ();
 	void show_edit_status (int length);
