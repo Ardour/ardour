@@ -159,7 +159,7 @@ RegionLayeringOrderEditor::set_context (const string& a_name, Session* s, const 
         track_name_label.set_text (a_name);
 
 	clock.set_session (s);
-	clock.set (pos, true, 0, 0);
+	clock.set (pos, true);
 
 	playlist_modified_connection.disconnect ();
 	playlist = pl;

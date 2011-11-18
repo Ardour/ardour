@@ -1213,10 +1213,11 @@ Editor::set_session (Session *t)
 		bbt.ticks = 120;
 		framepos_t pos = _session->tempo_map().bbt_duration_at (0, bbt, 1);
 		nudge_clock->set_mode(AudioClock::BBT);
-		nudge_clock->set (pos, true, 0, AudioClock::BBT);
+		nudge_clock->set (pos, true);
 
 	} else {
-		nudge_clock->set (_session->frame_rate() * 5, true, 0, AudioClock::Timecode); // default of 5 seconds
+		nudge_clock->set_mode (AudioClock::Timecode);
+		nudge_clock->set (_session->frame_rate() * 5, true);
 	}
 
 	playhead_cursor->canvas_item.show ();

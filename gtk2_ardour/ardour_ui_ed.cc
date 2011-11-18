@@ -633,7 +633,7 @@ ARDOUR_UI::use_menubar_as_top_menubar ()
 void
 ARDOUR_UI::setup_clock ()
 {
-	ARDOUR_UI::Clock.connect (sigc::bind (sigc::mem_fun (big_clock, &AudioClock::set), false));
+	ARDOUR_UI::Clock.connect (sigc::mem_fun (big_clock, &AudioClock::set));
 
 	big_clock_window->set (new Window (WINDOW_TOPLEVEL), false);
 

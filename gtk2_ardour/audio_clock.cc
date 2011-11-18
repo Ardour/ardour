@@ -114,6 +114,10 @@ AudioClock::set_widget_name (const string& str)
 	} else {
 		set_name (str + " clock");
 	}
+
+	if (is_realized()) {
+		set_colors ();
+	}
 }
 
 
@@ -660,37 +664,18 @@ AudioClock::session_configuration_changed (std::string p)
 }
 
 void
-AudioClock::set (framepos_t when, bool force, framecnt_t offset, char which)
+AudioClock::set (framepos_t when, bool force, framecnt_t offset)
 {
  	if ((!force && !is_visible()) || _session == 0) {
 		return;
 	}
 
-	bool const pdelta = Config->get_primary_clock_delta_edit_cursor ();
-	bool const sdelta = Config->get_secondary_clock_delta_edit_cursor ();
-
-	if (offset && which == 'p' && pdelta) {
-		when = (when > offset) ? when - offset : offset - when;
-	} else if (offset && which == 's' && sdelta) {
-		when = (when > offset) ? when - offset : offset - when;
-	}
+	if (is_duration) {
+		when = when - offset;
+	} 
 
 	if (when == last_when && !force) {
 		return;
-	}
-
-	if (which == 'p' && pdelta && !last_pdelta) {
-		set_name("TransportClockDisplayDelta");
-		last_pdelta = true;
-	} else if (which == 'p' && !pdelta && last_pdelta) {
-		set_name("TransportClockDisplay");
-		last_pdelta = false;
-	} else if (which == 's' && sdelta && !last_sdelta) {
-		set_name("SecondaryClockDisplayDelta");
-		last_sdelta = true;
-	} else if (which == 's' && !sdelta && last_sdelta) {
-		set_name("SecondaryClockDisplay");
-		last_sdelta = false;
 	}
 
 	if (!editing) {
@@ -1160,7 +1145,7 @@ AudioClock::on_button_press_event (GdkEventButton *ev)
 {
 	switch (ev->button) {
 	case 1:
-		if (editable) {
+		if (editable && !_off) {
 			dragging = true;
 			/* make absolutely sure that the pointer is grabbed */
 			gdk_pointer_grab(ev->window,false ,
@@ -1172,8 +1157,17 @@ AudioClock::on_button_press_event (GdkEventButton *ev)
 			
 			int index;
 			int trailing;
+			int y;
+			int x;
 
-			if (_layout->xy_to_index (ev->x * PANGO_SCALE, ev->y * PANGO_SCALE, index, trailing)) {			
+			/* the text has been centered vertically, so adjust
+			 * x and y. 
+			 */
+
+			y = ev->y - ((get_height() - layout_height)/2);
+			x = ev->x - x_leading_padding;
+			
+			if (_layout->xy_to_index (x * PANGO_SCALE, y * PANGO_SCALE, index, trailing)) {			
 				drag_field = index_to_field (index);
 			} else {
 				drag_field = Field (0);
@@ -1192,7 +1186,7 @@ AudioClock::on_button_press_event (GdkEventButton *ev)
 bool
 AudioClock::on_button_release_event (GdkEventButton *ev)
 {
-	if (editable) {
+	if (editable && !_off) {
 		if (dragging) {
 			gdk_pointer_ungrab (GDK_CURRENT_TIME);
 			dragging = false;
@@ -1238,11 +1232,21 @@ AudioClock::on_scroll_event (GdkEventScroll *ev)
 	int index;
 	int trailing;
 
-	if (_session == 0 || !editable) {
+	if (_session == 0 || !editable || _off) {
 		return false;
 	}
 
-	if (!_layout->xy_to_index (ev->x * PANGO_SCALE, ev->y * PANGO_SCALE, index, trailing)) {
+	int y;
+	int x;
+	
+	/* the text has been centered vertically, so adjust
+	 * x and y. 
+	 */
+
+	y = ev->y - ((get_height() - layout_height)/2);
+	x = ev->x - x_leading_padding;
+
+	if (!_layout->xy_to_index (x * PANGO_SCALE, y * PANGO_SCALE, index, trailing)) {
 		/* not in the main layout */
 		return false;
 	}
@@ -1572,7 +1576,7 @@ AudioClock::build_ops_menu ()
 	ops_items.push_back (MenuElem (_("Minutes:Seconds"), sigc::bind (sigc::mem_fun(*this, &AudioClock::set_mode), MinSec)));
 	ops_items.push_back (MenuElem (_("Samples"), sigc::bind (sigc::mem_fun(*this, &AudioClock::set_mode), Frames)));
 
-	if (editable && !is_duration && !_follows_playhead) {
+	if (editable && !_off && !is_duration && !_follows_playhead) {
 		ops_items.push_back (SeparatorElem());
 		ops_items.push_back (MenuElem (_("Set From Playhead"), sigc::mem_fun(*this, &AudioClock::set_from_playhead)));
 		ops_items.push_back (MenuElem (_("Locate to This Time"), sigc::mem_fun(*this, &AudioClock::locate)));
@@ -1668,7 +1672,7 @@ AudioClock::set_is_duration (bool yn)
 	}
 
 	is_duration = yn;
-	set (last_when, true, 0, 's');
+	set (last_when, true);
 }
 
 void

@@ -62,7 +62,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 
 	void focus ();
 
-	void set (framepos_t, bool force = false, ARDOUR::framecnt_t offset = 0, char which = 0);
+	void set (framepos_t, bool force = false, ARDOUR::framecnt_t offset = 0);
 	void set_from_playhead ();
 	void locate ();
 	void set_mode (Mode);

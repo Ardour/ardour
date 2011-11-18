@@ -297,8 +297,8 @@ ARDOUR_UI::setup_transport ()
 
 	/* clocks, etc. */
 
-	ARDOUR_UI::Clock.connect (sigc::bind (sigc::mem_fun (primary_clock, &AudioClock::set), 'p'));
-	ARDOUR_UI::Clock.connect (sigc::bind (sigc::mem_fun (secondary_clock, &AudioClock::set), 's'));
+	ARDOUR_UI::Clock.connect (sigc::mem_fun (primary_clock, &AudioClock::set));
+	ARDOUR_UI::Clock.connect (sigc::mem_fun (secondary_clock, &AudioClock::set));
 
 	primary_clock->ValueChanged.connect (sigc::mem_fun(*this, &ARDOUR_UI::primary_clock_value_changed));
 	secondary_clock->ValueChanged.connect (sigc::mem_fun(*this, &ARDOUR_UI::secondary_clock_value_changed));

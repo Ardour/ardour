@@ -3596,13 +3596,13 @@ void
 ARDOUR_UI::update_transport_clocks (framepos_t pos)
 {
 	if (Config->get_primary_clock_delta_edit_cursor()) {
-		primary_clock->set (pos, false, editor->get_preferred_edit_position(), 1);
+		primary_clock->set (pos, false, editor->get_preferred_edit_position());
 	} else {
-		primary_clock->set (pos, 0, true);
+		primary_clock->set (pos);
 	}
 
 	if (Config->get_secondary_clock_delta_edit_cursor()) {
-		secondary_clock->set (pos, false, editor->get_preferred_edit_position(), 2);
+		secondary_clock->set (pos, false, editor->get_preferred_edit_position());
 	} else {
 		secondary_clock->set (pos);
 	}
