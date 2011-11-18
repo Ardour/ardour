@@ -186,7 +186,7 @@ AudioClock::set_colors ()
 		editing_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: edited text", get_name()));
 	}
 
-	/* store for bg in ::render() */
+	/* store for bg in render() */
 
 	UINT_TO_RGBA (bg_color, &r, &g, &b, &a);
 	r = lrint ((r/256.0) * 65535.0);
@@ -282,12 +282,12 @@ AudioClock::render (cairo_t* cr)
 	}
 
 	if (editing) {
-		const double cursor_width = 16.0; /* need em width here, not 16 */
+		const double cursor_width = 4.0; /* need em width here, not 16 */
 
 		if (!insert_map.empty()) {
 			Pango::Rectangle cursor = _layout->get_cursor_strong_pos (insert_map[input_string.length()]);
 			
-			cairo_set_source_rgba (cr, 0.9, 0.1, 0.1, 0.4);
+			cairo_set_source_rgba (cr, 0.9, 0.1, 0.1, 0.8);
 			cairo_rectangle (cr, 
 					 x_leading_padding + cursor.get_x()/PANGO_SCALE, 
 					 (upper_height - layout_height)/2.0, 
@@ -295,7 +295,7 @@ AudioClock::render (cairo_t* cr)
 			cairo_fill (cr);	
 		} else {
 			if (input_string.empty()) {
-				cairo_set_source_rgba (cr, 0.9, 0.1, 0.1, 0.4);
+				cairo_set_source_rgba (cr, 0.9, 0.1, 0.1, 0.8);
 				cairo_rectangle (cr, 
 						 (get_width()/2.0) - cursor_width,
 						 (upper_height - layout_height)/2.0, 
