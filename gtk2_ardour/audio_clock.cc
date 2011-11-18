@@ -37,6 +37,7 @@
 
 #include "ardour_ui.h"
 #include "audio_clock.h"
+#include "global_signals.h"
 #include "utils.h"
 #include "keyboard.h"
 #include "gui_thread.h"
@@ -95,6 +96,8 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	if (!is_transient) {
 		clocks.push_back (this);
 	}
+
+	ColorsChanged.connect (sigc::mem_fun (*this, &AudioClock::set_colors));
 }
 
 AudioClock::~AudioClock ()
@@ -772,7 +775,7 @@ AudioClock::set_minsec (framepos_t when, bool force)
 	int millisecs;
 
 	if (_off) {
-		_layout->set_text ("--:--:--");
+		_layout->set_text ("\u2012\u2012:\u2012\u2012:\u2012\u2012.\u2012\u2012\u2012\u2012");
 
 		if (_left_layout) {
 			_left_layout->set_text ("");
@@ -802,7 +805,7 @@ AudioClock::set_timecode (framepos_t when, bool force)
 	Timecode::Time TC;
 	
 	if (_off) {
-		_layout->set_text ("--:--:--:--");
+		_layout->set_text ("\u2012\u2012:\u2012\u2012:\u2012\u2012:\u2012\u2012");
 		if (_left_layout) {
 			_left_layout->set_text ("");
 			_right_layout->set_text ("");
@@ -845,7 +848,7 @@ AudioClock::set_bbt (framepos_t when, bool force)
 	Timecode::BBT_Time BBT;
 
 	if (_off) {
-		_layout->set_text ("--|--|--");
+		_layout->set_text ("\u2012\u2012|\u2012\u2012|\u2012\u2012");
 		if (_left_layout) {
 			_left_layout->set_text ("");
 			_right_layout->set_text ("");
