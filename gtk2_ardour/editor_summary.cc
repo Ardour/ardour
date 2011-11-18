@@ -122,7 +122,7 @@ EditorSummary::on_expose_event (GdkEventExpose* event)
 
 	double const p = (_editor->playhead_cursor->current_frame - _start) * _x_scale;
 	cairo_move_to (cr, p, 0);
-	cairo_line_to (cr, p, _height);
+	cairo_line_to (cr, p, get_height());
 	cairo_stroke (cr);
 	_last_playhead = p;
 
@@ -140,7 +140,7 @@ EditorSummary::render (cairo_t* cr)
 	/* background */
 
 	cairo_set_source_rgb (cr, 0, 0, 0);
-	cairo_rectangle (cr, 0, 0, _width, _height);
+	cairo_rectangle (cr, 0, 0, get_width(), get_height());
 	cairo_fill (cr);
 
 	if (_session == 0) {
@@ -165,12 +165,12 @@ EditorSummary::render (cairo_t* cr)
 	if (N == 0) {
 		_track_height = 16;
 	} else {
-		_track_height = (double) _height / N;
+		_track_height = (double) get_height() / N;
 	}
 
 	/* calculate x scale */
 	if (_end != _start) {
-		_x_scale = static_cast<double> (_width) / (_end - _start);
+		_x_scale = static_cast<double> (get_width()) / (_end - _start);
  	} else {
 		_x_scale = 1;
 	}
@@ -187,7 +187,7 @@ EditorSummary::render (cairo_t* cr)
 		cairo_set_source_rgb (cr, 0.2, 0.2, 0.2);
 		cairo_set_line_width (cr, _track_height - 2);
 		cairo_move_to (cr, 0, y + _track_height / 2);
-		cairo_line_to (cr, _width, y + _track_height / 2);
+		cairo_line_to (cr, get_width(), y + _track_height / 2);
 		cairo_stroke (cr);
 
 		StreamView* s = (*i)->view ();
@@ -212,12 +212,12 @@ EditorSummary::render (cairo_t* cr)
 
 	double const p = (_session->current_start_frame() - _start) * _x_scale;
 	cairo_move_to (cr, p, 0);
-	cairo_line_to (cr, p, _height);
+	cairo_line_to (cr, p, get_height());
 	cairo_stroke (cr);
 
 	double const q = (_session->current_end_frame() - _start) * _x_scale;
 	cairo_move_to (cr, q, 0);
-	cairo_line_to (cr, q, _height);
+	cairo_line_to (cr, q, get_height());
 	cairo_stroke (cr);
 }
 
@@ -278,16 +278,16 @@ EditorSummary::centre_on_click (GdkEventButton* ev)
 	double ex = ev->x - w / 2;
 	if (ex < 0) {
 		ex = 0;
-	} else if ((ex + w) > _width) {
-		ex = _width - w;
+	} else if ((ex + w) > get_width()) {
+		ex = get_width() - w;
 	}
 
 	double const h = yr.second - yr.first;
 	double ey = ev->y - h / 2;
 	if (ey < 0) {
 		ey = 0;
-	} else if ((ey + h) > _height) {
-		ey = _height - h;
+	} else if ((ey + h) > get_height()) {
+		ey = get_height() - h;
 	}
 
 	set_editor (ex, ey);

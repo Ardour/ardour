@@ -20,11 +20,12 @@
 #include "cairo_widget.h"
 #include "gui_thread.h"
 
+static const char* has_cairo_widget_background_info = "has_cairo_widget_background_info";
+
 CairoWidget::CairoWidget ()
-	: _width (1)
-	, _height (1)
-	, _active_state (Gtkmm2ext::ActiveState (0))
+	: _active_state (Gtkmm2ext::ActiveState (0))
 	, _visual_state (Gtkmm2ext::VisualState (0))
+	, _need_bg (true)
 {
 
 }
@@ -39,7 +40,18 @@ CairoWidget::on_expose_event (GdkEventExpose *ev)
 	cairo_t* cr = gdk_cairo_create (get_window ()->gobj());
 	cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
 	cairo_clip (cr);
+
+	/* paint expose area the color of the parent window bg 
+	*/
+	
+	Gdk::Color bg (get_parent_bg());
+	
+	cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
+	cairo_set_source_rgb (cr, bg.get_red_p(), bg.get_green_p(), bg.get_blue_p());
+	cairo_fill (cr);
+
 	render (cr);
+
 	cairo_destroy (cr);
 
 	return true;
@@ -64,9 +76,6 @@ CairoWidget::on_size_allocate (Gtk::Allocation& alloc)
 {
 	Gtk::EventBox::on_size_allocate (alloc);
 
-	_width = alloc.get_width ();
-	_height = alloc.get_height ();
-
 	set_dirty ();
 }
 
@@ -77,8 +86,19 @@ CairoWidget::get_parent_bg ()
 
 	parent = get_parent ();
 
-        while (parent && !parent->get_has_window()) {
-                parent = parent->get_parent();
+        while (parent) {
+		void* p = g_object_get_data (G_OBJECT(parent->gobj()), has_cairo_widget_background_info);
+
+		if (p) {
+			Glib::RefPtr<Gtk::Style> style = parent->get_style();
+			return style->get_bg (get_state());
+		}
+		
+		if (!parent->get_has_window()) {
+			parent = parent->get_parent();
+		} else {
+			break;
+		}
         }
 
         if (parent && parent->get_has_window()) {
@@ -134,4 +154,25 @@ CairoWidget::on_state_changed (Gtk::StateType)
 	}
 
 	queue_draw ();
+}
+
+void
+CairoWidget::set_draw_background (bool yn)
+{
+	_need_bg = yn;
+}
+
+void
+CairoWidget::provide_background_for_cairo_widget (Gtk::Widget& w, const Gdk::Color& bg)
+{
+	/* set up @w to be able to provide bg information to 
+	   any CairoWidgets that are packed inside it.
+	*/
+
+	w.modify_bg (Gtk::STATE_NORMAL, bg);
+	w.modify_bg (Gtk::STATE_INSENSITIVE, bg);
+	w.modify_bg (Gtk::STATE_ACTIVE, bg);
+	w.modify_bg (Gtk::STATE_SELECTED, bg);
+
+	g_object_set_data (G_OBJECT(w.gobj()), has_cairo_widget_background_info, (void*) 0xfeedface);
 }

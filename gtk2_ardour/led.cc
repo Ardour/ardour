@@ -45,7 +45,7 @@ void
 LED::render (cairo_t* cr)
 {
 	if (!_fixed_diameter) {
-		_diameter = std::min (_width, _height);
+		_diameter = std::min (get_width(), get_height());
 	}
 
 	//background
@@ -75,7 +75,7 @@ LED::render (cairo_t* cr)
 	cairo_fill(cr);
 #endif
 
-	cairo_translate(cr, _width/2, _height/2);
+	cairo_translate(cr, get_width()/2, get_height()/2);
 
 	//inset
 	cairo_pattern_t *pat = cairo_pattern_create_linear (0.0, 0.0, 0.0, _diameter);

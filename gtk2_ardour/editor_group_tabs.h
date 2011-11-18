@@ -33,7 +33,7 @@ private:
 	double primary_coordinate (double, double) const;
 	ARDOUR::RouteList routes_for_tab (Tab const *) const;
 	double extent () const {
-		return _height;
+		return get_height();
 	}
 	void add_menu_items (Gtk::Menu *, ARDOUR::RouteGroup *);
 	PBD::PropertyList default_properties () const;

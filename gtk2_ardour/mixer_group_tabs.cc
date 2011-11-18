@@ -89,7 +89,7 @@ MixerGroupTabs::compute_tabs () const
 void
 MixerGroupTabs::draw_tab (cairo_t* cr, Tab const & tab) const
 {
-	double const arc_radius = _height;
+	double const arc_radius = get_height();
 
 	if (tab.group && tab.group->is_active()) {
 		cairo_set_source_rgba (cr, tab.color.get_red_p (), tab.color.get_green_p (), tab.color.get_blue_p (), 1);
@@ -97,10 +97,10 @@ MixerGroupTabs::draw_tab (cairo_t* cr, Tab const & tab) const
 		cairo_set_source_rgba (cr, 1, 1, 1, 0.2);
 	}
 
-	cairo_arc (cr, tab.from + arc_radius, _height, arc_radius, M_PI, 3 * M_PI / 2);
+	cairo_arc (cr, tab.from + arc_radius, get_height(), arc_radius, M_PI, 3 * M_PI / 2);
 	cairo_line_to (cr, tab.to - arc_radius, 0);
-	cairo_arc (cr, tab.to - arc_radius, _height, arc_radius, 3 * M_PI / 2, 2 * M_PI);
-	cairo_line_to (cr, tab.from, _height);
+	cairo_arc (cr, tab.to - arc_radius, get_height(), arc_radius, 3 * M_PI / 2, 2 * M_PI);
+	cairo_line_to (cr, tab.from, get_height());
 	cairo_fill (cr);
 
 	if (tab.group) {
@@ -110,7 +110,7 @@ MixerGroupTabs::draw_tab (cairo_t* cr, Tab const & tab) const
 		cairo_text_extents (cr, tab.group->name().c_str(), &ext);
 
 		cairo_set_source_rgb (cr, 1, 1, 1);
-		cairo_move_to (cr, tab.from + (tab.to - tab.from - f.second) / 2, _height - ext.height / 2);
+		cairo_move_to (cr, tab.from + (tab.to - tab.from - f.second) / 2, get_height() - ext.height / 2);
 		cairo_save (cr);
 		cairo_show_text (cr, f.first.c_str());
 		cairo_restore (cr);

@@ -129,30 +129,20 @@ void
 ArdourButton::render (cairo_t* cr)
 {
 	if (!_fixed_diameter) {
-		_diameter = std::min (_width, _height);
+		_diameter = std::min (get_width(), get_height());
 	}
 
-	/* background fill. use parent window style, so that we fit in nicely.
-	 */
-	
-	Color c = get_parent_bg ();
-
-	cairo_rectangle (cr, 0, 0, _width, _height);
-	cairo_stroke_preserve (cr);
-	cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
-	cairo_fill (cr);
-
 	if (_elements & Edge) {
-		Gtkmm2ext::rounded_rectangle (cr, 0, 0, _width, _height, _corner_radius);
+		Gtkmm2ext::rounded_rectangle (cr, 0, 0, get_width(), get_height(), _corner_radius);
 		cairo_set_source (cr, edge_pattern);
 		cairo_fill (cr);
 	}
 
 	if (_elements & Body) {
 		if (_elements & Edge) {
-			Gtkmm2ext::rounded_rectangle (cr, 1, 1, _width-2, _height-2, _corner_radius - 1.0);
+			Gtkmm2ext::rounded_rectangle (cr, 1, 1, get_width()-2, get_height()-2, _corner_radius - 1.0);
 		} else {
-			Gtkmm2ext::rounded_rectangle (cr, 0, 0, _width, _height, _corner_radius - 1.0);
+			Gtkmm2ext::rounded_rectangle (cr, 0, 0, get_width(), get_height(), _corner_radius - 1.0);
 		}
 		cairo_set_source (cr, fill_pattern);
 		cairo_fill (cr);
@@ -161,8 +151,8 @@ ArdourButton::render (cairo_t* cr)
 	if (_pixbuf) {
 
 		double x,y;
-		x = (_width - _pixbuf->get_width())/2.0;
-		y = (_height - _pixbuf->get_height())/2.0;
+		x = (get_width() - _pixbuf->get_width())/2.0;
+		y = (get_height() - _pixbuf->get_height())/2.0;
 
 		cairo_rectangle (cr, x, y, _pixbuf->get_width(), _pixbuf->get_height());
 		gdk_cairo_set_source_pixbuf (cr, _pixbuf->gobj(), x, y);
@@ -173,7 +163,7 @@ ArdourButton::render (cairo_t* cr)
 
 	int text_margin;
 
-	if (_width < 75) {
+	if (get_width() < 75) {
 		text_margin = 3;
 	} else {
 		text_margin = 10;
@@ -185,13 +175,13 @@ ArdourButton::render (cairo_t* cr)
 
 		if (_elements & Indicator) {
 			if (_led_left) {
-				cairo_move_to (cr, text_margin + _diameter + 4, _height/2.0 - _text_height/2.0);
+				cairo_move_to (cr, text_margin + _diameter + 4, get_height()/2.0 - _text_height/2.0);
 			} else {
-				cairo_move_to (cr, text_margin, _height/2.0 - _text_height/2.0);
+				cairo_move_to (cr, text_margin, get_height()/2.0 - _text_height/2.0);
 			}
 		} else {
 			/* center text */
-			cairo_move_to (cr, (_width - _text_width)/2.0, _height/2.0 - _text_height/2.0);
+			cairo_move_to (cr, (get_width() - _text_width)/2.0, get_height()/2.0 - _text_height/2.0);
 		}
 
 		pango_cairo_show_layout (cr, _layout->gobj());
@@ -205,12 +195,12 @@ ArdourButton::render (cairo_t* cr)
 
 		if (_elements & Text) {
 			if (_led_left) {
-				cairo_translate (cr, text_margin + (_diameter/2.0), _height/2.0);
+				cairo_translate (cr, text_margin + (_diameter/2.0), get_height()/2.0);
 			} else {
-				cairo_translate (cr, _width - ((_diameter/2.0) + 4.0), _height/2.0);
+				cairo_translate (cr, get_width() - ((_diameter/2.0) + 4.0), get_height()/2.0);
 			}
 		} else {
-			cairo_translate (cr, _width/2.0, _height/2.0);
+			cairo_translate (cr, get_width()/2.0, get_height()/2.0);
 		}
 		
 		//inset
@@ -242,7 +232,7 @@ ArdourButton::render (cairo_t* cr)
 	/* a partially transparent gray layer to indicate insensitivity */
 
 	if ((visual_state() & Gtkmm2ext::Insensitive)) {
-		Gtkmm2ext::rounded_rectangle (cr, 0, 0, _width, _height, _corner_radius);
+		Gtkmm2ext::rounded_rectangle (cr, 0, 0, get_width(), get_height(), _corner_radius);
 		cairo_set_source_rgba (cr, 0.905, 0.917, 0.925, 0.5);
 		cairo_fill (cr);
 	}
@@ -251,7 +241,7 @@ ArdourButton::render (cairo_t* cr)
 	
 	if (ARDOUR::Config->get_widget_prelight()) {
 		if (_hovering) {
-			Gtkmm2ext::rounded_rectangle (cr, 0, 0, _width, _height, _corner_radius);
+			Gtkmm2ext::rounded_rectangle (cr, 0, 0, get_width(), get_height(), _corner_radius);
 			cairo_set_source_rgba (cr, 0.905, 0.917, 0.925, 0.2);
 			cairo_fill (cr);
 		}
@@ -339,7 +329,7 @@ ArdourButton::set_colors ()
 
 	if (_elements & Edge) {
 
-		edge_pattern = cairo_pattern_create_linear (0.0, 0.0, 0.0, _height);
+		edge_pattern = cairo_pattern_create_linear (0.0, 0.0, 0.0, get_height());
 		if (visual_state() & Gtkmm2ext::Selected) {
 			start_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: border start selected", get_name()));
 			end_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: border end selected", get_name()));
@@ -362,7 +352,7 @@ ArdourButton::set_colors ()
 	}
 
 	if (_elements & Body) {
-		fill_pattern = cairo_pattern_create_linear (0.0, 0.0, 0.0, _height);
+		fill_pattern = cairo_pattern_create_linear (0.0, 0.0, 0.0, get_height());
 		
 		if (active_state() == Gtkmm2ext::Mid) {
 			start_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: fill start mid", get_name()));
@@ -590,7 +580,7 @@ ArdourButton::setup_led_rect ()
 {
 	int text_margin;
 
-	if (_width < 75) {
+	if (get_width() < 75) {
 		text_margin = 3;
 	} else {
 		text_margin = 10;
@@ -603,14 +593,14 @@ ArdourButton::setup_led_rect ()
 			if (_led_left) {
 				_led_rect->x = text_margin;
 			} else {
-				_led_rect->x = _width - text_margin - _diameter/2.0;
+				_led_rect->x = get_width() - text_margin - _diameter/2.0;
 			}
 		} else {
 			/* centered */
-			_led_rect->x = _width/2.0 - _diameter/2.0;
+			_led_rect->x = get_width()/2.0 - _diameter/2.0;
 		}
 
-		_led_rect->y = _height/2.0 - _diameter/2.0;
+		_led_rect->y = get_height()/2.0 - _diameter/2.0;
 		_led_rect->width = _diameter;
 		_led_rect->height = _diameter;
 

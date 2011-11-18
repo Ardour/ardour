@@ -143,6 +143,14 @@ TimeInfoBox::TimeInfoBox ()
 	Editor::instance().get_selection().RegionsChanged.connect (sigc::mem_fun (*this, &TimeInfoBox::selection_changed));
 
 	Editor::instance().MouseModeChanged.connect (editor_connections, invalidator(*this), ui_bind (&TimeInfoBox::track_mouse_mode, this), gui_context());
+
+	Gdk::Color bg;
+
+	bg.set_red (lrint (0.149 * 65535));
+	bg.set_green (lrint (0.149 * 65535));
+	bg.set_blue (lrint (0.149 * 65535));
+
+	CairoWidget::provide_background_for_cairo_widget (*this, bg);
 }
 
 TimeInfoBox::~TimeInfoBox ()

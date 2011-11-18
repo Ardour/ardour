@@ -80,7 +80,7 @@ EditorGroupTabs::compute_tabs () const
 void
 EditorGroupTabs::draw_tab (cairo_t* cr, Tab const & tab) const
 {
-	double const arc_radius = _width;
+	double const arc_radius = get_width();
 
 	if (tab.group && tab.group->is_active()) {
 		cairo_set_source_rgba (cr, tab.color.get_red_p (), tab.color.get_green_p (), tab.color.get_blue_p (), 1);
@@ -89,9 +89,9 @@ EditorGroupTabs::draw_tab (cairo_t* cr, Tab const & tab) const
 	}
 
 	cairo_move_to (cr, 0, tab.from + arc_radius);
-	cairo_arc (cr, _width, tab.from + arc_radius, arc_radius, M_PI, 3 * M_PI / 2);
-	cairo_line_to (cr, _width, tab.to);
-	cairo_arc (cr, _width, tab.to - arc_radius, arc_radius, M_PI / 2, M_PI);
+	cairo_arc (cr, get_width(), tab.from + arc_radius, arc_radius, M_PI, 3 * M_PI / 2);
+	cairo_line_to (cr, get_width(), tab.to);
+	cairo_arc (cr, get_width(), tab.to - arc_radius, arc_radius, M_PI / 2, M_PI);
 	cairo_line_to (cr, 0, tab.from + arc_radius);
 	cairo_fill (cr);
 
@@ -102,7 +102,7 @@ EditorGroupTabs::draw_tab (cairo_t* cr, Tab const & tab) const
 		cairo_text_extents (cr, tab.group->name().c_str(), &ext);
 
 		cairo_set_source_rgb (cr, 1, 1, 1);
-		cairo_move_to (cr, _width - ext.height / 2, tab.from + (f.second + tab.to - tab.from) / 2);
+		cairo_move_to (cr, get_width() - ext.height / 2, tab.from + (f.second + tab.to - tab.from) / 2);
 		cairo_save (cr);
 		cairo_rotate (cr, - M_PI / 2);
 		cairo_show_text (cr, f.first.c_str());

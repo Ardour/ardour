@@ -244,7 +244,7 @@ GroupTabs::render (cairo_t* cr)
 	/* background */
 
 	cairo_set_source_rgb (cr, 0, 0, 0);
-	cairo_rectangle (cr, 0, 0, _width, _height);
+	cairo_rectangle (cr, 0, 0, get_width(), get_height());
 	cairo_fill (cr);
 
 	/* tabs */

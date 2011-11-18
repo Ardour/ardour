@@ -53,6 +53,7 @@ sigc::signal<void> AudioClock::ModeChanged;
 vector<AudioClock*> AudioClock::clocks;
 const double AudioClock::info_font_scale_factor = 0.6;
 const double AudioClock::separator_height = 2.0;
+const double AudioClock::x_leading_padding = 6.0;
 
 AudioClock::AudioClock (const string& clock_name, bool transient, const string& widget_name,
 			bool allow_edit, bool follows_playhead, bool duration, bool with_info)
@@ -62,10 +63,8 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	, editable (allow_edit)
 	, _follows_playhead (follows_playhead)
 	, _off (false)
-	, _need_bg (true)
 	, ops_menu (0)
 	, editing_attr (0)
-	, background_attr (0)
 	, foreground_attr (0)
 	, mode_based_info_ratio (1.0)
 	, editing (false)
@@ -100,7 +99,6 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 
 AudioClock::~AudioClock ()
 {
-	delete background_attr;
 	delete foreground_attr;
 	delete editing_attr;
 }
@@ -180,13 +178,12 @@ AudioClock::set_colors ()
 		editing_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: edited text", get_name()));
 	}
 
+	/* store for bg in ::render() */
+
 	UINT_TO_RGBA (bg_color, &r, &g, &b, &a);
 	r = lrint ((r/256.0) * 65535.0);
 	g = lrint ((g/256.0) * 65535.0);
 	b = lrint ((b/256.0) * 65535.0);
-	background_attr = new Pango::AttrColor (Pango::Attribute::create_attr_background (r, g, b));
-
-	/* store for bg in ::render() */
 	bg_r = r/256.0;
 	bg_g = g/256.0;
 	bg_b = b/256.0;
@@ -204,13 +201,8 @@ AudioClock::set_colors ()
 	b = lrint ((b/256.0) * 65535.0);
 	editing_attr = new Pango::AttrColor (Pango::Attribute::create_attr_foreground (r, g, b));
 	
-	normal_attributes.change (*background_attr);
 	normal_attributes.change (*foreground_attr);
-
-	info_attributes.change (*background_attr);
 	info_attributes.change (*foreground_attr);
-
-	editing_attributes.change (*background_attr);
 	editing_attributes.change (*foreground_attr);
 	editing_attributes.change (*editing_attr);
 
@@ -231,67 +223,54 @@ AudioClock::set_colors ()
 void
 AudioClock::render (cairo_t* cr)
 {
+	/* main layout: rounded rect, plus the text */
+	
 	if (_need_bg) {
-		/* paint entire area the color of the parent window bg 
-		   
-		   XXX try to optimize this so that we just paint the corners and
-		   other areas that may be exposed by rounded corners.
-		*/
-		
-		Gdk::Color bg (get_parent_bg());
-		cairo_rectangle (cr, 0, 0, _width, _height);
-		cairo_stroke_preserve (cr);
-		cairo_set_source_rgb (cr, bg.get_red_p(), bg.get_green_p(), bg.get_blue_p());
+		cairo_set_source_rgba (cr, bg_r, bg_g, bg_b, bg_a);
+		Gtkmm2ext::rounded_rectangle (cr, 0, 0, get_width(), upper_height, 9);
 		cairo_fill (cr);
 	}
 
-	/* main layout: rounded rect, plus the text */
-	
-	cairo_set_source_rgba (cr, bg_r, bg_g, bg_b, bg_a);
-	Gtkmm2ext::rounded_rectangle (cr, 0, 0, _width, upper_height, 9);
-
-	cairo_move_to (cr, 6, (upper_height - layout_height) / 2.0);
+	cairo_move_to (cr, x_leading_padding, (upper_height - layout_height) / 2.0);
 	pango_cairo_show_layout (cr, _layout->gobj());
 
 	if (_left_layout) {
 
-		double h = _height - upper_height - separator_height;
+		double h = get_height() - upper_height - separator_height;
+
+		if (_need_bg) {
+			cairo_set_source_rgba (cr, bg_r, bg_g, bg_b, bg_a);
+		}
 
 		if (mode_based_info_ratio != 1.0) {
 
-			double left_rect_width = round (((_width - separator_height) * mode_based_info_ratio) + 0.5);
+			double left_rect_width = round (((get_width() - separator_height) * mode_based_info_ratio) + 0.5);
 
-			cairo_set_source_rgba (cr, bg_r, bg_g, bg_b, bg_a);
-			Gtkmm2ext::rounded_rectangle (cr, 0, upper_height + separator_height, left_rect_width, h, 9);
-			
-			cairo_move_to (cr, 6, upper_height + separator_height + ((h - info_height)/2.0));
+			if (_need_bg) {
+				Gtkmm2ext::rounded_rectangle (cr, 0, upper_height + separator_height, left_rect_width, h, 9);
+				cairo_fill (cr);
+			}
+
+			cairo_move_to (cr, x_leading_padding, upper_height + separator_height + ((h - info_height)/2.0));
 			pango_cairo_show_layout (cr, _left_layout->gobj());
 			
-			Gtkmm2ext::rounded_rectangle (cr, left_rect_width + separator_height, upper_height + separator_height, 
-						      _width - separator_height - left_rect_width, h, 9);
-			
-			cairo_move_to (cr, 6 + left_rect_width + separator_height, upper_height + separator_height + ((h - info_height)/2.0));
+			if (_need_bg) {
+				Gtkmm2ext::rounded_rectangle (cr, left_rect_width + separator_height, upper_height + separator_height, 
+							      get_width() - separator_height - left_rect_width, h, 9);
+				cairo_fill (cr);	
+			}
+
+			cairo_move_to (cr, x_leading_padding + left_rect_width + separator_height, upper_height + separator_height + ((h - info_height)/2.0));
 			pango_cairo_show_layout (cr, _right_layout->gobj());
 
 		} else {
 			/* no info to display, or just one */
 
-			cairo_set_source_rgba (cr, bg_r, bg_g, bg_b, bg_a);
-			Gtkmm2ext::rounded_rectangle (cr, 0, upper_height + separator_height, _width, h, 9);
+			if (_need_bg) {
+				Gtkmm2ext::rounded_rectangle (cr, 0, upper_height + separator_height, get_width(), h, 9);
+				cairo_fill (cr);
+			}
 		}
-	}
-
-	if (editing) {
-		Pango::Rectangle cursor = _layout->get_cursor_strong_pos (edit_string.length() - input_string.length() - 1);
-		cerr << "index at " << edit_string.length() - input_string.length() - 1 
-		     << " cursor at " << cursor.get_x()/PANGO_SCALE << ", " << cursor.get_y()/PANGO_SCALE
-		     << " " << cursor.get_width()/PANGO_SCALE
-		     << " .. " << cursor.get_height()/PANGO_SCALE
-		     << endl;
-		cairo_set_source_rgba (cr, 0.9, 0.1, 0.1, 0.3);
-		cairo_rectangle (cr, 6 + cursor.get_x()/PANGO_SCALE, cursor.get_y()/PANGO_SCALE, 
-				 10, cursor.get_height()/PANGO_SCALE);
-		cairo_fill (cr);
 	}
 }
 
@@ -301,9 +280,9 @@ AudioClock::on_size_allocate (Gtk::Allocation& alloc)
 	CairoWidget::on_size_allocate (alloc);
 	
 	if (_left_layout) {
-		upper_height = (_height/2.0) - 1.0;
+		upper_height = (get_height()/2.0) - 1.0;
 	} else {
-		upper_height = _height;
+		upper_height = get_height();
 	}
 }
 
@@ -356,6 +335,10 @@ AudioClock::on_size_request (Gtk::Requisition* req)
 		
 		tmp->get_pixel_size (w, info_height);
 		
+		/* silly extra padding that seems necessary to correct the info
+		 * that pango just gave us. I have no idea why.
+		 */
+
 		info_height += 4;
 
 		req->height += info_height;
@@ -369,7 +352,6 @@ AudioClock::show_edit_status (int length)
 	editing_attr->set_start_index (edit_string.length() - length);
 	editing_attr->set_end_index (edit_string.length());
 	
-	editing_attributes.change (*background_attr);
 	editing_attributes.change (*foreground_attr);
 	editing_attributes.change (*editing_attr);
 
@@ -452,6 +434,7 @@ AudioClock::end_edit (bool modify)
 		}
 
 	} else {
+
 		editing = false;
 		_layout->set_attributes (normal_attributes);
 		_layout->set_text (pre_edit_string);
@@ -1701,9 +1684,4 @@ AudioClock::focus ()
 	start_edit ();
 }
 
-void
-AudioClock::set_draw_background (bool yn)
-{
-	_need_bg = yn;
-}
 

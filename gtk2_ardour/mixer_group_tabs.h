@@ -32,7 +32,7 @@ private:
 	double primary_coordinate (double, double) const;
 	ARDOUR::RouteList routes_for_tab (Tab const *) const;
 	double extent () const {
-		return _width;
+		return get_width();
 	}
 
 	PBD::PropertyList default_properties () const;

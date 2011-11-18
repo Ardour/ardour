@@ -53,7 +53,17 @@ public:
 	void set_active (bool);
 	bool get_active () { return active_state() != Gtkmm2ext::ActiveState (0); }
 
+	/* widgets can be told to only draw their "foreground, and thus leave
+	   in place whatever background is drawn by their parent. the default
+	   is that the widget will fill its event window with the background
+	   color of the parent container.
+	*/
+
+	void set_draw_background (bool yn);
+
 	sigc::signal<void> StateChanged;
+
+	static void provide_background_for_cairo_widget (Gtk::Widget& w, const Gdk::Color& bg);
 
 protected:
 	/** Render the widget to the given Cairo context */
@@ -63,10 +73,9 @@ protected:
 	void on_state_changed (Gtk::StateType);
 	Gdk::Color get_parent_bg ();
 
-	int _width; ///< pixmap width
-	int _height; ///< pixmap height
 	Gtkmm2ext::ActiveState _active_state;
 	Gtkmm2ext::VisualState _visual_state;
+	bool                   _need_bg;
 
 private:
 	GdkPixmap* _pixmap; ///< our pixmap

@@ -67,7 +67,6 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	void set_mode (Mode);
 	void set_bbt_reference (framepos_t);
         void set_is_duration (bool);
-	void set_draw_background (bool yn);
 
 	std::string name() const { return _name; }
 
@@ -94,7 +93,6 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	/** true if this clock follows the playhead, meaning that certain operations are redundant */
 	bool             _follows_playhead;
 	bool             _off;
-	bool             _need_bg;
 
 	Gtk::Menu  *ops_menu;
 
@@ -103,7 +101,6 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	Glib::RefPtr<Pango::Layout> _right_layout;
 
 	Pango::AttrColor*    editing_attr;
-	Pango::AttrColor*    background_attr;
 	Pango::AttrColor*    foreground_attr;
 
 	Pango::AttrList normal_attributes;
@@ -117,6 +114,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	double mode_based_info_ratio;
 	static const double info_font_scale_factor;
 	static const double separator_height;
+	static const double x_leading_padding;
 
 	enum Field {
 		Timecode_Hours,
@@ -140,7 +138,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	std::string pre_edit_string;
 	std::string input_string;
 	std::string::size_type insert_max; 
-			   
+
 	framepos_t bbt_reference_time;
 	framepos_t last_when;
 	bool last_pdelta;
