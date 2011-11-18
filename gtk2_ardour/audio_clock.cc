@@ -282,24 +282,24 @@ AudioClock::render (cairo_t* cr)
 	}
 
 	if (editing) {
-		const double cursor_width = 4.0; /* need em width here, not 16 */
+		const double cursor_width = 12; /* need em width here, not 16 */
 
 		if (!insert_map.empty()) {
 			Pango::Rectangle cursor = _layout->get_cursor_strong_pos (insert_map[input_string.length()]);
 			
 			cairo_set_source_rgba (cr, 0.9, 0.1, 0.1, 0.8);
 			cairo_rectangle (cr, 
-					 x_leading_padding + cursor.get_x()/PANGO_SCALE, 
+					 x_leading_padding + cursor.get_x()/PANGO_SCALE + cursor_width,
 					 (upper_height - layout_height)/2.0, 
-					 cursor_width, cursor.get_height()/PANGO_SCALE);
+					 2.0, cursor.get_height()/PANGO_SCALE);
 			cairo_fill (cr);	
 		} else {
 			if (input_string.empty()) {
 				cairo_set_source_rgba (cr, 0.9, 0.1, 0.1, 0.8);
 				cairo_rectangle (cr, 
-						 (get_width()/2.0) - cursor_width,
+						 (get_width()/2.0),
 						 (upper_height - layout_height)/2.0, 
-						 cursor_width, upper_height);
+						 2.0, upper_height);
 				cairo_fill (cr);
 			}
 		}
@@ -441,7 +441,7 @@ AudioClock::end_edit (bool modify)
 		} else {
 
 			editing = false;
-			framepos_t pos;
+			framepos_t pos = 0; /* stupid gcc */
 
 			switch (_mode) {
 			case Timecode:
@@ -1117,6 +1117,11 @@ AudioClock::on_key_release_event (GdkEventKey *ev)
 		ChangeAborted();  /*  EMIT SIGNAL  */
 		return true;
 
+	case GDK_Delete:
+	case GDK_BackSpace:
+		input_string = input_string.substr (1, input_string.length() - 1);
+		goto use_input_string;
+
 	default:
 		return false;
 	}
@@ -1127,10 +1132,12 @@ AudioClock::on_key_release_event (GdkEventKey *ev)
 	}
 
 	input_string.insert (input_string.begin(), new_char);
-	
+
+  use_input_string:
+
 	string::reverse_iterator ri;
 	vector<int> insert_at;
-	int highlight_length;
+	int highlight_length = 0;
 	char buf[32];
 	framepos_t pos;
 
@@ -1139,10 +1146,16 @@ AudioClock::on_key_release_event (GdkEventKey *ev)
 	switch (_mode) {
 	case Frames:
 		/* get this one in the right order, and to the right width */
-		edit_string.push_back (new_char);
-		sscanf (edit_string.c_str(), "%" PRId64, &pos);
-		snprintf (buf, sizeof (buf), " %10" PRId64, pos);
-		edit_string = buf;
+		if (ev->keyval != GDK_Delete && ev->keyval != GDK_BackSpace) {
+			edit_string.push_back (new_char);
+		} else {
+			edit_string = edit_string.substr (0, edit_string.length() - 1);
+		}
+		if (!edit_string.empty()) {
+			sscanf (edit_string.c_str(), "%" PRId64, &pos);
+			snprintf (buf, sizeof (buf), " %10" PRId64, pos);
+			edit_string = buf;
+		}
 		highlight_length = edit_string.length();
 		break;
 		
