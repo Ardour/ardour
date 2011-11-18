@@ -55,11 +55,11 @@ guint Keyboard::delete_mod = GDK_SHIFT_MASK;
 guint Keyboard::snap_mod = GDK_MOD3_MASK;
 
 #ifdef GTKOSX
-guint Keyboard::PrimaryModifier = GDK_META_MASK;   // Command
+guint Keyboard::PrimaryModifier = GDK_MOD2_MASK;   // Command
 guint Keyboard::SecondaryModifier = GDK_MOD1_MASK; // Alt/Option
 guint Keyboard::TertiaryModifier = GDK_SHIFT_MASK; // Shift
 guint Keyboard::Level4Modifier = GDK_CONTROL_MASK; // Control
-guint Keyboard::CopyModifier = GDK_MOD1_MASK;      // Alt/Option
+guint Keyboard::CopyModifier = GDK_MOD2_MASK;      // Command
 guint Keyboard::RangeSelectModifier = GDK_SHIFT_MASK;   
 guint Keyboard::button2_modifiers = Keyboard::SecondaryModifier|Keyboard::Level4Modifier;
 #else

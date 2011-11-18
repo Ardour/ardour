@@ -428,12 +428,12 @@ keybindings_dict = { }
 if gtkardour['GTKOSX']:
 	#
 	# Command(Meta), Alt(Mod1), Ctrl, Shift
-	# **** as of february 4th 2008, OUR VERSION OF *****
+	# **** as of november 18th 2011, OUR VERSION OF *****
 	# Gtk/Quartz maps:
-	#  NSCommand (aka "Command" aka "Apple" aka "Cauliflower") -> Meta
+	#  NSCommand (aka "Command" aka "Apple" aka "Cauliflower") -> Mod2
 	#  NSAlternate (aka "Option")  -> Mod1
 	#
-	keybindings_dict['%PRIMARY%'] = 'Meta'
+	keybindings_dict['%PRIMARY%'] = 'Mod2'
 	keybindings_dict['%SECONDARY%'] = 'Mod1'
 	keybindings_dict['%TERTIARY%'] = 'Shift'
 	keybindings_dict['%LEVEL4%'] = 'Ctrl'
