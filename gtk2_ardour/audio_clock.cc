@@ -436,7 +436,7 @@ AudioClock::end_edit (bool modify)
 			edit_string = pre_edit_string;
 			input_string.clear ();
 			_layout->set_text (edit_string);
-			show_edit_status (1);
+			show_edit_status (0);
 			/* edit attributes remain in use */
 		} else {
 
