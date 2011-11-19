@@ -341,7 +341,7 @@ AudioClock::on_size_request (Gtk::Requisition* req)
 	   where we printf a fractional value (XXX or should)
 	*/
 
-	tmp->set_text (" 88|88:88:88,888"); 
+	tmp->set_text (" 88888888888,|"); 
 
 	tmp->get_pixel_size (req->width, req->height);
 
@@ -487,13 +487,20 @@ AudioClock::end_edit (bool modify)
 void
 AudioClock::drop_focus ()
 {
-	/* move focus back to the default widget in the top level window */
-	
 	Keyboard::magic_widget_drop_focus ();
-	Widget* top = get_toplevel();
-	if (top->is_toplevel ()) {
-		Window* win = dynamic_cast<Window*> (top);
-		win->grab_focus ();
+
+	DropFocus (); /* EMIT SIGNAL */
+	
+	if (has_focus()) {
+
+		/* move focus back to the default widget in the top level window */
+		
+		Widget* top = get_toplevel();
+		
+		if (top->is_toplevel ()) {
+			Window* win = dynamic_cast<Window*> (top);
+			win->grab_focus ();
+		}
 	}
 }
 
@@ -1209,7 +1216,7 @@ AudioClock::index_to_field (int index) const
 			return Timecode_Minutes;
 		} else if (index < 10) {
 			return Timecode_Seconds;
-		} else if (index < 13) {
+		} else {
 			return Timecode_Frames;
 		}
 		break;
@@ -1218,7 +1225,7 @@ AudioClock::index_to_field (int index) const
 			return Bars;
 		} else if (index < 7) {
 			return Beats;
-		} else if (index < 12) {
+		} else {
 			return Ticks;
 		}
 		break;
@@ -1229,7 +1236,7 @@ AudioClock::index_to_field (int index) const
 			return MS_Minutes;
 		} else if (index < 9) {
 			return MS_Seconds;
-		} else if (index < 12) {
+		} else {
 			return MS_Milliseconds;
 		}
 		break;
