@@ -265,6 +265,9 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 
 	boost::shared_ptr<Route> s = _showing_sends_to.lock ();
 	bus_send_display_changed (s);
+
+	update_mute_display ();
+	update_solo_display ();
 }
 
 void
