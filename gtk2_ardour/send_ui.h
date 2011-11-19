@@ -22,7 +22,7 @@
 
 #include "gain_meter.h"
 #include "panner_ui.h"
-#include "ardour_dialog.h"
+#include "ardour_window.h"
 
 namespace ARDOUR {
 	class Send;
@@ -58,7 +58,7 @@ class SendUI : public Gtk::HBox
 	PBD::ScopedConnectionList connections;
 };
 
-class SendUIWindow : public ArdourDialog
+class SendUIWindow : public ArdourWindow
 {
   public:
 	SendUIWindow(boost::shared_ptr<ARDOUR::Send>, ARDOUR::Session*);

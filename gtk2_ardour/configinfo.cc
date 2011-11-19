@@ -17,6 +17,8 @@
 
 */
 
+#include <gtkmm.h>
+
 #include "ardour/ardour.h"
 
 #include "configinfo.h"
@@ -32,4 +34,6 @@ ConfigInfoDialog::ConfigInfoDialog ()
 	text.set_size_request (300, 800);
 
 	get_vbox()->pack_start (text, true, true);
+
+	add_button (Gtk::Stock::CLOSE, Gtk::RESPONSE_ACCEPT);
 }

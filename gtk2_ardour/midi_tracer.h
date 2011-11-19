@@ -8,18 +8,19 @@
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/label.h>
 #include <gtkmm/comboboxtext.h>
+#include <gtkmm/box.h>
 
 #include "pbd/signals.h"
 #include "pbd/ringbuffer.h"
 #include "pbd/pool.h"
 #include "midi++/types.h"
-#include "ardour_dialog.h"
+#include "ardour_window.h"
 
 namespace MIDI {
 	class Parser;
 }
 
-class MidiTracer : public ArdourDialog
+class MidiTracer : public ArdourWindow
 {
   public:
 	MidiTracer ();

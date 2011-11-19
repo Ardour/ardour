@@ -61,7 +61,7 @@
 
 #include <lrdf.h>
 
-#include "ardour_dialog.h"
+#include "ardour_window.h"
 #include "ardour_ui.h"
 #include "prompter.h"
 #include "plugin_ui.h"
@@ -561,8 +561,8 @@ PlugUIBase::latency_button_clicked ()
 {
 	if (!latency_gui) {
 		latency_gui = new LatencyGUI (*(insert.get()), insert->session().frame_rate(), insert->session().get_block_size());
-		latency_dialog = new ArdourDialog (_("Edit Latency"), false, false);
-		latency_dialog->get_vbox()->pack_start (*latency_gui);
+		latency_dialog = new ArdourWindow (_("Edit Latency"));
+		latency_dialog->add (*latency_gui);
 		latency_dialog->signal_hide().connect (sigc::mem_fun (*this, &PlugUIBase::set_latency_label));
 	}
 

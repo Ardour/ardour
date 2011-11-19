@@ -59,7 +59,7 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 
 RouteParams_UI::RouteParams_UI ()
-	: ArdourDialog (_("Tracks and Busses")),
+	: ArdourWindow (_("Tracks and Busses")),
 	  latency_apply_button (Stock::APPLY),
 	  track_menu(0)
 {
@@ -137,7 +137,7 @@ RouteParams_UI::RouteParams_UI ()
 
 	//global_vpacker.pack_start (list_hpane, true, true);
 	//get_vbox()->pack_start (global_vpacker);
-	get_vbox()->pack_start (list_hpane);
+	add (list_hpane);
 
 
 	set_name ("RouteParamsWindow");
@@ -394,7 +394,7 @@ RouteParams_UI::route_removed (boost::weak_ptr<Route> wr)
 void
 RouteParams_UI::set_session (Session *sess)
 {
-	ArdourDialog::set_session (sess);
+	ArdourWindow::set_session (sess);
 
 	route_display_model->clear();
 	_plugin_selector->set_session (_session);

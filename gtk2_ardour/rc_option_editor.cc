@@ -38,6 +38,8 @@
 #include "ardour/control_protocol_manager.h"
 #include "control_protocol/control_protocol.h"
 
+#include "ardour_window.h"
+#include "ardour_dialog.h"
 #include "gui_thread.h"
 #include "midi_tracer.h"
 #include "rc_option_editor.h"
@@ -56,7 +58,7 @@ using namespace ARDOUR;
 class ClickOptions : public OptionEditorBox
 {
 public:
-	ClickOptions (RCConfiguration* c, ArdourDialog* p)
+	ClickOptions (RCConfiguration* c, Gtk::Window* p)
 		: _rc_config (c),
 		  _parent (p)
 	{
@@ -149,7 +151,7 @@ private:
 	}
 
 	RCConfiguration* _rc_config;
-	ArdourDialog* _parent;
+	Gtk::Window* _parent;
 	Entry _click_path_entry;
 	Entry _click_emphasis_path_entry;
 };
@@ -657,7 +659,7 @@ private:
 class ControlSurfacesOptions : public OptionEditorBox
 {
 public:
-	ControlSurfacesOptions (ArdourDialog& parent)
+	ControlSurfacesOptions (Gtk::Window& parent)
 		: _parent (parent)
 	{
 		_store = ListStore::create (_model);
@@ -754,8 +756,8 @@ private:
 				Box* box = (Box*) cpi->protocol->get_gui ();
 				if (box) {
 					string title = row[_model.name];
-					ArdourDialog* win = new ArdourDialog (_parent, title);
-					win->get_vbox()->pack_start (*box, false, false);
+					ArdourWindow* win = new ArdourWindow (_parent, title);
+					win->add (*box);
 					box->show ();
 					win->present ();
 					row[_model.editor] = win;

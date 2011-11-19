@@ -22,7 +22,7 @@
 
 #include "gain_meter.h"
 #include "panner_ui.h"
-#include "ardour_dialog.h"
+#include "ardour_window.h"
 
 namespace ARDOUR {
 	class Return;
@@ -57,7 +57,7 @@ class ReturnUI : public Gtk::HBox
 	void ins_changed (ARDOUR::IOChange, void*);
 };
 
-class ReturnUIWindow : public ArdourDialog
+class ReturnUIWindow : public ArdourWindow
 {
   public:
 	ReturnUIWindow(boost::shared_ptr<ARDOUR::Return>, ARDOUR::Session*);

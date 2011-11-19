@@ -72,7 +72,7 @@ namespace Gtkmm2ext {
 }
 
 class LatencyGUI;
-class ArdourDialog;
+class ArdourWindow;
 class PluginEqGui;
 
 class PlugUIBase : public virtual sigc::trackable, public PBD::ScopedConnectionList
@@ -119,7 +119,7 @@ class PlugUIBase : public virtual sigc::trackable, public PBD::ScopedConnectionL
 	void set_latency_label ();
 
 	LatencyGUI* latency_gui;
-	ArdourDialog* latency_dialog;
+	ArdourWindow* latency_dialog;
 
 	Gtk::Expander plugin_analysis_expander;
 	PluginEqGui* eqgui;

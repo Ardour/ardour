@@ -28,9 +28,9 @@
 
 #include "ardour/speakers.h"
 
-#include "ardour_dialog.h"
+#include "ardour_window.h"
 
-class SpeakerDialog  : public ArdourDialog
+class SpeakerDialog  : public ArdourWindow
 {
 public:
 	SpeakerDialog ();

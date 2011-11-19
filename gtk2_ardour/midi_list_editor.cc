@@ -38,7 +38,7 @@ using namespace Glib;
 using namespace ARDOUR;
 
 MidiListEditor::MidiListEditor (Session* s, boost::shared_ptr<MidiRegion> r)
-	: ArdourDialog (r->name(), false, false)
+	: ArdourWindow (r->name())
 	, region (r)
 {
 	/* We do not handle nested sources/regions. Caller should have tackled this */
@@ -83,7 +83,7 @@ MidiListEditor::MidiListEditor (Session* s, boost::shared_ptr<MidiRegion> r)
 	view.show ();
 	scroller.show ();
 
-	get_vbox()->pack_start (scroller);
+	add (scroller);
 	set_size_request (400, 400);
 }
 

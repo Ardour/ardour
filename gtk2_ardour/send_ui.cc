@@ -117,14 +117,13 @@ SendUI::fast_update ()
 }
 
 SendUIWindow::SendUIWindow (boost::shared_ptr<Send> s, Session* session)
-	: ArdourDialog (string (_("Send ")) + s->name())
+	: ArdourWindow (string (_("Send ")) + s->name())
 {
 	ui = new SendUI (this, s, session);
 
 	hpacker.pack_start (*ui, true, true);
 
-	get_vbox()->set_border_width (5);
-	get_vbox()->pack_start (hpacker);
+	add (hpacker);
 
 	set_name ("SendUIWindow");
 

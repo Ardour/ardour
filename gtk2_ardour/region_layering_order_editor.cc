@@ -15,7 +15,7 @@ using namespace Gtk;
 using namespace ARDOUR;
 
 RegionLayeringOrderEditor::RegionLayeringOrderEditor (PublicEditor& pe)
-	: ArdourDialog (pe, _("RegionLayeringOrderEditor"), false, false)
+	: ArdourWindow (pe, _("RegionLayeringOrderEditor"))
 	, playlist ()
 	, position ()
 	, in_row_change (false)
@@ -65,9 +65,11 @@ RegionLayeringOrderEditor::RegionLayeringOrderEditor (PublicEditor& pe)
         info_table->attach (clock_label, 0, 1, 1, 2, FILL, FILL);
         info_table->attach (clock, 1, 2, 1, 2, FILL, FILL);
 
-        get_vbox()->set_spacing (12);
-        get_vbox()->pack_start (*info_table, false, false);
-        get_vbox()->pack_start (*scroller_table, true, true);
+	Gtk::VBox* vbox = Gtk::manage (new Gtk::VBox ());
+	vbox->set_spacing (12);
+	vbox->pack_start (*info_table, false, false);
+	vbox->pack_start (*scroller_table, true, true);
+	add (*vbox);
 
         info_table->set_name ("RegionLayeringOrderTable");
         scroller_table->set_name ("RegionLayeringOrderTable");
@@ -185,7 +187,7 @@ RegionLayeringOrderEditor::on_key_press_event (GdkEventKey* ev)
 	*/
 
 	if (ev->keyval == GDK_Return) {
-		handled = ArdourDialog::on_key_press_event (ev);
+		handled = ArdourWindow::on_key_press_event (ev);
 	}
 
 	if (!handled) {
@@ -193,7 +195,7 @@ RegionLayeringOrderEditor::on_key_press_event (GdkEventKey* ev)
 	}
 
 	if (!handled) {
-		handled = ArdourDialog::on_key_press_event (ev);
+		handled = ArdourWindow::on_key_press_event (ev);
 	}
 
 	return handled;

@@ -33,7 +33,7 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 
 SpeakerDialog::SpeakerDialog ()
-        : ArdourDialog (_("Speaker Configuration"))
+        : ArdourWindow (_("Speaker Configuration"))
         , aspect_frame ("", 0.5, 0.5, 1.0, false)
         , azimuth_adjustment (0, 0.0, 360.0, 10.0, 1.0)
         , azimuth_spinner (azimuth_adjustment)
@@ -64,9 +64,11 @@ SpeakerDialog::SpeakerDialog ()
 	current_speaker_hbox->pack_start (azimuth_spinner, true, true);
 	current_speaker_hbox->pack_start (remove_speaker_button, true, true);
 
-        get_vbox()->pack_start (hbox);
-        get_vbox()->pack_start (*current_speaker_hbox, true, true);
-        get_vbox()->show_all ();
+	VBox* vbox = manage (new VBox);
+	vbox->pack_start (hbox);
+	vbox->pack_start (*current_speaker_hbox, true, true);
+	vbox->show_all ();
+	add (*vbox);
 
         darea.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::POINTER_MOTION_MASK);
 

@@ -778,7 +778,7 @@ Panner2d::toggle_bypass ()
 }
 
 Panner2dWindow::Panner2dWindow (boost::shared_ptr<PannerShell> p, int32_t h, uint32_t inputs)
-	: ArdourDialog (_("Panner (2D)"))
+	: ArdourWindow (_("Panner (2D)"))
         , widget (p, h)
 	, bypass_button (_("Bypass"))
 {
@@ -809,7 +809,7 @@ Panner2dWindow::Panner2dWindow (boost::shared_ptr<PannerShell> p, int32_t h, uin
 	hpacker.pack_start (left_side, false, false);
 	hpacker.show ();
 
-	get_vbox()->pack_start (hpacker);
+	add (hpacker);
 	reset (inputs);
 	widget.show ();
 }

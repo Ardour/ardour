@@ -101,14 +101,13 @@ ReturnUI::fast_update ()
 }
 
 ReturnUIWindow::ReturnUIWindow (boost::shared_ptr<Return> r, ARDOUR::Session* s)
-	: ArdourDialog (string(_("Return ")) + r->name())
+	: ArdourWindow (string(_("Return ")) + r->name())
 {
 	ui = new ReturnUI (this, r, s);
 
 	hpacker.pack_start (*ui, true, true);
 
-	get_vbox()->set_border_width (5);
-	get_vbox()->pack_start (hpacker);
+	add (hpacker);
 
 	set_name ("ReturnUIWindow");
 

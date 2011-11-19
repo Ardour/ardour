@@ -8,9 +8,9 @@
 #include <gtkmm/treestore.h>
 #include <gtkmm/scrolledwindow.h>
 
-#include "ardour_dialog.h"
+#include "ardour_window.h"
 
-class KeyEditor : public ArdourDialog
+class KeyEditor : public ArdourWindow
 {
   public:
 	KeyEditor ();

@@ -53,7 +53,7 @@ using namespace PBD;
 using Gtkmm2ext::Keyboard;
 
 KeyEditor::KeyEditor ()
-	: ArdourDialog (_("Key Bindings"), false)
+	: ArdourWindow (_("Key Bindings"))
 	, unbind_button (_("Remove shortcut"))
 	, unbind_box (BUTTONBOX_END)
 
@@ -79,9 +79,7 @@ KeyEditor::KeyEditor ()
 	scroller.add (view);
 	scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
-
-	get_vbox()->set_spacing (6);
-	get_vbox()->pack_start (scroller);
+	add (scroller);
 
 	if (!ARDOUR::Profile->get_sae()) {
 
@@ -92,13 +90,11 @@ KeyEditor::KeyEditor ()
 		unbind_box.pack_start (unbind_button, false, false);
 		unbind_button.signal_clicked().connect (sigc::mem_fun (*this, &KeyEditor::unbind));
 
-		get_vbox()->pack_start (unbind_box, false, false);
+		add (unbind_box);
 		unbind_box.show ();
 		unbind_button.show ();
 
 	}
-
-	get_vbox()->set_border_width (12);
 
 	view.show ();
 	scroller.show ();
@@ -137,13 +133,13 @@ KeyEditor::on_show ()
 {
 	populate ();
 	view.get_selection()->unselect_all ();
-	ArdourDialog::on_show ();
+	ArdourWindow::on_show ();
 }
 
 void
 KeyEditor::on_unmap ()
 {
-	ArdourDialog::on_unmap ();
+	ArdourWindow::on_unmap ();
 }
 
 void

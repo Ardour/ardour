@@ -9,7 +9,7 @@
 #include "ardour/region.h"
 #include "ardour/playlist.h"
 
-#include "ardour_dialog.h"
+#include "ardour_window.h"
 #include "audio_clock.h"
 
 class PublicEditor;
@@ -18,7 +18,7 @@ namespace ARDOUR {
 	class Session;
 }
 
-class RegionLayeringOrderEditor : public ArdourDialog
+class RegionLayeringOrderEditor : public ArdourWindow
 {
   public:
 	RegionLayeringOrderEditor (PublicEditor&);

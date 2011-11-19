@@ -176,6 +176,12 @@ PortInsertWindow::PortInsertWindow (ARDOUR::Session* sess, boost::shared_ptr<ARD
 
 	get_vbox()->pack_start (_portinsertui);
 
+	Gtk::Button* cancel_but = add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+	Gtk::Button* ok_but = add_button (Gtk::Stock::OK, Gtk::RESPONSE_OK);
+
+	cancel_but->signal_clicked().connect (sigc::mem_fun (*this, &PortInsertWindow::cancel));
+	ok_but->signal_clicked().connect (sigc::mem_fun (*this, &PortInsertWindow::accept));
+
 	signal_delete_event().connect (sigc::mem_fun (*this, &PortInsertWindow::wm_delete), false);
 
 	pi->DropReferences.connect (going_away_connection, invalidator (*this), boost::bind (&PortInsertWindow::plugin_going_away, this), gui_context());

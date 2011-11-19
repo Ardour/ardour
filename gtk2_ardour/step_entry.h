@@ -27,12 +27,12 @@
 #include <gtkmm/adjustment.h>
 #include <gtkmm2ext/bindings.h>
 
-#include "ardour_dialog.h"
+#include "ardour_window.h"
 #include "gtk_pianokeyboard.h"
 
 class StepEditor;
 
-class StepEntry : public ArdourDialog
+class StepEntry : public ArdourWindow
 {
   public:
         StepEntry (StepEditor&);

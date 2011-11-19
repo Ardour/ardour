@@ -57,7 +57,7 @@ _rest_event_handler (GtkWidget* /*widget*/, gpointer arg)
 }
 
 StepEntry::StepEntry (StepEditor& seditor)
-	: ArdourDialog (string_compose (_("Step Entry: %1"), seditor.name()))
+	: ArdourWindow (string_compose (_("Step Entry: %1"), seditor.name()))
         , _current_note_length (1.0)
         , _current_note_velocity (64)
 	, triplet_button ("3")
@@ -458,7 +458,7 @@ StepEntry::StepEntry (StepEditor& seditor)
 	packer.pack_start (*piano, false, false);
 	packer.show_all ();
 
-	get_vbox()->add (packer);
+	add (packer);
 
 	/* initial settings: quarter note and mezzo forte */
 
@@ -574,7 +574,7 @@ StepEntry::note_off_event_handler (int note)
 void
 StepEntry::on_show ()
 {
-	ArdourDialog::on_show ();
+	ArdourWindow::on_show ();
 	//piano->grab_focus ();
 }
 

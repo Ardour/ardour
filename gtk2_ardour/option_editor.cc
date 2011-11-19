@@ -237,7 +237,7 @@ OptionEditorPage::OptionEditorPage (Gtk::Notebook& n, std::string const & t)
  *  @param t Title for the dialog.
  */
 OptionEditor::OptionEditor (Configuration* c, std::string const & t)
-	: ArdourDialog (t, false), _config (c)
+	: ArdourWindow (t), _config (c)
 {
 	using namespace Notebook_Helpers;
 
@@ -249,8 +249,7 @@ OptionEditor::OptionEditor (Configuration* c, std::string const & t)
 
 	set_border_width (4);
 
-	get_vbox()->set_spacing (4);
-	get_vbox()->pack_start (_notebook);
+	add (_notebook);
 
 	_notebook.set_show_tabs (true);
 	_notebook.set_show_border (true);

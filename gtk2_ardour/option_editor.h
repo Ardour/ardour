@@ -26,7 +26,7 @@
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/table.h>
 #include "gtkmm2ext/slider_controller.h"
-#include "ardour_dialog.h"
+#include "ardour_window.h"
 #include "audio_clock.h"
 #include "ardour/types.h"
 
@@ -408,7 +408,7 @@ public:
 };
 
 /** The OptionEditor dialog base class */
-class OptionEditor : public ArdourDialog
+class OptionEditor : public ArdourWindow
 {
 public:
 	OptionEditor (ARDOUR::Configuration *, std::string const &);

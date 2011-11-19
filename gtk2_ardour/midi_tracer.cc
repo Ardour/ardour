@@ -36,7 +36,7 @@ using namespace MIDI;
 using namespace Glib;
 
 MidiTracer::MidiTracer ()
-	: ArdourDialog (_("MIDI Tracer"))
+	: ArdourWindow (_("MIDI Tracer"))
 	, parser (0)
 	, line_count_adjustment (200, 1, 2000, 1, 10)
 	, line_count_spinner (line_count_adjustment)
@@ -51,9 +51,10 @@ MidiTracer::MidiTracer ()
 	, base_button (_("Decimal"))
 	, collect_button (_("Enabled"))
 {
-	get_vbox()->set_spacing (4);
-
 	Manager::instance()->PortsChanged.connect (_manager_connection, invalidator (*this), boost::bind (&MidiTracer::ports_changed, this), gui_context());
+
+	VBox* vbox = manage (new VBox);
+	vbox->set_spacing (4);
 
 	HBox* pbox = manage (new HBox);
 	pbox->set_spacing (6);
@@ -62,11 +63,11 @@ MidiTracer::MidiTracer ()
 	_port_combo.signal_changed().connect (sigc::mem_fun (*this, &MidiTracer::port_changed));
 	pbox->pack_start (_port_combo);
 	pbox->show_all ();
-	get_vbox()->pack_start (*pbox, false, false);
+	vbox->pack_start (*pbox, false, false);
 
 	scroller.add (text);
-	get_vbox()->set_border_width (12);
-	get_vbox()->pack_start (scroller, true, true);
+	vbox->set_border_width (12);
+	vbox->pack_start (scroller, true, true);
 
 	text.show ();
 	text.set_name ("MidiTracerTextView");
@@ -85,15 +86,16 @@ MidiTracer::MidiTracer ()
 	line_count_label.show ();
 	line_count_box.show ();
 
-	get_action_area()->add (line_count_box);
-
 	HBox* bbox = manage (new HBox);
+	bbox->add (line_count_box);
 	bbox->add (base_button);
 	bbox->add (collect_button);
 	bbox->add (autoscroll_button);
 	bbox->show ();
 
-	get_action_area()->add (*bbox);
+	vbox->pack_start (*bbox, false, false);
+
+	add (*vbox);
 
 	base_button.signal_toggled().connect (sigc::mem_fun (*this, &MidiTracer::base_toggle));
 	collect_button.signal_toggled().connect (sigc::mem_fun (*this, &MidiTracer::collect_toggle));

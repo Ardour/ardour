@@ -27,7 +27,7 @@
 
 #include "ardour/session_handle.h"
 
-#include "ardour_dialog.h"
+#include "ardour_window.h"
 
 namespace Evoral {
 	template<typename Time> class Note;
@@ -39,7 +39,7 @@ namespace ARDOUR {
 	class Session;
 };
 
-class MidiListEditor : public ArdourDialog
+class MidiListEditor : public ArdourWindow
 {
   public:
 	typedef Evoral::Note<Evoral::MusicalTime> NoteType;

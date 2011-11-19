@@ -23,7 +23,7 @@
 #include <gtkmm/button.h>
 #include "port_matrix.h"
 #include "port_group.h"
-#include "ardour_dialog.h"
+#include "ardour_window.h"
 
 class GlobalPortMatrix : public PortMatrix
 {
@@ -50,7 +50,7 @@ private:
 	};
 };
 
-class GlobalPortMatrixWindow : public ArdourDialog
+class GlobalPortMatrixWindow : public ArdourWindow
 {
 public:
 	GlobalPortMatrixWindow (ARDOUR::Session *, ARDOUR::DataType);

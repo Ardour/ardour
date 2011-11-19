@@ -49,7 +49,7 @@ sigc::signal<void> ColorsChanged;
 sigc::signal<void,uint32_t> ColorChanged;
 
 ThemeManager::ThemeManager()
-	: ArdourDialog (_("Theme Manager")),
+	: ArdourWindow (_("Theme Manager")),
 	  dark_button (_("Dark Theme")),
 	  light_button (_("Light Theme")),
 	  reset_button (_("Restore Defaults"))
@@ -79,10 +79,12 @@ ThemeManager::ThemeManager()
 	theme_selection_hbox.pack_start (dark_button);
 	theme_selection_hbox.pack_start (light_button);
 
-	get_vbox()->set_homogeneous(false);
-	get_vbox()->pack_start (theme_selection_hbox, PACK_SHRINK);
-	get_vbox()->pack_start (reset_button, PACK_SHRINK);
-	get_vbox()->pack_start (scroller);
+	Gtk::VBox* vbox = Gtk::manage (new Gtk::VBox ());
+	vbox->set_homogeneous (false);
+	vbox->pack_start (theme_selection_hbox, PACK_SHRINK);
+	vbox->pack_start (reset_button, PACK_SHRINK);
+	vbox->pack_start (scroller);
+	add (*vbox);
 
 	color_display.signal_button_press_event().connect (sigc::mem_fun (*this, &ThemeManager::button_press_event), false);
 

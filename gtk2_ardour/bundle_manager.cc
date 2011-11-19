@@ -310,6 +310,9 @@ BundleManager::BundleManager (Session* session)
 		sigc::mem_fun (*this, &BundleManager::row_activated)
 		);
 
+	Gtk::Button* close_but = add_button (Gtk::Stock::CLOSE, Gtk::RESPONSE_ACCEPT);
+	close_but->signal_clicked ().connect (sigc::mem_fun (*this, &Gtk::Window::hide));
+
 	set_button_sensitivity ();
 
 	show_all ();

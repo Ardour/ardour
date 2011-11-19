@@ -1110,12 +1110,12 @@ LocationUI::session_going_away()
 /*------------------------*/
 
 LocationUIWindow::LocationUIWindow ()
-	: ArdourDialog (_("Locations"))
+	: ArdourWindow (_("Locations"))
 {
 	set_wmclass(X_("ardour_locations"), PROGRAM_NAME);
 	set_name ("LocationWindow");
 
-	get_vbox()->pack_start (_ui);
+	add (_ui);
 }
 
 LocationUIWindow::~LocationUIWindow()
@@ -1125,7 +1125,7 @@ LocationUIWindow::~LocationUIWindow()
 void
 LocationUIWindow::on_map ()
 {
-	ArdourDialog::on_map ();
+	ArdourWindow::on_map ();
 	_ui.refresh_location_list();
 }
 
@@ -1139,13 +1139,13 @@ LocationUIWindow::on_delete_event (GdkEventAny*)
 void
 LocationUIWindow::set_session (Session *s)
 {
-	ArdourDialog::set_session (s);
+	ArdourWindow::set_session (s);
 	_ui.set_session (s);
 }
 
 void
 LocationUIWindow::session_going_away ()
 {
-	ArdourDialog::session_going_away ();
+	ArdourWindow::session_going_away ();
 	hide_all();
 }

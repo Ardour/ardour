@@ -27,10 +27,10 @@
 #include <gtkmm/radiobutton.h>
 #include <gtkmm/button.h>
 #include <gtkmm/rc.h>
-#include "ardour_dialog.h"
+#include "ardour_window.h"
 #include "ui_config.h"
 
-class ThemeManager : public ArdourDialog
+class ThemeManager : public ArdourWindow
 {
   public:
 	ThemeManager();

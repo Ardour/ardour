@@ -52,7 +52,6 @@
 #include "panner_ui.h"
 #include "enums.h"
 #include "processor_box.h"
-#include "ardour_dialog.h"
 #include "visibility_group.h"
 
 namespace ARDOUR {
@@ -73,6 +72,7 @@ class Mixer_UI;
 class IOSelectorWindow;
 class MotionController;
 class RouteGroupMenu;
+class ArdourWindow;
 
 class MixerStrip : public RouteUI, public Gtk::EventBox
 {
@@ -202,7 +202,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 
 	Gtk::Button   name_button;
 
-	ArdourDialog*  comment_window;
+	ArdourWindow*  comment_window;
 	Gtk::TextView* comment_area;
 	Gtk::Button   _comment_button;
 
