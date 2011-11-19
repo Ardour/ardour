@@ -326,13 +326,14 @@ DirectoryOption::DirectoryOption (string const & i, string const & n, sigc::slot
 {
 	_file_chooser.set_action (Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER);
 	_file_chooser.signal_file_set().connect (sigc::mem_fun (*this, &DirectoryOption::file_set));
+	_file_chooser.signal_current_folder_changed().connect (sigc::mem_fun (*this, &DirectoryOption::current_folder_set));
 }
 
 
 void
 DirectoryOption::set_state_from_config ()
 {
-	_file_chooser.set_filename (_get ());
+	_file_chooser.set_current_folder (_get ());
 }
 
 void
@@ -345,4 +346,10 @@ void
 DirectoryOption::file_set ()
 {
 	_set (_file_chooser.get_filename ());
+}
+
+void
+DirectoryOption::current_folder_set ()
+{
+	_set (_file_chooser.get_current_folder ());
 }
