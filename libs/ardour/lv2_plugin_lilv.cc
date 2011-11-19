@@ -1,4 +1,4 @@
-;/*
+/*
     Copyright (C) 2008-2011 Paul Davis
     Author: David Robillard
 
