@@ -45,6 +45,7 @@ MonitorSection::MonitorSection (Session* s)
 	, pfl_button (_("PFL"), ArdourButton::led_default_elements)
 	, exclusive_solo_button (ArdourButton::led_default_elements)
 	, solo_mute_override_button (ArdourButton::led_default_elements)
+	, _inhibit_solo_model_update (false)
 {
         Glib::RefPtr<Action> act;
 
@@ -728,7 +729,16 @@ MonitorSection::solo_use_in_place ()
         if (act) {
                 Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic (act);
                 if (ract) {
+			if (!ract->get_active ()) {
+				/* We are turning SiP off, which means that AFL or PFL will be turned on
+				   shortly; don't update the solo model in the mean time, as if the currently
+				   configured listen position is not the one that is about to be turned on,
+				   things will go wrong.
+				*/
+				_inhibit_solo_model_update = true;
+			}
                         Config->set_solo_control_is_listen_control (!ract->get_active());
+			_inhibit_solo_model_update = false;
                 }
         }
 }
@@ -815,6 +825,10 @@ MonitorSection::setup_knob_images ()
 void
 MonitorSection::update_solo_model ()
 {
+	if (_inhibit_solo_model_update) {
+		return;
+	}
+	
         const char* action_name = 0;
         Glib::RefPtr<Action> act;
 

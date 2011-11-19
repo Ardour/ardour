@@ -135,5 +135,7 @@ class MonitorSection : public RouteUI
         PBD::ScopedConnection config_connection;
         PBD::ScopedConnectionList control_connections;
 
+	bool _inhibit_solo_model_update;
+	
         void assign_controllables ();
 };
