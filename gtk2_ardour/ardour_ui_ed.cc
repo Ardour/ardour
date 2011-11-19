@@ -633,7 +633,6 @@ ARDOUR_UI::use_menubar_as_top_menubar ()
 void
 ARDOUR_UI::big_clock_catch_focus ()
 {
-	cerr << "catch BC focus\n";
 	PublicEditor::instance().reset_focus ();
 }
 
@@ -650,11 +649,11 @@ ARDOUR_UI::setup_clock ()
 
 	big_clock_window->get()->set_title (_("Big Clock"));
 	big_clock_window->get()->signal_realize().connect (sigc::mem_fun (*this, &ARDOUR_UI::big_clock_realized));
-	big_clock_window->get()->signal_unmap().connect (sigc::bind (sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleBigClock")));
 	big_clock_window->get()->signal_key_press_event().connect (sigc::bind (sigc::ptr_fun (relay_key_press), big_clock_window->get()), false);
 	big_clock_window->get()->signal_size_allocate().connect (sigc::mem_fun (*this, &ARDOUR_UI::big_clock_size_allocate));
 
-	big_clock->DropFocus.connect (sigc::mem_fun (*this, &ARDOUR_UI::big_clock_catch_focus));
+	big_clock_window->get()->signal_unmap().connect (sigc::bind (sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleBigClock")));
+	big_clock_window->get()->signal_unmap().connect (sigc::mem_fun (*this, &ARDOUR_UI::big_clock_catch_focus));
 
 	manage_window (*big_clock_window->get());
 }

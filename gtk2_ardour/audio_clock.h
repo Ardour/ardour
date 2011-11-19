@@ -78,7 +78,6 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	sigc::signal<void> ValueChanged;
 	sigc::signal<void> mode_changed;
 	sigc::signal<void> ChangeAborted;
-	sigc::signal<void> DropFocus;
 
 	static sigc::signal<void> ModeChanged;
 	static std::vector<AudioClock*> clocks;

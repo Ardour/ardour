@@ -489,8 +489,6 @@ AudioClock::drop_focus ()
 {
 	Keyboard::magic_widget_drop_focus ();
 
-	DropFocus (); /* EMIT SIGNAL */
-	
 	if (has_focus()) {
 
 		/* move focus back to the default widget in the top level window */
