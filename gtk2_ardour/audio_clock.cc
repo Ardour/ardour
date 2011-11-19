@@ -68,7 +68,14 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	, ops_menu (0)
 	, editing_attr (0)
 	, foreground_attr (0)
+	, first_height (0)
+	, first_width (0)
+	, layout_height (0)
+	, layout_width (0)
+	, info_height (0)
+	, upper_height (0)
 	, mode_based_info_ratio (1.0)
+	, corner_radius (9)
 	, editing (false)
 	, bbt_reference_time (-1)
 	, last_when(0)
@@ -189,24 +196,28 @@ AudioClock::set_colors ()
 	/* store for bg in render() */
 
 	UINT_TO_RGBA (bg_color, &r, &g, &b, &a);
-	r = lrint ((r/256.0) * 65535.0);
-	g = lrint ((g/256.0) * 65535.0);
-	b = lrint ((b/256.0) * 65535.0);
-	bg_r = r/256.0;
-	bg_g = g/256.0;
-	bg_b = b/256.0;
-	bg_a = a/256.0;
+
+	bg_r = r/255.0;
+	bg_g = g/255.0;
+	bg_b = b/255.0;
+	bg_a = a/255.0;
+
+	/* rescale for Pango colors ... sigh */
+
+	r = lrint (r * 65535.0);
+	g = lrint (g * 65535.0);
+	b = lrint (b * 65535.0);
 
 	UINT_TO_RGBA (text_color, &r, &g, &b, &a);
-	r = lrint ((r/256.0) * 65535.0);
-	g = lrint ((g/256.0) * 65535.0);
-	b = lrint ((b/256.0) * 65535.0);
+	r = lrint ((r/255.0) * 65535.0);
+	g = lrint ((g/255.0) * 65535.0);
+	b = lrint ((b/255.0) * 65535.0);
 	foreground_attr = new Pango::AttrColor (Pango::Attribute::create_attr_foreground (r, g, b));
 
 	UINT_TO_RGBA (editing_color, &r, &g, &b, &a);
-	r = lrint ((r/256.0) * 65535.0);
-	g = lrint ((g/256.0) * 65535.0);
-	b = lrint ((b/256.0) * 65535.0);
+	r = lrint ((r/255.0) * 65535.0);
+	g = lrint ((g/255.0) * 65535.0);
+	b = lrint ((b/255.0) * 65535.0);
 	editing_attr = new Pango::AttrColor (Pango::Attribute::create_attr_foreground (r, g, b));
 	
 	normal_attributes.change (*foreground_attr);
@@ -235,11 +246,20 @@ AudioClock::render (cairo_t* cr)
 	
 	if (_need_bg) {
 		cairo_set_source_rgba (cr, bg_r, bg_g, bg_b, bg_a);
-		Gtkmm2ext::rounded_rectangle (cr, 0, 0, get_width(), upper_height, 9);
+		if (corner_radius) {
+			Gtkmm2ext::rounded_rectangle (cr, 0, 0, get_width(), upper_height, corner_radius);
+		} else {
+			cairo_rectangle (cr, 0, 0, get_width(), upper_height);
+		}
 		cairo_fill (cr);
 	}
 
-	cairo_move_to (cr, x_leading_padding, (upper_height - layout_height) / 2.0);
+	if (corner_radius) {
+		cairo_move_to (cr, x_leading_padding, (upper_height - layout_height) / 2.0);
+	} else {
+		cairo_move_to (cr, x_leading_padding, 0);
+	}
+
 	pango_cairo_show_layout (cr, _layout->gobj());
 
 	if (_left_layout) {
@@ -255,7 +275,11 @@ AudioClock::render (cairo_t* cr)
 			double left_rect_width = round (((get_width() - separator_height) * mode_based_info_ratio) + 0.5);
 
 			if (_need_bg) {
-				Gtkmm2ext::rounded_rectangle (cr, 0, upper_height + separator_height, left_rect_width, h, 9);
+				if (corner_radius) {
+					Gtkmm2ext::rounded_rectangle (cr, 0, upper_height + separator_height, left_rect_width, h, corner_radius);
+				} else {
+					cairo_rectangle (cr, 0, upper_height + separator_height, left_rect_width, h);
+				}
 				cairo_fill (cr);
 			}
 
@@ -263,8 +287,14 @@ AudioClock::render (cairo_t* cr)
 			pango_cairo_show_layout (cr, _left_layout->gobj());
 			
 			if (_need_bg) {
-				Gtkmm2ext::rounded_rectangle (cr, left_rect_width + separator_height, upper_height + separator_height, 
-							      get_width() - separator_height - left_rect_width, h, 9);
+				if (corner_radius) {
+					Gtkmm2ext::rounded_rectangle (cr, left_rect_width + separator_height, upper_height + separator_height, 
+								      get_width() - separator_height - left_rect_width, h, 
+								      corner_radius);
+				} else {
+					cairo_rectangle (cr, left_rect_width + separator_height, upper_height + separator_height, 
+							 get_width() - separator_height - left_rect_width, h);
+				}
 				cairo_fill (cr);	
 			}
 
@@ -275,7 +305,11 @@ AudioClock::render (cairo_t* cr)
 			/* no info to display, or just one */
 
 			if (_need_bg) {
-				Gtkmm2ext::rounded_rectangle (cr, 0, upper_height + separator_height, get_width(), h, 9);
+				if (corner_radius) {
+					Gtkmm2ext::rounded_rectangle (cr, 0, upper_height + separator_height, get_width(), h, corner_radius);
+				} else {
+					cairo_rectangle (cr, 0, upper_height + separator_height, get_width(), h);
+				}
 				cairo_fill (cr);
 			}
 		}
@@ -321,9 +355,20 @@ AudioClock::on_size_allocate (Gtk::Allocation& alloc)
 void
 AudioClock::on_size_request (Gtk::Requisition* req)
 {
+	/* our size never changes, so once we've computed it,
+	   just return it
+	*/
+
+	if (first_width) {
+		req->width = first_width;
+		req->height = first_height;
+		return;
+	}
+
 	Glib::RefPtr<Pango::Layout> tmp;
 	Glib::RefPtr<Gtk::Style> style = get_style ();
 	Pango::FontDescription font; 
+
 
 	tmp = Pango::Layout::create (get_pango_context());
 
@@ -376,6 +421,9 @@ AudioClock::on_size_request (Gtk::Requisition* req)
 		req->height += info_height;
 		req->height += separator_height;
 	}
+
+	first_height = req->height;
+	first_width = req->width;
 }
 
 void
@@ -1842,3 +1890,9 @@ AudioClock::focus ()
 }
 
 
+void
+AudioClock::set_corner_radius (double r)
+{
+	corner_radius = r;
+	queue_draw ();
+}

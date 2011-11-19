@@ -59,6 +59,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	void set_widget_name (const std::string& name);
 	void set_active_state (Gtkmm2ext::ActiveState s);
 	void set_editable (bool yn);
+	void set_corner_radius (double);
 
 	void focus ();
 
@@ -108,11 +109,14 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	Pango::AttrList editing_attributes;
 	Pango::AttrList info_attributes;
 
+	int first_height;
+	int first_width;
 	int layout_height;
 	int layout_width;
 	int info_height;
 	int upper_height;
 	double mode_based_info_ratio;
+	double corner_radius;
 
 	static const double info_font_scale_factor;
 	static const double separator_height;
