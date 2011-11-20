@@ -1696,6 +1696,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	framecnt_t autoscroll_x_distance;
 	double autoscroll_y_distance;
 
+	bool _autoscroll_fudging;
+	int autoscroll_fudge_threshold () const;
+
 	static gint _autoscroll_canvas (void *);
 	bool autoscroll_canvas ();
 	void start_canvas_autoscroll (int x, int y);
