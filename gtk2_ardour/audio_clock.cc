@@ -1146,6 +1146,10 @@ AudioClock::on_key_press_event (GdkEventKey* ev)
 	case GDK_Return:
 	case GDK_KP_Enter:
 	case GDK_Escape:
+	case GDK_minus:
+	case GDK_plus:
+	case GDK_KP_Add:
+	case GDK_KP_Subtract:
 		return true;
 	default:
 		return false;
