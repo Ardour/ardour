@@ -119,8 +119,26 @@ InternalSend::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame
 	} else {
 		if (role() == Listen) {
 			/* We're going to the monitor bus, so discard MIDI data */
-			assert (mixbufs.available().get (DataType::AUDIO) >= bufs.count().get (DataType::AUDIO));
-			mixbufs.read_from (bufs, nframes, DataType::AUDIO);
+			
+			uint32_t const bufs_audio = bufs.count().get (DataType::AUDIO);
+			uint32_t const mixbufs_audio = mixbufs.count().get (DataType::AUDIO);
+			
+			assert (mixbufs.available().get (DataType::AUDIO) >= bufs_audio);
+
+			/* Copy bufs into mixbufs, going round bufs more than once if necessary
+			   to ensure that every mixbuf gets some data.
+			*/
+
+			uint32_t j = 0;
+			for (uint32_t i = 0; i < mixbufs_audio; ++i) {
+				mixbufs.get_audio(i).read_from (bufs.get_audio(j), nframes);
+				++j;
+
+				if (j == bufs_audio) {
+					j = 0;
+				}
+			}
+
 		} else {
 			assert (mixbufs.available() >= bufs.count());
 			mixbufs.read_from (bufs, nframes);
