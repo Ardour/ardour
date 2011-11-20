@@ -57,6 +57,9 @@ const double AudioClock::info_font_scale_factor = 0.6;
 const double AudioClock::separator_height = 2.0;
 const double AudioClock::x_leading_padding = 6.0;
 
+#define BBT_BAR_CHAR "|"
+#define BBT_SCANF_FORMAT "%" PRIu32 "%*c%" PRIu32 "%*c%" PRIu32
+
 AudioClock::AudioClock (const string& clock_name, bool transient, const string& widget_name,
 			bool allow_edit, bool follows_playhead, bool duration, bool with_info)
 	: _name (clock_name)
@@ -65,6 +68,7 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	, editable (allow_edit)
 	, _follows_playhead (follows_playhead)
 	, _off (false)
+	, _fixed_width (true)
 	, ops_menu (0)
 	, editing_attr (0)
 	, foreground_attr (0)
@@ -106,6 +110,7 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	}
 
 	ColorsChanged.connect (sigc::mem_fun (*this, &AudioClock::set_colors));
+	DPIReset.connect (sigc::mem_fun (*this, &AudioClock::dpi_reset));
 }
 
 AudioClock::~AudioClock ()
@@ -242,6 +247,8 @@ AudioClock::set_colors ()
 void
 AudioClock::render (cairo_t* cr)
 {
+	double layout_x_offset;
+
 	/* main layout: rounded rect, plus the text */
 	
 	if (_need_bg) {
@@ -254,10 +261,12 @@ AudioClock::render (cairo_t* cr)
 		cairo_fill (cr);
 	}
 
-	if (corner_radius) {
-		cairo_move_to (cr, x_leading_padding, (upper_height - layout_height) / 2.0);
+	if (!_fixed_width) {
+		cairo_move_to (cr, 0, 0);
+		layout_x_offset = 0;
 	} else {
-		cairo_move_to (cr, x_leading_padding, 0);
+		layout_x_offset = (get_width() - layout_width)/2.0;
+		cairo_move_to (cr, layout_x_offset, (upper_height - layout_height) / 2.0);
 	}
 
 	pango_cairo_show_layout (cr, _layout->gobj());
@@ -323,7 +332,7 @@ AudioClock::render (cairo_t* cr)
 			
 			cairo_set_source_rgba (cr, 0.9, 0.1, 0.1, 0.8);
 			cairo_rectangle (cr, 
-					 x_leading_padding + cursor.get_x()/PANGO_SCALE + cursor_width,
+					 layout_x_offset + cursor.get_x()/PANGO_SCALE + cursor_width,
 					 (upper_height - layout_height)/2.0, 
 					 2.0, cursor.get_height()/PANGO_SCALE);
 			cairo_fill (cr);	
@@ -355,10 +364,11 @@ AudioClock::on_size_allocate (Gtk::Allocation& alloc)
 void
 AudioClock::on_size_request (Gtk::Requisition* req)
 {
-	/* our size never changes, so once we've computed it,
-	   just return it
+	/* even for non fixed width clocks, the size we *ask* for never changes, 
+	   even though the size we receive might. so once we've computed it,
+	   just return it.
 	*/
-
+	
 	if (first_width) {
 		req->width = first_width;
 		req->height = first_height;
@@ -368,7 +378,6 @@ AudioClock::on_size_request (Gtk::Requisition* req)
 	Glib::RefPtr<Pango::Layout> tmp;
 	Glib::RefPtr<Gtk::Style> style = get_style ();
 	Pango::FontDescription font; 
-
 
 	tmp = Pango::Layout::create (get_pango_context());
 
@@ -380,13 +389,30 @@ AudioClock::on_size_request (Gtk::Requisition* req)
 
 	tmp->set_font_description (font);
 
-	/* this string is the longest thing we will ever display,
-	   and also includes the BBT "|" that may descends below
-	   the baseline a bit, and a comma for the minsecs mode
-	   where we printf a fractional value (XXX or should)
-	*/
-
-	tmp->set_text (" 88888888888,|"); 
+	if (_fixed_width) {
+		/* this string is the longest thing we will ever display,
+		   and also includes the BBT bar char that may descends below
+		   the baseline a bit, and a comma for the minsecs mode
+		   where we printf a fractional value (XXX or should)
+		*/
+		
+		tmp->set_text (" 8888888888:,|"); 
+	} else {
+		switch (_mode) {
+		case Timecode:
+			tmp->set_text (" 88:88:88:88");
+			break;
+		case BBT:
+			tmp->set_text (" 888|88|8888");
+			break;
+		case MinSec:
+			tmp->set_text (" 88:88:88,888");
+			break;
+		case Frames:
+			tmp->set_text (" 8888888888");
+			break;
+		}
+	}
 
 	tmp->get_pixel_size (req->width, req->height);
 
@@ -991,9 +1017,11 @@ AudioClock::set_bbt (framepos_t when, bool force)
 	}
 
 	if (negative) {
-		snprintf (buf, sizeof (buf), "-%03" PRIu32 "|%02" PRIu32 "|%04" PRIu32, BBT.bars, BBT.beats, BBT.ticks);
+		snprintf (buf, sizeof (buf), "-%03" PRIu32 BBT_BAR_CHAR "%02" PRIu32 BBT_BAR_CHAR "%04" PRIu32, 
+			  BBT.bars, BBT.beats, BBT.ticks);
 	} else {
-		snprintf (buf, sizeof (buf), " %03" PRIu32 "|%02" PRIu32 "|%04" PRIu32, BBT.bars, BBT.beats, BBT.ticks);
+		snprintf (buf, sizeof (buf), " %03" PRIu32 BBT_BAR_CHAR "%02" PRIu32 BBT_BAR_CHAR "%04" PRIu32, 
+			  BBT.bars, BBT.beats, BBT.ticks);
 	}
 
 	_layout->set_text (buf);
@@ -1012,7 +1040,7 @@ AudioClock::set_bbt (framepos_t when, bool force)
 		sprintf (buf, "%-5.2f", m.tempo().beats_per_minute());
 		_left_layout->set_text (buf);
 
-		sprintf (buf, "%g|%g", m.meter().beats_per_bar(), m.meter().note_divisor());
+		sprintf (buf, "%g/%g", m.meter().beats_per_bar(), m.meter().note_divisor());
 		_right_layout->set_text (buf);
 	}
 }
@@ -1593,7 +1621,9 @@ AudioClock::bbt_validate_edit (const string& str)
 {
 	AnyTime any;
 
-	sscanf (str.c_str(), "%" PRIu32 "|%" PRIu32 "|%" PRIu32, &any.bbt.bars, &any.bbt.beats, &any.bbt.ticks);
+	if (sscanf (str.c_str(), BBT_SCANF_FORMAT, &any.bbt.bars, &any.bbt.beats, &any.bbt.ticks) != 3) {
+		return false;
+	}
 	
 	if (!is_duration && any.bbt.bars == 0) {
 		return false;
@@ -1687,7 +1717,9 @@ AudioClock::frames_from_bbt_string (framepos_t pos, const string& str) const
 	AnyTime any;
 	any.type = AnyTime::BBT;
 
-	sscanf (str.c_str(), "%" PRId32 "|%" PRId32 "|%" PRId32, &any.bbt.bars, &any.bbt.beats, &any.bbt.ticks);
+	if (sscanf (str.c_str(), BBT_SCANF_FORMAT, &any.bbt.bars, &any.bbt.beats, &any.bbt.ticks) != 3) {
+		return 0;
+	}
 	
 	if (is_duration) {
 		any.bbt.bars++;
@@ -1709,7 +1741,9 @@ AudioClock::frame_duration_from_bbt_string (framepos_t pos, const string& str) c
 
 	Timecode::BBT_Time bbt;
 
-	sscanf (str.c_str(), "%" PRIu32 "|%" PRIu32 "|%" PRIu32, &bbt.bars, &bbt.beats, &bbt.ticks);
+	if (sscanf (str.c_str(), BBT_SCANF_FORMAT, &bbt.bars, &bbt.beats, &bbt.ticks) != 0) {
+		return 0;
+	}
 
 	return _session->tempo_map().bbt_duration_at(pos,bbt,1);
 }
@@ -1833,6 +1867,13 @@ AudioClock::set_mode (Mode m)
                 ModeChanged (); /* EMIT SIGNAL (the static one)*/
         }
 
+	if (!_fixed_width) {
+		/* display is different, allow us to resize */
+		first_width = 0;
+		first_height = 0;
+		queue_resize ();
+	}
+
         mode_changed (); /* EMIT SIGNAL (the member one) */
 }
 
@@ -1895,4 +1936,20 @@ AudioClock::set_corner_radius (double r)
 {
 	corner_radius = r;
 	queue_draw ();
+}
+
+void
+AudioClock::set_fixed_width (bool yn)
+{
+	_fixed_width = yn;
+}
+
+void
+AudioClock::dpi_reset ()
+{
+	/* force recomputation of size even if we are fixed width 
+	 */
+	first_width = 0;
+	first_height = 0;
+	queue_resize ();
 }

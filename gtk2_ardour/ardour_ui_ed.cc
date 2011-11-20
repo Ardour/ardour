@@ -642,6 +642,8 @@ ARDOUR_UI::setup_clock ()
 	ARDOUR_UI::Clock.connect (sigc::mem_fun (big_clock, &AudioClock::set));
 
 	big_clock->set_corner_radius (0.0);
+	big_clock->set_fixed_width (false);
+	big_clock->mode_changed.connect (sigc::mem_fun (*this, &ARDOUR_UI::big_clock_reset_aspect_ratio));
 
 	big_clock_window->set (new Window (WINDOW_TOPLEVEL), false);
 
@@ -661,13 +663,8 @@ ARDOUR_UI::setup_clock ()
 }
 
 void
-ARDOUR_UI::big_clock_realized ()
+ARDOUR_UI::big_clock_reset_aspect_ratio ()
 {
-	int x, y, w, d;
-
-	set_decoration (big_clock_window->get(), (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH));
-	big_clock_window->get()->get_window()->get_geometry (x, y, w, big_clock_height, d);
-
 	Gtk::Requisition req;
 	big_clock->size_request (req);
 	float aspect = req.width/(float)req.height;
@@ -677,6 +674,17 @@ ARDOUR_UI::big_clock_realized ()
 	geom.max_aspect = aspect;
 
 	big_clock_window->get()->set_geometry_hints (*big_clock, geom, Gdk::HINT_ASPECT);
+}
+
+void
+ARDOUR_UI::big_clock_realized ()
+{
+	int x, y, w, d;
+
+	set_decoration (big_clock_window->get(), (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH));
+	big_clock_window->get()->get_window()->get_geometry (x, y, w, big_clock_height, d);
+
+	big_clock_reset_aspect_ratio ();
 
 	original_big_clock_height = big_clock_height;
 	original_big_clock_width = w;
