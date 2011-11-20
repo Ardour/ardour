@@ -107,19 +107,22 @@ public:
 	Role        _role;
 	BufferSet*  _output_buffers;
 	gain_t      _current_gain;
-	bool        _no_outs_cuz_we_no_monitor;
-	boost::shared_ptr<MuteMaster> _mute_master;
-	bool         no_panner_reset;
 	boost::shared_ptr<PannerShell> _panshell;
 
+	gain_t target_gain ();
+
+  private:
+	bool        _no_outs_cuz_we_no_monitor;
+	boost::shared_ptr<MuteMaster> _mute_master;
+	
 	static bool panners_legal;
-	static PBD::Signal0<int>            PannersLegal;
+	static PBD::Signal0<int> PannersLegal;
 
 	int panners_became_legal ();
 	PBD::ScopedConnection panner_legal_c;
 	void output_changed (IOChange, void*);
 
-	gain_t target_gain ();
+	bool _no_panner_reset;
 };
 
 

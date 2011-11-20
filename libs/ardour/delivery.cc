@@ -61,7 +61,7 @@ Delivery::Delivery (Session& s, boost::shared_ptr<IO> io, boost::shared_ptr<Pann
 	, _current_gain (1.0)
 	, _no_outs_cuz_we_no_monitor (false)
 	, _mute_master (mm)
-	, no_panner_reset (false)
+	, _no_panner_reset (false)
 {
 	if (pannable) {
 		_panshell = boost::shared_ptr<PannerShell>(new PannerShell (_name, _session, pannable));
@@ -85,7 +85,7 @@ Delivery::Delivery (Session& s, boost::shared_ptr<Pannable> pannable, boost::sha
 	, _current_gain (1.0)
 	, _no_outs_cuz_we_no_monitor (false)
 	, _mute_master (mm)
-	, no_panner_reset (false)
+	, _no_panner_reset (false)
 {
 	if (pannable) {
 		_panshell = boost::shared_ptr<PannerShell>(new PannerShell (_name, _session, pannable));
@@ -387,7 +387,7 @@ void
 Delivery::reset_panner ()
 {
 	if (panners_legal) {
-		if (!no_panner_reset) {
+		if (!_no_panner_reset) {
 
 			if (_panshell) {
 				_panshell->configure_io (ChanCount (DataType::AUDIO, pans_required()), ChanCount (DataType::AUDIO, pan_outs()));
@@ -422,19 +422,19 @@ Delivery::panners_became_legal ()
 void
 Delivery::defer_pan_reset ()
 {
-	no_panner_reset = true;
+	_no_panner_reset = true;
 }
 
 void
 Delivery::allow_pan_reset ()
 {
-	no_panner_reset = false;
+	_no_panner_reset = false;
 	reset_panner ();
 }
 
 
 int
-Delivery::disable_panners (void)
+Delivery::disable_panners ()
 {
 	panners_legal = false;
 	return 0;
