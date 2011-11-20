@@ -550,13 +550,14 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 #endif
 
 
-        DEBUG_TRACE (DEBUG::Accelerators, string_compose ("Win = %1 Key event: code = %2  state = %3 special handling ? %4 magic widget focus ? %5 allow_activation ? %6\n",
+        DEBUG_TRACE (DEBUG::Accelerators, string_compose ("Win = %1 focus = %7 Key event: code = %2  state = %3 special handling ? %4 magic widget focus ? %5 allow_activation ? %6\n",
                                                           win,
                                                           ev->keyval,
                                                           ev->state,
                                                           special_handling_of_unmodified_accelerators,
                                                           Keyboard::some_magic_widget_has_focus(),
-                                                          allow_activating));
+                                                          allow_activating,
+							  focus));
 
 	/* This exists to allow us to override the way GTK handles
 	   key events. The normal sequence is:
