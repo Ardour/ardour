@@ -274,7 +274,7 @@ PannerShell::run (BufferSet& inbufs, BufferSet& outbufs, framepos_t start_frame,
 {
 	if (inbufs.count().n_audio() == 0) {
 		/* Input has no audio buffers (e.g. Aux Send in a MIDI track at a
-		   point with no audio because there is no preceding instrument
+		   point with no audio because there is no preceding instrument)
 		*/
 		outbufs.silence(nframes, 0);
 		return;
