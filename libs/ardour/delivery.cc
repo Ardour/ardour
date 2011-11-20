@@ -62,7 +62,6 @@ Delivery::Delivery (Session& s, boost::shared_ptr<IO> io, boost::shared_ptr<Pann
 	, _no_outs_cuz_we_no_monitor (false)
 	, _mute_master (mm)
 	, no_panner_reset (false)
-        , scnt (0)
 {
 	if (pannable) {
 		_panshell = boost::shared_ptr<PannerShell>(new PannerShell (_name, _session, pannable));
@@ -87,7 +86,6 @@ Delivery::Delivery (Session& s, boost::shared_ptr<Pannable> pannable, boost::sha
 	, _no_outs_cuz_we_no_monitor (false)
 	, _mute_master (mm)
 	, no_panner_reset (false)
-        , scnt (0)
 {
 	if (pannable) {
 		_panshell = boost::shared_ptr<PannerShell>(new PannerShell (_name, _session, pannable));

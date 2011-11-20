@@ -111,7 +111,6 @@ public:
 	boost::shared_ptr<MuteMaster> _mute_master;
 	bool         no_panner_reset;
 	boost::shared_ptr<PannerShell> _panshell;
-	framecnt_t   scnt;
 
 	static bool panners_legal;
 	static PBD::Signal0<int>            PannersLegal;

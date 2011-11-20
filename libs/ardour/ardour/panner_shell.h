@@ -75,8 +75,6 @@ public:
 	boost::shared_ptr<Panner> _panner;
 	boost::shared_ptr<Pannable> _pannable;
 	bool _bypassed;
-
-	static float current_automation_version_number;
 };
 
 } // namespace ARDOUR
