@@ -2,23 +2,24 @@ Ardour User Interface Translation How-To
 
 Ardour's user interface can be translated into many languages. For this the application uses gettext engine. It works like this: there is a plain text editable PO file for every language that contains a number of sequences like: a line in English, a line in target language and a reference to a line in source code where original text in English comes from. The build system then creates a binary version of each PO file with MO file extension and places it in a system directory where running instance of Ardour will pick and use it.
 
-Ardour has two main PO files to translate: for user interface and for Ardour's library. Some messages from the library are actually passed to user interface (various warnings, for example), so ideally you have to translate both. For example, Russian translation is located here:
+Ardour has two main PO files to translate: for user interface and for Ardour's library. Some messages from the library are actually passed to user interface (various warnings, for example), so ideally you have to translate both. For example, Russian translations are located here:
 
 gtk_ardour/po/ru.po
 libs/ardour/po/ru.po
 
-Every PO file's name is a two-character code, e.g. de for German, es for Spanish and so on. However it's fairly common to have localizations for local versions of a language, e.g. pt_BR would stand for Brazilian Portuguese, and es_MX would stand for Mexican Spanish. Please refer to ISO language code table for details.
+Every PO file's name is a two-character code, e.g. 'de' for German, 'es' for Spanish and so on. However it's fairly common to have localizations for local versions of a language, e.g. 'pt_BR' would stand for Brazilian Portuguese, and 'es_MX' would stand for Mexican Spanish. Please refer to ISO language code table for details.
 
 Here is the best workflow for existing translations.
 
-1. Build Ardour  using './waf' command
-2. Run './waf i18n'. This will update all existing translations
-3. Open a PO file in you PO editor of choice (see below)
-4. Open Ardour, find something untranslated, locate this phrase in PO file, translate 
-5. Repeat previous step several times, save the PO file
-6. In gtk_ardour/po/ run 'msgfmt -o gtk2_ardour3.mo LANG.po' where LANG.po is your PO file
-7. Run 'sudo cp gtk2_ardour3.mo /usr/local/share/locale/LANG/LC_MESSAGES/' where LANG is two- or four letter code (see above)
-8. Restart Ardour to see what your translation looks like and whether it needs fixes, e.g. has to be shorter
+1. Build Ardour  using './waf' command.
+2. Run './waf i18n'. This will update all existing translations and build binary MO files.
+3. Open a PO file in you PO editor of choice (see below).
+4. Open Ardour, find something untranslated, locate this phrase in PO file, translate.
+5. Repeat previous step several times, save the PO file.
+6. Run './waf i18n' to regenerate binary MO files and 'sudo ./waf install' to install them.
+7. Restart Ardour to see what your translation looks like and whether it needs fixes, e.g. has to be shorter.
+
+Note that as of Ardour 3 beta 1 the translations are only installed when you run './waf i18n' after './waf' and before 'sudo ./waf install'.
 
 When you are done, save the file and submit it to the tracker.
 
@@ -26,19 +27,27 @@ There are some more things you need to know.
 
 1. Where does a phrase come from?
 
-Often when you go through translation hunting for untranslated messagesm you stumble upon things you have no idea where they come from. To assist you there most advanced PO editors have means to tell you which source code file it comes from, or, in some cases, even show the context in source code. Ardour has pretty much meaningful names for source code files, so it should help. If it doesn't, ask on IRC for help.
+Often when you go through translation hunting for untranslated messages, you stumble upon things you have no idea where they come from. To assist you there most advanced PO editors have means to tell you which source code file it comes from, or, in some cases, even show the context in source code. Ardour has pretty much meaningful names for source code files, so it should help. If it doesn't, please ask on IRC for help.
 
 2. Variables
 
-You will often meet things like "%1" or "%2" in translation. This is a variable that should be left intact. Here is an example:
+You will often meet things like "%1" or "%2" in the translation files. This is a variable that should be left intact. Here is an example:
 
 "Cannot load XML for session from %1"
 
-When Ardour runs, this "%1" will be substituted with "Ardour" so that the whole phrase will be "Cannot load XML for session from Ardour". If Mixbus runs, this will be "Cannot load XML for session from Mixbus" instead. You get the idea. So just place this variable in your translation in a way that makes the phrase sound natural in your language and make sure you know where the phrase comes from (see above) so that you know how to translate it correctly.
+When Ardour runs, this "%1" will be substituted with "Ardour" so that the whole phrase will be "Cannot load XML for session from Ardour". If Mixbus (an commercial Ardour's spin-off) runs, this will be "Cannot load XML for session from Mixbus" instead. You get the idea. So just place this variable in your translation in a way that makes the phrase sound natural in your language and make sure you know where the phrase comes from (see above) so that you know how to translate it correctly.
 
 3. Plural forms
 
 English has two plural forms, but many other languages have three and even four plural forms. Some parts of Ardour's code respect that, but some not (check for existing bug reports). A PO editor usually simplifies translating every plural form by putting every plural form into a dedicated tab.
+
+Not every PO editor can calculate the equation for the plural forms in your language, but you can look it up in headers of PO files from some application such a GIMP or Inkscape. Here is an example for Russian:
+
+http://git.gnome.org/browse/gimp/plain/po/ru.po
+
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2); 10<=4 && (n%100<10 || n"
+"%100>=20) ? 1 : 2);\n"
 
 4. PO editors
 
@@ -48,4 +57,4 @@ poEdit. It works on Linux, Mac and Windows. The user interface is fairly simple.
 
 Lokalize. Part of KDE desktop environment. It's a fairly advanced translation tool.
 
-GTranslator. Usually considered as GNOME translation tool, but has very few actual GNOME dependencies. Feature-wise it's someewhere between poEdit and Lokalize.
+GTranslator. Usually considered as GNOME translation tool, but has very few actual GNOME dependencies. Feature-wise it's somewhere between poEdit and Lokalize.
