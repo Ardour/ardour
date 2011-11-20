@@ -218,6 +218,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	void dpi_reset ();
 
 	double bg_r, bg_g, bg_b, bg_a;
+	double cursor_r, cursor_g, cursor_b, cursor_a;
 };
 
 #endif /* __audio_clock_h__ */

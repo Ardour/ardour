@@ -187,18 +187,21 @@ AudioClock::set_colors ()
 	uint32_t bg_color;
 	uint32_t text_color;
 	uint32_t editing_color;
+	uint32_t cursor_color;
 
 	if (active_state()) {
 		bg_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1 active: background", get_name()));
 		text_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1 active: text", get_name()));
 		editing_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1 active: edited text", get_name()));
+		cursor_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1 active: cursor", get_name()));
 	} else {
 		bg_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: background", get_name()));
 		text_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: text", get_name()));
 		editing_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: edited text", get_name()));
+		cursor_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: cursor", get_name()));
 	}
 
-	/* store for bg in render() */
+	/* store for bg and cursor in render() */
 
 	UINT_TO_RGBA (bg_color, &r, &g, &b, &a);
 
@@ -206,6 +209,13 @@ AudioClock::set_colors ()
 	bg_g = g/255.0;
 	bg_b = b/255.0;
 	bg_a = a/255.0;
+
+	UINT_TO_RGBA (cursor_color, &r, &g, &b, &a);
+
+	cursor_r = r/255.0;
+	cursor_g = g/255.0;
+	cursor_b = b/255.0;
+	cursor_a = a/255.0;
 
 	/* rescale for Pango colors ... sigh */
 
@@ -330,19 +340,33 @@ AudioClock::render (cairo_t* cr)
 		if (!insert_map.empty()) {
 			Pango::Rectangle cursor = _layout->get_cursor_strong_pos (insert_map[input_string.length()]);
 			
-			cairo_set_source_rgba (cr, 0.9, 0.1, 0.1, 0.8);
-			cairo_rectangle (cr, 
-					 layout_x_offset + cursor.get_x()/PANGO_SCALE + cursor_width,
-					 (upper_height - layout_height)/2.0, 
-					 2.0, cursor.get_height()/PANGO_SCALE);
+			cairo_set_source_rgba (cr, cursor_r, cursor_g, cursor_b, cursor_a);
+			if (!_fixed_width) {
+				cairo_rectangle (cr, 
+						 layout_x_offset + cursor.get_x()/PANGO_SCALE + cursor_width,
+						 0,
+						 2.0, cursor.get_height()/PANGO_SCALE);
+			} else {
+				cairo_rectangle (cr, 
+						 layout_x_offset + cursor.get_x()/PANGO_SCALE + cursor_width,
+						 (upper_height - layout_height)/2.0, 
+						 2.0, cursor.get_height()/PANGO_SCALE);
+			}
 			cairo_fill (cr);	
 		} else {
 			if (input_string.empty()) {
-				cairo_set_source_rgba (cr, 0.9, 0.1, 0.1, 0.8);
-				cairo_rectangle (cr, 
-						 (get_width()/2.0),
-						 (upper_height - layout_height)/2.0, 
-						 2.0, upper_height);
+				cairo_set_source_rgba (cr, cursor_r, cursor_g, cursor_b, cursor_a);
+				if (!_fixed_width) {
+					cairo_rectangle (cr, 
+							 (get_width()/2.0),
+							 0,
+							 2.0, upper_height);
+				} else {
+					cairo_rectangle (cr, 
+							 (get_width()/2.0),
+							 (upper_height - layout_height)/2.0, 
+							 2.0, upper_height);
+				}
 				cairo_fill (cr);
 			}
 		}
