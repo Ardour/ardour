@@ -6,6 +6,7 @@
   <accelerator action='set-mouse-mode-timefx'/>
   <accelerator action='set-mouse-mode-object-range'/>
   <accelerator action='toggle-internal-edit'/>
+  <accelerator action='focus-on-clock'/>
   
   <menubar name='Main' action='MainMenu'>
     <menu name='Session' action='Session'>

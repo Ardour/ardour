@@ -202,6 +202,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	AudioClock* primary_clock;
 	AudioClock* secondary_clock;
+	void focus_on_clock ();
 
 	TimeInfoBox* time_info_box;
 

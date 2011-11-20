@@ -354,7 +354,7 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (transport_actions, X_("focus-on-clock"), _("Focus On Clock"), sigc::mem_fun(primary_clock, &AudioClock::focus));
+	act = ActionManager::register_action (transport_actions, X_("focus-on-clock"), _("Focus On Clock"), sigc::mem_fun(*this, &ARDOUR_UI::focus_on_clock));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
 
@@ -861,4 +861,13 @@ ARDOUR_UI::resize_text_widgets ()
 {
 	set_size_request_to_display_given_text (cpu_load_label, "DSP: 100.0%", 2, 2);
 	set_size_request_to_display_given_text (buffer_load_label, "Buffers: p:100% c:100%", 2, 2);
+}
+
+void
+ARDOUR_UI::focus_on_clock ()
+{
+	if (editor && primary_clock) {
+		editor->present ();
+		primary_clock->focus ();
+	}
 }

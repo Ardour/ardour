@@ -69,6 +69,7 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	, _follows_playhead (follows_playhead)
 	, _off (false)
 	, _fixed_width (true)
+	, layout_x_offset (0)
 	, ops_menu (0)
 	, editing_attr (0)
 	, foreground_attr (0)
@@ -257,8 +258,6 @@ AudioClock::set_colors ()
 void
 AudioClock::render (cairo_t* cr)
 {
-	double layout_x_offset;
-
 	/* main layout: rounded rect, plus the text */
 	
 	if (_need_bg) {
@@ -272,10 +271,8 @@ AudioClock::render (cairo_t* cr)
 	}
 
 	if (!_fixed_width) {
-		cairo_move_to (cr, 0, 0);
-		layout_x_offset = 0;
+		cairo_move_to (cr, layout_x_offset, 0);
 	} else {
-		layout_x_offset = (get_width() - layout_width)/2.0;
 		cairo_move_to (cr, layout_x_offset, (upper_height - layout_height) / 2.0);
 	}
 
@@ -383,6 +380,15 @@ AudioClock::on_size_allocate (Gtk::Allocation& alloc)
 	} else {
 		upper_height = get_height();
 	}
+
+	if (_fixed_width) {
+		/* center display in available space */
+		layout_x_offset = (get_width() - layout_width)/2.0;
+	} else {
+		/* left justify */
+		layout_x_offset = 0;
+	}
+
 }
 
 void
@@ -1371,7 +1377,7 @@ AudioClock::on_button_press_event (GdkEventButton *ev)
 			 */
 
 			y = ev->y - ((upper_height - layout_height)/2);
-			x = ev->x - x_leading_padding;
+			x = ev->x - layout_x_offset;
 			
 			if (_layout->xy_to_index (x * PANGO_SCALE, y * PANGO_SCALE, index, trailing)) {			
 				drag_field = index_to_field (index);
@@ -1450,7 +1456,7 @@ AudioClock::on_scroll_event (GdkEventScroll *ev)
 	 */
 
 	y = ev->y - ((upper_height - layout_height)/2);
-	x = ev->x - x_leading_padding;
+	x = ev->x - layout_x_offset;
 
 	if (!_layout->xy_to_index (x * PANGO_SCALE, y * PANGO_SCALE, index, trailing)) {
 		/* not in the main layout */
@@ -1953,7 +1959,6 @@ AudioClock::focus ()
 {
 	start_edit ();
 }
-
 
 void
 AudioClock::set_corner_radius (double r)

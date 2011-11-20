@@ -177,7 +177,9 @@ TimeInfoBox::clock_button_release_event (GdkEventButton* ev, AudioClock* src)
 	}
 
 	if (ev->button == 1) {
-		_session->request_locate (src->current_time ());
+		if (!src->off()) {
+			_session->request_locate (src->current_time ());
+		}
 		return true;
 	}
 
