@@ -340,8 +340,13 @@ path_expand (string path)
 	/* canonicalize */
 
 	char buf[PATH_MAX+1];
-	realpath (path.c_str(), buf);
-	return buf;
+
+	if (realpath (path.c_str(), buf)) {
+		return buf;
+	} else {
+		error << string_compose (_("programming error: realpath(%1) failed, errcode %2"), path, errno) << endmsg;
+		return path;
+	}
 }
 
 #if __APPLE__
