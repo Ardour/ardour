@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.99beta23\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-06-12 18:04-0400\n"
+"POT-Creation-Date: 2011-11-21 16:11-0500\n"
 "PO-Revision-Date: 2005-01-11\n"
 "Last-Translator: Muadibas\n"
 "Language-Team: Hellenic(Greek) <LL@li.org>\n"
@@ -37,24 +37,24 @@ msgstr ""
 msgid "Press To Exit"
 msgstr ""
 
+#: gtk_ui.cc:660
+msgid "I'm sorry %1, I can't do that"
+msgstr ""
+
 #: keyboard.cc:68
 msgid "Command"
 msgstr ""
 
-#: keyboard.cc:69
-msgid "Option"
+#: keyboard.cc:69 keyboard.cc:72 keyboard.cc:85 keyboard.cc:89
+msgid "Control"
 msgstr ""
 
 #: keyboard.cc:70 keyboard.cc:73 keyboard.cc:87 keyboard.cc:90
 msgid "Shift"
 msgstr ""
 
-#: keyboard.cc:71 keyboard.cc:85 keyboard.cc:89
-msgid "Control"
-msgstr ""
-
-#: keyboard.cc:72
-msgid "Mod1"
+#: keyboard.cc:71
+msgid "Option"
 msgstr ""
 
 #: keyboard.cc:86
