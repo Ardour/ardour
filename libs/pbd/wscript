@@ -19,6 +19,7 @@ LIBPBD_LIB_VERSION = '4.1.0'
 # Variables for 'waf dist'
 APPNAME = 'libpbd'
 VERSION = LIBPBD_VERSION
+I18N_PACKAGE = 'libpbd4'
 
 # Mandatory variables
 top = '.'
@@ -122,10 +123,10 @@ def build(bld):
         obj.uselib += ' OSX'
     obj.vnum         = LIBPBD_LIB_VERSION
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
-    obj.cxxflags     = ['-DPACKAGE="libpbd"']
+    obj.defines     = ['PACKAGE="' + I18N_PACKAGE + '"']
 
     if bld.env['build_target'] == 'x86_64':
-        obj.cxxflags += [ '-DUSE_X86_64_ASM' ]
+        obj.defines += [ 'USE_X86_64_ASM' ]
 
     if bld.env['BUILD_TESTS'] and bld.is_defined('HAVE_CPPUNIT'):
         # Unit tests

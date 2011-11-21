@@ -88,9 +88,9 @@ def build(bld):
     obj.use          = 'libpbd'
     obj.vnum         = GTKMM2EXT_LIB_VERSION
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
-    obj.cxxflags     = [
-                    '-DPACKAGE="libgtkmm2ext3"',
-                    '-DLOCALEDIR="' + os.path.join(
+    obj.defines     = [
+                    'PACKAGE="' + I18N_PACKAGE + '"',
+                    'LOCALEDIR="' + os.path.join(
                             os.path.normpath(bld.env['DATADIR']), 'locale') + '"']
     if bld.is_defined('GTKOSX'):
         obj.source += ['gtkapplication_quartz.mm']

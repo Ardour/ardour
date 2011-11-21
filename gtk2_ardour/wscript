@@ -374,7 +374,7 @@ def build(bld):
     if sys.platform == 'darwin':
         obj.use += ' libappleutility'
     obj.defines     = [
-        'PACKAGE="gtk2_ardour3"',
+        'PACKAGE="' + I18N_PACKAGE + '"',
         'VERSIONSTRING="' + bld.env['VERSION'] + '"',
         'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
         'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',

@@ -362,7 +362,7 @@ def build(bld):
     obj.vnum         = LIBARDOUR_LIB_VERSION
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
     obj.defines      = [
-        'PACKAGE="libardour3"',
+        'PACKAGE="' + I18N_PACKAGE + '"',
         'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
         'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
         'MODULE_DIR="' + os.path.normpath(bld.env['LIBDIR']) + '"',
