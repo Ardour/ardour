@@ -336,30 +336,36 @@ AudioClock::render (cairo_t* cr)
 
 		if (!insert_map.empty()) {
 
-			Pango::Rectangle cursor;
-			
-			if (input_string.empty()) {
-				/* nothing entered yet, put cursor at the end
-				   of string
-				*/
-				cursor = _layout->get_cursor_strong_pos (edit_string.length() - 1);
+
+			if (input_string.length() < insert_map.size()) {
+				Pango::Rectangle cursor;
+				
+				if (input_string.empty()) {
+					/* nothing entered yet, put cursor at the end
+					   of string
+					*/
+					cursor = _layout->get_cursor_strong_pos (edit_string.length() - 1);
+				} else {
+					cursor = _layout->get_cursor_strong_pos (insert_map[input_string.length()]);
+				}
+				
+				cairo_set_source_rgba (cr, cursor_r, cursor_g, cursor_b, cursor_a);
+				if (!_fixed_width) {
+					cairo_rectangle (cr, 
+							 layout_x_offset + cursor.get_x()/PANGO_SCALE + cursor_width,
+							 0,
+							 2.0, cursor.get_height()/PANGO_SCALE);
+				} else {
+					cairo_rectangle (cr, 
+							 layout_x_offset + cursor.get_x()/PANGO_SCALE + cursor_width,
+							 (upper_height - layout_height)/2.0, 
+							 2.0, cursor.get_height()/PANGO_SCALE);
+				}
+				cairo_fill (cr);	
 			} else {
-				cursor = _layout->get_cursor_strong_pos (insert_map[input_string.length()-1]);
+				/* we've entered all possible digits, no cursor */
 			}
-			
-			cairo_set_source_rgba (cr, cursor_r, cursor_g, cursor_b, cursor_a);
-			if (!_fixed_width) {
-				cairo_rectangle (cr, 
-						 layout_x_offset + cursor.get_x()/PANGO_SCALE + cursor_width,
-						 0,
-						 2.0, cursor.get_height()/PANGO_SCALE);
-			} else {
-				cairo_rectangle (cr, 
-						 layout_x_offset + cursor.get_x()/PANGO_SCALE + cursor_width,
-						 (upper_height - layout_height)/2.0, 
-						 2.0, cursor.get_height()/PANGO_SCALE);
-			}
-			cairo_fill (cr);	
+
 		} else {
 			if (input_string.empty()) {
 				cairo_set_source_rgba (cr, cursor_r, cursor_g, cursor_b, cursor_a);
@@ -736,24 +742,18 @@ AudioClock::parse_as_bbt_distance (const std::string& str)
 framecnt_t 
 AudioClock::parse_as_distance (const std::string& instr)
 {
-	string str = instr;
-
-	/* the input string is in reverse order */
-	
-	std::reverse (str.begin(), str.end());
-
 	switch (_mode) {
 	case Timecode:
-		return parse_as_timecode_distance (str);
+		return parse_as_timecode_distance (instr);
 		break;
 	case Frames:
-		return parse_as_frames_distance (str);
+		return parse_as_frames_distance (instr);
 		break;
 	case BBT:
-		return parse_as_bbt_distance (str);
+		return parse_as_bbt_distance (instr);
 		break;
 	case MinSec:
-		return parse_as_minsec_distance (str);
+		return parse_as_minsec_distance (instr);
 		break;
 	}
 	return 0;
@@ -1197,10 +1197,9 @@ AudioClock::on_key_press_event (GdkEventKey* ev)
 	case GDK_Delete:
 	case GDK_BackSpace:
 		if (!input_string.empty()) {
-			/* delete the last key entered, which is at the FRONT 
-			   of the input_string
+			/* delete the last key entered
 			*/
-			input_string = input_string.substr (1, input_string.length() - 1);
+			input_string = input_string.substr (0, input_string.length() - 1);
 		}
 		goto use_input_string;
 
@@ -1213,14 +1212,11 @@ AudioClock::on_key_press_event (GdkEventKey* ev)
 		return true;
 	}
 
-	input_string.insert (input_string.begin(), new_char);
+	input_string.push_back (new_char);
 
   use_input_string:
 
-	string::reverse_iterator ri;
-	vector<int> insert_at;
 	int highlight_length = 0;
-	char buf[32];
 	framepos_t pos;
 
 	/* merge with pre-edit-string into edit string */
@@ -1234,52 +1230,37 @@ AudioClock::on_key_press_event (GdkEventKey* ev)
 			edit_string = edit_string.substr (0, edit_string.length() - 1);
 		}
 		if (!edit_string.empty()) {
+			char buf[32];
 			sscanf (edit_string.c_str(), "%" PRId64, &pos);
 			snprintf (buf, sizeof (buf), " %10" PRId64, pos);
 			edit_string = buf;
 		}
+		/* highlight the whole thing */
 		highlight_length = edit_string.length();
 		break;
 		
 	default:
-		if (!input_string.empty()) {
-			edit_string = pre_edit_string;
-			
-			/* backup through the original string, till we have
-			 * enough digits locations to put all the digits from
-			 * the input string.
-			 */
-			
-			for (ri = edit_string.rbegin(); ri != edit_string.rend(); ++ri) {
-				if (isdigit (*ri)) {
-					insert_at.push_back (edit_string.length() - (ri - edit_string.rbegin()) - 1);
-					if (insert_at.size() == input_string.length()) {
-						break;
-					}
-				}
-			}
-		
-			if (insert_at.size() != input_string.length()) {
-				error << "something went wrong, insert at = " << insert_at.size() << " is.len() = " << input_string.length() << endmsg;
-			} else {
-				for (int i = input_string.length() - 1; i >= 0; --i) {
-					edit_string[insert_at[i]] = input_string[i];
-				}
-				
-				highlight_length = edit_string.length() - insert_at.back();
-			}
-		} else {
-			edit_string = pre_edit_string;
+		edit_string = pre_edit_string;
+
+		if (input_string.empty()) {
 			highlight_length = 0;
+		} else {
+			// for (int i = input_string.length() - 1; i >= 0; --i) {
+			string::size_type target;
+			for (string::size_type i = 0; i < input_string.length(); ++i) {
+				target = insert_map[input_string.length() - 1 - i];
+				edit_string[target] = input_string[i];
+			}
+			/* highlight from end to wherever the last character was added */
+			highlight_length = edit_string.length() - insert_map[input_string.length()-1];
 		}
 		break;
 	}
 	
-	if (edit_string != _layout->get_text()) {
-		show_edit_status (highlight_length);
-		_layout->set_text (edit_string);
-		queue_draw ();
-	} 
+	
+	show_edit_status (highlight_length);
+	_layout->set_text (edit_string);
+	queue_draw ();
 
 	return true;
 }
@@ -1874,14 +1855,14 @@ AudioClock::set_mode (Mode m)
 	switch (_mode) {
 	case Timecode:
 		mode_based_info_ratio = 0.5;
+		insert_map.push_back (11);
 		insert_map.push_back (10);
-		insert_map.push_back (9);
+		insert_map.push_back (8);
 		insert_map.push_back (7);
-		insert_map.push_back (6);
+		insert_map.push_back (5);
 		insert_map.push_back (4);
-		insert_map.push_back (3);
+		insert_map.push_back (2);
 		insert_map.push_back (1);
-		insert_map.push_back (0);
 		break;
 		
 	case BBT:
