@@ -220,8 +220,8 @@ VisibilityGroup::list_view ()
 
 	Gtk::TreeView* v = Gtk::manage (new Gtk::TreeView (_model));
 	v->set_headers_visible (false);
-	v->append_column (_(""), _model_columns._visible);
-	v->append_column (_(""), _model_columns._name);
+	v->append_column ("", _model_columns._visible);
+	v->append_column ("", _model_columns._name);
 
 	Gtk::CellRendererToggle* visible_cell = dynamic_cast<Gtk::CellRendererToggle*> (v->get_column_cell_renderer (0));
 	visible_cell->property_activatable() = true;
