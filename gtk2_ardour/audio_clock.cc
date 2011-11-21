@@ -335,7 +335,17 @@ AudioClock::render (cairo_t* cr)
 		const double cursor_width = 12; /* need em width here, not 16 */
 
 		if (!insert_map.empty()) {
-			Pango::Rectangle cursor = _layout->get_cursor_strong_pos (insert_map[input_string.length()]);
+
+			Pango::Rectangle cursor;
+			
+			if (input_string.empty()) {
+				/* nothing entered yet, put cursor at the end
+				   of string
+				*/
+				cursor = _layout->get_cursor_strong_pos (edit_string.length() - 1);
+			} else {
+				cursor = _layout->get_cursor_strong_pos (insert_map[input_string.length()-1]);
+			}
 			
 			cairo_set_source_rgba (cr, cursor_r, cursor_g, cursor_b, cursor_a);
 			if (!_fixed_width) {
@@ -1114,54 +1124,6 @@ AudioClock::on_key_press_event (GdkEventKey* ev)
 	if (!editing) {
 		return false;
 	}
-	
-	/* return true for keys that we MIGHT use 
-	   at release
-	*/
-	switch (ev->keyval) {
-	case GDK_0:
-	case GDK_KP_0:
-	case GDK_1:
-	case GDK_KP_1:
-	case GDK_2:
-	case GDK_KP_2:
-	case GDK_3:
-	case GDK_KP_3:
-	case GDK_4:
-	case GDK_KP_4:
-	case GDK_5:
-	case GDK_KP_5:
-	case GDK_6:
-	case GDK_KP_6:
-	case GDK_7:
-	case GDK_KP_7:
-	case GDK_8:
-	case GDK_KP_8:
-	case GDK_9:
-	case GDK_KP_9:
-	case GDK_period:
-	case GDK_comma:
-	case GDK_KP_Decimal:
-	case GDK_Tab:
-	case GDK_Return:
-	case GDK_KP_Enter:
-	case GDK_Escape:
-	case GDK_minus:
-	case GDK_plus:
-	case GDK_KP_Add:
-	case GDK_KP_Subtract:
-		return true;
-	default:
-		return false;
-	}
-}
-
-bool
-AudioClock::on_key_release_event (GdkEventKey *ev)
-{
-	if (!editing) {
-		return false;
-	}
 
 	string new_text;
 	char new_char = 0;
@@ -1234,7 +1196,12 @@ AudioClock::on_key_release_event (GdkEventKey *ev)
 
 	case GDK_Delete:
 	case GDK_BackSpace:
-		input_string = input_string.substr (1, input_string.length() - 1);
+		if (!input_string.empty()) {
+			/* delete the last key entered, which is at the FRONT 
+			   of the input_string
+			*/
+			input_string = input_string.substr (1, input_string.length() - 1);
+		}
 		goto use_input_string;
 
 	default:
@@ -1242,7 +1209,7 @@ AudioClock::on_key_release_event (GdkEventKey *ev)
 	}
 
 	if (!insert_map.empty() && (input_string.length() >= insert_map.size())) {
-		/* eat the key event, but do no nothing with it */
+		/* too many digits: eat the key event, but do nothing with it */
 		return true;
 	}
 
@@ -1275,32 +1242,36 @@ AudioClock::on_key_release_event (GdkEventKey *ev)
 		break;
 		
 	default:
-		edit_string = pre_edit_string;
-		
-		/* backup through the original string, till we have
-		 * enough digits locations to put all the digits from
-		 * the input string.
-		 */
-		
-		for (ri = edit_string.rbegin(); ri != edit_string.rend(); ++ri) {
-			if (isdigit (*ri)) {
-				insert_at.push_back (edit_string.length() - (ri - edit_string.rbegin()) - 1);
-				if (insert_at.size() == input_string.length()) {
-					break;
+		if (!input_string.empty()) {
+			edit_string = pre_edit_string;
+			
+			/* backup through the original string, till we have
+			 * enough digits locations to put all the digits from
+			 * the input string.
+			 */
+			
+			for (ri = edit_string.rbegin(); ri != edit_string.rend(); ++ri) {
+				if (isdigit (*ri)) {
+					insert_at.push_back (edit_string.length() - (ri - edit_string.rbegin()) - 1);
+					if (insert_at.size() == input_string.length()) {
+						break;
+					}
 				}
 			}
-		}
 		
-		if (insert_at.size() != input_string.length()) {
-			error << "something went wrong " << endmsg;
-		} else {
-			for (int i = input_string.length() - 1; i >= 0; --i) {
-				edit_string[insert_at[i]] = input_string[i];
+			if (insert_at.size() != input_string.length()) {
+				error << "something went wrong, insert at = " << insert_at.size() << " is.len() = " << input_string.length() << endmsg;
+			} else {
+				for (int i = input_string.length() - 1; i >= 0; --i) {
+					edit_string[insert_at[i]] = input_string[i];
+				}
+				
+				highlight_length = edit_string.length() - insert_at.back();
 			}
-			
-			highlight_length = edit_string.length() - insert_at.back();
+		} else {
+			edit_string = pre_edit_string;
+			highlight_length = 0;
 		}
-		
 		break;
 	}
 	
@@ -1311,6 +1282,55 @@ AudioClock::on_key_release_event (GdkEventKey *ev)
 	} 
 
 	return true;
+}
+
+
+bool
+AudioClock::on_key_release_event (GdkEventKey *ev)
+{
+	if (!editing) {
+		return false;
+	}
+	
+	/* return true for keys that we used on press
+	   so that they cannot possibly do double-duty
+	*/
+	switch (ev->keyval) {
+	case GDK_0:
+	case GDK_KP_0:
+	case GDK_1:
+	case GDK_KP_1:
+	case GDK_2:
+	case GDK_KP_2:
+	case GDK_3:
+	case GDK_KP_3:
+	case GDK_4:
+	case GDK_KP_4:
+	case GDK_5:
+	case GDK_KP_5:
+	case GDK_6:
+	case GDK_KP_6:
+	case GDK_7:
+	case GDK_KP_7:
+	case GDK_8:
+	case GDK_KP_8:
+	case GDK_9:
+	case GDK_KP_9:
+	case GDK_period:
+	case GDK_comma:
+	case GDK_KP_Decimal:
+	case GDK_Tab:
+	case GDK_Return:
+	case GDK_KP_Enter:
+	case GDK_Escape:
+	case GDK_minus:
+	case GDK_plus:
+	case GDK_KP_Add:
+	case GDK_KP_Subtract:
+		return true;
+	default:
+		return false;
+	}
 }
 
 AudioClock::Field
@@ -1854,14 +1874,14 @@ AudioClock::set_mode (Mode m)
 	switch (_mode) {
 	case Timecode:
 		mode_based_info_ratio = 0.5;
-		insert_map.push_back (11);
 		insert_map.push_back (10);
-		insert_map.push_back (8);
+		insert_map.push_back (9);
 		insert_map.push_back (7);
-		insert_map.push_back (5);
+		insert_map.push_back (6);
 		insert_map.push_back (4);
-		insert_map.push_back (2);
+		insert_map.push_back (3);
 		insert_map.push_back (1);
+		insert_map.push_back (0);
 		break;
 		
 	case BBT:
