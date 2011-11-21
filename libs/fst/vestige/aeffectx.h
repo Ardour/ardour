@@ -304,13 +304,6 @@ typedef struct VstTimeInfo
 
 } VstTimeInfo;
 
-
-typedef long int (* audioMasterCallback)( AEffect * , long int , long int ,
-						long int , void * , float );
-// we don't use it, may be noise
-#define VSTCALLBACK
-
-
-
+typedef intptr_t (* audioMasterCallback) (AEffect *, int32_t, int32_t, intptr_t, void *, float);
 
 #endif

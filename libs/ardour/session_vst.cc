@@ -40,12 +40,14 @@ static int debug_callbacks = -1;
 
 using namespace ARDOUR;
 
-long Session::vst_callback (AEffect* effect,
-			    long opcode,
-			    long index,
-			    long value,
-			    void* ptr,
-			    float opt)
+intptr_t Session::vst_callback (
+	AEffect* effect,
+	int32_t opcode,
+	int32_t index,
+	intptr_t value,
+	void* ptr,
+	float opt
+	)
 {
 	static VstTimeInfo _timeInfo;
 	WindowsVSTPlugin* plug;
@@ -58,11 +60,11 @@ long Session::vst_callback (AEffect* effect,
 	if (effect && effect->user) {
 	        plug = (WindowsVSTPlugin*) (effect->user);
 		session = &plug->session();
-		SHOW_CALLBACK ("am callback 0x%x, opcode = %ld, plugin = \"%s\" ", (int) pthread_self(), opcode, plug->name());
+		SHOW_CALLBACK ("am callback 0x%x, opcode = %d, plugin = \"%s\" ", (int) pthread_self(), opcode, plug->name());
 	} else {
 		plug = 0;
 		session = 0;
-		SHOW_CALLBACK ("am callback 0x%x, opcode = %ld", (int) pthread_self(), opcode);
+		SHOW_CALLBACK ("am callback 0x%x, opcode = %d", (int) pthread_self(), opcode);
 	}
 
 	switch(opcode){
@@ -348,7 +350,7 @@ long Session::vst_callback (AEffect* effect,
 		return 0;
 
 	default:
-		SHOW_CALLBACK ("VST master dispatcher: undefed: %ld\n", opcode);
+		SHOW_CALLBACK ("VST master dispatcher: undefed: %d\n", opcode);
 		break;
 	}
 
