@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2008-2010 Paul Davis
+    Copyright (C) 2008-2011 Paul Davis
     Author: David Robillard
 
     This program is free software; you can redistribute it and/or modify
@@ -15,7 +15,6 @@
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 */
 
 #include <cassert>
@@ -37,15 +36,20 @@ namespace ARDOUR {
 
 URIMap::URIMap()
 {
-	uri_map_feature_data.uri_to_id     = &URIMap::uri_map_uri_to_id;
-	uri_map_feature_data.callback_data = this;
-	uri_map_feature.URI                = LV2_URI_MAP_URI;
-	uri_map_feature.data               = &uri_map_feature_data;
+	_uri_map_feature_data.uri_to_id     = &URIMap::uri_map_uri_to_id;
+	_uri_map_feature_data.callback_data = this;
+	_uri_map_feature.URI                = LV2_URI_MAP_URI;
+	_uri_map_feature.data               = &_uri_map_feature_data;
 
-	uri_unmap_feature_data.id_to_uri     = &URIMap::uri_unmap_id_to_uri;
-	uri_unmap_feature_data.callback_data = this;
-	uri_unmap_feature.URI                = LV2_URI_UNMAP_URI;
-	uri_unmap_feature.data               = &uri_unmap_feature_data;
+	_urid_map_feature_data.map    = &URIMap::urid_map;
+	_urid_map_feature_data.handle = this;
+	_urid_map_feature.URI         = LV2_URID_MAP_URI;
+	_urid_map_feature.data        = &_urid_map_feature_data;
+
+	_urid_unmap_feature_data.unmap  = &URIMap::urid_unmap;
+	_urid_unmap_feature_data.handle = this;
+	_urid_unmap_feature.URI         = LV2_URID_UNMAP_URI;
+	_urid_unmap_feature.data        = &_urid_unmap_feature_data;
 }
 
 
@@ -98,19 +102,26 @@ URIMap::uri_map_uri_to_id(LV2_URI_Map_Callback_Data callback_data,
                           const char*               map,
                           const char*               uri)
 {
-	URIMap* me = (URIMap*)callback_data;
+	URIMap* const me = (URIMap*)callback_data;
 	return me->uri_to_id(map, uri);
+}
 
+
+LV2_URID
+URIMap::urid_map(LV2_URID_Map_Handle handle,
+                 const char*         uri)
+{
+	URIMap* const me = (URIMap*)handle;
+	return me->uri_to_id(NULL, uri);
 }
 
 
 const char*
-URIMap::uri_unmap_id_to_uri(LV2_URI_Map_Callback_Data callback_data,
-                            const char*               map,
-                            uint32_t                  id)
+URIMap::urid_unmap(LV2_URID_Unmap_Handle handle,
+                   LV2_URID              urid)
 {
-	URIMap* me = (URIMap*)callback_data;
-	return me->id_to_uri(map, id);
+	URIMap* const me = (URIMap*)handle;
+	return me->id_to_uri(NULL, urid);
 }
 
 

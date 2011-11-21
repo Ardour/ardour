@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Paul Davis
+    Copyright (C) 2009-2011 Paul Davis
     Author: David Robillard
 
     This program is free software; you can redistribute it and/or modify
@@ -15,46 +15,48 @@
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 */
 
 #ifndef __ardour_uri_map_h__
 #define __ardour_uri_map_h__
 
 #include <map>
-#include <string>
 
 #include <boost/utility.hpp>
 
 #include "lv2.h"
 #include "lv2/lv2plug.in/ns/ext/uri-map/uri-map.h"
-#include "lv2/lv2plug.in/ns/ext/uri-unmap/uri-unmap.h"
+#include "lv2/lv2plug.in/ns/ext/urid/urid.h"
 
 namespace ARDOUR {
 
 
-/** Implementation of the LV2 URI Map extension
+/** Implementation of the LV2 uri-map and urid extensions.
  */
 class URIMap : public boost::noncopyable {
 public:
 	URIMap();
 
-	LV2_Feature* feature() { return &uri_map_feature; }
+	LV2_Feature* uri_map_feature()    { return &_uri_map_feature; }
+	LV2_Feature* urid_map_feature()   { return &_urid_map_feature; }
+	LV2_Feature* urid_unmap_feature() { return &_urid_unmap_feature; }
 
 	uint32_t uri_to_id(const char* map,
 	                   const char* uri);
 
 	const char* id_to_uri(const char* map,
-	                      uint32_t id);
+	                      uint32_t    id);
 
 private:
 	static uint32_t uri_map_uri_to_id(LV2_URI_Map_Callback_Data callback_data,
 	                                  const char*               map,
 	                                  const char*               uri);
 
-	static const char* uri_unmap_id_to_uri(LV2_URI_Map_Callback_Data callback_data,
-	                                       const char*               map,
-	                                       const uint32_t            id);
+	static LV2_URID urid_map(LV2_URID_Map_Handle handle,
+	                         const char*         uri);
+
+	static const char* urid_unmap(LV2_URID_Unmap_Handle handle,
+	                              LV2_URID              urid);
 
 	typedef std::map<uint16_t, uint32_t> EventToGlobal;
 	typedef std::map<uint32_t, uint16_t> GlobalToEvent;
@@ -62,10 +64,12 @@ private:
 	EventToGlobal _event_to_global;
 	GlobalToEvent _global_to_event;
 
-	LV2_Feature           uri_map_feature;
-	LV2_URI_Map_Feature   uri_map_feature_data;
-	LV2_Feature           uri_unmap_feature;
-	LV2_URI_Unmap_Feature uri_unmap_feature_data;
+	LV2_Feature           _uri_map_feature;
+	LV2_URI_Map_Feature   _uri_map_feature_data;
+	LV2_Feature           _urid_map_feature;
+	LV2_URID_Map          _urid_map_feature_data;
+	LV2_Feature           _urid_unmap_feature;
+	LV2_URID_Unmap        _urid_unmap_feature_data;
 };
 
 

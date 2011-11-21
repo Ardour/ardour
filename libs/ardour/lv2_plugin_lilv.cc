@@ -167,13 +167,15 @@ LV2Plugin::init(void* c_plugin, framecnt_t rate)
 	}
 #endif
 
-	_features    = (LV2_Feature**)malloc(sizeof(LV2_Feature*) * 6);
+	_features    = (LV2_Feature**)malloc(sizeof(LV2_Feature*) * 8);
 	_features[0] = &_instance_access_feature;
 	_features[1] = &_data_access_feature;
 	_features[2] = &_path_support_feature;
 	_features[3] = &_new_file_support_feature;
-	_features[4] = _uri_map.feature();
-	_features[5] = NULL;
+	_features[4] = _uri_map.uri_map_feature();
+	_features[5] = _uri_map.urid_map_feature();
+	_features[6] = _uri_map.urid_unmap_feature();
+	_features[7] = NULL;
 
 	LV2_Files_Path_Support* path_support = (LV2_Files_Path_Support*)malloc(
 		sizeof(LV2_Files_Path_Support));
