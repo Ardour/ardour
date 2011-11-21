@@ -554,6 +554,7 @@ AudioClock::end_edit (bool modify)
 			break;
 			
 		case MinSec:
+			ok = minsec_validate_edit (edit_string);
 			break;
 			
 		case Frames:
@@ -1667,7 +1668,11 @@ AudioClock::bbt_validate_edit (const string& str)
 	if (sscanf (str.c_str(), BBT_SCANF_FORMAT, &any.bbt.bars, &any.bbt.beats, &any.bbt.ticks) != 3) {
 		return false;
 	}
-	
+
+	if (any.bbt.ticks > Timecode::BBT_Time::ticks_per_beat) {
+		return false;
+	}
+
 	if (!is_duration && any.bbt.bars == 0) {
 		return false;
 	}
@@ -1689,7 +1694,7 @@ AudioClock::timecode_validate_edit (const string& str)
 		return false;
 	}
 
-	if (TC.minutes > 59U || TC.seconds > 59U) {
+	if (TC.hours > 23U || TC.minutes > 59U || TC.seconds > 59U) {
 		return false;
 	}
 
@@ -1701,6 +1706,22 @@ AudioClock::timecode_validate_edit (const string& str)
 		if (TC.minutes % 10 && TC.seconds == 0U && TC.frames < 2U) {
 			return false;
 		}
+	}
+
+	return true;
+}
+
+bool
+AudioClock::minsec_validate_edit (const string& str)
+{
+	int hrs, mins, secs, millisecs;
+
+	if (sscanf (str.c_str(), "%d:%d:%d.%d", &hrs, &mins, &secs, &millisecs) != 4) {
+		return false;
+	}
+	
+	if (hrs > 23 || mins > 59 || secs > 59 || millisecs > 999) {
+		return false;
 	}
 
 	return true;

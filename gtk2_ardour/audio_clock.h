@@ -188,6 +188,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 
 	bool timecode_validate_edit (const std::string&);
 	bool bbt_validate_edit (const std::string&);
+	bool minsec_validate_edit (const std::string&);
 
 	framepos_t frames_from_timecode_string (const std::string&) const;
 	framepos_t frames_from_bbt_string (framepos_t, const std::string&) const;
