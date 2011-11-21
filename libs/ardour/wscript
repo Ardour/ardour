@@ -21,8 +21,9 @@ LIBARDOUR_LIB_VERSION = '3.0.0'
 CURRENT_SESSION_FILE_VERSION = 3000
 
 # Variables for 'waf dist'
-APPNAME = 'libardour'
+APPNAME = 'libardour3'
 VERSION = LIBARDOUR_VERSION
+I18N_PACKAGE = 'libardour3'
 
 # Mandatory variables
 top = '.'
@@ -454,5 +455,17 @@ def shutdown():
     autowaf.shutdown()
 
 def i18n(bld):
-    autowaf.build_i18n(bld, top, 'libs/ardour', APPNAME, libardour_sources,
+    autowaf.build_i18n(bld, top, 'libs/ardour', I18N_PACKAGE, libardour_sources,
+                       'Paul Davis')
+
+def i18n_pot(bld):
+    autowaf.build_i18n(bld, top, 'libs/ardour', I18N_PACKAGE, libardour_sources,
+                       'Paul Davis')
+
+def i18n_po(bld):
+    autowaf.build_i18n_po(bld, top, 'libs/ardour', I18N_PACKAGE, libardour_sources,
+                       'Paul Davis')
+
+def i18n_mo(bld):
+    autowaf.build_i18n_mo(bld, top, 'libs/ardour', I18N_PACKAGE, libardour_sources,
                        'Paul Davis')

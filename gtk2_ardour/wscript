@@ -15,8 +15,9 @@ MICRO = '0'
 GTK2_ARDOUR_VERSION = "%s.%s.%s" % (MAJOR, MINOR, MICRO)
 
 # Variables for 'waf dist'
-APPNAME = 'gtk2_ardour'
+APPNAME = 'gtk2_ardour3'
 VERSION = GTK2_ARDOUR_VERSION
+I18N_PACKAGE = 'gtk2_ardour3'
 
 # Mandatory variables
 top = '.'
@@ -637,5 +638,17 @@ def build(bld):
                            mo)
 
 def i18n(bld):
-    autowaf.build_i18n(bld, top, 'gtk2_ardour', APPNAME, gtk2_ardour_sources,
+    autowaf.build_i18n(bld, top, 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
+                       'Paul Davis')
+
+def i18n_pot(bld):
+    autowaf.build_i18n_pot(bld, top, 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
+                       'Paul Davis')
+
+def i18n_po(bld):
+    autowaf.build_i18n_po(bld, top, 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
+                       'Paul Davis')
+
+def i18n_mo(bld):
+    autowaf.build_i18n_mo(bld, top, 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
                        'Paul Davis')

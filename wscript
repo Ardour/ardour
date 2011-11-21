@@ -9,7 +9,7 @@ import sys
 
 # Variables for 'waf dist'
 VERSION = '3.0beta1a'
-APPNAME = 'Ardour'
+APPNAME = 'Ardour3'
 
 # Mandatory variables
 top = '.'
@@ -667,4 +667,13 @@ def build(bld):
     obj.install_path = '${SYSCONFDIR}/ardour3'
 
 def i18n(bld):
+    bld.recurse (i18n_children)
+
+def i18n_pot(bld):
+    bld.recurse (i18n_children)
+
+def i18n_po(bld):
+    bld.recurse (i18n_children)
+
+def i18n_mo(bld):
     bld.recurse (i18n_children)

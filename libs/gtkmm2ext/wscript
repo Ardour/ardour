@@ -17,6 +17,7 @@ GTKMM2EXT_LIB_VERSION = '0.8.3'
 # Variables for 'waf dist'
 APPNAME = 'gtkmm2ext'
 VERSION = GTKMM2EXT_VERSION
+I18N_PACKAGE = 'gtkmm2ext3'
 
 gtkmm2ext_sources = [
         'actions.cc',
@@ -106,7 +107,19 @@ def build(bld):
                            mo)
 
 def i18n(bld):
-    autowaf.build_i18n(bld, top, 'libs/gtkmm2ext', APPNAME, gtkmm2ext_sources,
+    autowaf.build_i18n(bld, top, 'libs/gtkmm2ext', I18N_PACKAGE, gtkmm2ext_sources,
+                       'Paul Davis')
+
+def i18n_pot(bld):
+    autowaf.build_i18n_pot(bld, top, 'libs/gtkmm2ext', I18N_PACKAGE, gtkmm2ext_sources,
+                       'Paul Davis')
+
+def i18n_po(bld):
+    autowaf.build_i18n_po(bld, top, 'libs/gtkmm2ext', I18N_PACKAGE, gtkmm2ext_sources,
+                       'Paul Davis')
+
+def i18n_mo(bld):
+    autowaf.build_i18n_mo(bld, top, 'libs/gtkmm2ext', I18N_PACKAGE, gtkmm2ext_sources,
                        'Paul Davis')
 
 def shutdown():
