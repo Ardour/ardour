@@ -103,7 +103,7 @@ def build(bld):
         for mo in mo_files:
             lang = os.path.basename(mo.srcpath()).replace('.mo', '')
             bld.install_as(os.path.join(bld.env['PREFIX'], 'share', 'locale',
-                                        lang, 'LC_MESSAGES', 'libgtkmm2ext.mo'),
+                                        lang, 'LC_MESSAGES', I18N_PACKAGE + '.mo'),
                            mo)
 
 def i18n(bld):
