@@ -255,11 +255,12 @@ def configure(conf):
                       atleast_version='0.1.0')
     autowaf.check_pkg(conf, 'sigc++-2.0', uselib_store='SIGCPP',
                       atleast_version='2.0')
-    autowaf.check_pkg(conf, 'lilv-0', uselib_store='LILV',
-                      atleast_version='0.0.0', mandatory=False)
-    if conf.is_defined('HAVE_LILV'):
-        autowaf.check_pkg(conf, 'suil-0', uselib_store='SUIL',
-                          atleast_version='0.2.0', mandatory=False)
+    if Options.options.lv2:
+        autowaf.check_pkg(conf, 'lilv-0', uselib_store='LILV',
+                          atleast_version='0.0.0', mandatory=False)
+        if conf.is_defined('HAVE_LILV'):
+            autowaf.check_pkg(conf, 'suil-0', uselib_store='SUIL',
+                              atleast_version='0.2.0', mandatory=False)
 #    autowaf.check_pkg(conf, 'soundtouch-1.0', uselib_store='SOUNDTOUCH',
 #                      mandatory=False)
     autowaf.check_pkg(conf, 'cppunit', uselib_store='CPPUNIT',
@@ -330,7 +331,8 @@ int main(int argc, char **argv) {
     if ogg_supported():
         conf.define ('HAVE_OGG', 1)
 
-    if conf.is_defined('HAVE_LILV'):
+    if Options.options.lv2 and conf.is_defined('HAVE_LILV'):
+        print "LV2 option was ", Options.options.lv2
         conf.define ('LV2_SUPPORT', 1)
 
     conf.write_config_header('libardour-config.h', remove=False)

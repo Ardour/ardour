@@ -367,7 +367,7 @@ def options(opt):
                     help='Include Freesound database lookup')
     opt.add_option('--gprofile', action='store_true', default=False, dest='gprofile',
                     help='Compile for use with gprofile')
-    opt.add_option('--lv2', action='store_true', default=False, dest='lv2',
+    opt.add_option('--lv2', action='store', type="int", default=0, dest='lv2',
                     help='Compile with support for LV2 (if Lilv+Suil is available)')
     opt.add_option('--lxvst', action='store_true', default=lxvst_default, dest='lxvst',
                     help='Compile with support for linuxVST plugins')
