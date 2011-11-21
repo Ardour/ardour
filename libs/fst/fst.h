@@ -5,6 +5,8 @@
 #include <signal.h>
 #include <pthread.h>
 
+#include "ardour/vst_types.h"
+
 /**
  * Display FST error message.
  *
@@ -34,7 +36,6 @@ void  fst_error (const char *fmt, ...);
 typedef struct _FST FST;
 typedef struct _FSTHandle FSTHandle;
 typedef struct _FSTInfo FSTInfo;
-typedef struct _FSTKey FSTKey;
 
 struct _FSTInfo 
 {
@@ -71,14 +72,6 @@ struct _FSTHandle
     int plugincnt;
 };
 
-struct _FSTKey
-{
-	/** virtual-key code, or 0 if this _FSTKey is a `character' key */
-	int special;
-	/** `character' key, or 0 if this _FSTKey is a virtual-key */
-	int character;
-};
-
 struct _FST 
 {
     struct AEffect*    plugin;
@@ -101,7 +94,7 @@ struct _FST
     float      *want_params;
     float      *set_params;
 	
-    FSTKey      pending_keys[16];
+    VSTKey      pending_keys[16];
     int         n_pending_keys;
 
     int         dispatcher_wantcall;

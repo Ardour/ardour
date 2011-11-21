@@ -17,7 +17,7 @@
 #include <signal.h>
 #include <glib.h>
 
-#include <ardour/vstfx.h>
+#include "ardour/vstfx.h"
 
 #include <X11/X.h>
 #include <X11/Xlib.h>

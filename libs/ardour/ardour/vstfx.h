@@ -6,6 +6,8 @@
 #include <pthread.h>
 #include <stdio.h>
 
+#include "ardour/vst_types.h"
+
 /******************************************************************************************/
 /*VSTFX - an engine to manage native linux VST plugins - derived from FST for Windows VSTs*/
 /******************************************************************************************/
@@ -25,7 +27,6 @@ void  vstfx_error (const char *fmt, ...);
 typedef struct _VSTFX VSTFX;
 typedef struct _VSTFXHandle VSTFXHandle;
 typedef struct _VSTFXInfo VSTFXInfo;
-typedef struct _VSTFXKey VSTFXKey;
 
 
 /*Struct to contain the info about a plugin*/
@@ -69,18 +70,6 @@ struct _VSTFXHandle
     int plugincnt;
 };
 
-/*No key forwarding enabled in vstfx at the moment - maybe
-  not required*/
-
-struct _VSTFXKey
-{
-    /** virtual-key code, or 0 if this _VSTFXKey is a `character' key */
-    int special;
-    /** `character' key, or 0 if this _VSTFXKey is a virtual-key */
-    int character;
-};
-
-
 
 /*Structure used to describe the instance of VSTFX responsible for
   a particular plugin instance.  These are connected together in a 
@@ -119,7 +108,7 @@ struct _VSTFX
     float	*want_params;
     float	*set_params;
 	
-    VSTFXKey	pending_keys[16];
+    VSTKey	pending_keys[16];
 
     int		dispatcher_wantcall;
     int		dispatcher_opcode;
