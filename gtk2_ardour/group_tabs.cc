@@ -432,13 +432,24 @@ GroupTabs::subgroup (RouteGroup* g, bool aux, Placement placement)
 }
 
 struct CollectSorter {
-	CollectSorter (std::string const & key) : _key (key) {}
+	CollectSorter (string const & key) : _key (key) {}
 
 	bool operator () (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
 		return a->order_key (_key) < b->order_key (_key);
 	}
 
-	std::string _key;
+	string _key;
+};
+
+struct OrderSorter {
+	OrderSorter (string const & key) : _key (key) {}
+	
+	bool operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
+		/* use of ">" forces the correct sort order */
+		return a->order_key (_key) < b->order_key (_key);
+	}
+
+	string _key;
 };
 
 /** Collect all members of a RouteGroup so that they are together in the Editor or Mixer.
@@ -453,6 +464,7 @@ GroupTabs::collect (RouteGroup* g)
 
 	RouteList::iterator i = group_routes->begin ();
 	boost::shared_ptr<RouteList> routes = _session->get_routes ();
+	routes->sort (OrderSorter (order_key ()));
 	RouteList::const_iterator j = routes->begin ();
 
 	int diff = 0;
