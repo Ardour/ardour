@@ -99,6 +99,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	bool             _fixed_width;
 	int              layout_x_offset;
 	int              em_width;
+	bool             _edit_by_click_field;
 
 	Gtk::Menu  *ops_menu;
 
@@ -127,7 +128,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	static const double x_leading_padding;
 
 	enum Field {
-		Timecode_Hours,
+		Timecode_Hours = 1,
 		Timecode_Minutes,
 		Timecode_Seconds,
 		Timecode_Frames,
@@ -202,7 +203,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 
 	Field index_to_field () const;
 
-	void start_edit ();
+	void start_edit (Field f = Field (0));
 	void end_edit (bool);
 	void end_edit_relative (bool);
 	void edit_next_field ();
@@ -216,6 +217,8 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	void set_font ();
 	void set_colors ();
 	void show_edit_status (int length);
+	int  merge_input_and_edit_string ();
+	std::string get_field (Field);
 
 	void drop_focus ();
 	void dpi_reset ();

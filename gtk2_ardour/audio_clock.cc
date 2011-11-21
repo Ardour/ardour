@@ -71,6 +71,7 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	, _fixed_width (true)
 	, layout_x_offset (0)
 	, em_width (0)
+	, _edit_by_click_field (false)
 	, ops_menu (0)
 	, editing_attr (0)
 	, foreground_attr (0)
@@ -362,11 +363,13 @@ AudioClock::render (cairo_t* cr)
 				cairo_set_source_rgba (cr, cursor_r, cursor_g, cursor_b, cursor_a);
 				if (!_fixed_width) {
 					cairo_rectangle (cr, 
-							 min (get_width() - 2.0, (double) cursor.get_x()/PANGO_SCALE + em_width), 0,
+							 min (get_width() - 2.0, 
+							      (double) cursor.get_x()/PANGO_SCALE + layout_x_offset + em_width), 0,
 							 2.0, cursor.get_height()/PANGO_SCALE);
 				} else {
 					cairo_rectangle (cr, 
-							 min (get_width() - 2.0, (double) layout_x_offset + cursor.get_x()/PANGO_SCALE + em_width),
+							 min (get_width() - 2.0, 
+							      (double) layout_x_offset + cursor.get_x()/PANGO_SCALE + em_width),
 							 (upper_height - layout_height)/2.0, 
 							 2.0, cursor.get_height()/PANGO_SCALE);
 				}
@@ -519,7 +522,7 @@ AudioClock::show_edit_status (int length)
 }
 
 void
-AudioClock::start_edit ()
+AudioClock::start_edit (Field f)
 {
 	pre_edit_string = _layout->get_text ();
 	if (!insert_map.empty()) {
@@ -531,10 +534,59 @@ AudioClock::start_edit ()
 	input_string.clear ();
 	editing = true;
 
+	if (f) {
+		input_string = get_field (f);
+		show_edit_status (merge_input_and_edit_string ());
+		_layout->set_text (edit_string);
+	}
+
 	queue_draw ();
 
 	Keyboard::magic_widget_grab_focus ();
 	grab_focus ();
+}
+
+string
+AudioClock::get_field (Field f)
+{
+	switch (f) {
+	case Timecode_Hours:
+		return edit_string.substr (1, 2);
+		break;
+	case Timecode_Minutes:
+		return edit_string.substr (4, 2);
+		break;
+	case Timecode_Seconds:
+		return edit_string.substr (7, 2);
+		break;
+	case Timecode_Frames:
+		return edit_string.substr (10, 2);
+		break;
+	case MS_Hours:
+		return edit_string.substr (1, 2);
+		break;
+	case MS_Minutes:
+		return edit_string.substr (4, 2);
+		break;
+	case MS_Seconds:
+		return edit_string.substr (7, 2);
+		break;
+	case MS_Milliseconds:
+		return edit_string.substr (10, 3);
+		break;
+	case Bars:
+		return edit_string.substr (1, 3);
+		break;
+	case Beats:
+		return edit_string.substr (5, 2);
+		break;
+	case Ticks:
+		return edit_string.substr (8, 4);
+		break;
+	case AudioFrames:
+		return edit_string;
+		break;
+	}
 }
 
 void
@@ -1165,6 +1217,8 @@ AudioClock::on_key_press_event (GdkEventKey* ev)
 
 	string new_text;
 	char new_char = 0;
+	int highlight_length;
+	framepos_t pos;
 
 	switch (ev->keyval) {
 	case GDK_0:
@@ -1254,18 +1308,13 @@ AudioClock::on_key_press_event (GdkEventKey* ev)
 
   use_input_string:
 
-	int highlight_length = 0;
-	framepos_t pos;
-
-	/* merge with pre-edit-string into edit string */
-	
 	switch (_mode) {
 	case Frames:
 		/* get this one in the right order, and to the right width */
-		if (ev->keyval != GDK_Delete && ev->keyval != GDK_BackSpace) {
-			edit_string.push_back (new_char);
-		} else {
+		if (ev->keyval == GDK_Delete || ev->keyval == GDK_BackSpace) {
 			edit_string = edit_string.substr (0, edit_string.length() - 1);
+		} else {
+			edit_string.push_back (new_char);
 		}
 		if (!edit_string.empty()) {
 			char buf[32];
@@ -1276,31 +1325,36 @@ AudioClock::on_key_press_event (GdkEventKey* ev)
 		/* highlight the whole thing */
 		highlight_length = edit_string.length();
 		break;
-		
-	default:
-		edit_string = pre_edit_string;
 
-		if (input_string.empty()) {
-			highlight_length = 0;
-		} else {
-			// for (int i = input_string.length() - 1; i >= 0; --i) {
-			string::size_type target;
-			for (string::size_type i = 0; i < input_string.length(); ++i) {
-				target = insert_map[input_string.length() - 1 - i];
-				edit_string[target] = input_string[i];
-			}
-			/* highlight from end to wherever the last character was added */
-			highlight_length = edit_string.length() - insert_map[input_string.length()-1];
-		}
-		break;
+	default:
+		highlight_length = merge_input_and_edit_string ();
 	}
-	
-	
+
 	show_edit_status (highlight_length);
 	_layout->set_text (edit_string);
 	queue_draw ();
 
 	return true;
+}
+
+int
+AudioClock::merge_input_and_edit_string ()
+{
+	/* merge with pre-edit-string into edit string */
+	
+	edit_string = pre_edit_string;
+	
+	if (input_string.empty()) {
+		return 0;
+	} 
+
+	string::size_type target;
+	for (string::size_type i = 0; i < input_string.length(); ++i) {
+		target = insert_map[input_string.length() - 1 - i];
+		edit_string[target] = input_string[i];
+	}
+	/* highlight from end to wherever the last character was added */
+	return edit_string.length() - insert_map[input_string.length()-1];
 }
 
 
@@ -1451,10 +1505,36 @@ AudioClock::on_button_release_event (GdkEventButton *ev)
 				return true;
 			} else {
 				if (ev->button == 1) {
-					start_edit ();
+					
+					if (_edit_by_click_field) {
+
+						int index = 0;
+						int trailing;
+						int y = ev->y - ((upper_height - layout_height)/2);
+						int x = ev->x - layout_x_offset;
+						Field f;
+
+						if (!_layout->xy_to_index (x * PANGO_SCALE, y * PANGO_SCALE, index, trailing)) {
+							return true;
+						}
+						
+						f = index_to_field (index);
+						
+						switch (f) {
+						case Timecode_Frames:
+						case MS_Milliseconds:
+						case Ticks:
+							f = Field (0);
+							break;
+						default:
+							break;
+						}
+						start_edit (f);
+					} else {
+						start_edit ();
+					}
 				}
 			}
-
 		}
 	}
 
@@ -2020,7 +2100,7 @@ AudioClock::set_off (bool yn)
 void
 AudioClock::focus ()
 {
-	start_edit ();
+	start_edit (Field (0));
 }
 
 void
