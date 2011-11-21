@@ -1681,7 +1681,7 @@ AudioClock::timecode_validate_edit (const string& str)
 		return false;
 	}
 
-	if (TC.minutes > 59 || TC.seconds > 59) {
+	if (TC.minutes > 59U || TC.seconds > 59U) {
 		return false;
 	}
 
@@ -1690,7 +1690,7 @@ AudioClock::timecode_validate_edit (const string& str)
 	}
 
 	if (_session->timecode_drop_frames()) {
-		if (TC.minutes % 10 && TC.seconds == 0 && TC.frames < 2) {
+		if (TC.minutes % 10 && TC.seconds == 0U && TC.frames < 2U) {
 			return false;
 		}
 	}

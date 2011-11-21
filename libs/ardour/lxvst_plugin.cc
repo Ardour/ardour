@@ -344,8 +344,12 @@ LXVSTPlugin::load_plugin_preset (PresetRecord r)
 	/* Extract the index of this preset from the URI */
 	int id;
 	int index;
+#ifndef NDEBUG
 	int const p = sscanf (r.uri.c_str(), "VST:%d:%d", &id, &index);
 	assert (p == 2);
+#else 
+	sscanf (r.uri.c_str(), "VST:%d:%d", &id, &index);
+#endif
 	
 	_vstfx->want_program = index;
 	return true;

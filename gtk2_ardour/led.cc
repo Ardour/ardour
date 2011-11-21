@@ -146,7 +146,7 @@ LED::set_colors_from_style ()
 	Color c;
 
 	switch (_visual_state) {
-	case 0:
+	case VisualState(0):
 		c = style->get_fg (STATE_NORMAL);
 		break;
 	default:
