@@ -345,7 +345,7 @@ def build_color_scheme(path, prefix):
 def build(bld):
     # GTK front-end; if we're using VST we build this as a shared library,
     # otherwise it's a normal executabale
-    if bld.is_defined('VST_SUPPORT'):
+    if bld.is_defined('WINDOWS_VST_SUPPORT'):
         obj = bld(features = 'cxx c cxxshlib')
     else:
         obj = bld(features = 'cxx c cxxprogram')
@@ -354,7 +354,7 @@ def build(bld):
     obj.source       = gtk2_ardour_sources
     obj.name         = 'gtk2_ardour'
     obj.linkflags    = []
-    if bld.is_defined('VST_SUPPORT'):
+    if bld.is_defined('WINDOWS_VST_SUPPORT'):
         obj.target = 'gtk2_ardour'
         obj.includes += ['../libs/fst']
     else:
@@ -392,9 +392,9 @@ def build(bld):
         obj.source +=  [ 'sfdb_freesound_mootcher.cc' ]
         obj.defines += [ 'FREESOUND' ]
 
-    if bld.is_defined('VST_SUPPORT'):
-        obj.source += [ 'vst_pluginui.cc' ]
-        obj.defines += [ 'VST_SUPPORT' ]
+    if bld.is_defined('WINDOWS_VST_SUPPORT'):
+        obj.source += [ 'windows_vst_plugin_ui.cc' ]
+        obj.defines += [ 'WINDOWS_VST_SUPPORT' ]
         obj.uselib += ' X11 '
 
     if bld.is_defined('LXVST_SUPPORT'):
@@ -410,7 +410,7 @@ def build(bld):
         obj.source += [ 'cocoacarbon.mm', 'au_pluginui.mm' ]
         obj.use += ' libappleutility '
 
-    if bld.is_defined('VST_SUPPORT'):
+    if bld.is_defined('WINDOWS_VST_SUPPORT'):
         # If we require VST support we build a stub main() and the FST library
         # here using winegcc, and link it to the GTK front-end library
         obj = bld(features = 'cxx c cxxprogram wine')
@@ -423,7 +423,7 @@ def build(bld):
         '''
         obj.includes = '../libs/fst'
         obj.target = 'ardour-3.0-vst'
-        obj.linkflags += ['-mwindows', '-Wl,--export-dynamic', '-lpthread']
+        obj.linkflags = ['-mwindows', '-Wl,--export-dynamic', '-lpthread']
         obj.defines = ['_POSIX_SOURCE', 'USE_WS_PREFIX']
         obj.uselib = 'ALSA'
         obj.use = ['libpbd','libmidipp','libtaglib','libardour',

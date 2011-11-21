@@ -19,11 +19,11 @@
 
 #include "plugin_ui.h"
 
-class VSTPluginUI : public PlugUIBase, public Gtk::VBox
+class WindowsVSTPluginUI : public PlugUIBase, public Gtk::VBox
 {
   public:
-	VSTPluginUI (boost::shared_ptr<ARDOUR::PluginInsert>, boost::shared_ptr<ARDOUR::VSTPlugin>);
-	~VSTPluginUI ();
+	WindowsVSTPluginUI (boost::shared_ptr<ARDOUR::PluginInsert>, boost::shared_ptr<ARDOUR::WindowsVSTPlugin>);
+	~WindowsVSTPluginUI ();
 
 	gint get_preferred_height ();
 	gint get_preferred_width ();
@@ -36,7 +36,7 @@ class VSTPluginUI : public PlugUIBase, public Gtk::VBox
 	bool non_gtk_gui () const { return true; }
 
   private:
-	boost::shared_ptr<ARDOUR::VSTPlugin> vst;
+	boost::shared_ptr<ARDOUR::WindowsVSTPlugin> vst;
 	Gtk::Socket socket;
 	Gtk::HBox   preset_box;
 	Gtk::VBox   vpacker;

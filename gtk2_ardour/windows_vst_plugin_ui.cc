@@ -21,9 +21,9 @@
 #include <gtk/gtk.h>
 #include <gtk/gtksocket.h>
 #include "ardour/plugin_insert.h"
-#include "ardour/vst_plugin.h"
+#include "ardour/windows_vst_plugin.h"
 
-#include "vst_pluginui.h"
+#include "windows_vst_plugin_ui.h"
 
 #include <gdk/gdkx.h>
 
@@ -31,7 +31,7 @@ using namespace Gtk;
 using namespace ARDOUR;
 using namespace PBD;
 
-VSTPluginUI::VSTPluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_ptr<VSTPlugin> vp)
+WindowsVSTPluginUI::WindowsVSTPluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_ptr<WindowsVSTPlugin> vp)
 	: PlugUIBase (pi),
 	  vst (vp)
 {
@@ -53,37 +53,37 @@ VSTPluginUI::VSTPluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_ptr<
 	pack_start (plugin_analysis_expander, true, true);
 }
 
-VSTPluginUI::~VSTPluginUI ()
+WindowsVSTPluginUI::~WindowsVSTPluginUI ()
 {
 	// plugin destructor destroys the custom GUI, via Windows fun-and-games,
 	// and then our PluginUIWindow does the rest
 }
 
 void
-VSTPluginUI::preset_selected ()
+WindowsVSTPluginUI::preset_selected ()
 {
 	socket.grab_focus ();
 	PlugUIBase::preset_selected ();
 }
 
 int
-VSTPluginUI::get_preferred_height ()
+WindowsVSTPluginUI::get_preferred_height ()
 {
 	return vst->fst()->height;
 }
 
 int
-VSTPluginUI::get_preferred_width ()
+WindowsVSTPluginUI::get_preferred_width ()
 {
 	return vst->fst()->width;
 }
 
 int
-VSTPluginUI::package (Gtk::Window& win)
+WindowsVSTPluginUI::package (Gtk::Window& win)
 {
 	/* forward configure events to plugin window */
 
-	win.signal_configure_event().connect (sigc::bind (sigc::mem_fun (*this, &VSTPluginUI::configure_handler), &socket), false);
+	win.signal_configure_event().connect (sigc::bind (sigc::mem_fun (*this, &WindowsVSTPluginUI::configure_handler), &socket), false);
 
 	/*
 	   this assumes that the window's owner understands the XEmbed protocol.
@@ -97,7 +97,7 @@ VSTPluginUI::package (Gtk::Window& win)
 }
 
 bool
-VSTPluginUI::configure_handler (GdkEventConfigure* ev, Gtk::Socket *socket)
+WindowsVSTPluginUI::configure_handler (GdkEventConfigure* ev, Gtk::Socket *socket)
 {
 	XEvent event;
 	gint x, y;
@@ -136,7 +136,7 @@ VSTPluginUI::configure_handler (GdkEventConfigure* ev, Gtk::Socket *socket)
 }
 
 void
-VSTPluginUI::forward_key_event (GdkEventKey* ev)
+WindowsVSTPluginUI::forward_key_event (GdkEventKey* ev)
 {
 	if (ev->type == GDK_KEY_PRESS) {
 
@@ -199,7 +199,7 @@ fst_xerror_handler( Display *disp, XErrorEvent *ev )
 }
 
 void
-gui_init (int *argc, char **argv[])
+windows_vst_gui_init (int *argc, char **argv[])
 {
 	wine_error_handler = XSetErrorHandler (NULL);
 	gtk_init (argc, argv);

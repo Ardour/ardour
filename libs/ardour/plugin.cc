@@ -133,9 +133,9 @@ ARDOUR::find_plugin(Session& session, string identifier, PluginType type)
 		break;
 #endif
 
-#ifdef VST_SUPPORT
-	case ARDOUR::VST:
-		plugs = mgr.vst_plugin_info();
+#ifdef WINDOWS_VST_SUPPORT
+	case ARDOUR::Windows_VST:
+		plugs = mgr.windows_vst_plugin_info();
 		break;
 #endif
 
@@ -163,7 +163,7 @@ ARDOUR::find_plugin(Session& session, string identifier, PluginType type)
 		}
 	}
 
-#ifdef VST_SUPPORT
+#ifdef WINDOWS_VST_SUPPORT
 	/* hmm, we didn't find it. could be because in older versions of Ardour.
 	   we used to store the name of a VST plugin, not its unique ID. so try
 	   again.

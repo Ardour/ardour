@@ -17,8 +17,8 @@
 
 */
 
-#ifndef __ardour_vst_plugin_h__
-#define __ardour_vst_plugin_h__
+#ifndef __ardour_windows_vst_plugin_h__
+#define __ardour_windows_vst_plugin_h__
 
 #include <list>
 #include <map>
@@ -40,12 +40,12 @@ namespace ARDOUR {
 class AudioEngine;
 class Session;
 
-class VSTPlugin : public ARDOUR::Plugin
+class WindowsVSTPlugin : public ARDOUR::Plugin
 {
   public:
-	VSTPlugin (ARDOUR::AudioEngine&, ARDOUR::Session&, FSTHandle* handle);
-	VSTPlugin (const VSTPlugin &);
-	~VSTPlugin ();
+	WindowsVSTPlugin (ARDOUR::AudioEngine&, ARDOUR::Session&, FSTHandle* handle);
+	WindowsVSTPlugin (const WindowsVSTPlugin &);
+	~WindowsVSTPlugin ();
 
 	/* Plugin interface */
 
@@ -70,7 +70,7 @@ class VSTPlugin : public ARDOUR::Plugin
 			pframes_t nframes, framecnt_t offset);
 
 	std::string describe_parameter (Evoral::Parameter);
-	std::string state_node_name() const { return "vst"; }
+	std::string state_node_name() const { return "windows-vst"; }
 	void print_parameter (uint32_t, char*, uint32_t len) const;
 
 	bool parameter_is_audio(uint32_t i) const { return false; }
@@ -107,16 +107,16 @@ private:
 	bool        been_resumed;
 };
 
-class VSTPluginInfo : public PluginInfo
+class WindowsVSTPluginInfo : public PluginInfo
 {
   public:
-	VSTPluginInfo ();
-	~VSTPluginInfo () {}
+	WindowsVSTPluginInfo ();
+	~WindowsVSTPluginInfo () {}
 
 	PluginPtr load (Session& session);
 };
 
-typedef boost::shared_ptr<VSTPluginInfo> VSTPluginInfoPtr;
+typedef boost::shared_ptr<WindowsVSTPluginInfo> WindowsVSTPluginInfoPtr;
 
 } // namespace ARDOUR
 

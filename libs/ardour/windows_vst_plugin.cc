@@ -45,7 +45,7 @@
 #include "ardour/session.h"
 #include "ardour/audioengine.h"
 #include "ardour/filesystem_paths.h"
-#include "ardour/vst_plugin.h"
+#include "ardour/windows_vst_plugin.h"
 #include "ardour/buffer_set.h"
 #include "ardour/audio_buffer.h"
 #include "ardour/midi_buffer.h"
@@ -61,7 +61,7 @@ using namespace PBD;
 using std::min;
 using std::max;
 
-VSTPlugin::VSTPlugin (AudioEngine& e, Session& session, FSTHandle* h)
+WindowsVSTPlugin::WindowsVSTPlugin (AudioEngine& e, Session& session, FSTHandle* h)
 	: Plugin (e, session)
 {
 	handle = h;
@@ -87,7 +87,7 @@ VSTPlugin::VSTPlugin (AudioEngine& e, Session& session, FSTHandle* h)
 	// Plugin::setup_controls ();
 }
 
-VSTPlugin::VSTPlugin (const VSTPlugin &other)
+WindowsVSTPlugin::WindowsVSTPlugin (const WindowsVSTPlugin &other)
 	: Plugin (other)
 {
 	handle = other.handle;
@@ -100,14 +100,14 @@ VSTPlugin::VSTPlugin (const VSTPlugin &other)
 	// Plugin::setup_controls ();
 }
 
-VSTPlugin::~VSTPlugin ()
+WindowsVSTPlugin::~WindowsVSTPlugin ()
 {
 	deactivate ();
 	fst_close (_fst);
 }
 
 int
-VSTPlugin::set_block_size (pframes_t nframes)
+WindowsVSTPlugin::set_block_size (pframes_t nframes)
 {
 	deactivate ();
 	_plugin->dispatcher (_plugin, effSetBlockSize, 0, nframes, NULL, 0.0f);
@@ -116,13 +116,13 @@ VSTPlugin::set_block_size (pframes_t nframes)
 }
 
 float
-VSTPlugin::default_value (uint32_t port)
+WindowsVSTPlugin::default_value (uint32_t port)
 {
 	return 0;
 }
 
 void
-VSTPlugin::set_parameter (uint32_t which, float val)
+WindowsVSTPlugin::set_parameter (uint32_t which, float val)
 {
 	_plugin->setParameter (_plugin, which, val);
 
@@ -137,14 +137,14 @@ VSTPlugin::set_parameter (uint32_t which, float val)
 }
 
 float
-VSTPlugin::get_parameter (uint32_t which) const
+WindowsVSTPlugin::get_parameter (uint32_t which) const
 {
 	return _plugin->getParameter (_plugin, which);
 
 }
 
 uint32_t
-VSTPlugin::nth_parameter (uint32_t n, bool& ok) const
+WindowsVSTPlugin::nth_parameter (uint32_t n, bool& ok) const
 {
 	ok = true;
 	return n;
@@ -155,7 +155,7 @@ VSTPlugin::nth_parameter (uint32_t n, bool& ok) const
  *  @return 0-terminated base64-encoded data; must be passed to g_free () by caller.
  */
 gchar *
-VSTPlugin::get_chunk (bool single) const
+WindowsVSTPlugin::get_chunk (bool single) const
 {
 	guchar* data;
 	int32_t data_size = _plugin->dispatcher (_plugin, 23 /* effGetChunk */, single ? 1 : 0, 0, &data, 0);
@@ -172,7 +172,7 @@ VSTPlugin::get_chunk (bool single) const
  *  @return 0 on success, non-0 on failure
  */
 int
-VSTPlugin::set_chunk (gchar const * data, bool single)
+WindowsVSTPlugin::set_chunk (gchar const * data, bool single)
 {
 	gsize size = 0;
 	guchar* raw_data = g_base64_decode (data, &size);
@@ -182,7 +182,7 @@ VSTPlugin::set_chunk (gchar const * data, bool single)
 }
 
 void
-VSTPlugin::add_state (XMLNode* root) const
+WindowsVSTPlugin::add_state (XMLNode* root) const
 {
 	LocaleGuard lg (X_("POSIX"));
 
@@ -225,12 +225,12 @@ VSTPlugin::add_state (XMLNode* root) const
 }
 
 int
-VSTPlugin::set_state (const XMLNode& node, int version)
+WindowsVSTPlugin::set_state (const XMLNode& node, int version)
 {
 	LocaleGuard lg (X_("POSIX"));
 
 	if (node.name() != state_node_name()) {
-		error << _("Bad node sent to VSTPlugin::set_state") << endmsg;
+		error << _("Bad node sent to WindowsVSTPlugin::set_state") << endmsg;
 		return 0;
 	}
 
@@ -285,7 +285,7 @@ VSTPlugin::set_state (const XMLNode& node, int version)
 }
 
 int
-VSTPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& desc) const
+WindowsVSTPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& desc) const
 {
 	VstParameterProperties prop;
 
@@ -359,7 +359,7 @@ VSTPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& desc) 
 }
 
 bool
-VSTPlugin::load_preset (PresetRecord r)
+WindowsVSTPlugin::load_preset (PresetRecord r)
 {
 	bool s;
 
@@ -377,7 +377,7 @@ VSTPlugin::load_preset (PresetRecord r)
 }
 
 bool
-VSTPlugin::load_plugin_preset (PresetRecord r)
+WindowsVSTPlugin::load_plugin_preset (PresetRecord r)
 {
 	/* This is a plugin-provided preset.
 	   We can't dispatch directly here; too many plugins expects only one GUI thread.
@@ -394,7 +394,7 @@ VSTPlugin::load_plugin_preset (PresetRecord r)
 }
 
 bool
-VSTPlugin::load_user_preset (PresetRecord r)
+WindowsVSTPlugin::load_user_preset (PresetRecord r)
 {
 	/* This is a user preset; we load it, and this code also knows about the
 	   non-direct-dispatch thing.
@@ -464,7 +464,7 @@ VSTPlugin::load_user_preset (PresetRecord r)
 }
 
 string
-VSTPlugin::do_save_preset (string name)
+WindowsVSTPlugin::do_save_preset (string name)
 {
 	boost::shared_ptr<XMLTree> t (presets_tree ());
 	if (t == 0) {
@@ -512,7 +512,7 @@ VSTPlugin::do_save_preset (string name)
 }
 
 void
-VSTPlugin::do_remove_preset (string name)
+WindowsVSTPlugin::do_remove_preset (string name)
 {
 	boost::shared_ptr<XMLTree> t (presets_tree ());
 	if (t == 0) {
@@ -529,7 +529,7 @@ VSTPlugin::do_remove_preset (string name)
 }
 
 string
-VSTPlugin::describe_parameter (Evoral::Parameter param)
+WindowsVSTPlugin::describe_parameter (Evoral::Parameter param)
 {
 	char name[64];
 	_plugin->dispatcher (_plugin, effGetParamName, param.id(), 0, name, 0);
@@ -537,7 +537,7 @@ VSTPlugin::describe_parameter (Evoral::Parameter param)
 }
 
 framecnt_t
-VSTPlugin::signal_latency () const
+WindowsVSTPlugin::signal_latency () const
 {
 	if (_user_latency) {
 		return _user_latency;
@@ -551,7 +551,7 @@ VSTPlugin::signal_latency () const
 }
 
 set<Evoral::Parameter>
-VSTPlugin::automatable () const
+WindowsVSTPlugin::automatable () const
 {
 	set<Evoral::Parameter> ret;
 
@@ -563,7 +563,7 @@ VSTPlugin::automatable () const
 }
 
 int
-VSTPlugin::connect_and_run (BufferSet& bufs,
+WindowsVSTPlugin::connect_and_run (BufferSet& bufs,
 		ChanMapping in_map, ChanMapping out_map,
 		pframes_t nframes, framecnt_t offset)
 {
@@ -607,19 +607,19 @@ VSTPlugin::connect_and_run (BufferSet& bufs,
 }
 
 void
-VSTPlugin::deactivate ()
+WindowsVSTPlugin::deactivate ()
 {
 	_plugin->dispatcher (_plugin, effMainsChanged, 0, 0, NULL, 0.0f);
 }
 
 void
-VSTPlugin::activate ()
+WindowsVSTPlugin::activate ()
 {
 	_plugin->dispatcher (_plugin, effMainsChanged, 0, 1, NULL, 0.0f);
 }
 
 string
-VSTPlugin::unique_id() const
+WindowsVSTPlugin::unique_id() const
 {
 	char buf[32];
 
@@ -633,37 +633,37 @@ VSTPlugin::unique_id() const
 
 
 const char *
-VSTPlugin::name () const
+WindowsVSTPlugin::name () const
 {
 	return handle->name;
 }
 
 const char *
-VSTPlugin::maker () const
+WindowsVSTPlugin::maker () const
 {
 	return _info->creator.c_str();
 }
 
 const char *
-VSTPlugin::label () const
+WindowsVSTPlugin::label () const
 {
 	return handle->name;
 }
 
 uint32_t
-VSTPlugin::parameter_count() const
+WindowsVSTPlugin::parameter_count() const
 {
 	return _plugin->numParams;
 }
 
 bool
-VSTPlugin::has_editor () const
+WindowsVSTPlugin::has_editor () const
 {
 	return _plugin->flags & effFlagsHasEditor;
 }
 
 void
-VSTPlugin::print_parameter (uint32_t param, char *buf, uint32_t len) const
+WindowsVSTPlugin::print_parameter (uint32_t param, char *buf, uint32_t len) const
 {
 	char *first_nonws;
 
@@ -685,12 +685,12 @@ VSTPlugin::print_parameter (uint32_t param, char *buf, uint32_t len) const
 }
 
 PluginPtr
-VSTPluginInfo::load (Session& session)
+WindowsVSTPluginInfo::load (Session& session)
 {
 	try {
 		PluginPtr plugin;
 
-		if (Config->get_use_vst()) {
+		if (Config->get_use_windows_vst ()) {
 			FSTHandle* handle;
 
 			handle = fst_load(path.c_str());
@@ -698,14 +698,14 @@ VSTPluginInfo::load (Session& session)
 			if ( (int)handle == -1) {
 				error << string_compose(_("VST: cannot load module from \"%1\""), path) << endmsg;
 			} else {
-				plugin.reset (new VSTPlugin (session.engine(), session, handle));
+				plugin.reset (new WindowsVSTPlugin (session.engine(), session, handle));
 			}
 		} else {
 			error << _("You asked ardour to not use any VST plugins") << endmsg;
 			return PluginPtr ((Plugin*) 0);
 		}
 
-		plugin->set_info(PluginInfoPtr(new VSTPluginInfo(*this)));
+		plugin->set_info(PluginInfoPtr(new WindowsVSTPluginInfo(*this)));
 		return plugin;
 	}
 
@@ -715,7 +715,7 @@ VSTPluginInfo::load (Session& session)
 }
 
 void
-VSTPlugin::find_presets ()
+WindowsVSTPlugin::find_presets ()
 {
 	/* Built-in presets */
 
@@ -762,7 +762,7 @@ VSTPlugin::find_presets ()
  *  one was found, or 0 if one was present but badly-formatted.
  */
 XMLTree *
-VSTPlugin::presets_tree () const
+WindowsVSTPlugin::presets_tree () const
 {
 	XMLTree* t = new XMLTree;
 
@@ -776,7 +776,7 @@ VSTPlugin::presets_tree () const
 	p /= presets_file ();
 
 	if (!exists (p)) {
-		t->set_root (new XMLNode (X_("VSTPresets")));
+		t->set_root (new XMLNode (X_("WindowsVSTPresets")));
 		return t;
 	}
 
@@ -791,19 +791,19 @@ VSTPlugin::presets_tree () const
 
 /** @return Index of the first user preset in our lists */
 int
-VSTPlugin::first_user_preset_index () const
+WindowsVSTPlugin::first_user_preset_index () const
 {
 	return _plugin->numPrograms;
 }
 
 string
-VSTPlugin::presets_file () const
+WindowsVSTPlugin::presets_file () const
 {
 	return string_compose ("vst-%1", unique_id ());
 }
 
-VSTPluginInfo::VSTPluginInfo()
+WindowsVSTPluginInfo::WindowsVSTPluginInfo()
 {
-       type = ARDOUR::VST;
+       type = ARDOUR::Windows_VST;
 }
 

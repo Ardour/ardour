@@ -452,9 +452,9 @@ sigpipe_handler (int /*signal*/)
 void close_external_ui_windows();
 #endif
 
-#ifdef VST_SUPPORT
+#ifdef WINDOWS_VST_SUPPORT
 
-extern int gui_init (int* argc, char** argv[]);
+extern int windows_vst_gui_init (int* argc, char** argv[]);
 
 /* this is called from the entry point of a wine-compiled
    executable that is linked against gtk2_ardour built
@@ -474,11 +474,11 @@ int main (int argc, char *argv[])
 
 	gtk_set_locale ();
 
-#ifdef VST_SUPPORT
+#ifdef WINDOWS_VST_SUPPORT
 	/* this does some magic that is needed to make GTK and Wine's own
 	   X11 client interact properly.
 	*/
-	gui_init (&argc, &argv);
+	windows_vst_gui_init (&argc, &argv);
 #endif
 
 	(void) bindtextdomain (PACKAGE, localedir);
@@ -564,7 +564,7 @@ int main (int argc, char *argv[])
 #endif
 	return 0;
 }
-#ifdef VST_SUPPORT
+#ifdef WINDOWS_VST_SUPPORT
 } // end of extern C block
 #endif
 

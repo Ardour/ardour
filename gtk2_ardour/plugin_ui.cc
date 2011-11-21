@@ -46,9 +46,9 @@
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
 #include "ardour/ladspa_plugin.h"
-#ifdef VST_SUPPORT
-#include "ardour/vst_plugin.h"
-#include "vst_pluginui.h"
+#ifdef WINDOWS_VST_SUPPORT
+#include "ardour/windows_vst_plugin.h"
+#include "windows_vst_plugin_ui.h"
 #endif
 #ifdef LXVST_SUPPORT
 #include "ardour/lxvst_plugin.h"
@@ -99,8 +99,8 @@ PluginUIWindow::PluginUIWindow (
 	          << " editor: " << editor << std::endl;
 	if (editor && insert->plugin()->has_editor()) {
 		switch (insert->type()) {
-		case ARDOUR::VST:
-			have_gui = create_vst_editor (insert);
+		case ARDOUR::Windows_VST:
+			have_gui = create_windows_vst_editor (insert);
 			break;
 			
 		case ARDOUR::LXVST:
@@ -120,7 +120,7 @@ PluginUIWindow::PluginUIWindow (
 			break;
 
 		default:
-#ifndef VST_SUPPORT
+#ifndef WINDOWS_VST_SUPPORT
 			error << _("unknown type of editor-supplying plugin (note: no VST support in this version of ardour)")
 			      << endmsg;
 #else
@@ -253,24 +253,24 @@ PluginUIWindow::set_title(const std::string& title)
 }
 
 bool
-#ifdef VST_SUPPORT
-PluginUIWindow::create_vst_editor(boost::shared_ptr<PluginInsert> insert)
+#ifdef WINDOWS_VST_SUPPORT
+PluginUIWindow::create_windows_vst_editor(boost::shared_ptr<PluginInsert> insert)
 #else
-PluginUIWindow::create_vst_editor(boost::shared_ptr<PluginInsert>)
+PluginUIWindow::create_windows_vst_editor(boost::shared_ptr<PluginInsert>)
 #endif
 {
-#ifndef VST_SUPPORT
+#ifndef WINDOWS_VST_SUPPORT
 	return false;
 #else
 
-	boost::shared_ptr<VSTPlugin> vp;
+	boost::shared_ptr<WindowsVSTPlugin> vp;
 
-	if ((vp = boost::dynamic_pointer_cast<VSTPlugin> (insert->plugin())) == 0) {
+	if ((vp = boost::dynamic_pointer_cast<WindowsVSTPlugin> (insert->plugin())) == 0) {
 		error << _("unknown type of editor-supplying plugin (note: no VST support in this version of ardour)")
 			      << endmsg;
 		throw failed_constructor ();
 	} else {
-		VSTPluginUI* vpu = new VSTPluginUI (insert, vp);
+		WindowsVSTPluginUI* vpu = new WindowsVSTPluginUI (insert, vp);
 
 		_pluginui = vpu;
 		_pluginui->KeyboardFocused.connect (sigc::mem_fun (*this, &PluginUIWindow::keyboard_focused));

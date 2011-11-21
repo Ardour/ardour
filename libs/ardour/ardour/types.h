@@ -462,7 +462,7 @@ namespace ARDOUR {
 		AudioUnit,
 		LADSPA,
 		LV2,
-		VST,
+		Windows_VST,
 		LXVST,
 	};
 

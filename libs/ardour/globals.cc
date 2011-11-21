@@ -29,7 +29,7 @@
 #include <fcntl.h>
 #include <errno.h>
 
-#ifdef VST_SUPPORT
+#ifdef WINDOWS_VST_SUPPORT
 #include <fst.h>
 #endif
 
@@ -241,7 +241,7 @@ lotsa_files_please ()
 }
 
 int
-ARDOUR::init (bool use_vst, bool try_optimization)
+ARDOUR::init (bool use_windows_vst, bool try_optimization)
 {
 	if (!Glib::thread_supported()) {
 		Glib::thread_init();
@@ -293,7 +293,7 @@ ARDOUR::init (bool use_vst, bool try_optimization)
 		return -1;
 	}
 
-	Config->set_use_vst (use_vst);
+	Config->set_use_windows_vst (use_windows_vst);
 #ifdef LXVST_SUPPORT
 	Config->set_use_lxvst(true);
 #endif
@@ -301,8 +301,8 @@ ARDOUR::init (bool use_vst, bool try_optimization)
 	Profile = new RuntimeProfile;
 
 
-#ifdef VST_SUPPORT
-	if (Config->get_use_vst() && fst_init (0)) {
+#ifdef WINDOWS_VST_SUPPORT
+	if (Config->get_use_windows_vst() && fst_init (0)) {
 		return -1;
 	}
 #endif
@@ -386,7 +386,7 @@ ARDOUR::cleanup ()
 	delete Library;
 	lrdf_cleanup ();
 	delete &ControlProtocolManager::instance();
-#ifdef VST_SUPPORT
+#ifdef WINDOWS_VST_SUPPORT
 	fst_exit ();
 #endif
 

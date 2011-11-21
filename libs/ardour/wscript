@@ -383,10 +383,10 @@ def build(bld):
         if bld.is_defined('HAVE_SUIL'):
             obj.uselib += ['SUIL']
 
-    if bld.is_defined('VST_SUPPORT'):
-        obj.source += [ 'vst_plugin.cc', 'session_vst.cc' ]
+    if bld.is_defined('WINDOWS_VST_SUPPORT'):
+        obj.source += [ 'windows_vst_plugin.cc', 'session_vst.cc' ]
         obj.includes += [ '../fst' ]
-        obj.defines += [ 'VST_SUPPORT' ]
+        obj.defines += [ 'WINDOWS_VST_SUPPORT' ]
 
     if bld.is_defined('LXVST_SUPPORT'):
         obj.source += [ 'lxvst_plugin.cc', 'session_lxvst.cc', 'vstfx.cc', 'vstfxinfofile.cc' ]

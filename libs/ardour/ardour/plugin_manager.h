@@ -43,7 +43,7 @@ class PluginManager : public boost::noncopyable {
 
 	~PluginManager ();
 
-	ARDOUR::PluginInfoList &vst_plugin_info ();
+	ARDOUR::PluginInfoList &windows_vst_plugin_info ();
 	ARDOUR::PluginInfoList &lxvst_plugin_info ();
 	ARDOUR::PluginInfoList &ladspa_plugin_info ();
 	ARDOUR::PluginInfoList &lv2_plugin_info ();
@@ -52,7 +52,7 @@ class PluginManager : public boost::noncopyable {
 	void refresh ();
 
 	int add_ladspa_directory (std::string dirpath);
-	int add_vst_directory (std::string dirpath);
+	int add_windows_vst_directory (std::string dirpath);
 	int add_lxvst_directory (std::string dirpath);
 
 	enum PluginStatusType {
@@ -95,7 +95,7 @@ class PluginManager : public boost::noncopyable {
 	PluginStatusList statuses;
 
 	ARDOUR::PluginInfoList  _empty_plugin_info;
-	ARDOUR::PluginInfoList* _vst_plugin_info;
+	ARDOUR::PluginInfoList* _windows_vst_plugin_info;
 	ARDOUR::PluginInfoList*	_lxvst_plugin_info;
 	ARDOUR::PluginInfoList* _ladspa_plugin_info;
 	ARDOUR::PluginInfoList* _lv2_plugin_info;
@@ -104,16 +104,16 @@ class PluginManager : public boost::noncopyable {
 	std::map<uint32_t, std::string> rdf_type;
 
 	std::string ladspa_path;
-	std::string vst_path;
+	std::string windows_vst_path;
 	std::string lxvst_path;
 
 	void ladspa_refresh ();
-	void vst_refresh ();
+	void windows_vst_refresh ();
 	void lxvst_refresh ();
 
 	void add_lrdf_data (const std::string &path);
 	void add_ladspa_presets ();
-	void add_vst_presets ();
+	void add_windows_vst_presets ();
 	void add_lxvst_presets ();
 	void add_presets (std::string domain);
 
@@ -121,8 +121,8 @@ class PluginManager : public boost::noncopyable {
 
 	void lv2_refresh ();
 
-	int vst_discover_from_path (std::string path);
-	int vst_discover (std::string path);
+	int windows_vst_discover_from_path (std::string path);
+	int windows_vst_discover (std::string path);
 	
 	int lxvst_discover_from_path (std::string path);
 	int lxvst_discover (std::string path);

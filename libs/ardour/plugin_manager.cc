@@ -30,11 +30,11 @@
 #include <cstdlib>
 #include <fstream>
 
-#ifdef VST_SUPPORT
+#ifdef WINDOWS_VST_SUPPORT
 #include <fst.h>
 #include "pbd/basename.h"
 #include <cstring>
-#endif // VST_SUPPORT
+#endif // WINDOWS_VST_SUPPORT
 
 #ifdef LXVST_SUPPORT
 #include <ardour/vstfx.h>
@@ -59,8 +59,8 @@
 #include "ardour/lv2_plugin.h"
 #endif
 
-#ifdef VST_SUPPORT
-#include "ardour/vst_plugin.h"
+#ifdef WINDOWS_VST_SUPPORT
+#include "ardour/windows_vst_plugin.h"
 #endif
 
 #ifdef LXVST_SUPPORT
@@ -93,7 +93,7 @@ PluginManager::instance()
 }
 
 PluginManager::PluginManager ()
-	: _vst_plugin_info(0)
+	: _windows_vst_plugin_info(0)
 	, _lxvst_plugin_info(0)
 	, _ladspa_plugin_info(0)
 	, _lv2_plugin_info(0)
@@ -114,11 +114,11 @@ PluginManager::PluginManager ()
 
 	add_lrdf_data(lrdf_path);
 	add_ladspa_presets();
-#ifdef VST_SUPPORT
-	if (Config->get_use_vst()) {
-		add_vst_presets();
+#ifdef WINDOWS_VST_SUPPORT
+	if (Config->get_use_windows_vst ()) {
+		add_windows_vst_presets ();
 	}
-#endif /* VST_SUPPORT */
+#endif /* WINDOWS_VST_SUPPORT */
 
 #ifdef LXVST_SUPPORT
 	if (Config->get_use_lxvst()) {
@@ -131,9 +131,9 @@ PluginManager::PluginManager ()
 	}
 
 	if ((s = getenv ("VST_PATH"))) {
-		vst_path = s;
+		windows_vst_path = s;
 	} else if ((s = getenv ("VST_PLUGINS"))) {
-		vst_path = s;
+		windows_vst_path = s;
 	}
 
 	if ((s = getenv ("LXVST_PATH"))) {
@@ -176,11 +176,11 @@ PluginManager::refresh ()
 #ifdef LV2_SUPPORT
 	lv2_refresh ();
 #endif
-#ifdef VST_SUPPORT
-	if (Config->get_use_vst()) {
-		vst_refresh ();
+#ifdef WINDOWS_VST_SUPPORT
+	if (Config->get_use_windows_vst()) {
+		windows_vst_refresh ();
 	}
-#endif // VST_SUPPORT
+#endif // WINDOWS_VST_SUPPORT
 
 #ifdef LXVST_SUPPORT
 	if(Config->get_use_lxvst()) {
@@ -300,9 +300,9 @@ PluginManager::add_ladspa_presets()
 }
 
 void
-PluginManager::add_vst_presets()
+PluginManager::add_windows_vst_presets()
 {
-	add_presets ("vst");
+	add_presets ("windows-vst");
 }
 
 void
@@ -526,35 +526,36 @@ PluginManager::au_refresh ()
 
 #endif
 
-#ifdef VST_SUPPORT
+#ifdef WINDOWS_VST_SUPPORT
 
 void
-PluginManager::vst_refresh ()
+PluginManager::windows_vst_refresh ()
 {
-	if (_vst_plugin_info)
-		_vst_plugin_info->clear ();
-	else
-		_vst_plugin_info = new ARDOUR::PluginInfoList();
-
-	if (vst_path.length() == 0) {
-		vst_path = "/usr/local/lib/vst:/usr/lib/vst";
+	if (_windows_vst_plugin_info) {
+		_windows_vst_plugin_info->clear ();
+	} else {
+		_windows_vst_plugin_info = new ARDOUR::PluginInfoList();
 	}
 
-	vst_discover_from_path (vst_path);
+	if (windows_vst_path.length() == 0) {
+		windows_vst_path = "/usr/local/lib/vst:/usr/lib/vst";
+	}
+
+	windows_vst_discover_from_path (windows_vst_path);
 }
 
 int
-PluginManager::add_vst_directory (string path)
+PluginManager::add_windows_vst_directory (string path)
 {
-	if (vst_discover_from_path (path) == 0) {
-		vst_path += ':';
-		vst_path += path;
+	if (windows_vst_discover_from_path (path) == 0) {
+		windows_vst_path += ':';
+		windows_vst_path += path;
 		return 0;
 	}
 	return -1;
 }
 
-static bool vst_filter (const string& str, void *arg)
+static bool windows_vst_filter (const string& str, void *arg)
 {
 	/* Not a dotfile, has a prefix before a period, suffix is "dll" */
 
@@ -562,20 +563,20 @@ static bool vst_filter (const string& str, void *arg)
 }
 
 int
-PluginManager::vst_discover_from_path (string path)
+PluginManager::windows_vst_discover_from_path (string path)
 {
 	PathScanner scanner;
 	vector<string *> *plugin_objects;
 	vector<string *>::iterator x;
 	int ret = 0;
 
-	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("detecting VST plugins along %1\n", path));
+	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("detecting Windows VST plugins along %1\n", path));
 
-	plugin_objects = scanner (vst_path, vst_filter, 0, false, true);
+	plugin_objects = scanner (windows_vst_path, windows_vst_filter, 0, false, true);
 
 	if (plugin_objects) {
 		for (x = plugin_objects->begin(); x != plugin_objects->end (); ++x) {
-			vst_discover (**x);
+			windows_vst_discover (**x);
 		}
 	}
 
@@ -584,13 +585,13 @@ PluginManager::vst_discover_from_path (string path)
 }
 
 int
-PluginManager::vst_discover (string path)
+PluginManager::windows_vst_discover (string path)
 {
 	FSTInfo* finfo;
 	char buf[32];
 
 	if ((finfo = fst_get_info (const_cast<char *> (path.c_str()))) == 0) {
-		warning << "Cannot get VST information from " << path << endmsg;
+		warning << "Cannot get Windows VST information from " << path << endmsg;
 		return -1;
 	}
 
@@ -600,7 +601,7 @@ PluginManager::vst_discover (string path)
 			<< endl;
 	}
 
-	PluginInfoPtr info(new VSTPluginInfo);
+	PluginInfoPtr info (new WindowsVSTPluginInfo);
 
 	/* what a joke freeware VST is */
 
@@ -620,15 +621,15 @@ PluginManager::vst_discover (string path)
 	info->n_inputs.set_audio (finfo->numInputs);
 	info->n_outputs.set_audio (finfo->numOutputs);
 	info->n_inputs.set_midi (finfo->wantMidi ? 1 : 0);
-	info->type = ARDOUR::VST;
+	info->type = ARDOUR::Windows_VST;
 
-	_vst_plugin_info->push_back (info);
+	_windows_vst_plugin_info->push_back (info);
 	fst_free_info (finfo);
 
 	return 0;
 }
 
-#endif // VST_SUPPORT
+#endif // WINDOWS_VST_SUPPORT
 
 #ifdef LXVST_SUPPORT
 
@@ -786,8 +787,8 @@ PluginManager::save_statuses ()
 		case LV2:
 			ofs << "LV2";
 			break;
-		case VST:
-			ofs << "VST";
+		case Windows_VST:
+			ofs << "Windows-VST";
 			break;
 		case LXVST:
 			ofs << "LXVST";
@@ -874,8 +875,8 @@ PluginManager::load_statuses ()
 			type = AudioUnit;
 		} else if (stype == "LV2") {
 			type = LV2;
-		} else if (stype == "VST") {
-			type = VST;
+		} else if (stype == "Windows-VST") {
+			type = Windows_VST;
 		} else if (stype == "LXVST") {
 			type = LXVST;
 		} else {
@@ -906,12 +907,13 @@ PluginManager::set_status (PluginType t, string id, PluginStatusType status)
 }
 
 ARDOUR::PluginInfoList&
-PluginManager::vst_plugin_info ()
+PluginManager::windows_vst_plugin_info ()
 {
-#ifdef VST_SUPPORT
-	if (!_vst_plugin_info)
-		vst_refresh();
-	return *_vst_plugin_info;
+#ifdef WINDOWS_VST_SUPPORT
+	if (!_windows_vst_plugin_info) {
+		windows_vst_refresh ();
+	}
+	return *_windows_vst_plugin_info;
 #else
 	return _empty_plugin_info;
 #endif

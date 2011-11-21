@@ -42,8 +42,8 @@
 #include "ardour/lv2_plugin.h"
 #endif
 
-#ifdef VST_SUPPORT
-#include "ardour/vst_plugin.h"
+#ifdef WINDOWS_VST_SUPPORT
+#include "ardour/windows_vst_plugin.h"
 #endif
 
 #ifdef LXVST_SUPPORT
@@ -609,8 +609,8 @@ PluginInsert::plugin_factory (boost::shared_ptr<Plugin> other)
 #ifdef LV2_SUPPORT
 	boost::shared_ptr<LV2Plugin> lv2p;
 #endif
-#ifdef VST_SUPPORT
-	boost::shared_ptr<VSTPlugin> vp;
+#ifdef WINDOWS_VST_SUPPORT
+	boost::shared_ptr<WindowsVSTPlugin> vp;
 #endif
 #ifdef LXVST_SUPPORT
 	boost::shared_ptr<LXVSTPlugin> lxvp;
@@ -625,9 +625,9 @@ PluginInsert::plugin_factory (boost::shared_ptr<Plugin> other)
 	} else if ((lv2p = boost::dynamic_pointer_cast<LV2Plugin> (other)) != 0) {
 		return boost::shared_ptr<Plugin> (new LV2Plugin (*lv2p));
 #endif
-#ifdef VST_SUPPORT
-	} else if ((vp = boost::dynamic_pointer_cast<VSTPlugin> (other)) != 0) {
-		return boost::shared_ptr<Plugin> (new VSTPlugin (*vp));
+#ifdef WINDOWS_VST_SUPPORT
+	} else if ((vp = boost::dynamic_pointer_cast<WindowsVSTPlugin> (other)) != 0) {
+		return boost::shared_ptr<Plugin> (new WindowsVSTPlugin (*vp));
 #endif
 #ifdef LXVST_SUPPORT
 	} else if ((lxvp = boost::dynamic_pointer_cast<LXVSTPlugin> (other)) != 0) {
@@ -909,8 +909,8 @@ PluginInsert::set_state(const XMLNode& node, int version)
 		type = ARDOUR::LADSPA;
 	} else if (prop->value() == X_("lv2")) {
 		type = ARDOUR::LV2;
-	} else if (prop->value() == X_("vst")) {
-		type = ARDOUR::VST;
+	} else if (prop->value() == X_("windows-vst")) {
+		type = ARDOUR::Windows_VST;
 	} else if (prop->value() == X_("lxvst")) {
 		type = ARDOUR::LXVST;
 	} else if (prop->value() == X_("audiounit")) {
@@ -925,11 +925,11 @@ PluginInsert::set_state(const XMLNode& node, int version)
 	prop = node.property ("unique-id");
 
 	if (prop == 0) {
-#ifdef VST_SUPPORT
+#ifdef WINDOWS_VST_SUPPORT
 		/* older sessions contain VST plugins with only an "id" field.
 		 */
 
-		if (type == ARDOUR::VST) {
+		if (type == ARDOUR::Windows_VST) {
 			prop = node.property ("id");
 		}
 #endif

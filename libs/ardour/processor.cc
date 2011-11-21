@@ -38,8 +38,8 @@
 #include "ardour/port_insert.h"
 #include "ardour/plugin_insert.h"
 
-#ifdef VST_SUPPORT
-#include "ardour/vst_plugin.h"
+#ifdef WINDOWS_VST_SUPPORT
+#include "ardour/windows_vst_plugin.h"
 #endif
 
 #ifdef AUDIOUNIT_SUPPORT

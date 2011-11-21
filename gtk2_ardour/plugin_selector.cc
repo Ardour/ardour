@@ -238,7 +238,7 @@ PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& 
 			case LV2:
 				compstr = X_("LV2");
 				break;
-			case VST:
+			case Windows_VST:
 				compstr = X_("VST");
 				break;
 			case LXVST:
@@ -351,14 +351,14 @@ PluginSelector::lv2_refiller (const std::string& filterstr)
 }
 
 void
-#ifdef VST_SUPPORT
+#ifdef WINDOWS_VST_SUPPORT
 PluginSelector::vst_refiller (const std::string& filterstr)
 #else
 PluginSelector::vst_refiller (const std::string&)
 #endif
 {
-#ifdef VST_SUPPORT
-	refiller (manager.vst_plugin_info(), filterstr, "VST");
+#ifdef WINDOWS_VST_SUPPORT
+	refiller (manager.windows_vst_plugin_info(), filterstr, "VST");
 #endif
 }
 
@@ -599,8 +599,8 @@ PluginSelector::build_plugin_menu ()
 	PluginInfoList all_plugs;
 
 	all_plugs.insert (all_plugs.end(), manager.ladspa_plugin_info().begin(), manager.ladspa_plugin_info().end());
-#ifdef VST_SUPPORT
-	all_plugs.insert (all_plugs.end(), manager.vst_plugin_info().begin(), manager.vst_plugin_info().end());
+#ifdef WINDOWS_VST_SUPPORT
+	all_plugs.insert (all_plugs.end(), manager.windows_vst_plugin_info().begin(), manager.windows_vst_plugin_info().end());
 #endif
 #ifdef LXVST_SUPPORT
 	all_plugs.insert (all_plugs.end(), manager.lxvst_plugin_info().begin(), manager.lxvst_plugin_info().end());

@@ -66,7 +66,7 @@ print_help (const char *execname)
 	     << _("  -N, --new session-name      Create a new session from the command line\n")
 	     << _("  -O, --no-hw-optimizations   Disable h/w specific optimizations\n")
 	     << _("  -S, --sync                  Draw the gui synchronously \n")
-#ifdef VST_SUPPORT
+#ifdef WINDOWS_VST_SUPPORT
 	     << _("  -V, --novst                 Do not use VST support\n")
 #endif
 	     << _("  -E, --save <file>           Load the specified session, save it to <file> and then quit\n")
@@ -184,9 +184,9 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 			break;
 
 		case 'V':
-#ifdef VST_SUPPORT
+#ifdef WINDOWS_VST_SUPPORT
 			use_vst = false;
-#endif /* VST_SUPPORT */
+#endif /* WINDOWS_VST_SUPPORT */
 			break;
 
 		case 'c':

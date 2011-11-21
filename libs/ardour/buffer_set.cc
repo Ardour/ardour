@@ -37,7 +37,7 @@
 #include "ardour/lv2_plugin.h"
 #include "ardour/lv2_event_buffer.h"
 #endif
-#ifdef VST_SUPPORT
+#ifdef WINDOWS_VST_SUPPORT
 #include "vestige/aeffectx.h"
 #endif
 
@@ -81,7 +81,7 @@ BufferSet::clear()
 	_count.reset();
 	_available.reset();
 
-#if defined VST_SUPPORT || defined LXVST_SUPPORT 
+#if defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT 
 	for (VSTBuffers::iterator i = _vst_buffers.begin(); i != _vst_buffers.end(); ++i) {
 		delete *i;
 	}
@@ -197,7 +197,7 @@ BufferSet::ensure_buffers(DataType type, size_t num_buffers, size_t buffer_capac
 	}
 #endif
 
-#if defined VST_SUPPORT || defined LXVST_SUPPORT
+#if defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT
 	// As above but for VST
 	if (type == DataType::MIDI) {
 		while (_vst_buffers.size() < _buffers[type].size()) {
@@ -304,7 +304,7 @@ BufferSet::flush_lv2_midi(bool input, size_t i)
 
 #endif /* LV2_SUPPORT */
 
-#if defined VST_SUPPORT || defined LXVST_SUPPORT
+#if defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT
 
 VstEvents*
 BufferSet::get_vst_midi (size_t b)
@@ -381,7 +381,7 @@ BufferSet::VSTBuffer::push_back (Evoral::MIDIEvent<framepos_t> const & ev)
 	_events->numEvents++;
 }
 
-#endif /* VST_SUPPORT */
+#endif /* WINDOWS_VST_SUPPORT */
 
 /** Copy buffers of one type from `in' to this BufferSet */
 void

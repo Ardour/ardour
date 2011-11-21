@@ -25,7 +25,7 @@
 
 #include "ardour/session.h"
 #include "ardour/tempo.h"
-#include "ardour/vst_plugin.h"
+#include "ardour/windows_vst_plugin.h"
 
 #include "i18n.h"
 
@@ -48,7 +48,7 @@ long Session::vst_callback (AEffect* effect,
 			    float opt)
 {
 	static VstTimeInfo _timeInfo;
-	VSTPlugin* plug;
+	WindowsVSTPlugin* plug;
 	Session* session;
 
 	if (debug_callbacks < 0) {
@@ -56,7 +56,7 @@ long Session::vst_callback (AEffect* effect,
 	}
 
 	if (effect && effect->user) {
-	        plug = (VSTPlugin*) (effect->user);
+	        plug = (WindowsVSTPlugin*) (effect->user);
 		session = &plug->session();
 		SHOW_CALLBACK ("am callback 0x%x, opcode = %ld, plugin = \"%s\" ", (int) pthread_self(), opcode, plug->name());
 	} else {

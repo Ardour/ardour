@@ -244,9 +244,9 @@ def set_compiler_flags (conf,opt):
     # no VST on x86_64
     #
 
-    if conf.env['build_target'] == 'x86_64' and opt.vst:
+    if conf.env['build_target'] == 'x86_64' and opt.windows_vst:
         print("\n\n==================================================")
-        print("You cannot use VST plugins with a 64 bit host. Please run waf with --vst=0")
+        print("You cannot use VST plugins with a 64 bit host. Please run waf with --windows-vst=0")
         print("\nIt is theoretically possible to build a 32 bit host on a 64 bit system.")
         print("However, this is tricky and not recommended for beginners.")
         sys.exit (-1)
@@ -389,8 +389,8 @@ def options(opt):
                     help='Compile as universal binary (requires that external libraries are universal)')
     opt.add_option('--versioned', action='store_true', default=False, dest='versioned',
                     help='Add revision information to executable name inside the build directory')
-    opt.add_option('--vst', action='store_true', default=False, dest='vst',
-                    help='Compile with support for VST')
+    opt.add_option('--windows-vst', action='store_true', default=False, dest='windows_vst',
+                    help='Compile with support for Windows VST')
     opt.add_option('--wiimote', action='store_true', default=False, dest='wiimote',
                     help='Build the wiimote control surface')
     opt.add_option('--windows-key', type='string', action='store', dest='windows_key', default='Mod4><Super',
@@ -550,9 +550,9 @@ def configure(conf):
         conf.env['BUILD_TESTS'] = opts.build_tests
     if opts.tranzport:
         conf.env['TRANZPORT'] = 1
-    if opts.vst:
-        conf.define('VST_SUPPORT', 1)
-        conf.env['VST_SUPPORT'] = True
+    if opts.windows_vst:
+        conf.define('WINDOWS_VST_SUPPORT', 1)
+        conf.env['WINDOWS_VST_SUPPORT'] = True
         conf.env.append_value('CFLAGS', '-I' + Options.options.wine_include)
         conf.env.append_value('CXXFLAGS', '-I' + Options.options.wine_include)
         autowaf.check_header(conf, 'cxx', 'windows.h', mandatory = True)
@@ -614,7 +614,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('Tranzport',             opts.tranzport)
     write_config_text('Unit tests',            conf.env['BUILD_TESTS'])
     write_config_text('Universal binary',      opts.universal)
-    write_config_text('VST support',           opts.vst)
+    write_config_text('Windows VST support',   opts.windows_vst)
     write_config_text('Wiimote support',       opts.wiimote)
     write_config_text('Windows key',           opts.windows_key)
 

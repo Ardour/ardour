@@ -306,7 +306,8 @@ setup_enum_writer ()
 
 	REGISTER_ENUM (AudioUnit);
 	REGISTER_ENUM (LADSPA);
-	REGISTER_ENUM (VST);
+	REGISTER_ENUM (Windows_VST);
+	REGISTER_ENUM (LXVST);
 	REGISTER (_PluginType);
 
 	REGISTER_ENUM (MTC);
