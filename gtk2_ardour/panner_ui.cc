@@ -144,7 +144,10 @@ PannerUI::build_astate_menu ()
 		pan_astate_menu->items().clear ();
 	}
 
-	pan_astate_menu->items().push_back (MenuElem (_("Manual"), sigc::bind (
+	/** TRANSLATORS: this is `Manual' in the sense of automation not being played,
+	    so that changes to pan must be done by hand.
+	*/
+	pan_astate_menu->items().push_back (MenuElem (S_("Automation|Manual"), sigc::bind (
 			sigc::mem_fun (_panner.get(), &Panner::set_automation_state),
 			(AutoState) Off)));
 	pan_astate_menu->items().push_back (MenuElem (_("Play"), sigc::bind (

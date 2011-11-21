@@ -204,7 +204,7 @@ GainMeterBase::set_controls (boost::shared_ptr<Route> r,
 
 		gain_astate_menu.items().clear ();
 
-		gain_astate_menu.items().push_back (MenuElem (_("Manual"),
+		gain_astate_menu.items().push_back (MenuElem (S_("Automation|Manual"),
 							      sigc::bind (sigc::mem_fun (*(amp.get()), &Automatable::set_parameter_automation_state),
 								    Evoral::Parameter(GainAutomation), (AutoState) Off)));
 		gain_astate_menu.items().push_back (MenuElem (_("Play"),

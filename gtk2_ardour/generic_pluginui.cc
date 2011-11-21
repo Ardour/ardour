@@ -445,7 +445,7 @@ GenericPluginUI::automation_state_changed (ControlUI* cui)
 	switch (insert->get_parameter_automation_state (cui->parameter())
 			& (Off|Play|Touch|Write)) {
 	case Off:
-		cui->automate_button.set_label (_("Manual"));
+		cui->automate_button.set_label (S_("Automation|Manual"));
 		break;
 	case Play:
 		cui->automate_button.set_label (_("Play"));
@@ -696,7 +696,7 @@ GenericPluginUI::astate_clicked (ControlUI* cui, uint32_t /*port*/)
 	MenuList& items (automation_menu->items());
 
 	items.clear ();
-	items.push_back (MenuElem (_("Manual"),
+	items.push_back (MenuElem (S_("Automation|Manual"),
 				   sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::set_automation_state), (AutoState) Off, cui)));
 	items.push_back (MenuElem (_("Play"),
 				   sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::set_automation_state), (AutoState) Play, cui)));

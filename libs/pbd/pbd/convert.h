@@ -54,6 +54,9 @@ to_string (T t, std::ios_base & (*f)(std::ios_base&))
 	return oss.str();
 }
 
+const char *
+sgettext (const char *, const char *);
+
 } //namespace PBD
 
 #endif /* __pbd_convert_h__ */

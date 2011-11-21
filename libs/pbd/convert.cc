@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <cstdio>
 #include <ctype.h>
+#include <cstring>
 #ifndef __STDC_FORMAT_MACROS
 #define __STDC_FORMAT_MACROS
 #endif
@@ -325,5 +326,19 @@ strings_equal_ignore_case (const string& a, const string& b)
 	return false;
 }
 
+/** A wrapper for dgettext that takes a msgid of the form Context|Text.
+ *  If Context|Text is translated, the translation is returned, otherwise
+ *  just Text is returned.  Useful for getting translations of words or phrases
+ *  that have different meanings in different contexts.
+ */
+const char *
+sgettext (const char* domain_name, const char* msgid)
+{
+	const char * msgval = dgettext (domain_name, msgid);
+	if (msgval == msgid) {
+		msgval = strrchr (msgid, '|') + 1;
+	}
+	return msgval;
+}
 
 } // namespace PBD
