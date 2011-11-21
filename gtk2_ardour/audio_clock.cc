@@ -70,6 +70,7 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	, _off (false)
 	, _fixed_width (true)
 	, layout_x_offset (0)
+	, em_width (0)
 	, ops_menu (0)
 	, editing_attr (0)
 	, foreground_attr (0)
@@ -171,6 +172,17 @@ AudioClock::set_font ()
 	info_attributes.change (*font_attr);
 	
 	delete font_attr;
+
+	/* get the figure width for the font. This doesn't have to super
+	 * accurate since we only use it to measure the (roughly 1 character)
+	 * offset from the position Pango tells us for the "cursor"
+	 */
+
+	Glib::RefPtr<Pango::Layout> tmp = Pango::Layout::create (get_pango_context());
+	int ignore_height;
+
+	tmp->set_text ("8");
+	tmp->get_pixel_size (em_width, ignore_height);
 }
 
 void
@@ -332,8 +344,6 @@ AudioClock::render (cairo_t* cr)
 	}
 
 	if (editing) {
-		const double cursor_width = 12; /* need em width here, not 16 */
-
 		if (!insert_map.empty()) {
 
 
@@ -352,12 +362,11 @@ AudioClock::render (cairo_t* cr)
 				cairo_set_source_rgba (cr, cursor_r, cursor_g, cursor_b, cursor_a);
 				if (!_fixed_width) {
 					cairo_rectangle (cr, 
-							 layout_x_offset + cursor.get_x()/PANGO_SCALE + cursor_width,
-							 0,
+							 min (get_width() - 2.0, (double) cursor.get_x()/PANGO_SCALE + em_width), 0,
 							 2.0, cursor.get_height()/PANGO_SCALE);
 				} else {
 					cairo_rectangle (cr, 
-							 layout_x_offset + cursor.get_x()/PANGO_SCALE + cursor_width,
+							 min (get_width() - 2.0, (double) layout_x_offset + cursor.get_x()/PANGO_SCALE + em_width),
 							 (upper_height - layout_height)/2.0, 
 							 2.0, cursor.get_height()/PANGO_SCALE);
 				}
@@ -404,7 +413,6 @@ AudioClock::on_size_allocate (Gtk::Allocation& alloc)
 		/* left justify */
 		layout_x_offset = 0;
 	}
-
 }
 
 void

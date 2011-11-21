@@ -98,6 +98,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	bool             _off;
 	bool             _fixed_width;
 	int              layout_x_offset;
+	int              em_width;
 
 	Gtk::Menu  *ops_menu;
 
