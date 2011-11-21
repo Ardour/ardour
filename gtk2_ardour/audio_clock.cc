@@ -771,6 +771,35 @@ AudioClock::parse_as_distance (const std::string& instr)
 void
 AudioClock::end_edit_relative (bool add)
 {
+	bool ok = true;
+	
+	switch (_mode) {
+	case Timecode:
+		ok = timecode_validate_edit (edit_string);
+		break;
+		
+	case BBT:
+		ok = bbt_validate_edit (edit_string);
+		break;
+		
+	case MinSec:
+		ok = minsec_validate_edit (edit_string);
+		break;
+		
+	case Frames:
+		break;
+	}
+		
+	if (!ok) {
+		edit_string = pre_edit_string;
+		input_string.clear ();
+		_layout->set_text (edit_string);
+		show_edit_status (0);
+		/* edit attributes remain in use */
+		queue_draw ();
+		return;
+	}
+
 	framecnt_t frames = parse_as_distance (input_string);
 
 	editing = false;
