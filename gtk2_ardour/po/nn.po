@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtk2_ardour 3.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-11-21 16:11-0500\n"
+"POT-Creation-Date: 2011-11-21 17:19-0500\n"
 "PO-Revision-Date: 2011-09-13 20:45+0100\n"
 "Last-Translator: Eivind Ødegård <meinmycell-lists@yahoo.no>\n"
 "Language-Team:  <i18n-nn@lister.ping.uio.no>\n"
@@ -1609,6 +1609,11 @@ msgstr "Om"
 msgid "Chat"
 msgstr "Prat"
 
+#: ardour_ui_ed.cc:250
+#, fuzzy
+msgid "Help|Manual"
+msgstr "Manuell"
+
 #: ardour_ui_ed.cc:251
 msgid "Reference"
 msgstr "Referanse"
@@ -1989,6 +1994,13 @@ msgstr "automasjonstilstand"
 #: automation_time_axis.cc:146
 msgid "hide track"
 msgstr "gøym spor"
+
+#: automation_time_axis.cc:252 automation_time_axis.cc:304
+#: automation_time_axis.cc:504 gain_meter.cc:207 generic_pluginui.cc:448
+#: generic_pluginui.cc:699 panner_ui.cc:150
+#, fuzzy
+msgid "Automation|Manual"
+msgstr "Automasjon"
 
 #: automation_time_axis.cc:254 automation_time_axis.cc:315
 #: automation_time_axis.cc:509 editor.cc:1914 editor.cc:1991
@@ -10648,9 +10660,6 @@ msgstr "VerboseCanvasCursor"
 
 #~ msgid "Does %1 control the time?"
 #~ msgstr "Kontrollerer %1 klokka?"
-
-#~ msgid "Manual"
-#~ msgstr "Manuell"
 
 #~ msgid "EXT"
 #~ msgstr "EKST"

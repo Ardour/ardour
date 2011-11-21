@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtk2_ardour\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-11-21 16:11-0500\n"
+"POT-Creation-Date: 2011-11-21 17:19-0500\n"
 "PO-Revision-Date: 2008-04-10 10:47+0100\n"
 "Last-Translator: Piotr Zaryk <pzaryk@gmail.com>\n"
 "Language-Team: Polish <pzaryk@gmail.com>\n"
@@ -1607,6 +1607,11 @@ msgstr "O programie"
 msgid "Chat"
 msgstr ""
 
+#: ardour_ui_ed.cc:250
+#, fuzzy
+msgid "Help|Manual"
+msgstr "Ręcznie"
+
 #: ardour_ui_ed.cc:251
 #, fuzzy
 msgid "Reference"
@@ -2008,6 +2013,13 @@ msgstr "stan automatyki"
 #: automation_time_axis.cc:146
 msgid "hide track"
 msgstr "ukryj ścieżkę"
+
+#: automation_time_axis.cc:252 automation_time_axis.cc:304
+#: automation_time_axis.cc:504 gain_meter.cc:207 generic_pluginui.cc:448
+#: generic_pluginui.cc:699 panner_ui.cc:150
+#, fuzzy
+msgid "Automation|Manual"
+msgstr "Automatyka"
 
 #: automation_time_axis.cc:254 automation_time_axis.cc:315
 #: automation_time_axis.cc:509 editor.cc:1914 editor.cc:1991
@@ -11181,9 +11193,6 @@ msgstr ""
 #, fuzzy
 #~ msgid "Does %1 control the time?"
 #~ msgstr "Określa, czy Ardour kontroluje czas."
-
-#~ msgid "Manual"
-#~ msgstr "Ręcznie"
 
 #, fuzzy
 #~ msgid "External"

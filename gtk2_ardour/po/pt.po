@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ardour 0.688.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-11-21 16:11-0500\n"
+"POT-Creation-Date: 2011-11-21 17:19-0500\n"
 "PO-Revision-Date: 2005-08-15 21:50-0000\n"
 "Last-Translator: Chris Ross, Alexander Franca & Leandro Marco\n"
 "Language-Team: Portuguese\n"
@@ -1630,6 +1630,10 @@ msgstr "Sobre"
 msgid "Chat"
 msgstr ""
 
+#: ardour_ui_ed.cc:250
+msgid "Help|Manual"
+msgstr ""
+
 #: ardour_ui_ed.cc:251
 msgid "Reference"
 msgstr ""
@@ -2049,6 +2053,13 @@ msgstr "estado do automação"
 #: automation_time_axis.cc:146
 msgid "hide track"
 msgstr "ocultar esta trilha"
+
+#: automation_time_axis.cc:252 automation_time_axis.cc:304
+#: automation_time_axis.cc:504 gain_meter.cc:207 generic_pluginui.cc:448
+#: generic_pluginui.cc:699 panner_ui.cc:150
+#, fuzzy
+msgid "Automation|Manual"
+msgstr "Automação"
 
 #: automation_time_axis.cc:254 automation_time_axis.cc:315
 #: automation_time_axis.cc:509 editor.cc:1914 editor.cc:1991

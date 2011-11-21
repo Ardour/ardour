@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtk2_ardour rev.1702\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-11-21 16:11-0500\n"
+"POT-Creation-Date: 2011-11-21 17:19-0500\n"
 "PO-Revision-Date: 2007-04-15 19:00+0100\n"
 "Last-Translator: Rui Nuno Capela <rncbc@rncbc.org>\n"
 "Language-Team: Portuguese\n"
@@ -1639,6 +1639,10 @@ msgstr "Acerca de"
 msgid "Chat"
 msgstr ""
 
+#: ardour_ui_ed.cc:250
+msgid "Help|Manual"
+msgstr ""
+
 #: ardour_ui_ed.cc:251
 msgid "Reference"
 msgstr ""
@@ -2049,6 +2053,13 @@ msgstr "estado de automatização"
 #: automation_time_axis.cc:146
 msgid "hide track"
 msgstr "esconder faixa"
+
+#: automation_time_axis.cc:252 automation_time_axis.cc:304
+#: automation_time_axis.cc:504 gain_meter.cc:207 generic_pluginui.cc:448
+#: generic_pluginui.cc:699 panner_ui.cc:150
+#, fuzzy
+msgid "Automation|Manual"
+msgstr "Automatização"
 
 #: automation_time_axis.cc:254 automation_time_axis.cc:315
 #: automation_time_axis.cc:509 editor.cc:1914 editor.cc:1991

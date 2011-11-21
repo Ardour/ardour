@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ardour 0.354.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-11-21 16:11-0500\n"
+"POT-Creation-Date: 2011-11-21 17:19-0500\n"
 "PO-Revision-Date: 2011-11-05 12:43+0100\n"
 "Last-Translator: \n"
 "Language-Team: American English <kde-i18n-doc@kde.org>\n"
@@ -1575,6 +1575,11 @@ msgstr "Circa"
 msgid "Chat"
 msgstr ""
 
+#: ardour_ui_ed.cc:250
+#, fuzzy
+msgid "Help|Manual"
+msgstr "Manuale"
+
 #: ardour_ui_ed.cc:251
 msgid "Reference"
 msgstr "Riferimenti"
@@ -1957,6 +1962,13 @@ msgstr "Stato dell'automazione"
 #: automation_time_axis.cc:146
 msgid "hide track"
 msgstr "Nascondi traccia"
+
+#: automation_time_axis.cc:252 automation_time_axis.cc:304
+#: automation_time_axis.cc:504 gain_meter.cc:207 generic_pluginui.cc:448
+#: generic_pluginui.cc:699 panner_ui.cc:150
+#, fuzzy
+msgid "Automation|Manual"
+msgstr "Automazione"
 
 #: automation_time_axis.cc:254 automation_time_axis.cc:315
 #: automation_time_axis.cc:509 editor.cc:1914 editor.cc:1991
@@ -10858,9 +10870,6 @@ msgstr ""
 
 #~ msgid "Does %1 control the time?"
 #~ msgstr "%1 controlla il tempo?"
-
-#~ msgid "Manual"
-#~ msgstr "Manuale"
 
 #~ msgid "External"
 #~ msgstr "Esterno"

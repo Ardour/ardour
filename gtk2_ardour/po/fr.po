@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ardour 2.3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-11-21 16:11-0500\n"
+"POT-Creation-Date: 2011-11-21 17:19-0500\n"
 "PO-Revision-Date: 2011-07-03 19:53+0200\n"
 "Last-Translator: Romain Arnaud <roming22@gmail.com>\n"
 "Language-Team: American English <kde-i18n-doc@kde.org>\n"
@@ -1615,6 +1615,11 @@ msgstr "À propos..."
 msgid "Chat"
 msgstr "Salon de discussion (anglais)"
 
+#: ardour_ui_ed.cc:250
+#, fuzzy
+msgid "Help|Manual"
+msgstr "Manuel"
+
 #: ardour_ui_ed.cc:251
 msgid "Reference"
 msgstr "Référence"
@@ -1999,6 +2004,13 @@ msgstr "état de l'automatisation"
 #: automation_time_axis.cc:146
 msgid "hide track"
 msgstr "cacher la piste"
+
+#: automation_time_axis.cc:252 automation_time_axis.cc:304
+#: automation_time_axis.cc:504 gain_meter.cc:207 generic_pluginui.cc:448
+#: generic_pluginui.cc:699 panner_ui.cc:150
+#, fuzzy
+msgid "Automation|Manual"
+msgstr "Automatisation"
 
 #: automation_time_axis.cc:254 automation_time_axis.cc:315
 #: automation_time_axis.cc:509 editor.cc:1914 editor.cc:1991
@@ -10888,9 +10900,6 @@ msgstr "VerboseCanvasCursor"
 
 #~ msgid "Does %1 control the time?"
 #~ msgstr "Contrôle de l'horloge par %1"
-
-#~ msgid "Manual"
-#~ msgstr "Manuel"
 
 #~ msgid "External"
 #~ msgstr "Externe"

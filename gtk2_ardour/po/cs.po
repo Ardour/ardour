@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtk-ardour 0.347.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-11-21 16:11-0500\n"
+"POT-Creation-Date: 2011-11-21 17:19-0500\n"
 "PO-Revision-Date: 2011-05-08 16:26+0200\n"
 "Last-Translator: Pavel Fric <pavelfric@seznam.cz>\n"
 "Language-Team: Czech <kde-i18n-doc@kde.org>\n"
@@ -1634,6 +1634,11 @@ msgstr "O programu"
 msgid "Chat"
 msgstr "Povídání"
 
+#: ardour_ui_ed.cc:250
+#, fuzzy
+msgid "Help|Manual"
+msgstr "Příručka"
+
 #: ardour_ui_ed.cc:251
 msgid "Reference"
 msgstr "Odkaz"
@@ -2016,6 +2021,13 @@ msgstr "Režim automatizace"
 #: automation_time_axis.cc:146
 msgid "hide track"
 msgstr "Skrýt tuto stopu"
+
+#: automation_time_axis.cc:252 automation_time_axis.cc:304
+#: automation_time_axis.cc:504 gain_meter.cc:207 generic_pluginui.cc:448
+#: generic_pluginui.cc:699 panner_ui.cc:150
+#, fuzzy
+msgid "Automation|Manual"
+msgstr "Automatizace"
 
 #: automation_time_axis.cc:254 automation_time_axis.cc:315
 #: automation_time_axis.cc:509 editor.cc:1914 editor.cc:1991
@@ -10771,9 +10783,6 @@ msgstr "Ukazovátko podrobného plátna"
 
 #~ msgid "Does %1 control the time?"
 #~ msgstr "Ovládá %1 čas?"
-
-#~ msgid "Manual"
-#~ msgstr "Příručka"
 
 #~ msgid "External"
 #~ msgstr "Vnější"

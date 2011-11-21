@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtk-ardour 0.347.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-11-21 16:11-0500\n"
+"POT-Creation-Date: 2011-11-21 17:19-0500\n"
 "PO-Revision-Date: 2011-11-20 23:02+0100\n"
 "Last-Translator: Richard Oax <richard@pagliacciempire.de>\n"
 "Language-Team: German <kde-i18n-de@lists.kde.org>\n"
@@ -1621,6 +1621,11 @@ msgstr "Über Ardour..."
 msgid "Chat"
 msgstr "Chat"
 
+#: ardour_ui_ed.cc:250
+#, fuzzy
+msgid "Help|Manual"
+msgstr "Manuell"
+
 #: ardour_ui_ed.cc:251
 msgid "Reference"
 msgstr "Referenz"
@@ -1997,6 +2002,13 @@ msgstr "Automationsmodus"
 #: automation_time_axis.cc:146
 msgid "hide track"
 msgstr "Diese Spur verbergen"
+
+#: automation_time_axis.cc:252 automation_time_axis.cc:304
+#: automation_time_axis.cc:504 gain_meter.cc:207 generic_pluginui.cc:448
+#: generic_pluginui.cc:699 panner_ui.cc:150
+#, fuzzy
+msgid "Automation|Manual"
+msgstr "Automationen"
 
 #: automation_time_axis.cc:254 automation_time_axis.cc:315
 #: automation_time_axis.cc:509 editor.cc:1914 editor.cc:1991
@@ -10573,9 +10585,6 @@ msgstr "Konnte Icon-Bild für %1 nicht finden"
 #: verbose_cursor.cc:44
 msgid "VerboseCanvasCursor"
 msgstr ""
-
-#~ msgid "Manual"
-#~ msgstr "Manuell"
 
 #~ msgid "EXT"
 #~ msgstr "EXT"
