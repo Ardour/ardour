@@ -203,6 +203,8 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 		}
 	}
 
+	boost::shared_ptr<Processor> processor_by_id (PBD::ID) const;
+
 	boost::shared_ptr<Processor> nth_plugin (uint32_t n);
 	boost::shared_ptr<Processor> nth_send (uint32_t n);
 

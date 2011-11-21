@@ -165,6 +165,10 @@ class Track : public Route, public PublicDiskstream
 
 	boost::shared_ptr<Diskstream> _diskstream;
 	MeterPoint    _saved_meter_point;
+	/** used to keep track of processors that we are deactivating during record,
+	    if `do-not-record-plugins' is enabled.
+	*/
+	std::list<boost::weak_ptr<Processor> > _deactivated_processors;
 	TrackMode     _mode;
 	bool          _needs_butler;
 	MonitorChoice _monitoring;
@@ -223,6 +227,10 @@ private:
 	void diskstream_record_enable_changed ();
 	void diskstream_speed_changed ();
 	void diskstream_alignment_style_changed ();
+
+	void parameter_changed (std::string);
+	void deactivate_visible_processors ();
+	void activate_deactivated_processors ();
 };
 
 }; /* namespace ARDOUR*/

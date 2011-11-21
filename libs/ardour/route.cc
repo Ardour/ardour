@@ -3908,3 +3908,16 @@ Route::maybe_note_meter_position ()
 		}
 	}
 }
+
+boost::shared_ptr<Processor>
+Route::processor_by_id (PBD::ID id) const
+{
+	Glib::RWLock::ReaderLock lm (_processor_lock);
+	for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
+		if ((*i)->id() == id) {
+			return *i;
+		}
+	}
+
+	return boost::shared_ptr<Processor> ();
+}
