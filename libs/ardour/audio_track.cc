@@ -470,9 +470,9 @@ AudioTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_fram
 
 		process_output_buffers (
 			bufs, start_frame, end_frame, nframes,
-			(!_session.get_record_enabled() || !Config->get_do_not_record_plugins()),
 			declick,
-			(!diskstream->record_enabled() && _session.transport_rolling()));
+			(!diskstream->record_enabled() && _session.transport_rolling())
+			);
 
 	} else {
 		/* problem with the diskstream; just be quiet for a bit */

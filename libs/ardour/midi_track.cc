@@ -360,9 +360,10 @@ MidiTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame
 
 		/* final argument: don't waste time with automation if we're recording or we've just stopped (yes it can happen) */
 
-		process_output_buffers (bufs, start_frame, end_frame, nframes,
-					(!_session.get_record_enabled() || !Config->get_do_not_record_plugins()), declick,
-		                        (!diskstream->record_enabled() && !_session.transport_stopped()));
+		process_output_buffers (
+			bufs, start_frame, end_frame, nframes,
+			declick, (!diskstream->record_enabled() && !_session.transport_stopped())
+			);
 	}
 
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {

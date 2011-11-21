@@ -398,8 +398,7 @@ Route::maybe_declick (BufferSet&, framecnt_t, int)
 void
 Route::process_output_buffers (BufferSet& bufs,
 			       framepos_t start_frame, framepos_t end_frame, pframes_t nframes,
-			       bool /*with_processors*/, int declick,
-                               bool gain_automation_ok)
+			       int declick, bool gain_automation_ok)
 {
 	bool monitor = should_monitor ();
 
@@ -548,7 +547,7 @@ Route::passthru (framepos_t start_frame, framepos_t end_frame, pframes_t nframes
 	}
 
 	write_out_of_band_data (bufs, start_frame, end_frame, nframes);
-	process_output_buffers (bufs, start_frame, end_frame, nframes, true, declick, true);
+	process_output_buffers (bufs, start_frame, end_frame, nframes, declick, true);
 }
 
 void
@@ -558,7 +557,7 @@ Route::passthru_silence (framepos_t start_frame, framepos_t end_frame, pframes_t
 
 	bufs.set_count (_input->n_ports());
 	write_out_of_band_data (bufs, start_frame, end_frame, nframes);
-	process_output_buffers (bufs, start_frame, end_frame, nframes, true, declick, false);
+	process_output_buffers (bufs, start_frame, end_frame, nframes, declick, false);
 }
 
 void

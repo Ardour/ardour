@@ -428,7 +428,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 
 	virtual void process_output_buffers (BufferSet& bufs,
 	                                     framepos_t start_frame, framepos_t end_frame,
-	                                     pframes_t nframes, bool with_processors, int declick,
+	                                     pframes_t nframes, int declick,
 	                                     bool gain_automation_ok);
 
 	boost::shared_ptr<IO> _input;
