@@ -7,6 +7,8 @@
   <accelerator action='set-mouse-mode-object-range'/>
   <accelerator action='toggle-internal-edit'/>
   <accelerator action='focus-on-clock'/>
+  <accelerator action='track-solo-toggle'/>
+  <accelerator action='track-mute-toggle'/>
   
   <menubar name='Main' action='MainMenu'>
     <menu name='Session' action='Session'>
