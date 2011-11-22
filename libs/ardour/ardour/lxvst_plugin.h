@@ -31,9 +31,9 @@
 #include "ardour/plugin.h"
 
 struct _VSTHandle;
-struct _VSTFX;
+struct _VSTState;
 typedef struct _VSTHandle VSTHandle;
-typedef struct _VSTFX VSTFX;
+typedef struct _VSTState VSTState;
 struct _AEffect;
 typedef struct _AEffect AEffect;
 

@@ -8,14 +8,14 @@ vstfx_init (void* ptr)
 	return 0;
 }
 
-VSTFX *
+VSTState *
 vstfx_instantiate (VSTHandle* fhandle, audioMasterCallback amc, void* userptr)
 {
 	return 0;
 }
 
 void
-vstfx_close (VSTFX* vstfx)
+vstfx_close (VSTState* vstfx)
 {
 
 }
@@ -33,7 +33,7 @@ vstfx_unload (VSTHandle* fhandle)
 }
 
 void
-vstfx_destroy_editor (VSTFX *)
+vstfx_destroy_editor (VSTState *)
 {
 
 }
