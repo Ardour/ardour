@@ -318,7 +318,7 @@ MidiBuffer::merge_in_place(const MidiBuffer &other)
 		   the event referenced by "us"
 		*/
 
-		while (them != other.end() && (*them).time() <= (*us).time()) {
+		while (them != other.end() && (*them).time() < (*us).time()) {
 			if (src == -1) {
 				src = them.offset;
 			}
