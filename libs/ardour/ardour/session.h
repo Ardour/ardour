@@ -64,7 +64,8 @@
 
 class XMLTree;
 class XMLNode;
-class AEffect;
+struct _AEffect;
+typedef struct _AEffect AEffect;
 
 namespace MIDI {
 	class Port;

@@ -34,7 +34,8 @@ struct _VSTFXHandle;
 struct _VSTFX;
 typedef struct _VSTFXHandle VSTFXHandle;
 typedef struct _VSTFX VSTFX;
-class AEffect;
+struct _AEffect;
+typedef struct _AEffect AEffect;
 
 namespace ARDOUR {
 class AudioEngine;

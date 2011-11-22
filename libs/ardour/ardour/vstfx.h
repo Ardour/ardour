@@ -51,7 +51,7 @@ struct _VSTFXInfo
 
 /*The AEffect which contains the info about a plugin instance*/
 
-typedef struct AEffect * (*main_entry_t)(audioMasterCallback);
+typedef AEffect * (*main_entry_t) (audioMasterCallback);
 
 /*A handle used to identify a plugin to vstfx*/
 
@@ -73,7 +73,7 @@ struct _VSTFXHandle
 
 struct _VSTFX 
 {
-    struct AEffect*    plugin;
+    AEffect* plugin;
     int      	window;            /* The plugin's parent X11 XWindow */
     int         plugin_ui_window;  /*The ID of the plugin UI window created by the plugin*/
     int         xid;               /* X11 XWindow */

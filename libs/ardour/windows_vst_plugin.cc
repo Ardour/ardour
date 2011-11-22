@@ -619,7 +619,7 @@ WindowsVSTPlugin::unique_id() const
 {
 	char buf[32];
 
-       snprintf (buf, sizeof (buf), "%d", *((int32_t*) &_plugin->unused_id));
+       snprintf (buf, sizeof (buf), "%d", *((int32_t*) &_plugin->uniqueID));
        return string (buf);
 }
 

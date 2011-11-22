@@ -31,10 +31,11 @@
 #include "ardour/plugin.h"
 
 struct _FSTHandle;
-struct _FST;
 typedef struct _FSTHandle FSTHandle;
+struct _FST;
 typedef struct _FST FST;
-class AEffect;
+struct _AEffect;
+typedef struct _AEffect AEffect;
 
 namespace ARDOUR {
 class AudioEngine;

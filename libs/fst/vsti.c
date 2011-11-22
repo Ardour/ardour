@@ -30,9 +30,9 @@
 #include <fcntl.h>
 #include <stdbool.h>
 #include <jackvst.h>
-#include <vestige/aeffectx.h>
 #include <pthread.h>
 #include <sched.h>
+#include "ardour/vestige/aeffectx.h"
 
 snd_seq_t *
 create_sequencer (const char* client_name, bool isinput)
@@ -66,17 +66,17 @@ create_sequencer (const char* client_name, bool isinput)
 static void 
 queue_midi (JackVST *jvst, int val1, int val2, int val3)
 {
-	struct VstMidiEvent *pevent;
+	VstMidiEvent *pevent;
 	jack_ringbuffer_data_t vec[2];
 
 	jack_ringbuffer_get_write_vector (jvst->event_queue, vec);
 
-	if (vec[0].len < sizeof (struct VstMidiEvent)) {
+	if (vec[0].len < sizeof (VstMidiEvent)) {
 		fst_error ("event queue has no write space");
 		return;
 	}
 		
-	pevent = (struct VstMidiEvent *) vec[0].buf;
+	pevent = (VstMidiEvent *) vec[0].buf;
 
 	//  printf("note: %d\n",note);
 	
@@ -97,7 +97,7 @@ queue_midi (JackVST *jvst, int val1, int val2, int val3)
 	
 	//printf("Sending: %x %x %x\n",val1,val2,val3);
 
-	jack_ringbuffer_write_advance (jvst->event_queue, sizeof (struct VstMidiEvent));
+	jack_ringbuffer_write_advance (jvst->event_queue, sizeof (VstMidiEvent));
 }
 
 void *midireceiver(void *arg)

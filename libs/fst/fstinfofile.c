@@ -145,8 +145,10 @@ static int fst_info_file_is_valid( char *dllpath ) {
 	return TRUE;
 }
 
-static int fst_can_midi( FST *fst ) {
-	struct AEffect *plugin = fst->plugin;
+static int
+fst_can_midi (FST *fst)
+{
+	AEffect* plugin = fst->plugin;
 	int vst_version = plugin->dispatcher (plugin, effGetVstVersion, 0, 0, NULL, 0.0f);
 
 	if (vst_version >= 2) {
@@ -160,11 +162,13 @@ static int fst_can_midi( FST *fst ) {
 	return FALSE;
 
 }
-static FSTInfo *fst_info_from_plugin( FST *fst ) {
-    FSTInfo *info = (FSTInfo *) malloc( sizeof( FSTInfo ) );
-    struct AEffect *plugin;
-    int i;
-    char creator[65];
+static FSTInfo *
+fst_info_from_plugin (FST* fst)
+{
+	FSTInfo* info = (FSTInfo *) malloc( sizeof( FSTInfo ) );
+	AEffect* plugin;
+	int i;
+	char creator[65];
 
     if( ! fst ) {
 	fst_error( "fst is NULL\n" );
@@ -184,7 +188,7 @@ static FSTInfo *fst_info_from_plugin( FST *fst ) {
       info->creator = strdup (creator);
     }
 
-    info->UniqueID = *((int32_t *) &plugin->unused_id);
+    info->UniqueID = *((int32_t *) &plugin->uniqueID);
 
     info->Category = strdup( "None" );          // FIXME:  
     info->numInputs = plugin->numInputs;
@@ -213,7 +217,7 @@ static FSTInfo *fst_info_from_plugin( FST *fst ) {
 
 // most simple one :) could be sufficient.... 
 static intptr_t
-simple_master_callback (struct AEffect *fx, int32_t opcode, int32_t index, intptr_t value, void *ptr, float opt)
+simple_master_callback (AEffect *fx, int32_t opcode, int32_t index, intptr_t value, void *ptr, float opt)
 {
 	if (opcode == audioMasterVersion) {
 		return 2;

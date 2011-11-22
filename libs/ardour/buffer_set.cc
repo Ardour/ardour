@@ -37,11 +37,7 @@
 #include "ardour/lv2_plugin.h"
 #include "ardour/lv2_event_buffer.h"
 #endif
-#ifdef WINDOWS_VST_SUPPORT
-#include "vestige/aeffectx.h"
-#endif
-
-#ifdef LXVST_SUPPORT
+#if defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT
 #include "ardour/vestige/aeffectx.h"
 #endif
 

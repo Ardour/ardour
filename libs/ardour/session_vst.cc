@@ -21,11 +21,11 @@
 #include <cstdio>
 
 #include <fst.h>
-#include <fst/vestige/aeffectx.h>
 
 #include "ardour/session.h"
 #include "ardour/tempo.h"
 #include "ardour/windows_vst_plugin.h"
+#include "ardour/vestige/aeffectx.h"
 
 #include "i18n.h"
 

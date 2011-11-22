@@ -6,6 +6,7 @@
 #include <pthread.h>
 
 #include "ardour/vst_types.h"
+#include "ardour/vestige/aeffectx.h"
 
 /**
  * Display FST error message.
@@ -26,8 +27,6 @@ extern void (*fst_error_callback)(const char *msg);
 void fst_set_error_function (void (*func)(const char *));
 
 void  fst_error (const char *fmt, ...);
-
-#include <vestige/aeffectx.h>
 
 typedef struct _FST FST;
 typedef struct _FSTHandle FSTHandle;
@@ -55,7 +54,7 @@ struct _FSTInfo
     char **ParamLabels;
 };
 
-typedef struct AEffect * (*main_entry_t)(audioMasterCallback);
+typedef AEffect * (*main_entry_t)(audioMasterCallback);
 
 struct _FSTHandle
 {
@@ -70,7 +69,7 @@ struct _FSTHandle
 
 struct _FST 
 {
-    struct AEffect*    plugin;
+    AEffect*    plugin;
     void*       window; /* win32 HWND */
     int         xid; /* X11 XWindow */
     FSTHandle*  handle;

@@ -257,7 +257,7 @@ static FILE* vstfx_infofile_for_write (char* dllpath)
 
 static int vstfx_can_midi(VSTFX *vstfx)
 {
-	struct AEffect *plugin = vstfx->plugin;
+	AEffect *plugin = vstfx->plugin;
 	
 	int vst_version = plugin->dispatcher (plugin, effGetVstVersion, 0, 0, 0, 0.0f);
 
@@ -276,7 +276,7 @@ static VSTFXInfo* vstfx_info_from_plugin(VSTFX *vstfx)
 
 	VSTFXInfo* info = (VSTFXInfo*) malloc(sizeof(VSTFXInfo));
 	
-	struct AEffect *plugin;
+	AEffect *plugin;
 	int i;
 	
 	/*We need to init the creator because some plugins
@@ -346,7 +346,8 @@ static VSTFXInfo* vstfx_info_from_plugin(VSTFX *vstfx)
 /* A simple 'dummy' audiomaster callback which should be ok,
 we will only be instantiating the plugin in order to get its info*/
 
-static intptr_t simple_master_callback(struct AEffect *, int32_t opcode, int32_t, intptr_t, void *, float)
+static intptr_t
+simple_master_callback (AEffect *, int32_t opcode, int32_t, intptr_t, void *, float)
 {
 	if (opcode == audioMasterVersion)
 		return 2;

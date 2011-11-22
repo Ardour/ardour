@@ -30,99 +30,106 @@
 				( ( (int) c ) << 8 ) |		\
 				( ( (int) d ) << 0 ) )
 
-const int audioMasterAutomate = 0;
-const int audioMasterVersion = 1;
-const int audioMasterCurrentId = 2;
-const int audioMasterIdle = 3;
-const int audioMasterPinConnected = 4;
+#define audioMasterAutomate 0
+#define audioMasterVersion 1
+#define audioMasterCurrentId 2
+#define audioMasterIdle 3
+#define audioMasterPinConnected 4
 // unsupported? 5
-const int audioMasterWantMidi = 6;
-const int audioMasterGetTime = 7;
-const int audioMasterProcessEvents = 8;
-const int audioMasterSetTime = 9;
-const int audioMasterTempoAt = 10;
-const int audioMasterGetNumAutomatableParameters = 11;
-const int audioMasterGetParameterQuantization = 12;
-const int audioMasterIOChanged = 13;
-const int audioMasterNeedIdle = 14;
-const int audioMasterSizeWindow = 15;
-const int audioMasterGetSampleRate = 16;
-const int audioMasterGetBlockSize = 17;
-const int audioMasterGetInputLatency = 18;
-const int audioMasterGetOutputLatency = 19;
-const int audioMasterGetPreviousPlug = 20;
-const int audioMasterGetNextPlug = 21;
-const int audioMasterWillReplaceOrAccumulate = 22;
-const int audioMasterGetCurrentProcessLevel = 23;
-const int audioMasterGetAutomationState = 24;
-const int audioMasterOfflineStart = 25;
-const int audioMasterOfflineRead = 26;
-const int audioMasterOfflineWrite = 27;
-const int audioMasterOfflineGetCurrentPass = 28;
-const int audioMasterOfflineGetCurrentMetaPass = 29;
-const int audioMasterSetOutputSampleRate = 30;
+#define audioMasterWantMidi 6
+#define audioMasterGetTime 7
+#define audioMasterProcessEvents 8
+#define audioMasterSetTime 9
+#define audioMasterTempoAt 10
+#define audioMasterGetNumAutomatableParameters 11
+#define audioMasterGetParameterQuantization 12
+#define audioMasterIOChanged 13
+#define audioMasterNeedIdle 14
+#define audioMasterSizeWindow 15
+#define audioMasterGetSampleRate 16
+#define audioMasterGetBlockSize 17
+#define audioMasterGetInputLatency 18
+#define audioMasterGetOutputLatency 19
+#define audioMasterGetPreviousPlug 20
+#define audioMasterGetNextPlug 21
+#define audioMasterWillReplaceOrAccumulate 22
+#define audioMasterGetCurrentProcessLevel 23
+#define audioMasterGetAutomationState 24
+#define audioMasterOfflineStart 25
+#define audioMasterOfflineRead 26
+#define audioMasterOfflineWrite 27
+#define audioMasterOfflineGetCurrentPass 28
+#define audioMasterOfflineGetCurrentMetaPass 29
+#define audioMasterSetOutputSampleRate 30
 // unsupported? 31
-const int audioMasterGetSpeakerArrangement = 31; // deprecated in 2.4?
-const int audioMasterGetVendorString = 32;
-const int audioMasterGetProductString = 33;
-const int audioMasterGetVendorVersion = 34;
-const int audioMasterVendorSpecific = 35;
-const int audioMasterSetIcon = 36;
-const int audioMasterCanDo = 37;
-const int audioMasterGetLanguage = 38;
-const int audioMasterOpenWindow = 39;
-const int audioMasterCloseWindow = 40;
-const int audioMasterGetDirectory = 41;
-const int audioMasterUpdateDisplay = 42;
-const int audioMasterBeginEdit = 43;
-const int audioMasterEndEdit = 44;
-const int audioMasterOpenFileSelector = 45;
-const int audioMasterCloseFileSelector = 46; // currently unused
-const int audioMasterEditFile = 47; // currently unused
-const int audioMasterGetChunkFile = 48; // currently unused
-const int audioMasterGetInputSpeakerArrangement = 49; // currently unused
+#define audioMasterGetSpeakerArrangement 31 // deprecated in 2.4?
+#define audioMasterGetVendorString 32
+#define audioMasterGetProductString 33
+#define audioMasterGetVendorVersion 34
+#define audioMasterVendorSpecific 35
+#define audioMasterSetIcon 36
+#define audioMasterCanDo 37
+#define audioMasterGetLanguage 38
+#define audioMasterOpenWindow 39
+#define audioMasterCloseWindow 40
+#define audioMasterGetDirectory 41
+#define audioMasterUpdateDisplay 42
+#define audioMasterBeginEdit 43
+#define audioMasterEndEdit 44
+#define audioMasterOpenFileSelector 45
+#define audioMasterCloseFileSelector 46 // currently unused
+#define audioMasterEditFile 47 // currently unused
+#define audioMasterGetChunkFile 48 // currently unused
+#define audioMasterGetInputSpeakerArrangement 49 // currently unused
 
-const int effFlagsHasEditor = 1;
-const int effFlagsCanReplacing = 1 << 4; // very likely
-const int effFlagsIsSynth = 1 << 8; // currently unused
+#define effFlagsHasEditor 1
+#define effFlagsCanReplacing (1 << 4) // very likely
+#define effFlagsIsSynth (1 << 8) // currently unused
 
-const int effOpen = 0;
-const int effClose = 1; // currently unused
-const int effSetProgram = 2; // currently unused
-const int effGetProgram = 3; // currently unused
-const int effGetProgramName = 5; // currently unused
-const int effGetParamName = 8; // currently unused
-const int effSetSampleRate = 10;
-const int effSetBlockSize = 11;
-const int effMainsChanged = 12;
-const int effEditGetRect = 13;
-const int effEditOpen = 14;
-const int effEditClose = 15;
-const int effEditIdle = 19;
-const int effEditTop = 20;
-const int effProcessEvents = 25;
-const int effGetEffectName = 45;
-const int effGetParameterProperties = 47; // missing
-const int effGetVendorString = 47;
-const int effGetProductString = 48;
-const int effGetVendorVersion = 49;
-const int effCanDo = 51; // currently unused
-const int effGetVstVersion = 58; // currently unused
+#define effOpen 0
+#define effClose 1 // currently unused
+#define effSetProgram 2 // currently unused
+#define effGetProgram 3 // currently unused
+#define effGetProgramName 5 // currently unused
+#define effGetParamName 8 // currently unused
+#define effSetSampleRate 10
+#define effSetBlockSize 11
+#define effMainsChanged 12
+#define effEditGetRect 13
+#define effEditOpen 14
+#define effEditClose 15
+#define effEditIdle 19
+#define effEditTop 20
+#define effProcessEvents 25
+#define effGetEffectName 45
+#define effGetParameterProperties 47 // missing
+#define effGetVendorString 47
+#define effGetProductString 48
+#define effGetVendorVersion 49
+#define effCanDo 51 // currently unused
+#define effGetVstVersion 58 // currently unused
 
-const int kEffectMagic = CCONST( 'V', 's', 't', 'P' );
-const int kVstLangEnglish = 1;
-const int kVstMidiType = 1;
-const int kVstParameterUsesFloatStep = 1 << 2;
-const int kVstTempoValid = 1 << 10;
-const int kVstTransportPlaying = 1 << 1;
-
-
-class RemoteVstPlugin;
+#define kEffectMagic (CCONST( 'V', 's', 't', 'P' ))
+#define kVstLangEnglish 1
+#define kVstMidiType 1
+#define kVstParameterUsesFloatStep (1 << 2)
+#define kVstTempoValid (1 << 10)
+#define kVstTransportPlaying (1 << 1)
 
 
-class VstMidiEvent
+struct RemoteVstPlugin;
+
+#define kVstNanosValid (1 << 8)
+#define kVstPpqPosValid (1 << 9)
+#define kVstTempoValid (1 << 10)
+#define kVstBarsValid (1 << 11)
+#define kVstCyclePosValid (1 << 12)
+#define kVstTimeSigValid (1 << 13)
+#define kVstSmpteValid (1 << 14)
+#define kVstClockValid (1 << 15)
+
+struct _VstMidiEvent
 {
-public:
 	// 00
 	int type;
 	// 04
@@ -145,40 +152,34 @@ public:
 	char reserved1;
 	// 1f?
 	char reserved2;
+};
 
-} ;
+typedef struct _VstMidiEvent VstMidiEvent;
 
 
-
-
-class VstEvent
+struct _VstEvent
 {
-	char dump[sizeof( VstMidiEvent )];
+	char dump[sizeof (VstMidiEvent)];
 
-} ;
+};
 
+typedef struct _VstEvent VstEvent;
 
-
-
-class VstEvents
+struct _VstEvents
 {
-public:
 	// 00
 	int numEvents;
 	// 04
 	void *reserved;
 	// 08
 	VstEvent * events[];
+};
 
-} ;
-
-
-
+typedef struct _VstEvents VstEvents;
 
 // Not finished, neither really used
-class VstParameterProperties
+struct _VstParameterProperties
 {
-public:
 	float stepFloat;
 	char label[64];
 	int flags;
@@ -189,26 +190,23 @@ public:
 	int category;
 	char categoryLabel[24];
 	char empty[128];
+};
 
-} ;
+typedef struct _VstParameterProperties VstParameterProperties;
 
-
-
-
-class AEffect
+struct _AEffect
 {
-public:
 	// Never use virtual functions!!!
 	// 00-03
 	int magic;
 	// dispatcher 04-07
-	intptr_t (* dispatcher)( AEffect * , int , int , intptr_t, void * , float );
+	intptr_t (* dispatcher) (struct _AEffect *, int, int, intptr_t, void *, float);
 	// process, quite sure 08-0b
-	void (* process)( AEffect * , float * * , float * * , int );
+	void (* process) (struct _AEffect *, float **, float **, int);
 	// setParameter 0c-0f
-	void (* setParameter)( AEffect * , int , float );
+	void (* setParameter) (struct _AEffect *, int, float);
 	// getParameter 10-13
-	float (* getParameter)( AEffect * , int );
+	float (* getParameter) (struct _AEffect *, int);
 	// programs 14-17
 	int numPrograms;
 	// Params 18-1b
@@ -235,16 +233,13 @@ public:
 	// Don't know 4c-4f
 	char unknown1[4];
 	// processReplacing 50-53
-	void (* processReplacing)( AEffect * , float * * , float * * , int );
+	void (* processReplacing) (struct _AEffect *, float **, float **, int);
+};
 
-} ;
+typedef struct _AEffect AEffect;
 
-
-
-
-class VstTimeInfo
+struct _VstTimeInfo
 {
-public:
 	// 00
 	double samplePos;
 	// 08
@@ -263,12 +258,10 @@ public:
 	char empty3[4 + 4 + 4];
 	// 54
 	int flags;
+};
 
-} ;
+typedef struct _VstTimeInfo VstTimeInfo;
 
-
-
-typedef intptr_t (* audioMasterCallback)( AEffect * , int32_t, int32_t, intptr_t, void * , float );
-
+typedef intptr_t (* audioMasterCallback) (AEffect *, int32_t, int32_t, intptr_t, void *, float);
 
 #endif
