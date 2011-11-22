@@ -9,7 +9,7 @@ vstfx_init (void* ptr)
 }
 
 VSTFX *
-vstfx_instantiate (VSTFXHandle* fhandle, audioMasterCallback amc, void* userptr)
+vstfx_instantiate (VSTHandle* fhandle, audioMasterCallback amc, void* userptr)
 {
 	return 0;
 }
@@ -20,14 +20,14 @@ vstfx_close (VSTFX* vstfx)
 
 }
 
-VSTFXHandle *
+VSTHandle *
 vstfx_load (const char *path)
 {
 	return 0;
 }
 
 int
-vstfx_unload (VSTFXHandle* fhandle)
+vstfx_unload (VSTHandle* fhandle)
 {
 	return -1;
 }
