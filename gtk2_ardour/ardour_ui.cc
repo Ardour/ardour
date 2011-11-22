@@ -1021,29 +1021,29 @@ ARDOUR_UI::update_format ()
 	}
 
 	stringstream s;
-	s << "File: <span foreground=\"green\">";
+	s << _("File:") << X_(" <span foreground=\"green\">");
 
 	switch (_session->config.get_native_file_header_format ()) {
 	case BWF:
-		s << "BWF";
+		s << _("BWF");
 		break;
 	case WAVE:
-		s << "WAV";
+		s << _("WAV");
 		break;
 	case WAVE64:
-		s << "WAV64";
+		s << _("WAV64");
 		break;
 	case CAF:
-		s << "CAF";
+		s << _("CAF");
 		break;
 	case AIFF:
-		s << "AIFF";
+		s << _("AIFF");
 		break;
 	case iXML:
-		s << "iXML";
+		s << _("iXML");
 		break;
 	case RF64:
-		s << "RF64";
+		s << _("RF64");
 		break;
 	}
 
@@ -1051,17 +1051,17 @@ ARDOUR_UI::update_format ()
 	
 	switch (_session->config.get_native_file_data_format ()) {
 	case FormatFloat:
-		s << "32-float";
+		s << _("32-float");
 		break;
 	case FormatInt24:
-		s << "24-int";
+		s << _("24-int");
 		break;
 	case FormatInt16:
-		s << "16-int";
+		s << _("16-int");
 		break;
 	}
 
-	s << "</span>";
+	s << X_("</span>");
 
 	format_label.set_markup (s.str ());
 }
