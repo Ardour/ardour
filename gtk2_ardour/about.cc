@@ -131,6 +131,7 @@ static const char* authors[] = {
 	N_("Jesse Chappell"),
 	N_("Thomas Charbonnel"),
 	N_("Sam Chessman"),
+	N_("André Colomb"),
 	N_("Paul Davis"),
 	N_("Gerard van Dongen"),
 	N_("Colin Fletcher"),
