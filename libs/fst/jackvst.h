@@ -12,8 +12,8 @@ typedef struct _JackVST JackVST;
 
 struct _JackVST {
     jack_client_t *client;
-    VSTHandle*     handle;
-    FST*           fst;
+    VSTHandle *    handle;
+    VSTState *     fst;
     float        **ins;
     float        **outs;
     jack_port_t  *midi_port;
@@ -23,13 +23,6 @@ struct _JackVST {
     int            bypassed;
     int            muted;
     int		   current_program;
-
-    int		   midi_map[128];
-    volatile int   midi_learn;
-    volatile int   midi_learn_CC;
-    volatile int   midi_learn_PARAM;
-
-    int		   resume_called;
 
     /* For VST/i support */
 

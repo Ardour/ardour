@@ -140,7 +140,7 @@ WindowsVSTPluginUI::forward_key_event (GdkEventKey* ev)
 {
 	if (ev->type == GDK_KEY_PRESS) {
 
-		FST* fst = vst->fst ();
+		VSTState* fst = vst->fst ();
 		pthread_mutex_lock (&fst->lock);
 
 		if (fst->n_pending_keys == (sizeof (fst->pending_keys) * sizeof (VSTKey))) {

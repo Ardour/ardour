@@ -226,7 +226,7 @@ LXVSTPluginUI::forward_key_event (GdkEventKey* ev)
 void
 LXVSTPluginUI::create_preset_store ()
 {
-	VSTFX* vstfx = lxvst->vstfx();
+	VSTState* vstfx = lxvst->vstfx();
 	
 	int vst_version = vstfx->plugin->dispatcher (vstfx->plugin, effGetVstVersion, 0, 0, NULL, 0.0f);
 

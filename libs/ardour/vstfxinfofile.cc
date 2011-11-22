@@ -257,7 +257,8 @@ static FILE* vstfx_infofile_for_write (char* dllpath)
 	return f;
 }
 
-static int vstfx_can_midi(VSTFX *vstfx)
+static
+int vstfx_can_midi (VSTState* vstfx)
 {
 	AEffect *plugin = vstfx->plugin;
 	
@@ -274,7 +275,7 @@ static int vstfx_can_midi(VSTFX *vstfx)
 }
 
 static VSTInfo *
-vstfx_info_from_plugin (VSTFX *vstfx)
+vstfx_info_from_plugin (VSTState* vstfx)
 {
 	VSTInfo* info = (VSTInfo*) malloc (sizeof (VSTInfo));
 	
@@ -365,9 +366,9 @@ VSTInfo *
 vstfx_get_info (char* dllpath)
 {
 	FILE* infofile;
-	VSTHandle *h;
-	VSTFX *vstfx;
-	VSTInfo *info;
+	VSTHandle* h;
+	VSTState* vstfx;
+	VSTInfo* info;
 
 	if ((infofile = vstfx_infofile_for_read (dllpath)) != 0) {
 		VSTInfo *info;

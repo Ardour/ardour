@@ -87,7 +87,7 @@ class LXVSTPlugin : public ARDOUR::Plugin
 	int set_state (XMLNode const &, int);
 
 	AEffect * plugin () const { return _plugin; }
-	VSTFX * vstfx () const { return _vstfx; }
+	VSTState * vstfx () const { return _vstfx; }
 
 private:
 
@@ -103,8 +103,8 @@ private:
 	void add_state (XMLNode *) const;
 
 	VSTHandle *  handle;
-	VSTFX*      _vstfx;
-	AEffect*    _plugin;
+	VSTState *  _vstfx;
+	AEffect *   _plugin;
 	bool         been_resumed;
 };
 

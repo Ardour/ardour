@@ -53,9 +53,10 @@ vstfx_handle_new ()
 
 /*Create and return a pointer to a new vstfx instance*/
 
-VSTFX* vstfx_new ()
+VSTState *
+vstfx_new ()
 {
-	VSTFX* vstfx = (VSTFX*) calloc (1, sizeof (VSTFX));
+	VSTState* vstfx = (VSTState *) calloc (1, sizeof (VSTState));
 	
 	/*Mutexes*/
 	
@@ -72,8 +73,8 @@ VSTFX* vstfx_new ()
 	vstfx->n_pending_keys = 0;
 	vstfx->has_editor = 0;
 	vstfx->program_set_without_editor = 0;
-	vstfx->window = 0;
-	vstfx->plugin_ui_window = 0;
+	vstfx->linux_window = 0;
+	vstfx->linux_plugin_ui_window = 0;
 	vstfx->eventProc = NULL;
 	vstfx->extra_data = NULL;
 	vstfx->want_resize = 0;
@@ -270,10 +271,10 @@ vstfx_unload (VSTHandle* fhandle)
 
 /*This instantiates a plugin*/
 
-VSTFX *
+VSTState *
 vstfx_instantiate (VSTHandle* fhandle, audioMasterCallback amc, void* userptr)
 {
-	VSTFX* vstfx = vstfx_new ();
+	VSTState* vstfx = vstfx_new ();
 
 	if(fhandle == NULL)
 	{
@@ -315,7 +316,7 @@ vstfx_instantiate (VSTHandle* fhandle, audioMasterCallback amc, void* userptr)
 
 /*Close a vstfx instance*/
 
-void vstfx_close (VSTFX* vstfx)
+void vstfx_close (VSTState* vstfx)
 {
 	vstfx_destroy_editor(vstfx);
 	
@@ -358,7 +359,7 @@ void vstfx_close (VSTFX* vstfx)
 
 
 bool 
-vstfx_save_state (VSTFX* vstfx, char * filename)
+vstfx_save_state (VSTState* vstfx, char * filename)
 {
 	FILE* f = fopen (filename, "wb");
 	if (f)
@@ -460,7 +461,7 @@ vstfx_save_state (VSTFX* vstfx, char * filename)
 
 /*Set up a call to the plugins 'dispatcher' function*/
 
-int vstfx_call_dispatcher (VSTFX *vstfx, int opcode, int index, int val, void *ptr, float opt) 
+int vstfx_call_dispatcher (VSTState* vstfx, int opcode, int index, int val, void *ptr, float opt) 
 {
 	pthread_mutex_lock (&vstfx->lock);
 	

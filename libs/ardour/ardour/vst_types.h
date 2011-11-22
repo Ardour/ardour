@@ -69,4 +69,63 @@ struct _VSTHandle
 
 typedef struct _VSTHandle VSTHandle;
 
+struct _VSTState
+{
+	AEffect* plugin;
+
+	/* Linux */
+	int         linux_window;            /* The plugin's parent X11 XWindow */
+	int         linux_plugin_ui_window;  /*The ID of the plugin UI window created by the plugin*/
+
+	/* Windows */
+	void*       windows_window;
+
+	int         xid;               /* X11 XWindow */
+	
+	int         want_resize;       /*Set to signal the plugin resized its UI*/
+	void*       extra_data;        /*Pointer to any extra data*/
+	
+	void* event_callback_thisptr;
+	void (*eventProc) (void* event);
+	
+	VSTHandle*  handle;
+	
+	int	    width;
+	int 	    height;
+	int	    wantIdle;
+	int	    destroy;
+	int	    vst_version;
+	int 	    has_editor;
+	
+	int	    program_set_without_editor;
+	
+	int	    want_program;
+	int 	    want_chunk;
+	int	    n_pending_keys;
+	unsigned char* wanted_chunk;
+	int 	    wanted_chunk_size;
+	int	    current_program;
+	float *     want_params;
+	float *     set_params;
+	
+	VSTKey	    pending_keys[16];
+
+	int	    dispatcher_wantcall;
+	int	    dispatcher_opcode;
+	int	    dispatcher_index;
+	int	    dispatcher_val;
+	void *	    dispatcher_ptr;
+	float	    dispatcher_opt;
+	int	    dispatcher_retval;
+
+	struct _VSTState * next;
+	pthread_mutex_t    lock;
+	pthread_cond_t     window_status_change;
+	pthread_cond_t     plugin_dispatcher_called;
+	pthread_cond_t     window_created;
+	int                been_activated;
+};
+
+typedef struct _VSTState VSTState;
+
 #endif

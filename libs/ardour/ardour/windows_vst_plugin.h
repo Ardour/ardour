@@ -30,8 +30,8 @@
 #include "pbd/stateful.h"
 #include "ardour/plugin.h"
 
-struct _FST;
-typedef struct _FST FST;
+struct _VSTState;
+typedef struct _VSTState VSTState;
 struct _AEffect;
 typedef struct _AEffect AEffect;
 struct _VSTHandle;
@@ -87,7 +87,7 @@ class WindowsVSTPlugin : public ARDOUR::Plugin
 	int set_state (XMLNode const &, int);
 
 	AEffect * plugin () const { return _plugin; }
-	FST * fst () const { return _fst; }
+	VSTState * fst () const { return _fst; }
 
 private:
 
@@ -103,7 +103,7 @@ private:
 	void add_state (XMLNode *) const;
 
 	VSTHandle*  handle;
-	FST*       _fst;
+	VSTState*  _fst;
 	AEffect*   _plugin;
 	bool        been_resumed;
 };

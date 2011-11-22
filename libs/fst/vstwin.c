@@ -26,7 +26,7 @@ struct ERect{
 static pthread_mutex_t plugin_mutex;
 
 /** Head of linked list of all FSTs */
-static FST* fst_first = NULL;
+static VSTState* fst_first = NULL;
 
 const char magic[] = "FST Plugin State v002";
 
@@ -68,10 +68,10 @@ my_window_proc (HWND w, UINT msg, WPARAM wp, LPARAM lp)
 	return DefWindowProcA (w, msg, wp, lp );
 }
 
-static FST* 
+static VSTState * 
 fst_new ()
 {
-	FST* fst = (FST*) calloc (1, sizeof (FST));
+	VSTState* fst = (VSTState *) calloc (1, sizeof (VSTState));
 	pthread_mutex_init (&fst->lock, NULL);
 	pthread_cond_init (&fst->window_status_change, NULL);
 	pthread_cond_init (&fst->plugin_dispatcher_called, NULL);
@@ -92,7 +92,7 @@ fst_handle_new ()
 }
 
 void
-maybe_set_program (FST* fst)
+maybe_set_program (VSTState* fst)
 {
 	if (fst->want_program != -1) {
 		if (fst->vst_version >= 2) {
@@ -118,7 +118,7 @@ maybe_set_program (FST* fst)
 DWORD WINAPI gui_event_loop (LPVOID param)
 {
 	MSG msg;
-	FST* fst;
+	VSTState* fst;
 	HMODULE hInst;
 	HWND window;
         int i;
@@ -180,10 +180,10 @@ again:
 				
 				if (fst->destroy) {
 					fprintf (stderr, "%s scheduled for destroy\n", fst->handle->name);
-					if (fst->window) {
+					if (fst->windows_window) {
 						fst->plugin->dispatcher( fst->plugin, effEditClose, 0, 0, NULL, 0.0 );
-						CloseWindow (fst->window);
-						fst->window = NULL;
+						CloseWindow (fst->windows_window);
+						fst->windows_window = NULL;
 						fst->destroy = FALSE;
 					}
 					fst_event_loop_remove_plugin (fst);
@@ -193,7 +193,7 @@ again:
 					goto again;
 				} 
 				
-				if (fst->window == NULL) {
+				if (fst->windows_window == NULL) {
 					if (fst_create_editor (fst)) {
 						fst_error ("cannot create editor for plugin %s", fst->handle->name);
 						fst_event_loop_remove_plugin (fst);
@@ -326,7 +326,7 @@ fst_exit ()
 }
 
 int
-fst_run_editor (FST* fst)
+fst_run_editor (VSTState* fst)
 {
 	/* wait for the plugin editor window to be created (or not) */
 
@@ -334,12 +334,12 @@ fst_run_editor (FST* fst)
 
 	fst->has_editor = 1;
 	
-	if (!fst->window) {
+	if (!fst->windows_window) {
 		pthread_cond_wait (&fst->window_status_change, &fst->lock);
 	}
 	pthread_mutex_unlock (&fst->lock);
 
-	if (!fst->window) {
+	if (!fst->windows_window) {
 		return -1;
 	}
 
@@ -347,7 +347,7 @@ fst_run_editor (FST* fst)
 }
 
 int
-fst_call_dispatcher (FST *fst, int opcode, int index, int val, void *ptr, float opt) 
+fst_call_dispatcher (VSTState* fst, int opcode, int index, int val, void *ptr, float opt) 
 {
 	pthread_mutex_lock (&fst->lock);
 	fst->dispatcher_opcode = opcode;
@@ -364,7 +364,7 @@ fst_call_dispatcher (FST *fst, int opcode, int index, int val, void *ptr, float 
 }
 
 int
-fst_create_editor (FST* fst)
+fst_create_editor (VSTState * fst)
 {
 	HMODULE hInst;
 	HWND window;
@@ -401,12 +401,12 @@ fst_create_editor (FST* fst)
 		fst_error ("cannot set fst_ptr on window");
 	}
 
-	fst->window = window;
+	fst->windows_window = window;
 //	fst->xid = (int) GetPropA (window, "__wine_x11_whole_window");
 
 
 	//printf( "effEditOpen......\n" );
-	fst->plugin->dispatcher (fst->plugin, effEditOpen, 0, 0, fst->window, 0 );
+	fst->plugin->dispatcher (fst->plugin, effEditOpen, 0, 0, fst->windows_window, 0);
 	fst->plugin->dispatcher (fst->plugin, effEditGetRect, 0, 0, &er, 0 );
 
 	fst->width =  er->right-er->left;
@@ -414,8 +414,8 @@ fst_create_editor (FST* fst)
 	//printf( "get rect ses... %d,%d\n", fst->width, fst->height );
 
 	//SetWindowPos (fst->window, 0, 9999, 9999, er->right-er->left+8, er->bottom-er->top+26, 0);
-	SetWindowPos (fst->window, 0, 9999, 9999, 2, 2, 0);
-	ShowWindow (fst->window, SW_SHOWNA);
+	SetWindowPos (fst->windows_window, 0, 9999, 9999, 2, 2, 0);
+	ShowWindow (fst->windows_window, SW_SHOWNA);
 	//SetWindowPos (fst->window, 0, 0, 0, er->right-er->left+8, er->bottom-er->top+26, SWP_NOMOVE|SWP_NOZORDER);
 	
 	fst->xid = (int) GetPropA (window, "__wine_x11_whole_window");
@@ -427,19 +427,19 @@ fst_create_editor (FST* fst)
 }
 
 void
-fst_move_window_into_view (FST* fst)
+fst_move_window_into_view (VSTState* fst)
 {
-        if (fst->window) {
-		SetWindowPos (fst->window, 0, 0, 0, fst->width, fst->height+24, 0);
-		ShowWindow (fst->window, SW_SHOWNA);
+        if (fst->windows_window) {
+		SetWindowPos (fst->windows_window, 0, 0, 0, fst->width, fst->height + 24, 0);
+		ShowWindow (fst->windows_window, SW_SHOWNA);
 	}
 }
 
 void
-fst_destroy_editor (FST* fst)
+fst_destroy_editor (VSTState* fst)
 {
 	pthread_mutex_lock (&fst->lock);
-	if (fst->window) {
+	if (fst->windows_window) {
 		fprintf (stderr, "mark %s for destroy\n", fst->handle->name);
 		fst->destroy = TRUE;
 		//if (!PostThreadMessageA (gui_thread_id, WM_USER, 0, 0)) {
@@ -454,10 +454,10 @@ fst_destroy_editor (FST* fst)
 }
 
 void
-fst_event_loop_remove_plugin (FST* fst)
+fst_event_loop_remove_plugin (VSTState* fst)
 {
-	FST* p;
-	FST* prev;
+	VSTState* p;
+	VSTState* prev;
 
 	for (p = fst_first, prev = NULL; p->next; prev = p, p = p->next) {
 		if (p == fst) {
@@ -601,17 +601,17 @@ fst_unload (VSTHandle* fhandle)
 	return 0;
 }
 
-FST*
+VSTState*
 fst_instantiate (VSTHandle* fhandle, audioMasterCallback amc, void* userptr)
 {
-	FST* fst = fst_new ();
+	VSTState* fst = fst_new ();
 
 	pthread_mutex_lock (&plugin_mutex);
 
 	if (fst_first == NULL) {
 		fst_first = fst;
 	} else {
-		FST* p = fst_first;
+		VSTState* p = fst_first;
 		while (p->next) {
 			p = p->next;
 		}
@@ -652,7 +652,7 @@ fst_instantiate (VSTHandle* fhandle, audioMasterCallback amc, void* userptr)
 }
 
 void
-fst_close (FST* fst)
+fst_close (VSTState* fst)
 {
 	fst_destroy_editor (fst);
 
@@ -665,7 +665,7 @@ fst_close (FST* fst)
 }
 
 int
-fst_get_XID (FST* fst)
+fst_get_XID (VSTState* fst)
 {
 	return fst->xid;
 }
@@ -791,7 +791,8 @@ int fst_load_state (FST * fst, char * filename)
 }
 #endif
 
-int fst_save_state (FST * fst, char * filename)
+int
+fst_save_state (VSTState * fst, char * filename)
 {
 	FILE * f = fopen (filename, "wb");
         int j;

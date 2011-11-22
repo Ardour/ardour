@@ -148,7 +148,7 @@ static int fst_info_file_is_valid( char *dllpath ) {
 }
 
 static int
-fst_can_midi (FST *fst)
+fst_can_midi (VSTState* fst)
 {
 	AEffect* plugin = fst->plugin;
 	int vst_version = plugin->dispatcher (plugin, effGetVstVersion, 0, 0, NULL, 0.0f);
@@ -165,7 +165,7 @@ fst_can_midi (FST *fst)
 
 }
 static VSTInfo *
-fst_info_from_plugin (FST* fst)
+fst_info_from_plugin (VSTState* fst)
 {
 	VSTInfo* info = (VSTInfo *) malloc (sizeof (VSTInfo));
 	AEffect* plugin;
@@ -241,10 +241,10 @@ fst_get_info (char* dllpath)
 
     } else {
 
-	VSTHandle *h;
-	FST *fst;
-	VSTInfo *info;
-	char *fstpath;
+	VSTHandle* h;
+	VSTState* fst;
+	VSTInfo* info;
+	char* fstpath;
 
 	if( !(h = fst_load( dllpath )) ) return NULL;
 	if( !(fst = fst_instantiate( h, simple_master_callback, NULL )) ) {

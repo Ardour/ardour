@@ -36,7 +36,7 @@ struct ERect{
 
 static pthread_mutex_t plugin_mutex;
 
-static VSTFX* vstfx_first = NULL;
+static VSTState * vstfx_first = NULL;
 
 const char magic[] = "VSTFX Plugin State v002";
 
@@ -160,7 +160,8 @@ long getXWindowProperty(Window window, Atom atom)
 /*The event handler - called from within the main GUI thread to
 dispatch events to any VST UIs which have callbacks stuck to them*/
 
-static void dispatch_x_events(XEvent* event, VSTFX* vstfx)
+static void
+dispatch_x_events (XEvent* event, VSTState* vstfx)
 {
 	/*Handle some of the Events we might be interested in*/
 	
@@ -182,10 +183,8 @@ static void dispatch_x_events(XEvent* event, VSTFX* vstfx)
 			/*if the size has changed, we flag this so that in lxvst_pluginui.cc we can make the
 			change to the GTK parent window in ardour, from its UI thread*/ 
 			
-			if(window == (Window)(vstfx->window))
-			{
-				if((width!=vstfx->width) || (height!=vstfx->height))
-				{
+			if (window == (Window) (vstfx->linux_window)) {
+				if (width != vstfx->width || height!=vstfx->height) {
 					vstfx->width = width;
 					vstfx->height = height;
 					vstfx->want_resize = 1;
@@ -194,8 +193,9 @@ static void dispatch_x_events(XEvent* event, VSTFX* vstfx)
 					position at the same time. We need to re-position the window at the origin of
 					the parent window*/
 					
-					if(vstfx->plugin_ui_window)
-						XMoveWindow(LXVST_XDisplay, vstfx->plugin_ui_window, 0, 0);
+					if (vstfx->linux_plugin_ui_window) {
+						XMoveWindow (LXVST_XDisplay, vstfx->linux_plugin_ui_window, 0, 0);
+					}
 				}
 			}
 			
@@ -220,18 +220,19 @@ static void dispatch_x_events(XEvent* event, VSTFX* vstfx)
 			/* present time                                            */
 			/***********************************************************/
 			
-			if(ParentWindow == (Window)(vstfx->window))
-			{
+			if (ParentWindow == (Window) (vstfx->linux_window)) {
+
 				Window PluginUIWindowID = event->xreparent.window;
 				
-				vstfx->plugin_ui_window = PluginUIWindowID;
+				vstfx->linux_plugin_ui_window = PluginUIWindowID;
 #ifdef LXVST_32BIT
 				int result = getXWindowProperty(PluginUIWindowID, XInternAtom(LXVST_XDisplay, "_XEventProc", false));
 	
-				if(result == 0)
+				if (result == 0) {
 					vstfx->eventProc = NULL;
-				else
+				} else {
 					vstfx->eventProc = (void (*) (void* event))result;
+				}
 #endif
 #ifdef LXVST_64BIT
 				long result = getXWindowProperty(PluginUIWindowID, XInternAtom(LXVST_XDisplay, "_XEventProc", false));
@@ -254,15 +255,13 @@ static void dispatch_x_events(XEvent* event, VSTFX* vstfx)
 			that the plugin parent window is now valid and can be passed
 			to effEditOpen when the editor is launched*/
 			
-			if(window == (Window)(vstfx->window))
-			{
+			if (window == (Window) (vstfx->linux_window)) {
 				char* message = XGetAtomName(LXVST_XDisplay, message_type);
 				
-				if(strcmp(message,"LaunchEditor") == 0)
-				{
-				
-					if(event->xclient.data.l[0] == 0x0FEEDBAC)
-						vstfx_launch_editor(vstfx);
+				if (strcmp(message,"LaunchEditor") == 0) {
+					if (event->xclient.data.l[0] == 0x0FEEDBAC) {
+						vstfx_launch_editor (vstfx);
+					}
 				}
 				
 				XFree(message);
@@ -283,8 +282,9 @@ static void dispatch_x_events(XEvent* event, VSTFX* vstfx)
 	UI window after they create it.  If that is the case, we need to call it
 	here, passing the XEvent into it*/
 	
-	if(vstfx->eventProc == NULL)
+	if (vstfx->eventProc == NULL) {
 		return;
+	}
 				
 	vstfx->eventProc((void*)event);
 }
@@ -295,8 +295,7 @@ windows, that is if they don't manage their own UIs **/
 
 void* gui_event_loop (void* ptr)
 {
-
-	VSTFX* vstfx;
+	VSTState* vstfx;
 	int LXVST_sched_event_timer = 0;
 	int LXVST_sched_timer_interval = 50; //ms
 	XEvent event;
@@ -361,14 +360,13 @@ again:
 
 				/*Window scheduled for destruction*/
 				
-				if (vstfx->destroy)
-				{
-					if (vstfx->window)
-					{
-						vstfx->plugin->dispatcher( vstfx->plugin, effEditClose, 0, 0, NULL, 0.0 );
+				if (vstfx->destroy) {
+					if (vstfx->linux_window) {
+						vstfx->plugin->dispatcher (vstfx->plugin, effEditClose, 0, 0, NULL, 0.0);
 							
-						XDestroyWindow (LXVST_XDisplay, vstfx->window);
-						vstfx->window = 0;				//FIXME - probably safe to assume we never have an XID of 0 but not explicitly true
+						XDestroyWindow (LXVST_XDisplay, vstfx->linux_window);
+						/* FIXME - probably safe to assume we never have an XID of 0 but not explicitly true */
+						vstfx->linux_window = 0;
 						vstfx->destroy = FALSE;
 					}
 					
@@ -381,19 +379,16 @@ again:
 				} 
 				
 				/*Window does not yet exist - scheduled for creation*/
-				
-				if (vstfx->window == 0)		//FIXME - probably safe to assume 0 is not a valid XID but not explicitly true
-				{
-					if (vstfx_create_editor (vstfx))
-					{
+
+				/* FIXME - probably safe to assume 0 is not a valid XID but not explicitly true */
+				if (vstfx->linux_window == 0) {
+					if (vstfx_create_editor (vstfx)) {
 						vstfx_error ("** ERROR ** VSTFX : Cannot create editor for plugin %s", vstfx->handle->name);
 						vstfx_event_loop_remove_plugin (vstfx);
 						pthread_cond_signal (&vstfx->window_status_change);
 						pthread_mutex_unlock (&vstfx->lock);
 						goto again;
-					}
-					else
-					{
+					} else {
 						/* condition/unlock: it was signalled & unlocked in fst_create_editor()   */
 					}
 				}
@@ -527,27 +522,23 @@ void vstfx_exit()
 
 /*Adds a new plugin (VSTFX) instance to the linked list*/
 
-int vstfx_run_editor (VSTFX* vstfx)
+int vstfx_run_editor (VSTState* vstfx)
 {
 	pthread_mutex_lock (&plugin_mutex);
 
-	/*Add the new VSTFX instance to the linked list*/
+	/* Add the new VSTFX instance to the linked list */
 
-	if (vstfx_first == NULL)
-	{
+	if (vstfx_first == NULL) {
 		vstfx_first = vstfx;
-	}
-	else
-	{
-		VSTFX* p = vstfx_first;
+	} else {
+		VSTState* p = vstfx_first;
 		
-		while (p->next)
-		{
+		while (p->next) {
 			p = p->next;
 		}
 		p->next = vstfx;
 		
-		/*Mark the new end of the list*/
+		/* Mark the new end of the list */
 		
 		vstfx->next = NULL;
 	}
@@ -558,15 +549,13 @@ int vstfx_run_editor (VSTFX* vstfx)
 
 	pthread_mutex_lock (&vstfx->lock);
 	
-	if (!vstfx->window)
-	{
+	if (!vstfx->linux_window) {
 		pthread_cond_wait (&vstfx->window_status_change, &vstfx->lock);
 	}
 	
 	pthread_mutex_unlock (&vstfx->lock);
 
-	if (!vstfx->window)
-	{
+	if (!vstfx->linux_window) {
 		return -1;
 	}
 
@@ -577,7 +566,7 @@ int vstfx_run_editor (VSTFX* vstfx)
 /*Creates an editor for the plugin - normally called from within the gui event loop
 after run_editor has added the plugin (editor) to the linked list*/
 
-int vstfx_create_editor (VSTFX* vstfx)
+int vstfx_create_editor (VSTState* vstfx)
 {
 	Window parent_window;
 	
@@ -614,7 +603,7 @@ int vstfx_create_editor (VSTFX* vstfx)
 				parent_window,
 				SubstructureNotifyMask | ButtonPressMask | ButtonReleaseMask | ButtonMotionMask | ExposureMask);
 										
-	vstfx->window = parent_window;
+	vstfx->linux_window = parent_window;
 										
 	vstfx->xid = parent_window;  //vstfx->xid will be referenced to connect to GTK UI in ardour later
 	
@@ -654,7 +643,8 @@ int vstfx_create_editor (VSTFX* vstfx)
 	return 0;
 }
 
-int vstfx_launch_editor(VSTFX* vstfx)
+int
+vstfx_launch_editor (VSTState* vstfx)
 {
 	/*This is the second stage of launching the editor (see vstfx_create editor)
 	we get called here in response to receiving the ClientMessage on our Window,
@@ -672,7 +662,7 @@ int vstfx_launch_editor(VSTFX* vstfx)
 	int x_size = 1;
 	int y_size = 1;
 	
-	parent_window = vstfx->window;
+	parent_window = vstfx->linux_window;
 	
 	/*Open the editor - Bah! we have to pass the int windowID as a void pointer - yuck
 	it gets cast back to an int as the parent window XID in the plugin - and we have to pass the
@@ -726,93 +716,98 @@ int vstfx_launch_editor(VSTFX* vstfx)
 
 /*May not be needed in the XLib version*/
 
-void vstfx_move_window_into_view (VSTFX* vstfx)
+void
+vstfx_move_window_into_view (VSTState* vstfx)
 {
-
-	/*This is probably the equivalent of Mapping an XWindow
-	but we most likely don't need it because the window
-	will be Mapped by XReparentWindow*/
+	/* This is probably the equivalent of Mapping an XWindow
+	   but we most likely don't need it because the window
+	   will be Mapped by XReparentWindow
+	*/
 
 }
 
-/*Destroy the editor window*/
-
-void vstfx_destroy_editor (VSTFX* vstfx)
+/** Destroy the editor window */
+void
+vstfx_destroy_editor (VSTState* vstfx)
 {
 	pthread_mutex_lock (&vstfx->lock);
-	if (vstfx->window)
-	{
+	if (vstfx->linux_window) {
 		vstfx->destroy = TRUE;
 		pthread_cond_wait (&vstfx->window_status_change, &vstfx->lock);
 	}
 	pthread_mutex_unlock (&vstfx->lock);
 }
 
-/*Remove a vstfx instance from the linked list parsed by the
-event loop*/
-
-void vstfx_event_loop_remove_plugin (VSTFX* vstfx)
+/** Remove a vstfx instance from the linked list parsed by the
+    event loop
+*/
+void
+vstfx_event_loop_remove_plugin (VSTState* vstfx)
 {
-	/*This only ever gets called from within our GUI thread
-	so we don't need to lock here - if we did there would be
-	a deadlock anyway*/
+	/* This only ever gets called from within our GUI thread
+	   so we don't need to lock here - if we did there would be
+	   a deadlock anyway
+	*/
 	
-	VSTFX* p;
-	VSTFX* prev;
+	VSTState* p;
+	VSTState* prev;
 	
-	for(p = vstfx_first, prev = NULL; p; prev = p, p = p->next)
-	{
-		if(p == vstfx)
-		{
-			if(prev)
-			{
+	for (p = vstfx_first, prev = NULL; p; prev = p, p = p->next) {
+		if (p == vstfx) {
+			if (prev) {
 				prev->next = p->next;
 				break;
 			}
 		}
 	}
 
-	if (vstfx_first == vstfx)
+	if (vstfx_first == vstfx) {
 		vstfx_first = vstfx_first->next;
+	}
 }
 
 /*Get the XID of the plugin editor window*/
 
-int vstfx_get_XID (VSTFX* vstfx)
+int
+vstfx_get_XID (VSTState* vstfx)
 {
 	int id;
 	
-	/*Wait for the lock to become free - otherwise
-	the window might be in the process of being
-	created and we get bad Window errors when trying
-	to embed it in the GTK UI*/
+	/* Wait for the lock to become free - otherwise
+	   the window might be in the process of being
+	   created and we get bad Window errors when trying
+	   to embed it in the GTK UI
+	*/
 	
 	pthread_mutex_lock(&vstfx->lock);
 	
-	/*The Window may be scheduled for creation
-	but not actually created by the gui_event_loop yet - 
+	/* The Window may be scheduled for creation
+	   but not actually created by the gui_event_loop yet - 
+	   spin here until it has been activated.  Possible
+	   deadlock if the window never gets activated but
+	   should not be called here if the window doesn't
+	   exist or will never exist
+	*/
 	
-	spin here until it has been activated.  Possible
-	deadlock if the window never gets activated but
-	should not be called here if the window doesn't
-	exist or will never exist*/
-	
-	while(!(vstfx->been_activated))
-		usleep(1000);
+	while (!(vstfx->been_activated)) {
+		usleep (1000);
+	}
 	
 	id = vstfx->xid;
 	
-	pthread_mutex_unlock(&vstfx->lock);
+	pthread_mutex_unlock (&vstfx->lock);
 	
-	/*Finally it might be safe to return the ID - 
-	problems will arise if we return either a zero ID
-	and GTK tries to socket it or if we return an ID
-	which hasn't yet become real to the server*/
+	/* Finally it might be safe to return the ID - 
+	   problems will arise if we return either a zero ID
+	   and GTK tries to socket it or if we return an ID
+	   which hasn't yet become real to the server
+	*/
 	
 	return id;
 }
 
-float htonf (float v)
+float
+htonf (float v)
 {
       float result;
       char * fin = (char*)&v;
@@ -830,7 +825,7 @@ float htonf (float v)
 
 
 #if 0
-int vstfx_load_state (VSTFX* vstfx, char * filename)
+int vstfx_load_state (VSTState* vstfx, char * filename)
 {
 	FILE* f = fopen (filename, "rb");
 	if(f)
