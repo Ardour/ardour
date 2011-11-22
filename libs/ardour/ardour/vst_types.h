@@ -74,19 +74,19 @@ struct _VSTState
 	AEffect* plugin;
 
 	/* Linux */
-	int         linux_window;            /* The plugin's parent X11 XWindow */
-	int         linux_plugin_ui_window;  /*The ID of the plugin UI window created by the plugin*/
+	int         linux_window;            ///< The plugin's parent X11 XWindow
+	int         linux_plugin_ui_window;  ///< The ID of the plugin UI window created by the plugin
 
 	/* Windows */
 	void*       windows_window;
 
-	int         xid;               /* X11 XWindow */
+	int         xid;               ///< X11 XWindow
 	
-	int         want_resize;       /*Set to signal the plugin resized its UI*/
-	void*       extra_data;        /*Pointer to any extra data*/
+	int         want_resize;       ///< Set to signal the plugin resized its UI
+	void*       extra_data;        ///< Pointer to any extra data
 	
-	void* event_callback_thisptr;
-	void (*eventProc) (void* event);
+	void * event_callback_thisptr;
+	void  (* eventProc) (void * event);
 	
 	VSTHandle*  handle;
 	
@@ -102,7 +102,7 @@ struct _VSTState
 	int	    want_program;
 	int 	    want_chunk;
 	int	    n_pending_keys;
-	unsigned char* wanted_chunk;
+	unsigned char * wanted_chunk;
 	int 	    wanted_chunk_size;
 	int	    current_program;
 	float *     want_params;
