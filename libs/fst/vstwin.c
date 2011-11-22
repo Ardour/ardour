@@ -33,9 +33,6 @@ const char magic[] = "FST Plugin State v002";
 DWORD  gui_thread_id = 0;
 static int gui_quit = 0;
 
-#define DELAYED_WINDOW 1
-
-
 static LRESULT WINAPI 
 my_window_proc (HWND w, UINT msg, WPARAM wp, LPARAM lp)
 {

@@ -51,8 +51,6 @@ Display* LXVST_XDisplay = NULL;
 
 pthread_t LXVST_gui_event_thread;
 
-#define DELAYED_WINDOW 1
-
 /*Util functions to get the value of a property attached to an XWindow*/
 
 bool LXVST_xerror;
