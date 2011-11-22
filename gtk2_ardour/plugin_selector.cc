@@ -648,7 +648,9 @@ PluginSelector::create_favs_menu (PluginInfoList& all_plugs)
 
 	for (PluginInfoList::const_iterator i = all_plugs.begin(); i != all_plugs.end(); ++i) {
 		if (manager.get_status (*i) == PluginManager::Favorite) {
-			favs->items().push_back (MenuElem ((*i)->name, (sigc::bind (sigc::mem_fun (*this, &PluginSelector::plugin_chosen_from_menu), *i))));
+			MenuElem elem ((*i)->name, (sigc::bind (sigc::mem_fun (*this, &PluginSelector::plugin_chosen_from_menu), *i)));
+			elem.get_child()->set_use_underline (false);
+			favs->items().push_back (elem);
 		}
 	}
 	return favs;
@@ -690,7 +692,9 @@ PluginSelector::create_by_creator_menu (ARDOUR::PluginInfoList& all_plugs)
 			creator_submenu_map.insert (pair<std::string,Menu*> (creator, submenu));
 			submenu->set_name("ArdourContextMenu");
 		}
-		submenu->items().push_back (MenuElem ((*i)->name, (sigc::bind (sigc::mem_fun (*this, &PluginSelector::plugin_chosen_from_menu), *i))));
+		MenuElem elem ((*i)->name, (sigc::bind (sigc::mem_fun (*this, &PluginSelector::plugin_chosen_from_menu), *i)));
+		elem.get_child()->set_use_underline (false);
+		submenu->items().push_back (elem);
 	}
 	return by_creator;
 }
@@ -726,7 +730,9 @@ PluginSelector::create_by_category_menu (ARDOUR::PluginInfoList& all_plugs)
 			category_submenu_map.insert (pair<std::string,Menu*> (category, submenu));
 			submenu->set_name("ArdourContextMenu");
 		}
-		submenu->items().push_back (MenuElem ((*i)->name, (sigc::bind (sigc::mem_fun (*this, &PluginSelector::plugin_chosen_from_menu), *i))));
+		MenuElem elem ((*i)->name, (sigc::bind (sigc::mem_fun (*this, &PluginSelector::plugin_chosen_from_menu), *i)));
+		elem.get_child()->set_use_underline (false);
+		submenu->items().push_back (elem);
 	}
 	return by_category;
 }
