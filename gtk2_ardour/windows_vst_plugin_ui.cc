@@ -35,7 +35,7 @@ WindowsVSTPluginUI::WindowsVSTPluginUI (boost::shared_ptr<PluginInsert> pi, boos
 	: PlugUIBase (pi),
 	  vst (vp)
 {
-	fst_run_editor (vst->fst());
+	fst_run_editor (vst->state());
 
 	preset_box.set_spacing (6);
 	preset_box.set_border_width (6);
@@ -69,13 +69,13 @@ WindowsVSTPluginUI::preset_selected ()
 int
 WindowsVSTPluginUI::get_preferred_height ()
 {
-	return vst->fst()->height;
+	return vst->state()->height;
 }
 
 int
 WindowsVSTPluginUI::get_preferred_width ()
 {
-	return vst->fst()->width;
+	return vst->state()->width;
 }
 
 int
@@ -89,9 +89,9 @@ WindowsVSTPluginUI::package (Gtk::Window& win)
 	   this assumes that the window's owner understands the XEmbed protocol.
 	*/
 
-	socket.add_id (fst_get_XID (vst->fst()));
+	socket.add_id (fst_get_XID (vst->state ()));
 
-	fst_move_window_into_view (vst->fst());
+	fst_move_window_into_view (vst->state ());
 
 	return 0;
 }
@@ -140,7 +140,7 @@ WindowsVSTPluginUI::forward_key_event (GdkEventKey* ev)
 {
 	if (ev->type == GDK_KEY_PRESS) {
 
-		VSTState* fst = vst->fst ();
+		VSTState* fst = vst->state ();
 		pthread_mutex_lock (&fst->lock);
 
 		if (fst->n_pending_keys == (sizeof (fst->pending_keys) * sizeof (VSTKey))) {
@@ -204,6 +204,6 @@ windows_vst_gui_init (int *argc, char **argv[])
 	wine_error_handler = XSetErrorHandler (NULL);
 	gtk_init (argc, argv);
 	the_gtk_display = gdk_x11_display_get_xdisplay (gdk_display_get_default());
-	gtk_error_handler = XSetErrorHandler( fst_xerror_handler );
+	gtk_error_handler = XSetErrorHandler (fst_xerror_handler);
 }
 

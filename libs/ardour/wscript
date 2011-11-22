@@ -217,7 +217,8 @@ libardour_sources = [
         'unknown_processor.cc',
         'user_bundle.cc',
         'utils.cc',
-        'version.cc'
+        'version.cc',
+        'vst_plugin.cc'
 ]
 
 def flac_supported():

@@ -45,10 +45,10 @@ LXVSTPluginUI::LXVSTPluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_
 {
 	create_preset_store ();
 
-	vstfx_run_editor (lxvst->vstfx());
+	vstfx_run_editor (lxvst->state ());
 
-	if (lxvst->vstfx()->current_program != -1) {
-		lxvst_preset_combo.set_active (lxvst->vstfx()->current_program);
+	if (lxvst->state()->current_program != -1) {
+		lxvst_preset_combo.set_active (lxvst->state()->current_program);
 	} else {
 		lxvst_preset_combo.set_active (0);
 	}
@@ -104,17 +104,17 @@ LXVSTPluginUI::resize_callback()
 	/*We could maybe use this to resize the plugin GTK parent window
 	if required*/
 	
-	if(lxvst->vstfx()->want_resize)
-	{
-		int new_height = lxvst->vstfx()->height;
-		int new_width = lxvst->vstfx()->width;
+	if (lxvst->state()->want_resize) {
+		int new_height = lxvst->state()->height;
+		int new_width = lxvst->state()->width;
 		
-		void* gtk_parent_window = lxvst->vstfx()->extra_data;
+		void* gtk_parent_window = lxvst->state()->extra_data;
 		
-		if(gtk_parent_window)
+		if (gtk_parent_window) {
 			((Gtk::Window*)gtk_parent_window)->resize(new_width, new_height + LXVST_H_FIDDLE);
+		}
 		
-		lxvst->vstfx()->want_resize = 0;
+		lxvst->state()->want_resize = 0;
 	}
 }
 
@@ -130,7 +130,7 @@ LXVSTPluginUI::preset_chosen ()
 {
 	// we can't dispatch directly here, too many plugins only expects one GUI thread.
 	
-	lxvst->vstfx()->want_program = lxvst_preset_combo.get_active_row_number ();
+	lxvst->state()->want_program = lxvst_preset_combo.get_active_row_number ();
 	socket.grab_focus ();
 }
 
@@ -144,13 +144,13 @@ LXVSTPluginUI::get_preferred_height ()
 	and we can't realise it until we have told it how big we would like it to be
 	which we can't do until it is realised etc*/
 
-	return (lxvst->vstfx()->height) + LXVST_H_FIDDLE; //May not be 40 for all screen res etc
+	return (lxvst->state()->height) + LXVST_H_FIDDLE; //May not be 40 for all screen res etc
 }
 
 int
 LXVSTPluginUI::get_preferred_width ()
 {
-	return lxvst->vstfx()->width;
+	return lxvst->state()->width;
 }
 
 int
@@ -167,12 +167,12 @@ LXVSTPluginUI::package (Gtk::Window& win)
 
 	/* this assumes that the window's owner understands the XEmbed protocol. */
 	
-	socket.add_id (vstfx_get_XID (lxvst->vstfx()));
+	socket.add_id (vstfx_get_XID (lxvst->state ()));
 
-	vstfx_move_window_into_view (lxvst->vstfx());
+	vstfx_move_window_into_view (lxvst->state ());
 	
-	lxvst->vstfx()->extra_data = (void*)(&win);
-	lxvst->vstfx()->want_resize = 0;
+	lxvst->state()->extra_data = (void*)(&win);
+	lxvst->state()->want_resize = 0;
 
 	return 0;
 }
@@ -226,7 +226,7 @@ LXVSTPluginUI::forward_key_event (GdkEventKey* ev)
 void
 LXVSTPluginUI::create_preset_store ()
 {
-	VSTState* vstfx = lxvst->vstfx();
+	VSTState* vstfx = lxvst->state ();
 	
 	int vst_version = vstfx->plugin->dispatcher (vstfx->plugin, effGetVstVersion, 0, 0, NULL, 0.0f);
 

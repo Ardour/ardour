@@ -25,12 +25,12 @@
 #include <stdbool.h>
 #include <cstdio>
 #include <stdint.h>
-#include <ardour/vstfx.h>
-#include <ardour/vestige/aeffectx.h>
+#include "ardour/vstfx.h"
+#include "ardour/vestige/aeffectx.h"
 
-#include <ardour/session.h>
-#include <ardour/tempo.h>
-#include <ardour/lxvst_plugin.h>
+#include "ardour/session.h"
+#include "ardour/tempo.h"
+#include "ardour/lxvst_plugin.h"
 
 #include "i18n.h"
 
@@ -191,7 +191,7 @@ intptr_t Session::lxvst_callback (AEffect* effect,
 		SHOW_CALLBACK ("amc: audioMasterNeedIdle\n");
 		// plug needs idle calls (outside its editor window)
 		if (plug) {
-			plug->vstfx()->wantIdle = 1;
+			plug->state()->wantIdle = 1;
 		}
 		return 0;
 

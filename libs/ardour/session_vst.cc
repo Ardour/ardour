@@ -185,7 +185,7 @@ intptr_t Session::vst_callback (
 		SHOW_CALLBACK ("amc: audioMasterNeedIdle\n");
 		// plug needs idle calls (outside its editor window)
 		if (plug) {
-			plug->fst()->wantIdle = 1;
+			plug->state()->wantIdle = 1;
 		}
 		return 0;
 
