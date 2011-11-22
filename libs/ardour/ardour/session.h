@@ -740,22 +740,15 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	/* VST support */
 
-	static intptr_t vst_callback (AEffect* effect,
-			int32_t opcode,
-			int32_t index,
-			intptr_t value,
-			void* ptr,
-			float opt);
+	static intptr_t vst_callback (
+		AEffect* effect,
+		int32_t opcode,
+		int32_t index,
+		intptr_t value,
+		void* ptr,
+		float opt
+		);
 			
-	/*Native linuxVST support*/
-	
-	static intptr_t lxvst_callback (AEffect* effect,
-				  int32_t opcode,
-				  int32_t index,
-				  intptr_t value,
-				  void* ptr,
-				  float opt);
-
 	static PBD::Signal0<void> SendFeedback;
 
 	/* Speakers */

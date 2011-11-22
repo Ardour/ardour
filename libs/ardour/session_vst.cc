@@ -20,12 +20,11 @@
 #include <stdbool.h>
 #include <cstdio>
 
-#include <fst.h>
-
 #include "ardour/session.h"
 #include "ardour/tempo.h"
 #include "ardour/windows_vst_plugin.h"
 #include "ardour/vestige/aeffectx.h"
+#include "ardour/vst_types.h"
 
 #include "i18n.h"
 
@@ -50,7 +49,7 @@ intptr_t Session::vst_callback (
 	)
 {
 	static VstTimeInfo _timeInfo;
-	WindowsVSTPlugin* plug;
+	VSTPlugin* plug;
 	Session* session;
 
 	if (debug_callbacks < 0) {
@@ -58,7 +57,7 @@ intptr_t Session::vst_callback (
 	}
 
 	if (effect && effect->user) {
-	        plug = (WindowsVSTPlugin*) (effect->user);
+	        plug = (VSTPlugin *) (effect->user);
 		session = &plug->session();
 		SHOW_CALLBACK ("am callback 0x%x, opcode = %d, plugin = \"%s\" ", (int) pthread_self(), opcode, plug->name());
 	} else {

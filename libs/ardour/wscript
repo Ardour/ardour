@@ -386,13 +386,16 @@ def build(bld):
             obj.uselib += ['SUIL']
 
     if bld.is_defined('WINDOWS_VST_SUPPORT'):
-        obj.source += [ 'windows_vst_plugin.cc', 'session_vst.cc' ]
+        obj.source += [ 'windows_vst_plugin.cc']
         obj.includes += [ '../fst' ]
         obj.defines += [ 'WINDOWS_VST_SUPPORT' ]
 
     if bld.is_defined('LXVST_SUPPORT'):
-        obj.source += [ 'lxvst_plugin.cc', 'session_lxvst.cc', 'vstfx.cc', 'vstfxinfofile.cc' ]
+        obj.source += [ 'lxvst_plugin.cc', 'vstfx.cc', 'vstfxinfofile.cc' ]
         obj.defines += [ 'LXVST_SUPPORT' ]
+
+    if bld.is_defined('WINDOWS_VST_SUPPORT') or bld.is_defined('LXVST_SUPPORT'):
+        obj.source += [ 'session_vst.cc' ]
 
     if bld.is_defined('HAVE_COREAUDIO'):
         obj.source += [ 'coreaudiosource.cc', 'caimportable.cc' ]
