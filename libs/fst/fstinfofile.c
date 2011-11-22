@@ -212,11 +212,14 @@ static FSTInfo *fst_info_from_plugin( FST *fst ) {
 }
 
 // most simple one :) could be sufficient.... 
-static long simple_master_callback( struct AEffect *fx, long opcode, long index, long value, void *ptr, float opt ) {
-    if( opcode == audioMasterVersion )
-	return 2;
-    else
-	return 0;
+static intptr_t
+simple_master_callback (struct AEffect *fx, int32_t opcode, int32_t index, intptr_t value, void *ptr, float opt)
+{
+	if (opcode == audioMasterVersion) {
+		return 2;
+	} else {
+		return 0;
+	}
 }
 
 FSTInfo *fst_get_info( char *dllpath ) {
