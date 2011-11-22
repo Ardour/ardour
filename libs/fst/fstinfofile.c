@@ -31,22 +31,23 @@ static char *read_string( FILE *fp ) {
     }
 }
 
-static FSTInfo *load_fst_info_file( char *filename ) {
+static VSTInfo *
+load_fst_info_file (char* filename)
+{
+	VSTInfo *info = (VSTInfo *) malloc (sizeof (VSTInfo));
+	FILE *fp;
+	int i;
+	
+	if (info == NULL) {
+		return NULL;
+	}
 
-    FSTInfo *info = (FSTInfo *) malloc( sizeof( FSTInfo ) );
-    FILE *fp;
-    int i;
-
-
-    if( info == NULL )
-	return NULL;
-
-    fp = fopen( filename, "r" );
-    
-    if( fp == NULL ) {
-	free( info );
-	return NULL;
-    }
+	fp = fopen( filename, "r" );
+	
+	if (fp == NULL) {
+		free (info);
+		return NULL;
+	}
 
     if( (info->name = read_string( fp )) == NULL ) goto error;
     if( (info->creator = read_string( fp )) == NULL ) goto error;
@@ -78,8 +79,9 @@ error:
     return NULL;
 }
 
-static int save_fst_info_file( FSTInfo *info, char *filename ) {
-
+static int
+save_fst_info_file (VSTInfo* info, char* filename)
+{
     FILE *fp;
     int i;
 
@@ -162,10 +164,10 @@ fst_can_midi (FST *fst)
 	return FALSE;
 
 }
-static FSTInfo *
+static VSTInfo *
 fst_info_from_plugin (FST* fst)
 {
-	FSTInfo* info = (FSTInfo *) malloc( sizeof( FSTInfo ) );
+	VSTInfo* info = (VSTInfo *) malloc (sizeof (VSTInfo));
 	AEffect* plugin;
 	int i;
 	char creator[65];
@@ -226,21 +228,22 @@ simple_master_callback (AEffect *fx, int32_t opcode, int32_t index, intptr_t val
 	}
 }
 
-FSTInfo *fst_get_info( char *dllpath ) {
-
-    if( fst_info_file_is_valid( dllpath ) ) {
-	FSTInfo *info;
-	char *fstpath = fst_dllpath_to_infopath( dllpath );
-
-	info = load_fst_info_file( fstpath );
-	free( fstpath );
-	return info;
+VSTInfo *
+fst_get_info (char* dllpath)
+{
+	if( fst_info_file_is_valid( dllpath ) ) {
+		VSTInfo *info;
+		char *fstpath = fst_dllpath_to_infopath( dllpath );
+		
+		info = load_fst_info_file( fstpath );
+		free( fstpath );
+		return info;
 
     } else {
 
-	FSTHandle *h;
+	VSTHandle *h;
 	FST *fst;
-	FSTInfo *info;
+	VSTInfo *info;
 	char *fstpath;
 
 	if( !(h = fst_load( dllpath )) ) return NULL;
@@ -266,8 +269,9 @@ FSTInfo *fst_get_info( char *dllpath ) {
     }
 }
 
-void fst_free_info( FSTInfo *info ) {
-
+void
+fst_free_info (VSTInfo *info)
+{
     int i;
 
     for( i=0; i<info->numParams; i++ ) {

@@ -44,9 +44,10 @@ void (*vstfx_error_callback)(const char *desc) = &default_vstfx_error_callback;
 
 /*Create and return a pointer to a new VSTFX handle*/
 
-VSTFXHandle* vstfx_handle_new()
+VSTHandle *
+vstfx_handle_new ()
 {
-	VSTFXHandle* vstfx = (VSTFXHandle*)calloc(1, sizeof (VSTFXHandle));
+	VSTHandle* vstfx = (VSTHandle *) calloc (1, sizeof (VSTHandle));
 	return vstfx;
 }
 
@@ -156,10 +157,11 @@ void* vstfx_load_vst_library(const char* path)
 /*This loads up a plugin, given the path to its .so file and
  finds its main entry point etc*/
 
-VSTFXHandle* vstfx_load (const char *path)
+VSTHandle *
+vstfx_load (const char *path)
 {
 	char* buf = NULL;
-	VSTFXHandle* fhandle;
+	VSTHandle* fhandle;
 	int i;
 	
 	/*Create a new handle we can use to reference the plugin*/
@@ -235,7 +237,8 @@ VSTFXHandle* vstfx_load (const char *path)
 
 /*This unloads a plugin*/
 
-int vstfx_unload (VSTFXHandle* fhandle)
+int
+vstfx_unload (VSTHandle* fhandle)
 {
 	if (fhandle->plugincnt)
 	{
@@ -267,7 +270,8 @@ int vstfx_unload (VSTFXHandle* fhandle)
 
 /*This instantiates a plugin*/
 
-VSTFX* vstfx_instantiate (VSTFXHandle* fhandle, audioMasterCallback amc, void* userptr)
+VSTFX *
+vstfx_instantiate (VSTHandle* fhandle, audioMasterCallback amc, void* userptr)
 {
 	VSTFX* vstfx = vstfx_new ();
 

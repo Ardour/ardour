@@ -30,9 +30,9 @@
 #include "pbd/stateful.h"
 #include "ardour/plugin.h"
 
-struct _VSTFXHandle;
+struct _VSTHandle;
 struct _VSTFX;
-typedef struct _VSTFXHandle VSTFXHandle;
+typedef struct _VSTHandle VSTHandle;
 typedef struct _VSTFX VSTFX;
 struct _AEffect;
 typedef struct _AEffect AEffect;
@@ -44,7 +44,7 @@ class Session;
 class LXVSTPlugin : public ARDOUR::Plugin
 {
   public:
-	LXVSTPlugin (ARDOUR::AudioEngine&, ARDOUR::Session&, VSTFXHandle* handle);
+	LXVSTPlugin (ARDOUR::AudioEngine&, ARDOUR::Session&, VSTHandle *);
 	LXVSTPlugin (const LXVSTPlugin &);
 	~LXVSTPlugin ();
 
@@ -102,7 +102,7 @@ private:
 	bool load_plugin_preset (PresetRecord);
 	void add_state (XMLNode *) const;
 
-	VSTFXHandle* handle;
+	VSTHandle *  handle;
 	VSTFX*      _vstfx;
 	AEffect*    _plugin;
 	bool         been_resumed;

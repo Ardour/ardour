@@ -20,6 +20,8 @@
 #ifndef __ardour_vst_types_h__
 #define __ardour_vst_types_h__
 
+#include "ardour/vestige/aeffectx.h"
+
 struct _VSTKey
 {
 	/** virtual-key code, or 0 if this _VSTFXKey is a `character' key */
@@ -29,5 +31,42 @@ struct _VSTKey
 };
 
 typedef struct _VSTKey VSTKey;
+
+struct _VSTInfo 
+{
+	char  *name;
+	char  *creator;
+	int    UniqueID;
+	char  *Category;
+    
+	int    numInputs;
+	int    numOutputs;
+	int    numParams;
+	
+	int    wantMidi;
+	int    wantEvents;
+	int    hasEditor;
+	int    canProcessReplacing;
+	
+	char** ParamNames;
+	char** ParamLabels;
+};
+
+typedef struct _VSTInfo VSTInfo;
+
+typedef AEffect * (* main_entry_t) (audioMasterCallback);
+
+struct _VSTHandle
+{
+	void*        dll;
+	char*        name;
+	char*        nameptr;
+	
+	main_entry_t main_entry;
+
+	int          plugincnt;
+};
+
+typedef struct _VSTHandle VSTHandle;
 
 #endif

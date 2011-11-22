@@ -61,7 +61,7 @@ using namespace PBD;
 using std::min;
 using std::max;
 
-WindowsVSTPlugin::WindowsVSTPlugin (AudioEngine& e, Session& session, FSTHandle* h)
+WindowsVSTPlugin::WindowsVSTPlugin (AudioEngine& e, Session& session, VSTHandle* h)
 	: Plugin (e, session)
 {
 	handle = h;
@@ -683,7 +683,7 @@ WindowsVSTPluginInfo::load (Session& session)
 		PluginPtr plugin;
 
 		if (Config->get_use_windows_vst ()) {
-			FSTHandle* handle;
+			VSTHandle* handle;
 
 			handle = fst_load(path.c_str());
 

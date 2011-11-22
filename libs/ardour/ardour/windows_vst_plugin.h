@@ -30,12 +30,12 @@
 #include "pbd/stateful.h"
 #include "ardour/plugin.h"
 
-struct _FSTHandle;
-typedef struct _FSTHandle FSTHandle;
 struct _FST;
 typedef struct _FST FST;
 struct _AEffect;
 typedef struct _AEffect AEffect;
+struct _VSTHandle;
+typedef struct _VSTHandle VSTHandle;
 
 namespace ARDOUR {
 class AudioEngine;
@@ -44,7 +44,7 @@ class Session;
 class WindowsVSTPlugin : public ARDOUR::Plugin
 {
   public:
-	WindowsVSTPlugin (ARDOUR::AudioEngine&, ARDOUR::Session&, FSTHandle* handle);
+	WindowsVSTPlugin (ARDOUR::AudioEngine&, ARDOUR::Session&, VSTHandle *);
 	WindowsVSTPlugin (const WindowsVSTPlugin &);
 	~WindowsVSTPlugin ();
 
@@ -102,7 +102,7 @@ private:
 	bool load_plugin_preset (PresetRecord);
 	void add_state (XMLNode *) const;
 
-	FSTHandle* handle;
+	VSTHandle*  handle;
 	FST*       _fst;
 	AEffect*   _plugin;
 	bool        been_resumed;

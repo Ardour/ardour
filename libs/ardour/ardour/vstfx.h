@@ -18,54 +18,9 @@ void vstfx_set_error_function (void (*func)(const char *));
 
 void  vstfx_error (const char *fmt, ...);
 
-#include <ardour/vestige/aeffectx.h>
+#include "ardour/vestige/aeffectx.h"
 
 typedef struct _VSTFX VSTFX;
-typedef struct _VSTFXHandle VSTFXHandle;
-typedef struct _VSTFXInfo VSTFXInfo;
-
-
-/*Struct to contain the info about a plugin*/
-
-struct _VSTFXInfo 
-{
-    char *name;
-    char *creator;
-    int UniqueID;
-    char *Category;
-    
-    int numInputs;
-    int numOutputs;
-    int numParams;
-
-    int wantMidi;
-    int wantEvents;
-    int hasEditor;
-    int canProcessReplacing;
-
-    /* i think we should save the parameter Info Stuff soon. */
-    // struct VstParameterInfo *infos;
-    char **ParamNames;
-    char **ParamLabels;
-};
-
-/*The AEffect which contains the info about a plugin instance*/
-
-typedef AEffect * (*main_entry_t) (audioMasterCallback);
-
-/*A handle used to identify a plugin to vstfx*/
-
-struct _VSTFXHandle
-{
-    void*    dll;
-    char*    name;
-    char*    nameptr; /* ptr returned from strdup() etc. */
-	
-    main_entry_t main_entry;
-
-    int plugincnt;
-};
-
 
 /*Structure used to describe the instance of VSTFX responsible for
   a particular plugin instance.  These are connected together in a 
@@ -84,7 +39,7 @@ struct _VSTFX
     void* event_callback_thisptr;
     void (*eventProc) (void* event);
 	
-    VSTFXHandle*  handle;
+    VSTHandle*  handle;
 	
     int		width;
     int 	height;
@@ -127,9 +82,9 @@ struct _VSTFX
 extern int	    vstfx_launch_editor(VSTFX* vstfx);
 extern int          vstfx_init (void* possible_hmodule);
 extern void         vstfx_exit ();
-extern VSTFXHandle* vstfx_load (const char*);
-extern int          vstfx_unload (VSTFXHandle*);
-extern VSTFX*       vstfx_instantiate (VSTFXHandle*, audioMasterCallback amc, void* userptr);
+extern VSTHandle *  vstfx_load (const char*);
+extern int          vstfx_unload (VSTHandle *);
+extern VSTFX*       vstfx_instantiate (VSTHandle *, audioMasterCallback, void *);
 extern void         vstfx_close (VSTFX*);
 
 extern int          vstfx_create_editor (VSTFX* vstfx);
@@ -138,10 +93,10 @@ extern void         vstfx_destroy_editor (VSTFX*);
 extern int          vstfx_get_XID (VSTFX*);
 extern void         vstfx_move_window_into_view (VSTFX*);
 
-extern VSTFXInfo*   vstfx_get_info (char *dllpathname);
-extern void         vstfx_free_info (VSTFXInfo *info);
+extern VSTInfo *    vstfx_get_info (char *dllpathname);
+extern void         vstfx_free_info (VSTInfo *);
 extern void         vstfx_event_loop_remove_plugin (VSTFX* fst);
-extern int          vstfx_call_dispatcher(VSTFX *vstfx, int opcode, int index, int val, void *ptr, float opt );
+extern int          vstfx_call_dispatcher (VSTFX *vstfx, int opcode, int index, int val, void *ptr, float opt);
 
 /** Load a plugin state from a file.**/
 

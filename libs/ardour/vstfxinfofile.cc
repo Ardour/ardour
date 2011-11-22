@@ -42,12 +42,13 @@ static char* read_string(FILE *fp)
     }
 }
 
-static VSTFXInfo* load_vstfx_info_file(FILE* fp)
+static VSTInfo *
+load_vstfx_info_file (FILE* fp)
 {
-	VSTFXInfo *info;
+	VSTInfo *info;
 	int i;
 	
-	if ((info = (VSTFXInfo*) malloc(sizeof(VSTFXInfo))) == 0) {
+	if ((info = (VSTInfo*) malloc (sizeof (VSTInfo))) == 0) {
 		return 0;
 	}
 
@@ -85,7 +86,8 @@ static VSTFXInfo* load_vstfx_info_file(FILE* fp)
 	return 0;
 }
 
-static int save_vstfx_info_file(VSTFXInfo *info, FILE* fp)
+static int
+save_vstfx_info_file (VSTInfo *info, FILE* fp)
 {
     int i;
 
@@ -271,10 +273,10 @@ static int vstfx_can_midi(VSTFX *vstfx)
 	return false;
 }
 
-static VSTFXInfo* vstfx_info_from_plugin(VSTFX *vstfx)
+static VSTInfo *
+vstfx_info_from_plugin (VSTFX *vstfx)
 {
-
-	VSTFXInfo* info = (VSTFXInfo*) malloc(sizeof(VSTFXInfo));
+	VSTInfo* info = (VSTInfo*) malloc (sizeof (VSTInfo));
 	
 	AEffect *plugin;
 	int i;
@@ -359,15 +361,16 @@ simple_master_callback (AEffect *, int32_t opcode, int32_t, intptr_t, void *, fl
 data, and if that doesn't exist, load the plugin, get its data and
 then cache it for future ref*/
 
-VSTFXInfo *vstfx_get_info(char *dllpath)
+VSTInfo *
+vstfx_get_info (char* dllpath)
 {
 	FILE* infofile;
-	VSTFXHandle *h;
+	VSTHandle *h;
 	VSTFX *vstfx;
-	VSTFXInfo *info;
+	VSTInfo *info;
 
 	if ((infofile = vstfx_infofile_for_read (dllpath)) != 0) {
-		VSTFXInfo *info;
+		VSTInfo *info;
 		info = load_vstfx_info_file (infofile);
 		fclose (infofile);
 		return info;
@@ -402,20 +405,18 @@ VSTFXInfo *vstfx_get_info(char *dllpath)
 	return info;
 }
 
-void vstfx_free_info(VSTFXInfo *info )
+void
+vstfx_free_info (VSTInfo *info)
 {
-    int i;
-
-    for(i=0; i < info->numParams; i++)
-	{
-		free(info->ParamNames[i]);
-		free(info->ParamLabels[i]);
-    }
+	for (int i = 0; i < info->numParams; i++) {
+		free (info->ParamNames[i]);
+		free (info->ParamLabels[i]);
+	}
 	
-    free(info->name);
-    free(info->creator);
-    free(info->Category);
-    free(info);
+	free (info->name);
+	free (info->creator);
+	free (info->Category);
+	free (info);
 }
 
 

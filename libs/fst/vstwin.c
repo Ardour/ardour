@@ -84,10 +84,10 @@ fst_new ()
 	return fst;
 }
 
-static FSTHandle* 
+static VSTHandle* 
 fst_handle_new ()
 {
-	FSTHandle* fst = (FSTHandle*) calloc (1, sizeof (FSTHandle));
+	VSTHandle* fst = (VSTHandle*) calloc (1, sizeof (VSTHandle));
 	return fst;
 }
 
@@ -522,11 +522,11 @@ fst_load_vst_library(const char * path)
 	return dll;
 }
 
-FSTHandle*
+VSTHandle *
 fst_load (const char *path)
 {
 	char* buf;
-	FSTHandle* fhandle;
+	VSTHandle* fhandle;
 	char* period;
 
 	fhandle = fst_handle_new ();
@@ -581,7 +581,7 @@ fst_load (const char *path)
 }
 
 int
-fst_unload (FSTHandle* fhandle)
+fst_unload (VSTHandle* fhandle)
 {
 	if (fhandle->plugincnt) {
 		return -1;
@@ -602,7 +602,7 @@ fst_unload (FSTHandle* fhandle)
 }
 
 FST*
-fst_instantiate (FSTHandle* fhandle, audioMasterCallback amc, void* userptr)
+fst_instantiate (VSTHandle* fhandle, audioMasterCallback amc, void* userptr)
 {
 	FST* fst = fst_new ();
 

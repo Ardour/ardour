@@ -587,7 +587,7 @@ PluginManager::windows_vst_discover_from_path (string path)
 int
 PluginManager::windows_vst_discover (string path)
 {
-	FSTInfo* finfo;
+	VSTInfo* finfo;
 	char buf[32];
 
 	if ((finfo = fst_get_info (const_cast<char *> (path.c_str()))) == 0) {
@@ -692,7 +692,7 @@ PluginManager::lxvst_discover_from_path (string path)
 int
 PluginManager::lxvst_discover (string path)
 {
-	VSTFXInfo* finfo;
+	VSTInfo* finfo;
 	char buf[32];
 
 	if ((finfo = vstfx_get_info (const_cast<char *> (path.c_str()))) == 0) {

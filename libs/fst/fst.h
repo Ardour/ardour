@@ -29,50 +29,13 @@ void fst_set_error_function (void (*func)(const char *));
 void  fst_error (const char *fmt, ...);
 
 typedef struct _FST FST;
-typedef struct _FSTHandle FSTHandle;
-typedef struct _FSTInfo FSTInfo;
-
-struct _FSTInfo 
-{
-    char *name;
-    char *creator;
-    int UniqueID;
-    char *Category;
-    
-    int numInputs;
-    int numOutputs;
-    int numParams;
-
-    int wantMidi;
-    int wantEvents;
-    int hasEditor;
-    int canProcessReplacing; // what do we need this for ?
-
-    // i think we should save the parameter Info Stuff soon.
-    // struct VstParameterInfo *infos;
-    char **ParamNames;
-    char **ParamLabels;
-};
-
-typedef AEffect * (*main_entry_t)(audioMasterCallback);
-
-struct _FSTHandle
-{
-    void*    dll;
-    char*    name;
-    char*    nameptr; /* ptr returned from strdup() etc. */
-    //struct AEffect* (*main_entry)(audioMasterCallback);
-    main_entry_t main_entry;
-
-    int plugincnt;
-};
 
 struct _FST 
 {
     AEffect*    plugin;
     void*       window; /* win32 HWND */
     int         xid; /* X11 XWindow */
-    FSTHandle*  handle;
+    VSTHandle*  handle;
     int 	width;
     int 	height;
     int		wantIdle;
@@ -114,10 +77,10 @@ extern "C" {
 extern int        fst_init (void* possible_hmodule);
 extern void       fst_exit ();
 
-extern FSTHandle* fst_load (const char*);
-extern int        fst_unload (FSTHandle*);
+extern VSTHandle* fst_load (const char*);
+extern int        fst_unload (VSTHandle*);
 
-extern FST*       fst_instantiate (FSTHandle*, audioMasterCallback amc, void* userptr);
+extern FST*       fst_instantiate (VSTHandle*, audioMasterCallback amc, void* userptr);
 extern void       fst_close (FST*);
 
 extern int fst_create_editor (FST* fst);
@@ -126,8 +89,8 @@ extern void  fst_destroy_editor (FST*);
 extern int  fst_get_XID (FST*);
 extern void fst_move_window_into_view (FST*);
 
-extern FSTInfo *fst_get_info (char *dllpathname);
-extern void fst_free_info (FSTInfo *info);
+extern VSTInfo *fst_get_info (char *dllpathname);
+extern void fst_free_info (VSTInfo *info);
 extern void fst_event_loop_remove_plugin (FST* fst);
 extern int fst_call_dispatcher(FST *fst, int opcode, int index, int val, void *ptr, float opt );
 

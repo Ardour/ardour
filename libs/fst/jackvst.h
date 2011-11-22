@@ -12,7 +12,7 @@ typedef struct _JackVST JackVST;
 
 struct _JackVST {
     jack_client_t *client;
-    FSTHandle*     handle;
+    VSTHandle*     handle;
     FST*           fst;
     float        **ins;
     float        **outs;

@@ -67,7 +67,7 @@ using namespace PBD;
 using std::min;
 using std::max;
 
-LXVSTPlugin::LXVSTPlugin (AudioEngine& e, Session& session, VSTFXHandle* h)
+LXVSTPlugin::LXVSTPlugin (AudioEngine& e, Session& session, VSTHandle* h)
 	: Plugin (e, session)
 {
 	handle = h;
@@ -636,7 +636,7 @@ LXVSTPluginInfo::load (Session& session)
 		PluginPtr plugin;
 
 		if (Config->get_use_lxvst()) {
-			VSTFXHandle* handle;
+			VSTHandle* handle;
 
 			handle = vstfx_load(path.c_str());
 
