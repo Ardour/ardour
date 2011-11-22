@@ -682,7 +682,7 @@ Sequence<Time>::add_note_unlocked(const NotePtr note, void* arg)
         /* This is the core method to add notes to a Sequence 
          */
 
-	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 add note %2 @ %3\n", this, (int)note->note(), note->time()));
+	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 add note %2 @ %3 dur %4\n", this, (int)note->note(), note->time(), note->length()));
 
         if (resolve_overlaps_unlocked (note, arg)) {
                 DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 DISALLOWED: note %2 @ %3\n", this, (int)note->note(), note->time()));

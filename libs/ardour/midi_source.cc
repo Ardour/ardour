@@ -241,6 +241,8 @@ MidiSource::midi_read (Evoral::EventSink<framepos_t>& dst, framepos_t source_sta
 					}
 				}
 			} else {
+                                DEBUG_TRACE (DEBUG::MidiSourceIO, string_compose ("%1: reached end with event @ %2 vs. %3\n",
+                                                                                  _name, time_frames, start+cnt));
 				break;
 			}
 		}
@@ -258,7 +260,7 @@ framecnt_t
 MidiSource::midi_write (MidiRingBuffer<framepos_t>& source, framepos_t source_start, framecnt_t duration)
 {
 	Glib::Mutex::Lock lm (_lock);
-	cerr << "MidiSource calling write unlocked\n";
+
 	const framecnt_t ret = write_unlocked (source, source_start, duration);
 
 	if (duration == max_framecnt) {
@@ -267,7 +269,6 @@ MidiSource::midi_write (MidiRingBuffer<framepos_t>& source, framepos_t source_st
 		_last_write_end += duration;
 	}
 
-	cerr << name() << " last write end now @ " << _last_write_end << endl;
 	return ret;
 }
 
