@@ -509,9 +509,9 @@ Editor::maybe_autoscroll (bool allow_horiz, bool allow_vert)
 
 	Gtk::Allocation editor_list = _the_notebook.get_allocation ();
 
-	int distance = root_rect.get_x() + root_rect.get_width() - window_rect.get_x() - window_rect.get_width();
+	framecnt_t distance = pixel_to_frame (root_rect.get_x() + root_rect.get_width() - window_rect.get_x() - window_rect.get_width());
 	if (_the_notebook.is_visible ()) {
-		distance += editor_list.get_width();
+		distance += pixel_to_frame (editor_list.get_width());
 	}
 
 	/* Note whether we're fudging the autoscroll (see autoscroll_fudge_threshold) */
@@ -572,21 +572,6 @@ Editor::autoscroll_canvas ()
 	GdkEventMotion ev;
 	double new_pixel;
 	double target_pixel;
-
-	/* Work out whether the right-hand side of this window is next to the edge of the screen */
-
-	Glib::RefPtr<Gdk::Window> gdk_window = get_window ();
-	Gdk::Rectangle window_rect;
-	gdk_window->get_frame_extents (window_rect);
-	
-	Glib::RefPtr<Gdk::Screen> screen = get_screen ();
-	Gdk::Rectangle root_rect;
-	screen->get_root_window()->get_frame_extents (root_rect);
-
-	int distance = root_rect.get_x() + root_rect.get_width() - window_rect.get_x() - window_rect.get_width();
-	if (_the_notebook.is_visible ()) {
-		distance += _the_notebook.get_allocation().get_width();
-	}
 	
 	if (autoscroll_x_distance != 0) {
 
