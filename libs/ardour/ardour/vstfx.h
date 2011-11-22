@@ -18,10 +18,6 @@ void vstfx_set_error_function (void (*func)(const char *));
 
 void  vstfx_error (const char *fmt, ...);
 
-/*We will use the vestige headers*/
-
-#define VESTIGE_HEADER
-
 #include <ardour/vestige/aeffectx.h>
 
 typedef struct _VSTFX VSTFX;

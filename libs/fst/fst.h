@@ -27,11 +27,7 @@ void fst_set_error_function (void (*func)(const char *));
 
 void  fst_error (const char *fmt, ...);
 
-#define VESTIGE_HEADER
-
-#ifdef VESTIGE_HEADER
 #include <vestige/aeffectx.h>
-#endif
 
 typedef struct _FST FST;
 typedef struct _FSTHandle FSTHandle;

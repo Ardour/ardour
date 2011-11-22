@@ -184,11 +184,7 @@ static FSTInfo *fst_info_from_plugin( FST *fst ) {
       info->creator = strdup (creator);
     }
 
-#ifdef VESTIGE_HEADER
     info->UniqueID = *((int32_t *) &plugin->unused_id);
-#else
-    info->UniqueID = plugin->uniqueID;
-#endif
 
     info->Category = strdup( "None" );          // FIXME:  
     info->numInputs = plugin->numInputs;

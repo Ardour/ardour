@@ -543,11 +543,7 @@ WindowsVSTPlugin::signal_latency () const
 		return _user_latency;
 	}
 
-#ifdef VESTIGE_HEADER
         return *((framecnt_t *) (((char *) &_plugin->flags) + 12)); /* initialDelay */
-#else
-	return _plugin->initial_delay;
-#endif
 }
 
 set<Evoral::Parameter>
@@ -623,11 +619,7 @@ WindowsVSTPlugin::unique_id() const
 {
 	char buf[32];
 
-#ifdef VESTIGE_HEADER
        snprintf (buf, sizeof (buf), "%d", *((int32_t*) &_plugin->unused_id));
-#else
-       snprintf (buf, sizeof (buf), "%d", _plugin->uniqueID);
-#endif
        return string (buf);
 }
 

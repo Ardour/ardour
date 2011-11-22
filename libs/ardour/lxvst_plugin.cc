@@ -499,11 +499,7 @@ LXVSTPlugin::signal_latency () const
 		return _user_latency;
 	}
 
-#ifdef VESTIGE_HEADER
 	return *((int32_t *) (((char *) &_plugin->flags) + 12)); /* initialDelay */
-#else
-	return _plugin->initial_delay;
-#endif
 }
 
 set<Evoral::Parameter> 
