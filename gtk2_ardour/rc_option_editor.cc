@@ -1503,7 +1503,7 @@ RCOptionEditor::RCOptionEditor ()
 
 	/* INTERFACE */
 
-	add_option (_("Interface"),
+	add_option (_("Visual|Interface"),
 	     new BoolOption (
 		     "widget_prelight",
 		     _("Graphically indicate mouse pointer hovering over various widgets"),
@@ -1513,7 +1513,7 @@ RCOptionEditor::RCOptionEditor ()
 
 #ifndef GTKOSX
 	/* font scaling does nothing with GDK/Quartz */
-	add_option (_("Interface"), new FontScalingOptions (_rc_config));
+	add_option (_("Visual|Interface"), new FontScalingOptions (_rc_config));
 #endif
 
 	/* The names of these controls must be the same as those given in MixerStrip
@@ -1527,7 +1527,7 @@ RCOptionEditor::RCOptionEditor ()
 	_mixer_strip_visibility.add (0, X_("MeterPoint"), _("Meter Point"));
 	
 	add_option (
-		_("Interface"),
+		_("Visual|Interface"),
 		new VisibilityOption (
 			_("Mixer Strip"),
 			&_mixer_strip_visibility,
@@ -1536,7 +1536,7 @@ RCOptionEditor::RCOptionEditor ()
 			)
 		);
 
-	add_option (_("Interface"),
+	add_option (_("Visual|Interface"),
 	     new BoolOption (
 		     "default-narrow_ms",
 		     _("Use narrow mixer strips by default"),
@@ -1544,7 +1544,7 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_default_narrow_ms)
 		     ));
 
-	add_option (_("Interface"), new OptionEditorHeading (_("Metering")));
+	add_option (_("Visual|Interface"), new OptionEditorHeading (_("Metering")));
 
 	ComboOption<float>* mht = new ComboOption<float> (
 		"meter-hold",
@@ -1558,7 +1558,7 @@ RCOptionEditor::RCOptionEditor ()
 	mht->add (MeterHoldMedium, _("medium"));
 	mht->add (MeterHoldLong, _("long"));
 
-	add_option (_("Interface"), mht);
+	add_option (_("Visual|Interface"), mht);
 
 	ComboOption<float>* mfo = new ComboOption<float> (
 		"meter-falloff",
@@ -1575,7 +1575,7 @@ RCOptionEditor::RCOptionEditor ()
 	mfo->add (METER_FALLOFF_FASTER, _("faster"));
 	mfo->add (METER_FALLOFF_FASTEST, _("fastest"));
 
-	add_option (_("Interface"), mfo);
+	add_option (_("Visual|Interface"), mfo);
 }
 
 void

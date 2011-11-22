@@ -179,7 +179,7 @@ EngineControl::EngineControl ()
 	basic_packer.attach (driver_combo, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	row++;
 
-	label = manage (new Label (_("Interface:")));
+	label = manage (new Label (_("Audio|Interface:")));
 	label->set_alignment (0, 0.5);
 	basic_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	basic_packer.attach (interface_combo, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
