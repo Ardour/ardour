@@ -587,6 +587,7 @@ AudioClock::get_field (Field f)
 		return edit_string;
 		break;
 	}
+	return "";
 }
 
 void
