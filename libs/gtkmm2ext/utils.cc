@@ -63,7 +63,6 @@ get_pixel_size (Glib::RefPtr<Pango::Layout> layout,
 void
 Gtkmm2ext::set_size_request_to_display_given_text (Gtk::Widget &w, const gchar *text,
 						   gint hpadding, gint vpadding)
-	
 {
 	int width, height;
 	w.ensure_style ();
@@ -76,7 +75,6 @@ void
 Gtkmm2ext::set_size_request_to_display_given_text (Gtk::Widget &w, 
 						   const std::vector<std::string>& strings,
 						   gint hpadding, gint vpadding)
-	
 {
 	int width, height;
 	int width_max = 0;
@@ -220,15 +218,11 @@ Gtkmm2ext::pixbuf_from_string(const string& name, const Pango::FontDescription& 
 }
 
 void
-Gtkmm2ext::set_popdown_strings (Gtk::ComboBoxText& cr, const vector<string>& strings, bool set_size, gint hpadding, gint vpadding)
+Gtkmm2ext::set_popdown_strings (Gtk::ComboBoxText& cr, const vector<string>& strings)
 {
 	vector<string>::const_iterator i;
 
 	cr.clear ();
-
-	if (set_size) {
-                set_size_request_to_display_given_text (cr, strings, COMBO_FUDGE+10+hpadding, 15+vpadding); 
-	}
 
 	for (i = strings.begin(); i != strings.end(); ++i) {
 		cr.append_text (*i);

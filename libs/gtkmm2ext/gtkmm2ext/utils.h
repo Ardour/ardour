@@ -60,23 +60,14 @@ namespace Gtkmm2ext {
 						     gint hpadding,
 						     gint vpadding);
 
-        Glib::RefPtr<Gdk::Pixbuf> pixbuf_from_string (const std::string& name, 
-                                                      const Pango::FontDescription& font, 
-                                                      int clip_width, 
-                                                      int clip_height, 
-                                                      Gdk::Color fg);
+	Glib::RefPtr<Gdk::Pixbuf> pixbuf_from_string (const std::string& name, 
+	                                              const Pango::FontDescription& font, 
+	                                              int clip_width, 
+	                                              int clip_height, 
+	                                              Gdk::Color fg);
 
 	void set_popdown_strings (Gtk::ComboBoxText&, 
-				  const std::vector<std::string>&, 
-				  bool set_size = false,
-				  gint hpadding = 0, gint vpadding = 0);
-
-        // Combo's are stupid - they steal space from the entry for the button
-#ifdef GTKOSX
-        static const guint32 COMBO_FUDGE = 38; 
-#else
-        static const guint32 COMBO_FUDGE = 24; 
-#endif
+	                          const std::vector<std::string>&);
 
 	template<class T> void deferred_delete (void *ptr) {
 		delete static_cast<T *> (ptr);

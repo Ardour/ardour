@@ -245,7 +245,7 @@ AddRouteDialog::refill_track_modes ()
 		}
 	}
 
-	set_popdown_strings (mode_combo, s, true);
+	set_popdown_strings (mode_combo, s);
 	mode_combo.set_active_text (s.front());
 }
 
@@ -386,7 +386,7 @@ AddRouteDialog::refill_channel_setups ()
 		channel_combo_strings.push_back ((*i).name);
 	}
 
-	set_popdown_strings (channel_combo, channel_combo_strings, true);
+	set_popdown_strings (channel_combo, channel_combo_strings);
 	channel_combo.set_active_text (channel_combo_strings.front());
 }
 

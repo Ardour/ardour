@@ -71,7 +71,7 @@ GMCPGUI::GMCPGUI (GenericMidiControlProtocol& p)
 		popdowns.push_back ((*x).name);
 	}
 
-	set_popdown_strings (map_combo, popdowns, true, 5, 2);
+	set_popdown_strings (map_combo, popdowns);
 	
 	if (cp.current_binding().empty()) {
 		map_combo.set_active_text (popdowns[0]);

@@ -555,8 +555,6 @@ ARDOUR_UI::build_menu_bar ()
 	buffer_load_label.set_name ("BufferLoad");
 	buffer_load_label.set_use_markup ();
 
-	resize_text_widgets ();
-
 	sample_rate_box.add (sample_rate_label);
 	sample_rate_box.set_name ("SampleRate");
 	sample_rate_label.set_name ("SampleRate");

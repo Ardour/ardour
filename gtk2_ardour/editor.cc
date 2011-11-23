@@ -2788,11 +2788,11 @@ Editor::setup_toolbar ()
 	edit_mode_strings.push_back (edit_mode_to_string (Lock));
 
 	edit_mode_selector.set_name ("EditModeSelector");
-	set_popdown_strings (edit_mode_selector, edit_mode_strings, true);
+	set_popdown_strings (edit_mode_selector, edit_mode_strings);
 	edit_mode_selector.signal_changed().connect (sigc::mem_fun(*this, &Editor::edit_mode_selection_done));
 
-	mode_box->pack_start (edit_mode_selector);
-	mode_box->pack_start (*mouse_mode_button_box);
+	mode_box->pack_start (edit_mode_selector, false, false);
+	mode_box->pack_start (*mouse_mode_button_box, false, false);
 
 	_mouse_mode_tearoff = manage (new TearOff (*mode_box));
 	_mouse_mode_tearoff->set_name ("MouseModeBase");
@@ -2837,14 +2837,14 @@ Editor::setup_toolbar ()
 	zoom_out_full_button.set_related_action (act);
 
 	zoom_focus_selector.set_name ("ZoomFocusSelector");
-	set_popdown_strings (zoom_focus_selector, zoom_focus_strings, true);
+	set_popdown_strings (zoom_focus_selector, zoom_focus_strings);
 	zoom_focus_selector.signal_changed().connect (sigc::mem_fun(*this, &Editor::zoom_focus_selection_done));
 
 	_zoom_box.pack_start (zoom_out_button, false, false);
 	_zoom_box.pack_start (zoom_in_button, false, false);
 	_zoom_box.pack_start (zoom_out_full_button, false, false);
 
-	_zoom_box.pack_start (zoom_focus_selector);
+	_zoom_box.pack_start (zoom_focus_selector, false, false);
 
 	/* Track zoom buttons */
 	tav_expand_button.set_name ("TrackHeightButton");
@@ -2877,15 +2877,15 @@ Editor::setup_toolbar ()
 	snap_box.set_border_width (2);
 
 	snap_type_selector.set_name ("SnapTypeSelector");
-	set_popdown_strings (snap_type_selector, snap_type_strings, true);
+	set_popdown_strings (snap_type_selector, snap_type_strings);
 	snap_type_selector.signal_changed().connect (sigc::mem_fun(*this, &Editor::snap_type_selection_done));
 
 	snap_mode_selector.set_name ("SnapModeSelector");
-	set_popdown_strings (snap_mode_selector, snap_mode_strings, true);
+	set_popdown_strings (snap_mode_selector, snap_mode_strings);
 	snap_mode_selector.signal_changed().connect (sigc::mem_fun(*this, &Editor::snap_mode_selection_done));
 
 	edit_point_selector.set_name ("EditPointSelector");
-	set_popdown_strings (edit_point_selector, edit_point_strings, true);
+	set_popdown_strings (edit_point_selector, edit_point_strings);
 	edit_point_selector.signal_changed().connect (sigc::mem_fun(*this, &Editor::edit_point_selection_done));
 
 	snap_box.pack_start (snap_mode_selector, false, false);
@@ -2955,8 +2955,6 @@ Editor::setup_toolbar ()
 	toolbar_frame.set_shadow_type (SHADOW_OUT);
 	toolbar_frame.set_name ("BaseFrame");
 	toolbar_frame.add (_toolbar_viewport);
-
-        DPIReset.connect (sigc::mem_fun (*this, &Editor::resize_text_widgets));
 }
 
 void
@@ -5438,16 +5436,6 @@ Editor::action_menu_item (std::string const & name)
 	assert (a);
 
 	return *manage (a->create_menu_item ());
-}
-
-void
-Editor::resize_text_widgets ()
-{
-        set_size_request_to_display_given_text (edit_mode_selector, edit_mode_strings, COMBO_FUDGE+10, 15);
-        set_size_request_to_display_given_text (zoom_focus_selector, zoom_focus_strings, COMBO_FUDGE+10, 15);
-        set_size_request_to_display_given_text (snap_type_selector, snap_type_strings, COMBO_FUDGE+10, 15);
-        set_size_request_to_display_given_text (snap_mode_selector, snap_mode_strings, COMBO_FUDGE+10, 15);
-        set_size_request_to_display_given_text (edit_point_selector, edit_point_strings, COMBO_FUDGE+10, 15);
 }
 
 void

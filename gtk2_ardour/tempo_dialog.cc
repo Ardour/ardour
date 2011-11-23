@@ -77,7 +77,7 @@ TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double note_type,
 	strings.push_back (_("sixteenth (16)"));
 	strings.push_back (_("thirty-second (32)"));
 
-	set_popdown_strings (note_types, strings, true);
+	set_popdown_strings (note_types, strings);
 
 	if (note_type == 1.0f) {
 		note_types.set_active_text (_("whole (1)"));
@@ -275,7 +275,7 @@ MeterDialog::init (const Timecode::BBT_Time& when, double bpb, double note_type,
 	strings.push_back (_("sixteenth (16)"));
 	strings.push_back (_("thirty-second (32)"));
 
-	set_popdown_strings (note_types, strings, true);
+	set_popdown_strings (note_types, strings);
 
 	if (note_type == 1.0f) {
 		note_types.set_active_text (_("whole (1)"));

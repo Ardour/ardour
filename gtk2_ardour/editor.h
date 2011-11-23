@@ -2067,8 +2067,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	MouseCursors* _cursors;
 
-	void resize_text_widgets ();
-
 	void follow_mixer_selection ();
 	bool _following_mixer_selection;
 
