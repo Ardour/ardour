@@ -143,11 +143,12 @@ class LV2Plugin : public ARDOUR::Plugin
 	LV2_DataAccess _data_access_extension_data;
 	LV2_Feature    _data_access_feature;
 	LV2_Feature    _instance_access_feature;
-	LV2_Feature    _path_support_feature;
-	LV2_Feature    _new_file_support_feature;
+	LV2_Feature    _map_path_feature;
+	LV2_Feature    _make_path_feature;
 
 	static URIMap   _uri_map;
 	static uint32_t _midi_event_type;
+	static uint32_t _state_path_type;
 
 	static int
 	lv2_state_store_callback (void*       handle,
@@ -164,12 +165,12 @@ class LV2Plugin : public ARDOUR::Plugin
 	                             uint32_t* type,
 	                             uint32_t* flags);
 
-	static char* lv2_files_abstract_path (void*       host_data,
+	static char* lv2_state_abstract_path (void*       host_data,
 	                                      const char* absolute_path);
-	static char* lv2_files_absolute_path (void*       host_data,
+	static char* lv2_state_absolute_path (void*       host_data,
 	                                      const char* abstract_path);
-	static char* lv2_files_new_file_path (void*       host_data,
-	                                      const char* relative_path);
+	static char* lv2_state_make_path (void*       host_data,
+	                                  const char* path);
 
 	void init (void* c_plugin, framecnt_t rate);
 	void run (pframes_t nsamples);

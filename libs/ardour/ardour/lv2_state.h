@@ -34,8 +34,10 @@
 
 namespace ARDOUR {
 
+class LV2Plugin;
+
 struct LV2State {
-	LV2State(URIMap& map) : uri_map(map) {}
+	LV2State(const LV2Plugin& plug, URIMap& map) : plugin(plug), uri_map(map) {}
 
 	struct Value {
 		inline Value(uint32_t k, const void* v, size_t s, uint32_t t, uint32_t f)
@@ -75,6 +77,7 @@ struct LV2State {
 		const uint32_t key  = file_id_to_runtime_id(file_key);
 		const uint32_t type = file_id_to_runtime_id(file_type);
 		if (!key || !type) {
+			PBD::error << "Invalid file key or type" << endmsg;
 			return 1;
 		}
 
@@ -133,9 +136,10 @@ struct LV2State {
 		}
 	}
 
-	URIMap& uri_map;
-	URIs    uris;
-	Values  values;
+	const LV2Plugin& plugin;
+	URIMap&          uri_map;
+	URIs             uris;
+	Values           values;
 };
 
 } // namespace ARDOUR

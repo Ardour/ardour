@@ -36,8 +36,13 @@ extern "C" {
 #define LV2_STATE_URI "http://lv2plug.in/ns/ext/state"
 
 #define LV2_STATE_INTERFACE_URI LV2_STATE_URI "#Interface"
+#define LV2_STATE_PATH_URI      LV2_STATE_URI "#Path"
+#define LV2_STATE_MAP_PATH_URI  LV2_STATE_URI "#pathMap"
+#define LV2_STATE_MAKE_PATH_URI LV2_STATE_URI "#newPath"
 
 typedef void* LV2_State_Handle;
+typedef void* LV2_State_Map_Path_Handle;
+typedef void* LV2_State_Make_Path_Handle;
 
 /**
    Flags describing value characteristics.
@@ -250,6 +255,97 @@ typedef struct _LV2_State_Interface {
 	                const LV2_Feature *const *  features);
 
 } LV2_State_Interface;
+
+/**
+   Feature data for state:pathMap (LV2_STATE_MAP_PATH_URI).
+*/
+typedef struct {
+
+	/**
+	   Opaque host data.
+	*/
+	LV2_State_Map_Path_Handle handle;
+
+	/**
+	   Map an absolute path to an abstract path for use in plugin state.
+	   @param handle MUST be the @a handle member of this struct.
+	   @param absolute_path The absolute path of a file.
+	   @return An abstract path suitable for use in plugin state.
+
+	   The plugin MUST use this function to map any paths that will be stored
+	   in files in plugin state.  The returned value is an abstract path which
+	   MAY not be an actual file system path; @ref absolute_path MUST be used
+	   to map it to an actual path in order to use the file.
+
+	   Hosts MAY map paths in any way (e.g. by creating symbolic links within
+	   the plugin's state directory or storing a list of referenced files
+	   elsewhere).  Plugins MUST NOT make any assumptions about abstract paths
+	   except that they can be mapped back to an absolute path using @ref
+	   absolute_path.
+
+	   This function may only be called within the context of
+	   LV2_State_Interface.save() or LV2_State_Interface.restore().  The caller
+	   is responsible for freeing the returned value.
+	*/
+	char* (*abstract_path)(LV2_State_Map_Path_Handle handle,
+	                       const char*               absolute_path);
+
+	/**
+	   Map an abstract path from plugin state to an absolute path.
+	   @param handle MUST be the @a handle member of this struct.
+	   @param abstract_path An abstract path (e.g. a path from plugin state).
+	   @return An absolute file system path.
+
+	   Since abstract paths are not necessarily actual file paths (or at least
+	   not necessarily absolute paths), this function MUST be used in order to
+	   actually open or otherwise use the file referred to by an abstract path.
+
+	   This function may only be called within the context of
+	   LV2_State_Interface.save() or LV2_State_Interface.restore().  The caller
+	   is responsible for freeing the returned value.
+	*/
+	char* (*absolute_path)(LV2_State_Map_Path_Handle handle,
+	                       const char*               abstract_path);
+
+} LV2_State_Map_Path;
+
+/**
+   Feature data for state:makePath (@ref LV2_STATE_MAKE_PATH_URI).
+*/
+typedef struct {
+
+	/**
+	   Opaque host data.
+	*/
+	LV2_State_Make_Path_Handle handle;
+
+	/**
+	   Return a path the plugin may use to create a new file.
+	   @param handle MUST be the @a handle member of this struct.
+	   @param path The path of the new file relative to a namespace unique
+	   to this plugin instance.
+	   @return The absolute path to use for the new file.
+
+	   This function can be used by plugins to create files and directories,
+	   either at state saving time (if this feature is passed to
+	   LV2_State_Interface.save()) or any time (if this feature is passed to
+	   LV2_Descriptor.instantiate()).
+
+	   The host must do whatever is necessary for the plugin to be able to
+	   create a file at the returned path (e.g. using fopen), including
+	   creating any leading directories.
+
+	   If this function is passed to LV2_Descriptor.instantiate(), it may be
+	   called from any non-realtime context.  If it is passed to
+	   LV2_State_Interface.save(), it may only be called within the dynamic
+	   scope of that function call.
+
+	   The caller is responsible for freeing the returned value with free().
+	*/
+	char* (*path)(LV2_State_Make_Path_Handle handle,
+	              const char*                path);
+
+} LV2_State_Make_Path;
 
 #ifdef __cplusplus
 } /* extern "C" */
