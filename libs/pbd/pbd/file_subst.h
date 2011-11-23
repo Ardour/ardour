@@ -25,7 +25,7 @@
 
 namespace PBD {
 
-        int file_subst (std::string& path, const std::map<std::string,std::string>&);
+        int file_subst (const std::string& path, const std::map<std::string,std::string>&);
 
 } //namespace PBD
 

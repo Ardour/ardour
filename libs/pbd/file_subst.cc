@@ -40,7 +40,7 @@ using namespace std;
 */
 
 int
-file_subst (const string& path, const map<string,string>& dict)
+PBD::file_subst (const string& path, const map<string,string>& dict)
 {
         ifstream in (path.c_str());
         int replacements = 0;
@@ -61,6 +61,7 @@ file_subst (const string& path, const map<string,string>& dict)
         try {
                 str.reserve (length);
         } catch (exception& e) {
+		cerr << "reserve failed\n";
                 error << string_compose (_("could not reserve space to read substitution data from %1 (err: %2"),
                                          path, e.what()) << endmsg;
                 in.close ();
@@ -69,15 +70,22 @@ file_subst (const string& path, const map<string,string>& dict)
 
         /* read the file contents into the string */
 
-        while (!in.eof()) {
-                str += in.get();
-        }
+        while (true) {
 
-        if (!in) {
-                error << string_compose (_("could not read data for substitution from %1 (err: %2)"),
-                                           path, strerror (errno)) << endmsg;
-                in.close ();
-                return -1;
+                str += in.get();
+
+		if (in.eof()) {
+			break;
+		}
+
+		if (in.fail()) {
+			cerr << "input file has failed after " << str.size() << "chars\n";
+			error << string_compose (_("could not read data for substitution from %1 (err: %2)"),
+						 path, strerror (errno)) << endmsg;
+			in.close ();
+			return -1;
+		}
+
         }
 
         in.close ();
@@ -87,20 +95,20 @@ file_subst (const string& path, const map<string,string>& dict)
         for (map<string,string>::const_iterator i = dict.begin(); i != dict.end(); ++i) {
                 replacements += replace_all (str, i->first, i->second);
         }
-        
+
         if (replacements) {
                 char suffix[64];
                 snprintf (suffix, sizeof (suffix), ".fs_%d", getpid());
                 string s = path + suffix;
-                
 
                 ofstream out (s.c_str());
-                
+
                 if (out) {
 
                         out << str;
 
                         if (!out) {
+				cerr << "output failed\n";
                                 /* ignore error since we're failing anyway, although
                                    it will leave the file around.
                                 */
@@ -108,7 +116,6 @@ file_subst (const string& path, const map<string,string>& dict)
                                 (void) ::unlink (s.c_str());
                                 return -1;
                         } else {
-#if 0
                                 if (::rename (s.c_str(), path.c_str())) {
                                         error << string_compose (_("Could not rename substituted file %1 to %2 (err: %3)"), 
                                                                  s, path, strerror (errno)) << endmsg;
@@ -116,7 +123,6 @@ file_subst (const string& path, const map<string,string>& dict)
                                         out.close ();
                                         return -1;
                                 }
-#endif
                         }
 
                         out.close ();
@@ -129,3 +135,4 @@ file_subst (const string& path, const map<string,string>& dict)
 
         return 0;
 }
+
