@@ -74,7 +74,6 @@ fst_new ()
 	pthread_cond_init (&fst->plugin_dispatcher_called, NULL);
 	fst->want_program = -1;
 	fst->want_chunk = 0;
-	fst->current_program = -1;
 	fst->n_pending_keys = 0;
 	fst->has_editor = 0;
 	fst->program_set_without_editor = 0;
@@ -101,8 +100,6 @@ maybe_set_program (VSTState* fst)
 		if (fst->vst_version >= 2) {
 			fst->plugin->dispatcher (fst->plugin, 68 /* effEndSetProgram */, 0, 0, NULL, 0);
 		}
-		/* did it work? */
-		fst->current_program = fst->plugin->dispatcher (fst->plugin, 3, /* effGetProgram */ 0, 0, NULL, 0);
 		fst->want_program = -1; 
 	}
 	

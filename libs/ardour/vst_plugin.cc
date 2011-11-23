@@ -145,12 +145,6 @@ VSTPlugin::add_state (XMLNode* root) const
 {
 	LocaleGuard lg (X_("POSIX"));
 
-	if (_state->current_program != -1) {
-		char buf[32];
-		snprintf (buf, sizeof (buf), "%d", _state->current_program);
-		root->add_property ("current-program", buf);
-	}
-
 	if (_plugin->flags & 32 /* effFlagsProgramsChunks */) {
 
 		gchar* data = get_chunk (false);
@@ -193,12 +187,6 @@ VSTPlugin::set_state (const XMLNode& node, int version)
 		return 0;
 	}
 
-	const XMLProperty* prop;
-
-	if ((prop = node.property ("current-program")) != 0) {
-		_state->want_program = atoi (prop->value().c_str());
-	}
-
 	XMLNode* child;
 	int ret = -1;
 
@@ -229,10 +217,6 @@ VSTPlugin::set_state (const XMLNode& node, int version)
 
 			_plugin->setParameter (_plugin, param, val);
 		}
-
-		/* program number is not knowable */
-
-		_state->current_program = -1;
 
 		ret = 0;
 

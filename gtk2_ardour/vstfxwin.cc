@@ -407,9 +407,6 @@ again:
 						vstfx->plugin->dispatcher (vstfx->plugin, 68 /* effEndSetProgram */, 0, 0, NULL, 0);
 					}
 					
-					/* did it work? */
-					
-					vstfx->current_program = vstfx->plugin->dispatcher (vstfx->plugin, 3, /* effGetProgram */ 0, 0, NULL, 0);
 					vstfx->want_program = -1; 
 				}
 				

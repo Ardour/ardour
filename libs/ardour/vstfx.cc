@@ -69,7 +69,6 @@ vstfx_new ()
 	
 	vstfx->want_program = -1;
 	vstfx->want_chunk = 0;
-	vstfx->current_program = -1;
 	vstfx->n_pending_keys = 0;
 	vstfx->has_editor = 0;
 	vstfx->program_set_without_editor = 0;

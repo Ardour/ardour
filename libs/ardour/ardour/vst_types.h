@@ -104,7 +104,6 @@ struct _VSTState
 	int	    n_pending_keys;
 	unsigned char * wanted_chunk;
 	int 	    wanted_chunk_size;
-	int	    current_program;
 	float *     want_params;
 	float *     set_params;
 	
