@@ -99,15 +99,7 @@ void
 VSTPlugin::set_parameter (uint32_t which, float val)
 {
 	_plugin->setParameter (_plugin, which, val);
-	
-	if (_state->want_program == -1 && _state->want_chunk == 0) {
-		/* Heinous hack: Plugin::set_parameter below updates the `modified' status of the
-		   current preset, but if _state->want_program is not -1 then there is a preset
-		   setup pending or in progress, which we don't want any `modified' updates
-		   to happen for.  So we only do this if _state->want_program is -1.
-		*/
-		Plugin::set_parameter (which, val);
-	}
+	Plugin::set_parameter (which, val);
 }
 
 uint32_t
