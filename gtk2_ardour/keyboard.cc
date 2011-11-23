@@ -32,6 +32,7 @@
 
 #include <gdk/gdkkeysyms.h>
 #include <pbd/error.h>
+#include <pbd/file_subst.h>
 
 #include "keyboard.h"
 #include "gui_thread.h"
@@ -613,6 +614,17 @@ Keyboard::setup_keybindings ()
 bool
 Keyboard::load_keybindings (string path)
 {
+#ifdef GTKOSX
+        /* various versions of the GTK/OSX stack that we have used have had different
+           modifier masks associated with the command key. The current version (November 2011)
+           uses Mod2, previous versions used Meta. Edit the file before loading to change
+           any Meta entries to Mod2
+        */
+        std::map<string,string> dict;
+        dict.push_back (pair ("<Meta>", "<Mod2>"));
+        (void) PBD::file_subst (path, dict);
+#endif
+
 	try {
 		cerr << "loading bindings from " << path << endl;
 
