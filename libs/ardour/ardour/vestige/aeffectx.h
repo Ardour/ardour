@@ -102,17 +102,17 @@
 #define effEditTop 20
 #define effProcessEvents 25
 #define effGetEffectName 45
-#define effGetParameterProperties 47 // missing
 #define effGetVendorString 47
 #define effGetProductString 48
 #define effGetVendorVersion 49
 #define effCanDo 51 // currently unused
+/* from http://asseca.com/vst-24-specs/efGetParameterProperties.html */
+#define effGetParameterProperties 56
 #define effGetVstVersion 58 // currently unused
 
 #define kEffectMagic (CCONST( 'V', 's', 't', 'P' ))
 #define kVstLangEnglish 1
 #define kVstMidiType 1
-#define kVstParameterUsesFloatStep (1 << 2)
 #define kVstTempoValid (1 << 10)
 #define kVstTransportPlaying (1 << 1)
 
@@ -177,22 +177,34 @@ struct _VstEvents
 
 typedef struct _VstEvents VstEvents;
 
-// Not finished, neither really used
+/* this struct taken from http://asseca.com/vst-24-specs/efGetParameterProperties.html */
 struct _VstParameterProperties
 {
 	float stepFloat;
+	float smallStepFloat;
+	float largeStepFloat;
 	char label[64];
-	int flags;
-	int minInteger;
-	int maxInteger;
-	int stepInteger;
+	int32_t flags;
+	int32_t minInteger;
+	int32_t maxInteger;
+	int32_t stepInteger;
+	int32_t largeStepInteger;
 	char shortLabel[8];
-	int category;
-	char categoryLabel[24];
-	char empty[128];
 };
 
 typedef struct _VstParameterProperties VstParameterProperties;
+
+/* this enum taken from http://asseca.com/vst-24-specs/efGetParameterProperties.html */
+enum VstParameterFlags
+{
+	kVstParameterIsSwitch                = 1 << 0,  /* parameter is a switch (on/off) */
+	kVstParameterUsesIntegerMinMax       = 1 << 1,  /* minInteger, maxInteger valid */
+	kVstParameterUsesFloatStep           = 1 << 2,  /* stepFloat, smallStepFloat, largeStepFloat valid */
+	kVstParameterUsesIntStep             = 1 << 3,  /* stepInteger, largeStepInteger valid */
+	kVstParameterSupportsDisplayIndex    = 1 << 4,  /* displayIndex valid */
+	kVstParameterSupportsDisplayCategory = 1 << 5,  /* category, etc. valid */
+	kVstParameterCanRamp                 = 1 << 6   /* set if parameter value can ramp up/down */
+};
 
 struct _AEffect
 {

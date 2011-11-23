@@ -234,8 +234,6 @@ VSTPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& desc) 
 
 	if (_plugin->dispatcher (_plugin, effGetParameterProperties, which, 0, &prop, 0)) {
 
-#ifdef VESTIGE_COMPLETE
-
 		/* i have yet to find or hear of a VST plugin that uses this */
 
 		if (prop.flags & kVstParameterUsesIntegerMinMax) {
@@ -271,7 +269,6 @@ VSTPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& desc) 
 		desc.logarithmic = false;
 		desc.sr_dependent = false;
 		desc.label = prop.label;
-#endif
 
 	} else {
 
