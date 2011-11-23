@@ -17,9 +17,14 @@
 
 */
 
+#ifndef __pbd_copyfile_h__
+#define __pbd_copyfile_h__
+
 #include <string>
 
 namespace PBD {
 
 	int copy_file (const std::string& from, const std::string& to);
 }
+
+#endif /* __pbd_copyfile_h__ */
