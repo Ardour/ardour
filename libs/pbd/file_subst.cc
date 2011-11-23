@@ -61,7 +61,6 @@ PBD::file_subst (const string& path, const map<string,string>& dict)
         try {
                 str.reserve (length);
         } catch (exception& e) {
-		cerr << "reserve failed\n";
                 error << string_compose (_("could not reserve space to read substitution data from %1 (err: %2"),
                                          path, e.what()) << endmsg;
                 in.close ();
@@ -79,7 +78,6 @@ PBD::file_subst (const string& path, const map<string,string>& dict)
 		}
 
 		if (in.fail()) {
-			cerr << "input file has failed after " << str.size() << "chars\n";
 			error << string_compose (_("could not read data for substitution from %1 (err: %2)"),
 						 path, strerror (errno)) << endmsg;
 			in.close ();
@@ -108,7 +106,6 @@ PBD::file_subst (const string& path, const map<string,string>& dict)
                         out << str;
 
                         if (!out) {
-				cerr << "output failed\n";
                                 /* ignore error since we're failing anyway, although
                                    it will leave the file around.
                                 */
