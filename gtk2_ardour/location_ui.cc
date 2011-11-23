@@ -201,7 +201,6 @@ LocationEditRow::set_session (Session *sess)
 	start_clock.set_session (_session);
 	end_clock.set_session (_session);
 	length_clock.set_session (_session);
-
 }
 
 void
@@ -717,7 +716,6 @@ LocationUI::LocationUI ()
 	i_am_the_modifier = 0;
 
         _clock_group = new ClockGroup;
-        _clock_group->set_clock_mode (AudioClock::Frames);
 
 	VBox* vbox = manage (new VBox);
 
@@ -1066,6 +1064,7 @@ LocationUI::set_session(ARDOUR::Session* s)
 		_session->locations()->StateChanged.connect (_session_connections, invalidator (*this), boost::bind (&LocationUI::refresh_location_list, this), gui_context());
 		_session->locations()->added.connect (_session_connections, invalidator (*this), ui_bind (&LocationUI::location_added, this, _1), gui_context());
 		_session->locations()->removed.connect (_session_connections, invalidator (*this), ui_bind (&LocationUI::location_removed, this, _1), gui_context());
+		_clock_group->set_clock_mode (clock_mode_from_session_instant_xml ());
 	}
 
 	loop_edit_row.set_session (s);
@@ -1104,6 +1103,30 @@ LocationUI::session_going_away()
 	punch_edit_row.set_location (0);
 
 	SessionHandlePtr::session_going_away ();
+}
+
+XMLNode &
+LocationUI::get_state () const
+{
+	XMLNode* node = new XMLNode (X_("LocationUI"));
+	node->add_property (X_("clock-mode"), enum_2_string (_clock_group->clock_mode ()));
+	return *node;
+}
+
+AudioClock::Mode
+LocationUI::clock_mode_from_session_instant_xml () const
+{
+	XMLNode* node = _session->instant_xml (X_("LocationUI"));
+	if (!node) {
+		return AudioClock::Frames;
+	}
+
+	XMLProperty* p = node->property (X_("clock-mode"));
+	if (!p) {
+		return AudioClock::Frames;
+	}
+	      
+	return (AudioClock::Mode) string_2_enum (p->value (), AudioClock::Mode);
 }
 
 

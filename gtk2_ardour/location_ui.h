@@ -156,6 +156,8 @@ class LocationUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 
 	void refresh_location_list ();
 
+	XMLNode & get_state () const;
+
   private:
 	ARDOUR::LocationStack* locations;
 	ARDOUR::Location *newest_location;
@@ -197,6 +199,7 @@ class LocationUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	void map_locations (ARDOUR::Locations::LocationList&);
 
         ClockGroup* _clock_group;
+	AudioClock::Mode clock_mode_from_session_instant_xml () const;
 };
 
 class LocationUIWindow : public ArdourWindow
