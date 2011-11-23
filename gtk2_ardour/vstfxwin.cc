@@ -757,15 +757,3 @@ vstfx_event_loop_remove_plugin (VSTState* vstfx)
 	}
 }
 
-float
-htonf (float v)
-{
-      float result;
-      char * fin = (char*)&v;
-      char * fout = (char*)&result;
-      fout[0] = fin[3];
-      fout[1] = fin[2];
-      fout[2] = fin[1];
-      fout[3] = fin[0];
-      return result;
-}
