@@ -334,7 +334,6 @@ int main(int argc, char **argv) {
         conf.define ('HAVE_OGG', 1)
 
     if Options.options.lv2 and conf.is_defined('HAVE_LILV'):
-        print "LV2 option was ", Options.options.lv2
         conf.define ('LV2_SUPPORT', 1)
 
     conf.write_config_header('libardour-config.h', remove=False)
