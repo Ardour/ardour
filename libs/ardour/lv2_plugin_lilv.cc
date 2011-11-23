@@ -583,8 +583,7 @@ LV2Plugin::lv2_state_make_path(LV2_State_Make_Path_Handle handle,
 	const std::string abs_path = Glib::build_filename(
 		Glib::build_filename(
 			me->_session.plugins_dir(),
-			me->_insert_id.to_s()
-			),
+			me->_insert_id.to_s()),
 		path);
 
 	const std::string dirname = Glib::path_get_dirname(abs_path);
