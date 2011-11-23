@@ -25,8 +25,6 @@ public:
 	WindowsVSTPluginUI (boost::shared_ptr<ARDOUR::PluginInsert>, boost::shared_ptr<ARDOUR::VSTPlugin>);
 	~WindowsVSTPluginUI ();
 
-	gint get_preferred_height ();
-	gint get_preferred_width ();
 	bool start_updating (GdkEventAny*) { return false; }
 	bool stop_updating (GdkEventAny*) { return false; }
 

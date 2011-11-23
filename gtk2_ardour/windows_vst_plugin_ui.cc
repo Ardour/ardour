@@ -50,10 +50,6 @@ WindowsVSTPluginUI::package (Gtk::Window& win)
 {
 	VSTPluginUI::package (win);
 
-	/* This assumes that the window's owner understands the XEmbed protocol */
-
-	_socket.add_id (fst_get_XID (_vst->state ()));
-
 	fst_move_window_into_view (_vst->state ());
 
 	return 0;
