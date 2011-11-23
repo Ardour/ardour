@@ -31,14 +31,14 @@
 #include <fstream>
 
 #ifdef WINDOWS_VST_SUPPORT
-#include <fst.h>
+#include "fst.h"
 #include "pbd/basename.h"
 #include <cstring>
 #endif // WINDOWS_VST_SUPPORT
 
 #ifdef LXVST_SUPPORT
-#include <ardour/vstfx.h>
-#include <pbd/basename.h>
+#include "ardour/linux_vst_support.h"
+#include "pbd/basename.h"
 #include <cstring>
 #endif //LXVST_SUPPORT
 

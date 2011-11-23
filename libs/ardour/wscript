@@ -391,7 +391,7 @@ def build(bld):
         obj.defines += [ 'WINDOWS_VST_SUPPORT' ]
 
     if bld.is_defined('LXVST_SUPPORT'):
-        obj.source += [ 'lxvst_plugin.cc', 'vstfx.cc', 'vstfxinfofile.cc' ]
+        obj.source += [ 'lxvst_plugin.cc', 'linux_vst_support.cc', 'linux_vst_info_file.cc' ]
         obj.defines += [ 'LXVST_SUPPORT' ]
 
     if bld.is_defined('WINDOWS_VST_SUPPORT') or bld.is_defined('LXVST_SUPPORT'):

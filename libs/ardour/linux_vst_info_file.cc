@@ -20,7 +20,7 @@
 #include <glib.h>
 #include <glib/gstdio.h>
 
-#include "ardour/vstfx.h"
+#include "ardour/linux_vst_support.h"
 
 #define MAX_STRING_LEN 256
 

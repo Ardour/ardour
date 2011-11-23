@@ -34,7 +34,7 @@
 #endif
 
 #ifdef LXVST_SUPPORT
-#include "ardour/vstfx.h"
+#include "ardour/linux_vst_support.h"
 #endif
 
 #ifdef AUDIOUNIT_SUPPORT

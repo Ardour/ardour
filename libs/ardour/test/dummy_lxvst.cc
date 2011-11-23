@@ -1,6 +1,6 @@
 /* Dummy LXVST methods so that libardour can be linked against the test code */
 
-#include "ardour/vstfx.h"
+#include "ardour/linux_vst_support.h"
 
 int
 vstfx_init (void* ptr)

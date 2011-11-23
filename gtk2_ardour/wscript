@@ -399,7 +399,7 @@ def build(bld):
         obj.uselib += ' X11 '
 
     if bld.is_defined('LXVST_SUPPORT'):
-        obj.source += [ 'vstfxwin.cc', 'lxvst_plugin_ui.cc' ]
+        obj.source += [ 'linux_vst_gui_support.cc', 'lxvst_plugin_ui.cc' ]
         obj.defines += [ 'LXVST_SUPPORT' ]
         obj.uselib += ' X11 '
 

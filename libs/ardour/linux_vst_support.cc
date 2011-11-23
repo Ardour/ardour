@@ -10,7 +10,7 @@
 #include <unistd.h>
 #include <pthread.h>
 
-#include "ardour/vstfx.h"
+#include "ardour/linux_vst_support.h"
 #include "pbd/error.h"
 
 /***********************************************************/

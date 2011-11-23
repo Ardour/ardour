@@ -17,7 +17,7 @@
 
 */
 
-#include "ardour/vstfx.h"
+#include "ardour/linux_vst_support.h"
 #include "ardour/session.h"
 #include "ardour/lxvst_plugin.h"
 
