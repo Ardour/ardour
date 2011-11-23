@@ -107,23 +107,35 @@ class PlugUIBase : public virtual sigc::trackable, public PBD::ScopedConnectionL
   protected:
 	boost::shared_ptr<ARDOUR::PluginInsert> insert;
 	boost::shared_ptr<ARDOUR::Plugin> plugin;
-	Gtk::HBox _preset_box;
-	Gtk::ComboBoxText _preset_combo;
-	Gtk::Label _preset_modified;
-	Gtk::Button add_button;
-	Gtk::Button save_button;
-	Gtk::Button delete_button;
-	ArdourButton bypass_button;
-	Gtk::EventBox focus_button;
 
+	/* UI elements that can subclasses can add to their widgets */
+
+	/** a ComboBoxText which lists presets and manages their selection */
+	Gtk::ComboBoxText _preset_combo;
+	/** a label which has a * in if the current settings are different from the preset being shown */
+	Gtk::Label _preset_modified;
+	/** a button to add a preset */
+	Gtk::Button add_button;
+	/** a button to save the current settings as a new user preset */
+	Gtk::Button save_button;
+	/** a button to delete the current preset (if it is a user one) */
+	Gtk::Button delete_button;
+	/** a button to bypass the plugin */
+	ArdourButton bypass_button;
+	/** a button to acquire keyboard focus */
+	Gtk::EventBox focus_button;
+	/** an expander containing the plugin analysis graph */
+	Gtk::Expander plugin_analysis_expander;
+	/** a label indicating the plugin latency */
 	Gtk::Label latency_label;
+	/** a button which, when clicked, opens the latency GUI */
 	Gtk::Button latency_button;
+	
 	void set_latency_label ();
 
 	LatencyGUI* latency_gui;
 	ArdourWindow* latency_dialog;
 
-	Gtk::Expander plugin_analysis_expander;
 	PluginEqGui* eqgui;
 	Gtk::Requisition pre_eq_size;
 

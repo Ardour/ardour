@@ -34,7 +34,7 @@ VSTPluginUI::VSTPluginUI (boost::shared_ptr<ARDOUR::PluginInsert> insert, boost:
 	box->pack_end (delete_button, false, false);
 	box->pack_end (save_button, false, false);
 	box->pack_end (add_button, false, false);
-	box->pack_end (_preset_box, false, false);
+	box->pack_end (_preset_combo, false, false);
 
 	if (!insert->active ()) {
 		bypass_button.set_active_state (Gtkmm2ext::Active);

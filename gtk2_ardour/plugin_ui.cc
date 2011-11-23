@@ -461,7 +461,6 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	, plugin_analysis_expander (_("Plugin analysis"))
 	, eqgui (0)
 {
-	_preset_combo.set_size_request (100, -1);
 	_preset_modified.set_size_request (16, -1);
 	_preset_combo.signal_changed().connect(sigc::mem_fun(*this, &PlugUIBase::preset_selected));
 	ARDOUR_UI::instance()->set_tip (_preset_combo, _("Presets (if any) for this plugin\n(Both factory and user-created)"));
@@ -470,9 +469,6 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	ARDOUR_UI::instance()->set_tip (delete_button, _("Delete the current preset"));
 	ARDOUR_UI::instance()->set_tip (bypass_button, _("Disable signal processing by the plugin"));
 	_no_load_preset = 0;
-
-	_preset_box.pack_start (_preset_combo);
-	_preset_box.pack_start (_preset_modified);
 
 	update_preset_list ();
 	update_preset ();
