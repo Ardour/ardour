@@ -56,10 +56,6 @@ VSTPlugin::set_plugin (AEffect* e)
 
 	_plugin->dispatcher (_plugin, effSetSampleRate, 0, 0, NULL, (float) _session.frame_rate());
 	_plugin->dispatcher (_plugin, effSetBlockSize, 0, _session.get_block_size(), NULL, 0.0f);
-
-	/* set program to zero */
-
-	_plugin->dispatcher (_plugin, effSetProgram, 0, 0, NULL, 0.0f);
 }
 
 void
@@ -385,8 +381,8 @@ VSTPlugin::load_user_preset (PresetRecord r)
 
 			return false;
 
-		}
-		else {
+		} else {
+			
 			for (XMLNodeList::const_iterator j = (*i)->children().begin(); j != (*i)->children().end(); ++j) {
 				if ((*j)->name() == X_("Parameter")) {
 						XMLProperty* index = (*j)->property (X_("index"));
@@ -425,8 +421,7 @@ VSTPlugin::do_save_preset (string name)
 		p->add_content (string (data));
 		g_free (data);
 
-	}
-	else {
+	} else {
 
 		p = new XMLNode (X_("Preset"));
 		p->add_property (X_("uri"), uri);
