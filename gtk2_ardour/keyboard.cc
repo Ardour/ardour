@@ -621,8 +621,12 @@ Keyboard::load_keybindings (string path)
            any Meta entries to Mod2
         */
         std::map<string,string> dict;
-        dict.push_back (pair ("<Meta>", "<Mod2>"));
-        (void) PBD::file_subst (path, dict);
+        dict.insert (pair<string,string> ("<Meta>", "<Mod2>"));
+        if (PBD::file_subst (path, dict)) {
+		cerr << string_compose (_("Your keybindings will be wrong. The file %1 needs to be editable by Ardour to update it"),
+					 path) 
+		      << endl;
+	}
 #endif
 
 	try {

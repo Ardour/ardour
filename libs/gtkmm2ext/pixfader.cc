@@ -28,7 +28,7 @@ using namespace Gdk;
 using namespace std;
 
 #ifdef GTKOSX
-int PixFader::fine_scale_modifier = GDK_META_MASK;
+int PixFader::fine_scale_modifier = GDK_MOD2_MASK;
 #else
 int PixFader::fine_scale_modifier = GDK_CONTROL_MASK;
 #endif

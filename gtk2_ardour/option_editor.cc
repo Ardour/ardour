@@ -1145,18 +1145,18 @@ static const struct {
 
 #ifdef GTKOSX 
 
-	/* Command = Meta
+	/* Command = Mod2
 	   Option/Alt = Mod1
 	*/
 
 	{ "Shift", GDK_SHIFT_MASK },
-	{ "Command", GDK_META_MASK },
+	{ "Command", GDK_MOD2_MASK },
 	{ "Control", GDK_CONTROL_MASK },
 	{ "Option", GDK_MOD1_MASK },
-	{ "Command-Shift", GDK_MOD1_MASK|GDK_SHIFT_MASK },
-	{ "Command-Option", GDK_MOD1_MASK|GDK_MOD5_MASK },
-	{ "Shift-Option", GDK_SHIFT_MASK|GDK_MOD5_MASK },
-	{ "Shift-Command-Option", GDK_MOD5_MASK|GDK_SHIFT_MASK|GDK_MOD1_MASK },
+	{ "Command-Shift", GDK_MOD2_MASK|GDK_SHIFT_MASK },
+	{ "Command-Option", GDK_MOD2_MASK|GDK_MOD1_MASK },
+	{ "Shift-Option", GDK_SHIFT_MASK|GDK_MOD1_MASK },
+	{ "Shift-Command-Option", GDK_MOD1_MASK|GDK_SHIFT_MASK|GDK_MOD2_MASK },
 
 #else
 	{ "Shift", GDK_SHIFT_MASK },
