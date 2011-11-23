@@ -33,9 +33,9 @@ ControlSet::ControlSet()
 }
 
 ControlSet::ControlSet (const ControlSet&)
-        : noncopyable ()
+	: noncopyable ()
 {
-        /* derived class must copy controls */
+	/* derived class must copy controls */
 }
 
 void
@@ -47,7 +47,7 @@ ControlSet::add_control(boost::shared_ptr<Control> ac)
 
 	ac->list()->InterpolationChanged.connect_same_thread (
 		_list_connections, boost::bind (&ControlSet::control_list_interpolation_changed, this, ac->parameter(), _1)
-		);
+	                                                      );
 }
 
 void
@@ -91,26 +91,26 @@ ControlSet::find_next_event (double now, double end, ControlEvent& next_event) c
 
 	next_event.when = std::numeric_limits<double>::max();
 
-  	for (li = _controls.begin(); li != _controls.end(); ++li) {
+	for (li = _controls.begin(); li != _controls.end(); ++li) {
 		ControlList::const_iterator i;
 		boost::shared_ptr<const ControlList> alist (li->second->list());
 		ControlEvent cp (now, 0.0f);
 
- 		for (i = lower_bound (alist->begin(), alist->end(), &cp, ControlList::time_comparator);
-				i != alist->end() && (*i)->when < end; ++i) {
- 			if ((*i)->when > now) {
- 				break;
- 			}
- 		}
+		for (i = lower_bound (alist->begin(), alist->end(), &cp, ControlList::time_comparator);
+		     i != alist->end() && (*i)->when < end; ++i) {
+			if ((*i)->when > now) {
+				break;
+			}
+		}
 
- 		if (i != alist->end() && (*i)->when < end) {
- 			if ((*i)->when < next_event.when) {
- 				next_event.when = (*i)->when;
- 			}
- 		}
- 	}
+		if (i != alist->end() && (*i)->when < end) {
+			if ((*i)->when < next_event.when) {
+				next_event.when = (*i)->when;
+			}
+		}
+	}
 
- 	return next_event.when != std::numeric_limits<double>::max();
+	return next_event.when != std::numeric_limits<double>::max();
 }
 
 void

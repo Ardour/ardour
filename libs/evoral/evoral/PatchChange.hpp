@@ -1,20 +1,20 @@
 /*
-    Copyright (C) 2010 Paul Davis
-    Author: Carl Hetherington <cth@carlh.net>
+  Copyright (C) 2010 Paul Davis
+  Author: Carl Hetherington <cth@carlh.net>
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 #ifndef EVORAL_PATCH_CHANGE_HPP
@@ -28,7 +28,7 @@ namespace Evoral {
 /** Event representing a `patch change', composed of a LSB and MSB
  *  bank select and then a program change.
  */
-template<typename Time>	
+template<typename Time>
 class PatchChange
 {
 public:
@@ -49,7 +49,7 @@ public:
 		_bank_change_lsb.buffer()[0] = MIDI_CMD_CONTROL | c;
 		_bank_change_lsb.buffer()[1] = MIDI_CTL_LSB_BANK;
 		_bank_change_lsb.buffer()[2] = b & 0x7f;
-		
+
 		_program_change.buffer()[0] = MIDI_CMD_PGM_CHANGE | c;
 		_program_change.buffer()[1] = p;
 	}
@@ -65,7 +65,7 @@ public:
 	event_id_t id () const {
 		return _program_change.id ();
 	}
-	
+
 	void set_id (event_id_t id) {
 		_bank_change_msb.set_id (id);
 		_bank_change_lsb.set_id (id);
@@ -98,7 +98,7 @@ public:
 	void set_program (uint8_t p) {
 		_program_change.buffer()[1] = p;
 	}
-	
+
 	int bank () const {
 		return (bank_msb() << 7) | bank_lsb();
 	}
@@ -115,14 +115,14 @@ public:
 	uint8_t bank_lsb () const {
 		return _bank_change_lsb.buffer()[2];
 	}
-	
+
 	uint8_t channel () const { return _program_change.buffer()[0] & 0xf; }
 
 	inline bool operator< (const PatchChange<Time>& o) const {
 		if (time() != o.time()) {
 			return time() < o.time();
 		}
-		
+
 		if (bank != o.bank()) {
 			return bank() < o.bank();
 		}
@@ -164,5 +164,5 @@ private:
 };
 
 }
-	
+
 #endif

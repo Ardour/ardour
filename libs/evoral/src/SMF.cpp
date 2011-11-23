@@ -88,14 +88,14 @@ SMF::open(const std::string& path, int track) THROW_FILE_ERROR
 	if (f == 0) {
 		return -1;
 	}
-	
+
 	if ((_smf = smf_load (f)) == 0) {
 		return -1;
 	}
 
 	if ((_smf_track = smf_get_track_by_number(_smf, track)) == 0) {
 		return -2;
-        }
+	}
 
 	//cerr << "Track " << track << " # events: " << _smf_track->number_of_events << endl;
 	if (_smf_track->number_of_events == 0) {
@@ -129,7 +129,7 @@ SMF::create(const std::string& path, int track, uint16_t ppqn) THROW_FILE_ERROR
 	_smf = smf_new();
 
 	if (_smf == NULL) {
-                return -1;
+		return -1;
 	}
 
 	if (smf_set_ppqn(_smf, ppqn) != 0) {
@@ -148,19 +148,19 @@ SMF::create(const std::string& path, int track, uint16_t ppqn) THROW_FILE_ERROR
 
 	_smf_track->next_event_number = 0;
 
-        {
-                /* put a stub file on disk */
+	{
+		/* put a stub file on disk */
 
-                PBD::StdioFileDescriptor d (_file_path, "w+");
-                FILE* f = d.allocate ();
-                if (f == 0) {
-                        return -1;
-                }
-                
-                if (smf_save (_smf, f)) {
-                        return -1;
-                }
-        }
+		PBD::StdioFileDescriptor d (_file_path, "w+");
+		FILE* f = d.allocate ();
+		if (f == 0) {
+			return -1;
+		}
+
+		if (smf_save (_smf, f)) {
+			return -1;
+		}
+	}
 
 	_empty = true;
 
@@ -208,34 +208,34 @@ SMF::read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf, event_id_t* no
 	assert(delta_t);
 	assert(size);
 	assert(buf);
-        assert(note_id);
+	assert(note_id);
 
 	if ((event = smf_track_get_next_event(_smf_track)) != NULL) {
 
 		*delta_t = event->delta_time_pulses;
 
 		if (smf_event_is_metadata(event)) {
-                        *note_id = -1; // "no note id in this meta-event */
+			*note_id = -1; // "no note id in this meta-event */
 
-                        if (event->midi_buffer[1] == 0x7f) { // Sequencer-specific
+			if (event->midi_buffer[1] == 0x7f) { // Sequencer-specific
 
-                                uint32_t evsize;
-                                uint32_t lenlen;
-                                
-                                if (smf_extract_vlq (&event->midi_buffer[2], event->midi_buffer_length-2, &evsize, &lenlen) == 0) {
-                                
-                                        if (event->midi_buffer[2+lenlen] == 0x99 &&  // Evoral
-                                            event->midi_buffer[3+lenlen] == 0x1) { // Evoral Note ID
-                                                
-                                                uint32_t id;
-                                                uint32_t idlen;
-                                                
-                                                if (smf_extract_vlq (&event->midi_buffer[4+lenlen], event->midi_buffer_length-(4+lenlen), &id, &idlen) == 0) {
-                                                        *note_id = id;
-                                                }
-                                        }
-                                }
-                        }
+				uint32_t evsize;
+				uint32_t lenlen;
+
+				if (smf_extract_vlq (&event->midi_buffer[2], event->midi_buffer_length-2, &evsize, &lenlen) == 0) {
+
+					if (event->midi_buffer[2+lenlen] == 0x99 &&  // Evoral
+					    event->midi_buffer[3+lenlen] == 0x1) { // Evoral Note ID
+
+						uint32_t id;
+						uint32_t idlen;
+
+						if (smf_extract_vlq (&event->midi_buffer[4+lenlen], event->midi_buffer_length-(4+lenlen), &id, &idlen) == 0) {
+							*note_id = id;
+						}
+					}
+				}
+			}
 			return 0; /* this is a meta-event */
 		}
 
@@ -252,9 +252,9 @@ SMF::read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf, event_id_t* no
 		assert(midi_event_is_valid(*buf, *size));
 
 		/* printf("SMF::read_event @ %u: ", *delta_t);
-		for (size_t i = 0; i < *size; ++i) {
-			printf("%X ", (*buf)[i]);
-		} printf("\n") */
+		   for (size_t i = 0; i < *size; ++i) {
+		   printf("%X ", (*buf)[i]);
+		   } printf("\n") */
 
 		return event_size;
 	} else {
@@ -270,9 +270,9 @@ SMF::append_event_delta(uint32_t delta_t, uint32_t size, const uint8_t* buf, eve
 	}
 
 	/* printf("SMF::append_event_delta @ %u:", delta_t);
-	for (size_t i = 0; i < size; ++i) {
-		printf("%X ", buf[i]);
-	} printf("\n"); */
+	   for (size_t i = 0; i < size; ++i) {
+	   printf("%X ", buf[i]);
+	   } printf("\n"); */
 
 	if (!midi_event_is_valid(buf, size)) {
 		cerr << "WARNING: SMF ignoring illegal MIDI event" << endl;
@@ -281,8 +281,8 @@ SMF::append_event_delta(uint32_t delta_t, uint32_t size, const uint8_t* buf, eve
 
 	smf_event_t* event;
 
-        /* XXX july 2010: currently only store event ID's for notes, program changes and bank changes
-         */
+	/* XXX july 2010: currently only store event ID's for notes, program changes and bank changes
+	 */
 
 	uint8_t const c = buf[0] & 0xf0;
 	bool const store_id = (
@@ -290,42 +290,42 @@ SMF::append_event_delta(uint32_t delta_t, uint32_t size, const uint8_t* buf, eve
 		c == MIDI_CMD_NOTE_OFF ||
 		c == MIDI_CMD_PGM_CHANGE ||
 		(c == MIDI_CMD_CONTROL && (buf[1] == MIDI_CTL_MSB_BANK || buf[1] == MIDI_CTL_LSB_BANK))
-		);
+	                       );
 
 	if (store_id && note_id >= 0) {
-                int idlen;
-                int lenlen;
-                uint8_t idbuf[16];
-                uint8_t lenbuf[16];
+		int idlen;
+		int lenlen;
+		uint8_t idbuf[16];
+		uint8_t lenbuf[16];
 
-                event = smf_event_new ();
-                assert(event != NULL);
+		event = smf_event_new ();
+		assert(event != NULL);
 
-                /* generate VLQ representation of note ID */
-                idlen = smf_format_vlq (idbuf, sizeof(idbuf), note_id);
+		/* generate VLQ representation of note ID */
+		idlen = smf_format_vlq (idbuf, sizeof(idbuf), note_id);
 
-                /* generate VLQ representation of meta event length,
-                   which is the idlen + 2 bytes (Evoral type ID plus Note ID type)
-                */
+		/* generate VLQ representation of meta event length,
+		   which is the idlen + 2 bytes (Evoral type ID plus Note ID type)
+		*/
 
-                lenlen = smf_format_vlq (lenbuf, sizeof(lenbuf), idlen+2);
+		lenlen = smf_format_vlq (lenbuf, sizeof(lenbuf), idlen+2);
 
-                event->midi_buffer_length = 2 + lenlen + 2 + idlen;
+		event->midi_buffer_length = 2 + lenlen + 2 + idlen;
 		/* this should be allocated by malloc(3) because libsmf will
 		   call free(3) on it
 		*/
-                event->midi_buffer = (uint8_t*) malloc (sizeof (uint8_t*) * event->midi_buffer_length);
+		event->midi_buffer = (uint8_t*) malloc (sizeof (uint8_t*) * event->midi_buffer_length);
 
-                event->midi_buffer[0] = 0xff; // Meta-event
-                event->midi_buffer[1] = 0x7f; // Sequencer-specific
-                memcpy (&event->midi_buffer[2], lenbuf, lenlen);
-                event->midi_buffer[2+lenlen] = 0x99; // Evoral type ID
-                event->midi_buffer[3+lenlen] = 0x1;  // Evoral type Note ID
-                memcpy (&event->midi_buffer[4+lenlen], idbuf, idlen);
+		event->midi_buffer[0] = 0xff; // Meta-event
+		event->midi_buffer[1] = 0x7f; // Sequencer-specific
+		memcpy (&event->midi_buffer[2], lenbuf, lenlen);
+		event->midi_buffer[2+lenlen] = 0x99; // Evoral type ID
+		event->midi_buffer[3+lenlen] = 0x1;  // Evoral type Note ID
+		memcpy (&event->midi_buffer[4+lenlen], idbuf, idlen);
 
-                assert(_smf_track);
-                smf_track_add_event_delta_pulses(_smf_track, event, 0);
-        } 
+		assert(_smf_track);
+		smf_track_add_event_delta_pulses(_smf_track, event, 0);
+	}
 
 	event = smf_event_new_from_pointer(buf, size);
 	assert(event != NULL);
@@ -373,7 +373,7 @@ SMF::round_to_file_precision (double val) const
 void
 SMF::set_path (const std::string& p)
 {
-        _file_path = p;
+	_file_path = p;
 }
 
 } // namespace Evoral

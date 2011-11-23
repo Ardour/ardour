@@ -1,4 +1,3 @@
-
 /* This file is part of Evoral.
  * Copyright (C) 2008 David Robillard <http://drobilla.net>
  * Copyright (C) 2000-2008 Paul Davis
@@ -95,7 +94,7 @@ public:
 	inline void set_range(double min, double max, double normal, bool toggled) {
 		_metadata = boost::shared_ptr<Metadata>(new Metadata(min, max, normal, toggled));
 	}
-    
+
 	inline Metadata& metadata() const {
 		if (_metadata)
 			return *_metadata.get();

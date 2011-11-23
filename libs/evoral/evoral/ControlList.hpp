@@ -35,12 +35,12 @@ class Curve;
 /** A single event (time-stamped value) for a control
  */
 struct ControlEvent {
-    ControlEvent (double w, double v)
-	    : when (w), value (v), coeff (0)
+	ControlEvent (double w, double v)
+		: when (w), value (v), coeff (0)
 	{}
 
-    ControlEvent (const ControlEvent& other)
-	    : when (other.when), value (other.value), coeff (0)
+	ControlEvent (const ControlEvent& other)
+		: when (other.when), value (other.value), coeff (0)
 	{
 		if (other.coeff) {
 			create_coeffs();
@@ -58,9 +58,9 @@ struct ControlEvent {
 		coeff[0] = coeff[1] = coeff[2] = coeff[3] = 0.0;
 	}
 
-    double  when;
-    double  value;
-    double* coeff; ///< double[4] allocated by Curve as needed
+	double  when;
+	double  value;
+	double* coeff; ///< double[4] allocated by Curve as needed
 };
 
 
@@ -68,11 +68,11 @@ struct ControlEvent {
  * and allocates 8k blocks of new pointers at a time
  */
 typedef boost::fast_pool_allocator<
-		ControlEvent*,
-		boost::default_user_allocator_new_delete,
-		boost::details::pool::null_mutex,
-		8192>
-	ControlEventAllocator;
+	ControlEvent*,
+	boost::default_user_allocator_new_delete,
+	boost::details::pool::null_mutex,
+	8192>
+ControlEventAllocator;
 
 
 /** A list (sequence) of time-stamped values for a control
@@ -115,7 +115,7 @@ public:
 	void slide (iterator before, double distance);
 	void shift (double before, double distance);
 
-        virtual bool clamp_value (double& /*when*/, double& /*value*/) const { return true; }
+	virtual bool clamp_value (double& /*when*/, double& /*value*/) const { return true; }
 
 	void rt_add (double when, double value);
 	void add (double when, double value);
@@ -246,7 +246,7 @@ public:
 	mutable PBD::Signal0<void> Dirty;
 	/** Emitted when our interpolation style changes */
 	PBD::Signal1<void, InterpolationStyle> InterpolationChanged;
-	
+
 protected:
 
 	/** Called by unlocked_eval() to handle cases of 3 or more control points. */
@@ -282,13 +282,13 @@ protected:
 		EventList events;
 		double start_time;
 		double end_time;
-            
+
 		NascentInfo (double start = -1.0)
 			: start_time (start)
-			, end_time (-1.0) 
-			{}
+			, end_time (-1.0)
+		{}
 	};
-    
+
 	std::list<NascentInfo*> nascent;
 };
 

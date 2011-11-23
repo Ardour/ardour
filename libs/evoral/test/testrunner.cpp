@@ -12,20 +12,20 @@ main()
 {
 	Glib::thread_init();
 
-    CppUnit::TestResult testresult;
+	CppUnit::TestResult testresult;
 
-    CppUnit::TestResultCollector collectedresults;
-    testresult.addListener (&collectedresults);
+	CppUnit::TestResultCollector collectedresults;
+	testresult.addListener (&collectedresults);
 
-    CppUnit::BriefTestProgressListener progress;
-    testresult.addListener (&progress);
+	CppUnit::BriefTestProgressListener progress;
+	testresult.addListener (&progress);
 
-    CppUnit::TestRunner testrunner;
-    testrunner.addTest (CppUnit::TestFactoryRegistry::getRegistry ().makeTest ());
-    testrunner.run (testresult);
+	CppUnit::TestRunner testrunner;
+	testrunner.addTest (CppUnit::TestFactoryRegistry::getRegistry ().makeTest ());
+	testrunner.run (testresult);
 
-    CppUnit::CompilerOutputter compileroutputter (&collectedresults, std::cerr);
-    compileroutputter.write ();
+	CppUnit::CompilerOutputter compileroutputter (&collectedresults, std::cerr);
+	compileroutputter.write ();
 
-    return collectedresults.wasSuccessful () ? 0 : 1;
+	return collectedresults.wasSuccessful () ? 0 : 1;
 }

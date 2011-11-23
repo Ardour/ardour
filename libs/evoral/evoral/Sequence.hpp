@@ -98,13 +98,13 @@ public:
 	void start_write();
 	bool writing() const { return _writing; }
 
-        enum StuckNoteOption {
+	enum StuckNoteOption {
 		Relax,
 		DeleteStuckNotes,
 		ResolveStuckNotes
 	};
 
-        void end_write (StuckNoteOption, Time when = 0);
+	void end_write (StuckNoteOption, Time when = 0);
 
 	void append(const Event<Time>& ev, Evoral::event_id_t evid);
 
@@ -150,7 +150,7 @@ public:
 	inline       Notes& notes()       { return _notes; }
 	inline const Notes& notes() const { return _notes; }
 
-	enum NoteOperator { 
+	enum NoteOperator {
 		PitchEqual,
 		PitchLessThan,
 		PitchLessThanOrEqual,
@@ -169,7 +169,7 @@ public:
 	void trim_overlapping_notes ();
 	void remove_duplicate_notes ();
 
-	enum OverlapPitchResolution { 
+	enum OverlapPitchResolution {
 		LastOnFirstOff,
 		FirstOnFirstOff
 	};
@@ -187,7 +187,7 @@ public:
 
 	typedef boost::shared_ptr<PatchChange<Time> > PatchChangePtr;
 	typedef boost::shared_ptr<const PatchChange<Time> > constPatchChangePtr;
-	
+
 	struct EarlierPatchChangeComparator {
 		inline bool operator() (constPatchChangePtr a, constPatchChangePtr b) const {
 			return a->time() < b->time();
@@ -198,7 +198,7 @@ public:
 	inline       PatchChanges& patch_changes ()       { return _patch_changes; }
 	inline const PatchChanges& patch_changes () const { return _patch_changes; }
 
-        void dump (std::ostream&) const;
+	void dump (std::ostream&) const;
 
 private:
 	typedef std::priority_queue<NotePtr, std::deque<NotePtr>, LaterNoteEndComparator> ActiveNotes;
@@ -257,7 +257,7 @@ public:
 		std::set<Evoral::Parameter> const & f = std::set<Evoral::Parameter> ()) const {
 		return const_iterator (*this, t, force_discrete, f);
 	}
-	
+
 	const const_iterator& end() const { return _end_iter; }
 
 	typename Notes::const_iterator note_lower_bound (Time t) const;
@@ -269,7 +269,7 @@ public:
 	bool edited() const      { return _edited; }
 	void set_edited(bool yn) { _edited = yn; }
 
-	bool overlaps (const NotePtr& ev, 
+	bool overlaps (const NotePtr& ev,
 	               const NotePtr& ignore_this_note) const;
 	bool contains (const NotePtr& ev) const;
 

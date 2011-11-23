@@ -26,7 +26,7 @@ namespace Evoral {
 template<typename Time>
 Note<Time>::Note(uint8_t chan, Time t, Time l, uint8_t n, uint8_t v)
 	// FIXME: types?
-        : _on_event (0xDE, t, 3, NULL, true)
+	: _on_event (0xDE, t, 3, NULL, true)
 	, _off_event (0xAD, t + l, 3, NULL, true)
 {
 	assert(chan < 16);
@@ -50,21 +50,21 @@ Note<Time>::Note(uint8_t chan, Time t, Time l, uint8_t n, uint8_t v)
 
 template<typename Time>
 Note<Time>::Note(const Note<Time>& copy)
-        : _on_event(copy._on_event, true)
+	: _on_event(copy._on_event, true)
 	, _off_event(copy._off_event, true)
 {
-        set_id (copy.id());
+	set_id (copy.id());
 
 	assert(_on_event.buffer());
 	assert(_off_event.buffer());
 	/*
-	assert(copy._on_event.size == 3);
-	_on_event.buffer = _on_event_buffer;
-	memcpy(_on_event_buffer, copy._on_event_buffer, 3);
+	  assert(copy._on_event.size == 3);
+	  _on_event.buffer = _on_event_buffer;
+	  memcpy(_on_event_buffer, copy._on_event_buffer, 3);
 
-	assert(copy._off_event.size == 3);
-	_off_event.buffer = _off_event_buffer;
-	memcpy(_off_event_buffer, copy._off_event_buffer, 3);
+	  assert(copy._off_event.size == 3);
+	  _off_event.buffer = _off_event_buffer;
+	  memcpy(_off_event_buffer, copy._off_event_buffer, 3);
 	*/
 
 	assert(time() == copy.time());
@@ -84,8 +84,8 @@ Note<Time>::~Note()
 template<typename Time> void
 Note<Time>::set_id (event_id_t id)
 {
-        _on_event.set_id (id);
-        _off_event.set_id (id);
+	_on_event.set_id (id);
+	_off_event.set_id (id);
 }
 
 template<typename Time>

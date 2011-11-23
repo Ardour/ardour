@@ -251,7 +251,7 @@ smf_event_new_from_pointer(const void *midi_data, size_t len)
 		g_critical("Cannot allocate MIDI buffer structure: %s", strerror(errno));
 		smf_event_delete(event);
 
-		return (NULL); 
+		return (NULL);
 	}
 
 	memcpy(event->midi_buffer, midi_data, len);
@@ -269,7 +269,7 @@ smf_event_new_from_pointer(const void *midi_data, size_t len)
  * like this:
  *
  * smf_event_new_from_bytes(0xC0, 0x42, -1);
- * 
+ *
  * \param first_byte First byte of MIDI message.  Must be valid status byte.
  * \param second_byte Second byte of MIDI message or -1, if message is one byte long.
  * \param third_byte Third byte of MIDI message or -1, if message is two bytes long.
@@ -341,7 +341,7 @@ smf_event_new_from_bytes(int first_byte, int second_byte, int third_byte)
 		g_critical("Cannot allocate MIDI buffer structure: %s", strerror(errno));
 		smf_event_delete(event);
 
-		return (NULL); 
+		return (NULL);
 	}
 
 	event->midi_buffer[0] = first_byte;
@@ -378,7 +378,7 @@ static gint
 events_array_compare_function(gconstpointer aa, gconstpointer bb)
 {
 	smf_event_t *a, *b;
-	
+
 	/* "The comparison function for g_ptr_array_sort() doesn't take the pointers
 	    from the array as arguments, it takes pointers to the pointers in the array." */
 	a = (smf_event_t *)*(gpointer *)aa;
@@ -790,7 +790,7 @@ smf_track_get_last_event(const smf_track_t *track)
 
 	if (track->number_of_events == 0)
 		return (NULL);
-       
+
 	event = smf_track_get_event_by_number(track, track->number_of_events);
 
 	return (event);
@@ -845,7 +845,7 @@ smf_get_next_event(smf_t *smf)
 	}
 
 	event = smf_track_get_next_event(track);
-	
+
 	assert(event != NULL);
 
 	event->track->smf->last_seek_position = -1.0;
@@ -884,7 +884,7 @@ smf_peek_next_event(smf_t *smf)
 	}
 
 	event = smf_peek_next_event_from_track(track);
-	
+
 	assert(event != NULL);
 
 	return (event);
@@ -950,7 +950,7 @@ smf_seek_to_event(smf_t *smf, const smf_event_t *target)
 			smf_skip_next_event(smf);
 		else
 			break;
-	}	
+	}
 
 	smf->last_seek_position = event->time_seconds;
 

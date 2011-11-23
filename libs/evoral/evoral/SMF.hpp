@@ -67,10 +67,10 @@ public:
 
 	double round_to_file_precision (double val) const;
 
-  protected:
+protected:
 	void set_path (const std::string& p);
-    
-  private:
+
+private:
 	std::string  _file_path;
 	smf_t*       _smf;
 	smf_track_t* _smf_track;

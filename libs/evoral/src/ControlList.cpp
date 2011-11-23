@@ -107,11 +107,11 @@ ControlList::~ControlList()
 	for (EventList::iterator x = _events.begin(); x != _events.end(); ++x) {
 		delete (*x);
 	}
-        
+
 	for (list<NascentInfo*>::iterator n = nascent.begin(); n != nascent.end(); ++n) {
-                for (EventList::iterator x = (*n)->events.begin(); x != (*n)->events.end(); ++x) {
-                        delete *x;
-                }
+		for (EventList::iterator x = (*n)->events.begin(); x != (*n)->events.end(); ++x) {
+			delete *x;
+		}
 		delete (*n);
 	}
 
@@ -207,7 +207,7 @@ ControlList::extend_to (double when)
 	return true;
 }
 
-void 
+void
 ControlList::_x_scale (double factor)
 {
 	for (iterator i = _events.begin(); i != _events.end(); ++i) {
@@ -220,7 +220,7 @@ ControlList::_x_scale (double factor)
 void
 ControlList::write_pass_finished (double when)
 {
-        merge_nascent (when);
+	merge_nascent (when);
 }
 
 
@@ -233,104 +233,104 @@ struct ControlEventTimeComparator {
 void
 ControlList::merge_nascent (double when)
 {
-        {
-                Glib::Mutex::Lock lm (_lock);
+	{
+		Glib::Mutex::Lock lm (_lock);
 
-                if (nascent.empty()) {
-                        return;
-                }
+		if (nascent.empty()) {
+			return;
+		}
 
-                for (list<NascentInfo*>::iterator n = nascent.begin(); n != nascent.end(); ++n) {
+		for (list<NascentInfo*>::iterator n = nascent.begin(); n != nascent.end(); ++n) {
 
-                        NascentInfo* ninfo = *n;
-                        EventList& nascent_events (ninfo->events);
-                        bool need_adjacent_start_clamp;
-                        bool need_adjacent_end_clamp;
+			NascentInfo* ninfo = *n;
+			EventList& nascent_events (ninfo->events);
+			bool need_adjacent_start_clamp;
+			bool need_adjacent_end_clamp;
 
-                        if (nascent_events.empty()) {
-                                delete ninfo;
-                                continue;
-                        }
+			if (nascent_events.empty()) {
+				delete ninfo;
+				continue;
+			}
 
 			nascent_events.sort (ControlEventTimeComparator ());
-                        
-                        if (ninfo->start_time < 0.0) {
-                                ninfo->start_time = nascent_events.front()->when;
-                        }
-                        
-                        if (ninfo->end_time < 0.0) {
-                                ninfo->end_time = when;
-                        }
 
-                        bool preexisting = !_events.empty();
+			if (ninfo->start_time < 0.0) {
+				ninfo->start_time = nascent_events.front()->when;
+			}
 
-                        if (!preexisting) {
-                                
-                                _events = nascent_events;
-                                
-                        } else if (ninfo->end_time < _events.front()->when) {
-                                
-                                /* all points in nascent are before the first existing point */
+			if (ninfo->end_time < 0.0) {
+				ninfo->end_time = when;
+			}
 
-                                _events.insert (_events.begin(), nascent_events.begin(), nascent_events.end());
-                                
-                        } else if (ninfo->start_time > _events.back()->when) {
-                                
-                                /* all points in nascent are after the last existing point */
+			bool preexisting = !_events.empty();
 
-                                _events.insert (_events.end(), nascent_events.begin(), nascent_events.end());
-                                
-                        } else {
-                                
-                                /* find the range that overlaps with nascent events,
-                                   and insert the contents of nascent events.
-                                */
-                                
-                                iterator i;
-                                iterator range_begin = _events.end();
-                                iterator range_end = _events.end();
-                                double end_value = unlocked_eval (ninfo->end_time);
-                                double start_value = unlocked_eval (ninfo->start_time - 1);
+			if (!preexisting) {
 
-                                need_adjacent_end_clamp = true;
-                                need_adjacent_start_clamp = true;
+				_events = nascent_events;
 
-                                for (i = _events.begin(); i != _events.end(); ++i) {
+			} else if (ninfo->end_time < _events.front()->when) {
 
-                                        if ((*i)->when == ninfo->start_time) {
-                                                /* existing point at same time, remove it
-                                                   and the consider the next point instead.
-                                                */
-                                                i = _events.erase (i);
+				/* all points in nascent are before the first existing point */
 
-                                                if (i == _events.end()) {
-                                                        break;
-                                                }
+				_events.insert (_events.begin(), nascent_events.begin(), nascent_events.end());
 
-                                                if (range_begin == _events.end()) {
-                                                        range_begin = i;
-                                                        need_adjacent_start_clamp = false;
-                                                } else {
-                                                        need_adjacent_end_clamp = false;
-                                                }
-                                                
-                                                if ((*i)->when > ninfo->end_time) {
-                                                        range_end = i;
-                                                        break;
-                                                }   
+			} else if (ninfo->start_time > _events.back()->when) {
 
-                                        } else if ((*i)->when > ninfo->start_time) {
-                                                
-                                                if (range_begin == _events.end()) {
-                                                        range_begin = i;
-                                                }
-                                                
-                                                if ((*i)->when > ninfo->end_time) {
-                                                        range_end = i;
-                                                        break;
-                                                }
-                                        }
-                                }
+				/* all points in nascent are after the last existing point */
+
+				_events.insert (_events.end(), nascent_events.begin(), nascent_events.end());
+
+			} else {
+
+				/* find the range that overlaps with nascent events,
+				   and insert the contents of nascent events.
+				*/
+
+				iterator i;
+				iterator range_begin = _events.end();
+				iterator range_end = _events.end();
+				double end_value = unlocked_eval (ninfo->end_time);
+				double start_value = unlocked_eval (ninfo->start_time - 1);
+
+				need_adjacent_end_clamp = true;
+				need_adjacent_start_clamp = true;
+
+				for (i = _events.begin(); i != _events.end(); ++i) {
+
+					if ((*i)->when == ninfo->start_time) {
+						/* existing point at same time, remove it
+						   and the consider the next point instead.
+						*/
+						i = _events.erase (i);
+
+						if (i == _events.end()) {
+							break;
+						}
+
+						if (range_begin == _events.end()) {
+							range_begin = i;
+							need_adjacent_start_clamp = false;
+						} else {
+							need_adjacent_end_clamp = false;
+						}
+
+						if ((*i)->when > ninfo->end_time) {
+							range_end = i;
+							break;
+						}
+
+					} else if ((*i)->when > ninfo->start_time) {
+
+						if (range_begin == _events.end()) {
+							range_begin = i;
+						}
+
+						if ((*i)->when > ninfo->end_time) {
+							range_end = i;
+							break;
+						}
+					}
+				}
 
 				/* Now:
 				   range_begin is the first event on our list after the first nascent event
@@ -339,59 +339,59 @@ ControlList::merge_nascent (double when)
 				   range_begin may be equal to _events.end() iff the last event on our list
 				   was at the same time as the first nascent event.
 				*/
-                                
-                                if (range_begin != _events.begin()) {
-                                        /* clamp point before */
-                                        if (need_adjacent_start_clamp) {
-                                                _events.insert (range_begin, new ControlEvent (ninfo->start_time, start_value));
-                                        }
-                                }
 
-                                _events.insert (range_begin, nascent_events.begin(), nascent_events.end());
+				if (range_begin != _events.begin()) {
+					/* clamp point before */
+					if (need_adjacent_start_clamp) {
+						_events.insert (range_begin, new ControlEvent (ninfo->start_time, start_value));
+					}
+				}
 
-                                if (range_end != _events.end()) {
-                                        /* clamp point after */
-                                        if (need_adjacent_end_clamp) {
-                                                _events.insert (range_begin, new ControlEvent (ninfo->end_time, end_value));
-                                        }
-                                }
-                                
-                                _events.erase (range_begin, range_end);
-                        }
+				_events.insert (range_begin, nascent_events.begin(), nascent_events.end());
 
-                        delete ninfo;
-                }
+				if (range_end != _events.end()) {
+					/* clamp point after */
+					if (need_adjacent_end_clamp) {
+						_events.insert (range_begin, new ControlEvent (ninfo->end_time, end_value));
+					}
+				}
 
-                nascent.clear ();
+				_events.erase (range_begin, range_end);
+			}
 
-                if (writing()) {
-                        nascent.push_back (new NascentInfo ());
-                }
-        }
+			delete ninfo;
+		}
 
-        maybe_signal_changed ();
+		nascent.clear ();
+
+		if (writing()) {
+			nascent.push_back (new NascentInfo ());
+		}
+	}
+
+	maybe_signal_changed ();
 }
 
 void
 ControlList::rt_add (double when, double value)
 {
-        // this is for automation recording 
-        
-        if (touch_enabled() && !touching()) {
-                return;
-        }
+	// this is for automation recording
+
+	if (touch_enabled() && !touching()) {
+		return;
+	}
 
 	//cerr << "RT: alist " << this << " add " << value << " @ " << when << endl;
 
-        Glib::Mutex::Lock lm (_lock, Glib::TRY_LOCK);
+	Glib::Mutex::Lock lm (_lock, Glib::TRY_LOCK);
 
-        if (lm.locked()) {
-                assert (!nascent.empty());
+	if (lm.locked()) {
+		assert (!nascent.empty());
 		/* we don't worry about adding events out of time order as we will
 		   sort them in merge_nascent.
 		*/
-                nascent.back()->events.push_back (new ControlEvent (when, value));
-        }
+		nascent.back()->events.push_back (new ControlEvent (when, value));
+	}
 }
 
 void
@@ -405,13 +405,13 @@ ControlList::fast_simple_add (double when, double value)
 void
 ControlList::add (double when, double value)
 {
-        /* this is for making changes from some kind of user interface or 
-           control surface (GUI, MIDI, OSC etc) 
-        */
+	/* this is for making changes from some kind of user interface or
+	   control surface (GUI, MIDI, OSC etc)
+	*/
 
-        if (!clamp_value (when, value)) {
-                return;
-        }
+	if (!clamp_value (when, value)) {
+		return;
+	}
 
 	{
 		Glib::Mutex::Lock lm (_lock);
@@ -483,7 +483,7 @@ ControlList::erase (double when, double value)
 		if (i != end ()) {
 			_events.erase (i);
 		}
-		
+
 		mark_dirty ();
 	}
 
@@ -576,7 +576,7 @@ ControlList::slide (iterator before, double distance)
 			++before;
 		}
 
-                mark_dirty ();
+		mark_dirty ();
 	}
 
 	maybe_signal_changed ();
@@ -588,7 +588,7 @@ ControlList::shift (double pos, double frames)
 	{
 		Glib::Mutex::Lock lm (_lock);
 
-                for (iterator i = _events.begin(); i != _events.end(); ++i) {
+		for (iterator i = _events.begin(); i != _events.end(); ++i) {
 			if ((*i)->when >= pos) {
 				(*i)->when += frames;
 			}
@@ -727,7 +727,7 @@ ControlList::truncate_end (double last_coordinate)
 		if (last_coordinate > _events.back()->when) {
 
 			/* extending end:
-			*/
+			 */
 
 			iterator foo = _events.begin();
 			bool lessthantwo;
@@ -1129,7 +1129,7 @@ ControlList::rt_safe_earliest_event_discrete_unlocked (double start, double& x, 
 			return false;
 		}
 
-	/* No points in range */
+		/* No points in range */
 	} else {
 		return false;
 	}
@@ -1150,9 +1150,9 @@ ControlList::rt_safe_earliest_event_linear_unlocked (double start, double& x, do
 	const_iterator length_check_iter = _events.begin();
 	if (_events.empty()) { // 0 events
 		return false;
-        } else if (_events.end() == ++length_check_iter) { // 1 event
+	} else if (_events.end() == ++length_check_iter) { // 1 event
 		return rt_safe_earliest_event_discrete_unlocked (start, x, y, inclusive);
-        }
+	}
 
 	// Hack to avoid infinitely repeating the same event
 	build_search_cache_if_necessary (start);
@@ -1171,7 +1171,7 @@ ControlList::rt_safe_earliest_event_linear_unlocked (double start, double& x, do
 			}
 			next = *_search_cache.first;
 
-		/* Step is before first */
+			/* Step is before first */
 		} else {
 			const_iterator prev = _search_cache.first;
 			--prev;
@@ -1229,11 +1229,11 @@ ControlList::rt_safe_earliest_event_linear_unlocked (double start, double& x, do
 		}
 
 		/*cerr << first->value << " @ " << first->when << " ... "
-				<< next->value << " @ " << next->when
-				<< " = " << y << " @ " << x << endl;*/
+		  << next->value << " @ " << next->when
+		  << " = " << y << " @ " << x << endl;*/
 
 		assert(    (y >= first->value && y <= next->value)
-				|| (y <= first->value && y >= next->value) );
+		           || (y <= first->value && y >= next->value) );
 
 
 		const bool past_start = (inclusive ? x >= start : x > start);
@@ -1247,7 +1247,7 @@ ControlList::rt_safe_earliest_event_linear_unlocked (double start, double& x, do
 			return false;
 		}
 
-	/* No points in the future, so no steps (towards them) in the future */
+		/* No points in the future, so no steps (towards them) in the future */
 	} else {
 		return false;
 	}
@@ -1263,14 +1263,14 @@ ControlList::cut_copy_clear (double start, double end, int op)
 {
 	boost::shared_ptr<ControlList> nal = create (_parameter);
 	iterator s, e;
-        ControlEvent cp (start, 0.0);
+	ControlEvent cp (start, 0.0);
 
 	{
- 		Glib::Mutex::Lock lm (_lock);
+		Glib::Mutex::Lock lm (_lock);
 
-                /* first, determine s & e, two iterators that define the range of points
-                   affected by this operation
-                */
+		/* first, determine s & e, two iterators that define the range of points
+		   affected by this operation
+		*/
 
 		if ((s = lower_bound (_events.begin(), _events.end(), &cp, time_comparator)) == _events.end()) {
 			return nal;
@@ -1281,43 +1281,43 @@ ControlList::cut_copy_clear (double start, double end, int op)
 		e = upper_bound (_events.begin(), _events.end(), &cp, time_comparator);
 
 
-                /* if "start" isn't the location of an existing point,
-                   evaluate the curve to get a value for the start. Add a point to
-                   both the existing event list, and if its not a "clear" operation,
-                   to the copy ("nal") as well. 
+		/* if "start" isn't the location of an existing point,
+		   evaluate the curve to get a value for the start. Add a point to
+		   both the existing event list, and if its not a "clear" operation,
+		   to the copy ("nal") as well.
 
-                   Note that the time positions of the points in each list are different 
-                   because we want the copy ("nal") to have a zero time reference.
-                */
+		   Note that the time positions of the points in each list are different
+		   because we want the copy ("nal") to have a zero time reference.
+		*/
 
-                        
-                /* before we begin any cut/clear operations, get the value of the curve
-                   at "end".
-                */
 
-                double end_value = unlocked_eval (end);
+		/* before we begin any cut/clear operations, get the value of the curve
+		   at "end".
+		*/
 
-                if ((*s)->when != start) {
-                        
-                        double val = unlocked_eval (start);
+		double end_value = unlocked_eval (end);
+
+		if ((*s)->when != start) {
+
+			double val = unlocked_eval (start);
 
 			if (op == 0) { // cut
 				if (start > _events.front()->when) {
 					_events.insert (s, (new ControlEvent (start, val)));
 				}
 			}
-                        
-                        if (op != 2) { // ! clear
-                                nal->_events.push_back (new ControlEvent (0, val));
-                        }
-                }
+
+			if (op != 2) { // ! clear
+				nal->_events.push_back (new ControlEvent (0, val));
+			}
+		}
 
 		for (iterator x = s; x != e; ) {
 
 			/* adjust new points to be relative to start, which
 			   has been set to zero.
 			*/
-			
+
 			if (op != 2) {
 				nal->_events.push_back (new ControlEvent ((*x)->when - start, (*x)->value));
 			}
@@ -1325,30 +1325,30 @@ ControlList::cut_copy_clear (double start, double end, int op)
 			if (op != 1) {
 				x = _events.erase (x);
 			} else {
-                                ++x;
-                        }
-		}
-                
-                if (e == _events.end() || (*e)->when != end) {
-
-                        /* only add a boundary point if there is a point after "end"
-                         */
-
-                        if (op == 0 && (e != _events.end() && end < (*e)->when)) { // cut
-                                _events.insert (e, new ControlEvent (end, end_value));
-                        }
-
-                        if (op != 2 && (e != _events.end() && end < (*e)->when)) { // cut/copy
-                                nal->_events.push_back (new ControlEvent (end - start, end_value));
-                        }
+				++x;
+			}
 		}
 
-                mark_dirty ();
+		if (e == _events.end() || (*e)->when != end) {
+
+			/* only add a boundary point if there is a point after "end"
+			 */
+
+			if (op == 0 && (e != _events.end() && end < (*e)->when)) { // cut
+				_events.insert (e, new ControlEvent (end, end_value));
+			}
+
+			if (op != 2 && (e != _events.end() && end < (*e)->when)) { // cut/copy
+				nal->_events.push_back (new ControlEvent (end - start, end_value));
+			}
+		}
+
+		mark_dirty ();
 	}
 
-        if (op != 1) {
-                maybe_signal_changed ();
-        }
+	if (op != 1) {
+		maybe_signal_changed ();
+	}
 
 	return nal;
 }

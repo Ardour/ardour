@@ -31,7 +31,6 @@ namespace Evoral {
 /** ID of an event (note or other). This must be operable on by glib
     atomic ops
 */
-
 typedef int32_t event_id_t;
 
 /** Musical time: beats relative to some defined origin */

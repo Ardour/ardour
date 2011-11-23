@@ -44,10 +44,10 @@ public:
 
 	/** @param capacity Ringbuffer capacity in bytes.
 	 */
-        EventRingBuffer(size_t capacity) : PBD::RingBufferNPT<uint8_t>(capacity)
+	EventRingBuffer(size_t capacity) : PBD::RingBufferNPT<uint8_t>(capacity)
 	{}
 
-        size_t capacity() const { return bufsize(); }
+	size_t capacity() const { return bufsize(); }
 
 	/** Peek at the ringbuffer (read w/o advancing read pointer).
 	 * @return how much has been peeked (wraps around if read exceeds
@@ -57,7 +57,7 @@ public:
 	 *            read-pointer---^
 	 * </pre>
 	 */
-        bool peek (uint8_t*, size_t size);
+	bool peek (uint8_t*, size_t size);
 
 	uint32_t write(Time  time, EventType  type, uint32_t  size, const uint8_t* buf);
 	bool     read (Time* time, EventType* type, uint32_t* size,       uint8_t* buf);
@@ -67,25 +67,25 @@ template<typename Time>
 inline bool
 EventRingBuffer<Time>::peek (uint8_t* buf, size_t size)
 {
-        PBD::RingBufferNPT<uint8_t>::rw_vector vec;
+	PBD::RingBufferNPT<uint8_t>::rw_vector vec;
 
-        get_read_vector (&vec);
+	get_read_vector (&vec);
 
-        if (vec.len[0] + vec.len[1] < size) {
-                return false;
-        }
+	if (vec.len[0] + vec.len[1] < size) {
+		return false;
+	}
 
-        if (vec.len[0] > 0) {
-                memcpy (buf, vec.buf[0], min (vec.len[0], size));
-        }
+	if (vec.len[0] > 0) {
+		memcpy (buf, vec.buf[0], min (vec.len[0], size));
+	}
 
-        if (vec.len[0] < size) {
-                if (vec.len[1]) {
-                        memcpy (buf + vec.len[0], vec.buf[1], size - vec.len[0]);
-                }
-        }
+	if (vec.len[0] < size) {
+		if (vec.len[1]) {
+			memcpy (buf + vec.len[0], vec.buf[1], size - vec.len[0]);
+		}
+	}
 
-        return true;
+	return true;
 }
 
 template<typename Time>
@@ -93,20 +93,20 @@ inline bool
 EventRingBuffer<Time>::read(Time* time, EventType* type, uint32_t* size, uint8_t* buf)
 {
 	if (PBD::RingBufferNPT<uint8_t>::read ((uint8_t*)time, sizeof (Time)) != sizeof (Time)) {
-                return false;
-        }
+		return false;
+	}
 
-        if (PBD::RingBufferNPT<uint8_t>::read ((uint8_t*)type, sizeof(EventType)) != sizeof (EventType)) {
-                return false;
-        }
+	if (PBD::RingBufferNPT<uint8_t>::read ((uint8_t*)type, sizeof(EventType)) != sizeof (EventType)) {
+		return false;
+	}
 
-        if (PBD::RingBufferNPT<uint8_t>::read ((uint8_t*)size, sizeof(uint32_t)) != sizeof (uint32_t)) {
-                return false;
-        }
+	if (PBD::RingBufferNPT<uint8_t>::read ((uint8_t*)size, sizeof(uint32_t)) != sizeof (uint32_t)) {
+		return false;
+	}
 
-        if (PBD::RingBufferNPT<uint8_t>::read (buf, *size) != *size) {
-                return false;
-        }
+	if (PBD::RingBufferNPT<uint8_t>::read (buf, *size) != *size) {
+		return false;
+	}
 
 	return true;
 }
@@ -119,10 +119,10 @@ EventRingBuffer<Time>::write(Time time, EventType type, uint32_t size, const uin
 	if (write_space() < (sizeof(Time) + sizeof(EventType) + sizeof(uint32_t) + size)) {
 		return 0;
 	} else {
-                PBD::RingBufferNPT<uint8_t>::write ((uint8_t*)&time, sizeof(Time));
-                PBD::RingBufferNPT<uint8_t>::write ((uint8_t*)&type, sizeof(EventType));
-                PBD::RingBufferNPT<uint8_t>::write ((uint8_t*)&size, sizeof(uint32_t));
-                PBD::RingBufferNPT<uint8_t>::write (buf, size);
+		PBD::RingBufferNPT<uint8_t>::write ((uint8_t*)&time, sizeof(Time));
+		PBD::RingBufferNPT<uint8_t>::write ((uint8_t*)&type, sizeof(EventType));
+		PBD::RingBufferNPT<uint8_t>::write ((uint8_t*)&size, sizeof(uint32_t));
+		PBD::RingBufferNPT<uint8_t>::write (buf, size);
 		return size;
 	}
 }

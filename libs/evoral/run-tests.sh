@@ -4,7 +4,7 @@ srcdir=`pwd`
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$srcdir/../../build/default/libs/evoral:$srcdir/../../build/default/libs/pbd
 if [ ! -f './test/testdata/TakeFive.mid' ]; then
     echo "This script must be run from within the libs/evoral directory";
-	exit 1;
+    exit 1;
 fi
 
 # Make symlink to TakeFive.mid in build directory
