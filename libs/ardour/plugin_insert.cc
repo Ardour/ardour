@@ -94,7 +94,11 @@ PluginInsert::set_count (uint32_t num)
 		uint32_t diff = num - _plugins.size();
 
 		for (uint32_t n = 0; n < diff; ++n) {
-			add_plugin_with_activation (plugin_factory (_plugins[0]));
+			boost::shared_ptr<Plugin> p = plugin_factory (_plugins[0]);
+			add_plugin (p);
+			if (active ()) {
+				p->activate ();
+			}
 
 			if (require_state) {
 				/* XXX do something */
@@ -1270,17 +1274,6 @@ PluginInsert::collect_signal_for_analysis (framecnt_t nframes)
 
 	_signal_analysis_collected_nframes   = 0;
 	_signal_analysis_collect_nframes_max = nframes;
-}
-
-/** Add a plugin to our list and activate it if we have already been activated */
-void
-PluginInsert::add_plugin_with_activation (boost::shared_ptr<Plugin> plugin)
-{
-	plugin->set_insert_info (this);
-	_plugins.push_back (plugin);
-	if (active()) {
-		plugin->activate ();
-	}
 }
 
 /** Add a plugin to our list */

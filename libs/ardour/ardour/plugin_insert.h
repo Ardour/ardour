@@ -186,7 +186,6 @@ class PluginInsert : public Processor
 	void set_control_ids (const XMLNode&, int version);
 
 	boost::shared_ptr<Plugin> plugin_factory (boost::shared_ptr<Plugin>);
-	void add_plugin_with_activation (boost::shared_ptr<Plugin>);
 	void add_plugin (boost::shared_ptr<Plugin>);
 };
 
