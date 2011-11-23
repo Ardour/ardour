@@ -43,7 +43,7 @@ VSTPlugin::VSTPlugin (AudioEngine& engine, Session& session, VSTHandle* handle)
 
 VSTPlugin::~VSTPlugin ()
 {
-	deactivate ();
+	
 }
 
 void

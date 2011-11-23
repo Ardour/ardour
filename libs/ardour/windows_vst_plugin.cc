@@ -52,6 +52,7 @@ WindowsVSTPlugin::WindowsVSTPlugin (const WindowsVSTPlugin &other)
 
 WindowsVSTPlugin::~WindowsVSTPlugin ()
 {
+	deactivate ();
 	fst_close (_state);
 }
 
