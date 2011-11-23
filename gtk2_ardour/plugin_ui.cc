@@ -456,9 +456,9 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	, save_button (_("Save"))
 	, delete_button (_("Delete"))
 	, bypass_button (ArdourButton::led_default_elements)
+	, plugin_analysis_expander (_("Plugin analysis"))
 	, latency_gui (0)
 	, latency_dialog (0)
-	, plugin_analysis_expander (_("Plugin analysis"))
 	, eqgui (0)
 {
 	_preset_modified.set_size_request (16, -1);
