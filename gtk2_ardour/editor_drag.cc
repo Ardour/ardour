@@ -2094,39 +2094,6 @@ CursorDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
 void
 CursorDrag::motion (GdkEvent* event, bool)
 {
-	if (_drags->current_pointer_y() != last_pointer_y()) {
-
-		/* zoom when we move the pointer up and down */
-
-		/* y range to operate over (pixels) */
-		double const y_range = 512;
-		/* we will multiply the grab zoom by a factor between scale_range and scale_range^-1 */
-		double const scale_range = 4;
-		/* dead zone around the grab point in which to do no zooming (pixels) */
-		double const dead_zone = 100;
-
-		/* current dy */
-		double dy = _drags->current_pointer_y() - grab_y();
-
-		if (dy < -dead_zone || dy > dead_zone) {
-			/* we are outside the dead zone; remove it from our calculation */
-			if (dy < 0) {
-				dy += dead_zone;
-			} else {
-				dy -= dead_zone;
-			}
-
-			/* get a number from -1 to 1 as dy ranges from -y_range to y_range */
-			double udy = max (min (dy / y_range, 1.0), -1.0);
-
-			/* and zoom, using playhead focus temporarily */
-			Editing::ZoomFocus const zf = _editor->get_zoom_focus ();
-			_editor->set_zoom_focus (Editing::ZoomFocusPlayhead);
-			_editor->temporal_zoom (_grab_zoom * pow (scale_range, -udy));
-			_editor->set_zoom_focus (zf);
-		}
-	}
-
 	framepos_t const adjusted_frame = adjusted_current_frame (event);
 	if (adjusted_frame != last_pointer_frame()) {
 		fake_locate (adjusted_frame);
