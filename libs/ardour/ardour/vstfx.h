@@ -31,8 +31,6 @@ extern void         vstfx_close (VSTState*);
 extern int          vstfx_create_editor (VSTState *);
 extern int          vstfx_run_editor (VSTState *);
 extern void         vstfx_destroy_editor (VSTState *);
-extern int          vstfx_get_XID (VSTState *);
-extern void         vstfx_move_window_into_view (VSTState *);
 
 extern VSTInfo *    vstfx_get_info (char *);
 extern void         vstfx_free_info (VSTInfo *);

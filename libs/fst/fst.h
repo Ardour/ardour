@@ -44,7 +44,6 @@ extern void       fst_close (VSTState *);
 extern int  fst_create_editor (VSTState* fst);
 extern int  fst_run_editor (VSTState *);
 extern void fst_destroy_editor (VSTState *);
-extern int  fst_get_XID (VSTState *);
 extern void fst_move_window_into_view (VSTState *);
 
 extern VSTInfo *fst_get_info (char *dllpathname);

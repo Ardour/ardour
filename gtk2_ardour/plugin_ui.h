@@ -46,6 +46,7 @@
 #include <gtkmm/socket.h>
 
 #include "ardour/types.h"
+#include "ardour/plugin.h"
 
 #include "automation_controller.h"
 #include "ardour_button.h"
@@ -57,6 +58,7 @@ namespace ARDOUR {
 	class LXVSTPlugin;
 	class IOProcessor;
 	class AUPlugin;
+	class Processor;
 }
 
 namespace PBD {

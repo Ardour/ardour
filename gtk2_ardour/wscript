@@ -399,9 +399,12 @@ def build(bld):
         obj.uselib += ' X11 '
 
     if bld.is_defined('LXVST_SUPPORT'):
-        obj.source += [ 'vstfxwin.cc', 'lxvst_pluginui.cc' ]
+        obj.source += [ 'vstfxwin.cc', 'lxvst_plugin_ui.cc' ]
         obj.defines += [ 'LXVST_SUPPORT' ]
         obj.uselib += ' X11 '
+
+    if bld.is_defined('WINDOWS_VST_SUPPORT') or bld.is_defined('LXVST_SUPPORT'):
+        obj.source += [ 'vst_plugin_ui.cc' ]
         
     if bld.is_defined('PHONE_HOME'):
         obj.defines += [ 'PHONE_HOME' ]

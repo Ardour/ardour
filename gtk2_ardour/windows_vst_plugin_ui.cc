@@ -31,25 +31,11 @@ using namespace Gtk;
 using namespace ARDOUR;
 using namespace PBD;
 
-WindowsVSTPluginUI::WindowsVSTPluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_ptr<WindowsVSTPlugin> vp)
-	: PlugUIBase (pi),
-	  vst (vp)
+WindowsVSTPluginUI::WindowsVSTPluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_ptr<VSTPlugin> vp)
+	: VSTPluginUI (pi, vp)
 {
-	fst_run_editor (vst->state());
+	fst_run_editor (_vst->state());
 
-	preset_box.set_spacing (6);
-	preset_box.set_border_width (6);
-	preset_box.pack_end (focus_button, false, false);
-	preset_box.pack_end (bypass_button, false, false, 10);
-	preset_box.pack_end (delete_button, false, false);
-	preset_box.pack_end (save_button, false, false);
-	preset_box.pack_end (add_button, false, false);
-	preset_box.pack_end (_preset_box, false, false);
-
-	bypass_button.set_active (!insert->active());
-
-	pack_start (preset_box, false, false);
-	pack_start (socket, true, true);
 	pack_start (plugin_analysis_expander, true, true);
 }
 
@@ -59,126 +45,71 @@ WindowsVSTPluginUI::~WindowsVSTPluginUI ()
 	// and then our PluginUIWindow does the rest
 }
 
-void
-WindowsVSTPluginUI::preset_selected ()
-{
-	socket.grab_focus ();
-	PlugUIBase::preset_selected ();
-}
-
-int
-WindowsVSTPluginUI::get_preferred_height ()
-{
-	return vst->state()->height;
-}
-
-int
-WindowsVSTPluginUI::get_preferred_width ()
-{
-	return vst->state()->width;
-}
-
 int
 WindowsVSTPluginUI::package (Gtk::Window& win)
 {
-	/* forward configure events to plugin window */
+	VSTPluginUI::package (win);
 
-	win.signal_configure_event().connect (sigc::bind (sigc::mem_fun (*this, &WindowsVSTPluginUI::configure_handler), &socket), false);
+	/* This assumes that the window's owner understands the XEmbed protocol */
 
-	/*
-	   this assumes that the window's owner understands the XEmbed protocol.
-	*/
+	_socket.add_id (fst_get_XID (_vst->state ()));
 
-	socket.add_id (fst_get_XID (vst->state ()));
-
-	fst_move_window_into_view (vst->state ());
+	fst_move_window_into_view (_vst->state ());
 
 	return 0;
-}
-
-bool
-WindowsVSTPluginUI::configure_handler (GdkEventConfigure* ev, Gtk::Socket *socket)
-{
-	XEvent event;
-	gint x, y;
-	GdkWindow* w;
-
-	if (socket == 0 || ((w = socket->gobj()->plug_window) == 0)) {
-		return false;
-	}
-
-	event.xconfigure.type = ConfigureNotify;
-	event.xconfigure.event = GDK_WINDOW_XWINDOW (w);
-	event.xconfigure.window = GDK_WINDOW_XWINDOW (w);
-
-	/* The ICCCM says that synthetic events should have root relative
-	 * coordinates. We still aren't really ICCCM compliant, since
-	 * we don't send events when the real toplevel is moved.
-	 */
-	gdk_error_trap_push ();
-	gdk_window_get_origin (w, &x, &y);
-	gdk_error_trap_pop ();
-
-	event.xconfigure.x = x;
-	event.xconfigure.y = y;
-	event.xconfigure.width = GTK_WIDGET(socket->gobj())->allocation.width;
-	event.xconfigure.height = GTK_WIDGET(socket->gobj())->allocation.height;
-
-	event.xconfigure.border_width = 0;
-	event.xconfigure.above = None;
-	event.xconfigure.override_redirect = False;
-
-	gdk_error_trap_push ();
-	XSendEvent (GDK_WINDOW_XDISPLAY (w), GDK_WINDOW_XWINDOW (w), False, StructureNotifyMask, &event);
-	gdk_error_trap_pop ();
-
-	return false;
 }
 
 void
 WindowsVSTPluginUI::forward_key_event (GdkEventKey* ev)
 {
-	if (ev->type == GDK_KEY_PRESS) {
-
-		VSTState* fst = vst->state ();
-		pthread_mutex_lock (&fst->lock);
-
-		if (fst->n_pending_keys == (sizeof (fst->pending_keys) * sizeof (VSTKey))) {
-			/* buffer full */
-			return;
-		}
-
-		int special_windows_key = 0;
-		int character_windows_key = 0;
-
-		switch (ev->keyval) {
-		case GDK_Left:
-			special_windows_key = 0x25;
-			break;
-		case GDK_Right:
-			special_windows_key = 0x27;
-			break;
-		case GDK_Up:
-			special_windows_key = 0x26;
-			break;
-		case GDK_Down:
-			special_windows_key = 0x28;
-			break;
-		case GDK_Return:
-		case GDK_KP_Enter:
-			special_windows_key = 0xd;
-			break;
-		default:
-			character_windows_key = ev->keyval;
-			break;
-		}
-
-		fst->pending_keys[fst->n_pending_keys].special = special_windows_key;
-		fst->pending_keys[fst->n_pending_keys].character = character_windows_key;
-		fst->n_pending_keys++;
-
-		pthread_mutex_unlock (&fst->lock);
+	if (ev->type != GDK_KEY_PRESS) {
+		return;
 	}
+
+	VSTState* fst = _vst->state ();
+	pthread_mutex_lock (&fst->lock);
+
+	if (fst->n_pending_keys == (sizeof (fst->pending_keys) * sizeof (VSTKey))) {
+		/* buffer full */
+		return;
+	}
+	
+	int special_windows_key = 0;
+	int character_windows_key = 0;
+	
+	switch (ev->keyval) {
+	case GDK_Left:
+		special_windows_key = 0x25;
+		break;
+	case GDK_Right:
+		special_windows_key = 0x27;
+		break;
+	case GDK_Up:
+		special_windows_key = 0x26;
+		break;
+	case GDK_Down:
+		special_windows_key = 0x28;
+		break;
+	case GDK_Return:
+	case GDK_KP_Enter:
+		special_windows_key = 0xd;
+		break;
+	default:
+		character_windows_key = ev->keyval;
+		break;
+	}
+	
+	fst->pending_keys[fst->n_pending_keys].special = special_windows_key;
+	fst->pending_keys[fst->n_pending_keys].character = character_windows_key;
+	fst->n_pending_keys++;
+	
+	pthread_mutex_unlock (&fst->lock);
+}
+
+int
+WindowsVSTPluginUI::get_XID ()
+{
+	return _vst->state()->xid;
 }
 
 typedef int (*error_handler_t)( Display *, XErrorEvent *);
@@ -187,7 +118,7 @@ static error_handler_t wine_error_handler;
 static error_handler_t gtk_error_handler;
 
 static int
-fst_xerror_handler( Display *disp, XErrorEvent *ev )
+fst_xerror_handler (Display* disp, XErrorEvent* ev)
 {
 	if (disp == the_gtk_display) {
 		printf ("relaying error to gtk\n");

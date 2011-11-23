@@ -26,6 +26,7 @@
 
 #include "gtkmm2ext/barcontroller.h"
 #include "pbd/signals.h"
+#include "evoral/Parameter.hpp"
 
 namespace ARDOUR {
 	class Session;

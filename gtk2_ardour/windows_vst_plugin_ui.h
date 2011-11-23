@@ -17,31 +17,25 @@
 
 */
 
-#include "plugin_ui.h"
+#include "vst_plugin_ui.h"
 
-class WindowsVSTPluginUI : public PlugUIBase, public Gtk::VBox
+class WindowsVSTPluginUI : public VSTPluginUI
 {
-  public:
-	WindowsVSTPluginUI (boost::shared_ptr<ARDOUR::PluginInsert>, boost::shared_ptr<ARDOUR::WindowsVSTPlugin>);
+public:
+	WindowsVSTPluginUI (boost::shared_ptr<ARDOUR::PluginInsert>, boost::shared_ptr<ARDOUR::VSTPlugin>);
 	~WindowsVSTPluginUI ();
 
 	gint get_preferred_height ();
 	gint get_preferred_width ();
-	bool start_updating(GdkEventAny*) {return false;}
-	bool stop_updating(GdkEventAny*) {return false;}
+	bool start_updating (GdkEventAny*) { return false; }
+	bool stop_updating (GdkEventAny*) { return false; }
 
-	int package (Gtk::Window&);
+	int package (Gtk::Window &);
 
 	void forward_key_event (GdkEventKey *);
-	bool non_gtk_gui () const { return true; }
 
-  private:
-	boost::shared_ptr<ARDOUR::WindowsVSTPlugin> vst;
-	Gtk::Socket socket;
-	Gtk::HBox   preset_box;
-	Gtk::VBox   vpacker;
-
-	bool configure_handler (GdkEventConfigure*, Gtk::Socket*);
-	void save_plugin_setting ();
-	void preset_selected ();
+private:
+	
+	int get_XID ();
+	
 };

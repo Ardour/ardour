@@ -661,12 +661,6 @@ fst_close (VSTState* fst)
 	}
 }
 
-int
-fst_get_XID (VSTState* fst)
-{
-	return fst->xid;
-}
-
 float htonf (float v)
 {
       float result;

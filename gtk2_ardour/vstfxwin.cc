@@ -712,18 +712,6 @@ vstfx_launch_editor (VSTState* vstfx)
 	return 0;
 }
 
-/*May not be needed in the XLib version*/
-
-void
-vstfx_move_window_into_view (VSTState* vstfx)
-{
-	/* This is probably the equivalent of Mapping an XWindow
-	   but we most likely don't need it because the window
-	   will be Mapped by XReparentWindow
-	*/
-
-}
-
 /** Destroy the editor window */
 void
 vstfx_destroy_editor (VSTState* vstfx)
@@ -762,46 +750,6 @@ vstfx_event_loop_remove_plugin (VSTState* vstfx)
 	if (vstfx_first == vstfx) {
 		vstfx_first = vstfx_first->next;
 	}
-}
-
-/*Get the XID of the plugin editor window*/
-
-int
-vstfx_get_XID (VSTState* vstfx)
-{
-	int id;
-	
-	/* Wait for the lock to become free - otherwise
-	   the window might be in the process of being
-	   created and we get bad Window errors when trying
-	   to embed it in the GTK UI
-	*/
-	
-	pthread_mutex_lock(&vstfx->lock);
-	
-	/* The Window may be scheduled for creation
-	   but not actually created by the gui_event_loop yet - 
-	   spin here until it has been activated.  Possible
-	   deadlock if the window never gets activated but
-	   should not be called here if the window doesn't
-	   exist or will never exist
-	*/
-	
-	while (!(vstfx->been_activated)) {
-		usleep (1000);
-	}
-	
-	id = vstfx->xid;
-	
-	pthread_mutex_unlock (&vstfx->lock);
-	
-	/* Finally it might be safe to return the ID - 
-	   problems will arise if we return either a zero ID
-	   and GTK tries to socket it or if we return an ID
-	   which hasn't yet become real to the server
-	*/
-	
-	return id;
 }
 
 float
