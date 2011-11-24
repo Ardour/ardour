@@ -826,11 +826,15 @@ ARDOUR_UI::save_ardour_state ()
 	if (_session) {
 		_session->add_instant_xml (enode);
 		_session->add_instant_xml (mnode);
-		_session->add_instant_xml (location_ui->get()->ui().get_state ());
+		if (location_ui->get ()) {
+			_session->add_instant_xml (location_ui->get()->ui().get_state ());
+		}
 	} else {
 		Config->add_instant_xml (enode);
 		Config->add_instant_xml (mnode);
-		Config->add_instant_xml (location_ui->get()->ui().get_state ());
+		if (location_ui->get ()) {
+			Config->add_instant_xml (location_ui->get()->ui().get_state ());
+		}
 	}
 
 	Keyboard::save_keybindings ();
