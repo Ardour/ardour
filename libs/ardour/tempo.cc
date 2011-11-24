@@ -368,6 +368,42 @@ TempoMap::remove_meter (const MeterSection& tempo)
 void
 TempoMap::do_insert (MetricSection* section, bool with_bbt)
 {
+	/* First of all, check to see if the new MetricSection is in the
+	   middle of a bar.  If so, we need to fix the bar that we are in
+	   to have a different meter.
+	*/
+
+	assert (section->start().ticks == 0);
+
+	if (section->start().beats != 1) {
+
+		/* Here's the tempo and metric where we are proposing to insert `section' */
+		TempoMetric tm = metric_at (section->start ());
+
+		/* This is where we will put the `corrective' new meter; at the start of
+		   the bar that we are inserting into the middle of.
+		*/
+		BBT_Time where_correction = section->start();
+		where_correction.beats = 1;
+		where_correction.ticks = 0;
+
+		/* Put in the meter change to make the bar before our `section' the right
+		   length.
+		*/
+		do_insert (new MeterSection (where_correction, section->start().beats, tm.meter().note_divisor ()), true);
+
+		/* This is where the new stuff will now go; the start of the next bar
+		   (after the one whose meter we just fixed).
+		*/
+		BBT_Time where_new (where_correction.bars + 1, 1, 0);
+
+		/* Change back to the original meter */
+		do_insert (new MeterSection (where_new, tm.meter().beats_per_bar(), tm.meter().note_divisor()), true);
+
+		/* And set up `section' for where it should be, ready to be inserted */
+		section->set_start (where_new);
+	}
+
 	Metrics::iterator i;
 
 	/* Look for any existing MetricSection that is of the same type and
@@ -830,8 +866,6 @@ void
 TempoMap::bbt_time_with_metric (framepos_t frame, BBT_Time& bbt, const TempoMetric& metric) const
 {
 	framecnt_t frame_diff;
-
-	// cerr << "---- BBT time for " << frame << " using metric @ " << metric.frame() << " BBT " << metric.start() << endl;
 
 	const double beats_per_bar = metric.meter().beats_per_bar();
 	const double ticks_per_frame = metric.tempo().frames_per_beat (_frame_rate, metric.meter()) / BBT_Time::ticks_per_beat;
