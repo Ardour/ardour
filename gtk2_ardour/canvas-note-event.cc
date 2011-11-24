@@ -55,6 +55,7 @@ CanvasNoteEvent::CanvasNoteEvent(MidiRegionView& region, Item* item, const boost
 	, _valid (true)
 	, _mouse_x_fraction (-1.0)
 	, _mouse_y_fraction (-1.0)
+	, _channel_selection (0xffff)
 {
 }
 
@@ -113,14 +114,11 @@ CanvasNoteEvent::hide_velocity()
 void
 CanvasNoteEvent::on_channel_selection_change(uint16_t selection)
 {
-	// make note change its color if its channel is not marked active
-	if ( (selection & (1 << _note->channel())) == 0 ) {
-		set_fill_color(ARDOUR_UI::config()->canvasvar_MidiNoteInactiveChannel.get());
-		set_outline_color(calculate_outline(ARDOUR_UI::config()->canvasvar_MidiNoteInactiveChannel.get()));
-	} else {
-		// set the color according to the notes selection state
-		set_selected(_selected);
-	}
+	_channel_selection = selection;
+	
+	/* this takes into account whether or not the note should be drawn as inactive */
+	set_selected (_selected);
+
 	// this forces the item to update..... maybe slow...
 	_item->hide();
 	_item->show();
@@ -187,20 +185,31 @@ CanvasNoteEvent::set_selected(bool selected)
 	}
 
 	_selected = selected;
-	set_fill_color (base_color ());
 
-	if (_selected) {
+	bool const active = (_channel_selection & (1 << _note->channel())) != 0;
+
+	if (_selected && active) {
 		set_outline_color(calculate_outline(ARDOUR_UI::config()->canvasvar_MidiNoteSelected.get()));
 
 		if(_region.channel_selector_scoped_note() != 0){
 		    _region.channel_selector_scoped_note()->hide_channel_selector();
 		    _region.set_channel_selector_scoped_note(0);
 		}
+
+		set_fill_color (base_color ());
+
 	} else {
-		set_outline_color(calculate_outline(base_color()));
+
+		if (active) {
+			set_fill_color(base_color());
+			set_outline_color(calculate_outline(base_color()));
+		} else {
+			set_fill_color(ARDOUR_UI::config()->canvasvar_MidiNoteInactiveChannel.get());
+			set_outline_color(calculate_outline(ARDOUR_UI::config()->canvasvar_MidiNoteInactiveChannel.get()));
+		}
+		
 		hide_channel_selector();
 	}
-
 }
 
 #define SCALE_USHORT_TO_UINT8_T(x) ((x) / 257)
