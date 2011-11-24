@@ -150,8 +150,13 @@ MixerStrip::init ()
 	img = manage (new Gtk::Image (::get_icon("strip_width")));
 	img->show ();
 
+	string t = _("Click to toggle the width of this mixer strip.");
+	if (_mixer_owned) {
+		t += string_compose (_("\n%1-click to toggle the width of all strips."), Keyboard::tertiary_modifier_name ());
+	}
+	
 	width_button.add (*img);
-	ARDOUR_UI::instance()->set_tip (&width_button, _("Toggle the width of this mixer strip"));
+	ARDOUR_UI::instance()->set_tip (width_button, t);
 
 	img = manage (new Gtk::Image (::get_icon("hide")));
 	img->show ();
@@ -278,7 +283,7 @@ MixerStrip::init ()
 	hide_button.set_name ("MixerHideButton");
 	top_event_box.set_name ("MixerTopEventBox");
 
-	width_button.signal_clicked().connect (sigc::mem_fun(*this, &MixerStrip::width_clicked));
+	width_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MixerStrip::width_button_pressed), false);
 	hide_button.signal_clicked().connect (sigc::mem_fun(*this, &MixerStrip::hide_clicked));
 
 	width_hide_box.pack_start (width_button, false, true);
@@ -1532,17 +1537,35 @@ MixerStrip::name_changed ()
 	}
 }
 
-void
-MixerStrip::width_clicked ()
+bool
+MixerStrip::width_button_pressed (GdkEventButton* ev)
 {
-	switch (_width) {
-	case Wide:
-		set_width_enum (Narrow, this);
-		break;
-	case Narrow:
-		set_width_enum (Wide, this);
-		break;
+	if (ev->button != 1) {
+		return false;
 	}
+	
+	if (Keyboard::modifier_state_contains (ev->state, Keyboard::ModifierMask (Keyboard::TertiaryModifier)) && _mixer_owned) {
+		switch (_width) {
+		case Wide:
+			_mixer.set_strip_width (Narrow);
+			break;
+
+		case Narrow:
+			_mixer.set_strip_width (Wide);
+			break;
+		}
+	} else {
+		switch (_width) {
+		case Wide:
+			set_width_enum (Narrow, this);
+			break;
+		case Narrow:
+			set_width_enum (Wide, this);
+			break;
+		}
+	}
+
+	return true;
 }
 
 void

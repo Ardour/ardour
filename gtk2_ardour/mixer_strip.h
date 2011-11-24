@@ -157,7 +157,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	Gtk::EventBox*      spacer;
 
 	void hide_clicked();
-	void width_clicked ();
+	bool width_button_pressed (GdkEventButton *);
 
 	Gtk::Frame          global_frame;
 	Gtk::VBox           global_vpacker;
