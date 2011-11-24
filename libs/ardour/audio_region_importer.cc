@@ -317,7 +317,11 @@ AudioRegionImporter::prepare_region ()
 	}
 
 	// create region and update XML
-	region.push_back (RegionFactory::create (source_list, xml_region));
+	boost::shared_ptr<Region> r = RegionFactory::create (source_list, xml_region);
+	if (session.config.get_glue_new_regions_to_bars_and_beats ()) {
+		r->set_position_lock_style (MusicTime);
+	}
+	region.push_back (r);
 	if (*region.begin()) {
 		xml_region = (*region.begin())->get_state();
 	} else {

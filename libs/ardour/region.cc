@@ -548,10 +548,6 @@ Region::set_position_lock_style (PositionLockStyle ps)
 
 		boost::shared_ptr<Playlist> pl (playlist());
 
-		if (!pl) {
-			return;
-		}
-
 		_position_lock_style = ps;
 
 		if (_position_lock_style == MusicTime) {
@@ -559,7 +555,6 @@ Region::set_position_lock_style (PositionLockStyle ps)
 		}
 
 		send_change (Properties::position_lock_style);
-
 	}
 }
 
