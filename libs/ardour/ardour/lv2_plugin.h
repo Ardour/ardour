@@ -150,6 +150,8 @@ class LV2Plugin : public ARDOUR::Plugin
 	static uint32_t _midi_event_type;
 	static uint32_t _state_path_type;
 
+	const std::string state_dir () const;
+
 	static int
 	lv2_state_store_callback (void*       handle,
 	                          uint32_t    key,

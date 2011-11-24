@@ -26,6 +26,7 @@
 #include <cstring>
 
 #include <glibmm.h>
+#include <giomm/file.h>
 
 #include <boost/utility.hpp>
 
@@ -454,6 +455,13 @@ LV2Plugin::c_ui_type ()
 	return (void*)_impl->ui_type;
 }
 
+const std::string
+LV2Plugin::state_dir() const
+{
+	return Glib::build_filename(_session.plugins_dir(),
+	                            _insert_id.to_s());
+}
+
 int
 LV2Plugin::lv2_state_store_callback(LV2_State_Handle handle,
                                     uint32_t         key,
@@ -527,13 +535,17 @@ LV2Plugin::lv2_state_abstract_path(LV2_State_Map_Path_Handle handle,
 		return g_strdup(absolute_path);
 	}
 
-	const std::string state_dir = Glib::build_filename(me->_session.plugins_dir(),
-	                                                   me->_insert_id.to_s());
+	const std::string state_dir = me->state_dir();
 
 	char* ret = NULL;
 	if (strncmp(absolute_path, state_dir.c_str(), state_dir.length())) {
-		ret = g_strdup(absolute_path);
+		// Path outside state directory, make symbolic link
+		const std::string       name = Glib::path_get_basename(absolute_path);
+		const std::string       path = Glib::build_filename(state_dir, name);
+		Gio::File::create_for_path(path)->make_symbolic_link(absolute_path);
+		ret = g_strndup(path.c_str(), path.length());
 	} else {
+		// Path inside the state directory, return relative path
 		const std::string path(absolute_path + state_dir.length() + 1);
 		ret = g_strndup(path.c_str(), path.length());
 	}
@@ -558,10 +570,7 @@ LV2Plugin::lv2_state_absolute_path(LV2_State_Map_Path_Handle handle,
 		ret = g_strdup(abstract_path);
 	} else {
 		const std::string apath(abstract_path);
-		const std::string state_dir = Glib::build_filename(me->_session.plugins_dir(),
-		                                                   me->_insert_id.to_s());
-		const std::string path = Glib::build_filename(state_dir,
-		                                              apath);
+		const std::string path = Glib::build_filename(me->state_dir(), apath);
 		ret = g_strndup(path.c_str(), path.length());
 	}
 
@@ -580,19 +589,35 @@ LV2Plugin::lv2_state_make_path(LV2_State_Make_Path_Handle handle,
 		return g_strdup(path);
 	}
 
-	const std::string abs_path = Glib::build_filename(
-		Glib::build_filename(
-			me->_session.plugins_dir(),
-			me->_insert_id.to_s()),
-		path);
+	const std::string abs_path = Glib::build_filename(me->state_dir(), path);
+	const std::string dirname  = Glib::path_get_dirname(abs_path);
 
-	const std::string dirname = Glib::path_get_dirname(abs_path);
 	g_mkdir_with_parents(dirname.c_str(), 0744);
 
 	DEBUG_TRACE(DEBUG::LV2, string_compose("new file path %1 => %2\n",
 	                                       path, abs_path));
 
 	return g_strndup(abs_path.c_str(), abs_path.length());
+}
+
+static void
+remove_directory(const std::string& path)
+{
+	if (!Glib::file_test(path, Glib::FILE_TEST_IS_DIR)) {
+		return;
+	}
+	
+	Glib::RefPtr<Gio::File>           dir = Gio::File::create_for_path(path);
+	Glib::RefPtr<Gio::FileEnumerator> e   = dir->enumerate_children();
+	Glib::RefPtr<Gio::FileInfo>       fi;
+	while ((fi = e->next_file())) {
+		if (fi->get_type() == Gio::FILE_TYPE_DIRECTORY) {
+			remove_directory(fi->get_name());
+		} else {
+			dir->get_child(fi->get_name())->remove();
+		}
+	}
+	dir->remove();
 }
 
 void
@@ -632,6 +657,9 @@ LV2Plugin::add_state(XMLNode* root) const
 			    unique_id());
 			return;
 		}
+
+		// Remove old state directory (FIXME: should this be preserved?)
+		remove_directory(state_dir());
 
 		// Save plugin state to state object
 		LV2State state(*this, _uri_map);
