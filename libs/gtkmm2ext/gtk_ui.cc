@@ -40,6 +40,7 @@
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/window_title.h>
 #include <gtkmm2ext/actions.h>
+#include <gtkmm2ext/activatable.h>
 
 #include "i18n.h"
 
@@ -340,15 +341,23 @@ UI::set_tip (Widget *w, const gchar *tip, const gchar *hlp)
 	std::string msg(tip);
 
 	Glib::RefPtr<Gtk::Action> action = w->get_action();
+
+	if (!action) {
+		Gtkmm2ext::Activatable* activatable;
+		if ((activatable = dynamic_cast<Gtkmm2ext::Activatable*>(w))) {
+			action = activatable->get_related_action();
+		}
+	}
+
 	if (action) {
 		Gtk::AccelKey key;
-                ustring ap = action->get_accel_path();
-                if (!ap.empty()) {
-                        bool has_key = ActionManager::lookup_entry(ap, key);
-                        if (has_key && key.get_abbrev() != "") {
-                                msg.append("\n\n Key: ").append(key.get_abbrev());
-                        }
-                }
+		ustring ap = action->get_accel_path();
+		if (!ap.empty()) {
+			bool has_key = ActionManager::lookup_entry(ap, key);
+			if (has_key && key.get_abbrev() != "") {
+				msg.append("\n\nKey: ").append(key.get_abbrev());
+			}
+		}
 	}
 
 	if (req == 0) {

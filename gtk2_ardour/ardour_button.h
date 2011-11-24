@@ -27,10 +27,11 @@
 
 #include "pbd/signals.h"
 #include "gtkmm2ext/binding_proxy.h"
+#include "gtkmm2ext/activatable.h"
 
 #include "cairo_widget.h"
 
-class ArdourButton : public CairoWidget
+class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 {
   public:
 	enum Element {
@@ -76,7 +77,7 @@ class ArdourButton : public CairoWidget
 
 	boost::shared_ptr<PBD::Controllable> get_controllable() { return binding_proxy.get_controllable(); }
  	void set_controllable (boost::shared_ptr<PBD::Controllable> c);
-        void watch ();
+	void watch ();
 
 	void set_related_action (Glib::RefPtr<Gtk::Action>);
 
@@ -93,8 +94,8 @@ class ArdourButton : public CairoWidget
 	bool on_enter_notify_event (GdkEventCrossing*);
 	bool on_leave_notify_event (GdkEventCrossing*);
 
-        void controllable_changed ();
-        PBD::ScopedConnection watch_connection;
+	void controllable_changed ();
+	PBD::ScopedConnection watch_connection;
 
   private:
 	Glib::RefPtr<Pango::Layout> _layout;
@@ -102,8 +103,7 @@ class ArdourButton : public CairoWidget
 	std::string                 _text;
 	Element                     _elements;
 	Tweaks                      _tweaks;
-	BindingProxy binding_proxy;
-	bool    _act_on_release;
+	BindingProxy                binding_proxy;
 
 	int   _text_width;
 	int   _text_height;
@@ -115,6 +115,8 @@ class ArdourButton : public CairoWidget
 	cairo_pattern_t* led_inset_pattern;
 	cairo_pattern_t* reflection_pattern;
 
+	cairo_rectangle_t* _led_rect;
+
 	double text_r;
 	double text_g;
 	double text_b;
@@ -125,18 +127,16 @@ class ArdourButton : public CairoWidget
 	double led_b;
 	double led_a;
 
+	bool _act_on_release;
 	bool _led_left;
 	bool _fixed_diameter;
 	bool _distinct_led_click;
-	cairo_rectangle_t* _led_rect;
 	bool _hovering;
 
 	void setup_led_rect ();
 	void set_colors ();
 	void color_handler ();
 
-	Glib::RefPtr<Gtk::Action> _action;
-	void action_activated ();
 	void action_toggled ();
 
 	void action_sensitivity_changed ();

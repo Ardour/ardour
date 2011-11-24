@@ -53,7 +53,6 @@ ArdourButton::Element ArdourButton::just_led_default_elements = ArdourButton::El
 ArdourButton::ArdourButton (Element e)
 	: _elements (e)
 	, _tweaks (Tweaks (0))
-	, _act_on_release (true)
 	, _text_width (0)
 	, _text_height (0)
 	, _diameter (11.0)
@@ -62,10 +61,11 @@ ArdourButton::ArdourButton (Element e)
 	, fill_pattern (0)
 	, led_inset_pattern (0)
 	, reflection_pattern (0)
+	, _led_rect (0)
+	, _act_on_release (true)
 	, _led_left (false)
 	, _fixed_diameter (true)
 	, _distinct_led_click (false)
-	, _led_rect (0)
 	, _hovering (false)
 {
 	ColorsChanged.connect (sigc::mem_fun (*this, &ArdourButton::color_handler));
@@ -73,7 +73,6 @@ ArdourButton::ArdourButton (Element e)
 
 ArdourButton::ArdourButton (const std::string& str, Element e)
 	: _elements (e)
-	, _act_on_release (true)
 	, _text_width (0)
 	, _text_height (0)
 	, _diameter (11.0)
@@ -82,10 +81,11 @@ ArdourButton::ArdourButton (const std::string& str, Element e)
 	, fill_pattern (0)
 	, led_inset_pattern (0)
 	, reflection_pattern (0)
+	, _led_rect (0)
+	, _act_on_release (true)
 	, _led_left (false)
 	, _fixed_diameter (true)
 	, _distinct_led_click (false)
-	, _led_rect (0)
 	, _hovering (false)
 {
 	set_text (str);
@@ -535,14 +535,11 @@ ArdourButton::controllable_changed ()
 void
 ArdourButton::set_related_action (RefPtr<Action> act)
 {
-	_action = act;
+	Gtkmm2ext::Activatable::set_related_action (act);
 
 	if (_action) {
 
-		string str = _action->property_tooltip().get_value();
-		if (!str.empty()) {
-			ARDOUR_UI::instance()->set_tip (*this, str);
-		}
+		action_tooltip_changed ();
 
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (_action);
 		if (tact) {
@@ -698,4 +695,3 @@ ArdourButton::action_tooltip_changed ()
 	string str = _action->property_tooltip().get_value();
 	ARDOUR_UI::instance()->set_tip (*this, str);
 }
-
