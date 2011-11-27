@@ -124,11 +124,23 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session* sess, Canvas& can
 void
 MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 {
+	_route = rt;
+	
+	_view = new MidiStreamView (*this);
+	
+	if (is_track ()) {
+		_piano_roll_header = new PianoRollHeader(*midi_view());
+		_range_scroomer = new MidiScroomer(midi_view()->note_range_adjustment);
+	}
+
+	/* This next call will result in our height being set up, so it must come after
+	   the creation of the piano roll / range scroomer as their visibility is set up
+	   when our height is.
+	*/
 	RouteTimeAxisView::set_route (rt);
 
 	subplugin_menu.set_name ("ArdourContextMenu");
 
-	_view = new MidiStreamView (*this);
 	if (!gui_property ("note-range-min").empty ()) {
 		midi_view()->apply_note_range (atoi (gui_property ("note-range-min").c_str()), atoi (gui_property ("note-range-max").c_str()), true);
 	}
@@ -150,13 +162,9 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	_route->processors_changed.connect (*this, invalidator (*this), ui_bind (&MidiTimeAxisView::processors_changed, this, _1), gui_context());
 
 	if (is_track()) {
-		_piano_roll_header = new PianoRollHeader(*midi_view());
-
 		_piano_roll_header->AddNoteSelection.connect (sigc::mem_fun (*this, &MidiTimeAxisView::add_note_selection));
 		_piano_roll_header->ExtendNoteSelection.connect (sigc::mem_fun (*this, &MidiTimeAxisView::extend_note_selection));
 		_piano_roll_header->ToggleNoteSelection.connect (sigc::mem_fun (*this, &MidiTimeAxisView::toggle_note_selection));
-
-		_range_scroomer = new MidiScroomer(midi_view()->note_range_adjustment);
 
 		/* Suspend updates of the StreamView during scroomer drags to speed things up */
 		_range_scroomer->DragStarting.connect (sigc::mem_fun (*midi_view(), &MidiStreamView::suspend_updates));
