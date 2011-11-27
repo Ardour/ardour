@@ -326,15 +326,13 @@ MidiTimeAxisView::midi_view()
 void
 MidiTimeAxisView::set_height (uint32_t h)
 {
-	RouteTimeAxisView::set_height (h);
-
-	if (height >= MIDI_CONTROLS_BOX_MIN_HEIGHT) {
+	if (h >= MIDI_CONTROLS_BOX_MIN_HEIGHT) {
 		_midi_controls_box.show_all ();
 	} else {
 		_midi_controls_box.hide();
 	}
 	
-	if (height >= KEYBOARD_MIN_HEIGHT) {
+	if (h >= KEYBOARD_MIN_HEIGHT) {
 		if (is_track() && _range_scroomer) {
 			_range_scroomer->show();
 		}
@@ -349,6 +347,13 @@ MidiTimeAxisView::set_height (uint32_t h)
 			_piano_roll_header->hide();
 		}
 	}
+
+	/* We need to do this after changing visibility of our stuff, as it will
+	   eventually trigger a call to Editor::reset_controls_layout_width(),
+	   which needs to know if we have just shown or hidden a scroomer /
+	   piano roll.
+	*/
+	RouteTimeAxisView::set_height (h);
 }
 
 void
