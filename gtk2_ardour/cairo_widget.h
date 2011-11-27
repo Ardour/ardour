@@ -76,9 +76,6 @@ protected:
 	Gtkmm2ext::ActiveState _active_state;
 	Gtkmm2ext::VisualState _visual_state;
 	bool                   _need_bg;
-
-private:
-	GdkPixmap* _pixmap; ///< our pixmap
 };
 
 #endif
