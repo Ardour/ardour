@@ -1808,7 +1808,7 @@ AudioClock::timecode_validate_edit (const string& str)
 		return false;
 	}
 
-	if (TC.frames > (long)rint(_session->timecode_frames_per_second()) - 1) {
+	if (TC.frames > (uint32_t) rint (_session->timecode_frames_per_second()) - 1) {
 		return false;
 	}
 
