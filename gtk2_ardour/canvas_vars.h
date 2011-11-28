@@ -187,6 +187,9 @@ BUTTON_VARS(PunchButton, "punch button")
 BUTTON_VARS(MouseModeButton, "mouse mode button")
 BUTTON_VARS(ZoomButton, "zoom button")
 BUTTON_VARS(RouteButton, "route button")
+BUTTON_VARS(MixerStripButton, "mixer strip button")
+BUTTON_VARS(MixerStripNameButton, "mixer strip name button")
+BUTTON_VARS(MidiInputButton, "midi input button")
 
 #define CLOCK_VARS(root,name) \
 	CANVAS_VARIABLE(canvasvar_ ## root ## Background, name ": background") \

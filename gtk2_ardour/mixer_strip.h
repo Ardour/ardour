@@ -149,8 +149,8 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	Width _width;
 	void*  _width_owner;
 
-	Gtk::Button         hide_button;
-	Gtk::Button         width_button;
+	ArdourButton         hide_button;
+	ArdourButton         width_button;
 	Gtk::HBox           width_hide_box;
 	Gtk::VBox           whvbox;
 	Gtk::EventBox       top_event_box;
@@ -174,22 +174,15 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	Gtk::Table middle_button_table;
 	Gtk::Table bottom_button_table;
 
-	Gtk::Button                  gain_unit_button;
-	Gtk::Label                   gain_unit_label;
-	Gtk::Button                  meter_point_button;
-	Gtk::Label                   meter_point_label;
+	ArdourButton                 meter_point_button;
 
 	void meter_changed ();
 
-	Gtk::Button diskstream_button;
-	Gtk::Label  diskstream_label;
+	ArdourButton input_button;
+	ArdourButton output_button;
 
-	Gtk::Button input_button;
-	Gtkmm2ext::StatefulToggleButton* midi_input_enable_button;
+	ArdourButton* midi_input_enable_button;
 	Gtk::HBox   input_button_box;
-	Gtk::Label  input_label;
-	Gtk::Button output_button;
-	Gtk::Label  output_label;
 
 	std::string longest_label;
 
@@ -200,11 +193,11 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	gint    mark_update_safe ();
 	guint32 mode_switch_in_progress;
 
-	Gtk::Button   name_button;
+	ArdourButton   name_button;
 
 	ArdourWindow*  comment_window;
 	Gtk::TextView* comment_area;
-	Gtk::Button   _comment_button;
+	ArdourButton   _comment_button;
 
 	void comment_editor_done_editing ();
 	void setup_comment_editor ();
@@ -212,8 +205,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void toggle_comment_editor ();
 	void setup_comment_button ();
 
-	Gtk::Button   group_button;
-	Gtk::Label    group_label;
+	ArdourButton   group_button;
 	RouteGroupMenu *group_menu;
 
 	gint input_press (GdkEventButton *);

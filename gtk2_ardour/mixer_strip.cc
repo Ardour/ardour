@@ -91,7 +91,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, bool in_mixer)
 	, top_button_table (1, 2)
 	, middle_button_table (1, 2)
 	, bottom_button_table (1, 2)
-	, meter_point_label (_("pre"))
+	, meter_point_button (_("pre"))
 	, midi_input_enable_button (0)
 	, _comment_button (_("Comments"))
 	, _visibility (X_("mixer-strip-visibility"))
@@ -119,7 +119,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Route> rt
 	, button_table (3, 1)
 	, middle_button_table (1, 2)
 	, bottom_button_table (1, 2)
-	, meter_point_label (_("pre"))
+	, meter_point_button (_("pre"))
 	, midi_input_enable_button (0)
 	, _comment_button (_("Comments"))
 	, _visibility (X_("mixer-strip-visibility"))
@@ -145,43 +145,29 @@ MixerStrip::init ()
 	/* the length of this string determines the width of the mixer strip when it is set to `wide' */
 	longest_label = "longest label";
 
-	Gtk::Image* img;
-
-	img = manage (new Gtk::Image (::get_icon("strip_width")));
-	img->show ();
-
 	string t = _("Click to toggle the width of this mixer strip.");
 	if (_mixer_owned) {
 		t += string_compose (_("\n%1-click to toggle the width of all strips."), Keyboard::tertiary_modifier_name ());
 	}
 	
-	width_button.add (*img);
+	width_button.set_image (::get_icon("strip_width"));
 	ARDOUR_UI::instance()->set_tip (width_button, t);
 
-	img = manage (new Gtk::Image (::get_icon("hide")));
-	img->show ();
-
-	hide_button.add (*img);
+	hide_button.set_image(::get_icon("hide"));
 	ARDOUR_UI::instance()->set_tip (&hide_button, _("Hide this mixer strip"));
 
-	input_label.set_text (_("Input"));
+	input_button.set_text (_("Input"));
 	ARDOUR_UI::instance()->set_tip (&input_button, _("Button 1 to choose inputs from a port matrix, button 3 to select inputs from a menu"), "");
-	input_button.add (input_label);
-	input_button.set_name ("MixerIOButton");
-	input_label.set_name ("MixerIOButtonLabel");
+	input_button.set_name ("mixer strip button");
 	input_button_box.pack_start (input_button, true, true);
 
-	output_label.set_text (_("Output"));
+	output_button.set_text (_("Output"));
 	ARDOUR_UI::instance()->set_tip (&output_button, _("Button 1 to choose outputs from a port matrix, button 3 to select inputs from a menu"), "");
-	output_button.add (output_label);
-	output_button.set_name ("MixerIOButton");
-	output_label.set_name ("MixerIOButtonLabel");
+	output_button.set_name ("mixer strip button");
 	Gtkmm2ext::set_size_request_to_display_given_text (output_button, longest_label.c_str(), 4, 4);
 
 	ARDOUR_UI::instance()->set_tip (&meter_point_button, _("Select metering point"), "");
-	meter_point_button.add (meter_point_label);
-	meter_point_button.set_name ("MixerStripMeterPreButton");
-	meter_point_label.set_name ("MixerStripMeterPreButton");
+	meter_point_button.set_name ("mixer strip button");
 
 	/* TRANSLATORS: this string should be longest of the strings
 	   used to describe meter points. In english, it's "input".
@@ -262,29 +248,25 @@ MixerStrip::init ()
 	bottom_button_table.set_homogeneous (true);
 	bottom_button_table.attach (group_button, 0, 1, 0, 1);
 
-	name_button.add (name_label);
-	name_button.set_name ("MixerNameButton");
+	name_button.set_name ("mixer strip name button");
 	Gtkmm2ext::set_size_request_to_display_given_text (name_button, longest_label.c_str(), 2, 2);
 
-	name_label.set_name ("MixerNameButtonLabel");
 	ARDOUR_UI::instance()->set_tip (&group_button, _("Mix group"), "");
-	group_button.add (group_label);
-	group_button.set_name ("MixerGroupButton");
+	group_button.set_name ("mixer strip button");
 	Gtkmm2ext::set_size_request_to_display_given_text (group_button, "Group", 2, 2);
-	group_label.set_name ("MixerGroupButtonLabel");
 
-	_comment_button.set_name (X_("MixerCommentButton"));
-	_comment_button.signal_clicked().connect (sigc::mem_fun (*this, &MixerStrip::toggle_comment_editor));
+	_comment_button.set_name (X_("mixer strip button"));
+	_comment_button.signal_clicked.connect (sigc::mem_fun (*this, &MixerStrip::toggle_comment_editor));
 
 	global_vpacker.set_border_width (0);
 	global_vpacker.set_spacing (0);
 
-	width_button.set_name ("MixerWidthButton");
-	hide_button.set_name ("MixerHideButton");
-	top_event_box.set_name ("MixerTopEventBox");
+	width_button.set_name ("mixer strip button");
+	hide_button.set_name ("mixer strip button");
+	top_event_box.set_name ("mixer strip button");
 
 	width_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MixerStrip::width_button_pressed), false);
-	hide_button.signal_clicked().connect (sigc::mem_fun(*this, &MixerStrip::hide_clicked));
+	hide_button.signal_clicked.connect (sigc::mem_fun(*this, &MixerStrip::hide_clicked));
 
 	width_hide_box.pack_start (width_button, false, true);
 	width_hide_box.pack_start (top_event_box, true, true);
@@ -456,10 +438,9 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 
 	if (is_midi_track()) {
 		if (midi_input_enable_button == 0) {
-			Image* img = manage (new Image (get_icon (X_("midi_socket_small"))));
-			midi_input_enable_button = manage (new StatefulToggleButton);
-			midi_input_enable_button->set_name ("MixerMidiInputEnableButton");
-			midi_input_enable_button->set_image (*img);
+			midi_input_enable_button = manage (new ArdourButton);
+			midi_input_enable_button->set_name ("midi input button");
+			midi_input_enable_button->set_image (::get_icon (X_("midi_socket_small")));
 			midi_input_enable_button->signal_button_press_event().connect (sigc::mem_fun (*this, &MixerStrip::input_active_button_press), false);
 			midi_input_enable_button->signal_button_release_event().connect (sigc::mem_fun (*this, &MixerStrip::input_active_button_release), false);
 			ARDOUR_UI::instance()->set_tip (midi_input_enable_button, _("Enable/Disable MIDI input"));
@@ -506,7 +487,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		}
 	}
 
-	meter_point_label.set_text (meter_point_string (_route->meter_point()));
+	meter_point_button.set_text (meter_point_string (_route->meter_point()));
 
 	delete route_ops_menu;
 	route_ops_menu = 0;
@@ -561,20 +542,12 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	middle_button_table.show();
 	bottom_button_table.show();
 	gpm.show_all ();
-	gain_unit_button.show();
-	gain_unit_label.show();
 	meter_point_button.show();
-	meter_point_label.show();
-	diskstream_button.show();
-	diskstream_label.show();
 	input_button_box.show_all();
 	output_button.show();
-	output_label.show();
-	name_label.show();
 	name_button.show();
 	_comment_button.show();
 	group_button.show();
-	group_label.show();
 
 	parameter_changed ("mixer-strip-visibility");
 
@@ -1231,9 +1204,9 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width widt
   	}
 
 	if (for_input) {
-		input_label.set_text (label_string);
+		input_button.set_text (label_string);
 	} else {
-		output_label.set_text (label_string);
+		output_button.set_text (label_string);
 	}
 }
 
@@ -1289,20 +1262,20 @@ MixerStrip::setup_comment_button ()
 	case Wide:
 		if (_route->comment().empty ()) {
 			_comment_button.unset_bg (STATE_NORMAL);
-			((Gtk::Label *) _comment_button.get_child ())->set_text (_("Comments"));
+			_comment_button.set_text (_("Comments"));
 		} else {
 			_comment_button.modify_bg (STATE_NORMAL, color ());
-			((Gtk::Label *) _comment_button.get_child ())->set_text (_("*Comments*"));
+			_comment_button.set_text (_("*Comments*"));
 		}
 		break;
 
 	case Narrow:
 		if (_route->comment().empty ()) {
 			_comment_button.unset_bg (STATE_NORMAL);
-			((Gtk::Label *) _comment_button.get_child ())->set_text (_("Cmt"));
+			_comment_button.set_text (_("Cmt"));
 		} else {
 			_comment_button.modify_bg (STATE_NORMAL, color ());
-			((Gtk::Label *) _comment_button.get_child ())->set_text (_("*Cmt*"));
+			_comment_button.set_text (_("*Cmt*"));
 		}
 		break;
 	}
@@ -1421,14 +1394,14 @@ MixerStrip::route_group_changed ()
 	RouteGroup *rg = _route->route_group();
 
 	if (rg) {
-		group_label.set_text (PBD::short_version (rg->name(), 5));
+		group_button.set_text (PBD::short_version (rg->name(), 5));
 	} else {
 		switch (_width) {
 		case Wide:
-			group_label.set_text (_("Grp"));
+			group_button.set_text (_("Grp"));
 			break;
 		case Narrow:
-			group_label.set_text (_("~G"));
+			group_button.set_text (_("~G"));
 			break;
 		}
 	}
@@ -1529,10 +1502,10 @@ MixerStrip::name_changed ()
 {
 	switch (_width) {
 	case Wide:
-		RouteUI::property_changed (PropertyChange (ARDOUR::Properties::name));
+		name_button.set_text (_route->name());
 		break;
 	case Narrow:
-		name_label.set_text (PBD::short_version (_route->name(), 5));
+		name_button.set_text (PBD::short_version (_route->name(), 5));
 		break;
 	}
 }
@@ -1716,7 +1689,7 @@ MixerStrip::meter_point_string (MeterPoint mp)
 void
 MixerStrip::meter_changed ()
 {
-	meter_point_label.set_text (meter_point_string (_route->meter_point()));
+	meter_point_button.set_text (meter_point_string (_route->meter_point()));
 	gpm.setup_meters ();
 	// reset peak when meter point changes
 	gpm.reset_peak_display();
