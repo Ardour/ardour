@@ -407,24 +407,6 @@ Graph::run_one()
         return false;
 }
 
-static void get_rt()
-{
-        if (!jack_is_realtime (AudioEngine::instance()->jack())) {
-                return;
-        }
-
-        int priority = jack_client_real_time_priority (AudioEngine::instance()->jack());
-
-        if (priority) {
-                struct sched_param rtparam;
-
-                memset (&rtparam, 0, sizeof (rtparam));
-                rtparam.sched_priority = priority;
-
-                pthread_setschedparam (pthread_self(), SCHED_FIFO, &rtparam);
-        }
-}
-
 void
 Graph::helper_thread()
 {
@@ -433,7 +415,6 @@ Graph::helper_thread()
 	resume_rt_malloc_checks ();
 
         pt->get_buffers();
-        get_rt();
 
         while(1) {
                 if (run_one()) {
@@ -453,7 +434,6 @@ Graph::main_thread()
 	resume_rt_malloc_checks ();
 
         pt->get_buffers();
-        get_rt();
 
   again:
         _callback_start_sem.wait ();
