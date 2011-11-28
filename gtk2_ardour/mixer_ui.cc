@@ -1800,13 +1800,13 @@ Mixer_UI::update_title ()
 		}
 		
 		WindowTitle title (n);
-		title += _("Mixer");
+		title += S_("Window|Mixer");
 		title += Glib::get_application_name ();
 		set_title (title.get_string());
 
 	} else {
 		
-		WindowTitle title (X_("Mixer"));
+		WindowTitle title (S_("Window|Mixer"));
 		title += Glib::get_application_name ();
 		set_title (title.get_string());
 	}

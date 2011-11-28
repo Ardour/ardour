@@ -3172,9 +3172,9 @@ Editor::history_changed ()
 
 	if (undo_action && _session) {
 		if (_session->undo_depth() == 0) {
-			label = _("Undo");
+			label = S_("Command|Undo");
 		} else {
-			label = string_compose(_("Undo (%1)"), _session->next_undo());
+			label = string_compose(S_("Command|Undo (%1)"), _session->next_undo());
 		}
 		undo_action->property_label() = label;
 	}

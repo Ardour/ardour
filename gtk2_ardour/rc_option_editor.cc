@@ -261,7 +261,7 @@ static const struct {
 	/* Command = Meta
 	   Option/Alt = Mod1
 	*/
-	{ "Shift", GDK_SHIFT_MASK },
+	{ "Key|Shift", GDK_SHIFT_MASK },
 	{ "Command", GDK_META_MASK },
 	{ "Control", GDK_CONTROL_MASK },
 	{ "Option", GDK_MOD1_MASK },
@@ -271,7 +271,7 @@ static const struct {
 	{ "Shift-Command-Option", GDK_MOD5_MASK|GDK_SHIFT_MASK|GDK_META_MASK },
 
 #else
-	{ "Shift", GDK_SHIFT_MASK },
+	{ "Key|Shift", GDK_SHIFT_MASK },
 	{ "Control", GDK_CONTROL_MASK },
 	{ "Alt (Mod1)", GDK_MOD1_MASK },
 	{ "Control-Shift", GDK_CONTROL_MASK|GDK_SHIFT_MASK },
@@ -310,7 +310,7 @@ public:
 
 		for (int x = 0; modifiers[x].name; ++x) {
 			if (modifiers[x].modifier == Keyboard::edit_modifier ()) {
-				_edit_modifier_combo.set_active_text (_(modifiers[x].name));
+				_edit_modifier_combo.set_active_text (S_(modifiers[x].name));
 				break;
 			}
 		}
@@ -880,7 +880,7 @@ RCOptionEditor::RCOptionEditor ()
                 add_option (_("Misc"), procs);
         }
 
-	add_option (_("Misc"), new OptionEditorHeading (_("Undo")));
+	add_option (_("Misc"), new OptionEditorHeading (S_("Options|Undo")));
 
 	add_option (_("Misc"), new UndoOptions (_rc_config));
 

@@ -282,7 +282,7 @@ Editor::register_actions ()
 
 	reg_sens (editor_actions, "duplicate-range", _("Duplicate Range"), sigc::bind (sigc::mem_fun(*this, &Editor::duplicate_dialog), false));
 
-	undo_action = reg_sens (editor_actions, "undo", _("Undo"), sigc::bind (sigc::mem_fun(*this, &Editor::undo), 1U));
+	undo_action = reg_sens (editor_actions, "undo", S_("Command|Undo"), sigc::bind (sigc::mem_fun(*this, &Editor::undo), 1U));
 	redo_action = reg_sens (editor_actions, "redo", _("Redo"), sigc::bind (sigc::mem_fun(*this, &Editor::redo), 1U));
 
 	reg_sens (editor_actions, "export-audio", _("Export Audio"), sigc::mem_fun(*this, &Editor::export_audio));

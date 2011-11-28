@@ -129,7 +129,7 @@ TimeFXDialog::TimeFXDialog (Editor& e, bool pitch)
 
 		table->attach (preserve_formants_button, 1, 3, 3, 4, Gtk::FILL, Gtk::EXPAND, 0, 0);
 
-		add_button (_("Shift"), Gtk::RESPONSE_ACCEPT);
+		add_button (S_("Time|Shift"), Gtk::RESPONSE_ACCEPT);
 
 		upper_button_box.pack_start (*table, false, true);
 	} else {

@@ -608,7 +608,7 @@ SessionMetadataDialog<DataSet>::init_people_data ()
 	ptr = MetadataPtr (new TextMetadataField (&ARDOUR::SessionMetadata::dj_mixer, &ARDOUR::SessionMetadata::set_dj_mixer, _("DJ Mixer")));
 	data_set->add_data_field (ptr);
 
-	ptr = MetadataPtr (new TextMetadataField (&ARDOUR::SessionMetadata::mixer, &ARDOUR::SessionMetadata::set_mixer, _("Mixer")));
+	ptr = MetadataPtr (new TextMetadataField (&ARDOUR::SessionMetadata::mixer, &ARDOUR::SessionMetadata::set_mixer, S_("Metadata|Mixer")));
 	data_set->add_data_field (ptr);
 }
 

@@ -226,7 +226,7 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_toggle_action (common_actions, X_("KeepTearoffs"), _("Toolbars when Maximised"), mem_fun (*this, &ARDOUR_UI::toggle_keep_tearoffs));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	ActionManager::register_toggle_action (common_actions, X_("toggle-mixer"), _("Mixer"),  sigc::mem_fun(*this, &ARDOUR_UI::toggle_mixer_window));
+	ActionManager::register_toggle_action (common_actions, X_("toggle-mixer"), S_("Window|Mixer"),  sigc::mem_fun(*this, &ARDOUR_UI::toggle_mixer_window));
 	ActionManager::register_toggle_action (common_actions, X_("toggle-mixer-on-top"), _("Mixer on Top"),  sigc::mem_fun(*this, &ARDOUR_UI::toggle_mixer_on_top));
 	ActionManager::register_toggle_action (common_actions, X_("ToggleRCOptionsEditor"), _("Preferences"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_rc_options_window));
 	ActionManager::register_toggle_action (common_actions, X_("ToggleSessionOptionsEditor"), _("Properties"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_session_options_window));
