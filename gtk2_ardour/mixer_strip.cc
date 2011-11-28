@@ -147,7 +147,7 @@ MixerStrip::init ()
 
 	string t = _("Click to toggle the width of this mixer strip.");
 	if (_mixer_owned) {
-		t += string_compose (_("\n%1-click to toggle the width of all strips."), Keyboard::tertiary_modifier_name ());
+		t += string_compose (_("\n%1-%2-click to toggle the width of all strips."), Keyboard::primary_modifier_name(), Keyboard::tertiary_modifier_name ());
 	}
 	
 	width_button.set_image (::get_icon("strip_width"));
@@ -1517,7 +1517,7 @@ MixerStrip::width_button_pressed (GdkEventButton* ev)
 		return false;
 	}
 	
-	if (Keyboard::modifier_state_contains (ev->state, Keyboard::ModifierMask (Keyboard::TertiaryModifier)) && _mixer_owned) {
+	if (Keyboard::modifier_state_contains (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier | Keyboard::TertiaryModifier)) && _mixer_owned) {
 		switch (_width) {
 		case Wide:
 			_mixer.set_strip_width (Narrow);
