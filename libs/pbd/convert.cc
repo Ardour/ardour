@@ -336,7 +336,10 @@ sgettext (const char* domain_name, const char* msgid)
 {
 	const char * msgval = dgettext (domain_name, msgid);
 	if (msgval == msgid) {
-		msgval = strrchr (msgid, '|') + 1;
+		const char * p = strrchr (msgid, '|');
+		if (p) {
+			msgval = p + 1;
+		}
 	}
 	return msgval;
 }
