@@ -66,9 +66,6 @@ UI::UI (string namestr, int *argc, char ***argv)
 	: AbstractUI<UIRequest> (namestr)
 {
 	theMain = new Main (argc, argv);
-#ifndef GTK_NEW_TOOLTIP_API
-	tips = new Tooltips;
-#endif
 
 	_active = false;
 
@@ -454,16 +451,7 @@ UI::do_request (UIRequest* req)
 
 	} else if (req->type == SetTip) {
 
-#ifdef GTK_NEW_TOOLTIP_API
-		/* even if the installed GTK is up to date,
-		   at present (November 2008) our included
-		   version of gtkmm is not. so use the GTK
-		   API that we've verified has the right function.
-		*/
-		gtk_widget_set_tooltip_text (req->widget->gobj(), req->msg);
-#else
-		tips->set_tip (*req->widget, req->msg, "");
-#endif
+		gtk_widget_set_tooltip_markup (req->widget->gobj(), req->msg);
 
 	} else {
 
