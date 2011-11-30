@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Bindings name="ardour">
+<Bindings name="ardour-mixer">
   <Press>
      <Binding key="s" action="Mixer/solo"/>
      <Binding key="m" action="Mixer/mute"/>

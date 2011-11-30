@@ -20,9 +20,15 @@
 #include <gio/gio.h>
 #include <gtk/gtkiconfactory.h>
 
+
+#include "pbd/filesystem.h"
+#include "pbd/file_utils.h"
+#include "pbd/search_path.h"
+
 #include "gtkmm2ext/tearoff.h"
 
 #include "ardour/ardour.h"
+#include "ardour/filesystem_paths.h"
 #include "ardour/profile.h"
 #include "ardour/session.h"
 
@@ -614,6 +620,24 @@ Editor::register_actions ()
 	ActionManager::add_action_group (mouse_mode_actions);
 	ActionManager::add_action_group (snap_actions);
 	ActionManager::add_action_group (editor_actions);
+}
+
+void
+Editor::load_bindings ()
+{
+        /* XXX move this to a better place */
+	
+        key_bindings.set_action_map (editor_action_map);
+
+	sys::path binding_file;
+	SearchPath spath = ardour_search_path() + user_config_directory() + system_config_search_path();
+
+	if (find_file_in_search_path (spath, "editor.bindings", binding_file)) {
+                key_bindings.load (binding_file.to_string());
+		info << string_compose (_("Loaded editor bindings from %1"), binding_file.to_string()) << endmsg;
+        } else {
+		error << string_compose (_("Could not find editor.bindings in search path %1"), spath.to_string()) << endmsg;
+	}
 }
 
 void

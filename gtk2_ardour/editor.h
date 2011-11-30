@@ -42,6 +42,7 @@
 #include "gtkmm2ext/click_box.h"
 #include "gtkmm2ext/dndtreeview.h"
 #include "gtkmm2ext/stateful_button.h"
+#include "gtkmm2ext/bindings.h"
 
 #include "pbd/stateful.h"
 #include "pbd/signals.h"
@@ -1068,6 +1069,10 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void register_actions ();
 	void register_region_actions ();
+
+        void load_bindings ();
+        Gtkmm2ext::ActionMap editor_action_map;
+        Gtkmm2ext::Bindings  key_bindings;
 
 	int ensure_cursor (framepos_t* pos);
 
