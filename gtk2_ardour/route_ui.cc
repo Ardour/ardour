@@ -1765,7 +1765,7 @@ void
 RouteUI::setup_invert_buttons ()
 {
 	/* remove old invert buttons */
-	for (list<ArdourButton*>::iterator i = _invert_buttons.begin(); i != _invert_buttons.end(); ++i) {
+	for (vector<ArdourButton*>::iterator i = _invert_buttons.begin(); i != _invert_buttons.end(); ++i) {
 		_invert_button_box.remove (**i);
 	}
 
@@ -1781,8 +1781,8 @@ RouteUI::setup_invert_buttons ()
 
 	for (uint32_t i = 0; i < to_add; ++i) {
 		ArdourButton* b = manage (new ArdourButton);
-		b->StateChanged.connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::invert_toggled), i, b));
 		b->signal_button_press_event().connect (sigc::mem_fun (*this, &RouteUI::invert_press));
+		b->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::invert_release), i));
 
 		b->set_name (X_("mixer strip button"));
 		if (to_add == 1) {
@@ -1817,37 +1817,29 @@ RouteUI::set_invert_button_state ()
 	}
 
 	int j = 0;
-	for (list<ArdourButton*>::iterator i = _invert_buttons.begin(); i != _invert_buttons.end(); ++i, ++j) {
+	for (vector<ArdourButton*>::iterator i = _invert_buttons.begin(); i != _invert_buttons.end(); ++i, ++j) {
 		(*i)->set_active (_route->phase_invert (j));
 	}
 
 	--_i_am_the_modifier;
 }
 
-void
-RouteUI::invert_toggled (uint32_t i, ArdourButton* b)
+bool
+RouteUI::invert_release (GdkEventButton* ev, uint32_t i)
 {
-	if (_i_am_the_modifier) {
-		return;
+	if (ev->button == 1 && i < _invert_buttons.size()) {
+		_route->set_phase_invert (i, !_invert_buttons[i]->get_active());
+		return true;
 	}
-
-	uint32_t const N = _route->input()->n_ports().n_audio();
-	if (N <= _max_invert_buttons) {
-		_route->set_phase_invert (i, b->get_active ());
-	} else {
-		boost::dynamic_bitset<> p (N);
-		if (b->get_active ()) {
-			p.set ();
-		}
-		_route->set_phase_invert (p);
-	}
+	return false;
 }
+
 
 bool
 RouteUI::invert_press (GdkEventButton* ev)
 {
 	using namespace Menu_Helpers;
-
+	
 	if (ev->button != 3) {
 		return true;
 	}
@@ -1884,7 +1876,7 @@ RouteUI::invert_menu_toggled (uint32_t c)
 void
 RouteUI::set_invert_sensitive (bool yn)
 {
-        for (list<ArdourButton*>::iterator b = _invert_buttons.begin(); b != _invert_buttons.end(); ++b) {
+        for (vector<ArdourButton*>::iterator b = _invert_buttons.begin(); b != _invert_buttons.end(); ++b) {
                 (*b)->set_sensitive (yn);
         }
 }

@@ -271,12 +271,12 @@ class RouteUI : public virtual AxisView
 
 	void setup_invert_buttons ();
 	void set_invert_button_state ();
-	void invert_toggled (uint32_t, ArdourButton *);
 	void invert_menu_toggled (uint32_t);
 	bool invert_press (GdkEventButton *);
+	bool invert_release (GdkEventButton *, uint32_t i);
 
 	int _i_am_the_modifier;
-	std::list<ArdourButton*> _invert_buttons;
+	std::vector<ArdourButton*> _invert_buttons;
 	Gtk::Menu* _invert_menu;
 
 	static void set_showing_sends_to (boost::shared_ptr<ARDOUR::Route>);
