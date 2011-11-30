@@ -219,7 +219,7 @@ MixerStrip::init ()
         rec_solo_table.show ();
 
 	button_table.set_homogeneous (false);
-	button_table.set_spacings (0);
+	button_table.set_spacings (2);
 
 	if (solo_isolated_led) {
 		button_size_group->add_widget (*solo_isolated_led);
@@ -244,7 +244,7 @@ MixerStrip::init ()
 	middle_button_table.set_homogeneous (true);
 	middle_button_table.set_spacings (2);
 
-	bottom_button_table.set_col_spacings (0);
+	bottom_button_table.set_spacings (2);
 	bottom_button_table.set_homogeneous (true);
 	bottom_button_table.attach (group_button, 0, 1, 0, 1);
 
@@ -283,7 +283,7 @@ MixerStrip::init ()
 	global_vpacker.pack_start (middle_button_table, Gtk::PACK_SHRINK, 2);
 	global_vpacker.pack_start (gpm, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (bottom_button_table, Gtk::PACK_SHRINK);
-	global_vpacker.pack_start (output_button, Gtk::PACK_SHRINK);
+	global_vpacker.pack_start (output_button, Gtk::PACK_SHRINK, 2);
 	global_vpacker.pack_start (_comment_button, Gtk::PACK_SHRINK);
 
 	global_frame.add (global_vpacker);
@@ -1070,13 +1070,14 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width widt
 	ostringstream tooltip;
 	char * tooltip_cstr;
 
-	tooltip << route->name();
-
 	if (for_input) {
 		io_count = route->n_inputs().n_total();
+		tooltip << string_compose (_("<b>INPUT</b> to %1"), route->name());
 	} else {
 		io_count = route->n_outputs().n_total();
+		tooltip << string_compose (_("<b>OUTPUT</b> from %1"), route->name());
 	}
+
 
 	for (io_index = 0; io_index < io_count; ++io_index) {
 		if (for_input) {

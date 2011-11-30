@@ -1801,6 +1801,7 @@ RouteUI::setup_invert_buttons ()
 		_invert_button_box.pack_start (*b);
 	}
 
+	_invert_button_box.set_spacing (1);
 	_invert_button_box.show_all ();
 }
 
