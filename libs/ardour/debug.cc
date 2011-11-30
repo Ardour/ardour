@@ -51,4 +51,5 @@ uint64_t PBD::DEBUG::CaptureAlignment = PBD::new_debug_bit ("capturealignment");
 uint64_t PBD::DEBUG::PluginManager = PBD::new_debug_bit ("pluginmanager");
 uint64_t PBD::DEBUG::AudioUnits = PBD::new_debug_bit ("audiounits");
 uint64_t PBD::DEBUG::ControlProtocols = PBD::new_debug_bit ("controlprotocols");
+uint64_t PBD::DEBUG::CycleTimers = PBD::new_debug_bit ("cycletimers");
 

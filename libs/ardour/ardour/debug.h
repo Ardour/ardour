@@ -54,6 +54,7 @@ namespace PBD {
 		extern uint64_t PluginManager;
 		extern uint64_t AudioUnits;
 		extern uint64_t ControlProtocols;
+		extern uint64_t CycleTimers;
 	}
 }
 

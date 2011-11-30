@@ -24,24 +24,37 @@
 #include <iostream>
 
 #include "ardour/cycles.h"
+#include "ardour/debug.h"
 
 class CycleTimer {
   private:
 	static float cycles_per_usec;
+#ifndef NDEBUG
 	cycles_t _entry;
 	cycles_t _exit;
 	std::string _name;
+#endif
 
   public:
-	CycleTimer(std::string name) : _name (name){
-		if (cycles_per_usec == 0) {
-			cycles_per_usec = get_mhz ();
+	CycleTimer(const std::string& name) {
+#ifndef NDEBUG
+		if (PBD::debug_bits & PBD::DEBUG::CycleTimers) {
+			_name = name;
+			if (cycles_per_usec == 0) {
+				cycles_per_usec = get_mhz ();
+			}
+			_entry = get_cycles();
 		}
-		_entry = get_cycles();
+#endif
 	}
+
 	~CycleTimer() {
-		_exit = get_cycles();
-		std::cerr << _name << ": " << (float) (_exit - _entry) / cycles_per_usec << " (" <<  _entry << ", " << _exit << ')' << std::endl;
+#ifndef NDEBUG
+		if (PBD::debug_bits & PBD::DEBUG::CycleTimers) {
+			_exit = get_cycles();
+			std::cerr << _name << ": " << (float) (_exit - _entry) / cycles_per_usec << " (" <<  _entry << ", " << _exit << ')' << std::endl;
+		}
+#endif
 	}
 
 	static float get_mhz ();
