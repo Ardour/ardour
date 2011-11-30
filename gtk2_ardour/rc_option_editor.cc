@@ -310,7 +310,9 @@ public:
 
 		for (int x = 0; modifiers[x].name; ++x) {
 			if (modifiers[x].modifier == Keyboard::edit_modifier ()) {
-				_edit_modifier_combo.set_active_text (S_(modifiers[x].name));
+				string lookup_str = "key|";
+				lookup_str += modifiers[x].name;
+				_edit_modifier_combo.set_active_text (S_(lookup_str.c_str()));
 				break;
 			}
 		}
