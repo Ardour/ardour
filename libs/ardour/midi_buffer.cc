@@ -265,10 +265,134 @@ MidiBuffer::silence (framecnt_t /*nframes*/, framecnt_t /*offset*/)
 	_silent = true;
 }
 
+bool
+MidiBuffer::second_simultaneous_midi_byte_is_first (uint8_t a, uint8_t b)
+{
+	bool b_first = false;
+
+	/* two events at identical times. we need to determine
+	   the order in which they should occur.
+	   
+	   the rule is:
+	   
+	   Controller messages
+	   Program Change
+	   Note Off
+	   Note On
+	   Note Pressure
+	   Channel Pressure
+	   Pitch Bend
+	*/
+	
+	if ((a) >= 0xf0 || (b) >= 0xf0 || ((a & 0xf) != (b & 0xf))) {
+		
+		/* if either message is not a channel message, or if the channels are
+		 * different, we don't care about the type.
+		 */
+		
+		b_first = true;
+		
+	} else {
+		
+		switch (b & 0xf0) {
+		case MIDI_CMD_CONTROL:
+			b_first = true;
+			break;
+			
+		case MIDI_CMD_PGM_CHANGE:
+			switch (a & 0xf0) {
+			case MIDI_CMD_CONTROL:
+				break;
+			case MIDI_CMD_PGM_CHANGE:
+			case MIDI_CMD_NOTE_OFF:
+			case MIDI_CMD_NOTE_ON:
+			case MIDI_CMD_NOTE_PRESSURE:
+			case MIDI_CMD_CHANNEL_PRESSURE:
+			case MIDI_CMD_BENDER:
+				b_first = true;
+			}
+			
+		case MIDI_CMD_NOTE_OFF:
+			switch (a & 0xf0) {
+			case MIDI_CMD_CONTROL:
+			case MIDI_CMD_PGM_CHANGE:
+				break;
+			case MIDI_CMD_NOTE_OFF:
+			case MIDI_CMD_NOTE_ON:
+			case MIDI_CMD_NOTE_PRESSURE:
+			case MIDI_CMD_CHANNEL_PRESSURE:
+			case MIDI_CMD_BENDER:
+				b_first = true;
+			}
+			break;
+			
+		case MIDI_CMD_NOTE_ON:
+			switch (a & 0xf0) {
+			case MIDI_CMD_CONTROL:
+			case MIDI_CMD_PGM_CHANGE:
+			case MIDI_CMD_NOTE_OFF:
+				break;
+			case MIDI_CMD_NOTE_ON:
+			case MIDI_CMD_NOTE_PRESSURE:
+			case MIDI_CMD_CHANNEL_PRESSURE:
+			case MIDI_CMD_BENDER:
+				b_first = true;
+			}
+			break;
+		case MIDI_CMD_NOTE_PRESSURE:
+			switch (a & 0xf0) {
+			case MIDI_CMD_CONTROL:
+			case MIDI_CMD_PGM_CHANGE:
+			case MIDI_CMD_NOTE_OFF:
+			case MIDI_CMD_NOTE_ON:
+				break;
+			case MIDI_CMD_NOTE_PRESSURE:
+			case MIDI_CMD_CHANNEL_PRESSURE:
+			case MIDI_CMD_BENDER:
+				b_first = true;
+			}
+			break;
+			
+		case MIDI_CMD_CHANNEL_PRESSURE:
+			switch (a & 0xf0) {
+			case MIDI_CMD_CONTROL:
+			case MIDI_CMD_PGM_CHANGE:
+			case MIDI_CMD_NOTE_OFF:
+			case MIDI_CMD_NOTE_ON:
+			case MIDI_CMD_NOTE_PRESSURE:
+				break;
+			case MIDI_CMD_CHANNEL_PRESSURE:
+			case MIDI_CMD_BENDER:
+				b_first = true;
+			}
+			break;
+		case MIDI_CMD_BENDER:
+			switch (a & 0xf0) {
+			case MIDI_CMD_CONTROL:
+			case MIDI_CMD_PGM_CHANGE:
+			case MIDI_CMD_NOTE_OFF:
+			case MIDI_CMD_NOTE_ON:
+			case MIDI_CMD_NOTE_PRESSURE:
+			case MIDI_CMD_CHANNEL_PRESSURE:
+				break;
+			case MIDI_CMD_BENDER:
+				b_first = true;
+			}
+			break;
+		}
+	}
+	
+	return b_first;
+}
+	
 /** Merge \a other into this buffer.  Realtime safe. */
 bool
 MidiBuffer::merge_in_place(const MidiBuffer &other)
 {
+	if (other.size() || size()) {
+		DEBUG_TRACE (DEBUG::MidiIO, string_compose ("merge in place, sizes %1/%2\n", size(), other.size()));
+	}
+
 	if (other.size() == 0) {
 		return true;
 	}
@@ -311,27 +435,23 @@ MidiBuffer::merge_in_place(const MidiBuffer &other)
 
 	while (them != other.end()) {
 
-		size_t sz = 0;
-		ssize_t src = -1;
+		size_t sz;
+		ssize_t src;
 
 		/* gather up total size of events that are earlier than
 		   the event referenced by "us"
 		*/
 
-		while (them != other.end() && (*them).time() <= (*us).time()) {
+		src = -1;
+		sz = 0;
+
+		while (them != other.end() && (*them).time() < (*us).time()) {
 			if (src == -1) {
 				src = them.offset;
 			}
 			sz += sizeof (TimeType) + (*them).size();
 			++them;
 		}
-
-#if 0
-		if (us != end())
-			cerr << "us @ " << (*us).time() << endl;
-		if (them != other.end())
-			cerr << "them @ " << (*them).time() << endl;
-#endif
 
 		if (sz) {
 			assert(src >= 0);
@@ -355,11 +475,74 @@ MidiBuffer::merge_in_place(const MidiBuffer &other)
 			}
 		}
 
-		if (!(us != end())) {
+		if (us == end()) { 
+
 			/* just append the rest of other */
+
 			memcpy (_data + us.offset, other._data + them.offset, other._size - them.offset);
 			_size += other._size - them.offset;
+			assert(_size <= _capacity);
 			break;
+
+		} else if (them != other.end()) {
+
+			/* to get here implies that we've encountered two
+			 * messages with the same timestamp. we must order 
+			 * them correctly.
+			 */
+
+			DEBUG_TRACE (DEBUG::MidiIO, 
+				     string_compose ("simultaneous MIDI events discovered during merge, times %1/%2 status %3/%4\n",
+						     (*us).time(), (*them).time(),
+						     (int) *(_data + us.offset + sizeof (TimeType)),
+						     (int) *(other._data + them.offset + sizeof (TimeType))));
+
+			assert ((*us).time() == (*them).time());
+						     
+			uint8_t our_midi_status_byte = *(_data + us.offset + sizeof (TimeType));
+			uint8_t their_midi_status_byte = *(other._data + them.offset + sizeof (TimeType));
+			bool them_first = second_simultaneous_midi_byte_is_first (our_midi_status_byte, their_midi_status_byte);
+
+			DEBUG_TRACE (DEBUG::MidiIO, string_compose ("other message came first ? %1\n", them_first));
+			
+			if (!them_first) {
+				/* skip past our own event */
+				++us;
+			}
+				
+			sz = sizeof (TimeType) + (*them).size();
+			
+			/* move our remaining events later in the buffer by
+			 * enough to fit the one message we're going to merge
+			 */
+
+			memmove (_data + us.offset + sz, _data + us.offset, _size - us.offset);
+			/* increase _size */
+			_size += sz;
+			assert(_size <= _capacity);
+			/* insert new stuff */
+			memcpy  (_data + us.offset, other._data + them.offset, sz);
+			/* update iterator to our own events. this is a miserable hack */
+			us.offset += sz;
+			/* 'us' is now an iterator to the event right after the
+			   new ones that we merged
+			*/
+			if (them_first) {
+				/* need to skip the event pointed to by 'us'
+				   since its at the same time as 'them'
+				   (still), and we'll enter 
+				*/
+
+				if (us != end()) {
+					++us;
+				}
+			}
+
+			/* we merged one event from the other buffer, so
+			 * advance the iterator there.
+			 */
+
+			++them;
 		}
 	}
 
@@ -369,7 +552,7 @@ MidiBuffer::merge_in_place(const MidiBuffer &other)
 	size_t test_final_count = 0;
 	test_time = 0;
 	for (iterator i = begin(); i != end(); ++i) {
-		// cerr << "CHECK " << test_final_count << " / " << test_us_count + test_them_count << endl;
+		cerr << "CHECK " << test_final_count << " / " << test_us_count + test_them_count << endl;
 		assert(Evoral::midi_event_is_valid((*i).buffer(), (*i).size()));
 		assert((*i).time() >= test_time);
 		test_time = (*i).time();

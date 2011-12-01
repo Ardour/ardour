@@ -83,6 +83,9 @@ public:
 		inline bool operator!=(const iterator_base<BufferType, EventType>& other) const {
 			return (&buffer != &other.buffer) || (offset != other.offset);
 		}
+		inline bool operator==(const iterator_base<BufferType, EventType>& other) const {
+			return (&buffer == &other.buffer) && (offset == other.offset);
+		}
 		BufferType&     buffer;
 		size_t          offset;
 	};
@@ -98,6 +101,13 @@ public:
 
 	uint8_t* data() const { return _data; }
 
+	/**
+	 * returns true if the message with the second argument as its MIDI
+	 * status byte should preceed the message with the first argument as
+	 * its MIDI status byte.
+	 */
+	static bool second_simultaneous_midi_byte_is_first (uint8_t, uint8_t);
+	
 private:
 	friend class iterator_base< MidiBuffer, Evoral::MIDIEvent<TimeType> >;
 	friend class iterator_base< const MidiBuffer, const Evoral::MIDIEvent<TimeType> >;

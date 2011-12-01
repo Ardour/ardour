@@ -56,6 +56,9 @@ public:
 	/** Amount of valid data in buffer.  Use this over capacity almost always. */
 	size_t size() const { return _size; }
 
+	/** Return true if the buffer contains no data, false otherwise */
+	virtual bool empty() const { return _size == 0; }
+
 	/** Type of this buffer.
 	 * Based on this you can static cast a Buffer* to the desired type. */
 	DataType type() const { return _type; }

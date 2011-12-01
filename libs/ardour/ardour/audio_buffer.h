@@ -157,6 +157,7 @@ public:
 	 */
 	void resize (size_t nframes);
 
+	bool empty() const { return _size == 0; }
 
 	const Sample* data (framecnt_t offset = 0) const {
 		assert(offset <= _capacity);
