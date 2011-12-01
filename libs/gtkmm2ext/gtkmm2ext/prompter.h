@@ -58,13 +58,17 @@ class Prompter : public Gtk::Dialog
 	Gtk::Entry& the_entry() { return entry; }
 
 	void on_entry_changed ();
+	void on_show ();
 
   private:
 	Gtk::Entry entry;
 	Gtk::HBox entryBox;
 	Gtk::Label entryLabel;
-	
+	bool first_show;
+	bool can_accept_from_entry;
+
 	void init ();
+	void entry_activated ();
 };
 
 } /* namespace */

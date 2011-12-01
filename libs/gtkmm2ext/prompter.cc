@@ -32,12 +32,16 @@ using namespace Gtkmm2ext;
 
 Prompter::Prompter (Gtk::Window& parent, bool modal)
 	: Gtk::Dialog ("", parent, modal)
+	, first_show (true)
+	, can_accept_from_entry (false)
 {
 	init ();
 }
 
 Prompter::Prompter (bool modal)
 	: Gtk::Dialog ("", modal)
+	, first_show (true)
+	, can_accept_from_entry (false)
 {
 	init ();
 }
@@ -70,9 +74,23 @@ Prompter::init ()
 
 	get_vbox()->pack_start (entryBox);
 	show_all_children();
-	entry.signal_changed().connect (mem_fun (*this, &Prompter::on_entry_changed));
-	entry.signal_activate().connect (bind (mem_fun (*this, &Prompter::response), Gtk::RESPONSE_ACCEPT));
 }	
+
+void
+Prompter::on_show ()
+{
+	/* don't connect to signals till shown, so that we don't change the
+	   response sensitivity etc. when the setup of the dialog sets the text.
+	*/
+
+	if (first_show) {
+		entry.signal_changed().connect (mem_fun (*this, &Prompter::on_entry_changed));
+		entry.signal_activate().connect (mem_fun (*this, &Prompter::entry_activated));
+		first_show = false;
+	}
+
+	Dialog::on_show ();
+}
 
 void
 Prompter::change_labels (string /*okstr*/, string /*cancelstr*/)
@@ -91,6 +109,16 @@ Prompter::get_result (string &str, bool strip)
 }
 
 void
+Prompter::entry_activated ()
+{
+	if (can_accept_from_entry) {
+		response (Gtk::RESPONSE_ACCEPT);
+	} else {
+		response (Gtk::RESPONSE_CANCEL);
+	}
+}		
+
+void
 Prompter::on_entry_changed ()
 {
 	/* 
@@ -100,10 +128,11 @@ Prompter::on_entry_changed ()
 	   button, nothing will happen at all.
 	*/
 
-	if (entry.get_text() != "") {
-	  set_response_sensitive (Gtk::RESPONSE_ACCEPT, true);
-	  set_default_response (Gtk::RESPONSE_ACCEPT);
+	if (!entry.get_text().empty()) {
+		set_response_sensitive (Gtk::RESPONSE_ACCEPT, true);
+		set_default_response (Gtk::RESPONSE_ACCEPT);
+		can_accept_from_entry = true;
 	} else {
-	  set_response_sensitive (Gtk::RESPONSE_ACCEPT, false);
+		set_response_sensitive (Gtk::RESPONSE_ACCEPT, false);
 	}
 }
