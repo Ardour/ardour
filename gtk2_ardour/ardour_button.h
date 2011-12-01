@@ -72,6 +72,8 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 	void set_led_left (bool yn);
 	void set_distinct_led_click (bool yn);
 
+	Glib::RefPtr<Pango::Layout> layout() const { return _layout; }
+
 	sigc::signal<void> signal_led_clicked;
 	sigc::signal<void> signal_clicked;
 
