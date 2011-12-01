@@ -295,6 +295,8 @@ ARDOUR_UI::setup_transport ()
 	act = ActionManager::get_action (X_("Transport"), X_("ToggleExternalSync"));
 	sync_button.set_related_action (act);
 
+	join_play_range_button.signal_clicked.connect (sigc::mem_fun (*this, &ARDOUR_UI::join_play_range_clicked));
+
 	/* clocks, etc. */
 
 	ARDOUR_UI::Clock.connect (sigc::mem_fun (primary_clock, &AudioClock::set));
@@ -630,4 +632,10 @@ ARDOUR_UI::click_button_clicked (GdkEventButton* ev)
 
 	rc_option_editor->set_current_page (_("Misc"));
 	return true;
+}
+
+void
+ARDOUR_UI::join_play_range_clicked ()
+{
+	join_play_range_button.set_active (!join_play_range_button.get_active());
 }
