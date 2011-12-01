@@ -1512,6 +1512,9 @@ RouteUI::route_rename ()
 				done = true;
 			}
 			break;
+		default:
+			done = true;
+			break;
 		}
 	}
 
