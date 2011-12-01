@@ -278,16 +278,17 @@ MixerStrip::init ()
 
 	whvbox.pack_start (width_hide_box, true, true);
 
+	global_vpacker.set_spacing (2);
 	global_vpacker.pack_start (whvbox, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (button_table, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (processor_box, true, true);
 	global_vpacker.pack_start (panners, Gtk::PACK_SHRINK);
-	global_vpacker.pack_start (top_button_table, Gtk::PACK_SHRINK, 2);
-	global_vpacker.pack_start (rec_solo_table, Gtk::PACK_SHRINK, 2);
-	global_vpacker.pack_start (middle_button_table, Gtk::PACK_SHRINK, 2);
+	global_vpacker.pack_start (top_button_table, Gtk::PACK_SHRINK);
+	global_vpacker.pack_start (rec_solo_table, Gtk::PACK_SHRINK);
+	global_vpacker.pack_start (middle_button_table, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (gpm, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (bottom_button_table, Gtk::PACK_SHRINK);
-	global_vpacker.pack_start (output_button, Gtk::PACK_SHRINK, 2);
+	global_vpacker.pack_start (output_button, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (_comment_button, Gtk::PACK_SHRINK);
 
 	global_frame.add (global_vpacker);
@@ -593,7 +594,8 @@ MixerStrip::set_width_enum (Width w, void* owner)
 	switch (w) {
 	case Wide:
 		if (show_sends_button)  {
-			show_sends_button->set_text (_("Sends"));
+			show_sends_button->set_text (_("Aux\nSends"));
+			show_sends_button->layout()->set_alignment (Pango::ALIGN_CENTER);
 		}
 
 		((Gtk::Label*)gpm.gain_automation_style_button.get_child())->set_text (
@@ -1468,15 +1470,16 @@ MixerStrip::build_route_ops_menu ()
 gboolean
 MixerStrip::name_button_button_press (GdkEventButton* ev)
 {
-	if (ev->button == 3) {
+	/* show menu for either button 1 or 3, so as not to confuse people
+	   and also not hide stuff from them.
+	*/
+
+	if (ev->button == 3 || ev->button == 1) {
 		list_route_operations ();
 
 		/* do not allow rename if the track is record-enabled */
 		rename_menu_item->set_sensitive (!_route->record_enabled());
 		route_ops_menu->popup (1, ev->time);
-
-	} else if (ev->button == 1) {
-		revert_to_default_display ();
 	}
 
 	return false;
@@ -1729,6 +1732,7 @@ MixerStrip::bus_send_display_changed (boost::shared_ptr<Route> send_to)
 
 	if (send_to) {
 		boost::shared_ptr<Send> send = _route->internal_send_for (send_to);
+
 		if (send) {
 			show_send (send);
 		} else {
@@ -1744,7 +1748,7 @@ MixerStrip::drop_send ()
 {
 	boost::shared_ptr<Send> current_send;
 
-	if (_current_delivery && (current_send = boost::dynamic_pointer_cast<Send>(_current_delivery))) {
+	if (_current_delivery && ((current_send = boost::dynamic_pointer_cast<Send>(_current_delivery)) != 0)) {
 		current_send->set_metering (false);
 	}
 
