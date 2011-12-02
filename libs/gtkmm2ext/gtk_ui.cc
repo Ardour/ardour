@@ -351,8 +351,13 @@ UI::set_tip (Widget *w, const gchar *tip, const gchar *hlp)
 		ustring ap = action->get_accel_path();
 		if (!ap.empty()) {
 			bool has_key = ActionManager::lookup_entry(ap, key);
-			if (has_key && key.get_abbrev() != "") {
-				msg.append("\n\nKey: ").append(key.get_abbrev());
+			if (has_key) {
+				string  abbrev = key.get_abbrev();
+				if (!abbrev.empty()) {
+					replace_all (abbrev, "<", "");
+					replace_all (abbrev, ">", "-");
+					msg.append("\n\nKey: ").append (abbrev);
+				}
 			}
 		}
 	}
@@ -361,8 +366,6 @@ UI::set_tip (Widget *w, const gchar *tip, const gchar *hlp)
 		return;
 	}
 
-	replace_all (msg, "<", "");
-	replace_all (msg, ">", "-");
 
 	req->widget = w;
 	req->msg = msg.c_str();
