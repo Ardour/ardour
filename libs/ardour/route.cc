@@ -402,7 +402,7 @@ Route::process_output_buffers (BufferSet& bufs,
 {
 	bool monitor = should_monitor ();
 
-	bufs.is_silent (false);
+	bufs.set_is_silent (false);
 
 	/* figure out if we're going to use gain automation */
 	if (gain_automation_ok) {

@@ -508,7 +508,7 @@ PluginInsert::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end
 	 * all buffers appropriately.
 	 */
 
-	bufs.is_silent (false);
+	bufs.set_is_silent (false);
 }
 
 void
