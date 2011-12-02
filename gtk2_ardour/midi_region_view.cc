@@ -41,6 +41,7 @@
 
 #include "evoral/Parameter.hpp"
 #include "evoral/MIDIParameters.hpp"
+#include "evoral/MIDIEvent.hpp"
 #include "evoral/Control.hpp"
 #include "evoral/midi_util.h"
 
@@ -1232,9 +1233,58 @@ MidiRegionView::display_patch_changes_on_channel (uint8_t channel)
 void
 MidiRegionView::display_sysexes()
 {
+	bool have_periodic_system_messages = false;
+	bool display_periodic_messages = true;
+
+	if (!Config->get_never_display_periodic_midi()) {
+
+		for (MidiModel::SysExes::const_iterator i = _model->sysexes().begin(); i != _model->sysexes().end(); ++i) {
+			const boost::shared_ptr<const Evoral::MIDIEvent<Evoral::MusicalTime> > mev = 
+				boost::dynamic_pointer_cast<const Evoral::MIDIEvent<Evoral::MusicalTime> > (*i);
+			
+			if (mev) {
+				if (mev->is_spp() || mev->is_mtc_quarter() || mev->is_mtc_full()) {
+					have_periodic_system_messages = true;
+					break;
+				}
+			}
+		}
+		
+		if (have_periodic_system_messages) {
+			double zoom = trackview.editor().get_current_zoom (); // frames per pixel
+			
+			/* get an approximate value for the number of samples per video frame */
+			
+			double video_frame = trackview.session()->frame_rate() * (1.0/30);
+			
+			/* if we are zoomed out beyond than the cutoff (i.e. more
+			 * frames per pixel than frames per 4 video frames), don't
+			 * show periodic sysex messages.
+			 */
+			
+			if (zoom > (video_frame*4)) {
+				display_periodic_messages = false;
+			} 
+		}
+	} else {
+		display_periodic_messages = false;
+	}
+
 	for (MidiModel::SysExes::const_iterator i = _model->sysexes().begin(); i != _model->sysexes().end(); ++i) {
+
+		const boost::shared_ptr<const Evoral::MIDIEvent<Evoral::MusicalTime> > mev = 
+			boost::dynamic_pointer_cast<const Evoral::MIDIEvent<Evoral::MusicalTime> > (*i);
+
 		Evoral::MusicalTime time = (*i)->time();
-		assert(time >= 0);
+		assert (time >= 0);
+
+		if (mev) {
+			if (mev->is_spp() || mev->is_mtc_quarter() || mev->is_mtc_full()) {
+				if (!display_periodic_messages) {
+					continue;
+				}
+			}
+		}
 
 		ostringstream str;
 		str << hex;
@@ -1253,7 +1303,7 @@ MidiRegionView::display_sysexes()
 		boost::shared_ptr<CanvasSysEx> sysex = boost::shared_ptr<CanvasSysEx>(
 			new CanvasSysEx(*this, *_note_group, text, height, x, 1.0));
 
-		// Show unless patch change is beyond the region bounds
+		// Show unless message is beyond the region bounds
 		if (time - _region->start() >= _region->length() || time < _region->start()) {
 			sysex->hide();
 		} else {
@@ -1263,7 +1313,6 @@ MidiRegionView::display_sysexes()
 		_sys_exes.push_back(sysex);
 	}
 }
-
 
 MidiRegionView::~MidiRegionView ()
 {

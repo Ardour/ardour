@@ -1480,6 +1480,14 @@ RCOptionEditor::RCOptionEditor ()
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_first_midi_bank_is_zero)
 			    ));
 
+	add_option (_("MIDI"),
+	     new BoolOption (
+		     "never-display-periodic-midi",
+		     _("Never display periodic MIDI messages (MTC, MIDI Clock)"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_never_display_periodic_midi),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_never_display_periodic_midi)
+		     ));
+
 	/* USER INTERACTION */
 
 	add_option (_("User interaction"), new OptionEditorHeading (_("Keyboard")));
