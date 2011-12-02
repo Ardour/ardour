@@ -77,6 +77,8 @@ EditorRegions::EditorRegions (Editor* e)
 	, _sort_type ((Editing::RegionListSortType) 0)
 	, expanded (false)
 {
+	static const int column_width = 22;
+
 	_display.set_size_request (100, -1);
 	_display.set_name ("RegionListDisplay");
 	_display.set_rules_hint (true);
@@ -128,10 +130,17 @@ EditorRegions::EditorRegions (Editor* e)
 		ARDOUR_UI::instance()->set_tip (*l, ci[i].tooltip);
 		col->set_widget (*l);
 		l->show ();
+
+		if (ci[i].index > 6) {
+			col->set_fixed_width(column_width);
+			col->set_expand (false);
+			col->set_sizing (TREE_VIEW_COLUMN_FIXED);
+			col->set_alignment (ALIGN_CENTER);
+		} 
 	}
 
 	_display.set_headers_visible (true);
-	//_display.set_grid_lines (TREE_VIEW_GRID_LINES_BOTH);
+	_display.set_rules_hint ();
 
 	/* show path as the row tooltip */
 	_display.set_tooltip_column (14); /* path */
@@ -144,10 +153,10 @@ EditorRegions::EditorRegions (Editor* e)
 	_display.get_selection()->set_select_function (sigc::mem_fun (*this, &EditorRegions::selection_filter));
 
 	TreeViewColumn* tv_col = _display.get_column(0);
-	tv_col->set_resizable (true);
 	CellRendererText* renderer = dynamic_cast<CellRendererText*>(_display.get_column_cell_renderer (0));
 	tv_col->add_attribute(renderer->property_text(), _columns.name);
 	tv_col->add_attribute(renderer->property_foreground_gdk(), _columns.color_);
+	tv_col->set_expand (true);
 
 	CellRendererToggle* locked_cell = dynamic_cast<CellRendererToggle*> (_display.get_column_cell_renderer (7));
 	locked_cell->property_activatable() = true;
@@ -179,17 +188,6 @@ EditorRegions::EditorRegions (Editor* e)
 
 	_display.get_selection()->set_mode (SELECTION_MULTIPLE);
 	_display.add_object_drag (_columns.region.index(), "regions");
-
-
-	/* only the first column (Region name) is resizable */
-
-	for (int i = 1; ; ++i) {
-		TreeViewColumn* col = _display.get_column (i);
-		if (!col) {
-			break;
-		} 
-		col->set_resizable (false);
-	}
 
 	/* setup DnD handling */
 
