@@ -218,7 +218,6 @@ libardour_sources = [
         'user_bundle.cc',
         'utils.cc',
         'version.cc',
-        'vst_plugin.cc'
 ]
 
 def flac_supported():
@@ -394,7 +393,7 @@ def build(bld):
         obj.defines += [ 'LXVST_SUPPORT' ]
 
     if bld.is_defined('WINDOWS_VST_SUPPORT') or bld.is_defined('LXVST_SUPPORT'):
-        obj.source += [ 'session_vst.cc' ]
+        obj.source += [ 'session_vst.cc', 'vst_plugin.cc' ]
 
     if bld.is_defined('HAVE_COREAUDIO'):
         obj.source += [ 'coreaudiosource.cc', 'caimportable.cc' ]
