@@ -133,7 +133,7 @@ AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> insert)
 
 	smaller_hbox->set_spacing (6);
 	smaller_hbox->pack_start (preset_label, false, false, 4);
-	smaller_hbox->pack_start (_preset_box, false, false);
+	smaller_hbox->pack_start (_preset_combo, false, false);
 	smaller_hbox->pack_start (save_button, false, false);
 #if 0
 	/* one day these might be useful with an AU plugin, but not yet */
@@ -171,6 +171,7 @@ AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> insert)
 	cocoa_parent = 0;
 	_notify = 0;
 	cocoa_window = 0;
+	carbon_window = 0;
 	au_view = 0;
 	editView = 0;
 
@@ -178,8 +179,10 @@ AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> insert)
 
 	if (test_cocoa_view_support()) {
 		create_cocoa_view ();
+#ifdef WITH_CARBON
 	} else if (test_carbon_view_support()) {
 		create_carbon_view ();
+#endif
 	} else {
 		create_cocoa_view ();
 	}
@@ -196,10 +199,12 @@ AUPluginUI::~AUPluginUI ()
 
 	} 
 
+#ifdef WITH_CARBON
 	if (carbon_window) {
 		/* not parented, just overlaid on top of our window */
 		DisposeWindow (carbon_window);
 	}
+#endif
 
 	if (editView) {
 		CloseComponent (editView);
@@ -410,6 +415,7 @@ AUPluginUI::cocoa_view_resized ()
 int
 AUPluginUI::create_carbon_view ()
 {
+#ifdef WITH_CARBON
 	OSStatus err;
 	ControlRef root_control;
 
@@ -465,6 +471,10 @@ AUPluginUI::create_carbon_view ()
 	low_box.set_size_request (prefwidth, prefheight);
 
 	return 0;
+#else
+	error << _("AU Carbon GUI is not supported.") << endmsg;
+	return -1;
+#endif
 }
 
 NSWindow*
@@ -490,19 +500,24 @@ AUPluginUI::get_nswindow ()
 void
 AUPluginUI::activate ()
 {
+#ifdef WITH_CARBON
 	ActivateWindow (carbon_window, TRUE);
+#endif
 	// [cocoa_parent makeKeyAndOrderFront:nil];
 }
 
 void
 AUPluginUI::deactivate ()
 {
+#ifdef WITH_CARBON
 	ActivateWindow (carbon_window, FALSE);
+#endif
 }
 
 int
 AUPluginUI::parent_carbon_window ()
 {
+#ifdef WITH_CARBON
 	NSWindow* win = get_nswindow ();
 	int x, y;
 
@@ -543,6 +558,9 @@ AUPluginUI::parent_carbon_window ()
 	[win addChildWindow:cocoa_parent ordered:NSWindowAbove];
 
 	return 0;
+#else
+	return -1;
+#endif
 }	
 
 int
@@ -647,10 +665,12 @@ AUPluginUI::on_map_event (GdkEventAny*)
 void
 AUPluginUI::on_window_hide ()
 {
+#ifdef WITH_CARBON
 	if (carbon_window) {
 		HideWindow (carbon_window);
 		ActivateWindow (carbon_window, FALSE);
 	}
+#endif
 
 	hide_all ();
 }
@@ -664,10 +684,12 @@ AUPluginUI::on_window_show (const string& /*title*/)
 
 	show_all ();
 
+#ifdef WITH_CARBON
 	if (carbon_window) {
 		ShowWindow (carbon_window);
 		ActivateWindow (carbon_window, TRUE);
 	}
+#endif
 
 	return true;
 }

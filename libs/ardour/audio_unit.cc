@@ -54,6 +54,9 @@
 #include <CoreServices/CoreServices.h>
 #include <AudioUnit/AudioUnit.h>
 #include <AudioToolbox/AudioUnitUtilities.h>
+#ifdef WITH_CARBON
+#include <Carbon/Carbon.h>
+#endif
 
 #include "i18n.h"
 
@@ -2677,7 +2680,11 @@ AUPlugin::set_info (PluginInfoPtr info)
 int
 AUPlugin::create_parameter_listener (AUEventListenerProc cb, void* arg, float interval_secs)
 {
+#ifdef WITH_CARBON
 	CFRunLoopRef run_loop = (CFRunLoopRef) GetCFRunLoopFromEventLoop(GetCurrentEventLoop()); 
+#else
+	CFRunLoopRef run_loop = CFRunLoopGetCurrent();
+#endif
 	CFStringRef  loop_mode = kCFRunLoopDefaultMode;
 
 	if (AUEventListenerCreate (cb, arg, run_loop, loop_mode, interval_secs, interval_secs, &_parameter_listener) != noErr) {
