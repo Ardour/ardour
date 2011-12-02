@@ -86,17 +86,77 @@ EditorRegions::EditorRegions (Editor* e)
 
 	_display.set_model (_model);
 
-	_display.append_column (_("Regions"), _columns.name);
-	_display.append_column (_("Position"), _columns.position);
-	_display.append_column (_("End"), _columns.end);
-	_display.append_column (_("Length"), _columns.length);
-	_display.append_column (_("Sync"), _columns.sync);
-	_display.append_column (_("Fade In"), _columns.fadein);
-	_display.append_column (_("Fade Out"), _columns.fadeout);
-	_display.append_column (_("L"), _columns.locked);
-	_display.append_column (_("G"), _columns.glued);
-	_display.append_column (_("M"), _columns.muted);
-	_display.append_column (_("O"), _columns.opaque);
+	_display.append_column ("", _columns.name);
+	_display.append_column ("", _columns.position);
+	_display.append_column ("", _columns.end);
+	_display.append_column ("", _columns.length);
+	_display.append_column ("", _columns.sync);
+	_display.append_column ("", _columns.fadein);
+	_display.append_column ("", _columns.fadeout);
+	_display.append_column ("", _columns.locked);
+	_display.append_column ("", _columns.glued);
+	_display.append_column ("", _columns.muted);
+	_display.append_column ("", _columns.opaque);
+
+	TreeViewColumn* col;
+	Gtk::Label* l;
+
+	col = _display.get_column (0);
+	l = manage (new Label (_("Regions")));
+	ARDOUR_UI::instance()->set_tip (*l, _("Region name, with number of channels in []'s"));
+	col->set_widget (*l);
+	l->show ();
+	col = _display.get_column (1);
+	l = manage (new Label(_("Position")));
+	ARDOUR_UI::instance()->set_tip (*l, _("Length of the region"));
+	col->set_widget (*l);
+	l->show ();
+	col = _display.get_column (2);
+	l = manage (new Label(_("End")));
+	ARDOUR_UI::instance()->set_tip (*l, _("Length of the region"));
+	col->set_widget (*l);
+	l->show ();
+	col = _display.get_column (3);
+	l = manage (new Label(_("End")));
+	ARDOUR_UI::instance()->set_tip (*l, _("Length of the region"));
+	col->set_widget (*l);
+	l->show ();
+	col = _display.get_column (4);
+	l = manage (new Label(_("Sync")));
+	ARDOUR_UI::instance()->set_tip (*l, _("Position of region sync point, relative to start of the region"));
+	col->set_widget (*l);
+	l->show ();
+	col = _display.get_column (5);
+	l = manage (new Label(_("Sync")));
+	ARDOUR_UI::instance()->set_tip (*l, _("Region fade-in enabled?"));
+	col->set_widget (*l);
+	l->show ();
+	col = _display.get_column (6);
+	l = manage (new Label(_("Fade In")));
+	ARDOUR_UI::instance()->set_tip (*l, _("Region fade-out enabled?"));
+	col->set_widget (*l);
+	l->show ();
+	col = _display.get_column (7);
+	l = manage (new Label(_("L")));
+	ARDOUR_UI::instance()->set_tip (*l, _("Region position locked?"));
+	col->set_widget (*l);
+	l->show ();
+	col = _display.get_column (8);
+	l = manage (new Label(_("G")));
+	ARDOUR_UI::instance()->set_tip (*l, _("Region position glued to Bars|Beats time?"));
+	col->set_widget (*l);
+	l->show ();
+	col = _display.get_column (9);
+	l = manage (new Label(_("M")));
+	ARDOUR_UI::instance()->set_tip (*l, _("Region muted?"));
+	col->set_widget (*l);
+	l->show ();
+	col = _display.get_column (10);
+	l = manage (new Label(_("O")));
+	ARDOUR_UI::instance()->set_tip (*l, _("Region opaque (blocks regions below it from being heard)?"));
+	col->set_widget (*l);
+	l->show ();
+
 	// _display.append_column (_("Used"), _columns.used);
 	// _display.append_column (_("Path"), _columns.path);
 	_display.set_headers_visible (true);
@@ -113,6 +173,7 @@ EditorRegions::EditorRegions (Editor* e)
 	_display.get_selection()->set_select_function (sigc::mem_fun (*this, &EditorRegions::selection_filter));
 
 	TreeViewColumn* tv_col = _display.get_column(0);
+	tv_col->set_resizable (true);
 	CellRendererText* renderer = dynamic_cast<CellRendererText*>(_display.get_column_cell_renderer (0));
 	tv_col->add_attribute(renderer->property_text(), _columns.name);
 	tv_col->add_attribute(renderer->property_foreground_gdk(), _columns.color_);
@@ -147,6 +208,17 @@ EditorRegions::EditorRegions (Editor* e)
 
 	_display.get_selection()->set_mode (SELECTION_MULTIPLE);
 	_display.add_object_drag (_columns.region.index(), "regions");
+
+
+	/* only the first column (Region name) is resizable */
+
+	for (int i = 1; ; ++i) {
+		TreeViewColumn* col = _display.get_column (i);
+		if (!col) {
+			break;
+		} 
+		col->set_resizable (false);
+	}
 
 	/* setup DnD handling */
 
