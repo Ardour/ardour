@@ -973,6 +973,7 @@ Editor::sensitize_the_right_region_actions ()
 	/* Look through the regions that are selected and make notes about what we have got */
 
 	bool have_audio = false;
+	bool have_multichannel_audio = false;
 	bool have_midi = false;
 	bool have_locked = false;
 	bool have_unlocked = false;
@@ -997,6 +998,9 @@ Editor::sensitize_the_right_region_actions ()
 
 		if (ar) {
 			have_audio = true;
+			if (ar->n_channels() > 1) {
+				have_multichannel_audio = true;
+			}
 		}
 
 		if (boost::dynamic_pointer_cast<MidiRegion> (r)) {
@@ -1075,6 +1079,10 @@ Editor::sensitize_the_right_region_actions ()
 		_region_actions->get_action("add-range-markers-from-region")->set_sensitive (false);
 		_region_actions->get_action("close-region-gaps")->set_sensitive (false);
 		_region_actions->get_action("combine-regions")->set_sensitive (false);
+	}
+
+	if (!have_multichannel_audio) {
+		_region_actions->get_action("split-multichannel-region")->set_sensitive (false);
 	}
 
 	if (!have_midi) {
