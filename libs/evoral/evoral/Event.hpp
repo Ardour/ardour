@@ -56,7 +56,7 @@ struct Event {
 	 */
 	Event(const Event& copy, bool alloc);
 
-	~Event();
+        virtual ~Event();
 
 	const Event& operator=(const Event& copy);
 
