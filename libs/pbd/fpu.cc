@@ -19,12 +19,12 @@ FPU::FPU ()
 
 	_flags = Flags (0);
 
-#ifndef ARCH_X86
+#if !( (defined __x86_64__) || (defined __i386__) ) // !ARCH_X86
 	return;
-#endif
+#else
 
 	
-#ifndef USE_X86_64_ASM
+#ifndef _LP64 //USE_X86_64_ASM
 	asm volatile (
 		"mov $1, %%eax\n"
 		"pushl %%ebx\n"
@@ -102,6 +102,7 @@ FPU::FPU ()
 			free (fxbuf);
 		}
 	}
+#endif
 }			
 
 FPU::~FPU ()

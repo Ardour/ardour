@@ -182,7 +182,8 @@ def set_compiler_flags (conf,opt):
 
         #
         # ARCH_X86 means anything in the x86 family from i386 to x86_64
-        # USE_X86_64_ASM is used to distingush 32 and 64 bit assembler
+        # the compile-time presence of the macro _LP64 is used to 
+        # distingush 32 and 64 bit assembler
         #
 
         if (re.search ("(i[0-9]86|x86_64)", config[config_cpu]) != None):
@@ -227,9 +228,6 @@ def set_compiler_flags (conf,opt):
         elif conf.env['build_target'] == 'i686' or conf.env['build_target'] == 'x86_64':
             optimization_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
             debug_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
-        elif conf.env['build_target'] == 'x86_64':
-            optimization_flags.append ("-DUSE_X86_64_ASM")
-            debug_flags.append ("-DUSE_X86_64_ASM")
         if not build_host_supports_sse:
             print("\nWarning: you are building Ardour with SSE support even though your system does not support these instructions. (This may not be an error, especially if you are a package maintainer)")
 
