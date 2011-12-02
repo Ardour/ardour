@@ -59,6 +59,12 @@ using namespace Glib;
 using namespace Editing;
 using Gtkmm2ext::Keyboard;
 
+struct ColumnInfo {
+    int         index;
+    const char* label;
+    const char* tooltip;
+};
+
 EditorRegions::EditorRegions (Editor* e)
 	: EditorComponent (e)
 	, old_focus (0)
@@ -101,64 +107,29 @@ EditorRegions::EditorRegions (Editor* e)
 	TreeViewColumn* col;
 	Gtk::Label* l;
 
-	col = _display.get_column (0);
-	l = manage (new Label (_("Regions")));
-	ARDOUR_UI::instance()->set_tip (*l, _("Region name, with number of channels in []'s"));
-	col->set_widget (*l);
-	l->show ();
-	col = _display.get_column (1);
-	l = manage (new Label(_("Position")));
-	ARDOUR_UI::instance()->set_tip (*l, _("Length of the region"));
-	col->set_widget (*l);
-	l->show ();
-	col = _display.get_column (2);
-	l = manage (new Label(_("End")));
-	ARDOUR_UI::instance()->set_tip (*l, _("Length of the region"));
-	col->set_widget (*l);
-	l->show ();
-	col = _display.get_column (3);
-	l = manage (new Label(_("End")));
-	ARDOUR_UI::instance()->set_tip (*l, _("Length of the region"));
-	col->set_widget (*l);
-	l->show ();
-	col = _display.get_column (4);
-	l = manage (new Label(_("Sync")));
-	ARDOUR_UI::instance()->set_tip (*l, _("Position of region sync point, relative to start of the region"));
-	col->set_widget (*l);
-	l->show ();
-	col = _display.get_column (5);
-	l = manage (new Label(_("Sync")));
-	ARDOUR_UI::instance()->set_tip (*l, _("Region fade-in enabled?"));
-	col->set_widget (*l);
-	l->show ();
-	col = _display.get_column (6);
-	l = manage (new Label(_("Fade In")));
-	ARDOUR_UI::instance()->set_tip (*l, _("Region fade-out enabled?"));
-	col->set_widget (*l);
-	l->show ();
-	col = _display.get_column (7);
-	l = manage (new Label(_("L")));
-	ARDOUR_UI::instance()->set_tip (*l, _("Region position locked?"));
-	col->set_widget (*l);
-	l->show ();
-	col = _display.get_column (8);
-	l = manage (new Label(_("G")));
-	ARDOUR_UI::instance()->set_tip (*l, _("Region position glued to Bars|Beats time?"));
-	col->set_widget (*l);
-	l->show ();
-	col = _display.get_column (9);
-	l = manage (new Label(_("M")));
-	ARDOUR_UI::instance()->set_tip (*l, _("Region muted?"));
-	col->set_widget (*l);
-	l->show ();
-	col = _display.get_column (10);
-	l = manage (new Label(_("O")));
-	ARDOUR_UI::instance()->set_tip (*l, _("Region opaque (blocks regions below it from being heard)?"));
-	col->set_widget (*l);
-	l->show ();
+	ColumnInfo ci[] = {
+		{ 0, _("Region"), _("Region name, with number of channels in []'s") },
+		{ 1, _("Position"),  _("Length of the region") },
+		{ 2, _("End"),  _("Length of the region") },
+		{ 3, _("End"),  _("Length of the region") },
+		{ 4, _("Sync"),  _("Position of region sync point, relative to start of the region") },
+		{ 5, _("Sync"),  _("Region fade-in enabled?") },
+		{ 6, _("Fade In"),  _("Region fade-out enabled?") },
+		{ 7, _("L"),  _("Region position locked?") },
+		{ 8, _("G"),  _("Region position glued to Bars|Beats time?") },
+		{ 9, _("M"),  _("Region muted?") },
+		{ 10, _("O"),  _("Region opaque (blocks regions below it from being heard)?") },
+		{ -1, 0, 0 }
+	};
+	
+	for (int i = 0; ci[i].index >= 0; ++i) {
+		col = _display.get_column (ci[i].index);
+		l = manage (new Label (ci[i].label));
+		ARDOUR_UI::instance()->set_tip (*l, ci[i].tooltip);
+		col->set_widget (*l);
+		l->show ();
+	}
 
-	// _display.append_column (_("Used"), _columns.used);
-	// _display.append_column (_("Path"), _columns.path);
 	_display.set_headers_visible (true);
 	//_display.set_grid_lines (TREE_VIEW_GRID_LINES_BOTH);
 
