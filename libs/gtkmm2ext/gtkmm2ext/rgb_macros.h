@@ -239,6 +239,34 @@ UINT_TO_RGB((i), ((guchar*)p), ((guchar*)p)+1, ((guchar*)p)+2)
   } \
 }
 
+#define PAINT_VERTA_GR(inbuf, colr, colg, colb, cola, ptx, pty0, pty1, origin_y, obj_top) \
+{ \
+  GnomeCanvasBuf* pv_buf = (inbuf); \
+  guchar* pv_p; \
+  gint pv_b0, pv_b1; \
+  gint pv_colr=(colr), pv_colg=(colg), pv_colb=(colb), pv_cola=(cola); \
+  gint y_fract; \
+  gint y_span = (origin_y - obj_top); \
+  gint alpha; \
+  gint sat; \
+\
+  pv_b0 = MAX(pv_buf->rect.y0, (pty0)); \
+  pv_b1 = MIN(pv_buf->rect.y1, (pty1)); \
+\
+ if (pv_b0 < pv_b1 && BUF_INBOUNDS_X(pv_buf, ptx)) { \
+    pv_p = BUF_PTR(pv_buf, ptx, pv_b0); \
+    while (pv_b0 < pv_b1) { \
+      y_fract = (abs(origin_y - pv_b0)) * 0xFF; \
+	  y_fract = y_fract / y_span; \
+	  alpha = 0x7F + (y_fract >> 1); \
+	  sat = 0xFF - (y_fract); \
+	  PIXEL_RGBA(pv_p, (((pv_colr << 8) * sat) >> 16), (((pv_colg << 8) * sat) >> 16), (((pv_colb << 8) * sat) >> 16), pv_cola); \
+      ++pv_b0; \
+      pv_p += pv_buf->buf_rowstride; \
+    } \
+  } \
+}
+
 /* Paint a solid-colored box into a GnomeCanvasBuf (clipping as necessary).
    The box contains (ptx0,pty0), but not (ptx1, pty1).
    Each macro arg should appear exactly once in the body of the code. */
@@ -267,6 +295,44 @@ UINT_TO_RGB((i), ((guchar*)p), ((guchar*)p)+1, ((guchar*)p)+2)
     } \
   } \
 }
+
+/* Paint a gradient-colored box into a GnomeCanvasBuf (clipping as necessary).
+   The box contains (ptx0,pty0), but not (ptx1, pty1).
+   Each macro arg should appear exactly once in the body of the code. */
+#define PAINT_BOX_GR(inbuf, colr, colg, colb, cola, ptx0, pty0, ptx1, pty1, v_span) \
+{ \
+  GnomeCanvasBuf* pb_buf = (inbuf); \
+  guchar* pb_p; \
+  guchar* pb_pp; \
+  gint pb_a0, pb_a1, pb_b0, pb_b1, pb_i, pb_j; \
+  gint pb_colr=(colr), pb_colg=(colg), pb_colb=(colb), pb_cola=(cola); \
+  gint alpha; \
+  gint sat; \
+  gint y_fract; \
+  gint y_span = MAX(abs(v_span), 1); \
+\
+  pb_a0 = MAX(pb_buf->rect.x0, (ptx0)); \
+  pb_a1 = MIN(pb_buf->rect.x1, (ptx1)); \
+  pb_b0 = MAX(pb_buf->rect.y0, (pty0)); \
+  pb_b1 = MIN(pb_buf->rect.y1, (pty1)); \
+\
+  if (pb_a0 < pb_a1 && pb_b0 < pb_b1) { \
+    pb_p = BUF_PTR(pb_buf, pb_a0, pb_b0); \
+    for (pb_j=pb_b0; pb_j<pb_b1; ++pb_j) { \
+	  y_fract = 0xFF * (abs(pb_j - pty0));  \
+	  y_fract = y_fract / y_span; \
+	  alpha = 0xFF - y_fract; \
+	  sat = 0xFF - (y_fract >> 1); \
+      pb_pp = pb_p; \
+      for (pb_i=pb_a0; pb_i<pb_a1; ++pb_i) { \
+        PIXEL_RGBA(pb_pp, (((pb_colr << 8) * sat) >> 16), (((pb_colg << 8) * sat) >> 16), (((pb_colb << 8) * sat) >> 16), pb_cola); \
+        pb_pp += 3; \
+      } \
+      pb_p += pb_buf->buf_rowstride; \
+    } \
+  } \
+}
+
 
 /* No bounds checking in this version */
 
