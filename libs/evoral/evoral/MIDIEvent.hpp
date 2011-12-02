@@ -92,6 +92,12 @@ struct MIDIEvent : public Event<Time> {
 	inline bool     is_smf_meta_event()     const { return this->_buf[0] == 0xFF; }
 	inline bool     is_sysex()              const { return this->_buf[0] == 0xF0
 	                                                    || this->_buf[0] == 0xF7; }
+        inline bool     is_spp()                const { return this->_buf[0] == 0xF2 && this->size() == 0; }
+        inline bool     is_mtc_quarter()        const { return this->_buf[0] == 0xF1 && this->size() == 0; }
+        inline bool     is_mtc_full()           const { 
+		return this->size() == 10 && this->_buf[0] == 0xf0 && this->_buf[1] == 0x7f && 
+			this->_buf[3] == 0x01 && this->_buf[4] == 0x01;
+	}
 };
 
 } // namespace Evoral
