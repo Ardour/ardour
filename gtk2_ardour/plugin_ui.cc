@@ -313,13 +313,13 @@ PluginUIWindow::create_lxvst_editor(boost::shared_ptr<PluginInsert>)
 }
 
 bool
-#ifdef GTKOSX
+#ifdef AUDIOUNIT_SUPPORT
 PluginUIWindow::create_audiounit_editor (boost::shared_ptr<PluginInsert> insert)
 #else
 PluginUIWindow::create_audiounit_editor (boost::shared_ptr<PluginInsert>)
 #endif
 {
-#ifndef GTKOSX
+#ifndef AUDIOUNIT_SUPPORT
 	return false;
 #else
 	VBox* box;
@@ -340,7 +340,7 @@ PluginUIWindow::app_activated (bool yn)
 PluginUIWindow::app_activated (bool)
 #endif
 {
-#ifdef GTKOSX
+#ifdef AUDIOUNIT_SUPPORT
 	if (_pluginui) {
 		if (yn) {
 			if (was_visible) {

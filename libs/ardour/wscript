@@ -398,6 +398,8 @@ def build(bld):
     if bld.is_defined('HAVE_COREAUDIO'):
         obj.source += [ 'coreaudiosource.cc', 'caimportable.cc' ]
         obj.use    += ['libappleutility']
+
+    if bld.is_defined('AUDIOUNIT_SUPPORT'):
         obj.source += [ 'audio_unit.cc' ]
 
     if Options.options.fpu_optimization:

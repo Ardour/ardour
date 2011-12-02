@@ -411,8 +411,11 @@ def build(bld):
 
     if bld.is_defined('HAVE_COREAUDIO'):
         TaskGen.task_gen.mappings['.mm'] = TaskGen.task_gen.mappings['.cc']
-        obj.source += [ 'cocoacarbon.mm', 'au_pluginui.mm' ]
+        obj.source += [ 'cocoacarbon.mm' ]
         obj.use += ' libappleutility '
+
+    if bld.is_defined('AUDIOUNIT_SUPPORT'):
+        obj.source += [ 'au_pluginui.mm' ]
 
     if bld.is_defined('WINDOWS_VST_SUPPORT'):
         # If we require VST support we build a stub main() and the FST library
