@@ -117,7 +117,7 @@ PortInsert::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, 
 
                         _mtdm->process (nframes, in, out);
 
-                        outbuf.is_silent (false);
+                        outbuf.set_is_silent (false);
                 }
 
                 return;
