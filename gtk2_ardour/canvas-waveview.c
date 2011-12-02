@@ -1214,6 +1214,9 @@ gnome_canvas_waveview_render (GnomeCanvasItem *item,
 		int next_clip_max = 0;
 		int next_clip_min = 0;
 
+		int wave_middle = (int) rint ((item->y1 + origin) * item->canvas->pixels_per_unit);
+		int wave_top = (int) rint ((item->y1) * item->canvas->pixels_per_unit);
+
 		if (s1 < waveview->samples_per_unit) {
 			/* we haven't got a prev vars to compare with, so outline the whole line here */
 			prev_pymax = (int) rint ((item->y1 + origin) * item->canvas->pixels_per_unit);
@@ -1348,8 +1351,7 @@ gnome_canvas_waveview_render (GnomeCanvasItem *item,
 						++fill_max;
 					}
 					else {
-						PAINT_VERTA(buf, waveview->wave_r, waveview->wave_g, waveview->wave_b, waveview->wave_a, x, pymax, fill_max);
-					}
+						PAINT_VERTA_GR(buf, waveview->wave_r, waveview->wave_g, waveview->wave_b, waveview->wave_a, x, pymax, fill_max, wave_middle, wave_top);					}
 				}
 
 				if((prev_pymin > pymin && next_pymin > pymin) ||
@@ -1363,12 +1365,12 @@ gnome_canvas_waveview_render (GnomeCanvasItem *item,
 						PAINT_DOTA(buf, waveview->wave_r, waveview->wave_g, waveview->wave_b, waveview->wave_a, x, pymin);
 					}
 					else {
-						PAINT_VERTA(buf, waveview->wave_r, waveview->wave_g, waveview->wave_b, waveview->wave_a, x, fill_min, pymin);
+						PAINT_VERTA_GR(buf, waveview->wave_r, waveview->wave_g, waveview->wave_b, waveview->wave_a, x, fill_min, pymin, wave_middle, wave_top);
 					}
 				}
 
 				if(fill_max < fill_min) {
-					PAINT_VERTA(buf, waveview->fill_r, waveview->fill_g, waveview->fill_b, waveview->fill_a, x, fill_max, fill_min);
+					PAINT_VERTA_GR(buf, waveview->fill_r, waveview->fill_g, waveview->fill_b, waveview->fill_a, x, fill_max, fill_min, wave_middle, wave_top);
 				}
 				else if(fill_max == fill_min) {
 					PAINT_DOTA(buf, waveview->fill_r, waveview->fill_g, waveview->fill_b, waveview->fill_a, x, fill_max);
@@ -1376,11 +1378,16 @@ gnome_canvas_waveview_render (GnomeCanvasItem *item,
 			}
 
 			if (clip_max) {
-				PAINT_VERTA(buf, waveview->clip_r, waveview->clip_g, waveview->clip_b, waveview->clip_a, x, pymax, pymax+clip_length);
+				PAINT_VERTA(buf, waveview->clip_r, waveview->clip_g, waveview->clip_b, waveview->clip_a, x, pymax, pymax + clip_length);
+				PAINT_VERTA(buf, waveview->clip_r, waveview->clip_g, waveview->clip_b, waveview->clip_a >> 1, x + 1, pymax, pymax + (clip_length -1));
+				PAINT_VERTA(buf, waveview->clip_r, waveview->clip_g, waveview->clip_b, waveview->clip_a >> 1, x - 1, pymax, pymax + (clip_length - 1));
+
 			}
 
 			if (clip_min) {
-				PAINT_VERTA(buf, waveview->clip_r, waveview->clip_g, waveview->clip_b, waveview->clip_a, x, pymin-clip_length, pymin);
+				PAINT_VERTA(buf, waveview->clip_r, waveview->clip_g, waveview->clip_b, waveview->clip_a , x, pymin - clip_length, pymin);
+				PAINT_VERTA(buf, waveview->clip_r, waveview->clip_g, waveview->clip_b, waveview->clip_a >> 1, x + 1, pymin - (clip_length - 1), pymin);
+				PAINT_VERTA(buf, waveview->clip_r, waveview->clip_g, waveview->clip_b, waveview->clip_a >> 1, x - 1, pymin - (clip_length - 1), pymin);
 			}
 
 			prev_pymax = pymax;
@@ -1395,6 +1402,9 @@ gnome_canvas_waveview_render (GnomeCanvasItem *item,
 		double max, min;
 		int next_clip_max = 0;
 		int next_clip_min = 0;
+
+		int wave_middle = (int) rint ((item->y1 + waveview->height) * item->canvas->pixels_per_unit);
+		int wave_top = (int) rint ((item->y1) * item->canvas->pixels_per_unit);
 
 		// for rectified, this stays constant throughout the loop
 		pymin = (int) rint ((item->y1 + waveview->height) * item->canvas->pixels_per_unit);
@@ -1521,7 +1531,7 @@ gnome_canvas_waveview_render (GnomeCanvasItem *item,
 						++fill_max;
 					}
 					else {
-						PAINT_VERTA(buf, waveview->wave_r, waveview->wave_g, waveview->wave_b, waveview->wave_a, x, pymax, fill_max);
+						PAINT_VERTA_GR(buf, waveview->wave_r, waveview->wave_g, waveview->wave_b, waveview->wave_a, x, pymax, fill_max, wave_middle, wave_top);
 					}
 				}
 
@@ -1534,11 +1544,15 @@ gnome_canvas_waveview_render (GnomeCanvasItem *item,
 			}
 
 			if (clip_max) {
-				PAINT_VERTA(buf, waveview->clip_r, waveview->clip_g, waveview->clip_b, waveview->clip_a, x, pymax, pymax+clip_length);
+				PAINT_VERTA(buf, waveview->clip_r, waveview->clip_g, waveview->clip_b, waveview->clip_a, x, pymax, pymax + clip_length);
+				PAINT_VERTA(buf, waveview->clip_r, waveview->clip_g, waveview->clip_b, waveview->clip_a >> 1, x + 1, pymax, pymax + (clip_length -1));
+				PAINT_VERTA(buf, waveview->clip_r, waveview->clip_g, waveview->clip_b, waveview->clip_a >> 1, x - 1, pymax, pymax + (clip_length - 1));
 			}
 
-			if (clip_min) {
-				PAINT_VERTA(buf, waveview->clip_r, waveview->clip_g, waveview->clip_b, waveview->clip_a, x, pymin-clip_length, pymin);
+			if (clip_min) {	
+				PAINT_VERTA(buf, waveview->clip_r, waveview->clip_g, waveview->clip_b, waveview->clip_a , x, pymin - clip_length, pymin);
+				PAINT_VERTA(buf, waveview->clip_r, waveview->clip_g, waveview->clip_b, waveview->clip_a >> 1, x + 1, pymin - (clip_length - 1), pymin);
+				PAINT_VERTA(buf, waveview->clip_r, waveview->clip_g, waveview->clip_b, waveview->clip_a >> 1, x - 1, pymin - (clip_length - 1), pymin);
 			}
 
 			prev_pymax = pymax;
