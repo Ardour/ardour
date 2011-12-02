@@ -31,8 +31,8 @@ namespace Evoral {
 
 /** MIDI helper functions for an Event.
  *
- * This class contains no data, an event can be cast to a MIDIEvent
- * but the application must make sure the event actually contains
+ * This class contains no data, an Evoral::Event can be cast to a MIDIEvent
+ * but the application must make sure the Event actually contains
  * valid MIDI data for these functions to make sense.
  */
 template<typename Time>

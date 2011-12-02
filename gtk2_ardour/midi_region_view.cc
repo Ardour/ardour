@@ -1240,7 +1240,7 @@ MidiRegionView::display_sysexes()
 
 		for (MidiModel::SysExes::const_iterator i = _model->sysexes().begin(); i != _model->sysexes().end(); ++i) {
 			const boost::shared_ptr<const Evoral::MIDIEvent<Evoral::MusicalTime> > mev = 
-				boost::dynamic_pointer_cast<const Evoral::MIDIEvent<Evoral::MusicalTime> > (*i);
+				boost::static_pointer_cast<const Evoral::MIDIEvent<Evoral::MusicalTime> > (*i);
 			
 			if (mev) {
 				if (mev->is_spp() || mev->is_mtc_quarter() || mev->is_mtc_full()) {
@@ -1273,7 +1273,7 @@ MidiRegionView::display_sysexes()
 	for (MidiModel::SysExes::const_iterator i = _model->sysexes().begin(); i != _model->sysexes().end(); ++i) {
 
 		const boost::shared_ptr<const Evoral::MIDIEvent<Evoral::MusicalTime> > mev = 
-			boost::dynamic_pointer_cast<const Evoral::MIDIEvent<Evoral::MusicalTime> > (*i);
+			boost::static_pointer_cast<const Evoral::MIDIEvent<Evoral::MusicalTime> > (*i);
 
 		Evoral::MusicalTime time = (*i)->time();
 		assert (time >= 0);
