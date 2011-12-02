@@ -31,7 +31,7 @@
 #include <pbd/touchable.h>
 #include <pbd/failed_constructor.h>
 #include <pbd/pthread_utils.h>
-#include <pbd/stacktrace.h>
+#include <pbd/replace_all.h>
 
 #include <gtkmm2ext/application.h>
 #include <gtkmm2ext/gtk_ui.h>
@@ -360,6 +360,9 @@ UI::set_tip (Widget *w, const gchar *tip, const gchar *hlp)
 	if (req == 0) {
 		return;
 	}
+
+	replace_all (msg, "<", "");
+	replace_all (msg, ">", "-");
 
 	req->widget = w;
 	req->msg = msg.c_str();
