@@ -62,7 +62,7 @@ style "default" = "medium_text"
   GtkButton::button_relief = GTK_RELIEF_NONE
   GtkTreeView::vertical-padding = 0
   GtkTreeView::horizontal-padding = 0
-  GtkTreeView::even-row-color = @@COLPREFIX@_base
+  GtkTreeView::even-row-color = shade(0.75,@@COLPREFIX@_base)
   GtkTreeView::odd-row-color = darker(@@COLPREFIX@_base)
   
   GtkWidget           :: focus-line-pattern               = "\001\001"        #                              Dash pattern used to draw the focus indicator.
@@ -185,7 +185,7 @@ style "default" = "medium_text"
   text[NORMAL]        = @@COLPREFIX@_text
   text[PRELIGHT]      = @@COLPREFIX@_text
   text[ACTIVE]        = @@COLPREFIX@_fg_selected
-  text[INSENSITIVE]   = shade(0.7, @@COLPREFIX@_bg)
+  text[INSENSITIVE]   = darker(darker (@@COLPREFIX@_bg))
   text[SELECTED]      = @@COLPREFIX@_fg_selected
 
 #engine specific tweaks
