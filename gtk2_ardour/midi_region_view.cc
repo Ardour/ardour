@@ -93,8 +93,6 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	, _last_channel_selection(0xFFFF)
 	, _current_range_min(0)
 	, _current_range_max(0)
-	, _model_name(string())
-	, _custom_device_mode(string())
 	, _active_notes(0)
 	, _note_group(new ArdourCanvas::Group(*group))
 	, _note_diff_command (0)
@@ -130,8 +128,8 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	: RegionView (parent, tv, r, spu, basic_color, false, visibility)
 	, _force_channel(-1)
 	, _last_channel_selection(0xFFFF)
-	, _model_name(string())
-	, _custom_device_mode(string())
+	, _current_range_min(0)
+	, _current_range_max(0)
 	, _active_notes(0)
 	, _note_group(new ArdourCanvas::Group(*parent))
 	, _note_diff_command (0)
@@ -150,6 +148,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	, _no_sound_notes (false)
 	, _last_event_x (0)
 	, _last_event_y (0)
+	, _pre_enter_cursor (0)
 {
 	_note_group->raise_to_top();
 	PublicEditor::DropDownKeys.connect (sigc::mem_fun (*this, &MidiRegionView::drop_down_keys));
@@ -174,8 +173,8 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other)
 	, RegionView (other)
 	, _force_channel(-1)
 	, _last_channel_selection(0xFFFF)
-	, _model_name(string())
-	, _custom_device_mode(string())
+	, _current_range_min(0)
+	, _current_range_max(0)
 	, _active_notes(0)
 	, _note_group(new ArdourCanvas::Group(*get_canvas_group()))
 	, _note_diff_command (0)
@@ -194,6 +193,7 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other)
 	, _no_sound_notes (false)
 	, _last_event_x (0)
 	, _last_event_y (0)
+	, _pre_enter_cursor (0)
 {
 	Gdk::Color c;
 	int r,g,b,a;
@@ -208,8 +208,8 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other, boost::shared_ptr<M
 	: RegionView (other, boost::shared_ptr<Region> (region))
 	, _force_channel(-1)
 	, _last_channel_selection(0xFFFF)
-	, _model_name(string())
-	, _custom_device_mode(string())
+	, _current_range_min(0)
+	, _current_range_max(0)
 	, _active_notes(0)
 	, _note_group(new ArdourCanvas::Group(*get_canvas_group()))
 	, _note_diff_command (0)
@@ -228,6 +228,7 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other, boost::shared_ptr<M
 	, _no_sound_notes (false)
 	, _last_event_x (0)
 	, _last_event_y (0)
+	, _pre_enter_cursor (0)
 {
 	Gdk::Color c;
 	int r,g,b,a;
