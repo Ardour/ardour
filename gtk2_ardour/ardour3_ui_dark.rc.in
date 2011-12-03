@@ -53,14 +53,10 @@ gtk_color_scheme = "@COLOR_SCHEME@"
 
 #alternate BG color: #5C5E61
 
-
 style "default" = "medium_text"
 {
   #Original values for reference
-  GtkWidget::cursor_color =  @@COLPREFIX@_lightest
-  GtkButton::default_border = { 0, 0, 0, 0 }
-  GtkButton::default_outside_border = { 0, 0, 0, 0 }
-  GtkButton::button_relief = GTK_RELIEF_NONE
+
   GtkTreeView::vertical-padding = 0
   GtkTreeView::horizontal-padding = 0
   GtkTreeView::even-row-color = shade(0.25,@@COLPREFIX@_base)
@@ -72,17 +68,18 @@ style "default" = "medium_text"
   GtkWidget           :: interior-focus                   = 1                 # [               1 ] ( bool ) Draw the focus indicator inside widgets.
   GtkWidget           :: scroll-arrow-hlength             = 16                # [              16 ] ( >= 1 ) Length of horizontal scroll arrows.
   GtkWidget           :: scroll-arrow-vlength             = 16                # [              16 ] ( >= 1 ) Length of vertical scroll arrows.
-
   GtkWidget           :: link-color                       = shade(1.25, @@COLPREFIX@_bright_color)
   GtkWidget           :: visited-link-color               = @@COLPREFIX@_bright_color
   
-#Window Properties
   GtkDialog           :: action-area-border               = 4                 # [               5 ] ( >= 0 ) Width of border around the button area at the bottom of the dialog.
   GtkDialog           :: button-spacing                   = 4                 # [               6 ] ( >= 0 ) Spacing between buttons.
   GtkDialog           :: content-area-border              = 2                 # [               2 ] ( >= 0 ) Width of border around the main dialog area.
   GtkDialog           :: content-area-spacing             = 0                 # [               0 ] ( >= 0 ) The default spacing used between elements of the content area of the dialog.
   
-#Control Properties
+
+  GtkButton           :: default-border = { 0, 0, 0, 0 }
+  GtkButton           :: default-outside_border = { 0, 0, 0, 0 }
+  GtkButton           :: button-relief = GTK_RELIEF_NONE
   GtkButton           :: child-displacement-x             = 1                 # [               0 ]          How far in x direction to move the button when its depressed.
   GtkButton           :: child-displacement-y             = 1                 # [               0 ]          ... y
   GtkButton           :: default-border                   = { 0, 0, 0, 0 }    #                              Extra space to add for CAN_DEFAULT buttons.
@@ -157,7 +154,7 @@ style "default" = "medium_text"
   GtkTreeView         :: vertical-separator               = 2                 # [               2 ] ( >= 0 ) Vertical space between cells. Must be an even number.
 
   GtkEntry            :: honors-transparent-bg-hint       = 1                 # [               0 ] ( bool ) (Clearlooks) Without this, gecko will fill in the background of the entry.
-
+  GtkEntry            :: cursor-color = @@COLPREFIX@_fg_selected
 
   #GtkToolbar::shadow_type = GTK_SHADOW_ETCHED_IN
 

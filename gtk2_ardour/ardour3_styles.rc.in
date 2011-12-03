@@ -40,7 +40,6 @@ style "default_generic" = "medium_text"
 
 style "text_cell_entry" = "medium_text"
 {
-	GtkWidget::cursor_color =  @@COLPREFIX@_darkest
 }
 
 style "very_small_button" = "default_button" 
@@ -730,18 +729,19 @@ style "track_name_display" = "medium_text"
 {
 	fg[NORMAL] = @@COLPREFIX@_fg
 	fg[ACTIVE] = @@COLPREFIX@_fg
+	fg[SELECTED] = @@COLPREFIX@_fg
+
+	text[NORMAL] = @@COLPREFIX@_fg
+	text[ACTIVE] = @@COLPREFIX@_fg
+	text[SELECTED] = @@COLPREFIX@_fg
 
 	base[NORMAL] = @@COLPREFIX@_base
 	base[ACTIVE] = lighter(@@COLPREFIX@_base)
+        base[SELECTED] = @@COLPREFIX@_bg_selected
+
 	bg[NORMAL] = lighter(@@COLPREFIX@_base)
 	bg[ACTIVE] = lighter(@@COLPREFIX@_base)
-}
-
-style "active_track_name_display" = "medium_text"
-{
-	GtkWidget::cursor_color =  @@COLPREFIX@_base
-	text[NORMAL] = @@COLPREFIX@_base
-	base[NORMAL] = @@COLPREFIX@_text
+	bg[SELECTED] = lighter(@@COLPREFIX@_base)
 }
 
 style "track_separator"

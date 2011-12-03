@@ -651,7 +651,7 @@ bool
 TimeAxisView::name_entry_focus_in (GdkEventFocus*)
 {
 	name_entry.select_region (0, -1);
-	name_entry.set_name ("EditorActiveTrackNameDisplay");
+	name_entry.set_state (STATE_SELECTED);
 	return false;
 }
 
@@ -662,8 +662,8 @@ TimeAxisView::name_entry_focus_out (GdkEventFocus*)
 
 	last_name_entry_key_press_event = 0;
 	name_entry_key_timeout.disconnect ();
-	name_entry.set_name ("EditorTrackNameDisplay");
 	name_entry.select_region (0,0);
+	name_entry.set_state (STATE_NORMAL);
 
 	/* do the real stuff */
 
