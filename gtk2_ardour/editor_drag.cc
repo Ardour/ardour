@@ -1529,7 +1529,10 @@ NoteResizeDrag::finished (GdkEvent*, bool /*movement_occurred*/)
 void
 NoteResizeDrag::aborted (bool)
 {
-	/* XXX: TODO */
+	MidiRegionSelection& ms (_editor->get_selection().midi_regions);
+	for (MidiRegionSelection::iterator r = ms.begin(); r != ms.end(); ++r) {
+		(*r)->abort_resizing ();
+	}
 }
 
 RegionGainDrag::RegionGainDrag (Editor* e, ArdourCanvas::Item* i)

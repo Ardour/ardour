@@ -104,6 +104,10 @@ using Gtkmm2ext::Keyboard;
 void
 Editor::undo (uint32_t n)
 {
+	if (_drags->active ()) {
+		_drags->abort ();
+	}
+	
 	if (_session) {
 		_session->undo (n);
 	}
@@ -112,6 +116,10 @@ Editor::undo (uint32_t n)
 void
 Editor::redo (uint32_t n)
 {
+	if (_drags->active ()) {
+		_drags->abort ();
+	}
+	
 	if (_session) {
 		_session->redo (n);
 	}

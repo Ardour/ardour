@@ -218,6 +218,7 @@ public:
 
 	void update_resizing (ArdourCanvas::CanvasNoteEvent*, bool, double, bool);
 	void commit_resizing (ArdourCanvas::CanvasNoteEvent*, bool, double, bool);
+	void abort_resizing ();
 
 	/** Change the channel of the selection.
 	 * @param channel - the channel number of the new channel, zero-based

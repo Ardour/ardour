@@ -2678,6 +2678,17 @@ MidiRegionView::commit_resizing (ArdourCanvas::CanvasNoteEvent* primary, bool at
 }
 
 void
+MidiRegionView::abort_resizing ()
+{
+	for (std::vector<NoteResizeData *>::iterator i = _resize_data.begin(); i != _resize_data.end(); ++i) {
+		delete (*i)->resize_rect;
+		delete *i;
+	}
+
+	_resize_data.clear ();
+}
+
+void
 MidiRegionView::change_note_velocity(CanvasNoteEvent* event, int8_t velocity, bool relative)
 {
 	uint8_t new_velocity;
