@@ -453,6 +453,10 @@ RegionExportChannelSelector::RegionExportChannelSelector (ARDOUR::Session * _ses
 {
 	pack_start (vbox);
 
+	/* make fades+region gain be the default */
+
+	fades_button.set_active ();
+
 	raw_button.set_label (string_compose (_("Region contents without fades nor region gain (channels: %1)"), region_chans));
 	raw_button.signal_toggled ().connect (sigc::mem_fun (*this, &RegionExportChannelSelector::handle_selection));
 	vbox.pack_start (raw_button);
