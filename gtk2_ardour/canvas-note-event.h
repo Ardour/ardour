@@ -154,7 +154,6 @@ class CanvasNoteEvent : virtual public sigc::trackable
 	Widget*                           _channel_selector_widget;
 	State                             _state;
 	const boost::shared_ptr<NoteType> _note;
-	bool                              _own_note;
 	bool                              _selected;
 	bool                              _valid;
         float                             _mouse_x_fraction;
