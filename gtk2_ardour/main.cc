@@ -340,7 +340,7 @@ fixup_bundle_environment (int /*argc*/, char* argv[])
 	export_search_path (dir_path, "ARDOUR_PANNER_PATH", "/lib/panners");
 	export_search_path (dir_path, "ARDOUR_SURFACES_PATH", "/lib/surfaces");
 	export_search_path (dir_path, "ARDOUR_MIDIMAPS_PATH", "/share/midi_maps");
-	export_search_path (dir_path, "ARDOUR_EXPORT_FORMATS_PATH", "/share/exports");
+	export_search_path (dir_path, "ARDOUR_EXPORT_FORMATS_PATH", "/share/export");
 
 	path = dir_path;
 	path += "/lib/clearlooks";
