@@ -368,8 +368,8 @@ def options(opt):
                     help='Install MIME type, icons and .desktop file as per freedesktop.org standards')
     opt.add_option('--freebie', action='store_true', default=False, dest='freebie',
                     help='Build a version suitable for distribution as a zero-cost binary')
-    opt.add_option('--freesound', action='store_true', default=True, dest='freesound',
-                    help='Include Freesound database lookup')
+    opt.add_option('--no-freesound', action='store_false', default=True, dest='freesound',
+                    help='Do not build with Freesound database support')
     opt.add_option('--gprofile', action='store_true', default=False, dest='gprofile',
                     help='Compile for use with gprofile')
     opt.add_option('--lv2', action='store_true', default=True, dest='lv2',
