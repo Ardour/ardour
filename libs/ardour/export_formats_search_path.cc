@@ -36,12 +36,17 @@ SearchPath
 export_formats_search_path ()
 {
 	bool export_path_defined = false;
-	SearchPath spath (Glib::getenv (export_env_variable_name, export_path_defined));
+	SearchPath spath;
 
-	spath += user_config_directory ();
+	spath = user_config_directory ();
 	spath.add_subdirectory_to_paths (export_formats_dir_name);
 
-	std::cerr << "Looking for export formats in " << spath.to_string() << std::endl;
+	std::string env_var = Glib::getenv (export_env_variable_name, export_path_defined);	
+
+	if (export_path_defined) {
+		sys::path p = env_var;
+		spath += p;
+	}
 
 	return spath;
 }
