@@ -17,6 +17,7 @@
 
 */
 
+#include <iostream>
 #include <glibmm/miscutils.h>
 
 #include "ardour/export_formats_search_path.h"
@@ -39,6 +40,8 @@ export_formats_search_path ()
 
 	spath += user_config_directory ();
 	spath.add_subdirectory_to_paths (export_formats_dir_name);
+
+	std::cerr << "Looking for export formats in " << spath.to_string() << std::endl;
 
 	return spath;
 }
