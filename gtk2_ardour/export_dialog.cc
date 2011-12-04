@@ -62,6 +62,9 @@ ExportDialog::set_session (ARDOUR::Session* s)
 
 	handler = _session->get_export_handler ();
 	status = _session->get_export_status ();
+
+	std::cerr << "Setting ExportProfileManager\n";
+
 	profile_manager.reset (new ExportProfileManager (*_session, xml_node_name));
 
 	/* Possibly init stuff in derived classes */

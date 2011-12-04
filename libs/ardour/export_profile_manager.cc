@@ -68,6 +68,7 @@ ExportProfileManager::ExportProfileManager (Session & s, std::string xml_node_na
 
 	search_path += export_formats_search_path();
 
+	cerr << string_compose (_("Searching for export formats in %1"), search_path.to_string()) << endl;
 	info << string_compose (_("Searching for export formats in %1"), search_path.to_string()) << endmsg;
 
 	/* create export config directory if necessary */
