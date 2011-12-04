@@ -286,16 +286,17 @@ KeyEditor::populate ()
 
 #ifdef GTKOSX
 			string label = (*k);
-
+			
 			/* Gtk/Quartz maps:
 			   NSAlternate/NSOption key to Mod1
-			   NSCommand key to Meta
+			   NSCommand key to Mod2
 			*/
 
-			replace_all (label, "<Meta>", _("Command-"));
-			replace_all (label, "<Alt>", _("Option-"));
-			replace_all (label, "<Shift>", _("Shift-"));
-			replace_all (label, "<Control>", _("Control-"));
+//			replace_all (label, "<Primary>", _("Command-"));
+//			replace_all (label, "<Alt>", _("Option-"));
+//			replace_all (label, "<Shift>", _("Shift-"));
+//			replace_all (label, "<Control>", _("Control-"));
+
 			row[columns.binding] = label;
 #else
 			row[columns.binding] = (*k);
