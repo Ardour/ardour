@@ -247,7 +247,6 @@ UINT_TO_RGB((i), ((guchar*)p), ((guchar*)p)+1, ((guchar*)p)+2)
   gint pv_colr=(colr), pv_colg=(colg), pv_colb=(colb), pv_cola=(cola); \
   gint y_fract; \
   gint y_span = (origin_y - obj_top); \
-  gint alpha; \
   gint sat; \
 \
   pv_b0 = MAX(pv_buf->rect.y0, (pty0)); \
@@ -258,7 +257,6 @@ UINT_TO_RGB((i), ((guchar*)p), ((guchar*)p)+1, ((guchar*)p)+2)
     while (pv_b0 < pv_b1) { \
       y_fract = (abs(origin_y - pv_b0)) * 0xFF; \
 	  y_fract = y_fract / y_span; \
-	  alpha = 0x7F + (y_fract >> 1); \
 	  sat = 0xFF - (y_fract); \
 	  PIXEL_RGBA(pv_p, (((pv_colr << 8) * sat) >> 16), (((pv_colg << 8) * sat) >> 16), (((pv_colb << 8) * sat) >> 16), pv_cola); \
       ++pv_b0; \
@@ -306,7 +304,6 @@ UINT_TO_RGB((i), ((guchar*)p), ((guchar*)p)+1, ((guchar*)p)+2)
   guchar* pb_pp; \
   gint pb_a0, pb_a1, pb_b0, pb_b1, pb_i, pb_j; \
   gint pb_colr=(colr), pb_colg=(colg), pb_colb=(colb), pb_cola=(cola); \
-  gint alpha; \
   gint sat; \
   gint y_fract; \
   gint y_span = MAX(abs(v_span), 1); \
@@ -321,7 +318,6 @@ UINT_TO_RGB((i), ((guchar*)p), ((guchar*)p)+1, ((guchar*)p)+2)
     for (pb_j=pb_b0; pb_j<pb_b1; ++pb_j) { \
 	  y_fract = 0xFF * (abs(pb_j - pty0));  \
 	  y_fract = y_fract / y_span; \
-	  alpha = 0xFF - y_fract; \
 	  sat = 0xFF - (y_fract >> 1); \
       pb_pp = pb_p; \
       for (pb_i=pb_a0; pb_i<pb_a1; ++pb_i) { \
