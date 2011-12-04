@@ -34,17 +34,17 @@ namespace ARDOUR {
 SearchPath
 control_protocol_search_path ()
 {
-	bool surfaces_path_defined = false;
-	SearchPath spath_env (Glib::getenv(surfaces_env_variable_name, surfaces_path_defined));
-
-	if (surfaces_path_defined) {
-		return spath_env;
-	}
-
 	SearchPath spath (user_config_directory ());
 
 	spath += ardour_module_directory ();
 	spath.add_subdirectory_to_paths (surfaces_dir_name);
+
+	bool surfaces_path_defined = false;
+	SearchPath spath_env (Glib::getenv(surfaces_env_variable_name, surfaces_path_defined));
+	
+	if (surfaces_path_defined) {
+		spath += spath_env;
+	}
 
 	return spath;
 }
