@@ -1405,7 +1405,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	friend class EditorRouteGroups;
 	friend class EditorRegions;
 
-	ArdourCanvas::Item *last_item_entered;
 	/** true if the mouse is over a place where region trim can happen */
 	bool _over_region_trim_target;
 

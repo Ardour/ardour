@@ -302,8 +302,11 @@ Editor::set_canvas_cursor ()
 	}
 
 	/* up-down cursor as a cue that automation can be dragged up and down when in join object/range mode */
-	if (join_object_range_button.get_active() && last_item_entered) {
-		if (last_item_entered->property_parent() && (*last_item_entered->property_parent()).get_data (X_("timeselection"))) {
+	if (join_object_range_button.get_active()) {
+		double x, y;
+		get_pointer_position (x, y);
+		ArdourCanvas::Item* i = track_canvas->get_item_at (x, y);
+		if (i && i->property_parent() && (*i->property_parent()).get_data (X_("timeselection"))) {
 			pair<TimeAxisView*, int> tvp = trackview_by_y_position (_last_motion_y + vertical_adjustment.get_value() - canvas_timebars_vsize);
 			if (dynamic_cast<AutomationTimeAxisView*> (tvp.first)) {
 				current_canvas_cursor = _cursors->up_down;
@@ -1589,8 +1592,6 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	Marker * marker;
 	double fraction;
         bool ret = true;
-
-	last_item_entered = item;
 
 	switch (item_type) {
 	case ControlPointItem:

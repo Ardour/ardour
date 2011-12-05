@@ -332,7 +332,6 @@ Editor::Editor ()
 	current_interthread_info = 0;
 	_show_measures = true;
 	show_gain_after_trim = false;
-	last_item_entered = 0;
 
 	have_pending_keyboard_selection = false;
 	_follow_playhead = true;
