@@ -108,12 +108,12 @@ EditorRegions::EditorRegions (Editor* e)
 
 	ColumnInfo ci[] = {
 		{ 0, _("Region"), _("Region name, with number of channels in []'s") },
-		{ 1, _("Position"),  _("Length of the region") },
-		{ 2, _("End"),  _("Length of the region") },
-		{ 3, _("End"),  _("Length of the region") },
+		{ 1, _("Position"),  _("Position of start region") },
+		{ 2, _("End"),  _("Position of end of region") },
+		{ 3, _("Length"),  _("Length of the region") },
 		{ 4, _("Sync"),  _("Position of region sync point, relative to start of the region") },
-		{ 5, _("Sync"),  _("Region fade-in enabled?") },
-		{ 6, _("Fade In"),  _("Region fade-out enabled?") },
+		{ 5, _("Fade In"),  _("Length of region fade-in (units: secondary clock), () if disabled") },
+		{ 6, _("Fade Out"),  _("Length of region fade-out (units: secondary clock), () if dsisabled") },
 		{ 7, _("L"),  _("Region position locked?") },
 		{ 8, _("G"),  _("Region position glued to Bars|Beats time?") },
 		{ 9, _("M"),  _("Region muted?") },
