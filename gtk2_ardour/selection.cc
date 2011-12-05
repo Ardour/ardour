@@ -122,6 +122,9 @@ Selection::clear_regions ()
 	if (!regions.empty()) {
 		regions.clear_all ();
 		RegionsChanged();
+		if (Config->get_link_region_and_track_selection()) {
+			clear_tracks ();
+		}
 	}
 }
 
@@ -733,7 +736,10 @@ void
 Selection::set (RegionView* r, bool also_clear_tracks)
 {
 	clear_regions ();
-	if (also_clear_tracks) {
+	if (also_clear_tracks && !Config->get_link_region_and_track_selection()) {
+		/* clear_regions() will have done this if the link preference
+		 * is enabled
+		 */
 		clear_tracks ();
 	}
 	add (r);
