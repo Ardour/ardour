@@ -77,8 +77,6 @@ EditorRegions::EditorRegions (Editor* e)
 	, _sort_type ((Editing::RegionListSortType) 0)
 	, expanded (false)
 {
-	static const int column_width = 22;
-
 	_display.set_size_request (100, -1);
 	_display.set_name ("RegionListDisplay");
 	_display.set_rules_hint (true);
@@ -132,9 +130,7 @@ EditorRegions::EditorRegions (Editor* e)
 		l->show ();
 
 		if (ci[i].index > 6) {
-			col->set_fixed_width(column_width);
 			col->set_expand (false);
-			col->set_sizing (TREE_VIEW_COLUMN_FIXED);
 			col->set_alignment (ALIGN_CENTER);
 		} 
 	}
