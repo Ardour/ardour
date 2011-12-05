@@ -160,6 +160,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 				  Gdk::SCROLL_MASK);
 	controls_ebox.set_flags (CAN_FOCUS);
 
+	/* note that this handler connects *before* the default handler */
 	controls_ebox.signal_scroll_event().connect (sigc::mem_fun (*this, &TimeAxisView::controls_ebox_scroll), true);
 	controls_ebox.signal_button_press_event().connect (sigc::mem_fun (*this, &TimeAxisView::controls_ebox_button_press));
 	controls_ebox.signal_button_release_event().connect (sigc::mem_fun (*this, &TimeAxisView::controls_ebox_button_release));
@@ -319,10 +320,6 @@ TimeAxisView::clip_to_viewport ()
 bool
 TimeAxisView::controls_ebox_scroll (GdkEventScroll* ev)
 {
-	if (Keyboard::some_magic_widget_has_focus()) {
-		return false;
-	}
-
 	switch (ev->direction) {
 	case GDK_SCROLL_UP:
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {

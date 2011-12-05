@@ -182,6 +182,8 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	if (_controller) {
 		/* add bar controller */
 		controls_table.attach (*_controller.get(), 0, 8, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+		/* note that this handler connects *before* the default handler */
+		_controller->event_widget().signal_scroll_event().connect (mem_fun (*this, &AutomationTimeAxisView::controls_ebox_scroll), false);
 	}
 
 	controls_table.show_all ();
