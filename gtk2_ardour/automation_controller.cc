@@ -76,7 +76,10 @@ AutomationController::create(
 		const Evoral::Parameter& param,
 		boost::shared_ptr<AutomationControl> ac)
 {
-	Gtk::Adjustment* adjustment = manage (new Gtk::Adjustment (param.normal(), param.min(), param.max()));
+	Gtk::Adjustment* adjustment = manage (new Gtk::Adjustment (param.normal(), param.min(), param.max(),
+								   (param.max() - param.min())/100.0,
+								   (param.max() - param.min())/10.0));
+
         assert (ac);
         assert(ac->parameter() == param);
 	return boost::shared_ptr<AutomationController>(new AutomationController(printer, ac, adjustment));
