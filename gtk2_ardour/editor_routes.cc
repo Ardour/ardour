@@ -218,7 +218,6 @@ EditorRoutes::EditorRoutes (Editor* e)
 	}
 
 	_display.set_headers_visible (true);
-	_display.set_name ("TrackListDisplay");
 	_display.get_selection()->set_mode (SELECTION_SINGLE);
 	_display.get_selection()->set_select_function (sigc::mem_fun (*this, &EditorRoutes::selection_filter));
 	_display.set_reorderable (true);

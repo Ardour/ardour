@@ -40,7 +40,6 @@ EditorSnapshots::EditorSnapshots (Editor* e)
 	_model = ListStore::create (_columns);
 	_display.set_model (_model);
 	_display.append_column (X_("snapshot"), _columns.visible_name);
-	_display.set_name ("SnapshotDisplay");
 	_display.set_size_request (75, -1);
 	_display.set_headers_visible (false);
 	_display.set_reorderable (false);

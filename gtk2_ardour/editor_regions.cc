@@ -78,7 +78,6 @@ EditorRegions::EditorRegions (Editor* e)
 	, expanded (false)
 {
 	_display.set_size_request (100, -1);
-	_display.set_name ("RegionListDisplay");
 	_display.set_rules_hint (true);
 
 	/* Try to prevent single mouse presses from initiating edits.
