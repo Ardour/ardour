@@ -50,6 +50,7 @@ private:
 			add (edits);
 			add (active_state);
 			add (is_visible);
+			add (gdkcolor);
 			add (routegroup);
                 }
 
@@ -64,6 +65,7 @@ private:
 		Gtk::TreeModelColumn<bool> edits;
 		Gtk::TreeModelColumn<bool> active_state;
 	        Gtk::TreeModelColumn<bool> is_visible;
+	        Gtk::TreeModelColumn<Gdk::Color> gdkcolor;
 	        Gtk::TreeModelColumn<ARDOUR::RouteGroup*> routegroup;
 	};
 
@@ -92,6 +94,7 @@ private:
 	bool _in_rebuild;
 	PBD::ScopedConnectionList _property_changed_connections;
 	PBD::ScopedConnection all_route_groups_changed_connection;
+	Gtk::ColorSelectionDialog color_dialog;
 };
 
 

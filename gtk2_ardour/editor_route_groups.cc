@@ -24,7 +24,9 @@
 #include <cstdlib>
 #include <cmath>
 
-#include <gtkmm2ext/gtk_ui.h>
+#include "gtkmm2ext/gtk_ui.h"
+#include "gtkmm2ext/cell_renderer_color_selector.h"
+
 #include "ardour/route_group.h"
 
 #include "editor.h"
@@ -78,6 +80,12 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 	_display.append_column ("", _columns.active_state);
 	_display.append_column ("", _columns.is_visible);
 
+	Gtkmm2ext::CellRendererColorSelector* color_renderer = manage (new Gtkmm2ext::CellRendererColorSelector);
+	TreeViewColumn* color_column = manage (new TreeViewColumn ("", *color_renderer));
+	color_column->add_attribute (color_renderer->property_color(), _columns.gdkcolor);
+	
+	_display.append_column (*color_column);
+
 	TreeViewColumn* col;
 	Gtk::Label* l;
 
@@ -93,8 +101,10 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 		{ 8, S_("editing|E"), _("Sharing Editing?") },
 		{ 9, S_("active|A"), _("Sharing Active Status?") },
 		{ 10, _("Show"), _("Group is visible?") },
+		{ 11, _("Col"), _("Group Tab Color") },
 		{ -1, 0, 0 }
 	};
+
 
 	for (int i = 0; ci[i].index >= 0; ++i) {
 		col = _display.get_column (ci[i].index);
@@ -114,6 +124,11 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 
 	_display.set_headers_visible (true);
 
+	color_dialog.get_colorsel()->set_has_opacity_control (false);
+	color_dialog.get_colorsel()->set_has_palette (true);
+	color_dialog.get_ok_button()->signal_clicked().connect (sigc::bind (sigc::mem_fun (color_dialog, &Gtk::Dialog::response), RESPONSE_ACCEPT));
+	color_dialog.get_cancel_button()->signal_clicked().connect (sigc::bind (sigc::mem_fun (color_dialog, &Gtk::Dialog::response), RESPONSE_CANCEL));
+
 	/* name is directly editable */
 
 	CellRendererText* name_cell = dynamic_cast<CellRendererText*>(_display.get_column_cell_renderer (0));
@@ -124,8 +139,11 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 	
 	for (int i = 1; ci[i].index >= 0; ++i) {
 		CellRendererToggle* active_cell = dynamic_cast <CellRendererToggle*> (_display.get_column_cell_renderer (i));
-		active_cell->property_activatable() = true;
-		active_cell->property_radio() = false;
+
+		if (active_cell) {
+			active_cell->property_activatable() = true;
+			active_cell->property_radio() = false;
+		}
 	}
 
 	_model->signal_row_changed().connect (sigc::mem_fun (*this, &EditorRouteGroups::row_change));
@@ -138,9 +156,8 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 	_display.set_name ("EditGroupList");
 	_display.get_selection()->set_mode (SELECTION_SINGLE);
 	_display.set_headers_visible (true);
-	_display.set_reorderable (true);
+	_display.set_reorderable (false);
 	_display.set_rules_hint (true);
-	_display.set_size_request (75, -1);
 
 	_scroller.add (_display);
 	_scroller.set_policy (POLICY_AUTOMATIC, POLICY_AUTOMATIC);
@@ -221,6 +238,7 @@ EditorRouteGroups::button_press_event (GdkEventButton* ev)
 	int cellx;
 	int celly;
 	bool ret = false;
+	Gdk::Color c;
 
 	bool const p = _display.get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly);
 
@@ -244,6 +262,8 @@ EditorRouteGroups::button_press_event (GdkEventButton* ev)
 		_display.grab_focus ();
 		return true;
 	}
+
+	cerr << "click on col " << GPOINTER_TO_UINT (column->get_data (X_("colnum"))) << endl;
 
 	switch (GPOINTER_TO_UINT (column->get_data (X_("colnum")))) {
 	case 0:
@@ -336,6 +356,36 @@ EditorRouteGroups::button_press_event (GdkEventButton* ev)
 			ret = true;
 		}
 		break;
+
+	case 11: 
+		c = (*iter)[_columns.gdkcolor];
+
+		color_dialog.get_colorsel()->set_previous_color (c);
+		color_dialog.get_colorsel()->set_current_color (c);
+
+		switch (color_dialog.run()) {
+		case RESPONSE_CANCEL:
+			cerr << "cancel\n";
+			break;
+		case RESPONSE_ACCEPT:
+			c = color_dialog.get_colorsel()->get_current_color();
+			(*iter)[_columns.gdkcolor] = c;
+			cerr << "Set group " << (*iter)[_columns.routegroup] << " color to " 
+			     << c.get_red_p() << ':' << c.get_green_p() << ':' 
+			     << c.get_blue_p() << endl;
+			GroupTabs::set_group_color ((*iter)[_columns.routegroup], c);
+			ARDOUR_UI::config()->set_dirty ();
+			break;
+			
+		default:
+			cerr << "no accept nor cancel\n";
+			break;
+			
+		}
+
+		color_dialog.hide ();
+		ret = true;
+		break;
 		
 	default:
 		break;
@@ -385,7 +435,11 @@ EditorRouteGroups::row_change (const Gtk::TreeModel::Path&, const Gtk::TreeModel
 	val = (*iter)[_columns.active_state];
 	plist.add (Properties::route_active, val);
 
+	GroupTabs::set_group_color ((*iter)[_columns.routegroup], (*iter)[_columns.gdkcolor]);
+	
 	group->set_hidden (!(*iter)[_columns.is_visible], this);
+
+	/* XXX set color here */
 
 	group->apply_changes (plist);
 }
@@ -408,7 +462,8 @@ EditorRouteGroups::add (RouteGroup* group)
 	row[_columns.edits] = group->is_edit ();
 	row[_columns.active_state] = group->is_route_active ();
 	row[_columns.is_visible] = !group->is_hidden();
-
+	row[_columns.gdkcolor] = GroupTabs::group_color (group);
+	
 	_in_row_change = true;
 
 	row[_columns.routegroup] = group;
@@ -471,12 +526,13 @@ EditorRouteGroups::property_changed (RouteGroup* group, const PropertyChange& ch
 			(*iter)[_columns.edits] = group->is_edit ();
 			(*iter)[_columns.active_state] = group->is_route_active ();
 			(*iter)[_columns.is_visible] = !group->is_hidden();
+			(*iter)[_columns.gdkcolor] = GroupTabs::group_color (group);
 		}
 	}
 
 	_in_row_change = false;
 
-	if (change.contains (Properties::name) || change.contains (Properties::active)) {
+	if (change.contains (Properties::name) || change.contains (Properties::color) || change.contains (Properties::active)) {
 		_editor->_group_tabs->set_dirty ();
 	}
 
