@@ -47,17 +47,15 @@ class ThemeManager : public ArdourWindow
 	struct ColorDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {
 	    ColorDisplayModelColumns() {
 		    add (name);
-		    add (color);
 		    add (gdkcolor);
-			add (pVar);
+		    add (pVar);
 		    add (rgba);
 	    }
 
 	    Gtk::TreeModelColumn<std::string>  name;
-	    Gtk::TreeModelColumn<std::string>  color;
-	    Gtk::TreeModelColumn<Gdk::Color>     gdkcolor;
+	    Gtk::TreeModelColumn<Gdk::Color>   gdkcolor;
 	    Gtk::TreeModelColumn<UIConfigVariable<uint32_t> *> pVar;
-	    Gtk::TreeModelColumn<uint32_t>       rgba;
+	    Gtk::TreeModelColumn<uint32_t>     rgba;
 	};
 
 	ColorDisplayModelColumns columns;

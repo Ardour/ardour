@@ -23,8 +23,10 @@
 #include <errno.h>
 
 #include <gtkmm/stock.h>
-#include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm/settings.h>
+
+#include "gtkmm2ext/gtk_ui.h"
+#include "gtkmm2ext/cell_renderer_color_selector.h"
 
 #include "pbd/file_utils.h"
 
@@ -44,7 +46,6 @@ using namespace Gtk;
 using namespace PBD;
 using namespace ARDOUR;
 
-
 sigc::signal<void> ColorsChanged;
 sigc::signal<void,uint32_t> ColorChanged;
 
@@ -59,16 +60,20 @@ ThemeManager::ThemeManager()
 	color_list = TreeStore::create (columns);
 	color_display.set_model (color_list);
 	color_display.append_column (_("Object"), columns.name);
-	color_display.append_column (_("Color"), columns.color);
+
+	Gtkmm2ext::CellRendererColorSelector* color_renderer = manage (new Gtkmm2ext::CellRendererColorSelector);
+	TreeViewColumn* color_column = manage (new TreeViewColumn (_("Color"), *color_renderer));
+	color_column->add_attribute (color_renderer->property_color(), columns.gdkcolor);
+
+	color_display.append_column (*color_column);
+
 	color_display.get_column (0)->set_data (X_("colnum"), GUINT_TO_POINTER(0));
+	color_display.get_column (0)->set_expand (true);
 	color_display.get_column (1)->set_data (X_("colnum"), GUINT_TO_POINTER(1));
+	color_display.get_column (1)->set_expand (false);
 	color_display.set_reorderable (false);
 	color_display.get_selection()->set_mode (SELECTION_NONE);
 	color_display.set_headers_visible (true);
-
-	CellRenderer* color_cell = color_display.get_column_cell_renderer (1);
-	TreeViewColumn* color_column = color_display.get_column (1);
-	color_column->add_attribute (color_cell->property_cell_background_gdk(), columns.gdkcolor);
 
 	scroller.add (color_display);
 	scroller.set_policy (POLICY_NEVER, POLICY_AUTOMATIC);
@@ -311,7 +316,6 @@ ThemeManager::setup_theme ()
 		//cerr << (*i)->name() << " == " << hex << rgba << ": " << hex << r << " " << hex << g << " " << hex << b << endl;
 		col.set_rgb_p (r / 255.0, g / 255.0, b / 255.0);
 
-		row[columns.color] = "";
 		row[columns.pVar] = var;
 		row[columns.rgba] = rgba;
 		row[columns.gdkcolor] = col;
