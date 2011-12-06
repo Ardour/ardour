@@ -263,8 +263,6 @@ EditorRouteGroups::button_press_event (GdkEventButton* ev)
 		return true;
 	}
 
-	cerr << "click on col " << GPOINTER_TO_UINT (column->get_data (X_("colnum"))) << endl;
-
 	switch (GPOINTER_TO_UINT (column->get_data (X_("colnum")))) {
 	case 0:
 		if (Keyboard::is_edit_event (ev)) {
@@ -365,20 +363,15 @@ EditorRouteGroups::button_press_event (GdkEventButton* ev)
 
 		switch (color_dialog.run()) {
 		case RESPONSE_CANCEL:
-			cerr << "cancel\n";
 			break;
 		case RESPONSE_ACCEPT:
 			c = color_dialog.get_colorsel()->get_current_color();
 			(*iter)[_columns.gdkcolor] = c;
-			cerr << "Set group " << (*iter)[_columns.routegroup] << " color to " 
-			     << c.get_red_p() << ':' << c.get_green_p() << ':' 
-			     << c.get_blue_p() << endl;
 			GroupTabs::set_group_color ((*iter)[_columns.routegroup], c);
 			ARDOUR_UI::config()->set_dirty ();
 			break;
 			
 		default:
-			cerr << "no accept nor cancel\n";
 			break;
 			
 		}
