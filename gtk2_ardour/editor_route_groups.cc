@@ -51,6 +51,12 @@ using namespace PBD;
 using namespace Gtk;
 using Gtkmm2ext::Keyboard;
 
+struct ColumnInfo {
+    int         index;
+    const char* label;
+    const char* tooltip;
+};
+
 EditorRouteGroups::EditorRouteGroups (Editor* e)
 	: EditorComponent (e)
 	, _all_group_active_button (_("No Selection = All Tracks"))
@@ -60,27 +66,48 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 	_model = ListStore::create (_columns);
 	_display.set_model (_model);
 
-	int const columns = 10;
+	_display.append_column ("", _columns.text);
+	_display.append_column ("", _columns.gain);
+	_display.append_column ("", _columns.gain_relative);
+	_display.append_column ("", _columns.mute);
+	_display.append_column ("", _columns.solo);
+	_display.append_column ("", _columns.record);
+	_display.append_column ("", _columns.select);
+	_display.append_column ("", _columns.edits);
+	_display.append_column ("", _columns.active_state);
+	_display.append_column ("", _columns.is_visible);
 
-	_display.append_column (_("Name"), _columns.text);
-	_display.append_column (_("G"), _columns.gain);
-	_display.append_column (_("Rel"), _columns.gain_relative);
-	_display.append_column (_("M"), _columns.mute);
-	_display.append_column (_("S"), _columns.solo);
-	_display.append_column (_("Rec"), _columns.record);
-	_display.append_column (_("Sel"), _columns.select);
-	_display.append_column (_("E"), _columns.edits);
-	_display.append_column (_("A"), _columns.active_state);
-	_display.append_column (_("Show"), _columns.is_visible);
+	TreeViewColumn* col;
+	Gtk::Label* l;
 
-	for (int i = 0; i < columns; ++i) {
-		_display.get_column (i)->set_data (X_("colnum"), GUINT_TO_POINTER(i));
-	}
+	ColumnInfo ci[] = {
+		{ 0, _("Name"), _("Name of Group") },
+		{ 1, _("G"), _("Sharing Gain?") },
+		{ 2, _("Rel"), _("Relevative Gain Changes?") },
+		{ 3, _("M"), _("Sharing Mute?") },
+		{ 4, _("S"), _("Sharing Solo?") },
+		{ 5, _("Rec"), _("Sharing Record-enable Status?") },
+		{ 6, _("Sel"), _("Sharing Selected Status?") },
+		{ 7, _("E"), _("Sharing Editing?") },
+		{ 8, _("A"), _("Sharing Active Status?") },
+		{ 9, _("Show"), _("Group is visible?") },
+		{ -1, 0, 0 }
+	};
 
-	_display.get_column (0)->set_expand (true);
-	
-	for (int i = 1; i < columns; ++i) {
-		_display.get_column (i)->set_expand (false);
+	for (int i = 0; ci[i].index >= 0; ++i) {
+		col = _display.get_column (ci[i].index);
+		l = manage (new Label (ci[i].label));
+		ARDOUR_UI::instance()->set_tip (*l, ci[i].tooltip);
+		col->set_widget (*l);
+		l->show ();
+
+		col->set_data (X_("colnum"), GUINT_TO_POINTER(i));
+		if (i == 0) {
+			col->set_expand (true);
+		} else {
+			col->set_expand (false);
+			col->set_alignment (ALIGN_CENTER);
+		}
 	}
 
 	_display.set_headers_visible (true);
@@ -93,7 +120,7 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 	
 	/* use checkbox for the active + visible columns */
 	
-	for (int i = 1; i < columns; ++i) {
+	for (int i = 1; ci[i].index >= 0; ++i) {
 		CellRendererToggle* active_cell = dynamic_cast <CellRendererToggle*> (_display.get_column_cell_renderer (i));
 		active_cell->property_activatable() = true;
 		active_cell->property_radio() = false;
