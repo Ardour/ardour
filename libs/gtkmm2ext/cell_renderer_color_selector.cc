@@ -63,28 +63,33 @@ CellRendererColorSelector::property_color()
 void 
 CellRendererColorSelector::render_vfunc (const Glib::RefPtr<Gdk::Drawable>& window, Gtk::Widget& /*widget*/, const Gdk::Rectangle& /*background_area*/, const Gdk::Rectangle& cell_area, const Gdk::Rectangle& expose_area, Gtk::CellRendererState /*flags*/)
 {
-	cairo_t* cr = gdk_cairo_create (window->gobj());
-	double r, g, b;
 	Gdk::Color c = _property_color.get_value();
 
-	cairo_rectangle (cr, expose_area.get_x(), expose_area.get_y(), expose_area.get_width(), expose_area.get_height());
-	cairo_clip (cr);
+	if (c.gobj() != 0) {
 
-	r = c.get_red_p();
-	g = c.get_green_p();
-	b = c.get_blue_p();
+		cairo_t* cr = gdk_cairo_create (window->gobj());
+		double r, g, b;
+		Gdk::Color c = _property_color.get_value();
+		
+		cairo_rectangle (cr, expose_area.get_x(), expose_area.get_y(), expose_area.get_width(), expose_area.get_height());
+		cairo_clip (cr);
+		
+		r = c.get_red_p();
+		g = c.get_green_p();
+		b = c.get_blue_p();
+		
+		cairo_rectangle_t drawing_rect;
+		
+		drawing_rect.x = cell_area.get_x() + property_xpad();
+		drawing_rect.y = cell_area.get_y() + property_ypad();
+		drawing_rect.width = cell_area.get_width() - (2 * property_xpad());
+		drawing_rect.height = cell_area.get_height() - (2 * property_ypad());
+		
+		Gtkmm2ext::rounded_rectangle (cr, drawing_rect.x, drawing_rect.y, drawing_rect.width, drawing_rect.height, 5);
+		cairo_set_source_rgb (cr, r, g, b);
+		cairo_fill (cr);
 
-	cairo_rectangle_t drawing_rect;
-
-	drawing_rect.x = cell_area.get_x() + property_xpad();
-	drawing_rect.y = cell_area.get_y() + property_ypad();
-	drawing_rect.width = cell_area.get_width() - (2 * property_xpad());
-	drawing_rect.height = cell_area.get_height() - (2 * property_ypad());
-
-	Gtkmm2ext::rounded_rectangle (cr, drawing_rect.x, drawing_rect.y, drawing_rect.width, drawing_rect.height, 5);
-	cairo_set_source_rgb (cr, r, g, b);
-	cairo_fill (cr);
-
-	cairo_destroy (cr);
+		cairo_destroy (cr);
+	}
 }
 
