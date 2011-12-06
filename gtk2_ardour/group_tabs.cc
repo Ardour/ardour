@@ -543,6 +543,12 @@ GroupTabs::set_group_color (RouteGroup* group, Gdk::Color color)
 	char buf[64];
 	snprintf (buf, sizeof (buf), "%d:%d:%d", color.get_red(), color.get_green(), color.get_blue());
 	gui_state.set (group_gui_id (group), "color", buf);
+	
+	/* the group color change notification */
+	
+	PBD::PropertyChange change;
+	change.add (Properties::color);
+	group->PropertyChanged (change);
 
 	/* This is a bit of a hack, but this might change
 	   our route's effective color, so emit gui_changed
