@@ -28,6 +28,7 @@ gtkmm2ext_sources = [
         'bindable_button.cc',
         'bindings.cc',
         'cairocell.cc',
+        'cell_renderer_color_selector.cc',
         'cell_renderer_pixbuf_multi.cc',
         'cell_renderer_pixbuf_toggle.cc',
         'choice.cc',
