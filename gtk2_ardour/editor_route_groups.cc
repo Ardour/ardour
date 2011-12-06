@@ -68,6 +68,12 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 	_model = ListStore::create (_columns);
 	_display.set_model (_model);
 
+	Gtkmm2ext::CellRendererColorSelector* color_renderer = manage (new Gtkmm2ext::CellRendererColorSelector);
+	TreeViewColumn* color_column = manage (new TreeViewColumn ("", *color_renderer));
+	color_column->add_attribute (color_renderer->property_color(), _columns.gdkcolor);
+	
+	_display.append_column (*color_column);
+
 	_display.append_column ("", _columns.text);
 	_display.append_column ("", _columns.gain);
 	_display.append_column ("", _columns.gain_relative);
@@ -80,28 +86,22 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 	_display.append_column ("", _columns.active_state);
 	_display.append_column ("", _columns.is_visible);
 
-	Gtkmm2ext::CellRendererColorSelector* color_renderer = manage (new Gtkmm2ext::CellRendererColorSelector);
-	TreeViewColumn* color_column = manage (new TreeViewColumn ("", *color_renderer));
-	color_column->add_attribute (color_renderer->property_color(), _columns.gdkcolor);
-	
-	_display.append_column (*color_column);
-
 	TreeViewColumn* col;
 	Gtk::Label* l;
 
 	ColumnInfo ci[] = {
-		{ 0, _("Name"), _("Name of Group") },
-		{ 1, S_("group|G"), _("Sharing Gain?") },
-		{ 2, S_("relative|Rel"), _("Relevative Gain Changes?") },
-		{ 3, S_("mute|M"), _("Sharing Mute?") },
-		{ 4, S_("solo|S"), _("Sharing Solo?") },
-		{ 5, _("Rec"), _("Sharing Record-enable Status?") },
-		{ 6, S_("monitoring|Mon"), _("Sharing Monitoring Choice?") },
-		{ 7, S_("selection|Sel"), _("Sharing Selected Status?") },
-		{ 8, S_("editing|E"), _("Sharing Editing?") },
-		{ 9, S_("active|A"), _("Sharing Active Status?") },
-		{ 10, _("Show"), _("Group is visible?") },
-		{ 11, _("Col"), _("Group Tab Color") },
+		{ 0, _("Col"), _("Group Tab Color") },
+		{ 1, _("Name"), _("Name of Group") },
+		{ 2, S_("group|G"), _("Sharing Gain?") },
+		{ 3, S_("relative|Rel"), _("Relevative Gain Changes?") },
+		{ 4, S_("mute|M"), _("Sharing Mute?") },
+		{ 5, S_("solo|S"), _("Sharing Solo?") },
+		{ 6, _("Rec"), _("Sharing Record-enable Status?") },
+		{ 7, S_("monitoring|Mon"), _("Sharing Monitoring Choice?") },
+		{ 8, S_("selection|Sel"), _("Sharing Selected Status?") },
+		{ 9, S_("editing|E"), _("Sharing Editing?") },
+		{ 10, S_("active|A"), _("Sharing Active Status?") },
+		{ 11, _("Show"), _("Group is visible?") },
 		{ -1, 0, 0 }
 	};
 
@@ -114,7 +114,7 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 		l->show ();
 
 		col->set_data (X_("colnum"), GUINT_TO_POINTER(i));
-		if (i == 0) {
+		if (i == 1) {
 			col->set_expand (true);
 		} else {
 			col->set_expand (false);
@@ -131,11 +131,9 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 
 	/* name is directly editable */
 
-	CellRendererText* name_cell = dynamic_cast<CellRendererText*>(_display.get_column_cell_renderer (0));
+	CellRendererText* name_cell = dynamic_cast<CellRendererText*>(_display.get_column_cell_renderer (1));
 	name_cell->property_editable() = true;
 	name_cell->signal_edited().connect (sigc::mem_fun (*this, &EditorRouteGroups::name_edit));
-	
-	/* use checkbox for the active + visible columns */
 	
 	for (int i = 1; ci[i].index >= 0; ++i) {
 		CellRendererToggle* active_cell = dynamic_cast <CellRendererToggle*> (_display.get_column_cell_renderer (i));
