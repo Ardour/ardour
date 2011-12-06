@@ -262,98 +262,7 @@ EditorRouteGroups::button_press_event (GdkEventButton* ev)
 	}
 
 	switch (GPOINTER_TO_UINT (column->get_data (X_("colnum")))) {
-	case 0:
-		if (Keyboard::is_edit_event (ev)) {
-			if ((iter = _model->get_iter (path))) {
-				if ((group = (*iter)[_columns.routegroup]) != 0) {
-					ret = true;
-				}
-			}
-
-		}
-		break;
-
-	case 1:
-		if ((iter = _model->get_iter (path))) {
-			bool gain = (*iter)[_columns.gain];
-			(*iter)[_columns.gain] = !gain;
-			ret = true;
-		}
-		break;
-
-	case 2:
-		if ((iter = _model->get_iter (path))) {
-			bool gain_relative = (*iter)[_columns.gain_relative];
-			(*iter)[_columns.gain_relative] = !gain_relative;
-			ret = true;
-		}
-		break;
-
-	case 3:
-		if ((iter = _model->get_iter (path))) {
-			bool mute = (*iter)[_columns.mute];
-			(*iter)[_columns.mute] = !mute;
-			ret = true;
-		}
-		break;
-
-	case 4:
-		if ((iter = _model->get_iter (path))) {
-			bool solo = (*iter)[_columns.solo];
-			(*iter)[_columns.solo] = !solo;
-			ret = true;
-		}
-		break;
-
-	case 5:
-		if ((iter = _model->get_iter (path))) {
-			bool record = (*iter)[_columns.record];
-			(*iter)[_columns.record] = !record;
-			ret = true;
-		}
-		break;
-
-	case 6:
-		if ((iter = _model->get_iter (path))) {
-			bool monitoring = (*iter)[_columns.monitoring];
-			(*iter)[_columns.monitoring] = !monitoring;
-			ret = true;
-		}
-		break;
-
-	case 7:
-		if ((iter = _model->get_iter (path))) {
-			bool select = (*iter)[_columns.select];
-			(*iter)[_columns.select] = !select;
-			ret = true;
-		}
-		break;
-
-	case 8:
-		if ((iter = _model->get_iter (path))) {
-			bool edits = (*iter)[_columns.edits];
-			(*iter)[_columns.edits] = !edits;
-			ret = true;
-		}
-		break;
-
-	case 9:
-		if ((iter = _model->get_iter (path))) {
-			bool active_state = (*iter)[_columns.active_state];
-			(*iter)[_columns.active_state] = !active_state;
-			ret = true;
-		}
-		break;
-
-	case 10:
-		if ((iter = _model->get_iter (path))) {
-			bool is_visible = (*iter)[_columns.is_visible];
-			(*iter)[_columns.is_visible] = !is_visible;
-			ret = true;
-		}
-		break;
-
-	case 11: 
+	case 0: 
 		c = (*iter)[_columns.gdkcolor];
 
 		color_dialog.get_colorsel()->set_previous_color (c);
@@ -377,6 +286,98 @@ EditorRouteGroups::button_press_event (GdkEventButton* ev)
 		color_dialog.hide ();
 		ret = true;
 		break;
+
+	case 1:
+		if (Keyboard::is_edit_event (ev)) {
+			if ((iter = _model->get_iter (path))) {
+				if ((group = (*iter)[_columns.routegroup]) != 0) {
+					ret = true;
+				}
+			}
+
+		}
+		break;
+
+	case 2:
+		if ((iter = _model->get_iter (path))) {
+			bool gain = (*iter)[_columns.gain];
+			(*iter)[_columns.gain] = !gain;
+			ret = true;
+		}
+		break;
+
+	case 3:
+		if ((iter = _model->get_iter (path))) {
+			bool gain_relative = (*iter)[_columns.gain_relative];
+			(*iter)[_columns.gain_relative] = !gain_relative;
+			ret = true;
+		}
+		break;
+
+	case 4:
+		if ((iter = _model->get_iter (path))) {
+			bool mute = (*iter)[_columns.mute];
+			(*iter)[_columns.mute] = !mute;
+			ret = true;
+		}
+		break;
+
+	case 5:
+		if ((iter = _model->get_iter (path))) {
+			bool solo = (*iter)[_columns.solo];
+			(*iter)[_columns.solo] = !solo;
+			ret = true;
+		}
+		break;
+
+	case 6:
+		if ((iter = _model->get_iter (path))) {
+			bool record = (*iter)[_columns.record];
+			(*iter)[_columns.record] = !record;
+			ret = true;
+		}
+		break;
+
+	case 7:
+		if ((iter = _model->get_iter (path))) {
+			bool monitoring = (*iter)[_columns.monitoring];
+			(*iter)[_columns.monitoring] = !monitoring;
+			ret = true;
+		}
+		break;
+
+	case 8:
+		if ((iter = _model->get_iter (path))) {
+			bool select = (*iter)[_columns.select];
+			(*iter)[_columns.select] = !select;
+			ret = true;
+		}
+		break;
+
+	case 9:
+		if ((iter = _model->get_iter (path))) {
+			bool edits = (*iter)[_columns.edits];
+			(*iter)[_columns.edits] = !edits;
+			ret = true;
+		}
+		break;
+
+	case 10:
+		if ((iter = _model->get_iter (path))) {
+			bool active_state = (*iter)[_columns.active_state];
+			(*iter)[_columns.active_state] = !active_state;
+			ret = true;
+		}
+		break;
+
+	case 11:
+		if ((iter = _model->get_iter (path))) {
+			bool is_visible = (*iter)[_columns.is_visible];
+			(*iter)[_columns.is_visible] = !is_visible;
+			ret = true;
+		}
+		break;
+
 		
 	default:
 		break;
