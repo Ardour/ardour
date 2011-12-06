@@ -45,6 +45,7 @@ private:
 			add (mute);
 			add (solo);
 			add (record);
+			add (monitoring);
 			add (select);
 			add (edits);
 			add (active_state);
@@ -58,6 +59,7 @@ private:
 		Gtk::TreeModelColumn<bool> mute;
 		Gtk::TreeModelColumn<bool> solo;
 		Gtk::TreeModelColumn<bool> record;
+		Gtk::TreeModelColumn<bool> monitoring;
 		Gtk::TreeModelColumn<bool> select;
 		Gtk::TreeModelColumn<bool> edits;
 		Gtk::TreeModelColumn<bool> active_state;
@@ -71,7 +73,7 @@ private:
 	void row_change (const Gtk::TreeModel::Path&,const Gtk::TreeModel::iterator&);
 	void name_edit (const std::string&, const std::string&);
 	void button_clicked ();
-	gint button_press_event (GdkEventButton* ev);
+	bool button_press_event (GdkEventButton* ev);
 	void groups_changed ();
 	void property_changed (ARDOUR::RouteGroup*, const PBD::PropertyChange &);
 	void remove_selected ();

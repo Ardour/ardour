@@ -1138,15 +1138,21 @@ EditorRoutes::button_press (GdkEventButton* ev)
 		return true;
 	}
 
+	TreeModel::Path path;
+	TreeViewColumn *tvc;
+	int cell_x;
+	int cell_y;
+
+	if (!_display.get_path_at_pos ((int) ev->x, (int) ev->y, path, tvc, cell_x, cell_y)) {
+		/* cancel selection */
+		_display.get_selection()->unselect_all ();
+		/* end any editing by grabbing focus */
+		_display.grab_focus ();
+		return true;
+	}
+
 	//Scroll editor canvas to selected track
 	if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
-
-		TreeModel::Path path;
-		TreeViewColumn *tvc;
-		int cell_x;
-		int cell_y;
-
-		_display.get_path_at_pos ((int) ev->x, (int) ev->y, path, tvc, cell_x, cell_y);
 
 		// Get the model row.
 		Gtk::TreeModel::Row row = *_model->get_iter (path);

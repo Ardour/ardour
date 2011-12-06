@@ -59,7 +59,7 @@ struct ColumnInfo {
 
 EditorRouteGroups::EditorRouteGroups (Editor* e)
 	: EditorComponent (e)
-	, _all_group_active_button (_("No Selection = All Tracks"))
+	, _all_group_active_button (_("No Selection = All Tracks?"))
 	, _in_row_change (false)
 	, _in_rebuild (false)
 {
@@ -72,6 +72,7 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 	_display.append_column ("", _columns.mute);
 	_display.append_column ("", _columns.solo);
 	_display.append_column ("", _columns.record);
+	_display.append_column ("", _columns.monitoring);
 	_display.append_column ("", _columns.select);
 	_display.append_column ("", _columns.edits);
 	_display.append_column ("", _columns.active_state);
@@ -82,15 +83,16 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 
 	ColumnInfo ci[] = {
 		{ 0, _("Name"), _("Name of Group") },
-		{ 1, _("G"), _("Sharing Gain?") },
-		{ 2, _("Rel"), _("Relevative Gain Changes?") },
-		{ 3, _("M"), _("Sharing Mute?") },
-		{ 4, _("S"), _("Sharing Solo?") },
+		{ 1, S_("group|G"), _("Sharing Gain?") },
+		{ 2, S_("relative|Rel"), _("Relevative Gain Changes?") },
+		{ 3, S_("mute|M"), _("Sharing Mute?") },
+		{ 4, S_("solo|S"), _("Sharing Solo?") },
 		{ 5, _("Rec"), _("Sharing Record-enable Status?") },
-		{ 6, _("Sel"), _("Sharing Selected Status?") },
-		{ 7, _("E"), _("Sharing Editing?") },
-		{ 8, _("A"), _("Sharing Active Status?") },
-		{ 9, _("Show"), _("Group is visible?") },
+		{ 6, S_("monitoring|Mon"), _("Sharing Monitoring Choice?") },
+		{ 7, S_("selection|Sel"), _("Sharing Selected Status?") },
+		{ 8, S_("editing|E"), _("Sharing Editing?") },
+		{ 9, S_("active|A"), _("Sharing Active Status?") },
+		{ 10, _("Show"), _("Group is visible?") },
 		{ -1, 0, 0 }
 	};
 
@@ -209,7 +211,7 @@ EditorRouteGroups::button_clicked ()
 	run_new_group_dialog ();
 }
 
-gint
+bool
 EditorRouteGroups::button_press_event (GdkEventButton* ev)
 {
 	TreeModel::Path path;
@@ -218,6 +220,7 @@ EditorRouteGroups::button_press_event (GdkEventButton* ev)
 	TreeViewColumn* column;
 	int cellx;
 	int celly;
+	bool ret = false;
 
 	bool const p = _display.get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly);
 
@@ -227,15 +230,19 @@ EditorRouteGroups::button_press_event (GdkEventButton* ev)
 
 	if (iter) {
 		group = (*iter)[_columns.routegroup];
-	}
+	} 
 
 	if (Keyboard::is_context_menu_event (ev)) {
 		_editor->_group_tabs->get_menu(group)->popup (1, ev->time);
 		return true;
-	}
+	} 
 
 	if (!p) {
-		return 1;
+		/* cancel selection */
+		_display.get_selection()->unselect_all ();
+		/* end any editing by grabbing focus */
+		_display.grab_focus ();
+		return true;
 	}
 
 	switch (GPOINTER_TO_UINT (column->get_data (X_("colnum")))) {
@@ -243,10 +250,7 @@ EditorRouteGroups::button_press_event (GdkEventButton* ev)
 		if (Keyboard::is_edit_event (ev)) {
 			if ((iter = _model->get_iter (path))) {
 				if ((group = (*iter)[_columns.routegroup]) != 0) {
-#ifdef GTKOSX
-					_display.queue_draw();
-#endif
-					return true;
+					ret = true;
 				}
 			}
 
@@ -257,10 +261,7 @@ EditorRouteGroups::button_press_event (GdkEventButton* ev)
 		if ((iter = _model->get_iter (path))) {
 			bool gain = (*iter)[_columns.gain];
 			(*iter)[_columns.gain] = !gain;
-#ifdef GTKOSX
-			_display.queue_draw();
-#endif
-			return true;
+			ret = true;
 		}
 		break;
 
@@ -268,10 +269,7 @@ EditorRouteGroups::button_press_event (GdkEventButton* ev)
 		if ((iter = _model->get_iter (path))) {
 			bool gain_relative = (*iter)[_columns.gain_relative];
 			(*iter)[_columns.gain_relative] = !gain_relative;
-#ifdef GTKOSX
-			_display.queue_draw();
-#endif
-			return true;
+			ret = true;
 		}
 		break;
 
@@ -279,10 +277,7 @@ EditorRouteGroups::button_press_event (GdkEventButton* ev)
 		if ((iter = _model->get_iter (path))) {
 			bool mute = (*iter)[_columns.mute];
 			(*iter)[_columns.mute] = !mute;
-#ifdef GTKOSX
-			_display.queue_draw();
-#endif
-			return true;
+			ret = true;
 		}
 		break;
 
@@ -290,10 +285,7 @@ EditorRouteGroups::button_press_event (GdkEventButton* ev)
 		if ((iter = _model->get_iter (path))) {
 			bool solo = (*iter)[_columns.solo];
 			(*iter)[_columns.solo] = !solo;
-#ifdef GTKOSX
-			_display.queue_draw();
-#endif
-			return true;
+			ret = true;
 		}
 		break;
 
@@ -301,54 +293,47 @@ EditorRouteGroups::button_press_event (GdkEventButton* ev)
 		if ((iter = _model->get_iter (path))) {
 			bool record = (*iter)[_columns.record];
 			(*iter)[_columns.record] = !record;
-#ifdef GTKOSX
-			_display.queue_draw();
-#endif
-			return true;
+			ret = true;
 		}
 		break;
 
 	case 6:
 		if ((iter = _model->get_iter (path))) {
-			bool select = (*iter)[_columns.select];
-			(*iter)[_columns.select] = !select;
-#ifdef GTKOSX
-			_display.queue_draw();
-#endif
-			return true;
+			bool monitoring = (*iter)[_columns.monitoring];
+			(*iter)[_columns.monitoring] = !monitoring;
+			ret = true;
 		}
 		break;
 
 	case 7:
 		if ((iter = _model->get_iter (path))) {
-			bool edits = (*iter)[_columns.edits];
-			(*iter)[_columns.edits] = !edits;
-#ifdef GTKOSX
-			_display.queue_draw();
-#endif
-			return true;
+			bool select = (*iter)[_columns.select];
+			(*iter)[_columns.select] = !select;
+			ret = true;
 		}
 		break;
 
 	case 8:
 		if ((iter = _model->get_iter (path))) {
-			bool active_state = (*iter)[_columns.active_state];
-			(*iter)[_columns.active_state] = !active_state;
-#ifdef GTKOSX
-			_display.queue_draw();
-#endif
-			return true;
+			bool edits = (*iter)[_columns.edits];
+			(*iter)[_columns.edits] = !edits;
+			ret = true;
 		}
 		break;
 
 	case 9:
 		if ((iter = _model->get_iter (path))) {
+			bool active_state = (*iter)[_columns.active_state];
+			(*iter)[_columns.active_state] = !active_state;
+			ret = true;
+		}
+		break;
+
+	case 10:
+		if ((iter = _model->get_iter (path))) {
 			bool is_visible = (*iter)[_columns.is_visible];
 			(*iter)[_columns.is_visible] = !is_visible;
-#ifdef GTKOSX
-			_display.queue_draw();
-#endif
-			return true;
+			ret = true;
 		}
 		break;
 		
@@ -356,8 +341,14 @@ EditorRouteGroups::button_press_event (GdkEventButton* ev)
 		break;
 	}
 
-	return false;
- }
+#ifdef GTKOSX
+	if (ret) {
+		_display.queue_draw();
+	}
+#endif
+
+	return ret;
+}
 
 void
 EditorRouteGroups::row_change (const Gtk::TreeModel::Path&, const Gtk::TreeModel::iterator& iter)
@@ -385,6 +376,8 @@ EditorRouteGroups::row_change (const Gtk::TreeModel::Path&, const Gtk::TreeModel
 	plist.add (Properties::solo, val);
 	val = (*iter)[_columns.record];
 	plist.add (Properties::recenable, val);
+	val = (*iter)[_columns.monitoring];
+	plist.add (Properties::monitoring, val);
 	val = (*iter)[_columns.select];
 	plist.add (Properties::select, val);
 	val = (*iter)[_columns.edits];
@@ -410,6 +403,7 @@ EditorRouteGroups::add (RouteGroup* group)
 	row[_columns.mute] = group->is_mute ();
 	row[_columns.solo] = group->is_solo ();
 	row[_columns.record] = group->is_recenable();
+	row[_columns.monitoring] = group->is_monitoring();
 	row[_columns.select] = group->is_select ();
 	row[_columns.edits] = group->is_edit ();
 	row[_columns.active_state] = group->is_route_active ();
@@ -472,6 +466,7 @@ EditorRouteGroups::property_changed (RouteGroup* group, const PropertyChange& ch
 			(*iter)[_columns.mute] = group->is_mute ();
 			(*iter)[_columns.solo] = group->is_solo ();
 			(*iter)[_columns.record] = group->is_recenable ();
+			(*iter)[_columns.monitoring] = group->is_monitoring ();
 			(*iter)[_columns.select] = group->is_select ();
 			(*iter)[_columns.edits] = group->is_edit ();
 			(*iter)[_columns.active_state] = group->is_route_active ();
