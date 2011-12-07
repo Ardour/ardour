@@ -362,6 +362,7 @@ RouteGroup::set_edit (bool yn)
 		return;
 	}
 	_edit = yn;
+	send_change (PropertyChange (Properties::edit));
 }
 
 void
