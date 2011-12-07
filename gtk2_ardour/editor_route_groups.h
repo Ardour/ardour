@@ -50,6 +50,7 @@ private:
 			add (monitoring);
 			add (select);
 			add (edits);
+			add (active_shared);
 			add (active_state);
 			add (routegroup);
                 }
@@ -65,6 +66,7 @@ private:
 		Gtk::TreeModelColumn<bool> monitoring;
 		Gtk::TreeModelColumn<bool> select;
 		Gtk::TreeModelColumn<bool> edits;
+		Gtk::TreeModelColumn<bool> active_shared;
 		Gtk::TreeModelColumn<bool> active_state;
 	        Gtk::TreeModelColumn<ARDOUR::RouteGroup*> routegroup;
 	};

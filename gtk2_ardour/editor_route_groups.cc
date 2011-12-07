@@ -76,6 +76,7 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 
 	_display.append_column ("", _columns.text);
 	_display.append_column ("", _columns.is_visible);
+	_display.append_column ("", _columns.active_state);
 	_display.append_column ("", _columns.gain);
 	_display.append_column ("", _columns.gain_relative);
 	_display.append_column ("", _columns.mute);
@@ -84,7 +85,7 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 	_display.append_column ("", _columns.monitoring);
 	_display.append_column ("", _columns.select);
 	_display.append_column ("", _columns.edits);
-	_display.append_column ("", _columns.active_state);
+	_display.append_column ("", _columns.active_shared);
 
 	TreeViewColumn* col;
 	Gtk::Label* l;
@@ -93,15 +94,16 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 		{ 0, _("Col"), _("Group Tab Color") },
 		{ 1, _("Name"), _("Name of Group") },
 		{ 2, _("V"), _("Group is visible?") },
-		{ 3, S_("group|G"), _("Sharing Gain?") },
-		{ 4, S_("relative|Rel"), _("Relevative Gain Changes?") },
-		{ 5, S_("mute|M"), _("Sharing Mute?") },
-		{ 6, S_("solo|S"), _("Sharing Solo?") },
-		{ 7, _("Rec"), _("Sharing Record-enable Status?") },
-		{ 8, S_("monitoring|Mon"), _("Sharing Monitoring Choice?") },
-		{ 9, S_("selection|Sel"), _("Sharing Selected Status?") },
-		{ 10, S_("editing|E"), _("Sharing Editing?") },
-		{ 11, S_("active|A"), _("Sharing Active Status?") },
+		{ 3, _("On"), _("Group is enabled?") },
+		{ 4, S_("group|G"), _("Sharing Gain?") },
+		{ 5, S_("relative|Rel"), _("Relevative Gain Changes?") },
+		{ 6, S_("mute|M"), _("Sharing Mute?") },
+		{ 7, S_("solo|S"), _("Sharing Solo?") },
+		{ 8, _("Rec"), _("Sharing Record-enable Status?") },
+		{ 9, S_("monitoring|Mon"), _("Sharing Monitoring Choice?") },
+		{ 10, S_("selection|Sel"), _("Sharing Selected Status?") },
+		{ 11, S_("editing|E"), _("Sharing Editing?") },
+		{ 12, S_("active|A"), _("Sharing Active Status?") },
 		{ -1, 0, 0 }
 	};
 
@@ -308,56 +310,63 @@ EditorRouteGroups::button_press_event (GdkEventButton* ev)
 
 		
 	case 3:
+		val = (*iter)[_columns.active_state];
+		group->set_active (!val, this);
+		ret = true;
+		break;
+
+	case 4:
 		val = (*iter)[_columns.gain];
 		group->set_gain (!val);
 		ret = true;
 		break;
 
-	case 4:
+	case 5:
 		val = (*iter)[_columns.gain_relative];
 		group->set_relative (!val, this);
 		ret = true;
 		break;
 
-	case 5:
+	case 6:
 		val = (*iter)[_columns.mute];
 		group->set_mute (!val);
 		ret = true;
 		break;
 
-	case 6:
+	case 7:
 		val = (*iter)[_columns.solo];
 		group->set_solo (!val);
 		ret = true;
 		break;
 
-	case 7:
+	case 8:
 		val = (*iter)[_columns.record];
 		group->set_recenable (!val);
 		ret = true;
 		break;
 
-	case 8:
+	case 9:
 		val = (*iter)[_columns.monitoring];
 		group->set_monitoring (!val);
 		ret = true;
 		break;
 
-	case 9:
+	case 10:
 		val = (*iter)[_columns.select];
 		group->set_select (!val);
 		ret = true;
 		break;
 
-	case 10:
+	case 11:
 		val = (*iter)[_columns.edits];
 		group->set_edit (!val);
 		ret = true;
 		break;
 
-	case 11:
-		val = (*iter)[_columns.active_state];
-		group->set_active (!val, this);
+	case 12:
+		val = (*iter)[_columns.active_shared];
+		cerr << "set group active to " << !val << endl;
+		group->set_route_active (!val);
 		ret = true;
 		break;
 
@@ -400,8 +409,10 @@ EditorRouteGroups::row_change (const Gtk::TreeModel::Path& path, const Gtk::Tree
 	plist.add (Properties::select, val);
 	val = (*iter)[_columns.edits];
 	plist.add (Properties::edit, val);
-	val = (*iter)[_columns.active_state];
+	val = (*iter)[_columns.active_shared];
 	plist.add (Properties::route_active, val);
+	val = (*iter)[_columns.active_state];
+	plist.add (Properties::active, val);
 	val = (*iter)[_columns.is_visible];
 	plist.add (Properties::hidden, !val);
 
@@ -426,7 +437,8 @@ EditorRouteGroups::add (RouteGroup* group)
 	row[_columns.monitoring] = group->is_monitoring();
 	row[_columns.select] = group->is_select ();
 	row[_columns.edits] = group->is_edit ();
-	row[_columns.active_state] = group->is_route_active ();
+	row[_columns.active_shared] = group->is_route_active ();
+	row[_columns.active_state] = group->is_active ();
 	row[_columns.is_visible] = !group->is_hidden();
 	row[_columns.gdkcolor] = GroupTabs::group_color (group);
 	
@@ -496,7 +508,8 @@ EditorRouteGroups::property_changed (RouteGroup* group, const PropertyChange& ch
 			(*iter)[_columns.monitoring] = group->is_monitoring ();
 			(*iter)[_columns.select] = group->is_select ();
 			(*iter)[_columns.edits] = group->is_edit ();
-			(*iter)[_columns.active_state] = group->is_route_active ();
+			(*iter)[_columns.active_shared] = group->is_route_active ();
+			(*iter)[_columns.active_state] = group->is_active ();
 			(*iter)[_columns.is_visible] = !group->is_hidden();
 			(*iter)[_columns.gdkcolor] = GroupTabs::group_color (group);
 

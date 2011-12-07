@@ -18,6 +18,8 @@
 
 */
 
+#include <gtkmm/messagedialog.h>
+
 #include "export_filename_selector.h"
 
 #include "ardour/export_handler.h"
@@ -93,6 +95,7 @@ ExportFilenameSelector::ExportFilenameSelector () :
 
 	label_entry.signal_changed().connect (sigc::mem_fun (*this, &ExportFilenameSelector::update_label));
 	path_entry.signal_changed().connect (sigc::mem_fun (*this, &ExportFilenameSelector::update_folder));
+	path_entry.signal_activate().connect (sigc::mem_fun (*this, &ExportFilenameSelector::check_folder), false);
 
 	session_checkbox.signal_toggled().connect (sigc::mem_fun (*this, &ExportFilenameSelector::change_session_selection));
 
@@ -226,6 +229,23 @@ ExportFilenameSelector::update_folder ()
 }
 
 void
+ExportFilenameSelector::check_folder ()
+{
+	if (!filename) {
+		return;
+	}
+
+	if (!Glib::file_test (path_entry.get_text(), Glib::FILE_TEST_IS_DIR|Glib::FILE_TEST_EXISTS)) {
+		Gtk::MessageDialog msg (string_compose (_("%1: this is only the directory/folder name, not the filename.\n\
+The filename will be chosen from the information just above the folder selector."), path_entry.get_text()));
+		msg.run ();
+		path_entry.set_text (Glib::path_get_dirname (path_entry.get_text()));
+		filename->set_folder (path_entry.get_text());
+		CriticalSelectionChanged();
+	}
+}
+
+void
 ExportFilenameSelector::change_date_format ()
 {
 	if (!filename) {
@@ -295,13 +315,23 @@ ExportFilenameSelector::open_browse_dialog ()
 	dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 	dialog.add_button(Gtk::Stock::OK, Gtk::RESPONSE_OK);
 
-	int result = dialog.run();
+	while (true) {
+		int result = dialog.run();
+		
+		if (result == Gtk::RESPONSE_OK) {
+			std::string filename = dialog.get_filename();
+			
+			if (!Glib::file_test (filename, Glib::FILE_TEST_IS_DIR|Glib::FILE_TEST_EXISTS)) {
+				Gtk::MessageDialog msg (string_compose (_("%1: this is only the directory/folder name, not the filename.\n\
+The filename will be chosen from the information just above the folder selector."), filename));
+				msg.run ();
+				continue;
+			}
 
-	if (result == Gtk::RESPONSE_OK) {
-		std::string filename = dialog.get_filename();
-
-		if (filename.length()) {
-			path_entry.set_text (filename);
+			if (filename.length()) {
+				path_entry.set_text (filename);
+				break;
+			}
 		}
 	}
 

@@ -48,6 +48,7 @@ class ExportFilenameSelector : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 
 	void update_label ();
 	void update_folder ();
+	void check_folder ();
 
 	void change_date_format ();
 	void change_time_format ();
