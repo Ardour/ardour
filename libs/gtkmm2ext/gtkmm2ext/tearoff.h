@@ -38,6 +38,7 @@ class TearOff : public Gtk::HBox
 	void set_visible (bool yn, bool force = false);
 	void set_can_be_torn_off (bool);
 	bool can_be_torn_off () const { return _can_be_torn_off; }
+	bool visible () const { return _visible; }
 
 	sigc::signal<void> Detach;
 	sigc::signal<void> Attach;
