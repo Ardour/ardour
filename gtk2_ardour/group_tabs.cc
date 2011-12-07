@@ -309,16 +309,17 @@ GroupTabs::get_menu (RouteGroup* g)
 	_menu->set_name ("ArdourContextMenu");
 	MenuList& items = _menu->items();
 
-	items.push_back (MenuElem (_("New..."), hide_return (sigc::mem_fun(*this, &GroupTabs::create_and_add_group))));
-	items.push_back (MenuElem (_("New From"), *new_from));
+	items.push_back (MenuElem (_("Create New Group ..."), hide_return (sigc::mem_fun(*this, &GroupTabs::create_and_add_group))));
+	items.push_back (MenuElem (_("Create New Group From"), *new_from));
 
 	if (g) {
-		items.push_back (MenuElem (_("Edit..."), sigc::bind (sigc::mem_fun (*this, &GroupTabs::edit_group), g)));
+		items.push_back (MenuElem (_("Edit Group..."), sigc::bind (sigc::mem_fun (*this, &GroupTabs::edit_group), g)));
+		items.push_back (MenuElem (_("Collect Group"), sigc::bind (sigc::mem_fun (*this, &GroupTabs::collect), g)));
+		items.push_back (MenuElem (_("Remove Group"), sigc::bind (sigc::mem_fun (*this, &GroupTabs::remove_group), g)));
+		items.push_back (SeparatorElem());
 		items.push_back (MenuElem (_("Add New Subgroup Bus"), sigc::bind (sigc::mem_fun (*this, &GroupTabs::subgroup), g, false, PreFader)));
 		items.push_back (MenuElem (_("Add New Aux Bus (pre-fader)"), sigc::bind (sigc::mem_fun (*this, &GroupTabs::subgroup), g, true, PreFader)));
 		items.push_back (MenuElem (_("Add New Aux Bus (post-fader)"), sigc::bind (sigc::mem_fun (*this, &GroupTabs::subgroup), g, true, PostFader)));
-		items.push_back (MenuElem (_("Collect"), sigc::bind (sigc::mem_fun (*this, &GroupTabs::collect), g)));
-		items.push_back (MenuElem (_("Remove"), sigc::bind (sigc::mem_fun (*this, &GroupTabs::remove_group), g)));
 	}
 
 	add_menu_items (_menu, g);
