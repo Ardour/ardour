@@ -302,7 +302,7 @@ public:
 
 		vector<string> dumb;
 		for (int i = 0; modifiers[i].name; ++i) {
-			dumb.push_back (_(modifiers[i].name));
+			dumb.push_back (S_(modifiers[i].name));
 		}
 
 		set_popdown_strings (_edit_modifier_combo, dumb);
@@ -340,7 +340,7 @@ public:
 
 		for (int x = 0; modifiers[x].name; ++x) {
 			if (modifiers[x].modifier == Keyboard::delete_modifier ()) {
-				_delete_modifier_combo.set_active_text (_(modifiers[x].name));
+				_delete_modifier_combo.set_active_text (S_(modifiers[x].name));
 				break;
 			}
 		}
@@ -368,7 +368,7 @@ public:
 
 		for (int x = 0; modifiers[x].name; ++x) {
 			if (modifiers[x].modifier == Keyboard::insert_note_modifier ()) {
-				_insert_note_modifier_combo.set_active_text (_(modifiers[x].name));
+				_insert_note_modifier_combo.set_active_text (S_(modifiers[x].name));
 				break;
 			}
 		}
@@ -396,7 +396,7 @@ public:
 
 		for (int x = 0; modifiers[x].name; ++x) {
 			if (modifiers[x].modifier == (guint) Keyboard::snap_modifier ()) {
-				_snap_modifier_combo.set_active_text (_(modifiers[x].name));
+				_snap_modifier_combo.set_active_text (S_(modifiers[x].name));
 				break;
 			}
 		}
