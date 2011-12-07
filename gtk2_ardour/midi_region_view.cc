@@ -1541,7 +1541,7 @@ MidiRegionView::extend_active_notes()
 void
 MidiRegionView::play_midi_note(boost::shared_ptr<NoteType> note)
 {
-	if (_no_sound_notes || !trackview.editor().sound_notes()) {
+	if (_no_sound_notes || !Config->get_sound_midi_notes()) {
 		return;
 	}
 
@@ -1559,7 +1559,7 @@ MidiRegionView::play_midi_note(boost::shared_ptr<NoteType> note)
 void
 MidiRegionView::play_midi_chord (vector<boost::shared_ptr<NoteType> > notes)
 {
-	if (_no_sound_notes || !trackview.editor().sound_notes()) {
+	if (_no_sound_notes || !Config->get_sound_midi_notes()) {
 		return;
 	}
 
@@ -2341,7 +2341,7 @@ MidiRegionView::move_selection(double dx, double dy, double cumulative_dy)
 		(*i)->move_event(dx, dy);
 	}
 
-	if (dy && !_selection.empty() && !_no_sound_notes && trackview.editor().sound_notes()) {
+	if (dy && !_selection.empty() && !_no_sound_notes && Config->get_sound_midi_notes()) {
 
 		if (to_play.size() > 1) {
 

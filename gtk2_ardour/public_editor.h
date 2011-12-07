@@ -181,10 +181,6 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 
 	virtual bool internal_editing() const = 0;
 
-	/** @return Sound edited notes in MIDI regions while editing
-	 */
-	virtual bool sound_notes () const = 0;
-
 	/** Possibly start the audition of a region.  If @param r is 0, or not an AudioRegion
 	 * any current audition is cancelled.  If we are currently auditioning @param r,
 	 * the audition will be cancelled.  Otherwise an audition of @param r will start.

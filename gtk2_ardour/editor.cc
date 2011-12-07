@@ -642,7 +642,6 @@ Editor::Editor ()
 	// load_bindings ();
 
 	setup_toolbar ();
-	setup_midi_toolbar ();
 
 	_snap_type = SnapToBeat;
 	set_snap_to (_snap_type);
@@ -2982,25 +2981,7 @@ Editor::setup_tooltips ()
 	ARDOUR_UI::instance()->set_tip (snap_type_selector, _("Snap/Grid Units"));
 	ARDOUR_UI::instance()->set_tip (snap_mode_selector, _("Snap/Grid Mode"));
 	ARDOUR_UI::instance()->set_tip (edit_point_selector, _("Edit point"));
-	ARDOUR_UI::instance()->set_tip (midi_sound_notes, _("Sound Notes"));
 	ARDOUR_UI::instance()->set_tip (edit_mode_selector, _("Edit Mode"));
-}
-
-
-void
-Editor::setup_midi_toolbar ()
-{
-	RefPtr<Action> act;
-
-	/* Midi sound notes */
-	midi_sound_notes.add (*(manage (new Image (::get_icon("midi_sound_notes")))));
-	midi_sound_notes.unset_flags (CAN_FOCUS);
-	midi_sound_notes.set_name (X_("MidiSoundNotesButton"));
-
-	/* Panic */
-
-	panic_box.pack_start (midi_sound_notes , true, true);
-	// panic_box.pack_start (midi_panic_button, true, true);
 }
 
 int

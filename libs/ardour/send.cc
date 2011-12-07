@@ -21,6 +21,7 @@
 #include <algorithm>
 
 #include "pbd/xml++.h"
+#include "pbd/boost_debug.h"
 
 #include "ardour/amp.h"
 #include "ardour/send.h"
@@ -42,6 +43,8 @@ Send::Send (Session& s, boost::shared_ptr<Pannable> p, boost::shared_ptr<MuteMas
 	: Delivery (s, p, mm, string_compose (_("send %1"), (_bitslot = s.next_send_id()) + 1), r)
 	, _metering (false)
 {
+	boost_debug_shared_ptr_mark_interesting (this, "send");
+
 	_amp.reset (new Amp (_session));
 	_meter.reset (new PeakMeter (_session));
 }

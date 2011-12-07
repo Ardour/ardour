@@ -1486,6 +1486,14 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_never_display_periodic_midi)
 		     ));
 
+	add_option (_("MIDI"),
+	     new BoolOption (
+		     "sound-midi-notes",
+		     _("Sound MIDI notes as they are selected"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_sound_midi_notes),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_sound_midi_notes)
+		     ));
+
 	/* USER INTERACTION */
 
 	add_option (_("User interaction"), new OptionEditorHeading (_("Keyboard")));
