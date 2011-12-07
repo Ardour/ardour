@@ -20,7 +20,7 @@
 #ifndef __gtk_ardour_editor_summary_h__
 #define __gtk_ardour_editor_summary_h__
 
-#include "cairo_widget.h"
+#include "gtkmm2ext/cairo_widget.h"
 #include "editor_component.h"
 
 namespace ARDOUR {

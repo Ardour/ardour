@@ -26,6 +26,8 @@
 #include <gtkmm/label.h>
 #include <gtkmm/table.h>
 
+#include "gtkmm2ext/cairo_packer.h"
+
 #include "ardour/ardour.h"
 #include "ardour/session_handle.h"
 
@@ -38,16 +40,13 @@ namespace ARDOUR {
 
 class AudioClock;
 
-class TimeInfoBox : public Gtk::HBox, public ARDOUR::SessionHandlePtr
+class TimeInfoBox : public CairoHPacker, public ARDOUR::SessionHandlePtr
 {
   public:
     TimeInfoBox ();
     ~TimeInfoBox ();
 
     void set_session (ARDOUR::Session*);
-
-  protected:
-    bool on_expose_event (GdkEventExpose*);
 
   private:
     Gtk::Table left;

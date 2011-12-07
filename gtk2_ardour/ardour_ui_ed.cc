@@ -35,6 +35,7 @@
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/window_title.h"
 #include "gtkmm2ext/tearoff.h"
+#include "gtkmm2ext/cairo_packer.h"
 
 #include "pbd/file_utils.h"
 #include "pbd/fpu.h"
@@ -532,37 +533,21 @@ ARDOUR_UI::build_menu_bar ()
 
 	EventBox* ev = manage (new EventBox);
 	ev->show ();
-	HBox* hbox = manage (new HBox);
+	CairoHPacker* hbox = manage (new CairoHPacker);
 	hbox->show ();
 	
 	ev->add (*hbox);
 
-	wall_clock_box.add (wall_clock_label);
-	wall_clock_box.set_name ("WallClock");
 	wall_clock_label.set_name ("WallClock");
-
-	disk_space_box.add (disk_space_label);
-	disk_space_box.set_name ("WallClock");
+	wall_clock_label.set_use_markup ();
 	disk_space_label.set_name ("WallClock");
 	disk_space_label.set_use_markup ();
-
-	cpu_load_box.add (cpu_load_label);
-	cpu_load_box.set_name ("CPULoad");
 	cpu_load_label.set_name ("CPULoad");
 	cpu_load_label.set_use_markup ();
-
-	buffer_load_box.add (buffer_load_label);
-	buffer_load_box.set_name ("BufferLoad");
 	buffer_load_label.set_name ("BufferLoad");
 	buffer_load_label.set_use_markup ();
-
-	sample_rate_box.add (sample_rate_label);
-	sample_rate_box.set_name ("SampleRate");
 	sample_rate_label.set_name ("SampleRate");
 	sample_rate_label.set_use_markup ();
-
-	format_box.add (format_label);
-	format_box.set_name ("Format");
 	format_label.set_name ("Format");
 	format_label.set_use_markup ();
 
@@ -583,24 +568,24 @@ ARDOUR_UI::build_menu_bar ()
 		disk_space = true;
 	}
 	
-	hbox->pack_end (wall_clock_box, false, false, 2);
-	hbox->pack_end (disk_space_box, false, false, 4);
-	hbox->pack_end (cpu_load_box, false, false, 4);
-	hbox->pack_end (buffer_load_box, false, false, 4);
-	hbox->pack_end (sample_rate_box, false, false, 4);
-	hbox->pack_end (format_box, false, false, 4);
+	hbox->pack_end (wall_clock_label, false, false, 2);
+	hbox->pack_end (disk_space_label, false, false, 4);
+	hbox->pack_end (cpu_load_label, false, false, 4);
+	hbox->pack_end (buffer_load_label, false, false, 4);
+	hbox->pack_end (sample_rate_label, false, false, 4);
+	hbox->pack_end (format_label, false, false, 4);
 
 	menu_hbox.pack_end (*ev, false, false);
 
 	menu_bar_base.set_name ("MainMenuBar");
 	menu_bar_base.add (menu_hbox);
 
-	_status_bar_visibility.add (&wall_clock_box,  X_("WallClock"), _("Wall Clock"), wall_clock);
-	_status_bar_visibility.add (&disk_space_box,  X_("Disk"),      _("Disk Space"), disk_space);
-	_status_bar_visibility.add (&cpu_load_box,    X_("DSP"),       _("DSP"), true);
-	_status_bar_visibility.add (&buffer_load_box, X_("Buffers"),   _("Buffers"), true);
-	_status_bar_visibility.add (&sample_rate_box, X_("JACK"),      _("JACK Sampling Rate and Latency"), true);
-	_status_bar_visibility.add (&format_box,      X_("Format"),    _("File Format"), true);
+	_status_bar_visibility.add (&wall_clock_label,  X_("WallClock"), _("Wall Clock"), wall_clock);
+	_status_bar_visibility.add (&disk_space_label,  X_("Disk"),      _("Disk Space"), disk_space);
+	_status_bar_visibility.add (&cpu_load_label,    X_("DSP"),       _("DSP"), true);
+	_status_bar_visibility.add (&buffer_load_label, X_("Buffers"),   _("Buffers"), true);
+	_status_bar_visibility.add (&sample_rate_label, X_("JACK"),      _("JACK Sampling Rate and Latency"), true);
+	_status_bar_visibility.add (&format_label,      X_("Format"),    _("File Format"), true);
 
 	ev->signal_button_press_event().connect (sigc::mem_fun (_status_bar_visibility, &VisibilityGroup::button_press_event));
 }

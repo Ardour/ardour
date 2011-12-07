@@ -19,7 +19,7 @@
 
 #include <gtkmm/menu.h>
 #include "editor_component.h"
-#include "cairo_widget.h"
+#include "gtkmm2ext/cairo_widget.h"
 
 namespace ARDOUR {
 	class Session;

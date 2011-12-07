@@ -33,7 +33,7 @@
 #include "ardour/ardour.h"
 #include "ardour/session_handle.h"
 
-#include "cairo_widget.h"
+#include "gtkmm2ext/cairo_widget.h"
 
 namespace ARDOUR {
 	class Session;

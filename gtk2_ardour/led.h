@@ -22,7 +22,7 @@
 
 #include <stdint.h>
 
-#include "cairo_widget.h"
+#include "gtkmm2ext/cairo_widget.h"
 
 class LED : public CairoWidget
 {

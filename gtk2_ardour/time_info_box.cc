@@ -143,14 +143,6 @@ TimeInfoBox::TimeInfoBox ()
 	Editor::instance().get_selection().RegionsChanged.connect (sigc::mem_fun (*this, &TimeInfoBox::selection_changed));
 
 	Editor::instance().MouseModeChanged.connect (editor_connections, invalidator(*this), ui_bind (&TimeInfoBox::track_mouse_mode, this), gui_context());
-
-	Gdk::Color bg;
-
-	bg.set_red (lrint (0.149 * 65535));
-	bg.set_green (lrint (0.149 * 65535));
-	bg.set_blue (lrint (0.149 * 65535));
-
-	CairoWidget::provide_background_for_cairo_widget (*this, bg);
 }
 
 TimeInfoBox::~TimeInfoBox ()
@@ -343,31 +335,3 @@ TimeInfoBox::punch_changed (Location* loc)
 	punch_end->set (loc->end());
 }	
 
-bool
-TimeInfoBox::on_expose_event (GdkEventExpose* ev)
-{
-	{
-		int x, y;
-		Gtk::Widget* window_parent;
-		Glib::RefPtr<Gdk::Window> win = Gtkmm2ext::window_to_draw_on (*this, &window_parent);
-
-		if (win) {
-		
-			Cairo::RefPtr<Cairo::Context> context = win->create_cairo_context();
-
-#if 0			
-			translate_coordinates (*window_parent, ev->area.x, ev->area.y, x, y);
-			context->rectangle (x, y, ev->area.width, ev->area.height);
-			context->clip ();
-#endif
-			translate_coordinates (*window_parent, 0, 0, x, y);
-			context->set_source_rgba (0.149, 0.149, 0.149, 1.0);
-			Gtkmm2ext::rounded_rectangle (context, x, y, get_allocation().get_width(), get_allocation().get_height(), 9);
-			context->fill ();
-		}
-	}
-
-	HBox::on_expose_event (ev);
-
-	return false;
-}

@@ -509,27 +509,21 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void build_menu_bar ();
 
 	Gtk::Label   wall_clock_label;
-	Gtk::EventBox wall_clock_box;
 	gint update_wall_clock ();
 
 	Gtk::Label   disk_space_label;
-	Gtk::EventBox disk_space_box;
 	void update_disk_space ();
 
 	Gtk::Label   cpu_load_label;
-	Gtk::EventBox cpu_load_box;
 	void update_cpu_load ();
 
 	Gtk::Label   buffer_load_label;
-	Gtk::EventBox buffer_load_box;
 	void update_buffer_load ();
 
 	Gtk::Label   sample_rate_label;
-	Gtk::EventBox sample_rate_box;
 	void update_sample_rate (ARDOUR::framecnt_t);
 
 	Gtk::Label    format_label;
-	Gtk::EventBox format_box;
 	void update_format ();
 	
 	gint every_second ();

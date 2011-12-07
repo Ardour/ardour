@@ -28,8 +28,7 @@
 #include "pbd/signals.h"
 #include "gtkmm2ext/binding_proxy.h"
 #include "gtkmm2ext/activatable.h"
-
-#include "cairo_widget.h"
+#include "gtkmm2ext/cairo_widget.h"
 
 class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 {
