@@ -4218,6 +4218,32 @@ Session::source_search_path (DataType type) const
 {
 	string search_path;
 
+	/* first check the explicit (possibly user-specified) search path
+	 */
+
+	vector<string> dirs;
+
+	switch (type) {
+	case DataType::AUDIO:
+		split (config.get_audio_search_path (), dirs, ':');
+		break;
+	case DataType::MIDI:
+		split (config.get_midi_search_path (), dirs, ':');
+		break;
+	}
+
+	for (vector<string>::iterator i = dirs.begin(); i != dirs.end(); ++i) {
+		search_path += ':';
+		search_path += *i;
+
+	}
+
+	if (!search_path.empty()) {
+		return search_path;
+	}
+
+	/* if there was nothing there, check the session dirs */
+
 	if (session_dirs.size() == 1) {
 		switch (type) {
 		case DataType::AUDIO:
@@ -4244,26 +4270,6 @@ Session::source_search_path (DataType type) const
 		}
 	}
 
-	/* now add user-specified locations
-	 */
-
-	vector<string> dirs;
-
-	switch (type) {
-	case DataType::AUDIO:
-		split (config.get_audio_search_path (), dirs, ':');
-		break;
-	case DataType::MIDI:
-		split (config.get_midi_search_path (), dirs, ':');
-		break;
-	}
-
-	for (vector<string>::iterator i = dirs.begin(); i != dirs.end(); ++i) {
-		search_path += ':';
-		search_path += *i;
-
-	}
-
 	return search_path;
 }
 
@@ -4277,15 +4283,7 @@ Session::ensure_search_path_includes (const string& path, DataType type)
 		return;
 	}
 
-	switch (type) {
-	case DataType::AUDIO:
-		search_path = config.get_audio_search_path ();
-		break;
-	case DataType::MIDI:
-		search_path = config.get_midi_search_path ();
-		break;
-	}
-
+	search_path = source_search_path (type);
 	split (search_path, dirs, ':');
 
 	for (vector<string>::iterator i = dirs.begin(); i != dirs.end(); ++i) {
