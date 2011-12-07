@@ -3558,7 +3558,9 @@ Editor::pane_allocation_handler (Allocation &alloc, Paned* which)
 void
 Editor::detach_tearoff (Box* /*b*/, Window* /*w*/)
 {
-	if (_tools_tearoff->torn_off() && _mouse_mode_tearoff->torn_off()) {
+	if ((_tools_tearoff->torn_off() || !_tools_tearoff->visible()) && 
+	    (_mouse_mode_tearoff->torn_off() || !_mouse_mode_tearoff->visible()) && 
+	    (_zoom_tearoff->torn_off() || !_zoom_tearoff->visible())) {
 		top_hbox.remove (toolbar_frame);
 	}
 }
@@ -3897,6 +3899,9 @@ Editor::session_state_saved (string)
 void
 Editor::maximise_editing_space ()
 {
+	/* these calls will leave each tearoff visible *if* it is torn off
+	 */
+
 	_mouse_mode_tearoff->set_visible (false);
 	_tools_tearoff->set_visible (false);
 	_zoom_tearoff->set_visible (false);

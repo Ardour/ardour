@@ -279,6 +279,7 @@ void
 ARDOUR_UI::toggle_editing_space()
 {
 	Glib::RefPtr<Action> act = ActionManager::get_action ("Common", "ToggleMaximalEditor");
+
 	if (act) {
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
 		if (tact->get_active()) {
