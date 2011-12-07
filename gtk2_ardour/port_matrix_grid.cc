@@ -312,12 +312,12 @@ PortMatrixGrid::position_to_node (double x, double y) const
 }
 
 void
-PortMatrixGrid::button_press (double x, double y, int b, uint32_t t, guint)
+PortMatrixGrid::button_press (double x, double y, GdkEventButton* ev)
 {
 	ARDOUR::BundleChannel const px = position_to_channel (x, y, _matrix->visible_columns());
 	ARDOUR::BundleChannel const py = position_to_channel (y, x, _matrix->visible_rows());
 
-	if (b == 1) {
+	if (ev->button == 1) {
 
 		_dragging = true;
 		_drag_valid = (px.bundle && py.bundle);
@@ -326,9 +326,9 @@ PortMatrixGrid::button_press (double x, double y, int b, uint32_t t, guint)
 		_drag_start_x = x / grid_spacing ();
 		_drag_start_y = y / grid_spacing ();
 
-	} else if (b == 3) {
+	} else if (ev->button == 3) {
 
-		_matrix->popup_menu (px, py, t);
+		_matrix->popup_menu (px, py, ev->time);
 
 	}
 }
@@ -366,9 +366,9 @@ PortMatrixGrid::set_association (PortMatrixNode node, bool s)
 }
 
 void
-PortMatrixGrid::button_release (double x, double y, int b, uint32_t /*t*/, guint s)
+PortMatrixGrid::button_release (double x, double y, GdkEventButton* ev)
 {
-	if (b == 1) {
+	if (ev->button == 1) {
 
 		if (x != -1) {
 
@@ -387,7 +387,7 @@ PortMatrixGrid::button_release (double x, double y, int b, uint32_t /*t*/, guint
 
 			} else {
 
-				if (Keyboard::modifier_state_equals (s, Keyboard::PrimaryModifier)) {
+				if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 					/* associate/disassociate things diagonally down and right until we run out */
 					PortMatrixNode::State s = (PortMatrixNode::State) 0;
 					while (1) {

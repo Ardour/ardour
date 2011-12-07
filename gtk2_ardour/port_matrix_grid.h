@@ -41,8 +41,8 @@ class PortMatrixGrid : public PortMatrixComponent
 public:
 	PortMatrixGrid (PortMatrix *, PortMatrixBody *);
 
-	void button_press (double, double, int, uint32_t, guint);
-	void button_release (double, double, int, uint32_t, guint);
+	void button_press (double, double, GdkEventButton *);
+	void button_release (double, double, GdkEventButton *);
 	void motion (double, double);
 
 	double component_to_parent_x (double x) const;

@@ -20,6 +20,7 @@
 #include <iostream>
 #include <boost/weak_ptr.hpp>
 #include <cairo/cairo.h>
+#include "gtkmm2ext/keyboard.h"
 #include "ardour/bundle.h"
 #include "port_matrix_row_labels.h"
 #include "port_matrix.h"
@@ -140,7 +141,7 @@ PortMatrixRowLabels::render (cairo_t* cr)
 }
 
 void
-PortMatrixRowLabels::button_press (double x, double y, int b, uint32_t t, guint)
+PortMatrixRowLabels::button_press (double x, double y, GdkEventButton* ev)
 {
 	ARDOUR::BundleChannel w = position_to_channel (y, x, _matrix->visible_rows());
 
@@ -152,12 +153,13 @@ PortMatrixRowLabels::button_press (double x, double y, int b, uint32_t t, guint)
 			w.channel = -1;
 	}
 
-	if (b == 3) {
-
+	if (Gtkmm2ext::Keyboard::is_delete_event (ev) && w.channel != -1) {
+		_matrix->remove_channel (w);
+	} else if (ev->button == 3) {
 		_matrix->popup_menu (
 			ARDOUR::BundleChannel (),
 			w,
-			t
+			ev->time
 			);
 	}
 }

@@ -18,6 +18,7 @@
 */
 
 #include <iostream>
+#include "gtkmm2ext/keyboard.h"
 #include "ardour/bundle.h"
 #include "ardour/types.h"
 #include "port_matrix_column_labels.h"
@@ -451,7 +452,7 @@ PortMatrixColumnLabels::position_to_channel (double p, double o, boost::shared_p
 }
 
 void
-PortMatrixColumnLabels::button_press (double x, double y, int b, uint32_t t, guint)
+PortMatrixColumnLabels::button_press (double x, double y, GdkEventButton* ev)
 {
 	ARDOUR::BundleChannel w = position_to_channel (x, y, _matrix->visible_columns());
 
@@ -463,11 +464,13 @@ PortMatrixColumnLabels::button_press (double x, double y, int b, uint32_t t, gui
 		w.channel = -1;
 	}
 
-	if (b == 3) {
+	if (Gtkmm2ext::Keyboard::is_delete_event (ev) && w.channel != -1) {
+		_matrix->remove_channel (w);
+	} else if (ev->button == 3) {
 		_matrix->popup_menu (
 			w,
 			ARDOUR::BundleChannel (),
-			t
+			ev->time
 			);
 	}
 }

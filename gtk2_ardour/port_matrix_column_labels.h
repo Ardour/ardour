@@ -36,7 +36,7 @@ class PortMatrixColumnLabels : public PortMatrixLabels
 public:
 	PortMatrixColumnLabels (PortMatrix *, PortMatrixBody *);
 
-	void button_press (double, double, int, uint32_t, guint);
+	void button_press (double, double, GdkEventButton *);
 
 	double component_to_parent_x (double x) const;
 	double parent_to_component_x (double x) const;
