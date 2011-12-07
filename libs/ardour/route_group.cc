@@ -312,6 +312,7 @@ RouteGroup::set_gain (bool yn)
 		return;
 	}
 	_gain = yn;
+	send_change (PropertyChange (Properties::gain));
 }
 
 void
@@ -321,6 +322,7 @@ RouteGroup::set_mute (bool yn)
 		return;
 	}
 	_mute = yn;
+	send_change (PropertyChange (Properties::mute));
 }
 
 void
@@ -330,6 +332,7 @@ RouteGroup::set_solo (bool yn)
 		return;
 	}
 	_solo = yn;
+	send_change (PropertyChange (Properties::solo));
 }
 
 void
@@ -339,6 +342,7 @@ RouteGroup::set_recenable (bool yn)
 		return;
 	}
 	_recenable = yn;
+	send_change (PropertyChange (Properties::recenable));
 }
 
 void
@@ -348,6 +352,7 @@ RouteGroup::set_select (bool yn)
 		return;
 	}
 	_select = yn;
+	send_change (PropertyChange (Properties::select));
 }
 
 void
@@ -366,6 +371,7 @@ RouteGroup::set_route_active (bool yn)
 		return;
 	}
 	_route_active = yn;
+	send_change (PropertyChange (Properties::active));
 }
 
 void
@@ -375,6 +381,8 @@ RouteGroup::set_color (bool yn)
 		return;
 	}
 	_color = yn;
+
+	send_change (PropertyChange (Properties::color));
 
 	/* This is a bit of a hack, but this might change
 	   our route's effective color, so emit gui_changed
@@ -408,7 +416,6 @@ RouteGroup::set_active (bool yn, void* /*src*/)
 
 	_active = yn;
 	send_change (PropertyChange (Properties::active));
-
 	_session.set_dirty ();
 }
 
@@ -419,6 +426,7 @@ RouteGroup::set_relative (bool yn, void* /*src*/)
 		return;
 	}
 	_relative = yn;
+	send_change (PropertyChange (Properties::relative));
 	_session.set_dirty ();
 }
 
