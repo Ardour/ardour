@@ -108,7 +108,7 @@ EditorRegions::EditorRegions (Editor* e)
 
 	ColumnInfo ci[] = {
 		{ 0, _("Region"), _("Region name, with number of channels in []'s") },
-		{ 1, _("Position"),  _("Position of start region") },
+		{ 1, _("Position"),  _("Position of start of region") },
 		{ 2, _("End"),  _("Position of end of region") },
 		{ 3, _("Length"),  _("Length of the region") },
 		{ 4, _("Sync"),  _("Position of region sync point, relative to start of the region") },
