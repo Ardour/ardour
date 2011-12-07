@@ -372,7 +372,7 @@ RouteGroup::set_route_active (bool yn)
 		return;
 	}
 	_route_active = yn;
-	send_change (PropertyChange (Properties::active));
+	send_change (PropertyChange (Properties::route_active));
 }
 
 void
