@@ -28,6 +28,7 @@
 #include <gtkmm/button.h>
 #include <gtkmm/window.h>
 #include <gtkmm/paned.h>
+#include <gtkmm/label.h>
 #include <gtkmm/comboboxtext.h>
 
 #include "i18n.h"
@@ -488,26 +489,86 @@ Gtkmm2ext::window_to_draw_on (Gtk::Widget& w, Gtk::Widget** parent)
 	return Glib::RefPtr<Gdk::Window> ();
 }
 
+int
+Gtkmm2ext::pixel_width (const string& str, Pango::FontDescription& font)
+{
+	Gtk::Label foo;
+	Glib::RefPtr<Pango::Layout> layout = foo.create_pango_layout ("");
+
+	layout->set_font_description (font);
+	layout->set_text (str);
+
+	int width, height;
+	Gtkmm2ext::get_ink_pixel_size (layout, width, height);
+	return width;
+}
+
 #if 0
 string
-fit_to_pixels (const string& str, int pixel_width, Pango::FontDescription& font, int& actual_width, bool with_ellipses)
+Gtkmm2ext::fit_to_pixels (const string& str, int pixel_width, Pango::FontDescription& font, int& actual_width, bool with_ellipses)
 {
-	Label foo;
+	/* DECEMBER 2011: THIS PROTOTYPE OF fit_to_pixels() IS NOT USED
+	   ANYWHERE AND HAS NOT BEEN TESTED.
+	*/
+	Gtk::Label foo;
 	Glib::RefPtr<Pango::Layout> layout = foo.create_pango_layout (str);
-	Glib::RefPtr<Pango::LayoutLine> line;
+	Glib::RefPtr<const Pango::LayoutLine> line;
 
 	layout->set_font_description (font);
 	layout->set_width (pixel_width * PANGO_SCALE);
 
-	if (with_ellipsis)
-        	layout->set_ellipsize (PANGO_ELLIPSIZE_END);
-        else
-        	layout->set_wrap_mode (PANGO_WRAP_CHAR);
+	if (with_ellipses) {
+        	layout->set_ellipsize (Pango::ELLIPSIZE_END);
+	} else {
+        	layout->set_wrap (Pango::WRAP_CHAR);
+	}
 
-	line = layout->get_line_readonly (0);
+	line = layout->get_line (0);
 
 	/* XXX: might need special care to get the ellipsis character, not sure
-           how that works */	
-	return strdup (layout->get_text () + line->start_index, line->length);
+           how that works 
+	*/	
+
+	string s = string (layout->get_text ().substr(line->get_start_index(), line->get_length()));
+	
+	cerr << "fit to pixels of " << str << " returns " << s << endl;
+
+	return s;
 }
 #endif
+
+/** Try to fit a string into a given horizontal space by ellipsizing it.
+ *  @param cr Cairo context in which the text will be plotted.
+ *  @param name Text.
+ *  @param avail Available horizontal space.
+ *  @return (Text, possibly ellipsized) and (horizontal size of text)
+ */
+
+std::pair<std::string, double>
+Gtkmm2ext::fit_to_pixels (cairo_t* cr, std::string name, double avail)
+{
+	/* XXX hopefully there exists a more efficient way of doing this */
+
+	bool abbreviated = false;
+	uint32_t width = 0;
+
+	while (1) {
+		cairo_text_extents_t ext;
+		cairo_text_extents (cr, name.c_str(), &ext);
+
+		if (ext.width < avail || name.length() <= 4) {
+			width = ext.width;
+			break;
+		}
+
+		if (abbreviated) {
+			name = name.substr (0, name.length() - 4) + "...";
+		} else {
+			name = name.substr (0, name.length() - 3) + "...";
+			abbreviated = true;
+		}
+	}
+
+	return std::make_pair (name, width);
+}
+
