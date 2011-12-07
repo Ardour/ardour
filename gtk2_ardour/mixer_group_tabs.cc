@@ -19,6 +19,8 @@
 
 #include <boost/foreach.hpp>
 
+#include "gtkmm2ext/utils.h"
+
 #include "ardour/route_group.h"
 #include "ardour/session.h"
 #include "mixer_group_tabs.h"
@@ -104,7 +106,7 @@ MixerGroupTabs::draw_tab (cairo_t* cr, Tab const & tab) const
 	cairo_fill (cr);
 
 	if (tab.group) {
-		pair<string, double> const f = fit_to_pixels (cr, tab.group->name(), tab.to - tab.from - arc_radius * 2);
+		pair<string, double> const f = Gtkmm2ext::fit_to_pixels (cr, tab.group->name(), tab.to - tab.from - arc_radius * 2);
 
 		cairo_text_extents_t ext;
 		cairo_text_extents (cr, tab.group->name().c_str(), &ext);

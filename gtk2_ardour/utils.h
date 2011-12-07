@@ -44,14 +44,7 @@ namespace Gtk {
 
 extern sigc::signal<void>  DPIReset;
 
-std::string fit_to_pixels (const std::string&, int pixel_width, Pango::FontDescription& font, int& actual_width, bool with_ellipses = false);
-
-std::pair<std::string, double> fit_to_pixels (cairo_t *, std::string, double);
-
-int pixel_width (const std::string& str, Pango::FontDescription& font);
-
 gint   just_hide_it (GdkEventAny*, Gtk::Window*);
-void   allow_keyboard_focus (bool);
 void add_item_with_sensitivity (Gtk::Menu_Helpers::MenuList &, Gtk::Menu_Helpers::MenuElem, bool);
 
 unsigned char* xpm2rgb  (const char** xpm, uint32_t& w, uint32_t& h);
