@@ -4216,9 +4216,32 @@ Session::end_time_changed (framepos_t old)
 string
 Session::source_search_path (DataType type) const
 {
-	string search_path;
+	vector<string> s;
 
-	/* first check the explicit (possibly user-specified) search path
+	if (session_dirs.size() == 1) {
+		switch (type) {
+		case DataType::AUDIO:
+			s.push_back ( _session_dir->sound_path().to_string());
+			break;
+		case DataType::MIDI:
+			s.push_back (_session_dir->midi_path().to_string());
+			break;
+		}
+	} else {
+		for (vector<space_and_path>::const_iterator i = session_dirs.begin(); i != session_dirs.end(); ++i) {
+			SessionDirectory sdir (i->path);
+			switch (type) {
+			case DataType::AUDIO:
+				s.push_back (sdir.sound_path().to_string());
+				break;
+			case DataType::MIDI:
+			        s.push_back (sdir.midi_path().to_string());
+				break;
+			}
+		}
+	}
+
+	/* now check the explicit (possibly user-specified) search path
 	 */
 
 	vector<string> dirs;
@@ -4233,41 +4256,27 @@ Session::source_search_path (DataType type) const
 	}
 
 	for (vector<string>::iterator i = dirs.begin(); i != dirs.end(); ++i) {
-		search_path += ':';
-		search_path += *i;
 
-	}
+		vector<string>::iterator si;
 
-	if (!search_path.empty()) {
-		return search_path;
-	}
-
-	/* if there was nothing there, check the session dirs */
-
-	if (session_dirs.size() == 1) {
-		switch (type) {
-		case DataType::AUDIO:
-			search_path = _session_dir->sound_path().to_string();
-			break;
-		case DataType::MIDI:
-			search_path = _session_dir->midi_path().to_string();
-			break;
-		}
-	} else {
-		for (vector<space_and_path>::const_iterator i = session_dirs.begin(); i != session_dirs.end(); ++i) {
-			SessionDirectory sdir (i->path);
-			if (!search_path.empty()) {
-				search_path += ':';
-			}
-			switch (type) {
-			case DataType::AUDIO:
-				search_path += sdir.sound_path().to_string();
-				break;
-			case DataType::MIDI:
-				search_path += sdir.midi_path().to_string();
+		for (si = s.begin(); si != s.end(); ++si) {
+			if ((*si) == *i) {
 				break;
 			}
 		}
+
+		if (si == s.end()) {
+			s.push_back (*i);
+		}
+	}
+	
+	string search_path;
+
+	for (vector<string>::iterator si = s.begin(); si != s.end(); ++si) {
+		if (!search_path.empty()) {
+			search_path += ':';
+		}
+		search_path += *si;
 	}
 
 	return search_path;
@@ -4283,7 +4292,15 @@ Session::ensure_search_path_includes (const string& path, DataType type)
 		return;
 	}
 
-	search_path = source_search_path (type);
+	switch (type) {
+	case DataType::AUDIO:
+		search_path = config.get_audio_search_path ();
+		break;
+	case DataType::MIDI:
+		search_path = config.get_midi_search_path ();
+		break;
+	}
+	
 	split (search_path, dirs, ':');
 
 	for (vector<string>::iterator i = dirs.begin(); i != dirs.end(); ++i) {

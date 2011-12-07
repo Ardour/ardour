@@ -349,6 +349,34 @@ path_expand (string path)
 	}
 }
 
+string
+search_path_expand (string path)
+{
+        if (path.empty()) {
+                return path;
+        }
+
+	vector<string> s;
+	vector<string> n;
+
+	split (path, s, ':');
+
+	for (vector<string>::iterator i = s.begin(); i != s.end(); ++i) {
+		n.push_back (path_expand (*i));
+	}
+
+	string r;
+
+	for (vector<string>::iterator i = n.begin(); i != n.end(); ++i) {
+		if (!r.empty()) {
+			r += ':';
+		}
+		r += *i;
+	}
+
+	return r;
+}
+
 #if __APPLE__
 string
 CFStringRefToStdString(CFStringRef stringRef)
