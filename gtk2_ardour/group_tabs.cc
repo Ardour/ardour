@@ -324,8 +324,8 @@ GroupTabs::get_menu (RouteGroup* g)
 	add_menu_items (_menu, g);
 
 	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Activate All"), sigc::mem_fun(*this, &GroupTabs::activate_all)));
-	items.push_back (MenuElem (_("Disable All"), sigc::mem_fun(*this, &GroupTabs::disable_all)));
+	items.push_back (MenuElem (_("Enable All Groups"), sigc::mem_fun(*this, &GroupTabs::activate_all)));
+	items.push_back (MenuElem (_("Disable All Groups"), sigc::mem_fun(*this, &GroupTabs::disable_all)));
 
 	return _menu;
 
