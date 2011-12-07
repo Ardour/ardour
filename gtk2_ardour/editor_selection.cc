@@ -1045,12 +1045,16 @@ Editor::sensitize_the_right_region_actions ()
 			   its current setting.
 			*/
 
-			have_envelope_invisible = true;
+			have_envelope_invisible = false;
 
 			if (*i) {
 				AudioRegionView* arv = dynamic_cast<AudioRegionView*> (*i);
-				if (arv && arv->envelope_visible()) {
-					have_envelope_visible = true;
+				if (arv) {
+					if (arv->envelope_visible()) {
+						have_envelope_visible = true;
+					} else {
+						have_envelope_invisible = true;
+					}
 				}
 			}
 
