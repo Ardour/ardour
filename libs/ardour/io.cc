@@ -292,6 +292,15 @@ IO::add_port (string destination, void* src, DataType type)
 		type = _default_type;
 	}
 
+	ChanCount before = _ports.count ();
+	ChanCount after = before;
+	after.set (type, after.get (type) + 1);
+	
+	bool const r = PortCountChanging (after); /* EMIT SIGNAL */
+	if (r) {
+		return -1;
+	}
+	
 	IOChange change;
 
 	{

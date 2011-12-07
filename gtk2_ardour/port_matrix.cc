@@ -26,6 +26,7 @@
 #include <gtkmm/menu_elems.h>
 #include <gtkmm/window.h>
 #include <gtkmm/stock.h>
+#include <gtkmm/messagedialog.h>
 #include "ardour/bundle.h"
 #include "ardour/types.h"
 #include "ardour/session.h"
@@ -684,7 +685,14 @@ PortMatrix::add_channel (boost::shared_ptr<Bundle> b, DataType t)
 	boost::shared_ptr<IO> io = io_from_bundle (b);
 
 	if (io) {
-		io->add_port ("", this, t);
+		int const r = io->add_port ("", this, t);
+		if (r == -1) {
+			Gtk::MessageDialog msg (_("It is not possible to add a port here, as the first processor in the track or buss cannot "
+						  "support the new configuration."
+							));
+			msg.set_title (_("Cannot add port"));
+			msg.run ();
+		}
 	}
 }
 
