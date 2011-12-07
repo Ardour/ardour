@@ -75,6 +75,7 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 	_display.append_column (*color_column);
 
 	_display.append_column ("", _columns.text);
+	_display.append_column ("", _columns.is_visible);
 	_display.append_column ("", _columns.gain);
 	_display.append_column ("", _columns.gain_relative);
 	_display.append_column ("", _columns.mute);
@@ -84,7 +85,6 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 	_display.append_column ("", _columns.select);
 	_display.append_column ("", _columns.edits);
 	_display.append_column ("", _columns.active_state);
-	_display.append_column ("", _columns.is_visible);
 
 	TreeViewColumn* col;
 	Gtk::Label* l;
@@ -92,16 +92,16 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 	ColumnInfo ci[] = {
 		{ 0, _("Col"), _("Group Tab Color") },
 		{ 1, _("Name"), _("Name of Group") },
-		{ 2, S_("group|G"), _("Sharing Gain?") },
-		{ 3, S_("relative|Rel"), _("Relevative Gain Changes?") },
-		{ 4, S_("mute|M"), _("Sharing Mute?") },
-		{ 5, S_("solo|S"), _("Sharing Solo?") },
-		{ 6, _("Rec"), _("Sharing Record-enable Status?") },
-		{ 7, S_("monitoring|Mon"), _("Sharing Monitoring Choice?") },
-		{ 8, S_("selection|Sel"), _("Sharing Selected Status?") },
-		{ 9, S_("editing|E"), _("Sharing Editing?") },
-		{ 10, S_("active|A"), _("Sharing Active Status?") },
-		{ 11, _("Show"), _("Group is visible?") },
+		{ 2, _("V"), _("Group is visible?") },
+		{ 3, S_("group|G"), _("Sharing Gain?") },
+		{ 4, S_("relative|Rel"), _("Relevative Gain Changes?") },
+		{ 5, S_("mute|M"), _("Sharing Mute?") },
+		{ 6, S_("solo|S"), _("Sharing Solo?") },
+		{ 7, _("Rec"), _("Sharing Record-enable Status?") },
+		{ 8, S_("monitoring|Mon"), _("Sharing Monitoring Choice?") },
+		{ 9, S_("selection|Sel"), _("Sharing Selected Status?") },
+		{ 10, S_("editing|E"), _("Sharing Editing?") },
+		{ 11, S_("active|A"), _("Sharing Active Status?") },
 		{ -1, 0, 0 }
 	};
 
@@ -237,6 +237,7 @@ EditorRouteGroups::button_press_event (GdkEventButton* ev)
 	int celly;
 	bool ret = false;
 	Gdk::Color c;
+	bool val;
 
 	bool const p = _display.get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly);
 
@@ -261,6 +262,8 @@ EditorRouteGroups::button_press_event (GdkEventButton* ev)
 		return true;
 	}
 
+	group = (*iter)[_columns.routegroup];
+
 	switch (GPOINTER_TO_UINT (column->get_data (X_("colnum")))) {
 	case 0: 
 		c = (*iter)[_columns.gdkcolor];
@@ -273,8 +276,7 @@ EditorRouteGroups::button_press_event (GdkEventButton* ev)
 			break;
 		case RESPONSE_ACCEPT:
 			c = color_dialog.get_colorsel()->get_current_color();
-			(*iter)[_columns.gdkcolor] = c;
-			GroupTabs::set_group_color ((*iter)[_columns.routegroup], c);
+			GroupTabs::set_group_color (group, c);
 			ARDOUR_UI::config()->set_dirty ();
 			break;
 			
@@ -288,112 +290,86 @@ EditorRouteGroups::button_press_event (GdkEventButton* ev)
 		break;
 
 	case 1:
-		if (Keyboard::is_edit_event (ev)) {
-			if ((iter = _model->get_iter (path))) {
-				if ((group = (*iter)[_columns.routegroup]) != 0) {
-					ret = true;
-				}
-			}
-
+		if (Keyboard::is_edit_event (ev) && group) {
+			/* we'll be editing now ... */
+			ret = true;
 		}
 		break;
 
 	case 2:
-		if ((iter = _model->get_iter (path))) {
-			bool gain = (*iter)[_columns.gain];
-			(*iter)[_columns.gain] = !gain;
-			ret = true;
-		}
-		break;
-
-	case 3:
-		if ((iter = _model->get_iter (path))) {
-			bool gain_relative = (*iter)[_columns.gain_relative];
-			(*iter)[_columns.gain_relative] = !gain_relative;
-			ret = true;
-		}
-		break;
-
-	case 4:
-		if ((iter = _model->get_iter (path))) {
-			bool mute = (*iter)[_columns.mute];
-			(*iter)[_columns.mute] = !mute;
-			ret = true;
-		}
-		break;
-
-	case 5:
-		if ((iter = _model->get_iter (path))) {
-			bool solo = (*iter)[_columns.solo];
-			(*iter)[_columns.solo] = !solo;
-			ret = true;
-		}
-		break;
-
-	case 6:
-		if ((iter = _model->get_iter (path))) {
-			bool record = (*iter)[_columns.record];
-			(*iter)[_columns.record] = !record;
-			ret = true;
-		}
-		break;
-
-	case 7:
-		if ((iter = _model->get_iter (path))) {
-			bool monitoring = (*iter)[_columns.monitoring];
-			(*iter)[_columns.monitoring] = !monitoring;
-			ret = true;
-		}
-		break;
-
-	case 8:
-		if ((iter = _model->get_iter (path))) {
-			bool select = (*iter)[_columns.select];
-			(*iter)[_columns.select] = !select;
-			ret = true;
-		}
-		break;
-
-	case 9:
-		if ((iter = _model->get_iter (path))) {
-			bool edits = (*iter)[_columns.edits];
-			(*iter)[_columns.edits] = !edits;
-			ret = true;
-		}
-		break;
-
-	case 10:
-		if ((iter = _model->get_iter (path))) {
-			bool active_state = (*iter)[_columns.active_state];
-			(*iter)[_columns.active_state] = !active_state;
-			ret = true;
-		}
-		break;
-
-	case 11:
-		if ((iter = _model->get_iter (path))) {
-			bool is_visible = (*iter)[_columns.is_visible];
-			(*iter)[_columns.is_visible] = !is_visible;
-			ret = true;
-		}
+		val = (*iter)[_columns.is_visible];
+		/* note subtle logic inverse here: we set the new value with
+		   "val", rather than !val, because we're using ::set_hidden()
+		   not a (non-existent) ::set_visible() call.
+		*/
+		group->set_hidden (val, this);
+		ret = true;
 		break;
 
 		
+	case 3:
+		val = (*iter)[_columns.gain];
+		group->set_gain (!val);
+		ret = true;
+		break;
+
+	case 4:
+		val = (*iter)[_columns.gain_relative];
+		group->set_relative (!val, this);
+		ret = true;
+		break;
+
+	case 5:
+		val = (*iter)[_columns.mute];
+		group->set_mute (!val);
+		ret = true;
+		break;
+
+	case 6:
+		val = (*iter)[_columns.solo];
+		group->set_solo (!val);
+		ret = true;
+		break;
+
+	case 7:
+		val = (*iter)[_columns.record];
+		group->set_recenable (!val);
+		ret = true;
+		break;
+
+	case 8:
+		val = (*iter)[_columns.monitoring];
+		group->set_monitoring (!val);
+		ret = true;
+		break;
+
+	case 9:
+		val = (*iter)[_columns.select];
+		group->set_select (!val);
+		ret = true;
+		break;
+
+	case 10:
+		val = (*iter)[_columns.edits];
+		group->set_edit (!val);
+		ret = true;
+		break;
+
+	case 11:
+		val = (*iter)[_columns.active_state];
+		group->set_active (!val, this);
+		ret = true;
+		break;
+
 	default:
 		break;
 	}
-
-#ifdef GTKOSX
-	if (ret) {
-		_display.queue_draw();
-	}
-#endif
 
 	return ret;
 }
 
 void
-EditorRouteGroups::row_change (const Gtk::TreeModel::Path&, const Gtk::TreeModel::iterator& iter)
+EditorRouteGroups::row_change (const Gtk::TreeModel::Path& path, const Gtk::TreeModel::iterator& iter)
 {
 	RouteGroup* group;
 
@@ -407,7 +383,7 @@ EditorRouteGroups::row_change (const Gtk::TreeModel::Path&, const Gtk::TreeModel
 
 	PropertyList plist;
 	plist.add (Properties::name, string ((*iter)[_columns.text]));
-	
+
 	bool val = (*iter)[_columns.gain];
 	plist.add (Properties::gain, val);
 	val = (*iter)[_columns.gain_relative];
@@ -426,14 +402,12 @@ EditorRouteGroups::row_change (const Gtk::TreeModel::Path&, const Gtk::TreeModel
 	plist.add (Properties::edit, val);
 	val = (*iter)[_columns.active_state];
 	plist.add (Properties::route_active, val);
-
-	GroupTabs::set_group_color ((*iter)[_columns.routegroup], (*iter)[_columns.gdkcolor]);
-	
-	group->set_hidden (!(*iter)[_columns.is_visible], this);
-
-	/* XXX set color here */
+	val = (*iter)[_columns.is_visible];
+	plist.add (Properties::hidden, !val);
 
 	group->apply_changes (plist);
+
+	GroupTabs::set_group_color ((*iter)[_columns.routegroup], (*iter)[_columns.gdkcolor]);
 }
 
 void
@@ -507,6 +481,12 @@ EditorRouteGroups::property_changed (RouteGroup* group, const PropertyChange& ch
 
 	for(Gtk::TreeModel::Children::iterator iter = children.begin(); iter != children.end(); ++iter) {
 		if (group == (*iter)[_columns.routegroup]) {
+
+			/* we could check the PropertyChange and only set
+			 * appropriate fields. but the amount of saved by doing
+			 * that is pretty minimal, and this is nice and simple.
+			 */
+
 			(*iter)[_columns.text] = group->name();
 			(*iter)[_columns.gain] = group->is_gain ();
 			(*iter)[_columns.gain_relative] = group->is_relative ();
@@ -519,14 +499,12 @@ EditorRouteGroups::property_changed (RouteGroup* group, const PropertyChange& ch
 			(*iter)[_columns.active_state] = group->is_route_active ();
 			(*iter)[_columns.is_visible] = !group->is_hidden();
 			(*iter)[_columns.gdkcolor] = GroupTabs::group_color (group);
+
+			break;
 		}
 	}
-
+	
 	_in_row_change = false;
-
-	if (change.contains (Properties::name) || change.contains (Properties::color) || change.contains (Properties::active)) {
-		_editor->_group_tabs->set_dirty ();
-	}
 
 	for (TrackViewList::const_iterator i = _editor->get_track_views().begin(); i != _editor->get_track_views().end(); ++i) {
 		if ((*i)->route_group() == group) {
