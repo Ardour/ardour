@@ -332,14 +332,16 @@ ArdourStartup::setup_new_user_page ()
 	Label* foomatic = manage (new Label);
 
 	foomatic->set_markup (string_compose (_("\
-<span size=\"larger\">%1 is a digital audio workstation. You can use it to\n\
-record, edit and mix multi-track audio. You can produce your\n\
-own CDs, mix video soundtracks, or just experiment with new\n\
-ideas about music and sound.\n\
-\n\
-There are a few things that need to configured before you start\n\
-using the program.</span>\
+<span size=\"larger\">%1 is a digital audio workstation. You can use it to \
+record, edit and mix multi-track audio. You can produce your \
+own CDs, mix video soundtracks, or just experiment with new \
+ideas about music and sound. \
+\n\n\
+There are a few things that need to be configured before you start \
+using the program.</span> \
 "), PROGRAM_NAME));
+	foomatic->set_justify (JUSTIFY_FILL);
+	foomatic->set_line_wrap ();
 
 	HBox* hbox = manage (new HBox);
 	HBox* vbox = manage (new HBox);
