@@ -30,12 +30,9 @@
 using namespace std;
 using namespace ARDOUR;
 
-PBD::Signal1<void, pframes_t> InternalReturn::CycleStart;
-
 InternalReturn::InternalReturn (Session& s)
 	: Return (s, true)
 {
-	CycleStart.connect_same_thread (*this, boost::bind (&InternalReturn::cycle_start, this, _1));
         _display_to_user = false;
 }
 
@@ -57,28 +54,6 @@ InternalReturn::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*e
 	_active = _pending_active;
 }
 
-bool
-InternalReturn::configure_io (ChanCount in, ChanCount out)
-{
-	IOProcessor::configure_io (in, out);
-	allocate_buffers (_session.engine().frames_per_cycle());
-	return true;
-}
-
-int
-InternalReturn::set_block_size (pframes_t nframes)
-{
-	allocate_buffers (nframes);
-        return 0;
-}
-
-void
-InternalReturn::allocate_buffers (pframes_t nframes)
-{
-	buffers.ensure_buffers (_configured_input, nframes);
-	buffers.set_count (_configured_input);
-}
-
 void
 InternalReturn::add_send (InternalSend* send)
 {
@@ -91,16 +66,6 @@ InternalReturn::remove_send (InternalSend* send)
 {
 	Glib::Mutex::Lock lm (_session.engine().process_lock());
 	_sends.remove (send);
-}
-
-void
-InternalReturn::cycle_start (pframes_t nframes)
-{
-	/* called from process cycle - no lock necessary */
-	if (!_sends.empty ()) {
-		/* don't bother with this if nobody is going to feed us anything */
-		buffers.silence (nframes, 0);
-	}
 }
 
 XMLNode&
@@ -118,17 +83,9 @@ InternalReturn::get_state()
 	return state (true);
 }
 
-int
-InternalReturn::set_state (const XMLNode& node, int version)
-{
-	return Return::set_state (node, version);
-}
-
 bool
 InternalReturn::can_support_io_configuration (const ChanCount& in, ChanCount& out) const
 {
 	out = in;
 	return true;
 }
-
-

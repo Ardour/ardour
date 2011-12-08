@@ -34,27 +34,18 @@ class InternalReturn : public Return
   public:
 	InternalReturn (Session&);
 
-	XMLNode& state(bool full);
-	XMLNode& get_state(void);
-	int set_state(const XMLNode&, int version);
+	XMLNode& state (bool full);
+	XMLNode& get_state ();
 
 	void run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pframes_t nframes, bool);
-	bool configure_io (ChanCount in, ChanCount out);
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const;
-	int  set_block_size (pframes_t);
 
 	void add_send (InternalSend *);
 	void remove_send (InternalSend *);
 
-	static PBD::Signal1<void, pframes_t> CycleStart;
-
   private:
-	BufferSet buffers;
 	/** sends that we are receiving data from */
 	std::list<InternalSend*> _sends;
-
-	void allocate_buffers (pframes_t);
-	void cycle_start (pframes_t);
 };
 
 } // namespace ARDOUR
