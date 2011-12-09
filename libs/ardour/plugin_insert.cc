@@ -346,15 +346,6 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 		}
 	}
 
-	if (_match.method == Hide) {
-		/* Silence the hidden input buffers */
-		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
-			for (uint32_t i = in_streams.get(*t); i < (in_streams.get(*t) + _match.hide.get(*t)); ++i) {
-				bufs.get(*t, i).silence (nframes);
-			}
-		}
-	}
-
 	/* Note that we've already required that plugins
 	   be able to handle in-place processing.
 	*/
