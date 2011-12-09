@@ -423,13 +423,17 @@ def build(bld):
         testobj              = bld(features = 'cxx cxxprogram')
         testobj.source       = '''
                 test/dummy_lxvst.cc
-                test/bbt_test.cpp
-                test/interpolation_test.cpp
-                test/midi_clock_slave_test.cpp
-                test/resampled_source.cc
-                test/mantis_3356.cc
-                test/testrunner.cpp
+                test/bbt_test.cc
+                test/interpolation_test.cc
+                test/midi_clock_slave_test.cc
+                test/resampled_source_test.cc
+		test/framewalk_to_beats_test.cc
+                test/testrunner.cc
         '''.split()
+
+# Tests that don't work
+#                test/mantis_3356_test.cc
+
         testobj.includes     = obj.includes + ['test', '../pbd']
         testobj.uselib       = ['CPPUNIT','SIGCPP','JACK','GLIBMM','GTHREAD',
                                 'SAMPLERATE','XML','LRDF','COREAUDIO']

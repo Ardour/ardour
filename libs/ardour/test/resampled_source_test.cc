@@ -1,6 +1,6 @@
 #include "ardour/resampled_source.h"
 #include "ardour/sndfileimportable.h"
-#include "resampled_source.h"
+#include "resampled_source_test.h"
 
 CPPUNIT_TEST_SUITE_REGISTRATION (ResampledSourceTest);
 
