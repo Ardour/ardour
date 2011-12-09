@@ -4543,3 +4543,16 @@ Session::update_latency_compensation (bool force_whole_graph)
 	}
 }
 
+char
+Session::session_name_is_legal (const string& path)
+{
+	char illegal_chars[] = { '/', '\\', ':', ';', '\0' };
+
+	for (int i = 0; illegal_chars[i]; ++i) {
+		if (path.find (illegal_chars[i]) != string::npos) {
+			return illegal_chars[i];
+		}
+	}
+
+	return 0;
+}

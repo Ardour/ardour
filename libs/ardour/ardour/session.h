@@ -238,6 +238,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	template<class T> void foreach_route (T *obj, void (T::*func)(boost::shared_ptr<Route>));
 	template<class T, class A> void foreach_route (T *obj, void (T::*func)(Route&, A), A arg);
 
+	static char session_name_is_legal (const std::string&);
 	bool io_name_is_legal (const std::string&);
 	boost::shared_ptr<Route> route_by_name (std::string);
 	boost::shared_ptr<Route> route_by_id (PBD::ID);
