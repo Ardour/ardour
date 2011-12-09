@@ -178,12 +178,12 @@ Editor::ruler_scroll (GdkEventScroll* event)
 
 	switch (direction) {
 	case GDK_SCROLL_UP:
-		temporal_zoom_step (true);
+		temporal_zoom_step (false);
 		handled = true;
 		break;
 
 	case GDK_SCROLL_DOWN:
-		temporal_zoom_step (false);
+		temporal_zoom_step (true);
 		handled = true;
 		break;
 
