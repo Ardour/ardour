@@ -586,14 +586,24 @@ EditorSummary::on_scroll_event (GdkEventScroll* ev)
 		amount = 1;
 	}
 
-	if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+	if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
 
-		/* primary-wheel == left-right scrolling */
+		/* secondary-wheel == left-right scrolling */
 
 		if (ev->direction == GDK_SCROLL_UP) {
 			x += amount;
 		} else if (ev->direction == GDK_SCROLL_DOWN) {
 			x -= amount;
+		}
+
+	} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+
+		/* primary-wheel == zoom */
+		
+		if (ev->direction == GDK_SCROLL_UP) {
+			_editor->temporal_zoom_step (false);
+		} else {
+			_editor->temporal_zoom_step (true);
 		}
 
 	} else {
