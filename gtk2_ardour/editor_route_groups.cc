@@ -457,7 +457,7 @@ EditorRouteGroups::add (RouteGroup* group)
 
 	if (focus) {
 		TreeViewColumn* col = _display.get_column (0);
-		CellRendererText* name_cell = dynamic_cast<CellRendererText*>(_display.get_column_cell_renderer (0));
+		CellRendererText* name_cell = dynamic_cast<CellRendererText*>(_display.get_column_cell_renderer (1));
 		_display.set_cursor (_model->get_path (row), *col, *name_cell, true);
 	}
 
