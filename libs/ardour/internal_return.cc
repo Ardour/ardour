@@ -89,3 +89,10 @@ InternalReturn::can_support_io_configuration (const ChanCount& in, ChanCount& ou
 	out = in;
 	return true;
 }
+
+bool
+InternalReturn::configure_io (ChanCount in, ChanCount out)
+{
+	IOProcessor::configure_io (in, out);
+	return true;
+}
