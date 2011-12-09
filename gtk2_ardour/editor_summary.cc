@@ -591,9 +591,9 @@ EditorSummary::on_scroll_event (GdkEventScroll* ev)
 		/* secondary-wheel == left-right scrolling */
 
 		if (ev->direction == GDK_SCROLL_UP) {
-			x += amount;
-		} else if (ev->direction == GDK_SCROLL_DOWN) {
 			x -= amount;
+		} else if (ev->direction == GDK_SCROLL_DOWN) {
+			x += amount;
 		}
 
 	} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
