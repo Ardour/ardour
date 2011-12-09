@@ -2118,6 +2118,8 @@ TempoMap::framewalk_to_beats (framepos_t pos, framecnt_t distance) const
 
 	frames_per_beat = tempo->frames_per_beat (_frame_rate, *meter);
 
+	double last_dpos = 0;
+
 	while (ddist > 0) {
 
 		/* if we're nearly at the end, but have a fractional beat left,
@@ -2131,6 +2133,7 @@ TempoMap::framewalk_to_beats (framepos_t pos, framecnt_t distance) const
 
 		/* walk one beat */
 
+		last_dpos = dpos;
 		ddist -= frames_per_beat;
 		dpos += frames_per_beat;
 		beats += 1.0;
@@ -2140,7 +2143,34 @@ TempoMap::framewalk_to_beats (framepos_t pos, framecnt_t distance) const
 		*/
 
 		if (i != metrics->end()) {
-			if ((*i)->frame() <= (framepos_t) dpos) {
+
+			double const f = (*i)->frame ();
+
+			if (f <= (framepos_t) dpos) {
+
+				/* We just went past a tempo/meter section start at (*i)->frame(),
+				   which will be on a beat.
+
+				   So what we have is
+
+				                       (*i)->frame() [f]
+				   beat      beat      beat                beat
+				   |         |         |                   |
+				   |         |         |                   |
+                                                ^         ^
+				                |         |
+						|         new
+						|         dpos [q]
+						last
+						dpos [p]
+
+				  We need to go back to last_dpos (1 beat ago) and re-add
+				  (f - p) beats using the old frames per beat and (q - f) beats
+				  using the new.
+				*/
+
+				beats -= 1;
+				beats += (f - last_dpos) / frames_per_beat;
 
 				if ((t = dynamic_cast<const TempoSection*>(*i)) != 0) {
 					tempo = t;
@@ -2149,6 +2179,8 @@ TempoMap::framewalk_to_beats (framepos_t pos, framecnt_t distance) const
 				}
 				++i;
 				frames_per_beat = tempo->frames_per_beat (_frame_rate, *meter);
+
+				beats += (dpos - f) / frames_per_beat;
 			}
 		}
 	}

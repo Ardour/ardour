@@ -23,11 +23,75 @@ FramewalkToBeatsTest::singleTempoTest ()
 	map.add_meter (meter, BBT_Time (1, 1, 0));
 	map.add_tempo (tempo, BBT_Time (1, 1, 0));
 
-	/* Add 1 beats-worth of frames to a 2 beat starting point */
+	/* Walk 1 beats-worth of frames from beat 3 */
 	double r = map.framewalk_to_beats (frames_per_beat * 2, frames_per_beat * 1);
 	CPPUNIT_ASSERT (r == 1);
 
-	/* Add 6 beats-worth of frames to a 3 beat starting point */
+	/* Walk 6 beats-worth of frames from beat 4 */
 	r = map.framewalk_to_beats (frames_per_beat * 3, frames_per_beat * 6);
 	CPPUNIT_ASSERT (r == 6);
+
+	/* Walk 1.5 beats-worth of frames from beat 3 */
+	r = map.framewalk_to_beats (frames_per_beat * 2, frames_per_beat * 1.5);
+	CPPUNIT_ASSERT (r == 1.5);
+
+	/* Walk 1.5 beats-worth of frames from beat 2.5 */
+	r = map.framewalk_to_beats (frames_per_beat * 2.5, frames_per_beat * 1.5);
+	CPPUNIT_ASSERT (r == 1.5);
 }
+
+void
+FramewalkToBeatsTest::doubleTempoTest ()
+{
+	int const sampling_rate = 48000;
+
+	TempoMap map (sampling_rate);
+	Meter meter (4, 4);
+	map.add_meter (meter, BBT_Time (1, 1, 0));
+
+	/*
+	  120bpm at bar 1, 240bpm at bar 4
+	  
+	  120bpm = 24e3 samples per beat
+	  240bpm = 12e3 samples per beat
+	*/
+	
+
+	/*
+	  
+	  120bpm                                                240bpm
+	  0 beats                                               12 beats
+	  0 frames                                              288e3 frames
+	  |                 |                 |                 |                 |
+	  | 1.1 1.2 1.3 1.4 | 2.1 2.2 2.3.2.4 | 3.1 3.2 3.3 3.4 | 4.1 4.2 4.3 4.4 |
+
+	*/
+
+	Tempo tempoA (120);
+	map.add_tempo (tempoA, BBT_Time (1, 1, 0));
+	Tempo tempoB (240);
+	map.add_tempo (tempoB, BBT_Time (4, 1, 0));
+
+	/* Now some tests */
+
+	/* Walk 1 beat from 1.2 */
+	double r = map.framewalk_to_beats (24e3, 24e3);
+	assert (r == 1);
+
+	/* Walk 2 beats from 3.3 to 4.1 (over the tempo change) */
+	r = map.framewalk_to_beats (264e3, (24e3 + 12e3));
+	assert (r == 2);
+
+	/* Walk 2.5 beats from 3.3-and-a-half to 4.2 (over the tempo change) */
+	r = map.framewalk_to_beats (264e3 - 12e3, (24e3 + 12e3 + 12e3));
+	assert (r == 2.5);
+
+	/* Walk 3 beats from 3.3-and-a-half to 4.2-and-a-half (over the tempo change) */
+	r = map.framewalk_to_beats (264e3 - 12e3, (24e3 + 12e3 + 12e3 + 6e3));
+	assert (r == 3);
+
+	/* Walk 3.5 beats from 3.3-and-a-half to 4.3 (over the tempo change) */
+	r = map.framewalk_to_beats (264e3 - 12e3, (24e3 + 12e3 + 12e3 + 12e3));
+	assert (r == 3.5);
+}
+

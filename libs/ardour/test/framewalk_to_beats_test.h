@@ -6,6 +6,7 @@ class FramewalkToBeatsTest : public CppUnit::TestFixture
 {
 	CPPUNIT_TEST_SUITE (FramewalkToBeatsTest);
 	CPPUNIT_TEST (singleTempoTest);
+	CPPUNIT_TEST (doubleTempoTest);
 	CPPUNIT_TEST_SUITE_END ();
 
 public:
@@ -13,5 +14,6 @@ public:
 	void tearDown () {}
 
 	void singleTempoTest ();
+	void doubleTempoTest ();
 };
 
