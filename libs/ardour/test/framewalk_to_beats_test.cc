@@ -95,3 +95,42 @@ FramewalkToBeatsTest::doubleTempoTest ()
 	CPPUNIT_ASSERT_EQUAL (r, 3.5);
 }
 
+void
+FramewalkToBeatsTest::tripleTempoTest ()
+{
+	int const sampling_rate = 48000;
+
+	TempoMap map (sampling_rate);
+	Meter meter (4, 4);
+	map.add_meter (meter, BBT_Time (1, 1, 0));
+
+	/*
+	  120bpm at bar 1, 240bpm at bar 2, 160bpm at bar 3
+	  
+	  120bpm = 24e3 samples per beat
+	  160bpm = 18e3 samples per beat
+	  240bpm = 12e3 samples per beat
+	*/
+	
+
+	/*
+	  
+	  120bpm            240bpm            160bpm
+	  0 beats           4 beats           8 beats
+	  0 frames          96e3 frames       144e3 frames
+	  |                 |                 |                 |                 |
+	  | 1.1 1.2 1.3 1.4 | 2.1 2.2 2.3.2.4 | 3.1 3.2 3.3 3.4 | 4.1 4.2 4.3 4.4 |
+
+	*/
+
+	Tempo tempoA (120);
+	map.add_tempo (tempoA, BBT_Time (1, 1, 0));
+	Tempo tempoB (240);
+	map.add_tempo (tempoB, BBT_Time (2, 1, 0));
+	Tempo tempoC (160);
+	map.add_tempo (tempoC, BBT_Time (3, 1, 0));
+
+	/* Walk from 1|3 to 4|1 */
+	double r = map.framewalk_to_beats (2 * 24e3, (2 * 24e3) + (4 * 12e3) + (4 * 18e3));
+	CPPUNIT_ASSERT_EQUAL (10.0, r);
+}

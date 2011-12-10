@@ -2182,6 +2182,7 @@ TempoMap::framewalk_to_beats (framepos_t pos, framecnt_t distance) const
 		double const sub = min (distance, distance_to_end);
 
 		/* Update */
+		pos += sub;
 		distance -= sub;
 		beats += sub / tempo->frames_per_beat (_frame_rate, *meter);
 
