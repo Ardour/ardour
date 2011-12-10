@@ -369,9 +369,9 @@ SMFSource::append_event_unlocked_frames (const Evoral::Event<framepos_t>& ev, fr
 
 	_length_beats = max(_length_beats, ev_time_beats);
 
-	const framepos_t delta_time_frames = ev.time() - _last_ev_time_frames;
-	const double     delta_time_beats  = converter.from(delta_time_frames);
-	const uint32_t   delta_time_ticks  = (uint32_t)(lrint(delta_time_beats * (double)ppqn()));
+	const Evoral::MusicalTime last_time_beats  = converter.from (_last_ev_time_frames);
+	const Evoral::MusicalTime delta_time_beats = ev_time_beats - last_time_beats;
+	const uint32_t            delta_time_ticks = (uint32_t)(lrint(delta_time_beats * (double)ppqn()));
 
 	Evoral::SMF::append_event_delta(delta_time_ticks, ev.size(), ev.buffer(), event_id);
 	_last_ev_time_frames = ev.time();
