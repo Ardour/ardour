@@ -29,9 +29,9 @@ namespace ARDOUR {
 
 class TempoMap;
 
-/** Converter between beats and frames.  Takes durations in beats or frames
- *  and converts them using the tempo at the \a origin supplied to the constructor.
- *  Note that this does not covert positions, only durations.
+/** Converter between beats and frames.  Takes distances in beats or frames
+ *  from some origin (supplied to the constructor in frames), and converts
+ *  them to the opposite unit, taking tempo changes into account.
  */
 class BeatsFramesConverter : public Evoral::TimeConverter<double,framepos_t> {
 public:
