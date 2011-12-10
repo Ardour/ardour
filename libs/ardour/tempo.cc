@@ -24,9 +24,9 @@
 
 #include <cmath>
 
-
 #include <glibmm/thread.h>
 #include "pbd/xml++.h"
+#include "evoral/types.hpp"
 #include "ardour/debug.h"
 #include "ardour/tempo.h"
 #include "ardour/utils.h"
@@ -1935,6 +1935,72 @@ TempoMap::bbt_subtract (const BBT_Time& start, const BBT_Time& decrement) const
 	return result;
 }
 
+/** Add some (fractional) beats to a frame position, and return the result in frames */
+framepos_t
+TempoMap::framepos_plus_beats (framepos_t pos, Evoral::MusicalTime beats) const
+{
+	Metrics::const_iterator i;
+	const TempoSection* tempo;
+	const MeterSection* meter;
+	
+	/* Find the starting metrics for tempo & meter */
+
+	for (i = metrics->begin(); i != metrics->end(); ++i) {
+
+		if ((*i)->frame() > pos) {
+			break;
+		}
+
+		const TempoSection* t;
+		const MeterSection* m;
+
+		if ((t = dynamic_cast<const TempoSection*>(*i)) != 0) {
+			tempo = t;
+		} else if ((m = dynamic_cast<const MeterSection*>(*i)) != 0) {
+			meter = m;
+		}
+	}
+
+	/* We now have:
+
+	   meter -> the Meter for "pos"
+	   tempo -> the Tempo for "pos"
+	   i     -> for first new metric after "pos", possibly metrics->end()
+	*/
+
+	while (beats) {
+
+		/* End of this section */
+		framepos_t end = i == metrics->end() ? max_framepos : (*i)->frame ();
+
+		/* Distance to the end in beats */
+		Evoral::MusicalTime distance_beats = (end - pos) / tempo->frames_per_beat (_frame_rate, *meter);
+
+		/* Amount to subtract this time */
+		double const sub = min (distance_beats, beats);
+
+		/* Update */
+		beats -= sub;
+		pos += sub * tempo->frames_per_beat (_frame_rate, *meter);
+
+		/* Move on if there's anything to move to */
+		if (i != metrics->end ()) {
+			const TempoSection* t;
+			const MeterSection* m;
+			
+			if ((t = dynamic_cast<const TempoSection*>(*i)) != 0) {
+				tempo = t;
+			} else if ((m = dynamic_cast<const MeterSection*>(*i)) != 0) {
+				meter = m;
+			}
+
+			++i;
+		}
+	}
+
+	return pos;
+}
+
 /** Add the BBT interval op to pos and return the result */
 framepos_t
 TempoMap::framepos_plus_bbt (framepos_t pos, BBT_Time op) const
@@ -2068,6 +2134,7 @@ TempoMap::framepos_plus_bbt (framepos_t pos, BBT_Time op) const
 
 	return pos;
 }
+
 
 /** Count the number of beats that are equivalent to distance when starting at pos */
 double

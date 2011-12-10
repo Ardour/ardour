@@ -30,6 +30,7 @@
 #include "pbd/stateful.h"
 #include "pbd/statefuldestructible.h"
 
+#include "evoral/types.hpp"
 
 #include "ardour/ardour.h"
 
@@ -247,6 +248,7 @@ class TempoMap : public PBD::StatefulDestructible
 	Timecode::BBT_Time bbt_subtract (const Timecode::BBT_Time&, const Timecode::BBT_Time&) const;
 
 	framepos_t framepos_plus_bbt (framepos_t pos, Timecode::BBT_Time b) const;
+	framepos_t framepos_plus_beats (framepos_t, Evoral::MusicalTime) const;
 	double framewalk_to_beats (framepos_t pos, framecnt_t distance) const;
 
 	void change_existing_tempo_at (framepos_t, double bpm, double note_type);

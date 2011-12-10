@@ -427,7 +427,8 @@ def build(bld):
                 test/interpolation_test.cc
                 test/midi_clock_slave_test.cc
                 test/resampled_source_test.cc
-		test/framewalk_to_beats_test.cc
+                test/framewalk_to_beats_test.cc
+                test/framepos_plus_beats_test.cc
                 test/testrunner.cc
         '''.split()
 
