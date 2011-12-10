@@ -3609,6 +3609,11 @@ MidiRegionView::data_recorded (boost::weak_ptr<MidiSource> w)
 		Evoral::MIDIEvent<MidiBuffer::TimeType> const ev (*i, false);
 		assert (ev.buffer ());
 
+		/* ev.time() is in session frames, so (ev.time() - converter.origin_b()) is
+		   frames from the start of the source, and so time_beats is in terms of the
+		   source.
+		*/
+
 		Evoral::MusicalTime const time_beats = converter.from (ev.time () - converter.origin_b ());
 
 		if (ev.type() == MIDI_CMD_NOTE_ON) {
