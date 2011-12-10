@@ -504,16 +504,8 @@ Diskstream::set_state (const XMLNode& node, int /*version*/)
 		return -1;
 	}
 
-	{
-		bool had_playlist = (_playlist != 0);
-
-		if (find_and_use_playlist (prop->value())) {
-			return -1;
-		}
-
-		if (!had_playlist) {
-			_playlist->set_orig_diskstream_id (id());
-		}
+	if (find_and_use_playlist (prop->value())) {
+		return -1;
 	}
 
 	if ((prop = node.property ("speed")) != 0) {

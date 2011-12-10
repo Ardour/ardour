@@ -98,8 +98,7 @@ class Track : public Route, public PublicDiskstream
 	bool record_enabled() const;
 	void set_record_enabled (bool yn, void *src);
 
-	/* XXX: unfortunate that this is exposed */
-	PBD::ID const & diskstream_id () const;
+	bool using_diskstream_id (PBD::ID) const;
 
 	void set_block_size (pframes_t);
 

@@ -161,7 +161,7 @@ Playlist::Playlist (boost::shared_ptr<const Playlist> other, string namestr, boo
 	: SessionObject(other->_session, namestr)
 	, regions (*this)
 	, _type(other->_type)
-	, _orig_diskstream_id (other->_orig_diskstream_id)
+	, _orig_track_id (other->_orig_track_id)
 {
 	init (hide);
 
@@ -195,7 +195,7 @@ Playlist::Playlist (boost::shared_ptr<const Playlist> other, framepos_t start, f
 	: SessionObject(other->_session, str)
 	, regions (*this)
 	, _type(other->_type)
-	, _orig_diskstream_id (other->_orig_diskstream_id)
+	, _orig_track_id (other->_orig_track_id)
 {
 	RegionLock rlock2 (const_cast<Playlist*> (other.get()));
 
@@ -2221,7 +2221,10 @@ Playlist::flush_notifications (bool from_undo)
 			 _name = prop->value();
 			 _set_sort_id ();
 		 } else if (prop->name() == X_("orig-diskstream-id")) {
-			 _orig_diskstream_id = prop->value ();
+			 /* XXX legacy session: fix up later */
+			 _orig_track_id = prop->value ();
+		 } else if (prop->name() == X_("orig-track-id")) {
+			 _orig_track_id = prop->value ();
 		 } else if (prop->name() == X_("frozen")) {
 			 _frozen = string_is_affirmative (prop->value());
 		 } else if (prop->name() == X_("combine-ops")) {
@@ -2318,8 +2321,8 @@ Playlist::state (bool full_state)
 	node->add_property (X_("name"), _name);
 	node->add_property (X_("type"), _type.to_string());
 
-	_orig_diskstream_id.print (buf, sizeof (buf));
-	node->add_property (X_("orig-diskstream-id"), buf);
+	_orig_track_id.print (buf, sizeof (buf));
+	node->add_property (X_("orig-track-id"), buf);
 	node->add_property (X_("frozen"), _frozen ? "yes" : "no");
 
 	if (full_state) {

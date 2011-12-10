@@ -281,7 +281,6 @@ AudioDiskstream::use_new_playlist ()
 
 	if ((playlist = boost::dynamic_pointer_cast<AudioPlaylist> (PlaylistFactory::create (DataType::AUDIO, _session, newname, hidden()))) != 0) {
 
-		playlist->set_orig_diskstream_id (id());
 		return use_playlist (playlist);
 
 	} else {
@@ -309,7 +308,6 @@ AudioDiskstream::use_copy_playlist ()
 	newname = Playlist::bump_name (_playlist->name(), _session);
 
 	if ((playlist = boost::dynamic_pointer_cast<AudioPlaylist>(PlaylistFactory::create (audio_playlist(), newname))) != 0) {
-		playlist->set_orig_diskstream_id (id());
 		return use_playlist (playlist);
 	} else {
 		return -1;

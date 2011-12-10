@@ -2603,6 +2603,21 @@ Session::route_by_id (PBD::ID id)
 	return boost::shared_ptr<Route> ((Route*) 0);
 }
 
+boost::shared_ptr<Track>
+Session::track_by_diskstream_id (PBD::ID id)
+{
+	boost::shared_ptr<RouteList> r = routes.reader ();
+
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (*i);
+		if (t && t->using_diskstream_id (id)) {
+			return t;
+		}
+	}
+
+	return boost::shared_ptr<Track> ();
+}
+
 boost::shared_ptr<Route>
 Session::route_by_remote_id (uint32_t id)
 {

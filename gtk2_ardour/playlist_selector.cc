@@ -121,6 +121,14 @@ PlaylistSelector::show_for (RouteUI* ruix)
 	for (TrackPlaylistMap::iterator x = trpl_map.begin(); x != trpl_map.end(); ++x) {
 
 		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (_session->route_by_id (x->first));
+		
+		/* legacy sessions stored the diskstream ID as the original
+		 * playlist owner. so try there instead.
+		 */
+
+		if (tr == 0) {
+			tr = _session->track_by_diskstream_id (x->first);
+		}
 
 		if (tr == 0) {
 			continue;
@@ -222,8 +230,8 @@ PlaylistSelector::add_playlist_to_map (boost::shared_ptr<Playlist> pl)
 
 	TrackPlaylistMap::iterator x;
 
-	if ((x = trpl_map.find (apl->get_orig_diskstream_id())) == trpl_map.end()) {
-		x = trpl_map.insert (trpl_map.end(), make_pair (apl->get_orig_diskstream_id(), new list<boost::shared_ptr<Playlist> >));
+	if ((x = trpl_map.find (apl->get_orig_track_id())) == trpl_map.end()) {
+		x = trpl_map.insert (trpl_map.end(), make_pair (apl->get_orig_track_id(), new list<boost::shared_ptr<Playlist> >));
 	}
 
 	x->second->push_back (pl);

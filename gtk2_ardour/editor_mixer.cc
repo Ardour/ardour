@@ -99,7 +99,7 @@ Editor::show_editor_mixer (bool yn)
 			}
 
 		} else {
-			sort_track_selection ();
+			sort_track_selection (selection->tracks);
 
 			for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
 				RouteTimeAxisView* atv;

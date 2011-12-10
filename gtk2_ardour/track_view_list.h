@@ -21,6 +21,7 @@
 #define __ardour_gtk_track_view_list_h__
 
 #include <list>
+#include <set>
 
 class TimeAxisView;
 
@@ -34,6 +35,8 @@ public:
 
 	virtual TrackViewList add (TrackViewList const &);
 	bool contains (TimeAxisView const *) const;
+
+	TrackViewList filter_to_unique_playlists ();
 };
 
 #endif

@@ -115,6 +115,8 @@ Track::set_state (const XMLNode& node, int version)
 		}
 	}
 
+	_diskstream->playlist()->set_orig_track_id (id());
+
 	/* set rec-enable control *AFTER* setting up diskstream, because it may
 	   want to operate on the diskstream as it sets its own state
 	*/
@@ -694,13 +696,25 @@ Track::use_playlist (boost::shared_ptr<Playlist> p)
 int
 Track::use_copy_playlist ()
 {
-	return _diskstream->use_copy_playlist ();
+	int ret =  _diskstream->use_copy_playlist ();
+
+	if (ret == 0) {
+		_diskstream->playlist()->set_orig_track_id (id());
+	}
+
+	return ret;
 }
 
 int
 Track::use_new_playlist ()
 {
-	return _diskstream->use_new_playlist ();
+	int ret = _diskstream->use_new_playlist ();
+
+	if (ret == 0) {
+		_diskstream->playlist()->set_orig_track_id (id());
+	}
+
+	return ret;
 }
 
 void
@@ -715,10 +729,10 @@ Track::set_align_choice (AlignChoice s, bool force)
 	_diskstream->set_align_choice (s, force);
 }
 
-PBD::ID const &
-Track::diskstream_id () const
+bool
+Track::using_diskstream_id (PBD::ID id) const
 {
-	return _diskstream->id ();
+	return (id == _diskstream->id ());
 }
 
 void

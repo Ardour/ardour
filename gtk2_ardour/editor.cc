@@ -4349,15 +4349,10 @@ struct EditorOrderTimeAxisSorter {
 };
 
 void
-Editor::sort_track_selection (TrackViewList* sel)
+Editor::sort_track_selection (TrackViewList& sel)
 {
 	EditorOrderTimeAxisSorter cmp;
-
-	if (sel) {
-		sel->sort (cmp);
-	} else {
-		selection->tracks.sort (cmp);
-	}
+	sel.sort (cmp);
 }
 
 framepos_t

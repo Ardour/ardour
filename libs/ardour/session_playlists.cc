@@ -207,13 +207,13 @@ SessionPlaylists::unassigned (std::list<boost::shared_ptr<Playlist> > & list)
 	Glib::Mutex::Lock lm (lock);
 
 	for (List::iterator i = playlists.begin(); i != playlists.end(); ++i) {
-		if (!(*i)->get_orig_diskstream_id().to_s().compare ("0")) {
+		if (!(*i)->get_orig_track_id().to_s().compare ("0")) {
 			list.push_back (*i);
 		}
 	}
 
 	for (List::iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
-		if (!(*i)->get_orig_diskstream_id().to_s().compare ("0")) {
+		if (!(*i)->get_orig_track_id().to_s().compare ("0")) {
 			list.push_back (*i);
 		}
 	}
@@ -462,7 +462,7 @@ SessionPlaylists::playlists_for_track (boost::shared_ptr<Track> tr) const
 	vector<boost::shared_ptr<Playlist> > pl_tr;
 
 	for (vector<boost::shared_ptr<Playlist> >::iterator i = pl.begin(); i != pl.end(); ++i) {
-		if (((*i)->get_orig_diskstream_id() == tr->diskstream_id()) || (tr->playlist()->id() == (*i)->id())) {
+		if (((*i)->get_orig_track_id() == tr->id()) || (tr->playlist()->id() == (*i)->id())) {
 			pl_tr.push_back (*i);
 		}
 	}

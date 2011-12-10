@@ -560,11 +560,11 @@ Editor::build_region_boundary_cache ()
 
 	TimeAxisView *ontrack = 0;
 	TrackViewList tlist;
-
+	
 	if (!selection->tracks.empty()) {
-		tlist = selection->tracks;
+		tlist = selection->tracks.filter_to_unique_playlists ();
 	} else {
-		tlist = track_views;
+		tlist = track_views.filter_to_unique_playlists ();
 	}
 
 	while (pos < _session->current_end_frame() && !at_end) {
@@ -2339,9 +2339,10 @@ Editor::create_region_from_selection (vector<boost::shared_ptr<Region> >& new_re
 	framepos_t start = selection->time[clicked_selection].start;
 	framepos_t end = selection->time[clicked_selection].end;
 
-	sort_track_selection ();
+	TrackViewList ts = selection->tracks.filter_to_unique_playlists ();
+	sort_track_selection (ts);
 
-	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
+	for (TrackSelection::iterator i = ts.begin(); i != ts.end(); ++i) {
 		boost::shared_ptr<Region> current;
 		boost::shared_ptr<Playlist> playlist;
 		framepos_t internal_start;
@@ -2437,7 +2438,7 @@ Editor::get_tracks_for_range_action () const
 		t = selection->tracks;
 	}
 
-	return t;
+	return t.filter_to_unique_playlists();
 }
 
 void
@@ -2448,7 +2449,7 @@ Editor::separate_regions_between (const TimeSelection& ts)
 	RegionSelection new_selection;
 
 	TrackViewList tmptracks = get_tracks_for_range_action ();
-	sort_track_selection (&tmptracks);
+	sort_track_selection (tmptracks);
 
 	for (TrackSelection::iterator i = tmptracks.begin(); i != tmptracks.end(); ++i) {
 
@@ -2691,16 +2692,17 @@ Editor::crop_region_to (framepos_t start, framepos_t end)
 {
 	vector<boost::shared_ptr<Playlist> > playlists;
 	boost::shared_ptr<Playlist> playlist;
-	TrackViewList* ts;
+	TrackViewList ts;
 
 	if (selection->tracks.empty()) {
-		ts = &track_views;
+		ts = track_views.filter_to_unique_playlists();
 	} else {
-		sort_track_selection ();
-		ts = &selection->tracks;
+		ts = selection->tracks.filter_to_unique_playlists ();
 	}
 
-	for (TrackSelection::iterator i = ts->begin(); i != ts->end(); ++i) {
+	sort_track_selection (ts);
+
+	for (TrackSelection::iterator i = ts.begin(); i != ts.end(); ++i) {
 
 		RouteTimeAxisView* rtv;
 
@@ -2825,7 +2827,9 @@ Editor::region_fill_selection ()
 
 	begin_reversible_command (Operations::fill_selection);
 
-	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
+	TrackViewList ts = selection->tracks.filter_to_unique_playlists ();
+
+	for (TrackViewList::iterator i = ts.begin(); i != ts.end(); ++i) {
 
 		if ((playlist = (*i)->playlist()) == 0) {
 			continue;
@@ -3513,12 +3517,9 @@ Editor::cut_copy (CutCopyOp op)
 
 		/* we only want to cut regions if some are selected */
 
-		if (!selection->regions.empty()) {
-			rs = selection->regions;
-		}
-
 		switch (current_mouse_mode()) {
 		case MouseObject:
+			rs = get_regions_from_selection ();
 			if (!rs.empty() || !selection->points.empty()) {
 
 				begin_reversible_command (opname + _(" objects"));
@@ -3676,23 +3677,15 @@ Editor::remove_selected_regions ()
 	        	continue;
 	        }
 
-		vector<boost::shared_ptr<Playlist> >::iterator i;
+		/* get_regions_from_selection_and_entered() guarantees that
+		   the playlists involved are unique, so there is no need
+		   to check here.
+		*/
 
-		//only prep history if this is a new playlist.
-		for (i = playlists.begin(); i != playlists.end(); ++i) {
-			if ((*i) == playlist) {
-				break;
-			}
-		}
+		playlists.push_back (playlist);
 
-		if (i == playlists.end()) {
-
-			playlist->clear_changes ();
-			playlist->freeze ();
-
-			playlists.push_back (playlist);
-		}
-
+		playlist->clear_changes ();
+		playlist->freeze ();
 		playlist->remove_region (*rl);
 	}
 
@@ -3868,27 +3861,24 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 void
 Editor::cut_copy_ranges (CutCopyOp op)
 {
-	TrackViewList* ts;
-	TrackViewList entered;
+	TrackViewList ts = selection->tracks.filter_to_unique_playlists ();
 
 	/* Sort the track selection now, so that it if is used, the playlists
 	   selected by the calls below to cut_copy_clear are in the order that
 	   their tracks appear in the editor.  This makes things like paste
 	   of ranges work properly.
 	*/
-	sort_track_selection (&selection->tracks);
 
-	if (selection->tracks.empty()) {
+	sort_track_selection (ts);
+
+	if (ts.empty()) {
 		if (!entered_track) {
 			return;
 		}
-		entered.push_back (entered_track);
-		ts = &entered;
-	} else {
-		ts = &selection->tracks;
-	}
+		ts.push_back (entered_track);
+	} 
 
-	for (TrackSelection::iterator i = ts->begin(); i != ts->end(); ++i) {
+	for (TrackViewList::iterator i = ts.begin(); i != ts.end(); ++i) {
 		(*i)->cut_copy_clear (*selection, op);
 	}
 }
@@ -3942,8 +3932,8 @@ Editor::paste_internal (framepos_t position, float times)
 
 	if (!selection->tracks.empty()) {
 		/* there are some selected tracks, so paste to them */
-		sort_track_selection ();
-		ts = selection->tracks;
+		ts = selection->tracks.filter_to_unique_playlists ();
+		sort_track_selection (ts);
 	} else if (_last_cut_copy_source_track) {
 		/* otherwise paste to the track that the cut/copy came from;
 		   see discussion in mantis #3333.
@@ -4048,7 +4038,9 @@ Editor::duplicate_selection (float times)
 
 	ri = new_regions.begin();
 
-	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
+	TrackViewList ts = selection->tracks.filter_to_unique_playlists ();
+
+	for (TrackViewList::iterator i = ts.begin(); i != ts.end(); ++i) {
 		if ((playlist = (*i)->playlist()) == 0) {
 			continue;
 		}
@@ -4127,7 +4119,9 @@ Editor::nudge_track (bool use_edit, bool forwards)
 
 	begin_reversible_command (_("nudge track"));
 
-	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
+	TrackViewList ts = selection->tracks.filter_to_unique_playlists ();
+
+	for (TrackViewList::iterator i = ts.begin(); i != ts.end(); ++i) {
 
 		if ((playlist = (*i)->playlist()) == 0) {
 			continue;
@@ -5935,7 +5929,12 @@ Editor::tab_to_transient (bool forward)
 
 	if (!selection->tracks.empty()) {
 
-		for (TrackSelection::iterator t = selection->tracks.begin(); t != selection->tracks.end(); ++t) {
+		/* don't waste time searching for transients in duplicate playlists.
+		 */
+
+		TrackViewList ts = selection->tracks.filter_to_unique_playlists ();
+
+		for (TrackViewList::iterator t = ts.begin(); t != ts.end(); ++t) {
 
 			RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*t);
 
@@ -6212,23 +6211,34 @@ Editor::insert_time (
 
 	begin_reversible_command (_("insert time"));
 
-	for (TrackSelection::iterator x = selection->tracks.begin(); x != selection->tracks.end(); ++x) {
+	TrackViewList ts = selection->tracks.filter_to_unique_playlists ();
+
+	for (TrackViewList::iterator x = ts.begin(); x != ts.end(); ++x) {
 
 		/* regions */
 
-		vector<boost::shared_ptr<Playlist> > pl;
+		/* don't operate on any playlist more than once, which could
+		 * happen if "all playlists" is enabled, but there is more
+		 * than 1 track using playlists "from" a given track.
+		 */
+
+		set<boost::shared_ptr<Playlist> > pl;
+
 		if (all_playlists) {
 			RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*> (*x);
 			if (rtav) {
-				pl = _session->playlists->playlists_for_track (rtav->track ());
+				vector<boost::shared_ptr<Playlist> > all = _session->playlists->playlists_for_track (rtav->track ());
+				for (vector<boost::shared_ptr<Playlist> >::iterator p = all.begin(); p != all.end(); ++p) {
+					pl.insert (*p);
+				}
 			}
 		} else {
 			if ((*x)->playlist ()) {
-				pl.push_back ((*x)->playlist ());
+				pl.insert ((*x)->playlist ());
 			}
 		}
-
-		for (vector<boost::shared_ptr<Playlist> >::iterator i = pl.begin(); i != pl.end(); ++i) {
+		
+		for (set<boost::shared_ptr<Playlist> >::iterator i = pl.begin(); i != pl.end(); ++i) {
 
 			(*i)->clear_changes ();
 			(*i)->clear_owned_changes ();

@@ -1304,3 +1304,30 @@ TimeAxisView::reset_visual_state ()
 		set_height (preset_height (HeightNormal));
 	}
 }
+
+TrackViewList
+TrackViewList::filter_to_unique_playlists ()
+{
+	std::set<boost::shared_ptr<ARDOUR::Playlist> > playlists;
+	TrackViewList ts;
+
+	for (iterator i = begin(); i != end(); ++i) {
+		RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*> (*i);
+		if (!rtav) {
+			/* not a route: include it anyway */
+			ts.push_back (*i);
+		} else {
+			boost::shared_ptr<ARDOUR::Track> t = rtav->track();
+			if (t) {
+				if (playlists.insert (t->playlist()).second) {
+					/* playlist not seen yet */
+					ts.push_back (*i);
+				}
+			} else {
+				/* not a track: include it anyway */
+				ts.push_back (*i);
+			}
+		}
+	}
+	return ts;
+}

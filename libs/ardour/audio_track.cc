@@ -643,7 +643,7 @@ AudioTrack::freeze_me (InterThreadInfo& itt)
 
 	boost::shared_ptr<Region> region (RegionFactory::create (srcs, plist, false));
 
-	new_playlist->set_orig_diskstream_id (_diskstream->id());
+	new_playlist->set_orig_track_id (id());
 	new_playlist->add_region (region, _session.current_start_frame());
 	new_playlist->set_frozen (true);
 	region->set_locked (true);
