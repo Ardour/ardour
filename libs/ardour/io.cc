@@ -1554,6 +1554,11 @@ IO::process_input (boost::shared_ptr<Processor> proc, framepos_t start_frame, fr
 {
 	/* don't read the data into new buffers - just use the port buffers directly */
 
+	if (n_ports().n_total() == 0) {
+		/* We have no ports, so nothing to process */
+		return;
+	}
+
 	_buffers.get_jack_port_addresses (_ports, nframes);
 	proc->run (_buffers, start_frame, end_frame, nframes, true);
 }
