@@ -2135,35 +2135,24 @@ TempoMap::framepos_plus_bbt (framepos_t pos, BBT_Time op) const
 	return pos;
 }
 
-
 /** Count the number of beats that are equivalent to distance when starting at pos */
-double
+Evoral::MusicalTime
 TempoMap::framewalk_to_beats (framepos_t pos, framecnt_t distance) const
 {
 	Metrics::const_iterator i;
-	double beats = 0;
-	const MeterSection* meter;
-	const MeterSection* m;
 	const TempoSection* tempo;
-	const TempoSection* t;
-	double frames_per_beat;
-
-	double ddist = distance;
-	double dpos = pos;
-
-	meter = &first_meter ();
-	tempo = &first_tempo ();
-
-	assert (meter);
-	assert (tempo);
-
-	/* find the starting metrics for tempo & meter */
+	const MeterSection* meter;
+	
+	/* Find the starting metrics for tempo & meter */
 
 	for (i = metrics->begin(); i != metrics->end(); ++i) {
 
 		if ((*i)->frame() > pos) {
 			break;
 		}
+
+		const TempoSection* t;
+		const MeterSection* m;
 
 		if ((t = dynamic_cast<const TempoSection*>(*i)) != 0) {
 			tempo = t;
@@ -2179,82 +2168,40 @@ TempoMap::framewalk_to_beats (framepos_t pos, framecnt_t distance) const
 	   i     -> for first new metric after "pos", possibly metrics->end()
 	*/
 
-	/* now comes the complicated part. we have to add one beat a time,
-	   checking for a new metric on every beat.
-	*/
+	Evoral::MusicalTime beats = 0;
 
-	frames_per_beat = tempo->frames_per_beat (_frame_rate, *meter);
+	while (distance) {
 
-	double last_dpos = 0;
+		/* End of this section */
+		framepos_t const end = i == metrics->end() ? max_framepos : (*i)->frame ();
 
-	while (ddist > 0) {
+		/* Distance to the end in frames */
+		framecnt_t const distance_to_end = end - pos;
 
-		/* if we're nearly at the end, but have a fractional beat left,
-		   compute the fraction and then its all over
-		*/
+		/* Amount to subtract this time */
+		double const sub = min (distance, distance_to_end);
 
-		if (ddist < frames_per_beat) {
-			beats += ddist / frames_per_beat;
-			break;
-		}
+		/* Update */
+		distance -= sub;
+		beats += sub / tempo->frames_per_beat (_frame_rate, *meter);
 
-		/* walk one beat */
-
-		last_dpos = dpos;
-		ddist -= frames_per_beat;
-		dpos += frames_per_beat;
-		beats += 1.0;
-
-		/* check if we need to use a new metric section: has adding frames moved us
-		   to or after the start of the next metric section? in which case, use it.
-		*/
-
-		if (i != metrics->end()) {
-
-			double const f = (*i)->frame ();
-
-			if (f <= (framepos_t) dpos) {
-
-				/* We just went past a tempo/meter section start at (*i)->frame(),
-				   which will be on a beat.
-
-				   So what we have is
-
-				                       (*i)->frame() [f]
-				   beat      beat      beat                beat
-				   |         |         |                   |
-				   |         |         |                   |
-                                                ^         ^
-				                |         |
-						|         new
-						|         dpos [q]
-						last
-						dpos [p]
-
-				  We need to go back to last_dpos (1 beat ago) and re-add
-				  (f - p) beats using the old frames per beat and (q - f) beats
-				  using the new.
-				*/
-
-				beats -= 1;
-				beats += (f - last_dpos) / frames_per_beat;
-
-				if ((t = dynamic_cast<const TempoSection*>(*i)) != 0) {
-					tempo = t;
-				} else if ((m = dynamic_cast<const MeterSection*>(*i)) != 0) {
-					meter = m;
-				}
-				++i;
-				frames_per_beat = tempo->frames_per_beat (_frame_rate, *meter);
-
-				beats += (dpos - f) / frames_per_beat;
+		/* Move on if there's anything to move to */
+		if (i != metrics->end ()) {
+			const TempoSection* t;
+			const MeterSection* m;
+			
+			if ((t = dynamic_cast<const TempoSection*>(*i)) != 0) {
+				tempo = t;
+			} else if ((m = dynamic_cast<const MeterSection*>(*i)) != 0) {
+				meter = m;
 			}
+
+			++i;
 		}
 	}
 
 	return beats;
 }
-
 
 /** Compare the time of this with that of another MetricSection.
  *  @param with_bbt True to compare using start(), false to use frame().
