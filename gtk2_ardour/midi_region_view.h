@@ -290,6 +290,8 @@ public:
 	void trim_front_starting ();
 	void trim_front_ending ();
 
+	void create_note_at (framepos_t, double, double, bool, bool);
+	
 protected:
 	/** Allows derived types to specify their visibility requirements
 	 * to the TimeAxisViewItem parent class.
@@ -320,8 +322,6 @@ private:
 	void selection_cleared (MidiRegionView *);
 
 	friend class EditNoteDialog;
-
-	void create_note_at(double x, double y, double length, bool, bool);
 
 	/** Play the NoteOn event of the given note immediately
 	 * and schedule the playback of the corresponding NoteOff event.
@@ -385,11 +385,6 @@ private:
 	ArdourCanvas::CanvasNote*            _ghost_note;
 	double                               _last_ghost_x;
 	double                               _last_ghost_y;
-	double                               _drag_start_x;
-	double                               _drag_start_y;
-	double                               _last_x;
-	double                               _last_y;
-	ArdourCanvas::SimpleRect*            _drag_rect;
 	ArdourCanvas::SimpleRect*            _step_edit_cursor;
 	Evoral::MusicalTime                  _step_edit_cursor_width;
 	Evoral::MusicalTime                  _step_edit_cursor_position;

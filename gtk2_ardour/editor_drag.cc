@@ -4267,3 +4267,93 @@ EditorRubberbandSelectDrag::deselect_things ()
 	_editor->selection->clear_points ();
 	_editor->selection->clear_lines ();
 }
+
+NoteCreateDrag::NoteCreateDrag (Editor* e, ArdourCanvas::Item* i, MidiRegionView* rv)
+	: Drag (e, i)
+	, _region_view (rv)
+	, _drag_rect (0)
+{
+
+}
+
+NoteCreateDrag::~NoteCreateDrag ()
+{
+	delete _drag_rect;
+}
+
+void
+NoteCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
+{
+	_drag_rect = new ArdourCanvas::SimpleRect (*_region_view->get_canvas_group ());
+
+	framepos_t pf = _drags->current_pointer_frame ();
+	
+	bool success;
+	Evoral::MusicalTime grid_beats = _editor->get_grid_type_as_beats (success, pf);
+	if (!success) {
+		grid_beats = 1;
+	}
+
+	framecnt_t grid_frames = _region_view->region_beats_to_region_frames (grid_beats);
+
+	/* Hack so that we always snap to the note that we are over, instead of snapping
+	   to the next one if we're more than halfway through the one we're over.
+	*/
+	if (_editor->snap_mode() == SnapNormal && pf > grid_frames / 2) {
+		pf -= grid_frames / 2;
+	}
+
+	_note[0] = adjusted_frame (pf, event) - _region_view->region()->position ();
+
+	MidiStreamView* sv = _region_view->midi_stream_view ();
+	double const x = _editor->frame_to_pixel (_note[0]);
+	double const y = sv->note_to_y (sv->y_to_note (y_to_region (event->button.y)));
+
+	_drag_rect->property_x1() = x;
+	_drag_rect->property_y1() = y;
+	_drag_rect->property_x2() = x;
+	_drag_rect->property_y2() = y + floor (_region_view->midi_stream_view()->note_height ());
+
+	_drag_rect->property_outline_what() = 0xff;
+	_drag_rect->property_outline_color_rgba() = 0xffffff99;
+	_drag_rect->property_fill_color_rgba()    = 0xffffff66;
+}
+
+void
+NoteCreateDrag::motion (GdkEvent* event, bool)
+{
+	_note[1] = adjusted_current_frame (event) - _region_view->region()->position ();
+	double const x = _editor->frame_to_pixel (_note[1]);
+	if (_note[1] > _note[0]) {
+		_drag_rect->property_x2() = x;
+	} else {
+		_drag_rect->property_x1() = x;
+	}
+}
+
+void
+NoteCreateDrag::finished (GdkEvent* event, bool)
+{
+	if (_drag_rect->property_x2() < _drag_rect->property_x1() + 2) {
+		abort ();
+	}
+
+	framepos_t const start = min (_note[0], _note[1]);
+	framecnt_t const length = abs (_note[0] - _note[1]);
+	
+	_region_view->create_note_at (start, _drag_rect->property_y1(), _region_view->region_frames_to_region_beats (length), true, false);
+}
+
+double
+NoteCreateDrag::y_to_region (double y) const
+{
+	double x = 0;
+	_region_view->get_canvas_group()->w2i (x, y);
+	return y;
+}
+
+void
+NoteCreateDrag::aborted (bool)
+{
+	
+}
