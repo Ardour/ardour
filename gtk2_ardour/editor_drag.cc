@@ -4273,7 +4273,7 @@ NoteCreateDrag::NoteCreateDrag (Editor* e, ArdourCanvas::Item* i, MidiRegionView
 	, _region_view (rv)
 	, _drag_rect (0)
 {
-
+	
 }
 
 NoteCreateDrag::~NoteCreateDrag ()
@@ -4296,6 +4296,8 @@ NoteCreateDrag::grid_frames (framepos_t t) const
 void
 NoteCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
+	Drag::start_grab (event, cursor);
+						 
 	_drag_rect = new ArdourCanvas::SimpleRect (*_region_view->get_canvas_group ());
 
 	framepos_t pf = _drags->current_pointer_frame ();
@@ -4340,7 +4342,7 @@ void
 NoteCreateDrag::finished (GdkEvent* event, bool had_movement)
 {
 	if (!had_movement) {
-		abort ();
+		return;
 	}
 	
 	framepos_t const start = min (_note[0], _note[1]);
@@ -4350,7 +4352,7 @@ NoteCreateDrag::finished (GdkEvent* event, bool had_movement)
 	if (_editor->snap_mode() == SnapNormal && length < g) {
 		length = g;
 	}
-	
+
 	_region_view->create_note_at (start, _drag_rect->property_y1(), _region_view->region_frames_to_region_beats (length), true, false);
 }
 
