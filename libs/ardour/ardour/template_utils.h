@@ -22,6 +22,8 @@ namespace ARDOUR {
 	void find_route_templates (std::vector<TemplateInfo>& template_names);
 	void find_session_templates (std::vector<TemplateInfo>& template_names);
 
+	std::string session_template_dir_to_file (std::string const &);
+
 } // namespace ARDOUR
 
 #endif

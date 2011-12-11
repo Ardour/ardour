@@ -32,6 +32,7 @@
 #include "pbd/filesystem.h"
 #include "pbd/error.h"
 #include "pbd/compose.h"
+#include "pbd/pathscanner.h"
 
 #include "i18n.h"
 
@@ -195,6 +196,27 @@ copy_file(const path & from_path, const path & to_path)
 		remove (to_path);
 		throw filesystem_error(string_compose(_("Could not copy existing file %1 to %2"),
 					from_path.to_string(), to_path.to_string()));
+	}
+}
+
+static
+bool accept_all_files (string const &, void *)
+{
+	return true;
+}
+	
+void
+copy_files(const path & from_path, const path & to_dir)
+{
+	PathScanner scanner;
+	vector<string*>* files = scanner (from_path.to_string(), accept_all_files, 0, true, false);
+	for (vector<string*>::iterator i = files->begin(); i != files->end(); ++i) {
+		sys::path from = from_path;
+		from /= **i;
+		sys::path to = to_dir;
+		to /= **i;
+
+		copy_file (from, to);
 	}
 }
 

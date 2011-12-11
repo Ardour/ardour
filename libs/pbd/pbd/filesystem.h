@@ -179,6 +179,12 @@ void rename (const path& from_path, const path& to_path);
 void copy_file(const path & from_path, const path & to_path);
 
 /**
+ * Attempt to copy all regular files from from_path to a new directory.
+ * This method does not recurse.
+ */
+void copy_files(const path & from_path, const path & to_dir);
+
+/**
  * @return The substring of the filename component of the path, starting
  * at the beginning of the filename up to but not including the last dot.
  *

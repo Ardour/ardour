@@ -1,6 +1,8 @@
 #include <algorithm>
 #include <cstring>
 
+#include <glibmm.h>
+
 #include "pbd/filesystem.h"
 #include "pbd/basename.h"
 #include "pbd/pathscanner.h"
@@ -66,10 +68,22 @@ user_route_template_directory ()
 static bool
 template_filter (const string &str, void */*arg*/)
 {
-	cerr << "Checking into " << str << " using " << template_suffix << endl;
-	return (str.length() > strlen(template_suffix) &&
-		str.find (template_suffix) == (str.length() - strlen (template_suffix)));
+	if (!Glib::file_test (str, Glib::FILE_TEST_IS_DIR)) {
+		return false;
+	}
+	
+	return true;
 }
+
+string
+session_template_dir_to_file (string const & dir)
+{
+	sys::path dir_path = dir;
+	sys::path file_path = dir;
+	file_path /= dir_path.leaf() + template_suffix;
+	return file_path.to_string ();
+}
+
 
 void
 find_session_templates (vector<TemplateInfo>& template_names)
@@ -79,7 +93,7 @@ find_session_templates (vector<TemplateInfo>& template_names)
 	SearchPath spath (system_template_directory());
 	spath += user_template_directory ();
 
-	templates = scanner (spath.to_string(), template_filter, 0, false, true);
+	templates = scanner (spath.to_string(), template_filter, 0, true, true);
 
 	if (!templates) {
 		cerr << "Found nothing along " << spath.to_string() << endl;
@@ -89,18 +103,18 @@ find_session_templates (vector<TemplateInfo>& template_names)
 	cerr << "Found " << templates->size() << " along " << spath.to_string() << endl;
 
 	for (vector<string*>::iterator i = templates->begin(); i != templates->end(); ++i) {
-		string fullpath = *(*i);
+		string file = session_template_dir_to_file (**i);
 
 		XMLTree tree;
 
-		if (!tree.read (fullpath.c_str())) {
+		if (!tree.read (file.c_str())) {
 			continue;
 		}
 
 		TemplateInfo rti;
 
-		rti.name = basename_nosuffix (fullpath);
-		rti.path = fullpath;
+		rti.name = basename_nosuffix (**i);
+		rti.path = **i;
 
 		template_names.push_back (rti);
 	}

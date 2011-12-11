@@ -390,9 +390,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void remove_pending_capture_state ();
 	int rename (const std::string&);
 
-	static int rename_template (std::string old_name, std::string new_name);
-	static int delete_template (std::string name);
-
 	PBD::Signal1<void,std::string> StateSaved;
 	PBD::Signal0<void> StateReady;
 

@@ -22,9 +22,11 @@ def build(bld):
     for t in templates:
         obj = bld(features = 'subst')
         obj.source = [ t ]
-        obj.target = [ os.path.basename(t.srcpath()).replace('.in', '') ]
+        dir_name = os.path.basename(t.srcpath()).replace('.template.in', '')
+        file_name = os.path.basename(t.srcpath()).replace('.in', '')
+        obj.target = [ os.path.join(dir_name, file_name) ]
         obj.dict = subst_dict
-        obj.install_path = os.path.join(bld.env['DATADIR'], 'ardour3', 'templates')
+        obj.install_path = os.path.join(bld.env['DATADIR'], 'ardour3', os.path.join('templates', dir_name))
 
 def options(opt):
     pass

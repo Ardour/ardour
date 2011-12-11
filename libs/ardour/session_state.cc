@@ -502,9 +502,11 @@ Session::ensure_subdirs ()
 	return 0;
 }
 
-/** Caller must not hold process lock */
+/** @param session_template directory containing session template, or empty.
+ *  Caller must not hold process lock.
+ */
 int
-Session::create (const string& mix_template, BusProfile* bus_profile)
+Session::create (const string& session_template, BusProfile* bus_profile)
 {
 	if (g_mkdir_with_parents (_path.c_str(), 0755) < 0) {
 		error << string_compose(_("Session: cannot create session folder \"%1\" (%2)"), _path, strerror (errno)) << endmsg;
@@ -517,8 +519,8 @@ Session::create (const string& mix_template, BusProfile* bus_profile)
 
 	_writable = exists_and_writable (sys::path (_path));
 
-	if (!mix_template.empty()) {
-		std::string in_path = mix_template;
+	if (!session_template.empty()) {
+		std::string in_path = session_template_dir_to_file (session_template);
 
 		ifstream in(in_path.c_str());
 
@@ -532,16 +534,22 @@ Session::create (const string& mix_template, BusProfile* bus_profile)
 			if (out) {
 				out << in.rdbuf();
                                 _is_new = false;
+
+				/* Copy plugin state files from template to new session */
+				sys::path template_plugins = session_template;
+				template_plugins /= X_("plugins");
+				sys::copy_files (template_plugins, plugins_dir ());
+				
 				return 0;
 
 			} else {
-				error << string_compose (_("Could not open %1 for writing mix template"), out_path)
+				error << string_compose (_("Could not open %1 for writing session template"), out_path)
 					<< endmsg;
 				return -1;
 			}
 
 		} else {
-			error << string_compose (_("Could not open mix template %1 for reading"), in_path)
+			error << string_compose (_("Could not open session template %1 for reading"), in_path)
 				<< endmsg;
 			return -1;
 		}
@@ -2048,59 +2056,36 @@ Session::save_template (string template_name)
 
 	tree.set_root (&get_template());
 
-	sys::path template_file_path(user_template_dir);
-	template_file_path /= template_name + template_suffix;
-
-	if (sys::exists (template_file_path))
+	sys::path template_dir_path(user_template_dir);
+	
+	/* directory to put the template in */
+	template_dir_path /= template_name;
+	if (sys::exists (template_dir_path))
 	{
 		warning << string_compose(_("Template \"%1\" already exists - new version not created"),
-				template_file_path.to_string()) << endmsg;
+				template_dir_path.to_string()) << endmsg;
 		return -1;
 	}
+	
+	sys::create_directories (template_dir_path);
+
+	/* file to write */
+	sys::path template_file_path = template_dir_path;
+	template_file_path /= template_name + template_suffix;
 
 	if (!tree.write (template_file_path.to_string())) {
 		error << _("template not saved") << endmsg;
 		return -1;
 	}
 
+	/* copy plugin state directory */
+
+	sys::path template_plugin_state_path = template_dir_path;
+	template_plugin_state_path /= X_("plugins");
+	sys::create_directories (template_plugin_state_path);
+	sys::copy_files (plugins_dir(), template_plugin_state_path);
+
 	return 0;
-}
-
-int
-Session::rename_template (string old_name, string new_name)
-{
-	sys::path old_path (user_template_directory());
-	old_path /= old_name + template_suffix;
-
-	sys::path new_path(user_template_directory());
-	new_path /= new_name + template_suffix;
-
-	if (sys::exists (new_path)) {
-		warning << string_compose(_("Template \"%1\" already exists - template not renamed"),
-					  new_path.to_string()) << endmsg;
-		return -1;
-	}
-
-	try {
-		sys::rename (old_path, new_path);
-		return 0;
-	} catch (...) {
-		return -1;
-	}
-}
-
-int
-Session::delete_template (string name)
-{
-	sys::path path = user_template_directory();
-	path /= name + template_suffix;
-
-	try {
-		sys::remove (path);
-		return 0;
-	} catch (...) {
-		return -1;
-	}
 }
 
 void
