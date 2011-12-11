@@ -40,6 +40,7 @@
 #include "ardour/playlist.h"
 #include "ardour/region_factory.h"
 #include "ardour/session.h"
+#include "ardour/tempo.h"
 #include "ardour/types.h"
 
 #include "i18n.h"
@@ -52,6 +53,7 @@ using namespace PBD;
 namespace ARDOUR {
 	namespace Properties {
 		PBD::PropertyDescriptor<void*>                midi_data;
+		PBD::PropertyDescriptor<Evoral::MusicalTime>  start_beats;
 		PBD::PropertyDescriptor<Evoral::MusicalTime>  length_beats;
 	}
 }
@@ -61,6 +63,8 @@ MidiRegion::make_property_quarks ()
 {
 	Properties::midi_data.property_id = g_quark_from_static_string (X_("midi-data"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for midi-data = %1\n", Properties::midi_data.property_id));
+	Properties::start_beats.property_id = g_quark_from_static_string (X_("start-beats"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for start-beats = %1\n", Properties::start_beats.property_id));
 	Properties::length_beats.property_id = g_quark_from_static_string (X_("length-beats"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for length-beats = %1\n", Properties::length_beats.property_id));
 }
@@ -68,12 +72,14 @@ MidiRegion::make_property_quarks ()
 void
 MidiRegion::register_properties ()
 {
+	add_property (_start_beats);
 	add_property (_length_beats);
 }
 
 /* Basic MidiRegion constructor (many channels) */
 MidiRegion::MidiRegion (const SourceList& srcs)
 	: Region (srcs)
+	, _start_beats (Properties::start_beats, 0)
 	, _length_beats (Properties::length_beats, midi_source(0)->length_beats())
 {
 	register_properties ();
@@ -86,6 +92,7 @@ MidiRegion::MidiRegion (const SourceList& srcs)
 
 MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other)
 	: Region (other)
+	, _start_beats (Properties::start_beats, other->_start_beats)
 	, _length_beats (Properties::length_beats, (Evoral::MusicalTime) 0)
 {
 	update_length_beats ();
@@ -96,14 +103,16 @@ MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other)
 	model_changed ();
 }
 
-/** Create a new MidiRegion, that is part of an existing one */
+/** Create a new MidiRegion that is part of an existing one */
 MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other, frameoffset_t offset)
 	: Region (other, offset)
+	, _start_beats (Properties::start_beats, (Evoral::MusicalTime) 0)
 	, _length_beats (Properties::length_beats, (Evoral::MusicalTime) 0)
 {
 	BeatsFramesConverter bfc (_session.tempo_map(), _position);
 	Evoral::MusicalTime const offset_beats = bfc.from (offset);
 
+	_start_beats = other->_start_beats + offset_beats;
 	_length_beats = other->_length_beats - offset_beats;
 
 	register_properties ();
@@ -133,6 +142,7 @@ MidiRegion::clone () const
 	plist.add (Properties::name, ms->name());
 	plist.add (Properties::whole_file, true);
 	plist.add (Properties::start, _start);
+	plist.add (Properties::start_beats, _start_beats);
 	plist.add (Properties::length, _length);
 	plist.add (Properties::length_beats, _length_beats);
 	plist.add (Properties::layer, 0);
@@ -145,7 +155,16 @@ MidiRegion::post_set (const PropertyChange& pc)
 {
 	if (pc.contains (Properties::length) && !pc.contains (Properties::length_beats)) {
 		update_length_beats ();
+	} else if (pc.contains (Properties::start) && !pc.contains (Properties::start_beats)) {
+		set_start_beats_from_start_frames ();
 	}
+}
+
+void
+MidiRegion::set_start_beats_from_start_frames ()
+{
+	BeatsFramesConverter c (_session.tempo_map(), _position - _start);
+	_start_beats = c.from (_start);
 }
 
 void
@@ -153,6 +172,17 @@ MidiRegion::set_length_internal (framecnt_t len)
 {
 	Region::set_length_internal (len);
 	update_length_beats ();
+}
+
+void
+MidiRegion::update_after_tempo_map_change ()
+{
+	Region::update_after_tempo_map_change ();
+
+	/* _position has now been updated for the new tempo map */
+	_start = _position - _session.tempo_map().framepos_minus_beats (_position, _start_beats);
+
+	send_change (Properties::start);
 }
 
 void

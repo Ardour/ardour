@@ -189,7 +189,7 @@ class Region
 	void set_position (framepos_t);
 	void set_position_on_top (framepos_t);
 	void special_set_position (framepos_t);
-	void update_position_after_tempo_map_change ();
+	virtual void update_after_tempo_map_change ();
 	void nudge_position (frameoffset_t);
 
 	bool at_natural_position () const;

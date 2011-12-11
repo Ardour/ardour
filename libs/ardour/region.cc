@@ -559,7 +559,7 @@ Region::set_position_lock_style (PositionLockStyle ps)
 }
 
 void
-Region::update_position_after_tempo_map_change ()
+Region::update_after_tempo_map_change ()
 {
 	boost::shared_ptr<Playlist> pl (playlist());
 

@@ -2979,7 +2979,7 @@ Playlist::update_after_tempo_map_change ()
 	freeze ();
 
 	for (RegionList::iterator i = copy.begin(); i != copy.end(); ++i) {
-		(*i)->update_position_after_tempo_map_change ();
+		(*i)->update_after_tempo_map_change ();
 	}
 
 	thaw ();

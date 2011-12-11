@@ -1935,19 +1935,30 @@ TempoMap::bbt_subtract (const BBT_Time& start, const BBT_Time& decrement) const
 	return result;
 }
 
-/** Add some (fractional) beats to a frame position, and return the result in frames */
+/** Add some (fractional) beats to a session frame position, and return the result in frames.
+ *  pos can be -ve, if required.
+ */
 framepos_t
 TempoMap::framepos_plus_beats (framepos_t pos, Evoral::MusicalTime beats) const
 {
 	Metrics::const_iterator i;
 	const TempoSection* tempo;
 	const MeterSection* meter;
-	
+
 	/* Find the starting metrics for tempo & meter */
 
 	for (i = metrics->begin(); i != metrics->end(); ++i) {
 
-		if ((*i)->frame() > pos) {
+		/* This is a bit of a hack, but pos could be -ve, and if it is,
+		   we consider the initial metric changes (at time 0) to actually
+		   be in effect at pos.
+		*/
+		framepos_t f = (*i)->frame ();
+		if (pos < 0 && f == 0) {
+			f = pos;
+		}
+
+		if (f > pos) {
 			break;
 		}
 
@@ -1970,11 +1981,11 @@ TempoMap::framepos_plus_beats (framepos_t pos, Evoral::MusicalTime beats) const
 
 	while (beats) {
 
-		/* End of this section */
-		framepos_t end = i == metrics->end() ? max_framepos : (*i)->frame ();
+		/* Distance to the end of this section in frames */
+		framecnt_t distance_frames = i == metrics->end() ? max_framepos : ((*i)->frame() - pos);
 
 		/* Distance to the end in beats */
-		Evoral::MusicalTime distance_beats = (end - pos) / tempo->frames_per_beat (_frame_rate, *meter);
+		Evoral::MusicalTime distance_beats = distance_frames / tempo->frames_per_beat (_frame_rate, *meter);
 
 		/* Amount to subtract this time */
 		double const sub = min (distance_beats, beats);
@@ -1995,6 +2006,112 @@ TempoMap::framepos_plus_beats (framepos_t pos, Evoral::MusicalTime beats) const
 			}
 
 			++i;
+		}
+	}
+
+	return pos;
+}
+
+/** Subtract some (fractional) beats to a frame position, and return the result in frames */
+framepos_t
+TempoMap::framepos_minus_beats (framepos_t pos, Evoral::MusicalTime beats) const
+{
+	Metrics::const_iterator i;
+	const TempoSection* tempo = 0;
+	const MeterSection* meter = 0;
+	
+	/* Find the starting metrics for tempo & meter */
+
+	for (i = metrics->begin(); i != metrics->end(); ++i) {
+
+		if ((*i)->frame() > pos) {
+			break;
+		}
+
+		const TempoSection* t;
+		const MeterSection* m;
+
+		if ((t = dynamic_cast<const TempoSection*>(*i)) != 0) {
+			tempo = t;
+		} else if ((m = dynamic_cast<const MeterSection*>(*i)) != 0) {
+			meter = m;
+		}
+	}
+
+	/* Move i back to the metric before "pos" */
+	if (i != metrics->begin ()) {
+		--i;
+	}
+
+	/* We now have:
+
+	   meter -> the Meter for "pos"
+	   tempo -> the Tempo for "pos"
+	   i     -> the first metric before "pos", possibly metrics->end()
+	*/
+
+	while (beats) {
+
+		/* End of this section (looking backwards) */
+		framepos_t end = i == metrics->end() ? max_framepos : (*i)->frame ();
+
+		/* Distance to the end in beats */
+		Evoral::MusicalTime distance_beats = (pos - end) / tempo->frames_per_beat (_frame_rate, *meter);
+
+		/* Amount to subtract this time */
+		double const sub = min (distance_beats, beats);
+
+		/* Update */
+		beats -= sub;
+		pos -= sub * tempo->frames_per_beat (_frame_rate, *meter);
+
+		/* Move i, tempo and meter back, if there's anything to move to.
+		   This is more complicated than the forward case, as we have to
+		   a) move back to the previous change in tempo or metric
+		   then b) scan back further to the last change in the opposite thing
+		   so that tempo/meter are both set up correctly.
+
+		   e.g. if we have (where M is a meter change and T a tempo change):
+		   M1  T1  T2  T3  M2
+
+		   and we move i back to M2, we must also move tempo back to T3 so
+		   that tempo/meter continue to reflect the current state.
+
+		   Moving further back we'd move i to T3, and meter to M1, then
+		   i to T2 and meter (still) to M1, etc.
+
+		   XXX: this is slightly farcical.
+		*/
+
+		if (i != metrics->begin ()) {
+
+			--i;
+
+			bool found_tempo = false;
+			bool found_meter = false;
+
+			const TempoSection* t;
+			const MeterSection* m;
+
+			if ((t = dynamic_cast<const TempoSection*>(*i)) != 0) {
+				tempo = t;
+				found_tempo = true;
+			} else if ((m = dynamic_cast<const MeterSection*>(*i)) != 0) {
+				meter = m;
+				found_meter = true;
+			}
+
+			Metrics::const_iterator j = i;
+			while (j != metrics->begin ()) {
+				--j;
+				if (found_tempo && ((m = dynamic_cast<const MeterSection*> (*j)) != 0)) {
+					meter = m;
+					break;
+				} else if (found_meter && ((t = dynamic_cast<const TempoSection*> (*j)) != 0)) {
+					tempo = t;
+					break;
+				}
+			}
 		}
 	}
 
@@ -2135,7 +2252,9 @@ TempoMap::framepos_plus_bbt (framepos_t pos, BBT_Time op) const
 	return pos;
 }
 
-/** Count the number of beats that are equivalent to distance when starting at pos */
+/** Count the number of beats that are equivalent to distance when going forward,
+    starting at pos.
+*/
 Evoral::MusicalTime
 TempoMap::framewalk_to_beats (framepos_t pos, framecnt_t distance) const
 {
@@ -2165,7 +2284,7 @@ TempoMap::framewalk_to_beats (framepos_t pos, framecnt_t distance) const
 
 	   meter -> the Meter for "pos"
 	   tempo -> the Tempo for "pos"
-	   i     -> for first new metric after "pos", possibly metrics->end()
+	   i     -> the first metric after "pos", possibly metrics->end()
 	*/
 
 	Evoral::MusicalTime beats = 0;

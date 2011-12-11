@@ -1,8 +1,8 @@
-#include "framepos_plus_beats_test.h"
+#include "framepos_minus_beats_test.h"
 #include "ardour/tempo.h"
 #include "timecode/bbt_time.h"
 
-CPPUNIT_TEST_SUITE_REGISTRATION (FrameposPlusBeatsTest);
+CPPUNIT_TEST_SUITE_REGISTRATION (FrameposMinusBeatsTest);
 
 using namespace std;
 using namespace ARDOUR;
@@ -10,7 +10,7 @@ using namespace Timecode;
 
 /* Basic tests with no tempo / meter changes */
 void
-FrameposPlusBeatsTest::singleTempoTest ()
+FrameposMinusBeatsTest::singleTempoTest ()
 {
 	int const sampling_rate = 48000;
 	int const bpm = 120;
@@ -24,18 +24,14 @@ FrameposPlusBeatsTest::singleTempoTest ()
 	map.add_meter (meter, BBT_Time (1, 1, 0));
 	map.add_tempo (tempo, BBT_Time (1, 1, 0));
 
-	/* Add 1 beat to beat 3 of the first bar */
-	framepos_t r = map.framepos_plus_beats (frames_per_beat * 2, 1);
-	CPPUNIT_ASSERT_EQUAL (r, framepos_t (frames_per_beat * 3));
-
-	/* Add 4 beats to a -ve frame of 1 beat before zero */
-	r = map.framepos_plus_beats (-frames_per_beat * 1, 4);
-	CPPUNIT_ASSERT_EQUAL (r, framepos_t (frames_per_beat * 3));
+	/* Subtract 1 beat from beat 3 of the first bar */
+	framepos_t r = map.framepos_minus_beats (frames_per_beat * 2, 1);
+	CPPUNIT_ASSERT_EQUAL (r, framepos_t (frames_per_beat * 1));
 }
 
 /* Test adding things that overlap a tempo change */
 void
-FrameposPlusBeatsTest::doubleTempoTest ()
+FrameposMinusBeatsTest::doubleTempoTest ()
 {
 	int const sampling_rate = 48000;
 
@@ -68,17 +64,17 @@ FrameposPlusBeatsTest::doubleTempoTest ()
 
 	/* Now some tests */
 
-	/* Add 1 beat to 1|2 */
-	framepos_t r = map.framepos_plus_beats (24e3, 1);
-	CPPUNIT_ASSERT_EQUAL (r, framepos_t (48e3));
+	/* Subtract 1 beat from 1|2 */
+	framepos_t r = map.framepos_minus_beats (24e3, 1);
+	CPPUNIT_ASSERT_EQUAL (r, framepos_t (0));
 
-	/* Add 2 beats to 3|4 (over the tempo change) */
-	r = map.framepos_plus_beats (264e3, 2);
-	CPPUNIT_ASSERT_EQUAL (r, framepos_t (264e3 + 24e3 + 12e3));
+	/* Subtract 2 beats from 4|2 (over the tempo change) */
+	r = map.framepos_minus_beats (288e3 + 12e3, 2);
+	CPPUNIT_ASSERT_EQUAL (r, framepos_t (288e3 - 24e3));
 
-	/* Add 2.5 beats to 3|3|960 (over the tempo change) */
-	r = map.framepos_plus_beats (264e3 - 12e3, 2.5);
-	CPPUNIT_ASSERT_EQUAL (r, framepos_t (264e3 + 24e3 + 12e3));
+	/* Subtract 2.5 beats from 4|2 (over the tempo change) */
+	r = map.framepos_minus_beats (288e3 + 12e3, 2.5);
+	CPPUNIT_ASSERT_EQUAL (r, framepos_t (288e3 - 24e3 - 12e3));
 }
 
 /* Same as doubleTempoTest () except put a meter change at the same time as the
@@ -87,7 +83,7 @@ FrameposPlusBeatsTest::doubleTempoTest ()
 */
    
 void
-FrameposPlusBeatsTest::doubleTempoWithMeterTest ()
+FrameposMinusBeatsTest::doubleTempoWithMeterTest ()
 {
 	int const sampling_rate = 48000;
 
@@ -122,17 +118,17 @@ FrameposPlusBeatsTest::doubleTempoWithMeterTest ()
 
 	/* Now some tests */
 
-	/* Add 1 beat to 1|2 */
-	framepos_t r = map.framepos_plus_beats (24e3, 1);
-	CPPUNIT_ASSERT_EQUAL (r, framepos_t (48e3));
+	/* Subtract 1 beat from 1|2 */
+	framepos_t r = map.framepos_minus_beats (24e3, 1);
+	CPPUNIT_ASSERT_EQUAL (r, framepos_t (0));
 
-	/* Add 2 beats to 3|4 (over the tempo change) */
-	r = map.framepos_plus_beats (264e3, 2);
-	CPPUNIT_ASSERT_EQUAL (r, framepos_t (264e3 + 24e3 + 12e3));
+	/* Subtract 2 beats from 4|2 (over the tempo change) */
+	r = map.framepos_minus_beats (288e3 + 12e3, 2);
+	CPPUNIT_ASSERT_EQUAL (r, framepos_t (288e3 - 24e3));
 
-	/* Add 2.5 beats to 3|3|960 (over the tempo change) */
-	r = map.framepos_plus_beats (264e3 - 12e3, 2.5);
-	CPPUNIT_ASSERT_EQUAL (r, framepos_t (264e3 + 24e3 + 12e3));
+	/* Subtract 2.5 beats from 4|2 (over the tempo change) */
+	r = map.framepos_minus_beats (288e3 + 12e3, 2.5);
+	CPPUNIT_ASSERT_EQUAL (r, framepos_t (288e3 - 24e3 - 12e3));
 }
 
 
