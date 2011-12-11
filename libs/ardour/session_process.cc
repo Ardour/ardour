@@ -1133,11 +1133,23 @@ Session::process_event (SessionEvent* ev)
 framepos_t
 Session::compute_stop_limit () const
 {
-	bool const punching = (config.get_punch_in () && _locations->auto_punch_location());
+	if (!Config->get_stop_at_session_end ()) {
+		return max_framepos;
+	}
+	
+	bool const punching_in = (config.get_punch_in () && _locations->auto_punch_location());
+	bool const punching_out = (config.get_punch_out () && _locations->auto_punch_location());
 
-	if (!actively_recording() && !punching && Config->get_stop_at_session_end()) {
-		return current_end_frame ();
+	if (actively_recording ()) {
+		/* permanently recording */
+		return max_framepos;
+	} else if (punching_in && !punching_out) {
+		/* punching in but never out */
+		return max_framepos;
+	} else if (punching_in && punching_out && _locations->auto_punch_location()->end() > current_end_frame()) {
+		/* punching in and punching out after session end */
+		return max_framepos;
 	}
 
-	return max_framepos;
+	return current_end_frame ();
 }
