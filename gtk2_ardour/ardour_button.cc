@@ -543,6 +543,7 @@ ArdourButton::set_related_action (RefPtr<Action> act)
 
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (_action);
 		if (tact) {
+			action_toggled ();
 			tact->signal_toggled().connect (sigc::mem_fun (*this, &ArdourButton::action_toggled));
 		} 
 
