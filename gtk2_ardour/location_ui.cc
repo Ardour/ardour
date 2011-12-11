@@ -131,6 +131,7 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
 
 	 start_to_playhead_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::to_playhead_button_pressed), LocStart));
          start_clock.ValueChanged.connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::clock_changed), LocStart));
+	 start_clock.signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::locate_to_clock), &start_clock), false);
 
 	 end_hbox.set_spacing (2);
          end_hbox.pack_start (end_clock, false, false);
@@ -138,6 +139,7 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
 
 	 end_to_playhead_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::to_playhead_button_pressed), LocEnd));
          end_clock.ValueChanged.connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::clock_changed), LocEnd));
+	 end_clock.signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::locate_to_clock), &end_clock), false);
 
          length_clock.ValueChanged.connect (sigc::bind ( sigc::mem_fun(*this, &LocationEditRow::clock_changed), LocLength));
 
@@ -236,6 +238,8 @@ LocationEditRow::set_location (Location *loc)
 
 		name_label.set_text (location->name());
 		name_label.set_size_request (80, -1);
+
+		remove_button.hide ();
 
 		if (!name_label.get_parent()) {
 			item_table.attach (name_label, 1, 2, 0, 1, FILL, FILL, 4, 0);
@@ -400,6 +404,16 @@ LocationEditRow::to_playhead_button_pressed (LocationPart part)
 	default:
 		break;
 	}
+}
+
+bool
+LocationEditRow::locate_to_clock (GdkEventButton* ev, AudioClock* clock)
+{
+	if (Keyboard::is_button2_event (ev)) {
+		_session->request_locate (clock->current_time());
+		return true;
+	}
+	return false;
 }
 
 void

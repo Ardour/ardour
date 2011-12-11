@@ -118,6 +118,7 @@ class LocationEditRow  : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	void to_playhead_button_pressed (LocationPart part);
 
 	void clock_changed (LocationPart part);
+	bool locate_to_clock (GdkEventButton*, AudioClock*);
 
 	void cd_toggled ();
 	void hide_toggled ();
