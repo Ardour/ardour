@@ -27,6 +27,10 @@ FrameposMinusBeatsTest::singleTempoTest ()
 	/* Subtract 1 beat from beat 3 of the first bar */
 	framepos_t r = map.framepos_minus_beats (frames_per_beat * 2, 1);
 	CPPUNIT_ASSERT_EQUAL (r, framepos_t (frames_per_beat * 1));
+
+	/* Subtract 4 beats from 3 beats in, to go beyond zero */
+	r = map.framepos_minus_beats (frames_per_beat * 3, 4);
+	CPPUNIT_ASSERT_EQUAL (r, framepos_t (- frames_per_beat));
 }
 
 /* Test adding things that overlap a tempo change */

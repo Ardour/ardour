@@ -2024,6 +2024,15 @@ TempoMap::framepos_minus_beats (framepos_t pos, Evoral::MusicalTime beats) const
 
 	for (i = metrics->begin(); i != metrics->end(); ++i) {
 
+		/* This is a bit of a hack, but pos could be -ve, and if it is,
+		   we consider the initial metric changes (at time 0) to actually
+		   be in effect at pos.
+		*/
+		framepos_t f = (*i)->frame ();
+		if (pos < 0 && f == 0) {
+			f = pos;
+		}
+
 		if ((*i)->frame() > pos) {
 			break;
 		}
@@ -2038,9 +2047,13 @@ TempoMap::framepos_minus_beats (framepos_t pos, Evoral::MusicalTime beats) const
 		}
 	}
 
+	bool no_more_metrics = false;
+
 	/* Move i back to the metric before "pos" */
 	if (i != metrics->begin ()) {
 		--i;
+	} else {
+		no_more_metrics = true;
 	}
 
 	/* We now have:
@@ -2052,11 +2065,11 @@ TempoMap::framepos_minus_beats (framepos_t pos, Evoral::MusicalTime beats) const
 
 	while (beats) {
 
-		/* End of this section (looking backwards) */
-		framepos_t end = i == metrics->end() ? max_framepos : (*i)->frame ();
+		/* Distance to the end of this section in frames */
+		framecnt_t distance_frames = no_more_metrics ? max_framepos : (pos - (*i)->frame());
 
 		/* Distance to the end in beats */
-		Evoral::MusicalTime distance_beats = (pos - end) / tempo->frames_per_beat (_frame_rate, *meter);
+		Evoral::MusicalTime distance_beats = distance_frames / tempo->frames_per_beat (_frame_rate, *meter);
 
 		/* Amount to subtract this time */
 		double const sub = min (distance_beats, beats);
@@ -2112,6 +2125,8 @@ TempoMap::framepos_minus_beats (framepos_t pos, Evoral::MusicalTime beats) const
 					break;
 				}
 			}
+		} else {
+			no_more_metrics = true;
 		}
 	}
 
