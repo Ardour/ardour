@@ -2041,7 +2041,7 @@ Session::save_template (string template_name)
 	}
 	catch(sys::filesystem_error& ex)
 	{
-		error << string_compose(_("Could not create mix templates directory \"%1\" (%2)"),
+		error << string_compose(_("Could not create templates directory \"%1\" (%2)"),
 				user_template_dir.to_string(), ex.what()) << endmsg;
 		return -1;
 	}
