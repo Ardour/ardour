@@ -115,7 +115,9 @@ Track::set_state (const XMLNode& node, int version)
 		}
 	}
 
-	_diskstream->playlist()->set_orig_track_id (id());
+	if (_diskstream) {
+		_diskstream->playlist()->set_orig_track_id (id());
+	}
 
 	/* set rec-enable control *AFTER* setting up diskstream, because it may
 	   want to operate on the diskstream as it sets its own state
