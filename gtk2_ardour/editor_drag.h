@@ -471,6 +471,7 @@ public:
 
 private:
 	double y_to_region (double) const;
+	framecnt_t grid_frames (framepos_t) const;
 	
 	MidiRegionView* _region_view;
 	ArdourCanvas::SimpleRect* _drag_rect;

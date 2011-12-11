@@ -4281,26 +4281,31 @@ NoteCreateDrag::~NoteCreateDrag ()
 	delete _drag_rect;
 }
 
+framecnt_t
+NoteCreateDrag::grid_frames (framepos_t t) const
+{
+	bool success;
+	Evoral::MusicalTime grid_beats = _editor->get_grid_type_as_beats (success, t);
+	if (!success) {
+		grid_beats = 1;
+	}
+
+	return _region_view->region_beats_to_region_frames (grid_beats);
+}
+
 void
 NoteCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
 	_drag_rect = new ArdourCanvas::SimpleRect (*_region_view->get_canvas_group ());
 
 	framepos_t pf = _drags->current_pointer_frame ();
-	
-	bool success;
-	Evoral::MusicalTime grid_beats = _editor->get_grid_type_as_beats (success, pf);
-	if (!success) {
-		grid_beats = 1;
-	}
-
-	framecnt_t grid_frames = _region_view->region_beats_to_region_frames (grid_beats);
+	framecnt_t const g = grid_frames (pf);
 
 	/* Hack so that we always snap to the note that we are over, instead of snapping
 	   to the next one if we're more than halfway through the one we're over.
 	*/
-	if (_editor->snap_mode() == SnapNormal && pf > grid_frames / 2) {
-		pf -= grid_frames / 2;
+	if (_editor->snap_mode() == SnapNormal && pf > g / 2) {
+		pf -= g / 2;
 	}
 
 	_note[0] = adjusted_frame (pf, event) - _region_view->region()->position ();
@@ -4332,14 +4337,19 @@ NoteCreateDrag::motion (GdkEvent* event, bool)
 }
 
 void
-NoteCreateDrag::finished (GdkEvent* event, bool)
+NoteCreateDrag::finished (GdkEvent* event, bool had_movement)
 {
-	if (_drag_rect->property_x2() < _drag_rect->property_x1() + 2) {
+	if (!had_movement) {
 		abort ();
 	}
-
+	
 	framepos_t const start = min (_note[0], _note[1]);
-	framecnt_t const length = abs (_note[0] - _note[1]);
+	framecnt_t length = abs (_note[0] - _note[1]);
+
+	framecnt_t const g = grid_frames (start);
+	if (_editor->snap_mode() == SnapNormal && length < g) {
+		length = g;
+	}
 	
 	_region_view->create_note_at (start, _drag_rect->property_y1(), _region_view->region_frames_to_region_beats (length), true, false);
 }
