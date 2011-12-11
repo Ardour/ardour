@@ -79,12 +79,12 @@ class LocationEditRow  : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	Gtk::Label    number_label;
 
 	Gtk::HBox     start_hbox;
-	Gtk::Button   start_go_button;
 	AudioClock    start_clock;
+	Gtk::Button   start_to_playhead_button;
 
 	Gtk::HBox     end_hbox;
-	Gtk::Button   end_go_button;
 	AudioClock    end_clock;
+	Gtk::Button   end_to_playhead_button;
 
 	AudioClock    length_clock;
 	Gtk::CheckButton cd_check_button;
@@ -116,7 +116,6 @@ class LocationEditRow  : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	void composer_entry_changed ();
 
 	void to_playhead_button_pressed (LocationPart part);
-	void go_button_pressed (LocationPart part);
 
 	void clock_changed (LocationPart part);
 

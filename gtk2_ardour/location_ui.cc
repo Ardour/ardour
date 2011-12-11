@@ -48,7 +48,9 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
         , location(0)
         , item_table (1, 6, false)
         , start_clock (X_("locationstart"), true, "", true, false)
+	, start_to_playhead_button (_("Use PH"))
         , end_clock (X_("locationend"), true, "", true, false)
+	, end_to_playhead_button (_("Use PH"))
         , length_clock (X_("locationlength"), true, "", true, false, true)
         , cd_check_button (_("CD"))
         , hide_check_button (_("Hide"))
@@ -57,18 +59,14 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
         , scms_check_button (_("SCMS"))
         , preemph_check_button (_("Pre-Emphasis"))
         , _clock_group (0)
- {
+{
          i_am_the_modifier = 0;
 
-         start_go_button.set_image (*manage (new Image (Stock::JUMP_TO, Gtk::ICON_SIZE_SMALL_TOOLBAR)));
-         end_go_button.set_image (*manage (new Image (Stock::JUMP_TO, Gtk::ICON_SIZE_SMALL_TOOLBAR)));
-         remove_button.set_image (*manage (new Image (Stock::REMOVE, Gtk::ICON_SIZE_SMALL_TOOLBAR)));
+         remove_button.set_image (*manage (new Image (Stock::REMOVE, Gtk::ICON_SIZE_MENU)));
 
          number_label.set_name ("LocationEditNumberLabel");
          name_label.set_name ("LocationEditNameLabel");
          name_entry.set_name ("LocationEditNameEntry");
-         start_go_button.set_name ("LocationEditGoButton");
-         end_go_button.set_name ("LocationEditGoButton");
          cd_check_button.set_name ("LocationEditCdButton");
          hide_check_button.set_name ("LocationEditHideButton");
          lock_check_button.set_name ("LocationEditLockButton");
@@ -82,12 +80,6 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
          performer_entry.set_name ("LocationEditNameEntry");
          composer_label.set_name ("LocationEditNumberLabel");
          composer_entry.set_name ("LocationEditNameEntry");
-
-	 Gtk::Button* start_to_playhead_button = manage (new Button (_("Use PH")));
-	 Gtk::Button* end_to_playhead_button = manage (new Button (_("Use PH")));
-
-	 ARDOUR_UI::instance()->tooltips().set_tip (*start_to_playhead_button, _("Set value to playhead"));
-	 ARDOUR_UI::instance()->tooltips().set_tip (*end_to_playhead_button, _("Set value to playhead"));
 
          isrc_label.set_text ("ISRC: ");
          isrc_label.set_size_request (30, -1);
@@ -125,24 +117,26 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
 
          set_session (sess);
 
-         start_hbox.pack_start (start_go_button, false, false);
+	 start_hbox.set_spacing (2);
          start_hbox.pack_start (start_clock, false, false);
-	 start_hbox.pack_start (*start_to_playhead_button, false, false);
+	 start_hbox.pack_start (start_to_playhead_button, false, false);
 
          /* this is always in this location, no matter what the location is */
 
-         item_table.attach (start_hbox, 1, 2, 0, 1, FILL, FILL, 4, 0);
+	 VBox *rbox = manage (new VBox);
+	 rbox->pack_start (remove_button, false, false);
 
-         start_go_button.signal_clicked().connect(sigc::bind (sigc::mem_fun (*this, &LocationEditRow::go_button_pressed), LocStart));
-	 start_to_playhead_button->signal_clicked().connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::to_playhead_button_pressed), LocStart));
+	 item_table.attach (*rbox, 0, 1, 0, 1, FILL, Gtk::AttachOptions (0), 4, 0);
+         item_table.attach (start_hbox, 2, 3, 0, 1, FILL, Gtk::AttachOptions(0), 4, 0);
+
+	 start_to_playhead_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::to_playhead_button_pressed), LocStart));
          start_clock.ValueChanged.connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::clock_changed), LocStart));
 
-         end_hbox.pack_start (end_go_button, false, false);
+	 end_hbox.set_spacing (2);
          end_hbox.pack_start (end_clock, false, false);
-	 end_hbox.pack_start (*end_to_playhead_button, false, false);
+	 end_hbox.pack_start (end_to_playhead_button, false, false);
 
-         end_go_button.signal_clicked().connect(sigc::bind (sigc::mem_fun (*this, &LocationEditRow::go_button_pressed), LocEnd));
-	 end_to_playhead_button->signal_clicked().connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::to_playhead_button_pressed), LocEnd));
+	 end_to_playhead_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::to_playhead_button_pressed), LocEnd));
          end_clock.ValueChanged.connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::clock_changed), LocEnd));
 
          length_clock.ValueChanged.connect (sigc::bind ( sigc::mem_fun(*this, &LocationEditRow::clock_changed), LocLength));
@@ -229,9 +223,9 @@ LocationEditRow::set_location (Location *loc)
 	++i_am_the_modifier;
 
 	if (!hide_check_button.get_parent()) {
-		item_table.attach (hide_check_button, 5, 6, 0, 1, FILL, Gtk::FILL, 4, 0);
-		item_table.attach (lock_check_button, 6, 7, 0, 1, FILL, Gtk::FILL, 4, 0);
-		item_table.attach (glue_check_button, 7, 8, 0, 1, FILL, Gtk::FILL, 4, 0);
+		item_table.attach (hide_check_button, 6, 7, 0, 1, FILL, Gtk::FILL, 4, 0);
+		item_table.attach (lock_check_button, 7, 8, 0, 1, FILL, Gtk::FILL, 4, 0);
+		item_table.attach (glue_check_button, 8, 9, 0, 1, FILL, Gtk::FILL, 4, 0);
 	}
 	hide_check_button.set_active (location->is_hidden());
 	lock_check_button.set_active (location->locked());
@@ -244,7 +238,7 @@ LocationEditRow::set_location (Location *loc)
 		name_label.set_size_request (80, -1);
 
 		if (!name_label.get_parent()) {
-			item_table.attach (name_label, 0, 1, 0, 1, FILL, FILL, 4, 0);
+			item_table.attach (name_label, 1, 2, 0, 1, FILL, FILL, 4, 0);
 		}
 
 		name_label.show();
@@ -257,15 +251,12 @@ LocationEditRow::set_location (Location *loc)
 		name_entry.signal_changed().connect (sigc::mem_fun(*this, &LocationEditRow::name_entry_changed));
 
 		if (!name_entry.get_parent()) {
-			item_table.attach (name_entry, 0, 1, 0, 1, FILL | EXPAND, FILL, 4, 0);
+			item_table.attach (name_entry, 1, 2, 0, 1, FILL | EXPAND, FILL, 4, 0);
 		}
 		name_entry.show();
 
 		if (!cd_check_button.get_parent()) {
-			item_table.attach (cd_check_button, 4, 5, 0, 1, FILL, FILL, 4, 0);
-		}
-		if (!remove_button.get_parent()) {
-			item_table.attach (remove_button, 8, 9, 0, 1, FILL, FILL, 4, 0);
+			item_table.attach (cd_check_button, 5, 6, 0, 1, FILL, Gtk::AttachOptions (0), 4, 0);
 		}
 
 		if (location->is_session_range()) {
@@ -291,33 +282,33 @@ LocationEditRow::set_location (Location *loc)
 
 	if (!location->is_mark()) {
 		if (!end_hbox.get_parent()) {
-			item_table.attach (end_hbox, 2, 3, 0, 1, FILL, FILL, 4, 0);
+			item_table.attach (end_hbox, 3, 4, 0, 1, FILL, Gtk::AttachOptions (0), 4, 0);
 		}
 		if (!length_clock.get_parent()) {
-			item_table.attach (length_clock, 3, 4, 0, 1, FILL, FILL, 4, 0);
+			end_hbox.pack_start (length_clock, false, false);
 		}
 
 		end_clock.set (location->end(), true);
 		length_clock.set (location->length(), true);
 
-		end_go_button.show();
 		end_clock.show();
 		length_clock.show();
 
-		ARDOUR_UI::instance()->set_tip (end_go_button, _("Jump to the end of this range"));
-		ARDOUR_UI::instance()->set_tip (start_go_button, _("Jump to the start of this range"));
-		ARDOUR_UI::instance()->set_tip (remove_button, _("Forget this range"));
-		ARDOUR_UI::instance()->set_tip (start_clock, _("Start time"));
-		ARDOUR_UI::instance()->set_tip (end_clock, _("End time"));
+		ARDOUR_UI::instance()->set_tip (remove_button, _("Remove this range"));
+		ARDOUR_UI::instance()->set_tip (start_clock, _("Start time - middle click to locate here"));
+		ARDOUR_UI::instance()->set_tip (end_clock, _("End time - middle click to locate here"));
 		ARDOUR_UI::instance()->set_tip (length_clock, _("Length"));
 
+		ARDOUR_UI::instance()->tooltips().set_tip (start_to_playhead_button, _("Set range start from playhead location"));
+		ARDOUR_UI::instance()->tooltips().set_tip (end_to_playhead_button, _("Set range end from playhead location"));
+		
 	} else {
 
-		ARDOUR_UI::instance()->set_tip (start_go_button, _("Jump to this marker"));
-		ARDOUR_UI::instance()->set_tip (remove_button, _("Forget this marker"));
-		ARDOUR_UI::instance()->set_tip (start_clock, _("Position"));
+		ARDOUR_UI::instance()->set_tip (remove_button, _("Remove this marker"));
+		ARDOUR_UI::instance()->set_tip (start_clock, _("Position - middle click to locate here"));
 
-		end_go_button.hide();
+		ARDOUR_UI::instance()->tooltips().set_tip (start_to_playhead_button, _("Set marker time from playhead location"));
+
 		end_clock.hide();
 		length_clock.hide();
 	}
@@ -389,26 +380,6 @@ LocationEditRow::composer_entry_changed ()
 	location->cd_info["composer"] = composer_entry.get_text();
 	} else {
 	  location->cd_info.erase("composer");
-	}
-}
-
-
-void
-LocationEditRow::go_button_pressed (LocationPart part)
-{
-	if (!location) {
-		return;
-	}
-
-	switch (part) {
-	case LocStart:
-		ARDOUR_UI::instance()->do_transport_locate (location->start(), _session->transport_rolling ());
-		break;
-	case LocEnd:
-		ARDOUR_UI::instance()->do_transport_locate (location->end(), _session->transport_rolling ());
-		break;
-	default:
-		break;
 	}
 }
 
@@ -720,7 +691,7 @@ LocationUI::LocationUI ()
 	VBox* vbox = manage (new VBox);
 
 	Table* table = manage (new Table (2, 2));
-	table->set_spacings (4);
+	table->set_spacings (2);
 	table->set_col_spacing (0, 32);
 	int table_row = 0;
 
@@ -742,7 +713,7 @@ LocationUI::LocationUI ()
 	vbox->pack_start (*table, false, false);
 
  	table = manage (new Table (3, 2));
-	table->set_spacings (4);
+	table->set_spacings (2);
 	table->set_col_spacing (0, 32);
 	table_row = 0;
 
@@ -771,13 +742,13 @@ LocationUI::LocationUI ()
 
 	add_location_button.set_name ("LocationAddLocationButton");
 
-	table->attach (loc_frame_box, 1, 2, table_row, table_row + 1);
+	table->attach (loc_frame_box, 0, 2, table_row, table_row + 1);
 	++table_row;
 
 	loc_range_panes.pack1 (*table, true, false);
 
  	table = manage (new Table (3, 2));
-	table->set_spacings (4);
+	table->set_spacings (2);
 	table->set_col_spacing (0, 32);
 	table_row = 0;
 
@@ -803,7 +774,7 @@ LocationUI::LocationUI ()
 
 	add_range_button.set_name ("LocationAddRangeButton");
 
-	table->attach (range_frame_box, 1, 2, table_row, table_row + 1);
+	table->attach (range_frame_box, 0, 2, table_row, table_row + 1);
 	++table_row;
 
 	loc_range_panes.pack2 (*table, true, false);
@@ -821,6 +792,8 @@ LocationUI::LocationUI ()
 	add_range_button.signal_clicked().connect (sigc::mem_fun(*this, &LocationUI::add_new_range));
 
 	show_all ();
+
+	signal_map().connect (sigc::mem_fun (*this, &LocationUI::refresh_location_list));
 }
 
 LocationUI::~LocationUI()
