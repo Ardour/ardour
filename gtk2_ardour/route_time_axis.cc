@@ -2484,3 +2484,19 @@ RouteTimeAxisView::state_id() const
 	return string_compose ("rtav %1", _route->id().to_s());
 }
 
+
+void
+RouteTimeAxisView::remove_child (boost::shared_ptr<TimeAxisView> c)
+{
+	TimeAxisView::remove_child (c);
+	
+	boost::shared_ptr<AutomationTimeAxisView> a = boost::dynamic_pointer_cast<AutomationTimeAxisView> (c);
+	if (a) {
+		for (AutomationTracks::iterator i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
+			if (i->second == a) {
+				_automation_tracks.erase (i);
+				return;
+			}
+		}
+	}
+}

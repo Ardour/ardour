@@ -306,6 +306,10 @@ protected:
 	UnderlayMirrorList _underlay_mirrors;
 
 	bool _ignore_track_mode_change; ///< true to ignore track mode change signals
+
+private:
+
+	void remove_child (boost::shared_ptr<TimeAxisView>);
 };
 
 #endif /* __ardour_route_time_axis_h__ */

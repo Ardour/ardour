@@ -267,7 +267,7 @@ class TimeAxisView : public virtual AxisView
 	Children children;
 	bool is_child (TimeAxisView*);
 
-	void remove_child (boost::shared_ptr<TimeAxisView>);
+	virtual void remove_child (boost::shared_ptr<TimeAxisView>);
 	void add_child (boost::shared_ptr<TimeAxisView>);
 
 	/* selection display */
