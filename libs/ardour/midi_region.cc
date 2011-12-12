@@ -153,6 +153,8 @@ MidiRegion::clone () const
 void
 MidiRegion::post_set (const PropertyChange& pc)
 {
+	Region::post_set (pc);
+	
 	if (pc.contains (Properties::length) && !pc.contains (Properties::length_beats)) {
 		update_length_beats ();
 	} else if (pc.contains (Properties::start) && !pc.contains (Properties::start_beats)) {

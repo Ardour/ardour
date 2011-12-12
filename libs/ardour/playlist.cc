@@ -1354,6 +1354,7 @@ Playlist::flush_notifications (bool from_undo)
 		 (*r)->set_position ((*r)->position() + distance);
 	 }
 
+	 /* XXX: may not be necessary; Region::post_set should do this, I think */
 	 for (RegionList::iterator r = fixup.begin(); r != fixup.end(); ++r) {
 		 (*r)->recompute_position_from_lock_style ();
 	 }

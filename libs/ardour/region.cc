@@ -1685,3 +1685,11 @@ Region::is_compound () const
 {
 	return max_source_level() > 0;
 }
+
+void
+Region::post_set (const PropertyChange& pc)
+{
+	if (pc.contains (Properties::position)) {
+		recompute_position_from_lock_style ();
+	}
+}

@@ -396,6 +396,7 @@ class Region
 	virtual int _set_state (const XMLNode&, int version, PBD::PropertyChange& what_changed, bool send_signal);
 
 	void register_properties ();
+	void post_set (const PBD::PropertyChange&);
 
 protected:
 	void use_sources (SourceList const &);
