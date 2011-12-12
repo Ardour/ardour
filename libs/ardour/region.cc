@@ -596,8 +596,13 @@ Region::set_position (framepos_t pos)
 void
 Region::set_position_internal (framepos_t pos, bool allow_bbt_recompute)
 {
+	/* We emit a change of Properties::position even if the position hasn't changed
+	   (see Region::set_position), so we must always set this up so that
+	   e.g. Playlist::notify_region_moved doesn't use an out-of-date last_position.
+	*/
+	_last_position = _position;
+	
 	if (_position != pos) {
-		_last_position = _position;
 		_position = pos;
 
 		/* check that the new _position wouldn't make the current
