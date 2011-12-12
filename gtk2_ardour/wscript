@@ -144,6 +144,7 @@ gtk2_ardour_sources = [
         'midi_port_dialog.cc',
         'midi_region_view.cc',
         'midi_scroomer.cc',
+        'midi_selection.cc',
         'midi_streamview.cc',
         'midi_time_axis.cc',
         'midi_tracer.cc',
