@@ -104,7 +104,9 @@ class LocationEditRow  : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	Gtk::Label    composer_label;
  	Gtk::Entry    composer_entry;
 	Gtk::CheckButton   scms_check_button;
+	Gtk::Label         scms_label;
 	Gtk::CheckButton   preemph_check_button;
+	Gtk::Label         preemph_label;
         ClockGroup* _clock_group;
 
 	guint32 i_am_the_modifier;

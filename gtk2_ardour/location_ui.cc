@@ -56,8 +56,6 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
         , hide_check_button (_("Hide"))
         , lock_check_button (_("Lock"))
         , glue_check_button (_("Glue"))
-        , scms_check_button (_("SCMS"))
-        , preemph_check_button (_("Pre-Emphasis"))
         , _clock_group (0)
 {
          i_am_the_modifier = 0;
@@ -81,12 +79,11 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
          composer_label.set_name ("LocationEditNumberLabel");
          composer_entry.set_name ("LocationEditNameEntry");
 
-         isrc_label.set_text ("ISRC: ");
-         isrc_label.set_size_request (30, -1);
-         performer_label.set_text ("Performer: ");
-         performer_label.set_size_request (60, -1);
-         composer_label.set_text ("Composer: ");
-         composer_label.set_size_request (60, -1);
+         isrc_label.set_text (X_("ISRC:"));
+         performer_label.set_text (_("Performer:"));
+         composer_label.set_text (_("Composer:"));
+	 scms_label.set_text (X_("SCMS"));
+	 preemph_label.set_text (_("Pre-Emphasis"));
 
          isrc_entry.set_size_request (112, -1);
          isrc_entry.set_max_length(12);
@@ -100,14 +97,24 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
 
          name_label.set_alignment (0, 0.5);
 
+	 Gtk::HBox* front_spacing = manage (new HBox);
+	 front_spacing->set_size_request (20, -1);
+	 Gtk::HBox* mid_spacing = manage (new HBox);
+	 mid_spacing->set_size_request (20, -1);
+
+	 cd_track_details_hbox.set_spacing (4);
+	 cd_track_details_hbox.pack_start (*front_spacing, false, false);
          cd_track_details_hbox.pack_start (isrc_label, false, false);
          cd_track_details_hbox.pack_start (isrc_entry, false, false);
-         cd_track_details_hbox.pack_start (scms_check_button, false, false);
-         cd_track_details_hbox.pack_start (preemph_check_button, false, false);
          cd_track_details_hbox.pack_start (performer_label, false, false);
          cd_track_details_hbox.pack_start (performer_entry, true, true);
          cd_track_details_hbox.pack_start (composer_label, false, false);
          cd_track_details_hbox.pack_start (composer_entry, true, true);
+	 cd_track_details_hbox.pack_start (*mid_spacing, false, false);
+         cd_track_details_hbox.pack_start (scms_label, false, false);
+         cd_track_details_hbox.pack_start (scms_check_button, false, false);
+         cd_track_details_hbox.pack_start (preemph_label, false, false);
+         cd_track_details_hbox.pack_start (preemph_check_button, false, false);
 
          isrc_entry.signal_changed().connect (sigc::mem_fun(*this, &LocationEditRow::isrc_entry_changed));
          performer_entry.signal_changed().connect (sigc::mem_fun(*this, &LocationEditRow::performer_entry_changed));
