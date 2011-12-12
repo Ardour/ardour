@@ -47,7 +47,7 @@ Tempo    TempoMap::_default_tempo (120.0);
 
 double Tempo::frames_per_beat (framecnt_t sr, const Meter& meter) const
 {
-	return  ((60.0 * sr) / (_beats_per_minute * meter.note_divisor()/_note_type));
+	return  (60.0 * sr) / _beats_per_minute;
 }
 
 /***********************************************************************/
@@ -56,6 +56,12 @@ double
 Meter::frames_per_bar (const Tempo& tempo, framecnt_t sr) const
 {
 	return ((60.0 * sr * _beats_per_bar) / (tempo.beats_per_minute() * _note_type/tempo.note_type()));
+}
+
+double 
+Meter::frames_per_division (const Tempo& tempo, framecnt_t sr) const
+{
+	return  ((60.0 * sr) / (tempo.beats_per_minute() * _note_type/tempo.note_type()));
 }
 
 /***********************************************************************/
@@ -1402,7 +1408,7 @@ TempoMap::get_points (framepos_t lower, framepos_t upper) const
 
 	beats_per_bar = meter->beats_per_bar ();
 	frames_per_bar = meter->frames_per_bar (*tempo, _frame_rate);
-	beat_frames = tempo->frames_per_beat (_frame_rate, *meter);
+	beat_frames = meter->frames_per_division (*tempo,_frame_rate);
 
 	if (meter->frame() > tempo->frame()) {
 		bar = meter->start().bars;
@@ -1530,7 +1536,7 @@ TempoMap::get_points (framepos_t lower, framepos_t upper) const
 
 			beats_per_bar = meter->beats_per_bar ();
 			frames_per_bar = meter->frames_per_bar (*tempo, _frame_rate);
-			beat_frames = tempo->frames_per_beat (_frame_rate, *meter);
+			beat_frames = meter->frames_per_division (*tempo, _frame_rate);
 
 			++i;
 		}

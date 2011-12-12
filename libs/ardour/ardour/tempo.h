@@ -61,6 +61,7 @@ class Meter {
 	double note_divisor() const { return _note_type; }
 
 	double frames_per_bar (const Tempo&, framecnt_t sr) const;
+	double frames_per_division (const Tempo&, framecnt_t sr) const;
 
   protected:
 	/** The number of beats in a bar.  This is a real value because
