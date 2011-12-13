@@ -84,7 +84,7 @@ Editor::draw_metric_marks (const Metrics& metrics)
 	for (Metrics::const_iterator i = metrics.begin(); i != metrics.end(); ++i) {
 
 		if ((ms = dynamic_cast<const MeterSection*>(*i)) != 0) {
-			snprintf (buf, sizeof(buf), "%g/%g", ms->beats_per_bar(), ms->note_divisor ());
+			snprintf (buf, sizeof(buf), "%g/%g", ms->divisions_per_bar(), ms->note_divisor ());
 			metric_marks.push_back (new MeterMarker (*this, *meter_group, ARDOUR_UI::config()->canvasvar_MeterMarker.get(), buf,
 								 *(const_cast<MeterSection*>(ms))));
 		} else if ((ts = dynamic_cast<const TempoSection*>(*i)) != 0) {
@@ -157,7 +157,7 @@ Editor::compute_current_bbt_points (framepos_t leftmost, framepos_t rightmost)
 	}
 	previous_beat.ticks = 0;
 
-	if (_session->tempo_map().meter_at(rightmost).beats_per_bar () > next_beat.beats + 1) {
+	if (_session->tempo_map().meter_at(rightmost).divisions_per_bar () > next_beat.beats + 1) {
 		next_beat.beats += 1;
 	} else {
 		next_beat.bars += 1;

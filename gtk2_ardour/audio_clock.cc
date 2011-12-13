@@ -1171,7 +1171,7 @@ AudioClock::set_bbt (framepos_t when, bool force)
 		sprintf (buf, "%-5.2f", m.tempo().beats_per_minute());
 		_left_layout->set_text (buf);
 
-		sprintf (buf, "%g/%g", m.meter().beats_per_bar(), m.meter().note_divisor());
+		sprintf (buf, "%g/%g", m.meter().divisions_per_bar(), m.meter().note_divisor());
 		_right_layout->set_text (buf);
 	}
 }

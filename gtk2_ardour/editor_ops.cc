@@ -5475,7 +5475,9 @@ Editor::define_one_bar (framepos_t start, framepos_t end)
 	   we have frames per bar, and beats per bar, so ...
 	*/
 
-	double frames_per_beat = length / m.beats_per_bar();
+	/* XXXX METER MATH */
+
+	double frames_per_beat = length / m.divisions_per_bar();
 
 	/* beats per minute = */
 

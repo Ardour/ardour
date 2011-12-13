@@ -249,7 +249,7 @@ MeterDialog::MeterDialog (TempoMap& map, framepos_t frame, const string & action
 	Meter meter (map.meter_at(frame));
 
 	map.bbt_time (frame, when);
-	init (when, meter.beats_per_bar(), meter.note_divisor(), true);
+	init (when, meter.divisions_per_bar(), meter.note_divisor(), true);
 }
 
 MeterDialog::MeterDialog (MeterSection& section, const string & action)
@@ -257,7 +257,7 @@ MeterDialog::MeterDialog (MeterSection& section, const string & action)
 	  ok_button (action),
 	  cancel_button (_("Cancel"))
 {
-	init (section.start(), section.beats_per_bar(), section.note_divisor(), section.movable());
+	init (section.start(), section.divisions_per_bar(), section.note_divisor(), section.movable());
 }
 
 void

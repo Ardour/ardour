@@ -1853,35 +1853,37 @@ MeterMarkerDrag::MeterMarkerDrag (Editor* e, ArdourCanvas::Item* i, bool c)
 void
 MeterMarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
-	if (_copy) {
-		// create a dummy marker for visual representation of moving the copy.
-		// The actual copying is not done before we reach the finish callback.
-		char name[64];
-		snprintf (name, sizeof(name), "%g/%g", _marker->meter().beats_per_bar(), _marker->meter().note_divisor ());
-
-		MeterMarker* new_marker = new MeterMarker (
-			*_editor,
-			*_editor->meter_group,
-			ARDOUR_UI::config()->canvasvar_MeterMarker.get(),
-			name,
-			*new MeterSection (_marker->meter())
-			);
-
-		_item = &new_marker->the_item ();
-		_marker = new_marker;
-
-	} else {
-
-		MetricSection& section (_marker->meter());
-
-		if (!section.movable()) {
-			return;
-		}
-
+	// create a dummy marker for visual representation of moving the
+	// section, because whether its a copy or not, we're going to 
+	// leave or lose the original marker (leave if its a copy; lose if its
+	// not, because we'll remove it from the map).
+	
+	MeterSection section (_marker->meter());
+	
+	if (!section.movable()) {
+		return;
+	}
+	
+	char name[64];
+	snprintf (name, sizeof(name), "%g/%g", _marker->meter().divisions_per_bar(), _marker->meter().note_divisor ());
+	
+	_marker = new MeterMarker (
+		*_editor,
+		*_editor->meter_group,
+		ARDOUR_UI::config()->canvasvar_MeterMarker.get(),
+		name,
+		*new MeterSection (_marker->meter())
+		);
+	
+	_item = &_marker->the_item ();
+	
+	if (!_copy) {
+		TempoMap& map (_editor->session()->tempo_map());
+		/* remove the section while we drag it */
+		map.remove_meter (section);
 	}
 
 	Drag::start_grab (event, cursor);
-
 	show_verbose_cursor_time (adjusted_current_frame(event));
 }
 
@@ -1914,7 +1916,7 @@ MeterMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	TempoMap& map (_editor->session()->tempo_map());
 	map.bbt_time (last_pointer_frame(), when);
-
+	
 	if (_copy == true) {
 		_editor->begin_reversible_command (_("copy meter mark"));
 		XMLNode &before = map.get_state();
@@ -1923,17 +1925,21 @@ MeterMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 		_editor->session()->add_command(new MementoCommand<TempoMap>(map, &before, &after));
 		_editor->commit_reversible_command ();
 
-		// delete the dummy marker we used for visual representation of copying.
-		// a new visual marker will show up automatically.
-		delete _marker;
 	} else {
 		_editor->begin_reversible_command (_("move meter mark"));
 		XMLNode &before = map.get_state();
-		map.move_meter (_marker->meter(), when);
+
+		/* we removed it before, so add it back now */
+		
+		map.add_meter (_marker->meter(), when);
 		XMLNode &after = map.get_state();
 		_editor->session()->add_command(new MementoCommand<TempoMap>(map, &before, &after));
 		_editor->commit_reversible_command ();
 	}
+
+	// delete the dummy marker we used for visual representation while moving.
+	// a new visual marker will show up automatically.
+	delete _marker;
 }
 
 void

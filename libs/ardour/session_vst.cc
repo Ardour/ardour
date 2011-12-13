@@ -132,7 +132,7 @@ intptr_t Session::vst_callback (
 			}
 			if (value & (kVstBarsValid)) {
 				const Meter& m (session->tempo_map().meter_at (session->transport_frame()));
-				_timeInfo.timeSigNumerator = m.beats_per_bar ();
+				_timeInfo.timeSigNumerator = m.divisions_per_bar ();
 				_timeInfo.timeSigDenominator = m.note_divisor ();
 				_timeInfo.flags |= (kVstBarsValid);
 			}

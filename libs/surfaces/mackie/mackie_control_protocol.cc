@@ -1021,7 +1021,7 @@ MackieControlProtocol::format_bbt_timecode (framepos_t now_frame)
 	// figure out subdivisions per beat
 	const Meter & meter = session->tempo_map().meter_at (now_frame);
 	int subdiv = 2;
-	if (meter.note_divisor() == 8 && (meter.beats_per_bar() == 12.0 || meter.beats_per_bar() == 9.0 || meter.beats_per_bar() == 6.0)) {
+	if (meter.note_divisor() == 8 && (meter.divisions_per_bar() == 12.0 || meter.divisions_per_bar() == 9.0 || meter.divisions_per_bar() == 6.0)) {
 		subdiv = 3;
 	}
 

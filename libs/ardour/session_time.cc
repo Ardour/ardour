@@ -492,7 +492,7 @@ Session::jack_timebase_callback (jack_transport_state_t /*state*/,
 
 		// XXX still need to set bar_start_tick
 
-		pos->beats_per_bar = metric.meter().beats_per_bar();
+		pos->beats_per_bar = metric.meter().divisions_per_bar();
 		pos->beat_type = metric.meter().note_divisor();
 		pos->ticks_per_beat = Timecode::BBT_Time::ticks_per_beat;
 		pos->beats_per_minute = metric.tempo().beats_per_minute();

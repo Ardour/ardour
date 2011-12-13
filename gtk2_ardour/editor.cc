@@ -3745,7 +3745,7 @@ Editor::get_grid_type_as_beats (bool& success, framepos_t position)
 
 	case SnapToBar:
 		if (_session) {
-			return _session->tempo_map().meter_at (position).beats_per_bar();
+			return _session->tempo_map().meter_at (position).divisions_per_bar();
 		}
 		break;
 

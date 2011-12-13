@@ -215,7 +215,7 @@ VerboseCursor::set_duration (framepos_t start, framepos_t end, double x, double 
 
 		beats -= sbbt.beats;
 		if (beats < 0) {
-			beats += int (meter_at_start.beats_per_bar());
+			beats += int (meter_at_start.divisions_per_bar());
 			--bars;
 		}
 

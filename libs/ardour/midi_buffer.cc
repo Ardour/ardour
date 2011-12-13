@@ -497,6 +497,12 @@ MidiBuffer::merge_in_place(const MidiBuffer &other)
 						     (int) *(_data + us.offset + sizeof (TimeType)),
 						     (int) *(other._data + them.offset + sizeof (TimeType))));
 
+			if ((*us).time() != (*them).time()) {
+				cerr << " in merge code for two events:\n"
+				     << '\t' << (*us) << endl
+				     << '\t' << (*them) << endl
+				     << "about to crash ...\n";
+			}
 			assert ((*us).time() == (*them).time());
 						     
 			uint8_t our_midi_status_byte = *(_data + us.offset + sizeof (TimeType));
