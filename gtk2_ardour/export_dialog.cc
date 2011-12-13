@@ -163,7 +163,7 @@ ExportDialog::init_gui ()
 	timespan_align->add (*timespan_selector);
 	timespan_align->set_padding (0, 12, 18, 0);
 	advanced_vbox->pack_start (*timespan_label, false, false, 0);
-	advanced_vbox->pack_start (*timespan_align, false, false, 0);
+	advanced_vbox->pack_start (*timespan_align, true, true, 0);
 
 	Gtk::Alignment * channels_align = Gtk::manage (new Gtk::Alignment());
 	channels_label = Gtk::manage (new Gtk::Label (_("Channels"), Gtk::ALIGN_LEFT));
@@ -179,7 +179,7 @@ ExportDialog::init_gui ()
 	Gtk::Expander* advanced = Gtk::manage (new Gtk::Expander (_("Advanced options")));
 	advanced->add (*advanced_vbox);
 
-	get_vbox()->pack_start (*advanced, false, false);
+	get_vbox()->pack_start (*advanced, true, true);
 
 	Pango::AttrList bold;
 	Pango::Attribute b = Pango::Attribute::create_attr_weight (Pango::WEIGHT_BOLD);
