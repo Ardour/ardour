@@ -51,6 +51,22 @@ ExportTimespanSelector::ExportTimespanSelector (ARDOUR::Session * session, Profi
 	option_hbox.pack_start (time_format_label, false, false, 0);
 	option_hbox.pack_start (time_format_combo, false, false, 6);
 
+	Gtk::Button* b = manage (new Gtk::Button (_("Select All")));
+	b->signal_clicked().connect (
+		sigc::bind (
+			sigc::mem_fun (*this, &ExportTimespanSelector::set_selection_state_of_all_timespans), true
+			)
+		);
+	option_hbox.pack_start (*b, false, false, 6);
+	
+	b = manage (new Gtk::Button (_("Deselect All")));
+	b->signal_clicked().connect (
+		sigc::bind (
+			sigc::mem_fun (*this, &ExportTimespanSelector::set_selection_state_of_all_timespans), false
+			)
+		);
+	option_hbox.pack_start (*b, false, false, 6);
+
 	range_scroller.add (range_view);
 
 	pack_start (option_hbox, false, false, 0);
@@ -315,6 +331,14 @@ ExportTimespanSelector::update_range_name (std::string const & path, std::string
 	it->get_value (range_cols.location)->set_name (new_text);
 
 	CriticalSelectionChanged();
+}
+
+void
+ExportTimespanSelector::set_selection_state_of_all_timespans (bool s)
+{
+	for (Gtk::ListStore::Children::iterator it = range_list->children().begin(); it != range_list->children().end(); ++it) {
+		it->set_value (range_cols.selected, s);
+	}
 }
 
 /*** ExportTimespanSelectorSingle ***/

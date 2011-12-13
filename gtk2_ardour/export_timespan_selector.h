@@ -83,6 +83,8 @@ class ExportTimespanSelector : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 
 	void update_range_name (std::string const & path, std::string const & new_text);
 
+	void set_selection_state_of_all_timespans (bool);
+
 	/*** GUI components ***/
 
 	Gtk::HBox      option_hbox;
