@@ -167,13 +167,17 @@ MeterSection::MeterSection (const XMLNode& node)
 
 	set_start (start);
 
-	if ((prop = node.property ("beats-per-bar")) == 0) {
-		error << _("MeterSection XML node has no \"beats-per-bar\" property") << endmsg;
-		throw failed_constructor();
+	/* beats-per-bar is old; divisions-per-bar is new */
+
+	if ((prop = node.property ("divisions-per-bar")) == 0) {
+		if ((prop = node.property ("beats-per-bar")) == 0) {
+			error << _("MeterSection XML node has no \"beats-per-bar\" or \"divisions-per-bar\" property") << endmsg;
+			throw failed_constructor();
+		} 
 	}
 
 	if (sscanf (prop->value().c_str(), "%lf", &_divisions_per_bar) != 1 || _divisions_per_bar < 0.0) {
-		error << _("MeterSection XML node has an illegal \"beats-per-bar\" value") << endmsg;
+		error << _("MeterSection XML node has an illegal \"beats-per-bar\" or \"divisions-per-bar\" value") << endmsg;
 		throw failed_constructor();
 	}
 
@@ -210,7 +214,7 @@ MeterSection::get_state() const
 	snprintf (buf, sizeof (buf), "%f", _note_type);
 	root->add_property ("note-type", buf);
 	snprintf (buf, sizeof (buf), "%f", _divisions_per_bar);
-	root->add_property ("beats-per-bar", buf);
+	root->add_property ("divisions-per-bar", buf);
 	snprintf (buf, sizeof (buf), "%s", movable()?"yes":"no");
 	root->add_property ("movable", buf);
 
