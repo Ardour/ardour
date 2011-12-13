@@ -1845,7 +1845,6 @@ MeterMarkerDrag::MeterMarkerDrag (Editor* e, ArdourCanvas::Item* i, bool c)
 	  _copy (c)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New MeterMarkerDrag\n");
-
 	_marker = reinterpret_cast<MeterMarker*> (_item->get_data ("marker"));
 	assert (_marker);
 }
@@ -1853,36 +1852,6 @@ MeterMarkerDrag::MeterMarkerDrag (Editor* e, ArdourCanvas::Item* i, bool c)
 void
 MeterMarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
-	// create a dummy marker for visual representation of moving the
-	// section, because whether its a copy or not, we're going to 
-	// leave or lose the original marker (leave if its a copy; lose if its
-	// not, because we'll remove it from the map).
-	
-	MeterSection section (_marker->meter());
-	
-	if (!section.movable()) {
-		return;
-	}
-	
-	char name[64];
-	snprintf (name, sizeof(name), "%g/%g", _marker->meter().divisions_per_bar(), _marker->meter().note_divisor ());
-	
-	_marker = new MeterMarker (
-		*_editor,
-		*_editor->meter_group,
-		ARDOUR_UI::config()->canvasvar_MeterMarker.get(),
-		name,
-		*new MeterSection (_marker->meter())
-		);
-	
-	_item = &_marker->the_item ();
-	
-	if (!_copy) {
-		TempoMap& map (_editor->session()->tempo_map());
-		/* remove the section while we drag it */
-		map.remove_meter (section);
-	}
-
 	Drag::start_grab (event, cursor);
 	show_verbose_cursor_time (adjusted_current_frame(event));
 }
@@ -1894,12 +1863,44 @@ MeterMarkerDrag::setup_pointer_frame_offset ()
 }
 
 void
-MeterMarkerDrag::motion (GdkEvent* event, bool)
+MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 {
+	if (first_move) {
+
+		// create a dummy marker for visual representation of moving the
+		// section, because whether its a copy or not, we're going to 
+		// leave or lose the original marker (leave if its a copy; lose if its
+		// not, because we'll remove it from the map).
+		
+		MeterSection section (_marker->meter());
+		
+		if (!section.movable()) {
+			return;
+		}
+		
+		char name[64];
+		snprintf (name, sizeof(name), "%g/%g", _marker->meter().divisions_per_bar(), _marker->meter().note_divisor ());
+		
+		_marker = new MeterMarker (
+			*_editor,
+			*_editor->meter_group,
+			ARDOUR_UI::config()->canvasvar_MeterMarker.get(),
+			name,
+			*new MeterSection (_marker->meter())
+		);
+		
+		/* use the new marker for the grab */
+		swap_grab (&_marker->the_item(), 0, GDK_CURRENT_TIME);
+
+		if (!_copy) {
+			TempoMap& map (_editor->session()->tempo_map());
+			/* remove the section while we drag it */
+			map.remove_meter (section);
+		}
+	}
+
 	framepos_t const pf = adjusted_current_frame (event);
-
 	_marker->set_position (pf);
-
 	show_verbose_cursor_time (pf);
 }
 
