@@ -67,6 +67,18 @@ Track::init ()
         return 0;
 }
 
+void
+Track::use_new_diskstream ()
+{
+	boost::shared_ptr<Diskstream> ds = create_diskstream ();
+
+	ds->do_refill_with_alloc ();
+	ds->set_block_size (_session.get_block_size ());
+	ds->playlist()->set_orig_track_id (id());
+
+	set_diskstream (ds);
+}
+
 XMLNode&
 Track::get_state ()
 {
@@ -692,7 +704,11 @@ Track::playlist_modified ()
 int
 Track::use_playlist (boost::shared_ptr<Playlist> p)
 {
-	return _diskstream->use_playlist (p);
+	int ret = _diskstream->use_playlist (p);
+	if (ret == 0) {
+		p->set_orig_track_id (id());
+	}
+	return ret;
 }
 
 int

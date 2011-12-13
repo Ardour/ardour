@@ -69,7 +69,8 @@ class Track : public Route, public PublicDiskstream
 
 	bool can_record();
 
-	virtual void use_new_diskstream () = 0;
+	void use_new_diskstream ();
+	virtual boost::shared_ptr<Diskstream> create_diskstream() = 0;
 	virtual void set_diskstream (boost::shared_ptr<Diskstream>);
 
 	void set_latency_compensation (framecnt_t);

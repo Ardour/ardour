@@ -77,8 +77,8 @@ MidiTrack::init ()
 	return 0;
 }
 
-void
-MidiTrack::use_new_diskstream ()
+boost::shared_ptr<Diskstream>
+MidiTrack::create_diskstream ()
 {
 	MidiDiskstream::Flag dflags = MidiDiskstream::Flag (0);
 
@@ -90,12 +90,9 @@ MidiTrack::use_new_diskstream ()
 
 	assert(_mode != Destructive);
 
-	boost::shared_ptr<MidiDiskstream> ds (new MidiDiskstream (_session, name(), dflags));
-	ds->do_refill_with_alloc ();
-	ds->set_block_size (_session.get_block_size ());
-
-	set_diskstream (ds);
+	return boost::shared_ptr<Diskstream> (new MidiDiskstream (_session, name(), dflags));
 }
+
 
 void
 MidiTrack::set_record_enabled (bool yn, void *src)

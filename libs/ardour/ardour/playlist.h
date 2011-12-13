@@ -202,7 +202,7 @@ public:
 	void lower_region_to_bottom (boost::shared_ptr<Region>);
 
 	const PBD::ID& get_orig_track_id () const { return _orig_track_id; }
-	void set_orig_track_id (const PBD::ID& did) { _orig_track_id = did; }
+	void set_orig_track_id (const PBD::ID& did);
 
 	/* destructive editing */
 

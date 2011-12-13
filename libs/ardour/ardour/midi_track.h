@@ -46,7 +46,7 @@ public:
 	void realtime_handle_transport_stopped ();
 	void realtime_locate ();
 
-	void use_new_diskstream ();
+	boost::shared_ptr<Diskstream> create_diskstream ();
 	void set_diskstream (boost::shared_ptr<Diskstream>);
 	void set_record_enabled (bool yn, void *src);
 

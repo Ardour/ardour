@@ -42,7 +42,7 @@ class AudioTrack : public Track
 	int roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 	          int declick, bool& need_butler);
 
-	void use_new_diskstream ();
+	boost::shared_ptr<Diskstream> create_diskstream ();
 	void set_diskstream (boost::shared_ptr<Diskstream>);
 
 	DataType data_type () const {

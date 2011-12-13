@@ -3391,3 +3391,9 @@ Playlist::count_joined_regions () const
 
 	return cnt;
 }
+
+void
+Playlist::set_orig_track_id (const PBD::ID& id)
+{
+	_orig_track_id = id;
+}

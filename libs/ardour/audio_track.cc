@@ -61,8 +61,8 @@ AudioTrack::~AudioTrack ()
 {
 }
 
-void
-AudioTrack::use_new_diskstream ()
+boost::shared_ptr<Diskstream>
+AudioTrack::create_diskstream ()
 {
 	AudioDiskstream::Flag dflags = AudioDiskstream::Flag (0);
 
@@ -78,13 +78,7 @@ AudioTrack::use_new_diskstream ()
 		dflags = AudioDiskstream::Flag(dflags | AudioDiskstream::NonLayered);
 	}
 
-	AudioDiskstream* dsp (new AudioDiskstream (_session, name(), dflags));
-	boost::shared_ptr<AudioDiskstream> ds (dsp);
-
-	ds->do_refill_with_alloc ();
-	ds->set_block_size (_session.get_block_size ());
-
-	set_diskstream (ds);
+	return boost::shared_ptr<AudioDiskstream> (new AudioDiskstream (_session, name(), dflags));
 }
 
 void
