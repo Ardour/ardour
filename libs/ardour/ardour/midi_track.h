@@ -117,6 +117,8 @@ protected:
 	bool should_monitor () const;
 	bool send_silence () const;
 
+	void act_on_mute ();
+
   private:
 
 	virtual boost::shared_ptr<Diskstream> diskstream_factory (XMLNode const &);

@@ -805,6 +805,11 @@ Route::set_mute (bool yn, void *src)
 
 	if (muted() != yn) {
 		_mute_master->set_muted_by_self (yn);
+		/* allow any derived classes to respond to the mute change
+		   before anybody else knows about it.
+		*/
+		act_on_mute ();
+		/* tell everyone else */
 		mute_changed (src); /* EMIT SIGNAL */
 		_mute_control->Changed (); /* EMIT SIGNAL */
 	}

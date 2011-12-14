@@ -128,19 +128,15 @@ MidiPort::cycle_split ()
 void
 MidiPort::resolve_notes (void* jack_buffer, MidiBuffer::TimeType when)
 {
-	uint8_t ev[3];
-
-	ev[2] = 0;
 
 	for (uint8_t channel = 0; channel <= 0xF; channel++) {
-		ev[0] = (MIDI_CMD_CONTROL | channel);
+
+		uint8_t ev[3] = { MIDI_CMD_CONTROL | channel, MIDI_CTL_SUSTAIN, 0 };
 
 		/* we need to send all notes off AND turn the
 		 * sustain/damper pedal off to handle synths
 		 * that prioritize sustain over AllNotesOff
 		 */
-
-		ev[1] = MIDI_CTL_SUSTAIN;
 
 		if (jack_midi_event_write (jack_buffer, when, ev, 3) != 0) {
 			cerr << "failed to deliver sustain-zero on channel " << channel << " on port " << name() << endl;
@@ -164,7 +160,7 @@ MidiPort::flush_buffers (pframes_t nframes, framepos_t /*time*/)
 		if (_resolve_required) {
 			/* resolve all notes at the start of the buffer */
 			resolve_notes (jack_buffer, 0);
-			_resolve_required= false;
+			_resolve_required = false;
 		}
 
 		for (MidiBuffer::iterator i = _buffer->begin(); i != _buffer->end(); ++i) {

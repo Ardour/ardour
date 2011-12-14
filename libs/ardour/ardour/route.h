@@ -140,7 +140,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 
 	bool muted () const;
 	void set_mute (bool yn, void* src);
-
+	
 	/* controls use set_solo() to modify this route's solo state
 	 */
 
@@ -467,6 +467,8 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	boost::shared_ptr<SoloControllable> _solo_control;
 	boost::shared_ptr<MuteControllable> _mute_control;
 	boost::shared_ptr<MuteMaster> _mute_master;
+
+	virtual void act_on_mute () {}
 
 	std::string    _comment;
 	bool           _have_internal_generator;

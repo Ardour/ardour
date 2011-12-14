@@ -85,6 +85,14 @@ MidiStateTracker::track (const MidiBuffer::iterator &from, const MidiBuffer::ite
 			continue;
 		}
 
+		/* catch AllNotesOff message and turn off all notes
+		 */
+		
+		if (ev.type() == MIDI_CTL_ALL_NOTES_OFF) {
+			cerr << "State tracker sees ALL_NOTES_OFF, silenceing " << sizeof (_active_notes) << endl;
+			memset (_active_notes, 0, sizeof (_active_notes));
+		}
+
 		track_note_onoffs (ev);
 	}
 }

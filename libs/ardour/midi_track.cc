@@ -715,3 +715,33 @@ MidiTrack::get_gui_feed_buffer () const
 {
 	return midi_diskstream()->get_gui_feed_buffer ();
 }
+
+void
+MidiTrack::act_on_mute ()
+{
+	/* this is called right after our mute status has changed.
+	   if we are now muted, send suitable output to shutdown
+	   all our notes.
+
+	   XXX we should should also stop all relevant note trackers.
+	*/
+
+	if (muted()) {
+		/* only send messages for channels we are using */
+
+		uint16_t mask = get_channel_mask();
+
+		for (uint8_t channel = 0; channel <= 0xF; channel++) {
+
+			if ((1<<channel) & mask) {
+
+				DEBUG_TRACE (DEBUG::MidiIO, string_compose ("%1 delivers mute message to channel %2\n", name(), channel+1));
+				uint8_t ev[3] = { MIDI_CMD_CONTROL | channel, MIDI_CTL_SUSTAIN, 0 };
+				write_immediate_event (3, ev);
+				ev[1] = MIDI_CTL_ALL_NOTES_OFF;
+				write_immediate_event (3, ev);
+			}
+		}
+	}
+}
+	
