@@ -95,6 +95,7 @@ class MIDIControllable : public PBD::Stateful
 	MIDI::Port&     _port;
 	bool             setting;
 	MIDI::byte       last_value;
+	float            last_controllable_value;
 	bool            _momentary;
 	bool            _is_gain_controller;
 	bool            _learned;

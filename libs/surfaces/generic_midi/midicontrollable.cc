@@ -48,6 +48,7 @@ MIDIControllable::MIDIControllable (Port& p, bool m)
 	_learned = false; /* from URI */
 	setting = false;
 	last_value = 0; // got a better idea ?
+	last_controllable_value = 0.0f;
 	control_type = none;
 	_control_description = "MIDI Control: none";
 	control_additional = (byte) -1;
@@ -63,6 +64,7 @@ MIDIControllable::MIDIControllable (Port& p, Controllable& c, bool m)
 	_learned = true; /* from controllable */
 	setting = false;
 	last_value = 0; // got a better idea ?
+	last_controllable_value = 0.0f;
 	control_type = none;
 	_control_description = "MIDI Control: none";
 	control_additional = (byte) -1;
@@ -217,7 +219,20 @@ MIDIControllable::midi_sense_controller (Parser &, EventTwoBytes *msg)
 	if (control_additional == msg->controller_number) {
 
 		if (!controllable->is_toggle()) {
-			controllable->set_value (midi_to_control (msg->value));
+			float new_value = msg->value;
+			float max_value = max(last_controllable_value, new_value);
+			float min_value = min(last_controllable_value, new_value);
+			float range = max_value - min_value;
+			float threshold = 10;
+
+			// prevent jumps when MIDI controller and controllable are "out of sync"
+			if (range < threshold &&
+			    controllable->get_value() <= midi_to_control(max_value) &&
+			    controllable->get_value() >= midi_to_control(min_value)) {
+				controllable->set_value (midi_to_control (new_value) );
+			}
+
+			last_controllable_value = new_value;
 		} else {
 			if (msg->value > 64.0f) {
 				controllable->set_value (1);
