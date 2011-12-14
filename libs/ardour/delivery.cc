@@ -103,7 +103,16 @@ Delivery::Delivery (Session& s, boost::shared_ptr<Pannable> pannable, boost::sha
 
 Delivery::~Delivery()
 {
-	DEBUG_TRACE (DEBUG::Destruction, string_compose ("delivery %1 destructor\n", _name));
+	DEBUG_TRACE (DEBUG::Destruction, string_compose ("delivery %1 destructor\n", _name));	
+
+	/* this object should vanish from any signal callback lists
+	   that it is on before we get any further. The full qualification
+	   of the method name is not necessary, but is here to make it 
+	   clear that this call is about signals, not data flow connections.
+	*/
+
+	ScopedConnectionList::drop_connections ();
+
 	delete _output_buffers;
 }
 
