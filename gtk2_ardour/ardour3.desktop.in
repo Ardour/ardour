@@ -6,4 +6,4 @@ Icon=ardour3
 Terminal=false
 MimeType=application/x-ardour3;
 Type=Application
-Categories=AudioVideo;Audio;X-Recorders;X-Multitrack;X-Jack;
+Categories=AudioVideo;Audio;AudioEditing;X-Recorders;X-Multitrack;X-Jack;
