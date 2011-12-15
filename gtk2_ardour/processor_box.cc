@@ -505,7 +505,15 @@ ProcessorBox::ProcessorBox (ARDOUR::Session* sess, boost::function<PluginSelecto
 
 ProcessorBox::~ProcessorBox ()
 {
-	delete processor_menu;
+	/* it may appear as if we should delete processor_menu but that is a
+	 * pointer to a widget owned by the UI Manager, and has potentially
+	 * be returned to many other ProcessorBoxes. GTK doesn't really make
+	 * clear the ownership of this widget, which is a menu and thus is
+	 * never packed into any container other than an implict GtkWindow.
+	 *
+	 * For now, until or if we ever get clarification over the ownership
+	 * story just let it continue to exist. At worst, its a small memory leak.
+	 */
 }
 
 void
