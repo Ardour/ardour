@@ -736,6 +736,7 @@ PluginManager::lxvst_discover (string path)
 	if (!_lxvst_plugin_info->empty()) {
 		for (PluginInfoList::iterator i =_lxvst_plugin_info->begin(); i != _lxvst_plugin_info->end(); ++i) {
 			if ((info->type == (*i)->type)&&(info->unique_id == (*i)->unique_id)) {
+				warning << "Ignoring duplicate Linux VST plugin " << info->name << "\n";
 				vstfx_free_info(finfo);
 				return 0;
 			}
