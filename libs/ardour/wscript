@@ -430,6 +430,7 @@ def build(bld):
                 test/framewalk_to_beats_test.cc
                 test/framepos_plus_beats_test.cc
                 test/framepos_minus_beats_test.cc
+                test/playlist_layering_test.cc
                 test/testrunner.cc
         '''.split()
 

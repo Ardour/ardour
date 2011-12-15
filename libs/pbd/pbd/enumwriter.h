@@ -37,6 +37,7 @@ class unknown_enumeration : public std::exception {
 class EnumWriter {
   public:
 	static EnumWriter& instance();
+	static void destroy();
 
 	void register_distinct (std::string type, std::vector<int>, std::vector<std::string>);
 	void register_bits     (std::string type, std::vector<int>, std::vector<std::string>);

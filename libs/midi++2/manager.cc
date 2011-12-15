@@ -167,3 +167,10 @@ Manager::set_port_states (list<XMLNode*> s)
 		}
 	}
 }
+
+void
+Manager::destroy ()
+{
+	delete theManager;
+	theManager = 0;
+}

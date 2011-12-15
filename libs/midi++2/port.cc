@@ -113,10 +113,10 @@ Port::~Port ()
 	}
 
 	if (_jack_port) {
-		if (_jack_client && _jack_port) {
+		if (_jack_client) {
 			jack_port_unregister (_jack_client, _jack_port);
+			_jack_port = 0;
 		}
-		_jack_port = 0;
 	}
 }
 

@@ -74,6 +74,7 @@ class Manager {
 	static Manager *instance () {
 		return theManager;
 	}
+	static void destroy ();
 
 	void reestablish (jack_client_t *);
 	void reconnect ();

@@ -1513,3 +1513,10 @@ AudioEngine::update_latencies ()
                 jack_recompute_total_latencies (_priv_jack);
         }
 }
+
+void
+AudioEngine::destroy ()
+{
+	delete _instance;
+	_instance = 0;
+}

@@ -254,6 +254,7 @@ _	   the regular process() call to session->process() is not made.
 	bool port_is_mine (const std::string&) const;
 
 	static AudioEngine* instance() { return _instance; }
+	static void destroy();
 	void died ();
 
 	int create_process_thread (boost::function<void()>, pthread_t*, size_t stacksize);

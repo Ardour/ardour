@@ -73,6 +73,13 @@ EnumWriter::instance()
 	return *_instance;
 }
 
+void
+EnumWriter::destroy ()
+{
+	delete _instance;
+	_instance = 0;
+}
+
 EnumWriter::EnumWriter ()
 {
 }
