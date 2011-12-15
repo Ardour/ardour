@@ -198,9 +198,8 @@ msgid "Lincoln Spiteri"
 msgstr "Lincoln Spiteri"
 
 #: about.cc:167
-#, fuzzy
 msgid "Mike Start"
-msgstr "aligner le début des régions"
+msgstr "Mike Start"
 
 #: about.cc:168
 msgid "Mark Stewart"
