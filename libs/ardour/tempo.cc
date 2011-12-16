@@ -372,6 +372,7 @@ TempoMap::remove_meter (const MeterSection& tempo)
 	}
 
 	if (removed) {
+		timestamp_metrics (true);
 		PropertyChanged (PropertyChange ());
 	}
 }
