@@ -96,8 +96,6 @@ class MidiRegion : public Region
 
 	/* export */
 
-	int exportme (ARDOUR::Session&, ARDOUR::ExportSpecification&);
-
 	boost::shared_ptr<MidiModel> model();
 	boost::shared_ptr<const MidiModel> model() const;
 

@@ -177,7 +177,6 @@ class Region
 	bool region_list_equivalent (boost::shared_ptr<const Region>) const;
 	bool source_equivalent (boost::shared_ptr<const Region>) const;
 	bool uses_source (boost::shared_ptr<const Source>) const;
-	bool uses_source_path (const std::string&) const;
 
 	std::string source_string () const;
 
@@ -187,7 +186,6 @@ class Region
 	void set_length (framecnt_t);
 	void set_start (framepos_t);
 	void set_position (framepos_t);
-	void set_position_on_top (framepos_t);
 	void special_set_position (framepos_t);
 	virtual void update_after_tempo_map_change ();
 	void nudge_position (frameoffset_t);
@@ -258,8 +256,6 @@ class Region
 
 	virtual bool is_dependent() const { return false; }
 	virtual bool depends_on (boost::shared_ptr<Region> /*other*/) const { return false; }
-
-	virtual int exportme (ARDOUR::Session&, ARDOUR::ExportSpecification&) = 0;
 
 	virtual void add_transient (framepos_t) {
 		// no transients, but its OK

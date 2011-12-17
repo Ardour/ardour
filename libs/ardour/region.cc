@@ -625,29 +625,6 @@ Region::set_position_internal (framepos_t pos, bool allow_bbt_recompute)
 }
 
 void
-Region::set_position_on_top (framepos_t pos)
-{
-	if (locked()) {
-		return;
-	}
-
-	if (_position != pos) {
-		set_position_internal (pos, true);
-	}
-
-	boost::shared_ptr<Playlist> pl (playlist());
-
-	if (pl) {
-		pl->raise_region_to_top (shared_from_this ());
-	}
-
-	/* do this even if the position is the same. this helps out
-	   a GUI that has moved its representation already.
-	*/
-	send_change (Properties::position);
-}
-
-void
 Region::recompute_position_from_lock_style ()
 {
 	if (_position_lock_style == MusicTime) {
@@ -1485,20 +1462,6 @@ Region::uses_source (boost::shared_ptr<const Source> source) const
 		}
 	}
 
-	return false;
-}
-
-bool
-Region::uses_source_path (const std::string& path) const
-{
-	for (SourceList::const_iterator i = _sources.begin(); i != _sources.end(); ++i) {
-                boost::shared_ptr<const FileSource> fs = boost::dynamic_pointer_cast<const FileSource> (*i);
-                if (fs) {
-                        if (fs->path() == path) {
-                                return true;
-                        }
-                }
-	}
 	return false;
 }
 

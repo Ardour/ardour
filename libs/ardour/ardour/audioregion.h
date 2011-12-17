@@ -154,10 +154,6 @@ class AudioRegion : public Region
 		return _automatable.control(id);
 	}
 
-	/* export */
-
-	int exportme (ARDOUR::Session&, ARDOUR::ExportSpecification&);
-
 	/* xfade/fade interactions */
 
 	void suspend_fade_in ();

@@ -350,12 +350,6 @@ MidiRegion::model() const
 	return midi_source()->model();
 }
 
-int
-MidiRegion::exportme (ARDOUR::Session&, ARDOUR::ExportSpecification&)
-{
-	return -1;
-}
-
 boost::shared_ptr<MidiSource>
 MidiRegion::midi_source (uint32_t n) const
 {
