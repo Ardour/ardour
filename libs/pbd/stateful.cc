@@ -39,8 +39,8 @@ int Stateful::current_state_version = 0;
 int Stateful::loading_state_version = 0;
 
 Stateful::Stateful ()
-	: _frozen (0)
-	, _properties (new OwnedPropertyList)
+	: _properties (new OwnedPropertyList)
+	, _stateful_frozen (0)
 {
 	_extra_xml = 0;
 	_instant_xml = 0;
@@ -275,7 +275,7 @@ Stateful::send_change (const PropertyChange& what_changed)
 
 	{
 		Glib::Mutex::Lock lm (_lock);
-		if (_frozen) {
+		if (property_changes_suspended ()) {
 			_pending_changed.add (what_changed);
 			return;
 		}
@@ -287,7 +287,7 @@ Stateful::send_change (const PropertyChange& what_changed)
 void
 Stateful::suspend_property_changes ()
 {
-	_frozen++;
+	g_atomic_int_add (&_stateful_frozen, 1);
 }
 
 void
@@ -298,7 +298,7 @@ Stateful::resume_property_changes ()
 	{
 		Glib::Mutex::Lock lm (_lock);
 
-		if (_frozen && --_frozen > 0) {
+		if (property_changes_suspended() && g_atomic_int_dec_and_test (&_stateful_frozen) == FALSE) {
 			return;
 		}
 

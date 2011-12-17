@@ -90,9 +90,9 @@ class Stateful {
 
 	virtual void suspend_property_changes ();
 	virtual void resume_property_changes ();
-        
-        virtual bool frozen() const { return _frozen; }
 
+        bool property_changes_suspended() const { return g_atomic_int_get (&_stateful_frozen) > 0; }
+        
   protected:
 
 	void add_instant_xml (XMLNode&, const sys::path& directory_path);
@@ -109,7 +109,6 @@ class Stateful {
 
 	XMLNode *_extra_xml;
 	XMLNode *_instant_xml;
-        int32_t  _frozen;
 	PBD::PropertyChange     _pending_changed;
         Glib::Mutex _lock;
 
@@ -121,10 +120,10 @@ class Stateful {
             within thaw() just before send_change() is called.
         */
         virtual void mid_thaw (const PropertyChange&) { }
-        bool property_changes_suspended() const { return g_atomic_int_get (&_frozen) > 0; }
 
   private:
 	PBD::ID  _id;
+        int32_t  _stateful_frozen;
 };
 
 } // namespace PBD
