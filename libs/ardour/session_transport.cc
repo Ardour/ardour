@@ -1349,13 +1349,6 @@ Session::switch_to_sync_source (SyncSource src)
 }
 
 void
-Session::reverse_track_buffers ()
-{
-	add_post_transport_work (PostTransportReverse);
-	_butler->schedule_transport_work ();
-}
-
-void
 Session::set_track_speed (Track* track, double speed)
 {
 	if (track->realtime_set_speed (speed, false)) {

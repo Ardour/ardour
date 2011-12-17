@@ -1356,8 +1356,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	XMLNode* _bundle_xml_node;
 	int load_bundles (XMLNode const &);
 
-	void reverse_track_buffers ();
-
 	UndoHistory      _history;
 	/** current undo transaction, or 0 */
 	UndoTransaction* _current_trans;
