@@ -204,6 +204,18 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 	_external_ui_ptr = NULL;
 	if (_inst) {
 		if (!is_external_ui) {
+			Gtk::HBox* box = manage (new Gtk::HBox);
+			box->set_spacing (6);
+			box->set_border_width (6);
+			box->pack_end (focus_button, false, false);
+			box->pack_end (bypass_button, false, false, 10);
+			box->pack_end (delete_button, false, false);
+			box->pack_end (save_button, false, false);
+			box->pack_end (add_button, false, false);
+			box->pack_end (_preset_combo, false, false);
+			box->show_all();
+			pack_start(*box, false, false);
+
 			GtkWidget* c_widget = (GtkWidget*)GET_WIDGET(_inst);
 			_gui_widget = Glib::wrap(c_widget);
 			_gui_widget->show_all();
