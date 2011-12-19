@@ -800,19 +800,24 @@ MidiRegionView::create_note_at (framepos_t t, double y, double length, bool sh, 
 	}
 	assert (t >= 0);
 
-	// Snap length
-	length = region_frames_to_region_beats(
-		snap_frame_to_frame (t + region_beats_to_region_frames(length)) - t
-		);
-
 	assert (length != 0);
 
 	if (sh) {
-		length = region_frames_to_region_beats (region_beats_to_region_frames (length) - 1);
+		/* shorten the note down, but rather than using 1 frame (which
+		   would be the highest resolution, use 1 tick since all
+		   musical data is essentially quantized to this unit. it
+		   is bigger, but not by enough to make any difference.
+
+		   old single frame code:
+
+		   length = region_frames_to_region_beats (region_beats_to_region_frames (length) - 1);
+		*/
+		length -= 1.0/Timecode::BBT_Time::ticks_per_beat;
 	}
 
 	const boost::shared_ptr<NoteType> new_note (new NoteType (mtv->get_channel_for_add (),
-	                                                          region_frames_to_region_beats(t + _region->start()), length,
+	                                                          region_frames_to_region_beats(t + _region->start()), 
+								  length,
 	                                                          (uint8_t)note, 0x40));
 
 	if (_model->contains (new_note)) {
@@ -1913,6 +1918,8 @@ MidiRegionView::delete_note (boost::shared_ptr<NoteType> n)
 void
 MidiRegionView::clear_selection_except (ArdourCanvas::CanvasNoteEvent* ev, bool signal)
 {
+	bool changed = false;
+
 	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ) {
 		if ((*i) != ev) {
 			Selection::iterator tmp = i;
@@ -1921,7 +1928,8 @@ MidiRegionView::clear_selection_except (ArdourCanvas::CanvasNoteEvent* ev, bool 
 			(*i)->set_selected (false);
 			(*i)->hide_velocity ();
 			_selection.erase (i);
-			
+			changed = true;
+
 			i = tmp;
 		} else {
 			++i;
@@ -1932,7 +1940,7 @@ MidiRegionView::clear_selection_except (ArdourCanvas::CanvasNoteEvent* ev, bool 
 	   selection.
 	*/
 
-	if (signal) {
+	if (changed && signal) {
 		SelectionCleared (this); /* EMIT SIGNAL */
 	}
 }
@@ -3321,11 +3329,16 @@ MidiRegionView::update_ghost_note (double x, double y)
 	framepos_t const unsnapped_frame = editor.pixel_to_frame (x);
 	framecnt_t grid_frames;
 	framepos_t const f = snap_frame_to_grid_underneath (unsnapped_frame, grid_frames);
-	
+
 	/* use region_frames... because we are converting a delta within the region
 	*/
 	 
-	double length = region_frames_to_region_beats (snap_frame_to_frame (f + grid_frames) - f);
+	bool success;
+	double length = editor.get_grid_type_as_beats (success, unsnapped_frame);
+
+	if (!success) {
+		length = 1;
+	}
 
 	/* note that this sets the time of the ghost note in beats relative to
 	   the start of the source; that is how all note times are stored.
