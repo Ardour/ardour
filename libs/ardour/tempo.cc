@@ -53,16 +53,16 @@ Tempo::frames_per_beat (framecnt_t sr) const
 
 /***********************************************************************/
 
-double
-Meter::frames_per_bar (const Tempo& tempo, framecnt_t sr) const
-{
-	return (60.0 * sr * _divisions_per_bar) / tempo.beats_per_minute();
-}
-
 double 
 Meter::frames_per_division (const Tempo& tempo, framecnt_t sr) const
 {
-	return (60.0 * sr) / (tempo.beats_per_minute() * _note_type/tempo.note_type());
+	return (60.0 * sr) / (tempo.beats_per_minute() * (_note_type/tempo.note_type()));
+}
+
+double
+Meter::frames_per_bar (const Tempo& tempo, framecnt_t sr) const
+{
+	return frames_per_division (tempo, sr) * _divisions_per_bar;
 }
 
 /***********************************************************************/
@@ -862,52 +862,54 @@ TempoMap::bbt_time_unlocked (framepos_t frame, BBT_Time& bbt) const
 void
 TempoMap::bbt_time_with_metric (framepos_t frame, BBT_Time& bbt, const TempoMetric& metric) const
 {
-	framecnt_t frame_diff;
-
 	const double divisions_per_bar = metric.meter().divisions_per_bar();
-	const double ticks_per_frame = metric.meter().frames_per_division (metric.tempo(),_frame_rate) / BBT_Time::ticks_per_beat;
+	const double frames_per_tick = metric.meter().frames_per_division (metric.tempo(),_frame_rate) / BBT_Time::ticks_per_beat;
 
-	// cerr << "*** Compute BBT time for " << frame 
-	// <<  " from metric at " << metric.frame() << " tempo = " << metric.tempo().beats_per_minute () << " meter " 
-	// << metric.meter().divisions_per_bar() << '/' << metric.meter().note_divisor() 
-	// << endl; 
+	/* now compute how far beyond the metric we actually are, and add the
+	 * relevant number of ticks to the metric's BBT time
+	 */
 
-	/* now compute how far beyond that point we actually are. */
+	framecnt_t frame_diff = frame - metric.frame();
+	uint32_t tick_diff = (uint32_t) lrint ((double) frame_diff / frames_per_tick);
 
-	frame_diff = frame - metric.frame();
+	bbt.ticks = metric.start().ticks + tick_diff;
+	uint32_t beat_overflow = bbt.ticks / (uint32_t) BBT_Time::ticks_per_beat;
+	bbt.ticks = bbt.ticks % (uint32_t) BBT_Time::ticks_per_beat;
+	bbt.beats = metric.start().beats + beat_overflow;
+	/* bbt.beats uses 1-based counting, so adjust to get the right answer */
+	uint32_t bar_overflow = (bbt.beats - 1) / (uint32_t) divisions_per_bar;
+	bbt.bars = metric.start().bars + bar_overflow;
 
-	bbt.ticks = metric.start().ticks + (uint32_t)round((double)frame_diff / ticks_per_frame);
-	uint32_t xtra_beats = bbt.ticks / (uint32_t)BBT_Time::ticks_per_beat;
-	bbt.ticks %= (uint32_t)BBT_Time::ticks_per_beat;
+	/* fmod will map bbt.beats as follows:
 
-	bbt.beats = metric.start().beats + xtra_beats - 1; // correction for 1-based counting, see below for matching operation.
-	bbt.bars = metric.start().bars + (uint32_t)floor((double)bbt.beats / divisions_per_bar);
-	bbt.beats = (uint32_t)fmod((double)bbt.beats, divisions_per_bar);
-
-	/* if we have a fractional number of beats per bar, we see if
-	   we're in the last beat (the fractional one).  if so, we
-	   round ticks appropriately and bump to the next bar. 
+	   Beats      divisions per bar   Normalized beat
+	   0          N                   => 0
+           1          N                   => 1
+           2          N                   => 2
+	   3          N                   => 3
+           .   
+	   .
+	   .
+	   N-1        N                   => N-1
+	   N          N                   => 0
+	   N+1        N                   => 1
+	   .
+	   .
+	   .
+	   2N-1       N                   => N-1
+	   2N         N                   => 0
+   
+	   so, the only special cases are 0, N, 2N etc. however bbt.beats is
+	   never zero, so the only actual special cases are N, 2N and so on,
+	   allowing us to use a special case check for fmod () == 0 and
+	   changing the value to divisions per bar
 	*/
-	double beat_fraction = divisions_per_bar - floor(divisions_per_bar);
 
-	/* XXX one problem here is that I'm not sure how to handle
-	   fractional beats that don't evenly divide ticks_per_beat.
-	   If they aren't handled consistently, I would guess we'll
-	   continue to have strange discrepancies occuring.  Perhaps
-	   this will also behave badly in the case of meters like
-	   0.1/4, but I can't be bothered to test that.
-	*/
-	uint32_t ticks_on_last_beat = (uint32_t)floor(BBT_Time::ticks_per_beat * beat_fraction);
+	bbt.beats = (uint32_t) fmod (bbt.beats, divisions_per_bar);
 
-	if (bbt.beats > (uint32_t)floor(divisions_per_bar) && bbt.ticks >= ticks_on_last_beat) {
-		bbt.ticks -= ticks_on_last_beat;
-		bbt.beats = 0;
-		bbt.bars++;
+	if (bbt.beats == 0) {
+		bbt.beats = divisions_per_bar;
 	}
-
-	bbt.beats++; // correction for 1-based counting, see above for matching operation.
-
-	// cerr << "-----\t RETURN " << bbt << endl;
 }
 
 framecnt_t
@@ -1417,6 +1419,8 @@ TempoMap::get_points (framepos_t lower, framepos_t upper) const
 	frames_per_bar = meter->frames_per_bar (*tempo, _frame_rate);
 	beat_frames = meter->frames_per_division (*tempo,_frame_rate);
 
+	// cerr << "Start with beat frames = " << beat_frames <<  " bar = " << frames_per_bar << endl;
+
 	if (meter->frame() > tempo->frame()) {
 		bar = meter->start().bars;
 		beat = meter->start().beats;
@@ -1448,7 +1452,7 @@ TempoMap::get_points (framepos_t lower, framepos_t upper) const
 			limit = upper;
 			// cerr << "== limit set to end of request @ " << limit << endl;
 		} else {
-			// cerr << "== limit set to next metric @ " << (*i)->frame() << endl;
+			// cerr << "== limit set to next meter section @ " << (*i)->frame() << endl;
 			limit = (*i)->frame();
 		}
 
@@ -1486,22 +1490,22 @@ TempoMap::get_points (framepos_t lower, framepos_t upper) const
 			// << " beat frame @ " << beat_frame << " vs. " << limit
 			// << endl;
 
-			if (beat > ceil(divisions_per_bar) || i != metrics->end()) {
+			 if (beat > ceil(divisions_per_bar) || (i != metrics->end() && dynamic_cast<MeterSection*>(*i))) {
 
-				/* we walked an entire bar. its
-				   important to move `current' forward
-				   by the actual frames_per_bar, not move it to
-				   an integral beat_frame, so that metrics with
-				   non-integral beats-per-bar have
-				   their bar positions set
-				   correctly. consider a metric with
-				   9-1/2 beats-per-bar. the bar we
-				   just filled had  10 beat marks,
-				   but the bar end is 1/2 beat before
-				   the last beat mark.
-				   And it is also possible that a tempo
-				   change occured in the middle of a bar,
-				   so we subtract the possible extra fraction from the current
+				/* we've arrived at either the end of a bar or
+				   a new meter marker.
+
+				   its important to move `current' forward by
+				   the actual frames_per_bar, not move it to an
+				   integral beat_frame, so that metrics with
+				   non-integral beats-per-bar have their bar
+				   positions set correctly. consider a metric
+				   with 9-1/2 beats-per-bar. the bar we just
+				   filled had 10 beat marks, but the bar end is
+				   1/2 beat before the last beat mark.  And it
+				   is also possible that a tempo change occured
+				   in the middle of a bar, so we subtract the
+				   possible extra fraction from the current
 				*/
 
 				if (beat > ceil (divisions_per_bar)) {
@@ -1516,7 +1520,6 @@ TempoMap::get_points (framepos_t lower, framepos_t upper) const
 				bar++;
 				beat = 1;
 			}
-
 		}
 
 		/* if we're done, then we're done */
@@ -1545,6 +1548,8 @@ TempoMap::get_points (framepos_t lower, framepos_t upper) const
 			divisions_per_bar = meter->divisions_per_bar ();
 			frames_per_bar = meter->frames_per_bar (*tempo, _frame_rate);
 			beat_frames = meter->frames_per_division (*tempo, _frame_rate);
+
+			// cerr << "New metric with beat frames = " << beat_frames <<  " bar = " << frames_per_bar << endl;
 
 			++i;
 		}
