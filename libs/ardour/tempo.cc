@@ -735,7 +735,7 @@ TempoMap::timestamp_metrics (bool use_bbt)
 				first = false;
 			} else {
 
-				if (bbt.ticks > BBT_Time::ticks_per_beat/2) {
+				if (bbt.ticks > BBT_Time::ticks_per_bar_division/2) {
 					/* round up to next beat */
 					bbt.beats += 1;
 				}
@@ -863,7 +863,7 @@ void
 TempoMap::bbt_time_with_metric (framepos_t frame, BBT_Time& bbt, const TempoMetric& metric) const
 {
 	const double divisions_per_bar = metric.meter().divisions_per_bar();
-	const double frames_per_tick = metric.meter().frames_per_division (metric.tempo(),_frame_rate) / BBT_Time::ticks_per_beat;
+	const double frames_per_tick = metric.meter().frames_per_division (metric.tempo(),_frame_rate) / BBT_Time::ticks_per_bar_division;
 
 	/* now compute how far beyond the metric we actually are, and add the
 	 * relevant number of ticks to the metric's BBT time
@@ -873,8 +873,8 @@ TempoMap::bbt_time_with_metric (framepos_t frame, BBT_Time& bbt, const TempoMetr
 	uint32_t tick_diff = (uint32_t) lrint ((double) frame_diff / frames_per_tick);
 
 	bbt.ticks = metric.start().ticks + tick_diff;
-	uint32_t beat_overflow = bbt.ticks / (uint32_t) BBT_Time::ticks_per_beat;
-	bbt.ticks = bbt.ticks % (uint32_t) BBT_Time::ticks_per_beat;
+	uint32_t beat_overflow = bbt.ticks / (uint32_t) BBT_Time::ticks_per_bar_division;
+	bbt.ticks = bbt.ticks % (uint32_t) BBT_Time::ticks_per_bar_division;
 	bbt.beats = metric.start().beats + beat_overflow;
 	/* bbt.beats uses 1-based counting, so adjust to get the right answer */
 	uint32_t bar_overflow = (bbt.beats - 1) / (uint32_t) divisions_per_bar;
@@ -929,7 +929,7 @@ TempoMap::count_frames_between (const BBT_Time& start, const BBT_Time& end) cons
 	uint32_t bar_offset = start.bars - m.start().bars;
 
 	double  beat_offset = bar_offset*m.meter().divisions_per_bar() - (m.start().beats-1) + (start.beats -1)
-		+ start.ticks/BBT_Time::ticks_per_beat;
+		+ start.ticks/BBT_Time::ticks_per_bar_division;
 
 	start_frame = m.frame() + (framepos_t) rint(beat_offset * m.meter().frames_per_division(m.tempo(),_frame_rate));
 
@@ -943,7 +943,7 @@ TempoMap::count_frames_between (const BBT_Time& start, const BBT_Time& end) cons
 	bar_offset = end.bars - m.start().bars;
 
 	beat_offset = bar_offset * m.meter().divisions_per_bar() - (m.start().beats -1) + (end.beats - 1)
-		+ end.ticks/BBT_Time::ticks_per_beat;
+		+ end.ticks/BBT_Time::ticks_per_bar_division;
 
 	end_frame = m.frame() + (framepos_t) rint(beat_offset * m.meter().frames_per_division(m.tempo(),_frame_rate));
 
@@ -1076,8 +1076,8 @@ TempoMap::bbt_duration_at_unlocked (const BBT_Time& when, const BBT_Time& bbt, i
 		 */
 
 		uint32_t ticks_at_beat = (uint32_t) (result.beats == ceil(divisions_per_bar) ?
-					(1 - (ceil(divisions_per_bar) - divisions_per_bar))* BBT_Time::ticks_per_beat
-					   : BBT_Time::ticks_per_beat );
+					(1 - (ceil(divisions_per_bar) - divisions_per_bar))* BBT_Time::ticks_per_bar_division
+					   : BBT_Time::ticks_per_bar_division );
 
 		while (result.ticks >= ticks_at_beat) {
 			result.beats++;
@@ -1089,8 +1089,8 @@ TempoMap::bbt_duration_at_unlocked (const BBT_Time& when, const BBT_Time& bbt, i
 				divisions_per_bar = metric.meter().divisions_per_bar();
 			}
 			ticks_at_beat= (uint32_t) (result.beats == ceil(divisions_per_bar) ?
-				       (1 - (ceil(divisions_per_bar) - divisions_per_bar) ) * BBT_Time::ticks_per_beat
-				       : BBT_Time::ticks_per_beat);
+				       (1 - (ceil(divisions_per_bar) - divisions_per_bar) ) * BBT_Time::ticks_per_bar_division
+				       : BBT_Time::ticks_per_bar_division);
 		}
 
 
@@ -1117,7 +1117,7 @@ TempoMap::bbt_duration_at_unlocked (const BBT_Time& when, const BBT_Time& bbt, i
 			result.ticks = when.ticks - bbt.ticks;
 		} else {
 
-			uint32_t ticks_at_beat= (uint32_t) BBT_Time::ticks_per_beat;
+			uint32_t ticks_at_beat= (uint32_t) BBT_Time::ticks_per_bar_division;
 			uint32_t t = bbt.ticks - when.ticks;
 
 			do {
@@ -1128,10 +1128,10 @@ TempoMap::bbt_duration_at_unlocked (const BBT_Time& when, const BBT_Time& bbt, i
 					metric = metric_at(result); // maybe there is a meter change
 					divisions_per_bar = metric.meter().divisions_per_bar();
 					result.beats = (uint32_t) ceil(divisions_per_bar);
-					ticks_at_beat = (uint32_t) ((1 - (ceil(divisions_per_bar) - divisions_per_bar)) * BBT_Time::ticks_per_beat) ;
+					ticks_at_beat = (uint32_t) ((1 - (ceil(divisions_per_bar) - divisions_per_bar)) * BBT_Time::ticks_per_bar_division) ;
 				} else {
 					--result.beats;
-					ticks_at_beat = (uint32_t) BBT_Time::ticks_per_beat;
+					ticks_at_beat = (uint32_t) BBT_Time::ticks_per_bar_division;
 				}
 
 				if (t <= ticks_at_beat) {
@@ -1186,7 +1186,7 @@ TempoMap::round_to_beat_subdivision (framepos_t fr, int sub_num, int dir)
 
 	bbt_time(fr, the_beat);
 
-	ticks_one_subdivisions_worth = (uint32_t)BBT_Time::ticks_per_beat / sub_num;
+	ticks_one_subdivisions_worth = (uint32_t)BBT_Time::ticks_per_bar_division / sub_num;
 	ticks_one_half_subdivisions_worth = ticks_one_subdivisions_worth / 2;
 
 	if (dir > 0) {
@@ -1293,7 +1293,7 @@ TempoMap::round_to_type (framepos_t frame, int dir, BBTPointType type)
 			float midbar_ticks;
 
 			midbar_beats = metric.meter().divisions_per_bar() / 2 + 1;
-			midbar_ticks = BBT_Time::ticks_per_beat * fmod (midbar_beats, 1.0f);
+			midbar_ticks = BBT_Time::ticks_per_bar_division * fmod (midbar_beats, 1.0f);
 			midbar_beats = floor (midbar_beats);
 
 			BBT_Time midbar (bbt.bars, lrintf (midbar_beats), lrintf (midbar_ticks));
@@ -1346,7 +1346,7 @@ TempoMap::round_to_type (framepos_t frame, int dir, BBTPointType type)
 			/* "true" rounding */
 
 			/* round to nearest beat */
-			if (bbt.ticks >= (BBT_Time::ticks_per_beat/2)) {
+			if (bbt.ticks >= (BBT_Time::ticks_per_bar_division/2)) {
 
 				try {
 					bbt = bbt_add (bbt, one_beat, metric);
@@ -1752,9 +1752,9 @@ TempoMap::bbt_add (const BBT_Time& start, const BBT_Time& increment, const Tempo
 	BBT_Time op = increment; /* argument is const, but we need to modify it */
 	uint32_t ticks = result.ticks + op.ticks;
 
-	if (ticks >= BBT_Time::ticks_per_beat) {
+	if (ticks >= BBT_Time::ticks_per_bar_division) {
 		op.beats++;
-		result.ticks = ticks % (uint32_t) BBT_Time::ticks_per_beat;
+		result.ticks = ticks % (uint32_t) BBT_Time::ticks_per_bar_division;
 	} else {
 		result.ticks += op.ticks;
 	}
@@ -1855,7 +1855,7 @@ TempoMap::bbt_subtract (const BBT_Time& start, const BBT_Time& decrement) const
 	if (op.ticks > result.ticks) {
 		/* subtract an extra beat later; meanwhile set ticks to the right "carry" value */
 		op.beats++;
-		result.ticks = BBT_Time::ticks_per_beat - (op.ticks - result.ticks);
+		result.ticks = BBT_Time::ticks_per_bar_division - (op.ticks - result.ticks);
 	} else {
 		result.ticks -= op.ticks;
 	}
@@ -2228,12 +2228,12 @@ TempoMap::framepos_plus_bbt (framepos_t pos, BBT_Time op) const
 	pos += llrint (beats * frames_per_beat);
 
 	if (op.ticks) {
-		if (op.ticks >= BBT_Time::ticks_per_beat) {
+		if (op.ticks >= BBT_Time::ticks_per_bar_division) {
 			pos += llrint (frames_per_beat + /* extra beat */
-				       (frames_per_beat * ((op.ticks % (uint32_t) BBT_Time::ticks_per_beat) / 
-							   (double) BBT_Time::ticks_per_beat)));
+				       (frames_per_beat * ((op.ticks % (uint32_t) BBT_Time::ticks_per_bar_division) / 
+							   (double) BBT_Time::ticks_per_bar_division)));
 		} else {
-			pos += llrint (frames_per_beat * (op.ticks / (double) BBT_Time::ticks_per_beat));
+			pos += llrint (frames_per_beat * (op.ticks / (double) BBT_Time::ticks_per_bar_division));
 		}
 	}
 

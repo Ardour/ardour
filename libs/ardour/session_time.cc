@@ -494,7 +494,7 @@ Session::jack_timebase_callback (jack_transport_state_t /*state*/,
 
 		pos->beats_per_bar = metric.meter().divisions_per_bar();
 		pos->beat_type = metric.meter().note_divisor();
-		pos->ticks_per_beat = Timecode::BBT_Time::ticks_per_beat;
+		pos->ticks_per_beat = Timecode::BBT_Time::ticks_per_bar_division;
 		pos->beats_per_minute = metric.tempo().beats_per_minute();
 
 		pos->valid = jack_position_bits_t (pos->valid | JackPositionBBT);

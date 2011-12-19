@@ -812,7 +812,7 @@ MidiRegionView::create_note_at (framepos_t t, double y, double length, bool sh, 
 
 		   length = region_frames_to_region_beats (region_beats_to_region_frames (length) - 1);
 		*/
-		length -= 1.0/Timecode::BBT_Time::ticks_per_beat;
+		length -= 1.0/Timecode::BBT_Time::ticks_per_bar_division;
 	}
 
 	const boost::shared_ptr<NoteType> new_note (new NoteType (mtv->get_channel_for_add (),

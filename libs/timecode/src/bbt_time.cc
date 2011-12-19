@@ -23,7 +23,20 @@
 
 using namespace Timecode;
 
-const double BBT_Time::ticks_per_beat = 1920.0;
+/* This number doesn't describe the smallest division of a "beat" (which is
+   only defined contextually anyway), but rather the smallest division of the the
+   divisions of a bar. If using a meter of 4/8, there are 4 divisions per bar, and
+   we can divide each one into ticks_per_bar_division pieces; in a separate meter
+   (section) of 3/8, there are 3 divisions per bar, each of which can be divided
+   into ticks_per_bar_division pieces.
+
+   The number is intended to have as many integer factors as possible so that
+   1/Nth divisions are integer numbers of ticks.
+
+   1920 is the largest legal value that be used inside an SMF file, and has many factors.
+*/
+
+const double BBT_Time::ticks_per_bar_division = 1920.0;
 
 BBT_Time::BBT_Time (double dbeats)
 {
@@ -36,5 +49,5 @@ BBT_Time::BBT_Time (double dbeats)
 
         bars = 0;
         beats = rint (floor (dbeats));
-        ticks = rint (floor (BBT_Time::ticks_per_beat * fmod (dbeats, 1.0)));
+        ticks = rint (floor (BBT_Time::ticks_per_bar_division * fmod (dbeats, 1.0)));
 }

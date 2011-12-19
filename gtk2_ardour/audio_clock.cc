@@ -1779,7 +1779,7 @@ AudioClock::bbt_validate_edit (const string& str)
 		return false;
 	}
 
-	if (any.bbt.ticks > Timecode::BBT_Time::ticks_per_beat) {
+	if (any.bbt.ticks > Timecode::BBT_Time::ticks_per_bar_division) {
 		return false;
 	}
 

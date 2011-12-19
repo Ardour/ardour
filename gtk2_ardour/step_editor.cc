@@ -272,8 +272,8 @@ StepEditor::step_add_note (uint8_t channel, uint8_t pitch, uint8_t velocity, Evo
                    up by 1 tick from where the last note ended
                 */
 
-                at += 1.0/Timecode::BBT_Time::ticks_per_beat;
-                len -= 1.0/Timecode::BBT_Time::ticks_per_beat;
+                at += 1.0/Timecode::BBT_Time::ticks_per_bar_division;
+                len -= 1.0/Timecode::BBT_Time::ticks_per_bar_division;
         }
 
         step_edit_region_view->step_add_note (channel, pitch, velocity, at, len);
@@ -293,7 +293,7 @@ StepEditor::step_add_note (uint8_t channel, uint8_t pitch, uint8_t velocity, Evo
                 step_edit_beat_pos += beat_duration;
                 step_edit_region_view->move_step_edit_cursor (step_edit_beat_pos);
         } else {
-                step_edit_beat_pos += 1.0/Timecode::BBT_Time::ticks_per_beat; // tiny, but no longer overlapping
+                step_edit_beat_pos += 1.0/Timecode::BBT_Time::ticks_per_bar_division; // tiny, but no longer overlapping
                 _step_edit_chord_duration = max (_step_edit_chord_duration, beat_duration);
         }
 

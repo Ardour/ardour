@@ -221,7 +221,7 @@ MidiListEditor::redisplay_model ()
 			bbt.bars = 0;
 			dur = (*i)->end_time() - (*i)->time();
 			bbt.beats = floor (dur);
-			bbt.ticks = (uint32_t) lrint (fmod (dur, 1.0) * Timecode::BBT_Time::ticks_per_beat);
+			bbt.ticks = (uint32_t) lrint (fmod (dur, 1.0) * Timecode::BBT_Time::ticks_per_bar_division);
 
 			_session->tempo_map().bbt_duration_at (region->position(), bbt, 0);
 
