@@ -315,7 +315,6 @@ public:
 
 	void notify_region_removed (boost::shared_ptr<Region>);
 	void notify_region_added (boost::shared_ptr<Region>);
-	void notify_length_changed ();
 	void notify_layering_changed ();
 	void notify_contents_changed ();
 	void notify_state_changed (const PBD::PropertyChange&);

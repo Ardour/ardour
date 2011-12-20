@@ -563,15 +563,6 @@ Playlist::notify_region_added (boost::shared_ptr<Region> r)
 	}
 }
 
-void
-Playlist::notify_length_changed ()
-{
-	if (!holding_state ()) {
-		pending_contents_change = false;
-		ContentsChanged (); /* EMIT SIGNAL */
-	}
-}
-
 /** @param from_undo true if this flush is triggered by the end of an undo on this playlist */
 void
 Playlist::flush_notifications (bool from_undo)
@@ -737,17 +728,11 @@ Playlist::flush_notifications (bool from_undo)
  bool
  Playlist::add_region_internal (boost::shared_ptr<Region> region, framepos_t position)
  {
-	 if (region->data_type() != _type){
+	 if (region->data_type() != _type) {
 		 return false;
 	 }
 
 	 RegionSortByPosition cmp;
-
-	 framecnt_t old_length = 0;
-
-	 if (!holding_state()) {
-		  old_length = _get_extent().second;
-	 }
 
 	 if (!first_set_state) {
 		 boost::shared_ptr<Playlist> foo (shared_from_this());
@@ -772,14 +757,8 @@ Playlist::flush_notifications (bool from_undo)
 
 	 notify_region_added (region);
 
-
 	 if (!holding_state ()) {
-
 		 check_dependents (region, false);
-
-		 if (old_length != _get_extent().second) {
-			 notify_length_changed ();
-		 }
 	 }
 
 	 region->PropertyChanged.connect_same_thread (region_state_changed_connections, boost::bind (&Playlist::region_changed_proxy, this, _1, boost::weak_ptr<Region> (region)));
@@ -814,11 +793,6 @@ Playlist::flush_notifications (bool from_undo)
  Playlist::remove_region_internal (boost::shared_ptr<Region> region)
  {
 	 RegionList::iterator i;
-	 framecnt_t old_length = 0;
-
-	 if (!holding_state()) {
-		 old_length = _get_extent().second;
-	 }
 
 	 if (!in_set_state) {
 		 /* unset playlist */
@@ -840,10 +814,6 @@ Playlist::flush_notifications (bool from_undo)
 			 if (!holding_state ()) {
 				 relayer ();
 				 remove_dependents (region);
-
-				 if (old_length != _get_extent().second) {
-					 notify_length_changed ();
-				 }
 			 }
 
 			 notify_region_removed (region);
@@ -1222,8 +1192,6 @@ Playlist::flush_notifications (bool from_undo)
 		 RegionLock rl1 (this);
 		 RegionLock rl2 (other.get());
 
-		 framecnt_t const old_length = _get_extent().second;
-
 		 int itimes = (int) floor (times);
 		 framepos_t pos = position;
 		 framecnt_t const shift = other->_get_extent().second;
@@ -1242,15 +1210,6 @@ Playlist::flush_notifications (bool from_undo)
 			 }
 			 pos += shift;
 		 }
-
-
-		 /* XXX shall we handle fractional cases at some point? */
-
-		 if (old_length != _get_extent().second) {
-			 notify_length_changed ();
-		 }
-
-
 	 }
 
 	 return 0;
@@ -1496,7 +1455,7 @@ Playlist::flush_notifications (bool from_undo)
 
 	 _splicing = false;
 
-	 notify_length_changed ();
+	 notify_contents_changed ();
  }
 
  void
@@ -1552,7 +1511,7 @@ Playlist::flush_notifications (bool from_undo)
 				 timestamp_layer_op (region);
 			 }
 
-			 notify_length_changed ();
+			 notify_contents_changed ();
 			 relayer ();
 			 check_dependents (region, false);
 		 }
@@ -2713,7 +2672,7 @@ Playlist::nudge_after (framepos_t start, framecnt_t distance, bool forwards)
 
 	if (moved) {
 		_nudging = false;
-		notify_length_changed ();
+		notify_contents_changed ();
 	}
 
 }
