@@ -51,19 +51,19 @@ private:
 	bool bpm_button_press (GdkEventButton* );
 	bool bpm_button_release (GdkEventButton* );
 	bool entry_key_release (GdkEventKey* );
-	void note_types_change ();
+	void pulse_change ();
 
-	Gtk::ComboBoxText note_types;
-	std::vector<std::string> strings;
+	typedef std::map<std::string,float> NoteTypes;
+	NoteTypes note_types;
+
+	Gtk::ComboBoxText pulse_selector;
 	Gtk::Adjustment   bpm_adjustment;
 	Gtk::SpinButton   bpm_spinner;
-	Gtk::Button  ok_button;
-	Gtk::Button  cancel_button;
 	Gtk::Entry   when_bar_entry;
 	Gtk::Entry   when_beat_entry;
 	Gtk::Label   when_bar_label;
 	Gtk::Label   when_beat_label;
-	char buf[64];
+	Gtk::Label   pulse_selector_label;
 };
 
 class MeterDialog : public ArdourDialog
@@ -89,7 +89,6 @@ private:
 	Gtk::Button  ok_button;
 	Gtk::Button  cancel_button;
 	Gtk::Entry   when_bar_entry;
-	char buf[64];
 };
 
 #endif /* __ardour_gtk_tempo_dialog_h__ */

@@ -88,7 +88,7 @@ Editor::draw_metric_marks (const Metrics& metrics)
 			metric_marks.push_back (new MeterMarker (*this, *meter_group, ARDOUR_UI::config()->canvasvar_MeterMarker.get(), buf,
 								 *(const_cast<MeterSection*>(ms))));
 		} else if ((ts = dynamic_cast<const TempoSection*>(*i)) != 0) {
-			snprintf (buf, sizeof (buf), "%.2f", ts->beats_per_minute());
+			snprintf (buf, sizeof (buf), "%.2f/%.0f", ts->beats_per_minute(), ts->note_type());
 			metric_marks.push_back (new TempoMarker (*this, *tempo_group, ARDOUR_UI::config()->canvasvar_TempoMarker.get(), buf,
 								 *(const_cast<TempoSection*>(ts))));
 		}
