@@ -92,6 +92,7 @@ TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double note_type,
 	for (x = note_types.begin(); x != note_types.end(); ++x) {
 		if (x->second == note_type) {
 			pulse_selector.set_active_text (x->first);
+			break;
 		}
 	}
 
@@ -253,40 +254,44 @@ MeterDialog::MeterDialog (MeterSection& section, const string & action)
 }
 
 void
-MeterDialog::init (const Timecode::BBT_Time& when, double bpb, double note_type, bool movable)
+MeterDialog::init (const Timecode::BBT_Time& when, double bpb, double divisor, bool movable)
 {
 	char buf[64];
+	vector<string> strings;
+	NoteTypes::iterator x;
 
 	snprintf (buf, sizeof (buf), "%.2f", bpb);
 	bpb_entry.set_text (buf);
 	bpb_entry.select_region (0, -1);
 
-	strings.push_back (_("whole (1)"));
-	strings.push_back (_("second (2)"));
-	strings.push_back (_("third (3)"));
-	strings.push_back (_("quarter (4)"));
-	strings.push_back (_("eighth (8)"));
-	strings.push_back (_("sixteenth (16)"));
-	strings.push_back (_("thirty-second (32)"));
+	note_types.insert (make_pair (_("whole"), 1.0));
+	strings.push_back (_("whole"));
+	note_types.insert (make_pair (_("second"), 2.0));
+	strings.push_back (_("second"));
+	note_types.insert (make_pair (_("third"), 3.0));
+	strings.push_back (_("third"));
+	note_types.insert (make_pair (_("quarter"), 4.0));
+	strings.push_back (_("quarter"));
+	note_types.insert (make_pair (_("eighth"), 8.0));
+	strings.push_back (_("eighth"));
+	note_types.insert (make_pair (_("thirty-second"), 32.0));
+	strings.push_back (_("thirty-second"));
+	note_types.insert (make_pair (_("sixty-fourth"), 64.0));
+	strings.push_back (_("sixty-fourth"));
+	note_types.insert (make_pair (_("one-hundred-twenty-eighth"), 128.0));
+	strings.push_back (_("one-hundred-twenty-eighth"));
 
-	set_popdown_strings (note_types, strings);
+	set_popdown_strings (note_type, strings);
 
-	if (note_type == 1.0f) {
-		note_types.set_active_text (_("whole (1)"));
-	} else if (note_type == 2.0f) {
-		note_types.set_active_text (_("second (2)"));
-	} else if (note_type == 3.0f) {
-		note_types.set_active_text (_("third (3)"));
-	} else if (note_type == 4.0f) {
-		note_types.set_active_text (_("quarter (4)"));
-	} else if (note_type == 8.0f) {
-		note_types.set_active_text (_("eighth (8)"));
-	} else if (note_type == 16.0f) {
-		note_types.set_active_text (_("sixteenth (16)"));
-	} else if (note_type == 32.0f) {
-		note_types.set_active_text (_("thirty-second (32)"));
-	} else {
-		note_types.set_active_text (_("quarter (4)"));
+	for (x = note_types.begin(); x != note_types.end(); ++x) {
+		if (x->second == divisor) {
+			note_type.set_active_text (x->first);
+			break;
+		}
+	}
+	
+	if (x == note_types.end()) {
+		note_type.set_active_text (strings[3]); // "quarter"
 	}
 
 	Label* note_label = manage (new Label (_("Note value:"), ALIGN_LEFT, ALIGN_CENTER));
@@ -297,7 +302,7 @@ MeterDialog::init (const Timecode::BBT_Time& when, double bpb, double note_type,
 	table->attach (*bpb_label, 0, 1, 0, 1, FILL|EXPAND, FILL|EXPAND);
 	table->attach (bpb_entry, 1, 2, 0, 1, FILL|EXPAND, FILL|EXPAND);
 	table->attach (*note_label, 0, 1, 1, 2, FILL|EXPAND, FILL|EXPAND);
-	table->attach (note_types, 1, 2, 1, 2, FILL|EXPAND, SHRINK);
+	table->attach (note_type, 1, 2, 1, 2, FILL|EXPAND, SHRINK);
 
 	if (movable) {
 		char buf[64];
@@ -333,8 +338,7 @@ MeterDialog::init (const Timecode::BBT_Time& when, double bpb, double note_type,
 	when_bar_entry.signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &MeterDialog::response), RESPONSE_ACCEPT));
 	when_bar_entry.signal_key_press_event().connect (sigc::mem_fun (*this, &MeterDialog::entry_key_press), false);
 	when_bar_entry.signal_key_release_event().connect (sigc::mem_fun (*this, &MeterDialog::entry_key_release));
-
-	note_types.signal_changed().connect (sigc::mem_fun (*this, &MeterDialog::note_types_change));
+	note_type.signal_changed().connect (sigc::mem_fun (*this, &MeterDialog::note_type_change));
 }
 
 bool
@@ -397,7 +401,7 @@ MeterDialog::entry_key_release (GdkEventKey*)
 }
 
 void
-MeterDialog::note_types_change ()
+MeterDialog::note_type_change ()
 {
         set_response_sensitive (RESPONSE_ACCEPT, true);
 }
@@ -417,29 +421,14 @@ MeterDialog::get_bpb ()
 double
 MeterDialog::get_note_type ()
 {
-	double note_type = 0;
-	vector<string>::iterator i;
-	string text = note_types.get_active_text();
-
-	for (i = strings.begin(); i != strings.end(); ++i) {
-		if (text == *i) {
-			if (sscanf (text.c_str(), "%*[^0-9]%lf", &note_type) != 1) {
-				error << string_compose(_("garbaged note type entry (%1)"), text) << endmsg;
-				return 0;
-			} else {
-				break;
-			}
-		}
+	NoteTypes::iterator x = note_types.find (note_type.get_active_text());
+	
+	if (x == note_types.end()) {
+		error << string_compose(_("incomprehensible meter note type (%1)"), note_type.get_active_text()) << endmsg;
+		return 0;
 	}
 
-	if (i == strings.end()) {
-		if (sscanf (text.c_str(), "%lf", &note_type) != 1) {
-			error << string_compose(_("incomprehensible note type entry (%1)"), text) << endmsg;
-			return 0;
-		}
-	}
-
-	return note_type;
+	return x->second;
 }
 
 bool

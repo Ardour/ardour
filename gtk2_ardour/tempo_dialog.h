@@ -81,10 +81,13 @@ private:
 	void init (const Timecode::BBT_Time&, double, double, bool);
 	bool entry_key_press (GdkEventKey* );
 	bool entry_key_release (GdkEventKey* );
-	void note_types_change ();
+	void note_type_change ();
+
+	typedef std::map<std::string,float> NoteTypes;
+	NoteTypes note_types;
 
 	Gtk::Entry   bpb_entry;
-	Gtk::ComboBoxText note_types;
+	Gtk::ComboBoxText note_type;
 	std::vector<std::string> strings;
 	Gtk::Button  ok_button;
 	Gtk::Button  cancel_button;
