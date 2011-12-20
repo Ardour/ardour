@@ -304,7 +304,6 @@ Playlist::init (bool hide)
 	g_atomic_int_set (&block_notifications, 0);
 	g_atomic_int_set (&ignore_state_changes, 0);
 	pending_contents_change = false;
-	pending_length = false;
 	pending_layering = false;
 	first_set_state = true;
 	_refcnt = 0;
@@ -473,13 +472,10 @@ Playlist::notify_region_removed (boost::shared_ptr<Region> r)
 	if (holding_state ()) {
 		pending_removes.insert (r);
 		pending_contents_change = true;
-		pending_length = true;
 	} else {
 		/* this might not be true, but we have to act
 		   as though it could be.
 		*/
-		pending_length = false;
-		LengthChanged (); /* EMIT SIGNAL */
 		pending_contents_change = false;
 		RegionRemoved (boost::weak_ptr<Region> (r)); /* EMIT SIGNAL */
 		ContentsChanged (); /* EMIT SIGNAL */
@@ -559,11 +555,8 @@ Playlist::notify_region_added (boost::shared_ptr<Region> r)
 	if (holding_state()) {
 		pending_adds.insert (r);
 		pending_contents_change = true;
-		pending_length = true;
 	} else {
 		r->clear_changes ();
-		pending_length = false;
-		LengthChanged (); /* EMIT SIGNAL */
 		pending_contents_change = false;
 		RegionAdded (boost::weak_ptr<Region> (r)); /* EMIT SIGNAL */
 		ContentsChanged (); /* EMIT SIGNAL */
@@ -573,11 +566,7 @@ Playlist::notify_region_added (boost::shared_ptr<Region> r)
 void
 Playlist::notify_length_changed ()
 {
-	if (holding_state ()) {
-		pending_length = true;
-	} else {
-		pending_length = false;
-		LengthChanged(); /* EMIT SIGNAL */
+	if (!holding_state ()) {
 		pending_contents_change = false;
 		ContentsChanged (); /* EMIT SIGNAL */
 	}
@@ -590,8 +579,6 @@ Playlist::flush_notifications (bool from_undo)
 	set<boost::shared_ptr<Region> > dependent_checks_needed;
 	set<boost::shared_ptr<Region> >::iterator s;
 	uint32_t regions_changed = false;
-	bool check_length = false;
-	framecnt_t old_length = 0;
 
 	if (in_flush) {
 		return;
@@ -601,10 +588,6 @@ Playlist::flush_notifications (bool from_undo)
 
 	if (!pending_bounds.empty() || !pending_removes.empty() || !pending_adds.empty()) {
 		regions_changed = true;
-		if (!pending_length) {
-			old_length = _get_extent ().second;
-			check_length = true;
-		}
 	}
 
 	/* we have no idea what order the regions ended up in pending
@@ -636,19 +619,6 @@ Playlist::flush_notifications (bool from_undo)
 		    anyone hear's that its been added
 		 */
 		 dependent_checks_needed.insert (*s);
-	 }
-
-	 if (check_length) {
-		 if (old_length != _get_extent().second) {
-			 pending_length = true;
-			 // cerr << _name << " length has changed\n";
-		 }
-	 }
-
-	 if (pending_length || (freeze_length != _get_extent().second)) {
-		 pending_length = false;
-		 // cerr << _name << " sends LengthChanged\n";
-		 LengthChanged(); /* EMIT SIGNAL */
 	 }
 
 	 if (regions_changed || pending_contents_change) {
@@ -692,7 +662,6 @@ Playlist::flush_notifications (bool from_undo)
 	 pending_range_moves.clear ();
 	 pending_region_extensions.clear ();
 	 pending_contents_change = false;
-	 pending_length = false;
  }
 
  /*************************************************************
@@ -1701,8 +1670,6 @@ Playlist::flush_notifications (bool from_undo)
 		 }
 
 		 pending_removes.clear ();
-		 pending_length = false;
-		 LengthChanged ();
 		 pending_contents_change = false;
 		 ContentsChanged ();
 	 }

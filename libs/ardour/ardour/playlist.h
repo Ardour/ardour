@@ -180,7 +180,6 @@ public:
 	PBD::Signal1<void,boost::weak_ptr<Region> > RegionAdded;
 	PBD::Signal1<void,boost::weak_ptr<Region> > RegionRemoved;
 	PBD::Signal0<void>      NameChanged;
-	PBD::Signal0<void>      LengthChanged;
 	PBD::Signal0<void>      LayeringChanged;
 
 	/** Emitted when regions have moved (not when regions have only been trimmed) */
@@ -265,7 +264,6 @@ public:
 	RegionList       pending_bounds;
 	bool             pending_contents_change;
 	bool             pending_layering;
-	bool             pending_length;
 
 	/** Movements of time ranges caused by region moves; note that
 	 *  region trims are not included in this list; it is used to
