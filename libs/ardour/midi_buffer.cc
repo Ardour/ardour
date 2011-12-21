@@ -506,6 +506,16 @@ MidiBuffer::merge_in_place(const MidiBuffer &other)
 
 		} else if (them != other.end()) {
 
+			if ((*us).time() < ((*them).time())) {
+
+				/* just append the rest of other */
+
+				memcpy (_data + us.offset, other._data + them.offset, other._size - them.offset);
+				_size += other._size - them.offset;
+				assert(_size <= _capacity);
+				break;
+			} 
+
 			/* to get here implies that we've encountered two
 			 * messages with the same timestamp. we must order 
 			 * them correctly.
