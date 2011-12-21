@@ -223,8 +223,6 @@ Editor::ruler_button_press (GdkEventButton* ev)
 		return false;
 	}
 
-	// jlc: grab ev->window ?
-	//Gtk::Main::grab_add (*minsec_ruler);
 	Widget * grab_widget = 0;
 
 	if (timecode_ruler->is_realized() && ev->window == timecode_ruler->get_window()->gobj()) {
