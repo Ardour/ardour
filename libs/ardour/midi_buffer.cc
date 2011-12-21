@@ -397,12 +397,12 @@ MidiBuffer::merge_in_place(const MidiBuffer &other)
 		return true;
 	}
 
-	if (_size == 0) {
-		copy(other);
+	if (size() == 0) {
+		copy (other);
 		return true;
 	}
 
-	if (_size + other.size() > _capacity) {
+	if (size() + other.size() > _capacity) {
 		cerr << "MidiBuffer::merge failed (no space)" << endl;
 		return false;
 	}
@@ -417,128 +417,86 @@ MidiBuffer::merge_in_place(const MidiBuffer &other)
 	}
 	cerr << endl;
 
-#ifndef NDEBUG
-#ifdef  TEST_MIDI_MERGE
-	size_t   test_orig_us_size   = _size;
-	size_t   test_orig_them_size = other._size;
-	TimeType test_time           = 0;
-	size_t   test_us_count       = 0;
-	size_t   test_them_count     = 0;
-	for (iterator i = begin(); i != end(); ++i) {
-		assert(Evoral::midi_event_is_valid((*i).buffer(), (*i).size()));
-		assert((*i).time() >= test_time);
-		test_time = (*i).time();
-		++test_us_count;
-	}
-	test_time = 0;
-	for (const_iterator i = other.begin(); i != other.end(); ++i) {
-		assert(Evoral::midi_event_is_valid((*i).buffer(), (*i).size()));
-		assert((*i).time() >= test_time);
-		test_time = (*i).time();
-		++test_them_count;
-	}
-#endif
-#endif
-
 	const_iterator them = other.begin();
 	iterator us = begin();
 
 	while (them != other.end()) {
 
-		size_t sz;
-		ssize_t src;
+		size_t bytes_to_merge;
+		ssize_t merge_offset;
 
 		/* gather up total size of events that are earlier than
 		   the event referenced by "us"
 		*/
 
-		src = -1;
-		sz = 0;
+		merge_offset = -1;
+		bytes_to_merge = 0;
 
 		cerr << "Start merge skip with them = " << *them << endl;
 
 		while (them != other.end() && (*them).time() < (*us).time()) {
-			if (src == -1) {
-				src = them.offset;
+			if (merge_offset == -1) {
+				merge_offset = them.offset;
 			}
-			sz += sizeof (TimeType) + (*them).size();
+			bytes_to_merge += sizeof (TimeType) + (*them).size();
 			cerr << " move through other event " << *them << endl;
 			++them;
 		}
 
-		cerr << "merge skip done, sz = " << sz << " us @ end ? " << (us == end())
+		/* "them" now points to either:
+		 *
+		 * 1) an event that has the same or later timestamp than the
+		 *        event pointed to by "us"
+		 *
+		 * OR
+		 *
+		 * 2) the end of the "other" buffer
+		 *
+		 * if "sz" is non-zero, there is data to be merged from "other"
+		 * into this buffer before we do anything else, corresponding
+		 * to the events from "other" that we skipped while advancing
+		 * "them". 
+		 */
+
+		cerr << "merge skip done, sz = " << bytes_to_merge << " us @ end ? " << (us == end())
 		     << " them @ end ? " << (them == other.end()) 
 		     << endl;
 
-		if (sz) {
-			assert(src >= 0);
+		if (bytes_to_merge) {
+			assert(merge_offset >= 0);
 			/* move existing */
-			memmove (_data + us.offset + sz, _data + us.offset, _size - us.offset);
+			memmove (_data + us.offset + bytes_to_merge, _data + us.offset, _size - us.offset);
 			/* increase _size */
-			_size += sz;
-			assert(_size <= _capacity);
+			_size += bytes_to_merge;
+			assert (_size <= _capacity);
 			/* insert new stuff */
-			memcpy  (_data + us.offset, other._data + src, sz);
+			memcpy  (_data + us.offset, other._data + merge_offset, bytes_to_merge);
 			/* update iterator to our own events. this is a miserable hack */
-			us.offset += sz;
-		} else {
+			us.offset += bytes_to_merge;
+		} 
 
-			/* advance past our own events to get to the correct insertion
-			   point for the next event(s) from "other"
-			*/
+		/* if we're at the end of the other buffer, we're done */
 
-			while (us != end() && (*us).time() < (*them).time()) {
-				cerr << "skip by our own event " << (*us) << endl;
-				++us;
-			}
+		if (them == other.end()) {
+			break;
 		}
 
-		if (us == end()) { 
+		/* if we have two messages messages with the same timestamp. we
+		 * must order them correctly.
+		 */
 
-			cerr << " append rest of other to us\n";
-
-			/* just append the rest of other */
-
-			memcpy (_data + us.offset, other._data + them.offset, other._size - them.offset);
-			_size += other._size - them.offset;
-			assert(_size <= _capacity);
-			break;
-
-		} else if (them != other.end()) {
-
-			if ((*us).time() < ((*them).time())) {
-
-				/* just append the rest of other */
-
-				memcpy (_data + us.offset, other._data + them.offset, other._size - them.offset);
-				_size += other._size - them.offset;
-				assert(_size <= _capacity);
-				break;
-			} 
-
-			/* to get here implies that we've encountered two
-			 * messages with the same timestamp. we must order 
-			 * them correctly.
-			 */
+		if ((*us).time() == (*them).time()) {
 
 			DEBUG_TRACE (DEBUG::MidiIO, 
 				     string_compose ("simultaneous MIDI events discovered during merge, times %1/%2 status %3/%4\n",
 						     (*us).time(), (*them).time(),
 						     (int) *(_data + us.offset + sizeof (TimeType)),
 						     (int) *(other._data + them.offset + sizeof (TimeType))));
-
-			if ((*us).time() != (*them).time()) {
-				cerr << " in merge code for two events:\n"
-				     << '\t' << (*us) << endl
-				     << '\t' << (*them) << endl
-				     << "about to crash ...\n";
-			}
-			assert ((*us).time() == (*them).time());
-						     
+			
 			uint8_t our_midi_status_byte = *(_data + us.offset + sizeof (TimeType));
 			uint8_t their_midi_status_byte = *(other._data + them.offset + sizeof (TimeType));
 			bool them_first = second_simultaneous_midi_byte_is_first (our_midi_status_byte, their_midi_status_byte);
-
+			
 			DEBUG_TRACE (DEBUG::MidiIO, string_compose ("other message came first ? %1\n", them_first));
 			
 			if (!them_first) {
@@ -546,20 +504,20 @@ MidiBuffer::merge_in_place(const MidiBuffer &other)
 				++us;
 			}
 				
-			sz = sizeof (TimeType) + (*them).size();
+			bytes_to_merge = sizeof (TimeType) + (*them).size();
 			
 			/* move our remaining events later in the buffer by
 			 * enough to fit the one message we're going to merge
 			 */
 
-			memmove (_data + us.offset + sz, _data + us.offset, _size - us.offset);
+			memmove (_data + us.offset + bytes_to_merge, _data + us.offset, _size - us.offset);
 			/* increase _size */
-			_size += sz;
+			_size += bytes_to_merge;
 			assert(_size <= _capacity);
 			/* insert new stuff */
-			memcpy  (_data + us.offset, other._data + them.offset, sz);
+			memcpy  (_data + us.offset, other._data + them.offset, bytes_to_merge);
 			/* update iterator to our own events. this is a miserable hack */
-			us.offset += sz;
+			us.offset += bytes_to_merge;
 			/* 'us' is now an iterator to the event right after the
 			   new ones that we merged
 			*/
@@ -579,24 +537,33 @@ MidiBuffer::merge_in_place(const MidiBuffer &other)
 			 */
 
 			++them;
-		}
-	}
 
-#ifndef NDEBUG
-#ifdef  TEST_MIDI_MERGE
-	assert(_size == test_orig_us_size + test_orig_them_size);
-	size_t test_final_count = 0;
-	test_time = 0;
-	for (iterator i = begin(); i != end(); ++i) {
-		cerr << "CHECK " << test_final_count << " / " << test_us_count + test_them_count << endl;
-		assert(Evoral::midi_event_is_valid((*i).buffer(), (*i).size()));
-		assert((*i).time() >= test_time);
-		test_time = (*i).time();
-		++test_final_count;
+		} else {
+			
+			/* advance past our own events to get to the correct insertion
+			   point for the next event(s) from "other"
+			*/
+		
+			while (us != end() && (*us).time() <= (*them).time()) {
+				cerr << "skip by our own event " << (*us) << endl;
+				++us;
+			}
+		}
+
+		/* check to see if we reached the end of this buffer while
+		 * looking for the insertion point.
+		 */
+
+		if (us == end()) {
+
+			/* just append the rest of other and we're done*/
+			
+			memcpy (_data + us.offset, other._data + them.offset, other._size - them.offset);
+			_size += other._size - them.offset;
+			assert(_size <= _capacity);
+			break;
+		} 
 	}
-	assert(test_final_count = test_us_count + test_them_count);
-#endif
-#endif
 
 	return true;
 }
