@@ -1947,6 +1947,17 @@ void
 MeterMarkerDrag::aborted (bool)
 {
 	_marker->set_position (_marker->meter().frame ());
+
+	/* XXX problem: we don't know if we've moved yet, so we don't 
+	   know if the marker is a copy yet or not
+	*/
+
+	TempoMap& map (_editor->session()->tempo_map());
+	/* we removed it before, so add it back now */
+	map.add_meter (_marker->meter(), _marker->meter().frame());
+	// delete the dummy marker we used for visual representation while moving.
+	// a new visual marker will show up automatically.
+	delete _marker;
 }
 
 TempoMarkerDrag::TempoMarkerDrag (Editor* e, ArdourCanvas::Item* i, bool c)
@@ -1962,28 +1973,7 @@ TempoMarkerDrag::TempoMarkerDrag (Editor* e, ArdourCanvas::Item* i, bool c)
 void
 TempoMarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
-	if (_copy) {
-
-		// create a dummy marker for visual representation of moving the copy.
-		// The actual copying is not done before we reach the finish callback.
-		char name[64];
-		snprintf (name, sizeof (name), "%.2f", _marker->tempo().beats_per_minute());
-
-		TempoMarker* new_marker = new TempoMarker (
-			*_editor,
-			*_editor->tempo_group,
-			ARDOUR_UI::config()->canvasvar_TempoMarker.get(),
-			name,
-			*new TempoSection (_marker->tempo())
-			);
-
-		_item = &new_marker->the_item ();
-		_marker = new_marker;
-
-	}
-
 	Drag::start_grab (event, cursor);
-
 	show_verbose_cursor_time (adjusted_current_frame (event));
 }
 
@@ -1994,8 +1984,41 @@ TempoMarkerDrag::setup_pointer_frame_offset ()
 }
 
 void
-TempoMarkerDrag::motion (GdkEvent* event, bool)
+TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 {
+	if (first_move) {
+
+		// create a dummy marker for visual representation of moving the
+		// section, because whether its a copy or not, we're going to 
+		// leave or lose the original marker (leave if its a copy; lose if its
+		// not, because we'll remove it from the map).
+		
+		// create a dummy marker for visual representation of moving the copy.
+		// The actual copying is not done before we reach the finish callback.
+
+		char name[64];
+		snprintf (name, sizeof (name), "%.2f", _marker->tempo().beats_per_minute());
+
+		TempoSection section (_marker->tempo());
+
+		_marker = new TempoMarker (
+			*_editor,
+			*_editor->tempo_group,
+			ARDOUR_UI::config()->canvasvar_TempoMarker.get(),
+			name,
+			*new TempoSection (_marker->tempo())
+			);
+
+		/* use the new marker for the grab */
+		swap_grab (&_marker->the_item(), 0, GDK_CURRENT_TIME);
+
+		if (!_copy) {
+			TempoMap& map (_editor->session()->tempo_map());
+			/* remove the section while we drag it */
+			map.remove_tempo (section);
+		}
+	}
+
 	framepos_t const pf = adjusted_current_frame (event);
 	_marker->set_position (pf);
 	show_verbose_cursor_time (pf);
@@ -2023,23 +2046,34 @@ TempoMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 		_editor->session()->add_command (new MementoCommand<TempoMap>(map, &before, &after));
 		_editor->commit_reversible_command ();
 
-		// delete the dummy marker we used for visual representation of copying.
-		// a new visual marker will show up automatically.
-		delete _marker;
 	} else {
 		_editor->begin_reversible_command (_("move tempo mark"));
 		XMLNode &before = map.get_state();
-		map.move_tempo (_marker->tempo(), when);
+		/* we removed it before, so add it back now */
+		map.add_tempo (_marker->tempo(), when);
 		XMLNode &after = map.get_state();
 		_editor->session()->add_command (new MementoCommand<TempoMap>(map, &before, &after));
 		_editor->commit_reversible_command ();
 	}
+
+	// delete the dummy marker we used for visual representation while moving.
+	// a new visual marker will show up automatically.
+	delete _marker;
 }
 
 void
 TempoMarkerDrag::aborted (bool)
 {
 	_marker->set_position (_marker->tempo().frame());
+	/* XXX problem: we don't know if we've moved yet, so we don't 
+	   know if the marker is a copy yet or not
+	*/
+	TempoMap& map (_editor->session()->tempo_map());
+	/* we removed it before, so add it back now */
+	map.add_tempo (_marker->tempo(), _marker->tempo().frame());
+	// delete the dummy marker we used for visual representation while moving.
+	// a new visual marker will show up automatically.
+	delete _marker;
 }
 
 CursorDrag::CursorDrag (Editor* e, ArdourCanvas::Item* i, bool s)
