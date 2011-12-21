@@ -20,7 +20,10 @@
 #include <cstdio> // for snprintf, grrr
 
 #include <gtkmm/stock.h>
-#include <gtkmm2ext/utils.h>
+
+#include "gtkmm2ext/utils.h"
+
+#include "ardour/rc_configuration.h"
 
 #include "tempo_dialog.h"
 #include "utils.h"
@@ -100,16 +103,29 @@ TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double note_type,
 		pulse_selector.set_active_text (strings[3]); // "quarter"
 	}
 	
-	Table* table = manage (new Table (5, 5));
+	Table* table;
+
+	if (Config->get_allow_non_quarter_pulse()) {
+		table = manage (new Table (5, 5));
+	} else {
+		table = manage (new Table (5, 4));
+	}
+
 	table->set_spacings (6);
 	table->set_homogeneous (false);
 
+	int row;
 	Label* bpm_label = manage (new Label(_("Beats per minute:"), ALIGN_LEFT, ALIGN_CENTER));
 	table->attach (*bpm_label, 0, 1, 0, 1);
 	table->attach (bpm_spinner, 1, 5, 0, 1);
 
-	table->attach (pulse_selector_label, 0, 1, 1, 2);
-	table->attach (pulse_selector, 1, 5, 1, 2);
+	if (Config->get_allow_non_quarter_pulse()) {
+		table->attach (pulse_selector_label, 0, 1, 1, 2);
+		table->attach (pulse_selector, 1, 5, 1, 2);
+		row = 2;
+	} else {
+		row = 1;
+	}
 
 	if (movable) {
 		char buf[64];
@@ -128,14 +144,14 @@ TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double note_type,
 		when_bar_label.set_name ("MetricLabel");
 		when_beat_label.set_name ("MetricLabel");
 
-		table->attach (when_bar_label, 1, 2, 2, 3, Gtk::AttachOptions(0), Gtk::AttachOptions(0));
-		table->attach (when_bar_entry, 2, 3, 2, 3, Gtk::AttachOptions(0), Gtk::AttachOptions(0));
+		table->attach (when_bar_label, 1, 2, row, row+1, Gtk::AttachOptions(0), Gtk::AttachOptions(0));
+		table->attach (when_bar_entry, 2, 3, row, row+1, Gtk::AttachOptions(0), Gtk::AttachOptions(0));
 
-		table->attach (when_beat_label, 3, 4, 2, 3, Gtk::AttachOptions(0), Gtk::AttachOptions(0));
-		table->attach (when_beat_entry, 4, 5, 2, 3, Gtk::AttachOptions(0), Gtk::AttachOptions(0));
+		table->attach (when_beat_label, 3, 4, row, row+1, Gtk::AttachOptions(0), Gtk::AttachOptions(0));
+		table->attach (when_beat_entry, 4, 5, row, row+1, Gtk::AttachOptions(0), Gtk::AttachOptions(0));
 
 		Label* when_label = manage (new Label(_("Tempo begins at"), ALIGN_LEFT, ALIGN_CENTER));
-		table->attach (*when_label, 0, 1, 2, 3);
+		table->attach (*when_label, 0, 1, row, row+1);
 	}
 
 	get_vbox()->set_border_width (12);
