@@ -2,6 +2,9 @@
 
 <!DOCTYPE glossary PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN" "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd" [
 
+<!ENTITY % BOOK_ENTITIES SYSTEM "../../build/manual/ent/entities.ent">
+%BOOK_ENTITIES;
+
 ]>
 
 <glossary>
@@ -12,7 +15,7 @@
       <glossterm><acronym>ALSA</acronym></glossterm>
       <glossdef>
         <para>
-          Abbreviation for Advanced Linux Sound Architecture. ALSA provides
+          Acronym of the Advanced Linux Sound Architecture. ALSA provides
           audio and MIDI functionality to the Linux operating system.
         </para>
         <para>
@@ -98,7 +101,14 @@
       <glossterm><acronym>DSP</acronym></glossterm>
       <glossdef>
         <para>
-          Some reasonable definition here.
+          Acronym of Digital Signal Processing, a very general term for processing
+	  of any digital signal by digital means.  In &ARDOUR_NAME;'s context, it generally
+	  refers to the processing peformed on audio signals by &ARDOUR_NAME; and by plugins.
+	  It is often talked of in terms of DSP `load', referring to the amount of CPU power
+	  that Ardour is using for its signal processing.  This load increases with the
+	  number of tracks and plugins that a session uses.  A computer will have an upper
+	  limit to the amount of DSP it can perform, depending on its CPU and RAM speed and
+	  many other factors.
         </para>
       </glossdef>
     </glossentry>
@@ -122,7 +132,9 @@
       <glossterm><acronym>HDR</acronym></glossterm>
       <glossdef>
         <para>
-          Short for Hard Disk Recorder. Some reasonable definition here.
+          Acronym of Hard Disk Recorder.  A general term for devices which record
+	  audio onto hard disk; a HDR usually means some kind of standalone recording
+	  unit such as the Alesis HD-24 and similar.
         </para>
       </glossdef>
     </glossentry>
@@ -146,7 +158,7 @@
       <glossterm><acronym>JACK</acronym></glossterm>
       <glossdef>
         <para>
-          Initialism of Jack Audio Connection Kit. Some reasonable
+          Acronym of the Jack Audio Connection Kit. Some reasonable
           definition here.
         </para>
         <para>
@@ -162,8 +174,11 @@
       <glossterm><acronym>LADSPA</acronym> </glossterm>
       <glossdef>
         <para>
-          Abbreviation of Linux Audio Developers Simple Plugin API. Some
-          reasonable definition here.
+          Acronym of Linux Audio Developers Simple Plugin API.  One standard
+	  for writing plugins which &ARDOUR_NAME; can use.  Many LADSPA plugins
+	  are available; some free and open-source and others closed-source.  See, for example:
+	  <ulink url="http://plugin.org.uk/"/>
+	  <ulink url="http://calf.sourceforge.net/"/>
         </para>
         <para>
           <ulink url="http://ladspa.org"/>
@@ -178,8 +193,8 @@
       <glossterm><acronym>MIDI</acronym> </glossterm>
       <glossdef>
         <para>
-          Abbreviation for Musical Instrument Digital Interface. Some
-          reasonable definition here.
+          Acronym of Musical Instrument Digital Interface.  A standard for communicating note
+	  and other information between keyboards, computers, sound modules and many other devices.
         </para>
       </glossdef>
     </glossentry>
@@ -191,7 +206,9 @@
       <glossterm>Playlist</glossterm>
       <glossdef>
         <para>
-          some reasonable definition here.
+	  A list of <glossterm linkend="gt-region">regions</glossterm>; each
+	  <glossterm id="gt-track">track</glossterm> has one or more Playlists, one of which
+	  is active; this specifies the regions that will be played back by the track.
         </para>
       </glossdef>
     </glossentry>
@@ -200,7 +217,11 @@
       <glossterm>plugin</glossterm>
       <glossdef>
         <para>
-          some reasonable definition here.
+	  A piece of software that can be used inside Ardour to process audio
+	  or MIDI data.  Common examples are equalisers, compressors or reverb
+	  processors using the <glossterm linkend="gt-ladspa">LADSPA</glossterm>,
+	  <glossterm linkend="gt-lv2">LV2</glossterm> or <glossterm linkend="gt-vst">VST</glossterm>
+	  standards.
         </para>
       </glossdef>
     </glossentry>

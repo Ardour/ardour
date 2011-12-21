@@ -55,18 +55,6 @@
     </para>
   </section>
 
-  <section id="no-visible-send-controls">
-    <title>No visible send controls</title>
-    <para>
-      Although Ardour supports sends, there is no way to control them
-      directly from the mixer interface - you don't get a dedicated knob on
-      the mixer strip. However, if you bring up the send's own editor (for
-      example, by double-clicking on its name in the redirect list), you
-      will find a richer set of functionality than most other DAWs offer for
-      controlling the behaviour of a send.
-    </para>
-  </section>
-
   <section id="a-smaller-set-of-tools">
     <title>A smaller set of tools</title>
     <para>

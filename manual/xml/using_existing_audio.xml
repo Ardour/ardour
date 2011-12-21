@@ -217,7 +217,7 @@
     linkend="gt-embed">embedded</link> into your session.</para>
   </section>
 
-  <section id="how-to-embed-a-file">
+  <section id="working-with-tags">
     <title>Working with Tags</title>
 
     <para>A "tag" is bit of information, or <emphasis>metadata</emphasis>,
@@ -267,7 +267,7 @@
     </section>
   </section>
 
-  <section id="how-to-embed-a-file">
+  <section id="searching-freesound-for-soundfiles">
     <title>Searching Freesound for soundfiles (optional)</title>
 
     <para>Freesound (http://freesound.iua.upf.edu/) is an online database with
