@@ -1944,20 +1944,18 @@ MeterMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 }
 
 void
-MeterMarkerDrag::aborted (bool)
+MeterMarkerDrag::aborted (bool moved)
 {
 	_marker->set_position (_marker->meter().frame ());
 
-	/* XXX problem: we don't know if we've moved yet, so we don't 
-	   know if the marker is a copy yet or not
-	*/
-
-	TempoMap& map (_editor->session()->tempo_map());
-	/* we removed it before, so add it back now */
-	map.add_meter (_marker->meter(), _marker->meter().frame());
-	// delete the dummy marker we used for visual representation while moving.
-	// a new visual marker will show up automatically.
-	delete _marker;
+	if (moved) {
+		TempoMap& map (_editor->session()->tempo_map());
+		/* we removed it before, so add it back now */
+		map.add_meter (_marker->meter(), _marker->meter().frame());
+		// delete the dummy marker we used for visual representation while moving.
+		// a new visual marker will show up automatically.
+		delete _marker;
+	}
 }
 
 TempoMarkerDrag::TempoMarkerDrag (Editor* e, ArdourCanvas::Item* i, bool c)
@@ -2062,18 +2060,17 @@ TempoMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 }
 
 void
-TempoMarkerDrag::aborted (bool)
+TempoMarkerDrag::aborted (bool moved)
 {
 	_marker->set_position (_marker->tempo().frame());
-	/* XXX problem: we don't know if we've moved yet, so we don't 
-	   know if the marker is a copy yet or not
-	*/
-	TempoMap& map (_editor->session()->tempo_map());
-	/* we removed it before, so add it back now */
-	map.add_tempo (_marker->tempo(), _marker->tempo().frame());
-	// delete the dummy marker we used for visual representation while moving.
-	// a new visual marker will show up automatically.
-	delete _marker;
+	if (moved) {
+		TempoMap& map (_editor->session()->tempo_map());
+		/* we removed it before, so add it back now */
+		map.add_tempo (_marker->tempo(), _marker->tempo().frame());
+		// delete the dummy marker we used for visual representation while moving.
+		// a new visual marker will show up automatically.
+		delete _marker;
+	}
 }
 
 CursorDrag::CursorDrag (Editor* e, ArdourCanvas::Item* i, bool s)

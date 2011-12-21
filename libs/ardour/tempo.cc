@@ -345,6 +345,7 @@ TempoMap::remove_tempo (const TempoSection& tempo)
 	}
 
 	if (removed) {
+		timestamp_metrics (true);
 		PropertyChanged (PropertyChange ());
 	}
 }
