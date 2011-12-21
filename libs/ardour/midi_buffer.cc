@@ -407,6 +407,16 @@ MidiBuffer::merge_in_place(const MidiBuffer &other)
 		return false;
 	}
 
+	cerr << "MERGING\nUS: ";
+	for (MidiBuffer::iterator i = begin(); i != end(); ++i) {
+		cerr << *i << " ; ";
+	}
+	cerr << "\nTHEM: ";
+	for (MidiBuffer::const_iterator i = other.begin(); i != other.end(); ++i) {
+		cerr << *i << " ; ";
+	}
+	cerr << endl;
+
 #ifndef NDEBUG
 #ifdef  TEST_MIDI_MERGE
 	size_t   test_orig_us_size   = _size;
@@ -445,13 +455,20 @@ MidiBuffer::merge_in_place(const MidiBuffer &other)
 		src = -1;
 		sz = 0;
 
+		cerr << "Start merge skip with them = " << *them << endl;
+
 		while (them != other.end() && (*them).time() < (*us).time()) {
 			if (src == -1) {
 				src = them.offset;
 			}
 			sz += sizeof (TimeType) + (*them).size();
+			cerr << " move through other event " << *them << endl;
 			++them;
 		}
+
+		cerr << "merge skip done, sz = " << sz << " us @ end ? " << (us == end())
+		     << " them @ end ? " << (them == other.end()) 
+		     << endl;
 
 		if (sz) {
 			assert(src >= 0);
@@ -471,11 +488,14 @@ MidiBuffer::merge_in_place(const MidiBuffer &other)
 			*/
 
 			while (us != end() && (*us).time() < (*them).time()) {
+				cerr << "skip by our own event " << (*us) << endl;
 				++us;
 			}
 		}
 
 		if (us == end()) { 
+
+			cerr << " append rest of other to us\n";
 
 			/* just append the rest of other */
 
