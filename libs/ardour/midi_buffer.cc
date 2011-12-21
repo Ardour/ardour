@@ -403,19 +403,8 @@ MidiBuffer::merge_in_place(const MidiBuffer &other)
 	}
 
 	if (size() + other.size() > _capacity) {
-		cerr << "MidiBuffer::merge failed (no space)" << endl;
 		return false;
 	}
-
-	cerr << "MERGING\nUS: ";
-	for (MidiBuffer::iterator i = begin(); i != end(); ++i) {
-		cerr << *i << " ; ";
-	}
-	cerr << "\nTHEM: ";
-	for (MidiBuffer::const_iterator i = other.begin(); i != other.end(); ++i) {
-		cerr << *i << " ; ";
-	}
-	cerr << endl;
 
 	const_iterator them = other.begin();
 	iterator us = begin();
@@ -432,14 +421,11 @@ MidiBuffer::merge_in_place(const MidiBuffer &other)
 		merge_offset = -1;
 		bytes_to_merge = 0;
 
-		cerr << "Start merge skip with them = " << *them << endl;
-
 		while (them != other.end() && (*them).time() < (*us).time()) {
 			if (merge_offset == -1) {
 				merge_offset = them.offset;
 			}
 			bytes_to_merge += sizeof (TimeType) + (*them).size();
-			cerr << " move through other event " << *them << endl;
 			++them;
 		}
 
@@ -457,10 +443,6 @@ MidiBuffer::merge_in_place(const MidiBuffer &other)
 		 * to the events from "other" that we skipped while advancing
 		 * "them". 
 		 */
-
-		cerr << "merge skip done, sz = " << bytes_to_merge << " us @ end ? " << (us == end())
-		     << " them @ end ? " << (them == other.end()) 
-		     << endl;
 
 		if (bytes_to_merge) {
 			assert(merge_offset >= 0);
@@ -545,7 +527,6 @@ MidiBuffer::merge_in_place(const MidiBuffer &other)
 			*/
 		
 			while (us != end() && (*us).time() <= (*them).time()) {
-				cerr << "skip by our own event " << (*us) << endl;
 				++us;
 			}
 		}
