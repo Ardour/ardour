@@ -4,10 +4,10 @@
 				version="1.0"
 				exclude-result-prefixes="exsl">
 
-<xsl:import href="/usr/share/sgml/docbook/xsl-stylesheets/xhtml/docbook.xsl"/>
-<xsl:import href="/usr/share/sgml/docbook/xsl-stylesheets/xhtml/chunk-common.xsl"/>
-<xsl:import href="/usr/share/sgml/docbook/xsl-stylesheets/xhtml/chunk-code.xsl"/>
-<xsl:import href="/usr/share/sgml/docbook/xsl-stylesheets/xhtml/manifest.xsl"/>
+<xsl:import href="/usr/share/xml/docbook/stylesheet/docbook-xsl/xhtml/docbook.xsl"/>
+<xsl:import href="/usr/share/xml/docbook/stylesheet/docbook-xsl/xhtml/chunk-common.xsl"/>
+<xsl:import href="/usr/share/xml/docbook/stylesheet/docbook-xsl/xhtml/chunk-code.xsl"/>
+<xsl:import href="/usr/share/xml/docbook/stylesheet/docbook-xsl/xhtml/manifest.xsl"/>
 
 <xsl:param name="html.stylesheet" select="'ardour_manual.css'"/>
 <xsl:param name="html.stylesheet.type" select="'text/css'"/>

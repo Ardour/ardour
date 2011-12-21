@@ -21,6 +21,7 @@ def build(bld):
     templates = bld.path.ant_glob('*.template.in')
     for t in templates:
         obj = bld(features = 'subst')
+        obj.name = 'template'
         obj.source = [ t ]
         dir_name = os.path.basename(t.srcpath()).replace('.template.in', '')
         file_name = os.path.basename(t.srcpath()).replace('.in', '')

@@ -2,7 +2,7 @@
 
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN" "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd" [
 
-<!ENTITY % BOOK_ENTITIES SYSTEM "./entities.ent">
+<!ENTITY % BOOK_ENTITIES SYSTEM "../../build/manual/ent/entities.ent">
 %BOOK_ENTITIES;
 
 ]>

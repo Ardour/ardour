@@ -15,8 +15,7 @@
 
     <para>
       Key commands such as <keycombo><keycap>Ctrl</keycap><keycap>a</keycap>
-      </keycombo> mean "Hold down the Ctrl key and press the 'a' key". New
-      and important terms are written like this.
+      </keycombo> mean "Hold down the Ctrl key and press the 'a' key".
     </para>
 
     <para>
@@ -26,7 +25,7 @@
 
     <para>
       The name of a menu item is shown like <guimenuitem>This</guimenuitem>,
-      and nested menu items will appear like <menuchoice>
+      and nested menu items will appear as <menuchoice>
       <guimenu>Menu</guimenu> <guisubmenu>Sub Menu</guisubmenu>
       </menuchoice>
     </para>
