@@ -176,19 +176,20 @@ static const char* authors[] = {
 };
 
 static const char* translators[] = {
-	N_("French:\n\tAlain Fréhel <alain.frehel@free.fr>\n\tChristophe Combelles <ccomb@free.fr>\n\tMartin Blanchard\n"),
+	N_("French:\n\tAlain Fréhel <alain.frehel@free.fr>\n\tChristophe Combelles <ccomb@free.fr>\n\tMartin Blanchard\n\tRomain Arnaud <roming22@gmail.com>\n"),
 	N_("German:\n\tKarsten Petersen <kapet@kapet.de>\
 \n\tSebastian Arnold <mail@sebastian-arnold.net>\
 \n\tRobert Schwede <schwede@ironshark.com>\
 \n\tBenjamin Scherrer <realhangman@web.de>\
 \n\tEdgar Aichinger <edogawa@aon.at>\
 \n\tRichard Oax <richard@pagliacciempire.de>\n"),
-	N_("Italian:\n\tFilippo Pappalardo <filippo@email.it>\n"),
+	N_("Italian:\n\tFilippo Pappalardo <filippo@email.it>\n\tRaffaele Morelli <raffaele.morelli@gmail.com>\n"),
 	N_("Portuguese:\n\tRui Nuno Capela <rncbc@rncbc.org>\n"),
 	N_("Brazilian Portuguese:\n\tAlexander da Franca Fernandes <alexander@nautae.eti.br>\
 \n\tChris Ross <chris@tebibyte.org>\n"),
-	N_("Spanish:\n\t Alex Krohn <alexkrohn@fastmail.fm>\n"),
-	N_("Russian:\n\t Igor Blinov <pitstop@nm.ru>\n"),
+	N_("Spanish:\n\t Alex Krohn <alexkrohn@fastmail.fm>\n\tPablo Fernández <pablo.fbus@gmail.com>\n"),
+	N_("Russian:\n\t Igor Blinov <pitstop@nm.ru>\
+\n\tAlexandre Prokoudine <alexandre.prokoudine@gmail.com>\n"),
 	N_("Greek:\n\t Klearchos Gourgourinis <muadib@in.gr>\n"),
 	N_("Swedish:\n\t Petter Sundlöf <petter.sundlof@gmail.com>\n"),
 	N_("Polish:\n\t Piotr Zaryk <pzaryk@gmail.com>\n"),
