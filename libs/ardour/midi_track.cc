@@ -404,6 +404,7 @@ void
 MidiTrack::realtime_handle_transport_stopped ()
 {
 	Glib::RWLock::ReaderLock lm (_processor_lock, Glib::TRY_LOCK);
+
 	if (!lm.locked ()) {
 		return;
 	}

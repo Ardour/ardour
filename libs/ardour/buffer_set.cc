@@ -23,6 +23,7 @@
 
 #include <iostream>
 #include <algorithm>
+#include <sstream>
 
 #include "pbd/compose.h"
 
@@ -258,13 +259,16 @@ BufferSet::get_lv2_midi(bool input, size_t i)
 
 	ebuf->reset();
 	if (input) {
+		DEBUG_TRACE (PBD::DEBUG::LV2, string_compose ("%1 bytes of MIDI waiting @ %2\n", mbuf.size(), (void*) mbuf.data()));
 		for (MidiBuffer::iterator e = mbuf.begin(); e != mbuf.end(); ++e) {
 			const Evoral::MIDIEvent<framepos_t> ev(*e, false);
 			uint32_t type = LV2Plugin::midi_event_type();
 #ifndef NDEBUG
-			DEBUG_TRACE (PBD::DEBUG::LV2, string_compose ("(FLUSH) MIDI event of size %1\n", ev.size()));
+			DEBUG_TRACE (PBD::DEBUG::LV2, string_compose ("\tMIDI event of size %1 @ %2\n", ev.size(), ev.time()));
 			for (uint16_t x = 0; x < ev.size(); ++x) {
-				DEBUG_TRACE (PBD::DEBUG::LV2, string_compose ("\tByte[%1] = %2\n", x, (int) ev.buffer()[x]));
+				std::stringstream ss;
+				ss << "\t\tByte[" << x << "] = " << std::hex << (int) ev.buffer()[x] << std::dec << std::endl;
+				DEBUG_TRACE (PBD::DEBUG::LV2, ss.str());
 			}
 #endif
 			ebuf->append(ev.time(), 0, type, ev.size(), ev.buffer());

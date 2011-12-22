@@ -50,7 +50,6 @@ public:
 
 	void resize(size_t);
 
-	bool merge(const MidiBuffer& a, const MidiBuffer& b);
 	bool merge_in_place(const MidiBuffer &other);
 
 	template<typename BufferType, typename EventType>

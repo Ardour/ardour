@@ -944,7 +944,7 @@ MidiDiskstream::transport_stopped_wallclock (struct tm& /*when*/, time_t /*twhen
 	Glib::Mutex::Lock lm (capture_info_lock);
 
 	if (capture_info.empty()) {
-		return;
+		goto no_capture_stuff_to_do;
 	}
 
 	if (abort_capture) {
@@ -1097,12 +1097,14 @@ MidiDiskstream::transport_stopped_wallclock (struct tm& /*when*/, time_t /*twhen
 		delete *ci;
 	}
 
+	capture_info.clear ();
+	capture_start_frame = 0;
+
+  no_capture_stuff_to_do:
+
 	if (_playlist) {
 		midi_playlist()->clear_note_trackers ();
 	}
-
-	capture_info.clear ();
-	capture_start_frame = 0;
 }
 
 void

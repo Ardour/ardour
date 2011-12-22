@@ -281,6 +281,7 @@ MidiPlaylist::clear_note_trackers ()
 	for (NoteTrackers::iterator n = _note_trackers.begin(); n != _note_trackers.end(); ++n) {
 		delete n->second;
 	}
+	DEBUG_TRACE (DEBUG::MidiTrackers, string_compose ("%1 clears all note trackers\n", name()));
 	_note_trackers.clear ();
 }
 

@@ -258,7 +258,7 @@ MidiRegion::_read_at (const SourceList& /*srcs*/, Evoral::EventSink<framepos_t>&
 	src->set_note_mode(mode);
 
 	/*
-	  cerr << "MR read @ " << position << " * " << to_read
+	  cerr << "MR " << name () << " read @ " << position << " * " << to_read
 	  << " _position = " << _position
 	  << " _start = " << _start
 	  << " intoffset = " << internal_offset

@@ -130,8 +130,6 @@ bool
 MidiBuffer::push_back(const Evoral::MIDIEvent<TimeType>& ev)
 {
 	const size_t stamp_size = sizeof(TimeType);
-	/*cerr << "MidiBuffer: pushing event @ " << ev.time()
-		<< " size = " << ev.size() << endl;*/
 
 	if (_size + stamp_size + ev.size() >= _capacity) {
 		cerr << "MidiBuffer::push_back failed (buffer is full)" << endl;
@@ -204,6 +202,7 @@ bool
 MidiBuffer::push_back(const jack_midi_event_t& ev)
 {
 	const size_t stamp_size = sizeof(TimeType);
+
 	if (_size + stamp_size + ev.size >= _capacity) {
 		cerr << "MidiBuffer::push_back failed (buffer is full)" << endl;
 		return false;
@@ -213,6 +212,21 @@ MidiBuffer::push_back(const jack_midi_event_t& ev)
 		cerr << "WARNING: MidiBuffer ignoring illegal MIDI event" << endl;
 		return false;
 	}
+
+#ifndef NDEBUG
+	if (DEBUG::MidiIO & PBD::debug_bits) {
+		DEBUG_STR_DECL(a);
+		DEBUG_STR_APPEND(a, string_compose ("midibuffer %1 push jack event @ %2 sz %3 ", this, ev.time, ev.size));
+		for (size_t i=0; i < ev.size; ++i) {
+			DEBUG_STR_APPEND(a,hex);
+			DEBUG_STR_APPEND(a,"0x");
+			DEBUG_STR_APPEND(a,(int)ev.buffer[i]);
+			DEBUG_STR_APPEND(a,' ');
+		}
+		DEBUG_STR_APPEND(a,'\n');
+		DEBUG_TRACE (DEBUG::MidiIO, DEBUG_STR(a).str());
+	}
+#endif
 
 	uint8_t* const write_loc = _data + _size;
 	*((TimeType*)write_loc) = ev.time;
@@ -387,9 +401,9 @@ MidiBuffer::second_simultaneous_midi_byte_is_first (uint8_t a, uint8_t b)
 	
 /** Merge \a other into this buffer.  Realtime safe. */
 bool
-MidiBuffer::merge_in_place(const MidiBuffer &other)
+MidiBuffer::merge_in_place (const MidiBuffer &other)
 {
-	if (other.size() || size()) {
+	if (other.size() && size()) {
 		DEBUG_TRACE (DEBUG::MidiIO, string_compose ("merge in place, sizes %1/%2\n", size(), other.size()));
 	}
 
@@ -544,52 +558,6 @@ MidiBuffer::merge_in_place(const MidiBuffer &other)
 			assert(_size <= _capacity);
 			break;
 		} 
-	}
-
-	return true;
-}
-
-/** Clear, and merge \a a and \a b into this buffer.
- *
- * \return true if complete merge was successful
- */
-bool
-MidiBuffer::merge(const MidiBuffer& a, const MidiBuffer& b)
-{
-	_size = 0;
-
-	if (this == &a) {
-	    return merge_in_place(b);
-	} else if (this == &b) {
-	    return merge_in_place(a);
-	}
-
-	const_iterator ai = a.begin();
-	const_iterator bi = b.begin();
-
-	resize(a.size() + b.size());
-	while (ai != a.end() && bi != b.end()) {
-		if ((*ai).time() < (*bi).time()) {
-			memcpy(_data + _size, (*ai).buffer(), (*ai).size());
-			_size += (*ai).size();
-			++ai;
-		} else {
-			memcpy(_data + _size, (*bi).buffer(), (*bi).size());
-			_size += (*bi).size();
-			++bi;
-		}
-	}
-
-	while (ai != a.end()) {
-		memcpy(_data + _size, (*ai).buffer(), (*ai).size());
-		_size += (*ai).size();
-		++ai;
-	}
-
-	while (bi != b.end()) {
-		memcpy(_data + _size, (*bi).buffer(), (*bi).size());
-		_size += (*bi).size();
-		++bi;
 	}
 
 	return true;

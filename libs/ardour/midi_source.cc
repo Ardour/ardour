@@ -199,8 +199,8 @@ MidiSource::midi_read (Evoral::EventSink<framepos_t>& dst, framepos_t source_sta
 
 	BeatsFramesConverter converter(_session.tempo_map(), source_start);
 
-	DEBUG_TRACE (DEBUG::MidiSourceIO, string_compose ("MidiSource::midi-read() sstart %1 start %2 cnt %3 tracker %4\n",
-							  source_start, start, cnt, tracker));
+	DEBUG_TRACE (DEBUG::MidiSourceIO, string_compose ("MidiSource::midi-read() %5 sstart %1 start %2 cnt %3 tracker %4\n",
+							  source_start, start, cnt, tracker, name()));
 
 	if (_model) {
 		Evoral::Sequence<double>::const_iterator& i = _model_iter;
@@ -210,6 +210,7 @@ MidiSource::midi_read (Evoral::EventSink<framepos_t>& dst, framepos_t source_sta
 			DEBUG_TRACE (DEBUG::MidiSourceIO, string_compose ("*** %1 search for relevant iterator for %1 / %2\n", _name, source_start, start));
 			for (i = _model->begin(0, false, filtered); i != _model->end(); ++i) {
 				if (converter.to(i->time()) >= start) {
+					DEBUG_TRACE (DEBUG::MidiSourceIO, string_compose ("***\tstop iterator search @ %1\n", i->time()));
 					break;
 				}
 			}
