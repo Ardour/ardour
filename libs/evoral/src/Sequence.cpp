@@ -1243,8 +1243,6 @@ Sequence<Time>::control_list_marked_dirty ()
 	set_edited (true);
 }
 
-template class Sequence<Evoral::MusicalTime>;
-
 template<typename Time>
 void
 Sequence<Time>::dump (ostream& str) const
@@ -1256,6 +1254,8 @@ Sequence<Time>::dump (ostream& str) const
 	}
 	str << "--- dump\n";
 }
+
+template class Sequence<Evoral::MusicalTime>;
 
 } // namespace Evoral
 

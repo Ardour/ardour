@@ -341,7 +341,7 @@ private:
 
 } // namespace Evoral
 
-// template<typename Time> std::ostream& operator<<(std::ostream& o, const Evoral::Sequence<Time>& s) { s.dump (o); return o; }
+template<typename Time> std::ostream& operator<<(std::ostream& o, const Evoral::Sequence<Time>& s) { s.dump (o); return o; }
 
 #endif // EVORAL_SEQUENCE_HPP
 
