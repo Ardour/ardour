@@ -1462,7 +1462,7 @@ AUPlugin::get_musical_time_location_callback (UInt32*   outDeltaSampleOffsetToNe
 		} else {
 			*outDeltaSampleOffsetToNextBeat = (UInt32) 
 				floor (((Timecode::BBT_Time::ticks_per_bar_division - bbt.ticks)/Timecode::BBT_Time::ticks_per_bar_division) * // fraction of a beat to next beat
-				       metric.tempo().frames_per_beat(_session.frame_rate(), metric.meter())); // frames per beat
+				       metric.tempo().frames_per_beat(_session.frame_rate())); // frames per beat
 		}
 	}
 
