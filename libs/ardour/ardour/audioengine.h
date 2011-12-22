@@ -129,7 +129,6 @@ public:
 
 	int request_buffer_size (pframes_t);
 
-	framecnt_t set_monitor_check_interval (framecnt_t);
 	framecnt_t processed_frames() const { return _processed_frames; }
 
 	float get_cpu_load() {
