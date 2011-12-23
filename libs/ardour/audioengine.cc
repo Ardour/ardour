@@ -1492,7 +1492,7 @@ AudioEngine::port_is_physical (const std::string& portname) const
 }
 
 void
-AudioEngine::ensure_monitor_input (const std::string& portname, bool yn) const
+AudioEngine::request_jack_monitors_input (const std::string& portname, bool yn) const
 {
         GET_PRIVATE_JACK_POINTER(_jack);
 

@@ -159,7 +159,7 @@ class AudioDiskstream : public Diskstream
 		std::string name;
 
 		bool is_physical () const;
-		void ensure_monitor_input (bool) const;
+		void request_jack_monitors_input (bool) const;
 	};
 
 	/** Information about one of our channels */

@@ -165,7 +165,7 @@ public:
 	int unregister_port (boost::shared_ptr<Port>);
 
 	bool port_is_physical (const std::string&) const;
-	void ensure_monitor_input (const std::string&, bool) const;
+	void request_jack_monitors_input (const std::string&, bool) const;
 
 	void split_cycle (pframes_t offset);
 
