@@ -87,7 +87,7 @@ MidiStateTracker::track (const MidiBuffer::iterator &from, const MidiBuffer::ite
 {
 	looped = false;
 
-	DEBUG_TRACE (PBD::DEBUG::MidiTrackers, string_compose ("%1 track notes, looped = %2\n", this, looped));
+	// DEBUG_TRACE (PBD::DEBUG::MidiTrackers, string_compose ("%1 track notes, looped = %2\n", this, looped));
 
 	for (MidiBuffer::iterator i = from; i != to; ++i) {
 		const Evoral::MIDIEvent<MidiBuffer::TimeType> ev(*i, false);
