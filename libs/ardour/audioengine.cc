@@ -537,7 +537,7 @@ AudioEngine::process_callback (pframes_t nframes)
 
 			bool x;
 
-			if ((*i)->last_monitor() != (x = (*i)->monitoring_input ())) {
+			if ((*i)->last_monitor() != (x = (*i)->jack_monitoring_input ())) {
 				(*i)->set_last_monitor (x);
 				/* XXX I think this is dangerous, due to
 				   a likely mutex in the signal handlers ...

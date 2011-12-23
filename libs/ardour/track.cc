@@ -182,14 +182,6 @@ Track::get_template ()
 	return state (false);
 }
 
-void
-Track::toggle_monitor_input ()
-{
-	for (PortSet::iterator i = _input->ports().begin(); i != _input->ports().end(); ++i) {
-		i->ensure_monitor_input(!i->monitoring_input());
-	}
-}
-
 Track::FreezeRecord::~FreezeRecord ()
 {
 	for (vector<FreezeRecordProcessorInfo*>::iterator i = processor_info.begin(); i != processor_info.end(); ++i) {

@@ -212,13 +212,13 @@ Port::set_engine (AudioEngine* e)
 }
 
 void
-Port::ensure_monitor_input (bool yn)
+Port::ensure_jack_monitors_input (bool yn)
 {
 	jack_port_ensure_monitor (_jack_port, yn);
 }
 
 bool
-Port::monitoring_input () const
+Port::jack_monitoring_input () const
 {
 	return jack_port_monitoring_input (_jack_port);
 }
@@ -459,7 +459,7 @@ Port::set_name (std::string const & n)
 }
 
 void
-Port::request_monitor_input (bool yn)
+Port::request_jack_monitors_input (bool yn)
 {
 	jack_port_request_monitor (_jack_port, yn);
 }

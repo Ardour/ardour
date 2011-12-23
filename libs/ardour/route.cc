@@ -2844,14 +2844,6 @@ Route::silent_roll (pframes_t nframes, framepos_t /*start_frame*/, framepos_t /*
 	return 0;
 }
 
-void
-Route::toggle_monitor_input ()
-{
-	for (PortSet::iterator i = _input->ports().begin(); i != _input->ports().end(); ++i) {
-		i->ensure_monitor_input( ! i->monitoring_input());
-	}
-}
-
 bool
 Route::has_external_redirects () const
 {

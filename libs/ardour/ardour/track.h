@@ -63,7 +63,6 @@ class Track : public Route, public PublicDiskstream
 	                  int declick, bool& need_butler) = 0;
 
 	bool needs_butler() const { return _needs_butler; }
-	void toggle_monitor_input ();
 
 	virtual DataType data_type () const = 0;
 

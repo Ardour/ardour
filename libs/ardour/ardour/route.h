@@ -118,7 +118,6 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	virtual int silent_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 	                         bool& need_butler);
 
-	virtual void toggle_monitor_input ();
 	virtual bool can_record() { return false; }
 
 	virtual void set_record_enabled (bool /*yn*/, void * /*src*/) {}
