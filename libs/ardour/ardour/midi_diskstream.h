@@ -78,7 +78,7 @@ class MidiDiskstream : public Diskstream
 	XMLNode& get_state(void);
 	int set_state(const XMLNode&, int version);
 
-	void monitor_input (bool);
+	void ensure_jack_monitors_input (bool);
 
 	boost::shared_ptr<SMFSource> write_source ()    { return _write_source; }
 

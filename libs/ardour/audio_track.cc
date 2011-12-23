@@ -100,7 +100,7 @@ AudioTrack::set_diskstream (boost::shared_ptr<Diskstream> ds)
 	}
 
 	_diskstream->set_record_enabled (false);
-	_diskstream->monitor_input (false);
+	_diskstream->request_jack_monitors_input (false);
 
 	DiskstreamChanged (); /* EMIT SIGNAL */
 }

@@ -484,9 +484,15 @@ Track::playlist ()
 }
 
 void
-Track::monitor_input (bool m)
+Track::request_jack_monitors_input (bool m)
 {
-	_diskstream->monitor_input (m);
+	_diskstream->request_jack_monitors_input (m);
+}
+
+void
+Track::ensure_jack_monitors_input (bool m)
+{
+	_diskstream->ensure_jack_monitors_input (m);
 }
 
 bool

@@ -1973,7 +1973,7 @@ AudioDiskstream::allocate_temporary_buffers ()
 }
 
 void
-AudioDiskstream::monitor_input (bool yn)
+AudioDiskstream::request_jack_monitors_input (bool yn)
 {
 	boost::shared_ptr<ChannelList> c = channels.reader();
 
