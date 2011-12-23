@@ -653,7 +653,7 @@ MidiTrack::diskstream_data_recorded (boost::weak_ptr<MidiSource> src)
 }
 
 bool
-MidiTrack::should_monitor () const
+MidiTrack::ardour_should_monitor () const
 {
 	return true;
 }

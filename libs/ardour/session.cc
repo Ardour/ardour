@@ -788,16 +788,6 @@ Session::set_track_monitor_input_status (bool yn)
 }
 
 void
-Session::reset_input_monitor_state ()
-{
-	if (transport_rolling()) {
-		set_track_monitor_input_status (Config->get_monitoring_model() == HardwareMonitoring && !config.get_auto_input());
-	} else {
-		set_track_monitor_input_status (Config->get_monitoring_model() == HardwareMonitoring);
-	}
-}
-
-void
 Session::auto_punch_start_changed (Location* location)
 {
 	replace_event (SessionEvent::PunchIn, location->start());

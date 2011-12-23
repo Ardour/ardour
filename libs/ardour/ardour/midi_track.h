@@ -114,7 +114,7 @@ public:
 protected:
 	XMLNode& state (bool full);
 
-	bool should_monitor () const;
+	bool ardour_should_monitor () const;
 	bool send_silence () const;
 
 	void act_on_mute ();

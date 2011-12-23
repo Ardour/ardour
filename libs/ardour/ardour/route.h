@@ -494,7 +494,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	uint32_t pans_required() const;
 	ChanCount n_process_buffers ();
 
-	virtual bool should_monitor () const;
+	virtual bool ardour_should_monitor () const;
 	virtual void maybe_declick (BufferSet&, framecnt_t, int);
 
 	boost::shared_ptr<Amp>       _amp;

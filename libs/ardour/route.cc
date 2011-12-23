@@ -400,7 +400,7 @@ Route::process_output_buffers (BufferSet& bufs,
 			       framepos_t start_frame, framepos_t end_frame, pframes_t nframes,
 			       int declick, bool gain_automation_ok)
 {
-	bool monitor = should_monitor ();
+	bool monitor = ardour_should_monitor ();
 
 	bufs.set_is_silent (false);
 
@@ -3846,8 +3846,9 @@ Route::setup_invisible_processors ()
 	}
 }
 
+/** @return true if Ardour should provide monitoring for this route */
 bool
-Route::should_monitor () const
+Route::ardour_should_monitor () const
 {
 	switch (Config->get_monitoring_model()) {
 	case HardwareMonitoring:
