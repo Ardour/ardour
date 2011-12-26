@@ -1548,7 +1548,9 @@ IO::connected_to (const string& str) const
 	return false;
 }
 
-/** Caller must hold process lock */
+/** Call a processor's ::run() method, giving it our buffers
+ *  Caller must hold process lock.
+ */
 void
 IO::process_input (boost::shared_ptr<Processor> proc, framepos_t start_frame, framepos_t end_frame, pframes_t nframes)
 {

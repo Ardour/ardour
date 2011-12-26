@@ -353,9 +353,9 @@ namespace ARDOUR {
 	};
 
 	enum MonitorModel {
-		HardwareMonitoring,
-		SoftwareMonitoring,
-		ExternalMonitoring
+		HardwareMonitoring, ///< JACK does monitoring
+		SoftwareMonitoring, ///< Ardour does monitoring
+		ExternalMonitoring  ///< we leave monitoring to the audio hardware
 	};
 
 	enum MonitorChoice {
