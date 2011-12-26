@@ -375,25 +375,25 @@ Track::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 		*/
 		be_silent = true;
 	} else {
-                be_silent = send_silence ();
+		MonitorState const s = monitoring_state ();
+		/* we are not rolling, so be silent even if we are monitoring disk, as there
+		   will be no disk data coming in.
+		*/
+                be_silent = (s == MonitoringSilence || s == MonitoringDisk);
+	}
+
+	if (!_have_internal_generator && metering_state() == MeteringInput) {
+		_input->process_input (_meter, start_frame, end_frame, nframes);
 	}
 
 	_amp->apply_gain_automation(false);
 
+	/* if have_internal_generator, or .. */
+	//_input->process_input (_meter, start_frame, end_frame, nframes);
+
 	if (be_silent) {
 
-		/* if we're sending silence, but we want the meters to show levels for the signal,
-		   meter right here.
-		*/
-
-		if (_have_internal_generator) {
-			passthru_silence (start_frame, end_frame, nframes, 0);
-		} else {
-			if (_meter_point == MeterInput) {
-				_input->process_input (_meter, start_frame, end_frame, nframes);
-			}
-			passthru_silence (start_frame, end_frame, nframes, 0);
-		}
+		passthru_silence (start_frame, end_frame, nframes, 0);
 
 	} else {
 
@@ -774,101 +774,57 @@ Track::adjust_capture_buffering ()
         }
 }
 
-bool
-Track::send_silence () const
-{
-        bool send_silence;
-
-        if (Config->get_tape_machine_mode()) {
-
-                /* ADATs work in a strange way..
-		   they monitor input always when stopped.and auto-input is engaged.
-                */
-		
-                if ((Config->get_monitoring_model() == SoftwareMonitoring)
-                    && ((_monitoring & MonitorInput) || (_diskstream->record_enabled()))) {
-			send_silence = false;
-                } else {
-                        send_silence = true;
-                }
-		
-		
-        } else {
-		
-                /* Other machines switch to input on stop if the track is record enabled,
-		   regardless of the auto input setting (auto input only changes the
-		   monitoring state when the transport is rolling)
-                */
-		
-                if ((Config->get_monitoring_model() == SoftwareMonitoring)
-                    && ((_monitoring & MonitorInput) || 
-			(!(_monitoring & MonitorDisk) && (_session.config.get_auto_input () || _diskstream->record_enabled())))){
-
-			DEBUG_TRACE (DEBUG::Monitor, 
-				     string_compose ("%1: no roll, use silence = FALSE,  monitoring choice %2 recenable %3 sRA %4 autoinput %5\n",
-						     name(), enum_2_string (_monitoring), 
-						     _diskstream->record_enabled(), _session.actively_recording(),
-						     _session.config.get_auto_input()));
-
-                        send_silence = false;
-                } else {
-			DEBUG_TRACE (DEBUG::Monitor, 
-				     string_compose ("%1: no roll, use silence = TRUE,  monitoring choice %2 recenable %3 sRA %4 autoinput %5\n",
-						     name(), enum_2_string (_monitoring), 
-						     _diskstream->record_enabled(), _session.actively_recording(),
-						     _session.config.get_auto_input()));
-                        send_silence = true;
-                }
-        }
-
-        return send_silence;
-}
-
 MonitorState
-Track::monitoring_state ()
+Track::monitoring_state () const
 {
-	MonitorState ms = MonitoringSilence;
-
-	if (_session.transport_rolling()) {
+	/* Explicit requests */
+	
+	if (_monitoring & MonitorInput) {
+		return MonitoringInput;
+	}
 		
-		/* roll case */
-		
-		if (_monitoring & MonitorInput) { // explicitly requested input monitoring
-			
-			ms = MonitoringInput;
+	if (_monitoring & MonitorDisk) {
+		return MonitoringDisk;
+	}
 
-		} else if (_monitoring & MonitorDisk) { // explicitly requested disk monitoring
-			
-			ms = MonitoringDisk;
+	/* This is an implementation of the truth table in doc/monitor_modes.pdf;
+	   I don't think it's ever going to be too pretty too look at.
+	*/
 
-		} else if (_diskstream->record_enabled() && _session.actively_recording()) { // Track actually recording
-			
-			ms = MonitoringInput;
+	bool const roll = _session.transport_rolling ();
+	bool const track_rec = _diskstream->record_enabled ();
+	bool const session_rec = _session.get_record_enabled ();
+	bool const auto_input = _session.config.get_auto_input ();
+	bool const software_monitor = Config->get_monitoring_model() == SoftwareMonitoring;
+	bool const tape_machine_mode = Config->get_tape_machine_mode ();
 
-		} else if (_diskstream->record_enabled() && !_session.actively_recording() && _session.config.get_auto_input()) { // Track armed but not recording, with auto input enabled
-			
-			ms = MonitoringInput;
+	if (track_rec) {
 
-		} else { // Every other state
-			
-			ms = MonitoringDisk; 
-
+		if (!session_rec && roll && auto_input) {
+			return MonitoringDisk;
+		} else {
+			return software_monitor ? MonitoringInput : MonitoringSilence;
 		}
 
 	} else {
 
-		/* no-roll case */
+		if (tape_machine_mode) {
 
-		if (send_silence()) {
-			
-			ms = MonitoringSilence;
+			return MonitoringDisk;
+
 		} else {
+
+			if (!roll && auto_input) {
+				return software_monitor ? MonitoringInput : MonitoringSilence;
+			} else {
+				return MonitoringDisk;
+			}
 			
-			ms = MonitoringInput;
 		}
 	}
 
-	return ms;
+	/* NOTREACHED */
+	return MonitoringSilence;
 }
 
 void
@@ -954,4 +910,8 @@ Track::parameter_changed (string p)
 	}
 }
 	
-	
+MeterState
+Track::metering_state () const
+{
+	return _diskstream->record_enabled() ? MeteringInput : MeteringRoute;
+}

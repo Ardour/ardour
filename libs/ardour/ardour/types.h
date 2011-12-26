@@ -371,6 +371,11 @@ namespace ARDOUR {
 		MonitoringDisk = 0x4,
 	};
 
+	enum MeterState {
+		MeteringInput, ///< meter the input IO, regardless of what is going through the route
+		MeteringRoute  ///< meter what is going through the route
+	};
+
 	enum PFLPosition {
 		/** PFL signals come from before pre-fader processors */
 		PFLFromBeforeProcessors,

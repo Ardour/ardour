@@ -50,9 +50,11 @@ class Track : public Route, public PublicDiskstream
 
 	virtual void set_monitoring (MonitorChoice);
 	MonitorChoice monitoring_choice() const { return _monitoring; }
-	MonitorState monitoring_state();
+	MonitorState monitoring_state () const;
 	PBD::Signal0<void> MonitoringChanged;
 
+	MeterState metering_state () const;
+	
 	virtual int no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 	                     bool state_changing);
 
@@ -212,8 +214,6 @@ class Track : public Route, public PublicDiskstream
 	bool                  _destructive;
 
 	void maybe_declick (BufferSet&, framecnt_t, int);
-
-	virtual bool send_silence () const;
 
 	boost::shared_ptr<RecEnableControllable> _rec_enable_control;
 	

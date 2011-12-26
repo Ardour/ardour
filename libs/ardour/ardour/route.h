@@ -107,6 +107,9 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	bool is_master() const { return _flags & MasterOut; }
 	bool is_monitor() const { return _flags & MonitorOut; }
 
+	virtual MonitorState monitoring_state () const;
+	virtual MeterState metering_state () const;
+	
 	/* these are the core of the API of a Route. see the protected sections as well */
 
 	virtual int roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
@@ -494,7 +497,6 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	uint32_t pans_required() const;
 	ChanCount n_process_buffers ();
 
-	virtual bool ardour_should_monitor () const;
 	virtual void maybe_declick (BufferSet&, framecnt_t, int);
 
 	boost::shared_ptr<Amp>       _amp;

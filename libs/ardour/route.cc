@@ -400,8 +400,6 @@ Route::process_output_buffers (BufferSet& bufs,
 			       framepos_t start_frame, framepos_t end_frame, pframes_t nframes,
 			       int declick, bool gain_automation_ok)
 {
-	bool monitor = ardour_should_monitor ();
-
 	bufs.set_is_silent (false);
 
 	/* figure out if we're going to use gain automation */
@@ -411,8 +409,11 @@ Route::process_output_buffers (BufferSet& bufs,
 		_amp->apply_gain_automation (false);
 	}
 
-	/* tell main outs what to do about monitoring */
-	_main_outs->no_outs_cuz_we_no_monitor (!monitor);
+	/* Tell main outs what to do about monitoring.  We do this so that
+	   on a transition between monitoring states we get a de-clicking gain
+	   change in the _main_outs delivery.
+	*/
+	_main_outs->no_outs_cuz_we_no_monitor (monitoring_state () == MonitoringSilence);
 
 
 	/* -------------------------------------------------------------------------------------------
@@ -478,12 +479,20 @@ Route::process_output_buffers (BufferSet& bufs,
 	   and go ....
 	   ----------------------------------------------------------------------------------------- */
 
+	/* set this to be true if the meter will already have been ::run() earlier */
+	bool const meter_already_run = metering_state() == MeteringInput;
+
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 
 		if (boost::dynamic_pointer_cast<UnknownProcessor> (*i)) {
 			break;
 		}
 
+		if (boost::dynamic_pointer_cast<PeakMeter> (*i) && meter_already_run) {
+			/* don't ::run() the meter, otherwise it will have its previous peak corrupted */
+			continue;
+		}
+		
 #ifndef NDEBUG
 		/* if it has any inputs, make sure they match */
 		if ((*i)->input_streams() != ChanCount::ZERO) {
@@ -3846,22 +3855,6 @@ Route::setup_invisible_processors ()
 	}
 }
 
-/** @return true if Ardour should provide monitoring for this route */
-bool
-Route::ardour_should_monitor () const
-{
-	switch (Config->get_monitoring_model()) {
-	case HardwareMonitoring:
-	case ExternalMonitoring:
-		return !record_enabled() || (_session.config.get_auto_input() && !_session.actively_recording());
-		break;
-	default:
-		break;
-	}
-
-	return true;
-}
-
 void
 Route::unpan ()
 {
@@ -3918,4 +3911,22 @@ Route::processor_by_id (PBD::ID id) const
 	}
 
 	return boost::shared_ptr<Processor> ();
+}
+
+/** @return the monitoring state, or in other words what data we are pushing
+ *  into the route (data from the inputs, data from disk or silence)
+ */
+MonitorState
+Route::monitoring_state () const
+{
+	return MonitoringInput;
+}
+
+/** @return what we should be metering; either the data coming from the input
+ *  IO or the data that is flowing through the route.
+ */
+MeterState
+Route::metering_state () const
+{
+	return MeteringRoute;
 }
