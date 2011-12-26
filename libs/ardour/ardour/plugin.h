@@ -141,6 +141,8 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 	}
 
 	void realtime_handle_transport_stopped ();
+	void realtime_locate ();
+	void monitoring_changed ();
 
 	struct PresetRecord {
 		PresetRecord () : user (true) {}
@@ -257,6 +259,8 @@ private:
 	bool _have_pending_stop_events;
 	PresetRecord _last_preset;
 	bool _parameter_changed_since_last_preset;
+
+	void resolve_midi ();
 };
 
 PluginPtr find_plugin(ARDOUR::Session&, std::string unique_id, ARDOUR::PluginType);

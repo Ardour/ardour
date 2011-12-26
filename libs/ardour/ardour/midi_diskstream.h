@@ -65,6 +65,8 @@ class MidiDiskstream : public Diskstream
 	void get_playback (MidiBuffer& dst, framecnt_t);
 
 	void set_record_enabled (bool yn);
+	
+	void reset_tracker ();
 
 	boost::shared_ptr<MidiPlaylist> midi_playlist () { return boost::dynamic_pointer_cast<MidiPlaylist>(_playlist); }
 

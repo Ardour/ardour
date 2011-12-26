@@ -270,5 +270,12 @@ MidiRingBuffer<T>::dump(ostream& str)
 	delete [] buf;
 }
 
+template<typename T>
+void
+MidiRingBuffer<T>::reset_tracker ()
+{
+	_tracker.reset ();
+}
+
 template class MidiRingBuffer<framepos_t>;
 

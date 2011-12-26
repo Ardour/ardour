@@ -75,6 +75,8 @@ public:
 		return g_atomic_int_get(&_channel_mask) & 0x0000FFFF;
 	}
 
+	void reset_tracker ();
+	
 protected:
 	inline bool is_channel_event(uint8_t event_type_byte) {
 		// mask out channel information

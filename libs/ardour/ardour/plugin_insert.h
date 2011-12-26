@@ -77,6 +77,8 @@ class PluginInsert : public Processor
 	bool is_midi_instrument() const;
 
 	void realtime_handle_transport_stopped ();
+	void realtime_locate ();
+	void monitoring_changed ();
 
 	struct PluginControl : public AutomationControl
 	{

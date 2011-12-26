@@ -1282,3 +1282,19 @@ PluginInsert::realtime_handle_transport_stopped ()
 		(*i)->realtime_handle_transport_stopped ();
 	}
 }
+
+void
+PluginInsert::realtime_locate ()
+{
+	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
+		(*i)->realtime_locate ();
+	}
+}
+
+void
+PluginInsert::monitoring_changed ()
+{
+	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
+		(*i)->monitoring_changed ();
+	}
+}

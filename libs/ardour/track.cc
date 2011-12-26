@@ -890,6 +890,11 @@ Track::set_monitoring (MonitorChoice mc)
 {
 	if (mc !=  _monitoring) {
 		_monitoring = mc;
+
+		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+			(*i)->monitoring_changed ();
+		}
+
 		MonitoringChanged (); /* EMIT SIGNAL */
 	}
 }

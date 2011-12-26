@@ -87,6 +87,13 @@ class Processor : public SessionObject, public Automatable, public Latent
 	virtual void realtime_handle_transport_stopped () {}
 	virtual void realtime_locate () {}
 
+	/* most processors won't care about this, but plugins that
+	   receive MIDI or similar data from an input source that
+	   may suddenly go "quiet" because of monitoring changes
+	   need to know about it.
+	*/
+	virtual void monitoring_changed() {}
+
 	/* note: derived classes should implement state(), NOT get_state(), to allow
 	   us to merge C++ inheritance and XML lack-of-inheritance reasonably
 	   smoothly.

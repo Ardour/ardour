@@ -70,6 +70,7 @@ Plugin::Plugin (AudioEngine& e, Session& s)
 	, _have_pending_stop_events (false)
 	, _parameter_changed_since_last_preset (false)
 {
+	_pending_stop_events.ensure_buffers (DataType::MIDI, 1, 4096);
 }
 
 Plugin::Plugin (const Plugin& other)
@@ -83,12 +84,11 @@ Plugin::Plugin (const Plugin& other)
 	, _have_pending_stop_events (false)
 	, _parameter_changed_since_last_preset (false)
 {
-
+	_pending_stop_events.ensure_buffers (DataType::MIDI, 1, 4096);
 }
 
 Plugin::~Plugin ()
 {
-
 }
 
 void
@@ -242,8 +242,10 @@ Plugin::connect_and_run (BufferSet& bufs,
 	if (bufs.count().n_midi() > 0) {
 
 		/* Track notes that we are sending to the plugin */
+
 		MidiBuffer& b = bufs.get_midi (0);
 		bool looped;
+
 		_tracker.track (b.begin(), b.end(), looped);
 
 		if (_have_pending_stop_events) {
@@ -259,11 +261,28 @@ Plugin::connect_and_run (BufferSet& bufs,
 void
 Plugin::realtime_handle_transport_stopped ()
 {
+	resolve_midi ();
+}
+
+void
+Plugin::realtime_locate ()
+{
+	resolve_midi ();
+}
+
+void
+Plugin::monitoring_changed ()
+{
+	resolve_midi ();
+}
+
+void
+Plugin::resolve_midi ()
+{
 	/* Create note-offs for any active notes and put them in _pending_stop_events, to be picked
 	   up on the next call to connect_and_run ().
 	*/
 
-	_pending_stop_events.ensure_buffers (DataType::MIDI, 1, 4096);
 	_pending_stop_events.get_midi(0).clear ();
 	_tracker.resolve_notes (_pending_stop_events.get_midi (0), 0);
 	_have_pending_stop_events = true;
@@ -345,3 +364,5 @@ Plugin::set_info (PluginInfoPtr info)
 {
 	_info = info;
 }
+
+

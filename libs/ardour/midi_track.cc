@@ -109,11 +109,11 @@ MidiTrack::set_diskstream (boost::shared_ptr<Diskstream> ds)
 {
 	Track::set_diskstream (ds);
 
+	midi_diskstream()->reset_tracker ();	
+
 	_diskstream->set_track (this);
 	_diskstream->set_destructive (_mode == Destructive);
-
 	_diskstream->set_record_enabled (false);
-	//_diskstream->monitor_input (false);
 
 	_diskstream_data_recorded_connection.disconnect ();
 	boost::shared_ptr<MidiDiskstream> mds = boost::dynamic_pointer_cast<MidiDiskstream> (ds);
@@ -391,6 +391,7 @@ void
 MidiTrack::realtime_locate ()
 {
 	Glib::RWLock::ReaderLock lm (_processor_lock, Glib::TRY_LOCK);
+
 	if (!lm.locked ()) {
 		return;
 	}
@@ -398,6 +399,8 @@ MidiTrack::realtime_locate ()
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		(*i)->realtime_locate ();
 	}
+
+	midi_diskstream()->reset_tracker ();
 }
 
 void
@@ -734,3 +737,14 @@ MidiTrack::act_on_mute ()
 	}
 }
 	
+void
+MidiTrack::set_monitoring (MonitorChoice mc)
+{
+	Track::set_monitoring (mc);
+
+	boost::shared_ptr<MidiDiskstream> md (midi_diskstream());
+
+	if (md) {
+		md->reset_tracker ();
+	}
+}

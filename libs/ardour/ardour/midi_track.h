@@ -107,6 +107,8 @@ public:
 	PBD::Signal1<void, boost::weak_ptr<MidiSource> > DataRecorded;
 	boost::shared_ptr<MidiBuffer> get_gui_feed_buffer () const;
 
+	void set_monitoring (MonitorChoice);
+
 	void set_input_active (bool);
 	bool input_active () const;
 	PBD::Signal0<void> InputActiveChanged;
