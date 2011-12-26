@@ -69,6 +69,16 @@ FPU::FPU ()
 		
 		char* fxbuf = 0;
 		
+		/* DAZ wasn't available in the first version of SSE. Since
+		   setting a reserved bit in MXCSR causes a general protection
+		   fault, we need to be able to check the availability of this
+		   feature without causing problems. To do this, one needs to
+		   set up a 512-byte area of memory to save the SSE state to,
+		   using fxsave, and then one needs to inspect bytes 28 through
+		   31 for the MXCSR_MASK value. If bit 6 is set, DAZ is
+		   supported, otherwise, it isn't.
+		*/
+		
 #ifdef NO_POSIX_MEMALIGN
 		if ((fxbuf = (char *) malloc(512)) == 0)
 #else
