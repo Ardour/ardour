@@ -83,6 +83,7 @@ void
 PlaylistLayeringTest::tearDown ()
 {
 	AudioEngine::instance()->remove_session ();
+	delete _session;
 	EnumWriter::destroy ();
 	MIDI::Manager::destroy ();
 	AudioEngine::destroy ();
