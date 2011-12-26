@@ -60,7 +60,6 @@ StereoPanner::StereoPanner (boost::shared_ptr<Panner> panner)
 	: PannerInterface (panner)
 	, position_control (_panner->pannable()->pan_azimuth_control)
 	, width_control (_panner->pannable()->pan_width_control)
-	, dragging (false)
 	, dragging_position (false)
 	, dragging_left (false)
 	, dragging_right (false)
@@ -270,7 +269,7 @@ StereoPanner::on_button_press_event (GdkEventButton* ev)
 	dragging_position = false;
 	dragging_left = false;
 	dragging_right = false;
-	dragging = false;
+	_dragging = false;
 	accumulated_delta = 0;
 	detented = false;
 
@@ -347,7 +346,7 @@ StereoPanner::on_button_press_event (GdkEventButton* ev)
 			}
 		}
 
-		dragging = false;
+		_dragging = false;
 
 	} else if (ev->type == GDK_BUTTON_PRESS) {
 
@@ -355,6 +354,8 @@ StereoPanner::on_button_press_event (GdkEventButton* ev)
 			/* handled by button release */
 			return true;
 		}
+
+		show_drag_data_window ();
 
 		if (ev->y < 20) {
 			/* top section of widget is for position drags */
@@ -388,7 +389,7 @@ StereoPanner::on_button_press_event (GdkEventButton* ev)
 			StartWidthGesture ();
 		}
 
-		dragging = true;
+		_dragging = true;
 	}
 
 	return true;
@@ -403,16 +404,14 @@ StereoPanner::on_button_release_event (GdkEventButton* ev)
 
 	bool const dp = dragging_position;
 
-	dragging = false;
+	_dragging = false;
 	dragging_position = false;
 	dragging_left = false;
 	dragging_right = false;
 	accumulated_delta = 0;
 	detented = false;
 
-	if (_drag_data_window) {
-		_drag_data_window->hide ();
-	}
+	hide_drag_data_window ();
 
 	if (Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier)) {
 		_panner->reset ();
@@ -466,11 +465,9 @@ StereoPanner::on_scroll_event (GdkEventScroll* ev)
 bool
 StereoPanner::on_motion_notify_event (GdkEventMotion* ev)
 {
-	if (!dragging) {
+	if (!_dragging) {
 		return false;
 	}
-
-	show_drag_data_window ();
 
 	int w = get_width();
 	double delta = (ev->x - last_drag_x) / (double) w;

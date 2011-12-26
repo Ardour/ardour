@@ -39,7 +39,9 @@ protected:
 	virtual void set_drag_data () = 0;
 	
 	void show_drag_data_window ();
+	void hide_drag_data_window ();
 	void value_change ();
+	
         bool on_enter_notify_event (GdkEventCrossing *);
         bool on_leave_notify_event (GdkEventCrossing *);
 	bool on_key_release_event  (GdkEventKey *);
@@ -47,6 +49,11 @@ protected:
 	boost::shared_ptr<ARDOUR::Panner> _panner;
         Gtk::Window* _drag_data_window;
         Gtk::Label*  _drag_data_label;
+        bool _dragging;
+
+private:
+	bool drag_data_timeout ();
+	sigc::connection _drag_data_timeout;
 };
 
 #endif

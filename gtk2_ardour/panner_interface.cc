@@ -24,6 +24,7 @@
 
 #include "i18n.h"
 
+using namespace std;
 using namespace Gtk;
 using namespace ARDOUR;
 using namespace Gtkmm2ext;
@@ -32,6 +33,7 @@ PannerInterface::PannerInterface (boost::shared_ptr<Panner> p)
 	: _panner (p)
 	, _drag_data_window (0)
 	, _drag_data_label (0)
+        , _dragging (false)
 {
         set_flags (Gtk::CAN_FOCUS);
 
@@ -69,6 +71,8 @@ PannerInterface::show_drag_data_window ()
 			_drag_data_window->set_transient_for (*toplevel);
 		}
 	}
+
+	set_drag_data ();
 	
         if (!_drag_data_window->is_visible ()) {
                 /* move the window a little away from the mouse */
@@ -79,11 +83,29 @@ PannerInterface::show_drag_data_window ()
         }
 }
 
+void
+PannerInterface::hide_drag_data_window ()
+{
+        if (_drag_data_window) {
+                _drag_data_window->hide ();
+        }
+}
+
 bool
 PannerInterface::on_enter_notify_event (GdkEventCrossing *)
 {
 	grab_focus ();
 	Keyboard::magic_widget_grab_focus ();
+
+	_drag_data_timeout = Glib::signal_timeout().connect (sigc::mem_fun (*this, &PannerInterface::drag_data_timeout), 500);
+	
+	return false;
+}
+
+bool
+PannerInterface::drag_data_timeout ()
+{
+	show_drag_data_window ();
 	return false;
 }
 
@@ -91,6 +113,12 @@ bool
 PannerInterface::on_leave_notify_event (GdkEventCrossing *)
 {
 	Keyboard::magic_widget_drop_focus ();
+
+	_drag_data_timeout.disconnect ();
+	if (!_dragging) {
+		hide_drag_data_window ();
+	}
+	
 	return false;
 }
 

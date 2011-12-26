@@ -59,7 +59,6 @@ bool MonoPanner::have_colors = false;
 MonoPanner::MonoPanner (boost::shared_ptr<ARDOUR::Panner> panner)
 	: PannerInterface (panner)
 	, position_control (_panner->pannable()->pan_azimuth_control)
-        , dragging (false)
         , drag_start_x (0)
         , last_drag_x (0)
         , accumulated_delta (0)
@@ -251,7 +250,7 @@ MonoPanner::on_button_press_event (GdkEventButton* ev)
         drag_start_x = ev->x;
         last_drag_x = ev->x;
 
-        dragging = false;
+        _dragging = false;
         accumulated_delta = 0;
         detented = false;
 
@@ -286,7 +285,7 @@ MonoPanner::on_button_press_event (GdkEventButton* ev)
                         position_control->set_value (0.5);
                 }
 
-                dragging = false;
+                _dragging = false;
 
         } else if (ev->type == GDK_BUTTON_PRESS) {
 
@@ -295,8 +294,9 @@ MonoPanner::on_button_press_event (GdkEventButton* ev)
                         return true;
                 }
 
-                dragging = true;
+                _dragging = true;
                 StartGesture ();
+		show_drag_data_window ();
         }
 
         return true;
@@ -309,13 +309,11 @@ MonoPanner::on_button_release_event (GdkEventButton* ev)
                 return false;
         }
 
-        dragging = false;
+        _dragging = false;
         accumulated_delta = 0;
         detented = false;
 
-        if (_drag_data_window) {
-                _drag_data_window->hide ();
-        }
+	hide_drag_data_window ();
 
         if (Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier)) {
 		_panner->reset ();
@@ -358,11 +356,9 @@ MonoPanner::on_scroll_event (GdkEventScroll* ev)
 bool
 MonoPanner::on_motion_notify_event (GdkEventMotion* ev)
 {
-        if (!dragging) {
+        if (!_dragging) {
                 return false;
         }
-
-	show_drag_data_window ();
 
         int w = get_width();
         double delta = (ev->x - last_drag_x) / (double) w;

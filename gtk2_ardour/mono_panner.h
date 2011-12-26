@@ -54,7 +54,6 @@ class MonoPanner : public PannerInterface
   private:
         boost::shared_ptr<PBD::Controllable> position_control;
         PBD::ScopedConnectionList connections;
-        bool dragging;
         int drag_start_x;
         int last_drag_x;
         double accumulated_delta;
