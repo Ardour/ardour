@@ -57,15 +57,13 @@ MonoPanner::ColorScheme MonoPanner::colors;
 bool MonoPanner::have_colors = false;
 
 MonoPanner::MonoPanner (boost::shared_ptr<ARDOUR::Panner> panner)
-	: _panner (panner)
+	: PannerInterface (panner)
 	, position_control (_panner->pannable()->pan_azimuth_control)
         , dragging (false)
         , drag_start_x (0)
         , last_drag_x (0)
         , accumulated_delta (0)
         , detented (false)
-        , drag_data_window (0)
-        , drag_data_label (0)
         , position_binder (position_control)
 {
         if (!have_colors) {
@@ -75,26 +73,18 @@ MonoPanner::MonoPanner (boost::shared_ptr<ARDOUR::Panner> panner)
 
         position_control->Changed.connect (connections, invalidator(*this), boost::bind (&MonoPanner::value_change, this), gui_context());
 
-        set_flags (Gtk::CAN_FOCUS);
-
-        add_events (Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK|
-                    Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|
-                    Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|
-                    Gdk::SCROLL_MASK|
-                    Gdk::POINTER_MOTION_MASK);
-
-        ColorsChanged.connect (sigc::mem_fun (*this, &MonoPanner::color_handler));
+	ColorsChanged.connect (sigc::mem_fun (*this, &MonoPanner::color_handler));
 }
 
 MonoPanner::~MonoPanner ()
 {
-        delete drag_data_window;
+	
 }
 
 void
 MonoPanner::set_drag_data ()
 {
-        if (!drag_data_label) {
+        if (!_drag_data_label) {
                 return;
         }
 
@@ -112,14 +102,7 @@ MonoPanner::set_drag_data ()
         snprintf (buf, sizeof (buf), "L:%3d R:%3d",
                   (int) rint (100.0 * (1.0 - pos)),
                   (int) rint (100.0 * pos));
-        drag_data_label->set_markup (buf);
-}
-
-void
-MonoPanner::value_change ()
-{
-        set_drag_data ();
-        queue_draw ();
+        _drag_data_label->set_markup (buf);
 }
 
 bool
@@ -330,8 +313,8 @@ MonoPanner::on_button_release_event (GdkEventButton* ev)
         accumulated_delta = 0;
         detented = false;
 
-        if (drag_data_window) {
-                drag_data_window->hide ();
+        if (_drag_data_window) {
+                _drag_data_window->hide ();
         }
 
         if (Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier)) {
@@ -379,32 +362,7 @@ MonoPanner::on_motion_notify_event (GdkEventMotion* ev)
                 return false;
         }
 
-        if (!drag_data_window) {
-                drag_data_window = new Window (WINDOW_POPUP);
-                drag_data_window->set_name (X_("ContrastingPopup"));
-                drag_data_window->set_position (WIN_POS_MOUSE);
-                drag_data_window->set_decorated (false);
-
-                drag_data_label = manage (new Label);
-                drag_data_label->set_use_markup (true);
-
-                drag_data_window->set_border_width (6);
-                drag_data_window->add (*drag_data_label);
-                drag_data_label->show ();
-
-                Window* toplevel = dynamic_cast<Window*> (get_toplevel());
-                if (toplevel) {
-                        drag_data_window->set_transient_for (*toplevel);
-                }
-        }
-
-        if (!drag_data_window->is_visible ()) {
-                /* move the window a little away from the mouse */
-                int rx, ry;
-                get_window()->get_origin (rx, ry);
-                drag_data_window->move (rx, ry+get_height());
-                drag_data_window->present ();
-        }
+	show_drag_data_window ();
 
         int w = get_width();
         double delta = (ev->x - last_drag_x) / (double) w;
@@ -469,27 +427,6 @@ MonoPanner::on_key_press_event (GdkEventKey* ev)
         return true;
 }
 
-bool
-MonoPanner::on_key_release_event (GdkEventKey*)
-{
-        return false;
-}
-
-bool
-MonoPanner::on_enter_notify_event (GdkEventCrossing*)
-{
-	grab_focus ();
-	Keyboard::magic_widget_grab_focus ();
-	return false;
-}
-
-bool
-MonoPanner::on_leave_notify_event (GdkEventCrossing*)
-{
-	Keyboard::magic_widget_drop_focus ();
-	return false;
-}
-
 void
 MonoPanner::set_colors ()
 {
@@ -504,6 +441,7 @@ MonoPanner::set_colors ()
 void
 MonoPanner::color_handler ()
 {
-        set_colors ();
-        queue_draw ();
+	set_colors ();
+	queue_draw ();
 }
+

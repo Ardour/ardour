@@ -22,16 +22,17 @@
 
 #include "pbd/signals.h"
 
-#include <gtkmm/drawingarea.h>
 #include <boost/shared_ptr.hpp>
 
 #include "gtkmm2ext/binding_proxy.h"
+
+#include "panner_interface.h"
 
 namespace PBD {
         class Controllable;
 }
 
-class MonoPanner : public Gtk::DrawingArea
+class MonoPanner : public PannerInterface
 {
   public:
 	MonoPanner (boost::shared_ptr<ARDOUR::Panner>);
@@ -49,12 +50,8 @@ class MonoPanner : public Gtk::DrawingArea
 	bool on_motion_notify_event (GdkEventMotion*);
         bool on_scroll_event (GdkEventScroll*);
         bool on_key_press_event (GdkEventKey*);
-        bool on_key_release_event (GdkEventKey*);
-        bool on_enter_notify_event (GdkEventCrossing* ev);
-        bool on_leave_notify_event (GdkEventCrossing* ev);
 
   private:
-	boost::shared_ptr<ARDOUR::Panner> _panner;
         boost::shared_ptr<PBD::Controllable> position_control;
         PBD::ScopedConnectionList connections;
         bool dragging;
@@ -63,12 +60,8 @@ class MonoPanner : public Gtk::DrawingArea
         double accumulated_delta;
         bool detented;
 
-        Gtk::Window* drag_data_window;
-        Gtk::Label* drag_data_label;
-
         BindingProxy position_binder;
 
-        void value_change ();
         void set_drag_data ();
 
         struct ColorScheme {
@@ -83,7 +76,7 @@ class MonoPanner : public Gtk::DrawingArea
         static ColorScheme colors;
         static void set_colors ();
         static bool have_colors;
-        void color_handler ();
+	void color_handler ();
 };
 
 #endif /* __gtk_ardour_mono_panner_h__ */

@@ -21,11 +21,8 @@
 #define __gtk_ardour_stereo_panner_h__
 
 #include "pbd/signals.h"
-
-#include <gtkmm/drawingarea.h>
-#include <boost/shared_ptr.hpp>
-
 #include "gtkmm2ext/binding_proxy.h"
+#include "panner_interface.h"
 
 namespace PBD {
         class Controllable;
@@ -35,7 +32,7 @@ namespace ARDOUR {
         class Panner;
 }
 
-class StereoPanner : public Gtk::DrawingArea
+class StereoPanner : public PannerInterface
 {
   public:
 	StereoPanner (boost::shared_ptr<ARDOUR::Panner>);
@@ -53,12 +50,8 @@ class StereoPanner : public Gtk::DrawingArea
 	bool on_motion_notify_event (GdkEventMotion*);
         bool on_scroll_event (GdkEventScroll*);
         bool on_key_press_event (GdkEventKey*);
-        bool on_key_release_event (GdkEventKey*);
-        bool on_enter_notify_event (GdkEventCrossing* ev);
-        bool on_leave_notify_event (GdkEventCrossing* ev);
 
   private:
-        boost::shared_ptr<ARDOUR::Panner> _panner;
         boost::shared_ptr<PBD::Controllable> position_control;
         boost::shared_ptr<PBD::Controllable> width_control;
         PBD::ScopedConnectionList connections;
@@ -71,13 +64,9 @@ class StereoPanner : public Gtk::DrawingArea
         double accumulated_delta;
         bool detented;
 
-        Gtk::Window* drag_data_window;
-        Gtk::Label* drag_data_label;
-
         BindingProxy position_binder;
         BindingProxy width_binder;
 
-        void value_change ();
         void set_drag_data ();
 
         struct ColorScheme {
@@ -97,7 +86,7 @@ class StereoPanner : public Gtk::DrawingArea
         static ColorScheme colors[3];
         static void set_colors ();
         static bool have_colors;
-        void color_handler ();
+	void color_handler ();
 };
 
 #endif /* __gtk_ardour_stereo_panner_h__ */
