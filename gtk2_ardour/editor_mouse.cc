@@ -1300,6 +1300,8 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 	if (Keyboard::is_context_menu_event (&event->button)) {
 
+		context_click_event = *event;
+
 		if (!_drags->active ()) {
 
 			/* no matter which button pops up the context menu, tell the menu

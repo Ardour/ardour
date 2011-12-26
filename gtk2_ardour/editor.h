@@ -679,6 +679,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtk::Menu * track_edit_playlist_submenu;
 	Gtk::Menu * track_selection_edit_playlist_submenu;
 
+	GdkEvent context_click_event;
+
 	void popup_track_context_menu (int, int, ItemType, bool);
 	Gtk::Menu* build_track_context_menu ();
 	Gtk::Menu* build_track_bus_context_menu ();
@@ -1099,7 +1101,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void toggle_region_lock_style ();
 	void raise_region ();
 	void raise_region_to_top ();
-	void change_region_layering_order ();
+	void change_region_layering_order (bool from_context_menu);
 	void lower_region ();
 	void lower_region_to_bottom ();
 	void split_regions_at (framepos_t, RegionSelection&);
