@@ -1172,7 +1172,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	MidiControlUI* midi_control_ui;
 
 	int           start_midi_thread ();
-	void          terminate_midi_thread ();
 
 	void set_play_loop (bool yn);
 	void unset_play_loop ();

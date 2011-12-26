@@ -539,10 +539,6 @@ Session::mmc_step_timeout ()
 	return true;
 }
 
-/*---------------------------------------------------------------------------
-  MIDI THREAD
-  ---------------------------------------------------------------------------*/
-
 int
 Session::start_midi_thread ()
 {
@@ -550,13 +546,4 @@ Session::start_midi_thread ()
 	midi_control_ui->run ();
 	return 0;
 }
-
-void
-Session::terminate_midi_thread ()
-{
-	if (midi_control_ui) {
-		midi_control_ui->quit ();
-	}
-}
-
 
