@@ -1819,7 +1819,7 @@ Editor::add_region_context_items (Menu_Helpers::MenuList& edit_items, boost::sha
 
 	edit_items.push_back (*_popup_region_menu_item);
 	if (track->playlist()->count_regions_at (mouse) > 1 && (layering_order_editor == 0 || !layering_order_editor->is_visible ())) {
-		edit_items.push_back (*manage (_region_actions->get_action ("choose-top-region")->create_menu_item ()));
+		edit_items.push_back (*manage (_region_actions->get_action ("choose-top-region-context-menu")->create_menu_item ()));
 	}
 	edit_items.push_back (SeparatorElem());
 }
@@ -5356,9 +5356,15 @@ Editor::show_editor_list (bool yn)
 }
 
 void
-Editor::change_region_layering_order ()
+Editor::change_region_layering_order (bool from_context_menu)
 {
-	framepos_t const position = get_preferred_edit_position ();
+	framepos_t position;
+
+	if (from_context_menu) {
+		position = event_frame (&context_click_event, 0, 0);
+	} else {
+		position = get_preferred_edit_position ();
+	}
 
 	if (!clicked_routeview) {
 		if (layering_order_editor) {
@@ -5380,7 +5386,8 @@ Editor::change_region_layering_order ()
 	}
 
 	if (layering_order_editor == 0) {
-		layering_order_editor = new RegionLayeringOrderEditor(*this);
+		layering_order_editor = new RegionLayeringOrderEditor (*this);
+		layering_order_editor->set_position (WIN_POS_MOUSE);
 	}
 
 	layering_order_editor->set_context (clicked_routeview->name(), _session, pl, position);
@@ -5391,7 +5398,7 @@ void
 Editor::update_region_layering_order_editor ()
 {
 	if (layering_order_editor && layering_order_editor->is_visible ()) {
-		change_region_layering_order ();
+		change_region_layering_order (true);
 	}
 }
 
