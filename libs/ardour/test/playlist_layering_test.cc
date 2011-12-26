@@ -82,6 +82,12 @@ PlaylistLayeringTest::setUp ()
 void
 PlaylistLayeringTest::tearDown ()
 {
+	_playlist.reset ();
+	_source.reset ();
+	for (int i = 0; i < 16; ++i) {
+		_region[i].reset ();
+	}
+	
 	AudioEngine::instance()->remove_session ();
 	delete _session;
 	EnumWriter::destroy ();
