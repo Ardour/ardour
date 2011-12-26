@@ -40,6 +40,7 @@ ArdourWindow::ArdourWindow (Gtk::Window& parent, string title)
 	: Window ()
 {
 	init ();
+	set_transient_for (parent);
 	set_position (Gtk::WIN_POS_CENTER_ON_PARENT);
 }
 
