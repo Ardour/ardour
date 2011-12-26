@@ -504,6 +504,7 @@ Route::process_output_buffers (BufferSet& bufs,
 			}
 		}
 #endif
+
 		/* should we NOT run plugins here if the route is inactive?
 		   do we catch route != active somewhere higher?
 		*/

@@ -390,7 +390,67 @@ ControlList::rt_add (double when, double value)
 		/* we don't worry about adding events out of time order as we will
 		   sort them in merge_nascent.
 		*/
-		nascent.back()->events.push_back (new ControlEvent (when, value));
+
+		EventList& el (nascent.back()->events);
+
+		if (el.size() > 1 && (when >= el.back()->when) && (value == el.back()->value)) {
+			/* same value, later timestamp, effective slope is
+			 * zero, so just move the last point in nascent to our
+			 * new time position. this avoids storing an unlimited
+			 * number of points to represent a flat line.
+			 */
+			el.back()->when = when;
+		} else {
+			nascent.back()->events.push_back (new ControlEvent (when, value));
+		}
+	}
+}
+
+void
+ControlList::thin ()
+{
+	Glib::Mutex::Lock lm (_lock);
+
+	ControlEvent* prevprev;
+	ControlEvent* cur;
+	ControlEvent* prev;
+	iterator pprev;
+	int counter = 0;
+
+	for (iterator i = _events.begin(); i != _events.end(); ++i) {
+
+		cur = *i;
+		counter++;
+
+		if (counter > 2) {
+			
+			double area = fabs (0.5 * 
+					    (prevprev->when * (prev->value - cur->value)) + 
+					    (prev->when * (cur->value - prevprev->value)) + 
+					    (cur->when * (prevprev->value - prev->value)));
+			
+			/* the number 10.0 is an arbitrary value that needs to
+			 * be controlled by some user-controllable
+			 * configuration utility.
+			 */
+
+			if (area < 10.0) {
+				iterator tmp = pprev;
+
+				/* pprev will change to current
+				   i is incremented to the next event
+				*/
+
+				pprev = i;
+				_events.erase (tmp);
+
+				continue;
+			}
+		}
+
+		prevprev = prev;
+		prev = cur;
+		pprev = i;
 	}
 }
 

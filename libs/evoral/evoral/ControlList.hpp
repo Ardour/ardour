@@ -130,6 +130,8 @@ public:
 	bool move_ranges (std::list< RangeMove<double> > const &);
 	void modify (iterator, double, double);
 
+        void thin ();
+
 	boost::shared_ptr<ControlList> cut (double, double);
 	boost::shared_ptr<ControlList> copy (double, double);
 	void clear (double, double);

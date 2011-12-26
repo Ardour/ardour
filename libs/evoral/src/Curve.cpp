@@ -124,7 +124,6 @@ Curve::solve ()
 				} else {
 					fpi = 2 / (slope_before + slope_after);
 				}
-
 			}
 
 			/* compute second derivative for either side of control point `i' */
@@ -297,7 +296,6 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen)
 		for (i = 1; i < veclen; ++i) {
 			vec[i] = vec[i-1] + yfrac;
 		}
-
 		return;
 	}
 
