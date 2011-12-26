@@ -23,7 +23,7 @@ RegionLayeringOrderEditor::RegionLayeringOrderEditor (PublicEditor& pe)
 	, layering_order_columns ()
 	, layering_order_model (Gtk::ListStore::create (layering_order_columns))
 	, layering_order_display ()
-        , clock ("layer dialog", true, "clock", false, false, false)
+        , clock ("layer dialog", true, "", false, false, false)
 	, scroller ()
 	, editor (pe)
 {
