@@ -293,7 +293,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 }
 
 int
-Session::second_stage_init ()
+Session::second_stage_init (bool with_midi_ui)
 {
 	AudioFileSource::set_peak_dir (_session_dir->peak_path().to_string());
 
@@ -307,8 +307,10 @@ Session::second_stage_init ()
 		return -1;
 	}
 
-	if (start_midi_thread ()) {
-		return -1;
+	if (with_midi_ui) {
+		if (start_midi_thread ()) {
+			return -1;
+		}
 	}
 
 	setup_midi_machine_control ();

@@ -68,11 +68,17 @@ PlaylistLayeringTest::setUp ()
 	test_receiver.listen_to (fatal);
 	test_receiver.listen_to (warning);
 
-	AudioEngine* engine = new AudioEngine ("test", "");
+	AudioEngine* engine = 0;
+	try {
+		engine = new AudioEngine ("test", "");
+	} catch (...) {
+		CPPUNIT_ASSERT (false);
+	}
+	
 	MIDI::Manager::create (engine->jack ());
 	CPPUNIT_ASSERT (engine->start () == 0);
 
-	_session = new Session (*engine, test_session_path, "playlist_layering_test");
+	_session = new Session (*engine, test_session_path, "playlist_layering_test", 0, "", false);
 	engine->set_session (_session);
 
 	_playlist = PlaylistFactory::create (DataType::AUDIO, *_session, "test");

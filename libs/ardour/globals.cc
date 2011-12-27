@@ -454,6 +454,11 @@ ARDOUR::setup_fpu ()
 
 	MXCSR  = _mm_getcsr();
 
+#ifdef DEBUG_DENORMAL_EXCEPTION
+	/* This will raise a FP exception if a denormal is detected */
+	MXCSR &= ~_MM_MASK_DENORM;
+#endif	
+
 	switch (Config->get_denormal_model()) {
 	case DenormalNone:
 		MXCSR &= ~(_MM_FLUSH_ZERO_ON|0x8000);

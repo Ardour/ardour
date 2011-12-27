@@ -91,6 +91,7 @@ AudioEngine::AudioEngine (string client_name, string session_uuid)
 	g_atomic_int_set (&m_meter_exit, 0);
 
 	if (connect_to_jack (client_name, session_uuid)) {
+		_instance = 0;
 		throw NoBackendAvailable ();
 	}
 
