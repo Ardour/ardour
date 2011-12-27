@@ -55,7 +55,8 @@ public:
 
 private:
 
-	const char*	changeWorkingDir(const char *saveLocation);
+	void		changeWorkingDir(const char *saveLocation);
+	void		ensureWorkingDir();
 
 	std::string	doRequest(std::string uri, std::string params);
 	void		setcUrlOptions();

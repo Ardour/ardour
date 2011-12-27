@@ -41,6 +41,7 @@
 #include "sfdb_freesound_mootcher.h"
 
 #include "pbd/xml++.h"
+#include "pbd/filesystem.h"
 
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -64,7 +65,7 @@ Mootcher:: ~Mootcher()
 }
 
 //------------------------------------------------------------------------
-const char* Mootcher::changeWorkingDir(const char *saveLocation)
+void Mootcher::changeWorkingDir(const char *saveLocation)
 {
 	basePath = saveLocation;
 #ifdef __WIN32__
@@ -78,15 +79,17 @@ const char* Mootcher::changeWorkingDir(const char *saveLocation)
 	//
 	size_t pos2 = basePath.find_last_of("/");
 	if(basePath.length() != (pos2+1)) basePath += "/";
-
-	// create Freesound directory and sound dir
-	std::string sndLocation = basePath;
-	mkdir(sndLocation.c_str(), 0777);
-	sndLocation += "snd";
-	mkdir(sndLocation.c_str(), 0777);
-
-	return basePath.c_str();
 }
+
+void Mootcher::ensureWorkingDir ()
+{
+	PBD::sys::path p = basePath;
+	p /= "snd";
+	if (!PBD::sys::is_directory (p)) {
+		PBD::sys::create_directories (p);
+	}
+}
+	
 
 //------------------------------------------------------------------------
 size_t Mootcher::WriteMemoryCallback(void *ptr, size_t size, size_t nmemb, void *data)
@@ -259,6 +262,7 @@ std::string Mootcher::getSoundResourceFile(std::string ID)
 		// std::cerr << "getSoundResourceFile: saving XML: " << xmlFileName << std::endl;
 
 		// save the xml file to disk
+		ensureWorkingDir();
 		doc.write(xmlFileName.c_str());
 
 		//store all the tags in the database
@@ -293,7 +297,7 @@ int audioFileWrite(void *buffer, size_t size, size_t nmemb, void *file)
 //------------------------------------------------------------------------
 std::string Mootcher::getAudioFile(std::string originalFileName, std::string ID, std::string audioURL, Gtk::ProgressBar *progress_bar)
 {
-
+	ensureWorkingDir();
 	std::string audioFileName = basePath + "snd/" + ID + "-" + originalFileName;
 
 	//check to see if audio file already exists
