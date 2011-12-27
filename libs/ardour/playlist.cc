@@ -2519,7 +2519,7 @@ Playlist::commit_temporary_layers (TemporaryLayers const & temporary_layers)
 			(*i)->set_layer (0);
 		}
 		
-		DEBUG_TRACE (DEBUG::Layering, string_compose ("\t%1 %2\n", (*i)->name(), (*i)->layer()));
+		DEBUG_TRACE (DEBUG::Layering, string_compose ("\t%1 temporary %2 committed %3\n", (*i)->name(), temporary_layers.get (*i), (*i)->layer()));
 	}
 
 	notify_layering_changed ();
@@ -2579,13 +2579,13 @@ Playlist::relayer (boost::shared_ptr<Region> region, double temporary_layer)
 void
 Playlist::raise_region (boost::shared_ptr<Region> region)
 {
-	relayer (region, region->layer() + 0.5);
+	relayer (region, region->layer() + 1.5);
 }
 
 void
 Playlist::lower_region (boost::shared_ptr<Region> region)
 {
-	relayer (region, region->layer() - 0.5);
+	relayer (region, region->layer() - 1.5);
 }
 
 void
