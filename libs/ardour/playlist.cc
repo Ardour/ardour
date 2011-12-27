@@ -2450,6 +2450,8 @@ Playlist::compute_temporary_layers (RegionList const & relayer_regions)
 		   next_layer.
 		*/
 
+		DEBUG_TRACE (DEBUG::Layering, string_compose ("%1 and deps need to go between %2 and %3\n", (*i)->name(), previous_layer, next_layer));
+
 		/* Recurse into overlaps_to_preserve to find dependents */
 		RegionList recursed_overlaps_to_preserve;
 		
