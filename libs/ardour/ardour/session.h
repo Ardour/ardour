@@ -149,8 +149,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	         const std::string& fullpath,
 	         const std::string& snapshot_name,
 	         BusProfile* bus_profile = 0,
-	         std::string mix_template = "",
-		 bool with_midi_ui = true);
+	         std::string mix_template = "");
 
 	virtual ~Session ();
 
@@ -1077,7 +1076,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void             auto_loop_changed (Location *);
 
 	void first_stage_init (std::string path, std::string snapshot_name);
-	int  second_stage_init (bool with_midi_ui = true);
+	int  second_stage_init ();
 	void remove_empty_sounds ();
 
 	void setup_midi_control ();

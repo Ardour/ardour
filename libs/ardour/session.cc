@@ -140,8 +140,7 @@ Session::Session (AudioEngine &eng,
                   const string& fullpath,
                   const string& snapshot_name,
                   BusProfile* bus_profile,
-                  string mix_template,
-		  bool with_midi_ui)
+                  string mix_template)
 	: _engine (eng)
 	, _target_transport_speed (0.0)
 	, _requested_return_frame (-1)
@@ -192,7 +191,7 @@ Session::Session (AudioEngine &eng,
 		}
 	}
 
-	if (second_stage_init (with_midi_ui)) {
+	if (second_stage_init ()) {
 		destroy ();
 		throw failed_constructor ();
 	}

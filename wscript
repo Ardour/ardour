@@ -310,9 +310,7 @@ def set_compiler_flags (conf,opt):
         conf.env.append_value('CXXFLAGS', '-DDEBUG_RT_ALLOC')
         conf.env.append_value('LINKFLAGS', '-ldl')
 
-    print 'bar'
     if conf.env['DEBUG_DENORMAL_EXCEPTION']:
-        print 'foo'
         conf.env.append_value('CFLAGS', '-DDEBUG_DENORMAL_EXCEPTION')
         conf.env.append_value('CXXFLAGS', '-DDEBUG_DENORMAL_EXCEPTION')
 
