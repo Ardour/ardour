@@ -2410,6 +2410,11 @@ Playlist::compute_temporary_layers (RegionList const & relayer_regions)
 			continue;
 		}
 
+		DEBUG_TRACE (DEBUG::Layering, "Overlaps to check:\n");
+		for (RegionList::iterator j = overlaps_to_check.begin(); j != overlaps_to_check.end(); ++j) {
+			DEBUG_TRACE (DEBUG::Layering, string_compose ("\t%1\n", (*j)->name()));
+		}
+		
 		/* Put *i on our overlaps_to_check_list */
 		overlaps_to_check.push_back (*i);
 
@@ -2444,6 +2449,14 @@ Playlist::compute_temporary_layers (RegionList const & relayer_regions)
 		++j;
 		if (j != overlaps_to_check.end ()) {
 			next_layer = temporary_layers.get (*j);
+		}
+
+		if (next_layer < previous_layer) {
+			/* If this happens, it means that it's impossible to put *i between overlaps_to_check
+			   in a way that satisfies the current layering rule.  So we'll punt and put *i
+			   above previous_layer.
+			*/
+			next_layer = DBL_MAX;
 		}
 
 		/* Now we know where *i and overlaps_to_preserve should go: between previous_layer and
