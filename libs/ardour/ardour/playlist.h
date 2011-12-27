@@ -225,6 +225,7 @@ public:
 	framepos_t find_next_top_layer_position (framepos_t) const;
 	uint32_t combine_ops() const { return _combine_ops; }
 
+	void relayer (boost::shared_ptr<Region>);
 	void relayer (boost::shared_ptr<Region>, double);
 	void suspend_relayer ();
 	void resume_relayer ();
@@ -355,7 +356,6 @@ public:
 	boost::shared_ptr<Playlist> cut (framepos_t start, framecnt_t cnt, bool result_is_hidden);
 	boost::shared_ptr<Playlist> copy (framepos_t start, framecnt_t cnt, bool result_is_hidden);
 
-	void relayer (boost::shared_ptr<Region>);
 	void relayer (RegionList const &);
 
 	void begin_undo ();

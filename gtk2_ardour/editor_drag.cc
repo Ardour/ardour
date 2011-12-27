@@ -961,9 +961,9 @@ RegionMoveDrag::finished_no_copy (
 	RegionSelection new_views;
 	PlaylistSet modified_playlists;
 	PlaylistSet frozen_playlists;
-	PlaylistSet relayer_suspended_playlists;
 
-	list<pair<boost::shared_ptr<Region>, double> > pending_relayers;
+	list<pair<boost::shared_ptr<Region>, double> > pending_explicit_relayers;
+	Playlist::RegionList pending_implicit_relayers;
 
 	if (_brushing) {
 		/* all changes were made during motion event handlers */
@@ -1045,7 +1045,9 @@ RegionMoveDrag::finished_no_copy (
 			bool const explicit_relayer = dest_rtv->view()->layer_display() == Stacked || dest_rtv->view()->layer_display() == Expanded;
 			
 			if (explicit_relayer) {
-				pending_relayers.push_back (make_pair (rv->region (), dest_layer));
+				pending_explicit_relayers.push_back (make_pair (rv->region (), dest_layer));
+			} else {
+				pending_implicit_relayers.push_back (rv->region ());
 			}
 
 			/* freeze playlist to avoid lots of relayering in the case of a multi-region drag */
@@ -1054,6 +1056,7 @@ RegionMoveDrag::finished_no_copy (
 
 			if (r.second) {
 				playlist->freeze ();
+				playlist->suspend_relayer ();
 			}
 
 			/* this movement may result in a crossfade being modified, so we need to get undo
@@ -1064,9 +1067,6 @@ RegionMoveDrag::finished_no_copy (
 			if (r.second) {
 				playlist->clear_changes ();
 			}
-
-			relayer_suspended_playlists.insert (playlist);
-			playlist->suspend_relayer ();
 
 			rv->region()->set_position (where);
 
@@ -1112,18 +1112,24 @@ RegionMoveDrag::finished_no_copy (
 		_editor->selection->set (new_views);
 	}
 
+	/* We can't use the normal mechanism for relayering, as some regions may require an explicit relayer
+	   rather than an implicit one.  So we thaw before resuming relayering, then do the relayers
+	   that we require.
+	*/
+
 	for (PlaylistSet::iterator p = frozen_playlists.begin(); p != frozen_playlists.end(); ++p) {
 		(*p)->thaw();
-	}
-
-	for (PlaylistSet::iterator p = relayer_suspended_playlists.begin(); p != relayer_suspended_playlists.end(); ++p) {
 		(*p)->resume_relayer ();
 	}
-	
-	for (list<pair<boost::shared_ptr<Region>, double> >::iterator i = pending_relayers.begin(); i != pending_relayers.end(); ++i) {
+
+	for (list<pair<boost::shared_ptr<Region>, double> >::iterator i = pending_explicit_relayers.begin(); i != pending_explicit_relayers.end(); ++i) {
 		i->first->playlist()->relayer (i->first, i->second);
 	}
 
+	for (Playlist::RegionList::iterator i = pending_implicit_relayers.begin(); i != pending_implicit_relayers.end(); ++i) {
+		(*i)->playlist()->relayer (*i);
+	}
+	
 	/* write commands for the accumulated diffs for all our modified playlists */
 	add_stateful_diff_commands_for_playlists (modified_playlists);
 
