@@ -1677,7 +1677,8 @@ MidiRegionView::add_canvas_patch_change (MidiModel::PatchChangePtr patch, const 
 {
 	assert (patch->time() >= 0);
 
-	const double x = trackview.editor().frame_to_pixel (source_beats_to_region_frames (patch->time()));
+	framecnt_t region_frames = source_beats_to_region_frames (patch->time());
+	const double x = trackview.editor().frame_to_pixel (region_frames);
 
 	double const height = midi_stream_view()->contents_height();
 
@@ -1692,7 +1693,7 @@ MidiRegionView::add_canvas_patch_change (MidiModel::PatchChangePtr patch, const 
 		          );
 
 	// Show unless patch change is beyond the region bounds
-	if (patch->time() - _region->start() >= _region->length() || patch->time() < _region->start()) {
+	if (region_frames < 0 || region_frames >= _region->length()) {
 		patch_change->hide();
 	} else {
 		patch_change->show();
