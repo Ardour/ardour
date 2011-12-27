@@ -646,8 +646,12 @@ Playlist::flush_notifications (bool from_undo)
 		 RegionsExtended (pending_region_extensions);
 	 }
 
-	 if (!regions_to_relayer.empty ()) {
+	 if (!regions_to_relayer.empty () && !from_undo) {
 		 relayer (regions_to_relayer);
+	 }
+
+	 if (pending_layering) {
+		 LayeringChanged (); /* EMIT SIGNAL */
 	 }
 
 	 clear_pending ();
@@ -1569,6 +1573,10 @@ Playlist::flush_notifications (bool from_undo)
 		 notify_region_end_trimmed (region);
 	 } else if (what_changed.contains (Properties::position) && what_changed.contains (Properties::length)) {
 		 notify_region_start_trimmed (region);
+	 }
+
+	 if (what_changed.contains (Properties::layer)) {
+		 notify_layering_changed ();
 	 }
 
 	 if (what_changed.contains (our_interests)) {
@@ -2536,8 +2544,6 @@ Playlist::commit_temporary_layers (TemporaryLayers const & temporary_layers)
 		
 		DEBUG_TRACE (DEBUG::Layering, string_compose ("\t%1 temporary %2 committed %3\n", (*i)->name(), temporary_layers.get (*i), (*i)->layer()));
 	}
-
-	notify_layering_changed ();
 }
 
 /** Relayer a list of regions.

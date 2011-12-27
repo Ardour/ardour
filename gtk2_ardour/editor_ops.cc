@@ -2134,27 +2134,100 @@ Editor::loop_location (Location& location)
 }
 
 void
+Editor::do_layer_operation (LayerOperation op)
+{
+	if (selection->regions.empty ()) {
+		return;
+	}
+
+	bool const multiple = selection->regions.size() > 1;
+	switch (op) {
+	case Raise:
+		if (multiple) {
+			begin_reversible_command (_("raise regions"));
+		} else {
+			begin_reversible_command (_("raise region"));
+		}
+		break;
+
+	case RaiseToTop:
+		if (multiple) {
+			begin_reversible_command (_("raise regions to top"));
+		} else {
+			begin_reversible_command (_("raise region to top"));
+		}
+		break;
+		
+	case Lower:
+		if (multiple) {
+			begin_reversible_command (_("lower regions"));
+		} else {
+			begin_reversible_command (_("lower region"));
+		}
+		break;
+		
+	case LowerToBottom:
+		if (multiple) {
+			begin_reversible_command (_("lower regions to bottom"));
+		} else {
+			begin_reversible_command (_("lower region"));
+		}
+		break;
+	}
+
+	set<boost::shared_ptr<Playlist> > playlists = selection->regions.playlists ();
+	for (set<boost::shared_ptr<Playlist> >::iterator i = playlists.begin(); i != playlists.end(); ++i) {
+		(*i)->clear_owned_changes ();
+	}
+	
+	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+		boost::shared_ptr<Region> r = (*i)->region ();
+		switch (op) {
+		case Raise:
+			r->raise ();
+			break;
+		case RaiseToTop:
+			r->raise_to_top ();
+			break;
+		case Lower:
+			r->lower ();
+			break;
+		case LowerToBottom:
+			r->lower_to_bottom ();
+		}
+	}
+
+	for (set<boost::shared_ptr<Playlist> >::iterator i = playlists.begin(); i != playlists.end(); ++i) {
+		vector<Command*> cmds;
+		(*i)->rdiff (cmds);
+		_session->add_commands (cmds);
+	}
+	
+	commit_reversible_command ();
+}
+
+void
 Editor::raise_region ()
 {
-	selection->foreach_region (&Region::raise);
+	do_layer_operation (Raise);
 }
 
 void
 Editor::raise_region_to_top ()
 {
-	selection->foreach_region (&Region::raise_to_top);
+	do_layer_operation (RaiseToTop);
 }
 
 void
 Editor::lower_region ()
 {
-	selection->foreach_region (&Region::lower);
+	do_layer_operation (Lower);
 }
 
 void
 Editor::lower_region_to_bottom ()
 {
-	selection->foreach_region (&Region::lower_to_bottom);
+	do_layer_operation (LowerToBottom);
 }
 
 /** Show the region editor for the selected regions */

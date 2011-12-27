@@ -1099,6 +1099,15 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void toggle_solo_isolate ();
 	void toggle_mute ();
 	void toggle_region_lock_style ();
+
+	enum LayerOperation {
+		Raise,
+		RaiseToTop,
+		Lower,
+		LowerToBottom
+	};
+
+	void do_layer_operation (LayerOperation);
 	void raise_region ();
 	void raise_region_to_top ();
 	void change_region_layering_order (bool from_context_menu);

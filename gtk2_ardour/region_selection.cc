@@ -274,3 +274,15 @@ RegionSelection::end_frame () const
 
 	return e;
 }
+
+/** @return the playlists that the regions in the selection are on */
+set<boost::shared_ptr<Playlist> >
+RegionSelection::playlists () const
+{
+	set<boost::shared_ptr<Playlist> > pl;
+	for (RegionSelection::const_iterator i = begin(); i != end(); ++i) {
+		pl.insert ((*i)->region()->playlist ());
+	}
+
+	return pl;
+}

@@ -25,6 +25,10 @@
 #include "pbd/signals.h"
 #include "ardour/types.h"
 
+namespace ARDOUR {
+	class Playlist;
+}
+
 class RegionView;
 class TimeAxisView;
 
@@ -56,6 +60,8 @@ class RegionSelection : public std::list<RegionView*>
 	const std::list<RegionView *>& by_layer() const { return _bylayer; }
 	void  by_position (std::list<RegionView*>&) const;
 	void  by_track (std::list<RegionView*>&) const;
+
+	std::set<boost::shared_ptr<ARDOUR::Playlist> > playlists () const;
 
   private:
 	void remove_it (RegionView*);
