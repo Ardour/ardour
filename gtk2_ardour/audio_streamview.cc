@@ -809,13 +809,14 @@ AudioStreamView::update_contents_height ()
 void
 AudioStreamView::update_content_height (CrossfadeView* cv)
 {
-	if (_layer_display == Overlaid) {
-
+	switch (_layer_display) {
+	case Overlaid:
 		cv->set_y (0);
 		cv->set_height (height);
+		break;
 
-	} else {
-
+	case Stacked:
+	case Expanded:
 		layer_t const inl = cv->crossfade->in()->layer ();
 		layer_t const outl = cv->crossfade->out()->layer ();
 
@@ -824,9 +825,13 @@ AudioStreamView::update_content_height (CrossfadeView* cv)
 
 		const double h = child_height ();
 
-		cv->set_y ((_layers - high - 1) * h);
-		cv->set_height ((high - low + 1) * h);
-
+		if (_layer_display == Stacked) {
+			cv->set_y ((_layers - high - 1) * h);
+			cv->set_height ((high - low + 1) * h);
+		} else {
+			cv->set_y (((_layers - high) * 2 - 1) * h);
+			cv->set_height (((high - low) * 2 + 1) * h);
+		}
 	}
 }
 

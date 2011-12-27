@@ -272,8 +272,16 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 		);
 
 	lm->add (LaterHigher, _("later is higher"));
-	lm->add (MoveAddHigher, _("most recently moved or added is higher"));
+	lm->add (AddOrBoundsChangeHigher, _("most recently edited or added is higher"));
 	lm->add (AddHigher, _("most recently added is higher"));
+
+	add_option (_("Misc"), new BoolOption (
+			    "relayer-on-all-edits",
+			    _("Relayer regions after every edit"),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_relayer_on_all_edits),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_relayer_on_all_edits)
+			    ));
+			    
 
 	add_option (_("Misc"), lm);
 

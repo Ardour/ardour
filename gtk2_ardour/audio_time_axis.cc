@@ -87,14 +87,22 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session* sess, Canvas& c
 void
 AudioTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 {
+	_route = rt;
+
+	/* RouteTimeAxisView::set_route() sets up some things in the View,
+	   so it must be created before RouteTimeAxis::set_route() is
+	   called.
+	*/
+	_view = new AudioStreamView (*this);
+
 	RouteTimeAxisView::set_route (rt);
+
+	_view->apply_color (color (), StreamView::RegionColor);
 
 	// Make sure things are sane...
 	assert(!is_track() || is_audio_track());
 
 	subplugin_menu.set_name ("ArdourContextMenu");
-
-	_view = new AudioStreamView (*this);
 
 	ignore_toggle = false;
 

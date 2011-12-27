@@ -1195,10 +1195,10 @@ TimeAxisView::color_handler ()
  * TimeAxisView is non-0 if this object covers y, or one of its children does.
  * If the covering object is a child axis, then the child is returned.
  * TimeAxisView is 0 otherwise.
- * Layer index is the layer number if the TimeAxisView is valid and is in stacked
- * region display mode, otherwise 0.
+ * Layer index is the layer number (possibly fractional) if the TimeAxisView is valid
+ * and is in stacked or expanded region display mode, otherwise 0.
  */
-std::pair<TimeAxisView*, layer_t>
+std::pair<TimeAxisView*, double>
 TimeAxisView::covers_y_position (double y)
 {
 	if (hidden()) {
@@ -1208,15 +1208,30 @@ TimeAxisView::covers_y_position (double y)
 	if (_y_position <= y && y < (_y_position + height)) {
 
 		/* work out the layer index if appropriate */
-		layer_t l = 0;
-		if (layer_display () == Stacked && view ()) {
-			/* compute layer */
-			l = layer_t ((_y_position + height - y) / (view()->child_height ()));
-			/* clamp to max layers to be on the safe side; sometimes the above calculation
-			  returns a too-high value */
-			if (l >= view()->layers ()) {
-				l = view()->layers() - 1;
+		double l = 0;
+		switch (layer_display ()) {
+		case Overlaid:
+			break;
+		case Stacked:
+			if (view ()) {
+				/* compute layer */
+				l = floor ((_y_position + height - y) / (view()->child_height ()));
+				/* clamp to max layers to be on the safe side; sometimes the above calculation
+				   returns a too-high value */
+				if (l >= view()->layers ()) {
+					l = view()->layers() - 1;
+				}
 			}
+			break;
+		case Expanded:
+			if (view ()) {
+				int n = floor ((_y_position + height - y) / (view()->child_height ()));
+				l = n * 0.5 - 0.5;
+				if (l >= (view()->layers() - 0.5)) {
+					l = view()->layers() - 0.5;
+				}
+			}
+			break;
 		}
 
 		return std::make_pair (this, l);

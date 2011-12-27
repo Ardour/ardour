@@ -146,7 +146,7 @@ class TimeAxisView : public virtual AxisView
 
 	virtual void reset_visual_state ();
 
-	std::pair<TimeAxisView*, ARDOUR::layer_t> covers_y_position (double);
+	std::pair<TimeAxisView*, double> covers_y_position (double);
 
 	virtual void step_height (bool);
 

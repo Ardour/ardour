@@ -485,9 +485,13 @@ RegionMotionDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 
 	show_verbose_cursor_time (_last_frame_position);
 
-	pair<TimeAxisView*, int> const tv = _editor->trackview_by_y_position (_drags->current_pointer_y ());
+	pair<TimeAxisView*, double> const tv = _editor->trackview_by_y_position (_drags->current_pointer_y ());
 	_last_pointer_time_axis_view = find_time_axis_view (tv.first);
 	_last_pointer_layer = tv.first->layer_display() == Overlaid ? 0 : tv.second;
+
+	if (tv.first->view()->layer_display() == Stacked) {
+		tv.first->view()->set_layer_display (Expanded);
+	}
 }
 
 double
@@ -554,7 +558,7 @@ RegionMotionDrag::compute_x_delta (GdkEvent const * event, framepos_t* pending_r
 }
 
 bool
-RegionMotionDrag::y_movement_allowed (int delta_track, layer_t delta_layer) const
+RegionMotionDrag::y_movement_allowed (int delta_track, double delta_layer) const
 {
 	for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
 		int const n = i->time_axis_view + delta_track;
@@ -569,8 +573,13 @@ RegionMotionDrag::y_movement_allowed (int delta_track, layer_t delta_layer) cons
 			return false;
 		}
 
-		int const l = i->layer + delta_layer;
-		if (delta_track == 0 && (l < 0 || l >= int (to->view()->layers()))) {
+		double const l = i->layer + delta_layer;
+
+		/* Note that we allow layer to be up to 0.5 below zero, as this is used by `Expanded'
+		   mode to allow the user to place a region below another on layer 0.
+		*/
+		
+		if (delta_track == 0 && (l < -0.5 || l >= int (to->view()->layers()))) {
 			/* Off the top or bottom layer; note that we only refuse if the track hasn't changed.
 			   If it has, the layers will be munged later anyway, so it's ok.
 			*/
@@ -588,7 +597,7 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 	assert (!_views.empty ());
 
 	/* Find the TimeAxisView that the pointer is now over */
-	pair<TimeAxisView*, int> const tv = _editor->trackview_by_y_position (_drags->current_pointer_y ());
+	pair<TimeAxisView*, double> const tv = _editor->trackview_by_y_position (_drags->current_pointer_y ());
 
 	/* Bail early if we're not over a track */
 	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tv.first);
@@ -601,7 +610,7 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 
 	/* Here's the current pointer position in terms of time axis view and layer */
 	int const current_pointer_time_axis_view = find_time_axis_view (tv.first);
-	layer_t const current_pointer_layer = tv.first->layer_display() == Overlaid ? 0 : tv.second;
+	double const current_pointer_layer = tv.first->layer_display() == Overlaid ? 0 : tv.second;
 
 	/* Work out the change in x */
 	framepos_t pending_region_position;
@@ -609,7 +618,7 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 
 	/* Work out the change in y */
 	int delta_time_axis_view = current_pointer_time_axis_view - _last_pointer_time_axis_view;
-	int delta_layer = current_pointer_layer - _last_pointer_layer;
+	double delta_layer = current_pointer_layer - _last_pointer_layer;
 
 	if (!y_movement_allowed (delta_time_axis_view, delta_layer)) {
 		/* this y movement is not allowed, so do no y movement this time */
@@ -659,14 +668,24 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 		   confusion when dragging regions from non-zero layers onto different
 		   tracks.
 		*/
-		int this_delta_layer = delta_layer;
+		double this_delta_layer = delta_layer;
 		if (delta_time_axis_view != 0) {
 			this_delta_layer = - i->layer;
 		}
 
 		/* The TimeAxisView that this region is now on */
 		TimeAxisView* tv = _time_axis_views[i->time_axis_view + delta_time_axis_view];
+
+		/* Ensure it is moved from stacked -> expanded if appropriate */
+		if (tv->view()->layer_display() == Stacked) {
+			tv->view()->set_layer_display (Expanded);
+		}
 			
+		/* We're only allowed to go -ve in layer on Expanded views */
+		if (tv->view()->layer_display() != Expanded && (i->layer + this_delta_layer) < 0) {
+			this_delta_layer = - i->layer;
+		}
+
 		/* Set height */
 		rv->set_height (tv->view()->child_height ());
 
@@ -695,10 +714,17 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 			
 			/* And adjust for the layer that it should be on */
 			StreamView* cv = tv->view ();
-			if (cv->layer_display() == Stacked) {
+			switch (cv->layer_display ()) {
+			case Overlaid:
+				break;
+			case Stacked:
 				y += (cv->layers() - i->layer - 1) * cv->child_height ();
+				break;
+			case Expanded:
+				y += (cv->layers() - i->layer - 0.5) * 2 * cv->child_height ();
+				break;
 			}
-			
+
 			/* Now move the region view */
 			rv->move (x_delta, y - rv->get_canvas_group()->property_y());
 		}
@@ -789,8 +815,19 @@ RegionMoveDrag::motion (GdkEvent* event, bool first_move)
 }
 
 void
-RegionMoveDrag::finished (GdkEvent *, bool movement_occurred)
+RegionMotionDrag::finished (GdkEvent *, bool)
 {
+	for (vector<TimeAxisView*>::iterator i = _time_axis_views.begin(); i != _time_axis_views.end(); ++i) {
+		if ((*i)->view()->layer_display() == Expanded) {
+			(*i)->view()->set_layer_display (Stacked);
+		}
+	}
+}	
+
+void
+RegionMoveDrag::finished (GdkEvent* ev, bool movement_occurred)
+{
+	RegionMotionDrag::finished (ev, movement_occurred);
 	if (!movement_occurred) {
 		/* just a click */
 		return;
@@ -924,6 +961,9 @@ RegionMoveDrag::finished_no_copy (
 	RegionSelection new_views;
 	PlaylistSet modified_playlists;
 	PlaylistSet frozen_playlists;
+	PlaylistSet relayer_suspended_playlists;
+
+	list<pair<boost::shared_ptr<Region>, double> > pending_relayers;
 
 	if (_brushing) {
 		/* all changes were made during motion event handlers */
@@ -942,7 +982,7 @@ RegionMoveDrag::finished_no_copy (
 		RegionView* rv = i->view;
 
 		RouteTimeAxisView* const dest_rtv = dynamic_cast<RouteTimeAxisView*> (_time_axis_views[i->time_axis_view]);
-		layer_t const dest_layer = i->layer;
+		double const dest_layer = i->layer;
 
 		if (rv->region()->locked()) {
 			++i;
@@ -1002,9 +1042,10 @@ RegionMoveDrag::finished_no_copy (
 
 			boost::shared_ptr<Playlist> playlist = dest_rtv->playlist();
 
-			if (dest_rtv->view()->layer_display() == Stacked) {
-				rv->region()->set_layer (dest_layer);
-				rv->region()->set_pending_explicit_relayer (true);
+			bool const explicit_relayer = dest_rtv->view()->layer_display() == Stacked || dest_rtv->view()->layer_display() == Expanded;
+			
+			if (explicit_relayer) {
+				pending_relayers.push_back (make_pair (rv->region (), dest_layer));
 			}
 
 			/* freeze playlist to avoid lots of relayering in the case of a multi-region drag */
@@ -1023,6 +1064,9 @@ RegionMoveDrag::finished_no_copy (
 			if (r.second) {
 				playlist->clear_changes ();
 			}
+
+			relayer_suspended_playlists.insert (playlist);
+			playlist->suspend_relayer ();
 
 			rv->region()->set_position (where);
 
@@ -1068,8 +1112,16 @@ RegionMoveDrag::finished_no_copy (
 		_editor->selection->set (new_views);
 	}
 
-	for (set<boost::shared_ptr<Playlist> >::iterator p = frozen_playlists.begin(); p != frozen_playlists.end(); ++p) {
+	for (PlaylistSet::iterator p = frozen_playlists.begin(); p != frozen_playlists.end(); ++p) {
 		(*p)->thaw();
+	}
+
+	for (PlaylistSet::iterator p = relayer_suspended_playlists.begin(); p != relayer_suspended_playlists.end(); ++p) {
+		(*p)->resume_relayer ();
+	}
+	
+	for (list<pair<boost::shared_ptr<Region>, double> >::iterator i = pending_relayers.begin(); i != pending_relayers.end(); ++i) {
+		i->first->playlist()->relayer (i->first, i->second);
 	}
 
 	/* write commands for the accumulated diffs for all our modified playlists */
@@ -1137,9 +1189,8 @@ RegionMoveDrag::insert_region_into_playlist (
 
 	dest_playlist->add_region (region, where);
 
-	if (dest_rtv->view()->layer_display() == Stacked) {
-		region->set_layer (dest_layer);
-		region->set_pending_explicit_relayer (true);
+	if (dest_rtv->view()->layer_display() == Stacked || dest_rtv->view()->layer_display() == Expanded) {
+		dest_playlist->relayer (region, dest_layer);
 	}
 
 	c.disconnect ();
@@ -1188,6 +1239,12 @@ RegionMoveDrag::aborted (bool movement_occurred)
 void
 RegionMotionDrag::aborted (bool)
 {
+	for (vector<TimeAxisView*>::iterator i = _time_axis_views.begin(); i != _time_axis_views.end(); ++i) {
+		if ((*i)->view()->layer_display() == Expanded) {
+			(*i)->view()->set_layer_display (Stacked);
+		}
+	}
+
 	for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
 		RegionView* rv = i->view;
 		TimeAxisView* tv = &(rv->get_time_axis_view ());
@@ -1295,7 +1352,7 @@ RegionSpliceDrag::motion (GdkEvent* event, bool)
 {
 	/* Which trackview is this ? */
 
-	pair<TimeAxisView*, int> const tvp = _editor->trackview_by_y_position (_drags->current_pointer_y ());
+	pair<TimeAxisView*, double> const tvp = _editor->trackview_by_y_position (_drags->current_pointer_y ());
 	RouteTimeAxisView* tv = dynamic_cast<RouteTimeAxisView*> (tvp.first);
 
 	/* The region motion is only processed if the pointer is over

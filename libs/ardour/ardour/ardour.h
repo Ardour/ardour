@@ -63,8 +63,6 @@ namespace ARDOUR {
 	std::string translation_kill_path ();
 	bool translations_are_disabled ();
 
-	const layer_t max_layer = UCHAR_MAX;
-
 	static inline microseconds_t get_microseconds () {
 		return (microseconds_t) jack_get_time();
 	}

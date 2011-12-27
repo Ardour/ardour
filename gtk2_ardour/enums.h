@@ -35,7 +35,8 @@ namespace Gnome {
 
 enum LayerDisplay {
 	Overlaid,
-	Stacked
+	Stacked,
+	Expanded
 };
 
 struct SelectionRect {

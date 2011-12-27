@@ -139,6 +139,8 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	*/
 	RouteTimeAxisView::set_route (rt);
 
+	_view->apply_color (_color, StreamView::RegionColor);
+
 	subplugin_menu.set_name ("ArdourContextMenu");
 
 	if (!gui_property ("note-range-min").empty ()) {

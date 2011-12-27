@@ -73,6 +73,10 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<float> stretch;
 		PBD::PropertyDescriptor<float> shift;
 		PBD::PropertyDescriptor<PositionLockStyle> position_lock_style;
+		PBD::PropertyDescriptor<framepos_t> last_relayer_bounds_from;
+		PBD::PropertyDescriptor<framepos_t> last_relayer_bounds_to;
+		PBD::PropertyDescriptor<uint64_t> last_layer_op_add;
+		PBD::PropertyDescriptor<uint64_t> last_layer_op_bounds_change;
 	}
 }
 
@@ -127,6 +131,14 @@ Region::make_property_quarks ()
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for shift = %1\n", 	Properties::shift.property_id));
 	Properties::position_lock_style.property_id = g_quark_from_static_string (X_("positional-lock-style"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for position_lock_style = %1\n", 	Properties::position_lock_style.property_id));
+	Properties::last_relayer_bounds_from.property_id = g_quark_from_static_string (X_("last-relayer-bounds-from"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for last_relayer_bounds_from = %1\n", 	Properties::last_relayer_bounds_from.property_id));
+	Properties::last_relayer_bounds_to.property_id = g_quark_from_static_string (X_("last-relayer-bounds-to"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for last_relayer_bounds_to = %1\n", 	Properties::last_relayer_bounds_to.property_id));
+	Properties::last_layer_op_add.property_id = g_quark_from_static_string (X_("last-layer-op-add"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for last_layer_op_add = %1\n", Properties::last_layer_op_add.property_id));
+	Properties::last_layer_op_bounds_change.property_id = g_quark_from_static_string (X_("last-layer-op-bounds-change"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for last_layer_op_bounds_change = %1\n", Properties::last_layer_op_bounds_change.property_id));
 }
 
 void
@@ -157,6 +169,10 @@ Region::register_properties ()
 	add_property (_stretch);
 	add_property (_shift);
 	add_property (_position_lock_style);
+	add_property (_last_relayer_bounds_from);
+	add_property (_last_relayer_bounds_to);
+	add_property (_last_layer_op_add);
+	add_property (_last_layer_op_bounds_change);
 }
 
 #define REGION_DEFAULT_STATE(s,l) \
@@ -182,7 +198,11 @@ Region::register_properties ()
 	, _ancestral_length (Properties::ancestral_length, (l)) \
 	, _stretch (Properties::stretch, 1.0) \
 	, _shift (Properties::shift, 1.0) \
-	, _position_lock_style (Properties::position_lock_style, _type == DataType::AUDIO ? AudioTime : MusicTime)
+	, _position_lock_style (Properties::position_lock_style, _type == DataType::AUDIO ? AudioTime : MusicTime) \
+	, _last_relayer_bounds_from (Properties::last_relayer_bounds_from, 0) \
+	, _last_relayer_bounds_to (Properties::last_relayer_bounds_to, 0)	\
+	, _last_layer_op_add (Properties::last_layer_op_add, 0)	\
+	, _last_layer_op_bounds_change (Properties::last_layer_op_bounds_change, 0)
 
 #define REGION_COPY_STATE(other) \
 	  _sync_marked (Properties::sync_marked, other->_sync_marked) \
@@ -207,7 +227,11 @@ Region::register_properties ()
 	, _ancestral_length (Properties::ancestral_length, other->_ancestral_length) \
 	, _stretch (Properties::stretch, other->_stretch)	\
 	, _shift (Properties::shift, other->_shift)		\
-	, _position_lock_style (Properties::position_lock_style, other->_position_lock_style)
+	, _position_lock_style (Properties::position_lock_style, other->_position_lock_style) \
+        , _last_relayer_bounds_from (Properties::last_relayer_bounds_from, other->_last_relayer_bounds_from) \
+        , _last_relayer_bounds_to (Properties::last_relayer_bounds_to, other->_last_relayer_bounds_to) \
+        , _last_layer_op_add (Properties::last_layer_op_add, other->_last_layer_op_add) \
+        , _last_layer_op_bounds_change (Properties::last_layer_op_bounds_change, other->_last_layer_op_bounds_change)
 
 /* derived-from-derived constructor (no sources in constructor) */
 Region::Region (Session& s, framepos_t start, framecnt_t length, const string& name, DataType type)
@@ -217,11 +241,8 @@ Region::Region (Session& s, framepos_t start, framecnt_t length, const string& n
 	, _last_length (length)
 	, _last_position (0)
 	, _first_edit (EditChangesNothing)
-	, _last_layer_op(0)
-	, _pending_explicit_relayer (false)
 {
 	register_properties ();
-
 	/* no sources at this point */
 }
 
@@ -233,8 +254,6 @@ Region::Region (const SourceList& srcs)
 	, _last_length (0)
 	, _last_position (0)
 	, _first_edit (EditChangesNothing)
-	, _last_layer_op (0)
-	, _pending_explicit_relayer (false)
 {
 	register_properties ();
 
@@ -254,9 +273,6 @@ Region::Region (boost::shared_ptr<const Region> other)
 	, _last_length (other->_last_length)
 	, _last_position(other->_last_position) \
 	, _first_edit (EditChangesNothing)
-	, _last_layer_op (0)
-	, _pending_explicit_relayer (false)
-
 {
 	register_properties ();
 
@@ -326,9 +342,6 @@ Region::Region (boost::shared_ptr<const Region> other, frameoffset_t offset)
 	, _last_length (other->_last_length)
 	, _last_position(other->_last_position) \
 	, _first_edit (EditChangesNothing)
-	, _last_layer_op (0)
-	, _pending_explicit_relayer (false)
-
 {
 	register_properties ();
 
@@ -383,8 +396,6 @@ Region::Region (boost::shared_ptr<const Region> other, const SourceList& srcs)
 	, _last_length (other->_last_length)
 	, _last_position (other->_last_position)
 	, _first_edit (EditChangesID)
-	, _last_layer_op (other->_last_layer_op)
-	, _pending_explicit_relayer (false)
 {
 	register_properties ();
 
@@ -1123,9 +1134,12 @@ Region::set_layer (layer_t l)
 {
 	if (_layer != l) {
 		_layer = l;
-
 		send_change (Properties::layer);
 	}
+
+	Evoral::Range<framepos_t> const b = bounds ();
+	_last_relayer_bounds_from = b.from;
+	_last_relayer_bounds_to = b.to;
 }
 
 XMLNode&
@@ -1317,9 +1331,16 @@ Region::send_change (const PropertyChange& what_changed)
 }
 
 void
-Region::set_last_layer_op (uint64_t when)
+Region::set_last_layer_op (LayerOp op, uint64_t when)
 {
-	_last_layer_op = when;
+	switch (op) {
+	case LayerOpAdd:
+		_last_layer_op_add = when;
+		break;
+	case LayerOpBoundsChange:
+		_last_layer_op_bounds_change = when;
+		break;
+	}
 }
 
 bool
@@ -1661,3 +1682,25 @@ Region::post_set (const PropertyChange& pc)
 		recompute_position_from_lock_style ();
 	}
 }
+
+uint64_t
+Region::last_layer_op (LayerOp op) const
+{
+	switch (op) {
+	case LayerOpAdd:
+		return _last_layer_op_add;
+	case LayerOpBoundsChange:
+		return _last_layer_op_bounds_change;
+	}
+
+	/* NOTREACHED */
+	return 0;
+}
+
+Evoral::Range<framepos_t>
+Region::bounds () const
+{
+	return Evoral::Range<framepos_t> (_position, _position + _length);
+}
+
+       

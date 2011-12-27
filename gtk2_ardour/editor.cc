@@ -2477,12 +2477,12 @@ Editor::get_state ()
  *  TimeAxisView may be 0.  Layer index is the layer number if the TimeAxisView is valid and is
  *  in stacked region display mode, otherwise 0.
  */
-std::pair<TimeAxisView *, layer_t>
+std::pair<TimeAxisView *, double>
 Editor::trackview_by_y_position (double y)
 {
 	for (TrackViewList::iterator iter = track_views.begin(); iter != track_views.end(); ++iter) {
 
-		std::pair<TimeAxisView*, int> const r = (*iter)->covers_y_position (y);
+		std::pair<TimeAxisView*, double> const r = (*iter)->covers_y_position (y);
 		if (r.first) {
 			return r;
 		}

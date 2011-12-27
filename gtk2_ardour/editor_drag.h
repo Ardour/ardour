@@ -249,8 +249,11 @@ struct DraggingView
 	 *  or -1 if it is not visible.
 	 */
 	int time_axis_view;
-	/** layer that this region is currently being displayed on */
-	ARDOUR::layer_t layer;
+	/** Layer that this region is currently being displayed on.  This is a double
+	    rather than a layer_t as we use fractional layers during drags to allow the user
+	    to indicate a new layer to put a region on.
+	*/
+	double layer;
 	double initial_y; ///< the initial y position of the view before any reparenting
 	framepos_t initial_position; ///< initial position of the region
 	framepos_t initial_end; ///< initial end position of the region
@@ -295,7 +298,7 @@ public:
 
 	virtual void start_grab (GdkEvent *, Gdk::Cursor *);
 	virtual void motion (GdkEvent *, bool);
-	virtual void finished (GdkEvent *, bool) = 0;
+	virtual void finished (GdkEvent *, bool);
 	virtual void aborted (bool);
 
 	/** @return true if the regions being `moved' came from somewhere on the canvas;
@@ -306,13 +309,13 @@ public:
 protected:
 
 	double compute_x_delta (GdkEvent const *, ARDOUR::framecnt_t *);
-	bool y_movement_allowed (int, ARDOUR::layer_t) const;
+	bool y_movement_allowed (int, double) const;
 
 	bool _brushing;
 	ARDOUR::framepos_t _last_frame_position; ///< last position of the thing being dragged
 	double _total_x_delta;
 	int _last_pointer_time_axis_view;
-	ARDOUR::layer_t _last_pointer_layer;
+	double _last_pointer_layer;
 };
 
 

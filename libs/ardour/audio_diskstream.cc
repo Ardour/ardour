@@ -1510,15 +1510,6 @@ AudioDiskstream::transport_stopped_wallclock (struct tm& when, time_t twhen, boo
 			}
 
 			i_am_the_modifier++;
-
-			if (_playlist->explicit_relayering()) {
-				/* We are in `explicit relayering' mode, so we must specify which layer this new region
-				   should end up on.  Put it at the top.
-				*/
-				region->set_layer (_playlist->top_layer() + 1);
-				region->set_pending_explicit_relayer (true);
-			}
-
 			_playlist->add_region (region, (*ci)->start, 1, non_layered());
 			i_am_the_modifier--;
 

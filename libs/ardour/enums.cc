@@ -265,7 +265,7 @@ setup_enum_writer ()
 	REGISTER (_CrossfadeModel);
 
 	REGISTER_ENUM (LaterHigher);
-	REGISTER_ENUM (MoveAddHigher);
+	REGISTER_ENUM (AddOrBoundsChangeHigher);
 	REGISTER_ENUM (AddHigher);
 	REGISTER (_LayerModel);
 

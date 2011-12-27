@@ -75,6 +75,7 @@ namespace ARDOUR {
 
 	static const framepos_t max_framepos = INT64_MAX;
 	static const framecnt_t max_framecnt = INT64_MAX;
+	static const layer_t    max_layer    = UINT32_MAX;
 
 	// a set of (time) intervals: first of pair is the offset of the start within the region, second is the offset of the end
 	typedef std::list<std::pair<frameoffset_t, frameoffset_t> > AudioIntervalResult;
@@ -410,7 +411,7 @@ namespace ARDOUR {
 
 	enum LayerModel {
 		LaterHigher,
-		MoveAddHigher,
+		AddOrBoundsChangeHigher,
 		AddHigher
 	};
 
@@ -589,6 +590,11 @@ namespace ARDOUR {
 		FadeSlow,
 		FadeLogA,
 		FadeLogB
+	};
+
+	enum LayerOp {
+		LayerOpAdd,
+		LayerOpBoundsChange
 	};
 
 } // namespace ARDOUR
