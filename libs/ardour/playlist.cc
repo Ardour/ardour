@@ -2361,9 +2361,16 @@ Playlist::compute_temporary_layers (RegionList const & relayer_regions)
 
 	for (RegionList::const_iterator i = relayer_regions.begin(); i != relayer_regions.end(); ++i) {
 
+		DEBUG_TRACE (DEBUG::Layering, string_compose ("Compute temporary layer for %1\n", (*i)->name()));
+	
 		/* current_overlaps: regions that overlap *i now */
 		RegionList current_overlaps = cache.get ((*i)->bounds ());
 		current_overlaps.remove (*i);
+
+		DEBUG_TRACE (DEBUG::Layering, "Current overlaps:\n");
+		for (RegionList::iterator j = current_overlaps.begin(); j != current_overlaps.end(); ++j) {
+			DEBUG_TRACE (DEBUG::Layering, string_compose ("\t%1\n", (*j)->name()));
+		}
 		
 		/* overlaps_to_preserve: regions that overlap *i now, but which aren't being
 		   worked on during this relayer: these will have their relationship with
@@ -2486,6 +2493,8 @@ Playlist::commit_temporary_layers (TemporaryLayers const & temporary_layers)
 	RegionList all_regions = regions.rlist ();
 	all_regions.sort (SortByTemporaryLayer (temporary_layers));
 
+	DEBUG_TRACE (DEBUG::Layering, "Commit layering:\n");
+
 	for (RegionList::iterator i = all_regions.begin(); i != all_regions.end(); ++i) {
 
 		/* Go through the regions that we have already layered and hence work
@@ -2509,6 +2518,8 @@ Playlist::commit_temporary_layers (TemporaryLayers const & temporary_layers)
 			/* no overlap, so put on the bottom layer */
 			(*i)->set_layer (0);
 		}
+		
+		DEBUG_TRACE (DEBUG::Layering, string_compose ("\t%1 %2\n", (*i)->name(), (*i)->layer()));
 	}
 
 	notify_layering_changed ();
