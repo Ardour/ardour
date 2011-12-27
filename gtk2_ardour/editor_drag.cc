@@ -964,6 +964,7 @@ RegionMoveDrag::finished_no_copy (
 
 	list<pair<boost::shared_ptr<Region>, double> > pending_explicit_relayers;
 	Playlist::RegionList pending_implicit_relayers;
+	set<RouteTimeAxisView*> views_to_update;
 
 	if (_brushing) {
 		/* all changes were made during motion event handlers */
@@ -988,6 +989,8 @@ RegionMoveDrag::finished_no_copy (
 			++i;
 			continue;
 		}
+
+		views_to_update.insert (dest_rtv);
 
 		framepos_t where;
 
@@ -1134,6 +1137,17 @@ RegionMoveDrag::finished_no_copy (
 	add_stateful_diff_commands_for_playlists (modified_playlists);
 
 	_editor->commit_reversible_command ();
+
+	/* We have futzed with the layering of canvas items on our streamviews.
+	   If any region changed layer, this will have resulted in the stream
+	   views being asked to set up their region views, and all will be
+	   well.  If not, we might now have badly-ordered region views.  Ask
+	   the Streamviews involved to sort themselves out, just in case.
+	*/
+	
+	for (set<RouteTimeAxisView*>::iterator i = views_to_update.begin(); i != views_to_update.end(); ++i) {
+		(*i)->view()->playlist_layered ((*i)->track ());
+	}
 }
 
 /** Remove a region from a playlist, clearing the diff history of the playlist first if necessary.
