@@ -619,6 +619,11 @@ void
 StreamView::set_layer_display (LayerDisplay d)
 {
 	_layer_display = d;
+
+	if (_layer_display == Overlaid) {
+		layer_regions ();
+	}
+	
 	update_contents_height ();
 	update_coverage_frames ();
 }
