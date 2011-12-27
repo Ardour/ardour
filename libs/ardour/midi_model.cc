@@ -1868,7 +1868,7 @@ MidiModel::midi_source ()
 	return _midi_source.lock ();
 }
 
-/** Moves notes, controllers and sys-ex to insert silence at the start of the model.
+/** Moves notes, patch changes, controllers and sys-ex to insert silence at the start of the model.
  *  Adds commands to the session's current undo stack to reflect the movements.
  */
 void
@@ -1884,6 +1884,18 @@ MidiModel::insert_silence_at_start (TimeType t)
 
 		for (Notes::const_iterator i = notes().begin(); i != notes().end(); ++i) {
 			c->change (*i, NoteDiffCommand::StartTime, (*i)->time() + t);
+		}
+
+		apply_command_as_subcommand (s->session(), c);
+	}
+
+	/* Patch changes */
+
+	if (!patch_changes().empty ()) {
+		PatchChangeDiffCommand* c = new_patch_change_diff_command ("insert silence");
+
+		for (PatchChanges::const_iterator i = patch_changes().begin(); i != patch_changes().end(); ++i) {
+			c->change_time (*i, (*i)->time() + t);
 		}
 
 		apply_command_as_subcommand (s->session(), c);
