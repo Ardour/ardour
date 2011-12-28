@@ -49,10 +49,12 @@ namespace PBD {
 #define DEBUG_STR_DECL(id) std::stringstream __debug_str ## id;
 #define DEBUG_STR(id) __debug_str ## id
 #define DEBUG_STR_APPEND(id,s) __debug_str ## id << s;
+#define DEBUG_ENABLED(bits) ((bits) & PBD::debug_bits)
 #else
 #define DEBUG_TRACE(bits,fmt,...) /*empty*/
 #define DEBUG_STR(a) /* empty */
 #define DEBUG_STR_APPEND(a,b) /* empty */
+#define DEBUG_ENABLED(b) (0)
 #endif
 
 #endif /* __libpbd_debug_h__ */
