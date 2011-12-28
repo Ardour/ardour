@@ -56,8 +56,6 @@ public:
 
 	static PBD::Signal1<void,CrossfadeView*> CatchDeletion;
 
-	AudioRegionView& upper_regionview () const;
-
 	void fake_hide ();
 	void hide ();
 	void show ();
@@ -73,7 +71,6 @@ private:
 
 	ArdourCanvas::Line *fade_in;
 	ArdourCanvas::Line *fade_out;
-	ArdourCanvas::Item *active_button;
 
 	void crossfade_changed (const PBD::PropertyChange&);
 	void crossfade_fades_changed ();
