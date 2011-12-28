@@ -290,7 +290,6 @@ public:
 	bool            _frozen;
 	uint32_t         subcnt;
 	PBD::ID         _orig_track_id;
-	framecnt_t       freeze_length;
 	bool             auto_partition;
 	uint32_t        _combine_ops;
 

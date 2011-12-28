@@ -189,7 +189,6 @@ Playlist::Playlist (boost::shared_ptr<const Playlist> other, string namestr, boo
 	_frozen = other->_frozen;
 
 	layer_op_counter = other->layer_op_counter;
-	freeze_length = other->freeze_length;
 }
 
 Playlist::Playlist (boost::shared_ptr<const Playlist> other, framepos_t start, framecnt_t cnt, string str, bool hide)
@@ -320,7 +319,6 @@ Playlist::init (bool hide)
 	subcnt = 0;
 	_frozen = false;
 	layer_op_counter = 0;
-	freeze_length = 0;
 	_combine_ops = 0;
 	_relayer_suspended = false;
 
@@ -433,7 +431,6 @@ void
 Playlist::delay_notifications ()
 {
 	g_atomic_int_inc (&block_notifications);
-	freeze_length = _get_extent().second;
 }
 
 /** @param from_undo true if this release is triggered by the end of an undo on this playlist */
