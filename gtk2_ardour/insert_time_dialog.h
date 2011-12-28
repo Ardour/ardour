@@ -47,5 +47,6 @@ private:
 	Gtk::CheckButton _move_glued_markers;
 	Gtk::CheckButton _move_locked_markers;
 	Gtk::CheckButton _move_tempos;
+	Gtk::Label tempo_label;
 	AudioClock _clock;
 };

@@ -80,8 +80,12 @@ InsertTimeDialog::InsertTimeDialog (PublicEditor& e)
 	indent->set_padding (0, 0, 12, 0);
 	indent->add (_move_locked_markers);
 	get_vbox()->pack_start (*indent);
-	_move_tempos.set_label (_("Move tempo and meter changes"));
-	get_vbox()->pack_start (_move_tempos);
+	tempo_label.set_markup (_("Move tempo and meter changes\n<i>(may cause oddities in the tempo map)</i>"));
+	HBox* tempo_box = manage (new HBox);
+	tempo_box->set_spacing (6);
+	tempo_box->pack_start (_move_tempos, false, false);
+	tempo_box->pack_start (tempo_label, false, false);
+	get_vbox()->pack_start (*tempo_box);
 
 	add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 	add_button (_("Insert time"), Gtk::RESPONSE_OK);

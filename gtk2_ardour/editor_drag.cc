@@ -1972,7 +1972,7 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 		if (!_copy) {
 			TempoMap& map (_editor->session()->tempo_map());
 			/* remove the section while we drag it */
-			map.remove_meter (section);
+			map.remove_meter (section, true);
 		}
 	}
 
@@ -2090,7 +2090,7 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 		if (!_copy) {
 			TempoMap& map (_editor->session()->tempo_map());
 			/* remove the section while we drag it */
-			map.remove_tempo (section);
+			map.remove_tempo (section, true);
 		}
 	}
 
@@ -2143,7 +2143,7 @@ TempoMarkerDrag::aborted (bool moved)
 	if (moved) {
 		TempoMap& map (_editor->session()->tempo_map());
 		/* we removed it before, so add it back now */
-		map.add_tempo (_marker->tempo(), _marker->tempo().frame());
+		map.add_tempo (_marker->tempo(), _marker->tempo().start());
 		// delete the dummy marker we used for visual representation while moving.
 		// a new visual marker will show up automatically.
 		delete _marker;

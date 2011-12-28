@@ -455,7 +455,6 @@ MeterDialog::get_bbt_time (Timecode::BBT_Time& requested)
 	}
 
 	requested.beats = 1;
-
 	requested.ticks = 0;
 
 	return true;

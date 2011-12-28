@@ -330,9 +330,12 @@ Editor::edit_meter_section (MeterSection* section)
 
 	double note_type = meter_dialog.get_note_type ();
 
+	Timecode::BBT_Time when;
+	meter_dialog.get_bbt_time(when);
+
 	begin_reversible_command (_("replace tempo mark"));
         XMLNode &before = _session->tempo_map().get_state();
-	_session->tempo_map().replace_meter (*section, Meter (bpb, note_type));
+	_session->tempo_map().replace_meter (*section, Meter (bpb, note_type), when);
         XMLNode &after = _session->tempo_map().get_state();
 	_session->add_command(new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
 	commit_reversible_command ();
@@ -360,14 +363,9 @@ Editor::edit_tempo_section (TempoSection* section)
 	tempo_dialog.get_bbt_time(when);
 	bpm = max (0.01, bpm);
 
-	cerr << "Editing tempo section to be at " << when << endl;
-	_session->tempo_map().dump (cerr);
 	begin_reversible_command (_("replace tempo mark"));
 	XMLNode &before = _session->tempo_map().get_state();
-	_session->tempo_map().replace_tempo (*section, Tempo (bpm,nt));
-	_session->tempo_map().dump (cerr);
-	_session->tempo_map().move_tempo (*section, when);
-	_session->tempo_map().dump (cerr);
+	_session->tempo_map().replace_tempo (*section, Tempo (bpm, nt), when);
 	XMLNode &after = _session->tempo_map().get_state();
 	_session->add_command (new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
 	commit_reversible_command ();
@@ -416,7 +414,7 @@ Editor::real_remove_tempo_marker (TempoSection *section)
 {
 	begin_reversible_command (_("remove tempo mark"));
 	XMLNode &before = _session->tempo_map().get_state();
-	_session->tempo_map().remove_tempo (*section);
+	_session->tempo_map().remove_tempo (*section, true);
 	XMLNode &after = _session->tempo_map().get_state();
 	_session->add_command(new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
 	commit_reversible_command ();
@@ -450,7 +448,7 @@ Editor::real_remove_meter_marker (MeterSection *section)
 {
 	begin_reversible_command (_("remove tempo mark"));
 	XMLNode &before = _session->tempo_map().get_state();
-	_session->tempo_map().remove_meter (*section);
+	_session->tempo_map().remove_meter (*section, true);
 	XMLNode &after = _session->tempo_map().get_state();
 	_session->add_command(new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
 	commit_reversible_command ();

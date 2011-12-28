@@ -37,7 +37,10 @@
 class XMLNode;
 
 namespace ARDOUR {
+
 class Meter;
+class TempoMap;
+
 class Tempo {
   public:
 	Tempo (double bpm, double type=4.0) // defaulting to quarter note
@@ -105,7 +108,9 @@ class MetricSection {
 	*/
 	virtual XMLNode& get_state() const = 0;
 
-	int compare (MetricSection *, bool) const;
+	int compare (const MetricSection&) const;
+	bool operator== (const MetricSection& other) const;
+	bool operator!= (const MetricSection& other) const;
 
   private:
 	Timecode::BBT_Time _start;
@@ -129,14 +134,29 @@ class MeterSection : public MetricSection, public Meter {
 class TempoSection : public MetricSection, public Tempo {
   public:
 	TempoSection (const Timecode::BBT_Time& start, double qpm, double note_type)
-		: MetricSection (start), Tempo (qpm, note_type) {}
+		: MetricSection (start), Tempo (qpm, note_type), _bar_offset (-1.0)  {}
 	TempoSection (framepos_t start, double qpm, double note_type)
-		: MetricSection (start), Tempo (qpm, note_type) {}
+		: MetricSection (start), Tempo (qpm, note_type), _bar_offset (-1.0) {}
 	TempoSection (const XMLNode&);
 
 	static const std::string xml_state_node_name;
 
 	XMLNode& get_state() const;
+
+	void update_bar_offset_from_bbt (const Meter&);
+	void update_bbt_time_from_bar_offset (const Meter&);
+	double bar_offset() const { return _bar_offset; }
+
+  private:
+	/* this value provides a fractional offset into the bar in which
+	   the tempo section is located in. A value of 0.0 indicates that
+	   it occurs on the first beat of the bar, a value of 0.5 indicates
+	   that it occurs halfway through the bar and so on.
+	   
+	   this enables us to keep the tempo change at the same relative
+	   position within the bar if/when the meter changes.
+	*/
+	double _bar_offset;
 };
 
 typedef std::list<MetricSection*> Metrics;
@@ -215,17 +235,11 @@ class TempoMap : public PBD::StatefulDestructible
 	void add_tempo(const Tempo&, Timecode::BBT_Time where);
 	void add_meter(const Meter&, Timecode::BBT_Time where);
 
-	void add_tempo(const Tempo&, framepos_t where);
-	void add_meter(const Meter&, framepos_t where);
+	void remove_tempo(const TempoSection&, bool send_signal);
+	void remove_meter(const MeterSection&, bool send_signal);
 
-	void move_tempo (TempoSection&, const Timecode::BBT_Time& to);
-	void move_meter (MeterSection&, const Timecode::BBT_Time& to);
-
-	void remove_tempo(const TempoSection&);
-	void remove_meter(const MeterSection&);
-
-	void replace_tempo (TempoSection& existing, const Tempo& replacement);
-	void replace_meter (MeterSection& existing, const Meter& replacement);
+	void replace_tempo (const TempoSection&, const Tempo&, const Timecode::BBT_Time& where);
+	void replace_meter (const MeterSection&, const Meter&, const Timecode::BBT_Time& where);
 
 	framepos_t round_to_bar  (framepos_t frame, int dir);
 	framepos_t round_to_beat (framepos_t frame, int dir);
@@ -274,7 +288,8 @@ class TempoMap : public PBD::StatefulDestructible
 	Timecode::BBT_Time   last_bbt;
 	mutable Glib::RWLock lock;
 
-	void timestamp_metrics (bool use_bbt);
+	void timestamp_metrics (bool reassign_bar_references);
+	void timestamp_metrics_from_audio_time ();
 
 	framepos_t round_to_type (framepos_t fr, int dir, BBTPointType);
 
@@ -288,11 +303,11 @@ class TempoMap : public PBD::StatefulDestructible
 	const TempoSection& first_tempo() const;
 
 	framecnt_t count_frames_between (const Timecode::BBT_Time&, const Timecode::BBT_Time&) const;
-	framecnt_t count_frames_between_metrics (const Meter&, const Tempo&,
-	                                         const Timecode::BBT_Time&, const Timecode::BBT_Time&) const;
+	framecnt_t count_frames_with_metrics (const TempoMetric&, const TempoMetric&, const Timecode::BBT_Time&, const Timecode::BBT_Time&) const;
+	framecnt_t count_frames_between_metrics (const Meter& meter, const Tempo& tempo, const Timecode::BBT_Time& start, const Timecode::BBT_Time& end) const;
 
 	int move_metric_section (MetricSection&, const Timecode::BBT_Time& to);
-	void do_insert (MetricSection* section, bool with_bbt);
+	void do_insert (MetricSection* section);
 };
 
 }; /* namespace ARDOUR */

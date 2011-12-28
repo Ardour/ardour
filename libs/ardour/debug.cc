@@ -54,4 +54,7 @@ uint64_t PBD::DEBUG::ControlProtocols = PBD::new_debug_bit ("controlprotocols");
 uint64_t PBD::DEBUG::CycleTimers = PBD::new_debug_bit ("cycletimers");
 uint64_t PBD::DEBUG::MidiTrackers = PBD::new_debug_bit ("miditrackers");
 uint64_t PBD::DEBUG::Layering = PBD::new_debug_bit ("layering");
+uint64_t PBD::DEBUG::TempoMath = PBD::new_debug_bit ("tempomath");
+uint64_t PBD::DEBUG::TempoMap = PBD::new_debug_bit ("tempomap");
+
 
