@@ -818,6 +818,10 @@ void
 RegionMotionDrag::finished (GdkEvent *, bool)
 {
 	for (vector<TimeAxisView*>::iterator i = _time_axis_views.begin(); i != _time_axis_views.end(); ++i) {
+		if (!(*i)->view()) {
+			continue;
+		}
+
 		if ((*i)->view()->layer_display() == Expanded) {
 			(*i)->view()->set_layer_display (Stacked);
 		}
