@@ -309,7 +309,7 @@ cp $BUILD_ROOT/libs/vamp-plugins/libardourvampplugins.dylib $Frameworks
 
 while [ true ] ; do 
     missing=false
-    for file in $APPROOT/MacOS/* $Frameworks/* $Frameworks/modules/* $Panners/*.dylib $Plugins/*.so ; do 
+    for file in $APPROOT/MacOS/* $Frameworks/* $Frameworks/modules/* $Panners/*.dylib $Surfaces/*.dylib $Plugins/*.so ; do 
 	if ! file $file | grep -qs Mach-O ; then
 	    continue
 	fi
