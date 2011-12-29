@@ -1626,14 +1626,22 @@ TempoMap::get_points (framepos_t lower, framepos_t upper) const
 						
 					} else if (dynamic_cast<MeterSection*> (*next_metric)) {
 						
-						/* we hit a new meter section. bump the
-						 * bar and return to beat 1
+						/* we hit a new meter
+						 * section. nothing to do - the
+						 * right thing will happen as
+						 * we move to the next metric
+						 * section down below.
 						 */
+
+					} else {
 						
-						// bar++;
-						// beat = 1;
-						// bar_adjusted = true;
-						
+						/* we hit a tempo mark that is
+						 * precisely on beat. nothing
+						 * to do here  - the
+						 * right thing will happen as
+						 * we move to the next metric
+						 * section down below.
+						 */
 					}
 
 				} else {
@@ -1641,13 +1649,8 @@ TempoMap::get_points (framepos_t lower, framepos_t upper) const
 					/* we hit either:
 					   
 					   - the end of the requested range 
-					   - a tempo mark that is precisely on beat
 					   
-					   in the first case, we'll exit from
-					   the outer loop soon.
-				   
-					   in the second case, nothing special
-					   is required.
+					   we'll exit from the outer loop soon.
 					*/
 				}
 
