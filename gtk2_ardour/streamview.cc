@@ -181,7 +181,7 @@ StreamView::add_region_view (boost::weak_ptr<Region> wr)
 
 	add_region_view_internal (r, true);
 
-	if (_layer_display == Stacked) {
+	if (_layer_display == Stacked || _layer_display == Expanded) {
 		update_contents_height ();
 	}
 }
@@ -301,7 +301,7 @@ StreamView::playlist_layered (boost::weak_ptr<Track> wtr)
 		_layers = tr->playlist()->top_layer() + 1;
 	}
 
-	if (_layer_display == Stacked || _layer_display == Expanded) {
+	if (_layer_display == Stacked) {
 		update_contents_height ();
 		update_coverage_frames ();
 	} else {
@@ -574,7 +574,7 @@ StreamView::child_height () const
 	case Expanded:
 		return height / (_layers * 2 + 1);
 	}
-
+	
 	/* NOTREACHED */
 	return height;
 }

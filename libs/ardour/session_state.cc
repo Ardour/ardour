@@ -974,27 +974,7 @@ int
 Session::load_options (const XMLNode& node)
 {
 	LocaleGuard lg (X_("POSIX"));
-
-	/* Copy the node */
-	XMLNode node_copy = node;
-	
-	/* XXX: evil hack: fix up sessions from before the layering alterations
-	   (during A3 beta)
-	*/
-	
-	XMLNodeList children = node_copy.children ();
-	for (XMLNodeIterator i = children.begin(); i != children.end(); ++i) {
-		XMLProperty* p = (*i)->property (X_("name"));
-		if (p && p->name() == X_("name") && p->value() == X_("layer-model") ) {
-			p = (*i)->property (X_("value"));
-			if (p && p->value() == X_("MoveAddHigher")) {
-				(*i)->add_property (X_("value"), X_("AddOrBoundsChangeHigher"));
-			}
-		}
-	}
-	
-	config.set_variables (node_copy);
-	
+	config.set_variables (node);
 	return 0;
 }
 

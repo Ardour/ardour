@@ -57,7 +57,8 @@ CrossfadeView::CrossfadeView (ArdourCanvas::Group *parent,
 	  crossfade (xf),
 	  left_view (lview),
 	  right_view (rview),
-	  _all_in_view (false)
+	  _all_in_view (false),
+	  _child_height (0)
 {
 	_valid = true;
 	_visible = true;
@@ -109,13 +110,15 @@ CrossfadeView::reset_width_dependent_items (double pixel_width)
 }
 
 void
-CrossfadeView::set_height (double h)
+CrossfadeView::set_heights (double fade_height, double child_height)
 {
-	if (h > TimeAxisView::preset_height (HeightSmall)) {
-		h -= NAME_HIGHLIGHT_SIZE;
+	if (child_height > TimeAxisViewItem::NAME_HIGHLIGHT_THRESH) {
+		fade_height -= NAME_HIGHLIGHT_SIZE;
+		child_height -= NAME_HIGHLIGHT_SIZE;
 	}
 
-	TimeAxisViewItem::set_height (h);
+	TimeAxisViewItem::set_height (fade_height);
+	_child_height = child_height;
 
 	redraw_curves ();
 }
@@ -203,7 +206,9 @@ CrossfadeView::redraw_curves ()
 	for (int i = 0, pci = 0; i < npoints; ++i) {
 		Art::Point &p = (*points)[pci++];
 		p.set_x (xoff + i + 1);
-		p.set_y (_height - ((_height - 2) * vec[i]));
+
+		double const ho = crossfade->in()->layer() > crossfade->out()->layer() ? _child_height : _height;
+		p.set_y (ho - ((_child_height - 2) * vec[i]));
 	}
 
 	fade_in->property_points() = *points;
@@ -213,7 +218,9 @@ CrossfadeView::redraw_curves ()
 	for (int i = 0, pci = 0; i < npoints; ++i) {
 		Art::Point &p = (*points)[pci++];
 		p.set_x (xoff + i + 1);
-		p.set_y (_height - ((_height - 2) * vec[i]));
+		
+		double const ho = crossfade->in()->layer() < crossfade->out()->layer() ? _child_height : _height;
+		p.set_y (ho - ((_child_height - 2) * vec[i]));
 	}
 
 	fade_out->property_points() = *points;

@@ -1,19 +1,19 @@
 \documentclass{article}
-\title{Region Layering}
+\title{Region layering}
 \author{}
 \date{}
 
-\usepackage{graphicx}
+\usepackage{graphicx,amsmath}
 \begin{document}
 \maketitle
 
 \section{Introduction}
 
 When regions overlap in time, we need to decide which one should be
-played.  Ardour has a few options to set how this decision is made.
+played.
 
 
-\subsection{Layers}
+\section{Layers}
 
 Each region on a playlist is on a \emph{layer}.  All overlapping regions
 are on a unique layer, and when overlaps exist the highest-layered
@@ -37,114 +37,168 @@ This follows the basic rule that, at any given point, the region on
 the highest layer will be played.
 
 
-\section{Choice of layering}
+\section{Which layer does a region go on?}
 
-There are two main decisions to be made with regards to how a playlist should be layered:
-
-\begin{itemize}
-\item Given overlapping regions, what order should they be layered in?
-\item When should layering be changed?
-\end{itemize}
+The logic to decide which layer a region goes onto is somewhat complicated.
+This section describes it in hand-wavey and more technical terms.
 
 
-\subsection{Layering order}
+\subsection{Hand-wavey description}
 
-Ardour provides three-and-a-half ways to decide on the order in which
-regions are layered.  The most basic choice is:
-
-\begin{itemize}
-\item \emph{Later is higher} --- regions which are later in time will
-  be on higher layers.
-\item \emph{Most recently added is higher} --- regions which were more
-  recently added to the playlist will be on higher layers.
-\item \emph{Most recently edited or added is higher} --- regions which
-  were more recently edited or added to the playlist will be on
-  higher layers.
-\end{itemize}
-
-This choice can be set per-session from the \emph{Session Properties} dialogue
-box.
-
-\subsubsection{Explicit ordering}
-
-There are also cases when none of these rules should apply.  If, for
-example, you want to put a given region at the top of the stack (on
-the highest layer), this is possible using the region `raise to top'
-command.  Following such a command (called an `explicit layering'),
-the regions on the playlist may no longer obey any of the standard
-ordering rules.
-
-This situation also arises when editing tracks using the `stacked' layer mode.
-In this mode, almost all layering is explicit.  When starting a region drag,
-the other regions on a track spread apart vertically to allow the dragged
-region to be dropped in any position within the region stack.  The normal
-layering rules will only be followed if a region is dropped on top of another;
-in all other cases, explicit layering will be used to put the region wherever
-it was dropped.
-
-\subsection{When to update layering}
-
-There are two distinct approaches to updating layering:
-
-\begin{itemize}
-\item Update whenever any region edit is performed.
-\item Update only when a region is edited such that a new overlap has been set up.
-\end{itemize}
-
-The approach to use is optional, and can be set in \emph{Session Properties}.
-
-This decision only has consequences when an explicit layering command has
-been used.  Consider the case in Figure~\ref{fig:explicit-layering1}.
+A playlist maintains an internal \emph{layering order} for regions.  This order
+is not directly visible in Ardour, but it's useful to understand it
+nonetheless.  Figure~\ref{fig:layering-order-1} gives a rough idea of what this
+means.
 
 \begin{figure}[ht]
 \begin{center}
-\includegraphics{explicit-layering1.pdf}
+\includegraphics{layering-order-1.pdf}
 \end{center}
-\caption{Explicit layering: stage 1}
-\label{fig:explicit-layering1}
+\caption{Layering order}
+\label{fig:layering-order-1}
 \end{figure}
 
-Given that arrangement, imagine that we perform a `raise to top' on region $C$.
-This results in the arrangement in Figure~\ref{fig:explicit-layering2}.
+Here we see 6 regions; as the layering order value increases, the region will
+be placed on a higher layer.
+
+Every time any region is moved, added or edited, a \emph{relayer} occurs.  This
+collapses the regions down into layers.  For our example, this would result in
+the arrangement in Figure~\ref{fig:layering-order-2}.
 
 \begin{figure}[ht]
 \begin{center}
-\includegraphics{explicit-layering2.pdf}
+\includegraphics{layering-order-2.pdf}
 \end{center}
-\caption{Explicit layering: stage 2}
-\label{fig:explicit-layering2}
+\caption{Layering}
+\label{fig:layering-order-2}
 \end{figure}
 
-Imagine now that region $C$ is moved very slightly to the left, so
-that it still overlaps both $A$ and $B$.  If we are updating whenever
-any region edit is performed, this will result in a relayer; the
-regions' arrangement will go back to that in
-Figure~\ref{fig:explicit-layering1}.
+The relayer operation takes each region, in the layering order, and puts it
+on the lowest possible layer that it can be on without overlap.
 
-If, on the other hand, we only relayer when a new overlap is set up,
-the region layering will remain as in
-Figure~\ref{fig:explicit-layering2}.  Before the edit, regions $A$,
-$B$ and $C$ overlapped; after the edit, the situation is the same, so
-no relayering is performed.
 
-Another, more complex, example is shown in Figure~\ref{fig:tricky-explicit-layering}.
+\subsubsection{Layering order}
+
+Given that arrangement, the remaining question is how the layering order is
+arrived at.  The rules are as follows:
+
+\begin{itemize}
+
+\item When a region is added to a playlist, it goes above the current highest
+  region in the layering order.
+
+\item In `overlaid' track mode, moving or editing regions does not change the
+  layering order.  Hence, moving regions about will maintain their position in
+  the layering order.  Changing overlaps may change the \emph{layer} that the
+  region ends up on, but not the order in which they will be layered.
+
+\item In `stacked' track mode, moving regions places the region on the layer
+  that they are dropped on.  This is achieved by modifying the layering order
+  for the region that is moved, so that when the relayer operation happens the
+  region ends up on the desired layer.
+
+\item When regions are `raised' or `lowered' in the stack, the layering order
+  is modified to achieve the desired layer change.
+
+\end{itemize}
+
+The upshot of all this is that regions should maintain their expected layering
+order, unless that order is explicitly change using `stacked' mode or by
+explicit layering commands like `raise' or `lower'.
+
+
+
+\subsection{Technical description}
+
+Each region on a playlist has three layering-related properties: its current
+layer $c$ (an integer) and its layering index $i$ (also an integer).  It also
+has an \emph{optional} pending layer $p$ which is fractional.
+
+Whenever a region is added, moved, trimmed, etc.\ we run a \emph{relayer}.  This
+does the following:
+
+\begin{enumerate}
+\item Take a list of all regions and remove those who have a value for $p$.
+\item Sort the remainder in ascending order of $i$.
+\item Insert the regions which have a value for $p$ in the correct place in the
+  list by comparing $c$ of those in the list to $p$ of the inserted region.
+\item Iterate over the resulting list, putting each region on the lowest available
+  layer, setting its current layer $c$, and clearing $p$.
+\item If any region had a pending layer, iterate through the region list again
+  giving each region a new layering index $i$ ascending from 0.
+\end{enumerate}
+
+The pending layer $p$ is set up in the following situations:
+\begin{enumerate}
+\item When a region is added to the playlist, $p$ is set to $\infty$.
+\item When a region is raised to the top of the playlist, $p$ is set to $\infty$.
+\item When a region is raised one step in the playlist, $p$ is set to $c + 1.5$.
+\item When a region is lowered to the bottom of the playlist, $p$ is set to $-0.5$.
+\item When a region is lowered one step int the playlist, $p$ is set to $c - 1.5$.
+\item When a region is explicitly put between layers $A$ and $B$ in `stacked'
+  mode, $p$ is set to $(A + B) / 2$.
+\end{enumerate}
+
+The idea of this approach is that the layering indices $i$ are used to keep a
+current state of the stack, and this state is used to maintain region
+relationships.  Setting $p$ will alter these relationships, after which the
+layering indices $i$ are updated to reflect the new status quo.
+
+It is not sufficient to use current layer $c$ as the state of the stack.
+Consider two overlapping regions $P$ and $Q$, with $P$ on layer~0 and $Q$ on
+layer~1.  Now raise $P$ to the top of the stack, so that $Q$ is on layer~0 and
+$P$ on layer~1.  Move $P$ away from $Q$ (in overlaid mode) so that both regions
+are on layer~0.  Now drag $P$ back over $Q$.  One would expect $P$ to return to
+the top of the stack, since it was explicitly raised earlier.  However, if the
+relayer operation were to compare $c$ for each region, they would be identical;
+the information that $P$ was once higher than $Q$ has been lost.
+
+
+\section{Stacked mode}
+
+When a track is being displayed in \emph{stacked} mode, regions are spread out
+vertically to indicate their layering, like in Figure~\ref{fig:stacked}.
 
 \begin{figure}[ht]
 \begin{center}
-\includegraphics{tricky-explicit-layering.pdf}
+\includegraphics[scale=0.5]{stacked.png}
 \end{center}
-\caption{More complex explicit layering}
-\label{fig:tricky-explicit-layering}
+\caption{A track in stacked mode}
+\label{fig:stacked}
 \end{figure}
 
-% XXX: this makes no sense
+In this mode, layering is performed \emph{explicitly}.  In other words, the
+user's immediate actions decide which layer a region should be put on.  When a
+region move drag is started in stacked mode, the regions separate further out
+vertically, to leave space between each layer, as shown in
+Figure~\ref{fig:stacked-drag}.
 
-Here, imagine that $C$ has been moved to the top of the stack with an explicit
-`raise to top' command.  Now consider an extension of $C$ so that its
-right-hand edge overlaps $D$.  If we are relayering only on new overlaps, this
-case presents one new overlap (that of $C$ with $D$).  In this case, $C$ is
-moved according to the current layering rules so that it is correct with
-respect to $D$.  In addition, $A$ and $B$ are re-layered so that the relation
-of $C$ to $A$ and $B$ is preserved.
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[scale=0.5]{stacked-drag.png}
+\end{center}
+\caption{A track in stacked mode during a drag}
+\label{fig:stacked-drag}
+\end{figure}
+
+The region(s) being dragged can then be dropped in any location, horizontally
+and vertically, and the regions will be layered accordingly.
+
+
+\section{Overlaid mode}
+
+When a track is being displayed in \emph{overlaid} mode, regions are
+displayed on top of one another, like in Figure~\ref{fig:overlaid}.
+
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[scale=0.5]{overlaid.png}
+\end{center}
+\caption{A track in overlaid mode}
+\label{fig:overlaid}
+\end{figure}
+
+In this mode, drags of regions maintain the same \emph{layer ordering}, even if the layers may
+change.
 
 \end{document}

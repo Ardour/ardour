@@ -36,22 +36,6 @@ struct RegionSortByLayer {
 	}
 };
 
-struct RegionSortByAdd {
-	bool operator() (boost::shared_ptr<Region> a, boost::shared_ptr<Region> b) {
-		return (
-			(a->last_layer_op (LayerOpAdd) < b->last_layer_op (LayerOpAdd))
-			);
-	}
-};
-
-struct RegionSortByAddOrBounds {
-	bool operator() (boost::shared_ptr<Region> a, boost::shared_ptr<Region> b) {
-		uint64_t const p = std::max (a->last_layer_op (LayerOpAdd), a->last_layer_op (LayerOpBoundsChange));
-		uint64_t const q = std::max (b->last_layer_op (LayerOpAdd), b->last_layer_op (LayerOpBoundsChange));
-		return p < q;
-	}
-};
-
 } // namespace
 
 #endif /* __libardour_region_sorters_h__ */

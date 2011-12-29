@@ -73,7 +73,6 @@ setup_enum_writer ()
 	RemoteModel _RemoteModel;
 	DenormalModel _DenormalModel;
 	CrossfadeModel _CrossfadeModel;
-	LayerModel _LayerModel;
 	InsertMergePolicy _InsertMergePolicy;
 	ListenPosition _ListenPosition;
 	SampleFormat _SampleFormat;
@@ -263,11 +262,6 @@ setup_enum_writer ()
 	REGISTER_ENUM (FullCrossfade);
 	REGISTER_ENUM (ShortCrossfade);
 	REGISTER (_CrossfadeModel);
-
-	REGISTER_ENUM (LaterHigher);
-	REGISTER_ENUM (AddOrBoundsChangeHigher);
-	REGISTER_ENUM (AddHigher);
-	REGISTER (_LayerModel);
 
         REGISTER_ENUM (InsertMergeReject);
         REGISTER_ENUM (InsertMergeRelax);
@@ -707,19 +701,6 @@ std::istream& operator>>(std::istream& o, ListenPosition& var)
 }
 
 std::ostream& operator<<(std::ostream& o, const ListenPosition& var)
-{
-	std::string s = enum_2_string (var);
-	return o << s;
-}
-std::istream& operator>>(std::istream& o, LayerModel& var)
-{
-	std::string s;
-	o >> s;
-	var = (LayerModel) string_2_enum (s, var);
-	return o;
-}
-
-std::ostream& operator<<(std::ostream& o, const LayerModel& var)
 {
 	std::string s = enum_2_string (var);
 	return o << s;

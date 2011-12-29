@@ -2475,7 +2475,7 @@ Editor::get_state ()
 /** @param y y offset from the top of all trackviews.
  *  @return pair: TimeAxisView that y is over, layer index.
  *  TimeAxisView may be 0.  Layer index is the layer number if the TimeAxisView is valid and is
- *  in stacked region display mode, otherwise 0.
+ *  in stacked or expanded region display mode, otherwise 0.
  */
 std::pair<TimeAxisView *, double>
 Editor::trackview_by_y_position (double y)

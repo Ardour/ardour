@@ -30,7 +30,6 @@
 
 #include "pbd/convert.h"
 #include "pbd/failed_constructor.h"
-#include "pbd/stacktrace.h"
 #include "pbd/stateful_diff_command.h"
 #include "pbd/xml++.h"
 
@@ -187,8 +186,6 @@ Playlist::Playlist (boost::shared_ptr<const Playlist> other, string namestr, boo
 	in_partition = false;
 	subcnt = 0;
 	_frozen = other->_frozen;
-
-	layer_op_counter = other->layer_op_counter;
 }
 
 Playlist::Playlist (boost::shared_ptr<const Playlist> other, framepos_t start, framecnt_t cnt, string str, bool hide)
@@ -256,6 +253,7 @@ Playlist::Playlist (boost::shared_ptr<const Playlist> other, framepos_t start, f
 		plist.add (Properties::length, len);
 		plist.add (Properties::name, new_name);
 		plist.add (Properties::layer, region->layer());
+		plist.add (Properties::layering_index, region->layering_index());
 
 		new_region = RegionFactory::RegionFactory::create (region, plist);
 
@@ -318,9 +316,7 @@ Playlist::init (bool hide)
 	in_partition = false;
 	subcnt = 0;
 	_frozen = false;
-	layer_op_counter = 0;
 	_combine_ops = 0;
-	_relayer_suspended = false;
 
 	_session.history().BeginUndoRedo.connect_same_thread (*this, boost::bind (&Playlist::begin_undo, this));
 	_session.history().EndUndoRedo.connect_same_thread (*this, boost::bind (&Playlist::end_undo, this));
@@ -485,8 +481,6 @@ Playlist::notify_region_moved (boost::shared_ptr<Region> r)
 {
 	Evoral::RangeMove<framepos_t> const move (r->last_position (), r->length (), r->position ());
 
-	/* We could timestamp the region's layer op here, but we're doing it in region_bounds_changed */
-
 	if (holding_state ()) {
 
 		pending_range_moves.push_back (move);
@@ -503,8 +497,6 @@ Playlist::notify_region_moved (boost::shared_ptr<Region> r)
 void
 Playlist::notify_region_start_trimmed (boost::shared_ptr<Region> r)
 {
-	timestamp_layer_op (LayerOpBoundsChange, r);
-
 	if (r->position() >= r->last_position()) {
 		/* trimmed shorter */
 		return;
@@ -528,8 +520,6 @@ Playlist::notify_region_start_trimmed (boost::shared_ptr<Region> r)
 void
 Playlist::notify_region_end_trimmed (boost::shared_ptr<Region> r)
 {
-	timestamp_layer_op (LayerOpBoundsChange, r);
-
 	if (r->length() < r->last_length()) {
 		/* trimmed shorter */
 	}
@@ -556,8 +546,6 @@ Playlist::notify_region_added (boost::shared_ptr<Region> r)
 	   as though it could be.
 	*/
 
-	timestamp_layer_op (LayerOpAdd, r);
-
 	if (holding_state()) {
 		pending_adds.insert (r);
 		pending_contents_change = true;
@@ -566,7 +554,6 @@ Playlist::notify_region_added (boost::shared_ptr<Region> r)
 		pending_contents_change = false;
 		RegionAdded (boost::weak_ptr<Region> (r)); /* EMIT SIGNAL */
 		ContentsChanged (); /* EMIT SIGNAL */
-		relayer (r);
 	}
 }
 
@@ -584,35 +571,31 @@ Playlist::flush_notifications (bool from_undo)
 
 	in_flush = true;
 
-	/* We have:
-
-	   pending_bounds:  regions whose bounds position and/or length changes
-	   pending_removes: regions which were removed
-	   pending_adds:    regions which were added
-	   pending_length:  true if the playlist length might have changed
-	   pending_contents_change: true if there was almost any change in the playlist
-	   pending_range_moves: details of periods of time that have been moved about (when regions have been moved)
-
-	*/
-
 	if (!pending_bounds.empty() || !pending_removes.empty() || !pending_adds.empty()) {
 		regions_changed = true;
 	}
 
-	/* Make a list of regions that need relayering */
-	RegionList regions_to_relayer;
+	/* we have no idea what order the regions ended up in pending
+	   bounds (it could be based on selection order, for example).
+	   so, to preserve layering in the "most recently moved is higher"
+	   model, sort them by existing layer, then timestamp them.
+	*/
+
+	// RegionSortByLayer cmp;
+	// pending_bounds.sort (cmp);
 
 	for (RegionList::iterator r = pending_bounds.begin(); r != pending_bounds.end(); ++r) {
-		regions_to_relayer.push_back (*r);
 		dependent_checks_needed.insert (*r);
 	}
 
 	for (s = pending_removes.begin(); s != pending_removes.end(); ++s) {
 		remove_dependents (*s);
+		// cerr << _name << " sends RegionRemoved\n";
 		RegionRemoved (boost::weak_ptr<Region> (*s)); /* EMIT SIGNAL */
 	}
 
 	for (s = pending_adds.begin(); s != pending_adds.end(); ++s) {
+		 // cerr << _name << " sends RegionAdded\n";
 		 /* don't emit RegionAdded signal until relayering is done,
 		    so that the region is fully setup by the time
 		    anyone hear's that its been added
@@ -621,14 +604,18 @@ Playlist::flush_notifications (bool from_undo)
 	 }
 
 	 if (regions_changed || pending_contents_change) {
+		 if (!in_set_state) {
+			 relayer ();
+		 }
 		 pending_contents_change = false;
+		 // cerr << _name << " sends 5 contents change @ " << get_microseconds() << endl;
 		 ContentsChanged (); /* EMIT SIGNAL */
+		 // cerr << _name << "done contents change @ " << get_microseconds() << endl;
 	 }
 
 	 for (s = pending_adds.begin(); s != pending_adds.end(); ++s) {
 		 (*s)->clear_changes ();
 		 RegionAdded (boost::weak_ptr<Region> (*s)); /* EMIT SIGNAL */
-		 regions_to_relayer.push_back (*s);
 	 }
 
 	 for (s = dependent_checks_needed.begin(); s != dependent_checks_needed.end(); ++s) {
@@ -641,14 +628,6 @@ Playlist::flush_notifications (bool from_undo)
 
 	 if (!pending_region_extensions.empty ()) {
 		 RegionsExtended (pending_region_extensions);
-	 }
-
-	 if (!regions_to_relayer.empty () && !from_undo) {
-		 relayer (regions_to_relayer);
-	 }
-
-	 if (pending_layering) {
-		 LayeringChanged (); /* EMIT SIGNAL */
 	 }
 
 	 clear_pending ();
@@ -686,6 +665,7 @@ Playlist::flush_notifications (bool from_undo)
 	 }
 
 	 if (itimes >= 1) {
+		 region->set_pending_layer (DBL_MAX);
 		 add_region_internal (region, pos);
 		 pos += region->length();
 		 --itimes;
@@ -698,6 +678,7 @@ Playlist::flush_notifications (bool from_undo)
 
 	 for (int i = 0; i < itimes; ++i) {
 		 boost::shared_ptr<Region> copy = RegionFactory::create (region, true);
+		 copy->set_pending_layer (DBL_MAX);
 		 add_region_internal (copy, pos);
 		 pos += region->length();
 	 }
@@ -718,6 +699,7 @@ Playlist::flush_notifications (bool from_undo)
 			 plist.add (Properties::layer, region->layer());
 
 			 boost::shared_ptr<Region> sub = RegionFactory::create (region, plist);
+			 sub->set_pending_layer (DBL_MAX);
 			 add_region_internal (sub, pos);
 		 }
 	 }
@@ -758,6 +740,11 @@ Playlist::flush_notifications (bool from_undo)
 
 	 possibly_splice_unlocked (position, region->length(), region);
 
+	 if (!holding_state ()) {
+		 /* layers get assigned from XML state, and are not reset during undo/redo */
+		 relayer ();
+	 }
+
 	 /* we need to notify the existence of new region before checking dependents. Ick. */
 
 	 notify_region_added (region);
@@ -780,6 +767,7 @@ Playlist::flush_notifications (bool from_undo)
 	 _splicing = true;
 
 	 remove_region_internal (old);
+	 newr->set_pending_layer (newr->layer ());
 	 add_region_internal (newr, pos);
 
 	 _splicing = old_sp;
@@ -817,6 +805,7 @@ Playlist::flush_notifications (bool from_undo)
 			 possibly_splice_unlocked (pos, -distance);
 
 			 if (!holding_state ()) {
+				 relayer ();
 				 remove_dependents (region);
 			 }
 
@@ -873,15 +862,11 @@ Playlist::flush_notifications (bool from_undo)
  *  start and end if cutting == true.  Regions that lie entirely within start and end are always
  *  removed.
  */
+
  void
  Playlist::partition_internal (framepos_t start, framepos_t end, bool cutting, RegionList& thawlist)
  {
 	 RegionList new_regions;
-
-	 /* Don't relayer regions that are created during this operation; leave them
-	    on the same region as the original.
-	 */
-	 suspend_relayer ();
 
 	 {
 		 RegionLock rlock (this);
@@ -961,7 +946,8 @@ Playlist::flush_notifications (bool from_undo)
 					 plist.add (Properties::start, current->start() + (pos2 - pos1));
 					 plist.add (Properties::length, pos3 - pos2);
 					 plist.add (Properties::name, new_name);
-					 plist.add (Properties::layer, current->layer());
+					 plist.add (Properties::layer, current->layer ());
+					 plist.add (Properties::layering_index, current->layering_index ());
 					 plist.add (Properties::automatic, true);
 					 plist.add (Properties::left_of_split, true);
 					 plist.add (Properties::right_of_split, true);
@@ -980,7 +966,8 @@ Playlist::flush_notifications (bool from_undo)
 				 plist.add (Properties::start, current->start() + (pos3 - pos1));
 				 plist.add (Properties::length, pos4 - pos3);
 				 plist.add (Properties::name, new_name);
-				 plist.add (Properties::layer, current->layer());
+				 plist.add (Properties::layer, current->layer ());
+				 plist.add (Properties::layering_index, current->layering_index ());
 				 plist.add (Properties::automatic, true);
 				 plist.add (Properties::right_of_split, true);
 
@@ -1018,7 +1005,8 @@ Playlist::flush_notifications (bool from_undo)
 					 plist.add (Properties::start, current->start() + (pos2 - pos1));
 					 plist.add (Properties::length, pos4 - pos2);
 					 plist.add (Properties::name, new_name);
-					 plist.add (Properties::layer, current->layer());
+					 plist.add (Properties::layer, current->layer ());
+					 plist.add (Properties::layering_index, current->layering_index ());
 					 plist.add (Properties::automatic, true);
 					 plist.add (Properties::left_of_split, true);
 
@@ -1061,7 +1049,8 @@ Playlist::flush_notifications (bool from_undo)
 					 plist.add (Properties::start, current->start());
 					 plist.add (Properties::length, pos3 - pos1);
 					 plist.add (Properties::name, new_name);
-					 plist.add (Properties::layer, current->layer());
+					 plist.add (Properties::layer, current->layer ());
+					 plist.add (Properties::layering_index, current->layering_index ());
 					 plist.add (Properties::automatic, true);
 					 plist.add (Properties::right_of_split, true);
 
@@ -1108,8 +1097,6 @@ Playlist::flush_notifications (bool from_undo)
 	 for (RegionList::iterator i = new_regions.begin(); i != new_regions.end(); ++i) {
 		 check_dependents (*i, false);
 	 }
-
-	 resume_relayer ();
  }
 
  boost::shared_ptr<Playlist>
@@ -1210,7 +1197,7 @@ Playlist::flush_notifications (bool from_undo)
 		 int itimes = (int) floor (times);
 		 framepos_t pos = position;
 		 framecnt_t const shift = other->_get_extent().second;
-		 layer_t top_layer = regions.size();
+		 layer_t top = top_layer ();
 
 		 while (itimes--) {
 			 for (RegionList::iterator i = other->regions.begin(); i != other->regions.end(); ++i) {
@@ -1220,7 +1207,7 @@ Playlist::flush_notifications (bool from_undo)
 				    the ordering they had in the original playlist.
 				 */
 
-				 copy_of_region->set_layer (copy_of_region->layer() + top_layer);
+				 copy_of_region->set_pending_layer (copy_of_region->layer() + top);
 				 add_region_internal (copy_of_region, (*i)->position() + pos);
 			 }
 			 pos += shift;
@@ -1242,6 +1229,7 @@ Playlist::flush_notifications (bool from_undo)
 
 	 while (itimes--) {
 		 boost::shared_ptr<Region> copy = RegionFactory::create (region, true);
+		 copy->set_pending_layer (DBL_MAX);
 		 add_region_internal (copy, pos);
 		 pos += region->length();
 	 }
@@ -1259,6 +1247,7 @@ Playlist::flush_notifications (bool from_undo)
 			 plist.add (Properties::name, name);
 
 			 boost::shared_ptr<Region> sub = RegionFactory::create (region, plist);
+			 sub->set_pending_layer (DBL_MAX);
 			 add_region_internal (sub, pos);
 		 }
 	 }
@@ -1360,6 +1349,8 @@ Playlist::flush_notifications (bool from_undo)
 		 plist.add (Properties::length, before);
 		 plist.add (Properties::name, before_name);
 		 plist.add (Properties::left_of_split, true);
+		 plist.add (Properties::layering_index, region->layering_index ());
+		 plist.add (Properties::layer, region->layer ());
 
 		 /* note: we must use the version of ::create with an offset here,
 		    since it supplies that offset to the Region constructor, which
@@ -1377,6 +1368,8 @@ Playlist::flush_notifications (bool from_undo)
 		 plist.add (Properties::length, after);
 		 plist.add (Properties::name, after_name);
 		 plist.add (Properties::right_of_split, true);
+		 plist.add (Properties::layering_index, region->layering_index ());
+		 plist.add (Properties::layer, region->layer ());
 
 		 /* same note as above */
 		 right = RegionFactory::create (region, before, plist);
@@ -1470,8 +1463,6 @@ Playlist::flush_notifications (bool from_undo)
 
 	 if (what_changed.contains (Properties::position)) {
 
-		 timestamp_layer_op (LayerOpBoundsChange, region);
-		 
 		 /* remove it from the list then add it back in
 		    the right place again.
 		 */
@@ -1512,7 +1503,7 @@ Playlist::flush_notifications (bool from_undo)
 			 pending_bounds.push_back (region);
 		 } else {
 			 notify_contents_changed ();
-			 relayer (region);
+			 relayer ();
 			 check_dependents (region, false);
 		 }
 	 }
@@ -1572,9 +1563,9 @@ Playlist::flush_notifications (bool from_undo)
 		 notify_region_start_trimmed (region);
 	 }
 
-	 if (what_changed.contains (Properties::layer)) {
-		 notify_layering_changed ();
-	 }
+	 /* don't notify about layer changes, since we are the only object that can initiate
+	    them, and we notify in ::relayer()
+	 */
 
 	 if (what_changed.contains (our_interests)) {
 		 save = true;
@@ -2134,7 +2125,6 @@ Playlist::flush_notifications (bool from_undo)
 		 return -1;
 	 }
 
-	 suspend_relayer ();
 	 freeze ();
 
 	 plist = node.properties();
@@ -2196,7 +2186,7 @@ Playlist::flush_notifications (bool from_undo)
 			}
 
 			add_region (region, region->position(), 1.0);
-
+			
 			region->resume_property_changes ();
 
 		}
@@ -2217,7 +2207,6 @@ Playlist::flush_notifications (bool from_undo)
 		
 	thaw ();
 	notify_contents_changed ();
-	resume_relayer ();
 
 	in_set_state--;
 	first_set_state = false;
@@ -2345,277 +2334,189 @@ Playlist::set_edit_mode (EditMode mode)
 	_edit_mode = mode;
 }
 
-/** Relayer a region.  See the other relayer() methods for commentary. */
+struct RelayerSort {
+	bool operator () (boost::shared_ptr<Region> a, boost::shared_ptr<Region> b) {
+		return a->layering_index() < b->layering_index();
+	}
+};
+
 void
-Playlist::relayer (boost::shared_ptr<Region> region)
+Playlist::relayer ()
 {
-	if (_relayer_suspended) {
+	/* never compute layers when changing state for undo/redo or setting from XML */
+
+	if (in_update || in_set_state) {
 		return;
 	}
-	
-	RegionList r;
-	r.push_back (region);
-	relayer (r);
-}
 
-Playlist::TemporaryLayers
-Playlist::compute_temporary_layers (RegionList const & relayer_regions)
-{
-	TemporaryLayers temporary_layers;
-	OverlapCache cache (this);
+	bool changed = false;
 
-	for (RegionList::const_iterator i = relayer_regions.begin(); i != relayer_regions.end(); ++i) {
+	/* Build up a new list of regions on each layer, stored in a set of lists
+	   each of which represent some period of time on some layer.  The idea
+	   is to avoid having to search the entire region list to establish whether
+	   each region overlaps another */
 
-		DEBUG_TRACE (DEBUG::Layering, string_compose ("Compute temporary layer for %1\n", (*i)->name()));
-	
-		/* current_overlaps: regions that overlap *i now */
-		RegionList current_overlaps = cache.get ((*i)->bounds ());
-		current_overlaps.remove (*i);
+	/* how many pieces to divide this playlist's time up into */
+	int const divisions = 512;
 
-		DEBUG_TRACE (DEBUG::Layering, "Current overlaps:\n");
-		for (RegionList::iterator j = current_overlaps.begin(); j != current_overlaps.end(); ++j) {
-			DEBUG_TRACE (DEBUG::Layering, string_compose ("\t%1\n", (*j)->name()));
-		}
+	/* find the start and end positions of the regions on this playlist */
+	framepos_t start = INT64_MAX;
+	framepos_t end = 0;
+	for (RegionList::const_iterator i = regions.begin(); i != regions.end(); ++i) {
+		start = min (start, (*i)->position());
+		end = max (end, (*i)->position() + (*i)->length());
+	}
+
+	/* hence the size of each time division */
+	double const division_size = (end - start) / double (divisions);
+
+	vector<vector<RegionList> > layers;
+	layers.push_back (vector<RegionList> (divisions));
+
+	RegionList copy = regions.rlist();
+	RegionList pending;
+
+	/* Remove regions with pending relayers */
+	for (RegionList::iterator i = copy.begin(); i != copy.end(); ) {
+
+		RegionList::iterator j = i;
+		++j;
 		
-		/* overlaps_to_preserve: regions that overlap *i now, but which aren't being
-		   worked on during this relayer: these will have their relationship with
-		   *i preserved.
-		*/
-		RegionList overlaps_to_preserve;
+		if ((*i)->pending_layer()) {
+			pending.push_back (*i);
+			copy.erase (i);
+		}
 
-		/* overlaps_to_check: regions that overlap *i now, and must be checked to
-		   see if *i is still on the correct layer with respect to them (according
-		   to current layering rules).
-		*/
-		RegionList overlaps_to_check;
+		i = j;
+	}
 
-		if (_session.config.get_relayer_on_all_edits () || (*i)->last_layer_op (LayerOpAdd) > (*i)->last_layer_op (LayerOpBoundsChange)) {
-			/* We're configured to relayer on all edits, or this region has had
-			   no edit since it was added to the playlist, so we're relayering
-			   the whole lot; in this case there are no `overlaps_to_preserve'.
-			*/
-			overlaps_to_check = current_overlaps;
-		} else {
-			/* We're only relayering new overlaps; find them */
-			RegionList last_overlaps = cache.get ((*i)->last_relayer_bounds ());
-			last_overlaps.remove (*i);
-			for (RegionList::const_iterator j = current_overlaps.begin(); j != current_overlaps.end(); ++j) {
-				if (find (last_overlaps.begin(), last_overlaps.end(), *j) == last_overlaps.end()) {
-					/* This is a new overlap, which must be checked */
-					overlaps_to_check.push_back (*j);
-				} else {
-					/* This is an existing overlap, which must be preserved */
-					overlaps_to_preserve.push_back (*j);
-				}
+	/* Sort the remainder */
+	copy.sort (RelayerSort ());
+
+	/* Re-insert the pending layers in the right places */
+	for (RegionList::iterator i = pending.begin(); i != pending.end(); ++i) {
+		RegionList::iterator j = copy.begin();
+		while (j != copy.end ()) {
+			if ((*j)->pending_layer().get_value_or ((*j)->layer ()) > (*i)->pending_layer().get ()) {
+				break;
 			}
-		}
-
-		if (overlaps_to_check.empty ()) {
-			/* There are no overlaps to check, so just leave everything as it is */
-			continue;
-		}
-
-		DEBUG_TRACE (DEBUG::Layering, "Overlaps to check:\n");
-		for (RegionList::iterator j = overlaps_to_check.begin(); j != overlaps_to_check.end(); ++j) {
-			DEBUG_TRACE (DEBUG::Layering, string_compose ("\t%1\n", (*j)->name()));
-		}
-		
-		/* Put *i on our overlaps_to_check_list */
-		overlaps_to_check.push_back (*i);
-
-		/* And sort it according to the current layer model */
-		switch (_session.config.get_layer_model()) {
-		case LaterHigher:
-			overlaps_to_check.sort (RegionSortByPosition ());
-			break;
-		case AddOrBoundsChangeHigher:
-			overlaps_to_check.sort (RegionSortByAddOrBounds ());
-			break;
-		case AddHigher:
-			overlaps_to_check.sort (RegionSortByAdd ());
-			break;
-		}
-
-		/* Now find *i in our overlaps_to_check list; within this list it will be in the
-		   right place wrt the current layering rules, so we can work out the layers of the
-		   nearest regions below and above.
-		*/
-		double previous_layer = -DBL_MAX;
-		double next_layer = DBL_MAX;
-		RegionList::const_iterator j = overlaps_to_check.begin();
-		while (*j != *i) {
-			previous_layer = temporary_layers.get (*j);
 			++j;
 		}
+		copy.insert (j, *i);
+	}
 
-		/* we must have found *i */
-		assert (j != overlaps_to_check.end ());
+	bool had_pending = false;
 
-		++j;
-		if (j != overlaps_to_check.end ()) {
-			next_layer = temporary_layers.get (*j);
+	for (RegionList::iterator i = copy.begin(); i != copy.end(); ++i) {
+
+		/* reset the pending layer for every region now that we're relayering */
+		if ((*i)->reset_pending_layer ()) {
+			had_pending = true;
 		}
 
-		if (next_layer < previous_layer) {
-			/* If this happens, it means that it's impossible to put *i between overlaps_to_check
-			   in a way that satisfies the current layering rule.  So we'll punt and put *i
-			   above previous_layer.
-			*/
-			next_layer = DBL_MAX;
-		}
-
-		/* Now we know where *i and overlaps_to_preserve should go: between previous_layer and
-		   next_layer.
+		/* find the time divisions that this region covers; if there are no regions on the list,
+		   division_size will equal 0 and in this case we'll just say that
+		   start_division = end_division = 0.
 		*/
+		int start_division = 0;
+		int end_division = 0;
 
-		DEBUG_TRACE (DEBUG::Layering, string_compose ("%1 and deps need to go between %2 and %3\n", (*i)->name(), previous_layer, next_layer));
+		if (division_size > 0) {
+			start_division = floor ( ((*i)->position() - start) / division_size);
+			end_division = floor ( ((*i)->position() + (*i)->length() - start) / division_size );
+			if (end_division == divisions) {
+				end_division--;
+			}
+		}
 
-		/* Recurse into overlaps_to_preserve to find dependents */
-		RegionList recursed_overlaps_to_preserve;
-		
-		for (RegionList::const_iterator k = overlaps_to_preserve.begin(); k != overlaps_to_preserve.end(); ++k) {
-			recursed_overlaps_to_preserve.push_back (*k);
-			RegionList touched = recursive_regions_touched (*k, cache, *i);
-			for (RegionList::iterator m = touched.begin(); m != touched.end(); ++m) {
-				if (find (recursed_overlaps_to_preserve.begin(), recursed_overlaps_to_preserve.end(), *m) == recursed_overlaps_to_preserve.end()) {
-					recursed_overlaps_to_preserve.push_back (*m);
+		assert (divisions == 0 || end_division < divisions);
+
+		/* find the lowest layer that this region can go on */
+		size_t j = layers.size();
+		while (j > 0) {
+			/* try layer j - 1; it can go on if it overlaps no other region
+			   that is already on that layer
+			*/
+
+			bool overlap = false;
+			for (int k = start_division; k <= end_division; ++k) {
+				RegionList::iterator l = layers[j-1][k].begin ();
+				while (l != layers[j-1][k].end()) {
+					if ((*l)->overlap_equivalent (*i)) {
+						overlap = true;
+						break;
+					}
+					l++;
+				}
+
+				if (overlap) {
+					break;
 				}
 			}
-		}
 
-		/* Put *i into the overlaps_to_preserve list */
-		recursed_overlaps_to_preserve.push_back (*i);
-
-		/* Sort it by layer, so that we preserve layering */
-		recursed_overlaps_to_preserve.sort (SortByTemporaryLayer (temporary_layers));
-
-		/* Divide available space up into chunks so that we can relayer everything in that space */
-		double const space = (next_layer - previous_layer) / (recursed_overlaps_to_preserve.size() + 1);
-
-		/* And relayer */
-		int m = 1;
-		for (RegionList::const_iterator k = recursed_overlaps_to_preserve.begin(); k != recursed_overlaps_to_preserve.end(); ++k) {
-			temporary_layers.set (*k, previous_layer + space * m);
-			++m;
-		}
-	}
-
-	return temporary_layers;
-}
-
-/** Take a list of temporary layer indices and set up the layers of all regions
- *  based on them.
- */
-void
-Playlist::commit_temporary_layers (TemporaryLayers const & temporary_layers)
-{
-	/* Sort all the playlist's regions by layer, ascending */
-	RegionList all_regions = regions.rlist ();
-	all_regions.sort (SortByTemporaryLayer (temporary_layers));
-
-	DEBUG_TRACE (DEBUG::Layering, "Commit layering:\n");
-
-	for (RegionList::iterator i = all_regions.begin(); i != all_regions.end(); ++i) {
-
-		/* Go through the regions that we have already layered and hence work
-		   out the maximum layer index that is in used at some point during
-		   region *i.
-		*/
-		
-		layer_t max_layer_here = 0;
-		bool have_overlap = false;
-		for (RegionList::iterator j = all_regions.begin(); j != i; ++j) {
-			if ((*j)->overlap_equivalent (*i)) {
-				max_layer_here = max ((*j)->layer (), max_layer_here);
-				have_overlap = true;
+			if (overlap) {
+				/* overlap, so we must use layer j */
+				break;
 			}
+
+			--j;
 		}
 
-		if (have_overlap) {
-			/* *i overlaps something, so put it on the next available layer */
-			(*i)->set_layer (max_layer_here + 1);
-		} else {
-			/* no overlap, so put on the bottom layer */
-			(*i)->set_layer (0);
+		if (j == layers.size()) {
+			/* we need a new layer for this region */
+			layers.push_back (vector<RegionList> (divisions));
 		}
-		
-		DEBUG_TRACE (DEBUG::Layering, string_compose ("\t%1 temporary %2 committed %3\n", (*i)->name(), temporary_layers.get (*i), (*i)->layer()));
-	}
-}
 
-/** Relayer a list of regions.
- *
- *  Taking each region R in turn, this method examines the regions O that overlap R in time.
- *  If the session configuration option "relayer-on-all-moves" is false, we reduce O so that
- *  it contains only those regions with which new overlaps have been formed since the last
- *  relayer.
- *
- *  We then change the layer of R and its indirect overlaps so that R meets the current
- *  Session layer model with respect to O.  See doc/layering.
- */
+		/* put a reference to this region in each of the divisions that it exists in */
+		for (int k = start_division; k <= end_division; ++k) {
+			layers[j][k].push_back (*i);
+		}
 
-void
-Playlist::relayer (RegionList const & relayer_regions)
-{
-	if (_relayer_suspended) {
-		return;
+		if ((*i)->layer() != j) {
+			changed = true;
+		}
+
+		(*i)->set_layer (j);
 	}
 
-	/* We do this in two parts: first; compute `temporary layer' indices for
-	   regions on the playlist.  These are (possibly) fractional indices, which
-	   are a convenient means of working with things when you want to insert layers
-	   between others.
-	*/
-
-	TemporaryLayers temporary_layers = compute_temporary_layers (relayer_regions);
-
-	/* Second, we fix up these temporary layers and `commit' them by writing
-	   them to the regions involved.
-	*/
-	
-	commit_temporary_layers (temporary_layers);
-}
-
-/** Put a region on some fractional layer and sort everything else out around it.
- *  This can be used to force a region into some layering; for example, calling
- *  this method with temporary_layer == -0.5 will put the region at the bottom of
- *  the stack.
- */
-
-void
-Playlist::relayer (boost::shared_ptr<Region> region, double temporary_layer)
-{
-	if (_relayer_suspended) {
-		return;
+	if (changed) {
+		notify_layering_changed ();
 	}
 
-	TemporaryLayers t;
-	t.set (region, temporary_layer);
-	commit_temporary_layers (t);
+	if (had_pending) {
+		uint64_t i = 0;
+		for (RegionList::iterator j = copy.begin(); j != copy.end(); ++j) {
+			(*j)->set_layering_index (i++);
+		}
+	}
 }
 
 void
 Playlist::raise_region (boost::shared_ptr<Region> region)
 {
-	relayer (region, region->layer() + 1.5);
+	region->set_pending_layer (region->layer() + 1.5);
+	relayer ();
 }
 
 void
 Playlist::lower_region (boost::shared_ptr<Region> region)
 {
-	relayer (region, region->layer() - 1.5);
+	region->set_pending_layer (region->layer() - 1.5);
+	relayer ();
 }
 
 void
 Playlist::raise_region_to_top (boost::shared_ptr<Region> region)
 {
-	relayer (region, max_layer);
+	region->set_pending_layer (DBL_MAX);
+	relayer ();
 }
 
 void
 Playlist::lower_region_to_bottom (boost::shared_ptr<Region> region)
 {
-	relayer (region, -0.5);
+	region->set_pending_layer (-0.5);
+	relayer ();
 }
 
 void
@@ -2751,23 +2652,8 @@ Playlist::set_frozen (bool yn)
 }
 
 void
-Playlist::timestamp_layer_op (LayerOp op, boost::shared_ptr<Region> region)
-{
-	region->set_last_layer_op (op, ++layer_op_counter);
-}
-
-
-/** Find the next or previous region after `region' (next if dir > 0, previous otherwise)
- *  and swap its position with `region'.
- */
-void
 Playlist::shuffle (boost::shared_ptr<Region> region, int dir)
 {
-	/* As regards layering, the calls we make to set_position() will
-	   perform layering as if the regions had been moved, which I think
-	   is about right.
-	*/
-	
 	bool moved = false;
 
 	if (region->locked()) {
@@ -2872,9 +2758,13 @@ Playlist::shuffle (boost::shared_ptr<Region> region, int dir)
 	_shuffling = false;
 
 	if (moved) {
+
+		relayer ();
 		check_dependents (region, false);
+
 		notify_contents_changed();
 	}
+
 }
 
 bool
@@ -3293,145 +3183,16 @@ Playlist::set_orig_track_id (const PBD::ID& id)
 	_orig_track_id = id;
 }
 
-/** Set the temporary layer for a region */
-void
-Playlist::TemporaryLayers::set (boost::shared_ptr<Region> r, double l)
+uint64_t
+Playlist::highest_layering_index () const
 {
-	_map[r] = l;
-}
+	RegionLock rlock (const_cast<Playlist *> (this));
 
-/** Return the temporary layer for a region, if one has been specified
- *  to this TemporaryLayers object; if not return the region's current
- *  layer.
- */
-double
-Playlist::TemporaryLayers::get (boost::shared_ptr<Region> r) const
-{
-	Map::const_iterator i = _map.find (r);
-	if (i != _map.end ()) {
-		return i->second;
+	uint64_t h = 0;
+	for (RegionList::const_iterator i = regions.begin(); i != regions.end(); ++i) {
+		h = max (h, (*i)->layering_index ());
 	}
 
-	return double (r->layer ());
-}
-
-int const Playlist::OverlapCache::_divisions = 512;
-
-/** Set up an OverlapCache for a playlist; the cache will only be valid until
- *  the Playlist is changed.
- */
-Playlist::OverlapCache::OverlapCache (Playlist* playlist)
-	: _range (0, 0)
-{
-	/* Find the start and end positions of the regions on this playlist */
-	_range = Evoral::Range<framepos_t> (max_framepos, 0);
-	RegionList const & rl = playlist->region_list().rlist ();
-	for (RegionList::const_iterator i = rl.begin(); i != rl.end(); ++i) {
-		Evoral::Range<framepos_t> const b = (*i)->bounds ();
-		_range.from = min (_range.from, b.from);
-		_range.to = max (_range.to, b.to);
-	}
-
-	/* Hence the size of each time divison */
-	_division_size = (_range.to - _range.from) / double (_divisions);
-
-	_cache.resize (_divisions);
-
-	/* Build the cache */
-	for (RegionList::const_iterator i = rl.begin(); i != rl.end(); ++i) {
-		pair<int, int> ind = cache_indices ((*i)->bounds ());
-		for (int j = ind.first; j < ind.second; ++j) {
-			_cache[j].push_back (*i);
-		}
-	}
-}
-
-/** @param range Range, in frames.
- *  @return From and to cache indices for  (to is exclusive).
- */
-pair<int, int>
-Playlist::OverlapCache::cache_indices (Evoral::Range<framepos_t> range) const
-{
-	range.from = max (range.from, _range.from);
-	range.to = min (range.to, _range.to);
-	
-	pair<int, int> const p = make_pair (
-		floor ((range.from - _range.from) / _division_size),
-		ceil ((range.to - _range.from) / _division_size)
-		);
-
-	assert (p.first >= 0);
-	assert (p.second <= _divisions);
-
-	return p;
-}
-
-/** Return the regions that overlap a given range.  The returned list
- *  is not guaranteed to be in the same order as the Playlist that it was
- *  generated from.
- */
-Playlist::RegionList
-Playlist::OverlapCache::get (Evoral::Range<framepos_t> range) const
-{
-	if (_range.from == max_framepos) {
-		return RegionList ();
-	}
-	
-	RegionList r;
-
-	pair<int, int> ind = cache_indices (range);
-	for (int i = ind.first; i < ind.second; ++i) {
-		for (RegionList::const_iterator j = _cache[i].begin(); j != _cache[i].end(); ++j) {
-			if ((*j)->coverage (range.from, range.to) != OverlapNone) {
-				r.push_back (*j);
-			}
-		}
-	}
-
-	r.sort ();
-	r.unique ();
-
-	return r;
-}
-
-void
-Playlist::suspend_relayer ()
-{
-	_relayer_suspended = true;
-}
-
-void
-Playlist::resume_relayer ()
-{
-	_relayer_suspended = false;
-}
-
-/** Examine a region and return regions which overlap it, and also those which overlap those which overlap etc.
- *  @param ignore Optional region which should be treated as if it doesn't exist (ie not returned in the list,
- *  and not recursed into).
- */
-Playlist::RegionList
-Playlist::recursive_regions_touched (boost::shared_ptr<Region> region, OverlapCache const & cache, boost::shared_ptr<Region> ignore) const
-{
-	RegionList touched;
-	recursive_regions_touched_sub (region, cache, ignore, touched);
-
-	touched.remove (region);
-	return touched;
-}
-
-/** Recursive sub-routine of recursive_regions_touched */
-void
-Playlist::recursive_regions_touched_sub (
-	boost::shared_ptr<Region> region, OverlapCache const & cache, boost::shared_ptr<Region> ignore, RegionList & touched
-	) const
-{
-	RegionList r = cache.get (region->bounds ());
-	for (RegionList::iterator i = r.begin(); i != r.end(); ++i) {
-		if (find (touched.begin(), touched.end(), *i) == touched.end() && *i != ignore) {
-			touched.push_back (*i);
-			recursive_regions_touched_sub (*i, cache, ignore, touched);
-		}
-	}
+	return h;
 }
 

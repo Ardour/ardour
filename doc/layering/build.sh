@@ -1,6 +1,7 @@
 #!/bin/sh
 
-for f in basic-layering explicit-layering1 explicit-layering2 tricky-explicit-layering; do
+for f in basic-layering layering-order-1 layering-order-2; do
+    echo "$f"
     inkscape -z --export-area-drawing -f $f.svg --export-pdf $f.pdf
 done
 

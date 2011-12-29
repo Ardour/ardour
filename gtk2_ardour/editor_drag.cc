@@ -488,10 +488,6 @@ RegionMotionDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	pair<TimeAxisView*, double> const tv = _editor->trackview_by_y_position (_drags->current_pointer_y ());
 	_last_pointer_time_axis_view = find_time_axis_view (tv.first);
 	_last_pointer_layer = tv.first->layer_display() == Overlaid ? 0 : tv.second;
-
-	if (tv.first->view()->layer_display() == Stacked) {
-		tv.first->view()->set_layer_display (Expanded);
-	}
 }
 
 double
@@ -578,7 +574,6 @@ RegionMotionDrag::y_movement_allowed (int delta_track, double delta_layer) const
 		/* Note that we allow layer to be up to 0.5 below zero, as this is used by `Expanded'
 		   mode to allow the user to place a region below another on layer 0.
 		*/
-		
 		if (delta_track == 0 && (l < -0.5 || l >= int (to->view()->layers()))) {
 			/* Off the top or bottom layer; note that we only refuse if the track hasn't changed.
 			   If it has, the layers will be munged later anyway, so it's ok.
@@ -598,6 +593,10 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 
 	/* Find the TimeAxisView that the pointer is now over */
 	pair<TimeAxisView*, double> const tv = _editor->trackview_by_y_position (_drags->current_pointer_y ());
+
+	if (first_move && tv.first->view()->layer_display() == Stacked) {
+		tv.first->view()->set_layer_display (Expanded);
+	}
 
 	/* Bail early if we're not over a track */
 	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tv.first);
@@ -646,21 +645,21 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 		if (first_move) {
 
 			rv->get_time_axis_view().hide_dependent_views (*rv);
-										    
+
+			/* Absolutely no idea why this is necessary, but it is; without
+			   it, the region view disappears after the reparent.
+			*/
+			_editor->update_canvas_now ();
+			
 			/* Reparent to a non scrolling group so that we can keep the
 			   region selection above all time axis views.
 			   Reparenting means that we will have to move the region view
 			   later, as the two parent groups have different coordinates.
 			*/
-			
+
 			rv->get_canvas_group()->reparent (*(_editor->_region_motion_group));
 			
 			rv->fake_set_opaque (true);
-			
-			if (!rv->get_time_axis_view().hidden()) {
-				/* the track that this region view is on is hidden, so hide the region too */
-				rv->get_canvas_group()->hide ();
-			}
 		}
 
 		/* If we have moved tracks, we'll fudge the layer delta so that the
@@ -680,12 +679,12 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 		if (tv->view()->layer_display() == Stacked) {
 			tv->view()->set_layer_display (Expanded);
 		}
-			
+
 		/* We're only allowed to go -ve in layer on Expanded views */
 		if (tv->view()->layer_display() != Expanded && (i->layer + this_delta_layer) < 0) {
 			this_delta_layer = - i->layer;
 		}
-
+			
 		/* Set height */
 		rv->set_height (tv->view()->child_height ());
 
@@ -826,12 +825,13 @@ RegionMotionDrag::finished (GdkEvent *, bool)
 			(*i)->view()->set_layer_display (Stacked);
 		}
 	}
-}	
+}
 
 void
 RegionMoveDrag::finished (GdkEvent* ev, bool movement_occurred)
 {
 	RegionMotionDrag::finished (ev, movement_occurred);
+	
 	if (!movement_occurred) {
 		/* just a click */
 		return;
@@ -965,9 +965,6 @@ RegionMoveDrag::finished_no_copy (
 	RegionSelection new_views;
 	PlaylistSet modified_playlists;
 	PlaylistSet frozen_playlists;
-
-	list<pair<boost::shared_ptr<Region>, double> > pending_explicit_relayers;
-	Playlist::RegionList pending_implicit_relayers;
 	set<RouteTimeAxisView*> views_to_update;
 
 	if (_brushing) {
@@ -1049,12 +1046,8 @@ RegionMoveDrag::finished_no_copy (
 
 			boost::shared_ptr<Playlist> playlist = dest_rtv->playlist();
 
-			bool const explicit_relayer = dest_rtv->view()->layer_display() == Stacked || dest_rtv->view()->layer_display() == Expanded;
-			
-			if (explicit_relayer) {
-				pending_explicit_relayers.push_back (make_pair (rv->region (), dest_layer));
-			} else {
-				pending_implicit_relayers.push_back (rv->region ());
+			if (dest_rtv->view()->layer_display() == Stacked || dest_rtv->view()->layer_display() == Expanded) {
+				rv->region()->set_pending_layer (dest_layer);
 			}
 
 			/* freeze playlist to avoid lots of relayering in the case of a multi-region drag */
@@ -1063,7 +1056,6 @@ RegionMoveDrag::finished_no_copy (
 
 			if (r.second) {
 				playlist->freeze ();
-				playlist->suspend_relayer ();
 			}
 
 			/* this movement may result in a crossfade being modified, so we need to get undo
@@ -1119,24 +1111,10 @@ RegionMoveDrag::finished_no_copy (
 		_editor->selection->set (new_views);
 	}
 
-	/* We can't use the normal mechanism for relayering, as some regions may require an explicit relayer
-	   rather than an implicit one.  So we thaw before resuming relayering, then do the relayers
-	   that we require.
-	*/
-
-	for (PlaylistSet::iterator p = frozen_playlists.begin(); p != frozen_playlists.end(); ++p) {
+	for (set<boost::shared_ptr<Playlist> >::iterator p = frozen_playlists.begin(); p != frozen_playlists.end(); ++p) {
 		(*p)->thaw();
-		(*p)->resume_relayer ();
 	}
 
-	for (list<pair<boost::shared_ptr<Region>, double> >::iterator i = pending_explicit_relayers.begin(); i != pending_explicit_relayers.end(); ++i) {
-		i->first->playlist()->relayer (i->first, i->second);
-	}
-
-	for (Playlist::RegionList::iterator i = pending_implicit_relayers.begin(); i != pending_implicit_relayers.end(); ++i) {
-		(*i)->playlist()->relayer (*i);
-	}
-	
 	/* write commands for the accumulated diffs for all our modified playlists */
 	add_stateful_diff_commands_for_playlists (modified_playlists);
 
@@ -1144,11 +1122,11 @@ RegionMoveDrag::finished_no_copy (
 
 	/* We have futzed with the layering of canvas items on our streamviews.
 	   If any region changed layer, this will have resulted in the stream
-	   views being asked to set up their region views, and all will be
-	   well.  If not, we might now have badly-ordered region views.  Ask
-	   the Streamviews involved to sort themselves out, just in case.
+	   views being asked to set up their region views, and all will be well.
+	   If not, we might now have badly-ordered region views.  Ask the StreamViews
+	   involved to sort themselves out, just in case.
 	*/
-	
+
 	for (set<RouteTimeAxisView*>::iterator i = views_to_update.begin(); i != views_to_update.end(); ++i) {
 		(*i)->view()->playlist_layered ((*i)->track ());
 	}
@@ -1214,7 +1192,7 @@ RegionMoveDrag::insert_region_into_playlist (
 	dest_playlist->add_region (region, where);
 
 	if (dest_rtv->view()->layer_display() == Stacked || dest_rtv->view()->layer_display() == Expanded) {
-		dest_playlist->relayer (region, dest_layer);
+		region->set_pending_layer (dest_layer);
 	}
 
 	c.disconnect ();
@@ -1268,7 +1246,7 @@ RegionMotionDrag::aborted (bool)
 			(*i)->view()->set_layer_display (Stacked);
 		}
 	}
-
+	
 	for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
 		RegionView* rv = i->view;
 		TimeAxisView* tv = &(rv->get_time_axis_view ());

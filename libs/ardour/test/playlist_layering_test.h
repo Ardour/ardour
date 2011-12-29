@@ -1,6 +1,5 @@
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
-#include "test_needing_session.h"
 
 namespace ARDOUR {
 	class Session;
@@ -8,42 +7,23 @@ namespace ARDOUR {
 	class Source;
 }
 
-class PlaylistLayeringTest : public TestNeedingSession
+class PlaylistLayeringTest : public CppUnit::TestFixture
 {
 	CPPUNIT_TEST_SUITE (PlaylistLayeringTest);
-	CPPUNIT_TEST (lastLayerOpTest);
-	CPPUNIT_TEST (addHigher_relayerOnAll_Test);
-	CPPUNIT_TEST (addOrBoundsHigher_relayerOnAll_Test);
-	CPPUNIT_TEST (laterHigher_relayerOnAll_Test);
-	CPPUNIT_TEST (addOrBoundsHigher_relayerWhenNecessary_Test);
-	CPPUNIT_TEST (recursiveRelayerTest);
+	CPPUNIT_TEST (basicsTest);
 	CPPUNIT_TEST_SUITE_END ();
 
 public:
 	void setUp ();
 	void tearDown ();
 
-	void lastLayerOpTest ();
-	void addHigher_relayerOnAll_Test ();
-	void addOrBoundsHigher_relayerOnAll_Test ();
-	void laterHigher_relayerOnAll_Test ();
-	void addOrBoundsHigher_relayerWhenNecessary_Test ();
-	void recursiveRelayerTest ();
+	void basicsTest ();
 
 private:
-	void create_short_regions ();
+	void create_three_short_regions ();
 	
-	static int const num_regions;
-	enum {
-		A = 0,
-		B,
-		C,
-		D,
-		E,
-		F
-	};
-	
+	ARDOUR::Session* _session;
 	boost::shared_ptr<ARDOUR::Playlist> _playlist;
 	boost::shared_ptr<ARDOUR::Source> _source;
-	boost::shared_ptr<ARDOUR::Region>* _region;
+	boost::shared_ptr<ARDOUR::Region> _region[16];
 };

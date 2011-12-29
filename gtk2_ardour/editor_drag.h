@@ -249,7 +249,7 @@ struct DraggingView
 	 *  or -1 if it is not visible.
 	 */
 	int time_axis_view;
-	/** Layer that this region is currently being displayed on.  This is a double
+	/** layer that this region is currently being displayed on.  This is a double
 	    rather than a layer_t as we use fractional layers during drags to allow the user
 	    to indicate a new layer to put a region on.
 	*/

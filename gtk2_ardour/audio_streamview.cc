@@ -812,7 +812,7 @@ AudioStreamView::update_content_height (CrossfadeView* cv)
 	switch (_layer_display) {
 	case Overlaid:
 		cv->set_y (0);
-		cv->set_height (height);
+		cv->set_heights (height, height);
 		break;
 
 	case Stacked:
@@ -827,10 +827,10 @@ AudioStreamView::update_content_height (CrossfadeView* cv)
 
 		if (_layer_display == Stacked) {
 			cv->set_y ((_layers - high - 1) * h);
-			cv->set_height ((high - low + 1) * h);
+			cv->set_heights ((high - low + 1) * h, h);
 		} else {
 			cv->set_y (((_layers - high) * 2 - 1) * h);
-			cv->set_height (((high - low) * 2 + 1) * h);
+			cv->set_heights (((high - low) * 2 + 1) * h, h);
 		}
 	}
 }

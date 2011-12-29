@@ -19,8 +19,6 @@ export ARDOUR_PANNER_PATH=$libs/panners/2in2out:$libs/panners/1in2out:$libs/pann
 
 if [ "$1" == "--debug" ]; then
         gdb ./libs/ardour/run-tests
-elif [ "$1" == "--valgrind" ]; then
-        valgrind --tool="memcheck" ./libs/ardour/run-tests
 else
         ./libs/ardour/run-tests
 fi

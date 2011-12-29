@@ -409,12 +409,6 @@ namespace ARDOUR {
 		ShortCrossfade
 	};
 
-	enum LayerModel {
-		LaterHigher,
-		AddOrBoundsChangeHigher,
-		AddHigher
-	};
-
 	enum ListenPosition {
 		AfterFaderListen,
 		PreFaderListen
@@ -592,11 +586,6 @@ namespace ARDOUR {
 		FadeLogB
 	};
 
-	enum LayerOp {
-		LayerOpAdd,
-		LayerOpBoundsChange
-	};
-
 } // namespace ARDOUR
 
 
@@ -613,7 +602,6 @@ std::istream& operator>>(std::istream& o, ARDOUR::PFLPosition& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::AFLPosition& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::RemoteModel& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::ListenPosition& sf);
-std::istream& operator>>(std::istream& o, ARDOUR::LayerModel& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::InsertMergePolicy& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::CrossfadeModel& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::SyncSource& sf);
@@ -634,7 +622,6 @@ std::ostream& operator<<(std::ostream& o, const ARDOUR::PFLPosition& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::AFLPosition& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::RemoteModel& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::ListenPosition& sf);
-std::ostream& operator<<(std::ostream& o, const ARDOUR::LayerModel& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::InsertMergePolicy& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::CrossfadeModel& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::SyncSource& sf);

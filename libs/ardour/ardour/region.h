@@ -65,6 +65,7 @@ namespace Properties {
 	extern PBD::PropertyDescriptor<float>             stretch;
 	extern PBD::PropertyDescriptor<float>             shift;
 	extern PBD::PropertyDescriptor<PositionLockStyle> position_lock_style;
+	extern PBD::PropertyDescriptor<uint64_t>          layering_index;
 };
 
 class Playlist;
@@ -112,7 +113,6 @@ class Region
 	framepos_t start ()     const { return _start; }
 	framecnt_t length ()    const { return _length; }
 	layer_t    layer ()     const { return _layer; }
-	Evoral::Range<framepos_t> bounds () const;
 
 	framecnt_t source_length(uint32_t n) const;
 	uint32_t   max_source_level () const;
@@ -202,7 +202,7 @@ class Region
 	void cut_front (framepos_t new_position);
 	void cut_end (framepos_t new_position);
 
-	void set_layer (layer_t l); /* ONLY Playlist should call this */
+	void set_layer (layer_t l); /* ONLY Playlist can call this */
 	void raise ();
 	void lower ();
 	void raise_to_top ();
@@ -252,8 +252,8 @@ class Region
 
 	virtual boost::shared_ptr<Region> get_parent() const;
 
-	uint64_t last_layer_op (LayerOp) const;
-	void set_last_layer_op (LayerOp, uint64_t);
+	uint64_t layering_index () const { return _layering_index; }
+	void set_layering_index (uint64_t when) { _layering_index = when; }
 
 	virtual bool is_dependent() const { return false; }
 	virtual bool depends_on (boost::shared_ptr<Region> /*other*/) const { return false; }
@@ -294,12 +294,11 @@ class Region
 
 	void invalidate_transients ();
 
-	void drop_sources ();
+	void set_pending_layer (double);
+	bool reset_pending_layer ();
+	boost::optional<double> pending_layer () const;
 
-	/** @return our bounds the last time our relayer() method was called */
-	Evoral::Range<framepos_t> last_relayer_bounds () const {
-		return Evoral::Range<framepos_t> (_last_relayer_bounds_from, _last_relayer_bounds_to);
-	}
+	void drop_sources ();
 
   protected:
 	friend class RegionFactory;
@@ -384,17 +383,14 @@ class Region
 	PBD::Property<float>       _stretch;
 	PBD::Property<float>       _shift;
 	PBD::EnumProperty<PositionLockStyle> _position_lock_style;
+	PBD::Property<uint64_t>    _layering_index;
 
-	/* XXX: could use a Evoral::Range<> but I'm too lazy to make PBD::Property serialize such a thing nicely */
-	PBD::Property<framepos_t> _last_relayer_bounds_from; ///< from of our bounds last time relayer() was called
-	PBD::Property<framepos_t> _last_relayer_bounds_to; ///< to of our bounds last time relayer() was called
-	PBD::Property<uint64_t> _last_layer_op_add;
-	PBD::Property<uint64_t> _last_layer_op_bounds_change;
-	
 	framecnt_t              _last_length;
 	framepos_t              _last_position;
 	mutable RegionEditState _first_edit;
 	Timecode::BBT_Time      _bbt_time;
+
+	boost::optional<double> _pending_layer;
 
 	void register_properties ();
 
