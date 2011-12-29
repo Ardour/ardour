@@ -22,6 +22,8 @@
 #include <fstream>
 #include <errno.h>
 
+#include "fix_carbon.h"
+
 #include <gtkmm/stock.h>
 #include <gtkmm/settings.h>
 
