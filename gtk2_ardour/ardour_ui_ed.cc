@@ -535,8 +535,13 @@ ARDOUR_UI::build_menu_bar ()
 	ev->show ();
 	CairoHPacker* hbox = manage (new CairoHPacker);
 	hbox->show ();
-	
-	ev->add (*hbox);
+	hbox->set_border_width (3);
+
+	VBox* vbox = manage (new VBox);
+	vbox->pack_start (*hbox, true, false);
+	vbox->show();
+
+	ev->add (*vbox);
 
 	wall_clock_label.set_name ("WallClock");
 	wall_clock_label.set_use_markup ();
@@ -575,7 +580,7 @@ ARDOUR_UI::build_menu_bar ()
 	hbox->pack_end (sample_rate_label, false, false, 4);
 	hbox->pack_end (format_label, false, false, 4);
 
-	menu_hbox.pack_end (*ev, false, false);
+	menu_hbox.pack_end (*ev, false, false, 6);
 
 	menu_bar_base.set_name ("MainMenuBar");
 	menu_bar_base.add (menu_hbox);
