@@ -86,6 +86,7 @@ Prompter::on_show ()
 	if (first_show) {
 		entry.signal_changed().connect (mem_fun (*this, &Prompter::on_entry_changed));
 		entry.signal_activate().connect (mem_fun (*this, &Prompter::entry_activated));
+		can_accept_from_entry = !entry.get_text().empty();
 		first_show = false;
 	}
 
