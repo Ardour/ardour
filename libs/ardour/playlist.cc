@@ -2418,6 +2418,11 @@ Playlist::relayer ()
 	RegionList copy = regions.rlist();
 	copy.sort (RelayerSort ());
 
+	DEBUG_TRACE (DEBUG::Layering, "relayer() using:\n");
+	for (RegionList::iterator i = copy.begin(); i != copy.end(); ++i) {
+		DEBUG_TRACE (DEBUG::Layering, string_compose ("\t%1 %2\n", (*i)->name(), (*i)->layering_index()));
+	}
+
 	for (RegionList::iterator i = copy.begin(); i != copy.end(); ++i) {
 
 		/* find the time divisions that this region covers; if there are no regions on the list,
