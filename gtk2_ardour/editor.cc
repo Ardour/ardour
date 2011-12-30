@@ -5360,10 +5360,10 @@ Editor::change_region_layering_order (bool from_context_menu)
 {
 	framepos_t position;
 
-	if (from_context_menu) {
-		position = event_frame (&context_click_event, 0, 0);
-	} else {
+	if (!from_context_menu || (_edit_point != EditAtMouse)) {
 		position = get_preferred_edit_position ();
+	} else {
+		position = event_frame (&context_click_event, 0, 0);
 	}
 
 	if (!clicked_routeview) {
