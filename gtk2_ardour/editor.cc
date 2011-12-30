@@ -1947,7 +1947,7 @@ Editor::add_dstream_context_items (Menu_Helpers::MenuList& edit_items)
 
 	cutnpaste_items.push_back (MenuElem (_("Cut"), sigc::mem_fun(*this, &Editor::cut)));
 	cutnpaste_items.push_back (MenuElem (_("Copy"), sigc::mem_fun(*this, &Editor::copy)));
-	cutnpaste_items.push_back (MenuElem (_("Paste"), sigc::bind (sigc::mem_fun(*this, &Editor::paste), 1.0f)));
+	cutnpaste_items.push_back (MenuElem (_("Paste"), sigc::bind (sigc::mem_fun(*this, &Editor::paste), 1.0f, true)));
 
 	cutnpaste_items.push_back (SeparatorElem());
 
@@ -2018,7 +2018,7 @@ Editor::add_bus_context_items (Menu_Helpers::MenuList& edit_items)
 
 	cutnpaste_items.push_back (MenuElem (_("Cut"), sigc::mem_fun(*this, &Editor::cut)));
 	cutnpaste_items.push_back (MenuElem (_("Copy"), sigc::mem_fun(*this, &Editor::copy)));
-	cutnpaste_items.push_back (MenuElem (_("Paste"), sigc::bind (sigc::mem_fun(*this, &Editor::paste), 1.0f)));
+	cutnpaste_items.push_back (MenuElem (_("Paste"), sigc::bind (sigc::mem_fun(*this, &Editor::paste), 1.0f, true)));
 
 	Menu *nudge_menu = manage (new Menu());
 	MenuList& nudge_items = nudge_menu->items();
@@ -4356,11 +4356,15 @@ Editor::sort_track_selection (TrackViewList& sel)
 }
 
 framepos_t
-Editor::get_preferred_edit_position (bool ignore_playhead)
+Editor::get_preferred_edit_position (bool ignore_playhead, bool from_context_menu)
 {
 	bool ignored;
 	framepos_t where = 0;
 	EditPoint ep = _edit_point;
+
+	if (from_context_menu && (ep == EditAtMouse)) {
+		return  event_frame (&context_click_event, 0, 0);
+	}
 
 	if (entered_marker) {
                 DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("GPEP: use entered marker @ %1\n", entered_marker->position()));
@@ -5358,13 +5362,7 @@ Editor::show_editor_list (bool yn)
 void
 Editor::change_region_layering_order (bool from_context_menu)
 {
-	framepos_t position;
-
-	if (!from_context_menu || (_edit_point != EditAtMouse)) {
-		position = get_preferred_edit_position ();
-	} else {
-		position = event_frame (&context_click_event, 0, 0);
-	}
+	const framepos_t position = get_preferred_edit_position (false, from_context_menu);
 
 	if (!clicked_routeview) {
 		if (layering_order_editor) {

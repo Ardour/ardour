@@ -3957,10 +3957,11 @@ Editor::cut_copy_ranges (CutCopyOp op)
 }
 
 void
-Editor::paste (float times)
+Editor::paste (float times, bool from_context)
 {
         DEBUG_TRACE (DEBUG::CutNPaste, "paste to preferred edit pos\n");
-	paste_internal (get_preferred_edit_position(), times);
+
+	paste_internal (get_preferred_edit_position (false, from_context), times);
 }
 
 void
@@ -4563,13 +4564,7 @@ Editor::insert_patch_change (bool from_context)
 		return;
 	}
 
-	framepos_t p;
-
-	if (!from_context || (_edit_point != EditAtMouse)) {
-		p = get_preferred_edit_position (false);
-	} else {
-		p = event_frame (&context_click_event, 0, 0);
-	}
+	const framepos_t p = get_preferred_edit_position (false, from_context);
 
 	Evoral::PatchChange<Evoral::MusicalTime> empty (0, 0, 0, 0);
 	PatchChangeDialog d (0, _session, empty, Gtk::Stock::ADD);
