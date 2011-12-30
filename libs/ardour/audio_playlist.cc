@@ -113,6 +113,8 @@ AudioPlaylist::AudioPlaylist (Session& session, const XMLNode& node, bool hidden
 		throw failed_constructor();
 	}
 	in_set_state--;
+
+	relayer ();
 }
 
 AudioPlaylist::AudioPlaylist (Session& session, string name, bool hidden)

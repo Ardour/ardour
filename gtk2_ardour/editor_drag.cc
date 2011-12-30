@@ -1047,7 +1047,7 @@ RegionMoveDrag::finished_no_copy (
 			boost::shared_ptr<Playlist> playlist = dest_rtv->playlist();
 
 			if (dest_rtv->view()->layer_display() == Stacked || dest_rtv->view()->layer_display() == Expanded) {
-				rv->region()->set_pending_layer (dest_layer);
+				playlist->set_layer (rv->region(), dest_layer);
 			}
 
 			/* freeze playlist to avoid lots of relayering in the case of a multi-region drag */
@@ -1192,7 +1192,7 @@ RegionMoveDrag::insert_region_into_playlist (
 	dest_playlist->add_region (region, where);
 
 	if (dest_rtv->view()->layer_display() == Stacked || dest_rtv->view()->layer_display() == Expanded) {
-		region->set_pending_layer (dest_layer);
+		dest_playlist->set_layer (region, dest_layer);
 	}
 
 	c.disconnect ();

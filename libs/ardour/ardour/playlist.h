@@ -223,6 +223,8 @@ public:
 	uint32_t combine_ops() const { return _combine_ops; }
 
 	uint64_t highest_layering_index () const;
+
+	void set_layer (boost::shared_ptr<Region>, double);
 	
   protected:
 	friend class Session;
@@ -271,7 +273,7 @@ public:
 	bool             save_on_thaw;
 	std::string      last_save_reason;
 	uint32_t         in_set_state;
-	bool             in_update;
+	bool             in_undo;
 	bool             first_set_state;
 	bool            _hidden;
 	bool            _splicing;

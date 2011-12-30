@@ -1071,7 +1071,7 @@ AudioRegion::separate_by_channel (Session& /*session*/, vector<boost::shared_ptr
 		plist.add (Properties::start, _start.val());
 		plist.add (Properties::length, _length.val());
 		plist.add (Properties::name, new_name);
-		plist.add (Properties::layer, _layer.val());
+		plist.add (Properties::layer, layer ());
 
 		v.push_back(RegionFactory::create (srcs, plist));
 		v.back()->set_whole_file (false);

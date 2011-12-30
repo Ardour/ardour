@@ -154,7 +154,6 @@ Region::register_properties ()
 	add_property (_length);
 	add_property (_position);
 	add_property (_sync_position);
-	add_property (_layer);
 	add_property (_ancestral_start);
 	add_property (_ancestral_length);
 	add_property (_stretch);
@@ -172,7 +171,6 @@ Region::register_properties ()
 	, _length (Properties::length, (l))	\
 	, _position (Properties::position, 0) \
 	, _sync_position (Properties::sync_position, (s)) \
-	, _layer (Properties::layer, 0)	\
 	, _muted (Properties::muted, false) \
 	, _opaque (Properties::opaque, true) \
 	, _locked (Properties::locked, false) \
@@ -198,7 +196,6 @@ Region::register_properties ()
 	, _length(Properties::length, other->_length)		\
 	, _position(Properties::position, other->_position)	\
 	, _sync_position(Properties::sync_position, other->_sync_position) \
-	, _layer (Properties::layer, other->_layer)		\
         , _muted (Properties::muted, other->_muted)	        \
 	, _opaque (Properties::opaque, other->_opaque)		\
 	, _locked (Properties::locked, other->_locked)		\
@@ -223,6 +220,7 @@ Region::Region (Session& s, framepos_t start, framecnt_t length, const string& n
 	, _last_length (length)
 	, _last_position (0)
 	, _first_edit (EditChangesNothing)
+	, _layer (0)
 {
 	register_properties ();
 
@@ -237,6 +235,7 @@ Region::Region (const SourceList& srcs)
 	, _last_length (0)
 	, _last_position (0)
 	, _first_edit (EditChangesNothing)
+	, _layer (0)
 {
 	register_properties ();
 
@@ -256,6 +255,7 @@ Region::Region (boost::shared_ptr<const Region> other)
 	, _last_length (other->_last_length)
 	, _last_position(other->_last_position) \
 	, _first_edit (EditChangesNothing)
+	, _layer (other->_layer)
 {
 	register_properties ();
 
@@ -325,6 +325,7 @@ Region::Region (boost::shared_ptr<const Region> other, frameoffset_t offset)
 	, _last_length (other->_last_length)
 	, _last_position(other->_last_position) \
 	, _first_edit (EditChangesNothing)
+	, _layer (other->_layer)
 {
 	register_properties ();
 
@@ -379,6 +380,7 @@ Region::Region (boost::shared_ptr<const Region> other, const SourceList& srcs)
 	, _last_length (other->_last_length)
 	, _last_position (other->_last_position)
 	, _first_edit (EditChangesID)
+	, _layer (other->_layer)
 {
 	register_properties ();
 
@@ -1115,11 +1117,7 @@ Region::lower_to_bottom ()
 void
 Region::set_layer (layer_t l)
 {
-	if (_layer != l) {
-		_layer = l;
-
-		send_change (Properties::layer);
-	}
+	_layer = l;
 }
 
 XMLNode&
@@ -1650,22 +1648,3 @@ Region::post_set (const PropertyChange& pc)
 	}
 }
 
-void
-Region::set_pending_layer (double l)
-{
-	_pending_layer = l;
-}
-
-bool
-Region::reset_pending_layer ()
-{
-	bool const had = _pending_layer;
-	_pending_layer = boost::optional<double> ();
-	return had;
-}
-
-boost::optional<double>
-Region::pending_layer () const
-{
-	return _pending_layer;
-}

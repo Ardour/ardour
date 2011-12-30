@@ -1511,8 +1511,8 @@ AudioDiskstream::transport_stopped_wallclock (struct tm& when, time_t twhen, boo
 
 			i_am_the_modifier++;
 
-			region->set_pending_layer (max_layer);
 			_playlist->add_region (region, (*ci)->start, 1, non_layered());
+			_playlist->set_layer (region, DBL_MAX);
 			i_am_the_modifier--;
 
 			buffer_position += (*ci)->frames;

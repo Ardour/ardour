@@ -294,10 +294,6 @@ class Region
 
 	void invalidate_transients ();
 
-	void set_pending_layer (double);
-	bool reset_pending_layer ();
-	boost::optional<double> pending_layer () const;
-
 	void drop_sources ();
 
   protected:
@@ -341,7 +337,6 @@ class Region
 	PBD::Property<framepos_t>  _position;
 	/** Sync position relative to the start of our file */
 	PBD::Property<framepos_t>  _sync_position;
-	PBD::Property<layer_t>     _layer;
 	
 	SourceList              _sources;
 	/** Used when timefx are applied, so we can always use the original source */
@@ -389,8 +384,7 @@ class Region
 	framepos_t              _last_position;
 	mutable RegionEditState _first_edit;
 	Timecode::BBT_Time      _bbt_time;
-
-	boost::optional<double> _pending_layer;
+	layer_t                 _layer;
 
 	void register_properties ();
 

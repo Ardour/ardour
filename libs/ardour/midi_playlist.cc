@@ -57,6 +57,8 @@ MidiPlaylist::MidiPlaylist (Session& session, const XMLNode& node, bool hidden)
 		throw failed_constructor ();
 	}
 	in_set_state--;
+
+	relayer ();
 }
 
 MidiPlaylist::MidiPlaylist (Session& session, string name, bool hidden)

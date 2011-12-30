@@ -310,7 +310,7 @@ Playlist::init (bool hide)
 	_shuffling = false;
 	_nudging = false;
 	in_set_state = 0;
-	in_update = false;
+	in_undo = false;
 	_edit_mode = Config->get_edit_mode();
 	in_flush = false;
 	in_partition = false;
@@ -396,7 +396,7 @@ Playlist::set_name (const string& str)
 void
 Playlist::begin_undo ()
 {
-	in_update = true;
+	in_undo = true;
 	freeze ();
 }
 
@@ -404,7 +404,7 @@ void
 Playlist::end_undo ()
 {
 	thaw (true);
-	in_update = false;
+	in_undo = false;
 }
 
 void
@@ -563,7 +563,7 @@ Playlist::flush_notifications (bool from_undo)
 {
 	set<boost::shared_ptr<Region> > dependent_checks_needed;
 	set<boost::shared_ptr<Region> >::iterator s;
-	uint32_t regions_changed = false;
+	bool regions_changed = false;
 
 	if (in_flush) {
 		return;
@@ -603,14 +603,17 @@ Playlist::flush_notifications (bool from_undo)
 		 dependent_checks_needed.insert (*s);
 	 }
 
+	if (
+		((regions_changed || pending_contents_change) && !in_set_state) ||
+		pending_layering
+		) {
+		
+		relayer ();
+	}
+
 	 if (regions_changed || pending_contents_change) {
-		 if (!in_set_state) {
-			 relayer ();
-		 }
 		 pending_contents_change = false;
-		 // cerr << _name << " sends 5 contents change @ " << get_microseconds() << endl;
 		 ContentsChanged (); /* EMIT SIGNAL */
-		 // cerr << _name << "done contents change @ " << get_microseconds() << endl;
 	 }
 
 	 for (s = pending_adds.begin(); s != pending_adds.end(); ++s) {
@@ -665,8 +668,8 @@ Playlist::flush_notifications (bool from_undo)
 	 }
 
 	 if (itimes >= 1) {
-		 region->set_pending_layer (DBL_MAX);
 		 add_region_internal (region, pos);
+		 set_layer (region, DBL_MAX);
 		 pos += region->length();
 		 --itimes;
 	 }
@@ -678,8 +681,8 @@ Playlist::flush_notifications (bool from_undo)
 
 	 for (int i = 0; i < itimes; ++i) {
 		 boost::shared_ptr<Region> copy = RegionFactory::create (region, true);
-		 copy->set_pending_layer (DBL_MAX);
 		 add_region_internal (copy, pos);
+		 set_layer (copy, DBL_MAX);
 		 pos += region->length();
 	 }
 
@@ -699,8 +702,8 @@ Playlist::flush_notifications (bool from_undo)
 			 plist.add (Properties::layer, region->layer());
 
 			 boost::shared_ptr<Region> sub = RegionFactory::create (region, plist);
-			 sub->set_pending_layer (DBL_MAX);
 			 add_region_internal (sub, pos);
+			 set_layer (sub, DBL_MAX);
 		 }
 	 }
 
@@ -767,8 +770,8 @@ Playlist::flush_notifications (bool from_undo)
 	 _splicing = true;
 
 	 remove_region_internal (old);
-	 newr->set_pending_layer (newr->layer ());
 	 add_region_internal (newr, pos);
+	 set_layer (newr, old->layer ());
 
 	 _splicing = old_sp;
 
@@ -1207,8 +1210,8 @@ Playlist::flush_notifications (bool from_undo)
 				    the ordering they had in the original playlist.
 				 */
 
-				 copy_of_region->set_pending_layer (copy_of_region->layer() + top);
 				 add_region_internal (copy_of_region, (*i)->position() + pos);
+				 set_layer (copy_of_region, copy_of_region->layer() + top);
 			 }
 			 pos += shift;
 		 }
@@ -1229,8 +1232,8 @@ Playlist::flush_notifications (bool from_undo)
 
 	 while (itimes--) {
 		 boost::shared_ptr<Region> copy = RegionFactory::create (region, true);
-		 copy->set_pending_layer (DBL_MAX);
 		 add_region_internal (copy, pos);
+		 set_layer (copy, DBL_MAX);
 		 pos += region->length();
 	 }
 
@@ -1247,8 +1250,8 @@ Playlist::flush_notifications (bool from_undo)
 			 plist.add (Properties::name, name);
 
 			 boost::shared_ptr<Region> sub = RegionFactory::create (region, plist);
-			 sub->set_pending_layer (DBL_MAX);
 			 add_region_internal (sub, pos);
+			 set_layer (sub, DBL_MAX);
 		 }
 	 }
  }
@@ -2185,7 +2188,10 @@ Playlist::flush_notifications (bool from_undo)
 				return -1;
 			}
 
-			add_region (region, region->position(), 1.0);
+			 {
+				 RegionLock rlock (this);
+				 add_region_internal (region, region->position());
+			 }
 			
 			region->resume_property_changes ();
 
@@ -2210,6 +2216,7 @@ Playlist::flush_notifications (bool from_undo)
 
 	in_set_state--;
 	first_set_state = false;
+
 	return ret;
 }
 
@@ -2340,12 +2347,46 @@ struct RelayerSort {
 	}
 };
 
+/** Set a new layer for a region.  This adjusts the layering indices of all
+ *  regions in the playlist to put the specified region in the appropriate
+ *  place.  The actual layering will be fixed up when relayer() happens.
+ */
+
+void
+Playlist::set_layer (boost::shared_ptr<Region> region, double new_layer)
+{
+	/* Remove the layer we are setting from our region list, and sort it */
+	RegionList copy = regions.rlist();
+	copy.remove (region);
+	copy.sort (RelayerSort ());
+
+	/* Put region back in the right place */
+	RegionList::iterator i = copy.begin();
+	while (i != copy.end ()) {
+		if ((*i)->layer() > new_layer) {
+			break;
+		}
+		++i;
+	}
+	
+	copy.insert (i, region);
+
+	/* Then re-write layering indices */
+	uint64_t j = 0;
+	for (RegionList::iterator k = copy.begin(); k != copy.end(); ++k) {
+		(*k)->set_layering_index (j++);
+	}
+}
+
+/** Take the layering indices of each of our regions, compute the layers
+ *  that they should be on, and write the layers back to the regions.
+ */
 void
 Playlist::relayer ()
 {
-	/* never compute layers when changing state for undo/redo or setting from XML */
+	/* never compute layers when setting from XML */
 
-	if (in_update || in_set_state) {
+	if (in_set_state) {
 		return;
 	}
 
@@ -2373,46 +2414,11 @@ Playlist::relayer ()
 	vector<vector<RegionList> > layers;
 	layers.push_back (vector<RegionList> (divisions));
 
+	/* Sort our regions into layering index order */
 	RegionList copy = regions.rlist();
-	RegionList pending;
-
-	/* Remove regions with pending relayers */
-	for (RegionList::iterator i = copy.begin(); i != copy.end(); ) {
-
-		RegionList::iterator j = i;
-		++j;
-		
-		if ((*i)->pending_layer()) {
-			pending.push_back (*i);
-			copy.erase (i);
-		}
-
-		i = j;
-	}
-
-	/* Sort the remainder */
 	copy.sort (RelayerSort ());
 
-	/* Re-insert the pending layers in the right places */
-	for (RegionList::iterator i = pending.begin(); i != pending.end(); ++i) {
-		RegionList::iterator j = copy.begin();
-		while (j != copy.end ()) {
-			if ((*j)->pending_layer().get_value_or ((*j)->layer ()) > (*i)->pending_layer().get ()) {
-				break;
-			}
-			++j;
-		}
-		copy.insert (j, *i);
-	}
-
-	bool had_pending = false;
-
 	for (RegionList::iterator i = copy.begin(); i != copy.end(); ++i) {
-
-		/* reset the pending layer for every region now that we're relayering */
-		if ((*i)->reset_pending_layer ()) {
-			had_pending = true;
-		}
 
 		/* find the time divisions that this region covers; if there are no regions on the list,
 		   division_size will equal 0 and in this case we'll just say that
@@ -2482,40 +2488,33 @@ Playlist::relayer ()
 	if (changed) {
 		notify_layering_changed ();
 	}
-
-	if (had_pending) {
-		uint64_t i = 0;
-		for (RegionList::iterator j = copy.begin(); j != copy.end(); ++j) {
-			(*j)->set_layering_index (i++);
-		}
-	}
 }
 
 void
 Playlist::raise_region (boost::shared_ptr<Region> region)
 {
-	region->set_pending_layer (region->layer() + 1.5);
+	set_layer (region, region->layer() + 1.5);
 	relayer ();
 }
 
 void
 Playlist::lower_region (boost::shared_ptr<Region> region)
 {
-	region->set_pending_layer (region->layer() - 1.5);
+	set_layer (region, region->layer() - 1.5);
 	relayer ();
 }
 
 void
 Playlist::raise_region_to_top (boost::shared_ptr<Region> region)
 {
-	region->set_pending_layer (DBL_MAX);
+	set_layer (region, DBL_MAX);
 	relayer ();
 }
 
 void
 Playlist::lower_region_to_bottom (boost::shared_ptr<Region> region)
 {
-	region->set_pending_layer (-0.5);
+	set_layer (region, -0.5);
 	relayer ();
 }
 
