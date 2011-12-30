@@ -615,7 +615,7 @@
       <menuitem action='lower-region-to-bottom'/>
     </menu>
     <menu action='RegionMenuMIDI'>
-      <menuitem action='insert-patch-change'/>
+      <menuitem action='insert-patch-change-context'/>
       <menuitem action='quantize-region'/>
       <menuitem action='fork-region'/>
       <menuitem action='show-region-list-editor'/>

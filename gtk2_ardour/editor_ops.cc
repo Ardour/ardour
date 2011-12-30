@@ -4555,14 +4555,20 @@ Editor::quantize_region ()
 }
 
 void
-Editor::insert_patch_change ()
+Editor::insert_patch_change (bool from_context)
 {
 	RegionSelection rs = get_regions_from_selection_and_entered ();
 	if (rs.empty ()) {
 		return;
 	}
 
-	framepos_t const p = get_preferred_edit_position (false);
+	framepos_t p;
+
+	if (!from_context) {
+		p = get_preferred_edit_position (false);
+	} else {
+		p = event_frame (&context_click_event, 0, 0);
+	}
 
 	Evoral::PatchChange<Evoral::MusicalTime> empty (0, 0, 0, 0);
 	PatchChangeDialog d (0, _session, empty, Gtk::Stock::ADD);
