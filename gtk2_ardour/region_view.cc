@@ -779,8 +779,8 @@ RegionView::update_coverage_frames (LayerDisplay d)
 	ArdourCanvas::SimpleRect* cr = 0;
 	bool me = false;
 
-	uint32_t const color = frame->property_fill_color_rgba ();
-	uint32_t const base_alpha = UINT_RGBA_A (color);
+	/* the color that will be used to show parts of regions that will not be heard */
+	uint32_t non_playing_color = RGBA_TO_UINT (32, 32, 32, 192);
 
 	while (t < end) {
 
@@ -802,12 +802,11 @@ RegionView::update_coverage_frames (LayerDisplay d)
 			cr->property_y1() = 1;
 			cr->property_y2() = _height + 1;
 			cr->property_outline_pixels() = 0;
-			/* areas that will be played get a lower alpha */
-			uint32_t alpha = base_alpha;
 			if (new_me) {
-				alpha /= 2;
+				cr->property_fill_color_rgba () = UINT_RGBA_CHANGE_A (non_playing_color, 0);
+			} else {
+				cr->property_fill_color_rgba () = non_playing_color;
 			}
-			cr->property_fill_color_rgba () = UINT_RGBA_CHANGE_A (color, alpha);
 		}
 
 		t = pl->find_next_region_boundary (t, 1);
