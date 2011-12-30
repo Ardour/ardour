@@ -482,7 +482,12 @@ MidiRegionView::button_release (GdkEventButton* ev)
 						beats = 1;
 					}
 
-					create_note_at (editor.pixel_to_frame (event_x), event_y, beats, true, true);
+					/* Shorten the length by 1 tick so that we can add a new note at the next
+					   grid snap without it overlapping this one.
+					*/
+					beats -= 1.0 / Timecode::BBT_Time::ticks_per_bar_division;
+
+					create_note_at (editor.pixel_to_frame (event_x), event_y, beats, true);
 				}
 
 				break;
@@ -496,7 +501,12 @@ MidiRegionView::button_release (GdkEventButton* ev)
 					beats = 1;
 				}
 
-				create_note_at (editor.pixel_to_frame (event_x), event_y, beats, true, true);
+				/* Shorten the length by 1 tick so that we can add a new note at the next
+				   grid snap without it overlapping this one.
+				*/
+				beats -= 1.0 / Timecode::BBT_Time::ticks_per_bar_division;
+				
+				create_note_at (editor.pixel_to_frame (event_x), event_y, beats, true);
 
 				break;
 			}
@@ -778,12 +788,11 @@ MidiRegionView::show_list_editor ()
 /** Add a note to the model, and the view, at a canvas (click) coordinate.
  * \param t time in frames relative to the position of the region
  * \param y vertical position in pixels
- * \param length duration of the note in beats, which will be snapped to the grid
- * \param sh true to make the note 1 frame shorter than the snapped version of \a length.
- * \param snap_x true to snap x to the grid, otherwise false.
+ * \param length duration of the note in beats
+ * \param snap_t true to snap t to the grid, otherwise false.
  */
 void
-MidiRegionView::create_note_at (framepos_t t, double y, double length, bool sh, bool snap_x)
+MidiRegionView::create_note_at (framepos_t t, double y, double length, bool snap_t)
 {
 	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
 	MidiStreamView* const view = mtv->midi_view();
@@ -794,26 +803,13 @@ MidiRegionView::create_note_at (framepos_t t, double y, double length, bool sh, 
 	assert(note <= 127.0);
 
 	// Start of note in frames relative to region start
-	if (snap_x) {
+	if (snap_t) {
 		framecnt_t grid_frames;
 		t = snap_frame_to_grid_underneath (t, grid_frames);
 	}
+
 	assert (t >= 0);
-
 	assert (length != 0);
-
-	if (sh) {
-		/* shorten the note down, but rather than using 1 frame (which
-		   would be the highest resolution, use 1 tick since all
-		   musical data is essentially quantized to this unit. it
-		   is bigger, but not by enough to make any difference.
-
-		   old single frame code:
-
-		   length = region_frames_to_region_beats (region_beats_to_region_frames (length) - 1);
-		*/
-		length -= 1.0/Timecode::BBT_Time::ticks_per_bar_division;
-	}
 
 	const boost::shared_ptr<NoteType> new_note (new NoteType (mtv->get_channel_for_add (),
 	                                                          region_frames_to_region_beats(t + _region->start()), 

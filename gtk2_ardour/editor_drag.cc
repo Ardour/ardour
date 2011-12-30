@@ -4446,11 +4446,15 @@ NoteCreateDrag::finished (GdkEvent* event, bool had_movement)
 	framecnt_t length = abs (_note[0] - _note[1]);
 
 	framecnt_t const g = grid_frames (start);
+	double const one_tick = 1 / Timecode::BBT_Time::ticks_per_bar_division;
+	
 	if (_editor->snap_mode() == SnapNormal && length < g) {
-		length = g;
+		length = g - one_tick;
 	}
 
-	_region_view->create_note_at (start, _drag_rect->property_y1(), _region_view->region_frames_to_region_beats (length), true, false);
+	double const length_beats = max (one_tick, _region_view->region_frames_to_region_beats (length));
+
+	_region_view->create_note_at (start, _drag_rect->property_y1(), length_beats, false);
 }
 
 double

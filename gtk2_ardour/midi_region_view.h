@@ -290,7 +290,7 @@ public:
 	void trim_front_starting ();
 	void trim_front_ending ();
 
-	void create_note_at (framepos_t, double, double, bool, bool);
+	void create_note_at (framepos_t, double, double, bool);
 	
 protected:
 	/** Allows derived types to specify their visibility requirements
