@@ -2430,7 +2430,7 @@ Evoral::MusicalTime
 TempoMap::framewalk_to_beats (framepos_t pos, framecnt_t distance) const
 {
 	Metrics::const_iterator i;
-	const TempoSection* tempo;
+	const TempoSection* tempo = 0;
 	
 	/* Find the starting tempo */
 
@@ -2446,6 +2446,8 @@ TempoMap::framewalk_to_beats (framepos_t pos, framecnt_t distance) const
 			tempo = t;
 		}
 	}
+
+	assert (tempo);
 
 	/* We now have:
 
