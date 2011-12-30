@@ -378,6 +378,10 @@ public:
 	   with its constituent regions
 	*/
 	virtual void pre_uncombine (std::vector<boost::shared_ptr<Region> >&, boost::shared_ptr<Region>) {}
+
+private:
+
+	void setup_layering_indices (RegionList const &) const;
 };
 
 } /* namespace ARDOUR */

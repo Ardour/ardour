@@ -653,6 +653,7 @@ Playlist::flush_notifications (bool from_undo)
    PLAYLIST OPERATIONS
   *************************************************************/
 
+/** Note: this calls set_layer (..., DBL_MAX) so it will reset the layering index of region */
  void
  Playlist::add_region (boost::shared_ptr<Region> region, framepos_t position, float times, bool auto_partition)
  {
@@ -2097,7 +2098,7 @@ Playlist::flush_notifications (bool from_undo)
 	 freeze ();
 	 /* add the added regions */
 	 for (RegionListProperty::ChangeContainer::iterator i = change.added.begin(); i != change.added.end(); ++i) {
-		 add_region ((*i), (*i)->position());
+		 add_region_internal ((*i), (*i)->position());
 	 }
 	 /* remove the removed regions */
 	 for (RegionListProperty::ChangeContainer::iterator i = change.removed.begin(); i != change.removed.end(); ++i) {
@@ -2371,12 +2372,18 @@ Playlist::set_layer (boost::shared_ptr<Region> region, double new_layer)
 	
 	copy.insert (i, region);
 
-	/* Then re-write layering indices */
+	setup_layering_indices (copy);
+}
+
+void
+Playlist::setup_layering_indices (RegionList const & regions) const
+{
 	uint64_t j = 0;
-	for (RegionList::iterator k = copy.begin(); k != copy.end(); ++k) {
+	for (RegionList::const_iterator k = regions.begin(); k != regions.end(); ++k) {
 		(*k)->set_layering_index (j++);
 	}
 }
+
 
 /** Take the layering indices of each of our regions, compute the layers
  *  that they should be on, and write the layers back to the regions.
@@ -2493,6 +2500,12 @@ Playlist::relayer ()
 	if (changed) {
 		notify_layering_changed ();
 	}
+
+	/* This relayer() may have been called as a result of a region removal, in which
+	   case we need to setup layering indices so account for the one that has just
+	   gone away.
+	*/
+	setup_layering_indices (copy);
 }
 
 void
