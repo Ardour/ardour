@@ -2397,8 +2397,6 @@ Playlist::relayer ()
 		return;
 	}
 
-	bool changed = false;
-
 	/* Build up a new list of regions on each layer, stored in a set of lists
 	   each of which represent some period of time on some layer.  The idea
 	   is to avoid having to search the entire region list to establish whether
@@ -2490,16 +2488,16 @@ Playlist::relayer ()
 			layers[j][k].push_back (*i);
 		}
 
-		if ((*i)->layer() != j) {
-			changed = true;
-		}
-
 		(*i)->set_layer (j);
 	}
 
-	if (changed) {
-		notify_layering_changed ();
-	}
+	/* It's a little tricky to know when we could avoid calling this; e.g. if we are
+	   relayering because we just removed the only region on the top layer, nothing will
+	   appear to have changed, but the StreamView must still sort itself out.  We could
+	   probably keep a note of the top layer last time we relayered, and check that,
+	   but premature optimisation &c...
+	*/
+	notify_layering_changed ();
 
 	/* This relayer() may have been called as a result of a region removal, in which
 	   case we need to setup layering indices so account for the one that has just
