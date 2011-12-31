@@ -211,7 +211,7 @@ void
 ControlList::_x_scale (double factor)
 {
 	for (iterator i = _events.begin(); i != _events.end(); ++i) {
-		(*i)->when = floor ((*i)->when * factor);
+		(*i)->when *= factor;
 	}
 
 	mark_dirty ();
