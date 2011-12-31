@@ -338,7 +338,9 @@ StreamView::playlist_switched (boost::weak_ptr<Track> wtr)
 	tr->playlist()->LayeringChanged.connect (playlist_connections, invalidator (*this), boost::bind (&StreamView::playlist_layered, this, boost::weak_ptr<Track> (tr)), gui_context());
 	tr->playlist()->RegionAdded.connect (playlist_connections, invalidator (*this), ui_bind (&StreamView::add_region_view, this, _1), gui_context());
 	tr->playlist()->RegionRemoved.connect (playlist_connections, invalidator (*this), ui_bind (&StreamView::remove_region_view, this, _1), gui_context());
+	tr->playlist()->ContentsChanged.connect (playlist_connections, invalidator (*this), ui_bind (&StreamView::update_coverage_frames, this), gui_context());
 }
+
 
 void
 StreamView::diskstream_changed ()
