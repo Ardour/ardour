@@ -156,8 +156,8 @@ void
 
 TempoSection::update_bar_offset_from_bbt (const Meter& m)
 {
-	_bar_offset = ((double) (start().beats - 1) + (start().ticks/Timecode::BBT_Time::ticks_per_bar_division)) /
-		(m.divisions_per_bar() - 1);
+	_bar_offset = ((start().beats - 1) * BBT_Time::ticks_per_bar_division + start().ticks) / 
+		(m.divisions_per_bar() * BBT_Time::ticks_per_bar_division);
 
 	DEBUG_TRACE (DEBUG::TempoMath, string_compose ("Tempo set bar offset to %1 from %2 w/%3\n", _bar_offset, start(), m.divisions_per_bar()));
 }
@@ -174,18 +174,16 @@ TempoSection::update_bbt_time_from_bar_offset (const Meter& meter)
 
 	new_start.bars = start().bars;
 	
-	double ticks = BBT_Time::ticks_per_bar_division * (_bar_offset * (meter.divisions_per_bar() - 1));
+	double ticks = BBT_Time::ticks_per_bar_division * meter.divisions_per_bar() * _bar_offset;
 	new_start.beats = (uint32_t) floor(ticks/BBT_Time::ticks_per_bar_division);
 	new_start.ticks = (uint32_t) fmod (ticks, BBT_Time::ticks_per_bar_division);
-
-	DEBUG_TRACE (DEBUG::TempoMath, string_compose ("from bar offset %1 and dpb %2, ticks = %3->%4 beats = %5\n", 
-						       _bar_offset, meter.divisions_per_bar(), ticks, new_start.ticks, new_start.beats));
 
 	/* remember the 1-based counting properties of beats */
 	new_start.beats += 1;
 					    
-	DEBUG_TRACE (DEBUG::TempoMath, string_compose ("tempo updated BBT time to %1 from bar offset %2 w/dpb = %3\n", new_start,  _bar_offset, meter.divisions_per_bar()));
-	
+	DEBUG_TRACE (DEBUG::TempoMath, string_compose ("from bar offset %1 and dpb %2, ticks = %3->%4 beats = %5\n", 
+						       _bar_offset, meter.divisions_per_bar(), ticks, new_start.ticks, new_start.beats));
+
 	set_start (new_start);
 }
 
@@ -305,7 +303,7 @@ TempoMap::~TempoMap ()
 }
 
 void
-TempoMap::remove_tempo (const TempoSection& tempo, bool send_signal)
+TempoMap::remove_tempo (const TempoSection& tempo, bool complete_operation)
 {
 	bool removed = false;
 
@@ -327,15 +325,15 @@ TempoMap::remove_tempo (const TempoSection& tempo, bool send_signal)
 	}
 
 	if (removed) {
-		timestamp_metrics (false);
-		if (send_signal) {
+		if (complete_operation) {
+			recompute_map (false);
 			PropertyChanged (PropertyChange ());
 		}
 	}
 }
 
 void
-TempoMap::remove_meter (const MeterSection& tempo, bool send_signal)
+TempoMap::remove_meter (const MeterSection& tempo, bool complete_operation)
 {
 	bool removed = false;
 
@@ -357,8 +355,8 @@ TempoMap::remove_meter (const MeterSection& tempo, bool send_signal)
 	}
 
 	if (removed) {
-		timestamp_metrics (true);
-		if (send_signal) {
+		if (complete_operation) {
+			recompute_map (true);
 			PropertyChanged (PropertyChange ());
 		}
 	}
@@ -448,7 +446,7 @@ TempoMap::do_insert (MetricSection* section)
 		metrics->insert (metrics->end(), section);
 	}
 	
-	timestamp_metrics (reassign_tempo_bbt);
+	recompute_map (reassign_tempo_bbt);
 }
 
 void
@@ -462,7 +460,7 @@ TempoMap::replace_tempo (const TempoSection& ts, const Tempo& tempo, const BBT_T
 	} else {
 		/* cannot move the first tempo section */
 		*((Tempo*)&first) = tempo;
-		timestamp_metrics (false);
+		recompute_map (false);
 	}
 
 	PropertyChanged (PropertyChange ());
@@ -526,7 +524,7 @@ TempoMap::replace_meter (const MeterSection& ms, const Meter& meter, const BBT_T
 	} else {
 		/* cannot move the first meter section */
 		*((Meter*)&first) = meter;
-		timestamp_metrics (true);
+		recompute_map (true);
 	}
 
 	PropertyChanged (PropertyChange ());
@@ -737,41 +735,80 @@ TempoMap::timestamp_metrics_from_audio_time ()
 }
 
 void
-TempoMap::timestamp_metrics (bool reassign_tempo_bbt)
+TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 {
-	Metrics::iterator i;
-	const MeterSection* meter;
-	const TempoSection* tempo;
-	MeterSection *m;
-	TempoSection *t;
+	MeterSection* meter;
+	TempoSection* tempo;
+	TempoSection* ts;
+	MeterSection* ms;
+	double divisions_per_bar;
+	double beat_frames;
+	double frames_per_bar;
+	double current_frame;
+	BBT_Time current;
+	Metrics::iterator next_metric;
 
-	DEBUG_TRACE (DEBUG::TempoMath, "###################### TIMESTAMP via BBT ##############\n");
+	if (end < 0) {
+		if (_map.empty()) {
+			/* compute 1 mins worth */
+			end = _frame_rate * 60;
+		} else {
+			end = _map.back().frame;
+		}
+	}
+
+	DEBUG_TRACE (DEBUG::TempoMath, string_compose ("recomputing tempo map, zero to %1\n", end));
 	
-	framepos_t current = 0;
-	framepos_t section_frames;
-	BBT_Time start;
-	BBT_Time end;
+	_map.clear ();
+
+	for (Metrics::iterator i = metrics->begin(); i != metrics->end(); ++i) {
+		if ((ms = dynamic_cast<MeterSection *> (*i)) != 0) {
+			meter = ms;
+			break;
+		}
+	}
+
+	for (Metrics::iterator i = metrics->begin(); i != metrics->end(); ++i) {
+		if ((ts = dynamic_cast<TempoSection *> (*i)) != 0) {
+			tempo = ts;
+			break;
+		}
+	}
+
+	/* assumes that the first meter & tempo are at frame zero */
+	current_frame = 0;
+	meter->set_frame (0);
+	tempo->set_frame (0);
+
+	/* assumes that the first meter & tempo are at 1|1|0 */
+	current.bars = 1;
+	current.beats = 1;
+	current.ticks = 0;
+
+	divisions_per_bar = meter->divisions_per_bar ();
+	frames_per_bar = meter->frames_per_bar (*tempo, _frame_rate);
+	beat_frames = meter->frames_per_division (*tempo,_frame_rate);
 	
 	if (reassign_tempo_bbt) {
 
+		TempoSection* rtempo = tempo;
+		MeterSection* rmeter = meter;
+
 		DEBUG_TRACE (DEBUG::TempoMath, "\tUpdating tempo marks BBT time from bar offset\n");
 
-		meter = &first_meter ();
-		tempo = &first_tempo ();
-
-		for (i = metrics->begin(); i != metrics->end(); ++i) {
+		for (Metrics::iterator i = metrics->begin(); i != metrics->end(); ++i) {
 			
-			if ((t = dynamic_cast<TempoSection*>(*i)) != 0) {
+			if ((ts = dynamic_cast<TempoSection*>(*i)) != 0) {
 
 				/* reassign the BBT time of this tempo section
 				 * based on its bar offset position.
 				 */
 
-				t->update_bbt_time_from_bar_offset (*meter);
-				tempo = t;
+				ts->update_bbt_time_from_bar_offset (*rmeter);
+				rtempo = ts;
 
-			} else if ((m = dynamic_cast<MeterSection*>(*i)) != 0) {
-				meter = m;
+			} else if ((ms = dynamic_cast<MeterSection*>(*i)) != 0) {
+				rmeter = ms;
 			} else {
 				fatal << _("programming error: unhandled MetricSection type") << endmsg;
 				/*NOTREACHED*/
@@ -779,44 +816,110 @@ TempoMap::timestamp_metrics (bool reassign_tempo_bbt)
 		}
 	}
 
-	meter = &first_meter ();
-	tempo = &first_tempo ();
+	DEBUG_TRACE (DEBUG::TempoMath, string_compose ("start with meter = %1 tempo = %2 dpb %3 fpb %4\n", 
+						       *((Meter*)meter), *((Tempo*)tempo), divisions_per_bar, beat_frames));
 
-	for (i = metrics->begin(); i != metrics->end(); ++i) {
+	next_metric = metrics->begin();
+	++next_metric; // skip meter (or tempo)
+	++next_metric; // skip tempo (or meter)
 
-		end = (*i)->start();
-			     
-		section_frames = count_frames_between_metrics (*meter, *tempo, start, end);
-		current += section_frames;
+	DEBUG_TRACE (DEBUG::TempoMath, string_compose ("Add first bar at 1|1 @ %2\n", current.bars, current_frame));
+	_map.push_back (BBTPoint (*meter, *tempo,(framepos_t) llrint(current_frame), Bar, 1, 1));
 
-		DEBUG_TRACE (DEBUG::TempoMath, string_compose ("frames between %1 & %2 = %3 using %4 & %6 puts %7 at %8\n",
-							       start, end, section_frames, 
-							       *((Meter*) meter), *((Tempo*) tempo),
-							       (*i)->start(), current));
+	while (current_frame < end) {
+		
+		current.beats++;
+		current_frame += beat_frames;
 
-		start = end;
-
-		(*i)->set_frame (current);
-
-		if ((t = dynamic_cast<TempoSection*>(*i)) != 0) {
-			tempo = t;
-		} else if ((m = dynamic_cast<MeterSection*>(*i)) != 0) {
-			meter = m;
-		} else {
-			fatal << _("programming error: unhandled MetricSection type") << endmsg;
-			/*NOTREACHED*/
+		if (current.beats > meter->divisions_per_bar()) {
+			current.bars++;
+			current.beats = 1;
 		}
 
+		if (next_metric != metrics->end()) {
+
+			/* no operator >= so invert operator < */
+
+			DEBUG_TRACE (DEBUG::TempoMath, string_compose ("now at %1 next metric @ %2\n", current, (*next_metric)->start()));
+
+			if (!(current < (*next_metric)->start())) {
+				
+
+				if (((ts = dynamic_cast<TempoSection*> (*next_metric)) != 0)) {
+
+					tempo = ts;
+
+					/* new tempo section: if its on a beat,
+					 * we don't have to do anything other
+					 * than recompute various distances,
+					 * done further below as we transition
+					 * the next metric section.
+					 *
+					 * if its not on the beat, we have to
+					 * compute the duration of the beat it
+					 * is within, which will be different
+					 * from the preceding following ones
+					 * since it takes part of its duration
+					 * from the preceding tempo and part 
+					 * from this new tempo.
+					 */
+
+					if (tempo->start().ticks != 0) {
+						
+						double next_beat_frames = meter->frames_per_division (*tempo,_frame_rate);					
+						
+						DEBUG_TRACE (DEBUG::TempoMath, string_compose ("bumped into non-beat-aligned tempo metric at %1 = %2, adjust next beat using %3\n",
+											       tempo->start(), current_frame, tempo->bar_offset()));
+						
+						/* back up to previous beat */
+						current_frame -= beat_frames;
+						/* set tempo section location based on offset from last beat */
+						tempo->set_frame (current_frame + (ts->bar_offset() * beat_frames));
+						/* advance to the location of the new (adjusted) beat */
+						current_frame += (ts->bar_offset() * beat_frames) + ((1.0 - ts->bar_offset()) * next_beat_frames);
+						DEBUG_TRACE (DEBUG::TempoMath, string_compose ("Adjusted last beat to %1\n", current_frame));
+					} else {
+						
+						DEBUG_TRACE (DEBUG::TempoMath, string_compose ("bumped into beat-aligned tempo metric at %1 = %2\n",
+											       tempo->start(), current_frame));
+						tempo->set_frame (current_frame);
+					}
+
+				} else if ((ms = dynamic_cast<MeterSection*>(*next_metric)) != 0) {
+					
+					meter = ms;
+
+					/* new meter section: always defines the
+					 * start of a bar.
+					 */
+					
+					DEBUG_TRACE (DEBUG::TempoMath, string_compose ("bumped into meter section at %1 (%2)\n",
+										       meter->start(), current_frame));
+					
+					assert (current.beats == 1);
+
+					meter->set_frame (current_frame);
+				}
+				
+				divisions_per_bar = meter->divisions_per_bar ();
+				frames_per_bar = meter->frames_per_bar (*tempo, _frame_rate);
+				beat_frames = meter->frames_per_division (*tempo, _frame_rate);
+				
+				DEBUG_TRACE (DEBUG::TempoMath, string_compose ("New metric with beat frames = %1 dpb %2 meter %3 tempo %4\n", 
+									       beat_frames, divisions_per_bar, *((Meter*)meter), *((Tempo*)tempo)));
+			
+				++next_metric;
+			}
+		}
+
+		if (current.beats == 1) {
+			DEBUG_TRACE (DEBUG::TempoMath, string_compose ("Add Bar at %1|1 @ %2\n", current.bars, current_frame));
+			_map.push_back (BBTPoint (*meter, *tempo,(framepos_t) llrint(current_frame), Bar, current.bars, 1));
+		} else {
+			DEBUG_TRACE (DEBUG::TempoMath, string_compose ("Add Beat at %1|%2 @ %3\n", current.bars, current.beats, current_frame));
+			_map.push_back (BBTPoint (*meter, *tempo, (framepos_t) llrint(current_frame), Beat, current.bars, current.beats));
+		}
 	}
-
-#ifndef NDEBUG
-	if (DEBUG_ENABLED(DEBUG::TempoMath)) {
-		dump (cerr);
-	}
-#endif
-
-	DEBUG_TRACE (DEBUG::TempoMath, "###############################################\n");
-
 }
 
 TempoMetric
@@ -1005,81 +1108,6 @@ TempoMap::count_frames_with_metrics (const TempoMetric& bm, const TempoMetric& e
 	frames = end_frame - start_frame;
 
 	return frames;
-}
-
-framecnt_t
-TempoMap::count_frames_between_metrics (const Meter& meter, const Tempo& tempo, const BBT_Time& start, const BBT_Time& end) const
-{
-	/* this is used in timestamping the metrics by actually counting the
-	 * beats between two metrics ONLY. this means that we know we have a
-	 * fixed divisions_per_bar and frames_per_division for the entire
-	 * computation. 
-	 */
-
-	framecnt_t frames = 0;
-	uint32_t bar = start.bars;
-	double beat = (double) start.beats;
-	double divisions_counted = 0;
-	double divisions_per_bar = 0;
-	double division_frames = 0;
-	double max_divs;
-	int32_t ticks = 0;
-
-	divisions_per_bar = meter.divisions_per_bar();
-	max_divs = ceil (divisions_per_bar);
-	division_frames = meter.frames_per_division (tempo, _frame_rate);
-
-	if (start.ticks > 0) {
-		ticks = -start.ticks;
-		
-	}
-
-	frames = 0;
-
-	while (bar < end.bars || (bar == end.bars && beat < end.beats)) {
-
-		++beat;
-		++divisions_counted;
-		
-		if (beat > max_divs) {
-
-			if (beat > divisions_per_bar) {
-				
-				/* this is a fractional beat at the end of a fractional bar
-				   so it should only count for the fraction
-				*/
-				
-				divisions_counted -= (max_divs - divisions_per_bar);
-			}
-
-			++bar;
-			beat = 1;
-		}
-	}
-
-	ticks += end.ticks;
-
-#if 0	
-	cerr << "for " << start.ticks << " and " << end.ticks << " adjust divs by " << ticks << " = " 
-	     << (ticks/BBT_Time::ticks_per_bar_division) << " divs => " 
-	     << ((ticks/BBT_Time::ticks_per_bar_division) * division_frames)
-	     << " (fpd = " << division_frames << ')'
-	     << endl;
-#endif
-
-	frames = (framecnt_t) llrint (floor ((divisions_counted + (ticks/BBT_Time::ticks_per_bar_division)) * division_frames));
-
-#if 0
-	cerr << "Counted " << divisions_counted << " + " << ticks << " from " << start << " to " << end
-	     << " dpb were " << divisions_per_bar
-	     << " fpd was " << division_frames
-	     << " => " 
-	     << frames 
-	     << endl;
-#endif
-
-	return frames;
-
 }
 
 framepos_t
@@ -1440,296 +1468,22 @@ TempoMap::round_to_type (framepos_t frame, int dir, BBTPointType type)
 	return metric.frame() + count_frames_between (metric.start(), bbt);
 }
 
-TempoMap::BBTPointList *
-TempoMap::get_points (framepos_t lower, framepos_t upper) const
+void
+TempoMap::map (TempoMap::BBTPointList& points, framepos_t lower, framepos_t upper) 
 {
-	Metrics::const_iterator next_metric;
-	BBTPointList *points;
-	double current;
-	const MeterSection* meter;
-	const MeterSection* m;
-	const TempoSection* tempo;
-	const TempoSection* t;
-	uint32_t bar;
-	uint32_t beat;
-	double divisions_per_bar;
-	double beat_frame;
-	double beat_frames;
-	double frames_per_bar;
-	double delta_bars;
-	double delta_beats;
-	double dummy;
-	framepos_t limit;
-
-	meter = &first_meter ();
-	tempo = &first_tempo ();
-
-	/* find the starting point */
-
-	for (next_metric = metrics->begin(); next_metric != metrics->end(); ++next_metric) {
-
-		if ((*next_metric)->frame() > lower) {
-			break;
-		}
-
-		if ((t = dynamic_cast<const TempoSection*>(*next_metric)) != 0) {
-			tempo = t;
-		} else if ((m = dynamic_cast<const MeterSection*>(*next_metric)) != 0) {
-			meter = m;
-		}
+	if (_map.empty() || upper >= _map.back().frame) {
+		recompute_map (false, upper);
 	}
 
-	/* We now have:
-
-	   meter -> the Meter for "lower"
-	   tempo -> the Tempo for "lower"
-	   i     -> for first new metric after "lower", possibly metrics->end()
-
-	   Now start generating points.
-	*/
-
-	divisions_per_bar = meter->divisions_per_bar ();
-	frames_per_bar = meter->frames_per_bar (*tempo, _frame_rate);
-	beat_frames = meter->frames_per_division (*tempo,_frame_rate);
-	
-	DEBUG_TRACE (DEBUG::TempoMath, string_compose ("Start with beat frames = %1 bar = %2\n", beat_frames, frames_per_bar));
-
-	if (meter->frame() > tempo->frame()) {
-		bar = meter->start().bars;
-		beat = meter->start().beats;
-		current = meter->frame();
-	} else {
-		bar = tempo->start().bars;
-		beat = tempo->start().beats;
-		current = tempo->frame();
-	}
-
-	/* initialize current to point to the bar/beat just prior to the
-	   lower frame bound passed in.  assumes that current is initialized
-	   above to be on a beat.
-	*/
-
-	delta_bars = (lower-current) / frames_per_bar;
-	delta_beats = modf(delta_bars, &dummy) * divisions_per_bar;
-	current += (floor(delta_bars) * frames_per_bar) +  (floor(delta_beats) * beat_frames);
-
-	// adjust bars and beats too
-	bar += (uint32_t) (floor(delta_bars));
-	beat += (uint32_t) (floor(delta_beats));
-
-	points = new BBTPointList;
-
-	do {
-
-		/* we're going to add bar or beat points until we hit the
-		     earlier of:
-		     
-		    (1) the end point of this request
-		    (2) the next metric section
-		*/
-		
-		if (next_metric == metrics->end()) {
-			limit = upper;
-			DEBUG_TRACE (DEBUG::TempoMath, string_compose ("== limit set to end of request @ %1\n", limit));
-		} else {
-			limit = (*next_metric)->frame();
-			DEBUG_TRACE (DEBUG::TempoMath, string_compose ("== limit set to next metric section @ %1\n", limit));
+	for (BBTPointList::const_iterator i = _map.begin(); i != _map.end(); ++i) {
+		if ((*i).frame < lower) {
+			continue;
 		}
-
-		limit = min (limit, upper);
-
-		bool reset_current_to_metric_section = true;
-		bool bar_adjusted = false;
-		TempoSection* ts;
-
-		while (current < limit) {
-
-			/* if we're at the start of a bar, add bar point */
-
-			if (beat == 1) {
-				if (current >= lower) {
-					DEBUG_TRACE (DEBUG::TempoMath, string_compose ("Add Bar at %1|1 @ %2\n", bar, current));
-					points->push_back (BBTPoint (*meter, *tempo,(framepos_t) llrint(current), Bar, bar, 1));
-
-				}
-			}
-
-			/* add some beats if we can */
-
-			beat_frame = current;
-
-			const uint32_t max_divs = ceil (divisions_per_bar);
-
-			while (beat <= max_divs && beat_frame < limit) {
-
-				if (beat_frame >= lower) {
-					DEBUG_TRACE (DEBUG::TempoMath, string_compose ("Add Beat at %1|%2 @ %3\n", bar, beat, beat_frame));
-					points->push_back (BBTPoint (*meter, *tempo, (framepos_t) llrint(beat_frame), Beat, bar, beat));
-				}
-
-				beat_frame += beat_frames;
-				current = beat_frame;
-				beat++;
-			}
-
-			DEBUG_TRACE (DEBUG::TempoMath, string_compose ("break in beats addition @ end ? %1 out of bpb ? %2 beat frame @ %3 vs %4 beat @ %5 vs %6\n",
-								       (next_metric == metrics->end()), (beat > max_divs), beat_frame, limit, beat, max_divs));
-
-			if (beat <= max_divs) {
-
-				/* we didn't reach the end of the bar. 
-
-				   this could be be because we hit "upper"
-				   or a new metric section.
-
-				*/
-				
-				if (next_metric != metrics->end() && limit == (*next_metric)->frame()) {
-
-					/* we bumped into a new metric
-					 * section. meter sections are always
-					 * at bar boundaries, but tempo
-					 * sections can begin anywhere and need
-					 * special handling if they are not on
-					 * a beat boundary.
-					 */
-
-					DEBUG_TRACE (DEBUG::TempoMath, string_compose ("stopped at metric at %1 @ 2\n", (*next_metric)->start(), (*next_metric)->frame()));
-
-					if (((ts = dynamic_cast<TempoSection*> (*next_metric)) != 0) && ts->start().ticks != 0) {
-				
-						/* compute current at the *next* beat,
-						   using the tempo section we just
-						   bumped into.
-						*/
-						
-						/* recompute how many frames per
-						 * division using the tempo we've just
-						 * found
-						 */
-						
-						double next_beat_frames = meter->frames_per_division (*ts,_frame_rate);					
-						
-						DEBUG_TRACE (DEBUG::TempoMath, string_compose ("bumped into non-beat-aligned tempo metric at %1 = %2, adjust next beat using %3\n",
-											       (*next_metric)->start(), (*next_metric)->frame(), ts->bar_offset()));
-						
-						current -= beat_frames;
-						current += (ts->bar_offset() * beat_frames) + ((1.0 - ts->bar_offset()) * next_beat_frames);
-
-						/* avoid resetting current to position
-						   of the next metric section as we
-						   iterate through "metrics"
-						   further on below.
-						*/
-						
-						reset_current_to_metric_section = false;
-						
-					} else if (dynamic_cast<MeterSection*> (*next_metric)) {
-						
-						/* we hit a new meter
-						 * section. nothing to do - the
-						 * right thing will happen as
-						 * we move to the next metric
-						 * section down below.
-						 */
-
-					} else {
-						
-						/* we hit a tempo mark that is
-						 * precisely on beat. nothing
-						 * to do here  - the
-						 * right thing will happen as
-						 * we move to the next metric
-						 * section down below.
-						 */
-					}
-
-				} else {
-
-					/* we hit either:
-					   
-					   - the end of the requested range 
-					   
-					   we'll exit from the outer loop soon.
-					*/
-				}
-
-			} else if ((beat > max_divs) || (next_metric != metrics->end() && dynamic_cast<MeterSection*>(*next_metric))) {
-					
-				/* we've arrived at either the end of a bar or
-				   a new **meter** marker (not tempo marker).
-
-				   its important to move `current' forward by
-				   the actual frames_per_bar, not move it to an
-				   integral beat_frame, so that metrics with
-				   non-integral beats-per-bar have their bar
-				   positions set correctly. consider a metric
-				   with 9-1/2 beats-per-bar. the bar we just
-				   filled had 10 beat marks, but the bar end is
-				   1/2 beat before the last beat mark.  And it
-				   is also possible that a tempo change occured
-				   in the middle of a bar, so we subtract the
-				   possible extra fraction from the current
-				*/
-
-				if (beat > max_divs) {
-					/* next bar goes where the numbers suggest */
-					current -= beat_frames * (max_divs - divisions_per_bar);
-					DEBUG_TRACE (DEBUG::TempoMath, "++ next bar from numbers\n");
-				} else {
-					/* next bar goes where the next meter metric is */
-					current = limit;
-					DEBUG_TRACE (DEBUG::TempoMath, "++ next bar at next metric\n");
-				}
-
-				bar++;
-				beat = 1;
-				bar_adjusted = true;
-			}
-		}
-
-		/* if we're done, then we're done */
-
-		if (current >= upper) {
+		if ((*i).frame >= upper) {
 			break;
 		}
-
-		/* i is an iterator that refers to the next metric (or none).
-		   if there is a next metric, move to it, and continue.
-		*/
-
-		if (next_metric != metrics->end()) {
-
-			if ((t = dynamic_cast<const TempoSection*>(*next_metric)) != 0) {
-				tempo = t;
-			} else if ((m = dynamic_cast<const MeterSection*>(*next_metric)) != 0) {
-				meter = m;
-
-				if (!bar_adjusted) {
-					/* new MeterSection, beat always returns to 1 */
-					beat = 1;
-				}
-			}
-			
-			if (reset_current_to_metric_section) {
-				current = (*next_metric)->frame ();
-			}
-
-			DEBUG_TRACE (DEBUG::TempoMath, string_compose ("loop around with current @ %1\n", current));
-			
-			divisions_per_bar = meter->divisions_per_bar ();
-			frames_per_bar = meter->frames_per_bar (*tempo, _frame_rate);
-			beat_frames = meter->frames_per_division (*tempo, _frame_rate);
-
-			DEBUG_TRACE (DEBUG::TempoMath, string_compose ("New metric with beat frames = %1 bar = %2 dpb %3 meter %4 tempo %5\n", 
-								       beat_frames, frames_per_bar, divisions_per_bar, *((Meter*)meter), *((Tempo*)tempo)));
-			
-			++next_metric;
-		}
-
-	} while (1);
-
-	return points;
+		points.push_back (*i);
+	}
 }
 
 const TempoSection&
@@ -1847,7 +1601,7 @@ TempoMap::set_state (const XMLNode& node, int /*version*/)
 
 			MetricSectionSorter cmp;
 			metrics->sort (cmp);
-			timestamp_metrics (true);
+			recompute_map (true);
 		}
 	}
 

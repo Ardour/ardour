@@ -114,7 +114,7 @@ Editor::tempo_map_changed (const PropertyChange& /*ignored*/)
 		tempo_lines->tempo_map_changed();
 	}
 
-	compute_current_bbt_points(leftmost_frame, leftmost_frame + current_page_frames());
+	compute_current_bbt_points (leftmost_frame, leftmost_frame + current_page_frames());
 	_session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks); // redraw metric markers
 	redraw_measures ();
 	update_tempo_based_rulers ();
@@ -169,10 +169,8 @@ Editor::compute_current_bbt_points (framepos_t leftmost, framepos_t rightmost)
 	}
 	next_beat.ticks = 0;
 
-	delete current_bbt_points;
-	current_bbt_points = 0;
-
-	current_bbt_points = _session->tempo_map().get_points (_session->tempo_map().frame_time (previous_beat), _session->tempo_map().frame_time (next_beat) + 1);
+	current_bbt_points.clear();
+	_session->tempo_map().map (current_bbt_points, _session->tempo_map().frame_time (previous_beat), _session->tempo_map().frame_time (next_beat) + 1);
 }
 
 void
@@ -192,8 +190,7 @@ Editor::redraw_measures ()
 void
 Editor::draw_measures ()
 {
-	if (_session == 0 || _show_measures == false ||
-	    !current_bbt_points || current_bbt_points->empty()) {
+	if (_session == 0 || _show_measures == false || current_bbt_points.empty()) {
 		return;
 	}
 
@@ -201,7 +198,7 @@ Editor::draw_measures ()
 		tempo_lines = new TempoLines(*track_canvas, time_line_group, physical_screen_height(get_window()));
 	}
 
-	tempo_lines->draw(*current_bbt_points, frames_per_unit);
+	tempo_lines->draw (current_bbt_points, frames_per_unit);
 }
 
 void

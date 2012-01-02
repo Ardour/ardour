@@ -218,8 +218,9 @@ class TempoMap : public PBD::StatefulDestructible
 		(obj.*method)(*metrics);
 	}
 
-	BBTPointList *get_points (framepos_t start, framepos_t end) const;
-
+	const BBTPointList& map() const { return _map ; }
+	void map (BBTPointList&, framepos_t start, framepos_t end);
+	
 	void      bbt_time (framepos_t when, Timecode::BBT_Time&) const;
 	framecnt_t frame_time (const Timecode::BBT_Time&) const;
 	framecnt_t bbt_duration_at (framepos_t, const Timecode::BBT_Time&, int dir) const;
@@ -282,13 +283,15 @@ class TempoMap : public PBD::StatefulDestructible
 	static Meter    _default_meter;
 
 	Metrics*             metrics;
-	framecnt_t           _frame_rate;
+	framecnt_t          _frame_rate;
 	framepos_t           last_bbt_when;
 	bool                 last_bbt_valid;
 	Timecode::BBT_Time   last_bbt;
 	mutable Glib::RWLock lock;
+	BBTPointList          _map;
 
-	void timestamp_metrics (bool reassign_bar_references);
+	void recompute_map (bool reassign_tempo_bbt, framepos_t end = -1);
+
 	void timestamp_metrics_from_audio_time ();
 
 	framepos_t round_to_type (framepos_t fr, int dir, BBTPointType);
@@ -304,7 +307,6 @@ class TempoMap : public PBD::StatefulDestructible
 
 	framecnt_t count_frames_between (const Timecode::BBT_Time&, const Timecode::BBT_Time&) const;
 	framecnt_t count_frames_with_metrics (const TempoMetric&, const TempoMetric&, const Timecode::BBT_Time&, const Timecode::BBT_Time&) const;
-	framecnt_t count_frames_between_metrics (const Meter& meter, const Tempo& tempo, const Timecode::BBT_Time& start, const Timecode::BBT_Time& end) const;
 
 	int move_metric_section (MetricSection&, const Timecode::BBT_Time& to);
 	void do_insert (MetricSection* section);

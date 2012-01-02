@@ -305,7 +305,6 @@ Editor::Editor ()
         pre_press_cursor = 0;
 	_drags = new DragManager (this);
 	current_mixer_strip = 0;
-	current_bbt_points = 0;
 	tempo_lines = 0;
 
 	snap_type_strings =  I18N (_snap_type_strings);
@@ -5335,8 +5334,7 @@ Editor::session_going_away ()
 	hide_measures ();
 	clear_marker_display ();
 
-	delete current_bbt_points;
-	current_bbt_points = 0;
+	current_bbt_points.clear ();
 
 	/* get rid of any existing editor mixer strip */
 
