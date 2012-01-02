@@ -484,7 +484,8 @@ Session::jack_timebase_callback (jack_transport_state_t /*state*/,
 	if (_tempo_map) {
 
 		TempoMetric metric (_tempo_map->metric_at (_transport_frame));
-		_tempo_map->bbt_time_with_metric (_transport_frame, bbt, metric);
+
+		_tempo_map->bbt_time (_transport_frame, bbt);
 
 		pos->bar = bbt.bars;
 		pos->beat = bbt.beats;

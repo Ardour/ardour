@@ -35,7 +35,7 @@ class TempoMap;
  */
 class BeatsFramesConverter : public Evoral::TimeConverter<double,framepos_t> {
 public:
-	BeatsFramesConverter (const TempoMap& tempo_map, framepos_t origin)
+	BeatsFramesConverter (TempoMap& tempo_map, framepos_t origin)
 		: Evoral::TimeConverter<double, framepos_t> (origin)
 		, _tempo_map(tempo_map)
 	{}
@@ -44,7 +44,7 @@ public:
 	double     from (framepos_t frames) const;
 
 private:
-	const TempoMap& _tempo_map;
+	TempoMap& _tempo_map;
 };
 
 } /* namespace ARDOUR */
