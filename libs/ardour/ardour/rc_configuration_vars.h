@@ -175,7 +175,7 @@ CONFIG_VARIABLE (bool, sound_midi_notes, "sound-midi-notes", false)
 /* denormal management */
 
 CONFIG_VARIABLE (bool, denormal_protection, "denormal-protection", false)
-CONFIG_VARIABLE (DenormalModel, denormal_model, "denormal-model", DenormalNone)
+CONFIG_VARIABLE (DenormalModel, denormal_model, "denormal-model", DenormalFTZDAZ)
 
 /* visibility of various things */
 
