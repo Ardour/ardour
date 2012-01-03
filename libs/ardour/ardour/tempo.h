@@ -310,7 +310,7 @@ class TempoMap : public PBD::StatefulDestructible
 
 	framepos_t round_to_type (framepos_t fr, int dir, BBTPointType);
 
-	void bbt_time_unlocked (framepos_t, Timecode::BBT_Time&);
+        void bbt_time_unlocked (framepos_t, Timecode::BBT_Time&, const BBTPointList::const_iterator&);
 
     framecnt_t bbt_duration_at_unlocked (const Timecode::BBT_Time& when, const Timecode::BBT_Time& bbt, int dir);
 

@@ -704,7 +704,8 @@ TempoMap::timestamp_metrics_from_audio_time ()
 			// which is correct for our purpose
 		}
 
-		bbt_time_unlocked ((*i)->frame(), bbt);
+		BBTPointList::const_iterator bi = bbt_before_or_at ((*i)->frame());
+		bbt_time_unlocked ((*i)->frame(), bbt, bi);
 		
 		// cerr << "timestamp @ " << (*i)->frame() << " with " << bbt.bars << "|" << bbt.beats << "|" << bbt.ticks << " => ";
 
@@ -775,6 +776,7 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 	TempoSection* tempo;
 	TempoSection* ts;
 	MeterSection* ms;
+	MetricSection* last_metric_section;
 	double divisions_per_bar;
 	double beat_frames;
 	double current_frame;
@@ -812,6 +814,7 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 	current_frame = 0;
 	meter->set_frame (0);
 	tempo->set_frame (0);
+	last_metric_section = tempo;
 
 	/* assumes that the first meter & tempo are at 1|1|0 */
 	current.bars = 1;
@@ -868,13 +871,15 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 
 		if (next_metric != metrics->end()) {
 
+			bool exact_start_match_required = true;
+
 			/* no operator >= so invert operator < */
 
 			DEBUG_TRACE (DEBUG::TempoMath, string_compose ("now at %1 next metric @ %2\n", current, (*next_metric)->start()));
 
 			if (!(current < (*next_metric)->start())) {
-				
 
+			  set_metrics:
 				if (((ts = dynamic_cast<TempoSection*> (*next_metric)) != 0)) {
 
 					tempo = ts;
@@ -907,7 +912,13 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 						tempo->set_frame (current_frame + (ts->bar_offset() * beat_frames));
 						/* advance to the location of the new (adjusted) beat */
 						current_frame += (ts->bar_offset() * beat_frames) + ((1.0 - ts->bar_offset()) * next_beat_frames);
+						/* next metric doesn't have to
+						 * match this precisely to
+						 * merit a reloop ...
+						 */
+						exact_start_match_required = false;
 						DEBUG_TRACE (DEBUG::TempoMath, string_compose ("Adjusted last beat to %1\n", current_frame));
+						
 					} else {
 						
 						DEBUG_TRACE (DEBUG::TempoMath, string_compose ("bumped into beat-aligned tempo metric at %1 = %2\n",
@@ -923,8 +934,8 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 					 * start of a bar.
 					 */
 					
-					DEBUG_TRACE (DEBUG::TempoMath, string_compose ("bumped into meter section at %1 (%2)\n",
-										       meter->start(), current_frame));
+					DEBUG_TRACE (DEBUG::TempoMath, string_compose ("bumped into meter section at %1 vs %2 (%3)\n",
+										       meter->start(), current, current_frame));
 					
 					assert (current.beats == 1);
 
@@ -937,7 +948,14 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 				DEBUG_TRACE (DEBUG::TempoMath, string_compose ("New metric with beat frames = %1 dpb %2 meter %3 tempo %4\n", 
 									       beat_frames, divisions_per_bar, *((Meter*)meter), *((Tempo*)tempo)));
 			
+				last_metric_section = *next_metric;
 				++next_metric;
+
+				if (next_metric != metrics->end() && ((*next_metric)->start() == current)) {
+					/* same position so go back and set this one up before advancing
+					*/
+					goto set_metrics;
+				}
 			}
 		}
 
@@ -1029,22 +1047,21 @@ TempoMap::bbt_time (framepos_t frame, BBT_Time& bbt)
 {
 	{
 		Glib::RWLock::ReaderLock lm (lock);
-		bbt_time_unlocked (frame, bbt);
+		BBTPointList::const_iterator i = bbt_before_or_at (frame);
+		bbt_time_unlocked (frame, bbt, i);
 	}
 }
 
 void
-TempoMap::bbt_time_unlocked (framepos_t frame, BBT_Time& bbt)
+TempoMap::bbt_time_unlocked (framepos_t frame, BBT_Time& bbt, const BBTPointList::const_iterator& i)
 {
-	BBTPointList::const_iterator i = bbt_before_or_at (frame);
-	
 	bbt.bars = (*i).bar;
 	bbt.beats = (*i).beat;
 
 	if ((*i).frame == frame) {
 		bbt.ticks = 0;
 	} else {
-		bbt.ticks = llrint (((frame - (*i).frame) / (*i).meter->frames_per_division(*((*i).tempo), _frame_rate)) /
+		bbt.ticks = llrint (((frame - (*i).frame) / (*i).meter->frames_per_division(*((*i).tempo), _frame_rate)) *
 				    BBT_Time::ticks_per_bar_division);
 	}
 }
@@ -1145,37 +1162,46 @@ TempoMap::round_to_beat (framepos_t fr, int dir)
 framepos_t
 TempoMap::round_to_beat_subdivision (framepos_t fr, int sub_num, int dir)
 {
+	Glib::RWLock::ReaderLock lm (lock);
+	BBTPointList::const_iterator i = bbt_before_or_at (fr);
 	BBT_Time the_beat;
-	uint32_t ticks_one_half_subdivisions_worth;
 	uint32_t ticks_one_subdivisions_worth;
 	uint32_t difference;
 
-	bbt_time(fr, the_beat);
+	bbt_time_unlocked (fr, the_beat, i);
+
+	DEBUG_TRACE (DEBUG::SnapBBT, string_compose ("round %1 to nearest 1/%2 beat, before-or-at = %3 @ %4|%5 precise = %6\n",
+						     fr, sub_num, (*i).frame, (*i).bar, (*i).beat, the_beat));
 
 	ticks_one_subdivisions_worth = (uint32_t)BBT_Time::ticks_per_bar_division / sub_num;
-	ticks_one_half_subdivisions_worth = ticks_one_subdivisions_worth / 2;
 
 	if (dir > 0) {
 
-		/* round to next */
+		/* round to next (even if we're on a subdivision */
 
 		uint32_t mod = the_beat.ticks % ticks_one_subdivisions_worth;
 
 		if (mod == 0) {
 			/* right on the subdivision, so the difference is just the subdivision ticks */
-			difference = ticks_one_subdivisions_worth;
+			the_beat.ticks += ticks_one_subdivisions_worth;
 
 		} else {
 			/* not on subdivision, compute distance to next subdivision */
 
-			difference = ticks_one_subdivisions_worth - mod;
+			the_beat.ticks += ticks_one_subdivisions_worth - mod;
 		}
 
-		the_beat = bbt_add (the_beat, BBT_Time (0, 0, difference));
+		if (the_beat.ticks > BBT_Time::ticks_per_bar_division) {
+			assert (i != _map.end());
+			++i;
+			assert (i != _map.end());
+			the_beat.ticks -= BBT_Time::ticks_per_bar_division;
+		} 
+
 
 	} else if (dir < 0) {
 
-		/* round to previous */
+		/* round to previous (even if we're on a subdivision) */
 
 		uint32_t mod = the_beat.ticks % ticks_one_subdivisions_worth;
 
@@ -1190,26 +1216,64 @@ TempoMap::round_to_beat_subdivision (framepos_t fr, int sub_num, int dir)
 			difference = mod;
 		}
 
-		try {
-			the_beat = bbt_subtract (the_beat, BBT_Time (0, 0, difference));
-		} catch (...) {
-			/* can't go backwards from wherever pos is, so just return it */
-			return fr;
+		if (the_beat.ticks < difference) {
+			if (i == _map.begin()) {
+				/* can't go backwards from wherever pos is, so just return it */
+				return fr;
+			}
+			--i;
+			the_beat.ticks = BBT_Time::ticks_per_bar_division - the_beat.ticks;
+		} else {
+			the_beat.ticks -= difference;
 		}
 
 	} else {
 		/* round to nearest */
 
-		if (the_beat.ticks % ticks_one_subdivisions_worth > ticks_one_half_subdivisions_worth) {
-			difference = ticks_one_subdivisions_worth - (the_beat.ticks % ticks_one_subdivisions_worth);
-			the_beat = bbt_add (the_beat, BBT_Time (0, 0, difference));
+		double rem;
+
+		/* compute the distance to the previous and next subdivision */
+		
+		if ((rem = fmod ((double) the_beat.ticks, (double) ticks_one_subdivisions_worth)) > ticks_one_subdivisions_worth/2.0) {
+			
+			/* closer to the next subdivision, so shift forward */
+
+			the_beat.ticks = lrint (the_beat.ticks + (ticks_one_subdivisions_worth - rem));
+
+			DEBUG_TRACE (DEBUG::SnapBBT, string_compose ("moved forward to %1\n", the_beat.ticks));
+
+			if (the_beat.ticks > BBT_Time::ticks_per_bar_division) {
+				assert (i != _map.end());
+				++i;
+				assert (i != _map.end());
+				the_beat.ticks -= BBT_Time::ticks_per_bar_division;
+				DEBUG_TRACE (DEBUG::SnapBBT, string_compose ("fold beat to %1\n", the_beat));
+			} 
+
+		} else if (rem > 0) {
+			
+			/* closer to previous subdivision, so shift backward */
+
+			if (rem > the_beat.ticks) {
+				if (i == _map.begin()) {
+					/* can't go backwards past zero, so ... */
+					return 0;
+				}
+				/* step back to previous beat */
+				--i;
+				the_beat.ticks = lrint (BBT_Time::ticks_per_bar_division - rem);
+				DEBUG_TRACE (DEBUG::SnapBBT, string_compose ("step back beat to %1\n", the_beat));
+			} else {
+				the_beat.ticks = lrint (the_beat.ticks - rem);
+				DEBUG_TRACE (DEBUG::SnapBBT, string_compose ("moved backward to %1\n", the_beat.ticks));
+			}
 		} else {
-			// difference = ticks_one_subdivisions_worth - (the_beat.ticks % ticks_one_subdivisions_worth);
-			the_beat.ticks -= the_beat.ticks % ticks_one_subdivisions_worth;
+			/* on the subdivision, do nothing */
 		}
 	}
 
-	return frame_time (the_beat);
+	return (*i).frame + (the_beat.ticks/BBT_Time::ticks_per_bar_division) * 
+		(*i).meter->frames_per_division (*((*i).tempo), _frame_rate);
 }
 
 framepos_t
@@ -1272,6 +1336,10 @@ TempoMap::round_to_type (framepos_t frame, int dir, BBTPointType type)
 
 			BBTPointList::const_iterator prev = fi;
 			BBTPointList::const_iterator next = fi;
+
+			if ((*fi).frame == frame) {
+				return frame;
+			}
 
 			while ((*prev).beat != 1) {
 				if (prev == _map.begin()) {
@@ -1542,226 +1610,6 @@ TempoMap::insert_time (framepos_t where, framecnt_t amount)
 	timestamp_metrics_from_audio_time ();
 
 	PropertyChanged (PropertyChange ());
-}
-
-BBT_Time
-TempoMap::bbt_add (const BBT_Time& start, const BBT_Time& other) const
-{
-	TempoMetric metric =  metric_at (start);
-	return bbt_add (start, other, metric);
-}
-
-/**
- * add the BBT interval @param increment to  @param start and return the result
- */
-BBT_Time
-TempoMap::bbt_add (const BBT_Time& start, const BBT_Time& increment, const TempoMetric& /*metric*/) const
-{
-	BBT_Time result = start;
-	BBT_Time op = increment; /* argument is const, but we need to modify it */
-	uint32_t ticks = result.ticks + op.ticks;
-
-	if (ticks >= BBT_Time::ticks_per_bar_division) {
-		op.beats++;
-		result.ticks = ticks % (uint32_t) BBT_Time::ticks_per_bar_division;
-	} else {
-		result.ticks += op.ticks;
-	}
-
-	/* now comes the complicated part. we have to add one beat a time,
-	   checking for a new metric on every beat.
-	*/
-
-	/* grab all meter sections */
-
-	list<const MeterSection*> meter_sections;
-
-	for (Metrics::const_iterator x = metrics->begin(); x != metrics->end(); ++x) {
-		const MeterSection* ms;
-		if ((ms = dynamic_cast<const MeterSection*>(*x)) != 0) {
-			meter_sections.push_back (ms);
-		}
-	}
-
-	assert (!meter_sections.empty());
-
-	list<const MeterSection*>::const_iterator next_meter;
-	const Meter* meter = 0;
-
-	/* go forwards through the meter sections till we get to the one
-	   covering the current value of result. this positions i to point to
-	   the next meter section too, or the end.
-	*/
-
-	for (next_meter = meter_sections.begin(); next_meter != meter_sections.end(); ++next_meter) {
-
-		if (result < (*next_meter)->start()) {
-			/* this metric is past the result time. stop looking, we have what we need */
-			break;
-		}
-
-		if (result == (*next_meter)->start()) {
-			/* this meter section starts at result, push i beyond it so that it points
-			   to the NEXT section, opwise we will get stuck later, and use this meter section.
-			*/
-			meter = *next_meter;
-			++next_meter;
-			break;
-		}
-
-		meter = *next_meter;
-	}
-
-	assert (meter != 0);
-
-	/* OK, now have the meter for the bar start we are on, and i is an iterator
-	   that points to the metric after the one we are currently dealing with
-	   (or to metrics->end(), of course)
-	*/
-
-	while (op.beats) {
-
-		/* given the current meter, have we gone past the end of the bar ? */
-
-		if (result.beats >= meter->divisions_per_bar()) {
-			/* move to next bar, first beat */
-			result.bars++;
-			result.beats = 1;
-		} else {
-			result.beats++;
-		}
-
-		/* one down ... */
-
-		op.beats--;
-
-		/* check if we need to use a new meter section: has adding beats to result taken us
-		   to or after the start of the next meter section? in which case, use it.
-		*/
-
-		if (next_meter != meter_sections.end() && (((*next_meter)->start () < result) || (result == (*next_meter)->start()))) {
-			meter = *next_meter;
-			++next_meter;
-		}
-	}
-
-	/* finally, add bars */
-
-	result.bars += op.bars++;
-
-	return result;
-}
-
-/**
- * subtract the BBT interval @param decrement from @param start and return the result
- */
-BBT_Time
-TempoMap::bbt_subtract (const BBT_Time& start, const BBT_Time& decrement) const
-{
-	BBT_Time result = start;
-	BBT_Time op = decrement; /* argument is const, but we need to modify it */
-
-	if (op.ticks > result.ticks) {
-		/* subtract an extra beat later; meanwhile set ticks to the right "carry" value */
-		op.beats++;
-		result.ticks = BBT_Time::ticks_per_bar_division - (op.ticks - result.ticks);
-	} else {
-		result.ticks -= op.ticks;
-	}
-
-
-	/* now comes the complicated part. we have to subtract one beat a time,
-	   checking for a new metric on every beat.
-	*/
-
-	/* grab all meter sections */
-
-	list<const MeterSection*> meter_sections;
-
-	for (Metrics::const_iterator x = metrics->begin(); x != metrics->end(); ++x) {
-		const MeterSection* ms;
-		if ((ms = dynamic_cast<const MeterSection*>(*x)) != 0) {
-			meter_sections.push_back (ms);
-		}
-		}
-
-	assert (!meter_sections.empty());
-
-	/* go backwards through the meter sections till we get to the one
-	   covering the current value of result. this positions i to point to
-	   the next (previous) meter section too, or the end.
-	*/
-
-	const MeterSection* meter = 0;
-	list<const MeterSection*>::reverse_iterator next_meter; // older versions of GCC don't
-	                                                        // support const_reverse_iterator::operator!=()
-
-	for (next_meter = meter_sections.rbegin(); next_meter != meter_sections.rend(); ++next_meter) {
-
-		/* when we find the first meter section that is before or at result, use it,
-		   and set next_meter to the previous one
-		*/
-
-		if ((*next_meter)->start() < result || (*next_meter)->start() == result) {
-			meter = *next_meter;
-			++next_meter;
-			break;
-		}
-	}
-
-	assert (meter != 0);
-
-	/* OK, now have the meter for the bar start we are on, and i is an iterator
-	   that points to the metric after the one we are currently dealing with
-	   (or to metrics->end(), of course)
-	*/
-
-	while (op.beats) {
-
-		/* have we reached the start of the bar? if so, move to the last beat of the previous
-		   bar. opwise, just step back 1 beat.
-		*/
-
-		if (result.beats == 1) {
-
-			/* move to previous bar, last beat */
-
-			if (result.bars <= 1) {
-				/* i'm sorry dave, i can't do that */
-				throw std::out_of_range ("illegal BBT subtraction");
-			}
-
-			result.bars--;
-			result.beats = meter->divisions_per_bar();
-		} else {
-
-			/* back one beat */
-
-			result.beats--;
-		}
-
-		/* one down ... */
-		op.beats--;
-
-		/* check if we need to use a new meter section: has subtracting beats to result taken us
-		   to before the start of the current meter section? in which case, use the prior one.
-		*/
-
-		if (result < meter->start() && next_meter != meter_sections.rend()) {
-			meter = *next_meter;
-			++next_meter;
-		}
-	}
-
-	/* finally, subtract bars */
-
-	if (op.bars >= result.bars) {
-		/* i'm sorry dave, i can't do that */
-		throw std::out_of_range ("illegal BBT subtraction");
-	}
-
-	result.bars -= op.bars;
-	return result;
 }
 
 /** Add some (fractional) beats to a session frame position, and return the result in frames.
@@ -2093,6 +1941,10 @@ TempoMap::bbt_before_or_at (framepos_t pos)
 	require_map_to (pos);
 	BBTPointList::const_iterator i = lower_bound (_map.begin(), _map.end(), pos);
 	assert (i != _map.end());
+	if ((*i).frame > pos) {
+		assert (i != _map.begin());
+		--i;
+	}
 	return i;
 }
 
