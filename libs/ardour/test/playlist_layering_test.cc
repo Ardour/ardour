@@ -15,66 +15,12 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-class TestReceiver : public Receiver 
-{
-protected:
-	void receive (Transmitter::Channel chn, const char * str) {
-		const char *prefix = "";
-		
-		switch (chn) {
-		case Transmitter::Error:
-			prefix = ": [ERROR]: ";
-			break;
-		case Transmitter::Info:
-			/* ignore */
-			return;
-		case Transmitter::Warning:
-			prefix = ": [WARNING]: ";
-			break;
-		case Transmitter::Fatal:
-			prefix = ": [FATAL]: ";
-			break;
-		case Transmitter::Throw:
-			/* this isn't supposed to happen */
-			abort ();
-		}
-		
-		/* note: iostreams are already thread-safe: no external
-		   lock required.
-		*/
-		
-		cout << prefix << str << endl;
-		
-		if (chn == Transmitter::Fatal) {
-			exit (9);
-		}
-	}
-};
-
-TestReceiver test_receiver;
-
 void
 PlaylistLayeringTest::setUp ()
 {
-	string const test_session_path = "libs/ardour/test/playlist_layering_test";
-	string const test_wav_path = "libs/ardour/test/playlist_layering_test/playlist_layering_test.wav";
-	system (string_compose ("rm -rf %1", test_session_path).c_str());
+	TestNeedingSession::setUp ();
 	
-	init (false, true);
-	SessionEvent::create_per_thread_pool ("test", 512);
-
-	test_receiver.listen_to (error);
-	test_receiver.listen_to (info);
-	test_receiver.listen_to (fatal);
-	test_receiver.listen_to (warning);
-
-	AudioEngine* engine = new AudioEngine ("test", "");
-	MIDI::Manager::create (engine->jack ());
-	CPPUNIT_ASSERT (engine->start () == 0);
-
-	_session = new Session (*engine, test_session_path, "playlist_layering_test");
-	engine->set_session (_session);
-
+	string const test_wav_path = "libs/ardour/test/playlist_layering_test/playlist_layering_test.wav";
 	_playlist = PlaylistFactory::create (DataType::AUDIO, *_session, "test");
 	_source = SourceFactory::createWritable (DataType::AUDIO, *_session, test_wav_path, "", false, 44100);
 }
@@ -87,12 +33,8 @@ PlaylistLayeringTest::tearDown ()
 	for (int i = 0; i < 16; ++i) {
 		_region[i].reset ();
 	}
-	
-	AudioEngine::instance()->remove_session ();
-	delete _session;
-	EnumWriter::destroy ();
-	MIDI::Manager::destroy ();
-	AudioEngine::destroy ();
+
+	TestNeedingSession::tearDown ();
 }
 
 void
