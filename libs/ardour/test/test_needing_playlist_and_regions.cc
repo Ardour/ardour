@@ -1,3 +1,4 @@
+#include "pbd/filesystem.h"
 #include "ardour/playlist_factory.h"
 #include "ardour/source_factory.h"
 #include "ardour/region.h"
@@ -13,7 +14,7 @@ TestNeedingPlaylistAndRegions::setUp ()
 {
 	TestNeedingSession::setUp ();
 
-	string const test_wav_path = "libs/ardour/test/playlist_layering_test/playlist_layering_test.wav";
+	string const test_wav_path = "libs/ardour/test/test.wav";
 	_playlist = PlaylistFactory::create (DataType::AUDIO, *_session, "test");
 	_source = SourceFactory::createWritable (DataType::AUDIO, *_session, test_wav_path, "", false, 44100);
 	
