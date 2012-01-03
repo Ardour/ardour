@@ -25,19 +25,19 @@ FramewalkToBeatsTest::singleTempoTest ()
 
 	/* Walk 1 beats-worth of frames from beat 3 */
 	double r = map.framewalk_to_beats (frames_per_beat * 2, frames_per_beat * 1);
-	CPPUNIT_ASSERT_EQUAL (r, 1.0);
+	CPPUNIT_ASSERT_EQUAL (1.0, r);
 
 	/* Walk 6 beats-worth of frames from beat 4 */
 	r = map.framewalk_to_beats (frames_per_beat * 3, frames_per_beat * 6);
-	CPPUNIT_ASSERT_EQUAL (r, 6.0);
+	CPPUNIT_ASSERT_EQUAL (6.0, r);
 
 	/* Walk 1.5 beats-worth of frames from beat 3 */
 	r = map.framewalk_to_beats (frames_per_beat * 2, frames_per_beat * 1.5);
-	CPPUNIT_ASSERT_EQUAL (r, 1.5);
+	CPPUNIT_ASSERT_EQUAL (1.5, r);
 
 	/* Walk 1.5 beats-worth of frames from beat 2.5 */
 	r = map.framewalk_to_beats (frames_per_beat * 2.5, frames_per_beat * 1.5);
-	CPPUNIT_ASSERT_EQUAL (r, 1.5);
+	CPPUNIT_ASSERT_EQUAL (1.5, r);
 }
 
 void
@@ -76,23 +76,23 @@ FramewalkToBeatsTest::doubleTempoTest ()
 
 	/* Walk 1 beat from 1|2 */
 	double r = map.framewalk_to_beats (24e3, 24e3);
-	CPPUNIT_ASSERT_EQUAL (r, 1.0);
+	CPPUNIT_ASSERT_EQUAL (1.0, r);
 
 	/* Walk 2 beats from 3|3 to 4|1 (over the tempo change) */
 	r = map.framewalk_to_beats (264e3, (24e3 + 12e3));
-	CPPUNIT_ASSERT_EQUAL (r, 2.0);
+	CPPUNIT_ASSERT_EQUAL (2.0, r);
 
 	/* Walk 2.5 beats from 3|3.5 to 4.2 (over the tempo change) */
 	r = map.framewalk_to_beats (264e3 - 12e3, (24e3 + 12e3 + 12e3));
-	CPPUNIT_ASSERT_EQUAL (r, 2.5);
+	CPPUNIT_ASSERT_EQUAL (2.5, r);
 
 	/* Walk 3 beats from 3|4.5 to 4|3.5 (over the tempo change) */
 	r = map.framewalk_to_beats (264e3 - 12e3, (24e3 + 12e3 + 12e3 + 6e3));
-	CPPUNIT_ASSERT_EQUAL (r, 3.0);
+	CPPUNIT_ASSERT_EQUAL (3.0, r);
 
 	/* Walk 3.5 beats from 3|4.5 to 4.4 (over the tempo change) */
 	r = map.framewalk_to_beats (264e3 - 12e3, (24e3 + 12e3 + 12e3 + 12e3));
-	CPPUNIT_ASSERT_EQUAL (r, 3.5);
+	CPPUNIT_ASSERT_EQUAL (3.5, r);
 }
 
 void
