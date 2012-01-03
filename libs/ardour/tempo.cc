@@ -777,7 +777,6 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 	MeterSection* ms;
 	double divisions_per_bar;
 	double beat_frames;
-	double frames_per_bar;
 	double current_frame;
 	BBT_Time current;
 	Metrics::iterator next_metric;
@@ -820,12 +819,10 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 	current.ticks = 0;
 
 	divisions_per_bar = meter->divisions_per_bar ();
-	frames_per_bar = meter->frames_per_bar (*tempo, _frame_rate);
 	beat_frames = meter->frames_per_division (*tempo,_frame_rate);
 	
 	if (reassign_tempo_bbt) {
 
-		TempoSection* rtempo = tempo;
 		MeterSection* rmeter = meter;
 
 		DEBUG_TRACE (DEBUG::TempoMath, "\tUpdating tempo marks BBT time from bar offset\n");
@@ -839,7 +836,6 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 				 */
 
 				ts->update_bbt_time_from_bar_offset (*rmeter);
-				rtempo = ts;
 
 			} else if ((ms = dynamic_cast<MeterSection*>(*i)) != 0) {
 				rmeter = ms;
@@ -936,7 +932,6 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 				}
 				
 				divisions_per_bar = meter->divisions_per_bar ();
-				frames_per_bar = meter->frames_per_bar (*tempo, _frame_rate);
 				beat_frames = meter->frames_per_division (*tempo, _frame_rate);
 				
 				DEBUG_TRACE (DEBUG::TempoMath, string_compose ("New metric with beat frames = %1 dpb %2 meter %3 tempo %4\n", 
@@ -1339,6 +1334,10 @@ TempoMap::round_to_type (framepos_t frame, int dir, BBTPointType type)
 		}
 		break;
 	}
+
+	/* NOTREACHED */
+	assert (false);
+	return 0;
 }
 
 void
