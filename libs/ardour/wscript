@@ -424,6 +424,7 @@ def build(bld):
         testobj.source       = '''
                 test/dummy_lxvst.cc
                 test/test_needing_session.cc
+                test/test_needing_playlist_and_regions.cc
                 test/bbt_test.cc
                 test/tempo_test.cc
                 test/interpolation_test.cc
