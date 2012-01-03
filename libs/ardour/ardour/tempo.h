@@ -227,7 +227,9 @@ class TempoMap : public PBD::StatefulDestructible
 	}
 
 	const BBTPointList& map() const { return _map ; }
-	void map (BBTPointList&, framepos_t start, framepos_t end);
+
+	void map (BBTPointList::const_iterator&, BBTPointList::const_iterator&, 
+		  framepos_t start, framepos_t end);
 	
 	void      bbt_time (framepos_t when, Timecode::BBT_Time&);
         framecnt_t frame_time (const Timecode::BBT_Time&);

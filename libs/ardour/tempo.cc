@@ -1409,21 +1409,16 @@ TempoMap::round_to_type (framepos_t frame, int dir, BBTPointType type)
 }
 
 void
-TempoMap::map (TempoMap::BBTPointList& points, framepos_t lower, framepos_t upper) 
+TempoMap::map (TempoMap::BBTPointList::const_iterator& begin, 
+	       TempoMap::BBTPointList::const_iterator& end, 
+	       framepos_t lower, framepos_t upper) 
 {
 	if (_map.empty() || upper >= _map.back().frame) {
 		recompute_map (false, upper);
 	}
 
-	for (BBTPointList::const_iterator i = _map.begin(); i != _map.end(); ++i) {
-		if ((*i).frame < lower) {
-			continue;
-		}
-		if ((*i).frame >= upper) {
-			break;
-		}
-		points.push_back (*i);
-	}
+	begin = lower_bound (_map.begin(), _map.end(), lower);
+	end = upper_bound (_map.begin(), _map.end(), upper);
 }
 
 const TempoSection&

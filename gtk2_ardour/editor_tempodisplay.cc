@@ -169,8 +169,7 @@ Editor::compute_current_bbt_points (framepos_t leftmost, framepos_t rightmost)
 	}
 	next_beat.ticks = 0;
 
-	current_bbt_points.clear();
-	_session->tempo_map().map (current_bbt_points, _session->tempo_map().frame_time (previous_beat), _session->tempo_map().frame_time (next_beat) + 1);
+	_session->tempo_map().map (current_bbt_points_begin, current_bbt_points_end, _session->tempo_map().frame_time (previous_beat), _session->tempo_map().frame_time (next_beat) + 1);
 }
 
 void
@@ -190,7 +189,7 @@ Editor::redraw_measures ()
 void
 Editor::draw_measures ()
 {
-	if (_session == 0 || _show_measures == false || current_bbt_points.empty()) {
+	if (_session == 0 || _show_measures == false || distance (current_bbt_points_begin, current_bbt_points_end) == 0) {
 		return;
 	}
 
@@ -198,7 +197,7 @@ Editor::draw_measures ()
 		tempo_lines = new TempoLines(*track_canvas, time_line_group, physical_screen_height(get_window()));
 	}
 
-	tempo_lines->draw (current_bbt_points, frames_per_unit);
+	tempo_lines->draw (current_bbt_points_begin, current_bbt_points_end, frames_per_unit);
 }
 
 void

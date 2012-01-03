@@ -41,7 +41,8 @@ Pool Click::pool ("click", sizeof (Click), 128);
 void
 Session::click (framepos_t start, framecnt_t nframes)
 {
-	TempoMap::BBTPointList points;
+	TempoMap::BBTPointList::const_iterator points_begin;
+	TempoMap::BBTPointList::const_iterator points_end;
 	Sample *buf;
 
 	if (_click_io == 0) {
@@ -59,13 +60,13 @@ Session::click (framepos_t start, framecnt_t nframes)
 
 	BufferSet& bufs = get_scratch_buffers(ChanCount(DataType::AUDIO, 1));
 	buf = bufs.get_audio(0).data();
-	_tempo_map->map (points, start, end);
+	_tempo_map->map (points_begin, points_end, start, end);
 
-	if (points.empty()) {
+	if (distance (points_begin, points_end) == 0) {
 		goto run_clicks;
 	}
 
-	for (TempoMap::BBTPointList::iterator i = points.begin(); i != points.end(); ++i) {
+	for (TempoMap::BBTPointList::const_iterator i = points_begin; i != points_end; ++i) {
 		switch ((*i).type) {
 		case TempoMap::Beat:
 			if (click_emphasis_data == 0 || (click_emphasis_data && (*i).beat != 1)) {

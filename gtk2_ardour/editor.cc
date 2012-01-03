@@ -5334,7 +5334,7 @@ Editor::session_going_away ()
 	hide_measures ();
 	clear_marker_display ();
 
-	current_bbt_points.clear ();
+	current_bbt_points_begin = current_bbt_points_end;
 
 	/* get rid of any existing editor mixer strip */
 

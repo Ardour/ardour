@@ -71,9 +71,11 @@ TempoLines::hide ()
 }
 
 void
-TempoLines::draw (ARDOUR::TempoMap::BBTPointList& points, double frames_per_unit)
+TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin, 
+		  const ARDOUR::TempoMap::BBTPointList::const_iterator& end, 
+		  double frames_per_unit)
 {
-	ARDOUR::TempoMap::BBTPointList::iterator i;
+	ARDOUR::TempoMap::BBTPointList::const_iterator i;
 	ArdourCanvas::SimpleLine *line = NULL;
 	gdouble xpos;
 	double who_cares;
@@ -83,16 +85,16 @@ TempoLines::draw (ARDOUR::TempoMap::BBTPointList& points, double frames_per_unit
 	uint32_t bars = 0;
 	uint32_t color;
 
-	const size_t needed = points.size();
+	const size_t needed = distance (begin, end);
 
 	_canvas.get_scroll_region (x1, y1, x2, who_cares);
 
 	/* get the first bar spacing */
 
-	i = points.end();
+	i = end;
 	i--;
-	bars = (*i).bar - (*points.begin()).bar;
-	beats = points.size() - bars;
+	bars = (*i).bar - (*begin).bar;
+	beats = distance (begin, end) - bars;
 
 	beat_density = (beats * 10.0f) / _canvas.get_width ();
 
@@ -105,7 +107,7 @@ TempoLines::draw (ARDOUR::TempoMap::BBTPointList& points, double frames_per_unit
 	xpos = rint(((framepos_t)(*i).frame) / (double)frames_per_unit);
 	const double needed_right = xpos;
 
-	i = points.begin();
+	i = begin;
 
 	xpos = rint(((framepos_t)(*i).frame) / (double)frames_per_unit);
 	const double needed_left = xpos;
@@ -129,7 +131,7 @@ TempoLines::draw (ARDOUR::TempoMap::BBTPointList& points, double frames_per_unit
 	bool inserted_last_time = true;
 	bool invalidated = false;
 
-	for (i = points.begin(); i != points.end(); ++i) {
+	for (i = begin; i != end; ++i) {
 
 		if ((*i).type == ARDOUR::TempoMap::Bar) {
 			color = ARDOUR_UI::config()->canvasvar_MeasureLineBar.get();
