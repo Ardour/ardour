@@ -35,7 +35,10 @@
 #include "ardour/ardour.h"
 
 class XMLNode;
+
 class BBTTest;
+class FrameposPlusBeatsTest;
+class TempoTest;
 
 namespace ARDOUR {
 
@@ -281,6 +284,8 @@ class TempoMap : public PBD::StatefulDestructible
   private:
 
 	friend class ::BBTTest;
+	friend class ::FrameposPlusBeatsTest;
+	friend class ::TempoTest;
 	
 	static Tempo    _default_tempo;
 	static Meter    _default_meter;
