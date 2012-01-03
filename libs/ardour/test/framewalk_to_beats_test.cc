@@ -79,7 +79,7 @@ FramewalkToBeatsTest::doubleTempoTest ()
 	CPPUNIT_ASSERT_EQUAL (1.0, r);
 
 	/* Walk 2 beats from 3|3 to 4|1 (over the tempo change) */
-	r = map.framewalk_to_beats (264e3, (24e3 + 12e3));
+	r = map.framewalk_to_beats (240e3, (24e3 + 24e3));
 	CPPUNIT_ASSERT_EQUAL (2.0, r);
 
 	/* Walk 2.5 beats from 3|3.5 to 4.2 (over the tempo change) */
