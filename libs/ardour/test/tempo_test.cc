@@ -53,6 +53,9 @@ TempoTest::recomputeMapTest ()
 	list<MetricSection*>::iterator i = map.metrics->begin();
 	CPPUNIT_ASSERT_EQUAL (framepos_t (0), (*i)->frame ());
 	CPPUNIT_ASSERT_EQUAL (framepos_t (0), (*i)->frame ());
+
+	i = map.metrics->end();
+	--i;
 	CPPUNIT_ASSERT_EQUAL (framepos_t (288e3), (*i)->frame ());
 	CPPUNIT_ASSERT_EQUAL (framepos_t (288e3), (*i)->frame ());
 }
