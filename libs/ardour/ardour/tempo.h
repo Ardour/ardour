@@ -203,7 +203,6 @@ class TempoMap : public PBD::StatefulDestructible
 	};
 
 	struct BBTPoint {
-            BBTPointType type;
             framepos_t  frame;
             const Meter* meter;
             const Tempo* tempo;
@@ -215,8 +214,8 @@ class TempoMap : public PBD::StatefulDestructible
             operator framepos_t() const { return frame; }
             
             BBTPoint (const Meter& m, const Tempo& t, framepos_t f,
-                      BBTPointType ty, uint32_t b, uint32_t e)
-                    : type (ty), frame (f), meter (&m), tempo (&t), bar (b), beat (e) {}
+                      uint32_t b, uint32_t e)
+                    : frame (f), meter (&m), tempo (&t), bar (b), beat (e) {}
 	};
 
 	typedef std::vector<BBTPoint> BBTPointList;

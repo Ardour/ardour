@@ -857,7 +857,7 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 	++next_metric; // skip tempo (or meter)
 
 	DEBUG_TRACE (DEBUG::TempoMath, string_compose ("Add first bar at 1|1 @ %2\n", current.bars, current_frame));
-	_map.push_back (BBTPoint (*meter, *tempo,(framepos_t) llrint(current_frame), Bar, 1, 1));
+	_map.push_back (BBTPoint (*meter, *tempo,(framepos_t) llrint(current_frame), 1, 1));
 
 	while (current_frame < end) {
 		
@@ -961,10 +961,10 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 
 		if (current.beats == 1) {
 			DEBUG_TRACE (DEBUG::TempoMath, string_compose ("Add Bar at %1|1 @ %2\n", current.bars, current_frame));
-			_map.push_back (BBTPoint (*meter, *tempo,(framepos_t) llrint(current_frame), Bar, current.bars, 1));
+			_map.push_back (BBTPoint (*meter, *tempo,(framepos_t) llrint(current_frame), current.bars, 1));
 		} else {
 			DEBUG_TRACE (DEBUG::TempoMath, string_compose ("Add Beat at %1|%2 @ %3\n", current.bars, current.beats, current_frame));
-			_map.push_back (BBTPoint (*meter, *tempo, (framepos_t) llrint(current_frame), Beat, current.bars, current.beats));
+			_map.push_back (BBTPoint (*meter, *tempo, (framepos_t) llrint(current_frame), current.bars, current.beats));
 		}
 	}
 }
@@ -1120,7 +1120,7 @@ TempoMap::bbt_duration_at_unlocked (const BBT_Time& when, const BBT_Time& bbt, i
 
 	while (wi != _map.end() && bars < bbt.bars) {
 		++wi;
-		if ((*wi).type == Bar) {
+		if ((*wi).beat == 1) {
 			++bars;
 		}
 	}

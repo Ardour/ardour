@@ -67,19 +67,20 @@ Session::click (framepos_t start, framecnt_t nframes)
 	}
 
 	for (TempoMap::BBTPointList::const_iterator i = points_begin; i != points_end; ++i) {
-		switch ((*i).type) {
-		case TempoMap::Beat:
-			if (click_emphasis_data == 0 || (click_emphasis_data && (*i).beat != 1)) {
-				clicks.push_back (new Click ((*i).frame, click_length, click_data));
-			}
-			break;
-
-		case TempoMap::Bar:
+		switch ((*i).beat) {
+		case 1:
 			if (click_emphasis_data) {
 				clicks.push_back (new Click ((*i).frame, click_emphasis_length, click_emphasis_data));
 			}
 			break;
+
+		default:
+			if (click_emphasis_data == 0 || (click_emphasis_data && (*i).beat != 1)) {
+				clicks.push_back (new Click ((*i).frame, click_length, click_data));
+			}
+			break;
 		}
+
 	}
 
   run_clicks:

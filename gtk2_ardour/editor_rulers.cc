@@ -1628,7 +1628,7 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upp
         		bbt_nmarks = (gint) (bbt_bars / 64) + 1;
 			*marks = (GtkCustomRulerMark *) g_malloc (sizeof(GtkCustomRulerMark) * bbt_nmarks);
 			for (n = 0,   i = current_bbt_points_begin; i != current_bbt_points_end && n < bbt_nmarks; i++) {
-				if ((*i).type == TempoMap::Bar)  {
+				if ((*i).beat == 1) {
 					if ((*i).bar % 64 == 1) {
 						if ((*i).bar % 256 == 1) {
 							snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bar);
@@ -1653,7 +1653,7 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upp
        		bbt_nmarks = (bbt_bars / 16) + 1;
 	        *marks = (GtkCustomRulerMark *) g_malloc (sizeof(GtkCustomRulerMark) * bbt_nmarks);
 		for (n = 0,  i = current_bbt_points_begin; i != current_bbt_points_end && n < bbt_nmarks; i++) {
-		        if ((*i).type == TempoMap::Bar)  {
+		        if ((*i).beat == 1) {
 			  if ((*i).bar % 16 == 1) {
 			        if ((*i).bar % 64 == 1) {
 				        snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bar);
@@ -1678,7 +1678,7 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upp
 		bbt_nmarks = (bbt_bars / 4) + 1;
  		*marks = (GtkCustomRulerMark *) g_malloc (sizeof(GtkCustomRulerMark) * bbt_nmarks);
 		for (n = 0,   i = current_bbt_points_begin; i != current_bbt_points_end && n < bbt_nmarks; ++i) {
-		        if ((*i).type == TempoMap::Bar)  {
+		        if ((*i).beat == 1) {
 			  if ((*i).bar % 4 == 1) {
 			        if ((*i).bar % 16 == 1) {
 				        snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bar);
@@ -1704,7 +1704,7 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upp
 	        bbt_nmarks = bbt_bars + 2;
 	        *marks = (GtkCustomRulerMark *) g_malloc (sizeof(GtkCustomRulerMark) * bbt_nmarks );
 		for (n = 0,  i = current_bbt_points_begin; i != current_bbt_points_end && n < bbt_nmarks; i++) {
-		        if ((*i).type == TempoMap::Bar)  {
+		        if ((*i).beat == 1) {
 			  if ((*i).bar % 4 == 1) {
 				        snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bar);
 					(*marks)[n].style = GtkCustomRulerMarkMajor;
