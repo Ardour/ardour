@@ -1,0 +1,13 @@
+Running unit tests
+------------------
+
+This is slightly neater if you have doc/waft on your path.
+
+1.  Pass --test to waf configure
+2.  cd libs/ardour
+3.  waft --targets=libardour-tests && ./run-tests.sh
+
+The "--targets=libardour-tests" is optional, but it avoids a
+rebuild of the whole gtk2_ardour (which isn't necessary for
+running the tests).
+
