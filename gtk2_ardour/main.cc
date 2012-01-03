@@ -527,7 +527,7 @@ int main (int argc, char *argv[])
 	}
 
 	if (no_splash) {
-		cerr << _("Copyright (C) 1999-2011 Paul Davis") << endl
+		cerr << _("Copyright (C) 1999-2012 Paul Davis") << endl
 		     << _("Some portions Copyright (C) Steve Harris, Ari Johnson, Brett Viren, Joel Baker") << endl
 		     << endl
 		     << string_compose (_("%1 comes with ABSOLUTELY NO WARRANTY"), PROGRAM_NAME) << endl
