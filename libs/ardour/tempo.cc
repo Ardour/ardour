@@ -776,7 +776,6 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 	TempoSection* tempo;
 	TempoSection* ts;
 	MeterSection* ms;
-	MetricSection* last_metric_section;
 	double divisions_per_bar;
 	double beat_frames;
 	double current_frame;
@@ -814,7 +813,6 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 	current_frame = 0;
 	meter->set_frame (0);
 	tempo->set_frame (0);
-	last_metric_section = tempo;
 
 	/* assumes that the first meter & tempo are at 1|1|0 */
 	current.bars = 1;
@@ -871,8 +869,6 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 
 		if (next_metric != metrics->end()) {
 
-			bool exact_start_match_required = true;
-
 			/* no operator >= so invert operator < */
 
 			DEBUG_TRACE (DEBUG::TempoMath, string_compose ("now at %1 next metric @ %2\n", current, (*next_metric)->start()));
@@ -916,7 +912,6 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 						 * match this precisely to
 						 * merit a reloop ...
 						 */
-						exact_start_match_required = false;
 						DEBUG_TRACE (DEBUG::TempoMath, string_compose ("Adjusted last beat to %1\n", current_frame));
 						
 					} else {
@@ -948,7 +943,6 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 				DEBUG_TRACE (DEBUG::TempoMath, string_compose ("New metric with beat frames = %1 dpb %2 meter %3 tempo %4\n", 
 									       beat_frames, divisions_per_bar, *((Meter*)meter), *((Tempo*)tempo)));
 			
-				last_metric_section = *next_metric;
 				++next_metric;
 
 				if (next_metric != metrics->end() && ((*next_metric)->start() == current)) {
