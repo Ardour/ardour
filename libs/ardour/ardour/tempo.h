@@ -35,6 +35,7 @@
 #include "ardour/ardour.h"
 
 class XMLNode;
+class BBTTest;
 
 namespace ARDOUR {
 
@@ -278,6 +279,9 @@ class TempoMap : public PBD::StatefulDestructible
 	framecnt_t frame_rate () const { return _frame_rate; }
 
   private:
+
+	friend class ::BBTTest;
+	
 	static Tempo    _default_tempo;
 	static Meter    _default_meter;
 
