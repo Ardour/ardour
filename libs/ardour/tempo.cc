@@ -1632,83 +1632,51 @@ TempoMap::framepos_plus_beats (framepos_t pos, Evoral::MusicalTime beats)
 framepos_t
 TempoMap::framepos_minus_beats (framepos_t pos, Evoral::MusicalTime beats)
 {
-	Metrics::const_iterator i;
-	const TempoSection* tempo = 0;
-	const TempoSection* t;
+	return framepos_minus_bbt (pos, BBT_Time (beats));
+}
+
+framepos_t
+TempoMap::framepos_minus_bbt (framepos_t pos, BBT_Time op)
+{
+	BBTPointList::const_iterator i;
+	framecnt_t extra_frames = 0;
+
+	/* start from the bar|beat right before (or at) pos */
+
+	i = bbt_before_or_at (pos);
 	
-	/* Find the starting tempo */
+	/* we know that (*i).frame is less than or equal to pos */
+	extra_frames = pos - (*i).frame;
+	
+	/* walk backwards */
 
-	for (i = metrics->begin(); i != metrics->end(); ++i) {
-
-		/* This is a bit of a hack, but pos could be -ve, and if it is,
-		   we consider the initial metric changes (at time 0) to actually
-		   be in effect at pos.
-		*/
-		framepos_t f = (*i)->frame ();
-		if (pos < 0 && f == 0) {
-			f = pos;
-		}
-
-		if ((*i)->frame() > pos) {
-			break;
-		}
-
-		if ((t = dynamic_cast<const TempoSection*>(*i)) != 0) {
-			tempo = t;
-		}
-	}
-
-	bool no_more_tempos = false;
-
-	/* Move i back to the tempo before "pos" */
-	if (i != metrics->begin ()) {
-		while (i != metrics->begin ()) {
-			--i;
-			t = dynamic_cast<TempoSection*> (*i);
-			if (t) {
-				break;
-			}
-		}
-	} else {
-		no_more_tempos = true;
-	}
-
-	/* We now have:
-
-	   tempo -> the Tempo for "pos"
-	   i     -> the first metric before "pos", unless no_more_tempos is true
-	*/
-
-	while (beats) {
-
-		/* Distance to the end of this section in frames */
-		framecnt_t distance_frames = no_more_tempos ? max_framepos : (pos - (*i)->frame());
-
-		/* Distance to the end in beats */
-		Evoral::MusicalTime distance_beats = distance_frames / tempo->frames_per_beat (_frame_rate);
-
-		/* Amount to subtract this time */
-		double const sub = min (distance_beats, beats);
-
-		/* Update */
-		beats -= sub;
-		pos -= sub * tempo->frames_per_beat (_frame_rate);
-
-		/* Move i and tempo back, if there's anything to move to */
-		if (i != metrics->begin ()) {
-			while (i != metrics->begin ()) {
-				--i;
-				if ((t = dynamic_cast<const TempoSection*>(*i)) != 0) {
-					tempo = t;
-					break;
-				}
+	while (i != _map.begin() && (op.bars || op.beats)) {
+		--i;
+		if ((*i).is_bar()) {
+			if (op.bars) {
+				op.bars--;
 			}
 		} else {
-			no_more_tempos = true;
+			if (op.beats) {
+				op.beats--;
+			}
 		}
 	}
+	
+	/* handle ticks (assumed to be less than
+	 * BBT_Time::ticks_per_bar_division, as always.
+	 */
 
-	return pos;
+	if (op.ticks) {
+		frameoffset_t tick_frames = llrint ((*i).meter->frames_per_division (*(*i).tempo, _frame_rate) * (op.ticks/BBT_Time::ticks_per_bar_division));
+		framepos_t pre_tick_frames = (*i).frame + extra_frames;
+		if (tick_frames < pre_tick_frames) {
+			return pre_tick_frames - tick_frames;
+		} 
+		return 0;
+	} else {
+		return (*i).frame + extra_frames;
+	}
 }
 
 /** Add the BBT interval op to pos and return the result */
@@ -1718,6 +1686,7 @@ TempoMap::framepos_plus_bbt (framepos_t pos, BBT_Time op)
 	BBT_Time op_copy (op);
 	int additional_minutes = 1;
 	BBTPointList::const_iterator i;
+	framecnt_t backup_frames = 0;
 
 	while (true) {
 
@@ -1725,10 +1694,8 @@ TempoMap::framepos_plus_bbt (framepos_t pos, BBT_Time op)
 		
 		op = op_copy;
 
-		if ((*i).frame != pos) {
-			/* we know that (*i).frame is before pos */
-			cerr << "Need to account for offset of " << (pos - (*i).frame) << endl;
-		}
+		/* we know that (*i).frame is before or equal to pos */
+		backup_frames = pos - (*i).frame;
 
 		while (i != _map.end() && (op.bars || op.beats)) {
 			++i;
@@ -1754,14 +1721,17 @@ TempoMap::framepos_plus_bbt (framepos_t pos, BBT_Time op)
 		additional_minutes *= 2;
 
 		/* go back and try again */
-		cerr << "reached end of map with op now at " << op << " end = " << _map.back().frame << ' ' << _map.back().bar << '|' << _map.back().beat << ", trying to walk " << op_copy << " ... retry\n";
+		warning << "reached end of map with op now at " << op << " end = " 
+			<< _map.back().frame << ' ' << _map.back().bar << '|' << _map.back().beat << ", trying to walk " 
+			<< op_copy << " ... retry" 
+			<< endmsg;
 	}
 	
 	if (op.ticks) {
-		return (*i).frame + 
+		return (*i).frame - backup_frames + 
 			llrint ((*i).meter->frames_per_division (*(*i).tempo, _frame_rate) * (op.ticks/BBT_Time::ticks_per_bar_division));
 	} else {
-		return (*i).frame;
+		return (*i).frame - backup_frames;
 	}
 }
 
