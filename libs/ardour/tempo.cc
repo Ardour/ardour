@@ -311,7 +311,7 @@ TempoMap::remove_tempo (const TempoSection& tempo, bool complete_operation)
 	bool removed = false;
 
 	{
-		Glib::RWLock::WriterLock lm (metrics_lock);
+		Glib::RWLock::WriterLock lm (lock);
 		Metrics::iterator i;
 
 		for (i = metrics->begin(); i != metrics->end(); ++i) {
@@ -325,10 +325,13 @@ TempoMap::remove_tempo (const TempoSection& tempo, bool complete_operation)
 				}
 			}
 		}
+
+		if (removed && complete_operation) {
+			recompute_map (false, false);
+		}
 	}
 
 	if (removed && complete_operation) {
-		recompute_map (false);
 		PropertyChanged (PropertyChange ());
 	}
 }
@@ -339,7 +342,7 @@ TempoMap::remove_meter (const MeterSection& tempo, bool complete_operation)
 	bool removed = false;
 
 	{
-		Glib::RWLock::WriterLock lm (metrics_lock);
+		Glib::RWLock::WriterLock lm (lock);
 		Metrics::iterator i;
 
 		for (i = metrics->begin(); i != metrics->end(); ++i) {
@@ -353,10 +356,13 @@ TempoMap::remove_meter (const MeterSection& tempo, bool complete_operation)
 				}
 			}
 		}
+
+		if (removed && complete_operation) {
+			recompute_map (true, false);
+		}
 	}
 
 	if (removed && complete_operation) {
-		recompute_map (true);
 		PropertyChanged (PropertyChange ());
 	}
 }
@@ -471,12 +477,11 @@ TempoMap::replace_tempo (const TempoSection& ts, const Tempo& tempo, const BBT_T
 		add_tempo (tempo, where);
 	} else {
 		{
-			Glib::RWLock::WriterLock lm (metrics_lock);
+			Glib::RWLock::WriterLock lm (lock);
 			/* cannot move the first tempo section */
 			*((Tempo*)&first) = tempo;
+			recompute_map (false, false);
 		}
-
-		recompute_map (false);
 	}
 
 	PropertyChanged (PropertyChange ());
@@ -486,7 +491,7 @@ void
 TempoMap::add_tempo (const Tempo& tempo, BBT_Time where)
 {
 	{
-		Glib::RWLock::WriterLock lm (metrics_lock);
+		Glib::RWLock::WriterLock lm (lock);
 
 		/* new tempos always start on a beat */
 		where.ticks = 0;
@@ -524,9 +529,10 @@ TempoMap::add_tempo (const Tempo& tempo, BBT_Time where)
 		/* and insert it */
 		
 		do_insert (ts);
+
+		recompute_map (false, false);
 	}
 
-	recompute_map (false);
 
 	PropertyChanged (PropertyChange ());
 }
@@ -541,11 +547,11 @@ TempoMap::replace_meter (const MeterSection& ms, const Meter& meter, const BBT_T
 		add_meter (meter, where);
 	} else {
 		{
-			Glib::RWLock::WriterLock lm (metrics_lock);
+			Glib::RWLock::WriterLock lm (lock);
 			/* cannot move the first meter section */
 			*((Meter*)&first) = meter;
+			recompute_map (true, false);
 		}
-		recompute_map (true);
 	}
 
 	PropertyChanged (PropertyChange ());
@@ -555,7 +561,7 @@ void
 TempoMap::add_meter (const Meter& meter, BBT_Time where)
 {
 	{
-		Glib::RWLock::WriterLock lm (metrics_lock);
+		Glib::RWLock::WriterLock lm (lock);
 
 		/* a new meter always starts a new bar on the first beat. so
 		   round the start time appropriately. remember that
@@ -573,9 +579,9 @@ TempoMap::add_meter (const Meter& meter, BBT_Time where)
 		where.ticks = 0;
 		
 		do_insert (new MeterSection (where, meter.divisions_per_bar(), meter.note_divisor()));
+		recompute_map (true, false);
 	}
 
-	recompute_map (true);
 	
 #ifndef NDEBUG
 	if (DEBUG_ENABLED(DEBUG::TempoMap)) {
@@ -595,10 +601,10 @@ TempoMap::change_initial_tempo (double beats_per_minute, double note_type)
 	for (Metrics::iterator i = metrics->begin(); i != metrics->end(); ++i) {
 		if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
 			{
-				Glib::RWLock::WriterLock lm (metrics_lock);
+				Glib::RWLock::WriterLock lm (lock);
 				*((Tempo*) t) = newtempo;
+				recompute_map (false, false);
 			}
-			recompute_map (false);
 			PropertyChanged (PropertyChange ());
 			break;
 		}
@@ -645,12 +651,12 @@ TempoMap::change_existing_tempo_at (framepos_t where, double beats_per_minute, d
 	/* reset */
 
 	{
-		Glib::RWLock::WriterLock lm (metrics_lock);
+		Glib::RWLock::WriterLock lm (lock);
 		/* cannot move the first tempo section */
 		*((Tempo*)prev) = newtempo;
+		recompute_map (false, false);
 	}
 
-	recompute_map (false);
 	PropertyChanged (PropertyChange ());
 }
 
@@ -687,120 +693,30 @@ TempoMap::first_tempo () const
 }
 
 void
-TempoMap::timestamp_metrics_from_audio_time ()
-{
-	Metrics::iterator i;
-	const MeterSection* meter;
-	const TempoSection* tempo;
-	MeterSection *m;
-	TempoSection *t;
-
-	meter = &first_meter ();
-	tempo = &first_tempo ();
-
-	BBT_Time start;
-	BBT_Time end;
-	
-	// cerr << "\n###################### TIMESTAMP via AUDIO ##############\n" << endl;
-
-	bool first = true;
-	MetricSection* prev = 0;
-
-	for (i = metrics->begin(); i != metrics->end(); ++i) {
-
-		BBT_Time bbt;
-		TempoMetric metric (*meter, *tempo);
-
-		if (prev) {
-			metric.set_start (prev->start());
-			metric.set_frame (prev->frame());
-		} else {
-			// metric will be at frames=0 bbt=1|1|0 by default
-			// which is correct for our purpose
-		}
-
-		BBTPointList::const_iterator bi = bbt_before_or_at ((*i)->frame());
-		bbt_time_unlocked ((*i)->frame(), bbt, bi);
-		
-		// cerr << "timestamp @ " << (*i)->frame() << " with " << bbt.bars << "|" << bbt.beats << "|" << bbt.ticks << " => ";
-
-		if (first) {
-			first = false;
-		} else {
-
-			if (bbt.ticks > BBT_Time::ticks_per_bar_division/2) {
-				/* round up to next beat */
-				bbt.beats += 1;
-			}
-
-			bbt.ticks = 0;
-
-			if (bbt.beats != 1) {
-				/* round up to next bar */
-				bbt.bars += 1;
-				bbt.beats = 1;
-			}
-		}
-
-		// cerr << bbt << endl;
-
-		(*i)->set_start (bbt);
-			
-		if ((t = dynamic_cast<TempoSection*>(*i)) != 0) {
-			tempo = t;
-			// cerr << "NEW TEMPO, frame = " << (*i)->frame() << " start = " << (*i)->start() <<endl;
-		} else if ((m = dynamic_cast<MeterSection*>(*i)) != 0) {
-			meter = m;
-			// cerr << "NEW METER, frame = " << (*i)->frame() << " start = " << (*i)->start() <<endl;
-		} else {
-			fatal << _("programming error: unhandled MetricSection type") << endmsg;
-			/*NOTREACHED*/
-		}
-
-		prev = (*i);
-	}
-
-#ifndef NDEBUG
-	if (DEBUG_ENABLED(DEBUG::TempoMap)) {
-		dump (cerr);
-	}
-#endif
-
-}
-
-void
 TempoMap::require_map_to (framepos_t pos)
 {
-	bool revise_map;
+	/* CALLER MUST HOLD READ LOCK AND MAY NOT HOLD WRITE LOCK */
 
-	{
-		Glib::RWLock::ReaderLock lm (map_lock);
-		revise_map = (_map->empty() || _map->back().frame < pos);
-	}
-
-	if (revise_map) {
-		recompute_map (false, pos);
+	if (_map->empty() || _map->back().frame < pos) {
+		recompute_map (false, true, pos);
 	}
 }
 
 void
 TempoMap::require_map_to (const BBT_Time& bbt)
 {
-	bool revise_map;
-
-	{
-		Glib::RWLock::ReaderLock lm (map_lock);
-		revise_map = (_map->empty() || _map->back().bbt() < bbt);
-	}
-
-	if (revise_map) {
-		recompute_map (false, 99);
+	/* CALLER MUST HOLD READ LOCK AND MAY NOT HOLD WRITE LOCK */
+	
+	if (_map->empty() || _map->back().bbt() < bbt) {
+		recompute_map (false, true, 99);
 	}
 }
 
 void
-TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
+TempoMap::recompute_map (bool reassign_tempo_bbt, bool use_write_lock, framepos_t end)
 {
+	/* CALLER MUST HOLD READ LOCK AND MAY HOLD WRITE LOCK */
+
 	MeterSection* meter;
 	TempoSection* tempo;
 	TempoSection* ts;
@@ -814,8 +730,6 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 
 	if (end < 0) {
 
-		Glib::RWLock::ReaderLock lm (map_lock);
-
 		if (_map->empty()) {
 			/* compute 1 mins worth */
 			end = _frame_rate * 60;
@@ -826,8 +740,6 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 
 	DEBUG_TRACE (DEBUG::TempoMath, string_compose ("recomputing tempo map, zero to %1\n", end));
 
-	Glib::RWLock::ReaderLock lm (metrics_lock);
-	
 	for (Metrics::iterator i = metrics->begin(); i != metrics->end(); ++i) {
 		if ((ms = dynamic_cast<MeterSection *> (*i)) != 0) {
 			meter = ms;
@@ -995,17 +907,20 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 		}
 	}
 
-	{
-		Glib::RWLock::WriterLock lm (map_lock);
+	if (use_write_lock) {
+		Glib::RWLock::WriterLock lm (lock);
 		swap (_map, new_map);
-		delete new_map;
+	} else {
+		swap (_map, new_map);
 	}
+
+	delete new_map;
 }
 
 TempoMetric
 TempoMap::metric_at (framepos_t frame) const
 {
-	Glib::RWLock::ReaderLock lm (metrics_lock);
+	Glib::RWLock::ReaderLock lm (lock);
 	TempoMetric m (first_meter(), first_tempo());
 	const Meter* meter;
 	const Tempo* tempo;
@@ -1042,7 +957,7 @@ TempoMap::metric_at (framepos_t frame) const
 TempoMetric
 TempoMap::metric_at (BBT_Time bbt) const
 {
-	Glib::RWLock::ReaderLock lm (metrics_lock);
+	Glib::RWLock::ReaderLock lm (lock);
 	TempoMetric m (first_meter(), first_tempo());
 	const Meter* meter;
 	const Tempo* tempo;
@@ -1078,16 +993,26 @@ TempoMap::metric_at (BBT_Time bbt) const
 void
 TempoMap::bbt_time (framepos_t frame, BBT_Time& bbt)
 {
-	{
-		Glib::RWLock::ReaderLock lm (map_lock);
-		BBTPointList::const_iterator i = bbt_before_or_at (frame);
-		bbt_time_unlocked (frame, bbt, i);
+	Glib::RWLock::ReaderLock lm (lock);
+
+	const BBTPointList::const_iterator& i = bbt_before_or_at (frame);
+
+	bbt.bars = (*i).bar;
+	bbt.beats = (*i).beat;
+
+	if ((*i).frame == frame) {
+		bbt.ticks = 0;
+	} else {
+		bbt.ticks = llrint (((frame - (*i).frame) / (*i).meter->frames_per_division(*((*i).tempo), _frame_rate)) *
+				    BBT_Time::ticks_per_bar_division);
 	}
 }
 
 void
-TempoMap::bbt_time_unlocked (framepos_t frame, BBT_Time& bbt, const BBTPointList::const_iterator& i)
+TempoMap::bbt_time (framepos_t frame, BBT_Time& bbt, const BBTPointList::const_iterator& i)
 {
+	/* CALLER MUST HOLD READ LOCK */
+
 	bbt.bars = (*i).bar;
 	bbt.beats = (*i).beat;
 
@@ -1102,7 +1027,7 @@ TempoMap::bbt_time_unlocked (framepos_t frame, BBT_Time& bbt, const BBTPointList
 framepos_t
 TempoMap::frame_time (const BBT_Time& bbt)
 {
-	Glib::RWLock::ReaderLock lm (map_lock);
+	Glib::RWLock::ReaderLock lm (lock);
 
 	BBTPointList::const_iterator s = bbt_point_for (BBT_Time (1, 1, 0));
 	BBTPointList::const_iterator e = bbt_point_for (BBT_Time (bbt.bars, bbt.beats, 0));
@@ -1118,7 +1043,7 @@ TempoMap::frame_time (const BBT_Time& bbt)
 framecnt_t
 TempoMap::bbt_duration_at (framepos_t pos, const BBT_Time& bbt, int dir)
 {
-	Glib::RWLock::ReaderLock lm (map_lock);
+	Glib::RWLock::ReaderLock lm (lock);
 	framecnt_t frames = 0;
 	BBT_Time when;
 
@@ -1189,13 +1114,13 @@ TempoMap::round_to_beat (framepos_t fr, int dir)
 framepos_t
 TempoMap::round_to_beat_subdivision (framepos_t fr, int sub_num, int dir)
 {
-	Glib::RWLock::ReaderLock lm (map_lock);
+	Glib::RWLock::ReaderLock lm (lock);
 	BBTPointList::const_iterator i = bbt_before_or_at (fr);
 	BBT_Time the_beat;
 	uint32_t ticks_one_subdivisions_worth;
 	uint32_t difference;
 
-	bbt_time_unlocked (fr, the_beat, i);
+	bbt_time (fr, the_beat, i);
 
 	DEBUG_TRACE (DEBUG::SnapBBT, string_compose ("round %1 to nearest 1/%2 beat, before-or-at = %3 @ %4|%5 precise = %6\n",
 						     fr, sub_num, (*i).frame, (*i).bar, (*i).beat, the_beat));
@@ -1306,7 +1231,7 @@ TempoMap::round_to_beat_subdivision (framepos_t fr, int sub_num, int dir)
 framepos_t
 TempoMap::round_to_type (framepos_t frame, int dir, BBTPointType type)
 {
-	Glib::RWLock::ReaderLock lm (map_lock);
+	Glib::RWLock::ReaderLock lm (lock);
 	BBTPointList::const_iterator fi;
 
 	if (dir > 0) {
@@ -1441,6 +1366,7 @@ TempoMap::map (TempoMap::BBTPointList::const_iterator& begin,
 	       TempoMap::BBTPointList::const_iterator& end, 
 	       framepos_t lower, framepos_t upper) 
 {
+	Glib::RWLock::ReaderLock lm (lock);
 	require_map_to (upper);
 	begin = lower_bound (_map->begin(), _map->end(), lower);
 	end = upper_bound (_map->begin(), _map->end(), upper);
@@ -1449,7 +1375,7 @@ TempoMap::map (TempoMap::BBTPointList::const_iterator& begin,
 const TempoSection&
 TempoMap::tempo_section_at (framepos_t frame) const
 {
-	Glib::RWLock::ReaderLock lm (metrics_lock);
+	Glib::RWLock::ReaderLock lm (lock);
 	Metrics::const_iterator i;
 	TempoSection* prev = 0;
 
@@ -1495,7 +1421,7 @@ TempoMap::get_state ()
 	XMLNode *root = new XMLNode ("TempoMap");
 
 	{
-		Glib::RWLock::ReaderLock lm (metrics_lock);
+		Glib::RWLock::ReaderLock lm (lock);
 		for (i = metrics->begin(); i != metrics->end(); ++i) {
 			root->add_child_nocopy ((*i)->get_state());
 		}
@@ -1508,7 +1434,7 @@ int
 TempoMap::set_state (const XMLNode& node, int /*version*/)
 {
 	{
-		Glib::RWLock::WriterLock lm (metrics_lock);
+		Glib::RWLock::WriterLock lm (lock);
 
 		XMLNodeList nlist;
 		XMLNodeConstIterator niter;
@@ -1561,9 +1487,10 @@ TempoMap::set_state (const XMLNode& node, int /*version*/)
 			MetricSectionSorter cmp;
 			metrics->sort (cmp);
 		}
+
+		recompute_map (true, false);
 	}
 
-	recompute_map (true);
 	PropertyChanged (PropertyChange ());
 
 	return 0;
@@ -1572,7 +1499,7 @@ TempoMap::set_state (const XMLNode& node, int /*version*/)
 void
 TempoMap::dump (std::ostream& o) const
 {
-	Glib::RWLock::ReaderLock lm (metrics_lock);
+	Glib::RWLock::ReaderLock lm (lock);
 	const MeterSection* m;
 	const TempoSection* t;
 
@@ -1591,7 +1518,7 @@ TempoMap::dump (std::ostream& o) const
 int
 TempoMap::n_tempos() const
 {
-	Glib::RWLock::ReaderLock lm (metrics_lock);
+	Glib::RWLock::ReaderLock lm (lock);
 	int cnt = 0;
 
 	for (Metrics::const_iterator i = metrics->begin(); i != metrics->end(); ++i) {
@@ -1606,7 +1533,7 @@ TempoMap::n_tempos() const
 int
 TempoMap::n_meters() const
 {
-	Glib::RWLock::ReaderLock lm (metrics_lock);
+	Glib::RWLock::ReaderLock lm (lock);
 	int cnt = 0;
 
 	for (Metrics::const_iterator i = metrics->begin(); i != metrics->end(); ++i) {
@@ -1621,14 +1548,93 @@ TempoMap::n_meters() const
 void
 TempoMap::insert_time (framepos_t where, framecnt_t amount)
 {
-	Glib::RWLock::WriterLock lm (metrics_lock);
-	for (Metrics::iterator i = metrics->begin(); i != metrics->end(); ++i) {
-		if ((*i)->frame() >= where && (*i)->movable ()) {
-			(*i)->set_frame ((*i)->frame() + amount);
+	{
+		Glib::RWLock::WriterLock lm (lock);
+		for (Metrics::iterator i = metrics->begin(); i != metrics->end(); ++i) {
+			if ((*i)->frame() >= where && (*i)->movable ()) {
+				(*i)->set_frame ((*i)->frame() + amount);
+			}
 		}
+
+		/* now reset the BBT time of all metrics, based on their new
+		 * audio time. This is the only place where we do this reverse
+		 * timestamp.
+		 */
+
+		Metrics::iterator i;
+		const MeterSection* meter;
+		const TempoSection* tempo;
+		MeterSection *m;
+		TempoSection *t;
+		
+		meter = &first_meter ();
+		tempo = &first_tempo ();
+		
+		BBT_Time start;
+		BBT_Time end;
+		
+		// cerr << "\n###################### TIMESTAMP via AUDIO ##############\n" << endl;
+		
+		bool first = true;
+		MetricSection* prev = 0;
+		
+		for (i = metrics->begin(); i != metrics->end(); ++i) {
+			
+			BBT_Time bbt;
+			TempoMetric metric (*meter, *tempo);
+			
+			if (prev) {
+				metric.set_start (prev->start());
+				metric.set_frame (prev->frame());
+			} else {
+				// metric will be at frames=0 bbt=1|1|0 by default
+				// which is correct for our purpose
+			}
+			
+			BBTPointList::const_iterator bi = bbt_before_or_at ((*i)->frame());
+			bbt_time ((*i)->frame(), bbt, bi);
+			
+			// cerr << "timestamp @ " << (*i)->frame() << " with " << bbt.bars << "|" << bbt.beats << "|" << bbt.ticks << " => ";
+			
+			if (first) {
+				first = false;
+			} else {
+				
+				if (bbt.ticks > BBT_Time::ticks_per_bar_division/2) {
+					/* round up to next beat */
+					bbt.beats += 1;
+				}
+				
+				bbt.ticks = 0;
+				
+				if (bbt.beats != 1) {
+					/* round up to next bar */
+					bbt.bars += 1;
+					bbt.beats = 1;
+				}
+			}
+			
+			// cerr << bbt << endl;
+			
+			(*i)->set_start (bbt);
+			
+			if ((t = dynamic_cast<TempoSection*>(*i)) != 0) {
+				tempo = t;
+				// cerr << "NEW TEMPO, frame = " << (*i)->frame() << " start = " << (*i)->start() <<endl;
+			} else if ((m = dynamic_cast<MeterSection*>(*i)) != 0) {
+				meter = m;
+				// cerr << "NEW METER, frame = " << (*i)->frame() << " start = " << (*i)->start() <<endl;
+			} else {
+				fatal << _("programming error: unhandled MetricSection type") << endmsg;
+				/*NOTREACHED*/
+			}
+			
+			prev = (*i);
+		}
+		
+		recompute_map (true, false);
 	}
 
-	timestamp_metrics_from_audio_time ();
 
 	PropertyChanged (PropertyChange ());
 }
@@ -1652,7 +1658,7 @@ TempoMap::framepos_minus_beats (framepos_t pos, Evoral::MusicalTime beats)
 framepos_t
 TempoMap::framepos_minus_bbt (framepos_t pos, BBT_Time op)
 {
-	Glib::RWLock::ReaderLock lm (map_lock);
+	Glib::RWLock::ReaderLock lm (lock);
 	BBTPointList::const_iterator i;
 	framecnt_t extra_frames = 0;
 	bool had_bars = (op.bars != 0);
@@ -1707,7 +1713,7 @@ TempoMap::framepos_minus_bbt (framepos_t pos, BBT_Time op)
 framepos_t
 TempoMap::framepos_plus_bbt (framepos_t pos, BBT_Time op)
 {
-	Glib::RWLock::ReaderLock lm (map_lock);
+	Glib::RWLock::ReaderLock lm (lock);
 	BBT_Time op_copy (op);
 	int additional_minutes = 1;
 	BBTPointList::const_iterator i;
@@ -1777,7 +1783,7 @@ TempoMap::framepos_plus_bbt (framepos_t pos, BBT_Time op)
 Evoral::MusicalTime
 TempoMap::framewalk_to_beats (framepos_t pos, framecnt_t distance)
 {
-	Glib::RWLock::ReaderLock lm (map_lock);
+	Glib::RWLock::ReaderLock lm (lock);
 	BBTPointList::const_iterator i = bbt_after_or_at (pos);
 	Evoral::MusicalTime beats = 0;
 	framepos_t end = pos + distance;
@@ -1812,17 +1818,15 @@ TempoMap::framewalk_to_beats (framepos_t pos, framecnt_t distance)
 TempoMap::BBTPointList::const_iterator
 TempoMap::bbt_before_or_at (framepos_t pos)
 {
+	/* CALLER MUST HOLD READ LOCK */
 	BBTPointList::const_iterator i;
 
 	require_map_to (pos);
-	{
-		Glib::RWLock::ReaderLock lm (map_lock);
-		i = lower_bound (_map->begin(), _map->end(), pos);
-		assert (i != _map->end());
-		if ((*i).frame > pos) {
-			assert (i != _map->begin());
-			--i;
-		}
+	i = lower_bound (_map->begin(), _map->end(), pos);
+	assert (i != _map->end());
+	if ((*i).frame > pos) {
+		assert (i != _map->begin());
+		--i;
 	}
 	return i;
 }
@@ -1830,14 +1834,13 @@ TempoMap::bbt_before_or_at (framepos_t pos)
 TempoMap::BBTPointList::const_iterator
 TempoMap::bbt_after_or_at (framepos_t pos)
 {
+	/* CALLER MUST HOLD READ LOCK */
+
 	BBTPointList::const_iterator i;
 
 	require_map_to (pos);
-	{
-		Glib::RWLock::ReaderLock lm (map_lock);
-		i = upper_bound (_map->begin(), _map->end(), pos);
-		assert (i != _map->end());
-	}
+	i = upper_bound (_map->begin(), _map->end(), pos);
+	assert (i != _map->end());
 	return i;
 }
 
@@ -1850,13 +1853,14 @@ struct bbtcmp {
 TempoMap::BBTPointList::const_iterator
 TempoMap::bbt_point_for (const BBT_Time& bbt)
 {
+	/* CALLER MUST HOLD READ LOCK */
+
 	BBTPointList::const_iterator i;
 	bbtcmp cmp;
 	int additional_minutes = 1;
 
 	while (1) {
 		{
-			Glib::RWLock::ReaderLock lm (map_lock);
 			if (!_map->empty() && _map->back().bar >= (bbt.bars + 1)) {
 				break;
 			}
@@ -1866,11 +1870,8 @@ TempoMap::bbt_point_for (const BBT_Time& bbt)
 		additional_minutes *= 2;
 	}
 
-	{
-		Glib::RWLock::ReaderLock lm (map_lock);
-		i = lower_bound (_map->begin(), _map->end(), bbt, cmp);
-		assert (i != _map->end());
-	}
+	i = lower_bound (_map->begin(), _map->end(), bbt, cmp);
+	assert (i != _map->end());
 
 	return i;
 }

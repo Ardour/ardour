@@ -223,7 +223,7 @@ class TempoMap : public PBD::StatefulDestructible
 	typedef std::vector<BBTPoint> BBTPointList;
 
 	template<class T> void apply_with_metrics (T& obj, void (T::*method)(const Metrics&)) {
-		Glib::RWLock::ReaderLock lm (metrics_lock);
+		Glib::RWLock::ReaderLock lm (lock);
 		(obj.*method)(*metrics);
 	}
 
@@ -297,11 +297,10 @@ class TempoMap : public PBD::StatefulDestructible
 	framepos_t           last_bbt_when;
 	bool                 last_bbt_valid;
 	Timecode::BBT_Time   last_bbt;
-	mutable Glib::RWLock metrics_lock;
-	mutable Glib::RWLock map_lock;
+	mutable Glib::RWLock lock;
 	BBTPointList*       _map;
 
-	void recompute_map (bool reassign_tempo_bbt, framepos_t end = -1);
+	void recompute_map (bool reassign_tempo_bbt, bool use_write_lock, framepos_t end = -1);
         void require_map_to (framepos_t pos);
         void require_map_to (const Timecode::BBT_Time&);
 
@@ -309,11 +308,9 @@ class TempoMap : public PBD::StatefulDestructible
 	BBTPointList::const_iterator bbt_after_or_at (framepos_t);
 	BBTPointList::const_iterator bbt_point_for (const Timecode::BBT_Time&);
 	
-	void timestamp_metrics_from_audio_time ();
-	
 	framepos_t round_to_type (framepos_t fr, int dir, BBTPointType);
 	
-        void bbt_time_unlocked (framepos_t, Timecode::BBT_Time&, const BBTPointList::const_iterator&);
+        void bbt_time (framepos_t, Timecode::BBT_Time&, const BBTPointList::const_iterator&);
 	
 	framecnt_t bbt_duration_at_unlocked (const Timecode::BBT_Time& when, const Timecode::BBT_Time& bbt, int dir);
 	
