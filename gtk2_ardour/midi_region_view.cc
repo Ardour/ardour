@@ -2303,7 +2303,12 @@ MidiRegionView::note_dropped(CanvasNoteEvent *, frameoffset_t dt, int8_t dnote)
 
 	for (Selection::iterator i = _selection.begin(); i != _selection.end() ; ++i) {
 
+		cerr << "Note dropped, was at " << (*i)->note()->time() << " now + " << dt << endl;
+		cerr << "original pos as frames " << source_beats_to_absolute_frames ((*i)->note()->time()) << endl;
+		
 		Evoral::MusicalTime new_time = absolute_frames_to_source_beats (source_beats_to_absolute_frames ((*i)->note()->time()) + dt);
+
+		cerr << "new time in beats = " << new_time << endl;
 
 		if (new_time < 0) {
 			continue;

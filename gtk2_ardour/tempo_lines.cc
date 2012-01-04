@@ -133,7 +133,7 @@ TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 
 	for (i = begin; i != end; ++i) {
 
-		if ((*i).beat == 1) {
+		if ((*i).is_bar()) {
 			color = ARDOUR_UI::config()->canvasvar_MeasureLineBar.get();
 		} else {
 			if (beat_density > 2.0) {

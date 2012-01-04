@@ -213,6 +213,8 @@ class TempoMap : public PBD::StatefulDestructible
             operator Timecode::BBT_Time() const { return bbt(); }
             operator framepos_t() const { return frame; }
             
+	    bool is_bar() const { return beat == 1; }
+
             BBTPoint (const Meter& m, const Tempo& t, framepos_t f,
                       uint32_t b, uint32_t e)
                     : frame (f), meter (&m), tempo (&t), bar (b), beat (e) {}
