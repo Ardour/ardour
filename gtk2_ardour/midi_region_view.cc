@@ -1498,7 +1498,6 @@ void
 MidiRegionView::update_note (CanvasNote* ev, bool update_ghost_regions)
 {
 	boost::shared_ptr<NoteType> note = ev->note();
-
 	const double x = trackview.editor().frame_to_pixel (source_beats_to_region_frames (note->time()));
 	const double y1 = midi_stream_view()->note_to_y(note->note());
 
@@ -2302,13 +2301,9 @@ MidiRegionView::note_dropped(CanvasNoteEvent *, frameoffset_t dt, int8_t dnote)
 	start_note_diff_command (_("move notes"));
 
 	for (Selection::iterator i = _selection.begin(); i != _selection.end() ; ++i) {
-
-		cerr << "Note dropped, was at " << (*i)->note()->time() << " now + " << dt << endl;
-		cerr << "original pos as frames " << source_beats_to_absolute_frames ((*i)->note()->time()) << endl;
 		
-		Evoral::MusicalTime new_time = absolute_frames_to_source_beats (source_beats_to_absolute_frames ((*i)->note()->time()) + dt);
-
-		cerr << "new time in beats = " << new_time << endl;
+		framepos_t new_frames = source_beats_to_absolute_frames ((*i)->note()->time()) + dt;
+		Evoral::MusicalTime new_time = absolute_frames_to_source_beats (new_frames);
 
 		if (new_time < 0) {
 			continue;

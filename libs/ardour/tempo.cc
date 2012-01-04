@@ -1655,6 +1655,7 @@ TempoMap::framepos_minus_bbt (framepos_t pos, BBT_Time op)
 	Glib::RWLock::ReaderLock lm (map_lock);
 	BBTPointList::const_iterator i;
 	framecnt_t extra_frames = 0;
+	bool had_bars = (op.bars != 0);
 
 	/* start from the bar|beat right before (or at) pos */
 
@@ -1667,11 +1668,19 @@ TempoMap::framepos_minus_bbt (framepos_t pos, BBT_Time op)
 
 	while (i != _map->begin() && (op.bars || op.beats)) {
 		--i;
-		if ((*i).is_bar()) {
-			if (op.bars) {
-				op.bars--;
+
+		if (had_bars) {
+			if ((*i).is_bar()) {
+				if (op.bars) {
+					op.bars--;
+				}
 			}
-		} else {
+		}
+
+		if ((had_bars && op.bars == 0) || !had_bars) {
+			/* finished counting bars, or none to count, 
+			   so decrement beat count
+			*/
 			if (op.beats) {
 				op.beats--;
 			}
@@ -1703,23 +1712,34 @@ TempoMap::framepos_plus_bbt (framepos_t pos, BBT_Time op)
 	int additional_minutes = 1;
 	BBTPointList::const_iterator i;
 	framecnt_t backup_frames = 0;
-
+	bool had_bars = (op.bars != 0);
+		
 	while (true) {
 
 		i = bbt_before_or_at (pos);
-		
+
 		op = op_copy;
 
 		/* we know that (*i).frame is before or equal to pos */
 		backup_frames = pos - (*i).frame;
 
 		while (i != _map->end() && (op.bars || op.beats)) {
+
 			++i;
-			if ((*i).is_bar()) {
-				if (op.bars) {
-					op.bars--;
+
+			if (had_bars) {
+				if ((*i).is_bar()) {
+					if (op.bars) {
+						op.bars--;
+					}
 				}
-			} else {
+			}
+			
+			if ((had_bars && op.bars == 0) || !had_bars) {
+				/* finished counting bars, or none to count, 
+				   so decrement beat count
+				*/
+
 				if (op.beats) {
 					op.beats--;
 				}
