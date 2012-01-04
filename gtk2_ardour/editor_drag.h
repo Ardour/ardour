@@ -570,6 +570,7 @@ public:
 private:
 	MeterMarker* _marker;
 	bool _copy;
+	XMLNode* before_state;
 };
 
 /** Tempo marker drag */
@@ -596,6 +597,7 @@ public:
 private:
 	TempoMarker* _marker;
 	bool _copy;
+	XMLNode* before_state;
 };
 
 

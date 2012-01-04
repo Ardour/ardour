@@ -1953,6 +1953,8 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 
 		if (!_copy) {
 			TempoMap& map (_editor->session()->tempo_map());
+			/* get current state */
+			before_state = &map.get_state();
 			/* remove the section while we drag it */
 			map.remove_meter (section, true);
 		}
@@ -1987,13 +1989,12 @@ MeterMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	} else {
 		_editor->begin_reversible_command (_("move meter mark"));
-		XMLNode &before = map.get_state();
 
 		/* we removed it before, so add it back now */
 		
 		map.add_meter (_marker->meter(), when);
 		XMLNode &after = map.get_state();
-		_editor->session()->add_command(new MementoCommand<TempoMap>(map, &before, &after));
+		_editor->session()->add_command(new MementoCommand<TempoMap>(map, before_state, &after));
 		_editor->commit_reversible_command ();
 	}
 
@@ -2071,6 +2072,8 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 
 		if (!_copy) {
 			TempoMap& map (_editor->session()->tempo_map());
+			/* get current state */
+			before_state = &map.get_state();
 			/* remove the section while we drag it */
 			map.remove_tempo (section, true);
 		}
@@ -2105,11 +2108,10 @@ TempoMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	} else {
 		_editor->begin_reversible_command (_("move tempo mark"));
-		XMLNode &before = map.get_state();
 		/* we removed it before, so add it back now */
 		map.add_tempo (_marker->tempo(), when);
 		XMLNode &after = map.get_state();
-		_editor->session()->add_command (new MementoCommand<TempoMap>(map, &before, &after));
+		_editor->session()->add_command (new MementoCommand<TempoMap>(map, before_state, &after));
 		_editor->commit_reversible_command ();
 	}
 
