@@ -223,16 +223,14 @@ class TempoMap : public PBD::StatefulDestructible
 	typedef std::vector<BBTPoint> BBTPointList;
 
 	template<class T> void apply_with_metrics (T& obj, void (T::*method)(const Metrics&)) {
-		Glib::RWLock::ReaderLock lm (lock);
+		Glib::RWLock::ReaderLock lm (metrics_lock);
 		(obj.*method)(*metrics);
 	}
-
-	const BBTPointList& map() const { return _map ; }
 
 	void map (BBTPointList::const_iterator&, BBTPointList::const_iterator&, 
 		  framepos_t start, framepos_t end);
 	
-	void      bbt_time (framepos_t when, Timecode::BBT_Time&);
+	void       bbt_time (framepos_t when, Timecode::BBT_Time&);
         framecnt_t frame_time (const Timecode::BBT_Time&);
 	framecnt_t bbt_duration_at (framepos_t, const Timecode::BBT_Time&, int dir);
 
@@ -299,31 +297,32 @@ class TempoMap : public PBD::StatefulDestructible
 	framepos_t           last_bbt_when;
 	bool                 last_bbt_valid;
 	Timecode::BBT_Time   last_bbt;
-	mutable Glib::RWLock lock;
-	BBTPointList          _map;
+	mutable Glib::RWLock metrics_lock;
+	mutable Glib::RWLock map_lock;
+	BBTPointList*       _map;
 
 	void recompute_map (bool reassign_tempo_bbt, framepos_t end = -1);
         void require_map_to (framepos_t pos);
         void require_map_to (const Timecode::BBT_Time&);
 
-    BBTPointList::const_iterator bbt_before_or_at (framepos_t);
-    BBTPointList::const_iterator bbt_after_or_at (framepos_t);
-    BBTPointList::const_iterator bbt_point_for (const Timecode::BBT_Time&);
-
+	BBTPointList::const_iterator bbt_before_or_at (framepos_t);
+	BBTPointList::const_iterator bbt_after_or_at (framepos_t);
+	BBTPointList::const_iterator bbt_point_for (const Timecode::BBT_Time&);
+	
 	void timestamp_metrics_from_audio_time ();
-
+	
 	framepos_t round_to_type (framepos_t fr, int dir, BBTPointType);
-
+	
         void bbt_time_unlocked (framepos_t, Timecode::BBT_Time&, const BBTPointList::const_iterator&);
-
-    framecnt_t bbt_duration_at_unlocked (const Timecode::BBT_Time& when, const Timecode::BBT_Time& bbt, int dir);
-
+	
+	framecnt_t bbt_duration_at_unlocked (const Timecode::BBT_Time& when, const Timecode::BBT_Time& bbt, int dir);
+	
 	const MeterSection& first_meter() const;
 	const TempoSection& first_tempo() const;
-
+	
 	int move_metric_section (MetricSection&, const Timecode::BBT_Time& to);
 	void do_insert (MetricSection* section);
-
+	
 	Timecode::BBT_Time bbt_add (const Timecode::BBT_Time&, const Timecode::BBT_Time&, const TempoMetric&) const;
 	Timecode::BBT_Time bbt_add (const Timecode::BBT_Time& a, const Timecode::BBT_Time& b) const;
 	Timecode::BBT_Time bbt_subtract (const Timecode::BBT_Time&, const Timecode::BBT_Time&) const;
