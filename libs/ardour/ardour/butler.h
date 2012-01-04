@@ -60,7 +60,6 @@ class Butler : public SessionHandleRef
 
 	struct Request {
 		enum Type {
-			Wake,
 			Run,
 			Pause,
 			Quit

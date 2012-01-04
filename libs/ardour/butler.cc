@@ -179,9 +179,6 @@ Butler::thread_work ()
 
 					switch ((Request::Type) req) {
 
-					case Request::Wake:
-						break;
-
 					case Request::Run:
 						should_run = true;
 						break;
@@ -365,7 +362,7 @@ void
 Butler::wait_until_finished ()
 {
 	Glib::Mutex::Lock lm (request_lock);
-	char c = Request::Wake;
+	char c = Request::Pause;
 	(void) ::write (request_pipe[1], &c, 1);
 	paused.wait(request_lock);
 }
