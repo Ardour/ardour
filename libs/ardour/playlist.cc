@@ -1634,13 +1634,12 @@ Playlist::flush_notifications (bool from_undo)
   FINDING THINGS
   **********************************************************************/
 
- Playlist::RegionList *
- Playlist::regions_at (framepos_t frame)
-
- {
-	 RegionLock rlock (this);
-	 return find_regions_at (frame);
- }
+boost::shared_ptr<Playlist::RegionList>
+Playlist::regions_at (framepos_t frame)
+{
+	RegionLock rlock (this);
+	return find_regions_at (frame);
+}
 
  uint32_t
  Playlist::count_regions_at (framepos_t frame) const
@@ -1662,7 +1661,7 @@ Playlist::flush_notifications (bool from_undo)
 
  {
 	 RegionLock rlock (this);
-	 RegionList *rlist = find_regions_at (frame);
+	 boost::shared_ptr<RegionList> rlist = find_regions_at (frame);
 	 boost::shared_ptr<Region> region;
 
 	 if (rlist->size()) {
@@ -1671,7 +1670,6 @@ Playlist::flush_notifications (bool from_undo)
 		 region = rlist->back();
 	 }
 
-	 delete rlist;
 	 return region;
  }
 
@@ -1680,7 +1678,7 @@ Playlist::flush_notifications (bool from_undo)
 
  {
 	 RegionLock rlock (this);
-	 RegionList *rlist = find_regions_at (frame);
+	 boost::shared_ptr<RegionList> rlist = find_regions_at (frame);
 
 	 for (RegionList::iterator i = rlist->begin(); i != rlist->end(); ) {
 
@@ -1702,13 +1700,12 @@ Playlist::flush_notifications (bool from_undo)
 		 region = rlist->back();
 	 }
 
-	 delete rlist;
 	 return region;
  }
 
- Playlist::RegionList*
- Playlist::regions_to_read (framepos_t start, framepos_t end)
- {
+boost::shared_ptr<Playlist::RegionList>
+Playlist::regions_to_read (framepos_t start, framepos_t end)
+{
 	 /* Caller must hold lock */
 
 	 RegionList covering;
@@ -1772,7 +1769,7 @@ Playlist::flush_notifications (bool from_undo)
 		 }
 	 }
 
-	 RegionList* rlist = new RegionList;
+	 boost::shared_ptr<RegionList> rlist (new RegionList);
 
 	 /* find all the regions that cover each position .... */
 
@@ -1841,36 +1838,36 @@ Playlist::flush_notifications (bool from_undo)
 	 return rlist;
  }
 
- Playlist::RegionList *
- Playlist::find_regions_at (framepos_t frame)
- {
-	 /* Caller must hold lock */
+boost::shared_ptr<Playlist::RegionList>
+Playlist::find_regions_at (framepos_t frame)
+{
+	/* Caller must hold lock */
+	
+	boost::shared_ptr<RegionList> rlist (new RegionList);
 
-	 RegionList *rlist = new RegionList;
+	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
+		if ((*i)->covers (frame)) {
+			rlist->push_back (*i);
+		}
+	}
+	
+	return rlist;
+}
 
-	 for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
-		 if ((*i)->covers (frame)) {
-			 rlist->push_back (*i);
-		 }
-	 }
-
+boost::shared_ptr<Playlist::RegionList>
+Playlist::regions_touched (framepos_t start, framepos_t end)
+{
+	RegionLock rlock (this);
+	boost::shared_ptr<RegionList> rlist (new RegionList);
+	
+	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
+		if ((*i)->coverage (start, end) != OverlapNone) {
+			rlist->push_back (*i);
+		}
+	}
+	
 	 return rlist;
- }
-
- Playlist::RegionList *
- Playlist::regions_touched (framepos_t start, framepos_t end)
- {
-	 RegionLock rlock (this);
-	 RegionList *rlist = new RegionList;
-
-	 for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
-		 if ((*i)->coverage (start, end) != OverlapNone) {
-			 rlist->push_back (*i);
-		 }
-	 }
-
-	 return rlist;
- }
+}
 
  framepos_t
  Playlist::find_next_transient (framepos_t from, int dir)

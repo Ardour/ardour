@@ -568,7 +568,7 @@ Editor::canvas_crossfade_view_event (GdkEvent* event, ArdourCanvas::Item* item, 
 			boost::shared_ptr<AudioPlaylist> pl;
 			if ((pl = boost::dynamic_pointer_cast<AudioPlaylist> (atv->track()->playlist())) != 0) {
 
-				Playlist::RegionList* rl = pl->regions_at (event_frame (event));
+				boost::shared_ptr<Playlist::RegionList> rl = pl->regions_at (event_frame (event));
 				if (!rl->empty()) {
 
 					if (atv->layer_display() == Overlaid) {
@@ -579,8 +579,6 @@ Editor::canvas_crossfade_view_event (GdkEvent* event, ArdourCanvas::Item* item, 
 						rl->sort (cmp);
 
 						RegionView* rv = atv->view()->find_view (rl->front());
-
-						delete rl;
 
 						/* proxy */
 						return canvas_region_view_event (event, rv->get_canvas_group(), rv);
@@ -627,15 +625,12 @@ Editor::canvas_crossfade_view_event (GdkEvent* event, ArdourCanvas::Item* item, 
 
 						if (i != rl->end()) {
 							RegionView* rv = atv->view()->find_view (*i);
-							delete rl;
 
 							/* proxy */
 							return canvas_region_view_event (event, rv->get_canvas_group(), rv);
 						}
 					}
 				}
-
-				delete rl;
 			}
 		}
 	}

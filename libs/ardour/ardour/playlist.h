@@ -151,11 +151,11 @@ public:
 
 	const RegionListProperty& region_list () const { return regions; }
 
-	RegionList*                regions_at (framepos_t frame);
+	boost::shared_ptr<RegionList> regions_at (framepos_t frame);
 	uint32_t                   count_regions_at (framepos_t) const;
 	uint32_t                   count_joined_regions () const;
-	RegionList*                regions_touched (framepos_t start, framepos_t end);
-	RegionList*                regions_to_read (framepos_t start, framepos_t end);
+	boost::shared_ptr<RegionList> regions_touched (framepos_t start, framepos_t end);
+	boost::shared_ptr<RegionList> regions_to_read (framepos_t start, framepos_t end);
 	uint32_t                   region_use_count (boost::shared_ptr<Region>) const;
 	boost::shared_ptr<Region>  find_region (const PBD::ID&) const;
 	boost::shared_ptr<Region>  top_region_at (framepos_t frame);
@@ -340,7 +340,6 @@ public:
 	bool add_region_internal (boost::shared_ptr<Region>, framepos_t position);
 
 	int remove_region_internal (boost::shared_ptr<Region>);
-	RegionList *find_regions_at (framepos_t);
 	void copy_regions (RegionList&) const;
 	void partition_internal (framepos_t start, framepos_t end, bool cutting, RegionList& thawlist);
 
@@ -382,6 +381,7 @@ public:
 private:
 
 	void setup_layering_indices (RegionList const &) const;
+	boost::shared_ptr<RegionList> find_regions_at (framepos_t);
 };
 
 } /* namespace ARDOUR */
