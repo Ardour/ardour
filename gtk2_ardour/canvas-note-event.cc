@@ -366,7 +366,7 @@ CanvasNoteEvent::mouse_near_ends () const
 bool
 CanvasNoteEvent::big_enough_to_trim () const
 {
-        return (x2() - x1()) > 10; /* canvas units, really pixels */
+        return (x2() - x1()) > 20; /* canvas units, really pixels */
 }
 
 } // namespace Canvas
