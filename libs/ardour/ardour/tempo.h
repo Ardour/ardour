@@ -204,27 +204,26 @@ class TempoMap : public PBD::StatefulDestructible
 
 	struct BBTPoint {
             framepos_t  frame;
-            const Meter* meter;
-            const Tempo* tempo;
+            const MeterSection* meter;
+            const TempoSection* tempo;
             uint32_t bar;
             uint32_t beat;
             
+            BBTPoint (const MeterSection& m, const TempoSection& t, framepos_t f,
+                      uint32_t b, uint32_t e)
+                    : frame (f), meter (&m), tempo (&t), bar (b), beat (e) {}
+
             Timecode::BBT_Time bbt() const { return Timecode::BBT_Time (bar, beat, 0); }
             operator Timecode::BBT_Time() const { return bbt(); }
             operator framepos_t() const { return frame; }
-            
 	    bool is_bar() const { return beat == 1; }
-
-            BBTPoint (const Meter& m, const Tempo& t, framepos_t f,
-                      uint32_t b, uint32_t e)
-                    : frame (f), meter (&m), tempo (&t), bar (b), beat (e) {}
 	};
 
 	typedef std::vector<BBTPoint> BBTPointList;
 
 	template<class T> void apply_with_metrics (T& obj, void (T::*method)(const Metrics&)) {
 		Glib::RWLock::ReaderLock lm (lock);
-		(obj.*method)(*metrics);
+		(obj.*method)(metrics);
 	}
 
 	void map (BBTPointList::const_iterator&, BBTPointList::const_iterator&, 
@@ -299,37 +298,31 @@ class TempoMap : public PBD::StatefulDestructible
 	static Tempo    _default_tempo;
 	static Meter    _default_meter;
 
-	Metrics*             metrics;
+	Metrics              metrics;
 	framecnt_t          _frame_rate;
-	framepos_t           last_bbt_when;
-	bool                 last_bbt_valid;
-	Timecode::BBT_Time   last_bbt;
 	mutable Glib::RWLock lock;
-	BBTPointList*       _map;
+	BBTPointList        _map;
 
 	void recompute_map (bool reassign_tempo_bbt, framepos_t end = -1);
+	void extend_map (framepos_t end);
         void require_map_to (framepos_t pos);
         void require_map_to (const Timecode::BBT_Time&);
+	void _extend_map (TempoSection* tempo, MeterSection* meter, 
+			  Metrics::iterator next_metric,
+			  Timecode::BBT_Time current, framepos_t current_frame, framepos_t end);
 
 	BBTPointList::const_iterator bbt_before_or_at (framepos_t);
 	BBTPointList::const_iterator bbt_before_or_at (const Timecode::BBT_Time&);
 	BBTPointList::const_iterator bbt_after_or_at (framepos_t);
 	
 	framepos_t round_to_type (framepos_t fr, int dir, BBTPointType);
-	
         void bbt_time (framepos_t, Timecode::BBT_Time&, const BBTPointList::const_iterator&);
-	
 	framecnt_t bbt_duration_at_unlocked (const Timecode::BBT_Time& when, const Timecode::BBT_Time& bbt, int dir);
 	
 	const MeterSection& first_meter() const;
 	const TempoSection& first_tempo() const;
 	
-	int move_metric_section (MetricSection&, const Timecode::BBT_Time& to);
 	void do_insert (MetricSection* section);
-	
-	Timecode::BBT_Time bbt_add (const Timecode::BBT_Time&, const Timecode::BBT_Time&, const TempoMetric&) const;
-	Timecode::BBT_Time bbt_add (const Timecode::BBT_Time& a, const Timecode::BBT_Time& b) const;
-	Timecode::BBT_Time bbt_subtract (const Timecode::BBT_Time&, const Timecode::BBT_Time&) const;
 };
 
 }; /* namespace ARDOUR */
