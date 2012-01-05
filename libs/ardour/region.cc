@@ -547,7 +547,7 @@ Region::set_position_lock_style (PositionLockStyle ps)
 		_position_lock_style = ps;
 
 		if (_position_lock_style == MusicTime) {
-			_session.tempo_map().bbt_time (_position, _bbt_time);
+			_session.bbt_time (_position, _bbt_time);
 		}
 
 		send_change (Properties::position_lock_style);
@@ -624,7 +624,7 @@ void
 Region::recompute_position_from_lock_style ()
 {
 	if (_position_lock_style == MusicTime) {
-		_session.tempo_map().bbt_time (_position, _bbt_time);
+		_session.bbt_time (_position, _bbt_time);
 	}
 }
 

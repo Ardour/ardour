@@ -520,8 +520,8 @@ Location::recompute_bbt_from_frames ()
 		return;
 	}
 
-	_session.tempo_map().bbt_time (_start, _bbt_start);
-	_session.tempo_map().bbt_time (_end, _bbt_end);
+	_session.bbt_time (_start, _bbt_start);
+	_session.bbt_time (_end, _bbt_end);
 }
 
 void

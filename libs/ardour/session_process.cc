@@ -38,6 +38,7 @@
 #include "ardour/timestamps.h"
 #include "ardour/graph.h"
 #include "ardour/audio_port.h"
+#include "ardour/tempo.h"
 
 #include "midi++/manager.h"
 #include "midi++/mmc.h"
@@ -79,10 +80,14 @@ Session::process (pframes_t nframes)
 	// the ticker is for sending time information like MidiClock
 	framepos_t transport_frames = transport_frame();
 	Timecode::BBT_Time transport_bbt;
-	bbt_time(transport_frames, transport_bbt);
-	Timecode::Time transport_timecode;
-	timecode_time(transport_frames, transport_timecode);
-	tick (transport_frames, transport_bbt, transport_timecode); /* EMIT SIGNAL */
+	try {
+		_tempo_map->bbt_time_rt (transport_frames, transport_bbt);
+		Timecode::Time transport_timecode;
+		timecode_time(transport_frames, transport_timecode);
+		tick (transport_frames, transport_bbt, transport_timecode); /* EMIT SIGNAL */
+	} catch (...) {
+		warning << _("Missed MIDI Clock tick due to problems with tempo map") << endmsg;
+	}
 
 	SendFeedback (); /* EMIT SIGNAL */
 

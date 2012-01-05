@@ -231,7 +231,21 @@ class TempoMap : public PBD::StatefulDestructible
 		  framepos_t start, framepos_t end);
 	
 	void       bbt_time (framepos_t when, Timecode::BBT_Time&);
+	/* realtime safe variant of ::bbt_time(), will throw 
+	   std::logic_error if the map is not large enough
+	   to provide an answer.
+	*/
+	void       bbt_time_rt (framepos_t when, Timecode::BBT_Time&);
+
+
         framecnt_t frame_time (const Timecode::BBT_Time&);
+	/* realtime safe variant of ::frame_time(), will throw 
+	   std::logic_error if the map is not large enough
+	   to provide an answer.
+	*/
+        framecnt_t frame_time_rt (const Timecode::BBT_Time&);
+
+
 	framecnt_t bbt_duration_at (framepos_t, const Timecode::BBT_Time&, int dir);
 
 	static const Tempo& default_tempo() { return _default_tempo; }
@@ -300,13 +314,13 @@ class TempoMap : public PBD::StatefulDestructible
 	mutable Glib::RWLock lock;
 	BBTPointList*       _map;
 
-	void recompute_map (bool reassign_tempo_bbt, bool use_write_lock, framepos_t end = -1);
+	void recompute_map (bool reassign_tempo_bbt, framepos_t end = -1);
         void require_map_to (framepos_t pos);
         void require_map_to (const Timecode::BBT_Time&);
 
 	BBTPointList::const_iterator bbt_before_or_at (framepos_t);
+	BBTPointList::const_iterator bbt_before_or_at (const Timecode::BBT_Time&);
 	BBTPointList::const_iterator bbt_after_or_at (framepos_t);
-	BBTPointList::const_iterator bbt_point_for (const Timecode::BBT_Time&);
 	
 	framepos_t round_to_type (framepos_t fr, int dir, BBTPointType);
 	

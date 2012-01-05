@@ -485,20 +485,25 @@ Session::jack_timebase_callback (jack_transport_state_t /*state*/,
 
 		TempoMetric metric (_tempo_map->metric_at (_transport_frame));
 
-		_tempo_map->bbt_time (_transport_frame, bbt);
+		try {
+			_tempo_map->bbt_time_rt (_transport_frame, bbt);
 
-		pos->bar = bbt.bars;
-		pos->beat = bbt.beats;
-		pos->tick = bbt.ticks;
+			pos->bar = bbt.bars;
+			pos->beat = bbt.beats;
+			pos->tick = bbt.ticks;
+			
+			// XXX still need to set bar_start_tick
+			
+			pos->beats_per_bar = metric.meter().divisions_per_bar();
+			pos->beat_type = metric.meter().note_divisor();
+			pos->ticks_per_beat = Timecode::BBT_Time::ticks_per_bar_division;
+			pos->beats_per_minute = metric.tempo().beats_per_minute();
+			
+			pos->valid = jack_position_bits_t (pos->valid | JackPositionBBT);
 
-		// XXX still need to set bar_start_tick
-
-		pos->beats_per_bar = metric.meter().divisions_per_bar();
-		pos->beat_type = metric.meter().note_divisor();
-		pos->ticks_per_beat = Timecode::BBT_Time::ticks_per_bar_division;
-		pos->beats_per_minute = metric.tempo().beats_per_minute();
-
-		pos->valid = jack_position_bits_t (pos->valid | JackPositionBBT);
+		} catch (...) {
+			warning << _("failed to set tempo map information for JACK due to issues with tempo map") << endmsg;
+		}
 	}
 
 #ifdef HAVE_JACK_VIDEO_SUPPORT
@@ -554,7 +559,7 @@ Session::convert_to_frames (AnyTime const & position)
 
 	switch (position.type) {
 	case AnyTime::BBT:
-		return _tempo_map->frame_time (position.bbt);
+		return _tempo_map->frame_time_rt (position.bbt);
 		break;
 
 	case AnyTime::Timecode:
