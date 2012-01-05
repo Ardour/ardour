@@ -1414,7 +1414,7 @@ AUPlugin::get_beat_and_tempo_callback (Float64* outCurrentBeat,
 
 	Timecode::BBT_Time bbt;
 	TempoMetric metric = tmap.metric_at (_session.transport_frame() + input_offset);
-	tmap.bbt_time_with_metric (_session.transport_frame() + input_offset, bbt, metric);
+	tmap.bbt_time (_session.transport_frame() + input_offset, bbt);
 
 	if (outCurrentBeat) {
 		float beat;
@@ -1453,7 +1453,7 @@ AUPlugin::get_musical_time_location_callback (UInt32*   outDeltaSampleOffsetToNe
 
 	Timecode::BBT_Time bbt;
 	TempoMetric metric = tmap.metric_at (_session.transport_frame() + input_offset);
-	tmap.bbt_time_with_metric (_session.transport_frame() + input_offset, bbt, metric);
+	tmap.bbt_time (_session.transport_frame() + input_offset, bbt);
 
 	if (outDeltaSampleOffsetToNextBeat) {
 		if (bbt.ticks == 0) {
@@ -1462,7 +1462,7 @@ AUPlugin::get_musical_time_location_callback (UInt32*   outDeltaSampleOffsetToNe
 		} else {
 			*outDeltaSampleOffsetToNextBeat = (UInt32) 
 				floor (((Timecode::BBT_Time::ticks_per_bar_division - bbt.ticks)/Timecode::BBT_Time::ticks_per_bar_division) * // fraction of a beat to next beat
-				       metric.tempo().frames_per_beat(_session.frame_rate())); // frames per beat
+				       metric.meter().frames_per_division (metric.tempo(), _session.frame_rate())); // frames per beat
 		}
 	}
 
@@ -1548,7 +1548,7 @@ AUPlugin::get_transport_state_callback (Boolean*  outIsPlaying,
 
 				if (outCycleStartBeat) {
 					TempoMetric metric = tmap.metric_at (loc->start() + input_offset);
-					_session.tempo_map().bbt_time_with_metric (loc->start(), bbt, metric);
+					_session.tempo_map().bbt_time (loc->start(), bbt);
 
 					float beat;
 					beat = metric.meter().divisions_per_bar() * bbt.bars;
@@ -1560,7 +1560,7 @@ AUPlugin::get_transport_state_callback (Boolean*  outIsPlaying,
 
 				if (outCycleEndBeat) {
 					TempoMetric metric = tmap.metric_at (loc->end() + input_offset);
-					_session.tempo_map().bbt_time_with_metric (loc->end(), bbt, metric);
+					_session.tempo_map().bbt_time (loc->end(), bbt);
 
 					float beat;
 					beat = metric.meter().divisions_per_bar() * bbt.bars;
