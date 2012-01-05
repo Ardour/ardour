@@ -851,12 +851,6 @@ TempoMap::extend_map (framepos_t end)
 		}
 	}
 
-	cerr << "extend map to " << end << " next_metric @ end ? " << (next_metric == metrics.end());
-	if (next_metric != metrics.end()) {
-		cerr << *next_metric;
-	}
-	cerr << endl;
-
 	/* we cast away const here because this is the one place where we need
 	 * to actually modify the frame time of each metric section. 
 	 */
