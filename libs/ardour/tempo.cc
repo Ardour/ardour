@@ -1060,30 +1060,6 @@ TempoMap::frame_time (const BBT_Time& bbt)
 	}
 }
 
-framepos_t
-TempoMap::frame_time_rt (const BBT_Time& bbt)
-{
-	Glib::RWLock::ReaderLock lm (lock, Glib::TRY_LOCK);
-
-	if (!lm.locked()) {
-		throw std::logic_error ("TempoMap::bbt_time_rt() could not lock tempo map");
-	}
-
-	if (_map->empty() || _map->back().bar < bbt.bars || (_map->back().bar == bbt.bars && _map->back().beat < bbt.beats)) {
-		throw std::logic_error (string_compose ("map not long enough to reach %1", bbt));
-	}
-
-	BBTPointList::const_iterator s = bbt_before_or_at (BBT_Time (1, 1, 0));
-	BBTPointList::const_iterator e = bbt_before_or_at (BBT_Time (bbt.bars, bbt.beats, 0));
-
-	if (bbt.ticks != 0) {
-		return ((*e).frame - (*s).frame) + 
-			llrint ((*e).meter->frames_per_division (*(*e).tempo, _frame_rate) * (bbt.ticks/BBT_Time::ticks_per_bar_division));
-	} else {
-		return ((*e).frame - (*s).frame);
-	}
-}
-
 framecnt_t
 TempoMap::bbt_duration_at (framepos_t pos, const BBT_Time& bbt, int dir)
 {

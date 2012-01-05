@@ -559,7 +559,7 @@ Session::convert_to_frames (AnyTime const & position)
 
 	switch (position.type) {
 	case AnyTime::BBT:
-		return _tempo_map->frame_time_rt (position.bbt);
+		return _tempo_map->frame_time (position.bbt);
 		break;
 
 	case AnyTime::Timecode:

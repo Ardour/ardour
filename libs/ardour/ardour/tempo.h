@@ -239,13 +239,6 @@ class TempoMap : public PBD::StatefulDestructible
 
 
         framecnt_t frame_time (const Timecode::BBT_Time&);
-	/* realtime safe variant of ::frame_time(), will throw 
-	   std::logic_error if the map is not large enough
-	   to provide an answer.
-	*/
-        framecnt_t frame_time_rt (const Timecode::BBT_Time&);
-
-
 	framecnt_t bbt_duration_at (framepos_t, const Timecode::BBT_Time&, int dir);
 
 	static const Tempo& default_tempo() { return _default_tempo; }
