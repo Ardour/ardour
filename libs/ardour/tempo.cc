@@ -732,12 +732,6 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 	BBT_Time current;
 	Metrics::iterator next_metric;
 
-	if (end == 0) {
-		/* silly call from Session::process() during startup
-		 */
-		return;
-	}
-
 	if (end < 0) {
 
 		if (_map.empty()) {
@@ -814,6 +808,12 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 
 	DEBUG_TRACE (DEBUG::TempoMath, string_compose ("Add first bar at 1|1 @ %2\n", current.bars, current_frame));
 	_map.push_back (BBTPoint (*meter, *tempo,(framepos_t) llrint(current_frame), 1, 1));
+
+	if (end == 0) {
+		/* silly call from Session::process() during startup
+		 */
+		return;
+	}
 
 	_extend_map (tempo, meter, next_metric, current, current_frame, end);
 }
