@@ -1932,7 +1932,7 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 		// not, because we'll remove it from the map).
 		
 		MeterSection section (_marker->meter());
-		
+
 		if (!section.movable()) {
 			return;
 		}

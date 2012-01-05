@@ -421,13 +421,15 @@ TempoMap::do_insert (MetricSection* section)
 
 			if (!(*i)->movable()) {
 
-				/* can't (re)move this section, so overwrite it
+				/* can't (re)move this section, so overwrite
+				 * its data content (but not its properties as
+				 * a section
 				 */
 
 				if (!iter_is_tempo) {
-					*(dynamic_cast<MeterSection*>(*i)) = *(dynamic_cast<MeterSection*>(section));
+					*(dynamic_cast<Meter*>(*i)) = *(dynamic_cast<Meter*>(section));
 				} else {
-					*(dynamic_cast<TempoSection*>(*i)) = *(dynamic_cast<TempoSection*>(section));
+					*(dynamic_cast<Tempo*>(*i)) = *(dynamic_cast<Tempo*>(section));
 				}
 				need_add = false;
 				break;
@@ -546,6 +548,7 @@ TempoMap::replace_meter (const MeterSection& ms, const Meter& meter, const BBT_T
 			/* cannot move the first meter section */
 			*((Meter*)&first) = meter;
 			recompute_map (true);
+			
 		}
 	}
 
@@ -724,10 +727,8 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 {
 	/* CALLER MUST HOLD WRITE LOCK */
 
-	MeterSection* meter;
-	TempoSection* tempo;
-	TempoSection* ts;
-	MeterSection* ms;
+	MeterSection* meter = 0;
+	TempoSection* tempo = 0;
 	double current_frame;
 	BBT_Time current;
 	Metrics::iterator next_metric;
@@ -750,6 +751,8 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 	DEBUG_TRACE (DEBUG::TempoMath, string_compose ("recomputing tempo map, zero to %1\n", end));
 
 	for (Metrics::iterator i = metrics.begin(); i != metrics.end(); ++i) {
+		MeterSection* ms;
+
 		if ((ms = dynamic_cast<MeterSection *> (*i)) != 0) {
 			meter = ms;
 			break;
@@ -757,6 +760,8 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 	}
 
 	for (Metrics::iterator i = metrics.begin(); i != metrics.end(); ++i) {
+		TempoSection* ts;
+
 		if ((ts = dynamic_cast<TempoSection *> (*i)) != 0) {
 			tempo = ts;
 			break;
@@ -780,7 +785,10 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 		DEBUG_TRACE (DEBUG::TempoMath, "\tUpdating tempo marks BBT time from bar offset\n");
 
 		for (Metrics::iterator i = metrics.begin(); i != metrics.end(); ++i) {
-			
+
+			TempoSection* ts;
+			MeterSection* ms;
+	
 			if ((ts = dynamic_cast<TempoSection*>(*i)) != 0) {
 
 				/* reassign the BBT time of this tempo section
@@ -1326,6 +1334,10 @@ TempoMap::round_to_type (framepos_t frame, int dir, BBTPointType type)
 		if (dir < 0) {
 			/* find bar previous to 'frame' */
 
+			if (fi == _map.begin()) {
+				return 0;
+			}
+
 			if ((*fi).is_bar() && (*fi).frame == frame) {
 				--fi;
 			}
@@ -1378,15 +1390,11 @@ TempoMap::round_to_type (framepos_t frame, int dir, BBTPointType type)
 				prev--;
 			}
 
-			while ((*next).beat != 1) {
+			while ((next != _map.end()) && (*next).beat != 1) {
 				next++;
-				if (next == _map.end()) {
-					--next;
-					break;
-				}
 			}
 
-			if ((frame - (*prev).frame) < ((*next).frame - frame)) {
+			if ((next == _map.end()) || (frame - (*prev).frame) < ((*next).frame - frame)) {
 				return (*prev).frame;
 			} else {
 				return (*next).frame;
@@ -1398,6 +1406,11 @@ TempoMap::round_to_type (framepos_t frame, int dir, BBTPointType type)
 
 	case Beat:
 		if (dir < 0) {
+
+			if (fi == _map.begin()) {
+				return 0;
+			}
+
 			if ((*fi).frame >= frame) {
 				DEBUG_TRACE (DEBUG::SnapBBT, "requested frame is on beat, step back\n");
 				--fi;
@@ -1421,10 +1434,12 @@ TempoMap::round_to_type (framepos_t frame, int dir, BBTPointType type)
 
 			BBTPointList::const_iterator prev = fi;
 			BBTPointList::const_iterator next = fi;
-			--prev;
+			if (prev != _map.begin()) {
+				--prev;
+			}
 			++next;
 			
-			if ((frame - (*prev).frame) < ((*next).frame - frame)) {
+			if ((next == _map.end()) || (frame - (*prev).frame) < ((*next).frame - frame)) {
 				return (*prev).frame;
 			} else {
 				return (*next).frame;
