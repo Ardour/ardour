@@ -9,6 +9,7 @@
 #@color fg #171717
 #@color bg #cccccc
 #@color text #171717
+#@color muted_text #171717
 #@color base #cccccc
 #@color fg_selected #EEF
 #@color bg_selected #58B
@@ -25,7 +26,7 @@
 
 #@color arm #F33
 #@color solo #A8F730
-#@color midi_channel_selector #A8F730
+#@color midi_channel_selector #005900
 #@color mute #FFFA87
 #@color mono #DEC
 #@color monitor #7596DE

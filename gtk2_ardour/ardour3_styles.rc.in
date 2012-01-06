@@ -426,7 +426,7 @@ style "midi_channel_selector_button"
 	bg[NORMAL] = @@COLPREFIX@_bg
 	bg[ACTIVE] = @@COLPREFIX@_midi_channel_selector
 	fg[NORMAL] = @@COLPREFIX@_fg
-	fg[ACTIVE] = @@COLPREFIX@_darkest
+	fg[ACTIVE] = @@COLPREFIX@_muted_text
 }
 
 style "shuttle_control" = "very_small_text"
