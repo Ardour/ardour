@@ -59,11 +59,13 @@ FramewalkToBeatsTest::doubleTempoTest ()
 
 	/*
 	  
-	  120bpm                                                240bpm
-	  0 beats                                               12 beats
-	  0 frames                                              288e3 frames
-	  |                 |                 |                 |                 |
-	  | 1.1 1.2 1.3 1.4 | 2.1 2.2 2.3.2.4 | 3.1 3.2 3.3 3.4 | 4.1 4.2 4.3 4.4 |
+	  120bpm                                          240bpm
+	  0 beats                                         12 beats
+	  0 frames                                        288e3 frames
+	  24e3 frames per beat                            12e3 frames per beat
+	  |               |               |               |               |
+	  1.1 1.2 1.3 1.4 2.1 2.2 2.3 2.4 3.1 3.2 3.3 3.4 4.1 4.2 4.3 4.4 5.1
+	  0   1   2   3   4   5   6   7   8   9   10  11  12  13  14  15  16
 
 	*/
 
@@ -85,7 +87,6 @@ FramewalkToBeatsTest::doubleTempoTest ()
 	/* Walk 2.5 beats from 3|3.5 to 4.2 (over the tempo change) */
 	r = map.framewalk_to_beats (264e3 - 12e3, (24e3 + 12e3 + 12e3));
 	CPPUNIT_ASSERT_EQUAL (2.5, r);
-
 	/* Walk 3 beats from 3|4.5 to 4|3.5 (over the tempo change) */
 	r = map.framewalk_to_beats (264e3 - 12e3, (24e3 + 12e3 + 12e3 + 6e3));
 	CPPUNIT_ASSERT_EQUAL (3.0, r);
