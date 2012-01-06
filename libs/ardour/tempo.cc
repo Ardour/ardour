@@ -830,8 +830,6 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 	}
 
 	_extend_map (tempo, meter, next_metric, current, current_frame, end);
-
-	dump (cerr);
 }
 
 void
