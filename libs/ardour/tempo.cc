@@ -1884,6 +1884,10 @@ TempoMap::framepos_minus_beats (framepos_t pos, Evoral::MusicalTime beats) const
 		}
 	}
 
+	DEBUG_TRACE (DEBUG::TempoMath, string_compose ("frame %1 minus %2 beats, start with tempo = %3 @ %4 prev at beg? %5\n",
+						       pos, beats, *((Tempo*)tempo), tempo->frame(),
+						       prev_tempo == metrics.rend()));
+
 	/* We now have:
 
 	   tempo       -> the Tempo for "pos"
@@ -1893,7 +1897,7 @@ TempoMap::framepos_minus_beats (framepos_t pos, Evoral::MusicalTime beats) const
 	while (beats) {
 		
 		/* Distance to the start of this section in frames */
-		framecnt_t distance_frames = ((prev_tempo == metrics.rend()) ? max_framepos : (pos - (*prev_tempo)->frame()));
+		framecnt_t distance_frames = (pos - tempo->frame());
 
 		/* Distance to the start in beats */
 		Evoral::MusicalTime distance_beats = distance_frames / tempo->frames_per_beat (_frame_rate);
@@ -1901,16 +1905,25 @@ TempoMap::framepos_minus_beats (framepos_t pos, Evoral::MusicalTime beats) const
 		/* Amount to subtract this time */
 		double const sub = min (distance_beats, beats);
 
+		DEBUG_TRACE (DEBUG::TempoMath, string_compose ("\tdistance to %1 = %2 (%3 beats)\n",
+							       tempo->frame(), distance_frames, distance_beats));
 		/* Update */
 
 		beats -= sub;
 		pos -= sub * tempo->frames_per_beat (_frame_rate);
+
+		DEBUG_TRACE (DEBUG::TempoMath, string_compose ("\tnow at %1, %2 beats left, prev at end ? %3\n", pos, beats,
+							       (prev_tempo == metrics.rend())));
 
 		/* step backwards to prior TempoSection */
 
 		if (prev_tempo != metrics.rend()) {
 
 			tempo = dynamic_cast<const TempoSection*>(*prev_tempo);
+
+			DEBUG_TRACE (DEBUG::TempoMath, string_compose ("\tnew tempo = %1 @ %2 fpb = %3\n",
+								       *((Tempo*)tempo), tempo->frame(),
+								       tempo->frames_per_beat (_frame_rate)));
 
 			while (prev_tempo != metrics.rend ()) {
 
@@ -1920,6 +1933,9 @@ TempoMap::framepos_minus_beats (framepos_t pos, Evoral::MusicalTime beats) const
 					break;
 				}
 			}
+		} else {
+			pos -= llrint (beats * tempo->frames_per_beat (_frame_rate));
+			beats = 0;
 		}
 	}
 
@@ -2112,16 +2128,23 @@ TempoMap::framewalk_to_beats (framepos_t pos, framecnt_t distance) const
 		beats += sub / tempo->frames_per_beat (_frame_rate);
 		
 		/* Move on if there's anything to move to */
-		while (next_tempo != metrics.end ()) {
-			const TempoSection* t;
-			
-			++next_tempo;
 
-			if (next_tempo != metrics.end() && (t = dynamic_cast<const TempoSection*>(*next_tempo)) != 0) {
-				tempo = t;
-				break;
+		if (next_tempo != metrics.end()) {
+
+			tempo = dynamic_cast<const TempoSection*>(*next_tempo);
+
+			DEBUG_TRACE (DEBUG::TempoMath, string_compose ("\tnew tempo = %1 @ %2 fpb = %3\n",
+								       *((Tempo*)tempo), tempo->frame(),
+								       tempo->frames_per_beat (_frame_rate)));
+
+			while (next_tempo != metrics.end ()) {
+
+				++next_tempo;
+				
+				if (next_tempo != metrics.end() && dynamic_cast<const TempoSection*>(*next_tempo)) {
+					break;
+				}
 			}
-			
 		}
 	}
 
