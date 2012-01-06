@@ -502,7 +502,7 @@ Session::jack_timebase_callback (jack_transport_state_t /*state*/,
 			pos->valid = jack_position_bits_t (pos->valid | JackPositionBBT);
 
 		} catch (...) {
-			warning << _("failed to set tempo map information for JACK due to issues with tempo map") << endmsg;
+			/* no message */
 		}
 	}
 

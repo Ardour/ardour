@@ -86,7 +86,7 @@ Session::process (pframes_t nframes)
 		timecode_time(transport_frames, transport_timecode);
 		tick (transport_frames, transport_bbt, transport_timecode); /* EMIT SIGNAL */
 	} catch (...) {
-		warning << _("Missed MIDI Clock tick due to problems with tempo map") << endmsg;
+		/* don't bother with a message */
 	}
 
 	SendFeedback (); /* EMIT SIGNAL */
