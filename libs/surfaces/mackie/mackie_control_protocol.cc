@@ -1025,8 +1025,8 @@ MackieControlProtocol::format_bbt_timecode (framepos_t now_frame)
 		subdiv = 3;
 	}
 
-	uint32_t subdivisions = bbt_time.ticks / uint32_t (Timecode::BBT_Time::ticks_per_bar_division / subdiv);
-	uint32_t ticks = bbt_time.ticks % uint32_t (Timecode::BBT_Time::ticks_per_bar_division / subdiv);
+	uint32_t subdivisions = bbt_time.ticks / uint32_t (Timecode::BBT_Time::ticks_per_beat / subdiv);
+	uint32_t ticks = bbt_time.ticks % uint32_t (Timecode::BBT_Time::ticks_per_beat / subdiv);
 
 	os << setw(2) << setfill('0') << subdivisions + 1;
 	os << setw(3) << setfill('0') << ticks;

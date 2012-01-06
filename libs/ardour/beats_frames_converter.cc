@@ -32,7 +32,8 @@ framecnt_t
 BeatsFramesConverter::to (double beats) const
 {
 	assert (beats >= 0);
-	return _tempo_map.framepos_plus_beats (_origin_b, beats) - _origin_b;
+	framecnt_t r = _tempo_map.framepos_plus_beats (_origin_b, beats) - _origin_b;
+	return r;
 }
 
 /** Takes a duration in frames and considers it as a distance from the origin
@@ -42,7 +43,8 @@ BeatsFramesConverter::to (double beats) const
 double
 BeatsFramesConverter::from (framecnt_t frames) const
 {
-	return _tempo_map.framewalk_to_beats (_origin_b, frames);
+	double b = _tempo_map.framewalk_to_beats (_origin_b, frames);
+	return b;
 }
 
 } /* namespace ARDOUR */

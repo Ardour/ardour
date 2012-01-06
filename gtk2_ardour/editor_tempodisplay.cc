@@ -169,7 +169,7 @@ Editor::compute_current_bbt_points (framepos_t leftmost, framepos_t rightmost)
 	}
 	next_beat.ticks = 0;
 
-	_session->tempo_map().map (current_bbt_points_begin, current_bbt_points_end, _session->tempo_map().frame_time (previous_beat), _session->tempo_map().frame_time (next_beat) + 1);
+	_session->tempo_map().get_grid (current_bbt_points_begin, current_bbt_points_end, _session->tempo_map().frame_time (previous_beat), _session->tempo_map().frame_time (next_beat) + 1);
 }
 
 void

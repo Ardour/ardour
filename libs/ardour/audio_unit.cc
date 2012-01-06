@@ -1420,7 +1420,7 @@ AUPlugin::get_beat_and_tempo_callback (Float64* outCurrentBeat,
 		float beat;
 		beat = metric.meter().divisions_per_bar() * bbt.bars;
 		beat += bbt.beats;
-		beat += bbt.ticks / Timecode::BBT_Time::ticks_per_bar_division;
+		beat += bbt.ticks / Timecode::BBT_Time::ticks_per_beat;
 		*outCurrentBeat = beat;
 	}
 
@@ -1461,7 +1461,7 @@ AUPlugin::get_musical_time_location_callback (UInt32*   outDeltaSampleOffsetToNe
 			*outDeltaSampleOffsetToNextBeat = 0;
 		} else {
 			*outDeltaSampleOffsetToNextBeat = (UInt32) 
-				floor (((Timecode::BBT_Time::ticks_per_bar_division - bbt.ticks)/Timecode::BBT_Time::ticks_per_bar_division) * // fraction of a beat to next beat
+				floor (((Timecode::BBT_Time::ticks_per_beat - bbt.ticks)/Timecode::BBT_Time::ticks_per_beat) * // fraction of a beat to next beat
 				       metric.meter().frames_per_division (metric.tempo(), _session.frame_rate())); // frames per beat
 		}
 	}
@@ -1553,7 +1553,7 @@ AUPlugin::get_transport_state_callback (Boolean*  outIsPlaying,
 					float beat;
 					beat = metric.meter().divisions_per_bar() * bbt.bars;
 					beat += bbt.beats;
-					beat += bbt.ticks / Timecode::BBT_Time::ticks_per_bar_division;
+					beat += bbt.ticks / Timecode::BBT_Time::ticks_per_beat;
 
 					*outCycleStartBeat = beat;
 				}
@@ -1565,7 +1565,7 @@ AUPlugin::get_transport_state_callback (Boolean*  outIsPlaying,
 					float beat;
 					beat = metric.meter().divisions_per_bar() * bbt.bars;
 					beat += bbt.beats;
-					beat += bbt.ticks / Timecode::BBT_Time::ticks_per_bar_division;
+					beat += bbt.ticks / Timecode::BBT_Time::ticks_per_beat;
 
 					*outCycleEndBeat = beat;
 				}

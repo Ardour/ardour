@@ -209,7 +209,7 @@ VerboseCursor::set_duration (framepos_t start, framepos_t end, double x, double 
 
 		ticks -= sbbt.ticks;
 		if (ticks < 0) {
-			ticks += int (Timecode::BBT_Time::ticks_per_bar_division);
+			ticks += int (Timecode::BBT_Time::ticks_per_beat);
 			--beats;
 		}
 

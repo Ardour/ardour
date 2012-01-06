@@ -485,7 +485,7 @@ MidiRegionView::button_release (GdkEventButton* ev)
 					/* Shorten the length by 1 tick so that we can add a new note at the next
 					   grid snap without it overlapping this one.
 					*/
-					beats -= 1.0 / Timecode::BBT_Time::ticks_per_bar_division;
+					beats -= 1.0 / Timecode::BBT_Time::ticks_per_beat;
 
 					create_note_at (editor.pixel_to_frame (event_x), event_y, beats, true);
 				}
@@ -504,7 +504,7 @@ MidiRegionView::button_release (GdkEventButton* ev)
 				/* Shorten the length by 1 tick so that we can add a new note at the next
 				   grid snap without it overlapping this one.
 				*/
-				beats -= 1.0 / Timecode::BBT_Time::ticks_per_bar_division;
+				beats -= 1.0 / Timecode::BBT_Time::ticks_per_beat;
 				
 				create_note_at (editor.pixel_to_frame (event_x), event_y, beats, true);
 

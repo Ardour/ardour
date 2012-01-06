@@ -68,7 +68,7 @@ class Meter {
 	double note_divisor() const { return _note_type; }
 
 	double frames_per_bar (const Tempo&, framecnt_t sr) const;
-	double frames_per_division (const Tempo&, framecnt_t sr) const;
+	double frames_per_grid (const Tempo&, framecnt_t sr) const;
 
   protected:
 	/** The number of divisions in a bar.  This is a floating point value because
@@ -226,19 +226,42 @@ class TempoMap : public PBD::StatefulDestructible
 		(obj.*method)(metrics);
 	}
 
-	void map (BBTPointList::const_iterator&, BBTPointList::const_iterator&, 
-		  framepos_t start, framepos_t end);
+	void get_grid (BBTPointList::const_iterator&, BBTPointList::const_iterator&, 
+		       framepos_t start, framepos_t end);
 	
+	/* TEMPO- AND METER-SENSITIVE FUNCTIONS 
+
+	   bbt_time(), bbt_time_rt(), frame_time() and bbt_duration_at()
+	   are all sensitive to tempo and meter, and will give answers
+	   that align with the grid formed by tempo and meter sections.
+	   
+	   They SHOULD NOT be used to determine the position of events 
+	   whose location is canonically defined in beats.
+	*/
+
 	void       bbt_time (framepos_t when, Timecode::BBT_Time&);
 	/* realtime safe variant of ::bbt_time(), will throw 
 	   std::logic_error if the map is not large enough
 	   to provide an answer.
 	*/
 	void       bbt_time_rt (framepos_t when, Timecode::BBT_Time&);
-
-
         framecnt_t frame_time (const Timecode::BBT_Time&);
 	framecnt_t bbt_duration_at (framepos_t, const Timecode::BBT_Time&, int dir);
+
+	/* TEMPO-SENSITIVE FUNCTIONS
+	   
+	   These next 4 functions will all take tempo in account and should be
+	   used to determine position (and in the last case, distance in beats)
+	   when tempo matters but meter does not.
+
+	   They SHOULD be used to determine the position of events 
+	   whose location is canonically defined in beats.
+	*/
+
+	framepos_t framepos_plus_bbt (framepos_t pos, Timecode::BBT_Time b) const;
+	framepos_t framepos_plus_beats (framepos_t, Evoral::MusicalTime) const;
+	framepos_t framepos_minus_beats (framepos_t, Evoral::MusicalTime) const;
+	Evoral::MusicalTime framewalk_to_beats (framepos_t pos, framecnt_t distance) const;
 
 	static const Tempo& default_tempo() { return _default_tempo; }
 	static const Meter& default_meter() { return _default_meter; }
@@ -273,11 +296,6 @@ class TempoMap : public PBD::StatefulDestructible
 	TempoMetric metric_at (Timecode::BBT_Time bbt) const;
 	TempoMetric metric_at (framepos_t) const;
 
-	framepos_t framepos_plus_bbt (framepos_t pos, Timecode::BBT_Time b);
-	framepos_t framepos_plus_beats (framepos_t, Evoral::MusicalTime);
-	framepos_t framepos_minus_bbt (framepos_t pos, Timecode::BBT_Time b);
-	framepos_t framepos_minus_beats (framepos_t, Evoral::MusicalTime);
-	Evoral::MusicalTime framewalk_to_beats (framepos_t pos, framecnt_t distance);
 
 	void change_existing_tempo_at (framepos_t, double bpm, double note_type);
 	void change_initial_tempo (double bpm, double note_type);

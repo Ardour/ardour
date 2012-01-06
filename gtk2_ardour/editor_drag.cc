@@ -4448,7 +4448,7 @@ NoteCreateDrag::finished (GdkEvent* event, bool had_movement)
 	framecnt_t length = abs (_note[0] - _note[1]);
 
 	framecnt_t const g = grid_frames (start);
-	double const one_tick = 1 / Timecode::BBT_Time::ticks_per_bar_division;
+	double const one_tick = 1 / Timecode::BBT_Time::ticks_per_beat;
 	
 	if (_editor->snap_mode() == SnapNormal && length < g) {
 		length = g - one_tick;

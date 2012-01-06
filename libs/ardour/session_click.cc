@@ -60,7 +60,7 @@ Session::click (framepos_t start, framecnt_t nframes)
 
 	BufferSet& bufs = get_scratch_buffers(ChanCount(DataType::AUDIO, 1));
 	buf = bufs.get_audio(0).data();
-	_tempo_map->map (points_begin, points_end, start, end);
+	_tempo_map->get_grid (points_begin, points_end, start, end);
 
 	if (distance (points_begin, points_end) == 0) {
 		goto run_clicks;
