@@ -830,6 +830,8 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 	}
 
 	_extend_map (tempo, meter, next_metric, current, current_frame, end);
+
+	dump (cerr);
 }
 
 void
@@ -939,8 +941,15 @@ TempoMap::_extend_map (TempoSection* tempo, MeterSection* meter,
 
 						/* set tempo section location based on offset from last beat */
 
-						double bar_offset_in_beats = (ts->bar_offset() * meter->divisions_per_bar()) - 1;
-						bar_offset_in_beats -= current.beats;
+						double bar_offset_in_beats = 1 + (ts->bar_offset() * meter->divisions_per_bar());
+
+						/* we've already advanced
+						 * current.beats, but we want
+						 * the previous beat's value
+						 */
+
+						bar_offset_in_beats -= current.beats - 1;
+
 						tempo->set_frame (current_frame + (bar_offset_in_beats * beat_frames));
 
 						/* advance to the location of the new (adjusted) beat */
