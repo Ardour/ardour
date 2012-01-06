@@ -936,8 +936,13 @@ TempoMap::_extend_map (TempoSection* tempo, MeterSection* meter,
 						
 						/* back up to previous beat */
 						current_frame -= beat_frames;
+
 						/* set tempo section location based on offset from last beat */
-						tempo->set_frame (current_frame + (ts->bar_offset() * beat_frames));
+
+						double bar_offset_in_beats = (ts->bar_offset() * meter->divisions_per_bar()) - 1;
+						bar_offset_in_beats -= current.beats;
+						tempo->set_frame (current_frame + (bar_offset_in_beats * beat_frames));
+
 						/* advance to the location of the new (adjusted) beat */
 						current_frame += (ts->bar_offset() * beat_frames) + ((1.0 - ts->bar_offset()) * next_beat_frames);
 						/* next metric doesn't have to
@@ -1602,7 +1607,7 @@ TempoMap::set_state (const XMLNode& node, int /*version*/)
 void
 TempoMap::dump (std::ostream& o) const
 {
-	Glib::RWLock::ReaderLock lm (lock);
+	Glib::RWLock::ReaderLock lm (lock, Glib::TRY_LOCK);
 	const MeterSection* m;
 	const TempoSection* t;
 
