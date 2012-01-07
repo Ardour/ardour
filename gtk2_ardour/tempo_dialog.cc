@@ -83,6 +83,8 @@ TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double note_type,
 	strings.push_back (_("quarter"));
 	note_types.insert (make_pair (_("eighth"), 8.0));
 	strings.push_back (_("eighth"));
+	note_types.insert (make_pair (_("sixteenth"), 16.0));
+	strings.push_back (_("sixteenth"));
 	note_types.insert (make_pair (_("thirty-second"), 32.0));
 	strings.push_back (_("thirty-second"));
 	note_types.insert (make_pair (_("sixty-fourth"), 64.0));
@@ -134,9 +136,6 @@ TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double note_type,
 		when_bar_entry.set_text (buf);
 		snprintf (buf, sizeof (buf), "%" PRIu32, when.beats);
 		when_beat_entry.set_text (buf);
-
-		when_bar_entry.set_name ("MetricEntry");
-		when_beat_entry.set_name ("MetricEntry");
 
 		when_bar_entry.set_width_chars(4);
 		when_beat_entry.set_width_chars (4);
@@ -290,6 +289,8 @@ MeterDialog::init (const Timecode::BBT_Time& when, double bpb, double divisor, b
 	strings.push_back (_("quarter"));
 	note_types.insert (make_pair (_("eighth"), 8.0));
 	strings.push_back (_("eighth"));
+	note_types.insert (make_pair (_("sixteenth"), 16.0));
+	strings.push_back (_("sixteenth"));
 	note_types.insert (make_pair (_("thirty-second"), 32.0));
 	strings.push_back (_("thirty-second"));
 	note_types.insert (make_pair (_("sixty-fourth"), 64.0));
@@ -325,7 +326,6 @@ MeterDialog::init (const Timecode::BBT_Time& when, double bpb, double divisor, b
 
 		snprintf (buf, sizeof (buf), "%" PRIu32, when.bars);
 		when_bar_entry.set_text (buf);
-		when_bar_entry.set_name ("MetricEntry");
 
 		Label* when_label = manage (new Label(_("Meter begins at bar:"), ALIGN_LEFT, ALIGN_CENTER));
 
@@ -337,8 +337,6 @@ MeterDialog::init (const Timecode::BBT_Time& when, double bpb, double divisor, b
 
 	get_vbox()->set_border_width (12);
 	get_vbox()->pack_start (*table, false, false);
-
-	bpb_entry.set_name ("MetricEntry");
 
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);
 	add_button (Stock::APPLY, RESPONSE_ACCEPT);
