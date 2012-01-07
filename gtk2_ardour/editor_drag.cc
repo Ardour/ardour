@@ -2093,10 +2093,11 @@ TempoMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	motion (event, false);
 
+	TempoMap& map (_editor->session()->tempo_map());
+	framepos_t beat_time = map.round_to_beat (last_pointer_frame(), 0);
 	Timecode::BBT_Time when;
 
-	TempoMap& map (_editor->session()->tempo_map());
-	map.bbt_time (last_pointer_frame(), when);
+	map.bbt_time (beat_time, when);
 
 	if (_copy == true) {
 		_editor->begin_reversible_command (_("copy tempo mark"));
