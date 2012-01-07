@@ -399,75 +399,84 @@ TempoMap::do_insert (MetricSection* section)
 		}
 	}
 
-	Metrics::iterator i;
+	
 
 	/* Look for any existing MetricSection that is of the same type and
-	   at the same time as the new one, and remove it before adding
-	   the new one.
+	   in the same bar as the new one, and remove it before adding
+	   the new one. Note that this means that if we find a matching,
+	   existing section, we can break out of the loop since we're
+	   guaranteed that there is only one such match.
 	*/
 
-	Metrics::iterator to_remove = metrics.end ();
+	for (Metrics::iterator i = metrics.begin(); i != metrics.end(); ++i) {
 
-	for (i = metrics.begin(); i != metrics.end(); ++i) {
-
-		int const c = (*i)->compare (*section);
-
-		if (c < 0) {
-			/* this section is before the one to be added; go back round */
-			continue;
-		} else if (c > 0) {
-			/* this section is after the one to be added; there can't be any at the same time */
-			break;
-		}
-
-		/* hacky comparison of type */
 		bool const iter_is_tempo = dynamic_cast<TempoSection*> (*i) != 0;
 		bool const insert_is_tempo = dynamic_cast<TempoSection*> (section) != 0;
 
-		if (iter_is_tempo == insert_is_tempo) {
+		if (iter_is_tempo && insert_is_tempo) {
 
-			if (!(*i)->movable()) {
+			/* Tempo sections */
 
-				/* can't (re)move this section, so overwrite
-				 * its data content (but not its properties as
-				 * a section
-				 */
+			if ((*i)->start().bars == section->start().bars &&
+			    (*i)->start().beats == section->start().beats) {
 
-				if (!iter_is_tempo) {
-					*(dynamic_cast<Meter*>(*i)) = *(dynamic_cast<Meter*>(section));
-				} else {
+				if (!(*i)->movable()) {
+					
+					/* can't (re)move this section, so overwrite
+					 * its data content (but not its properties as
+					 * a section).
+					 */
+					
 					*(dynamic_cast<Tempo*>(*i)) = *(dynamic_cast<Tempo*>(section));
+					need_add = false;
+				} else {
+					metrics.erase (i);
 				}
-				need_add = false;
+				break;
+			} 
+
+		} else if (!iter_is_tempo && !insert_is_tempo) {
+
+			/* Meter Sections */
+
+			if ((*i)->start().bars == section->start().bars) {
+
+				if (!(*i)->movable()) {
+					
+					/* can't (re)move this section, so overwrite
+					 * its data content (but not its properties as
+					 * a section
+					 */
+					
+					*(dynamic_cast<Meter*>(*i)) = *(dynamic_cast<Meter*>(section));
+					need_add = false;
+				} else {
+					metrics.erase (i);
+					
+				}
+
 				break;
 			}
-
-			to_remove = i;
-			break;
+		} else {
+			/* non-matching types, so we don't care */
 		}
 	}
 
-	if (to_remove != metrics.end()) {
-		/* remove the MetricSection at the same time as the one we are about to add */
-		metrics.erase (to_remove);
-	}
-
-	/* Add the given MetricSection */
+	/* Add the given MetricSection, if we didn't just reset an existing
+	 * one above
+	 */
 
 	if (need_add) {
-		for (i = metrics.begin(); i != metrics.end(); ++i) {
-			
-			if ((*i)->compare (*section) < 0) {
-				continue;
-			}
-			
-			metrics.insert (i, section);
-			break;
-		}
 
-		if (i == metrics.end()) {
-			metrics.insert (metrics.end(), section);
+		Metrics::iterator i;
+
+		for (i = metrics.begin(); i != metrics.end(); ++i) {
+			if ((*i)->start() > section->start()) {
+				break;
+			}
 		}
+		
+		metrics.insert (i, section);
 	}
 }
 
@@ -476,7 +485,7 @@ TempoMap::replace_tempo (const TempoSection& ts, const Tempo& tempo, const BBT_T
 {
 	const TempoSection& first (first_tempo());
 
-	if (ts != first) {
+	if (ts.start() != first.start()) {
 		remove_tempo (ts, false);
 		add_tempo (tempo, where);
 	} else {
@@ -546,7 +555,7 @@ TempoMap::replace_meter (const MeterSection& ms, const Meter& meter, const BBT_T
 {
 	const MeterSection& first (first_meter());
 
-	if (ms != first) {
+	if (ms.start() != first.start()) {
 		remove_meter (ms, false);
 		add_meter (meter, where);
 	} else {
@@ -1038,8 +1047,6 @@ TempoMap::metric_at (framepos_t frame) const
 
 	for (Metrics::const_iterator i = metrics.begin(); i != metrics.end(); ++i) {
 
-		// cerr << "Looking at a metric section " << **i << endl;
-
 		if ((*i)->frame() > frame) {
 			break;
 		}
@@ -1054,7 +1061,6 @@ TempoMap::metric_at (framepos_t frame) const
 		m.set_start ((*i)->start ());
 	}
 	
-	// cerr << "for framepos " << frame << " returning " << m.meter() << " @ " << m.tempo() << " location " << m.frame() << " = " << m.start() << endl;
 	return m;
 }
 
@@ -1359,7 +1365,8 @@ TempoMap::round_to_type (framepos_t frame, int dir, BBTPointType type)
 
 	assert (fi != _map.end());
 
-	DEBUG_TRACE(DEBUG::SnapBBT, string_compose ("round from %1 (%3|%4 @ %5) to bars in direction %2\n", frame, dir, (*fi).bar, (*fi).beat, (*fi).frame));
+	DEBUG_TRACE (DEBUG::SnapBBT, string_compose ("round from %1 (%3|%4 @ %5) to %6 in direction %2\n", frame, dir, (*fi).bar, (*fi).beat, (*fi).frame,
+						     (type == Bar ? "bar" : "beat")));
 		
 	switch (type) {
 	case Bar:
@@ -1466,9 +1473,11 @@ TempoMap::round_to_type (framepos_t frame, int dir, BBTPointType type)
 
 			BBTPointList::const_iterator prev = fi;
 			BBTPointList::const_iterator next = fi;
-			if (prev != _map.begin()) {
-				--prev;
-			}
+
+			/* fi is already the beat before_or_at frame, and
+			   we've just established that its not at frame, so its
+			   the beat before frame.
+			*/
 			++next;
 			
 			if ((next == _map.end()) || (frame - (*prev).frame) < ((*next).frame - frame)) {
@@ -2231,38 +2240,6 @@ TempoMap::bbt_after_or_at (framepos_t pos)
 	i = upper_bound (_map.begin(), _map.end(), pos);
 	assert (i != _map.end());
 	return i;
-}
-
-/** Compare the time of this with that of another MetricSection.
- *  @param with_bbt True to compare using start(), false to use frame().
- *  @return -1 for less than, 0 for equal, 1 for greater than.
- */
-
-int
-MetricSection::compare (const MetricSection& other) const
-{
-	if (start() == other.start()) {
-		return 0;
-	} else if (start() < other.start()) {
-		return -1;
-	} else {
-		return 1;
-	}
-
-	/* NOTREACHED */
-	return 0;
-}
-
-bool
-MetricSection::operator== (const MetricSection& other) const
-{
-	return compare (other) == 0;
-}
-
-bool
-MetricSection::operator!= (const MetricSection& other) const
-{
-	return compare (other) != 0;
 }
 
 std::ostream& 

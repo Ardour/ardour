@@ -112,10 +112,6 @@ class MetricSection {
 	*/
 	virtual XMLNode& get_state() const = 0;
 
-	int compare (const MetricSection&) const;
-	bool operator== (const MetricSection& other) const;
-	bool operator!= (const MetricSection& other) const;
-
   private:
 	Timecode::BBT_Time _start;
 	framepos_t         _frame;
