@@ -885,12 +885,19 @@ TempoMap::_extend_map (TempoSection* tempo, MeterSection* meter,
 	MeterSection* ms;
 	double divisions_per_bar;
 	double beat_frames;
+	framepos_t bar_start_frame;
+
+	if (current.beats == 1) {
+		bar_start_frame = current_frame;
+	} else {
+		bar_start_frame = 0;
+	}
 
 	divisions_per_bar = meter->divisions_per_bar ();
 	beat_frames = meter->frames_per_grid (*tempo,_frame_rate);
 
 	while (current_frame < end) {
-		
+
 		current.beats++;
 		current_frame += beat_frames;
 
@@ -937,19 +944,13 @@ TempoMap::_extend_map (TempoSection* tempo, MeterSection* meter,
 						/* back up to previous beat */
 						current_frame -= beat_frames;
 
-						/* set tempo section location based on offset from last beat */
-
-						double bar_offset_in_beats = 1 + (ts->bar_offset() * meter->divisions_per_bar());
-
-						/* we've already advanced
-						 * current.beats, but we want
-						 * the previous beat's value
+						/* set tempo section location
+						 * based on offset from last
+						 * bar start 
 						 */
-
-						bar_offset_in_beats -= current.beats - 1;
-
-						tempo->set_frame (current_frame + (bar_offset_in_beats * beat_frames));
-
+						tempo->set_frame (bar_start_frame + 
+								  llrint ((ts->bar_offset() * meter->divisions_per_bar() * beat_frames)));
+						
 						/* advance to the location of the new (adjusted) beat */
 						current_frame += (ts->bar_offset() * beat_frames) + ((1.0 - ts->bar_offset()) * next_beat_frames);
 						/* next metric doesn't have to
@@ -1000,6 +1001,7 @@ TempoMap::_extend_map (TempoSection* tempo, MeterSection* meter,
 		if (current.beats == 1) {
 			DEBUG_TRACE (DEBUG::TempoMath, string_compose ("Add Bar at %1|1 @ %2\n", current.bars, current_frame));
 			_map.push_back (BBTPoint (*meter, *tempo,(framepos_t) llrint(current_frame), current.bars, 1));
+			bar_start_frame = current_frame;
 		} else {
 			DEBUG_TRACE (DEBUG::TempoMath, string_compose ("Add Beat at %1|%2 @ %3\n", current.bars, current.beats, current_frame));
 			_map.push_back (BBTPoint (*meter, *tempo, (framepos_t) llrint(current_frame), current.bars, current.beats));
