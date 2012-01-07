@@ -68,6 +68,10 @@ struct BBT_Time {
 	bool operator== (const BBT_Time& other) const {
 		return bars == other.bars && beats == other.beats && ticks == other.ticks;
 	}
+
+	bool operator!= (const BBT_Time& other) const {
+		return bars != other.bars || beats != other.beats || ticks != other.ticks;
+	}
 };
 	
 }
