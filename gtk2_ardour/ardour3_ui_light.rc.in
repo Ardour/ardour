@@ -9,7 +9,7 @@
 #@color fg #171717
 #@color bg #cccccc
 #@color text #171717
-#@color muted_text #171717
+#@color light_text_on_dark #CFCFC1
 #@color base #cccccc
 #@color fg_selected #EEF
 #@color bg_selected #58B
