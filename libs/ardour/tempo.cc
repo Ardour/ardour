@@ -951,8 +951,20 @@ TempoMap::_extend_map (TempoSection* tempo, MeterSection* meter,
 						tempo->set_frame (bar_start_frame + 
 								  llrint ((ts->bar_offset() * meter->divisions_per_bar() * beat_frames)));
 						
-						/* advance to the location of the new (adjusted) beat */
-						current_frame += (ts->bar_offset() * beat_frames) + ((1.0 - ts->bar_offset()) * next_beat_frames);
+						/* advance to the location of
+						 * the new (adjusted) beat. do
+						 * this by figuring out the
+						 * offset within the beat that
+						 * would have been there
+						 * without the tempo
+						 * change. then stretch the
+						 * beat accordingly.
+						 */
+
+						double offset_within_old_beat = (tempo->frame() - current_frame) / beat_frames;
+
+						current_frame += (offset_within_old_beat * beat_frames) + ((1.0 - offset_within_old_beat) * next_beat_frames);
+
 						/* next metric doesn't have to
 						 * match this precisely to
 						 * merit a reloop ...
