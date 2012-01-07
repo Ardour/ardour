@@ -144,6 +144,12 @@ private:
 	PBD::ScopedConnection name_connection;
 };
 
+class BlankProcessorEntry : public ProcessorEntry
+{
+  public:
+	BlankProcessorEntry (Width w);
+};
+
 class SendProcessorEntry : public ProcessorEntry
 {
 public:
@@ -252,6 +258,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	 *  put at the end of the plugin list.
 	 */
 	int _placement;
+	uint32_t                  _visible_prefader_processors;
 
 	RouteProcessorSelection& _rr_selection;
 
@@ -290,6 +297,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	bool processor_button_release_event (GdkEventButton *, ProcessorEntry *);
 	void redisplay_processors ();
 	void add_processor_to_display (boost::weak_ptr<ARDOUR::Processor>);
+	void help_count_visible_prefader_processors (boost::weak_ptr<ARDOUR::Processor>, uint32_t*, bool*);
 	void reordered ();
 	void report_failed_reorder ();
 	void route_processors_changed (ARDOUR::RouteProcessorChange);

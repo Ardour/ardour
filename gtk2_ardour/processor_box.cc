@@ -102,24 +102,31 @@ ProcessorEntry::ProcessorEntry (boost::shared_ptr<Processor> p, Width w)
 	, _width (w)
 	, _visual_state (Gtk::STATE_NORMAL)
 {
-	_vbox.pack_start (_button, true, true);
 	_vbox.show ();
 	
-	if (_processor->active()) {
-		_button.set_active_state (Gtkmm2ext::Active);
-	}
 	_button.set_diameter (3);
 	_button.set_distinct_led_click (true);
 	_button.set_led_left (true);
 	_button.signal_led_clicked.connect (sigc::mem_fun (*this, &ProcessorEntry::led_clicked));
 	_button.set_text (name (_width));
-	_button.show ();
 
-	_processor->ActiveChanged.connect (active_connection, invalidator (*this), boost::bind (&ProcessorEntry::processor_active_changed, this), gui_context());
-	_processor->PropertyChanged.connect (name_connection, invalidator (*this), ui_bind (&ProcessorEntry::processor_property_changed, this, _1), gui_context());
+	if (_processor) {
+		_vbox.pack_start (_button, true, true);
 
-	setup_tooltip ();
-	setup_visuals ();
+		if (_processor->active()) {
+			_button.set_active_state (Gtkmm2ext::Active);
+		}
+		
+		_button.show ();
+		
+		_processor->ActiveChanged.connect (active_connection, invalidator (*this), boost::bind (&ProcessorEntry::processor_active_changed, this), gui_context());
+		_processor->PropertyChanged.connect (name_connection, invalidator (*this), ui_bind (&ProcessorEntry::processor_property_changed, this, _1), gui_context());
+
+		setup_tooltip ();
+		setup_visuals ();
+	} else {
+		_vbox.set_size_request (-1, _button.size_request().height);
+	}
 }
 
 EventBox&
@@ -191,20 +198,24 @@ ProcessorEntry::set_enum_width (Width w)
 void
 ProcessorEntry::led_clicked()
 {
-	if (_button.active_state() == Gtkmm2ext::Active) {
-		_processor->deactivate ();
-	} else {
-		_processor->activate ();
+	if (_processor) {
+		if (_button.active_state() == Gtkmm2ext::Active) {
+			_processor->deactivate ();
+		} else {
+			_processor->activate ();
+		}
 	}
 }
 
 void
 ProcessorEntry::processor_active_changed ()
 {
-	if (_processor->active()) {
-		_button.set_active_state (Gtkmm2ext::Active);
-	} else {
-		_button.unset_active_state ();
+	if (_processor) {
+		if (_processor->active()) {
+			_button.set_active_state (Gtkmm2ext::Active);
+		} else {
+			_button.unset_active_state ();
+		}
 	}
 }
 
@@ -228,6 +239,10 @@ ProcessorEntry::name (Width w) const
 {
 	boost::shared_ptr<Send> send;
 	string name_display;
+
+	if (!_processor) {
+		return string();
+	}
 
 	if ((send = boost::dynamic_pointer_cast<Send> (_processor)) != 0 &&
 	    !boost::dynamic_pointer_cast<InternalSend>(_processor)) {
@@ -263,6 +278,11 @@ ProcessorEntry::name (Width w) const
 	}
 
 	return name_display;
+}
+
+BlankProcessorEntry::BlankProcessorEntry (Width w)
+	: ProcessorEntry (boost::shared_ptr<Processor>(), w)
+{
 }
 
 SendProcessorEntry::SendProcessorEntry (boost::shared_ptr<Send> s, Width w)
@@ -466,6 +486,7 @@ ProcessorBox::ProcessorBox (ARDOUR::Session* sess, boost::function<PluginSelecto
 	, ab_direction (true)
 	, _get_plugin_selector (get_plugin_selector)
 	, _placement (-1)
+	, _visible_prefader_processors (0)
 	, _rr_selection(rsel)
 {
 	set_session (sess);
@@ -501,6 +522,8 @@ ProcessorBox::ProcessorBox (ARDOUR::Session* sess, boost::function<PluginSelecto
 			_mixer_strip_connections, invalidator (*this), ui_bind (&ProcessorBox::mixer_strip_delivery_changed, this, _1), gui_context ()
 			);
 	}
+
+	ARDOUR_UI::instance()->set_tip (processor_display, _("Right-click to add/remove/edit\nplugins,inserts,sends and more"));
 }
 
 ProcessorBox::~ProcessorBox ()
@@ -706,6 +729,12 @@ ProcessorBox::show_processor_menu (int arg)
 	int x, y;
 	processor_display.get_pointer (x, y);
 	_placement = processor_display.add_placeholder (y);
+
+	if (_visible_prefader_processors == 0) {
+		if (_placement == 1) {
+			_placement = 0;
+		}
+	}
 }
 
 bool
@@ -735,7 +764,7 @@ ProcessorBox::processor_operation (ProcessorOperation op)
 
 		pair<ProcessorEntry *, double> const pointer = processor_display.get_child_at_position (y);
 
-		if (pointer.first) {
+		if (pointer.first && pointer.first->processor()) {
 			targets.push_back (pointer.first->processor ());
 		}
 	}
@@ -1087,13 +1116,26 @@ ProcessorBox::route_processors_changed (RouteProcessorChange c)
 void
 ProcessorBox::redisplay_processors ()
 {
-	ENSURE_GUI_THREAD (*this, &ProcessorBox::redisplay_processors)
+	ENSURE_GUI_THREAD (*this, &ProcessorBox::redisplay_processors);
+	bool     fader_seen;
 
 	if (no_processor_redisplay) {
 		return;
 	}
 
 	processor_display.clear ();
+
+	_visible_prefader_processors = 0;
+	fader_seen = false;
+
+	_route->foreach_processor (sigc::bind (sigc::mem_fun (*this, &ProcessorBox::help_count_visible_prefader_processors), 
+					       &_visible_prefader_processors, &fader_seen));
+
+	if (_visible_prefader_processors == 0) { // fader only
+		BlankProcessorEntry* bpe = new BlankProcessorEntry (_width);
+		bpe->set_pixel_width (get_allocation().get_width());
+		processor_display.add_child (bpe);
+	}
 
 	_route->foreach_processor (sigc::mem_fun (*this, &ProcessorBox::add_processor_to_display));
 
@@ -1183,6 +1225,23 @@ ProcessorBox::maybe_add_processor_to_ui_list (boost::weak_ptr<Processor> w)
 }
 
 void
+ProcessorBox::help_count_visible_prefader_processors (boost::weak_ptr<Processor> p, uint32_t* cnt, bool* amp_seen)
+{
+	boost::shared_ptr<Processor> processor (p.lock ());
+
+	if (processor && processor->display_to_user()) {
+
+		if (boost::dynamic_pointer_cast<Amp>(processor)) {
+			*amp_seen = true;
+		} else {
+			if (!*amp_seen) {
+				(*cnt)++;
+			}
+		}
+	}
+}
+
+void
 ProcessorBox::add_processor_to_display (boost::weak_ptr<Processor> p)
 {
 	boost::shared_ptr<Processor> processor (p.lock ());
@@ -1190,6 +1249,7 @@ ProcessorBox::add_processor_to_display (boost::weak_ptr<Processor> p)
 	if (!processor || !processor->display_to_user()) {
 		return;
 	}
+
 
 	boost::shared_ptr<Send> send = boost::dynamic_pointer_cast<Send> (processor);
 	boost::shared_ptr<PluginInsert> plugin_insert = boost::dynamic_pointer_cast<PluginInsert> (processor);
