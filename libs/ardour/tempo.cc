@@ -182,8 +182,8 @@ TempoSection::update_bbt_time_from_bar_offset (const Meter& meter)
 	new_start.bars = start().bars;
 	
 	double ticks = BBT_Time::ticks_per_beat * meter.divisions_per_bar() * _bar_offset;
-	new_start.beats = (uint32_t) floor(ticks/BBT_Time::ticks_per_beat);
-	new_start.ticks = (uint32_t) fmod (ticks, BBT_Time::ticks_per_beat);
+	new_start.beats = (uint32_t) floor (ticks/BBT_Time::ticks_per_beat);
+	new_start.ticks = 0; /* (uint32_t) fmod (ticks, BBT_Time::ticks_per_beat); */
 
 	/* remember the 1-based counting properties of beats */
 	new_start.beats += 1;
