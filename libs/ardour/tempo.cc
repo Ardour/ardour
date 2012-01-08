@@ -2196,6 +2196,8 @@ TempoMap::bbt_before_or_at (framepos_t pos)
 	i = lower_bound (_map.begin(), _map.end(), pos);
 	assert (i != _map.end());
 	if ((*i).frame > pos) {
+		cerr << "lower bound was found at " << (*i).frame << " for " << pos;
+		dump (cerr);
 		assert (i != _map.begin());
 		--i;
 	}
