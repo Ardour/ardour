@@ -1106,6 +1106,15 @@ TempoMap::bbt_time (framepos_t frame, BBT_Time& bbt)
 	require_map_to (frame);
 
 	Glib::RWLock::ReaderLock lm (lock);
+
+	if (frame < 0) {
+		bbt.bars = 1;
+		bbt.beats = 1;
+		bbt.ticks = 0;
+		warning << string_compose (_("tempo map asked for BBT time at frame %1\n"), frame) << endmsg;
+		return;
+	}
+
 	return bbt_time (frame, bbt, bbt_before_or_at (frame));
 }
 
@@ -1144,6 +1153,15 @@ TempoMap::bbt_time (framepos_t frame, BBT_Time& bbt, const BBTPointList::const_i
 framepos_t
 TempoMap::frame_time (const BBT_Time& bbt)
 {
+	if (bbt.bars < 1) {
+		warning << string_compose (_("tempo map asked for frame time at bar < 1  (%1)\n"), bbt) << endmsg;
+		return 0;
+	}
+	
+	if (bbt.beats < 1) {
+		throw std::logic_error ("beats are counted from one");
+	}
+
 	require_map_to (bbt);
 
 	Glib::RWLock::ReaderLock lm (lock);
@@ -2193,11 +2211,16 @@ TempoMap::bbt_before_or_at (framepos_t pos)
 
 	BBTPointList::const_iterator i;
 
+	if (pos < 0) {
+		/* not really correct, but we should catch pos < 0 at a higher
+		   level 
+		*/
+		return _map.begin();
+	}
+
 	i = lower_bound (_map.begin(), _map.end(), pos);
 	assert (i != _map.end());
 	if ((*i).frame > pos) {
-		cerr << "lower bound was found at " << (*i).frame << " for " << pos;
-		dump (cerr);
 		assert (i != _map.begin());
 		--i;
 	}
