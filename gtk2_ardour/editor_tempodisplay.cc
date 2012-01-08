@@ -148,28 +148,10 @@ Editor::compute_current_bbt_points (framepos_t leftmost, framepos_t rightmost)
 		return;
 	}
 
-	Timecode::BBT_Time previous_beat, next_beat; // the beats previous to the leftmost frame and after the rightmost frame
+	/* prevent negative values of leftmost from creeping into tempomap
+	 */
 
-	_session->bbt_time(leftmost, previous_beat);
-	_session->bbt_time(rightmost, next_beat);
-
-	if (previous_beat.beats > 1) {
-		previous_beat.beats -= 1;
-	} else if (previous_beat.bars > 1) {
-		previous_beat.bars--;
-		previous_beat.beats += 1;
-	}
-	previous_beat.ticks = 0;
-
-	if (_session->tempo_map().meter_at(rightmost).divisions_per_bar () > next_beat.beats + 1) {
-		next_beat.beats += 1;
-	} else {
-		next_beat.bars += 1;
-		next_beat.beats = 1;
-	}
-	next_beat.ticks = 0;
-
-	_session->tempo_map().get_grid (current_bbt_points_begin, current_bbt_points_end, _session->tempo_map().frame_time (previous_beat), _session->tempo_map().frame_time (next_beat) + 1);
+	_session->tempo_map().get_grid (current_bbt_points_begin, current_bbt_points_end, max (leftmost, (framepos_t) 0), rightmost);
 }
 
 void
