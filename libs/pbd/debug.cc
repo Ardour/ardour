@@ -21,6 +21,8 @@
 #include <cstdlib>
 #include <iostream>
 #include <map>
+#include <vector>
+#include <algorithm>
 
 #include "pbd/debug.h"
 
@@ -100,9 +102,17 @@ void
 PBD::list_debug_options ()
 {
 	cout << _("The following debug options are available. Separate multipe options with commas.\nNames are case-insensitive and can be abbreviated.") << endl << endl;
-	cout << "\tAll" << endl;
+	cout << '\t' << X_("all") << endl; 
+
+	vector<string> options;
 
         for (map<const char*,uint64_t>::iterator i = _debug_bit_map.begin(); i != _debug_bit_map.end(); ++i) {
-                cout << "\t" << i->first << endl;
+		options.push_back (i->first);
         }
+
+	sort (options.begin(), options.end());
+
+	for (vector<string>::iterator i = options.begin(); i != options.end(); ++i) {
+                cout << "\t" << (*i) << endl;
+	}
 }
