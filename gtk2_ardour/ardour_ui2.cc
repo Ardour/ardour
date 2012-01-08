@@ -401,10 +401,8 @@ ARDOUR_UI::setup_transport ()
 	auto_box->pack_start (sync_button, false, false);
 	auto_box->pack_start (auto_play_button, false, false);
 	auto_box->pack_start (auto_return_button, false, false);
-        if (!Profile->get_small_screen()) {
-		transport_tearoff_hbox.pack_start (*auto_box, false, false);
-        }
 
+	transport_tearoff_hbox.pack_start (*auto_box, false, false);
 	transport_tearoff_hbox.pack_start (*clock_box, false, false);
 	transport_tearoff_hbox.pack_start (click_button, false, false);
 
