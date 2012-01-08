@@ -2285,10 +2285,6 @@ ProcessorBox::get_processor_ui (boost::shared_ptr<Processor> p) const
 		++i;
 	}
 
-	/* we shouldn't get here, because the ProcessorUIList should always contain
-	   an entry for each processor.
-	*/
-	assert (false);
 	return 0;
 }
 
