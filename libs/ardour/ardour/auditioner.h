@@ -48,6 +48,8 @@ class Auditioner : public AudioTrack
 
 	int play_audition (framecnt_t nframes);
 
+	MonitorState monitoring_state () const;
+
 	void cancel_audition () {
 		g_atomic_int_set (&_auditioning, 0);
 	}

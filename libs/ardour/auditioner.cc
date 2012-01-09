@@ -289,3 +289,9 @@ Auditioner::input_streams () const
 
         return ChanCount ();
 }
+
+MonitorState 
+Auditioner::monitoring_state () const
+{
+	return MonitoringDisk;
+}
