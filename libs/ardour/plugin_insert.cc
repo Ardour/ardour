@@ -140,11 +140,11 @@ PluginInsert::output_streams() const
 
 	if (_plugins.front()->reconfigurable_io()) {
 		ChanCount out = _plugins.front()->output_streams ();
-		DEBUG_TRACE (DEBUG::Processors, string_compose ("Plugin insert, reconfigur(able) output streams = %1\n", out));
+		// DEBUG_TRACE (DEBUG::Processors, string_compose ("Plugin insert, reconfigur(able) output streams = %1\n", out));
 		return out;
 	} else {
 		ChanCount out = _plugins.front()->get_info()->n_outputs;
-		DEBUG_TRACE (DEBUG::Processors, string_compose ("Plugin insert, static output streams = %1 for %2 plugins\n", out, _plugins.size()));
+		// DEBUG_TRACE (DEBUG::Processors, string_compose ("Plugin insert, static output streams = %1 for %2 plugins\n", out, _plugins.size()));
 		out.set_audio (out.n_audio() * _plugins.size());
 		out.set_midi (out.n_midi() * _plugins.size());
 		return out;
