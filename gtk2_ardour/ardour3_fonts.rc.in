@@ -47,7 +47,7 @@ style "red_medium_text" = "medium_text"
 
 style "large_bold_text"
 {
- 	font_name = "bold @FONT_BIGGER@"
+ 	font_name = "bold @FONT_LARGE@"
 }
 
 style "larger_text"

@@ -476,7 +476,7 @@ def build(bld):
 
     # Set up font sizes
     if bld.is_defined('GTKOSX'): # OS X fonts
-        basefont = "Lucida Grande"
+        basefont = ""
         font_sizes = {
                 'TINY' : '7',
                 'SMALLER' : '9',
