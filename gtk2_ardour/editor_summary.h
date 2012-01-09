@@ -83,6 +83,8 @@ private:
 	void set_cursor (Position);
 	void route_gui_changed (std::string);
 	bool suspending_editor_updates () const;
+	double playhead_frame_to_position (framepos_t) const;
+	void set_overlays_dirty (int, int, int, int);
 
 	framepos_t _start; ///< start frame of the overview
 	framepos_t _end; ///< end frame of the overview

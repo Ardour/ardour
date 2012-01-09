@@ -120,7 +120,7 @@ EditorSummary::on_expose_event (GdkEventExpose* event)
 	/* XXX: colour should be set from configuration file */
 	cairo_set_source_rgba (cr, 1, 0, 0, 1);
 
-	double const p = (_editor->playhead_cursor->current_frame - _start) * _x_scale;
+	double const p = playhead_frame_to_position (_editor->playhead_cursor->current_frame);
 	cairo_move_to (cr, p, 0);
 	cairo_line_to (cr, p, get_height());
 	cairo_stroke (cr);
@@ -251,9 +251,18 @@ EditorSummary::render_region (RegionView* r, cairo_t* cr, double y) const
 void
 EditorSummary::set_overlays_dirty ()
 {
-	ENSURE_GUI_THREAD (*this, &EditorSummary::set_overlays_dirty)
+	ENSURE_GUI_THREAD (*this, &EditorSummary::set_overlays_dirty);
 	queue_draw ();
 }
+
+/** Set the summary so that just the overlays (viewbox, playhead etc.) in a given area will be re-rendered */
+void
+EditorSummary::set_overlays_dirty (int x, int y, int w, int h)
+{
+	ENSURE_GUI_THREAD (*this, &EditorSummary::set_overlays_dirty);
+	queue_draw_area (x, y, w, h);
+}
+
 
 /** Handle a size request.
  *  @param req GTK requisition
@@ -859,8 +868,12 @@ EditorSummary::set_editor_y (pair<double, double> const y)
 void
 EditorSummary::playhead_position_changed (framepos_t p)
 {
-	if (_session && int (p * _x_scale) != int (_last_playhead)) {
-		set_overlays_dirty ();
+	int const o = int (_last_playhead);
+	int const n = int (playhead_frame_to_position (p));
+	if (_session && o != n) {
+		int a = min (o, n);
+		int b = max (o, n);
+		set_overlays_dirty (a - 1, 0, b + 1, get_height ());
 	}
 }
 
@@ -927,4 +940,10 @@ EditorSummary::route_gui_changed (string c)
 	if (c == "color") {
 		set_dirty ();
 	}
+}
+
+double
+EditorSummary::playhead_frame_to_position (framepos_t t) const
+{
+	return (t - _start) * _x_scale;
 }
