@@ -147,7 +147,11 @@ mountpoint (string path)
 		}
 	}
 
-	free(mntbufp);
+	/* From the manpage, under "BUGS" : "The memory allocated by getmntinfo() cannot be free(3)'d by the 
+	   application."
+
+	   free(mntbufp);
+	*/
 	
 	return best;
 }
