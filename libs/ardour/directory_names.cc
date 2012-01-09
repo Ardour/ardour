@@ -16,7 +16,14 @@ const char* const export_formats_dir_name = X_("export");
 const char* const templates_dir_name = X_("templates");
 const char* const route_templates_dir_name = X_("route_templates");
 const char* const surfaces_dir_name = X_("surfaces");
-const char* const user_config_dir_name = X_("ardour3");
 const char* const panner_dir_name = X_("panners");
+
+
+/* these should end up using variants of PROGRAM_NAME */
+#ifdef __APPLE__
+const char* const user_config_dir_name = X_("Ardour" "3");
+#else
+const char* const user_config_dir_name = X_("ardour" "3");
+#endif
 
 }

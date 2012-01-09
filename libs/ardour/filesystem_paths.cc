@@ -19,12 +19,16 @@
 #include <cstdlib>
 
 #include "pbd/error.h"
+#include "pbd/compose.h"
 #include "pbd/filesystem_paths.h"
 
 #include <glibmm/miscutils.h>
+#include <glibmm/fileutils.h>
 
 #include "ardour/directory_names.h"
 #include "ardour/filesystem_paths.h"
+
+#include "i18n.h"
 
 #define WITH_STATIC_PATHS 1
 
@@ -37,8 +41,14 @@ using std::string;
 sys::path
 user_config_directory ()
 {
-	const char* c = 0;
 	sys::path p;
+
+#ifdef __APPLE__
+	p = Glib::get_home_dir();
+	p /= "Library/Preferences";
+
+#else
+	const char* c = 0;
 
 	/* adopt freedesktop standards, and put .ardour3 into $XDG_CONFIG_HOME or ~/.config
 	 */
@@ -60,8 +70,23 @@ user_config_directory ()
 		p = home_dir;
 		p /= ".config";
 	}
+#endif
 
 	p /= user_config_dir_name;
+
+	std::string ps (p.to_string());
+
+	if (!Glib::file_test (ps, Glib::FILE_TEST_EXISTS)) {
+		if (g_mkdir_with_parents (ps.c_str(), 0755)) {
+			error << string_compose (_("Cannot create Configuration directory %1 - cannot run"),
+						   ps) << endmsg;
+			exit (1);
+		}
+	} else if (!Glib::file_test (ps, Glib::FILE_TEST_IS_DIR)) {
+		error << string_compose (_("Configuration directory %1 already exists and is not a directory/folder - cannot run"),
+					   ps) << endmsg;
+		exit (1);
+	}
 
 	return p;
 }
