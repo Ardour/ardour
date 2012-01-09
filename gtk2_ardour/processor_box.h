@@ -277,7 +277,6 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	Gtk::Menu *processor_menu;
 	gint processor_menu_map_handler (GdkEventAny *ev);
 	Gtk::Menu * build_processor_menu ();
-	void build_processor_tooltip (Gtk::EventBox&, std::string);
 	void show_processor_menu (int);
 	Gtk::Menu* build_possible_aux_menu();
 

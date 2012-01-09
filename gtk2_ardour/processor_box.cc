@@ -586,7 +586,9 @@ ProcessorBox::object_drop(DnDVBox<ProcessorEntry>* source, ProcessorEntry* posit
 	list<ProcessorEntry*> children = source->selection ();
 	list<boost::shared_ptr<Processor> > procs;
 	for (list<ProcessorEntry*>::const_iterator i = children.begin(); i != children.end(); ++i) {
-		procs.push_back ((*i)->processor ());
+		if ((*i)->processor ()) {
+			procs.push_back ((*i)->processor ());
+		}
 	}
 
 	for (list<boost::shared_ptr<Processor> >::const_iterator i = procs.begin(); i != procs.end(); ++i) {
@@ -1266,21 +1268,6 @@ ProcessorBox::add_processor_to_display (boost::weak_ptr<Processor> p)
 	processor_display.add_child (e);
 }
 
-
-void
-ProcessorBox::build_processor_tooltip (EventBox& box, string start)
-{
-	string tip(start);
-
-	list<ProcessorEntry*> children = processor_display.children ();
-	for (list<ProcessorEntry*>::iterator i = children.begin(); i != children.end(); ++i) {
-		tip += '\n';
-  		tip += (*i)->processor()->name();
-	}
-
-	ARDOUR_UI::instance()->set_tip (box, tip);
-}
-
 void
 ProcessorBox::reordered ()
 {
@@ -1314,8 +1301,10 @@ ProcessorBox::compute_processor_sort_keys ()
 	list<ProcessorEntry*> children = processor_display.children ();
 	Route::ProcessorList our_processors;
 
-	for (list<ProcessorEntry*>::iterator iter = children.begin(); iter != children.end(); ++iter) {
-		our_processors.push_back ((*iter)->processor ());
+	for (list<ProcessorEntry*>::iterator i = children.begin(); i != children.end(); ++i) {
+		if ((*i)->processor()) {
+			our_processors.push_back ((*i)->processor ());
+		}
 	}
 
 	if (_route->reorder_processors (our_processors)) {
@@ -2223,6 +2212,10 @@ ProcessorBox::route_property_changed (const PropertyChange& what_changed)
 	for (list<ProcessorEntry*>::iterator iter = children.begin(); iter != children.end(); ++iter) {
 
   		processor = (*iter)->processor ();
+
+		if (!processor) {
+			continue;
+		}
 
 		Window* w = get_processor_ui (processor);
 
