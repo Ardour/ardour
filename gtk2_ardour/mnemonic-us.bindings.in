@@ -156,7 +156,7 @@ This mode provides many different operations on both regions and control points,
 @select|Editor/select-all-within-cursors|u|all present in edit range
 @eep|Region/insert-region-from-region-list|i|insert from region list
 @select|Editor/invert-selection|<@TERTIARY@>i|invert selection
-@sess|Editor/addExistingAudioFiles|<@SECONDARY@>i|import audio files
+@sess|Editor/addExistingAudioFiles|<@PRIMARY@>i|import audio files
 @mmode|MouseMode/set-mouse-mode-object|o|object mode
 @sess|Main/Open|<@PRIMARY@>o|open an existing session
 @sess|Main/Recent|<@PRIMARY@><@TERTIARY@>o|open a recent session
