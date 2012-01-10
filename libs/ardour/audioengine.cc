@@ -335,7 +335,6 @@ AudioEngine::_graph_order_callback (void *arg)
 	return 0;
 }
 
-int
 void*
 AudioEngine::_process_thread (void *arg)
 {
