@@ -210,7 +210,12 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	ARDOUR_UI::instance()->set_tip(*mute_button,_("Mute"));
 	ARDOUR_UI::instance()->set_tip(route_group_button, _("Route Group"));
 	ARDOUR_UI::instance()->set_tip(playlist_button,_("Playlist"));
-	ARDOUR_UI::instance()->set_tip(automation_button, _("Automation"));
+
+	if (is_midi_track()) {
+		ARDOUR_UI::instance()->set_tip(automation_button, _("MIDI Controllers and Automation"));
+	} else {
+		ARDOUR_UI::instance()->set_tip(automation_button, _("Automation"));
+	}
 
 	label_view ();
 
