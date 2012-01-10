@@ -38,7 +38,8 @@ class Splash : public Gtk::Window
 
 	static Splash* instance() { return the_splash; }
 
-	void pop_back ();
+	void pop_back_for (Gtk::Window&);
+	void pop_front ();
 
 	bool expose (GdkEventExpose*);
 	bool on_button_release_event (GdkEventButton*);

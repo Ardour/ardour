@@ -78,7 +78,7 @@ ArdourDialog::on_show ()
 	Splash* spl = Splash::instance();
 
 	if (spl) {
-		spl->pop_back ();
+		spl->pop_back_for (*this);
 	}
 
 	Dialog::on_show ();

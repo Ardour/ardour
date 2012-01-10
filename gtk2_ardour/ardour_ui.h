@@ -630,7 +630,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	About* about;
 	Splash* splash;
-	void pop_back_splash ();
+	void pop_back_splash (Gtk::Window&);
 
 	/* cleanup */
 

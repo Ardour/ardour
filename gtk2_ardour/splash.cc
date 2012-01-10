@@ -35,7 +35,7 @@ Splash::Splash ()
 	}
 
 	darea.set_size_request (pixbuf->get_width(), pixbuf->get_height());
-	set_keep_above (true);
+	pop_front ();
 	set_position (WIN_POS_CENTER);
 	darea.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 	darea.set_double_buffered (false);
@@ -60,9 +60,17 @@ Splash::Splash ()
 }
 
 void
-Splash::pop_back ()
+Splash::pop_back_for (Gtk::Window& win)
 {
 	set_keep_above (false);
+	get_window()->restack (win.get_window(), false);
+	win.signal_hide().connect (sigc::mem_fun (*this, &Splash::pop_front));
+}
+
+void
+Splash::pop_front ()
+{
+	set_keep_above (true);
 }
 
 void

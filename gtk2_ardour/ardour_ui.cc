@@ -507,11 +507,10 @@ ARDOUR_UI::~ARDOUR_UI ()
 }
 
 void
-ARDOUR_UI::pop_back_splash ()
+ARDOUR_UI::pop_back_splash (Gtk::Window& win)
 {
 	if (Splash::instance()) {
-		// Splash::instance()->pop_back();
-		Splash::instance()->hide ();
+		Splash::instance()->pop_back_for (win);
 	}
 }
 
@@ -696,7 +695,7 @@ Please consider the possibilities, and perhaps (re)start JACK."));
 
 	win.show_all ();
 	win.set_position (Gtk::WIN_POS_CENTER);
-	pop_back_splash ();
+	pop_back_splash (win);
 
 	/* we just don't care about the result, but we want to block */
 
@@ -800,7 +799,7 @@ ARDOUR_UI::check_memory_locking ()
 				vbox->show();
 				hbox.show ();
 
-				pop_back_splash ();
+				pop_back_splash (msg);
 
 				editor->ensure_float (msg);
 				msg.run ();
@@ -853,7 +852,7 @@ ARDOUR_UI::finish()
 Ardour was unable to save your session.\n\n\
 If you still wish to quit, please use the\n\n\
 \"Just quit\" option."));
-					pop_back_splash();
+					pop_back_splash(msg);
 					msg.run ();
 					return;
 				}
@@ -1380,7 +1379,7 @@ ARDOUR_UI::check_audioengine ()
 				                   _("%1 is not connected to JACK\n"
 				                     "You cannot open or close sessions in this condition"),
 				                   PROGRAM_NAME));
-			pop_back_splash ();
+			pop_back_splash (msg);
 			msg.run ();
 			return false;
 		}
@@ -1533,7 +1532,7 @@ ARDOUR_UI::session_add_audio_route (
 to create a new track or bus.\n\
 You should save %1, exit and\n\
 restart JACK with more ports."), PROGRAM_NAME));
-		pop_back_splash ();
+		pop_back_splash (msg);
 		msg.run ();
 	}
 }
@@ -2070,7 +2069,7 @@ JACK, reconnect and save the session."), PROGRAM_NAME);
 	}
 
 	MessageDialog msg (*editor, msgstr);
-	pop_back_splash ();
+	pop_back_splash (msg);
 	msg.run ();
 
 	if (free_reason) {
@@ -2457,7 +2456,7 @@ ARDOUR_UI::ask_about_loading_existing_session (const std::string& session_path)
 	msg.set_title (_("Open Existing Session"));
 	msg.set_wmclass (X_("existing_session"), PROGRAM_NAME);
 	msg.set_position (Gtk::WIN_POS_MOUSE);
-	pop_back_splash ();
+	pop_back_splash (msg);
 
 	switch (msg.run()) {
 	case RESPONSE_YES:
@@ -2559,10 +2558,10 @@ ARDOUR_UI::end_loading_messages ()
 }
 
 void
-ARDOUR_UI::loading_message (const std::string& /*msg*/)
+ARDOUR_UI::loading_message (const std::string& msg)
 {
-	// show_splash ();
-	// splash->message (msg);
+	show_splash ();
+	splash->message (msg);
 	flush_pending ();
 }
 
@@ -2799,7 +2798,7 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
 		msg.set_title (_("Port Registration Error"));
 		msg.set_secondary_text (_("Click the Close button to try again."));
 		msg.set_position (Gtk::WIN_POS_CENTER);
-		pop_back_splash ();
+		pop_back_splash (msg);
 		msg.present ();
 
 		int response = msg.run ();
@@ -2828,7 +2827,7 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
 		msg.set_secondary_text (_("Click the Refresh button to try again."));
 		msg.add_button (Stock::REFRESH, 1);
 		msg.set_position (Gtk::WIN_POS_CENTER);
-		pop_back_splash ();
+		pop_back_splash (msg);
 		msg.present ();
 
 		int response = msg.run ();
@@ -2908,7 +2907,7 @@ ARDOUR_UI::build_session (const std::string& path, const std::string& snap_name,
 	catch (...) {
 
 		MessageDialog msg (string_compose(_("Could not create session in \"%1\""), path));
-		pop_back_splash ();
+		pop_back_splash (msg);
 		msg.run ();
 		return -1;
 	}
@@ -3001,8 +3000,8 @@ ARDOUR_UI::show_splash ()
 		}
 	}
 
-	splash->show ();
 	splash->present ();
+	splash->pop_front ();
 	splash->queue_draw ();
 	splash->get_window()->process_updates (true);
 	flush_pending ();
