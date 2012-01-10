@@ -34,7 +34,7 @@ using namespace std;
 string ARDOUR_COMMAND_LINE::session_name = "";
 string ARDOUR_COMMAND_LINE::jack_client_name = "ardour";
 bool  ARDOUR_COMMAND_LINE::show_key_actions = false;
-bool ARDOUR_COMMAND_LINE::no_splash = true;
+bool ARDOUR_COMMAND_LINE::no_splash = false;
 bool ARDOUR_COMMAND_LINE::just_version = false;
 bool ARDOUR_COMMAND_LINE::use_vst = true;
 bool ARDOUR_COMMAND_LINE::new_session = false;
@@ -61,7 +61,7 @@ print_help (const char *execname)
 	     << _("  -c, --name <name>           Use a specific jack client name, default is ardour\n")
 	     << _("  -d, --disable-plugins       Disable all plugins in an existing session\n")
 	     << _("  -D, --debug <options>       Set debug flags. Use \"-D list\" to see available options\n")
-	     << _("  -n, --show-splash           Show splash screen\n")
+	     << _("  -n, --no-splash             Do not show splash screen\n")
 	     << _("  -m, --menus file            Use \"file\" to define menus\n")
 	     << _("  -N, --new session-name      Create a new session from the command line\n")
 	     << _("  -O, --no-hw-optimizations   Disable h/w specific optimizations\n")
@@ -155,7 +155,7 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 			break;
 
 		case 'n':
-			no_splash = false;
+			no_splash = true;
 			break;
 
 		case 'p':

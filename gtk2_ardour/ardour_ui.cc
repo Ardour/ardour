@@ -2560,6 +2560,10 @@ ARDOUR_UI::end_loading_messages ()
 void
 ARDOUR_UI::loading_message (const std::string& msg)
 {
+	if (ARDOUR_COMMAND_LINE::no_splash) {
+		return;
+	}
+
 	show_splash ();
 	splash->message (msg);
 	flush_pending ();
