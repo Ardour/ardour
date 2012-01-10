@@ -335,17 +335,7 @@ AudioEngine::_graph_order_callback (void *arg)
 	return 0;
 }
 
-/** Wrapped which is called by JACK as its process callback.  It is just
- * here to get us back into C++ land by calling AudioEngine::process_callback()
- * @param nframes Number of frames passed by JACK.
- * @param arg User argument passed by JACK, which will be the AudioEngine*.
- */
 int
-AudioEngine::_process_callback (pframes_t nframes, void *arg)
-{
-	return static_cast<AudioEngine *> (arg)->process_callback (nframes);
-}
-
 void*
 AudioEngine::_process_thread (void *arg)
 {
@@ -450,9 +440,8 @@ AudioEngine::process_thread ()
         return 0;
 }
 
-/** Method called by JACK (via _process_callback) which says that there
- * is work to be done.
- * @param nframes Number of frames to process.
+/** Method called by our ::process_thread when there is work to be done.
+ *  @param nframes Number of frames to process.
  */
 int
 AudioEngine::process_callback (pframes_t nframes)

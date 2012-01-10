@@ -299,7 +299,6 @@ private:
 	static void _session_callback (jack_session_event_t *event, void *arg);
 #endif
 	static int  _graph_order_callback (void *arg);
-	static int  _process_callback (pframes_t nframes, void *arg);
 	static void* _process_thread (void *arg);
 	static int  _sample_rate_callback (pframes_t nframes, void *arg);
 	static int  _bufsize_callback (pframes_t nframes, void *arg);
