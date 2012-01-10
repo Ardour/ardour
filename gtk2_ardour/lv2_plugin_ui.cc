@@ -231,6 +231,23 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 	_lv2->ParameterChanged.connect(mem_fun(*this, &LV2PluginUI::parameter_changed));
 }
 
+void
+LV2PluginUI::lv2ui_free()
+{
+	stop_updating (0);
+
+	if (_gui_widget) {
+		remove (*_gui_widget);
+	}
+
+	suil_instance_free((SuilInstance*)_inst);
+
+	_inst = NULL;
+	_gui_widget = NULL;
+}
+
+
+
 LV2PluginUI::~LV2PluginUI ()
 {
 	//cout << "LV2PluginUI destructor called" << endl;
@@ -239,9 +256,9 @@ LV2PluginUI::~LV2PluginUI ()
 		delete[] _values;
 	}
 
-	suil_instance_free(_inst);
-	_inst = NULL;
-		
+	/* Close and delete GUI. */
+	lv2ui_free();
+
 	_screen_update_connection.disconnect();		
 
 	if (_lv2->is_external_ui()) {
