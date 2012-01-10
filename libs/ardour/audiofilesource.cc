@@ -103,7 +103,6 @@ AudioFileSource::AudioFileSource (Session& s, const string& path, Source::Flag f
 	if (init (_path, true)) {
 		throw failed_constructor ();
 	}
-        cerr << "audiofile source created with path " << path << endl;
 }
 
 /** Constructor used for new internal-to-session files. */
