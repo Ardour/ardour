@@ -110,8 +110,13 @@ mountpoint (string path)
 	const char *cpath = path.c_str();
 	char best[PATH_MAX+1];
 	
+	/* From the manpage, under "BUGS" : "The memory allocated by getmntinfo() cannot be free(3)'d by the 
+	   application."
+	   
+	   Thus: we do NOT try to free memory allocated by getmntinfo()
+	*/
+
 	if ((count = getmntinfo(&mntbufp, MNT_NOWAIT)) == 0) {
-		free(mntbufp);
 		return "\0";
 	}
 
@@ -135,7 +140,6 @@ mountpoint (string path)
 
 		if (cpath[matchlen] == '\0') {
 			snprintf(best, sizeof(best), "%s", mntbufp[i].f_mntonname);
-			free(mntbufp);
 			return best;
 
 		} else {
@@ -146,12 +150,6 @@ mountpoint (string path)
 			}
 		}
 	}
-
-	/* From the manpage, under "BUGS" : "The memory allocated by getmntinfo() cannot be free(3)'d by the 
-	   application."
-
-	   free(mntbufp);
-	*/
 	
 	return best;
 }
