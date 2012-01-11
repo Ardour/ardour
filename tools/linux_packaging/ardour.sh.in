@@ -35,7 +35,7 @@ export ARDOUR_BUNDLED=true
 
 %ENV%
 
-export GTK_PATH=$INSTALL_DIR${GTK_PATH:+:$GTK_PATH}
+export GTK_PATH=$INSTALL_DIR/libs/clearlooks${GTK_PATH:+:$GTK_PATH}
 export GTK_MODULES=""		# Disable extra modules from being loaded by gtk (example, libcanberra-gtk-module.so)
 export LD_LIBRARY_PATH=$INSTALL_DIR/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 
