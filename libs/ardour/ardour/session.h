@@ -1388,6 +1388,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	static const framecnt_t default_click_emphasis_length;
 
 	Click *get_click();
+	framepos_t _clicks_cleared;
 	void   setup_click_sounds (int which);
 	void   setup_click_sounds (Sample**, Sample const *, framecnt_t*, framecnt_t, std::string const &);
 	void   clear_clicks ();

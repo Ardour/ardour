@@ -44,6 +44,7 @@ Session::click (framepos_t start, framecnt_t nframes)
 	TempoMap::BBTPointList::const_iterator points_begin;
 	TempoMap::BBTPointList::const_iterator points_end;
 	Sample *buf;
+	framecnt_t click_distance;
 
 	if (_click_io == 0) {
 		return;
@@ -51,15 +52,26 @@ Session::click (framepos_t start, framecnt_t nframes)
 
 	Glib::RWLock::WriterLock clickm (click_lock, Glib::TRY_LOCK);
 
-	if (!clickm.locked() || _transport_speed != 1.0 || !_clicking || click_data == 0) {
+	/* how far have we moved since the last time the clicks got cleared
+	 */
+
+	click_distance = start - _clicks_cleared;
+
+
+	if (!clickm.locked() || _transport_speed != 1.0 || !_clicking || click_data == 0 || ((click_distance + nframes) < _worst_track_latency)) {
 		_click_io->silence (nframes);
 		return;
 	}
 
+	start -= _worst_track_latency;
+	/* start could be negative at this point */
 	const framepos_t end = start + nframes;
+	/* correct start, potentially */
+	start = max (start, (framepos_t) 0);
 
 	BufferSet& bufs = get_scratch_buffers(ChanCount(DataType::AUDIO, 1));
 	buf = bufs.get_audio(0).data();
+
 	_tempo_map->get_grid (points_begin, points_end, start, end);
 
 	if (distance (points_begin, points_end) == 0) {
@@ -71,16 +83,17 @@ Session::click (framepos_t start, framecnt_t nframes)
 		case 1:
 			if (click_emphasis_data) {
 				clicks.push_back (new Click ((*i).frame, click_emphasis_length, click_emphasis_data));
+				cerr << "click emph @ " << (*i).frame << endl;
 			}
 			break;
 
 		default:
 			if (click_emphasis_data == 0 || (click_emphasis_data && (*i).beat != 1)) {
 				clicks.push_back (new Click ((*i).frame, click_length, click_data));
+				cerr << "click norm @ " << (*i).frame << endl;
 			}
 			break;
 		}
-
 	}
 
   run_clicks:
@@ -91,11 +104,8 @@ Session::click (framepos_t start, framecnt_t nframes)
 		framecnt_t copy;
 		framecnt_t internal_offset;
 		Click *clk;
-		list<Click*>::iterator next;
 
 		clk = *i;
-		next = i;
-		++next;
 
 		if (clk->start < start) {
 			internal_offset = 0;
@@ -118,11 +128,10 @@ Session::click (framepos_t start, framecnt_t nframes)
 
 		if (clk->offset >= clk->duration) {
 			delete clk;
-			clicks.erase (i);
+			i = clicks.erase (i);
+		} else {
+			++i;
 		}
-
-
-		i = next;
 	}
 
 	_click_io->copy_to_outputs (bufs, DataType::AUDIO, nframes, 0);
@@ -224,4 +233,5 @@ Session::clear_clicks ()
 	}
 
 	clicks.clear ();
+	_clicks_cleared = _transport_frame;
 }
