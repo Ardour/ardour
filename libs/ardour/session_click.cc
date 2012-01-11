@@ -42,19 +42,28 @@ Session::click (nframes_t start, nframes_t nframes)
 	nframes_t end;
 	Sample *buf;
 	vector<Sample*> bufs;
+        nframes_t click_distance;
 
 	if (_click_io == 0) {
 		return;
 	}
 
 	Glib::RWLock::WriterLock clickm (click_lock, Glib::TRY_LOCK);
-	
-	if (!clickm.locked() || _transport_speed != 1.0 || !_clicking || click_data == 0) {
+        
+        click_distance = start - _clicks_cleared;
+
+	if (!clickm.locked() || _transport_speed != 1.0 || !_clicking || click_data == 0 || ((click_distance + nframes) < _worst_track_latency)) {
 		_click_io->silence (nframes);
 		return;
 	} 
-
-	end = start + nframes;
+                
+        if (start < _worst_track_latency) {
+                end = start + (_worst_track_latency - start);
+                start = 0;
+        } else {
+                start -= _worst_track_latency;
+                end = start + nframes;
+        }
 
 	buf = _passthru_buffers[0];
 	points = _tempo_map->get_points (start, end);
@@ -221,4 +230,5 @@ Session::clear_clicks ()
 	}
 
 	clicks.clear ();
+        _clicks_cleared = _transport_frame;
 }

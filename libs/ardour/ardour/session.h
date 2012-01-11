@@ -1729,6 +1729,7 @@ class Session : public PBD::StatefulDestructible
 	nframes_t  click_length;
 	nframes_t  click_emphasis_length;
 	mutable Glib::RWLock click_lock;
+        nframes_t  _clicks_cleared;
 
 	static const Sample         default_click[];
 	static const nframes_t default_click_length;

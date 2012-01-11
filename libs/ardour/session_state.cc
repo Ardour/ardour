@@ -203,6 +203,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	first_file_data_format_reset = true;
 	first_file_header_format_reset = true;
 	butler_thread = (pthread_t) 0;
+        _clicks_cleared = 0;
 
 	AudioDiskstream::allocate_working_buffers();
 	
