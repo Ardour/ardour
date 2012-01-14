@@ -43,15 +43,15 @@ typedef uint64_t cycles_t;
 
 extern cycles_t cacheflush_time;
 
-#define rdtscll(val) \
-     __asm__ __volatile__("rdtsc" : "=A" (val))
+#define rdtscll(lo, hi)						\
+	__asm__ __volatile__("rdtsc" : "=a" (lo), "=d" (hi))
 
 static inline cycles_t get_cycles (void)
 {
-	cycles_t ret;
+	cycles_t lo, hi;
 
-	rdtscll(ret);
-	return ret & 0xffffffff;
+	rdtscll(lo, hi);
+	return lo;
 }
 
 #elif defined(__powerpc__)
