@@ -935,9 +935,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void unblock_processing() { g_atomic_int_set (&processing_prohibited, 0); }
 	bool processing_blocked() const { return g_atomic_int_get (&processing_prohibited); }
 
-	Glib::Mutex                process_thread_lock;
-	std::list<ProcessThread*>  process_threads;
-
 	/* slave tracking */
 
 	static const int delta_accumulator_size = 25;
