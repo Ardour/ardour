@@ -446,8 +446,10 @@ int
 AudioEngine::process_callback (pframes_t nframes)
 {
 	GET_PRIVATE_JACK_POINTER_RET(_jack,0);
-	// CycleTimer ct ("AudioEngine::process");
 	Glib::Mutex::Lock tm (_process_lock, Glib::TRY_LOCK);
+
+	PT_TIMING_REF;
+	PT_TIMING_CHECK (1);
 
 	/// The number of frames that will have been processed when we've finished
 	pframes_t next_processed_frames;
@@ -504,7 +506,6 @@ AudioEngine::process_callback (pframes_t nframes)
 	} else {
 		if (_session) {
 			_session->process (nframes);
-
 		}
 	}
 
@@ -555,6 +556,9 @@ AudioEngine::process_callback (pframes_t nframes)
 	}
 
 	_processed_frames = next_processed_frames;
+
+	PT_TIMING_CHECK (2);
+	
 	return 0;
 }
 

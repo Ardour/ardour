@@ -22,9 +22,12 @@
 
 #include <string>
 #include <iostream>
+#include <cstdlib>
 
 #include "ardour/cycles.h"
 #include "ardour/debug.h"
+
+float get_mhz ();
 
 class CycleTimer {
   private:
@@ -56,8 +59,34 @@ class CycleTimer {
 		}
 #endif
 	}
-
-	static float get_mhz ();
 };
+
+class StoringTimer
+{
+public:
+	StoringTimer (int);
+	void ref ();
+	void check (int);
+	void dump (std::string const &);
+
+private:
+	cycles_t _current_ref;
+	int* _point;
+	cycles_t* _value;
+	cycles_t* _ref;
+	int _points;
+	int _max_points;
+};
+
+#ifdef PT_TIMING
+extern StoringTimer ST;
+#define PT_TIMING_REF ST.ref();
+#define PT_TIMING_CHECK(x) ST.check(x);
+#endif
+
+#ifndef PT_TIMING
+#define PT_TIMING_REF
+#define PT_TIMING_CHECK(x)
+#endif
 
 #endif /* __ardour_cycle_timer_h__ */

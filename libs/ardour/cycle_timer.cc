@@ -18,17 +18,19 @@
 */
 
 #include <cstdio>
+#include <fstream>
 #include "pbd/error.h"
 #include "ardour/cycle_timer.h"
 
 #include "i18n.h"
 
+using namespace std;
 using namespace PBD;
 
 float CycleTimer::cycles_per_usec = 0;
 
 float
-CycleTimer::get_mhz()
+get_mhz()
 {
 	FILE *f;
 
@@ -72,3 +74,54 @@ CycleTimer::get_mhz()
 	/*NOTREACHED*/
 	return 0.0f;
 }
+
+StoringTimer::StoringTimer (int N)
+{
+	_point = new int[N];
+	_value = new cycles_t[N];
+	_ref = new cycles_t[N];
+	_max_points = N;
+	_points = 0;
+}
+	
+
+void
+StoringTimer::dump (string const & file)
+{
+	ofstream f (file.c_str ());
+
+	f << min (_points, _max_points) << "\n";
+	f << get_mhz () << "\n";
+	for (int i = 0; i < min (_points, _max_points); ++i) {
+		f << _point[i] << " " << _ref[i] << " " << _value[i] << "\n";
+	}
+}
+
+void
+StoringTimer::ref ()
+{
+	_current_ref = get_cycles ();
+}
+
+void
+StoringTimer::check (int p)
+{
+	if (_points == _max_points) {
+		++_points;
+		return;
+	} else if (_points > _max_points) {
+		return;
+	}
+	
+	_point[_points] = p;
+	_value[_points] = get_cycles ();
+	_ref[_points] = _current_ref;
+	
+	++_points;
+}
+
+#ifdef PT_TIMING
+StoringTimer ST (64 * 1024);
+#endif
+
+

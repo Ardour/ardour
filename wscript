@@ -391,6 +391,8 @@ def options(opt):
                     help='Build with debugging for the STL')
     opt.add_option('--rt-alloc-debug', action='store_true', default=False, dest='rt_alloc_debug',
                     help='Build with debugging for memory allocation in the real-time thread')
+    opt.add_option('--pt-timing', action='store_true', default=False, dest='pt_timing',
+                    help='Build with logging of timing in the process thread(s)')
     opt.add_option('--denormal-exception', action='store_true', default=False, dest='denormal_exception',
                     help='Raise a floating point exception if a denormal is detected')
     opt.add_option('--test', action='store_true', default=False, dest='build_tests',
@@ -589,6 +591,9 @@ def configure(conf):
     if opts.rt_alloc_debug:
         conf.define('DEBUG_RT_ALLOC', 1)
         conf.env['DEBUG_RT_ALLOC'] = True
+    if opts.pt_timing:
+        conf.define('PT_TIMING', 1)
+        conf.env['PT_TIMING'] = True
     if opts.denormal_exception:
         conf.define('DEBUG_DENORMAL_EXCEPTION', 1)
         conf.env['DEBUG_DENORMAL_EXCEPTION'] = True
@@ -621,6 +626,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('Build target',          conf.env['build_target'])
     write_config_text('CoreAudio',             conf.is_defined('HAVE_COREAUDIO'))
     write_config_text('Debug RT allocations',  conf.is_defined('DEBUG_RT_ALLOC'))
+    write_config_text('Process thread timing', conf.is_defined('PT_TIMING'))
     write_config_text('Denormal exceptions',   conf.is_defined('DEBUG_DENORMAL_EXCEPTION'))
     write_config_text('FLAC',                  conf.is_defined('HAVE_FLAC'))
     write_config_text('FPU optimization',      opts.fpu_optimization)
