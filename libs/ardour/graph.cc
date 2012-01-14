@@ -222,17 +222,18 @@ Graph::prep()
         _finished_refcount = _init_finished_refcount[chain];
 
 	/* Trigger the initial nodes for processing, which are the ones at the `input' end */
+	pthread_mutex_lock (&_trigger_mutex);
         for (i=_init_trigger_list[chain].begin(); i!=_init_trigger_list[chain].end(); i++) {
-                trigger (i->get ());
+		/* don't use ::trigger here, as we have already locked the mutex */
+                _trigger_queue.push_back (i->get ());
         }
+	pthread_mutex_unlock (&_trigger_mutex);
 }
 
 void
 Graph::trigger (GraphNode* n)
 {
-        pthread_mutex_lock (&_trigger_mutex);
         _trigger_queue.push_back (n);
-        pthread_mutex_unlock (&_trigger_mutex);
 }
 
 /** Called when a node at the `output' end of the chain (ie one that has no-one to feed)
