@@ -37,6 +37,8 @@ using namespace PBD;
 using namespace ARDOUR;
 using namespace std;
 
+PBD::Signal1<void, pframes_t> InternalSend::CycleStart;
+
 InternalSend::InternalSend (Session& s, boost::shared_ptr<Pannable> p, boost::shared_ptr<MuteMaster> mm, boost::shared_ptr<Route> sendto, Delivery::Role role)
 	: Send (s, p, mm, role)
 {
@@ -47,6 +49,8 @@ InternalSend::InternalSend (Session& s, boost::shared_ptr<Pannable> p, boost::sh
         }
 
 	init_gain ();
+
+	CycleStart.connect_same_thread (*this, boost::bind (&InternalSend::cycle_start, this, _1));
 }
 
 InternalSend::~InternalSend ()
@@ -356,9 +360,7 @@ InternalSend::set_can_pan (bool yn)
 void
 InternalSend::cycle_start (pframes_t nframes)
 {
-	Delivery::cycle_start (nframes);
-
 	for (BufferSet::audio_iterator b = mixbufs.audio_begin(); b != mixbufs.audio_end(); ++b) {
-		(*b).prepare ();
+		b->prepare ();
 	}
 }	

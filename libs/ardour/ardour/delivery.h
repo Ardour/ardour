@@ -74,15 +74,12 @@ public:
 
 	void flush_buffers (framecnt_t nframes, framepos_t time);
 	void no_outs_cuz_we_no_monitor(bool);
-	virtual void cycle_start (pframes_t);
 	void transport_stopped (framepos_t frame);
 	void realtime_locate ();
 
 	BufferSet& output_buffers() { return *_output_buffers; }
 
 	PBD::Signal0<void> MuteChange;
-
-	static PBD::Signal1<void, pframes_t> CycleStart;
 
 	XMLNode& state (bool full);
 	int set_state (const XMLNode&, int version);

@@ -56,6 +56,8 @@ class InternalSend : public Send
 	void set_can_pan (bool yn);
 	uint32_t pan_outs () const;
 
+	static PBD::Signal1<void, pframes_t> CycleStart;
+
   private:
 	BufferSet mixbufs;
 	boost::shared_ptr<Route> _send_to;

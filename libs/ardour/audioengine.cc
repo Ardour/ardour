@@ -43,9 +43,9 @@
 #include "ardour/buffer.h"
 #include "ardour/buffer_set.h"
 #include "ardour/cycle_timer.h"
-#include "ardour/delivery.h"
 #include "ardour/event_type_map.h"
 #include "ardour/internal_return.h"
+#include "ardour/internal_send.h"
 #include "ardour/io.h"
 #include "ardour/meter.h"
 #include "ardour/midi_port.h"
@@ -479,7 +479,7 @@ AudioEngine::process_callback (pframes_t nframes)
 
 	/* tell all relevant objects that we're starting a new cycle */
 
-	Delivery::CycleStart (nframes);
+	InternalSend::CycleStart (nframes);
 	Port::set_global_port_buffer_offset (0);
         Port::set_cycle_framecnt (nframes);
 

@@ -47,7 +47,6 @@ using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
 
-PBD::Signal1<void, pframes_t> Delivery::CycleStart;
 PBD::Signal0<int>             Delivery::PannersLegal;
 bool                          Delivery::panners_legal = false;
 
@@ -72,8 +71,6 @@ Delivery::Delivery (Session& s, boost::shared_ptr<IO> io, boost::shared_ptr<Pann
 	if (_output) {
 		_output->changed.connect_same_thread (*this, boost::bind (&Delivery::output_changed, this, _1, _2));
 	}
-
-	CycleStart.connect_same_thread (*this, boost::bind (&Delivery::cycle_start, this, _1));
 }
 
 /* deliver to a new IO object */
@@ -96,8 +93,6 @@ Delivery::Delivery (Session& s, boost::shared_ptr<Pannable> pannable, boost::sha
 	if (_output) {
 		_output->changed.connect_same_thread (*this, boost::bind (&Delivery::output_changed, this, _1, _2));
 	}
-
-	CycleStart.connect_same_thread (*this, boost::bind (&Delivery::cycle_start, this, _1));
 }
 
 
@@ -131,12 +126,6 @@ Delivery::display_name () const
 	default:
 		return name();
 	}
-}
-
-void
-Delivery::cycle_start (pframes_t /*nframes*/)
-{
-	_no_outs_cuz_we_no_monitor = false;
 }
 
 bool
