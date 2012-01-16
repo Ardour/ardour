@@ -297,8 +297,8 @@ cp $BUILD_ROOT/libs/panners/*/lib*.dylib $Panners
 	echo ExportFormat: $f; cp "$f" ../tools/osx_packaging/$ExportFormats ; 
 done)
 (cd $BUILD_ROOT/templates && \
-    for f in *.template ; do 
-	echo Template: $f ; cp "$f" ../../tools/osx_packaging/$Templates ; 
+    for f in * ; do 
+	echo Template: $f ; cp -r "$f" ../../tools/osx_packaging/$Templates ; 
 done)
 
 # MIDI maps
