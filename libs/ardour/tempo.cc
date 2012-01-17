@@ -2006,6 +2006,7 @@ TempoMap::framepos_plus_bbt (framepos_t pos, BBT_Time op) const
 	const TempoSection* tempo;
 	const TempoSection* t;
 	double frames_per_beat;
+	framepos_t effective_pos = max (pos, (framepos_t) 0);
 
 	meter = &first_meter ();
 	tempo = &first_tempo ();
@@ -2017,7 +2018,7 @@ TempoMap::framepos_plus_bbt (framepos_t pos, BBT_Time op) const
 
 	for (i = metrics.begin(); i != metrics.end(); ++i) {
 
-		if ((*i)->frame() > pos) {
+		if ((*i)->frame() > effective_pos) {
 			break;
 		}
 
@@ -2138,8 +2139,9 @@ TempoMap::framewalk_to_beats (framepos_t pos, framecnt_t distance) const
 {
 	Glib::RWLock::ReaderLock lm (lock);
 	Metrics::const_iterator next_tempo;
-	const TempoSection* tempo;
-	
+	const TempoSection* tempo = 0;
+	framepos_t effective_pos = max (pos, (framepos_t) 0);
+
 	/* Find the relevant initial tempo metric  */
 
 	for (next_tempo = metrics.begin(); next_tempo != metrics.end(); ++next_tempo) {
@@ -2148,7 +2150,7 @@ TempoMap::framewalk_to_beats (framepos_t pos, framecnt_t distance) const
 
 		if ((t = dynamic_cast<const TempoSection*>(*next_tempo)) != 0) {
 
-			if ((*next_tempo)->frame() > pos) {
+			if ((*next_tempo)->frame() > effective_pos) {
 				break;
 			}
 
@@ -2161,6 +2163,8 @@ TempoMap::framewalk_to_beats (framepos_t pos, framecnt_t distance) const
 	   tempo -> the Tempo for "pos"
 	   next_tempo -> the next tempo after "pos", possibly metrics.end()
 	*/
+
+	assert (tempo);
 
 	Evoral::MusicalTime beats = 0;
 
@@ -2178,6 +2182,7 @@ TempoMap::framewalk_to_beats (framepos_t pos, framecnt_t distance) const
 		/* Update */
 		pos += sub;
 		distance -= sub;
+		assert (tempo);
 		beats += sub / tempo->frames_per_beat (_frame_rate);
 		
 		/* Move on if there's anything to move to */
@@ -2199,6 +2204,7 @@ TempoMap::framewalk_to_beats (framepos_t pos, framecnt_t distance) const
 				}
 			}
 		}
+		assert (tempo);
 	}
 
 	return beats;
