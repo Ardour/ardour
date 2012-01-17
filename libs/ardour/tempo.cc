@@ -750,12 +750,11 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 
 	if (end < 0) {
 
-		if (_map.empty()) {
-			/* compute 1 mins worth */
-			end = _frame_rate * 60;
-		} else {
-			end = _map.back().frame;
-		}
+		/* we will actually stop once we hit
+		   the last metric.
+		*/
+		end = max_framepos;
+
 	} else {
 		if (!_map.empty ()) {
 			/* never allow the map to be shortened */
@@ -896,6 +895,8 @@ TempoMap::_extend_map (TempoSection* tempo, MeterSection* meter,
 	double beat_frames;
 	framepos_t bar_start_frame;
 
+	DEBUG_TRACE (DEBUG::TempoMath, string_compose ("Extend map to %1 from %2 = %3\n", end, current, current_frame));
+
 	if (current.beats == 1) {
 		bar_start_frame = current_frame;
 	} else {
@@ -1017,7 +1018,7 @@ TempoMap::_extend_map (TempoSection* tempo, MeterSection* meter,
 					goto set_metrics;
 				}
 			}
-		}
+		} 
 
 		if (current.beats == 1) {
 			DEBUG_TRACE (DEBUG::TempoMath, string_compose ("Add Bar at %1|1 @ %2\n", current.bars, current_frame));
@@ -1026,6 +1027,15 @@ TempoMap::_extend_map (TempoSection* tempo, MeterSection* meter,
 		} else {
 			DEBUG_TRACE (DEBUG::TempoMath, string_compose ("Add Beat at %1|%2 @ %3\n", current.bars, current.beats, current_frame));
 			_map.push_back (BBTPoint (*meter, *tempo, (framepos_t) llrint(current_frame), current.bars, current.beats));
+		}
+
+		if (next_metric == metrics.end()) {
+			/* no more metrics - we've timestamped them all, stop here */
+			if (end == max_framepos) {
+				DEBUG_TRACE (DEBUG::TempoMath, string_compose ("stop extending map now that we've reach the end @ %1|%2 = %3\n",
+									       current.bars, current.beats, current_frame));
+				break;
+			}
 		}
 	}
 }
@@ -1596,7 +1606,6 @@ TempoMap::set_state (const XMLNode& node, int /*version*/)
 		XMLNodeConstIterator niter;
 		Metrics old_metrics (metrics);
 		MeterSection* last_meter = 0;
-
 		metrics.clear();
 
 		nlist = node.children();
@@ -1644,7 +1653,7 @@ TempoMap::set_state (const XMLNode& node, int /*version*/)
 			metrics.sort (cmp);
 		}
 
-		recompute_map (true);
+		recompute_map (true, -1);
 	}
 
 	PropertyChanged (PropertyChange ());
@@ -2166,6 +2175,9 @@ TempoMap::framewalk_to_beats (framepos_t pos, framecnt_t distance) const
 
 	assert (tempo);
 
+	DEBUG_TRACE (DEBUG::TempoMath, string_compose ("frame %1 walk by %2 frames, start with tempo = %3 @ %4\n",
+						       pos, distance, *((Tempo*)tempo), tempo->frame()));
+	
 	Evoral::MusicalTime beats = 0;
 
 	while (distance) {
@@ -2179,12 +2191,18 @@ TempoMap::framewalk_to_beats (framepos_t pos, framecnt_t distance) const
 		/* Amount to subtract this time */
 		double const sub = min (distance, distance_to_end);
 
+		DEBUG_TRACE (DEBUG::TempoMath, string_compose ("to reach end at %1 (end ? %2), distance= %3 sub=%4\n", end, (next_tempo == metrics.end()),
+							       distance_to_end, sub));
+
 		/* Update */
 		pos += sub;
 		distance -= sub;
 		assert (tempo);
 		beats += sub / tempo->frames_per_beat (_frame_rate);
-		
+
+		DEBUG_TRACE (DEBUG::TempoMath, string_compose ("now at %1, beats = %2 distance left %3\n",
+							       pos, beats, distance));
+
 		/* Move on if there's anything to move to */
 
 		if (next_tempo != metrics.end()) {
@@ -2203,6 +2221,14 @@ TempoMap::framewalk_to_beats (framepos_t pos, framecnt_t distance) const
 					break;
 				}
 			}
+
+			if (next_tempo == metrics.end()) {
+				DEBUG_TRACE (DEBUG::TempoMath, "no more tempo sections\n");
+			} else {
+				DEBUG_TRACE (DEBUG::TempoMath, string_compose ("next tempo section is %1 @ %2\n",
+									       **next_tempo, (*next_tempo)->frame()));
+			}
+
 		}
 		assert (tempo);
 	}
