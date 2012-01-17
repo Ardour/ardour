@@ -233,7 +233,9 @@ Graph::prep()
 void
 Graph::trigger (GraphNode* n)
 {
+	pthread_mutex_lock (&_trigger_mutex);
         _trigger_queue.push_back (n);
+	pthread_mutex_unlock (&_trigger_mutex);
 }
 
 /** Called when a node at the `output' end of the chain (ie one that has no-one to feed)
