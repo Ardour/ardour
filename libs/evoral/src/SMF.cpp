@@ -354,11 +354,11 @@ SMF::end_write() THROW_FILE_ERROR
 	PBD::StdioFileDescriptor d (_file_path, "w+");
 	FILE* f = d.allocate ();
 	if (f == 0) {
-		throw FileError ();
+		throw FileError (_file_path);
 	}
 
 	if (smf_save(_smf, f) != 0) {
-		throw FileError();
+		throw FileError (_file_path);
 	}
 }
 

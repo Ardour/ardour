@@ -773,7 +773,11 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 	/* tell sources we're saving first, in case they write out to a new file
 	 * which should be saved with the state rather than the old one */
 	for (SourceMap::const_iterator i = sources.begin(); i != sources.end(); ++i) {
-		i->second->session_saved();
+		try {
+			i->second->session_saved();
+		} catch (Evoral::SMF::FileError& e) {
+			error << string_compose ("Could not write to MIDI file %1; MIDI data not saved.", e.file_name ()) << endmsg;
+		}
         }
 
 	tree.set_root (&get_state());

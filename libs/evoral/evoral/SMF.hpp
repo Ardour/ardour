@@ -38,7 +38,13 @@ namespace Evoral {
 class SMF {
 public:
 	class FileError : public std::exception {
+	public:
+		FileError (std::string const & n) : _file_name (n) {}
+		~FileError () throw () {}
 		const char* what() const throw() { return "Unknown SMF error"; }
+		std::string file_name () const { return _file_name; }
+	private:
+		std::string _file_name;
 	};
 
 	SMF() : _smf(0), _smf_track(0), _empty(true) {};
