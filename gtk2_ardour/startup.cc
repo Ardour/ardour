@@ -334,7 +334,7 @@ ArdourStartup::setup_new_user_page ()
 	foomatic->set_markup (string_compose (_("\
 <span size=\"larger\">%1 is a digital audio workstation. You can use it to \
 record, edit and mix multi-track audio. You can produce your \
-own CDs, mix video soundtracks, or just experiment with new \
+own CDs, mix video soundtracks, or experiment with new \
 ideas about music and sound. \
 \n\n\
 There are a few things that need to be configured before you start \
