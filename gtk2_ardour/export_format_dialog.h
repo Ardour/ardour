@@ -297,6 +297,14 @@ class ExportFormatDialog : public ArdourDialog, public PBD::ScopedConnectionList
 	Gtk::Label  sample_format_label;
 	Gtk::Label  dither_label;
 
+	Gtk::CheckButton with_cue;
+	Gtk::CheckButton with_toc;
+
+	Gtk::VBox cue_toc_vbox;
+
+	void update_with_toc ();
+	void update_with_cue ();
+
 	Gtk::TreeView sample_format_view;
 	Gtk::TreeView dither_type_view;
 

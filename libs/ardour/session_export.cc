@@ -178,7 +178,7 @@ Session::process_export (pframes_t nframes)
 		ProcessExport (nframes);
 
 	} catch (std::exception & e) {
-		std::cout << e.what() << std::endl;
+		error << string_compose (_("Export ended unexpectedly: %1"), e.what()) << endmsg;
 		export_status->abort (true);
 	}
 }
@@ -222,6 +222,9 @@ Session::finalize_audio_export ()
 
 	_engine.freewheel (false);
 	export_freewheel_connection.disconnect();
+	
+	/* maybe write CUE/TOC */
+
 	export_handler.reset();
 	export_status.reset();
 

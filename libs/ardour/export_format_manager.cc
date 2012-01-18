@@ -265,6 +265,18 @@ ExportFormatManager::select_src_quality (ExportFormatBase::SRCQuality value)
 }
 
 void
+ExportFormatManager::select_with_cue (bool value)
+{
+	current_selection->set_with_cue (value);
+}
+
+void
+ExportFormatManager::select_with_toc (bool value)
+{
+	current_selection->set_with_toc (value);
+}
+
+void
 ExportFormatManager::select_trim_beginning (bool value)
 {
 	current_selection->set_trim_beginning (value);

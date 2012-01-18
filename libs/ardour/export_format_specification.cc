@@ -167,6 +167,8 @@ ExportFormatSpecification::ExportFormatSpecification (Session & s)
 
 	, _normalize (false)
 	, _normalize_target (1.0)
+	, _with_toc (false)
+	, _with_cue (false)
 {
 	format_ids.insert (F_None);
 	endiannesses.insert (E_FileDefault);
@@ -235,6 +237,8 @@ ExportFormatSpecification::get_state ()
 
 	root->add_property ("name", _name);
 	root->add_property ("id", _id.to_s());
+	root->add_property ("with-cue", _with_cue ? "true" : "false");
+	root->add_property ("with-toc", _with_toc ? "true" : "false");
 
 	node = root->add_child ("Encoding");
 	node->add_property ("id", enum_2_string (format_id()));
@@ -300,6 +304,18 @@ ExportFormatSpecification::set_state (const XMLNode & root)
 		_id = prop->value();
 	}
 
+	if ((prop = root.property ("with-cue"))) {
+		_with_cue = string_is_affirmative (prop->value());
+	} else {
+		_with_cue = false;
+	}
+	
+	if ((prop = root.property ("with-toc"))) {
+		_with_toc = string_is_affirmative (prop->value());
+	} else {
+		_with_toc = false;
+	}
+	
 	/* Encoding and SRC */
 
 	if ((child = root.child ("Encoding"))) {
@@ -320,7 +336,11 @@ ExportFormatSpecification::set_state (const XMLNode & root)
 		}
 
 		if ((prop = child->property ("has-sample-format"))) {
-			has_sample_format = !prop->value().compare ("true");
+			has_sample_format = string_is_affirmative (prop->value());
+		}
+
+		if ((prop = child->property ("has-sample-format"))) {
+			has_sample_format = string_is_affirmative (prop->value());
 		}
 
 		if ((prop = child->property ("channel-limit"))) {

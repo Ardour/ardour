@@ -237,6 +237,17 @@ void
 ExportHandler::finish_timespan ()
 {
 	while (config_map.begin() != timespan_bounds.second) {
+
+		ExportFormatSpecPtr fmt = config_map.begin()->second.format;
+
+		if (fmt->with_cue()) {
+			export_cd_marker_file (current_timespan, fmt, config_map.begin()->second.filename->get_path(fmt), CDMarkerCUE);
+		} 
+
+		if (fmt->with_toc()) {
+			export_cd_marker_file (current_timespan, fmt, config_map.begin()->second.filename->get_path(fmt), CDMarkerTOC);
+		}
+
 		config_map.erase (config_map.begin());
 	}
 
@@ -256,12 +267,11 @@ ExportHandler::export_cd_marker_file (ExportTimespanPtr timespan, ExportFormatSp
                                       std::string filename, CDMarkerFormat format)
 {
 	string filepath;
-	string basename = Glib::path_get_basename(filename);
 
-	size_t ext_pos = basename.rfind('.');
-	if (ext_pos != string::npos) {
-		basename = basename.substr(0, ext_pos); /* strip file extension, if there is one */
-	}
+	/* do not strip file suffix because there may be more than one format, 
+	   and we do not want the CD marker file from one format to overwrite
+	   another (e.g. foo.wav.cue > foo.aiff.cue)
+	*/
 
 	void (ExportHandler::*header_func) (CDMarkerStatus &);
 	void (ExportHandler::*track_func) (CDMarkerStatus &);
@@ -269,13 +279,15 @@ ExportHandler::export_cd_marker_file (ExportTimespanPtr timespan, ExportFormatSp
 
 	switch (format) {
 	  case CDMarkerTOC:
-		filepath = Glib::build_filename(Glib::path_get_dirname(filename), basename + ".toc");
+		filepath = filename;
+		filepath += ".toc";
 		header_func = &ExportHandler::write_toc_header;
 		track_func = &ExportHandler::write_track_info_toc;
 		index_func = &ExportHandler::write_index_info_toc;
 		break;
 	  case CDMarkerCUE:
-		filepath = Glib::build_filename(Glib::path_get_dirname(filename), basename + ".cue");
+		filepath = filename;
+		filepath += ".cue";
 		header_func = &ExportHandler::write_cue_header;
 		track_func = &ExportHandler::write_track_info_cue;
 		index_func = &ExportHandler::write_index_info_cue;

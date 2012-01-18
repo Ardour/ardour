@@ -64,6 +64,9 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog) :
   sample_format_label (_("Sample Format"), Gtk::ALIGN_LEFT),
   dither_label (_("Dithering"), Gtk::ALIGN_LEFT),
 
+  with_cue (_("Create CUE file for disk-at-once CD/DVD creation")),
+  with_toc (_("Create TOC file for disk-at-once CD/DVD creation")),
+
   tag_checkbox (_("Tag file with session's metadata"))
 {
 
@@ -73,6 +76,7 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog) :
 	get_vbox()->pack_start (silence_table, false, false, 6);
 	get_vbox()->pack_start (format_table, false, false, 6);
 	get_vbox()->pack_start (encoding_options_vbox, false, false, 0);
+	get_vbox()->pack_start (cue_toc_vbox, false, false, 0);
 
 	/* Name, new and remove */
 
@@ -128,6 +132,12 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog) :
 	close_button->set_sensitive (false);
 	close_button->signal_clicked().connect (sigc::mem_fun (*this, &ExportFormatDialog::end_dialog));
 	manager.CompleteChanged.connect (*this, invalidator (*this), ui_bind (&Gtk::Button::set_sensitive, close_button, _1), gui_context());
+
+	with_cue.signal_toggled().connect (sigc::mem_fun (*this, &ExportFormatDialog::update_with_cue));
+	with_toc.signal_toggled().connect (sigc::mem_fun (*this, &ExportFormatDialog::update_with_toc));
+
+	cue_toc_vbox.pack_start (with_cue, false, false);
+	cue_toc_vbox.pack_start (with_toc, false, false);
 
 	/* Load state before hooking up the rest of the signals */
 
@@ -233,6 +243,9 @@ ExportFormatDialog::load_state (FormatPtr spec)
 	trim_end_checkbox.set_active (spec->trim_end());
 	silence_end = spec->silence_end_time();
 	silence_end_checkbox.set_active (spec->silence_end_time().not_zero());
+
+	with_cue.set_active (spec->with_cue());
+	with_toc.set_active (spec->with_toc());
 
 	for (Gtk::ListStore::Children::iterator it = src_quality_list->children().begin(); it != src_quality_list->children().end(); ++it) {
 		if (it->get_value (src_quality_cols.id) == spec->src_quality()) {
@@ -683,6 +696,18 @@ ExportFormatDialog::change_compatibility (bool compatibility, boost::weak_ptr<T>
 			break;
 		}
 	}
+}
+
+void
+ExportFormatDialog::update_with_cue ()
+{
+	manager.select_with_cue (with_cue.get_active());
+}
+
+void
+ExportFormatDialog::update_with_toc ()
+{
+	manager.select_with_toc (with_toc.get_active());
 }
 
 void

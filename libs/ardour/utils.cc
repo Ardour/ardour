@@ -643,7 +643,8 @@ string_is_affirmative (const std::string& str)
 	 * in the way we desire when doing it in C.
 	 */
 
-	return str == "1" || str == "y" || str == "Y" || (!g_strncasecmp(str.c_str(), "yes", str.length()));
+	return str == "1" || str == "y" || str == "Y" || (!g_strncasecmp(str.c_str(), "yes", str.length())) ||
+		(!g_strncasecmp(str.c_str(), "true", str.length()));
 }
 
 const char*
