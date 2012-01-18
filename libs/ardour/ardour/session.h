@@ -51,6 +51,7 @@
 
 #include "ardour/ardour.h"
 #include "ardour/chan_count.h"
+#include "ardour/delivery.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/session_configuration.h"
 #include "ardour/session_event.h"
@@ -650,12 +651,15 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	}
 
 	uint32_t next_send_id();
+	uint32_t next_aux_send_id();
 	uint32_t next_return_id();
 	uint32_t next_insert_id();
 	void mark_send_id (uint32_t);
+	void mark_aux_send_id (uint32_t);
 	void mark_return_id (uint32_t);
 	void mark_insert_id (uint32_t);
 	void unmark_send_id (uint32_t);
+	void unmark_aux_send_id (uint32_t);
 	void unmark_return_id (uint32_t);
 	void unmark_insert_id (uint32_t);
 
@@ -1313,6 +1317,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	/* INSERT AND SEND MANAGEMENT */
 
 	boost::dynamic_bitset<uint32_t> send_bitset;
+	boost::dynamic_bitset<uint32_t> aux_send_bitset;
 	boost::dynamic_bitset<uint32_t> return_bitset;
 	boost::dynamic_bitset<uint32_t> insert_bitset;
 

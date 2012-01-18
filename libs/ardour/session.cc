@@ -624,7 +624,7 @@ Session::remove_monitor_section ()
 			} else if ((*x)->is_master()) {
 				/* relax */
 			} else {
-				(*x)->drop_listen (_monitor_out);
+				(*x)->remove_aux_or_listen (_monitor_out);
 			}
 		}
 	}
@@ -2143,13 +2143,17 @@ Session::add_routes (RouteList& new_routes, bool auto_connect, bool save)
 
 	if (_monitor_out && IO::connecting_legal) {
 
-		for (RouteList::iterator x = new_routes.begin(); x != new_routes.end(); ++x) {
-			if ((*x)->is_monitor()) {
-				/* relax */
-			} else if ((*x)->is_master()) {
-				/* relax */
-			} else {
-				(*x)->enable_monitor_send ();
+		{
+			Glib::Mutex::Lock lm (_engine.process_lock());		
+			
+			for (RouteList::iterator x = new_routes.begin(); x != new_routes.end(); ++x) {
+				if ((*x)->is_monitor()) {
+					/* relax */
+				} else if ((*x)->is_master()) {
+					/* relax */
+				} else {
+					(*x)->enable_monitor_send ();
+				}
 			}
 		}
 
@@ -2233,13 +2237,14 @@ Session::add_internal_sends (boost::shared_ptr<Route> dest, Placement p, boost::
 		dest->add_internal_return();
 	}
 
+	
 	for (RouteList::iterator i = senders->begin(); i != senders->end(); ++i) {
-
+		
 		if ((*i)->is_monitor() || (*i)->is_master() || (*i) == dest) {
 			continue;
 		}
-
-		(*i)->listen_via (dest, p);
+		
+		(*i)->add_aux_send (dest, p);
 	}
 
 	graph_reordered ();
@@ -3622,6 +3627,26 @@ Session::next_send_id ()
 }
 
 uint32_t
+Session::next_aux_send_id ()
+{
+	/* this doesn't really loop forever. just think about it */
+
+	while (true) {
+		for (boost::dynamic_bitset<uint32_t>::size_type n = 0; n < aux_send_bitset.size(); ++n) {
+			if (!aux_send_bitset[n]) {
+				aux_send_bitset[n] = true;
+				return n;
+
+			}
+		}
+
+		/* none available, so resize and try again */
+
+		aux_send_bitset.resize (aux_send_bitset.size() + 16, false);
+	}
+}
+
+uint32_t
 Session::next_return_id ()
 {
 	/* this doesn't really loop forever. just think about it */
@@ -3654,6 +3679,18 @@ Session::mark_send_id (uint32_t id)
 }
 
 void
+Session::mark_aux_send_id (uint32_t id)
+{
+	if (id >= aux_send_bitset.size()) {
+		aux_send_bitset.resize (id+16, false);
+	}
+	if (aux_send_bitset[id]) {
+		warning << string_compose (_("aux send ID %1 appears to be in use already"), id) << endmsg;
+	}
+	aux_send_bitset[id] = true;
+}
+
+void
 Session::mark_return_id (uint32_t id)
 {
 	if (id >= return_bitset.size()) {
@@ -3682,6 +3719,14 @@ Session::unmark_send_id (uint32_t id)
 {
 	if (id < send_bitset.size()) {
 		send_bitset[id] = false;
+	}
+}
+
+void
+Session::unmark_aux_send_id (uint32_t id)
+{
+	if (id < aux_send_bitset.size()) {
+		aux_send_bitset[id] = false;
 	}
 }
 

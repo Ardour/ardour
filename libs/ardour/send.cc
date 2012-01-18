@@ -39,8 +39,26 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace std;
 
+string
+Send::name_and_id_new_send (Session& s, Role r, uint32_t& bitslot)
+{
+	switch (r) {
+	case Delivery::Aux:
+		return string_compose (_("aux %1"), (bitslot = s.next_aux_send_id ()) + 1);
+	case Delivery::Listen:
+		return _("listen"); // no ports, no need for numbering
+	case Delivery::Send:
+		return string_compose (_("send %1"), (bitslot = s.next_send_id ()) + 1);
+	default:
+		fatal << string_compose (_("programming error: send created using role %1"), enum_2_string (r)) << endmsg;
+		/*NOTREACHED*/
+		return string();
+	}
+	
+}
+
 Send::Send (Session& s, boost::shared_ptr<Pannable> p, boost::shared_ptr<MuteMaster> mm, Role r)
-	: Delivery (s, p, mm, string_compose (_("send %1"), (_bitslot = s.next_send_id()) + 1), r)
+	: Delivery (s, p, mm, name_and_id_new_send (s, r, _bitslot), r)
 	, _metering (false)
 {
 	boost_debug_shared_ptr_mark_interesting (this, "send");
@@ -157,11 +175,25 @@ Send::set_state (const XMLNode& node, int version)
         */
 
         if ((prop = node.property ("bitslot")) == 0) {
-                _bitslot = _session.next_send_id();
+		if (_role == Delivery::Aux) {
+			_bitslot = _session.next_aux_send_id ();
+		} else if (_role == Delivery::Send) {
+			_bitslot = _session.next_send_id ();
+		} else {
+			// bitslot doesn't matter
+		}
         } else {
-                _session.unmark_send_id (_bitslot);
-                sscanf (prop->value().c_str(), "%" PRIu32, &_bitslot);
-                _session.mark_send_id (_bitslot);
+		if (_role == Delivery::Aux) {
+			_session.unmark_aux_send_id (_bitslot);
+			sscanf (prop->value().c_str(), "%" PRIu32, &_bitslot);
+			_session.mark_aux_send_id (_bitslot);
+		} else if (_role == Delivery::Send) {
+			_session.unmark_send_id (_bitslot);
+			sscanf (prop->value().c_str(), "%" PRIu32, &_bitslot);
+			_session.mark_send_id (_bitslot);
+		} else {
+			// bitslot doesn't matter
+		}
         }
 
 	XMLNodeList nlist = node.children();

@@ -2595,12 +2595,12 @@ Route::enable_monitor_send ()
 	configure_processors (0);
 }
 
-/** Add an internal send to a route.
+/** Add an aux send to a route.
  *  @param route route to send to.
  *  @param placement placement for the send.
  */
 int
-Route::listen_via (boost::shared_ptr<Route> route, Placement placement)
+Route::add_aux_send (boost::shared_ptr<Route> route, Placement placement)
 {
 	assert (route != _session.monitor_out ());
 
@@ -2619,7 +2619,14 @@ Route::listen_via (boost::shared_ptr<Route> route, Placement placement)
 	}
 
 	try {
-		boost::shared_ptr<InternalSend> listener (new InternalSend (_session, _pannable, _mute_master, route, Delivery::Aux));
+
+		boost::shared_ptr<InternalSend> listener;
+
+		{
+			Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+			listener.reset (new InternalSend (_session, _pannable, _mute_master, route, Delivery::Aux));
+		}
+
 		add_processor (listener, placement);
 
 	} catch (failed_constructor& err) {
@@ -2630,7 +2637,7 @@ Route::listen_via (boost::shared_ptr<Route> route, Placement placement)
 }
 
 void
-Route::drop_listen (boost::shared_ptr<Route> route)
+Route::remove_aux_or_listen (boost::shared_ptr<Route> route)
 {
 	ProcessorStreams err;
 	ProcessorList::iterator tmp;

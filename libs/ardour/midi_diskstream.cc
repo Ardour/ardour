@@ -737,7 +737,7 @@ MidiDiskstream::read (framepos_t& start, framecnt_t dur, bool reversed)
 			start = loop_start + ((start - loop_start) % loop_length);
 			//cerr << "to " << start << endl;
 		}
-		// cerr << "start is " << start << "  loopstart: " << loop_start << "  loopend: " << loop_end << endl;
+		// cerr << "start is " << start << " end " << start+dur << "  loopstart: " << loop_start << "  loopend: " << loop_end << endl;
 	}
 
 	while (dur) {

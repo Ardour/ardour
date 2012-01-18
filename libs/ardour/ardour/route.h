@@ -163,7 +163,6 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	void set_listen (bool yn, void* src);
 	bool listening_via_monitor () const;
 	void enable_monitor_send ();
-	void disable_monitor_send ();
 
 	void set_phase_invert (uint32_t, bool yn);
 	void set_phase_invert (boost::dynamic_bitset<>);
@@ -305,9 +304,8 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 
 	PBD::Signal1<void,void*> SelectedChanged;
 
-	int listen_via_monitor ();
-	int listen_via (boost::shared_ptr<Route>, Placement p);
-	void drop_listen (boost::shared_ptr<Route>);
+	int add_aux_send (boost::shared_ptr<Route>, Placement p);
+	void remove_aux_or_listen (boost::shared_ptr<Route>);
 
 	/**
 	 * return true if this route feeds the first argument via at least one

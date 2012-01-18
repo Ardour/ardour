@@ -79,6 +79,7 @@ class Send : public Delivery
 	int set_state_2X (XMLNode const &, int);
 
 	uint32_t  _bitslot;
+	static std::string name_and_id_new_send (Session&, Delivery::Role r, uint32_t&);
 };
 
 } // namespace ARDOUR
