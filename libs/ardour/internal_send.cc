@@ -325,7 +325,7 @@ string
 InternalSend::display_name () const
 {
 	if (_role == Aux) {
-		return string_compose (X_("aux-%1"), _name);
+		return string_compose (X_("%1"), _name);
 	} else {
 		return _name;
 	}
