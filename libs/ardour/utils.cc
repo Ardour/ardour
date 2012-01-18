@@ -344,8 +344,7 @@ path_expand (string path)
 	if (realpath (path.c_str(), buf)) {
 		return buf;
 	} else {
-		error << string_compose (_("programming error: realpath(%1) failed, errcode %2"), path, errno) << endmsg;
-		return path;
+		return string();
 	}
 }
 
@@ -362,7 +361,10 @@ search_path_expand (string path)
 	split (path, s, ':');
 
 	for (vector<string>::iterator i = s.begin(); i != s.end(); ++i) {
-		n.push_back (path_expand (*i));
+		string exp = path_expand (*i);
+		if (!exp.empty()) {
+			n.push_back (exp);
+		}
 	}
 
 	string r;

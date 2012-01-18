@@ -250,6 +250,9 @@ Mixer_UI::Mixer_UI ()
 
 Mixer_UI::~Mixer_UI ()
 {
+	if (_monitor_section) {
+		delete _monitor_section;
+	}
 }
 
 void
@@ -323,19 +326,21 @@ Mixer_UI::add_strip (RouteList& routes)
 		}
 
                 if (route->is_monitor()) {
+
                         if (!_monitor_section) {
                                 _monitor_section = new MonitorSection (_session);
-                                out_packer.pack_end (_monitor_section->tearoff(), false, false);
-                        } else {
-                                _monitor_section->set_session (_session);
-                        }
+				
+				XMLNode* mnode = ARDOUR_UI::instance()->tearoff_settings (X_("monitor-section"));
+				if (mnode) {
+					_monitor_section->tearoff().set_state (*mnode);
+				}
+                        } 
 
+			out_packer.pack_end (_monitor_section->tearoff(), false, false);
+			_monitor_section->set_session (_session);
                         _monitor_section->tearoff().show_all ();
 
-                        XMLNode* mnode = ARDOUR_UI::instance()->tearoff_settings (X_("monitor-section"));
-                        if (mnode) {
-                                _monitor_section->tearoff().set_state (*mnode);
-                        }
+			route->DropReferences.connect (*this, invalidator(*this), ui_bind (&Mixer_UI::monitor_section_going_away, this), gui_context());
 
                         /* no regular strip shown for control out */
 
@@ -384,25 +389,23 @@ Mixer_UI::remove_strip (MixerStrip* strip)
 		return;
 	}
 
-	ENSURE_GUI_THREAD (*this, &Mixer_UI::remove_strip, strip);
-
 	TreeModel::Children rows = track_model->children();
 	TreeModel::Children::iterator ri;
 	list<MixerStrip *>::iterator i;
-
+	
 	if ((i = find (strips.begin(), strips.end(), strip)) != strips.end()) {
 		strips.erase (i);
 	}
-
+	
 	strip_redisplay_does_not_sync_order_keys = true;
-
+	
 	for (ri = rows.begin(); ri != rows.end(); ++ri) {
 		if ((*ri)[track_columns.strip] == strip) {
 			track_model->erase (ri);
 			break;
 		}
 	}
-
+	
 	strip_redisplay_does_not_sync_order_keys = false;
 }
 
@@ -1848,5 +1851,14 @@ Mixer_UI::set_route_targets_for_operation ()
 	
 	if (ms) {
 		_route_targets.insert (ms);
+	}
+}
+
+void
+Mixer_UI::monitor_section_going_away ()
+{
+	if (_monitor_section) {
+		out_packer.remove (_monitor_section->tearoff());
+		_monitor_section->set_session (0);
 	}
 }

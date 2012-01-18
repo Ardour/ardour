@@ -214,7 +214,7 @@ MonitorSection::MonitorSection (Session* s)
         act = ActionManager::get_action (X_("Monitor"), X_("monitor-cut-all"));
         if (act) {
 		cut_all_button.set_related_action (act);
-        }
+	}
 
 	dim_all_button.set_text (_("dim"));
 	dim_all_button.set_name ("monitor section dim");
@@ -549,7 +549,7 @@ MonitorSection::cut_all ()
         if (act) {
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
                 _monitor->set_cut_all (tact->get_active());
-        }
+	}
 }
 
 void

@@ -260,6 +260,13 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_auto_input)
 			    ));
 
+        add_option (_("Monitoring"), new BoolOption (
+			    "have-monitor-section",
+			    _("Use monitor section in this session"),
+			    sigc::mem_fun (*this, &SessionOptionEditor::get_use_monitor_section),
+			    sigc::mem_fun (*this, &SessionOptionEditor::set_use_monitor_section)
+			    ));
+
         /* Misc */
 
 	add_option (_("Misc"), new OptionEditorHeading (_("MIDI Options")));
@@ -340,4 +347,28 @@ SessionOptionEditor::parameter_changed (std::string const & p)
 	if (p == "external-sync") {
 		_sync_source->set_sensitive (!_session->config.get_external_sync ());
 	}
+}
+
+/* the presence of absence of a monitor section is not really a regular session
+ * property so we provide these two functions to act as setter/getter slots
+ */
+
+bool
+SessionOptionEditor::set_use_monitor_section (bool yn)
+{
+	bool had_monitor_section = _session->monitor_out();
+
+	if (yn) {
+		_session->add_monitor_section ();
+	} else {
+		_session->remove_monitor_section ();
+	}
+
+	return had_monitor_section != yn;
+}
+
+bool
+SessionOptionEditor::get_use_monitor_section ()
+{
+	return _session->monitor_out() != 0;
 }

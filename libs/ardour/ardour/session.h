@@ -628,7 +628,10 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	PBD::Signal0<void> SoloChanged;
 	PBD::Signal0<void> IsolatedChanged;
 
-	/* control/master out */
+	/* monitor/master out */
+
+	void add_monitor_section ();
+	void remove_monitor_section ();
 
 	boost::shared_ptr<Route> monitor_out() const { return _monitor_out; }
 	boost::shared_ptr<Route> master_out() const { return _master_out; }
@@ -1406,6 +1409,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	boost::shared_ptr<Route> _master_out;
 	boost::shared_ptr<Route> _monitor_out;
 
+	void auto_connect_master_bus ();
+
 	/* Windows VST support */
 
 	long _windows_vst_callback (
@@ -1505,6 +1510,9 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	    and solo/mute computations.
 	*/
 	GraphEdges _current_route_graph;
+
+	uint32_t next_control_id () const;
+	bool ignore_route_processor_changes;
 };
 
 } // namespace ARDOUR

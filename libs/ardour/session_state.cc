@@ -225,6 +225,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
         no_questions_about_missing_files = false;
         _speakers.reset (new Speakers);
 	_clicks_cleared = 0;
+	ignore_route_processor_changes = false;
 
 	AudioDiskstream::allocate_working_buffers();
 
@@ -570,7 +571,6 @@ Session::create (const string& session_template, BusProfile* bus_profile)
         if (bus_profile) {
 
 		RouteList rl;
-		int control_id = 1;
                 ChanCount count(DataType::AUDIO, bus_profile->master_out_channels);
 
 		if (bus_profile->master_out_channels) {
@@ -586,27 +586,8 @@ Session::create (const string& session_template, BusProfile* bus_profile)
 				r->input()->ensure_io (count, false, this);
 				r->output()->ensure_io (count, false, this);
 			}
-			r->set_remote_control_id (control_id++);
 
 			rl.push_back (r);
-
-                        if (Config->get_use_monitor_bus()) {
-				boost::shared_ptr<Route> r (new Route (*this, _("monitor"), Route::MonitorOut, DataType::AUDIO));
-                                if (r->init ()) {
-                                        return -1;
-                                }
-#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
-                                // boost_debug_shared_ptr_mark_interesting (r.get(), "Route");
-#endif
-				{
-					Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
-					r->input()->ensure_io (count, false, this);
-					r->output()->ensure_io (count, false, this);
-				}
-                                r->set_remote_control_id (control_id);
-
-                                rl.push_back (r);
-                        }
 
 		} else {
 			/* prohibit auto-connect to master, because there isn't one */
@@ -628,6 +609,10 @@ Session::create (const string& session_template, BusProfile* bus_profile)
                 Config->set_input_auto_connect (bus_profile->input_ac);
                 Config->set_output_auto_connect (bus_profile->output_ac);
         }
+
+	if (Config->get_use_monitor_bus() && bus_profile) {
+		add_monitor_section ();
+	}
 
 	save_state ("");
 

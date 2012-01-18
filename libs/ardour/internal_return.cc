@@ -57,14 +57,18 @@ InternalReturn::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*e
 void
 InternalReturn::add_send (InternalSend* send)
 {
-	Glib::Mutex::Lock lm (_session.engine().process_lock());
+	/* caller must hold process lock */
+	assert (!AudioEngine::instance()->process_lock().trylock());
+
 	_sends.push_back (send);
 }
 
 void
 InternalReturn::remove_send (InternalSend* send)
 {
-	Glib::Mutex::Lock lm (_session.engine().process_lock());
+	/* caller must hold process lock */
+	assert (!AudioEngine::instance()->process_lock().trylock());
+
 	_sends.remove (send);
 }
 

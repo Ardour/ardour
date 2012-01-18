@@ -1503,6 +1503,10 @@ Session::xrun_recovery ()
 void
 Session::route_processors_changed (RouteProcessorChange c)
 {
+	if (ignore_route_processor_changes) {
+		return;
+	}
+
 	if (c.type == RouteProcessorChange::MeterPointChange) {
 		return;
 	}

@@ -57,7 +57,6 @@ Session::click (framepos_t start, framecnt_t nframes)
 
 	click_distance = start - _clicks_cleared;
 
-
 	if (!clickm.locked() || _transport_speed != 1.0 || !_clicking || click_data == 0 || ((click_distance + nframes) < _worst_track_latency)) {
 		_click_io->silence (nframes);
 		return;

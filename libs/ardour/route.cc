@@ -108,6 +108,13 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 {
 	processor_max_streams.reset();
 	order_keys[N_("signal")] = order_key_cnt++;
+
+	if (is_master()) {
+		set_remote_control_id (MasterBusRemoteControlID);
+	} else if (is_monitor()) {
+		set_remote_control_id (MonitorBusRemoteControlID);
+	}
+		
 }
 
 int
@@ -207,6 +214,26 @@ Route::~Route ()
 void
 Route::set_remote_control_id (uint32_t id, bool notify_class_listeners)
 {
+	/* force IDs for master/monitor busses and prevent 
+	   any other route from accidentally getting these IDs
+	   (i.e. legacy sessions)
+	*/
+
+	if (is_master() && id != MasterBusRemoteControlID) {
+		id = MasterBusRemoteControlID;
+	}
+
+	if (is_monitor() && id != MonitorBusRemoteControlID) {
+		id = MonitorBusRemoteControlID;
+	}
+
+	/* don't allow it to collide */
+
+	if (!is_master () && !is_monitor() && 
+	    (id == MasterBusRemoteControlID || id == MonitorBusRemoteControlID)) {
+		id += MonitorBusRemoteControlID;
+	}
+
 	if (id != _remote_control_id) {
 		_remote_control_id = id;
 		RemoteControlIDChanged ();
@@ -1330,7 +1357,7 @@ Route::clear_processors (Placement p)
 }
 
 int
-Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStreams* err)
+Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStreams* err, bool need_process_lock)
 {
 	/* these can never be removed */
 
@@ -1388,11 +1415,18 @@ Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStream
 		if (!removed) {
 			/* what? */
 			return 1;
-		}
+		} 
 
-		{
+		if (need_process_lock) {
 			Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 
+			if (configure_processors_unlocked (err)) {
+				pstate.restore ();
+				/* we know this will work, because it worked before :) */
+				configure_processors_unlocked (0);
+				return -1;
+			}
+		} else {
 			if (configure_processors_unlocked (err)) {
 				pstate.restore ();
 				/* we know this will work, because it worked before :) */
@@ -2542,11 +2576,13 @@ Route::remove_send_from_internal_return (InternalSend* send)
 	}
 }
 
-/** Add a monitor send (if we don't already have one) but don't activate it */
-int
-Route::listen_via_monitor ()
+void
+Route::enable_monitor_send ()
 {
-	/* master never sends to control outs */
+	/* Caller must hold process lock */
+	assert (!AudioEngine::instance()->process_lock().trylock());
+
+	/* master never sends to monitor section via the normal mechanism */
 	assert (!is_master ());
 
 	/* make sure we have one */
@@ -2556,10 +2592,7 @@ Route::listen_via_monitor ()
 	}
 
 	/* set it up */
-	Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 	configure_processors (0);
-
-	return 0;
 }
 
 /** Add an internal send to a route.
@@ -2602,31 +2635,34 @@ Route::drop_listen (boost::shared_ptr<Route> route)
 	ProcessorStreams err;
 	ProcessorList::iterator tmp;
 
-	Glib::RWLock::ReaderLock rl(_processor_lock);
-	rl.acquire ();
+	{
+		Glib::RWLock::ReaderLock rl(_processor_lock);
 
-  again:
-	for (ProcessorList::iterator x = _processors.begin(); x != _processors.end(); ) {
+		/* have to do this early because otherwise processor reconfig
+		 * will put _monitor_send back in the list
+		 */
 
-		boost::shared_ptr<InternalSend> d = boost::dynamic_pointer_cast<InternalSend>(*x);
-
-		if (d && d->target_route() == route) {
-			rl.release ();
-			remove_processor (*x, &err);
-			rl.acquire ();
-
-			/* list could have been demolished while we dropped the lock
-			   so start over.
-			*/
-
-			goto again;
+		if (route == _session.monitor_out()) {
+			_monitor_send.reset ();
 		}
-	}
 
-	rl.release ();
+	  again:
+		for (ProcessorList::iterator x = _processors.begin(); x != _processors.end(); ++x) {
+			
+			boost::shared_ptr<InternalSend> d = boost::dynamic_pointer_cast<InternalSend>(*x);
+			
+			if (d && d->target_route() == route) {
+				rl.release ();
+				remove_processor (*x, &err, false);
+				rl.acquire ();
 
-	if (route == _session.monitor_out()) {
-		_monitor_send.reset ();
+				/* list could have been demolished while we dropped the lock
+				   so start over.
+				*/
+				
+				goto again;
+			}
+		}
 	}
 }
 

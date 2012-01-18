@@ -1252,6 +1252,7 @@ IO::disable_connecting ()
 int
 IO::enable_connecting ()
 {
+	Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock());
 	connecting_legal = true;
 	boost::optional<int> r = ConnectingLegal ();
 	return r.get_value_or (0);

@@ -35,4 +35,7 @@ private:
 
 	ARDOUR::SessionConfiguration* _session_config;
 	ComboOption<ARDOUR::SyncSource>* _sync_source;
+
+	bool set_use_monitor_section (bool);
+	bool get_use_monitor_section ();
 };

@@ -275,6 +275,8 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 
 	void follow_editor_selection ();
 	bool _following_editor_selection;
+
+	void monitor_section_going_away ();
 };
 
 #endif /* __ardour_mixer_ui_h__ */
