@@ -64,11 +64,11 @@ static string poor_mans_glob (string path)
 
 ArdourStartup::ArdourStartup ()
 	: _response (RESPONSE_OK)
-	, ic_new_session_button (_("Open a new session"))
+	, ic_new_session_button (_("Create a new session"))
 	, ic_existing_session_button (_("Open an existing session"))
 	, monitor_via_hardware_button (_("Use an external mixer or the hardware mixer of your audio interface.\n\
 Ardour will play NO role in monitoring"))
-	, monitor_via_ardour_button (string_compose (_("Ask %1 to playback material as it is being recorded"), PROGRAM_NAME))
+	, monitor_via_ardour_button (string_compose (_("Ask %1 to play back material as it is being recorded"), PROGRAM_NAME))
 	, new_folder_chooser (FILE_CHOOSER_ACTION_SELECT_FOLDER)
 	, more_new_session_options_button (_("I'd like more options for this session"))
 	, _output_limit_count_adj (1, 0, 100, 1, 10, 0)
