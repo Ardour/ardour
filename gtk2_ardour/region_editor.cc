@@ -121,38 +121,38 @@ RegionEditor::RegionEditor (Session* s, boost::shared_ptr<Region> r)
 	Gtk::HBox* nb = Gtk::manage (new Gtk::HBox);
 	nb->set_spacing (6);
 	nb->pack_start (name_entry);
-	nb->pack_start (audition_button);
+	nb->pack_start (audition_button, false, false);
 
 	_table.attach (name_label, 0, 1, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
-	_table.attach (*nb, 1, 2, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
+	_table.attach (*nb, 1, 2, _table_row, _table_row + 1, Gtk::FILL | Gtk::EXPAND, Gtk::FILL);
 	++_table_row;
 
 	_table.attach (position_label, 0, 1, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
-	_table.attach (position_clock, 1, 2, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
+	_table.attach (position_clock, 1, 2, _table_row, _table_row + 1, Gtk::FILL | Gtk::EXPAND, Gtk::FILL);
 	++_table_row;
 
  	_table.attach (end_label, 0, 1, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
-	_table.attach (end_clock, 1, 2, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
+	_table.attach (end_clock, 1, 2, _table_row, _table_row + 1, Gtk::FILL | Gtk::EXPAND, Gtk::FILL);
 	++_table_row;
 
  	_table.attach (length_label, 0, 1, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
-	_table.attach (length_clock, 1, 2, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
+	_table.attach (length_clock, 1, 2, _table_row, _table_row + 1, Gtk::FILL | Gtk::EXPAND, Gtk::FILL);
 	++_table_row;
 
  	_table.attach (sync_relative_label, 0, 1, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
- 	_table.attach (sync_offset_relative_clock, 1, 2, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
+ 	_table.attach (sync_offset_relative_clock, 1, 2, _table_row, _table_row + 1, Gtk::FILL | Gtk::EXPAND, Gtk::FILL);
 	++_table_row;
 
  	_table.attach (sync_absolute_label, 0, 1, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
- 	_table.attach (sync_offset_absolute_clock, 1, 2, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
+ 	_table.attach (sync_offset_absolute_clock, 1, 2, _table_row, _table_row + 1, Gtk::FILL | Gtk::EXPAND, Gtk::FILL);
 	++_table_row;
 
  	_table.attach (start_label, 0, 1, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
- 	_table.attach (start_clock, 1, 2, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
+ 	_table.attach (start_clock, 1, 2, _table_row, _table_row + 1, Gtk::FILL | Gtk::EXPAND, Gtk::FILL);
 	++_table_row;
 
 	_table.attach (_sources_label, 0, 1, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
-	_table.attach (_sources, 1, 2, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
+	_table.attach (_sources, 1, 2, _table_row, _table_row + 1, Gtk::FILL | Gtk::EXPAND, Gtk::FILL);
 	++_table_row;
 
 	get_vbox()->pack_start (_table, true, true);
