@@ -26,6 +26,7 @@
 
 #include <sigc++/signal.h>
 
+#include <gtkmm/stock.h>
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
 #include <gtkmm/checkbutton.h>
@@ -36,6 +37,11 @@
 #include <gtkmm/frame.h>
 #include <gtkmm/label.h>
 #include <gtkmm/textview.h>
+#include <gtkmm/table.h>
+#include <gtkmm/liststore.h>
+#include <gtkmm/spinbutton.h>
+#include <gtkmm/notebook.h>
+
 
 #include "ardour/audiofilesource.h"
 #include "ardour/session_handle.h"
@@ -130,7 +136,7 @@ class SoundFileBrowser : public ArdourDialog
 	FreesoundColumns freesound_list_columns;
 	Glib::RefPtr<Gtk::ListStore> freesound_list;
 
-	Gtk::ProgressBar progress_bar;
+	Gtk::Button freesound_stop_btn;
 
   public:
 	SoundFileBrowser (Gtk::Window& parent, std::string title, ARDOUR::Session* _s, bool persistent);
@@ -155,6 +161,9 @@ class SoundFileBrowser : public ArdourDialog
 	
 	Gtk::Button freesound_search_btn;
 	Gtk::TreeView freesound_list_view;
+	Gtk::ProgressBar progress_bar;
+
+	bool freesound_stop;
 
 	void freesound_search();
 
@@ -189,7 +198,8 @@ class SoundFileBrowser : public ArdourDialog
 	void freesound_list_view_selected ();
 	void freesound_list_view_activated (const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn*);
 	void freesound_search_clicked ();
-
+	void freesound_stop_clicked ();
+	
 	void chooser_file_activated ();
 
 	bool on_audio_filter (const Gtk::FileFilter::Info& filter_info);

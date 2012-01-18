@@ -23,6 +23,8 @@
 #include <gtkmm/progressbar.h>
 //#include <ctime>
 
+#include "sfdb_ui.h"
+
 #include "curl/curl.h"
 
 //--- struct to store XML file
@@ -50,7 +52,7 @@ public:
 	Mootcher(const char *saveLocation);
 	~Mootcher();
 
-	std::string	getAudioFile(std::string originalFileName, std::string ID, std::string audioURL, Gtk::ProgressBar *progress_bar);
+	std::string	getAudioFile(std::string originalFileName, std::string ID, std::string audioURL, SoundFileBrowser *caller);
 	std::string	searchText(std::string query, int page, std::string filter, enum sortMethod sort);
 
 private:

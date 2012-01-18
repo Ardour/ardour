@@ -548,6 +548,8 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 		
 		passbox->pack_start (freesound_search_btn, false, false);
 		passbox->pack_start (progress_bar);
+		passbox->pack_end   (freesound_stop_btn, false, false);
+		freesound_stop_btn.set_label(_("Stop"));
 		
 		Gtk::ScrolledWindow *scroll = manage(new ScrolledWindow);
 		scroll->add(freesound_list_view);
@@ -559,13 +561,14 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 
 		freesound_list_view.append_column(_("ID")      , freesound_list_columns.id);
 		freesound_list_view.append_column(_("Filename"), freesound_list_columns.filename);
-		freesound_list_view.append_column(_("URI")     , freesound_list_columns.uri);
+		// freesound_list_view.append_column(_("URI")     , freesound_list_columns.uri);
 		freesound_list_view.get_selection()->signal_changed().connect(sigc::mem_fun(*this, &SoundFileBrowser::freesound_list_view_selected));
 
 		freesound_list_view.get_selection()->set_mode (SELECTION_MULTIPLE);
 		freesound_list_view.signal_row_activated().connect (sigc::mem_fun (*this, &SoundFileBrowser::freesound_list_view_activated));
 		freesound_search_btn.signal_clicked().connect(sigc::mem_fun(*this, &SoundFileBrowser::freesound_search_clicked));
 		freesound_entry.signal_activate().connect(sigc::mem_fun(*this, &SoundFileBrowser::freesound_search_clicked));
+		freesound_stop_btn.signal_clicked().connect(sigc::mem_fun(*this, &SoundFileBrowser::freesound_stop_clicked));
 		notebook.append_page (*vbox, _("Search Freesound"));
 	}
 #endif
@@ -756,12 +759,15 @@ SoundFileBrowser::freesound_list_view_selected ()
 			gdk_window_set_cursor (get_window()->gobj(), gdk_cursor_new(GDK_WATCH));
 			gdk_flush();
 
-			file = theMootcher.getAudioFile(ofn, id, uri, &progress_bar);
+			freesound_stop = false;
+			file = theMootcher.getAudioFile(ofn, id, uri, this);
 
 			gdk_window_set_cursor (get_window()->gobj(), prev_cursor);
 
-			chooser.set_filename (file);
-			set_response_sensitive (RESPONSE_OK, true);
+			if (file != "") {
+				chooser.set_filename (file);
+				set_response_sensitive (RESPONSE_OK, true);
+			}
 		} else {
 			set_response_sensitive (RESPONSE_OK, false);
 		}
@@ -799,6 +805,12 @@ void
 SoundFileBrowser::freesound_search_clicked ()
 {
 	freesound_search();
+}
+
+void
+SoundFileBrowser::freesound_stop_clicked ()
+{
+	freesound_stop = true;
 }
 
 
@@ -940,8 +952,11 @@ SoundFileBrowser::get_paths ()
 			gdk_window_set_cursor (get_window()->gobj(), gdk_cursor_new(GDK_WATCH));
 			gdk_flush();
 
-			string str = theMootcher.getAudioFile(ofn, id, uri, &progress_bar);
-			results.push_back (str);
+			freesound_stop = false;
+			string str = theMootcher.getAudioFile(ofn, id, uri, this);
+			if (str != "") {
+				results.push_back (str);
+			}
 			
 			gdk_window_set_cursor (get_window()->gobj(), prev_cursor);
 
