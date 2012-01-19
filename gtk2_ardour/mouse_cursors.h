@@ -17,6 +17,9 @@
 
 */
 
+#ifndef __gtk2_ardour_mouse_cursors__
+#define __gtk2_ardour_mouse_cursors__
+
 /** @file Handling of bitmaps to be used for mouse cursors.
  *
  *  Held centrally by the Editor because some cursors are used in several places.
@@ -64,3 +67,5 @@ public:
 	Gdk::Cursor* expand_left_right;
 	Gdk::Cursor* expand_up_down;
 };
+
+#endif /* __gtk2_ardour_mouse_cursors__ */

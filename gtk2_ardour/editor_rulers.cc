@@ -32,7 +32,8 @@
 #include "ardour/session.h"
 #include "ardour/tempo.h"
 #include "ardour/profile.h"
-#include <gtkmm2ext/gtk_ui.h>
+
+#include "gtkmm2ext/gtk_ui.h"
 
 #include "editor.h"
 #include "editing.h"

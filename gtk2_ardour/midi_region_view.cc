@@ -24,7 +24,7 @@
 
 #include <gtkmm.h>
 
-#include <gtkmm2ext/gtk_ui.h>
+#include "gtkmm2ext/gtk_ui.h"
 
 #include <sigc++/signal.h>
 
@@ -63,6 +63,7 @@
 #include "midi_streamview.h"
 #include "midi_time_axis.h"
 #include "midi_util.h"
+#include "mouse_cursors.h"
 #include "note_player.h"
 #include "public_editor.h"
 #include "rgb_macros.h"
@@ -70,7 +71,6 @@
 #include "simpleline.h"
 #include "streamview.h"
 #include "utils.h"
-#include "mouse_cursors.h"
 #include "patch_change_dialog.h"
 #include "verbose_cursor.h"
 
@@ -110,7 +110,8 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	, _no_sound_notes (false)
 	, _last_event_x (0)
 	, _last_event_y (0)
-	, _pre_enter_cursor (0)
+	, pre_enter_cursor (0)
+	, pre_press_cursor (0)
 {
 	_note_group->raise_to_top();
 	PublicEditor::DropDownKeys.connect (sigc::mem_fun (*this, &MidiRegionView::drop_down_keys));
@@ -146,7 +147,8 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	, _no_sound_notes (false)
 	, _last_event_x (0)
 	, _last_event_y (0)
-	, _pre_enter_cursor (0)
+	, pre_enter_cursor (0)
+	, pre_press_cursor (0)
 {
 	_note_group->raise_to_top();
 	PublicEditor::DropDownKeys.connect (sigc::mem_fun (*this, &MidiRegionView::drop_down_keys));
@@ -190,7 +192,8 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other)
 	, _no_sound_notes (false)
 	, _last_event_x (0)
 	, _last_event_y (0)
-	, _pre_enter_cursor (0)
+	, pre_enter_cursor (0)
+	, pre_press_cursor (0)
 {
 	Gdk::Color c;
 	int r,g,b,a;
@@ -224,7 +227,8 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other, boost::shared_ptr<M
 	, _no_sound_notes (false)
 	, _last_event_x (0)
 	, _last_event_y (0)
-	, _pre_enter_cursor (0)
+	, pre_enter_cursor (0)
+	, pre_press_cursor (0)
 {
 	Gdk::Color c;
 	int r,g,b,a;
@@ -429,11 +433,19 @@ MidiRegionView::button_press (GdkEventButton* ev)
 		return false;
 	}
 
-	if (_mouse_state != SelectTouchDragging) {
+	Editor* editor = dynamic_cast<Editor *> (&trackview.editor());
+	MouseMode m = editor->current_mouse_mode();
+	
+	if (m == MouseObject && Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier())) {
+		pre_press_cursor = editor->get_canvas_cursor ();
+		editor->set_canvas_cursor (editor->cursors()->midi_pencil);
+	} 
 
+	if (_mouse_state != SelectTouchDragging) {
+		
 		_pressed_button = ev->button;
 		_mouse_state = Pressed;
-
+		
 		return true;
 	}
 
@@ -458,6 +470,11 @@ MidiRegionView::button_release (GdkEventButton* ev)
 	group->ungrab(ev->time);
 
 	PublicEditor& editor = trackview.editor ();
+
+	if (pre_press_cursor) {
+		dynamic_cast<Editor*>(&editor)->set_canvas_cursor (pre_press_cursor, false);
+		pre_press_cursor = 0;
+	}
 
 	switch (_mouse_state) {
 	case Pressed: // Clicked
@@ -538,21 +555,24 @@ MidiRegionView::motion (GdkEventMotion* ev)
 {
 	PublicEditor& editor = trackview.editor ();
 
-	if (!_ghost_note && editor.current_mouse_mode() != MouseDraw
-	    && Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier())
-	    && _mouse_state != AddDragging) {
+	if (!_ghost_note && editor.current_mouse_mode() == MouseObject &&
+	    Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier()) &&
+	    _mouse_state != AddDragging) {
 
 		create_ghost_note (ev->x, ev->y);
-	} else if (_ghost_note && editor.current_mouse_mode() != MouseDraw
-	           && Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier())) {
+
+	} else if (_ghost_note && editor.current_mouse_mode() == MouseObject &&
+	           Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier())) {
 
 		update_ghost_note (ev->x, ev->y);
-	} else if (_ghost_note && editor.current_mouse_mode() != MouseDraw) {
+
+	} else if (_ghost_note && editor.current_mouse_mode() == MouseObject) {
 
 		remove_ghost_note ();
-
 		editor.verbose_cursor()->hide ();
+
 	} else if (_ghost_note && editor.current_mouse_mode() == MouseDraw) {
+
 		update_ghost_note (ev->x, ev->y);
 	}
 
@@ -565,23 +585,25 @@ MidiRegionView::motion (GdkEventMotion* ev)
 	switch (_mouse_state) {
 	case Pressed:
 
-		if (_pressed_button == 1 && editor.current_mouse_mode() == MouseObject
-		    && !Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier())) {
+		if (_pressed_button == 1) {
+			
+			MouseMode m = editor.current_mouse_mode();
+			
+			if (m == MouseDraw || (m == MouseObject && Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier()))) {
+			
+				editor.drags()->set (new NoteCreateDrag (dynamic_cast<Editor *> (&editor), group, this), (GdkEvent *) ev);
+				_mouse_state = AddDragging;
+				remove_ghost_note ();
+				editor.verbose_cursor()->hide ();
+				cerr << "starting note create drag\n";
 
-			editor.drags()->set (new MidiRubberbandSelectDrag (dynamic_cast<Editor *> (&editor), this), (GdkEvent *) ev);
-			_mouse_state = SelectRectDragging;
-			return true;
-
-		} else if (editor.internal_editing()) {
-
-			editor.drags()->set (new NoteCreateDrag (dynamic_cast<Editor *> (&editor), group, this), (GdkEvent *) ev);
-			_mouse_state = AddDragging;
-
-			remove_ghost_note ();
-
-			editor.verbose_cursor()->hide ();
-
-			return true;
+				return true;
+			} else {
+				
+				editor.drags()->set (new MidiRubberbandSelectDrag (dynamic_cast<Editor *> (&editor), this), (GdkEvent *) ev);
+				_mouse_state = SelectRectDragging;
+				return true;
+			}
 		}
 
 		return false;
@@ -2959,7 +2981,7 @@ MidiRegionView::note_entered(ArdourCanvas::CanvasNoteEvent* ev)
 {
 	Editor* editor = dynamic_cast<Editor*>(&trackview.editor());
 
-	_pre_enter_cursor = editor->get_canvas_cursor ();
+	pre_enter_cursor = editor->get_canvas_cursor ();
 
 	if (_mouse_state == SelectTouchDragging) {
 		note_selected (ev, true);
@@ -2979,9 +3001,9 @@ MidiRegionView::note_left (ArdourCanvas::CanvasNoteEvent*)
 
 	editor->verbose_cursor()->hide ();
 
-	if (_pre_enter_cursor) {
-		editor->set_canvas_cursor (_pre_enter_cursor);
-		_pre_enter_cursor = 0;
+	if (pre_enter_cursor) {
+		editor->set_canvas_cursor (pre_enter_cursor);
+		pre_enter_cursor = 0;
 	}
 }
 
@@ -3010,8 +3032,8 @@ MidiRegionView::note_mouse_position (float x_fraction, float /*y_fraction*/, boo
 	} else if (x_fraction >= 0.8 && x_fraction < 1.0) {
 		editor->set_canvas_cursor (editor->cursors()->right_side_trim);
 	} else {
-		if (_pre_enter_cursor && can_set_cursor) {
-			editor->set_canvas_cursor (_pre_enter_cursor);
+		if (pre_enter_cursor && can_set_cursor) {
+			editor->set_canvas_cursor (pre_enter_cursor);
 		}
 	}
 }

@@ -465,7 +465,8 @@ private:
 	
 	PBD::ScopedConnection _mouse_mode_connection;
 
-	Gdk::Cursor* _pre_enter_cursor;
+	Gdk::Cursor* pre_enter_cursor;
+	Gdk::Cursor* pre_press_cursor;
 };
 
 

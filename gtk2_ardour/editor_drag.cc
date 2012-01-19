@@ -205,19 +205,15 @@ Drag::swap_grab (ArdourCanvas::Item* new_item, Gdk::Cursor* cursor, uint32_t tim
 	_item = new_item;
 
 	if (cursor == 0) {
-		cursor = _editor->which_grabber_cursor ();
+		_item->grab (Gdk::POINTER_MOTION_MASK | Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK, time);
+	} else {
+		_item->grab (Gdk::POINTER_MOTION_MASK | Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK, *cursor, time);
 	}
-
-	_item->grab (Gdk::POINTER_MOTION_MASK | Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK, *cursor, time);
 }
 
 void
 Drag::start_grab (GdkEvent* event, Gdk::Cursor *cursor)
 {
-	if (cursor == 0) {
-		cursor = _editor->which_grabber_cursor ();
-	}
-
 	// if dragging with button2, the motion is x constrained, with Alt-button2 it is y constrained
 
 	if (Keyboard::is_button2_event (&event->button)) {
@@ -240,9 +236,14 @@ Drag::start_grab (GdkEvent* event, Gdk::Cursor *cursor)
 	_last_pointer_x = _grab_x;
 	_last_pointer_y = _grab_y;
 
-	_item->grab (Gdk::POINTER_MOTION_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK,
-	             *cursor,
-	             event->button.time);
+	if (cursor == 0) {
+		_item->grab (Gdk::POINTER_MOTION_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK,
+			     event->button.time);
+	} else {
+		_item->grab (Gdk::POINTER_MOTION_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK,
+			     *cursor,
+			     event->button.time);
+	}
 
 	if (_editor->session() && _editor->session()->transport_rolling()) {
 		_was_rolling = true;
