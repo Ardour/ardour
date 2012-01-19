@@ -2565,8 +2565,10 @@ ARDOUR_UI::loading_message (const std::string& msg)
 	}
 
 	show_splash ();
-	splash->message (msg);
-	flush_pending ();
+	if (splash) {
+		splash->message (msg);
+		flush_pending ();
+	}
 }
 
 /** @param quit_on_cancel true if exit() should be called if the user clicks `cancel' in the new session dialog */
@@ -3000,6 +3002,7 @@ ARDOUR_UI::show_splash ()
 		try {
 			splash = new Splash;
 		} catch (...) {
+			cerr << "Splash could not be created\n";
 			return;
 		}
 	}
