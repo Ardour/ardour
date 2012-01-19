@@ -190,6 +190,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	bool internal_editing() const { return _internal_editing ; }
 	void set_internal_edit (bool yn);
+	bool toggle_internal_editing_from_double_click (GdkEvent*);
 
 #ifdef WITH_CMT
 	void add_imageframe_time_axis(const std::string & track_name, void*) ;
@@ -1551,6 +1552,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	Gtkmm2ext::TearOff*      _mouse_mode_tearoff;
 	ArdourButton mouse_select_button;
+	ArdourButton mouse_draw_button;
 	ArdourButton mouse_move_button;
 	ArdourButton mouse_gain_button;
 	ArdourButton mouse_zoom_button;

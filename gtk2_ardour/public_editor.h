@@ -176,6 +176,15 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 
 	virtual void set_internal_edit (bool yn) = 0;
 
+	/** Driven by a double-click, switch in or out of a mode in which
+	    editing is primarily focused on "within" regions, rather than
+	    regions as black-box objects. For Ardour3, this is aimed at editing
+	    MIDI regions but may expand in the future to other types of
+	    regions.
+	*/
+
+	virtual bool toggle_internal_editing_from_double_click (GdkEvent*) = 0;
+
 	/** @return Whether editing is currently in "internal" mode or not
 	 */
 

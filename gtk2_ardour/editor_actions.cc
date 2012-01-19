@@ -412,6 +412,11 @@ Editor::register_actions ()
 	mouse_select_button.set_image (::get_icon("tool_range"));
 	mouse_select_button.set_name ("mouse mode button");
 
+	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-draw", _("Note Drawing Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseDraw));	
+	mouse_draw_button.set_related_action (act);
+	mouse_draw_button.set_image (::get_icon("midi_tool_pencil"));
+	mouse_draw_button.set_name ("mouse mode button");
+
 	act = ActionManager::register_toggle_action (mouse_mode_actions, "set-mouse-mode-object-range", _("Link Object / Range Tools"), sigc::mem_fun (*this, &Editor::mouse_mode_object_range_toggled));	
 	join_object_range_button.set_related_action (act);
 	join_object_range_button.set_image (::get_icon ("tool_object_range"));

@@ -24,7 +24,8 @@
 #include <libgnomecanvasmm/init.h>
 #include <libgnomecanvasmm/pixbuf.h>
 #include <jack/types.h>
-#include <gtkmm2ext/utils.h>
+
+#include "gtkmm2ext/utils.h"
 
 #include "ardour/profile.h"
 #include "ardour/rc_configuration.h"

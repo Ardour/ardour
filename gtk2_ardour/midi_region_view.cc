@@ -325,6 +325,10 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 		break;
 	}
 
+	if (ev->type == GDK_2BUTTON_PRESS) {
+		return trackview.editor().toggle_internal_editing_from_double_click (ev);
+	}
+
 	if (!trackview.editor().internal_editing()) {
 		return false;
 	}
@@ -341,9 +345,6 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 
 	case GDK_BUTTON_PRESS:
 		return button_press (&ev->button);
-
-	case GDK_2BUTTON_PRESS:
-		return false;
 
 	case GDK_BUTTON_RELEASE:
 		return button_release (&ev->button);
@@ -378,7 +379,7 @@ MidiRegionView::enter_notify (GdkEventCrossing* ev)
 		_mouse_mode_connection, invalidator (*this), ui_bind (&MidiRegionView::mouse_mode_changed, this), gui_context ()
 		);
 
-	if (trackview.editor().current_mouse_mode() == MouseRange && _mouse_state != AddDragging) {
+	if (trackview.editor().current_mouse_mode() == MouseDraw && _mouse_state != AddDragging) {
 		create_ghost_note (ev->x, ev->y);
 	}
 
@@ -406,7 +407,7 @@ MidiRegionView::leave_notify (GdkEventCrossing*)
 void
 MidiRegionView::mouse_mode_changed ()
 {
-	if (trackview.editor().current_mouse_mode() == MouseRange && trackview.editor().internal_editing()) {
+	if (trackview.editor().current_mouse_mode() == MouseDraw && trackview.editor().internal_editing()) {
 		create_ghost_note (_last_event_x, _last_event_y);
 	} else {
 		remove_ghost_note ();
@@ -492,7 +493,7 @@ MidiRegionView::button_release (GdkEventButton* ev)
 
 				break;
 			}
-		case MouseRange:
+		case MouseDraw:
 			{
 				bool success;
 				Evoral::MusicalTime beats = editor.get_grid_type_as_beats (success, editor.pixel_to_frame (event_x));
@@ -537,21 +538,21 @@ MidiRegionView::motion (GdkEventMotion* ev)
 {
 	PublicEditor& editor = trackview.editor ();
 
-	if (!_ghost_note && editor.current_mouse_mode() != MouseRange
+	if (!_ghost_note && editor.current_mouse_mode() != MouseDraw
 	    && Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier())
 	    && _mouse_state != AddDragging) {
 
 		create_ghost_note (ev->x, ev->y);
-	} else if (_ghost_note && editor.current_mouse_mode() != MouseRange
+	} else if (_ghost_note && editor.current_mouse_mode() != MouseDraw
 	           && Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier())) {
 
 		update_ghost_note (ev->x, ev->y);
-	} else if (_ghost_note && editor.current_mouse_mode() != MouseRange) {
+	} else if (_ghost_note && editor.current_mouse_mode() != MouseDraw) {
 
 		remove_ghost_note ();
 
 		editor.verbose_cursor()->hide ();
-	} else if (_ghost_note && editor.current_mouse_mode() == MouseRange) {
+	} else if (_ghost_note && editor.current_mouse_mode() == MouseDraw) {
 		update_ghost_note (ev->x, ev->y);
 	}
 
