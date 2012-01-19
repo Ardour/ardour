@@ -343,7 +343,7 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 		return button_press (&ev->button);
 
 	case GDK_2BUTTON_PRESS:
-		return true;
+		return false;
 
 	case GDK_BUTTON_RELEASE:
 		return button_release (&ev->button);

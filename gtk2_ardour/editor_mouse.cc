@@ -835,7 +835,10 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				}
 
 				if (internal_editing ()) {
-					/* no region drags in internal edit mode */
+					if (event->type == GDK_2BUTTON_PRESS && event->button.button == 1) {
+						Glib::RefPtr<Action> act = ActionManager::get_action (X_("MouseMode"), X_("toggle-internal-edit"));
+						act->activate ();
+					}
 					break;
 				}
 
@@ -848,7 +851,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 					add_region_drag (item, event, clicked_regionview);
 				}
 
-				if (_join_object_range_state == JOIN_OBJECT_RANGE_OBJECT && !selection->regions.empty()) {
+				if (!internal_editing() && (_join_object_range_state == JOIN_OBJECT_RANGE_OBJECT && !selection->regions.empty())) {
 					_drags->add (new SelectionDrag (this, clicked_axisview->get_selection_rect (clicked_selection)->rect, SelectionDrag::SelectionMove));
 				}
 
@@ -1149,6 +1152,16 @@ Editor::button_press_handler_2 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 bool
 Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
+	if (event->type == GDK_2BUTTON_PRESS) {
+		if (_drags->active()) {
+			_drags->end_grab (event);
+		} else {
+			Glib::RefPtr<Action> act = ActionManager::get_action (X_("MouseMode"), X_("toggle-internal-edit"));
+			act->activate ();
+		}
+		return true;
+	}
+
 	if (event->type != GDK_BUTTON_PRESS) {
 		return false;
 	}

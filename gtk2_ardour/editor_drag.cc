@@ -834,6 +834,11 @@ RegionMoveDrag::finished (GdkEvent* ev, bool movement_occurred)
 	
 	if (!movement_occurred) {
 		/* just a click */
+		if (ev->type == GDK_2BUTTON_PRESS && ev->button.button == 1) {
+			/* double click - internal edit mode */
+			Glib::RefPtr<Action> act = ActionManager::get_action (X_("MouseMode"), X_("toggle-internal-edit"));
+			act->activate ();
+		}
 		return;
 	}
 
