@@ -46,23 +46,20 @@ public:
 	std::string get_string (const std::string& id, const std::string& prop_name, bool* empty = 0);
 
 	template<typename T> void set (const std::string& id, const std::string& prop_name, const T& val) {
-		XMLNode* child = find_node (id);
-		if (!child) {
-			child = new XMLNode (X_("Object"));
-			child->add_property (X_("id"), id);
-			_state.add_child_nocopy (*child);
-		}
-		
+		XMLNode* child = get_or_add_node (id);
 		std::stringstream s;
 		s << val;
 		child->add_property (prop_name.c_str(), s.str());
 	}
 
 	std::list<std::string> all_ids () const;
+
+	static XMLNode* get_node (const XMLNode *, const std::string &);
+	XMLNode* get_or_add_node (const std::string &);
+	static XMLNode* get_or_add_node (XMLNode *, const std::string &);
 	
   private:
-	XMLNode* find_node (const std::string &) const;
-
+	
 	XMLNode _state;
 };
 

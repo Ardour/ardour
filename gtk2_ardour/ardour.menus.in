@@ -527,6 +527,8 @@
     <menuitem action='newsend'/>
     <menuitem action='newaux'/>
     <separator/>
+    <menuitem action='controls'/>
+    <separator/>
     <menuitem action='clear'/>
     <menuitem action='clear_pre'/>
     <menuitem action='clear_post'/>
@@ -546,7 +548,6 @@
     <menuitem action='ab_plugins'/>
     <separator/>
     <menuitem action='edit'/>
-    <menuitem action='controls'/>
   </popup>
 
   <popup name='ShuttleUnitPopup'>

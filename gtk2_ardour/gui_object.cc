@@ -34,9 +34,9 @@ GUIObjectState::GUIObjectState ()
 }
 
 XMLNode *
-GUIObjectState::find_node (const string& id) const
+GUIObjectState::get_node (const XMLNode* parent, const string& id)
 {
-	XMLNodeList const & children = _state.children ();
+	XMLNodeList const & children = parent->children ();
 	for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
 		if ((*i)->name() != X_("Object")) {
 			continue;
@@ -51,6 +51,25 @@ GUIObjectState::find_node (const string& id) const
 	return 0;
 }
 
+XMLNode *
+GUIObjectState::get_or_add_node (XMLNode* parent, const string& id)
+{
+	XMLNode* child = get_node (parent, id);
+	if (!child) {
+		child = new XMLNode (X_("Object"));
+		child->add_property (X_("id"), id);
+		parent->add_child_nocopy (*child);
+	}
+
+	return child;
+}
+
+XMLNode *
+GUIObjectState::get_or_add_node (const string& id)
+{
+	return get_or_add_node (&_state, id);
+}
+
 /** Get a string from our state.
  *  @param id property of Object node to look for.
  *  @param prop_name name of the Object property to return.
@@ -61,7 +80,7 @@ GUIObjectState::find_node (const string& id) const
 string 
 GUIObjectState::get_string (const string& id, const string& prop_name, bool* empty)
 {
-	XMLNode* child = find_node (id);
+	XMLNode* child = get_node (&_state, id);
 	if (!child) {
 		if (empty) {
 			*empty = true;

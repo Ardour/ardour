@@ -31,6 +31,13 @@ namespace Evoral {
 class ControlList;
 class Transport;
 
+/** Base class representing some kind of (automatable) control; a fader's gain,
+ *  for example, or a compressor plugin's threshold.
+ *
+ *  The class knows the Evoral::Parameter that it is controlling, and has
+ *  a list of values for automation.
+ */
+
 class Control
 {
 public:

@@ -382,9 +382,12 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		rec_solo_table.remove (*show_sends_button);
 	}
 
-	processor_box.set_route (rt);
-
 	RouteUI::set_route (rt);
+
+	/* ProcessorBox needs access to _route so that it can read
+	   GUI object state.
+	*/
+	processor_box.set_route (rt);
 
 	/* map the current state */
 

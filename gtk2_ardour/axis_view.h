@@ -68,6 +68,8 @@ class AxisView : public virtual Selectable, public PBD::ScopedConnectionList, pu
 
 	bool marked_for_display () const;
 	virtual bool set_marked_for_display (bool);
+
+	static GUIObjectState& gui_object_state();
 	
   protected:
 
@@ -90,10 +92,6 @@ class AxisView : public virtual Selectable, public PBD::ScopedConnectionList, pu
 
 	bool _marked_for_display;
 	uint32_t _old_order_key;
-
-protected:
-	static GUIObjectState& gui_object_state();
-
 }; /* class AxisView */
 
 #endif /* __ardour_gtk_axis_view_h__ */
