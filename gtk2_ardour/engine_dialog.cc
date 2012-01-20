@@ -955,7 +955,14 @@ EngineControl::driver_changed ()
 uint32_t
 EngineControl::get_rate ()
 {
-	return atoi (sample_rate_combo.get_active_text ());
+	double r = atof (sample_rate_combo.get_active_text ());
+	/* the string may have been translated with an abbreviation for
+	 * thousands, so use a crude heuristic to fix this.
+	 */
+	if (r < 1000.0) {
+		r *= 1000.0;
+	}
+	return lrint (r);
 }
 
 void
