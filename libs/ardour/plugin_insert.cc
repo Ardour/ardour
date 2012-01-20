@@ -1161,25 +1161,16 @@ PluginInsert::PluginControl::set_value (double user_val)
 {
 	/* FIXME: probably should be taking out some lock here.. */
 
-	double const plugin_val = user_to_plugin (user_val);
-
 	for (Plugins::iterator i = _plugin->_plugins.begin(); i != _plugin->_plugins.end(); ++i) {
-		(*i)->set_parameter (_list->parameter().id(), plugin_val);
+		(*i)->set_parameter (_list->parameter().id(), user_val);
 	}
 
 	boost::shared_ptr<Plugin> iasp = _plugin->_impulseAnalysisPlugin.lock();
 	if (iasp) {
-		iasp->set_parameter (_list->parameter().id(), plugin_val);
+		iasp->set_parameter (_list->parameter().id(), user_val);
 	}
 
 	AutomationControl::set_value (user_val);
-}
-
-double
-PluginInsert::PluginControl::user_to_plugin (double val) const
-{
-	/* no known transformations at this time */
-	return val;
 }
 
 double
@@ -1206,20 +1197,6 @@ PluginInsert::PluginControl::ui_to_user (double val) const
 	return val;
 }
 
-/** Convert plugin values to UI values.  See pbd/controllable.h */
-double
-PluginInsert::PluginControl::plugin_to_ui (double val) const
-{
-	return user_to_ui (plugin_to_user (val));
-}
-
-double
-PluginInsert::PluginControl::plugin_to_user (double val) const
-{
-	/* no known transformations at this time */
-	return val;
-}
-
 XMLNode&
 PluginInsert::PluginControl::get_state ()
 {
@@ -1237,8 +1214,7 @@ double
 PluginInsert::PluginControl::get_value () const
 {
 	/* FIXME: probably should be taking out some lock here.. */
-
-	return plugin_to_user (_plugin->get_parameter (_list->parameter()));
+	return _plugin->get_parameter (_list->parameter());
 }
 
 boost::shared_ptr<Plugin>

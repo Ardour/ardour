@@ -594,7 +594,7 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 
 		}
 
-		adj->set_value (pc->plugin_to_ui (plugin->get_parameter (port_index)));
+		adj->set_value (pc->user_to_ui (plugin->get_parameter (port_index)));
 
 		/* XXX memory leak: SliderController not destroyed by ControlUI
 		   destructor, and manage() reports object hierarchy

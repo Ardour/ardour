@@ -43,19 +43,26 @@ class Controllable : public PBD::StatefulDestructible {
 	Controllable (const std::string& name, Flag f = Flag (0));
 	virtual ~Controllable() { Destroyed (this); }
 
-	/* We express Controllable values in one of three ways:
-	 * 1. `user' --- as presented to the user (e.g. dB, Hz etc.)
-	 * 2. `UI' --- as used in some cases for the internal representation
+	/* We express Controllable values in one of two ways:
+	 * 1. `UI' --- as used in some cases for the internal representation
 	 *    of the UI.  This may be the same as `user', or may be something
 	 *    like the natural log of frequency in order that sliders operate
 	 *    in a logarithmic fashion.
-	 * 3. `plugin' --- as passed to a plugin.
+	 * 2. `user' --- as passed to a plugin, and presented to the user.
 	 */
 
 	/** Set `user' value */
 	virtual void set_value (double) = 0;
 	/** @return `user' value */
 	virtual double get_value (void) const = 0;
+
+	virtual double user_to_ui (double v) const {
+		return v;
+	}
+
+	virtual double ui_to_user (double v) const {
+		return v;
+	}
 
 	PBD::Signal0<void> LearningFinished;
 	static PBD::Signal3<void,PBD::Controllable*,int,int> CreateBinding;
