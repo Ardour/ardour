@@ -2551,7 +2551,6 @@ Route::add_internal_return ()
 void
 Route::add_send_to_internal_return (InternalSend* send)
 {
-	Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 	Glib::RWLock::ReaderLock rm (_processor_lock);
 
 	for (ProcessorList::const_iterator x = _processors.begin(); x != _processors.end(); ++x) {
