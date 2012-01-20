@@ -1823,8 +1823,12 @@ ProcessorBox::toggle_edit_processor (boost::shared_ptr<Processor> processor)
 		} else {
 			/* assign internal send to main fader */
 			if (_parent_strip) {
-				_parent_strip->show_send(send);
-			}
+				if (_parent_strip->current_delivery() == send) {
+					_parent_strip->revert_to_default_display ();
+				} else {
+					_parent_strip->show_send(send);
+				}
+			} 
 		}
 
 	} else if ((retrn = boost::dynamic_pointer_cast<Return> (processor)) != 0) {
