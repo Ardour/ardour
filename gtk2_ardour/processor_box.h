@@ -271,9 +271,6 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 
 	Width _width;
 
-	void new_send ();
-	void show_send_controls ();
-
 	Gtk::Menu *processor_menu;
 	gint processor_menu_map_handler (GdkEventAny *ev);
 	Gtk::Menu * build_processor_menu ();

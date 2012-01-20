@@ -657,16 +657,6 @@ ProcessorBox::build_possible_aux_menu ()
 }
 
 void
-ProcessorBox::show_send_controls ()
-{
-}
-
-void
-ProcessorBox::new_send ()
-{
-}
-
-void
 ProcessorBox::show_processor_menu (int arg)
 {
 	if (processor_menu == 0) {
@@ -1830,6 +1820,11 @@ ProcessorBox::toggle_edit_processor (boost::shared_ptr<Processor> processor)
 		if (boost::dynamic_pointer_cast<InternalSend> (processor) == 0) {
 			SendUIWindow* w = new SendUIWindow (send, _session);
 			w->show ();
+		} else {
+			/* assign internal send to main fader */
+			if (_parent_strip) {
+				_parent_strip->show_send(send);
+			}
 		}
 
 	} else if ((retrn = boost::dynamic_pointer_cast<Return> (processor)) != 0) {
