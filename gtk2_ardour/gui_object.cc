@@ -18,10 +18,7 @@
 */
 
 #include <iostream>
-#include <iomanip>
 #include <sstream>
-
-#include <boost/variant/static_visitor.hpp>
 
 #include "gui_object.h"
 #include "i18n.h"
@@ -30,92 +27,67 @@ using std::string;
 
 const string GUIObjectState::xml_node_name (X_("GUIObjectState"));
 
-GUIObjectState::~GUIObjectState ()
+GUIObjectState::GUIObjectState ()
+	: _state (X_("GUIObjectState"))
 {
-	clear_maps ();
+
 }
 
-void
-GUIObjectState::clear_maps ()
+XMLNode *
+GUIObjectState::find_node (const string& id) const
 {
-	_property_maps.clear ();
+	XMLNodeList const & children = _state.children ();
+	for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
+		if ((*i)->name() != X_("Object")) {
+			continue;
+		}
+
+		XMLProperty* p = (*i)->property (X_("id"));
+		if (p && p->value() == id) {
+			return *i;
+		}
+	}
+
+	return 0;
 }
 
-class gos_string_vistor : public boost::static_visitor<> {
-  public:
-    gos_string_vistor (std::ostream& o) 
-	    : stream (o) {}
-	    
-    void operator() (const int64_t& i) {
-	    stream << i;
-    }
+/** Get a string from our state.
+ *  @param id property of Object node to look for.
+ *  @param prop_name name of the Object property to return.
+ *  @param empty if non-0, filled in with true if the property is currently non-existant, otherwise false.
+ *  @return value of property `prop_name', or empty.
+ */
 
-    void operator() (const std::string& s) {
-	    stream << s;
-    }
-
-  private:
-    std::ostream& stream;
-};
-
-std::string 
-GUIObjectState::get_string (const std::string& id, const std::string& prop_name, bool* empty)
+string 
+GUIObjectState::get_string (const string& id, const string& prop_name, bool* empty)
 {
-	StringPropertyMap::iterator i = _property_maps.find (id);
-	
-	if (i == _property_maps.end()) {
+	XMLNode* child = find_node (id);
+	if (!child) {
 		if (empty) {
 			*empty = true;
 		}
-		return string();
+		return string ();
 	}
-	
-	const PropertyMap& pmap (i->second);
-	PropertyMap::const_iterator p = pmap.find (prop_name);
-	
-	if (p == pmap.end()) {
+
+	XMLProperty* p = child->property (prop_name);
+	if (!p) {
 		if (empty) {
 			*empty = true;
 		}
-		return string();
+		return string ();
 	}
-	
-	std::stringstream ss;
-	gos_string_vistor gsv (ss);
-
-	boost::apply_visitor (gsv, p->second);
 
 	if (empty) {
 		*empty = false;
 	}
-	
-	return ss.str ();
+
+	return p->value ();
 }
 
 XMLNode&
 GUIObjectState::get_state () const
 {
-	XMLNode* root = new XMLNode (xml_node_name);
-	
-	for (StringPropertyMap::const_iterator i = _property_maps.begin(); i != _property_maps.end(); ++i) {
-
-		const PropertyMap& pmap (i->second);
-		XMLNode* id_node = new XMLNode (X_("Object"));
-		
-		id_node->add_property ("id", i->first);
-		
-		for (PropertyMap::const_iterator p = pmap.begin(); p != pmap.end(); ++p) {
-			std::stringstream ss;
-			gos_string_vistor gsv (ss);
-			boost::apply_visitor (gsv, p->second);
-			id_node->add_property (p->first.c_str(), ss.str());
-		}
-		
-		root->add_child_nocopy (*id_node);
-	}
-
-
-	return *root;
+	return *new XMLNode (_state);
 }
 
 int
@@ -124,37 +96,10 @@ GUIObjectState::set_state (const XMLNode& node)
 	if (node.name() != xml_node_name) {
 		return -1;
 	}
-	
-	clear_maps ();
-	
-	for (XMLNodeList::const_iterator i = node.children().begin(); i != node.children().end(); ++i) {
-		if ((*i)->name() == X_("Object")) {
 
-			XMLNode* child = (*i);
-			const XMLProperty* idp = child->property (X_("id"));
-
-			if (!idp) {
-				continue;
-			}
-
-			string id (idp->value());
-			
-			for (XMLPropertyList::const_iterator p = child->properties().begin(); p != child->properties().end(); ++p) {
-				/* note that this always sets the property with
-				   a string value, and so is not equivalent to
-				   a call made by the program that passed a
-				   scalar.
-				*/
-				if ((*p)->name() != X_("id")) {
-					set (id, (*p)->name(), (*p)->value());
-				}
-			}
-		}
-	}
-
+	_state = node;
 	return 0;
 }
-
 
 void
 GUIObjectState::load (const XMLNode& node)
@@ -165,22 +110,27 @@ GUIObjectState::load (const XMLNode& node)
 GUIObjectState&
 GUIObjectState::operator= (const GUIObjectState& other)
 {
-	_property_maps = other._property_maps;
-
+	_state = other._state;
 	return *this;
 }
 
-/** @return begin iterator into our StringPropertyMap */
-GUIObjectState::StringPropertyMap::const_iterator
-GUIObjectState::begin () const
+std::list<string>
+GUIObjectState::all_ids () const
 {
-	return _property_maps.begin ();
+	std::list<string> ids;
+	XMLNodeList const & children = _state.children ();
+	for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
+		if ((*i)->name() != X_("Object")) {
+			continue;
+		}
+
+		XMLProperty* p = (*i)->property (X_("id"));
+		if (p) {
+			ids.push_back (p->value ());
+		}
+	}
+
+	return ids;
 }
 
-/** @return end iterator into our StringPropertyMap */
-GUIObjectState::StringPropertyMap::const_iterator
-GUIObjectState::end () const
-{
-	return _property_maps.end ();
-}
-
+	

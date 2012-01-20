@@ -248,16 +248,16 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	/* Look for any GUI object state nodes that represent automation children that should exist, and create
 	 * the children.
 	 */
-	
-	GUIObjectState& gui_state = gui_object_state ();
-	for (GUIObjectState::StringPropertyMap::const_iterator i = gui_state.begin(); i != gui_state.end(); ++i) {
+
+	list<string> gui_ids = gui_object_state().all_ids ();
+	for (list<string>::const_iterator i = gui_ids.begin(); i != gui_ids.end(); ++i) {
 		PBD::ID route_id;
 		bool has_parameter;
 		Evoral::Parameter parameter (0, 0, 0);
 
-		bool const p = AutomationTimeAxisView::parse_state_id (i->first, route_id, has_parameter, parameter);
+		bool const p = AutomationTimeAxisView::parse_state_id (*i, route_id, has_parameter, parameter);
 		if (p && route_id == _route->id () && has_parameter) {
-			create_automation_child (parameter, string_is_affirmative (gui_object_state().get_string (i->first, X_("visible"))));
+			create_automation_child (parameter, string_is_affirmative (gui_object_state().get_string (*i, X_("visible"))));
 		}
 	}
 }

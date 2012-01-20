@@ -28,19 +28,13 @@
 #include "pbd/xml++.h"
 #include "pbd/id.h"
 
-class GUIObjectState {
-  private:
-	typedef boost::variant<int64_t,std::string> Variant;
-	typedef std::map<std::string,Variant> PropertyMap;
+#include "i18n.h"
 
-  public:
-	typedef std::map<std::string,PropertyMap> StringPropertyMap;
+class GUIObjectState
+{
+public:
+	GUIObjectState ();
 	
-	~GUIObjectState();
-
-	StringPropertyMap::const_iterator begin () const;
-	StringPropertyMap::const_iterator end () const;
-
 	XMLNode& get_state () const;
 	int set_state (const XMLNode&);
 
@@ -52,19 +46,24 @@ class GUIObjectState {
 	std::string get_string (const std::string& id, const std::string& prop_name, bool* empty = 0);
 
 	template<typename T> void set (const std::string& id, const std::string& prop_name, const T& val) {
-		StringPropertyMap::iterator i = _property_maps.find (id);
-		
-		if (i != _property_maps.end()) {
-			i->second[prop_name] = val;
-		} else {
-			_property_maps[id] = PropertyMap();
-			_property_maps[id][prop_name] = val;
+		XMLNode* child = find_node (id);
+		if (!child) {
+			child = new XMLNode (X_("Object"));
+			child->add_property (X_("id"), id);
+			_state.add_child_nocopy (*child);
 		}
+		
+		std::stringstream s;
+		s << val;
+		child->add_property (prop_name.c_str(), s.str());
 	}
-  private:
-	StringPropertyMap _property_maps;
 
-	void clear_maps ();
+	std::list<std::string> all_ids () const;
+	
+  private:
+	XMLNode* find_node (const std::string &) const;
+
+	XMLNode _state;
 };
 
 
