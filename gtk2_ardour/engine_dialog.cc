@@ -179,7 +179,7 @@ EngineControl::EngineControl ()
 	basic_packer.attach (driver_combo, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	row++;
 
-	label = manage (new Label (_("Audio|Interface:")));
+	label = manage (new Label (_("Audio Interface:")));
 	label->set_alignment (0, 0.5);
 	basic_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	basic_packer.attach (interface_combo, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
@@ -362,16 +362,6 @@ EngineControl::EngineControl ()
 	device_packer.attach (output_device_combo, 1, 2, row, row+1, FILL|EXPAND, (AttachOptions) 0);
 	++row;
 #endif
-	label = manage (new Label (_("Input channels:")));
-	label->set_alignment (0, 0.5);
-	device_packer.attach (*label, 0, 1, row, row+1, FILL|EXPAND, (AttachOptions) 0);
-	device_packer.attach (input_channels, 1, 2, row, row+1, FILL|EXPAND, (AttachOptions) 0);
-	++row;
-	label = manage (new Label (_("Output channels:")));
-	label->set_alignment (0, 0.5);
-	device_packer.attach (*label, 0, 1, row, row+1, FILL|EXPAND, (AttachOptions) 0);
-	device_packer.attach (output_channels, 1, 2, row, row+1, FILL|EXPAND, (AttachOptions) 0);
-	++row;
 	label = manage (new Label (_("Hardware input latency:")));
 	label->set_alignment (0, 0.5);
 	device_packer.attach (*label, 0, 1, row, row+1, FILL|EXPAND, (AttachOptions) 0);
@@ -996,8 +986,10 @@ EngineControl::audio_mode_changed ()
 		output_device_combo.set_sensitive (true);
 	} else if (str == _("Playback only")) {
 		output_device_combo.set_sensitive (true);
+		input_device_combo.set_sensitive (false);
 	} else if (str == _("Recording only")) {
 		input_device_combo.set_sensitive (true);
+		output_device_combo.set_sensitive (false);
 	}
 }
 
@@ -1135,14 +1127,6 @@ EngineControl::get_state ()
 
 	child = new XMLNode ("ports");
 	child->add_property ("val", to_string (ports_adjustment.get_value(), std::dec));
-	root->add_child_nocopy (*child);
-
-	child = new XMLNode ("inchannels");
-	child->add_property ("val", to_string (input_channels.get_value(), std::dec));
-	root->add_child_nocopy (*child);
-
-	child = new XMLNode ("outchannels");
-	child->add_property ("val", to_string (output_channels.get_value(), std::dec));
 	root->add_child_nocopy (*child);
 
 	child = new XMLNode ("inlatency");
@@ -1293,12 +1277,6 @@ EngineControl::set_state (const XMLNode& root)
 		} else if (child->name() == "ports") {
 			val = atoi (strval);
 			ports_adjustment.set_value(val);
-		} else if (child->name() == "inchannels") {
-			val = atoi (strval);
-			input_channels.set_value(val);
-		} else if (child->name() == "outchannels") {
-			val = atoi (strval);
-			output_channels.set_value(val);
 		} else if (child->name() == "inlatency") {
 			val = atoi (strval);
 			input_latency.set_value(val);
