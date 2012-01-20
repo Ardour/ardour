@@ -800,6 +800,9 @@ public:
 	virtual void select_things (int button_state, framepos_t x1, framepos_t x2, double y1, double y2, bool drag_in_progress) = 0;
 	
 	virtual void deselect_things () = 0;
+
+  protected:
+	bool _vertical_only;
 };
 
 /** A general editor RubberbandSelectDrag (for regions, automation points etc.) */
@@ -817,6 +820,19 @@ class MidiRubberbandSelectDrag : public RubberbandSelectDrag
 {
 public:
 	MidiRubberbandSelectDrag (Editor *, MidiRegionView *);
+
+	void select_things (int, framepos_t, framepos_t, double, double, bool);
+	void deselect_things ();
+
+private:
+	MidiRegionView* _region_view;
+};
+
+/** A RubberbandSelectDrag for selecting MIDI notes but with no horizonal component */
+class MidiVerticalSelectDrag : public RubberbandSelectDrag
+{
+public:
+	MidiVerticalSelectDrag (Editor *, MidiRegionView *);
 
 	void select_things (int, framepos_t, framepos_t, double, double, bool);
 	void deselect_things ();

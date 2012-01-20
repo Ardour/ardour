@@ -164,6 +164,7 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	_route->processors_changed.connect (*this, invalidator (*this), ui_bind (&MidiTimeAxisView::processors_changed, this, _1), gui_context());
 
 	if (is_track()) {
+		_piano_roll_header->SetNoteSelection.connect (sigc::mem_fun (*this, &MidiTimeAxisView::set_note_selection));
 		_piano_roll_header->AddNoteSelection.connect (sigc::mem_fun (*this, &MidiTimeAxisView::add_note_selection));
 		_piano_roll_header->ExtendNoteSelection.connect (sigc::mem_fun (*this, &MidiTimeAxisView::extend_note_selection));
 		_piano_roll_header->ToggleNoteSelection.connect (sigc::mem_fun (*this, &MidiTimeAxisView::toggle_note_selection));
@@ -964,7 +965,21 @@ MidiTimeAxisView::route_active_changed ()
 	}
 }
 
+void
+MidiTimeAxisView::set_note_selection (uint8_t note)
+{
+	if (!_editor.internal_editing()) {
+		return;
+	}
 
+	uint16_t chn_mask = _channel_selector.get_selected_channels();
+
+	if (_view->num_selected_regionviews() == 0) {
+		_view->foreach_regionview (sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_note_selection_region_view), note, chn_mask));
+	} else {
+		_view->foreach_selected_regionview (sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_note_selection_region_view), note, chn_mask));
+	}
+}
 
 void
 MidiTimeAxisView::add_note_selection (uint8_t note)
@@ -1015,9 +1030,15 @@ MidiTimeAxisView::toggle_note_selection (uint8_t note)
 }
 
 void
-MidiTimeAxisView::add_note_selection_region_view (RegionView* rv, uint8_t note, uint16_t chn_mask)
+MidiTimeAxisView::set_note_selection_region_view (RegionView* rv, uint8_t note, uint16_t chn_mask)
 {
 	dynamic_cast<MidiRegionView*>(rv)->select_matching_notes (note, chn_mask, false, false);
+}
+
+void
+MidiTimeAxisView::add_note_selection_region_view (RegionView* rv, uint8_t note, uint16_t chn_mask)
+{
+	dynamic_cast<MidiRegionView*>(rv)->select_matching_notes (note, chn_mask, true, false);
 }
 
 void

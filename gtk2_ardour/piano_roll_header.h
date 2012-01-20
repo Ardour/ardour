@@ -30,6 +30,7 @@ namespace ARDOUR {
 
 class MidiTimeAxisView;
 class MidiStreamView;
+class PublicEditor;
 
 class PianoRollHeader : public Gtk::DrawingArea {
 public:
@@ -58,6 +59,7 @@ public:
 		double b;
 	};
 
+	sigc::signal<void,uint8_t> SetNoteSelection;
 	sigc::signal<void,uint8_t> AddNoteSelection;
 	sigc::signal<void,uint8_t> ToggleNoteSelection;
 	sigc::signal<void,uint8_t> ExtendNoteSelection;
@@ -107,6 +109,8 @@ private:
 
 	double _note_height;
 	double _black_note_width;
+
+	PublicEditor& editor() const;
 };
 
 #endif /* __ardour_piano_roll_header_h__ */

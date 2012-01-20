@@ -153,9 +153,11 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	void build_controller_menu ();
 	void set_channel_mode (ARDOUR::ChannelMode, uint16_t);
 
+	void set_note_selection (uint8_t note);
 	void add_note_selection (uint8_t note);
 	void extend_note_selection (uint8_t note);
 	void toggle_note_selection (uint8_t note);
+	void set_note_selection_region_view (RegionView* rv, uint8_t note, uint16_t chn_mask);
 	void add_note_selection_region_view (RegionView* rv, uint8_t note, uint16_t chn_mask);
 	void extend_note_selection_region_view (RegionView*, uint8_t note, uint16_t chn_mask);
 	void toggle_note_selection_region_view (RegionView*, uint8_t note, uint16_t chn_mask);

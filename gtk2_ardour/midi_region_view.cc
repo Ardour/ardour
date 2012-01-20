@@ -435,7 +435,7 @@ MidiRegionView::button_press (GdkEventButton* ev)
 
 	Editor* editor = dynamic_cast<Editor *> (&trackview.editor());
 	MouseMode m = editor->current_mouse_mode();
-	
+
 	if (m == MouseObject && Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier())) {
 		pre_press_cursor = editor->get_canvas_cursor ();
 		editor->set_canvas_cursor (editor->cursors()->midi_pencil);
@@ -480,6 +480,11 @@ MidiRegionView::button_release (GdkEventButton* ev)
 	case Pressed: // Clicked
 
 		switch (editor.current_mouse_mode()) {
+		case MouseRange:
+			/* no motion occured - simple click */
+			clear_selection ();
+			break;
+
 		case MouseObject:
 		case MouseTimeFX:
 			{
@@ -595,13 +600,15 @@ MidiRegionView::motion (GdkEventMotion* ev)
 				_mouse_state = AddDragging;
 				remove_ghost_note ();
 				editor.verbose_cursor()->hide ();
-				cerr << "starting note create drag\n";
-
 				return true;
-			} else {
+			} else if (m == MouseObject) {
 				
 				editor.drags()->set (new MidiRubberbandSelectDrag (dynamic_cast<Editor *> (&editor), this), (GdkEvent *) ev);
 				_mouse_state = SelectRectDragging;
+				return true;
+			} else if (m == MouseRange) {
+				editor.drags()->set (new MidiVerticalSelectDrag (dynamic_cast<Editor *> (&editor), this), (GdkEvent *) ev);
+				_mouse_state = SelectVerticalDragging;
 				return true;
 			}
 		}
@@ -609,6 +616,7 @@ MidiRegionView::motion (GdkEventMotion* ev)
 		return false;
 
 	case SelectRectDragging:
+	case SelectVerticalDragging:
 	case AddDragging:
 		editor.drags()->motion_handler ((GdkEvent *) ev, false);
 		break;
@@ -2198,6 +2206,38 @@ MidiRegionView::update_drag_selection(double x1, double x2, double y1, double y2
 		    (ix2 >= x1 && ix2 <= x2 && iy2 >= y1 && iy2 <= y2)) {
 
 			// Inside rectangle
+			if (!(*i)->selected()) {
+				add_to_selection (*i);
+			}
+		} else if ((*i)->selected() && !extend) {
+			// Not inside rectangle
+			remove_from_selection (*i);
+		}
+	}
+}
+
+void
+MidiRegionView::update_vertical_drag_selection (double y1, double y2, bool extend)
+{
+	if (y1 > y2) {
+		swap (y1, y2);
+	}
+
+	// TODO: Make this faster by storing the last updated selection rect, and only
+	// adjusting things that are in the area that appears/disappeared.
+	// We probably need a tree to be able to find events in O(log(n)) time.
+
+	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
+
+		/* check if any corner of the note is inside the rect
+
+		   Notes:
+		   1) this is computing "touched by", not "contained by" the rect.
+		   2) this does not require that events be sorted in time.
+		*/
+
+		if (((*i)->y1() >= y1 && (*i)->y1() <= y2)) {
+			// within y- (note-) range
 			if (!(*i)->selected()) {
 				add_to_selection (*i);
 			}
