@@ -35,6 +35,7 @@
 
 #include "pbd/rcu.h"
 #include "pbd/signals.h"
+#include "pbd/stacktrace.h"
 
 #include <jack/weakjack.h>
 #include <jack/jack.h>

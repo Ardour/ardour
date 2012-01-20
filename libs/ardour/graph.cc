@@ -597,10 +597,10 @@ Graph::process_one_route (Route* route)
 bool
 Graph::in_process_thread () const
 {
-	list<pthread_t>::const_iterator i = _thread_list.begin ();
-	while (i != _thread_list.end() && *i != pthread_self ()) {
-		++i;
+	for (list<pthread_t>::const_iterator i = _thread_list.begin (); i != _thread_list.end(); ++i) {
+		if (*i == pthread_self()) {
+			return true;
+		}
 	}
-
-	return i != _thread_list.end ();
+	return false;
 }
