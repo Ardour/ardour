@@ -226,34 +226,25 @@
 
     <menu name='RegionMenu' action='RegionMenu'>
       <menuitem action='insert-region-from-region-list'/>
+      <menuitem action='play-selected-regions'/>
+      <menuitem action='loop-region'/>
       <menuitem action='rename-region'/>
       <menuitem action='show-region-properties'/>
-      <menuitem action='set-region-sync-position'/>
-      <menuitem action='remove-region-sync'/>
-      <menuitem action='play-selected-regions'/>
-      <menuitem action='export-region'/>
-      <menuitem action='bounce-regions-processed'/>
-      <menuitem action='bounce-regions-unprocessed'/>
-      <menuitem action='combine-regions'/>
-      <menuitem action='uncombine-regions'/>
-      <menuitem action='analyze-region'/>
-      <menuitem action='toggle-region-lock'/>
-      <menuitem action='toggle-region-lock-style'/>
-      <menuitem action='toggle-opaque-region'/>
-      <menuitem action='toggle-region-mute'/>
-      <menuitem action='pitch-shift-region'/>
-      <menuitem action='transpose-region'/>
-      <menuitem action='naturalize-region'/>
-      <menuitem action='split-region'/>
-      <menuitem action='split-multichannel-region'/>
-      <menuitem action='remove-region'/>
-      <menuitem action='loop-region'/>
-      <menuitem action='snap-regions-to-grid'/>
-      <menuitem action='close-region-gaps'/>
-      <menuitem action='place-transient' />
-      <menuitem action='show-rhythm-ferret'/>
-      <menuitem action='strip-region-silence'/>
-      <menuitem action='reverse-region'/>    
+      <menu action='RegionMenuEdit'>
+         <menuitem action='combine-regions'/>
+         <menuitem action='uncombine-regions'/>
+         <menuitem action='analyze-region'/>
+         <menuitem action='toggle-opaque-region'/>
+         <menuitem action='toggle-region-mute'/>
+         <menuitem action='pitch-shift-region'/>
+         <menuitem action='split-region'/>
+         <menuitem action='split-multichannel-region'/>
+         <menuitem action='close-region-gaps'/>
+         <menuitem action='place-transient' />
+         <menuitem action='show-rhythm-ferret'/>
+         <menuitem action='strip-region-silence'/>
+         <menuitem action='reverse-region'/>    
+      </menu>
       <menu action='RegionMenuLayering'>
         <menuitem action='raise-region-to-top'/>
         <menuitem action='raise-region'/>
@@ -261,20 +252,27 @@
         <menuitem action='lower-region-to-bottom'/>
       </menu>
       <menu action='RegionMenuMIDI'>
+        <menuitem action='transpose-region'/>
         <menuitem action='insert-patch-change'/>
         <menuitem action='quantize-region'/>
         <menuitem action='fork-region'/>
         <menuitem action='show-region-list-editor'/>
       </menu>
       <menu action='RegionMenuGain'>
+        <menuitem action='normalize-region'/>
         <menuitem action='boost-region-gain'/>
         <menuitem action='cut-region-gain'/>      		   
         <menuitem action='reset-region-gain-envelopes'/>
         <menuitem action='toggle-region-gain-envelope-visible'/>
         <menuitem action='toggle-region-gain-envelope-active'/>
-        <menuitem action='normalize-region'/>
       </menu>
-      <menu action='RegionMenuNudge'>
+      <menu action='RegionMenuPosition'>
+        <menuitem action='naturalize-region'/>
+        <menuitem action='snap-regions-to-grid'/>
+        <menuitem action='toggle-region-lock'/>
+        <menuitem action='toggle-region-lock-style'/>
+        <menuitem action='set-region-sync-position'/>
+        <menuitem action='remove-region-sync'/>
         <menuitem action='nudge-forward'/>
         <menuitem action='nudge-backward'/>
         <menuitem action='nudge-forward-by-capture-offset'/>
@@ -305,6 +303,11 @@
         <menuitem action='multi-duplicate-region'/>
         <menuitem action='region-fill-track'/>
       </menu>
+      <menuitem action='export-region'/>
+      <menuitem action='bounce-regions-processed'/>
+      <menuitem action='bounce-regions-unprocessed'/>
+      <separator/>
+      <menuitem action='remove-region'/>
     </menu>
 
     <menu action='TrackMenu'>
@@ -580,55 +583,38 @@
   </popup>
 
   <popup name='PopupRegionMenu' action='PopupRegionMenu'>
+    <menuitem action='play-selected-regions'/>
+    <menuitem action='loop-region'/>
     <menuitem action='rename-region'/>
     <menuitem action='show-region-properties'/>
-    <menuitem action='combine-regions'/>
-    <menuitem action='uncombine-regions'/>
-    <menuitem action='split-region'/>
-    <menuitem action='split-multichannel-region'/>
-    <menuitem action='set-region-sync-position'/>
-    <menuitem action='remove-region-sync'/>
-    <menuitem action='play-selected-regions'/>
-    <menuitem action='export-region'/>
-    <menuitem action='bounce-regions-processed'/>
-    <menuitem action='bounce-regions-unprocessed'/>
-    <menuitem action='analyze-region'/>
-    <menuitem action='toggle-region-lock'/>
-    <menuitem action='toggle-region-lock-style'/>
-    <menuitem action='toggle-opaque-region'/>
-    <menuitem action='toggle-region-mute'/>
-    <menuitem action='pitch-shift-region'/>
-    <menuitem action='transpose-region'/>
-    <menuitem action='naturalize-region'/>
-    <menuitem action='reverse-region'/>    
-    <menuitem action='loop-region'/>
-    <menuitem action='snap-regions-to-grid'/>
-    <menuitem action='close-region-gaps'/>
-    <menuitem action='place-transient' />
-    <menuitem action='show-rhythm-ferret'/>
-    <menuitem action='strip-region-silence'/>
-    <menuitem action='remove-region'/>
-    <menu action='RegionMenuLayering'>
-      <menuitem action='raise-region-to-top'/>
-      <menuitem action='raise-region'/>
-      <menuitem action='lower-region'/>
-      <menuitem action='lower-region-to-bottom'/>
+    <menu action='RegionMenuEdit'>
+       <menuitem action='combine-regions'/>
+       <menuitem action='uncombine-regions'/>
+       <menuitem action='split-region'/>
+       <menuitem action='split-multichannel-region'/>
+       <menuitem action='toggle-opaque-region'/>
+       <menuitem action='toggle-region-mute'/>
+       <menuitem action='pitch-shift-region'/>
+       <menuitem action='reverse-region'/>    
+       <menuitem action='close-region-gaps'/>
+       <menuitem action='place-transient' />
+       <menuitem action='show-rhythm-ferret'/>
+       <menuitem action='strip-region-silence'/>
     </menu>
     <menu action='RegionMenuMIDI'>
+      <menuitem action='transpose-region'/>
       <menuitem action='insert-patch-change-context'/>
       <menuitem action='quantize-region'/>
       <menuitem action='fork-region'/>
       <menuitem action='show-region-list-editor'/>
     </menu>
-    <menu action='RegionMenuGain'>
-      <menuitem action='boost-region-gain'/>
-      <menuitem action='cut-region-gain'/>      		   
-      <menuitem action='reset-region-gain-envelopes'/>
-      <menuitem action='toggle-region-gain-envelope-visible'/>
-      <menuitem action='toggle-region-gain-envelope-active'/>
-      <menuitem action='normalize-region'/>
-    </menu>
-    <menu action='RegionMenuNudge'>
+    <menu action='RegionMenuPosition'>
+      <menuitem action='naturalize-region'/>
+      <menuitem action='toggle-region-lock'/>
+      <menuitem action='toggle-region-lock-style'/>
+      <menuitem action='snap-regions-to-grid'/>
+      <menuitem action='set-region-sync-position'/>
+      <menuitem action='remove-region-sync'/>
       <menuitem action='nudge-forward'/>
       <menuitem action='nudge-backward'/>
       <menuitem action='nudge-forward-by-capture-offset'/>
@@ -642,12 +628,26 @@
       <menuitem action='trim-to-previous-region'/>
       <menuitem action='trim-to-next-region'/>
     </menu>
+    <menu action='RegionMenuLayering'>
+      <menuitem action='raise-region-to-top'/>
+      <menuitem action='raise-region'/>
+      <menuitem action='lower-region'/>
+      <menuitem action='lower-region-to-bottom'/>
+    </menu>
     <menu action='RegionMenuRanges'>
       <menuitem action='set-loop-from-region'/>
       <menuitem action='set-punch-from-region'/>
       <menuitem action='add-range-marker-from-region'/>
       <menuitem action='add-range-markers-from-region'/>
       <menuitem action='set-selection-from-region'/>
+    </menu>
+    <menu action='RegionMenuGain'>
+      <menuitem action='normalize-region'/>
+      <menuitem action='boost-region-gain'/>
+      <menuitem action='cut-region-gain'/>      		   
+      <menuitem action='reset-region-gain-envelopes'/>
+      <menuitem action='toggle-region-gain-envelope-visible'/>
+      <menuitem action='toggle-region-gain-envelope-active'/>
     </menu>
     <menu action='RegionMenuFades'>
       <menuitem action='toggle-region-fade-in'/>
@@ -659,6 +659,12 @@
       <menuitem action='multi-duplicate-region'/>
       <menuitem action='region-fill-track'/>
     </menu>
+    <menuitem action='export-region'/>
+    <menuitem action='bounce-regions-processed'/>
+    <menuitem action='bounce-regions-unprocessed'/>
+    <menuitem action='analyze-region'/>
+    <separator/>
+    <menuitem action='remove-region'/>
     
   </popup>
 

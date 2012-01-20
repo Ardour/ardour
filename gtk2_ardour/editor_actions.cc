@@ -97,7 +97,8 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_actions, X_("LatchMenu"), _("Latch"));
 	ActionManager::register_action (editor_actions, X_("RegionMenu"), _("Region"));
 	ActionManager::register_action (editor_actions, X_("RegionMenuLayering"), _("Layering"));
-	ActionManager::register_action (editor_actions, X_("RegionMenuNudge"), _("Nudge"));
+	ActionManager::register_action (editor_actions, X_("RegionMenuPosition"), _("Position"));
+	ActionManager::register_action (editor_actions, X_("RegionMenuEdit"), _("Edit"));
 	ActionManager::register_action (editor_actions, X_("RegionMenuTrim"), _("Trim"));
 	ActionManager::register_action (editor_actions, X_("RegionMenuGain"), _("Gain"));
 	ActionManager::register_action (editor_actions, X_("RegionMenuRanges"), _("Ranges"));
@@ -1334,16 +1335,16 @@ Editor::register_region_actions ()
 
 	/* Add a single range marker around all selected regions */
 	reg_sens (
-		_region_actions, "add-range-marker-from-region", _("Add 1 Range Marker"), sigc::mem_fun (*this, &Editor::add_location_from_region)
+		_region_actions, "add-range-marker-from-region", _("Add Single Range Marker"), sigc::mem_fun (*this, &Editor::add_location_from_region)
 		);
 
 	/* Add a range marker around each selected region */
 	reg_sens (
-		_region_actions, "add-range-markers-from-region", _("Add Range Marker(s)"), sigc::mem_fun (*this, &Editor::add_locations_from_region)
+		_region_actions, "add-range-markers-from-region", _("Add Range Marker Per Region"), sigc::mem_fun (*this, &Editor::add_locations_from_region)
 		);
 
 	/* Snap selected regions to the grid */
-	reg_sens (_region_actions, "snap-regions-to-grid", _("Snap to Grid"), sigc::mem_fun (*this, &Editor::snap_regions_to_grid));
+	reg_sens (_region_actions, "snap-regions-to-grid", _("Snap Position To Grid"), sigc::mem_fun (*this, &Editor::snap_regions_to_grid));
 
 	/* Close gaps in selected regions */
 	reg_sens (_region_actions, "close-region-gaps", _("Close Gaps"), sigc::mem_fun (*this, &Editor::close_region_gaps));
