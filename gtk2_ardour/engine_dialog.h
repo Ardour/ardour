@@ -53,8 +53,6 @@ class EngineControl : public Gtk::VBox {
 	Gtk::SpinButton priority_spinner;
 	Gtk::Adjustment ports_adjustment;
 	Gtk::SpinButton ports_spinner;
-	Gtk::SpinButton input_channels;
-	Gtk::SpinButton output_channels;
 	Gtk::Adjustment input_latency_adjustment;
 	Gtk::SpinButton input_latency;
 	Gtk::Adjustment output_latency_adjustment;
