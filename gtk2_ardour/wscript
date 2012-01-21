@@ -91,7 +91,6 @@ gtk2_ardour_sources = [
         'editor_markers.cc',
         'editor_mixer.cc',
         'editor_mouse.cc',
-        'editor_nudge.cc',
         'editor_ops.cc',
         'editor_regions.cc',
         'editor_routes.cc',
