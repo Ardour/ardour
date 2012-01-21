@@ -39,7 +39,6 @@
 #include "ardour/audioregion.h"
 #include "ardour/debug.h"
 #include "ardour/session.h"
-#include "ardour/gain.h"
 #include "ardour/dB.h"
 #include "ardour/playlist.h"
 #include "ardour/audiofilesource.h"

@@ -32,7 +32,6 @@
 
 #include "ardour/automation_control.h"
 #include "ardour/dB.h"
-#include "ardour/gain.h"
 #include "ardour/midi_model.h"
 #include "ardour/midi_region.h"
 #include "ardour/midi_ring_buffer.h"

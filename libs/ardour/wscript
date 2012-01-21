@@ -103,7 +103,6 @@ libardour_sources = [
         'filesystem_paths.cc',
         'filter.cc',
         'find_session.cc',
-        'gain.cc',
         'globals.cc',
         'graph.cc',
         'graphnode.cc',
