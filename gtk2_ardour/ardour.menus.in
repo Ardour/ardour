@@ -548,6 +548,7 @@
     <menuitem action='ab_plugins'/>
     <separator/>
     <menuitem action='edit'/>
+    <menuitem action='edit-generic'/>
   </popup>
 
   <popup name='ShuttleUnitPopup'>

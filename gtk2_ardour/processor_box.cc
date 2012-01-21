@@ -92,7 +92,7 @@ RefPtr<Action> ProcessorBox::paste_action;
 RefPtr<Action> ProcessorBox::cut_action;
 RefPtr<Action> ProcessorBox::rename_action;
 RefPtr<Action> ProcessorBox::edit_action;
-RefPtr<Action> ProcessorBox::controls_action;
+RefPtr<Action> ProcessorBox::edit_generic_action;
 Glib::RefPtr<Gdk::Pixbuf> ProcessorEntry::_slider_pixbuf;
 
 ProcessorEntry::ProcessorEntry (ProcessorBox* parent, boost::shared_ptr<Processor> p, Width w)
@@ -875,6 +875,9 @@ ProcessorBox::show_processor_menu (int arg)
 	if (single_selection) {
 		pi = boost::dynamic_pointer_cast<PluginInsert> (single_selection->processor ());
 	}
+
+	/* allow editing with an Ardour-generated UI for plugin inserts with editors */
+	edit_generic_action->set_sensitive (pi && pi->plugin()->has_editor ());
 
 	/* disallow rename for multiple selections, for plugin inserts and for the fader */
 	rename_action->set_sensitive (single_selection && !pi && !boost::dynamic_pointer_cast<Amp> (single_selection->processor ()));
@@ -2090,6 +2093,29 @@ ProcessorBox::toggle_edit_processor (boost::shared_ptr<Processor> processor)
 	}
 }
 
+/** Toggle a generic (Ardour-generated) plugin UI */
+void
+ProcessorBox::toggle_edit_generic_processor (boost::shared_ptr<Processor> processor)
+{
+	boost::shared_ptr<PluginInsert> plugin_insert
+		= boost::dynamic_pointer_cast<PluginInsert>(processor);
+	if (!plugin_insert) {
+		return;
+	}
+
+	Container*      toplevel  = get_toplevel();
+	Window*         win       = dynamic_cast<Gtk::Window*>(toplevel);
+	PluginUIWindow* plugin_ui = new PluginUIWindow(win, plugin_insert, true, false);
+	plugin_ui->set_title(generate_processor_title (plugin_insert));
+
+	if (plugin_ui->is_visible()) {
+		plugin_ui->hide();
+	} else {
+		plugin_ui->show_all();
+		plugin_ui->present();
+	}
+}
+
 void
 ProcessorBox::register_actions ()
 {
@@ -2153,7 +2179,21 @@ ProcessorBox::register_actions ()
 		popup_act_grp, X_("edit"), _("Edit..."),
 		sigc::ptr_fun (ProcessorBox::rb_edit));
 
+	edit_generic_action = ActionManager::register_action (
+		popup_act_grp, X_("edit-generic"), _("Edit with basic controls..."),
+		sigc::ptr_fun (ProcessorBox::rb_edit_generic));
+
 	ActionManager::add_action_group (popup_act_grp);
+}
+
+void
+ProcessorBox::rb_edit_generic ()
+{
+	if (_current_processor_box == 0) {
+		return;
+	}
+
+	_current_processor_box->for_selected_processors (&ProcessorBox::toggle_edit_generic_processor);
 }
 
 void
