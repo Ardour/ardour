@@ -385,14 +385,14 @@ ProcessorEntry::Control::Control (Glib::RefPtr<Gdk::Pixbuf> s, boost::shared_ptr
 	_slider.show ();
 	box.pack_start (_slider);
 
-	double const lo = c->user_to_ui (c->lower ());
-	double const up = c->user_to_ui (c->upper ());
+	double const lo = c->internal_to_interface (c->lower ());
+	double const up = c->internal_to_interface (c->upper ());
 
 	_adjustment.set_lower (lo);
 	_adjustment.set_upper (up);
 	_adjustment.set_step_increment ((up - lo) / 100);
 	_adjustment.set_page_increment ((up - lo) / 10);
-	_slider.set_default_value (c->user_to_ui (c->normal ()));
+	_slider.set_default_value (c->internal_to_interface (c->normal ()));
 
 	_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &Control::slider_adjusted));
 	c->Changed.connect (_connection, MISSING_INVALIDATOR, boost::bind (&Control::control_changed, this), gui_context ());
@@ -419,7 +419,7 @@ ProcessorEntry::Control::slider_adjusted ()
 		return;
 	}
 
-	c->set_value (c->ui_to_user (_adjustment.get_value ()));
+	c->set_value (c->interface_to_internal (_adjustment.get_value ()));
 }
 
 void
@@ -432,14 +432,12 @@ ProcessorEntry::Control::control_changed ()
 
 	_ignore_slider_adjustment = true;
 
-	_adjustment.set_value (c->user_to_ui (c->get_value ()));
+	_adjustment.set_value (c->internal_to_interface (c->get_value ()));
 
-	/* XXX: general presentation of values to the user */
 	stringstream s;
 	s.precision (1);
 	s.setf (ios::fixed, ios::floatfield);
-	s << accurate_coefficient_to_dB (c->get_value ());
-	s << _("dB");
+	s << c->internal_to_user (c->get_value ());
 	
 	_slider.set_tooltip_text (s.str ());
 	

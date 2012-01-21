@@ -82,10 +82,10 @@ public:
 		}
 
 		void set_value (double val);
-		double get_value (void) const;
 
-		double user_to_ui (double) const;
-		double ui_to_user (double) const;
+		double internal_to_interface (double) const;
+		double interface_to_internal (double) const;
+		double internal_to_user (double) const;
 
 		Amp* _amp;
 	};

@@ -1174,7 +1174,7 @@ PluginInsert::PluginControl::set_value (double user_val)
 }
 
 double
-PluginInsert::PluginControl::user_to_ui (double val) const
+PluginInsert::PluginControl::internal_to_interface (double val) const
 {
 	if (_logarithmic) {
 		if (val > 0) {
@@ -1188,7 +1188,7 @@ PluginInsert::PluginControl::user_to_ui (double val) const
 }
 
 double
-PluginInsert::PluginControl::ui_to_user (double val) const
+PluginInsert::PluginControl::interface_to_internal (double val) const
 {
 	if (_logarithmic) {
 		val = exp (val);

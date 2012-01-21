@@ -570,8 +570,8 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 		Adjustment* adj = control_ui->controller->adjustment();
 		boost::shared_ptr<PluginInsert::PluginControl> pc = boost::dynamic_pointer_cast<PluginInsert::PluginControl> (control_ui->control);
 
-		adj->set_lower (pc->user_to_ui (desc.lower));
-		adj->set_upper (pc->user_to_ui (desc.upper));
+		adj->set_lower (pc->internal_to_interface (desc.lower));
+		adj->set_upper (pc->internal_to_interface (desc.upper));
 
 		adj->set_step_increment (desc.step);
 		adj->set_page_increment (desc.largestep);
@@ -594,7 +594,7 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 
 		}
 
-		adj->set_value (pc->user_to_ui (plugin->get_parameter (port_index)));
+		adj->set_value (pc->internal_to_interface (plugin->get_parameter (port_index)));
 
 		/* XXX memory leak: SliderController not destroyed by ControlUI
 		   destructor, and manage() reports object hierarchy

@@ -77,6 +77,18 @@ public:
 	void set_value (double);
 	double get_value () const;
 
+	virtual double internal_to_interface (double v) const {
+		return v;
+	}
+	
+	virtual double interface_to_internal (double v) const {
+		return v;
+	}
+
+	virtual double internal_to_user (double v) const {
+		return v;
+	}
+
 	double lower() const { return parameter().min(); }
 	double upper() const { return parameter().max(); }
 	double normal() const { return parameter().normal(); }

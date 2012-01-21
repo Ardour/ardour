@@ -423,21 +423,21 @@ Amp::GainControl::set_value (double val)
 }
 
 double
-Amp::GainControl::get_value (void) const
-{
-	return AutomationControl::get_value();
-}
-
-double
-Amp::GainControl::user_to_ui (double v) const
+Amp::GainControl::internal_to_interface (double v) const
 {
 	return gain_to_slider_position (v);
 }
 
 double
-Amp::GainControl::ui_to_user (double v) const
+Amp::GainControl::interface_to_internal (double v) const
 {
 	return slider_position_to_gain (v);
+}
+
+double
+Amp::GainControl::internal_to_user (double v) const
+{
+	return accurate_coefficient_to_dB (v);
 }
 
 void

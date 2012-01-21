@@ -89,8 +89,8 @@ class PluginInsert : public Processor
 		double get_value (void) const;
 		XMLNode& get_state();
 
-		double user_to_ui (double) const;
-		double ui_to_user (double) const;
+		double internal_to_interface (double) const;
+		double interface_to_internal (double) const;
 
 	private:
 		PluginInsert* _plugin;
