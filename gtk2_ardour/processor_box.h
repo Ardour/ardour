@@ -178,14 +178,18 @@ private:
 
 	private:
 		void slider_adjusted ();
+		void button_clicked ();
 		void control_changed ();
 		std::string state_id () const;
 
 		boost::weak_ptr<ARDOUR::AutomationControl> _control;
+		/* things for a slider */
 		Gtk::Adjustment _adjustment;
 		Gtkmm2ext::HSliderController _slider;
 		Gtk::Label _label;
-		bool _ignore_slider_adjustment;
+		/* things for a button */
+		ArdourButton _button;
+		bool _ignore_ui_adjustment;
 		PBD::ScopedConnection _connection;
 		bool _visible;
 		std::string _name;

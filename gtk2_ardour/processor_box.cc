@@ -412,30 +412,44 @@ ProcessorEntry::Control::Control (Glib::RefPtr<Gdk::Pixbuf> s, boost::shared_ptr
 	: _control (c)
 	, _adjustment (gain_to_slider_position_with_max (1.0, Config->get_max_gain()), 0, 1, 0.01, 0.1)
 	, _slider (s, &_adjustment, 0, false)
-	, _ignore_slider_adjustment (false)
+	, _button (ArdourButton::Element (ArdourButton::Text | ArdourButton::Indicator))
+	, _ignore_ui_adjustment (false)
 	, _visible (false)
 	, _name (n)
 {
 	_slider.set_controllable (c);
 
-	box.pack_start (_label);
-	_label.show ();
-	_label.set_text (_name);
+	if (c->toggled()) {
+		_button.set_text (_name);
+		_button.set_led_left (true);
+		_button.set_name ("processor control button");
+		box.pack_start (_button);
+		_button.show ();
 
-	box.pack_start (_slider);
-	_slider.show ();
+		_button.signal_clicked.connect (sigc::mem_fun (*this, &Control::button_clicked));
+		_button.signal_led_clicked.connect (sigc::mem_fun (*this, &Control::button_clicked));
+		c->Changed.connect (_connection, MISSING_INVALIDATOR, boost::bind (&Control::control_changed, this), gui_context ());
 
-	double const lo = c->internal_to_interface (c->lower ());
-	double const up = c->internal_to_interface (c->upper ());
+	} else {
+		
+		box.pack_start (_label);
+		_label.show ();
+		_label.set_text (_name);
+		box.pack_start (_slider);
+		_slider.show ();
 
-	_adjustment.set_lower (lo);
-	_adjustment.set_upper (up);
-	_adjustment.set_step_increment ((up - lo) / 100);
-	_adjustment.set_page_increment ((up - lo) / 10);
-	_slider.set_default_value (c->internal_to_interface (c->normal ()));
-
-	_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &Control::slider_adjusted));
-	c->Changed.connect (_connection, MISSING_INVALIDATOR, boost::bind (&Control::control_changed, this), gui_context ());
+		double const lo = c->internal_to_interface (c->lower ());
+		double const up = c->internal_to_interface (c->upper ());
+		
+		_adjustment.set_lower (lo);
+		_adjustment.set_upper (up);
+		_adjustment.set_step_increment ((up - lo) / 100);
+		_adjustment.set_page_increment ((up - lo) / 10);
+		_slider.set_default_value (c->internal_to_interface (c->normal ()));
+		
+		_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &Control::slider_adjusted));
+		c->Changed.connect (_connection, MISSING_INVALIDATOR, boost::bind (&Control::control_changed, this), gui_context ());
+	}
 
 	control_changed ();
 }
@@ -449,7 +463,7 @@ ProcessorEntry::Control::set_pixel_width (int p)
 void
 ProcessorEntry::Control::slider_adjusted ()
 {
-	if (_ignore_slider_adjustment) {
+	if (_ignore_ui_adjustment) {
 		return;
 	}
 	
@@ -463,6 +477,21 @@ ProcessorEntry::Control::slider_adjusted ()
 }
 
 void
+ProcessorEntry::Control::button_clicked ()
+{
+	boost::shared_ptr<AutomationControl> c = _control.lock ();
+
+	if (!c) {
+		return;
+	}
+
+	bool const n = _button.active_state() == Gtkmm2ext::Active ? false : true;
+	
+	c->set_value (n ? 1 : 0);
+	_button.set_active_state (n ? Gtkmm2ext::Active : Gtkmm2ext::ActiveState (0));
+}
+
+void
 ProcessorEntry::Control::control_changed ()
 {
 	boost::shared_ptr<AutomationControl> c = _control.lock ();
@@ -470,18 +499,25 @@ ProcessorEntry::Control::control_changed ()
 		return;
 	}
 
-	_ignore_slider_adjustment = true;
+	_ignore_ui_adjustment = true;
 
-	_adjustment.set_value (c->internal_to_interface (c->get_value ()));
+	if (c->toggled ()) {
 
-	stringstream s;
-	s.precision (1);
-	s.setf (ios::fixed, ios::floatfield);
-	s << c->internal_to_user (c->get_value ());
+		_button.set_active_state (c->get_value() > 0.5 ? Gtkmm2ext::Active : Gtkmm2ext::ActiveState (0));
+		
+	} else {
+
+		_adjustment.set_value (c->internal_to_interface (c->get_value ()));
+		
+		stringstream s;
+		s.precision (1);
+		s.setf (ios::fixed, ios::floatfield);
+		s << c->internal_to_user (c->get_value ());
+		
+		_slider.set_tooltip_text (s.str ());
+	}
 	
-	_slider.set_tooltip_text (s.str ());
-	
-	_ignore_slider_adjustment = false;
+	_ignore_ui_adjustment = false;
 }
 
 void

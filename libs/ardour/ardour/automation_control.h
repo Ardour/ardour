@@ -92,6 +92,7 @@ public:
 	double lower() const { return parameter().min(); }
 	double upper() const { return parameter().max(); }
 	double normal() const { return parameter().normal(); }
+	bool toggled() const { return parameter().toggled(); }
 
 	const ARDOUR::Session& session() const { return _session; }
 
