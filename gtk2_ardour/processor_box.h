@@ -69,7 +69,6 @@ namespace ARDOUR {
 	class PluginInsert;
 	class PortInsert;
 	class Route;
-	class Send;
 	class Session;
 }
 
@@ -103,6 +102,7 @@ class ProcessorEntry : public Gtkmm2ext::DnDVBoxChild, public sigc::trackable
 {
 public:
 	ProcessorEntry (boost::shared_ptr<ARDOUR::Processor>, Width);
+	~ProcessorEntry ();
 
 	Gtk::EventBox& action_widget ();
 	Gtk::Widget& widget ();
@@ -187,27 +187,6 @@ class BlankProcessorEntry : public ProcessorEntry
 {
   public:
 	BlankProcessorEntry (Width w);
-};
-
-class SendProcessorEntry : public ProcessorEntry
-{
-public:
-	SendProcessorEntry (boost::shared_ptr<ARDOUR::Send>, Width);
-
-	void set_enum_width (Width, int);
-	void set_pixel_width (int);
-
-private:
-	void show_gain ();
-	void gain_adjusted ();
-	void setup_gain_adjustment ();
-
-	boost::shared_ptr<ARDOUR::Send> _send;
-	Gtk::Adjustment _adjustment;
-	Gtkmm2ext::HSliderController _fader;
-	bool _ignore_gain_change;
-	PBD::ScopedConnectionList _send_connections;
-	ARDOUR::DataType _data_type;
 };
 
 class PluginInsertProcessorEntry : public ProcessorEntry

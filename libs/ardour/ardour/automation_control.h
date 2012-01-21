@@ -79,18 +79,9 @@ public:
 
 	double lower() const { return parameter().min(); }
 	double upper() const { return parameter().max(); }
+	double normal() const { return parameter().normal(); }
 
 	const ARDOUR::Session& session() const { return _session; }
-
-	/** Convert user values to UI values.  See pbd/controllable.h */
-	virtual double user_to_ui (double val) const {
-		return val;
-	}
-
-	/** Convert UI values to user values.  See pbd/controllable.h */
-	virtual double ui_to_user (double val) const {
-		return val;
-	}
 
 protected:
 

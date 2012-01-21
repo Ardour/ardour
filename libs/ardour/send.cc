@@ -81,6 +81,8 @@ Send::Send (Session& s, boost::shared_ptr<Pannable> p, boost::shared_ptr<MuteMas
 
 	_amp.reset (new Amp (_session));
 	_meter.reset (new PeakMeter (_session));
+
+	add_control (_amp->gain_control ());
 }
 
 Send::~Send ()

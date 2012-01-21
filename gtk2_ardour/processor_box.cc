@@ -28,7 +28,6 @@
 #include <sigc++/bind.h>
 
 #include "pbd/convert.h"
-#include "pbd/stacktrace.h"
 
 #include <glibmm/miscutils.h>
 
@@ -112,6 +111,7 @@ ProcessorEntry::ProcessorEntry (boost::shared_ptr<Processor> p, Width w)
 	_button.set_text (name (_width));
 
 	if (_processor) {
+
 		_vbox.pack_start (_button, true, true);
 
 		if (_processor->active()) {
@@ -126,10 +126,17 @@ ProcessorEntry::ProcessorEntry (boost::shared_ptr<Processor> p, Width w)
 		set<Evoral::Parameter> p = _processor->what_can_be_automated ();
 		for (set<Evoral::Parameter>::iterator i = p.begin(); i != p.end(); ++i) {
 			if (boost::dynamic_pointer_cast<Amp> (_processor)) {
+				/* Don't give Fader processors separate controls here */
 				continue;
 			}
-			
-			Control* c = new Control (_slider_pixbuf, _processor->automation_control (*i), _processor->describe_parameter (*i));
+
+			string d = _processor->describe_parameter (*i);
+			if (boost::dynamic_pointer_cast<Send> (_processor)) {
+				/* Little hack; don't label send level faders */
+				d = "";
+			}
+
+			Control* c = new Control (_slider_pixbuf, _processor->automation_control (*i), d);
 			_controls.push_back (c);
 			_vbox.pack_start (c->box);
 		}
@@ -138,6 +145,13 @@ ProcessorEntry::ProcessorEntry (boost::shared_ptr<Processor> p, Width w)
 		setup_visuals ();
 	} else {
 		_vbox.set_size_request (-1, _button.size_request().height);
+	}
+}
+
+ProcessorEntry::~ProcessorEntry ()
+{
+	for (list<Control*>::iterator i = _controls.begin(); i != _controls.end(); ++i) {
+		delete *i;
 	}
 }
 
@@ -373,12 +387,12 @@ ProcessorEntry::Control::Control (Glib::RefPtr<Gdk::Pixbuf> s, boost::shared_ptr
 
 	double const lo = c->user_to_ui (c->lower ());
 	double const up = c->user_to_ui (c->upper ());
-	
+
 	_adjustment.set_lower (lo);
 	_adjustment.set_upper (up);
 	_adjustment.set_step_increment ((up - lo) / 100);
 	_adjustment.set_page_increment ((up - lo) / 10);
-	_slider.set_default_value (up);
+	_slider.set_default_value (c->user_to_ui (c->normal ()));
 
 	_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &Control::slider_adjusted));
 	c->Changed.connect (_connection, MISSING_INVALIDATOR, boost::bind (&Control::control_changed, this), gui_context ());
@@ -404,7 +418,7 @@ ProcessorEntry::Control::slider_adjusted ()
 	if (!c) {
 		return;
 	}
-	
+
 	c->set_value (c->ui_to_user (_adjustment.get_value ()));
 }
 
@@ -417,7 +431,18 @@ ProcessorEntry::Control::control_changed ()
 	}
 
 	_ignore_slider_adjustment = true;
+
 	_adjustment.set_value (c->user_to_ui (c->get_value ()));
+
+	/* XXX: general presentation of values to the user */
+	stringstream s;
+	s.precision (1);
+	s.setf (ios::fixed, ios::floatfield);
+	s << accurate_coefficient_to_dB (c->get_value ());
+	s << _("dB");
+	
+	_slider.set_tooltip_text (s.str ());
+	
 	_ignore_slider_adjustment = false;
 }
 
@@ -483,111 +508,6 @@ ProcessorEntry::Control::state_id () const
 BlankProcessorEntry::BlankProcessorEntry (Width w)
 	: ProcessorEntry (boost::shared_ptr<Processor>(), w)
 {
-}
-
-SendProcessorEntry::SendProcessorEntry (boost::shared_ptr<Send> s, Width w)
-	: ProcessorEntry (s, w)
-	, _send (s)
-	, _adjustment (gain_to_slider_position_with_max (1.0, Config->get_max_gain()), 0, 1, 0.01, 0.1)
-	, _fader (_slider_pixbuf, &_adjustment, 0, false)
-	, _ignore_gain_change (false)
-	, _data_type (DataType::AUDIO)
-{
-	_fader.set_name ("SendFader");
-	_fader.set_controllable (_send->amp()->gain_control ());
-	_vbox.pack_start (_fader);
-
-	_fader.show ();
-
-	_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &SendProcessorEntry::gain_adjusted));
-
-	_send->amp()->gain_control()->Changed.connect (
-		_send_connections, invalidator (*this), boost::bind (&SendProcessorEntry::show_gain, this), gui_context()
-		);
-	
-	_send->amp()->ConfigurationChanged.connect (
-		_send_connections, invalidator (*this), ui_bind (&SendProcessorEntry::setup_gain_adjustment, this), gui_context ()
-		);
-
-	setup_gain_adjustment ();
-	show_gain ();
-}
-
-void
-SendProcessorEntry::setup_gain_adjustment ()
-{
-	if (_send->amp()->output_streams().n_midi() == 0) {
-		_data_type = DataType::AUDIO;
-		_adjustment.set_lower (0);
-		_adjustment.set_upper (1);
-		_adjustment.set_step_increment (0.01);
-		_adjustment.set_page_increment (0.1);
-		_fader.set_default_value (gain_to_slider_position (1));
-	} else {
-		_data_type = DataType::MIDI;
-		_adjustment.set_lower (0);
-		_adjustment.set_upper (2);
-		_adjustment.set_step_increment (0.05);
-		_adjustment.set_page_increment (0.1);
-		_fader.set_default_value (1);
-	}
-}
-
-void
-SendProcessorEntry::show_gain ()
-{
-	gain_t value = 0;
-	
-	switch (_data_type) {
-	case DataType::AUDIO:
-		value = gain_to_slider_position_with_max (_send->amp()->gain (), Config->get_max_gain());
-		break;
-	case DataType::MIDI:
-		value = _send->amp()->gain ();
-		break;
-	}
-
-	if (_adjustment.get_value() != value) {
-		_ignore_gain_change = true;
-		_adjustment.set_value (value);
-		_ignore_gain_change = false;
-
-		stringstream s;
-		s.precision (1);
-		s.setf (ios::fixed, ios::floatfield);
-		s << accurate_coefficient_to_dB (_send->amp()->gain ());
-		if (_data_type == DataType::AUDIO) {
-			s << _("dB");
-		}
-		
-		_fader.set_tooltip_text (s.str ());
-	}
-}
-
-void
-SendProcessorEntry::gain_adjusted ()
-{
-	if (_ignore_gain_change) {
-		return;
-	}
-
-	gain_t value = 0;
-
-	switch (_data_type) {
-	case DataType::AUDIO:
-		value = slider_position_to_gain_with_max (_adjustment.get_value(), Config->get_max_gain());
-		break;
-	case DataType::MIDI:
-		value = _adjustment.get_value ();
-	}
-	
-	_send->amp()->set_gain (value, this);
-}
-
-void
-SendProcessorEntry::set_pixel_width (int p)
-{
-	_fader.set_fader_length (p);
 }
 
 PluginInsertProcessorEntry::PluginInsertProcessorEntry (boost::shared_ptr<ARDOUR::PluginInsert> p, Width w)
@@ -1450,12 +1370,9 @@ ProcessorBox::add_processor_to_display (boost::weak_ptr<Processor> p)
 		return;
 	}
 
-	boost::shared_ptr<Send> send = boost::dynamic_pointer_cast<Send> (processor);
 	boost::shared_ptr<PluginInsert> plugin_insert = boost::dynamic_pointer_cast<PluginInsert> (processor);
 	ProcessorEntry* e = 0;
-	if (send) {
-		e = new SendProcessorEntry (send, _width);
-	} else if (plugin_insert) {
+	if (plugin_insert) {
 		e = new PluginInsertProcessorEntry (plugin_insert, _width);
 	} else {
 		e = new ProcessorEntry (processor, _width);
@@ -1469,6 +1386,11 @@ ProcessorBox::add_processor_to_display (boost::weak_ptr<Processor> p)
 		e->set_control_state (proc);
 	}
 	
+	if (boost::dynamic_pointer_cast<Send> (processor)) {
+		/* Always show send controls */
+		e->show_all_controls ();
+	}
+
 	processor_display.add_child (e);
 }
 

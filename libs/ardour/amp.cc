@@ -42,8 +42,11 @@ Amp::Amp (Session& s)
 	, _apply_gain_automation(false)
 	, _current_gain(1.0)
 {
-	boost::shared_ptr<AutomationList> gl(new AutomationList(Evoral::Parameter(GainAutomation)));
-	_gain_control = boost::shared_ptr<GainControl>( new GainControl(X_("gaincontrol"), s, this, Evoral::Parameter(GainAutomation), gl ));
+	Evoral::Parameter p (GainAutomation);
+	/* gain range of -inf to +6dB, default 0dB */
+	p.set_range (0, 1.99526231f, 1, false);
+	boost::shared_ptr<AutomationList> gl (new AutomationList (p));
+	_gain_control = boost::shared_ptr<GainControl> (new GainControl (X_("gaincontrol"), s, this, p, gl));
 	add_control(_gain_control);
 }
 
@@ -371,8 +374,6 @@ Amp::set_gain (gain_t val, void *src)
 		val = 1.99526231f;
 	}
 
-	//cerr << "set desired gain to " << val << " when curgain = " << _gain_control->get_value () << endl;
-
 	if (src != _gain_control.get()) {
 		_gain_control->set_value (val);
 		// bit twisty, this will come back and call us again
@@ -425,6 +426,18 @@ double
 Amp::GainControl::get_value (void) const
 {
 	return AutomationControl::get_value();
+}
+
+double
+Amp::GainControl::user_to_ui (double v) const
+{
+	return gain_to_slider_position (v);
+}
+
+double
+Amp::GainControl::ui_to_user (double v) const
+{
+	return slider_position_to_gain (v);
 }
 
 void
