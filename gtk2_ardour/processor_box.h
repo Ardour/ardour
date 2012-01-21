@@ -101,7 +101,7 @@ private:
 class ProcessorEntry : public Gtkmm2ext::DnDVBoxChild, public sigc::trackable
 {
 public:
-	ProcessorEntry (boost::shared_ptr<ARDOUR::Processor>, Width);
+	ProcessorEntry (ProcessorBox *, boost::shared_ptr<ARDOUR::Processor>, Width);
 	~ProcessorEntry ();
 
 	Gtk::EventBox& action_widget ();
@@ -128,6 +128,7 @@ public:
 	void add_control_state (XMLNode *) const;
 	void set_control_state (XMLNode const *);
 	std::string state_id () const;
+	Gtk::Menu* build_controls_menu ();
 
 	static void setup_slider_pix ();
 
@@ -147,6 +148,7 @@ private:
 	std::string name (Width) const;
 	void setup_tooltip ();
 
+	ProcessorBox* _parent;
 	boost::shared_ptr<ARDOUR::Processor> _processor;
 	Width _width;
 	Gtk::StateType _visual_state;
@@ -158,11 +160,19 @@ private:
 		Control (Glib::RefPtr<Gdk::Pixbuf>, boost::shared_ptr<ARDOUR::AutomationControl>, std::string const &);
 
 		void set_pixel_width (int);
-		void show ();
-		void hide ();
+		void set_visible (bool);
 		void add_state (XMLNode *) const;
 		void set_state (XMLNode const *);
 		void hide_things ();
+		void hide_label ();
+
+		bool visible () const {
+			return _visible;
+		}
+
+		std::string name () const {
+			return _name;
+		}
 		
 		Gtk::VBox box;
 
@@ -178,21 +188,24 @@ private:
 		bool _ignore_slider_adjustment;
 		PBD::ScopedConnection _connection;
 		bool _visible;
+		std::string _name;
 	};
 
 	std::list<Control*> _controls;
+
+	void toggle_control_visibility (Control *);
 };
 
 class BlankProcessorEntry : public ProcessorEntry
 {
   public:
-	BlankProcessorEntry (Width w);
+	BlankProcessorEntry (ProcessorBox *, Width w);
 };
 
 class PluginInsertProcessorEntry : public ProcessorEntry
 {
 public:
-	PluginInsertProcessorEntry (boost::shared_ptr<ARDOUR::PluginInsert>, Width);
+	PluginInsertProcessorEntry (ProcessorBox *, boost::shared_ptr<ARDOUR::PluginInsert>, Width);
 
 	void hide_things ();
 
@@ -246,6 +259,8 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	Gtk::Window* get_processor_ui (boost::shared_ptr<ARDOUR::Processor>) const;
 	void toggle_edit_processor (boost::shared_ptr<ARDOUR::Processor>);
 
+	void update_gui_object_state (ProcessorEntry *);
+	
 	sigc::signal<void,boost::shared_ptr<ARDOUR::Processor> > ProcessorSelected;
 	sigc::signal<void,boost::shared_ptr<ARDOUR::Processor> > ProcessorUnselected;
 
@@ -289,9 +304,6 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	Gtk::Menu * build_processor_menu ();
 	void show_processor_menu (int);
 	Gtk::Menu* build_possible_aux_menu();
-	Gtk::Menu* build_controls_menu (boost::shared_ptr<ARDOUR::Processor>);
-
-	void show_or_hide_all_controls (boost::weak_ptr<ARDOUR::Processor>, bool);
 
 	void choose_aux (boost::weak_ptr<ARDOUR::Route>);
 	void choose_send ();
@@ -393,7 +405,6 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 
 	void mixer_strip_delivery_changed (boost::weak_ptr<ARDOUR::Delivery>);
 
-	void update_gui_object_state (ProcessorEntry *);
 	XMLNode* entry_gui_object_state (ProcessorEntry *);
 };
 
