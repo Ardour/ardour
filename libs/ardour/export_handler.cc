@@ -431,7 +431,8 @@ ExportHandler::write_toc_header (CDMarkerStatus & status)
 
 	status.out << "CD_DA" << endl;
 	status.out << "CD_TEXT {" << endl << "  LANGUAGE_MAP {" << endl << "    0 : EN" << endl << "  }" << endl;
-	status.out << "  LANGUAGE 0 {" << endl << "    TITLE \"" << title << "\"" << endl << "  }" << endl << "}" << endl;
+	status.out << "  LANGUAGE 0 {" << endl << "    TITLE \"" << title << "\"" << endl ;
+	status.out << "    PERFORMER \"\"" << endl << "  }" << endl << "}" << endl;
 }
 
 void
@@ -505,9 +506,13 @@ ExportHandler::write_track_info_toc (CDMarkerStatus & status)
 	}
 
 	status.out << "CD_TEXT {" << endl << "  LANGUAGE 0 {" << endl << "     TITLE \"" << status.marker->name() << "\"" << endl;
+	
+	status.out << "     PERFORMER \"";
 	if (status.marker->cd_info.find("performer") != status.marker->cd_info.end()) {
-		status.out << "     PERFORMER \"" << status.marker->cd_info["performer"]  << "\"" << endl;
+		status.out << status.marker->cd_info["performer"];
 	}
+	status.out << "\"" << endl;
+	
 	if (status.marker->cd_info.find("composer") != status.marker->cd_info.end()) {
 		status.out  << "     COMPOSER \"" << status.marker->cd_info["composer"] << "\"" << endl;
 	}
