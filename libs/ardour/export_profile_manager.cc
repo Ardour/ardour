@@ -840,6 +840,23 @@ ExportProfileManager::check_config (boost::shared_ptr<Warnings> warnings,
 				warnings->conflicting_filenames.push_back (path);
 			}
 		}
+
+		// TODO check what happens with split channel configs...
+		string path = filename->get_path (format);
+
+		if (format->with_toc()) {
+			string marker_file = handler->get_cd_marker_filename(path, CDMarkerTOC);
+			if (sys::exists (sys::path (marker_file))) {
+				warnings->conflicting_filenames.push_back (marker_file);
+			}
+		}
+
+		if (format->with_cue()) {
+			string marker_file = handler->get_cd_marker_filename(path, CDMarkerCUE);
+			if (sys::exists (sys::path (marker_file))) {
+				warnings->conflicting_filenames.push_back (marker_file);
+			}
+		}
 	}
 }
 

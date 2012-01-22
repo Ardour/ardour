@@ -266,12 +266,7 @@ void
 ExportHandler::export_cd_marker_file (ExportTimespanPtr timespan, ExportFormatSpecPtr file_format,
                                       std::string filename, CDMarkerFormat format)
 {
-	string filepath;
-
-	/* do not strip file suffix because there may be more than one format, 
-	   and we do not want the CD marker file from one format to overwrite
-	   another (e.g. foo.wav.cue > foo.aiff.cue)
-	*/
+	string filepath = get_cd_marker_filename(filename, format);
 
 	void (ExportHandler::*header_func) (CDMarkerStatus &);
 	void (ExportHandler::*track_func) (CDMarkerStatus &);
@@ -279,15 +274,11 @@ ExportHandler::export_cd_marker_file (ExportTimespanPtr timespan, ExportFormatSp
 
 	switch (format) {
 	  case CDMarkerTOC:
-		filepath = filename;
-		filepath += ".toc";
 		header_func = &ExportHandler::write_toc_header;
 		track_func = &ExportHandler::write_track_info_toc;
 		index_func = &ExportHandler::write_index_info_toc;
 		break;
 	  case CDMarkerCUE:
-		filepath = filename;
-		filepath += ".cue";
 		header_func = &ExportHandler::write_cue_header;
 		track_func = &ExportHandler::write_track_info_cue;
 		index_func = &ExportHandler::write_index_info_cue;
@@ -378,6 +369,24 @@ ExportHandler::export_cd_marker_file (ExportTimespanPtr timespan, ExportFormatSp
 		}
 
 		(this->*track_func) (status);
+	}
+}
+
+string
+ExportHandler::get_cd_marker_filename(std::string filename, CDMarkerFormat format)
+{
+	/* do not strip file suffix because there may be more than one format, 
+	   and we do not want the CD marker file from one format to overwrite
+	   another (e.g. foo.wav.cue > foo.aiff.cue)
+	*/
+
+	switch (format) {
+	  case CDMarkerTOC:
+		return filename + ".toc";
+	  case CDMarkerCUE:
+		return filename + ".cue";
+	  default:
+		return filename + ".marker"; // Should not be reached when actually creating a file
 	}
 }
 

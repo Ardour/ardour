@@ -115,6 +115,8 @@ class ExportHandler : public ExportElementFactory
 	                        BroadcastInfoPtr broadcast_info);
 	void do_export (bool rt = false);
 
+	std::string get_cd_marker_filename(std::string filename, CDMarkerFormat format);
+
   private:
 
 	int process (framecnt_t frames);
