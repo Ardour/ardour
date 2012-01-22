@@ -171,6 +171,7 @@ CONFIG_VARIABLE (gain_t, max_gain, "max-gain", 2.0) /* +6.0dB */
 CONFIG_VARIABLE (bool, update_editor_during_summary_drag, "update-editor-during-summary-drag", true)
 CONFIG_VARIABLE (bool, never_display_periodic_midi, "never-display-periodic-midi", true)
 CONFIG_VARIABLE (bool, sound_midi_notes, "sound-midi-notes", false)
+CONFIG_VARIABLE (bool, use_plugin_own_gui, "use-plugin-own-gui", true)
 
 /* denormal management */
 

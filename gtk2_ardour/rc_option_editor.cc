@@ -1521,7 +1521,7 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (S_("Visual|Interface"),
 	     new BoolOption (
-		     "widget_prelight",
+		     "widget-prelight",
 		     _("Graphically indicate mouse pointer hovering over various widgets"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_widget_prelight),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_widget_prelight)
@@ -1531,6 +1531,13 @@ RCOptionEditor::RCOptionEditor ()
 	/* font scaling does nothing with GDK/Quartz */
 	add_option (S_("Visual|Interface"), new FontScalingOptions (_rc_config));
 #endif
+	add_option (S_("Visual|Interface"),
+		    new BoolOption (
+			    "use-own-plugin-gui",
+			    _("Use plugins' own interface instead of Ardour's basic one"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_use_plugin_own_gui),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_use_plugin_own_gui)
+			    ));
 
 	/* The names of these controls must be the same as those given in MixerStrip
 	   for the actual widgets being controlled.

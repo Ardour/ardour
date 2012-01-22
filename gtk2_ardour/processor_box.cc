@@ -1025,7 +1025,11 @@ ProcessorBox::processor_button_press_event (GdkEventButton *ev, ProcessorEntry* 
 
 		if (_session->engine().connected()) {
 			/* XXX giving an error message here is hard, because we may be in the midst of a button press */
-			toggle_edit_processor (processor);
+			if (Config->get_use_plugin_own_gui ()) {
+				toggle_edit_processor (processor);
+			} else {
+				toggle_edit_generic_processor (processor);
+			}
 		}
 		ret = true;
 
