@@ -574,6 +574,14 @@ ExportFormatSpecification::description ()
 		break;
 	}
 
+	if (_with_toc) {
+		desc += ", TOC";
+	}
+
+	if (_with_cue) {
+		desc += ", CUE";
+	}
+
 	return desc;
 }
 
