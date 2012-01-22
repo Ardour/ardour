@@ -115,7 +115,7 @@ Session::no_roll (pframes_t nframes)
 		_click_io->silence (nframes);
 	}
 
-	if (1 || _process_graph->threads_in_use() > 0) {
+	if (_process_graph) {
 		DEBUG_TRACE(DEBUG::ProcessThreads,"calling graph/no-roll\n");
 		_process_graph->routes_no_roll( nframes, _transport_frame, end_frame, non_realtime_work_pending(), declick);
 	} else {
@@ -155,11 +155,7 @@ Session::process_routes (pframes_t nframes, bool& need_butler)
 	const framepos_t start_frame = _transport_frame;
 	const framepos_t end_frame = _transport_frame + floor (nframes * _transport_speed);
 
-	/* XXX this is hack to force use of the graph even if we are only
-	   using 1 thread. its needed because otherwise when we remove
-	   tracks, the graph never gets updated.
-	*/
-	if (1 || _process_graph->threads_in_use() > 0) {
+	if (_process_graph) {
 		DEBUG_TRACE(DEBUG::ProcessThreads,"calling graph/process-routes\n");
 		_process_graph->process_routes (nframes, start_frame, end_frame, declick, need_butler);
 	} else {
@@ -192,11 +188,7 @@ Session::silent_process_routes (pframes_t nframes, bool& need_butler)
 	const framepos_t start_frame = _transport_frame;
 	const framepos_t end_frame = _transport_frame + lrintf(nframes * _transport_speed);
 
-	/* XXX this is hack to force use of the graph even if we are only
-	   using 1 thread. its needed because otherwise when we remove
-	   tracks, the graph never gets updated.
-	*/
-	if (1 || _process_graph->threads_in_use() > 0) {
+	if (_process_graph) {
 		_process_graph->silent_process_routes (nframes, start_frame, end_frame, need_butler);
 	} else {
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {

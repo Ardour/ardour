@@ -877,6 +877,8 @@ RCOptionEditor::RCOptionEditor ()
                         procs->add (i, string_compose (_("%1 processors"), i));
                 }
 
+		procs->set_note (_("This setting will only take effect when Ardour is restarted."));
+
                 add_option (_("Misc"), procs);
         }
 

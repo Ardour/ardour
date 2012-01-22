@@ -71,6 +71,13 @@ public:
 
 	void add_widget_to_page (OptionEditorPage*, Gtk::Widget*);
 	void add_widgets_to_page (OptionEditorPage*, Gtk::Widget*, Gtk::Widget*);
+
+	void set_note (std::string const &);
+
+private:
+	void maybe_add_note (OptionEditorPage *, int);
+	
+	std::string _note;
 };
 
 /** A component which provides a subheading within the dialog */
