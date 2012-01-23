@@ -479,15 +479,15 @@ ExportHandler::write_track_info_cue (CDMarkerStatus & status)
 
 	}
 	if (status.marker->name() != "") {
-		status.out << "    TITLE " << cd_marker_file_escape_string (status.marker->name()) << endl;
+		status.out << "    TITLE \"" << status.marker->name() << '"' << endl;
 	}
 
 	if (status.marker->cd_info.find("performer") != status.marker->cd_info.end()) {
-		status.out << "    PERFORMER " <<  cd_marker_file_escape_string (status.marker->cd_info["performer"]) << endl;
+		status.out << "    PERFORMER \"" <<  status.marker->cd_info["performer"] << '"' << endl;
 	}
 
 	if (status.marker->cd_info.find("composer") != status.marker->cd_info.end()) {
-		status.out << "    SONGWRITER " << cd_marker_file_escape_string (status.marker->cd_info["composer"])  << endl;
+		status.out << "    SONGWRITER \"" << status.marker->cd_info["composer"]  << '"' << endl;
 	}
 
 	if (status.track_position != status.track_start_frame) {
