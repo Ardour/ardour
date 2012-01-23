@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Session version="3.0.0" name="3-0tracks" sample-rate="48000" id-counter="83" event-counter="0">
+  <Config>
+    <Option name="xfade-model" value="FullCrossfade"/>
+    <Option name="auto-xfade" value="1"/>
+    <Option name="short-xfade-seconds" value="0.015"/>
+    <Option name="xfades-active" value="1"/>
+    <Option name="xfades-visible" value="1"/>
+    <Option name="destructive-xfade-msecs" value="2"/>
+    <Option name="use-region-fades" value="1"/>
+    <Option name="show-region-fades" value="1"/>
+    <Option name="native-file-data-format" value="FormatFloat"/>
+    <Option name="native-file-header-format" value="WAVE"/>
+    <Option name="auto-play" value="0"/>
+    <Option name="auto-return" value="0"/>
+    <Option name="auto-input" value="1"/>
+    <Option name="punch-in" value="0"/>
+    <Option name="punch-out" value="0"/>
+    <Option name="subframes-per-frame" value="100"/>
+    <Option name="timecode-format" value="timecode_30"/>
+    <Option name="raid-path" value=""/>
+    <Option name="audio-search-path" value=""/>
+    <Option name="midi-search-path" value=""/>
+    <Option name="bwf-country-code" value="US"/>
+    <Option name="bwf-organization-code" value="US"/>
+    <Option name="auditioner-output-left" value="default"/>
+    <Option name="auditioner-output-right" value="default"/>
+    <Option name="timecode-source-is-synced" value="1"/>
+    <Option name="jack-time-master" value="1"/>
+    <Option name="use-video-sync" value="0"/>
+    <Option name="video-pullup" value="0"/>
+    <Option name="show-summary" value="1"/>
+    <Option name="show-group-tabs" value="1"/>
+    <Option name="external-sync" value="0"/>
+    <Option name="sync-source" value="JACK"/>
+    <Option name="insert-merge-policy" value="InsertMergeRelax"/>
+    <Option name="timecode-offset" value="0"/>
+    <Option name="timecode-offset-negative" value="1"/>
+    <Option name="glue-new-markers-to-bars-and-beats" value="0"/>
+    <Option name="midi-copy-is-fork" value="0"/>
+    <Option name="glue-new-regions-to-bars-and-beats" value="0"/>
+  </Config>
+  <Metadata/>
+  <Sources/>
+  <Regions/>
+  <Locations>
+    <Location id="81" name="Loop" start="0" end="1" flags="IsAutoLoop,IsHidden" locked="no" position-lock-style="AudioTime"/>
+    <Location id="82" name="Punch" start="0" end="1" flags="IsAutoPunch,IsHidden" locked="no" position-lock-style="AudioTime"/>
+  </Locations>
+  <Bundles/>
+  <Routes>
+    <Route id="22" name="master" default-type="audio" flags="MasterOut" active="yes" phase-invert="00" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=0:signal=0" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no">
+      <IO name="master" id="39" direction="Input" default-type="audio" user-latency="0">
+        <Port type="audio" name="master/audio_in 1"/>
+        <Port type="audio" name="master/audio_in 2"/>
+      </IO>
+      <IO name="master" id="40" direction="Output" default-type="audio" user-latency="0">
+        <Port type="audio" name="master/audio_out 1">
+          <Connection other="system:playback_1"/>
+        </Port>
+        <Port type="audio" name="master/audio_out 2">
+          <Connection other="system:playback_2"/>
+        </Port>
+      </IO>
+      <Controllable name="solo" id="24" flags="Toggle" value="0.000000000000"/>
+      <Controllable name="mute" id="26" flags="Toggle" value="0.000000000000"/>
+      <MuteMaster mute-point="PreFader,PostFader,Listen,Main" muted="no"/>
+      <RemoteControl id="1"/>
+      <Pannable>
+        <Controllable name="pan-azimuth" id="30" flags="" value="0.500000000000"/>
+        <Controllable name="pan-width" id="34" flags="" value="1.000000000000"/>
+        <Controllable name="pan-elevation" id="32" flags="" value="0.000000000000"/>
+        <Controllable name="pan-frontback" id="36" flags="" value="0.000000000000"/>
+        <Controllable name="pan-lfe" id="38" flags="" value="0.000000000000"/>
+        <Automation/>
+      </Pannable>
+      <Processor id="41" name="Amp" active="yes" user-latency="0" type="amp">
+        <Controllable name="gaincontrol" id="43" flags="GainLike" value="1.000000000000"/>
+      </Processor>
+      <Processor id="44" name="Meter" active="yes" user-latency="0" type="meter"/>
+      <Processor id="45" name="master" active="yes" user-latency="0" own-input="yes" own-output="no" output="master" type="main-outs" role="Main">
+        <PannerShell bypassed="no">
+          <Panner type="Equal Power Stereo"/>
+        </PannerShell>
+      </Processor>
+    </Route>
+  </Routes>
+  <Playlists/>
+  <UnusedPlaylists/>
+  <RouteGroups/>
+  <Click>
+    <IO name="click" id="47" direction="Output" default-type="audio" user-latency="0">
+      <Port type="audio" name="click/audio_out 1">
+        <Connection other="system:playback_1"/>
+      </Port>
+      <Port type="audio" name="click/audio_out 2">
+        <Connection other="system:playback_2"/>
+      </Port>
+    </IO>
+  </Click>
+  <NamedSelections/>
+  <Speakers>
+    <Speaker azimuth="0" elevation="0" distance="1"/>
+    <Speaker azimuth="180" elevation="0" distance="0"/>
+  </Speakers>
+  <TempoMap>
+    <Tempo start="1|1|0" beats-per-minute="120.000000" note-type="4.000000" movable="no"/>
+    <Meter start="1|1|0" note-type="4.000000" divisions-per-bar="4.000000" movable="no"/>
+  </TempoMap>
+  <ControlProtocols>
+    <Protocol name="Open Sound Control (OSC)" active="no"/>
+    <Protocol name="Generic MIDI" active="no"/>
+    <Protocol name="Mackie" active="no"/>
+  </ControlProtocols>
+  <Extra>
+    <UI>
+      <Window name="R-22-41" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="R-22-44" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="R-22-45" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-22-41" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-22-44" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-22-45" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <GUIObjectState>
+        <Object id="automation 30" height="58" visible="0"/>
+        <Object id="automation 34" height="58" visible="0"/>
+        <Object id="automation 43" height="58" visible="0"/>
+        <Object id="route 22" color="3506:22021:40784"/>
+        <Object id="rtav 22" height="58" visible="1"/>
+        <Object id="strip 22" visible="1"/>
+      </GUIObjectState>
+    </UI>
+  </Extra>
+</Session>
