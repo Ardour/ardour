@@ -511,18 +511,14 @@ Route::process_output_buffers (BufferSet& bufs,
 
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 
-		if (boost::dynamic_pointer_cast<UnknownProcessor> (*i)) {
-			break;
-		}
-
-		if (boost::dynamic_pointer_cast<PeakMeter> (*i) && meter_already_run) {
+		if (meter_already_run && boost::dynamic_pointer_cast<PeakMeter> (*i)) {
 			/* don't ::run() the meter, otherwise it will have its previous peak corrupted */
 			continue;
 		}
 		
 #ifndef NDEBUG
 		/* if it has any inputs, make sure they match */
-		if ((*i)->input_streams() != ChanCount::ZERO) {
+		if (boost::dynamic_pointer_cast<UnknownProcessor> (*i) == 0 && (*i)->input_streams() != ChanCount::ZERO) {
 			if (bufs.count() != (*i)->input_streams()) {
 				cerr << _name << " bufs = " << bufs.count()
 				     << " input for " << (*i)->name() << " = " << (*i)->input_streams()
