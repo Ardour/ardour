@@ -597,6 +597,8 @@ ExportHandler::toc_escape_string (const std::string& txt)
 
 		if ((*c) == '"') {
 			out += "\\\"";
+		} else if ((*c) == '\\') {
+			out += "\\034";
 		} else if (g_unichar_isprint (*c)) {
 			out += *c;
 		} else {
