@@ -440,7 +440,7 @@ ExportHandler::write_toc_header (CDMarkerStatus & status)
 
 	status.out << "CD_DA" << endl;
 	status.out << "CD_TEXT {" << endl << "  LANGUAGE_MAP {" << endl << "    0 : EN" << endl << "  }" << endl;
-	status.out << "  LANGUAGE 0 {" << endl << "    TITLE \"" << title << "\"" << endl ;
+	status.out << "  LANGUAGE 0 {" << endl << "    TITLE " << toc_escape_string (title) << endl ;
 	status.out << "    PERFORMER \"\"" << endl << "  }" << endl << "}" << endl;
 }
 
@@ -514,16 +514,17 @@ ExportHandler::write_track_info_toc (CDMarkerStatus & status)
 		status.out << "ISRC \"" << status.marker->cd_info["isrc"] << "\"" << endl;
 	}
 
-	status.out << "CD_TEXT {" << endl << "  LANGUAGE 0 {" << endl << "     TITLE \"" << status.marker->name() << "\"" << endl;
+	status.out << "CD_TEXT {" << endl << "  LANGUAGE 0 {" << endl << "     TITLE "
+		   << toc_escape_string (status.marker->name()) << endl;
 	
-	status.out << "     PERFORMER \"";
 	if (status.marker->cd_info.find("performer") != status.marker->cd_info.end()) {
-		status.out << status.marker->cd_info["performer"];
+		status.out << "     PERFORMER " << toc_escape_string (status.marker->cd_info["performer"]);
+	} else {
+		status.out << "     PERFORMER \"\"";
 	}
-	status.out << "\"" << endl;
 	
 	if (status.marker->cd_info.find("composer") != status.marker->cd_info.end()) {
-		status.out  << "     COMPOSER \"" << status.marker->cd_info["composer"] << "\"" << endl;
+		status.out  << "     COMPOSER " << toc_escape_string (status.marker->cd_info["composer"]) << endl;
 	}
 
 	if (status.marker->cd_info.find("isrc") != status.marker->cd_info.end()) {
@@ -537,7 +538,7 @@ ExportHandler::write_track_info_toc (CDMarkerStatus & status)
 	status.out << "  }" << endl << "}" << endl;
 
 	frames_to_cd_frames_string (buf, status.track_position);
-	status.out << "FILE \"" << status.filename << "\" " << buf;
+	status.out << "FILE " << toc_escape_string (status.filename) << ' ' << buf;
 
 	frames_to_cd_frames_string (buf, status.track_duration);
 	status.out << buf << endl;
@@ -581,6 +582,33 @@ ExportHandler::frames_to_cd_frames_string (char* buf, framepos_t when)
 	remainder -= secs * fr;
 	frames = remainder / (fr / 75);
 	sprintf (buf, " %02d:%02d:%02d", mins, secs, frames);
+}
+
+std::string
+ExportHandler::toc_escape_string (const std::string& txt)
+{
+	Glib::ustring utxt (txt);
+	Glib::ustring out;
+	char buf[5];
+
+	out = '"';
+
+	for (Glib::ustring::iterator c = utxt.begin(); c != utxt.end(); ++c) {
+
+		if ((*c) == '"') {
+			out += "\\\"";
+		} else if (g_unichar_isprint (*c)) {
+			out += *c;
+		} else {
+			/* this isn't really correct */
+			snprintf (buf, sizeof (buf), "\\%03o", *c);
+			out += buf;
+		}
+	}
+	
+	out += '"';
+
+	return std::string (out);
 }
 
 } // namespace ARDOUR
