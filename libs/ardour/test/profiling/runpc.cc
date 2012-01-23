@@ -49,10 +49,15 @@ protected:
 TestReceiver test_receiver;
 
 int
-main ()
+main (int argc, char* argv[])
 {
-	string const test_session_path = "../libs/ardour/test/profiling/sessions/0tracks";
-	string const test_session_snapshot = "0tracks.ardour";
+	if (argc < 2) {
+		cerr << argv[0] << ": <session>\n";
+		exit (EXIT_FAILURE);
+	}
+	
+	string const test_session_path = string_compose ("../libs/ardour/test/profiling/sessions/%1", argv[1]);
+	string const test_session_snapshot = string_compose ("%1.ardour", argv[1]);
 	
 	init (false, true);
 	SessionEvent::create_per_thread_pool ("test", 512);
@@ -68,6 +73,8 @@ main ()
 
 	Session* session = new Session (*engine, test_session_path, test_session_snapshot);
 	engine->set_session (session);
+
+	cout << "INFO: " << session->get_routes()->size() << " routes.\n";
 
 	for (int i = 0; i < 32768; ++i) {
 		session->process (64);

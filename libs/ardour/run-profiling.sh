@@ -18,13 +18,14 @@ export LD_LIBRARY_PATH=$libs/audiographer:$libs/vamp-sdk:$libs/surfaces:$libs/su
 export ARDOUR_PANNER_PATH=$libs/panners/2in2out:$libs/panners/1in2out:$libs/panners/vbap
 
 export LD_PRELOAD=/home/carl/src/libfakejack/libjack.so
+session='32tracks'
 
 if [ "$1" == "--debug" ]; then
-        gdb ./libs/ardour/run-profiling
+        gdb --args ./libs/ardour/run-profiling $session
 elif [ "$1" == "--valgrind" ]; then
-        valgrind ./libs/ardour/run-profiling
+        valgrind ./libs/ardour/run-profiling $session
 elif [ "$1" == "--callgrind" ]; then
-        valgrind --tool=callgrind ./libs/ardour/run-profiling
+        valgrind --tool=callgrind ./libs/ardour/run-profiling $session
 else
-        ./libs/ardour/run-profiling $*
+        ./libs/ardour/run-profiling $session
 fi
