@@ -1012,13 +1012,14 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 	bufs_count.set(DataType::MIDI, 1);
 	BufferSet& silent_bufs  = _session.get_silent_buffers(bufs_count);
 	BufferSet& scratch_bufs = _session.get_silent_buffers(bufs_count);
+	uint32_t const num_ports = parameter_count();
 
 	uint32_t audio_in_index  = 0;
 	uint32_t audio_out_index = 0;
 	uint32_t midi_in_index   = 0;
 	uint32_t midi_out_index  = 0;
 	bool valid;
-	for (uint32_t port_index = 0; port_index < parameter_count(); ++port_index) {
+	for (uint32_t port_index = 0; port_index < num_ports; ++port_index) {
 		if (parameter_is_audio(port_index)) {
 			if (parameter_is_input(port_index)) {
 				const uint32_t buf_index = in_map.get(DataType::AUDIO, audio_in_index++, &valid);
@@ -1065,7 +1066,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 	run(nframes);
 
 	midi_out_index = 0;
-	for (uint32_t port_index = 0; port_index < parameter_count(); ++port_index) {
+	for (uint32_t port_index = 0; port_index < num_ports; ++port_index) {
 		if (parameter_is_midi(port_index) && parameter_is_output(port_index)) {
 			const uint32_t buf_index = out_map.get(DataType::MIDI, midi_out_index++, &valid);
 			if (valid) {
@@ -1157,7 +1158,8 @@ LV2Plugin::get_scale_points(uint32_t port_index) const
 void
 LV2Plugin::run(pframes_t nframes)
 {
-	for (uint32_t i = 0; i < parameter_count(); ++i) {
+	uint32_t const N = parameter_count();
+	for (uint32_t i = 0; i < N; ++i) {
 		if (parameter_is_control(i) && parameter_is_input(i)) {
 			_control_data[i] = _shadow_data[i];
 		}
