@@ -75,6 +75,16 @@ template_filter (const string &str, void */*arg*/)
 	return true;
 }
 
+static bool
+route_template_filter (const string &str, void */*arg*/)
+{
+	if (str.find (template_suffix) == str.length() - strlen (template_suffix)) {
+		return true;
+	}
+	
+	return false;
+}
+
 string
 session_template_dir_to_file (string const & dir)
 {
@@ -130,7 +140,7 @@ find_route_templates (vector<TemplateInfo>& template_names)
 	SearchPath spath (system_route_template_directory());
 	spath += user_route_template_directory ();
 
-	templates = scanner (spath.to_string(), template_filter, 0, false, true);
+	templates = scanner (spath.to_string(), route_template_filter, 0, false, true);
 
 	if (!templates) {
 		return;
