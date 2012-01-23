@@ -21,6 +21,7 @@
 #include "ardour/export_handler.h"
 
 #include <glibmm.h>
+#include <glibmm/convert.h>
 
 #include "pbd/convert.h"
 #include "pbd/filesystem.h"
@@ -268,107 +269,116 @@ ExportHandler::export_cd_marker_file (ExportTimespanPtr timespan, ExportFormatSp
 {
 	string filepath = get_cd_marker_filename(filename, format);
 
-	void (ExportHandler::*header_func) (CDMarkerStatus &);
-	void (ExportHandler::*track_func) (CDMarkerStatus &);
-	void (ExportHandler::*index_func) (CDMarkerStatus &);
+	try {
+		void (ExportHandler::*header_func) (CDMarkerStatus &);
+		void (ExportHandler::*track_func) (CDMarkerStatus &);
+		void (ExportHandler::*index_func) (CDMarkerStatus &);
 
-	switch (format) {
-	  case CDMarkerTOC:
-		header_func = &ExportHandler::write_toc_header;
-		track_func = &ExportHandler::write_track_info_toc;
-		index_func = &ExportHandler::write_index_info_toc;
-		break;
-	  case CDMarkerCUE:
-		header_func = &ExportHandler::write_cue_header;
-		track_func = &ExportHandler::write_track_info_cue;
-		index_func = &ExportHandler::write_index_info_cue;
-		break;
-	  default:
-		return;
-	}
-
-	CDMarkerStatus status (filepath, timespan, file_format, filename);
-
-	if (!status.out) {
-		error << string_compose(_("Editor: cannot open \"%1\" as export file for CD marker file"), filepath) << endmsg;
-		return;
-	}
-
-	(this->*header_func) (status);
-
-	/* Get locations and sort */
-
-	Locations::LocationList const & locations (session.locations()->list());
-	Locations::LocationList::const_iterator i;
-	Locations::LocationList temp;
-
-	for (i = locations.begin(); i != locations.end(); ++i) {
-		if ((*i)->start() >= timespan->get_start() && (*i)->end() <= timespan->get_end() && (*i)->is_cd_marker() && !(*i)->is_session_range()) {
-			temp.push_back (*i);
+		switch (format) {
+		case CDMarkerTOC:
+			header_func = &ExportHandler::write_toc_header;
+			track_func = &ExportHandler::write_track_info_toc;
+			index_func = &ExportHandler::write_index_info_toc;
+			break;
+		case CDMarkerCUE:
+			header_func = &ExportHandler::write_cue_header;
+			track_func = &ExportHandler::write_track_info_cue;
+			index_func = &ExportHandler::write_index_info_cue;
+			break;
+		default:
+			return;
 		}
-	}
 
-	if (temp.empty()) {
-		// TODO One index marker for whole thing
-		return;
-	}
+		CDMarkerStatus status (filepath, timespan, file_format, filename);
 
-	LocationSortByStart cmp;
-	temp.sort (cmp);
-	Locations::LocationList::const_iterator nexti;
+		if (!status.out) {
+			error << string_compose(_("Editor: cannot open \"%1\" as export file for CD marker file"), filepath) << endmsg;
+			return;
+		}
 
-	/* Start actual marker stuff */
+		(this->*header_func) (status);
 
-	framepos_t last_end_time = timespan->get_start(), last_start_time = timespan->get_start();
-	status.track_position = last_start_time - timespan->get_start();
+		/* Get locations and sort */
 
-	for (i = temp.begin(); i != temp.end(); ++i) {
+		Locations::LocationList const & locations (session.locations()->list());
+		Locations::LocationList::const_iterator i;
+		Locations::LocationList temp;
 
-		status.marker = *i;
+		for (i = locations.begin(); i != locations.end(); ++i) {
+			if ((*i)->start() >= timespan->get_start() && (*i)->end() <= timespan->get_end() && (*i)->is_cd_marker() && !(*i)->is_session_range()) {
+				temp.push_back (*i);
+			}
+		}
 
-		if ((*i)->start() < last_end_time) {
+		if (temp.empty()) {
+			// TODO One index marker for whole thing
+			return;
+		}
+
+		LocationSortByStart cmp;
+		temp.sort (cmp);
+		Locations::LocationList::const_iterator nexti;
+
+		/* Start actual marker stuff */
+
+		framepos_t last_end_time = timespan->get_start(), last_start_time = timespan->get_start();
+		status.track_position = last_start_time - timespan->get_start();
+
+		for (i = temp.begin(); i != temp.end(); ++i) {
+
+			status.marker = *i;
+
+			if ((*i)->start() < last_end_time) {
+				if ((*i)->is_mark()) {
+					/* Index within track */
+
+					status.index_position = (*i)->start() - timespan->get_start();
+					(this->*index_func) (status);
+				}
+
+				continue;
+			}
+
+			/* A track, defined by a cd range marker or a cd location marker outside of a cd range */
+
+			status.track_position = last_end_time - timespan->get_start();
+			status.track_start_frame = (*i)->start() - timespan->get_start();  // everything before this is the pregap
+			status.track_duration = 0;
+
 			if ((*i)->is_mark()) {
-				/* Index within track */
+				// a mark track location needs to look ahead to the next marker's start to determine length
+				nexti = i;
+				++nexti;
 
-				status.index_position = (*i)->start() - timespan->get_start();
-				(this->*index_func) (status);
-			}
+				if (nexti != temp.end()) {
+					status.track_duration = (*nexti)->start() - last_end_time;
 
-			continue;
-		}
+					last_start_time = (*i)->start();
+					last_end_time = (*nexti)->start();
+				} else {
+					// this was the last marker, use timespan end
+					status.track_duration = timespan->get_end() - last_end_time;
 
-		/* A track, defined by a cd range marker or a cd location marker outside of a cd range */
-
-		status.track_position = last_end_time - timespan->get_start();
-		status.track_start_frame = (*i)->start() - timespan->get_start();  // everything before this is the pregap
-		status.track_duration = 0;
-
-		if ((*i)->is_mark()) {
-			// a mark track location needs to look ahead to the next marker's start to determine length
-			nexti = i;
-			++nexti;
-
-			if (nexti != temp.end()) {
-				status.track_duration = (*nexti)->start() - last_end_time;
-
-				last_start_time = (*i)->start();
-				last_end_time = (*nexti)->start();
+					last_start_time = (*i)->start();
+					last_end_time = timespan->get_end();
+				}
 			} else {
-				// this was the last marker, use timespan end
-				status.track_duration = timespan->get_end() - last_end_time;
+				// range
+				status.track_duration = (*i)->end() - last_end_time;
 
 				last_start_time = (*i)->start();
-				last_end_time = timespan->get_end();
+				last_end_time = (*i)->end();
 			}
-		} else {
-			// range
-			status.track_duration = (*i)->end() - last_end_time;
 
-			last_start_time = (*i)->start();
-			last_end_time = (*i)->end();
+			(this->*track_func) (status);
 		}
 
-		(this->*track_func) (status);
+	} catch (std::exception& e) {
+		error << string_compose (_("an error occured while writing a TOC/CUE file: %1"), e.what()) << endmsg;
+		::unlink (filepath.c_str());
+	} catch (Glib::Exception& e) {
+		error << string_compose (_("an error occured while writing a TOC/CUE file: %1"), e.what()) << endmsg;
+		::unlink (filepath.c_str());
 	}
 }
 
@@ -440,7 +450,7 @@ ExportHandler::write_toc_header (CDMarkerStatus & status)
 
 	status.out << "CD_DA" << endl;
 	status.out << "CD_TEXT {" << endl << "  LANGUAGE_MAP {" << endl << "    0 : EN" << endl << "  }" << endl;
-	status.out << "  LANGUAGE 0 {" << endl << "    TITLE " << toc_escape_string (title) << endl ;
+	status.out << "  LANGUAGE 0 {" << endl << "    TITLE " << cd_marker_file_escape_string (title) << endl ;
 	status.out << "    PERFORMER \"\"" << endl << "  }" << endl << "}" << endl;
 }
 
@@ -469,15 +479,15 @@ ExportHandler::write_track_info_cue (CDMarkerStatus & status)
 
 	}
 	if (status.marker->name() != "") {
-		status.out << "    TITLE \"" << status.marker->name() << "\"" << endl;
+		status.out << "    TITLE " << cd_marker_file_escape_string (status.marker->name()) << endl;
 	}
 
 	if (status.marker->cd_info.find("performer") != status.marker->cd_info.end()) {
-		status.out << "    PERFORMER \"" <<  status.marker->cd_info["performer"] << "\"" << endl;
+		status.out << "    PERFORMER " <<  cd_marker_file_escape_string (status.marker->cd_info["performer"]) << endl;
 	}
 
 	if (status.marker->cd_info.find("composer") != status.marker->cd_info.end()) {
-		status.out << "    SONGWRITER \"" << status.marker->cd_info["composer"]  << "\"" << endl;
+		status.out << "    SONGWRITER " << cd_marker_file_escape_string (status.marker->cd_info["composer"])  << endl;
 	}
 
 	if (status.track_position != status.track_start_frame) {
@@ -515,16 +525,16 @@ ExportHandler::write_track_info_toc (CDMarkerStatus & status)
 	}
 
 	status.out << "CD_TEXT {" << endl << "  LANGUAGE 0 {" << endl << "     TITLE "
-		   << toc_escape_string (status.marker->name()) << endl;
+		   << cd_marker_file_escape_string (status.marker->name()) << endl;
 	
 	if (status.marker->cd_info.find("performer") != status.marker->cd_info.end()) {
-		status.out << "     PERFORMER " << toc_escape_string (status.marker->cd_info["performer"]);
+		status.out << "     PERFORMER " << cd_marker_file_escape_string (status.marker->cd_info["performer"]);
 	} else {
 		status.out << "     PERFORMER \"\"";
 	}
 	
 	if (status.marker->cd_info.find("composer") != status.marker->cd_info.end()) {
-		status.out  << "     COMPOSER " << toc_escape_string (status.marker->cd_info["composer"]) << endl;
+		status.out  << "     COMPOSER " << cd_marker_file_escape_string (status.marker->cd_info["composer"]) << endl;
 	}
 
 	if (status.marker->cd_info.find("isrc") != status.marker->cd_info.end()) {
@@ -538,7 +548,7 @@ ExportHandler::write_track_info_toc (CDMarkerStatus & status)
 	status.out << "  }" << endl << "}" << endl;
 
 	frames_to_cd_frames_string (buf, status.track_position);
-	status.out << "FILE " << toc_escape_string (status.filename) << ' ' << buf;
+	status.out << "FILE " << cd_marker_file_escape_string (status.filename) << ' ' << buf;
 
 	frames_to_cd_frames_string (buf, status.track_duration);
 	status.out << buf << endl;
@@ -585,24 +595,27 @@ ExportHandler::frames_to_cd_frames_string (char* buf, framepos_t when)
 }
 
 std::string
-ExportHandler::toc_escape_string (const std::string& txt)
+ExportHandler::cd_marker_file_escape_string (const std::string& txt)
 {
-	Glib::ustring utxt (txt);
-	Glib::ustring out;
+	Glib::ustring check (txt);
+	std::string out;
 	char buf[5];
+
+	if (!check.is_ascii()) {
+		throw Glib::ConvertError (Glib::ConvertError::NO_CONVERSION, string_compose (_("Cannot convert %1 to Latin-1 text"), txt));
+	}
 
 	out = '"';
 
-	for (Glib::ustring::iterator c = utxt.begin(); c != utxt.end(); ++c) {
+	for (std::string::const_iterator c = txt.begin(); c != txt.end(); ++c) {
 
 		if ((*c) == '"') {
 			out += "\\\"";
 		} else if ((*c) == '\\') {
-			out += "\\034";
-		} else if (g_unichar_isprint (*c)) {
+			out += "\\134";
+		} else if (isprint (*c)) {
 			out += *c;
 		} else {
-			/* this isn't really correct */
 			snprintf (buf, sizeof (buf), "\\%03o", *c);
 			out += buf;
 		}
@@ -610,7 +623,7 @@ ExportHandler::toc_escape_string (const std::string& txt)
 	
 	out += '"';
 
-	return std::string (out);
+	return out;
 }
 
 } // namespace ARDOUR
