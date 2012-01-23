@@ -131,6 +131,10 @@ class LV2Plugin : public ARDOUR::Plugin
 	bool              _was_activated;
 	bool              _has_state_interface;
 	std::vector<bool> _port_is_input;
+	std::vector<bool> _port_is_output;
+	std::vector<bool> _port_is_midi;
+	std::vector<bool> _port_is_audio;
+	std::vector<bool> _port_is_control;
 
 	std::map<std::string,uint32_t> _port_indices;
 

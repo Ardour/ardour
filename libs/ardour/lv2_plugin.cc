@@ -218,6 +218,16 @@ LV2Plugin::init(void* c_plugin, framecnt_t rate)
 	_sample_rate = rate;
 
 	const uint32_t num_ports    = this->num_ports();
+
+	for (uint32_t i = 0; i < num_ports; ++i) {
+		const LilvPort* port = lilv_plugin_get_port_by_index(_impl->plugin, i);
+		_port_is_control.push_back(lilv_port_is_a(_impl->plugin, port, _world.control_class));
+		_port_is_audio.push_back(lilv_port_is_a(_impl->plugin, port, _world.audio_class));
+		_port_is_midi.push_back(lilv_port_is_a(_impl->plugin, port, _world.event_class));
+		_port_is_output.push_back(lilv_port_is_a(_impl->plugin, port, _world.output_class));
+		_port_is_input.push_back(lilv_port_is_a(_impl->plugin, port, _world.input_class));
+	}
+	
 	const bool     latent       = lilv_plugin_has_latency(plugin);
 	const uint32_t latency_port = (latent)
 	    ? lilv_plugin_get_latency_port_index(plugin)
@@ -1073,37 +1083,36 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 bool
 LV2Plugin::parameter_is_control(uint32_t param) const
 {
-	const LilvPort* port = lilv_plugin_get_port_by_index(_impl->plugin, param);
-	return lilv_port_is_a(_impl->plugin, port, _world.control_class);
+	assert(param < _port_is_control.size());
+	return _port_is_control[param];
 }
 
 bool
 LV2Plugin::parameter_is_audio(uint32_t param) const
 {
-	const LilvPort* port = lilv_plugin_get_port_by_index(_impl->plugin, param);
-	return lilv_port_is_a(_impl->plugin, port, _world.audio_class);
+	assert(param < _port_is_audio.size());
+	return _port_is_audio[param];
 }
 
 bool
 LV2Plugin::parameter_is_midi(uint32_t param) const
 {
-	const LilvPort* port = lilv_plugin_get_port_by_index(_impl->plugin, param);
-	return lilv_port_is_a(_impl->plugin, port, _world.event_class);
-	//	&& lilv_port_supports_event(_impl->plugin, port, _world.midi_class);
+	assert(param < _port_is_midi.size());
+	return _port_is_midi[param];
 }
 
 bool
 LV2Plugin::parameter_is_output(uint32_t param) const
 {
-	const LilvPort* port = lilv_plugin_get_port_by_index(_impl->plugin, param);
-	return lilv_port_is_a(_impl->plugin, port, _world.output_class);
+	assert(param < _port_is_output.size());
+	return _port_is_output[param];
 }
 
 bool
 LV2Plugin::parameter_is_input(uint32_t param) const
 {
-	const LilvPort* port = lilv_plugin_get_port_by_index(_impl->plugin, param);
-	return lilv_port_is_a(_impl->plugin, port, _world.input_class);
+	assert(param < _port_is_input.size());
+	return _port_is_input[param];
 }
 
 void
