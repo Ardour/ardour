@@ -43,7 +43,7 @@ class Threader : public Source<T>, public Sink<T>
 	  * \param thread_pool a thread pool from which all tasks are scheduled
 	  * \param wait_timeout_milliseconds maximum time allowed for threads to use in processing
 	  */
-	Threader (Glib::ThreadPool & thread_pool, long wait_timeout_milliseconds = 1000)
+	Threader (Glib::ThreadPool & thread_pool, long wait_timeout_milliseconds = 500)
 	  : thread_pool (thread_pool)
 	  , readers (0)
 	  , wait_timeout (wait_timeout_milliseconds)
@@ -85,14 +85,15 @@ class Threader : public Source<T>, public Sink<T>
 
 	void wait()
 	{
-		Glib::TimeVal wait_time;
-		wait_time.assign_current_time();
-		wait_time.add_milliseconds(wait_timeout);
+		while (g_atomic_int_get (&readers) != 0) {
+			Glib::TimeVal wait_time;
+			wait_time.assign_current_time();
+			wait_time.add_milliseconds(wait_timeout);
 		
-		wait_cond.timed_wait(wait_mutex, wait_time);
-		bool timed_out = (g_atomic_int_get (&readers) != 0);
+			wait_cond.timed_wait(wait_mutex, wait_time);
+		}
+
 		wait_mutex.unlock();
-		if (timed_out) { throw Exception (*this, "wait timed out"); }
 		
 		if (exception) {
 			throw *exception;
