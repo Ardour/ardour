@@ -34,6 +34,10 @@ class MidiPort;
  * This allows access to all the ports as a list, ignoring type, or accessing
  * the nth port of a given type.  Note that port(n) and nth_audio_port(n) may
  * NOT return the same port.
+ *
+ * Each port is held twice; once in a per-type vector of vectors (_ports)
+ * and once in a vector of all port (_all_ports).  This is to speed up the
+ * fairly common case of iterating over all ports.
  */
 class PortSet : public boost::noncopyable {
 public:
@@ -60,7 +64,7 @@ public:
 	/** Remove all ports from the PortSet.  Ports are not deregistered with
 	 * the engine, it's the caller's responsibility to not leak here!
 	 */
-	void clear() { _ports.clear(); }
+	void clear();
 
 	const ChanCount& count() const { return _count; }
 
@@ -132,6 +136,8 @@ private:
 
 	// Vector of vectors, indexed by DataType::to_index()
 	std::vector<PortVec> _ports;
+	// All ports in _ports in one vector, to speed some operations
+	PortVec _all_ports;
 
 	ChanCount _count;
 };

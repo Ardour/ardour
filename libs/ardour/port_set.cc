@@ -71,14 +71,27 @@ static bool sort_ports_by_name (boost::shared_ptr<Port> a, boost::shared_ptr<Por
 	}
 }
 
+
+static bool sort_ports_by_type_and_name (boost::shared_ptr<Port> a, boost::shared_ptr<Port> b)
+{
+	if (a->type() != b->type()) {
+		return a->type() < b->type();
+	}
+
+	return sort_ports_by_name (a, b);
+}
+
 void
 PortSet::add (boost::shared_ptr<Port> port)
 {
 	PortVec& v = _ports[port->type()];
 
 	v.push_back(port);
+	_all_ports.push_back(port);
 
 	sort(v.begin(), v.end(), sort_ports_by_name);
+	sort(_all_ports.begin(), _all_ports.end(), sort_ports_by_type_and_name);
+	
 	_count.set(port->type(), _count.get(port->type()) + 1);
 	assert(_count.get(port->type()) == _ports[port->type()].size());
 }
@@ -86,6 +99,11 @@ PortSet::add (boost::shared_ptr<Port> port)
 bool
 PortSet::remove (boost::shared_ptr<Port> port)
 {
+	PortVec::iterator i = find(_all_ports.begin(), _all_ports.end(), port);
+	if (i != _all_ports.end()) {
+		_all_ports.erase(i);
+	}
+	
 	for (std::vector<PortVec>::iterator l = _ports.begin(); l != _ports.end(); ++l) {
 		PortVec::iterator i = find(l->begin(), l->end(), port);
 		if (i != l->end()) {
@@ -103,40 +121,20 @@ PortSet::remove (boost::shared_ptr<Port> port)
 size_t
 PortSet::num_ports() const
 {
-	size_t ret = 0;
-
-	for (std::vector<PortVec>::const_iterator l = _ports.begin(); l != _ports.end(); ++l)
-		ret += (*l).size();
-
-	return ret;
+	return _all_ports.size();
 }
 
 bool
 PortSet::contains (boost::shared_ptr<const Port> port) const
 {
-	for (std::vector<PortVec>::const_iterator l = _ports.begin(); l != _ports.end(); ++l)
-		if (find (l->begin(), l->end(), port) != l->end())
-			return true;
-
-	return false;
+	return find(_all_ports.begin(), _all_ports.end(), port) != _all_ports.end();
 }
 
 boost::shared_ptr<Port>
 PortSet::port(size_t n) const
 {
-	// This is awesome.  Awesomely slow.
-
-	size_t size_so_far = 0;
-
-	for (std::vector<PortVec>::const_iterator l = _ports.begin(); l != _ports.end(); ++l) {
-		if (n < size_so_far + l->size()) {
-			return (*l)[n - size_so_far];
-		} else {
-			size_so_far += l->size();
-		}
-	}
-
-	return boost::shared_ptr<Port> (); // n out of range
+	assert(n < _all_ports.size());
+	return _all_ports[n];
 }
 
 boost::shared_ptr<Port>
@@ -161,6 +159,13 @@ boost::shared_ptr<MidiPort>
 PortSet::nth_midi_port(size_t n) const
 {
 	return boost::dynamic_pointer_cast<MidiPort> (port (DataType::MIDI, n));
+}
+
+void
+PortSet::clear()
+{
+	_ports.clear();
+	_all_ports.clear();
 }
 
 } // namepace ARDOUR
