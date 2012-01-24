@@ -68,6 +68,16 @@ ExportGraphBuilder::process_normalize ()
 	return normalizers.empty();
 }
 
+unsigned
+ExportGraphBuilder::get_normalize_cycle_count() const
+{
+	unsigned max = 0;
+	for (std::list<Normalizer *>::const_iterator it = normalizers.begin(); it != normalizers.end(); ++it) {
+		max = std::max(max, (*it)->get_normalize_cycle_count());
+	}
+	return max;
+}
+
 void
 ExportGraphBuilder::reset ()
 {
@@ -296,7 +306,8 @@ ExportGraphBuilder::Normalizer::Normalizer (ExportGraphBuilder & parent, FileSpe
 	int format = ExportFormatBase::F_RAW | ExportFormatBase::SF_Float;
 	tmp_file.reset (new TmpFile<float> (format, config.channel_config->get_n_chans(),
 	                                    config.format->sample_rate()));
-	tmp_file->FileWritten.connect_same_thread (post_processing_connection, boost::bind (&Normalizer::start_post_processing, this));
+	tmp_file->FileWritten.connect_same_thread (post_processing_connection,
+	                                           boost::bind (&Normalizer::start_post_processing, this));
 
 	add_child (new_config);
 
@@ -328,6 +339,13 @@ ExportGraphBuilder::Normalizer::operator== (FileSpec const & other_config) const
 {
 	return config.format->normalize() == other_config.format->normalize() &&
 	       config.format->normalize_target() == other_config.format->normalize_target();
+}
+
+unsigned
+ExportGraphBuilder::Normalizer::get_normalize_cycle_count() const
+{
+	return static_cast<unsigned>(std::ceil(static_cast<float>(tmp_file->get_frames_written()) /
+	                                       max_frames_out));
 }
 
 bool

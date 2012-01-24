@@ -64,6 +64,7 @@ class ExportGraphBuilder
 	int process (framecnt_t frames, bool last_cycle);
 	bool process_normalize (); // returns true when finished
 	bool will_normalize() { return !normalizers.empty(); }
+	unsigned get_normalize_cycle_count() const;
 
 	void reset ();
 	void set_current_timespan (boost::shared_ptr<ExportTimespan> span);
@@ -129,6 +130,8 @@ class ExportGraphBuilder
 		FloatSinkPtr sink ();
 		void add_child (FileSpec const & new_config);
 		bool operator== (FileSpec const & other_config) const;
+
+		unsigned get_normalize_cycle_count() const;
 
 		/// Returns true when finished
 		bool process ();

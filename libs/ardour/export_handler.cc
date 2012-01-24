@@ -138,8 +138,10 @@ ExportHandler::do_export (bool rt)
 	export_status->init();
 	std::set<ExportTimespanPtr> timespan_set;
 	for (ConfigMap::iterator it = config_map.begin(); it != config_map.end(); ++it) {
-		timespan_set.insert (it->first);
-		export_status->total_frames += it->first->get_length();
+		bool new_timespan = timespan_set.insert (it->first).second;
+		if (new_timespan) {
+			export_status->total_frames += it->first->get_length();
+		}
 	}
 	export_status->total_timespans = timespan_set.size();
 
@@ -207,18 +209,31 @@ ExportHandler::process_timespan (framecnt_t frames)
 	if (last_cycle) {
 		frames_to_read = end - process_position;
 		export_status->stop = true;
-		normalizing = true;
 	} else {
 		frames_to_read = frames;
 	}
 
 	process_position += frames_to_read;
 	export_status->processed_frames += frames_to_read;
-	export_status->progress = (float) export_status->processed_frames / export_status->total_frames;
+	export_status->progress = (float) export_status->processed_frames /
+	                                  export_status->total_frames;
 
 	/* Do actual processing */
+	int ret = graph_builder->process (frames_to_read, last_cycle);
 
-	return graph_builder->process (frames_to_read, last_cycle);
+	/* Start normalizing if necessary */
+	if (last_cycle) {
+		normalizing = graph_builder->will_normalize();
+		if (normalizing) {
+			export_status->total_normalize_cycles = graph_builder->get_normalize_cycle_count();
+			export_status->current_normalize_cycle = 0;
+		} else {
+			finish_timespan ();
+			return 0;
+		}
+	}
+
+	return ret;
 }
 
 int
@@ -230,6 +245,10 @@ ExportHandler::process_normalize ()
 	} else {
 		export_status->normalizing = true;
 	}
+
+	export_status->progress = (float) export_status->current_normalize_cycle /
+	                                  export_status->total_normalize_cycles;
+	export_status->current_normalize_cycle++;
 
 	return 0;
 }

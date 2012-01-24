@@ -31,7 +31,7 @@ class SndfileWriter
 	  : SndfileHandle (path, Write, format, channels, samplerate)
 	  , path (path)
 	{
-		add_supported_flag (ProcessContext<T>::EndOfInput);
+		init();
 
 		if (broadcast_info) {
 			broadcast_info->write_to_file (this);
@@ -40,8 +40,16 @@ class SndfileWriter
 	
 	virtual ~SndfileWriter () {}
 	
-	SndfileWriter (SndfileWriter const & other) : SndfileHandle (other) {}
+	SndfileWriter (SndfileWriter const & other)
+		: SndfileHandle (other)
+	{
+		init();
+	}
+
 	using SndfileHandle::operator=;
+
+	framecnt_t get_frames_written() const { return frames_written; }
+	void       reset_frames_written_count() { frames_written = 0; }
 	
 	/// Writes data to file
 	void process (ProcessContext<T> const & c)
@@ -55,6 +63,8 @@ class SndfileWriter
 		}
 		
 		framecnt_t const written = write (c.data(), c.frames());
+		frames_written += written;
+
 		if (throw_level (ThrowProcess) && written != c.frames()) {
 			throw Exception (*this, boost::str (boost::format
 				("Could not write data to output file (%1%)")
@@ -75,11 +85,18 @@ class SndfileWriter
 	/// SndfileHandle has to be constructed directly by deriving classes
 	SndfileWriter ()
 	{
+		init();
+	}
+
+	void init()
+	{
+		frames_written = 0;
 		add_supported_flag (ProcessContext<T>::EndOfInput);
 	}
-	
+
   protected:
 	std::string path;
+	framecnt_t frames_written;
 };
 
 } // namespace

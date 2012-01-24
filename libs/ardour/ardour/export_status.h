@@ -61,6 +61,9 @@ struct ExportStatus {
 	volatile framecnt_t     total_frames;
 	volatile framecnt_t     processed_frames;
 
+	volatile uint32_t       total_normalize_cycles;
+	volatile uint32_t       current_normalize_cycle;
+
   private:
 	volatile bool          _aborted;
 	volatile bool          _errors;
