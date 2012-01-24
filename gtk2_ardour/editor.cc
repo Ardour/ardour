@@ -1807,17 +1807,10 @@ Editor::add_region_context_items (Menu_Helpers::MenuList& edit_items, boost::sha
 		_popup_region_menu_item->set_label (menu_item_name);
 	}
 
-	/* Use the mouse position rather than the edit point to decide whether to show the `choose top region'
-	   dialogue.  If we use the edit point it gets a bit messy because the user still has to click over
-	   *some* region in order to get the region context menu stuff to be displayed at all.
-	*/
-
-	framepos_t mouse;
-	bool ignored;
-	mouse_frame (mouse, ignored);
+	const framepos_t position = get_preferred_edit_position (false, true);
 
 	edit_items.push_back (*_popup_region_menu_item);
-	if (track->playlist()->count_regions_at (mouse) > 1 && (layering_order_editor == 0 || !layering_order_editor->is_visible ())) {
+	if (track->playlist()->count_regions_at (position) > 1 && (layering_order_editor == 0 || !layering_order_editor->is_visible ())) {
 		edit_items.push_back (*manage (_region_actions->get_action ("choose-top-region-context-menu")->create_menu_item ()));
 	}
 	edit_items.push_back (SeparatorElem());
