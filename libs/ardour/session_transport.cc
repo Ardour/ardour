@@ -582,6 +582,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 			_requested_return_frame = -1;
 
 			if (do_locate) {
+				clear_clicks ();
 				_engine.transport_locate (_transport_frame);
 			}
 		}
