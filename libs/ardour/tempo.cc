@@ -1187,14 +1187,11 @@ TempoMap::frame_time (const BBT_Time& bbt)
 framecnt_t
 TempoMap::bbt_duration_at (framepos_t pos, const BBT_Time& bbt, int dir)
 {
-	Glib::RWLock::ReaderLock lm (lock);
-	framecnt_t frames = 0;
 	BBT_Time when;
-
 	bbt_time (pos, when);
-	frames = bbt_duration_at_unlocked (when, bbt,dir);
-
-	return frames;
+	
+	Glib::RWLock::ReaderLock lm (lock);
+	return bbt_duration_at_unlocked (when, bbt, dir);
 }
 
 framecnt_t
