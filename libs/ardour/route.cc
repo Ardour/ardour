@@ -515,6 +515,11 @@ Route::process_output_buffers (BufferSet& bufs,
 			/* don't ::run() the meter, otherwise it will have its previous peak corrupted */
 			continue;
 		}
+
+		if (Config->get_plugins_stop_with_transport() && _session.transport_speed() == 0 && boost::dynamic_pointer_cast<PluginInsert> (*i)) {
+			/* don't run plugins with the transport stopped, if configured this way */
+			continue;
+		}
 		
 #ifndef NDEBUG
 		/* if it has any inputs, make sure they match */
