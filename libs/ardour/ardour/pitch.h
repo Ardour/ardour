@@ -53,7 +53,7 @@ class Pitch : public Filter {
 	Pitch (ARDOUR::Session&, TimeFXRequest&);
 	~Pitch () {}
 
-	int run (boost::shared_ptr<ARDOUR::Region>);
+	int run (boost::shared_ptr<ARDOUR::Region>, Progress *);
 
   private:
 	TimeFXRequest& tsr;

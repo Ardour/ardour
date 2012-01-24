@@ -39,13 +39,12 @@ Pitch::Pitch (Session& s, TimeFXRequest& req)
 	, tsr (req)
 
 {
-	tsr.progress = 0.0f;
+
 }
 
 int
 Pitch::run (boost::shared_ptr<Region> region)
 {
-	tsr.progress = 1.0f;
 	tsr.done = true;
 
 	return 1;

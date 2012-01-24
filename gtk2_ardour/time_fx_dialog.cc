@@ -186,11 +186,10 @@ TimeFXDialog::TimeFXDialog (Editor& e, bool pitch)
 	show_all_children ();
 }
 
-gint
-TimeFXDialog::update_progress ()
+void
+TimeFXDialog::update_progress_gui (float p)
 {
-	progress_bar.set_fraction (request.progress);
-	return !request.done;
+	progress_bar.set_fraction (p);
 }
 
 void

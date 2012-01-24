@@ -24,10 +24,13 @@
 
 #include "ardour_dialog.h"
 #include "region_selection.h"
+#include "progress_reporter.h"
 
 class Editor;
 
-struct TimeFXDialog : public ArdourDialog {
+class TimeFXDialog : public ArdourDialog, public ProgressReporter
+{
+public:
     ARDOUR::TimeFXRequest request;
     Editor&               editor;
     bool                  pitching;
@@ -58,11 +61,14 @@ struct TimeFXDialog : public ArdourDialog {
 
     TimeFXDialog (Editor& e, bool for_pitch);
 
-    gint update_progress ();
     sigc::connection first_cancel;
     sigc::connection first_delete;
     void cancel_in_progress ();
     gint delete_in_progress (GdkEventAny*);
+
+private:
+	
+    void update_progress_gui (float);
 };
 
 #endif /* __ardour_time_fx_dialog_h__ */

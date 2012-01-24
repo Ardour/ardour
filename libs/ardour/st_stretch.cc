@@ -56,7 +56,6 @@ STStretch::STStretch (Session& s, TimeFXRequest& req)
 	st.setSetting(SETTING_USE_QUICKSEEK, tsr.quick_seek);
 	st.setSetting(SETTING_USE_AA_FILTER, tsr.antialias);
 
-	tsr.progress = 0.0f;
 }
 
 STStretch::~STStretch ()
@@ -64,7 +63,7 @@ STStretch::~STStretch ()
 }
 
 int
-STStretch::run (boost::shared_ptr<Region> a_region)
+STStretch::run (boost::shared_ptr<Region> a_region, Progress* progress)
 {
 	SourceList nsrcs;
 	framecnt_t total_frames;
@@ -77,7 +76,7 @@ STStretch::run (boost::shared_ptr<Region> a_region)
 	string new_name;
 	string::size_type at;
 
-	tsr.progress = 0.0f;
+	progress->set_progress (0);
 	tsr.done = false;
 
 	boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion>(a_region);
@@ -131,7 +130,7 @@ STStretch::run (boost::shared_ptr<Region> a_region)
 				pos += this_read;
 				done += this_read;
 
-				tsr.progress = (float) done / total_frames;
+				progress->set_progress ((float) done / total_frames);
 
 				st.putSamples (buffer, this_read);
 

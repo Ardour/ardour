@@ -107,8 +107,6 @@ Editor::time_fx (RegionSelection& regions, float val, bool pitching)
 
 	current_timefx = new TimeFXDialog (*this, pitching);
 
-	current_timefx->progress_bar.set_fraction (0.0f);
-
 	switch (current_timefx->run ()) {
 	case RESPONSE_ACCEPT:
 		break;
@@ -234,7 +232,6 @@ Editor::time_fx (RegionSelection& regions, float val, bool pitching)
 	current_timefx->request.quick_seek = current_timefx->quick_button.get_active();
 	current_timefx->request.antialias = !current_timefx->antialias_button.get_active();
 #endif
-	current_timefx->request.progress = 0.0f;
 	current_timefx->request.done = false;
 	current_timefx->request.cancel = false;
 
@@ -256,13 +253,9 @@ Editor::time_fx (RegionSelection& regions, float val, bool pitching)
 
 	pthread_detach (current_timefx->request.thread);
 
-	sigc::connection c = Glib::signal_timeout().connect (sigc::mem_fun (current_timefx, &TimeFXDialog::update_progress), 100);
-
 	while (!current_timefx->request.done && !current_timefx->request.cancel) {
 		gtk_main_iteration ();
 	}
-
-	c.disconnect ();
 
 	current_timefx->hide ();
 	return current_timefx->status;
@@ -275,6 +268,8 @@ Editor::do_timefx (TimeFXDialog& dialog)
 	boost::shared_ptr<Playlist> playlist;
 	boost::shared_ptr<Region>   new_region;
 	bool in_command = false;
+
+	uint32_t const N = dialog.regions.size ();
 
 	for (RegionSelection::iterator i = dialog.regions.begin(); i != dialog.regions.end(); ) {
 		AudioRegionView* arv = dynamic_cast<AudioRegionView*>(*i);
@@ -324,7 +319,9 @@ Editor::do_timefx (TimeFXDialog& dialog)
 #endif
 		}
 
-		if (fx->run (region)) {
+		current_timefx->descend (1.0 / N);
+
+		if (fx->run (region, current_timefx)) {
 			dialog.status = -1;
 			dialog.request.done = true;
 			delete fx;
@@ -343,6 +340,8 @@ Editor::do_timefx (TimeFXDialog& dialog)
 			playlist->replace_region (region, new_region, region->position());
 			_session->add_command (new StatefulDiffCommand (playlist));
 		}
+
+		current_timefx->ascend ();
 
 		i = tmp;
 		delete fx;

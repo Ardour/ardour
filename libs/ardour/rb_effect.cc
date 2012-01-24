@@ -29,6 +29,7 @@
 #include "ardour/audiofilesource.h"
 #include "ardour/session.h"
 #include "ardour/audioregion.h"
+#include "ardour/progress.h"
 
 #include "i18n.h"
 
@@ -52,7 +53,7 @@ RBEffect::RBEffect (Session& s, TimeFXRequest& req)
 	, tsr (req)
 
 {
-	tsr.progress = 0.0f;
+
 }
 
 RBEffect::~RBEffect ()
@@ -60,7 +61,7 @@ RBEffect::~RBEffect ()
 }
 
 int
-RBEffect::run (boost::shared_ptr<Region> r, Progress*)
+RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 {
 	boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion> (r);
 
@@ -160,7 +161,7 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress*)
 		(session.frame_rate(), channels,
 		 (RubberBandStretcher::Options) tsr.opts, stretch, shift);
 
-	tsr.progress = 0.0f;
+	progress->set_progress (0);
 	tsr.done = false;
 
 	stretcher.setExpectedInputDuration(read_duration);
@@ -238,7 +239,7 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress*)
 			pos += this_read;
 			done += this_read;
 
-			tsr.progress = ((float) done / read_duration) * 0.25;
+			progress->set_progress (((float) done / read_duration) * 0.25);
 
 			stretcher.study(buffers, this_read, pos == read_duration);
 		}
@@ -279,7 +280,7 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress*)
 			pos += this_read;
 			done += this_read;
 
-			tsr.progress = 0.25 + ((float) done / read_duration) * 0.75;
+			progress->set_progress (0.25 + ((float) done / read_duration) * 0.75);
 
 			stretcher.process(buffers, this_read, pos == read_duration);
 

@@ -3292,7 +3292,9 @@ TimeFXDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 	RegionSelection rs;
 	rs.add (_primary);
 
-	if (_editor->time_stretch (rs, percentage) == -1) {
+	RegionSelection all = _editor->get_equivalent_regions (rs, ARDOUR::Properties::edit.property_id);
+
+	if (_editor->time_stretch (all, percentage) == -1) {
 		error << _("An error occurred while executing time stretch operation") << endmsg;
 	}
 }
