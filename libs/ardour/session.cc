@@ -2003,6 +2003,8 @@ Session::new_route_from_template (uint32_t how_many, const std::string& template
 
 	XMLNode* node = tree.root();
 
+	IO::disable_connecting ();
+
 	control_id = next_control_id ();
 
 	while (how_many) {
@@ -2080,6 +2082,7 @@ Session::new_route_from_template (uint32_t how_many, const std::string& template
   out:
 	if (!ret.empty()) {
 		add_routes (ret, true, true);
+		IO::enable_connecting ();
 	}
 
 	return ret;
@@ -2243,7 +2246,6 @@ Session::add_internal_sends (boost::shared_ptr<Route> dest, Placement p, boost::
 	if (!dest->internal_return()) {
 		dest->add_internal_return();
 	}
-
 	
 	for (RouteList::iterator i = senders->begin(); i != senders->end(); ++i) {
 		
