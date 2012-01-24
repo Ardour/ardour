@@ -276,7 +276,8 @@ InternalSend::connect_when_legal ()
         boost::shared_ptr<Route> sendto;
 
 	if ((sendto = _session.route_by_id (_send_to_id)) == 0) {
-		error << X_("cannot find route to connect to") << endmsg;
+		error << string_compose (_("%1 - cannot find any track/bus with the ID %2 to connect to"), display_name(), _send_to_id) << endmsg;
+		cerr << string_compose (_("%1 - cannot find any track/bus with the ID %2 to connect to"), display_name(), _send_to_id) << endl;
 		return -1;
 	}
 
