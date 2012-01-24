@@ -478,12 +478,15 @@ ExportHandler::write_track_info_cue (CDMarkerStatus & status)
 		status.out << "    ISRC " << status.marker->cd_info["isrc"] << endl;
 
 	}
+
 	if (status.marker->name() != "") {
 		status.out << "    TITLE \"" << status.marker->name() << '"' << endl;
 	}
 
 	if (status.marker->cd_info.find("performer") != status.marker->cd_info.end()) {
-		status.out << "    PERFORMER \"" <<  status.marker->cd_info["performer"] << '"' << endl;
+		status.out <<  "    PERFORMER \"" << status.marker->cd_info["performer"] << '"' << endl;
+	} else {
+		status.out <<  "    PERFORMER \"\"" << endl;
 	}
 
 	if (status.marker->cd_info.find("composer") != status.marker->cd_info.end()) {
@@ -528,7 +531,7 @@ ExportHandler::write_track_info_toc (CDMarkerStatus & status)
 		   << cd_marker_file_escape_string (status.marker->name()) << endl;
 	
 	if (status.marker->cd_info.find("performer") != status.marker->cd_info.end()) {
-		status.out << "     PERFORMER " << cd_marker_file_escape_string (status.marker->cd_info["performer"]);
+		status.out << cd_marker_file_escape_string (status.marker->cd_info["performer"]);
 	} else {
 		status.out << "     PERFORMER \"\"";
 	}
