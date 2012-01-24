@@ -343,3 +343,13 @@ ActionManager::get_key_representation (const string& accel_path, AccelKey& key)
 	
 	return unbound_string;
 }
+
+void
+ActionManager::do_action (const char* group, const char*action)
+{
+	Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (group, action);
+	if (act) {
+		act->activate ();
+	}
+}
+
