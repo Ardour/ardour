@@ -1,3 +1,22 @@
+/*
+    Copyright (C) 2011-2012 Paul Davis
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+*/
+
 #include <gtkmm/table.h>
 #include <gtkmm/stock.h>
 #include <gtkmm/alignment.h>
@@ -7,6 +26,7 @@
 #include "keyboard.h"
 #include "public_editor.h"
 #include "region_layering_order_editor.h"
+#include "region_view.h"
 #include "utils.h"
 #include "i18n.h"
 
@@ -16,16 +36,13 @@ using namespace ARDOUR;
 
 RegionLayeringOrderEditor::RegionLayeringOrderEditor (PublicEditor& pe)
 	: ArdourWindow (_("RegionLayeringOrderEditor"))
-	, playlist ()
-	, position ()
+	, position (0)
 	, in_row_change (false)
         , regions_at_position (0)
-	, layering_order_columns ()
 	, layering_order_model (Gtk::ListStore::create (layering_order_columns))
-	, layering_order_display ()
         , clock ("layer dialog", true, "", false, false, false)
-	, scroller ()
 	, editor (pe)
+	, _time_axis_view (0)
 {
 	set_name ("RegionLayeringOrderEditorWindow");
 
@@ -86,6 +103,7 @@ RegionLayeringOrderEditor::RegionLayeringOrderEditor (PublicEditor& pe)
 
 RegionLayeringOrderEditor::~RegionLayeringOrderEditor ()
 {
+	
 }
 
 void
@@ -97,40 +115,42 @@ RegionLayeringOrderEditor::row_activated (const TreeModel::Path& path, TreeViewC
 
 	TreeModel::iterator iter = layering_order_model->get_iter (path);
 
-	if (iter) {
-		TreeModel::Row row = *iter;
-		boost::shared_ptr<Region> region = row[layering_order_columns.region];
-
-		region->raise_to_top ();
+	if (!iter) {
+		return;
+	}
+	
+	TreeModel::Row row = *iter;
+	RegionView* rv = row[layering_order_columns.region_view];
+	
+	vector<RegionView*> eq;
+	editor.get_equivalent_regions (rv, eq, Properties::edit.property_id);
+	
+	for (vector<RegionView*>::iterator i = eq.begin(); i != eq.end(); ++i) {
+		(*i)->region()->raise_to_top ();
 	}
 }
 
-typedef boost::shared_ptr<Region> RegionPtr;
-
-struct RegionCompareByLayer {
-    bool operator() (RegionPtr a, RegionPtr b) const {
-	    return a->layer() > b->layer();
-    }
+struct RegionViewCompareByLayer {
+	bool operator() (RegionView* a, RegionView* b) const {
+		return a->region()->layer() > b->region()->layer();
+	}
 };
 
 void
 RegionLayeringOrderEditor::refill ()
 {
+	assert (_time_axis_view);
+	
 	regions_at_position = 0;
-
-	if (!playlist) {
-		return;
-	}
-
-	typedef Playlist::RegionList RegionList;
-
 	in_row_change = true;
-
 	layering_order_model->clear ();
 
-	boost::shared_ptr<RegionList> region_list(playlist->regions_at (position));
+	RegionSelection region_list;
+	TrackViewList ts;
+	ts.push_back (_time_axis_view);
+	editor.get_regions_at (region_list, position, ts);
 
-	regions_at_position = region_list->size();
+	regions_at_position = region_list.size ();
 
 	if (regions_at_position < 2) {
 		playlist_modified_connection.disconnect ();
@@ -139,15 +159,15 @@ RegionLayeringOrderEditor::refill ()
 		return;
 	}
 
-	RegionCompareByLayer cmp;
-	region_list->sort (cmp);
+	RegionViewCompareByLayer cmp;
+	region_list.sort (cmp);
 
-	for (RegionList::const_iterator i = region_list->begin(); i != region_list->end(); ++i) {
+	for (RegionSelection::const_iterator i = region_list.begin(); i != region_list.end(); ++i) {
 		TreeModel::Row newrow = *(layering_order_model->append());
-		newrow[layering_order_columns.name] = (*i)->name();
-		newrow[layering_order_columns.region] = *i;
+		newrow[layering_order_columns.name] = (*i)->region()->name();
+		newrow[layering_order_columns.region_view] = *i;
 
-               if (i == region_list->begin()) {
+               if (i == region_list.begin()) {
                        layering_order_display.get_selection()->select(newrow);
                }
 	}
@@ -156,7 +176,7 @@ RegionLayeringOrderEditor::refill ()
 }
 
 void
-RegionLayeringOrderEditor::set_context (const string& a_name, Session* s, const boost::shared_ptr<Playlist>  & pl, framepos_t pos)
+RegionLayeringOrderEditor::set_context (const string& a_name, Session* s, TimeAxisView* tav, boost::shared_ptr<Playlist> pl, framepos_t pos)
 {
         track_name_label.set_text (a_name);
 
@@ -164,9 +184,10 @@ RegionLayeringOrderEditor::set_context (const string& a_name, Session* s, const 
 	clock.set (pos, true);
 
 	playlist_modified_connection.disconnect ();
-	playlist = pl;
-	playlist->ContentsChanged.connect (playlist_modified_connection, invalidator (*this), boost::bind
-                                           (&RegionLayeringOrderEditor::playlist_modified, this), gui_context());
+	pl->ContentsChanged.connect (playlist_modified_connection, invalidator (*this), boost::bind
+				     (&RegionLayeringOrderEditor::playlist_modified, this), gui_context());
+
+	_time_axis_view = tav;
 
 	position = pos;
 	refill ();

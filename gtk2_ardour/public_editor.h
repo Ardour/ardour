@@ -395,6 +395,8 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 
 	virtual void snap_to_with_modifier (framepos_t &, GdkEvent const *, int32_t direction = 0, bool for_mark = false) = 0;
 
+	virtual void get_regions_at (RegionSelection &, framepos_t where, TrackViewList const &) const = 0;
+
 	/// Singleton instance, set up by Editor::Editor()
 
 	static PublicEditor* _instance;

@@ -5378,7 +5378,7 @@ Editor::change_region_layering_order (bool from_context_menu)
 		layering_order_editor->set_position (WIN_POS_MOUSE);
 	}
 
-	layering_order_editor->set_context (clicked_routeview->name(), _session, pl, position);
+	layering_order_editor->set_context (clicked_routeview->name(), _session, clicked_routeview, pl, position);
 	layering_order_editor->maybe_present ();
 }
 
