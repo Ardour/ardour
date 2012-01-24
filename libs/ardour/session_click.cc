@@ -36,7 +36,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-Pool Click::pool ("click", sizeof (Click), 128);
+Pool Click::pool ("click", sizeof (Click), 1024);
 
 void
 Session::click (framepos_t start, framecnt_t nframes)
@@ -82,14 +82,12 @@ Session::click (framepos_t start, framecnt_t nframes)
 		case 1:
 			if (click_emphasis_data) {
 				clicks.push_back (new Click ((*i).frame, click_emphasis_length, click_emphasis_data));
-				cerr << "click emph @ " << (*i).frame << endl;
 			}
 			break;
 
 		default:
 			if (click_emphasis_data == 0 || (click_emphasis_data && (*i).beat != 1)) {
 				clicks.push_back (new Click ((*i).frame, click_length, click_data));
-				cerr << "click norm @ " << (*i).frame << endl;
 			}
 			break;
 		}
