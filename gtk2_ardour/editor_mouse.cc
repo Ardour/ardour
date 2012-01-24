@@ -1269,14 +1269,18 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 		return true;
 	}
 
+
+
 	if (internal_editing()) {
+		bool leave_internal_edit_mode = false;
+
 		switch (item_type) {
 		case NoteItem:
 			break;
 
 		case RegionItem:
 			if (!dynamic_cast<MidiRegionView*> (clicked_regionview)) {
-				ActionManager::do_action ("MouseMode", "toggle-internal-edit");
+				leave_internal_edit_mode = true;
 			}
 			break;
 
@@ -1294,8 +1298,18 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 			   change the editing mode.
 			*/
 			break;
+			
+		case StreamItem:
+			if (!dynamic_cast<MidiTimeAxisView*> (clicked_axisview)) {
+				leave_internal_edit_mode = true;
+			}
+			break;
 
 		default:
+			break;
+		}
+		
+		if (leave_internal_edit_mode) {
 			ActionManager::do_action ("MouseMode", "toggle-internal-edit");
 		}
 	}
