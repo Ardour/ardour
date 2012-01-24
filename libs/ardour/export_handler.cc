@@ -599,15 +599,18 @@ ExportHandler::cd_marker_file_escape_string (const std::string& txt)
 {
 	Glib::ustring check (txt);
 	std::string out;
+	std::string latin1_txt;
 	char buf[5];
 
-	if (!check.is_ascii()) {
+	try {
+		latin1_txt = Glib::convert (txt, "ISO-8859-1", "UTF-8");
+	} catch (...) {
 		throw Glib::ConvertError (Glib::ConvertError::NO_CONVERSION, string_compose (_("Cannot convert %1 to Latin-1 text"), txt));
 	}
 
 	out = '"';
 
-	for (std::string::const_iterator c = txt.begin(); c != txt.end(); ++c) {
+	for (std::string::const_iterator c = latin1_txt.begin(); c != latin1_txt.end(); ++c) {
 
 		if ((*c) == '"') {
 			out += "\\\"";
@@ -616,7 +619,7 @@ ExportHandler::cd_marker_file_escape_string (const std::string& txt)
 		} else if (isprint (*c)) {
 			out += *c;
 		} else {
-			snprintf (buf, sizeof (buf), "\\%03o", *c);
+			snprintf (buf, sizeof (buf), "\\%03o", (int) (unsigned char) *c);
 			out += buf;
 		}
 	}
