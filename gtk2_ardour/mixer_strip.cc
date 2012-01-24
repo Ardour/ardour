@@ -1442,7 +1442,9 @@ MixerStrip::build_route_ops_menu ()
 	MenuList& items = route_ops_menu->items();
 
 	items.push_back (MenuElem (_("Comments..."), sigc::mem_fun (*this, &MixerStrip::open_comment_editor)));
-	items.push_back (MenuElem (_("Save As Template..."), sigc::mem_fun(*this, &RouteUI::save_as_template)));
+	if (!_route->is_master()) {
+		items.push_back (MenuElem (_("Save As Template..."), sigc::mem_fun(*this, &RouteUI::save_as_template)));
+	}
 	items.push_back (MenuElem (_("Rename..."), sigc::mem_fun(*this, &RouteUI::route_rename)));
 	rename_menu_item = &items.back();
 
