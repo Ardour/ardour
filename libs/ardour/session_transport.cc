@@ -465,7 +465,6 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 		auditioner->cancel_audition ();
 	}
 
-	clear_clicks();
 	cumulative_rf_motion = 0;
 	reset_rf_scale (0);
 
@@ -582,12 +581,13 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 			_requested_return_frame = -1;
 
 			if (do_locate) {
-				clear_clicks ();
 				_engine.transport_locate (_transport_frame);
 			}
 		}
 
 	}
+
+	clear_clicks();
 
 	/* do this before seeking, because otherwise the tracks will do the wrong thing in seamless loop mode.
 	*/
