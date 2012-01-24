@@ -2243,6 +2243,9 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 	if ((prop = node.property ("left-frame")) != 0) {
 		framepos_t pos;
 		if (sscanf (prop->value().c_str(), "%" PRId64, &pos) == 1) {
+			if (pos < 0) {
+				pos = 0;
+			}
 			reset_x_origin (pos);
 		}
 	}
@@ -4308,6 +4311,7 @@ Editor::idle_visual_changer ()
 		*/
 
 		leftmost_frame = pending_visual_change.time_origin;
+		assert (leftmost_frame >= 0);
 	}
 
 	if (p & VisualChange::ZoomLevel) {
