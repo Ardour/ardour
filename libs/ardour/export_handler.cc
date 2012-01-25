@@ -469,7 +469,7 @@ ExportHandler::write_toc_header (CDMarkerStatus & status)
 
 	status.out << "CD_DA" << endl;
 	status.out << "CD_TEXT {" << endl << "  LANGUAGE_MAP {" << endl << "    0 : EN" << endl << "  }" << endl;
-	status.out << "  LANGUAGE 0 {" << endl << "    TITLE " << cd_marker_file_escape_string (title) << endl ;
+	status.out << "  LANGUAGE 0 {" << endl << "    TITLE " << toc_escape_cdtext (title) << endl ;
 	status.out << "    PERFORMER \"\"" << endl << "  }" << endl << "}" << endl;
 }
 
@@ -546,17 +546,18 @@ ExportHandler::write_track_info_toc (CDMarkerStatus & status)
 		status.out << "ISRC \"" << status.marker->cd_info["isrc"] << "\"" << endl;
 	}
 
-	status.out << "CD_TEXT {" << endl << "  LANGUAGE 0 {" << endl << "     TITLE "
-		   << cd_marker_file_escape_string (status.marker->name()) << endl;
+	status.out << "CD_TEXT {" << endl << "  LANGUAGE 0 {" << endl;
+	status.out << "     TITLE " << toc_escape_cdtext (status.marker->name()) << endl;
 	
+	status.out << "     PERFORMER ";
 	if (status.marker->cd_info.find("performer") != status.marker->cd_info.end()) {
-		status.out << cd_marker_file_escape_string (status.marker->cd_info["performer"]);
+		status.out << toc_escape_cdtext (status.marker->cd_info["performer"]) << endl;
 	} else {
-		status.out << "     PERFORMER \"\"";
+		status.out << "\"\"" << endl;
 	}
 	
 	if (status.marker->cd_info.find("composer") != status.marker->cd_info.end()) {
-		status.out  << "     COMPOSER " << cd_marker_file_escape_string (status.marker->cd_info["composer"]) << endl;
+		status.out  << "     SONGWRITER " << toc_escape_cdtext (status.marker->cd_info["composer"]) << endl;
 	}
 
 	if (status.marker->cd_info.find("isrc") != status.marker->cd_info.end()) {
@@ -570,7 +571,7 @@ ExportHandler::write_track_info_toc (CDMarkerStatus & status)
 	status.out << "  }" << endl << "}" << endl;
 
 	frames_to_cd_frames_string (buf, status.track_position);
-	status.out << "FILE " << cd_marker_file_escape_string (status.filename) << ' ' << buf;
+	status.out << "FILE " << toc_escape_filename (status.filename) << ' ' << buf;
 
 	frames_to_cd_frames_string (buf, status.track_duration);
 	status.out << buf << endl;
@@ -617,7 +618,7 @@ ExportHandler::frames_to_cd_frames_string (char* buf, framepos_t when)
 }
 
 std::string
-ExportHandler::cd_marker_file_escape_string (const std::string& txt)
+ExportHandler::toc_escape_cdtext (const std::string& txt)
 {
 	Glib::ustring check (txt);
 	std::string out;
@@ -626,8 +627,8 @@ ExportHandler::cd_marker_file_escape_string (const std::string& txt)
 
 	try {
 		latin1_txt = Glib::convert (txt, "ISO-8859-1", "UTF-8");
-	} catch (...) {
-		throw Glib::ConvertError (Glib::ConvertError::NO_CONVERSION, string_compose (_("Cannot convert %1 to Latin-1 text"), txt));
+	} catch (Glib::ConvertError& err) {
+		throw Glib::ConvertError (err.code(), string_compose (_("Cannot convert %1 to Latin-1 text"), txt));
 	}
 
 	out = '"';
@@ -643,6 +644,31 @@ ExportHandler::cd_marker_file_escape_string (const std::string& txt)
 		} else {
 			snprintf (buf, sizeof (buf), "\\%03o", (int) (unsigned char) *c);
 			out += buf;
+		}
+	}
+	
+	out += '"';
+
+	return out;
+}
+
+std::string
+ExportHandler::toc_escape_filename (const std::string& txt)
+{
+	std::string out;
+
+	out = '"';
+
+	// We iterate byte-wise not character-wise over a UTF-8 string here,
+	// because we only want to translate backslashes and double quotes
+	for (std::string::const_iterator c = txt.begin(); c != txt.end(); ++c) {
+
+		if (*c == '"') {
+			out += "\\\"";
+		} else if (*c == '\\') {
+			out += "\\134";
+		} else {
+			out += *c;
 		}
 	}
 	

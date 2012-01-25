@@ -185,7 +185,8 @@ class ExportHandler : public ExportElementFactory
 	void write_index_info_toc (CDMarkerStatus & status);
 
 	void frames_to_cd_frames_string (char* buf, framepos_t when);
-	std::string cd_marker_file_escape_string (const std::string&);
+	std::string toc_escape_cdtext (const std::string&);
+	std::string toc_escape_filename (const std::string&);
 
 	int cue_tracknum;
 	int cue_indexnum;
