@@ -72,20 +72,20 @@ Session::rt_set_solo (boost::shared_ptr<RouteList> rl, bool yn, bool /* group_ov
 }
 
 void
-Session::cancel_solo_after_disconnect (boost::shared_ptr<Route> r, SessionEvent::RTeventCallback after)
+Session::cancel_solo_after_disconnect (boost::shared_ptr<Route> r, bool upstream, SessionEvent::RTeventCallback after)
 {
 	boost::shared_ptr<RouteList> rl (new RouteList);
 	rl->push_back (r);
 
-	queue_event (get_rt_event (rl, false, after, false, &Session::rt_cancel_solo_after_disconnect));
+	queue_event (get_rt_event (rl, upstream, after, false, &Session::rt_cancel_solo_after_disconnect));
 }
 
 void
-Session::rt_cancel_solo_after_disconnect (boost::shared_ptr<RouteList> rl, bool /*yn */, bool /* group_override */)
+Session::rt_cancel_solo_after_disconnect (boost::shared_ptr<RouteList> rl, bool upstream, bool /* group_override */)
 {
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		if (!(*i)->is_hidden()) {
-			(*i)->cancel_solo_after_disconnect ();
+			(*i)->cancel_solo_after_disconnect (upstream);
 		}
 	}
 	/* no need to call set-dirty - the disconnect will already have done that */

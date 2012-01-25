@@ -145,6 +145,8 @@ Route::init ()
 	_input->changed.connect_same_thread (*this, boost::bind (&Route::input_change_handler, this, _1, _2));
 	_input->PortCountChanging.connect_same_thread (*this, boost::bind (&Route::input_port_count_changing, this, _1));
 
+	_output->changed.connect_same_thread (*this, boost::bind (&Route::output_change_handler, this, _1, _2));
+
 	/* add amp processor  */
 
 	_amp.reset (new Amp (_session));
@@ -2820,32 +2822,64 @@ Route::nonrealtime_handle_transport_stopped (bool /*abort_ignored*/, bool did_lo
 	_roll_delay = _initial_delay;
 }
 
-/** Called with the process lock held if change contains ConfigurationChanged */
 void
 Route::input_change_handler (IOChange change, void * /*src*/)
 {
 	bool need_to_queue_solo_change = true;
 
 	if ((change.type & IOChange::ConfigurationChanged)) {
+		/* This is called with the process lock held if change 
+		   contains ConfigurationChanged 
+		*/
 		need_to_queue_solo_change = false;
 		configure_processors (0);
 		_phase_invert.resize (_input->n_ports().n_audio ());
 		io_changed (); /* EMIT SIGNAL */
 	}
 
-	if (_fed_by.size() == 0 && _soloed_by_others_upstream) {
+	cerr << _name << ": input change, connected ? " << _input->connected() << endl;
+
+	if (!_input->connected() && _soloed_by_others_upstream) {
 		if (need_to_queue_solo_change) {
-			_session.cancel_solo_after_disconnect (shared_from_this());
+			_session.cancel_solo_after_disconnect (shared_from_this(), true);
 		} else {
-			cancel_solo_after_disconnect ();
+			cancel_solo_after_disconnect (true);
 		}
 	}
 }
 
 void
-Route::cancel_solo_after_disconnect ()
+Route::output_change_handler (IOChange change, void * /*src*/)
 {
-	_soloed_by_others_upstream = 0;
+	bool need_to_queue_solo_change = true;
+
+	if ((change.type & IOChange::ConfigurationChanged)) {
+		/* This is called with the process lock held if change 
+		   contains ConfigurationChanged 
+		*/
+		need_to_queue_solo_change = false;
+	}
+
+	cerr << _name << ": output change, connected ? " << _output->connected() << endl;
+
+	if (!_output->connected() && _soloed_by_others_downstream) {
+		if (need_to_queue_solo_change) {
+			_session.cancel_solo_after_disconnect (shared_from_this(), false);
+		} else {
+			cancel_solo_after_disconnect (false);
+		}
+	}
+}
+
+void
+Route::cancel_solo_after_disconnect (bool upstream)
+{
+	cerr << _name << " CSAD upstream ? " << upstream << endl;
+	if (upstream) {
+		_soloed_by_others_upstream = 0;
+	} else {
+		_soloed_by_others_downstream = 0;
+	}
 	set_mute_master_solo ();
 	solo_changed (false, this);
 }

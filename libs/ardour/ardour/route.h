@@ -148,7 +148,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 
 	void set_solo (bool yn, void *src);
 	bool soloed () const { return self_soloed () || soloed_by_others (); }
-	void cancel_solo_after_disconnect ();
+	void cancel_solo_after_disconnect (bool upstream);
 
 	bool soloed_by_others () const { return _soloed_by_others_upstream||_soloed_by_others_downstream; }
 	bool soloed_by_others_upstream () const { return _soloed_by_others_upstream; }
