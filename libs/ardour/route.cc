@@ -2824,11 +2824,30 @@ Route::nonrealtime_handle_transport_stopped (bool /*abort_ignored*/, bool did_lo
 void
 Route::input_change_handler (IOChange change, void * /*src*/)
 {
+	bool need_to_queue_solo_change = true;
+
 	if ((change.type & IOChange::ConfigurationChanged)) {
+		need_to_queue_solo_change = false;
 		configure_processors (0);
 		_phase_invert.resize (_input->n_ports().n_audio ());
 		io_changed (); /* EMIT SIGNAL */
 	}
+
+	if (_fed_by.size() == 0 && _soloed_by_others_upstream) {
+		if (need_to_queue_solo_change) {
+			_session.cancel_solo_after_disconnect (shared_from_this());
+		} else {
+			cancel_solo_after_disconnect ();
+		}
+	}
+}
+
+void
+Route::cancel_solo_after_disconnect ()
+{
+	_soloed_by_others_upstream = 0;
+	set_mute_master_solo ();
+	solo_changed (false, this);
 }
 
 uint32_t
