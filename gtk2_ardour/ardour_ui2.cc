@@ -592,26 +592,17 @@ ARDOUR_UI::editor_realized ()
 void
 ARDOUR_UI::maximise_editing_space ()
 {
-	if (!editor) {
-		return;
-	}
-
-	transport_tearoff->set_visible (false);
-	editor->maximise_editing_space ();
- 	if (Config->get_keep_tearoffs()) {
-		transport_tearoff->set_visible (true);
+	if (editor) {
+		editor->maximise_editing_space ();
 	}
 }
 
 void
 ARDOUR_UI::restore_editing_space ()
 {
-	if (!editor) {
-		return;
+	if (editor) {
+		editor->restore_editing_space ();
 	}
-
-	transport_tearoff->set_visible (true);
-	editor->restore_editing_space ();
 }
 
 bool
