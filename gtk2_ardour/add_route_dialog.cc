@@ -61,7 +61,7 @@ AddRouteDialog::AddRouteDialog (Session* s)
 	set_resizable (false);
 
 	name_template_entry.set_name (X_("AddRouteDialogNameTemplateEntry"));
-	routes_spinner.set_name (X_("AddRouteDialogSpinner"));
+	// routes_spinner.set_name (X_("AddRouteDialogSpinner"));
 	channel_combo.set_name (X_("ChannelCountSelector"));
 	mode_combo.set_name (X_("ChannelCountSelector"));
 
@@ -71,8 +71,9 @@ AddRouteDialog::AddRouteDialog (Session* s)
 
 	channel_combo.set_active_text (channel_combo_strings.front());
 
-	track_bus_combo.append_text (_("tracks"));
-	track_bus_combo.append_text (_("busses"));
+	track_bus_combo.append_text (_("Audio Tracks"));
+	track_bus_combo.append_text (_("MIDI Tracks"));
+	track_bus_combo.append_text (_("Busses"));
 	track_bus_combo.set_active (0);
 
 	VBox* vbox = manage (new VBox);
@@ -186,12 +187,10 @@ AddRouteDialog::maybe_update_name_template_entry ()
 		return;
 	}
 
-	if (track ()) {
-		if (type () == DataType::MIDI) {
-			name_template_entry.set_text (_("MIDI"));
-		} else {
-			name_template_entry.set_text (_("Audio"));
-		}
+	if (audio_tracks_wanted ()) {
+		name_template_entry.set_text (_("Audio"));
+	} else if (midi_tracks_wanted()) {
+		name_template_entry.set_text (_("MIDI"));
 	} else {
 		name_template_entry.set_text (_("Bus"));
 	}
@@ -200,22 +199,30 @@ AddRouteDialog::maybe_update_name_template_entry ()
 void
 AddRouteDialog::track_type_chosen ()
 {
-	mode_combo.set_sensitive (track ());
+	if (midi_tracks_wanted()) {
+		channel_combo.set_sensitive (false);
+		mode_combo.set_sensitive (false);
+	} else if (audio_tracks_wanted()) {
+		mode_combo.set_sensitive (true);
+		channel_combo.set_sensitive (true);
+	} else {
+		mode_combo.set_sensitive (false);
+		channel_combo.set_sensitive (true);
+	}
+
 	maybe_update_name_template_entry ();
 }
 
 bool
-AddRouteDialog::track ()
+AddRouteDialog::audio_tracks_wanted ()
 {
 	return track_bus_combo.get_active_row_number () == 0;
 }
 
-ARDOUR::DataType
-AddRouteDialog::type ()
+bool
+AddRouteDialog::midi_tracks_wanted ()
 {
-	return (channel_combo.get_active_text() == _("MIDI"))
-			? ARDOUR::DataType::MIDI
-			: ARDOUR::DataType::AUDIO;
+	return track_bus_combo.get_active_row_number () == 1;
 }
 
 string
@@ -239,10 +246,7 @@ AddRouteDialog::refill_track_modes ()
 
 	if (!ARDOUR::Profile->get_sae ()) {
 		s.push_back (_("Non Layered"));
-
-		if (type() != DataType::MIDI) {
-			s.push_back (_("Tape"));
-		}
+		s.push_back (_("Tape"));
 	}
 
 	set_popdown_strings (mode_combo, s);
@@ -324,13 +328,6 @@ AddRouteDialog::refill_channel_setups ()
 
 	chn.name = _("Stereo");
 	chn.channels = 2;
-	channel_setups.push_back (chn);
-
-	chn.name = "separator";
-	channel_setups.push_back (chn);
-
-	chn.name = _("MIDI");
-	chn.channels = 0;
 	channel_setups.push_back (chn);
 
 	chn.name = "separator";

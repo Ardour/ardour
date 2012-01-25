@@ -3260,6 +3260,7 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 
 	if (add_route_dialog == 0) {
 		add_route_dialog = new AddRouteDialog (_session);
+		add_route_dialog->set_position (WIN_POS_MOUSE);
 		if (float_window) {
 			add_route_dialog->set_transient_for (*float_window);
 		}
@@ -3296,7 +3297,6 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 	uint32_t input_chan = add_route_dialog->channels ();
 	uint32_t output_chan;
 	string name_template = add_route_dialog->name_template ();
-	bool track = add_route_dialog->track ();
 	RouteGroup* route_group = add_route_dialog->route_group ();
 
 	AutoConnectOption oac = Config->get_output_auto_connect();
@@ -3309,21 +3309,12 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 
 	/* XXX do something with name template */
 
-	if (add_route_dialog->type() == ARDOUR::DataType::MIDI) {
-		if (track) {
-			session_add_midi_track (route_group, count, name_template);
-		} else  {
-			MessageDialog msg (*editor,
-					_("Sorry, MIDI Busses are not supported at this time."));
-			msg.run ();
-			//session_add_midi_bus();
-		}
+	if (add_route_dialog->midi_tracks_wanted()) {
+		session_add_midi_track (route_group, count, name_template);
+	} else if (add_route_dialog->audio_tracks_wanted()) {
+		session_add_audio_track (input_chan, output_chan, add_route_dialog->mode(), route_group, count, name_template);
 	} else {
-		if (track) {
-			session_add_audio_track (input_chan, output_chan, add_route_dialog->mode(), route_group, count, name_template);
-		} else {
-			session_add_audio_bus (input_chan, output_chan, route_group, count, name_template);
-		}
+		session_add_audio_bus (input_chan, output_chan, route_group, count, name_template);
 	}
 }
 
