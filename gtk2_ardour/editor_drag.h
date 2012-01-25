@@ -212,6 +212,8 @@ protected:
 		return _last_pointer_frame;
 	}
 
+	boost::shared_ptr<ARDOUR::Region> add_midi_region (MidiTimeAxisView*);
+
 	void show_verbose_cursor_time (framepos_t);
 	void show_verbose_cursor_duration (framepos_t, framepos_t, double xoffset = 0);
 	void show_verbose_cursor_text (std::string const &);
@@ -417,7 +419,6 @@ public:
 private:
 	MidiTimeAxisView* _view;
 	boost::shared_ptr<ARDOUR::Region> _region;
-        void add_region ();
 };
 
 /** Drags to resize MIDI notes */

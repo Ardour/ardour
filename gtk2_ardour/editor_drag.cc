@@ -396,6 +396,22 @@ Drag::show_verbose_cursor_text (string const & text)
 		);
 }
 
+boost::shared_ptr<Region>
+Drag::add_midi_region (MidiTimeAxisView* view)
+{
+	if (_editor->session()) {
+		const TempoMap& map (_editor->session()->tempo_map());
+		framecnt_t pos = grab_frame();
+		const Meter& m = map.meter_at (pos);
+		/* not that the frame rate used here can be affected by pull up/down which
+		   might be wrong.
+		*/
+		framecnt_t len = m.frames_per_bar (map.tempo_at (pos), _editor->session()->frame_rate());
+		return view->add_region (grab_frame(), len, true);
+	}
+
+	return boost::shared_ptr<Region>();
+}
 
 struct EditorOrderTimeAxisViewSorter {
     bool operator() (TimeAxisView* a, TimeAxisView* b) {
@@ -1443,7 +1459,7 @@ void
 RegionCreateDrag::motion (GdkEvent* event, bool first_move)
 {
 	if (first_move) {
-		add_region();
+		_region = add_midi_region (_view);
 		_view->playlist()->freeze ();
 	} else {
 		if (_region) {
@@ -1469,28 +1485,13 @@ void
 RegionCreateDrag::finished (GdkEvent*, bool movement_occurred)
 {
 	if (!movement_occurred) {
-		add_region ();
+		add_midi_region (_view);
 	} else {
 		_view->playlist()->thaw ();
 	}
 
 	if (_region) {
 		_editor->commit_reversible_command ();
-	}
-}
-
-void
-RegionCreateDrag::add_region ()
-{
-	if (_editor->session()) {
-		const TempoMap& map (_editor->session()->tempo_map());
-		framecnt_t pos = grab_frame();
-		const Meter& m = map.meter_at (pos);
-		/* not that the frame rate used here can be affected by pull up/down which
-		   might be wrong.
-		*/
-		framecnt_t len = m.frames_per_bar (map.tempo_at (pos), _editor->session()->frame_rate());
-		_region = _view->add_region (grab_frame(), len, false);
 	}
 }
 
@@ -3221,7 +3222,23 @@ RubberbandSelectDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	} else {
 
-		deselect_things ();
+		/* just a click */
+
+		bool do_deselect = true;
+		MidiTimeAxisView* mtv;
+
+		if ((mtv = dynamic_cast<MidiTimeAxisView*>(_editor->clicked_axisview)) != 0) {
+			/* MIDI track */
+			if (_editor->selection->empty()) {
+				/* nothing selected */
+				add_midi_region (mtv);
+				do_deselect = false;
+			}
+		} 
+
+		if (do_deselect) {
+			deselect_things ();
+		}
 
 	}
 
