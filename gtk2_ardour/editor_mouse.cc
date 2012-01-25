@@ -1300,9 +1300,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 			break;
 			
 		case StreamItem:
-			if (!dynamic_cast<MidiTimeAxisView*> (clicked_axisview)) {
-				leave_internal_edit_mode = true;
-			}
+			leave_internal_edit_mode = true;
 			break;
 
 		default:
