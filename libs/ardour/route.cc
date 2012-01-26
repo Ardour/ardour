@@ -2837,8 +2837,6 @@ Route::input_change_handler (IOChange change, void * /*src*/)
 		io_changed (); /* EMIT SIGNAL */
 	}
 
-	cerr << _name << ": input change, connected ? " << _input->connected() << endl;
-
 	if (!_input->connected() && _soloed_by_others_upstream) {
 		if (need_to_queue_solo_change) {
 			_session.cancel_solo_after_disconnect (shared_from_this(), true);
@@ -2860,8 +2858,6 @@ Route::output_change_handler (IOChange change, void * /*src*/)
 		need_to_queue_solo_change = false;
 	}
 
-	cerr << _name << ": output change, connected ? " << _output->connected() << endl;
-
 	if (!_output->connected() && _soloed_by_others_downstream) {
 		if (need_to_queue_solo_change) {
 			_session.cancel_solo_after_disconnect (shared_from_this(), false);
@@ -2874,7 +2870,6 @@ Route::output_change_handler (IOChange change, void * /*src*/)
 void
 Route::cancel_solo_after_disconnect (bool upstream)
 {
-	cerr << _name << " CSAD upstream ? " << upstream << endl;
 	if (upstream) {
 		_soloed_by_others_upstream = 0;
 	} else {

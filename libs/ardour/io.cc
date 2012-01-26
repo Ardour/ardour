@@ -69,6 +69,7 @@ IO::IO (Session& s, const string& name, Direction dir, DataType default_type)
 	, _default_type (default_type)
 {
 	_active = true;
+	Port::PostDisconnect.connect_same_thread (*this, boost::bind (&IO::disconnect_check, this, _1, _2));
 	pending_state_node = 0;
 	setup_bundle ();
 }
@@ -80,6 +81,7 @@ IO::IO (Session& s, const XMLNode& node, DataType dt)
 {
 	_active = true;
 	pending_state_node = 0;
+	Port::PostDisconnect.connect_same_thread (*this, boost::bind (&IO::disconnect_check, this, _1, _2));
 
 	set_state (node, Stateful::loading_state_version);
 	setup_bundle ();
@@ -93,6 +95,31 @@ IO::~IO ()
 
 	for (PortSet::iterator i = _ports.begin(); i != _ports.end(); ++i) {
 		_session.engine().unregister_port (*i);
+	}
+}
+
+void
+IO::disconnect_check (boost::shared_ptr<Port> a, boost::shared_ptr<Port> b)
+{
+	/* this could be called from within our own ::disconnect() method(s)
+	   or from somewhere that operates directly on a port. so, we don't
+	   know for sure if we can take this lock or not. if we fail,
+	   we assume that its safely locked by our own ::disconnect().
+	*/
+
+	Glib::Mutex::Lock tm (io_lock, Glib::TRY_LOCK);
+
+	if (tm.locked()) {
+		/* we took the lock, so we cannot be here from inside
+		 * ::disconnect()
+		 */
+		if (_ports.contains (a) || _ports.contains (b)) {
+			changed (IOChange (IOChange::ConnectionsChanged), this); /* EMIT SIGNAL */		
+		}
+	} else {
+		/* we didn't get the lock, so assume that we're inside
+		 * ::disconnect(), and it will call changed() appropriately.
+		 */
 	}
 }
 

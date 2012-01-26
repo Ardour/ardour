@@ -125,7 +125,7 @@ public:
 	static void set_engine (AudioEngine *);
 
 	PBD::Signal1<void,bool> MonitorInputChanged;
-
+	static PBD::Signal2<void,boost::shared_ptr<Port>,boost::shared_ptr<Port> > PostDisconnect;
 
 	static void set_cycle_framecnt (pframes_t n) {
 		_cycle_nframes = n;

@@ -247,6 +247,7 @@ class IO : public SessionObject, public Latent
 	std::string bundle_channel_name (uint32_t, uint32_t, DataType) const;
 
 	BufferSet _buffers;
+	void disconnect_check (boost::shared_ptr<ARDOUR::Port>, boost::shared_ptr<ARDOUR::Port>);
 };
 
 } // namespace ARDOUR
