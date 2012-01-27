@@ -144,8 +144,14 @@ SndFileSource::SndFileSource (Session& s, const string& path, const string& orig
 	_info.samplerate = rate;
 	_info.format = fmt;
 
-        /* do not open the file here - do that in write_unlocked() as needed
-         */
+	if (_flags & Destructive) {
+		if (open()) {
+			throw failed_constructor();
+		}
+	} else {
+		/* normal mode: do not open the file here - do that in write_unlocked() as needed
+		 */
+	}
 }
 
 void
