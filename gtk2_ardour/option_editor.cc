@@ -184,12 +184,15 @@ FaderOption::FaderOption (string const & i, string const & n, sigc::slot<gain_t>
 	_label.set_text (n + ":");
 	_label.set_name (X_("OptionsLabel"));
 
+	_fader_centering_box.pack_start (*_db_slider, true, false);
+
 	_box.set_spacing (4);
-	_box.pack_start (*_db_slider, false, false);
+	_box.set_homogeneous (false);
+	_box.pack_start (_fader_centering_box, false, false);
 	_box.pack_start (_db_display, false, false);
 	_box.show_all ();
 
-	set_size_request_to_display_given_text (_db_display, "-99.0", 12, 12);
+	set_size_request_to_display_given_text (_db_display, "-99.00", 12, 12);
 
 	_db_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &FaderOption::db_changed));
 }

@@ -365,6 +365,7 @@ private:
 	Gtk::Entry _db_display;
 	Gtk::Label _label;
 	Gtk::HBox _box;
+	Gtk::VBox _fader_centering_box;
 	sigc::slot<ARDOUR::gain_t> _get;
 	sigc::slot<bool, ARDOUR::gain_t> _set;
 };
