@@ -187,6 +187,7 @@ class ExportHandler : public ExportElementFactory
 	void frames_to_cd_frames_string (char* buf, framepos_t when);
 	std::string toc_escape_cdtext (const std::string&);
 	std::string toc_escape_filename (const std::string&);
+	std::string cue_escape_cdtext (const std::string& txt);
 
 	int cue_tracknum;
 	int cue_indexnum;
