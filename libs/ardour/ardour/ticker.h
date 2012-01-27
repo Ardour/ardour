@@ -44,9 +44,7 @@ public:
 	MidiClockTicker ();
 	virtual ~MidiClockTicker() {};
 
-	void tick (const framepos_t&         transport_frames,
-		   const Timecode::BBT_Time& transport_bbt,
-		   const Timecode::Time&     transport_timecode);
+	void tick (const framepos_t& transport_frames);
 
 	bool has_midi_port() const { return _midi_port != 0; }
 

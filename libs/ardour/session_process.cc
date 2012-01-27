@@ -89,18 +89,7 @@ Session::process (pframes_t nframes)
 
 	try {
 		if (Config->get_send_midi_clock() && transport_speed() == 1.0f && midi_clock->has_midi_port()) {
-
-			/* As of january 26th 2012, MidiClockTicker::tick()
-			 * doesn't actually these variables, so don't waste
-			 * cycles computing them.
-			 */
-
-			Timecode::BBT_Time transport_bbt;
-			Timecode::Time transport_timecode;
-			// _tempo_map->bbt_time_rt (transport_at_start, transport_bbt);
-			// timecode_time (transport_at_start, transport_timecode);
-
-			midi_clock->tick (transport_at_start, transport_bbt, transport_timecode);
+			midi_clock->tick (transport_at_start);
 		}
 	} catch (...) {
 		/* don't bother with a message */

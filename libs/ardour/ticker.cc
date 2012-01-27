@@ -104,7 +104,7 @@ void MidiClockTicker::transport_state_changed()
 		send_stop_event(0);
 	}
 
-	tick (position, *((Timecode::BBT_Time *) 0), *((Timecode::Time *)0));
+	tick (position);
 }
 
 void MidiClockTicker::position_changed (framepos_t position)
@@ -130,7 +130,7 @@ void MidiClockTicker::transport_looped()
 	_last_tick = loop_location->start() - elapsed_since_last_tick;
 }
 
-void MidiClockTicker::tick (const framepos_t& transport_frames, const Timecode::BBT_Time& /*transport_bbt*/, const Timecode::Time& /*transport_smpt*/)
+void MidiClockTicker::tick (const framepos_t& transport_frames)
 {
 	if (!Config->get_send_midi_clock() || _session == 0 || _session->transport_speed() != 1.0f || _midi_port == 0)
 		return;
