@@ -353,3 +353,15 @@ ActionManager::do_action (const char* group, const char*action)
 	}
 }
 
+void
+ActionManager::set_toggle_action (const char* group, const char*action, bool yn)
+{
+	Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (group, action);
+	if (act) {
+		Glib::RefPtr<Gtk::ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+		if (tact) {
+			tact->set_active (yn);
+		}
+	}
+}
+

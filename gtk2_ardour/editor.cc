@@ -2263,7 +2263,7 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 	}
 
 	if ((prop = node.property ("join-object-range"))) {
-		join_object_range_button.set_active (string_is_affirmative (prop->value ()));
+		ActionManager::set_toggle_action ("MouseMode", "set-mouse-mode-object-range", string_is_affirmative (prop->value ()));
 	}
 
 	if ((prop = node.property ("edit-point"))) {
