@@ -22,6 +22,8 @@
 
 #include <gtkmm.h>
 
+#include "ardour/playlist.h"
+
 #include "ardour_dialog.h"
 #include "region_selection.h"
 #include "progress_reporter.h"
@@ -40,8 +42,8 @@ public:
     Gtk::SpinButton       pitch_octave_spinner;
     Gtk::SpinButton       pitch_semitone_spinner;
     Gtk::SpinButton       pitch_cent_spinner;
-    RegionSelection       regions;
     Gtk::ProgressBar      progress_bar;
+    ARDOUR::RegionList    regions;
 
     /* SoundTouch */
     Gtk::CheckButton      quick_button;

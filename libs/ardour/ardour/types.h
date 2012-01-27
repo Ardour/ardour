@@ -82,6 +82,8 @@ namespace ARDOUR {
 	// associate a set of intervals with regions (e.g. for silence detection)
 	typedef std::map<boost::shared_ptr<ARDOUR::Region>,AudioIntervalResult> AudioIntervalMap;
 
+	typedef std::list<boost::shared_ptr<Region> > RegionList;
+
 	struct IOChange {
 
 		enum Type {

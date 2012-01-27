@@ -3304,15 +3304,16 @@ TimeFXDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 	}
 #endif
 
-	// XXX how do timeFX on multiple regions ?
+	if (!_editor->get_selection().regions.empty()) {
+		/* primary will already be included in the selection, and edit
+		   group shared editing will propagate selection across
+		   equivalent regions, so just use the current region
+		   selection.
+		*/
 
-	RegionSelection rs;
-	rs.add (_primary);
-
-	RegionSelection all = _editor->get_equivalent_regions (rs, ARDOUR::Properties::edit.property_id);
-
-	if (_editor->time_stretch (all, percentage) == -1) {
-		error << _("An error occurred while executing time stretch operation") << endmsg;
+		if (_editor->time_stretch (_editor->get_selection().regions, percentage) == -1) {
+			error << _("An error occurred while executing time stretch operation") << endmsg;
+		}
 	}
 }
 

@@ -2416,7 +2416,7 @@ RouteTimeAxisView::create_gain_automation_child (const Evoral::Parameter& param,
 }
 
 static
-void add_region_to_list (RegionView* rv, Playlist::RegionList* l)
+void add_region_to_list (RegionView* rv, RegionList* l)
 {
 	l->push_back (rv->region());
 }
@@ -2435,7 +2435,7 @@ RouteTimeAxisView::combine_regions ()
 		return 0;
 	}
 
-	Playlist::RegionList selected_regions;
+	RegionList selected_regions;
 	boost::shared_ptr<Playlist> playlist = track()->playlist();
 
 	_view->foreach_selected_regionview (sigc::bind (sigc::ptr_fun (add_region_to_list), &selected_regions));
@@ -2466,7 +2466,7 @@ RouteTimeAxisView::uncombine_regions ()
 		return;
 	}
 
-	Playlist::RegionList selected_regions;
+	RegionList selected_regions;
 	boost::shared_ptr<Playlist> playlist = track()->playlist();
 
 	/* have to grab selected regions first because the uncombine is going
@@ -2477,7 +2477,7 @@ RouteTimeAxisView::uncombine_regions ()
 
 	playlist->clear_changes ();
 
-	for (Playlist::RegionList::iterator i = selected_regions.begin(); i != selected_regions.end(); ++i) {
+	for (RegionList::iterator i = selected_regions.begin(); i != selected_regions.end(); ++i) {
 		playlist->uncombine (*i);
 	}
 

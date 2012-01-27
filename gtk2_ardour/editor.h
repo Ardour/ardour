@@ -1834,7 +1834,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	int time_stretch (RegionSelection&, float fraction);
 	int pitch_shift (RegionSelection&, float cents);
 	void pitch_shift_region ();
-	int time_fx (RegionSelection&, float val, bool pitching);
 
 	void transpose_region ();
 
@@ -2080,6 +2079,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void follow_mixer_selection ();
 	bool _following_mixer_selection;
+
+	int time_fx (ARDOUR::RegionList&, float val, bool pitching);
 
 	friend class Drag;
 	friend class RegionDrag;

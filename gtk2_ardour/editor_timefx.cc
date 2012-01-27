@@ -21,8 +21,8 @@
 #include <cstdlib>
 #include <cmath>
 #include <ctime>
-
 #include <string>
+#include <set>
 
 #include "pbd/error.h"
 #include "pbd/pthread_utils.h"
@@ -63,30 +63,58 @@ using namespace Gtkmm2ext;
 int
 Editor::time_stretch (RegionSelection& regions, float fraction)
 {
-	// FIXME: kludge, implement stretching of selection of both types
+	RegionList audio;
+	RegionList midi;
+	int aret;
 
-	if (regions.front()->region()->data_type() == DataType::AUDIO) {
-		// Audio, pop up timefx dialog
-		return time_fx (regions, fraction, false);
-	} else {
-		// MIDI, just stretch
-		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (&regions.front()->get_time_axis_view());
-		if (!rtv)
-			return -1;
+	begin_reversible_command (_("stretch/shrink"));
 
-		boost::shared_ptr<Playlist> playlist = rtv->track()->playlist();
-
-		ARDOUR::TimeFXRequest request;
-		request.time_fraction = fraction;
-		MidiStretch stretch(*_session, request);
-		begin_reversible_command ("midi stretch");
-		stretch.run(regions.front()->region());
-                playlist->clear_changes ();
-		playlist->replace_region (regions.front()->region(), stretch.results[0],
-				regions.front()->region()->position());
-		_session->add_command (new StatefulDiffCommand (playlist));
-		commit_reversible_command ();
+	for (RegionSelection::iterator i = regions.begin(); i != regions.end(); ++i) {
+		if  ((*i)->region()->data_type() == DataType::AUDIO) {
+			audio.push_back ((*i)->region());
+		} else if  ((*i)->region()->data_type() == DataType::MIDI) {
+			midi.push_back ((*i)->region());
+		}
 	}
+
+	if ((aret = time_fx (audio, fraction, false)) != 0) {
+		return aret;
+	}
+
+	set<boost::shared_ptr<Playlist> > midi_playlists_affected;
+
+	for (RegionList::iterator i = midi.begin(); i != midi.end(); ++i) {
+		boost::shared_ptr<Playlist> playlist = (*i)->playlist();
+
+		if (playlist) {
+			playlist->clear_changes ();
+		}
+
+	}
+
+	ARDOUR::TimeFXRequest request;
+	request.time_fraction = fraction;
+
+	for (RegionList::iterator i = midi.begin(); i != midi.end(); ++i) {
+		boost::shared_ptr<Playlist> playlist = (*i)->playlist();
+
+		if (!playlist) {
+			continue;
+		}
+
+		MidiStretch stretch (*_session, request);
+		stretch.run (*i);
+
+		playlist->replace_region (regions.front()->region(), stretch.results[0],
+					  regions.front()->region()->position());
+		midi_playlists_affected.insert (playlist);
+	}
+
+	for (set<boost::shared_ptr<Playlist> >::iterator p = midi_playlists_affected.begin(); p != midi_playlists_affected.end(); ++p) {
+		_session->add_command (new StatefulDiffCommand (*p));
+	}
+
+	commit_reversible_command ();
 
 	return 0;
 }
@@ -94,14 +122,28 @@ Editor::time_stretch (RegionSelection& regions, float fraction)
 int
 Editor::pitch_shift (RegionSelection& regions, float fraction)
 {
-	return time_fx (regions, fraction, true);
+	RegionList rl;
+
+	for (RegionSelection::iterator i = regions.begin(); i != regions.end(); ++i) {
+		rl.push_back ((*i)->region());
+	}
+
+	begin_reversible_command (_("pitch shift"));
+
+	int ret = time_fx (rl, fraction, true);
+
+	if (ret == 0) {
+		commit_reversible_command ();
+	}
+
+	return ret;
 }
 
 /** @param val Percentage to time stretch by; ignored if pitch-shifting.
  *  @param pitching true to pitch shift, false to time stretch.
  *  @return -1 in case of error, 1 if operation was cancelled by the user, 0 if everything went ok */
 int
-Editor::time_fx (RegionSelection& regions, float val, bool pitching)
+Editor::time_fx (RegionList& regions, float val, bool pitching)
 {
 	delete current_timefx;
 
@@ -264,45 +306,31 @@ Editor::time_fx (RegionSelection& regions, float val, bool pitching)
 void
 Editor::do_timefx (TimeFXDialog& dialog)
 {
-	Track*    t;
 	boost::shared_ptr<Playlist> playlist;
 	boost::shared_ptr<Region>   new_region;
-	bool in_command = false;
+	set<boost::shared_ptr<Playlist> > playlists_affected;
 
 	uint32_t const N = dialog.regions.size ();
 
-	for (RegionSelection::iterator i = dialog.regions.begin(); i != dialog.regions.end(); ) {
-		AudioRegionView* arv = dynamic_cast<AudioRegionView*>(*i);
+	for (RegionList::iterator i = dialog.regions.begin(); i != dialog.regions.end(); ++i) {
+		boost::shared_ptr<Playlist> playlist = (*i)->playlist();
 
-		if (!arv) {
-			continue;
+		if (playlist) {
+			playlist->clear_changes ();
 		}
+	}
 
-		boost::shared_ptr<AudioRegion> region (arv->audio_region());
-		TimeAxisView* tv = &(arv->get_time_axis_view());
-		RouteTimeAxisView* rtv;
-		RegionSelection::iterator tmp;
+	for (RegionList::iterator i = dialog.regions.begin(); i != dialog.regions.end(); ++i) {
 
-		tmp = i;
-		++tmp;
+		boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion> (*i);
 
-		if ((rtv = dynamic_cast<RouteTimeAxisView*> (tv)) == 0) {
-			i = tmp;
-			continue;
-		}
-
-		if ((t = dynamic_cast<Track*> (rtv->route().get())) == 0) {
-			i = tmp;
-			continue;
-		}
-
-		if ((playlist = t->playlist()) == 0) {
-			i = tmp;
+		if (!region || (playlist = region->playlist()) == 0) {
 			continue;
 		}
 
 		if (dialog.request.cancel) {
 			/* we were cancelled */
+			/* XXX what to do about playlists already affected ? */
 			dialog.status = 1;
 			return;
 		}
@@ -331,24 +359,16 @@ Editor::do_timefx (TimeFXDialog& dialog)
 		if (!fx->results.empty()) {
 			new_region = fx->results.front();
 
-			if (!in_command) {
-				_session->begin_reversible_command (dialog.pitching ? _("pitch shift") : _("time stretch"));
-				in_command = true;
-			}
-
-                        playlist->clear_changes ();
 			playlist->replace_region (region, new_region, region->position());
-			_session->add_command (new StatefulDiffCommand (playlist));
+			playlists_affected.insert (playlist);
 		}
 
 		current_timefx->ascend ();
-
-		i = tmp;
 		delete fx;
 	}
 
-	if (in_command) {
-		_session->commit_reversible_command ();
+	for (set<boost::shared_ptr<Playlist> >::iterator p = playlists_affected.begin(); p != playlists_affected.end(); ++p) {
+		_session->add_command (new StatefulDiffCommand (*p));
 	}
 
 	dialog.status = 0;

@@ -81,7 +81,6 @@ class RegionListProperty : public PBD::SequenceProperty<std::list<boost::shared_
 class Playlist : public SessionObject , public boost::enable_shared_from_this<Playlist>
 {
 public:
-	typedef std::list<boost::shared_ptr<Region> > RegionList;
 	static void make_property_quarks ();
 
 	Playlist (Session&, const XMLNode&, DataType type, bool hidden = false);

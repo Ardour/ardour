@@ -33,7 +33,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-MidiStretch::MidiStretch (Session& s, TimeFXRequest& req)
+MidiStretch::MidiStretch (Session& s, const TimeFXRequest& req)
 	: Filter (s)
 	, _request (req)
 {
