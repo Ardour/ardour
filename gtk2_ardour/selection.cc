@@ -1045,6 +1045,9 @@ void
 Selection::add (const list<Marker*>& m)
 {
 	markers.insert (markers.end(), m.begin(), m.end());
+	markers.sort ();
+	markers.unique ();
+	
 	MarkersChanged ();
 }
 
