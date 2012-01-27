@@ -64,7 +64,7 @@ class ProcessThread;
 class AudioEngine : public SessionHandlePtr
 {
 public:
-	typedef std::set<boost::shared_ptr<Port> > Ports;
+	typedef std::map<std::string,boost::shared_ptr<Port> > Ports;
 
 	AudioEngine (std::string client_name, std::string session_uuid);
 	virtual ~AudioEngine ();
@@ -185,6 +185,7 @@ public:
 	void get_physical_inputs (DataType type, std::vector<std::string>&);
 
 	boost::shared_ptr<Port> get_port_by_name (const std::string &);
+	void port_renamed (const std::string&, const std::string&);
 
 	enum TransportState {
 		TransportStopped = JackTransportStopped,

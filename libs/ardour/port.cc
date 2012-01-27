@@ -472,8 +472,10 @@ Port::set_name (std::string const & n)
 	int const r = jack_port_set_name (_jack_port, n.c_str());
 
 	if (r == 0) {
+		_engine->port_renamed (_name, n);
 		_name = n;
 	}
+
 
 	return r;
 }
