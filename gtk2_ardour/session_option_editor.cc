@@ -280,7 +280,7 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 
 	ComboOption<InsertMergePolicy>* li = new ComboOption<InsertMergePolicy> (
 		"insert-merge-policy",
-		_("Policy for handling same note\nand channel overlaps"),
+		_("Policy for handling overlapping notes\n on the same MIDI channel"),
 		sigc::mem_fun (*_session_config, &SessionConfiguration::get_insert_merge_policy),
 		sigc::mem_fun (*_session_config, &SessionConfiguration::set_insert_merge_policy)
 		);
