@@ -18,6 +18,7 @@
     $Id$
 */
 
+#include <boost/noncopyable.hpp>
 
 #include "pbd/signals.h"
 
@@ -37,40 +38,17 @@ namespace ARDOUR
 
 class Session;
 
-class Ticker : public SessionHandlePtr
+class MidiClockTicker : public SessionHandlePtr, boost::noncopyable
 {
 public:
-	Ticker() {};
-	virtual ~Ticker() {}
-
-	virtual void tick (
-		const framepos_t&         transport_frames,
-		const Timecode::BBT_Time& transport_bbt,
-		const Timecode::Time&     transport_timecode) = 0;
-
-	void set_session (Session* s);
-};
-
-class MidiClockTicker : public Ticker
-{
-	/// Singleton
-private:
-	MidiClockTicker() : _midi_port(0), _ppqn(24), _last_tick(0.0) {};
-	MidiClockTicker( const MidiClockTicker& );
-	MidiClockTicker& operator= (const MidiClockTicker&);
-
-public:
+	MidiClockTicker ();
 	virtual ~MidiClockTicker() {};
 
-	static MidiClockTicker& instance() {
-		static MidiClockTicker _instance;
-		return _instance;
-	}
+	void tick (const framepos_t&         transport_frames,
+		   const Timecode::BBT_Time& transport_bbt,
+		   const Timecode::Time&     transport_timecode);
 
-	void tick(
-		const framepos_t&         transport_frames,
-		const Timecode::BBT_Time& transport_bbt,
-		const Timecode::Time&     transport_timecode);
+	bool has_midi_port() const { return _midi_port != 0; }
 
 	void set_session (Session* s);
 	void session_going_away();

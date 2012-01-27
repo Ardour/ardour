@@ -39,6 +39,7 @@
 #include "ardour/graph.h"
 #include "ardour/audio_port.h"
 #include "ardour/tempo.h"
+#include "ardour/ticker.h"
 #include "ardour/cycle_timer.h"
 
 #include "midi++/manager.h"
@@ -57,6 +58,8 @@ using namespace std;
 void
 Session::process (pframes_t nframes)
 {
+	framepos_t transport_at_start = _transport_frame;
+
 	MIDI::Manager::instance()->cycle_start(nframes);
 
 	_silent = false;
@@ -78,14 +81,27 @@ Session::process (pframes_t nframes)
 
 	_engine.main_thread()->drop_buffers ();
 
-	// the ticker is for sending time information like MidiClock
-	framepos_t transport_frames = transport_frame();
-	Timecode::BBT_Time transport_bbt;
+	/* deliver MIDI clock. Note that we need to use the transport frame
+	 * position at the start of process(), not the value at the end of
+	 * it. We may already have ticked() because of a transport state
+	 * change, for example.
+	 */
+
 	try {
-		_tempo_map->bbt_time_rt (transport_frames, transport_bbt);
-		Timecode::Time transport_timecode;
-		timecode_time(transport_frames, transport_timecode);
-		tick (transport_frames, transport_bbt, transport_timecode); /* EMIT SIGNAL */
+		if (Config->get_send_midi_clock() && transport_speed() == 1.0f && midi_clock->has_midi_port()) {
+
+			/* As of january 26th 2012, MidiClockTicker::tick()
+			 * doesn't actually these variables, so don't waste
+			 * cycles computing them.
+			 */
+
+			Timecode::BBT_Time transport_bbt;
+			Timecode::Time transport_timecode;
+			// _tempo_map->bbt_time_rt (transport_at_start, transport_bbt);
+			// timecode_time (transport_at_start, transport_timecode);
+
+			midi_clock->tick (transport_at_start, transport_bbt, transport_timecode);
+		}
 	} catch (...) {
 		/* don't bother with a message */
 	}

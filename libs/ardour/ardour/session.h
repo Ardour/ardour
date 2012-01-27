@@ -104,6 +104,7 @@ class Graph;
 class IO;
 class IOProcessor;
 class ImportStatus;
+class MidiClockTicker;
 class MidiControlUI;
 class MidiRegion;
 class MidiSource;
@@ -512,9 +513,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	bool silent () { return _silent; }
 
 	TempoMap& tempo_map() { return *_tempo_map; }
-
-	/// signals the current transport position in frames, bbt and timecode time (in that order)
-	PBD::Signal3<void, const framepos_t &, const Timecode::BBT_Time&, const Timecode::Time&> tick;
 
 	/* region info  */
 
@@ -1520,6 +1518,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	uint32_t next_control_id () const;
 	bool ignore_route_processor_changes;
+
+	MidiClockTicker* midi_clock;
 };
 
 } // namespace ARDOUR

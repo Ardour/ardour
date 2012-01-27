@@ -14,14 +14,16 @@
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-    $Id$
 */
 
 #include "pbd/compose.h"
+#include "pbd/stacktrace.h"
+
 #include "midi++/port.h"
 #include "midi++/manager.h"
+
 #include "evoral/midi_events.h"
+
 #include "ardour/ticker.h"
 #include "ardour/session.h"
 #include "ardour/tempo.h"
@@ -29,19 +31,17 @@
 
 using namespace ARDOUR;
 
-void Ticker::set_session (Session* s)
+MidiClockTicker::MidiClockTicker ()
+	: _midi_port (0)
+	, _ppqn (24)
+	, _last_tick (0.0)
 {
-	SessionHandlePtr::set_session (s);
-
-	if (_session) {
-		_session->tick.connect_same_thread (_session_connections, boost::bind (&Ticker::tick, this, _1, _2, _3));
-	}
 }
 
 void MidiClockTicker::set_session (Session* s)
 {
-	 Ticker::set_session (s);
-
+	SessionHandlePtr::set_session (s);
+	
 	 if (_session) {
 		 _session->TransportStateChange.connect_same_thread (_session_connections, boost::bind (&MidiClockTicker::transport_state_changed, this));
 		 _session->PositionChanged.connect_same_thread (_session_connections, boost::bind (&MidiClockTicker::position_changed, this, _1));
@@ -73,7 +73,7 @@ void MidiClockTicker::transport_state_changed()
 	framepos_t position = _session->transport_frame();
 
 	DEBUG_TRACE (PBD::DEBUG::MidiClock,
-		     string_compose ("Transport state change, speed: %1 position: %2 play loop: %3\n", speed, position, _session->get_play_loop())
+		     string_compose ("Transport state change @ %4, speed: %1 position: %2 play loop: %3\n", speed, position, _session->get_play_loop(), position)
 		);
 
 	if (speed == 1.0f) {
@@ -104,7 +104,7 @@ void MidiClockTicker::transport_state_changed()
 		send_stop_event(0);
 	}
 
-	tick(position, *((Timecode::BBT_Time *) 0), *((Timecode::Time *)0));
+	tick (position, *((Timecode::BBT_Time *) 0), *((Timecode::Time *)0));
 }
 
 void MidiClockTicker::position_changed (framepos_t position)
@@ -137,7 +137,7 @@ void MidiClockTicker::tick (const framepos_t& transport_frames, const Timecode::
 
 	while (true) {
 		double next_tick = _last_tick + one_ppqn_in_frames(transport_frames);
-		framecnt_t next_tick_offset = framecnt_t(next_tick) - transport_frames;
+		frameoffset_t next_tick_offset = llrint (next_tick) - transport_frames;
 
 		DEBUG_TRACE (PBD::DEBUG::MidiClock,
 			     string_compose ("Transport: %1, last tick time: %2, next tick time: %3, offset: %4, cycle length: %5\n",
@@ -145,11 +145,11 @@ void MidiClockTicker::tick (const framepos_t& transport_frames, const Timecode::
 				     )
 			);
 
-		if (next_tick_offset >= _midi_port->nframes_this_cycle())
-			return;
+		if (next_tick_offset >= _midi_port->nframes_this_cycle()) {
+			break;
+		}
 
-		send_midi_clock_event(next_tick_offset);
-
+		send_midi_clock_event (next_tick_offset);
 		_last_tick = next_tick;
 	}
 }

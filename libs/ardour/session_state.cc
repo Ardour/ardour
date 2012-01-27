@@ -348,6 +348,9 @@ Session::second_stage_init ()
 	_engine.Halted.connect_same_thread (*this, boost::bind (&Session::engine_halted, this));
 	_engine.Xrun.connect_same_thread (*this, boost::bind (&Session::xrun_recovery, this));
 
+	midi_clock = new MidiClockTicker ();
+	midi_clock->set_session (this);
+
 	try {
 		when_engine_running ();
 	}
@@ -371,7 +374,6 @@ Session::second_stage_init ()
 	MIDI::Manager::instance()->mmc()->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdMmcReset));
 	MIDI::Manager::instance()->mmc()->send (MIDI::MachineControlCommand (Timecode::Time ()));
 
-	MidiClockTicker::instance().set_session (this);
 	MIDI::Name::MidiPatchManager::instance().set_session (this);
 
 	/* initial program change will be delivered later; see ::config_changed() */
