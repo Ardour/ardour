@@ -1167,15 +1167,16 @@ Session::state(bool full_state)
 	}
 
 	if (_click_io) {
-		child = node->add_child ("Click");
-		child->add_child_nocopy (_click_io->state (full_state));
+		XMLNode* gain_child = node->add_child ("Click");
+		gain_child->add_child_nocopy (_click_io->state (full_state));
+		gain_child->add_child_nocopy (_click_gain->state (full_state));
 	}
 
 	if (full_state) {
-		child = node->add_child ("NamedSelections");
+		XMLNode* ns_child = node->add_child ("NamedSelections");
 		for (NamedSelectionList::iterator i = named_selections.begin(); i != named_selections.end(); ++i) {
 			if (full_state) {
-				child->add_child_nocopy ((*i)->get_state());
+				ns_child->add_child_nocopy ((*i)->get_state());
 			}
 		}
 	}
@@ -1409,7 +1410,13 @@ Session::set_state (const XMLNode& node, int version)
 	if ((child = find_named_node (node, "Click")) == 0) {
 		warning << _("Session: XML state has no click section") << endmsg;
 	} else if (_click_io) {
-		_click_io->set_state (*child, version);
+		const XMLNodeList& children (child->children());
+		XMLNodeList::const_iterator i = children.begin();
+		_click_io->set_state (**i, version);
+		++i;
+		if (i != children.end()) {
+			_click_gain->set_state (**i, version);
+		}
 	}
 
 	if ((child = find_named_node (node, "ControlProtocols")) != 0) {
@@ -3479,6 +3486,12 @@ Session::config_changed (std::string p, bool ours)
 			}
 		} else {
 			_clicking = false;
+		}
+
+	} else if (p == "click-gain") {
+		
+		if (_click_gain) {
+			_click_gain->set_gain (Config->get_click_gain(), this);
 		}
 
 	} else if (p == "send-mtc") {

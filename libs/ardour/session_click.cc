@@ -20,6 +20,7 @@
 #include <list>
 #include <cerrno>
 
+#include "ardour/amp.h"
 #include "ardour/ardour.h"
 #include "ardour/audio_buffer.h"
 #include "ardour/buffer_set.h"
@@ -118,9 +119,9 @@ Session::click (framepos_t start, framecnt_t nframes)
 		}
 
 		copy = min (clk->duration - clk->offset, nframes - internal_offset);
-
+		
 		memcpy (buf + internal_offset, &clk->data[clk->offset], copy * sizeof (Sample));
-
+		
 		clk->offset += copy;
 
 		if (clk->offset >= clk->duration) {
@@ -131,6 +132,7 @@ Session::click (framepos_t start, framecnt_t nframes)
 		}
 	}
 
+	_click_gain->run (bufs, 0, 0, nframes, false);
 	_click_io->copy_to_outputs (bufs, DataType::AUDIO, nframes, 0);
 }
 

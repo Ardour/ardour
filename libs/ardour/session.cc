@@ -377,19 +377,27 @@ Session::when_engine_running ()
 		XMLNode* child = 0;
 
 		_click_io.reset (new ClickIO (*this, "click"));
+		_click_gain.reset (new Amp (*this));
+		_click_gain->activate ();
 
 		if (state_tree && (child = find_named_node (*state_tree->root(), "Click")) != 0) {
 
 			/* existing state for Click */
-			int c;
+			int c = 0;
 
 			if (Stateful::loading_state_version < 3000) {
 				c = _click_io->set_state_2X (*child->children().front(), Stateful::loading_state_version, false);
 			} else {
-				c = _click_io->set_state (*child->children().front(), Stateful::loading_state_version);
+				const XMLNodeList& children (child->children());
+				XMLNodeList::const_iterator i = children.begin();
+				if ((c = _click_io->set_state (**i, Stateful::loading_state_version)) == 0) {
+					++i;
+					if (i != children.end()) {
+						c = _click_gain->set_state (**i, Stateful::loading_state_version);
+					}
+				}
 			}
-
-
+			
 			if (c == 0) {
 				_clicking = Config->get_clicking ();
 

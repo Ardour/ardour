@@ -85,6 +85,7 @@ namespace Evoral {
 
 namespace ARDOUR {
 
+class Amp;
 class AudioEngine;
 class AudioFileSource;
 class AudioRegion;
@@ -723,6 +724,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	/* clicking */
 
 	boost::shared_ptr<IO> click_io() { return _click_io; }
+	boost::shared_ptr<Amp> click_gain() { return _click_gain; }
 
 	/* disk, buffer loads */
 
@@ -1377,14 +1379,15 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	/* click track */
 	typedef std::list<Click*> Clicks;
-	Clicks                 clicks;
-	bool                  _clicking;
-	boost::shared_ptr<IO> _click_io;
-	Sample*                click_data;
-	Sample*                click_emphasis_data;
-	framecnt_t             click_length;
-	framecnt_t             click_emphasis_length;
-	mutable Glib::RWLock   click_lock;
+	Clicks                  clicks;
+	bool                   _clicking;
+	boost::shared_ptr<IO>  _click_io;
+	boost::shared_ptr<Amp> _click_gain;
+	Sample*                 click_data;
+	Sample*                 click_emphasis_data;
+	framecnt_t              click_length;
+	framecnt_t              click_emphasis_length;
+	mutable Glib::RWLock    click_lock;
 
 	static const Sample     default_click[];
 	static const framecnt_t default_click_length;

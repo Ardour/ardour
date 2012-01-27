@@ -80,7 +80,7 @@ public:
 		b = manage (new Button (_("Browse...")));
 		b->signal_clicked().connect (sigc::mem_fun (*this, &ClickOptions::click_emphasis_browse_clicked));
 		t->attach (*b, 2, 3, 1, 2, FILL);
-
+		
 		_box->pack_start (*t, false, false);
 
 		_click_path_entry.signal_activate().connect (sigc::mem_fun (*this, &ClickOptions::click_changed));	
@@ -922,6 +922,14 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Misc"), new OptionEditorHeading (_("Click")));
 
 	add_option (_("Misc"), new ClickOptions (_rc_config, this));
+
+	add_option (_("Misc"),
+	     new FaderOption (
+		     "click-gain",
+		     _("Click Gain Level"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_click_gain),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_click_gain)
+		     ));
 
 	/* TRANSPORT */
 
