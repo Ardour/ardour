@@ -771,6 +771,7 @@ LV2Plugin::set_state(const XMLNode& node, int version)
 		set_parameter(port_id, atof(value));
 	}
 
+#ifdef HAVE_NEW_LILV
 	_state_version = 0;
 	if ((prop = node.property("state-dir")) != 0) {
 		if (sscanf(prop->value().c_str(), "state%u", &_state_version) != 1) {
@@ -790,6 +791,7 @@ LV2Plugin::set_state(const XMLNode& node, int version)
 
 		lilv_state_restore(state, _impl->instance, NULL, NULL, 0, NULL);
 	}
+#endif
 
 	latency_compute_run();
 
