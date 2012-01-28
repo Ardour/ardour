@@ -122,7 +122,6 @@ ExportDialog::init ()
 
 	/* Progress indicators */
 
-	progress_widget.pack_start (progress_label, false, false, 6);
 	progress_widget.pack_start (progress_bar, false, false, 6);
 
 	/* Buttons */
@@ -340,7 +339,7 @@ ExportDialog::progress_timeout ()
 		                              status->timespan, status->total_timespans);
 		progress = ((float) status->processed_frames_current_timespan) / status->total_frames_current_timespan;
 	}
-	progress_label.set_text (status_text);
+	progress_bar.set_text (status_text);
 
 	if (progress < previous_progress) {
 		// Work around gtk bug
@@ -448,4 +447,3 @@ StemExportDialog::init_components ()
 	channel_selector.reset (new TrackExportChannelSelector (_session, profile_manager));
 	file_notebook.reset (new ExportFileNotebook ());
 }
-

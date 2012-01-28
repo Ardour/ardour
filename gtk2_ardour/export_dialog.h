@@ -127,7 +127,6 @@ class ExportDialog : public ArdourDialog {
 
 	/* Progress bar */
 
-	Gtk::Label              progress_label;
 	Gtk::ProgressBar        progress_bar;
 	sigc::connection        progress_connection;
 
