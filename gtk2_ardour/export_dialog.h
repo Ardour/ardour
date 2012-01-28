@@ -131,6 +131,12 @@ class ExportDialog : public ArdourDialog {
 	Gtk::ProgressBar        progress_bar;
 	sigc::connection        progress_connection;
 
+	/* Normalizing */
+
+	Gtk::VBox               normalizing_widget;
+	Gtk::Label              normalizing_label;
+	Gtk::ProgressBar        normalizing_bar;
+
 	/* Buttons */
 
 	Gtk::Button *           cancel_button;

@@ -125,6 +125,10 @@ ExportDialog::init ()
 	progress_widget.pack_start (progress_label, false, false, 6);
 	progress_widget.pack_start (progress_bar, false, false, 6);
 
+	progress_widget.pack_start (normalizing_widget, false, false, 0);
+	normalizing_widget.pack_start (normalizing_label, false, false, 6);
+	normalizing_widget.pack_start (normalizing_bar, false, false, 6);
+
 	/* Buttons */
 
 	cancel_button = add_button (Gtk::Stock::CANCEL, RESPONSE_CANCEL);
@@ -310,6 +314,7 @@ ExportDialog::show_progress ()
 	warning_widget.hide_all();
 	progress_widget.show ();
 	progress_widget.show_all_children ();
+	normalizing_widget.hide();
 	progress_connection = Glib::signal_timeout().connect (sigc::mem_fun(*this, &ExportDialog::progress_timeout), 100);
 
 	gtk_main_iteration ();
@@ -329,17 +334,20 @@ ExportDialog::show_progress ()
 gint
 ExportDialog::progress_timeout ()
 {
-	std::string status_text;
 	if (status->normalizing) {
-		 status_text = string_compose (_("Normalizing timespan %1 of %2"),
-		                               status->timespan, status->total_timespans);
+		normalizing_widget.show();
+		normalizing_label.set_text (string_compose (_("Normalizing timespan %1 of %2"),
+		                                            status->timespan, status->total_timespans));
+		normalizing_bar.set_fraction (status->progress);
 	} else {
-		status_text = string_compose (_("Exporting timespan %1 of %2"),
-		                              status->timespan, status->total_timespans);
-	}
-	progress_label.set_text (status_text);
+		normalizing_bar.set_fraction (0);
+		normalizing_label.set_text ("");
 
-	progress_bar.set_fraction (status->progress);
+		progress_label.set_text (string_compose (_("Exporting timespan %1 of %2"),
+		                                         status->timespan, status->total_timespans));
+		progress_bar.set_fraction (status->progress);
+	}
+
 	return TRUE;
 }
 
