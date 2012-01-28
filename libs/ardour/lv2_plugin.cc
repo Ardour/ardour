@@ -460,29 +460,32 @@ LV2Plugin::c_ui_type ()
 	return (void*)_impl->ui_type;
 }
 
+/** Directory for all plugin state. */
+const std::string
+LV2Plugin::plugin_dir() const
+{
+	return Glib::build_filename(_session.plugins_dir(), _insert_id.to_s());
+}
+
 /** Directory for files created by the plugin (except during save). */
 const std::string
 LV2Plugin::scratch_dir() const
 {
-	return Glib::build_filename(
-		_session.plugins_dir(), _insert_id.to_s(), "scratch");
+	return Glib::build_filename(plugin_dir(), "scratch");
 }
 
 /** Directory for snapshots of files in the scratch directory. */
 const std::string
 LV2Plugin::file_dir() const
 {
-	return Glib::build_filename(
-		_session.plugins_dir(), _insert_id.to_s(), "files");
+	return Glib::build_filename(plugin_dir(), "files");
 }
 
 /** Directory to save state snapshot version @c num into. */
 const std::string
 LV2Plugin::state_dir(unsigned num) const
 {
-	return Glib::build_filename(_session.plugins_dir(),
-	                            _insert_id.to_s(),
-	                            string_compose("state%1", num));
+	return Glib::build_filename(plugin_dir(), string_compose("state%1", num));
 }
 
 /** Implementation of state:makePath for files created at instantiation time.
@@ -780,10 +783,9 @@ LV2Plugin::set_state(const XMLNode& node, int version)
 				prop->value()) << endmsg;
 		}
 
-		std::string state_file = Glib::build_filename(_session.plugins_dir(),
-		                                              _insert_id.to_s(),
-		                                              prop->value(),
-		                                              "state.ttl");
+		std::string state_file = Glib::build_filename(
+			plugin_dir(),
+			Glib::build_filename(prop->value(), "state.ttl"));
 
 		cout << "Loading LV2 state from " << state_file << endl;
 		LilvState* state = lilv_state_new_from_file(

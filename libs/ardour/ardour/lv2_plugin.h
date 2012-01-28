@@ -156,6 +156,7 @@ class LV2Plugin : public ARDOUR::Plugin
 	static uint32_t _midi_event_type;
 	static uint32_t _state_path_type;
 
+	const std::string plugin_dir () const;
 	const std::string scratch_dir () const;
 	const std::string file_dir () const;
 	const std::string state_dir (unsigned num) const;
