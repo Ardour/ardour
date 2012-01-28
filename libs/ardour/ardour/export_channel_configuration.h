@@ -68,6 +68,9 @@ class ExportChannelConfiguration : public boost::enable_shared_from_this<ExportC
 	void set_name (std::string name) { _name = name; }
 	void set_split (bool value) { split = value; }
 
+	RegionExportChannelFactory::Type region_processing_type() const { return region_type; }
+	void set_region_processing_type(RegionExportChannelFactory::Type type) { region_type = type; }
+
 	bool get_split () const { return split; }
 	uint32_t get_n_chans () const { return channels.size(); }
 
@@ -88,6 +91,7 @@ class ExportChannelConfiguration : public boost::enable_shared_from_this<ExportC
 	ChannelList     channels;
 	bool            split; // Split to mono files
 	std::string  _name;
+	RegionExportChannelFactory::Type region_type;
 };
 
 } // namespace ARDOUR

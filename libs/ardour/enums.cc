@@ -27,6 +27,7 @@
 #include "ardour/export_filename.h"
 #include "ardour/export_format_base.h"
 #include "ardour/export_profile_manager.h"
+#include "ardour/export_channel_configuration.h"
 #include "ardour/io.h"
 #include "ardour/location.h"
 #include "ardour/midi_model.h"
@@ -112,6 +113,7 @@ setup_enum_writer ()
 	ExportFormatBase::SampleRate _ExportFormatBase_SampleRate;
 	ExportFormatBase::SRCQuality _ExportFormatBase_SRCQuality;
 	ExportProfileManager::TimeFormat _ExportProfileManager_TimeFormat;
+	RegionExportChannelFactory::Type _RegionExportChannelFactory_Type;
 	Delivery::Role _Delivery_Role;
 	IO::Direction _IO_Direction;
 	MuteMaster::MutePoint _MuteMaster_MutePoint;
@@ -528,6 +530,12 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (ExportProfileManager, MinSec);
 	REGISTER_CLASS_ENUM (ExportProfileManager, Frames);
 	REGISTER (_ExportProfileManager_TimeFormat);
+
+	REGISTER_CLASS_ENUM (RegionExportChannelFactory, None);
+	REGISTER_CLASS_ENUM (RegionExportChannelFactory, Raw);
+	REGISTER_CLASS_ENUM (RegionExportChannelFactory, Fades);
+	REGISTER_CLASS_ENUM (RegionExportChannelFactory, Processed);
+	REGISTER (_RegionExportChannelFactory_Type);
 
 	REGISTER_CLASS_ENUM (Delivery, Insert);
 	REGISTER_CLASS_ENUM (Delivery, Send);

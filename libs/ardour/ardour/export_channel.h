@@ -93,6 +93,7 @@ class RegionExportChannelFactory
 {
   public:
 	enum Type {
+		None,
 		Raw,
 		Fades,
 		Processed

@@ -478,6 +478,24 @@ void
 RegionExportChannelSelector::sync_with_manager ()
 {
 	state = manager->get_channel_configs().front();
+
+	if (!state) { return; }
+
+	switch (state->config->region_processing_type()) {
+	case RegionExportChannelFactory::None:
+		// Do nothing
+		break;
+	case RegionExportChannelFactory::Raw:
+		raw_button.set_active (true);
+		break;
+	case RegionExportChannelFactory::Fades:
+		fades_button.set_active (true);
+		break;
+	case RegionExportChannelFactory::Processed:
+		processed_button.set_active (true);
+		break;
+	}
+
 	handle_selection ();
 }
 
@@ -490,16 +508,20 @@ RegionExportChannelSelector::handle_selection ()
 
 	state->config->clear_channels ();
 
+	RegionExportChannelFactory::Type type = RegionExportChannelFactory::None;
 	if (raw_button.get_active ()) {
-		factory.reset (new RegionExportChannelFactory (_session, region, track, RegionExportChannelFactory::Raw));
+		type = RegionExportChannelFactory::Raw;
 	} else if (fades_button.get_active ()) {
-		factory.reset (new RegionExportChannelFactory (_session, region, track, RegionExportChannelFactory::Fades));
+		type = RegionExportChannelFactory::Fades;
 	} else if (processed_button.get_active ()) {
-		factory.reset (new RegionExportChannelFactory(_session, region, track, RegionExportChannelFactory::Processed));
+		type = RegionExportChannelFactory::Processed;
 	} else {
 		CriticalSelectionChanged ();
 		return;
 	}
+
+	factory.reset (new RegionExportChannelFactory (_session, region, track, type));
+	state->config->set_region_processing_type (type);
 
 	for (size_t chan = 0; chan < region_chans; ++chan) {
 		state->config->register_channel (factory->create (chan));

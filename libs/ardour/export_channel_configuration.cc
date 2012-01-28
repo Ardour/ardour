@@ -31,6 +31,7 @@
 #include "ardour/audioengine.h"
 
 #include "pbd/convert.h"
+#include "pbd/enumwriter.h"
 #include "pbd/pthread_utils.h"
 
 using namespace PBD;
@@ -40,9 +41,10 @@ namespace ARDOUR
 
 /* ExportChannelConfiguration */
 
-ExportChannelConfiguration::ExportChannelConfiguration (Session & session) :
-  session (session),
-  split (false)
+ExportChannelConfiguration::ExportChannelConfiguration (Session & session)
+  : session (session)
+  , split (false)
+  , region_type (RegionExportChannelFactory::None)
 {
 
 }
@@ -55,6 +57,15 @@ ExportChannelConfiguration::get_state ()
 
 	root->add_property ("split", get_split() ? "true" : "false");
 	root->add_property ("channels", to_string (get_n_chans(), std::dec));
+
+	switch (region_type) {
+	case RegionExportChannelFactory::None:
+		// Do nothing
+		break;
+	default:
+		root->add_property ("region-processing", enum_2_string (region_type));
+		break;
+	}
 
 	uint32_t i = 1;
 	for (ExportChannelConfiguration::ChannelList::const_iterator c_it = channels.begin(); c_it != channels.end(); ++c_it) {
@@ -77,6 +88,11 @@ ExportChannelConfiguration::set_state (const XMLNode & root)
 
 	if ((prop = root.property ("split"))) {
 		set_split (!prop->value().compare ("true"));
+	}
+
+	if ((prop = root.property ("region-processing"))) {
+		set_region_processing_type ((RegionExportChannelFactory::Type)
+			string_2_enum (prop->value(), RegionExportChannelFactory::Type));
 	}
 
 	XMLNodeList channels = root.children ("Channel");

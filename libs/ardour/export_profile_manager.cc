@@ -90,8 +90,6 @@ ExportProfileManager::ExportProfileManager (Session & s, std::string xml_node_na
 
 ExportProfileManager::~ExportProfileManager ()
 {
-	if (single_range_mode) { return; }
-
 	XMLNode * instant_xml (new XMLNode (xml_node_name));
 	serialize_profile (*instant_xml);
 	session.add_instant_xml (*instant_xml, false);
