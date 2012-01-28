@@ -832,6 +832,7 @@ ExportProfileManager::check_config (boost::shared_ptr<Warnings> warnings,
 			}
 
 		} else {
+			filename->include_channel = false;
 			string path = filename->get_path (format);
 
 			if (sys::exists (sys::path (path))) {
