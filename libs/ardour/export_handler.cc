@@ -163,6 +163,8 @@ ExportHandler::start_timespan ()
 	}
 
 	current_timespan = config_map.begin()->first;
+	export_status->total_frames_current_timespan = current_timespan->get_length();
+	export_status->processed_frames_current_timespan = 0;
 
 	/* Register file configurations to graph builder */
 
@@ -215,8 +217,7 @@ ExportHandler::process_timespan (framecnt_t frames)
 
 	process_position += frames_to_read;
 	export_status->processed_frames += frames_to_read;
-	export_status->progress = (float) export_status->processed_frames /
-	                                  export_status->total_frames;
+	export_status->processed_frames_current_timespan += frames_to_read;
 
 	/* Do actual processing */
 	int ret = graph_builder->process (frames_to_read, last_cycle);
@@ -246,8 +247,6 @@ ExportHandler::process_normalize ()
 		export_status->normalizing = true;
 	}
 
-	export_status->progress = (float) export_status->current_normalize_cycle /
-	                                  export_status->total_normalize_cycles;
 	export_status->current_normalize_cycle++;
 
 	return 0;

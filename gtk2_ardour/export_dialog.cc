@@ -125,10 +125,6 @@ ExportDialog::init ()
 	progress_widget.pack_start (progress_label, false, false, 6);
 	progress_widget.pack_start (progress_bar, false, false, 6);
 
-	progress_widget.pack_start (normalizing_widget, false, false, 0);
-	normalizing_widget.pack_start (normalizing_label, false, false, 6);
-	normalizing_widget.pack_start (normalizing_bar, false, false, 6);
-
 	/* Buttons */
 
 	cancel_button = add_button (Gtk::Stock::CANCEL, RESPONSE_CANCEL);
@@ -314,7 +310,6 @@ ExportDialog::show_progress ()
 	warning_widget.hide_all();
 	progress_widget.show ();
 	progress_widget.show_all_children ();
-	normalizing_widget.hide();
 	progress_connection = Glib::signal_timeout().connect (sigc::mem_fun(*this, &ExportDialog::progress_timeout), 100);
 
 	gtk_main_iteration ();
@@ -334,20 +329,27 @@ ExportDialog::show_progress ()
 gint
 ExportDialog::progress_timeout ()
 {
+	std::string status_text;
+	float progress = 0.0;
 	if (status->normalizing) {
-		normalizing_widget.show();
-		normalizing_label.set_text (string_compose (_("Normalizing timespan %1 of %2"),
-		                                            status->timespan, status->total_timespans));
-		normalizing_bar.set_fraction (status->progress);
+		status_text = string_compose (_("Normalizing timespan %1 of %2"),
+		                               status->timespan, status->total_timespans);
+		progress = ((float) status->current_normalize_cycle) / status->total_normalize_cycles;
 	} else {
-		normalizing_bar.set_fraction (0);
-		normalizing_label.set_text ("");
-
-		progress_label.set_text (string_compose (_("Exporting timespan %1 of %2"),
-		                                         status->timespan, status->total_timespans));
-		progress_bar.set_fraction (status->progress);
+		status_text = string_compose (_("Exporting timespan %1 of %2"),
+		                              status->timespan, status->total_timespans);
+		progress = ((float) status->processed_frames_current_timespan) / status->total_frames_current_timespan;
 	}
+	progress_label.set_text (status_text);
 
+	if (progress < previous_progress) {
+		// Work around gtk bug
+		progress_bar.hide();
+		progress_bar.show();
+	}
+	previous_progress = progress;
+
+	progress_bar.set_fraction (progress);
 	return TRUE;
 }
 

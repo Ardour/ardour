@@ -37,7 +37,6 @@ ExportStatus::init ()
 	_finished = false;
 	_errors = false;
 
-	progress = 0.0;
 	normalizing = false;
 
 	total_timespans = 0;
@@ -45,6 +44,12 @@ ExportStatus::init ()
 
 	total_frames = 0;
 	processed_frames = 0;
+
+	total_frames_current_timespan = 0;
+	processed_frames_current_timespan = 0;
+
+	total_normalize_cycles = 0;
+	current_normalize_cycle = 0;
 }
 
 void
