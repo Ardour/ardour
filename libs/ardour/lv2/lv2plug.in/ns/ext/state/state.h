@@ -37,8 +37,8 @@ extern "C" {
 
 #define LV2_STATE_INTERFACE_URI LV2_STATE_URI "#Interface"
 #define LV2_STATE_PATH_URI      LV2_STATE_URI "#Path"
-#define LV2_STATE_MAP_PATH_URI  LV2_STATE_URI "#pathMap"
-#define LV2_STATE_MAKE_PATH_URI LV2_STATE_URI "#newPath"
+#define LV2_STATE_MAP_PATH_URI  LV2_STATE_URI "#mapPath"
+#define LV2_STATE_MAKE_PATH_URI LV2_STATE_URI "#makePath"
 
 typedef void* LV2_State_Handle;
 typedef void* LV2_State_Map_Path_Handle;
@@ -55,7 +55,7 @@ typedef enum {
 	/**
 	   Plain Old Data.
 
-	   Values with this flag contain no references to non-stateent or
+	   Values with this flag contain no references to non-persistent or
 	   non-global resources (e.g. pointers, handles, local paths, etc.). It is
 	   safe to copy POD values with a simple memcpy and store them for use at
 	   any time in the future on a machine with a compatible architecture
@@ -221,7 +221,6 @@ typedef struct _LV2_State_Interface {
 	             uint32_t                   flags,
 	             const LV2_Feature *const * features);
 
-
 	/**
 	   Restore plugin state using a host-provided @c retrieve callback.
 
@@ -257,7 +256,7 @@ typedef struct _LV2_State_Interface {
 } LV2_State_Interface;
 
 /**
-   Feature data for state:pathMap (LV2_STATE_MAP_PATH_URI).
+   Feature data for state:mapPath (LV2_STATE_MAP_PATH_URI).
 */
 typedef struct {
 

@@ -41,11 +41,12 @@ public:
 	LV2_Feature* urid_map_feature()   { return &_urid_map_feature; }
 	LV2_Feature* urid_unmap_feature() { return &_urid_unmap_feature; }
 
-	uint32_t uri_to_id(const char* map,
-	                   const char* uri);
+	LV2_URID_Map*   urid_map()   { return &_urid_map_feature_data; }
+	LV2_URID_Unmap* urid_unmap() { return &_urid_unmap_feature_data; }
 
-	const char* id_to_uri(const char* map,
-	                      uint32_t    id);
+	uint32_t uri_to_id(const char* map, const char* uri);
+
+	const char* id_to_uri(const char* map, uint32_t id);
 
 private:
 	static uint32_t uri_map_uri_to_id(LV2_URI_Map_Callback_Data callback_data,
@@ -64,12 +65,12 @@ private:
 	EventToGlobal _event_to_global;
 	GlobalToEvent _global_to_event;
 
-	LV2_Feature           _uri_map_feature;
-	LV2_URI_Map_Feature   _uri_map_feature_data;
-	LV2_Feature           _urid_map_feature;
-	LV2_URID_Map          _urid_map_feature_data;
-	LV2_Feature           _urid_unmap_feature;
-	LV2_URID_Unmap        _urid_unmap_feature_data;
+	LV2_Feature         _uri_map_feature;
+	LV2_URI_Map_Feature _uri_map_feature_data;
+	LV2_Feature         _urid_map_feature;
+	LV2_URID_Map        _urid_map_feature_data;
+	LV2_Feature         _urid_unmap_feature;
+	LV2_URID_Unmap      _urid_unmap_feature_data;
 };
 
 

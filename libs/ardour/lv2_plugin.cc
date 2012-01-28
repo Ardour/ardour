@@ -15,7 +15,6 @@
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 */
 
 #include <string>
@@ -44,7 +43,6 @@
 #include "ardour/debug.h"
 #include "ardour/lv2_event_buffer.h"
 #include "ardour/lv2_plugin.h"
-#include "ardour/lv2_state.h"
 #include "ardour/session.h"
 
 #include "i18n.h"
@@ -59,11 +57,9 @@
 #endif
 
 #define NS_DC      "http://dublincore.org/documents/dcmi-namespace/"
-#define NS_LV2     "http://lv2plug.in/ns/lv2core#"
 #define NS_OLDPSET "http://lv2plug.in/ns/dev/presets#"
 #define NS_PSET    "http://lv2plug.in/ns/ext/presets#"
 #define NS_UI      "http://lv2plug.in/ns/extensions/ui#"
-#define NS_RDFS    "http://www.w3.org/2000/01/rdf-schema#"
 
 using namespace std;
 using namespace ARDOUR;
@@ -100,13 +96,20 @@ public:
 static LV2World _world;
 
 struct LV2Plugin::Impl {
-	Impl() : plugin(0), ui(0), ui_type(0), name(0), author(0), instance(0) {}
+	Impl() : plugin(0), ui(0), ui_type(0), name(0), author(0), instance(0)
+#ifdef HAVE_NEW_LILV
+	       , state(0)
+#endif
+	{}
 	LilvPlugin*     plugin;
 	const LilvUI*   ui;
 	const LilvNode* ui_type;
 	LilvNode*       name;
 	LilvNode*       author;
 	LilvInstance*   instance;
+#ifdef HAVE_NEW_LILV
+	LilvState*      state;
+#endif
 };
 
 LV2Plugin::LV2Plugin (AudioEngine& engine,
@@ -146,46 +149,36 @@ LV2Plugin::init(void* c_plugin, framecnt_t rate)
 	_control_data         = 0;
 	_shadow_data          = 0;
 	_latency_control_port = 0;
+	_state_version        = 0;
 	_was_activated        = false;
-
+	_has_state_interface  = false;
+	
 	_instance_access_feature.URI = "http://lv2plug.in/ns/ext/instance-access";
 	_data_access_feature.URI     = "http://lv2plug.in/ns/ext/data-access";
-	_map_path_feature.URI        = LV2_STATE_MAP_PATH_URI;
 	_make_path_feature.URI       = LV2_STATE_MAKE_PATH_URI;
 
 	LilvPlugin* plugin = _impl->plugin;
 
+#ifdef HAVE_NEW_LILV
 	LilvNode* state_iface_uri = lilv_new_uri(_world.world, LV2_STATE_INTERFACE_URI);
-#ifdef lilv_plugin_has_extension_data
-	_has_state_interface = lilv_plugin_has_extension_data(plugin, state_iface_uri);
+	LilvNode* state_uri       = lilv_new_uri(_world.world, LV2_STATE_URI);
+	_has_state_interface =
+		// What plugins should have (lv2:extensionData state:Interface)
+		lilv_plugin_has_extension_data(plugin, state_iface_uri)
+		// What some outdated/incorrect ones have
+		|| lilv_plugin_has_feature(plugin, state_uri);
+	lilv_node_free(state_uri);
 	lilv_node_free(state_iface_uri);
-#else
-	LilvNode* lv2_extensionData = lilv_new_uri(_world.world, NS_LV2 "extensionData");
-	LilvNodes* extdatas = lilv_plugin_get_value(plugin, lv2_extensionData);
-	LILV_FOREACH(nodes, i, extdatas) {
-		if (lilv_node_equals(lilv_nodes_get(extdatas, i), state_iface_uri)) {
-			_has_state_interface = true;
-			break;
-		}
-	}
 #endif
 
-	_features    = (LV2_Feature**)malloc(sizeof(LV2_Feature*) * 8);
+	_features    = (LV2_Feature**)malloc(sizeof(LV2_Feature*) * 7);
 	_features[0] = &_instance_access_feature;
 	_features[1] = &_data_access_feature;
-	_features[2] = &_map_path_feature;
-	_features[3] = &_make_path_feature;
-	_features[4] = _uri_map.uri_map_feature();
-	_features[5] = _uri_map.urid_map_feature();
-	_features[6] = _uri_map.urid_unmap_feature();
-	_features[7] = NULL;
-
-	LV2_State_Map_Path* map_path = (LV2_State_Map_Path*)malloc(
-		sizeof(LV2_State_Map_Path));
-	map_path->handle = this;
-	map_path->abstract_path = &lv2_state_abstract_path;
-	map_path->absolute_path = &lv2_state_absolute_path;
-	_map_path_feature.data = map_path;
+	_features[2] = &_make_path_feature;
+	_features[3] = _uri_map.uri_map_feature();
+	_features[4] = _uri_map.urid_map_feature();
+	_features[5] = _uri_map.urid_unmap_feature();
+	_features[6] = NULL;
 
 	LV2_State_Make_Path* make_path = (LV2_State_Make_Path*)malloc(
 		sizeof(LV2_State_Make_Path));
@@ -467,148 +460,56 @@ LV2Plugin::c_ui_type ()
 	return (void*)_impl->ui_type;
 }
 
+/** Directory for files created by the plugin (except during save). */
 const std::string
-LV2Plugin::state_dir() const
+LV2Plugin::scratch_dir() const
+{
+	return Glib::build_filename(
+		_session.plugins_dir(), _insert_id.to_s(), "scratch");
+}
+
+/** Directory for snapshots of files in the scratch directory. */
+const std::string
+LV2Plugin::file_dir() const
+{
+	return Glib::build_filename(
+		_session.plugins_dir(), _insert_id.to_s(), "files");
+}
+
+/** Directory to save state snapshot version @c num into. */
+const std::string
+LV2Plugin::state_dir(unsigned num) const
 {
 	return Glib::build_filename(_session.plugins_dir(),
-	                            _insert_id.to_s());
+	                            _insert_id.to_s(),
+	                            string_compose("state%1", num));
 }
 
-int
-LV2Plugin::lv2_state_store_callback(LV2_State_Handle handle,
-                                    uint32_t         key,
-                                    const void*      value,
-                                    size_t           size,
-                                    uint32_t         type,
-                                    uint32_t         flags)
-{
-	DEBUG_TRACE(DEBUG::LV2, string_compose(
-		            "state store %1 (size: %2, type: %3, flags: %4)\n",
-		            _uri_map.id_to_uri(NULL, key),
-		            size,
-		            _uri_map.id_to_uri(NULL, type),
-		            flags));
-
-	LV2State* state = (LV2State*)handle;
-	state->add_uri(key,  _uri_map.id_to_uri(NULL, key));
-	state->add_uri(type, _uri_map.id_to_uri(NULL, type));
-
-	if (type == _state_path_type) {
-		const LV2Plugin&    me = state->plugin;
-		LV2_State_Map_Path* mp = (LV2_State_Map_Path*)me._map_path_feature.data;
-		return state->add_value(
-			key,
-			lv2_state_abstract_path(mp->handle, (const char*)value),
-			size, type, flags);
-	} else if ((flags & LV2_STATE_IS_POD) && (flags & LV2_STATE_IS_PORTABLE)) {
-		return state->add_value(key, value, size, type, flags);
-	} else {
-		PBD::warning << "LV2 plugin attempted to store non-portable property." << endl;
-		return -1;
-	}
-}
-
-const void*
-LV2Plugin::lv2_state_retrieve_callback(LV2_State_Handle host_data,
-                                       uint32_t         key,
-                                       size_t*          size,
-                                       uint32_t*        type,
-                                       uint32_t*        flags)
-{
-	LV2State* state = (LV2State*)host_data;
-	LV2State::Values::const_iterator i = state->values.find(key);
-	if (i == state->values.end()) {
-		warning << "LV2 plugin attempted to retrieve nonexistent key: "
-		        << _uri_map.id_to_uri(NULL, key) << endmsg;
-		return NULL;
-	}
-	*size  = i->second.size;
-	*type  = i->second.type;
-	*flags = LV2_STATE_IS_POD | LV2_STATE_IS_PORTABLE;
-	DEBUG_TRACE(DEBUG::LV2, string_compose(
-		            "state retrieve %1 = %2 (size: %3, type: %4)\n",
-		            _uri_map.id_to_uri(NULL, key),
-		            i->second.value, *size, *type));
-	if (*type == _state_path_type) {
-		const LV2Plugin&    me = state->plugin;
-		LV2_State_Map_Path* mp = (LV2_State_Map_Path*)me._map_path_feature.data;
-		return lv2_state_absolute_path(mp->handle, (const char*)i->second.value);
-	} else {
-		return i->second.value;
-	}
-}
-
-char*
-LV2Plugin::lv2_state_abstract_path(LV2_State_Map_Path_Handle handle,
-                                   const char*               absolute_path)
-{
-	LV2Plugin* me = (LV2Plugin*)handle;
-	if (me->_insert_id == PBD::ID("0")) {
-		return g_strdup(absolute_path);
-	}
-
-	const std::string state_dir = me->state_dir();
-
-	char* ret = NULL;
-	if (strncmp(absolute_path, state_dir.c_str(), state_dir.length())) {
-		// Path outside state directory, make symbolic link
-		const std::string       name = Glib::path_get_basename(absolute_path);
-		const std::string       path = Glib::build_filename(state_dir, name);
-		Gio::File::create_for_path(path)->make_symbolic_link(absolute_path);
-		ret = g_strndup(path.c_str(), path.length());
-	} else {
-		// Path inside the state directory, return relative path
-		const std::string path(absolute_path + state_dir.length() + 1);
-		ret = g_strndup(path.c_str(), path.length());
-	}
-
-	DEBUG_TRACE(DEBUG::LV2, string_compose("abstract path %1 => %2\n",
-	                                       absolute_path, ret));
-
-	return ret;
-}
-
-char*
-LV2Plugin::lv2_state_absolute_path(LV2_State_Map_Path_Handle handle,
-                                   const char*               abstract_path)
-{
-	LV2Plugin* me = (LV2Plugin*)handle;
-	if (me->_insert_id == PBD::ID("0")) {
-		return g_strdup(abstract_path);
-	}
-
-	char* ret = NULL;
-	if (g_path_is_absolute(abstract_path)) {
-		ret = g_strdup(abstract_path);
-	} else {
-		const std::string apath(abstract_path);
-		const std::string path = Glib::build_filename(me->state_dir(), apath);
-		ret = g_strndup(path.c_str(), path.length());
-	}
-
-	DEBUG_TRACE(DEBUG::LV2, string_compose("absolute path %1 => %2\n",
-	                                       abstract_path, ret));
-
-	return ret;
-}
-
+/** Implementation of state:makePath for files created at instantiation time.
+ * Note this is not used for files created at save time (Lilv deals with that).
+ */
 char*
 LV2Plugin::lv2_state_make_path(LV2_State_Make_Path_Handle handle,
                                const char*                path)
 {
 	LV2Plugin* me = (LV2Plugin*)handle;
 	if (me->_insert_id == PBD::ID("0")) {
+		warning << string_compose(
+			"File path \"%1\" requested but LV2 %2 has no insert ID",
+			path, me->name()) << endmsg;
 		return g_strdup(path);
 	}
 
-	const std::string abs_path = Glib::build_filename(me->state_dir(), path);
+	const std::string abs_path = Glib::build_filename(me->scratch_dir(), path);
 	const std::string dirname  = Glib::path_get_dirname(abs_path);
-
 	g_mkdir_with_parents(dirname.c_str(), 0744);
 
 	DEBUG_TRACE(DEBUG::LV2, string_compose("new file path %1 => %2\n",
 	                                       path, abs_path));
 
+	std::cerr << "MAKE PATH " << path
+	          << " => " << g_strndup(abs_path.c_str(), abs_path.length())
+	          << std::endl;
 	return g_strndup(abs_path.c_str(), abs_path.length());
 }
 
@@ -616,9 +517,10 @@ static void
 remove_directory(const std::string& path)
 {
 	if (!Glib::file_test(path, Glib::FILE_TEST_IS_DIR)) {
+		warning << string_compose("\"%1\" is not a directory", path) << endmsg;
 		return;
 	}
-	
+
 	Glib::RefPtr<Gio::File>           dir = Gio::File::create_for_path(path);
 	Glib::RefPtr<Gio::FileEnumerator> e   = dir->enumerate_children();
 	Glib::RefPtr<Gio::FileInfo>       fi;
@@ -652,41 +554,57 @@ LV2Plugin::add_state(XMLNode* root) const
 	}
 
 	if (_has_state_interface) {
-		// Create state directory for this plugin instance
-		cerr << "Create statefile name from ID " << _insert_id << endl;
-		const std::string state_filename = _insert_id.to_s() + ".rdff";
-		const std::string state_path     = Glib::build_filename(
-		        _session.plugins_dir(), state_filename);
+		cout << "LV2 " << name() << " has state interface" << endl;
+#ifdef HAVE_NEW_LILV
+		// Provisionally increment state version and create directory
+		const std::string new_dir = state_dir(++_state_version);
+		g_mkdir_with_parents(new_dir.c_str(), 0744);
 
-		cout << "Saving LV2 plugin state to " << state_path << endl;
+		cout << "NEW DIR: " << new_dir << endl;
 
-		// Get LV2 State extension data from plugin instance
-		LV2_State_Interface* state_iface = (LV2_State_Interface*)extension_data(
-			LV2_STATE_INTERFACE_URI);
-		if (!state_iface) {
-			warning << string_compose(
-			    _("Plugin \"%1\% failed to return LV2 state interface"),
-			    unique_id());
-			return;
+		LilvState* state = lilv_state_new_from_instance(
+			_impl->plugin,
+			_impl->instance,
+			_uri_map.urid_map(),
+			scratch_dir().c_str(),
+			file_dir().c_str(),
+			_session.externals_dir().c_str(),
+			new_dir.c_str(),
+			NULL,
+			(void*)this,
+			0,
+			NULL);
+
+		if (!_impl->state || !lilv_state_equals(state, _impl->state)) {
+			lilv_state_save(_world.world,
+			                _uri_map.urid_unmap(),
+			                state,
+			                NULL,
+			                new_dir.c_str(),
+			                "state.ttl",
+			                NULL);
+
+			lilv_state_free(_impl->state);
+			_impl->state = state;
+
+			cout << "Saved LV2 state to " << state_dir(_state_version) << endl;
+		} else {
+			// State is identical, decrement version and nuke directory
+			cout << "LV2 state identical, not saving" << endl;
+			lilv_state_free(state);
+			remove_directory(new_dir);
+			--_state_version;
 		}
 
-		// Remove old state directory (FIXME: should this be preserved?)
-		remove_directory(state_dir());
+		root->add_property("state-dir", string_compose("state%1", _state_version));
 
-		// Save plugin state to state object
-		LV2State state(*this, _uri_map);
-		state_iface->save(_impl->instance->lv2_handle,
-		                  &LV2Plugin::lv2_state_store_callback,
-		                  &state,
-		                  LV2_STATE_IS_POD|LV2_STATE_IS_PORTABLE,
-		                  NULL);
-
-		// Write state object to RDFF file
-		RDFF file = rdff_open(state_path.c_str(), true);
-		state.write(file);
-		rdff_close(file);
-
-		root->add_property("state-file", state_filename);
+#else  /* !HAVE_NEW_LILV */
+		warning << string_compose(
+			_("Plugin \"%1\" has state, but Lilv is too old to save it"),
+			unique_id()) << endmsg;
+#endif  /* HAVE_NEW_LILV */
+	} else {
+		cout << "LV2 " << name() << " has no state interface." << endl;
 	}
 }
 
@@ -717,7 +635,7 @@ find_presets_helper(LilvWorld*                                   world,
 			warning << string_compose(
 			    _("Plugin \"%1\% preset \"%2%\" is missing a label\n"),
 			    lilv_node_as_string(lilv_plugin_get_uri(plugin)),
-			    lilv_node_as_string(preset));
+			    lilv_node_as_string(preset)) << endmsg;
 		}
 	}
 	lilv_nodes_free(presets);
@@ -729,7 +647,7 @@ LV2Plugin::find_presets()
 	LilvNode* dc_title          = lilv_new_uri(_world.world, NS_DC   "title");
 	LilvNode* oldpset_hasPreset = lilv_new_uri(_world.world, NS_OLDPSET "hasPreset");
 	LilvNode* pset_hasPreset    = lilv_new_uri(_world.world, NS_PSET "hasPreset");
-	LilvNode* rdfs_label        = lilv_new_uri(_world.world, NS_RDFS "label");
+	LilvNode* rdfs_label        = lilv_new_uri(_world.world, LILV_NS_RDFS "label");
 
 	find_presets_helper(_world.world, _impl->plugin, _presets,
 	                    oldpset_hasPreset, dc_title);
@@ -748,8 +666,8 @@ LV2Plugin::load_preset(PresetRecord r)
 {
 	Plugin::load_preset(r);
 
-	LilvNode* lv2_port      = lilv_new_uri(_world.world, NS_LV2 "port");
-	LilvNode* lv2_symbol    = lilv_new_uri(_world.world, NS_LV2 "symbol");
+	LilvNode* lv2_port      = lilv_new_uri(_world.world, LILV_NS_LV2 "port");
+	LilvNode* lv2_symbol    = lilv_new_uri(_world.world, LILV_NS_LV2 "symbol");
 	LilvNode* oldpset_value = lilv_new_uri(_world.world, NS_OLDPSET "value");
 	LilvNode* preset        = lilv_new_uri(_world.world, r.uri.c_str());
 	LilvNode* pset_value    = lilv_new_uri(_world.world, NS_PSET "value");
@@ -853,31 +771,24 @@ LV2Plugin::set_state(const XMLNode& node, int version)
 		set_parameter(port_id, atof(value));
 	}
 
-	if ((prop = node.property("state-file")) != 0) {
-		std::string state_path = Glib::build_filename(_session.plugins_dir(),
-		                                              prop->value());
-
-		cout << "LV2 state path " << state_path << endl;
-
-		// Get LV2 State extension data from plugin instance
-		LV2_State_Interface* state_iface = (LV2_State_Interface*)extension_data(
-			LV2_STATE_INTERFACE_URI);
-		if (state_iface) {
-			cout << "Loading LV2 state from " << state_path << endl;
-			RDFF     file = rdff_open(state_path.c_str(), false);
-			LV2State state(*this, _uri_map);
-			state.read(file);
-			state_iface->restore(_impl->instance->lv2_handle,
-			                     &LV2Plugin::lv2_state_retrieve_callback,
-			                     &state,
-			                     LV2_STATE_IS_POD|LV2_STATE_IS_PORTABLE,
-			                     NULL);
-			rdff_close(file);
-		} else {
-			warning << string_compose(
-			    _("Plugin \"%1\% failed to return LV2 state interface"),
-			    unique_id());
+	_state_version = 0;
+	if ((prop = node.property("state-dir")) != 0) {
+		if (sscanf(prop->value().c_str(), "state%u", &_state_version) != 1) {
+			error << string_compose(
+				"LV2: failed to parse state version from \"%1\"",
+				prop->value()) << endmsg;
 		}
+
+		std::string state_file = Glib::build_filename(_session.plugins_dir(),
+		                                              _insert_id.to_s(),
+		                                              prop->value(),
+		                                              "state.ttl");
+
+		cout << "Loading LV2 state from " << state_file << endl;
+		LilvState* state = lilv_state_new_from_file(
+			_world.world, _uri_map.urid_map(), NULL, state_file.c_str());
+
+		lilv_state_restore(state, _impl->instance, NULL, NULL, 0, NULL);
 	}
 
 	latency_compute_run();
@@ -904,7 +815,7 @@ LV2Plugin::get_parameter_descriptor(uint32_t which, ParameterDescriptor& desc) c
 		desc.lower *= _session.frame_rate ();
 		desc.upper *= _session.frame_rate ();
 	}
-		
+
 	desc.min_unbound  = false; // TODO: LV2 extension required
 	desc.max_unbound  = false; // TODO: LV2 extension required
 

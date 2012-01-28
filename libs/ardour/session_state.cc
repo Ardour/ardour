@@ -503,6 +503,13 @@ Session::ensure_subdirs ()
 		return -1;
 	}
 
+	dir = externals_dir ();
+
+	if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
+		error << string_compose(_("Session: cannot create session externals folder \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
+		return -1;
+	}
+
 	return 0;
 }
 
@@ -2256,6 +2263,12 @@ string
 Session::plugins_dir () const
 {
 	return Glib::build_filename (_path, "plugins");
+}
+
+string
+Session::externals_dir () const
+{
+	return Glib::build_filename (_path, "externals");
 }
 
 int

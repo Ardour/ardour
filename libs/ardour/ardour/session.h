@@ -182,9 +182,10 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	int ensure_subdirs ();
 
-	std::string automation_dir () const;
-	std::string analysis_dir() const;
-	std::string plugins_dir() const;
+	std::string automation_dir () const;  ///< Automation data
+	std::string analysis_dir () const;    ///< Analysis data
+	std::string plugins_dir () const;     ///< Plugin state
+	std::string externals_dir () const;   ///< Links to external files
 
 	std::string peak_path (std::string) const;
 
