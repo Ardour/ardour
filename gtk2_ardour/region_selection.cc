@@ -269,7 +269,7 @@ RegionSelection::end_frame () const
 {
 	framepos_t e = 0;
 	for (RegionSelection::const_iterator i = begin(); i != end(); ++i) {
-		e = max (e, (*i)->region()->position () + (*i)->region()->length ());
+		e = max (e, (*i)->region()->last_frame ());
 	}
 
 	return e;
