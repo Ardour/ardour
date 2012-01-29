@@ -769,6 +769,21 @@ ProcessorBox::object_drop(DnDVBox<ProcessorEntry>* source, ProcessorEntry* posit
 	boost::shared_ptr<Processor> p;
 	if (position) {
 		p = position->processor ();
+		if (!p) {
+			/* dropped on the blank entry (which will be before the
+			   fader), so use the first non-blank child as our
+			   `dropped on' processor */
+			list<ProcessorEntry*> c = processor_display.children ();
+			list<ProcessorEntry*>::iterator i = c.begin ();
+			while (dynamic_cast<BlankProcessorEntry*> (*i)) {
+				assert (i != c.end ());
+				++i;
+			}
+
+			assert (i != c.end ());
+			p = (*i)->processor ();
+			assert (p);
+		}
 	}
 
 	list<ProcessorEntry*> children = source->selection ();
