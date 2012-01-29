@@ -987,30 +987,6 @@ RouteUI::solo_safe_active_state (boost::shared_ptr<Route> r)
 void
 RouteUI::update_solo_display ()
 {
-	bool x;
-
-	if (Config->get_solo_control_is_listen_control()) {
-
-		if ((bool) solo_button->active_state() != (x = _route->listening_via_monitor())) {
-			++_i_am_the_modifier;
-			solo_button->set_active_state (Active);
-			--_i_am_the_modifier;
-		}
-
-	} else {
-
-		if ((bool) solo_button->active_state() != (x = _route->soloed())) {
-			++_i_am_the_modifier;
-			if (x) {
-				solo_button->set_active_state (Active);
-			} else {
-				solo_button->unset_active_state();
-			}
-			--_i_am_the_modifier;
-		}
-
-	}
-
 	bool yn = _route->solo_safe ();
 
 	if (solo_safe_check && solo_safe_check->get_active() != yn) {
