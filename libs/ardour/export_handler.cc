@@ -164,6 +164,7 @@ ExportHandler::start_timespan ()
 
 	current_timespan = config_map.begin()->first;
 	export_status->total_frames_current_timespan = current_timespan->get_length();
+	export_status->timespan_name = current_timespan->name();
 	export_status->processed_frames_current_timespan = 0;
 
 	/* Register file configurations to graph builder */

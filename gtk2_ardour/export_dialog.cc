@@ -262,6 +262,8 @@ ExportDialog::update_warnings ()
 			list_files_string += it->substr (0, pos + 1) + "<b>" + it->substr (pos + 1) + "</b>\n";
 		}
 	}
+
+	
 }
 
 void
@@ -331,12 +333,12 @@ ExportDialog::progress_timeout ()
 	std::string status_text;
 	float progress = 0.0;
 	if (status->normalizing) {
-		status_text = string_compose (_("Normalizing timespan %1 of %2"),
-		                               status->timespan, status->total_timespans);
+		status_text = string_compose (_("Normalizing '%3' (timespan %1 of %2)"),
+		                              status->timespan, status->total_timespans, status->timespan_name);
 		progress = ((float) status->current_normalize_cycle) / status->total_normalize_cycles;
 	} else {
-		status_text = string_compose (_("Exporting timespan %1 of %2"),
-		                              status->timespan, status->total_timespans);
+		status_text = string_compose (_("Exporting '%3' (timespan %1 of %2)"),
+		                              status->timespan, status->total_timespans, status->timespan_name);
 		progress = ((float) status->processed_frames_current_timespan) / status->total_frames_current_timespan;
 	}
 	progress_bar.set_text (status_text);

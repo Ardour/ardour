@@ -56,6 +56,7 @@ struct ExportStatus {
 
 	volatile uint32_t       total_timespans;
 	volatile uint32_t       timespan;
+	std::string             timespan_name;
 
 	volatile framecnt_t     total_frames;
 	volatile framecnt_t     processed_frames;
