@@ -94,7 +94,7 @@ class ExportDialog : public ArdourDialog {
 	void close_dialog ();
 
 	void sync_with_manager ();
-	void update_warnings ();
+	void update_warnings_and_example_filename ();
 	void show_conflicting_files ();
 
 	void export_rt ();

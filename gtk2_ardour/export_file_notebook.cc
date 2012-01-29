@@ -22,11 +22,14 @@
 
 #include "ardour/export_format_specification.h"
 
+#include "pbd/filesystem.h"
+
 #include "gui_thread.h"
 #include "utils.h"
 #include "i18n.h"
 
 using namespace ARDOUR;
+using namespace PBD;
 
 ExportFileNotebook::ExportFileNotebook () :
   page_counter (1)
@@ -86,6 +89,16 @@ ExportFileNotebook::sync_with_manager ()
 
 	set_current_page (0);
 	CriticalSelectionChanged ();
+}
+
+void
+ExportFileNotebook::update_example_filenames()
+{
+	int i = 0;
+	FilePage * page;
+	while ((page = dynamic_cast<FilePage *> (get_nth_page (i++)))) {
+		page->update_example_filename();
+	}
 }
 
 std::string
@@ -203,8 +216,10 @@ ExportFileNotebook::FilePage::FilePage (Session * s, ManagerPtr profile_manager,
 	format_selector.FormatRemoved.connect (sigc::mem_fun (*profile_manager, &ExportProfileManager::remove_format_profile));
 	format_selector.NewFormat.connect (sigc::mem_fun (*profile_manager, &ExportProfileManager::get_new_format));
 
-	format_selector.CriticalSelectionChanged.connect (sigc::mem_fun (*this, &ExportFileNotebook::FilePage::update_tab_label));
-	filename_selector.CriticalSelectionChanged.connect (CriticalSelectionChanged.make_slot());
+	format_selector.CriticalSelectionChanged.connect (
+		sigc::mem_fun (*this, &ExportFileNotebook::FilePage::critical_selection_changed));
+	filename_selector.CriticalSelectionChanged.connect (
+		sigc::mem_fun (*this, &ExportFileNotebook::FilePage::critical_selection_changed));
 
 	/* Tab widget */
 
@@ -216,6 +231,7 @@ ExportFileNotebook::FilePage::FilePage (Session * s, ManagerPtr profile_manager,
 	tab_widget.pack_end (tab_close_alignment, false, false, 0);
 	tab_widget.show_all_children ();
 	update_tab_label ();
+	update_example_filename();
 
 	/* Done */
 
@@ -251,5 +267,27 @@ void
 ExportFileNotebook::FilePage::update_tab_label ()
 {
 	tab_label.set_text (string_compose ("Format %1: %2", tab_number, get_format_name()));
+}
+
+void
+ExportFileNotebook::FilePage::update_example_filename()
+{
+	if (profile_manager) {
+		std::string example = profile_manager->get_sample_filename_for_format (
+			filename_state->filename, format_state->format);
+		if (example != "") {
+			sys::path path(example);
+			filename_selector.set_example_filename(path.leaf());
+		} else {
+			filename_selector.set_example_filename("");
+		}
+	}
+}
+
+void
+ExportFileNotebook::FilePage::critical_selection_changed ()
+{
+	update_tab_label();
+	update_example_filename();
 	CriticalSelectionChanged();
 }

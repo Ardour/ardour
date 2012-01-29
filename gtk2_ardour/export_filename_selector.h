@@ -37,6 +37,7 @@ class ExportFilenameSelector : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 	~ExportFilenameSelector ();
 
 	void set_state (ARDOUR::ExportProfileManager::FilenameStatePtr state_, ARDOUR::Session * session_);
+	void set_example_filename (std::string filename);
 
 	/* Compatibility with other elements */
 
@@ -80,6 +81,7 @@ class ExportFilenameSelector : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 	Gtk::Label        path_label;
 	Gtk::Entry        path_entry;
 	Gtk::Button       browse_button;
+	Gtk::Label        example_filename_label;
 
 	/* Date combo */
 

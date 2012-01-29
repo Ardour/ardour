@@ -711,6 +711,19 @@ ExportProfileManager::remove_filename_state (FilenameStatePtr state)
 	}
 }
 
+std::string
+ExportProfileManager::get_sample_filename_for_format (ExportFilenamePtr filename, ExportFormatSpecPtr format)
+{
+	if (channel_configs.empty()) { return ""; }
+
+	std::list<string> filenames;
+	build_filenames (filenames, filename, timespans.front()->timespans,
+	                 channel_configs.front()->config, format);
+
+	if (filenames.empty()) { return ""; }
+	return filenames.front();
+}
+
 bool
 ExportProfileManager::init_filenames (XMLNodeList nodes)
 {
@@ -815,33 +828,16 @@ ExportProfileManager::check_config (boost::shared_ptr<Warnings> warnings,
 
 //	filename->include_timespan = (timespans->size() > 1); Disabled for now...
 
-	for (std::list<ExportTimespanPtr>::iterator timespan_it = timespans->begin(); timespan_it != timespans->end(); ++timespan_it) {
-		filename->set_timespan (*timespan_it);
+	std::list<string> paths;
+	build_filenames(paths, filename, timespans, channel_config, format);
 
-		if (channel_config->get_split()) {
-			filename->include_channel = true;
+	for (std::list<string>::const_iterator path_it = paths.begin(); path_it != paths.end(); ++path_it) {
 
-			for (uint32_t chan = 1; chan <= channel_config->get_n_chans(); ++chan) {
-				filename->set_channel (chan);
+		string path = *path_it;
 
-				string path = filename->get_path (format);
-
-				if (sys::exists (sys::path (path))) {
-					warnings->conflicting_filenames.push_back (path);
-				}
-			}
-
-		} else {
-			filename->include_channel = false;
-			string path = filename->get_path (format);
-
-			if (sys::exists (sys::path (path))) {
-				warnings->conflicting_filenames.push_back (path);
-			}
+		if (sys::exists (sys::path (path))) {
+			warnings->conflicting_filenames.push_back (path);
 		}
-
-		// TODO check what happens with split channel configs...
-		string path = filename->get_path (format);
 
 		if (format->with_toc()) {
 			string marker_file = handler->get_cd_marker_filename(path, CDMarkerTOC);
@@ -880,6 +876,30 @@ ExportProfileManager::check_sndfile_format (ExportFormatSpecPtr format, unsigned
 	sf_info.format = format->format_id () | format->sample_format ();
 
 	return (sf_format_check (&sf_info) == SF_TRUE ? true : false);
+}
+
+void
+ExportProfileManager::build_filenames(std::list<std::string> & result, ExportFilenamePtr filename,
+                                      TimespanListPtr timespans, ExportChannelConfigPtr channel_config,
+                                      ExportFormatSpecPtr format)
+{
+	for (std::list<ExportTimespanPtr>::iterator timespan_it = timespans->begin();
+	     timespan_it != timespans->end(); ++timespan_it) {
+		filename->set_timespan (*timespan_it);
+
+		if (channel_config->get_split()) {
+			filename->include_channel = true;
+
+			for (uint32_t chan = 1; chan <= channel_config->get_n_chans(); ++chan) {
+				filename->set_channel (chan);
+				result.push_back(filename->get_path (format));
+			}
+
+		} else {
+			filename->include_channel = false;
+			result.push_back(filename->get_path (format));
+		}
+	}
 }
 
 }; // namespace ARDOUR

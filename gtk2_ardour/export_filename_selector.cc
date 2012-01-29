@@ -38,11 +38,14 @@ ExportFilenameSelector::ExportFilenameSelector () :
 	revision_checkbox (_("Revision:")),
 
 	path_label (_("Folder:"), Gtk::ALIGN_LEFT),
-	browse_button (_("Browse"))
+	browse_button (_("Browse")),
+
+	example_filename_label ("", Gtk::ALIGN_LEFT)
 {
 	pack_start (include_label, false, false, 6);
 	pack_start (include_hbox, false, false, 0);
 	pack_start (path_hbox, false, false, 12);
+	pack_start (example_filename_label, false, false, 0);
 
 	include_hbox.pack_start (label_label, false, false, 3);
 	include_hbox.pack_start (label_entry, false, false, 3);
@@ -202,6 +205,17 @@ ExportFilenameSelector::set_state (ARDOUR::ExportProfileManager::FilenameStatePt
 
 	load_state();
 
+}
+
+void
+ExportFilenameSelector::set_example_filename (std::string filename)
+{
+	if (filename == "") {
+		example_filename_label.set_text (_("Sorry, no example filename can be shown at the moment"));
+	} else {
+		example_filename_label.set_text (string_compose(_("Example filename: \"%1\""),
+		                                                filename));
+	}
 }
 
 void

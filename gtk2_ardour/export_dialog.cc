@@ -91,13 +91,13 @@ ExportDialog::set_session (ARDOUR::Session* s)
 	/* Warnings */
 
 	preset_selector->CriticalSelectionChanged.connect (sigc::mem_fun (*this, &ExportDialog::sync_with_manager));
-	timespan_selector->CriticalSelectionChanged.connect (sigc::mem_fun (*this, &ExportDialog::update_warnings));
-	channel_selector->CriticalSelectionChanged.connect (sigc::mem_fun (*this, &ExportDialog::update_warnings));
-	file_notebook->CriticalSelectionChanged.connect (sigc::mem_fun (*this, &ExportDialog::update_warnings));
+	timespan_selector->CriticalSelectionChanged.connect (sigc::mem_fun (*this, &ExportDialog::update_warnings_and_example_filename));
+	channel_selector->CriticalSelectionChanged.connect (sigc::mem_fun (*this, &ExportDialog::update_warnings_and_example_filename));
+	file_notebook->CriticalSelectionChanged.connect (sigc::mem_fun (*this, &ExportDialog::update_warnings_and_example_filename));
 
 	status->Aborting.connect (abort_connection, invalidator (*this), boost::bind (&ExportDialog::notify_errors, this), gui_context());
 
-	update_warnings ();
+	update_warnings_and_example_filename ();
 }
 
 void
@@ -226,11 +226,11 @@ ExportDialog::sync_with_manager ()
 	channel_selector->sync_with_manager();
 	file_notebook->sync_with_manager ();
 
-	update_warnings ();
+	update_warnings_and_example_filename ();
 }
 
 void
-ExportDialog::update_warnings ()
+ExportDialog::update_warnings_and_example_filename ()
 {
 	/* Reset state */
 
@@ -263,7 +263,9 @@ ExportDialog::update_warnings ()
 		}
 	}
 
-	
+	/* Update example filename */
+
+	file_notebook->update_example_filenames();
 }
 
 void

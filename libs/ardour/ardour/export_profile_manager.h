@@ -232,6 +232,8 @@ class ExportProfileManager
 	FilenameStatePtr duplicate_filename_state (FilenameStatePtr state);
 	void remove_filename_state (FilenameStatePtr state);
 
+	std::string get_sample_filename_for_format (ExportFilenamePtr filename, ExportFormatSpecPtr format);
+
   private:
 
 	FilenameStateList filenames;
@@ -260,6 +262,10 @@ class ExportProfileManager
 	bool check_sndfile_format (ExportFormatSpecPtr format, unsigned int channels);
 
  /* Utilities */
+
+	void build_filenames(std::list<std::string> & result, ExportFilenamePtr filename,
+	                     TimespanListPtr timespans, ExportChannelConfigPtr channel_config,
+	                     ExportFormatSpecPtr format);
 
 	/* Element state lists should never be empty, this is used to check them */
 	template<typename T>
