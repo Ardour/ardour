@@ -169,7 +169,11 @@ MouseCursors::MouseCursors ()
 		expand_up_down = new Cursor (Display::get_default(), p, 4, 11);
 	}
 
-	selector = new Cursor (XTERM);
+	{
+		RefPtr<Pixbuf> p (::get_icon ("i_beam_cursor"));
+		selector = new Cursor (Display::get_default(), p, 4, 11);
+	}
+
 	time_fx = new Cursor (SIZING);
 	wait = new Cursor (WATCH);
 	timebar = new Cursor(LEFT_PTR);
