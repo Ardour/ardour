@@ -491,8 +491,15 @@ Editor::autoscroll_fudge_threshold () const
 	return current_page_frames() / 6;
 }
 
+/** @param allow_horiz true to allow horizontal autoscroll, otherwise false.
+ *  @param allow_vert true to allow vertical autoscroll, otherwise false.
+ *  @param moving_left true if we are moving left, so we only want to autoscroll on the left of the canvas,
+ *  otherwise false, so we only want to autoscroll on the right of the canvas.
+ *  @param moving_up true if we are moving up, so we only want to autoscroll at the top of the canvas,
+ *  otherwise false, so we only want to autoscroll at the bottom of the canvas.
+ */
 void
-Editor::maybe_autoscroll (bool allow_horiz, bool allow_vert)
+Editor::maybe_autoscroll (bool allow_horiz, bool allow_vert, bool moving_left, bool moving_up)
 {
 	bool startit = false;
 
@@ -522,10 +529,10 @@ Editor::maybe_autoscroll (bool allow_horiz, bool allow_vert)
 
 	autoscroll_y = 0;
 	autoscroll_x = 0;
-	if (ty < canvas_timebars_vsize && allow_vert) {
+	if (ty < canvas_timebars_vsize && moving_up && allow_vert) {
 		autoscroll_y = -1;
 		startit = true;
-	} else if (ty > _canvas_height && allow_vert) {
+	} else if (ty > _canvas_height && !moving_up && allow_vert) {
 		autoscroll_y = 1;
 		startit = true;
 	}
@@ -536,12 +543,12 @@ Editor::maybe_autoscroll (bool allow_horiz, bool allow_vert)
 	}
 
 	if (_drags->current_pointer_frame() > rightmost_frame && allow_horiz) {
-		if (rightmost_frame < max_framepos) {
+		if (rightmost_frame < max_framepos && !moving_left) {
 			autoscroll_x = 1;
 			startit = true;
 		}
 	} else if (_drags->current_pointer_frame() < leftmost_frame && allow_horiz) {
-		if (leftmost_frame > 0) {
+		if (leftmost_frame > 0 && moving_left) {
 			autoscroll_x = -1;
 			startit = true;
 		}

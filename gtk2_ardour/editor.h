@@ -440,7 +440,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 		return _drags;
 	}
 
-	void maybe_autoscroll (bool, bool);
+	void maybe_autoscroll (bool, bool, bool, bool);
 
 	Gdk::Cursor* get_canvas_cursor () const { return current_canvas_cursor; }
 	void set_canvas_cursor (Gdk::Cursor*, bool save=false);

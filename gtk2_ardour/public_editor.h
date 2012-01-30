@@ -382,7 +382,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 	virtual Gtkmm2ext::TearOff* tools_tearoff () const = 0;
 
 	virtual DragManager* drags () const = 0;
-	virtual void maybe_autoscroll (bool, bool) = 0;
+	virtual void maybe_autoscroll (bool, bool, bool, bool) = 0;
 	virtual void stop_canvas_autoscroll () = 0;
 
 	virtual MouseCursors const * cursors () const = 0;
