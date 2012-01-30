@@ -98,7 +98,7 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 		{ 2, _("V"), _("Group is visible?") },
 		{ 3, _("On"), _("Group is enabled?") },
 		{ 4, S_("group|G"), _("Sharing Gain?") },
-		{ 5, S_("relative|Rel"), _("Relevative Gain Changes?") },
+		{ 5, S_("relative|Rel"), _("Relative Gain Changes?") },
 		{ 6, S_("mute|M"), _("Sharing Mute?") },
 		{ 7, S_("solo|S"), _("Sharing Solo?") },
 		{ 8, _("Rec"), _("Sharing Record-enable Status?") },
