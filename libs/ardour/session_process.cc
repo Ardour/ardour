@@ -147,7 +147,7 @@ Session::no_roll (pframes_t nframes)
 }
 
 /** @param need_butler to be set to true by this method if it needs the butler,
- *  otherwise it can be left alone or set to false.
+ *  otherwise it must be left alone.
  */
 int
 Session::process_routes (pframes_t nframes, bool& need_butler)
