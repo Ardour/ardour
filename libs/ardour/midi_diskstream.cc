@@ -623,6 +623,9 @@ MidiDiskstream::commit (framecnt_t playback_distance)
 
 	uint32_t frames_read = g_atomic_int_get(&_frames_read_from_ringbuffer);
 	uint32_t frames_written = g_atomic_int_get(&_frames_written_to_ringbuffer);
+
+	assert (frames_read <= frames_written);
+
 	if ((frames_written - frames_read) + playback_distance < midi_readahead) {
 		need_butler = true;
 	}
