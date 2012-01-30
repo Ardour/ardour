@@ -242,8 +242,10 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 
 	int add_processor (boost::shared_ptr<Processor>, Placement placement, ProcessorStreams* err = 0, bool activation_allowed = true);
 	int add_processor_by_index (boost::shared_ptr<Processor>, int, ProcessorStreams* err = 0, bool activation_allowed = true);
-	int add_processor (boost::shared_ptr<Processor>, ProcessorList::iterator iter, ProcessorStreams* err = 0, bool activation_allowed = true);
-	int add_processors (const ProcessorList&, boost::shared_ptr<Processor> before, ProcessorStreams* err = 0);
+	int add_processor (boost::shared_ptr<Processor>, boost::shared_ptr<Processor>, ProcessorStreams* err = 0, bool activation_allowed = true);
+	int add_processors (const ProcessorList&, boost::shared_ptr<Processor>, ProcessorStreams* err = 0);
+	boost::shared_ptr<Processor> before_processor_for_placement (Placement);
+	boost::shared_ptr<Processor> before_processor_for_index (int);
 	int remove_processor (boost::shared_ptr<Processor>, ProcessorStreams* err = 0, bool need_process_lock = true);
 	int remove_processors (const ProcessorList&, ProcessorStreams* err = 0);
 	int reorder_processors (const ProcessorList& new_order, ProcessorStreams* err = 0);
@@ -305,7 +307,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 
 	PBD::Signal1<void,void*> SelectedChanged;
 
-	int add_aux_send (boost::shared_ptr<Route>, Placement p);
+	int add_aux_send (boost::shared_ptr<Route>, boost::shared_ptr<Processor>);
 	void remove_aux_or_listen (boost::shared_ptr<Route>);
 
 	/**

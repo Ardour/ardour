@@ -643,6 +643,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void globally_set_send_gains_to_zero (boost::shared_ptr<Route> dest);
 	void globally_set_send_gains_to_unity (boost::shared_ptr<Route> dest);
 	void add_internal_sends (boost::shared_ptr<Route> dest, Placement p, boost::shared_ptr<RouteList> senders);
+	void add_internal_send (boost::shared_ptr<Route>, int, boost::shared_ptr<Route>);
+	void add_internal_send (boost::shared_ptr<Route>, boost::shared_ptr<Processor>, boost::shared_ptr<Route>);
 
 	static void set_disable_all_loaded_plugins (bool yn) {
 		_disable_all_loaded_plugins = yn;

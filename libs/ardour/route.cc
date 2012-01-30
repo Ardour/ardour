@@ -874,16 +874,17 @@ dump_processors(const string& name, const list<boost::shared_ptr<Processor> >& p
 }
 #endif
 
-int
-Route::add_processor (boost::shared_ptr<Processor> processor, Placement placement, ProcessorStreams* err, bool activation_allowed)
+/** Supposing that we want to insert a Processor at a given Placement, return
+ *  the processor to add the new one before (or 0 to add at the end).
+ */
+boost::shared_ptr<Processor>
+Route::before_processor_for_placement (Placement p)
 {
+	Glib::RWLock::ReaderLock lm (_processor_lock);
+
 	ProcessorList::iterator loc;
-
-	/* XXX this is not thread safe - we don't hold the lock across determining the iter
-	   to add before and actually doing the insertion. dammit.
-	*/
-
-	if (placement == PreFader) {
+	
+	if (p == PreFader) {
 		/* generic pre-fader: insert immediately before the amp */
 		loc = find (_processors.begin(), _processors.end(), _amp);
 	} else {
@@ -891,24 +892,20 @@ Route::add_processor (boost::shared_ptr<Processor> processor, Placement placemen
 		loc = find (_processors.begin(), _processors.end(), _main_outs);
 	}
 
-	return add_processor (processor, loc, err, activation_allowed);
+	return loc != _processors.end() ? *loc : boost::shared_ptr<Processor> ();
 }
 
-
-/** Add a processor to a route such that it ends up with a given index into the visible processors.
- *  @param index Index to add the processor at, or -1 to add at the end of the list.
+/** Supposing that we want to insert a Processor at a given index, return
+ *  the processor to add the new one before (or 0 to add at the end).
  */
-
-int
-Route::add_processor_by_index (boost::shared_ptr<Processor> processor, int index, ProcessorStreams* err, bool activation_allowed)
+boost::shared_ptr<Processor>
+Route::before_processor_for_index (int index)
 {
-	/* XXX this is not thread safe - we don't hold the lock across determining the iter
-	   to add before and actually doing the insertion. dammit.
-	*/
-
 	if (index == -1) {
-		return add_processor (processor, _processors.end(), err, activation_allowed);
+		return boost::shared_ptr<Processor> ();
 	}
+
+	Glib::RWLock::ReaderLock lm (_processor_lock);
 	
 	ProcessorList::iterator i = _processors.begin ();
 	int j = 0;
@@ -919,15 +916,36 @@ Route::add_processor_by_index (boost::shared_ptr<Processor> processor, int index
 		
 		++i;
 	}
-	
-	return add_processor (processor, i, err, activation_allowed);
+
+	return (i != _processors.end() ? *i : boost::shared_ptr<Processor> ());
+}
+
+/** Add a processor either pre- or post-fader
+ *  @return 0 on success, non-0 on failure.
+ */
+int
+Route::add_processor (boost::shared_ptr<Processor> processor, Placement placement, ProcessorStreams* err, bool activation_allowed)
+{
+	return add_processor (processor, before_processor_for_placement (placement), err, activation_allowed);
+}
+
+
+/** Add a processor to a route such that it ends up with a given index into the visible processors.
+ *  @param index Index to add the processor at, or -1 to add at the end of the list.
+ *  @return 0 on success, non-0 on failure.
+ */
+int
+Route::add_processor_by_index (boost::shared_ptr<Processor> processor, int index, ProcessorStreams* err, bool activation_allowed)
+{
+	return add_processor (processor, before_processor_for_index (index), err, activation_allowed);
 }
 
 /** Add a processor to the route.
- *  @param iter an iterator in _processors; the new processor will be inserted immediately before this location.
+ *  @param before An existing processor in the list, or 0; the new processor will be inserted immediately before it (or at the end).
+ *  @return 0 on success, non-0 on failure.
  */
 int
-Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorList::iterator iter, ProcessorStreams* err, bool activation_allowed)
+Route::add_processor (boost::shared_ptr<Processor> processor, boost::shared_ptr<Processor> before, ProcessorStreams* err, bool activation_allowed)
 {
 	assert (processor != _meter);
 	assert (processor != _main_outs);
@@ -946,25 +964,32 @@ Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorList::ite
 		boost::shared_ptr<PluginInsert> pi;
 		boost::shared_ptr<PortInsert> porti;
 
-		ProcessorList::iterator loc = find(_processors.begin(), _processors.end(), processor);
-
 		if (processor == _amp) {
-			// Ensure only one amp is in the list at any time
-			if (loc != _processors.end()) {
-				if (iter == loc) { // Already in place, do nothing
+			/* Ensure that only one amp is in the list at any time */
+			ProcessorList::iterator check = find (_processors.begin(), _processors.end(), processor);
+			if (check != _processors.end()) {
+				if (before == _amp) {
+					/* Already in position; all is well */
 					return 0;
-				} else { // New position given, relocate
-					_processors.erase (loc);
+				} else {
+					_processors.erase (check);
 				}
 			}
+		}
 
-		} else {
-			if (loc != _processors.end()) {
-				cerr << "ERROR: Processor added to route twice!" << endl;
+		assert (find (_processors.begin(), _processors.end(), processor) == _processors.end ());
+
+		ProcessorList::iterator loc;
+		if (before) {
+			/* inserting before a processor; find it */
+			loc = find (_processors.begin(), _processors.end(), before);
+			if (loc == _processors.end ()) {
+				/* Not found */
 				return 1;
 			}
-
-			loc = iter;
+		} else {
+			/* inserting at end */
+			loc = _processors.end ();
 		}
 
 		_processors.insert (loc, processor);
@@ -2619,10 +2644,10 @@ Route::enable_monitor_send ()
 
 /** Add an aux send to a route.
  *  @param route route to send to.
- *  @param placement placement for the send.
+ *  @param before Processor to insert before, or 0 to insert at the end.
  */
 int
-Route::add_aux_send (boost::shared_ptr<Route> route, Placement placement)
+Route::add_aux_send (boost::shared_ptr<Route> route, boost::shared_ptr<Processor> before)
 {
 	assert (route != _session.monitor_out ());
 
@@ -2649,7 +2674,7 @@ Route::add_aux_send (boost::shared_ptr<Route> route, Placement placement)
 			listener.reset (new InternalSend (_session, _pannable, _mute_master, route, Delivery::Aux));
 		}
 
-		add_processor (listener, placement);
+		add_processor (listener, before);
 
 	} catch (failed_constructor& err) {
 		return -1;

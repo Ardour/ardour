@@ -942,10 +942,8 @@ ProcessorBox::show_processor_menu (int arg)
 	processor_display.get_pointer (x, y);
 	_placement = processor_display.add_placeholder (y);
 
-	if (_visible_prefader_processors == 0) {
-		if (_placement == 1) {
-			_placement = 0;
-		}
+	if (_visible_prefader_processors == 0 && _placement > 0) {
+		--_placement;
 	}
 }
 
@@ -1312,10 +1310,7 @@ ProcessorBox::choose_aux (boost::weak_ptr<Route> wr)
 		return;
 	}
 
-	boost::shared_ptr<RouteList> rlist (new RouteList);
-	rlist->push_back (_route);
-
-	_session->add_internal_sends (target, PreFader, rlist);
+	_session->add_internal_send (target, _placement, _route);
 }
 
 void

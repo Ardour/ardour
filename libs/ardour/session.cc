@@ -2247,22 +2247,29 @@ Session::globally_add_internal_sends (boost::shared_ptr<Route> dest, Placement p
 void
 Session::add_internal_sends (boost::shared_ptr<Route> dest, Placement p, boost::shared_ptr<RouteList> senders)
 {
-	if (dest->is_monitor() || dest->is_master()) {
+	for (RouteList::iterator i = senders->begin(); i != senders->end(); ++i) {
+		add_internal_send (dest, (*i)->before_processor_for_placement (p), *i);
+	}
+}
+
+void
+Session::add_internal_send (boost::shared_ptr<Route> dest, int index, boost::shared_ptr<Route> sender)
+{
+	add_internal_send (dest, sender->before_processor_for_index (index), sender);
+}
+
+void
+Session::add_internal_send (boost::shared_ptr<Route> dest, boost::shared_ptr<Processor> before, boost::shared_ptr<Route> sender)
+{
+	if (sender->is_monitor() || sender->is_master() || sender == dest || dest->is_monitor() || dest->is_master()) {
 		return;
 	}
 
 	if (!dest->internal_return()) {
-		dest->add_internal_return();
+		dest->add_internal_return ();
 	}
-	
-	for (RouteList::iterator i = senders->begin(); i != senders->end(); ++i) {
-		
-		if ((*i)->is_monitor() || (*i)->is_master() || (*i) == dest) {
-			continue;
-		}
-		
-		(*i)->add_aux_send (dest, p);
-	}
+
+	sender->add_aux_send (dest, before);
 
 	graph_reordered ();
 }
