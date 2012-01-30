@@ -146,6 +146,9 @@ Session::no_roll (pframes_t nframes)
 	return ret;
 }
 
+/** @param need_butler to be set to true by this method if it needs the butler,
+ *  otherwise it can be left alone or set to false.
+ */
 int
 Session::process_routes (pframes_t nframes, bool& need_butler)
 {
@@ -175,9 +178,15 @@ Session::process_routes (pframes_t nframes, bool& need_butler)
 
 			(*i)->set_pending_declick (declick);
 
-			if ((ret = (*i)->roll (nframes, start_frame, end_frame, declick, need_butler)) < 0) {
+			bool b = false;
+
+			if ((ret = (*i)->roll (nframes, start_frame, end_frame, declick, b)) < 0) {
 				stop_transport ();
 				return -1;
+			}
+
+			if (b) {
+				need_butler = true;
 			}
 		}
 	}
@@ -185,6 +194,9 @@ Session::process_routes (pframes_t nframes, bool& need_butler)
 	return 0;
 }
 
+/** @param need_butler to be set to true by this method if it needs the butler,
+ *  otherwise it must be left alone.
+ */
 int
 Session::silent_process_routes (pframes_t nframes, bool& need_butler)
 {
@@ -204,9 +216,15 @@ Session::silent_process_routes (pframes_t nframes, bool& need_butler)
 				continue;
 			}
 
-			if ((ret = (*i)->silent_roll (nframes, start_frame, end_frame, need_butler)) < 0) {
+			bool b = false;
+
+			if ((ret = (*i)->silent_roll (nframes, start_frame, end_frame, b)) < 0) {
 				stop_transport ();
 				return -1;
+			}
+
+			if (b) {
+				need_butler = true;
 			}
 		}
 	}

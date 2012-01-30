@@ -269,6 +269,9 @@ MidiTrack::set_state_part_two ()
 	return;
 }
 
+/** @param need_butler to be set to true if this track now needs the butler, otherwise it can be left alone
+ *  or set to false.
+ */
 int
 MidiTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick, bool& need_butler)
 {
