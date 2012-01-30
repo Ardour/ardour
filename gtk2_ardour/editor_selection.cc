@@ -177,13 +177,12 @@ Editor::select_all_tracks ()
  *  tracks, in which case nothing will happen unless `force' is true.
  */
 void
-Editor::set_selected_track_as_side_effect (Selection::Operation op, bool /*force*/)
+Editor::set_selected_track_as_side_effect (Selection::Operation op)
 {
 	if (!clicked_axisview) {
 		return;
 	}
 
-#if 1
 	if (!clicked_routeview) {
 		return;
 	}
@@ -265,18 +264,6 @@ Editor::set_selected_track_as_side_effect (Selection::Operation op, bool /*force
 		cerr << ("Editor::set_selected_track_as_side_effect  case  Selection::Add  not yet implemented\n");
 		break;
 	}
-
-#else // the older version
-
-	if (!selection->tracks.empty()) {
-		if (!selection->selected (clicked_axisview)) {
-			selection->add (clicked_axisview);
-		}
-
-	} else if (force) {
-		selection->set (clicked_axisview);
-	}
-#endif
 }
 
 void
@@ -560,7 +547,7 @@ Editor::get_regionview_count_from_region_list (boost::shared_ptr<Region> region)
 
 
 bool
-Editor::set_selected_regionview_from_click (bool press, Selection::Operation op, bool /*no_track_remove*/)
+Editor::set_selected_regionview_from_click (bool press, Selection::Operation op)
 {
 	vector<RegionView*> all_equivalent_regions;
 	bool commit = false;
@@ -574,7 +561,6 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 	}
 
 	if (op == Selection::Toggle || op == Selection::Set) {
-
 
 		switch (op) {
 		case Selection::Toggle:
@@ -982,6 +968,10 @@ Editor::time_selection_changed ()
 	} else {
 		ActionManager::set_sensitive (ActionManager::time_selection_sensitive_actions, true);
 	}
+
+	if (_session && Config->get_always_play_range() && !_session->transport_rolling() && !selection->time.empty()) {
+		_session->request_locate (selection->time.start());
+	}
 }
 
 /** Set all region actions to have a given sensitivity */
@@ -1265,6 +1255,10 @@ Editor::region_selection_changed ()
 		   are allowed, so sensitize them all in case a key is pressed.
 		*/
 		sensitize_all_region_actions (true);
+	}
+
+	if (_session && Config->get_always_play_range() && !_session->transport_rolling() && !selection->regions.empty()) {
+		_session->request_locate (selection->regions.start());
 	}
 }
 
@@ -1851,13 +1845,9 @@ Editor::deselect_all ()
 }
 
 long
-Editor::select_range_around_region (RegionView* rv)
+Editor::select_range (framepos_t s, framepos_t e)
 {
-	assert (rv);
-
-	selection->set (&rv->get_time_axis_view());
-
+	selection->add (clicked_axisview);
 	selection->time.clear ();
-	boost::shared_ptr<Region> r = rv->region ();
-	return selection->set (r->position(), r->position() + r->length());
+	return selection->set (s, e);
 }

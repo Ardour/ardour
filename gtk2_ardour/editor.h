@@ -281,6 +281,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void invert_selection_in_track ();
 	void invert_selection ();
 	void deselect_all ();
+	long select_range (framepos_t, framepos_t);
 
 	void set_selected_regionview_from_region_list (boost::shared_ptr<ARDOUR::Region> region, Selection::Operation op = Selection::Set);
 
@@ -652,14 +653,12 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	bool set_selected_control_point_from_click (Selection::Operation op = Selection::Set, bool no_remove=false);
 	void set_selected_track_from_click (bool press, Selection::Operation op = Selection::Set, bool no_remove=false);
-	void set_selected_track_as_side_effect (Selection::Operation op, bool force = false);
-	bool set_selected_regionview_from_click (bool press, Selection::Operation op = Selection::Set, bool no_track_remove=false);
+	void set_selected_track_as_side_effect (Selection::Operation op);
+	bool set_selected_regionview_from_click (bool press, Selection::Operation op = Selection::Set);
 
 	bool set_selected_regionview_from_map_event (GdkEventAny*, StreamView*, boost::weak_ptr<ARDOUR::Region>);
 	void collect_new_region_view (RegionView *);
 	void collect_and_select_new_region_view (RegionView *);
-
-	long select_range_around_region (RegionView *);
 
 	Gtk::Menu track_context_menu;
 	Gtk::Menu track_region_context_menu;
@@ -2081,6 +2080,16 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	bool _following_mixer_selection;
 
 	int time_fx (ARDOUR::RegionList&, float val, bool pitching);
+
+	bool doing_range_stuff() const {
+		return (mouse_mode == Editing::MouseRange && (_join_object_range_state == JOIN_OBJECT_RANGE_NONE)) ||
+			_join_object_range_state == JOIN_OBJECT_RANGE_RANGE;
+	}
+	
+	bool doing_object_stuff() const {
+		return (mouse_mode == Editing::MouseObject && (_join_object_range_state == JOIN_OBJECT_RANGE_NONE)) ||
+			_join_object_range_state == JOIN_OBJECT_RANGE_OBJECT;
+	}
 
 	friend class Drag;
 	friend class RegionDrag;

@@ -129,6 +129,7 @@ CONFIG_VARIABLE (bool, secondary_clock_delta_edit_cursor, "secondary-clock-delta
 CONFIG_VARIABLE (bool, show_track_meters, "show-track-meters", true)
 CONFIG_VARIABLE (bool, locate_while_waiting_for_sync, "locate-while-waiting-for-sync", false)
 CONFIG_VARIABLE (bool, disable_disarm_during_roll, "disable-disarm-during-roll", false)
+CONFIG_VARIABLE (bool, always_play_range, "always-play-range", false)
 
 /* metering */
 

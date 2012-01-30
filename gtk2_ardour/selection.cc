@@ -748,11 +748,21 @@ Selection::set (RegionView* r, bool also_clear_tracks)
 void
 Selection::set (vector<RegionView*>& v)
 {
+	bool had_regions = !regions.empty();
+
 	clear_regions ();
+
 	if (Config->get_link_region_and_track_selection()) {
-		clear_tracks ();
-		// make sure to deselect any automation selections
-		clear_points();
+		if (had_regions) {
+			/* there were regions before, so we're changing the
+			 * region selection (likely), thus link region/track
+			 * selection. relevant tracks will get selected
+			 * as we ::add() below.
+			 */
+			clear_tracks ();
+			// make sure to deselect any automation selections
+			clear_points();
+		}
 	}
 	add (v);
 }

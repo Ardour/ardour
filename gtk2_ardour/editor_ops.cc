@@ -3594,8 +3594,7 @@ Editor::cut_copy (CutCopyOp op)
 
 		/* we only want to cut regions if some are selected */
 
-		switch (current_mouse_mode()) {
-		case MouseObject:
+		if (doing_object_stuff()) {
 			rs = get_regions_from_selection ();
 			if (!rs.empty() || !selection->points.empty()) {
 
@@ -3617,15 +3616,15 @@ Editor::cut_copy (CutCopyOp op)
 					}
 				}
 				commit_reversible_command ();
-				break; // terminate case statement here
+				goto out;
 			}
-			if (!selection->time.empty()) {
+			if (!selection->time.empty() && (_join_object_range_state == JOIN_OBJECT_RANGE_NONE)) {
 				/* don't cause suprises */
-				break;
+				goto out;
 			}
-			// fall thru if there was nothing selected
+		}
 
-		case MouseRange:
+		if (doing_range_stuff()) {
 			if (selection->time.empty()) {
 				framepos_t start, end;
 				if (!get_edit_op_range (start, end)) {
@@ -3641,14 +3640,10 @@ Editor::cut_copy (CutCopyOp op)
 			if (op == Cut || op == Delete) {
 				selection->clear_time ();
 			}
-
-			break;
-
-		default:
-			break;
 		}
 	}
 
+  out:
 	if (op == Delete || op == Cut || op == Clear) {
 		_drags->abort ();
 	}

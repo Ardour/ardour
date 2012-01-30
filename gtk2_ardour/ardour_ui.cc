@@ -1728,12 +1728,12 @@ ARDOUR_UI::transport_roll ()
 		if (!Config->get_seamless_loop()) {
 			_session->request_play_loop (false, true);
 		}
-	} else if (_session->get_play_range () && !join_play_range_button.active_state()) {
+	} else if (_session->get_play_range () && !Config->get_always_play_range()) {
 		/* stop playing a range if we currently are */
 		_session->request_play_range (0, true);
 	}
 
-	if (join_play_range_button.active_state()) {
+	if (Config->get_always_play_range()) {
 		_session->request_play_range (&editor->get_selection().time, true);
 	}
 
@@ -1792,7 +1792,7 @@ ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 		if (rolling) {
 			_session->request_stop (with_abort, true);
 		} else {
-			if (join_play_range_button.active_state()) {
+			if (Config->get_always_play_range ()) {
 				_session->request_play_range (&editor->get_selection().time, true);
 			}
 
@@ -1957,7 +1957,7 @@ ARDOUR_UI::map_transport_state ()
 			auto_loop_button.unset_active_state ();
 		}
 
-		if (join_play_range_button.active_state()) {
+		if (Config->get_always_play_range()) {
 			/* light up both roll and play-selection if they are joined */
 			roll_button.set_active_state (Gtkmm2ext::Active);
 			play_selection_button.set_active_state (Gtkmm2ext::Active);

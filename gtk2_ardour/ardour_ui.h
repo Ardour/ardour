@@ -418,7 +418,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	boost::shared_ptr<TransportControllable> play_selection_controllable;
 	boost::shared_ptr<TransportControllable> rec_controllable;
 
-	void join_play_range_clicked ();
+	void toggle_always_play_range ();
 
 	void set_transport_controllable_state (const XMLNode&);
 	XMLNode& get_transport_controllable_state ();

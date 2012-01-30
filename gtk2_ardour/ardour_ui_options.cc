@@ -318,6 +318,10 @@ ARDOUR_UI::parameter_changed (std::string p)
 			ActionManager::get_action ("Transport", "ToggleAutoReturn")->set_sensitive (false);
 		}
 
+	} else if (p == "always-play-range") {
+
+		ActionManager::map_some_state ("Transport", "AlwaysPlayRange", &RCConfiguration::get_always_play_range);
+
 	} else if (p == "send-mtc") {
 
 		ActionManager::map_some_state ("options", "SendMTC", &RCConfiguration::get_send_mtc);

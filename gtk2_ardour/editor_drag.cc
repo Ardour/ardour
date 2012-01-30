@@ -897,6 +897,10 @@ RegionMoveDrag::finished (GdkEvent* ev, bool movement_occurred)
 			);
 
 	}
+
+	if (_editor->session() && Config->get_always_play_range()) {
+		_editor->session()->request_locate (_editor->get_selection().regions.start());
+	}
 }
 
 void
@@ -3364,6 +3368,7 @@ SelectionDrag::SelectionDrag (Editor* e, ArdourCanvas::Item* i, Operation o)
 	, _copy (false)
 	, _original_pointer_time_axis (-1)
 	, _last_pointer_time_axis (-1)
+	, _time_selection_at_start (!_editor->get_selection().time.empty())
 {
 	DEBUG_TRACE (DEBUG::Drags, "New SelectionDrag\n");
 }
@@ -3595,16 +3600,42 @@ SelectionDrag::finished (GdkEvent* event, bool movement_occurred)
 		}
 
 		/* XXX what if its a music time selection? */
-		if (s && (s->config.get_auto_play() || (s->get_play_range() && s->transport_rolling()))) {
-			s->request_play_range (&_editor->selection->time, true);
+		if (s) {
+			if ((s->config.get_auto_play() || (s->get_play_range() && s->transport_rolling()))) {
+				s->request_play_range (&_editor->selection->time, true);
+			} else {
+				if (Config->get_always_play_range()) {
+					if (_editor->doing_range_stuff()) {
+						s->request_locate (_editor->get_selection().time.start());
+					} 
+				}
+			}
 		}
 
-
 	} else {
-		/* just a click, no pointer movement.*/
+		/* just a click, no pointer movement.
+		 */
 
 		if (Keyboard::no_modifier_keys_pressed (&event->button)) {
-			_editor->selection->clear_time();
+			if (!_time_selection_at_start) {
+				if (_editor->clicked_regionview) {
+					if (_editor->get_selection().selected (_editor->clicked_regionview)) {
+						/* range select the entire current
+						   region selection
+						*/
+						_editor->select_range (_editor->get_selection().regions.start(), 
+								       _editor->get_selection().regions.end_frame());
+					} else {
+						/* range select this (unselected)
+						 * region
+						 */
+						_editor->select_range (_editor->clicked_regionview->region()->position(), 
+								       _editor->clicked_regionview->region()->last_frame());
+					}
+				}
+			} else {
+				_editor->selection->clear_time();
+			}
 		}
 
 		if (_editor->clicked_axisview && !_editor->selection->selected (_editor->clicked_axisview)) {
@@ -3615,6 +3646,11 @@ SelectionDrag::finished (GdkEvent* event, bool movement_occurred)
 			s->request_stop (false, false);
 		}
 
+		if (Config->get_always_play_range()) {
+			if (_editor->doing_range_stuff()) {
+				s->request_locate (_editor->get_selection().time.start());
+			} 
+		}
 	}
 
 	_editor->stop_canvas_autoscroll ();

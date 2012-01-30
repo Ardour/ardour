@@ -892,6 +892,7 @@ private:
 	int _original_pointer_time_axis;
 	int _last_pointer_time_axis;
 	std::list<TimeAxisView*> _added_time_axes;
+	bool _time_selection_at_start;
 };
 
 /** Range marker drag */

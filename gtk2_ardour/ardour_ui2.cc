@@ -294,8 +294,8 @@ ARDOUR_UI::setup_transport ()
 	midi_panic_button.set_related_action (act);
 	act = ActionManager::get_action (X_("Transport"), X_("ToggleExternalSync"));
 	sync_button.set_related_action (act);
-
-	join_play_range_button.signal_clicked.connect (sigc::mem_fun (*this, &ARDOUR_UI::join_play_range_clicked));
+	act = ActionManager::get_action (X_("Transport"), X_("AlwaysPlayRange"));
+	join_play_range_button.set_related_action (act);
 
 	/* clocks, etc. */
 
@@ -624,7 +624,15 @@ ARDOUR_UI::click_button_clicked (GdkEventButton* ev)
 }
 
 void
-ARDOUR_UI::join_play_range_clicked ()
+ARDOUR_UI::toggle_always_play_range ()
 {
-	join_play_range_button.set_active (!join_play_range_button.get_active());
+	RefPtr<Action> act = ActionManager::get_action (X_("Transport"), X_("AlwaysPlayRange"));
+	assert (act);
+
+	RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic (act);
+	assert (tact);
+
+	Config->set_always_play_range (tact->get_active ());
 }
+
+	
