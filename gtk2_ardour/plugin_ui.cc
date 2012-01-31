@@ -156,11 +156,6 @@ PluginUIWindow::PluginUIWindow (
 
 	if (scrollable) {
 		if (h > 600) h = 600;
-		if (w > 600) w = 600;
-
-		if (w < 0) {
-			w = 450;
-		}
 	}
 
 	set_default_size (w, h);

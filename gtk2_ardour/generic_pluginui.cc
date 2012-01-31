@@ -113,7 +113,7 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	main_contents.pack_start (*constraint_hbox, false, false);
 
 	if (is_scrollable ) {
-		scroller.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+		scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 		scroller.set_name ("PluginEditor");
 		scroller_view.set_name("PluginEditor");
 		scroller_view.add (hpacker);
