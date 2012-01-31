@@ -146,9 +146,21 @@ int
 Editor::time_fx (RegionList& regions, float val, bool pitching)
 {
 	delete current_timefx;
-
 	current_timefx = new TimeFXDialog (*this, pitching);
+	current_timefx->regions = regions;
 
+	/* See if we have any audio regions on our list */
+	RegionList::iterator i = regions.begin ();
+	while (i != regions.end() && boost::dynamic_pointer_cast<AudioRegion> (*i) == 0) {
+		++i;
+	}
+
+	if (i == regions.end ()) {
+		/* No audio regions; we can just do the timefx without a dialogue */
+		do_timefx (*current_timefx);
+		return 0;
+	}
+	
 	switch (current_timefx->run ()) {
 	case RESPONSE_ACCEPT:
 		break;
@@ -158,7 +170,6 @@ Editor::time_fx (RegionList& regions, float val, bool pitching)
 	}
 
 	current_timefx->status = 0;
-	current_timefx->regions = regions;
 
 	if (pitching) {
 
