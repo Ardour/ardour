@@ -61,6 +61,7 @@ static const gchar *sample_rates[] = {
 	N_("48kHz"),
 	N_("88.2kHz"),
 	N_("96kHz"),
+	N_("176.4kHz"),
 	N_("192kHz"),
 	0
 };
@@ -432,6 +433,9 @@ ExportDialog::connect_to_session (Session *s)
 		break;
 	case 96000:
 		sample_rate_combo.set_active_text (_("96kHz"));
+		break;
+	case 176400:
+		sample_rate_combo.set_active_text (_("176.4kHz"));
 		break;
 	case 192000:
 		sample_rate_combo.set_active_text (_("192kHz"));
@@ -1243,6 +1247,8 @@ ExportDialog::sample_rate_chosen ()
 		rate = 88200;
 	} else if (sr_str == _("96kHz")) {
 		rate = 96000;
+	} else if (sr_str == _("176.4kHz")) {
+		rate = 176400;
 	} else if (sr_str == _("192kHz")) {
 		rate = 192000;
 	} else {
@@ -1421,6 +1427,8 @@ ExportDialog::initSpec(string &filepath)
 		spec.sample_rate = 88200;
 	} else if (sr_str == _("96kHz")) {
 		spec.sample_rate = 96000;
+	} else if (sr_str == _("176.4kHz")) {
+		spec.sample_rate = 176400;
 	} else if (sr_str == _("192kHz")) {
 		spec.sample_rate = 192000;
 	} else {

@@ -83,6 +83,7 @@ EngineControl::EngineControl ()
 	strings.push_back (_("48000Hz"));
 	strings.push_back (_("88200Hz"));
 	strings.push_back (_("96000Hz"));
+	strings.push_back (_("176400Hz"));
 	strings.push_back (_("192000Hz"));
 	set_popdown_strings (sample_rate_combo, strings);
 	sample_rate_combo.set_active_text ("48000Hz");
