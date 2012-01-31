@@ -1823,12 +1823,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	 */
 	bool mouse_frame (framepos_t&, bool& in_track_canvas) const;
 
-	/* "whats mine is yours" */
-
 	TimeFXDialog* current_timefx;
-
 	static void* timefx_thread (void *arg);
-	void do_timefx (TimeFXDialog&);
+	void do_timefx ();
 
 	int time_stretch (RegionSelection&, float fraction);
 	int pitch_shift (RegionSelection&, float cents);
