@@ -157,6 +157,7 @@ class Track : public Route, public PublicDiskstream
 
 	PBD::Signal0<void> DiskstreamChanged;
 	PBD::Signal0<void> FreezeChange;
+	/* Emitted when our diskstream is set to use a different playlist */
 	PBD::Signal0<void> PlaylistChanged;
 	PBD::Signal0<void> RecordEnableChanged;
 	PBD::Signal0<void> SpeedChanged;

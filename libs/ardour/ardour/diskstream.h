@@ -161,6 +161,7 @@ class Diskstream : public SessionObject, public PublicDiskstream
 	PBD::Signal0<void>            RecordEnableChanged;
 	PBD::Signal0<void>            SpeedChanged;
 	PBD::Signal0<void>            ReverseChanged;
+	/* Emitted when this diskstream is set to use a different playlist */
 	PBD::Signal0<void>            PlaylistChanged;
 	PBD::Signal0<void>            AlignmentStyleChanged;
 	PBD::Signal1<void,Location *> LoopSet;
