@@ -4523,7 +4523,7 @@ NoteCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 void
 NoteCreateDrag::motion (GdkEvent* event, bool)
 {
-	_note[1] = adjusted_current_frame (event) - _region_view->region()->position ();
+	_note[1] = max ((framepos_t)0, adjusted_current_frame (event) - _region_view->region()->position ());
 	double const x = _editor->frame_to_pixel (_note[1]);
 	if (_note[1] > _note[0]) {
 		_drag_rect->property_x2() = x;
