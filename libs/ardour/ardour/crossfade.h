@@ -164,6 +164,7 @@ class Crossfade : public ARDOUR::AudioRegion
 	static Sample* crossfade_buffer_in;
 
 	void initialize ();
+	void register_properties ();
 	int  compute (boost::shared_ptr<ARDOUR::AudioRegion>, boost::shared_ptr<ARDOUR::AudioRegion>, CrossfadeModel);
 	bool update ();
 

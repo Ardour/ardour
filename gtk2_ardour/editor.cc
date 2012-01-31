@@ -3636,7 +3636,11 @@ Editor::toggle_xfade_active (boost::weak_ptr<Crossfade> wxfade)
 {
 	boost::shared_ptr<Crossfade> xfade (wxfade.lock());
 	if (xfade) {
+		xfade->clear_changes ();
 		xfade->set_active (!xfade->active());
+		_session->begin_reversible_command (_("Change crossfade active state"));
+		_session->add_command (new StatefulDiffCommand (xfade));
+		_session->commit_reversible_command ();
 	}
 }
 
@@ -3645,7 +3649,16 @@ Editor::toggle_xfade_length (boost::weak_ptr<Crossfade> wxfade)
 {
 	boost::shared_ptr<Crossfade> xfade (wxfade.lock());
 	if (xfade) {
+		XMLNode& before = xfade->get_state ();
 		xfade->set_follow_overlap (!xfade->following_overlap());
+		XMLNode& after = xfade->get_state ();
+
+		/* This can't be a StatefulDiffCommand as the fade shapes are not
+		   managed by the Stateful properties system.
+		*/
+		_session->begin_reversible_command (_("Change crossfade length"));
+		_session->add_command (new MementoCommand<Crossfade> (*xfade.get(), &before, &after));
+		_session->commit_reversible_command ();
 	}
 }
 

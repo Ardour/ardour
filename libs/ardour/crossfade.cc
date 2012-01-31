@@ -92,6 +92,8 @@ Crossfade::Crossfade (boost::shared_ptr<AudioRegion> in, boost::shared_ptr<Audio
 	, _fade_out (Evoral::Parameter(FadeOutAutomation)) // linear (gain coefficient) => -inf..+6dB
 
 {
+	register_properties ();
+
 	_in = in;
 	_out = out;
 	_anchor_point = ap;
@@ -107,6 +109,8 @@ Crossfade::Crossfade (boost::shared_ptr<AudioRegion> a, boost::shared_ptr<AudioR
 	, _fade_in (Evoral::Parameter(FadeInAutomation)) // linear (gain coefficient) => -inf..+6dB
 	, _fade_out (Evoral::Parameter(FadeOutAutomation)) // linear (gain coefficient) => -inf..+6dB
 {
+	register_properties ();
+	
 	_in_update = false;
 	_fixed = false;
 	_follow_overlap = false;
@@ -127,6 +131,8 @@ Crossfade::Crossfade (const Playlist& playlist, XMLNode const & node)
 	, _fade_out (Evoral::Parameter(FadeOutAutomation)) // linear (gain coefficient) => -inf..+6dB
 
 {
+	register_properties ();
+	
 	boost::shared_ptr<Region> r;
 	XMLProperty const * prop;
 	LocaleGuard lg (X_("POSIX"));
@@ -197,6 +203,8 @@ Crossfade::Crossfade (boost::shared_ptr<Crossfade> orig, boost::shared_ptr<Audio
 	, _fade_in (orig->_fade_in)
 	, _fade_out (orig->_fade_out)
 {
+	register_properties ();
+	
 	_active           = orig->_active;
 	_in_update        = orig->_in_update;
 	_anchor_point     = orig->_anchor_point;
@@ -222,6 +230,13 @@ Crossfade::Crossfade (boost::shared_ptr<Crossfade> orig, boost::shared_ptr<Audio
 
 Crossfade::~Crossfade ()
 {
+}
+
+void
+Crossfade::register_properties ()
+{
+	add_property (_active);
+	add_property (_follow_overlap);
 }
 
 void
