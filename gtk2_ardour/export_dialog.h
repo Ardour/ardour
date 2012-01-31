@@ -75,6 +75,9 @@ class ExportDialog : public ArdourDialog {
 	// Must initialize all the shared_ptrs below
 	virtual void init_components ();
 
+	// Override if the channel selector should not be grown
+	virtual bool channel_selector_is_expandable() { return true; }
+
 	boost::scoped_ptr<ExportPresetSelector>   preset_selector;
 	boost::scoped_ptr<ExportTimespanSelector> timespan_selector;
 	boost::scoped_ptr<ExportChannelSelector>  channel_selector;
@@ -148,7 +151,7 @@ class ExportRangeDialog : public ExportDialog
   private:
 	void init_components ();
 
-        std::string range_id;
+	std::string range_id;
 };
 
 class ExportSelectionDialog : public ExportDialog
@@ -164,6 +167,9 @@ class ExportRegionDialog : public ExportDialog
 {
   public:
 	ExportRegionDialog (PublicEditor & editor, ARDOUR::AudioRegion const & region, ARDOUR::AudioTrack & track);
+
+  protected:
+	virtual bool channel_selector_is_expandable() { return false; }
 
   private:
 	void init_gui ();
