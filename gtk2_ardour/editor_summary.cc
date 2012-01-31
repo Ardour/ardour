@@ -75,8 +75,8 @@ EditorSummary::set_session (Session* s)
 	 */
 
 	if (_session) {
-		_session->StartTimeChanged.connect (_session_connections, invalidator (*this), boost::bind (&EditorSummary::set_dirty, this), gui_context());
-		_session->EndTimeChanged.connect (_session_connections, invalidator (*this), boost::bind (&EditorSummary::set_dirty, this), gui_context());
+		_session->StartTimeChanged.connect (_session_connections, invalidator (*this), boost::bind (&CairoWidget::set_dirty, this), gui_context());
+		_session->EndTimeChanged.connect (_session_connections, invalidator (*this), boost::bind (&CairoWidget::set_dirty, this), gui_context());
 	}
 }
 
@@ -926,9 +926,13 @@ EditorSummary::editor_y_to_summary (double y) const
 void
 EditorSummary::routes_added (list<RouteTimeAxisView*> const & r)
 {
-	/* Connect to gui_changed() on the routes so that we know when their colour has changed */
 	for (list<RouteTimeAxisView*>::const_iterator i = r.begin(); i != r.end(); ++i) {
+		/* Connect to gui_changed() on the route so that we know when their colour has changed */
 		(*i)->route()->gui_changed.connect (*this, invalidator (*this), ui_bind (&EditorSummary::route_gui_changed, this, _1), gui_context ());
+		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> ((*i)->route ());
+		if (tr) {
+			tr->PlaylistChanged.connect (*this, invalidator (*this), ui_bind (&CairoWidget::set_dirty, this), gui_context ());
+		}
 	}
 
 	set_dirty ();
