@@ -28,6 +28,9 @@
 #include "ardour/session.h"
 #include "ardour/tempo.h"
 
+#include "gtkmm2ext/gui_thread.h"
+#include "gtkmm2ext/keyboard.h"
+
 #include "midi_list_editor.h"
 
 #include "i18n.h"
@@ -63,8 +66,8 @@ MidiListEditor::MidiListEditor (Session* s, boost::shared_ptr<MidiRegion> r)
 	view.append_column (_("Length"), columns.length);
 	view.append_column (_("End"), columns.end);
 	view.set_headers_visible (true);
-	view.set_name (X_("MidiListView"));
 	view.set_rules_hint (true);
+	view.get_selection()->set_mode (SELECTION_MULTIPLE);
 
 	for (int i = 0; i < 6; ++i) {
 		CellRendererText* renderer = dynamic_cast<CellRendererText*>(view.get_column_cell_renderer (i));
@@ -80,11 +83,14 @@ MidiListEditor::MidiListEditor (Session* s, boost::shared_ptr<MidiRegion> r)
 
 	redisplay_model ();
 
+	region->midi_source(0)->model()->ContentsChanged.connect (content_connection, invalidator (*this), 
+								  boost::bind (&MidiListEditor::redisplay_model, this), gui_context());
+
 	view.show ();
 	scroller.show ();
 
 	add (scroller);
-	set_size_request (400, 400);
+	set_size_request (-1, 400);
 }
 
 MidiListEditor::~MidiListEditor ()
@@ -111,6 +117,7 @@ MidiListEditor::key_press (GdkEventKey* ev)
 			break;
 		case GDK_Escape:
 			break;
+
 		}
 	}
 
@@ -124,9 +131,22 @@ MidiListEditor::key_release (GdkEventKey* ev)
 
 	switch (ev->keyval) {
 	case GDK_Delete:
+	case GDK_BackSpace:
 		delete_selected_note ();
 		ret = true;
 		break;
+	case GDK_z:
+		if (_session && Gtkmm2ext::Keyboard::modifier_state_contains (ev->state, Gtkmm2ext::Keyboard::PrimaryModifier)) {
+			_session->undo (1);
+		}
+		break;
+		
+	case GDK_r:
+		if (_session && Gtkmm2ext::Keyboard::modifier_state_contains (ev->state, Gtkmm2ext::Keyboard::PrimaryModifier)) {
+			_session->redo (1);
+		}
+		break;
+
 	default:
 		break;
 	}
@@ -144,16 +164,26 @@ MidiListEditor::delete_selected_note ()
 		return;
 	}
 
-	TreeView::Selection::ListHandle_Path::iterator i = rows.begin();
-	TreeIter iter;
+	typedef vector<boost::shared_ptr<NoteType> > Notes;
+	Notes to_delete;
 
-	/* selection mode is single, so rows.begin() is it */
+	for (TreeView::Selection::ListHandle_Path::iterator i = rows.begin(); i != rows.end(); ++i) {
+		TreeIter iter;
 
-	if ((iter = model->get_iter (*i))) {
-		boost::shared_ptr<NoteType> note = (*iter)[columns._note];
-		cerr << "Would have deleted " << *note << endl;
+		if ((iter = model->get_iter (*i))) {
+			boost::shared_ptr<NoteType> note = (*iter)[columns._note];
+			to_delete.push_back (note);
+		}
 	}
 
+	boost::shared_ptr<MidiModel> m (region->midi_source(0)->model());
+	MidiModel::NoteDiffCommand* cmd = m->new_note_diff_command (_("delete notes (from list)"));
+
+	for (Notes::iterator i = to_delete.begin(); i != to_delete.end(); ++i) {
+		cmd->remove (*i);
+	}
+
+	m->apply_command (*_session, cmd);
 }
 
 void

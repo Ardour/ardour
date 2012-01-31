@@ -77,6 +77,9 @@ class MidiListEditor : public ArdourWindow
 
 	boost::shared_ptr<ARDOUR::MidiRegion> region;
 
+	/** connection used to connect to model's ContentChanged signal */
+	PBD::ScopedConnection content_connection;
+
 	void edited (const std::string&, const std::string&);
 	void editing_started (Gtk::CellEditable*, const std::string& path, int);
 	void editing_canceled ();
