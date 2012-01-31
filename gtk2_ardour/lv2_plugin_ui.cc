@@ -47,6 +47,11 @@ LV2PluginUI::lv2_ui_write(void*       controller,
                           const void* buffer)
 {
 	LV2PluginUI* me = (LV2PluginUI*)controller;
+
+	if (port_index >= me->_controllables.size()) {
+		return;
+	}
+
 	boost::shared_ptr<AutomationControl> ac = me->_controllables[port_index];
 
 	if (ac) {
