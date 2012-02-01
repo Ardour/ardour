@@ -92,6 +92,7 @@ public:
 	void update (const CrossfadeListProperty::ChangeRecord &);
 
 	boost::shared_ptr<Crossfade> find_crossfade (const PBD::ID &) const;
+	void get_equivalent_crossfades (boost::shared_ptr<Crossfade>, std::vector<boost::shared_ptr<Crossfade> > &);
 
 protected:
 

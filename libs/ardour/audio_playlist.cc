@@ -1194,3 +1194,13 @@ AudioPlaylist::pre_uncombine (vector<boost::shared_ptr<Region> >& originals, boo
 		_session.add_command (new StatefulDiffCommand (*i));
 	}
 }
+
+void
+AudioPlaylist::get_equivalent_crossfades (boost::shared_ptr<Crossfade> c, vector<boost::shared_ptr<Crossfade> > & results)
+{
+	for (list<boost::shared_ptr<Crossfade> >::iterator i = _crossfades.begin(); i != _crossfades.end(); ++i) {
+		if ((*i)->equivalent (c)) {
+			results.push_back (*i);
+		}
+	}
+}

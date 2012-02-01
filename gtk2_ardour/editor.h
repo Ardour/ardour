@@ -630,18 +630,21 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void get_equivalent_regions (RegionView* rv, std::vector<RegionView*> &, PBD::PropertyID) const;
 	RegionSelection get_equivalent_regions (RegionSelection &, PBD::PropertyID) const;
+	std::vector<boost::shared_ptr<ARDOUR::Crossfade> > get_equivalent_crossfades (
+		RouteTimeAxisView&, boost::shared_ptr<ARDOUR::Crossfade>, PBD::PropertyID
+		) const;
 	void mapover_tracks (sigc::slot<void,RouteTimeAxisView&,uint32_t> sl, TimeAxisView*, PBD::PropertyID) const;
 	void mapover_tracks_with_unique_playlists (sigc::slot<void,RouteTimeAxisView&,uint32_t> sl, TimeAxisView*, PBD::PropertyID) const;
 
 	/* functions to be passed to mapover_tracks(), possibly with sigc::bind()-supplied arguments */
-
 	void mapped_get_equivalent_regions (RouteTimeAxisView&, uint32_t, RegionView *, std::vector<RegionView*>*) const;
 	void mapped_use_new_playlist (RouteTimeAxisView&, uint32_t, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
 	void mapped_use_copy_playlist (RouteTimeAxisView&, uint32_t, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
 	void mapped_clear_playlist (RouteTimeAxisView&, uint32_t);
-
-	/* end */
-
+	void mapped_get_equivalent_crossfades (
+		RouteTimeAxisView&, uint32_t, boost::shared_ptr<ARDOUR::Crossfade>, std::vector<boost::shared_ptr<ARDOUR::Crossfade> >*
+		) const;
+	
 	void button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type);
 	bool button_release_can_deselect;
 
@@ -1895,8 +1898,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	ImageFrameSocketHandler* image_socket_listener ;
 #endif
 
-	void toggle_xfade_active (boost::weak_ptr<ARDOUR::Crossfade>);
-	void toggle_xfade_length (boost::weak_ptr<ARDOUR::Crossfade>);
+	void toggle_xfade_active (RouteTimeAxisView *, boost::weak_ptr<ARDOUR::Crossfade>);
+	void toggle_xfade_length (RouteTimeAxisView *, boost::weak_ptr<ARDOUR::Crossfade>);
 	void edit_xfade (boost::weak_ptr<ARDOUR::Crossfade>);
 	void xfade_edit_left_region ();
 	void xfade_edit_right_region ();

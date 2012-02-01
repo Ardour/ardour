@@ -1718,7 +1718,7 @@ Editor::build_track_selection_context_menu ()
  * @param edit_items List to add the items to.
  */
 void
-Editor::add_crossfade_context_items (AudioStreamView* /*view*/, boost::shared_ptr<Crossfade> xfade, Menu_Helpers::MenuList& edit_items, bool many)
+Editor::add_crossfade_context_items (AudioStreamView* view, boost::shared_ptr<Crossfade> xfade, Menu_Helpers::MenuList& edit_items, bool many)
 {
 	using namespace Menu_Helpers;
 	Menu     *xfade_menu = manage (new Menu);
@@ -1732,8 +1732,13 @@ Editor::add_crossfade_context_items (AudioStreamView* /*view*/, boost::shared_pt
 		str = _("Unmute");
 	}
 
-	items.push_back (MenuElem (str, sigc::bind (sigc::mem_fun(*this, &Editor::toggle_xfade_active), boost::weak_ptr<Crossfade> (xfade))));
-	items.push_back (MenuElem (_("Edit..."), sigc::bind (sigc::mem_fun(*this, &Editor::edit_xfade), boost::weak_ptr<Crossfade> (xfade))));
+	items.push_back (
+		MenuElem (str, sigc::bind (sigc::mem_fun (*this, &Editor::toggle_xfade_active), &view->trackview(), boost::weak_ptr<Crossfade> (xfade)))
+		);
+	
+	items.push_back (
+		MenuElem (_("Edit..."), sigc::bind (sigc::mem_fun (*this, &Editor::edit_xfade), boost::weak_ptr<Crossfade> (xfade)))
+		);
 
 	if (xfade->can_follow_overlap()) {
 
@@ -1743,7 +1748,9 @@ Editor::add_crossfade_context_items (AudioStreamView* /*view*/, boost::shared_pt
 			str = _("Convert to Full");
 		}
 
-		items.push_back (MenuElem (str, sigc::bind (sigc::mem_fun(*this, &Editor::toggle_xfade_length), xfade)));
+		items.push_back (
+			MenuElem (str, sigc::bind (sigc::mem_fun (*this, &Editor::toggle_xfade_length), &view->trackview(), xfade))
+			);
 	}
 
 	if (many) {
@@ -3632,34 +3639,50 @@ Editor::set_stationary_playhead (bool yn)
 }
 
 void
-Editor::toggle_xfade_active (boost::weak_ptr<Crossfade> wxfade)
+Editor::toggle_xfade_active (RouteTimeAxisView* tv, boost::weak_ptr<Crossfade> wxfade)
 {
 	boost::shared_ptr<Crossfade> xfade (wxfade.lock());
-	if (xfade) {
-		xfade->clear_changes ();
-		xfade->set_active (!xfade->active());
-		_session->begin_reversible_command (_("Change crossfade active state"));
-		_session->add_command (new StatefulDiffCommand (xfade));
-		_session->commit_reversible_command ();
+	if (!xfade) {
+		return;
 	}
+
+	vector<boost::shared_ptr<Crossfade> > all = get_equivalent_crossfades (*tv, xfade, ARDOUR::Properties::edit.property_id);
+
+	_session->begin_reversible_command (_("Change crossfade active state"));
+	
+	for (vector<boost::shared_ptr<Crossfade> >::iterator i = all.begin(); i != all.end(); ++i) {
+		(*i)->clear_changes ();
+		(*i)->set_active (!(*i)->active());
+		_session->add_command (new StatefulDiffCommand (*i));
+	}
+	
+	_session->commit_reversible_command ();
 }
 
 void
-Editor::toggle_xfade_length (boost::weak_ptr<Crossfade> wxfade)
+Editor::toggle_xfade_length (RouteTimeAxisView* tv, boost::weak_ptr<Crossfade> wxfade)
 {
 	boost::shared_ptr<Crossfade> xfade (wxfade.lock());
-	if (xfade) {
-		XMLNode& before = xfade->get_state ();
-		xfade->set_follow_overlap (!xfade->following_overlap());
-		XMLNode& after = xfade->get_state ();
-
-		/* This can't be a StatefulDiffCommand as the fade shapes are not
-		   managed by the Stateful properties system.
-		*/
-		_session->begin_reversible_command (_("Change crossfade length"));
-		_session->add_command (new MementoCommand<Crossfade> (*xfade.get(), &before, &after));
-		_session->commit_reversible_command ();
+	if (!xfade) {
+		return;
 	}
+	
+	vector<boost::shared_ptr<Crossfade> > all = get_equivalent_crossfades (*tv, xfade, ARDOUR::Properties::edit.property_id);
+
+	/* This can't be a StatefulDiffCommand as the fade shapes are not
+	   managed by the Stateful properties system.
+	*/
+	_session->begin_reversible_command (_("Change crossfade length"));
+	
+	for (vector<boost::shared_ptr<Crossfade> >::iterator i = all.begin(); i != all.end(); ++i) {
+		XMLNode& before = (*i)->get_state ();
+		(*i)->set_follow_overlap (!(*i)->following_overlap());
+		XMLNode& after = (*i)->get_state ();
+	
+		_session->add_command (new MementoCommand<Crossfade> (*i->get(), &before, &after));
+	}
+	
+	_session->commit_reversible_command ();
 }
 
 void
