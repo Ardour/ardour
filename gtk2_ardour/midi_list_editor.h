@@ -20,6 +20,8 @@
 #define __ardour_gtk2_midi_list_editor_h_
 
 #include <gtkmm/treeview.h>
+#include <gtkmm/table.h>
+#include <gtkmm/box.h>
 #include <gtkmm/liststore.h>
 #include <gtkmm/scrolledwindow.h>
 
@@ -36,6 +38,7 @@ namespace Evoral {
 namespace ARDOUR {
 	class MidiRegion;
 	class MidiModel;
+	class MidiTrack;
 	class Session;
 };
 
@@ -44,7 +47,8 @@ class MidiListEditor : public ArdourWindow
   public:
 	typedef Evoral::Note<Evoral::MusicalTime> NoteType;
 
-	MidiListEditor(ARDOUR::Session*, boost::shared_ptr<ARDOUR::MidiRegion>);
+	MidiListEditor(ARDOUR::Session*, boost::shared_ptr<ARDOUR::MidiRegion>,
+		       boost::shared_ptr<ARDOUR::MidiTrack>);
 	~MidiListEditor();
 
   private:
@@ -59,23 +63,40 @@ class MidiListEditor : public ArdourWindow
 			add (end);
 			add (_note);
 		};
-		Gtk::TreeModelColumn<uint8_t> channel;
-		Gtk::TreeModelColumn<uint8_t> note;
+		Gtk::TreeModelColumn<uint8_t>     channel;
+		Gtk::TreeModelColumn<uint8_t>     note;
 		Gtk::TreeModelColumn<std::string> note_name;
-		Gtk::TreeModelColumn<uint8_t> velocity;
+		Gtk::TreeModelColumn<uint8_t>     velocity;
 		Gtk::TreeModelColumn<std::string> start;
-		Gtk::TreeModelColumn<std::string> length;
+		Gtk::TreeModelColumn<int>         length;
 		Gtk::TreeModelColumn<std::string> end;
 		Gtk::TreeModelColumn<boost::shared_ptr<NoteType> > _note;
 	};
 
+	struct NoteLengthColumns : public Gtk::TreeModel::ColumnRecord {
+		NoteLengthColumns() {
+			add (ticks);
+			add (name);
+		}
+		Gtk::TreeModelColumn<int>         ticks;
+		Gtk::TreeModelColumn<std::string> name;
+	};
+
 	MidiListModelColumns         columns;
 	Glib::RefPtr<Gtk::ListStore> model;
+	NoteLengthColumns            note_length_columns;
+	Glib::RefPtr<Gtk::ListStore> note_length_model;
 	Gtk::TreeView                view;
 	Gtk::ScrolledWindow          scroller;
-	std::string               _current_edit;
+	Gtk::TreeModel::Path         edit_path;
+	int                          edit_column;
+	Gtk::CellRendererText*       editing_renderer;
+	Gtk::Table                   buttons;
+	Gtk::VBox                    vbox;
+	Gtk::ToggleButton            additional_info_button;
 
 	boost::shared_ptr<ARDOUR::MidiRegion> region;
+	boost::shared_ptr<ARDOUR::MidiTrack>  track;
 
 	/** connection used to connect to model's ContentChanged signal */
 	PBD::ScopedConnection content_connection;
@@ -83,6 +104,7 @@ class MidiListEditor : public ArdourWindow
 	void edited (const std::string&, const std::string&);
 	void editing_started (Gtk::CellEditable*, const std::string& path, int);
 	void editing_canceled ();
+	void stop_editing (bool cancelled = false);
 
 	void redisplay_model ();
 
@@ -90,6 +112,7 @@ class MidiListEditor : public ArdourWindow
 	bool key_release (GdkEventKey* ev);
 
 	void delete_selected_note ();
+	void selection_changed ();
 };
 
 #endif /* __ardour_gtk2_midi_list_editor_h_ */

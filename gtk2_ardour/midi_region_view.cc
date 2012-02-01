@@ -811,7 +811,7 @@ void
 MidiRegionView::show_list_editor ()
 {
 	if (!_list_editor) {
-		_list_editor = new MidiListEditor (trackview.session(), midi_region());
+		_list_editor = new MidiListEditor (trackview.session(), midi_region(), midi_view()->midi_track());
 	}
 	_list_editor->present ();
 }
