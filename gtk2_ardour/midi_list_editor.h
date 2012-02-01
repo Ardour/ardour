@@ -60,7 +60,6 @@ class MidiListEditor : public ArdourWindow
 			add (velocity);
 			add (start);
 			add (length);
-			add (end);
 			add (_note);
 		};
 		Gtk::TreeModelColumn<uint8_t>     channel;
@@ -69,7 +68,6 @@ class MidiListEditor : public ArdourWindow
 		Gtk::TreeModelColumn<uint8_t>     velocity;
 		Gtk::TreeModelColumn<std::string> start;
 		Gtk::TreeModelColumn<std::string> length;
-		Gtk::TreeModelColumn<std::string> end;
 		Gtk::TreeModelColumn<boost::shared_ptr<NoteType> > _note;
 	};
 
@@ -111,6 +109,7 @@ class MidiListEditor : public ArdourWindow
 
 	bool key_press (GdkEventKey* ev);
 	bool key_release (GdkEventKey* ev);
+	bool scroll_event (GdkEventScroll*);
 
 	void delete_selected_note ();
 	void selection_changed ();

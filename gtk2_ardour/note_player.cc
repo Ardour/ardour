@@ -55,7 +55,7 @@ NotePlayer::play ()
 	/* note: if there is more than 1 note, we will silence them all at the same time
 	 */
 
-	const uint32_t note_length_ms = 350;
+	const uint32_t note_length_ms = 100;
 
 	Glib::signal_timeout().connect (sigc::bind (sigc::ptr_fun (&NotePlayer::_off), this),
 					note_length_ms, G_PRIORITY_DEFAULT);
