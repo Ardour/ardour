@@ -827,13 +827,13 @@ Playlist::flush_notifications (bool from_undo)
 	 if (Config->get_use_overlap_equivalency()) {
 		 for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
 			 if ((*i)->overlap_equivalent (other)) {
-				 results.push_back ((*i));
+				 results.push_back (*i);
 			 }
 		 }
 	 } else {
 		 for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
 			 if ((*i)->equivalent (other)) {
-				 results.push_back ((*i));
+				 results.push_back (*i);
 			 }
 		 }
 	 }
