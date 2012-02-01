@@ -39,26 +39,26 @@ NotePlayer::add (boost::shared_ptr<NoteType> note)
 }
 
 void
+NotePlayer::clear ()
+{
+	off ();
+	notes.clear ();
+}
+
+void
 NotePlayer::play ()
 {
-	Evoral::MusicalTime longest_duration_beats = 0;
+	for (Notes::iterator n = notes.begin(); n != notes.end(); ++n) {
+		track->write_immediate_event ((*n)->on_event().size(), (*n)->on_event().buffer());
+	}
 
 	/* note: if there is more than 1 note, we will silence them all at the same time
 	 */
 
-	for (Notes::iterator n = notes.begin(); n != notes.end(); ++n) {
-		track->write_immediate_event ((*n)->on_event().size(), (*n)->on_event().buffer());
-		if ((*n)->length() > longest_duration_beats) {
-			longest_duration_beats = (*n)->length();
-		}
-	}
+	const uint32_t note_length_ms = 350;
 
-	uint32_t note_length_ms = 350;
-	/* beats_to_frames (longest_duration_beats)
-	 * (1000 / (double)track->session().nominal_frame_rate()); */
-
-	Glib::signal_timeout().connect(sigc::bind (sigc::ptr_fun (&NotePlayer::_off), this),
-	                               note_length_ms, G_PRIORITY_DEFAULT);
+	Glib::signal_timeout().connect (sigc::bind (sigc::ptr_fun (&NotePlayer::_off), this),
+					note_length_ms, G_PRIORITY_DEFAULT);
 }
 
 bool
@@ -73,6 +73,6 @@ void
 NotePlayer::off ()
 {
 	for (Notes::iterator n = notes.begin(); n != notes.end(); ++n) {
-		track->write_immediate_event((*n)->off_event().size(), (*n)->off_event().buffer());
+		track->write_immediate_event ((*n)->off_event().size(), (*n)->off_event().buffer());
 	}
 }

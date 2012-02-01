@@ -39,6 +39,7 @@ public:
 	void add (boost::shared_ptr<NoteType>);
 	void play ();
 	void off ();
+	void clear ();
 
 	static bool _off (NotePlayer*);
 
