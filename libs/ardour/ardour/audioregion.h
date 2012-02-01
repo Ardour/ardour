@@ -56,7 +56,6 @@ namespace Properties {
 	extern PBD::PropertyDescriptor<bool> fade_out;
 }
 
-class Route;
 class Playlist;
 class Session;
 class Filter;
