@@ -68,7 +68,7 @@ class MidiListEditor : public ArdourWindow
 		Gtk::TreeModelColumn<std::string> note_name;
 		Gtk::TreeModelColumn<uint8_t>     velocity;
 		Gtk::TreeModelColumn<std::string> start;
-		Gtk::TreeModelColumn<int>         length;
+		Gtk::TreeModelColumn<std::string> length;
 		Gtk::TreeModelColumn<std::string> end;
 		Gtk::TreeModelColumn<boost::shared_ptr<NoteType> > _note;
 	};
@@ -91,9 +91,10 @@ class MidiListEditor : public ArdourWindow
 	Gtk::TreeModel::Path         edit_path;
 	int                          edit_column;
 	Gtk::CellRendererText*       editing_renderer;
+	Gtk::CellEditable*           editing_editable;
 	Gtk::Table                   buttons;
 	Gtk::VBox                    vbox;
-	Gtk::ToggleButton            additional_info_button;
+	Gtk::ToggleButton            sound_notes_button;
 
 	boost::shared_ptr<ARDOUR::MidiRegion> region;
 	boost::shared_ptr<ARDOUR::MidiTrack>  track;

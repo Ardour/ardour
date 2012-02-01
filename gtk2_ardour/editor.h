@@ -2091,6 +2091,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 			_join_object_range_state == JOIN_OBJECT_RANGE_OBJECT;
 	}
 
+	void toggle_sound_midi_notes ();
+
 	friend class Drag;
 	friend class RegionDrag;
 	friend class RegionMoveDrag;

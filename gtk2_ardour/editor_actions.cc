@@ -111,6 +111,7 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_actions, X_("MarkerMenu"), _("Markers"));
 	ActionManager::register_action (editor_actions, X_("MeterFalloff"), _("Meter falloff"));
 	ActionManager::register_action (editor_actions, X_("MeterHold"), _("Meter hold"));
+	ActionManager::register_action (editor_actions, X_("MIDI"), _("MIDI Options"));
 	ActionManager::register_action (editor_actions, X_("MiscOptions"), _("Misc Options"));
 	ActionManager::register_action (editor_actions, X_("Monitoring"), _("Monitoring"));
 	ActionManager::register_action (editor_actions, X_("MoveActiveMarkMenu"), _("Active Mark"));
@@ -237,7 +238,6 @@ Editor::register_actions ()
 	reg_sens (editor_actions, "nudge-playhead-backward", _("Nudge Playhead Backward"), sigc::bind (sigc::mem_fun(*this, &Editor::nudge_backward), false, true));
 	reg_sens (editor_actions, "playhead-forward-to-grid", _("Forward to Grid"), sigc::mem_fun(*this, &Editor::playhead_forward_to_grid));
 	reg_sens (editor_actions, "playhead-backward-to-grid", _("Backward to Grid"), sigc::mem_fun(*this, &Editor::playhead_backward_to_grid));
-
 
 	reg_sens (editor_actions, "temporal-zoom-out", _("Zoom Out"), sigc::bind (sigc::mem_fun(*this, &Editor::temporal_zoom_step), true));
 	reg_sens (editor_actions, "temporal-zoom-in", _("Zoom In"), sigc::bind (sigc::mem_fun(*this, &Editor::temporal_zoom_step), false));
@@ -389,6 +389,8 @@ Editor::register_actions ()
 	act = reg_sens (editor_actions, "track-height-small", _("Small"), sigc::bind (
 				sigc::mem_fun(*this, &Editor::set_track_height), HeightSmall));
 	ActionManager::track_selection_sensitive_actions.push_back (act);
+
+	toggle_reg_sens (editor_actions, "sound-midi-notes", _("Sound Selected MIDI Notes"), sigc::mem_fun (*this, &Editor::toggle_sound_midi_notes));
 
 	Glib::RefPtr<ActionGroup> zoom_actions = ActionGroup::create (X_("Zoom"));
 	RadioAction::Group zoom_group;
@@ -1114,6 +1116,20 @@ Editor::zoom_focus_action (ZoomFocus focus)
 }
 
 void
+Editor::toggle_sound_midi_notes ()
+{
+	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("sound-midi-notes"));
+	
+	if (act) {
+		bool s = Config->get_sound_midi_notes();
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+		if (tact->get_active () != s) {
+			Config->set_sound_midi_notes (tact->get_active());
+		}
+	}
+}
+
+void
 Editor::zoom_focus_chosen (ZoomFocus focus)
 {
 	/* this is driven by a toggle on a radio group, and so is invoked twice,
@@ -1192,6 +1208,16 @@ Editor::parameter_changed (std::string p)
 		update_just_timecode ();
 	} else if (p == "show-zoom-tools") {
 		_zoom_tearoff->set_visible (Config->get_show_zoom_tools(), true);
+	} else if (p == "sound-midi-notes") {
+		Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("sound-midi-notes"));
+
+		if (act) {
+			bool s = Config->get_sound_midi_notes();
+			Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+			if (tact->get_active () != s) {
+				tact->set_active (s);
+			}
+		}
 	}
 }
 

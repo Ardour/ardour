@@ -17,6 +17,7 @@
 */
 
 #include <cmath>
+#include <map>
 
 #include <gtkmm/cellrenderercombo.h>
 
@@ -32,6 +33,7 @@
 
 #include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/keyboard.h"
+#include "gtkmm2ext/actions.h"
 
 #include "midi_list_editor.h"
 #include "note_player.h"
@@ -44,11 +46,31 @@ using namespace Glib;
 using namespace ARDOUR;
 using Timecode::BBT_Time;
 
+static map<int,std::string> note_length_map;
+
+static void 
+fill_note_length_map ()
+{
+	note_length_map.insert (make_pair<int,string> (BBT_Time::ticks_per_beat, _("Whole")));
+	note_length_map.insert (make_pair<int,string> (BBT_Time::ticks_per_beat/2, _("Half")));
+	note_length_map.insert (make_pair<int,string> (BBT_Time::ticks_per_beat/3, _("Triplet")));
+	note_length_map.insert (make_pair<int,string> (BBT_Time::ticks_per_beat/4, _("Quarter")));
+	note_length_map.insert (make_pair<int,string> (BBT_Time::ticks_per_beat/8, _("Eighth")));
+	note_length_map.insert (make_pair<int,string> (BBT_Time::ticks_per_beat/16, _("Sixteenth")));
+	note_length_map.insert (make_pair<int,string> (BBT_Time::ticks_per_beat/32, _("Thirty-second")));
+	note_length_map.insert (make_pair<int,string> (BBT_Time::ticks_per_beat/64, _("Sixty-fourth")));
+}
+
 MidiListEditor::MidiListEditor (Session* s, boost::shared_ptr<MidiRegion> r, boost::shared_ptr<MidiTrack> tr)
 	: ArdourWindow (r->name())
+	, buttons (1, 1)
 	, region (r)
 	, track (tr)
 {
+	if (note_length_map.empty()) {
+		fill_note_length_map ();
+	}
+	
 	/* We do not handle nested sources/regions. Caller should have tackled this */
 
 	if (r->max_source_level() > 0) {
@@ -59,43 +81,19 @@ MidiListEditor::MidiListEditor (Session* s, boost::shared_ptr<MidiRegion> r, boo
 
 	edit_column = -1;
 	editing_renderer = 0;
+	editing_editable = 0;
 
 	model = ListStore::create (columns);
 	view.set_model (model);
 
 	note_length_model = ListStore::create (note_length_columns);
 	TreeModel::Row row;
-	row = *(note_length_model->append());
-	row[note_length_columns.ticks] = BBT_Time::ticks_per_beat;
-	row[note_length_columns.name] = _("Whole");
-
-	row = *(note_length_model->append());
-	row[note_length_columns.ticks] = BBT_Time::ticks_per_beat/2;
-	row[note_length_columns.name] = _("Half");
-
-	row = *(note_length_model->append());
-	row[note_length_columns.ticks] = BBT_Time::ticks_per_beat/3;
-	row[note_length_columns.name] = _("Triplet");
-
-	row = *(note_length_model->append());
-	row[note_length_columns.ticks] = BBT_Time::ticks_per_beat/4;
-	row[note_length_columns.name] = _("Quarter");
-
-	row = *(note_length_model->append());
-	row[note_length_columns.ticks] = BBT_Time::ticks_per_beat/8;
-	row[note_length_columns.name] = _("Eighth");
-
-	row = *(note_length_model->append());
-	row[note_length_columns.ticks] = BBT_Time::ticks_per_beat;
-	row[note_length_columns.name] = _("Sixteenth");
-
-	row = *(note_length_model->append());
-	row[note_length_columns.ticks] = BBT_Time::ticks_per_beat/32;
-	row[note_length_columns.name] = _("Thirty-second");
-
-	row = *(note_length_model->append());
-	row[note_length_columns.ticks] = BBT_Time::ticks_per_beat/64;
-	row[note_length_columns.name] = _("Sixty-fourth");
+	
+	for (std::map<int,string>::iterator i = note_length_map.begin(); i != note_length_map.end(); ++i) {
+		row = *(note_length_model->append());
+		row[note_length_columns.ticks] = i->first;
+		row[note_length_columns.name] = i->second;
+	}
 
 	view.signal_key_press_event().connect (sigc::mem_fun (*this, &MidiListEditor::key_press), false);
 	view.signal_key_release_event().connect (sigc::mem_fun (*this, &MidiListEditor::key_release), false);
@@ -145,11 +143,20 @@ MidiListEditor::MidiListEditor (Session* s, boost::shared_ptr<MidiRegion> r, boo
 	region->midi_source(0)->model()->ContentsChanged.connect (content_connection, invalidator (*this), 
 								  boost::bind (&MidiListEditor::redisplay_model, this), gui_context());
 
+	buttons.attach (sound_notes_button, 0, 1, 0, 1);
+	Glib::RefPtr<Gtk::Action> act = ActionManager::get_action ("Editor", "sound-midi-notes");
+	if (act) {
+		gtk_activatable_set_related_action (GTK_ACTIVATABLE (sound_notes_button.gobj()), act->gobj());	
+	}
+
 	view.show ();
 	scroller.show ();
 	buttons.show ();
 	vbox.show ();
+	sound_notes_button.show ();
 
+	vbox.set_spacing (6);
+	vbox.set_border_width (6);
 	vbox.pack_start (buttons, false, false);
 	vbox.pack_start (scroller, true, true);
 
@@ -167,38 +174,54 @@ MidiListEditor::key_press (GdkEventKey* ev)
 	bool ret = false;
 	TreeModel::Path path;
 	TreeViewColumn* col;
+	int colnum;
 
 	switch (ev->keyval) {
 	case GDK_Tab:
 		if (edit_column > 0) {
-			if (edit_column >= 6) {
-				edit_column = 0;
-				edit_path.next();
-			} else {
-				edit_column++;
-			}
-			col = view.get_column (edit_column);
+			colnum = edit_column;
 			path = edit_path;
+			if (editing_editable) {
+				editing_editable->editing_done ();
+			}
+			if (colnum >= 6) {
+				/* wrap to next line */
+				colnum = 0;
+				path.next();
+			} else {
+				colnum++;
+			}
+			col = view.get_column (colnum);
 			view.set_cursor (path, *col, true);
 			ret = true;
 		}
 		break;
 		
 	case GDK_Up:
+	case GDK_uparrow:
 		if (edit_column > 0) {
-			edit_path.prev ();
-			col = view.get_column (edit_column);
+			colnum = edit_column;
 			path = edit_path;
+			if (editing_editable) {
+				editing_editable->editing_done ();
+			}
+			path.prev ();
+			col = view.get_column (colnum);
 			view.set_cursor (path, *col, true);
 			ret = true;
 		}
 		break;
 
 	case GDK_Down:
+	case GDK_downarrow:
 		if (edit_column > 0) {
-			edit_path.next ();
-			col = view.get_column (edit_column);
+			colnum = edit_column;
 			path = edit_path;
+			if (editing_editable) {
+				editing_editable->editing_done ();
+			}
+			path.next ();
+			col = view.get_column (colnum);
 			view.set_cursor (path, *col, true);
 			ret = true;
 		}
@@ -309,27 +332,41 @@ MidiListEditor::delete_selected_note ()
 void
 MidiListEditor::stop_editing (bool cancelled)
 {
-	if (editing_renderer) {
-		editing_renderer->stop_editing (cancelled);
+	if (!cancelled) {
+		if (editing_editable) {
+			editing_editable->editing_done ();
+		}
+	} else {
+		if (editing_renderer) {
+			editing_renderer->stop_editing (cancelled);
+		}
 	}
 }
 
 void
-MidiListEditor::editing_started (CellEditable*, const string& path, int colno)
+MidiListEditor::editing_started (CellEditable* ed, const string& path, int colno)
 {
-	cerr << "start editing at [" << path << "] col " << colno << endl;
 	edit_path = TreePath (path);
 	edit_column = colno;
 	editing_renderer = dynamic_cast<CellRendererText*>(view.get_column_cell_renderer (colno));
+	editing_editable = ed;
+
+	if (ed) {
+		Gtk::Entry *e = dynamic_cast<Gtk::Entry*> (ed);
+		if (e) {
+			e->signal_key_press_event().connect (sigc::mem_fun (*this, &MidiListEditor::key_press), false);
+			e->signal_key_release_event().connect (sigc::mem_fun (*this, &MidiListEditor::key_release), false);
+		}
+	}
 }
 
 void
 MidiListEditor::editing_canceled ()
 {
-	cerr << "editing cancelled with edit_column = " << edit_column << " path \"" << edit_path.to_string() << "\"\n";
 	edit_path.clear ();
 	edit_column = -1;
 	editing_renderer = 0;
+	editing_editable = 0;
 }
 
 void
@@ -341,56 +378,116 @@ MidiListEditor::edited (const std::string& path, const std::string& text)
 		return;
 	}
 
-	cerr << "Edited " << path << " col " << edit_column << " to \"" << text << "\"\n";
-
 	boost::shared_ptr<NoteType> note = (*iter)[columns._note];
-	boost::shared_ptr<MidiModel> m (region->midi_source(0)->model());
-	MidiModel::NoteDiffCommand* cmd;
-
-	cmd = m->new_note_diff_command (_("insert new note"));
+	MidiModel::NoteDiffCommand::Property prop (MidiModel::NoteDiffCommand::NoteNumber);
 
 	double fval;
 	int    ival;
 	bool   apply = false;
-
+	int    idelta;
+	double fdelta;
+	char*  opname;
 	switch (edit_column) {
 	case 0: // start
 		break;
 	case 1: // channel
 		// correct ival for zero-based counting after scan
-		if (sscanf (text.c_str(), "%d", &ival) == 1 && --ival != note->note()) {
-			cmd->change (note, MidiModel::NoteDiffCommand::NoteNumber, (uint8_t) ival);
+		if (sscanf (text.c_str(), "%d", &ival) == 1 && --ival != note->channel()) {
+			idelta = ival - note->channel();
+			prop = MidiModel::NoteDiffCommand::Channel;
+			opname = _("change note channel");
 			apply = true;
-			cerr << "channel differs " << (int) ival << " vs. " << (int) note->channel() << endl;
 		}
 		break;
 	case 2: // note
 		if (sscanf (text.c_str(), "%d", &ival) == 1 && ival != note->note()) {
-			cmd->change (note, MidiModel::NoteDiffCommand::NoteNumber, (uint8_t) ival);
+			idelta = ival - note->note();
+			prop = MidiModel::NoteDiffCommand::NoteNumber;
+			opname = _("change note number");
 			apply = true;
-			cerr << "note number differs " << (int) ival << " vs. " << (int) note->note() << endl;
 		}
 		break;
 	case 3: // name
 		break;
 	case 4: // velocity
 		if (sscanf (text.c_str(), "%d", &ival) == 1 && ival != note->velocity()) {
-			cmd->change (note, MidiModel::NoteDiffCommand::Velocity, (uint8_t) ival);
+			idelta = ival - note->velocity();
+			prop = MidiModel::NoteDiffCommand::Velocity;
+			opname = _("change note velocity");
 			apply = true;
-			cerr << "velocity differs " << (int) ival << " vs. " << (int) note->velocity() << endl;
 		}
 		break;
 	case 5: // length
-		if (sscanf (text.c_str(), "%d", &ival) == 1) {
-			fval = (double) ival / Timecode::BBT_Time::ticks_per_beat;
-		
-			if (fval != note->length()) {
-				cmd->change (note, MidiModel::NoteDiffCommand::Length, fval);
-				apply = true;
-				cerr << "length differs: " << fval << " vs. " << note->length() << endl;
+
+		if (sscanf (text.c_str(), "%lf", &fval) == 1) {
+
+			/* numeric value entered */
+			
+			if (text.find ('.') == string::npos && text.find (',') == string::npos) {
+				/* integral => units are ticks */
+				fval = fval / BBT_Time::ticks_per_beat;
+			} else {
+				/* non-integral => beats, so use as-is */
+			}
+
+		} else {
+
+			/* assume its text from the combo. look for the map
+			 * entry for the actual note ticks
+			 */
+
+			int len_ticks = lrint (note->length() * Timecode::BBT_Time::ticks_per_beat);
+			std::map<int,string>::iterator x = note_length_map.find (len_ticks);
+
+			if (x == note_length_map.end()) {
+
+				/* tick length not in map - was
+				 * displaying numeric value ... use new value
+				 * from note length map, and convert to beats.
+				 */
+				
+				for (x = note_length_map.begin(); x != note_length_map.end(); ++x) {
+					if (x->second == text) {
+						break;
+					}
+				}
+				
+				if (x != note_length_map.end()) {
+					fval = x->first / BBT_Time::ticks_per_beat;
+				}
+
+			} else {
+
+				fval = -1.0;
+
+				if (text != x->second) {
+					
+					/* get ticks for the newly selected
+					 * note length
+					 */
+
+					for (x = note_length_map.begin(); x != note_length_map.end(); ++x) {
+						if (x->second == text) {
+							break;
+						}
+					}
+					
+					if (x != note_length_map.end()) {
+						/* convert to beats */
+						fval = (double) x->first / BBT_Time::ticks_per_beat;
+					}
+				}
 			}
 		}
+
+		if (fval > 0.0) {
+			fdelta = fval - note->length();
+			prop = MidiModel::NoteDiffCommand::Length;
+			opname = _("change note length");
+			apply = true;
+		}
 		break;
+
 	case 6: // end
 		break;
 	default:
@@ -398,17 +495,51 @@ MidiListEditor::edited (const std::string& path, const std::string& text)
 	}
 
 	if (apply) {
-		cerr << "Apply change\n";
-		m->apply_command (*_session, cmd);
-	} else {
-		cerr << "No change\n";
-	}
-	
-	/* model has been redisplayed by now */
-	/* keep selected row(s), move cursor there, to allow us to continue editing */
 
-	TreeViewColumn* col = view.get_column (edit_column);
-	view.set_cursor (edit_path, *col, 0);
+		boost::shared_ptr<MidiModel> m (region->midi_source(0)->model());
+		MidiModel::NoteDiffCommand* cmd = m->new_note_diff_command (opname);
+
+		TreeView::Selection::ListHandle_Path rows = view.get_selection()->get_selected_rows ();
+		
+		for (TreeView::Selection::ListHandle_Path::iterator i = rows.begin(); i != rows.end(); ++i) {
+			if (iter = model->get_iter (*i)) {
+
+				note = (*iter)[columns._note];		
+				
+				switch (prop) {
+				case MidiModel::NoteDiffCommand::Velocity:
+					cmd->change (note, prop, (uint8_t) (note->velocity() + idelta));
+					break;
+				case MidiModel::NoteDiffCommand::Length:
+					cmd->change (note, prop, note->length() + fdelta);
+					break;
+				case MidiModel::NoteDiffCommand::Channel:
+					cmd->change (note, prop, (uint8_t) (note->channel() + idelta));
+					break;
+				case MidiModel::NoteDiffCommand::NoteNumber:
+					cmd->change (note, prop, (uint8_t) (note->note() + idelta));
+					break;
+				default:
+					continue;
+				}
+			}
+		}
+
+		m->apply_command (*_session, cmd);
+
+		/* model has been redisplayed by now */
+		/* keep selected row(s), move cursor there, don't continue editing */
+		
+		TreeViewColumn* col = view.get_column (edit_column);
+		view.set_cursor (edit_path, *col, 0);
+
+		/* reset edit info, since we're done */
+
+		edit_path.clear ();
+		edit_column = -1;
+		editing_renderer = 0;
+		editing_editable = 0;
+	}
 }
 
 void
@@ -445,7 +576,16 @@ MidiListEditor::redisplay_model ()
 			bbt.beats = floor (dur);
 			bbt.ticks = (uint32_t) lrint (fmod (dur, 1.0) * Timecode::BBT_Time::ticks_per_beat);
 			
-			row[columns.length] = lrint ((*i)->length() * Timecode::BBT_Time::ticks_per_beat);
+			int len_ticks = lrint ((*i)->length() * Timecode::BBT_Time::ticks_per_beat);
+			std::map<int,string>::iterator x = note_length_map.find (len_ticks);
+
+			if (x != note_length_map.end()) {
+				row[columns.length] = x->second;
+			} else {
+				ss.str ("");
+				ss << len_ticks;
+				row[columns.length] = ss.str();
+			}
 
 			_session->tempo_map().bbt_time (conv.to ((*i)->end_time()), bbt);
 			
