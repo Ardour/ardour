@@ -1082,8 +1082,8 @@ Editor::track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const & /*c*/, 
 			return true;
 		}
 
-		if (boost::dynamic_pointer_cast<MidiRegion> (region_copy) == 0 &&
-		    dynamic_cast<MidiTimeAxisView*> (tv.first) != 0) {
+		if (boost::dynamic_pointer_cast<MidiRegion> (region_copy) != 0 &&
+		    dynamic_cast<MidiTimeAxisView*> (tv.first) == 0) {
 
 			/* MIDI -> non-MIDI */
 			return true;
