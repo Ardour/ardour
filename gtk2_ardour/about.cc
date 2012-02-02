@@ -135,6 +135,7 @@ static const char* authors[] = {
 	N_("Paul Davis"),
 	N_("Gerard van Dongen"),
 	N_("Colin Fletcher"),
+	N_("Dave Flick"),
 	N_("Hans Fugal"),
         N_("Robin Gareus"),
 	N_("Christopher George"),
