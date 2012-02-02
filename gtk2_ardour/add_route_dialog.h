@@ -29,9 +29,12 @@
 #include <gtkmm/adjustment.h>
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/button.h>
+#include <gtkmm/combobox.h>
 #include <gtkmm/comboboxtext.h>
 #include <gtkmm/treemodel.h>
+#include <gtkmm/liststore.h>
 
+#include "ardour/plugin.h"
 #include "ardour/types.h"
 #include "ardour/template_utils.h"
 
@@ -52,7 +55,8 @@ class AddRouteDialog : public ArdourDialog
 
 	std::string name_template ();
 	std::string track_template ();
-
+	ARDOUR::PluginInfoPtr requested_instrument ();
+	
 	ARDOUR::TrackMode mode();
 	ARDOUR::RouteGroup* route_group ();
 
@@ -62,9 +66,12 @@ class AddRouteDialog : public ArdourDialog
 	Gtk::Adjustment routes_adjustment;
 	Gtk::SpinButton routes_spinner;
 	Gtk::ComboBoxText channel_combo;
+	Gtk::Label configuration_label;
 	Gtk::Label mode_label;
+	Gtk::Label instrument_label;
 	Gtk::ComboBoxText mode_combo;
 	Gtk::ComboBoxText route_group_combo;
+	Gtk::ComboBox     instrument_combo;
 
 	std::vector<ARDOUR::TemplateInfo> route_templates;
 
@@ -94,6 +101,20 @@ class AddRouteDialog : public ArdourDialog
 
 	static std::vector<std::string> channel_combo_strings;
 	static std::vector<std::string> bus_mode_strings;
+
+	struct InstrumentListColumns : public Gtk::TreeModel::ColumnRecord {
+		InstrumentListColumns () {
+			add (name);
+			add (info_ptr);
+		}
+		Gtk::TreeModelColumn<std::string>  name;
+		Gtk::TreeModelColumn<ARDOUR::PluginInfoPtr> info_ptr;
+	};
+
+	Glib::RefPtr<Gtk::ListStore> instrument_list;
+	InstrumentListColumns instrument_list_columns;
+
+	void build_instrument_list ();
 };
 
 #endif /* __gtk_ardour_add_route_dialog_h__ */

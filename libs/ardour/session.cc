@@ -81,6 +81,7 @@
 #include "ardour/named_selection.h"
 #include "ardour/process_thread.h"
 #include "ardour/playlist.h"
+#include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
 #include "ardour/port_insert.h"
 #include "ardour/processor.h"
@@ -1567,9 +1568,10 @@ Session::count_existing_track_channels (ChanCount& in, ChanCount& out)
 
 /** Caller must not hold process lock
  *  @param name_template string to use for the start of the name, or "" to use "MIDI".
+ *  @param instrument plugin info for the instrument to insert pre-fader, if any
  */
 list<boost::shared_ptr<MidiTrack> >
-Session::new_midi_track (TrackMode mode, RouteGroup* route_group, uint32_t how_many, string name_template)
+Session::new_midi_track (boost::shared_ptr<PluginInfo> instrument, TrackMode mode, RouteGroup* route_group, uint32_t how_many, string name_template)
 {
 	char track_name[32];
 	uint32_t track_id = 0;
@@ -1645,6 +1647,15 @@ Session::new_midi_track (TrackMode mode, RouteGroup* route_group, uint32_t how_m
   failed:
 	if (!new_routes.empty()) {
 		add_routes (new_routes, true, true);
+
+		if (instrument) {
+			for (RouteList::iterator r = new_routes.begin(); r != new_routes.end(); ++r) {
+				PluginPtr plugin = instrument->load (*this);
+				boost::shared_ptr<Processor> p (new PluginInsert (*this, plugin));
+				(*r)->add_processor (p, PreFader);
+				
+			}
+		}
 	}
 
 	return ret;

@@ -1441,7 +1441,7 @@ ARDOUR_UI::open_session ()
 
 
 void
-ARDOUR_UI::session_add_midi_route (bool disk, RouteGroup* route_group, uint32_t how_many, string const & name_template)
+ARDOUR_UI::session_add_midi_route (bool disk, RouteGroup* route_group, uint32_t how_many, const string& name_template, PluginInfoPtr instrument)
 {
 	list<boost::shared_ptr<MidiTrack> > tracks;
 
@@ -1453,7 +1453,7 @@ ARDOUR_UI::session_add_midi_route (bool disk, RouteGroup* route_group, uint32_t 
 	try {
 		if (disk) {
 
-			tracks = _session->new_midi_track (ARDOUR::Normal, route_group, how_many, name_template);
+			tracks = _session->new_midi_track (instrument, ARDOUR::Normal, route_group, how_many, name_template);
 
 			if (tracks.size() != how_many) {
 				if (how_many == 1) {
@@ -1462,6 +1462,7 @@ ARDOUR_UI::session_add_midi_route (bool disk, RouteGroup* route_group, uint32_t 
 					error << string_compose (_("could not create %1 new midi tracks"), how_many) << endmsg;
 				}
 			}
+			
 		} /*else {
 			if ((route = _session->new_midi_route ()) == 0) {
 				error << _("could not create new midi bus") << endmsg;
@@ -3297,6 +3298,7 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 	uint32_t input_chan = add_route_dialog->channels ();
 	uint32_t output_chan;
 	string name_template = add_route_dialog->name_template ();
+	PluginInfoPtr instrument = add_route_dialog->requested_instrument ();
 	RouteGroup* route_group = add_route_dialog->route_group ();
 
 	AutoConnectOption oac = Config->get_output_auto_connect();
@@ -3310,7 +3312,7 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 	/* XXX do something with name template */
 
 	if (add_route_dialog->midi_tracks_wanted()) {
-		session_add_midi_track (route_group, count, name_template);
+		session_add_midi_track (route_group, count, name_template, instrument);
 	} else if (add_route_dialog->audio_tracks_wanted()) {
 		session_add_audio_track (input_chan, output_chan, add_route_dialog->mode(), route_group, count, name_template);
 	} else {

@@ -113,6 +113,7 @@ class MidiTrack;
 class NamedSelection;
 class Playlist;
 class PluginInsert;
+class PluginInfo;
 class Port;
 class PortInsert;
 class ProcessThread;
@@ -455,7 +456,9 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 		);
 
 	std::list<boost::shared_ptr<MidiTrack> > new_midi_track (
-		TrackMode mode = Normal, RouteGroup* route_group = 0, uint32_t how_many = 1, std::string name_template = ""
+		boost::shared_ptr<PluginInfo> instrument = boost::shared_ptr<PluginInfo>(),
+		TrackMode mode = Normal, 
+		RouteGroup* route_group = 0, uint32_t how_many = 1, std::string name_template = ""
 		);
 
 	void   remove_route (boost::shared_ptr<Route>);
