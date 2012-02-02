@@ -62,6 +62,12 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
+bool
+PluginInfo::is_instrument () const
+{
+	return (n_inputs.n_midi() != 0) && (n_outputs.n_audio() > 0);
+}
+
 Plugin::Plugin (AudioEngine& e, Session& s)
 	: _engine (e)
 	, _session (s)

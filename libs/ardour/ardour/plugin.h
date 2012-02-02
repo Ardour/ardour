@@ -65,6 +65,7 @@ class PluginInfo {
 	std::string unique_id;
 
 	virtual PluginPtr load (Session& session) = 0;
+	virtual bool is_instrument() const; 
 
   protected:
 	friend class PluginManager;

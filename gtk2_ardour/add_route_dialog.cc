@@ -516,13 +516,7 @@ AddRouteDialog::build_instrument_list ()
 
 		if (manager.get_status (*i) == PluginManager::Hidden) continue;
 
-		string category = (*i)->category;
-		
-		/* XXX more finesse is possible here. VST plugins have a
-		   a specific "instrument" flag, for example.
-		*/
-
-		if ((*i)->n_inputs.n_midi() != 0 && (*i)->n_outputs.n_audio() > 0) {
+		if ((*i)->is_instrument()) {
 			row = *(instrument_list->append());
 			row[instrument_list_columns.name] = (*i)->name;
 			row[instrument_list_columns.info_ptr] = *i;

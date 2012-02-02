@@ -316,13 +316,13 @@ AudioEngine::_xrun_callback (void *arg)
 void
 AudioEngine::_session_callback (jack_session_event_t *event, void *arg)
 {
-	printf( "helo.... " );
 	AudioEngine* ae = static_cast<AudioEngine*> (arg);
 	if (ae->connected()) {
 		ae->JackSessionEvent ( event ); /* EMIT SIGNAL */
 	}
 }
 #endif
+
 int
 AudioEngine::_graph_order_callback (void *arg)
 {
