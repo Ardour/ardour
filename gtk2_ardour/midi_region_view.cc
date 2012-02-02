@@ -3251,7 +3251,7 @@ MidiRegionView::paste (framepos_t pos, float times, const MidiCutBuffer& mcb)
 		DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("Paste extended region from %1 to %2\n", region_end, end_frame));
 
 		_region->clear_changes ();
-		_region->set_length (end_frame);
+		_region->set_length (end_frame - _region->position());
 		trackview.session()->add_command (new StatefulDiffCommand (_region));
 	}
 
