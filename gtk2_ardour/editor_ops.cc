@@ -6185,29 +6185,6 @@ Editor::goto_visual_state (uint32_t n)
 void
 Editor::start_visual_state_op (uint32_t n)
 {
-	if (visual_state_op_connection.empty()) {
-		visual_state_op_connection = Glib::signal_timeout().connect (bind (mem_fun (*this, &Editor::end_visual_state_op), n), 1000);
-	}
-}
-
-void
-Editor::cancel_visual_state_op (uint32_t n)
-{
-	if (!visual_state_op_connection.empty()) {
-		visual_state_op_connection.disconnect();
-		goto_visual_state (n);
-	} else {
-		//we land here if called from the menu OR if end_visual_state_op has been called
-		//so check if we are already in visual state n
-		// XXX not yet checking it at all, but redoing does not hurt
-		goto_visual_state (n);
-	}
-}
-
-bool
-Editor::end_visual_state_op (uint32_t n)
-{
-	visual_state_op_connection.disconnect();
 	save_visual_state (n);
 	
 	PopUp* pup = new PopUp (WIN_POS_MOUSE, 1000, true);
@@ -6215,7 +6192,10 @@ Editor::end_visual_state_op (uint32_t n)
 	snprintf (buf, sizeof (buf), _("Saved view %u"), n+1);
 	pup->set_text (buf);
 	pup->touch();
-
-	return false; // do not call again
 }
 
+void
+Editor::cancel_visual_state_op (uint32_t n)
+{
+        goto_visual_state (n);
+}
