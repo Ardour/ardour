@@ -543,10 +543,11 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 
         if (is_midi_track()) {
 
-                /* cannot rec-enable while step-editing */
+                /* rec-enable button exits from step editing */
 
                 if (midi_track()->step_editing()) {
-                        return true;
+			midi_track()->set_step_editing (false);
+			return true;
                 }
         }
 
