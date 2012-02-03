@@ -13,16 +13,16 @@
 
 using namespace Gtk;
 
-ButtonJoiner::ButtonJoiner (const std::string& str, Gtk::Widget& l, Gtk::Widget& r)
-	: left (l)
-	, right (r)
+ButtonJoiner::ButtonJoiner (const std::string& str, Gtk::Widget& lw, Gtk::Widget& rw)
+	: left (lw)
+	, right (rw)
 	, name (str)
 	, active_fill_pattern (0)
 	, inactive_fill_pattern (0)
 {
 	packer.set_homogeneous (true);
-	packer.pack_start (l);
-	packer.pack_start (r);
+	packer.pack_start (left);
+	packer.pack_start (right);
 	packer.show ();
 
 	align.add (packer);
@@ -35,12 +35,22 @@ ButtonJoiner::ButtonJoiner (const std::string& str, Gtk::Widget& l, Gtk::Widget&
 	add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|
 		    Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK);
 
+	uint32_t border_color;
+	uint32_t r, g, b, a;
+
+	border_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: border end", name));
+	UINT_TO_RGBA (border_color, &r, &g, &b, &a);
+	
+	border_r = r/255.0;
+	border_g = g/255.0;
+	border_b = b/255.0;
+
 	/* child cairo widgets need the color of the inner edge as their
 	 * "background"
 	 */
 
 	Gdk::Color col;
-	col.set_rgb_p (0.172, 0.192, 0.364);
+	col.set_rgb_p (border_r, border_g, border_b);
 	provide_background_for_cairo_widget (*this, col);
 }
 
@@ -71,7 +81,7 @@ ButtonJoiner::render (cairo_t* cr)
 	/* outer edge */
 
 	cairo_set_line_width (cr, 1);
-	cairo_set_source_rgb (cr, 0.172, 0.192, 0.364);
+	cairo_set_source_rgb (cr, border_r, border_g, border_b);
 	cairo_stroke (cr);
 
 	/* inner "edge" */

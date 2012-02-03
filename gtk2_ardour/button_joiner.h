@@ -35,7 +35,9 @@ class ButtonJoiner : public CairoWidget, public Gtkmm2ext::Activatable {
 	std::string    name;
 	cairo_pattern_t* active_fill_pattern;
 	cairo_pattern_t* inactive_fill_pattern;
-
+	double         border_r;
+	double         border_g;
+	double         border_b;
 	void set_colors ();
 };
 
