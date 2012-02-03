@@ -11,6 +11,8 @@
 class ButtonJoiner : public CairoWidget, public Gtkmm2ext::Activatable {
   public:
 	ButtonJoiner (Gtk::Widget&, Gtk::Widget&);
+	~ButtonJoiner ();
+
 	void set_related_action (Glib::RefPtr<Gtk::Action>);	
 	void set_active_state (Gtkmm2ext::ActiveState);
 
@@ -18,6 +20,7 @@ class ButtonJoiner : public CairoWidget, public Gtkmm2ext::Activatable {
 	void render (cairo_t*);
 	bool on_button_release_event (GdkEventButton*);
 	void on_size_request (Gtk::Requisition*);
+	void on_size_allocate (Gtk::Allocation&);
 
 	void action_sensitivity_changed ();
 	void action_visibility_changed ();
@@ -29,6 +32,9 @@ class ButtonJoiner : public CairoWidget, public Gtkmm2ext::Activatable {
 	Gtk::Widget& right;
 	Gtk::HBox    packer;
 	Gtk::Alignment align;
+
+	cairo_pattern_t* active_fill_pattern;
+	cairo_pattern_t* inactive_fill_pattern;
 
 	void set_colors ();
 };

@@ -4,6 +4,7 @@
 #include <gtkmm/toggleaction.h>
 
 #include "gtkmm2ext/utils.h"
+#include "gtkmm2ext/rgb_macros.h"
 
 #include "ardour_ui.h"
 #include "button_joiner.h"
@@ -13,6 +14,8 @@ using namespace Gtk;
 ButtonJoiner::ButtonJoiner (Gtk::Widget& l, Gtk::Widget& r)
 	: left (l)
 	, right (r)
+	, active_fill_pattern (0)
+	, inactive_fill_pattern (0)
 {
 	packer.set_homogeneous (true);
 	packer.pack_start (l);
@@ -21,34 +24,65 @@ ButtonJoiner::ButtonJoiner (Gtk::Widget& l, Gtk::Widget& r)
 
 	align.add (packer);
 	align.set (0.5, 1.0);
-	align.set_padding (7, 0, 5, 5);
+	align.set_padding (9, 0, 9, 9);
 	align.show ();
 
 	add (align);
 
 	add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|
 		    Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK);
+
+	/* child cairo widgets need the color of the inner edge as their
+	 * "background"
+	 */
+
+	Gdk::Color col;
+	col.set_rgb_p (0.172, 0.192, 0.364);
+	provide_background_for_cairo_widget (*this, col);
+}
+
+ButtonJoiner::~ButtonJoiner ()
+{
+	if (active_fill_pattern) {
+		cairo_pattern_destroy (active_fill_pattern);
+		cairo_pattern_destroy (inactive_fill_pattern);
+	}
 }
 
 void
 ButtonJoiner::render (cairo_t* cr)
 {
 	double h = get_height();
-	double r, g, b;
 	
 	if (_active_state == Gtkmm2ext::ActiveState (0)) {
-		r = 0.0;
-		g = 0.0;
-		b = 0.0;
+		cairo_set_source (cr, inactive_fill_pattern);
 	} else {
-		r = 0.16;
-		g = 0.58;
-		b = 0.757;
+		cairo_set_source (cr, active_fill_pattern);
 	}
 
-	Gtkmm2ext::rounded_top_rectangle (cr, 0, 0, get_width(), h, 9);
-	cairo_set_source_rgb (cr, r, g, b);
-	cairo_fill (cr);
+	/* outer rect */
+
+	Gtkmm2ext::rounded_top_rectangle (cr, 0, 0, get_width(), h, 12);
+	cairo_fill_preserve (cr);
+
+	/* outer edge */
+
+	cairo_set_line_width (cr, 1);
+	cairo_set_source_rgb (cr, 0.172, 0.192, 0.364);
+	cairo_stroke (cr);
+
+	/* inner "edge" */
+
+	Gtkmm2ext::rounded_top_rectangle (cr, 8, 8, get_width() - 16, h - 8, 9);
+	cairo_stroke (cr);
+
+}
+
+void
+ButtonJoiner::on_size_allocate (Allocation& alloc)
+{
+	CairoWidget::on_size_allocate (alloc);
+	set_colors ();
 }
 
 bool
@@ -143,20 +177,32 @@ ButtonJoiner::set_active_state (Gtkmm2ext::ActiveState s)
 void
 ButtonJoiner::set_colors ()
 {
-	double r, g, b;
+	uint32_t start_color;
+	uint32_t end_color;
+	uint32_t r, g, b, a;
 
-	if (_active_state == Gtkmm2ext::ActiveState (0)) {
-		r = 0.0;
-		g = 0.0;
-		b = 0.0;
-	} else {
-		r = 0.16;
-		g = 0.58;
-		b = 0.757;
+	if (active_fill_pattern) {
+		cairo_pattern_destroy (active_fill_pattern);
+		cairo_pattern_destroy (inactive_fill_pattern);
 	}
 
-	Gdk::Color col;
-	col.set_rgb_p (r, g, b);
-	provide_background_for_cairo_widget (*this, col);
+	active_fill_pattern = cairo_pattern_create_linear (0.0, 0.0, 0.0, get_height());
+	inactive_fill_pattern = cairo_pattern_create_linear (0.0, 0.0, 0.0, get_height());
+
+	start_color = ARDOUR_UI::config()->color_by_name ("transport button: fill start");
+	end_color = ARDOUR_UI::config()->color_by_name ("transport button: fill end");
+	UINT_TO_RGBA (start_color, &r, &g, &b, &a);
+	cairo_pattern_add_color_stop_rgba (inactive_fill_pattern, 0, r/255.0,g/255.0,b/255.0, a/255.0);
+	UINT_TO_RGBA (end_color, &r, &g, &b, &a);
+	cairo_pattern_add_color_stop_rgba (inactive_fill_pattern, 1, r/255.0,g/255.0,b/255.0, a/255.0);
+
+	start_color = ARDOUR_UI::config()->color_by_name ("transport button: fill start active");
+	end_color = ARDOUR_UI::config()->color_by_name ("transport button: fill end active");
+	UINT_TO_RGBA (start_color, &r, &g, &b, &a);
+	cairo_pattern_add_color_stop_rgba (active_fill_pattern, 0, r/255.0,g/255.0,b/255.0, a/255.0);
+	UINT_TO_RGBA (end_color, &r, &g, &b, &a);
+	cairo_pattern_add_color_stop_rgba (active_fill_pattern, 1, r/255.0,g/255.0,b/255.0, a/255.0);
+
+	queue_draw ();
 }
 

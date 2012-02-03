@@ -307,7 +307,7 @@ Editor::set_canvas_cursor ()
 	}
 
 	/* up-down cursor as a cue that automation can be dragged up and down when in join object/range mode */
-	if (join_object_range_button.get_active()) {
+	if (smart_mode_action->get_active()) {
 		double x, y;
 		get_pointer_position (x, y);
 		ArdourCanvas::Item* i = track_canvas->get_item_at (x, y);
@@ -807,7 +807,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				pair<TimeAxisView*, int> tvp = trackview_by_y_position (y);
 				if (tvp.first) {
 					AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*> (tvp.first);
-					if (join_object_range_button.get_active() && atv) {
+					if (smart_mode_action->get_active() && atv) {
 						/* smart "join" mode: drag automation */
 						_drags->set (new AutomationRangeDrag (this, atv->base_item(), selection->time), event, _cursors->up_down);
 					} else {
@@ -1010,7 +1010,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 			case SelectionItem:
 			{
-				if (join_object_range_button.get_active()) {
+				if (smart_mode_action->get_active()) {
 					/* we're in "smart" joined mode, and we've clicked on a Selection */
 					double const y = event->button.y + vertical_adjustment.get_value() - canvas_timebars_vsize;
 					pair<TimeAxisView*, int> tvp = trackview_by_y_position (y);
@@ -1923,7 +1923,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		}
 		break;
 	case SelectionItem:
-		if (join_object_range_button.get_active()) {
+		if (smart_mode_action->get_active()) {
 			set_canvas_cursor ();
 		}
 		break;
@@ -2735,7 +2735,7 @@ Editor::update_join_object_range_location (double /*x*/, double y)
 	   that we're over requires searching the playlist.
 	*/
 
-	if (join_object_range_button.get_active() == false || (mouse_mode != MouseRange && mouse_mode != MouseObject)) {
+	if (!smart_mode_action->get_active() || (mouse_mode != MouseRange && mouse_mode != MouseObject)) {
 		_join_object_range_state = JOIN_OBJECT_RANGE_NONE;
 		return;
 	}

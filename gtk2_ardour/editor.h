@@ -104,6 +104,7 @@ class AutomationLine;
 class AutomationSelection;
 class AutomationTimeAxisView;
 class BundleManager;
+class ButtonJoiner;
 class ControlPoint;
 class CrossfadeView;
 class DragManager;
@@ -1554,7 +1555,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	ArdourButton mouse_zoom_button;
 	ArdourButton mouse_timefx_button;
 	ArdourButton mouse_audition_button;
-	ArdourButton join_object_range_button;
+
+	ButtonJoiner* smart_mode_joiner;
+	Glib::RefPtr<Gtk::ToggleAction> smart_mode_action;
 
 	void                     mouse_mode_toggled (Editing::MouseMode m);
 	void			 mouse_mode_object_range_toggled () {}

@@ -421,9 +421,7 @@ Editor::register_actions ()
 	mouse_draw_button.set_name ("mouse mode button");
 
 	act = ActionManager::register_toggle_action (mouse_mode_actions, "set-mouse-mode-object-range", _("Link Object / Range Tools"), sigc::mem_fun (*this, &Editor::mouse_mode_object_range_toggled));	
-	join_object_range_button.set_related_action (act);
-	join_object_range_button.set_image (::get_icon ("tool_object_range"));
-	join_object_range_button.set_name ("mouse mode button");
+	smart_mode_action = Glib::RefPtr<ToggleAction>::cast_static (act);
 
 	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-gain", _("Gain Tool"), sigc::bind (mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseGain));	
 	mouse_gain_button.set_related_action (act);
