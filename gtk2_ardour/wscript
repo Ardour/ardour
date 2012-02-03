@@ -54,6 +54,7 @@ gtk2_ardour_sources = [
         'automation_time_axis.cc',
         'axis_view.cc',
         'bundle_manager.cc',
+        'button_joiner.cc',
         'canvas-flag.cc',
         'canvas-hit.cc',
         'canvas-note-event.cc',

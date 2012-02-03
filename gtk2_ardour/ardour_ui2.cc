@@ -129,11 +129,12 @@ ARDOUR_UI::setup_tooltips ()
 	set_tip (stop_button, _("Stop playback"));
 	set_tip (rec_button, _("Toggle record"));
 	set_tip (play_selection_button, _("Play range/selection"));
-	set_tip (join_play_range_button, _("Always play range/selection"));
 	set_tip (goto_start_button, _("Go to start of session"));
 	set_tip (goto_end_button, _("Go to end of session"));
 	set_tip (auto_loop_button, _("Play loop range"));
 	set_tip (midi_panic_button, _("MIDI Panic\nSend note off and reset controller messages on all MIDI channels"));
+
+	set_tip (transport_joiner, _("Always Play Range Selection (if any)"));
 
 	set_tip (auto_return_button, _("Return to last playback start when stopped"));
 	set_tip (auto_play_button, _("Start playback after any locate"));
@@ -270,7 +271,6 @@ ARDOUR_UI::setup_transport ()
 	play_selection_button.set_image (get_icon (X_("transport_range")));
 	rec_button.set_image (get_icon (X_("transport_record")));
 	auto_loop_button.set_image (get_icon (X_("transport_loop")));
-	join_play_range_button.set_image (get_icon (X_("tool_object_range")));
 
 	midi_panic_button.set_image (get_icon (X_("midi_panic")));
 	/* the icon for this has an odd aspect ratio, so fatten up the button */
@@ -294,8 +294,9 @@ ARDOUR_UI::setup_transport ()
 	midi_panic_button.set_related_action (act);
 	act = ActionManager::get_action (X_("Transport"), X_("ToggleExternalSync"));
 	sync_button.set_related_action (act);
+
 	act = ActionManager::get_action (X_("Transport"), X_("AlwaysPlayRange"));
-	join_play_range_button.set_related_action (act);
+	transport_joiner.set_related_action (act);
 
 	/* clocks, etc. */
 
@@ -328,49 +329,63 @@ ARDOUR_UI::setup_transport ()
 	alert_box.pack_start (auditioning_alert_button, true, false);
 	alert_box.pack_start (feedback_alert_button, true, false);
 
+	/* all transport buttons should be the same size vertically and
+	 * horizontally 
+	 */
+
+	Glib::RefPtr<SizeGroup> transport_button_size_group = SizeGroup::create (SIZE_GROUP_BOTH);
+	transport_button_size_group->add_widget (goto_start_button);
+	transport_button_size_group->add_widget (goto_end_button);
+	transport_button_size_group->add_widget (auto_loop_button);
+	transport_button_size_group->add_widget (rec_button);
+	transport_button_size_group->add_widget (play_selection_button);
+	transport_button_size_group->add_widget (roll_button);
+
+	HBox* tbox1 = manage (new HBox);
+	HBox* tbox2 = manage (new HBox);
+	HBox* tbox3 = manage (new HBox);
 	HBox* tbox = manage (new HBox);
+
+	VBox* vbox1 = manage (new VBox);
+	VBox* vbox2 = manage (new VBox);
+	VBox* vbox3 = manage (new VBox);
+
+	Alignment* a1 = manage (new Alignment);
+	Alignment* a2 = manage (new Alignment);
+	Alignment* a3 = manage (new Alignment);
+
+	tbox1->set_spacing (2);
+	tbox2->set_spacing (2);
+	tbox3->set_spacing (2);
 	tbox->set_spacing (2);
 
-	tbox->pack_start (midi_panic_button, false, false);
-	tbox->pack_start (goto_start_button, false, false);
-	tbox->pack_start (goto_end_button, false, false);
+	tbox1->pack_start (midi_panic_button, false, false);
+	tbox1->pack_start (goto_start_button, false, false);
+	tbox1->pack_start (goto_end_button, false, false);
+	tbox1->pack_start (auto_loop_button, false, false);
 
-	Glib::RefPtr<SizeGroup> transport_button_size_group1 = SizeGroup::create (SIZE_GROUP_HORIZONTAL);
-	transport_button_size_group1->add_widget (goto_start_button);
-	transport_button_size_group1->add_widget (goto_end_button);
-	transport_button_size_group1->add_widget (auto_loop_button);
-	transport_button_size_group1->add_widget (rec_button);
+	play_selection_button.set_rounded_corner_mask (0x1); /* upper left only */
+	roll_button.set_rounded_corner_mask (0x2); /* upper right only */
 
-	if (Profile->get_sae()) {
-		tbox->pack_start (auto_loop_button);
-		tbox->pack_start (roll_button);
-		transport_button_size_group1->add_widget (play_selection_button);
-		transport_button_size_group1->add_widget (roll_button);
+	tbox2->pack_start (transport_joiner, false, false);
 
-	} else {
+	tbox3->pack_start (stop_button, false, false);
+	tbox3->pack_start (rec_button, false, false, 6);
 
-		tbox->pack_start (auto_loop_button, false, false);
+	vbox1->pack_start (*tbox1, false, false);
+	vbox2->pack_start (*tbox2, false, false);
+	vbox3->pack_start (*tbox3, false, false);
 
-		Frame* jpframe = manage (new Frame);
-		HBox* jpbox = manage (new HBox);
+	a1->add (*vbox1);
+	a1->set (0.5, 1.0, 0.0, 0.0);
+	a2->add (*vbox2);
+	a2->set (0.5, 1.0, 0.0, 0.0);
+	a3->add (*vbox3);
+	a3->set (0.5, 1.0, 0.0, 0.0);
 
-		jpframe->add (*jpbox);
-		jpframe->set_shadow_type (SHADOW_NONE);
-		
-		jpbox->pack_start (play_selection_button, false, false);
-		jpbox->pack_start (join_play_range_button, false, false);
-		jpbox->pack_start (roll_button, false, false);
-
-		tbox->pack_start (*jpframe, false, false);
-
-		Glib::RefPtr<SizeGroup> transport_button_size_group2 = SizeGroup::create (SIZE_GROUP_HORIZONTAL);
-		transport_button_size_group2->add_widget (play_selection_button);
-		transport_button_size_group2->add_widget (join_play_range_button);
-		transport_button_size_group2->add_widget (roll_button);
-	}
-
-	tbox->pack_start (stop_button, false, false);
-	tbox->pack_start (rec_button, false, false, 6);
+	tbox->pack_start (*a1, false, false);
+	tbox->pack_start (*a2, false, false);
+	tbox->pack_start (*a3, false, false);
 
 	HBox* clock_box = manage (new HBox);
 

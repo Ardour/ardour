@@ -154,6 +154,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	, play_selection_controllable (new TransportControllable ("transport play selection", *this, TransportControllable::PlaySelection))
 	, rec_controllable (new TransportControllable ("transport rec-enable", *this, TransportControllable::RecordEnable))
 
+	, transport_joiner (play_selection_button, roll_button)
+
 	, auto_return_button (ArdourButton::led_default_elements)
 	, auto_play_button (ArdourButton::led_default_elements)
 	, auto_input_button (ArdourButton::led_default_elements)
@@ -236,7 +238,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	auto_loop_button.set_name ("transport button");
 	play_selection_button.set_name ("transport button");
 	rec_button.set_name ("transport recenable button");
-	join_play_range_button.set_name ("transport button");
 	midi_panic_button.set_name ("transport button");
 
 	goto_start_button.set_tweaks (ArdourButton::ShowClick);
