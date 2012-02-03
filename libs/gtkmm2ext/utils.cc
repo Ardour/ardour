@@ -390,6 +390,24 @@ Gtkmm2ext::rounded_rectangle (Cairo::RefPtr<Cairo::Context> context, double x, d
 }
 
 void
+Gtkmm2ext::rounded_top_rectangle (Cairo::RefPtr<Cairo::Context> context, double x, double y, double w, double h, double r)
+{
+	rounded_top_rectangle (context->cobj(), x, y, w, h, r);
+}
+
+void
+Gtkmm2ext::rounded_top_left_rectangle (Cairo::RefPtr<Cairo::Context> context, double x, double y, double w, double h, double r)
+{
+	rounded_top_left_rectangle (context->cobj(), x, y, w, h, r);
+}
+
+void
+Gtkmm2ext::rounded_top_right_rectangle (Cairo::RefPtr<Cairo::Context> context, double x, double y, double w, double h, double r)
+{
+	rounded_top_right_rectangle (context->cobj(), x, y, w, h, r);
+}
+
+void
 Gtkmm2ext::rounded_rectangle (cairo_t* cr, double x, double y, double w, double h, double r)
 {
         /* renders small shapes better than most others */
@@ -409,6 +427,64 @@ Gtkmm2ext::rounded_rectangle (cairo_t* cr, double x, double y, double w, double 
 	cairo_curve_to (cr, x,y+h,x,y+h,x,y+h-r); // Curve to G
 	cairo_line_to (cr, x,y+r); // Line to H
 	cairo_curve_to (cr, x,y,x,y,x+r,y); // Curve to A
+}
+
+void
+Gtkmm2ext::rounded_top_rectangle (cairo_t* cr, double x, double y, double w, double h, double r)
+{
+        /* renders small shapes better than most others */
+
+/*    A****BQ
+      H    C
+      *    *
+      *    *
+      F****E
+*/
+	cairo_move_to (cr, x+r,y); // Move to A
+	cairo_line_to (cr, x+w-r,y); // Straight line to B
+	cairo_curve_to (cr, x+w,y,x+w,y,x+w,y+r); // Curve to C, Control points are both at Q
+	cairo_line_to (cr, x+w,y+h); // Move to E
+	cairo_line_to (cr, x,y+h); // Line to F
+	cairo_line_to (cr, x,y+r); // Line to H
+	cairo_curve_to (cr, x,y,x,y,x+r,y); // Curve to A
+}
+
+void
+Gtkmm2ext::rounded_top_left_rectangle (cairo_t* cr, double x, double y, double w, double h, double r)
+{
+        /* renders small shapes better than most others */
+
+/*    A****B
+      H    *
+      *    *
+      *    *
+      F****E
+*/
+	cairo_move_to (cr, x+r,y); // Move to A
+	cairo_line_to (cr, x+w,y); // Straight line to B
+	cairo_line_to (cr, x+w,y+h); // Move to E
+	cairo_line_to (cr, x,y+h); // Line to F
+	cairo_line_to (cr, x,y+r); // Line to H
+	cairo_curve_to (cr, x,y,x,y,x+r,y); // Curve to A
+}
+
+void
+Gtkmm2ext::rounded_top_right_rectangle (cairo_t* cr, double x, double y, double w, double h, double r)
+{
+        /* renders small shapes better than most others */
+
+/*    A****BQ
+      *    C
+      *    *
+      *    *
+      F****E
+*/
+	cairo_move_to (cr, x+r,y); // Move to A
+	cairo_line_to (cr, x+w-r,y); // Straight line to B
+	cairo_curve_to (cr, x+w,y,x+w,y,x+w,y+r); // Curve to C, Control points are both at Q
+	cairo_line_to (cr, x+w,y+h); // Move to E
+	cairo_line_to (cr, x,y+h); // Line to F
+	cairo_line_to (cr, x,y); // Line to A
 }
 
 #else

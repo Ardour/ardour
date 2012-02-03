@@ -93,7 +93,14 @@ namespace Gtkmm2ext {
 
         void container_clear (Gtk::Container&);
         void rounded_rectangle (Cairo::RefPtr<Cairo::Context> context, double x, double y, double w, double h, double r=10);
+        void rounded_top_rectangle (Cairo::RefPtr<Cairo::Context> context, double x, double y, double w, double h, double r=10);
+        void rounded_top_left_rectangle (Cairo::RefPtr<Cairo::Context> context, double x, double y, double w, double h, double r=10);
+        void rounded_top_right_rectangle (Cairo::RefPtr<Cairo::Context> context, double x, double y, double w, double h, double r=10);
+
         void rounded_rectangle (cairo_t*, double x, double y, double w, double h, double r=10);
+        void rounded_top_rectangle (cairo_t*, double x, double y, double w, double h, double r=10);
+        void rounded_top_left_rectangle (cairo_t*, double x, double y, double w, double h, double r=10);
+        void rounded_top_right_rectangle (cairo_t*, double x, double y, double w, double h, double r=10);
 };
 
 #endif /*  __gtkmm2ext_utils_h__ */
