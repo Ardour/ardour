@@ -62,6 +62,7 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 	Element elements() const { return _elements; }
 
 	void set_corner_radius (float);
+	void set_rounded_corner_mask (int);
 	void set_diameter (float);
 
 	void set_text (const std::string&);
@@ -109,6 +110,7 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 	int   _text_height;
 	float _diameter;
 	float _corner_radius;
+	int   _corner_mask;
 
 	cairo_pattern_t* edge_pattern;
 	cairo_pattern_t* fill_pattern;

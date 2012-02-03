@@ -57,6 +57,7 @@ ArdourButton::ArdourButton (Element e)
 	, _text_height (0)
 	, _diameter (11.0)
 	, _corner_radius (9.0)
+	, _corner_mask (0xf)
 	, edge_pattern (0)
 	, fill_pattern (0)
 	, led_inset_pattern (0)
@@ -128,21 +129,40 @@ ArdourButton::set_markup (const std::string& str)
 void
 ArdourButton::render (cairo_t* cr)
 {
+	void (*rounded_function)(cairo_t*, double, double, double, double, double);
+
+	switch (_corner_mask) {
+	case 0x1: /* upper left only */
+		rounded_function = Gtkmm2ext::rounded_top_left_rectangle;
+		break;
+	case 0x2: /* upper right only */
+		rounded_function = Gtkmm2ext::rounded_top_right_rectangle;
+		break;
+	case 0x3: /* upper only */
+		rounded_function = Gtkmm2ext::rounded_top_rectangle;
+		break;
+		/* should really have functions for lower right, lower left,
+		   lower only, but for now, we don't
+		*/
+	default:
+		rounded_function = Gtkmm2ext::rounded_rectangle;
+	}
+
 	if (!_fixed_diameter) {
 		_diameter = std::min (get_width(), get_height());
 	}
 
 	if (_elements & Edge) {
-		Gtkmm2ext::rounded_rectangle (cr, 0, 0, get_width(), get_height(), _corner_radius);
+		rounded_function (cr, 0, 0, get_width(), get_height(), _corner_radius);
 		cairo_set_source (cr, edge_pattern);
 		cairo_fill (cr);
 	}
 
 	if (_elements & Body) {
 		if (_elements & Edge) {
-			Gtkmm2ext::rounded_rectangle (cr, 1, 1, get_width()-2, get_height()-2, _corner_radius - 1.0);
+			rounded_function (cr, 1, 1, get_width()-2, get_height()-2, _corner_radius - 1.0);
 		} else {
-			Gtkmm2ext::rounded_rectangle (cr, 0, 0, get_width(), get_height(), _corner_radius - 1.0);
+			rounded_function (cr, 0, 0, get_width(), get_height(), _corner_radius - 1.0);
 		}
 		cairo_set_source (cr, fill_pattern);
 		cairo_fill (cr);
@@ -232,7 +252,7 @@ ArdourButton::render (cairo_t* cr)
 	/* a partially transparent gray layer to indicate insensitivity */
 
 	if ((visual_state() & Gtkmm2ext::Insensitive)) {
-		Gtkmm2ext::rounded_rectangle (cr, 0, 0, get_width(), get_height(), _corner_radius);
+		rounded_function (cr, 0, 0, get_width(), get_height(), _corner_radius);
 		cairo_set_source_rgba (cr, 0.905, 0.917, 0.925, 0.5);
 		cairo_fill (cr);
 	}
@@ -241,7 +261,7 @@ ArdourButton::render (cairo_t* cr)
 	
 	if (ARDOUR::Config->get_widget_prelight()) {
 		if (_hovering) {
-			Gtkmm2ext::rounded_rectangle (cr, 0, 0, get_width(), get_height(), _corner_radius);
+			rounded_function (cr, 0, 0, get_width(), get_height(), _corner_radius);
 			cairo_set_source_rgba (cr, 0.905, 0.917, 0.925, 0.2);
 			cairo_fill (cr);
 		}
@@ -694,4 +714,11 @@ ArdourButton::action_tooltip_changed ()
 {
 	string str = _action->property_tooltip().get_value();
 	ARDOUR_UI::instance()->set_tip (*this, str);
+}
+
+void
+ArdourButton::set_rounded_corner_mask (int mask)
+{
+	_corner_mask = mask;
+	queue_draw ();
 }
