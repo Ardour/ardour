@@ -1,8 +1,10 @@
 #include <iostream>
 #include <algorithm>
 
+
 #include <gtkmm/toggleaction.h>
 
+#include "pbd/compose.h"
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/rgb_macros.h"
 
@@ -11,9 +13,10 @@
 
 using namespace Gtk;
 
-ButtonJoiner::ButtonJoiner (Gtk::Widget& l, Gtk::Widget& r)
+ButtonJoiner::ButtonJoiner (const std::string& str, Gtk::Widget& l, Gtk::Widget& r)
 	: left (l)
 	, right (r)
+	, name (str)
 	, active_fill_pattern (0)
 	, inactive_fill_pattern (0)
 {
@@ -189,15 +192,15 @@ ButtonJoiner::set_colors ()
 	active_fill_pattern = cairo_pattern_create_linear (0.0, 0.0, 0.0, get_height());
 	inactive_fill_pattern = cairo_pattern_create_linear (0.0, 0.0, 0.0, get_height());
 
-	start_color = ARDOUR_UI::config()->color_by_name ("transport button: fill start");
-	end_color = ARDOUR_UI::config()->color_by_name ("transport button: fill end");
+	start_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: fill start", name));
+	end_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: fill end", name));
 	UINT_TO_RGBA (start_color, &r, &g, &b, &a);
 	cairo_pattern_add_color_stop_rgba (inactive_fill_pattern, 0, r/255.0,g/255.0,b/255.0, a/255.0);
 	UINT_TO_RGBA (end_color, &r, &g, &b, &a);
 	cairo_pattern_add_color_stop_rgba (inactive_fill_pattern, 1, r/255.0,g/255.0,b/255.0, a/255.0);
 
-	start_color = ARDOUR_UI::config()->color_by_name ("transport button: fill start active");
-	end_color = ARDOUR_UI::config()->color_by_name ("transport button: fill end active");
+	start_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: fill start active", name));
+	end_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: fill end active", name));
 	UINT_TO_RGBA (start_color, &r, &g, &b, &a);
 	cairo_pattern_add_color_stop_rgba (active_fill_pattern, 0, r/255.0,g/255.0,b/255.0, a/255.0);
 	UINT_TO_RGBA (end_color, &r, &g, &b, &a);

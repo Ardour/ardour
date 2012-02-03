@@ -154,8 +154,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	, play_selection_controllable (new TransportControllable ("transport play selection", *this, TransportControllable::PlaySelection))
 	, rec_controllable (new TransportControllable ("transport rec-enable", *this, TransportControllable::RecordEnable))
 
-	, transport_joiner (play_selection_button, roll_button)
-
 	, auto_return_button (ArdourButton::led_default_elements)
 	, auto_play_button (ArdourButton::led_default_elements)
 	, auto_input_button (ArdourButton::led_default_elements)

@@ -67,7 +67,6 @@
 
 #include "ardour_dialog.h"
 #include "ardour_button.h"
-#include "button_joiner.h"
 #include "editing.h"
 #include "ui_config.h"
 #include "window_proxy.h"
@@ -80,6 +79,7 @@ class ArdourStartup;
 class ArdourKeyboard;
 class AudioClock;
 class BundleManager;
+class ButtonJoiner;
 class ConnectionEditor;
 class KeyEditor;
 class LocationUIWindow;
@@ -424,7 +424,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	ArdourButton play_selection_button;
 	ArdourButton rec_button;
 
-	ButtonJoiner transport_joiner;
+	ButtonJoiner* transport_joiner;
 
 	void toggle_external_sync ();
 	void toggle_time_master ();

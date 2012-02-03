@@ -86,6 +86,7 @@
 #include "audio_time_axis.h"
 #include "automation_time_axis.h"
 #include "bundle_manager.h"
+#include "button_joiner.h"
 #include "canvas-noevent-text.h"
 #include "canvas_impl.h"
 #include "crossfade_edit.h"
@@ -2787,7 +2788,7 @@ Editor::setup_toolbar ()
 	/* make them just a bit bigger */
 	mouse_move_button.set_size_request (-1, 25);
 
-	smart_mode_joiner = manage (new ButtonJoiner (mouse_move_button, mouse_select_button));
+	smart_mode_joiner = manage (new ButtonJoiner ("mouse mode button", mouse_move_button, mouse_select_button));
 	smart_mode_joiner->set_related_action (smart_mode_action);
 
 	mouse_move_button.set_rounded_corner_mask (0x1); // upper left only 

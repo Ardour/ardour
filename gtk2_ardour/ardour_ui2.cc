@@ -48,6 +48,7 @@
 #include "public_editor.h"
 #include "audio_clock.h"
 #include "actions.h"
+#include "button_joiner.h"
 #include "utils.h"
 #include "theme_manager.h"
 #include "midi_tracer.h"
@@ -133,9 +134,7 @@ ARDOUR_UI::setup_tooltips ()
 	set_tip (goto_end_button, _("Go to end of session"));
 	set_tip (auto_loop_button, _("Play loop range"));
 	set_tip (midi_panic_button, _("MIDI Panic\nSend note off and reset controller messages on all MIDI channels"));
-
-	set_tip (transport_joiner, _("Always Play Range Selection (if any)"));
-
+	set_tip (*transport_joiner, _("Always Play Range Selection (if any)"));
 	set_tip (auto_return_button, _("Return to last playback start when stopped"));
 	set_tip (auto_play_button, _("Start playback after any locate"));
 	set_tip (auto_input_button, _("Be sensible about input monitoring"));
@@ -295,8 +294,10 @@ ARDOUR_UI::setup_transport ()
 	act = ActionManager::get_action (X_("Transport"), X_("ToggleExternalSync"));
 	sync_button.set_related_action (act);
 
+	transport_joiner = manage (new ButtonJoiner ("transport button", play_selection_button, roll_button));
+
 	act = ActionManager::get_action (X_("Transport"), X_("AlwaysPlayRange"));
-	transport_joiner.set_related_action (act);
+	transport_joiner->set_related_action (act);
 
 	/* clocks, etc. */
 
@@ -367,7 +368,7 @@ ARDOUR_UI::setup_transport ()
 	play_selection_button.set_rounded_corner_mask (0x1); /* upper left only */
 	roll_button.set_rounded_corner_mask (0x2); /* upper right only */
 
-	tbox2->pack_start (transport_joiner, false, false);
+	tbox2->pack_start (*transport_joiner, false, false);
 
 	tbox3->pack_start (stop_button, false, false);
 	tbox3->pack_start (rec_button, false, false, 6);
