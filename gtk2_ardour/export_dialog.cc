@@ -146,6 +146,12 @@ ExportDialog::init ()
 }
 
 void
+ExportDialog::expanded_changed ()
+{
+	set_resizable(advanced->get_expanded());
+}
+
+void
 ExportDialog::init_gui ()
 {
 	Gtk::Alignment * preset_align = Gtk::manage (new Gtk::Alignment());
@@ -183,8 +189,16 @@ ExportDialog::init_gui ()
 	get_vbox()->pack_start (warning_widget, false, false, 0);
 	get_vbox()->pack_start (progress_widget, false, false, 0);
 
-	Gtk::Expander* advanced = Gtk::manage (new Gtk::Expander (_("Advanced options")));
+	advanced = Gtk::manage (new Gtk::Expander (_("Advanced options")));
+	advanced->property_expanded().signal_changed().connect(
+		sigc::mem_fun(*this, &ExportDialog::expanded_changed));
 	advanced->add (*advanced_paned);
+
+	if (channel_selector_is_expandable()) {
+		advanced_sizegroup = Gtk::SizeGroup::create(Gtk::SIZE_GROUP_VERTICAL);
+		advanced_sizegroup->add_widget(*timespan_selector);
+		advanced_sizegroup->add_widget(*channel_selector);
+	}
 
 	get_vbox()->pack_start (*advanced, true, true);
 

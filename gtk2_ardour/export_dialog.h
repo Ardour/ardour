@@ -93,6 +93,8 @@ class ExportDialog : public ArdourDialog {
 
 	void init ();
 
+	void expanded_changed();
+
 	void notify_errors ();
 	void close_dialog ();
 
@@ -113,6 +115,9 @@ class ExportDialog : public ArdourDialog {
 	PBD::ScopedConnection abort_connection;
 
 	/*** GUI components ***/
+
+	Glib::RefPtr<Gtk::SizeGroup> advanced_sizegroup;
+	Gtk::Expander * advanced;
 
 	/* Warning area */
 
