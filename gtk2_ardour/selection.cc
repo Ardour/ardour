@@ -104,6 +104,7 @@ Selection::clear ()
 	clear_playlists ();
 	clear_midi_notes ();
 	clear_midi_regions ();
+	clear_markers ();
 }
 
 void
