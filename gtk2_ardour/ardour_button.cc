@@ -345,6 +345,7 @@ ArdourButton::set_colors ()
 	
 	if (edge_pattern) {
 		cairo_pattern_destroy (edge_pattern);
+		edge_pattern = 0;
 	}
 
 	if (_elements & Edge) {
@@ -369,6 +370,7 @@ ArdourButton::set_colors ()
 
 	if (fill_pattern) {
 		cairo_pattern_destroy (fill_pattern);
+		fill_pattern = 0;
 	}
 
 	if (_elements & Body) {
@@ -721,4 +723,11 @@ ArdourButton::set_rounded_corner_mask (int mask)
 {
 	_corner_mask = mask;
 	queue_draw ();
+}
+
+void
+ArdourButton::set_elements (Element e)
+{
+	_elements = e;
+	set_colors ();
 }

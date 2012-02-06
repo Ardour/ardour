@@ -221,6 +221,9 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	original_big_clock_height = -1;
 	original_big_clock_font_size = 0;
 
+	roll_button.set_elements (ArdourButton::Element (ArdourButton::Body|ArdourButton::Text));
+	play_selection_button.set_elements (ArdourButton::Element (ArdourButton::Body|ArdourButton::Text));
+	
 	roll_button.set_controllable (roll_controllable);
 	stop_button.set_controllable (stop_controllable);
 	goto_start_button.set_controllable (goto_start_controllable);

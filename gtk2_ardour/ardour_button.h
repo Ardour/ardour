@@ -60,7 +60,8 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 	void set_visual_state (Gtkmm2ext::VisualState);
 
 	Element elements() const { return _elements; }
-
+	void set_elements (Element);
+	
 	void set_corner_radius (float);
 	void set_rounded_corner_mask (int);
 	void set_diameter (float);

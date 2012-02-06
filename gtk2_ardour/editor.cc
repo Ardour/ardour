@@ -2791,6 +2791,9 @@ Editor::setup_toolbar ()
 	smart_mode_joiner = manage (new ButtonJoiner ("mouse mode button", mouse_move_button, mouse_select_button));
 	smart_mode_joiner->set_related_action (smart_mode_action);
 
+	mouse_move_button.set_elements (ArdourButton::Element (ArdourButton::Body|ArdourButton::Text));
+	mouse_select_button.set_elements (ArdourButton::Element (ArdourButton::Body|ArdourButton::Text));
+
 	mouse_move_button.set_rounded_corner_mask (0x1); // upper left only 
 	mouse_select_button.set_rounded_corner_mask (0x2); // upper right only 
 
