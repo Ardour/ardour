@@ -455,14 +455,23 @@ MidiDiskstream::commit (framecnt_t playback_distance)
 	uint32_t frames_read = g_atomic_int_get(&_frames_read_from_ringbuffer);
 	uint32_t frames_written = g_atomic_int_get(&_frames_written_to_ringbuffer);
 
-	cerr << name() << " MDS written: " << frames_written << " - read: " << frames_read <<
-		" = " << frames_written - frames_read
-	     << " + " << playback_distance << " < " << midi_readahead << " = " << need_butler << ")" << endl;
-		
-	assert (frames_read <= frames_written);
+	/*
+	  cerr << name() << " MDS written: " << frames_written << " - read: " << frames_read <<
+	  " = " << frames_written - frames_read
+	  << " + " << playback_distance << " < " << midi_readahead << " = " << need_butler << ")" << endl;
+	*/
 
-	if ((frames_written - frames_read) + playback_distance < midi_readahead) {
-		need_butler = true;
+	/* frames_read will generally be less than frames_written, but
+	 * immediately after an overwrite, we can end up having read some data
+	 * before we've written any. we don't need to trip an assert() on this,
+	 * but we do need to check so that the decision on whether or not we
+	 * need the butler is done correctly.
+	 */
+	
+	if (frames_read <= frames_written) {
+		if ((frames_written - frames_read) + playback_distance < midi_readahead) {
+			need_butler = true;
+		}
 	}
 
 
@@ -487,8 +496,6 @@ MidiDiskstream::overwrite_existing_buffers ()
 	g_atomic_int_set (&_frames_read_from_ringbuffer, 0);
 	g_atomic_int_set (&_frames_written_to_ringbuffer, 0);
 
-	cerr << name() << " FWTRB reset to zero for overwrite\n";
-
 	read (overwrite_frame, disk_io_chunk_frames, false);
 	file_frame = overwrite_frame; // it was adjusted by ::read()
 	overwrite_queued = false;
@@ -507,8 +514,6 @@ MidiDiskstream::seek (framepos_t frame, bool complete_refill)
 	_capture_buf->reset();
 	g_atomic_int_set(&_frames_read_from_ringbuffer, 0);
 	g_atomic_int_set(&_frames_written_to_ringbuffer, 0);
-
-	cerr << name() << " FWTRB reset to zero for seek\n";
 
 	playback_sample = frame;
 	file_frame = frame;
@@ -606,7 +611,6 @@ MidiDiskstream::read (framepos_t& start, framecnt_t dur, bool reversed)
 		}
 
 		g_atomic_int_add (&_frames_written_to_ringbuffer, this_read);
-		cerr << "FWTRB added " << this_read << " now " << g_atomic_int_get (&_frames_written_to_ringbuffer) << endl;
 
 		if (reversed) {
 
@@ -1297,7 +1301,6 @@ MidiDiskstream::get_playback (MidiBuffer& dst, framecnt_t nframes)
 #endif
 
 	g_atomic_int_add (&_frames_read_from_ringbuffer, nframes);
-	cerr << name() << " FRFB advanced by " << nframes << " to " << g_atomic_int_get (&_frames_read_from_ringbuffer) << endl;
 }
 
 bool
