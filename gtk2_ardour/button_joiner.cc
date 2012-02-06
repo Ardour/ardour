@@ -86,7 +86,7 @@ ButtonJoiner::render (cairo_t* cr)
 
 	/* inner "edge" */
 
-	Gtkmm2ext::rounded_top_rectangle (cr, 8, 8, get_width() - 16, h - 8, 9);
+	Gtkmm2ext::rounded_top_rectangle (cr, 8, 8, get_width() - 16, h - 8, 10);
 	cairo_stroke (cr);
 
 }
