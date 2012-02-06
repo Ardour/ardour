@@ -84,6 +84,7 @@ AudioEngine::AudioEngine (string client_name, string session_uuid)
 	_frame_rate = 0;
 	_buffer_size = 0;
 	_freewheeling = false;
+	_pre_freewheel_mmc_enabled = false;
         _main_thread = 0;
 	port_remove_in_progress = false;
 
@@ -344,7 +345,20 @@ AudioEngine::_process_thread (void *arg)
 void
 AudioEngine::_freewheel_callback (int onoff, void *arg)
 {
-	static_cast<AudioEngine*>(arg)->_freewheeling = onoff;
+	static_cast<AudioEngine*>(arg)->freewheel_callback (onoff);
+}
+
+void
+AudioEngine::freewheel_callback (int onoff)
+{
+	_freewheeling = onoff;
+
+	if (onoff) {
+		_pre_freewheel_mmc_enabled = MIDI::Manager::instance()->mmc()->send_enabled ();
+		MIDI::Manager::instance()->mmc()->enable_send (false);
+	} else {
+		MIDI::Manager::instance()->mmc()->enable_send (_pre_freewheel_mmc_enabled);
+	}
 }
 
 void

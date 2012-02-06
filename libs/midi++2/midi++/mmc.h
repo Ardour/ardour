@@ -99,6 +99,7 @@ class MachineControl
 	byte receive_device_id () const { return _receive_device_id; }
 	byte send_device_id () const { return _send_device_id; }
 	void enable_send (bool);
+	bool send_enabled () const { return _enable_send; }
 	void send (MachineControlCommand const &);
 
 	static bool is_mmc (byte *sysex_buf, size_t len);

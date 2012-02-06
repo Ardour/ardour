@@ -361,7 +361,7 @@ Session::send_full_time_code (framepos_t const t)
 
 	_send_timecode_update = false;
 
-	if (!Config->get_send_mtc() || _slave) {
+	if (_engine.freewheeling() || !Config->get_send_mtc() || _slave) {
 		return 0;
 	}
 
@@ -415,7 +415,7 @@ Session::send_full_time_code (framepos_t const t)
 int
 Session::send_midi_time_code_for_cycle (framepos_t start_frame, framepos_t end_frame, pframes_t nframes)
 {
-	if (_slave || !_send_qf_mtc || transmitting_timecode_time.negative || (next_quarter_frame_to_send < 0)) {
+	if (_engine.freewheeling() || _slave || !_send_qf_mtc || transmitting_timecode_time.negative || (next_quarter_frame_to_send < 0)) {
 		// cerr << "(MTC) Not sending MTC\n";
 		return 0;
 	}

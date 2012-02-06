@@ -226,6 +226,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
         _speakers.reset (new Speakers);
 	_clicks_cleared = 0;
 	ignore_route_processor_changes = false;
+	_pre_export_mmc_enabled = false;
 
 	AudioDiskstream::allocate_working_buffers();
 

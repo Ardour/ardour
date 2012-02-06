@@ -21,6 +21,9 @@
 #include "pbd/error.h"
 #include <glibmm/thread.h>
 
+#include <midi++/manager.h>
+#include <midi++/mmc.h>
+
 #include "ardour/audioengine.h"
 #include "ardour/butler.h"
 #include "ardour/export_failed.h"
@@ -89,6 +92,11 @@ Session::pre_export ()
 	export_status->running = true;
 	export_status->Aborting.connect_same_thread (*this, boost::bind (&Session::stop_audio_export, this));
 	export_status->Finished.connect_same_thread (*this, boost::bind (&Session::finalize_audio_export, this));
+	
+	/* disable MMC output early */
+
+	_pre_export_mmc_enabled = MIDI::Manager::instance()->mmc()->send_enabled ();
+	MIDI::Manager::instance()->mmc()->enable_send (false);
 
 	return 0;
 }
@@ -223,6 +231,8 @@ Session::finalize_audio_export ()
 	_engine.freewheel (false);
 	export_freewheel_connection.disconnect();
 	
+	MIDI::Manager::instance()->mmc()->enable_send (_pre_export_mmc_enabled);
+
 	/* maybe write CUE/TOC */
 
 	export_handler.reset();

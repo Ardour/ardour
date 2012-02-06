@@ -983,6 +983,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	int  pre_export ();
 	int  stop_audio_export ();
 	void finalize_audio_export ();
+	bool _pre_export_mmc_enabled;
 
 	PBD::ScopedConnection export_freewheel_connection;
 

@@ -280,6 +280,7 @@ private:
 	/// the number of frames processed since start() was called
 	framecnt_t                _processed_frames;
 	bool                      _freewheeling;
+	bool                      _pre_freewheel_mmc_enabled;
 	int                       _usecs_per_cycle;
 	bool                       port_remove_in_progress;
 
@@ -314,6 +315,7 @@ private:
 	int  jack_sync_callback (jack_transport_state_t, jack_position_t*);
 	int  jack_bufsize_callback (pframes_t);
 	int  jack_sample_rate_callback (pframes_t);
+	void freewheel_callback (int);
 
 	void set_jack_callbacks ();
 
