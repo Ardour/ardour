@@ -30,6 +30,7 @@
 #include "pbd/failed_constructor.h"
 #include "pbd/convert.h"
 #include "pbd/strsplit.h"
+#include "pbd/stacktrace.h"
 
 #include "midi++/types.h"
 #include "midi++/port.h"
@@ -306,7 +307,10 @@ Port::write(byte * msg, size_t msglen, timestamp_t timestamp)
 
 		// XXX This had to be temporarily commented out to make export work again
 		if (!(timestamp < _nframes_this_cycle)) {
-			std::cerr << "assertion timestamp < _nframes_this_cycle failed!" << std::endl;
+			std::cerr << "attempting to write MIDI event of " << msglen << " bytes at time "
+				  << timestamp << " of " << _nframes_this_cycle
+				  << " (this will not work - needs a code fix)"
+				  << std::endl;
 		}
 
 		if (_currently_in_cycle) {
@@ -327,6 +331,7 @@ Port::write(byte * msg, size_t msglen, timestamp_t timestamp)
 			}
 		} else {
 			cerr << "write to JACK midi port failed: not currently in a process cycle." << endl;
+			PBD::stacktrace (cerr, 20);
 		}
 	}
 

@@ -24,6 +24,7 @@
 
 #include "evoral/midi_events.h"
 
+#include "ardour/audioengine.h"
 #include "ardour/ticker.h"
 #include "ardour/session.h"
 #include "ardour/tempo.h"
@@ -66,6 +67,11 @@ void MidiClockTicker::transport_state_changed()
 {
 	if (_session->exporting()) {
 		/* no midi clock during export, for now */
+		return;
+	}
+
+	if (!_session->engine().running()) {
+		/* Engine stopped, we can't do anything */
 		return;
 	}
 
@@ -126,22 +132,29 @@ void MidiClockTicker::transport_looped()
 
 	// adjust _last_tick, so that the next MIDI clock message is sent
 	// in due time (and the tick interval is still constant)
+
 	framecnt_t elapsed_since_last_tick = loop_location->end() - _last_tick;
-	_last_tick = loop_location->start() - elapsed_since_last_tick;
+
+	if (loop_location->start() > elapsed_since_last_tick) {
+		_last_tick = loop_location->start() - elapsed_since_last_tick;
+	} else {
+		_last_tick = 0;
+	}
 }
 
-void MidiClockTicker::tick (const framepos_t& transport_frames)
+void MidiClockTicker::tick (const framepos_t& transport_frame)
 {
-	if (!Config->get_send_midi_clock() || _session == 0 || _session->transport_speed() != 1.0f || _midi_port == 0)
+	if (!Config->get_send_midi_clock() || _session == 0 || _session->transport_speed() != 1.0f || _midi_port == 0) {
 		return;
+	}
 
 	while (true) {
-		double next_tick = _last_tick + one_ppqn_in_frames(transport_frames);
-		frameoffset_t next_tick_offset = llrint (next_tick) - transport_frames;
+		double next_tick = _last_tick + one_ppqn_in_frames (transport_frame);
+		frameoffset_t next_tick_offset = llrint (next_tick) - transport_frame;
 
 		DEBUG_TRACE (PBD::DEBUG::MidiClock,
 			     string_compose ("Transport: %1, last tick time: %2, next tick time: %3, offset: %4, cycle length: %5\n",
-					     transport_frames, _last_tick, next_tick, next_tick_offset, _midi_port->nframes_this_cycle()
+					     transport_frame, _last_tick, next_tick, next_tick_offset, _midi_port->nframes_this_cycle()
 				     )
 			);
 
@@ -149,15 +162,18 @@ void MidiClockTicker::tick (const framepos_t& transport_frames)
 			break;
 		}
 
-		send_midi_clock_event (next_tick_offset);
+		if (next_tick_offset >= 0) {
+			send_midi_clock_event (next_tick_offset);
+		}
+
 		_last_tick = next_tick;
 	}
 }
 
 double MidiClockTicker::one_ppqn_in_frames (framepos_t transport_position)
 {
-	const Tempo& current_tempo = _session->tempo_map().tempo_at(transport_position);
-	double frames_per_beat = current_tempo.frames_per_beat(_session->nominal_frame_rate());
+	const Tempo& current_tempo = _session->tempo_map().tempo_at (transport_position);
+	double frames_per_beat = current_tempo.frames_per_beat (_session->nominal_frame_rate());
 
 	double quarter_notes_per_beat = 4.0 / current_tempo.note_type();
 	double frames_per_quarter_note = frames_per_beat / quarter_notes_per_beat;
