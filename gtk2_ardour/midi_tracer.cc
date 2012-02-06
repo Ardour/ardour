@@ -40,18 +40,23 @@ MidiTracer::MidiTracer ()
 	, parser (0)
 	, line_count_adjustment (200, 1, 2000, 1, 10)
 	, line_count_spinner (line_count_adjustment)
-	, line_count_label (_("Store this many lines: "))
+	, line_count_label (_("Line history: "))
 	, autoscroll (true)
 	, show_hex (true)
 	, collect (true)
+	, show_delta_time (false)
 	, _update_queued (0)
 	, fifo (1024)
 	, buffer_pool ("miditracer", buffer_size, 1024) // 1024 256 byte buffers
 	, autoscroll_button (_("Auto-Scroll"))
 	, base_button (_("Decimal"))
 	, collect_button (_("Enabled"))
+	, delta_time_button (_("Delta times"))
 {
 	Manager::instance()->PortsChanged.connect (_manager_connection, invalidator (*this), boost::bind (&MidiTracer::ports_changed, this), gui_context());
+
+	_last_receipt.tv_sec = 0;
+	_last_receipt.tv_usec = 0;
 
 	VBox* vbox = manage (new VBox);
 	vbox->set_spacing (4);
@@ -88,6 +93,7 @@ MidiTracer::MidiTracer ()
 
 	HBox* bbox = manage (new HBox);
 	bbox->add (line_count_box);
+	bbox->add (delta_time_button);
 	bbox->add (base_button);
 	bbox->add (collect_button);
 	bbox->add (autoscroll_button);
@@ -100,6 +106,7 @@ MidiTracer::MidiTracer ()
 	base_button.signal_toggled().connect (sigc::mem_fun (*this, &MidiTracer::base_toggle));
 	collect_button.signal_toggled().connect (sigc::mem_fun (*this, &MidiTracer::collect_toggle));
 	autoscroll_button.signal_toggled().connect (sigc::mem_fun (*this, &MidiTracer::autoscroll_toggle));
+	delta_time_button.signal_toggled().connect (sigc::mem_fun (*this, &MidiTracer::delta_toggle));
 
 	base_button.show ();
 	collect_button.show ();
@@ -157,15 +164,24 @@ MidiTracer::tracer (Parser&, byte* msg, size_t len)
 	size_t s;
 
 	gettimeofday (&tv, 0);
-	localtime_r (&tv.tv_sec, &now);
 
 	buf = (char *) buffer_pool.alloc ();
 	bufsize = buffer_size;
 
-	s = strftime (buf, bufsize, "%H:%M:%S", &now);
-	bufsize -= s;
-	s += snprintf (&buf[s], bufsize, ".%06" PRId64, (int64_t) tv.tv_usec);
-	bufsize -= s;
+	if (_last_receipt.tv_sec != 0 && show_delta_time) {
+		struct timeval delta;
+		timersub (&tv, &_last_receipt, &delta);
+		s = snprintf (buf, bufsize, "+%02" PRId64 ":%06" PRId64, (int64_t) delta.tv_sec, (int64_t) delta.tv_usec);
+		bufsize -= s;
+	} else {
+		localtime_r (&tv.tv_sec, &now);
+		s = strftime (buf, bufsize, "%H:%M:%S", &now);
+		bufsize -= s;
+		s += snprintf (&buf[s], bufsize, ".%06" PRId64, (int64_t) tv.tv_usec);
+		bufsize -= s;
+	}
+
+	_last_receipt = tv;
 
 	switch ((eventType) msg[0]&0xf0) {
 	case off:
@@ -383,6 +399,12 @@ void
 MidiTracer::base_toggle ()
 {
 	show_hex = !base_button.get_active();
+}
+
+void
+MidiTracer::delta_toggle ()
+{
+	show_delta_time = delta_time_button.get_active();
 }
 
 void

@@ -34,10 +34,12 @@ class MidiTracer : public ArdourWindow
 	Gtk::SpinButton line_count_spinner;
 	Gtk::Label line_count_label;
 	Gtk::HBox line_count_box;
-
+	struct timeval _last_receipt;
+	
 	bool autoscroll;
 	bool show_hex;
 	bool collect;
+	bool show_delta_time;
 
 	/** Incremented when an update is requested, decremented when one is handled; hence
 	 *  equal to 0 when an update is not queued.  May temporarily be negative if a
@@ -55,11 +57,13 @@ class MidiTracer : public ArdourWindow
 	Gtk::CheckButton autoscroll_button;
 	Gtk::CheckButton base_button;
 	Gtk::CheckButton collect_button;
+	Gtk::CheckButton delta_time_button;
 	Gtk::ComboBoxText _port_combo;
 
 	void base_toggle ();
 	void autoscroll_toggle ();
 	void collect_toggle ();
+	void delta_toggle ();
 
 	void port_changed ();
 	void ports_changed ();
