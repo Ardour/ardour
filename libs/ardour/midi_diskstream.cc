@@ -487,7 +487,7 @@ MidiDiskstream::overwrite_existing_buffers ()
 	g_atomic_int_set (&_frames_read_from_ringbuffer, 0);
 	g_atomic_int_set (&_frames_written_to_ringbuffer, 0);
 
-	cerr << "FWTRB reset to zero for overwrite\n";
+	cerr << name() << " FWTRB reset to zero for overwrite\n";
 
 	read (overwrite_frame, disk_io_chunk_frames, false);
 	file_frame = overwrite_frame; // it was adjusted by ::read()
@@ -508,7 +508,7 @@ MidiDiskstream::seek (framepos_t frame, bool complete_refill)
 	g_atomic_int_set(&_frames_read_from_ringbuffer, 0);
 	g_atomic_int_set(&_frames_written_to_ringbuffer, 0);
 
-	cerr << "FWTRB reset to zero for seek\n";
+	cerr << name() << " FWTRB reset to zero for seek\n";
 
 	playback_sample = frame;
 	file_frame = frame;
@@ -1297,6 +1297,7 @@ MidiDiskstream::get_playback (MidiBuffer& dst, framecnt_t nframes)
 #endif
 
 	g_atomic_int_add (&_frames_read_from_ringbuffer, nframes);
+	cerr << name() << " FRFB advanced by " << nframes << " to " << g_atomic_int_get (&_frames_read_from_ringbuffer) << endl;
 }
 
 bool
