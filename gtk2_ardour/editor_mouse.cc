@@ -2051,7 +2051,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 	case TempoMarkerItem:
 
 		if (is_drawable()) {
-			set_canvas_cursor (_cursors->timebar);
+			set_canvas_cursor (current_canvas_cursor);
 		}
 
 		break;
