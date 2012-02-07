@@ -2389,7 +2389,7 @@ ARDOUR_UI::transport_rec_enable_blink (bool onoff)
 			rec_button.set_active_state (Gtkmm2ext::ImplicitActive);
 		}
 	} else if (r == Session::Recording && h) {
-		rec_button.set_active_state (Gtkmm2ext::ImplicitActive);
+		rec_button.set_active_state (Gtkmm2ext::ExplicitActive);
 	} else {
 		rec_button.unset_active_state ();
 	}

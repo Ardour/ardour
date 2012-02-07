@@ -1431,6 +1431,8 @@ Session::set_state (const XMLNode& node, int version)
 		ControlProtocolManager::instance().set_protocol_states (*child);
 	}
 
+	update_have_rec_enabled_track ();
+
 	/* here beginneth the second phase ... */
 
 	StateReady (); /* EMIT SIGNAL */
