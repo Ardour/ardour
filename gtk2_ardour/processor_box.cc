@@ -115,10 +115,7 @@ ProcessorEntry::ProcessorEntry (ProcessorBox* parent, boost::shared_ptr<Processo
 
 		_vbox.pack_start (_button, true, true);
 
-		if (_processor->active()) {
-			_button.set_active_state (Gtkmm2ext::Active);
-		}
-		
+		_button.set_active (_processor->active());
 		_button.show ();
 		
 		_processor->ActiveChanged.connect (active_connection, invalidator (*this), boost::bind (&ProcessorEntry::processor_active_changed, this), gui_context());
@@ -225,7 +222,7 @@ void
 ProcessorEntry::led_clicked()
 {
 	if (_processor) {
-		if (_button.active_state() == Gtkmm2ext::Active) {
+		if (_button.get_active ()) {
 			_processor->deactivate ();
 		} else {
 			_processor->activate ();
@@ -237,11 +234,7 @@ void
 ProcessorEntry::processor_active_changed ()
 {
 	if (_processor) {
-		if (_processor->active()) {
-			_button.set_active_state (Gtkmm2ext::Active);
-		} else {
-			_button.unset_active_state ();
-		}
+		_button.set_active (_processor->active());
 	}
 }
 
@@ -485,10 +478,10 @@ ProcessorEntry::Control::button_clicked ()
 		return;
 	}
 
-	bool const n = _button.active_state() == Gtkmm2ext::Active ? false : true;
-	
-	c->set_value (n ? 1 : 0);
-	_button.set_active_state (n ? Gtkmm2ext::Active : Gtkmm2ext::ActiveState (0));
+	bool const n = _button.get_active ();
+
+	c->set_value (n ? 0 : 1);
+	_button.set_active (!n);
 }
 
 void
@@ -503,7 +496,7 @@ ProcessorEntry::Control::control_changed ()
 
 	if (c->toggled ()) {
 
-		_button.set_active_state (c->get_value() > 0.5 ? Gtkmm2ext::Active : Gtkmm2ext::ActiveState (0));
+		_button.set_active (c->get_value() > 0.5);
 		
 	} else {
 

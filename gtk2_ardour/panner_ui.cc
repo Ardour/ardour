@@ -149,7 +149,7 @@ PannerUI::build_astate_menu ()
 	*/
 	pan_astate_menu->items().push_back (MenuElem (S_("Automation|Manual"), sigc::bind (
 			sigc::mem_fun (_panner.get(), &Panner::set_automation_state),
-			(AutoState) Off)));
+			(AutoState) ARDOUR::Off)));
 	pan_astate_menu->items().push_back (MenuElem (_("Play"), sigc::bind (
 			sigc::mem_fun (_panner.get(), &Panner::set_automation_state),
 			(AutoState) Play)));
@@ -515,7 +515,7 @@ PannerUI::pan_automation_state_changed ()
 		break;
 	}
 
-	bool x = (pannable->automation_state() != Off);
+	bool x = (pannable->automation_state() != ARDOUR::Off);
 
 	if (pan_automation_state_button.get_active() != x) {
                 ignore_toggle = true;
@@ -552,7 +552,7 @@ PannerUI::_astate_string (AutoState state, bool shrt)
 	string sstr;
 
 	switch (state) {
-	case Off:
+	case ARDOUR::Off:
 		sstr = (shrt ? "M" : _("M"));
 		break;
 	case Play:

@@ -67,7 +67,7 @@ ButtonJoiner::render (cairo_t* cr)
 {
 	double h = get_height();
 	
-	if (_active_state == Gtkmm2ext::ActiveState (0)) {
+	if (!get_active()) {
 		cairo_set_source (cr, inactive_fill_pattern);
 	} else {
 		cairo_set_source (cr, active_fill_pattern);
@@ -169,11 +169,7 @@ ButtonJoiner::action_toggled ()
 	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (_action);
 
 	if (tact) {
-		if (tact->get_active()) {
-			set_active_state (Gtkmm2ext::Active);
-		} else {
-			unset_active_state ();
-		}
+		set_active (tact->get_active());
 	}
 }	
 

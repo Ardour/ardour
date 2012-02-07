@@ -92,7 +92,7 @@ LED::render (cairo_t* cr)
 	cairo_fill(cr);
 
 	//knob color
-	cairo_set_source_rgba (cr, _red, _green, _blue, (active_state() == Active) ? 0.8 : 0.2);
+	cairo_set_source_rgba (cr, _red, _green, _blue, (active_state() == Gtkmm2ext::ExplicitActive) ? 0.8 : 0.2);
 	cairo_arc (cr, 0, 0, _diameter/2-3, 0, 2 * M_PI);
 	cairo_fill(cr);
 

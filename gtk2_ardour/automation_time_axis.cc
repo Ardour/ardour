@@ -252,7 +252,7 @@ AutomationTimeAxisView::auto_clicked ()
 		MenuList& items (automation_menu->items());
 
 		items.push_back (MenuElem (S_("Automation|Manual"), sigc::bind (sigc::mem_fun(*this,
-				&AutomationTimeAxisView::set_automation_state), (AutoState) Off)));
+											      &AutomationTimeAxisView::set_automation_state), (AutoState) ARDOUR::Off)));
 		items.push_back (MenuElem (_("Play"), sigc::bind (sigc::mem_fun(*this,
 				&AutomationTimeAxisView::set_automation_state), (AutoState) Play)));
 		items.push_back (MenuElem (_("Write"), sigc::bind (sigc::mem_fun(*this,
@@ -298,11 +298,11 @@ AutomationTimeAxisView::automation_state_changed ()
 		assert (_control);
 		state = _control->alist()->automation_state ();
 	} else {
-		state = Off;
+		state = ARDOUR::Off;
 	}
 
-	switch (state & (Off|Play|Touch|Write)) {
-	case Off:
+	switch (state & (ARDOUR::Off|Play|Touch|Write)) {
+	case ARDOUR::Off:
 		auto_button.set_label (S_("Automation|Manual"));
 		if (auto_off_item) {
 			ignore_state_request = true;
@@ -505,7 +505,7 @@ AutomationTimeAxisView::build_display_menu ()
 
 	as_items.push_back (CheckMenuElem (S_("Automation|Manual"), sigc::bind (
 			sigc::mem_fun(*this, &AutomationTimeAxisView::set_automation_state),
-			(AutoState) Off)));
+			(AutoState) ARDOUR::Off)));
 	auto_off_item = dynamic_cast<CheckMenuItem*>(&as_items.back());
 
 	as_items.push_back (CheckMenuElem (_("Play"), sigc::bind (

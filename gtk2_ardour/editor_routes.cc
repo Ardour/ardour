@@ -121,9 +121,9 @@ EditorRoutes::EditorRoutes (Editor* e)
 	// Mute enable toggle
 	CellRendererPixbufMulti* mute_col_renderer = manage (new CellRendererPixbufMulti());
 
-	mute_col_renderer->set_pixbuf (ActiveState(0), ::get_icon("mute-disabled"));
-	mute_col_renderer->set_pixbuf (Mid, ::get_icon("muted-by-others"));
-	mute_col_renderer->set_pixbuf (Active, ::get_icon("mute-enabled"));
+	mute_col_renderer->set_pixbuf (Gtkmm2ext::Off, ::get_icon("mute-disabled"));
+	mute_col_renderer->set_pixbuf (Gtkmm2ext::ImplicitActive, ::get_icon("muted-by-others"));
+	mute_col_renderer->set_pixbuf (Gtkmm2ext::ExplicitActive, ::get_icon("mute-enabled"));
 	mute_col_renderer->signal_changed().connect (sigc::mem_fun (*this, &EditorRoutes::on_tv_mute_enable_toggled));
 
 	TreeViewColumn* mute_state_column = manage (new TreeViewColumn("M", *mute_col_renderer));
@@ -137,9 +137,9 @@ EditorRoutes::EditorRoutes (Editor* e)
 	// Solo enable toggle
 	CellRendererPixbufMulti* solo_col_renderer = manage (new CellRendererPixbufMulti());
 
-	solo_col_renderer->set_pixbuf (ActiveState(0), ::get_icon("solo-disabled"));
-	solo_col_renderer->set_pixbuf (Active, ::get_icon("solo-enabled"));
-	solo_col_renderer->set_pixbuf (Mid, ::get_icon("soloed-by-others"));
+	solo_col_renderer->set_pixbuf (Gtkmm2ext::Off, ::get_icon("solo-disabled"));
+	solo_col_renderer->set_pixbuf (Gtkmm2ext::ExplicitActive, ::get_icon("solo-enabled"));
+	solo_col_renderer->set_pixbuf (Gtkmm2ext::ImplicitActive, ::get_icon("soloed-by-others"));
 	solo_col_renderer->signal_changed().connect (sigc::mem_fun (*this, &EditorRoutes::on_tv_solo_enable_toggled));
 
 	TreeViewColumn* solo_state_column = manage (new TreeViewColumn("S", *solo_col_renderer));
@@ -641,7 +641,7 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 			row[_columns.is_midi] = false;
 		}
 
-		row[_columns.mute_state] = (*x)->route()->muted() ? Active : ActiveState (0);
+		row[_columns.mute_state] = (*x)->route()->muted() ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off;
 		row[_columns.solo_state] = RouteUI::solo_active_state ((*x)->route());
 		row[_columns.solo_visible] = !(*x)->route()->is_master ();
 		row[_columns.solo_isolate_state] = (*x)->route()->solo_isolated();

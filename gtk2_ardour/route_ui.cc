@@ -129,14 +129,14 @@ RouteUI::init ()
 	show_sends_button->set_name ("send alert button");
 	UI::instance()->set_tip (show_sends_button, _("make mixer strips show sends to this bus"), "");
 
-	monitor_input_button = manage (new ArdourButton (ArdourButton::led_default_elements));
-	monitor_input_button->set_name ("monitor");
+	monitor_input_button = manage (new ArdourButton (ArdourButton::default_elements));
+	monitor_input_button->set_name ("monitor button");
 	monitor_input_button->set_text (_("In"));
 	UI::instance()->set_tip (monitor_input_button, _("Monitor input"), "");
 	monitor_input_button->set_no_show_all (true);
-
-	monitor_disk_button = manage (new ArdourButton (ArdourButton::led_default_elements));
-	monitor_disk_button->set_name ("monitor");
+	
+	monitor_disk_button = manage (new ArdourButton (ArdourButton::default_elements));
+	monitor_disk_button->set_name ("monitor button");
 	monitor_disk_button->set_text (_("Disk"));
 	UI::instance()->set_tip (monitor_disk_button, _("Monitor playback"), "");
 	monitor_disk_button->set_no_show_all (true);
@@ -608,20 +608,20 @@ RouteUI::update_monitoring_display ()
 	MonitorState ms = t->monitoring_state();
 
 	if (t->monitoring_choice() & MonitorInput) {
-		monitor_input_button->set_active_state (Gtkmm2ext::Active);
+		monitor_input_button->set_active_state (Gtkmm2ext::ExplicitActive);
 	} else {
 		if (ms & MonitoringInput) {
-			monitor_input_button->set_active_state (Gtkmm2ext::Mid);
+			monitor_input_button->set_active_state (Gtkmm2ext::ImplicitActive);
 		} else {
 			monitor_input_button->unset_active_state ();
 		}
 	}
 
 	if (t->monitoring_choice() & MonitorDisk) {
-		monitor_disk_button->set_active_state (Gtkmm2ext::Active);
+		monitor_disk_button->set_active_state (Gtkmm2ext::ExplicitActive);
 	} else {
 		if (ms & MonitoringDisk) {
-			monitor_disk_button->set_active_state (Gtkmm2ext::Mid);
+			monitor_disk_button->set_active_state (Gtkmm2ext::ImplicitActive);
 		} else {
 			monitor_disk_button->unset_active_state ();
 		}
@@ -744,7 +744,7 @@ RouteUI::step_edit_changed (bool yn)
 {
         if (yn) {
                 if (rec_enable_button) {
-                        rec_enable_button->set_active_state (Active);
+                        rec_enable_button->set_active_state (Gtkmm2ext::ExplicitActive);
                 }
 
                 start_step_editing ();
@@ -923,7 +923,7 @@ RouteUI::send_blink (bool onoff)
 	}
 
 	if (onoff) {
-		show_sends_button->set_active_state (Gtkmm2ext::Active);
+		show_sends_button->set_active_state (Gtkmm2ext::ExplicitActive);
 	} else {
 		show_sends_button->unset_active_state ();
 	}
@@ -933,27 +933,27 @@ Gtkmm2ext::ActiveState
 RouteUI::solo_active_state (boost::shared_ptr<Route> r)
 {
 	if (r->is_master() || r->is_monitor()) {
-		return ActiveState (0);
+		return Gtkmm2ext::Off;
 	}
 
 	if (Config->get_solo_control_is_listen_control()) {
 
 		if (r->listening_via_monitor()) {
-			return Active;
+			return Gtkmm2ext::ExplicitActive;
 		} else {
-			return ActiveState (0);
+			return Gtkmm2ext::Off;
 		}
 
 	}
 
 	if (r->soloed()) {
                 if (!r->self_soloed()) {
-                        return Mid;
+                        return Gtkmm2ext::ImplicitActive;
                 } else {
-                        return Active;
+                        return Gtkmm2ext::ExplicitActive;
                 }
 	} else {
-		return ActiveState(0);
+		return Gtkmm2ext::Off;
 	}
 }
 
@@ -961,13 +961,13 @@ Gtkmm2ext::ActiveState
 RouteUI::solo_isolate_active_state (boost::shared_ptr<Route> r)
 {
 	if (r->is_master() || r->is_monitor()) {
-		return ActiveState (0);
+		return Gtkmm2ext::Off;
 	}
 
 	if (r->solo_isolated()) {
-		return Active;
+		return Gtkmm2ext::ExplicitActive;
 	} else {
-		return ActiveState(0);
+		return Gtkmm2ext::Off;
 	}
 }
 
@@ -975,13 +975,13 @@ Gtkmm2ext::ActiveState
 RouteUI::solo_safe_active_state (boost::shared_ptr<Route> r)
 {
 	if (r->is_master() || r->is_monitor()) {
-		return ActiveState (0);
+		return Gtkmm2ext::Off;
 	}
 
 	if (r->solo_safe()) {
-		return Active;
+		return Gtkmm2ext::ExplicitActive;
 	} else {
-		return ActiveState (0);
+		return Gtkmm2ext::Off;
 	}
 }
 
@@ -1004,7 +1004,7 @@ RouteUI::update_solo_display ()
 
         if (solo_isolated_led) {
 		if (_route->solo_isolated()) {
-			solo_isolated_led->set_active_state (Gtkmm2ext::Active);
+			solo_isolated_led->set_active_state (Gtkmm2ext::ExplicitActive);
 		} else {
 			solo_isolated_led->unset_active_state ();
 		}
@@ -1012,7 +1012,7 @@ RouteUI::update_solo_display ()
 
         if (solo_safe_led) {
 		if (_route->solo_safe()) {
-			solo_safe_led->set_active_state (Gtkmm2ext::Active);
+			solo_safe_led->set_active_state (Gtkmm2ext::ExplicitActive);
 		} else {
 			solo_safe_led->unset_active_state ();
 		}
@@ -1050,23 +1050,23 @@ RouteUI::mute_active_state (Session* s, boost::shared_ptr<Route> r)
 
 		if (r->muted ()) {
 			/* full mute */
-			return Active;
+			return Gtkmm2ext::ExplicitActive;
 		} else if (!r->is_master() && s->soloing() && !r->soloed() && !r->solo_isolated()) {
 			/* master is NEVER muted by others */
-			return Mid;
+			return Gtkmm2ext::ImplicitActive;
 		} else {
 			/* no mute at all */
-			return ActiveState(0);
+			return Gtkmm2ext::Off;
 		}
 
 	} else {
 
 		if (r->muted()) {
 			/* full mute */
-			return Active;
+			return Gtkmm2ext::ExplicitActive;
 		} else {
 			/* no mute at all */
-			return ActiveState(0);
+			return Gtkmm2ext::Off;
 		}
 	}
 
@@ -1107,12 +1107,12 @@ RouteUI::update_rec_display ()
 	if (_route->record_enabled()) {
                 switch (_session->record_status ()) {
                 case Session::Recording:
-                        rec_enable_button->set_active_state (Active);
+                        rec_enable_button->set_active_state (Gtkmm2ext::ExplicitActive);
                         break;
 
                 case Session::Disabled:
                 case Session::Enabled:
-                        rec_enable_button->set_active_state (Mid);
+                        rec_enable_button->set_active_state (Gtkmm2ext::ImplicitActive);
                         break;
 
                 }
@@ -1907,10 +1907,10 @@ void
 RouteUI::bus_send_display_changed (boost::shared_ptr<Route> send_to)
 {
 	if (_route == send_to) {
-		show_sends_button->set_active_state (Gtkmm2ext::Active);
+		show_sends_button->set_active (true);
 		send_blink_connection = ARDOUR_UI::instance()->Blink.connect (sigc::mem_fun (*this, &RouteUI::send_blink));
 	} else {
-		show_sends_button->unset_active_state ();
+		show_sends_button->set_active (false);
 		send_blink_connection.disconnect ();
 	}
 }

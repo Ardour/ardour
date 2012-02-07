@@ -44,14 +44,14 @@ public:
 	virtual void set_active_state (Gtkmm2ext::ActiveState);
 	virtual void set_visual_state (Gtkmm2ext::VisualState);
 
-	void unset_active_state () { set_active_state (Gtkmm2ext::ActiveState (0)); }
-	void unset_visual_state () { set_visual_state (Gtkmm2ext::VisualState (0)); }
+	void unset_active_state () { set_active_state (Gtkmm2ext::Off); }
+	void unset_visual_state () { set_visual_state (Gtkmm2ext::NoVisualState); }
 
 	/* this is an API simplification for widgets
 	   that only use the Active and Normal active states.
 	*/
 	void set_active (bool);
-	bool get_active () { return active_state() != Gtkmm2ext::ActiveState (0); }
+	bool get_active () { return active_state() != Gtkmm2ext::Off; }
 
 	/* widgets can be told to only draw their "foreground, and thus leave
 	   in place whatever background is drawn by their parent. the default

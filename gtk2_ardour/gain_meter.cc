@@ -206,7 +206,7 @@ GainMeterBase::set_controls (boost::shared_ptr<Route> r,
 
 		gain_astate_menu.items().push_back (MenuElem (S_("Automation|Manual"),
 							      sigc::bind (sigc::mem_fun (*(amp.get()), &Automatable::set_parameter_automation_state),
-								    Evoral::Parameter(GainAutomation), (AutoState) Off)));
+									  Evoral::Parameter(GainAutomation), (AutoState) ARDOUR::Off)));
 		gain_astate_menu.items().push_back (MenuElem (_("Play"),
 							      sigc::bind (sigc::mem_fun (*(amp.get()), &Automatable::set_parameter_automation_state),
 								    Evoral::Parameter(GainAutomation), (AutoState) Play)));
@@ -710,7 +710,7 @@ GainMeterBase::_astate_string (AutoState state, bool shrt)
 	string sstr;
 
 	switch (state) {
-	case Off:
+	case ARDOUR::Off:
 		sstr = (shrt ? "M" : _("M"));
 		break;
 	case Play:
@@ -780,7 +780,7 @@ GainMeterBase::gain_automation_state_changed ()
 		break;
 	}
 
-	x = (_amp->gain_control()->alist()->automation_state() != Off);
+	x = (_amp->gain_control()->alist()->automation_state() != ARDOUR::Off);
 
 	if (gain_automation_state_button.get_active() != x) {
 		ignore_toggle = true;

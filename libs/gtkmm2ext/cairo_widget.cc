@@ -23,8 +23,8 @@
 static const char* has_cairo_widget_background_info = "has_cairo_widget_background_info";
 
 CairoWidget::CairoWidget ()
-	: _active_state (Gtkmm2ext::ActiveState (0))
-	, _visual_state (Gtkmm2ext::VisualState (0))
+	: _active_state (Gtkmm2ext::Off)
+	, _visual_state (Gtkmm2ext::NoVisualState)
 	, _need_bg (true)
 {
 
@@ -134,7 +134,7 @@ CairoWidget::set_active (bool yn)
 	*/
 
 	if (yn) {
-		set_active_state (Gtkmm2ext::Active);
+		set_active_state (Gtkmm2ext::ExplicitActive);
 	} else {
 		unset_active_state ();
 	}

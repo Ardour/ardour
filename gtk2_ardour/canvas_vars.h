@@ -147,20 +147,16 @@ CANVAS_VARIABLE(canvasvar_ ## root ## FillStart, name ": fill start") \
 CANVAS_VARIABLE(canvasvar_ ## root ## FillEnd, name ": fill end") \
 CANVAS_VARIABLE(canvasvar_ ## root ## FillStartActive, name ": fill start active") \
 CANVAS_VARIABLE(canvasvar_ ## root ## FillEndActive, name ": fill end active") \
-CANVAS_VARIABLE(canvasvar_ ## root ## FillStartMid, name ": fill start mid") \
-CANVAS_VARIABLE(canvasvar_ ## root ## FillEndMid, name ": fill end mid") \
 CANVAS_VARIABLE(canvasvar_ ## root ## LED, name ": led") \
 CANVAS_VARIABLE(canvasvar_ ## root ## LEDActive, name ": led active") \
-CANVAS_VARIABLE(canvasvar_ ## root ## LEDMid, name ": led mid") \
 CANVAS_VARIABLE(canvasvar_ ## root ## Text, name ": text") \
 CANVAS_VARIABLE(canvasvar_ ## root ## TextActive, name ": text active") \
-CANVAS_VARIABLE(canvasvar_ ## root ## TextMid, name ": text mid") 
 
 BUTTON_VARS(ProcessorPreFader, "processor prefader")
 BUTTON_VARS(ProcessorFader, "processor fader")
 BUTTON_VARS(ProcessorPostFader, "processor postfader")
 BUTTON_VARS(ProcessorControlButton, "processor control button")
-BUTTON_VARS(MonitorButton, "monitor")
+BUTTON_VARS(MonitorButton, "monitor button")
 BUTTON_VARS(SoloIsolateButton, "solo isolate")
 BUTTON_VARS(SoloSafeButton, "solo safe")
 BUTTON_VARS(MonitorSectionCutButton, "monitor section cut")

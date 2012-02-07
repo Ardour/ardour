@@ -1929,7 +1929,7 @@ ARDOUR_UI::map_transport_state ()
 		auto_loop_button.unset_active_state ();
 		play_selection_button.unset_active_state ();
 		roll_button.unset_active_state ();
-		stop_button.set_active_state (Gtkmm2ext::Active);
+		stop_button.set_active_state (Gtkmm2ext::ExplicitActive);
 		return;
 	}
 
@@ -1943,37 +1943,37 @@ ARDOUR_UI::map_transport_state ()
 
 		if (_session->get_play_range()) {
 
-			play_selection_button.set_active_state (Gtkmm2ext::Active);
+			play_selection_button.set_active_state (Gtkmm2ext::ExplicitActive);
 			roll_button.unset_active_state ();
 			auto_loop_button.unset_active_state ();
 
 		} else if (_session->get_play_loop ()) {
 
-			auto_loop_button.set_active_state (Gtkmm2ext::Active);
-			play_selection_button.unset_active_state ();
-			roll_button.unset_active_state ();
+			auto_loop_button.set_active (true);
+			play_selection_button.set_active (false);
+			roll_button.set_active (false);
 
 		} else {
 
-			roll_button.set_active_state (Gtkmm2ext::Active);
-			play_selection_button.unset_active_state ();
-			auto_loop_button.unset_active_state ();
+			roll_button.set_active (true);
+			play_selection_button.set_active (false);
+			auto_loop_button.set_active (false);
 		}
 
 		if (Config->get_always_play_range()) {
 			/* light up both roll and play-selection if they are joined */
-			roll_button.set_active_state (Gtkmm2ext::Active);
-			play_selection_button.set_active_state (Gtkmm2ext::Active);
+			roll_button.set_active (true);
+			play_selection_button.set_active (true);
 		}
 
-		stop_button.unset_active_state ();
+		stop_button.set_active (false);
 
 	} else {
 
-		stop_button.set_active_state (Gtkmm2ext::Active);
-		roll_button.unset_active_state ();
-		play_selection_button.unset_active_state ();
-		auto_loop_button.unset_active_state ();
+		stop_button.set_active (true);
+		roll_button.set_active (false);
+		play_selection_button.set_active (false);
+		auto_loop_button.set_active (false);
 		update_disk_space ();
 	}
 }
@@ -2384,12 +2384,12 @@ ARDOUR_UI::transport_rec_enable_blink (bool onoff)
 
 	if (r == Session::Enabled || (r == Session::Recording && !h)) {
 		if (onoff) {
-			rec_button.set_active_state (Active);
+			rec_button.set_active_state (Gtkmm2ext::ExplicitActive);
 		} else {
-			rec_button.set_active_state (Mid);
+			rec_button.set_active_state (Gtkmm2ext::ImplicitActive);
 		}
 	} else if (r == Session::Recording && h) {
-		rec_button.set_active_state (Mid);
+		rec_button.set_active_state (Gtkmm2ext::ImplicitActive);
 	} else {
 		rec_button.unset_active_state ();
 	}
@@ -3600,7 +3600,7 @@ ARDOUR_UI::step_edit_status_change (bool yn)
 	// we make insensitive
 
 	if (yn) {
-		rec_button.set_active_state (Mid);
+		rec_button.set_active_state (Gtkmm2ext::ImplicitActive);
 		rec_button.set_sensitive (false);
 	} else {
 		rec_button.unset_active_state ();;

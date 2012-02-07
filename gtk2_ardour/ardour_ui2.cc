@@ -261,7 +261,7 @@ ARDOUR_UI::setup_transport ()
 	click_button.set_name ("transport active option button");
 	sync_button.set_name ("transport active option button");
 
-	stop_button.set_active_state (Active);
+	stop_button.set_active (true);
 
 	goto_start_button.set_image (get_icon (X_("transport_start")));
 	goto_end_button.set_image (get_icon (X_("transport_end")));

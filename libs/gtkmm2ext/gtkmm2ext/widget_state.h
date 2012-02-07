@@ -8,12 +8,14 @@ namespace Gtkmm2ext {
 	*/
 
 	enum ActiveState {
-		Active = 1,
-		Mid,
+		Off,
+		ExplicitActive,
+		ImplicitActive,
 	};
 	
 	enum VisualState {
 		/* these can be OR-ed together */
+		NoVisualState = 0x0,
 		Selected = 0x1,
 		Prelight = 0x2,
 		Insensitive = 0x4,

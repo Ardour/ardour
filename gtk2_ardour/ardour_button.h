@@ -114,7 +114,8 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 	int   _corner_mask;
 
 	cairo_pattern_t* edge_pattern;
-	cairo_pattern_t* fill_pattern;
+	cairo_pattern_t* active_pattern;
+	cairo_pattern_t* inactive_pattern;
 	cairo_pattern_t* led_inset_pattern;
 	cairo_pattern_t* reflection_pattern;
 
@@ -129,6 +130,11 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 	double led_g;
 	double led_b;
 	double led_a;
+
+	double active_r;
+	double active_g;
+	double active_b;
+	double active_a;
 
 	bool _act_on_release;
 	bool _led_left;
@@ -145,6 +151,9 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 	void action_sensitivity_changed ();
 	void action_visibility_changed ();
 	void action_tooltip_changed ();
+
+	static cairo_pattern_t* mid_mask;
+	static void create_mid_mask ();
 };
 
 #endif /* __gtk2_ardour_ardour_button_h__ */

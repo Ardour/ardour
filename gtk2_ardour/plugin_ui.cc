@@ -481,13 +481,7 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 
 	bypass_button.set_name ("plugin bypass button");
 	bypass_button.set_text (_("Bypass"));
-
-	if (!pi->active()) {
-		bypass_button.set_active_state (Gtkmm2ext::Active);
-	} else {
-		bypass_button.unset_active_state ();
-	}
-
+	bypass_button.set_active (!pi->active());
 	bypass_button.signal_button_release_event().connect (sigc::mem_fun(*this, &PlugUIBase::bypass_button_release));
 	focus_button.add_events (Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK);
 
@@ -567,11 +561,7 @@ PlugUIBase::processor_active_changed (boost::weak_ptr<Processor> weak_p)
 	boost::shared_ptr<Processor> p (weak_p.lock());
 
 	if (p) {
-		if (!p->active()) {
-			bypass_button.set_active_state (Gtkmm2ext::Active);
-		} else {
-			bypass_button.unset_active_state ();
-		}
+		bypass_button.set_active (!p->active());
 	}
 }
 
