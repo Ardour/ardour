@@ -4066,8 +4066,11 @@ void
 NoteDrag::finished (GdkEvent* ev, bool moved)
 {
 	if (!moved) {
-		if (_editor->current_mouse_mode() == Editing::MouseObject) {
-
+		/* no motion - select note */
+		
+		if (_editor->current_mouse_mode() == Editing::MouseObject ||
+		    _editor->current_mouse_mode() == Editing::MouseDraw) {
+			
 			if (_was_selected) {
 				bool add = Keyboard::modifier_state_equals (ev->button.state, Keyboard::PrimaryModifier);
 				if (add) {
