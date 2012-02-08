@@ -22,7 +22,6 @@
 #define __gtk2_ardour_canvas_noevent_text_h__
 
 #include <libgnomecanvasmm/text.h>
-#include <libgnomecanvasmm/text.h>
 
 namespace Gnome { namespace Canvas {
 
