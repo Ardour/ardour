@@ -819,16 +819,6 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			}
 			break;
 
-		case NoteItem:
-			if (internal_editing()) {
-				/* trim notes if we're in internal edit mode and near the ends of the note */
-				ArdourCanvas::CanvasNote* cn = dynamic_cast<ArdourCanvas::CanvasNote*> (item);
-				if (cn && cn->big_enough_to_trim() && cn->mouse_near_ends()) {
-					_drags->set (new NoteResizeDrag (this, item), event, current_canvas_cursor);
-				} 
-			}
-			return true;
-
 		case StreamItem:
 			if (internal_editing()) {
 				if (dynamic_cast<MidiTimeAxisView*> (clicked_axisview)) {
