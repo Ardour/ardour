@@ -33,6 +33,7 @@
 #include "ardour_ui.h"
 #include "global_signals.h"
 #include "canvas-noevent-text.h"
+#include "canvas-noevent-rect.h"
 #include "streamview.h"
 #include "region_view.h"
 #include "automation_region_view.h"
@@ -238,7 +239,7 @@ RegionView::set_silent_frames (const AudioIntervalResult& silences, double /*thr
 
 	for (AudioIntervalResult::const_iterator i = silences.begin(); i != silences.end(); ++i) {
 
-		ArdourCanvas::SimpleRect* cr = new ArdourCanvas::SimpleRect (*group);
+		ArdourCanvas::SimpleRect* cr = new ArdourCanvas::NoEventSimpleRect (*group);
 		_silent_frames.push_back (cr);
 
 		/* coordinates for the rect are relative to the regionview origin */
@@ -796,7 +797,7 @@ RegionView::update_coverage_frames (LayerDisplay d)
 
 		/* start off any new rect, if required */
 		if (cr == 0 || me != new_me) {
-			cr = new ArdourCanvas::SimpleRect (*group);
+			cr = new ArdourCanvas::NoEventSimpleRect (*group);
 			_coverage_frames.push_back (cr);
 			cr->property_x1() = trackview.editor().frame_to_pixel (t - position);
 			cr->property_y1() = 1;
