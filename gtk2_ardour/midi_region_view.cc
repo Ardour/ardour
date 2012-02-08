@@ -3067,7 +3067,7 @@ MidiRegionView::note_mouse_position (float x_fraction, float /*y_fraction*/, boo
 {
 	Editor* editor = dynamic_cast<Editor*>(&trackview.editor());
 	Editing::MouseMode mm = editor->current_mouse_mode();
-	bool trimmable = (mm == MouseObject || mm == MouseTimeFX || mm == MouseRange);
+	bool trimmable = (mm == MouseObject || mm == MouseTimeFX || mm == MouseDraw);
 
 	if (trimmable && x_fraction > 0.0 && x_fraction < 0.2) {
 		editor->set_canvas_cursor (editor->cursors()->left_side_trim);
