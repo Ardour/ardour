@@ -473,7 +473,10 @@ Editor::register_actions ()
 	ActionManager::register_radio_action (editor_actions, snap_mode_group, X_("snap-magnetic"), _("Magnetic"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_mode_chosen), Editing::SnapMagnetic)));
 
 	ActionManager::register_action (editor_actions, X_("cycle-snap-mode"), _("Next Snap Mode"), sigc::mem_fun (*this, &Editor::cycle_snap_mode));
-	ActionManager::register_action (editor_actions, X_("cycle-snap-choice"), _("Next Snap Choice"), sigc::mem_fun (*this, &Editor::cycle_snap_choice));
+	ActionManager::register_action (editor_actions, X_("next-snap-choice"), _("Next Snap Choice"), sigc::mem_fun (*this, &Editor::next_snap_choice));
+	ActionManager::register_action (editor_actions, X_("next-snap-choice-music-only"), _("Next Musical Snap Choice"), sigc::mem_fun (*this, &Editor::next_snap_choice_music_only));
+	ActionManager::register_action (editor_actions, X_("prev-snap-choice"), _("Previous Snap Choice"), sigc::mem_fun (*this, &Editor::prev_snap_choice));
+	ActionManager::register_action (editor_actions, X_("prev-snap-choice-music-only"), _("Previous Musical Snap Choice"), sigc::mem_fun (*this, &Editor::prev_snap_choice_music_only));
 
 	Glib::RefPtr<ActionGroup> snap_actions = ActionGroup::create (X_("Snap"));
 	RadioAction::Group snap_choice_group;
@@ -853,7 +856,7 @@ Editor::snap_type_action (SnapType type)
 }
 
 void
-Editor::cycle_snap_choice()
+Editor::next_snap_choice ()
 {
 	switch (_snap_type) {
 	case Editing::SnapToCDFrame:
@@ -939,6 +942,239 @@ Editor::cycle_snap_choice()
 		break;
 	case Editing::SnapToRegionBoundary:
 		set_snap_to (Editing::SnapToCDFrame);
+		break;
+	}
+}
+
+void
+Editor::prev_snap_choice ()
+{
+	switch (_snap_type) {
+	case Editing::SnapToCDFrame:
+		set_snap_to (Editing::SnapToTimecodeFrame);
+		break;
+	case Editing::SnapToTimecodeFrame:
+		set_snap_to (Editing::SnapToTimecodeSeconds);
+		break;
+	case Editing::SnapToTimecodeSeconds:
+		set_snap_to (Editing::SnapToTimecodeMinutes);
+		break;
+	case Editing::SnapToTimecodeMinutes:
+		set_snap_to (Editing::SnapToSeconds);
+		break;
+	case Editing::SnapToSeconds:
+		set_snap_to (Editing::SnapToMinutes);
+		break;
+	case Editing::SnapToMinutes:
+		set_snap_to (Editing::SnapToBeatDiv32);
+		break;
+	case Editing::SnapToBeatDiv32:
+		set_snap_to (Editing::SnapToBeatDiv28);
+		break;
+	case Editing::SnapToBeatDiv28:
+		set_snap_to (Editing::SnapToBeatDiv24);
+		break;
+	case Editing::SnapToBeatDiv24:
+		set_snap_to (Editing::SnapToBeatDiv20);
+		break;
+	case Editing::SnapToBeatDiv20:
+		set_snap_to (Editing::SnapToBeatDiv16);
+		break;
+	case Editing::SnapToBeatDiv16:
+		set_snap_to (Editing::SnapToBeatDiv14);
+		break;
+	case Editing::SnapToBeatDiv14:
+		set_snap_to (Editing::SnapToBeatDiv12);
+		break;
+	case Editing::SnapToBeatDiv12:
+		set_snap_to (Editing::SnapToBeatDiv10);
+		break;
+	case Editing::SnapToBeatDiv10:
+		set_snap_to (Editing::SnapToBeatDiv8);
+		break;
+	case Editing::SnapToBeatDiv8:
+		set_snap_to (Editing::SnapToBeatDiv7);
+		break;
+	case Editing::SnapToBeatDiv7:
+		set_snap_to (Editing::SnapToBeatDiv6);
+		break;
+	case Editing::SnapToBeatDiv6:
+		set_snap_to (Editing::SnapToBeatDiv5);
+		break;
+	case Editing::SnapToBeatDiv5:
+		set_snap_to (Editing::SnapToBeatDiv4);
+		break;
+	case Editing::SnapToBeatDiv4:
+		set_snap_to (Editing::SnapToBeatDiv3);
+		break;
+	case Editing::SnapToBeatDiv3:
+		set_snap_to (Editing::SnapToBeatDiv2);
+		break;
+	case Editing::SnapToBeatDiv2:
+		set_snap_to (Editing::SnapToBeat);
+		break;
+	case Editing::SnapToBeat:
+		set_snap_to (Editing::SnapToBar);
+		break;
+	case Editing::SnapToBar:
+		set_snap_to (Editing::SnapToMark);
+		break;
+	case Editing::SnapToMark:
+		set_snap_to (Editing::SnapToRegionStart);
+		break;
+	case Editing::SnapToRegionStart:
+		set_snap_to (Editing::SnapToRegionEnd);
+		break;
+	case Editing::SnapToRegionEnd:
+		set_snap_to (Editing::SnapToRegionSync);
+		break;
+	case Editing::SnapToRegionSync:
+		set_snap_to (Editing::SnapToRegionBoundary);
+		break;
+	case Editing::SnapToRegionBoundary:
+		set_snap_to (Editing::SnapToCDFrame);
+		break;
+	}
+}
+
+void
+Editor::next_snap_choice_music_only ()
+{
+	switch (_snap_type) {
+	case Editing::SnapToMark:
+	case Editing::SnapToRegionStart:
+	case Editing::SnapToRegionEnd:
+	case Editing::SnapToRegionSync:
+	case Editing::SnapToRegionBoundary:
+	case Editing::SnapToCDFrame:
+	case Editing::SnapToTimecodeFrame:
+	case Editing::SnapToTimecodeSeconds:
+	case Editing::SnapToTimecodeMinutes:
+	case Editing::SnapToSeconds:
+	case Editing::SnapToMinutes:
+		set_snap_to (Editing::SnapToBeatDiv32);
+		break;
+	case Editing::SnapToBeatDiv32:
+		set_snap_to (Editing::SnapToBeatDiv28);
+		break;
+	case Editing::SnapToBeatDiv28:
+		set_snap_to (Editing::SnapToBeatDiv24);
+		break;
+	case Editing::SnapToBeatDiv24:
+		set_snap_to (Editing::SnapToBeatDiv20);
+		break;
+	case Editing::SnapToBeatDiv20:
+		set_snap_to (Editing::SnapToBeatDiv16);
+		break;
+	case Editing::SnapToBeatDiv16:
+		set_snap_to (Editing::SnapToBeatDiv14);
+		break;
+	case Editing::SnapToBeatDiv14:
+		set_snap_to (Editing::SnapToBeatDiv12);
+		break;
+	case Editing::SnapToBeatDiv12:
+		set_snap_to (Editing::SnapToBeatDiv10);
+		break;
+	case Editing::SnapToBeatDiv10:
+		set_snap_to (Editing::SnapToBeatDiv8);
+		break;
+	case Editing::SnapToBeatDiv8:
+		set_snap_to (Editing::SnapToBeatDiv7);
+		break;
+	case Editing::SnapToBeatDiv7:
+		set_snap_to (Editing::SnapToBeatDiv6);
+		break;
+	case Editing::SnapToBeatDiv6:
+		set_snap_to (Editing::SnapToBeatDiv5);
+		break;
+	case Editing::SnapToBeatDiv5:
+		set_snap_to (Editing::SnapToBeatDiv4);
+		break;
+	case Editing::SnapToBeatDiv4:
+		set_snap_to (Editing::SnapToBeatDiv3);
+		break;
+	case Editing::SnapToBeatDiv3:
+		set_snap_to (Editing::SnapToBeatDiv2);
+		break;
+	case Editing::SnapToBeatDiv2:
+		set_snap_to (Editing::SnapToBeat);
+		break;
+	case Editing::SnapToBeat:
+		set_snap_to (Editing::SnapToBar);
+		break;
+	case Editing::SnapToBar:
+		set_snap_to (Editing::SnapToBeatDiv32);
+		break;
+	}
+}
+
+void
+Editor::prev_snap_choice_music_only ()
+{
+	switch (_snap_type) {
+	case Editing::SnapToMark:
+	case Editing::SnapToRegionStart:
+	case Editing::SnapToRegionEnd:
+	case Editing::SnapToRegionSync:
+	case Editing::SnapToRegionBoundary:
+	case Editing::SnapToCDFrame:
+	case Editing::SnapToTimecodeFrame:
+	case Editing::SnapToTimecodeSeconds:
+	case Editing::SnapToTimecodeMinutes:
+	case Editing::SnapToSeconds:
+	case Editing::SnapToMinutes:
+		set_snap_to (Editing::SnapToBar);
+		break;
+	case Editing::SnapToBeatDiv32:
+		set_snap_to (Editing::SnapToBeat);
+		break;
+	case Editing::SnapToBeatDiv28:
+		set_snap_to (Editing::SnapToBeatDiv32);
+		break;
+	case Editing::SnapToBeatDiv24:
+		set_snap_to (Editing::SnapToBeatDiv28);
+		break;
+	case Editing::SnapToBeatDiv20:
+		set_snap_to (Editing::SnapToBeatDiv24);
+		break;
+	case Editing::SnapToBeatDiv16:
+		set_snap_to (Editing::SnapToBeatDiv20);
+		break;
+	case Editing::SnapToBeatDiv14:
+		set_snap_to (Editing::SnapToBeatDiv16);
+		break;
+	case Editing::SnapToBeatDiv12:
+		set_snap_to (Editing::SnapToBeatDiv14);
+		break;
+	case Editing::SnapToBeatDiv10:
+		set_snap_to (Editing::SnapToBeatDiv12);
+		break;
+	case Editing::SnapToBeatDiv8:
+		set_snap_to (Editing::SnapToBeatDiv10);
+		break;
+	case Editing::SnapToBeatDiv7:
+		set_snap_to (Editing::SnapToBeatDiv8);
+		break;
+	case Editing::SnapToBeatDiv6:
+		set_snap_to (Editing::SnapToBeatDiv7);
+		break;
+	case Editing::SnapToBeatDiv5:
+		set_snap_to (Editing::SnapToBeatDiv6);
+		break;
+	case Editing::SnapToBeatDiv4:
+		set_snap_to (Editing::SnapToBeatDiv5);
+		break;
+	case Editing::SnapToBeatDiv3:
+		set_snap_to (Editing::SnapToBeatDiv4);
+		break;
+	case Editing::SnapToBeatDiv2:
+		set_snap_to (Editing::SnapToBeatDiv3);
+		break;
+	case Editing::SnapToBeat:
+		set_snap_to (Editing::SnapToBeatDiv2);
+		break;
+	case Editing::SnapToBar:
+		set_snap_to (Editing::SnapToBeat);
 		break;
 	}
 }

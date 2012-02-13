@@ -2705,16 +2705,29 @@ Editor::escape ()
 void
 Editor::set_internal_edit (bool yn)
 {
+	if (_internal_editing == yn) {
+		return;
+	}
+
 	_internal_editing = yn;
 	
 	if (yn) {
                 pre_internal_mouse_mode = mouse_mode;
+		pre_internal_snap_type = _snap_type;
+		pre_internal_snap_mode = _snap_mode;
 
                 for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
                         (*i)->enter_internal_edit_mode ();
                 }
 
+		set_snap_to (internal_snap_type);
+		set_snap_mode (internal_snap_mode);
+
 	} else {
+
+		internal_snap_mode = _snap_mode;
+		internal_snap_type = _snap_type;
+
                 for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
                         (*i)->leave_internal_edit_mode ();
                 }
@@ -2723,6 +2736,9 @@ Editor::set_internal_edit (bool yn)
                         /* we were drawing .. flip back to something sensible */
                         set_mouse_mode (pre_internal_mouse_mode);
                 }
+
+		set_snap_to (pre_internal_snap_type);
+		set_snap_mode (pre_internal_snap_mode);
 	}
 	
 	set_canvas_cursor ();

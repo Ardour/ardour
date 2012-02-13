@@ -329,10 +329,13 @@ This mode provides many different operations on both regions and control points,
 ;; numbers
 
 @eep|Editor/cycle-snap-mode|2|cycle to next grid snap mode
-@eep|Editor/cycle-snap-choice|3|cycle to next grid unit
-@trans|Editor/step-mouse-mode|4|toggle auto play
-@trans|Transport/ToggleAutoReturn|5|toggle auto return
-@trans|Transport/ToggleClick|6|toggle auto input
+@eep|Editor/prev-snap-choice|3|use next grid unit
+@eep|Editor/prev-snap-choice-music-only|<@PRIMARY@>3|use previous grid unit
+@eep|Editor/next-snap-choice|4|use next grid unit
+@eep|Editor/next-snap-choice-music-only|<@PRIMARY@>4|use next musical grid unit
+@trans|Transport/ToggleAutoPlay|5|toggle auto play
+@trans|Transport/ToggleAutoReturn|6|toggle auto return
+@trans|Transport/ToggleClick|7|toggle click (metronome)
 @ranges|Editor/set-tempo-from-region|9|set tempo (1 bar) from region(s)
 @ranges|Editor/set-tempo-from-edit-range|0|set tempo (1 bar) from edit range
 

@@ -41,6 +41,9 @@ setup_gtk_ardour_enums ()
 	EditPoint edit_point;
 	LayerDisplay layer_display;
 	RegionListSortType region_list_sort_type;
+	SnapType snap_type;
+	SnapMode snap_mode;
+	ZoomFocus zoom_focus;
 
 #define REGISTER(e) enum_writer.register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_BITS(e) enum_writer.register_bits (typeid(e).name(), i, s); i.clear(); s.clear()
@@ -83,4 +86,47 @@ setup_gtk_ardour_enums ()
 	REGISTER_ENUM (ByStartInFile);
 	REGISTER_ENUM (ByTimestamp);
 	REGISTER (region_list_sort_type);
+
+	REGISTER_ENUM (SnapToCDFrame);
+	REGISTER_ENUM (SnapToTimecodeFrame);
+	REGISTER_ENUM (SnapToTimecodeSeconds);
+	REGISTER_ENUM (SnapToTimecodeMinutes);
+	REGISTER_ENUM (SnapToSeconds);
+	REGISTER_ENUM (SnapToMinutes);
+	REGISTER_ENUM (SnapToBeatDiv32);
+	REGISTER_ENUM (SnapToBeatDiv28);
+	REGISTER_ENUM (SnapToBeatDiv24);
+	REGISTER_ENUM (SnapToBeatDiv20);
+	REGISTER_ENUM (SnapToBeatDiv16);
+	REGISTER_ENUM (SnapToBeatDiv14);
+	REGISTER_ENUM (SnapToBeatDiv12);
+	REGISTER_ENUM (SnapToBeatDiv10);
+	REGISTER_ENUM (SnapToBeatDiv8);
+	REGISTER_ENUM (SnapToBeatDiv7);
+	REGISTER_ENUM (SnapToBeatDiv6);
+	REGISTER_ENUM (SnapToBeatDiv5);
+	REGISTER_ENUM (SnapToBeatDiv4);
+	REGISTER_ENUM (SnapToBeatDiv3);
+	REGISTER_ENUM (SnapToBeatDiv2);
+	REGISTER_ENUM (SnapToBeat);
+	REGISTER_ENUM (SnapToBar);
+	REGISTER_ENUM (SnapToMark);
+	REGISTER_ENUM (SnapToRegionStart);
+	REGISTER_ENUM (SnapToRegionEnd);
+	REGISTER_ENUM (SnapToRegionSync);
+	REGISTER_ENUM (SnapToRegionBoundary);
+	REGISTER (snap_type);
+
+	REGISTER_ENUM (SnapOff);
+	REGISTER_ENUM (SnapNormal);
+	REGISTER_ENUM (SnapMagnetic);
+	REGISTER (snap_mode);
+
+	REGISTER_ENUM (ZoomFocusLeft);
+	REGISTER_ENUM (ZoomFocusRight);
+	REGISTER_ENUM (ZoomFocusCenter);
+	REGISTER_ENUM (ZoomFocusPlayhead);
+	REGISTER_ENUM (ZoomFocusMouse);
+	REGISTER_ENUM (ZoomFocusEdit);
+	REGISTER (zoom_focus);
 }

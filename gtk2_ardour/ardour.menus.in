@@ -373,7 +373,10 @@
         <menuitem action='snap-magnetic'/>
         <separator/>
         <menuitem action='cycle-snap-mode'/>
-        <menuitem action='cycle-snap-choice'/>
+        <menuitem action='next-snap-choice'/>
+        <menuitem action='prev-snap-choice'/>
+        <menuitem action='next-snap-choice-music-only'/>
+        <menuitem action='prev-snap-choice-music-only'/>
       </menu>
       <menu name='SnapTo' action='SnapTo'>
         <menuitem action='snap-to-cd-frame'/>

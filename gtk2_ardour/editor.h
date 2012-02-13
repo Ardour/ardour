@@ -169,7 +169,12 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	}
 
 	void cycle_snap_mode ();
-	void cycle_snap_choice ();
+	void next_snap_choice ();
+	void next_snap_choice_music_only ();
+	void next_snap_choice_music_and_time ();
+	void prev_snap_choice ();
+	void prev_snap_choice_music_only ();
+	void prev_snap_choice_music_and_time ();
 	void set_snap_to (Editing::SnapType);
 	void set_snap_mode (Editing::SnapMode);
 	void set_snap_threshold (double pixel_distance) {snap_threshold = pixel_distance;}
@@ -512,6 +517,10 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	Editing::MouseMode mouse_mode;
 	Editing::MouseMode pre_internal_mouse_mode;
+	Editing::SnapType  pre_internal_snap_type;
+	Editing::SnapMode  pre_internal_snap_mode;
+	Editing::SnapType  internal_snap_type;
+	Editing::SnapMode  internal_snap_mode;
 	bool _internal_editing;
 	Editing::MouseMode effective_mouse_mode () const;
 

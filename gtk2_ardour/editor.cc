@@ -647,6 +647,10 @@ Editor::Editor ()
 	set_snap_mode (_snap_mode);
 	set_mouse_mode (MouseObject, true);
         pre_internal_mouse_mode = MouseObject;
+        pre_internal_snap_type = _snap_type;
+        pre_internal_snap_mode = _snap_mode;
+        internal_snap_type = _snap_type;
+        internal_snap_mode = _snap_mode;
 	set_edit_point_preference (EditAtMouse, true);
 
 	_playlist_selector = new PlaylistSelector();
@@ -2222,7 +2226,7 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 	}
 
 	if ((prop = node.property ("zoom-focus"))) {
-		set_zoom_focus ((ZoomFocus) atoi (prop->value()));
+		set_zoom_focus ((ZoomFocus) string_2_enum (prop->value(), zoom_focus));
 	}
 
 	if ((prop = node.property ("zoom"))) {
@@ -2232,11 +2236,27 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 	}
 
 	if ((prop = node.property ("snap-to"))) {
-		set_snap_to ((SnapType) atoi (prop->value()));
+		set_snap_to ((SnapType) string_2_enum (prop->value(), _snap_type));
 	}
 
 	if ((prop = node.property ("snap-mode"))) {
-		set_snap_mode ((SnapMode) atoi (prop->value()));
+		set_snap_mode ((SnapMode) string_2_enum (prop->value(), _snap_mode));
+	}
+
+	if ((prop = node.property ("internal-snap-to"))) {
+		internal_snap_type = (SnapType) string_2_enum (prop->value(), internal_snap_type);
+	}
+
+	if ((prop = node.property ("internal-snap-mode"))) {
+		internal_snap_mode = (SnapMode) string_2_enum (prop->value(), internal_snap_mode);
+	}
+
+	if ((prop = node.property ("pre-internal-snap-to"))) {
+		pre_internal_snap_type = (SnapType) string_2_enum (prop->value(), pre_internal_snap_type);
+	}
+
+	if ((prop = node.property ("pre-internal-snap-mode"))) {
+		pre_internal_snap_mode = (SnapMode) string_2_enum (prop->value(), pre_internal_snap_mode);
 	}
 
 	if ((prop = node.property ("mouse-mode"))) {
@@ -2420,15 +2440,15 @@ Editor::get_state ()
 
 	maybe_add_mixer_strip_width (*node);
 
-	snprintf (buf, sizeof(buf), "%d", (int) zoom_focus);
-	node->add_property ("zoom-focus", buf);
+	node->add_property ("zoom-focus", enum_2_string (zoom_focus));
 	snprintf (buf, sizeof(buf), "%f", frames_per_unit);
 	node->add_property ("zoom", buf);
-	snprintf (buf, sizeof(buf), "%d", (int) _snap_type);
-	node->add_property ("snap-to", buf);
-	snprintf (buf, sizeof(buf), "%d", (int) _snap_mode);
-	node->add_property ("snap-mode", buf);
-
+	node->add_property ("snap-to", enum_2_string (_snap_type));
+	node->add_property ("snap-mode", enum_2_string (_snap_mode));
+	node->add_property ("internal-snap-to", enum_2_string (internal_snap_type));
+	node->add_property ("internal-snap-mode", enum_2_string (internal_snap_mode));
+	node->add_property ("pre-internal-snap-to", enum_2_string (pre_internal_snap_type));
+	node->add_property ("pre-internal-snap-mode", enum_2_string (pre_internal_snap_mode));
 	node->add_property ("edit-point", enum_2_string (_edit_point));
 
 	snprintf (buf, sizeof (buf), "%" PRIi64, playhead_cursor->current_frame);
