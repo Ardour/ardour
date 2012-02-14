@@ -385,6 +385,8 @@
         <menuitem action='snap-to-timecode-minutes'/>
         <menuitem action='snap-to-seconds'/>
         <menuitem action='snap-to-minutes'/>
+        <menuitem action='snap-to-onetwentyeighths'/>
+        <menuitem action='snap-to-sixtyfourths'/>
         <menuitem action='snap-to-thirtyseconds'/>
         <menuitem action='snap-to-twentyeighths'/>
         <menuitem action='snap-to-twentyfourths'/>

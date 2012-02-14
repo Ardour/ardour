@@ -93,6 +93,8 @@ setup_gtk_ardour_enums ()
 	REGISTER_ENUM (SnapToTimecodeMinutes);
 	REGISTER_ENUM (SnapToSeconds);
 	REGISTER_ENUM (SnapToMinutes);
+	REGISTER_ENUM (SnapToBeatDiv128);
+	REGISTER_ENUM (SnapToBeatDiv64);
 	REGISTER_ENUM (SnapToBeatDiv32);
 	REGISTER_ENUM (SnapToBeatDiv28);
 	REGISTER_ENUM (SnapToBeatDiv24);

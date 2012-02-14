@@ -1221,6 +1221,14 @@ Editor::compute_bbt_ruler_scale (framepos_t lower, framepos_t upper)
                 bbt_beat_subdivision = 32;
 		bbt_accent_modulo = 8;
 		break;
+	case SnapToBeatDiv64:
+                bbt_beat_subdivision = 64;
+		bbt_accent_modulo = 8;
+		break;
+	case SnapToBeatDiv128:
+                bbt_beat_subdivision = 128;
+		bbt_accent_modulo = 8;
+		break;
 	default:
                 bbt_beat_subdivision = 4;
 		break;

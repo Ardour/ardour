@@ -151,6 +151,8 @@ static const gchar *_snap_type_strings[] = {
 	N_("Timecode Minutes"),
 	N_("Seconds"),
 	N_("Minutes"),
+	N_("Beats/128"),
+	N_("Beats/64"),
 	N_("Beats/32"),
 	N_("Beats/28"),
 	N_("Beats/24"),
@@ -2068,6 +2070,8 @@ Editor::set_snap_to (SnapType st)
 	instant_save ();
 
 	switch (_snap_type) {
+	case SnapToBeatDiv128:
+	case SnapToBeatDiv64:
 	case SnapToBeatDiv32:
 	case SnapToBeatDiv28:
 	case SnapToBeatDiv24:
@@ -2655,6 +2659,12 @@ Editor::snap_to_internal (framepos_t& start, int32_t direction, bool for_mark)
 		start = _session->tempo_map().round_to_beat (start, direction);
 		break;
 
+	case SnapToBeatDiv128:
+		start = _session->tempo_map().round_to_beat_subdivision (start, 128, direction);
+		break;
+	case SnapToBeatDiv64:
+		start = _session->tempo_map().round_to_beat_subdivision (start, 64, direction);
+		break;
 	case SnapToBeatDiv32:
 		start = _session->tempo_map().round_to_beat_subdivision (start, 32, direction);
 		break;
@@ -3371,6 +3381,10 @@ Editor::snap_type_selection_done ()
 		snaptype = SnapToBeatDiv28;
 	} else if (choice == _("Beats/32")) {
 		snaptype = SnapToBeatDiv32;
+	} else if (choice == _("Beats/64")) {
+		snaptype = SnapToBeatDiv64;
+	} else if (choice == _("Beats/128")) {
+		snaptype = SnapToBeatDiv128;
 	} else if (choice == _("Beats")) {
 		snaptype = SnapToBeat;
 	} else if (choice == _("Bars")) {
@@ -3778,6 +3792,12 @@ Editor::get_grid_type_as_beats (bool& success, framepos_t position)
 		return 1.0;
 		break;
 
+	case SnapToBeatDiv128:
+		return 1.0/128.0;
+		break;
+	case SnapToBeatDiv64:
+		return 1.0/64.0;
+		break;
 	case SnapToBeatDiv32:
 		return 1.0/32.0;
 		break;
