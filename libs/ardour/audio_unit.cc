@@ -1494,7 +1494,11 @@ AUPlugin::automatable() const
 string
 AUPlugin::describe_parameter (uint32_t param)
 {
-	return descriptors[param].label;
+        if (param < descriptors.size()) {
+                return descriptors[param].label;
+        } else {
+                return "??";
+        }
 }
 
 void
