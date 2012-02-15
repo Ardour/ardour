@@ -1484,6 +1484,8 @@ Editor::parameter_changed (std::string p)
 				tact->set_active (s);
 			}
 		}
+	} else if (p == "show-region-gain") {
+		set_gain_envelope_visibility (Config->get_show_region_gain ());
 	}
 }
 
@@ -1683,13 +1685,6 @@ Editor::register_region_actions ()
 	reg_sens (_region_actions, "reset-region-gain-envelopes", _("Reset Envelope"), sigc::mem_fun (*this, &Editor::reset_region_gain_envelopes));
 
 	reg_sens (_region_actions, "reset-region-scale-amplitude", _("Reset Gain"), sigc::mem_fun (*this, &Editor::reset_region_scale_amplitude));
-
-	toggle_reg_sens (
-		_region_actions,
-		"toggle-region-gain-envelope-visible",
-		_("Envelope Visible"),
-		sigc::mem_fun (*this, &Editor::toggle_gain_envelope_visibility)
-		);
 
 	toggle_reg_sens (
 		_region_actions,

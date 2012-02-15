@@ -1055,6 +1055,14 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_show_waveforms)
 		     ));
 
+	add_option (_("Editor"),
+	     new BoolOption (
+		     "show-region-gain-envelopes",
+		     _("Show gain envelopes in audio regions"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_show_region_gain),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_show_region_gain)
+		     ));
+
 	ComboOption<WaveformScale>* wfs = new ComboOption<WaveformScale> (
 		"waveform-scale",
 		_("Waveform scale"),

@@ -1071,8 +1071,6 @@ Editor::sensitize_the_right_region_actions ()
 	bool have_opaque = false;
 	bool have_non_opaque = false;
 	bool have_not_at_natural_position = false;
-	bool have_envelope_visible = false;
-	bool have_envelope_invisible = false;
 	bool have_envelope_active = false;
 	bool have_envelope_inactive = false;
 	bool have_non_unity_scale_amplitude = false;
@@ -1127,24 +1125,6 @@ Editor::sensitize_the_right_region_actions ()
 		}
 
 		if (ar) {
-			/* its a bit unfortunate that "envelope visible" is a view-only
-			   property. we have to find the regionview to able to check
-			   its current setting.
-			*/
-
-			have_envelope_invisible = false;
-
-			if (*i) {
-				AudioRegionView* arv = dynamic_cast<AudioRegionView*> (*i);
-				if (arv) {
-					if (arv->envelope_visible()) {
-						have_envelope_visible = true;
-					} else {
-						have_envelope_invisible = true;
-					}
-				}
-			}
-
 			if (ar->envelope_active()) {
 				have_envelope_active = true;
 			} else {
@@ -1204,12 +1184,6 @@ Editor::sensitize_the_right_region_actions ()
 	}
 
 	if (have_audio) {
-
-		if (have_envelope_visible && !have_envelope_invisible) {
-			Glib::RefPtr<ToggleAction>::cast_dynamic (_region_actions->get_action("toggle-region-gain-envelope-visible"))->set_active ();
-		} else if (have_envelope_visible && have_envelope_invisible) {
-			// _region_actions->get_action("toggle-region-gain-envelope-visible")->set_inconsistent ();
-		}
 
 		if (have_envelope_active && !have_envelope_inactive) {
 			Glib::RefPtr<ToggleAction>::cast_dynamic (_region_actions->get_action("toggle-region-gain-envelope-active"))->set_active ();

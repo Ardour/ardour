@@ -4723,30 +4723,27 @@ Editor::reset_region_gain_envelopes ()
 }
 
 void
-Editor::toggle_gain_envelope_visibility ()
+Editor::set_region_gain_visibility (RegionView* rv, bool yn)
 {
-	if (_ignore_region_action) {
+	AudioRegionView* arv = dynamic_cast<AudioRegionView*> (rv);
+	if (arv) {
+		arv->set_envelope_visible (yn);
+	}
+}
+
+void
+Editor::set_gain_envelope_visibility (bool yn)
+{
+	if (!_session) {
 		return;
 	}
 
-	RegionSelection rs = get_regions_from_selection_and_entered ();
-
-	if (!_session || rs.empty()) {
-		return;
-	}
-
-	_session->begin_reversible_command (_("region gain envelope visible"));
-
-	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
-		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
-		if (arv) {
-			arv->region()->clear_changes ();
-			arv->set_envelope_visible (!arv->envelope_visible());
-			_session->add_command (new StatefulDiffCommand (arv->region()));
+	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+		AudioTimeAxisView* v = dynamic_cast<AudioTimeAxisView*>(*i);
+		if (v) {
+			v->audio_view()->foreach_regionview (sigc::bind (sigc::mem_fun (this, &Editor::set_region_gain_visibility), yn));
 		}
 	}
-
-	_session->commit_reversible_command ();
 }
 
 void

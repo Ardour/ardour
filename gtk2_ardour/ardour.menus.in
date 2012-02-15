@@ -263,7 +263,6 @@
         <menuitem action='boost-region-gain'/>
         <menuitem action='cut-region-gain'/>      		   
         <menuitem action='reset-region-gain-envelopes'/>
-        <menuitem action='toggle-region-gain-envelope-visible'/>
         <menuitem action='toggle-region-gain-envelope-active'/>
       </menu>
       <menu action='RegionMenuPosition'>
@@ -653,7 +652,6 @@
       <menuitem action='boost-region-gain'/>
       <menuitem action='cut-region-gain'/>      		   
       <menuitem action='reset-region-gain-envelopes'/>
-      <menuitem action='toggle-region-gain-envelope-visible'/>
       <menuitem action='toggle-region-gain-envelope-active'/>
     </menu>
     <menu action='RegionMenuFades'>
