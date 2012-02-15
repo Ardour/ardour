@@ -65,7 +65,6 @@ static string poor_mans_glob (string path)
 ArdourStartup::ArdourStartup ()
 	: _response (RESPONSE_OK)
 	, ic_new_session_button (_("Create a new session"))
-	, ic_existing_session_button (_("Open an existing session"))
 	, monitor_via_hardware_button (_("Use an external mixer or the hardware mixer of your audio interface.\n\
 Ardour will play NO role in monitoring"))
 	, monitor_via_ardour_button (string_compose (_("Ask %1 to play back material as it is being recorded"), PROGRAM_NAME))
@@ -245,10 +244,6 @@ ArdourStartup::session_template_name ()
 	if (!load_template_override.empty()) {
 		string the_path = (ARDOUR::user_template_directory()/ (load_template_override + ".template")).to_string();
 		return the_path;
-	}
-
-	if (ic_existing_session_button.get_active()) {
-		return string();
 	}
 
 	if (use_template_button.get_active()) {
@@ -537,16 +532,18 @@ ArdourStartup::setup_initial_choice_page ()
 	ic_vbox.set_spacing (6);
 	ic_vbox.set_border_width (24);
 
-	RadioButton::Group g (ic_new_session_button.get_group());
-	ic_existing_session_button.set_group (g);
-
 	HBox* centering_hbox = manage (new HBox);
 	VBox* centering_vbox = manage (new VBox);
 
 	centering_vbox->set_spacing (6);
 
+	ic_new_session_button.set_active (true);
 	centering_vbox->pack_start (ic_new_session_button, false, true);
-	centering_vbox->pack_start (ic_existing_session_button, false, true);
+
+	Gtk::Label* l = manage (new Label);
+	l->set_markup  (_("<b>Open a recent session</b>"));
+	l->set_alignment (0.0, 0.5);
+	centering_vbox->pack_start (*l, true, true);
 
 	recent_session_model = TreeStore::create (recent_session_columns);
 	redisplay_recent_sessions ();
@@ -580,6 +577,11 @@ ArdourStartup::setup_initial_choice_page ()
 
 		centering_vbox->pack_start (recent_scroller, true, true);
 			
+		l = manage (new Label);
+		l->set_markup  (_("<b>Browse for existing sessions</b>"));
+		l->set_alignment (0.0, 0.5);
+		centering_vbox->pack_start (*l, true, true);
+
 		existing_session_chooser.set_title (_("Select session file"));
 		existing_session_chooser.signal_file_set().connect (sigc::mem_fun (*this, &ArdourStartup::existing_session_selected));
 			
@@ -587,19 +589,11 @@ ArdourStartup::setup_initial_choice_page ()
 		existing_session_chooser.add_shortcut_folder ("/Volumes");
 #endif
 			
-		HBox* hbox = manage (new HBox);
-		hbox->set_spacing (4);
-		hbox->pack_start (*manage (new Label (_("Browse:"))), PACK_SHRINK);
-		hbox->pack_start (existing_session_chooser);
-		centering_vbox->pack_start (*hbox, false, false);
-		hbox->show_all ();
+		centering_vbox->pack_start (existing_session_chooser, true, true);
 	}
 
 	ic_new_session_button.signal_button_press_event().connect(sigc::mem_fun(*this, &ArdourStartup::initial_button_press), false);
 	ic_new_session_button.signal_activate().connect(sigc::mem_fun(*this, &ArdourStartup::initial_button_activated), false);
-
-	ic_existing_session_button.signal_button_press_event().connect(sigc::mem_fun(*this, &ArdourStartup::initial_button_press), false);
-	ic_existing_session_button.signal_activate().connect(sigc::mem_fun(*this, &ArdourStartup::initial_button_activated), false);
 
 	centering_hbox->pack_start (*centering_vbox, true, true);
 
@@ -1340,7 +1334,6 @@ ArdourStartup::move_along_now ()
 void
 ArdourStartup::recent_row_activated (const Gtk::TreePath&, Gtk::TreeViewColumn*)
 {
-	ic_existing_session_button.set_active (true);
 	ic_new_session_button.set_active (false);
 	set_page_type (ic_vbox, ASSISTANT_PAGE_CONFIRM);
 	set_page_complete (ic_vbox, true);
@@ -1351,7 +1344,6 @@ void
 ArdourStartup::existing_session_selected ()
 {
 	ic_new_session_button.set_active (false);
-	ic_existing_session_button.set_active (true);
 	_existing_session_chooser_used = true;
 	set_page_type (ic_vbox, ASSISTANT_PAGE_CONFIRM);
 	set_page_complete (ic_vbox, true);

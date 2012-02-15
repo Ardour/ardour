@@ -115,8 +115,7 @@ class ArdourStartup : public Gtk::Assistant {
 
 	void setup_initial_choice_page ();
 	Gtk::VBox ic_vbox;
-	Gtk::RadioButton ic_new_session_button;
-	Gtk::RadioButton ic_existing_session_button;
+	Gtk::CheckButton ic_new_session_button;
 	bool initial_button_press(GdkEventButton *);
 	void initial_button_activated();
 
