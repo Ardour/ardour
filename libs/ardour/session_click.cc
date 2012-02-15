@@ -33,7 +33,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-Pool Session::Click::pool ("click", sizeof (Click), 128);
+Pool Session::Click::pool ("click", sizeof (Click), 1024);
 
 void
 Session::click (nframes_t start, nframes_t nframes)

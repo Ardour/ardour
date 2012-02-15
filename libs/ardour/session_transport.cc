@@ -349,7 +349,6 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 		auditioner->cancel_audition ();
 	}
 
-	clear_clicks();
 	cumulative_rf_motion = 0;
 	reset_rf_scale (0);
 
@@ -483,6 +482,8 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 		} 
 
 	}
+
+        clear_clicks ();
 
 	/* do this before seeking, because otherwise the Diskstreams will do the wrong thing in seamless loop mode.
 	*/
