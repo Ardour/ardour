@@ -182,7 +182,7 @@ KeyEditor::on_key_release_event (GdkEventKey* ev)
 			known = ActionManager::lookup_entry (path, key);
 			
 			if (known) {
-				(*i)[columns.binding] = ActionManager::ui_manager->get_accel_group()->name (key.get_key(), Gdk::ModifierType (key.get_mod()));
+				(*i)[columns.binding] = ActionManager::ui_manager->get_accel_group()->get_label (key.get_key(), Gdk::ModifierType (key.get_mod()));
 			} else {
 				(*i)[columns.binding] = string();
 			}
