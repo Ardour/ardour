@@ -430,7 +430,7 @@ def build(bld):
                 ../vst/winmain.c
         '''
         obj.includes = '../libs/fst'
-        obj.target = 'ardour-3.0-vst'
+        obj.target = 'ardour-3.0-vst.exe'
         obj.linkflags = ['-mwindows', '-Wl,--export-dynamic', '-lpthread']
         obj.defines = ['_POSIX_SOURCE', 'USE_WS_PREFIX']
         obj.uselib = 'ALSA'
