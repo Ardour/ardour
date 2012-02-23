@@ -36,6 +36,7 @@
 #include "actions.h"
 #include "opts.h"
 #include "i18n.h"
+#include "utils.h"
 
 using namespace std;
 using namespace Gtk;
@@ -240,21 +241,29 @@ ActionManager::get_all_actions (vector<string>& names, vector<string>& paths, ve
 
 			names.push_back (label);
 			paths.push_back (accel_path);
-			
+
 			AccelKey key;
-			bool known = lookup_entry (accel_path, key);
-			
-			if (known) {
-				keys.push_back (ui_manager->get_accel_group()->name (key.get_key(), Gdk::ModifierType (key.get_mod())));
-			} else {
-				keys.push_back (unbound_string);
-			}
-			
+			keys.push_back (get_key_representation (accel_path, key));
 			bindings.push_back (AccelKey (key.get_key(), Gdk::ModifierType (key.get_mod())));
 		}
 	}
 }
 
+string
+ActionManager::get_key_representation (const string& accel_path, AccelKey& key)
+{
+	bool known = lookup_entry (accel_path, key);
+	
+	if (known) {
+		
+		uint32_t k = key.get_key(); 
+		possibly_translate_keyval_to_make_legal_accelerator (k);
+		key = AccelKey (k, Gdk::ModifierType (key.get_mod()));
+		return ui_manager->get_accel_group()->get_label (key.get_key(), Gdk::ModifierType (key.get_mod()));
+	} 
+	
+	return unbound_string;
+}
 
 void
 ActionManager::add_action_group (RefPtr<ActionGroup> grp)

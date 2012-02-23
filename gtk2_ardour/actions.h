@@ -107,6 +107,8 @@ class ActionManager
 				     std::vector<Gtk::AccelKey>& bindings);
 
 	static void uncheck_toggleaction (const char * actionname);
+
+	static string get_key_representation (const std::string& accel_path, Gtk::AccelKey& key);
 };
 
 #endif /* __ardour_gtk_actions_h__ */
