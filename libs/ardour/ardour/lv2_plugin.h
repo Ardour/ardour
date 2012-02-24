@@ -34,6 +34,8 @@
 #include <lilv/lilv.h>
 #include <ardour/plugin.h>
 
+#include "lv2/lv2plug.in/ns/ext/urid/urid.h"
+
 namespace ARDOUR {
 class AudioEngine;
 class Session;
@@ -114,6 +116,11 @@ class LV2Plugin : public ARDOUR::Plugin
 	bool     save_preset(std::string name);
 
 	bool has_editor() const;
+
+	static LV2_Feature    _urid_map_feature;
+	static LV2_URID_Map   _urid_map;
+	static LV2_Feature    _urid_unmap_feature;
+	static LV2_URID_Unmap _urid_unmap;
 
   private:
 	void*           _module;

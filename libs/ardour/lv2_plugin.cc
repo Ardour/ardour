@@ -25,6 +25,8 @@
 #include <cmath>
 #include <cstring>
 
+#include <glib.h>
+
 #include <pbd/compose.h>
 #include <pbd/error.h>
 #include <pbd/pathscanner.h>
@@ -48,7 +50,24 @@
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
-	
+
+static LV2_URID
+urid_map(LV2_URID_Map_Handle handle, const char* uri)
+{
+	return g_quark_from_string(uri);
+}
+
+const char*
+urid_unmap(LV2_URID_Unmap_Handle handle, LV2_URID urid)
+{
+	return g_quark_to_string(urid);
+}
+
+LV2_URID_Map   LV2Plugin::_urid_map           = { NULL, urid_map };
+LV2_Feature    LV2Plugin::_urid_map_feature   = { LV2_URID_MAP_URI, &LV2Plugin::_urid_map };
+LV2_URID_Unmap LV2Plugin::_urid_unmap         = { NULL, urid_unmap };
+LV2_Feature    LV2Plugin::_urid_unmap_feature = { LV2_URID_UNMAP_URI, &LV2Plugin::_urid_unmap };
+
 LV2Plugin::LV2Plugin (AudioEngine& e, Session& session, LV2World& world, LilvPlugin* plugin, nframes_t rate)
 	: Plugin (e, session)
 	, _world(world)
@@ -106,10 +125,12 @@ LV2Plugin::init (LV2World& world, LilvPlugin* plugin, nframes_t rate)
 	_data_access_feature.URI = "http://lv2plug.in/ns/ext/data-access";
 	_data_access_feature.data = &_data_access_extension_data;
 	
-	_features = (LV2_Feature**)malloc(sizeof(LV2_Feature*) * 3);
+	_features = (LV2_Feature**)malloc(sizeof(LV2_Feature*) * 5);
 	_features[0] = &_instance_access_feature;
 	_features[1] = &_data_access_feature;
-	_features[2] = NULL;
+	_features[2] = &_urid_map_feature;
+	_features[3] = &_urid_unmap_feature;
+	_features[4] = NULL;
 
 	_sample_rate = rate;
 
