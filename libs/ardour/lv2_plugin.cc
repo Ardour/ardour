@@ -152,7 +152,7 @@ LV2Plugin::init(void* c_plugin, framecnt_t rate)
 	_state_version        = 0;
 	_was_activated        = false;
 	_has_state_interface  = false;
-	
+
 	_instance_access_feature.URI = "http://lv2plug.in/ns/ext/instance-access";
 	_data_access_feature.URI     = "http://lv2plug.in/ns/ext/data-access";
 	_make_path_feature.URI       = LV2_STATE_MAKE_PATH_URI;
@@ -210,17 +210,35 @@ LV2Plugin::init(void* c_plugin, framecnt_t rate)
 
 	_sample_rate = rate;
 
-	const uint32_t num_ports    = this->num_ports();
-
+	const uint32_t num_ports = this->num_ports();
 	for (uint32_t i = 0; i < num_ports; ++i) {
-		const LilvPort* port = lilv_plugin_get_port_by_index(_impl->plugin, i);
-		_port_is_control.push_back(lilv_port_is_a(_impl->plugin, port, _world.control_class));
-		_port_is_audio.push_back(lilv_port_is_a(_impl->plugin, port, _world.audio_class));
-		_port_is_midi.push_back(lilv_port_is_a(_impl->plugin, port, _world.event_class));
-		_port_is_output.push_back(lilv_port_is_a(_impl->plugin, port, _world.output_class));
-		_port_is_input.push_back(lilv_port_is_a(_impl->plugin, port, _world.input_class));
+		const LilvPort* port  = lilv_plugin_get_port_by_index(_impl->plugin, i);
+		PortFlags       flags = 0;
+		if (lilv_port_is_a(_impl->plugin, port, _world.control_class)) {
+			flags |= PORT_CONTROL;
+		} else if (lilv_port_is_a(_impl->plugin, port, _world.audio_class)) {
+			flags |= PORT_AUDIO;
+		} else if (lilv_port_is_a(_impl->plugin, port, _world.event_class)) {
+			flags |= PORT_EVENT;
+		} else {
+			error << string_compose(
+				"LV2: \"%1\" port %2 has no known data type",
+				lilv_node_as_string(_impl->name), i) << endmsg;
+			throw failed_constructor();
+		}
+		if (lilv_port_is_a(_impl->plugin, port, _world.output_class)) {
+			flags |= PORT_OUTPUT;
+		} else if (lilv_port_is_a(_impl->plugin, port, _world.input_class)) {
+			flags |= PORT_INPUT;
+		} else {
+			error << string_compose(
+				"LV2: \"%1\" port %2 is neither input nor output",
+				lilv_node_as_string(_impl->name), i) << endmsg;
+			throw failed_constructor();
+		}
+		_port_flags.push_back(flags);
 	}
-	
+
 	const bool     latent       = lilv_plugin_has_latency(plugin);
 	const uint32_t latency_port = (latent)
 	    ? lilv_plugin_get_latency_port_index(plugin)
@@ -935,55 +953,47 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 	uint32_t midi_out_index  = 0;
 	bool valid;
 	for (uint32_t port_index = 0; port_index < num_ports; ++port_index) {
+		void*    buf   = NULL;
+		uint32_t index = 0;
 		if (parameter_is_audio(port_index)) {
 			if (parameter_is_input(port_index)) {
-				const uint32_t buf_index = in_map.get(DataType::AUDIO, audio_in_index++, &valid);
-				lilv_instance_connect_port(_impl->instance, port_index,
-				                           valid ? bufs.get_audio(buf_index).data(offset)
-				                                 : silent_bufs.get_audio(0).data(offset));
+				index = in_map.get(DataType::AUDIO, audio_in_index++, &valid);
+				buf = (valid)
+					? bufs.get_audio(index).data(offset)
+					: silent_bufs.get_audio(0).data(offset);
 			} else if (parameter_is_output(port_index)) {
-				const uint32_t buf_index = out_map.get(DataType::AUDIO, audio_out_index++, &valid);
-				//cerr << port_index << " : " << " AUDIO OUT " << buf_index << endl;
-				lilv_instance_connect_port(_impl->instance, port_index,
-				                           valid ? bufs.get_audio(buf_index).data(offset)
-				                                 : scratch_bufs.get_audio(0).data(offset));
+				index = out_map.get(DataType::AUDIO, audio_out_index++, &valid);
+				buf = (valid)
+					? bufs.get_audio(index).data(offset)
+					: scratch_bufs.get_audio(0).data(offset);
 			}
-		} else if (parameter_is_midi(port_index)) {
-			/* FIXME: The checks here for bufs.count().n_midi() > buf_index shouldn't
+		} else if (parameter_is_event(port_index)) {
+			/* FIXME: The checks here for bufs.count().n_midi() > index shouldn't
 			   be necessary, but the mapping is illegal in some cases.  Ideally
 			   that should be fixed, but this is easier...
 			*/
 			if (parameter_is_input(port_index)) {
-				const uint32_t buf_index = in_map.get(DataType::MIDI, midi_in_index++, &valid);
-				if (valid && bufs.count().n_midi() > buf_index) {
-					lilv_instance_connect_port(_impl->instance, port_index,
-					                           bufs.get_lv2_midi(true, buf_index).data());
-				} else {
-					lilv_instance_connect_port(_impl->instance, port_index,
-					                           silent_bufs.get_lv2_midi(true, 0).data());
-				}
+				index = in_map.get(DataType::MIDI, midi_in_index++, &valid);
+				buf = (valid && bufs.count().n_midi() > index)
+					? bufs.get_lv2_midi(true, index).data()
+					: silent_bufs.get_lv2_midi(true, 0).data();
 			} else if (parameter_is_output(port_index)) {
-				const uint32_t buf_index = out_map.get(DataType::MIDI, midi_out_index++, &valid);
-				if (valid && bufs.count().n_midi() > buf_index) {
-					lilv_instance_connect_port(_impl->instance, port_index,
-					                           bufs.get_lv2_midi(false, buf_index).data());
-				} else {
-					lilv_instance_connect_port(_impl->instance, port_index,
-					                           scratch_bufs.get_lv2_midi(true, 0).data());
-				}
+				index = out_map.get(DataType::MIDI, midi_out_index++, &valid);
+				buf = (valid && bufs.count().n_midi() > index)
+					? bufs.get_lv2_midi(false, index).data()
+					: scratch_bufs.get_lv2_midi(true, 0).data();
 			}
-		} else if (!parameter_is_control(port_index)) {
-			// Optional port (it'd better be if we've made it this far...)
-			lilv_instance_connect_port(_impl->instance, port_index, NULL);
-		}
+		}  // else port is optional (or we shouldn't have made it this far)
+		lilv_instance_connect_port(_impl->instance, port_index, buf);
 	}
 
 	run(nframes);
 
 	midi_out_index = 0;
 	for (uint32_t port_index = 0; port_index < num_ports; ++port_index) {
-		if (parameter_is_midi(port_index) && parameter_is_output(port_index)) {
-			const uint32_t buf_index = out_map.get(DataType::MIDI, midi_out_index++, &valid);
+		if (parameter_is_event(port_index) && parameter_is_output(port_index)) {
+			const uint32_t buf_index = out_map.get(
+				DataType::MIDI, midi_out_index++, &valid);
 			if (valid) {
 				bufs.flush_lv2_midi(true, buf_index);
 			}
@@ -999,36 +1009,36 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 bool
 LV2Plugin::parameter_is_control(uint32_t param) const
 {
-	assert(param < _port_is_control.size());
-	return _port_is_control[param];
+	assert(param < _port_flags.size());
+	return _port_flags[param] & PORT_CONTROL;
 }
 
 bool
 LV2Plugin::parameter_is_audio(uint32_t param) const
 {
-	assert(param < _port_is_audio.size());
-	return _port_is_audio[param];
+	assert(param < _port_flags.size());
+	return _port_flags[param] & PORT_AUDIO;
 }
 
 bool
-LV2Plugin::parameter_is_midi(uint32_t param) const
+LV2Plugin::parameter_is_event(uint32_t param) const
 {
-	assert(param < _port_is_midi.size());
-	return _port_is_midi[param];
+	assert(param < _port_flags.size());
+	return _port_flags[param] & PORT_EVENT;
 }
 
 bool
 LV2Plugin::parameter_is_output(uint32_t param) const
 {
-	assert(param < _port_is_output.size());
-	return _port_is_output[param];
+	assert(param < _port_flags.size());
+	return _port_flags[param] & PORT_OUTPUT;
 }
 
 bool
 LV2Plugin::parameter_is_input(uint32_t param) const
 {
-	assert(param < _port_is_input.size());
-	return _port_is_input[param];
+	assert(param < _port_flags.size());
+	return _port_flags[param] & PORT_INPUT;
 }
 
 void

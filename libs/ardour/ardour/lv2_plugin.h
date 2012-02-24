@@ -1,4 +1,3 @@
-
 /*
     Copyright (C) 2008-2011 Paul Davis
     Author: David Robillard
@@ -16,7 +15,6 @@
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 */
 
 #ifndef __ardour_lv2_plugin_h__
@@ -25,12 +23,6 @@
 #include <set>
 #include <string>
 #include <vector>
-
-#include <dlfcn.h>
-
-#include "pbd/stateful.h"
-
-#include <jack/types.h>
 
 #include "ardour/plugin.h"
 #include "ardour/uri_map.h"
@@ -98,7 +90,7 @@ class LV2Plugin : public ARDOUR::Plugin
 
 	bool parameter_is_audio (uint32_t) const;
 	bool parameter_is_control (uint32_t) const;
-	bool parameter_is_midi (uint32_t) const;
+	bool parameter_is_event (uint32_t) const;
 	bool parameter_is_input (uint32_t) const;
 	bool parameter_is_output (uint32_t) const;
 	bool parameter_is_toggled (uint32_t) const;
@@ -130,12 +122,17 @@ class LV2Plugin : public ARDOUR::Plugin
 	float*        _latency_control_port;
 	PBD::ID       _insert_id;
 
-	std::vector<bool> _port_is_input;
-	std::vector<bool> _port_is_output;
-	std::vector<bool> _port_is_midi;
-	std::vector<bool> _port_is_audio;
-	std::vector<bool> _port_is_control;
+	typedef enum {
+		PORT_INPUT   = 1,
+		PORT_OUTPUT  = 1 << 1,
+		PORT_EVENT   = 1 << 2,
+		PORT_AUDIO   = 1 << 3,
+		PORT_CONTROL = 1 << 4
+	} PortFlag;
 
+	typedef unsigned PortFlags;
+
+	std::vector<PortFlags>         _port_flags;
 	std::map<std::string,uint32_t> _port_indices;
 
 	typedef struct {
