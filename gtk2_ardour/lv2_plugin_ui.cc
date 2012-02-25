@@ -68,7 +68,6 @@ LV2PluginUI::write_to_ui(void*       controller,
                          const void* buffer)
 {
 	LV2PluginUI* me = (LV2PluginUI*)controller;
-	fprintf(stderr, "MESSAGE FROM PLUGIN %u BYTES\n", buffer_size);
 	suil_instance_port_event((SuilInstance*)me->_inst,
 	                         port_index, buffer_size, format, buffer);
 }
