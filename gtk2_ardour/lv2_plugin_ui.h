@@ -90,7 +90,7 @@ class LV2PluginUI : public PlugUIBase, public Gtk::VBox
 	                        uint32_t    format,
 	                        const void* buffer);
 
-	bool update_timeout();
+	void update_timeout();
 
 	void lv2ui_instantiate(const std::string& title);
 	void lv2ui_free();

@@ -113,6 +113,7 @@ class LV2Plugin : public ARDOUR::Plugin
 	std::string current_preset () const;
 
 	bool has_editor () const;
+	bool has_message_output () const;
 
 	uint32_t atom_eventTransfer() const;
 

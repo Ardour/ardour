@@ -763,6 +763,17 @@ LV2Plugin::has_editor() const
 	return _impl->ui != NULL;
 }
 
+bool
+LV2Plugin::has_message_output() const
+{
+	for (uint32_t i = 0; i < num_ports(); ++i) {
+		if ((_port_flags[i] & PORT_MESSAGE) && _port_flags[i] & PORT_OUTPUT) {
+			return true;
+		}
+	}
+	return false;
+}
+
 uint32_t
 LV2Plugin::atom_eventTransfer() const
 {

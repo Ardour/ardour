@@ -73,11 +73,10 @@ LV2PluginUI::write_to_ui(void*       controller,
 	                         port_index, buffer_size, format, buffer);
 }
 
-bool
+void
 LV2PluginUI::update_timeout()
 {
 	_lv2->emit_to_ui(this, &LV2PluginUI::write_to_ui);
-	return true;
 }
 
 void
@@ -267,8 +266,10 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 		}
 	}
 
-	Glib::signal_timeout().connect(
-		sigc::mem_fun(*this, &LV2PluginUI::update_timeout), 500);
+	if (_lv2->has_message_output()) {
+		ARDOUR_UI::instance()->RapidScreenUpdate.connect(
+			sigc::mem_fun(*this, &LV2PluginUI::update_timeout));
+	}
 }
 
 void
