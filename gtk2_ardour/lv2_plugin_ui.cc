@@ -267,6 +267,7 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 	}
 
 	if (_lv2->has_message_output()) {
+		_lv2->enable_ui_emmission();
 		ARDOUR_UI::instance()->RapidScreenUpdate.connect(
 			sigc::mem_fun(*this, &LV2PluginUI::update_timeout));
 	}

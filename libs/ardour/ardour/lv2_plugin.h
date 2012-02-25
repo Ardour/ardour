@@ -125,6 +125,7 @@ class LV2Plugin : public ARDOUR::Plugin
 	                           uint32_t    format,
 	                           const void* buffer);
 
+	void enable_ui_emmission();
 	void emit_to_ui(void* controller, UIMessageSink sink);
 
 	static URIMap _uri_map;

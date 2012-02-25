@@ -820,11 +820,15 @@ LV2Plugin::write_to_ui(uint32_t index,
                        uint32_t size,
                        uint8_t* body)
 {
+	write_to(_to_ui, index, protocol, size, body);
+}
+
+void
+LV2Plugin::enable_ui_emmission()
+{
 	if (!_to_ui) {
 		_to_ui = new RingBuffer<uint8_t>(4096);
 	}
-
-	write_to(_to_ui, index, protocol, size, body);
 }
 
 void
@@ -1156,7 +1160,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 		}
 
 		// Write messages to UI
-		if ((flags & PORT_OUTPUT) && (flags & PORT_MESSAGE)) {
+		if (_to_ui && (flags & PORT_OUTPUT) && (flags & PORT_MESSAGE)) {
 			LV2_Evbuf* buf = _ev_buffers[port_index];
 			for (LV2_Evbuf_Iterator i = lv2_evbuf_begin(buf);
 			     lv2_evbuf_is_valid(i);
