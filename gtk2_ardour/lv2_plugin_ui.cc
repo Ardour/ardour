@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2008-2011 Paul Davis
+    Copyright (C) 2008-2012 Paul Davis
     Author: David Robillard
 
     This program is free software; you can redistribute it and/or modify
@@ -15,7 +15,6 @@
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 */
 
 #include "ardour/lv2_plugin.h"
@@ -31,8 +30,8 @@
 #include <lilv/lilv.h>
 #include <suil/suil.h>
 
-using namespace Gtk;
 using namespace ARDOUR;
+using namespace Gtk;
 using namespace PBD;
 
 #define NS_UI "http://lv2plug.in/ns/extensions/ui#"
