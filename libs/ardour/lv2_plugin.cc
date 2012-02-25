@@ -85,22 +85,23 @@ public:
 	~LV2World ();
 
 	LilvWorld* world;
-	LilvNode*  input_class;      ///< Input port
-	LilvNode*  output_class;     ///< Output port
-	LilvNode*  audio_class;      ///< Audio port
-	LilvNode*  control_class;    ///< Control port
-	LilvNode*  event_class;      ///< Event port
-	LilvNode*  midi_class;       ///< MIDI event
-	LilvNode*  message_port_class;
-	LilvNode*  buffer_type;
-	LilvNode*  sequence_class;
-	LilvNode*  in_place_broken;
-	LilvNode*  integer;
-	LilvNode*  toggled;
-	LilvNode*  srate;
-	LilvNode*  gtk_gui;
-	LilvNode*  external_gui;
-	LilvNode*  logarithmic;
+
+	LilvNode* atom_MessagePort;
+	LilvNode* atom_Sequence;
+	LilvNode* atom_bufferType;
+	LilvNode* ev_EventPort;
+	LilvNode* ext_logarithmic;
+	LilvNode* lv2_AudioPort;
+	LilvNode* lv2_ControlPort;
+	LilvNode* lv2_InputPort;
+	LilvNode* lv2_OutputPort;
+	LilvNode* lv2_inPlaceBroken;
+	LilvNode* lv2_integer;
+	LilvNode* lv2_sampleRate;
+	LilvNode* lv2_toggled;
+	LilvNode* midi_MidiEvent;
+	LilvNode* ui_GtkUI;
+	LilvNode* ui_external;
 };
 
 static LV2World _world;
@@ -209,7 +210,7 @@ LV2Plugin::init(void* c_plugin, framecnt_t rate)
 	_data_access_extension_data.extension_data = _impl->instance->lv2_descriptor->extension_data;
 	_data_access_feature.data                  = &_data_access_extension_data;
 
-	if (lilv_plugin_has_feature(plugin, _world.in_place_broken)) {
+	if (lilv_plugin_has_feature(plugin, _world.lv2_inPlaceBroken)) {
 		error << string_compose(
 		    _("LV2: \"%1\" cannot be used, since it cannot do inplace processing"),
 		    lilv_node_as_string(_impl->name)) << endmsg;
@@ -224,16 +225,16 @@ LV2Plugin::init(void* c_plugin, framecnt_t rate)
 	for (uint32_t i = 0; i < num_ports; ++i) {
 		const LilvPort* port  = lilv_plugin_get_port_by_index(_impl->plugin, i);
 		PortFlags       flags = 0;
-		if (lilv_port_is_a(_impl->plugin, port, _world.control_class)) {
+		if (lilv_port_is_a(_impl->plugin, port, _world.lv2_ControlPort)) {
 			flags |= PORT_CONTROL;
-		} else if (lilv_port_is_a(_impl->plugin, port, _world.audio_class)) {
+		} else if (lilv_port_is_a(_impl->plugin, port, _world.lv2_AudioPort)) {
 			flags |= PORT_AUDIO;
-		} else if (lilv_port_is_a(_impl->plugin, port, _world.event_class)) {
+		} else if (lilv_port_is_a(_impl->plugin, port, _world.ev_EventPort)) {
 			flags |= PORT_EVENT;
-		} else if (lilv_port_is_a(_impl->plugin, port, _world.message_port_class)) {
+		} else if (lilv_port_is_a(_impl->plugin, port, _world.atom_MessagePort)) {
 			LilvNodes* buffer_types = lilv_port_get_value(
-				_impl->plugin, port, _world.buffer_type);
-			if (lilv_nodes_contains(buffer_types, _world.sequence_class)) {
+				_impl->plugin, port, _world.atom_bufferType);
+			if (lilv_nodes_contains(buffer_types, _world.atom_Sequence)) {
 				flags |= PORT_MESSAGE;
 			}
 			lilv_nodes_free(buffer_types);
@@ -243,9 +244,9 @@ LV2Plugin::init(void* c_plugin, framecnt_t rate)
 				lilv_node_as_string(_impl->name), i) << endmsg;
 			throw failed_constructor();
 		}
-		if (lilv_port_is_a(_impl->plugin, port, _world.output_class)) {
+		if (lilv_port_is_a(_impl->plugin, port, _world.lv2_OutputPort)) {
 			flags |= PORT_OUTPUT;
-		} else if (lilv_port_is_a(_impl->plugin, port, _world.input_class)) {
+		} else if (lilv_port_is_a(_impl->plugin, port, _world.lv2_InputPort)) {
 			flags |= PORT_INPUT;
 		} else {
 			error << string_compose(
@@ -277,7 +278,7 @@ LV2Plugin::init(void* c_plugin, framecnt_t rate)
 			LilvNode* def;
 			lilv_port_get_range(plugin, port, &def, NULL, NULL);
 			_defaults[i] = def ? lilv_node_as_float(def) : 0.0f;
-			if (lilv_port_has_property (plugin, port, _world.srate)) {
+			if (lilv_port_has_property (plugin, port, _world.lv2_sampleRate)) {
 				_defaults[i] *= _session.frame_rate ();
 			}
 			lilv_node_free(def);
@@ -306,7 +307,7 @@ LV2Plugin::init(void* c_plugin, framecnt_t rate)
 			const LilvNode* this_ui_type = NULL;
 			if (lilv_ui_is_supported(this_ui,
 			                         suil_ui_supported,
-			                         _world.gtk_gui,
+			                         _world.ui_GtkUI,
 			                         &this_ui_type)) {
 				// TODO: Multiple UI support
 				_impl->ui      = this_ui;
@@ -330,9 +331,9 @@ LV2Plugin::init(void* c_plugin, framecnt_t rate)
 		if (!_impl->ui) {
 			LILV_FOREACH(uis, i, uis) {
 				const LilvUI* ui = lilv_uis_get(uis, i);
-				if (lilv_ui_is_a(ui, _world.external_gui)) {
+				if (lilv_ui_is_a(ui, _world.ui_external)) {
 					_impl->ui      = ui;
-					_impl->ui_type = _world.external_gui;
+					_impl->ui_type = _world.ui_external;
 					break;
 				}
 			}
@@ -363,7 +364,7 @@ LV2Plugin::is_external_ui() const
 	if (!_impl->ui) {
 		return false;
 	}
-	return lilv_ui_is_a(_impl->ui, _world.external_gui);
+	return lilv_ui_is_a(_impl->ui, _world.ui_external);
 }
 
 string
@@ -843,10 +844,10 @@ LV2Plugin::get_parameter_descriptor(uint32_t which, ParameterDescriptor& desc) c
 	LilvNode *def, *min, *max;
 	lilv_port_get_range(_impl->plugin, port, &def, &min, &max);
 
-	desc.integer_step = lilv_port_has_property(_impl->plugin, port, _world.integer);
-	desc.toggled      = lilv_port_has_property(_impl->plugin, port, _world.toggled);
-	desc.logarithmic  = lilv_port_has_property(_impl->plugin, port, _world.logarithmic);
-	desc.sr_dependent = lilv_port_has_property(_impl->plugin, port, _world.srate);
+	desc.integer_step = lilv_port_has_property(_impl->plugin, port, _world.lv2_integer);
+	desc.toggled      = lilv_port_has_property(_impl->plugin, port, _world.lv2_toggled);
+	desc.logarithmic  = lilv_port_has_property(_impl->plugin, port, _world.ext_logarithmic);
+	desc.sr_dependent = lilv_port_has_property(_impl->plugin, port, _world.lv2_sampleRate);
 	desc.label        = lilv_node_as_string(lilv_port_get_name(_impl->plugin, port));
 	desc.lower        = min ? lilv_node_as_float(min) : 0.0f;
 	desc.upper        = max ? lilv_node_as_float(max) : 1.0f;
@@ -1159,36 +1160,42 @@ LV2World::LV2World()
 	: world(lilv_world_new())
 {
 	lilv_world_load_all(world);
-	input_class        = lilv_new_uri(world, LILV_URI_INPUT_PORT);
-	output_class       = lilv_new_uri(world, LILV_URI_OUTPUT_PORT);
-	control_class      = lilv_new_uri(world, LILV_URI_CONTROL_PORT);
-	audio_class        = lilv_new_uri(world, LILV_URI_AUDIO_PORT);
-	event_class        = lilv_new_uri(world, LILV_URI_EVENT_PORT);
-	midi_class         = lilv_new_uri(world, LILV_URI_MIDI_EVENT);
-	message_port_class = lilv_new_uri(world, LV2_ATOM__MessagePort);
-	buffer_type        = lilv_new_uri(world, LV2_ATOM__bufferType);
-	sequence_class     = lilv_new_uri(world, LV2_ATOM__Sequence);
-	in_place_broken    = lilv_new_uri(world, LILV_NS_LV2 "inPlaceBroken");
-	integer            = lilv_new_uri(world, LILV_NS_LV2 "integer");
-	toggled            = lilv_new_uri(world, LILV_NS_LV2 "toggled");
-	srate              = lilv_new_uri(world, LILV_NS_LV2 "sampleRate");
-	gtk_gui            = lilv_new_uri(world, NS_UI "GtkUI");
-	external_gui       = lilv_new_uri(world, NS_UI "external");
-	logarithmic        = lilv_new_uri(world, "http://lv2plug.in/ns/dev/extportinfo#logarithmic");
+	atom_MessagePort  = lilv_new_uri(world, LV2_ATOM__MessagePort);
+	atom_Sequence     = lilv_new_uri(world, LV2_ATOM__Sequence);
+	atom_bufferType   = lilv_new_uri(world, LV2_ATOM__bufferType);
+	ev_EventPort      = lilv_new_uri(world, LILV_URI_EVENT_PORT);
+	ext_logarithmic   = lilv_new_uri(world, "http://lv2plug.in/ns/dev/extportinfo#logarithmic");
+	lv2_AudioPort     = lilv_new_uri(world, LILV_URI_AUDIO_PORT);
+	lv2_ControlPort   = lilv_new_uri(world, LILV_URI_CONTROL_PORT);
+	lv2_InputPort     = lilv_new_uri(world, LILV_URI_INPUT_PORT);
+	lv2_OutputPort    = lilv_new_uri(world, LILV_URI_OUTPUT_PORT);
+	lv2_inPlaceBroken = lilv_new_uri(world, LILV_NS_LV2 "inPlaceBroken");
+	lv2_integer       = lilv_new_uri(world, LILV_NS_LV2 "integer");
+	lv2_sampleRate    = lilv_new_uri(world, LILV_NS_LV2 "sampleRate");
+	lv2_toggled       = lilv_new_uri(world, LILV_NS_LV2 "toggled");
+	midi_MidiEvent    = lilv_new_uri(world, LILV_URI_MIDI_EVENT);
+	ui_GtkUI          = lilv_new_uri(world, NS_UI "GtkUI");
+	ui_external       = lilv_new_uri(world, NS_UI "external");
 }
 
 LV2World::~LV2World()
 {
-	lilv_node_free(input_class);
-	lilv_node_free(output_class);
-	lilv_node_free(control_class);
-	lilv_node_free(audio_class);
-	lilv_node_free(event_class);
-	lilv_node_free(midi_class);
-	lilv_node_free(message_port_class);
-	lilv_node_free(buffer_type);
-	lilv_node_free(sequence_class);
-	lilv_node_free(in_place_broken);
+	lilv_node_free(ui_external);
+	lilv_node_free(ui_GtkUI);
+	lilv_node_free(midi_MidiEvent);
+	lilv_node_free(lv2_toggled);
+	lilv_node_free(lv2_sampleRate);
+	lilv_node_free(lv2_integer);
+	lilv_node_free(lv2_inPlaceBroken);
+	lilv_node_free(lv2_OutputPort);
+	lilv_node_free(lv2_InputPort);
+	lilv_node_free(lv2_ControlPort);
+	lilv_node_free(lv2_AudioPort);
+	lilv_node_free(ext_logarithmic);
+	lilv_node_free(ev_EventPort);
+	lilv_node_free(atom_bufferType);
+	lilv_node_free(atom_Sequence);
+	lilv_node_free(atom_MessagePort);
 }
 
 LV2PluginInfo::LV2PluginInfo (void* c_plugin)
@@ -1254,21 +1261,21 @@ LV2PluginInfo::discover()
 
 		info->n_inputs.set_audio(
 			lilv_plugin_get_num_ports_of_class(
-				p, _world.input_class, _world.audio_class, NULL));
+				p, _world.lv2_InputPort, _world.lv2_AudioPort, NULL));
 		info->n_inputs.set_midi(
 			lilv_plugin_get_num_ports_of_class(
-				p, _world.input_class, _world.event_class, NULL)
+				p, _world.lv2_InputPort, _world.ev_EventPort, NULL)
 			+ lilv_plugin_get_num_ports_of_class(
-				p, _world.input_class, _world.message_port_class, NULL));
+				p, _world.lv2_InputPort, _world.atom_MessagePort, NULL));
 
 		info->n_outputs.set_audio(
 			lilv_plugin_get_num_ports_of_class(
-				p, _world.output_class, _world.audio_class, NULL));
+				p, _world.lv2_OutputPort, _world.lv2_AudioPort, NULL));
 		info->n_outputs.set_midi(
 			lilv_plugin_get_num_ports_of_class(
-				p, _world.output_class, _world.event_class, NULL)
+				p, _world.lv2_OutputPort, _world.ev_EventPort, NULL)
 			+ lilv_plugin_get_num_ports_of_class(
-				p, _world.output_class, _world.message_port_class, NULL));
+				p, _world.lv2_OutputPort, _world.atom_MessagePort, NULL));
 
 		info->unique_id = lilv_node_as_uri(lilv_plugin_get_uri(p));
 		info->index     = 0; // Meaningless for LV2
