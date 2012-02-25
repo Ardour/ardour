@@ -98,7 +98,10 @@ class LV2Plugin : public ARDOUR::Plugin
 	boost::shared_ptr<Plugin::ScalePoints>
 	get_scale_points(uint32_t port_index) const;
 
-	static uint32_t midi_event_type () { return _midi_event_type; }
+	/// Return the URID of midi:MidiEvent
+	static uint32_t midi_event_type (bool event_api) {
+		return event_api ? _midi_event_type_ev : _midi_event_type;
+	}
 
 	void set_insert_info(const PluginInsert* insert);
 
@@ -125,9 +128,10 @@ class LV2Plugin : public ARDOUR::Plugin
 	typedef enum {
 		PORT_INPUT   = 1,
 		PORT_OUTPUT  = 1 << 1,
-		PORT_EVENT   = 1 << 2,
-		PORT_AUDIO   = 1 << 3,
-		PORT_CONTROL = 1 << 4
+		PORT_AUDIO   = 1 << 2,
+		PORT_CONTROL = 1 << 3,
+		PORT_EVENT   = 1 << 4,
+		PORT_MESSAGE = 1 << 5
 	} PortFlag;
 
 	typedef unsigned PortFlags;
@@ -150,7 +154,9 @@ class LV2Plugin : public ARDOUR::Plugin
 	bool _has_state_interface;
 
 	static URIMap   _uri_map;
+	static uint32_t _midi_event_type_ev;
 	static uint32_t _midi_event_type;
+	static uint32_t _sequence_type;
 	static uint32_t _state_path_type;
 
 	const std::string plugin_dir () const;

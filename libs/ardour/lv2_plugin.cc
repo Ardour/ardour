@@ -41,7 +41,6 @@
 #include "ardour/audio_buffer.h"
 #include "ardour/audioengine.h"
 #include "ardour/debug.h"
-#include "ardour/lv2_event_buffer.h"
 #include "ardour/lv2_plugin.h"
 #include "ardour/session.h"
 
@@ -50,8 +49,11 @@
 
 #include <lilv/lilv.h>
 
+#include "lv2/lv2plug.in/ns/ext/atom/atom.h"
 #include "lv2/lv2plug.in/ns/ext/state/state.h"
-#include "rdff.h"
+
+#include "lv2_evbuf.h"
+
 #ifdef HAVE_SUIL
 #include <suil/suil.h>
 #endif
@@ -66,11 +68,16 @@ using namespace ARDOUR;
 using namespace PBD;
 
 URIMap LV2Plugin::_uri_map;
+uint32_t LV2Plugin::_midi_event_type_ev = _uri_map.uri_to_id(
+	"http://lv2plug.in/ns/ext/event",
+	"http://lv2plug.in/ns/ext/midi#MidiEvent");
 uint32_t LV2Plugin::_midi_event_type = _uri_map.uri_to_id(
-        "http://lv2plug.in/ns/ext/event",
-        "http://lv2plug.in/ns/ext/midi#MidiEvent");
+	NULL,
+	"http://lv2plug.in/ns/ext/midi#MidiEvent");
+uint32_t LV2Plugin::_sequence_type = _uri_map.uri_to_id(
+	NULL, LV2_ATOM__Sequence);
 uint32_t LV2Plugin::_state_path_type = _uri_map.uri_to_id(
-        NULL, LV2_STATE_PATH_URI);
+	NULL, LV2_STATE_PATH_URI);
 
 class LV2World : boost::noncopyable {
 public:
@@ -84,6 +91,9 @@ public:
 	LilvNode*  control_class;    ///< Control port
 	LilvNode*  event_class;      ///< Event port
 	LilvNode*  midi_class;       ///< MIDI event
+	LilvNode*  message_port_class;
+	LilvNode*  buffer_type;
+	LilvNode*  sequence_class;
 	LilvNode*  in_place_broken;
 	LilvNode*  integer;
 	LilvNode*  toggled;
@@ -220,6 +230,13 @@ LV2Plugin::init(void* c_plugin, framecnt_t rate)
 			flags |= PORT_AUDIO;
 		} else if (lilv_port_is_a(_impl->plugin, port, _world.event_class)) {
 			flags |= PORT_EVENT;
+		} else if (lilv_port_is_a(_impl->plugin, port, _world.message_port_class)) {
+			LilvNodes* buffer_types = lilv_port_get_value(
+				_impl->plugin, port, _world.buffer_type);
+			if (lilv_nodes_contains(buffer_types, _world.sequence_class)) {
+				flags |= PORT_MESSAGE;
+			}
+			lilv_nodes_free(buffer_types);
 		} else {
 			error << string_compose(
 				"LV2: \"%1\" port %2 has no known data type",
@@ -953,37 +970,41 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 	uint32_t midi_out_index  = 0;
 	bool valid;
 	for (uint32_t port_index = 0; port_index < num_ports; ++port_index) {
-		void*    buf   = NULL;
-		uint32_t index = 0;
-		if (parameter_is_audio(port_index)) {
-			if (parameter_is_input(port_index)) {
+		void*     buf   = NULL;
+		uint32_t  index = 0;
+		PortFlags flags = _port_flags[port_index];
+		if (flags & PORT_AUDIO) {
+			if (flags & PORT_INPUT) {
 				index = in_map.get(DataType::AUDIO, audio_in_index++, &valid);
 				buf = (valid)
 					? bufs.get_audio(index).data(offset)
 					: silent_bufs.get_audio(0).data(offset);
-			} else if (parameter_is_output(port_index)) {
+			} else {
 				index = out_map.get(DataType::AUDIO, audio_out_index++, &valid);
 				buf = (valid)
 					? bufs.get_audio(index).data(offset)
 					: scratch_bufs.get_audio(0).data(offset);
 			}
-		} else if (parameter_is_event(port_index)) {
+		} else if (flags & (PORT_EVENT|PORT_MESSAGE)) {
 			/* FIXME: The checks here for bufs.count().n_midi() > index shouldn't
 			   be necessary, but the mapping is illegal in some cases.  Ideally
 			   that should be fixed, but this is easier...
 			*/
-			if (parameter_is_input(port_index)) {
+			const uint32_t atom_type = (flags & PORT_MESSAGE) ? _sequence_type : 0;
+			if (flags & PORT_INPUT) {
 				index = in_map.get(DataType::MIDI, midi_in_index++, &valid);
 				buf = (valid && bufs.count().n_midi() > index)
-					? bufs.get_lv2_midi(true, index).data()
-					: silent_bufs.get_lv2_midi(true, 0).data();
-			} else if (parameter_is_output(port_index)) {
+					? lv2_evbuf_get_buffer(bufs.get_lv2_midi(true, index, atom_type))
+					: lv2_evbuf_get_buffer(silent_bufs.get_lv2_midi(true, 0, atom_type));
+			} else {
 				index = out_map.get(DataType::MIDI, midi_out_index++, &valid);
 				buf = (valid && bufs.count().n_midi() > index)
-					? bufs.get_lv2_midi(false, index).data()
-					: scratch_bufs.get_lv2_midi(true, 0).data();
+					? lv2_evbuf_get_buffer(bufs.get_lv2_midi(false, index, atom_type))
+					: lv2_evbuf_get_buffer(scratch_bufs.get_lv2_midi(false, 0, atom_type));
 			}
-		}  // else port is optional (or we shouldn't have made it this far)
+		} else {
+			continue;  // Control port, leave buffer alone
+		}
 		lilv_instance_connect_port(_impl->instance, port_index, buf);
 	}
 
@@ -1138,19 +1159,22 @@ LV2World::LV2World()
 	: world(lilv_world_new())
 {
 	lilv_world_load_all(world);
-	input_class     = lilv_new_uri(world, LILV_URI_INPUT_PORT);
-	output_class    = lilv_new_uri(world, LILV_URI_OUTPUT_PORT);
-	control_class   = lilv_new_uri(world, LILV_URI_CONTROL_PORT);
-	audio_class     = lilv_new_uri(world, LILV_URI_AUDIO_PORT);
-	event_class     = lilv_new_uri(world, LILV_URI_EVENT_PORT);
-	midi_class      = lilv_new_uri(world, LILV_URI_MIDI_EVENT);
-	in_place_broken = lilv_new_uri(world, LILV_NS_LV2 "inPlaceBroken");
-	integer         = lilv_new_uri(world, LILV_NS_LV2 "integer");
-	toggled         = lilv_new_uri(world, LILV_NS_LV2 "toggled");
-	srate           = lilv_new_uri(world, LILV_NS_LV2 "sampleRate");
-	gtk_gui         = lilv_new_uri(world, NS_UI "GtkUI");
-	external_gui    = lilv_new_uri(world, NS_UI "external");
-	logarithmic     = lilv_new_uri(world, "http://lv2plug.in/ns/dev/extportinfo#logarithmic");
+	input_class        = lilv_new_uri(world, LILV_URI_INPUT_PORT);
+	output_class       = lilv_new_uri(world, LILV_URI_OUTPUT_PORT);
+	control_class      = lilv_new_uri(world, LILV_URI_CONTROL_PORT);
+	audio_class        = lilv_new_uri(world, LILV_URI_AUDIO_PORT);
+	event_class        = lilv_new_uri(world, LILV_URI_EVENT_PORT);
+	midi_class         = lilv_new_uri(world, LILV_URI_MIDI_EVENT);
+	message_port_class = lilv_new_uri(world, LV2_ATOM__MessagePort);
+	buffer_type        = lilv_new_uri(world, LV2_ATOM__bufferType);
+	sequence_class     = lilv_new_uri(world, LV2_ATOM__Sequence);
+	in_place_broken    = lilv_new_uri(world, LILV_NS_LV2 "inPlaceBroken");
+	integer            = lilv_new_uri(world, LILV_NS_LV2 "integer");
+	toggled            = lilv_new_uri(world, LILV_NS_LV2 "toggled");
+	srate              = lilv_new_uri(world, LILV_NS_LV2 "sampleRate");
+	gtk_gui            = lilv_new_uri(world, NS_UI "GtkUI");
+	external_gui       = lilv_new_uri(world, NS_UI "external");
+	logarithmic        = lilv_new_uri(world, "http://lv2plug.in/ns/dev/extportinfo#logarithmic");
 }
 
 LV2World::~LV2World()
@@ -1161,6 +1185,9 @@ LV2World::~LV2World()
 	lilv_node_free(audio_class);
 	lilv_node_free(event_class);
 	lilv_node_free(midi_class);
+	lilv_node_free(message_port_class);
+	lilv_node_free(buffer_type);
+	lilv_node_free(sequence_class);
 	lilv_node_free(in_place_broken);
 }
 
@@ -1230,14 +1257,18 @@ LV2PluginInfo::discover()
 				p, _world.input_class, _world.audio_class, NULL));
 		info->n_inputs.set_midi(
 			lilv_plugin_get_num_ports_of_class(
-				p, _world.input_class, _world.event_class, NULL));
+				p, _world.input_class, _world.event_class, NULL)
+			+ lilv_plugin_get_num_ports_of_class(
+				p, _world.input_class, _world.message_port_class, NULL));
 
 		info->n_outputs.set_audio(
 			lilv_plugin_get_num_ports_of_class(
 				p, _world.output_class, _world.audio_class, NULL));
 		info->n_outputs.set_midi(
 			lilv_plugin_get_num_ports_of_class(
-				p, _world.output_class, _world.event_class, NULL));
+				p, _world.output_class, _world.event_class, NULL)
+			+ lilv_plugin_get_num_ports_of_class(
+				p, _world.output_class, _world.message_port_class, NULL));
 
 		info->unique_id = lilv_node_as_uri(lilv_plugin_get_uri(p));
 		info->index     = 0; // Meaningless for LV2

@@ -379,8 +379,7 @@ def build(bld):
     #obj.add_objects = 'default/libs/surfaces/control_protocol/smpte_1.o'
 
     if bld.is_defined('HAVE_LILV') :
-        obj.source += [ 'lv2_plugin.cc', 'lv2_event_buffer.cc',
-                        'uri_map.cc', 'rdff.c' ]
+        obj.source += ['lv2_plugin.cc', 'lv2_evbuf.c', 'uri_map.cc'] 
         obj.uselib += ['LILV']
         if bld.is_defined('HAVE_SUIL'):
             obj.uselib += ['SUIL']

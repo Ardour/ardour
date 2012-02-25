@@ -36,7 +36,7 @@
 #include "ardour/audioengine.h"
 #ifdef LV2_SUPPORT
 #include "ardour/lv2_plugin.h"
-#include "ardour/lv2_event_buffer.h"
+#include "lv2_evbuf.h"
 #endif
 #if defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT
 #include "ardour/vestige/aeffectx.h"
@@ -189,7 +189,9 @@ BufferSet::ensure_buffers(DataType type, size_t num_buffers, size_t buffer_capac
 	// in both directions (input & output, out-of-place)
 	if (type == DataType::MIDI && _lv2_buffers.size() < _buffers[type].size() * 2 + 1) {
 		while (_lv2_buffers.size() < _buffers[type].size() * 2) {
-			_lv2_buffers.push_back(std::make_pair(false, new LV2EventBuffer(buffer_capacity)));
+			_lv2_buffers.push_back(
+				std::make_pair(false,
+				               lv2_evbuf_new(buffer_capacity, LV2_EVBUF_EVENT, 0)));
 		}
 	}
 #endif
@@ -248,50 +250,61 @@ BufferSet::get(DataType type, size_t i) const
 
 #ifdef LV2_SUPPORT
 
-LV2EventBuffer&
-BufferSet::get_lv2_midi(bool input, size_t i)
+LV2_Evbuf*
+BufferSet::get_lv2_midi(bool input, size_t i, uint32_t atom_type)
 {
-	assert (count().get(DataType::MIDI) > i);
+	assert(count().get(DataType::MIDI) > i);
 
-	MidiBuffer& mbuf = get_midi(i);
-	LV2Buffers::value_type b = _lv2_buffers.at(i * 2 + (input ? 0 : 1));
-	LV2EventBuffer* ebuf = b.second;
+	MidiBuffer&            mbuf  = get_midi(i);
+	LV2Buffers::value_type b     = _lv2_buffers.at(i * 2 + (input ? 0 : 1));
+	LV2_Evbuf*             evbuf = b.second;
+	lv2_evbuf_set_type(evbuf,
+	                   atom_type ? LV2_EVBUF_ATOM : LV2_EVBUF_EVENT,
+	                   atom_type);
 
-	ebuf->reset();
+	lv2_evbuf_reset(evbuf);
 	if (input) {
-		DEBUG_TRACE (PBD::DEBUG::LV2, string_compose ("%1 bytes of MIDI waiting @ %2\n", mbuf.size(), (void*) mbuf.data()));
+		DEBUG_TRACE(PBD::DEBUG::LV2,
+		            string_compose("%1 bytes of MIDI waiting @ %2\n",
+		                           mbuf.size(), (void*) mbuf.data()));
+		
+		LV2_Evbuf_Iterator i    = lv2_evbuf_begin(evbuf);
+		const uint32_t     type = LV2Plugin::midi_event_type(atom_type == 0);
 		for (MidiBuffer::iterator e = mbuf.begin(); e != mbuf.end(); ++e) {
 			const Evoral::MIDIEvent<framepos_t> ev(*e, false);
-			uint32_t type = LV2Plugin::midi_event_type();
 #ifndef NDEBUG
-			DEBUG_TRACE (PBD::DEBUG::LV2, string_compose ("\tMIDI event of size %1 @ %2\n", ev.size(), ev.time()));
+			DEBUG_TRACE(PBD::DEBUG::LV2,
+			            string_compose("\tMIDI event of size %1 @ %2\n",
+			                           ev.size(), ev.time()));
 			for (uint16_t x = 0; x < ev.size(); ++x) {
 				std::stringstream ss;
-				ss << "\t\tByte[" << x << "] = " << std::hex << (int) ev.buffer()[x] << std::dec << std::endl;
+				ss << "\t\tev[" << x << "] = " << std::hex << (int) ev.buffer()[x] << std::dec << std::endl;
 				DEBUG_TRACE (PBD::DEBUG::LV2, ss.str());
 			}
 #endif
-			ebuf->append(ev.time(), 0, type, ev.size(), ev.buffer());
+			lv2_evbuf_write(&i, ev.time(), 0, type, ev.size(), ev.buffer());
 		}
 	}
-	return *ebuf;
+	return evbuf;
 }
 
 void
 BufferSet::flush_lv2_midi(bool input, size_t i)
 {
-	MidiBuffer& mbuf = get_midi(i);
-	LV2Buffers::value_type b = _lv2_buffers.at(i * 2 + (input ? 0 : 1));
-	LV2EventBuffer* ebuf = b.second;
+	MidiBuffer&            mbuf  = get_midi(i);
+	LV2Buffers::value_type b     = _lv2_buffers.at(i * 2 + (input ? 0 : 1));
+	LV2_Evbuf*             evbuf = b.second;
 
 	mbuf.silence(0, 0);
-	for (ebuf->rewind(); ebuf->is_valid(); ebuf->increment()) {
+	for (LV2_Evbuf_Iterator i = lv2_evbuf_begin(evbuf);
+	     lv2_evbuf_is_valid(i);
+	     i = lv2_evbuf_next(i)) {
 		uint32_t frames;
 		uint32_t subframes;
-		uint16_t type;
-		uint16_t size;
+		uint32_t type;
+		uint32_t size;
 		uint8_t* data;
-		ebuf->get_event(&frames, &subframes, &type, &size, &data);
+		lv2_evbuf_get(i, &frames, &subframes, &type, &size, &data);
 #ifndef NDEBUG
 		DEBUG_TRACE (PBD::DEBUG::LV2, string_compose ("(FLUSH) MIDI event of size %1\n", size));
 		for (uint16_t x = 0; x < size; ++x) {
