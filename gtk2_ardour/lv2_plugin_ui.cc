@@ -40,23 +40,45 @@ using namespace PBD;
 static SuilHost* ui_host = NULL;
 
 void
-LV2PluginUI::lv2_ui_write(void*       controller,
-                          uint32_t    port_index,
-                          uint32_t    /*buffer_size*/,
-                          uint32_t    /*format*/,
-                          const void* buffer)
+LV2PluginUI::write_from_ui(void*       controller,
+                           uint32_t    port_index,
+                           uint32_t    buffer_size,
+                           uint32_t    format,
+                           const void* buffer)
 {
 	LV2PluginUI* me = (LV2PluginUI*)controller;
+	if (format == 0) {
+		if (port_index >= me->_controllables.size()) {
+			return;
+		}
 
-	if (port_index >= me->_controllables.size()) {
-		return;
+		boost::shared_ptr<AutomationControl> ac = me->_controllables[port_index];
+		if (ac) {
+			ac->set_value(*(float*)buffer);
+		}
+	} else if (format == me->_lv2->atom_eventTransfer()) {
+		me->_lv2->write_from_ui(port_index, format, buffer_size, (uint8_t*)buffer);
 	}
+}
 
-	boost::shared_ptr<AutomationControl> ac = me->_controllables[port_index];
+void
+LV2PluginUI::write_to_ui(void*       controller,
+                         uint32_t    port_index,
+                         uint32_t    buffer_size,
+                         uint32_t    format,
+                         const void* buffer)
+{
+	LV2PluginUI* me = (LV2PluginUI*)controller;
+	fprintf(stderr, "MESSAGE FROM PLUGIN %u BYTES\n", buffer_size);
+	suil_instance_port_event((SuilInstance*)me->_inst,
+	                         port_index, buffer_size, format, buffer);
+}
 
-	if (ac) {
-		ac->set_value(*(float*)buffer);
-	}
+bool
+LV2PluginUI::update_timeout()
+{
+	_lv2->emit_to_ui(this, &LV2PluginUI::write_to_ui);
+	return true;
 }
 
 void
@@ -173,7 +195,7 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 	}
 
 	if (!ui_host) {
-		ui_host = suil_host_new(LV2PluginUI::lv2_ui_write, NULL, NULL, NULL);
+		ui_host = suil_host_new(LV2PluginUI::write_from_ui, NULL, NULL, NULL);
 	}
 	const char* container_type = (is_external_ui)
 		? NS_UI "external"
@@ -245,6 +267,9 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 			}
 		}
 	}
+
+	Glib::signal_timeout().connect(
+		sigc::mem_fun(*this, &LV2PluginUI::update_timeout), 500);
 }
 
 void

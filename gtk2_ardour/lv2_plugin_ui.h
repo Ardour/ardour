@@ -79,12 +79,19 @@ class LV2PluginUI : public PlugUIBase, public Gtk::VBox
 
 	void* _inst;
 
-	static void lv2_ui_write(
-			void*       controller,
-			uint32_t    port_index,
-			uint32_t    buffer_size,
-			uint32_t    format,
-			const void* buffer);
+	static void write_from_ui(void*       controller,
+	                          uint32_t    port_index,
+	                          uint32_t    buffer_size,
+	                          uint32_t    format,
+	                          const void* buffer);
+
+	static void write_to_ui(void*       controller,
+	                        uint32_t    port_index,
+	                        uint32_t    buffer_size,
+	                        uint32_t    format,
+	                        const void* buffer);
+
+	bool update_timeout();
 
 	void lv2ui_instantiate(const std::string& title);
 	void lv2ui_free();

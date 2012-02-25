@@ -26,6 +26,7 @@
 
 #include "ardour/plugin.h"
 #include "ardour/uri_map.h"
+#include "pbd/ringbuffer.h"
 
 namespace ARDOUR {
 
@@ -113,6 +114,20 @@ class LV2Plugin : public ARDOUR::Plugin
 
 	bool has_editor () const;
 
+	uint32_t atom_eventTransfer() const;
+
+	void write_from_ui(uint32_t index, uint32_t protocol, uint32_t size, uint8_t* body);
+
+	typedef void UIMessageSink(void*       controller,
+	                           uint32_t    index,
+	                           uint32_t    size,
+	                           uint32_t    format,
+	                           const void* buffer);
+
+	void emit_to_ui(void* controller, UIMessageSink sink);
+
+	static URIMap _uri_map;
+
   private:
 	struct Impl;
 	Impl*         _impl;
@@ -122,6 +137,7 @@ class LV2Plugin : public ARDOUR::Plugin
 	float*        _control_data;
 	float*        _shadow_data;
 	float*        _defaults;
+	LV2_Evbuf**   _ev_buffers;
 	float*        _latency_control_port;
 	PBD::ID       _insert_id;
 
@@ -139,6 +155,28 @@ class LV2Plugin : public ARDOUR::Plugin
 	std::vector<PortFlags>         _port_flags;
 	std::map<std::string,uint32_t> _port_indices;
 
+	/// Message send to/from UI via ports
+	struct UIMessage {
+		uint32_t index;
+		uint32_t protocol;
+		uint32_t size;
+	};
+
+	void write_to_ui(uint32_t index,
+	                 uint32_t protocol,
+	                 uint32_t size,
+	                 uint8_t* body);
+
+	void write_to(RingBuffer<uint8_t>* dest,
+	              uint32_t             index,
+	              uint32_t             protocol,
+	              uint32_t             size,
+	              uint8_t*             body);
+
+	// Created on demand so the space is only consumed if necessary
+	RingBuffer<uint8_t>* _to_ui;
+	RingBuffer<uint8_t>* _from_ui;
+
 	typedef struct {
 		const void* (*extension_data) (const char* uri);
 	} LV2_DataAccess;
@@ -153,10 +191,10 @@ class LV2Plugin : public ARDOUR::Plugin
 	bool _was_activated;
 	bool _has_state_interface;
 
-	static URIMap   _uri_map;
 	static uint32_t _midi_event_type_ev;
 	static uint32_t _midi_event_type;
 	static uint32_t _sequence_type;
+	static uint32_t _event_transfer_type;
 	static uint32_t _state_path_type;
 
 	const std::string plugin_dir () const;
