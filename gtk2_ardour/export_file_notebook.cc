@@ -273,8 +273,13 @@ void
 ExportFileNotebook::FilePage::update_example_filename()
 {
 	if (profile_manager) {
-		std::string example = profile_manager->get_sample_filename_for_format (
-			filename_state->filename, format_state->format);
+
+		std::string example;
+		if (format_state->format) {
+			example = profile_manager->get_sample_filename_for_format (
+				filename_state->filename, format_state->format);
+		}
+		
 		if (example != "") {
 			sys::path path(example);
 			filename_selector.set_example_filename(path.leaf());

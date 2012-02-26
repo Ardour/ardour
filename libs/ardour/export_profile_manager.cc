@@ -714,6 +714,8 @@ ExportProfileManager::remove_filename_state (FilenameStatePtr state)
 std::string
 ExportProfileManager::get_sample_filename_for_format (ExportFilenamePtr filename, ExportFormatSpecPtr format)
 {
+	assert (format);
+	
 	if (channel_configs.empty()) { return ""; }
 
 	std::list<string> filenames;
