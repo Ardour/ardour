@@ -377,12 +377,14 @@ vstfx_get_info (char* dllpath)
 		return info;
 	} 
 	
-	if(!(h = vstfx_load(dllpath)))
+	if(!(h = vstfx_load(dllpath))) {
+		warning << "Cannot get LinuxVST information from " << dllpath << ": load failed." << endmsg;
 		return 0;
+	}
 	
 	if(!(vstfx = vstfx_instantiate(h, simple_master_callback, 0))) {
 	    	vstfx_unload(h);
-	    	vstfx_error( "** ERROR ** VSTFXinfofile : Instantiate failed\n" );
+		warning << "Cannot get LinuxVST information from " << dllpath << ": instantiation failed." << endmsg;
 	    	return 0;
 	}
 	
@@ -391,7 +393,7 @@ vstfx_get_info (char* dllpath)
 	if(!infofile) {
 		vstfx_close(vstfx);
 		vstfx_unload(h);
-		vstfx_error("cannot create new FST info file for plugin");
+		warning << "Cannot get LinuxVST information from " << dllpath << ": cannot create new FST info file." << endmsg;
 		return 0;
 	}
 	

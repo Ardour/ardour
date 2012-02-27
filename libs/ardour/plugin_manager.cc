@@ -696,7 +696,6 @@ PluginManager::lxvst_discover (string path)
 	char buf[32];
 
 	if ((finfo = vstfx_get_info (const_cast<char *> (path.c_str()))) == 0) {
-		warning << "Cannot get linuxVST information from " << path << endmsg;
 		return -1;
 	}
 
