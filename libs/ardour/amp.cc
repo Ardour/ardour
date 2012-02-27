@@ -458,3 +458,16 @@ Amp::visible() const
 {
 	return true;
 }
+
+std::string
+Amp::value_as_string (boost::shared_ptr<AutomationControl> ac) const
+{
+	if (ac == _gain_control) {
+		char buffer[32];
+		snprintf (buffer, sizeof (buffer), "%.2fdB", ac->internal_to_user (ac->get_value ()));
+		return buffer;
+	}
+
+	return Automatable::value_as_string (ac);
+}
+	
