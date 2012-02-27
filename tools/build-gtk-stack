@@ -4,7 +4,7 @@ download=
 
 while [ $# -gt 0 ] ; do
    case $1 in
-    --down*) $download=1 ; shift ;
+    --down*) download=1 ; shift ;
    esac
 done
 
