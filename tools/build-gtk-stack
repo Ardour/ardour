@@ -1,46 +1,86 @@
 #!/bin/sh
 
 download=
+clean=
+parallel=2
 
 while [ $# -gt 0 ] ; do
    case $1 in
-    --down*) download=1 ; shift ;
+    --down*) download=1 ; shift ;;
+    --clean*) clean=1 ; shift ;;
+    -j*) parallel=`echo $1 | sed 's/-j//'` ; shift ;;
    esac
 done
 
+
 if [ $download ] ; then
 # 1st level build tools
+    set -e
+    echo m4
     curl -O http://ftp.gnu.org/gnu/m4/m4-1.4.16.tar.bz2
+    echo automake
     curl -O http://ftp.gnu.org/gnu/automake/automake-1.11.3.tar.gz
+    echo autoconf
     curl -O http://ftp.gnu.org/gnu/autoconf/autoconf-2.68.tar.bz2
+    echo libtool
     curl -O http://mirrors.ibiblio.org/pub/mirrors/gnu/ftp/gnu/libtool/libtool-2.4.2.tar.gz
+    echo make
     curl -O http://ftp.gnu.org/gnu/make/make-3.82.tar.bz2
+    echo bison
     curl -O ftp://ftp.gnu.org/gnu/bison/bison-2.5.tar.bz2
+    echo glib
     curl -LO http://ftp.gnome.org/pub/gnome/sources/glib/2.31/glib-2.31.2.tar.bz2    
+    echo pkg-config
     curl -O http://pkgconfig.freedesktop.org/releases/pkg-config-0.26.tar.gz
+    echo readline
     curl -O ftp://ftp.cwru.edu/pub/bash/readline-6.2.tar.gz
+    echo zlib
     curl -O http://zlib.net/zlib-1.2.6.tar.bz2
+    echo libiconv
     curl -O ftp://ftp.gnu.org/gnu/libiconv/libiconv-1.14.tar.gz
+    echo gettext
     curl -O http://ftp.gnu.org/pub/gnu/gettext/gettext-0.18.1.1.tar.gz
+    echo libxml2
     curl -O ftp://xmlsoft.org/libxslt/libxml2-2.7.8.tar.gz
+    echo libxslt
     curl -O ftp://xmlsoft.org/libxslt/libxslt-1.1.26.tar.gz
+    echo tiff
     curl -O ftp://ftp.remotesensing.org/pub/libtiff/tiff-4.0.1.tar.gz
+    echo png
     curl -O ftp://ftp.simplesystems.org/pub/libpng/png/src/libpng-1.5.9.tar.gz
+    echo jpeg
     curl -O http://www.ijg.org/files/jpegsrc.v8d.tar.gz
+    echo perl xml parser
     curl -O http://search.cpan.org/CPAN/authors/id/T/TO/TODDR/XML-Parser-2.41.tar.gz
+    echo perl xml
     curl -O http://search.cpan.org/CPAN/authors/id/G/GR/GRANTM/XML-Simple-2.18.tar.gz
+    echo atk
     curl -O http://ftp.gnome.org/pub/GNOME/sources/atk/2.2/atk-2.2.0.tar.bz2
+    echo gnome-common
     curl -O http://ftp.acc.umu.se/pub/gnome/sources/gnome-common/2.34/gnome-common-2.34.0.tar.bz2
+    echo gtk-doc
     curl -O http://ftp.gnome.org/pub/GNOME/sources/gtk-doc/1.18/gtk-doc-1.18.tar.bz2
+    echo gnome-doc
     curl -O http://ftp.acc.umu.se/pub/gnome/sources/gnome-doc-utils/0.20/gnome-doc-utils-0.20.6.tar.bz2
+    echo pixman
     curl -O http://cgit.freedesktop.org/pixman/snapshot/pixman-0.24.4.tar.gz
+    echo ffi
+    curl -O ftp://sourceware.org/pub/libffi/libffi-3.0.10.tar.gz
+    echo freetype
     curl -LO http://download.savannah.gnu.org/releases/freetype/freetype-2.4.8.tar.bz2
+    echo fontconfig
     curl -LO http://www.freedesktop.org/software/fontconfig/release/fontconfig-2.8.0.tar.gz
+    echo cairo
     curl -LO http://cairographics.org/releases/cairo-1.10.2.tar.gz
+    echo pango
     curl -LO http://ftp.gnome.org/pub/GNOME/sources/pango/1.29/pango-1.29.5.tar.bz2
+    echo gdk-pixbuf
     curl -LO http://ftp.gnome.org/pub/GNOME/sources/gdk-pixbuf/2.24/gdk-pixbuf-2.24.0.tar.bz2
+    echo intltool
     curl -LO https://launchpad.net/intltool/trunk/0.50.2/+download/intltool-0.50.2.tar.gz
+    echo flex
     curl -L -o flex-2.5.25.tar.bz2 http://prdownloads.sourceforge.net/flex/flex-2.5.35.tar.bz2?download
+    echo gtk-osx-docbook
     curl -L -o gtk-osx-docbook-1.0.tar.gz http://sourceforge.net/projects/gtk-osx/files/GTK-OSX%20Build/gtk-osx-docbook-1.0.tar.gz/download
 
     exit 0
@@ -48,16 +88,24 @@ fi
 
 # target for install
 PREFIX=$HOME/gtk/inst
+
+if [ $clean ] ; then
+    rm -rf `ls -ld * | awk '/^d/ {print $9;}'`
+    # have to use sudo because we used sudo for libxml2 install, sigh.
+    sudo rm -rf $PREFIX
+    exit 0
+fi
+
 mkdir -p $PREFIX
 
-export MAKEFLAGS=-j2
+export MAKEFLAGS=-j$parallel
 PATH=$PREFIX/bin:$PATH
 
 if uname -a | grep --silent arwin ; then
     
     # its OS X! run for the hills !!
 
-    export DYLD_FALLBACK_LIBRARY_PATH=$PREFIX/lib
+    export DYLD_FALLBACK_LIBRARY_PATH=$PREFIX/lib${DYLD_FALLBACK_LIBRARY_PATH:+:$DYLD_FALLBACK_LIBRARY_PATH}
     # force compilation to use 10.4 APIs only. could be overkill, but better safe than sorry
     GLOBAL_CFLAGS="-DMAC_OS_X_VERSION_MIN_REQUIRED=1040 -DMAC_OSX_VERSION_MAX_ALLOWED=1040 -mmacosx-version-min=10.4"
     # for 10.5 and above, add to CFLAGS
@@ -68,9 +116,10 @@ if uname -a | grep --silent arwin ; then
     export MACOSX_DEPLOYMENT_TARGET=10.4
     # If the default python is not new enough, set PYTHON to point to a 
     # suitably new (2.7 or later) version of Python's framework
-    PYTHON=/Library/Frameworks/Python.framework/Versions/2.7
+    PYTHON=
+    #PYTHON=/Library/Frameworks/Python.framework/Versions/2.7
 else 
-    export LD_LIBRARY_PATH=$PREFIX/lib
+    export LD_LIBRARY_PATH=$PREFIX/lib{$LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
     GLOBAL_CFLAGS=
     GLOBAL_LDFLAGS=
 fi
@@ -86,13 +135,17 @@ tar  zxf libtool-2.4.2.tar.gz && (cd libtool-2.4.2 && CFLAGS=$GLOBAL_CFLAGS LD_F
 tar  jxf make-3.82.tar.bz2 && (cd make-3.82 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
 tar  jxf bison-2.5.tar.bz2 && (cd bison-2.5  && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
 tar  jxf flex-2.5.35.tar.bz2 && (cd flex-2.5.35  && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
-tar  zxf libxml2-2.7.8.tar.gz && (cd libxml2-2.7.8 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX --with-zlib=$PREFIX --with-python=$PYTHON && make && make install)
+#
+# libxml2 tries to install python modules in the system python folders and thus needs sudo for the install step. 
+# clean up afterwards to reset ownership on dirs and files created under $PREFIX as root
+# 
+tar  zxf libxml2-2.7.8.tar.gz && (cd libxml2-2.7.8 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX --with-zlib=$PREFIX ${PYTHON:+--with-python=$PYTHON} && make && sudo make install && sudo chown -R `whoami` $PREFIX)
 tar  zxf libxslt-1.1.26.tar.gz && (cd libxslt-1.1.26 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
 tar  zxf readline-6.2.tar.gz && (cd readline-6.2  && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
 tar  zxf libiconv-1.14.tar.gz && (cd libiconv-1.14  && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
-tar  zxf intltool-0.50.1.tar.gz && (cd intltool-0.50.1  && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
+tar  zxf intltool-0.50.2.tar.gz && (cd intltool-0.50.2  && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
 tar  zxf gettext-0.18.1.1.tar.gz && (cd gettext-0.18.1.1  && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
-tar  zxf tiff-4.0.1.tar.gz && (cd tiff-4.0.1 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
+tar  zxf tiff-4.0.1.tar.gz && (cd tiff-4.0.1 && CFLAGS="$GLOBAL_CFLAGS -DHAVE_APPLE_OPENGL_FRAMEWORK" LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
 tar  zxf libpng-1.5.9.tar.gz && (cd libpng-1.5.9 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
 tar  zxf jpegsrc.v8d.tar.gz && (cd jpeg-8d && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
 tar zxf XML-Simple-2.18.tar.gz && (cd XML-Simple-2.18 && perl Makefile.PL PREFIX=$PREFIX && make && make install)
@@ -100,9 +153,9 @@ tar zxf XML-Parser-2.40.tar.gz && (cd XML-Parser-2.40 && perl Makefile.PL PREFIX
 #
 # libffi has a bug that is caused by it depending on the output format of GNU wc(1)
 #  it can be avoided by changing into the target build directory, re-running configure and then running make from there.
-#  the target dir gets built by the first invocation of configure, and is the newest dir, so we find its name with ls -t|head -1
+#  the target dir gets built by the first invocation of configure, and is the newest dir, so we find its name with ls and awk.
 #
-tar zxf libffi-3.0.10.tar.gz && (cd libffi-3.0.10 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && cd `ls -t | head -1` && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ../configure --prefix=$PREFIX && make && make install)
+tar zxf libffi-3.0.10.tar.gz && (cd libffi-3.0.10 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && cd `ls -ltd * | awk '/^d/ {print $9; exit}'` && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ../configure --prefix=$PREFIX && make && make install)
 
 # time to bootstrap the circular dependency between pkg-config and glib.
 #
