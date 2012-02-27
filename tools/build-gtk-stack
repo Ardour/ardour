@@ -53,7 +53,7 @@ mkdir -p $PREFIX
 export MAKEFLAGS=-j2
 PATH=$PREFIX/bin:$PATH
 
-if uname -a | grep -s arwin ; then
+if uname -a | grep --silent arwin ; then
     
     # its OS X! run for the hills !!
 
