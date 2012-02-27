@@ -113,7 +113,7 @@ class LadspaPlugin : public ARDOUR::Plugin
 	LADSPA_Properties           properties() const                { return _descriptor->Properties; }
 	uint32_t                    index() const                     { return _index; }
 	const char *                copyright() const                 { return _descriptor->Copyright; }
-	LADSPA_PortDescriptor       port_descriptor(uint32_t i) const { return _descriptor->PortDescriptors[i]; }
+	LADSPA_PortDescriptor       port_descriptor(uint32_t i) const;
 	const LADSPA_PortRangeHint* port_range_hints() const          { return _descriptor->PortRangeHints; }
 	const char * const *        port_names() const                { return _descriptor->PortNames; }
 
