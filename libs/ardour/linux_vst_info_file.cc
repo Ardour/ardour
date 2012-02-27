@@ -20,6 +20,8 @@
 #include <glib.h>
 #include <glib/gstdio.h>
 
+#include "pbd/error.h"
+
 #include "ardour/linux_vst_support.h"
 
 #define MAX_STRING_LEN 256
@@ -378,13 +380,13 @@ vstfx_get_info (char* dllpath)
 	} 
 	
 	if(!(h = vstfx_load(dllpath))) {
-		warning << "Cannot get LinuxVST information from " << dllpath << ": load failed." << endmsg;
+		PBD::warning << "Cannot get LinuxVST information from " << dllpath << ": load failed." << endmsg;
 		return 0;
 	}
 	
 	if(!(vstfx = vstfx_instantiate(h, simple_master_callback, 0))) {
 	    	vstfx_unload(h);
-		warning << "Cannot get LinuxVST information from " << dllpath << ": instantiation failed." << endmsg;
+		PBD::warning << "Cannot get LinuxVST information from " << dllpath << ": instantiation failed." << endmsg;
 	    	return 0;
 	}
 	
@@ -393,7 +395,7 @@ vstfx_get_info (char* dllpath)
 	if(!infofile) {
 		vstfx_close(vstfx);
 		vstfx_unload(h);
-		warning << "Cannot get LinuxVST information from " << dllpath << ": cannot create new FST info file." << endmsg;
+		PBD::warning << "Cannot get LinuxVST information from " << dllpath << ": cannot create new FST info file." << endmsg;
 		return 0;
 	}
 	
