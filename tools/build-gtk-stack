@@ -39,9 +39,9 @@ if [ $download ] ; then
     curl -LO http://cairographics.org/releases/cairo-1.10.2.tar.gz
     curl -LO http://ftp.gnome.org/pub/GNOME/sources/pango/1.29/pango-1.29.5.tar.bz2
     curl -LO http://ftp.gnome.org/pub/GNOME/sources/gdk-pixbuf/2.24/gdk-pixbuf-2.24.0.tar.bz2
-    curl -LO http://prdownloads.sourceforge.net/flex/flex-2.5.35.tar.bz2?download
     curl -LO https://launchpad.net/intltool/trunk/0.50.2/+download/intltool-0.50.2.tar.gz
-    curl -LO http://sourceforge.net/projects/gtk-osx/files/GTK-OSX%20Build/gtk-osx-docbook-1.0.tar.gz/download
+    curl -L -o flex-2.5.25.tar.bz2 http://prdownloads.sourceforge.net/flex/flex-2.5.35.tar.bz2?download
+    curl -L -o gtk-osx-docbook-1.0.tar.gz http://sourceforge.net/projects/gtk-osx/files/GTK-OSX%20Build/gtk-osx-docbook-1.0.tar.gz/download
 
     exit 0
 fi
