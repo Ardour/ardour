@@ -37,6 +37,7 @@
 #include <ardour/session.h>
 #include <ardour/audioengine.h>
 #include <ardour/lv2_plugin.h>
+#include <ardour/tempo.h>
 
 #include <pbd/stl_delete.h>
 
@@ -97,14 +98,30 @@ LV2Plugin::init (LV2World& world, LilvPlugin* plugin, nframes_t rate)
 	_ui = NULL;
 	_control_data = 0;
 	_shadow_data = 0;
-	_latency_control_port = 0;
+	_bpm_control_port = NULL;
+	_freewheel_control_port = NULL;
+	_latency_control_port = NULL;
 	_was_activated = false;
 	
+	_instance_access_feature.URI = "http://lv2plug.in/ns/ext/instance-access";
+	_data_access_feature.URI = "http://lv2plug.in/ns/ext/data-access";
+
+	_features = (LV2_Feature**)malloc(sizeof(LV2_Feature*) * 5);
+	_features[0] = &_instance_access_feature;
+	_features[1] = &_data_access_feature;
+	_features[2] = &_urid_map_feature;
+	_features[3] = &_urid_unmap_feature;
+	_features[4] = NULL;
+
 	_instance = lilv_plugin_instantiate(plugin, rate, _features);
 	_name = lilv_plugin_get_name(plugin);
-	assert(_name);
 	_author = lilv_plugin_get_author_name(plugin);
 
+	_instance_access_feature.data = (void*)_instance->lv2_handle;
+
+	_data_access_extension_data.extension_data = _instance->lv2_descriptor->extension_data;
+	_data_access_feature.data = &_data_access_extension_data;
+	
 	if (_instance == 0) {
 		error << _("LV2: Failed to instantiate plugin ") << lilv_plugin_get_uri(plugin) << endl;
 		throw failed_constructor();
@@ -141,7 +158,21 @@ LV2Plugin::init (LV2World& world, LilvPlugin* plugin, nframes_t rate)
 	_defaults = new float[num_ports];
 
 	const bool latent = lilv_plugin_has_latency(plugin);
-	uint32_t latency_port = (latent ? lilv_plugin_get_latency_port_index(plugin) : 0);
+	uint32_t latency_index = (latent ? lilv_plugin_get_latency_port_index(plugin) : 0);
+
+#ifdef HAVE_NEW_LILV
+	#define NS_TIME "http://lv2plug.in/ns/ext/time#"
+	LilvNode* time_bpm = lilv_new_uri(_world.world, NS_TIME "beatsPerMinute");
+	LilvNode* lv2_freeWheeling = lilv_new_uri(_world.world, LILV_NS_LV2 "freeWheeling");
+
+	LilvPort* bpm_port = lilv_plugin_get_port_by_parameter(
+		plugin, _world.input_class, time_bpm);
+	LilvPort* freewheel_port = lilv_plugin_get_port_by_parameter(
+		plugin, _world.output_class, lv2_freeWheeling);
+
+	lilv_node_free(lv2_freeWheeling);
+	lilv_node_free(time_bpm);
+#endif
 
 	for (uint32_t i = 0; i < num_ports; ++i) {
 		if (parameter_is_control(i)) {
@@ -153,10 +184,22 @@ LV2Plugin::init (LV2World& world, LilvPlugin* plugin, nframes_t rate)
 
 			lilv_instance_connect_port (_instance, i, &_control_data[i]);
 
-			if (latent && i == latency_port) {
+			if (latent && i == latency_index) {
 				_latency_control_port = &_control_data[i];
 				*_latency_control_port = 0;
 			}
+
+#ifdef HAVE_NEW_LILV
+			if (parameter_is_input(i) && bpm_port
+			    && i == lilv_port_get_index(plugin, bpm_port)) {
+				_bpm_control_port = &_shadow_data[i];
+			}
+
+			if (parameter_is_input(i) && freewheel_port
+			    && i == lilv_port_get_index(plugin, freewheel_port)) {
+				_freewheel_control_port = &_shadow_data[i];
+			}
+#endif  // HAVE_NEW_LILV
 
 			if (parameter_is_input(i)) {
 				_shadow_data[i] = default_value (i);
@@ -484,6 +527,16 @@ LV2Plugin::connect_and_run (vector<Sample*>& bufs, uint32_t nbufs, int32_t& in_i
 
 	then = get_cycles ();
 
+	if (_freewheel_control_port) {
+		*_freewheel_control_port = _session.engine().freewheeling ();
+	}
+
+	if (_bpm_control_port) {
+		TempoMap& tmap (_session.tempo_map ());
+		TempoMap::Metric metric = tmap.metric_at (_session.transport_frame () + offset);
+		*_bpm_control_port = metric.tempo().beats_per_minute ();
+	}
+		
 	while (port_index < parameter_count()) {
 		if (parameter_is_audio(port_index)) {
 			if (parameter_is_input(port_index)) {

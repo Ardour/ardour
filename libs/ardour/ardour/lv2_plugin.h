@@ -136,7 +136,9 @@ class LV2Plugin : public ARDOUR::Plugin
 	float*          _control_data;
 	float*          _shadow_data;
 	float*          _defaults;
-	float*          _latency_control_port;
+	float*          _bpm_control_port;  ///< Special input set by ardour
+	float*          _freewheel_control_port;  ///< Special input set by ardour
+	float*          _latency_control_port;  ///< Special output set by plugin
 	bool            _was_activated;
 	vector<bool>    _port_is_input;
 
