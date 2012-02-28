@@ -49,7 +49,6 @@ static VSTInfo *
 load_vstfx_info_file (FILE* fp)
 {
 	VSTInfo *info;
-	int i;
 	
 	if ((info = (VSTInfo*) malloc (sizeof (VSTInfo))) == 0) {
 		return 0;
@@ -70,7 +69,7 @@ load_vstfx_info_file (FILE* fp)
 		goto error;
 	}
 
-	for (i=0; i<info->numParams; i++) {
+	for (int i = 0; i < info->numParams; ++i) {
 		if((info->ParamNames[i] = read_string(fp)) == 0) goto error;
 	}
 
@@ -78,7 +77,7 @@ load_vstfx_info_file (FILE* fp)
 		goto error;
 	}
 	
-	for (i=0; i < info->numParams; i++) {
+	for (int i = 0; i < info->numParams; ++i) {
 		if((info->ParamLabels[i] = read_string(fp)) == 0) goto error;
 	}
 	
@@ -92,8 +91,6 @@ load_vstfx_info_file (FILE* fp)
 static int
 save_vstfx_info_file (VSTInfo *info, FILE* fp)
 {
-    int i;
-
     if (info == 0) {
 	    vstfx_error("** ERROR ** VSTFXinfofile : info ptr is 0\n");
 	    return -1;
@@ -115,11 +112,11 @@ save_vstfx_info_file (VSTInfo *info, FILE* fp)
     fprintf( fp, "%d\n", info->hasEditor );
     fprintf( fp, "%d\n", info->canProcessReplacing );
 
-    for (i=0; i < info->numParams; i++) {
+    for (int i = 0; i < info->numParams; i++) {
 		fprintf(fp, "%s\n", info->ParamNames[i]);
     }
 	
-    for (i=0; i < info->numParams; i++) {
+    for (int i = 0; i < info->numParams; i++) {
 		fprintf(fp, "%s\n", info->ParamLabels[i]);
     }
 	
@@ -285,7 +282,6 @@ vstfx_info_from_plugin (VSTState* vstfx)
 	VSTInfo* info = (VSTInfo*) malloc (sizeof (VSTInfo));
 	
 	AEffect *plugin;
-	int i;
 	
 	/*We need to init the creator because some plugins
 	  fail to implement getVendorString, and so won't stuff the
@@ -326,7 +322,7 @@ vstfx_info_from_plugin (VSTState* vstfx)
 	info->ParamNames = (char **) malloc(sizeof(char*)*info->numParams);
 	info->ParamLabels = (char **) malloc(sizeof(char*)*info->numParams);
 
-	for(i=0; i < info->numParams; i++) {
+	for (int i = 0; i < info->numParams; ++i) {
 		char name[64];
 		char label[64];
 		
