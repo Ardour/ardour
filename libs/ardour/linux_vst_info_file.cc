@@ -369,6 +369,7 @@ vstfx_get_info (char* dllpath)
 		VSTInfo *info;
 		info = load_vstfx_info_file (infofile);
 		fclose (infofile);
+		PBD::warning << "Cannot get LinuxVST information form " << dllpath << ": info file load failed." << endmsg;
 		return info;
 	} 
 	
