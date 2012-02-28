@@ -64,6 +64,8 @@ class Send : public Delivery
 
 	bool set_name (const std::string& str);
 
+	std::string value_as_string (boost::shared_ptr<AutomationControl>) const;
+	
 	static uint32_t how_many_sends();
 	static void make_unique (XMLNode &, Session &);
 

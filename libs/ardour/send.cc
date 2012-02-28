@@ -357,3 +357,11 @@ Send::display_to_user () const
 
 	return true;
 }
+
+string
+Send::value_as_string (boost::shared_ptr<AutomationControl> ac) const
+{
+	return _amp->value_as_string (ac);
+}
+
+	
