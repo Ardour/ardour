@@ -5,6 +5,7 @@
 /***********************************************************/
 
 #include <iostream>
+#include <cassert>
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -279,6 +280,8 @@ int vstfx_can_midi (VSTState* vstfx)
 static VSTInfo *
 vstfx_info_from_plugin (VSTState* vstfx)
 {
+	assert (vstfx);
+	
 	VSTInfo* info = (VSTInfo*) malloc (sizeof (VSTInfo));
 	
 	AEffect *plugin;
@@ -289,12 +292,6 @@ vstfx_info_from_plugin (VSTState* vstfx)
 	  string with any name*/
 	
 	char creator[65] = "Unknown\0";
-	
-	if(!vstfx)
-	{
-		vstfx_error( "** ERROR ** VSTFXinfofile : vstfx ptr is 0\n" );
-		return 0;
-	}
 	
 	if(!info)
 		return 0;
