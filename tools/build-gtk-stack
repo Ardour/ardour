@@ -153,8 +153,10 @@ if [ $download ] ; then
     fi
 
     echo "GTK+ (2.24 branch)"
-    git clone git://git.gnome.org/gtk+
-    git checkout --track -b gtk-2-24 origin/gtk-2-24
+    if [ ! -d gtk+ ] ; then
+        git clone git://git.gnome.org/gtk+
+        git checkout --track -b gtk-2-24 origin/gtk-2-24
+    fi
 
     exit 0
 fi
