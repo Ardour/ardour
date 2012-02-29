@@ -877,7 +877,7 @@ RCOptionEditor::RCOptionEditor ()
                         procs->add (i, string_compose (_("%1 processors"), i));
                 }
 
-		procs->set_note (_("This setting will only take effect when Ardour is restarted."));
+		procs->set_note (string_compose (_("This setting will only take effect when %1 is restarted."), PROGRAM_NAME));
 
                 add_option (_("Misc"), procs);
         }
@@ -1552,7 +1552,7 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (S_("Visual|Interface"),
 		    new BoolOption (
 			    "use-own-plugin-gui",
-			    _("Use plugins' own interface instead of Ardour's basic one"),
+			    _("Use plugins' own interface instead of a builtin one"),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_use_plugin_own_gui),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_use_plugin_own_gui)
 			    ));

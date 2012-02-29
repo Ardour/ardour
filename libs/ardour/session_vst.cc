@@ -282,7 +282,7 @@ intptr_t Session::vst_callback (
 	case audioMasterGetProductString:
 		SHOW_CALLBACK ("amc: audioMasterGetProductString\n");
 		// fills <ptr> with a string with product name (max 64 char)
-		strcpy ((char*) ptr, "Ardour");
+		strcpy ((char*) ptr, PROGRAM_NAME);
 		return 0;
 
 	case audioMasterGetVendorVersion:

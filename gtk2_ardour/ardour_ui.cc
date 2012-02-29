@@ -3110,9 +3110,9 @@ require some unused files to continue to exist."));
 	}
 
 	if (removed > 1) {
-		txt.set_text (string_compose (plural_msg, removed, dead_directory, space_adjusted, bprefix));
+		txt.set_text (string_compose (plural_msg, removed, dead_directory, space_adjusted, bprefix, PROGRAM_NAME));
 	} else {
-		txt.set_text (string_compose (singular_msg, removed, dead_directory, space_adjusted, bprefix));
+		txt.set_text (string_compose (singular_msg, removed, dead_directory, space_adjusted, bprefix, PROGRAM_NAME));
 	}
 
 	dhbox.pack_start (*dimage, true, false, 5);
@@ -3212,7 +3212,7 @@ Clean-up will move all unused files to a \"dead\" location."));
 The following %1 files were not in use and \n\
 have been moved to:\n\n\
 %2\n\n\
-After a restart of Ardour,\n\n\
+After a restart of %5,\n\n\
 Session -> Clean-up -> Flush Wastebasket\n\n\
 will release an additional\n\
 %3 %4bytes of disk space.\n"),
@@ -3220,7 +3220,7 @@ will release an additional\n\
 The following file was not in use and \n\
 has been moved to:\n				\
 %2\n\n\
-After a restart of Ardour,\n\n\
+After a restart of %5,\n\n\
 Session -> Clean-up -> Flush Wastebasket\n\n\
 will release an additional\n\
 %3 %4bytes of disk space.\n"
