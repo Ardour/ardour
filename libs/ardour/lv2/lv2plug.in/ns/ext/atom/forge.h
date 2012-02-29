@@ -131,6 +131,7 @@ lv2_atom_forge_set_buffer(LV2_Atom_Forge* forge, uint8_t* buf, size_t size)
 	forge->offset = 0;
 	forge->sink   = NULL;
 	forge->handle = NULL;
+	forge->stack  = NULL;
 }
 
 /**
@@ -154,6 +155,7 @@ lv2_atom_forge_set_sink(LV2_Atom_Forge*            forge,
 	forge->size   = forge->offset = 0;
 	forge->sink   = sink;
 	forge->handle = handle;
+	forge->stack  = NULL;
 }
 
 /**
@@ -195,7 +197,7 @@ lv2_atom_forge_raw(LV2_Atom_Forge* forge, const void* data, uint32_t size)
 {
 	uint8_t* out = NULL;
 	if (forge->sink) {
-		out = forge->sink(forge->handle, data, size);
+		out = (uint8_t*)forge->sink(forge->handle, data, size);
 	} else {
 		out = forge->buf + forge->offset;
 		if (forge->offset + size > forge->size) {
@@ -295,12 +297,12 @@ lv2_atom_forge_string_body(LV2_Atom_Forge* forge,
                            const uint8_t*  str,
                            uint32_t        len)
 {
-	uint8_t* out = NULL;
+	void* out = NULL;
 	if (   (out = lv2_atom_forge_raw(forge, str, len))
 	    && (out = lv2_atom_forge_raw(forge, "", 1))) {
 		lv2_atom_forge_pad(forge, len + 1);
 	}
-	return out;
+	return (uint8_t*)out;
 }
 
 /** Write an atom compatible with atom:String.  Used internally. */
@@ -424,7 +426,7 @@ static inline LV2_Atom_Tuple*
 lv2_atom_forge_tuple(LV2_Atom_Forge* forge, LV2_Atom_Forge_Frame* frame)
 {
 	const LV2_Atom_Tuple a    = { { 0, forge->Tuple } };
-	LV2_Atom*            atom = lv2_atom_forge_write(forge, &a, sizeof(a));
+	LV2_Atom*            atom = (LV2_Atom*)lv2_atom_forge_write(forge, &a, sizeof(a));
 	return (LV2_Atom_Tuple*)lv2_atom_forge_push(forge, frame, atom);
 }
 

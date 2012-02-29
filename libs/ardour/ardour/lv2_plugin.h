@@ -130,6 +130,13 @@ class LV2Plugin : public ARDOUR::Plugin
 
 	static URIMap _uri_map;
 
+	static uint32_t _midi_event_type_ev;
+	static uint32_t _midi_event_type;
+	static uint32_t _chunk_type;
+	static uint32_t _sequence_type;
+	static uint32_t _event_transfer_type;
+	static uint32_t _state_path_type;
+
   private:
 	struct Impl;
 	Impl*         _impl;
@@ -192,12 +199,6 @@ class LV2Plugin : public ARDOUR::Plugin
 
 	bool _was_activated;
 	bool _has_state_interface;
-
-	static uint32_t _midi_event_type_ev;
-	static uint32_t _midi_event_type;
-	static uint32_t _sequence_type;
-	static uint32_t _event_transfer_type;
-	static uint32_t _state_path_type;
 
 	const std::string plugin_dir () const;
 	const std::string scratch_dir () const;

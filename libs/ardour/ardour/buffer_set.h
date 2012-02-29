@@ -112,13 +112,13 @@ public:
 	}
 
 #ifdef LV2_SUPPORT
-	/** Get a MIDI buffer translated into an LV2 MIDI buffer for use with plugins.
-	 * The index here corresponds directly to MIDI buffer numbers (i.e. the index
-	 * passed to get_midi), translation back and forth will happen as needed.
-	 * If atom_type is 0 the returned buffer will be in the old event API
-	 * format.  Otherwise, atom_type must be the URID for atom:Sequence.
+	/** Get a MIDI buffer translated into an LV2 MIDI buffer for use with
+	 * plugins.  The index here corresponds directly to MIDI buffer numbers
+	 * (i.e. the index passed to get_midi), translation back and forth will
+	 * happen as needed.  If old_api is true, the returned buffer will be in
+	 * old event format.  Otherwise it will be in new atom sequence format.
 	 */
-	LV2_Evbuf* get_lv2_midi(bool input, size_t i, uint32_t atom_type);
+	LV2_Evbuf* get_lv2_midi(bool input, size_t i, bool old_api);
 
 	/** Flush modified LV2 event output buffers back to Ardour buffers */
 	void flush_lv2_midi(bool input, size_t i);

@@ -18,10 +18,11 @@
 #define LV2_EVBUF_H
 
 #include <stdint.h>
-#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
+#else
+#include <stdbool.h>
 #endif
 
 /**
@@ -54,11 +55,13 @@ typedef struct {
 
 /**
    Allocate a new, empty event buffer.
-   The URID for atom:Sequence must be passed for atom_Sequence if type is
-   LV2_EVBUF_ATOM.
+   URIDs for atom:Chunk and atom:Sequence must be passed for LV2_EVBUF_ATOM.
 */
 LV2_Evbuf*
-lv2_evbuf_new(uint32_t capacity, LV2_Evbuf_Type type, uint32_t atom_type);
+lv2_evbuf_new(uint32_t       capacity,
+              LV2_Evbuf_Type type,
+              uint32_t       atom_Chunk,
+              uint32_t       atom_Sequence);
 
 /**
    Free an event buffer allocated with lv2_evbuf_new.
@@ -67,21 +70,21 @@ void
 lv2_evbuf_free(LV2_Evbuf* evbuf);
 
 /**
-   Change the type of an existing event buffer.  This will clear and reset the
-   buffer, it is not possible to change the type and preserve the buffer
-   contents since the formats differ.  The URID for atom:Sequence must be
-   passed for atom_Sequence if type is LV2_EVBUF_ATOM.
+   Reset and change the type of an existing event buffer.
+   URIDs for atom:Chunk and atom:Sequence must be passed for LV2_EVBUF_ATOM.
 */
 void
-lv2_evbuf_set_type(LV2_Evbuf* evbuf, LV2_Evbuf_Type type, uint32_t atom_type);
+lv2_evbuf_set_type(LV2_Evbuf* evbuf, LV2_Evbuf_Type type);
 
 /**
    Clear and initialize an existing event buffer.
    The contents of buf are ignored entirely and overwritten, except capacity
    which is unmodified.
+   If input is false and this is an atom buffer, the buffer will be prepared
+   for writing by the plugin.  This MUST be called before every run cycle.
 */
 void
-lv2_evbuf_reset(LV2_Evbuf* evbuf);
+lv2_evbuf_reset(LV2_Evbuf* evbuf, bool input);
 
 /**
    Return the total padded size of the events stored in the buffer.

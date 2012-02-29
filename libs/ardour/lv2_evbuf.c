@@ -14,8 +14,6 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <stdint.h>
-#include <stdbool.h>
 #include <string.h>
 #include <stdlib.h>
 
@@ -27,9 +25,11 @@
 struct LV2_Evbuf_Impl {
 	LV2_Evbuf_Type type;
 	uint32_t       capacity;
+	uint32_t       atom_Chunk;
+	uint32_t       atom_Sequence;
 	union {
-		LV2_Event_Buffer     event;
-		LV2_Atom_Port_Buffer atom;
+		LV2_Event_Buffer  event;
+		LV2_Atom_Sequence atom;
 	} buf;
 };
 
@@ -40,14 +40,19 @@ lv2_evbuf_pad_size(uint32_t size)
 }
 
 LV2_Evbuf*
-lv2_evbuf_new(uint32_t capacity, LV2_Evbuf_Type type, uint32_t atom_type)
+lv2_evbuf_new(uint32_t       capacity,
+              LV2_Evbuf_Type type,
+              uint32_t       atom_Chunk,
+              uint32_t       atom_Sequence)
 {
 	// FIXME: memory must be 64-bit aligned
 	LV2_Evbuf* evbuf = (LV2_Evbuf*)malloc(
 		sizeof(LV2_Evbuf) + sizeof(LV2_Atom_Sequence) + capacity);
-	evbuf->capacity = capacity;
-	lv2_evbuf_set_type(evbuf, type, atom_type);
-	lv2_evbuf_reset(evbuf);
+	evbuf->capacity      = capacity;
+	evbuf->atom_Chunk    = atom_Chunk;
+	evbuf->atom_Sequence = atom_Sequence;
+	lv2_evbuf_set_type(evbuf, type);
+	lv2_evbuf_reset(evbuf, true);
 	return evbuf;
 }
 
@@ -58,7 +63,7 @@ lv2_evbuf_free(LV2_Evbuf* evbuf)
 }
 
 void
-lv2_evbuf_set_type(LV2_Evbuf* evbuf, LV2_Evbuf_Type type, uint32_t atom_type)
+lv2_evbuf_set_type(LV2_Evbuf* evbuf, LV2_Evbuf_Type type)
 {
 	evbuf->type = type;
 	switch (type) {
@@ -67,18 +72,13 @@ lv2_evbuf_set_type(LV2_Evbuf* evbuf, LV2_Evbuf_Type type, uint32_t atom_type)
 		evbuf->buf.event.capacity = evbuf->capacity;
 		break;
 	case LV2_EVBUF_ATOM:
-		evbuf->buf.atom.data       = (LV2_Atom*)(evbuf + 1);
-		evbuf->buf.atom.size       = sizeof(LV2_Atom_Port_Buffer);
-		evbuf->buf.atom.capacity   = evbuf->capacity;
-		evbuf->buf.atom.data->type = atom_type;
-		evbuf->buf.atom.data->size = 0;
 		break;
 	}
-	lv2_evbuf_reset(evbuf);
+	lv2_evbuf_reset(evbuf, true);
 }
 
 void
-lv2_evbuf_reset(LV2_Evbuf* evbuf)
+lv2_evbuf_reset(LV2_Evbuf* evbuf, bool input)
 {
 	switch (evbuf->type) {
 	case LV2_EVBUF_EVENT:
@@ -88,7 +88,13 @@ lv2_evbuf_reset(LV2_Evbuf* evbuf)
 		evbuf->buf.event.size        = 0;
 		break;
 	case LV2_EVBUF_ATOM:
-		evbuf->buf.atom.data->size = 0;
+		if (input) {
+			evbuf->buf.atom.atom.size = 0;
+			evbuf->buf.atom.atom.type = evbuf->atom_Sequence;
+		} else {
+			evbuf->buf.atom.atom.size = evbuf->capacity;
+			evbuf->buf.atom.atom.type = evbuf->atom_Chunk;
+		}
 	}
 }
 
@@ -99,7 +105,9 @@ lv2_evbuf_get_size(LV2_Evbuf* evbuf)
 	case LV2_EVBUF_EVENT:
 		return evbuf->buf.event.size;
 	case LV2_EVBUF_ATOM:
-		return evbuf->buf.atom.data->size;
+		return evbuf->buf.atom.atom.type == evbuf->atom_Sequence
+			? evbuf->buf.atom.atom.size
+			: 0;
 	}
 	return 0;
 }
@@ -154,7 +162,7 @@ lv2_evbuf_next(LV2_Evbuf_Iterator iter)
 		break;
 	case LV2_EVBUF_ATOM:
 		size = ((LV2_Atom_Event*)
-		        ((char*)LV2_ATOM_CONTENTS(LV2_Atom_Sequence, evbuf->buf.atom.data)
+		        ((char*)LV2_ATOM_CONTENTS(LV2_Atom_Sequence, &evbuf->buf.atom)
 		         + offset))->body.size;
 		offset += lv2_evbuf_pad_size(sizeof(LV2_Atom_Event) + size);
 		break;
@@ -179,10 +187,10 @@ lv2_evbuf_get(LV2_Evbuf_Iterator iter,
 		return false;
 	}
 
-	LV2_Event_Buffer*     ebuf;
-	LV2_Event*            ev;
-	LV2_Atom_Port_Buffer* abuf;
-	LV2_Atom_Event*       aev;
+	LV2_Event_Buffer*  ebuf;
+	LV2_Event*         ev;
+	LV2_Atom_Sequence* aseq;
+	LV2_Atom_Event*    aev;
 	switch (iter.evbuf->type) {
 	case LV2_EVBUF_EVENT:
 		ebuf = &iter.evbuf->buf.event;
@@ -194,9 +202,9 @@ lv2_evbuf_get(LV2_Evbuf_Iterator iter,
 		*data      = (uint8_t*)ev + sizeof(LV2_Event);
 		break;
 	case LV2_EVBUF_ATOM:
-		abuf = &iter.evbuf->buf.atom;
+		aseq = (LV2_Atom_Sequence*)&iter.evbuf->buf.atom;
 		aev = (LV2_Atom_Event*)(
-			(char*)LV2_ATOM_CONTENTS(LV2_Atom_Sequence, abuf->data)
+			(char*)LV2_ATOM_CONTENTS(LV2_Atom_Sequence, aseq)
 			+ iter.offset);
 		*frames    = aev->time.frames;
 		*subframes = 0;
@@ -217,10 +225,10 @@ lv2_evbuf_write(LV2_Evbuf_Iterator* iter,
                 uint32_t            size,
                 const uint8_t*      data)
 {
-	LV2_Event_Buffer*     ebuf;
-	LV2_Event*            ev;
-	LV2_Atom_Port_Buffer* abuf;
-	LV2_Atom_Event*       aev;
+	LV2_Event_Buffer*  ebuf;
+	LV2_Event*         ev;
+	LV2_Atom_Sequence* aseq;
+	LV2_Atom_Event*    aev;
 	switch (iter->evbuf->type) {
 	case LV2_EVBUF_EVENT:
 		ebuf = &iter->evbuf->buf.event;
@@ -241,22 +249,23 @@ lv2_evbuf_write(LV2_Evbuf_Iterator* iter,
 		iter->offset      += size;
 		break;
 	case LV2_EVBUF_ATOM:
-		abuf = &iter->evbuf->buf.atom;
-		if (abuf->capacity - abuf->data->size < sizeof(LV2_Atom_Event) + size) {
+		aseq = (LV2_Atom_Sequence*)&iter->evbuf->buf.atom;
+		if (iter->evbuf->capacity - sizeof(LV2_Atom) - aseq->atom.size
+		    < sizeof(LV2_Atom_Event) + size) {
 			return false;
 		}
 
 		aev = (LV2_Atom_Event*)(
-			(char*)LV2_ATOM_CONTENTS(LV2_Atom_Sequence, abuf->data)
+			(char*)LV2_ATOM_CONTENTS(LV2_Atom_Sequence, aseq)
 			+ iter->offset);
 		aev->time.frames = frames;
 		aev->body.type   = type;
 		aev->body.size   = size;
 		memcpy(LV2_ATOM_BODY(&aev->body), data, size);
 
-		size              = lv2_evbuf_pad_size(sizeof(LV2_Atom_Event) + size);
-		abuf->data->size += size;
-		iter->offset     += size;
+		size             = lv2_evbuf_pad_size(sizeof(LV2_Atom_Event) + size);
+		aseq->atom.size += size;
+		iter->offset    += size;
 		break;
 	}
 

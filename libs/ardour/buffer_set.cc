@@ -190,8 +190,10 @@ BufferSet::ensure_buffers(DataType type, size_t num_buffers, size_t buffer_capac
 	if (type == DataType::MIDI && _lv2_buffers.size() < _buffers[type].size() * 2 + 1) {
 		while (_lv2_buffers.size() < _buffers[type].size() * 2) {
 			_lv2_buffers.push_back(
-				std::make_pair(false,
-				               lv2_evbuf_new(buffer_capacity, LV2_EVBUF_EVENT, 0)));
+				std::make_pair(false, lv2_evbuf_new(buffer_capacity,
+				                                    LV2_EVBUF_EVENT,
+				                                    LV2Plugin::_chunk_type,
+				                                    LV2Plugin::_sequence_type)));
 		}
 	}
 #endif
@@ -251,25 +253,23 @@ BufferSet::get(DataType type, size_t i) const
 #ifdef LV2_SUPPORT
 
 LV2_Evbuf*
-BufferSet::get_lv2_midi(bool input, size_t i, uint32_t atom_type)
+BufferSet::get_lv2_midi(bool input, size_t i, bool old_api)
 {
 	assert(count().get(DataType::MIDI) > i);
 
 	MidiBuffer&            mbuf  = get_midi(i);
 	LV2Buffers::value_type b     = _lv2_buffers.at(i * 2 + (input ? 0 : 1));
 	LV2_Evbuf*             evbuf = b.second;
-	lv2_evbuf_set_type(evbuf,
-	                   atom_type ? LV2_EVBUF_ATOM : LV2_EVBUF_EVENT,
-	                   atom_type);
+	lv2_evbuf_set_type(evbuf, old_api ? LV2_EVBUF_EVENT : LV2_EVBUF_ATOM);
 
-	lv2_evbuf_reset(evbuf);
+	lv2_evbuf_reset(evbuf, input);
 	if (input) {
 		DEBUG_TRACE(PBD::DEBUG::LV2,
 		            string_compose("%1 bytes of MIDI waiting @ %2\n",
 		                           mbuf.size(), (void*) mbuf.data()));
 		
 		LV2_Evbuf_Iterator i    = lv2_evbuf_begin(evbuf);
-		const uint32_t     type = LV2Plugin::midi_event_type(atom_type == 0);
+		const uint32_t     type = LV2Plugin::midi_event_type(old_api);
 		for (MidiBuffer::iterator e = mbuf.begin(); e != mbuf.end(); ++e) {
 			const Evoral::MIDIEvent<framepos_t> ev(*e, false);
 #ifndef NDEBUG

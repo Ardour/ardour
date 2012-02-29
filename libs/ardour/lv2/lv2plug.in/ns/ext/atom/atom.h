@@ -33,6 +33,7 @@
 #define LV2_ATOM__Beats         LV2_ATOM_URI "#Beats"
 #define LV2_ATOM__Blank         LV2_ATOM_URI "#Blank"
 #define LV2_ATOM__Bool          LV2_ATOM_URI "#Bool"
+#define LV2_ATOM__Chunk         LV2_ATOM_URI "#Chunk"
 #define LV2_ATOM__Double        LV2_ATOM_URI "#Double"
 #define LV2_ATOM__Event         LV2_ATOM_URI "#Event"
 #define LV2_ATOM__Float         LV2_ATOM_URI "#Float"
@@ -55,6 +56,7 @@
 #define LV2_ATOM__Vector        LV2_ATOM_URI "#Vector"
 #define LV2_ATOM__beatTime      LV2_ATOM_URI "#beatTime"
 #define LV2_ATOM__bufferType    LV2_ATOM_URI "#bufferType"
+#define LV2_ATOM__childType     LV2_ATOM_URI "#childType"
 #define LV2_ATOM__eventTransfer LV2_ATOM_URI "#eventTransfer"
 #define LV2_ATOM__frameTime     LV2_ATOM_URI "#frameTime"
 #define LV2_ATOM__supports      LV2_ATOM_URI "#supports"
@@ -90,6 +92,12 @@ typedef struct {
 	uint32_t size;  /**< Size in bytes, not including type and size. */
 	uint32_t type;  /**< Type of this atom (mapped URI). */
 } LV2_Atom;
+
+/** A chunk of memory that may be uninitialized or contain an Atom. */
+typedef struct {
+	LV2_Atom atom;  /**< Atom header. */
+	LV2_Atom body;  /**< Body atom header. */
+} LV2_Atom_Chunk;
 
 /** An atom:Int32 or atom:Bool.  May be cast to LV2_Atom. */
 typedef struct {
@@ -228,29 +236,6 @@ typedef struct {
 	LV2_Atom              atom;  /**< Atom header. */
 	LV2_Atom_Literal_Body body;  /**< Body. */
 } LV2_Atom_Sequence;
-
-/**
-   The contents of an atom:AtomPort buffer.
-
-   This contains a pointer to an Atom, which is the data to be
-   processed/written, as well as additional metadata.  This struct may be
-   augmented in the future to add more metadata fields as they become
-   necessary.  The initial version of this struct contains data, size, and
-   capacity.  Implementations MUST check that any other fields they wish to use
-   are actually present by comparing the size with the offset of that field,
-   e.g.:
-
-   @code
-   if (offsetof(LV2_Atom_Port_Buffer, field) < buf->size) {
-       do_stuff_with(buf->field);
-   }
-   @endcode
-*/
-typedef struct {
-	LV2_Atom* data;      /** Pointer to data. */
-	uint32_t  size;      /** Total size of this struct. */
-	uint32_t  capacity;  /** Available space for data body. */
-} LV2_Atom_Port_Buffer;
 
 #ifdef __cplusplus
 }  /* extern "C" */
