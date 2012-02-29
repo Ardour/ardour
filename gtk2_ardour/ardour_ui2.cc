@@ -341,6 +341,7 @@ ARDOUR_UI::setup_transport ()
 	transport_button_size_group->add_widget (rec_button);
 	transport_button_size_group->add_widget (play_selection_button);
 	transport_button_size_group->add_widget (roll_button);
+	transport_button_size_group->add_widget (stop_button);
 
 	HBox* tbox1 = manage (new HBox);
 	HBox* tbox2 = manage (new HBox);
