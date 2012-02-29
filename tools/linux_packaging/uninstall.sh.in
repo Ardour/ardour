@@ -158,11 +158,6 @@ then
 		${SUPER} rm -f ${USER_DESKTOP_DIR}/${DESKTOP_LINK_FILE}
 	fi
 
-	if [ -e ${USER_DESKTOP_DIR}/${PGM_NAME}\ ${PGM_VERSION}\ User\ Manual.pdf ];
-	then
-		${SUPER} rm -f ${USER_DESKTOP_DIR}/${PGM_NAME}\ ${PGM_VERSION}\ User\ Manual.pdf
-	fi
-
 	# delete the bin link if it is linked to this version
 	if [ -e "${USER_BIN_DIR}/${PGM_NAME}" ]; 
 	then
