@@ -467,6 +467,15 @@ def build(bld):
     obj.install_path = bld.env['BINDIR']
     set_subst_dict(obj, wrapper_subst_dict)
 
+    if bld.is_defined('WINDOWS_VST_SUPPORT'):
+        obj              = bld(features = 'subst')
+        obj.source       = '../vst/ardourvst.in'
+        obj.target       = 'ardourvst3'
+        obj.chmod        = Utils.O755
+        obj.dict         = wrapper_subst_dict
+        obj.install_path = bld.env['BINDIR']
+        set_subst_dict(obj, wrapper_subst_dict)
+
     # Font configuration
 
     dark_rc_subst_dict = {}
