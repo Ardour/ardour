@@ -160,19 +160,15 @@ LV2Plugin::init (LV2World& world, LilvPlugin* plugin, nframes_t rate)
 	const bool latent = lilv_plugin_has_latency(plugin);
 	uint32_t latency_index = (latent ? lilv_plugin_get_latency_port_index(plugin) : 0);
 
-#ifdef HAVE_NEW_LILV
 	#define NS_TIME "http://lv2plug.in/ns/ext/time#"
-	LilvNode* time_bpm = lilv_new_uri(_world.world, NS_TIME "beatsPerMinute");
-	LilvNode* lv2_freeWheeling = lilv_new_uri(_world.world, LILV_NS_LV2 "freeWheeling");
-
-	LilvPort* bpm_port = lilv_plugin_get_port_by_parameter(
-		plugin, _world.input_class, time_bpm);
-	LilvPort* freewheel_port = lilv_plugin_get_port_by_parameter(
-		plugin, _world.output_class, lv2_freeWheeling);
-
-	lilv_node_free(lv2_freeWheeling);
-	lilv_node_free(time_bpm);
-#endif
+	
+	// Build an array of pointers to special parameter buffers
+	void*** params = new void**[num_ports];
+	for (uint32_t i = 0; i < num_ports; ++i) {
+		params[i] = NULL;
+	}
+	parameter_input (NS_TIME "beatsPerMinute", params, (void**)&_bpm_control_port);
+	parameter_input (LILV_NS_LV2 "freeWheeling", params, (void**)&_freewheel_control_port);
 
 	for (uint32_t i = 0; i < num_ports; ++i) {
 		if (parameter_is_control(i)) {
@@ -189,25 +185,18 @@ LV2Plugin::init (LV2World& world, LilvPlugin* plugin, nframes_t rate)
 				*_latency_control_port = 0;
 			}
 
-#ifdef HAVE_NEW_LILV
-			if (parameter_is_input(i) && bpm_port
-			    && i == lilv_port_get_index(plugin, bpm_port)) {
-				_bpm_control_port = &_shadow_data[i];
-			}
-
-			if (parameter_is_input(i) && freewheel_port
-			    && i == lilv_port_get_index(plugin, freewheel_port)) {
-				_freewheel_control_port = &_shadow_data[i];
-			}
-#endif  // HAVE_NEW_LILV
-
 			if (parameter_is_input(i)) {
 				_shadow_data[i] = default_value (i);
+				if (params[i]) {
+					*params[i] = (void*)&_shadow_data[i];
+				}
 			}
 		} else {
 			_defaults[i] = 0.0f;
 		}
 	}
+
+	delete[] params;
 
 	LilvUIs* uis = lilv_plugin_get_uis(plugin);
 	if (lilv_uis_size(uis) > 0) {
@@ -653,6 +642,21 @@ LV2Plugin::latency_compute_run ()
 	
 	run (bufsize);
 	deactivate ();
+}
+
+LilvPort*
+LV2Plugin::parameter_input (const char* uri, void** bufptrs[], void** bufptr)
+{
+	LilvPort* port = NULL;
+#ifdef HAVE_NEW_LILV
+	LilvNode* param = lilv_new_uri(_world.world, uri);
+	port = lilv_plugin_get_port_by_parameter(_plugin, _world.input_class, param);
+	lilv_node_free(param);
+	if (port) {
+		bufptrs[lilv_port_get_index(_plugin, port)] = bufptr;
+	}
+#endif
+	return port;
 }
 
 LV2World::LV2World()

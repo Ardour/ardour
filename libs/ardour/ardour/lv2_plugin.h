@@ -150,6 +150,11 @@ class LV2Plugin : public ARDOUR::Plugin
 	void init (LV2World& world, LilvPlugin* plugin, nframes_t rate);
 	void run (nframes_t nsamples);
 	void latency_compute_run ();
+
+	/** Find the LV2 input port for the given parameter.
+	 * If found, bufptrs[port_index] will be set to bufptr.
+	 */
+	LilvPort* parameter_input (const char* uri, void** bufptrs[], void** bufptr);
 };
 
 
