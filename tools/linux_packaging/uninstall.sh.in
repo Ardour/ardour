@@ -15,6 +15,9 @@ PGM_BUILD="%REPLACE_BUILD%"
 PGM_BUILDTYPE="%REPLACE_TYPE%"
 
 INSTALL_DEST_BASE=/opt
+USER_BIN_DIR="/usr/local/bin"
+
+UNINSTALLER="$(readlink -f "$0")"
 
 USER_NAME=$(logname)
 
@@ -46,29 +49,49 @@ if [ "$(id -u)" != "0" ]; then
 	if ! which sudo > /dev/null;
 	then
 		echo ""
-		echo "!!! ERROR !!!"
+		echo "Attempting to uninstall using su"
+		echo "Please enter root password below"
 		echo ""
-		echo "The uninstaller requires root privileges. It is currently not"
-		echo "running as root AND the program sudo is missing from this system."
-		echo ""
-		echo "Please correct this by running the uninstaller as root or"
-		echo "installing and configuring sudo."
-		echo ""
-		read -p "Press ENTER to exit uninstaller:" BLAH
-		exit 1
+
+		if ! su -c "${UNINSTALLER}";
+		then
+			echo ""
+			echo "!!! ERROR !!!"
+			echo ""
+			echo "This uninstaller requires root privileges. It is currently not"
+			echo "running as root AND an attempt to use su failed."
+			echo ""
+			echo "Please correct this by installing and configuring sudo or running"
+			echo "the uninstaller as root (su -c)."
+			echo ""
+			read -p "Press ENTER to exit uninstaller:" BLAH
+			exit 1
+		fi
+		exit
 	fi
 
 	if ! sudo date;
 	then
 		echo ""
-		echo "!!! ERROR !!!"
+		echo "Attempting to uninstall using su"
+		echo "Please enter root password below"
 		echo ""
-		echo "Either you don't know the root password or the user is not allowed to sudo"
-		echo "Please correct this and run the uninstaller again"
-		echo "(hint: use visudo to edit sudoers file or run the installer as root)"
-		echo ""
-		read -p "Press ENTER to exit uninstaller:" BLAH
-		exit 1
+
+		if ! su -c "${UNINSTALLER}";
+		then
+			echo ""
+			echo "!!! ERROR !!!"
+			echo ""
+			echo "This uninstaller requires root privileges. It is currently not"
+			echo "running as root AND an attempt to use both sudo and su failed."
+			echo ""
+			echo "Please correct this by installing and configuring sudo or running"
+			echo "the uninstaller as root (su -c)."
+			echo ""
+			read -p "Press ENTER to exit uninstaller:" BLAH
+			exit 1
+		fi
+		exit
 	fi
 	SUPER="sudo"
 fi
@@ -134,6 +157,19 @@ then
 	then
 		${SUPER} rm -f ${USER_DESKTOP_DIR}/${DESKTOP_LINK_FILE}
 	fi
+
+	# delete the bin link if it is linked to this version
+	if [ -e "${USER_BIN_DIR}/${PGM_NAME}3" ]; 
+	then
+		BIN_LINK_TARGET=$(readlink "${USER_BIN_DIR}/${PGM_NAME}3")
+		BIN_LINK_TARGET_DIR=$(dirname "${BIN_LINK_TARGET}")
+
+		if [ "${BIN_LINK_TARGET_DIR}" = "${PGM_PATH}/bin" ];
+		then
+			${SUPER} rm -f "${USER_BIN_DIR}/${PGM_NAME}3"
+		fi
+	fi
+	
 
 	# delete the old package
 	${SUPER} rm -rf ${PGM_PATH}

@@ -15,6 +15,7 @@ PGM_VENDOR="Ardour"
 PGM_EXEC_FILE="ardour3"
 
 INSTALL_DEST_BASE="/opt"
+USER_BIN_DIR="/usr/local/bin"
 
 PGM_NAME_LOWER=$(echo $PGM_NAME | tr '[:upper:]' '[:lower:]')
 
@@ -138,31 +139,49 @@ if [ "$(id -u)" != "0" ]; then
 	if ! which sudo > /dev/null;
 	then
 		echo ""
-		echo "!!! ERROR !!!"
+		echo "Sudo installed failed, attempting to install using su"
+		echo "Please enter root password below"
 		echo ""
-		echo "This installer requires root privileges. It is currently not"
-		echo "running as root AND the program sudo is missing from this system."
-		echo ""
-		echo "Please correct this by installing and configuring sudo or running"
-		echo "the installer as root (su -c)."
-		echo ""
-		read -p "Press ENTER to exit installer:" BLAH
-		exit 1
+
+		if ! su -c "./.stage2.run";
+		then
+			echo ""
+			echo "!!! ERROR !!!"
+			echo ""
+			echo "This installer requires root privileges. It is currently not"
+			echo "running as root AND an attempt to use su failed."
+			echo ""
+			echo "Please correct this by installing and configuring sudo or running"
+			echo "the installer as root (su -c)."
+			echo ""
+			read -p "Press ENTER to exit installer:" BLAH
+			exit 1
+		fi
+		exit
 	fi
 
 	if ! sudo date;
 	then
 		echo ""
-		echo "!!! ERROR !!!"
+		echo "Attempting to install using su"
+		echo "Please enter root password below"
 		echo ""
-		echo "This installer requires root privileges. It is currently not"
-		echo "running as root AND an attempt to use sudo failed."
-		echo ""
-		echo "Please correct this by installing and configuring sudo or running"
-		echo "the installer as root (su -c)."
-		echo ""
-		read -p "Press ENTER to exit installer:" BLAH
-		exit 1
+
+		if ! su -c "./.stage2.run";
+		then
+			echo ""
+			echo "!!! ERROR !!!"
+			echo ""
+			echo "This installer requires root privileges. It is currently not"
+			echo "running as root AND an attempt to use both sudo and su failed."
+			echo ""
+			echo "Please correct this by installing and configuring sudo or running"
+			echo "the installer as root (su -c)."
+			echo ""
+			read -p "Press ENTER to exit installer:" BLAH
+			exit 1
+		fi
+		exit
 	fi
 	SUPER="sudo"
 	
@@ -450,6 +469,25 @@ echo "Copying uninstall script to ${INSTALL_DEST_BASE}"
 echo ""
 
 ${SUPER} cp -f ${BUNDLE_DIR}/bin/*.uninstall.sh ${INSTALL_DEST_BASE}/.
+
+# Create link to the program in user bin
+
+echo ""
+echo "Creating link ${PGM_NAME}3 in ${USER_BIN_DIR}"
+echo ""
+
+if [ -d "${USER_BIN_DIR}" ]; then
+	if [ -e "${USER_BIN_DIR}/${PGM_NAME}3" ]; then
+		${SUPER} rm -f ${USER_BIN_DIR}/${PGM_NAME}3
+	fi
+
+	cd "${USER_BIN_DIR}"
+	${SUPER} ln -sf ${PGM_EXEC_PATH} ${PGM_NAME}3 
+	cd "${PKG_PATH}"
+	
+else
+	echo "Can not create link because ${USER_BIN_DIR} does not exist"
+fi
 
 ###########################
 # Check Jack and qjackctl
