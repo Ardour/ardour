@@ -1,10 +1,8 @@
 #!/bin/sh
 
-# NOTE: the use of PREFIX is incorrect - it should be INSTALL_PREFIX,
-# but somehow scons puts leading /'s on INSTALL_PREFIX and that causes
-# wine to be unable to find the .exe.so file
+export GTK_PATH=@LIBDIR@/ardour3${GTK_PATH:+:$GTK_PATH}
+export LD_LIBRARY_PATH=@LIBDIR@/ardour3${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 
-export GTK_PATH=%PREFIX%/lib/ardour3:$GTK_PATH
+exec wine @LIBDIR@/ardour3/ardour_vst.exe.so "$@"
 
-LD_LIBRARY_PATH=%PREFIX%/lib/ardour3:$LD_LIBRARY_PATH exec wine %PREFIX%/lib/ardour3/ardour_vst.exe.so "$@"
 
