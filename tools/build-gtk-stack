@@ -15,140 +15,144 @@ done
 
 if [ $download ] ; then
     set -e
-    echo xz
     if [ ! -f xz-5.0.3.tar.bz2 ] ; then
+        echo xz
 	curl -LO http://tukaani.org/xz/xz-5.0.3.tar.bz2
     fi
-    echo m4
+    if [ ! -f tar-1.26.tar.bz2 ] ; then
+        echo tar
+        curl -LO http://ftp.gnu.org/gnu/tar/tar-1.26.tar.bz2
+    fi
     if [ ! -f m4-1.4.16.tar.bz2 ] ; then
+        echo m4
 	curl -O http://ftp.gnu.org/gnu/m4/m4-1.4.16.tar.bz2
     fi
-    echo automake
     if [ ! -f automake-1.11.3.tar.gz ] ; then
+        echo automake
 	curl -O http://ftp.gnu.org/gnu/automake/automake-1.11.3.tar.gz
     fi
-    echo autoconf
     if [ ! -f autoconf-2.68.tar.bz2 ] ; then
+        echo autoconf
 	curl -O http://ftp.gnu.org/gnu/autoconf/autoconf-2.68.tar.bz2
     fi
-    echo libtool
     if [ ! -f libtool-2.4.2.tar.gz ] ; then
+        echo libtool
 	curl -O http://mirrors.ibiblio.org/pub/mirrors/gnu/ftp/gnu/libtool/libtool-2.4.2.tar.gz
     fi
-    echo make
     if [ ! -f make-3.82.tar.bz2 ] ; then
+        echo make
 	curl -O http://ftp.gnu.org/gnu/make/make-3.82.tar.bz2
     fi
-    echo bison
     if [ ! -f bison-2.5.tar.bz2 ] ; then
+        echo bison
 	curl -O ftp://ftp.gnu.org/gnu/bison/bison-2.5.tar.bz2
     fi
-    echo glib
     if [ ! -f glib-2.31.18.tar.xz ] ; then
+        echo glib
 	curl -LO http://ftp.gnome.org/pub/gnome/sources/glib/2.31/glib-2.31.18.tar.xz
     fi
-    echo pkg-config
     if [ ! -f pkg-config-0.26.tar.gz ] ; then
+        echo pkg-config
 	curl -O http://pkgconfig.freedesktop.org/releases/pkg-config-0.26.tar.gz
     fi
-    echo readline
     if [ ! -f readline-6.2.tar.gz ] ; then
+        echo readline
 	curl -O ftp://ftp.cwru.edu/pub/bash/readline-6.2.tar.gz
     fi
-    echo zlib
     if [ ! -f zlib-1.2.6.tar.bz2 ] ; then
+        echo zlib
 	curl -O http://zlib.net/zlib-1.2.6.tar.bz2
     fi
-    echo libiconv
     if [ ! -f libiconv-1.14.tar.gz ] ; then
+        echo libiconv
 	curl -O ftp://ftp.gnu.org/gnu/libiconv/libiconv-1.14.tar.gz
     fi
-    echo gettext
     if [ ! -f gettext-0.18.1.1.tar.gz ] ; then
+        echo gettext
 	curl -O http://ftp.gnu.org/pub/gnu/gettext/gettext-0.18.1.1.tar.gz
     fi
-    echo libxml2
     if [ ! -f libxml2-2.7.8.tar.gz ] ; then
+        echo libxml2
 	curl -O ftp://xmlsoft.org/libxslt/libxml2-2.7.8.tar.gz
     fi
-    echo libxslt
     if [ ! -f libxslt-1.1.26.tar.gz ] ; then
+        echo libxslt
 	curl -O ftp://xmlsoft.org/libxslt/libxslt-1.1.26.tar.gz
     fi
-    echo tiff
     if [ ! -f tiff-4.0.1.tar.gz ] ; then
+        echo tiff
 	curl -O ftp://ftp.remotesensing.org/pub/libtiff/tiff-4.0.1.tar.gz
     fi
-    echo png
     if [ ! -f libpng-1.5.9.tar.gz ] ; then
+        echo png
 	curl -O ftp://ftp.simplesystems.org/pub/libpng/png/src/libpng-1.5.9.tar.gz
     fi
-    echo jpeg
     if [ ! -f jpegsrc.v8d.tar.gz ] ; then
+        echo jpeg
 	curl -O http://www.ijg.org/files/jpegsrc.v8d.tar.gz
     fi
-    echo perl xml parser
     if [ ! -f XML-Parser-2.41.tar.gz ] ; then
+        echo perl xml parser
 	curl -L -o XML-Parser-2.41.tar.gz http://search.cpan.org/CPAN/authors/id/T/TO/TODDR/XML-Parser-2.41.tar.gz
     fi
-    echo perl xml
     if [ ! -f XML-Simple-2.18.tar.gz ] ; then
+        echo perl xml
 	curl -L -o XML-Simple-2.18.tar.gz http://search.cpan.org/CPAN/authors/id/G/GR/GRANTM/XML-Simple-2.18.tar.gz
     fi
-    echo atk
     if [ ! -f atk-2.2.0.tar.bz2 ] ; then
+        echo atk
 	curl -O http://ftp.gnome.org/pub/GNOME/sources/atk/2.2/atk-2.2.0.tar.bz2
     fi
-    echo gnome-common
     if [ ! -f gnome-common-2.34.0.tar.bz2 ] ; then
+        echo gnome-common
 	curl -O http://ftp.acc.umu.se/pub/gnome/sources/gnome-common/2.34/gnome-common-2.34.0.tar.bz2
     fi
-    echo gtk-doc
     if [ ! -f gtk-doc-1.18.tar.bz2 ] ; then
+        echo gtk-doc
 	curl -O http://ftp.gnome.org/pub/GNOME/sources/gtk-doc/1.18/gtk-doc-1.18.tar.bz2
     fi
-    echo gnome-doc
     if [ ! -f gnome-doc-utils-0.20.6.tar.bz2 ] ; then
+        echo gnome-doc
 	curl -O http://ftp.acc.umu.se/pub/gnome/sources/gnome-doc-utils/0.20/gnome-doc-utils-0.20.6.tar.bz2
     fi
-    echo pixman
     if [ ! -f pixman-0.24.4.tar.gz ] ; then
+        echo pixman
 	curl -O http://cgit.freedesktop.org/pixman/snapshot/pixman-0.24.4.tar.gz
     fi
-    echo ffi
     if [ ! -f libffi-3.0.10.tar.gz ] ; then
+        echo ffi
 	curl -O ftp://sourceware.org/pub/libffi/libffi-3.0.10.tar.gz
     fi
-    echo freetype
     if [ ! -f freetype-2.4.8.tar.bz2 ] ; then
+        echo freetype
 	curl -L -o freetype-2.4.8.tar.bz2 http://sourceforge.net/projects/freetype/files/freetype2/2.4.8/freetype-2.4.8.tar.bz2/download
     fi
-    echo fontconfig
     if [ ! -f fontconfig-2.8.0.tar.gz ] ; then
+        echo fontconfig
 	curl -LO http://www.freedesktop.org/software/fontconfig/release/fontconfig-2.8.0.tar.gz
     fi
-    echo cairo
     if [ ! -f cairo-1.10.2.tar.gz ] ; then
+        echo cairo
 	curl -LO http://cairographics.org/releases/cairo-1.10.2.tar.gz
     fi
-    echo pango
     if [ ! -f pango-1.29.5.tar.bz2 ] ; then
+        echo pango
 	curl -LO http://ftp.gnome.org/pub/GNOME/sources/pango/1.29/pango-1.29.5.tar.bz2
     fi
-    echo gdk-pixbuf
     if [ ! -f gdk-pixbuf-2.25.2.tar.xz ] ; then
+        echo gdk-pixbuf
 	curl -LO http://ftp.gnome.org/pub/GNOME/sources/gdk-pixbuf/2.25/gdk-pixbuf-2.25.2.tar.xz
     fi
-    echo intltool
     if [ ! -f intltool-0.50.2.tar.gz ] ; then
+        echo intltool
 	curl -LO https://launchpad.net/intltool/trunk/0.50.2/+download/intltool-0.50.2.tar.gz
     fi
-    echo gtk-osx-docbook
     if [ ! -f gtk-osx-docbook-1.0.tar.gz ] ; then
+        echo gtk-osx-docbook
 	curl -L -o gtk-osx-docbook-1.0.tar.gz http://sourceforge.net/projects/gtk-osx/files/GTK-OSX%20Build/gtk-osx-docbook-1.0.tar.gz/download
     fi
-    echo gobject-introspection
     if [ ! -f gobject-introspection-1.31.10.tar.xz ] ; then
+        echo gobject-introspection
 	curl -LO http://ftp.gnome.org/pub/GNOME/sources/gobject-introspection/1.31/gobject-introspection-1.31.10.tar.xz
     fi
 
@@ -202,6 +206,7 @@ fi
 export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
 
 tar xf xz-5.0.3.tar.bz2 && (cd xz-5.0.3 && LDFLAGS="-L$PREFIX/lib" CFLAGS="-I$PREFIX/include" ./configure --prefix=$PREFIX && make && make install)
+tar xf tar-1.26.tar.bz2 && (cd tar-1.26 && LDFLAGS="-L$PREFIX/lib" CFLAGS="-I$PREFIX/include" ./configure --prefix=$PREFIX && make && make install)
 tar xf m4-1.4.16.tar.bz2 && (cd m4-1.4.16 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
 tar xf make-3.82.tar.bz2 && (cd make-3.82 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
 tar xf zlib-1.2.6.tar.bz2 && (cd zlib-1.2.6 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && PATH=/usr/bin:$PATH make && make install)
