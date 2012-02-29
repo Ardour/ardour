@@ -110,8 +110,8 @@ Configuration::load_state ()
 				return -1;
 			}
 		} else {
-			error << string_compose (_("your system %1 configuration file is empty. This probably means that there as an error installing Ardour"),
-						 PROGRAM_NAME)
+			error << string_compose (_("your system \"%1\" configuration file is empty. This probably means that there as an error installing %2"),
+						 rcfile, PROGRAM_NAME)
 			      << endmsg;
 		}
 	}

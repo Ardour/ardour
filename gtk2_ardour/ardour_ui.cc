@@ -3360,14 +3360,14 @@ ARDOUR_UI::pending_state_dialog ()
  	HBox* hbox = new HBox();
 	Image* image = new Image (Stock::DIALOG_QUESTION, ICON_SIZE_DIALOG);
 	ArdourDialog dialog (_("Crash Recovery"), true);
-	Label  message (_("\
+	Label  message (string_compose (_("\
 This session appears to have been in\n\
 middle of recording when ardour or\n\
 the computer was shutdown.\n\
 \n\
-Ardour can recover any captured audio for\n\
+%1 can recover any captured audio for\n\
 you, or it can ignore it. Please decide\n\
-what you would like to do.\n"));
+what you would like to do.\n"), PROGRAM_NAME));
 	image->set_alignment(ALIGN_CENTER, ALIGN_TOP);
 	hbox->pack_start (*image, PACK_EXPAND_WIDGET, 12);
 	hbox->pack_end (message, PACK_EXPAND_PADDING, 12);

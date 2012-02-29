@@ -623,9 +623,8 @@ Keyboard::load_keybindings (string path)
         std::map<string,string> dict;
         dict.insert (pair<string,string> ("<Meta>", "<Mod2>"));
         if (PBD::file_subst (path, dict)) {
-		cerr << string_compose (_("Your keybindings will be wrong. The file %1 needs to be editable by Ardour to update it"),
-					 path) 
-		      << endl;
+        	cerr << string_compose (_("Your keybindings will be wrong. The file %1 needs to be editable by %2 to update it"),
+					path, PROGRAM_NAME)
 	}
 #endif
 
