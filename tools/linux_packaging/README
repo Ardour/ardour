@@ -7,10 +7,9 @@ to the folder and run:
 	
 	./install.sh
 	
-The installer will ask for your root password (sudo), and copy the 
+The installer will ask for your root password (sudo/su), and copy the 
 contents of the appropriate bundle (32-bit or 64-bit) to your /opt
-folder. If your distro does not provide sudo, then run install.sh
-as root (su -c ./install.sh).
+folder. 
 
 
 * Links and Menu entries:
@@ -23,8 +22,8 @@ In addition to installing the program, the installer will create:
 
 * Uninstaller:
 
-To uninstall Ardour, run the uninstaller script in the /opt folder
-(as root).  This will remove the app, desktop links, menu links, and
+To uninstall Ardour, run the uninstaller script in the /opt folder.
+This will remove the app, desktop links, menu links, and
 the uninstaller itself.
 
 
