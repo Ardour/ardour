@@ -490,7 +490,7 @@ def configure(conf):
         #       off processor type.  Need to add in a check
         #       for that.
         #
-        conf.env.append_value('CXXFLAGS_OSX', '-F/System/LibraryFrameworks')
+        conf.env.append_value('CXXFLAGS_OSX', '-F/System/Library/Frameworks')
         conf.env.append_value('CXXFLAGS_OSX', '-F/Library/Frameworks')
 
         conf.env.append_value('LINKFLAGS_OSX', ['-framework', 'AppKit'])
