@@ -98,6 +98,10 @@ if [ $download ] ; then
 	echo libsndfile
 	curl -LO http://www.mega-nerd.com/libsndfile/files/libsndfile-1.0.25.tar.gz
     fi
+    if [ ! -f aubio-0.3.2.tar.gz ] ; then
+	echo aubio
+	curl -LO http://aubio.org/pub/aubio-0.3.2.tar.gz
+    fi
     if [ ! -f lv2core-6.0.tar.bz2 ] ; then 
 	echo lv2core
 	curl -LO http://lv2plug.in/spec/lv2core-6.0.tar.bz2
@@ -154,6 +158,7 @@ export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
 
 set -e
 
+
 tar xf boost_1_49_0.tar.bz2 && \
   (set -e && cd boost_1_49_0 && ./bootstrap.sh --prefix=$PREFIX --with-libraries=exception && ./b2 && ./b2 install)
 
@@ -204,10 +209,17 @@ tar xf libvorbis-1.3.2.tar.bz2 && \
 
 # sndfile-play incorrectly includes <Carbon.h> which no longer works on Lion
 tar xf libsndfile-1.0.25.tar.gz && \
-    (set -e && cd libsndfile-1.0.25 && CXXFLAGS="$GLOBAL_CFLAGS" CFLAGS="$GLOBAL_CFLAGS -I/System/Library/Frameworks/Carbon.framework/Headers" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX --disable-silent-rules && make && make install)
+    (set -e && cd libsndfile-1.0.25 && CFLAGS="$GLOBAL_CFLAGS -I/System/Library/Frameworks/Carbon.framework/Headers" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX --disable-silent-rules && make && make install)
 
+# samplerate incorrectly includes <Carbon.h> which no longer works on Lion
 tar xf libsamplerate-0.1.8.tar.gz && \
-    (set -e && cd libsamplerate-0.1.8 && CXXFLAGS="$GLOBAL_CFLAGS" CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
+    (set -e && cd libsamplerate-0.1.8 && CFLAGS="$GLOBAL_CFLAGS -I/System/Library/Frameworks/Carbon.framework/Headers" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
+
+tar xf aubio-0.3.2.tar.gz && \
+   (set -e && cd aubio-0.3.2 && sed '/no-long-double/d' < ./configure > ./configure.XXX && mv ./configure.XXX ./configure && chmod +x ./configure && CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
+
+# LRDF from git
+(set -e && git clone https://github.com/swh/LRDF.git && cd LRDF && CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" sh ./autogen.sh --prefix=$PREFIX && make && make install)
 
 tar xf lv2core-6.0.tar.bz2 && \
     (set -e && cd lv2core-6.0 && ./waf configure --prefix=$PREFIX && ./waf && sudo ./waf install)
