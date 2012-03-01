@@ -22,6 +22,7 @@
 
 #include <string>
 #include <cstdlib>
+#include <typeinfo>
 
 #ifdef __GNUC__
 #include <cxxabi.h>
