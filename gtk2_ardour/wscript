@@ -374,7 +374,7 @@ def build(bld):
         # now the shared library containing the GTK GUI for ardour
         obj = bld (features = 'cxx c cxxshlib')
         obj.source    = gtk2_ardour_sources
-        obj.includes  = [ '../libs/fst' ]
+        obj.includes  = [ '../libs/fst', '.' ]
         obj.target    = 'gtk2_ardour'
     else:
         # just the normal executable version of the GTK GUI
