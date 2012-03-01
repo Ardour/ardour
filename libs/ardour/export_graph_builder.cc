@@ -293,9 +293,10 @@ ExportGraphBuilder::Normalizer::Normalizer (ExportGraphBuilder & parent, FileSpe
   : parent (parent)
 {
 	config = new_config;
-	max_frames_out = 4086; // TODO good chunk size
-
-	buffer.reset (new AllocatingProcessContext<Sample> (max_frames_out, config.channel_config->get_n_chans()));
+	uint32_t const channels = config.channel_config->get_n_chans();
+	max_frames_out = 4086 - (4086 % channels); // TODO good chunk size
+	
+	buffer.reset (new AllocatingProcessContext<Sample> (max_frames_out, channels));
 	peak_reader.reset (new PeakReader ());
 	normalizer.reset (new AudioGrapher::Normalizer (config.format->normalize_target()));
 	threader.reset (new Threader<Sample> (parent.thread_pool));
@@ -304,8 +305,7 @@ ExportGraphBuilder::Normalizer::Normalizer (ExportGraphBuilder & parent, FileSpe
 	normalizer->add_output (threader);
 
 	int format = ExportFormatBase::F_RAW | ExportFormatBase::SF_Float;
-	tmp_file.reset (new TmpFile<float> (format, config.channel_config->get_n_chans(),
-	                                    config.format->sample_rate()));
+	tmp_file.reset (new TmpFile<float> (format, channels, config.format->sample_rate()));
 	tmp_file->FileWritten.connect_same_thread (post_processing_connection,
 	                                           boost::bind (&Normalizer::start_post_processing, this));
 
