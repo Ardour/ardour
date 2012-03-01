@@ -28,7 +28,7 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <glib/gatomic.h>
+#include <glib.h>
 #include <cassert>
 
 #include <pthread.h>
