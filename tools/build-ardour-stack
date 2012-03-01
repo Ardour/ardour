@@ -1,0 +1,231 @@
+#!/bin/sh
+
+download=
+clean=
+parallel=2
+
+while [ $# -gt 0 ] ; do
+   case $1 in
+    --down*) download=1 ; shift ;;
+    --clean*) clean=1 ; shift ;;
+    -j*) parallel=`echo $1 | sed 's/-j//'` ; shift ;;
+   esac
+done
+
+
+if [ $download ] ; then
+
+    set -e
+
+    if [ ! -f boost_1_49_0.tar.bz2 ] ; then 
+	echo boost
+	curl -L -o boost_1_49_0.tar.bz2 http://sourceforge.net/projects/boost/files/boost/1.49.0/boost_1_49_0.tar.bz2/download
+    fi
+    if [ ! -f fftw-3.3.1.tar.gz ] ; then
+	echo fftw
+	curl -LO http://www.fftw.org/fftw-3.3.1.tar.gz
+    fi
+    if [ ! -f libsigc++-2.2.10.tar.xz ] ; then 
+	echo sigc++
+	curl -LO http://ftp.gnome.org/pub/GNOME/sources/libsigc++/2.2/libsigc++-2.2.10.tar.xz
+    fi
+    if [ ! -f glibmm-2.30.1.tar.xz ] ; then
+	echo glibmm
+	curl -LO http://ftp.gnome.org/pub/GNOME/sources/glibmm/2.30/glibmm-2.30.1.tar.xz
+    fi
+    if [ ! -f cairomm-1.10.0.tar.gz ] ; then
+	echo cairomm
+	curl -LO http://cairographics.org/releases/cairomm-1.10.0.tar.gz
+    fi
+    if [ ! -f pangomm-2.28.4.tar.xz ] ; then 
+	echo pangomm
+	curl -LO http://ftp.acc.umu.se/pub/gnome/sources/pangomm/2.28/pangomm-2.28.4.tar.xz    
+    fi
+    if [ ! -f atkmm-2.22.6.tar.xz ] ; then 
+	echo atkmm
+	curl -LO http://ftp.gnome.org/pub/GNOME/sources/atkmm/2.22/atkmm-2.22.6.tar.xz
+    fi
+    if [ ! -f gtkmm-2.24.2.tar.xz ] ; then
+	echo gtkmm
+	curl -LO http://ftp.acc.umu.se/pub/GNOME/sources/gtkmm/2.24/gtkmm-2.24.2.tar.xz
+    fi
+    if [ ! -f libart_lgpl-2.3.21.tar.bz2 ] ; then 
+	echo libart_lgpl
+	curl -LO http://ftp.gnome.org/pub/gnome/sources/libart_lgpl/2.3/libart_lgpl-2.3.21.tar.bz2
+    fi
+    if [ ! -f libgnomecanvas-2.30.3.tar.bz2 ] ; then 
+	echo libgnomecanvas
+	curl -LO http://ftp.gnome.org/pub/gnome/sources/libgnomecanvas/2.30/libgnomecanvas-2.30.3.tar.bz2
+    fi
+    if [ ! -f libgnomecanvasmm-2.26.0.tar.bz2 ] ; then
+	echo libgnomecanvasmm
+	curl -LO http://ftp.acc.umu.se/pub/GNOME/sources/libgnomecanvasmm/2.26/libgnomecanvasmm-2.26.0.tar.bz2
+    fi
+
+    if [ ! -f liblo-0.26.tar.gz ] ; then 
+	echo liblo
+	curl -LO http://downloads.sourceforge.net/liblo/liblo-0.26.tar.gz
+    fi
+    if [ ! -f raptor2-2.0.6.tar.gz ] ; then 
+	echo raptor
+	curl -LO http://download.librdf.org/source/raptor2-2.0.6.tar.gz
+    fi
+    if [ ! -f rasqal-0.9.28.tar.gz ] ; then 
+	echo rasqal 
+	curl -LO http://download.librdf.org/source/rasqal-0.9.28.tar.gz
+    fi
+    if [ ! -f  redland-1.0.15.tar.gz ] ; then 
+	echo librdf
+	curl -LO http://download.librdf.org/source/redland-1.0.15.tar.gz
+    fi
+    if [ ! -f libogg-1.3.0.tar.xz ] ; then
+	echo libogg
+	curl -LO http://downloads.xiph.org/releases/ogg/libogg-1.3.0.tar.xz
+    fi
+    if [ ! -f flac-1.2.1.tar.gz ] ; then
+	echo flac
+	curl -LO http://downloads.xiph.org/releases/flac/flac-1.2.1.tar.gz
+    fi
+    if [ ! -f libvorbis-1.3.2.tar.bz2 ] ; then
+	echo libvorbis
+	curl -LO http://downloads.xiph.org/releases/vorbis/libvorbis-1.3.2.tar.bz2
+    fi
+    if [ ! -f libsamplerate-0.1.8.tar.gz  ] ; then
+	echo libsamplerate
+	curl -LO http://www.mega-nerd.com/SRC/libsamplerate-0.1.8.tar.gz
+    fi
+    if [ ! -f libsndfile-1.0.25.tar.gz ] ; then 
+	echo libsndfile
+	curl -LO http://www.mega-nerd.com/libsndfile/files/libsndfile-1.0.25.tar.gz
+    fi
+    if [ ! -f lv2core-6.0.tar.bz2 ] ; then 
+	echo lv2core
+	curl -LO http://lv2plug.in/spec/lv2core-6.0.tar.bz2
+    fi
+    if [ ! -f lv2-ui-2.4.tar.bz2 ] ; then 
+	echo lv2 UI
+	curl -LO http://lv2plug.in/spec/lv2-ui-2.4.tar.bz2
+    fi
+    if [ ! -f lv2-urid-1.0.tar.bz2 ] ; then
+	echo lv2 URID
+	curl -LO http://lv2plug.in/spec/lv2-urid-1.0.tar.bz2
+    fi
+    exit 0
+fi
+
+# target for install
+PREFIX=$HOME/a3/inst
+
+if [ $clean ] ; then
+    rm -rf `ls -ld * | awk '/^d/ {print $9;}'`
+    sudo rm -rf $PREFIX
+    exit 0
+fi
+
+mkdir -p $PREFIX
+
+export MAKEFLAGS=-j$parallel
+PATH=$PREFIX/bin:$PATH
+
+if uname -a | grep --silent arwin ; then
+    
+    # its OS X! run for the hills !!
+
+    export DYLD_FALLBACK_LIBRARY_PATH=$PREFIX/lib${DYLD_FALLBACK_LIBRARY_PATH:+:$DYLD_FALLBACK_LIBRARY_PATH}
+    # force compilation to use 10.4 APIs only. could be overkill, but better safe than sorry
+    GLOBAL_CFLAGS="-DMAC_OS_X_VERSION_MIN_REQUIRED=1040 -DMAC_OSX_VERSION_MAX_ALLOWED=1040 -mmacosx-version-min=10.4"
+    # for 10.5 and above, add to CFLAGS
+    # -sysroot=/Developer/SDKs/MacOSX10.4u.sdk"
+    GLOBAL_LDFLAGS=
+    # for 10.5 and above, add to LDFLAGS
+    # "-syslibroot /Developer/SDKs/MacOSX10.4u.sdk"
+    export MACOSX_DEPLOYMENT_TARGET=10.4
+    # If the default python is not new enough, set PYTHON to point to a 
+    # suitably new (2.7 or later) version of Python's framework
+    PYTHON=
+    #PYTHON=/Library/Frameworks/Python.framework/Versions/2.7
+else 
+    export LD_LIBRARY_PATH=$PREFIX/lib{$LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+    GLOBAL_CFLAGS=
+    GLOBAL_LDFLAGS=
+fi
+
+export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
+
+set -e
+
+tar xf boost_1_49_0.tar.bz2 && \
+  (set -e && cd boost_1_49_0 && ./bootstrap.sh --prefix=$PREFIX --with-libraries=exception && ./b2 && ./b2 install)
+
+tar xf fftw-3.3.1.tar.gz && \
+   (set -e && cd fftw-3.3.1 && ./configure --prefix=$PREFIX && make && make install && make clean && ./configure --prefix=$PREFIX --enable-single && make && make install)
+
+tar xf libsigc++-2.2.10.tar.xz && \
+    (set -e && cd libsigc++-2.2.10 && CXXFLAGS="$GLOBAL_CFLAGS" CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
+tar xf glibmm-2.30.1.tar.xz && \
+    (set -e && cd glibmm-2.30.1 && CXXFLAGS="$GLOBAL_CFLAGS" CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
+tar xf cairomm-1.10.0.tar.gz && \
+    (set -e && cd cairomm-1.10.0 && CXXFLAGS="$GLOBAL_CFLAGS" CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
+tar xf pangomm-2.28.4.tar.xz && \
+    (set -e && cd pangomm-2.28.4 && CXXFLAGS="$GLOBAL_CFLAGS" CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
+tar xf atkmm-2.22.6.tar.xz && \
+    (set -e && cd atkmm-2.22.6 && CXXFLAGS="$GLOBAL_CFLAGS" CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
+tar xf gtkmm-2.24.2.tar.xz && \
+   (set -e && cd gtkmm-2.24.2 && CXXFLAGS="$GLOBAL_CFLAGS" CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
+tar xf libart_lgpl-2.3.21.tar.bz2 && \
+    (set -e && cd libart_lgpl-2.3.21 && CXXFLAGS="$GLOBAL_CFLAGS" CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
+tar xf libgnomecanvas-2.30.3.tar.bz2 && \
+    (set -e && cd libgnomecanvas-2.30.3 && CXXFLAGS="$GLOBAL_CFLAGS" CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
+tar xf libgnomecanvasmm-2.26.0.tar.bz2 && \
+    (set -e && cd libgnomecanvasmm-2.26.0 && CXXFLAGS="$GLOBAL_CFLAGS" CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
+
+
+tar xf liblo-0.26.tar.gz && \
+    (set -e && cd liblo-0.26 && CXXFLAGS="$GLOBAL_CFLAGS" CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
+
+tar xf raptor2-2.0.6.tar.gz && \
+    (set -e && cd raptor2-2.0.6 && CXXFLAGS="$GLOBAL_CFLAGS" CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
+
+tar xf rasqal-0.9.28.tar.gz && \
+    (set -e && cd rasqal-0.9.28 && CXXFLAGS="$GLOBAL_CFLAGS" CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
+
+tar xf redland-1.0.15.tar.gz && \
+    (set -e && cd redland-1.0.15 && CXXFLAGS="$GLOBAL_CFLAGS" CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
+
+tar xf libogg-1.3.0.tar.xz && \
+    (set -e && cd libogg-1.3.0 && CXXFLAGS="$GLOBAL_CFLAGS" CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
+
+# FLAC will not build correctly on OS X Lion with asm optimization enabled, so lets at least force SSE
+tar xf flac-1.2.1.tar.gz && \
+    (set -e && cd flac-1.2.1 && CXXFLAGS="$GLOBAL_CFLAGS" CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX --disable-asm-optimizations --enable-sse --disable-debug && make && make install)
+
+tar xf libvorbis-1.3.2.tar.bz2 && \
+    (set -e && cd libvorbis-1.3.2 && CXXFLAGS="$GLOBAL_CFLAGS" CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
+
+# sndfile-play incorrectly includes <Carbon.h> which no longer works on Lion
+tar xf libsndfile-1.0.25.tar.gz && \
+    (set -e && cd libsndfile-1.0.25 && CXXFLAGS="$GLOBAL_CFLAGS" CFLAGS="$GLOBAL_CFLAGS -I/System/Library/Frameworks/Carbon.framework/Headers" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX --disable-silent-rules && make && make install)
+
+tar xf libsamplerate-0.1.8.tar.gz && \
+    (set -e && cd libsamplerate-0.1.8 && CXXFLAGS="$GLOBAL_CFLAGS" CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
+
+tar xf lv2core-6.0.tar.bz2 && \
+    (set -e && cd lv2core-6.0 && ./waf configure --prefix=$PREFIX && ./waf && sudo ./waf install)
+tar xf lv2-ui-2.4.tar.bz2 && \
+   (set -e && cd lv2-ui-2.4 && ./waf configure --prefix=$PREFIX && ./waf && sudo ./waf install)
+
+tar xf lv2-urid-1.0.tar.bz2 && \
+   (set -e && cd lv2-urid-1.0 && ./waf configure --prefix=$PREFIX && ./waf && sudo ./waf install)
+
+#
+# drobilla stuff is from svn for now
+#
+
+(if [ ! -d serd ] ; then mkdir serd ; fi && cd serd && svn co http://svn.drobilla.net/serd/trunk)  && \
+    (set -e && cd serd/trunk && ./waf configure --prefix=$PREFIX && ./waf && ./waf install)
+(if [ ! -d sord ] ; then mkdir sord ; fi && cd sord && svn co http://svn.drobilla.net/sord/trunk)  && \
+    (set -e && cd sord/trunk && ./waf configure --prefix=$PREFIX && ./waf && ./waf install)
+svn co http://svn.drobilla.net/lad/trunk/lilv && \
+    (set -e && cd lilv && ./waf configure --prefix=$PREFIX && ./waf && ./waf install)
+svn co http://svn.drobilla.net/lad/trunk/suil && \
+    (set -e && cd suil && CFLAGS="-I$PREFIX/include" ./waf configure --prefix=$PREFIX && ./waf && ./waf install)
