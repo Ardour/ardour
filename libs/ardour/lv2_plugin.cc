@@ -333,9 +333,9 @@ LV2Plugin::init(void* c_plugin, framecnt_t rate)
 		// Look for Gtk native UI
 		LILV_FOREACH(uis, i, uis) {
 			const LilvUI* ui = lilv_uis_get(uis, i);
-			if (lilv_ui_is_a(ui, _world.gtk_gui)) {
+			if (lilv_ui_is_a(ui, _world.ui_GtkUI)) {
 				_impl->ui      = ui;
-				_impl->ui_type = _world.gtk_gui;
+				_impl->ui_type = _world.ui_GtkUI;
 				break;
 			}
 		}
