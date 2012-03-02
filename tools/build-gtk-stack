@@ -47,9 +47,9 @@ if [ $download ] ; then
         echo bison
 	curl -O ftp://ftp.gnu.org/gnu/bison/bison-2.5.tar.bz2
     fi
-    if [ ! -f glib-2.31.18.tar.xz ] ; then
+    if [ ! -f glib-2.31.2.tar.bz2 ] ; then
         echo glib
-	curl -LO http://ftp.gnome.org/pub/gnome/sources/glib/2.31/glib-2.31.18.tar.xz
+	curl -LO http://ftp.gnome.org/pub/gnome/sources/glib/2.31/glib-2.31.2.tar.bz2
     fi
     if [ ! -f pkg-config-0.26.tar.gz ] ; then
         echo pkg-config
@@ -139,9 +139,9 @@ if [ $download ] ; then
         echo pango
 	curl -LO http://ftp.gnome.org/pub/GNOME/sources/pango/1.29/pango-1.29.5.tar.bz2
     fi
-    if [ ! -f gdk-pixbuf-2.25.2.tar.xz ] ; then
+    if [ ! -f gdk-pixbuf-2.25.0.tar.xz ] ; then
         echo gdk-pixbuf
-	curl -LO http://ftp.gnome.org/pub/GNOME/sources/gdk-pixbuf/2.25/gdk-pixbuf-2.25.2.tar.xz
+	curl -LO http://ftp.gnome.org/pub/GNOME/sources/gdk-pixbuf/2.25/gdk-pixbuf-2.25.0.tar.xz
     fi
     if [ ! -f intltool-0.50.2.tar.gz ] ; then
         echo intltool
@@ -159,6 +159,7 @@ if [ $download ] ; then
     echo "GTK+ (2.24 branch)"
     if [ ! -d gtk+ ] ; then
         git clone git://git.gnome.org/gtk+
+	cd gtk+
         git checkout --track -b gtk-2-24 origin/gtk-2-24
     fi
 
@@ -205,8 +206,15 @@ fi
 
 export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
 
-tar xf xz-5.0.3.tar.bz2 && (cd xz-5.0.3 && LDFLAGS="-L$PREFIX/lib" CFLAGS="-I$PREFIX/include" ./configure --prefix=$PREFIX && make && make install)
-tar xf tar-1.26.tar.bz2 && (cd tar-1.26 && LDFLAGS="-L$PREFIX/lib" CFLAGS="-I$PREFIX/include" ./configure --prefix=$PREFIX && make && make install)
+tar jxf xz-5.0.3.tar.bz2 && (cd xz-5.0.3 && LDFLAGS="-L$PREFIX/lib" CFLAGS="-I$PREFIX/include" ./configure --prefix=$PREFIX && make && make install)
+tar jxf tar-1.26.tar.bz2 && (cd tar-1.26 && LDFLAGS="-L$PREFIX/lib" CFLAGS="-I$PREFIX/include" ./configure --prefix=$PREFIX && make && make install)
+#
+# now we have a working, modern tar we can drop the compression-type flag
+#
+hash tar
+#
+# well, we do now ..
+#
 tar xf m4-1.4.16.tar.bz2 && (cd m4-1.4.16 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
 tar xf make-3.82.tar.bz2 && (cd make-3.82 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
 tar xf zlib-1.2.6.tar.bz2 && (cd zlib-1.2.6 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && PATH=/usr/bin:$PATH make && make install)
@@ -229,19 +237,18 @@ tar  xf tiff-4.0.1.tar.gz && (cd tiff-4.0.1 && CFLAGS="$GLOBAL_CFLAGS -DHAVE_APP
 tar  xf libpng-1.5.9.tar.gz && (cd libpng-1.5.9 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
 tar  xf jpegsrc.v8d.tar.gz && (cd jpeg-8d && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
 tar xf XML-Simple-2.18.tar.gz && (cd XML-Simple-2.18 && perl Makefile.PL PREFIX=$PREFIX && make && make install)
-tar xf XML-Parser-2.40.tar.gz && (cd XML-Parser-2.40 && perl Makefile.PL PREFIX=$PREFIX && make && make install)
+tar xf XML-Parser-2.41.tar.gz && (cd XML-Parser-2.41 && perl Makefile.PL PREFIX=$PREFIX && make && make install)
 #
 # libffi has a bug that is caused by it depending on the output format of GNU wc(1)
 #  it can be avoided by changing into the target build directory, re-running configure and then running make from there.
 #  the target dir gets built by the first invocation of configure, and is the newest dir, so we find its name with ls and awk.
 #
 tar xf libffi-3.0.10.tar.gz && (cd libffi-3.0.10 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && cd `ls -ltd * | awk '/^d/ {print $9; exit}'` && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ../configure --prefix=$PREFIX && make && make install)
-
 # time to bootstrap the circular dependency between pkg-config and glib.
 #
 # step one: build glib with everything specified so that pkg-config is not used or required
 #
-tar xf glib-2.31.18.tar.xz && (cd glib-2.31.18 && LDFLAGS=-L$PREFIX/lib CFLAGS=-I$PREFIX/include ZLIB_CFLAGS=-I$PREFIX/include ZLIB_LIBS=-I$PREFIX/lib LIBFFI_CFLAGS=-I$PREFIX/lib/libffi-3.0.10/include LIBFFI_LIBS="-L$PREFIX/lib -lffi" ./configure --prefix=$PREFIX --with-pcre=internal && make && make install) && rm -rf glib-2.31.18
+tar xf glib-2.31.2.tar.bz2 && (cd glib-2.31.2 && LDFLAGS=-L$PREFIX/lib CFLAGS=-I$PREFIX/include ZLIB_CFLAGS=-I$PREFIX/include ZLIB_LIBS=-I$PREFIX/lib LIBFFI_CFLAGS=-I$PREFIX/lib/libffi-3.0.10/include LIBFFI_LIBS="-L$PREFIX/lib -lffi" ./configure --prefix=$PREFIX --with-pcre=internal --disable-silent-rules && make && make install) && rm -rf glib-2.31.2
 #
 # step two: build pkg-config with glib flags specified so that pkg-config is not used or required
 #
@@ -268,7 +275,8 @@ tar xf freetype-2.4.8.tar.bz2 && (cd freetype-2.4.8 && CFLAGS=$GLOBAL_CFLAGS LD_
 tar xf fontconfig-2.8.0.tar.gz && (cd fontconfig-2.8.0 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
 tar xf cairo-1.10.2.tar.gz && (cd cairo-1.10.2 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
 tar xf pango-1.29.5.tar.bz2 && (cd pango-1.29.5 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
-tar xf gdk-pixbuf-2.25.2.tar.xz && (cd gdk-pixbuf-2.25.2 && LDFLAGS="$GLOBAL_LDFLAGS -L$PREFIX/lib" CFLAGS="-I$PREFIX/include $GLOBAL_CFLAGS" ./configure --prefix=$PREFIX && make && make install)
+
+tar xf gdk-pixbuf-2.25.0.tar.xz && (cd gdk-pixbuf-2.25.0 && LDFLAGS="$GLOBAL_LDFLAGS -L$PREFIX/lib" CFLAGS="-I$PREFIX/include $GLOBAL_CFLAGS" ./configure --prefix=$PREFIX && make && make install)
 # gobject-introspection uses #include <libintl.h> and there's no way to force the "scanner" to look outside the system tree
 sudo ln -s $PREFIX/include/libintl.h /usr/include
 tar xf gobject-introspection-1.31.10.tar.xz && (cd gobject-introspection-1.31.10 && LDFLAGS="$GLOBAL_LDFLAGS -L$PREFIX/lib -lintl" CFLAGS="-I$PREFIX/include $GLOBAL_CFLAGS" ./configure --prefix=$PREFIX --disable-silent-rules && make && make install)
