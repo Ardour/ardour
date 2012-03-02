@@ -175,7 +175,7 @@ setup_hardware_optimization (bool try_optimization)
 		}
 
 #elif defined (__APPLE__) && defined (BUILD_VECLIB_OPTIMIZATIONS)
-		long sysVersion = 0;
+		SInt32 sysVersion = 0;
 
 		if (noErr != Gestalt(gestaltSystemVersion, &sysVersion))
 			sysVersion = 0;

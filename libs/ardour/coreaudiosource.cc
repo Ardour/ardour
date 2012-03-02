@@ -224,7 +224,7 @@ CoreAudioSource::get_soundfile_info (string path, SoundFileInfo& _info, string&)
 {
 	FSRef ref;
 	ExtAudioFileRef af = 0;
-	size_t size;
+	UInt32 size;
 	CFStringRef name;
 	int ret = -1;
 
