@@ -377,6 +377,7 @@ def build(bld):
         obj = bld (features = 'cxx c cxxshlib')
         obj.source    = gtk2_ardour_sources
         obj.includes  = [ '../libs/fst', '.' ]
+        obj.name      = 'libgtk2_ardour'
         obj.target    = 'gtk2_ardour'
     else:
         # just the normal executable version of the GTK GUI
