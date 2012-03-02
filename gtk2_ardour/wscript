@@ -363,6 +363,7 @@ def build(bld):
                              'libtaglib',
                              'libardour',
                              'libardour_cp',
+                             'libgtk2_ardour',
                              'libgtkmm2ext',
                              'libtaglib' ]
         obj.target = 'ardour-3.0-vst.exe.so'
