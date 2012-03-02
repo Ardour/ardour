@@ -366,6 +366,7 @@ def build(bld):
                              'libgtkmm2ext',
                              'libtaglib' ]
         obj.target = 'ardour-3.0-vst.exe.so'
+        obj.includes  = [ '../libs/fst', '.' ]
         obj.linkflags = ['-mwindows', '-Wl,--export-dynamic', '-lpthread']
         obj.defines = ['_POSIX_SOURCE', 'USE_WS_PREFIX']
         obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
