@@ -3,6 +3,6 @@
 export GTK_PATH=@LIBDIR@/ardour3${GTK_PATH:+:$GTK_PATH}
 export LD_LIBRARY_PATH=@LIBDIR@/ardour3${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 
-exec wine @LIBDIR@/ardour3/ardour_vst.exe.so "$@"
+exec wine @LIBDIR@/ardour3/ardour-3.0-vst.exe.so "$@"
 
 
