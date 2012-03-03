@@ -634,12 +634,12 @@ LV2Plugin::add_state(XMLNode* root) const
 
 		if (!_impl->state || !lilv_state_equals(state, _impl->state)) {
 			lilv_state_save(_world.world,
+			                _uri_map.urid_map(),
 			                _uri_map.urid_unmap(),
 			                state,
 			                NULL,
 			                new_dir.c_str(),
-			                "state.ttl",
-			                NULL);
+			                "state.ttl");
 
 			lilv_state_free(_impl->state);
 			_impl->state = state;
