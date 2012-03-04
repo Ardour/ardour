@@ -68,6 +68,8 @@ class LV2PluginUI : public PlugUIBase, public Gtk::VBox
 	std::vector<int>                     _output_ports;
 	sigc::connection                     _screen_update_connection;
 	Gtk::Widget*                         _gui_widget;
+	/** a box containing the focus, bypass, delete, save / add preset buttons etc. */
+	Gtk::HBox*                           _ardour_buttons_box;
 	float*                               _values;
 	std::vector<ControllableRef>         _controllables;
 	struct lv2_external_ui_host          _external_ui_host;

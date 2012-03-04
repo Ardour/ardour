@@ -151,6 +151,7 @@ LV2PluginUI::LV2PluginUI(boost::shared_ptr<PluginInsert> pi,
 	: PlugUIBase(pi)
 	, _lv2(lv2p)
 	, _gui_widget(NULL)
+	, _ardour_buttons_box(NULL)
 	, _values(NULL)
 	, _external_ui_ptr(NULL)
 	, _inst(NULL)
@@ -228,17 +229,17 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 	_external_ui_ptr = NULL;
 	if (_inst) {
 		if (!is_external_ui) {
-			Gtk::HBox* box = manage (new Gtk::HBox);
-			box->set_spacing (6);
-			box->set_border_width (6);
-			box->pack_end (focus_button, false, false);
-			box->pack_end (bypass_button, false, false, 10);
-			box->pack_end (delete_button, false, false);
-			box->pack_end (save_button, false, false);
-			box->pack_end (add_button, false, false);
-			box->pack_end (_preset_combo, false, false);
-			box->show_all();
-			pack_start(*box, false, false);
+			_ardour_buttons_box = manage (new Gtk::HBox);
+			_ardour_buttons_box->set_spacing (6);
+			_ardour_buttons_box->set_border_width (6);
+			_ardour_buttons_box->pack_end (focus_button, false, false);
+			_ardour_buttons_box->pack_end (bypass_button, false, false, 10);
+			_ardour_buttons_box->pack_end (delete_button, false, false);
+			_ardour_buttons_box->pack_end (save_button, false, false);
+			_ardour_buttons_box->pack_end (add_button, false, false);
+			_ardour_buttons_box->pack_end (_preset_combo, false, false);
+			_ardour_buttons_box->show_all();
+			pack_start(*_ardour_buttons_box, false, false);
 
 			GtkWidget* c_widget = (GtkWidget*)GET_WIDGET(_inst);
 			_gui_widget = Glib::wrap(c_widget);
@@ -279,6 +280,12 @@ LV2PluginUI::lv2ui_free()
 
 	if (_gui_widget) {
 		remove (*_gui_widget);
+	}
+
+	if (_ardour_buttons_box) {
+		remove (*_ardour_buttons_box);
+		delete _ardour_buttons_box;
+		_ardour_buttons_box = 0;
 	}
 
 	suil_instance_free((SuilInstance*)_inst);
