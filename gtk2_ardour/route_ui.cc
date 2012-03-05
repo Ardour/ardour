@@ -1766,7 +1766,11 @@ RouteUI::setup_invert_buttons ()
 
 		b->set_name (X_("mixer strip button"));
 		if (to_add == 1) {
-			b->set_text (X_("Ø"));
+			if (N > 1) {
+				b->set_text (string_compose (X_("Ø (%1)"), N));
+			} else {
+				b->set_text (X_("Ø"));
+			}
 		} else {
 			b->set_text (string_compose (X_("Ø%1"), i + 1));
 		}
