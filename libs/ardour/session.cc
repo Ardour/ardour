@@ -4482,7 +4482,13 @@ Session::ensure_search_path_includes (const string& path, DataType type)
 	split (search_path, dirs, ':');
 
 	for (vector<string>::iterator i = dirs.begin(); i != dirs.end(); ++i) {
-		if (*i == path) {
+		/* No need to add this new directory if it has the same inode as
+		   an existing one; checking inode rather than name prevents duplicated
+		   directories when we are using symlinks.
+
+		   On Windows, I think we could just do if (*i == path) here.
+		*/
+		if (inodes_same (*i, path)) {
 			return;
 		}
 	}
