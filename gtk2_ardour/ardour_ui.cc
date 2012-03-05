@@ -651,59 +651,6 @@ ARDOUR_UI::update_autosave ()
 }
 
 void
-ARDOUR_UI::backend_audio_error (bool we_set_params, Gtk::Window* toplevel)
-{
-	string title;
-	if (we_set_params) {
-		title = string_compose (_("%1 could not start JACK"), PROGRAM_NAME);
-	} else {
-		title = string_compose (_("%1 could not connect to JACK."), PROGRAM_NAME);
-	}
-
-	MessageDialog win (title,
-			   false,
-			   Gtk::MESSAGE_INFO,
-			   Gtk::BUTTONS_NONE);
-
-	if (we_set_params) {
-		win.set_secondary_text(_("There are several possible reasons:\n\
-\n\
-1) You requested audio parameters that are not supported..\n\
-2) JACK is running as another user.\n\
-\n\
-Please consider the possibilities, and perhaps try different parameters."));
-	} else {
-		win.set_secondary_text(_("There are several possible reasons:\n\
-\n\
-1) JACK is not running.\n\
-2) JACK is running as another user, perhaps root.\n\
-3) There is already another client called \"ardour\".\n\
-\n\
-Please consider the possibilities, and perhaps (re)start JACK."));
-	}
-
-	if (toplevel) {
-		win.set_transient_for (*toplevel);
-	}
-
-	if (we_set_params) {
-		win.add_button (Stock::OK, RESPONSE_CLOSE);
-	} else {
-		win.add_button (Stock::QUIT, RESPONSE_CLOSE);
-	}
-
-	win.set_default_response (RESPONSE_CLOSE);
-
-	win.show_all ();
-	win.set_position (Gtk::WIN_POS_CENTER);
-	pop_back_splash (win);
-
-	/* we just don't care about the result, but we want to block */
-
-	win.run ();
-}
-
-void
 ARDOUR_UI::startup ()
 {
 	Application* app = Application::instance ();
@@ -1192,13 +1139,6 @@ ARDOUR_UI::update_wall_clock ()
 	return TRUE;
 }
 
-gint
-ARDOUR_UI::session_menu (GdkEventButton */*ev*/)
-{
-	session_popup_menu->popup (0, 0);
-	return TRUE;
-}
-
 void
 ARDOUR_UI::redisplay_recent_sessions ()
 {
@@ -1540,25 +1480,6 @@ restart JACK with more ports."), PROGRAM_NAME));
 }
 
 void
-ARDOUR_UI::do_transport_locate (framepos_t new_position, bool with_roll)
-{
-	framecnt_t _preroll = 0;
-
-	if (_session) {
-		// XXX CONFIG_CHANGE FIX - requires AnyTime handling
-		// _preroll = _session->convert_to_frames_at (new_position, Config->get_preroll());
-
-		if (new_position > _preroll) {
-			new_position -= _preroll;
-		} else {
-			new_position = 0;
-		}
-
-		_session->request_locate (new_position, with_roll);
-	}
-}
-
-void
 ARDOUR_UI::transport_goto_start ()
 {
 	if (_session) {
@@ -1648,14 +1569,6 @@ ARDOUR_UI::transport_stop ()
 	}
 
 	_session->request_stop (false, true);
-}
-
-void
-ARDOUR_UI::transport_stop_and_forget_capture ()
-{
-	if (_session) {
-		_session->request_stop (true, true);
-	}
 }
 
 void
@@ -2098,12 +2011,6 @@ ARDOUR_UI::do_engine_start ()
 }
 
 void
-ARDOUR_UI::setup_theme ()
-{
-	theme_manager->setup_theme();
-}
-
-void
 ARDOUR_UI::update_clocks ()
 {
 	if (!editor || !editor->dragging_playhead()) {
@@ -2121,18 +2028,6 @@ void
 ARDOUR_UI::stop_clocking ()
 {
 	clock_signal_connection.disconnect ();
-}
-
-void
-ARDOUR_UI::toggle_clocking ()
-{
-#if 0
-	if (clock_button.get_active()) {
-		start_clocking ();
-	} else {
-		stop_clocking ();
-	}
-#endif
 }
 
 gint
@@ -2551,12 +2446,6 @@ ARDOUR_UI::idle_load (const std::string& path)
 			//new_session_dialog->response (1);
 		//}
 	}
-}
-
-void
-ARDOUR_UI::end_loading_messages ()
-{
-	// hide_splash ();
 }
 
 void
