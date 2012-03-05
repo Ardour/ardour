@@ -57,7 +57,6 @@
 
 #include "midi++/names.h"
 
-#include "add_midi_cc_track_dialog.h"
 #include "ardour_ui.h"
 #include "ardour_button.h"
 #include "automation_line.h"

@@ -28,7 +28,6 @@ path_prefix = 'gtk2_ardour/'
 gtk2_ardour_sources = [
         'about.cc',
         'actions.cc',
-        'add_midi_cc_track_dialog.cc',
         'add_route_dialog.cc',
         'ambiguous_file_dialog.cc',
         'analysis_window.cc',
