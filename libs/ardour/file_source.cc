@@ -270,6 +270,8 @@ FileSource::find (Session& s, DataType type, const string& path, bool must_exist
 
 		/* Remove duplicate inodes from the list of ambiguous files, since if there are symlinks
 		   in the session path it is possible to arrive at the same file via more than one path.
+
+		   I suppose this is not necessary on Windows.
 		*/
 
 		vector<string> de_duped_hits;
@@ -280,13 +282,7 @@ FileSource::find (Session& s, DataType type, const string& path, bool must_exist
 			++j;
 			
 			while (j != hits.end()) {
-
-				struct stat bufA;
-				int const rA = stat (i->c_str(), &bufA);
-				struct stat bufB;
-				int const rB = stat (j->c_str(), &bufB);
-
-				if (rA == 0 && rB == 0 && bufA.st_ino == bufB.st_ino) {
+				if (inodes_same (*i, *j)) {
 					/* *i and *j are the same file; break out of the loop early */
 					break;
 				}
