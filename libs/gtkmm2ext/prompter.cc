@@ -69,8 +69,8 @@ Prompter::init ()
 	entryBox.set_homogeneous (false);
 	entryBox.set_spacing (5);
 	entryBox.set_border_width (10);
-	entryBox.pack_start (entryLabel);
-	entryBox.pack_start (entry, false, false);
+	entryBox.pack_start (entryLabel, false, false);
+	entryBox.pack_start (entry, true, true);
 
 	get_vbox()->pack_start (entryBox);
 	show_all_children();
