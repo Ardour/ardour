@@ -1771,10 +1771,10 @@ RouteUI::setup_invert_buttons ()
 			b->set_text (string_compose (X_("Ø%1"), i + 1));
 		}
 
-		if (N <= 4) {
+		if (N <= _max_invert_buttons) {
 			UI::instance()->set_tip (*b, string_compose (_("Left-click to invert (phase reverse) channel %1 of this track.  Right-click to show menu."), i + 1));
 		} else {
-			UI::instance()->set_tip (*b, string_compose (_("Left-click to invert (phase reverse) all channels of this track.  Right-click to show menu."), i + 1));
+			UI::instance()->set_tip (*b, _("Click to show a menu of channels for inversion (phase reverse)"));
 		}
 
 		_invert_buttons.push_back (b);
@@ -1792,14 +1792,30 @@ RouteUI::set_invert_button_state ()
 
 	uint32_t const N = _route->input()->n_ports().n_audio();
 	if (N > _max_invert_buttons) {
-		_invert_buttons.front()->set_active (_route->phase_invert().any());
-		--_i_am_the_modifier;
-		return;
-	}
 
-	int j = 0;
-	for (vector<ArdourButton*>::iterator i = _invert_buttons.begin(); i != _invert_buttons.end(); ++i, ++j) {
-		(*i)->set_active (_route->phase_invert (j));
+		/* One button for many channels; explicit active if all channels are inverted,
+		   implicit active if some are, off if none are.
+		*/
+
+		ArdourButton* b = _invert_buttons.front ();
+		
+		if (_route->phase_invert().count() == _route->phase_invert().size()) {
+			b->set_active_state (Gtkmm2ext::ExplicitActive);
+		} else if (_route->phase_invert().any()) {
+			b->set_active_state (Gtkmm2ext::ImplicitActive);
+		} else {
+			b->set_active_state (Gtkmm2ext::Off);
+		}
+
+	} else {
+
+		/* One button per channel; just set active */
+
+		int j = 0;
+		for (vector<ArdourButton*>::iterator i = _invert_buttons.begin(); i != _invert_buttons.end(); ++i, ++j) {
+			(*i)->set_active (_route->phase_invert (j));
+		}
+		
 	}
 
 	--_i_am_the_modifier;
@@ -1809,8 +1825,12 @@ bool
 RouteUI::invert_release (GdkEventButton* ev, uint32_t i)
 {
 	if (ev->button == 1 && i < _invert_buttons.size()) {
-		_route->set_phase_invert (i, !_invert_buttons[i]->get_active());
-		return true;
+		uint32_t const N = _route->input()->n_ports().n_audio ();
+		if (N <= _max_invert_buttons) {
+			/* left-click inverts phase so long as we have a button per channel */
+			_route->set_phase_invert (i, !_invert_buttons[i]->get_active());
+			return true;
+		}
 	}
 	return false;
 }
@@ -1820,17 +1840,21 @@ bool
 RouteUI::invert_press (GdkEventButton* ev)
 {
 	using namespace Menu_Helpers;
-	
-	if (ev->button != 3) {
+
+	uint32_t const N = _route->input()->n_ports().n_audio();
+	if (N <= _max_invert_buttons && ev->button != 3) {
+		/* If we have an invert button per channel, we only pop
+		   up a menu on right-click; left click is handled
+		   on release.
+		*/
 		return true;
 	}
-
+	
 	delete _invert_menu;
 	_invert_menu = new Menu;
 	_invert_menu->set_name ("ArdourContextMenu");
 	MenuList& items = _invert_menu->items ();
 
-	uint32_t const N = _route->input()->n_ports().n_audio();
 	for (uint32_t i = 0; i < N; ++i) {
 		items.push_back (CheckMenuElem (string_compose (X_("Ø%1"), i + 1), sigc::bind (sigc::mem_fun (*this, &RouteUI::invert_menu_toggled), i)));
 		CheckMenuItem* e = dynamic_cast<CheckMenuItem*> (&items.back ());
