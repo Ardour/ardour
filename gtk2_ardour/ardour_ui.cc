@@ -205,7 +205,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	big_clock_resize_in_progress = false;
 	session_selector_window = 0;
 	last_key_press_time = 0;
-	_will_create_new_session_automatically = false;
 	add_route_dialog = 0;
 	route_params = 0;
 	bundle_manager = 0;

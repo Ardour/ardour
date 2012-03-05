@@ -139,14 +139,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	ARDOUR::Session* the_session() { return _session; }
 
-	bool will_create_new_session_automatically() const {
-		return _will_create_new_session_automatically;
-	}
-
-	void set_will_create_new_session_automatically (bool yn) {
-		_will_create_new_session_automatically = yn;
-	}
-
 	int get_session_parameters (bool quit_on_cancel, bool should_be_new = false, std::string load_template = "");
 	int  build_session_from_nsd (const std::string& session_name, const std::string& session_path);
 	bool ask_about_loading_existing_session (const std::string& session_path);
@@ -530,8 +522,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	sigc::connection point_zero_one_second_connection;
 
 	gint session_menu (GdkEventButton *);
-
-	bool _will_create_new_session_automatically;
 
 	void open_session ();
 	void open_recent_session ();
