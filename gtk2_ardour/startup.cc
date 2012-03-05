@@ -742,6 +742,12 @@ ArdourStartup::setup_new_session_page ()
 	}
 
 	session_new_vbox.set_spacing (18);
+	new_session_hbox.pack_start (session_new_vbox, true, true);
+	new_session_vbox.pack_start (new_session_hbox, true, true);
+	new_session_page_index = append_page (new_session_vbox);
+	/* initial setting */
+	set_page_type (new_session_vbox, ASSISTANT_PAGE_CONFIRM);
+	set_page_title (new_session_vbox, _("New Session"));
 
 	if (session_new_vbox.get_children().empty()) {
 		VBox *vbox1 = manage (new VBox);
@@ -883,15 +889,9 @@ ArdourStartup::setup_new_session_page ()
 	}
 
 	session_new_vbox.show_all ();
-	new_session_hbox.pack_start (session_new_vbox, true, true);
 
 	new_session_vbox.set_border_width (24);
-	new_session_vbox.pack_start (new_session_hbox, true, true);
 	new_session_vbox.show_all ();
-	new_session_page_index = append_page (new_session_vbox);
-	/* initial setting */
-	set_page_type (new_session_vbox, ASSISTANT_PAGE_CONFIRM);
-	set_page_title (new_session_vbox, _("New Session"));
 
 	if (more_new_session_options_button.get_active()) {
 		set_page_type (new_session_vbox, ASSISTANT_PAGE_CONTENT);
