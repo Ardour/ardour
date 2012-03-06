@@ -54,7 +54,6 @@ class MIDIControllable : public PBD::Stateful
 	uint32_t rid() const { return _rid; }
 	std::string what() const { return _what; }
 
-	void send_feedback ();
 	MIDI::byte* write_feedback (MIDI::byte* buf, int32_t& bufsize, bool force = false);
 	
 	void midi_rebind (MIDI::channel_t channel=-1);
@@ -89,12 +88,15 @@ class MIDIControllable : public PBD::Stateful
 	MIDI::byte get_control_additional () { return control_additional; }
 	
   private:
+
+	int max_value_for_type () const;
+	
 	PBD::Controllable* controllable;
 	PBD::ControllableDescriptor* _descriptor;
 	std::string        _current_uri;
 	MIDI::Port&     _port;
 	bool             setting;
-	MIDI::byte       last_value;
+	int              last_value;
 	float            last_controllable_value;
 	bool            _momentary;
 	bool            _is_gain_controller;
@@ -102,6 +104,7 @@ class MIDIControllable : public PBD::Stateful
 	int              midi_msg_id;      /* controller ID or note number */
 	PBD::ScopedConnection midi_sense_connection[2];
 	PBD::ScopedConnection midi_learn_connection;
+	/** the type of MIDI message that is used for this control */
 	MIDI::eventType  control_type;
 	MIDI::byte       control_additional;
 	MIDI::channel_t  control_channel;
