@@ -2,6 +2,7 @@
   <accelerator action='set-mouse-mode-object'/>
   <accelerator action='set-mouse-mode-range'/>
   <accelerator action='set-mouse-mode-gain'/>
+  <accelerator action='set-mouse-mode-draw'/>
   <accelerator action='set-mouse-mode-zoom'/>
   <accelerator action='set-mouse-mode-timefx'/>
   <accelerator action='set-mouse-mode-object-range'/>
