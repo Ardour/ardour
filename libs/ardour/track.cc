@@ -196,7 +196,7 @@ Track::freeze_state() const
 }
 
 Track::RecEnableControllable::RecEnableControllable (Track& s)
-	: Controllable (X_("recenable")), track (s)
+	: Controllable (X_("recenable"), Controllable::Toggle), track (s)
 {
 }
 
