@@ -390,7 +390,7 @@ ARDOUR::cleanup ()
 	fst_exit ();
 #endif
 
-#ifdef LXVST_SUPPOR
+#ifdef LXVST_SUPPORT
 	vstfx_exit();
 #endif
 	return 0;
