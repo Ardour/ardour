@@ -1597,6 +1597,10 @@ ARDOUR_UI::toggle_session_auto_loop ()
 			}
 		}
 	}
+
+	Location *loop_loc = session->locations()->auto_loop_location();
+	if (loop_loc)
+		loop_loc->set_hidden (false, this);
 }
 
 void
