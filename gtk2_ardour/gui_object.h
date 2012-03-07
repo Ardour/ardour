@@ -34,14 +34,12 @@ class GUIObjectState
 {
 public:
 	GUIObjectState ();
-	
+
 	XMLNode& get_state () const;
 	int set_state (const XMLNode&);
 
 	static const std::string xml_node_name;
 	void load (const XMLNode&);
-
-	GUIObjectState& operator= (const GUIObjectState& other);
 
 	std::string get_string (const std::string& id, const std::string& prop_name, bool* empty = 0);
 
@@ -59,7 +57,6 @@ public:
 	static XMLNode* get_or_add_node (XMLNode *, const std::string &);
 	
   private:
-	
 	XMLNode _state;
 };
 

@@ -38,6 +38,7 @@ GUIObjectState::get_node (const XMLNode* parent, const string& id)
 {
 	XMLNodeList const & children = parent->children ();
 	for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
+
 		if ((*i)->name() != X_("Object")) {
 			continue;
 		}
@@ -81,6 +82,7 @@ string
 GUIObjectState::get_string (const string& id, const string& prop_name, bool* empty)
 {
 	XMLNode* child = get_node (&_state, id);
+
 	if (!child) {
 		if (empty) {
 			*empty = true;
@@ -124,13 +126,6 @@ void
 GUIObjectState::load (const XMLNode& node)
 {
 	(void) set_state (node);
-}
-
-GUIObjectState&
-GUIObjectState::operator= (const GUIObjectState& other)
-{
-	_state = other._state;
-	return *this;
 }
 
 std::list<string>
