@@ -151,9 +151,6 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 	void action_sensitivity_changed ();
 	void action_visibility_changed ();
 	void action_tooltip_changed ();
-
-	static cairo_pattern_t* mid_mask;
-	static void create_mid_mask ();
 };
 
 #endif /* __gtk2_ardour_ardour_button_h__ */

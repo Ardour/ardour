@@ -49,59 +49,6 @@ using namespace std;
 ArdourButton::Element ArdourButton::default_elements = ArdourButton::Element (ArdourButton::Edge|ArdourButton::Body|ArdourButton::Text);
 ArdourButton::Element ArdourButton::led_default_elements = ArdourButton::Element (ArdourButton::default_elements|ArdourButton::Indicator);
 ArdourButton::Element ArdourButton::just_led_default_elements = ArdourButton::Element (ArdourButton::Edge|ArdourButton::Body|ArdourButton::Indicator);
-cairo_pattern_t* ArdourButton::mid_mask = 0;
-
-void
-ArdourButton::create_mid_mask ()
-{
-	cairo_surface_t *surface;
-	
-	surface = cairo_image_surface_create (CAIRO_FORMAT_A8, 32, 32);
-
-	cairo_t* cr2 = cairo_create (surface);
-	
-	cairo_set_source_rgba (cr2, 1.0, 0.0, 0.0, 1.0);
-	cairo_set_line_join (cr2, CAIRO_LINE_JOIN_MITER);
-
-	/* some of these lines extend outside the image surface - we just rely
-	 * on cairo clipping them since it makes the math easier to visualize
-	 * (at least for paul)
-	 */
-
-	cairo_move_to (cr2, 0.0, 4.0);
-	cairo_line_to (cr2, 4.0, 0.0);
-
-	cairo_move_to (cr2, 0.0, 12.0);
-	cairo_line_to (cr2, 12.0, 0.0);
-
-	cairo_move_to (cr2, 0.0, 20.0);
-	cairo_line_to (cr2, 20.0, 0.0);
-
-	cairo_move_to (cr2, 0.0, 28.0);
-	cairo_line_to (cr2, 28.0, 0.0);
-
-	cairo_move_to (cr2, 0.0, 28.0);
-	cairo_line_to (cr2, 28.0, 0.0);
-
-	cairo_move_to (cr2, 0.0, 36.0);
-	cairo_line_to (cr2, 36.0, 0.0);
-
-	cairo_move_to (cr2, 0.0, 44.0);
-	cairo_line_to (cr2, 44.0, 0.0);
-
-	cairo_move_to (cr2, 0.0, 52.0);
-	cairo_line_to (cr2, 52.0, 0.0);
-
-	cairo_set_line_width (cr2, 3.0);
-	cairo_stroke (cr2);
-	
-	mid_mask = cairo_pattern_create_for_surface (surface);
-	cairo_pattern_set_extend (mid_mask, CAIRO_EXTEND_REPEAT);
-	cairo_pattern_set_filter (mid_mask, CAIRO_FILTER_NEAREST);
-	
-	cairo_surface_destroy (surface);
-	cairo_destroy (cr2);
-}
 
 ArdourButton::ArdourButton (Element e)
 	: _elements (e)
@@ -124,9 +71,6 @@ ArdourButton::ArdourButton (Element e)
 	, _hovering (false)
 {
 	ColorsChanged.connect (sigc::mem_fun (*this, &ArdourButton::color_handler));
-	if (!mid_mask) {
-		create_mid_mask ();
-	}
 }
 
 ArdourButton::ArdourButton (const std::string& str, Element e)
@@ -148,10 +92,6 @@ ArdourButton::ArdourButton (const std::string& str, Element e)
 	, _hovering (false)
 {
 	set_text (str);
-
-	if (!mid_mask) {
-		create_mid_mask ();
-	}
 }
 
 ArdourButton::~ArdourButton()
