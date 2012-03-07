@@ -248,8 +248,6 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	void set_route (boost::shared_ptr<ARDOUR::Route>);
 	void set_width (Width);
 
-	void update();
-
 	void processor_operation (ProcessorOperation);
 
 	void select_all_processors ();
@@ -345,8 +343,6 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	void delete_processors (const ProcSelection&);
 	void paste_processors ();
 	void paste_processors (boost::shared_ptr<ARDOUR::Processor> before);
-	void processors_up ();
-	void processors_down ();
 
 	void delete_dragged_processors (const std::list<boost::shared_ptr<ARDOUR::Processor> >&);
 	void clear_processors ();
@@ -365,8 +361,6 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	static Glib::RefPtr<Gtk::Action> edit_generic_action;
 	void paste_processor_state (const XMLNodeList&, boost::shared_ptr<ARDOUR::Processor>);
 
-	void activate_processor (boost::shared_ptr<ARDOUR::Processor>);
-	void deactivate_processor (boost::shared_ptr<ARDOUR::Processor>);
 	void hide_processor_editor (boost::shared_ptr<ARDOUR::Processor>);
 	void rename_processor (boost::shared_ptr<ARDOUR::Processor>);
 

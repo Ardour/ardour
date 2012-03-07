@@ -808,12 +808,6 @@ ProcessorBox::object_drop(DnDVBox<ProcessorEntry>* source, ProcessorEntry* posit
 }
 
 void
-ProcessorBox::update()
-{
-	redisplay_processors ();
-}
-
-void
 ProcessorBox::set_width (Width w)
 {
 	if (_width == w) {
@@ -1656,19 +1650,6 @@ ProcessorBox::copy_processors (const ProcSelection& to_be_copied)
 }
 
 void
-ProcessorBox::processors_up ()
-{
-	/* unimplemented */
-}
-
-void
-ProcessorBox::processors_down ()
-{
-	/* unimplemented */
-}
-	
-
-void
 ProcessorBox::delete_processors (const ProcSelection& targets)
 {
 	if (targets.empty()) {
@@ -1886,18 +1867,6 @@ could not match the configuration of this track.");
 		MessageDialog am (msg);
 		am.run ();
 	}
-}
-
-void
-ProcessorBox::activate_processor (boost::shared_ptr<Processor> r)
-{
-	r->activate ();
-}
-
-void
-ProcessorBox::deactivate_processor (boost::shared_ptr<Processor> r)
-{
-	r->deactivate ();
 }
 
 void
