@@ -81,6 +81,10 @@ class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
 	void next_bank ();
 	void prev_bank ();
 
+	bool motorised () const {
+		return _motorised;
+	}
+
   private:
 	MIDI::Port* _input_port;
 	MIDI::Port* _output_port;
@@ -124,6 +128,12 @@ class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
 	std::string _current_binding;
 	uint32_t _bank_size;
 	uint32_t _current_bank;
+	/** true if this surface is motorised.  If it is, we assume
+	    that the surface's controls are never out of sync with
+	    Ardour's state, so we don't have to take steps to avoid
+	    values jumping around when things are not in sync.
+	*/
+	bool _motorised;
 
 	mutable void *gui;
 	void build_gui ();

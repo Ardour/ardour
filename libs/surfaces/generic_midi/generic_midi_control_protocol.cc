@@ -55,9 +55,9 @@ using namespace std;
 
 GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s)
 	: ControlProtocol (s, _("Generic MIDI"), midi_ui_context())
+	, _motorised (false)
 	, gui (0)
 {
-
 	_input_port = MIDI::Manager::instance()->midi_input_port ();
 	_output_port = MIDI::Manager::instance()->midi_output_port ();
 
@@ -320,7 +320,7 @@ GenericMidiControlProtocol::start_learning (Controllable* c)
 	}
 
 	if (!mc) {
-		mc = new MIDIControllable (*_input_port, *c, false);
+		mc = new MIDIControllable (this, *_input_port, *c, false);
 	}
 	
 	{
@@ -417,7 +417,7 @@ GenericMidiControlProtocol::create_binding (PBD::Controllable* control, int pos,
 		MIDI::byte value = control_number;
 		
 		// Create a MIDIControllable
-		MIDIControllable* mc = new MIDIControllable (*_input_port, *control, false);
+		MIDIControllable* mc = new MIDIControllable (this, *_input_port, *control, false);
 
 		// Remove any old binding for this midi channel/type/value pair
 		// Note:  can't use delete_binding() here because we don't know the specific controllable we want to remove, only the midi information
@@ -533,7 +533,7 @@ GenericMidiControlProtocol::set_state (const XMLNode& node, int version)
                                 cerr << "\tresult = " << c << endl;
 				
 				if (c) {
-					MIDIControllable* mc = new MIDIControllable (*_input_port, *c, false);
+					MIDIControllable* mc = new MIDIControllable (this, *_input_port, *c, false);
                                         
 					if (mc->set_state (**niter, version) == 0) {
 						controllables.push_back (mc);
@@ -621,6 +621,12 @@ GenericMidiControlProtocol::load_bindings (const string& xmlpath)
 			if ((prop = (*citer)->property ("bank-size")) != 0) {
 				_bank_size = atoi (prop->value());
 				_current_bank = 0;
+			}
+
+			if ((prop = (*citer)->property ("motorised")) != 0) {
+				_motorised = string_is_affirmative (prop->value ());
+			} else {
+				_motorised = false;
 			}
 		}
 
@@ -714,7 +720,7 @@ GenericMidiControlProtocol::create_binding (const XMLNode& node)
 	prop = node.property (X_("uri"));
 	uri = prop->value();
 
-	MIDIControllable* mc = new MIDIControllable (*_input_port, momentary);
+	MIDIControllable* mc = new MIDIControllable (this, *_input_port, momentary);
 
 	if (mc->init (uri)) {
 		delete mc;

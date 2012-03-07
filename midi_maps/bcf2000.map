@@ -5,7 +5,7 @@
 <!-- Set the BCF2000 to factory preset number 2, and this will bind -->
 <!-- the controllers intuitively to the DAW controllers.            -->
 <!--                                                                -->
-<DeviceInfo bank-size="8"/>
+<DeviceInfo bank-size="8" motorised="yes"/>
 
 <!--  Channel controls:                                             -->
 <!--   - the rotary encoder, when pushed, will                      -->

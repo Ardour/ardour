@@ -40,11 +40,13 @@ namespace MIDI {
 	class Parser;
 }
 
+class GenericMidiControlProtocol;
+
 class MIDIControllable : public PBD::Stateful
 {
   public:
-	MIDIControllable (MIDI::Port&, PBD::Controllable&, bool momentary);
-	MIDIControllable (MIDI::Port&, bool momentary = false);
+	MIDIControllable (GenericMidiControlProtocol *, MIDI::Port&, PBD::Controllable&, bool momentary);
+	MIDIControllable (GenericMidiControlProtocol *, MIDI::Port&, bool momentary = false);
 	virtual ~MIDIControllable ();
 
 	int init (const std::string&);
@@ -65,8 +67,8 @@ class MIDIControllable : public PBD::Stateful
 	bool get_midi_feedback () { return feedback; }
 	void set_midi_feedback (bool val) { feedback = val; }
 
-	float control_to_midi(float val);
-	float midi_to_control(float val);
+	int control_to_midi(float val);
+	float midi_to_control(int val);
 
 	bool learned() const { return _learned; }
 
@@ -90,7 +92,8 @@ class MIDIControllable : public PBD::Stateful
   private:
 
 	int max_value_for_type () const;
-	
+
+	GenericMidiControlProtocol* _surface;
 	PBD::Controllable* controllable;
 	PBD::ControllableDescriptor* _descriptor;
 	std::string        _current_uri;

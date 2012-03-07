@@ -4,7 +4,7 @@
 <!-- Adapted by Carl Hetherington                                   -->
 
 <!-- Map for the Behringer BCF2000 in Mackie Control emulation mode -->
-<DeviceInfo bank-size="8"/>
+<DeviceInfo bank-size="8" motorised="yes"/>
 
 <!--  Channel controls:                                             -->
 <!--   - the rotary encoder, when pushed, will                      -->

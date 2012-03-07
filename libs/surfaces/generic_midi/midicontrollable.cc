@@ -33,14 +33,16 @@
 #include "ardour/utils.h"
 
 #include "midicontrollable.h"
+#include "generic_midi_control_protocol.h"
 
 using namespace std;
 using namespace MIDI;
 using namespace PBD;
 using namespace ARDOUR;
 
-MIDIControllable::MIDIControllable (Port& p, bool m)
-	: controllable (0)
+MIDIControllable::MIDIControllable (GenericMidiControlProtocol* s, Port& p, bool m)
+	: _surface (s)
+	, controllable (0)
 	, _descriptor (0)
 	, _port (p)
 	, _momentary (m)
@@ -55,8 +57,9 @@ MIDIControllable::MIDIControllable (Port& p, bool m)
 	feedback = true; // for now
 }
 
-MIDIControllable::MIDIControllable (Port& p, Controllable& c, bool m)
-	: controllable (&c)
+MIDIControllable::MIDIControllable (GenericMidiControlProtocol* s, Port& p, Controllable& c, bool m)
+	: _surface (s)
+	, controllable (&c)
 	, _descriptor (0)
 	, _port (p)
 	, _momentary (m)
@@ -134,7 +137,7 @@ MIDIControllable::stop_learning ()
 	midi_learn_connection.disconnect ();
 }
 
-float
+int
 MIDIControllable::control_to_midi (float val)
 {
         if (controllable->is_gain_like()) {
@@ -149,24 +152,24 @@ MIDIControllable::control_to_midi (float val)
 }
 
 float
-MIDIControllable::midi_to_control (float val)
+MIDIControllable::midi_to_control (int val)
 {
         /* fiddle with MIDI value so that we get an odd number of integer steps
            and can thus represent "middle" precisely as 0.5. this maps to
            the range 0..+1.0
         */
 
-        val = (val == 0.0f ? 0.0f : (val-1.0f) / (max_value_for_type() - 1));
+        float fv = (val == 0 ? 0 : float (val - 1) / (max_value_for_type() - 1));
 
         if (controllable->is_gain_like()) {
-                return slider_position_to_gain (val);
+                return slider_position_to_gain (fv);
         }
 
 	float control_min = controllable->lower ();
 	float control_max = controllable->upper ();
 	const float control_range = control_max - control_min;
 
-	return  (val * control_range) + control_min;
+	return (fv * control_range) + control_min;
 }
 
 void
@@ -219,11 +222,19 @@ MIDIControllable::midi_sense_controller (Parser &, EventTwoBytes *msg)
 			float range = max_value - min_value;
 			float threshold = 10;
 
-			// prevent jumps when MIDI controller and controllable are "out of sync"
-			if (range < threshold &&
-			    controllable->get_value() <= midi_to_control(max_value) &&
-			    controllable->get_value() >= midi_to_control(min_value)) {
-				controllable->set_value (midi_to_control (new_value) );
+			bool const in_sync = (
+				range < threshold &&
+				controllable->get_value() <= midi_to_control(max_value) &&
+				controllable->get_value() >= midi_to_control(min_value)
+				);
+
+			/* If the surface is not motorised, we try to prevent jumps when
+			   the MIDI controller and controllable are out of sync.
+			   There might be a better way of doing this.
+			*/
+
+			if (in_sync || _surface->motorised ()) {
+				controllable->set_value (midi_to_control (new_value));
 			}
 
 			last_controllable_value = new_value;
@@ -360,7 +371,7 @@ MIDIControllable::write_feedback (MIDI::byte* buf, int32_t& bufsize, bool /*forc
 		return buf;
 	}
 	
-	float const gm = control_to_midi (controllable->get_value());
+	int const gm = control_to_midi (controllable->get_value());
 
 	if (gm == last_value) {
 		return buf;
