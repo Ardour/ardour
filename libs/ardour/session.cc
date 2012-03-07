@@ -673,7 +673,7 @@ Session::add_monitor_section ()
 	}
 
 	rl.push_back (r);
-	add_routes (rl, false, false);
+	add_routes (rl, false, false, false);
 	
 	assert (_monitor_out);
 
@@ -1646,7 +1646,7 @@ Session::new_midi_track (boost::shared_ptr<PluginInfo> instrument, TrackMode mod
 
   failed:
 	if (!new_routes.empty()) {
-		add_routes (new_routes, true, true);
+		add_routes (new_routes, true, true, true);
 
 		if (instrument) {
 			for (RouteList::iterator r = new_routes.begin(); r != new_routes.end(); ++r) {
@@ -1889,7 +1889,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 
   failed:
 	if (!new_routes.empty()) {
-		add_routes (new_routes, true, true);
+		add_routes (new_routes, true, true, true);
 	}
 
 	return ret;
@@ -2001,7 +2001,7 @@ Session::new_audio_route (int input_channels, int output_channels, RouteGroup* r
 
   failure:
 	if (!ret.empty()) {
-		add_routes (ret, false, true);
+		add_routes (ret, false, true, true); // autoconnect outputs only
 	}
 
 	return ret;
@@ -2100,7 +2100,7 @@ Session::new_route_from_template (uint32_t how_many, const std::string& template
 
   out:
 	if (!ret.empty()) {
-		add_routes (ret, true, true);
+		add_routes (ret, true, true, true);
 		IO::enable_connecting ();
 	}
 
@@ -2108,7 +2108,7 @@ Session::new_route_from_template (uint32_t how_many, const std::string& template
 }
 
 void
-Session::add_routes (RouteList& new_routes, bool auto_connect, bool save)
+Session::add_routes (RouteList& new_routes, bool input_auto_connect, bool output_auto_connect, bool save)
 {
         ChanCount existing_inputs;
         ChanCount existing_outputs;
@@ -2165,8 +2165,8 @@ Session::add_routes (RouteList& new_routes, bool auto_connect, bool save)
 			}
 		}
 
-		if (auto_connect) {
-			auto_connect_route (r, existing_inputs, existing_outputs, true);
+		if (input_auto_connect || output_auto_connect) {
+			auto_connect_route (r, existing_inputs, existing_outputs, true, input_auto_connect);
 		}
 	}
 
