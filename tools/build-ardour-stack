@@ -7,14 +7,12 @@ function die () {
 
 set -e
 
-download=
 clean=
 parallel=2
 PREFIX=$HOME/a3/inst
 
 while [ $# -gt 0 ] ; do
    case $1 in
-    --down*) download=1 ; shift ;;
     --clean*) clean=1 ; shift ;;
     --prefix*) PREFIX=`echo $1 | sed 's/--prefix=//'` ; shift ;;
     -j*) parallel=`echo $1 | sed 's/-j//'` ; shift ;;
