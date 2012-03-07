@@ -31,6 +31,7 @@
 #include "pbd/basename.h"
 #include "pbd/pthread_utils.h"
 #include "pbd/memento_command.h"
+#include "pbd/unwind.h"
 #include "pbd/whitespace.h"
 #include "pbd/stateful_diff_command.h"
 
@@ -1485,16 +1486,15 @@ Editor::temporal_zoom_region (bool both_axes)
 		end = max_framepos;
 	}
 
-	if (both_axes) {
-		/* save visual state with track states included, and prevent
-		   set_frames_per_unit() from doing it again.
-		*/
-		undo_visual_stack.push_back (current_visual_state(true));
-		no_save_visual = true;
-	}
+	/* if we're zooming on both axes we need to save track heights etc.
+	 */
+
+	undo_visual_stack.push_back (current_visual_state (both_axes));
+
+	PBD::Unwinder<bool> nsv (no_save_visual, true);
 
 	temporal_zoom_by_frame (start, end, "zoom to region");
-
+	
 	if (both_axes) {
 		uint32_t per_track_height = (uint32_t) floor ((_canvas_height - canvas_timebars_vsize - 10.0) / tracks.size());
 
@@ -1517,10 +1517,9 @@ Editor::temporal_zoom_region (bool both_axes)
 		_routes->resume_redisplay ();
 
 		vertical_adjustment.set_value (0.0);
-		no_save_visual = false;
 	}
 
-	redo_visual_stack.push_back (current_visual_state());
+	redo_visual_stack.push_back (current_visual_state (both_axes));
 }
 
 void
@@ -6487,7 +6486,8 @@ Editor::fit_tracks (TrackViewList & tracks)
 		return;
 	}
 
-	undo_visual_stack.push_back (current_visual_state());
+	undo_visual_stack.push_back (current_visual_state (true));
+	no_save_visual = true;
 
 	/* build a list of all tracks, including children */
 
@@ -6542,7 +6542,7 @@ Editor::fit_tracks (TrackViewList & tracks)
 	controls_layout.property_height () = full_canvas_height - canvas_timebars_vsize;
 	vertical_adjustment.set_value (first_y_pos);
 
-	redo_visual_stack.push_back (current_visual_state());
+	redo_visual_stack.push_back (current_visual_state (true));
 }
 
 void

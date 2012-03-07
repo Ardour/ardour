@@ -484,7 +484,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	typedef std::pair<TimeAxisView*,XMLNode*> TAVState;
 
 	struct VisualState {
-	    VisualState();
+	    VisualState (bool with_tracks);
 	    ~VisualState ();
 	    double              y_position;
 	    double              frames_per_unit;

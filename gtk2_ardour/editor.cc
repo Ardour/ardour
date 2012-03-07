@@ -43,7 +43,7 @@
 #include "pbd/enumwriter.h"
 #include "pbd/memento_command.h"
 #include "pbd/unknown_type.h"
-#include "pbd/stacktrace.h"
+#include "pbd/unwind.h"
 
 #include <glibmm/miscutils.h>
 #include <gtkmm/image.h>
@@ -4146,8 +4146,8 @@ Editor::reposition_and_zoom (framepos_t frame, double fpu)
 	}
 }
 
-Editor::VisualState::VisualState ()
-	: gui_state (new GUIObjectState)
+Editor::VisualState::VisualState (bool with_tracks)
+	: gui_state (with_tracks ? new GUIObjectState : 0)
 {
 }
 
@@ -4159,14 +4159,14 @@ Editor::VisualState::~VisualState ()
 Editor::VisualState*
 Editor::current_visual_state (bool with_tracks)
 {
-	VisualState* vs = new VisualState;
+	VisualState* vs = new VisualState (with_tracks);
 	vs->y_position = vertical_adjustment.get_value();
 	vs->frames_per_unit = frames_per_unit;
 	vs->leftmost_frame = leftmost_frame;
 	vs->zoom_focus = zoom_focus;
 
 	if (with_tracks) {	
-		*(vs->gui_state) = *ARDOUR_UI::instance()->gui_object_state;
+		*vs->gui_state = *ARDOUR_UI::instance()->gui_object_state;
 	}
 
 	return vs;
@@ -4179,10 +4179,12 @@ Editor::undo_visual_state ()
 		return;
 	}
 
-	redo_visual_stack.push_back (current_visual_state());
-
 	VisualState* vs = undo_visual_stack.back();
 	undo_visual_stack.pop_back();
+
+
+	redo_visual_stack.push_back (current_visual_state (vs ? vs->gui_state != 0 : false));
+
 	use_visual_state (*vs);
 }
 
@@ -4193,10 +4195,11 @@ Editor::redo_visual_state ()
 		return;
 	}
 
-	undo_visual_stack.push_back (current_visual_state());
-
 	VisualState* vs = redo_visual_stack.back();
 	redo_visual_stack.pop_back();
+
+	undo_visual_stack.push_back (current_visual_state (vs ? vs->gui_state != 0 : false));
+
 	use_visual_state (*vs);
 }
 
@@ -4213,7 +4216,7 @@ Editor::swap_visual_state ()
 void
 Editor::use_visual_state (VisualState& vs)
 {
-	no_save_visual = true;
+	PBD::Unwinder<bool> nsv (no_save_visual, true);
 
 	_routes->suspend_redisplay ();
 
@@ -4222,16 +4225,16 @@ Editor::use_visual_state (VisualState& vs)
 	set_zoom_focus (vs.zoom_focus);
 	reposition_and_zoom (vs.leftmost_frame, vs.frames_per_unit);
 	
-	*ARDOUR_UI::instance()->gui_object_state = *vs.gui_state;
-
-	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {	
-		(*i)->reset_visual_state ();
+	if (vs.gui_state) {
+		*ARDOUR_UI::instance()->gui_object_state = *vs.gui_state;
+		
+		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {	
+			(*i)->reset_visual_state ();
+		}
 	}
 
 	_routes->update_visibility ();
 	_routes->resume_redisplay ();
-
-	no_save_visual = false;
 }
 
 void
