@@ -206,37 +206,63 @@ XMLNode::XMLNode(const string& n, const string& c)
 
 XMLNode::XMLNode(const XMLNode& from)
 {
-	XMLPropertyList props;
-	XMLPropertyIterator curprop;
-	XMLNodeList nodes;
-	XMLNodeIterator curnode;
-
-	_name = from.name();
-	set_content(from.content());
-
-	props = from.properties();
-	for (curprop = props.begin(); curprop != props.end(); ++curprop) {
-		add_property((*curprop)->name().c_str(), (*curprop)->value());
-	}
-
-	nodes = from.children();
-	for (curnode = nodes.begin(); curnode != nodes.end(); ++curnode) {
-		add_child_copy(**curnode);
-	}
+	*this = from;
 }
 
 XMLNode::~XMLNode()
 {
+	clear_lists ();
+}
+
+void
+XMLNode::clear_lists ()
+{
 	XMLNodeIterator curchild;
 	XMLPropertyIterator curprop;
+
+	_selected_children.clear ();
+	_propmap.clear ();
 
 	for (curchild = _children.begin(); curchild != _children.end();	++curchild) {
 		delete *curchild;
 	}
 
+	_children.clear ();
+
 	for (curprop = _proplist.begin(); curprop != _proplist.end(); ++curprop) {
 		delete *curprop;
 	}
+
+	_proplist.clear ();
+}
+
+XMLNode& 
+XMLNode::operator= (const XMLNode& from)
+{
+	if (&from != this) {
+
+		XMLPropertyList props;
+		XMLPropertyIterator curprop;
+		XMLNodeList nodes;
+		XMLNodeIterator curnode;
+		
+		clear_lists ();
+
+		_name = from.name();
+		set_content(from.content());
+		
+		props = from.properties();
+		for (curprop = props.begin(); curprop != props.end(); ++curprop) {
+			add_property((*curprop)->name().c_str(), (*curprop)->value());
+		}
+		
+		nodes = from.children();
+		for (curnode = nodes.begin(); curnode != nodes.end(); ++curnode) {
+			add_child_copy(**curnode);
+		}
+	}
+
+	return *this;
 }
 
 const string&

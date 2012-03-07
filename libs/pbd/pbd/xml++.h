@@ -75,6 +75,8 @@ public:
 	XMLNode(const XMLNode& other);
 	~XMLNode();
 
+	XMLNode& operator= (const XMLNode& other);
+
 	const std::string& name() const { return _name; }
 
 	bool          is_content() const { return _is_content; }
@@ -121,6 +123,8 @@ private:
 	XMLPropertyList     _proplist;
 	XMLPropertyMap      _propmap;
 	mutable XMLNodeList _selected_children;
+
+	void clear_lists ();
 };
 
 class XMLProperty {
