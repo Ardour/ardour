@@ -3,15 +3,61 @@
 download=
 clean=
 parallel=2
+patch_gtk_osx=
+PREFIX=$HOME/gtk/inst
 
 while [ $# -gt 0 ] ; do
    case $1 in
     --down*) download=1 ; shift ;;
     --clean*) clean=1 ; shift ;;
+    --prefix*) PREFIX=`echo $1 | sed 's/--prefix=//'` ; shift ;;
+    --patch*) patch_gtk_osx=1 ; shift ;;
     -j*) parallel=`echo $1 | sed 's/-j//'` ; shift ;;
    esac
 done
 
+
+if [ $clean ] ; then
+    if [ ! -d gtk+ ] ; then
+        echo "This doesn't appear to be your source directory. Don't run --clean here."
+        exit 1
+    fi
+    rm -rf `ls -ld * | awk '/^d/ {print $9;}' | grep -v gtk+`
+    # have to use sudo because we used sudo for libxml2 install, sigh.
+    sudo rm -rf $PREFIX
+    exit 0
+fi
+
+mkdir -p $PREFIX
+
+export MAKEFLAGS=-j$parallel
+PATH=$PREFIX/bin:$PATH
+
+if uname -a | grep --silent arwin ; then
+    
+    # its OS X! run for the hills !!
+
+    export DYLD_FALLBACK_LIBRARY_PATH=$PREFIX/lib${DYLD_FALLBACK_LIBRARY_PATH:+:$DYLD_FALLBACK_LIBRARY_PATH}
+    # force compilation to use 10.4 APIs only. could be overkill, but better safe than sorry
+    GLOBAL_CFLAGS="-DMAC_OSX_VERSION_MAX_ALLOWED=1040 -mmacosx-version-min=10.4 -O3 -Wl,-headerpad_max_install_names"
+    # for 10.5 and above, add to CFLAGS
+    # -sysroot=/Developer/SDKs/MacOSX10.4u.sdk"
+    GLOBAL_LDFLAGS=
+    # for 10.5 and above, add to LDFLAGS
+    # "-syslibroot /Developer/SDKs/MacOSX10.4u.sdk"
+    export MACOSX_DEPLOYMENT_TARGET=10.4
+    # If the default python is not new enough, set PYTHON to point to a 
+    # suitably new (2.7 or later) version of Python's framework
+    PYTHON=
+    #PYTHON=/Library/Frameworks/Python.framework/Versions/2.7
+else 
+    export LD_LIBRARY_PATH=$PREFIX/lib{$LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+    GLOBAL_CFLAGS=
+    GLOBAL_LDFLAGS=
+fi
+
+export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
+GLOBAL_CONF="--prefix=$PREFIX"
 
 if [ $download ] ; then
     set -e
@@ -25,27 +71,27 @@ if [ $download ] ; then
     fi
     if [ ! -f m4-1.4.16.tar.bz2 ] ; then
         echo m4
-	curl -O http://ftp.gnu.org/gnu/m4/m4-1.4.16.tar.bz2
+	curl -LO http://ftp.gnu.org/gnu/m4/m4-1.4.16.tar.bz2
     fi
     if [ ! -f automake-1.11.3.tar.gz ] ; then
         echo automake
-	curl -O http://ftp.gnu.org/gnu/automake/automake-1.11.3.tar.gz
+	curl -LO http://ftp.gnu.org/gnu/automake/automake-1.11.3.tar.gz
     fi
     if [ ! -f autoconf-2.68.tar.bz2 ] ; then
         echo autoconf
-	curl -O http://ftp.gnu.org/gnu/autoconf/autoconf-2.68.tar.bz2
+	curl -LO http://ftp.gnu.org/gnu/autoconf/autoconf-2.68.tar.bz2
     fi
     if [ ! -f libtool-2.4.2.tar.gz ] ; then
         echo libtool
-	curl -O http://mirrors.ibiblio.org/pub/mirrors/gnu/ftp/gnu/libtool/libtool-2.4.2.tar.gz
+	curl -LO http://mirrors.ibiblio.org/pub/mirrors/gnu/ftp/gnu/libtool/libtool-2.4.2.tar.gz
     fi
     if [ ! -f make-3.82.tar.bz2 ] ; then
         echo make
-	curl -O http://ftp.gnu.org/gnu/make/make-3.82.tar.bz2
+	curl -LO http://ftp.gnu.org/gnu/make/make-3.82.tar.bz2
     fi
     if [ ! -f bison-2.5.tar.bz2 ] ; then
         echo bison
-	curl -O ftp://ftp.gnu.org/gnu/bison/bison-2.5.tar.bz2
+	curl -LO ftp://ftp.gnu.org/gnu/bison/bison-2.5.tar.bz2
     fi
     if [ ! -f glib-2.31.2.tar.bz2 ] ; then
         echo glib
@@ -53,43 +99,43 @@ if [ $download ] ; then
     fi
     if [ ! -f pkg-config-0.26.tar.gz ] ; then
         echo pkg-config
-	curl -O http://pkgconfig.freedesktop.org/releases/pkg-config-0.26.tar.gz
+	curl -LO http://pkgconfig.freedesktop.org/releases/pkg-config-0.26.tar.gz
     fi
     if [ ! -f readline-6.2.tar.gz ] ; then
         echo readline
-	curl -O ftp://ftp.cwru.edu/pub/bash/readline-6.2.tar.gz
+	curl -LO ftp://ftp.cwru.edu/pub/bash/readline-6.2.tar.gz
     fi
     if [ ! -f zlib-1.2.6.tar.bz2 ] ; then
         echo zlib
-	curl -O http://zlib.net/zlib-1.2.6.tar.bz2
+	curl -LO http://zlib.net/zlib-1.2.6.tar.bz2
     fi
     if [ ! -f libiconv-1.14.tar.gz ] ; then
         echo libiconv
-	curl -O ftp://ftp.gnu.org/gnu/libiconv/libiconv-1.14.tar.gz
+	curl -LO ftp://ftp.gnu.org/gnu/libiconv/libiconv-1.14.tar.gz
     fi
     if [ ! -f gettext-0.18.1.1.tar.gz ] ; then
         echo gettext
-	curl -O http://ftp.gnu.org/pub/gnu/gettext/gettext-0.18.1.1.tar.gz
+	curl -LO http://ftp.gnu.org/pub/gnu/gettext/gettext-0.18.1.1.tar.gz
     fi
     if [ ! -f libxml2-2.7.8.tar.gz ] ; then
         echo libxml2
-	curl -O ftp://xmlsoft.org/libxslt/libxml2-2.7.8.tar.gz
+	curl -LO ftp://xmlsoft.org/libxslt/libxml2-2.7.8.tar.gz
     fi
     if [ ! -f libxslt-1.1.26.tar.gz ] ; then
         echo libxslt
-	curl -O ftp://xmlsoft.org/libxslt/libxslt-1.1.26.tar.gz
+	curl -LO ftp://xmlsoft.org/libxslt/libxslt-1.1.26.tar.gz
     fi
     if [ ! -f tiff-4.0.1.tar.gz ] ; then
         echo tiff
-	curl -O ftp://ftp.remotesensing.org/pub/libtiff/tiff-4.0.1.tar.gz
+	curl -LO ftp://ftp.remotesensing.org/pub/libtiff/tiff-4.0.1.tar.gz
     fi
     if [ ! -f libpng-1.5.9.tar.gz ] ; then
         echo png
-	curl -O ftp://ftp.simplesystems.org/pub/libpng/png/src/libpng-1.5.9.tar.gz
+	curl -LO ftp://ftp.simplesystems.org/pub/libpng/png/src/libpng-1.5.9.tar.gz
     fi
     if [ ! -f jpegsrc.v8d.tar.gz ] ; then
         echo jpeg
-	curl -O http://www.ijg.org/files/jpegsrc.v8d.tar.gz
+	curl -LO http://www.ijg.org/files/jpegsrc.v8d.tar.gz
     fi
     if [ ! -f XML-Parser-2.41.tar.gz ] ; then
         echo perl xml parser
@@ -101,27 +147,27 @@ if [ $download ] ; then
     fi
     if [ ! -f atk-2.2.0.tar.bz2 ] ; then
         echo atk
-	curl -O http://ftp.gnome.org/pub/GNOME/sources/atk/2.2/atk-2.2.0.tar.bz2
+	curl -LO http://ftp.gnome.org/pub/GNOME/sources/atk/2.2/atk-2.2.0.tar.bz2
     fi
     if [ ! -f gnome-common-2.34.0.tar.bz2 ] ; then
         echo gnome-common
-	curl -O http://ftp.acc.umu.se/pub/gnome/sources/gnome-common/2.34/gnome-common-2.34.0.tar.bz2
+	curl -LO http://ftp.acc.umu.se/pub/gnome/sources/gnome-common/2.34/gnome-common-2.34.0.tar.bz2
     fi
     if [ ! -f gtk-doc-1.18.tar.bz2 ] ; then
         echo gtk-doc
-	curl -O http://ftp.gnome.org/pub/GNOME/sources/gtk-doc/1.18/gtk-doc-1.18.tar.bz2
+	curl -LO http://ftp.gnome.org/pub/GNOME/sources/gtk-doc/1.18/gtk-doc-1.18.tar.bz2
     fi
     if [ ! -f gnome-doc-utils-0.20.6.tar.bz2 ] ; then
         echo gnome-doc
-	curl -O http://ftp.acc.umu.se/pub/gnome/sources/gnome-doc-utils/0.20/gnome-doc-utils-0.20.6.tar.bz2
+	curl -LO http://ftp.acc.umu.se/pub/gnome/sources/gnome-doc-utils/0.20/gnome-doc-utils-0.20.6.tar.bz2
     fi
     if [ ! -f pixman-0.24.4.tar.gz ] ; then
         echo pixman
-	curl -O http://cgit.freedesktop.org/pixman/snapshot/pixman-0.24.4.tar.gz
+	curl -LO http://cgit.freedesktop.org/pixman/snapshot/pixman-0.24.4.tar.gz
     fi
     if [ ! -f libffi-3.0.10.tar.gz ] ; then
         echo ffi
-	curl -O ftp://sourceware.org/pub/libffi/libffi-3.0.10.tar.gz
+	curl -LO ftp://sourceware.org/pub/libffi/libffi-3.0.10.tar.gz
     fi
     if [ ! -f freetype-2.4.8.tar.bz2 ] ; then
         echo freetype
@@ -166,48 +212,31 @@ if [ $download ] ; then
     exit 0
 fi
 
-# target for install
-PREFIX=$HOME/gtk/inst
+if [ x$patch_gtk_osx != x ] ; then
 
-if [ $clean ] ; then
-    rm -rf `ls -ld * | awk '/^d/ {print $9;}' | grep -v gtk+`
-    # have to use sudo because we used sudo for libxml2 install, sigh.
-    sudo rm -rf $PREFIX
+    this_script_dir="`/usr/bin/dirname \"$0\"`"
+    cd gtk+
+    echo "Testing patches ... "
+
+    patches=`ls $this_script_dir/current_gtk_osx_patches/*.patch`
+    for patch in $patches ; do
+        if patch --dry-run -p0 < $patch >/dev/null 2>&1 ; then
+            echo "Patch $patch no longer applies cleanly."
+            exit 1
+        fi
+    done
+
+    echo "Applying patches ..."
+    for patch in $patches ; do
+        patch --dry-run -p0 < $patch
+    done
     exit 0
-fi
-
-mkdir -p $PREFIX
-
-export MAKEFLAGS=-j$parallel
-PATH=$PREFIX/bin:$PATH
-
-if uname -a | grep --silent arwin ; then
-    
-    # its OS X! run for the hills !!
-
-    export DYLD_FALLBACK_LIBRARY_PATH=$PREFIX/lib${DYLD_FALLBACK_LIBRARY_PATH:+:$DYLD_FALLBACK_LIBRARY_PATH}
-    # force compilation to use 10.4 APIs only. could be overkill, but better safe than sorry
-    GLOBAL_CFLAGS="-DMAC_OS_X_VERSION_MIN_REQUIRED=1040 -DMAC_OSX_VERSION_MAX_ALLOWED=1040 -mmacosx-version-min=10.4"
-    # for 10.5 and above, add to CFLAGS
-    # -sysroot=/Developer/SDKs/MacOSX10.4u.sdk"
-    GLOBAL_LDFLAGS=
-    # for 10.5 and above, add to LDFLAGS
-    # "-syslibroot /Developer/SDKs/MacOSX10.4u.sdk"
-    export MACOSX_DEPLOYMENT_TARGET=10.4
-    # If the default python is not new enough, set PYTHON to point to a 
-    # suitably new (2.7 or later) version of Python's framework
-    PYTHON=
-    #PYTHON=/Library/Frameworks/Python.framework/Versions/2.7
-else 
-    export LD_LIBRARY_PATH=$PREFIX/lib{$LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
-    GLOBAL_CFLAGS=
-    GLOBAL_LDFLAGS=
 fi
 
 export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
 
-tar jxf xz-5.0.3.tar.bz2 && (cd xz-5.0.3 && LDFLAGS="-L$PREFIX/lib" CFLAGS="-I$PREFIX/include" ./configure --prefix=$PREFIX && make && make install)
-tar jxf tar-1.26.tar.bz2 && (cd tar-1.26 && LDFLAGS="-L$PREFIX/lib" CFLAGS="-I$PREFIX/include" ./configure --prefix=$PREFIX && make && make install)
+tar jxf xz-5.0.3.tar.bz2 && (cd xz-5.0.3 && LDFLAGS="-L$PREFIX/lib" CFLAGS="-I$PREFIX/include" ./configure $GLOBAL_CONF && make && make install)
+tar jxf tar-1.26.tar.bz2 && (cd tar-1.26 && LDFLAGS="-L$PREFIX/lib" CFLAGS="-I$PREFIX/include" ./configure $GLOBAL_CONF && make && make install)
 #
 # now we have a working, modern tar we can drop the compression-type flag
 #
@@ -215,27 +244,27 @@ hash tar
 #
 # well, we do now ..
 #
-tar xf m4-1.4.16.tar.bz2 && (cd m4-1.4.16 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
-tar xf make-3.82.tar.bz2 && (cd make-3.82 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
-tar xf zlib-1.2.6.tar.bz2 && (cd zlib-1.2.6 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && PATH=/usr/bin:$PATH make && make install)
-tar xf autoconf-2.68.tar.bz2 && (cd autoconf-2.68 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
-tar  xf automake-1.11.3.tar.gz && (cd automake-1.11.3 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
-tar  xf libtool-2.4.2.tar.gz && (cd libtool-2.4.2 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
-tar  xf make-3.82.tar.bz2 && (cd make-3.82 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
-tar  xf bison-2.5.tar.bz2 && (cd bison-2.5  && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
+tar xf m4-1.4.16.tar.bz2 && (cd m4-1.4.16 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install)
+tar xf make-3.82.tar.bz2 && (cd make-3.82 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install)
+tar xf zlib-1.2.6.tar.bz2 && (cd zlib-1.2.6 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && PATH=/usr/bin:$PATH make && make install)
+tar xf autoconf-2.68.tar.bz2 && (cd autoconf-2.68 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install)
+tar  xf automake-1.11.3.tar.gz && (cd automake-1.11.3 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install)
+tar  xf libtool-2.4.2.tar.gz && (cd libtool-2.4.2 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install)
+tar  xf make-3.82.tar.bz2 && (cd make-3.82 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install)
+tar  xf bison-2.5.tar.bz2 && (cd bison-2.5  && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install)
 #
 # libxml2 tries to install python modules in the system python folders and thus needs sudo for the install step. 
 # clean up afterwards to reset ownership on dirs and files created under $PREFIX as root
 # 
-tar  xf libxml2-2.7.8.tar.gz && (cd libxml2-2.7.8 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX --with-zlib=$PREFIX ${PYTHON:+--with-python=$PYTHON} && make && sudo make install && sudo chown -R `whoami` $PREFIX)
-tar  xf libxslt-1.1.26.tar.gz && (cd libxslt-1.1.26 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
-tar  xf readline-6.2.tar.gz && (cd readline-6.2  && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
-tar  xf libiconv-1.14.tar.gz && (cd libiconv-1.14  && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
-tar  xf intltool-0.50.2.tar.gz && (cd intltool-0.50.2  && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
-tar  xf gettext-0.18.1.1.tar.gz && (cd gettext-0.18.1.1  && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
-tar  xf tiff-4.0.1.tar.gz && (cd tiff-4.0.1 && CFLAGS="$GLOBAL_CFLAGS -DHAVE_APPLE_OPENGL_FRAMEWORK" LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
-tar  xf libpng-1.5.9.tar.gz && (cd libpng-1.5.9 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
-tar  xf jpegsrc.v8d.tar.gz && (cd jpeg-8d && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
+tar  xf libxml2-2.7.8.tar.gz && (cd libxml2-2.7.8 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF --with-zlib=$PREFIX ${PYTHON:+--with-python=$PYTHON} && make && sudo make install && sudo chown -R `whoami` $PREFIX)
+tar  xf libxslt-1.1.26.tar.gz && (cd libxslt-1.1.26 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install)
+tar  xf readline-6.2.tar.gz && (cd readline-6.2  && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install)
+tar  xf libiconv-1.14.tar.gz && (cd libiconv-1.14  && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install)
+tar  xf intltool-0.50.2.tar.gz && (cd intltool-0.50.2  && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install)
+tar  xf gettext-0.18.1.1.tar.gz && (cd gettext-0.18.1.1  && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install)
+tar  xf tiff-4.0.1.tar.gz && (cd tiff-4.0.1 && CFLAGS="$GLOBAL_CFLAGS -DHAVE_APPLE_OPENGL_FRAMEWORK" LD_FLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install)
+tar  xf libpng-1.5.9.tar.gz && (cd libpng-1.5.9 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install)
+tar  xf jpegsrc.v8d.tar.gz && (cd jpeg-8d && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install)
 tar xf XML-Simple-2.18.tar.gz && (cd XML-Simple-2.18 && perl Makefile.PL PREFIX=$PREFIX && make && make install)
 tar xf XML-Parser-2.41.tar.gz && (cd XML-Parser-2.41 && perl Makefile.PL PREFIX=$PREFIX && make && make install)
 #
@@ -243,12 +272,12 @@ tar xf XML-Parser-2.41.tar.gz && (cd XML-Parser-2.41 && perl Makefile.PL PREFIX=
 #  it can be avoided by changing into the target build directory, re-running configure and then running make from there.
 #  the target dir gets built by the first invocation of configure, and is the newest dir, so we find its name with ls and awk.
 #
-tar xf libffi-3.0.10.tar.gz && (cd libffi-3.0.10 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && cd `ls -ltd * | awk '/^d/ {print $9; exit}'` && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ../configure --prefix=$PREFIX && make && make install)
+tar xf libffi-3.0.10.tar.gz && (cd libffi-3.0.10 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && cd `ls -ltd * | awk '/^d/ {print $9; exit}'` && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ../configure $GLOBAL_CONF && make && make install)
 # time to bootstrap the circular dependency between pkg-config and glib.
 #
 # step one: build glib with everything specified so that pkg-config is not used or required
 #
-tar xf glib-2.31.2.tar.bz2 && (cd glib-2.31.2 && LDFLAGS=-L$PREFIX/lib CFLAGS=-I$PREFIX/include ZLIB_CFLAGS=-I$PREFIX/include ZLIB_LIBS=-I$PREFIX/lib LIBFFI_CFLAGS=-I$PREFIX/lib/libffi-3.0.10/include LIBFFI_LIBS="-L$PREFIX/lib -lffi" ./configure --prefix=$PREFIX --with-pcre=internal --disable-silent-rules && make && make install) && rm -rf glib-2.31.2
+tar xf glib-2.31.2.tar.bz2 && (cd glib-2.31.2 && LDFLAGS=-L$PREFIX/lib CFLAGS=-I$PREFIX/include ZLIB_CFLAGS=-I$PREFIX/include ZLIB_LIBS=-I$PREFIX/lib LIBFFI_CFLAGS=-I$PREFIX/lib/libffi-3.0.10/include LIBFFI_LIBS="-L$PREFIX/lib -lffi" ./configure $GLOBAL_CONF --with-pcre=internal --disable-silent-rules && make && make install) && rm -rf glib-2.31.2
 #
 # step two: build pkg-config with glib flags specified so that pkg-config is not used or required
 #
@@ -260,26 +289,26 @@ tar xf glib-2.31.18.tar.xz && (cd glib-2.31.18 && LDFLAGS="$GLOBAL_LDFLAGS -L$PR
 #
 # step four: rebuilding pkg-config now that glib is all set
 #
-tar xf pkg-config-0.26.tar.gz && (cd pkg-config-0.26 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
+tar xf pkg-config-0.26.tar.gz && (cd pkg-config-0.26 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install)
 #
 # now we can start on the GTK stack itself
 # 
-tar xf atk-2.2.0.tar.bz2 && (cd atk-2.2.0 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
-tar xf gnome-common-2.34.0.tar.bz2 && (cd gnome-common-2.34.0 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
+tar xf atk-2.2.0.tar.bz2 && (cd atk-2.2.0 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install)
+tar xf gnome-common-2.34.0.tar.bz2 && (cd gnome-common-2.34.0 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install)
 tar xf gtk-osx-docbook-1.0.tar.gz && (cd gtk-osx-docbook-1.0 && JHBUILD_PREFIX=$PREFIX make install)
 # gnome-doc-utils is not parallel-build safe so turn off make -j2
-tar xf gnome-doc-utils-0.20.6.tar.bz2 && (cd gnome-doc-utils-0.20.6 && PYTHONPATH=$PREFIX/lib/python2.7/site-packages CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX --disable-scrollkeeper && PYTHONPATH=$PREFIX/lib/python2.7/site-packages MAKEFLAGS= make && PYTHONPATH=$PREFIX/lib/python2.7/site-packages MAKEFLAGS= make install)
+tar xf gnome-doc-utils-0.20.6.tar.bz2 && (cd gnome-doc-utils-0.20.6 && PYTHONPATH=$PREFIX/lib/python2.7/site-packages CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF --disable-scrollkeeper && PYTHONPATH=$PREFIX/lib/python2.7/site-packages MAKEFLAGS= make && PYTHONPATH=$PREFIX/lib/python2.7/site-packages MAKEFLAGS= make install)
 tar xf gtk-doc-1.18.tar.bz2 && (cd gtk-doc-1.18 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --disable-scrollkeeper --with-xml-catalog=$PREFIX/etc/xml/catalog --prefix=$PREFIX && PYTHONPATH=$PREFIX/lib/python2.7/site-packages make && make install)
 tar xf pixman-0.24.4.tar.gz && (cd pixman-0.24.4 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" sh ./autogen.sh --prefix=$PREFIX && make && make install)
-tar xf freetype-2.4.8.tar.bz2 && (cd freetype-2.4.8 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
-tar xf fontconfig-2.8.0.tar.gz && (cd fontconfig-2.8.0 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
-tar xf cairo-1.10.2.tar.gz && (cd cairo-1.10.2 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
-tar xf pango-1.29.5.tar.bz2 && (cd pango-1.29.5 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install)
+tar xf freetype-2.4.8.tar.bz2 && (cd freetype-2.4.8 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install)
+tar xf fontconfig-2.8.0.tar.gz && (cd fontconfig-2.8.0 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install)
+tar xf cairo-1.10.2.tar.gz && (cd cairo-1.10.2 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install)
+tar xf pango-1.29.5.tar.bz2 && (cd pango-1.29.5 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install)
 
-tar xf gdk-pixbuf-2.25.0.tar.xz && (cd gdk-pixbuf-2.25.0 && LDFLAGS="$GLOBAL_LDFLAGS -L$PREFIX/lib" CFLAGS="-I$PREFIX/include $GLOBAL_CFLAGS" ./configure --prefix=$PREFIX && make && make install)
+tar xf gdk-pixbuf-2.25.0.tar.xz && (cd gdk-pixbuf-2.25.0 && LDFLAGS="$GLOBAL_LDFLAGS -L$PREFIX/lib" CFLAGS="-I$PREFIX/include $GLOBAL_CFLAGS" ./configure $GLOBAL_CONF && make && make install)
 # gobject-introspection uses #include <libintl.h> and there's no way to force the "scanner" to look outside the system tree
 sudo ln -s $PREFIX/include/libintl.h /usr/include
-tar xf gobject-introspection-1.31.10.tar.xz && (cd gobject-introspection-1.31.10 && LDFLAGS="$GLOBAL_LDFLAGS -L$PREFIX/lib -lintl" CFLAGS="-I$PREFIX/include $GLOBAL_CFLAGS" ./configure --prefix=$PREFIX --disable-silent-rules && make && make install)
+tar xf gobject-introspection-1.31.10.tar.xz && (cd gobject-introspection-1.31.10 && LDFLAGS="$GLOBAL_LDFLAGS -L$PREFIX/lib -lintl" CFLAGS="-I$PREFIX/include $GLOBAL_CFLAGS" ./configure $GLOBAL_CONF --disable-silent-rules && make && make install)
 sudo rm /usr/include/libintl.h
 #
 # now gtk itself
