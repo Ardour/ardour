@@ -205,8 +205,8 @@ if [ ! -f gobject-introspection-1.31.10.tar.xz ] ; then
     curl -LO http://ftp.gnome.org/pub/GNOME/sources/gobject-introspection/1.31/gobject-introspection-1.31.10.tar.xz
 fi
 
-echo "GTK+ (2.24 branch)"
 if [ ! -d gtk+ ] ; then
+    echo "GTK+ (2.24 branch)"
     git clone git://git.gnome.org/gtk+
     cd gtk+
     git checkout --track -b gtk-2-24 origin/gtk-2-24
@@ -285,7 +285,7 @@ tar xf pkg-config-0.26.tar.gz && (cd pkg-config-0.26 && GLIB_CFLAGS="-I$PREFIX/i
 # 
 # step three: rebuild glib (still need CFLAGS in order to find libintl)
 #
-tar xf glib-2.31.2.tar.xz && (cd glib-2.31.2 && LDFLAGS="$GLOBAL_LDFLAGS -L$PREFIX/lib -lintl" CFLAGS="$GLOBAL_CFLAGS -I$PREFIX/include" ./configure --prefix=$HOME/gtk/inst && make && make install) || die "glib build failed"
+tar xf glib-2.31.2.tar.bz2 && (cd glib-2.31.2 && LDFLAGS="$GLOBAL_LDFLAGS -L$PREFIX/lib -lintl" CFLAGS="$GLOBAL_CFLAGS -I$PREFIX/include" ./configure --prefix=$HOME/gtk/inst && make && make install) || die "glib build failed"
 #
 # step four: rebuilding pkg-config now that glib is all set
 #
@@ -307,7 +307,9 @@ tar xf pango-1.29.5.tar.bz2 && (cd pango-1.29.5 && CFLAGS=$GLOBAL_CFLAGS LD_FLAG
 
 tar xf gdk-pixbuf-2.25.0.tar.xz && (cd gdk-pixbuf-2.25.0 && LDFLAGS="$GLOBAL_LDFLAGS -L$PREFIX/lib" CFLAGS="-I$PREFIX/include $GLOBAL_CFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "gdk build failed"
 # gobject-introspection uses #include <libintl.h> and there's no way to force the "scanner" to look outside the system tree
-sudo ln -s $PREFIX/include/libintl.h /usr/include
+if [ ! -f /usr/include/libintl.h ] ; then 
+    sudo ln -s $PREFIX/include/libintl.h /usr/include
+fi
 tar xf gobject-introspection-1.31.10.tar.xz && (cd gobject-introspection-1.31.10 && LDFLAGS="$GLOBAL_LDFLAGS -L$PREFIX/lib -lintl" CFLAGS="-I$PREFIX/include $GLOBAL_CFLAGS" ./configure $GLOBAL_CONF --disable-silent-rules && make && make install) || die "gobject build failed"
 sudo rm /usr/include/libintl.h
 #
