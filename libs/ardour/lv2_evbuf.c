@@ -14,6 +14,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <assert.h>
 #include <string.h>
 #include <stdlib.h>
 
@@ -89,7 +90,7 @@ lv2_evbuf_reset(LV2_Evbuf* evbuf, bool input)
 		break;
 	case LV2_EVBUF_ATOM:
 		if (input) {
-			evbuf->buf.atom.atom.size = 0;
+			evbuf->buf.atom.atom.size = sizeof(LV2_Atom_Sequence_Body);
 			evbuf->buf.atom.atom.type = evbuf->atom_Sequence;
 		} else {
 			evbuf->buf.atom.atom.size = evbuf->capacity;
@@ -105,8 +106,10 @@ lv2_evbuf_get_size(LV2_Evbuf* evbuf)
 	case LV2_EVBUF_EVENT:
 		return evbuf->buf.event.size;
 	case LV2_EVBUF_ATOM:
+		assert(evbuf->buf.atom.atom.type != evbuf->atom_Sequence
+		       || evbuf->buf.atom.atom.size >= sizeof(LV2_Atom_Sequence_Body));
 		return evbuf->buf.atom.atom.type == evbuf->atom_Sequence
-			? evbuf->buf.atom.atom.size
+			? evbuf->buf.atom.atom.size - sizeof(LV2_Atom_Sequence_Body)
 			: 0;
 	}
 	return 0;
@@ -134,7 +137,7 @@ lv2_evbuf_begin(LV2_Evbuf* evbuf)
 LV2_Evbuf_Iterator
 lv2_evbuf_end(LV2_Evbuf* evbuf)
 {
-	const size_t             size = lv2_evbuf_get_size(evbuf);
+	const uint32_t           size = lv2_evbuf_get_size(evbuf);
 	const LV2_Evbuf_Iterator iter = { evbuf, lv2_evbuf_pad_size(size) };
 	return iter;
 }
