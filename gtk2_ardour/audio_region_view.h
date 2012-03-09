@@ -91,7 +91,7 @@ class AudioRegionView : public RegionView
 	void add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *event);
 	void remove_gain_point_event (ArdourCanvas::Item *item, GdkEvent *event);
 
-	AudioRegionGainLine* get_gain_line() const { return gain_line; }
+	boost::shared_ptr<AudioRegionGainLine> get_gain_line() const { return gain_line; }
 
 	void region_changed (const PBD::PropertyChange&);
 	void envelope_active_changed ();
@@ -142,7 +142,7 @@ class AudioRegionView : public RegionView
 	ArdourCanvas::SimpleRect*        fade_out_handle; ///< fade out handle, or 0
 	ArdourCanvas::SimpleLine*        fade_position_line;
 
-	AudioRegionGainLine * gain_line;
+	boost::shared_ptr<AudioRegionGainLine> gain_line;
 
 	double _amplitude_above_axis;
 
