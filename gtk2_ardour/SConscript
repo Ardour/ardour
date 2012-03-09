@@ -425,15 +425,28 @@ my_subst_dict = { }
 
 keybindings_dict = { }
 
-keybindings_dict['%PRIMARY%'] = 'Primary'
-keybindings_dict['%SECONDARY%'] = 'Alt'
-keybindings_dict['%TERTIARY%'] = 'Shift'
-keybindings_dict['%WINDOW%'] = 'Alt'
-	
 if gtkardour['GTKOSX']:
+	#
+	# Command(Meta), Alt(Mod1), Ctrl, Shift
+	# **** as of november 18th 2011, OUR VERSION OF *****
+	# Gtk/Quartz maps:
+	#  NSCommand (aka "Command" aka "Apple" aka "Cauliflower") -> Mod2
+	#  NSAlternate (aka "Option")  -> Mod1
+	#
+	keybindings_dict['%PRIMARY%'] = 'Mod2'
+	keybindings_dict['%SECONDARY%'] = 'Mod1'
+	keybindings_dict['%TERTIARY%'] = 'Shift'
 	keybindings_dict['%LEVEL4%'] = 'Ctrl'
+	keybindings_dict['%WINDOW%'] = 'Mod1'
 else:
+	#
+	# Ctrl, Alt, Shift, Mod4(Super/Windows/Hyper)
+	#
+	keybindings_dict['%PRIMARY%'] = 'Ctrl'
+	keybindings_dict['%SECONDARY%'] = 'Alt'
+	keybindings_dict['%TERTIARY%'] = 'Shift'
 	keybindings_dict['%LEVEL4%'] = env['WINDOWS_KEY']
+	keybindings_dict['%WINDOW%'] = 'Alt'
 
 for b in [ 'SAE-de-keypad',  'SAE-de-nokeypad', 'SAE-us-keypad', 'SAE-us-nokeypad', 'mnemonic-us', 'ergonomic-us' ]:
 	target_file = b + '.bindings'
