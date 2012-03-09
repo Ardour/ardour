@@ -835,6 +835,7 @@ EditorRegions::populate_row_position (boost::shared_ptr<Region> region, TreeMode
 		row[_columns.position] = _("Mult.");
 	} else {
 		char buf[16];
+		cerr << "Adding a region " << region->name() << " at " << region->position() << endl;
 		format_position (region->position(), buf, sizeof (buf));
 		row[_columns.position] = buf;
 	}
