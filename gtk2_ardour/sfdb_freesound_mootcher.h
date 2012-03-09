@@ -49,7 +49,7 @@ enum sortMethod {
 class Mootcher
 {
 public:
-	Mootcher(const char *saveLocation);
+	Mootcher();
 	~Mootcher();
 
 	std::string	getAudioFile(std::string originalFileName, std::string ID, std::string audioURL, SoundFileBrowser *caller);

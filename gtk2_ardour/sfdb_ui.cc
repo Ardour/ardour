@@ -177,6 +177,7 @@ SoundFileBox::SoundFileBox (bool persistent)
 	main_box.pack_start (table, false, false);
 
 	tags_entry.set_editable (true);
+	tags_entry.set_wrap_mode(Gtk::WRAP_WORD);
 	tags_entry.signal_focus_out_event().connect (sigc::mem_fun (*this, &SoundFileBox::tags_entry_left));
 
 	Label* label = manage (new Label (_("Tags:")));
@@ -562,6 +563,9 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 		freesound_list_view.append_column(_("ID")      , freesound_list_columns.id);
 		freesound_list_view.append_column(_("Filename"), freesound_list_columns.filename);
 		// freesound_list_view.append_column(_("URI")     , freesound_list_columns.uri);
+		freesound_list_view.append_column(_("Duration"), freesound_list_columns.duration);
+		freesound_list_view.get_column(1)->set_expand(true);
+
 		freesound_list_view.get_selection()->signal_changed().connect(sigc::mem_fun(*this, &SoundFileBrowser::freesound_list_view_selected));
 
 		freesound_list_view.get_selection()->set_mode (SELECTION_MULTIPLE);
@@ -737,10 +741,7 @@ SoundFileBrowser::freesound_list_view_selected ()
 		set_response_sensitive (RESPONSE_OK, false);
 	} else {
 
-		string path;
-		path = Glib::get_home_dir();
-		path += "/Freesound/";
-		Mootcher theMootcher(path.c_str()); // XXX should be a member of SoundFileBrowser
+		Mootcher theMootcher; // XXX should be a member of SoundFileBrowser
 
 		string file;
 
@@ -820,10 +821,7 @@ SoundFileBrowser::freesound_search()
 #ifdef FREESOUND
 	freesound_list->clear();
 
-	string path;
-	path = Glib::get_home_dir();
-	path += "/Freesound/";
-	Mootcher theMootcher(path.c_str());
+	Mootcher theMootcher;
 
 	string search_string = freesound_entry.get_text ();
 	enum sortMethod sort_method = (enum sortMethod) freesound_sort.get_active_row_number();
@@ -879,15 +877,30 @@ SoundFileBrowser::freesound_search()
 		XMLNode *id_node  = node->child ("id");
 		XMLNode *uri_node = node->child ("serve");
 		XMLNode *ofn_node = node->child ("original_filename");
+		XMLNode *dur_node = node->child ("duration");
 
 		if (id_node && uri_node && ofn_node) {
 			
 			std::string  id =  id_node->child("text")->content();
 			std::string uri = uri_node->child("text")->content();
 			std::string ofn = ofn_node->child("text")->content();
+			std::string dur = dur_node->child("text")->content();
 
 			std::string r;
-			// cerr << "id=" << id << ",uri=" << uri << ",ofn=" << ofn << endl;
+			// cerr << "id=" << id << ",uri=" << uri << ",ofn=" << ofn << ",dur=" << dur << endl;
+			
+			double duration_seconds = atof(dur.c_str());
+			double h, m, s;
+			char duration_hhmmss[16];
+			if (duration_seconds >= 99 * 60 * 60) {
+				strcpy(duration_hhmmss, ">99h");
+			} else {
+				s = modf(duration_seconds/60, &m) * 60;
+				m = modf(m/60, &h) * 60;
+				sprintf(duration_hhmmss, "%02.fh:%02.fm:%04.1fs",
+					h, m, s
+				);
+			}
 
 			TreeModel::iterator new_row = freesound_list->append();
 			TreeModel::Row row = *new_row;
@@ -895,6 +908,7 @@ SoundFileBrowser::freesound_search()
 			row[freesound_list_columns.id      ] = id;
 			row[freesound_list_columns.uri     ] = uri;
 			row[freesound_list_columns.filename] = ofn;
+			row[freesound_list_columns.duration] = duration_hhmmss;
 
 		}
 	}
@@ -934,10 +948,7 @@ SoundFileBrowser::get_paths ()
 #ifdef FREESOUND
 		typedef TreeView::Selection::ListHandle_Path ListPath;
 
-		string path;
-		path = Glib::get_home_dir();
-		path += "/Freesound/";
-		Mootcher theMootcher(path.c_str()); // XXX should be a member of SoundFileBrowser
+		Mootcher theMootcher; // XXX should be a member of SoundFileBrowser
 
 
 		ListPath rows = freesound_list_view.get_selection()->get_selected_rows ();
