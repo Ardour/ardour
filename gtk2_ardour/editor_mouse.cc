@@ -73,6 +73,21 @@ using namespace Editing;
 bool
 Editor::mouse_frame (nframes64_t& where, bool& in_track_canvas) const
 {
+        /* gdk_window_get_pointer() has X11's XQueryPointer semantics in that it only
+           pays attentions to subwindows. this means that menu windows are ignored, and 
+           if the pointer is in a menu, the return window from the call will be the
+           the regular subwindow *under* the menu.
+
+           this matters quite a lot if the pointer is moving around in a menu that overlaps
+           the track canvas because we will believe that we are within the track canvas
+           when we are not. therefore, we track enter/leave events for the track canvas
+           and allow that to override the result of gdk_window_get_pointer().
+        */
+
+        if (!within_track_canvas) {
+                return false;
+        }
+
 	int x, y;
 	double wx, wy;
 	Gdk::ModifierType mask;

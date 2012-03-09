@@ -593,6 +593,7 @@ class Editor : public PublicEditor
 	ArdourCanvas::Canvas* track_canvas;
 	ArdourCanvas::NoEventText* verbose_canvas_cursor;
 	bool                 verbose_cursor_visible;
+        bool                 within_track_canvas;
 
 	void parameter_changed (const char *);
 	

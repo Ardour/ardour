@@ -121,6 +121,7 @@ Editor::initialize_canvas ()
 	delete font;
 	
 	verbose_cursor_visible = false;
+        within_track_canvas = false;
 
 	/* on the bottom, an image */
 	
@@ -795,6 +796,7 @@ Editor::stop_canvas_autoscroll ()
 bool
 Editor::left_track_canvas (GdkEventCrossing *ev)
 {
+        within_track_canvas = false;
 	set_entered_track (0);
 	set_entered_regionview (0);
 	reset_canvas_action_sensitivity (false);
@@ -804,6 +806,7 @@ Editor::left_track_canvas (GdkEventCrossing *ev)
 bool
 Editor::entered_track_canvas (GdkEventCrossing *ev)
 {
+        within_track_canvas = true;
 	reset_canvas_action_sensitivity (true);
 	return FALSE;
 }
