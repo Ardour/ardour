@@ -417,7 +417,32 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 		uint32_t fakekey = ev->keyval;
 
 		if (Gtkmm2ext::possibly_translate_keyval_to_make_legal_accelerator (fakekey)) {
-			if (allow_activating && gtk_accel_groups_activate(G_OBJECT(win), fakekey, GdkModifierType(ev->state))) {
+			DEBUG_TRACE (DEBUG::Accelerators, string_compose ("\tactivate (was %1 now %2) without special hanlding of unmodified accels\n",
+									  ev->keyval, fakekey));
+
+			GdkModifierType mod = GdkModifierType (ev->state);
+
+			mod = GdkModifierType (mod & gtk_accelerator_get_default_mod_mask());
+#ifdef GTKOSX
+			/* GTK on OS X is currently (February 2012) setting both
+			   the Meta and Mod2 bits in the event modifier state if 
+			   the Command key is down.
+
+			   gtk_accel_groups_activate() does not invoke any of the logic
+			   that gtk_window_activate_key() will that sorts out that stupid
+			   state of affairs, and as a result it fails to find a match
+			   for the key event and the current set of accelerators.
+
+			   to fix this, if the meta bit is set, remove the mod2 bit
+			   from the modifier. this assumes that our bindings use Primary
+			   which will have set the meta bit in the accelerator entry.
+			*/
+			if (mod & GDK_META_MASK) {
+				mod = GdkModifierType (mod & ~GDK_MOD2_MASK);
+			}
+#endif
+
+			if (allow_activating && gtk_accel_groups_activate(G_OBJECT(win), fakekey, mod)) {
 				DEBUG_TRACE (DEBUG::Accelerators, "\taccel group activated by fakekey\n");
 				return true;
 			}

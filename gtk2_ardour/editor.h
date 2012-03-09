@@ -714,6 +714,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void set_canvas_cursor ();
 
 	ArdourCanvas::Canvas* track_canvas;
+	bool within_track_canvas;
 
 	friend class VerboseCursor;
 	VerboseCursor* _verbose_cursor;

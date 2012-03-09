@@ -370,6 +370,7 @@ Editor::Editor ()
 	layering_order_editor = 0;
 	no_save_visual = false;
 	resize_idle_id = -1;
+	within_track_canvas = false;
 
 	scrubbing_direction = 0;
 

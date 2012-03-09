@@ -731,6 +731,7 @@ bool
 Editor::left_track_canvas (GdkEventCrossing */*ev*/)
 {
 	DropDownKeys ();
+	within_track_canvas = false;
 	set_entered_track (0);
 	set_entered_regionview (0);
 	reset_canvas_action_sensitivity (false);
@@ -740,6 +741,7 @@ Editor::left_track_canvas (GdkEventCrossing */*ev*/)
 bool
 Editor::entered_track_canvas (GdkEventCrossing */*ev*/)
 {
+	within_track_canvas = false;
 	reset_canvas_action_sensitivity (true);
 	return FALSE;
 }

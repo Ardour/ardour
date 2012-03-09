@@ -488,7 +488,7 @@ EditorRoutes::show_menu ()
 void
 EditorRoutes::redisplay ()
 {
-	if (_no_redisplay || !_session) {
+	if (_no_redisplay || !_session || _session->deletion_in_progress()) {
 		return;
 	}
 
