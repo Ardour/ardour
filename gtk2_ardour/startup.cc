@@ -593,6 +593,7 @@ ArdourStartup::setup_initial_choice_page ()
 	}
 
 	ic_new_session_button.signal_button_press_event().connect(sigc::mem_fun(*this, &ArdourStartup::initial_button_press), false);
+	ic_new_session_button.signal_clicked().connect(sigc::mem_fun(*this, &ArdourStartup::initial_button_clicked));
 	ic_new_session_button.signal_activate().connect(sigc::mem_fun(*this, &ArdourStartup::initial_button_activated), false);
 
 	centering_hbox->pack_start (*centering_vbox, true, true);
@@ -608,10 +609,20 @@ ArdourStartup::setup_initial_choice_page ()
 	set_page_complete (ic_vbox, true);
 }
 
+void
+ArdourStartup::initial_button_clicked ()
+{
+	if (ic_new_session_button.get_active ()) {
+		recent_session_display.get_selection()->unselect_all ();
+	}
+}
+		
 bool
 ArdourStartup::initial_button_press (GdkEventButton *event)
 {
 	if (event && event->type == GDK_2BUTTON_PRESS && new_session_page_index != -1) {
+		ic_new_session_button.set_active (true);
+		recent_session_display.get_selection()->unselect_all ();
 		set_current_page (new_session_page_index);
 		return true;
 	} else {
@@ -622,6 +633,7 @@ ArdourStartup::initial_button_press (GdkEventButton *event)
 void
 ArdourStartup::initial_button_activated ()
 {
+	recent_session_display.get_selection()->unselect_all ();
 	set_current_page (new_session_page_index);
 }
 
@@ -686,6 +698,12 @@ void
 ArdourStartup::on_prepare (Gtk::Widget* page)
 {
 	if (page == &new_session_vbox) {
+
+		if (recent_session_display.get_selection()->count_selected_rows() > 0) {
+			/* row selected, use it */
+			set_page_type (new_session_vbox, ASSISTANT_PAGE_CONFIRM);
+			on_apply ();
+		}	
 
 		/* HACK HACK HACK ... change the "Apply" button label
 		   to say "Open"
@@ -1004,9 +1022,9 @@ void
 ArdourStartup::recent_session_row_selected ()
 {
 	if (recent_session_display.get_selection()->count_selected_rows() > 0) {
-		set_page_complete (ic_vbox, true);
+		ic_new_session_button.set_active (false);
 	} else {
-		set_page_complete (ic_vbox, false);
+		ic_new_session_button.set_active (true);
 	}
 }
 
@@ -1336,7 +1354,6 @@ ArdourStartup::recent_row_activated (const Gtk::TreePath&, Gtk::TreeViewColumn*)
 {
 	ic_new_session_button.set_active (false);
 	set_page_type (ic_vbox, ASSISTANT_PAGE_CONFIRM);
-	set_page_complete (ic_vbox, true);
 	on_apply ();
 }
 
@@ -1346,7 +1363,6 @@ ArdourStartup::existing_session_selected ()
 	ic_new_session_button.set_active (false);
 	_existing_session_chooser_used = true;
 	set_page_type (ic_vbox, ASSISTANT_PAGE_CONFIRM);
-	set_page_complete (ic_vbox, true);
 	on_apply ();
 }
 
