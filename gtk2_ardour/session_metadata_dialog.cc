@@ -82,6 +82,7 @@ Gtk::Widget &
 TextMetadataField::name_widget ()
 {
 	label = Gtk::manage (new Gtk::Label(_name + ':', Gtk::ALIGN_LEFT));
+	label->set_alignment (0, 0.5);
 	return *label;
 }
 
@@ -160,6 +161,7 @@ Gtk::Widget &
 NumberMetadataField::name_widget ()
 {
 	label = Gtk::manage (new Gtk::Label(_name + ':', Gtk::ALIGN_LEFT));
+	label->set_alignment (0, 0.5);
 	return *label;
 }
 
@@ -231,6 +233,7 @@ SessionMetadataSetEditable::SessionMetadataSetEditable (string const & name)
 {
 	table.set_row_spacings (6);
 	table.set_col_spacings (12);
+	table.set_homogeneous (false);
 	vbox.pack_start (table, false, false);
 	vbox.set_spacing (6);
 	vbox.set_border_width (6);
@@ -260,7 +263,7 @@ SessionMetadataSetEditable::set_session (ARDOUR::Session * s)
 	for (DataList::const_iterator it = list.begin(); it != list.end(); ++it) {
 		field = *it;
 		field->load_data (data);
-		table.attach (field->name_widget(), 0, 1, row, row + 1);
+		table.attach (field->name_widget(), 0, 1, row, row + 1, Gtk::FILL);
 		table.attach (field->edit_widget(), 1, 2, row, row + 1);
 		++row;
 	}
