@@ -37,3 +37,9 @@ vstfx_destroy_editor (VSTState *)
 {
 
 }
+
+void
+vstfx_exit ()
+{
+
+}
