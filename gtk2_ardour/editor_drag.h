@@ -504,21 +504,6 @@ private:
 	double _cumulative_dx;
 };
 
-/** Drag of region gain */
-class RegionGainDrag : public Drag
-{
-public:
-	RegionGainDrag (Editor *, ArdourCanvas::Item *);
-
-	void motion (GdkEvent *, bool);
-	void finished (GdkEvent *, bool);
-	bool active (Editing::MouseMode m) {
-		return (m == Editing::MouseGain);
-	}
-
-	void aborted (bool);
-};
-
 /** Drag to trim region(s) */
 class TrimDrag : public RegionDrag
 {

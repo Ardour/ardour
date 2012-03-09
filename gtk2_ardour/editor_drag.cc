@@ -1602,30 +1602,6 @@ NoteResizeDrag::aborted (bool)
 	}
 }
 
-RegionGainDrag::RegionGainDrag (Editor* e, ArdourCanvas::Item* i)
-	: Drag (e, i)
-{
-	DEBUG_TRACE (DEBUG::Drags, "New RegionGainDrag\n");
-}
-
-void
-RegionGainDrag::motion (GdkEvent* /*event*/, bool)
-{
-
-}
-
-void
-RegionGainDrag::finished (GdkEvent *, bool)
-{
-
-}
-
-void
-RegionGainDrag::aborted (bool)
-{
-	/* XXX: TODO */
-}
-
 TrimDrag::TrimDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v)
 	: RegionDrag (e, i, p, v)
 {

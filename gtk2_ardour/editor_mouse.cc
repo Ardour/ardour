@@ -1110,13 +1110,6 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 	case MouseGain:
 		switch (item_type) {
-		case RegionItem:
-			/* start a grab so that if we finish after moving
-			   we can tell what happened.
-			*/
-			_drags->set (new RegionGainDrag (this, item), event, current_canvas_cursor);
-			break;
-
 		case GainLineItem:
 			_drags->set (new LineDrag (this, item), event);
 			return true;
@@ -1126,27 +1119,10 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			return true;
 			break;
 
-		default:
-			break;
-		}
-		return true;
-		break;
-
-		switch (item_type) {
-		case ControlPointItem:
-			_drags->set (new ControlPointDrag (this, item), event);
-			break;
-
 		case AutomationLineItem:
 			_drags->set (new LineDrag (this, item), event);
 			break;
-
-		case RegionItem:
-			// XXX need automation mode to identify which
-			// line to use
-			// start_line_grab_from_regionview (item, event);
-			break;
-
+			
 		default:
 			break;
 		}
@@ -1664,7 +1640,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				   points when doing this.
 				*/
 				AudioRegionView* arv = dynamic_cast<AudioRegionView*> (clicked_regionview);
-				if (were_dragging && arv) {
+				if (!were_dragging && arv) {
 					arv->add_gain_point_event (item, event);
 				}
 				return true;
