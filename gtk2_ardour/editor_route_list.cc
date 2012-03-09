@@ -305,6 +305,10 @@ Editor::redisplay_route_list ()
 		return;
 	}
 
+        if (session && session->deletion_in_progress()) {
+                return;
+        }
+
 	for (n = 0, order = 0, position = 0, i = rows.begin(); i != rows.end(); ++i) {
 		TimeAxisView *tv = (*i)[route_display_columns.tv];
 		boost::shared_ptr<Route> route = (*i)[route_display_columns.route];
