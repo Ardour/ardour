@@ -268,8 +268,6 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_action (common_actions, X_("Save"), _("Save"),  sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::save_state), string(""), false));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, X_("RemoveLastCapture"), _("Remove Last Capture"), sigc::mem_fun(*this, &ARDOUR_UI::remove_last_capture));
-	ActionManager::session_sensitive_actions.push_back (act);
 
 	Glib::RefPtr<ActionGroup> transport_actions = ActionGroup::create (X_("Transport"));
 

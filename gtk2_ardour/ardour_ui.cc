@@ -1572,14 +1572,6 @@ ARDOUR_UI::transport_stop ()
 }
 
 void
-ARDOUR_UI::remove_last_capture()
-{
-	if (editor) {
-		editor->remove_last_capture();
-	}
-}
-
-void
 ARDOUR_UI::transport_record (bool roll)
 {
 

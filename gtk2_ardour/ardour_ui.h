@@ -529,8 +529,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	void set_transport_sensitivity (bool);
 
-	void remove_last_capture ();
-
 	void transport_goto_zero ();
 	void transport_goto_start ();
 	void transport_goto_end ();
