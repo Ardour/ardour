@@ -28,6 +28,7 @@
 #include "pbd/error.h"
 
 #include "ardour/configuration.h"
+#include "ardour/rc_configuration.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/recent_sessions.h"
 #include "ardour/utils.h"
@@ -130,8 +131,10 @@ ARDOUR::store_recent_sessions (string name, string path)
 
 	rs.push_front (newpair);
 
-	if (rs.size() > 10) {
-		rs.erase(rs.begin()+10, rs.end());
+	uint32_t max_recent_sessions = Config->get_max_recent_sessions();
+
+	if (rs.size() > max_recent_sessions) {
+		rs.erase(rs.begin()+max_recent_sessions, rs.end());
 	}
 
 	return ARDOUR::write_recent_sessions (rs);

@@ -919,6 +919,15 @@ RCOptionEditor::RCOptionEditor ()
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_default_session_parent_dir)
 			    ));
 
+	add_option (_("Misc"),
+	     new SpinOption<uint32_t> (
+		     "max-recent-sessions",
+		     _("Maximum number of recent sessions"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_max_recent_sessions),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_max_recent_sessions),
+		     0, 1000, 1, 20
+		     ));
+
 	add_option (_("Misc"), new OptionEditorHeading (_("Click")));
 
 	add_option (_("Misc"), new ClickOptions (_rc_config, this));

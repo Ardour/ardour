@@ -174,6 +174,7 @@ CONFIG_VARIABLE (bool, update_editor_during_summary_drag, "update-editor-during-
 CONFIG_VARIABLE (bool, never_display_periodic_midi, "never-display-periodic-midi", true)
 CONFIG_VARIABLE (bool, sound_midi_notes, "sound-midi-notes", false)
 CONFIG_VARIABLE (bool, use_plugin_own_gui, "use-plugin-own-gui", true)
+CONFIG_VARIABLE (uint32_t, max_recent_sessions, "max-recent-sessions", 10)
 
 /* denormal management */
 
