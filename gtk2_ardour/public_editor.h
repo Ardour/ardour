@@ -305,6 +305,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
         static sigc::signal<void> DropDownKeys;
 
 	Glib::RefPtr<Gtk::ActionGroup> editor_actions;
+	Glib::RefPtr<Gtk::ActionGroup> editor_menu_actions;
 	Glib::RefPtr<Gtk::ActionGroup> _region_actions;
 
 	virtual void reset_focus () = 0;
