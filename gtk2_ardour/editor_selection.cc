@@ -832,7 +832,7 @@ Editor::track_selection_changed ()
 			(*i)->show_selected (*selection);
 	}
 
-	ActionManager::set_sensitive (ActionManager::track_selection_sensitive_actions, !selection->tracks.empty());
+	reset_canvas_action_sensitivity();
 }
 
 void
@@ -856,12 +856,7 @@ Editor::time_selection_changed ()
 		}
 	}
 
-	if (selection->time.empty()) {
-		ActionManager::set_sensitive (ActionManager::time_selection_sensitive_actions, false);
-	} else {
-		ActionManager::set_sensitive (ActionManager::time_selection_sensitive_actions, true);
-	}
-
+	reset_canvas_action_sensitivity();
 }
 
 void

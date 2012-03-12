@@ -2882,28 +2882,16 @@ Editor::separate_regions_between (const TimeSelection& ts)
 void
 Editor::separate_region_from_selection ()
 {
-	/* preferentially use *all* ranges in the time selection if we're in range mode
-	   to allow discontiguous operation, since get_edit_op_range() currently
-	   returns a single range.
-	*/
-
-	if (mouse_mode == MouseRange && !selection->time.empty()) {
-
-		separate_regions_between (selection->time);
-
-	} else {
-
-		nframes64_t start;
-		nframes64_t end;
+	nframes64_t start;
+	nframes64_t end;
+	
+	if (get_edit_op_range (start, end)) {
 		
-		if (get_edit_op_range (start, end)) {
-			
-			AudioRange ar (start, end, 1);
-			TimeSelection ts;
-			ts.push_back (ar);
+		AudioRange ar (start, end, 1);
+		TimeSelection ts;
+		ts.push_back (ar);
 
-			separate_regions_between (ts);
-		}
+		separate_regions_between (ts);
 	}
 }
 
@@ -2943,20 +2931,11 @@ Editor::separate_regions_using_location (Location& loc)
 void
 Editor::crop_region_to_selection ()
 {
-	if (!selection->time.empty()) {
-
-		crop_region_to (selection->time.start(), selection->time.end_frame());
-
-	} else {
-
-		nframes64_t start;
-		nframes64_t end;
-
-		if (get_edit_op_range (start, end)) {
-			crop_region_to (start, end);
-		}
+	nframes64_t start;
+	nframes64_t end;
+	if (get_edit_op_range (start, end)) {
+		crop_region_to (start, end);
 	}
-		
 }		
 
 void
@@ -2967,7 +2946,7 @@ Editor::crop_region_to (nframes64_t start, nframes64_t end)
 	TrackSelection* ts;
 
 	if (selection->tracks.empty()) {
-		ts = &track_views;
+		return;
 	} else {
 		sort_track_selection ();
 		ts = &selection->tracks;

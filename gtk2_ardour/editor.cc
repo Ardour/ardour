@@ -2374,13 +2374,10 @@ Editor::set_edit_point_preference (EditPoint ep, bool force)
 	}
 
 	nframes64_t foo;
-	bool in_track_canvas;
+	bool ignored;
+	within_track_canvas = mouse_frame (foo, ignored);
 
-	if (!mouse_frame (foo, in_track_canvas)) {
-		in_track_canvas = false;
-	}
-
-	reset_canvas_action_sensitivity (in_track_canvas);
+	reset_canvas_action_sensitivity ();
 
 	instant_save ();
 }
@@ -3658,6 +3655,8 @@ Editor::edit_point_selection_done ()
 	if (ract) {
 		ract->set_active (true);
 	}
+	
+	reset_canvas_action_sensitivity();
 }
 
 void

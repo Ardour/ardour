@@ -2164,7 +2164,7 @@ public:
 
 	bool _new_regionviews_show_envelope;
 
-	void reset_canvas_action_sensitivity (bool);
+	void reset_canvas_action_sensitivity ();
 	void toggle_gain_envelope_visibility ();
 	void toggle_gain_envelope_active ();
 	void reset_region_gain_envelopes ();

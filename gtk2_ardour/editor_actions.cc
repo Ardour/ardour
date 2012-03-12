@@ -538,16 +538,14 @@ Editor::register_actions ()
 
 	act = ActionManager::register_action (editor_actions, "editor-separate", _("Separate"), mem_fun(*this, &Editor::separate_region_from_selection));
 	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::mouse_edit_point_requires_canvas_actions.push_back (act);
+	ActionManager::time_selection_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "separate-from-punch", _("Separate Using Punch Range"), mem_fun(*this, &Editor::separate_region_from_punch));
 	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::mouse_edit_point_requires_canvas_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "separate-from-loop", _("Separate Using Loop Range"), mem_fun(*this, &Editor::separate_region_from_loop));
 	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::mouse_edit_point_requires_canvas_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "editor-crop", _("Crop"), mem_fun(*this, &Editor::crop_region_to_selection));
 	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::mouse_edit_point_requires_canvas_actions.push_back (act);
+	ActionManager::time_selection_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "editor-cut", _("Cut"), mem_fun(*this, &Editor::cut));
 	ActionManager::session_sensitive_actions.push_back (act);
 	/* Note: for now, editor-delete does the exact same thing as editor-cut */
@@ -579,6 +577,7 @@ Editor::register_actions ()
 
 	act = ActionManager::register_action (editor_actions, "crop", _("Crop"), mem_fun(*this, &Editor::crop_region_to_selection));
 	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::time_selection_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "insert-chunk", _("Insert Chunk"), bind (mem_fun(*this, &Editor::paste_named_selection), 1.0f));
 	ActionManager::session_sensitive_actions.push_back (act);
 
@@ -1787,15 +1786,27 @@ Editor::reset_focus ()
 }
 
 void
-Editor::reset_canvas_action_sensitivity (bool onoff)
+Editor::reset_canvas_action_sensitivity ()
 {
-	if (_edit_point != EditAtMouse) {
-		onoff = true;
-	}
+	//some actions depend on a track selection existing
+	ActionManager::set_sensitive (ActionManager::track_selection_sensitive_actions, !selection->tracks.empty());
+	
+	//some actions depend on a track selection existing
+	ActionManager::set_sensitive (ActionManager::track_selection_sensitive_actions, !selection->tracks.empty());
 
-	for (vector<Glib::RefPtr<Action> >::iterator x = ActionManager::mouse_edit_point_requires_canvas_actions.begin();  
-	     x != ActionManager::mouse_edit_point_requires_canvas_actions.end(); ++x) {
-		(*x)->set_sensitive (onoff);
+	//some actions depend on a valid range existing
+	bool range_exists = false;
+	if ( !selection->time.empty() ) {  //explicit range selected
+		range_exists = true;
+	} else if ( selection->tracks.empty() && selection->regions.empty() ) {  //nothing selected, bail out here
+		range_exists = false;
+	} else if (_edit_point == EditAtMouse && !selection->markers.empty() && within_track_canvas) {  //for mouse mode, need mouse & marker 
+		range_exists = true;
+	} else if (_edit_point == EditAtSelectedMarker && !selection->markers.empty() && within_track_canvas) {  //for marker mode, need marker & mouse
+		range_exists = true;
+	} else if (_edit_point == EditAtPlayhead && !selection->markers.empty()) {  //for playhead mode, need playhead & marker
+		range_exists = true;
 	}
+	ActionManager::set_sensitive (ActionManager::time_selection_sensitive_actions, range_exists);
 }
 

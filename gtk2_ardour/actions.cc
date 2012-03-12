@@ -55,7 +55,6 @@ vector<RefPtr<Gtk::Action> > ActionManager::point_selection_sensitive_actions;
 vector<RefPtr<Gtk::Action> > ActionManager::time_selection_sensitive_actions;
 vector<RefPtr<Gtk::Action> > ActionManager::line_selection_sensitive_actions;
 vector<RefPtr<Gtk::Action> > ActionManager::playlist_selection_sensitive_actions;
-vector<RefPtr<Gtk::Action> > ActionManager::mouse_edit_point_requires_canvas_actions;
 
 vector<RefPtr<Gtk::Action> > ActionManager::range_sensitive_actions;
 vector<RefPtr<Gtk::Action> > ActionManager::jack_sensitive_actions;
