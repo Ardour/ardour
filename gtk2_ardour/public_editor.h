@@ -182,6 +182,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	sigc::signal<void,nframes64_t> UpdateAllTransportClocks;
 
 	Glib::RefPtr<Gtk::ActionGroup> editor_actions;
+	Glib::RefPtr<Gtk::ActionGroup> editor_menu_actions;
 
 	virtual void reset_focus() = 0;
 

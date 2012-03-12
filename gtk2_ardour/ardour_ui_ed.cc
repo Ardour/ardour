@@ -83,26 +83,28 @@ void
 ARDOUR_UI::install_actions ()
 {
 	Glib::RefPtr<ActionGroup> main_actions = ActionGroup::create (X_("Main"));
+	Glib::RefPtr<ActionGroup> main_menu_actions = ActionGroup::create (X_("Main_menu"));
 	Glib::RefPtr<Action> act;
 
 	/* menus + submenus that need action items */
 
-	ActionManager::register_action (main_actions, X_("Session"), _("Session"));
-	act = ActionManager::register_action (main_actions, X_("Cleanup"), _("Cleanup"));
+	ActionManager::register_action (main_menu_actions, X_("Session"), _("Session"));
+	act = ActionManager::register_action (main_menu_actions, X_("Cleanup"), _("Cleanup"));
 	ActionManager::write_sensitive_actions.push_back (act);
-	ActionManager::register_action (main_actions, X_("Sync"), _("Sync"));
-	ActionManager::register_action (main_actions, X_("Options"), _("Options"));
-	ActionManager::register_action (main_actions, X_("TransportOptions"), _("Options"));
-	ActionManager::register_action (main_actions, X_("Help"), _("Help"));
- 	ActionManager::register_action (main_actions, X_("KeyMouseActions"), _("Editing Modes"));
-	ActionManager::register_action (main_actions, X_("AudioFileFormat"), _("Audio File Format"));
-	ActionManager::register_action (main_actions, X_("AudioFileFormatHeader"), _("File Type"));
-	ActionManager::register_action (main_actions, X_("AudioFileFormatData"), _("Sample Format"));
-	ActionManager::register_action (main_actions, X_("ControlSurfaces"), _("Control Surfaces"));
-	ActionManager::register_action (main_actions, X_("Metering"), _("Metering"));
-	ActionManager::register_action (main_actions, X_("MeteringFallOffRate"), _("Fall off rate"));
-	ActionManager::register_action (main_actions, X_("MeteringHoldTime"), _("Hold Time"));
-	ActionManager::register_action (main_actions, X_("Denormals"), _("Denormal Handling"));
+	ActionManager::register_action (main_menu_actions, X_("Sync"), _("Sync"));
+	ActionManager::register_action (main_menu_actions, X_("Options"), _("Options"));
+	ActionManager::register_action (main_menu_actions, X_("WindowMenu"), _("Window"));
+	ActionManager::register_action (main_menu_actions, X_("TransportOptions"), _("Options"));
+	ActionManager::register_action (main_menu_actions, X_("Help"), _("Help"));
+ 	ActionManager::register_action (main_menu_actions, X_("KeyMouseActions"), _("Editing Modes"));
+	ActionManager::register_action (main_menu_actions, X_("AudioFileFormat"), _("Audio File Format"));
+	ActionManager::register_action (main_menu_actions, X_("AudioFileFormatHeader"), _("File Type"));
+	ActionManager::register_action (main_menu_actions, X_("AudioFileFormatData"), _("Sample Format"));
+	ActionManager::register_action (main_menu_actions, X_("ControlSurfaces"), _("Control Surfaces"));
+	ActionManager::register_action (main_menu_actions, X_("Metering"), _("Metering"));
+	ActionManager::register_action (main_menu_actions, X_("MeteringFallOffRate"), _("Fall off rate"));
+	ActionManager::register_action (main_menu_actions, X_("MeteringHoldTime"), _("Hold Time"));
+	ActionManager::register_action (main_menu_actions, X_("Denormals"), _("Denormal Handling"));
 
 	/* the real actions */
 
@@ -201,7 +203,6 @@ ARDOUR_UI::install_actions ()
 	/* these actions are intended to be shared across all windows */
 	
 	common_actions = ActionGroup::create (X_("Common"));
-	ActionManager::register_action (main_actions, X_("WindowMenu"), _("Window"));
 	ActionManager::register_action (common_actions, X_("Quit"), _("Quit"), (hide_return (mem_fun(*this, &ARDOUR_UI::finish))));
 
         /* windows visibility actions */
@@ -635,6 +636,7 @@ ARDOUR_UI::install_actions ()
 	ActionManager::add_action_group (jack_actions);
 	ActionManager::add_action_group (transport_actions);
 	ActionManager::add_action_group (main_actions);
+	ActionManager::add_action_group (main_menu_actions);
 	ActionManager::add_action_group (common_actions);
 }
 
