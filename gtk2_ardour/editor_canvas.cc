@@ -741,7 +741,7 @@ Editor::left_track_canvas (GdkEventCrossing */*ev*/)
 bool
 Editor::entered_track_canvas (GdkEventCrossing */*ev*/)
 {
-	within_track_canvas = false;
+	within_track_canvas = true;
 	reset_canvas_action_sensitivity (true);
 	return FALSE;
 }
