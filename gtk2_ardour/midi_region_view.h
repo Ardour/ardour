@@ -253,13 +253,13 @@ public:
 	 */
 	framepos_t snap_pixel_to_frame(double x);
 
-	/** Convert a timestamp in beats into frames (both relative to region start) */
+	/** Convert a timestamp in beats into frames (both relative to region position) */
 	framepos_t region_beats_to_region_frames(double beats) const;
 	/** Convert a timestamp in beats into absolute frames */
 	framepos_t region_beats_to_absolute_frames(double beats) const {
 		return _region->position() + region_beats_to_region_frames (beats);
 	}
-	/** Convert a timestamp in frames to beats (both relative to region start) */
+	/** Convert a timestamp in frames to beats (both relative to region position) */
 	double region_frames_to_region_beats(framepos_t) const;
 
 	/** Convert a timestamp in beats measured from source start into absolute frames */
