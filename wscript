@@ -400,7 +400,7 @@ def options(opt):
     opt.add_option('--tranzport', action='store_true', default=False, dest='tranzport',
                     help='Compile with support for Frontier Designs Tranzport (if libusb is available)')
     opt.add_option('--universal', action='store_true', default=False, dest='universal',
-                    help='Compile as universal binary (requires that external libraries are universal)')
+                    help='Compile as universal binary (OS X ONLY, requires that external libraries are universal)')
     opt.add_option('--versioned', action='store_true', default=False, dest='versioned',
                     help='Add revision information to executable name inside the build directory')
     opt.add_option('--windows-vst', action='store_true', default=False, dest='windows_vst',
