@@ -3215,7 +3215,7 @@ MidiRegionView::paste (framepos_t pos, float times, const MidiCutBuffer& mcb)
 	Evoral::MusicalTime end_point = 0;
 
 	duration = (*mcb.notes().rbegin())->end_time() - (*mcb.notes().begin())->time();
-	paste_pos_beats = region_frames_to_region_beats (pos - _region->position());
+	paste_pos_beats = absolute_frames_to_source_beats (pos);
 	beat_delta = (*mcb.notes().begin())->time() - paste_pos_beats;
 	paste_pos_beats = 0;
 
