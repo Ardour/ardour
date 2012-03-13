@@ -1806,8 +1806,12 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 			} else if (type->value() == "send") {
 
 				XMLNode n (**niter);
-				Send::make_unique (n, *_session);
-                                Send* s = new Send (*_session, _route->pannable(), _route->mute_master());
+				uint32_t bslot;
+				string name = Send::name_and_id_new_send (*_session, Delivery::Send, bslot);
+                                Send* s = new Send (*_session, name, bslot, _route->pannable(), _route->mute_master());
+
+				Send::make_unique (n);
+				
                                 if (s->set_state (n, Stateful::loading_state_version)) {
                                         delete s;
                                         return;
@@ -1815,12 +1819,15 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 
 				p.reset (s);
 
-
 			} else if (type->value() == "return") {
 
 				XMLNode n (**niter);
-				Return::make_unique (n, *_session);
-                                Return* r = new Return (*_session);
+				uint32_t bslot;
+
+				string name = Return::name_and_id_new_return (*_session, bslot);
+                                Return* r = new Return (*_session, name, bslot);
+
+				Return::make_unique (n);
 
                                 if (r->set_state (n, Stateful::loading_state_version)) {
                                         delete r;
@@ -1832,10 +1839,18 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 			} else if (type->value() == "port") {
 
 				XMLNode n (**niter);
-				p.reset (new PortInsert (*_session, _route->pannable (), _route->mute_master ()));
-				if (p->set_state (n, Stateful::loading_state_version)) {
+				uint32_t bslot;
+				string name = PortInsert::name_and_id_new_insert (*_session, bslot);
+
+				PortInsert* pi = new PortInsert (*_session, name, bslot, _route->pannable (), _route->mute_master ());
+				
+				PortInsert::make_unique (n);
+				
+				if (pi->set_state (n, Stateful::loading_state_version)) {
 					return;
 				}
+				
+				p.reset (pi);
 
 			} else {
 				/* XXX its a bit limiting to assume that everything else
