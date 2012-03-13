@@ -9,6 +9,8 @@
 #include <time.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <glib.h>
+#include <glib/gstdio.h>
 
 #include "ardour/linux_vst_support.h"
 #include "pbd/error.h"
@@ -360,7 +362,7 @@ void vstfx_close (VSTState* vstfx)
 bool 
 vstfx_save_state (VSTState* vstfx, char * filename)
 {
-	FILE* f = fopen (filename, "wb");
+	FILE* f = g_fopen (filename, "wb");
 	if (f)
 	{
 		int bytelen;
