@@ -203,10 +203,10 @@ vstfx_infofile_for_read (char* dllpath)
 		if (sys_info) {
 			if (own_statbuf.st_mtime <= sys_statbuf.st_mtime) {
 				/* system info file is newer, use it */
-				return fopen (sys_info, "r");
+				return g_fopen (sys_info, "rb");
 			}
 		} else {
-			return fopen (own_info, "r");
+			return g_fopen (own_info, "rb");
 		}
 	}
 
