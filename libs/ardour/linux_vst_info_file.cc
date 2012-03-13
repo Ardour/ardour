@@ -1,8 +1,7 @@
-/***********************************************************/
-/*vstfx infofile - module to manage info files             */
-/*containing cached information about a plugin. e.g. its   */
-/*name, creator etc etc                                    */
-/***********************************************************/
+/** @file libs/ardour/vst_info_file.cc
+ *  @brief Code to manage info files containing cached information about a plugin.
+ *  e.g. its name, creator etc.
+ */
 
 #include <iostream>
 #include <cassert>
@@ -30,22 +29,23 @@
 
 using namespace std;
 
-static char* read_string(FILE *fp)
+static char *
+read_string (FILE *fp)
 {
-    char buf[MAX_STRING_LEN];
+	char buf[MAX_STRING_LEN];
 
-    if (!fgets( buf, MAX_STRING_LEN, fp )) {
-	    return 0;
-    }
-    
-    if(strlen(buf) < MAX_STRING_LEN) {
-	    if (strlen(buf)) {
-		    buf[strlen(buf)-1] = 0;
-	    }
-	    return strdup(buf);
-    } else {
-	    return 0;
-    }
+	if (!fgets (buf, MAX_STRING_LEN, fp)) {
+		return 0;
+	}
+	
+	if (strlen(buf) < MAX_STRING_LEN) {
+		if (strlen (buf)) {
+			buf[strlen(buf)-1] = 0;
+		}
+		return strdup (buf);
+	} else {
+		return 0;
+	}
 }
 
 /** Read an integer value from a line in fp into n,
@@ -103,41 +103,34 @@ load_vstfx_info_file (FILE* fp)
 	return info;
 	
   error:
-	free( info );
+	free (info);
 	return 0;
 }
 
 static int
 save_vstfx_info_file (VSTInfo *info, FILE* fp)
 {
-    if (info == 0) {
-	    vstfx_error("** ERROR ** VSTFXinfofile : info ptr is 0\n");
-	    return -1;
-    }
-
-    if (fp == 0) {
-	    vstfx_error("** ERROR ** VSTFXinfofile : file ptr is 0\n");
-	    return -1;
-    }
+	assert (info);
+	assert (fp);
     
-    fprintf( fp, "%s\n", info->name );
-    fprintf( fp, "%s\n", info->creator );
-    fprintf( fp, "%d\n", info->UniqueID );
-    fprintf( fp, "%s\n", info->Category );
-    fprintf( fp, "%d\n", info->numInputs );
-    fprintf( fp, "%d\n", info->numOutputs );
-    fprintf( fp, "%d\n", info->numParams );
-    fprintf( fp, "%d\n", info->wantMidi );
-    fprintf( fp, "%d\n", info->hasEditor );
-    fprintf( fp, "%d\n", info->canProcessReplacing );
+	fprintf (fp, "%s\n", info->name);
+	fprintf (fp, "%s\n", info->creator);
+	fprintf (fp, "%d\n", info->UniqueID);
+	fprintf (fp, "%s\n", info->Category);
+	fprintf (fp, "%d\n", info->numInputs);
+	fprintf (fp, "%d\n", info->numOutputs);
+	fprintf (fp, "%d\n", info->numParams);
+	fprintf (fp, "%d\n", info->wantMidi);
+	fprintf (fp, "%d\n", info->hasEditor);
+	fprintf (fp, "%d\n", info->canProcessReplacing);
 
-    for (int i = 0; i < info->numParams; i++) {
-		fprintf(fp, "%s\n", info->ParamNames[i]);
-    }
+	for (int i = 0; i < info->numParams; i++) {
+		fprintf (fp, "%s\n", info->ParamNames[i]);
+	}
 	
-    for (int i = 0; i < info->numParams; i++) {
-		fprintf(fp, "%s\n", info->ParamLabels[i]);
-    }
+	for (int i = 0; i < info->numParams; i++) {
+		fprintf (fp, "%s\n", info->ParamLabels[i]);
+	}
 	
     return 0;
 }
@@ -165,7 +158,8 @@ vstfx_infofile_path (char* dllpath, int personal)
 	return Glib::build_filename (dir, s.str ());
 }
 
-static char* vstfx_infofile_stat (char *dllpath, struct stat* statbuf, int personal)
+static char *
+vstfx_infofile_stat (char *dllpath, struct stat* statbuf, int personal)
 {
 	if (strstr (dllpath, ".so" ) == 0) {
 		return 0;
@@ -196,15 +190,14 @@ static char* vstfx_infofile_stat (char *dllpath, struct stat* statbuf, int perso
 }
 
 
-static FILE* vstfx_infofile_for_read (char* dllpath)
+static FILE *
+vstfx_infofile_for_read (char* dllpath)
 {
 	struct stat own_statbuf;
 	struct stat sys_statbuf;
-	char *own_info;
-	char *sys_info;
 	
-	own_info = vstfx_infofile_stat (dllpath, &own_statbuf, 1);
-	sys_info = vstfx_infofile_stat (dllpath, &sys_statbuf, 0);
+	char* own_info = vstfx_infofile_stat (dllpath, &own_statbuf, 1);
+	char* sys_info = vstfx_infofile_stat (dllpath, &sys_statbuf, 0);
 
 	if (own_info) {
 		if (sys_info) {
@@ -220,7 +213,8 @@ static FILE* vstfx_infofile_for_read (char* dllpath)
 	return 0;
 }
 
-static FILE* vstfx_infofile_create (char* dllpath, int personal)
+static FILE *
+vstfx_infofile_create (char* dllpath, int personal)
 {
 	if (strstr (dllpath, ".so" ) == 0) {
 		return 0;
@@ -230,7 +224,8 @@ static FILE* vstfx_infofile_create (char* dllpath, int personal)
 	return fopen (path.c_str(), "w");
 }
 
-static FILE* vstfx_infofile_for_write (char* dllpath)
+static FILE *
+vstfx_infofile_for_write (char* dllpath)
 {
 	FILE* f;
 
@@ -244,17 +239,18 @@ static FILE* vstfx_infofile_for_write (char* dllpath)
 static
 int vstfx_can_midi (VSTState* vstfx)
 {
-	AEffect *plugin = vstfx->plugin;
+	AEffect* plugin = vstfx->plugin;
 	
-	int vst_version = plugin->dispatcher (plugin, effGetVstVersion, 0, 0, 0, 0.0f);
+	int const vst_version = plugin->dispatcher (plugin, effGetVstVersion, 0, 0, 0, 0.0f);
 
-	if (vst_version >= 2)
-	{
+	if (vst_version >= 2) {
 		/* should we send it VST events (i.e. MIDI) */
 		
-		if ((plugin->flags & effFlagsIsSynth) || (plugin->dispatcher (plugin, effCanDo, 0, 0,(void*) "receiveVstEvents", 0.0f) > 0))
-		    return -1;
+		if ((plugin->flags & effFlagsIsSynth) || (plugin->dispatcher (plugin, effCanDo, 0, 0,(void*) "receiveVstEvents", 0.0f) > 0)) {
+			return -1;
+		}
 	}
+	
 	return false;
 }
 
@@ -264,8 +260,9 @@ vstfx_info_from_plugin (VSTState* vstfx)
 	assert (vstfx);
 	
 	VSTInfo* info = (VSTInfo*) malloc (sizeof (VSTInfo));
-	
-	AEffect *plugin;
+	if (!info) {
+		return 0;
+	}
 	
 	/*We need to init the creator because some plugins
 	  fail to implement getVendorString, and so won't stuff the
@@ -273,12 +270,9 @@ vstfx_info_from_plugin (VSTState* vstfx)
 	
 	char creator[65] = "Unknown\0";
 	
-	if(!info)
-		return 0;
+	AEffect* plugin = vstfx->plugin;
 	
-	plugin = vstfx->plugin;
-	
-	info->name = strdup(vstfx->handle->name ); 
+	info->name = strdup (vstfx->handle->name); 
 	
 	/*If the plugin doesn't bother to implement GetVendorString we will
 	  have pre-stuffed the string with 'Unkown' */
@@ -289,14 +283,14 @@ vstfx_info_from_plugin (VSTState* vstfx)
 	  so if its just a zero length string we replace it with 'Unknown' */
 	
 	if (strlen(creator) == 0) {
-		info->creator = strdup("Unknown");
+		info->creator = strdup ("Unknown");
 	} else {
 		info->creator = strdup (creator);
 	}
 	
 	info->UniqueID = plugin->uniqueID;
 	
-	info->Category = strdup("None");          // FIXME:  
+	info->Category = strdup("None"); /* XXX */
 	info->numInputs = plugin->numInputs;
 	info->numOutputs = plugin->numOutputs;
 	info->numParams = plugin->numParams;
@@ -310,10 +304,10 @@ vstfx_info_from_plugin (VSTState* vstfx)
 		char name[64];
 		char label[64];
 		
-		/*Not all plugins give parameters labels as well as names*/
+		/* Not all plugins give parameters labels as well as names */
 		
-		strcpy(name, "No Name");
-		strcpy(label, "No Label");
+		strcpy (name, "No Name");
+		strcpy (label, "No Label");
 		
 		plugin->dispatcher (plugin, effGetParamName, i, 0, name, 0);
 		info->ParamNames[i] = strdup(name);
@@ -326,20 +320,23 @@ vstfx_info_from_plugin (VSTState* vstfx)
 }
 
 /* A simple 'dummy' audiomaster callback which should be ok,
-we will only be instantiating the plugin in order to get its info*/
+   we will only be instantiating the plugin in order to get its info
+*/
 
 static intptr_t
 simple_master_callback (AEffect *, int32_t opcode, int32_t, intptr_t, void *, float)
 {
-	if (opcode == audioMasterVersion)
+	if (opcode == audioMasterVersion) {
 		return 2;
-	else
+	} else {
 		return 0;
+	}
 }
 
-/*Try to get plugin info - first by looking for a .fsi cache of the
-data, and if that doesn't exist, load the plugin, get its data and
-then cache it for future ref*/
+/** Try to get plugin info - first by looking for a .fsi cache of the
+    data, and if that doesn't exist, load the plugin, get its data and
+    then cache it for future ref
+*/
 
 VSTInfo *
 vstfx_get_info (char* dllpath)
@@ -347,7 +344,6 @@ vstfx_get_info (char* dllpath)
 	FILE* infofile;
 	VSTHandle* h;
 	VSTState* vstfx;
-	VSTInfo* info;
 
 	if ((infofile = vstfx_infofile_for_read (dllpath)) != 0) {
 		VSTInfo *info;
@@ -359,12 +355,12 @@ vstfx_get_info (char* dllpath)
 		return info;
 	} 
 	
-	if(!(h = vstfx_load(dllpath))) {
+	if (!(h = vstfx_load(dllpath))) {
 		PBD::warning << "Cannot get LinuxVST information from " << dllpath << ": load failed." << endmsg;
 		return 0;
 	}
 	
-	if(!(vstfx = vstfx_instantiate(h, simple_master_callback, 0))) {
+	if (!(vstfx = vstfx_instantiate(h, simple_master_callback, 0))) {
 	    	vstfx_unload(h);
 		PBD::warning << "Cannot get LinuxVST information from " << dllpath << ": instantiation failed." << endmsg;
 	    	return 0;
@@ -372,20 +368,20 @@ vstfx_get_info (char* dllpath)
 	
 	infofile = vstfx_infofile_for_write (dllpath);
 	
-	if(!infofile) {
+	if (!infofile) {
 		vstfx_close(vstfx);
 		vstfx_unload(h);
 		PBD::warning << "Cannot get LinuxVST information from " << dllpath << ": cannot create new FST info file." << endmsg;
 		return 0;
 	}
 	
-	info = vstfx_info_from_plugin(vstfx);
+	VSTInfo* info = vstfx_info_from_plugin (vstfx);
 	
-	save_vstfx_info_file(info, infofile);
+	save_vstfx_info_file (info, infofile);
 	fclose (infofile);
 	
-	vstfx_close(vstfx);
-	vstfx_unload(h);
+	vstfx_close (vstfx);
+	vstfx_unload (h);
 	
 	return info;
 }
