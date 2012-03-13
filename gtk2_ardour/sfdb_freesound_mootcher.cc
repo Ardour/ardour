@@ -47,6 +47,9 @@
 #include <sys/types.h>
 #include <iostream>
 
+#include <glib.h>
+#include <glib/gstdio.h>
+
 #include "ardour/audio_library.h"
 
 static const std::string base_url = "http://www.freesound.org/api";
@@ -305,7 +308,7 @@ std::string Mootcher::getAudioFile(std::string originalFileName, std::string ID,
 	std::string audioFileName = basePath + "snd/" + ID + "-" + originalFileName;
 
 	// check to see if audio file already exists
-	FILE *testFile = fopen(audioFileName.c_str(), "r");
+	FILE *testFile = g_fopen(audioFileName.c_str(), "r");
 	if (testFile) {  
 		fseek (testFile , 0 , SEEK_END);
 		if (ftell (testFile) > 256) {
@@ -325,7 +328,7 @@ std::string Mootcher::getAudioFile(std::string originalFileName, std::string ID,
 
 	//now download the actual file
 	FILE* theFile;
-	theFile = fopen( audioFileName.c_str(), "wb" );
+	theFile = g_fopen( audioFileName.c_str(), "wb" );
 
 	if (!theFile) {
 		return "";
