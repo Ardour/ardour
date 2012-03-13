@@ -20,12 +20,15 @@
 
 #include <glib.h>
 #include <glib/gstdio.h>
+#include <glibmm.h>
 
 #include "pbd/error.h"
 
 #include "ardour/linux_vst_support.h"
 
 #define MAX_STRING_LEN 256
+
+using namespace std;
 
 static char* read_string(FILE *fp)
 {
@@ -139,37 +142,38 @@ save_vstfx_info_file (VSTInfo *info, FILE* fp)
     return 0;
 }
 
+static string
+vstfx_infofile_path (char* dllpath, int personal)
+{
+	string dir;
+	if (personal) {
+		dir = Glib::build_filename (Glib::get_home_dir (), ".fst");
+
+		/* If the directory doesn't exist, try to create it */
+		if (!Glib::file_test (dir, Glib::FILE_TEST_IS_DIR)) {
+			if (g_mkdir (dir.c_str (), 0700)) {
+				return 0;
+			}
+		}
+		
+	} else {
+		dir = Glib::path_get_dirname (dllpath);
+	}
+
+	stringstream s;
+	s << "." << Glib::path_get_basename (dllpath) << ".fsi";
+	return Glib::build_filename (dir, s.str ());
+}
+
 static char* vstfx_infofile_stat (char *dllpath, struct stat* statbuf, int personal)
 {
-	char* path;
-	char* dir_path;
-	char* basename;
-	char* base;
-	size_t blen;
-
 	if (strstr (dllpath, ".so" ) == 0) {
 		return 0;
 	}
-	
-	if (personal) {
-		dir_path = g_build_filename (g_get_home_dir(), ".fst", NULL);
-	} else {
-		dir_path = g_path_get_dirname (dllpath);
-	}
-	
-	base = g_path_get_basename (dllpath);
-	blen = strlen (base) + 2; // null char and '.'
-	basename = (char*) g_malloc (blen);
-	snprintf (basename, blen, ".%s.fsi", base);
-	g_free (base);
-	
-	path = g_build_filename (dir_path, basename, NULL);
-	
-	g_free (dir_path);
-	g_free (basename);
 
+	string const path = vstfx_infofile_path (dllpath, personal);
 
-	if (g_file_test (path, GFileTest (G_FILE_TEST_EXISTS|G_FILE_TEST_IS_REGULAR))) {
+	if (Glib::file_test (path, Glib::FileTest (Glib::FILE_TEST_EXISTS | Glib::FILE_TEST_IS_REGULAR))) {
 
 		/* info file exists in same location as the shared object, so
 		   check if its current and up to date
@@ -179,16 +183,14 @@ static char* vstfx_infofile_stat (char *dllpath, struct stat* statbuf, int perso
 		struct stat dllstat;
 		
 		if (stat (dllpath, &dllstat) == 0) {
-			if (stat(path, statbuf) == 0) {
+			if (stat (path.c_str(), statbuf) == 0) {
 				if (dllstat.st_mtime <= statbuf->st_mtime) {
 					/* plugin is older than info file */
-					return path;
+					return strdup (path.c_str ());
 				}
 			}
 		} 
 	}
-
-	g_free (path);
 
 	return 0;
 }
@@ -220,46 +222,12 @@ static FILE* vstfx_infofile_for_read (char* dllpath)
 
 static FILE* vstfx_infofile_create (char* dllpath, int personal)
 {
-	char* path;
-	char* dir_path;
-	char* basename;
-	char* base;
-	size_t blen;
-
 	if (strstr (dllpath, ".so" ) == 0) {
 		return 0;
 	}
-	
-	if (personal) {
-		dir_path = g_build_filename (g_get_home_dir(), ".fst", NULL);
 
-		/* if the directory doesn't yet exist, try to create it */
-
-		if (!g_file_test (dir_path, G_FILE_TEST_IS_DIR)) {
-			if (g_mkdir (dir_path, 0700)) {
-				return 0;
-			}
-		}
-
-	} else {
-		dir_path = g_path_get_dirname (dllpath);
-	}
-	
-	base = g_path_get_basename (dllpath);
-	blen = strlen (base) + 2; // null char and '.'
-	basename = (char*) g_malloc (blen);
-	snprintf (basename, blen, ".%s.fsi", base);
-	g_free (base);
-
-	path = g_build_filename (dir_path, basename, NULL);
-
-	g_free (dir_path);
-	g_free (basename);
-
-	FILE* f = fopen (path, "w");
-	g_free (path);
-
-	return f;
+	string const path = vstfx_infofile_path (dllpath, personal);
+	return fopen (path.c_str(), "w");
 }
 
 static FILE* vstfx_infofile_for_write (char* dllpath)
