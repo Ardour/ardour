@@ -602,6 +602,7 @@ About::show_config_info ()
 		config_info = new ConfigInfoDialog;
 	}
 
-	config_info->present ();
+	config_info->run ();
+	config_info->hide ();
 }
 
