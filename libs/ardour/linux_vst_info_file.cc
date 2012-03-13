@@ -45,6 +45,22 @@ static char* read_string(FILE *fp)
     }
 }
 
+/** Read an integer value from a line in fp into n,
+ *  @return true on success, false on failure.
+ */
+static bool
+read_int (FILE* fp, int* n)
+{
+	char buf[MAX_STRING_LEN];
+
+	char* p = fgets (buf, MAX_STRING_LEN, fp);
+	if (p == 0) {
+		return false;
+	}
+
+	return (sscanf (p, "%d", n) != 1);
+}
+
 static VSTInfo *
 load_vstfx_info_file (FILE* fp)
 {
@@ -54,23 +70,23 @@ load_vstfx_info_file (FILE* fp)
 		return 0;
 	}
 
-	if((info->name = read_string(fp)) == 0) goto error;
-	if((info->creator = read_string(fp)) == 0) goto error;
-	if(1 != fscanf(fp, "%d\n", &info->UniqueID)) goto error;
-	if((info->Category = read_string(fp)) == 0) goto error;
-	if(1 != fscanf(fp, "%d\n", &info->numInputs)) goto error;
-	if(1 != fscanf(fp, "%d\n", &info->numOutputs)) goto error;
-	if(1 != fscanf(fp, "%d\n", &info->numParams)) goto error;
-	if(1 != fscanf(fp, "%d\n", &info->wantMidi)) goto error;
-	if(1 != fscanf(fp, "%d\n", &info->hasEditor)) goto error;
-	if(1 != fscanf(fp, "%d\n", &info->canProcessReplacing)) goto error;
-	
-	if((info->ParamNames = (char **) malloc(sizeof(char*)*info->numParams)) == 0) {
+	if ((info->name = read_string(fp)) == 0) goto error;
+	if ((info->creator = read_string(fp)) == 0) goto error;
+	if (read_int (fp, &info->UniqueID)) goto error;
+	if ((info->Category = read_string(fp)) == 0) goto error;
+	if (read_int (fp, &info->numInputs)) goto error;
+	if (read_int (fp, &info->numOutputs)) goto error;
+	if (read_int (fp, &info->numParams)) goto error;
+	if (read_int (fp, &info->wantMidi)) goto error;
+	if (read_int (fp, &info->hasEditor)) goto error;
+	if (read_int (fp, &info->canProcessReplacing)) goto error;
+
+	if ((info->ParamNames = (char **) malloc(sizeof(char*)*info->numParams)) == 0) {
 		goto error;
 	}
 
 	for (int i = 0; i < info->numParams; ++i) {
-		if((info->ParamNames[i] = read_string(fp)) == 0) goto error;
+		if ((info->ParamNames[i] = read_string(fp)) == 0) goto error;
 	}
 
 	if ((info->ParamLabels = (char **) malloc(sizeof(char*)*info->numParams)) == 0) {
@@ -78,7 +94,7 @@ load_vstfx_info_file (FILE* fp)
 	}
 	
 	for (int i = 0; i < info->numParams; ++i) {
-		if((info->ParamLabels[i] = read_string(fp)) == 0) goto error;
+		if ((info->ParamLabels[i] = read_string(fp)) == 0) goto error;
 	}
 	
 	return info;
@@ -369,7 +385,9 @@ vstfx_get_info (char* dllpath)
 		VSTInfo *info;
 		info = load_vstfx_info_file (infofile);
 		fclose (infofile);
-		PBD::warning << "Cannot get LinuxVST information form " << dllpath << ": info file load failed." << endmsg;
+		if (info == 0) {
+			PBD::warning << "Cannot get LinuxVST information form " << dllpath << ": info file load failed." << endmsg;
+		}
 		return info;
 	} 
 	
