@@ -38,10 +38,29 @@
 using namespace ARDOUR;
 using namespace PBD;
 
+std::string
+Return::name_and_id_new_return (Session& s, uint32_t& bitslot)
+{
+	bitslot = s.next_return_id();
+	return string_compose (_("return %1"), bitslot + 1);
+}
+
+
 Return::Return (Session& s, bool internal)
 	: IOProcessor (s, (internal ? false : true), false,
-		       string_compose (_("return %1"), (_bitslot = s.next_return_id()) + 1))
+		       name_and_id_new_return (s, _bitslot))
 	, _metering (false)
+{
+	/* never muted */
+
+	_amp.reset (new Amp (_session));
+	_meter.reset (new PeakMeter (_session));
+}
+
+Return::Return (Session& s, const std::string& name, uint32_t bslot, bool internal)
+	: IOProcessor (s, (internal ? false : true), false, name)
+	, _metering (false)
+	, _bitslot (bslot)
 {
 	/* never muted */
 
@@ -92,12 +111,14 @@ Return::set_state (const XMLNode& node, int version)
 
 	IOProcessor::set_state (*insert_node, version);
 
-	if ((prop = node.property ("bitslot")) == 0) {
-		_bitslot = _session.next_return_id();
-	} else {
-                _session.unmark_return_id (_bitslot);
-		sscanf (prop->value().c_str(), "%" PRIu32, &_bitslot);
-		_session.mark_return_id (_bitslot);
+	if (!node.property ("ignore-bitslot")) {
+		if ((prop = node.property ("bitslot")) == 0) {
+			_bitslot = _session.next_return_id();
+		} else {
+			_session.unmark_return_id (_bitslot);
+			sscanf (prop->value().c_str(), "%" PRIu32, &_bitslot);
+			_session.mark_return_id (_bitslot);
+		}
 	}
 
 	return 0;
@@ -154,27 +175,15 @@ Return::configure_io (ChanCount in, ChanCount out)
 	return true;
 }
 
-/** Set up the XML description of a return so that its name is unique.
+/** Set up the XML description of a return so that we will not
+ *  reset its name or bitslot during ::set_state()
  *  @param state XML return state.
- *  @param session Session.
  */
 void
-Return::make_unique (XMLNode &state, Session &session)
+Return::make_unique (XMLNode &state)
 {
-	uint32_t const bitslot = session.next_return_id() + 1;
-
-	char buf[32];
-	snprintf (buf, sizeof (buf), "%" PRIu32, bitslot);
-	state.property("bitslot")->set_value (buf);
-
-	std::string const name = string_compose (_("return %1"), bitslot);
-
-	state.property("name")->set_value (name);
-
-	XMLNode* io = state.child ("IO");
-	if (io) {
-		io->property("name")->set_value (name);
-	}
+	state.add_property ("ignore-bitslot", "1");
+	state.add_property ("ignore-name", "1");
 }
 
 

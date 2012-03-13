@@ -141,15 +141,15 @@ Processor::set_state_2X (const XMLNode & node, int /*version*/)
 	XMLProperty const * prop;
 
 	XMLNodeList children = node.children ();
-
+	
 	for (XMLNodeIterator i = children.begin(); i != children.end(); ++i) {
 
 		if ((*i)->name() == X_("IO")) {
-
+			
 			if ((prop = (*i)->property ("name")) != 0) {
 				set_name (prop->value ());
 			}
-
+			
 			set_id (**i);
 
 			if ((prop = (*i)->property ("active")) != 0) {
@@ -177,16 +177,19 @@ Processor::set_state (const XMLNode& node, int version)
 
 	const XMLProperty *prop;
 	const XMLProperty *legacy_active = 0;
+	bool leave_name_alone = (node.property ("ignore-name") != 0);
 
-	// may not exist for legacy 3.0 sessions
-	if ((prop = node.property ("name")) != 0) {
-		/* don't let derived classes have a crack at set_name,
-		   as some (like Send) will screw with the one we suggest.
-		*/
-		Processor::set_name (prop->value());
+	if (!leave_name_alone) {
+		// may not exist for legacy 3.0 sessions
+		if ((prop = node.property ("name")) != 0) {
+			/* don't let derived classes have a crack at set_name,
+			   as some (like Send) will screw with the one we suggest.
+			*/
+			Processor::set_name (prop->value());
+		}
+		
+		set_id (node);
 	}
-
-	set_id (node);
 
 	XMLNodeList nlist = node.children();
 	XMLNodeIterator niter;

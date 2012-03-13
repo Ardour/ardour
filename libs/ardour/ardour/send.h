@@ -36,6 +36,7 @@ class Send : public Delivery
 {
   public:
 	Send (Session&, boost::shared_ptr<Pannable> pannable, boost::shared_ptr<MuteMaster>, Delivery::Role r = Delivery::Send);
+	Send (Session&, const std::string& name, uint32_t bitslot, boost::shared_ptr<Pannable> pannable, boost::shared_ptr<MuteMaster>, Delivery::Role r = Delivery::Send);
 	virtual ~Send ();
 
 	uint32_t bit_slot() const { return _bitslot; }
@@ -67,7 +68,8 @@ class Send : public Delivery
 	std::string value_as_string (boost::shared_ptr<AutomationControl>) const;
 	
 	static uint32_t how_many_sends();
-	static void make_unique (XMLNode &, Session &);
+	static void make_unique (XMLNode &);
+	static std::string name_and_id_new_send (Session&, Delivery::Role r, uint32_t&);
 
   protected:
 	bool _metering;
@@ -81,7 +83,6 @@ class Send : public Delivery
 	int set_state_2X (XMLNode const &, int);
 
 	uint32_t  _bitslot;
-	static std::string name_and_id_new_send (Session&, Delivery::Role r, uint32_t&);
 };
 
 } // namespace ARDOUR

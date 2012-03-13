@@ -41,9 +41,27 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
+string
+PortInsert::name_and_id_new_insert (Session& s, uint32_t& bitslot)
+{
+	bitslot = s.next_insert_id ();
+	return string_compose (_("insert %1"), bitslot+ 1);
+}
+
 PortInsert::PortInsert (Session& s, boost::shared_ptr<Pannable> pannable, boost::shared_ptr<MuteMaster> mm)
-	: IOProcessor (s, true, true, string_compose (_("insert %1"), (bitslot = s.next_insert_id()) + 1), "")
+	: IOProcessor (s, true, true, name_and_id_new_insert (s, _bitslot), "")
 	, _out (new Delivery (s, _output, pannable, mm, _name, Delivery::Insert))
+{
+        _mtdm = 0;
+        _latency_detect = false;
+        _latency_flush_frames = false;
+        _measured_latency = 0;
+}
+
+PortInsert::PortInsert (Session& s, const std::string& name, uint32_t bslot, boost::shared_ptr<Pannable> pannable, boost::shared_ptr<MuteMaster> mm)
+	: IOProcessor (s, true, true, name, "")
+	, _out (new Delivery (s, _output, pannable, mm, _name, Delivery::Insert))
+	, _bitslot (bslot)
 {
         _mtdm = 0;
         _latency_detect = false;
@@ -53,7 +71,7 @@ PortInsert::PortInsert (Session& s, boost::shared_ptr<Pannable> pannable, boost:
 
 PortInsert::~PortInsert ()
 {
-        _session.unmark_insert_id (bitslot);
+        _session.unmark_insert_id (_bitslot);
         delete _mtdm;
 }
 
@@ -164,7 +182,7 @@ PortInsert::state (bool full)
 	XMLNode& node = IOProcessor::state(full);
 	char buf[32];
 	node.add_property ("type", "port");
-	snprintf (buf, sizeof (buf), "%" PRIu32, bitslot);
+	snprintf (buf, sizeof (buf), "%" PRIu32, _bitslot);
 	node.add_property ("bitslot", buf);
         snprintf (buf, sizeof (buf), "%" PRId64, _measured_latency);
         node.add_property("latency", buf);
@@ -216,12 +234,14 @@ PortInsert::set_state (const XMLNode& node, int version)
                 _measured_latency = latency;
         }
 
-	if ((prop = node.property ("bitslot")) == 0) {
-		bitslot = _session.next_insert_id();
-	} else {
-                _session.unmark_insert_id (bitslot);
-		sscanf (prop->value().c_str(), "%" PRIu32, &bitslot);
-		_session.mark_insert_id (bitslot);
+	if (!node.property ("ignore-bitslot")) {
+		if ((prop = node.property ("bitslot")) == 0) {
+			_bitslot = _session.next_insert_id();
+		} else {
+			_session.unmark_insert_id (_bitslot);
+			sscanf (prop->value().c_str(), "%" PRIu32, &_bitslot);
+			_session.mark_insert_id (_bitslot);
+		}
 	}
 
 	return 0;
@@ -294,4 +314,16 @@ PortInsert::deactivate ()
 	IOProcessor::deactivate ();
 
 	_out->deactivate ();
+}
+
+/** Set up the XML description of a send so that we will not
+ *  reset its name or bitslot during ::set_state()
+ *  @param state XML insert state.
+ */
+
+void
+PortInsert::make_unique (XMLNode &state)
+{
+	state.add_property ("ignore-bitslot", "1");
+	state.add_property ("ignore-name", "1");
 }

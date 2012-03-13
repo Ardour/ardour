@@ -70,7 +70,7 @@ Port::Port (std::string const & n, DataType t, Flags f)
 	}
 
 	if ((_jack_port = jack_port_register (_engine->jack (), _name.c_str (), t.to_jack_type (), _flags, 0)) == 0) {
-		cerr << "Failed to register JACK port, reason is unknown from here\n";
+		cerr << "Failed to register JACK port \"" << _name << "\", reason is unknown from here\n";
 		throw failed_constructor ();
 	}
 }
