@@ -53,8 +53,8 @@ if uname -a | grep --silent arwin ; then
     export MACOSX_DEPLOYMENT_TARGET=10.4
     # If the default python is not new enough, set PYTHON to point to a 
     # suitably new (2.7 or later) version of Python's framework
-    PYTHON=
-    #PYTHON=/Library/Frameworks/Python.framework/Versions/2.7
+    #PYTHON=
+    PYTHON=/Library/Frameworks/Python.framework/Versions/2.7
 else 
     export LD_LIBRARY_PATH=$PREFIX/lib{$LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
     GLOBAL_CFLAGS=
@@ -208,8 +208,7 @@ fi
 if [ ! -d gtk+ ] ; then
     echo "GTK+ (2.24 branch)"
     git clone git://git.gnome.org/gtk+
-    cd gtk+
-    git checkout --track -b gtk-2-24 origin/gtk-2-24
+    (cd gtk+ && git checkout --track -b gtk-2-24 origin/gtk-2-24)
 fi
 
 if [ x$patch_gtk_osx != x ] ; then
