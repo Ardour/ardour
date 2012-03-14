@@ -11,12 +11,13 @@ clean=
 parallel=2
 patch_gtk_osx=
 PREFIX=$HOME/gtk/inst
-
+unpatch=
 while [ $# -gt 0 ] ; do
    case $1 in
     --clean*) clean=1 ; shift ;;
     --prefix*) PREFIX=`echo $1 | sed 's/--prefix=//'` ; shift ;;
     --patch*) patch_gtk_osx=1 ; shift ;;
+    --unpatch*) patch_gtk_osx=1 ; unpatch=-R; shift ;;
     -j*) parallel=`echo $1 | sed 's/-j//'` ; shift ;;
    esac
 done
@@ -215,19 +216,21 @@ if [ x$patch_gtk_osx != x ] ; then
 
     this_script_dir="`/usr/bin/dirname \"$0\"`"
     cd gtk+
-    echo "Testing patches ... "
+    echo "Testing ($unpatch) patches ... "
 
-    patches=`ls $this_script_dir/current_gtk_osx_patches/*.patch`
+    patches=`ls $this_script_dir/current-gtk-patches/*.patch`
     for patch in $patches ; do
-        if patch --dry-run -p0 < $patch >/dev/null 2>&1 ; then
-            echo "Patch $patch no longer applies cleanly."
-            exit 1
+        if patch $unpatch --dry-run -p1 < $patch ; then
+	    :
+	else
+            echo "$? : Patch $patch no longer applies ($unpatch) cleanly."
+	    exit 1
         fi
     done
 
-    echo "Applying patches ..."
+    echo "Applying ($unpatch) patches ..."
     for patch in $patches ; do
-        patch --dry-run -p0 < $patch
+        patch $unpatch -p1 < $patch
     done
     exit 0
 fi
