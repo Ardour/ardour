@@ -3185,16 +3185,6 @@ Editor::map_transport_state ()
 
 /* UNDO/REDO */
 
-Editor::State::State (PublicEditor const * e)
-{
-	selection = new Selection (e);
-}
-
-Editor::State::~State ()
-{
-	delete selection;
-}
-
 void
 Editor::begin_reversible_command (string name)
 {

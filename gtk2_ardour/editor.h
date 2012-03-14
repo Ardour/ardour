@@ -1808,14 +1808,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void update_title ();
 	void update_title_s (const std::string & snapshot_name);
 
-	struct State {
-	    Selection* selection;
-	    double frames_per_unit;
-
-	    State (PublicEditor const * e);
-	    ~State ();
-	};
-
 	void instant_save ();
 
 	boost::shared_ptr<ARDOUR::AudioRegion> last_audition_region;
