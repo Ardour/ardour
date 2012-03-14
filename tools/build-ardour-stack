@@ -146,7 +146,18 @@ if [ ! -f rdflib-3.2.0.tar.gz ] ; then
     echo python rdflib
     curl -LO http://rdflib.googlecode.com/files/rdflib-3.2.0.tar.gz
 fi
-
+if [ ! -f setuptools-0.6c11.tar.gz ] ; then
+    echo python setuptools
+    curl -L -o setuptools-0.6c11.tar.gz http://pypi.python.org/packages/source/s/setuptools/setuptools-0.6c11.tar.gz#md5=7df2a529a074f613b509fb44feefe74e
+fi    
+if [ ! -f isodate-0.4.0.tar.gz ] ; then
+    echo python isodate
+    curl -L -o isodate-0.4.0.tar.gz  http://pypi.python.org/packages/source/i/isodate/isodate-0.4.0.tar.gz#md5=74eb2ffca6ab3318d6627f25f88e24e5
+fi
+if [ ! -d LRDF ] ; then
+    echo LRDF
+    git clone git://github.com/swh/LRDF.git
+fi
 
 tar xf boost_1_49_0.tar.bz2 && \
   (set -e && cd boost_1_49_0 && ./bootstrap.sh --prefix=$PREFIX --with-libraries=exception && ./b2 && ./b2 install) || die "boost build failed"
@@ -208,17 +219,22 @@ tar xf libsamplerate-0.1.8.tar.gz && \
 tar xf aubio-0.3.2.tar.gz 
    (set -e && cd aubio-0.3.2 && sed '/no-long-double/d' < ./configure > ./configure.XXX && mv ./configure.XXX ./configure && chmod +x ./configure && CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && MAKEFLAGS=-j1 make install) || die "aubio build failed"
 
-# this python lib wants to install to a system-wide location
+# these python lib wants to install to a system-wide location
 tar xf rdflib-3.2.0.tar.gz && \
     (set -e && cd rdflib-3.2.0 && python ./setup.py build && sudo python ./setup.py install)
+tar xf setuptools-0.6c11.tar.gz && \
+    (set -e && cd setuptools-0.6c11 && python ./setup.py build && sudo python ./setup.py install)
+tar xf isodate-0.4.0.tar.gz && \
+    (set -e && cd isodate-0.4.0 && python ./setup.py build && sudo python ./setup.py install)
 
-# LRDF from git
-(set -e && git clone https://github.com/swh/LRDF.git && cd LRDF && CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" sh ./autogen.sh --prefix=$PREFIX && make && make install) || die "suil build failed"
+(set -e && cd LRDF && \
+  sed 's/glibtoolize/libtoolize/g' < autogen.sh > ag.sh && mv ag.sh autogen.sh && \
+  CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" sh ./autogen.sh --prefix=$PREFIX && make && make install) || die "LRDF build failed"
 
 # LV2 from svn - note: this doesn't exit with the correct exit code no matter what, plus a bug in waf prevents the use
 # of MACOSX_DEPLOYMENT_TARGET which probably doesn't matter since this isn't using Carbon/Cocoa APIs.
 (if [ ! -d lv2-svn ] ; then svn co http://lv2plug.in/repo/trunk lv2-svn ; fi &&  \
-    cd lv2-svn && unset MACOSX_DEPLOYMENT_TARGET && ./waf configure --prefix=$PREFIX --experimental && ./waf && sudo ./waf install)
+    cd lv2-svn && unset MACOSX_DEPLOYMENT_TARGET && ./waf configure --prefix=$PREFIX --experimental && ./waf && sudo ./waf install) || die "lv2-svn build failed"
 
 #
 # drobilla stuff is from svn for now
