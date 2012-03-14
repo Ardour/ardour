@@ -246,27 +246,27 @@ hash tar
 #
 # well, we do now ..
 #
-tar xf m4-1.4.16.tar.bz2 && (cd m4-1.4.16 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "m4 build failed"
-tar xf make-3.82.tar.bz2 && (cd make-3.82 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "make build failed"
-tar xf zlib-1.2.6.tar.bz2 && (cd zlib-1.2.6 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && PATH=/usr/bin:$PATH make && make install) || die "zlib build failed"
-tar xf autoconf-2.68.tar.bz2 && (cd autoconf-2.68 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "autoconf build failed"
-tar  xf automake-1.11.3.tar.gz && (cd automake-1.11.3 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "automake build failed"
-tar  xf libtool-2.4.2.tar.gz && (cd libtool-2.4.2 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "libtool build failed"
-tar  xf make-3.82.tar.bz2 && (cd make-3.82 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "make build failed"
-tar  xf bison-2.5.tar.bz2 && (cd bison-2.5  && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "bison build failed"
+tar xf m4-1.4.16.tar.bz2 && (cd m4-1.4.16 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "m4 build failed"
+tar xf make-3.82.tar.bz2 && (cd make-3.82 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "make build failed"
+tar xf zlib-1.2.6.tar.bz2 && (cd zlib-1.2.6 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && PATH=/usr/bin:$PATH make && make install) || die "zlib build failed"
+tar xf autoconf-2.68.tar.bz2 && (cd autoconf-2.68 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "autoconf build failed"
+tar  xf automake-1.11.3.tar.gz && (cd automake-1.11.3 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "automake build failed"
+tar  xf libtool-2.4.2.tar.gz && (cd libtool-2.4.2 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "libtool build failed"
+tar  xf make-3.82.tar.bz2 && (cd make-3.82 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "make build failed"
+tar  xf bison-2.5.tar.bz2 && (cd bison-2.5  && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "bison build failed"
 #
 # libxml2 tries to install python modules in the system python folders and thus needs sudo for the install step. 
 # clean up afterwards to reset ownership on dirs and files created under $PREFIX as root
 # 
-tar  xf libxml2-2.7.8.tar.gz && (cd libxml2-2.7.8 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF --with-zlib=$PREFIX ${PYTHON:+--with-python=$PYTHON} && make && sudo make install && sudo chown -R `whoami` $PREFIX) || die "libxml2 build failed"
-tar  xf libxslt-1.1.26.tar.gz && (cd libxslt-1.1.26 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "libxslt build failed"
-tar  xf readline-6.2.tar.gz && (cd readline-6.2  && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "readline build failed"
-tar  xf libiconv-1.14.tar.gz && (cd libiconv-1.14  && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "libiconv build failed"
-tar  xf intltool-0.50.2.tar.gz && (cd intltool-0.50.2  && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "intltool build failed"
-tar  xf gettext-0.18.1.1.tar.gz && (cd gettext-0.18.1.1  && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "gettext build failed"
-tar  xf tiff-4.0.1.tar.gz && (cd tiff-4.0.1 && CFLAGS="$GLOBAL_CFLAGS -DHAVE_APPLE_OPENGL_FRAMEWORK" LD_FLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "tiff build failed"
-tar  xf libpng-1.5.9.tar.gz && (cd libpng-1.5.9 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "libpng build failed"
-tar  xf jpegsrc.v8d.tar.gz && (cd jpeg-8d && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "jpegsrc build failed"
+tar  xf libxml2-2.7.8.tar.gz && (cd libxml2-2.7.8 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF --with-zlib=$PREFIX ${PYTHON:+--with-python=$PYTHON} && make && sudo make install && sudo chown -R `whoami` $PREFIX) || die "libxml2 build failed"
+tar  xf libxslt-1.1.26.tar.gz && (cd libxslt-1.1.26 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "libxslt build failed"
+tar  xf readline-6.2.tar.gz && (cd readline-6.2  && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "readline build failed"
+tar  xf libiconv-1.14.tar.gz && (cd libiconv-1.14  && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "libiconv build failed"
+tar  xf intltool-0.50.2.tar.gz && (cd intltool-0.50.2  && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "intltool build failed"
+tar  xf gettext-0.18.1.1.tar.gz && (cd gettext-0.18.1.1  && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "gettext build failed"
+tar  xf tiff-4.0.1.tar.gz && (cd tiff-4.0.1 && CFLAGS="$GLOBAL_CFLAGS -DHAVE_APPLE_OPENGL_FRAMEWORK" LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "tiff build failed"
+tar  xf libpng-1.5.9.tar.gz && (cd libpng-1.5.9 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "libpng build failed"
+tar  xf jpegsrc.v8d.tar.gz && (cd jpeg-8d && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "jpegsrc build failed"
 tar xf XML-Simple-2.18.tar.gz && (cd XML-Simple-2.18 && perl Makefile.PL PREFIX=$PREFIX && make && make install) || die "XML-Simple build failed"
 tar xf XML-Parser-2.41.tar.gz && (cd XML-Parser-2.41 && perl Makefile.PL PREFIX=$PREFIX && make && make install) || die "XML-Parser build failed"
 #
@@ -274,7 +274,7 @@ tar xf XML-Parser-2.41.tar.gz && (cd XML-Parser-2.41 && perl Makefile.PL PREFIX=
 #  it can be avoided by changing into the target build directory, re-running configure and then running make from there.
 #  the target dir gets built by the first invocation of configure, and is the newest dir, so we find its name with ls and awk.
 #
-tar xf libffi-3.0.10.tar.gz && (cd libffi-3.0.10 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && cd `ls -ltd * | awk '/^d/ {print $9; exit}'` && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ../configure $GLOBAL_CONF && make && make install) || die "libffi build failed"
+tar xf libffi-3.0.10.tar.gz && (cd libffi-3.0.10 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && cd `ls -ltd * | awk '/^d/ {print $9; exit}'` && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ../configure $GLOBAL_CONF && make && make install) || die "libffi build failed"
 # time to bootstrap the circular dependency between pkg-config and glib.
 #
 # step one: build glib with everything specified so that pkg-config is not used or required
@@ -291,21 +291,21 @@ tar xf glib-2.31.2.tar.bz2 && (cd glib-2.31.2 && LDFLAGS="$GLOBAL_LDFLAGS -L$PRE
 #
 # step four: rebuilding pkg-config now that glib is all set
 #
-tar xf pkg-config-0.26.tar.gz && (cd pkg-config-0.26 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "pkg build failed"
+tar xf pkg-config-0.26.tar.gz && (cd pkg-config-0.26 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "pkg build failed"
 #
 # now we can start on the GTK stack itself
 # 
-tar xf atk-2.2.0.tar.bz2 && (cd atk-2.2.0 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "atk build failed"
-tar xf gnome-common-2.34.0.tar.bz2 && (cd gnome-common-2.34.0 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "gnome build failed"
+tar xf atk-2.2.0.tar.bz2 && (cd atk-2.2.0 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "atk build failed"
+tar xf gnome-common-2.34.0.tar.bz2 && (cd gnome-common-2.34.0 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "gnome build failed"
 tar xf gtk-osx-docbook-1.0.tar.gz && (cd gtk-osx-docbook-1.0 && JHBUILD_PREFIX=$PREFIX make install) || die "gtk build failed"
 # gnome-doc-utils is not parallel-build safe so turn off make -j2
-tar xf gnome-doc-utils-0.20.6.tar.bz2 && (cd gnome-doc-utils-0.20.6 && PYTHONPATH=$PREFIX/lib/python2.7/site-packages CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF --disable-scrollkeeper && PYTHONPATH=$PREFIX/lib/python2.7/site-packages MAKEFLAGS= make && PYTHONPATH=$PREFIX/lib/python2.7/site-packages MAKEFLAGS= make install) || die "gnome build failed"
-tar xf gtk-doc-1.18.tar.bz2 && (cd gtk-doc-1.18 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure --disable-scrollkeeper --with-xml-catalog=$PREFIX/etc/xml/catalog --prefix=$PREFIX && PYTHONPATH=$PREFIX/lib/python2.7/site-packages make && make install) || die "gtk build failed"
-tar xf pixman-0.24.4.tar.gz && (cd pixman-0.24.4 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" sh ./autogen.sh --prefix=$PREFIX && make && make install) || die "pixman build failed"
-tar xf freetype-2.4.8.tar.bz2 && (cd freetype-2.4.8 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "freetype build failed"
-tar xf fontconfig-2.8.0.tar.gz && (cd fontconfig-2.8.0 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "fontconfig build failed"
-tar xf cairo-1.10.2.tar.gz && (cd cairo-1.10.2 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "cairo build failed"
-tar xf pango-1.29.5.tar.bz2 && (cd pango-1.29.5 && CFLAGS=$GLOBAL_CFLAGS LD_FLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "pango build failed"
+tar xf gnome-doc-utils-0.20.6.tar.bz2 && (cd gnome-doc-utils-0.20.6 && PYTHONPATH=$PREFIX/lib/python2.7/site-packages CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF --disable-scrollkeeper && PYTHONPATH=$PREFIX/lib/python2.7/site-packages MAKEFLAGS= make && PYTHONPATH=$PREFIX/lib/python2.7/site-packages MAKEFLAGS= make install) || die "gnome build failed"
+tar xf gtk-doc-1.18.tar.bz2 && (cd gtk-doc-1.18 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure --disable-scrollkeeper --with-xml-catalog=$PREFIX/etc/xml/catalog --prefix=$PREFIX && PYTHONPATH=$PREFIX/lib/python2.7/site-packages make && make install) || die "gtk build failed"
+tar xf pixman-0.24.4.tar.gz && (cd pixman-0.24.4 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" sh ./autogen.sh --prefix=$PREFIX && make && make install) || die "pixman build failed"
+tar xf freetype-2.4.8.tar.bz2 && (cd freetype-2.4.8 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "freetype build failed"
+tar xf fontconfig-2.8.0.tar.gz && (cd fontconfig-2.8.0 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "fontconfig build failed"
+tar xf cairo-1.10.2.tar.gz && (cd cairo-1.10.2 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "cairo build failed"
+tar xf pango-1.29.5.tar.bz2 && (cd pango-1.29.5 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "pango build failed"
 
 tar xf gdk-pixbuf-2.25.0.tar.xz && (cd gdk-pixbuf-2.25.0 && LDFLAGS="$GLOBAL_LDFLAGS -L$PREFIX/lib" CFLAGS="-I$PREFIX/include $GLOBAL_CFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "gdk build failed"
 # gobject-introspection uses #include <libintl.h> and there's no way to force the "scanner" to look outside the system tree
