@@ -49,7 +49,7 @@ read_string (FILE *fp)
 }
 
 /** Read an integer value from a line in fp into n,
- *  @return true on success, false on failure.
+ *  @return true on failure, false on success.
  */
 static bool
 read_int (FILE* fp, int* n)
@@ -58,7 +58,7 @@ read_int (FILE* fp, int* n)
 
 	char* p = fgets (buf, MAX_STRING_LEN, fp);
 	if (p == 0) {
-		return false;
+		return true;
 	}
 
 	return (sscanf (p, "%d", n) != 1);
