@@ -1165,7 +1165,7 @@ Editor::sensitize_the_right_region_actions ()
 		_region_actions->get_action("insert-patch-change")->set_sensitive (false);
 		_region_actions->get_action("transpose-region")->set_sensitive (false);
 	} else {
-		editor_actions->get_action("RegionMenuMIDI")->set_sensitive (true);
+		editor_menu_actions->get_action("RegionMenuMIDI")->set_sensitive (true);
 		/* others were already marked sensitive */
 	}
 
