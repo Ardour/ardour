@@ -159,6 +159,7 @@ if [ ! -d LRDF ] ; then
     git clone git://github.com/swh/LRDF.git
 fi
 
+
 tar xf boost_1_49_0.tar.bz2 && \
   (set -e && cd boost_1_49_0 && ./bootstrap.sh --prefix=$PREFIX --with-libraries=exception && ./b2 && ./b2 install) || die "boost build failed"
 
@@ -175,8 +176,9 @@ tar xf pangomm-2.28.4.tar.xz && \
     (set -e && cd pangomm-2.28.4 && CXXFLAGS="$GLOBAL_CFLAGS" CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install) || die "pangomm build failed"
 tar xf atkmm-2.22.6.tar.xz && \
     (set -e && cd atkmm-2.22.6 && CXXFLAGS="$GLOBAL_CFLAGS" CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install) || die "atkmm build failed"
+
 tar xf gtkmm-2.24.2.tar.xz && \
-   (set -e && cd gtkmm-2.24.2 && CXXFLAGS="$GLOBAL_CFLAGS" CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install) || die "gtkmm build failed"
+   (set -e && cd gtkmm-2.24.2 && CXXFLAGS="$GLOBAL_CFLAGS" CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX --disable-documentation && make && make install) || die "gtkmm build failed"
 tar xf libart_lgpl-2.3.21.tar.bz2 && \
     (set -e && cd libart_lgpl-2.3.21 && CXXFLAGS="$GLOBAL_CFLAGS" CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install) || die "libart build failed"
 tar xf libgnomecanvas-2.30.3.tar.bz2 && \
@@ -234,7 +236,7 @@ tar xf isodate-0.4.0.tar.gz && \
 # LV2 from svn - note: this doesn't exit with the correct exit code no matter what, plus a bug in waf prevents the use
 # of MACOSX_DEPLOYMENT_TARGET which probably doesn't matter since this isn't using Carbon/Cocoa APIs.
 (if [ ! -d lv2-svn ] ; then svn co http://lv2plug.in/repo/trunk lv2-svn ; fi &&  \
-    cd lv2-svn && unset MACOSX_DEPLOYMENT_TARGET && ./waf configure --prefix=$PREFIX --experimental && ./waf && sudo ./waf install) || die "lv2-svn build failed"
+    cd lv2-svn && unset MACOSX_DEPLOYMENT_TARGET && ./waf configure --prefix=$PREFIX --copy-headers --experimental && ./waf && sudo ./waf install) || die "lv2-svn build failed"
 
 #
 # drobilla stuff is from svn for now
