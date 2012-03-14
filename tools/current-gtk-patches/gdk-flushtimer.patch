@@ -1,0 +1,172 @@
+diff -urp gtk+/gdk/quartz/gdkdrawable-quartz.c gtk+664894/gdk/quartz/gdkdrawable-quartz.c
+--- gtk+/gdk/quartz/gdkdrawable-quartz.c	2011-11-23 00:19:24.000000000 -0500
++++ gtk+664894/gdk/quartz/gdkdrawable-quartz.c	2011-11-29 04:09:38.000000000 -0500
+@@ -768,34 +768,28 @@ void
+ _gdk_quartz_drawable_flush (GdkDrawable *drawable)
+ {
+   static struct timeval prev_tv;
+-  static gint intervals[4];
+-  static gint index;
+   struct timeval tv;
+   gint ms;
+-
+-  gettimeofday (&tv, NULL);
++      
++  gettimeofday (&tv, NULL);            
+   ms = (tv.tv_sec - prev_tv.tv_sec) * 1000 + (tv.tv_usec - prev_tv.tv_usec) / 1000;
+-  intervals[index++ % 4] = ms;
++  prev_tv = tv;
+ 
+   if (drawable)
+     {
+-      ms = intervals[0] + intervals[1] + intervals[2] + intervals[3];
+-
+-      /* ~25Hz on average. */
+-      if (ms > 4*40)
++      if (GDK_IS_WINDOW_IMPL_QUARTZ (drawable))
+         {
+-          if (GDK_IS_WINDOW_IMPL_QUARTZ (drawable))
++          GdkWindowImplQuartz *window_impl = GDK_WINDOW_IMPL_QUARTZ (drawable);
++          if (ms > (4*GDK_QUARTZ_FLUSH_TIMER_MSEC)) /* first update in a while so immediately flush */
+             {
+-              GdkWindowImplQuartz *window_impl = GDK_WINDOW_IMPL_QUARTZ (drawable);
+-
+               [window_impl->toplevel flushWindow];
+             }
+-
+-          prev_tv = tv;
++	    else
++            {
++              window_impl->needs_flush = 1;
++            }
+         }
+     }
+-  else
+-    prev_tv = tv;
+ }
+ 
+ void
+diff -urp gtk+/gdk/quartz/gdkprivate-quartz.h gtk+664894/gdk/quartz/gdkprivate-quartz.h
+--- gtk+/gdk/quartz/gdkprivate-quartz.h	2011-11-23 20:43:12.000000000 -0500
++++ gtk+664894/gdk/quartz/gdkprivate-quartz.h	2011-11-29 03:36:34.000000000 -0500
+@@ -24,6 +24,8 @@
+ #define GDK_QUARTZ_ALLOC_POOL NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init]
+ #define GDK_QUARTZ_RELEASE_POOL [pool release]
+ 
++#define GDK_QUARTZ_FLUSH_TIMER_MSEC (10)
++
+ #include <gdk/gdkprivate.h>
+ #include <gdk/quartz/gdkpixmap-quartz.h>
+ #include <gdk/quartz/gdkwindow-quartz.h>
+@@ -163,6 +165,9 @@ void       _gdk_quartz_window_set_needs_
+ 
+ void       _gdk_quartz_window_update_position           (GdkWindow    *window);
+ 
++gboolean   _gdk_quartz_window_traverse_and_flush_main_window_stack (gpointer data);
++
++
+ /* Events */
+ typedef enum {
+   GDK_QUARTZ_EVENT_SUBTYPE_EVENTLOOP
+diff -urp gtk+/gdk/quartz/gdkwindow-quartz.c gtk+664894/gdk/quartz/gdkwindow-quartz.c
+--- gtk+/gdk/quartz/gdkwindow-quartz.c	2011-11-23 20:43:12.000000000 -0500
++++ gtk+664894/gdk/quartz/gdkwindow-quartz.c	2011-11-29 03:36:34.000000000 -0500
+@@ -34,6 +34,7 @@ static GSList   *update_nswindows;
+ static gboolean  in_process_all_updates = FALSE;
+ 
+ static GSList *main_window_stack;
++static guint flush_timer_id = 0;
+ 
+ #define FULLSCREEN_DATA "fullscreen-data"
+ 
+@@ -874,6 +875,12 @@ _gdk_window_impl_new (GdkWindow     *win
+   GdkDrawableImplQuartz *draw_impl;
+   GdkWindowImplQuartz *parent_impl;
+ 
++  if(!flush_timer_id)
++	{
++	flush_timer_id = g_timeout_add(GDK_QUARTZ_FLUSH_TIMER_MSEC, 
++		_gdk_quartz_window_traverse_and_flush_main_window_stack, NULL);
++	}
++
+   GDK_QUARTZ_ALLOC_POOL;
+ 
+   private = (GdkWindowObject *)window;
+@@ -3115,3 +3122,64 @@ gdk_window_impl_iface_init (GdkWindowImp
+   iface->input_window_destroy = _gdk_input_window_destroy;
+   iface->input_window_crossing = _gdk_input_window_crossing;
+ }
++
++
++gboolean 
++_gdk_quartz_window_traverse_and_flush_main_window_stack (gpointer data)
++{
++GSList *mws = main_window_stack;
++GSList *tops = NULL;
++GSList *dirty = NULL;
++GSList *iter;
++
++while(mws)
++	{
++	GdkWindow *w = mws->data;
++	if(w)
++		{
++		if (!GDK_WINDOW_DESTROYED (w))
++			{
++			GdkWindowObject *private = (GdkWindowObject *)w;
++			GdkWindowImplQuartz *giq = (GdkWindowImplQuartz *)private->impl;
++			NSWindow *nsw;
++			if(giq->needs_flush)
++				{
++				giq->needs_flush = 0;
++				nsw = giq->toplevel;
++
++				if(!g_slist_find(tops, nsw))
++					{
++					tops = g_slist_prepend(tops, nsw);
++					dirty = g_slist_prepend(dirty, giq);
++					}
++				}
++			}
++		}
++
++	mws = g_slist_next(mws);
++	}
++
++if(tops)
++	{
++	g_slist_free(tops);
++	}
++
++if(dirty)
++	{
++	iter = dirty;
++	while(iter)
++		{
++		GdkWindowImplQuartz *giq = (GdkWindowImplQuartz *)iter->data;
++
++		[giq->view lockFocus];
++		[giq->toplevel flushWindow];
++		[giq->view unlockFocus];
++
++		iter = g_slist_next(iter);
++		}		
++	
++	g_slist_free(dirty);
++	}
++
++return(TRUE);
++}
+diff -urp gtk+/gdk/quartz/gdkwindow-quartz.h gtk+664894/gdk/quartz/gdkwindow-quartz.h
+--- gtk+/gdk/quartz/gdkwindow-quartz.h	2011-11-23 00:19:24.000000000 -0500
++++ gtk+664894/gdk/quartz/gdkwindow-quartz.h	2011-11-29 03:36:34.000000000 -0500
+@@ -60,6 +60,9 @@ struct _GdkWindowImplQuartz
+   GList *sorted_children;
+ 
+   GdkRegion *needs_display_region;
++
++  /* experimental periodic flush code */
++  unsigned needs_flush : 1;
+ };
+  
+ struct _GdkWindowImplQuartzClass 

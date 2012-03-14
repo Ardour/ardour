@@ -1,0 +1,30 @@
+--- ../og/gtk/gtktreeview.c~	2011-01-26 14:46:37.000000000 -0500
++++ ../og/gtk/gtktreeview.c	2011-08-12 13:59:23.000000000 -0400
+@@ -2556,6 +2556,7 @@
+   gint horizontal_separator;
+   gboolean path_is_selectable;
+   gboolean rtl;
++  gboolean edits_allowed;
+ 
+   rtl = (gtk_widget_get_direction (widget) == GTK_TEXT_DIR_RTL);
+   gtk_tree_view_stop_editing (tree_view, FALSE);
+@@ -2695,9 +2696,17 @@
+ 
+       tree_view->priv->focus_column = column;
+ 
++      /* ARDOUR HACK */
++
++      if (g_object_get_data (G_OBJECT(tree_view), "mouse-edits-require-mod1")) {
++             edits_allowed = (event->state & GDK_MOD1_MASK);
++      } else {
++             /* regular GTK design: do edits if none of the default modifiers are active */
++             edits_allowed = !(event->state & gtk_accelerator_get_default_mod_mask ());
++      }
++
+       /* decide if we edit */
+-      if (event->type == GDK_BUTTON_PRESS && event->button == 1 &&
+-	  !(event->state & gtk_accelerator_get_default_mod_mask ()))
++      if (event->type == GDK_BUTTON_PRESS && event->button == 1 && edits_allowed)
+ 	{
+ 	  GtkTreePath *anchor;
+ 	  GtkTreeIter iter;

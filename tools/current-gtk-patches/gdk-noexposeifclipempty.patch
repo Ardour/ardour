@@ -1,0 +1,38 @@
+diff --git a/gdk/gdkwindow.c b/gdk/gdkwindow.c
+index f058570..2ae3763 100644
+--- a/gdk/gdkwindow.c
++++ b/gdk/gdkwindow.c
+@@ -5418,17 +5418,25 @@ _gdk_window_process_updates_recurse (GdkWindow *window,
+       if (private->event_mask & GDK_EXPOSURE_MASK)
+ 	{
+ 	  GdkEvent event;
++	  GdkRegion *region_copy = gdk_region_copy (expose_region);
+ 
+-	  event.expose.type = GDK_EXPOSE;
+-	  event.expose.window = g_object_ref (window);
+-	  event.expose.send_event = FALSE;
+-	  event.expose.count = 0;
+-	  event.expose.region = expose_region;
+-	  gdk_region_get_clipbox (expose_region, &event.expose.area);
++	  gdk_region_intersect (region_copy, private->clip_region_with_children);
+ 
+-	  (*_gdk_event_func) (&event, _gdk_event_data);
++	  if (!gdk_region_empty (region_copy))
++	    {
++	      event.expose.type = GDK_EXPOSE;
++	      event.expose.window = g_object_ref (window);
++	      event.expose.send_event = FALSE;
++	      event.expose.count = 0;
++	      event.expose.region = expose_region;
++	      gdk_region_get_clipbox (expose_region, &event.expose.area);
++
++	      (*_gdk_event_func) (&event, _gdk_event_data);
++
++	      g_object_unref (window);
++	    }
+ 
+-	  g_object_unref (window);
++	    gdk_region_destroy (region_copy);
+ 	}
+       else if (private->bg_pixmap != GDK_NO_BG &&
+ 	       private->window_type != GDK_WINDOW_FOREIGN)

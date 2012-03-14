@@ -1,0 +1,24 @@
+--- ../og/gdk/quartz/gdkevents-quartz.c~	2011-08-11 19:24:36.000000000 -0400
++++ ../og/gdk/quartz/gdkevents-quartz.c	2011-08-12 12:56:34.000000000 -0400
+@@ -692,6 +692,21 @@
+                 toplevel_private = (GdkWindowObject *)toplevel;
+                 toplevel_impl = (GdkWindowImplQuartz *)toplevel_private->impl;
+ 
++		{
++			unsigned int subviews = [[toplevel_impl->view subviews] count];
++			unsigned int si;
++			
++			for (si = 0; si < subviews; ++si) {
++				NSView* sv = [[toplevel_impl->view subviews] objectAtIndex:si];
++				NSRect r = [sv frame];
++				if (r.origin.x <= *x && r.origin.x + r.size.width >= *x &&
++				    r.origin.y <= *y && r.origin.y + r.size.height >= *y) {
++					/* event is within subview, forward back to Cocoa */
++					return NULL;
++				}
++			}
++		}
++
+                 *x = x_tmp;
+                 *y = y_tmp;
+               }
