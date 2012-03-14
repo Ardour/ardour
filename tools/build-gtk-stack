@@ -319,3 +319,46 @@ sudo rm /usr/include/libintl.h
 # 
 #
 (cd gtk+ && CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" sh autogen.sh --enable-maintainer-mode --prefix=$PREFIX --libdir=$PREFIX/lib --disable-cups --disable-papi --disable-introspection --with-gdktarget=quartz && make && make install) || die "GTK build failed"
+
+# two post-install hacks
+
+if uname -a | grep --silent arwin ; then
+    #
+    # this is only needed on OS X where some Carbon headers define nil
+    #
+    cat <<EOFA | (cd $PREFIX && patch -p0)
+--- include/sigc++-2.0/sigc++/functors/functor_trait.h~2012-03-14 14:22:09.000000000 -0400
++++ include/sigc++-2.0/sigc++/functors/functor_trait.h2012-03-14 14:53:32.000000000 -0400
+@@ -24,6 +24,9 @@
+ #define _SIGC_FUNCTORS_MACROS_FUNCTOR_TRAITHM4_
+ #include <sigc++/type_traits.h>
+ 
++#ifdef nil
++#undef nil
++#endif
+ 
+ namespace sigc {
+ 
+EOFA
+fi
+
+#
+# libgnomecanvas has an incorrect pkg-config file. it has an implicit dependency on pangoft2.
+#
+
+cat <<EOFB | (cd $PREFIX && patch -p0)
+--- lib/pkgconfig/libgnomecanvas-2.0.pc~2012-03-14 14:35:34.000000000 -0400
++++ lib/pkgconfig/libgnomecanvas-2.0.pc2012-03-14 14:53:06.000000000 -0400
+@@ -5,8 +5,8 @@
+ 
+ Name: libgnomecanvas-2.0
+ Description: libgnomecanvas
+-Requires: libart-2.0 gtk+-2.0
+-Requires.private: pango pangoft2 gail
++Requires: libart-2.0 gtk+-2.0 pangoft2
++Requires.private: pango gail
+ Version: 2.30.3
+ Libs: -L${libdir} -lgnomecanvas-2
+ Cflags: -I${includedir}/libgnomecanvas-2.0
+
+EOFB 
