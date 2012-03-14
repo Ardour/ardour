@@ -436,7 +436,6 @@ def configure(conf):
                'Thanks for your co-operation with our development process.\n\n' +
                'Press Enter to continue.\n')
         sys.stdin.readline()
-    create_stored_revision()
     conf.env['VERSION'] = VERSION
     conf.line_just = 52
     autowaf.set_recursive()
@@ -659,6 +658,8 @@ const char* const ardour_config_info = "\\n\\
     print('')
 
 def build(bld):
+    create_stored_revision()
+
     # add directories that contain only headers, to workaround an issue with waf
 
     bld.path.find_dir ('libs/evoral/evoral')
