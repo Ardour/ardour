@@ -1,5 +1,5 @@
---- ../og/gdk/quartz/gdkevents-quartz.c~	2011-08-11 19:24:36.000000000 -0400
-+++ ../og/gdk/quartz/gdkevents-quartz.c	2011-08-12 12:56:34.000000000 -0400
+--- gtk+/gdk/quartz/gdkevents-quartz.c~	2011-08-11 19:24:36.000000000 -0400
++++ gtk+/gdk/quartz/gdkevents-quartz.c	2011-08-12 12:56:34.000000000 -0400
 @@ -692,6 +692,21 @@
                  toplevel_private = (GdkWindowObject *)toplevel;
                  toplevel_impl = (GdkWindowImplQuartz *)toplevel_private->impl;

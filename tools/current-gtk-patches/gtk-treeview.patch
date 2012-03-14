@@ -1,5 +1,5 @@
---- ../og/gtk/gtktreeview.c~	2011-01-26 14:46:37.000000000 -0500
-+++ ../og/gtk/gtktreeview.c	2011-08-12 13:59:23.000000000 -0400
+--- gtk+/gtk/gtktreeview.c~	2011-01-26 14:46:37.000000000 -0500
++++ gtk+/gtk/gtktreeview.c	2011-08-12 13:59:23.000000000 -0400
 @@ -2556,6 +2556,7 @@
    gint horizontal_separator;
    gboolean path_is_selectable;
