@@ -1,0 +1,51 @@
+From a2b9d813967352bd2070e7c3a17834f1733921ac Mon Sep 17 00:00:00 2001
+From: Christian Hergert <chris@dronelabs.com>
+Date: Wed, 26 Aug 2009 00:15:11 +0000
+Subject: Synthesize NSMouseEntered when the window is placed directly under mouse pointer.
+
+This fixes a bug where the window is not immediately changeable because it does
+not realize that the cursor is within it's bounds.
+---
+diff --git a/gdk/quartz/GdkQuartzWindow.c b/gdk/quartz/GdkQuartzWindow.c
+index b0acbca..15623ab 100644
+--- a/gdk/quartz/GdkQuartzWindow.c
++++ b/gdk/quartz/GdkQuartzWindow.c
+@@ -271,6 +271,7 @@
+   GdkWindow *window = [[self contentView] gdkWindow];
+   GdkWindowObject *private = (GdkWindowObject *)window;
+   GdkWindowImplQuartz *impl = GDK_WINDOW_IMPL_QUARTZ (private->impl);
++  NSPoint nspoint;
+ 
+   inShowOrHide = YES;
+ 
+@@ -279,6 +280,28 @@
+   else
+     [impl->toplevel orderFront:nil];
+ 
++  /* If the window is placed directly under the mouse pointer, then quartz
++   * will not send a NSMouseEntered event.  Therefore, we will go ahead and
++   * synthesize the event ourselves.
++   */
++  nspoint = [impl->toplevel mouseLocationOutsideOfEventStream];
++  if ([impl->view mouse:nspoint inRect:[impl->view frame]])
++    {
++      NSEvent *event;
++
++      event = [NSEvent enterExitEventWithType: NSMouseEntered
++                                     location: NSMakePoint(0, 0)
++                                modifierFlags: 0
++                                    timestamp: 0
++                                 windowNumber: [impl->toplevel windowNumber]
++                                      context: NULL
++                                  eventNumber: 0
++                               trackingNumber: [impl->view trackingRect]
++                                     userData: nil];
++
++      [NSApp postEvent:event atStart:NO];
++    }
++
+   inShowOrHide = NO;
+ }
+ 
+--
+cgit v0.8.2.1-10-g45e7
