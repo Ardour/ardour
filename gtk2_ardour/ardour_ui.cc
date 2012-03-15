@@ -1349,6 +1349,17 @@ ARDOUR_UI::open_session ()
 		open_session_selector->add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 		open_session_selector->add_button (Gtk::Stock::OPEN, Gtk::RESPONSE_ACCEPT);
 		open_session_selector->set_default_response(Gtk::RESPONSE_ACCEPT);
+		
+		if (_session) {
+			string session_parent_dir = Glib::path_get_dirname(_session->path());
+			string::size_type last_dir_sep = session_parent_dir.rfind(G_DIR_SEPARATOR);
+			session_parent_dir = session_parent_dir.substr(0, last_dir_sep);
+			open_session_selector->set_current_folder(session_parent_dir);
+		} else {
+			open_session_selector->set_current_folder(Config->get_default_session_parent_dir());
+		}
+
+		open_session_selector->add_shortcut_folder (Config->get_default_session_parent_dir());
 
 		FileFilter session_filter;
 		session_filter.add_pattern ("*.ardour");
@@ -2577,19 +2588,10 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 				continue;
 			}
 
-			if (session_name.find ('/') != std::string::npos) {
-				MessageDialog msg (*_startup,
-				                   _("To ensure compatibility with various systems\n"
-				                     "session names may not contain a '/' character"));
-				msg.run ();
-				ARDOUR_COMMAND_LINE::session_name = ""; // cancel that
-				continue;
-			}
-
-			if (session_name.find ('\\') != std::string::npos) {
-				MessageDialog msg (*_startup,
-				                   _("To ensure compatibility with various systems\n"
-				                     "session names may not contain a '\\' character"));
+			char illegal = Session::session_name_is_legal(session_name);
+			if (illegal) {
+				MessageDialog msg (*_startup, string_compose(_("To ensure compatibility with various systems\n"
+				                     "session names may not contain a '%1' character"), illegal));
 				msg.run ();
 				ARDOUR_COMMAND_LINE::session_name = ""; // cancel that
 				continue;

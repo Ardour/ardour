@@ -39,6 +39,7 @@
 #include "ardour/session_state_utils.h"
 #include "ardour/template_utils.h"
 
+#include "ardour_ui.h"
 #include "startup.h"
 #include "opts.h"
 #include "engine_dialog.h"
@@ -361,6 +362,8 @@ void
 ArdourStartup::default_dir_changed ()
 {
 	Config->set_default_session_parent_dir (default_dir_chooser->get_filename());
+	// make new session folder chooser point to the new default
+	new_folder_chooser.set_current_folder (Config->get_default_session_parent_dir());
 	config_changed ();
 }
 
@@ -584,6 +587,7 @@ ArdourStartup::setup_initial_choice_page ()
 
 		existing_session_chooser.set_title (_("Select session file"));
 		existing_session_chooser.signal_file_set().connect (sigc::mem_fun (*this, &ArdourStartup::existing_session_selected));
+		existing_session_chooser.set_current_folder(poor_mans_glob (Config->get_default_session_parent_dir()));
 			
 #ifdef GTKOSX
 		existing_session_chooser.add_shortcut_folder ("/Volumes");
@@ -804,6 +808,13 @@ ArdourStartup::setup_new_session_page ()
 
 		if (!ARDOUR_COMMAND_LINE::session_name.empty()) {
 			new_folder_chooser.set_current_folder (poor_mans_glob (Glib::path_get_dirname (ARDOUR_COMMAND_LINE::session_name)));
+		} else if (ARDOUR_UI::instance()->session_loaded) {
+			// point the new session file chooser at the parent directory of the current session
+			string session_parent_dir = Glib::path_get_dirname(ARDOUR_UI::instance()->the_session()->path());
+			string::size_type last_dir_sep = session_parent_dir.rfind(G_DIR_SEPARATOR);
+			session_parent_dir = session_parent_dir.substr(0, last_dir_sep);
+			new_folder_chooser.set_current_folder (session_parent_dir);
+			new_folder_chooser.add_shortcut_folder (poor_mans_glob (Config->get_default_session_parent_dir()));
 		} else {
 			new_folder_chooser.set_current_folder (poor_mans_glob (Config->get_default_session_parent_dir()));
 		}
