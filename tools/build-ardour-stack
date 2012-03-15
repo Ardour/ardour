@@ -160,6 +160,8 @@ if [ ! -d LRDF ] ; then
 fi
 
 
+
+
 tar xf boost_1_49_0.tar.bz2 && \
   (set -e && cd boost_1_49_0 && ./bootstrap.sh --prefix=$PREFIX --with-libraries=exception && ./b2 && ./b2 install) || die "boost build failed"
 
@@ -251,3 +253,45 @@ svn co http://svn.drobilla.net/lad/trunk/lilv && \
 svn co http://svn.drobilla.net/lad/trunk/suil && \
     (set -e && cd suil && CFLAGS="-I$PREFIX/include" ./waf configure --prefix=$PREFIX && ./waf && ./waf install) || die "suil build failed"
 
+# two post-install hacks
+
+if uname -a | grep --silent arwin ; then
+    #
+    # this is only needed on OS X where some Carbon headers define nil
+    #
+    cat <<EOFA | patch -d $PREFIX -p1
+--- ../include/sigc++-2.0/sigc++/functors/functor_trait.h~
++++ ../include/sigc++-2.0/sigc++/functors/functor_trait.h
+@@ -24,6 +24,9 @@
+ #define _SIGC_FUNCTORS_MACROS_FUNCTOR_TRAITHM4_
+ #include <sigc++/type_traits.h>
+ 
++#ifdef nil
++#undef nil
++#endif
+ 
+ namespace sigc {
+ 
+EOFA
+fi
+
+#
+# libgnomecanvas has an incorrect pkg-config file. it has an implicit dependency on pangoft2.
+#
+
+cat <<EOFB | patch -d $PREFIX -p1
+--- ../lib/pkgconfig/libgnomecanvas-2.0.pc~
++++ ../lib/pkgconfig/libgnomecanvas-2.0.pc
+@@ -5,8 +5,8 @@
+ 
+ Name: libgnomecanvas-2.0
+ Description: libgnomecanvas
+-Requires: libart-2.0 gtk+-2.0
+-Requires.private: pango pangoft2 gail
++Requires: libart-2.0 gtk+-2.0 pangoft2
++Requires.private: pango gail
+ Version: 2.30.3
+ Libs: -L${libdir} -lgnomecanvas-2
+ Cflags: -I${includedir}/libgnomecanvas-2.0
+
+EOFB 
