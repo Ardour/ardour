@@ -113,14 +113,14 @@ PortExportChannel::set_state (XMLNode * node, Session & session)
 	}
 }
 
-RegionExportChannelFactory::RegionExportChannelFactory (Session * session, AudioRegion const & region, AudioTrack & track, Type type) :
-  region (region),
-  track (track),
-  type (type),
-  frames_per_cycle (session->engine().frames_per_cycle ()),
-  buffers_up_to_date (false),
-  region_start (region.position()),
-  position (region_start)
+RegionExportChannelFactory::RegionExportChannelFactory (Session * session, AudioRegion const & region, AudioTrack & track, Type type) 
+	: region (region)
+	, track (track)
+	, type (type)
+	, frames_per_cycle (session->engine().frames_per_cycle ())
+	, buffers_up_to_date (false)
+	, region_start (region.position())
+	, position (region_start)
 {
 	switch (type) {
 	  case Raw:
@@ -190,10 +190,10 @@ RegionExportChannelFactory::update_buffers (framecnt_t frames)
 			region.read_at (buffers.get_audio (channel).data(), mixdown_buffer.get(), gain_buffer.get(), position, frames, channel);
 		}
 		break;
-	  case Processed:
-		track.export_stuff (buffers, position, frames);
+	case Processed:
+		track.export_stuff (buffers, position, frames, track.main_outs(), true, true);
 		break;
-	  default:
+	default:
 		throw ExportFailed ("Unhandled type in ExportChannelFactory::update_buffers");
 	}
 

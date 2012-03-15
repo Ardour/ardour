@@ -25,6 +25,7 @@
 
 #include <stdint.h>
 
+#include "ardour/interthread_info.h"
 #include "ardour/types.h"
 
 namespace ARDOUR {

@@ -161,7 +161,13 @@ Editor::bounce_region_selection (bool with_processing)
 
 		InterThreadInfo itt;
 
-		boost::shared_ptr<Region> r = track->bounce_range (region->position(), region->position() + region->length(), itt, with_processing);
+		boost::shared_ptr<Region> r;
+
+		if (with_processing) {
+			r = track->bounce_range (region->position(), region->position() + region->length(), itt, track->main_outs(), false);
+		} else {
+			r = track->bounce_range (region->position(), region->position() + region->length(), itt, boost::shared_ptr<Processor>(), false);
+		}
 	}
 }
 

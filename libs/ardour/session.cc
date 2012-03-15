@@ -3901,7 +3901,9 @@ Session::freeze_all (InterThreadInfo& itt)
 boost::shared_ptr<Region>
 Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
 			  bool /*overwrite*/, vector<boost::shared_ptr<Source> >& srcs,
-			  InterThreadInfo& itt, bool enable_processing)
+			  InterThreadInfo& itt, 
+			  boost::shared_ptr<Processor> endpoint, bool include_endpoint,
+			  bool for_export)
 {
 	boost::shared_ptr<Region> result;
 	boost::shared_ptr<Playlist> playlist;
@@ -3997,7 +3999,7 @@ Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
 
 		this_chunk = min (to_do, chunk_size);
 
-		if (track.export_stuff (buffers, start, this_chunk, enable_processing)) {
+		if (track.export_stuff (buffers, start, this_chunk, endpoint, include_endpoint, for_export)) {
 			goto out;
 		}
 

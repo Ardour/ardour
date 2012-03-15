@@ -9,6 +9,7 @@
 namespace ARDOUR {
 
 class ThreadBuffers;
+class BufferSet;
 
 class ProcessThread
 {

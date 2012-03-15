@@ -52,6 +52,8 @@ public:
 
 	static bool role_requires_output_ports (Role r) { return r == Main || r == Send || r == Insert; }
 
+	bool does_routing() const { return true; }
+
 	/* Delivery to an existing output */
 
 	Delivery (Session& s, boost::shared_ptr<IO> io, boost::shared_ptr<Pannable>, boost::shared_ptr<MuteMaster> mm, const std::string& name, Role);

@@ -62,7 +62,8 @@ class MIDIInvokable : public PBD::Stateful
 	MIDI::channel_t  control_channel;
 	MIDI::byte*      data;
 	size_t           data_size;
-	
+	bool            _parameterized;
+
 	void midi_sense_note (MIDI::Parser &, MIDI::EventTwoBytes *, bool is_on);
 	void midi_sense_note_on (MIDI::Parser &p, MIDI::EventTwoBytes *tb);
 	void midi_sense_note_off (MIDI::Parser &p, MIDI::EventTwoBytes *tb);

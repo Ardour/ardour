@@ -52,6 +52,8 @@ class IOProcessor : public Processor
 
 	bool set_name (const std::string& str);
 
+	bool does_routing() const { return true; }
+
 	virtual ChanCount natural_output_streams() const;
 	virtual ChanCount natural_input_streams () const;
 

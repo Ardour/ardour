@@ -3345,14 +3345,17 @@ Editor::unfreeze_route ()
 void*
 Editor::_freeze_thread (void* arg)
 {
-	SessionEvent::create_per_thread_pool ("freeze events", 64);
-
 	return static_cast<Editor*>(arg)->freeze_thread ();
 }
 
 void*
 Editor::freeze_thread ()
 {
+	/* create event pool because we may need to talk to the session */
+	SessionEvent::create_per_thread_pool ("freeze events", 64);
+	/* create per-thread buffers for process() tree to use */
+	current_interthread_info->process_thread.init ();
+
 	clicked_routeview->audio_track()->freeze_me (*current_interthread_info);
 	current_interthread_info->done = true;
 	return 0;
@@ -3368,22 +3371,23 @@ Editor::freeze_route ()
 	/* stop transport before we start. this is important */
 
 	_session->request_transport_speed (0.0);
+	
+	/* wait for just a little while, because the above call is asynchronous */
+
+	::usleep (250000);
 
 	if (clicked_routeview == 0 || !clicked_routeview->is_audio_track()) {
 		return;
 	}
 
-	if (!clicked_routeview->track()->bounceable()) {
-		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (clicked_routeview);
-		if (rtv && !rtv->track()->bounceable()) {
-			MessageDialog d (
-				_("This route cannot be frozen because it has more outputs than inputs.  "
-				  "You can fix this by increasing the number of inputs.")
-				);
-			d.set_title (_("Cannot freeze"));
-			d.run ();
-			return;
-		}
+	if (!clicked_routeview->track()->bounceable (clicked_routeview->track()->main_outs(), true)) {
+		MessageDialog d (
+			_("This track/bus cannot be frozen because the signal adds or loses channels before reaching the outputs.\n"
+			  "This is typically caused by plugins that generate stereo output from mono input or vice versa.")
+			);
+		d.set_title (_("Cannot freeze"));
+		d.run ();
+		return;
 	}
 
 	InterThreadInfo itt;
@@ -3413,16 +3417,21 @@ Editor::bounce_range_selection (bool replace, bool enable_processing)
 	TrackSelection views = selection->tracks;
 
 	for (TrackViewList::iterator i = views.begin(); i != views.end(); ++i) {
-		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
-		if (rtv && rtv->track() && replace && enable_processing && !rtv->track()->bounceable()) {
-			MessageDialog d (
-				_("You can't perform this operation because the processing of the signal "
-				  "will cause one or more of the tracks will end up with a region with more channels than this track has inputs.\n\n"
-				  "You can do this without processing, which is a different operation.")
-				);
-			d.set_title (_("Cannot bounce"));
-			d.run ();
-			return;
+
+		if (enable_processing) {
+
+			RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
+
+			if (rtv && rtv->track() && replace && enable_processing && !rtv->track()->bounceable (rtv->track()->main_outs(), false)) {
+				MessageDialog d (
+					_("You can't perform this operation because the processing of the signal "
+					  "will cause one or more of the tracks will end up with a region with more channels than this track has inputs.\n\n"
+					  "You can do this without processing, which is a different operation.")
+					);
+				d.set_title (_("Cannot bounce"));
+				d.run ();
+				return;
+			}
 		}
 	}
 
@@ -3451,7 +3460,13 @@ Editor::bounce_range_selection (bool replace, bool enable_processing)
 		playlist->clear_changes ();
 		playlist->clear_owned_changes ();
 
-		boost::shared_ptr<Region> r = rtv->track()->bounce_range (start, start+cnt, itt, enable_processing);
+		boost::shared_ptr<Region> r;
+
+		if (enable_processing) {
+			r = rtv->track()->bounce_range (start, start+cnt, itt, rtv->track()->main_outs(), false);
+		} else {
+			r = rtv->track()->bounce_range (start, start+cnt, itt, boost::shared_ptr<Processor>(), false);
+		}
 
 		if (!r) {
 			continue;

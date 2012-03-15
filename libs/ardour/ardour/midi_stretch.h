@@ -21,6 +21,7 @@
 #define __ardour_midi_stretch_h__
 
 #include "ardour/filter.h"
+#include "ardour/timefx_request.h"
 
 namespace ARDOUR {
 

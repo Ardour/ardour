@@ -20,6 +20,7 @@
 #ifndef __ardour_midi_track_h__
 #define __ardour_midi_track_h__
 
+#include "ardour/interthread_info.h"
 #include "ardour/track.h"
 #include "ardour/midi_ring_buffer.h"
 #include "ardour/midi_state_tracker.h"
@@ -54,15 +55,15 @@ public:
 		return DataType::MIDI;
 	}
 
-	int export_stuff (BufferSet& bufs, framecnt_t nframes, framepos_t end_frame);
-
 	void freeze_me (InterThreadInfo&);
 	void unfreeze ();
 
+	bool bounceable (boost::shared_ptr<Processor>, bool) const { return false; }
 	boost::shared_ptr<Region> bounce (InterThreadInfo&);
-	boost::shared_ptr<Region> bounce_range (
-			framepos_t start, framepos_t end, InterThreadInfo&, bool enable_processing
-		);
+	boost::shared_ptr<Region> bounce_range (framepos_t start, framepos_t end, InterThreadInfo&, 
+						boost::shared_ptr<Processor> endpoint, bool include_endpoint);
+	int export_stuff (BufferSet& bufs, framecnt_t nframes, framepos_t end_frame, 
+			  boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export);
 
 	int set_state (const XMLNode&, int version);
 
@@ -99,10 +100,6 @@ public:
 	ChannelMode get_channel_mode ();
 	uint16_t get_channel_mask ();
 	boost::shared_ptr<MidiPlaylist> midi_playlist ();
-
-	bool bounceable () const {
-		return false;
-	}
 
 	PBD::Signal1<void, boost::weak_ptr<MidiSource> > DataRecorded;
 	boost::shared_ptr<MidiBuffer> get_gui_feed_buffer () const;

@@ -25,6 +25,7 @@
 #endif
 
 #include "ardour/filter.h"
+#include "ardour/timefx_request.h"
 
 #ifdef USE_RUBBERBAND
 

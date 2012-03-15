@@ -21,6 +21,7 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include "ardour/interthread_info.h"
 #include "ardour/route.h"
 #include "ardour/public_diskstream.h"
 
@@ -87,8 +88,14 @@ class Track : public Route, public PublicDiskstream
 	virtual void freeze_me (InterThreadInfo&) = 0;
 	virtual void unfreeze () = 0;
 
+	/** @return true if the track can be bounced, or false otherwise.
+	 */
+	virtual bool bounceable (boost::shared_ptr<Processor> endpoint, bool include_endpoint) const = 0;
 	virtual boost::shared_ptr<Region> bounce (InterThreadInfo&) = 0;
-	virtual boost::shared_ptr<Region> bounce_range (framepos_t start, framepos_t end, InterThreadInfo&, bool enable_processing = true) = 0;
+	virtual boost::shared_ptr<Region> bounce_range (framepos_t start, framepos_t end, InterThreadInfo&, 
+							boost::shared_ptr<Processor> endpoint, bool include_endpoint) = 0;
+	virtual int export_stuff (BufferSet& bufs, framepos_t start_frame, framecnt_t nframes,
+				  boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export) = 0;
 
 	XMLNode&    get_state();
 	XMLNode&    get_template();
@@ -103,11 +110,6 @@ class Track : public Route, public PublicDiskstream
 	bool using_diskstream_id (PBD::ID) const;
 
 	void set_block_size (pframes_t);
-
-	/** @return true if the track can be bounced, or false if it cannot because
-	 *  it has more outputs than diskstream channels.
-	 */
-	virtual bool bounceable () const = 0;
 
 	/* PublicDiskstream interface */
 	boost::shared_ptr<Playlist> playlist ();

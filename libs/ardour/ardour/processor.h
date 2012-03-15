@@ -58,6 +58,8 @@ class Processor : public SessionObject, public Automatable, public Latent
 
 	bool active () const { return _pending_active; }
 
+	virtual bool does_routing() const { return false; }
+
 	bool get_next_ab_is_active () const { return _next_ab_is_active; }
 	void set_next_ab_is_active (bool yn) { _next_ab_is_active = yn; }
 

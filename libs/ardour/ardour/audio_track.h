@@ -20,6 +20,7 @@
 #ifndef __ardour_audio_track_h__
 #define __ardour_audio_track_h__
 
+#include "ardour/interthread_info.h"
 #include "ardour/track.h"
 
 namespace ARDOUR {
@@ -49,19 +50,19 @@ class AudioTrack : public Track
 		return DataType::AUDIO;
 	}
 
-	int export_stuff (BufferSet& bufs, framepos_t start_frame, framecnt_t nframes, bool enable_processing = true);
-
 	void freeze_me (InterThreadInfo&);
 	void unfreeze ();
 
+	bool bounceable (boost::shared_ptr<Processor>, bool include_endpoint) const;
 	boost::shared_ptr<Region> bounce (InterThreadInfo&);
-	boost::shared_ptr<Region> bounce_range (framepos_t start, framepos_t end, InterThreadInfo&, bool enable_processing);
+	boost::shared_ptr<Region> bounce_range (framepos_t start, framepos_t end, InterThreadInfo&, 
+						boost::shared_ptr<Processor> endpoint, bool include_endpoint);
+	int export_stuff (BufferSet& bufs, framepos_t start_frame, framecnt_t nframes,
+			  boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export);
 
 	int set_state (const XMLNode&, int version);
 
 	boost::shared_ptr<AudioFileSource> write_source (uint32_t n = 0);
-
-	bool bounceable () const;
 
   protected:
 	boost::shared_ptr<AudioDiskstream> audio_diskstream () const;

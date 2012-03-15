@@ -38,6 +38,7 @@
 #include "ardour/meter.h"
 #include "ardour/playlist_factory.h"
 #include "ardour/plugin_insert.h"
+#include "ardour/port_insert.h"
 #include "ardour/processor.h"
 #include "ardour/region_factory.h"
 #include "ardour/route_group_specialized.h"
@@ -482,7 +483,8 @@ AudioTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_fram
 }
 
 int
-AudioTrack::export_stuff (BufferSet& buffers, framepos_t start, framecnt_t nframes, bool enable_processing)
+AudioTrack::export_stuff (BufferSet& buffers, framepos_t start, framecnt_t nframes,
+			  boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export)
 {
 	boost::scoped_array<gain_t> gain_buffer (new gain_t[nframes]);
 	boost::scoped_array<Sample> mix_buffer (new Sample[nframes]);
@@ -517,41 +519,110 @@ AudioTrack::export_stuff (BufferSet& buffers, framepos_t start, framecnt_t nfram
 	}
 
 	// If no processing is required, there's no need to go any further.
-	if (!enable_processing) {
+
+	if (!endpoint && !include_endpoint) {
 		return 0;
 	}
 
-	/* note: only run processors during export. other layers in the machinery
-	   will already have checked that there are no external port processors.
-	   Also, don't run deliveries that write to real output ports, and don't
-	   run meters.
-	*/
-
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		boost::shared_ptr<Processor> processor = boost::dynamic_pointer_cast<Processor> (*i);
-		boost::shared_ptr<Delivery> delivery = boost::dynamic_pointer_cast<Delivery> (*i);
-		boost::shared_ptr<PeakMeter> meter = boost::dynamic_pointer_cast<PeakMeter> (*i);
 
-		if (processor && (!delivery || !Delivery::role_requires_output_ports (delivery->role())) && !meter) {
-			processor->run (buffers, start, start+nframes, nframes, true);
+		if (!include_endpoint && (*i) == endpoint) {
+			break;
+		}
+		
+		/* if we're not exporting, stop processing if we come across a routing processor.
+		 */
+		
+		if (!for_export && (*i)->does_routing()) {
+			break;
+		}
+
+		/* even for export, don't run any processor that does routing. 
+
+		   oh, and don't bother with the peak meter either.
+		 */
+
+		if (!(*i)->does_routing() && !boost::dynamic_pointer_cast<PeakMeter>(*i)) {
+			(*i)->run (buffers, start, start+nframes, nframes, true);
+		}
+		
+		if ((*i) == endpoint) {
+			break;
 		}
 	}
 
 	return 0;
 }
 
-boost::shared_ptr<Region>
-AudioTrack::bounce (InterThreadInfo& itt)
+bool
+AudioTrack::bounceable (boost::shared_ptr<Processor> endpoint, bool include_endpoint) const
 {
-	vector<boost::shared_ptr<Source> > srcs;
-	return _session.write_one_track (*this, _session.current_start_frame(), _session.current_end_frame(), false, srcs, itt);
+	if (!endpoint && !include_endpoint) {
+		/* no processing - just read from the playlist and create new
+		   files: always possible.
+		*/
+		return true;
+	}
+
+	Glib::RWLock::ReaderLock lm (_processor_lock);
+	uint32_t naudio = n_inputs().n_audio();
+
+	for (ProcessorList::const_iterator r = _processors.begin(); r != _processors.end(); ++r) {
+
+		/* if we're not including the endpoint, potentially stop
+		   right here before we test matching i/o valences.
+		*/
+
+		if (!include_endpoint && (*r) == endpoint) {
+			return true;
+		}
+
+		/* ignore any processors that do routing, because we will not
+		 * use them during a bounce/freeze/export operation.
+		 */
+
+		if ((*r)->does_routing()) {
+			continue;
+		}
+
+		/* does the output from the last considered processor match the
+		 * input to this one?
+		 */
+		
+		if (naudio != (*r)->input_streams().n_audio()) {
+			return false;
+		}
+
+		/* we're including the endpoint - if we just hit it, 
+		   then stop.
+		*/
+
+		if ((*r) == endpoint) {
+			return true;
+		}
+
+		/* save outputs of this processor to test against inputs 
+		   of the next one.
+		*/
+
+		naudio = (*r)->output_streams().n_audio();
+	}
+
+	return true;
 }
 
 boost::shared_ptr<Region>
-AudioTrack::bounce_range (framepos_t start, framepos_t end, InterThreadInfo& itt, bool enable_processing)
+AudioTrack::bounce (InterThreadInfo& itt)
+{
+	return bounce_range (_session.current_start_frame(), _session.current_end_frame(), itt, main_outs(), false);
+}
+
+boost::shared_ptr<Region>
+AudioTrack::bounce_range (framepos_t start, framepos_t end, InterThreadInfo& itt,
+			  boost::shared_ptr<Processor> endpoint, bool include_endpoint)
 {
 	vector<boost::shared_ptr<Source> > srcs;
-	return _session.write_one_track (*this, start, end, false, srcs, itt, enable_processing);
+	return _session.write_one_track (*this, start, end, false, srcs, itt, endpoint, include_endpoint, false);
 }
 
 void
@@ -594,7 +665,8 @@ AudioTrack::freeze_me (InterThreadInfo& itt)
 
 	boost::shared_ptr<Region> res;
 
-	if ((res = _session.write_one_track (*this, _session.current_start_frame(), _session.current_end_frame(), true, srcs, itt)) == 0) {
+	if ((res = _session.write_one_track (*this, _session.current_start_frame(), _session.current_end_frame(), true, srcs, itt, 
+					     main_outs(), false, false)) == 0) {
 		return;
 	}
 
@@ -605,21 +677,20 @@ AudioTrack::freeze_me (InterThreadInfo& itt)
 
 		for (ProcessorList::iterator r = _processors.begin(); r != _processors.end(); ++r) {
 
-			boost::shared_ptr<Processor> processor;
+			if (!(*r)->does_routing()) {
 
-			if ((processor = boost::dynamic_pointer_cast<Processor>(*r)) != 0) {
+				FreezeRecordProcessorInfo* frii  = new FreezeRecordProcessorInfo ((*r)->get_state(), (*r));
 
-				FreezeRecordProcessorInfo* frii  = new FreezeRecordProcessorInfo ((*r)->get_state(), processor);
-
-				frii->id = processor->id();
+				frii->id = (*r)->id();
 
 				_freeze_record.processor_info.push_back (frii);
 
 				/* now deactivate the processor */
 
-				processor->deactivate ();
-				_session.set_dirty ();
+				(*r)->deactivate ();
 			}
+			
+			_session.set_dirty ();
 		}
 	}
 
@@ -690,12 +761,6 @@ AudioTrack::write_source (uint32_t n)
 	boost::shared_ptr<AudioDiskstream> ds = boost::dynamic_pointer_cast<AudioDiskstream> (_diskstream);
 	assert (ds);
 	return ds->write_source (n);
-}
-
-bool
-AudioTrack::bounceable () const
-{
-	return n_inputs().n_audio() >= n_outputs().n_audio();
 }
 
 boost::shared_ptr<Diskstream>
