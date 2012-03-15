@@ -44,7 +44,6 @@ ProcessThread::init ()
 }
 
 ProcessThread::ProcessThread ()
-        : _thread (0)
 {
 }
 
