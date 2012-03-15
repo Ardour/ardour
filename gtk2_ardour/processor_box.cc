@@ -1806,11 +1806,9 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 			} else if (type->value() == "send") {
 
 				XMLNode n (**niter);
-				uint32_t bslot;
-				string name = Send::name_and_id_new_send (*_session, Delivery::Send, bslot);
-                                Send* s = new Send (*_session, name, bslot, _route->pannable(), _route->mute_master());
+                                Send* s = new Send (*_session, _route->pannable(), _route->mute_master());
 
-				Send::make_unique (n);
+				IOProcessor::prepare_for_reset (n, s->name());
 				
                                 if (s->set_state (n, Stateful::loading_state_version)) {
                                         delete s;
@@ -1822,12 +1820,9 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 			} else if (type->value() == "return") {
 
 				XMLNode n (**niter);
-				uint32_t bslot;
+                                Return* r = new Return (*_session);
 
-				string name = Return::name_and_id_new_return (*_session, bslot);
-                                Return* r = new Return (*_session, name, bslot);
-
-				Return::make_unique (n);
+				IOProcessor::prepare_for_reset (n, r->name());
 
                                 if (r->set_state (n, Stateful::loading_state_version)) {
                                         delete r;
@@ -1839,12 +1834,9 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 			} else if (type->value() == "port") {
 
 				XMLNode n (**niter);
-				uint32_t bslot;
-				string name = PortInsert::name_and_id_new_insert (*_session, bslot);
-
-				PortInsert* pi = new PortInsert (*_session, name, bslot, _route->pannable (), _route->mute_master ());
+				PortInsert* pi = new PortInsert (*_session, _route->pannable (), _route->mute_master ());
 				
-				PortInsert::make_unique (n);
+				IOProcessor::prepare_for_reset (n, pi->name());
 				
 				if (pi->set_state (n, Stateful::loading_state_version)) {
 					return;
