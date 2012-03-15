@@ -75,6 +75,8 @@ class IOProcessor : public Processor
 	XMLNode& state (bool full_state);
 	int set_state (const XMLNode&, int version);
 
+	static void prepare_for_reset (XMLNode& state, const std::string& name);
+
   protected:
 	boost::shared_ptr<IO> _input;
 	boost::shared_ptr<IO> _output;

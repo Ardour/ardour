@@ -155,6 +155,7 @@ IOProcessor::set_state (const XMLNode& node, int version)
 
 	Processor::set_state(node, version);
 
+
 	if ((prop = node.property ("own-input")) != 0) {
 		_own_input = string_is_affirmative (prop->value());
 	}
@@ -300,5 +301,23 @@ IOProcessor::disconnect ()
 
 	if (_output) {
 		_output->disconnect (this);
+	}
+}
+
+/** Set up the XML description of a send so that we will not
+ *  reset its name or bitslot during ::set_state()
+ *  @param state XML send state.
+ *  @param session Session.
+ */
+void
+IOProcessor::prepare_for_reset (XMLNode &state, const std::string& name)
+{
+	state.add_property ("ignore-bitslot", "1");
+	state.add_property ("ignore-name", "1");
+
+	XMLNode* io_node = state.child (IO::state_node_name.c_str());
+
+	if (io_node) {
+		io_node->add_property ("name", name);
 	}
 }

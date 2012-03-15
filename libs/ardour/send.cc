@@ -85,26 +85,6 @@ Send::Send (Session& s, boost::shared_ptr<Pannable> p, boost::shared_ptr<MuteMas
 	add_control (_amp->gain_control ());
 }
 
-Send::Send (Session& s, const std::string& name, uint32_t bslot, boost::shared_ptr<Pannable> p, boost::shared_ptr<MuteMaster> mm, Role r)
-	: Delivery (s, p, mm, name, r)
-	, _metering (false)
-	, _bitslot (bslot)
-{
-	if (_role == Listen) {
-		/* we don't need to do this but it keeps things looking clean
-		   in a debugger. _bitslot is not used by listen sends.
-		*/
-		_bitslot = 0;
-	}
-
-	boost_debug_shared_ptr_mark_interesting (this, "send");
-
-	_amp.reset (new Amp (_session));
-	_meter.reset (new PeakMeter (_session));
-
-	add_control (_amp->gain_control ());
-}
-
 Send::~Send ()
 {
         _session.unmark_send_id (_bitslot);
@@ -313,18 +293,6 @@ Send::configure_io (ChanCount in, ChanCount out)
 	reset_panner ();
 
 	return true;
-}
-
-/** Set up the XML description of a send so that we will not
- *  reset its name or bitslot during ::set_state()
- *  @param state XML send state.
- *  @param session Session.
- */
-void
-Send::make_unique (XMLNode &state)
-{
-	state.add_property ("ignore-bitslot", "1");
-	state.add_property ("ignore-name", "1");
 }
 
 bool

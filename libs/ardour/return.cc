@@ -57,17 +57,6 @@ Return::Return (Session& s, bool internal)
 	_meter.reset (new PeakMeter (_session));
 }
 
-Return::Return (Session& s, const std::string& name, uint32_t bslot, bool internal)
-	: IOProcessor (s, (internal ? false : true), false, name)
-	, _metering (false)
-	, _bitslot (bslot)
-{
-	/* never muted */
-
-	_amp.reset (new Amp (_session));
-	_meter.reset (new PeakMeter (_session));
-}
-
 Return::~Return ()
 {
         _session.unmark_return_id (_bitslot);
@@ -174,16 +163,4 @@ Return::configure_io (ChanCount in, ChanCount out)
 
 	return true;
 }
-
-/** Set up the XML description of a return so that we will not
- *  reset its name or bitslot during ::set_state()
- *  @param state XML return state.
- */
-void
-Return::make_unique (XMLNode &state)
-{
-	state.add_property ("ignore-bitslot", "1");
-	state.add_property ("ignore-name", "1");
-}
-
 

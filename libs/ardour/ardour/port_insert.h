@@ -45,8 +45,6 @@ class PortInsert : public IOProcessor
 {
   public:
 	PortInsert (Session&, boost::shared_ptr<Pannable>, boost::shared_ptr<MuteMaster> mm);
-	PortInsert (Session&, const std::string&, uint32_t bitslot, 
-		    boost::shared_ptr<Pannable>, boost::shared_ptr<MuteMaster> mm);
 	~PortInsert ();
 
 	XMLNode& state(bool full);
@@ -74,7 +72,6 @@ class PortInsert : public IOProcessor
 	void set_measured_latency (framecnt_t);
 	framecnt_t latency () const;
 
-	static void make_unique (XMLNode &);
 	static std::string name_and_id_new_insert (Session&, uint32_t&);
 
   private:

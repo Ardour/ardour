@@ -58,17 +58,6 @@ PortInsert::PortInsert (Session& s, boost::shared_ptr<Pannable> pannable, boost:
         _measured_latency = 0;
 }
 
-PortInsert::PortInsert (Session& s, const std::string& name, uint32_t bslot, boost::shared_ptr<Pannable> pannable, boost::shared_ptr<MuteMaster> mm)
-	: IOProcessor (s, true, true, name, "")
-	, _out (new Delivery (s, _output, pannable, mm, _name, Delivery::Insert))
-	, _bitslot (bslot)
-{
-        _mtdm = 0;
-        _latency_detect = false;
-        _latency_flush_frames = false;
-        _measured_latency = 0;
-}
-
 PortInsert::~PortInsert ()
 {
         _session.unmark_insert_id (_bitslot);
@@ -314,16 +303,4 @@ PortInsert::deactivate ()
 	IOProcessor::deactivate ();
 
 	_out->deactivate ();
-}
-
-/** Set up the XML description of a send so that we will not
- *  reset its name or bitslot during ::set_state()
- *  @param state XML insert state.
- */
-
-void
-PortInsert::make_unique (XMLNode &state)
-{
-	state.add_property ("ignore-bitslot", "1");
-	state.add_property ("ignore-name", "1");
 }
