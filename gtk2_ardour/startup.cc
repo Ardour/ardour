@@ -148,6 +148,8 @@ Ardour will play NO role in monitoring"))
 			setup_audio_page ();
 		}
 
+		ic_new_session_button.set_active (true); // always create new session on first run
+
 	} else {
 
 		if (need_audio_setup) {
