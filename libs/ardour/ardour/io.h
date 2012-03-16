@@ -144,6 +144,7 @@ class IO : public SessionObject, public Latent
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&, int version);
 	int set_state_2X (const XMLNode&, int, bool);
+	static void prepare_for_reset (XMLNode&, const std::string&);
 
 	class BoolCombiner {
 	public:

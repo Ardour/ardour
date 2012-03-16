@@ -614,6 +614,8 @@ IO::set_state (const XMLNode& node, int version)
 		return -1;
 	}
 
+	cerr << "IO::set state, connecting legal ? " << connecting_legal << endl;
+
 	if (connecting_legal) {
 
 		if (make_connections (node, version, false)) {
@@ -954,6 +956,44 @@ IO::make_connections (const XMLNode& node, int version, bool in)
 	}
 
 	return 0;
+}
+
+void
+IO::prepare_for_reset (XMLNode& node, const std::string& name)
+{
+	/* reset name */
+	node.add_property ("name", name);
+
+	/* now find connections and reset the name of the port
+	   in one so that when we re-use it it will match
+	   the name of the thing we're applying it to.
+	*/
+
+	XMLProperty* prop;
+	XMLNodeList children = node.children();
+
+	for (XMLNodeIterator i = children.begin(); i != children.end(); ++i) {
+
+		if ((*i)->name() == "Port") {
+			
+			prop = (*i)->property (X_("name"));
+			
+			if (prop) {
+				string new_name;
+				string old = prop->value();
+				string::size_type slash = old.find ('/');
+
+				if (slash != string::npos) {
+					/* port name is of form: <IO-name>/<port-name> */
+					
+					new_name = name;
+					new_name += old.substr (old.find ('/'));
+					
+					prop->set_value (new_name);
+				}
+			}
+		}
+	}
 }
 
 

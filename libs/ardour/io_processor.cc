@@ -318,6 +318,6 @@ IOProcessor::prepare_for_reset (XMLNode &state, const std::string& name)
 	XMLNode* io_node = state.child (IO::state_node_name.c_str());
 
 	if (io_node) {
-		io_node->add_property ("name", name);
+		IO::prepare_for_reset (*io_node, name);
 	}
 }
