@@ -57,7 +57,7 @@ guint Keyboard::snap_mod = GDK_MOD3_MASK;
 
 #ifdef GTKOSX
 
-uint Keyboard::PrimaryModifier = GDK_META_MASK;   // Command
+uint Keyboard::PrimaryModifier = GDK_MOD2_MASK;   // Command
 guint Keyboard::SecondaryModifier = GDK_CONTROL_MASK; // Alt/Option
 guint Keyboard::TertiaryModifier = GDK_SHIFT_MASK; // Shift
 guint Keyboard::Level4Modifier = GDK_MOD1_MASK; // Control
