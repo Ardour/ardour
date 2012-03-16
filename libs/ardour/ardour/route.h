@@ -429,7 +429,6 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	void catch_up_on_solo_mute_override ();
 	void mod_solo_by_others_upstream (int32_t);
 	void mod_solo_by_others_downstream (int32_t);
-	bool has_external_redirects() const;
 	void curve_reallocate ();
 	virtual void set_block_size (pframes_t nframes);
 

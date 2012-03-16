@@ -3940,12 +3940,6 @@ Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
 		goto out;
 	}
 
-	/* external redirects will be a problem */
-
-	if (track.has_external_redirects()) {
-		goto out;
-	}
-
 	ext = native_header_format_extension (config.get_native_file_header_format(), DataType::AUDIO);
 
 	for (uint32_t chan_n = 0; chan_n < diskstream_channels.n_audio(); ++chan_n) {
