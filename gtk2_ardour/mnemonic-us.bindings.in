@@ -312,18 +312,18 @@ This mode provides many different operations on both regions and control points,
 @-group|Editor/save-visual-state-11|<@PRIMARY@>F11|some text
 @-group|Editor/save-visual-state-12|<@PRIMARY@>F12|some text
 
-@-group|Editor/goto-visual-state-1|<Release><@PRIMARY@>F1|some text
-@-group|Editor/goto-visual-state-2|<Release><@PRIMARY@>F2|some text
-@-group|Editor/goto-visual-state-3|<Release><@PRIMARY@>F3|some text
-@-group|Editor/goto-visual-state-4|<Release><@PRIMARY@>F4|some text
-@-group|Editor/goto-visual-state-5|<Release><@PRIMARY@>F5|some text
-@-group|Editor/goto-visual-state-6|<Release><@PRIMARY@>F6|some text
-@-group|Editor/goto-visual-state-7|<Release><@PRIMARY@>F7|some text
-@-group|Editor/goto-visual-state-8|<Release><@PRIMARY@>F8|some text
-@-group|Editor/goto-visual-state-9|<Release><@PRIMARY@>F9|some text
-@-group|Editor/goto-visual-state-10|<Release><@PRIMARY@>F10|some text
-@-group|Editor/goto-visual-state-11|<Release><@PRIMARY@>F11|some text
-@-group|Editor/goto-visual-state-12|<Release><@PRIMARY@>F12|some text
+@-group|Editor/goto-visual-state-1|F1|some text
+@-group|Editor/goto-visual-state-2|F2|some text
+@-group|Editor/goto-visual-state-3|F3|some text
+@-group|Editor/goto-visual-state-4|F4|some text
+@-group|Editor/goto-visual-state-5|F5|some text
+@-group|Editor/goto-visual-state-6|F6|some text
+@-group|Editor/goto-visual-state-7|F7|some text
+@-group|Editor/goto-visual-state-8|F8|some text
+@-group|Editor/goto-visual-state-9|F9|some text
+@-group|Editor/goto-visual-state-10|F10|some text
+@-group|Editor/goto-visual-state-11|F11|some text
+@-group|Editor/goto-visual-state-12|F12|some text
 
 
 ;; numbers

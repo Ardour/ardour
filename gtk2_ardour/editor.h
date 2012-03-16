@@ -503,10 +503,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void swap_visual_state ();
 
 	std::vector<VisualState*> visual_states;
-	sigc::connection visual_state_op_connection;
 	void start_visual_state_op (uint32_t n);
 	void cancel_visual_state_op (uint32_t n);
-	bool end_visual_state_op (uint32_t n);
 
 	framepos_t leftmost_frame;
 	double      frames_per_unit;
