@@ -82,7 +82,7 @@ Editor::register_actions ()
 	RefPtr<Action> act;
 
 	editor_actions = ActionGroup::create (X_("Editor"));
-	editor_menu_actions = ActionGroup::create (X_("Editor"));
+	editor_menu_actions = ActionGroup::create (X_("EditorMenu"));
 
 	/* non-operative menu items for menu bar */
 
