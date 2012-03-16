@@ -423,6 +423,8 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	void sync_order_keys (std::string const &);
 	static PBD::Signal1<void,std::string const &> SyncOrderKeys;
 
+	bool has_external_redirects() const;
+
   protected:
 	friend class Session;
 

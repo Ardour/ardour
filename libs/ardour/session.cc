@@ -3969,12 +3969,13 @@ Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
 		srcs.push_back (fsource);
 	}
 
-	/* tell redirects that care that we are about to use a much larger blocksize */
+	/* tell redirects that care that we are about to use a much larger
+	 * blocksize. this will flush all plugins too, so that they are ready
+	 * to be used for this process.
+	 */
 
 	need_block_size_reset = true;
 	track.set_block_size (chunk_size);
-
-	/* XXX need to flush all redirects */
 
 	position = start;
 	to_do = len;

@@ -3390,6 +3390,25 @@ Editor::freeze_route ()
 		return;
 	}
 
+	if (clicked_routeview->track()->has_external_redirects()) {
+		MessageDialog d (string_compose (_("<b>%1</b>\n\nThis track has at least one send/insert/return as part of its signal flow.\n\n"
+						   "Freezing will only process the signal as far as the first send/insert/return."),
+						 clicked_routeview->track()->name()), true, MESSAGE_INFO, BUTTONS_NONE, true);
+
+		d.add_button (_("Freeze anyway"), Gtk::RESPONSE_OK);
+		d.add_button (_("Don't freeze"), Gtk::RESPONSE_CANCEL);
+		d.set_title (_("Freeze Limits"));
+
+		int response = d.run ();
+
+		switch (response) {
+		case Gtk::RESPONSE_CANCEL:
+			return;
+		default:
+			break;
+		}
+	}
+
 	InterThreadInfo itt;
 	current_interthread_info = &itt;
 

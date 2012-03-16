@@ -4039,3 +4039,21 @@ Route::metering_state () const
 {
 	return MeteringRoute;
 }
+
+bool
+Route::has_external_redirects () const
+{
+	for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
+
+		/* ignore inactive processors and obviously ignore the main
+		 * outs since everything has them and we don't care.
+		 */
+		 
+		if ((*i)->active() && (*i) != _main_outs && (*i)->does_routing()) {
+			return true;;
+		}
+	}
+
+	return false;
+}
+
