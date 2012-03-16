@@ -720,6 +720,7 @@ style "editor_time_ruler" = "small_text"
 {
 	fg[NORMAL] = { 0, 0, 0 }
 	bg[NORMAL] = { 0.74, 0.74, 0.77 }
+        ythickness = 0
 }
 
 style "audio_bus_base"
