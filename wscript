@@ -453,8 +453,8 @@ def configure(conf):
         # libintl may or may not be trivially locatable
         if not os.path.isfile ('/usr/include/libintl.h'):
             # XXXX hack hack hack
-            prefinclude = ' '.join ([ '-I', os.path.expanduser ('~/gtk/inst/include') ])
-            preflib = ' '.join ([ '-L', os.path.expanduser ('~/gtk/inst/lib') ])
+            prefinclude = ''.join ([ '-I', os.path.expanduser ('~/gtk/inst/include') ])
+            preflib = ''.join ([ '-L', os.path.expanduser ('~/gtk/inst/lib') ])
             conf.env.append_value('CFLAGS', [ prefinclude ])
             conf.env.append_value('CXXFLAGS',  [prefinclude ])
             conf.env.append_value('LINKFLAGS', [ preflib ])
