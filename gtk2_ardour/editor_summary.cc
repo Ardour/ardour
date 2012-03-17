@@ -185,7 +185,7 @@ EditorSummary::render (cairo_t* cr)
 		}
 
 		cairo_set_source_rgb (cr, 0.2, 0.2, 0.2);
-		cairo_set_line_width (cr, _track_height - 2);
+		cairo_set_line_width (cr, _track_height - 1);
 		cairo_move_to (cr, 0, y + _track_height / 2);
 		cairo_line_to (cr, get_width(), y + _track_height / 2);
 		cairo_stroke (cr);
