@@ -243,10 +243,12 @@ GroupTabs::render (cairo_t* cr)
 
 	/* background */
 
-	cairo_set_source_rgb (cr, 0, 0, 0);
+	Gdk::Color c = get_style()->get_base (Gtk::STATE_NORMAL);
+
+	cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
 	cairo_rectangle (cr, 0, 0, get_width(), get_height());
 	cairo_fill (cr);
-
+	
 	/* tabs */
 
 	for (list<Tab>::const_iterator i = _tabs.begin(); i != _tabs.end(); ++i) {
