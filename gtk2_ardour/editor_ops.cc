@@ -489,7 +489,7 @@ Editor::nudge_backward_capture_offset ()
 		return;
 	}
 
-	begin_reversible_command (_("nudge forward"));
+	begin_reversible_command (_("nudge backward"));
 
 	framepos_t const distance = _session->worst_output_latency();
 
