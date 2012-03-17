@@ -1269,7 +1269,7 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Audio"),
 	     new BoolOption (
 		     "plugins-stop-with-transport",
-		     _("Stop plugins when the transport is stopped"),
+		     _("Flush plugins when the transport is stopped"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_plugins_stop_with_transport),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_plugins_stop_with_transport)
 		     ));
