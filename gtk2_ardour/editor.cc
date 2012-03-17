@@ -1213,20 +1213,6 @@ Editor::set_session (Session *t)
 	_session->locations()->StateChanged.connect (_session_connections, invalidator (*this), ui_bind (&Editor::refresh_location_display, this), gui_context());
 	_session->history().Changed.connect (_session_connections, invalidator (*this), boost::bind (&Editor::history_changed, this), gui_context());
 
-	if (Profile->get_sae()) {
-		Timecode::BBT_Time bbt;
-		bbt.bars = 0;
-		bbt.beats = 0;
-		bbt.ticks = 120;
-		framepos_t pos = _session->tempo_map().bbt_duration_at (0, bbt, 1);
-		nudge_clock->set_mode(AudioClock::BBT);
-		nudge_clock->set (pos, true);
-
-	} else {
-		nudge_clock->set_mode (AudioClock::Timecode);
-		nudge_clock->set (_session->frame_rate() * 5, true);
-	}
-
 	playhead_cursor->canvas_item.show ();
 
 	boost::function<void (string)> pc (boost::bind (&Editor::parameter_changed, this, _1));
@@ -2405,6 +2391,15 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 		}
 	}
 
+	if ((prop = node.property ("nudge-clock-value"))) {
+		framepos_t f;
+		sscanf (prop->value().c_str(), "%" PRId64, &f);
+		nudge_clock->set (f);
+	} else {
+		nudge_clock->set_mode (AudioClock::Timecode);
+		nudge_clock->set (_session->frame_rate() * 5, true);
+	}
+
 	return 0;
 }
 
@@ -2498,6 +2493,9 @@ Editor::get_state ()
 
 	node->add_child_nocopy (selection->get_state ());
 	node->add_child_nocopy (_regions->get_state ());
+
+	snprintf (buf, sizeof (buf), "%" PRId64, nudge_clock->current_duration());
+	node->add_property ("nudge-clock-value", buf);
 
 	return *node;
 }
