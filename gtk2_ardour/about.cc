@@ -152,6 +152,7 @@ static const char* authors[] = {
 	N_("Stefan Kersten"),
 	N_("Armand Klenk"),
 	N_("Matt Krai"),
+	N_("Nick Lanham"),
 	N_("Colin Law"),
 	N_("Joshua Leach"),
 	N_("Ben Loftis"),
