@@ -614,8 +614,6 @@ IO::set_state (const XMLNode& node, int version)
 		return -1;
 	}
 
-	cerr << "IO::set state, connecting legal ? " << connecting_legal << endl;
-
 	if (connecting_legal) {
 
 		if (make_connections (node, version, false)) {
