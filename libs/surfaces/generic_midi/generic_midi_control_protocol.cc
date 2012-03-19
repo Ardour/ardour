@@ -986,3 +986,9 @@ GenericMidiControlProtocol::prev_bank()
 		reset_controllables ();
 	}
 }
+
+void
+GenericMidiControlProtocol::set_motorised (bool m)
+{
+	_motorised = m;
+}

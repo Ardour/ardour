@@ -81,6 +81,8 @@ class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
 	void next_bank ();
 	void prev_bank ();
 
+	void set_motorised (bool);
+	
 	bool motorised () const {
 		return _motorised;
 	}
