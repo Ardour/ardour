@@ -757,6 +757,7 @@ private:
 				if (box) {
 					string title = row[_model.name];
 					ArdourWindow* win = new ArdourWindow (_parent, title);
+					win->set_title ("Control Protocol Options");
 					win->add (*box);
 					box->show ();
 					win->present ();
