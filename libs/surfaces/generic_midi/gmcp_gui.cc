@@ -1,3 +1,22 @@
+/*
+    Copyright (C) 2009-2012 Paul Davis
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+*/
+
 #include <iostream>
 #include <list>
 #include <string>
@@ -7,6 +26,7 @@
 #include <gtkmm/box.h>
 #include <gtkmm/adjustment.h>
 #include <gtkmm/spinbutton.h>
+#include <gtkmm/table.h>
 
 #include "gtkmm2ext/utils.h"
 
@@ -17,17 +37,19 @@
 class GMCPGUI : public Gtk::VBox 
 {
 public:
-    GMCPGUI (GenericMidiControlProtocol&);
-    ~GMCPGUI ();
-
+	GMCPGUI (GenericMidiControlProtocol&);
+	~GMCPGUI ();
+	
 private:
-    GenericMidiControlProtocol& cp;
-    Gtk::ComboBoxText map_combo;
-    Gtk::Adjustment bank_adjustment;
-    Gtk::SpinButton bank_spinner;
+	GenericMidiControlProtocol& cp;
+	Gtk::ComboBoxText map_combo;
+	Gtk::Adjustment bank_adjustment;
+	Gtk::SpinButton bank_spinner;
+	Gtk::CheckButton motorised_button;
 
-    void binding_changed ();
-    void bank_change ();
+	void binding_changed ();
+	void bank_changed ();
+	void motorised_changed ();
 };
 
 using namespace PBD;
@@ -63,12 +85,13 @@ GMCPGUI::GMCPGUI (GenericMidiControlProtocol& p)
 	: cp (p)
 	, bank_adjustment (1, 1, 100, 1, 10)
 	, bank_spinner (bank_adjustment)
+	, motorised_button ("Motorised")
 {
 	vector<string> popdowns;
 	popdowns.push_back (_("Reset All"));
 
 	for (list<GenericMidiControlProtocol::MapInfo>::iterator x = cp.map_info.begin(); x != cp.map_info.end(); ++x) {
-		popdowns.push_back ((*x).name);
+		popdowns.push_back (x->name);
 	}
 
 	set_popdown_strings (map_combo, popdowns);
@@ -82,38 +105,42 @@ GMCPGUI::GMCPGUI (GenericMidiControlProtocol& p)
 	map_combo.signal_changed().connect (sigc::mem_fun (*this, &GMCPGUI::binding_changed));
 
 	set_spacing (6);
-	set_border_width (12);
+	set_border_width (6);
 
-	Label* label = manage (new Label (_("Available MIDI bindings:")));
-	HBox* hpack = manage (new HBox);
+	Table* table = manage (new Table);
+	table->set_row_spacings (6);
+	table->set_col_spacings (6);
+	table->show ();
+	
+	int n = 0;
 
-	hpack->set_spacing (6);
-	hpack->pack_start (*label, false, false);
-	hpack->pack_start (map_combo, false, false);
-
+	Label* label = manage (new Label (_("MIDI Bindings:")));
+	label->set_alignment (0, 0.5);
+	table->attach (*label, 0, 1, n, n + 1);
+	table->attach (map_combo, 1, 2, n, n + 1);
+	++n;
+	
 	map_combo.show ();
 	label->show ();
-	hpack->show ();
 	
-	pack_start (*hpack, false, false);
-
-
-	bank_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &GMCPGUI::bank_change));
+	bank_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &GMCPGUI::bank_changed));
 
 	label = manage (new Label (_("Current Bank:")));
-	hpack = manage (new HBox);
-
-	hpack->set_spacing (6);
-	hpack->pack_start (*label, false, false);
-	hpack->pack_start (bank_spinner, false, false);
-
-
+	label->set_alignment (0, 0.5);
+	table->attach (*label, 0, 1, n, n + 1);
+	table->attach (bank_spinner, 1, 2, n, n + 1);
+	++n;
+	
 	bank_spinner.show ();
 	label->show ();
-	hpack->show ();
 
-	pack_start (*hpack, false, false);
+	motorised_button.signal_toggled().connect (sigc::mem_fun (*this, &GMCPGUI::motorised_changed));
+	table->attach (motorised_button, 0, 2, n, n + 1);
+	++n;
 
+	motorised_button.show ();
+
+	pack_start (*table, false, false);
 }
 
 GMCPGUI::~GMCPGUI ()
@@ -121,7 +148,7 @@ GMCPGUI::~GMCPGUI ()
 }
 
 void
-GMCPGUI::bank_change ()
+GMCPGUI::bank_changed ()
 {
 	int new_bank = bank_adjustment.get_value() - 1;
 	cp.set_current_bank (new_bank);
@@ -136,10 +163,16 @@ GMCPGUI::binding_changed ()
 		cp.drop_bindings ();
 	} else {
 		for (list<GenericMidiControlProtocol::MapInfo>::iterator x = cp.map_info.begin(); x != cp.map_info.end(); ++x) {
-			if (str == (*x).name) {
-				cp.load_bindings ((*x).path);
+			if (str == x->name) {
+				cp.load_bindings (x->path);
 				break;
 			}
 		}
 	}
+}
+
+void
+GMCPGUI::motorised_changed ()
+{
+	cp.set_motorised (motorised_button.get_active ());
 }
