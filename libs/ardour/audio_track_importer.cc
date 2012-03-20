@@ -267,7 +267,7 @@ AudioTrackImporter::_move ()
 
 	boost::shared_ptr<XMLSharedNodeList> ds_node_list;
 	string xpath = "/Session/DiskStreams/AudioDiskstream[@id='" + old_ds_id.to_s() + "']";
-	ds_node_list = source.root()->find (xpath);
+	ds_node_list = source.find (xpath);
 
 	if (ds_node_list->size() != 1) {
 		error << string_compose (_("Error Importing Audio track %1"), name) << endmsg;
