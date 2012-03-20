@@ -123,6 +123,7 @@ libardour_sources = [
         'midi_diskstream.cc',
         'midi_model.cc',
         'midi_patch_manager.cc',
+        'midi_patch_search_path.cc',
         'midi_playlist.cc',
         'midi_playlist_source.cc',
         'midi_port.cc',

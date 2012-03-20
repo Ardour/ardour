@@ -39,7 +39,7 @@ class MidiPatchManager : public PBD::ScopedConnectionList, public ARDOUR::Sessio
 {
 	/// Singleton
 private:
-	MidiPatchManager() {};
+	MidiPatchManager();
 	MidiPatchManager( const MidiPatchManager& );
 	MidiPatchManager& operator= (const MidiPatchManager&);
 
@@ -136,6 +136,7 @@ public:
 private:
 	void session_going_away();
 	void refresh();
+	void add_session_patches();
 
 	MidiNameDocuments                       _documents;
 	MIDINameDocument::MasterDeviceNamesList _master_devices_by_model;
