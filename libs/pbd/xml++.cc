@@ -22,6 +22,7 @@ static XMLSharedNodeList* find_impl(xmlXPathContext* ctxt, const string& xpath);
 XMLTree::XMLTree()
 	: _filename()
 	, _root(0)
+	, _doc (0)
 	, _compression(0)
 {
 }
@@ -29,6 +30,7 @@ XMLTree::XMLTree()
 XMLTree::XMLTree(const string& fn, bool validate)
 	: _filename(fn)
 	, _root(0)
+	, _doc (0)
 	, _compression(0)
 {
 	read_internal(validate);
@@ -37,13 +39,19 @@ XMLTree::XMLTree(const string& fn, bool validate)
 XMLTree::XMLTree(const XMLTree* from)
 	: _filename(from->filename())
 	, _root(new XMLNode(*from->root()))
+	, _doc (xmlCopyDoc (from->_doc, 1))
 	, _compression(from->compression())
 {
+	
 }
 
 XMLTree::~XMLTree()
 {
 	delete _root;
+
+	if (_doc) {
+		xmlFreeDoc (_doc);
+	}
 }
 
 int
@@ -69,8 +77,12 @@ XMLTree::read_internal(bool validate)
 	delete _root;
 	_root = 0;
 
+	if (_doc) {
+		xmlFreeDoc (_doc);
+		_doc = 0;
+	}
+
 	xmlParserCtxtPtr ctxt = NULL; /* the parser context */
-	xmlDocPtr doc; /* the resulting document tree */
 
 	xmlKeepBlanksDefault(0);
 	/* parse the file, activating the DTD validation option */
@@ -80,13 +92,13 @@ XMLTree::read_internal(bool validate)
 		if (ctxt == NULL) {
 			return false;
 		}
-		doc = xmlCtxtReadFile(ctxt, _filename.c_str(), NULL, XML_PARSE_DTDVALID);
+		_doc = xmlCtxtReadFile(ctxt, _filename.c_str(), NULL, XML_PARSE_DTDVALID);
 	} else {
-		doc = xmlParseFile(_filename.c_str());
+		_doc = xmlParseFile(_filename.c_str());
 	}
-
+	
 	/* check if parsing suceeded */
-	if (doc == NULL) {
+	if (_doc == NULL) {
 		if (validate) {
 			xmlFreeParserCtxt(ctxt);
 		}
@@ -95,19 +107,17 @@ XMLTree::read_internal(bool validate)
 		/* check if validation suceeded */
 		if (validate && ctxt->valid == 0) {
 			xmlFreeParserCtxt(ctxt);
-			xmlFreeDoc(doc);
 			throw XMLException("Failed to validate document " + _filename);
 		}
 	}
 
-	_root = readnode(xmlDocGetRootElement(doc));
+	_root = readnode(xmlDocGetRootElement(_doc));
 
 	/* free up the parser context */
 	if (validate) {
 		xmlFreeParserCtxt(ctxt);
 	}
-	xmlFreeDoc(doc);
-
+	
 	return true;
 }
 
@@ -342,17 +352,26 @@ XMLNode::add_child_copy(const XMLNode& n)
 }
 
 boost::shared_ptr<XMLSharedNodeList>
-XMLNode::find(const string xpath) const
+XMLTree::find(const string xpath, XMLNode* node) const
 {
-	xmlDocPtr doc = xmlNewDoc((xmlChar*) XML_VERSION);
-	writenode(doc, (XMLNode*)this, doc->children, 1);
-	xmlXPathContext* ctxt = xmlXPathNewContext(doc);
+	xmlXPathContext* ctxt;
+	xmlDocPtr doc = 0;
 
+	if (node) {
+		doc = xmlNewDoc((xmlChar*) XML_VERSION);
+		writenode(doc, node, doc->children, 1);
+		ctxt = xmlXPathNewContext(doc);
+	} else {
+		ctxt = xmlXPathNewContext(_doc);
+	}
+	
 	boost::shared_ptr<XMLSharedNodeList> result =
-	    boost::shared_ptr<XMLSharedNodeList>(find_impl(ctxt, xpath));
-
+		boost::shared_ptr<XMLSharedNodeList>(find_impl(ctxt, xpath));
+	
 	xmlXPathFreeContext(ctxt);
-	xmlFreeDoc(doc);
+	if (doc) {
+		xmlFreeDoc (doc);
+	}
 
 	return result;
 }
