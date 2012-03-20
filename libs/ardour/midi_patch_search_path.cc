@@ -19,7 +19,7 @@
 
 #include <glibmm/miscutils.h>
 
-#include "ardour/midi_name_search_path.h"
+#include "ardour/midi_patch_search_path.h"
 #include "ardour/directory_names.h"
 #include "ardour/filesystem_paths.h"
 
