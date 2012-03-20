@@ -26,7 +26,6 @@
 #include <set>
 #include <map>
 
-#include "pbd/stateful.h"
 #include "midi++/event.h"
 #include "pbd/xml++.h"
 
@@ -84,13 +83,12 @@ public:
 
 class PatchBank;
 	
-class Patch : public PBD::Stateful
+class Patch 
 {
 public:
 
-	Patch(PatchBank* a_bank = 0) : _bank(a_bank) {};
-	Patch(std::string a_number, std::string a_name, PatchBank* a_bank = 0) 
-		: _number(a_number), _name(a_name), _bank(a_bank) {};
+	Patch (PatchBank* a_bank = 0);
+	Patch(std::string a_number, std::string a_name, PatchBank* a_bank = 0);
 	virtual ~Patch() {};
 
 	const std::string& name() const          { return _name; }
@@ -102,17 +100,17 @@ public:
 	const PatchPrimaryKey&   patch_primary_key()   const { return _id; }
 
 	XMLNode& get_state (void);
-	int      set_state (const XMLNode&, int version);
+	int      set_state (const XMLTree&, const XMLNode&);
+
+	int use_bank_info (PatchBank*);
 
 private:
 	std::string        _number;
 	std::string        _name;
-	// cannot use a boost::shared_ptr here in order to avoid retain cycles
-	PatchBank*        _bank;
 	PatchPrimaryKey   _id;
 };
 
-class PatchBank : public PBD::Stateful
+class PatchBank 
 {
 public:
 	typedef std::list<boost::shared_ptr<Patch> > PatchNameList;
@@ -125,21 +123,25 @@ public:
 	void set_name(const std::string a_name)       { _name = a_name; }
 
 	const PatchNameList& patch_name_list() const { return _patch_name_list; }
-	
+	const std::string& patch_list_name() const { return _patch_list_name; }
+
+	int set_patch_name_list (const PatchNameList&);
+
 	const PatchPrimaryKey* patch_primary_key()  const { return _id; }
 
 	XMLNode& get_state (void);
-	int      set_state (const XMLNode&, int version);
+	int      set_state (const XMLTree&, const XMLNode&);
 
 private:
 	std::string       _name;
 	PatchNameList     _patch_name_list;
 	PatchPrimaryKey*  _id;
+	std::string       _patch_list_name;
 };
 
 #include <iostream>
 
-class ChannelNameSet : public PBD::Stateful
+class ChannelNameSet
 {
 public:
 	typedef std::set<uint8_t>                                    AvailableForChannels;
@@ -203,7 +205,7 @@ public:
 	}
 
 	XMLNode& get_state (void);
-	int      set_state (const XMLNode& a_node, int version);
+	int      set_state (const XMLTree&, const XMLNode&);
 
 private:
 	std::string _name;
@@ -211,9 +213,10 @@ private:
 	PatchBanks           _patch_banks;
 	PatchMap             _patch_map;
 	PatchList            _patch_list;
+	std::string          _patch_list_name;
 };
 
-class Note : public PBD::Stateful
+class Note
 {
 public:
 	Note() {};
@@ -227,14 +230,14 @@ public:
 	void set_number(const std::string a_number)   { _number = a_number; }
 
 	XMLNode& get_state (void);
-	int      set_state (const XMLNode&, int version);
+	int      set_state (const XMLTree&, const XMLNode&);
 
 private:
 	std::string _number;
 	std::string _name;
 };
 
-class NoteNameList : public PBD::Stateful
+class NoteNameList 
 {
 public:
 	typedef std::list<boost::shared_ptr<Note> > Notes;
@@ -248,14 +251,14 @@ public:
 	const Notes& notes() const { return _notes; }
 
 	XMLNode& get_state (void);
-	int      set_state (const XMLNode&, int version);
+	int      set_state (const XMLTree&, const XMLNode&);
 
 private:
 	std::string _name;
 	Notes  _notes;
 };
 
-class CustomDeviceMode : public PBD::Stateful
+class CustomDeviceMode
 {
 public:
 	CustomDeviceMode() {};
@@ -266,7 +269,7 @@ public:
 
 	
 	XMLNode& get_state (void);
-	int      set_state (const XMLNode&, int version);
+	int      set_state (const XMLTree&, const XMLNode&);
 	
 	std::string channel_name_set_name_by_channel(uint8_t channel) {
 		assert(channel <= 15);
@@ -280,7 +283,7 @@ private:
 	std::string _channel_name_set_assignments[16];
 };
 
-class MasterDeviceNames : public PBD::Stateful
+class MasterDeviceNames
 {
 public:
 	typedef std::list<std::string>                                       Models;
@@ -290,7 +293,7 @@ public:
 	/// maps name to ChannelNameSet
 	typedef std::map<std::string, boost::shared_ptr<ChannelNameSet> >    ChannelNameSets;
 	typedef std::list<boost::shared_ptr<NoteNameList> >                  NoteNameLists;
-	
+	typedef std::map<std::string, PatchBank::PatchNameList>              PatchNameLists;
 	
 	MasterDeviceNames() {};
 	virtual ~MasterDeviceNames() {};
@@ -317,7 +320,7 @@ public:
 	}
 	
 	XMLNode& get_state (void);
-	int      set_state (const XMLNode&, int version);
+	int      set_state (const XMLTree&, const XMLNode&);
 	
 private:
 	std::string           _manufacturer;
@@ -326,9 +329,10 @@ private:
 	CustomDeviceModeNames _custom_device_mode_names;
 	ChannelNameSets       _channel_name_sets;
 	NoteNameLists         _note_name_lists;
+	PatchNameLists        _patch_name_lists;
 };
 
-class MIDINameDocument : public PBD::Stateful
+class MIDINameDocument
 {
 public:
 	// Maps Model names to MasterDeviceNames
@@ -346,7 +350,7 @@ public:
 	const MasterDeviceNames::Models& all_models() const { return _all_models; }
 		
 	XMLNode& get_state (void);
-	int      set_state (const XMLNode&, int version);
+	int      set_state (const XMLTree&, const XMLNode&);
 
 private:
 	std::string                   _author;
