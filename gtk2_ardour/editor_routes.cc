@@ -182,6 +182,10 @@ EditorRoutes::EditorRoutes (Editor* e)
 	solo_safe_state_column->set_expand(false);
 	solo_safe_state_column->set_fixed_width(column_width);
 
+        _name_column = _display.append_column ("", _columns.text) - 1;
+	_visible_column = _display.append_column ("", _columns.visible) - 1;
+	_active_column = _display.append_column ("", _columns.active) - 1;
+
 	_display.append_column (*input_active_column);
 	_display.append_column (*rec_state_column);
 	_display.append_column (*mute_state_column);
@@ -189,23 +193,20 @@ EditorRoutes::EditorRoutes (Editor* e)
 	_display.append_column (*solo_isolate_state_column);
 	_display.append_column (*solo_safe_state_column);
 
-        _name_column = _display.append_column ("", _columns.text) - 1;
-	_visible_column = _display.append_column ("", _columns.visible) - 1;
-	_active_column = _display.append_column ("", _columns.active) - 1;
 
 	TreeViewColumn* col;
 	Gtk::Label* l;
 
 	ColumnInfo ci[] = {
-		{ 0, _("I"), _("MIDI input enabled") },
-		{ 1, _("R"), _("Record enabled") },
-		{ 2, _("M"), _("Muted") },
-		{ 3, _("S"), _("Soloed") },
-		{ 4, _("SI"), _("Solo Isolated") },
-		{ 5, _("SS"), _("Solo Safe (Locked)") },
-		{ 6, _("Name"), _("Track/Bus Name") },
-		{ 7, _("V"), _("Track/Bus visible ?") },
-		{ 8, _("A"), _("Track/Bus active ?") },
+		{ 0, _("Name"), _("Track/Bus Name") },
+		{ 1, _("V"), _("Track/Bus visible ?") },
+		{ 2, _("A"), _("Track/Bus active ?") },
+		{ 3, _("I"), _("MIDI input enabled") },
+		{ 4, _("R"), _("Record enabled") },
+		{ 5, _("M"), _("Muted") },
+		{ 6, _("S"), _("Soloed") },
+		{ 7, _("SI"), _("Solo Isolated") },
+		{ 8, _("SS"), _("Solo Safe (Locked)") },
 		{ -1, 0, 0 }
 	};
 

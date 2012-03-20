@@ -137,7 +137,7 @@ EditorSummary::on_expose_event (GdkEventExpose* event)
 void
 EditorSummary::render (cairo_t* cr)
 {
-	/* background */
+	/* background (really just the dividing lines between tracks */
 
 	cairo_set_source_rgb (cr, 0, 0, 0);
 	cairo_rectangle (cr, 0, 0, get_width(), get_height());
@@ -183,6 +183,8 @@ EditorSummary::render (cairo_t* cr)
 		if ((*i)->hidden()) {
 			continue;
 		}
+
+		/* paint a non-bg colored strip to represent the track itself */
 
 		cairo_set_source_rgb (cr, 0.2, 0.2, 0.2);
 		cairo_set_line_width (cr, _track_height - 1);
