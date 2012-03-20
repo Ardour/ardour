@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument 
+	PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 0.7//EN" "http://www.sonosphere.com/dtds/MIDINameDocument.dtd">
+
+<MIDINameDocument>
+	<Author>Digidesign</Author>
+	<MasterDeviceNames>
+		<Manufacturer>Roland</Manufacturer>
+		<Model>GR-33</Model>
+		<CustomDeviceMode Name="">
+			<ChannelNameSetAssignments>
+				<ChannelNameSetAssign Channel="1" NameSet="Patches" />
+				<ChannelNameSetAssign Channel="2" NameSet="Patches" />
+				<ChannelNameSetAssign Channel="3" NameSet="Patches" />
+				<ChannelNameSetAssign Channel="4" NameSet="Patches" />
+				<ChannelNameSetAssign Channel="5" NameSet="Patches" />
+				<ChannelNameSetAssign Channel="6" NameSet="Patches" />
+				<ChannelNameSetAssign Channel="7" NameSet="Patches" />
+				<ChannelNameSetAssign Channel="8" NameSet="Patches" />
+				<ChannelNameSetAssign Channel="9" NameSet="Patches" />
+				<ChannelNameSetAssign Channel="10" NameSet="Patches" />
+				<ChannelNameSetAssign Channel="11" NameSet="Patches" />
+				<ChannelNameSetAssign Channel="12" NameSet="Patches" />
+				<ChannelNameSetAssign Channel="13" NameSet="Patches" />
+				<ChannelNameSetAssign Channel="14" NameSet="Patches" />
+				<ChannelNameSetAssign Channel="15" NameSet="Patches" />
+				<ChannelNameSetAssign Channel="16" NameSet="Patches" />
+			</ChannelNameSetAssignments>
+
+		</CustomDeviceMode>
+		<ChannelNameSet Name="Patches">
+			<AvailableForChannels>
+				<AvailableChannel Channel="1" Available="true" />
+				<AvailableChannel Channel="2" Available="true" />
+				<AvailableChannel Channel="3" Available="true" />
+				<AvailableChannel Channel="4" Available="true" />
+				<AvailableChannel Channel="5" Available="true" />
+				<AvailableChannel Channel="6" Available="true" />
+				<AvailableChannel Channel="7" Available="true" />
+				<AvailableChannel Channel="8" Available="true" />
+				<AvailableChannel Channel="9" Available="true" />
+				<AvailableChannel Channel="10" Available="true" />
+				<AvailableChannel Channel="11" Available="true" />
+				<AvailableChannel Channel="12" Available="true" />
+				<AvailableChannel Channel="13" Available="true" />
+				<AvailableChannel Channel="14" Available="true" />
+				<AvailableChannel Channel="15" Available="true" />
+				<AvailableChannel Channel="16" Available="true" />
+			</AvailableForChannels>
+
+			<PatchBank Name="Patches User" ROM="false">
+				<MIDICommands>
+					<ControlChange Control="0" Value="0" />
+				</MIDICommands>
+				<UsesPatchNameList Name="Patches User" />
+			</PatchBank>
+                        <PatchBank Name="Patches Preset" ROM="false">
+				<MIDICommands>
+					<ControlChange Control="0" Value="1" />
+				</MIDICommands>
+				<UsesPatchNameList Name="Patches Preset" />
+			</PatchBank>
+		</ChannelNameSet>
+
+		<PatchNameList Name="Patches User">
+			<Patch Number="User-0" Name="JAZZ SCAT" ProgramChange="0" />
+			<Patch Number="A12" Name="DIDGERI FLT" ProgramChange="1" />
+			<Patch Number="A13" Name="JANGLE PAD" ProgramChange="2" />
+			<Patch Number="A14" Name="GR-300 LEAD" ProgramChange="3" />
+			<Patch Number="A21" Name="12ST GUITAR" ProgramChange="4" />
+			<Patch Number="A22" Name="303 TEKNO" ProgramChange="5" />
+			<Patch Number="A23" Name="GR STRINGS" ProgramChange="6" />
+			<Patch Number="A24" Name="E.ORGAN/PDL" ProgramChange="7" />
+			<Patch Number="A31" Name="ROMANTIC PAD" ProgramChange="8" />
+			<Patch Number="A32" Name="FRETLESS BS" ProgramChange="9" />
+			<Patch Number="A33" Name="DAFT WAVE" ProgramChange="10" />
+			<Patch Number="A34" Name="Cmaj-STRINGS" ProgramChange="11" />
+			<Patch Number="A41" Name="NYLON STR GT" ProgramChange="12" />
+			<Patch Number="A42" Name="MIDI PIANO" ProgramChange="13" />
+			<Patch Number="A43" Name="DIST.GUITAR" ProgramChange="14" />
+			<Patch Number="A44" Name="E.SITAR" ProgramChange="15" />
+			<Patch Number="A51" Name="TABLAnSITAR" ProgramChange="16" />
+			<Patch Number="A52" Name="DIDGERI PIPE" ProgramChange="17" />
+			<Patch Number="A53" Name="TABLA+VoxKit" ProgramChange="18" />
+			<Patch Number="A54" Name="SALSA SPLIT" ProgramChange="19" />
+			<Patch Number="A61" Name="GRAND PIANO" ProgramChange="20" />
+			<Patch Number="A62" Name="OD PIANO" ProgramChange="21" />
+			<Patch Number="A63" Name="MIDI KEYS" ProgramChange="22" />
+			<Patch Number="A64" Name="PANNING RHDS" ProgramChange="23" />
+			<Patch Number="A71" Name="BS/RHODES" ProgramChange="24" />
+			<Patch Number="A72" Name="ROCK ORGAN" ProgramChange="25" />
+			<Patch Number="A73" Name="PurpleORGAN" ProgramChange="26" />
+			<Patch Number="A74" Name="GOTHIC" ProgramChange="27" />
+			<Patch Number="A81" Name="ACCORDION" ProgramChange="28" />
+			<Patch Number="A82" Name="BAMBOO FLUTE" ProgramChange="29" />
+			<Patch Number="A83" Name="VOX FLUTE" ProgramChange="30" />
+			<Patch Number="A84" Name="TIN WHISTLE" ProgramChange="31" />
+			<Patch Number="B11" Name="BLOW PIPE" ProgramChange="32" />
+			<Patch Number="B12" Name="MIZMAR" ProgramChange="33" />
+			<Patch Number="B13" Name="HARMONICA" ProgramChange="34" />
+			<Patch Number="B14" Name="SOPRANO SAX" ProgramChange="35" />
+			<Patch Number="B21" Name="ALTO SAX" ProgramChange="36" />
+			<Patch Number="B22" Name="BreathyT.SAX" ProgramChange="37" />
+			<Patch Number="B23" Name="TRUMPET" ProgramChange="38" />
+			<Patch Number="B24" Name="MUTE Tp" ProgramChange="39" />
+			<Patch Number="B31" Name="F.HRN SECT" ProgramChange="40" />
+			<Patch Number="B32" Name="T.SAX SECT" ProgramChange="41" />
+			<Patch Number="B33" Name="Tp'n Tb SECT" ProgramChange="42" />
+			<Patch Number="B34" Name="Tb'n Sax SECT" ProgramChange="43" />
+			<Patch Number="B41" Name="OKTOBERFEST" ProgramChange="44" />
+			<Patch Number="B42" Name="BIG BRASS" ProgramChange="45" />
+			<Patch Number="B43" Name="HUGE SAW BRS" ProgramChange="46" />
+			<Patch Number="B44" Name="SAW BRASS" ProgramChange="47" />
+			<Patch Number="B51" Name="AC.BASS" ProgramChange="48" />
+			<Patch Number="B52" Name="FINGERED BS" ProgramChange="49" />
+			<Patch Number="B53" Name="SLAP BASS" ProgramChange="50" />
+			<Patch Number="B54" Name="DEEP FRETLES" ProgramChange="51" />
+			<Patch Number="B61" Name="GUITARRON BS" ProgramChange="52" />
+			<Patch Number="B62" Name="TB-303 BASS" ProgramChange="53" />
+			<Patch Number="B63" Name="PEDAL BASS" ProgramChange="54" />
+			<Patch Number="B64" Name="TEKNO TAURUS" ProgramChange="55" />
+			<Patch Number="B71" Name="SAW YER BS" ProgramChange="56" />
+			<Patch Number="B72" Name="PICK WAH" ProgramChange="57" />
+			<Patch Number="B73" Name="ROCK LEAD" ProgramChange="58" />
+			<Patch Number="B74" Name="CLEAN TELE" ProgramChange="59" />
+			<Patch Number="B81" Name="JC STRAT" ProgramChange="60" />
+			<Patch Number="B82" Name="STEEL STR GT" ProgramChange="61" />
+			<Patch Number="B83" Name="PEDAL STEEL" ProgramChange="62" />
+			<Patch Number="B84" Name="FLAMENCO" ProgramChange="63" />
+			<Patch Number="C11" Name="SITAR DRONE" ProgramChange="64" />
+			<Patch Number="C12" Name="SHAMISEN" ProgramChange="65" />
+			<Patch Number="C13" Name="OrientExpres" ProgramChange="66" />
+			<Patch Number="C14" Name="PLANET Am" ProgramChange="67" />
+			<Patch Number="C21" Name="TUBALAR BELL" ProgramChange="68" />
+			<Patch Number="C22" Name="ANGEL BELLS" ProgramChange="69" />
+			<Patch Number="C23" Name="ASIAN BELLS" ProgramChange="70" />
+			<Patch Number="C24" Name="STEEL DRUM" ProgramChange="71" />
+			<Patch Number="C31" Name="SoftDigi Swp" ProgramChange="72" />
+			<Patch Number="C32" Name="WICHITA PIPE" ProgramChange="73" />
+			<Patch Number="C33" Name="70s SAW LEAD" ProgramChange="74" />
+			<Patch Number="C34" Name="BRITE SAW LD" ProgramChange="75" />
+			<Patch Number="C41" Name="DETUNED SAWS" ProgramChange="76" />
+			<Patch Number="C42" Name="SYNC LEAD" ProgramChange="77" />
+			<Patch Number="C43" Name="OD SYN LEAD" ProgramChange="78" />
+			<Patch Number="C44" Name="BELL PAD" ProgramChange="79" />
+			<Patch Number="C51" Name="AIR BELL PAD" ProgramChange="80" />
+			<Patch Number="C52" Name="WIRE STRINGS" ProgramChange="81" />
+			<Patch Number="C53" Name="NASTY KEYS" ProgramChange="82" />
+			<Patch Number="C54" Name="DIGI GUITAR" ProgramChange="83" />
+			<Patch Number="C61" Name="DIGI SAWS" ProgramChange="84" />
+			<Patch Number="C62" Name="BLASTER OCT." ProgramChange="85" />
+			<Patch Number="C63" Name="150 BPM" ProgramChange="86" />
+			<Patch Number="C64" Name="TAPE STOP" ProgramChange="87" />
+			<Patch Number="C71" Name="PHILLY HIT" ProgramChange="88" />
+			<Patch Number="C72" Name="ULTIMATE HIT" ProgramChange="89" />
+			<Patch Number="C73" Name="ORCH HIT" ProgramChange="90" />
+			<Patch Number="C74" Name="FIDDLE" ProgramChange="91" />
+			<Patch Number="C81" Name="HYB STRINGS" ProgramChange="92" />
+			<Patch Number="C82" Name="JP8 STRINGS" ProgramChange="93" />
+			<Patch Number="C83" Name="PHASER STR1" ProgramChange="94" />
+			<Patch Number="C84" Name="PHASER STR2" ProgramChange="95" />
+			<Patch Number="D11" Name="CHOIR" ProgramChange="96" />
+			<Patch Number="D12" Name="GREGORIAN CH" ProgramChange="97" />
+			<Patch Number="D13" Name="LFO VOX" ProgramChange="98" />
+			<Patch Number="D14" Name="SOUNDTRACK" ProgramChange="99" />
+			<Patch Number="D21" Name="TotalEclipse" ProgramChange="100" />
+			<Patch Number="D22" Name="SWEEPING SAW" ProgramChange="101" />
+			<Patch Number="D23" Name="DEEP SWEEP" ProgramChange="102" />
+			<Patch Number="D24" Name="HOLLOW PAD" ProgramChange="103" />
+			<Patch Number="D31" Name="HYBRID PAD" ProgramChange="104" />
+			<Patch Number="D32" Name="JP SOFT PAD" ProgramChange="105" />
+			<Patch Number="D33" Name="FLG PROLOGUE" ProgramChange="106" />
+			<Patch Number="D34" Name="CONQUERER" ProgramChange="107" />
+			<Patch Number="D41" Name="DIGI CHOIR" ProgramChange="108" />
+			<Patch Number="D42" Name="PULSATER" ProgramChange="109" />
+			<Patch Number="D43" Name="ORBIT SHUFFL" ProgramChange="110" />
+			<Patch Number="D44" Name="STEP FLANGER" ProgramChange="111" />
+			<Patch Number="D51" Name="STROBE MODE" ProgramChange="112" />
+			<Patch Number="D52" Name="FLYING GR" ProgramChange="113" />
+			<Patch Number="D53" Name="OXYGEN-JAR" ProgramChange="114" />
+			<Patch Number="D54" Name="DYNO SPACE" ProgramChange="115" />
+			<Patch Number="D61" Name="MOLTEN LAVA" ProgramChange="116" />
+			<Patch Number="D62" Name="NIGHTMARE" ProgramChange="117" />
+			<Patch Number="D63" Name="FILTER DANCE" ProgramChange="118" />
+			<Patch Number="D64" Name="COSMOS" ProgramChange="119" />
+			<Patch Number="D71" Name="SPACESHIP" ProgramChange="120" />
+			<Patch Number="D72" Name="ALL WOUND UP" ProgramChange="121" />
+			<Patch Number="D73" Name="HUMAN DRUMS" ProgramChange="122" />
+			<Patch Number="D74" Name="PERC KIT" ProgramChange="123" />
+			<Patch Number="D81" Name="GAMELAN KIT" ProgramChange="124" />
+			<Patch Number="D82" Name="INDUS. KIT" ProgramChange="125" />
+			<Patch Number="D83" Name="TRIBAL DRUMS" ProgramChange="126" />
+			<Patch Number="D84" Name="DRUM KIT" ProgramChange="127" />
+		</PatchNameList>
+
+                <PatchNameList Name="Patches Preset">
+			<Patch Number="Bank 1-0" Name="JAZZ SCAT" ProgramChange="0" />
+			<Patch Number="A12" Name="DIDGERI FLT" ProgramChange="1" />
+			<Patch Number="A13" Name="JANGLE PAD" ProgramChange="2" />
+			<Patch Number="A14" Name="GR-300 LEAD" ProgramChange="3" />
+			<Patch Number="A21" Name="12ST GUITAR" ProgramChange="4" />
+			<Patch Number="A22" Name="303 TEKNO" ProgramChange="5" />
+			<Patch Number="A23" Name="GR STRINGS" ProgramChange="6" />
+			<Patch Number="A24" Name="E.ORGAN/PDL" ProgramChange="7" />
+			<Patch Number="A31" Name="ROMANTIC PAD" ProgramChange="8" />
+			<Patch Number="A32" Name="FRETLESS BS" ProgramChange="9" />
+			<Patch Number="A33" Name="DAFT WAVE" ProgramChange="10" />
+			<Patch Number="A34" Name="Cmaj-STRINGS" ProgramChange="11" />
+			<Patch Number="A41" Name="NYLON STR GT" ProgramChange="12" />
+			<Patch Number="A42" Name="MIDI PIANO" ProgramChange="13" />
+			<Patch Number="A43" Name="DIST.GUITAR" ProgramChange="14" />
+			<Patch Number="A44" Name="E.SITAR" ProgramChange="15" />
+			<Patch Number="A51" Name="TABLAnSITAR" ProgramChange="16" />
+			<Patch Number="A52" Name="DIDGERI PIPE" ProgramChange="17" />
+			<Patch Number="A53" Name="TABLA+VoxKit" ProgramChange="18" />
+			<Patch Number="A54" Name="SALSA SPLIT" ProgramChange="19" />
+			<Patch Number="A61" Name="GRAND PIANO" ProgramChange="20" />
+			<Patch Number="A62" Name="OD PIANO" ProgramChange="21" />
+			<Patch Number="A63" Name="MIDI KEYS" ProgramChange="22" />
+			<Patch Number="A64" Name="PANNING RHDS" ProgramChange="23" />
+			<Patch Number="A71" Name="BS/RHODES" ProgramChange="24" />
+			<Patch Number="A72" Name="ROCK ORGAN" ProgramChange="25" />
+			<Patch Number="A73" Name="PurpleORGAN" ProgramChange="26" />
+			<Patch Number="A74" Name="GOTHIC" ProgramChange="27" />
+			<Patch Number="A81" Name="ACCORDION" ProgramChange="28" />
+			<Patch Number="A82" Name="BAMBOO FLUTE" ProgramChange="29" />
+			<Patch Number="A83" Name="VOX FLUTE" ProgramChange="30" />
+			<Patch Number="A84" Name="TIN WHISTLE" ProgramChange="31" />
+			<Patch Number="B11" Name="BLOW PIPE" ProgramChange="32" />
+			<Patch Number="B12" Name="MIZMAR" ProgramChange="33" />
+			<Patch Number="B13" Name="HARMONICA" ProgramChange="34" />
+			<Patch Number="B14" Name="SOPRANO SAX" ProgramChange="35" />
+			<Patch Number="B21" Name="ALTO SAX" ProgramChange="36" />
+			<Patch Number="B22" Name="BreathyT.SAX" ProgramChange="37" />
+			<Patch Number="B23" Name="TRUMPET" ProgramChange="38" />
+			<Patch Number="B24" Name="MUTE Tp" ProgramChange="39" />
+			<Patch Number="B31" Name="F.HRN SECT" ProgramChange="40" />
+			<Patch Number="B32" Name="T.SAX SECT" ProgramChange="41" />
+			<Patch Number="B33" Name="Tp'n Tb SECT" ProgramChange="42" />
+			<Patch Number="B34" Name="Tb'n Sax SECT" ProgramChange="43" />
+			<Patch Number="B41" Name="OKTOBERFEST" ProgramChange="44" />
+			<Patch Number="B42" Name="BIG BRASS" ProgramChange="45" />
+			<Patch Number="B43" Name="HUGE SAW BRS" ProgramChange="46" />
+			<Patch Number="B44" Name="SAW BRASS" ProgramChange="47" />
+			<Patch Number="B51" Name="AC.BASS" ProgramChange="48" />
+			<Patch Number="B52" Name="FINGERED BS" ProgramChange="49" />
+			<Patch Number="B53" Name="SLAP BASS" ProgramChange="50" />
+			<Patch Number="B54" Name="DEEP FRETLES" ProgramChange="51" />
+			<Patch Number="B61" Name="GUITARRON BS" ProgramChange="52" />
+			<Patch Number="B62" Name="TB-303 BASS" ProgramChange="53" />
+			<Patch Number="B63" Name="PEDAL BASS" ProgramChange="54" />
+			<Patch Number="B64" Name="TEKNO TAURUS" ProgramChange="55" />
+			<Patch Number="B71" Name="SAW YER BS" ProgramChange="56" />
+			<Patch Number="B72" Name="PICK WAH" ProgramChange="57" />
+			<Patch Number="B73" Name="ROCK LEAD" ProgramChange="58" />
+			<Patch Number="B74" Name="CLEAN TELE" ProgramChange="59" />
+			<Patch Number="B81" Name="JC STRAT" ProgramChange="60" />
+			<Patch Number="B82" Name="STEEL STR GT" ProgramChange="61" />
+			<Patch Number="B83" Name="PEDAL STEEL" ProgramChange="62" />
+			<Patch Number="B84" Name="FLAMENCO" ProgramChange="63" />
+			<Patch Number="C11" Name="SITAR DRONE" ProgramChange="64" />
+			<Patch Number="C12" Name="SHAMISEN" ProgramChange="65" />
+			<Patch Number="C13" Name="OrientExpres" ProgramChange="66" />
+			<Patch Number="C14" Name="PLANET Am" ProgramChange="67" />
+			<Patch Number="C21" Name="TUBALAR BELL" ProgramChange="68" />
+			<Patch Number="C22" Name="ANGEL BELLS" ProgramChange="69" />
+			<Patch Number="C23" Name="ASIAN BELLS" ProgramChange="70" />
+			<Patch Number="C24" Name="STEEL DRUM" ProgramChange="71" />
+			<Patch Number="C31" Name="SoftDigi Swp" ProgramChange="72" />
+			<Patch Number="C32" Name="WICHITA PIPE" ProgramChange="73" />
+			<Patch Number="C33" Name="70s SAW LEAD" ProgramChange="74" />
+			<Patch Number="C34" Name="BRITE SAW LD" ProgramChange="75" />
+			<Patch Number="C41" Name="DETUNED SAWS" ProgramChange="76" />
+			<Patch Number="C42" Name="SYNC LEAD" ProgramChange="77" />
+			<Patch Number="C43" Name="OD SYN LEAD" ProgramChange="78" />
+			<Patch Number="C44" Name="BELL PAD" ProgramChange="79" />
+			<Patch Number="C51" Name="AIR BELL PAD" ProgramChange="80" />
+			<Patch Number="C52" Name="WIRE STRINGS" ProgramChange="81" />
+			<Patch Number="C53" Name="NASTY KEYS" ProgramChange="82" />
+			<Patch Number="C54" Name="DIGI GUITAR" ProgramChange="83" />
+			<Patch Number="C61" Name="DIGI SAWS" ProgramChange="84" />
+			<Patch Number="C62" Name="BLASTER OCT." ProgramChange="85" />
+			<Patch Number="C63" Name="150 BPM" ProgramChange="86" />
+			<Patch Number="C64" Name="TAPE STOP" ProgramChange="87" />
+			<Patch Number="C71" Name="PHILLY HIT" ProgramChange="88" />
+			<Patch Number="C72" Name="ULTIMATE HIT" ProgramChange="89" />
+			<Patch Number="C73" Name="ORCH HIT" ProgramChange="90" />
+			<Patch Number="C74" Name="FIDDLE" ProgramChange="91" />
+			<Patch Number="C81" Name="HYB STRINGS" ProgramChange="92" />
+			<Patch Number="C82" Name="JP8 STRINGS" ProgramChange="93" />
+			<Patch Number="C83" Name="PHASER STR1" ProgramChange="94" />
+			<Patch Number="C84" Name="PHASER STR2" ProgramChange="95" />
+			<Patch Number="D11" Name="CHOIR" ProgramChange="96" />
+			<Patch Number="D12" Name="GREGORIAN CH" ProgramChange="97" />
+			<Patch Number="D13" Name="LFO VOX" ProgramChange="98" />
+			<Patch Number="D14" Name="SOUNDTRACK" ProgramChange="99" />
+			<Patch Number="D21" Name="TotalEclipse" ProgramChange="100" />
+			<Patch Number="D22" Name="SWEEPING SAW" ProgramChange="101" />
+			<Patch Number="D23" Name="DEEP SWEEP" ProgramChange="102" />
+			<Patch Number="D24" Name="HOLLOW PAD" ProgramChange="103" />
+			<Patch Number="D31" Name="HYBRID PAD" ProgramChange="104" />
+			<Patch Number="D32" Name="JP SOFT PAD" ProgramChange="105" />
+			<Patch Number="D33" Name="FLG PROLOGUE" ProgramChange="106" />
+			<Patch Number="D34" Name="CONQUERER" ProgramChange="107" />
+			<Patch Number="D41" Name="DIGI CHOIR" ProgramChange="108" />
+			<Patch Number="D42" Name="PULSATER" ProgramChange="109" />
+			<Patch Number="D43" Name="ORBIT SHUFFL" ProgramChange="110" />
+			<Patch Number="D44" Name="STEP FLANGER" ProgramChange="111" />
+			<Patch Number="D51" Name="STROBE MODE" ProgramChange="112" />
+			<Patch Number="D52" Name="FLYING GR" ProgramChange="113" />
+			<Patch Number="D53" Name="OXYGEN-JAR" ProgramChange="114" />
+			<Patch Number="D54" Name="DYNO SPACE" ProgramChange="115" />
+			<Patch Number="D61" Name="MOLTEN LAVA" ProgramChange="116" />
+			<Patch Number="D62" Name="NIGHTMARE" ProgramChange="117" />
+			<Patch Number="D63" Name="FILTER DANCE" ProgramChange="118" />
+			<Patch Number="D64" Name="COSMOS" ProgramChange="119" />
+			<Patch Number="D71" Name="SPACESHIP" ProgramChange="120" />
+			<Patch Number="D72" Name="ALL WOUND UP" ProgramChange="121" />
+			<Patch Number="D73" Name="HUMAN DRUMS" ProgramChange="122" />
+			<Patch Number="D74" Name="PERC KIT" ProgramChange="123" />
+			<Patch Number="D81" Name="GAMELAN KIT" ProgramChange="124" />
+			<Patch Number="D82" Name="INDUS. KIT" ProgramChange="125" />
+			<Patch Number="D83" Name="TRIBAL DRUMS" ProgramChange="126" />
+			<Patch Number="D84" Name="DRUM KIT" ProgramChange="127" />
+		</PatchNameList>
+
+	</MasterDeviceNames>
+</MIDINameDocument>

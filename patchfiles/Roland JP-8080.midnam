@@ -1,0 +1,679 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument 
+	PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 0.7//EN" "http://www.sonosphere.com/dtds/MIDINameDocument.dtd">
+
+
+<MIDINameDocument>
+	<Author>Digidesign</Author>
+	<MasterDeviceNames>
+		<Manufacturer>Roland</Manufacturer>
+		<Model>JP-8080</Model>
+		<CustomDeviceMode Name="">
+			<ChannelNameSetAssignments>
+				<ChannelNameSetAssign Channel="1" NameSet="Patches" />
+				<ChannelNameSetAssign Channel="2" NameSet="Patches" />
+				<ChannelNameSetAssign Channel="3" NameSet="Patches" />
+				<ChannelNameSetAssign Channel="4" NameSet="Patches" />
+				<ChannelNameSetAssign Channel="5" NameSet="Patches" />
+				<ChannelNameSetAssign Channel="6" NameSet="Patches" />
+				<ChannelNameSetAssign Channel="7" NameSet="Patches" />
+				<ChannelNameSetAssign Channel="8" NameSet="Patches" />
+				<ChannelNameSetAssign Channel="9" NameSet="Patches" />
+				<ChannelNameSetAssign Channel="10" NameSet="Drums" />
+				<ChannelNameSetAssign Channel="11" NameSet="Patches" />
+				<ChannelNameSetAssign Channel="12" NameSet="Patches" />
+				<ChannelNameSetAssign Channel="13" NameSet="Patches" />
+				<ChannelNameSetAssign Channel="14" NameSet="Patches" />
+				<ChannelNameSetAssign Channel="15" NameSet="Patches" />
+				<ChannelNameSetAssign Channel="16" NameSet="Patches" />
+			</ChannelNameSetAssignments>
+
+		</CustomDeviceMode>
+		<ChannelNameSet Name="Patches">
+			<AvailableForChannels>
+				<AvailableChannel Channel="1" Available="true" />
+				<AvailableChannel Channel="2" Available="true" />
+				<AvailableChannel Channel="3" Available="true" />
+				<AvailableChannel Channel="4" Available="true" />
+				<AvailableChannel Channel="5" Available="true" />
+				<AvailableChannel Channel="6" Available="true" />
+				<AvailableChannel Channel="7" Available="true" />
+				<AvailableChannel Channel="8" Available="true" />
+				<AvailableChannel Channel="9" Available="true" />
+				<AvailableChannel Channel="10" Available="true" />
+				<AvailableChannel Channel="11" Available="true" />
+				<AvailableChannel Channel="12" Available="true" />
+				<AvailableChannel Channel="13" Available="true" />
+				<AvailableChannel Channel="14" Available="true" />
+				<AvailableChannel Channel="15" Available="true" />
+				<AvailableChannel Channel="16" Available="true" />
+			</AvailableForChannels>
+
+			<PatchBank Name="User Patches" ROM="false">
+				<MIDICommands>
+					<ControlChange Control="0" Value="80" />
+					<ControlChange Control="32" Value="0" />
+				</MIDICommands>
+				<UsesPatchNameList Name="User Patches" />
+			</PatchBank>
+			<PatchBank Name="Preset A Patches" ROM="false">
+				<MIDICommands>
+					<ControlChange Control="0" Value="81" />
+					<ControlChange Control="32" Value="0" />
+				</MIDICommands>
+				<UsesPatchNameList Name="Preset A Patches" />
+			</PatchBank>
+			<PatchBank Name="Preset B Patches" ROM="false">
+				<MIDICommands>
+					<ControlChange Control="0" Value="81" />
+					<ControlChange Control="32" Value="1" />
+				</MIDICommands>
+				<UsesPatchNameList Name="Preset B Patches" />
+			</PatchBank>
+			<PatchBank Name="Preset C Patches" ROM="false">
+				<MIDICommands>
+					<ControlChange Control="0" Value="81" />
+					<ControlChange Control="32" Value="2" />
+				</MIDICommands>
+				<UsesPatchNameList Name="Preset C Patches" />
+			</PatchBank>
+		</ChannelNameSet>
+
+		<ChannelNameSet Name="Performances">
+			<AvailableForChannels>
+				<AvailableChannel Channel="1" Available="true" />
+				<AvailableChannel Channel="2" Available="true" />
+				<AvailableChannel Channel="3" Available="true" />
+				<AvailableChannel Channel="4" Available="true" />
+				<AvailableChannel Channel="5" Available="true" />
+				<AvailableChannel Channel="6" Available="true" />
+				<AvailableChannel Channel="7" Available="true" />
+				<AvailableChannel Channel="8" Available="true" />
+				<AvailableChannel Channel="9" Available="true" />
+				<AvailableChannel Channel="10" Available="true" />
+				<AvailableChannel Channel="11" Available="true" />
+				<AvailableChannel Channel="12" Available="true" />
+				<AvailableChannel Channel="13" Available="true" />
+				<AvailableChannel Channel="14" Available="true" />
+				<AvailableChannel Channel="15" Available="true" />
+				<AvailableChannel Channel="16" Available="true" />
+			</AvailableForChannels>
+
+			<PatchBank Name="User Performances" ROM="false">
+				<MIDICommands>
+					<ControlChange Control="0" Value="85" />
+					<ControlChange Control="32" Value="0" />
+				</MIDICommands>
+				<UsesPatchNameList Name="User Performances" />
+			</PatchBank>
+			<PatchBank Name="Preset A Performances" ROM="false">
+				<MIDICommands>
+					<ControlChange Control="0" Value="85" />
+					<ControlChange Control="32" Value="64" />
+				</MIDICommands>
+				<UsesPatchNameList Name="Preset A Performances" />
+			</PatchBank>
+			<PatchBank Name="Preset B Performances" ROM="false">
+				<MIDICommands>
+					<ControlChange Control="0" Value="85" />
+					<ControlChange Control="32" Value="65" />
+				</MIDICommands>
+				<UsesPatchNameList Name="Preset B Performances" />
+			</PatchBank>
+		</ChannelNameSet>
+
+		<ChannelNameSet Name="Drums">
+			<AvailableForChannels>
+				<AvailableChannel Channel="1" Available="true" />
+				<AvailableChannel Channel="2" Available="true" />
+				<AvailableChannel Channel="3" Available="true" />
+				<AvailableChannel Channel="4" Available="true" />
+				<AvailableChannel Channel="5" Available="true" />
+				<AvailableChannel Channel="6" Available="true" />
+				<AvailableChannel Channel="7" Available="true" />
+				<AvailableChannel Channel="8" Available="true" />
+				<AvailableChannel Channel="9" Available="true" />
+				<AvailableChannel Channel="10" Available="true" />
+				<AvailableChannel Channel="11" Available="true" />
+				<AvailableChannel Channel="12" Available="true" />
+				<AvailableChannel Channel="13" Available="true" />
+				<AvailableChannel Channel="14" Available="true" />
+				<AvailableChannel Channel="15" Available="true" />
+				<AvailableChannel Channel="16" Available="true" />
+			</AvailableForChannels>
+
+			<PatchBank Name="User Drums" ROM="false">
+				<MIDICommands>
+					<ControlChange Control="0" Value="86" />
+					<ControlChange Control="32" Value="0" />
+				</MIDICommands>
+				<UsesPatchNameList Name="User Drums" />
+			</PatchBank>
+		</ChannelNameSet>
+
+		<PatchNameList Name="User Patches">
+			<Patch Number="User-1" Name="MG Bass" ProgramChange="0" />
+			<Patch Number="Preset B-2" Name="Trance Bass 4" ProgramChange="1" />
+			<Patch Number="Preset B-3" Name="Trance Bass 5" ProgramChange="2" />
+			<Patch Number="Preset B-4" Name="Trance Bass 6" ProgramChange="3" />
+			<Patch Number="Preset B-5" Name="Bone Sa Mo" ProgramChange="4" />
+			<Patch Number="Preset B-6" Name="Bone Yall" ProgramChange="5" />
+			<Patch Number="Preset B-7" Name="PHM 1" ProgramChange="6" />
+			<Patch Number="Preset B-8" Name="PHM 2" ProgramChange="7" />
+			<Patch Number="Preset B-9" Name="PHM 3" ProgramChange="8" />
+			<Patch Number="Preset B-10" Name="Static Bass 1" ProgramChange="9" />
+			<Patch Number="Preset B-11" Name="Static Bass 2" ProgramChange="10" />
+			<Patch Number="Preset B-12" Name="M Bass" ProgramChange="11" />
+			<Patch Number="Preset B-13" Name="PHM 4" ProgramChange="12" />
+			<Patch Number="Preset B-14" Name="PHM 5" ProgramChange="13" />
+			<Patch Number="Preset B-15" Name="Mini Bass" ProgramChange="14" />
+			<Patch Number="Preset B-16" Name="Wonderland Bass" ProgramChange="15" />
+			<Patch Number="Preset B-17" Name="Hard Bass" ProgramChange="16" />
+			<Patch Number="Preset B-18" Name="Fretless Synth" ProgramChange="17" />
+			<Patch Number="Preset B-19" Name="Lead Bass" ProgramChange="18" />
+			<Patch Number="Preset B-20" Name="JP Fat Synbrass" ProgramChange="19" />
+			<Patch Number="Preset B-21" Name="Gate me!" ProgramChange="20" />
+			<Patch Number="Preset B-22" Name="Kling Klang 2" ProgramChange="21" />
+			<Patch Number="Preset B-23" Name="Rising Key" ProgramChange="22" />
+			<Patch Number="Preset B-24" Name="Flat Out 1" ProgramChange="23" />
+			<Patch Number="Preset B-25" Name="Flat LFO" ProgramChange="24" />
+			<Patch Number="Preset B-26" Name="Flat Out 2" ProgramChange="25" />
+			<Patch Number="Preset B-27" Name="Flat Out 3" ProgramChange="26" />
+			<Patch Number="Preset B-28" Name="MiniSynth 1" ProgramChange="27" />
+			<Patch Number="Preset B-29" Name="AW/DM Resonance1" ProgramChange="28" />
+			<Patch Number="Preset B-30" Name="AW/DM Resonance2" ProgramChange="29" />
+			<Patch Number="Preset B-31" Name="AW/DM Resonance3" ProgramChange="30" />
+			<Patch Number="Preset B-32" Name="AW/DM Resonance4" ProgramChange="31" />
+			<Patch Number="Preset B-33" Name="WONDERLAND 1" ProgramChange="32" />
+			<Patch Number="Preset B-34" Name="WONDERLAND 2" ProgramChange="33" />
+			<Patch Number="Preset B-35" Name="Jupiter8Arpeggio" ProgramChange="34" />
+			<Patch Number="Preset B-36" Name="Fuel" ProgramChange="35" />
+			<Patch Number="Preset B-37" Name="Shake" ProgramChange="36" />
+			<Patch Number="Preset B-38" Name="Model" ProgramChange="37" />
+			<Patch Number="Preset B-39" Name="Vanishing Key" ProgramChange="38" />
+			<Patch Number="Preset B-40" Name="Fade Away" ProgramChange="39" />
+			<Patch Number="Preset B-41" Name="Hard Key 1" ProgramChange="40" />
+			<Patch Number="Preset B-42" Name="Hard Key 2" ProgramChange="41" />
+			<Patch Number="Preset B-43" Name="Hard Key 3" ProgramChange="42" />
+			<Patch Number="Preset B-44" Name="Cheesy Key 1" ProgramChange="43" />
+			<Patch Number="Preset B-45" Name="Cheesy Key 2" ProgramChange="44" />
+			<Patch Number="Preset B-46" Name="DM 1" ProgramChange="45" />
+			<Patch Number="Preset B-47" Name="DM 2" ProgramChange="46" />
+			<Patch Number="Preset B-48" Name="Hard Key 4" ProgramChange="47" />
+			<Patch Number="Preset B-49" Name="Hard Key 5" ProgramChange="48" />
+			<Patch Number="Preset B-50" Name="Hard Key 6" ProgramChange="49" />
+			<Patch Number="Preset B-51" Name="DM 3" ProgramChange="50" />
+			<Patch Number="Preset B-52" Name="Arpy 3" ProgramChange="51" />
+			<Patch Number="Preset B-53" Name="Arpy 4" ProgramChange="52" />
+			<Patch Number="Preset B-54" Name="J Echo" ProgramChange="53" />
+			<Patch Number="Preset B-55" Name="Mini Seq. 1" ProgramChange="54" />
+			<Patch Number="Preset B-56" Name="Mini Seq. 2" ProgramChange="55" />
+			<Patch Number="Preset B-57" Name="Pulsar 88" ProgramChange="56" />
+			<Patch Number="Preset B-58" Name="Kling Klang 3" ProgramChange="57" />
+			<Patch Number="Preset B-59" Name="Straight Jacket" ProgramChange="58" />
+			<Patch Number="Preset B-60" Name="DM 4" ProgramChange="59" />
+			<Patch Number="Preset B-61" Name="CHEM 1" ProgramChange="60" />
+			<Patch Number="Preset B-62" Name="CHEM 2" ProgramChange="61" />
+			<Patch Number="Preset B-63" Name="Dusseldorf 1" ProgramChange="62" />
+			<Patch Number="Preset B-64" Name="Dusseldorf 2" ProgramChange="63" />
+			<Patch Number="Preset B-65" Name="Virtual Voltage" ProgramChange="64" />
+			<Patch Number="Preset B-66" Name="DAD or alive" ProgramChange="65" />
+			<Patch Number="Preset B-67" Name="Freeze Frame" ProgramChange="66" />
+			<Patch Number="Preset B-68" Name="Rave2theRhythm" ProgramChange="67" />
+			<Patch Number="Preset B-69" Name="Cheesy Lead 1" ProgramChange="68" />
+			<Patch Number="Preset B-70" Name="Cheesy Lead 2" ProgramChange="69" />
+			<Patch Number="Preset B-71" Name="Cheesy Lead 3" ProgramChange="70" />
+			<Patch Number="Preset B-72" Name="Cheesy Lead 4" ProgramChange="71" />
+			<Patch Number="Preset B-73" Name="Cheesy Lead 5" ProgramChange="72" />
+			<Patch Number="Preset B-74" Name="Coreline Nine" ProgramChange="73" />
+			<Patch Number="Preset B-75" Name="Wonderland Pad 1" ProgramChange="74" />
+			<Patch Number="Preset B-76" Name="Wonderland Pad 2" ProgramChange="75" />
+			<Patch Number="Preset B-77" Name="Wonderland Pad 3" ProgramChange="76" />
+			<Patch Number="Preset B-78" Name="seqaT nortoleM" ProgramChange="77" />
+			<Patch Number="Preset B-79" Name="Venusian Strings" ProgramChange="78" />
+			<Patch Number="Preset B-80" Name="Wonderland Pad 4" ProgramChange="79" />
+			<Patch Number="Preset B-81" Name="GRAMMAPHONE 1" ProgramChange="80" />
+			<Patch Number="Preset B-82" Name="GRAMMAPHONE 2" ProgramChange="81" />
+			<Patch Number="Preset B-83" Name="GRAMMAPHONE 3" ProgramChange="82" />
+			<Patch Number="Preset B-84" Name="Oil Canvas 1" ProgramChange="83" />
+			<Patch Number="Preset B-85" Name="Oil Canvas 2" ProgramChange="84" />
+			<Patch Number="Preset B-86" Name="Oil Canvas 3" ProgramChange="85" />
+			<Patch Number="Preset B-87" Name="Oil Canvas 4" ProgramChange="86" />
+			<Patch Number="Preset B-88" Name="Oil Canvas 5" ProgramChange="87" />
+			<Patch Number="Preset B-89" Name="Blossoms 1" ProgramChange="88" />
+			<Patch Number="Preset B-90" Name="Blossoms 2" ProgramChange="89" />
+			<Patch Number="Preset B-91" Name="Broom" ProgramChange="90" />
+			<Patch Number="Preset B-92" Name="J Pad" ProgramChange="91" />
+			<Patch Number="Preset B-93" Name="Ream Kate" ProgramChange="92" />
+			<Patch Number="Preset B-94" Name="Temple 1" ProgramChange="93" />
+			<Patch Number="Preset B-95" Name="Temple 2" ProgramChange="94" />
+			<Patch Number="Preset B-96" Name="Thick" ProgramChange="95" />
+			<Patch Number="Preset B-97" Name="Open 54" ProgramChange="96" />
+			<Patch Number="Preset B-98" Name="Kling Klang 4" ProgramChange="97" />
+			<Patch Number="Preset B-99" Name="Epic" ProgramChange="98" />
+			<Patch Number="Preset B-100" Name="Multiples 1" ProgramChange="99" />
+			<Patch Number="Preset B-101" Name="Lodelity" ProgramChange="100" />
+			<Patch Number="Preset B-102" Name="Lode in Stereo" ProgramChange="101" />
+			<Patch Number="Preset B-103" Name="Wonderland Brs" ProgramChange="102" />
+			<Patch Number="Preset B-104" Name="Hard Pad" ProgramChange="103" />
+			<Patch Number="Preset B-105" Name="Gate in Stereo 1" ProgramChange="104" />
+			<Patch Number="Preset B-106" Name="Gate in Stereo 2" ProgramChange="105" />
+			<Patch Number="Preset B-107" Name="Gate in Stereo 3" ProgramChange="106" />
+			<Patch Number="Preset B-108" Name="S/H in Stereo" ProgramChange="107" />
+			<Patch Number="Preset B-109" Name="Bub" ProgramChange="108" />
+			<Patch Number="Preset B-110" Name="Simple E.Drums" ProgramChange="109" />
+			<Patch Number="Preset B-111" Name="Boom your Woofer" ProgramChange="110" />
+			<Patch Number="Preset B-112" Name="Multiples 2" ProgramChange="111" />
+			<Patch Number="Preset B-113" Name="Midnight 1-900" ProgramChange="112" />
+			<Patch Number="Preset B-114" Name="100% After" ProgramChange="113" />
+			<Patch Number="Preset B-115" Name="Time and Space" ProgramChange="114" />
+			<Patch Number="Preset B-116" Name="LFO 1" ProgramChange="115" />
+			<Patch Number="Preset B-117" Name="LFO 2" ProgramChange="116" />
+			<Patch Number="Preset B-118" Name="HLAH" ProgramChange="117" />
+			<Patch Number="Preset B-119" Name="Blade" ProgramChange="118" />
+			<Patch Number="Preset B-120" Name="Cyborg" ProgramChange="119" />
+			<Patch Number="Preset B-121" Name="Fall" ProgramChange="120" />
+			<Patch Number="Preset B-122" Name="Rise" ProgramChange="121" />
+			<Patch Number="Preset B-123" Name="Radioactive 1" ProgramChange="122" />
+			<Patch Number="Preset B-124" Name="Radioactive 2" ProgramChange="123" />
+			<Patch Number="Preset B-125" Name="DroneOn" ProgramChange="124" />
+			<Patch Number="Preset B-126" Name="Duss" ProgramChange="125" />
+			<Patch Number="Preset B-127" Name="Hydro Noise" ProgramChange="126" />
+			<Patch Number="Preset B-128" Name="From Space..." ProgramChange="127" />
+		</PatchNameList>
+
+		<PatchNameList Name="Preset A Patches">
+			<Patch Number="Preset 1-1" Name="Spit'n Slide Bs" ProgramChange="0" />
+			<Patch Number="Preset A-2" Name="Velo Dacay Bass" ProgramChange="1" />
+			<Patch Number="Preset A-3" Name="Wall Bob" ProgramChange="2" />
+			<Patch Number="Preset A-4" Name="Juno Sub Bass" ProgramChange="3" />
+			<Patch Number="Preset A-5" Name="Subsonic Bass" ProgramChange="4" />
+			<Patch Number="Preset A-6" Name="Big n Dark" ProgramChange="5" />
+			<Patch Number="Preset A-7" Name="Bass Flow" ProgramChange="6" />
+			<Patch Number="Preset A-8" Name="Juno Bass Vel" ProgramChange="7" />
+			<Patch Number="Preset A-9" Name="Dubb Bass" ProgramChange="8" />
+			<Patch Number="Preset A-10" Name="Juice Bass" ProgramChange="9" />
+			<Patch Number="Preset A-11" Name="Dreams Are Made" ProgramChange="10" />
+			<Patch Number="Preset A-12" Name="Reso Bass Line" ProgramChange="11" />
+			<Patch Number="Preset A-13" Name="Bass Pedals" ProgramChange="12" />
+			<Patch Number="Preset A-14" Name="Hard Core Bass" ProgramChange="13" />
+			<Patch Number="Preset A-15" Name="MC-202 Bass" ProgramChange="14" />
+			<Patch Number="Preset A-16" Name="Rubber SH-2" ProgramChange="15" />
+			<Patch Number="Preset A-17" Name="Raging Bass" ProgramChange="16" />
+			<Patch Number="Preset A-18" Name="Blipper Bass" ProgramChange="17" />
+			<Patch Number="Preset A-19" Name="JP-303" ProgramChange="18" />
+			<Patch Number="Preset A-20" Name="Rave Time" ProgramChange="19" />
+			<Patch Number="Preset A-21" Name="Fretless Bass" ProgramChange="20" />
+			<Patch Number="Preset A-22" Name="Digi Strat" ProgramChange="21" />
+			<Patch Number="Preset A-23" Name="Fire Wire" ProgramChange="22" />
+			<Patch Number="Preset A-24" Name="Proflike Clavit" ProgramChange="23" />
+			<Patch Number="Preset A-25" Name="Withmod Comp" ProgramChange="24" />
+			<Patch Number="Preset A-26" Name="Juno Clav" ProgramChange="25" />
+			<Patch Number="Preset A-27" Name="Gritty Power" ProgramChange="26" />
+			<Patch Number="Preset A-28" Name="Seperate ways" ProgramChange="27" />
+			<Patch Number="Preset A-29" Name="For RPS" ProgramChange="28" />
+			<Patch Number="Preset A-30" Name="Bread'n Butter" ProgramChange="29" />
+			<Patch Number="Preset A-31" Name="Silk 5ths" ProgramChange="30" />
+			<Patch Number="Preset A-32" Name="Ancient Asia" ProgramChange="31" />
+			<Patch Number="Preset A-33" Name="Intervalic" ProgramChange="32" />
+			<Patch Number="Preset A-34" Name="Squared Away" ProgramChange="33" />
+			<Patch Number="Preset A-35" Name="Velo Syncoid" ProgramChange="34" />
+			<Patch Number="Preset A-36" Name="Resonance Chord" ProgramChange="35" />
+			<Patch Number="Preset A-37" Name="Resorelease" ProgramChange="36" />
+			<Patch Number="Preset A-38" Name="Waspy Synth" ProgramChange="37" />
+			<Patch Number="Preset A-39" Name="Euro SAW" ProgramChange="38" />
+			<Patch Number="Preset A-40" Name="Dance Sweep" ProgramChange="39" />
+			<Patch Number="Preset A-41" Name="Trance Food" ProgramChange="40" />
+			<Patch Number="Preset A-42" Name="One Shot Reso" ProgramChange="41" />
+			<Patch Number="Preset A-43" Name="The Fat Guy" ProgramChange="42" />
+			<Patch Number="Preset A-44" Name="Spit Brass" ProgramChange="43" />
+			<Patch Number="Preset A-45" Name="Poly Sync" ProgramChange="44" />
+			<Patch Number="Preset A-46" Name="Rave 5th" ProgramChange="45" />
+			<Patch Number="Preset A-47" Name="UK Shorty" ProgramChange="46" />
+			<Patch Number="Preset A-48" Name="Old Rhodes" ProgramChange="47" />
+			<Patch Number="Preset A-49" Name="Wurly Piano 1" ProgramChange="48" />
+			<Patch Number="Preset A-50" Name="Wurly Piano 2" ProgramChange="49" />
+			<Patch Number="Preset A-51" Name="Moody Organ" ProgramChange="50" />
+			<Patch Number="Preset A-52" Name="Org/Rotary>Ribom" ProgramChange="51" />
+			<Patch Number="Preset A-53" Name="VK09 PercEchoes" ProgramChange="52" />
+			<Patch Number="Preset A-54" Name="Sine Lead" ProgramChange="53" />
+			<Patch Number="Preset A-55" Name="Witchita Lead" ProgramChange="54" />
+			<Patch Number="Preset A-56" Name="Creamy" ProgramChange="55" />
+			<Patch Number="Preset A-57" Name="Smoothy" ProgramChange="56" />
+			<Patch Number="Preset A-58" Name="Soaring Mini" ProgramChange="57" />
+			<Patch Number="Preset A-59" Name="Ribn F/B Lead" ProgramChange="58" />
+			<Patch Number="Preset A-60" Name="Sup-Jup Lead" ProgramChange="59" />
+			<Patch Number="Preset A-61" Name="Modular Lead" ProgramChange="60" />
+			<Patch Number="Preset A-62" Name="Syncrosolo" ProgramChange="61" />
+			<Patch Number="Preset A-63" Name="Ripper" ProgramChange="62" />
+			<Patch Number="Preset A-64" Name="Phantom Lead" ProgramChange="63" />
+			<Patch Number="Preset A-65" Name="Whammy Mammy" ProgramChange="64" />
+			<Patch Number="Preset A-66" Name="Wicked Lead" ProgramChange="65" />
+			<Patch Number="Preset A-67" Name="Drefull Dr." ProgramChange="66" />
+			<Patch Number="Preset A-68" Name="Wiggle Mod" ProgramChange="67" />
+			<Patch Number="Preset A-69" Name="Feedback Lead" ProgramChange="68" />
+			<Patch Number="Preset A-70" Name="Crunch" ProgramChange="69" />
+			<Patch Number="Preset A-71" Name="Chaus Lead" ProgramChange="70" />
+			<Patch Number="Preset A-72" Name="Out of Control" ProgramChange="71" />
+			<Patch Number="Preset A-73" Name="String Machine" ProgramChange="72" />
+			<Patch Number="Preset A-74" Name="Trom Vlns" ProgramChange="73" />
+			<Patch Number="Preset A-75" Name="Luxury Symph" ProgramChange="74" />
+			<Patch Number="Preset A-76" Name="Debussy" ProgramChange="75" />
+			<Patch Number="Preset A-77" Name="BPF Velo Strings" ProgramChange="76" />
+			<Patch Number="Preset A-78" Name="Detuned Str." ProgramChange="77" />
+			<Patch Number="Preset A-79" Name="Juno B81 Pad" ProgramChange="78" />
+			<Patch Number="Preset A-80" Name="Richland" ProgramChange="79" />
+			<Patch Number="Preset A-81" Name="MOD Strings" ProgramChange="80" />
+			<Patch Number="Preset A-82" Name="Jupiter Pad" ProgramChange="81" />
+			<Patch Number="Preset A-83" Name="Soft Strings" ProgramChange="82" />
+			<Patch Number="Preset A-84" Name="Shan-gri-la" ProgramChange="83" />
+			<Patch Number="Preset A-85" Name="Fine Wine" ProgramChange="84" />
+			<Patch Number="Preset A-86" Name="Glue Pad" ProgramChange="85" />
+			<Patch Number="Preset A-87" Name="True Pad" ProgramChange="86" />
+			<Patch Number="Preset A-88" Name="Foreboding" ProgramChange="87" />
+			<Patch Number="Preset A-89" Name="Skreachea" ProgramChange="88" />
+			<Patch Number="Preset A-90" Name="BPM Pulse 1" ProgramChange="89" />
+			<Patch Number="Preset A-91" Name="BPM Pulse 2" ProgramChange="90" />
+			<Patch Number="Preset A-92" Name="Hi-Pass Puls" ProgramChange="91" />
+			<Patch Number="Preset A-93" Name="Sample'n Hold Me" ProgramChange="92" />
+			<Patch Number="Preset A-94" Name="MKS80 Space" ProgramChange="93" />
+			<Patch Number="Preset A-95" Name="Arctic Sweep" ProgramChange="94" />
+			<Patch Number="Preset A-96" Name="Replicant CS" ProgramChange="95" />
+			<Patch Number="Preset A-97" Name="Stargate" ProgramChange="96" />
+			<Patch Number="Preset A-98" Name="Lost in Time" ProgramChange="97" />
+			<Patch Number="Preset A-99" Name="Circular" ProgramChange="98" />
+			<Patch Number="Preset A-100" Name="Space Choir" ProgramChange="99" />
+			<Patch Number="Preset A-101" Name="Hypass Sweep" ProgramChange="100" />
+			<Patch Number="Preset A-102" Name="BPF Tides" ProgramChange="101" />
+			<Patch Number="Preset A-103" Name="Matrix Sweep" ProgramChange="102" />
+			<Patch Number="Preset A-104" Name="MKS80 Bells" ProgramChange="103" />
+			<Patch Number="Preset A-105" Name="Tiny bells" ProgramChange="104" />
+			<Patch Number="Preset A-106" Name="Chimey" ProgramChange="105" />
+			<Patch Number="Preset A-107" Name="Juno Arp" ProgramChange="106" />
+			<Patch Number="Preset A-108" Name="Sonar Ping" ProgramChange="107" />
+			<Patch Number="Preset A-109" Name="Air Harp" ProgramChange="108" />
+			<Patch Number="Preset A-110" Name="Velo FX Percs" ProgramChange="109" />
+			<Patch Number="Preset A-111" Name="Quizzled" ProgramChange="110" />
+			<Patch Number="Preset A-112" Name="Intermittent" ProgramChange="111" />
+			<Patch Number="Preset A-113" Name="Brain Static" ProgramChange="112" />
+			<Patch Number="Preset A-114" Name="Computone" ProgramChange="113" />
+			<Patch Number="Preset A-115" Name="Pin Matrix" ProgramChange="114" />
+			<Patch Number="Preset A-116" Name="Space Cheese" ProgramChange="115" />
+			<Patch Number="Preset A-117" Name="Rough Day" ProgramChange="116" />
+			<Patch Number="Preset A-118" Name="The Etruscan." ProgramChange="117" />
+			<Patch Number="Preset A-119" Name="Varese" ProgramChange="118" />
+			<Patch Number="Preset A-120" Name="Pipe Dream" ProgramChange="119" />
+			<Patch Number="Preset A-121" Name="Meteor" ProgramChange="120" />
+			<Patch Number="Preset A-122" Name="Snowman" ProgramChange="121" />
+			<Patch Number="Preset A-123" Name="Space Ghost" ProgramChange="122" />
+			<Patch Number="Preset A-124" Name="Ozone" ProgramChange="123" />
+			<Patch Number="Preset A-125" Name="Cool-a-little..." ProgramChange="124" />
+			<Patch Number="Preset A-126" Name="Electro Gulls" ProgramChange="125" />
+			<Patch Number="Preset A-127" Name="Template 1" ProgramChange="126" />
+			<Patch Number="Preset A-128" Name="Template 2" ProgramChange="127" />
+		</PatchNameList>
+
+		<PatchNameList Name="Preset B Patches">
+			<Patch Number="Preset 2-1" Name="MG Bass" ProgramChange="0" />
+			<Patch Number="Preset B-2" Name="Trance Bass 4" ProgramChange="1" />
+			<Patch Number="Preset B-3" Name="Trance Bass 5" ProgramChange="2" />
+			<Patch Number="Preset B-4" Name="Trance Bass 6" ProgramChange="3" />
+			<Patch Number="Preset B-5" Name="Bone Sa Mo" ProgramChange="4" />
+			<Patch Number="Preset B-6" Name="Bone Yall" ProgramChange="5" />
+			<Patch Number="Preset B-7" Name="PHM 1" ProgramChange="6" />
+			<Patch Number="Preset B-8" Name="PHM 2" ProgramChange="7" />
+			<Patch Number="Preset B-9" Name="PHM 3" ProgramChange="8" />
+			<Patch Number="Preset B-10" Name="Static Bass 1" ProgramChange="9" />
+			<Patch Number="Preset B-11" Name="Static Bass 2" ProgramChange="10" />
+			<Patch Number="Preset B-12" Name="M Bass" ProgramChange="11" />
+			<Patch Number="Preset B-13" Name="PHM 4" ProgramChange="12" />
+			<Patch Number="Preset B-14" Name="PHM 5" ProgramChange="13" />
+			<Patch Number="Preset B-15" Name="Mini Bass" ProgramChange="14" />
+			<Patch Number="Preset B-16" Name="Wonderland Bass" ProgramChange="15" />
+			<Patch Number="Preset B-17" Name="Hard Bass" ProgramChange="16" />
+			<Patch Number="Preset B-18" Name="Fretless Synth" ProgramChange="17" />
+			<Patch Number="Preset B-19" Name="Lead Bass" ProgramChange="18" />
+			<Patch Number="Preset B-20" Name="JP Fat Synbrass" ProgramChange="19" />
+			<Patch Number="Preset B-21" Name="Gate me!" ProgramChange="20" />
+			<Patch Number="Preset B-22" Name="Kling Klang 2" ProgramChange="21" />
+			<Patch Number="Preset B-23" Name="Rising Key" ProgramChange="22" />
+			<Patch Number="Preset B-24" Name="Flat Out 1" ProgramChange="23" />
+			<Patch Number="Preset B-25" Name="Flat LFO" ProgramChange="24" />
+			<Patch Number="Preset B-26" Name="Flat Out 2" ProgramChange="25" />
+			<Patch Number="Preset B-27" Name="Flat Out 3" ProgramChange="26" />
+			<Patch Number="Preset B-28" Name="MiniSynth 1" ProgramChange="27" />
+			<Patch Number="Preset B-29" Name="AW/DM Resonance1" ProgramChange="28" />
+			<Patch Number="Preset B-30" Name="AW/DM Resonance2" ProgramChange="29" />
+			<Patch Number="Preset B-31" Name="AW/DM Resonance3" ProgramChange="30" />
+			<Patch Number="Preset B-32" Name="AW/DM Resonance4" ProgramChange="31" />
+			<Patch Number="Preset B-33" Name="WONDERLAND 1" ProgramChange="32" />
+			<Patch Number="Preset B-34" Name="WONDERLAND 2" ProgramChange="33" />
+			<Patch Number="Preset B-35" Name="Jupiter8Arpeggio" ProgramChange="34" />
+			<Patch Number="Preset B-36" Name="Fuel" ProgramChange="35" />
+			<Patch Number="Preset B-37" Name="Shake" ProgramChange="36" />
+			<Patch Number="Preset B-38" Name="Model" ProgramChange="37" />
+			<Patch Number="Preset B-39" Name="Vanishing Key" ProgramChange="38" />
+			<Patch Number="Preset B-40" Name="Fade Away" ProgramChange="39" />
+			<Patch Number="Preset B-41" Name="Hard Key 1" ProgramChange="40" />
+			<Patch Number="Preset B-42" Name="Hard Key 2" ProgramChange="41" />
+			<Patch Number="Preset B-43" Name="Hard Key 3" ProgramChange="42" />
+			<Patch Number="Preset B-44" Name="Cheesy Key 1" ProgramChange="43" />
+			<Patch Number="Preset B-45" Name="Cheesy Key 2" ProgramChange="44" />
+			<Patch Number="Preset B-46" Name="DM 1" ProgramChange="45" />
+			<Patch Number="Preset B-47" Name="DM 2" ProgramChange="46" />
+			<Patch Number="Preset B-48" Name="Hard Key 4" ProgramChange="47" />
+			<Patch Number="Preset B-49" Name="Hard Key 5" ProgramChange="48" />
+			<Patch Number="Preset B-50" Name="Hard Key 6" ProgramChange="49" />
+			<Patch Number="Preset B-51" Name="DM 3" ProgramChange="50" />
+			<Patch Number="Preset B-52" Name="Arpy 3" ProgramChange="51" />
+			<Patch Number="Preset B-53" Name="Arpy 4" ProgramChange="52" />
+			<Patch Number="Preset B-54" Name="J Echo" ProgramChange="53" />
+			<Patch Number="Preset B-55" Name="Mini Seq. 1" ProgramChange="54" />
+			<Patch Number="Preset B-56" Name="Mini Seq. 2" ProgramChange="55" />
+			<Patch Number="Preset B-57" Name="Pulsar 88" ProgramChange="56" />
+			<Patch Number="Preset B-58" Name="Kling Klang 3" ProgramChange="57" />
+			<Patch Number="Preset B-59" Name="Straight Jacket" ProgramChange="58" />
+			<Patch Number="Preset B-60" Name="DM 4" ProgramChange="59" />
+			<Patch Number="Preset B-61" Name="CHEM 1" ProgramChange="60" />
+			<Patch Number="Preset B-62" Name="CHEM 2" ProgramChange="61" />
+			<Patch Number="Preset B-63" Name="Dusseldorf 1" ProgramChange="62" />
+			<Patch Number="Preset B-64" Name="Dusseldorf 2" ProgramChange="63" />
+			<Patch Number="Preset B-65" Name="Virtual Voltage" ProgramChange="64" />
+			<Patch Number="Preset B-66" Name="DAD or alive" ProgramChange="65" />
+			<Patch Number="Preset B-67" Name="Freeze Frame" ProgramChange="66" />
+			<Patch Number="Preset B-68" Name="Rave2theRhythm" ProgramChange="67" />
+			<Patch Number="Preset B-69" Name="Cheesy Lead 1" ProgramChange="68" />
+			<Patch Number="Preset B-70" Name="Cheesy Lead 2" ProgramChange="69" />
+			<Patch Number="Preset B-71" Name="Cheesy Lead 3" ProgramChange="70" />
+			<Patch Number="Preset B-72" Name="Cheesy Lead 4" ProgramChange="71" />
+			<Patch Number="Preset B-73" Name="Cheesy Lead 5" ProgramChange="72" />
+			<Patch Number="Preset B-74" Name="Coreline Nine" ProgramChange="73" />
+			<Patch Number="Preset B-75" Name="Wonderland Pad 1" ProgramChange="74" />
+			<Patch Number="Preset B-76" Name="Wonderland Pad 2" ProgramChange="75" />
+			<Patch Number="Preset B-77" Name="Wonderland Pad 3" ProgramChange="76" />
+			<Patch Number="Preset B-78" Name="seqaT nortoleM" ProgramChange="77" />
+			<Patch Number="Preset B-79" Name="Venusian Strings" ProgramChange="78" />
+			<Patch Number="Preset B-80" Name="Wonderland Pad 4" ProgramChange="79" />
+			<Patch Number="Preset B-81" Name="GRAMMAPHONE 1" ProgramChange="80" />
+			<Patch Number="Preset B-82" Name="GRAMMAPHONE 2" ProgramChange="81" />
+			<Patch Number="Preset B-83" Name="GRAMMAPHONE 3" ProgramChange="82" />
+			<Patch Number="Preset B-84" Name="Oil Canvas 1" ProgramChange="83" />
+			<Patch Number="Preset B-85" Name="Oil Canvas 2" ProgramChange="84" />
+			<Patch Number="Preset B-86" Name="Oil Canvas 3" ProgramChange="85" />
+			<Patch Number="Preset B-87" Name="Oil Canvas 4" ProgramChange="86" />
+			<Patch Number="Preset B-88" Name="Oil Canvas 5" ProgramChange="87" />
+			<Patch Number="Preset B-89" Name="Blossoms 1" ProgramChange="88" />
+			<Patch Number="Preset B-90" Name="Blossoms 2" ProgramChange="89" />
+			<Patch Number="Preset B-91" Name="Broom" ProgramChange="90" />
+			<Patch Number="Preset B-92" Name="J Pad" ProgramChange="91" />
+			<Patch Number="Preset B-93" Name="Ream Kate" ProgramChange="92" />
+			<Patch Number="Preset B-94" Name="Temple 1" ProgramChange="93" />
+			<Patch Number="Preset B-95" Name="Temple 2" ProgramChange="94" />
+			<Patch Number="Preset B-96" Name="Thick" ProgramChange="95" />
+			<Patch Number="Preset B-97" Name="Open 54" ProgramChange="96" />
+			<Patch Number="Preset B-98" Name="Kling Klang 4" ProgramChange="97" />
+			<Patch Number="Preset B-99" Name="Epic" ProgramChange="98" />
+			<Patch Number="Preset B-100" Name="Multiples 1" ProgramChange="99" />
+			<Patch Number="Preset B-101" Name="Lodelity" ProgramChange="100" />
+			<Patch Number="Preset B-102" Name="Lode in Stereo" ProgramChange="101" />
+			<Patch Number="Preset B-103" Name="Wonderland Brs" ProgramChange="102" />
+			<Patch Number="Preset B-104" Name="Hard Pad" ProgramChange="103" />
+			<Patch Number="Preset B-105" Name="Gate in Stereo 1" ProgramChange="104" />
+			<Patch Number="Preset B-106" Name="Gate in Stereo 2" ProgramChange="105" />
+			<Patch Number="Preset B-107" Name="Gate in Stereo 3" ProgramChange="106" />
+			<Patch Number="Preset B-108" Name="S/H in Stereo" ProgramChange="107" />
+			<Patch Number="Preset B-109" Name="Bub" ProgramChange="108" />
+			<Patch Number="Preset B-110" Name="Simple E.Drums" ProgramChange="109" />
+			<Patch Number="Preset B-111" Name="Boom your Woofer" ProgramChange="110" />
+			<Patch Number="Preset B-112" Name="Multiples 2" ProgramChange="111" />
+			<Patch Number="Preset B-113" Name="Midnight 1-900" ProgramChange="112" />
+			<Patch Number="Preset B-114" Name="100% After" ProgramChange="113" />
+			<Patch Number="Preset B-115" Name="Time and Space" ProgramChange="114" />
+			<Patch Number="Preset B-116" Name="LFO 1" ProgramChange="115" />
+			<Patch Number="Preset B-117" Name="LFO 2" ProgramChange="116" />
+			<Patch Number="Preset B-118" Name="HLAH" ProgramChange="117" />
+			<Patch Number="Preset B-119" Name="Blade" ProgramChange="118" />
+			<Patch Number="Preset B-120" Name="Cyborg" ProgramChange="119" />
+			<Patch Number="Preset B-121" Name="Fall" ProgramChange="120" />
+			<Patch Number="Preset B-122" Name="Rise" ProgramChange="121" />
+			<Patch Number="Preset B-123" Name="Radioactive 1" ProgramChange="122" />
+			<Patch Number="Preset B-124" Name="Radioactive 2" ProgramChange="123" />
+			<Patch Number="Preset B-125" Name="DroneOn" ProgramChange="124" />
+			<Patch Number="Preset B-126" Name="Duss" ProgramChange="125" />
+			<Patch Number="Preset B-127" Name="Hydro Noise" ProgramChange="126" />
+			<Patch Number="Preset B-128" Name="From Space..." ProgramChange="127" />
+		</PatchNameList>
+
+		<PatchNameList Name="Preset C Patches">
+			<Patch Number="Preset 3-1" Name="Culture Bass" ProgramChange="0" />
+			<Patch Number="Preset C-2" Name="Techno Brie" ProgramChange="1" />
+			<Patch Number="Preset C-3" Name="Wired Funk" ProgramChange="2" />
+			<Patch Number="Preset C-4" Name="Deep Thought" ProgramChange="3" />
+			<Patch Number="Preset C-5" Name="Trance Bass" ProgramChange="4" />
+			<Patch Number="Preset C-6" Name="Baroque Bass" ProgramChange="5" />
+			<Patch Number="Preset C-7" Name="Pulse 303" ProgramChange="6" />
+			<Patch Number="Preset C-8" Name="101 Sub Bass" ProgramChange="7" />
+			<Patch Number="Preset C-9" Name="Serious Low Ant1" ProgramChange="8" />
+			<Patch Number="Preset C-10" Name="Serious Low Ant2" ProgramChange="9" />
+			<Patch Number="Preset C-11" Name="Bone" ProgramChange="10" />
+			<Patch Number="Preset C-12" Name="JX Dyna Bass" ProgramChange="11" />
+			<Patch Number="Preset C-13" Name="Xa Bass" ProgramChange="12" />
+			<Patch Number="Preset C-14" Name="Offbeat Bass" ProgramChange="13" />
+			<Patch Number="Preset C-15" Name="Drone Bass" ProgramChange="14" />
+			<Patch Number="Preset C-16" Name="Clean Wow Bass" ProgramChange="15" />
+			<Patch Number="Preset C-17" Name="FM Solid" ProgramChange="16" />
+			<Patch Number="Preset C-18" Name="FM Tube Bass" ProgramChange="17" />
+			<Patch Number="Preset C-19" Name="FM Rave Bass" ProgramChange="18" />
+			<Patch Number="Preset C-20" Name="Velo Organ" ProgramChange="19" />
+			<Patch Number="Preset C-21" Name="Club Organ" ProgramChange="20" />
+			<Patch Number="Preset C-22" Name="Old Organ" ProgramChange="21" />
+			<Patch Number="Preset C-23" Name="PercussivToyPno" ProgramChange="22" />
+			<Patch Number="Preset C-24" Name="Noise Toys" ProgramChange="23" />
+			<Patch Number="Preset C-25" Name="Apostle Piano" ProgramChange="24" />
+			<Patch Number="Preset C-26" Name="Clavi-Club" ProgramChange="25" />
+			<Patch Number="Preset C-27" Name="Perc Clavsynth" ProgramChange="26" />
+			<Patch Number="Preset C-28" Name="Cyber Cellopluck" ProgramChange="27" />
+			<Patch Number="Preset C-29" Name="Pulse Key" ProgramChange="28" />
+			<Patch Number="Preset C-30" Name="Nova Catch" ProgramChange="29" />
+			<Patch Number="Preset C-31" Name="Eurodance Perc 1" ProgramChange="30" />
+			<Patch Number="Preset C-32" Name="Tribal Party" ProgramChange="31" />
+			<Patch Number="Preset C-33" Name="Viking" ProgramChange="32" />
+			<Patch Number="Preset C-34" Name="Nova Pad" ProgramChange="33" />
+			<Patch Number="Preset C-35" Name="HPF Saws" ProgramChange="34" />
+			<Patch Number="Preset C-36" Name="5th Saws Key" ProgramChange="35" />
+			<Patch Number="Preset C-37" Name="Eros Synth" ProgramChange="36" />
+			<Patch Number="Preset C-38" Name="Mov'Mov Synth !" ProgramChange="37" />
+			<Patch Number="Preset C-39" Name="Formula Stack 1" ProgramChange="38" />
+			<Patch Number="Preset C-40" Name="Formula Stack 2" ProgramChange="39" />
+			<Patch Number="Preset C-41" Name="Raveline" ProgramChange="40" />
+			<Patch Number="Preset C-42" Name="Ravers Delite" ProgramChange="41" />
+			<Patch Number="Preset C-43" Name="Super Saw Soup" ProgramChange="42" />
+			<Patch Number="Preset C-44" Name="Chainsawmassacre" ProgramChange="43" />
+			<Patch Number="Preset C-45" Name="Daft Five" ProgramChange="44" />
+			<Patch Number="Preset C-46" Name="Coming up" ProgramChange="45" />
+			<Patch Number="Preset C-47" Name="Power of 80's" ProgramChange="46" />
+			<Patch Number="Preset C-48" Name="Jericho Horns" ProgramChange="47" />
+			<Patch Number="Preset C-49" Name="Milling Lead" ProgramChange="48" />
+			<Patch Number="Preset C-50" Name="Dark Loonie" ProgramChange="49" />
+			<Patch Number="Preset C-51" Name="X-Mod May-Day !" ProgramChange="50" />
+			<Patch Number="Preset C-52" Name="Dirty Mania" ProgramChange="51" />
+			<Patch Number="Preset C-53" Name="Vinyl Story" ProgramChange="52" />
+			<Patch Number="Preset C-54" Name="Zipper Hymn" ProgramChange="53" />
+			<Patch Number="Preset C-55" Name="Nova Attack" ProgramChange="54" />
+			<Patch Number="Preset C-56" Name="Super Attack" ProgramChange="55" />
+			<Patch Number="Preset C-57" Name="Beep 8000" ProgramChange="56" />
+			<Patch Number="Preset C-58" Name="Optic Perc" ProgramChange="57" />
+			<Patch Number="Preset C-59" Name="8008-Cow Signal" ProgramChange="58" />
+			<Patch Number="Preset C-60" Name="X-FM Metallic" ProgramChange="59" />
+			<Patch Number="Preset C-61" Name="Pluck n Pray" ProgramChange="60" />
+			<Patch Number="Preset C-62" Name="Bermuda Triangle" ProgramChange="61" />
+			<Patch Number="Preset C-63" Name="Home of the Rave" ProgramChange="62" />
+			<Patch Number="Preset C-64" Name="Paris spirit" ProgramChange="63" />
+			<Patch Number="Preset C-65" Name="Eurodance Perc 2" ProgramChange="64" />
+			<Patch Number="Preset C-66" Name="Lo-Fi Chops" ProgramChange="65" />
+			<Patch Number="Preset C-67" Name="Tranvients" ProgramChange="66" />
+			<Patch Number="Preset C-68" Name="Voicetransformer" ProgramChange="67" />
+			<Patch Number="Preset C-69" Name="AW/DM" ProgramChange="68" />
+			<Patch Number="Preset C-70" Name="Braindead" ProgramChange="69" />
+			<Patch Number="Preset C-71" Name="I get a Kick" ProgramChange="70" />
+			<Patch Number="Preset C-72" Name="Upside down" ProgramChange="71" />
+			<Patch Number="Preset C-73" Name="Hoppy Lead" ProgramChange="72" />
+			<Patch Number="Preset C-74" Name="Magic Ribbon" ProgramChange="73" />
+			<Patch Number="Preset C-75" Name="Nice Lead" ProgramChange="74" />
+			<Patch Number="Preset C-76" Name="Solo Sine n Square" ProgramChange="75" />
+			<Patch Number="Preset C-77" Name="Vintage Voltage" ProgramChange="76" />
+			<Patch Number="Preset C-78" Name="Trusty Lead" ProgramChange="77" />
+			<Patch Number="Preset C-79" Name="Dream P5" ProgramChange="78" />
+			<Patch Number="Preset C-80" Name="Eastern Lead 1" ProgramChange="79" />
+			<Patch Number="Preset C-81" Name="Eastern Lead 2" ProgramChange="80" />
+			<Patch Number="Preset C-82" Name="Tri n Saw Lead" ProgramChange="81" />
+			<Patch Number="Preset C-83" Name="Crystal Noise" ProgramChange="82" />
+			<Patch Number="Preset C-84" Name="Happy euro Lead" ProgramChange="83" />
+			<Patch Number="Preset C-85" Name="Alphabet Lead" ProgramChange="84" />
+			<Patch Number="Preset C-86" Name="Feedbacky" ProgramChange="85" />
+			<Patch Number="Preset C-87" Name="Trance Lead" ProgramChange="86" />
+			<Patch Number="Preset C-88" Name="CheeseOscillator" ProgramChange="87" />
+			<Patch Number="Preset C-89" Name="Prod Lead" ProgramChange="88" />
+			<Patch Number="Preset C-90" Name="Dirty Electrons" ProgramChange="89" />
+			<Patch Number="Preset C-91" Name="Kitch Vinylead" ProgramChange="90" />
+			<Patch Number="Preset C-92" Name="Killerbeez" ProgramChange="91" />
+			<Patch Number="Preset C-93" Name="*\ Ethnomad !" ProgramChange="92" />
+			<Patch Number="Preset C-94" Name="P5 Sync" ProgramChange="93" />
+			<Patch Number="Preset C-95" Name="Ergot Rye Seed" ProgramChange="94" />
+			<Patch Number="Preset C-96" Name="FB 5th" ProgramChange="95" />
+			<Patch Number="Preset C-97" Name="70's Mono" ProgramChange="96" />
+			<Patch Number="Preset C-98" Name="Mega HPF Lead" ProgramChange="97" />
+			<Patch Number="Preset C-99" Name="Siren's Song" ProgramChange="98" />
+			<Patch Number="Preset C-100" Name="Retro Strings" ProgramChange="99" />
+			<Patch Number="Preset C-101" Name="Ambient Pad" ProgramChange="100" />
+			<Patch Number="Preset C-102" Name="Mystery Room" ProgramChange="101" />
+			<Patch Number="Preset C-103" Name="ElectronicHarmon" ProgramChange="102" />
+			<Patch Number="Preset C-104" Name="Jungle Pad" ProgramChange="103" />
+			<Patch Number="Preset C-105" Name="Filtersweep 1" ProgramChange="104" />
+			<Patch Number="Preset C-106" Name="Filtersweep 2" ProgramChange="105" />
+			<Patch Number="Preset C-107" Name="Sizzler" ProgramChange="106" />
+			<Patch Number="Preset C-108" Name="Hi-Pass Saws" ProgramChange="107" />
+			<Patch Number="Preset C-109" Name="Piping Pad" ProgramChange="108" />
+			<Patch Number="Preset C-110" Name="Odyssee Astral" ProgramChange="109" />
+			<Patch Number="Preset C-111" Name="Agitation" ProgramChange="110" />
+			<Patch Number="Preset C-112" Name="Safari LFO" ProgramChange="111" />
+			<Patch Number="Preset C-113" Name="Tricky LFO" ProgramChange="112" />
+			<Patch Number="Preset C-114" Name="Extra Hi-Fi" ProgramChange="113" />
+			<Patch Number="Preset C-115" Name="Rhythmic Synth" ProgramChange="114" />
+			<Patch Number="Preset C-116" Name="Asteroid Mode" ProgramChange="115" />
+			<Patch Number="Preset C-117" Name="Disaster 1" ProgramChange="116" />
+			<Patch Number="Preset C-118" Name="Fuzzy Logic" ProgramChange="117" />
+			<Patch Number="Preset C-119" Name="QZ Sub Naut" ProgramChange="118" />
+			<Patch Number="Preset C-120" Name="Searing" ProgramChange="119" />
+			<Patch Number="Preset C-121" Name="Disaster 2" ProgramChange="120" />
+			<Patch Number="Preset C-122" Name="Scrapers" ProgramChange="121" />
+			<Patch Number="Preset C-123" Name="Trip in Stereo" ProgramChange="122" />
+			<Patch Number="Preset C-124" Name="CHEM" ProgramChange="123" />
+			<Patch Number="Preset C-125" Name="Xform" ProgramChange="124" />
+			<Patch Number="Preset C-126" Name="Amuck" ProgramChange="125" />
+			<Patch Number="Preset C-127" Name="Cat Conversation" ProgramChange="126" />
+			<Patch Number="Preset C-128" Name="Pulsing Sweep" ProgramChange="127" />
+		</PatchNameList>
+
+	</MasterDeviceNames>
+</MIDINameDocument>
