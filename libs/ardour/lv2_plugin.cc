@@ -105,6 +105,7 @@ public:
 	LilvNode* lv2_integer;
 	LilvNode* lv2_sampleRate;
 	LilvNode* lv2_toggled;
+	LilvNode* lv2_enumeration;
 	LilvNode* midi_MidiEvent;
 	LilvNode* ui_GtkUI;
 	LilvNode* ui_external;
@@ -985,6 +986,8 @@ LV2Plugin::get_parameter_descriptor(uint32_t which, ParameterDescriptor& desc) c
 		desc.largestep = delta / 10.0f;
 	}
 
+	desc.enumeration = lilv_port_has_property(_impl->plugin, port, _world.lv2_enumeration);
+
 	lilv_node_free(def);
 	lilv_node_free(min);
 	lilv_node_free(max);
@@ -1336,6 +1339,7 @@ LV2World::LV2World()
 	lv2_integer        = lilv_new_uri(world, LILV_NS_LV2 "integer");
 	lv2_sampleRate     = lilv_new_uri(world, LILV_NS_LV2 "sampleRate");
 	lv2_toggled        = lilv_new_uri(world, LILV_NS_LV2 "toggled");
+	lv2_enumeration    = lilv_new_uri(world, LILV_NS_LV2 "enumeration");
 	midi_MidiEvent     = lilv_new_uri(world, LILV_URI_MIDI_EVENT);
 	ui_GtkUI           = lilv_new_uri(world, NS_UI "GtkUI");
 	ui_external        = lilv_new_uri(world, NS_UI "external");
