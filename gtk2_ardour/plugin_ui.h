@@ -269,7 +269,9 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 	void start_touch (ControlUI*);
 	void stop_touch (ControlUI*);
 
+	/* XXX: remove */
 	void print_parameter (char *buf, uint32_t len, uint32_t param);
+	bool integer_printer (char* buf, Gtk::Adjustment &, ControlUI *);
 };
 
 class PluginUIWindow : public Gtk::Window

@@ -459,10 +459,24 @@ GenericPluginUI::automation_state_changed (ControlUI* cui)
 }
 
 
-static bool
-integer_printer (char buf[32], Adjustment &adj)
+bool
+GenericPluginUI::integer_printer (char buf[32], Adjustment &adj, ControlUI* cui)
 {
-	snprintf (buf, 32, "%.0f", adj.get_value());
+	float const v = adj.get_value ();
+	
+	if (cui->scale_points) {
+		Plugin::ScalePoints::const_iterator i = cui->scale_points->begin ();
+		while (i != cui->scale_points->end() && i->second != v) {
+			++i;
+		}
+
+		if (i != cui->scale_points->end ()) {
+			snprintf (buf, 32, "%s", i->first.c_str());
+			return true;
+		}
+	}
+		
+	snprintf (buf, 32, "%.0f", v);
 	return true;
 }
 
@@ -496,11 +510,17 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 
 	if (plugin->parameter_is_input(port_index)) {
 
-		/* Build a combo box */
-
+		/* See if there any named values for our input value */
 		control_ui->scale_points = plugin->get_scale_points (port_index);
 
-		if (control_ui->scale_points) {
+		/* If this parameter is an integer, work out the number of distinct values
+		   it can take on (assuming that lower and upper values are allowed).
+		*/
+		int const steps = desc.integer_step ? (desc.upper - desc.lower + 1) / desc.step : 0;
+
+		if (control_ui->scale_points && steps && control_ui->scale_points->size() == steps) {
+			/* There is a label for each possible value of this input, so build a combo box */
+
 			std::vector<std::string> labels;
 			for (
 				ARDOUR::Plugin::ScalePoints::const_iterator i = control_ui->scale_points->begin();
@@ -576,7 +596,7 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 		if (desc.integer_step) {
 			control_ui->clickbox = new ClickBox (adj, "PluginUIClickBox");
 			Gtkmm2ext::set_size_request_to_display_given_text (*control_ui->clickbox, "g9999999", 2, 2);
-			control_ui->clickbox->set_printer (sigc::ptr_fun (integer_printer));
+			control_ui->clickbox->set_printer (sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::integer_printer), control_ui));
 		} else {
 			//sigc::slot<void,char*,uint32_t> pslot = sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::print_parameter), (uint32_t) port_index);
 
