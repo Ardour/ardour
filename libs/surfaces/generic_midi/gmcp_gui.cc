@@ -165,6 +165,7 @@ GMCPGUI::binding_changed ()
 		for (list<GenericMidiControlProtocol::MapInfo>::iterator x = cp.map_info.begin(); x != cp.map_info.end(); ++x) {
 			if (str == x->name) {
 				cp.load_bindings (x->path);
+				motorised_button.set_active (cp.motorised ());
 				break;
 			}
 		}
