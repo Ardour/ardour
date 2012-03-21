@@ -32,8 +32,6 @@ using namespace sigc;
 ClickBox::ClickBox (Gtk::Adjustment *adjp, const string &name, bool round_to_steps)
 	: AutoSpin (*adjp,0,round_to_steps)
 {
-	print_func = default_printer;
-	print_arg = 0;
 	layout = create_pango_layout ("");
 	twidth = 0;
 	theight = 0;
@@ -80,22 +78,15 @@ ClickBox::button_release_handler (GdkEventButton* ev)
 }
 
 void
-ClickBox::default_printer (char buf[32], Gtk::Adjustment &adj, 
-			       void *)
-{
-	sprintf (buf, "%.2f", adj.get_value());
-}
-
-void
 ClickBox::set_label ()
 {
-	if (!print_func) {
-		return;
-	}
-
 	char buf[32];
 
-	print_func (buf, get_adjustment(), print_arg);
+	bool const h = _printer (buf, get_adjustment());
+	if (!h) {
+		/* the printer didn't handle it, so use a default */
+		sprintf (buf, "%.2f", get_adjustment().get_value ());
+	}
 
 	layout->set_text (buf);
 	layout->get_pixel_size (twidth, theight);
@@ -122,31 +113,36 @@ ClickBox::on_expose_event (GdkEventExpose *ev)
 
 	Gtk::DrawingArea::on_expose_event (ev);
 
-	if (print_func) {
-
-		Glib::RefPtr<Gtk::Style> style (get_style());
-		Glib::RefPtr<Gdk::GC> fg_gc (style->get_fg_gc (Gtk::STATE_NORMAL));
-		Glib::RefPtr<Gdk::GC> bg_gc (style->get_bg_gc (Gtk::STATE_NORMAL));
-		Glib::RefPtr<Gdk::Window> win (get_window());
-		
-		GdkRectangle base_rect;
-		GdkRectangle draw_rect;
-		gint x, y, width, height, depth;
-		
-		win->get_geometry (x, y, width, height, depth);
-		
-		base_rect.width = width;
-		base_rect.height = height;
-		base_rect.x = 0;
-		base_rect.y = 0;
-		
-		gdk_rectangle_intersect (&ev->area, &base_rect, &draw_rect);
-		win->draw_rectangle (bg_gc, true, draw_rect.x, draw_rect.y, draw_rect.width, draw_rect.height);
-
-		if (twidth && theight) {
-		  win->draw_layout (fg_gc, (width - twidth) / 2, (height - theight) / 2, layout);
-		}
+	Glib::RefPtr<Gtk::Style> style (get_style());
+	Glib::RefPtr<Gdk::GC> fg_gc (style->get_fg_gc (Gtk::STATE_NORMAL));
+	Glib::RefPtr<Gdk::GC> bg_gc (style->get_bg_gc (Gtk::STATE_NORMAL));
+	Glib::RefPtr<Gdk::Window> win (get_window());
+	
+	GdkRectangle base_rect;
+	GdkRectangle draw_rect;
+	gint x, y, width, height, depth;
+	
+	win->get_geometry (x, y, width, height, depth);
+	
+	base_rect.width = width;
+	base_rect.height = height;
+	base_rect.x = 0;
+	base_rect.y = 0;
+	
+	gdk_rectangle_intersect (&ev->area, &base_rect, &draw_rect);
+	win->draw_rectangle (bg_gc, true, draw_rect.x, draw_rect.y, draw_rect.width, draw_rect.height);
+	
+	if (twidth && theight) {
+		win->draw_layout (fg_gc, (width - twidth) / 2, (height - theight) / 2, layout);
 	}
 
 	return true;
 }
+
+void
+ClickBox::set_printer (sigc::slot<bool, char *, Gtk::Adjustment &> p)
+{
+	_printer = p;
+	set_label ();
+}
+

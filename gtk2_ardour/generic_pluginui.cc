@@ -459,9 +459,11 @@ GenericPluginUI::automation_state_changed (ControlUI* cui)
 }
 
 
-static void integer_printer (char buf[32], Adjustment &adj, void */*arg*/)
+static bool
+integer_printer (char buf[32], Adjustment &adj)
 {
 	snprintf (buf, 32, "%.0f", adj.get_value());
+	return true;
 }
 
 void
@@ -574,7 +576,7 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 		if (desc.integer_step) {
 			control_ui->clickbox = new ClickBox (adj, "PluginUIClickBox");
 			Gtkmm2ext::set_size_request_to_display_given_text (*control_ui->clickbox, "g9999999", 2, 2);
-			control_ui->clickbox->set_print_func (integer_printer, 0);
+			control_ui->clickbox->set_printer (sigc::ptr_fun (integer_printer));
 		} else {
 			//sigc::slot<void,char*,uint32_t> pslot = sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::print_parameter), (uint32_t) port_index);
 

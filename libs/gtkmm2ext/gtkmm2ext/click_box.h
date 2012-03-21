@@ -33,21 +33,17 @@ class ClickBox : public Gtk::DrawingArea, public AutoSpin
 	ClickBox (Gtk::Adjustment *adj, const std::string &name, bool round_to_steps = false);
 	~ClickBox ();
 
-	void set_print_func(void (*pf)(char buf[32], Gtk::Adjustment &, void *),
-			    void *arg) {
-		print_func = pf;
-		print_arg = arg;
-		set_label ();
-	}
-
+	/** Set a slot to `print' the value to put in the box.
+	 *  The slot should write the value of the Gtk::Adjustment
+	 *  into the char array, and should return true if it has done the printing,
+	 *  or false to use the ClickBox's default printing method.
+	 */
+	void set_printer (sigc::slot<bool, char *, Gtk::Adjustment &>);
 
   protected:
 	bool on_expose_event (GdkEventExpose*);
 
   private:
-	void (*print_func) (char buf[32], Gtk::Adjustment &, void *);
-	void *print_arg;
-
 	Glib::RefPtr<Pango::Layout> layout;
 	int twidth;
 	int theight;
@@ -57,7 +53,7 @@ class ClickBox : public Gtk::DrawingArea, public AutoSpin
 	bool button_press_handler (GdkEventButton *);
 	bool button_release_handler (GdkEventButton *);
 
-	static void default_printer (char buf[32], Gtk::Adjustment &, void *);
+	sigc::slot<bool, char *, Gtk::Adjustment &> _printer;
 };
 
 } /* namespace */
