@@ -259,7 +259,7 @@ MIDIControllable::midi_sense_program_change (Parser &, byte msg)
 
 	if (!controllable->is_toggle()) {
 		controllable->set_value (midi_to_control (msg));
-	} else {
+	} else if (msg == control_additional) {
 		controllable->set_value (controllable->get_value() > 0.5f ? 0.0f : 1.0f);
 	}
 
