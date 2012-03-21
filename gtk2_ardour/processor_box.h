@@ -181,6 +181,7 @@ private:
 		void button_clicked ();
 		void control_changed ();
 		std::string state_id () const;
+		void set_tooltip ();
 
 		boost::weak_ptr<ARDOUR::AutomationControl> _control;
 		/* things for a slider */

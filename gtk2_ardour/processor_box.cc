@@ -445,6 +445,29 @@ ProcessorEntry::Control::Control (Glib::RefPtr<Gdk::Pixbuf> s, boost::shared_ptr
 	}
 
 	control_changed ();
+	set_tooltip ();
+}
+
+void
+ProcessorEntry::Control::set_tooltip ()
+{
+	boost::shared_ptr<AutomationControl> c = _control.lock ();
+
+	if (!c) {
+		return;
+	}
+	
+	stringstream s;
+	s << _name << ": ";
+	if (c->toggled ()) {
+		s << (c->get_value() > 0.5 ? _("on") : _("off"));
+	} else {
+		s << c->internal_to_interface (c->get_value ());
+	}
+	
+	ARDOUR_UI::instance()->set_tip (_label, s.str ());
+	ARDOUR_UI::instance()->set_tip (_slider, s.str ());
+	ARDOUR_UI::instance()->set_tip (_button, s.str ());
 }
 
 void
