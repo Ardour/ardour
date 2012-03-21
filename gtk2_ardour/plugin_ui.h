@@ -228,7 +228,7 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 		/* input */
 
 		Gtk::ComboBoxText*                      combo;
-		boost::shared_ptr<ARDOUR::Plugin::ScalePoints> combo_map;
+		boost::shared_ptr<ARDOUR::Plugin::ScalePoints> scale_points;
 		Gtk::ToggleButton*                      button;
 		boost::shared_ptr<AutomationController> controller;
 		Gtkmm2ext::ClickBox*                    clickbox;
