@@ -159,9 +159,6 @@ if [ ! -d LRDF ] ; then
     git clone git://github.com/swh/LRDF.git
 fi
 
-
-
-
 tar xf boost_1_49_0.tar.bz2 && \
   (set -e && cd boost_1_49_0 && ./bootstrap.sh --prefix=$PREFIX --with-libraries=exception && ./b2 && ./b2 install) || die "boost build failed"
 
@@ -225,11 +222,11 @@ tar xf aubio-0.3.2.tar.gz
 
 # these python lib wants to install to a system-wide location
 tar xf rdflib-3.2.0.tar.gz && \
-    (set -e && cd rdflib-3.2.0 && python ./setup.py build && sudo python ./setup.py install)
+    (set -e && cd rdflib-3.2.0 && unset MACOSX_DEPLOYMENT_TARGET && python ./setup.py build && sudo python ./setup.py install)
 tar xf setuptools-0.6c11.tar.gz && \
-    (set -e && cd setuptools-0.6c11 && python ./setup.py build && sudo python ./setup.py install)
+    (set -e && cd setuptools-0.6c11 && unset MACOSX_DEPLOYMENT_TARGET && python ./setup.py build && sudo python ./setup.py install)
 tar xf isodate-0.4.0.tar.gz && \
-    (set -e && cd isodate-0.4.0 && python ./setup.py build && sudo python ./setup.py install)
+    (set -e && cd isodate-0.4.0 && unset MACOSX_DEPLOYMENT_TARGET && python ./setup.py build && sudo python ./setup.py install)
 
 (set -e && cd LRDF && \
   sed 's/glibtoolize/libtoolize/g' < autogen.sh > ag.sh && mv ag.sh autogen.sh && \
@@ -248,6 +245,8 @@ tar xf isodate-0.4.0.tar.gz && \
     (set -e && cd serd/trunk && ./waf configure --prefix=$PREFIX && ./waf && ./waf install) || die "serd build failed"
 (if [ ! -d sord ] ; then mkdir sord ; fi && cd sord && svn co http://svn.drobilla.net/sord/trunk)  && \
     (set -e && cd sord/trunk && ./waf configure --prefix=$PREFIX && ./waf && ./waf install) || die "sord build failed"
+(if [ ! -d sratom ] ; then mkdir sratom ; fi && svn co http://svn.drobilla.net/lad/trunk/sratom)  && \
+    (set -e && cd sratom && ./waf configure --prefix=$PREFIX && ./waf && ./waf install) || die "sratom build failed"
 svn co http://svn.drobilla.net/lad/trunk/lilv && \
     (set -e && cd lilv && ./waf configure --prefix=$PREFIX && ./waf && ./waf install) || die "lilv build failed"
 svn co http://svn.drobilla.net/lad/trunk/suil && \
