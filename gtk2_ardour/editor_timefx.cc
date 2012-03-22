@@ -71,7 +71,7 @@ Editor::TimeFXDialog::TimeFXDialog (Editor& e, bool pitch)
 	  quick_button (_("Quick but Ugly")),
 	  antialias_button (_("Skip Anti-aliasing")),
 	  stretch_opts_label (_("Contents:")),
-	  precise_button (_("Strict Linear")),
+	  precise_button (_("Minimize time distortion")),
 	  preserve_formants_button(_("Preserve Formants"))
 {
 	set_modal (true);
