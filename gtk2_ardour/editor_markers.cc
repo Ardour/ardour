@@ -879,6 +879,8 @@ Editor::build_range_marker_menu (bool loop_or_punch, bool session)
 		items.push_back (MenuElem (_("Set Range from Range Selection"), sigc::mem_fun(*this, &Editor::marker_menu_set_from_selection)));
 	}
 
+	items.push_back (MenuElem (_("Zoom to Range"), sigc::mem_fun (*this, &Editor::marker_menu_zoom_to_range)));
+
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Export Range..."), sigc::mem_fun(*this, &Editor::export_range)));
 	items.push_back (SeparatorElem());
@@ -1213,6 +1215,33 @@ Editor::marker_menu_loop_range ()
 			_session->request_locate (l2->start(), true);
 		}
 	}
+}
+
+/** Temporal zoom to the range of the marker_menu_item (plus 5% either side) */
+void
+Editor::marker_menu_zoom_to_range ()
+{
+	Marker* marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"));
+	assert (marker);
+
+	bool is_start;
+	Location* l = find_location_from_marker (marker, is_start);
+	if (l == 0) {
+		return;
+	}
+
+	framecnt_t const extra = l->length() * 0.05;
+	framepos_t a = l->start ();
+	if (a >= extra) {
+		a -= extra;
+	}
+	
+	framepos_t b = l->end ();
+	if (b < (max_framepos - extra)) {
+		b += extra;
+	}
+
+	temporal_zoom_by_frame (a, b);
 }
 
 void

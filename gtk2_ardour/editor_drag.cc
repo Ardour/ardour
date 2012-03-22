@@ -3915,9 +3915,9 @@ MouseZoomDrag::finished (GdkEvent* event, bool movement_occurred)
 		motion (event, false);
 
 		if (grab_frame() < last_pointer_frame()) {
-			_editor->temporal_zoom_by_frame (grab_frame(), last_pointer_frame(), "mouse zoom");
+			_editor->temporal_zoom_by_frame (grab_frame(), last_pointer_frame());
 		} else {
-			_editor->temporal_zoom_by_frame (last_pointer_frame(), grab_frame(), "mouse zoom");
+			_editor->temporal_zoom_by_frame (last_pointer_frame(), grab_frame());
 		}
 	} else {
 		if (Keyboard::the_keyboard().key_is_down (GDK_Shift_L)) {

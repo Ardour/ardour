@@ -1201,7 +1201,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void zoom_to_region (bool both_axes);
 	void temporal_zoom_session ();
 	void temporal_zoom (gdouble scale);
-	void temporal_zoom_by_frame (framepos_t start, framepos_t end, const std::string & op);
+	void temporal_zoom_by_frame (framepos_t start, framepos_t end);
 	void temporal_zoom_to_frame (bool coarser, framepos_t frame);
 
 	void insert_region_list_drag (boost::shared_ptr<ARDOUR::Region>, int x, int y);
@@ -1501,6 +1501,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void marker_menu_set_from_playhead ();
 	void marker_menu_set_from_selection ();
 	void marker_menu_range_to_next ();
+	void marker_menu_zoom_to_range ();
 	void new_transport_marker_menu_set_loop ();
 	void new_transport_marker_menu_set_punch ();
 	void update_loop_range_view (bool visibility=false);

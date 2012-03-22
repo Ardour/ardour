@@ -1493,7 +1493,7 @@ Editor::temporal_zoom_region (bool both_axes)
 
 	PBD::Unwinder<bool> nsv (no_save_visual, true);
 
-	temporal_zoom_by_frame (start, end, "zoom to region");
+	temporal_zoom_by_frame (start, end);
 	
 	if (both_axes) {
 		uint32_t per_track_height = (uint32_t) floor ((_canvas_height - canvas_timebars_vsize - 10.0) / tracks.size());
@@ -1540,7 +1540,7 @@ Editor::temporal_zoom_selection ()
 	framepos_t start = selection->time[clicked_selection].start;
 	framepos_t end = selection->time[clicked_selection].end;
 
-	temporal_zoom_by_frame (start, end, "zoom to selection");
+	temporal_zoom_by_frame (start, end);
 }
 
 void
@@ -1555,12 +1555,12 @@ Editor::temporal_zoom_session ()
 			s = 0;
 		}
 		framecnt_t const e = _session->current_end_frame() + l * 0.01;
-		temporal_zoom_by_frame (framecnt_t (s), e, "zoom to _session");
+		temporal_zoom_by_frame (framecnt_t (s), e);
 	}
 }
 
 void
-Editor::temporal_zoom_by_frame (framepos_t start, framepos_t end, const string & /*op*/)
+Editor::temporal_zoom_by_frame (framepos_t start, framepos_t end)
 {
 	if (!_session) return;
 
