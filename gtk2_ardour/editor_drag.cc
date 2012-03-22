@@ -4076,26 +4076,43 @@ NoteDrag::aborted (bool)
 	/* XXX: TODO */
 }
 
-AutomationRangeDrag::AutomationRangeDrag (Editor* editor, ArdourCanvas::Item* item, list<AudioRange> const & r)
-	: Drag (editor, item)
+/** Make an AutomationRangeDrag for lines in an AutomationTimeAxisView */
+AutomationRangeDrag::AutomationRangeDrag (Editor* editor, AutomationTimeAxisView* atv, list<AudioRange> const & r)
+	: Drag (editor, atv->base_item ())
 	, _ranges (r)
 	, _nothing_to_drag (false)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New AutomationRangeDrag\n");
 
-	_atav = reinterpret_cast<AutomationTimeAxisView*> (_item->get_data ("trackview"));
-	assert (_atav);
+	setup (atv->lines ());
+}
 
-	/* get all lines in the automation view */
-	list<boost::shared_ptr<AutomationLine> > lines = _atav->lines ();
+/** Make an AutomationRangeDrag for region gain lines */
+AutomationRangeDrag::AutomationRangeDrag (Editor* editor, AudioRegionView* rv, list<AudioRange> const & r)
+	: Drag (editor, rv->get_canvas_group ())
+	, _ranges (r)
+	, _nothing_to_drag (false)
+{
+	DEBUG_TRACE (DEBUG::Drags, "New AutomationRangeDrag\n");
 
-	/* find those that overlap the ranges being dragged */
-	list<boost::shared_ptr<AutomationLine> >::iterator i = lines.begin ();
+	list<boost::shared_ptr<AutomationLine> > lines;
+	lines.push_back (rv->get_gain_line ());
+	setup (lines);
+}
+
+/** @param lines AutomationLines to drag.
+ *  @param offset Offset from the session start to the points in the AutomationLines.
+ */
+void
+AutomationRangeDrag::setup (list<boost::shared_ptr<AutomationLine> > const & lines)
+{
+	/* find the lines that overlap the ranges being dragged */
+	list<boost::shared_ptr<AutomationLine> >::const_iterator i = lines.begin ();
 	while (i != lines.end ()) {
-		list<boost::shared_ptr<AutomationLine> >::iterator j = i;
+		list<boost::shared_ptr<AutomationLine> >::const_iterator j = i;
 		++j;
 
-		pair<framepos_t, framepos_t> const r = (*i)->get_point_x_range ();
+		pair<framepos_t, framepos_t> r = (*i)->get_point_x_range ();
 
 		/* check this range against all the AudioRanges that we are using */
 		list<AudioRange>::const_iterator k = _ranges.begin ();

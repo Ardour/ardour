@@ -55,19 +55,28 @@ using namespace PBD;
 using namespace Editing;
 using namespace Gnome; // for Canvas
 
-static const Evoral::IdentityConverter<double, framepos_t> default_converter;
-
+/** @param converter A TimeConverter whose origin_b is the start time of the AutomationList in session frames.
+ *  This will not be deleted by AutomationLine.
+ */
 AutomationLine::AutomationLine (const string& name, TimeAxisView& tv, ArdourCanvas::Group& parent,
 		boost::shared_ptr<AutomationList> al,
-		const Evoral::TimeConverter<double, framepos_t>* converter)
+		Evoral::TimeConverter<double, framepos_t>* converter)
 	: trackview (tv)
 	, _name (name)
 	, alist (al)
+	, _time_converter (converter ? converter : new Evoral::IdentityConverter<double, framepos_t>)
 	, _parent_group (parent)
 	, _offset (0)
-	, _time_converter (converter ? (*converter) : default_converter)
 	, _maximum_time (max_framepos)
 {
+	if (converter) {
+		_time_converter = converter;
+		_our_time_converter = false;
+	} else {
+		_time_converter = new Evoral::IdentityConverter<double, framepos_t>;
+		_our_time_converter = true;
+	}
+	
 	points_visible = false;
 	update_pending = false;
 	_uses_gain_mapping = false;
@@ -103,6 +112,10 @@ AutomationLine::~AutomationLine ()
 {
 	vector_delete (&control_points);
 	delete group;
+
+	if (_our_time_converter) {
+		delete _time_converter;
+	}
 }
 
 bool
@@ -225,7 +238,7 @@ AutomationLine::modify_point_y (ControlPoint& cp, double y)
 	y = min (1.0, y);
 	y = _height - (y * _height);
 
-	double const x = trackview.editor().frame_to_unit (_time_converter.to((*cp.model())->when) - _offset);
+	double const x = trackview.editor().frame_to_unit (_time_converter->to((*cp.model())->when) - _offset);
 
 	trackview.editor().session()->begin_reversible_command (_("automation event move"));
 	trackview.editor().session()->add_command (
@@ -286,11 +299,11 @@ AutomationLine::model_representation (ControlPoint& cp, ModelRepresentation& mr)
 
 	/* if xval has not changed, set it directly from the model to avoid rounding errors */
 
-	if (mr.xval == trackview.editor().frame_to_unit(_time_converter.to((*cp.model())->when)) - _offset) {
+	if (mr.xval == trackview.editor().frame_to_unit(_time_converter->to((*cp.model())->when)) - _offset) {
 		mr.xval = (*cp.model())->when - _offset;
 	} else {
 		mr.xval = trackview.editor().unit_to_frame (mr.xval);
-		mr.xval = _time_converter.from (mr.xval + _offset);
+		mr.xval = _time_converter->from (mr.xval + _offset);
 	}
 
 	/* convert y to model units; the x was already done above
@@ -994,7 +1007,7 @@ AutomationLine::get_selectables (
 		   (as it is the session frame position of the start of the source)
 		*/
 		
-		framepos_t const session_frames_when = _time_converter.to (model_when) + _time_converter.origin_b ();
+		framepos_t const session_frames_when = _time_converter->to (model_when) + _time_converter->origin_b ();
 
 		if (session_frames_when >= start && session_frames_when <= end && (*i)->get_y() >= bot_track && (*i)->get_y() <= top_track) {
 			results.push_back (*i);
@@ -1025,8 +1038,8 @@ AutomationLine::point_selection_to_control_points (PointSelection const & s)
 
 		for (vector<ControlPoint*>::iterator j = control_points.begin(); j != control_points.end(); ++j) {
 
-			double const rstart = trackview.editor().frame_to_unit (_time_converter.to (i->start) - _offset);
-			double const rend = trackview.editor().frame_to_unit (_time_converter.to (i->end) - _offset);
+			double const rstart = trackview.editor().frame_to_unit (_time_converter->to (i->start) - _offset);
+			double const rend = trackview.editor().frame_to_unit (_time_converter->to (i->end) - _offset);
 
 			if ((*j)->get_x() >= rstart && (*j)->get_x() <= rend) {
 				if ((*j)->get_y() >= bot && (*j)->get_y() <= top) {
@@ -1212,7 +1225,7 @@ AutomationLine::set_state (const XMLNode &node, int version)
 void
 AutomationLine::view_to_model_coord (double& x, double& y) const
 {
-	x = _time_converter.from (x);
+	x = _time_converter->from (x);
 	view_to_model_coord_y (y);
 }
 
@@ -1254,7 +1267,7 @@ AutomationLine::model_to_view_coord (double& x, double& y) const
 		y = y / (double)alist->parameter().max(); /* ... like this */
 	}
 
-	x = _time_converter.to (x) - _offset;
+	x = _time_converter->to (x) - _offset;
 }
 
 /** Called when our list has announced that its interpolation style has changed */
@@ -1373,8 +1386,8 @@ AutomationLine::get_point_x_range () const
 	pair<framepos_t, framepos_t> r (max_framepos, 0);
 
 	for (AutomationList::const_iterator i = the_list()->begin(); i != the_list()->end(); ++i) {
-		r.first = min (r.first, _time_converter.to ((*i)->when) + _offset + _time_converter.origin_b ());
-		r.second = max (r.second, _time_converter.to ((*i)->when) + _offset + _time_converter.origin_b ());
+		r.first = min (r.first, _time_converter->to ((*i)->when) + _offset + _time_converter->origin_b ());
+		r.second = max (r.second, _time_converter->to ((*i)->when) + _offset + _time_converter->origin_b ());
 	}
 
 	return r;

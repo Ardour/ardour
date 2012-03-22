@@ -932,11 +932,14 @@ private:
 	bool _zoom_out;
 };
 
-/** Drag of a range of automation data, changing value but not position */
+/** Drag of a range of automation data (either on an automation track or region gain),
+ *  changing value but not position.
+ */
 class AutomationRangeDrag : public Drag
 {
 public:
-	AutomationRangeDrag (Editor *, ArdourCanvas::Item *, std::list<ARDOUR::AudioRange> const &);
+	AutomationRangeDrag (Editor *, AutomationTimeAxisView *, std::list<ARDOUR::AudioRange> const &);
+	AutomationRangeDrag (Editor *, AudioRegionView *, std::list<ARDOUR::AudioRange> const &);
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
@@ -947,9 +950,14 @@ public:
 		return false;
 	}
 
+	bool active (Editing::MouseMode) {
+		return true;
+	}
+
 private:
+	void setup (std::list<boost::shared_ptr<AutomationLine> > const &);
+	
 	std::list<ARDOUR::AudioRange> _ranges;
-	AutomationTimeAxisView* _atav;
 
 	/** A line that is part of the drag */
 	struct Line {

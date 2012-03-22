@@ -25,6 +25,12 @@ namespace Evoral {
  *
  * Think of the conversion method names as if they are written in-between
  * the two template parameters (i.e. "A <name> B").
+ *
+ * _origin_b should be the origin for conversion in the units of B.
+ * That is, there is some point in time _origin_b, such that:
+ *
+ *    to()   converts a time _origin_b + a into an offset from _origin_b in units of B.
+ *    from() converts a time _origin_b + b into an offset from _origin_b in units of A.
  */
 template<typename A, typename B>
 class TimeConverter {
@@ -52,7 +58,10 @@ protected:
 };
 
 
-/** A stub TimeConverter that simple statically casts between types. */
+/** A stub TimeConverter that simple statically casts between types.
+ *  _origin_b has no bearing here, as there is no time conversion
+ *  going on.
+ */
 template<typename A, typename B>
 class IdentityConverter : public TimeConverter<A,B> {
   public:

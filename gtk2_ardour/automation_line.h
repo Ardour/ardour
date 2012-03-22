@@ -59,7 +59,7 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
   public:
 	AutomationLine (const std::string& name, TimeAxisView&, ArdourCanvas::Group&,
 			boost::shared_ptr<ARDOUR::AutomationList>,
-			const Evoral::TimeConverter<double, ARDOUR::framepos_t>* converter = 0);
+			Evoral::TimeConverter<double, ARDOUR::framepos_t>* converter = 0);
 	virtual ~AutomationLine ();
 
 	void queue_reset ();
@@ -135,7 +135,7 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 	virtual MementoCommandBinder<ARDOUR::AutomationList>* memento_command_binder ();
 
 	const Evoral::TimeConverter<double, ARDOUR::framepos_t>& time_converter () const {
-		return _time_converter;
+		return *_time_converter;
 	}
 
 	std::pair<ARDOUR::framepos_t, ARDOUR::framepos_t> get_point_x_range () const;
@@ -155,6 +155,9 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 	uint32_t  _line_color;
 
 	boost::shared_ptr<ARDOUR::AutomationList> alist;
+	Evoral::TimeConverter<double, ARDOUR::framepos_t>* _time_converter;
+	/** true if _time_converter belongs to us (ie we should delete it) */
+	bool _our_time_converter;
 
 	bool    _visible                  : 1;
 	bool    _uses_gain_mapping        : 1;
@@ -206,8 +209,6 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 	 *  a +ve offset means that the 0 on the line is at _offset in the list
 	 */
 	ARDOUR::framecnt_t _offset;
-
-	const Evoral::TimeConverter<double, ARDOUR::framepos_t>& _time_converter;
 
 	void reset_line_coords (ControlPoint&);
 	void add_visible_control_point (uint32_t, uint32_t, double, double, ARDOUR::AutomationList::iterator, uint32_t);

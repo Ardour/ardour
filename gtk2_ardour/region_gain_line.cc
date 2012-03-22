@@ -44,6 +44,8 @@ AudioRegionGainLine::AudioRegionGainLine (const string & name, AudioRegionView& 
 	// If this isn't true something is horribly wrong, and we'll get catastrophic gain values
 	assert(l->parameter().type() == EnvelopeAutomation);
 
+	_time_converter->set_origin_b (r.region()->position() - r.region()->start());
+
 	group->raise_to_top ();
 	group->property_y() = 2;
 	set_uses_gain_mapping (true);

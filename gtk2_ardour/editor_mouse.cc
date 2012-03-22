@@ -456,9 +456,9 @@ Editor::mouse_mode_toggled (MouseMode m)
 	instant_save ();
 
 	if (!internal_editing()) {
-		if (mouse_mode != MouseRange && _join_object_range_state == JOIN_OBJECT_RANGE_NONE) {
+		if (mouse_mode != MouseRange && mouse_mode != MouseGain && _join_object_range_state == JOIN_OBJECT_RANGE_NONE) {
 
-			/* in all modes except range and joined object/range, hide the range selection,
+			/* in all modes except range, gain and joined object/range, hide the range selection,
 			   show the object (region) selection.
 			*/
 
@@ -824,7 +824,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 					AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*> (tvp.first);
 					if (smart_mode_action->get_active() && atv) {
 						/* smart "join" mode: drag automation */
-						_drags->set (new AutomationRangeDrag (this, atv->base_item(), selection->time), event, _cursors->up_down);
+						_drags->set (new AutomationRangeDrag (this, atv, selection->time), event, _cursors->up_down);
 					} else {
 						/* this was debated, but decided the more common action was to
 						   make a new selection */
@@ -1040,7 +1040,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 						/* if we're over an automation track, start a drag of its data */
 						AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*> (tvp.first);
 						if (atv) {
-							_drags->set (new AutomationRangeDrag (this, atv->base_item(), selection->time), event, _cursors->up_down);
+							_drags->set (new AutomationRangeDrag (this, atv, selection->time), event, _cursors->up_down);
 						}
 
 						/* if we're over a track and a region, and in the `object' part of a region,
@@ -1118,6 +1118,17 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			_drags->set (new ControlPointDrag (this, item), event);
 			return true;
 			break;
+
+		case SelectionItem:
+		{
+			AudioRegionView* arv = dynamic_cast<AudioRegionView *> (clicked_regionview);
+			if (arv) {
+				_drags->set (new AutomationRangeDrag (this, arv, selection->time), event, _cursors->up_down);
+				_drags->start_grab (event);
+			}
+			return true;
+			break;
+		}
 
 		case AutomationLineItem:
 			_drags->set (new LineDrag (this, item), event);
@@ -1286,7 +1297,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 			break;
 
 		case RegionItem:
-			if (!dynamic_cast<MidiRegionView*> (clicked_regionview)) {
+			if (!dynamic_cast<MidiRegionView*> (clicked_regionview) && !dynamic_cast<AutomationRegionView*> (clicked_regionview)) {
 				leave_internal_edit_mode = true;
 			}
 			break;
