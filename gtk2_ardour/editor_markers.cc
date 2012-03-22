@@ -894,7 +894,7 @@ Editor::build_range_marker_menu (bool loop_or_punch, bool session)
 		items.push_back (MenuElem (_("Remove Range"), sigc::mem_fun(*this, &Editor::marker_menu_remove)));
 	}
 
-	if (loop_or_punch_or_session) {
+	if (!loop_or_punch_or_session || !session) {
 		items.push_back (SeparatorElem());
 	}
 	
