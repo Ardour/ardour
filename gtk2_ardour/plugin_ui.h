@@ -85,6 +85,7 @@ class PlugUIBase : public virtual sigc::trackable, public PBD::ScopedConnectionL
 
 	virtual gint get_preferred_height () = 0;
 	virtual gint get_preferred_width () = 0;
+	virtual bool resizable () { return true; }
 	virtual bool start_updating(GdkEventAny*) = 0;
 	virtual bool stop_updating(GdkEventAny*) = 0;
 

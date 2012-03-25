@@ -327,6 +327,12 @@ LV2PluginUI::get_preferred_width()
 	return r.width;
 }
 
+bool
+LV2PluginUI::resizable()
+{
+	return _lv2->ui_is_resizable();
+}
+
 int
 LV2PluginUI::package(Gtk::Window& win)
 {

@@ -90,8 +90,8 @@ public:
 
 	LilvWorld* world;
 
+	LilvNode* atom_AtomPort;
 	LilvNode* atom_Chunk;
-	LilvNode* atom_MessagePort;
 	LilvNode* atom_Sequence;
 	LilvNode* atom_bufferType;
 	LilvNode* atom_eventTransfer;
@@ -101,11 +101,11 @@ public:
 	LilvNode* lv2_ControlPort;
 	LilvNode* lv2_InputPort;
 	LilvNode* lv2_OutputPort;
+	LilvNode* lv2_enumeration;
 	LilvNode* lv2_inPlaceBroken;
 	LilvNode* lv2_integer;
 	LilvNode* lv2_sampleRate;
 	LilvNode* lv2_toggled;
-	LilvNode* lv2_enumeration;
 	LilvNode* midi_MidiEvent;
 	LilvNode* ui_GtkUI;
 	LilvNode* ui_external;
@@ -253,7 +253,7 @@ LV2Plugin::init(void* c_plugin, framecnt_t rate)
 			flags |= PORT_AUDIO;
 		} else if (lilv_port_is_a(_impl->plugin, port, _world.ev_EventPort)) {
 			flags |= PORT_EVENT;
-		} else if (lilv_port_is_a(_impl->plugin, port, _world.atom_MessagePort)) {
+		} else if (lilv_port_is_a(_impl->plugin, port, _world.atom_AtomPort)) {
 			LilvNodes* buffer_types = lilv_port_get_value(
 				_impl->plugin, port, _world.atom_bufferType);
 				if (lilv_nodes_contains(buffer_types, _world.atom_Sequence)) {
@@ -384,6 +384,26 @@ LV2Plugin::is_external_ui() const
 		return false;
 	}
 	return lilv_ui_is_a(_impl->ui, _world.ui_external);
+}
+
+bool
+LV2Plugin::ui_is_resizable () const
+{
+	const LilvNode* s   = lilv_ui_get_uri(_impl->ui);
+	LilvNode*       p   = lilv_new_uri(_world.world, NS_UI "optionalFeature");
+	LilvNode*       fs  = lilv_new_uri(_world.world, NS_UI "fixedSize");
+	LilvNode*       nrs = lilv_new_uri(_world.world, NS_UI "noUserResize");
+
+	LilvNodes* fs_matches = lilv_world_find_nodes(_world.world, s, p, fs);
+	LilvNodes* nrs_matches = lilv_world_find_nodes(_world.world, s, p, nrs);
+
+	lilv_nodes_free(nrs_matches);
+	lilv_nodes_free(fs_matches);
+	lilv_node_free(nrs);
+	lilv_node_free(fs);
+	lilv_node_free(p);
+
+	return !fs_matches && !nrs_matches;
 }
 
 string
@@ -1324,8 +1344,8 @@ LV2World::LV2World()
 	: world(lilv_world_new())
 {
 	lilv_world_load_all(world);
+	atom_AtomPort      = lilv_new_uri(world, LV2_ATOM__AtomPort);
 	atom_Chunk         = lilv_new_uri(world, LV2_ATOM__Chunk);
-	atom_MessagePort   = lilv_new_uri(world, LV2_ATOM__MessagePort);
 	atom_Sequence      = lilv_new_uri(world, LV2_ATOM__Sequence);
 	atom_bufferType    = lilv_new_uri(world, LV2_ATOM__bufferType);
 	atom_eventTransfer = lilv_new_uri(world, LV2_ATOM__eventTransfer);
@@ -1363,8 +1383,8 @@ LV2World::~LV2World()
 	lilv_node_free(atom_eventTransfer);
 	lilv_node_free(atom_bufferType);
 	lilv_node_free(atom_Sequence);
-	lilv_node_free(atom_MessagePort);
 	lilv_node_free(atom_Chunk);
+	lilv_node_free(atom_AtomPort);
 }
 
 LV2PluginInfo::LV2PluginInfo (void* c_plugin)
@@ -1435,7 +1455,7 @@ LV2PluginInfo::discover()
 			lilv_plugin_get_num_ports_of_class(
 				p, _world.lv2_InputPort, _world.ev_EventPort, NULL)
 			+ lilv_plugin_get_num_ports_of_class(
-				p, _world.lv2_InputPort, _world.atom_MessagePort, NULL));
+				p, _world.lv2_InputPort, _world.atom_AtomPort, NULL));
 
 		info->n_outputs.set_audio(
 			lilv_plugin_get_num_ports_of_class(
@@ -1444,7 +1464,7 @@ LV2PluginInfo::discover()
 			lilv_plugin_get_num_ports_of_class(
 				p, _world.lv2_OutputPort, _world.ev_EventPort, NULL)
 			+ lilv_plugin_get_num_ports_of_class(
-				p, _world.lv2_OutputPort, _world.atom_MessagePort, NULL));
+				p, _world.lv2_OutputPort, _world.atom_AtomPort, NULL));
 
 		info->unique_id = lilv_node_as_uri(lilv_plugin_get_uri(p));
 		info->index     = 0; // Meaningless for LV2
