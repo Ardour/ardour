@@ -47,6 +47,8 @@ class InternalReturn : public Return
   private:
 	/** sends that we are receiving data from */
 	std::list<InternalSend*> _sends;
+	/** mutex to protect _sends */
+	Glib::Mutex _sends_mutex;
 };
 
 } // namespace ARDOUR

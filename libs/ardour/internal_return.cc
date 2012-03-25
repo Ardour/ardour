@@ -43,11 +43,13 @@ InternalReturn::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*e
 		return;
 	}
 
-	/* _sends is only modified with the process lock held, so this is ok, I think */
-
-	for (list<InternalSend*>::iterator i = _sends.begin(); i != _sends.end(); ++i) {
-		if ((*i)->active ()) {
-			bufs.merge_from ((*i)->get_buffers(), nframes);
+	Glib::Mutex::Lock lm (_sends_mutex, Glib::TRY_LOCK);
+	
+	if (lm.locked ()) {
+		for (list<InternalSend*>::iterator i = _sends.begin(); i != _sends.end(); ++i) {
+			if ((*i)->active ()) {
+				bufs.merge_from ((*i)->get_buffers(), nframes);
+			}
 		}
 	}
 
@@ -57,18 +59,14 @@ InternalReturn::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*e
 void
 InternalReturn::add_send (InternalSend* send)
 {
-	/* caller must hold process lock */
-	assert (!AudioEngine::instance()->process_lock().trylock());
-
+	Glib::Mutex::Lock lm (_sends_mutex);
 	_sends.push_back (send);
 }
 
 void
 InternalReturn::remove_send (InternalSend* send)
 {
-	/* caller must hold process lock */
-	assert (!AudioEngine::instance()->process_lock().trylock());
-
+	Glib::Mutex::Lock lm (_sends_mutex);
 	_sends.remove (send);
 }
 
