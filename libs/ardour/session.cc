@@ -613,7 +613,7 @@ Session::remove_monitor_section ()
 		return;
 	}
 
-	/* force reversion to Solo-In-Pace */
+	/* force reversion to Solo-In-Place */
 	Config->set_solo_control_is_listen_control (false);
 
 	{
