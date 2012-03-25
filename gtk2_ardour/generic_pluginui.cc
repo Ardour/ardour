@@ -518,7 +518,7 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 		*/
 		int const steps = desc.integer_step ? (desc.upper - desc.lower + 1) / desc.step : 0;
 
-		if (control_ui->scale_points && ((steps && control_ui->scale_points->size() == steps) || desc.enumeration)) {
+		if (control_ui->scale_points && ((steps && int (control_ui->scale_points->size()) == steps) || desc.enumeration)) {
 			
 			/* Either:
 			 *   a) There is a label for each possible value of this input, or
