@@ -4268,7 +4268,11 @@ Editor::post_zoom ()
 		zoom_range_clock->set (frames);
 	}
 
-	if (mouse_mode == MouseRange && selection->time.start () != selection->time.end_frame ()) {
+	bool const showing_time_selection =
+		mouse_mode == MouseRange ||
+		(mouse_mode == MouseObject && _join_object_range_state != JOIN_OBJECT_RANGE_NONE);
+
+	if (showing_time_selection && selection->time.start () != selection->time.end_frame ()) {
 		for (TrackViewList::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
 			(*i)->reshow_selection (selection->time);
 		}
