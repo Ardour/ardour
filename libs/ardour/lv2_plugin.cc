@@ -649,9 +649,10 @@ LV2Plugin::parameter_input (const char* uri, void** bufptrs[], void** bufptr)
 {
 	LilvPort* port = NULL;
 #ifdef HAVE_NEW_LILV
-	LilvNode* param = lilv_new_uri(_world.world, uri);
-	port = lilv_plugin_get_port_by_parameter(_plugin, _world.input_class, param);
-	lilv_node_free(param);
+	LilvNode* designation = lilv_new_uri(_world.world, uri);
+	port = lilv_plugin_get_port_by_designation(
+		_plugin, _world.input_class, designation);
+	lilv_node_free(designation);
 	if (port) {
 		bufptrs[lilv_port_get_index(_plugin, port)] = bufptr;
 	}

@@ -559,7 +559,7 @@ if env['LV2']:
 		libraries['lilv'] = LibraryInfo()
 		libraries['lilv'].ParseConfig('pkg-config --cflags --libs lilv-0')
 		env.Append (CCFLAGS="-DHAVE_LV2")
-		if conf.CheckPKGVersion('lilv-0', '0.10.0'):
+		if conf.CheckPKGVersion('lilv-0', '0.14.0'):
 			env.Append (CCFLAGS="-DHAVE_NEW_LILV")
 
 	else:
