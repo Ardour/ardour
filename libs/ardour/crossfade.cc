@@ -210,6 +210,7 @@ Crossfade::Crossfade (boost::shared_ptr<Crossfade> orig, boost::shared_ptr<Audio
 	_anchor_point     = orig->_anchor_point;
 	_follow_overlap   = orig->_follow_overlap;
 	_fixed            = orig->_fixed;
+	_position         = orig->_position;
 
 	_in = newin;
 	_out = newout;
