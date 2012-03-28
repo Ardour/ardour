@@ -235,7 +235,7 @@ tar xf isodate-0.4.0.tar.gz && \
 # LV2 from svn - note: this doesn't exit with the correct exit code no matter what, plus a bug in waf prevents the use
 # of MACOSX_DEPLOYMENT_TARGET which probably doesn't matter since this isn't using Carbon/Cocoa APIs.
 (if [ ! -d lv2-svn ] ; then svn co http://lv2plug.in/repo/trunk lv2-svn ; fi &&  \
-    cd lv2-svn && unset MACOSX_DEPLOYMENT_TARGET && ./waf configure --prefix=$PREFIX --copy-headers --experimental && ./waf && sudo ./waf install) || die "lv2-svn build failed"
+    cd lv2-svn && unset MACOSX_DEPLOYMENT_TARGET && ./waf configure --prefix=$PREFIX --copy-headers && ./waf && sudo ./waf install) || die "lv2-svn build failed"
 
 #
 # drobilla stuff is from svn for now
