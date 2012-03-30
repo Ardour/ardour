@@ -125,7 +125,7 @@ SampleFormatConverter<TOut>::process (ProcessContext<float> const & c_in)
 	/* Write forward */
 
 	ProcessContext<TOut> c_out(c_in, data_out);
-	output (c_out);
+	this->output (c_out);
 }
 
 /* Basic non-const version of process(), calls the const one */

@@ -43,7 +43,7 @@ class SndfileReader
 		if (frames_read < context.frames()) {
 			c_out.set_flag (ProcessContext<T>::EndOfInput);
 		}
-		output (c_out);
+		this->output (c_out);
 		return frames_read;
 	}
 	
