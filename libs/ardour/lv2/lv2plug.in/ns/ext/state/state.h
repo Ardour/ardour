@@ -1,5 +1,5 @@
 /*
-  Copyright 2010-2011 David Robillard <http://drobilla.net>
+  Copyright 2010-2012 David Robillard <http://drobilla.net>
   Copyright 2010 Leonard Ritter <paniq@paniq.org>
 
   Permission to use, copy, modify, and/or distribute this software for any
@@ -16,29 +16,32 @@
 */
 
 /**
-   @file
+   @file state.h
    C API for the LV2 State extension <http://lv2plug.in/ns/ext/state>.
 */
 
 #ifndef LV2_STATE_H
 #define LV2_STATE_H
 
-#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
 #include "lv2/lv2plug.in/ns/lv2core/lv2.h"
 
+#define LV2_STATE_URI    "http://lv2plug.in/ns/ext/state"
+#define LV2_STATE_PREFIX LV2_STATE_URI "#"
+
+#define LV2_STATE__State     LV2_STATE_PREFIX "State"
+#define LV2_STATE__interface LV2_STATE_PREFIX "interface"
+#define LV2_STATE__makePath  LV2_STATE_PREFIX "makePath"
+#define LV2_STATE__mapPath   LV2_STATE_PREFIX "mapPath"
+#define LV2_STATE__state     LV2_STATE_PREFIX "state"
+
 #ifdef __cplusplus
 extern "C" {
+#else
+#    include <stdbool.h>
 #endif
-
-#define LV2_STATE_URI "http://lv2plug.in/ns/ext/state"
-
-#define LV2_STATE_INTERFACE_URI LV2_STATE_URI "#Interface"
-#define LV2_STATE_PATH_URI      LV2_STATE_URI "#Path"
-#define LV2_STATE_MAP_PATH_URI  LV2_STATE_URI "#mapPath"
-#define LV2_STATE_MAKE_PATH_URI LV2_STATE_URI "#makePath"
 
 typedef void* LV2_State_Handle;
 typedef void* LV2_State_Map_Path_Handle;
@@ -55,11 +58,11 @@ typedef enum {
 	/**
 	   Plain Old Data.
 
-	   Values with this flag contain no references to non-persistent or
-	   non-global resources (e.g. pointers, handles, local paths, etc.). It is
-	   safe to copy POD values with a simple memcpy and store them for use at
-	   any time in the future on a machine with a compatible architecture
-	   (e.g. the same endianness and alignment).
+	   Values with this flag contain no pointers or references to other areas
+	   of memory.  It is safe to copy POD values with a simple memcpy and store
+	   them for the duration of the process.  A POD value is not necessarily
+	   safe to trasmit between processes or machines (e.g. filenames are POD),
+	   see LV2_STATE_IS_PORTABLE for details.
 
 	   Implementations MUST NOT attempt to copy or serialise a non-POD value if
 	   they do not understand its type (and thus know how to correctly do so).
@@ -70,8 +73,10 @@ typedef enum {
 	   Portable (architecture independent) data.
 
 	   Values with this flag are in a format that is usable on any
-	   architecture, i.e. if the value is saved on one machine it can safely be
-	   restored on another machine regardless of endianness, alignment, etc.
+	   architecture.  A portable value saved on one machine can be restored on
+	   another machine regardless of architecture.  The format of portable
+	   values MUST NOT depend on architecture-specific properties like
+	   endianness or alignment.  Portable values MUST NOT contain filenames.
 	*/
 	LV2_STATE_IS_PORTABLE = 1 << 1,
 
@@ -88,115 +93,120 @@ typedef enum {
 
 } LV2_State_Flags;
 
+/** A status code for state functions. */
+typedef enum {
+	LV2_STATE_SUCCESS         = 0, /**< Completed successfully. */
+	LV2_STATE_ERR_UNKNOWN     = 1, /**< Unknown error. */
+	LV2_STATE_ERR_BAD_TYPE    = 2, /**< Failed due to unsupported type. */
+	LV2_STATE_ERR_BAD_FLAGS   = 3, /**< Failed due to unsupported flags. */
+	LV2_STATE_ERR_NO_FEATURE  = 4, /**< Failed due to missing features. */
+	LV2_STATE_ERR_NO_PROPERTY = 5  /**< Failed due to missing property. */
+} LV2_State_Status;
+
 /**
    A host-provided function to store a property.
    @param handle Must be the handle passed to LV2_State_Interface.save().
-   @param key The key (predicate) to store @c value under (URI mapped integer).
-   @param value Pointer to the value (object) to be stored.
-   @param size The size of the data at @c value in bytes.
-   @param type The type of @c value (URI).
-   @param flags LV2_State_Flags for @c value.
+   @param key The key to store @p value under (URID).
+   @param value Pointer to the value to be stored.
+   @param size The size of @p value in bytes.
+   @param type The type of @p value (URID).
+   @param flags LV2_State_Flags for @p value.
    @return 0 on success, otherwise a non-zero error code.
 
-   The host passes a callback of this type to LV2_State_Interface.save(). This callback
-   is called repeatedly by the plugin within LV2_State_Interface.save() to store all
-   the statements that describe its current state.
+   The host passes a callback of this type to LV2_State_Interface.save(). This
+   callback is called repeatedly by the plugin to store all the properties that
+   describe its current state.
 
-   The host MAY fail to store a property if the type is not understood and is
-   not LV2_STATE_IS_POD and/or LV2_STATE_IS_PORTABLE. Implementations are
-   encouraged to use POD and portable values (e.g. string literals) wherever
-   possible, and use common types (e.g. types from
-   http://lv2plug.in/ns/ext/atom) regardless, since hosts are likely to already
-   contain the necessary implementation.
+   DO NOT INVENT NONSENSE URI SCHEMES FOR THE KEY.  Best is to use keys from
+   existing vocabularies.  If nothing appropriate is available, use http URIs
+   that point to somewhere you can host documents so documentation can be made
+   resolvable (e.g. a child of the plugin or project URI).  If this is not
+   possible, invent a URN scheme, e.g. urn:myproj:whatever.  The plugin MUST
+   NOT pass an invalid URI key.
 
-   Note that @c size MUST be > 0, and @c value MUST point to a valid region of
-   memory @c size bytes long (this is required to make restore unambiguous).
+   The host MAY fail to store a property for whatever reason, but SHOULD
+   store any property that is LV2_STATE_IS_POD and LV2_STATE_IS_PORTABLE.
+   Implementations SHOULD use the types from the LV2 Atom extension
+   (http://lv2plug.in/ns/ext/atom) wherever possible.  The plugin SHOULD
+   attempt to fall-back and avoid the error if possible.
+
+   Note that @p size MUST be > 0, and @p value MUST point to a valid region of
+   memory @p size bytes long (this is required to make restore unambiguous).
 
    The plugin MUST NOT attempt to use this function outside of the
    LV2_State_Interface.restore() context.
 */
-typedef int (*LV2_State_Store_Function)(LV2_State_Handle handle,
-                                        uint32_t         key,
-                                        const void*      value,
-                                        size_t           size,
-                                        uint32_t         type,
-                                        uint32_t         flags);
+typedef LV2_State_Status (*LV2_State_Store_Function)(
+	LV2_State_Handle handle,
+	uint32_t         key,
+	const void*      value,
+	size_t           size,
+	uint32_t         type,
+	uint32_t         flags);
 
 /**
    A host-provided function to retrieve a property.
-   @param handle Must be the handle passed to
-   LV2_State_Interface.restore().
-   @param key The key (predicate) of the property to retrieve (URI).
+   @param handle Must be the handle passed to LV2_State_Interface.restore().
+   @param key The key of the property to retrieve (URID).
    @param size (Output) If non-NULL, set to the size of the restored value.
    @param type (Output) If non-NULL, set to the type of the restored value.
-   @param flags (Output) If non-NULL, set to the LV2_State_Flags for
-   the returned value.
+   @param flags (Output) If non-NULL, set to the flags for the restored value.
    @return A pointer to the restored value (object), or NULL if no value
-   has been stored under @c key.
+   has been stored under @p key.
 
    A callback of this type is passed by the host to
-   LV2_State_Interface.restore(). This callback is called repeatedly by the
-   plugin within LV2_State_Interface.restore() to retrieve any properties it
-   requires to restore its state.
+   LV2_State_Interface.restore().  This callback is called repeatedly by the
+   plugin to retrieve any properties it requires to restore its state.
 
    The returned value MUST remain valid until LV2_State_Interface.restore()
-   returns.
-
-   The plugin MUST NOT attempt to use this function, or any value returned from
-   it, outside of the LV2_State_Interface.restore() context. Returned values
-   MAY be copied for later use if necessary, assuming the plugin knows how to
-   do so correctly (e.g. the value is POD, or the plugin understands the type).
+   returns.  The plugin MUST NOT attempt to use this function, or any value
+   returned from it, outside of the LV2_State_Interface.restore() context.
 */
-typedef const void* (*LV2_State_Retrieve_Function)(LV2_State_Handle handle,
-                                                   uint32_t         key,
-                                                   size_t*          size,
-                                                   uint32_t*        type,
-                                                   uint32_t*        flags);
+typedef const void* (*LV2_State_Retrieve_Function)(
+	LV2_State_Handle handle,
+	uint32_t         key,
+	size_t*          size,
+	uint32_t*        type,
+	uint32_t*        flags);
 
 /**
-   State Extension Data.
+   LV2 Plugin State Interface.
 
-   When the plugin's extension_data is called with argument LV2_STATE_URI,
-   the plugin MUST return an LV2_State structure, which remains valid for the
-   lifetime of the plugin.
+   When the plugin's extension_data is called with argument
+   LV2_STATE__interface, the plugin MUST return an LV2_State_Interface
+   structure, which remains valid for the lifetime of the plugin.
 
    The host can use the contained function pointers to save and restore the
-   state of a plugin instance at any time (provided the threading restrictions
-   for the given function are met).
-
-   The typical use case is to save the plugin's state when a project is saved,
-   and to restore the state when a project has been loaded. Other uses are
-   possible (e.g. cloning plugin instances or taking a snapshot of plugin
-   state).
+   state of a plugin instance at any time, provided the threading restrictions
+   of the functions are met.
 
    Stored data is only guaranteed to be compatible between instances of plugins
    with the same URI (i.e. if a change to a plugin would cause a fatal error
    when restoring state saved by a previous version of that plugin, the plugin
-   URI MUST change just as it must when ports change incompatibly). Plugin
+   URI MUST change just as it must when ports change incompatibly).  Plugin
    authors should consider this possibility, and always store sensible data
-   with meaningful types to avoid such compatibility issues in the future.
+   with meaningful types to avoid such problems in the future.
 */
 typedef struct _LV2_State_Interface {
 
 	/**
-	   Save plugin state using a host-provided @c store callback.
+	   Save plugin state using a host-provided @p store callback.
 
 	   @param instance The instance handle of the plugin.
 	   @param store The host-provided store callback.
-	   @param handle An opaque pointer to host data, e.g. the map or
-	   file where the values are to be stored. If @c store is called, this MUST
-	   be passed as its handle parameter.
-	   @param flags Flags describing desires properties of this save.  The
-	   plugin SHOULD use these values to determine the most appropriate and/or
-	   efficient serialisation, but is not required to do so.
+	   @param handle An opaque pointer to host data which MUST be passed as the
+	   handle parameter to @p store if it is called.
+	   @param flags Flags describing desired properties of this save.  These
+	   flags may be used to determine the most appropriate values to store.
 	   @param features Extensible parameter for passing any additional
 	   features to be used for this save.
 
 	   The plugin is expected to store everything necessary to completely
-	   restore its state later (possibly much later, in a different process, on
-	   a completely different machine, etc.)
+	   restore its state later.  Plugins SHOULD store simple POD data whenever
+	   possible, and consider the possibility of state being restored much
+	   later on a different machine.
 
-	   The @c handle pointer and @c store function MUST NOT be used
+	   The @p handle pointer and @p store function MUST NOT be used
 	   beyond the scope of save().
 
 	   This function has its own special threading class: it may not be called
@@ -204,7 +214,7 @@ typedef struct _LV2_State_Interface {
 	   concurrently with functions in any other class, unless the definition of
 	   that class prohibits it (e.g. it may not be called concurrently with a
 	   "Discovery" function, but it may be called concurrently with an "Audio"
-	   function. The plugin is responsible for any locking or lock-free
+	   function.  The plugin is responsible for any locking or lock-free
 	   techniques necessary to make this possible.
 
 	   Note that in the simple case where state is only modified by restore(),
@@ -215,20 +225,19 @@ typedef struct _LV2_State_Interface {
 	   care to do so in such a way that a concurrent call to save() will save a
 	   consistent representation of plugin state for a single instant in time.
 	*/
-	void (*save)(LV2_Handle                 instance,
-	             LV2_State_Store_Function   store,
-	             LV2_State_Handle           handle,
-	             uint32_t                   flags,
-	             const LV2_Feature *const * features);
+	LV2_State_Status (*save)(LV2_Handle                 instance,
+	                         LV2_State_Store_Function   store,
+	                         LV2_State_Handle           handle,
+	                         uint32_t                   flags,
+	                         const LV2_Feature *const * features);
 
 	/**
-	   Restore plugin state using a host-provided @c retrieve callback.
+	   Restore plugin state using a host-provided @p retrieve callback.
 
 	   @param instance The instance handle of the plugin.
 	   @param retrieve The host-provided retrieve callback.
-	   @param handle An opaque pointer to host data, e.g. the map or
-	   file from which the values are to be restored. If @c retrieve is
-	   called, this MUST be passed as its handle parameter.
+	   @param handle An opaque pointer to host data which MUST be passed as the
+	   handle parameter to @p retrieve if it is called.
 	   @param flags Currently unused.
 	   @param features Extensible parameter for passing any additional
 	   features to be used for this restore.
@@ -237,26 +246,26 @@ typedef struct _LV2_State_Interface {
 	   LV2_State_Interface.save() by a plugin with the same URI.
 
 	   The plugin MUST gracefully fall back to a default value when a value can
-	   not be retrieved. This allows the host to reset the plugin state with an
-	   empty map.
+	   not be retrieved.  This allows the host to reset the plugin state with
+	   an empty map.
 
-	   The @c handle pointer and @c store function MUST NOT be used
+	   The @p handle pointer and @p store function MUST NOT be used
 	   beyond the scope of restore().
 
 	   This function is in the "Instantiation" threading class as defined by
 	   LV2. This means it MUST NOT be called concurrently with any other
 	   function on the same plugin instance.
 	*/
-	void (*restore)(LV2_Handle                  instance,
-	                LV2_State_Retrieve_Function retrieve,
-	                LV2_State_Handle            handle,
-	                uint32_t                    flags,
-	                const LV2_Feature *const *  features);
+	LV2_State_Status (*restore)(LV2_Handle                  instance,
+	                            LV2_State_Retrieve_Function retrieve,
+	                            LV2_State_Handle            handle,
+	                            uint32_t                    flags,
+	                            const LV2_Feature *const *  features);
 
 } LV2_State_Interface;
 
 /**
-   Feature data for state:mapPath (LV2_STATE_MAP_PATH_URI).
+   Feature data for state:mapPath (LV2_STATE__mapPath).
 */
 typedef struct {
 
@@ -267,41 +276,38 @@ typedef struct {
 
 	/**
 	   Map an absolute path to an abstract path for use in plugin state.
-	   @param handle MUST be the @a handle member of this struct.
+	   @param handle MUST be the @p handle member of this struct.
 	   @param absolute_path The absolute path of a file.
 	   @return An abstract path suitable for use in plugin state.
 
 	   The plugin MUST use this function to map any paths that will be stored
-	   in files in plugin state.  The returned value is an abstract path which
-	   MAY not be an actual file system path; @ref absolute_path MUST be used
-	   to map it to an actual path in order to use the file.
+	   in plugin state.  The returned value is an abstract path which MAY not
+	   be an actual file system path; @ref absolute_path() MUST be used to map
+	   it to an actual path in order to use the file.
 
-	   Hosts MAY map paths in any way (e.g. by creating symbolic links within
-	   the plugin's state directory or storing a list of referenced files
-	   elsewhere).  Plugins MUST NOT make any assumptions about abstract paths
-	   except that they can be mapped back to an absolute path using @ref
-	   absolute_path.
+	   Plugins MUST NOT make any assumptions about abstract paths except that
+	   they can be mapped back to the absolute path of the "same" file (though
+	   not necessarily the same original path) using @ref absolute_path().
 
 	   This function may only be called within the context of
-	   LV2_State_Interface.save() or LV2_State_Interface.restore().  The caller
-	   is responsible for freeing the returned value.
+	   LV2_State_Interface methods.  The caller is responsible for freeing the
+	   returned value with free().
 	*/
 	char* (*abstract_path)(LV2_State_Map_Path_Handle handle,
 	                       const char*               absolute_path);
 
 	/**
 	   Map an abstract path from plugin state to an absolute path.
-	   @param handle MUST be the @a handle member of this struct.
+	   @param handle MUST be the @p handle member of this struct.
 	   @param abstract_path An abstract path (e.g. a path from plugin state).
 	   @return An absolute file system path.
 
-	   Since abstract paths are not necessarily actual file paths (or at least
-	   not necessarily absolute paths), this function MUST be used in order to
-	   actually open or otherwise use the file referred to by an abstract path.
+	   The plugin MUST use this function in order to actually open or otherwise
+	   use any paths loaded from plugin state.
 
 	   This function may only be called within the context of
-	   LV2_State_Interface.save() or LV2_State_Interface.restore().  The caller
-	   is responsible for freeing the returned value.
+	   LV2_State_Interface methods.  The caller is responsible for freeing the
+	   returned value with free().
 	*/
 	char* (*absolute_path)(LV2_State_Map_Path_Handle handle,
 	                       const char*               abstract_path);
@@ -309,7 +315,7 @@ typedef struct {
 } LV2_State_Map_Path;
 
 /**
-   Feature data for state:makePath (@ref LV2_STATE_MAKE_PATH_URI).
+   Feature data for state:makePath (@ref LV2_STATE__makePath).
 */
 typedef struct {
 
@@ -320,9 +326,9 @@ typedef struct {
 
 	/**
 	   Return a path the plugin may use to create a new file.
-	   @param handle MUST be the @a handle member of this struct.
-	   @param path The path of the new file relative to a namespace unique
-	   to this plugin instance.
+	   @param handle MUST be the @p handle member of this struct.
+	   @param path The path of the new file within a namespace unique to this
+	   plugin instance.
 	   @return The absolute path to use for the new file.
 
 	   This function can be used by plugins to create files and directories,
@@ -330,7 +336,7 @@ typedef struct {
 	   LV2_State_Interface.save()) or any time (if this feature is passed to
 	   LV2_Descriptor.instantiate()).
 
-	   The host must do whatever is necessary for the plugin to be able to
+	   The host MUST do whatever is necessary for the plugin to be able to
 	   create a file at the returned path (e.g. using fopen), including
 	   creating any leading directories.
 

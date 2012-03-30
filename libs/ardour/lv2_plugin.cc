@@ -80,8 +80,8 @@ uint32_t LV2Plugin::_sequence_type = _uri_map.uri_to_id(
 	NULL, LV2_ATOM__Sequence);
 uint32_t LV2Plugin::_event_transfer_type = _uri_map.uri_to_id(
 	NULL, LV2_ATOM__eventTransfer);
-uint32_t LV2Plugin::_state_path_type = _uri_map.uri_to_id(
-	NULL, LV2_STATE_PATH_URI);
+uint32_t LV2Plugin::_path_type = _uri_map.uri_to_id(
+	NULL, LV2_ATOM__Path);
 
 class LV2World : boost::noncopyable {
 public:
@@ -176,12 +176,12 @@ LV2Plugin::init(void* c_plugin, framecnt_t rate)
 
 	_instance_access_feature.URI = "http://lv2plug.in/ns/ext/instance-access";
 	_data_access_feature.URI     = "http://lv2plug.in/ns/ext/data-access";
-	_make_path_feature.URI       = LV2_STATE_MAKE_PATH_URI;
+	_make_path_feature.URI       = LV2_STATE__makePath;
 
 	LilvPlugin* plugin = _impl->plugin;
 
 #ifdef HAVE_NEW_LILV
-	LilvNode* state_iface_uri = lilv_new_uri(_world.world, LV2_STATE_INTERFACE_URI);
+	LilvNode* state_iface_uri = lilv_new_uri(_world.world, LV2_STATE__interface);
 	LilvNode* state_uri       = lilv_new_uri(_world.world, LV2_STATE_URI);
 	_has_state_interface =
 		// What plugins should have (lv2:extensionData state:Interface)

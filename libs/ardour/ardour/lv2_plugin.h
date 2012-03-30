@@ -136,7 +136,7 @@ class LV2Plugin : public ARDOUR::Plugin
 	static uint32_t _chunk_type;
 	static uint32_t _sequence_type;
 	static uint32_t _event_transfer_type;
-	static uint32_t _state_path_type;
+	static uint32_t _path_type;
 
   private:
 	struct Impl;
