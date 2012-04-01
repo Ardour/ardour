@@ -112,7 +112,8 @@ protected:
 	static char bwf_organization_code[4];
 	static char bwf_serial_number[13];
 
-	static uint64_t header_position_offset;
+	/** Kept up to date with the position of the session location start */
+	static framecnt_t header_position_offset;
 
   private:
 	std::string old_peak_path (std::string audio_path);

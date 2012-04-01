@@ -71,7 +71,7 @@ using namespace Glib;
 string AudioFileSource::peak_dir = "";
 
 PBD::Signal0<void> AudioFileSource::HeaderPositionOffsetChanged;
-uint64_t           AudioFileSource::header_position_offset = 0;
+framecnt_t         AudioFileSource::header_position_offset = 0;
 
 /* XXX maybe this too */
 char AudioFileSource::bwf_serial_number[13] = "000000000000";
