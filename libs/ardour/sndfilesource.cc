@@ -223,6 +223,9 @@ SndFileSource::open ()
 
 	bool bwf_info_exists = _broadcast_info->load_from_file (sf);
 
+	/* Set our timeline position to either the time reference from a BWF header or the current
+	   start of the session.
+	*/
 	set_timeline_position (bwf_info_exists ? _broadcast_info->get_time_reference() : header_position_offset);
 
 	if (_length != 0 && !bwf_info_exists) {
