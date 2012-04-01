@@ -8,7 +8,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION (XPathTest);
 
 using namespace std;
 
-static string const prefix = "../../libs/pbd/test/";
+static string const prefix = "../libs/pbd/test/";
 
 void
 XPathTest::testMisc ()

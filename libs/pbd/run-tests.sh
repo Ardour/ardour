@@ -6,7 +6,7 @@ if [ ! -f './id.cc' ]; then
 fi
 
 srcdir=`pwd`
-cd ../../build/default
+cd ../../build
 
 libs='libs'
 
