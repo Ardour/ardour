@@ -178,94 +178,23 @@ int_from_hex (char hic, char loc)
 	return lo + (16 * hi);
 }
 
-void
-url_decode (string& url)
+string
+url_decode (string const & url)
 {
-	string::iterator last;
-	string::iterator next;
+	string decoded;
 
-	for (string::iterator i = url.begin(); i != url.end(); ++i) {
-		if ((*i) == '+') {
-			*i = ' ';
-		}
-	}
-
-	if (url.length() <= 3) {
-		return;
-	}
-
-	last = url.end();
-
-	--last; /* points at last char */
-	--last; /* points at last char - 1 */
-
-	for (string::iterator i = url.begin(); i != last; ) {
-
-		if (*i == '%') {
-
-			next = i;
-
-			url.erase (i);
-			
-			i = next;
-			++next;
-			
-			if (isxdigit (*i) && isxdigit (*next)) {
-				/* replace first digit with char */
-				*i = int_from_hex (*i,*next);
-				++i; /* points at 2nd of 2 digits */
-				url.erase (i);
-			}
+	for (string::size_type i = 0; i < url.length(); ++i) {
+		if (url[i] == '+') {
+			decoded += ' ';
+		} else if (url[i] == '%' && i <= url.length() - 3) {
+			decoded += char (int_from_hex (url[i + 1], url[i + 2]));
+			i += 2;
 		} else {
-			++i;
-		}
-	}
-}
-
-void
-url_decode (ustring& url)
-{
-	ustring::iterator last;
-	ustring::iterator next;
-
-	for (ustring::iterator i = url.begin(); i != url.end(); ++i) {
-		if ((*i) == '+') {
-			next = i;
-			++next;
-			url.replace (i, next, 1, ' ');
+			decoded += url[i];
 		}
 	}
 
-	if (url.length() <= 3) {
-		return;
-	}
-
-	last = url.end();
-
-	--last; /* points at last char */
-	--last; /* points at last char - 1 */
-
-	for (ustring::iterator i = url.begin(); i != last; ) {
-
-		if (*i == '%') {
-
-			next = i;
-
-			url.erase (i);
-			
-			i = next;
-			++next;
-			
-			if (isxdigit (*i) && isxdigit (*next)) {
-				/* replace first digit with char */
-				url.replace (i, next, 1, (gunichar) int_from_hex (*i,*next));
-				++i; /* points at 2nd of 2 digits */
-				url.erase (i);
-			}
-		} else {
-			++i;
-		}
-	}
+	return decoded;
 }
 
 #if 0

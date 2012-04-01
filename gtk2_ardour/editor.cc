@@ -3132,14 +3132,13 @@ Editor::convert_drop_to_paths (
 
 		if ((*i).substr (0,7) == "file://") {
 
-			string p = *i;
-			PBD::url_decode (p);
+			string const p = PBD::url_decode (*i);
 
 			// scan forward past three slashes
 
 			string::size_type slashcnt = 0;
 			string::size_type n = 0;
-			string::iterator x = p.begin();
+			string::const_iterator x = p.begin();
 
 			while (slashcnt < 3 && x != p.end()) {
 				if ((*x) == '/') {

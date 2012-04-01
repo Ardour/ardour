@@ -8,7 +8,6 @@ using namespace std;
 void
 ConvertTest::testUrlDecode ()
 {
-	string url = "http://foo.bar.baz/A%20B%20C%20.html";
-	PBD::url_decode (url);
-	CPPUNIT_ASSERT_EQUAL (url, string ("http://foo.bar.baz/A B C .html"));
+	string const url = "http://foo.bar.baz/A%20B%20C%20+42.html";
+	CPPUNIT_ASSERT_EQUAL (PBD::url_decode (url), string ("http://foo.bar.baz/A B C  42.html"));
 }
