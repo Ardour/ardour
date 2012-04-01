@@ -875,6 +875,7 @@ smf_load_from_memory(const void *buffer, const size_t buffer_length)
 		if (parse_mtrk_chunk(track)) {
 			g_warning("SMF warning: Cannot load track.");
 			smf_track_delete(track);
+			continue;
 		}
 
 		track->file_buffer = NULL;
