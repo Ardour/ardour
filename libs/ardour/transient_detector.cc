@@ -125,23 +125,17 @@ TransientDetector::cleanup_transients (AnalysisFeatureList& t, float sr, float g
 void
 TransientDetector::update_positions (Readable* src, uint32_t channel, AnalysisFeatureList& positions)
 {
-	Plugin::FeatureSet features;
+	int const buff_size = 1024;
+	int const step_size = 64;
 
-	Sample* data = 0;
-
-	int buff_size = 1024;
-	int step_size = 64;
-
-	data = new Sample[buff_size];
+	Sample* data = new Sample[buff_size];
 
 	AnalysisFeatureList::iterator i = positions.begin();
 
 	while (i != positions.end()) {
 
-		framecnt_t to_read;
-
 		/* read from source */
-		to_read = buff_size;
+		framecnt_t const to_read = buff_size;
 
 		if (src->read (data, (*i) - buff_size, to_read, channel) != to_read) {
 			break;
@@ -149,18 +143,18 @@ TransientDetector::update_positions (Readable* src, uint32_t channel, AnalysisFe
 
 		// Simple heuristic for locating approx correct cut position.
 
-		for (int j = 0; j < buff_size;){
+		for (int j = 0; j < (buff_size - step_size); ) {
 
-			Sample s = abs (data[j]);
-			Sample s2 = abs (data[j + step_size]);
+			Sample const s = abs (data[j]);
+			Sample const s2 = abs (data[j + step_size]);
 
-			if ((s2 - s) > threshold){
+			if ((s2 - s) > threshold) {
 				//cerr << "Thresh exceeded. Moving pos from: " << (*i) << " to: " << (*i) - buff_size + (j + 16) << endl;
 				(*i) = (*i) - buff_size + (j + 24);
 				break;
 			}
 
-			j = j + step_size;
+			j += step_size;
 		}
 
 		++i;
