@@ -67,8 +67,6 @@ public:
 	void flush_midi ();
 	void ensure_disk_file ();
 
-	static void set_header_position_offset (framecnt_t offset, bool negative);
-
 	static bool safe_midi_file_extension (const std::string& path);
 
   protected:
