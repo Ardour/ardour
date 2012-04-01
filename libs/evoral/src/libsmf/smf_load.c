@@ -833,13 +833,14 @@ load_file_into_buffer(void **file_buffer, size_t *file_buffer_length, FILE* stre
 	*file_buffer = malloc(*file_buffer_length);
 	if (*file_buffer == NULL) {
 		g_critical("malloc(3) failed: %s", strerror(errno));
-
+		
 		return (-5);
 	}
 
 	if (fread(*file_buffer, 1, *file_buffer_length, stream) != *file_buffer_length) {
 		g_critical("fread(3) failed: %s", strerror(errno));
-
+		free (*file_buffer);
+		*file_buffer = NULL;
 		return (-6);
 	}
 	
