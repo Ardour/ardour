@@ -152,7 +152,6 @@ public:
 
 	boost::shared_ptr<RegionList> regions_at (framepos_t frame);
 	uint32_t                   count_regions_at (framepos_t) const;
-	uint32_t                   count_joined_regions () const;
 	boost::shared_ptr<RegionList> regions_touched (framepos_t start, framepos_t end);
 	boost::shared_ptr<RegionList> regions_to_read (framepos_t start, framepos_t end);
 	uint32_t                   region_use_count (boost::shared_ptr<Region>) const;
@@ -221,8 +220,6 @@ public:
 	framepos_t find_next_top_layer_position (framepos_t) const;
 	uint32_t combine_ops() const { return _combine_ops; }
 
-	uint64_t highest_layering_index () const;
-
 	void set_layer (boost::shared_ptr<Region>, double);
 	
   protected:
@@ -269,8 +266,6 @@ public:
 	std::list< Evoral::RangeMove<framepos_t> > pending_range_moves;
 	/** Extra sections added to regions during trims */
 	std::list< Evoral::Range<framepos_t> >     pending_region_extensions;
-	bool             save_on_thaw;
-	std::string      last_save_reason;
 	uint32_t         in_set_state;
 	bool             in_undo;
 	bool             first_set_state;
@@ -285,7 +280,6 @@ public:
 	bool            _frozen;
 	uint32_t         subcnt;
 	PBD::ID         _orig_track_id;
-	bool             auto_partition;
 	uint32_t        _combine_ops;
 
 	void init (bool hide);
@@ -353,8 +347,6 @@ public:
 
 	void begin_undo ();
 	void end_undo ();
-	void unset_freeze_parent (Playlist*);
-	void unset_freeze_child (Playlist*);
 
 	void _split_region (boost::shared_ptr<Region>, framepos_t position);
 

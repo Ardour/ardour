@@ -3173,38 +3173,8 @@ Playlist::max_source_level () const
 	return lvl;
 }
 
-
-uint32_t
-Playlist::count_joined_regions () const
-{
-	RegionLock rlock (const_cast<Playlist *> (this));
-	uint32_t cnt = 0;
-
-	for (RegionList::const_iterator i = regions.begin(); i != regions.end(); ++i) {
-		if ((*i)->max_source_level() > 0) {
-			cnt++;
-		}
-	}
-
-	return cnt;
-}
-
 void
 Playlist::set_orig_track_id (const PBD::ID& id)
 {
 	_orig_track_id = id;
 }
-
-uint64_t
-Playlist::highest_layering_index () const
-{
-	RegionLock rlock (const_cast<Playlist *> (this));
-
-	uint64_t h = 0;
-	for (RegionList::const_iterator i = regions.begin(); i != regions.end(); ++i) {
-		h = max (h, (*i)->layering_index ());
-	}
-
-	return h;
-}
-
