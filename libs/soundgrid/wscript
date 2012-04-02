@@ -1,0 +1,64 @@
+#!/usr/bin/env python
+from waflib.extras import autowaf as autowaf
+from waflib import TaskGen
+import os
+import sys
+
+# Version of this package (even if built as a child)
+MAJOR = '1'
+MINOR = '0'
+MICRO = '0'
+LIBSGARDOUR_VERSION = "%s.%s.%s" % (MAJOR, MINOR, MICRO)
+
+# Library version (UNIX style major, minor, micro)
+# major increment <=> incompatible changes
+# minor increment <=> compatible changes (additions)
+# micro increment <=> no interface changes
+LIBSGARDOUR_LIB_VERSION = '1.0.0'
+
+# Variables for 'waf dist'
+APPNAME = 'libsgardour'
+VERSION = LIBSGARDOUR_VERSION
+I18N_PACKAGE = 'libsgardour'
+
+# Mandatory variables
+top = '.'
+out = 'build'
+
+path_prefix = 'libs/sgardour/'
+
+def options(opt):
+    autowaf.set_options(opt)
+
+def configure(conf):
+    conf.load('compiler_cxx')
+    autowaf.configure(conf)
+    autowaf.check_pkg(conf, 'libxml-2.0', uselib_store='XML')
+
+    conf.write_config_header('libsgardour-config.h', remove=False)
+
+    # Boost headers
+    autowaf.check_header(conf, 'cxx', 'boost/shared_ptr.hpp')
+    autowaf.check_header(conf, 'cxx', 'boost/weak_ptr.hpp')
+
+def build(bld):
+    # Library
+    driver = bld(features = 'cxx cxxshlib')
+    driver.source = '''
+               driver.cc
+    '''
+
+    driver.export_includes = ['.']
+    driver.includes     = ['.']
+    driver.name         = 'libsgardour'
+    driver.target       = 'sgardour'
+    driver.uselib       = 'GLIBMM SIGCPP XML UUID SNDFILE GIOMM'
+    if sys.platform == 'darwin':
+        driver.linkflags += [ '-framework', 'SGMixerCore' ]
+        driver.defines += [ '-framework', 'SGMixerCore' ]
+    driver.vnum         = LIBSGARDOUR_LIB_VERSION
+    driver.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
+    driver.defines     = ['PACKAGE="' + I18N_PACKAGE + '"']
+
+def shutdown():
+    autowaf.shutdown()

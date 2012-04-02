@@ -26,6 +26,7 @@ children = [
         'libs/rubberband',
         'libs/surfaces',
         'libs/panners',
+        'libs/soundgrid',
         'libs/timecode',
         'libs/ardour',
         'libs/gtkmm2ext',
@@ -364,6 +365,8 @@ def options(opt):
                     help='Compile without support for AU Plugins with only CARBON UI (needed for 64bit)')
     opt.add_option('--boost-sp-debug', action='store_true', default=False, dest='boost_sp_debug',
                     help='Compile with Boost shared pointer debugging')
+    opt.add_option('--soundgrid', action='store_true', default=False, dest='soundgrid',
+                    help='Compile with support for Waves SoundGrid')
     opt.add_option('--dist-target', type='string', default='auto', dest='dist_target',
                     help='Specify the target for cross-compiling [auto,none,x86,i386,i686,x86_64,powerpc,tiger,leopard]')
     opt.add_option('--fpu-optimization', action='store_true', default=True, dest='fpu_optimization',
@@ -520,6 +523,10 @@ def configure(conf):
             conf.env.append_value('CXXFLAGS_AUDIOUNITS', "-DWITH_CARBON")
             conf.env.append_value('LINKFLAGS_AUDIOUNITS', ['-framework', 'Carbon'])
 
+    if Options.options.soundgrid:
+        conf.env.append_value ('CXXFLAGS', '-DUSE_SOUNDGRID')
+        conf.env.append_value ('CFLAGS', '-DUSE_SOUNDGRID')
+
     if Options.options.boost_include != '':
         conf.env.append_value('CXXFLAGS', '-I' + Options.options.boost_include)
 
@@ -608,6 +615,8 @@ def configure(conf):
     if not conf.is_defined('HAVE_CPPUNIT'):
         conf.env['BUILD_TESTS'] = False
 
+        
+
     set_compiler_flags (conf, Options.options)
 
     config_text = open('libs/ardour/config_text.cc', "w")
@@ -652,6 +661,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('Samplerate',            conf.is_defined('HAVE_SAMPLERATE'))
 #    write_config_text('Soundtouch',            conf.is_defined('HAVE_SOUNDTOUCH'))
     write_config_text('Translation',           opts.nls)
+    write_config_text('SoundGrid support',     opts.soundgrid)
     write_config_text('Tranzport',             opts.tranzport)
     write_config_text('Unit tests',            conf.env['BUILD_TESTS'])
     write_config_text('Universal binary',      opts.universal)

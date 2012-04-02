@@ -40,6 +40,7 @@
 #endif
 
 #include "ardour/profile.h"
+#include "ardour/soundgrid.h"
 #include <jack/jack.h>
 
 #include <gtkmm/stock.h>
@@ -179,11 +180,26 @@ EngineControl::EngineControl ()
 	basic_packer.attach (driver_combo, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	row++;
 
-	label = manage (new Label (_("Audio Interface:")));
-	label->set_alignment (0, 0.5);
-	basic_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
-	basic_packer.attach (interface_combo, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
-	row++;
+	if (!ARDOUR::Profile->get_soundgrid()) {
+		label = manage (new Label (_("Audio Interface:")));
+		label->set_alignment (0, 0.5);
+		basic_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+		basic_packer.attach (interface_combo, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+		row++;
+	} else {
+		label = manage (new Label (_("Waves SoundGrid")));
+		label->set_alignment (0, 0.5);
+		basic_packer.attach (*label, 0, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+		row++;
+
+		label = manage (new Label (_("LAN Port:")));
+		label->set_alignment (0, 0.5);
+		basic_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+		basic_packer.attach (soundgrid_lan_port_combo, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+		row++;
+
+		set_popdown_strings (soundgrid_lan_port_combo, ARDOUR::SoundGrid::lan_port_names());
+	}
 
 	label = manage (new Label (_("Sample rate:")));
 	label->set_alignment (0, 0.5);
@@ -228,6 +244,7 @@ EngineControl::EngineControl ()
 #endif
 
 	interface_combo.set_size_request (250, -1);
+	soundgrid_lan_port_combo.set_size_request (250, -1);
 	input_device_combo.set_size_request (250, -1);
 	output_device_combo.set_size_request (250, -1);
 
@@ -916,6 +933,8 @@ EngineControl::driver_changed ()
 			maxlen = (*i).length();
 		}
 	}
+
+	
 
 	set_popdown_strings (interface_combo, strings);
 	set_popdown_strings (input_device_combo, strings);

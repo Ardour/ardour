@@ -31,6 +31,7 @@ public:
 		SmallScreen,
 		SAE,
 		SinglePackage,
+		SoundGrid,
 		LastElement
 	};
 
@@ -45,6 +46,9 @@ public:
 
     void set_single_package () { bits[SinglePackage] = true; }
     bool get_single_package () const { return bits[SinglePackage]; }
+
+    void set_soundgrid () { bits[SoundGrid] = true; }
+    bool get_soundgrid () const { return bits[SoundGrid]; }
 
 private:
     boost::dynamic_bitset<uint64_t> bits;

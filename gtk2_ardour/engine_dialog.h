@@ -46,6 +46,8 @@ class EngineControl : public Gtk::VBox {
 	XMLNode& get_state ();
 	void set_state (const XMLNode&);
 
+	std::string soundgrid_lan_port () const;
+
   private:
 	Gtk::Adjustment periods_adjustment;
 	Gtk::SpinButton periods_spinner;
@@ -86,10 +88,12 @@ class EngineControl : public Gtk::VBox {
 	Gtk::ComboBoxText input_device_combo;
 	Gtk::ComboBoxText output_device_combo;
 	Gtk::ComboBoxText midi_driver_combo;
+	Gtk::ComboBoxText soundgrid_lan_port_combo;
 
 	Gtk::Table basic_packer;
 	Gtk::Table options_packer;
 	Gtk::Table device_packer;
+	Gtk::Table soundgrid_packer;
 	Gtk::HBox basic_hbox;
 	Gtk::HBox options_hbox;
 	Gtk::HBox device_hbox;

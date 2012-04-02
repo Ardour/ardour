@@ -85,6 +85,7 @@
 #include "ardour/runtime_functions.h"
 #include "ardour/session.h"
 #include "ardour/session_event.h"
+#include "ardour/soundgrid.h"
 #include "ardour/source_factory.h"
 #include "ardour/utils.h"
 
@@ -300,6 +301,9 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization)
 
 	Profile = new RuntimeProfile;
 
+	if (SoundGrid::available()) {
+		Profile->set_soundgrid ();
+	}
 
 #ifdef WINDOWS_VST_SUPPORT
 	if (Config->get_use_windows_vst() && fst_init (0)) {
