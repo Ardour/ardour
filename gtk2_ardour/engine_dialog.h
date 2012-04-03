@@ -33,6 +33,8 @@
 #include <gtkmm/box.h>
 #include <gtkmm/buttonbox.h>
 #include <gtkmm/button.h>
+#include <gtkmm/treeview.h>
+#include <gtkmm/treestore.h>
 
 class EngineControl : public Gtk::VBox {
   public:
@@ -78,6 +80,8 @@ class EngineControl : public Gtk::VBox {
 	Gtk::ComboBoxText sample_rate_combo;
 	Gtk::ComboBoxText period_size_combo;
 
+	Gtk::Label device_label;
+
 	Gtk::ComboBoxText preset_combo;
 	Gtk::ComboBoxText serverpath_combo;
 	Gtk::ComboBoxText driver_combo;
@@ -88,15 +92,72 @@ class EngineControl : public Gtk::VBox {
 	Gtk::ComboBoxText input_device_combo;
 	Gtk::ComboBoxText output_device_combo;
 	Gtk::ComboBoxText midi_driver_combo;
-	Gtk::ComboBoxText soundgrid_lan_port_combo;
 
 	Gtk::Table basic_packer;
 	Gtk::Table options_packer;
 	Gtk::Table device_packer;
-	Gtk::Table soundgrid_packer;
 	Gtk::HBox basic_hbox;
 	Gtk::HBox options_hbox;
 	Gtk::HBox device_hbox;
+
+	struct SGInventoryColumns : public Gtk::TreeModel::ColumnRecord {
+		SGInventoryColumns () {
+			add (assign);
+			add (device);
+			add (channels);
+			add (name);
+			add (mac);
+			add (status);
+			add (id);
+		}
+
+		Gtk::TreeModelColumn<std::string> device;
+		Gtk::TreeModelColumn<std::string> name;
+		Gtk::TreeModelColumn<std::string> mac;
+		Gtk::TreeModelColumn<std::string> status;
+		Gtk::TreeModelColumn<std::string> assign; 
+		Gtk::TreeModelColumn<std::string> channels;
+		Gtk::TreeModelColumn<std::string> id;
+	};
+
+	struct SGServerInventoryColumns : public Gtk::TreeModel::ColumnRecord {
+		SGServerInventoryColumns () {
+			add (assign);
+			add (name);
+			add (channels);
+			add (mac);
+		}
+
+		Gtk::TreeModelColumn<std::string> name;
+		Gtk::TreeModelColumn<std::string> mac;
+		Gtk::TreeModelColumn<std::string> assign; 
+		Gtk::TreeModelColumn<std::string> channels;
+	};
+
+	struct SGNumericalColumns : public Gtk::TreeModel::ColumnRecord {
+		SGNumericalColumns () {
+			add (number);
+		}
+		Gtk::TreeModelColumn<uint32_t> number;
+	};
+
+	SGInventoryColumns sg_iobox_columns;
+	SGServerInventoryColumns sg_server_columns;
+	SGNumericalColumns sg_assignment_columns;
+	SGNumericalColumns sg_channel_columns;
+
+	Glib::RefPtr<Gtk::TreeStore> soundgrid_iobox_model;
+	Glib::RefPtr<Gtk::TreeStore> soundgrid_server_model;
+	Glib::RefPtr<Gtk::TreeStore> sg_assignment_model;
+	Glib::RefPtr<Gtk::TreeStore> sg_channel_model;
+
+	Gtk::TreeView soundgrid_iobox_display;
+	Gtk::TreeView soundgrid_server_display;
+	Gtk::VBox soundgrid_vbox;
+	void create_soundgrid_inventory ();
+	void refill_soundgrid_inventory ();
+	void soundgrid_configure ();
+
 	Gtk::Notebook notebook;
 
 	bool _used;
@@ -114,11 +175,11 @@ class EngineControl : public Gtk::VBox {
 #else
 	std::vector<std::string> enumerate_alsa_devices ();
 	std::vector<std::string> enumerate_oss_devices ();
-	std::vector<std::string> enumerate_netjack_devices ();
 	std::vector<std::string> enumerate_freebob_devices ();
 	std::vector<std::string> enumerate_ffado_devices ();
-	std::vector<std::string> enumerate_dummy_devices ();
 #endif
+	std::vector<std::string> enumerate_netjack_devices ();
+	std::vector<std::string> enumerate_dummy_devices ();
 
 	void redisplay_latency ();
 	uint32_t get_rate();

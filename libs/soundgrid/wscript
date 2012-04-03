@@ -54,8 +54,11 @@ def build(bld):
     driver.target       = 'sgardour'
     driver.uselib       = 'GLIBMM SIGCPP XML UUID SNDFILE GIOMM'
     if sys.platform == 'darwin':
-        driver.linkflags += [ '-framework', 'SGMixerCore' ]
-        driver.defines += [ '-framework', 'SGMixerCore' ]
+        # if/when Waves releases the SG Mixer Core as a framework we'll use this
+        # driver.linkflags = [ '-framework', 'SGMixerCore' ]
+        # driver.defines   = [ '-framework', 'SGMixerCore' ]
+        # but until then, we'll use this
+        driver.linkflags = [ "-L. -lmixerapplicationcoresg" ]
     driver.vnum         = LIBSGARDOUR_LIB_VERSION
     driver.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
     driver.defines     = ['PACKAGE="' + I18N_PACKAGE + '"']

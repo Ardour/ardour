@@ -301,7 +301,7 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization)
 
 	Profile = new RuntimeProfile;
 
-	if (SoundGrid::available()) {
+	if (true || SoundGrid::available()) {
 		Profile->set_soundgrid ();
 	}
 

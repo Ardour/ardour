@@ -36,6 +36,30 @@ class SoundGrid : public boost::noncopyable
 	static SoundGrid& instance();
 	static bool available ();
 	static std::vector<std::string> lan_port_names();
+	static std::string coreaudio_device_name ();
+	static uint32_t current_network_buffer_size ();
+	static std::vector<uint32_t> possible_network_buffer_sizes ();
+
+	struct InventoryItem {
+	    virtual ~InventoryItem() {}; /* force virtual so that we can use dynamic_cast<> */
+
+	    uint32_t    assign;
+	    std::string name;
+	    std::string mac;
+	    uint32_t    channels;
+	};
+
+	struct SGSInventoryItem : public InventoryItem {
+	};
+
+	struct IOInventoryItem : public InventoryItem {
+	    std::string device;
+	    std::string status;
+	};
+
+	typedef std::vector<InventoryItem*> Inventory;
+	static void update_inventory (Inventory&);
+	static void clear_inventory (Inventory&);
 
   private:
 	SoundGrid ();

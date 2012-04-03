@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2010 Paul Davis
+    Copyright (C) 2010-2012 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,12 +20,16 @@
 #include <vector>
 #include <cmath>
 #include <fstream>
+#include <sstream>
 #include <map>
 
 #include <boost/scoped_ptr.hpp>
 
 #include <glibmm.h>
 #include <gtkmm/messagedialog.h>
+#include <gtkmm/cellrendererspin.h>
+#include <gtkmm/cellrenderercombo.h>
+#include <gtkmm/stock.h>
 
 #include "pbd/epa.h"
 #include "pbd/xml++.h"
@@ -43,8 +47,8 @@
 #include "ardour/soundgrid.h"
 #include <jack/jack.h>
 
-#include <gtkmm/stock.h>
-#include <gtkmm2ext/utils.h>
+#include "gtkmm2ext/utils.h"
+#include "gtkmm2ext/gtk_ui.h"
 
 #include "pbd/convert.h"
 #include "pbd/error.h"
@@ -62,37 +66,38 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace PBD;
 using namespace Glib;
+using ARDOUR::SoundGrid;
 
 EngineControl::EngineControl ()
-	: periods_adjustment (2, 2, 16, 1, 2),
-	  periods_spinner (periods_adjustment),
-	  priority_adjustment (60, 10, 90, 1, 10),
-	  priority_spinner (priority_adjustment),
-	  ports_adjustment (128, 8, 1024, 1, 16),
-	  ports_spinner (ports_adjustment),
-	  input_latency_adjustment (0, 0, 99999, 1),
-	  input_latency (input_latency_adjustment),
-	  output_latency_adjustment (0, 0, 99999, 1),
-	  output_latency (output_latency_adjustment),
-	  realtime_button (_("Realtime")),
-	  no_memory_lock_button (_("Do not lock memory")),
-	  unlock_memory_button (_("Unlock memory")),
-	  soft_mode_button (_("No zombies")),
-	  monitor_button (_("Provide monitor ports")),
-	  force16bit_button (_("Force 16 bit")),
-	  hw_monitor_button (_("H/W monitoring")),
-	  hw_meter_button (_("H/W metering")),
-	  verbose_output_button (_("Verbose output")),
-	  start_button (_("Start")),
-	  stop_button (_("Stop")),
-#ifdef __APPLE__
-	  basic_packer (5, 2),
-	  options_packer (4, 2),
-	  device_packer (4, 2)
+	: periods_adjustment (2, 2, 16, 1, 2)
+	, periods_spinner (periods_adjustment)
+	, priority_adjustment (60, 10, 90, 1, 10)
+	, priority_spinner (priority_adjustment)
+	, ports_adjustment (128, 8, 1024, 1, 16)
+	, ports_spinner (ports_adjustment)
+	, input_latency_adjustment (0, 0, 99999, 1)
+	, input_latency (input_latency_adjustment)
+	, output_latency_adjustment (0, 0, 99999, 1)
+	, output_latency (output_latency_adjustment)
+	, realtime_button (_("Realtime"))
+	, no_memory_lock_button (_("Do not lock memory"))
+	, unlock_memory_button (_("Unlock memory"))
+	, soft_mode_button (_("No zombies"))
+	, monitor_button (_("Provide monitor ports"))
+	, force16bit_button (_("Force 16 bit"))
+	, hw_monitor_button (_("H/W monitoring"))
+	, hw_meter_button (_("H/W metering"))
+	, verbose_output_button (_("Verbose output"))
+	, start_button (_("Start"))
+	, stop_button (_("Stop"))
+#ifdef __APPLE_
+	, basic_packer (5, 2)
+	, options_packer (4, 2)
+	, device_packer (4, 2)
 #else
-	  basic_packer (8, 2),
-	  options_packer (14, 2),
-	  device_packer (6, 2)
+	, basic_packer (8, 2)
+	, options_packer (14, 2)
+	, device_packer (6, 2)
 #endif
 {
 	using namespace Notebook_Helpers;
@@ -140,6 +145,7 @@ EngineControl::EngineControl ()
 	strings.clear ();
 #ifdef __APPLE__
 	strings.push_back (X_("CoreAudio"));
+	strings.push_back (X_("SoundGrid"));
 #else
 	strings.push_back (X_("ALSA"));
 	strings.push_back (X_("OSS"));
@@ -180,26 +186,11 @@ EngineControl::EngineControl ()
 	basic_packer.attach (driver_combo, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	row++;
 
-	if (!ARDOUR::Profile->get_soundgrid()) {
-		label = manage (new Label (_("Audio Interface:")));
-		label->set_alignment (0, 0.5);
-		basic_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
-		basic_packer.attach (interface_combo, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
-		row++;
-	} else {
-		label = manage (new Label (_("Waves SoundGrid")));
-		label->set_alignment (0, 0.5);
-		basic_packer.attach (*label, 0, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
-		row++;
-
-		label = manage (new Label (_("LAN Port:")));
-		label->set_alignment (0, 0.5);
-		basic_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
-		basic_packer.attach (soundgrid_lan_port_combo, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
-		row++;
-
-		set_popdown_strings (soundgrid_lan_port_combo, ARDOUR::SoundGrid::lan_port_names());
-	}
+	device_label.set_text (_("Audio Interface:"));
+	device_label.set_alignment (0, 0.5);
+	basic_packer.attach (device_label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+	basic_packer.attach (interface_combo, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+	row++;
 
 	label = manage (new Label (_("Sample rate:")));
 	label->set_alignment (0, 0.5);
@@ -244,7 +235,6 @@ EngineControl::EngineControl ()
 #endif
 
 	interface_combo.set_size_request (250, -1);
-	soundgrid_lan_port_combo.set_size_request (250, -1);
 	input_device_combo.set_size_request (250, -1);
 	output_device_combo.set_size_request (250, -1);
 
@@ -489,6 +479,9 @@ EngineControl::build_command_line (vector<string>& cmd)
 	} else if (driver == X_("CoreAudio")) {
 		using_coreaudio = true;
 		cmd.push_back ("coreaudio");
+	} else if (driver == X_("SoundGrid")) {
+		using_coreaudio = true;
+		cmd.push_back ("coreaudio");
 	} else if (driver == X_("NetJACK")) {
 		cmd.push_back ("netjack");
 	} else if (driver == X_("FreeBoB")) {
@@ -566,6 +559,7 @@ EngineControl::build_command_line (vector<string>& cmd)
 		if (audio_mode_combo.get_active_text() != _("Playback/Recording on 2 Devices")) {
 
 			string device = get_device_name (driver, interface_combo.get_active_text());
+
 			if (device.empty()) {
 				cmd.clear ();
 				return;
@@ -614,7 +608,14 @@ EngineControl::build_command_line (vector<string>& cmd)
 #ifdef __APPLE__
 		// note: older versions of the CoreAudio JACK backend use -n instead of -d here
 
-		string device = get_device_name (driver, interface_combo.get_active_text());
+		string device;
+
+		if (driver == _("SoundGrid")) {
+			device = SoundGrid::coreaudio_device_name();
+		} else {
+			device = get_device_name (driver, interface_combo.get_active_text());
+		}
+
 		if (device.empty()) {
 			cmd.clear ();
 			return;
@@ -680,6 +681,11 @@ EngineControl::setup_engine ()
 	jackdrc << endl;
 	jackdrc.close ();
 
+	string driver = driver_combo.get_active_text();
+	if (driver == "SoundGrid") {
+		soundgrid_configure ();
+	}
+
 	_used = true;
 
 	return 0;
@@ -698,13 +704,18 @@ EngineControl::enumerate_devices (const string& driver)
 {
 	/* note: case matters for the map keys */
 
-	if (driver == "CoreAudio") {
-#ifdef __APPLE__
-		devices[driver] = enumerate_coreaudio_devices ();
-#endif
+	if (false) {
 
-#ifndef __APPLE__
-	} else if (driver == "ALSA") {
+#ifdef __APPLE__
+
+	} else if (driver == "CoreAudio") {
+		devices[driver] = enumerate_coreaudio_devices ();
+	} else if (driver == "SoundGrid") {
+		devices[driver] = SoundGrid::lan_port_names ();
+
+#else
+
+        } else if (driver == "ALSA") {
 		devices[driver] = enumerate_alsa_devices ();
 	} else if (driver == "FreeBOB") {
 		devices[driver] = enumerate_freebob_devices ();
@@ -712,14 +723,13 @@ EngineControl::enumerate_devices (const string& driver)
 		devices[driver] = enumerate_ffado_devices ();
 	} else if (driver == "OSS") {
 		devices[driver] = enumerate_oss_devices ();
+#endif
+
 	} else if (driver == "Dummy") {
 		devices[driver] = enumerate_dummy_devices ();
 	} else if (driver == "NetJACK") {
 		devices[driver] = enumerate_netjack_devices ();
 	}
-#else
-        }
-#endif
 }
 
 #ifdef __APPLE__
@@ -934,8 +944,21 @@ EngineControl::driver_changed ()
 		}
 	}
 
-	
+	if (driver == _("SoundGrid")) {
+		device_label.set_text (_("LAN Port"));
 
+		if (soundgrid_vbox.children().empty()) {
+			create_soundgrid_inventory ();
+		} else {
+			refill_soundgrid_inventory ();
+		}
+
+		notebook.insert_page (soundgrid_vbox, _("SoundGrid Inventory"), 1);
+	} else {
+		device_label.set_text (_("Audio Interface"));
+		notebook.remove_page (soundgrid_vbox);
+	}
+	
 	set_popdown_strings (interface_combo, strings);
 	set_popdown_strings (input_device_combo, strings);
 	set_popdown_strings (output_device_combo, strings);
@@ -1385,4 +1408,187 @@ EngineControl::set_state (const XMLNode& root)
 			midi_driver_combo.set_active_text(strval);
 		}
 	}
+}
+
+void
+EngineControl::create_soundgrid_inventory ()
+{
+	vector<uint32_t> latencies = SoundGrid::possible_network_buffer_sizes ();
+	vector<string> latency_strings;
+	stringstream s;
+
+	for (vector<uint32_t>::iterator i = latencies.begin(); i != latencies.end(); ++i) {
+		s.str (std::string());
+		s << *i;
+		latency_strings.push_back (s.str());
+	}
+
+	Gtk::ComboBoxText* latency_combo;
+	latency_combo = manage (new Gtk::ComboBoxText);
+	set_popdown_strings (*latency_combo, latency_strings);
+	s.str (std::string());
+	s << SoundGrid::current_network_buffer_size();
+	latency_combo->set_active_text (s.str());
+
+	Gtk::HBox* hb = manage (new HBox);
+	Label* l;
+	l = manage (new Label (_("AUDIO PARAMETERS")));
+	l->set_alignment (0, 0.5);
+	hb->pack_start (*l, false, false, 10);
+	hb->pack_end (*latency_combo, false, true);
+
+	soundgrid_vbox.set_spacing (10);
+	soundgrid_vbox.set_border_width (6);
+	soundgrid_vbox.pack_start (*hb, false, false);
+
+	soundgrid_iobox_model = TreeStore::create (sg_iobox_columns);
+	soundgrid_iobox_display.set_model (soundgrid_iobox_model);
+
+	soundgrid_server_model = TreeStore::create (sg_server_columns);
+	soundgrid_server_display.set_model (soundgrid_server_model);
+
+	/* IO Boxes etc. */
+	
+	l = manage (new Label (_("Input/Output Devices")));
+	l->set_alignment (0.0, 0.5);
+	soundgrid_vbox.pack_start (*l, false, false);
+
+	sg_assignment_model = TreeStore::create (sg_assignment_columns);
+	TreeModel::Row r;
+	for (uint32_t i = 0; i < 5; ++i) {
+		r = *(sg_assignment_model->append());
+		r[sg_assignment_columns.number] = i;
+	}
+
+	CellRendererCombo* assign_renderer = manage (new CellRendererCombo);
+	assign_renderer->property_model() = sg_assignment_model;
+	assign_renderer->property_editable() = true;
+	assign_renderer->property_text_column() = 0;
+	TreeViewColumn* cc = manage (new TreeViewColumn (_("Assign"), *assign_renderer));
+	cc->add_attribute (assign_renderer->property_text(), sg_iobox_columns.assign);
+	soundgrid_iobox_display.append_column (*cc);
+
+	soundgrid_iobox_display.append_column (_("Device"), sg_iobox_columns.device);
+
+	CellRendererSpin* channel_renderer = manage (new CellRendererSpin);
+	Gtk::Adjustment* adj = manage (new Adjustment (0, 0, 512, 1, 1));
+	channel_renderer->property_adjustment() = adj;
+	channel_renderer->property_editable() = true;
+	cc = manage (new TreeViewColumn (_("Channels"), *channel_renderer));
+	cc->add_attribute (channel_renderer->property_text(), sg_iobox_columns.channels);
+	soundgrid_iobox_display.append_column (*cc);
+
+	soundgrid_iobox_display.append_column (_("Name"), sg_iobox_columns.name);
+	soundgrid_iobox_display.append_column (_("MAC Address/\nComputer Name"), sg_iobox_columns.mac);
+	soundgrid_iobox_display.append_column (_("Status"), sg_iobox_columns.status);
+
+	l = manage (new Label (_("ID")));
+	Gtkmm2ext::UI::instance()->set_tip (*l, _("Click to identify physical I/O box"));
+
+	soundgrid_iobox_display.append_column ("", sg_iobox_columns.id);
+	TreeViewColumn* col = soundgrid_iobox_display.get_column (6);
+	col->set_widget (*l);
+	l->show ();
+
+	soundgrid_iobox_display.set_rules_hint (true);
+
+	soundgrid_vbox.pack_start (soundgrid_iobox_display);
+
+	/* Server Display */
+	
+	l = manage (new Label (_("SoundGrid Servers")));
+	l->set_alignment (0.0, 0.5);
+	soundgrid_vbox.pack_start (*l, false, false);
+	
+	assign_renderer = manage (new CellRendererCombo);
+	assign_renderer->property_model() = sg_assignment_model;
+	assign_renderer->property_editable() = true;
+	assign_renderer->property_text_column() = 0;
+	cc = manage (new TreeViewColumn (_("Assign"), *assign_renderer));
+	cc->add_attribute (assign_renderer->property_text(), sg_server_columns.assign);
+	soundgrid_server_display.append_column (*cc);
+	soundgrid_server_display.append_column (_("Name"), sg_server_columns.name);
+
+	channel_renderer = manage (new CellRendererSpin);
+	adj = manage (new Adjustment (0, 0, 512, 1, 1));
+	channel_renderer->property_adjustment() = adj;
+	channel_renderer->property_editable() = true;
+	cc = manage (new TreeViewColumn (_("Channels"), *channel_renderer));
+	cc->add_attribute (channel_renderer->property_text(), sg_server_columns.channels);
+	soundgrid_server_display.append_column (*cc);
+
+	soundgrid_server_display.append_column (_("MAC Address/\nComputer Name"), sg_server_columns.mac);
+
+	soundgrid_vbox.pack_start (soundgrid_server_display);
+
+	soundgrid_vbox.show_all ();
+
+	refill_soundgrid_inventory ();
+}
+
+void
+EngineControl::refill_soundgrid_inventory ()
+{
+	SoundGrid::Inventory inventory;
+	SoundGrid::update_inventory (inventory);
+
+	soundgrid_iobox_display.set_model (Glib::RefPtr<TreeModel>(0));
+	soundgrid_iobox_model->clear ();
+
+	soundgrid_server_display.set_model (Glib::RefPtr<TreeModel>(0));
+	soundgrid_server_model->clear ();
+
+	for (SoundGrid::Inventory::iterator i = inventory.begin(); i != inventory.end(); ++i) {
+		TreeModel::Row row;
+		SoundGrid::IOInventoryItem* ii = dynamic_cast<SoundGrid::IOInventoryItem*> (*i);
+		SoundGrid::SGSInventoryItem* is = dynamic_cast<SoundGrid::SGSInventoryItem*> (*i);
+
+		if (ii) {
+			row = *(soundgrid_iobox_model->append());
+			
+			stringstream s;
+			s << ii->assign;
+			row[sg_iobox_columns.assign] = s.str();
+			
+			row[sg_iobox_columns.device] = ii->device;
+			
+			s.str (std::string());
+			s << ii->channels;
+			row[sg_iobox_columns.channels] = s.str();
+			
+			row[sg_iobox_columns.name] = ii->name;
+			row[sg_iobox_columns.mac] = ii->mac;
+			row[sg_iobox_columns.status] = ii->status;
+			row[sg_iobox_columns.id] = "?";
+
+		} else if (is) {
+
+			row = *(soundgrid_server_model->append());
+			
+			stringstream s;
+			s << is->assign;
+			row[sg_server_columns.assign] = s.str();
+
+			s.str (std::string());
+			s << is->channels;
+			row[sg_server_columns.channels] = s.str();
+
+			row[sg_server_columns.name] = is->name;
+			row[sg_server_columns.mac] = is->mac;
+		}
+	}
+	
+	soundgrid_iobox_display.set_model (soundgrid_iobox_model);
+	soundgrid_server_display.set_model (soundgrid_server_model);
+
+	SoundGrid::clear_inventory (inventory);
+}
+
+void
+EngineControl::soundgrid_configure ()
+{
+	/* retrieve state from current SG inventory display, map to
+	 * ARDOUR::SoundGrid API, and ask for the state to be implemented.
+	 */
+
 }
