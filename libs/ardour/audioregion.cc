@@ -668,7 +668,6 @@ AudioRegion::_set_state (const XMLNode& node, int version, PropertyChange& what_
 				set_default_envelope ();
 			}
 
-			_envelope->set_max_xval (_length);
 			_envelope->truncate_end (_length);
 
 
@@ -987,7 +986,6 @@ AudioRegion::recompute_at_end ()
 
 	_envelope->freeze ();
 	_envelope->truncate_end (_length);
-	_envelope->set_max_xval (_length);
 	_envelope->thaw ();
 
 	suspend_property_changes();

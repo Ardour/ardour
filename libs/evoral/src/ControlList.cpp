@@ -43,7 +43,6 @@ ControlList::ControlList (const Parameter& id)
 	_changed_when_thawed = false;
 	_min_yval = id.min();
 	_max_yval = id.max();
-	_max_xval = 0; // means "no limit"
 	_default_value = 0;
 	_lookup_cache.left = -1;
 	_lookup_cache.range.first = _events.end();
@@ -61,7 +60,6 @@ ControlList::ControlList (const ControlList& other)
 	_changed_when_thawed = false;
 	_min_yval = other._min_yval;
 	_max_yval = other._max_yval;
-	_max_xval = other._max_xval;
 	_default_value = other._default_value;
 	_lookup_cache.range.first = _events.end();
 	_search_cache.first = _events.end();
@@ -83,7 +81,6 @@ ControlList::ControlList (const ControlList& other, double start, double end)
 	_changed_when_thawed = false;
 	_min_yval = other._min_yval;
 	_max_yval = other._max_yval;
-	_max_xval = other._max_xval;
 	_default_value = other._default_value;
 	_lookup_cache.range.first = _events.end();
 	_search_cache.first = _events.end();
@@ -143,7 +140,6 @@ ControlList::operator= (const ControlList& other)
 
 		_min_yval = other._min_yval;
 		_max_yval = other._max_yval;
-		_max_xval = other._max_xval;
 		_default_value = other._default_value;
 
 		mark_dirty ();
@@ -721,12 +717,6 @@ ControlList::control_points_adjacent (double xval)
 	}
 
 	return ret;
-}
-
-void
-ControlList::set_max_xval (double x)
-{
-	_max_xval = x;
 }
 
 void

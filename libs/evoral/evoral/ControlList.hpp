@@ -165,9 +165,6 @@ public:
 		(obj.*method)(*this);
 	}
 
-	void set_max_xval (double);
-	double get_max_xval() const { return _max_xval; }
-
 	double eval (double where) {
 		Glib::Mutex::Lock lm (_lock);
 		return unlocked_eval (where);
@@ -272,7 +269,6 @@ protected:
 	mutable Glib::Mutex   _lock;
 	int8_t                _frozen;
 	bool                  _changed_when_thawed;
-	double                _max_xval;
 	double                _min_yval;
 	double                _max_yval;
 	double                _default_value;
