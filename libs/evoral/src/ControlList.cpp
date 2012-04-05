@@ -33,6 +33,21 @@ inline bool event_time_less_than (ControlEvent* a, ControlEvent* b)
 	return a->when < b->when;
 }
 
+/* this has no units but corresponds to the area of a rectangle
+   computed between three points in the list. If the area is
+   large, it indicates significant non-linearity between the
+   points. 
+
+   during automation recording we thin the recorded points
+   using this value. if a point is sufficiently co-linear 
+   with its neighbours (as defined by the area of the rectangle
+   formed by three of them), we will not include it in the
+   ControlList. a smaller value will exclude less points,
+   a larger value will exclude more points, so it effectively
+   measures the amount of thinning to be done.
+*/
+
+double ControlList::_thinning_factor = 20.0; 
 
 ControlList::ControlList (const Parameter& id)
 	: _parameter(id)
@@ -420,17 +435,11 @@ ControlList::thin ()
 
 		if (counter > 2) {
 			
-			double area = fabs (0.5 * 
-					    (prevprev->when * (prev->value - cur->value)) + 
+			double area = fabs ((prevprev->when * (prev->value - cur->value)) + 
 					    (prev->when * (cur->value - prevprev->value)) + 
 					    (cur->when * (prevprev->value - prev->value)));
 			
-			/* the number 10.0 is an arbitrary value that needs to
-			 * be controlled by some user-controllable
-			 * configuration utility.
-			 */
-
-			if (area < 10.0) {
+			if (area < _thinning_factor) {
 				iterator tmp = pprev;
 
 				/* pprev will change to current
@@ -1538,6 +1547,12 @@ ControlList::set_interpolation (InterpolationStyle s)
 
 	_interpolation = s;
 	InterpolationChanged (s); /* EMIT SIGNAL */
+}
+
+void
+ControlList::set_thinning_factor (double v)
+{
+	_thinning_factor = v;
 }
 
 } // namespace Evoral

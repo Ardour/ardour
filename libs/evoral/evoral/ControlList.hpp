@@ -246,6 +246,9 @@ public:
 	/** Emitted when our interpolation style changes */
 	PBD::Signal1<void, InterpolationStyle> InterpolationChanged;
 
+        static void set_thinning_factor (double d);
+        static double thinning_factor() { return _thinning_factor; }
+
 protected:
 
 	/** Called by unlocked_eval() to handle cases of 3 or more control points. */
@@ -288,6 +291,7 @@ protected:
 	};
 
 	std::list<NascentInfo*> nascent;
+        static double _thinning_factor;
 };
 
 } // namespace Evoral
