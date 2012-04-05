@@ -275,7 +275,9 @@ AudioTrackImporter::_move ()
 	}
 
 	boost::shared_ptr<XMLNode> ds_node = ds_node_list->front();
-	ds_node->property ("id")->set_value (new_ds_id.to_s());
+	XMLProperty* p = ds_node->property (X_("id"));
+	assert (p);
+	p->set_value (new_ds_id.to_s());
 
 	boost::shared_ptr<Diskstream> new_ds (new AudioDiskstream (session, *ds_node));
 	new_ds->set_name (name);
