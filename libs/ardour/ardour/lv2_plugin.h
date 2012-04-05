@@ -26,6 +26,7 @@
 
 #include "ardour/plugin.h"
 #include "ardour/uri_map.h"
+#include "ardour/worker.h"
 #include "pbd/ringbuffer.h"
 
 namespace ARDOUR {
@@ -33,7 +34,7 @@ namespace ARDOUR {
 class AudioEngine;
 class Session;
 
-class LV2Plugin : public ARDOUR::Plugin
+class LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 {
   public:
 	LV2Plugin (ARDOUR::AudioEngine& engine,
@@ -129,6 +130,9 @@ class LV2Plugin : public ARDOUR::Plugin
 	void enable_ui_emmission();
 	void emit_to_ui(void* controller, UIMessageSink sink);
 
+	void work(uint32_t size, const void* data);
+	void work_response(uint32_t size, const void* data);
+
 	static URIMap _uri_map;
 
 	static uint32_t _midi_event_type_ev;
@@ -195,6 +199,7 @@ class LV2Plugin : public ARDOUR::Plugin
 	LV2_Feature    _data_access_feature;
 	LV2_Feature    _instance_access_feature;
 	LV2_Feature    _make_path_feature;
+	LV2_Feature    _work_schedule_feature;
 
 	mutable unsigned _state_version;
 

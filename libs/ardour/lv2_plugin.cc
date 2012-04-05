@@ -43,6 +43,7 @@
 #include "ardour/debug.h"
 #include "ardour/lv2_plugin.h"
 #include "ardour/session.h"
+#include "ardour/worker.h"
 
 #include "i18n.h"
 #include <locale.h>
@@ -51,6 +52,7 @@
 
 #include "lv2/lv2plug.in/ns/ext/atom/atom.h"
 #include "lv2/lv2plug.in/ns/ext/state/state.h"
+#include "lv2/lv2plug.in/ns/ext/worker/worker.h"
 
 #include "lv2_evbuf.h"
 
@@ -113,20 +115,45 @@ public:
 
 static LV2World _world;
 
+/** Called by the plugin to schedule non-RT work. */
+static LV2_Worker_Status
+work_schedule(LV2_Worker_Schedule_Handle handle,
+              uint32_t                   size,
+              const void*                data)
+{
+	Worker* worker = (Worker*)handle;
+	return worker->schedule(size, data) ?
+		LV2_WORKER_SUCCESS : LV2_WORKER_ERR_UNKNOWN;
+}
+
+/** Called by the plugin to respond to non-RT work. */
+static LV2_Worker_Status
+work_respond(LV2_Worker_Respond_Handle handle,
+             uint32_t                  size,
+             const void*               data)
+{
+	Worker* worker = (Worker*)handle;
+	return worker->respond(size, data) ?
+		LV2_WORKER_SUCCESS : LV2_WORKER_ERR_UNKNOWN;
+}
+
 struct LV2Plugin::Impl {
 	Impl() : plugin(0), ui(0), ui_type(0), name(0), author(0), instance(0)
+	       , worker(0), work_iface(0)
 #ifdef HAVE_NEW_LILV
 	       , state(0)
 #endif
 	{}
-	LilvPlugin*     plugin;
-	const LilvUI*   ui;
-	const LilvNode* ui_type;
-	LilvNode*       name;
-	LilvNode*       author;
-	LilvInstance*   instance;
+	LilvPlugin*           plugin;
+	const LilvUI*         ui;
+	const LilvNode*       ui_type;
+	LilvNode*             name;
+	LilvNode*             author;
+	LilvInstance*         instance;
+	Worker*               worker;
+	LV2_Worker_Interface* work_iface;
 #ifdef HAVE_NEW_LILV
-	LilvState*      state;
+	LilvState*            state;
 #endif
 };
 
@@ -177,6 +204,7 @@ LV2Plugin::init(void* c_plugin, framecnt_t rate)
 	_instance_access_feature.URI = "http://lv2plug.in/ns/ext/instance-access";
 	_data_access_feature.URI     = "http://lv2plug.in/ns/ext/data-access";
 	_make_path_feature.URI       = LV2_STATE__makePath;
+	_work_schedule_feature.URI   = LV2_WORKER__schedule;
 
 	LilvPlugin* plugin = _impl->plugin;
 
@@ -192,7 +220,7 @@ LV2Plugin::init(void* c_plugin, framecnt_t rate)
 	lilv_node_free(state_iface_uri);
 #endif
 
-	_features    = (LV2_Feature**)malloc(sizeof(LV2_Feature*) * 7);
+	_features    = (LV2_Feature**)malloc(sizeof(LV2_Feature*) * 8);
 	_features[0] = &_instance_access_feature;
 	_features[1] = &_data_access_feature;
 	_features[2] = &_make_path_feature;
@@ -200,12 +228,25 @@ LV2Plugin::init(void* c_plugin, framecnt_t rate)
 	_features[4] = _uri_map.urid_map_feature();
 	_features[5] = _uri_map.urid_unmap_feature();
 	_features[6] = NULL;
+	_features[7] = NULL;
 
 	LV2_State_Make_Path* make_path = (LV2_State_Make_Path*)malloc(
 		sizeof(LV2_State_Make_Path));
 	make_path->handle = this;
 	make_path->path = &lv2_state_make_path;
 	_make_path_feature.data = make_path;
+
+	LilvNode* worker_schedule = lilv_new_uri(_world.world, LV2_WORKER__schedule);
+	if (lilv_plugin_has_feature(plugin, worker_schedule)) {
+		LV2_Worker_Schedule* schedule = (LV2_Worker_Schedule*)malloc(
+			sizeof(LV2_Worker_Schedule));
+		_impl->worker               = new Worker(this, 4096);
+		schedule->handle            = _impl->worker;
+		schedule->schedule_work     = work_schedule;
+		_work_schedule_feature.data = schedule;
+		_features[6]                = &_work_schedule_feature;
+	}
+	lilv_node_free(worker_schedule);
 
 	_impl->instance = lilv_plugin_instantiate(plugin, rate, _features);
 	_impl->name     = lilv_plugin_get_name(plugin);
@@ -219,6 +260,8 @@ LV2Plugin::init(void* c_plugin, framecnt_t rate)
 	_instance_access_feature.data              = (void*)_impl->instance->lv2_handle;
 	_data_access_extension_data.extension_data = _impl->instance->lv2_descriptor->extension_data;
 	_data_access_feature.data                  = &_data_access_extension_data;
+
+	_impl->work_iface = (LV2_Worker_Interface*)extension_data(LV2_WORKER__interface);
 
 	if (lilv_plugin_has_feature(plugin, _world.lv2_inPlaceBroken)) {
 		error << string_compose(
@@ -368,6 +411,10 @@ LV2Plugin::~LV2Plugin ()
 	lilv_instance_free(_impl->instance);
 	lilv_node_free(_impl->name);
 	lilv_node_free(_impl->author);
+
+	free(_features);
+	free(_make_path_feature.data);
+	free(_work_schedule_feature.data);
 
 	delete _to_ui;
 	delete _from_ui;
@@ -850,6 +897,7 @@ LV2Plugin::write_to_ui(uint32_t index,
                        uint32_t size,
                        uint8_t* body)
 {
+	std::cerr << "WRITE TO UI" << std::endl;
 	write_to(_to_ui, index, protocol, size, body);
 }
 
@@ -885,6 +933,19 @@ LV2Plugin::emit_to_ui(void* controller, UIMessageSink sink)
 
 		read_space -= sizeof(msg) + msg.size;
 	}
+}
+
+void
+LV2Plugin::work(uint32_t size, const void* data)
+{
+	_impl->work_iface->work(
+		_impl->instance->lv2_handle, work_respond, _impl->worker, size, data);
+}
+
+void
+LV2Plugin::work_response(uint32_t size, const void* data)
+{
+	_impl->work_iface->work_response(_impl->instance->lv2_handle, size, data);
 }
 
 void
@@ -1297,6 +1358,13 @@ LV2Plugin::run(pframes_t nframes)
 	}
 
 	lilv_instance_run(_impl->instance, nframes);
+
+	if (_impl->work_iface) {
+		_impl->worker->emit_responses();
+		if (_impl->work_iface->end_run) {
+			_impl->work_iface->end_run(_impl->instance->lv2_handle);
+		}
+	}
 }
 
 void
