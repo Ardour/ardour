@@ -35,10 +35,16 @@
 #include <gtkmm/filechooserwidget.h>
 #include <gtkmm/frame.h>
 #include <gtkmm/label.h>
+#include <gtkmm/table.h>
+#include <gtkmm/liststore.h>
+#include <gtkmm/textview.h>
+#include <gtkmm/spinbutton.h>
+#include <gtkmm/notebook.h>
 
 #include <ardour/session.h>
 #include <ardour/audiofilesource.h>
 
+#include "audio_clock.h"
 #include "ardour_dialog.h"
 #include "editing.h"
 
@@ -47,6 +53,7 @@ namespace ARDOUR {
 };
 
 class GainMeter;
+class Mootcher;
 
 class SoundFileBox : public Gtk::VBox
 {
@@ -102,6 +109,7 @@ class SoundFileBox : public Gtk::VBox
 	void stop_audition ();
 };
 
+
 class SoundFileBrowser : public ArdourDialog
 {
   private:
@@ -113,11 +121,29 @@ class SoundFileBrowser : public ArdourDialog
 		FoundTagColumns() { add(pathname); }
 	};
 	
+	class FreesoundColumns : public Gtk::TreeModel::ColumnRecord
+	{
+	  public:
+		Gtk::TreeModelColumn<std::string> id;
+		Gtk::TreeModelColumn<std::string> uri;
+		Gtk::TreeModelColumn<std::string> filename;
+		Gtk::TreeModelColumn<std::string> duration;
+
+		FreesoundColumns() {
+			add(id); 
+			add(filename); 
+			add(uri);
+			add(duration);
+		}
+	};
+
 	FoundTagColumns found_list_columns;
 	Glib::RefPtr<Gtk::ListStore> found_list;
 
-	FoundTagColumns freesound_list_columns;
+	FreesoundColumns freesound_list_columns;
 	Glib::RefPtr<Gtk::ListStore> freesound_list;
+
+	Gtk::Button freesound_stop_btn;
 
   public:
 	SoundFileBrowser (Gtk::Window& parent, std::string title, ARDOUR::Session* _s, bool persistent);
@@ -136,13 +162,21 @@ class SoundFileBrowser : public ArdourDialog
 	Gtk::Button found_search_btn;
 	Gtk::TreeView found_list_view;
 
-	Gtk::Entry freesound_name_entry;
-	Gtk::Entry freesound_pass_entry;
 	Gtk::Entry freesound_entry;
 	Gtk::Button freesound_search_btn;
+	Gtk::ComboBoxText freesound_sort;
+	Gtk::SpinButton freesound_page;
 	Gtk::TreeView freesound_list_view;
+	Gtk::ProgressBar freesound_progress_bar;
 
-	void freesound_search_thread();
+	bool freesound_search_cancel;
+	bool freesound_download_cancel;
+
+	void freesound_search();
+	
+#ifdef FREESOUND
+	Mootcher *mootcher;
+#endif
 
   protected:
 	bool resetting_ourselves;
@@ -173,6 +207,7 @@ class SoundFileBrowser : public ArdourDialog
 	void freesound_list_view_selected ();
 	void freesound_list_view_activated (const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn*);
 	void freesound_search_clicked ();
+	void freesound_stop_clicked ();
 	
 	void chooser_file_activated ();
 	

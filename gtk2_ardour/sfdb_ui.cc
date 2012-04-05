@@ -178,10 +178,10 @@ SoundFileBox::SoundFileBox (bool persistent)
 	main_box.pack_start(bottom_box, false, false);
 	
 	play_btn.set_image (*(manage (new Image (Stock::MEDIA_PLAY, ICON_SIZE_BUTTON))));
-	play_btn.set_label (_("Play (double click)"));
+//	play_btn.set_label (_("Play (double click)"));
 
 	stop_btn.set_image (*(manage (new Image (Stock::MEDIA_STOP, ICON_SIZE_BUTTON))));
-	stop_btn.set_label (_("Stop"));
+//	stop_btn.set_label (_("Stop"));
 	
 	bottom_box.set_homogeneous (false);
 	bottom_box.set_spacing (6);
@@ -399,19 +399,22 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 	  preview (persistent),
 	  found_search_btn (_("Search")),
 	  found_list_view (found_list),
-	  freesound_search_btn (_("Start Downloading")),
+	  freesound_search_btn (_("Search")),
 	  freesound_list_view (freesound_list)
 {
 	resetting_ourselves = false;
 	gm = 0;
 
-	
 #ifdef GTKOSX
 	chooser.add_shortcut_folder_uri("file:///Library/GarageBand/Apple Loops");
 	chooser.add_shortcut_folder_uri("file:///Library/Audio/Apple Loops");
 	chooser.add_shortcut_folder_uri("file:///Library/Application Support/GarageBand/Instrument Library/Sampler/Sampler Files");
 	
 	chooser.add_shortcut_folder_uri("file:///Volumes");
+#endif
+
+#ifdef FREESOUND
+	mootcher = new Mootcher();
 #endif
 
 	//add the file chooser
@@ -472,6 +475,8 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 		found_search_btn.signal_clicked().connect(mem_fun(*this, &SoundFileBrowser::found_search_clicked));
 		found_entry.signal_activate().connect(mem_fun(*this, &SoundFileBrowser::found_search_clicked));
 
+		freesound_stop_btn.signal_clicked().connect(sigc::mem_fun(*this, &SoundFileBrowser::freesound_stop_clicked));
+
 		notebook.append_page (*vbox, _("Search Tags"));
 	}
 	
@@ -485,21 +490,36 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 		passbox = manage(new HBox);
 		passbox->set_border_width (12);
 		passbox->set_spacing (6);
-
-		label = manage (new Label);
-		label->set_text (_("User:"));
-		passbox->pack_start (*label, false, false);
-		passbox->pack_start (freesound_name_entry);
-		label = manage (new Label);
-		label->set_text (_("Password:"));
-		passbox->pack_start (*label, false, false);
-		passbox->pack_start (freesound_pass_entry);
 		label = manage (new Label);
 		label->set_text (_("Tags:"));
 		passbox->pack_start (*label, false, false);
 		passbox->pack_start (freesound_entry, false, false);
+
+		label = manage (new Label);
+		label->set_text (_("Sort:"));
+		passbox->pack_start (*label, false, false);
+		passbox->pack_start (freesound_sort, false, false);
+//		freesound_sort.clear_items();
+		
+		// Order of the following must correspond with enum sortMethod
+		// in sfdb_freesound_mootcher.h	
+		freesound_sort.append_text(_("None"));
+		freesound_sort.append_text(_("Longest"));
+		freesound_sort.append_text(_("Shortest"));
+		freesound_sort.append_text(_("Newest"));
+		freesound_sort.append_text(_("Oldest"));
+		freesound_sort.append_text(_("Most downloaded"));
+		freesound_sort.append_text(_("Least downloaded"));
+		freesound_sort.append_text(_("Highest rated"));
+		freesound_sort.append_text(_("Lowest rated"));
+		freesound_sort.set_active(0);
+
 		passbox->pack_start (freesound_search_btn, false, false);
 		
+		passbox->pack_start (freesound_progress_bar);
+		passbox->pack_end   (freesound_stop_btn, false, false);
+		freesound_stop_btn.set_label(_("Stop"));
+
 		Gtk::ScrolledWindow *scroll = manage(new ScrolledWindow);
 		scroll->add(freesound_list_view);
 		scroll->set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
@@ -510,11 +530,15 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 		
 		//vbox->pack_start (freesound_list_view);
 
-		freesound_list_view.append_column(_("Paths"), freesound_list_columns.pathname);
+		freesound_list_view.append_column(_("ID")      , freesound_list_columns.id);
+		freesound_list_view.append_column(_("Filename"), freesound_list_columns.filename);
+		// freesound_list_view.append_column(_("URI")     , freesound_list_columns.uri);
+		freesound_list_view.append_column(_("Duration"), freesound_list_columns.duration);
+		freesound_list_view.get_column(1)->set_expand(true);
+		freesound_list_view.get_selection()->signal_changed().connect(sigc::mem_fun(*this, &SoundFileBrowser::freesound_list_view_selected));
+		freesound_list_view.get_selection()->set_mode (SELECTION_MULTIPLE);
 
-		freesound_list_view.get_selection()->signal_changed().connect(mem_fun(*this, &SoundFileBrowser::freesound_list_view_selected));
-		
-		//freesound_list_view.get_selection()->set_mode (SELECTION_MULTIPLE);
+		freesound_list_view.get_selection()->set_mode (SELECTION_MULTIPLE);
 		freesound_list_view.signal_row_activated().connect (mem_fun (*this, &SoundFileBrowser::freesound_list_view_activated));
 
 		freesound_search_btn.signal_clicked().connect(mem_fun(*this, &SoundFileBrowser::freesound_search_clicked));
@@ -522,6 +546,7 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 
 		notebook.append_page (*vbox, _("Search Freesound"));
 	}
+
 #endif
 	
 
@@ -658,7 +683,7 @@ SoundFileBrowser::found_list_view_selected ()
 		string file;
 
 		TreeView::Selection::ListHandle_Path rows = found_list_view.get_selection()->get_selected_rows ();
-		
+
 		if (!rows.empty()) {
 			TreeIter iter = found_list->get_iter(*rows.begin());
 			file = (*iter)[found_list_columns.pathname];
@@ -667,7 +692,7 @@ SoundFileBrowser::found_list_view_selected ()
 		} else {
 			set_response_sensitive (RESPONSE_OK, false);
 		}
-		
+
 		preview.setup_labels (file);
 	}
 }
@@ -675,24 +700,45 @@ SoundFileBrowser::found_list_view_selected ()
 void
 SoundFileBrowser::freesound_list_view_selected ()
 {
+	freesound_download_cancel = false;
+
+#ifdef FREESOUND
 	if (!reset_options ()) {
 		set_response_sensitive (RESPONSE_OK, false);
 	} else {
+
 		string file;
 
 		TreeView::Selection::ListHandle_Path rows = freesound_list_view.get_selection()->get_selected_rows ();
-		
+
 		if (!rows.empty()) {
 			TreeIter iter = freesound_list->get_iter(*rows.begin());
-			file = (*iter)[freesound_list_columns.pathname];
-			chooser.set_filename (file);
-			set_response_sensitive (RESPONSE_OK, true);
+
+			string id  = (*iter)[freesound_list_columns.id];
+			string uri = (*iter)[freesound_list_columns.uri];
+			string ofn = (*iter)[freesound_list_columns.filename];
+
+			// download the sound file			
+			GdkCursor *prev_cursor;
+			prev_cursor = gdk_window_get_cursor (get_window()->gobj());
+			gdk_window_set_cursor (get_window()->gobj(), gdk_cursor_new(GDK_WATCH));
+			gdk_flush();
+
+			file = mootcher->getAudioFile(ofn, id, uri, this);
+
+			gdk_window_set_cursor (get_window()->gobj(), prev_cursor);
+
+			if (file != "") {
+				chooser.set_filename (file);
+				set_response_sensitive (RESPONSE_OK, true);
+			}
 		} else {
 			set_response_sensitive (RESPONSE_OK, false);
 		}
-		
+
 		preview.setup_labels (file);
 	}
+#endif
 }
 
 void
@@ -719,85 +765,131 @@ SoundFileBrowser::found_search_clicked ()
 	}
 }
 
-void*
-freesound_search_thread_entry (void* arg)
-{
-	PBD::notify_gui_about_thread_creation (pthread_self(), X_("Freesound Search"));
-
-	static_cast<SoundFileBrowser*>(arg)->freesound_search_thread ();
-	
-	return 0;
-}
-
-bool searching = false;
-bool canceling = false;
-
 void
 SoundFileBrowser::freesound_search_clicked ()
 {
-	if (canceling)  //already canceling, button does nothing
-		return;
-	
-	if ( searching ) {
-		freesound_search_btn.set_label(_("Cancelling.."));
-		canceling = true;
-	} else {
-		searching = true;
-		freesound_search_btn.set_label(_("Cancel"));
-		pthread_t freesound_thr;
-		pthread_create_and_store ("freesound_search", &freesound_thr, 0, freesound_search_thread_entry, this);
-	}
+	freesound_search_cancel = false;
+	freesound_search();
 }
 
 void
-SoundFileBrowser::freesound_search_thread()
+SoundFileBrowser::freesound_stop_clicked ()
+{
+	freesound_download_cancel = true;
+	freesound_search_cancel = true;
+}
+
+void
+SoundFileBrowser::freesound_search()
 {
 #ifdef FREESOUND
 	freesound_list->clear();
 
-	string path;
-	path = Glib::get_home_dir();
-	path += "/Freesound/";
-	Mootcher theMootcher(path.c_str());
-	
-	string name_string = freesound_name_entry.get_text ();
-	string pass_string = freesound_pass_entry.get_text ();
 	string search_string = freesound_entry.get_text ();
+	enum sortMethod sort_method = (enum sortMethod) freesound_sort.get_active_row_number();
 
-	if ( theMootcher.doLogin( name_string, pass_string ) ) {
+	GdkCursor *prev_cursor;
+	prev_cursor = gdk_window_get_cursor (get_window()->gobj());
+	gdk_window_set_cursor (get_window()->gobj(), gdk_cursor_new(GDK_WATCH));
+	gdk_flush();
+	for (int page = 1; page <= 99; page++ ) {
+		
+		string prog;
+		prog = string_compose (_("Searching Page %1, click Stop to cancel -->"), page);
+		freesound_progress_bar.set_text(prog);
+		while (Glib::MainContext::get_default()->iteration (false)) {
+			/* do nothing */
+		}
 
-		string theString = theMootcher.searchText(search_string);
+		string theString = mootcher->searchText(
+			search_string, 
+			page,
+			"", // filter, could do, e.g. "type:wav"
+			sort_method
+		);
 
 		XMLTree doc;
 		doc.read_buffer( theString );
 		XMLNode *root = doc.root();
 
-		if (root==NULL) return;
+		if (!root) {
+			cerr << "no root XML node!" << endl;
+			break;
+		}
 
-		if ( strcmp(root->name().c_str(), "freesound") == 0) {
+		if ( strcmp(root->name().c_str(), "response") != 0) {
+			cerr << "root node name == " << root->name() << ", != \"response\"!" << endl;
+			break;
+		}
 
-			XMLNode *node = 0;
-			XMLNodeList children = root->children();
-			XMLNodeConstIterator niter;
-			for (niter = children.begin(); niter != children.end() && !canceling; ++niter) {
-				node = *niter;
-				if( strcmp( node->name().c_str(), "sample") == 0 ){
-					XMLProperty *prop=node->property ("id");
-					string filename = theMootcher.getFile( prop->value().c_str() );
-					if ( filename != "" ) {
-						TreeModel::iterator new_row = freesound_list->append();
-						TreeModel::Row row = *new_row;
-						string path = Glib::filename_from_uri (string ("file:") + filename);
-						row[freesound_list_columns.pathname] = path;						
-					}
+		XMLNode *sounds_root = root->child("sounds");
+		
+		if (!sounds_root) {
+			cerr << "no child node \"sounds\" found!" << endl;
+			break;
+		}
+		
+		XMLNodeList sounds = sounds_root->children();
+		XMLNodeConstIterator niter;
+		XMLNode *node;
+		for (niter = sounds.begin(); niter != sounds.end(); ++niter) {
+			node = *niter;
+			if( strcmp( node->name().c_str(), "resource") != 0 ){
+				cerr << "node->name()=" << node->name() << ",!= \"resource\"!" << endl;
+				freesound_search_cancel = true;
+				break;
+			}
+
+			// node->dump(cerr, "node:");
+			
+			XMLNode *id_node  = node->child ("id");
+			XMLNode *uri_node = node->child ("serve");
+			XMLNode *ofn_node = node->child ("original_filename");
+			XMLNode *dur_node = node->child ("duration");
+
+			if (id_node && uri_node && ofn_node) {
+				
+				std::string  id =  id_node->child("text")->content();
+				std::string uri = uri_node->child("text")->content();
+				std::string ofn = ofn_node->child("text")->content();
+				std::string dur = dur_node->child("text")->content();
+
+				std::string r;
+				// cerr << "id=" << id << ",uri=" << uri << ",ofn=" << ofn << ",dur=" << dur << endl;
+				
+				double duration_seconds = atof(dur.c_str());
+				double h, m, s;
+				char duration_hhmmss[16];
+				if (duration_seconds >= 99 * 60 * 60) {
+					strcpy(duration_hhmmss, ">99h");
+				} else {
+					s = modf(duration_seconds/60, &m) * 60;
+					m = modf(m/60, &h) * 60;
+					sprintf(duration_hhmmss, "%02.fh:%02.fm:%04.1fs",
+						h, m, s
+					);
 				}
+
+ 				TreeModel::iterator new_row = freesound_list->append();
+				TreeModel::Row row = *new_row;
+				
+				row[freesound_list_columns.id      ] = id;
+				row[freesound_list_columns.uri     ] = uri;
+				row[freesound_list_columns.filename] = ofn;
+				row[freesound_list_columns.duration] = duration_hhmmss;
+
 			}
 		}
-	}
+	
+		if (freesound_search_cancel)
+			break;
 
-	searching = false;
-	canceling = false;
-	freesound_search_btn.set_label(_("Start Downloading"));
+	}  //page "for" loop
+
+	gdk_window_set_cursor (get_window()->gobj(), prev_cursor);
+
+	freesound_progress_bar.set_text("");
+
 #endif
 }
 
@@ -831,16 +923,30 @@ SoundFileBrowser::get_paths ()
 			results.push_back (str);
 		}
 	} else {
-		
+#ifdef FREESOUND
 		typedef TreeView::Selection::ListHandle_Path ListPath;
-		
+
 		ListPath rows = freesound_list_view.get_selection()->get_selected_rows ();
 		for (ListPath::iterator i = rows.begin() ; i != rows.end(); ++i) {
 			TreeIter iter = freesound_list->get_iter(*i);
-			string str = (*iter)[freesound_list_columns.pathname];
+			string id  = (*iter)[freesound_list_columns.id];
+			string uri = (*iter)[freesound_list_columns.uri];
+			string ofn = (*iter)[freesound_list_columns.filename];
+
+			GdkCursor *prev_cursor;
+			prev_cursor = gdk_window_get_cursor (get_window()->gobj());
+			gdk_window_set_cursor (get_window()->gobj(), gdk_cursor_new(GDK_WATCH));
+			gdk_flush();
+
+			string str = mootcher->getAudioFile(ofn, id, uri, this);
+			if (str != "") {
+				results.push_back (str);
+			}
 			
-			results.push_back (str);
+			gdk_window_set_cursor (get_window()->gobj(), prev_cursor);
+
 		}
+#endif
 	}
 
 	return results;
