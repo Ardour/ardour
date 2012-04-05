@@ -398,7 +398,6 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 #endif
 
 		nread = ::pread (peakfile_fd, peaks, sizeof (PeakData)* npeaks, first_peak_byte);
-		delete peakfile_descriptor;
 
 		if (nread != sizeof (PeakData) * npeaks) {
 			cerr << "AudioSource["
