@@ -2990,7 +2990,7 @@ Session::remove_source (boost::weak_ptr<Source> src)
 		}
 	}
 
-	if (!_state_of_the_state & InCleanup) {
+	if (!(_state_of_the_state & InCleanup)) {
 
 		/* save state so we don't end up with a session file
 		   referring to non-existent sources.
