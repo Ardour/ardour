@@ -50,6 +50,8 @@
 #include <glib.h>
 #include <glib/gstdio.h>
 
+#include "i18n.h"
+
 #include "ardour/audio_library.h"
 
 static const std::string base_url = "http://www.freesound.org/api";
@@ -67,6 +69,7 @@ Mootcher::Mootcher()
 //------------------------------------------------------------------------
 Mootcher:: ~Mootcher()
 {
+	curl_easy_cleanup(curl);
 }
 
 //------------------------------------------------------------------------
@@ -192,6 +195,7 @@ std::string Mootcher::doRequest(std::string uri, std::string params)
 		xml_page.size = 0;
 	}
 
+//printf("freesound result: %s\n", result.c_str());
 	return result;
 
 }
@@ -215,6 +219,8 @@ std::string Mootcher::searchText(std::string query, int page, std::string filter
 	if (sort)
 		params += "&s=" + sortMethodString(sort);
 
+	params += "&fields=id,original_filename,duration,serve";	
+
 	return doRequest("/sounds/search", params);
 }
 
@@ -225,7 +231,6 @@ std::string Mootcher::getSoundResourceFile(std::string ID)
 
 	std::string originalSoundURI;
 	std::string audioFileName;
-	std::string xmlFileName;
 	std::string xml;
 
 
@@ -250,27 +255,11 @@ std::string Mootcher::getSoundResourceFile(std::string ID)
 	}
 
 	XMLNode *name = freesound->child("original_filename");
-	XMLNode *filesize = freesound->child("filesize");
-
 
 	// get the file name and size from xml file
-	if (name && filesize) {
+	if (name) {
 
 		audioFileName = basePath + "snd/" + ID + "-" + name->child("text")->content();
-
-		// create new filename with the ID number
-		xmlFileName = basePath;
-		xmlFileName += "snd/";
-		xmlFileName += freesound->child("id")->child("text")->content();
-		xmlFileName += "-";
-		xmlFileName += name->child("text")->content();
-		xmlFileName += ".xml";
-
-		// std::cerr << "getSoundResourceFile: saving XML: " << xmlFileName << std::endl;
-
-		// save the xml file to disk
-		ensureWorkingDir();
-		doc.write(xmlFileName.c_str());
 
 		//store all the tags in the database
 		XMLNode *tags = freesound->child("tags");
@@ -326,6 +315,11 @@ std::string Mootcher::getAudioFile(std::string originalFileName, std::string ID,
 		return "";
 	}
 
+	//if already canceling a previous download, bail out here  ( this can happen b/c getAudioFile gets called by various UI update funcs )
+	if ( caller->freesound_download_cancel ) {
+		return "";
+	}
+	
 	//now download the actual file
 	FILE* theFile;
 	theFile = g_fopen( audioFileName.c_str(), "wb" );
@@ -344,8 +338,12 @@ std::string Mootcher::getAudioFile(std::string originalFileName, std::string ID,
 
 	std::cerr << "downloading " << audioFileName << " from " << audioURL << "..." << std::endl;
 	/* hack to get rid of the barber-pole stripes */
-	caller->progress_bar.hide();
-	caller->progress_bar.show();
+	caller->freesound_progress_bar.hide();
+	caller->freesound_progress_bar.show();
+
+	std::string prog;
+	prog = string_compose (_("%1: [Stop]->"), originalFileName);
+	caller->freesound_progress_bar.set_text(prog);
 
 	curl_easy_setopt (curl, CURLOPT_NOPROGRESS, 0); // turn on the progress bar
 	curl_easy_setopt (curl, CURLOPT_PROGRESSFUNCTION, progress_callback);
@@ -355,7 +353,8 @@ std::string Mootcher::getAudioFile(std::string originalFileName, std::string ID,
 	fclose(theFile);
 
 	curl_easy_setopt (curl, CURLOPT_NOPROGRESS, 1); // turn off the progress bar
-	caller->progress_bar.set_fraction(0.0);
+	caller->freesound_progress_bar.set_fraction(0.0);
+	caller->freesound_progress_bar.set_text("");
 	
 	if( res != 0 ) {
 		std::cerr <<  "curl error " << res << " (" << curl_easy_strerror(res) << ")" << std::endl;
@@ -377,12 +376,12 @@ int Mootcher::progress_callback(void *caller, double dltotal, double dlnow, doub
 SoundFileBrowser *sfb = (SoundFileBrowser *) caller;
 	//XXX I hope it's OK to do GTK things in this callback. Otherwise
 	// I'll have to do stuff like in interthread_progress_window.
-	if (sfb->freesound_stop) {
+	if (sfb->freesound_download_cancel) {
 		return -1;
 	}
 	
 	
-	sfb->progress_bar.set_fraction(dlnow/dltotal);
+	sfb->freesound_progress_bar.set_fraction(dlnow/dltotal);
 	/* Make sure the progress widget gets updated */
 	while (Glib::MainContext::get_default()->iteration (false)) {
 		/* do nothing */
