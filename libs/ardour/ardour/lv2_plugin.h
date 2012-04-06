@@ -130,6 +130,8 @@ class LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	void enable_ui_emmission();
 	void emit_to_ui(void* controller, UIMessageSink sink);
 
+	Worker* worker() { return _worker; }
+
 	void work(uint32_t size, const void* data);
 	void work_response(uint32_t size, const void* data);
 
@@ -147,6 +149,7 @@ class LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	Impl*         _impl;
 	void*         _module;
 	LV2_Feature** _features;
+	Worker*       _worker;
 	framecnt_t    _sample_rate;
 	float*        _control_data;
 	float*        _shadow_data;

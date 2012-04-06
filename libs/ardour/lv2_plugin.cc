@@ -121,9 +121,15 @@ work_schedule(LV2_Worker_Schedule_Handle handle,
               uint32_t                   size,
               const void*                data)
 {
-	Worker* worker = (Worker*)handle;
-	return worker->schedule(size, data) ?
-		LV2_WORKER_SUCCESS : LV2_WORKER_ERR_UNKNOWN;
+	LV2Plugin* plugin = (LV2Plugin*)handle;
+	if (plugin->session().engine().freewheeling()) {
+		// Freewheeling, do the work immediately in this (audio) thread
+		plugin->work(size, data);
+	} else {
+		// Enqueue message for the worker thread
+		return plugin->worker()->schedule(size, data) ?
+			LV2_WORKER_SUCCESS : LV2_WORKER_ERR_UNKNOWN;
+	}
 }
 
 /** Called by the plugin to respond to non-RT work. */
@@ -132,14 +138,20 @@ work_respond(LV2_Worker_Respond_Handle handle,
              uint32_t                  size,
              const void*               data)
 {
-	Worker* worker = (Worker*)handle;
-	return worker->respond(size, data) ?
-		LV2_WORKER_SUCCESS : LV2_WORKER_ERR_UNKNOWN;
+	LV2Plugin* plugin = (LV2Plugin*)handle;
+	if (plugin->session().engine().freewheeling()) {
+		// Freewheeling, respond immediately in this (audio) thread
+		plugin->work_response(size, data);
+	} else {
+		// Enqueue response for the worker
+		return plugin->worker()->respond(size, data) ?
+			LV2_WORKER_SUCCESS : LV2_WORKER_ERR_UNKNOWN;
+	}
 }
 
 struct LV2Plugin::Impl {
 	Impl() : plugin(0), ui(0), ui_type(0), name(0), author(0), instance(0)
-	       , worker(0), work_iface(0)
+	       , work_iface(0)
 #ifdef HAVE_NEW_LILV
 	       , state(0)
 #endif
@@ -150,7 +162,6 @@ struct LV2Plugin::Impl {
 	LilvNode*             name;
 	LilvNode*             author;
 	LilvInstance*         instance;
-	Worker*               worker;
 	LV2_Worker_Interface* work_iface;
 #ifdef HAVE_NEW_LILV
 	LilvState*            state;
@@ -164,6 +175,7 @@ LV2Plugin::LV2Plugin (AudioEngine& engine,
 	: Plugin(engine, session)
 	, _impl(new Impl())
 	, _features(NULL)
+	, _worker(NULL)
 	, _insert_id("0")
 {
 	init(c_plugin, rate);
@@ -173,6 +185,7 @@ LV2Plugin::LV2Plugin (const LV2Plugin& other)
 	: Plugin(other)
 	, _impl(new Impl())
 	, _features(NULL)
+	, _worker(NULL)
 	, _insert_id(other._insert_id)
 {
 	init(other._impl->plugin, other._sample_rate);
@@ -240,8 +253,8 @@ LV2Plugin::init(void* c_plugin, framecnt_t rate)
 	if (lilv_plugin_has_feature(plugin, worker_schedule)) {
 		LV2_Worker_Schedule* schedule = (LV2_Worker_Schedule*)malloc(
 			sizeof(LV2_Worker_Schedule));
-		_impl->worker               = new Worker(this, 4096);
-		schedule->handle            = _impl->worker;
+		_worker                     = new Worker(this, 4096);
+		schedule->handle            = this;
 		schedule->schedule_work     = work_schedule;
 		_work_schedule_feature.data = schedule;
 		_features[6]                = &_work_schedule_feature;
@@ -939,7 +952,7 @@ void
 LV2Plugin::work(uint32_t size, const void* data)
 {
 	_impl->work_iface->work(
-		_impl->instance->lv2_handle, work_respond, _impl->worker, size, data);
+		_impl->instance->lv2_handle, work_respond, this, size, data);
 }
 
 void
@@ -1360,7 +1373,7 @@ LV2Plugin::run(pframes_t nframes)
 	lilv_instance_run(_impl->instance, nframes);
 
 	if (_impl->work_iface) {
-		_impl->worker->emit_responses();
+		_worker->emit_responses();
 		if (_impl->work_iface->end_run) {
 			_impl->work_iface->end_run(_impl->instance->lv2_handle);
 		}
