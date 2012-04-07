@@ -3054,7 +3054,7 @@ struct null_deleter { void operator()(void const *) const {} };
 void
 Session::remove_controllable (Controllable* c)
 {
-	if (_state_of_the_state | Deletion) {
+	if (_state_of_the_state & Deletion) {
 		return;
 	}
 
