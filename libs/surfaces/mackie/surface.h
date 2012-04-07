@@ -38,7 +38,8 @@ public:
 		\param max_strips is the number of strips for the entire surface.
 		\param unit_strips is the number of strips per unit.
 	*/
-	Surface( uint32_t max_strips, uint32_t unit_strips = 8 );
+
+	Surface (uint32_t max_strips, uint32_t unit_strips);
 	virtual ~Surface();
 
 	/// Calls the virtual initialisation methods. This *must* be called after
@@ -76,10 +77,7 @@ public:
 	typedef std::map<std::string,Group*> Groups;
 	Groups groups;
 
-	uint32_t max_strips() const
-	{
-		return _max_strips;
-	}
+	uint32_t max_strips() const { return _max_strips; }
 	
 	/// map button ids to calls to press_ and release_ in mbh
 	virtual void handle_button( MackieButtonHandler & mbh, ButtonState bs, Button & button ) = 0;
@@ -117,11 +115,10 @@ public:
 
 protected:
 	virtual void init_controls() = 0;
-	virtual void init_strips( uint32_t max_strips, uint32_t unit_strips );
+	virtual void init_strips () {}
 
-private:
-	uint32_t _max_strips;
-	uint32_t _unit_strips;
+	const uint32_t _max_strips;
+	const uint32_t _unit_strips;
 };
 
 }

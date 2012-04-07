@@ -38,8 +38,8 @@ class Control;
 class Group
 {
 public:
-	Group( const std::string & name )
-	: _name( name )
+	Group (const std::string & name)
+	: _name (name)
 	{
 	}
 	
@@ -55,7 +55,7 @@ public:
 		return false;
 	}
 	
-	virtual void add( Control & control );
+	virtual void add (Control & control);
 	
 	const std::string & name() const
 	{
@@ -63,7 +63,7 @@ public:
 	}
 	
 	// This is for Surface only
-	void name( const std::string & rhs ) { _name = rhs; }
+	void name (const std::string & rhs) { _name = rhs; }
 	
 	typedef std::vector<Control*> Controls;
 	const Controls & controls() const { return _controls; }
@@ -88,21 +88,22 @@ public:
 	/**
 		\param is the index of the strip. 0-based.
 	*/
-	Strip( const std::string & name, int index );
-	
+	Strip (const std::string & name, int index);
+	Strip (const Strip& other);
+
 	virtual bool is_strip() const
 	{
 		return true;
 	}
 	
-	virtual void add( Control & control );
+	virtual void add (Control & control);
 	
 	/// This is the index of the strip. zero-based.
 	int index() const { return _index; }
 	
 	/// This is for Surface only
 	/// index is zero-based
-	void index( int rhs ) { _index = rhs; }
+	void index (int rhs) { _index = rhs; }
 	
 	Button & solo();
 	Button & recenable();
@@ -134,20 +135,15 @@ private:
 	int _index;
 };
 
-std::ostream & operator << ( std::ostream &, const Strip & );
+std::ostream & operator <<  (std::ostream &, const Strip &);
 
 class MasterStrip : public Strip
 {
 public:
-	MasterStrip( const std::string & name, int index )
-	: Strip( name, index )
-	{
-	}
+	MasterStrip (const std::string & name, int index)
+		: Strip (name, index) {}
 	
-	virtual bool is_master() const
-	{
-		return true;
-	}
+	virtual bool is_master() const  { return true; }
 };
 
 class Led;
@@ -159,22 +155,22 @@ class Led;
 class Control
 {
 public:
-	enum type_t { type_led, type_led_ring, type_fader = 0xe0, type_button = 0x90, type_pot = 0xb0 };
+	enum type_t { 
+		type_led, 
+		type_led_ring, 
+		type_fader = 0xe0, 
+		type_button = 0x90, 
+		type_pot = 0xb0 
+	};
 	
-	Control( int id, int ordinal, std::string name, Group & group );
+	Control (int id, int ordinal, std::string name, Group & group);
 	virtual ~Control() {}
 	
-	virtual const Led & led() const
-	{
-		throw MackieControlException( "no led available" );
-	}
+	virtual const Led & led() const { throw MackieControlException ("no led available"); }
 
 	/// type() << 8 + midi id of the control. This
 	/// provides a unique id for any control on the surface.
-	int id() const
-	{
-		return ( type() << 8 ) + _id;
-	}
+	int id() const { return (type() << 8) + _id; }
 	
 	/// the value of the second bytes of the message. It's
 	/// the id of the control, but only guaranteed to be
@@ -184,30 +180,11 @@ public:
 	/// The 1-based number of the control
 	int ordinal() const { return _ordinal; }
 	
-	const std::string & name() const
-	{
-		return _name;
-	}
-	
-	const Group & group() const
-	{
-		return _group;
-	}
-	
-	const Strip & strip() const
-	{
-		return dynamic_cast<const Strip&>( _group );
-	}
-	
-	Strip & strip()
-	{
-		return dynamic_cast<Strip&>( _group );
-	}
-	
-	virtual bool accepts_feedback() const
-	{
-		return true;
-	}
+	const std::string & name() const  { return _name; }
+	const Group & group() const { return _group; }
+	const Strip & strip() const { return dynamic_cast<const Strip&> (_group); }
+	Strip & strip() { return dynamic_cast<Strip&> (_group); }
+	virtual bool accepts_feedback() const  { return true; }
 	
 	virtual type_t type() const = 0;
 	
@@ -224,7 +201,13 @@ public:
 	 *  is its touch button control; otherwise 0.
 	 */
 	Control* in_use_touch_control;
-	
+
+	static uint32_t button_cnt;
+	static uint32_t pot_cnt;
+	static uint32_t fader_cnt;
+	static uint32_t led_cnt;
+	static uint32_t jog_cnt;
+
 private:
 	int _id;
 	int _ordinal;
@@ -233,13 +216,13 @@ private:
 	bool _in_use;
 };
 
-std::ostream & operator << ( std::ostream & os, const Control & control );
+std::ostream & operator <<  (std::ostream & os, const Control & control);
 
 class Fader : public Control
 {
 public:
-	Fader( int id, int ordinal, std::string name, Group & group )
-	: Control( id, ordinal, name, group )
+	Fader (int ordinal, std::string name, Group & group)
+		: Control (Control::fader_cnt++, ordinal, name, group)
 	{
 	}
 	
@@ -249,8 +232,8 @@ public:
 class Led : public Control
 {
 public:
-	Led( int id, int ordinal, std::string name, Group & group )
-	: Control( id, ordinal, name, group )
+	Led (int ordinal, std::string name, Group & group)
+		: Control (Control::led_cnt++, ordinal, name, group)
 	{
 	}
 	
@@ -262,16 +245,11 @@ public:
 class Button : public Control
 {
 public:
-	Button( int id, int ordinal, std::string name, Group & group )
-	: Control( id, ordinal, name, group )
-	, _led( id, ordinal, name + "_led", group )
-	{
-	}
+	Button (int ordinal, std::string name, Group & group)
+		: Control (Control::button_cnt++, ordinal, name, group)
+		, _led  (ordinal, name + "_led", group) {}
 	
-	virtual const Led & led() const
-	{
-		return _led;
-	}
+	virtual const Led & led() const  { return _led; }
 	
 	virtual type_t type() const { return type_button; };
 	
@@ -282,8 +260,8 @@ private:
 class LedRing : public Led
 {
 public:
-	LedRing( int id, int ordinal, std::string name, Group & group )
-	: Led( id, ordinal, name, group )
+	LedRing (int ordinal, std::string name, Group & group)
+		: Led (ordinal, name, group)
 	{
 	}
 
@@ -293,18 +271,17 @@ public:
 class Pot : public Control
 {
 public:
-	Pot( int id, int ordinal, std::string name, Group & group )
-	: Control( id, ordinal, name, group )
-	, _led_ring( id, ordinal, name + "_ring", group )
-	{
-	}
+	Pot (int ordinal, std::string name, Group & group)
+		: Control (Control::pot_cnt++, ordinal, name, group)
+		, _led_ring (ordinal, name + "_ring", group) {}
+
+	Pot (int id, int ordinal, std::string name, Group & group)
+		: Control (id, ordinal, name, group)
+		, _led_ring (ordinal, name + "_ring", group) {}
 
 	virtual type_t type() const { return type_pot; }
 
-	virtual const LedRing & led_ring() const
-	{
-		return _led_ring;
-	}
+	virtual const LedRing & led_ring() const {return _led_ring; }
 
 private:
 	LedRing _led_ring;
@@ -313,8 +290,8 @@ private:
 class Jog : public Pot
 {
 public:
-	Jog( int id, int ordinal, std::string name, Group & group )
-	: Pot( id, ordinal, name, group )
+	Jog (int ordinal, std::string name, Group & group)
+		: Pot  (Control::jog_cnt++, ordinal, name, group)
 	{
 	}
 

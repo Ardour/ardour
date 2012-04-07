@@ -26,6 +26,12 @@
 using namespace Mackie;
 using namespace std;
 
+uint32_t Control::button_cnt = 0;
+uint32_t Control::pot_cnt = 0;
+uint32_t Control::fader_cnt = 0;
+uint32_t Control::led_cnt = 0;
+uint32_t Control::jog_cnt = 0;
+
 void Group::add( Control & control )
 {
 	_controls.push_back( &control );
