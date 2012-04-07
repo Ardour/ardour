@@ -4364,7 +4364,7 @@ Session::start_time_changed (framepos_t old)
 
 	Location* l = _locations->auto_loop_location ();
 
-	if (l->start() == old) {
+	if (l && l->start() == old) {
 		l->set_start (s->start(), true);
 	}
 }
