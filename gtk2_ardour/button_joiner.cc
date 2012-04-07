@@ -75,18 +75,18 @@ ButtonJoiner::render (cairo_t* cr)
 
 	/* outer rect */
 
-	Gtkmm2ext::rounded_top_rectangle (cr, 0, 0, get_width(), h, 12);
+	Gtkmm2ext::rounded_top_rectangle (cr, 0, 0, get_width(), h, 8);
 	cairo_fill_preserve (cr);
 
 	/* outer edge */
 
-	cairo_set_line_width (cr, 1);
+	cairo_set_line_width (cr, 1.5);
 	cairo_set_source_rgb (cr, border_r, border_g, border_b);
 	cairo_stroke (cr);
 
 	/* inner "edge" */
 
-	Gtkmm2ext::rounded_top_rectangle (cr, 8, 8, get_width() - 16, h - 8, 10);
+	Gtkmm2ext::rounded_top_rectangle (cr, 8, 8, get_width() - 16, h - 8, 6);
 	cairo_stroke (cr);
 
 }
