@@ -298,7 +298,7 @@ MackieControlProtocol::switch_banks (int initial)
 
 			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("remote id %1 connecting %2 to %3 with port %4\n", 
 									   route->remote_control_id(), route->name(), strip.name(), port_for_id(i)));
-			route_table[i] = route;
+			set_route_table (1, route);
 			RouteSignal * rs = new RouteSignal (route, *this, strip, port_for_id(i));
 			route_signals.push_back (rs);
 			// update strip from route

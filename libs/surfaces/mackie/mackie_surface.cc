@@ -30,9 +30,6 @@ Mackie::MackieSurface::init_controls()
 	// intialise groups and strips
 	Group * group = 0;
 	
-	// make sure there are enough strips
-	strips.resize (8);
-	
 	group = new Group  ("user");
 	groups["user"] = group;
 	

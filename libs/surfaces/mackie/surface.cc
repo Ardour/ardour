@@ -18,8 +18,11 @@ Surface::Surface( uint32_t max_strips, uint32_t unit_strips )
 void Surface::init()
 {
 	DEBUG_TRACE (DEBUG::MackieControl, "Surface::init\n");
+
+	strips.resize (_max_strips);
 	init_controls ();
 	init_strips ();
+
 	DEBUG_TRACE (DEBUG::MackieControl, "Surface::init finish\n");
 }
 
