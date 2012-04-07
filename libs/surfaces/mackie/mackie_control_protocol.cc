@@ -185,14 +185,23 @@ MackiePort&
 MackieControlProtocol::port_for_id (uint32_t index)
 {
 	uint32_t current_max = 0;
+	
+	cerr << "Looking for port for index " << index << endl;
+	
+
 	for (MackiePorts::iterator it = _ports.begin(); it != _ports.end(); ++it) {
+		cerr << "\tport " << (*it)->input_port().name() << '/' << (*it)->output_port().name() << " has " << (*it)->strips() << endl;
 		current_max += (*it)->strips();
-		if (index < current_max) return **it;
+		if (index < current_max) { 
+			cerr << "\t\tUSE IT\n";
+			return **it;
+		}
 	}
 
 	// oops - no matching port
 	ostringstream os;
 	os << "No port for index " << index;
+	cerr << "No port for index " << index << endl;
 	throw MackieControlException (os.str());
 }
 
