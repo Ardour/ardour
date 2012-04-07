@@ -140,17 +140,18 @@ MidiByteArray calculate_challenge_response (MidiByteArray::iterator begin, MidiB
 // not used right now
 MidiByteArray MackiePort::host_connection_query (MidiByteArray & bytes)
 {
+	MidiByteArray response;
+
 	// handle host connection query
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("host connection query: %1\n", bytes));
 	
 	if  (bytes.size() != 18) {
 		finalise_init (false);
 		cerr << "expecting 18 bytes, read " << bytes << " from " << input_port().name() << endl;
-		return;
+		return response;
 	}
 
 	// build and send host connection reply
-	MidiByteArray response;
 	response << 0x02;
 	copy (bytes.begin() + 6, bytes.begin() + 6 + 7, back_inserter (response));
 	response << calculate_challenge_response (bytes.begin() + 6 + 7, bytes.begin() + 6 + 7 + 4);

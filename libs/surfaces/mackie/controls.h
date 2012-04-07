@@ -163,7 +163,7 @@ public:
 		type_pot = 0xb0 
 	};
 	
-	Control (int id, int ordinal, std::string name, Group & group);
+	Control (int id, int ordinal, std::string name, Group& group);
 	virtual ~Control() {}
 	
 	virtual const Led & led() const { throw MackieControlException ("no led available"); }
@@ -212,7 +212,7 @@ private:
 	int _id;
 	int _ordinal;
 	std::string _name;
-	Group & _group;
+	Group& _group;
 	bool _in_use;
 };
 
