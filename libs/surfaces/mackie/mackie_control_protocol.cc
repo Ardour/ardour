@@ -285,10 +285,8 @@ MackieControlProtocol::switch_banks (int initial)
 
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("switch to %1, %2\n", _current_initial_bank, end_pos));
 
-		// clear out routes from our table in case any have been deleted
-		for (vector<boost::shared_ptr<Route> >::iterator i = route_table.begin(); i != route_table.end(); ++i) {
-			i->reset ();
-		}
+		route_table.clear ();
+		set_route_table_size (surface().strips.size());
 
 		// link routes to strips
 		uint32_t i = 0;

@@ -314,7 +314,8 @@ void MackiePort::handle_midi_sysex (MIDI::Parser &, MIDI::byte * raw_bytes, size
 	}
 }
 
-Control & MackiePort::lookup_control (MIDI::byte * bytes, size_t count)
+Control& 
+MackiePort::lookup_control (MIDI::byte * bytes, size_t count)
 {
 	// Don't instantiate a MidiByteArray here unless it's needed for exceptions.
 	// Reason being that this method is called for every single incoming
@@ -375,7 +376,8 @@ Control & MackiePort::lookup_control (MIDI::byte * bytes, size_t count)
 // converts midi messages into control_event signals
 // it might be worth combining this with lookup_control
 // because they have similar logic flows.
-void MackiePort::handle_midi_any (MIDI::Parser &, MIDI::byte * raw_bytes, size_t count)
+void 
+MackiePort::handle_midi_any (MIDI::Parser &, MIDI::byte * raw_bytes, size_t count)
 {
 	MidiByteArray bytes (count, raw_bytes);
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("MackiePort::handle_midi_any %1\n", bytes));
@@ -383,7 +385,9 @@ void MackiePort::handle_midi_any (MIDI::Parser &, MIDI::byte * raw_bytes, size_t
 	try
 	{
 		// ignore sysex messages
-		if  (raw_bytes[0] == MIDI::sysex) return;
+		if  (raw_bytes[0] == MIDI::sysex) { 
+			return;
+		}
 
 		// sanity checking
 		if (count != 3) {
