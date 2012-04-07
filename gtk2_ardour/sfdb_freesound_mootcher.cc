@@ -187,17 +187,16 @@ std::string Mootcher::doRequest(std::string uri, std::string params)
 		return "";
 	}
 
-	result = xml_page.memory;
 	// free the memory
-	if(xml_page.memory){
-		free( xml_page.memory );
-		xml_page.memory = NULL;
-		xml_page.size = 0;
+	if (xml_page.memory) {
+		result = xml_page.memory;
 	}
+	
+	free (xml_page.memory);
+	xml_page.memory = NULL;
+	xml_page.size = 0;
 
-//printf("freesound result: %s\n", result.c_str());
 	return result;
-
 }
 
 
