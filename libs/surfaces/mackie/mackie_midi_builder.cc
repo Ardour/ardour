@@ -22,10 +22,14 @@
 #include <iomanip>
 #include <algorithm>
 
+#include "pbd/compose.h"
+
+#include "ardour/debug.h"
 #include "controls.h"
 #include "midi_byte_array.h"
 #include "mackie_port.h"
 
+using namespace PBD;
 using namespace Mackie;
 using namespace std;
 
@@ -191,39 +195,40 @@ MidiByteArray MackieMidiBuilder::strip_display_blank( SurfacePort & port, const 
 	return strip_display( port, strip, line_number, "      " );
 }
 
-MidiByteArray MackieMidiBuilder::strip_display( SurfacePort & port, const Strip & strip, unsigned int line_number, const std::string & line )
+MidiByteArray MackieMidiBuilder::strip_display (SurfacePort & port, const Strip & strip, unsigned int line_number, const std::string & line )
 {
 	assert (line_number <= 1);
-	assert (strip.index() < 8);
-
-#ifdef NUCLEUS_DEBUG	
-	cout << "MackieMidiBuilder::strip_display index: " << strip.index() << ", line " << line_number << ": " << line << endl;
-#endif
 
 	MidiByteArray retval;
-	
+	uint32_t index = strip.index() % port.strips();
+
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("MackieMidiBuilder::strip_display index: %1, line %2 = %3\n", strip.index(), line_number, line));
+
 	// sysex header
 	retval << port.sysex_hdr();
 	
 	// code for display
 	retval << 0x12;
 	// offset (0 to 0x37 first line, 0x38 to 0x6f for second line )
-	retval << ( strip.index() * 7 + ( line_number * 0x38 ) );
+	retval << (index * 7 + (line_number * 0x38));
 	
 	// ascii data to display
 	retval << line;
 	// pad with " " out to 6 chars
-	for ( int i = line.length(); i < 6; ++i ) retval << ' ';
+	for (int i = line.length(); i < 6; ++i) {
+		retval << ' ';
+	}
 	
 	// column spacer, unless it's the right-hand column
-	if ( strip.index() < 7 ) retval << ' ';
+	if (strip.index() < 7) {
+		retval << ' ';
+	}
 
 	// sysex trailer
 	retval << MIDI::eox;
 	
-#ifdef NUCLEUS_DEBUG	
-	cout << "MackieMidiBuilder::strip_display midi: " << retval << endl;
-#endif
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("MackieMidiBuilder::strip_display midi: %1\n", retval));
+
 	return retval;
 }
 	
