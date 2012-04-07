@@ -72,6 +72,8 @@ using namespace PBD;
 
 #include "pbd/abstract_ui.cc" // instantiate template
 
+#define NUCLEUS_DEBUG 1
+
 MackieMidiBuilder builder;
 
 #define midi_ui_context() MidiControlUI::instance() /* a UICallback-derived object that specifies the event loop for signal handling */
@@ -948,6 +950,10 @@ MackieControlProtocol::notify_property_changed (const PropertyChange& what_chang
 			} else {
 				line1 = PBD::short_version (fullname, 6);
 			}
+
+#ifdef NUCLEUS_DEBUG
+			cerr << "show strip name from " << fullname << " as " << line1 << endl;
+#endif
 
 			SurfacePort & port = route_signal->port();
 			port.write (builder.strip_display (port, strip, 0, line1));

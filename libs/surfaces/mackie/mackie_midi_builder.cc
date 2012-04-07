@@ -29,6 +29,8 @@
 using namespace Mackie;
 using namespace std;
 
+#define NUCLEUS_DEBUG 1
+
 MIDI::byte MackieMidiBuilder::calculate_pot_value( midi_pot_mode mode, const ControlState & state )
 {
 	// TODO do an exact calc for 0.50? To allow manually re-centering the port.
@@ -194,7 +196,7 @@ MidiByteArray MackieMidiBuilder::strip_display( SurfacePort & port, const Strip 
 	assert (line_number <= 1);
 	assert (strip.index() < 8);
 
-#ifdef DEBUG	
+#ifdef NUCLEUS_DEBUG	
 	cout << "MackieMidiBuilder::strip_display index: " << strip.index() << ", line " << line_number << ": " << line << endl;
 #endif
 
@@ -219,7 +221,7 @@ MidiByteArray MackieMidiBuilder::strip_display( SurfacePort & port, const Strip 
 	// sysex trailer
 	retval << MIDI::eox;
 	
-#ifdef DEBUG	
+#ifdef NUCLEUS_DEBUG	
 	cout << "MackieMidiBuilder::strip_display midi: " << retval << endl;
 #endif
 	return retval;
