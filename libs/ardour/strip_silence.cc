@@ -30,8 +30,7 @@ using namespace ARDOUR;
 
 /** Construct a StripSilence filter.
  *  @param s Session.
- *  @param threshold Threshold below which audio is considered silence, in dBFS.
- *  @param minimum_length Minimum length of silence period to recognise, in samples.
+ *  @param sm Silences to remove.
  *  @param fade_length Length of fade in/out to apply to trimmed regions, in samples.
  */
 
