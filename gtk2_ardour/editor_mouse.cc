@@ -889,6 +889,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		default:
 			break;
 		}
+		break;
 
 	case MouseObject:
 		switch (item_type) {
