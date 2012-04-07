@@ -567,11 +567,11 @@ MackieControlProtocol::connect_session_signals()
 }
 
 void 
-MackieControlProtocol::add_port (MIDI::Port & midi_input_port, MIDI::Port & midi_output_port, int number)
+MackieControlProtocol::add_port (MIDI::Port & midi_input_port, MIDI::Port & midi_output_port, int number, MackiePort::port_type_t port_type)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("add port %1 %2\n", midi_input_port.name(), midi_output_port.name()));
 
-	MackiePort * sport = new MackiePort (*this, midi_input_port, midi_output_port, number);
+	MackiePort * sport = new MackiePort (*this, midi_input_port, midi_output_port, number, port_type);
 	_ports.push_back (sport);
 	
 	sport->init_event.connect_same_thread (port_connections, boost::bind (&MackieControlProtocol::handle_port_init, this, sport));
@@ -611,7 +611,7 @@ MackieControlProtocol::create_ports()
 		throw MackieControlException (os.str());
 	}
 
-	add_port (*midi_input_port, *midi_output_port, 0);
+	add_port (*midi_input_port, *midi_output_port, 0, MackiePort::mcu);
 
 	/* Create extender ports */
 
@@ -623,7 +623,7 @@ MackieControlProtocol::create_ports()
 			new MIDI::Port (string_compose (_("mcu_xt_%1 out"), index), MIDI::Port::IsOutput, session->engine().jack())
 			);
 		if (midi_input_port->ok() && midi_output_port->ok()) {
-			add_port (*midi_input_port, *midi_output_port, index);
+			add_port (*midi_input_port, *midi_output_port, index, MackiePort::ext);
 		}
 	}
 }
@@ -949,8 +949,7 @@ MackieControlProtocol::notify_property_changed (const PropertyChange& what_chang
 	try {
 		Strip & strip = route_signal->strip();
 		
-		/* XXX: not sure about this check to only display stuff for strips of index < 8 */
-		if (!strip.is_master() && strip.index() < 8) {
+		if (!strip.is_master()) {
 			string line1;
 			string fullname = route_signal->route()->name();
 
