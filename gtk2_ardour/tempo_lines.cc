@@ -48,8 +48,9 @@ TempoLines::tempo_map_changed()
 		++next;
 		i->second->property_x1() = - d;
 		i->second->property_x2() = - d;
+		ArdourCanvas::SimpleLine* f = i->second;
 		_lines.erase(i);
-		_lines.insert(make_pair(- d, i->second));
+		_lines.insert(make_pair(- d, f));
 		i = next;
 	}
 }
