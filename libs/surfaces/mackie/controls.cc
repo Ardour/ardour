@@ -289,6 +289,7 @@ Jog::factory (Surface& surface, int id, int ordinal, const char* name, Group& gr
 {
 	Jog* j = new Jog (id, ordinal, name, group);
 	surface.controls.push_back (j);
+	surface.controls_by_name["jog"] = j;
 	group.add (*j);
 	return j;
 }

@@ -368,6 +368,10 @@ MackiePort::handle_midi_controller_message (MIDI::Parser &, MIDI::EventTwoBytes*
 
 	Control* control = _mcp.surface().pots[(8*number()) + ev->controller_number];
 
+	if (!control && ev->controller_number == Control::jog_base_id) {
+		control = _mcp.surface().controls_by_name["jog"];
+	}
+
 	if (control) {
 		ControlState state;
 		
