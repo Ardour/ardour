@@ -329,15 +329,12 @@ void MackiePort::handle_midi_sysex (MIDI::Parser &, MIDI::byte * raw_bytes, size
 void
 MackiePort::handle_midi_pitchbend_message (MIDI::Parser&, MIDI::pitchbend_t pb, uint32_t fader_id)
 {
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("handle_midi pitchbend, fader = %1 value = %2\n", fader_id, pb));
+
 	Control* control = _mcp.surface().faders[fader_id];
 
 	if (control) {
-		// only the top-order 10 bits out of 14 are used
-		int midi_pos = pb & 0x3ff;
-	
-	        // in_use is set by the MackieControlProtocol::handle_strip_button
-		
-	        // relies on implicit ControlState constructor
+		int midi_pos = pb & 0x3ff; // only the top-order 10 bits out of 14 are used
 		_mcp.handle_control_event (*this, *control, float (midi_pos) / float(0x3ff));
 	}
 }

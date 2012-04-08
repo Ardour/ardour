@@ -1,5 +1,6 @@
 /*
 	Copyright (C) 2006,2007 John Anderson
+	Copyright (C) 2012 Paul Davis
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -15,8 +16,9 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifndef mackie_controls_h
-#define mackie_controls_h
+
+#ifndef __mackie_controls_h__
+#define __mackie_controls_h__
 
 #include <map>
 #include <vector>
@@ -299,4 +301,4 @@ public:
 
 }
 
-#endif
+#endif /* __mackie_controls_h__ */
