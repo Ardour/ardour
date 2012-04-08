@@ -68,6 +68,7 @@ private:
 class Button;
 class Pot;
 class Fader;
+class Meter;
 
 struct StripControlDefinition {
     const char* name;
@@ -103,7 +104,8 @@ public:
 	Button & fader_touch();
 	Pot & vpot();
 	Fader & gain();
-	
+	Meter& meter ();
+
 	bool has_solo() const { return _solo != 0; }
 	bool has_recenable() const { return _recenable != 0; }
 	bool has_mute() const { return _mute != 0; }
@@ -112,7 +114,7 @@ public:
 	bool has_fader_touch() const { return _fader_touch != 0; }
 	bool has_vpot() const { return _vpot != 0; }
 	bool has_gain() const { return _gain != 0; }
-	
+	bool has_meter() const { return _meter != 0; }
 private:
 	Button* _solo;
 	Button* _recenable;
@@ -122,6 +124,7 @@ private:
 	Button* _fader_touch;
 	Pot*    _vpot;
 	Fader*  _gain;
+	Meter*  _meter;
 	int     _index;
 };
 

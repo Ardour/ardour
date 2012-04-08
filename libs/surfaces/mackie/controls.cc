@@ -93,6 +93,8 @@ void Strip::add (Control & control)
 		_vselect = reinterpret_cast<Button*>(&control);
 	} else if  (control.name() == "fader_touch") {
 		_fader_touch = reinterpret_cast<Button*>(&control);
+	} else if  (control.name() == "meter") {
+		_meter = reinterpret_cast<Meter*>(&control);
 	} else if  (control.type() == Control::type_led || control.type() == Control::type_led_ring) {
 		// relax
 	} else {
