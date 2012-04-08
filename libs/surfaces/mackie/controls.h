@@ -21,6 +21,7 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <stdint.h>
 
 #include "pbd/signals.h"
 
@@ -30,6 +31,7 @@ namespace Mackie
 {
 
 class Control;
+class Surface;
 
 /**
 	This is a loose group of controls, eg cursor buttons,
@@ -39,31 +41,17 @@ class Group
 {
 public:
 	Group (const std::string & name)
-	: _name (name)
-	{
-	}
-	
+		: _name (name) {}
+
 	virtual ~Group() {}
 	
-	virtual bool is_strip() const
-	{
-		return false;
-	}
-	
-	virtual bool is_master() const
-	{
-		return false;
-	}
+	virtual bool is_strip() const { return false; }
+	virtual bool is_master() const { return false; }
 	
 	virtual void add (Control & control);
 	
-	const std::string & name() const
-	{
-		return _name;
-	}
-	
-	// This is for Surface only
-	void name (const std::string & rhs) { _name = rhs; }
+	const std::string & name() const { return _name; }
+	void set_name (const std::string & rhs) { _name = rhs; }
 	
 	typedef std::vector<Control*> Controls;
 	const Controls & controls() const { return _controls; }
@@ -79,31 +67,31 @@ class Button;
 class Pot;
 class Fader;
 
+struct StripControlDefinition {
+    const char* name;
+    uint32_t base_id;
+    Control* (*factory)(Surface&, int index, int ordinal, const char* name, Group&);
+};
+
+struct GlobalControlDefinition {
+    const char* name;
+    uint32_t id;
+    Control* (*factory)(Surface&, int index, int ordinal, const char* name, Group&);
+    const char* group_name;
+};
+
 /**
 	This is the set of controls that make up a strip.
 */
 class Strip : public Group
 {
 public:
-	/**
-		\param is the index of the strip. 0-based.
-	*/
-	Strip (const std::string & name, int index);
-	Strip (const Strip& other);
+	Strip (const std::string& name, int index); /* master strip only */
+	Strip (Surface&, const std::string & name, int index, int unit_index, StripControlDefinition* ctls);
 
-	virtual bool is_strip() const
-	{
-		return true;
-	}
-	
+	virtual bool is_strip() const { return true; }
 	virtual void add (Control & control);
-	
-	/// This is the index of the strip. zero-based.
-	int index() const { return _index; }
-	
-	/// This is for Surface only
-	/// index is zero-based
-	void index (int rhs) { _index = rhs; }
+	int index() const { return _index; } // zero based
 	
 	Button & solo();
 	Button & recenable();
@@ -124,15 +112,15 @@ public:
 	bool has_gain() const { return _gain != 0; }
 	
 private:
-	Button * _solo;
-	Button * _recenable;
-	Button * _mute;
-	Button * _select;
-	Button * _vselect;
-	Button * _fader_touch;
-	Pot * _vpot;
-	Fader * _gain;
-	int _index;
+	Button* _solo;
+	Button* _recenable;
+	Button* _mute;
+	Button* _select;
+	Button* _vselect;
+	Button* _fader_touch;
+	Pot*    _vpot;
+	Fader*  _gain;
+	int     _index;
 };
 
 std::ostream & operator <<  (std::ostream &, const Strip &);
@@ -161,6 +149,17 @@ public:
 		type_fader = 0xe0, 
 		type_button = 0x90, 
 		type_pot = 0xb0 
+	};
+
+	enum base_id_t {
+		fader_base_id = 0x0,
+		pot_base_id = 0x10,
+		fader_touch_button_base_id = 0x68,
+		vselect_button_base_id = 0x20,
+		select_button_base_id = 0x18,
+		mute_button_base_id = 0x10,
+		solo_button_base_id = 0x08,
+		recenable_button_base_id = 0x0,
 	};
 	
 	Control (int id, int ordinal, std::string name, Group& group);
@@ -202,12 +201,6 @@ public:
 	 */
 	Control* in_use_touch_control;
 
-	static uint32_t button_cnt;
-	static uint32_t pot_cnt;
-	static uint32_t fader_cnt;
-	static uint32_t led_cnt;
-	static uint32_t jog_cnt;
-
 private:
 	int _id;
 	int _ordinal;
@@ -221,37 +214,43 @@ std::ostream & operator <<  (std::ostream & os, const Control & control);
 class Fader : public Control
 {
 public:
-	Fader (int ordinal, std::string name, Group & group)
-		: Control (Control::fader_cnt++, ordinal, name, group)
+	Fader (int id, int ordinal, std::string name, Group & group)
+		: Control (id, ordinal, name, group)
 	{
 	}
 	
 	virtual type_t type() const { return type_fader; }
+
+	static Control* factory (Surface&, int id, int ordinal, const char*, Group&);
 };
 
 class Led : public Control
 {
 public:
-	Led (int ordinal, std::string name, Group & group)
-		: Control (Control::led_cnt++, ordinal, name, group)
+	Led (int id, int ordinal, std::string name, Group & group)
+		: Control (id, ordinal, name, group)
 	{
 	}
 	
 	virtual const Led & led() const { return *this; }
 
 	virtual type_t type() const { return type_led; }
+
+	static Control* factory (Surface&, int id, int ordinal, const char*, Group&);
 };
 
 class Button : public Control
 {
 public:
-	Button (int ordinal, std::string name, Group & group)
-		: Control (Control::button_cnt++, ordinal, name, group)
-		, _led  (ordinal, name + "_led", group) {}
+	Button (int id, int ordinal, std::string name, Group & group)
+		: Control (id,  ordinal, name, group)
+		, _led  (id, ordinal, name + "_led", group) {}
 	
 	virtual const Led & led() const  { return _led; }
 	
 	virtual type_t type() const { return type_button; };
+
+	static Control* factory (Surface&, int id, int ordinal, const char*, Group&);
 	
 private:
 	Led _led;
@@ -260,8 +259,8 @@ private:
 class LedRing : public Led
 {
 public:
-	LedRing (int ordinal, std::string name, Group & group)
-		: Led (ordinal, name, group)
+	LedRing (int id, int ordinal, std::string name, Group & group)
+		: Led (id, ordinal, name, group)
 	{
 	}
 
@@ -271,17 +270,15 @@ public:
 class Pot : public Control
 {
 public:
-	Pot (int ordinal, std::string name, Group & group)
-		: Control (Control::pot_cnt++, ordinal, name, group)
-		, _led_ring (ordinal, name + "_ring", group) {}
-
 	Pot (int id, int ordinal, std::string name, Group & group)
 		: Control (id, ordinal, name, group)
-		, _led_ring (ordinal, name + "_ring", group) {}
+		, _led_ring (id, ordinal, name + "_ring", group) {}
 
 	virtual type_t type() const { return type_pot; }
 
 	virtual const LedRing & led_ring() const {return _led_ring; }
+
+	static Control* factory (Surface&, int id, int ordinal, const char*, Group&);
 
 private:
 	LedRing _led_ring;
@@ -290,12 +287,14 @@ private:
 class Jog : public Pot
 {
 public:
-	Jog (int ordinal, std::string name, Group & group)
-		: Pot  (Control::jog_cnt++, ordinal, name, group)
+	Jog (int id, int ordinal, std::string name, Group & group)
+		: Pot  (id, ordinal, name, group)
 	{
 	}
 
 	virtual bool is_jog() const { return true; }
+
+	static Control* factory (Surface&, int id, int ordinal, const char*, Group&);
 };
 
 }

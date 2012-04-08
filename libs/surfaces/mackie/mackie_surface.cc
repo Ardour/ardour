@@ -1,6 +1,7 @@
 #include <cmath>
 #include <sstream>
 #include <string>
+#include <cstdio>
 
 #include "mackie_surface.h"
 #include "surface_port.h"
@@ -9,618 +10,147 @@
 using namespace Mackie;
 
 void 
-MackieSurface::display_timecode( SurfacePort & port, MackieMidiBuilder & builder, const std::string & timecode, const std::string & timecode_last )
+MackieSurface::display_timecode (SurfacePort & port, MackieMidiBuilder & builder, const std::string & timecode, const std::string & timecode_last)
 {
-	port.write( builder.timecode_display( port, timecode, timecode_last ) );
+	port.write (builder.timecode_display (port, timecode, timecode_last));
 }
 
 float 
-MackieSurface::scaled_delta( const ControlState & state, float current_speed )
+MackieSurface::scaled_delta (const ControlState & state, float current_speed)
 {
-	return state.sign * ( std::pow( float(state.ticks + 1), 2 ) + current_speed ) / 100.0;
+	return state.sign *  (std::pow (float(state.ticks + 1), 2) + current_speed) / 100.0;
 }
 
+static GlobalControlDefinition mackie_global_controls[] = {
+	{ "jog", 0x3c, Jog::factory, "none" },
+	{ "external", 0x2e, Pot::factory, "none" },
+	{ "io", 0x28, Button::factory, "assignment" },
+	{ "sends", 0x29, Button::factory, "assignment" },
+	{ "pan", 0x2a, Button::factory, "assignment" },
+	{ "plugin", 0x2b, Button::factory, "assignment" },
+	{ "eq", 0x2c, Button::factory, "assignment" },
+	{ "dyn", 0x2d, Button::factory, "assignment" },
+	{ "left", 0x2e, Button::factory, "bank" },
+	{ "right", 0x2f, Button::factory, "bank" },
+	{ "channel_left", 0x30, Button::factory, "bank" },
+	{ "channel_right", 0x31, Button::factory, "bank" },
+	{ "flip", 0x32, Button::factory, "none" },
+	{ "edit", 0x33, Button::factory, "none" },
+	{ "name_value", 0x34, Button::factory, "display" },
+	{ "timecode_beats", 0x35, Button::factory, "display" },
+	{ "F1", 0x36, Button::factory, "none" },
+	{ "F2", 0x37, Button::factory, "none" },
+	{ "F3", 0x38, Button::factory, "none" },
+	{ "F4", 0x39, Button::factory, "none" },
+	{ "F5", 0x3a, Button::factory, "none" },
+	{ "F6", 0x3b, Button::factory, "none" },
+	{ "F7", 0x3c, Button::factory, "none" },
+	{ "F8", 0x3d, Button::factory, "none" },
+	{ "F9", 0x3e, Button::factory, "none" },
+	{ "F10", 0x3f, Button::factory, "none" },
+	{ "F11", 0x40, Button::factory, "none" },
+	{ "F12", 0x41, Button::factory, "none" },
+	{ "F13", 0x42, Button::factory, "none" },
+	{ "F14", 0x43, Button::factory, "none" },
+	{ "F15", 0x44, Button::factory, "none" },
+	{ "F16", 0x45, Button::factory, "none" },
+	{ "shift", 0x46, Button::factory, "modifiers" },
+	{ "option", 0x47, Button::factory, "modifiers" },
+	{ "control", 0x48, Button::factory, "modifiers" },
+	{ "cmd_alt", 0x49, Button::factory, "modifiers" },
+	{ "on", 0x4a, Button::factory, "automation" },
+	{ "rec_ready", 0x4b, Button::factory, "automation" },
+	{ "undo", 0x4c, Button::factory, "functions" },
+	{ "snapshot", 0x4d, Button::factory, "automation" },
+	{ "touch", 0x4e, Button::factory, "automation" },
+	{ "redo", 0x4f, Button::factory, "functions" },
+	{ "marker", 0x50, Button::factory, "functions" },
+	{ "enter", 0x51, Button::factory, "functions" },
+	{ "cancel", 0x52, Button::factory, "functions" },
+	{ "mixer", 0x53, Button::factory, "functions" },
+	{ "frm_left", 0x54, Button::factory, "transport" },
+	{ "frm_right", 0x55, Button::factory, "transport" },
+	{ "loop", 0x56, Button::factory, "transport" },
+	{ "punch_in", 0x57, Button::factory, "transport" },
+	{ "punch_out", 0x58, Button::factory, "transport" },
+	{ "home", 0x59, Button::factory, "transport" },
+	{ "end", 0x5a, Button::factory, "transport" },
+	{ "rewind", 0x5b, Button::factory, "transport" },
+	{ "ffwd", 0x5c, Button::factory, "transport" },
+	{ "stop", 0x5d, Button::factory, "transport" },
+	{ "play", 0x5e, Button::factory, "transport" },
+	{ "record", 0x5f, Button::factory, "transport" },
+	{ "cursor_up", 0x60, Button::factory, "cursor" },
+	{ "cursor_down", 0x61, Button::factory, "cursor" },
+	{ "cursor_left", 0x62, Button::factory, "cursor" },
+	{ "cursor_right", 0x63, Button::factory, "cursor" },
+	{ "zoom", 0x64, Button::factory, "none" },
+	{ "scrub", 0x65, Button::factory, "none" },
+	{ "user_a", 0x66, Button::factory, "user" },
+	{ "user_b", 0x67, Button::factory, "user" },
+	{ "fader_touch", 0x70, Led::factory, "master" },
+	{ "timecode", 0x71, Led::factory, "none" },
+	{ "beats", 0x72, Led::factory, "none" },
+	{ "solo", 0x73, Led::factory, "none" },
+	{ "relay_click", 0x73, Led::factory, "none" },
+	{ "", 0, Button::factory, "" }
+};
+	
 void 
 Mackie::MackieSurface::init_controls()
 {
-	Pot* pot = 0;
-	Button* button = 0;
-	Led* led = 0;
+	Group* group;
 
-	// intialise groups and strips
-	Group * group = 0;
-	
-	group = new Group  ("user");
-	groups["user"] = group;
-	
-	group = new Group  ("assignment");
-	groups["assignment"] = group;
-	
-	group = new Group  ("none");
-	groups["none"] = group;
-	
+	groups["assignment"] = new Group  ("assignment");
+	groups["automation"] = new Group  ("automation");
+	groups["bank"] = new Group  ("bank");
+	groups["cursor"] = new Group  ("cursor");
+	groups["display"] = new Group  ("display");
+	groups["functions"] = new Group  ("functions");
+	groups["modifiers"] = new Group  ("modifiers");
+	groups["none"] = new Group  ("none");
+	groups["transport"] = new Group  ("transport");
+	groups["user"] = new Group  ("user");
+
 	group = new MasterStrip  ("master", 0);
 	groups["master"] = group;
 	strips[0] = dynamic_cast<Strip*> (group);
-	
-	group = new Group  ("cursor");
-	groups["cursor"] = group;
-	
 
-	group = new Group  ("functions");
-	groups["functions"] = group;
-	
-	group = new Group  ("automation");
-	groups["automation"] = group;
-	
-
-	group = new Group  ("display");
-	groups["display"] = group;
-		
-	group = new Group  ("transport");
-	groups["transport"] = group;
-	
-	group = new Group  ("modifiers");
-	groups["modifiers"] = group;
-	
-	group = new Group  ("bank");
-	groups["bank"] = group;
-	
-	group = groups["none"];
-	pot = new Jog  (1, "jog", *group);
-	pots[0x3c] = pot;
-	controls.push_back (pot);
-	controls_by_name["jog"] = pot;
-	group->add (*pot);
-
-	group = groups["none"];
-	pot = new Pot  (1, "external", *group);
-	pots[0x2e] = pot;
-	controls.push_back (pot);
-	controls_by_name["external"] = pot;
-	group->add (*pot);
-
-	group = groups["assignment"];
-	button = new Button (1, "io", *group);
-	buttons[0x28] = button;
-	controls.push_back (button);
-	controls_by_name["io"] = button;
-	group->add (*button);
-
-	group = groups["assignment"];
-	button = new Button (1, "sends", *group);
-	buttons[0x29] = button;
-	controls.push_back (button);
-	controls_by_name["sends"] = button;
-	group->add (*button);
-
-	group = groups["assignment"];
-	button = new Button (1, "pan", *group);
-	buttons[0x2a] = button;
-	controls.push_back (button);
-	controls_by_name["pan"] = button;
-	group->add (*button);
-
-	group = groups["assignment"];
-	button = new Button (1, "plugin", *group);
-	buttons[0x2b] = button;
-	controls.push_back (button);
-	controls_by_name["plugin"] = button;
-	group->add (*button);
-
-	group = groups["assignment"];
-	button = new Button (1, "eq", *group);
-	buttons[0x2c] = button;
-	controls.push_back (button);
-	controls_by_name["eq"] = button;
-	group->add (*button);
-
-	group = groups["assignment"];
-	button = new Button (1, "dyn", *group);
-	buttons[0x2d] = button;
-	controls.push_back (button);
-	controls_by_name["dyn"] = button;
-	group->add (*button);
-
-	group = groups["bank"];
-	button = new Button (1, "left", *group);
-	buttons[0x2e] = button;
-	controls.push_back (button);
-	controls_by_name["left"] = button;
-	group->add (*button);
-
-	group = groups["bank"];
-	button = new Button (1, "right", *group);
-	buttons[0x2f] = button;
-	controls.push_back (button);
-	controls_by_name["right"] = button;
-	group->add (*button);
-
-	group = groups["bank"];
-	button = new Button (1, "channel_left", *group);
-	buttons[0x30] = button;
-	controls.push_back (button);
-	controls_by_name["channel_left"] = button;
-	group->add (*button);
-
-	group = groups["bank"];
-	button = new Button (1, "channel_right", *group);
-	buttons[0x31] = button;
-	controls.push_back (button);
-	controls_by_name["channel_right"] = button;
-	group->add (*button);
-
-	group = groups["none"];
-	button = new Button (1, "flip", *group);
-	buttons[0x32] = button;
-	controls.push_back (button);
-	controls_by_name["flip"] = button;
-	group->add (*button);
-
-	group = groups["none"];
-	button = new Button (1, "edit", *group);
-	buttons[0x33] = button;
-	controls.push_back (button);
-	controls_by_name["edit"] = button;
-	group->add (*button);
-
-	group = groups["display"];
-	button = new Button (1, "name_value", *group);
-	buttons[0x34] = button;
-	controls.push_back (button);
-	controls_by_name["name_value"] = button;
-	group->add (*button);
-
-	group = groups["display"];
-	button = new Button (1, "timecode_beats", *group);
-	buttons[0x35] = button;
-	controls.push_back (button);
-	controls_by_name["timecode_beats"] = button;
-	group->add (*button);
-
-	group = groups["none"];
-	button = new Button (1, "F1", *group);
-	buttons[0x36] = button;
-	controls.push_back (button);
-	controls_by_name["F1"] = button;
-	group->add (*button);
-
-	group = groups["none"];
-	button = new Button (1, "F2", *group);
-	buttons[0x37] = button;
-	controls.push_back (button);
-	controls_by_name["F2"] = button;
-	group->add (*button);
-
-	group = groups["none"];
-	button = new Button (1, "F3", *group);
-	buttons[0x38] = button;
-	controls.push_back (button);
-	controls_by_name["F3"] = button;
-	group->add (*button);
-
-	group = groups["none"];
-	button = new Button (1, "F4", *group);
-	buttons[0x39] = button;
-	controls.push_back (button);
-	controls_by_name["F4"] = button;
-	group->add (*button);
-
-	group = groups["none"];
-	button = new Button (1, "F5", *group);
-	buttons[0x3a] = button;
-	controls.push_back (button);
-	controls_by_name["F5"] = button;
-	group->add (*button);
-
-	group = groups["none"];
-	button = new Button (1, "F6", *group);
-	buttons[0x3b] = button;
-	controls.push_back (button);
-	controls_by_name["F6"] = button;
-	group->add (*button);
-
-	group = groups["none"];
-	button = new Button (1, "F7", *group);
-	buttons[0x3c] = button;
-	controls.push_back (button);
-	controls_by_name["F7"] = button;
-	group->add (*button);
-
-	group = groups["none"];
-	button = new Button (1, "F8", *group);
-	buttons[0x3d] = button;
-	controls.push_back (button);
-	controls_by_name["F8"] = button;
-	group->add (*button);
-
-	group = groups["none"];
-	button = new Button (1, "F9", *group);
-	buttons[0x3e] = button;
-	controls.push_back (button);
-	controls_by_name["F9"] = button;
-	group->add (*button);
-
-	group = groups["none"];
-	button = new Button (1, "F10", *group);
-	buttons[0x3f] = button;
-	controls.push_back (button);
-	controls_by_name["F10"] = button;
-	group->add (*button);
-
-	group = groups["none"];
-	button = new Button (1, "F11", *group);
-	buttons[0x40] = button;
-	controls.push_back (button);
-	controls_by_name["F11"] = button;
-	group->add (*button);
-
-	group = groups["none"];
-	button = new Button (1, "F12", *group);
-	buttons[0x41] = button;
-	controls.push_back (button);
-	controls_by_name["F12"] = button;
-	group->add (*button);
-
-	group = groups["none"];
-	button = new Button (1, "F13", *group);
-	buttons[0x42] = button;
-	controls.push_back (button);
-	controls_by_name["F13"] = button;
-	group->add (*button);
-
-	group = groups["none"];
-	button = new Button (1, "F14", *group);
-	buttons[0x43] = button;
-	controls.push_back (button);
-	controls_by_name["F14"] = button;
-	group->add (*button);
-
-	group = groups["none"];
-	button = new Button (1, "F15", *group);
-	buttons[0x44] = button;
-	controls.push_back (button);
-	controls_by_name["F15"] = button;
-	group->add (*button);
-
-	group = groups["none"];
-	button = new Button (1, "F16", *group);
-	buttons[0x45] = button;
-	controls.push_back (button);
-	controls_by_name["F16"] = button;
-	group->add (*button);
-
-	group = groups["modifiers"];
-	button = new Button (1, "shift", *group);
-	buttons[0x46] = button;
-	controls.push_back (button);
-	controls_by_name["shift"] = button;
-	group->add (*button);
-
-	group = groups["modifiers"];
-	button = new Button (1, "option", *group);
-	buttons[0x47] = button;
-	controls.push_back (button);
-	controls_by_name["option"] = button;
-	group->add (*button);
-
-	group = groups["modifiers"];
-	button = new Button (1, "control", *group);
-	buttons[0x48] = button;
-	controls.push_back (button);
-	controls_by_name["control"] = button;
-	group->add (*button);
-
-	group = groups["modifiers"];
-	button = new Button (1, "cmd_alt", *group);
-	buttons[0x49] = button;
-	controls.push_back (button);
-	controls_by_name["cmd_alt"] = button;
-	group->add (*button);
-
-	group = groups["automation"];
-	button = new Button (1, "on", *group);
-	buttons[0x4a] = button;
-	controls.push_back (button);
-	controls_by_name["on"] = button;
-	group->add (*button);
-
-	group = groups["automation"];
-	button = new Button (1, "rec_ready", *group);
-	buttons[0x4b] = button;
-	controls.push_back (button);
-	controls_by_name["rec_ready"] = button;
-	group->add (*button);
-
-	group = groups["functions"];
-	button = new Button (1, "undo", *group);
-	buttons[0x4c] = button;
-	controls.push_back (button);
-	controls_by_name["undo"] = button;
-	group->add (*button);
-
-	group = groups["automation"];
-	button = new Button (1, "snapshot", *group);
-	buttons[0x4d] = button;
-	controls.push_back (button);
-	controls_by_name["snapshot"] = button;
-	group->add (*button);
-
-	group = groups["automation"];
-	button = new Button (1, "touch", *group);
-	buttons[0x4e] = button;
-	controls.push_back (button);
-	controls_by_name["touch"] = button;
-	group->add (*button);
-
-	group = groups["functions"];
-	button = new Button (1, "redo", *group);
-	buttons[0x4f] = button;
-	controls.push_back (button);
-	controls_by_name["redo"] = button;
-	group->add (*button);
-
-	group = groups["functions"];
-	button = new Button (1, "marker", *group);
-	buttons[0x50] = button;
-	controls.push_back (button);
-	controls_by_name["marker"] = button;
-	group->add (*button);
-
-	group = groups["functions"];
-	button = new Button (1, "enter", *group);
-	buttons[0x51] = button;
-	controls.push_back (button);
-	controls_by_name["enter"] = button;
-	group->add (*button);
-
-	group = groups["functions"];
-	button = new Button (1, "cancel", *group);
-	buttons[0x52] = button;
-	controls.push_back (button);
-	controls_by_name["cancel"] = button;
-	group->add (*button);
-
-	group = groups["functions"];
-	button = new Button (1, "mixer", *group);
-	buttons[0x53] = button;
-	controls.push_back (button);
-	controls_by_name["mixer"] = button;
-	group->add (*button);
-
-	group = groups["transport"];
-	button = new Button (1, "frm_left", *group);
-	buttons[0x54] = button;
-	controls.push_back (button);
-	controls_by_name["frm_left"] = button;
-	group->add (*button);
-
-	group = groups["transport"];
-	button = new Button (1, "frm_right", *group);
-	buttons[0x55] = button;
-	controls.push_back (button);
-	controls_by_name["frm_right"] = button;
-	group->add (*button);
-
-	group = groups["transport"];
-	button = new Button (1, "loop", *group);
-	buttons[0x56] = button;
-	controls.push_back (button);
-	controls_by_name["loop"] = button;
-	group->add (*button);
-
-	group = groups["transport"];
-	button = new Button (1, "punch_in", *group);
-	buttons[0x57] = button;
-	controls.push_back (button);
-	controls_by_name["punch_in"] = button;
-	group->add (*button);
-
-	group = groups["transport"];
-	button = new Button (1, "punch_out", *group);
-	buttons[0x58] = button;
-	controls.push_back (button);
-	controls_by_name["punch_out"] = button;
-	group->add (*button);
-
-	group = groups["transport"];
-	button = new Button (1, "home", *group);
-	buttons[0x59] = button;
-	controls.push_back (button);
-	controls_by_name["home"] = button;
-	group->add (*button);
-
-	group = groups["transport"];
-	button = new Button (1, "end", *group);
-	buttons[0x5a] = button;
-	controls.push_back (button);
-	controls_by_name["end"] = button;
-	group->add (*button);
-
-	group = groups["transport"];
-	button = new Button (1, "rewind", *group);
-	buttons[0x5b] = button;
-	controls.push_back (button);
-	controls_by_name["rewind"] = button;
-	group->add (*button);
-
-	group = groups["transport"];
-	button = new Button (1, "ffwd", *group);
-	buttons[0x5c] = button;
-	controls.push_back (button);
-	controls_by_name["ffwd"] = button;
-	group->add (*button);
-
-	group = groups["transport"];
-	button = new Button (1, "stop", *group);
-	buttons[0x5d] = button;
-	controls.push_back (button);
-	controls_by_name["stop"] = button;
-	group->add (*button);
-
-	group = groups["transport"];
-	button = new Button (1, "play", *group);
-	buttons[0x5e] = button;
-	controls.push_back (button);
-	controls_by_name["play"] = button;
-	group->add (*button);
-
-	group = groups["transport"];
-	button = new Button (1, "record", *group);
-	buttons[0x5f] = button;
-	controls.push_back (button);
-	controls_by_name["record"] = button;
-	group->add (*button);
-
-	group = groups["cursor"];
-	button = new Button (1, "cursor_up", *group);
-	buttons[0x60] = button;
-	controls.push_back (button);
-	controls_by_name["cursor_up"] = button;
-	group->add (*button);
-
-	group = groups["cursor"];
-	button = new Button (1, "cursor_down", *group);
-	buttons[0x61] = button;
-	controls.push_back (button);
-	controls_by_name["cursor_down"] = button;
-	group->add (*button);
-
-	group = groups["cursor"];
-	button = new Button (1, "cursor_left", *group);
-	buttons[0x62] = button;
-	controls.push_back (button);
-	controls_by_name["cursor_left"] = button;
-	group->add (*button);
-
-	group = groups["cursor"];
-	button = new Button (1, "cursor_right", *group);
-	buttons[0x63] = button;
-	controls.push_back (button);
-	controls_by_name["cursor_right"] = button;
-	group->add (*button);
-
-	group = groups["none"];
-	button = new Button (1, "zoom", *group);
-	buttons[0x64] = button;
-	controls.push_back (button);
-	controls_by_name["zoom"] = button;
-	group->add (*button);
-
-	group = groups["none"];
-	button = new Button (1, "scrub", *group);
-	buttons[0x65] = button;
-	controls.push_back (button);
-	controls_by_name["scrub"] = button;
-	group->add (*button);
-
-	group = groups["user"];
-	button = new Button (1, "user_a", *group);
-	buttons[0x66] = button;
-	controls.push_back (button);
-	controls_by_name["user_a"] = button;
-	group->add (*button);
-
-	group = groups["user"];
-	button = new Button (1, "user_b", *group);
-	buttons[0x67] = button;
-	controls.push_back (button);
-	controls_by_name["user_b"] = button;
-	group->add (*button);
-
-	group = groups["master"];
-	button = new Button (1, "fader_touch", *group);
-	buttons[0x70] = button;
-	controls.push_back (button);
-	group->add (*button);
-
-	group = groups["none"];
-	led = new Led  (1, "timecode", *group);
-	leds[0x71] = led;
-	controls.push_back (led);
-	controls_by_name["timecode"] = led;
-	group->add (*led);
-
-	group = groups["none"];
-	led = new Led  (1, "beats", *group);
-	leds[0x72] = led;
-	controls.push_back (led);
-	controls_by_name["beats"] = led;
-	group->add (*led);
-
-	group = groups["none"];
-	led = new Led  (1, "solo", *group);
-	leds[0x73] = led;
-	controls.push_back (led);
-	controls_by_name["solo"] = led;
-	group->add (*led);
-
-	group = groups["none"];
-	led = new Led  (1, "relay_click", *group);
-	leds[0x76] = led;
-	controls.push_back (led);
-	controls_by_name["relay_click"] = led;
-	group->add (*led);
+	for (uint32_t n = 0; mackie_global_controls[n].name[0]; ++n) {
+		group = groups[mackie_global_controls[n].group_name];
+		Control* control = mackie_global_controls[n].factory (*this, mackie_global_controls[n].id, 1, mackie_global_controls[n].name, *group);
+		controls_by_name[mackie_global_controls[n].name] = control;
+		group->add (*control);
+	}
 }
+
+static StripControlDefinition mackie_strip_controls[] = {
+	{ "gain", Control::fader_base_id, Fader::factory, },
+	{ "vpot", Control::pot_base_id, Pot::factory, },
+	{ "recenable", Control::recenable_button_base_id, Button::factory, },
+	{ "solo", Control::solo_button_base_id, Button::factory, },
+	{ "mute", Control::mute_button_base_id, Button::factory, },
+	{ "select", Control::select_button_base_id, Button::factory, },
+	{ "vselect", Control::vselect_button_base_id, Button::factory, },
+	{ "fader_touch", Control::fader_touch_button_base_id, Button::factory, },
+	{ "", 0, Button::factory, }
+};
 
 void MackieSurface::init_strips ()
 {
-	Fader* fader = 0;
-	Pot* pot = 0;
-	Button* button = 0;
-
 	for (uint32_t i = 0; i < _max_strips; ++i) {
 
-		std::ostringstream os;
-		uint32_t unit_index = i % _unit_strips;
-		uint32_t unit_ordinal = unit_index + 1;
-
-		os << "strip_" << unit_ordinal;
-		std::string name = os.str();
+		char name[32];
 		
-		Strip* strip = new Strip (name, i);
+		uint32_t unit_index = i % _unit_strips;
+		
+		snprintf (name, sizeof (name), "strip_%d", unit_index+1);
+		
+		Strip* strip = new Strip (*this, name, i, unit_index, mackie_strip_controls);
 		
 		groups[name] = strip;
 		strips[i] = strip;
-
-		fader = new Fader (unit_ordinal, "gain", *strip);
-		faders[0x00+unit_index] = fader;
-		controls.push_back (fader);
-		strip->add (*fader);
-
-		pot = new Pot  (unit_ordinal, "vpot", *strip);
-		pots[0x10+unit_index] = pot;
-		controls.push_back (pot);
-		strip->add (*pot);
-
-		button = new Button  (unit_ordinal, "recenable", *strip);
-		buttons[0x00+unit_index] = button;
-		controls.push_back (button);
-		strip->add (*button);
-
-		button = new Button  (unit_ordinal, "solo", *strip);
-		buttons[0x08+unit_index] = button;
-		controls.push_back (button);
-		strip->add (*button);
-
-		button = new Button  (unit_ordinal, "mute", *strip);
-		buttons[0x10+unit_index] = button;
-		controls.push_back (button);
-		strip->add (*button);
-
-		button = new Button  (unit_ordinal, "select", *strip);
-		buttons[0x18+unit_index] = button;
-		controls.push_back (button);
-		strip->add (*button);
-
-		button = new Button  (unit_ordinal, "vselect", *strip);
-		buttons[0x20+unit_index] = button;
-		controls.push_back (button);
-		strip->add (*button);
-
-		button = new Button  (unit_ordinal, "fader_touch", *strip);
-		buttons[0x68+unit_index] = button;
-		controls.push_back (button);
-		strip->add (*button);
+		
 	}
-}	
+}
+

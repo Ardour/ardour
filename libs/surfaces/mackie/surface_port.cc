@@ -56,7 +56,7 @@ SurfacePort::~SurfacePort()
 	cout << "~SurfacePort::SurfacePort()" << endl;
 #endif
 	// make sure another thread isn't reading or writing as we close the port
-	Glib::RecMutex::Lock lock( _rwlock );
+	Glib::RecMutex::Lock lock (_rwlock);
 	_active = false;
 
 	MIDI::Manager* mm = MIDI::Manager::instance ();
@@ -77,9 +77,9 @@ SurfacePort::~SurfacePort()
 }
 
 // wrapper for one day when strerror_r is working properly
-string fetch_errmsg( int error_number )
+string fetch_errmsg (int error_number)
 {
-	char * msg = strerror( error_number );
+	char * msg = strerror (error_number);
 	return msg;
 }
 	
@@ -91,46 +91,43 @@ MidiByteArray SurfacePort::read()
 
 	// check active. Mainly so that the destructor
 	// doesn't destroy the mutex while it's still locked
-	if ( !active() ) return retval;
+	if  (!active()) {
+		return retval;
+	}
 	
 	// return nothing read if the lock isn't acquired
 #if 0
-	Glib::RecMutex::Lock lock( _rwlock, Glib::TRY_LOCK );
+	Glib::RecMutex::Lock lock (_rwlock, Glib::TRY_LOCK);
 		
-	if ( !lock.locked() )
-	{
+	if  (!lock.locked()) {
 		cout << "SurfacePort::read not locked" << endl;
 		return retval;
 	}
 	
 	// check active again - destructor sequence
-	if ( !active() ) return retval;
+	if  (!active()) return retval;
 #endif
 	
 	// read port and copy to return value
-	int nread = input_port().read( buf, sizeof (buf) );
+	int nread = input_port().read (buf, sizeof (buf));
 
 	if (nread >= 0) {
-		retval.copy( nread, buf );
-		if ((size_t) nread == sizeof (buf))
-		{
+		retval.copy (nread, buf);
+		if ((size_t) nread == sizeof (buf)) {
 #ifdef PORT_DEBUG
 			cout << "SurfacePort::read recursive" << endl;
 #endif
 			retval << read();
 		}
-	}
-	else
-	{
-		if ( errno != EAGAIN )
-		{
+	} else {
+		if  (errno != EAGAIN) {
 			ostringstream os;
 			os << "Surface: error reading from port: " << input_port().name();
-			os << ": " << errno << fetch_errmsg( errno );
+			os << ": " << errno << fetch_errmsg (errno);
 
 			cout << os.str() << endl;
 			inactive_event();
-			throw MackieControlException( os.str() );
+			throw MackieControlException (os.str());
 		}
 	}
 #ifdef PORT_DEBUG
@@ -139,8 +136,12 @@ MidiByteArray SurfacePort::read()
 	return retval;
 }
 
-void SurfacePort::write( const MidiByteArray & mba )
+void SurfacePort::write (const MidiByteArray & mba)
 {
+	if (mba.empty()) {
+		return;
+	}
+
 #ifdef PORT_DEBUG
 	cout << "SurfacePort::write: " << mba << " to " << output_port().name() << endl;
 #endif
@@ -148,22 +149,18 @@ void SurfacePort::write( const MidiByteArray & mba )
 	// check active before and after lock - to make sure
 	// that the destructor doesn't destroy the mutex while
 	// it's still in use
-	if ( !active() ) return;
-	Glib::RecMutex::Lock lock( _rwlock );
-	if ( !active() ) return;
+	if (!active()) return;
+	Glib::RecMutex::Lock lock (_rwlock);
+	if (!active()) return;
 
-	int count = output_port().write( mba.bytes().get(), mba.size(), 0);
-	if ( count != (int)mba.size() )
-	{
-		if ( errno == 0 )
-		{
+	int count = output_port().write (mba.bytes().get(), mba.size(), 0);
+	if  (count != (int)mba.size()) {
+		if  (errno == 0) {
 			cout << "port overflow on " << output_port().name() << ". Did not write all of " << mba << endl;
-		}
-		else if ( errno != EAGAIN )
-		{
+		} else if  (errno != EAGAIN) {
 			ostringstream os;
 			os << "Surface: couldn't write to port " << output_port().name();
-			os << ", error: " << fetch_errmsg( errno ) << "(" << errno << ")";
+			os << ", error: " << fetch_errmsg (errno) << "(" << errno << ")";
 			
 			cout << os.str() << endl;
 			inactive_event();
@@ -174,21 +171,25 @@ void SurfacePort::write( const MidiByteArray & mba )
 #endif
 }
 
-void SurfacePort::write_sysex( const MidiByteArray & mba )
+void SurfacePort::write_sysex (const MidiByteArray & mba)
 {
+	if (mba.empty()) {
+		return;
+	}
+
 	MidiByteArray buf;
 	buf << sysex_hdr() << mba << MIDI::eox;
-	write( buf );
+	write (buf);
 }
 
-void SurfacePort::write_sysex( MIDI::byte msg )
+void SurfacePort::write_sysex (MIDI::byte msg)
 {
 	MidiByteArray buf;
 	buf << sysex_hdr() << msg << MIDI::eox;
-	write( buf );
+	write (buf);
 }
 
-ostream & Mackie::operator << ( ostream & os, const SurfacePort & port )
+ostream & Mackie::operator <<  (ostream & os, const SurfacePort & port)
 {
 	os << "{ ";
 	os << "name: " << port.input_port().name() << " " << port.output_port().name();
@@ -226,13 +227,13 @@ SurfacePort::add_in_use_timeout (Control& in_use_control, Control* touch_control
 {
 	in_use_control.in_use_connection.disconnect ();
 
-	/* XXX should this use the GUI event loop (default) or the MIDI UI event loop? */
+	Glib::RefPtr<Glib::TimeoutSource> timeout (Glib::TimeoutSource::create (250));
 	
 	/* timeout after 250ms */
-	in_use_control.in_use_connection = Glib::signal_timeout().connect (
-		sigc::bind (sigc::mem_fun (*this, &SurfacePort::control_in_use_timeout), &in_use_control, touch_control),
-		250
-		);
+	in_use_control.in_use_connection = timeout->connect (
+		sigc::bind (sigc::mem_fun (*this, &SurfacePort::control_in_use_timeout), &in_use_control, touch_control));
 	
+	/* XXX need to access main event loop of MackieControlProtocol */
+
 	in_use_control.in_use_touch_control = touch_control;
 }

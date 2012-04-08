@@ -54,11 +54,8 @@ public:
 
 	/// Handle device initialisation
 	void handle_midi_sysex( MIDI::Parser &, MIDI::byte *, size_t count );
-
-	/// Handle all control messags
-	void handle_midi_any( MIDI::Parser &, MIDI::byte *, size_t count );
-	
-	Control & lookup_control( MIDI::byte *, size_t count );
+	void handle_midi_pitchbend_message (MIDI::Parser &, MIDI::pitchbend_t, uint32_t channel_id);
+	void handle_midi_controller_message (MIDI::Parser &, MIDI::EventTwoBytes*);
 	
 	/// return the number of strips associated with this port
 	virtual int strips() const;
@@ -71,7 +68,7 @@ public:
 	
 	/// Connect the any signal from the parser to handle_midi_any
 	/// unless it's already connected
-	void connect_any();
+	void connect_to_signals ();
 
 protected:
 	/**

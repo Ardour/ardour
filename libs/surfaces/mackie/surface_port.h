@@ -34,7 +34,7 @@ namespace Mackie
 /**
 	Make a relationship between a midi port and a Mackie device.
 */
-class SurfacePort
+class SurfacePort : public PBD::ScopedConnectionList
 {
 public:
 	SurfacePort (MIDI::Port & input_port, MIDI::Port & output_port, int number);

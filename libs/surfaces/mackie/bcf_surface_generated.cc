@@ -87,502 +87,502 @@ void Mackie::BcfSurface::init_controls()
 	Led * led = 0;
 
 	group = groups["master"];
-	fader = new Fader  (1, "gain", *group);
+	fader = new Fader  (0x07, 1, "gain", *group);
 	faders[0x07] = fader;
 	controls.push_back (fader);
 	group->add (*fader);
 
 	group = groups["none"];
-	pot = new Jog  (1, "jog", *group);
+	pot = new Jog  (0x17, 1, "jog", *group);
 	pots[0x17] = pot;
 	controls.push_back (pot);
 	controls_by_name["jog"] = pot;
 	group->add (*pot);
 
 	group = groups["none"];
-	pot = new Pot  (1, "external", *group);
+	pot = new Pot (0x2e, 1, "external", *group);
 	pots[0x2e] = pot;
 	controls.push_back (pot);
 	controls_by_name["external"] = pot;
 	group->add (*pot);
 
 	group = groups["assignment"];
-	button = new Button  (1, "io", *group);
+	button = new Button (0x28, 1, "io", *group);
 	buttons[0x28] = button;
 	controls.push_back (button);
 	controls_by_name["io"] = button;
 	group->add (*button);
 
 	group = groups["assignment"];
-	button = new Button  (1, "sends", *group);
+	button = new Button  (0x5a, 1, "sends", *group);
 	buttons[0x5a] = button;
 	controls.push_back (button);
 	controls_by_name["sends"] = button;
 	group->add (*button);
 
 	group = groups["assignment"];
-	button = new Button  (1, "pan", *group);
+	button = new Button  (0x59, 1, "pan", *group);
 	buttons[0x59] = button;
 	controls.push_back (button);
 	controls_by_name["pan"] = button;
 	group->add (*button);
 
 	group = groups["assignment"];
-	button = new Button  (1, "plugin", *group);
+	button = new Button  (0x57, 1, "plugin", *group);
 	buttons[0x57] = button;
 	controls.push_back (button);
 	controls_by_name["plugin"] = button;
 	group->add (*button);
 
 	group = groups["functions"];
-	button = new Button  (1, "drop", *group);
+	button = new Button  (0x58, 1, "drop", *group);
 	buttons[0x58] = button;
 	controls.push_back (button);
 	controls_by_name["drop"] = button;
 	group->add (*button);
 
 	group = groups["assignment"];
-	button = new Button  (1, "zoom", *group);
+	button = new Button  (0x2d, 1, "zoom", *group);
 	buttons[0x2d] = button;
 	controls.push_back (button);
 	controls_by_name["zoom"] = button;
 	group->add (*button);
 
 	group = groups["bank"];
-	button = new Button  (1, "left", *group);
+	button = new Button  (0x2e, 1, "left", *group);
 	buttons[0x2e] = button;
 	controls.push_back (button);
 	controls_by_name["left"] = button;
 	group->add (*button);
 
 	group = groups["bank"];
-	button = new Button  (1, "right", *group);
+	button = new Button  (0x2f, 1, "right", *group);
 	buttons[0x2f] = button;
 	controls.push_back (button);
 	controls_by_name["right"] = button;
 	group->add (*button);
 
 	group = groups["bank"];
-	button = new Button  (1, "channel_left", *group);
+	button = new Button  (0x30, 1, "channel_left", *group);
 	buttons[0x30] = button;
 	controls.push_back (button);
 	controls_by_name["channel_left"] = button;
 	group->add (*button);
 
 	group = groups["bank"];
-	button = new Button  (1, "channel_right", *group);
+	button = new Button  (0x31, 1, "channel_right", *group);
 	buttons[0x31] = button;
 	controls.push_back (button);
 	controls_by_name["channel_right"] = button;
 	group->add (*button);
 
 	group = groups["none"];
-	button = new Button  (1, "scrub", *group);
+	button = new Button  (0x32, 1, "scrub", *group);
 	buttons[0x32] = button;
 	controls.push_back (button);
 	controls_by_name["scrub"] = button;
 	group->add (*button);
 
 	group = groups["none"];
-	button = new Button  (1, "edit", *group);
+	button = new Button  (0x56, 1, "edit", *group);
 	buttons[0x56] = button;
 	controls.push_back (button);
 	controls_by_name["edit"] = button;
 	group->add (*button);
 
 	group = groups["display"];
-	button = new Button  (1, "name_value", *group);
+	button = new Button  (0x34, 1, "name_value", *group);
 	buttons[0x34] = button;
 	controls.push_back (button);
 	controls_by_name["name_value"] = button;
 	group->add (*button);
 
 	group = groups["display"];
-	button = new Button  (1, "timecode_beats", *group);
+	button = new Button  (0x35, 1, "timecode_beats", *group);
 	buttons[0x35] = button;
 	controls.push_back (button);
 	controls_by_name["timecode_beats"] = button;
 	group->add (*button);
 
 	group = groups["none"];
-	button = new Button  (1, "F1", *group);
+	button = new Button  (0x36, 1, "F1", *group);
 	buttons[0x36] = button;
 	controls.push_back (button);
 	controls_by_name["F1"] = button;
 	group->add (*button);
 
 	group = groups["none"];
-	button = new Button  (1, "F2", *group);
+	button = new Button  (0x37, 1, "F2", *group);
 	buttons[0x37] = button;
 	controls.push_back (button);
 	controls_by_name["F2"] = button;
 	group->add (*button);
 
 	group = groups["none"];
-	button = new Button  (1, "F3", *group);
+	button = new Button  (0x38, 1, "F3", *group);
 	buttons[0x38] = button;
 	controls.push_back (button);
 	controls_by_name["F3"] = button;
 	group->add (*button);
 
 	group = groups["none"];
-	button = new Button  (1, "F4", *group);
+	button = new Button  (0x39, 1, "F4", *group);
 	buttons[0x39] = button;
 	controls.push_back (button);
 	controls_by_name["F4"] = button;
 	group->add (*button);
 
 	group = groups["none"];
-	button = new Button  (1, "F5", *group);
+	button = new Button  (0x3a, 1, "F5", *group);
 	buttons[0x3a] = button;
 	controls.push_back (button);
 	controls_by_name["F5"] = button;
 	group->add (*button);
 
 	group = groups["none"];
-	button = new Button  (1, "F6", *group);
+	button = new Button  (0x3b, 1, "F6", *group);
 	buttons[0x3b] = button;
 	controls.push_back (button);
 	controls_by_name["F6"] = button;
 	group->add (*button);
 
 	group = groups["none"];
-	button = new Button  (1, "F7", *group);
+	button = new Button  (0x3c, 1, "F7", *group);
 	buttons[0x3c] = button;
 	controls.push_back (button);
 	controls_by_name["F7"] = button;
 	group->add (*button);
 
 	group = groups["none"];
-	button = new Button  (1, "F8", *group);
+	button = new Button  (0x3d, 1, "F8", *group);
 	buttons[0x3d] = button;
 	controls.push_back (button);
 	controls_by_name["F8"] = button;
 	group->add (*button);
 
 	group = groups["none"];
-	button = new Button  (1, "F9", *group);
+	button = new Button  (0x3e, 1, "F9", *group);
 	buttons[0x3e] = button;
 	controls.push_back (button);
 	controls_by_name["F9"] = button;
 	group->add (*button);
 
 	group = groups["none"];
-	button = new Button  (1, "F10", *group);
+	button = new Button  (0x3f, 1, "F10", *group);
 	buttons[0x3f] = button;
 	controls.push_back (button);
 	controls_by_name["F10"] = button;
 	group->add (*button);
 
 	group = groups["none"];
-	button = new Button  (1, "F11", *group);
+	button = new Button  (0x40, 1, "F11", *group);
 	buttons[0x40] = button;
 	controls.push_back (button);
 	controls_by_name["F11"] = button;
 	group->add (*button);
 
 	group = groups["none"];
-	button = new Button  (1, "F12", *group);
+	button = new Button  (0x41, 1, "F12", *group);
 	buttons[0x41] = button;
 	controls.push_back (button);
 	controls_by_name["F12"] = button;
 	group->add (*button);
 
 	group = groups["none"];
-	button = new Button  (1, "F13", *group);
+	button = new Button  (0x42, 1, "F13", *group);
 	buttons[0x42] = button;
 	controls.push_back (button);
 	controls_by_name["F13"] = button;
 	group->add (*button);
 
 	group = groups["none"];
-	button = new Button  (1, "F14", *group);
+	button = new Button  (0x43, 1, "F14", *group);
 	buttons[0x43] = button;
 	controls.push_back (button);
 	controls_by_name["F14"] = button;
 	group->add (*button);
 
 	group = groups["none"];
-	button = new Button  (1, "F15", *group);
+	button = new Button  (0x44, 1, "F15", *group);
 	buttons[0x44] = button;
 	controls.push_back (button);
 	controls_by_name["F15"] = button;
 	group->add (*button);
 
 	group = groups["none"];
-	button = new Button  (1, "F16", *group);
+	button = new Button  (0x45, 1, "F16", *group);
 	buttons[0x45] = button;
 	controls.push_back (button);
 	controls_by_name["F16"] = button;
 	group->add (*button);
 
 	group = groups["none"];
-	button = new Button  (1, "global_solo", *group);
+	button = new Button  (0x27, 1, "global_solo", *group);
 	buttons[0x27] = button;
 	controls.push_back (button);
 	controls_by_name["global_solo"] = button;
 	group->add (*button);
 
 	group = groups["modifiers"];
-	button = new Button  (1, "option", *group);
+	button = new Button  (0x50, 1, "option", *group);
 	buttons[0x50] = button;
 	controls.push_back (button);
 	controls_by_name["option"] = button;
 	group->add (*button);
 
 	group = groups["modifiers"];
-	button = new Button  (1, "cmd_alt", *group);
+	button = new Button  (0x49, 1, "cmd_alt", *group);
 	buttons[0x49] = button;
 	controls.push_back (button);
 	controls_by_name["cmd_alt"] = button;
 	group->add (*button);
 
 	group = groups["automation"];
-	button = new Button  (1, "on", *group);
+	button = new Button  (0x4a, 1, "on", *group);
 	buttons[0x4a] = button;
 	controls.push_back (button);
 	controls_by_name["on"] = button;
 	group->add (*button);
 
 	group = groups["automation"];
-	button = new Button  (1, "rec_ready", *group);
+	button = new Button  (0x4b, 1, "rec_ready", *group);
 	buttons[0x4b] = button;
 	controls.push_back (button);
 	controls_by_name["rec_ready"] = button;
 	group->add (*button);
 
 	group = groups["functions"];
-	button = new Button  (1, "undo", *group);
+	button = new Button  (0x4c, 1, "undo", *group);
 	buttons[0x4c] = button;
 	controls.push_back (button);
 	controls_by_name["undo"] = button;
 	group->add (*button);
 
 	group = groups["automation"];
-	button = new Button  (1, "snapshot", *group);
+	button = new Button  (0x5f, 1, "snapshot", *group);
 	buttons[0x5f] = button;
 	controls.push_back (button);
 	controls_by_name["snapshot"] = button;
 	group->add (*button);
 
 	group = groups["functions"];
-	button = new Button  (1, "redo", *group);
+	button = new Button  (0x4f, 1, "redo", *group);
 	buttons[0x4f] = button;
 	controls.push_back (button);
 	controls_by_name["redo"] = button;
 	group->add (*button);
 
 	group = groups["functions"];
-	button = new Button  (1, "marker", *group);
+	button = new Button  (0x47, 1, "marker", *group);
 	buttons[0x47] = button;
 	controls.push_back (button);
 	controls_by_name["marker"] = button;
 	group->add (*button);
 
 	group = groups["functions"];
-	button = new Button  (1, "enter", *group);
+	button = new Button  (0x51, 1, "enter", *group);
 	buttons[0x51] = button;
 	controls.push_back (button);
 	controls_by_name["enter"] = button;
 	group->add (*button);
 
 	group = groups["functions"];
-	button = new Button  (1, "cancel", *group);
+	button = new Button  (0x52, 1, "cancel", *group);
 	buttons[0x52] = button;
 	controls.push_back (button);
 	controls_by_name["cancel"] = button;
 	group->add (*button);
 
 	group = groups["functions"];
-	button = new Button  (1, "mixer", *group);
+	button = new Button  (0x53, 1, "mixer", *group);
 	buttons[0x53] = button;
 	controls.push_back (button);
 	controls_by_name["mixer"] = button;
 	group->add (*button);
 
 	group = groups["functions"];
-	button = new Button  (1, "save", *group);
+	button = new Button  (0x4d, 1, "save", *group);
 	buttons[0x4d] = button;
 	controls.push_back (button);
 	controls_by_name["save"] = button;
 	group->add (*button);
 
 	group = groups["transport"];
-	button = new Button  (1, "frm_left", *group);
+	button = new Button  (0x5b, 1, "frm_left", *group);
 	buttons[0x5b] = button;
 	controls.push_back (button);
 	controls_by_name["frm_left"] = button;
 	group->add (*button);
 
 	group = groups["transport"];
-	button = new Button  (1, "frm_right", *group);
+	button = new Button  (0x5c, 1, "frm_right", *group);
 	buttons[0x5c] = button;
 	controls.push_back (button);
 	controls_by_name["frm_right"] = button;
 	group->add (*button);
 
 	group = groups["transport"];
-	button = new Button  (1, "loop", *group);
+	button = new Button  (0x46, 1, "loop", *group);
 	buttons[0x46] = button;
 	controls.push_back (button);
 	controls_by_name["loop"] = button;
 	group->add (*button);
 
 	group = groups["transport"];
-	button = new Button  (1, "punch_in", *group);
+	button = new Button  (0x48, 1, "punch_in", *group);
 	buttons[0x48] = button;
 	controls.push_back (button);
 	controls_by_name["punch_in"] = button;
 	group->add (*button);
 
 	group = groups["transport"];
-	button = new Button  (1, "punch_out", *group);
+	button = new Button  (0x4e, 1, "punch_out", *group);
 	buttons[0x4e] = button;
 	controls.push_back (button);
 	controls_by_name["punch_out"] = button;
 	group->add (*button);
 
 	group = groups["transport"];
-	button = new Button  (1, "home", *group);
+	button = new Button  (0x2a, 1, "home", *group);
 	buttons[0x2a] = button;
 	controls.push_back (button);
 	controls_by_name["home"] = button;
 	group->add (*button);
 
 	group = groups["transport"];
-	button = new Button (1, "end", *group);
+	button = new Button (0x29, 1, "end", *group);
 	buttons[0x29] = button;
 	controls.push_back (button);
 	controls_by_name["end"] = button;
 	group->add (*button);
 
 	group = groups["transport"];
-	button = new Button (1, "rewind", *group);
+	button = new Button (0x2c, 1, "rewind", *group);
 	buttons[0x2c] = button;
 	controls.push_back (button);
 	controls_by_name["rewind"] = button;
 	group->add (*button);
 
 	group = groups["transport"];
-	button = new Button (1, "ffwd", *group);
+	button = new Button (0x2b, 1, "ffwd", *group);
 	buttons[0x2b] = button;
 	controls.push_back (button);
 	controls_by_name["ffwd"] = button;
 	group->add (*button);
 
 	group = groups["transport"];
-	button = new Button (1, "stop", *group);
+	button = new Button (0x5d, 1, "stop", *group);
 	buttons[0x5d] = button;
 	controls.push_back (button);
 	controls_by_name["stop"] = button;
 	group->add (*button);
 
 	group = groups["transport"];
-	button = new Button (1, "play", *group);
+	button = new Button (0x5e, 1, "play", *group);
 	buttons[0x5e] = button;
 	controls.push_back (button);
 	controls_by_name["play"] = button;
 	group->add (*button);
 
 	group = groups["transport"];
-	button = new Button (1, "record", *group);
+	button = new Button (0x1f, 1, "record", *group);
 	buttons[0x1f] = button;
 	controls.push_back (button);
 	controls_by_name["record"] = button;
 	group->add (*button);
 
 	group = groups["cursor"];
-	button = new Button (1, "cursor_up", *group);
+	button = new Button (0x60, 1, "cursor_up", *group);
 	buttons[0x60] = button;
 	controls.push_back (button);
 	controls_by_name["cursor_up"] = button;
 	group->add (*button);
 
 	group = groups["cursor"];
-	button = new Button (1, "cursor_down", *group);
+	button = new Button (0x61, 1, "cursor_down", *group);
 	buttons[0x61] = button;
 	controls.push_back (button);
 	controls_by_name["cursor_down"] = button;
 	group->add (*button);
 
 	group = groups["cursor"];
-	button = new Button (1, "cursor_left", *group);
+	button = new Button (0x62, 1, "cursor_left", *group);
 	buttons[0x62] = button;
 	controls.push_back (button);
 	controls_by_name["cursor_left"] = button;
 	group->add (*button);
 
 	group = groups["cursor"];
-	button = new Button (1, "cursor_right", *group);
+	button = new Button (0x63, 1, "cursor_right", *group);
 	buttons[0x63] = button;
 	controls.push_back (button);
 	controls_by_name["cursor_right"] = button;
 	group->add (*button);
 
 	group = groups["none"];
-	button = new Button (1, "dyn", *group);
+	button = new Button (0x64, 1, "dyn", *group);
 	buttons[0x64] = button;
 	controls.push_back (button);
 	controls_by_name["dyn"] = button;
 	group->add (*button);
 
 	group = groups["none"];
-	button = new Button (1, "flip", *group);
+	button = new Button (0x65, 1, "flip", *group);
 	buttons[0x65] = button;
 	controls.push_back (button);
 	controls_by_name["flip"] = button;
 	group->add (*button);
 
 	group = groups["user"];
-	button = new Button (1, "user_a", *group);
+	button = new Button (0x66, 1, "user_a", *group);
 	buttons[0x66] = button;
 	controls.push_back (button);
 	controls_by_name["user_a"] = button;
 	group->add (*button);
 
 	group = groups["user"];
-	button = new Button (1, "user_b", *group);
+	button = new Button (0x67, 1, "user_b", *group);
 	buttons[0x67] = button;
 	controls.push_back (button);
 	controls_by_name["user_b"] = button;
 	group->add (*button);
 
 	group = groups["master"];
-	button = new Button (1, "mute", *group);
+	button = new Button (0x17, 1, "mute", *group);
 	buttons[0x17] = button;
 	controls.push_back (button);
 	group->add (*button);
 
 	group = groups["none"];
-	button = new Button (1, "clicking", *group);
+	button = new Button (0x33, 1, "clicking", *group);
 	buttons[0x33] = button;
 	controls.push_back (button);
 	controls_by_name["clicking"] = button;
 	group->add (*button);
 
 	group = groups["none"];
-	led = new Led  (1, "timecode", *group);
+	led = new Led  (0x71, 1, "timecode", *group);
 	leds[0x71] = led;
 	controls.push_back (led);
 	controls_by_name["timecode"] = led;
 	group->add (*led);
 
 	group = groups["none"];
-	led = new Led  (1, "beats", *group);
+	led = new Led  (0x72, 1, "beats", *group);
 	leds[0x72] = led;
 	controls.push_back (led);
 	controls_by_name["beats"] = led;
 	group->add (*led);
 
 	group = groups["none"];
-	led = new Led  (1, "solo", *group);
+	led = new Led  (0x73, 1, "solo", *group);
 	leds[0x73] = led;
 	controls.push_back (led);
 	controls_by_name["solo"] = led;
 	group->add (*led);
 
 	group = groups["none"];
-	led = new Led  (1, "relay_click", *group);
+	led = new Led  (0x76, 1, "relay_click", *group);
 	leds[0x76] = led;
 	controls.push_back (led);
 	controls_by_name["relay_click"] = led;

@@ -102,7 +102,7 @@ void MackiePort::close()
 	DEBUG_TRACE (DEBUG::MackieControl, "MackiePort::close\n");
 	
 	// disconnect signals
-	any_connection.disconnect();
+
 	sysex_connection.disconnect();
 	
 	// TODO emit a "closing" signal?
@@ -230,21 +230,16 @@ void MackiePort::finalise_init (bool yn)
 	// TODO This might have to be specified on a per-port basis
 	// in the config file
 	// if an mcu and a bcf are needed to work as one surface
-	if  (_emulation == none)
-	{
+	if  (_emulation == none) {
+
 		// TODO same as code in mackie_control_protocol.cc
-		if  (ARDOUR::Config->get_mackie_emulation() == "bcf")
-		{
+		if  (ARDOUR::Config->get_mackie_emulation() == "bcf") {
 			_emulation = bcf2000;
 			emulation_ok = true;
-		}
-		else if  (ARDOUR::Config->get_mackie_emulation() == "mcu")
-		{
+		} else if  (ARDOUR::Config->get_mackie_emulation() == "mcu")  {
 			_emulation = mackie;
 			emulation_ok = true;
-		}
-		else
-		{
+		} else {
 			cout << "unknown mackie emulation: " << ARDOUR::Config->get_mackie_emulation() << endl;
 			emulation_ok = false;
 		}
@@ -258,7 +253,7 @@ void MackiePort::finalise_init (bool yn)
 		active_event();
 		
 		// start handling messages from controls
-		connect_any();
+		connect_to_signals ();
 	}
 
 	_initialising = false;
@@ -268,11 +263,24 @@ void MackiePort::finalise_init (bool yn)
 	DEBUG_TRACE (DEBUG::MackieControl, "MackiePort::finalise_init lock released\n");
 }
 
-void MackiePort::connect_any()
+void MackiePort::connect_to_signals ()
 {
-	if (!any_connection.connected()) {
-		input_port().parser()->any.connect_same_thread (any_connection, boost::bind (&MackiePort::handle_midi_any, this, _1, _2, _3));
+	if (ScopedConnectionList::empty()) {
+
+		MIDI::Parser* p = input_port().parser();
+
+		p->controller.connect_same_thread (*this, boost::bind (&MackiePort::handle_midi_controller_message, this, _1, _2));
+		
+		p->channel_pitchbend[0].connect_same_thread (*this, boost::bind (&MackiePort::handle_midi_pitchbend_message, this, _1, _2, 0U));
+		p->channel_pitchbend[1].connect_same_thread (*this, boost::bind (&MackiePort::handle_midi_pitchbend_message, this, _1, _2, 1U));
+		p->channel_pitchbend[2].connect_same_thread (*this, boost::bind (&MackiePort::handle_midi_pitchbend_message, this, _1, _2, 2U));
+		p->channel_pitchbend[3].connect_same_thread (*this, boost::bind (&MackiePort::handle_midi_pitchbend_message, this, _1, _2, 3U));
+		p->channel_pitchbend[4].connect_same_thread (*this, boost::bind (&MackiePort::handle_midi_pitchbend_message, this, _1, _2, 4U));
+		p->channel_pitchbend[5].connect_same_thread (*this, boost::bind (&MackiePort::handle_midi_pitchbend_message, this, _1, _2, 5U));
+		p->channel_pitchbend[6].connect_same_thread (*this, boost::bind (&MackiePort::handle_midi_pitchbend_message, this, _1, _2, 6U));
+		p->channel_pitchbend[7].connect_same_thread (*this, boost::bind (&MackiePort::handle_midi_pitchbend_message, this, _1, _2, 7U));
 	}
+
 }
 
 bool MackiePort::wait_for_init()
@@ -314,156 +322,72 @@ void MackiePort::handle_midi_sysex (MIDI::Parser &, MIDI::byte * raw_bytes, size
 	}
 }
 
-Control& 
-MackiePort::lookup_control (MIDI::byte * bytes, size_t count)
+void
+MackiePort::handle_midi_pitchbend_message (MIDI::Parser&, MIDI::pitchbend_t pb, uint32_t fader_id)
 {
-	// Don't instantiate a MidiByteArray here unless it's needed for exceptions.
-	// Reason being that this method is called for every single incoming
-	// midi event, and it needs to be as efficient as possible.
+	Control* control = _mcp.surface().faders[fader_id];
 
-	Control * control = 0;
-	MIDI::byte midi_type = bytes[0] & 0xf0; //0b11110000
-
-	switch (midi_type) {
-		// fader
-		case MackieMidiBuilder::midi_fader_id:
-		{
-			int midi_id = bytes[0] & 0x0f;
-			control = _mcp.surface().faders[midi_id];
-			if  (control == 0)
-			{
-				MidiByteArray mba (count, bytes);
-				ostringstream os;
-				os << "Control for fader" << bytes << " id " << midi_id << " is null";
-				throw MackieControlException (os.str());
-			}
-			break;
-		}
-			
-		// button
-		case MackieMidiBuilder::midi_button_id:
-			control = _mcp.surface().buttons[bytes[1]];
-			if  (control == 0)
-			{
-				MidiByteArray mba (count, bytes);
-				ostringstream os;
-				os << "Control for button " << mba << " is null";
-				throw MackieControlException (os.str());
-			}
-			break;
-			
-		// pot (jog wheel, external control)
-		case MackieMidiBuilder::midi_pot_id:
-			control = _mcp.surface().pots[bytes[1]];
-			if  (control == 0)
-			{
-				MidiByteArray mba (count, bytes);
-				ostringstream os;
-				os << "Control for rotary " << mba << " is null";
-				throw MackieControlException (os.str());
-			}
-			break;
+	if (control) {
+		// only the top-order 10 bits out of 14 are used
+		int midi_pos = pb & 0x3ff;
+	
+	        // in_use is set by the MackieControlProtocol::handle_strip_button
 		
-		default:
-			MidiByteArray mba (count, bytes);
-			ostringstream os;
-			os << "Cannot find control for " << mba;
-			throw MackieControlException (os.str());
+	        // relies on implicit ControlState constructor
+		control_event (*this, *control, float (midi_pos) / float(0x3ff));
 	}
-	return *control;
 }
 
-// converts midi messages into control_event signals
-// it might be worth combining this with lookup_control
-// because they have similar logic flows.
 void 
-MackiePort::handle_midi_any (MIDI::Parser &, MIDI::byte * raw_bytes, size_t count)
+MackiePort::handle_midi_controller_message (MIDI::Parser &, MIDI::EventTwoBytes* ev)
 {
-	MidiByteArray bytes (count, raw_bytes);
-	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("MackiePort::handle_midi_any %1\n", bytes));
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("MackiePort::handle_midi_controller %1 = %2\n", ev->controller_number, ev->value));
 
-	try
-	{
-		// ignore sysex messages
-		if  (raw_bytes[0] == MIDI::sysex) { 
-			return;
-		}
+	Control* control;
 
-		// sanity checking
-		if (count != 3) {
-			ostringstream os;
-			MidiByteArray mba (count, raw_bytes);
-			os << "MackiePort::handle_midi_any needs 3 bytes, but received " << mba;
-			throw MackieControlException (os.str());
+	switch (ev->controller_number & 0xf0) {
+	case Control::type_button:
+		control = _mcp.surface().buttons[ev->controller_number];
+		if (control) {
+			control->set_in_use (true);
+			ControlState control_state (ev->value == 0x7f ? press : release);
+			control->set_in_use (control_state.button_state == press);
+			control_event (*this, *control, control_state);
 		}
 		
-		Control & control = lookup_control (raw_bytes, count);
-		control.set_in_use (true);
-		
-		// This handles incoming bytes. Outgoing bytes
-		// are sent by the signal handlers.
-		switch (control.type()) {
-			// fader
-			case Control::type_fader:
-			{
-				// only the top-order 10 bits out of 14 are used
-				int midi_pos =  ( (raw_bytes[2] << 7) + raw_bytes[1]) >> 4;
-				
-				// in_use is set by the MackieControlProtocol::handle_strip_button
-				
-				// relies on implicit ControlState constructor
-				control_event (*this, control, float(midi_pos) / float(0x3ff));
-			}
-			break;
-				
-			// button
-			case Control::type_button:
-			{
-				ControlState control_state (raw_bytes[2] == 0x7f ? press : release);
-				control.set_in_use (control_state.button_state == press);
-				control_event (*this, control, control_state);
-				
-				break;
-			}
-				
-			// pot (jog wheel, external control)
-			case Control::type_pot:
-			{
-				ControlState state;
-				
-				// bytes[2] & 0b01000000 (0x40) give sign
-				state.sign =  (raw_bytes[2] & 0x40) == 0 ? 1 : -1; 
-				// bytes[2] & 0b00111111 (0x3f) gives delta
-				state.ticks =  (raw_bytes[2] & 0x3f);
-                                if (state.ticks == 0) {
-                                        /* euphonix and perhaps other devices send zero
-                                           when they mean 1, we think.
-                                        */
-                                        state.ticks = 1;
-                                }
-				state.delta = float (state.ticks) / float (0x3f);
-				
-				/* Pots only emit events when they move, not when they
-				   stop moving. So to get a stop event, we need to use a timeout.
+		break;
+
+	case Control::type_pot:
+		control = _mcp.surface().pots[ev->controller_number];
+		if (control) {
+			ControlState state;
+			
+			// bytes[2] & 0b01000000 (0x40) give sign
+			state.sign = (ev->value & 0x40) == 0 ? 1 : -1; 
+			// bytes[2] & 0b00111111 (0x3f) gives delta
+			state.ticks = (ev->value & 0x3f);
+			if (state.ticks == 0) {
+				/* euphonix and perhaps other devices send zero
+				   when they mean 1, we think.
 				*/
-
-				control.set_in_use (true);
-				add_in_use_timeout (control, &control);
-
-				// emit the control event
-				control_event (*this, control, state);
-				break;
+				state.ticks = 1;
 			}
-			default:
-				cerr << "Do not understand control type " << control;
+			state.delta = float (state.ticks) / float (0x3f);
+			
+			/* Pots only emit events when they move, not when they
+			   stop moving. So to get a stop event, we need to use a timeout.
+			*/
+			
+			control->set_in_use (true);
+			add_in_use_timeout (*control, control);
+			
+			// emit the control event
+			control_event (*this, *control, state);
 		}
+		break;
+	
+	default:
+		break;
 	}
-
-	catch (MackieControlException & e) {
-		MidiByteArray bytes (count, raw_bytes);
-		cout << bytes << ' ' << e.what() << endl;
-	}
-
-	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("finished MackiePort::handle_midi_any %1\n", bytes));
 }
 
