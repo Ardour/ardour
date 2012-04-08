@@ -54,6 +54,7 @@ MackiePort::MackiePort (MackieControlProtocol & mcp, MIDI::Port & input_port, MI
 	, _port_type (port_type)
 	, _emulation (none)
 	, _initialising (true)
+	, _connected (false)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, "MackiePort::MackiePort\n");
 }
@@ -104,7 +105,9 @@ void MackiePort::close()
 	// disconnect signals
 
 	sysex_connection.disconnect();
-	
+	ScopedConnectionList::drop_connections ();
+	_connected = false;
+
 	// TODO emit a "closing" signal?
 }
 
@@ -265,7 +268,7 @@ void MackiePort::finalise_init (bool yn)
 
 void MackiePort::connect_to_signals ()
 {
-	if (ScopedConnectionList::empty()) {
+	if (!_connected) {
 
 		MIDI::Parser* p = input_port().parser();
 
@@ -279,8 +282,9 @@ void MackiePort::connect_to_signals ()
 		p->channel_pitchbend[5].connect_same_thread (*this, boost::bind (&MackiePort::handle_midi_pitchbend_message, this, _1, _2, 5U));
 		p->channel_pitchbend[6].connect_same_thread (*this, boost::bind (&MackiePort::handle_midi_pitchbend_message, this, _1, _2, 6U));
 		p->channel_pitchbend[7].connect_same_thread (*this, boost::bind (&MackiePort::handle_midi_pitchbend_message, this, _1, _2, 7U));
+		
+		_connected = true;
 	}
-
 }
 
 bool MackiePort::wait_for_init()

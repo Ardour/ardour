@@ -112,6 +112,7 @@ private:
 	emulation_t _emulation;
 
 	bool _initialising;
+	bool _connected;
 	Glib::Cond init_cond;
 	Glib::Mutex init_mutex;
 };
