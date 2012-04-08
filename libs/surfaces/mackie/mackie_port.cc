@@ -275,7 +275,7 @@ void MackiePort::connect_to_signals ()
 		/* V-Pot messages are Controller */
 		p->controller.connect_same_thread (*this, boost::bind (&MackiePort::handle_midi_controller_message, this, _1, _2));
 		/* Button messages are NoteOn */
-		p->controller.connect_same_thread (*this, boost::bind (&MackiePort::handle_midi_note_on_message, this, _1, _2));
+		p->note_on.connect_same_thread (*this, boost::bind (&MackiePort::handle_midi_note_on_message, this, _1, _2));
 		/* Fader messages are Pitchbend */
 		p->channel_pitchbend[0].connect_same_thread (*this, boost::bind (&MackiePort::handle_midi_pitchbend_message, this, _1, _2, 0U));
 		p->channel_pitchbend[1].connect_same_thread (*this, boost::bind (&MackiePort::handle_midi_pitchbend_message, this, _1, _2, 1U));
@@ -340,6 +340,8 @@ MackiePort::handle_midi_pitchbend_message (MIDI::Parser&, MIDI::pitchbend_t pb, 
 	if (control) {
 		float midi_pos = pb >> 4; // only the top 10 bytes are used
 		_mcp.handle_control_event (*this, *control, midi_pos / 1023.0);
+	} else {
+		DEBUG_TRACE (DEBUG::MackieControl, "fader not found\n");
 	}
 }
 
@@ -354,6 +356,8 @@ MackiePort::handle_midi_note_on_message (MIDI::Parser &, MIDI::EventTwoBytes* ev
 		ControlState control_state (ev->velocity == 0x7f ? press : release);
 		control->set_in_use (control_state.button_state == press);
 		control_event (*this, *control, control_state);
+	} else {
+		DEBUG_TRACE (DEBUG::MackieControl, "button not found\n");
 	}
 }
 
@@ -387,6 +391,8 @@ MackiePort::handle_midi_controller_message (MIDI::Parser &, MIDI::EventTwoBytes*
 		_mcp.add_in_use_timeout (*this, *control, control);
 
 		control_event (*this, *control, state);
+	} else {
+		DEBUG_TRACE (DEBUG::MackieControl, "pot not found\n");
 	}
 }
 
