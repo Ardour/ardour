@@ -22,7 +22,6 @@ def build(bld):
     obj = bld(features = 'cxx cxxshlib')
     obj.source = '''
             bcf_surface.cc
-            bcf_surface_generated.cc
             controls.cc
             dummy_port.cc
             gui.cc
@@ -34,7 +33,6 @@ def build(bld):
             mackie_midi_builder.cc
             mackie_port.cc
             mackie_surface.cc
-            mackie_surface_generated.cc
             midi_byte_array.cc
             route_signal.cc
             surface.cc

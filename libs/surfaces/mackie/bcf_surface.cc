@@ -1,8 +1,9 @@
-#include "bcf_surface.h"
-#include "surface_port.h"
-#include "mackie_midi_builder.h"
-
 #include <cmath>
+
+#include "bcf_surface.h"
+#include "controls.h"
+#include "mackie_midi_builder.h"
+#include "surface_port.h"
 
 using namespace Mackie;
 
@@ -40,7 +41,3 @@ BcfSurface::scaled_delta (const ControlState & state, float current_speed)
 	return state.sign *  (std::pow (float(state.ticks + 1), 2) + current_speed) / 100.0;
 }
 
-void
-BcfSurface::init_strips ()
-{
-}

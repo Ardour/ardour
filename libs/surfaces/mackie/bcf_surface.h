@@ -16,10 +16,6 @@ class BcfSurface : public Surface
 public:
 	BcfSurface (uint32_t max_strips) : Surface (max_strips, 7) {}
 	
-	virtual void handle_button( MackieButtonHandler & mbh, ButtonState bs, Button & button );
-	virtual void init_controls();
-	virtual void init_strips ();
-
 	virtual void display_bank_start( SurfacePort & port, MackieMidiBuilder & builder, uint32_t current_bank );
 	virtual void zero_all( SurfacePort & port, MackieMidiBuilder & builder );
 	virtual void blank_jog_ring( SurfacePort & port, MackieMidiBuilder & builder );

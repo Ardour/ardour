@@ -80,7 +80,7 @@ public:
 	uint32_t max_strips() const { return _max_strips; }
 	
 	/// map button ids to calls to press_ and release_ in mbh
-	virtual void handle_button( MackieButtonHandler & mbh, ButtonState bs, Button & button ) = 0;
+	virtual void handle_button (MackieButtonHandler & mbh, ButtonState bs, Button & button);
 
 public:
 	/// display an indicator of the first switched-in Route. Do nothing by default.
@@ -114,8 +114,8 @@ public:
 	virtual float scaled_delta( const ControlState & state, float current_speed ) = 0;
 
 protected:
-	virtual void init_controls() = 0;
-	virtual void init_strips () {}
+	virtual void init_controls();
+	virtual void init_strips ();
 
 	const uint32_t _max_strips;
 	const uint32_t _unit_strips;

@@ -15,10 +15,6 @@ class MackieSurface : public Surface
   public:
         MackieSurface (uint32_t max_strips) : Surface  (max_strips, 8) {}
 	
-	virtual void handle_button (MackieButtonHandler & mbh, ButtonState bs, Button & button);
-	virtual void init_controls();
-	virtual void init_strips();
-
 	virtual bool has_timecode_display() const { return true; }
 	virtual void display_timecode (SurfacePort &, MackieMidiBuilder &, const std::string & timecode, const std::string & timecode_last);
 
