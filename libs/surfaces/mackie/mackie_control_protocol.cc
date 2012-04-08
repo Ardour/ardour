@@ -263,23 +263,22 @@ MackieControlProtocol::switch_banks (int initial)
 	// DON'T prevent bank switch if initial == _current_initial_bank
 	// because then this method can't be used as a refresh
 
-	// sanity checking
 	Sorted sorted = get_sorted_routes();
 	int delta = sorted.size() - route_table.size();
+
 	if (initial < 0 || (delta > 0 && initial > delta)) {
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("not switching to %1\n", initial));
 		return;
 	}
-	_current_initial_bank = initial;
 
-	// first clear the signals from old routes
-	// taken care of by the RouteSignal destructors
+	_current_initial_bank = initial;
 	clear_route_signals();
 
 	// now set the signals for new routes
 	if (_current_initial_bank <= sorted.size()) {
-		// fetch the bank start and end to switch to
+
 		uint32_t end_pos = min (route_table.size(), sorted.size());
+		uint32_t i = 0;
 		Sorted::iterator it = sorted.begin() + _current_initial_bank;
 		Sorted::iterator end = sorted.begin() + _current_initial_bank + end_pos;
 
@@ -289,7 +288,7 @@ MackieControlProtocol::switch_banks (int initial)
 		set_route_table_size (surface().strips.size());
 
 		// link routes to strips
-		uint32_t i = 0;
+
 		for (; it != end && it != sorted.end(); ++it, ++i) {
 			boost::shared_ptr<Route> route = *it;
 
@@ -301,8 +300,7 @@ MackieControlProtocol::switch_banks (int initial)
 			set_route_table (i, route);
 			RouteSignal * rs = new RouteSignal (route, *this, strip, port_for_id(i));
 			route_signals.push_back (rs);
-			// update strip from route
-			rs->notify_all();
+			rs->notify_all ();
 		}
 
 		// create dead strips if there aren't enough routes to
