@@ -272,8 +272,11 @@ void MackiePort::connect_to_signals ()
 
 		MIDI::Parser* p = input_port().parser();
 
+		/* V-Pot messages are Controller */
 		p->controller.connect_same_thread (*this, boost::bind (&MackiePort::handle_midi_controller_message, this, _1, _2));
-		
+		/* Button messages are NoteOn */
+		p->controller.connect_same_thread (*this, boost::bind (&MackiePort::handle_midi_note_on_message, this, _1, _2));
+		/* Fader messages are Pitchbend */
 		p->channel_pitchbend[0].connect_same_thread (*this, boost::bind (&MackiePort::handle_midi_pitchbend_message, this, _1, _2, 0U));
 		p->channel_pitchbend[1].connect_same_thread (*this, boost::bind (&MackiePort::handle_midi_pitchbend_message, this, _1, _2, 1U));
 		p->channel_pitchbend[2].connect_same_thread (*this, boost::bind (&MackiePort::handle_midi_pitchbend_message, this, _1, _2, 2U));
@@ -341,53 +344,49 @@ MackiePort::handle_midi_pitchbend_message (MIDI::Parser&, MIDI::pitchbend_t pb, 
 }
 
 void 
+MackiePort::handle_midi_note_on_message (MIDI::Parser &, MIDI::EventTwoBytes* ev)
+{
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("MackiePort::handle_note_on %1 = %2\n", ev->note_number, ev->velocity));
+
+	Control* control = _mcp.surface().buttons[(8*number()) + ev->note_number];
+
+	if (control) {
+		ControlState control_state (ev->velocity == 0x7f ? press : release);
+		control->set_in_use (control_state.button_state == press);
+		control_event (*this, *control, control_state);
+	}
+}
+
+void 
 MackiePort::handle_midi_controller_message (MIDI::Parser &, MIDI::EventTwoBytes* ev)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("MackiePort::handle_midi_controller %1 = %2\n", ev->controller_number, ev->value));
 
-	Control* control;
+	Control* control = _mcp.surface().pots[(8*number()) + ev->controller_number];
 
-	switch (ev->controller_number & 0xf0) {
-	case Control::type_button:
-		control = _mcp.surface().buttons[ev->controller_number];
-		if (control) {
-			control->set_in_use (true);
-			ControlState control_state (ev->value == 0x7f ? press : release);
-			control->set_in_use (control_state.button_state == press);
-			control_event (*this, *control, control_state);
-		}
+	if (control) {
+		ControlState state;
 		
-		break;
-
-	case Control::type_pot:
-		control = _mcp.surface().pots[ev->controller_number];
-		if (control) {
-			ControlState state;
-			
-			// bytes[2] & 0b01000000 (0x40) give sign
-			state.sign = (ev->value & 0x40) == 0 ? 1 : -1; 
-			// bytes[2] & 0b00111111 (0x3f) gives delta
-			state.ticks = (ev->value & 0x3f);
-			if (state.ticks == 0) {
-				/* euphonix and perhaps other devices send zero
-				   when they mean 1, we think.
-				*/
-				state.ticks = 1;
-			}
-			state.delta = float (state.ticks) / float (0x3f);
-			
-			/* Pots only emit events when they move, not when they
-			   stop moving. So to get a stop event, we need to use a timeout.
+		// bytes[2] & 0b01000000 (0x40) give sign
+		state.sign = (ev->value & 0x40) == 0 ? 1 : -1; 
+		// bytes[2] & 0b00111111 (0x3f) gives delta
+		state.ticks = (ev->value & 0x3f);
+		if (state.ticks == 0) {
+			/* euphonix and perhaps other devices send zero
+			   when they mean 1, we think.
 			*/
-			
-			control->set_in_use (true);
-			_mcp.add_in_use_timeout (*this, *control, control);
-			control_event (*this, *control, state);
+			state.ticks = 1;
 		}
-		break;
-	
-	default:
-		break;
+		state.delta = float (state.ticks) / float (0x3f);
+		
+		/* Pots only emit events when they move, not when they
+		   stop moving. So to get a stop event, we need to use a timeout.
+		*/
+		
+		control->set_in_use (true);
+		_mcp.add_in_use_timeout (*this, *control, control);
+
+		control_event (*this, *control, state);
 	}
 }
 

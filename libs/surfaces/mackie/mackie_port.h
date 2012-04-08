@@ -56,6 +56,7 @@ public:
 	void handle_midi_sysex( MIDI::Parser &, MIDI::byte *, size_t count );
 	void handle_midi_pitchbend_message (MIDI::Parser &, MIDI::pitchbend_t, uint32_t channel_id);
 	void handle_midi_controller_message (MIDI::Parser &, MIDI::EventTwoBytes*);
+	void handle_midi_note_on_message (MIDI::Parser &, MIDI::EventTwoBytes*);
 	
 	/// return the number of strips associated with this port
 	virtual int strips() const;

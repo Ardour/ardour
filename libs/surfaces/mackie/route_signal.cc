@@ -71,33 +71,34 @@ void RouteSignal::connect()
 	// RemoteControlIDChanged. Better handled at Session level.
 }
 
-void RouteSignal::disconnect()
+void 
+RouteSignal::disconnect()
 {
 	connections.drop_connections ();
 }
 
-void RouteSignal::notify_all()
+void 
+RouteSignal::notify_all()
 {
-#ifdef DEBUG
-	cout << "RouteSignal::notify_all for " << _strip << endl;
-#endif
-	if ( _strip.has_solo() )
-		_mcp.notify_solo_changed( this );
+	if  (_strip.has_solo()) {
+		_mcp.notify_solo_changed (this);
+	}
 	
-	if ( _strip.has_mute() )
-		_mcp.notify_mute_changed( this );
+	if  (_strip.has_mute()) {
+		_mcp.notify_mute_changed (this);
+	}
 	
-	if ( _strip.has_gain() )
-		_mcp.notify_gain_changed( this );
+	if  (_strip.has_gain()) {
+		_mcp.notify_gain_changed (this);
+	}
 	
-	_mcp.notify_property_changed (PBD::PropertyChange (ARDOUR::Properties::name), this );
+	_mcp.notify_property_changed (PBD::PropertyChange (ARDOUR::Properties::name), this);
 	
-	if ( _strip.has_vpot() )
-		_mcp.notify_panner_changed( this );
+	if  (_strip.has_vpot()) {
+		_mcp.notify_panner_changed (this);
+	}
 	
-	if ( _strip.has_recenable() )
-		_mcp.notify_record_enable_changed( this );
-#ifdef DEBUG
-	cout << "RouteSignal::notify_all finish" << endl;
-#endif
+	if  (_strip.has_recenable()) {
+		_mcp.notify_record_enable_changed (this);
+	}
 }
