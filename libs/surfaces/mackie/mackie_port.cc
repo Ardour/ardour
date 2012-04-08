@@ -329,7 +329,8 @@ void MackiePort::handle_midi_sysex (MIDI::Parser &, MIDI::byte * raw_bytes, size
 void
 MackiePort::handle_midi_pitchbend_message (MIDI::Parser&, MIDI::pitchbend_t pb, uint32_t fader_id)
 {
-	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("handle_midi pitchbend, fader = %1 value = %2\n", (8*number()) + fader_id, pb));
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("handle_midi pitchbend on port %3 (number %4), fader = %1 value = %2\n", 
+							   (8*number()) + fader_id, pb, *this, number()));
 
 	Control* control = _mcp.surface().faders[(8*number()) + fader_id];
 
