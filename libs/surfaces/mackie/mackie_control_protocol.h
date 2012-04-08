@@ -48,6 +48,8 @@ namespace MIDI {
 
 namespace Mackie {
 	class Surface;
+	class Control;
+	class SurfacePort;
 }
 
 /**
@@ -220,6 +222,8 @@ class MackieControlProtocol
 	Mackie::SurfacePort & mcu_port();
 	ARDOUR::Session & get_session() { return *session; }
  
+	void add_in_use_timeout (Mackie::SurfacePort& port, Mackie::Control& in_use_control, Mackie::Control* touch_control);
+	
   protected:
 	// create instances of MackiePort, depending on what's found in ardour.rc
 	void create_ports();
@@ -307,10 +311,11 @@ class MackieControlProtocol
 
 	void do_request (MackieControlUIRequest*);
 	int stop ();
-	
+
   private:
 
 	void port_connected_or_disconnected (std::string, std::string, bool);
+	bool control_in_use_timeout (Mackie::SurfacePort*, Mackie::Control *, Mackie::Control *);
 	
 	boost::shared_ptr<Mackie::RouteSignal> master_route_signal;
 	

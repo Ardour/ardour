@@ -93,8 +93,6 @@ protected:
 	virtual void control_event (SurfacePort &, Control &, const ControlState &) {}
 	
 private:
-	bool control_in_use_timeout (Control *, Control *);
-
 	MIDI::Port * _input_port;
 	MIDI::Port * _output_port;
 	int _number;

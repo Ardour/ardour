@@ -383,8 +383,7 @@ MackiePort::handle_midi_controller_message (MIDI::Parser &, MIDI::EventTwoBytes*
 			*/
 			
 			control->set_in_use (true);
-			add_in_use_timeout (*control, control);
-			
+			_mcp.add_in_use_timeout (*this, *control, control);
 			control_event (*this, *control, state);
 		}
 		break;

@@ -298,7 +298,7 @@ MackieControlProtocol::switch_banks (int initial)
 
 			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("remote id %1 connecting %2 to %3 with port %4\n", 
 									   route->remote_control_id(), route->name(), strip.name(), port_for_id(i)));
-			set_route_table (1, route);
+			set_route_table (i, route);
 			RouteSignal * rs = new RouteSignal (route, *this, strip, port_for_id(i));
 			route_signals.push_back (rs);
 			// update strip from route
@@ -438,7 +438,7 @@ MackieControlProtocol::handle_strip_button (SurfacePort & port, Control & contro
 			/* BCF faders don't support touch, so add a timeout to reset
 			   their `in_use' state.
 			*/
-			port.add_in_use_timeout (control.strip().gain(), &control.strip().fader_touch());
+			add_in_use_timeout (port, control.strip().gain(), &control.strip().fader_touch());
 		}
 	}
 
@@ -800,7 +800,7 @@ MackieControlProtocol::handle_control_event (SurfacePort & port, Control & contr
 
 				if (ARDOUR::Config->get_mackie_emulation() == "bcf") {
 					/* reset the timeout while we're still moving the fader */
-					port.add_in_use_timeout (control, control.in_use_touch_control);
+					add_in_use_timeout (port, control, control.in_use_touch_control);
 				}
 
 				// must echo bytes back to slider now, because
@@ -1741,3 +1741,41 @@ MackieControlProtocol::stop ()
 
 	return 0;
 }
+
+/** Add a timeout so that a control's in_use flag will be reset some time in the future.
+ *  @param in_use_control the control whose in_use flag to reset.
+ *  @param touch_control a touch control to emit an event for, or 0.
+ */
+void
+MackieControlProtocol::add_in_use_timeout (SurfacePort& port, Control& in_use_control, Control* touch_control)
+{
+	Glib::RefPtr<Glib::TimeoutSource> timeout (Glib::TimeoutSource::create (250)); // milliseconds
+
+	in_use_control.in_use_connection.disconnect ();
+	in_use_control.in_use_connection = timeout->connect (
+		sigc::bind (sigc::mem_fun (*this, &MackieControlProtocol::control_in_use_timeout), &port, &in_use_control, touch_control));
+	in_use_control.in_use_touch_control = touch_control;
+
+	timeout->attach (main_loop()->get_context());
+}
+
+/** Handle timeouts to reset in_use for controls that can't
+ *  do this by themselves (e.g. pots, and faders without touch support).
+ *  @param in_use_control the control whose in_use flag to reset.
+ *  @param touch_control a touch control to emit an event for, or 0.
+ */
+bool
+MackieControlProtocol::control_in_use_timeout (SurfacePort* port, Control* in_use_control, Control* touch_control)
+{
+	in_use_control->set_in_use (false);
+
+	if (touch_control) {
+		// empty control_state
+		ControlState control_state;
+		handle_control_event (*port, *touch_control, control_state);
+	}
+	
+	// only call this method once from the timer
+	return false;
+}
+
