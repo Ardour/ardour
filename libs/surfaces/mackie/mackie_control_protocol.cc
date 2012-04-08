@@ -929,6 +929,10 @@ MackieControlProtocol::notify_gain_changed (RouteSignal * route_signal, bool for
 {
 	try {
 		Fader & fader = route_signal->strip().gain();
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("route %1 gain change, update fader %2 on port %3\n", 
+								   route_signal->route()->name(), 
+								   fader.raw_id(),
+								   route_signal->port().output_port().name()));
 		if (!fader.in_use()) {
 			float gain_value = gain_to_slider_position (route_signal->route()->gain_control()->get_value());
 			// check that something has actually changed
