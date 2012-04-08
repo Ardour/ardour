@@ -329,9 +329,9 @@ void MackiePort::handle_midi_sysex (MIDI::Parser &, MIDI::byte * raw_bytes, size
 void
 MackiePort::handle_midi_pitchbend_message (MIDI::Parser&, MIDI::pitchbend_t pb, uint32_t fader_id)
 {
-	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("handle_midi pitchbend, fader = %1 value = %2\n", fader_id, pb));
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("handle_midi pitchbend, fader = %1 value = %2\n", (8*number()) + fader_id, pb));
 
-	Control* control = _mcp.surface().faders[fader_id];
+	Control* control = _mcp.surface().faders[(8*number()) + fader_id];
 
 	if (control) {
 		float midi_pos = pb >> 4; // only the top 10 bytes are used
