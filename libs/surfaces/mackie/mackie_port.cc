@@ -334,8 +334,8 @@ MackiePort::handle_midi_pitchbend_message (MIDI::Parser&, MIDI::pitchbend_t pb, 
 	Control* control = _mcp.surface().faders[fader_id];
 
 	if (control) {
-		int midi_pos = pb & 0x3ff; // only the top-order 10 bits out of 14 are used
-		_mcp.handle_control_event (*this, *control, float (midi_pos) / float(0x3ff));
+		float midi_pos = pb >> 4; // only the top 10 bytes are used
+		_mcp.handle_control_event (*this, *control, midi_pos / 1023.0);
 	}
 }
 
