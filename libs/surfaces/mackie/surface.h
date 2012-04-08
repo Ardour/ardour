@@ -63,6 +63,7 @@ public:
 	std::map<int,Pot*> pots;
 	std::map<int,Button*> buttons;
 	std::map<int,Led*> leds;
+	std::map<int,Meter*> meters;
 
 	/// no strip controls in here because they usually
 	/// have the same names.

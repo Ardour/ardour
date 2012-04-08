@@ -62,6 +62,8 @@ public:
   	MidiByteArray build_led( const Button & button, LedState ls );
 	
 	MidiByteArray build_fader( const Fader & fader, float pos );
+
+	MidiByteArray build_meter (const Meter& meter, float val);
 	
 	/// return bytes that will reset all controls to their zero positions
 	/// And blank the display for the strip. Pass SurfacePort so we know which sysex header to use.

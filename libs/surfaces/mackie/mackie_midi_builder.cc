@@ -21,6 +21,7 @@
 #include <sstream>
 #include <iomanip>
 #include <algorithm>
+#include <cmath>
 
 #include "pbd/compose.h"
 
@@ -106,6 +107,15 @@ MidiByteArray MackieMidiBuilder::build_fader( const Fader & fader, float pos )
 		// higher-order bits
 		, ( posi >> 7 )
 	);
+}
+
+MidiByteArray MackieMidiBuilder::build_meter (const Meter & meter, float val)
+{
+	MIDI::byte segment = lrintf (val*16.0);
+
+	return MidiByteArray (2,
+			     0xD0,
+			     (meter.raw_id()<<3) | segment);
 }
 
 MidiByteArray MackieMidiBuilder::zero_strip( SurfacePort & port, const Strip & strip )

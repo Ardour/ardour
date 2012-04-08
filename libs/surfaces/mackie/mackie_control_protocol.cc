@@ -351,13 +351,17 @@ MackieControlProtocol::set_active (bool yn)
 	if (yn == _active) {
 		return 0;
 	}
-	
+
 	try
 	{
 		// the reason for the locking and unlocking is that
 		// glibmm can't do a condition wait on a RecMutex
 		if (yn) {
 			// TODO what happens if this fails half way?
+
+			// start an event loop
+
+			BaseUI::run ();
 			
 			// create MackiePorts
 			{
@@ -390,6 +394,7 @@ MackieControlProtocol::set_active (bool yn)
 			// must come after _active = true otherwise it won't run
 			update_surface();
 		} else {
+			BaseUI::quit ();
 			close();
 			_active = false;
 		}
@@ -1039,7 +1044,7 @@ MackieControlProtocol::format_bbt_timecode (framepos_t now_frame)
 	os << setw(2) << setfill('0') << bbt_time.beats;
 
 	// figure out subdivisions per beat
-	const Meter & meter = session->tempo_map().meter_at (now_frame);
+	const ARDOUR::Meter & meter = session->tempo_map().meter_at (now_frame);
 	int subdiv = 2;
 	if (meter.note_divisor() == 8 && (meter.divisions_per_bar() == 12.0 || meter.divisions_per_bar() == 9.0 || meter.divisions_per_bar() == 6.0)) {
 		subdiv = 3;

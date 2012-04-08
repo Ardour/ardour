@@ -150,7 +150,8 @@ public:
 		type_led_ring, 
 		type_fader = 0xe0, 
 		type_button = 0x90, 
-		type_pot = 0xb0 
+		type_pot = 0xb0,
+		type_meter = 0xd0
 	};
 
 	enum base_id_t {
@@ -163,6 +164,7 @@ public:
 		mute_button_base_id = 0x10,
 		solo_button_base_id = 0x08,
 		recenable_button_base_id = 0x0,
+		meter_base_id = 0xd0,
 	};
 	
 	Control (int id, int ordinal, std::string name, Group& group);
@@ -296,6 +298,17 @@ public:
 	}
 
 	virtual bool is_jog() const { return true; }
+
+	static Control* factory (Surface&, int id, int ordinal, const char*, Group&);
+};
+
+class Meter : public Control
+{
+public:
+	Meter (int id, int ordinal, std::string name, Group & group)
+		: Control  (id, ordinal, name, group) {}
+	
+	virtual type_t type() const { return type_meter; }
 
 	static Control* factory (Surface&, int id, int ordinal, const char*, Group&);
 };

@@ -155,6 +155,7 @@ static StripControlDefinition mackie_strip_controls[] = {
 	{ "select", Control::select_button_base_id, Button::factory, },
 	{ "vselect", Control::vselect_button_base_id, Button::factory, },
 	{ "fader_touch", Control::fader_touch_button_base_id, Button::factory, },
+	{ "meter", 0, Meter::factory, },
 	{ "", 0, Button::factory, }
 };
 

@@ -293,3 +293,13 @@ Jog::factory (Surface& surface, int id, int ordinal, const char* name, Group& gr
 	group.add (*j);
 	return j;
 }
+
+Control*
+Meter::factory (Surface& surface, int id, int ordinal, const char* name, Group& group)
+{
+	Meter* m = new Meter (id, ordinal, name, group);
+	surface.meters[id] = m;
+	surface.controls.push_back (m);
+	group.add (*m);
+	return m;
+}
