@@ -1757,7 +1757,9 @@ MackieControlProtocol::add_in_use_timeout (SurfacePort& port, Control& in_use_co
 	in_use_control.in_use_touch_control = touch_control;
 
 	timeout->attach (main_loop()->get_context());
-}
+
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("timeout queued for port %1, control %2 touch control %3\n",
+							   &port, &in_use_control, touch_control));}
 
 /** Handle timeouts to reset in_use for controls that can't
  *  do this by themselves (e.g. pots, and faders without touch support).
@@ -1767,6 +1769,9 @@ MackieControlProtocol::add_in_use_timeout (SurfacePort& port, Control& in_use_co
 bool
 MackieControlProtocol::control_in_use_timeout (SurfacePort* port, Control* in_use_control, Control* touch_control)
 {
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("timeout elapsed for port %1, control %2 touch control %3\n",
+							   port, in_use_control, touch_control));
+
 	in_use_control->set_in_use (false);
 
 	if (touch_control) {
