@@ -657,12 +657,6 @@ MackieControlProtocol::initialize_surface()
 	}
 
 	_surface->init();
-
-	// Connect events. Must be after route table otherwise there will be trouble
-
-	for (MackiePorts::iterator it = _ports.begin(); it != _ports.end(); ++it) {
-		(*it)->control_event.connect_same_thread (port_connections, boost::bind (&MackieControlProtocol::handle_control_event, this, _1, _2, _3));
-	}
 }
 
 void 
@@ -767,15 +761,26 @@ MackieControlProtocol::handle_control_event (SurfacePort & port, Control & contr
 {
 	// find the route for the control, if there is one
 	boost::shared_ptr<Route> route;
+
 	if (control.group().is_strip()) {
 		if (control.group().is_master()) {
+			DEBUG_TRACE (DEBUG::MackieControl, "master strip control event\n");
 			route = master_route();
 		} else {
 			uint32_t index = control.ordinal() - 1 + (port.number() * port.strips());
-			if (index < route_table.size())
+			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("strip control event, index = %1, rt size = %2\n",
+									   index, route_table.size()));
+			if (index < route_table.size()) {
 				route = route_table[index];
-			else
+				if (route) {
+					DEBUG_TRACE (DEBUG::MackieControl, string_compose ("modifying %1\n", route->name()));
+				} else {
+					DEBUG_TRACE (DEBUG::MackieControl, "no route found!\n");
+				}
+			} else {
 				cerr << "Warning: index is " << index << " which is not in the route table, size: " << route_table.size() << endl;
+				DEBUG_TRACE (DEBUG::MackieControl, "illegal route index found!\n");
+			}
 		}
 	}
 
@@ -789,6 +794,8 @@ MackieControlProtocol::handle_control_event (SurfacePort & port, Control & contr
 			// at which point the fader should just reset itself
 			if (route != 0)
 			{
+				DEBUG_TRACE (DEBUG::MackieControl, string_compose ("fader to %1\n", state.pos));
+
 				route->gain_control()->set_value (slider_position_to_gain (state.pos));
 
 				if (ARDOUR::Config->get_mackie_emulation() == "bcf") {
@@ -806,6 +813,7 @@ MackieControlProtocol::handle_control_event (SurfacePort & port, Control & contr
 		case Control::type_button:
 			if (control.group().is_strip()) {
 				// strips
+				DEBUG_TRACE (DEBUG::MackieControl, string_compose ("strip button %1\n", control.id()));
 				if (route != 0) {
 					handle_strip_button (port, control, state.button_state, route);
 				} else {
@@ -815,11 +823,13 @@ MackieControlProtocol::handle_control_event (SurfacePort & port, Control & contr
 				}
 			} else if (control.group().is_master()) {
 				// master fader touch
+				DEBUG_TRACE (DEBUG::MackieControl, string_compose ("master strip button %1\n", control.id()));
 				if (route != 0) {
 					handle_strip_button (port, control, state.button_state, route);
 				}
 			} else {
 				// handle all non-strip buttons
+				DEBUG_TRACE (DEBUG::MackieControl, string_compose ("global button %1\n", control.id()));
 				surface().handle_button (*this, state.button_state, dynamic_cast<Button&> (control));
 			}
 			break;
@@ -827,6 +837,7 @@ MackieControlProtocol::handle_control_event (SurfacePort & port, Control & contr
 		// pot (jog wheel, external control)
 		case Control::type_pot:
 			if (control.group().is_strip()) {
+				DEBUG_TRACE (DEBUG::MackieControl, string_compose ("strip pot %1\n", control.id()));
 				if (route) {
                                         boost::shared_ptr<Panner> panner = route->panner_shell()->panner();
 					// pan for mono input routes, or stereo linked panners
@@ -843,12 +854,12 @@ MackieControlProtocol::handle_control_event (SurfacePort & port, Control & contr
 					// it's a pot for an umnapped route, so turn all the lights off
 					port.write (builder.build_led_ring (dynamic_cast<Pot &> (control), off));
 				}
-			}
-			else
-			{
+			} else {
 				if (control.is_jog()) {
+					DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Jog wheel moved %1\n", state.ticks));
 					_jog_wheel.jog_event (port, control, state);
 				} else {
+					DEBUG_TRACE (DEBUG::MackieControl, string_compose ("External controller moved %1\n", state.ticks));
 					cout << "external controller" << state.ticks * state.sign << endl;
 				}
 			}

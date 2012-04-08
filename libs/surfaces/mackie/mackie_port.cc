@@ -338,7 +338,7 @@ MackiePort::handle_midi_pitchbend_message (MIDI::Parser&, MIDI::pitchbend_t pb, 
 	        // in_use is set by the MackieControlProtocol::handle_strip_button
 		
 	        // relies on implicit ControlState constructor
-		control_event (*this, *control, float (midi_pos) / float(0x3ff));
+		_mcp.handle_control_event (*this, *control, float (midi_pos) / float(0x3ff));
 	}
 }
 
@@ -385,7 +385,6 @@ MackiePort::handle_midi_controller_message (MIDI::Parser &, MIDI::EventTwoBytes*
 			control->set_in_use (true);
 			add_in_use_timeout (*control, control);
 			
-			// emit the control event
 			control_event (*this, *control, state);
 		}
 		break;
@@ -395,3 +394,8 @@ MackiePort::handle_midi_controller_message (MIDI::Parser &, MIDI::EventTwoBytes*
 	}
 }
 
+void
+MackiePort::control_event (SurfacePort& sp, Control& c, const ControlState& cs)
+{
+	_mcp.handle_control_event (sp, c, cs);
+}

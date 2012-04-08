@@ -101,34 +101,24 @@ class MackieControlProtocol
 	void tear_down_gui ();
 	
 	// control events
-	void handle_control_event(Mackie::SurfacePort & port, Mackie::Control & control, const Mackie::ControlState & state);
+	void handle_control_event (Mackie::SurfacePort & port, Mackie::Control & control, const Mackie::ControlState & state);
 
 	// strip/route related stuff
   public:	
-	/// Signal handler for Route::solo
-	void notify_solo_changed(Mackie::RouteSignal *);
-	/// Signal handler for Route::mute
-	void notify_mute_changed(Mackie::RouteSignal *);
-	/// Signal handler for Route::record_enable_changed
-	void notify_record_enable_changed(Mackie::RouteSignal *);
-	/// Signal handler for Route::gain_changed (from IO)
-	void notify_gain_changed(Mackie::RouteSignal *, bool force_update = true);
-	/// Signal handler for Route::name_change
-	void notify_property_changed(const PBD::PropertyChange&, Mackie::RouteSignal *);
-	/// Signal handler from Panner::Change
-	void notify_panner_changed(Mackie::RouteSignal *, bool force_update = true);
-	/// Signal handler for new routes added
-	void notify_route_added(ARDOUR::RouteList &);
-	/// Signal handler for Route::active_changed
-	void notify_active_changed(Mackie::RouteSignal *);
+	void notify_solo_changed (Mackie::RouteSignal *);
+	void notify_mute_changed (Mackie::RouteSignal *);
+	void notify_record_enable_changed (Mackie::RouteSignal *);
+	void notify_gain_changed (Mackie::RouteSignal *, bool force_update = true);
+	void notify_property_changed (const PBD::PropertyChange&, Mackie::RouteSignal *);
+	void notify_panner_changed (Mackie::RouteSignal *, bool force_update = true);
+	void notify_route_added (ARDOUR::RouteList &);
+	void notify_active_changed (Mackie::RouteSignal *);
  
 	void notify_remote_id_changed();
 
 	/// rebuild the current bank. Called on route added/removed and
 	/// remote id changed.
 	void refresh_current_bank();
-
-	// global buttons (ie button not part of strips)
 
   public:
 	// button-related signals

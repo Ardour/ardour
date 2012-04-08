@@ -53,6 +53,7 @@ public:
 
 	virtual const MidiByteArray & sysex_hdr() const;
 	virtual int strips() const;
+
 };	
 
 }

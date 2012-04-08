@@ -65,9 +65,6 @@ public:
 	MIDI::Port & output_port() { return *_output_port; }
 	const MIDI::Port & output_port() const { return *_output_port; }
 	
-	// all control notofications are sent from here
-	PBD::Signal3<void,SurfacePort &, Control &, const ControlState &> control_event;
-	
 	// emitted just before the port goes into initialisation
 	// where it tries to establish that its device is connected
 	PBD::Signal0<void> init_event;
@@ -92,6 +89,8 @@ public:
 protected:
 	/// Only for use by DummyPort
 	SurfacePort();
+
+	virtual void control_event (SurfacePort &, Control &, const ControlState &) {}
 	
 private:
 	bool control_in_use_timeout (Control *, Control *);

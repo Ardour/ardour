@@ -104,6 +104,8 @@ protected:
 	*/
 	void probe_emulation( const MidiByteArray & bytes );
 
+	void control_event (SurfacePort &, Control &, const ControlState &);
+
 private:
 	MackieControlProtocol & _mcp;
 	port_type_t _port_type;
