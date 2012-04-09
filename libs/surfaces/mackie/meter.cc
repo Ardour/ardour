@@ -45,7 +45,7 @@ Meter::update_message (float dB)
 {
 	float def = 0.0f; /* Meter deflection %age */
 
-	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Meter ID %1 dB %2\n", raw_id(), dB));
+	// DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Meter ID %1 dB %2\n", raw_id(), dB));
 	
 	if (dB < -70.0f) {
 		def = 0.0f;
