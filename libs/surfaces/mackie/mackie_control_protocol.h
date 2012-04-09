@@ -373,6 +373,8 @@ class MackieControlProtocol
 	void do_request (MackieControlUIRequest*);
 	int stop ();
 
+	void thread_init ();
+
   private:
 
 	void port_connected_or_disconnected (std::string, std::string, bool);

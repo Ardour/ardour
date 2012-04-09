@@ -130,6 +130,13 @@ MackieControlProtocol::~MackieControlProtocol()
 	DEBUG_TRACE (DEBUG::MackieControl, "finished ~MackieControlProtocol::MackieControlProtocol\n");
 }
 
+void
+MackieControlProtocol::thread_init ()
+{
+	PBD::notify_gui_about_thread_creation (X_("gui"), pthread_self(), X_("MackieControl"), 2048);
+	ARDOUR::SessionEvent::create_per_thread_pool (X_("MackieControl"), 128);
+}
+
 Mackie::Surface& 
 MackieControlProtocol::surface()
 {
