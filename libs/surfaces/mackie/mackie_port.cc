@@ -190,15 +190,18 @@ void MackiePort::probe_emulation (const MidiByteArray &)
 	cout << "MackiePort::probe_emulation: " << bytes.size() << ", " << bytes << endl;
 
 	MidiByteArray version_string;
-	for  (int i = 6; i < 11; ++i) version_string << bytes[i];
+
+	for  (int i = 6; i < 11; ++i) {
+		version_string << bytes[i];
+	}
+
 	cout << "version_string: " << version_string << endl;
 #endif
 	
 	// TODO investigate using serial number. Also, possibly size of bytes might
 	// give an indication. Also, apparently MCU sends non-documented messages
 	// sometimes.
-	if (!_initialising)
-	{
+	if (!_initialising) {
 		//cout << "MackiePort::probe_emulation out of sequence." << endl;
 		return;
 	}

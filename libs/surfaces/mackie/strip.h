@@ -35,7 +35,7 @@ class Strip : public Group
 {
 public:
 	Strip (const std::string& name, int index); /* master strip only */
-	Strip (Surface&, const std::string & name, int index, int unit_index, StripControlDefinition* ctls);
+	Strip (Surface&, const std::string & name, int surface_number, int index, int unit_index, StripControlDefinition* ctls);
 
 	virtual bool is_strip() const { return true; }
 	virtual void add (Control & control);

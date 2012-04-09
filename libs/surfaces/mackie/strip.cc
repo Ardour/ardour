@@ -47,7 +47,7 @@ Strip::Strip (const std::string& name, int index)
 	/* master strip only */
 }
 
-Strip::Strip (Surface& surface, const std::string& name, int index, int unit_index, StripControlDefinition* ctls)
+Strip::Strip (Surface& surface, const std::string& name, int surface_number, int index, int unit_index, StripControlDefinition* ctls)
 	: Group (name)
 	, _solo (0)
 	, _recenable (0)
@@ -64,7 +64,7 @@ Strip::Strip (Surface& surface, const std::string& name, int index, int unit_ind
 	*/
 
 	for (uint32_t i = 0; ctls[i].name[0]; ++i) {
-		ctls[i].factory (surface, ctls[i].base_id + unit_index, unit_index+1, ctls[i].name, *this);
+		ctls[i].factory (surface, ctls[i].base_id + (8*surface_number) + unit_index, unit_index+1, ctls[i].name, *this);
 	}
 }	
 

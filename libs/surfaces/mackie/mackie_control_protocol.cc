@@ -90,6 +90,11 @@ MackieMidiBuilder builder;
 extern PBD::EventLoop::InvalidationRecord* __invalidator (sigc::trackable& trackable, const char*, int);
 #define invalidator(x) __invalidator ((x), __FILE__, __LINE__)
 
+const int MackieControlProtocol::MODIFIER_OPTION = 0x1;
+const int MackieControlProtocol::MODIFIER_CONTROL = 0x2;
+const int MackieControlProtocol::MODIFIER_SHIFT = 0x3;
+const int MackieControlProtocol::MODIFIER_CMDALT = 0x4;
+
 MackieControlProtocol::MackieControlProtocol (Session& session)
 	: ControlProtocol (session, X_("Mackie"), MidiControlUI::instance())
 	, AbstractUI<MackieControlUIRequest> ("mackie")
@@ -486,7 +491,7 @@ MackieControlProtocol::handle_strip_button (SurfacePort & port, Control & contro
 		} else if (control.name() == "select") {
 			Strip* strip = const_cast<Strip*>(dynamic_cast<const Strip*>(&control.group()));
 			if (strip) {
-				if (strip->index() < route_table.size()) {
+				if ((uint32_t) strip->index() < route_table.size()) {
 					boost::shared_ptr<Route> r = route_table[strip->index()];
 					if (r->remote_control_id() == _current_selected_track) {
 						UnselectTrack (); /* EMIT SIGNAL */
@@ -1165,249 +1170,6 @@ MackieControlProtocol::update_timecode_display()
 	}
 }
 
-/////////////////////////////////////
-// Transport Buttons
-/////////////////////////////////////
-
-LedState 
-MackieControlProtocol::frm_left_press (Button &)
-{
-	// can use first_mark_before/after as well
-	unsigned long elapsed = _frm_left_last.restart();
-
-	Location * loc = session->locations()->first_location_before (
-		session->transport_frame()
-	);
-
-	// allow a quick double to go past a previous mark
-	if (session->transport_rolling() && elapsed < 500 && loc != 0) {
-		Location * loc_two_back = session->locations()->first_location_before (loc->start());
-		if (loc_two_back != 0)
-		{
-			loc = loc_two_back;
-		}
-	}
-
-	// move to the location, if it's valid
-	if (loc != 0) {
-		session->request_locate (loc->start(), session->transport_rolling());
-	}
-
-	return on;
-}
-
-LedState 
-MackieControlProtocol::frm_left_release (Button &)
-{
-	return off;
-}
-
-LedState 
-MackieControlProtocol::frm_right_press (Button &)
-{
-	// can use first_mark_before/after as well
-	Location * loc = session->locations()->first_location_after (session->transport_frame());
-	
-	if (loc != 0) {
-		session->request_locate (loc->start(), session->transport_rolling());
-	}
-		
-	return on;
-}
-
-LedState 
-MackieControlProtocol::frm_right_release (Button &)
-{
-	return off;
-}
-
-LedState 
-MackieControlProtocol::stop_press (Button &)
-{
-	session->request_stop();
-	return on;
-}
-
-LedState 
-MackieControlProtocol::stop_release (Button &)
-{
-	return session->transport_stopped();
-}
-
-LedState 
-MackieControlProtocol::play_press (Button &)
-{
-	session->request_transport_speed (1.0);
-	return on;
-}
-
-LedState 
-MackieControlProtocol::play_release (Button &)
-{
-	return session->transport_rolling();
-}
-
-LedState 
-MackieControlProtocol::record_press (Button &)
-{
-	if (session->get_record_enabled()) {
-		session->disable_record (false);
-	} else {
-		session->maybe_enable_record();
-	}
-	return on;
-}
-
-LedState 
-MackieControlProtocol::record_release (Button &)
-{
-	if (session->get_record_enabled()) {
-		if (session->transport_rolling()) {
-			return on;
-		} else {
-			return flashing;
-		}
-	} else {
-		return off;
-	}
-}
-
-LedState 
-MackieControlProtocol::rewind_press (Button &)
-{
-	_jog_wheel.push (JogWheel::speed);
-	_jog_wheel.transport_direction (-1);
-	session->request_transport_speed (-_jog_wheel.transport_speed());
-	return on;
-}
-
-LedState 
-MackieControlProtocol::rewind_release (Button &)
-{
-	_jog_wheel.pop();
-	_jog_wheel.transport_direction (0);
-	if (_transport_previously_rolling) {
-		session->request_transport_speed (1.0);
-	} else {
-		session->request_stop();
-	}
-	return off;
-}
-
-LedState 
-MackieControlProtocol::ffwd_press (Button &)
-{
-	_jog_wheel.push (JogWheel::speed);
-	_jog_wheel.transport_direction (1);
-	session->request_transport_speed (_jog_wheel.transport_speed());
-	return on;
-}
-
-LedState 
-MackieControlProtocol::ffwd_release (Button &)
-{
-	_jog_wheel.pop();
-	_jog_wheel.transport_direction (0);
-	if (_transport_previously_rolling) {
-		session->request_transport_speed (1.0);
-	} else {
-		session->request_stop();
-	}
-	return off;
-}
-
-LedState 
-MackieControlProtocol::loop_press (Button &)
-{
-	session->request_play_loop (!session->get_play_loop());
-	return on;
-}
-
-LedState 
-MackieControlProtocol::loop_release (Button &)
-{
-	return session->get_play_loop();
-}
-
-LedState 
-MackieControlProtocol::punch_in_press (Button &)
-{
-	bool const state = !session->config.get_punch_in();
-	session->config.set_punch_in (state);
-	return state;
-}
-
-LedState 
-MackieControlProtocol::punch_in_release (Button &)
-{
-	return session->config.get_punch_in();
-}
-
-LedState 
-MackieControlProtocol::punch_out_press (Button &)
-{
-	bool const state = !session->config.get_punch_out();
-	session->config.set_punch_out (state);
-	return state;
-}
-
-LedState 
-MackieControlProtocol::punch_out_release (Button &)
-{
-	return session->config.get_punch_out();
-}
-
-LedState 
-MackieControlProtocol::home_press (Button &)
-{
-	session->goto_start();
-	return on;
-}
-
-LedState 
-MackieControlProtocol::home_release (Button &)
-{
-	return off;
-}
-
-LedState 
-MackieControlProtocol::end_press (Button &)
-{
-	session->goto_end();
-	return on;
-}
-
-LedState 
-MackieControlProtocol::end_release (Button &)
-{
-	return off;
-}
-
-LedState 
-MackieControlProtocol::clicking_press (Button &)
-{
-	bool state = !Config->get_clicking();
-	Config->set_clicking (state);
-	return state;
-}
-
-LedState 
-MackieControlProtocol::clicking_release (Button &)
-{
-	return Config->get_clicking();
-}
-
-LedState MackieControlProtocol::global_solo_press (Button &)
-{
-	bool state = !session->soloing();
-	session->set_solo (session->get_routes(), state);
-	return state;
-}
-
-LedState MackieControlProtocol::global_solo_release (Button &)
-{
-	return session->soloing();
-}
 
 ///////////////////////////////////////////
 // Session signals
@@ -1556,7 +1318,7 @@ MackieControlProtocol::cursor_left_press (Button& )
 {
 	if (_zoom_mode) {
 
-		if (false) { // button_down (BUTTON_OPTION)) {
+		if (_modifier_state & MODIFIER_OPTION) {
 			/* reset selected tracks to default vertical zoom */
 		} else {
 			ZoomOut (); /* EMIT SIGNAL */
@@ -1576,8 +1338,8 @@ LedState
 MackieControlProtocol::cursor_right_press (Button& )
 {
 	if (_zoom_mode) {
-
-		if (false) { // button_down (BUTTON_OPTION)) {
+		
+		if (_modifier_state & MODIFIER_OPTION) {
 			/* reset selected tracks to default vertical zoom */
 		} else {
 			ZoomIn (); /* EMIT SIGNAL */

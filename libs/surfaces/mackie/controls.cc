@@ -91,26 +91,6 @@ ostream & Mackie::operator <<  (ostream & os, const Mackie::Control & control)
 }
 
 Control*
-Button::factory (Surface& surface, int id, int ordinal, const char* name, Group& group)
-{
-	Button* b = new Button (id, ordinal, name, group);
-	surface.buttons[id] = b;
-	surface.controls.push_back (b);
-	group.add (*b);
-	return b;
-}
-
-Control*
-Fader::factory (Surface& surface, int id, int ordinal, const char* name, Group& group)
-{
-	Fader* f = new Fader (id, ordinal, name, group);
-	surface.faders[id] = f;
-	surface.controls.push_back (f);
-	group.add (*f);
-	return f;
-}
-
-Control*
 Pot::factory (Surface& surface, int id, int ordinal, const char* name, Group& group)
 {
 	Pot* p = new Pot (id, ordinal, name, group);

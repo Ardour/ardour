@@ -179,8 +179,10 @@ Surface::init_strips ()
 		uint32_t unit_index = i % _unit_strips;
 		
 		snprintf (name, sizeof (name), "strip_%d", unit_index+1);
+
+		cerr << "Register strip " << i << " unit index " << unit_index << endl;
 		
-		Strip* strip = new Strip (*this, name, i, unit_index, mackie_strip_controls);
+		Strip* strip = new Strip (*this, name, i/8, i, unit_index, mackie_strip_controls);
 		
 		groups[name] = strip;
 		strips[i] = strip;
