@@ -87,9 +87,6 @@ public:
 
 	uint32_t max_strips() const { return _max_strips; }
 	
-	/// map button ids to calls to press_ and release_ in mbh
-	virtual void handle_button (MackieButtonHandler & mbh, ButtonState bs, Button & button);
-
 public:
 	/// display an indicator of the first switched-in Route. Do nothing by default.
 	virtual void display_bank_start( SurfacePort &, MackieMidiBuilder &, uint32_t /*current_bank*/ ) {};

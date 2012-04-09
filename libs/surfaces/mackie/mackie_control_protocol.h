@@ -37,7 +37,6 @@
 #include "controls.h"
 #include "dummy_port.h"
 #include "route_signal.h"
-#include "mackie_button_handler.h"
 #include "mackie_port.h"
 #include "mackie_jog_wheel.h"
 #include "timer.h"
@@ -81,7 +80,6 @@ public:
 class MackieControlProtocol 
 	: public ARDOUR::ControlProtocol
 	, public AbstractUI<MackieControlUIRequest>
-	, public Mackie::MackieButtonHandler
 {
   public:
 	MackieControlProtocol(ARDOUR::Session &);
@@ -104,6 +102,7 @@ class MackieControlProtocol
 	
 	// control events
 	void handle_control_event (Mackie::SurfacePort & port, Mackie::Control & control, const Mackie::ControlState & state);
+	void handle_button_event (Mackie::Button& button, Mackie::ButtonState);
 
 	// strip/route related stuff
   public:	
@@ -139,82 +138,150 @@ class MackieControlProtocol
   
 	void update_global_button(const std::string & name, Mackie::LedState);
 	void update_global_led(const std::string & name, Mackie::LedState);
-  
-	// transport button handler methods from MackieButtonHandler
-	virtual Mackie::LedState frm_left_press(Mackie::Button &);
-	virtual Mackie::LedState frm_left_release(Mackie::Button &);
 
-	virtual Mackie::LedState frm_right_press(Mackie::Button &);
-	virtual Mackie::LedState frm_right_release(Mackie::Button &);
+	/* implemented button handlers */
+	Mackie::LedState frm_left_press(Mackie::Button &);
+	Mackie::LedState frm_left_release(Mackie::Button &);
+	Mackie::LedState frm_right_press(Mackie::Button &);
+	Mackie::LedState frm_right_release(Mackie::Button &);
+	Mackie::LedState stop_press(Mackie::Button &);
+	Mackie::LedState stop_release(Mackie::Button &);
+	Mackie::LedState play_press(Mackie::Button &);
+	Mackie::LedState play_release(Mackie::Button &);
+	Mackie::LedState record_press(Mackie::Button &);
+	Mackie::LedState record_release(Mackie::Button &);
+	Mackie::LedState loop_press(Mackie::Button &);
+	Mackie::LedState loop_release(Mackie::Button &);
+	Mackie::LedState punch_in_press(Mackie::Button &);
+	Mackie::LedState punch_in_release(Mackie::Button &);
+	Mackie::LedState punch_out_press(Mackie::Button &);
+	Mackie::LedState punch_out_release(Mackie::Button &);
+	Mackie::LedState home_press(Mackie::Button &);
+	Mackie::LedState home_release(Mackie::Button &);
+	Mackie::LedState end_press(Mackie::Button &);
+	Mackie::LedState end_release(Mackie::Button &);
+	Mackie::LedState rewind_press(Mackie::Button & button);
+	Mackie::LedState rewind_release(Mackie::Button & button);
+	Mackie::LedState ffwd_press(Mackie::Button & button);
+	Mackie::LedState ffwd_release(Mackie::Button & button);
+	Mackie::LedState cursor_up_press (Mackie::Button &);
+	Mackie::LedState cursor_up_release (Mackie::Button &);
+	Mackie::LedState cursor_down_press (Mackie::Button &);
+	Mackie::LedState cursor_down_release (Mackie::Button &);
+	Mackie::LedState cursor_left_press (Mackie::Button &);
+	Mackie::LedState cursor_left_release (Mackie::Button &);
+	Mackie::LedState cursor_right_press (Mackie::Button &);
+	Mackie::LedState cursor_right_release (Mackie::Button &);
+	Mackie::LedState left_press(Mackie::Button &);
+	Mackie::LedState left_release(Mackie::Button &);
+	Mackie::LedState right_press(Mackie::Button &);
+	Mackie::LedState right_release(Mackie::Button &);
+	Mackie::LedState channel_left_press(Mackie::Button &);
+	Mackie::LedState channel_left_release(Mackie::Button &);
+	Mackie::LedState channel_right_press(Mackie::Button &);
+	Mackie::LedState channel_right_release(Mackie::Button &);
+	Mackie::LedState clicking_press(Mackie::Button &);
+	Mackie::LedState clicking_release(Mackie::Button &);
+	Mackie::LedState global_solo_press(Mackie::Button &);
+	Mackie::LedState global_solo_release(Mackie::Button &);
+	Mackie::LedState marker_press(Mackie::Button &);
+	Mackie::LedState marker_release(Mackie::Button &);
+	Mackie::LedState drop_press(Mackie::Button &);
+	Mackie::LedState drop_release(Mackie::Button &);
+	Mackie::LedState save_press(Mackie::Button &);
+	Mackie::LedState save_release(Mackie::Button &);
+	Mackie::LedState timecode_beats_press(Mackie::Button &);
+	Mackie::LedState timecode_beats_release(Mackie::Button &);
+	Mackie::LedState zoom_press(Mackie::Button &);
+	Mackie::LedState zoom_release(Mackie::Button &);
+	Mackie::LedState scrub_press(Mackie::Button &);
+	Mackie::LedState scrub_release(Mackie::Button &);
 
-	virtual Mackie::LedState stop_press(Mackie::Button &);
-	virtual Mackie::LedState stop_release(Mackie::Button &);
+	/* unimplemented button handlers */
 
-	virtual Mackie::LedState play_press(Mackie::Button &);
-	virtual Mackie::LedState play_release(Mackie::Button &);
+	Mackie::LedState io_press (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState io_release (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState sends_press (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState sends_release (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState pan_press (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState pan_release (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState plugin_press (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState plugin_release (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState eq_press (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState eq_release (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState dyn_press (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState dyn_release (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState flip_press (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState flip_release (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState edit_press (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState edit_release (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState name_value_press (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState name_value_release (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState F1_press (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState F1_release (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState F2_press (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState F2_release (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState F3_press (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState F3_release (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState F4_press (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState F4_release (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState F5_press (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState F5_release (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState F6_press (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState F6_release (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState F7_press (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState F7_release (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState F8_press (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState F8_release (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState F9_press (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState F9_release (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState F10_press (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState F10_release (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState F11_press (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState F11_release (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState F12_press (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState F12_release (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState F13_press (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState F13_release (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState F14_press (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState F14_release (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState F15_press (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState F15_release (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState F16_press (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState F16_release (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState shift_press (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState shift_release (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState option_press (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState option_release (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState control_press (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState control_release (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState cmd_alt_press (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState cmd_alt_release (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState on_press (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState on_release (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState rec_ready_press (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState rec_ready_release (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState undo_press (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState undo_release (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState snapshot_press (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState snapshot_release (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState touch_press (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState touch_release (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState redo_press (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState redo_release (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState enter_press (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState enter_release (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState cancel_press (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState cancel_release (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState mixer_press (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState mixer_release (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState user_a_press (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState user_a_release (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState user_b_press (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState user_b_release (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState fader_touch_press (Mackie::Button &) { return Mackie::off; }
+	Mackie::LedState fader_touch_release (Mackie::Button &) { return Mackie::off; }
 
-	virtual Mackie::LedState record_press(Mackie::Button &);
-	virtual Mackie::LedState record_release(Mackie::Button &);
-
-	virtual Mackie::LedState loop_press(Mackie::Button &);
-	virtual Mackie::LedState loop_release(Mackie::Button &);
-
-	virtual Mackie::LedState punch_in_press(Mackie::Button &);
-	virtual Mackie::LedState punch_in_release(Mackie::Button &);
-
-	virtual Mackie::LedState punch_out_press(Mackie::Button &);
-	virtual Mackie::LedState punch_out_release(Mackie::Button &);
-
-	virtual Mackie::LedState home_press(Mackie::Button &);
-	virtual Mackie::LedState home_release(Mackie::Button &);
-
-	virtual Mackie::LedState end_press(Mackie::Button &);
-	virtual Mackie::LedState end_release(Mackie::Button &);
-	
-	virtual Mackie::LedState rewind_press(Mackie::Button & button);
-	virtual Mackie::LedState rewind_release(Mackie::Button & button);
-
-	virtual Mackie::LedState ffwd_press(Mackie::Button & button);
-	virtual Mackie::LedState ffwd_release(Mackie::Button & button);
-
-	// bank switching button handler methods from MackieButtonHandler
-	virtual Mackie::LedState left_press(Mackie::Button &);
-	virtual Mackie::LedState left_release(Mackie::Button &);
-
-	virtual Mackie::LedState right_press(Mackie::Button &);
-	virtual Mackie::LedState right_release(Mackie::Button &);
-
-	virtual Mackie::LedState channel_left_press(Mackie::Button &);
-	virtual Mackie::LedState channel_left_release(Mackie::Button &);
-
-	virtual Mackie::LedState channel_right_press(Mackie::Button &);
-	virtual Mackie::LedState channel_right_release(Mackie::Button &);
-	
-	virtual Mackie::LedState clicking_press(Mackie::Button &);
-	virtual Mackie::LedState clicking_release(Mackie::Button &);
-	
-	virtual Mackie::LedState global_solo_press(Mackie::Button &);
-	virtual Mackie::LedState global_solo_release(Mackie::Button &);
-	
-	// function buttons
-	virtual Mackie::LedState marker_press(Mackie::Button &);
-	virtual Mackie::LedState marker_release(Mackie::Button &);
-
-	virtual Mackie::LedState drop_press(Mackie::Button &);
-	virtual Mackie::LedState drop_release(Mackie::Button &);
-
-	virtual Mackie::LedState save_press(Mackie::Button &);
-	virtual Mackie::LedState save_release(Mackie::Button &);
-
-	virtual Mackie::LedState timecode_beats_press(Mackie::Button &);
-	virtual Mackie::LedState timecode_beats_release(Mackie::Button &);
-
-	// jog wheel states
-	virtual Mackie::LedState zoom_press(Mackie::Button &);
-	virtual Mackie::LedState zoom_release(Mackie::Button &);
-
-	virtual Mackie::LedState scrub_press(Mackie::Button &);
-	virtual Mackie::LedState scrub_release(Mackie::Button &);
 	
 	/// This is the main MCU port, ie not an extender port
 	/// Only for use by JogWheel
@@ -359,6 +426,8 @@ class MackieControlProtocol
 
 	void build_gui ();
 	void* _gui;
+
+	bool _zoom_mode;
 };
 
 #endif // ardour_mackie_control_protocol_h

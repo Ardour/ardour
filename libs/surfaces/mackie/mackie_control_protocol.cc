@@ -100,6 +100,7 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 	, _input_bundle (new ARDOUR::Bundle (_("Mackie Control In"), true))
 	, _output_bundle (new ARDOUR::Bundle (_("Mackie Control Out"), false))
 	, _gui (0)
+	, _zoom_mode (false)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::MackieControlProtocol\n");
 
@@ -501,24 +502,6 @@ MackieControlProtocol::handle_strip_button (SurfacePort & port, Control & contro
 }
 
 void 
-MackieControlProtocol::update_led (Mackie::Button & button, Mackie::LedState ls)
-{
-	if (ls != none) {
-		SurfacePort * port = 0;
-		if (button.group().is_strip()) {
-			if (button.group().is_master()) {
-				port = &mcu_port();
-			} else {
-				port = &port_for_id (dynamic_cast<const Strip&> (button.group()).index());
-			}
-		} else {
-			port = &mcu_port();
-		}
-		port->write (builder.build_led (button, ls));
-	}
-}
-
-void 
 MackieControlProtocol::update_timecode_beats_led()
 {
 	switch (_timecode_type) {
@@ -886,7 +869,8 @@ MackieControlProtocol::handle_control_event (SurfacePort & port, Control & contr
 			} else {
 				// handle all non-strip buttons
 				DEBUG_TRACE (DEBUG::MackieControl, string_compose ("global button %1\n", control.id()));
-				surface().handle_button (*this, state.button_state, dynamic_cast<Button&> (control));
+				handle_button_event (dynamic_cast<Button&>(control), state.button_state);
+
 			}
 			break;
 
@@ -1503,9 +1487,6 @@ MackieControlProtocol::notify_transport_state_changed()
 	mcu_port().write (builder.build_led (*rec, record_release (*rec)));
 }
 
-/////////////////////////////////////
-// Bank Switching
-/////////////////////////////////////
 LedState 
 MackieControlProtocol::left_press (Button &)
 {
@@ -1536,27 +1517,81 @@ MackieControlProtocol::left_release (Button &)
 LedState 
 MackieControlProtocol::right_press (Button &)
 {
-	Sorted sorted = get_sorted_routes();
-	if (sorted.size() > route_table.size()) {
-		uint32_t delta = sorted.size() - (route_table.size() + _current_initial_bank);
-
-		if (delta > route_table.size()) {
-			delta = route_table.size();
-		}
-		
-		if (delta > 0) {
-			session->set_dirty();
-			switch_banks (_current_initial_bank + delta);
-		}
-
-		return on;
-	} else {
-		return flashing;
-	}
+	return off;
 }
 
 LedState 
 MackieControlProtocol::right_release (Button &)
+{
+	if (_zoom_mode) {
+
+	}
+
+	return off;
+}
+
+LedState
+MackieControlProtocol::cursor_left_press (Button& )
+{
+	if (_zoom_mode) {
+
+		if (false) { // button_down (BUTTON_OPTION)) {
+			/* reset selected tracks to default vertical zoom */
+		} else {
+			ZoomOut (); /* EMIT SIGNAL */
+		}
+	}
+
+	return off;
+}
+
+LedState
+MackieControlProtocol::cursor_left_release (Button&)
+{
+	return off;
+}
+
+LedState
+MackieControlProtocol::cursor_right_press (Button& )
+{
+	if (_zoom_mode) {
+
+		if (false) { // button_down (BUTTON_OPTION)) {
+			/* reset selected tracks to default vertical zoom */
+		} else {
+			ZoomOut (); /* EMIT SIGNAL */
+		}
+	}
+
+	return off;
+}
+
+LedState
+MackieControlProtocol::cursor_right_release (Button&)
+{
+	return off;
+}
+
+LedState
+MackieControlProtocol::cursor_up_press (Button&)
+{
+	return off;
+}
+
+LedState
+MackieControlProtocol::cursor_up_release (Button&)
+{
+	return off;
+}
+
+LedState
+MackieControlProtocol::cursor_down_press (Button&)
+{
+	return off;
+}
+
+LedState
+MackieControlProtocol::cursor_down_release (Button&)
 {
 	return off;
 }
@@ -1651,16 +1686,16 @@ jog_wheel_state_display (JogWheel::State state, SurfacePort & port)
 Mackie::LedState 
 MackieControlProtocol::zoom_press (Mackie::Button &)
 {
-	_jog_wheel.zoom_state_toggle();
-	update_global_button ("scrub", _jog_wheel.jog_wheel_state() == JogWheel::scrub);
-	jog_wheel_state_display (_jog_wheel.jog_wheel_state(), mcu_port());
-	return _jog_wheel.jog_wheel_state() == JogWheel::zoom;
+	_zoom_mode = true;
+	return on;
+	
 }
 
 Mackie::LedState 
 MackieControlProtocol::zoom_release (Mackie::Button &)
 {
-	return _jog_wheel.jog_wheel_state() == JogWheel::zoom;
+	_zoom_mode = false;
+	return off;
 }
 
 Mackie::LedState 
@@ -1837,3 +1872,551 @@ MackieControlProtocol::control_in_use_timeout (SurfacePort* port, Control* in_us
 	return false;
 }
 
+void 
+MackieControlProtocol::update_led (Button& button, Mackie::LedState ls)
+{
+	if (ls != none) {
+		SurfacePort * port = 0;
+
+		if (button.group().is_strip()) {
+			if (button.group().is_master()) {
+				port = &mcu_port();
+			} else {
+				port = &port_for_id (dynamic_cast<const Strip&> (button.group()).index());
+			}
+		} else {
+			port = &mcu_port();
+		}
+		port->write (builder.build_led (button, ls));
+	}
+}
+
+void 
+MackieControlProtocol::handle_button_event (Button& button, ButtonState bs)
+{
+	if  (bs != press && bs != release) {
+		update_led (button, none);
+		return;
+	}
+	
+	LedState ls;
+
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Handling %1 for button %2\n", (bs == press ? "press" : "release"), button.raw_id()));
+
+	switch  (button.raw_id()) {
+	case 0x28: // io
+		switch  (bs) {
+		case press: ls = io_press (button); break;
+		case release: ls = io_release (button); break;
+		case neither: break;
+		}
+		break;
+		
+	case 0x29: // sends
+		switch  (bs) {
+		case press: ls = sends_press (button); break;
+		case release: ls = sends_release (button); break;
+		case neither: break;
+		}
+		break;
+		
+	case 0x2a: // pan
+		switch  (bs) {
+		case press: ls = pan_press (button); break;
+		case release: ls = pan_release (button); break;
+		case neither: break;
+		}
+		break;
+		
+	case 0x2b: // plugin
+		switch  (bs) {
+		case press: ls = plugin_press (button); break;
+		case release: ls = plugin_release (button); break;
+		case neither: break;
+		}
+		break;
+		
+	case 0x2c: // eq
+		switch  (bs) {
+		case press: ls = eq_press (button); break;
+		case release: ls = eq_release (button); break;
+		case neither: break;
+		}
+		break;
+		
+	case 0x2d: // dyn
+		switch  (bs) {
+		case press: ls = dyn_press (button); break;
+		case release: ls = dyn_release (button); break;
+		case neither: break;
+		}
+		break;
+		
+	case 0x2e: // left
+		switch  (bs) {
+		case press: ls = left_press (button); break;
+		case release: ls = left_release (button); break;
+		case neither: break;
+		}
+		break;
+		
+	case 0x2f: // right
+		switch  (bs) {
+		case press: ls = right_press (button); break;
+		case release: ls = right_release (button); break;
+		case neither: break;
+		}
+		break;
+		
+	case 0x30: // channel_left
+		switch  (bs) {
+		case press: ls = channel_left_press (button); break;
+		case release: ls = channel_left_release (button); break;
+		case neither: break;
+		}
+		break;
+		
+	case 0x31: // channel_right
+		switch  (bs) {
+		case press: ls = channel_right_press (button); break;
+		case release: ls = channel_right_release (button); break;
+		case neither: break;
+		}
+		break;
+		
+	case 0x32: // flip
+		switch  (bs) {
+		case press: ls = flip_press (button); break;
+		case release: ls = flip_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case 0x33: // edit
+		switch  (bs) {
+		case press: ls = edit_press (button); break;
+		case release: ls = edit_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case 0x34: // name_value
+		switch  (bs) {
+		case press: ls = name_value_press (button); break;
+		case release: ls = name_value_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case 0x35: // timecode_beats
+		switch  (bs) {
+		case press: ls = timecode_beats_press (button); break;
+		case release: ls = timecode_beats_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case 0x36: // F1
+		switch  (bs) {
+		case press: ls = F1_press (button); break;
+		case release: ls = F1_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case 0x37: // F2
+		switch  (bs) {
+		case press: ls = F2_press (button); break;
+		case release: ls = F2_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case 0x38: // F3
+		switch  (bs) {
+		case press: ls = F3_press (button); break;
+		case release: ls = F3_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case 0x39: // F4
+		switch  (bs) {
+		case press: ls = F4_press (button); break;
+		case release: ls = F4_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case 0x3a: // F5
+		switch  (bs) {
+		case press: ls = F5_press (button); break;
+		case release: ls = F5_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case 0x3b: // F6
+		switch  (bs) {
+		case press: ls = F6_press (button); break;
+		case release: ls = F6_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case 0x3c: // F7
+		switch  (bs) {
+		case press: ls = F7_press (button); break;
+		case release: ls = F7_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case 0x3d: // F8
+		switch  (bs) {
+		case press: ls = F8_press (button); break;
+		case release: ls = F8_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case 0x3e: // F9
+		switch  (bs) {
+		case press: ls = F9_press (button); break;
+		case release: ls = F9_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case 0x3f: // F10
+		switch  (bs) {
+		case press: ls = F10_press (button); break;
+		case release: ls = F10_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case 0x40: // F11
+		switch  (bs) {
+		case press: ls = F11_press (button); break;
+		case release: ls = F11_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case 0x41: // F12
+		switch  (bs) {
+		case press: ls = F12_press (button); break;
+		case release: ls = F12_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case 0x42: // F13
+		switch  (bs) {
+		case press: ls = F13_press (button); break;
+		case release: ls = F13_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case 0x43: // F14
+		switch  (bs) {
+		case press: ls = F14_press (button); break;
+		case release: ls = F14_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case 0x44: // F15
+		switch  (bs) {
+		case press: ls = F15_press (button); break;
+		case release: ls = F15_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case 0x45: // F16
+		switch  (bs) {
+		case press: ls = F16_press (button); break;
+		case release: ls = F16_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case 0x46: // shift
+		switch  (bs) {
+		case press: ls = shift_press (button); break;
+		case release: ls = shift_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case 0x47: // option
+		switch  (bs) {
+		case press: ls = option_press (button); break;
+		case release: ls = option_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case 0x48: // control
+		switch  (bs) {
+		case press: ls = control_press (button); break;
+		case release: ls = control_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case 0x49: // cmd_alt
+		switch  (bs) {
+		case press: ls = cmd_alt_press (button); break;
+		case release: ls = cmd_alt_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case 0x4a: // on
+		switch  (bs) {
+		case press: ls = on_press (button); break;
+		case release: ls = on_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case 0x4b: // rec_ready
+		switch  (bs) {
+		case press: ls = rec_ready_press (button); break;
+		case release: ls = rec_ready_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case 0x4c: // undo
+		switch  (bs) {
+		case press: ls = undo_press (button); break;
+		case release: ls = undo_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case 0x4d: // snapshot
+		switch  (bs) {
+		case press: ls = snapshot_press (button); break;
+		case release: ls = snapshot_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case 0x4e: // touch
+		switch  (bs) {
+		case press: ls = touch_press (button); break;
+		case release: ls = touch_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case 0x4f: // redo
+		switch  (bs) {
+		case press: ls = redo_press (button); break;
+		case release: ls = redo_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case 0x50: // marker
+		switch  (bs) {
+		case press: ls = marker_press (button); break;
+		case release: ls = marker_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case 0x51: // enter
+		switch  (bs) {
+		case press: ls = enter_press (button); break;
+		case release: ls = enter_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case 0x52: // cancel
+		switch  (bs) {
+		case press: ls = cancel_press (button); break;
+		case release: ls = cancel_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case 0x53: // mixer
+		switch  (bs) {
+		case press: ls = mixer_press (button); break;
+		case release: ls = mixer_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case 0x54: // frm_left
+		switch  (bs) {
+		case press: ls = frm_left_press (button); break;
+		case release: ls = frm_left_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case 0x55: // frm_right
+		switch  (bs) {
+		case press: ls = frm_right_press (button); break;
+		case release: ls = frm_right_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case 0x56: // loop
+		switch  (bs) {
+		case press: ls = loop_press (button); break;
+		case release: ls = loop_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case 0x57: // punch_in
+		switch  (bs) {
+		case press: ls = punch_in_press (button); break;
+		case release: ls = punch_in_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case 0x58: // punch_out
+		switch  (bs) {
+		case press: ls = punch_out_press (button); break;
+		case release: ls = punch_out_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case 0x59: // home
+		switch  (bs) {
+		case press: ls = home_press (button); break;
+		case release: ls = home_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case 0x5a: // end
+		switch  (bs) {
+		case press: ls = end_press (button); break;
+		case release: ls = end_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case 0x5b: // rewind
+		switch  (bs) {
+		case press: ls = rewind_press (button); break;
+		case release: ls = rewind_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case 0x5c: // ffwd
+		switch  (bs) {
+		case press: ls = ffwd_press (button); break;
+		case release: ls = ffwd_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case 0x5d: // stop
+		switch  (bs) {
+		case press: ls = stop_press (button); break;
+		case release: ls = stop_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case 0x5e: // play
+		switch  (bs) {
+		case press: ls = play_press (button); break;
+		case release: ls = play_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case 0x5f: // record
+		switch  (bs) {
+		case press: ls = record_press (button); break;
+		case release: ls = record_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case 0x60: // cursor_up
+		switch  (bs) {
+		case press: ls = cursor_up_press (button); break;
+		case release: ls = cursor_up_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case 0x61: // cursor_down
+		switch  (bs) {
+		case press: ls = cursor_down_press (button); break;
+		case release: ls = cursor_down_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case 0x62: // cursor_left
+		switch  (bs) {
+		case press: ls = cursor_left_press (button); break;
+		case release: ls = cursor_left_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case 0x63: // cursor_right
+		switch  (bs) {
+		case press: ls = cursor_right_press (button); break;
+		case release: ls = cursor_right_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case 0x64: // zoom
+		switch  (bs) {
+		case press: ls = zoom_press (button); break;
+		case release: ls = zoom_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case 0x65: // scrub
+		switch  (bs) {
+		case press: ls = scrub_press (button); break;
+		case release: ls = scrub_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case 0x66: // user_a
+		switch  (bs) {
+		case press: ls = user_a_press (button); break;
+		case release: ls = user_a_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case 0x67: // user_b
+		switch  (bs) {
+		case press: ls = user_b_press (button); break;
+		case release: ls = user_b_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	}
+
+	update_led (button, ls);
+}

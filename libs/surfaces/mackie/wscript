@@ -26,7 +26,6 @@ def build(bld):
             dummy_port.cc
             gui.cc
             interface.cc
-            mackie_button_handler.cc
             mackie_control_protocol.cc
             mackie_control_protocol_poll.cc
             mackie_jog_wheel.cc
