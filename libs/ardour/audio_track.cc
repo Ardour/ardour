@@ -815,7 +815,7 @@ AudioTrack::export_stuff (vector<Sample*>& buffers, uint32_t nbufs, nframes_t st
 		}
 	}
 	
-	if (_gain_automation_curve.automation_state() == Auto_Play) {
+	if (_gain_automation_curve.automation_state() == Auto_Play || _gain_automation_curve.automation_state() == Auto_Touch) {
 		
 		_gain_automation_curve.get_vector (start, start + nframes, gain_automation.get(), nframes);
 
