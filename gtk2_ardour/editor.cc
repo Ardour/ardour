@@ -2817,14 +2817,8 @@ Editor::setup_toolbar ()
 	/* make them just a bit bigger */
 	mouse_move_button.set_size_request (-1, 25);
 
-	smart_mode_joiner = manage (new ButtonJoiner ("mouse mode button", mouse_move_button, mouse_select_button));
+	smart_mode_joiner = manage (new ButtonJoiner ("mouse mode button", mouse_move_button, mouse_select_button, true));
 	smart_mode_joiner->set_related_action (smart_mode_action);
-
-	mouse_move_button.set_elements (ArdourButton::Element (ArdourButton::Body|ArdourButton::Text));
-	mouse_select_button.set_elements (ArdourButton::Element (ArdourButton::Body|ArdourButton::Text));
-
-	mouse_move_button.set_rounded_corner_mask (0x1); // upper left only 
-	mouse_select_button.set_rounded_corner_mask (0x2); // upper right only 
 
 	mouse_mode_hbox2->set_spacing (2);
 	mouse_mode_box->set_spacing (2);

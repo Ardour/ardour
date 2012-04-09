@@ -13,21 +13,38 @@
 
 using namespace Gtk;
 
-ButtonJoiner::ButtonJoiner (const std::string& str, Gtk::Widget& lw, Gtk::Widget& rw)
+ButtonJoiner::ButtonJoiner (const std::string& str, Gtk::Widget& lw, Gtk::Widget& rw, bool central_joiner)
 	: left (lw)
 	, right (rw)
 	, name (str)
 	, active_fill_pattern (0)
 	, inactive_fill_pattern (0)
+	, central_link (central_joiner)
 {
 	packer.set_homogeneous (true);
+
+	if (central_link) {
+		packer.set_spacing (20);
+	}
+
 	packer.pack_start (left);
 	packer.pack_start (right);
 	packer.show ();
 
+	/* this alignment is how we position the box that holds the two widgets
+	   within our allocation, and how we request more space around them.
+	*/
+
 	align.add (packer);
-	align.set (0.5, 1.0);
-	align.set_padding (9, 0, 9, 9);
+
+	if (!central_link) {
+		align.set (0.5, 1.0);
+		align.set_padding (9, 0, 9, 9);
+	} else {
+		align.set (0.5, 0.5);
+		align.set_padding (1, 1, 1, 1);
+	}
+
 	align.show ();
 
 	add (align);
@@ -73,22 +90,44 @@ ButtonJoiner::render (cairo_t* cr)
 		cairo_set_source (cr, active_fill_pattern);
 	}
 
-	/* outer rect */
+	if (!central_link) {
+		/* outer rect */
+		
+		Gtkmm2ext::rounded_top_rectangle (cr, 0, 0, get_width(), h, 8);
+		cairo_fill_preserve (cr);
+		
+		/* outer edge */
+		
+		cairo_set_line_width (cr, 1.5);
+		cairo_set_source_rgb (cr, border_r, border_g, border_b);
+		cairo_stroke (cr);
+		
+		/* inner "edge" */
+		
+		Gtkmm2ext::rounded_top_rectangle (cr, 8, 8, get_width() - 16, h - 8, 6);
+		cairo_stroke (cr);
+	} else {
+		if (get_active()) {
+			Gtkmm2ext::rounded_top_rectangle (cr, 0, 0, (get_width() - 20.0)/2.0 , h, 8);
+			cairo_fill_preserve (cr);
+			
+			Gtkmm2ext::rounded_top_rectangle (cr, (get_width() - 20.)/2.0 + 20.0, 0.0, 
+							  (get_width() - 20.0)/2.0 , h, 8);
+			cairo_fill_preserve (cr);
 
-	Gtkmm2ext::rounded_top_rectangle (cr, 0, 0, get_width(), h, 8);
-	cairo_fill_preserve (cr);
-
-	/* outer edge */
-
-	cairo_set_line_width (cr, 1.5);
-	cairo_set_source_rgb (cr, border_r, border_g, border_b);
-	cairo_stroke (cr);
-
-	/* inner "edge" */
-
-	Gtkmm2ext::rounded_top_rectangle (cr, 8, 8, get_width() - 16, h - 8, 6);
-	cairo_stroke (cr);
-
+			cairo_move_to (cr, get_width()/2.0 - 10.0, h/2.0);
+			cairo_set_line_width (cr, 1.5);
+			cairo_rel_line_to (cr, 20.0, 0.0);
+			cairo_set_source (cr, active_fill_pattern);
+			cairo_stroke (cr);
+		} else {
+			cairo_arc (cr, get_width()/2.0, h/2.0, 6.0, 0, M_PI*2.0);
+			cairo_set_line_width (cr, 1.5);
+			cairo_fill_preserve (cr);
+			cairo_set_source_rgb (cr, border_r, border_g, border_b);
+			cairo_stroke (cr);		
+		}
+	}
 }
 
 void
