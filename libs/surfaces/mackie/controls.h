@@ -75,6 +75,10 @@ public:
 	/// the id of the control, but only guaranteed to be
 	/// unique within the control type.
 	int raw_id() const { return _id; }
+
+	/* this identifies a given control within its MCU "bank of 8"
+	 */
+	int control_id() const { return _id % 8; }
 	
 	/// The 1-based number of the control
 	int ordinal() const { return _ordinal; }

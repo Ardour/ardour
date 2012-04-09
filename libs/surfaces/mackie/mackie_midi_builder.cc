@@ -74,13 +74,13 @@ MidiByteArray MackieMidiBuilder::build_led_ring (const LedRing & led_ring, const
 	// 0x30 + pot/ring number (0-7)
 	//, 0x30 + led_ring.ordinal() - 1
 	return MidiByteArray  (3
-		// the control type
-		, midi_pot_id
-		// the id
-		, 0x20 + led_ring.raw_id()
-		// the value
-		, calculate_pot_value (mode, state)
-	);
+			       // the control type
+			       , midi_pot_id
+			       // the id
+			       , 0x20 + led_ring.control_id()
+			       // the value
+			       , calculate_pot_value (mode, state)
+		);
 }
 
 MidiByteArray MackieMidiBuilder::build_led (const Button & button, LedState ls)
@@ -101,7 +101,7 @@ MidiByteArray MackieMidiBuilder::build_led (const Led & led, LedState ls)
 	
 	return MidiByteArray  (3
 		, midi_button_id
-		, led.raw_id()
+		, led.control_id()
 		, state
 	);
 }
@@ -111,12 +111,12 @@ MidiByteArray MackieMidiBuilder::build_fader (const Fader & fader, float pos)
 	int posi = int (0x3fff * pos);
 	
 	return MidiByteArray  (3
-		, midi_fader_id | fader.raw_id()
-		// lower-order bits
-		, posi & 0x7f
-		// higher-order bits
-		,  (posi >> 7)
-	);
+			       , midi_fader_id | fader.control_id()
+			       // lower-order bits
+			       , posi & 0x7f
+			       // higher-order bits
+			       ,  (posi >> 7)
+		);
 }
 
 MidiByteArray MackieMidiBuilder::zero_strip (SurfacePort & port, const Strip & strip)
