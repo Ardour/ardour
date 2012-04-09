@@ -1559,7 +1559,7 @@ MackieControlProtocol::cursor_right_press (Button& )
 		if (false) { // button_down (BUTTON_OPTION)) {
 			/* reset selected tracks to default vertical zoom */
 		} else {
-			ZoomOut (); /* EMIT SIGNAL */
+			ZoomIn (); /* EMIT SIGNAL */
 		}
 	}
 
