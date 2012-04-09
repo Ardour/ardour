@@ -26,6 +26,13 @@ namespace Mackie
 {
 
 class SurfacePort;
+class Button;
+class Meter;
+class Fader;
+class Jog;
+class Pot;
+class Led;
+class LedRing;
 
 /**
 	This knows how to build midi messages given a control and
@@ -63,8 +70,6 @@ public:
 	
 	MidiByteArray build_fader( const Fader & fader, float pos );
 
-	MidiByteArray build_meter (const Meter& meter, float val);
-	
 	/// return bytes that will reset all controls to their zero positions
 	/// And blank the display for the strip. Pass SurfacePort so we know which sysex header to use.
 	MidiByteArray zero_strip( SurfacePort &, const Strip & strip );

@@ -32,119 +32,11 @@
 namespace Mackie
 {
 
-class Control;
+class Strip;
+class Group;
+class Led;
 class Surface;
 
-/**
-	This is a loose group of controls, eg cursor buttons,
-	transport buttons, functions buttons etc.
-*/
-class Group
-{
-public:
-	Group (const std::string & name)
-		: _name (name) {}
-
-	virtual ~Group() {}
-	
-	virtual bool is_strip() const { return false; }
-	virtual bool is_master() const { return false; }
-	
-	virtual void add (Control & control);
-	
-	const std::string & name() const { return _name; }
-	void set_name (const std::string & rhs) { _name = rhs; }
-	
-	typedef std::vector<Control*> Controls;
-	const Controls & controls() const { return _controls; }
-	
-protected:
-	Controls _controls;
-	
-private:
-	std::string _name;
-};
-
-class Button;
-class Pot;
-class Fader;
-class Meter;
-
-struct StripControlDefinition {
-    const char* name;
-    uint32_t base_id;
-    Control* (*factory)(Surface&, int index, int ordinal, const char* name, Group&);
-};
-
-struct GlobalControlDefinition {
-    const char* name;
-    uint32_t id;
-    Control* (*factory)(Surface&, int index, int ordinal, const char* name, Group&);
-    const char* group_name;
-};
-
-/**
-	This is the set of controls that make up a strip.
-*/
-class Strip : public Group
-{
-public:
-	Strip (const std::string& name, int index); /* master strip only */
-	Strip (Surface&, const std::string & name, int index, int unit_index, StripControlDefinition* ctls);
-
-	virtual bool is_strip() const { return true; }
-	virtual void add (Control & control);
-	int index() const { return _index; } // zero based
-	
-	Button & solo();
-	Button & recenable();
-	Button & mute();
-	Button & select();
-	Button & vselect();
-	Button & fader_touch();
-	Pot & vpot();
-	Fader & gain();
-	Meter& meter ();
-
-	bool has_solo() const { return _solo != 0; }
-	bool has_recenable() const { return _recenable != 0; }
-	bool has_mute() const { return _mute != 0; }
-	bool has_select() const { return _select != 0; }
-	bool has_vselect() const { return _vselect != 0; }
-	bool has_fader_touch() const { return _fader_touch != 0; }
-	bool has_vpot() const { return _vpot != 0; }
-	bool has_gain() const { return _gain != 0; }
-	bool has_meter() const { return _meter != 0; }
-private:
-	Button* _solo;
-	Button* _recenable;
-	Button* _mute;
-	Button* _select;
-	Button* _vselect;
-	Button* _fader_touch;
-	Pot*    _vpot;
-	Fader*  _gain;
-	Meter*  _meter;
-	int     _index;
-};
-
-std::ostream & operator <<  (std::ostream &, const Strip &);
-
-class MasterStrip : public Strip
-{
-public:
-	MasterStrip (const std::string & name, int index)
-		: Strip (name, index) {}
-	
-	virtual bool is_master() const  { return true; }
-};
-
-class Led;
-
-/**
-	The base class for controls on the surface. They deliberately
-	don't know the midi protocol for updating them.
-*/
 class Control
 {
 public:
@@ -189,8 +81,6 @@ public:
 	
 	const std::string & name() const  { return _name; }
 	const Group & group() const { return _group; }
-	const Strip & strip() const { return dynamic_cast<const Strip&> (_group); }
-	Strip & strip() { return dynamic_cast<Strip&> (_group); }
 	virtual bool accepts_feedback() const  { return true; }
 	
 	virtual type_t type() const = 0;
@@ -218,103 +108,6 @@ private:
 };
 
 std::ostream & operator <<  (std::ostream & os, const Control & control);
-
-class Fader : public Control
-{
-public:
-	Fader (int id, int ordinal, std::string name, Group & group)
-		: Control (id, ordinal, name, group)
-	{
-	}
-	
-	virtual type_t type() const { return type_fader; }
-
-	static Control* factory (Surface&, int id, int ordinal, const char*, Group&);
-};
-
-class Led : public Control
-{
-public:
-	Led (int id, int ordinal, std::string name, Group & group)
-		: Control (id, ordinal, name, group)
-	{
-	}
-	
-	virtual const Led & led() const { return *this; }
-
-	virtual type_t type() const { return type_led; }
-
-	static Control* factory (Surface&, int id, int ordinal, const char*, Group&);
-};
-
-class Button : public Control
-{
-public:
-	Button (int id, int ordinal, std::string name, Group & group)
-		: Control (id,  ordinal, name, group)
-		, _led  (id, ordinal, name + "_led", group) {}
-	
-	virtual const Led & led() const  { return _led; }
-	
-	virtual type_t type() const { return type_button; };
-
-	static Control* factory (Surface&, int id, int ordinal, const char*, Group&);
-	
-private:
-	Led _led;
-};
-
-class LedRing : public Led
-{
-public:
-	LedRing (int id, int ordinal, std::string name, Group & group)
-		: Led (id, ordinal, name, group)
-	{
-	}
-
-	virtual type_t type() const { return type_led_ring; }
-};
-
-class Pot : public Control
-{
-public:
-	Pot (int id, int ordinal, std::string name, Group & group)
-		: Control (id, ordinal, name, group)
-		, _led_ring (id, ordinal, name + "_ring", group) {}
-
-	virtual type_t type() const { return type_pot; }
-
-	virtual const LedRing & led_ring() const {return _led_ring; }
-
-	static Control* factory (Surface&, int id, int ordinal, const char*, Group&);
-
-private:
-	LedRing _led_ring;
-};
-
-class Jog : public Pot
-{
-public:
-	Jog (int id, int ordinal, std::string name, Group & group)
-		: Pot  (id, ordinal, name, group)
-	{
-	}
-
-	virtual bool is_jog() const { return true; }
-
-	static Control* factory (Surface&, int id, int ordinal, const char*, Group&);
-};
-
-class Meter : public Control
-{
-public:
-	Meter (int id, int ordinal, std::string name, Group & group)
-		: Control  (id, ordinal, name, group) {}
-	
-	virtual type_t type() const { return type_meter; }
-
-	static Control* factory (Surface&, int id, int ordinal, const char*, Group&);
-};
 
 }
 

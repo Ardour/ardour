@@ -33,8 +33,10 @@ def build(bld):
             mackie_midi_builder.cc
             mackie_port.cc
             mackie_surface.cc
+            meter.cc
             midi_byte_array.cc
             route_signal.cc
+            strip.cc
             surface.cc
             surface_port.cc
             types.cc

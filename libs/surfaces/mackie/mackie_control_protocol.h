@@ -278,13 +278,6 @@ class MackieControlProtocol
 
 	void add_port (MIDI::Port &, MIDI::Port &, int number, Mackie::MackiePort::port_type_t);
 
-	/**
-	   Read session data and send to surface. Includes
-	   automation from the currently active routes and
-	   timecode displays.
-	*/
-	void poll_session_data();
-	
 	// called from poll_automation to figure out which automations need to be sent
 	void update_automation(Mackie::RouteSignal &);
 	
@@ -317,8 +310,9 @@ class MackieControlProtocol
 
 	void port_connected_or_disconnected (std::string, std::string, bool);
 	bool control_in_use_timeout (Mackie::SurfacePort*, Mackie::Control *, Mackie::Control *);
-	bool meter_update();
-	sigc::connection meter_connection;
+
+	bool periodic();
+	sigc::connection periodic_connection;
 
 	boost::shared_ptr<Mackie::RouteSignal> master_route_signal;
 	

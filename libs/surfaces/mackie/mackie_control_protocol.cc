@@ -64,6 +64,13 @@
 #include "bcf_surface.h"
 #include "mackie_surface.h"
 
+#include "strip.h"
+#include "control_group.h"
+#include "meter.h"
+#include "button.h"
+#include "fader.h"
+#include "pot.h"
+
 using namespace ARDOUR;
 using namespace std;
 using namespace Mackie;
@@ -105,6 +112,8 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 MackieControlProtocol::~MackieControlProtocol()
 {
 	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::~MackieControlProtocol\n");
+
+	_active = false;
 
 	try {
 		close();
@@ -400,11 +409,11 @@ MackieControlProtocol::set_active (bool yn)
 			// must come after _active = true otherwise it won't run
 			update_surface();
 
-			Glib::RefPtr<Glib::TimeoutSource> meter_timeout = Glib::TimeoutSource::create (100); // milliseconds
+			Glib::RefPtr<Glib::TimeoutSource> periodic_timeout = Glib::TimeoutSource::create (100); // milliseconds
 
-			meter_connection = meter_timeout->connect (sigc::mem_fun (*this, &MackieControlProtocol::meter_update));
+			periodic_connection = periodic_timeout->connect (sigc::mem_fun (*this, &MackieControlProtocol::periodic));
 
-			meter_timeout->attach (main_loop()->get_context());
+			periodic_timeout->attach (main_loop()->get_context());
 
 		} else {
 			BaseUI::quit ();
@@ -423,51 +432,29 @@ MackieControlProtocol::set_active (bool yn)
 }
 
 bool
-MackieControlProtocol::meter_update ()
+MackieControlProtocol::periodic ()
 {
-	/* update automation while we're here */
-
-	poll_session_data ();
+	if (!_active) {
+		return false;
+	}
 
 	{
 		Glib::Mutex::Lock lm (route_signals_lock);
-		
-		for (std::vector<RouteSignal*>::iterator r = route_signals.begin(); r != route_signals.end(); ++r) {
-			float dB;
-			
-			dB = const_cast<PeakMeter&> ((*r)->route()->peak_meter()).peak_power (0);
-			Mackie::Meter& m = (*r)->strip().meter();
-			
-			float def = 0.0f; /* Meter deflection %age */
-			
-			if (dB < -70.0f) {
-				def = 0.0f;
-			} else if (dB < -60.0f) {
-				def = (dB + 70.0f) * 0.25f;
-			} else if (dB < -50.0f) {
-				def = (dB + 60.0f) * 0.5f + 2.5f;
-			} else if (dB < -40.0f) {
-				def = (dB + 50.0f) * 0.75f + 7.5f;
-			} else if (dB < -30.0f) {
-				def = (dB + 40.0f) * 1.5f + 15.0f;
-			} else if (dB < -20.0f) {
-				def = (dB + 30.0f) * 2.0f + 30.0f;
-			} else if (dB < 6.0f) {
-				def = (dB + 20.0f) * 2.5f + 50.0f;
-			} else {
-				def = 115.0f;
-			}
-			
-			/* 115 is the deflection %age that would be
-			   when dB=6.0. this is an arbitrary
-			   endpoint for our scaling.
-			*/
-			
-			(*r)->port().write (builder.build_meter (m, def/115.0));
+		for (RouteSignals::iterator rs = route_signals.begin(); rs != route_signals.end(); ++rs) {
+			update_automation (**rs);
+			float dB = const_cast<PeakMeter&> ((*rs)->route()->peak_meter()).peak_power (0);
+			(*rs)->port().write ((*rs)->strip().meter().update_message (dB));
+		}
+
+		// and the master strip
+		if (master_route_signal != 0) {
+			update_automation (*master_route_signal);
 		}
 	}
 
-	return _active; // call it again as long as we're active
+	update_timecode_display();
+
+	return true;
 }
 
 bool 
@@ -496,13 +483,17 @@ MackieControlProtocol::handle_strip_button (SurfacePort & port, Control & contro
 
 	if (control.name() == "fader_touch") {
 		state = bs == press;
-		control.strip().gain().set_in_use (state);
+		Strip* strip = const_cast<Strip*>(dynamic_cast<const Strip*>(&control.group()));
+		
+		if (strip) {
+			strip->gain().set_in_use (state);
 
-		if (ARDOUR::Config->get_mackie_emulation() == "bcf" && state) {
-			/* BCF faders don't support touch, so add a timeout to reset
-			   their `in_use' state.
-			*/
-			add_in_use_timeout (port, control.strip().gain(), &control.strip().fader_touch());
+			if (ARDOUR::Config->get_mackie_emulation() == "bcf" && state) {
+				/* BCF faders don't support touch, so add a timeout to reset
+				   their `in_use' state.
+				*/
+				add_in_use_timeout (port, strip->gain(), &strip->fader_touch());
+			}
 		}
 	}
 
@@ -733,7 +724,7 @@ MackieControlProtocol::close()
 	port_connections.drop_connections ();
 	session_connections.drop_connections ();
 	route_connections.drop_connections ();
-	meter_connection.disconnect ();
+	periodic_connection.disconnect ();
 
 	if (_surface != 0) {
 		// These will fail if the port has gone away.
@@ -1166,27 +1157,6 @@ MackieControlProtocol::update_timecode_display()
 			surface().display_timecode (mcu_port(), builder, timecode, _timecode_last);
 			_timecode_last = timecode;
 		}
-	}
-}
-
-void 
-MackieControlProtocol::poll_session_data()
-{
-	if (_active) {
-		// do all currently mapped routes
-		{
-			Glib::Mutex::Lock lm (route_signals_lock);
-			for (RouteSignals::iterator it = route_signals.begin(); it != route_signals.end(); ++it) {
-				update_automation (**it);
-			}
-		}
-
-		// and the master strip
-		if (master_route_signal != 0) {
-			update_automation (*master_route_signal);
-		}
-
-		update_timecode_display();
 	}
 }
 

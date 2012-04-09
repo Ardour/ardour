@@ -4,10 +4,13 @@
 #include "controls.h"
 #include "mackie_midi_builder.h"
 #include "surface_port.h"
+#include "jog.h"
+#include "pot.h"
 
 using namespace Mackie;
 
-void BcfSurface::display_bank_start (SurfacePort & port, MackieMidiBuilder & builder, uint32_t current_bank)
+void 
+BcfSurface::display_bank_start (SurfacePort & port, MackieMidiBuilder & builder, uint32_t current_bank)
 {
 	if  (current_bank == 0) {
 		// send Ar. to 2-char display on the master

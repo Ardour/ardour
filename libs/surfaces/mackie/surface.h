@@ -11,6 +11,13 @@ namespace Mackie
 class MackieButtonHandler;
 class SurfacePort;
 class MackieMidiBuilder;
+class Button;
+class Meter;
+class Fader;
+class Jog;
+class Pot;
+class Led;
+class LedRing;
 
 /**
 	This represents an entire control surface, made up of Groups,

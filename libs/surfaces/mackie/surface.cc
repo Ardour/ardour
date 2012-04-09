@@ -6,8 +6,19 @@
 #include "ardour/debug.h"
 
 #include "mackie_button_handler.h"
+#include "control_group.h"
 #include "surface_port.h"
 #include "surface.h"
+#include "strip.h"
+
+#include "strip.h"
+#include "button.h"
+#include "led.h"
+#include "ledring.h"
+#include "pot.h"
+#include "fader.h"
+#include "jog.h"
+#include "meter.h"
 
 using namespace std;
 using namespace PBD;

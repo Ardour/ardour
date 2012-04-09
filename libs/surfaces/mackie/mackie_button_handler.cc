@@ -3,6 +3,13 @@
 */
 #include "mackie_button_handler.h"
 #include "controls.h"
+#include "button.h"
+#include "led.h"
+#include "ledring.h"
+#include "pot.h"
+#include "fader.h"
+#include "jog.h"
+#include "meter.h"
 
 #include <iostream>
 

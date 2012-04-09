@@ -15,7 +15,8 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#include "route_signal.h"
+
+#include <stdexcept>
 
 #include "ardour/route.h"
 #include "ardour/track.h"
@@ -24,8 +25,8 @@
 #include "ardour/session_object.h" // for Properties::name 
 
 #include "mackie_control_protocol.h"
-
-#include <stdexcept>
+#include "route_signal.h"
+#include "strip.h"
 
 using namespace ARDOUR;
 using namespace Mackie;

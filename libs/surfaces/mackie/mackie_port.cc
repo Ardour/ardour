@@ -15,6 +15,12 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
+
+#include <sstream>
+
+#include <glibmm/main.h>
+#include <boost/shared_array.hpp>
+
 #include "mackie_port.h"
 
 #include "mackie_control_exception.h"
@@ -23,9 +29,11 @@
 #include "controls.h"
 #include "surface.h"
 
-#include <glibmm/main.h>
-
-#include <boost/shared_array.hpp>
+#include "fader.h"
+#include "button.h"
+#include "strip.h"
+#include "pot.h"
+#include "control_group.h"
 
 #include "midi++/types.h"
 #include "midi++/port.h"
@@ -34,8 +42,6 @@
 #include "ardour/rc_configuration.h"
 
 #include "i18n.h"
-
-#include <sstream>
 
 using namespace std;
 using namespace Mackie;
