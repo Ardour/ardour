@@ -264,7 +264,8 @@ class MackieControlProtocol
 	
 	typedef std::vector<Mackie::RouteSignal*> RouteSignals;
 	RouteSignals route_signals;
-	
+	Glib::Mutex route_signals_lock;	
+
 	// return which of the ports a particular route_table
 	// index belongs to
 	Mackie::MackiePort & port_for_id(uint32_t index);

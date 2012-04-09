@@ -174,9 +174,12 @@ MackieControlProtocol::next_track()
 void 
 MackieControlProtocol::clear_route_signals()
 {
+	Glib::Mutex::Lock lm (route_signals_lock);
+
 	for (RouteSignals::iterator it = route_signals.begin(); it != route_signals.end(); ++it) {
 		delete *it;
 	}
+
 	route_signals.clear();
 }
 
@@ -289,6 +292,8 @@ MackieControlProtocol::switch_banks (int initial)
 		set_route_table_size (surface().strips.size());
 
 		// link routes to strips
+
+		Glib::Mutex::Lock lm (route_signals_lock);
 
 		for (; it != end && it != sorted.end(); ++it, ++i) {
 			boost::shared_ptr<Route> route = *it;
@@ -420,41 +425,49 @@ MackieControlProtocol::set_active (bool yn)
 bool
 MackieControlProtocol::meter_update ()
 {
-	for (std::vector<RouteSignal*>::iterator r = route_signals.begin(); r != route_signals.end(); ++r) {
-		float dB;
-		
-		dB = const_cast<PeakMeter&> ((*r)->route()->peak_meter()).peak_power (0);
-		Mackie::Meter& m = (*r)->strip().meter();
+	/* update automation while we're here */
 
-		float def = 0.0f; /* Meter deflection %age */
+	poll_session_data ();
+
+	{
+		Glib::Mutex::Lock lm (route_signals_lock);
 		
-		if (dB < -70.0f) {
-			def = 0.0f;
-		} else if (dB < -60.0f) {
-			def = (dB + 70.0f) * 0.25f;
-		} else if (dB < -50.0f) {
-			def = (dB + 60.0f) * 0.5f + 2.5f;
-		} else if (dB < -40.0f) {
-			def = (dB + 50.0f) * 0.75f + 7.5f;
-		} else if (dB < -30.0f) {
-			def = (dB + 40.0f) * 1.5f + 15.0f;
-		} else if (dB < -20.0f) {
-			def = (dB + 30.0f) * 2.0f + 30.0f;
-		} else if (dB < 6.0f) {
-			def = (dB + 20.0f) * 2.5f + 50.0f;
-		} else {
-			def = 115.0f;
+		for (std::vector<RouteSignal*>::iterator r = route_signals.begin(); r != route_signals.end(); ++r) {
+			float dB;
+			
+			dB = const_cast<PeakMeter&> ((*r)->route()->peak_meter()).peak_power (0);
+			Mackie::Meter& m = (*r)->strip().meter();
+			
+			float def = 0.0f; /* Meter deflection %age */
+			
+			if (dB < -70.0f) {
+				def = 0.0f;
+			} else if (dB < -60.0f) {
+				def = (dB + 70.0f) * 0.25f;
+			} else if (dB < -50.0f) {
+				def = (dB + 60.0f) * 0.5f + 2.5f;
+			} else if (dB < -40.0f) {
+				def = (dB + 50.0f) * 0.75f + 7.5f;
+			} else if (dB < -30.0f) {
+				def = (dB + 40.0f) * 1.5f + 15.0f;
+			} else if (dB < -20.0f) {
+				def = (dB + 30.0f) * 2.0f + 30.0f;
+			} else if (dB < 6.0f) {
+				def = (dB + 20.0f) * 2.5f + 50.0f;
+			} else {
+				def = 115.0f;
+			}
+			
+			/* 115 is the deflection %age that would be
+			   when dB=6.0. this is an arbitrary
+			   endpoint for our scaling.
+			*/
+			
+			(*r)->port().write (builder.build_meter (m, def/115.0));
 		}
-		
-		/* 115 is the deflection %age that would be
-		   when dB=6.0. this is an arbitrary
-		   endpoint for our scaling.
-		*/
-		
-		(*r)->port().write (builder.build_meter (m, def/115.0));
 	}
 
-	return true; // call it again
+	return _active; // call it again as long as we're active
 }
 
 bool 
@@ -720,6 +733,7 @@ MackieControlProtocol::close()
 	port_connections.drop_connections ();
 	session_connections.drop_connections ();
 	route_connections.drop_connections ();
+	meter_connection.disconnect ();
 
 	if (_surface != 0) {
 		// These will fail if the port has gone away.
@@ -1158,12 +1172,13 @@ MackieControlProtocol::update_timecode_display()
 void 
 MackieControlProtocol::poll_session_data()
 {
-	// XXX need to attach this to a timer in the MIDI UI event loop (20msec)
-
 	if (_active) {
 		// do all currently mapped routes
-		for (RouteSignals::iterator it = route_signals.begin(); it != route_signals.end(); ++it) {
-			update_automation (**it);
+		{
+			Glib::Mutex::Lock lm (route_signals_lock);
+			for (RouteSignals::iterator it = route_signals.begin(); it != route_signals.end(); ++it) {
+				update_automation (**it);
+			}
 		}
 
 		// and the master strip
@@ -1442,9 +1457,14 @@ MackieControlProtocol::notify_route_added (ARDOUR::RouteList & rl)
 {
 	// currently assigned banks are less than the full set of
 	// strips, so activate the new strip now.
-	if (route_signals.size() < route_table.size()) {
-		refresh_current_bank();
+
+	{
+		Glib::Mutex::Lock lm (route_signals_lock);
+		if (route_signals.size() < route_table.size()) {
+			refresh_current_bank();
+		}
 	}
+
 	// otherwise route added, but current bank needs no updating
 
 	// make sure remote id changes in the new route are handled
@@ -1469,9 +1489,17 @@ MackieControlProtocol::notify_remote_id_changed()
 
 	// if a remote id has been moved off the end, we need to shift
 	// the current bank backwards.
-	if (sorted.size() - _current_initial_bank < route_signals.size()) {
+
+	uint32_t sz;
+
+	{
+		Glib::Mutex::Lock lm (route_signals_lock);
+		sz = route_signals.size();
+	}
+
+	if (sorted.size() - _current_initial_bank < sz) {
 		// but don't shift backwards past the zeroth channel
-		switch_banks (max((Sorted::size_type) 0, sorted.size() - route_signals.size()));
+		switch_banks (max((Sorted::size_type) 0, sorted.size() - sz));
 	} else {
 		// Otherwise just refresh the current bank
 		refresh_current_bank();
