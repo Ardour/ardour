@@ -400,7 +400,7 @@ MackieControlProtocol::set_active (bool yn)
 			// must come after _active = true otherwise it won't run
 			update_surface();
 
-			Glib::RefPtr<Glib::TimeoutSource> meter_timeout = Glib::TimeoutSource::create (25);
+			Glib::RefPtr<Glib::TimeoutSource> meter_timeout = Glib::TimeoutSource::create (100); // milliseconds
 
 			meter_connection = meter_timeout->connect (sigc::mem_fun (*this, &MackieControlProtocol::meter_update));
 
