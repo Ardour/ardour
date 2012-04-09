@@ -39,6 +39,7 @@ Signal0<void>       ControlProtocol::Undo;
 Signal0<void>       ControlProtocol::Redo;
 Signal1<void,float> ControlProtocol::ScrollTimeline;
 Signal1<void,uint32_t> ControlProtocol::SelectByRID;
+Signal0<void> ControlProtocol::UnselectTrack;
 
 ControlProtocol::ControlProtocol (Session& s, string str, EventLoop* evloop)
 	: BasicUI (s),

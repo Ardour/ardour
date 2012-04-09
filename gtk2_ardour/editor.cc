@@ -713,6 +713,7 @@ Editor::Editor ()
 	ControlProtocol::Redo.connect (*this, invalidator (*this), boost::bind (&Editor::redo, this, true), gui_context());
 	ControlProtocol::ScrollTimeline.connect (*this, invalidator (*this), ui_bind (&Editor::control_scroll, this, _1), gui_context());
 	ControlProtocol::SelectByRID.connect (*this, invalidator (*this), ui_bind (&Editor::control_select, this, _1), gui_context());
+	ControlProtocol::UnselectTrack.connect (*this, invalidator (*this), ui_bind (&Editor::control_unselect, this), gui_context());
 	BasicUI::AccessAction.connect (*this, invalidator (*this), ui_bind (&Editor::access_action, this, _1, _2), gui_context());
 
 	/* problematic: has to return a value and thus cannot be x-thread */
@@ -919,6 +920,12 @@ Editor::zoom_adjustment_changed ()
 	}
 
 	temporal_zoom (fpu);
+}
+
+void
+Editor::control_unselect ()
+{
+	selection->clear_tracks ();
 }
 
 void

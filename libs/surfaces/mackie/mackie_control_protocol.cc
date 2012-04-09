@@ -101,6 +101,7 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 	, _output_bundle (new ARDOUR::Bundle (_("Mackie Control Out"), false))
 	, _gui (0)
 	, _zoom_mode (false)
+	, _current_selected_track (-1)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::MackieControlProtocol\n");
 
@@ -286,6 +287,8 @@ MackieControlProtocol::switch_banks (int initial)
 	}
 
 	_current_initial_bank = initial;
+	_current_selected_track = -1;
+
 	clear_route_signals();
 
 	// now set the signals for new routes
@@ -474,8 +477,19 @@ MackieControlProtocol::handle_strip_button (SurfacePort & port, Control & contro
 			state = !route->soloed();
 			route->set_solo (state, this);
 		} else if (control.name() == "select") {
-			// TODO make the track selected. Whatever that means.
-			//state = default_button_press (dynamic_cast<Button&> (control));
+			Strip* strip = const_cast<Strip*>(dynamic_cast<const Strip*>(&control.group()));
+			if (strip) {
+				if (strip->index() < route_table.size()) {
+					boost::shared_ptr<Route> r = route_table[strip->index()];
+					if (r->remote_control_id() == _current_selected_track) {
+						UnselectTrack (); /* EMIT SIGNAL */
+						_current_selected_track = -1;
+					} else {
+						SelectByRID (r->remote_control_id()); /* EMIT SIGNAL */
+						_current_selected_track = r->remote_control_id();;
+					}
+				} 
+			}
 		} else if (control.name() == "vselect") {
 			// TODO could be used to select different things to apply the pot to?
 			//state = default_button_press (dynamic_cast<Button&> (control));

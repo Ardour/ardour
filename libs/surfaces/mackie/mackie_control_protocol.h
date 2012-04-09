@@ -428,6 +428,7 @@ class MackieControlProtocol
 	void* _gui;
 
 	bool _zoom_mode;
+	int  _current_selected_track;
 };
 
 #endif // ardour_mackie_control_protocol_h

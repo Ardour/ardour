@@ -44,6 +44,8 @@ MidiByteArray
 Meter::update_message (float dB)
 {
 	float def = 0.0f; /* Meter deflection %age */
+
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Meter ID %1 dB %2\n", raw_id(), dB));
 	
 	if (dB < -70.0f) {
 		def = 0.0f;
@@ -88,10 +90,7 @@ Meter::update_message (float dB)
 	
 	if (last_segment_value_sent != segment) {
 		last_segment_value_sent = segment;
-		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Meter ID %1 to use segment %2\n", raw_id(), segment));
 		msg << MidiByteArray (2, 0xD0, (raw_id()<<4) | segment);
-	} else {
-		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Meter ID %1 not sent (same as last)\n", raw_id()));
 	}
 
 	return msg;

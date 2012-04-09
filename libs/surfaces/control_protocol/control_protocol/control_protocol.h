@@ -64,6 +64,7 @@ class ControlProtocol : virtual public sigc::trackable, public PBD::Stateful, pu
 	static PBD::Signal0<void> Redo;
 	static PBD::Signal1<void,float> ScrollTimeline;
 	static PBD::Signal1<void,uint32_t> SelectByRID;
+	static PBD::Signal0<void> UnselectTrack;
 
 	/* the model here is as follows:
 
