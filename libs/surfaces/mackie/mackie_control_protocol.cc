@@ -1720,6 +1720,32 @@ MackieControlProtocol::scrub_release (Mackie::Button &)
 		);
 }
 
+LedState
+MackieControlProtocol::undo_press (Button&)
+{
+	Undo(); /* EMIT SIGNAL */
+	return off;
+}
+
+LedState
+MackieControlProtocol::undo_release (Button&)
+{
+	return off;
+}
+
+LedState
+MackieControlProtocol::redo_press (Button&)
+{
+	Redo(); /* EMIT SIGNAL */
+	return off;
+}
+
+LedState
+MackieControlProtocol::redo_release (Button&)
+{
+	return off;
+}
+
 LedState 
 MackieControlProtocol::drop_press (Button &)
 {

@@ -35,6 +35,8 @@ Signal0<void>       ControlProtocol::ZoomToSession;
 Signal0<void>       ControlProtocol::ZoomOut;
 Signal0<void>       ControlProtocol::ZoomIn;
 Signal0<void>       ControlProtocol::Enter;
+Signal0<void>       ControlProtocol::Undo;
+Signal0<void>       ControlProtocol::Redo;
 Signal1<void,float> ControlProtocol::ScrollTimeline;
 Signal1<void,uint32_t> ControlProtocol::SelectByRID;
 

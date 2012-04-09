@@ -196,6 +196,10 @@ class MackieControlProtocol
 	Mackie::LedState zoom_release(Mackie::Button &);
 	Mackie::LedState scrub_press(Mackie::Button &);
 	Mackie::LedState scrub_release(Mackie::Button &);
+	Mackie::LedState undo_press (Mackie::Button &);
+	Mackie::LedState undo_release (Mackie::Button &);
+	Mackie::LedState redo_press (Mackie::Button &);
+	Mackie::LedState redo_release (Mackie::Button &);
 
 	/* unimplemented button handlers */
 
@@ -261,14 +265,10 @@ class MackieControlProtocol
 	Mackie::LedState on_release (Mackie::Button &) { return Mackie::off; }
 	Mackie::LedState rec_ready_press (Mackie::Button &) { return Mackie::off; }
 	Mackie::LedState rec_ready_release (Mackie::Button &) { return Mackie::off; }
-	Mackie::LedState undo_press (Mackie::Button &) { return Mackie::off; }
-	Mackie::LedState undo_release (Mackie::Button &) { return Mackie::off; }
 	Mackie::LedState snapshot_press (Mackie::Button &) { return Mackie::off; }
 	Mackie::LedState snapshot_release (Mackie::Button &) { return Mackie::off; }
 	Mackie::LedState touch_press (Mackie::Button &) { return Mackie::off; }
 	Mackie::LedState touch_release (Mackie::Button &) { return Mackie::off; }
-	Mackie::LedState redo_press (Mackie::Button &) { return Mackie::off; }
-	Mackie::LedState redo_release (Mackie::Button &) { return Mackie::off; }
 	Mackie::LedState enter_press (Mackie::Button &) { return Mackie::off; }
 	Mackie::LedState enter_release (Mackie::Button &) { return Mackie::off; }
 	Mackie::LedState cancel_press (Mackie::Button &) { return Mackie::off; }
