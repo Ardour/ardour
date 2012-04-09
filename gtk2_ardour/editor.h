@@ -318,6 +318,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void temporal_zoom_step (bool coarser);
 	void tav_zoom_step (bool coarser);
+	void tav_zoom_smooth (bool coarser, bool force_all);
 
 	/* stuff that AudioTimeAxisView and related classes use */
 
@@ -987,6 +988,11 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtk::VBox           edit_controls_vbox;
 	Gtk::HBox           edit_controls_hbox;
 
+	void control_vertical_zoom_in_all ();
+	void control_vertical_zoom_out_all ();
+	void control_vertical_zoom_in_selected ();
+	void control_vertical_zoom_out_selected ();
+	void control_view (uint32_t);
 	void control_scroll (float);
 	void control_select (uint32_t rid);
 	void control_unselect ();

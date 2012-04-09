@@ -138,6 +138,8 @@ class Keyboard : public sigc::trackable, PBD::Stateful
 	static void magic_widget_grab_focus ();
 	static void magic_widget_drop_focus ();
 
+	static void close_current_dialog ();
+
 	static void keybindings_changed ();
 	static void save_keybindings ();
 	static bool load_keybindings (std::string path);

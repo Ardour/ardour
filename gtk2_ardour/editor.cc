@@ -714,6 +714,13 @@ Editor::Editor ()
 	ControlProtocol::ScrollTimeline.connect (*this, invalidator (*this), ui_bind (&Editor::control_scroll, this, _1), gui_context());
 	ControlProtocol::SelectByRID.connect (*this, invalidator (*this), ui_bind (&Editor::control_select, this, _1), gui_context());
 	ControlProtocol::UnselectTrack.connect (*this, invalidator (*this), ui_bind (&Editor::control_unselect, this), gui_context());
+	ControlProtocol::GotoView.connect (*this, invalidator (*this), ui_bind (&Editor::control_view, this, _1), gui_context());
+	ControlProtocol::CloseDialog.connect (*this, invalidator (*this), Keyboard::close_current_dialog, gui_context());
+	ControlProtocol::VerticalZoomInAll.connect (*this, invalidator (*this), ui_bind (&Editor::control_vertical_zoom_in_all, this), gui_context());
+	ControlProtocol::VerticalZoomOutAll.connect (*this, invalidator (*this), ui_bind (&Editor::control_vertical_zoom_out_all, this), gui_context());
+	ControlProtocol::VerticalZoomInSelected.connect (*this, invalidator (*this), ui_bind (&Editor::control_vertical_zoom_in_selected, this), gui_context());
+	ControlProtocol::VerticalZoomOutSelected.connect (*this, invalidator (*this), ui_bind (&Editor::control_vertical_zoom_out_selected, this), gui_context());
+
 	BasicUI::AccessAction.connect (*this, invalidator (*this), ui_bind (&Editor::access_action, this, _1, _2), gui_context());
 
 	/* problematic: has to return a value and thus cannot be x-thread */
@@ -920,6 +927,36 @@ Editor::zoom_adjustment_changed ()
 	}
 
 	temporal_zoom (fpu);
+}
+
+void
+Editor::control_vertical_zoom_in_all ()
+{
+	tav_zoom_smooth (false, true);
+}
+
+void
+Editor::control_vertical_zoom_out_all ()
+{
+	tav_zoom_smooth (true, true);
+}
+
+void
+Editor::control_vertical_zoom_in_selected ()
+{
+	tav_zoom_smooth (false, false);
+}
+
+void
+Editor::control_vertical_zoom_out_selected ()
+{
+	tav_zoom_smooth (true, false);
+}
+
+void
+Editor::control_view (uint32_t view)
+{
+	goto_visual_state (view);
 }
 
 void

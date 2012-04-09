@@ -65,6 +65,12 @@ class ControlProtocol : virtual public sigc::trackable, public PBD::Stateful, pu
 	static PBD::Signal1<void,float> ScrollTimeline;
 	static PBD::Signal1<void,uint32_t> SelectByRID;
 	static PBD::Signal0<void> UnselectTrack;
+	static PBD::Signal1<void,uint32_t> GotoView;
+	static PBD::Signal0<void> CloseDialog;
+	static PBD::Signal0<void> VerticalZoomInAll;
+	static PBD::Signal0<void> VerticalZoomOutAll;
+	static PBD::Signal0<void> VerticalZoomInSelected;
+	static PBD::Signal0<void> VerticalZoomOutSelected;
 
 	/* the model here is as follows:
 

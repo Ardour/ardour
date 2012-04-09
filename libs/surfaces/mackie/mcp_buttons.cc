@@ -17,6 +17,8 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include "pbd/memento_command.h"
+
 #include "ardour/session.h"
 #include "ardour/route.h"
 #include "ardour/location.h"
@@ -24,12 +26,15 @@
 
 #include "mackie_control_protocol.h"
 
+#include "i18n.h"
+
 /* handlers for all buttons, broken into a separate file to avoid clutter in
  * mackie_control_protocol.cc 
  */
 
 using namespace Mackie;
 using namespace ARDOUR;
+using std::string;
 
 LedState
 MackieControlProtocol::shift_press (Button &)
@@ -78,6 +83,192 @@ MackieControlProtocol::cmd_alt_release (Button &)
 {
 	_modifier_state &= ~MODIFIER_CMDALT;
 	return on;
+}
+
+LedState 
+MackieControlProtocol::left_press (Button &)
+{
+	Sorted sorted = get_sorted_routes();
+	if (sorted.size() > route_table.size()) {
+		int new_initial = _current_initial_bank - route_table.size();
+		if (new_initial < 0) {
+			new_initial = 0;
+		}
+		
+		if (new_initial != int (_current_initial_bank)) {
+			session->set_dirty();
+			switch_banks (new_initial);
+		}
+
+		return on;
+	} else {
+		return flashing;
+	}
+}
+
+LedState 
+MackieControlProtocol::left_release (Button &)
+{
+	return off;
+}
+
+LedState 
+MackieControlProtocol::right_press (Button &)
+{
+	return off;
+}
+
+LedState 
+MackieControlProtocol::right_release (Button &)
+{
+	if (_zoom_mode) {
+
+	}
+
+	return off;
+}
+
+LedState
+MackieControlProtocol::cursor_left_press (Button& )
+{
+	if (_zoom_mode) {
+
+		if (_modifier_state & MODIFIER_OPTION) {
+			/* reset selected tracks to default vertical zoom */
+		} else {
+			ZoomOut (); /* EMIT SIGNAL */
+		}
+	}
+
+	return off;
+}
+
+LedState
+MackieControlProtocol::cursor_left_release (Button&)
+{
+	return off;
+}
+
+LedState
+MackieControlProtocol::cursor_right_press (Button& )
+{
+	if (_zoom_mode) {
+		
+		if (_modifier_state & MODIFIER_OPTION) {
+			/* reset selected tracks to default vertical zoom */
+		} else {
+			ZoomIn (); /* EMIT SIGNAL */
+		}
+	}
+
+	return off;
+}
+
+LedState
+MackieControlProtocol::cursor_right_release (Button&)
+{
+	return off;
+}
+
+LedState
+MackieControlProtocol::cursor_up_press (Button&)
+{
+	if (_zoom_mode) {
+		if (_modifier_state & MODIFIER_OPTION) {
+			VerticalZoomOutSelected (); /* EMIT SIGNAL */
+		} else {
+			VerticalZoomOutAll (); /* EMIT SIGNAL */
+		}
+	}
+	return off;
+}
+
+LedState
+MackieControlProtocol::cursor_up_release (Button&)
+{
+	return off;
+}
+
+LedState
+MackieControlProtocol::cursor_down_press (Button&)
+{
+	if (_zoom_mode) {
+		
+		if (_modifier_state & MODIFIER_OPTION) {
+			VerticalZoomInSelected (); /* EMIT SIGNAL */
+		} else {
+			VerticalZoomInAll (); /* EMIT SIGNAL */
+		}
+	}
+	return off;
+}
+
+LedState
+MackieControlProtocol::cursor_down_release (Button&)
+{
+	return off;
+}
+
+LedState 
+MackieControlProtocol::channel_left_press (Button &)
+{
+	Sorted sorted = get_sorted_routes();
+	if (sorted.size() > route_table.size()) {
+		prev_track();
+		return on;
+	} else {
+		return flashing;
+	}
+}
+
+LedState 
+MackieControlProtocol::channel_left_release (Button &)
+{
+	return off;
+}
+
+LedState 
+MackieControlProtocol::channel_right_press (Button &)
+{
+	Sorted sorted = get_sorted_routes();
+	if (sorted.size() > route_table.size()) {
+		next_track();
+		return on;
+	} else {
+		return flashing;
+	}
+}
+
+LedState 
+MackieControlProtocol::channel_right_release (Button &)
+{
+	return off;
+}
+
+/////////////////////////////////////
+// Functions
+/////////////////////////////////////
+LedState 
+MackieControlProtocol::marker_press (Button &)
+{
+	// cut'n'paste from LocationUI::add_new_location()
+	string markername;
+	framepos_t where = session->audible_frame();
+	session->locations()->next_available_name(markername,"mcu");
+	Location *location = new Location (*session, where, where, markername, Location::IsMark);
+	session->begin_reversible_command (_("add marker"));
+	XMLNode &before = session->locations()->get_state();
+	session->locations()->add (location, true);
+	XMLNode &after = session->locations()->get_state();
+	session->add_command (new MementoCommand<Locations>(*(session->locations()), &before, &after));
+	session->commit_reversible_command ();
+	return on;
+}
+
+LedState 
+MackieControlProtocol::marker_release (Button &)
+{
+	return off;
 }
 
 /////////////////////////////////////
@@ -432,6 +623,7 @@ MackieControlProtocol::name_value_release (Button &)
 LedState
 MackieControlProtocol::F1_press (Button &) 
 { 
+	GotoView (0); /* EMIT SIGNAL */
 	return off; 
 }
 LedState
@@ -442,6 +634,7 @@ MackieControlProtocol::F1_release (Button &)
 LedState
 MackieControlProtocol::F2_press (Button &) 
 { 
+	GotoView (1); /* EMIT SIGNAL */
 	return off; 
 }
 LedState
@@ -452,6 +645,7 @@ MackieControlProtocol::F2_release (Button &)
 LedState
 MackieControlProtocol::F3_press (Button &) 
 { 
+	GotoView (2); /* EMIT SIGNAL */
 	return off; 
 }
 LedState
@@ -462,6 +656,7 @@ MackieControlProtocol::F3_release (Button &)
 LedState
 MackieControlProtocol::F4_press (Button &) 
 { 
+	GotoView (3); /* EMIT SIGNAL */
 	return off; 
 }
 LedState
@@ -472,6 +667,7 @@ MackieControlProtocol::F4_release (Button &)
 LedState
 MackieControlProtocol::F5_press (Button &) 
 { 
+	GotoView (4); /* EMIT SIGNAL */
 	return off; 
 }
 LedState
@@ -482,6 +678,7 @@ MackieControlProtocol::F5_release (Button &)
 LedState
 MackieControlProtocol::F6_press (Button &) 
 { 
+	GotoView (5); /* EMIT SIGNAL */
 	return off; 
 }
 LedState
@@ -492,6 +689,7 @@ MackieControlProtocol::F6_release (Button &)
 LedState
 MackieControlProtocol::F7_press (Button &) 
 { 
+	GotoView (6); /* EMIT SIGNAL */
 	return off; 
 }
 LedState
@@ -502,6 +700,7 @@ MackieControlProtocol::F7_release (Button &)
 LedState
 MackieControlProtocol::F8_press (Button &) 
 { 
+	CloseDialog (); /* EMIT SIGNAL */
 	return off; 
 }
 LedState
@@ -512,6 +711,7 @@ MackieControlProtocol::F8_release (Button &)
 LedState
 MackieControlProtocol::F9_press (Button &) 
 { 
+	GotoView (8); /* EMIT SIGNAL */
 	return off; 
 }
 LedState

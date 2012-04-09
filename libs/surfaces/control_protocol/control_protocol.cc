@@ -40,6 +40,12 @@ Signal0<void>       ControlProtocol::Redo;
 Signal1<void,float> ControlProtocol::ScrollTimeline;
 Signal1<void,uint32_t> ControlProtocol::SelectByRID;
 Signal0<void> ControlProtocol::UnselectTrack;
+Signal1<void,uint32_t> ControlProtocol::GotoView;
+Signal0<void> ControlProtocol::CloseDialog;
+PBD::Signal0<void> ControlProtocol::VerticalZoomInAll;
+PBD::Signal0<void> ControlProtocol::VerticalZoomOutAll;
+PBD::Signal0<void> ControlProtocol::VerticalZoomInSelected;
+PBD::Signal0<void> ControlProtocol::VerticalZoomOutSelected;
 
 ControlProtocol::ControlProtocol (Session& s, string str, EventLoop* evloop)
 	: BasicUI (s),

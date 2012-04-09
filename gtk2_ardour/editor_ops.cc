@@ -1278,13 +1278,51 @@ Editor::scroll_tracks_up_line ()
 void
 Editor::tav_zoom_step (bool coarser)
 {
-	ENSURE_GUI_THREAD (*this, &Editor::temporal_zoom_step, coarser)
-
 	_routes->suspend_redisplay ();
 
-	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+	TrackViewList* ts;
+
+	if (selection->tracks.empty()) {
+		ts = &track_views;
+	} else {
+		ts = &selection->tracks;
+	}
+	
+	for (TrackViewList::iterator i = ts->begin(); i != ts->end(); ++i) {
 		TimeAxisView *tv = (static_cast<TimeAxisView*>(*i));
 			tv->step_height (coarser);
+	}
+
+	_routes->resume_redisplay ();
+}
+
+void
+Editor::tav_zoom_smooth (bool coarser, bool force_all)
+{
+	_routes->suspend_redisplay ();
+
+	TrackViewList* ts;
+
+	if (selection->tracks.empty() || force_all) {
+		ts = &track_views;
+	} else {
+		ts = &selection->tracks;
+	}
+	
+	for (TrackViewList::iterator i = ts->begin(); i != ts->end(); ++i) {
+		TimeAxisView *tv = (static_cast<TimeAxisView*>(*i));
+		uint32_t h = tv->current_height ();
+
+		if (coarser) {
+			if (h > 5) {
+				h -= 5; // pixels
+				if (h >= TimeAxisView::preset_height (HeightSmall)) {
+					tv->set_height (h);
+				}
+			}
+		} else {
+			tv->set_height (h + 5);
+		}
 	}
 
 	_routes->resume_redisplay ();

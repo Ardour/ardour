@@ -496,16 +496,6 @@ TimeAxisView::step_height (bool coarser)
 }
 
 void
-TimeAxisView::set_heights (uint32_t h)
-{
-	TrackSelection& ts (_editor.get_selection().tracks);
-
-	for (TrackSelection::iterator i = ts.begin(); i != ts.end(); ++i) {
-		(*i)->set_height (h);
-	}
-}
-
-void
 TimeAxisView::set_height_enum (Height h, bool apply_to_selection)
 {
 	if (apply_to_selection) {

@@ -299,16 +299,22 @@ Keyboard::snooper (GtkWidget *widget, GdkEventKey *event)
 	if (event->type == GDK_KEY_RELEASE && modifier_state_equals (event->state, PrimaryModifier)) {
 		switch (event->keyval) {
 		case GDK_w:
-			if (current_window) {
-				current_window->hide ();
-				current_window = 0;
-				ret = true;
-			}
+			close_current_dialog ();
+			ret = true;
 			break;
 		}
 	}
 
 	return ret;
+}
+
+void
+Keyboard::close_current_dialog ()
+{
+	if (current_window) {
+		current_window->hide ();
+		current_window = 0;
+	}
 }
 
 bool
@@ -555,5 +561,4 @@ Keyboard::load_keybindings (string path)
 
 	return true;
 }
-
 
