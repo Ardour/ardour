@@ -19,12 +19,16 @@
 
 #include <cmath>
 
+#include "pbd/compose.h"
+#include "ardour/debug.h"
+
 #include "meter.h"
 #include "surface.h"
 #include "surface_port.h"
 #include "control_group.h"
 
 using namespace Mackie;
+using namespace PBD;
 
 Control*
 Meter::factory (Surface& surface, int id, int ordinal, const char* name, Group& group)
@@ -84,8 +88,10 @@ Meter::update_message (float dB)
 	
 	if (last_segment_value_sent != segment) {
 		last_segment_value_sent = segment;
-		std::cerr << "Meter ID " << raw_id() << " as byte " << (((int) raw_id() << 4) | segment) << std::endl;
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Meter ID %1 to use segment %2\n", raw_id(), segment));
 		msg << MidiByteArray (2, 0xD0, (raw_id()<<4) | segment);
+	} else {
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Meter ID %1 not sent (same as last)\n", raw_id()));
 	}
 
 	return msg;
