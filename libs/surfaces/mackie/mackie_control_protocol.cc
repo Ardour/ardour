@@ -1686,15 +1686,14 @@ jog_wheel_state_display (JogWheel::State state, SurfacePort & port)
 Mackie::LedState 
 MackieControlProtocol::zoom_press (Mackie::Button &)
 {
-	_zoom_mode = true;
-	return on;
+	_zoom_mode = !_zoom_mode;
+	return (_zoom_mode ? on : off);
 	
 }
 
 Mackie::LedState 
 MackieControlProtocol::zoom_release (Mackie::Button &)
 {
-	_zoom_mode = false;
 	return off;
 }
 
