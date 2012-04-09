@@ -184,6 +184,15 @@ Strip::fader_touch()
 	return *_fader_touch;
 }
 
+Meter& 
+Strip::meter()
+{
+	if  (_meter == 0) {
+		throw MackieControlException ("meter is null");
+	}
+	return *_meter;
+}
+
 /** @return true if the control is in use, or false otherwise.
     Buttons are `in use' when they are held down.
     Faders with touch support are `in use' when they are being touched.

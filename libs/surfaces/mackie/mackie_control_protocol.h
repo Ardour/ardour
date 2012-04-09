@@ -316,7 +316,9 @@ class MackieControlProtocol
 
 	void port_connected_or_disconnected (std::string, std::string, bool);
 	bool control_in_use_timeout (Mackie::SurfacePort*, Mackie::Control *, Mackie::Control *);
-	
+	bool meter_update();
+	sigc::connection meter_connection;
+
 	boost::shared_ptr<Mackie::RouteSignal> master_route_signal;
 	
 	static const char * default_port_name;

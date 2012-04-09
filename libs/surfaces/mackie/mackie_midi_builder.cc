@@ -112,7 +112,7 @@ MidiByteArray MackieMidiBuilder::build_fader( const Fader & fader, float pos )
 MidiByteArray MackieMidiBuilder::build_meter (const Meter & meter, float val)
 {
 	MIDI::byte segment = lrintf (val*16.0);
-
+	
 	return MidiByteArray (2,
 			     0xD0,
 			     (meter.raw_id()<<3) | segment);
@@ -142,27 +142,29 @@ MidiByteArray MackieMidiBuilder::zero_strip( SurfacePort & port, const Strip & s
 
 MidiByteArray MackieMidiBuilder::zero_control( const Control & control )
 {
-	switch( control.type() )
-	{
-		case Control::type_button:
-			return build_led( (Button&)control, off );
+	switch( control.type() ) {
+	case Control::type_button:
+		return build_led( (Button&)control, off );
 		
-		case Control::type_led:
-			return build_led( (Led&)control, off );
+	case Control::type_led:
+		return build_led( (Led&)control, off );
 		
-		case Control::type_fader:
-			return build_fader( (Fader&)control, 0.0 );
+	case Control::type_fader:
+		return build_fader( (Fader&)control, 0.0 );
 		
-		case Control::type_pot:
-			return build_led_ring( dynamic_cast<const Pot&>( control ), off );
+	case Control::type_pot:
+		return build_led_ring( dynamic_cast<const Pot&>( control ), off );
 		
-		case Control::type_led_ring:
-			return build_led_ring( dynamic_cast<const LedRing&>( control ), off );
+	case Control::type_led_ring:
+		return build_led_ring( dynamic_cast<const LedRing&>( control ), off );
 		
-		default:
-			ostringstream os;
-			os << "Unknown control type " << control << " in Strip::zero_control";
-			throw MackieControlException( os.str() );
+	case Control::type_meter:
+		return build_meter (dynamic_cast<const Meter&>(control), 0.0);
+		
+	default:
+		ostringstream os;
+		os << "Unknown control type " << control << " in Strip::zero_control";
+		throw MackieControlException( os.str() );
 	}
 }
 

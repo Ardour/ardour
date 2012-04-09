@@ -44,6 +44,7 @@
 #include "ardour/debug.h"
 #include "ardour/location.h"
 #include "ardour/midi_ui.h"
+#include "ardour/meter.h"
 #include "ardour/panner.h"
 #include "ardour/panner_shell.h"
 #include "ardour/route.h"
@@ -393,6 +394,13 @@ MackieControlProtocol::set_active (bool yn)
 			// send current control positions to surface
 			// must come after _active = true otherwise it won't run
 			update_surface();
+
+			Glib::RefPtr<Glib::TimeoutSource> meter_timeout = Glib::TimeoutSource::create (25);
+
+			meter_connection = meter_timeout->connect (sigc::mem_fun (*this, &MackieControlProtocol::meter_update));
+
+			meter_timeout->attach (main_loop()->get_context());
+
 		} else {
 			BaseUI::quit ();
 			close();
@@ -407,6 +415,46 @@ MackieControlProtocol::set_active (bool yn)
 	}
 
 	return 0;
+}
+
+bool
+MackieControlProtocol::meter_update ()
+{
+	for (std::vector<RouteSignal*>::iterator r = route_signals.begin(); r != route_signals.end(); ++r) {
+		float dB;
+		
+		dB = const_cast<PeakMeter&> ((*r)->route()->peak_meter()).peak_power (0);
+		Mackie::Meter& m = (*r)->strip().meter();
+
+		float def = 0.0f; /* Meter deflection %age */
+		
+		if (dB < -70.0f) {
+			def = 0.0f;
+		} else if (dB < -60.0f) {
+			def = (dB + 70.0f) * 0.25f;
+		} else if (dB < -50.0f) {
+			def = (dB + 60.0f) * 0.5f + 2.5f;
+		} else if (dB < -40.0f) {
+			def = (dB + 50.0f) * 0.75f + 7.5f;
+		} else if (dB < -30.0f) {
+			def = (dB + 40.0f) * 1.5f + 15.0f;
+		} else if (dB < -20.0f) {
+			def = (dB + 30.0f) * 2.0f + 30.0f;
+		} else if (dB < 6.0f) {
+			def = (dB + 20.0f) * 2.5f + 50.0f;
+		} else {
+			def = 115.0f;
+		}
+		
+		/* 115 is the deflection %age that would be
+		   when dB=6.0. this is an arbitrary
+		   endpoint for our scaling.
+		*/
+		
+		(*r)->port().write (builder.build_meter (m, def/115.0));
+	}
+
+	return true; // call it again
 }
 
 bool 
