@@ -491,14 +491,20 @@ MackieControlProtocol::handle_strip_button (SurfacePort & port, Control & contro
 		} else if (control.name() == "select") {
 			Strip* strip = const_cast<Strip*>(dynamic_cast<const Strip*>(&control.group()));
 			if (strip) {
+
 				if ((uint32_t) strip->index() < route_table.size()) {
 					boost::shared_ptr<Route> r = route_table[strip->index()];
-					if (r->remote_control_id() == _current_selected_track) {
-						UnselectTrack (); /* EMIT SIGNAL */
-						_current_selected_track = -1;
+
+					if (_modifier_state == MODIFIER_SHIFT) {
+						r->gain_control()->set_value (0.0);
 					} else {
-						SelectByRID (r->remote_control_id()); /* EMIT SIGNAL */
-						_current_selected_track = r->remote_control_id();;
+						if (r->remote_control_id() == _current_selected_track) {
+							UnselectTrack (); /* EMIT SIGNAL */
+							_current_selected_track = -1;
+						} else {
+							SelectByRID (r->remote_control_id()); /* EMIT SIGNAL */
+							_current_selected_track = r->remote_control_id();;
+						}
 					}
 				} 
 			}
