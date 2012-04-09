@@ -115,6 +115,23 @@ MackieControlProtocol::left_release (Button &)
 LedState 
 MackieControlProtocol::right_press (Button &)
 {
+	Sorted sorted = get_sorted_routes();
+	if (sorted.size() > route_table.size()) {
+		uint32_t delta = sorted.size() - (route_table.size() + _current_initial_bank);
+
+		if (delta > route_table.size()) {
+			delta = route_table.size();
+		}
+		
+		if (delta > 0) {
+			session->set_dirty();
+			switch_banks (_current_initial_bank + delta);
+		}
+
+		return on;
+	} else {
+		return flashing;
+	}
 	return off;
 }
 
@@ -241,6 +258,113 @@ MackieControlProtocol::channel_right_press (Button &)
 
 LedState 
 MackieControlProtocol::channel_right_release (Button &)
+{
+	return off;
+}
+
+Mackie::LedState 
+MackieControlProtocol::zoom_press (Mackie::Button &)
+{
+	_zoom_mode = !_zoom_mode;
+	return (_zoom_mode ? on : off);
+}
+
+Mackie::LedState 
+MackieControlProtocol::zoom_release (Mackie::Button &)
+{
+	return (_zoom_mode ? on : off);
+}
+
+Mackie::LedState 
+MackieControlProtocol::scrub_press (Mackie::Button &)
+{
+	_scrub_mode = !_scrub_mode;
+	return (_scrub_mode ? on : off);
+}
+
+Mackie::LedState 
+MackieControlProtocol::scrub_release (Mackie::Button &)
+{
+	return (_scrub_mode ? on : off);
+}
+
+LedState
+MackieControlProtocol::undo_press (Button&)
+{
+	if (_modifier_state & MODIFIER_SHIFT) {
+		Redo(); /* EMIT SIGNAL */
+	} else {
+		Undo(); /* EMIT SIGNAL */
+	}
+	return off;
+}
+
+LedState
+MackieControlProtocol::undo_release (Button&)
+{
+	return off;
+}
+
+LedState
+MackieControlProtocol::redo_press (Button&)
+{
+	Redo(); /* EMIT SIGNAL */
+	return off;
+}
+
+LedState
+MackieControlProtocol::redo_release (Button&)
+{
+	return off;
+}
+
+LedState 
+MackieControlProtocol::drop_press (Button &)
+{
+	session->remove_last_capture();
+	return on;
+}
+
+LedState 
+MackieControlProtocol::drop_release (Button &)
+{
+	return off;
+}
+
+LedState 
+MackieControlProtocol::save_press (Button &)
+{
+	session->save_state ("");
+	return on;
+}
+
+LedState 
+MackieControlProtocol::save_release (Button &)
+{
+	return off;
+}
+
+LedState 
+MackieControlProtocol::timecode_beats_press (Button &)
+{
+	switch (_timecode_type) {
+	case ARDOUR::AnyTime::BBT:
+		_timecode_type = ARDOUR::AnyTime::Timecode;
+		break;
+	case ARDOUR::AnyTime::Timecode:
+		_timecode_type = ARDOUR::AnyTime::BBT;
+		break;
+	default:
+		return off;
+	}
+
+	update_timecode_beats_led();
+
+	return on;
+}
+
+LedState 
+MackieControlProtocol::timecode_beats_release (Button &)
 {
 	return off;
 }

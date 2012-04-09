@@ -428,6 +428,7 @@ class MackieControlProtocol
 	void* _gui;
 
 	bool _zoom_mode;
+	bool _scrub_mode;
 	int  _current_selected_track;
 	
 	static const int MODIFIER_OPTION;

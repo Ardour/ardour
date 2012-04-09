@@ -106,6 +106,7 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 	, _output_bundle (new ARDOUR::Bundle (_("Mackie Control Out"), false))
 	, _gui (0)
 	, _zoom_mode (false)
+	, _scrub_mode (false)
 	, _current_selected_track (-1)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::MackieControlProtocol\n");
@@ -1302,119 +1303,6 @@ jog_wheel_state_display (JogWheel::State state, SurfacePort & port)
 	}
 }
 
-Mackie::LedState 
-MackieControlProtocol::zoom_press (Mackie::Button &)
-{
-	_zoom_mode = !_zoom_mode;
-	return (_zoom_mode ? on : off);
-	
-}
-
-Mackie::LedState 
-MackieControlProtocol::zoom_release (Mackie::Button &)
-{
-	return off;
-}
-
-Mackie::LedState 
-MackieControlProtocol::scrub_press (Mackie::Button &)
-{
-	_jog_wheel.scrub_state_cycle();
-	update_global_button ("zoom", _jog_wheel.jog_wheel_state() == JogWheel::zoom);
-	jog_wheel_state_display (_jog_wheel.jog_wheel_state(), mcu_port());
-	return (
-		_jog_wheel.jog_wheel_state() == JogWheel::scrub
-		||
-		_jog_wheel.jog_wheel_state() == JogWheel::shuttle
-		);
-}
-
-Mackie::LedState 
-MackieControlProtocol::scrub_release (Mackie::Button &)
-{
-	return (
-		_jog_wheel.jog_wheel_state() == JogWheel::scrub
-		||
-		_jog_wheel.jog_wheel_state() == JogWheel::shuttle
-		);
-}
-
-LedState
-MackieControlProtocol::undo_press (Button&)
-{
-	Undo(); /* EMIT SIGNAL */
-	return off;
-}
-
-LedState
-MackieControlProtocol::undo_release (Button&)
-{
-	return off;
-}
-
-LedState
-MackieControlProtocol::redo_press (Button&)
-{
-	Redo(); /* EMIT SIGNAL */
-	return off;
-}
-
-LedState
-MackieControlProtocol::redo_release (Button&)
-{
-	return off;
-}
-
-LedState 
-MackieControlProtocol::drop_press (Button &)
-{
-	session->remove_last_capture();
-	return on;
-}
-
-LedState 
-MackieControlProtocol::drop_release (Button &)
-{
-	return off;
-}
-
-LedState 
-MackieControlProtocol::save_press (Button &)
-{
-	session->save_state ("");
-	return on;
-}
-
-LedState 
-MackieControlProtocol::save_release (Button &)
-{
-	return off;
-}
-
-LedState 
-MackieControlProtocol::timecode_beats_press (Button &)
-{
-	switch (_timecode_type) {
-	case ARDOUR::AnyTime::BBT:
-		_timecode_type = ARDOUR::AnyTime::Timecode;
-		break;
-	case ARDOUR::AnyTime::Timecode:
-		_timecode_type = ARDOUR::AnyTime::BBT;
-		break;
-	default:
-		ostringstream os;
-		os << "Unknown Anytime::Type " << _timecode_type;
-		throw runtime_error (os.str());
-	}
-	update_timecode_beats_led();
-	return on;
-}
-
-LedState 
-MackieControlProtocol::timecode_beats_release (Button &)
-{
-	return off;
-}
 
 list<boost::shared_ptr<ARDOUR::Bundle> >
 MackieControlProtocol::bundles ()
