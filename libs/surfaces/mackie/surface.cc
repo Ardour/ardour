@@ -88,6 +88,8 @@ Surface::Surface (MackieControlProtocol& mcp, jack_client_t* jack, const std::st
 		break;
 	}
 
+	connect_to_signals ();
+
 	DEBUG_TRACE (DEBUG::MackieControl, "Surface::init finish\n");
 }
 
