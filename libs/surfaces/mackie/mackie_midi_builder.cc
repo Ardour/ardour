@@ -39,6 +39,7 @@
 #include "meter.h"
 #include "midi_byte_array.h"
 #include "mackie_port.h"
+#include "surface.h"
 
 using namespace PBD;
 using namespace Mackie;
@@ -77,7 +78,7 @@ MidiByteArray MackieMidiBuilder::build_led_ring (const LedRing & led_ring, const
 			       // the control type
 			       , midi_pot_id
 			       // the id
-			       , 0x20 + led_ring.control_id()
+			       , 0x20 + led_ring.raw_id()
 			       // the value
 			       , calculate_pot_value (mode, state)
 		);
@@ -101,7 +102,7 @@ MidiByteArray MackieMidiBuilder::build_led (const Led & led, LedState ls)
 	
 	return MidiByteArray  (3
 		, midi_button_id
-		, led.control_id()
+		, led.raw_id()
 		, state
 	);
 }
@@ -111,7 +112,7 @@ MidiByteArray MackieMidiBuilder::build_fader (const Fader & fader, float pos)
 	int posi = int (0x3fff * pos);
 	
 	return MidiByteArray  (3
-			       , midi_fader_id | fader.control_id()
+			       , midi_fader_id | fader.raw_id()
 			       // lower-order bits
 			       , posi & 0x7f
 			       // higher-order bits
@@ -119,7 +120,7 @@ MidiByteArray MackieMidiBuilder::build_fader (const Fader & fader, float pos)
 		);
 }
 
-MidiByteArray MackieMidiBuilder::zero_strip (SurfacePort & port, const Strip & strip)
+MidiByteArray MackieMidiBuilder::zero_strip (Surface& surface, const Strip & strip)
 {
 	Group::Controls::const_iterator it = strip.controls().begin();
 	MidiByteArray retval;
@@ -134,8 +135,8 @@ MidiByteArray MackieMidiBuilder::zero_strip (SurfacePort & port, const Strip & s
 
 	/* XXX: not sure about this check to only display stuff for strips of index < 8 */
 	if (strip.index() < 8) {
-		retval << strip_display_blank (port, strip, 0);
-		retval << strip_display_blank (port, strip, 1);
+		retval << strip_display_blank (surface, strip, 0);
+		retval << strip_display_blank (surface, strip, 1);
 	}
 	
 	return retval;
@@ -202,23 +203,23 @@ MidiByteArray MackieMidiBuilder::two_char_display (unsigned int value, const std
 	return two_char_display (os.str());
 }
 
-MidiByteArray MackieMidiBuilder::strip_display_blank (SurfacePort & port, const Strip & strip, unsigned int line_number)
+MidiByteArray MackieMidiBuilder::strip_display_blank (Surface& surface, const Strip & strip, unsigned int line_number)
 {
 	// 6 spaces, not 7 because strip_display adds a space where appropriate
-	return strip_display (port, strip, line_number, "      ");
+	return strip_display (surface, strip, line_number, "      ");
 }
 
-MidiByteArray MackieMidiBuilder::strip_display (SurfacePort & port, const Strip & strip, unsigned int line_number, const std::string & line)
+MidiByteArray MackieMidiBuilder::strip_display (Surface& surface, const Strip & strip, unsigned int line_number, const std::string & line)
 {
 	assert (line_number <= 1);
 
 	MidiByteArray retval;
-	uint32_t index = strip.index() % port.strips();
+	uint32_t index = strip.index() % 8;
 
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("MackieMidiBuilder::strip_display index: %1, line %2 = %3\n", strip.index(), line_number, line));
 
 	// sysex header
-	retval << port.sysex_hdr();
+	retval << surface.sysex_hdr();
 	
 	// code for display
 	retval << 0x12;
@@ -254,7 +255,8 @@ MidiByteArray MackieMidiBuilder::all_strips_display (SurfacePort & /*port*/, std
 	return retval;
 }
 
-MidiByteArray MackieMidiBuilder::timecode_display (SurfacePort & port, const std::string & timecode, const std::string & last_timecode)
+MidiByteArray 
+MackieMidiBuilder::timecode_display (Surface& surface, const std::string & timecode, const std::string & last_timecode)
 {
 	// if there's no change, send nothing, not even sysex header
 	if  (timecode == last_timecode) return MidiByteArray();
@@ -278,7 +280,7 @@ MidiByteArray MackieMidiBuilder::timecode_display (SurfacePort & port, const std
 	MidiByteArray retval;
 	
 	// sysex header
-	retval << port.sysex_hdr();
+	retval << surface.sysex_hdr();
 	
 	// code for timecode display
 	retval << 0x10;

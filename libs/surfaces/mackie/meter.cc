@@ -31,9 +31,9 @@ using namespace Mackie;
 using namespace PBD;
 
 Control*
-Meter::factory (Surface& surface, int id, int ordinal, const char* name, Group& group)
+Meter::factory (Surface& surface, int id, const char* name, Group& group)
 {
-	Meter* m = new Meter (id, ordinal, name, group);
+	Meter* m = new Meter (id, name, group);
 	surface.meters[id] = m;
 	surface.controls.push_back (m);
 	group.add (*m);

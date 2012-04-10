@@ -27,8 +27,8 @@ namespace Mackie {
 class Led : public Control
 {
 public:
-	Led (int id, int ordinal, std::string name, Group & group)
-		: Control (id, ordinal, name, group)
+	Led (int id, std::string name, Group & group)
+		: Control (id, name, group)
 	{
 	}
 	
@@ -36,7 +36,7 @@ public:
 
 	virtual type_t type() const { return type_led; }
 
-	static Control* factory (Surface&, int id, int ordinal, const char*, Group&);
+	static Control* factory (Surface&, int id, const char*, Group&);
 };
 
 }

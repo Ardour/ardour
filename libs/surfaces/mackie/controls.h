@@ -62,7 +62,7 @@ public:
 		meter_base_id = 0xd0,
 	};
 	
-	Control (int id, int ordinal, std::string name, Group& group);
+	Control (int id, std::string name, Group& group);
 	virtual ~Control() {}
 	
 	virtual const Led & led() const { throw MackieControlException ("no led available"); }
@@ -76,15 +76,8 @@ public:
 	/// unique within the control type.
 	int raw_id() const { return _id; }
 
-	/* this identifies a given control within its MCU "bank of 8"
-	 */
-	int control_id() const { return _id % 8; }
-	
-	/// The 1-based number of the control
-	int ordinal() const { return _ordinal; }
-	
 	const std::string & name() const  { return _name; }
-	const Group & group() const { return _group; }
+	Group & group() const { return _group; }
 	virtual bool accepts_feedback() const  { return true; }
 	
 	virtual type_t type() const = 0;
@@ -105,7 +98,6 @@ public:
 
 private:
 	int _id;
-	int _ordinal;
 	std::string _name;
 	Group& _group;
 	bool _in_use;

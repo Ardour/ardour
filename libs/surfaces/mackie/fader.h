@@ -7,15 +7,15 @@ namespace Mackie {
 
 class Fader : public Control
 {
-public:
-	Fader (int id, int ordinal, std::string name, Group & group)
-		: Control (id, ordinal, name, group)
+  public:
+	Fader (int id, std::string name, Group & group)
+		: Control (id, name, group)
 	{
 	}
 	
 	virtual type_t type() const { return type_fader; }
 
-	static Control* factory (Surface&, int id, int ordinal, const char*, Group&);
+	static Control* factory (Surface&, int id, const char*, Group&);
 };
 
 }

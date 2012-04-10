@@ -25,6 +25,7 @@
 #include "ardour/rc_configuration.h"
 
 #include "mackie_control_protocol.h"
+#include "surface.h"
 
 #include "i18n.h"
 
@@ -89,8 +90,8 @@ LedState
 MackieControlProtocol::left_press (Button &)
 {
 	Sorted sorted = get_sorted_routes();
-	if (sorted.size() > route_table.size()) {
-		int new_initial = _current_initial_bank - route_table.size();
+	if (sorted.size() > n_strips()) {
+		int new_initial = _current_initial_bank - n_strips();
 		if (new_initial < 0) {
 			new_initial = 0;
 		}
@@ -116,11 +117,13 @@ LedState
 MackieControlProtocol::right_press (Button &)
 {
 	Sorted sorted = get_sorted_routes();
-	if (sorted.size() > route_table.size()) {
-		uint32_t delta = sorted.size() - (route_table.size() + _current_initial_bank);
+	uint32_t strip_cnt = n_strips();
 
-		if (delta > route_table.size()) {
-			delta = route_table.size();
+	if (sorted.size() > strip_cnt) {
+		uint32_t delta = sorted.size() - (strip_cnt + _current_initial_bank);
+
+		if (delta > strip_cnt) {
+			delta = strip_cnt;
 		}
 		
 		if (delta > 0) {
@@ -230,7 +233,7 @@ LedState
 MackieControlProtocol::channel_left_press (Button &)
 {
 	Sorted sorted = get_sorted_routes();
-	if (sorted.size() > route_table.size()) {
+	if (sorted.size() > n_strips()) {
 		prev_track();
 		return on;
 	} else {
@@ -248,7 +251,7 @@ LedState
 MackieControlProtocol::channel_right_press (Button &)
 {
 	Sorted sorted = get_sorted_routes();
-	if (sorted.size() > route_table.size()) {
+	if (sorted.size() > n_strips()) {
 		next_track();
 		return on;
 	} else {
@@ -505,17 +508,21 @@ MackieControlProtocol::record_release (Button &)
 LedState 
 MackieControlProtocol::rewind_press (Button &)
 {
-	_jog_wheel.push (JogWheel::speed);
-	_jog_wheel.transport_direction (-1);
-	session->request_transport_speed (-_jog_wheel.transport_speed());
+	JogWheel* jog = surfaces.front()->jog_wheel();
+	assert (jog);
+	jog->push (JogWheel::speed);
+	jog->transport_direction (-1);
+	session->request_transport_speed (-jog->transport_speed());
 	return on;
 }
 
 LedState 
 MackieControlProtocol::rewind_release (Button &)
 {
-	_jog_wheel.pop();
-	_jog_wheel.transport_direction (0);
+	JogWheel* jog = surfaces.front()->jog_wheel();
+	assert (jog);
+	jog->pop();
+	jog->transport_direction (0);
 	if (_transport_previously_rolling) {
 		session->request_transport_speed (1.0);
 	} else {
@@ -527,17 +534,21 @@ MackieControlProtocol::rewind_release (Button &)
 LedState 
 MackieControlProtocol::ffwd_press (Button &)
 {
-	_jog_wheel.push (JogWheel::speed);
-	_jog_wheel.transport_direction (1);
-	session->request_transport_speed (_jog_wheel.transport_speed());
+	JogWheel* jog = surfaces.front()->jog_wheel();
+	assert (jog);
+	jog->push (JogWheel::speed);
+	jog->transport_direction (1);
+	session->request_transport_speed (jog->transport_speed());
 	return on;
 }
 
 LedState 
 MackieControlProtocol::ffwd_release (Button &)
 {
-	_jog_wheel.pop();
-	_jog_wheel.transport_direction (0);
+	JogWheel* jog = surfaces.front()->jog_wheel();
+	assert (jog);
+	jog->pop();
+	jog->transport_direction (0);
 	if (_transport_previously_rolling) {
 		session->request_transport_speed (1.0);
 	} else {

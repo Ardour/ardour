@@ -15,49 +15,48 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#include "surface_port.h"
 
-#include "mackie_control_exception.h"
-#include "controls.h"
+#include <sstream>
+#include <cstring>
+#include <cerrno>
+
+#include <sigc++/sigc++.h>
+#include <boost/shared_array.hpp>
 
 #include "midi++/types.h"
 #include "midi++/port.h"
 #include "midi++/manager.h"
-#include <sigc++/sigc++.h>
-#include <boost/shared_array.hpp>
+
+#include "ardour/debug.h"
+#include "ardour/rc_configuration.h"
+
+#include "controls.h"
+#include "mackie_control_exception.h"
+#include "surface.h"
+#include "surface_port.h"
+
 
 #include "i18n.h"
 
-#include <sstream>
-
-#include <cstring>
-#include <cerrno>
-
 using namespace std;
 using namespace Mackie;
-
-SurfacePort::SurfacePort()
-	: _input_port (0), _output_port (0), _number (0), _active (false)
-{
-}
+using namespace PBD;
 
 /** @param input_port Input MIDI::Port; this object takes responsibility for removing it from
  *  the MIDI::Manager and destroying it.
  *  @param output_port Output MIDI::Port; responsibility similarly taken.
  */
-SurfacePort::SurfacePort (MIDI::Port & input_port, MIDI::Port & output_port, int number)
-	: _input_port (&input_port), _output_port (&output_port), _number (number), _active (false)
+SurfacePort::SurfacePort (Surface& s, MIDI::Port & input_port, MIDI::Port & output_port)
+	: _surface (&s)
+	, _input_port (&input_port)
+	, _output_port (&output_port)
+	, _active (false)
 {
 }
 
 SurfacePort::~SurfacePort()
 {
-#ifdef PORT_DEBUG
-	cout << "~SurfacePort::SurfacePort()" << endl;
-#endif
-	// make sure another thread isn't reading or writing as we close the port
-	Glib::RecMutex::Lock lock (_rwlock);
-	_active = false;
+	close ();
 
 	MIDI::Manager* mm = MIDI::Manager::instance ();
 	
@@ -70,10 +69,6 @@ SurfacePort::~SurfacePort()
 		mm->remove_port (_output_port);
 		delete _output_port;
 	}
-	
-#ifdef PORT_DEBUG
-	cout << "~SurfacePort::SurfacePort() finished" << endl;
-#endif
 }
 
 // wrapper for one day when strerror_r is working properly
@@ -96,18 +91,7 @@ MidiByteArray SurfacePort::read()
 	}
 	
 	// return nothing read if the lock isn't acquired
-#if 0
-	Glib::RecMutex::Lock lock (_rwlock, Glib::TRY_LOCK);
-		
-	if  (!lock.locked()) {
-		cout << "SurfacePort::read not locked" << endl;
-		return retval;
-	}
-	
-	// check active again - destructor sequence
-	if  (!active()) return retval;
-#endif
-	
+
 	// read port and copy to return value
 	int nread = input_port().read (buf, sizeof (buf));
 
@@ -150,8 +134,6 @@ void SurfacePort::write (const MidiByteArray & mba)
 	// that the destructor doesn't destroy the mutex while
 	// it's still in use
 	if (!active()) return;
-	Glib::RecMutex::Lock lock (_rwlock);
-	if (!active()) return;
 
 	int count = output_port().write (mba.bytes().get(), mba.size(), 0);
 	if  (count != (int)mba.size()) {
@@ -171,23 +153,113 @@ void SurfacePort::write (const MidiByteArray & mba)
 #endif
 }
 
-void SurfacePort::write_sysex (const MidiByteArray & mba)
+
+void SurfacePort::open()
 {
-	if (mba.empty()) {
-		return;
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("SurfacePort::open %1\n", *this));
+	input_port().parser()->sysex.connect_same_thread (sysex_connection, boost::bind (&SurfacePort::handle_midi_sysex, this, _1, _2, _3));
+	_active = true;
+}
+
+void SurfacePort::close()
+{
+	DEBUG_TRACE (DEBUG::MackieControl, "SurfacePort::close\n");
+	sysex_connection.disconnect();
+
+	if (_surface) {
+		// faders to minimum
+		_surface->write_sysex (0x61);
+		// All LEDs off
+		_surface->write_sysex (0x62);
+		// Reset (reboot into offline mode)
+		_surface->write_sysex (0x63);
 	}
 
-	MidiByteArray buf;
-	buf << sysex_hdr() << mba << MIDI::eox;
-	write (buf);
+	_active = false;
 }
 
-void SurfacePort::write_sysex (MIDI::byte msg)
+void 
+SurfacePort::handle_midi_sysex (MIDI::Parser &, MIDI::byte * raw_bytes, size_t count)
 {
-	MidiByteArray buf;
-	buf << sysex_hdr() << msg << MIDI::eox;
-	write (buf);
+	MidiByteArray bytes (count, raw_bytes);
+
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("handle_midi_sysex: %1\n", bytes));
+
+	switch (bytes[5])
+	{
+		case 0x01:
+			_surface->write_sysex (host_connection_query (bytes));
+			break;
+		case 0x03:
+			// not used right now
+			_surface->write_sysex (host_connection_confirmation (bytes));
+			break;
+		case 0x04:
+			inactive_event ();
+			cout << "host connection error" << bytes << endl;
+			break;
+		case 0x14:
+			// probe_emulation (bytes);
+			break;
+		default:
+			cout << "unknown sysex: " << bytes << endl;
+	}
 }
+
+MidiByteArray calculate_challenge_response (MidiByteArray::iterator begin, MidiByteArray::iterator end)
+{
+	MidiByteArray l;
+	back_insert_iterator<MidiByteArray> back  (l);
+	copy (begin, end, back);
+	
+	MidiByteArray retval;
+	
+	// this is how to calculate the response to the challenge.
+	// from the Logic docs.
+	retval <<  (0x7f &  (l[0] +  (l[1] ^ 0xa) - l[3]));
+	retval <<  (0x7f &  ( (l[2] >> l[3]) ^  (l[0] + l[3])));
+	retval <<  (0x7f &  ((l[3] -  (l[2] << 2)) ^  (l[0] | l[1])));
+	retval <<  (0x7f &  (l[1] - l[2] +  (0xf0 ^  (l[3] << 4))));
+	
+	return retval;
+}
+
+// not used right now
+MidiByteArray SurfacePort::host_connection_query (MidiByteArray & bytes)
+{
+	MidiByteArray response;
+
+	// handle host connection query
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("host connection query: %1\n", bytes));
+	
+	if  (bytes.size() != 18) {
+		cerr << "expecting 18 bytes, read " << bytes << " from " << input_port().name() << endl;
+		return response;
+	}
+
+	// build and send host connection reply
+	response << 0x02;
+	copy (bytes.begin() + 6, bytes.begin() + 6 + 7, back_inserter (response));
+	response << calculate_challenge_response (bytes.begin() + 6 + 7, bytes.begin() + 6 + 7 + 4);
+	return response;
+}
+
+// not used right now
+MidiByteArray SurfacePort::host_connection_confirmation (const MidiByteArray & bytes)
+{
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("host_connection_confirmation: %1\n", bytes));
+	
+	// decode host connection confirmation
+	if  (bytes.size() != 14) {
+		ostringstream os;
+		os << "expecting 14 bytes, read " << bytes << " from " << input_port().name();
+		throw MackieControlException (os.str());
+	}
+	
+	// send version request
+	return MidiByteArray (2, 0x13, 0x00);
+}
+
 
 ostream & Mackie::operator <<  (ostream & os, const SurfacePort & port)
 {

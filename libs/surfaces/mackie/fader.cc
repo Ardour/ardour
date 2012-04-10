@@ -24,11 +24,9 @@
 using namespace Mackie;
 
 Control*
-Fader::factory (Surface& surface, int id, int ordinal, const char* name, Group& group)
+Fader::factory (Surface& surface, int id, const char* name, Group& group)
 {
-	Fader* f = new Fader (id, ordinal, name, group);
-
-	std::cerr << "Registering fader " << id << " ord " << ordinal << std::endl;
+	Fader* f = new Fader (id, name, group);
 
 	surface.faders[id] = f;
 	surface.controls.push_back (f);

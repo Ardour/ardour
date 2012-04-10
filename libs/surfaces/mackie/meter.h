@@ -30,8 +30,8 @@ class SurfacePort;
 class Meter : public Control
 {
 public:
-	Meter (int id, int ordinal, std::string name, Group & group)
-		: Control  (id, ordinal, name, group)
+	Meter (int id, std::string name, Group & group)
+		: Control  (id, name, group)
 		, last_segment_value_sent (-1)
 		, overload_on (false) {}
 	
@@ -39,7 +39,7 @@ public:
 
 	MidiByteArray update_message (float dB);
 
-	static Control* factory (Surface&, int id, int ordinal, const char*, Group&);
+	static Control* factory (Surface&, int id, const char*, Group&);
 	
 	int last_segment_value_sent;
 

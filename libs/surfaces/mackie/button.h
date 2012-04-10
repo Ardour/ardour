@@ -97,15 +97,15 @@ public:
 		ButtonUserB = 0x67,
 	};
 
-	Button (int id, int ordinal, std::string name, Group & group)
-		: Control (id,  ordinal, name, group)
-		, _led  (id, ordinal, name + "_led", group) {}
+	Button (int id, std::string name, Group & group)
+		: Control (id, name, group)
+		, _led  (id, name + "_led", group) {}
 	
 	virtual const Led & led() const  { return _led; }
 	
 	virtual type_t type() const { return type_button; };
 
-	static Control* factory (Surface&, int id, int ordinal, const char*, Group&);
+	static Control* factory (Surface&, int id, const char*, Group&);
 	
 private:
 	Led _led;

@@ -9,15 +9,15 @@ namespace Mackie {
 class Pot : public Control
 {
 public:
-	Pot (int id, int ordinal, std::string name, Group & group)
-		: Control (id, ordinal, name, group)
-		, _led_ring (id, ordinal, name + "_ring", group) {}
+	Pot (int id, std::string name, Group & group)
+		: Control (id, name, group)
+		, _led_ring (id, name + "_ring", group) {}
 
 	virtual type_t type() const { return type_pot; }
 
 	virtual const LedRing & led_ring() const {return _led_ring; }
 
-	static Control* factory (Surface&, int id, int ordinal, const char*, Group&);
+	static Control* factory (Surface&, int id, const char*, Group&);
 
 private:
 	LedRing _led_ring;

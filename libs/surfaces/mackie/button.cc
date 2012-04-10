@@ -24,9 +24,9 @@
 using namespace Mackie;
 
 Control*
-Button::factory (Surface& surface, int id, int ordinal, const char* name, Group& group)
+Button::factory (Surface& surface, int id, const char* name, Group& group)
 {
-	Button* b = new Button (id, ordinal, name, group);
+	Button* b = new Button (id, name, group);
 	surface.buttons[id] = b;
 	surface.controls.push_back (b);
 	group.add (*b);

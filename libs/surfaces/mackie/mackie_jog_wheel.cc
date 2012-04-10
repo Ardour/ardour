@@ -14,17 +14,17 @@
 using namespace Mackie;
 using std::isnan;
 
-JogWheel::JogWheel( MackieControlProtocol & mcp )
-: _mcp( mcp )
-, _transport_speed( 4.0 )
-, _transport_direction( 0 )
-, _shuttle_speed( 0.0 )
+JogWheel::JogWheel (MackieControlProtocol & mcp)
+: _mcp (mcp)
+, _transport_speed (4.0)
+, _transport_direction (0)
+, _shuttle_speed (0.0)
 {
 }
 
 JogWheel::State JogWheel::jog_wheel_state() const
 {
-	if ( !_jog_wheel_states.empty() )
+	if  (!_jog_wheel_states.empty())
 		return _jog_wheel_states.top();
 	else
 		return scroll;
@@ -49,28 +49,28 @@ void JogWheel::scroll_event (SurfacePort &, Control &, const ControlState &)
 void JogWheel::jog_event (SurfacePort &, Control &, const ControlState & state)
 {
 	// TODO use current snap-to setting?
-	switch ( jog_wheel_state() )
+	switch  (jog_wheel_state())
 	{
 	case scroll:
-		_mcp.ScrollTimeline( state.delta * state.sign );
+		_mcp.ScrollTimeline (state.delta * state.sign);
 		break;
 	
 	case zoom:
 		// Chunky Zoom.
 		// TODO implement something similar to ScrollTimeline which
 		// ends up in Editor::control_scroll for smoother zooming.
-		if ( state.sign > 0 )
-			for ( unsigned int i = 0; i < state.ticks; ++i ) _mcp.ZoomIn();
+		if  (state.sign > 0)
+			for  (unsigned int i = 0; i < state.ticks; ++i) _mcp.ZoomIn();
 		else
-			for ( unsigned int i = 0; i < state.ticks; ++i ) _mcp.ZoomOut();
+			for  (unsigned int i = 0; i < state.ticks; ++i) _mcp.ZoomOut();
 		break;
 		
 	case speed:
 		// locally, _transport_speed is an positive value
-		_transport_speed += _mcp.surface().scaled_delta( state, _mcp.get_session().transport_speed() );
+		_transport_speed += _mcp.surfaces.front()->scaled_delta (state, _mcp.get_session().transport_speed());
 
 		// make sure no weirdness gets to the session
-		if ( _transport_speed < 0 || isnan( _transport_speed ) )
+		if  (_transport_speed < 0 || isnan (_transport_speed))
 		{
 			_transport_speed = 0.0;
 		}
@@ -81,11 +81,11 @@ void JogWheel::jog_event (SurfacePort &, Control &, const ControlState & state)
 	
 	case scrub:
 	{
-		if ( state.sign != 0 )
+		if  (state.sign != 0)
 		{
-			add_scrub_interval( _scrub_timer.restart() );
+			add_scrub_interval (_scrub_timer.restart());
 			// x clicks per second => speed == 1.0
-			float speed = _mcp.surface().scrub_scaling_factor() / average_scrub_interval() * state.ticks;
+			float speed = _mcp.surfaces.front()->scrub_scaling_factor() / average_scrub_interval() * state.ticks;
 			_mcp.get_session().request_transport_speed_nonzero (speed * state.sign);
 		}
 		else
@@ -98,7 +98,7 @@ void JogWheel::jog_event (SurfacePort &, Control &, const ControlState & state)
 	
 	case shuttle:
 		_shuttle_speed = _mcp.get_session().transport_speed();
-		_shuttle_speed += _mcp.surface().scaled_delta( state, _mcp.get_session().transport_speed() );
+		_shuttle_speed += _mcp.surfaces.front()->scaled_delta (state, _mcp.get_session().transport_speed());
 		_mcp.get_session().request_transport_speed_nonzero (_shuttle_speed);
 		break;
 	
@@ -111,21 +111,21 @@ void JogWheel::jog_event (SurfacePort &, Control &, const ControlState & state)
 void JogWheel::check_scrubbing()
 {
 	// if the last elapsed is greater than the average + std deviation, then stop
-	if ( !_scrub_intervals.empty() && _scrub_timer.elapsed() > average_scrub_interval() + std_dev_scrub_interval() )
+	if  (!_scrub_intervals.empty() && _scrub_timer.elapsed() > average_scrub_interval() + std_dev_scrub_interval())
 	{
-		_mcp.get_session().request_transport_speed( 0.0 );
+		_mcp.get_session().request_transport_speed (0.0);
 		_scrub_intervals.clear();
 	}
 }
 
-void JogWheel::push( State state )
+void JogWheel::push (State state)
 {
-	_jog_wheel_states.push( state );
+	_jog_wheel_states.push (state);
 }
 
 void JogWheel::pop()
 {
-	if ( _jog_wheel_states.size() > 0 )
+	if  (_jog_wheel_states.size() > 0)
 	{
 		_jog_wheel_states.pop();
 	}
@@ -133,23 +133,23 @@ void JogWheel::pop()
 
 void JogWheel::zoom_state_toggle()
 {
-	if ( jog_wheel_state() == zoom )
+	if  (jog_wheel_state() == zoom)
 		pop();
 	else
-		push( zoom );
+		push (zoom);
 }
 
 JogWheel::State JogWheel::scrub_state_cycle()
 {
 	State top = jog_wheel_state();
-	if ( top == scrub )
+	if  (top == scrub)
 	{
 		// stop scrubbing and go to shuttle
 		pop();
-		push( shuttle );
+		push (shuttle);
 		_shuttle_speed = 0.0;
 	}
-	else if ( top == shuttle )
+	else if  (top == shuttle)
 	{
 		// default to scroll, or the last selected
 		pop();
@@ -157,25 +157,25 @@ JogWheel::State JogWheel::scrub_state_cycle()
 	else
 	{
 		// start with scrub
-		push( scrub );
+		push (scrub);
 	}
 	
 	return jog_wheel_state();
 }
 
-void JogWheel::add_scrub_interval( unsigned long elapsed )
+void JogWheel::add_scrub_interval (unsigned long elapsed)
 {
-	if ( _scrub_intervals.size() > 5 )
+	if  (_scrub_intervals.size() > 5)
 	{
 		_scrub_intervals.pop_front();
 	}
-	_scrub_intervals.push_back( elapsed );
+	_scrub_intervals.push_back (elapsed);
 }
 
 float JogWheel::average_scrub_interval()
 {
 	float sum = 0.0;
-	for ( std::deque<unsigned long>::iterator it = _scrub_intervals.begin(); it != _scrub_intervals.end(); ++it )
+	for  (std::deque<unsigned long>::iterator it = _scrub_intervals.begin(); it != _scrub_intervals.end(); ++it)
 	{
 		sum += *it;
 	}
@@ -188,9 +188,9 @@ float JogWheel::std_dev_scrub_interval()
 	
 	// calculate standard deviation
 	float sum = 0.0;
-	for ( std::deque<unsigned long>::iterator it = _scrub_intervals.begin(); it != _scrub_intervals.end(); ++it )
+	for  (std::deque<unsigned long>::iterator it = _scrub_intervals.begin(); it != _scrub_intervals.end(); ++it)
 	{
-		sum += pow( *it - average, 2 );
+		sum += pow (*it - average, 2);
 	}
-	return sqrt( sum / _scrub_intervals.size() -1 );
+	return sqrt (sum / _scrub_intervals.size() -1);
 }

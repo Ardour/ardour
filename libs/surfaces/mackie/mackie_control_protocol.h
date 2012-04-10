@@ -23,22 +23,22 @@
 
 #include <sys/time.h>
 #include <pthread.h>
+#include <boost/smart_ptr.hpp>
 
 #include <glibmm/thread.h>
 
 #include "pbd/abstract_ui.h"
 
-#include "ardour/types.h"
-#include "ardour/midi_ui.h"
 #include "midi++/types.h"
+
+#include "ardour/types.h"
 
 #include "control_protocol/control_protocol.h"
 #include "midi_byte_array.h"
 #include "controls.h"
-#include "dummy_port.h"
-#include "route_signal.h"
 #include "mackie_port.h"
 #include "mackie_jog_wheel.h"
+#include "mackie_midi_builder.h"
 #include "timer.h"
 
 namespace MIDI {
@@ -92,36 +92,28 @@ class MackieControlProtocol
   
 	static bool probe();
 	
-	Mackie::Surface & surface();
+	typedef std::list<boost::shared_ptr<Mackie::Surface> > Surfaces;
+	Surfaces surfaces;
 
 	std::list<boost::shared_ptr<ARDOUR::Bundle> > bundles ();
 
+	uint32_t n_strips () const;
+	
 	bool has_editor () const { return true; }
 	void* get_gui () const;
 	void tear_down_gui ();
-	
-	// control events
-	void handle_control_event (Mackie::SurfacePort & port, Mackie::Control & control, const Mackie::ControlState & state);
-	void handle_button_event (Mackie::Button& button, Mackie::ButtonState);
 
-	// strip/route related stuff
-  public:	
-	void notify_solo_changed (Mackie::RouteSignal *);
-	void notify_mute_changed (Mackie::RouteSignal *);
-	void notify_record_enable_changed (Mackie::RouteSignal *);
-	void notify_gain_changed (Mackie::RouteSignal *, bool force_update = true);
-	void notify_property_changed (const PBD::PropertyChange&, Mackie::RouteSignal *);
-	void notify_panner_changed (Mackie::RouteSignal *, bool force_update = true);
+	void select_track (boost::shared_ptr<ARDOUR::Route> r);
+	
+	void handle_button_event (Mackie::Surface&, Mackie::Button& button, Mackie::ButtonState);
+
 	void notify_route_added (ARDOUR::RouteList &);
-	void notify_active_changed (Mackie::RouteSignal *);
- 
 	void notify_remote_id_changed();
 
 	/// rebuild the current bank. Called on route added/removed and
 	/// remote id changed.
 	void refresh_current_bank();
 
-  public:
 	// button-related signals
 	void notify_record_state_changed();
 	void notify_transport_state_changed();
@@ -134,7 +126,7 @@ class MackieControlProtocol
 	void update_timecode_beats_led();
   
 	/// this is called to generate the midi to send in response to a button press.
-	void update_led(Mackie::Button & button, Mackie::LedState);
+	void update_led(Mackie::Surface&, Mackie::Button & button, Mackie::LedState);
   
 	void update_global_button(const std::string & name, Mackie::LedState);
 	void update_global_led(const std::string & name, Mackie::LedState);
@@ -280,30 +272,17 @@ class MackieControlProtocol
 	Mackie::LedState fader_touch_press (Mackie::Button &);
 	Mackie::LedState fader_touch_release (Mackie::Button &);
 
-	
-	/// This is the main MCU port, ie not an extender port
-	/// Only for use by JogWheel
-	const Mackie::SurfacePort & mcu_port() const;
-	Mackie::SurfacePort & mcu_port();
 	ARDOUR::Session & get_session() { return *session; }
  
-	void add_in_use_timeout (Mackie::SurfacePort& port, Mackie::Control& in_use_control, Mackie::Control* touch_control);
+	void add_in_use_timeout (Mackie::Surface& surface, Mackie::Control& in_use_control, Mackie::Control* touch_control);
 	
   protected:
-	// create instances of MackiePort, depending on what's found in ardour.rc
-	void create_ports();
-  
 	// shut down the surface
 	void close();
   
-	// create the Surface object, with the correct number
-	// of strips for the currently connected ports and 
-	// hook up the control event notification
-	void initialize_surface();
-  
 	// This sets up the notifications and sets the
 	// controls to the correct values
-	void update_surface();
+	void update_surfaces();
 	
 	// connects global (not strip) signals from the Session to here
 	// so the surface can be notified of changes from the other UIs.
@@ -320,54 +299,16 @@ class MackieControlProtocol
 	Sorted get_sorted_routes();
   
 	// bank switching
-	void switch_banks(int initial);
-	void prev_track();
-	void next_track();
+	void switch_banks (uint32_t first_remote_id, bool force = false);
+	void prev_track ();
+	void next_track ();
   
-	// delete all RouteSignal objects connecting Routes to Strips
-	void clear_route_signals();
-	
-	typedef std::vector<Mackie::RouteSignal*> RouteSignals;
-	RouteSignals route_signals;
-	Glib::Mutex route_signals_lock;	
-
-	// return which of the ports a particular route_table
-	// index belongs to
-	Mackie::MackiePort & port_for_id(uint32_t index);
-
-	/**
-	   Handle a button press for the control and return whether
-	   the corresponding light should be on or off.
-	*/
-	bool handle_strip_button (Mackie::SurfacePort &, Mackie::Control &, Mackie::ButtonState, boost::shared_ptr<ARDOUR::Route>);
-
-	void add_port (MIDI::Port &, MIDI::Port &, int number, Mackie::MackiePort::port_type_t);
-
-	// called from poll_automation to figure out which automations need to be sent
-	void update_automation(Mackie::RouteSignal &);
-	
 	// also called from poll_automation to update timecode display
 	void update_timecode_display();
 
 	std::string format_bbt_timecode (ARDOUR::framepos_t now_frame);
 	std::string format_timecode_timecode (ARDOUR::framepos_t now_frame);
 	
-	/**
-	   notification that the port is about to start it's init sequence.
-	   We must make sure that before this exits, the port is being polled
-	   for new data.
-	*/
-	void handle_port_init(Mackie::SurfacePort *);
-
-	/// notification from a MackiePort that it's now active
-	void handle_port_active(Mackie::SurfacePort *);
-	
-	/// notification from a MackiePort that it's now inactive
-	void handle_port_inactive(Mackie::SurfacePort *);
-	
-	boost::shared_ptr<ARDOUR::Route> master_route();
-	Mackie::Strip & master_strip();
-
 	void do_request (MackieControlUIRequest*);
 	int stop ();
 
@@ -375,23 +316,13 @@ class MackieControlProtocol
 
   private:
 
+	void create_surfaces ();
 	void port_connected_or_disconnected (std::string, std::string, bool);
-	bool control_in_use_timeout (Mackie::SurfacePort*, Mackie::Control *, Mackie::Control *);
+	bool control_in_use_timeout (Mackie::Surface*, Mackie::Control *, Mackie::Control *);
 
 	bool periodic();
 	sigc::connection periodic_connection;
 
-	boost::shared_ptr<Mackie::RouteSignal> master_route_signal;
-	
-	static const char * default_port_name;
-	
-	/// The Midi port(s) connected to the units
-	typedef std::vector<Mackie::MackiePort*> MackiePorts;
-	MackiePorts _ports;
-  
-	/// Sometimes the real port goes away, and we want to contain the breakage
-	Mackie::DummyPort _dummy_port;
-  
 	/// The initial remote_id of the currently switched in bank.
 	uint32_t _current_initial_bank;
 	
@@ -403,15 +334,10 @@ class MackieControlProtocol
 	PBD::ScopedConnectionList port_connections;
 	PBD::ScopedConnectionList route_connections;
 	
-	/// The representation of the physical controls on the surface.
-  	Mackie::Surface * _surface;
-	
 	bool _transport_previously_rolling;
 	
 	// timer for two quick marker left presses
 	Mackie::Timer _frm_left_last;
-	
-	Mackie::JogWheel _jog_wheel;
 	
 	// last written timecode string
 	std::string _timecode_last;
@@ -437,6 +363,8 @@ class MackieControlProtocol
 	static const int MODIFIER_CMDALT;
 
 	int  _modifier_state;
+
+	Mackie::MackieMidiBuilder builder;
 };
 
 #endif // ardour_mackie_control_protocol_h

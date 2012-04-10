@@ -1,9 +1,21 @@
 #ifndef mackie_surface_h
 #define mackie_surface_h
 
+#include <stdint.h>
+
+#include "midi++/types.h"
+
 #include "controls.h"
 #include "types.h"
-#include <stdint.h>
+#include "mackie_midi_builder.h"
+#include "mackie_jog_wheel.h"
+
+namespace MIDI {
+	class Parser;
+}
+
+class MidiByteArray;
+class MackieControlProtocol;
 
 namespace Mackie
 {
@@ -19,53 +31,23 @@ class Pot;
 class Led;
 class LedRing;
 
-/**
-	This represents an entire control surface, made up of Groups,
-	Strips and Controls. There are several collections for
-	ease of addressing in different ways, but only one collection
-	has definitive ownership.
-
-	It handles mapping button ids to press_ and release_ calls.
-
-	There are various emulations of the Mackie around, so specific
-	emulations will inherit from this to change button mapping, or 
-	have 7 fader channels instead of 8, or whatever.
-
-	Currently there are BcfSurface and MackieSurface.
-
-	TODO maybe make Group inherit from Control, for ease of ownership.
-*/
-class Surface
+class Surface : public PBD::ScopedConnectionList
 {
 public:
-	/**
-		A Surface can be made up of multiple units. eg one Mackie MCU plus
-		one or more Mackie MCU extenders.
-		
-		\param max_strips is the number of strips for the entire surface.
-		\param unit_strips is the number of strips per unit.
-	*/
-
-	Surface (uint32_t max_strips, uint32_t unit_strips);
+	Surface (MackieControlProtocol&, jack_client_t* jack, const std::string& device_name, uint32_t number, surface_type_t stype);
 	virtual ~Surface();
 
-	/// Calls the virtual initialisation methods. This *must* be called after
-	/// construction, because c++ is too dumb to call virtual methods from
-	/// inside a constructor
-	void init();
+	surface_type_t type() const { return _stype; }
+	uint32_t number() const { return _number; }
+
+	MackieControlProtocol& mcp() const { return _mcp; }
+
+	bool active() const { return _active; }
+	void drop_routes ();
 
 	typedef std::vector<Control*> Controls;
-	
-	/// This collection has ownership of all the controls
 	Controls controls;
 
-	/**
-		These are alternative addressing schemes
-		They use maps because the indices aren't always
-		0-based.
-		
-		Indexed by raw_id not by id. @see Control for the distinction.
-	*/
 	std::map<int,Fader*> faders;
 	std::map<int,Pot*> pots;
 	std::map<int,Button*> buttons;
@@ -75,39 +57,63 @@ public:
 	/// no strip controls in here because they usually
 	/// have the same names.
 	std::map<std::string,Control*> controls_by_name;
+	
+	Mackie::JogWheel* jog_wheel() const { return _jog_wheel; }
 
 	/// The collection of all numbered strips. No master
 	/// strip in here.
 	typedef std::vector<Strip*> Strips;
 	Strips strips;
 
+	uint32_t n_strips () const;
+	Strip* nth_strip (uint32_t n) const;
+
 	/// This collection owns the groups
 	typedef std::map<std::string,Group*> Groups;
 	Groups groups;
 
-	uint32_t max_strips() const { return _max_strips; }
-	
-public:
+	SurfacePort& port() const { return *_port; }
+
+	const MidiByteArray& sysex_hdr() const;
+
+	void periodic ();
+
+	void handle_midi_pitchbend_message (MIDI::Parser&, MIDI::pitchbend_t, uint32_t channel_id);
+	void handle_midi_controller_message (MIDI::Parser&, MIDI::EventTwoBytes*);
+	void handle_midi_note_on_message (MIDI::Parser&, MIDI::EventTwoBytes*);
+
+	/// Connect the any signal from the parser to handle_midi_any
+	/// unless it's already connected
+	void connect_to_signals ();
+
+	/// notification from a MackiePort that it's now inactive
+	void handle_port_inactive(Mackie::SurfacePort *);
+
+	/// write a sysex message
+	void write_sysex (const MidiByteArray& mba);
+	void write_sysex (MIDI::byte msg);
+	/// proxy write for port
+	void write (const MidiByteArray&);
+
 	/// display an indicator of the first switched-in Route. Do nothing by default.
-	virtual void display_bank_start( SurfacePort &, MackieMidiBuilder &, uint32_t /*current_bank*/ ) {};
+	void display_bank_start (uint32_t /*current_bank*/);
 		
-	/// called from MackieControlPRotocol::zero_all to turn things off
-	virtual void zero_all( SurfacePort &, MackieMidiBuilder & ) {};
+	/// called from MackieControlProtocol::zero_all to turn things off
+	void zero_all ();
 
 	/// turn off leds around the jog wheel. This is for surfaces that use a pot
 	/// pretending to be a jog wheel.
-	virtual void blank_jog_ring( SurfacePort &, MackieMidiBuilder & ) {};
+	void blank_jog_ring ();
 
-	virtual bool has_timecode_display() const = 0;
-	virtual void display_timecode( SurfacePort &, MackieMidiBuilder &, const std::string & /*timecode*/, const std::string & /*timecode_last*/) {};
-	
-public:
+	bool has_timecode_display() const;
+	void display_timecode (const std::string & /*timecode*/, const std::string & /*timecode_last*/);
+
 	/**
 		This is used to calculate the clicks per second that define
 		a transport speed of 1.0 for the jog wheel. 100.0 is 10 clicks
 		per second, 50.5 is 5 clicks per second.
 	*/
-	virtual float scrub_scaling_factor() = 0;
+	float scrub_scaling_factor() const;
 
 	/**
 		The scaling factor function for speed increase and decrease. At
@@ -116,14 +122,25 @@ public:
 		high definition control at low speeds and quick speed changes to/from
 		higher speeds.
 	*/
-	virtual float scaled_delta( const ControlState & state, float current_speed ) = 0;
+	float scaled_delta (const ControlState & state, float current_speed);
 
-protected:
-	virtual void init_controls();
-	virtual void init_strips ();
+	void handle_control_event (Mackie::Control & control, const Mackie::ControlState & state);
 
-	const uint32_t _max_strips;
-	const uint32_t _unit_strips;
+  protected:
+	void init_controls();
+	void init_strips ();
+
+  private:
+	MackieControlProtocol& _mcp;
+	SurfacePort* _port;
+	surface_type_t _stype;
+	uint32_t _number;
+	bool _active;
+	bool _connected;
+	Mackie::JogWheel* _jog_wheel;
+	MackieMidiBuilder builder;
+
+	void jog_wheel_state_display (Mackie::JogWheel::State state);
 };
 
 }

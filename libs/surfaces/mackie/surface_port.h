@@ -18,6 +18,7 @@
 #ifndef surface_port_h
 #define surface_port_h
 
+#include <midi++/types.h>
 #include <glibmm/thread.h>
 
 #include "pbd/signals.h"
@@ -26,82 +27,62 @@
 
 namespace MIDI {
 	class Port;
+	class Parser;
 }
+
+class MackieControlProtocol;
 
 namespace Mackie
 {
 
+class Surface;
+
 /**
 	Make a relationship between a midi port and a Mackie device.
 */
-class SurfacePort : public PBD::ScopedConnectionList
+
+class SurfacePort 
 {
 public:
-	SurfacePort (MIDI::Port & input_port, MIDI::Port & output_port, int number);
+	SurfacePort (Mackie::Surface&, MIDI::Port& input_port, MIDI::Port& output_port);
 	virtual ~SurfacePort();
 	
-	// when this is successful, active() should return true
-	virtual void open() = 0;
-	
-	// subclasses should call this before doing their own close
-	virtual void close() = 0;
+	void open();
+	void close();
 
 	/// read bytes from the port. They'll either end up in the
 	/// parser, or if that's not active they'll be returned
-	virtual MidiByteArray read();
+	MidiByteArray read();
 	
 	/// an easier way to output bytes via midi
-	virtual void write( const MidiByteArray & );
+	void write (const MidiByteArray&);
 	
-	/// write a sysex message
-	void write_sysex( const MidiByteArray & mba );
-	void write_sysex( MIDI::byte msg );
-
-	/// return the correct sysex header for this port
-	virtual const MidiByteArray & sysex_hdr() const = 0;
-
-	MIDI::Port & input_port() { return *_input_port; }
-	const MIDI::Port & input_port() const { return *_input_port; }
-	MIDI::Port & output_port() { return *_output_port; }
-	const MIDI::Port & output_port() const { return *_output_port; }
-	
-	// emitted just before the port goes into initialisation
-	// where it tries to establish that its device is connected
-	PBD::Signal0<void> init_event;
-	
-	// emitted when the port completes initialisation successfully
-	PBD::Signal0<void> active_event;
+	MIDI::Port& input_port() { return *_input_port; }
+	const MIDI::Port& input_port() const { return *_input_port; }
+	MIDI::Port& output_port() { return *_output_port; }
+	const MIDI::Port& output_port() const { return *_output_port; }
 
 	// emitted when the port goes inactive (ie a read or write failed)
 	PBD::Signal0<void> inactive_event;
 	
-	// the port number - master is 0(extenders are 1((,4
-	virtual int number() const { return _number; }
-	
-	// number of strips handled by this port. Usually 8.
-	virtual int strips() const = 0;
+	void handle_midi_sysex (MIDI::Parser&, MIDI::byte *, size_t count);
 
-	virtual bool active() const { return _active; }
-	virtual void active( bool yn ) { _active = yn; }
+	bool active() const { return _active; }
 
-	void add_in_use_timeout (Control &, Control *);
-	
 protected:
-	/// Only for use by DummyPort
-	SurfacePort();
+	MidiByteArray host_connection_query (MidiByteArray& bytes);
+	MidiByteArray host_connection_confirmation (const MidiByteArray& bytes);
 
-	virtual void control_event (SurfacePort &, Control &, const ControlState &) {}
-	
 private:
-	MIDI::Port * _input_port;
-	MIDI::Port * _output_port;
-	int _number;
-	bool _active;
+	Mackie::Surface* _surface;
+	MIDI::Port*      _input_port;
+	MIDI::Port*      _output_port;
+	bool             _active;
 
-	Glib::RecMutex _rwlock;
+	PBD::ScopedConnection sysex_connection;
 };	
 
-std::ostream & operator << ( std::ostream & , const SurfacePort & port );
+std::ostream& operator <<  (std::ostream& , const SurfacePort& port);
 
 }
 

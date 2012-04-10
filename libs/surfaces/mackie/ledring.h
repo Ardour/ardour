@@ -28,8 +28,8 @@ namespace Mackie {
 class LedRing : public Led
 {
 public:
-	LedRing (int id, int ordinal, std::string name, Group & group)
-		: Led (id, ordinal, name, group)
+	LedRing (int id, std::string name, Group & group)
+		: Led (id, name, group)
 	{
 	}
 

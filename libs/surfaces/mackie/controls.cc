@@ -43,9 +43,8 @@ void Group::add (Control& control)
 	_controls.push_back (&control);
 }
 
-Control::Control (int id, int ordinal, std::string name, Group & group)
+Control::Control (int id, std::string name, Group & group)
 	: _id (id)
-	, _ordinal (ordinal)
 	, _name (name)
 	, _group (group)
 	, _in_use (false)
@@ -82,8 +81,6 @@ ostream & Mackie::operator <<  (ostream & os, const Mackie::Control & control)
 	os << ", ";
 	os << "raw_id: " << "0x" << setw(2) << setfill('0') << hex << control.raw_id() << setfill(' ');
 	os << ", ";
-	os << "ordinal: " << dec << control.ordinal();
-	os << ", ";
 	os << "group: " << control.group().name();
 	os << " }";
 	
@@ -91,9 +88,9 @@ ostream & Mackie::operator <<  (ostream & os, const Mackie::Control & control)
 }
 
 Control*
-Pot::factory (Surface& surface, int id, int ordinal, const char* name, Group& group)
+Pot::factory (Surface& surface, int id, const char* name, Group& group)
 {
-	Pot* p = new Pot (id, ordinal, name, group);
+	Pot* p = new Pot (id, name, group);
 	surface.pots[id] = p;
 	surface.controls.push_back (p);
 	group.add (*p);
@@ -101,9 +98,9 @@ Pot::factory (Surface& surface, int id, int ordinal, const char* name, Group& gr
 }
 
 Control*
-Led::factory (Surface& surface, int id, int ordinal, const char* name, Group& group)
+Led::factory (Surface& surface, int id, const char* name, Group& group)
 {
-	Led* l = new Led (id, ordinal, name, group);
+	Led* l = new Led (id, name, group);
 	surface.leds[id] = l;
 	surface.controls.push_back (l);
 	group.add (*l);
@@ -111,9 +108,9 @@ Led::factory (Surface& surface, int id, int ordinal, const char* name, Group& gr
 }
 
 Control*
-Jog::factory (Surface& surface, int id, int ordinal, const char* name, Group& group)
+Jog::factory (Surface& surface, int id, const char* name, Group& group)
 {
-	Jog* j = new Jog (id, ordinal, name, group);
+	Jog* j = new Jog (id, name, group);
 	surface.controls.push_back (j);
 	surface.controls_by_name["jog"] = j;
 	group.add (*j);

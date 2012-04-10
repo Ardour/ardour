@@ -21,23 +21,17 @@ def configure(conf):
 def build(bld):
     obj = bld(features = 'cxx cxxshlib')
     obj.source = '''
-            bcf_surface.cc
             button.cc
             controls.cc
-            dummy_port.cc
             fader.cc
             gui.cc
             interface.cc
             mackie_control_protocol.cc
-            mackie_control_protocol_poll.cc
             mackie_jog_wheel.cc
             mackie_midi_builder.cc
-            mackie_port.cc
-            mackie_surface.cc
             mcp_buttons.cc
             meter.cc
             midi_byte_array.cc
-            route_signal.cc
             strip.cc
             surface.cc
             surface_port.cc

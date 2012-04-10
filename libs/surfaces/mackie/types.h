@@ -23,6 +23,11 @@
 namespace Mackie
 {
 
+enum surface_type_t { 
+	mcu, 
+	ext, 
+};
+
 /**
 	This started off as an enum, but it got really annoying
 	typing ? on : off

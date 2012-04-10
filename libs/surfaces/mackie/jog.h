@@ -28,14 +28,14 @@ namespace Mackie {
 class Jog : public Pot
 {
 public:
-	Jog (int id, int ordinal, std::string name, Group & group)
-		: Pot  (id, ordinal, name, group)
+	Jog (int id, std::string name, Group & group)
+		: Pot  (id, name, group)
 	{
 	}
 
 	virtual bool is_jog() const { return true; }
 
-	static Control* factory (Surface&, int id, int ordinal, const char*, Group&);
+	static Control* factory (Surface&, int id, const char*, Group&);
 };
 
 }
