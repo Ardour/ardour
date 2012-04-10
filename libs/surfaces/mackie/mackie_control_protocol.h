@@ -36,7 +36,6 @@
 #include "control_protocol/control_protocol.h"
 #include "midi_byte_array.h"
 #include "controls.h"
-#include "mackie_port.h"
 #include "mackie_jog_wheel.h"
 #include "mackie_midi_builder.h"
 #include "timer.h"

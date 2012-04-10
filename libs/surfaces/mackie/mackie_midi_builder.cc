@@ -38,8 +38,8 @@
 #include "jog.h"
 #include "meter.h"
 #include "midi_byte_array.h"
-#include "mackie_port.h"
 #include "surface.h"
+#include "surface_port.h"
 
 using namespace PBD;
 using namespace Mackie;

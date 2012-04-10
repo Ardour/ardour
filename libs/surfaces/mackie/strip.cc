@@ -36,6 +36,7 @@
 #include "ardour/meter.h"
 
 #include "mackie_control_protocol.h"
+#include "surface_port.h"
 #include "surface.h"
 #include "button.h"
 #include "led.h"
