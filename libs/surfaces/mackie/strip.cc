@@ -443,8 +443,10 @@ Strip::handle_button (SurfacePort & port, Control & control, ButtonState bs)
 
 	if (control.name() == "fader_touch") {
 
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("fader touch, press ? %1\n", (bs == press)));
+
 		state = (bs == press);
-		
+
 		gain().set_in_use (state);
 		
 		if (ARDOUR::Config->get_mackie_emulation() == "bcf" && state) {
