@@ -231,6 +231,10 @@ Strip::set_route (boost::shared_ptr<Route> r)
 	_route = r;
 
 	if (r) {
+		
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Surface %1 strip %2 now mapping route %3\n",
+								   _surface->number(), _index, _route->name()));
+		
 
 		if (has_solo()) {
 			_route->solo_control()->Changed.connect(route_connections, MISSING_INVALIDATOR, ui_bind (&Strip::notify_solo_changed, this), midi_ui_context());
@@ -269,6 +273,9 @@ Strip::set_route (boost::shared_ptr<Route> r)
 		/* Update */
 
 		notify_all ();
+	} else {
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Surface %1 strip %2 now unmapped\n",
+								   _surface->number(), _index));
 	}
 }
 

@@ -14,6 +14,10 @@ namespace MIDI {
 	class Parser;
 }
 
+namespace ARDOUR {
+	class Route;
+}
+
 class MidiByteArray;
 class MackieControlProtocol;
 
@@ -73,6 +77,8 @@ public:
 	Groups groups;
 
 	SurfacePort& port() const { return *_port; }
+
+	void map_routes (const std::vector<boost::shared_ptr<ARDOUR::Route> >& routes);
 
 	const MidiByteArray& sysex_hdr() const;
 

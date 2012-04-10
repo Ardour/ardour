@@ -606,3 +606,17 @@ Surface::jog_wheel_state_display (JogWheel::State state)
 	}
 }
 
+void
+Surface::map_routes (const vector<boost::shared_ptr<Route> >& routes)
+{
+	vector<boost::shared_ptr<Route> >::const_iterator r;
+	Strips::iterator s;
+
+	for (s = strips.begin(); s != strips.end(); ++s) {
+		(*s)->set_route (boost::shared_ptr<Route>());
+	}
+
+	for (r = routes.begin(), s = strips.begin(); r != routes.end() && s != strips.end(); ++r, ++s) {
+		(*s)->set_route (*r);
+	}
+}

@@ -235,15 +235,19 @@ MackieControlProtocol::n_strips() const
 void 
 MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 {
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("switch banking to start at %1 force ? %2 current = %3\n", initial, force, _current_initial_bank));
+
 	if (initial == _current_initial_bank && !force) {
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("not switching to %1\n", initial));
 		return;
 	}
 
 	Sorted sorted = get_sorted_routes();
 	uint32_t strip_cnt = n_strips();
 
-	if (sorted.size() <= strip_cnt) {
+	if (sorted.size() <= strip_cnt && !force) {
 		/* no banking */
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("not switching to %1\n", initial));
 		return;
 	}
 
@@ -265,34 +269,26 @@ MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 
 	if (_current_initial_bank <= sorted.size()) {
 
-		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("switch to %1, %2\n", _current_initial_bank, strip_cnt));
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("switch to %1, %2, available routes %3\n", _current_initial_bank, strip_cnt, sorted.size()));
 
 		// link routes to strips
 
-		Surfaces::iterator si = surfaces.begin();
-		uint32_t surface_strip_cnt = (*si)->n_strips();
-		uint32_t surface_strip = 0;
+		Sorted::iterator r = sorted.begin() + _current_initial_bank;
 		
-		for (Sorted::iterator r = sorted.begin() + _current_initial_bank; r != sorted.end(); ++r) {
+		for (Surfaces::iterator si = surfaces.begin(); si != surfaces.end(); ++si) {
+			vector<boost::shared_ptr<Route> > routes;
+			uint32_t added = 0;
 
-			Strip* strip = (*si)->nth_strip (surface_strip);
+			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("surface has %1 strips\n", (*si)->n_strips()));
 
-			if (strip) {
-				strip->set_route (*r);
+			for (; r != sorted.end() && added < (*si)->n_strips(); ++r, ++added) {
+				routes.push_back (*r);
+				cerr << "\t\tadded " << (*r)->name() << endl;
 			}
 
-			if (surface_strip == surface_strip_cnt) {
+			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("give surface %1 routes\n", routes.size()));
 
-				/* move to next surface */
-
-				surface_strip = 0;
-				++si;
-
-				if (si == surfaces.end()) {
-					break;
-				}
-				surface_strip_cnt += (*si)->n_strips();
-			}
+			(*si)->map_routes (routes);
 		}
 	}
 
