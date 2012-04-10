@@ -51,10 +51,11 @@ Port::Port (string const & name, Flags flags, jack_client_t* jack_client)
 	, _jack_client (jack_client)
 	, _jack_port (0)
 	, _last_read_index (0)
-	, xthread (true)
 	, output_fifo (512)
 	, input_fifo (1024)
+	, xthread (true)
 	, _flags (flags)
+	, _centrally_parsed (true)
 {
 	assert (jack_client);
 	init (name, flags);
@@ -66,9 +67,10 @@ Port::Port (const XMLNode& node, jack_client_t* jack_client)
 	, _jack_client (jack_client)
 	, _jack_port (0)
 	, _last_read_index (0)
-	, xthread (true)
 	, output_fifo (512)
 	, input_fifo (1024)
+	, xthread (true)
+	, _centrally_parsed (true)
 {
 	assert (jack_client);
 	

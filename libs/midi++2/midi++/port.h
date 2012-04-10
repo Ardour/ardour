@@ -108,6 +108,9 @@ class Port {
 	const char *name () const   { return _tagname.c_str(); }
 	bool   ok ()   const        { return _ok; }
 
+	bool centrally_parsed() const { return _centrally_parsed; }
+	void set_centrally_parsed(bool yn) { _centrally_parsed = yn; }
+
 	bool receives_input () const {
 		return _flags == IsInput;
 	}
@@ -139,23 +142,28 @@ class Port {
 	static PBD::Signal0<void> JackHalted;
 
 private:	
-	bool             _ok;
-	bool             _currently_in_cycle;
-	pframes_t        _nframes_this_cycle;
-	std::string      _tagname;
-	size_t           _number;
-	Channel          *_channel[16];
-	Parser           *_parser;
+	bool              _ok;
+	bool              _currently_in_cycle;
+	pframes_t         _nframes_this_cycle;
+	std::string       _tagname;
+	size_t            _number;
+	Channel*          _channel[16];
+	Parser*           _parser;
+	jack_client_t*    _jack_client;
+	jack_port_t*      _jack_port;
+	framecnt_t        _last_read_index;
+	timestamp_t       _last_write_timestamp;
+	RingBuffer< Evoral::Event<double> > output_fifo;
+	Evoral::EventRingBuffer<timestamp_t> input_fifo;
+	Glib::Mutex output_fifo_lock;
+	CrossThreadChannel xthread;
+	Flags             _flags;
+	bool              _centrally_parsed;
+
 
 	int create_port ();
 
-	jack_client_t* _jack_client;
-	jack_port_t*   _jack_port;
-	framecnt_t     _last_read_index;
-	timestamp_t    _last_write_timestamp;
-
 	/** Channel used to signal to the MidiControlUI that input has arrived */
-	CrossThreadChannel xthread;
 	
 	std::string _connections;
 	PBD::ScopedConnection connect_connection;
@@ -167,12 +175,6 @@ private:
 
 	static pthread_t _process_thread;
 
-	RingBuffer< Evoral::Event<double> > output_fifo;
-	Evoral::EventRingBuffer<timestamp_t> input_fifo;
-
-	Glib::Mutex output_fifo_lock;
-
-	Flags _flags;
 };
 
 struct PortSet {
