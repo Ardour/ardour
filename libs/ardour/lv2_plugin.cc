@@ -167,8 +167,8 @@ LV2Plugin::init (LV2World& world, LilvPlugin* plugin, nframes_t rate)
 	for (uint32_t i = 0; i < num_ports; ++i) {
 		params[i] = NULL;
 	}
-	parameter_input (NS_TIME "beatsPerMinute", params, (void**)&_bpm_control_port);
-	parameter_input (LILV_NS_LV2 "freeWheeling", params, (void**)&_freewheel_control_port);
+	designated_input (NS_TIME "beatsPerMinute", params, (void**)&_bpm_control_port);
+	designated_input (LILV_NS_LV2 "freeWheeling", params, (void**)&_freewheel_control_port);
 
 	for (uint32_t i = 0; i < num_ports; ++i) {
 		if (parameter_is_control(i)) {
@@ -645,7 +645,7 @@ LV2Plugin::latency_compute_run ()
 }
 
 LilvPort*
-LV2Plugin::parameter_input (const char* uri, void** bufptrs[], void** bufptr)
+LV2Plugin::designated_input (const char* uri, void** bufptrs[], void** bufptr)
 {
 	LilvPort* port = NULL;
 #ifdef HAVE_NEW_LILV
