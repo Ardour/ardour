@@ -349,16 +349,20 @@ Strip::notify_gain_changed (bool force_update)
 {
 	if (_route) {
 		Fader & fader = gain();
-		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("route %1 gain change, update fader %2 on port %3\n", 
+
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("route %1 gain change, update fader %2 on port %3 in-use ? %4\n", 
 								   _route->name(), 
 								   fader.raw_id(),
-								   _surface->port().output_port().name()));
+								   _surface->port().output_port().name(),
+								   fader.in_use()));
 		if (!fader.in_use()) {
 			float gain_value = gain_to_slider_position (_route->gain_control()->get_value());
 			// check that something has actually changed
 			if (force_update || gain_value != _last_gain_written) {
 				_surface->write (builder.build_fader (fader, gain_value));
 				_last_gain_written = gain_value;
+			} else {
+				DEBUG_TRACE (DEBUG::MackieControl, string_compose ("fader not updated because gain still equals %1\n", gain_value));
 			}
 		}
 	}
