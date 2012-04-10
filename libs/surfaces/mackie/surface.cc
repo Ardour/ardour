@@ -59,8 +59,15 @@ Surface::Surface (MackieControlProtocol& mcp, jack_client_t* jack, const std::st
 	DEBUG_TRACE (DEBUG::MackieControl, "Surface::init\n");
 	
 	MIDI::Manager * mm = MIDI::Manager::instance();
-	MIDI::Port * input = mm->add_port (new MIDI::Port (string_compose (_("%1 in"), device_name), MIDI::Port::IsInput, jack));
-	MIDI::Port * output = mm->add_port (new MIDI::Port (string_compose (_("%1 out"), device_name), MIDI::Port::IsOutput, jack));
+
+	MIDI::Port * input = new MIDI::Port (string_compose (_("%1 in"), device_name), MIDI::Port::IsInput, jack);
+	MIDI::Port * output =new MIDI::Port (string_compose (_("%1 out"), device_name), MIDI::Port::IsOutput, jack);
+
+	input->set_centrally_parsed (false);
+	output->set_centrally_parsed (false);
+	
+	mm->add_port (input);
+	mm->add_port (output);
 
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("surface has ports named %1 and %2\n",
 							   input->name(), output->name()));

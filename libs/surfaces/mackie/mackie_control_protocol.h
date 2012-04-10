@@ -84,6 +84,8 @@ class MackieControlProtocol
 	MackieControlProtocol(ARDOUR::Session &);
 	virtual ~MackieControlProtocol();
 
+	static MackieControlProtocol* instance() { return _instance; }
+
 	int set_active (bool yn);
 
 	XMLNode& get_state ();
@@ -315,6 +317,8 @@ class MackieControlProtocol
 
   private:
 
+	static MackieControlProtocol* _instance;
+
 	void create_surfaces ();
 	void port_connected_or_disconnected (std::string, std::string, bool);
 	bool control_in_use_timeout (Mackie::Surface*, Mackie::Control *, Mackie::Control *);
@@ -364,6 +368,13 @@ class MackieControlProtocol
 	int  _modifier_state;
 
 	Mackie::MackieMidiBuilder builder;
+
+	typedef std::list<GSource*> PortSources;
+	PortSources port_sources;
+
+	bool midi_input_handler (Glib::IOCondition ioc, MIDI::Port* port);
+	void clear_ports ();
+
 };
 
 #endif // ardour_mackie_control_protocol_h

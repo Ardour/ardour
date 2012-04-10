@@ -42,7 +42,6 @@
 #include "ardour/dB.h"
 #include "ardour/debug.h"
 #include "ardour/location.h"
-#include "ardour/midi_ui.h"
 #include "ardour/meter.h"
 #include "ardour/panner.h"
 #include "ardour/panner_shell.h"
@@ -71,21 +70,22 @@ using namespace ARDOUR;
 using namespace std;
 using namespace Mackie;
 using namespace PBD;
+using namespace Glib;
 
 #include "i18n.h"
 
 #include "pbd/abstract_ui.cc" // instantiate template
 
-#define midi_ui_context() MidiControlUI::instance() /* a UICallback-derived object that specifies the event loop for signal handling */
 #define ui_bind(f, ...) boost::protect (boost::bind (f, __VA_ARGS__))
-
 extern PBD::EventLoop::InvalidationRecord* __invalidator (sigc::trackable& trackable, const char*, int);
-#define invalidator(x) __invalidator (*(MidiControlUI::instance()), __FILE__, __LINE__)
+#define invalidator() __invalidator ((*this), __FILE__, __LINE__)
 
 const int MackieControlProtocol::MODIFIER_OPTION = 0x1;
 const int MackieControlProtocol::MODIFIER_CONTROL = 0x2;
 const int MackieControlProtocol::MODIFIER_SHIFT = 0x3;
 const int MackieControlProtocol::MODIFIER_CMDALT = 0x4;
+
+MackieControlProtocol* MackieControlProtocol::_instance = 0;
 
 bool MackieControlProtocol::probe()
 {
@@ -107,9 +107,11 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::MackieControlProtocol\n");
 
 	AudioEngine::instance()->PortConnectedOrDisconnected.connect (
-		audio_engine_connections, invalidator (*this), ui_bind (&MackieControlProtocol::port_connected_or_disconnected, this, _2, _4, _5),
-		midi_ui_context ()
+		audio_engine_connections, invalidator (), ui_bind (&MackieControlProtocol::port_connected_or_disconnected, this, _2, _4, _5),
+		this
 		);
+
+	_instance = this;
 }
 
 MackieControlProtocol::~MackieControlProtocol()
@@ -129,13 +131,26 @@ MackieControlProtocol::~MackieControlProtocol()
 	}
 
 	DEBUG_TRACE (DEBUG::MackieControl, "finished ~MackieControlProtocol::MackieControlProtocol\n");
+
+	_instance = 0;
 }
 
 void
 MackieControlProtocol::thread_init ()
 {
+	struct sched_param rtparam;
+
+	pthread_set_name (X_("MackieControl"));
+
 	PBD::notify_gui_about_thread_creation (X_("gui"), pthread_self(), X_("MackieControl"), 2048);
 	ARDOUR::SessionEvent::create_per_thread_pool (X_("MackieControl"), 128);
+
+	memset (&rtparam, 0, sizeof (rtparam));
+	rtparam.sched_priority = 9; /* XXX should be relative to audio (JACK) thread */
+
+	if (pthread_setschedparam (pthread_self(), SCHED_FIFO, &rtparam) != 0) {
+		// do we care? not particularly.
+	}
 }
 
 // go to the previous track.
@@ -307,6 +322,10 @@ MackieControlProtocol::set_active (bool yn)
 	{
 		if (yn) {
 
+			/* start event loop */
+
+			BaseUI::run ();
+
 			create_surfaces ();
 			connect_session_signals ();
 			
@@ -432,23 +451,23 @@ void
 MackieControlProtocol::connect_session_signals()
 {
 	// receive routes added
-	session->RouteAdded.connect(session_connections, MISSING_INVALIDATOR, ui_bind (&MackieControlProtocol::notify_route_added, this, _1), midi_ui_context());
+	session->RouteAdded.connect(session_connections, invalidator(), ui_bind (&MackieControlProtocol::notify_route_added, this, _1), this);
 	// receive record state toggled
-	session->RecordStateChanged.connect(session_connections, MISSING_INVALIDATOR, ui_bind (&MackieControlProtocol::notify_record_state_changed, this), midi_ui_context());
+	session->RecordStateChanged.connect(session_connections, invalidator(), ui_bind (&MackieControlProtocol::notify_record_state_changed, this), this);
 	// receive transport state changed
-	session->TransportStateChange.connect(session_connections, MISSING_INVALIDATOR, ui_bind (&MackieControlProtocol::notify_transport_state_changed, this), midi_ui_context());
+	session->TransportStateChange.connect(session_connections, invalidator(), ui_bind (&MackieControlProtocol::notify_transport_state_changed, this), this);
 	// receive punch-in and punch-out
-	Config->ParameterChanged.connect(session_connections, MISSING_INVALIDATOR, ui_bind (&MackieControlProtocol::notify_parameter_changed, this, _1), midi_ui_context());
-	session->config.ParameterChanged.connect (session_connections, MISSING_INVALIDATOR, ui_bind (&MackieControlProtocol::notify_parameter_changed, this, _1), midi_ui_context());
+	Config->ParameterChanged.connect(session_connections, invalidator(), ui_bind (&MackieControlProtocol::notify_parameter_changed, this, _1), this);
+	session->config.ParameterChanged.connect (session_connections, invalidator(), ui_bind (&MackieControlProtocol::notify_parameter_changed, this, _1), this);
 	// receive rude solo changed
-	session->SoloActive.connect(session_connections, MISSING_INVALIDATOR, ui_bind (&MackieControlProtocol::notify_solo_active_changed, this, _1), midi_ui_context());
+	session->SoloActive.connect(session_connections, invalidator(), ui_bind (&MackieControlProtocol::notify_solo_active_changed, this, _1), this);
 
 	// make sure remote id changed signals reach here
 	// see also notify_route_added
 	Sorted sorted = get_sorted_routes();
 
 	for (Sorted::iterator it = sorted.begin(); it != sorted.end(); ++it) {
-		(*it)->RemoteControlIDChanged.connect (route_connections, MISSING_INVALIDATOR, ui_bind(&MackieControlProtocol::notify_remote_id_changed, this), midi_ui_context());
+		(*it)->RemoteControlIDChanged.connect (route_connections, invalidator(), ui_bind(&MackieControlProtocol::notify_remote_id_changed, this), this);
 	}
 }
 
@@ -480,12 +499,29 @@ MackieControlProtocol::create_surfaces ()
 			ARDOUR::DataType::MIDI,
 			session->engine().make_port_name_non_relative (surface->port().output_port().name())
 			);
+
+		int fd;
+		MIDI::Port& input_port (surface->port().input_port());
+		
+		if ((fd = input_port.selectable ()) >= 0) {
+			Glib::RefPtr<IOSource> psrc = IOSource::create (fd, IO_IN|IO_HUP|IO_ERR);
+
+			psrc->connect (sigc::bind (sigc::mem_fun (this, &MackieControlProtocol::midi_input_handler), &input_port));
+			psrc->attach (main_loop()->get_context());
+			
+			// glibmm hack: for now, store only the GSource*
+
+			port_sources.push_back (psrc->gobj());
+			g_source_ref (psrc->gobj());
+		}
 	}
 }
 
 void 
 MackieControlProtocol::close()
 {
+	clear_ports ();
+
 	port_connections.drop_connections ();
 	session_connections.drop_connections ();
 	route_connections.drop_connections ();
@@ -658,7 +694,7 @@ MackieControlProtocol::notify_route_added (ARDOUR::RouteList & rl)
 	typedef ARDOUR::RouteList ARS;
 
 	for (ARS::iterator it = rl.begin(); it != rl.end(); ++it) {
-		(*it)->RemoteControlIDChanged.connect (route_connections, MISSING_INVALIDATOR, ui_bind (&MackieControlProtocol::notify_remote_id_changed, this), midi_ui_context());
+		(*it)->RemoteControlIDChanged.connect (route_connections, invalidator(), ui_bind (&MackieControlProtocol::notify_remote_id_changed, this), this);
 	}
 }
 
@@ -757,7 +793,7 @@ MackieControlProtocol::do_request (MackieControlUIRequest* req)
 {
 	if (req->type == CallSlot) {
 
-		call_slot (MISSING_INVALIDATOR, req->the_slot);
+		call_slot (invalidator(), req->the_slot);
 
 	} else if (req->type == Quit) {
 
@@ -787,7 +823,7 @@ MackieControlProtocol::add_in_use_timeout (Surface& surface, Control& in_use_con
 		sigc::bind (sigc::mem_fun (*this, &MackieControlProtocol::control_in_use_timeout), &surface, &in_use_control, touch_control));
 	in_use_control.in_use_touch_control = touch_control;
 	
-	timeout->attach (MidiControlUI::instance()->main_loop()->get_context());
+	timeout->attach (main_loop()->get_context());
 
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("timeout queued for surface %1, control %2 touch control %3\n",
 							   surface.number(), &in_use_control, touch_control));}
@@ -1367,5 +1403,37 @@ MackieControlProtocol::select_track (boost::shared_ptr<Route> r)
 			_current_selected_track = r->remote_control_id();;
 		}
 	}
+}
+
+bool
+MackieControlProtocol::midi_input_handler (IOCondition ioc, MIDI::Port* port)
+{
+	DEBUG_TRACE (DEBUG::MidiIO, string_compose ("something happend on  %1\n", port->name()));
+
+	if (ioc & ~IO_IN) {
+		return false;
+	}
+
+	if (ioc & IO_IN) {
+
+		CrossThreadChannel::drain (port->selectable());
+
+		DEBUG_TRACE (DEBUG::MidiIO, string_compose ("data available on %1\n", port->name()));
+		framepos_t now = session->engine().frame_time();
+		port->parse (now);
+	}
+
+	return true;
+}
+
+void
+MackieControlProtocol::clear_ports ()
+{
+	for (PortSources::iterator i = port_sources.begin(); i != port_sources.end(); ++i) {
+		g_source_destroy (*i);
+		g_source_unref (*i);
+	}
+
+	port_sources.clear ();
 }
 

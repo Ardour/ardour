@@ -51,11 +51,11 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-#define midi_ui_context() ARDOUR::MidiControlUI::instance() /* a UICallback-derived object that specifies the event loop for signal handling */
+#define ui_context() MackieControlProtocol::instance() /* a UICallback-derived object that specifies the event loop for signal handling */
 #define ui_bind(f, ...) boost::protect (boost::bind (f, __VA_ARGS__))
 
 extern PBD::EventLoop::InvalidationRecord* __invalidator (sigc::trackable& trackable, const char*, int);
-#define invalidator(x) __invalidator (*(MidiControlUI::instance()), __FILE__, __LINE__)
+#define invalidator() __invalidator (*(MackieControlProtocol::instance()), __FILE__, __LINE__)
 
 Strip::Strip (Surface& s, const std::string& name, int index, StripControlDefinition* ctls)
 	: Group (name)
@@ -237,34 +237,34 @@ Strip::set_route (boost::shared_ptr<Route> r)
 		
 
 		if (has_solo()) {
-			_route->solo_control()->Changed.connect(route_connections, MISSING_INVALIDATOR, ui_bind (&Strip::notify_solo_changed, this), midi_ui_context());
+			_route->solo_control()->Changed.connect(route_connections, invalidator(), ui_bind (&Strip::notify_solo_changed, this), ui_context());
 		}
 		if (has_mute()) {
-			_route->mute_control()->Changed.connect(route_connections, MISSING_INVALIDATOR, ui_bind (&Strip::notify_mute_changed, this), midi_ui_context());
+			_route->mute_control()->Changed.connect(route_connections, invalidator(), ui_bind (&Strip::notify_mute_changed, this), ui_context());
 		}
 		
 		if (has_gain()) {
-			_route->gain_control()->Changed.connect(route_connections, MISSING_INVALIDATOR, ui_bind (&Strip::notify_gain_changed, this, false), midi_ui_context());
+			_route->gain_control()->Changed.connect(route_connections, invalidator(), ui_bind (&Strip::notify_gain_changed, this, false), ui_context());
 		}
 		
-		_route->PropertyChanged.connect (route_connections, MISSING_INVALIDATOR, ui_bind (&Strip::notify_property_changed, this, _1), midi_ui_context());
+		_route->PropertyChanged.connect (route_connections, invalidator(), ui_bind (&Strip::notify_property_changed, this, _1), ui_context());
 		
 		if (_route->pannable()) {
-			_route->pannable()->pan_azimuth_control->Changed.connect(route_connections, MISSING_INVALIDATOR, ui_bind (&Strip::notify_panner_changed, this, false), midi_ui_context());
-			_route->pannable()->pan_width_control->Changed.connect(route_connections, MISSING_INVALIDATOR, ui_bind (&Strip::notify_panner_changed, this, false), midi_ui_context());
+			_route->pannable()->pan_azimuth_control->Changed.connect(route_connections, invalidator(), ui_bind (&Strip::notify_panner_changed, this, false), ui_context());
+			_route->pannable()->pan_width_control->Changed.connect(route_connections, invalidator(), ui_bind (&Strip::notify_panner_changed, this, false), ui_context());
 		}
 		
 		boost::shared_ptr<Track> trk = boost::dynamic_pointer_cast<ARDOUR::Track>(_route);
 	
 		if (trk) {
-			trk->rec_enable_control()->Changed .connect(route_connections, MISSING_INVALIDATOR, ui_bind (&Strip::notify_record_enable_changed, this), midi_ui_context());
+			trk->rec_enable_control()->Changed .connect(route_connections, invalidator(), ui_bind (&Strip::notify_record_enable_changed, this), ui_context());
 		}
 		
 		// TODO this works when a currently-banked route is made inactive, but not
 		// when a route is activated which should be currently banked.
 		
-		_route->active_changed.connect (route_connections, MISSING_INVALIDATOR, ui_bind (&Strip::notify_active_changed, this), midi_ui_context());
-		_route->DropReferences.connect (route_connections, MISSING_INVALIDATOR, ui_bind (&Strip::notify_route_deleted, this), midi_ui_context());
+		_route->active_changed.connect (route_connections, invalidator(), ui_bind (&Strip::notify_active_changed, this), ui_context());
+		_route->DropReferences.connect (route_connections, invalidator(), ui_bind (&Strip::notify_route_deleted, this), ui_context());
 	
 		// TODO
 		// SelectedChanged
