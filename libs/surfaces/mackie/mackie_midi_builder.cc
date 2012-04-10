@@ -186,11 +186,11 @@ MidiByteArray MackieMidiBuilder::two_char_display (const std::string & msg, cons
 	if  (msg.length() != 2) throw MackieControlException ("MackieMidiBuilder::two_char_display: msg must be exactly 2 characters");
 	if  (dots.length() != 2) throw MackieControlException ("MackieMidiBuilder::two_char_display: dots must be exactly 2 characters");
 	
-	MidiByteArray bytes (5, 0xb0, 0x4a, 0x00, 0x4b, 0x00);
+	MidiByteArray bytes (6, 0xb0, 0x4a, 0x00, 0xb0, 0x4b, 0x00);
 	
 	// chars are understood by the surface in right-to-left order
 	// could also exchange the 0x4a and 0x4b, above
-	bytes[4] = translate_seven_segment (msg[0]) +  (dots[0] == '.' ? 0x40 : 0x00);
+	bytes[5] = translate_seven_segment (msg[0]) +  (dots[0] == '.' ? 0x40 : 0x00);
 	bytes[2] = translate_seven_segment (msg[1]) +  (dots[1] == '.' ? 0x40 : 0x00);
 	
 	return bytes;
