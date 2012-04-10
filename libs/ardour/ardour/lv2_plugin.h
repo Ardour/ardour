@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2008-2011 Paul Davis
+    Copyright (C) 2008-2012 Paul Davis
     Author: David Robillard
 
     This program is free software; you can redistribute it and/or modify
@@ -132,8 +132,8 @@ class LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 
 	Worker* worker() { return _worker; }
 
-	void work(uint32_t size, const void* data);
-	void work_response(uint32_t size, const void* data);
+	int work(uint32_t size, const void* data);
+	int work_response(uint32_t size, const void* data);
 
 	static URIMap _uri_map;
 
@@ -155,7 +155,9 @@ class LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	float*        _shadow_data;
 	float*        _defaults;
 	LV2_Evbuf**   _ev_buffers;
-	float*        _latency_control_port;
+	float*        _bpm_control_port;  ///< Special input set by ardour
+	float*        _freewheel_control_port;  ///< Special input set by ardour
+	float*        _latency_control_port;  ///< Special output set by ardour
 	PBD::ID       _insert_id;
 
 	typedef enum {

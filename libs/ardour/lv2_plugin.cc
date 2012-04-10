@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2008-2011 Paul Davis
+    Copyright (C) 2008-2012 Paul Davis
     Author: David Robillard
 
     This program is free software; you can redistribute it and/or modify
@@ -43,6 +43,7 @@
 #include "ardour/debug.h"
 #include "ardour/lv2_plugin.h"
 #include "ardour/session.h"
+#include "ardour/tempo.h"
 #include "ardour/worker.h"
 
 #include "i18n.h"
@@ -124,7 +125,7 @@ work_schedule(LV2_Worker_Schedule_Handle handle,
 	LV2Plugin* plugin = (LV2Plugin*)handle;
 	if (plugin->session().engine().freewheeling()) {
 		// Freewheeling, do the work immediately in this (audio) thread
-		plugin->work(size, data);
+		return (LV2_Worker_Status)plugin->work(size, data);
 	} else {
 		// Enqueue message for the worker thread
 		return plugin->worker()->schedule(size, data) ?
@@ -141,7 +142,7 @@ work_respond(LV2_Worker_Respond_Handle handle,
 	LV2Plugin* plugin = (LV2Plugin*)handle;
 	if (plugin->session().engine().freewheeling()) {
 		// Freewheeling, respond immediately in this (audio) thread
-		plugin->work_response(size, data);
+		return (LV2_Worker_Status)plugin->work_response(size, data);
 	} else {
 		// Enqueue response for the worker
 		return plugin->worker()->respond(size, data) ?
@@ -156,6 +157,12 @@ struct LV2Plugin::Impl {
 	       , state(0)
 #endif
 	{}
+	
+	/** Find the LV2 input port with the given designation.
+	 * If found, bufptrs[port_index] will be set to bufptr.
+	 */
+	LilvPort* designated_input (const char* uri, void** bufptrs[], void** bufptr);
+
 	LilvPlugin*           plugin;
 	const LilvUI*         ui;
 	const LilvNode*       ui_type;
@@ -326,16 +333,26 @@ LV2Plugin::init(void* c_plugin, framecnt_t rate)
 		_port_flags.push_back(flags);
 	}
 
-	const bool     latent       = lilv_plugin_has_latency(plugin);
-	const uint32_t latency_port = (latent)
-	    ? lilv_plugin_get_latency_port_index(plugin)
-		: 0;
-
 	_control_data = new float[num_ports];
 	_shadow_data  = new float[num_ports];
 	_defaults     = new float[num_ports];
 	_ev_buffers   = new LV2_Evbuf*[num_ports];
 	memset(_ev_buffers, 0, sizeof(LV2_Evbuf*) * num_ports);
+
+	const bool     latent        = lilv_plugin_has_latency(plugin);
+	const uint32_t latency_index = (latent)
+		? lilv_plugin_get_latency_port_index(plugin)
+		: 0;
+
+#define NS_TIME "http://lv2plug.in/ns/ext/time#"
+	
+	// Build an array of pointers to special parameter buffers
+	void*** params = new void**[num_ports];
+	for (uint32_t i = 0; i < num_ports; ++i) {
+		params[i] = NULL;
+	}
+	_impl->designated_input (NS_TIME "beatsPerMinute", params, (void**)&_bpm_control_port);
+	_impl->designated_input (LILV_NS_LV2 "freeWheeling", params, (void**)&_freewheel_control_port);
 
 	for (uint32_t i = 0; i < num_ports; ++i) {
 		const LilvPort* port = lilv_plugin_get_port_by_index(plugin, i);
@@ -356,18 +373,23 @@ LV2Plugin::init(void* c_plugin, framecnt_t rate)
 
 			lilv_instance_connect_port(_impl->instance, i, &_control_data[i]);
 
-			if (latent && ( i == latency_port) ) {
+			if (latent && i == latency_index) {
 				_latency_control_port  = &_control_data[i];
 				*_latency_control_port = 0;
 			}
 
 			if (parameter_is_input(i)) {
 				_shadow_data[i] = default_value(i);
+				if (params[i]) {
+					*params[i] = (void*)&_shadow_data[i];
+				}
 			}
 		} else {
 			_defaults[i] = 0.0f;
 		}
 	}
+
+	delete[] params;
 
 	LilvUIs* uis = lilv_plugin_get_uis(plugin);
 	if (lilv_uis_size(uis) > 0) {
@@ -948,17 +970,18 @@ LV2Plugin::emit_to_ui(void* controller, UIMessageSink sink)
 	}
 }
 
-void
+int
 LV2Plugin::work(uint32_t size, const void* data)
 {
-	_impl->work_iface->work(
+	return _impl->work_iface->work(
 		_impl->instance->lv2_handle, work_respond, this, size, data);
 }
 
-void
+int
 LV2Plugin::work_response(uint32_t size, const void* data)
 {
-	_impl->work_iface->work_response(_impl->instance->lv2_handle, size, data);
+	return _impl->work_iface->work_response(
+		_impl->instance->lv2_handle, size, data);
 }
 
 void
@@ -1169,6 +1192,16 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 	Plugin::connect_and_run(bufs, in_map, out_map, nframes, offset);
 
 	cycles_t then = get_cycles();
+
+	if (_freewheel_control_port) {
+		*_freewheel_control_port = _session.engine().freewheeling ();
+	}
+
+	if (_bpm_control_port) {
+		TempoMap& tmap (_session.tempo_map ());
+		Tempo tempo = tmap.tempo_at (_session.transport_frame () + offset);
+		*_bpm_control_port = tempo.beats_per_minute ();
+	}
 
 	ChanCount bufs_count;
 	bufs_count.set(DataType::AUDIO, 1);
@@ -1419,6 +1452,22 @@ LV2Plugin::latency_compute_run()
 
 	run(bufsize);
 	deactivate();
+}
+
+LilvPort*
+LV2Plugin::Impl::designated_input (const char* uri, void** bufptrs[], void** bufptr)
+{
+	LilvPort* port = NULL;
+#ifdef HAVE_NEW_LILV
+	LilvNode* designation = lilv_new_uri(_world.world, uri);
+	port = lilv_plugin_get_port_by_designation(
+		plugin, _world.lv2_InputPort, designation);
+	lilv_node_free(designation);
+	if (port) {
+		bufptrs[lilv_port_get_index(plugin, port)] = bufptr;
+	}
+#endif
+	return port;
 }
 
 LV2World::LV2World()

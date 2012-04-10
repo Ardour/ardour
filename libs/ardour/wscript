@@ -261,7 +261,7 @@ def configure(conf):
         autowaf.check_pkg(conf, 'lilv-0', uselib_store='LILV',
                           atleast_version='0.0.0', mandatory=False)
         autowaf.check_pkg(conf, 'lilv-0', uselib_store='NEW_LILV',
-                          atleast_version='0.11.0', mandatory=False)
+                          atleast_version='0.14.0', mandatory=False)
         if conf.is_defined('HAVE_LILV'):
             autowaf.check_pkg(conf, 'suil-0', uselib_store='SUIL',
                               atleast_version='0.2.0', mandatory=False)

@@ -39,12 +39,12 @@ public:
 	/**
 	   Do some work in the worker thread.
 	*/
-	virtual void work(uint32_t size, const void* data) = 0;
+	virtual int work(uint32_t size, const void* data) = 0;
 
 	/**
 	   Handle a response from the worker thread in the audio thread.
 	*/
-	virtual void work_response(uint32_t size, const void* data) = 0;
+	virtual int work_response(uint32_t size, const void* data) = 0;
 };
 
 /**
