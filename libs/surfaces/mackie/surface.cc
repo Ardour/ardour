@@ -306,6 +306,9 @@ Surface::connect_to_signals ()
 {
 	if (!_connected) {
 
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Surface %1 connecting to signals on port %2\n", 
+								   number(), _port->input_port().name()));
+
 		MIDI::Parser* p = _port->input_port().parser();
 
 		/* V-Pot messages are Controller */

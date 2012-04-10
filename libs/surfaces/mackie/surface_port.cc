@@ -126,16 +126,12 @@ void SurfacePort::write (const MidiByteArray & mba)
 		return;
 	}
 
-#ifdef PORT_DEBUG
-	cout << "SurfacePort::write: " << mba << " to " << output_port().name() << endl;
-#endif
-	
-	// check active before and after lock - to make sure
-	// that the destructor doesn't destroy the mutex while
-	// it's still in use
 	if (!active()) return;
 
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("port %1 write %2\n", output_port().name(), mba));
+	
 	int count = output_port().write (mba.bytes().get(), mba.size(), 0);
+
 	if  (count != (int)mba.size()) {
 		if  (errno == 0) {
 			cout << "port overflow on " << output_port().name() << ". Did not write all of " << mba << endl;
@@ -148,9 +144,6 @@ void SurfacePort::write (const MidiByteArray & mba)
 			inactive_event();
 		}
 	}
-#ifdef PORT_DEBUG
-	cout << "SurfacePort::wrote " << count << endl;
-#endif
 }
 
 
