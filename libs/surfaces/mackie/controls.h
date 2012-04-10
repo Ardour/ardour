@@ -53,7 +53,7 @@ public:
 		fader_base_id = 0x0,
 		pot_base_id = 0x10,
 		jog_base_id = 0x3c,
-		fader_touch_button_base_id = 0x68,
+		fader_touch_button_base_id = 0xe0,
 		vselect_button_base_id = 0x20,
 		select_button_base_id = 0x18,
 		mute_button_base_id = 0x10,

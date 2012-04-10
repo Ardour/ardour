@@ -93,7 +93,7 @@ bool MackieControlProtocol::probe()
 }
 
 MackieControlProtocol::MackieControlProtocol (Session& session)
-	: ControlProtocol (session, X_("Mackie"), MidiControlUI::instance())
+	: ControlProtocol (session, X_("Mackie"), this)
 	, AbstractUI<MackieControlUIRequest> ("mackie")
 	, _current_initial_bank (0)
 	, _timecode_type (ARDOUR::AnyTime::BBT)
@@ -337,7 +337,7 @@ MackieControlProtocol::set_active (bool yn)
 
 			Glib::RefPtr<Glib::TimeoutSource> periodic_timeout = Glib::TimeoutSource::create (100); // milliseconds
 			periodic_connection = periodic_timeout->connect (sigc::mem_fun (*this, &MackieControlProtocol::periodic));
-			periodic_timeout->attach (MidiControlUI::instance()->main_loop()->get_context());
+			periodic_timeout->attach (main_loop()->get_context());
 
 		} else {
 			BaseUI::quit ();
