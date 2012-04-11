@@ -84,33 +84,6 @@ MidiByteArray MackieMidiBuilder::build_led_ring (const LedRing & led_ring, const
 		);
 }
 
-MidiByteArray MackieMidiBuilder::build_led (const Button & button, LedState ls)
-{
-	return build_led (button.led(), ls);
-}
-
-MidiByteArray MackieMidiBuilder::build_led (const Led & led, LedState ls)
-{
-	MIDI::byte state = 0;
-
-	switch  (ls.state()) {
-		case LedState::on:			
-			state = 0x7f; break;
-		case LedState::off:			
-			state = 0x00; break;
-		case LedState::flashing:	
-			state = 0x01; break;
-		case LedState::none:			
-			return MidiByteArray ();
-	}
-	
-	return MidiByteArray  (3
-		, midi_button_id
-		, led.raw_id()
-		, state
-	);
-}
-
 MidiByteArray MackieMidiBuilder::build_fader (const Fader & fader, float pos)
 {
 	int posi = int (0x3fff * pos);
@@ -146,14 +119,14 @@ MidiByteArray MackieMidiBuilder::zero_strip (Surface& surface, const Strip & str
 	return retval;
 }
 
-MidiByteArray MackieMidiBuilder::zero_control (const Control & control)
+MidiByteArray MackieMidiBuilder::zero_control (Control & control)
 {
 	switch (control.type()) {
 	case Control::type_button:
-		return build_led ((Button&)control, off);
+		return control.led().set_state (off);
 		
 	case Control::type_led:
-		return build_led ((Led&)control, off);
+		return dynamic_cast<Led&>(control).set_state (off);
 		
 	case Control::type_fader:
 		return build_fader ((Fader&)control, 0.0);

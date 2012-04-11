@@ -401,7 +401,7 @@ MackieControlProtocol::update_global_button (const string & name, LedState ls)
 
 	if (surface->controls_by_name.find (name) != surface->controls_by_name.end()) {
 		Button * button = dynamic_cast<Button*> (surface->controls_by_name[name]);
-		surface->write (builder.build_led (button->led(), ls));
+		surface->write (button->led().set_state (ls));
 	} else {
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Button %1 not found\n", name));
 	}
@@ -418,7 +418,7 @@ MackieControlProtocol::update_global_led (const string & name, LedState ls)
 
 	if (surface->controls_by_name.find (name) != surface->controls_by_name.end()) {
 		Led * led = dynamic_cast<Led*> (surface->controls_by_name[name]);
-		surface->write (builder.build_led (*led, ls));
+		surface->write (led->set_state (ls));
 	} else {
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Led %1 not found\n", name));
 	}
@@ -706,7 +706,7 @@ MackieControlProtocol::notify_solo_active_changed (bool active)
 	Button * rude_solo = reinterpret_cast<Button*> (surface->controls_by_name["solo"]);
 
 	if (rude_solo) {
-		surface->write (builder.build_led (*rude_solo, active ? flashing : off));
+		surface->write (rude_solo->led().set_state (active ? flashing : off));
 	}
 }
 
@@ -775,7 +775,7 @@ MackieControlProtocol::notify_record_state_changed ()
 			break;
 		}
 
-		surfaces.front()->write (builder.build_led (*rec, ls));
+		surfaces.front()->write (rec->led().set_state (ls));
 	} else {
 		DEBUG_TRACE (DEBUG::MackieControl, "record button control not found\n");
 	}
@@ -877,7 +877,7 @@ void
 MackieControlProtocol::update_led (Surface& surface, Button& button, Mackie::LedState ls)
 {
 	if (ls != none) {
-		surface.port().write (builder.build_led (button, ls));
+		surface.port().write (button.led().set_state (ls));
 	}
 }
 
@@ -960,8 +960,6 @@ MackieControlProtocol::handle_button_event (Surface& surface, Button& button, Bu
 		return;
 	}
 	
-	LedState ls;
-
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Handling %1 for button %2\n", (bs == press ? "press" : "release"), button.raw_id()));
 
 	ButtonMap::iterator b = button_map.find (button.raw_id());
@@ -971,13 +969,15 @@ MackieControlProtocol::handle_button_event (Surface& surface, Button& button, Bu
 		ButtonHandlers& bh (b->second);
 
 		switch  (bs) {
-		case press: ls = (this->*(bh.press)) (button); break;
-		case release: ls = (this->*(bh.release)) (button); break;
-		case neither: break;
+		case press: 
+			surface.write (button.led().set_state ((this->*(bh.press)) (button)));
+		case release: 
+			surface.write (button.led().set_state ((this->*(bh.release)) (button)));
+			break;
+		default:
+			break;
 		}
 	}
-		
-	update_led (surface, button, ls);
 }
 
 void

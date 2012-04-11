@@ -26,6 +26,7 @@ def build(bld):
             fader.cc
             gui.cc
             interface.cc
+            led.cc
             mackie_control_protocol.cc
             mackie_jog_wheel.cc
             mackie_midi_builder.cc

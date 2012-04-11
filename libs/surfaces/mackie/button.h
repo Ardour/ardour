@@ -101,9 +101,11 @@ public:
 		: Control (id, name, group)
 		, _led  (id, name + "_led", group) {}
 	
-	virtual const Led & led() const  { return _led; }
+	virtual Led & led() { return _led; }
 	
 	virtual type_t type() const { return type_button; };
+
+	MidiByteArray update_message () const;
 
 	static Control* factory (Surface&, int id, const char*, Group&);
 	

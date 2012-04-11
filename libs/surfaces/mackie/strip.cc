@@ -310,7 +310,7 @@ Strip::notify_solo_changed ()
 {
 	if (_route) {
 		Button& button = solo();
-		_surface->write (builder.build_led (button, _route->soloed()));
+		_surface->write (button.led().set_state (_route->soloed() ? on : off));
 	}
 }
 
@@ -319,7 +319,7 @@ Strip::notify_mute_changed ()
 {
 	if (_route) {
 		Button & button = mute();
-		_surface->write (builder.build_led (button, _route->muted()));
+		_surface->write (button.led().set_state (_route->muted() ? on : off));
 	}
 }
 
@@ -328,7 +328,7 @@ Strip::notify_record_enable_changed ()
 {
 	if (_route) {
 		Button & button = recenable();
-		_surface->write (builder.build_led (button, _route->record_enabled()));
+		_surface->write (button.led().set_state (_route->record_enabled() ? on : off));
 	}
 }
 
@@ -421,7 +421,7 @@ Strip::handle_button (SurfacePort & port, Control & control, ButtonState bs)
 	if (!_route) {
 		// no route so always switch the light off
 		// because no signals will be emitted by a non-route
-		_surface->write (builder.build_led (control.led(), off));
+		_surface->write (control.led().set_state  (off));
 		return false;
 	}
 

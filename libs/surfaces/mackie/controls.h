@@ -65,7 +65,7 @@ public:
 	Control (int id, std::string name, Group& group);
 	virtual ~Control() {}
 	
-	virtual const Led & led() const { throw MackieControlException ("no led available"); }
+	virtual Led & led() { throw MackieControlException ("no led available"); }
 
 	/// type() << 8 + midi id of the control. This
 	/// provides a unique id for any control on the surface.

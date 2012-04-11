@@ -17,34 +17,43 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef __ardour_mackie_control_protocol_led_h__
-#define __ardour_mackie_control_protocol_led_h__
+#include "led.h"
+#include "surface.h"
+#include "control_group.h"
 
-#include "controls.h"
-#include "midi_byte_array.h"
-#include "types.h"
+using namespace Mackie;
 
-namespace Mackie {
-
-class Led : public Control
+Control*
+Led::factory (Surface& surface, int id, const char* name, Group& group)
 {
-public:
-	Led (int id, std::string name, Group & group)
-		: Control (id, name, group)
-		, state (off)
-	{
-	}
-	
-	Led & led() { return *this; }
-	type_t type() const { return type_led; }
-	MidiByteArray set_state (LedState);
-	
-	static Control* factory (Surface&, int id, const char*, Group&);
-
-  private:
-	LedState state;
-};
-
+	Led* l = new Led (id, name, group);
+	surface.leds[id] = l;
+	surface.controls.push_back (l);
+	group.add (*l);
+	return l;
 }
 
-#endif /* __ardour_mackie_control_protocol_led_h__ */
+MidiByteArray 
+Led::set_state (LedState new_state)
+{
+	if (new_state != state) {
+		return MidiByteArray();
+	}
+	
+	state = new_state;
+
+	MIDI::byte msg = 0;
+
+	switch  (state.state()) {
+	case LedState::on:			
+		msg = 0x7f; break;
+	case LedState::off:			
+		msg = 0x00; break;
+	case LedState::flashing:	
+		msg = 0x01; break;
+	case LedState::none:			
+		return MidiByteArray ();
+	}
+	
+	return MidiByteArray  (3, 0x90, raw_id(), msg);
+}

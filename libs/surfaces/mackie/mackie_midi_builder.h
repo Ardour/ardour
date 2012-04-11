@@ -68,9 +68,6 @@ public:
 	MidiByteArray build_led_ring (const Pot & pot, const ControlState &, midi_pot_mode mode = midi_pot_mode_dot);
 	MidiByteArray build_led_ring (const LedRing & led_ring, const ControlState &, midi_pot_mode mode = midi_pot_mode_dot);
 
-  	MidiByteArray build_led (const Led & led, LedState ls);
-  	MidiByteArray build_led (const Button & button, LedState ls);
-	
 	MidiByteArray build_fader (const Fader & fader, float pos);
 
 	/// return bytes that will reset all controls to their zero positions
@@ -78,7 +75,7 @@ public:
 	MidiByteArray zero_strip (Surface&, const Strip & strip);
 	
 	// provide bytes to zero the given control
-	MidiByteArray zero_control (const Control & control);
+	MidiByteArray zero_control (Control & control);
 	
 	// display the first 2 chars of the msg in the 2 char display
 	// . is appended to the previous character, so A.B. would

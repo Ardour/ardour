@@ -98,16 +98,6 @@ Pot::factory (Surface& surface, int id, const char* name, Group& group)
 }
 
 Control*
-Led::factory (Surface& surface, int id, const char* name, Group& group)
-{
-	Led* l = new Led (id, name, group);
-	surface.leds[id] = l;
-	surface.controls.push_back (l);
-	group.add (*l);
-	return l;
-}
-
-Control*
 Jog::factory (Surface& surface, int id, const char* name, Group& group)
 {
 	Jog* j = new Jog (id, name, group);
