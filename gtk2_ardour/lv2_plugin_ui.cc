@@ -20,6 +20,7 @@
 #include "ardour/lv2_plugin.h"
 #include "ardour/plugin_manager.h"
 #include "ardour/processor.h"
+#include "ardour/session.h"
 
 #include "ardour_ui.h"
 #include "gui_thread.h"
@@ -68,10 +69,29 @@ LV2PluginUI::write_to_ui(void*       controller,
                          const void* buffer)
 {
 	LV2PluginUI* me = (LV2PluginUI*)controller;
-
 	if (me->_inst) {
 		suil_instance_port_event((SuilInstance*)me->_inst,
 					 port_index, buffer_size, format, buffer);
+	}
+}
+
+uint32_t
+LV2PluginUI::port_index(void* controller, const char* symbol)
+{
+	return ((LV2PluginUI*)controller)->_lv2->port_index(symbol);
+}
+
+void
+LV2PluginUI::touch(void*    controller,
+                   uint32_t port_index,
+                   bool     grabbed)
+{
+	LV2PluginUI*    me      = (LV2PluginUI*)controller;
+	ControllableRef control = me->_controllables[port_index];
+	if (grabbed) {
+		control->start_touch(control->session().transport_frame());
+	} else {
+		control->stop_touch(false, control->session().transport_frame());
 	}
 }
 
@@ -196,7 +216,12 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 	}
 
 	if (!ui_host) {
-		ui_host = suil_host_new(LV2PluginUI::write_from_ui, NULL, NULL, NULL);
+		ui_host = suil_host_new(LV2PluginUI::write_from_ui,
+		                        LV2PluginUI::port_index,
+		                        NULL, NULL);
+#ifdef HAVE_NEW_SUIL
+		suil_host_set_touch_func(ui_host, LV2PluginUI::touch);
+#endif
 	}
 	const char* container_type = (is_external_ui)
 		? NS_UI "external"

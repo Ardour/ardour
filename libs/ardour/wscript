@@ -265,6 +265,8 @@ def configure(conf):
         if conf.is_defined('HAVE_LILV'):
             autowaf.check_pkg(conf, 'suil-0', uselib_store='SUIL',
                               atleast_version='0.2.0', mandatory=False)
+            autowaf.check_pkg(conf, 'suil-0', uselib_store='NEW_SUIL',
+                              atleast_version='0.5.0', mandatory=False)
 
 #    autowaf.check_pkg(conf, 'soundtouch-1.0', uselib_store='SOUNDTOUCH',
 #                      mandatory=False)
