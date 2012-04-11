@@ -335,7 +335,7 @@ Surface::handle_midi_pitchbend_message (MIDI::Parser&, MIDI::pitchbend_t pb, uin
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("handle_midi pitchbend on port %3, fader = %1 value = %2\n", 
 							   fader_id, pb, _number));
 	
-	Fader* fader = faders[fader_id];
+	Fader* fader = faders[Control::fader_base_id | fader_id];
 
 	if (fader) {
 		Strip* strip = dynamic_cast<Strip*> (&fader->group());
@@ -354,7 +354,7 @@ void
 Surface::handle_midi_note_on_message (MIDI::Parser &, MIDI::EventTwoBytes* ev)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("SurfacePort::handle_note_on %1 = %2\n", ev->note_number, ev->velocity));
-
+	
 	Button* button = buttons[ev->note_number];
 
 	if (button) {
@@ -367,7 +367,7 @@ Surface::handle_midi_note_on_message (MIDI::Parser &, MIDI::EventTwoBytes* ev)
 			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("global button %1\n", button->raw_id()));
 			_mcp.handle_button_event (*this, *button, ev->velocity == 0x7f ? press : release);
 		}
-	} 
+	}
 }
 
 void 
@@ -375,7 +375,7 @@ Surface::handle_midi_controller_message (MIDI::Parser &, MIDI::EventTwoBytes* ev
 {
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("SurfacePort::handle_midi_controller %1 = %2\n", ev->controller_number, ev->value));
 
-	Pot* pot = pots[ev->controller_number];
+	Pot* pot = pots[Control::pot_base_id | ev->controller_number];
 
 	if (!pot && ev->controller_number == Control::jog_base_id) {
 		pot = dynamic_cast<Pot*> (controls_by_name["jog"]);

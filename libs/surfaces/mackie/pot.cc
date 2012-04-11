@@ -81,7 +81,7 @@ Pot::update_message ()
 		msg +=  (lrintf (value * 10.0) + 1) & 0x0f; // 0b00001111
 	}
 
-	return MidiByteArray (3, 0xb0, raw_id(), msg);
+	return MidiByteArray (3, 0xb0, pot_base_id | raw_id(), msg);
 
 }
 	
