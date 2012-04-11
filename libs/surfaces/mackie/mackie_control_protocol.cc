@@ -211,19 +211,44 @@ MackieControlProtocol::get_sorted_routes()
 
 	// sort in remote_id order, and exclude master, control and hidden routes
 	// and any routes that are already set.
+
 	for (RouteList::iterator it = routes->begin(); it != routes->end(); ++it) {
+
 		Route & route = **it;
-		if (
-			route.active()
-			&& !route.is_master()
-			&& !route.is_hidden()
-			&& !route.is_monitor()
-			&& remote_ids.find (route.remote_control_id()) == remote_ids.end()
-			) {
-			sorted.push_back (*it);
-			remote_ids.insert (route.remote_control_id());
+
+		if (remote_ids.find (route.remote_control_id()) != remote_ids.end()) {
+			continue;
 		}
+
+		if (route.is_hidden() || route.is_master() || route.is_monitor()) {
+			continue;
+		}
+
+		switch (_view_mode) {
+		case Global:
+			break;
+		case AudioTracks:
+			break;
+		case Busses:
+			break;
+		case MidiTracks:
+			break;
+		case Dynamics:
+			break;
+		case EQ:
+			break;
+		case Loop:
+			break;
+		case Sends:
+			break;
+		case Plugins:
+			break;
+		}
+
+		sorted.push_back (*it);
+		remote_ids.insert (route.remote_control_id());
 	}
+
 	sort (sorted.begin(), sorted.end(), RouteByRemoteId());
 	return sorted;
 }
@@ -1071,34 +1096,37 @@ MackieControlProtocol::set_view_mode (ViewMode m)
 
 	boost::shared_ptr<Surface> surface = surfaces.front();
 
-	if (surface->type() != mcu) {
-		return;
+	if (surface->type() == mcu) {
+		switch (_view_mode) {
+		case Global:
+			surface->write (surface->two_char_display ("Gl"));
+			break;
+		case Dynamics:
+			surface->write (surface->two_char_display ("Dy"));
+			break;
+		case EQ:
+			surface->write (surface->two_char_display ("EQ"));
+			break;
+		case Loop:
+			surface->write (surface->two_char_display ("LP"));
+			break;
+		case AudioTracks:
+			surface->write (surface->two_char_display ("AT"));
+			break;
+		case MidiTracks:
+			surface->write (surface->two_char_display ("MT"));
+			break;
+		case Busses:
+			surface->write (surface->two_char_display ("Bs"));
+			break;
+		case Sends:
+			surface->write (surface->two_char_display ("Sn"));
+			break;
+		case Plugins:
+			surface->write (surface->two_char_display ("Pl"));
+			break;
+		}
 	}
 
-	switch (_view_mode) {
-	case Global:
-		surface->write (surface->two_char_display ("Gl"));
-		break;
-	case Dynamics:
-		surface->write (surface->two_char_display ("Dy"));
-		break;
-	case EQ:
-		surface->write (surface->two_char_display ("EQ"));
-		break;
-	case Loop:
-		surface->write (surface->two_char_display ("LP"));
-		break;
-	case AudioTracks:
-		surface->write (surface->two_char_display ("AT"));
-		break;
-	case MidiTracks:
-		surface->write (surface->two_char_display ("MT"));
-		break;
-	case Busses:
-		surface->write (surface->two_char_display ("Bs"));
-		break;
-	case Sends:
-		surface->write (surface->two_char_display ("Sn"));
-		break;
-	}
+	switch_banks (_current_initial_bank, true);
 }

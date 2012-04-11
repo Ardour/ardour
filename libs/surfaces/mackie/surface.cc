@@ -399,9 +399,9 @@ Surface::handle_midi_controller_message (MIDI::Parser &, MIDI::EventTwoBytes* ev
 		
 		// bit 6 gives the sign
 		float sign = (ev->value & 0x40) == 0 ? 1.0 : -1.0; 
-		// bits 0..3 give the velocity. we interpret this as "ticks
+		// bits 0..5 give the velocity. we interpret this as "ticks
 		// moved before this message was sent"
-		float ticks = (ev->value & 0xf);
+		float ticks = (ev->value & 0x3f);
 		if (ticks == 0) {
 			/* euphonix and perhaps other devices send zero
 			   when they mean 1, we think.

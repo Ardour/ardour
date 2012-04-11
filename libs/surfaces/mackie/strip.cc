@@ -343,6 +343,8 @@ Strip::notify_mute_changed ()
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Strip %1 mute changed\n", _index));
 	if (_route && _mute) {
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("\troute muted ? %1\n", _route->muted()));
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("mute message: %1\n", _mute->led().set_state (_route->muted() ? on : off)));
+
 		_surface->write (_mute->led().set_state (_route->muted() ? on : off));
 	}
 }

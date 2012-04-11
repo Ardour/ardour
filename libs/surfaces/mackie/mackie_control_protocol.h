@@ -97,6 +97,7 @@ class MackieControlProtocol
 		MidiTracks,
 		Busses,
 		Sends,
+		Plugins,
 	};
 
 	enum FlipMode {
