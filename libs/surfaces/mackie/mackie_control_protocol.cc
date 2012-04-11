@@ -111,6 +111,8 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 		);
 
 	_instance = this;
+
+	build_button_map ();
 }
 
 MackieControlProtocol::~MackieControlProtocol()
