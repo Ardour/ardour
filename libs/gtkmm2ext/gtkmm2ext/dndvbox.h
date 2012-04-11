@@ -571,8 +571,9 @@ private:
 	{
 		typename std::list<T*>::iterator x = find (_selection.begin(), _selection.end(), child);
 		if (x != _selection.end()) {
+			T* c = *x;
 			_selection.erase (x);
-			setup_child_state (*x);
+			setup_child_state (c);
 		}
 	}
 		
