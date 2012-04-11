@@ -329,18 +329,22 @@ Surface::connect_to_signals ()
 	}
 }
 
-
 void
 Surface::handle_midi_pitchbend_message (MIDI::Parser&, MIDI::pitchbend_t pb, uint32_t fader_id)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("handle_midi pitchbend on port %3, fader = %1 value = %2\n", 
 							   fader_id, pb, _number));
 	
-	Control* control = faders[fader_id];
+	Fader* fader = faders[fader_id];
 
-	if (control) {
-		float midi_pos = pb >> 4; // only the top 10 bytes are used
-		handle_control_event (*control, midi_pos / 1023.0);
+	if (fader) {
+		Strip* strip = dynamic_cast<Strip*> (&fader->group());
+		if (strip) {
+			float midi_pos = pb >> 4; // only the top 10 bytes are used
+			strip->handle_fader (*fader, midi_pos/1023.0);
+		} else {
+			/* master fader */
+		}
 	} else {
 		DEBUG_TRACE (DEBUG::MackieControl, "fader not found\n");
 	}
@@ -351,15 +355,19 @@ Surface::handle_midi_note_on_message (MIDI::Parser &, MIDI::EventTwoBytes* ev)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("SurfacePort::handle_note_on %1 = %2\n", ev->note_number, ev->velocity));
 
-	Control* control = buttons[ev->note_number];
+	Button* button = buttons[ev->note_number];
 
-	if (control) {
-		ControlState control_state (ev->velocity == 0x7f ? press : release);
-		control->set_in_use (control_state.button_state == press);
-		handle_control_event (*control, control_state);
-	} else {
-		DEBUG_TRACE (DEBUG::MackieControl, "button not found\n");
-	}
+	if (button) {
+		Strip* strip = dynamic_cast<Strip*> (&button->group());
+
+		if (strip) {
+			strip->handle_button (*button, ev->velocity == 0x7f ? press : release);
+		} else {
+			/* global button */
+			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("global button %1\n", button->raw_id()));
+			_mcp.handle_button_event (*this, *button, ev->velocity == 0x7f ? press : release);
+		}
+	} 
 }
 
 void 
@@ -367,13 +375,13 @@ Surface::handle_midi_controller_message (MIDI::Parser &, MIDI::EventTwoBytes* ev
 {
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("SurfacePort::handle_midi_controller %1 = %2\n", ev->controller_number, ev->value));
 
-	Control* control = pots[ev->controller_number];
+	Pot* pot = pots[ev->controller_number];
 
-	if (!control && ev->controller_number == Control::jog_base_id) {
-		control = controls_by_name["jog"];
+	if (!pot && ev->controller_number == Control::jog_base_id) {
+		pot = dynamic_cast<Pot*> (controls_by_name["jog"]);
 	}
 
-	if (control) {
+	if (pot) {
 		ControlState state;
 		
 		// bytes[2] & 0b01000000 (0x40) give sign
@@ -391,100 +399,24 @@ Surface::handle_midi_controller_message (MIDI::Parser &, MIDI::EventTwoBytes* ev
 		/* Pots only emit events when they move, not when they
 		   stop moving. So to get a stop event, we need to use a timeout.
 		*/
-		
-		control->set_in_use (true);
-		_mcp.add_in_use_timeout (*this, *control, control);
 
-		handle_control_event (*control, state);
-	} else {
-		DEBUG_TRACE (DEBUG::MackieControl, "pot not found\n");
-	}
-}
+		_mcp.add_in_use_timeout (*this, *pot, pot);
 
-void 
-Surface::handle_control_event (Control & control, const ControlState & state)
-{
-	// find the route for the control, if there is one
-	boost::shared_ptr<Route> route;
-	Strip* strip;
-
-	if ((strip = dynamic_cast<Strip*> (&control.group())) != 0) {
-		route = strip->route ();
-	}
-
-	// This handles control element events from the surface
-	// the state of the controls on the surface is usually updated
-	// from UI events.
-
-	Fader* fader = dynamic_cast<Fader*> (&control);
-	Button* button = dynamic_cast<Button*> (&control);
-	Pot* pot = dynamic_cast<Pot*> (&control);
-
-	if (fader) {
-		// find the route in the route table for the id
-		// if the route isn't available, skip it
-		// at which point the fader should just reset itself
-		if (route != 0) {
-			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("fader to %1\n", state.pos));
-			
-			route->gain_control()->set_value (slider_position_to_gain (state.pos));
-			
-			if (ARDOUR::Config->get_mackie_emulation() == "bcf") {
-				/* reset the timeout while we're still moving the fader */
-				_mcp.add_in_use_timeout (*this, control, control.in_use_touch_control);
-			}
-			
-			// must echo bytes back to slider now, because
-			// the notifier only works if the fader is not being
-			// touched. Which it is if we're getting input.
-			_port->write (fader->set_position (state.pos));
-		}
-	}
-
-	if (button) {
+		Strip* strip = dynamic_cast<Strip*> (&pot->group());
 		if (strip) {
-			strip->handle_button (*_port, control, state.button_state);
-		} else {
-			// handle all non-strip buttons
-			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("global button %1\n", control.raw_id()));
-			_mcp.handle_button_event (*this, dynamic_cast<Button&>(control), state.button_state);
-			
-		}
-	}
-		// pot (jog wheel, external control)
-
-	if (pot) {
-		if (strip) {
-			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("strip pot %1\n", control.raw_id()));
-			if (route) {
-				boost::shared_ptr<Panner> panner = route->panner_shell()->panner();
-				// pan for mono input routes, or stereo linked panners
-				if (panner) {
-					double p = panner->position ();
-                                        
-					// calculate new value, and adjust
-					p += state.delta * state.sign;
-					p = min (1.0, p);
-					p = max (0.0, p);
-					panner->set_position (p);
-				}
-			} else {
-				// it's a pot for an umnapped route, so turn all the lights off
-				Pot* pot = dynamic_cast<Pot*> (&control);
-				if (pot) {
-					_port->write (pot->set_onoff (false));
-				}
-			}
+			strip->handle_pot (*pot, state);
 		} else {
 			JogWheel* wheel = dynamic_cast<JogWheel*> (pot);
 			if (wheel) {
 				DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Jog wheel moved %1\n", state.ticks));
-				wheel->jog_event (*_port, control, state);
+				wheel->jog_event (*_port, *pot, state);
 			} else {
 				DEBUG_TRACE (DEBUG::MackieControl, string_compose ("External controller moved %1\n", state.ticks));
 				cout << "external controller" << state.ticks * state.sign << endl;
 			}
 		}
+	} else {
+		DEBUG_TRACE (DEBUG::MackieControl, "pot not found\n");
 	}
 }
 

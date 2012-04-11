@@ -77,7 +77,9 @@ public:
 	// call all signal handlers manually
 	void notify_all();
 
-	bool handle_button (SurfacePort & port, Control & control, ButtonState bs);
+	void handle_button (Button&, ButtonState bs);
+	void handle_fader (Fader&, float position);
+	void handle_pot (Pot&, ControlState&);
 
 	void periodic ();
 

@@ -32,6 +32,7 @@
 #include "ardour/track.h"
 #include "ardour/pannable.h"
 #include "ardour/panner.h"
+#include "ardour/panner_shell.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/meter.h"
 
@@ -403,49 +404,39 @@ Strip::notify_panner_changed (bool force_update)
 	}
 }
 
-bool 
-Strip::handle_button (SurfacePort & port, Control & control, ButtonState bs)
+void
+Strip::handle_button (Button& button, ButtonState bs)
 {
-	Button* button = dynamic_cast<Button*>(&control);
-	
-	if (!button) {
-		return false;
-	}
+	button.set_in_use (bs == press);
 
 	if (!_route) {
 		// no route so always switch the light off
 		// because no signals will be emitted by a non-route
-		_surface->write (button->led().set_state  (off));
-		return false;
+		_surface->write (button.led().set_state  (off));
 	}
 
-	bool state = false;
-
 	if (bs == press) {
-		if (control.name() == "recenable") {
-			state = !_route->record_enabled();
-			_route->set_record_enabled (state, this);
-		} else if (control.name() == "mute") {
-			state = !_route->muted();
-			_route->set_mute (state, this);
-		} else if (control.name() == "solo") {
-			state = !_route->soloed();
-			_route->set_solo (state, this);
-		} else if (control.name() == "select") {
+		if (button.name() == "recenable") {
+			_route->set_record_enabled (!_route->record_enabled(), this);
+		} else if (button.name() == "mute") {
+			_route->set_mute (!_route->muted(), this);
+		} else if (button.name() == "solo") {
+			_route->set_solo (!_route->soloed(), this);
+		} else if (button.name() == "select") {
 			_surface->mcp().select_track (_route);
-		} else if (control.name() == "vselect") {
+		} else if (button.name() == "vselect") {
 			// TODO could be used to select different things to apply the pot to?
 			//state = default_button_press (dynamic_cast<Button&> (control));
 		}
 	}
 
-	if (control.name() == "fader_touch") {
+	if (button.name() == "fader_touch") {
 
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("fader touch, press ? %1\n", (bs == press)));
 
-		state = (bs == press);
+		bool state = (bs == press);
 
-		gain().set_in_use (state);
+		_gain->set_in_use (state);
 		
 		if (ARDOUR::Config->get_mackie_emulation() == "bcf" && state) {
 
@@ -456,8 +447,48 @@ Strip::handle_button (SurfacePort & port, Control & control, ButtonState bs)
 			_surface->mcp().add_in_use_timeout (*_surface, gain(), &fader_touch());
 		}
 	}
+}
 
-	return state;
+void
+Strip::handle_fader (Fader& fader, float position)
+{
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("fader to %1\n", position));
+
+	if (_route) {
+		_route->gain_control()->set_value (slider_position_to_gain (position));
+	}
+	
+	if (ARDOUR::Config->get_mackie_emulation() == "bcf") {
+		/* reset the timeout while we're still moving the fader */
+		_surface->mcp().add_in_use_timeout (*_surface, fader, fader.in_use_touch_control);
+	}
+	
+	// must echo bytes back to slider now, because
+	// the notifier only works if the fader is not being
+	// touched. Which it is if we're getting input.
+
+	_surface->write (fader.set_position (position));
+}
+
+void
+Strip::handle_pot (Pot& pot, ControlState& state)
+{
+	if (!_route) {
+		_surface->write (pot.set_onoff (false));
+		return;
+	}
+
+	boost::shared_ptr<Panner> panner = _route->panner_shell()->panner();
+	// pan for mono input routes, or stereo linked panners
+	if (panner) {
+		double p = panner->position ();
+                
+		// calculate new value, and adjust
+		p += state.delta * state.sign;
+		p = min (1.0, p);
+		p = max (0.0, p);
+		panner->set_position (p);
+	}
 }
 
 void

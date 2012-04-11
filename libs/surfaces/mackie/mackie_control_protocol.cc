@@ -861,9 +861,7 @@ MackieControlProtocol::control_in_use_timeout (Surface* surface, Control* in_use
 	in_use_control->set_in_use (false);
 
 	if (touch_control) {
-		// empty control_state
-		ControlState control_state;
-		surface->handle_control_event (*touch_control, control_state);
+		/* figure out what to do here */
 	}
 	
 	// only call this method once from the timer

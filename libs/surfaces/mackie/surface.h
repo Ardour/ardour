@@ -128,8 +128,6 @@ public:
 	*/
 	float scaled_delta (const ControlState & state, float current_speed);
 
-	void handle_control_event (Mackie::Control & control, const Mackie::ControlState & state);
-
 	// display the first 2 chars of the msg in the 2 char display
 	// . is appended to the previous character, so A.B. would
 	// be two characters
