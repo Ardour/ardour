@@ -502,6 +502,7 @@ MackieControlProtocol::record_release (Button &)
 LedState 
 MackieControlProtocol::rewind_press (Button &)
 {
+	DEBUG_TRACE (DEBUG::MackieControl, "REWIND PRESS\n");
 	rewind ();
 	return none;
 }

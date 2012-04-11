@@ -160,7 +160,6 @@ void
 MackieControlProtocol::prev_track()
 {
 	if (_current_initial_bank >= 1) {
-		session->set_dirty();
 		switch_banks (_current_initial_bank - 1);
 	}
 }
@@ -172,7 +171,6 @@ MackieControlProtocol::next_track()
 {
 	Sorted sorted = get_sorted_routes();
 	if (_current_initial_bank + n_strips() < sorted.size()) {
-		session->set_dirty();
 		switch_banks (_current_initial_bank + 1);
 	}
 }
@@ -277,7 +275,6 @@ MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("switch banking to start at %1 force ? %2 current = %3\n", initial, force, _current_initial_bank));
 
 	if (initial == _current_initial_bank && !force) {
-		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("not switching to %1\n", initial));
 		return;
 	}
 
@@ -285,8 +282,7 @@ MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 	uint32_t strip_cnt = n_strips();
 
 	if (sorted.size() <= strip_cnt && !force) {
-		/* no banking */
-		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("not switching to %1\n", initial));
+		/* no banking - not enough routes to fill all strips */
 		return;
 	}
 
@@ -333,6 +329,10 @@ MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 
 	/* reset this to get the right display of view mode after the switch */
 	set_view_mode (_view_mode);
+	
+	/* current bank has not been saved */
+
+	session->set_dirty();
 }
 
 int 
@@ -782,7 +782,7 @@ void
 MackieControlProtocol::notify_transport_state_changed()
 {
 	// switch various play and stop buttons on / off
-	update_global_button ("play", session->transport_rolling());
+	update_global_button ("play", session->transport_speed() == 1.0);
 	update_global_button ("stop", !session->transport_rolling());
 	update_global_button ("rewind", session->transport_speed() < 0.0);
 	update_global_button ("ffwd", session->transport_speed() > 1.0);
@@ -1015,6 +1015,8 @@ MackieControlProtocol::handle_button_event (Surface& surface, Button& button, Bu
 		default:
 			break;
 		}
+	} else {
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("no button handlers for ID %1\n", button.id()));
 	}
 }
 
