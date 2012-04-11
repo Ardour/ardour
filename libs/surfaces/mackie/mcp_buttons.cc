@@ -472,7 +472,11 @@ MackieControlProtocol::stop_release (Button &)
 LedState 
 MackieControlProtocol::play_press (Button &)
 {
-	transport_play ();
+	/* if we're already rolling, and we're pressed
+	   again, jump back to where we started last time
+	*/
+
+	transport_play (session->transport_rolling());
 	return none;
 }
 
