@@ -66,10 +66,12 @@ Strip::Strip (Surface& s, const std::string& name, int index, StripControlDefini
 	, _vselect (0)
 	, _fader_touch (0)
 	, _vpot (0)
-	, _gain (0)
+	, _fader (0)
 	, _index (index)
 	, _surface (&s)
 	, _route_locked (false)
+	, _last_fader_position_written (-1.0)
+	, _last_vpot_position_written (-1.0)
 {
 	/* build the controls for this track, which will automatically add them
 	   to the Group 
@@ -100,7 +102,7 @@ void Strip::add (Control & control)
 
 	if ((fader = dynamic_cast<Fader*>(&control)) != 0) {
 
-		_gain = fader;
+		_fader = fader;
 
 	} else if ((pot = dynamic_cast<Pot*>(&control)) != 0) {
 
@@ -144,110 +146,6 @@ void Strip::add (Control & control)
 	}
 }
 
-Fader& 
-Strip::gain()
-{
-	if  (_gain == 0) {
-		throw MackieControlException ("gain is null");
-	}
-	return *_gain;
-}
-
-Pot& 
-Strip::vpot()
-{
-	if  (_vpot == 0) {
-		throw MackieControlException ("vpot is null");
-	}
-	return *_vpot;
-}
-
-Button& 
-Strip::recenable()
-{
-	if  (_recenable == 0) {
-		throw MackieControlException ("recenable is null");
-	}
-	return *_recenable;
-}
-
-Button& 
-Strip::solo()
-{
-	if  (_solo == 0) {
-		throw MackieControlException ("solo is null");
-	}
-	return *_solo;
-}
-Button& 
-Strip::mute()
-{
-	if  (_mute == 0) {
-		throw MackieControlException ("mute is null");
-	}
-	return *_mute;
-}
-
-Button& 
-Strip::select()
-{
-	if  (_select == 0) {
-		throw MackieControlException ("select is null");
-	}
-	return *_select;
-}
-
-Button& 
-Strip::vselect()
-{
-	if  (_vselect == 0) {
-		throw MackieControlException ("vselect is null");
-	}
-	return *_vselect;
-}
-
-Button& 
-Strip::fader_touch()
-{
-	if  (_fader_touch == 0) {
-		throw MackieControlException ("fader_touch is null");
-	}
-	return *_fader_touch;
-}
-
-Meter& 
-Strip::meter()
-{
-	if  (_meter == 0) {
-		throw MackieControlException ("meter is null");
-	}
-	return *_meter;
-}
-
-std::ostream & Mackie::operator <<  (std::ostream & os, const Strip & strip)
-{
-	os << typeid (strip).name();
-	os << " { ";
-	os << "has_solo: " << boolalpha << strip.has_solo();
-	os << ", ";
-	os << "has_recenable: " << boolalpha << strip.has_recenable();
-	os << ", ";
-	os << "has_mute: " << boolalpha << strip.has_mute();
-	os << ", ";
-	os << "has_select: " << boolalpha << strip.has_select();
-	os << ", ";
-	os << "has_vselect: " << boolalpha << strip.has_vselect();
-	os << ", ";
-	os << "has_fader_touch: " << boolalpha << strip.has_fader_touch();
-	os << ", ";
-	os << "has_vpot: " << boolalpha << strip.has_vpot();
-	os << ", ";
-	os << "has_gain: " << boolalpha << strip.has_gain();
-	os << " }";
-	
-	return os;
-}
-
 void
 Strip::set_route (boost::shared_ptr<Route> r)
 {
@@ -265,16 +163,15 @@ Strip::set_route (boost::shared_ptr<Route> r)
 								   _surface->number(), _index, _route->name()));
 		
 
-		if (has_solo()) {
+		if (_solo) {
 			_route->solo_control()->Changed.connect(route_connections, invalidator(), ui_bind (&Strip::notify_solo_changed, this), ui_context());
 		}
-		if (has_mute()) {
+
+		if (_mute) {
 			_route->mute_control()->Changed.connect(route_connections, invalidator(), ui_bind (&Strip::notify_mute_changed, this), ui_context());
 		}
 		
-		if (has_gain()) {
-			_route->gain_control()->Changed.connect(route_connections, invalidator(), ui_bind (&Strip::notify_gain_changed, this, false), ui_context());
-		}
+		_route->gain_control()->Changed.connect(route_connections, invalidator(), ui_bind (&Strip::notify_gain_changed, this, false), ui_context());
 		
 		_route->PropertyChanged.connect (route_connections, invalidator(), ui_bind (&Strip::notify_property_changed, this, _1), ui_context());
 		
@@ -311,27 +208,12 @@ Strip::set_route (boost::shared_ptr<Route> r)
 void 
 Strip::notify_all()
 {
-	if  (has_solo()) {
-		notify_solo_changed ();
-	}
-	
-	if  (has_mute()) {
-		notify_mute_changed ();
-	}
-	
-	if  (has_gain()) {
-		notify_gain_changed ();
-	}
-	
+	notify_solo_changed ();
+	notify_mute_changed ();
+	notify_gain_changed ();
 	notify_property_changed (PBD::PropertyChange (ARDOUR::Properties::name));
-	
-	if  (has_vpot()) {
-		notify_panner_changed ();
-	}
-	
-	if  (has_recenable()) {
-		notify_record_enable_changed ();
-	}
+	notify_panner_changed ();
+	notify_record_enable_changed ();
 }
 
 void 
@@ -377,15 +259,30 @@ Strip::notify_route_deleted ()
 void 
 Strip::notify_gain_changed (bool force_update)
 {
-	if (_route) {
-		Fader & fader = gain();
+	if (_route && _fader) {
+		
+		if (!_fader->in_use()) {
 
-		if (!fader.in_use()) {
-			float position = gain_to_slider_position (_route->gain_control()->get_value());
-			// check that something has actually changed
-			if (force_update || position != _last_gain_written) {
-				_surface->write (fader.set_position (position));
-				_last_gain_written = position;
+			double pos;
+
+			switch (_surface->mcp().flip_mode()) {
+			case MackieControlProtocol::Swap:
+				pos = _route->gain_control()->get_value();
+				return;
+				
+			case MackieControlProtocol::Normal:
+			case MackieControlProtocol::Zero:
+			case MackieControlProtocol::Mirror:
+				/* fader is used for something else and/or
+				   should not move.
+				*/
+				return;
+			}
+			
+			pos = gain_to_slider_position (pos);
+			if (force_update || pos != _last_fader_position_written) {
+				_surface->write (_fader->set_position (pos));
+				_last_fader_position_written = pos;
 			}
 		}
 	}
@@ -415,27 +312,32 @@ Strip::notify_property_changed (const PropertyChange& what_changed)
 void 
 Strip::notify_panner_changed (bool force_update)
 {
-	if (_route) {
-		Pot & pot = vpot();
-		boost::shared_ptr<Panner> panner = _route->panner();
+	if (_route && _vpot) {
 
-		if (panner) {
-			double pos = panner->position ();
+		boost::shared_ptr<Pannable> pannable = _route->pannable();
 
-			// cache the MidiByteArray here, because the mackie led control is much lower
-			// resolution than the panner control. So we save lots of byte
-			// sends in spite of more work on the comparison
+		if (!pannable) {
+			_surface->write (_vpot->zero());
+			return;
+		}
 
-			MidiByteArray bytes = pot.set_all (pos, true, Pot::dot);
+		double pos;
 
-			// check that something has actually changed
-			if (force_update || bytes != _last_pan_written)
-			{
-				_surface->write (bytes);
-				_last_pan_written = bytes;
-			}
-		} else {
-			_surface->write (pot.zero());
+		switch (_surface->mcp().flip_mode()) {
+		case MackieControlProtocol::Swap:
+			/* pot is controlling the gain */
+			return;
+			
+		case MackieControlProtocol::Normal:
+		case MackieControlProtocol::Zero:
+		case MackieControlProtocol::Mirror:
+			pos = pannable->pan_azimuth_control->get_value();
+			break;
+		}
+
+		if (force_update || pos != _last_vpot_position_written) {
+			_surface->write (_vpot->set_all (pos, true, Pot::dot));
+			_last_vpot_position_written = pos;
 		}
 	}
 }
@@ -494,7 +396,7 @@ Strip::handle_button (Button& button, ButtonState bs)
 
 		bool state = (bs == press);
 
-		_gain->set_in_use (state);
+		_fader->set_in_use (state);
 		
 		if (ARDOUR::Config->get_mackie_emulation() == "bcf" && state) {
 
@@ -502,7 +404,7 @@ Strip::handle_button (Button& button, ButtonState bs)
 			   their `in_use' state.
 			*/
 
-			_surface->mcp().add_in_use_timeout (*_surface, gain(), &fader_touch());
+			_surface->mcp().add_in_use_timeout (*_surface, *_fader, _fader_touch);
 		}
 	}
 }
@@ -512,24 +414,23 @@ Strip::handle_fader (Fader& fader, float position)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("fader to %1\n", position));
 
+	if (!_route) {
+		return;
+	}
+
 	switch (_surface->mcp().flip_mode()) {
 	case MackieControlProtocol::Normal:
+		_route->gain_control()->set_value (slider_position_to_gain (position));
 		break;
 	case MackieControlProtocol::Zero:
 		break;
 	case MackieControlProtocol::Mirror:
 		break;
 	case MackieControlProtocol::Swap:
-		if (_vpot) {
-			handle_pot (*_vpot, 1.0);
-		}
+		_route->pannable()->pan_azimuth_control->set_value (position);
 		return;
 	}
 
-	if (_route) {
-		_route->gain_control()->set_value (slider_position_to_gain (position));
-	}
-	
 	if (ARDOUR::Config->get_mackie_emulation() == "bcf") {
 		/* reset the timeout while we're still moving the fader */
 		_surface->mcp().add_in_use_timeout (*_surface, fader, fader.in_use_touch_control);
@@ -554,13 +455,22 @@ Strip::handle_pot (Pot& pot, float delta)
 
 	if (pannable) {
 		boost::shared_ptr<AutomationControl> ac;
-		
-		if (_surface->mcp().modifier_state() & MackieControlProtocol::MODIFIER_CONTROL) {
-			ac = pannable->pan_width_control;
-		} else {
-			ac = pannable->pan_azimuth_control;
+
+		switch (_surface->mcp().flip_mode()) {
+		case MackieControlProtocol::Normal: /* pot controls pan */
+		case MackieControlProtocol::Mirror: /* pot + fader control pan */
+		case MackieControlProtocol::Zero:   /* pot controls pan, faders don't move */
+			if (_surface->mcp().modifier_state() & MackieControlProtocol::MODIFIER_CONTROL) {
+				ac = pannable->pan_width_control;
+			} else {
+				ac = pannable->pan_azimuth_control;
+			}
+			break;
+		case MackieControlProtocol::Swap:
+			ac = _route->gain_control();
+			break;
 		}
-		
+
 		double p = ac->get_value();
                 
 		// calculate new value, and adjust
@@ -603,8 +513,10 @@ Strip::update_automation ()
 void
 Strip::update_meter ()
 {
-	float dB = const_cast<PeakMeter&> (_route->peak_meter()).peak_power (0);
-	_surface->write (meter().update_message (dB));
+	if (_meter) {
+		float dB = const_cast<PeakMeter&> (_route->peak_meter()).peak_power (0);
+		_surface->write (_meter->update_message (dB));
+	}
 }
 
 MidiByteArray

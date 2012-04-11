@@ -101,10 +101,10 @@ class MackieControlProtocol
 	};
 
 	enum FlipMode {
-		Normal,
-		Mirror,
-		Swap,
-		Zero,
+		Normal, /* fader controls primary, vpot controls secondary */
+		Mirror, /* fader + vpot control secondary */
+		Swap,   /* fader controls secondary, vpot controls primary */
+		Zero,   /* fader controls primary, but doesn't move, vpot controls secondary */
 	};
 	
 	MackieControlProtocol(ARDOUR::Session &);

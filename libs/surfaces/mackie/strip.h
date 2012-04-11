@@ -52,26 +52,6 @@ public:
 	void add (Control & control);
 	int index() const { return _index; } // zero based
 	
-	Button & solo();
-	Button & recenable();
-	Button & mute();
-	Button & select();
-	Button & vselect();
-	Button & fader_touch();
-	Pot & vpot();
-	Fader & gain();
-	Meter& meter ();
-
-	bool has_solo() const { return _solo != 0; }
-	bool has_recenable() const { return _recenable != 0; }
-	bool has_mute() const { return _mute != 0; }
-	bool has_select() const { return _select != 0; }
-	bool has_vselect() const { return _vselect != 0; }
-	bool has_fader_touch() const { return _fader_touch != 0; }
-	bool has_vpot() const { return _vpot != 0; }
-	bool has_gain() const { return _gain != 0; }
-	bool has_meter() const { return _meter != 0; }
-
 	void set_route (boost::shared_ptr<ARDOUR::Route>);
 
 	// call all signal handlers manually
@@ -98,7 +78,7 @@ private:
 	Button* _vselect;
 	Button* _fader_touch;
 	Pot*    _vpot;
-	Fader*  _gain;
+	Fader*  _fader;
 	Meter*  _meter;
 	int     _index;
 	Surface* _surface;
@@ -107,11 +87,8 @@ private:
 	boost::shared_ptr<ARDOUR::Route> _route;
 	PBD::ScopedConnectionList route_connections;
 
-	// Last written values for the gain and pan, to avoid overloading
-	// the midi connection to the surface
-	float         _last_gain_written;
-	MidiByteArray _last_pan_written;
-
+	float _last_fader_position_written;
+	float _last_vpot_position_written;
 
 	void notify_solo_changed ();
 	void notify_mute_changed ();
@@ -126,8 +103,6 @@ private:
 	void update_meter ();
 
 };
-
-std::ostream & operator <<  (std::ostream &, const Strip &);
 
 }
 

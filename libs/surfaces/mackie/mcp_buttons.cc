@@ -202,10 +202,11 @@ LedState
 MackieControlProtocol::cursor_up_press (Button&)
 {
 	if (_zoom_mode) {
+		
 		if (_modifier_state & MODIFIER_OPTION) {
-			VerticalZoomOutSelected (); /* EMIT SIGNAL */
+			VerticalZoomInSelected (); /* EMIT SIGNAL */
 		} else {
-			VerticalZoomOutAll (); /* EMIT SIGNAL */
+			VerticalZoomInAll (); /* EMIT SIGNAL */
 		}
 	}
 	return off;
@@ -221,11 +222,10 @@ LedState
 MackieControlProtocol::cursor_down_press (Button&)
 {
 	if (_zoom_mode) {
-		
 		if (_modifier_state & MODIFIER_OPTION) {
-			VerticalZoomInSelected (); /* EMIT SIGNAL */
+			VerticalZoomOutSelected (); /* EMIT SIGNAL */
 		} else {
-			VerticalZoomInAll (); /* EMIT SIGNAL */
+			VerticalZoomOutAll (); /* EMIT SIGNAL */
 		}
 	}
 	return off;
