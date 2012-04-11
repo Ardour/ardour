@@ -541,6 +541,12 @@ MackieControlProtocol::get_state()
 	os << _current_initial_bank;
 	node->add_property (X_("bank"), os.str());
 
+	for (uint32_t n = 0; n < 16; ++n) {
+		ostringstream s;
+		s << string_compose ("f%1-action", n+1);
+		node->add_property (s.str().c_str(), f_action (n));
+	}
+
 	return *node;
 }
 
@@ -550,21 +556,27 @@ MackieControlProtocol::set_state (const XMLNode & node, int /*version*/)
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("MackieControlProtocol::set_state: active %1\n", _active));
 
 	int retval = 0;
-
+	const XMLProperty* prop;
 	// fetch current bank
 
-	if (node.property (X_("bank")) != 0) {
-		string bank = node.property (X_("bank"))->value();
-		try {
-			set_active (true);
-			uint32_t new_bank = atoi (bank.c_str());
-			if (_current_initial_bank != new_bank) {
-				switch_banks (new_bank);
-			}
+	if ((prop = node.property (X_("bank"))) != 0) {
+		string bank = prop->value();
+		set_active (true);
+		uint32_t new_bank = atoi (bank.c_str());
+		if (_current_initial_bank != new_bank) {
+			switch_banks (new_bank);
 		}
-		catch (exception & e) {
-			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("exception in MackieControlProtocol::set_state: %1\n", e.what()));
-			return -1;
+	}
+
+	_f_actions.clear ();
+	_f_actions.resize (16);
+
+	for (uint32_t n = 0; n < 16; ++n) {
+		ostringstream s;
+		s << string_compose ("f%1-action", n+1);
+		
+		if ((prop = node.property (s.str())) != 0) {
+			_f_actions[n] = prop->value();
 		}
 	}
 
@@ -1023,3 +1035,21 @@ MackieControlProtocol::clear_ports ()
 	port_sources.clear ();
 }
 
+string
+MackieControlProtocol::f_action (uint32_t fn)
+{
+	if (fn >= _f_actions.size()) {
+		return string();
+	}
+
+	return _f_actions[fn];
+}
+
+void
+MackieControlProtocol::f_press (uint32_t fn)
+{
+	string action = f_action (0);
+	if (!action.empty()) {
+		access_action (action);
+	}
+}

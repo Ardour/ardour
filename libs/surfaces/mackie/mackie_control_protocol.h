@@ -325,6 +325,11 @@ class MackieControlProtocol
 
 	void thread_init ();
 
+	/* handling function key presses */
+
+	std::string f_action (uint32_t fn);
+	void f_press (uint32_t fn);
+
   private:
 
 	static MackieControlProtocol* _instance;
@@ -392,6 +397,8 @@ class MackieControlProtocol
 	ButtonMap button_map;
 
 	void build_button_map ();
+
+	std::vector<std::string> _f_actions;
 };
 
 

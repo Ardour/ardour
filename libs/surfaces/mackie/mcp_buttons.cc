@@ -632,11 +632,10 @@ MackieControlProtocol::enter_release (Button &)
 { 
 	return off;
 }
-
 LedState
 MackieControlProtocol::F1_press (Button &) 
 { 
-	GotoView (0); /* EMIT SIGNAL */
+	f_press (0);
 	return off; 
 }
 LedState
@@ -647,7 +646,7 @@ MackieControlProtocol::F1_release (Button &)
 LedState
 MackieControlProtocol::F2_press (Button &) 
 { 
-	GotoView (1); /* EMIT SIGNAL */
+	f_press (1);
 	return off; 
 }
 LedState
@@ -658,7 +657,7 @@ MackieControlProtocol::F2_release (Button &)
 LedState
 MackieControlProtocol::F3_press (Button &) 
 { 
-	GotoView (2); /* EMIT SIGNAL */
+	f_press (2);
 	return off; 
 }
 LedState
@@ -669,7 +668,7 @@ MackieControlProtocol::F3_release (Button &)
 LedState
 MackieControlProtocol::F4_press (Button &) 
 { 
-	GotoView (3); /* EMIT SIGNAL */
+	f_press (3);
 	return off; 
 }
 LedState
@@ -680,7 +679,7 @@ MackieControlProtocol::F4_release (Button &)
 LedState
 MackieControlProtocol::F5_press (Button &) 
 { 
-	GotoView (4); /* EMIT SIGNAL */
+	f_press (4);
 	return off; 
 }
 LedState
@@ -691,7 +690,7 @@ MackieControlProtocol::F5_release (Button &)
 LedState
 MackieControlProtocol::F6_press (Button &) 
 { 
-	GotoView (5); /* EMIT SIGNAL */
+	f_press (5);
 	return off; 
 }
 LedState
@@ -702,7 +701,7 @@ MackieControlProtocol::F6_release (Button &)
 LedState
 MackieControlProtocol::F7_press (Button &) 
 { 
-	GotoView (6); /* EMIT SIGNAL */
+	f_press (6);
 	return off; 
 }
 LedState
