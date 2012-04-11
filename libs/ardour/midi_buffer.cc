@@ -325,6 +325,7 @@ MidiBuffer::second_simultaneous_midi_byte_is_first (uint8_t a, uint8_t b)
 			case MIDI_CMD_BENDER:
 				b_first = true;
 			}
+			break;
 			
 		case MIDI_CMD_NOTE_OFF:
 			switch (a & 0xf0) {
