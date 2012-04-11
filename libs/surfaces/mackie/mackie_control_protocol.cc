@@ -579,7 +579,7 @@ MackieControlProtocol::set_state (const XMLNode & node, int /*version*/)
 
 		if (action.empty()) {
 			/* default action if nothing is specified */
-			action = string_compose ("goto-visual-state-%1", n+1);
+			action = string_compose ("Editor/goto-visual-state-%1", n+1);
 		}
 
 		_f_actions[n] = action;
