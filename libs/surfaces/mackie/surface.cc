@@ -369,6 +369,8 @@ Surface::handle_midi_note_on_message (MIDI::Parser &, MIDI::EventTwoBytes* ev)
 		Strip* strip = dynamic_cast<Strip*> (&button->group());
 
 		if (strip) {
+			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("strip %1 button %2 pressed ? %3\n",
+									   strip->index(), button->name(), (ev->velocity == 0x7f)));
 			strip->handle_button (*button, ev->velocity == 0x7f ? press : release);
 		} else {
 			/* global button */
