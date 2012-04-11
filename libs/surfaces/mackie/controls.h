@@ -43,16 +43,10 @@ public:
 	Control (int id, std::string name, Group& group);
 	virtual ~Control() {}
 	
-	/// the value of the second bytes of the message. It's
-	/// the id of the control, but only guaranteed to be
-	/// unique within the control type.
-	int raw_id() const { return _id; }
-
+	int id() const { return _id; }
 	const std::string & name() const  { return _name; }
 	Group & group() const { return _group; }
 
-	virtual bool accepts_feedback() const  { return true; }
-	
 	bool in_use () const;
 	void set_in_use (bool);
 	

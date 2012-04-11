@@ -374,7 +374,7 @@ Surface::handle_midi_note_on_message (MIDI::Parser &, MIDI::EventTwoBytes* ev)
 			strip->handle_button (*button, ev->velocity == 0x7f ? press : release);
 		} else {
 			/* global button */
-			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("global button %1\n", button->raw_id()));
+			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("global button %1\n", button->id()));
 			_mcp.handle_button_event (*this, *button, ev->velocity == 0x7f ? press : release);
 		}
 	} else {
@@ -497,7 +497,7 @@ Surface::zero_all ()
 
 	for (Controls::iterator it = controls.begin(); it != controls.end(); ++it) {
 		Control & control = **it;
-		if (!control.group().is_strip() && control.accepts_feedback()) {
+		if (!control.group().is_strip()) {
 			_port->write (control.zero());
 		}
 	}

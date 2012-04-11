@@ -955,9 +955,9 @@ MackieControlProtocol::handle_button_event (Surface& surface, Button& button, Bu
 		return;
 	}
 	
-	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Handling %1 for button %2\n", (bs == press ? "press" : "release"), button.raw_id()));
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Handling %1 for button %2\n", (bs == press ? "press" : "release"), button.id()));
 
-	ButtonMap::iterator b = button_map.find (button.raw_id());
+	ButtonMap::iterator b = button_map.find (button.id());
 
 	if (b != button_map.end()) {
 

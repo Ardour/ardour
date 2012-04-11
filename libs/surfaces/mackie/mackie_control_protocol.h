@@ -285,7 +285,7 @@ class MackieControlProtocol
  
 	void add_in_use_timeout (Mackie::Surface& surface, Mackie::Control& in_use_control, Mackie::Control* touch_control);
 
-	int modifier_state();
+	int modifier_state() const { return _modifier_state; }
 	
   protected:
 	// shut down the surface

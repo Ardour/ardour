@@ -55,5 +55,5 @@ Led::set_state (LedState new_state)
 		return MidiByteArray ();
 	}
 	
-	return MidiByteArray  (3, 0x90, raw_id(), msg);
+	return MidiByteArray  (3, 0x90, id(), msg);
 }

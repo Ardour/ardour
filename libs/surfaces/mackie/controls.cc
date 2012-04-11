@@ -73,7 +73,7 @@ ostream & Mackie::operator <<  (ostream & os, const Mackie::Control & control)
 	os << " { ";
 	os << "name: " << control.name();
 	os << ", ";
-	os << "raw_id: " << "0x" << setw(2) << setfill('0') << hex << control.raw_id() << setfill(' ');
+	os << "id: " << "0x" << setw(2) << setfill('0') << hex << control.id() << setfill(' ');
 	os << ", ";
 	os << "group: " << control.group().name();
 	os << " }";

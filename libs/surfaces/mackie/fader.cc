@@ -45,5 +45,5 @@ MidiByteArray
 Fader::update_message ()
 {
 	int posi = int (0x3fff * position);
-	return MidiByteArray  (3, 0xe0 | raw_id(), posi & 0x7f, posi >> 7);
+	return MidiByteArray  (3, 0xe0 | id(), posi & 0x7f, posi >> 7);
 }

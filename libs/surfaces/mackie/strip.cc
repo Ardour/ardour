@@ -107,33 +107,33 @@ void Strip::add (Control & control)
 
 	} else if ((button = dynamic_cast<Button*>(&control)) != 0) {
 
-		if (control.raw_id() >= Button::recenable_base_id &&
-		    control.raw_id() < Button::recenable_base_id + 8) {
+		if (control.id() >= Button::recenable_base_id &&
+		    control.id() < Button::recenable_base_id + 8) {
 			
 			_recenable = button;
 
-		} else if (control.raw_id() >= Button::mute_base_id &&
-			   control.raw_id() < Button::mute_base_id + 8) {
+		} else if (control.id() >= Button::mute_base_id &&
+			   control.id() < Button::mute_base_id + 8) {
 
 			_mute = button;
 
-		} else if (control.raw_id() >= Button::solo_base_id &&
-			   control.raw_id() < Button::solo_base_id + 8) {
+		} else if (control.id() >= Button::solo_base_id &&
+			   control.id() < Button::solo_base_id + 8) {
 
 			_solo = button;
 
-		} else if (control.raw_id() >= Button::select_base_id &&
-			   control.raw_id() < Button::select_base_id + 8) {
+		} else if (control.id() >= Button::select_base_id &&
+			   control.id() < Button::select_base_id + 8) {
 
 			_select = button;
 
-		} else if (control.raw_id() >= Button::vselect_base_id &&
-			   control.raw_id() < Button::vselect_base_id + 8) {
+		} else if (control.id() >= Button::vselect_base_id &&
+			   control.id() < Button::vselect_base_id + 8) {
 
 			_vselect = button;
 
-		} else if (control.raw_id() >= Button::fader_touch_base_id &&
-			   control.raw_id() < Button::fader_touch_base_id + 8) {
+		} else if (control.id() >= Button::fader_touch_base_id &&
+			   control.id() < Button::fader_touch_base_id + 8) {
 
 			_fader_touch = button;
 		}
@@ -445,34 +445,34 @@ Strip::handle_button (Button& button, ButtonState bs)
 	}
 
 	if (bs == press) {
-		if (button.raw_id() >= Button::recenable_base_id &&
-		    button.raw_id() < Button::recenable_base_id + 8) {
+		if (button.id() >= Button::recenable_base_id &&
+		    button.id() < Button::recenable_base_id + 8) {
 
 			_route->set_record_enabled (!_route->record_enabled(), this);
 
-		} else if (button.raw_id() >= Button::mute_base_id &&
-			   button.raw_id() < Button::mute_base_id + 8) {
+		} else if (button.id() >= Button::mute_base_id &&
+			   button.id() < Button::mute_base_id + 8) {
 
 			_route->set_mute (!_route->muted(), this);
 
-		} else if (button.raw_id() >= Button::solo_base_id &&
-			   button.raw_id() < Button::solo_base_id + 8) {
+		} else if (button.id() >= Button::solo_base_id &&
+			   button.id() < Button::solo_base_id + 8) {
 
 			_route->set_solo (!_route->soloed(), this);
 
-		} else if (button.raw_id() >= Button::select_base_id &&
-			   button.raw_id() < Button::select_base_id + 8) {
+		} else if (button.id() >= Button::select_base_id &&
+			   button.id() < Button::select_base_id + 8) {
 
 			_surface->mcp().select_track (_route);
 
-		} else if (button.raw_id() >= Button::vselect_base_id &&
-			   button.raw_id() < Button::vselect_base_id + 8) {
+		} else if (button.id() >= Button::vselect_base_id &&
+			   button.id() < Button::vselect_base_id + 8) {
 
 		}
 	}
 
-	if (button.raw_id() >= Button::fader_touch_base_id &&
-	    button.raw_id() < Button::fader_touch_base_id + 8) {
+	if (button.id() >= Button::fader_touch_base_id &&
+	    button.id() < Button::fader_touch_base_id + 8) {
 
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("fader touch, press ? %1\n", (bs == press)));
 

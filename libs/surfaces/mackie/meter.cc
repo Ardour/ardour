@@ -45,7 +45,7 @@ Meter::update_message (float dB)
 {
 	float def = 0.0f; /* Meter deflection %age */
 
-	// DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Meter ID %1 dB %2\n", raw_id(), dB));
+	// DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Meter ID %1 dB %2\n", id(), dB));
 	
 	if (dB < -70.0f) {
 		def = 0.0f;
@@ -75,12 +75,12 @@ Meter::update_message (float dB)
 	if (def > 100.0f) {
 		if (!overload_on) {
 			overload_on = true;
-			msg << MidiByteArray (2, 0xd0, (raw_id() << 4) | 0xe);
+			msg << MidiByteArray (2, 0xd0, (id() << 4) | 0xe);
 		}
 	} else {
 		if (overload_on) {
 			overload_on = false;
-			msg << MidiByteArray (2, 0xd0, (raw_id() << 4) | 0xf);
+			msg << MidiByteArray (2, 0xd0, (id() << 4) | 0xf);
 		}
 	}
 	
@@ -90,7 +90,7 @@ Meter::update_message (float dB)
 	
 	if (last_segment_value_sent != segment) {
 		last_segment_value_sent = segment;
-		msg << MidiByteArray (2, 0xD0, (raw_id()<<4) | segment);
+		msg << MidiByteArray (2, 0xD0, (id()<<4) | segment);
 	}
 
 	return msg;
