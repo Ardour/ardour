@@ -69,6 +69,7 @@ class LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	bool ui_is_resizable () const;
 
 	const char* port_symbol (uint32_t port) const;
+	uint32_t    port_index (const char* symbol) const;
 
 	const LV2_Feature* const* features () { return _features; }
 

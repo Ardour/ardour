@@ -208,18 +208,20 @@ LV2Plugin::init(void* c_plugin, framecnt_t rate)
 {
 	DEBUG_TRACE(DEBUG::LV2, "init\n");
 
-	_impl->plugin         = (LilvPlugin*)c_plugin;
-	_impl->ui             = NULL;
-	_impl->ui_type        = NULL;
-	_to_ui                = NULL;
-	_from_ui              = NULL;
-	_control_data         = 0;
-	_shadow_data          = 0;
-	_ev_buffers           = 0;
-	_latency_control_port = 0;
-	_state_version        = 0;
-	_was_activated        = false;
-	_has_state_interface  = false;
+	_impl->plugin           = (LilvPlugin*)c_plugin;
+	_impl->ui               = NULL;
+	_impl->ui_type          = NULL;
+	_to_ui                  = NULL;
+	_from_ui                = NULL;
+	_control_data           = 0;
+	_shadow_data            = 0;
+	_ev_buffers             = 0;
+	_bpm_control_port       = 0;
+	_freewheel_control_port = 0;
+	_latency_control_port   = 0;
+	_state_version          = 0;
+	_was_activated          = false;
+	_has_state_interface    = false;
 
 	_instance_access_feature.URI = "http://lv2plug.in/ns/ext/instance-access";
 	_data_access_feature.URI     = "http://lv2plug.in/ns/ext/data-access";
@@ -546,6 +548,18 @@ LV2Plugin::port_symbol(uint32_t index) const
 
 	const LilvNode* sym = lilv_port_get_symbol(_impl->plugin, port);
 	return lilv_node_as_string(sym);
+}
+
+uint32_t
+LV2Plugin::port_index (const char* symbol) const
+{
+	const map<string, uint32_t>::const_iterator i = _port_indices.find(symbol);
+	if (i != _port_indices.end()) {
+		return  i->second;
+	} else {
+		warning << string_compose(_("LV2: Unknown port %1"), symbol) << endmsg;
+		return (uint32_t)-1;
+	}
 }
 
 void
