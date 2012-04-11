@@ -44,7 +44,6 @@ class Auditioner : public AudioTrack
 	void audition_region (boost::shared_ptr<Region>);
 
 	ARDOUR::AudioPlaylist& prepare_playlist ();
-	void audition_current_playlist ();
 
 	int play_audition (framecnt_t nframes);
 

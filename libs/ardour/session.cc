@@ -3419,12 +3419,9 @@ Session::audition_playlist ()
 void
 Session::non_realtime_set_audition ()
 {
-	if (!pending_audition_region) {
-		auditioner->audition_current_playlist ();
-	} else {
-		auditioner->audition_region (pending_audition_region);
-		pending_audition_region.reset ();
-	}
+	assert (pending_audition_region);
+	auditioner->audition_region (pending_audition_region);
+	pending_audition_region.reset ();
 	AuditionActive (true); /* EMIT SIGNAL */
 }
 
