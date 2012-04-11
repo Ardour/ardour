@@ -238,9 +238,7 @@ MackieControlProtocol::n_strips() const
 	uint32_t strip_count = 0;
 
 	for (Surfaces::const_iterator si = surfaces.begin(); si != surfaces.end(); ++si) {
-		if ((*si)->active()) {
-			strip_count += (*si)->n_strips ();
-		}
+		strip_count += (*si)->n_strips ();
 	}
 
 	return strip_count;
@@ -885,6 +883,69 @@ void
 MackieControlProtocol::build_button_map ()
 {
 	button_map.insert (pair<int,ButtonHandlers> (Button::Io, ButtonHandlers (&MackieControlProtocol::io_press, &MackieControlProtocol::io_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::Sends, ButtonHandlers (&MackieControlProtocol::sends_press, &MackieControlProtocol::sends_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::Pan, ButtonHandlers (&MackieControlProtocol::pan_press, &MackieControlProtocol::pan_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::Plugin, ButtonHandlers (&MackieControlProtocol::plugin_press, &MackieControlProtocol::plugin_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::Eq, ButtonHandlers (&MackieControlProtocol::eq_press, &MackieControlProtocol::eq_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::Dyn, ButtonHandlers (&MackieControlProtocol::dyn_press, &MackieControlProtocol::dyn_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::Left, ButtonHandlers (&MackieControlProtocol::left_press, &MackieControlProtocol::left_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::Right, ButtonHandlers (&MackieControlProtocol::right_press, &MackieControlProtocol::right_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::ChannelLeft, ButtonHandlers (&MackieControlProtocol::channel_left_press, &MackieControlProtocol::channel_left_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::ChannelRight, ButtonHandlers (&MackieControlProtocol::channel_right_press, &MackieControlProtocol::channel_right_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::Flip, ButtonHandlers (&MackieControlProtocol::flip_press, &MackieControlProtocol::flip_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::Edit, ButtonHandlers (&MackieControlProtocol::edit_press, &MackieControlProtocol::edit_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::NameValue, ButtonHandlers (&MackieControlProtocol::name_value_press, &MackieControlProtocol::name_value_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::TimecodeBeats, ButtonHandlers (&MackieControlProtocol::timecode_beats_press, &MackieControlProtocol::timecode_beats_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::F1, ButtonHandlers (&MackieControlProtocol::F1_press, &MackieControlProtocol::F1_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::F2, ButtonHandlers (&MackieControlProtocol::F2_press, &MackieControlProtocol::F2_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::F3, ButtonHandlers (&MackieControlProtocol::F3_press, &MackieControlProtocol::F3_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::F4, ButtonHandlers (&MackieControlProtocol::F4_press, &MackieControlProtocol::F4_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::F5, ButtonHandlers (&MackieControlProtocol::F5_press, &MackieControlProtocol::F5_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::F6, ButtonHandlers (&MackieControlProtocol::F6_press, &MackieControlProtocol::F6_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::F7, ButtonHandlers (&MackieControlProtocol::F7_press, &MackieControlProtocol::F7_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::F8, ButtonHandlers (&MackieControlProtocol::F8_press, &MackieControlProtocol::F8_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::F9, ButtonHandlers (&MackieControlProtocol::F9_press, &MackieControlProtocol::F9_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::F10, ButtonHandlers (&MackieControlProtocol::F10_press, &MackieControlProtocol::F10_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::F11, ButtonHandlers (&MackieControlProtocol::F11_press, &MackieControlProtocol::F11_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::F12, ButtonHandlers (&MackieControlProtocol::F12_press, &MackieControlProtocol::F12_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::F13, ButtonHandlers (&MackieControlProtocol::F13_press, &MackieControlProtocol::F13_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::F14, ButtonHandlers (&MackieControlProtocol::F14_press, &MackieControlProtocol::F14_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::F15, ButtonHandlers (&MackieControlProtocol::F15_press, &MackieControlProtocol::F15_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::F16, ButtonHandlers (&MackieControlProtocol::F16_press, &MackieControlProtocol::F16_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::Shift, ButtonHandlers (&MackieControlProtocol::shift_press, &MackieControlProtocol::shift_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::Option, ButtonHandlers (&MackieControlProtocol::option_press, &MackieControlProtocol::option_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::Ctrl, ButtonHandlers (&MackieControlProtocol::control_press, &MackieControlProtocol::control_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::CmdAlt, ButtonHandlers (&MackieControlProtocol::cmd_alt_press, &MackieControlProtocol::cmd_alt_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::On, ButtonHandlers (&MackieControlProtocol::on_press, &MackieControlProtocol::on_release)));
+	//button_map.insert (pair<int,ButtonHandlers> (Button::Rec, ButtonHandlers (&MackieControlProtocol::rec_press, &MackieControlProtocol::rec_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::Undo, ButtonHandlers (&MackieControlProtocol::undo_press, &MackieControlProtocol::undo_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::Save, ButtonHandlers (&MackieControlProtocol::save_press, &MackieControlProtocol::save_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::Touch, ButtonHandlers (&MackieControlProtocol::touch_press, &MackieControlProtocol::touch_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::Redo, ButtonHandlers (&MackieControlProtocol::redo_press, &MackieControlProtocol::redo_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::Marker, ButtonHandlers (&MackieControlProtocol::marker_press, &MackieControlProtocol::marker_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::Enter, ButtonHandlers (&MackieControlProtocol::enter_press, &MackieControlProtocol::enter_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::Cancel, ButtonHandlers (&MackieControlProtocol::cancel_press, &MackieControlProtocol::cancel_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::Mixer, ButtonHandlers (&MackieControlProtocol::mixer_press, &MackieControlProtocol::mixer_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::FrmLeft, ButtonHandlers (&MackieControlProtocol::frm_left_press, &MackieControlProtocol::frm_left_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::FrmRight, ButtonHandlers (&MackieControlProtocol::frm_right_press, &MackieControlProtocol::frm_right_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::Loop, ButtonHandlers (&MackieControlProtocol::loop_press, &MackieControlProtocol::loop_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::PunchIn, ButtonHandlers (&MackieControlProtocol::punch_in_press, &MackieControlProtocol::punch_in_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::PunchOut, ButtonHandlers (&MackieControlProtocol::punch_out_press, &MackieControlProtocol::punch_out_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::Home, ButtonHandlers (&MackieControlProtocol::home_press, &MackieControlProtocol::home_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::End, ButtonHandlers (&MackieControlProtocol::end_press, &MackieControlProtocol::end_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::Rewind, ButtonHandlers (&MackieControlProtocol::rewind_press, &MackieControlProtocol::rewind_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::Ffwd, ButtonHandlers (&MackieControlProtocol::ffwd_press, &MackieControlProtocol::ffwd_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::Stop, ButtonHandlers (&MackieControlProtocol::stop_press, &MackieControlProtocol::stop_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::Play, ButtonHandlers (&MackieControlProtocol::play_press, &MackieControlProtocol::play_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::Record, ButtonHandlers (&MackieControlProtocol::record_press, &MackieControlProtocol::record_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::CursorUp, ButtonHandlers (&MackieControlProtocol::cursor_up_press, &MackieControlProtocol::cursor_up_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::CursorDown, ButtonHandlers (&MackieControlProtocol::cursor_down_press, &MackieControlProtocol::cursor_down_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::CursorLeft, ButtonHandlers (&MackieControlProtocol::cursor_left_press, &MackieControlProtocol::cursor_left_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::CursorRight, ButtonHandlers (&MackieControlProtocol::cursor_right_press, &MackieControlProtocol::cursor_right_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::Zoom, ButtonHandlers (&MackieControlProtocol::zoom_press, &MackieControlProtocol::zoom_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::Scrub, ButtonHandlers (&MackieControlProtocol::scrub_press, &MackieControlProtocol::scrub_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::UserA, ButtonHandlers (&MackieControlProtocol::user_a_press, &MackieControlProtocol::user_a_release)));
+	button_map.insert (pair<int,ButtonHandlers> (Button::UserB, ButtonHandlers (&MackieControlProtocol::user_b_press, &MackieControlProtocol::user_b_release)));
 }
 
 void 
@@ -899,521 +960,19 @@ MackieControlProtocol::handle_button_event (Surface& surface, Button& button, Bu
 
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Handling %1 for button %2\n", (bs == press ? "press" : "release"), button.raw_id()));
 
-	switch  (button.raw_id()) {
-	case 0x28: // io
-		switch  (bs) {
-		case press: ls = io_press (button); break;
-		case release: ls = io_release (button); break;
-		case neither: break;
-		}
-		break;
-		
-	case 0x29: // sends
-		switch  (bs) {
-		case press: ls = sends_press (button); break;
-		case release: ls = sends_release (button); break;
-		case neither: break;
-		}
-		break;
-		
-	case 0x2a: // pan
-		switch  (bs) {
-		case press: ls = pan_press (button); break;
-		case release: ls = pan_release (button); break;
-		case neither: break;
-		}
-		break;
-		
-	case 0x2b: // plugin
-		switch  (bs) {
-		case press: ls = plugin_press (button); break;
-		case release: ls = plugin_release (button); break;
-		case neither: break;
-		}
-		break;
-		
-	case 0x2c: // eq
-		switch  (bs) {
-		case press: ls = eq_press (button); break;
-		case release: ls = eq_release (button); break;
-		case neither: break;
-		}
-		break;
-		
-	case 0x2d: // dyn
-		switch  (bs) {
-		case press: ls = dyn_press (button); break;
-		case release: ls = dyn_release (button); break;
-		case neither: break;
-		}
-		break;
-		
-	case 0x2e: // left
-		switch  (bs) {
-		case press: ls = left_press (button); break;
-		case release: ls = left_release (button); break;
-		case neither: break;
-		}
-		break;
-		
-	case 0x2f: // right
-		switch  (bs) {
-		case press: ls = right_press (button); break;
-		case release: ls = right_release (button); break;
-		case neither: break;
-		}
-		break;
-		
-	case 0x30: // channel_left
-		switch  (bs) {
-		case press: ls = channel_left_press (button); break;
-		case release: ls = channel_left_release (button); break;
-		case neither: break;
-		}
-		break;
-		
-	case 0x31: // channel_right
-		switch  (bs) {
-		case press: ls = channel_right_press (button); break;
-		case release: ls = channel_right_release (button); break;
-		case neither: break;
-		}
-		break;
-		
-	case 0x32: // flip
-		switch  (bs) {
-		case press: ls = flip_press (button); break;
-		case release: ls = flip_release (button); break;
-		case neither: break;
-		}
-		break;
+	ButtonMap::iterator b = button_map.find (button.raw_id());
 
-	case 0x33: // edit
+	if (b != button_map.end()) {
+
+		ButtonHandlers& bh (b->second);
+
 		switch  (bs) {
-		case press: ls = edit_press (button); break;
-		case release: ls = edit_release (button); break;
+		case press: ls = (this->*(bh.press)) (button); break;
+		case release: ls = (this->*(bh.release)) (button); break;
 		case neither: break;
 		}
-		break;
-
-	case 0x34: // name_value
-		switch  (bs) {
-		case press: ls = name_value_press (button); break;
-		case release: ls = name_value_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case 0x35: // timecode_beats
-		switch  (bs) {
-		case press: ls = timecode_beats_press (button); break;
-		case release: ls = timecode_beats_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case 0x46: // shift
-		switch  (bs) {
-		case press: ls = shift_press (button); break;
-		case release: ls = shift_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case 0x47: // option
-		switch  (bs) {
-		case press: ls = option_press (button); break;
-		case release: ls = option_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case Button::Ctrl:
-		switch  (bs) {
-		case press: ls = control_press (button); break;
-		case release: ls = control_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case 0x49: // cmd_alt
-		switch  (bs) {
-		case press: ls = cmd_alt_press (button); break;
-		case release: ls = cmd_alt_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case 0x4a: // on
-		switch  (bs) {
-		case press: ls = on_press (button); break;
-		case release: ls = on_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case 0x4b: // rec_ready
-		switch  (bs) {
-		case press: ls = rec_ready_press (button); break;
-		case release: ls = rec_ready_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case Button::Undo: // undo
-		switch  (bs) {
-		case press: ls = undo_press (button); break;
-		case release: ls = undo_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case Button::Save:
-		switch (bs) {
-		case press: ls = save_press (button); break;
-		case release: ls = save_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case Button::Touch: // touch
-		switch  (bs) {
-		case press: ls = touch_press (button); break;
-		case release: ls = touch_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case Button::Redo: // redo
-		switch  (bs) {
-		case press: ls = redo_press (button); break;
-		case release: ls = redo_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case Button::Marker: // marker
-		switch  (bs) {
-		case press: ls = marker_press (button); break;
-		case release: ls = marker_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case Button::Enter: // enter
-		switch  (bs) {
-		case press: ls = enter_press (button); break;
-		case release: ls = enter_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case 0x52: // cancel
-		switch  (bs) {
-		case press: ls = cancel_press (button); break;
-		case release: ls = cancel_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case 0x53: // mixer
-		switch  (bs) {
-		case press: ls = mixer_press (button); break;
-		case release: ls = mixer_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case 0x54: // frm_left
-		switch  (bs) {
-		case press: ls = frm_left_press (button); break;
-		case release: ls = frm_left_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case 0x55: // frm_right
-		switch  (bs) {
-		case press: ls = frm_right_press (button); break;
-		case release: ls = frm_right_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case 0x56: // loop
-		switch  (bs) {
-		case press: ls = loop_press (button); break;
-		case release: ls = loop_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case 0x57: // punch_in
-		switch  (bs) {
-		case press: ls = punch_in_press (button); break;
-		case release: ls = punch_in_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case 0x58: // punch_out
-		switch  (bs) {
-		case press: ls = punch_out_press (button); break;
-		case release: ls = punch_out_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case 0x59: // home
-		switch  (bs) {
-		case press: ls = home_press (button); break;
-		case release: ls = home_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case 0x5a: // end
-		switch  (bs) {
-		case press: ls = end_press (button); break;
-		case release: ls = end_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case Button::Rewind:
-		switch  (bs) {
-		case press: ls = rewind_press (button); break;
-		case release: ls = rewind_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case Button::Ffwd:
-		switch  (bs) {
-		case press: ls = ffwd_press (button); break;
-		case release: ls = ffwd_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case Button::Stop:
-		switch  (bs) {
-		case press: ls = stop_press (button); break;
-		case release: ls = stop_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case Button::Play:
-		switch  (bs) {
-		case press: ls = play_press (button); break;
-		case release: ls = play_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case 0x5f: // record
-		switch  (bs) {
-		case press: ls = record_press (button); break;
-		case release: ls = record_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case 0x60: // cursor_up
-		switch  (bs) {
-		case press: ls = cursor_up_press (button); break;
-		case release: ls = cursor_up_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case 0x61: // cursor_down
-		switch  (bs) {
-		case press: ls = cursor_down_press (button); break;
-		case release: ls = cursor_down_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case 0x62: // cursor_left
-		switch  (bs) {
-		case press: ls = cursor_left_press (button); break;
-		case release: ls = cursor_left_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case 0x63: // cursor_right
-		switch  (bs) {
-		case press: ls = cursor_right_press (button); break;
-		case release: ls = cursor_right_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case 0x64: // zoom
-		switch  (bs) {
-		case press: ls = zoom_press (button); break;
-		case release: ls = zoom_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case 0x65: // scrub
-		switch  (bs) {
-		case press: ls = scrub_press (button); break;
-		case release: ls = scrub_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case 0x66: // user_a
-		switch  (bs) {
-		case press: ls = user_a_press (button); break;
-		case release: ls = user_a_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case 0x67: // user_b
-		switch  (bs) {
-		case press: ls = user_b_press (button); break;
-		case release: ls = user_b_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case Button::F1:
-		switch  (bs) {
-		case press: ls = F1_press (button); break;
-		case release: ls = F1_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case Button::F2:
-		switch  (bs) {
-		case press: ls = F2_press (button); break;
-		case release: ls = F2_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case Button::F3:
-		switch  (bs) {
-		case press: ls = F3_press (button); break;
-		case release: ls = F3_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case Button::F4:
-		switch  (bs) {
-		case press: ls = F4_press (button); break;
-		case release: ls = F4_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case Button::F5:
-		switch  (bs) {
-		case press: ls = F5_press (button); break;
-		case release: ls = F5_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case Button::F6:
-		switch  (bs) {
-		case press: ls = F6_press (button); break;
-		case release: ls = F6_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case Button::F7:
-		switch  (bs) {
-		case press: ls = F7_press (button); break;
-		case release: ls = F7_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case Button::F8:
-		switch  (bs) {
-		case press: ls = F8_press (button); break;
-		case release: ls = F8_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case Button::F9:
-		switch  (bs) {
-		case press: ls = F9_press (button); break;
-		case release: ls = F9_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case Button::F10:
-		switch  (bs) {
-		case press: ls = F10_press (button); break;
-		case release: ls = F10_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case Button::F11:
-		switch  (bs) {
-		case press: ls = F11_press (button); break;
-		case release: ls = F11_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case Button::F12:
-		switch  (bs) {
-		case press: ls = F12_press (button); break;
-		case release: ls = F12_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case Button::F13:
-		switch  (bs) {
-		case press: ls = F13_press (button); break;
-		case release: ls = F13_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case Button::F14:
-		switch  (bs) {
-		case press: ls = F14_press (button); break;
-		case release: ls = F14_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case Button::F15:
-		switch  (bs) {
-		case press: ls = F15_press (button); break;
-		case release: ls = F15_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case Button::F16:
-		switch  (bs) {
-		case press: ls = F16_press (button); break;
-		case release: ls = F16_release (button); break;
-		case neither: break;
-		}
-		break;
-
 	}
-
+		
 	update_led (surface, button, ls);
 }
 
