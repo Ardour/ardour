@@ -259,6 +259,8 @@ Strip::notify_route_deleted ()
 void 
 Strip::notify_gain_changed (bool force_update)
 {
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("gain changed for strip %1\n", _index));
+
 	if (_route && _fader) {
 		
 		if (!_fader->in_use()) {
@@ -266,11 +268,11 @@ Strip::notify_gain_changed (bool force_update)
 			double pos;
 
 			switch (_surface->mcp().flip_mode()) {
-			case MackieControlProtocol::Swap:
+			case MackieControlProtocol::Normal:
 				pos = _route->gain_control()->get_value();
 				return;
 				
-			case MackieControlProtocol::Normal:
+			case MackieControlProtocol::Swap:
 			case MackieControlProtocol::Zero:
 			case MackieControlProtocol::Mirror:
 				/* fader is used for something else and/or
@@ -284,7 +286,7 @@ Strip::notify_gain_changed (bool force_update)
 				_surface->write (_fader->set_position (pos));
 				_last_fader_position_written = pos;
 			}
-		}
+		} 
 	}
 }
 
