@@ -404,7 +404,6 @@ Strip::notify_property_changed (const PropertyChange& what_changed)
 		}
 		
 		_surface->write (display (0, line1));
-		_surface->write (blank_display (1));
 	}
 }
 

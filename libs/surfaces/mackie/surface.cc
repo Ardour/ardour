@@ -581,6 +581,10 @@ static char translate_seven_segment (char achar)
 MidiByteArray 
 Surface::two_char_display (const std::string & msg, const std::string & dots)
 {
+	if (_stype != mcu) {
+		return MidiByteArray();
+	}
+
 	if  (msg.length() != 2) throw MackieControlException ("MackieMidiBuilder::two_char_display: msg must be exactly 2 characters");
 	if  (dots.length() != 2) throw MackieControlException ("MackieMidiBuilder::two_char_display: dots must be exactly 2 characters");
 	
@@ -653,3 +657,51 @@ Surface::timecode_display (const std::string & timecode, const std::string & las
 	return retval;
 }
 
+void
+Surface::update_view_mode_display ()
+{
+	string text;
+
+	switch (_mcp.view_mode()) {
+	case MackieControlProtocol::Global:
+		_port->write (two_char_display ("Gl"));
+		text = _("Pan");
+		break;
+	case MackieControlProtocol::Dynamics:
+		_port->write (two_char_display ("Dy"));
+		text = _("");
+		break;
+	case MackieControlProtocol::EQ:
+		_port->write (two_char_display ("EQ"));
+		text = _("");
+		break;
+	case MackieControlProtocol::Loop:
+		_port->write (two_char_display ("LP"));
+		text = _("");
+		break;
+	case MackieControlProtocol::AudioTracks:
+		_port->write (two_char_display ("AT"));
+		text = _("");
+		break;
+	case MackieControlProtocol::MidiTracks:
+		_port->write (two_char_display ("MT"));
+		text = _("");
+		break;
+	case MackieControlProtocol::Busses:
+		_port->write (two_char_display ("Bs"));
+		text = _("");
+		break;
+	case MackieControlProtocol::Sends:
+		_port->write (two_char_display ("Sn"));
+		text = _("");
+		break;
+	case MackieControlProtocol::Plugins:
+		_port->write (two_char_display ("Pl"));
+		text = _("");
+		break;
+	}
+
+	for (Strips::iterator s = strips.begin(); s != strips.end(); ++s) {
+		_port->write ((*s)->display (1, text));
+	}
+}

@@ -333,6 +333,9 @@ MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 
 	// display the current start bank.
 	surfaces.front()->display_bank_start (_current_initial_bank);
+
+	/* reset this to get the right display of view mode after the switch */
+	set_view_mode (_view_mode);
 }
 
 int 
@@ -1090,43 +1093,8 @@ MackieControlProtocol::set_view_mode (ViewMode m)
 {
 	_view_mode = m;
 
-	if (surfaces.empty()) {
-		return;
+	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
+		(*s)->update_view_mode_display ();
 	}
-
-	boost::shared_ptr<Surface> surface = surfaces.front();
-
-	if (surface->type() == mcu) {
-		switch (_view_mode) {
-		case Global:
-			surface->write (surface->two_char_display ("Gl"));
-			break;
-		case Dynamics:
-			surface->write (surface->two_char_display ("Dy"));
-			break;
-		case EQ:
-			surface->write (surface->two_char_display ("EQ"));
-			break;
-		case Loop:
-			surface->write (surface->two_char_display ("LP"));
-			break;
-		case AudioTracks:
-			surface->write (surface->two_char_display ("AT"));
-			break;
-		case MidiTracks:
-			surface->write (surface->two_char_display ("MT"));
-			break;
-		case Busses:
-			surface->write (surface->two_char_display ("Bs"));
-			break;
-		case Sends:
-			surface->write (surface->two_char_display ("Sn"));
-			break;
-		case Plugins:
-			surface->write (surface->two_char_display ("Pl"));
-			break;
-		}
-	}
-
-	switch_banks (_current_initial_bank, true);
+	
 }
