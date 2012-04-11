@@ -90,14 +90,15 @@ LedState
 MackieControlProtocol::left_press (Button &)
 {
 	Sorted sorted = get_sorted_routes();
-	if (sorted.size() > n_strips()) {
-		int new_initial = _current_initial_bank - n_strips();
+	uint32_t strip_cnt = n_strips ();
+
+	if (sorted.size() > strip_cnt) {
+		int new_initial = _current_initial_bank - strip_cnt;
 		if (new_initial < 0) {
 			new_initial = 0;
 		}
 		
 		if (new_initial != int (_current_initial_bank)) {
-			session->set_dirty();
 			switch_banks (new_initial);
 		}
 
@@ -127,7 +128,6 @@ MackieControlProtocol::right_press (Button &)
 		}
 		
 		if (delta > 0) {
-			session->set_dirty();
 			switch_banks (_current_initial_bank + delta);
 		}
 

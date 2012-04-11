@@ -135,7 +135,6 @@ MidiControlUI::reset_ports ()
 	for (MIDI::Manager::PortList::const_iterator i = plist->begin(); i != plist->end(); ++i) {
 
 		if (!(*i)->centrally_parsed()) {
-			cerr << "Skip MIDI port " << (*i)->name() << endl;
 			continue;
 		}
 

@@ -77,8 +77,6 @@ using namespace Glib;
 #include "pbd/abstract_ui.cc" // instantiate template
 
 #define ui_bind(f, ...) boost::protect (boost::bind (f, __VA_ARGS__))
-extern PBD::EventLoop::InvalidationRecord* __invalidator (sigc::trackable& trackable, const char*, int);
-#define invalidator() __invalidator ((*this), __FILE__, __LINE__)
 
 const int MackieControlProtocol::MODIFIER_OPTION = 0x1;
 const int MackieControlProtocol::MODIFIER_CONTROL = 0x2;
@@ -107,7 +105,7 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::MackieControlProtocol\n");
 
 	AudioEngine::instance()->PortConnectedOrDisconnected.connect (
-		audio_engine_connections, invalidator (), ui_bind (&MackieControlProtocol::port_connected_or_disconnected, this, _2, _4, _5),
+		audio_engine_connections, MISSING_INVALIDATOR, ui_bind (&MackieControlProtocol::port_connected_or_disconnected, this, _2, _4, _5),
 		this
 		);
 
@@ -451,23 +449,23 @@ void
 MackieControlProtocol::connect_session_signals()
 {
 	// receive routes added
-	session->RouteAdded.connect(session_connections, invalidator(), ui_bind (&MackieControlProtocol::notify_route_added, this, _1), this);
+	session->RouteAdded.connect(session_connections, MISSING_INVALIDATOR, ui_bind (&MackieControlProtocol::notify_route_added, this, _1), this);
 	// receive record state toggled
-	session->RecordStateChanged.connect(session_connections, invalidator(), ui_bind (&MackieControlProtocol::notify_record_state_changed, this), this);
+	session->RecordStateChanged.connect(session_connections, MISSING_INVALIDATOR, ui_bind (&MackieControlProtocol::notify_record_state_changed, this), this);
 	// receive transport state changed
-	session->TransportStateChange.connect(session_connections, invalidator(), ui_bind (&MackieControlProtocol::notify_transport_state_changed, this), this);
+	session->TransportStateChange.connect(session_connections, MISSING_INVALIDATOR, ui_bind (&MackieControlProtocol::notify_transport_state_changed, this), this);
 	// receive punch-in and punch-out
-	Config->ParameterChanged.connect(session_connections, invalidator(), ui_bind (&MackieControlProtocol::notify_parameter_changed, this, _1), this);
-	session->config.ParameterChanged.connect (session_connections, invalidator(), ui_bind (&MackieControlProtocol::notify_parameter_changed, this, _1), this);
+	Config->ParameterChanged.connect(session_connections, MISSING_INVALIDATOR, ui_bind (&MackieControlProtocol::notify_parameter_changed, this, _1), this);
+	session->config.ParameterChanged.connect (session_connections, MISSING_INVALIDATOR, ui_bind (&MackieControlProtocol::notify_parameter_changed, this, _1), this);
 	// receive rude solo changed
-	session->SoloActive.connect(session_connections, invalidator(), ui_bind (&MackieControlProtocol::notify_solo_active_changed, this, _1), this);
+	session->SoloActive.connect(session_connections, MISSING_INVALIDATOR, ui_bind (&MackieControlProtocol::notify_solo_active_changed, this, _1), this);
 
 	// make sure remote id changed signals reach here
 	// see also notify_route_added
 	Sorted sorted = get_sorted_routes();
 
 	for (Sorted::iterator it = sorted.begin(); it != sorted.end(); ++it) {
-		(*it)->RemoteControlIDChanged.connect (route_connections, invalidator(), ui_bind(&MackieControlProtocol::notify_remote_id_changed, this), this);
+		(*it)->RemoteControlIDChanged.connect (route_connections, MISSING_INVALIDATOR, ui_bind(&MackieControlProtocol::notify_remote_id_changed, this), this);
 	}
 }
 
@@ -694,7 +692,7 @@ MackieControlProtocol::notify_route_added (ARDOUR::RouteList & rl)
 	typedef ARDOUR::RouteList ARS;
 
 	for (ARS::iterator it = rl.begin(); it != rl.end(); ++it) {
-		(*it)->RemoteControlIDChanged.connect (route_connections, invalidator(), ui_bind (&MackieControlProtocol::notify_remote_id_changed, this), this);
+		(*it)->RemoteControlIDChanged.connect (route_connections, MISSING_INVALIDATOR, ui_bind (&MackieControlProtocol::notify_remote_id_changed, this), this);
 	}
 }
 
@@ -793,7 +791,7 @@ MackieControlProtocol::do_request (MackieControlUIRequest* req)
 {
 	if (req->type == CallSlot) {
 
-		call_slot (invalidator(), req->the_slot);
+		call_slot (MISSING_INVALIDATOR, req->the_slot);
 
 	} else if (req->type == Quit) {
 

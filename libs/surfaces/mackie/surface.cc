@@ -253,8 +253,6 @@ Surface::init_strips ()
 		
 		snprintf (name, sizeof (name), "strip_%d", (8* _number) + i);
 
-		cerr << "Register strip " << i << endl;
-		
 		Strip* strip = new Strip (*this, name, i, mackie_strip_controls);
 		
 		groups[name] = strip;
