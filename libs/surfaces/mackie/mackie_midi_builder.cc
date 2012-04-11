@@ -92,12 +92,16 @@ MidiByteArray MackieMidiBuilder::build_led (const Button & button, LedState ls)
 MidiByteArray MackieMidiBuilder::build_led (const Led & led, LedState ls)
 {
 	MIDI::byte state = 0;
-	switch  (ls.state())
-	{
-		case LedState::on:			state = 0x7f; break;
-		case LedState::off:			state = 0x00; break;
-		case LedState::none:			state = 0x00; break; // actually, this should never happen.
-		case LedState::flashing:	state = 0x01; break;
+
+	switch  (ls.state()) {
+		case LedState::on:			
+			state = 0x7f; break;
+		case LedState::off:			
+			state = 0x00; break;
+		case LedState::flashing:	
+			state = 0x01; break;
+		case LedState::none:			
+			return MidiByteArray ();
 	}
 	
 	return MidiByteArray  (3

@@ -479,65 +479,65 @@ LedState
 MackieControlProtocol::play_press (Button &)
 {
 	transport_play ();
-	return on;
+	return none;
 }
 
 LedState 
 MackieControlProtocol::play_release (Button &)
 {
-	return session->transport_rolling();
+	return none;
 }
 
 LedState 
 MackieControlProtocol::record_press (Button &)
 {
 	rec_enable_toggle ();
-	return off;
+	return none;
 }
 
 LedState 
 MackieControlProtocol::record_release (Button &)
 {
-	return off;
+	return none;
 }
 
 LedState 
 MackieControlProtocol::rewind_press (Button &)
 {
 	rewind ();
-	return off;
+	return none;
 }
 
 LedState 
 MackieControlProtocol::rewind_release (Button &)
 {
-	return off;
+	return none;
 }
 
 LedState 
 MackieControlProtocol::ffwd_press (Button &)
 {
 	ffwd ();
-	return off;
+	return none;
 }
 
 LedState 
 MackieControlProtocol::ffwd_release (Button &)
 {
-	return off;
+	return none;
 }
 
 LedState 
 MackieControlProtocol::loop_press (Button &)
 {
 	session->request_play_loop (!session->get_play_loop());
-	return off;
+	return none;
 }
 
 LedState 
 MackieControlProtocol::loop_release (Button &)
 {
-	return off;
+	return none;
 }
 
 LedState 
