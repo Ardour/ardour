@@ -151,7 +151,7 @@ MidiPort::resolve_notes (void* jack_buffer, MidiBuffer::TimeType when)
 }
 
 void
-MidiPort::flush_buffers (pframes_t nframes, framepos_t /*time*/)
+MidiPort::flush_buffers (pframes_t nframes)
 {
 	if (sends_output ()) {
 

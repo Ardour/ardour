@@ -41,7 +41,7 @@ class MidiPort : public Port {
 	void cycle_end (pframes_t nframes);
 	void cycle_split ();
 
-	void flush_buffers (pframes_t nframes, framepos_t time);
+	void flush_buffers (pframes_t nframes);
 	void transport_stopped ();
 	void realtime_locate ();
 	void reset ();

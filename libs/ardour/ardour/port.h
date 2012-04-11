@@ -116,7 +116,7 @@ public:
 	virtual void cycle_end (pframes_t) = 0;
 	virtual void cycle_split () = 0;
 	virtual Buffer& get_buffer (pframes_t nframes) = 0;
-	virtual void flush_buffers (pframes_t /*nframes*/, framepos_t /*time*/) {}
+	virtual void flush_buffers (pframes_t /*nframes*/) {}
 	virtual void transport_stopped () {}
 	virtual void realtime_locate () {}
 
