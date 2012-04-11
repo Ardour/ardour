@@ -3643,9 +3643,9 @@ Session::setup_midi_machine_control ()
 
 	/* also handle MIDI SPP because its so common */
 
-	mmc->SPPStart.connect_same_thread (*this, boost::bind (&Session::spp_start, this, _1, _2));
-	mmc->SPPContinue.connect_same_thread (*this, boost::bind (&Session::spp_continue, this, _1, _2));
-	mmc->SPPStop.connect_same_thread (*this, boost::bind (&Session::spp_stop, this, _1, _2));
+	mmc->SPPStart.connect_same_thread (*this, boost::bind (&Session::spp_start, this));
+	mmc->SPPContinue.connect_same_thread (*this, boost::bind (&Session::spp_continue, this));
+	mmc->SPPStop.connect_same_thread (*this, boost::bind (&Session::spp_stop, this));
 }
 
 boost::shared_ptr<Controllable>

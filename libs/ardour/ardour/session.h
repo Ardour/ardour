@@ -1126,9 +1126,9 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	/* MIDI Machine Control */
 
-	void spp_start (MIDI::Parser&, framepos_t timestamp);
-	void spp_continue (MIDI::Parser&, framepos_t timestamp);
-	void spp_stop (MIDI::Parser&, framepos_t timestamp);
+	void spp_start ();
+	void spp_continue ();
+	void spp_stop ();
 
 	void mmc_deferred_play (MIDI::MachineControl &);
 	void mmc_stop (MIDI::MachineControl &);

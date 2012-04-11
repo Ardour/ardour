@@ -206,9 +206,9 @@ MachineControl::MachineControl (Manager* m, jack_client_t* jack)
 	_output_port = m->add_port (new Port ("MMC out", Port::IsOutput, jack));
 
 	_input_port->parser()->mmc.connect_same_thread (port_connections, boost::bind (&MachineControl::process_mmc_message, this, _1, _2, _3));
-	_input_port->parser()->start.connect_same_thread (port_connections, boost::bind (&MachineControl::spp_start, this, _1, _2));
-	_input_port->parser()->contineu.connect_same_thread (port_connections, boost::bind (&MachineControl::spp_continue, this, _1, _2));
-	_input_port->parser()->stop.connect_same_thread (port_connections, boost::bind (&MachineControl::spp_stop, this, _1, _2));
+	_input_port->parser()->start.connect_same_thread (port_connections, boost::bind (&MachineControl::spp_start, this));
+	_input_port->parser()->contineu.connect_same_thread (port_connections, boost::bind (&MachineControl::spp_continue, this));
+	_input_port->parser()->stop.connect_same_thread (port_connections, boost::bind (&MachineControl::spp_stop, this));
 }
 
 void
@@ -649,21 +649,21 @@ MachineControl::send (MachineControlCommand const & c)
 }
 
 void
-MachineControl::spp_start (Parser& parser, framecnt_t timestamp)
+MachineControl::spp_start ()
 {
-	SPPStart (parser, timestamp); /* EMIT SIGNAL */
+	SPPStart (); /* EMIT SIGNAL */
 }
 
 void
-MachineControl::spp_continue (Parser& parser, framecnt_t timestamp)
+MachineControl::spp_continue ()
 {
-	SPPContinue (parser, timestamp); /* EMIT SIGNAL */
+	SPPContinue (); /* EMIT SIGNAL */
 }
 
 void
-MachineControl::spp_stop (Parser& parser, framecnt_t timestamp)
+MachineControl::spp_stop ()
 {
-	SPPStop (parser, timestamp); /* EMIT SIGNAL */
+	SPPStop (); /* EMIT SIGNAL */
 }
 
 MachineControlCommand::MachineControlCommand (MachineControl::Command c)
