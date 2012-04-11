@@ -223,6 +223,7 @@ AudioTrackImporter::get_info () const
 	return name;
 }
 
+/** @return true if everything is ok */
 bool
 AudioTrackImporter::_prepare_move ()
 {
@@ -247,7 +248,21 @@ AudioTrackImporter::_prepare_move ()
 		}
 		name = rename_pair.second;
 	}
-	xml_track.child ("IO")->property ("name")->set_value (name);
+	
+	XMLNode* c = xml_track.child ("IO");
+	if (!c) {
+		error << _("badly-formed XML in imported track") << endmsg;
+		return false;
+	}
+
+	XMLProperty* p = c->property ("name");
+	if (!p) {
+		error << _("badly-formed XML in imported track") << endmsg;
+		return false;
+	}
+	
+	p->set_value (name);
+	
 	track_handler.add_name (name);
 
 	return true;

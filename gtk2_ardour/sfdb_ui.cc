@@ -884,7 +884,7 @@ SoundFileBrowser::freesound_search()
 			XMLNode *ofn_node = node->child ("original_filename");
 			XMLNode *dur_node = node->child ("duration");
 
-			if (id_node && uri_node && ofn_node) {
+			if (id_node && uri_node && ofn_node && dur_node) {
 				
 				std::string  id =  id_node->child("text")->content();
 				std::string uri = uri_node->child("text")->content();
