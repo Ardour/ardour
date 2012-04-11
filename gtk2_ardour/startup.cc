@@ -984,6 +984,7 @@ ArdourStartup::redisplay_recent_sessions ()
 		}
 	}
 
+	recent_session_display.set_tooltip_column(1); // recent_session_columns.fullpath 
 	recent_session_display.set_model (recent_session_model);
 	return rs.size();
 }
