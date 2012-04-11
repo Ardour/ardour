@@ -457,7 +457,7 @@ MackieControlProtocol::frm_right_release (Button &)
 LedState 
 MackieControlProtocol::stop_press (Button &)
 {
-	session->request_stop();
+	transport_stop ();
 	return on;
 }
 
@@ -470,7 +470,7 @@ MackieControlProtocol::stop_release (Button &)
 LedState 
 MackieControlProtocol::play_press (Button &)
 {
-	session->request_transport_speed (1.0);
+	transport_play ();
 	return on;
 }
 
@@ -483,77 +483,39 @@ MackieControlProtocol::play_release (Button &)
 LedState 
 MackieControlProtocol::record_press (Button &)
 {
-	if (session->get_record_enabled()) {
-		session->disable_record (false);
-	} else {
-		session->maybe_enable_record();
-	}
-	return on;
+	rec_enable_toggle ();
+	return off;
 }
 
 LedState 
 MackieControlProtocol::record_release (Button &)
 {
-	if (session->get_record_enabled()) {
-		if (session->transport_rolling()) {
-			return on;
-		} else {
-			return flashing;
-		}
-	} else {
-		return off;
-	}
+	return off;
 }
 
 LedState 
 MackieControlProtocol::rewind_press (Button &)
 {
-	JogWheel* jog = surfaces.front()->jog_wheel();
-	assert (jog);
-	jog->push (JogWheel::speed);
-	jog->transport_direction (-1);
-	session->request_transport_speed (-jog->transport_speed());
-	return on;
+	rewind ();
+	return off;
 }
 
 LedState 
 MackieControlProtocol::rewind_release (Button &)
 {
-	JogWheel* jog = surfaces.front()->jog_wheel();
-	assert (jog);
-	jog->pop();
-	jog->transport_direction (0);
-	if (_transport_previously_rolling) {
-		session->request_transport_speed (1.0);
-	} else {
-		session->request_stop();
-	}
 	return off;
 }
 
 LedState 
 MackieControlProtocol::ffwd_press (Button &)
 {
-	JogWheel* jog = surfaces.front()->jog_wheel();
-	assert (jog);
-	jog->push (JogWheel::speed);
-	jog->transport_direction (1);
-	session->request_transport_speed (jog->transport_speed());
-	return on;
+	ffwd ();
+	return off;
 }
 
 LedState 
 MackieControlProtocol::ffwd_release (Button &)
 {
-	JogWheel* jog = surfaces.front()->jog_wheel();
-	assert (jog);
-	jog->pop();
-	jog->transport_direction (0);
-	if (_transport_previously_rolling) {
-		session->request_transport_speed (1.0);
-	} else {
-		session->request_stop();
-	}
 	return off;
 }
 
@@ -561,13 +523,13 @@ LedState
 MackieControlProtocol::loop_press (Button &)
 {
 	session->request_play_loop (!session->get_play_loop());
-	return on;
+	return off;
 }
 
 LedState 
 MackieControlProtocol::loop_release (Button &)
 {
-	return session->get_play_loop();
+	return off;
 }
 
 LedState 
@@ -663,98 +625,6 @@ MackieControlProtocol::enter_release (Button &)
 	return off;
 }
 
-/* UNIMPLEMENTED */
-
-LedState
-MackieControlProtocol::io_press (Button &) 
-{ 
-	return off; 
-}
-LedState
-MackieControlProtocol::io_release (Button &) 
-{ 
-	return off; 
-}
-LedState
-MackieControlProtocol::sends_press (Button &) 
-{ 
-	return off; 
-}
-LedState
-MackieControlProtocol::sends_release (Button &) 
-{ 
-	return off; 
-}
-LedState
-MackieControlProtocol::pan_press (Button &) 
-{ 
-	return off; 
-}
-LedState
-MackieControlProtocol::pan_release (Button &) 
-{ 
-	return off; 
-}
-LedState
-MackieControlProtocol::plugin_press (Button &) 
-{ 
-	return off; 
-}
-LedState
-MackieControlProtocol::plugin_release (Button &) 
-{ 
-	return off; 
-}
-LedState
-MackieControlProtocol::eq_press (Button &) 
-{ 
-	return off; 
-}
-LedState
-MackieControlProtocol::eq_release (Button &) 
-{ 
-	return off; 
-}
-LedState
-MackieControlProtocol::dyn_press (Button &) 
-{ 
-	return off; 
-}
-LedState
-MackieControlProtocol::dyn_release (Button &) 
-{ 
-	return off; 
-}
-LedState
-MackieControlProtocol::flip_press (Button &) 
-{ 
-	return off; 
-}
-LedState
-MackieControlProtocol::flip_release (Button &) 
-{ 
-	return off; 
-}
-LedState
-MackieControlProtocol::edit_press (Button &) 
-{ 
-	return off; 
-}
-LedState
-MackieControlProtocol::edit_release (Button &) 
-{ 
-	return off; 
-}
-LedState
-MackieControlProtocol::name_value_press (Button &) 
-{ 
-	return off; 
-}
-LedState
-MackieControlProtocol::name_value_release (Button &) 
-{ 
-	return off; 
-}
 LedState
 MackieControlProtocol::F1_press (Button &) 
 { 
@@ -843,10 +713,103 @@ MackieControlProtocol::F8_release (Button &)
 { 
 	return off; 
 }
+
+/* UNIMPLEMENTED */
+
+LedState
+MackieControlProtocol::io_press (Button &) 
+{ 
+	return off; 
+}
+LedState
+MackieControlProtocol::io_release (Button &) 
+{ 
+	return off; 
+}
+LedState
+MackieControlProtocol::sends_press (Button &) 
+{ 
+	return off; 
+}
+LedState
+MackieControlProtocol::sends_release (Button &) 
+{ 
+	return off; 
+}
+LedState
+MackieControlProtocol::pan_press (Button &) 
+{ 
+	return off; 
+}
+LedState
+MackieControlProtocol::pan_release (Button &) 
+{ 
+	return off; 
+}
+LedState
+MackieControlProtocol::plugin_press (Button &) 
+{ 
+	return off; 
+}
+LedState
+MackieControlProtocol::plugin_release (Button &) 
+{ 
+	return off; 
+}
+LedState
+MackieControlProtocol::eq_press (Button &) 
+{ 
+	return off; 
+}
+LedState
+MackieControlProtocol::eq_release (Button &) 
+{ 
+	return off; 
+}
+LedState
+MackieControlProtocol::dyn_press (Button &) 
+{ 
+	return off; 
+}
+LedState
+MackieControlProtocol::dyn_release (Button &) 
+{ 
+	return off; 
+}
+LedState
+MackieControlProtocol::flip_press (Button &) 
+{ 
+	_flip_mode = !_flip_mode;
+	return (_flip_mode ? on : off);
+}
+LedState
+MackieControlProtocol::flip_release (Button &) 
+{ 
+	return (_flip_mode ? on : off);
+}
+LedState
+MackieControlProtocol::edit_press (Button &) 
+{ 
+	return off; 
+}
+LedState
+MackieControlProtocol::edit_release (Button &) 
+{ 
+	return off; 
+}
+LedState
+MackieControlProtocol::name_value_press (Button &) 
+{ 
+	return off; 
+}
+LedState
+MackieControlProtocol::name_value_release (Button &) 
+{ 
+	return off; 
+}
 LedState
 MackieControlProtocol::F9_press (Button &) 
 { 
-	GotoView (8); /* EMIT SIGNAL */
 	return off; 
 }
 LedState
@@ -945,16 +908,6 @@ MackieControlProtocol::rec_ready_release (Button &)
 	return off; 
 }
 LedState
-MackieControlProtocol::snapshot_press (Button &) 
-{ 
-	return off; 
-}
-LedState
-MackieControlProtocol::snapshot_release (Button &) 
-{ 
-	return off; 
-}
-LedState
 MackieControlProtocol::touch_press (Button &) 
 { 
 	return off; 
@@ -1001,16 +954,6 @@ MackieControlProtocol::user_b_press (Button &)
 }
 LedState
 MackieControlProtocol::user_b_release (Button &) 
-{ 
-	return off; 
-}
-LedState
-MackieControlProtocol::fader_touch_press (Button &) 
-{ 
-	return off; 
-}
-LedState
-MackieControlProtocol::fader_touch_release (Button &) 
 { 
 	return off; 
 }

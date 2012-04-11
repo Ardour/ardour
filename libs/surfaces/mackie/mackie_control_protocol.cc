@@ -100,6 +100,7 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 	, _gui (0)
 	, _zoom_mode (false)
 	, _scrub_mode (false)
+	, _flip_mode (false)
 	, _current_selected_track (-1)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::MackieControlProtocol\n");
@@ -454,6 +455,7 @@ MackieControlProtocol::connect_session_signals()
 	session->RecordStateChanged.connect(session_connections, MISSING_INVALIDATOR, ui_bind (&MackieControlProtocol::notify_record_state_changed, this), this);
 	// receive transport state changed
 	session->TransportStateChange.connect(session_connections, MISSING_INVALIDATOR, ui_bind (&MackieControlProtocol::notify_transport_state_changed, this), this);
+	session->TransportLooped.connect (session_connections, MISSING_INVALIDATOR, ui_bind (&MackieControlProtocol::notify_loop_state_changed, this), this);
 	// receive punch-in and punch-out
 	Config->ParameterChanged.connect(session_connections, MISSING_INVALIDATOR, ui_bind (&MackieControlProtocol::notify_parameter_changed, this, _1), this);
 	session->config.ParameterChanged.connect (session_connections, MISSING_INVALIDATOR, ui_bind (&MackieControlProtocol::notify_parameter_changed, this, _1), this);
@@ -731,13 +733,9 @@ MackieControlProtocol::notify_remote_id_changed()
 ///////////////////////////////////////////
 
 void 
-MackieControlProtocol::notify_record_state_changed()
+MackieControlProtocol::notify_loop_state_changed()
 {
-	// switch rec button on / off / flashing
-	Button * rec = reinterpret_cast<Button*> (surfaces.front()->controls_by_name["record"]);
-	if (rec) {
-		surfaces.front()->write (builder.build_led (*rec, record_release (*rec)));
-	}
+	update_global_button ("loop", session->get_play_loop());
 }
 
 void 
@@ -746,14 +744,33 @@ MackieControlProtocol::notify_transport_state_changed()
 	// switch various play and stop buttons on / off
 	update_global_button ("play", session->transport_rolling());
 	update_global_button ("stop", !session->transport_rolling());
-	update_global_button ("loop", session->get_play_loop());
+	update_global_button ("rewind", session->transport_speed() < 0.0);
+	update_global_button ("ffwd", session->transport_speed() > 1.0);
 
 	_transport_previously_rolling = session->transport_rolling();
 
-	// rec is special because it's tristate
+}
+
+void
+MackieControlProtocol::notify_record_state_changed ()
+{
 	Button * rec = reinterpret_cast<Button*> (surfaces.front()->controls_by_name["record"]);
 	if (rec) {
-		surfaces.front()->write (builder.build_led (*rec, record_release (*rec)));
+		LedState ls;
+
+		switch (session->record_status()) {
+		case Session::Disabled:
+			ls = off;
+			break;
+		case Session::Recording:
+			ls = on;
+			break;
+		case Session::Enabled:
+			ls = flashing;
+			break;
+		}
+
+		surfaces.front()->write (builder.build_led (*rec, ls));
 	}
 }
 
@@ -1126,7 +1143,7 @@ MackieControlProtocol::handle_button_event (Surface& surface, Button& button, Bu
 		}
 		break;
 
-	case 0x48: // control
+	case Button::Ctrl:
 		switch  (bs) {
 		case press: ls = control_press (button); break;
 		case release: ls = control_release (button); break;
@@ -1158,7 +1175,7 @@ MackieControlProtocol::handle_button_event (Surface& surface, Button& button, Bu
 		}
 		break;
 
-	case 0x4c: // undo
+	case Button::Undo: // undo
 		switch  (bs) {
 		case press: ls = undo_press (button); break;
 		case release: ls = undo_release (button); break;
@@ -1166,15 +1183,15 @@ MackieControlProtocol::handle_button_event (Surface& surface, Button& button, Bu
 		}
 		break;
 
-	case 0x4d: // snapshot
-		switch  (bs) {
-		case press: ls = snapshot_press (button); break;
-		case release: ls = snapshot_release (button); break;
+	case Button::Save:
+		switch (bs) {
+		case press: ls = save_press (button); break;
+		case release: ls = save_release (button); break;
 		case neither: break;
 		}
 		break;
 
-	case 0x4e: // touch
+	case Button::Touch: // touch
 		switch  (bs) {
 		case press: ls = touch_press (button); break;
 		case release: ls = touch_release (button); break;
@@ -1182,7 +1199,7 @@ MackieControlProtocol::handle_button_event (Surface& surface, Button& button, Bu
 		}
 		break;
 
-	case 0x4f: // redo
+	case Button::Redo: // redo
 		switch  (bs) {
 		case press: ls = redo_press (button); break;
 		case release: ls = redo_release (button); break;
@@ -1190,7 +1207,7 @@ MackieControlProtocol::handle_button_event (Surface& surface, Button& button, Bu
 		}
 		break;
 
-	case 0x50: // marker
+	case Button::Marker: // marker
 		switch  (bs) {
 		case press: ls = marker_press (button); break;
 		case release: ls = marker_release (button); break;
@@ -1198,7 +1215,7 @@ MackieControlProtocol::handle_button_event (Surface& surface, Button& button, Bu
 		}
 		break;
 
-	case 0x51: // enter
+	case Button::Enter: // enter
 		switch  (bs) {
 		case press: ls = enter_press (button); break;
 		case release: ls = enter_release (button); break;
@@ -1278,7 +1295,7 @@ MackieControlProtocol::handle_button_event (Surface& surface, Button& button, Bu
 		}
 		break;
 
-	case 0x5b: // rewind
+	case Button::Rewind:
 		switch  (bs) {
 		case press: ls = rewind_press (button); break;
 		case release: ls = rewind_release (button); break;
@@ -1286,7 +1303,7 @@ MackieControlProtocol::handle_button_event (Surface& surface, Button& button, Bu
 		}
 		break;
 
-	case 0x5c: // ffwd
+	case Button::Ffwd:
 		switch  (bs) {
 		case press: ls = ffwd_press (button); break;
 		case release: ls = ffwd_release (button); break;
@@ -1294,7 +1311,7 @@ MackieControlProtocol::handle_button_event (Surface& surface, Button& button, Bu
 		}
 		break;
 
-	case 0x5d: // stop
+	case Button::Stop:
 		switch  (bs) {
 		case press: ls = stop_press (button); break;
 		case release: ls = stop_release (button); break;
@@ -1302,7 +1319,7 @@ MackieControlProtocol::handle_button_event (Surface& surface, Button& button, Bu
 		}
 		break;
 
-	case 0x5e: // play
+	case Button::Play:
 		switch  (bs) {
 		case press: ls = play_press (button); break;
 		case release: ls = play_release (button); break;

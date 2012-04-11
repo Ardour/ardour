@@ -100,13 +100,13 @@ BasicUI::add_marker ()
 void
 BasicUI::rewind ()
 {
-	session->request_transport_speed (-2.0f);
+	session->request_transport_speed (session->transport_speed() * 1.5);
 }
 
 void
 BasicUI::ffwd ()
 {
-	session->request_transport_speed (2.0f);
+	session->request_transport_speed (session->transport_speed() + 1.5);
 }
 
 void

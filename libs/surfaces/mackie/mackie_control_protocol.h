@@ -118,6 +118,7 @@ class MackieControlProtocol
 	// button-related signals
 	void notify_record_state_changed();
 	void notify_transport_state_changed();
+	void notify_loop_state_changed();
 	// mainly to pick up punch-in and punch-out
 	void notify_parameter_changed(std::string const &);
 	void notify_solo_active_changed(bool);
@@ -358,6 +359,7 @@ class MackieControlProtocol
 
 	bool _zoom_mode;
 	bool _scrub_mode;
+	bool _flip_mode;
 	int  _current_selected_track;
 	
 	static const int MODIFIER_OPTION;
