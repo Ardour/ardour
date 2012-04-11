@@ -35,9 +35,9 @@ public:
 		, last_segment_value_sent (-1)
 		, overload_on (false) {}
 	
-	virtual type_t type() const { return type_meter; }
-
 	MidiByteArray update_message (float dB);
+
+	MidiByteArray zero() { return update_message (-99999999.0); }
 
 	static Control* factory (Surface&, int id, const char*, Group&);
 	

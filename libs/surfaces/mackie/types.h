@@ -106,7 +106,6 @@ class Strip;
 class Group;
 class Pot;
 class Led;
-class LedRing;
 
 }
 

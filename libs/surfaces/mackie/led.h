@@ -36,8 +36,9 @@ public:
 	}
 	
 	Led & led() { return *this; }
-	type_t type() const { return type_led; }
 	MidiByteArray set_state (LedState);
+
+	MidiByteArray zero() { return set_state (off); }
 	
 	static Control* factory (Surface&, int id, const char*, Group&);
 

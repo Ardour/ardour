@@ -95,3 +95,4 @@ Meter::update_message (float dB)
 
 	return msg;
 }
+

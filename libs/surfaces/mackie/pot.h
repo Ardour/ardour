@@ -2,25 +2,40 @@
 #define __ardour_mackie_control_protocol_pot_h__
 
 #include "controls.h"
-#include "ledring.h"
 
 namespace Mackie {
 
 class Pot : public Control
 {
 public:
+	enum Mode {
+		dot = 0,
+		boost_cut = 1,
+		wrap = 2,
+		spread = 3,
+	};
+
 	Pot (int id, std::string name, Group & group)
 		: Control (id, name, group)
-		, _led_ring (id, name + "_ring", group) {}
+		, value (0.0)
+		, mode (dot)
+		, on (true) {}
 
-	virtual type_t type() const { return type_pot; }
+	MidiByteArray set_mode (Mode);
+	MidiByteArray set_value (float);
+	MidiByteArray set_onoff (bool);
+	MidiByteArray set_all (float, bool, Mode);
 
-	virtual const LedRing & led_ring() const {return _led_ring; }
+	MidiByteArray zero() { return set_value (0.0); }
+	
+	MidiByteArray update_message ();
 
 	static Control* factory (Surface&, int id, const char*, Group&);
 
-private:
-	LedRing _led_ring;
+  private:
+	float value;
+	Mode mode;
+	bool on;
 };
 
 }

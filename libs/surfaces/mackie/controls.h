@@ -28,30 +28,21 @@
 #include "pbd/signals.h"
 
 #include "mackie_control_exception.h"
+#include "midi_byte_array.h"
 
 namespace Mackie
 {
 
 class Strip;
 class Group;
-class Led;
 class Surface;
 
 class Control
 {
 public:
-	enum type_t { 
-		type_led, 
-		type_led_ring, 
-		type_fader = 0xe0, 
-		type_button = 0x90, 
-		type_pot = 0xb0,
-		type_meter = 0xd0
-	};
-
 	enum base_id_t {
-		fader_base_id = 0x0,
-		pot_base_id = 0x10,
+		fader_base_id = 0xe0,
+		pot_base_id = 0x30,
 		jog_base_id = 0x3c,
 		fader_touch_button_base_id = 0xe0,
 		vselect_button_base_id = 0x20,
@@ -65,12 +56,6 @@ public:
 	Control (int id, std::string name, Group& group);
 	virtual ~Control() {}
 	
-	virtual Led & led() { throw MackieControlException ("no led available"); }
-
-	/// type() << 8 + midi id of the control. This
-	/// provides a unique id for any control on the surface.
-	int id() const { return (type() << 8) + _id; }
-	
 	/// the value of the second bytes of the message. It's
 	/// the id of the control, but only guaranteed to be
 	/// unique within the control type.
@@ -78,18 +63,16 @@ public:
 
 	const std::string & name() const  { return _name; }
 	Group & group() const { return _group; }
+
 	virtual bool accepts_feedback() const  { return true; }
 	
-	virtual type_t type() const = 0;
-	
-	/// Return true if this control is the one and only Jog Wheel
-	virtual bool is_jog() const { return false; }
-
 	bool in_use () const;
 	void set_in_use (bool);
 	
 	/// Keep track of the timeout so it can be updated with more incoming events
 	sigc::connection in_use_connection;
+
+	virtual MidiByteArray zero() = 0;
 
 	/** If we are doing an in_use timeout for a fader without touch, this
 	 *  is its touch button control; otherwise 0.

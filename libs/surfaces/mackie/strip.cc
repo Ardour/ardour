@@ -40,7 +40,6 @@
 #include "surface.h"
 #include "button.h"
 #include "led.h"
-#include "ledring.h"
 #include "pot.h"
 #include "fader.h"
 #include "jog.h"
@@ -110,12 +109,8 @@ void Strip::add (Control & control)
 		_fader_touch = reinterpret_cast<Button*>(&control);
 	} else if  (control.name() == "meter") {
 		_meter = reinterpret_cast<Meter*>(&control);
-	} else if  (control.type() == Control::type_led || control.type() == Control::type_led_ring) {
-		// relax
 	} else {
-		ostringstream os;
-		os << "Strip::add: unknown control type " << control;
-		throw MackieControlException (os.str());
+		// relax 
 	}
 }
 
@@ -308,27 +303,24 @@ Strip::notify_all()
 void 
 Strip::notify_solo_changed ()
 {
-	if (_route) {
-		Button& button = solo();
-		_surface->write (button.led().set_state (_route->soloed() ? on : off));
+	if (_route && _solo) {
+		_surface->write (_solo->led().set_state (_route->soloed() ? on : off));
 	}
 }
 
 void 
 Strip::notify_mute_changed ()
 {
-	if (_route) {
-		Button & button = mute();
-		_surface->write (button.led().set_state (_route->muted() ? on : off));
+	if (_route && _mute) {
+		_surface->write (_mute->led().set_state (_route->muted() ? on : off));
 	}
 }
 
 void 
 Strip::notify_record_enable_changed ()
 {
-	if (_route) {
-		Button & button = recenable();
-		_surface->write (button.led().set_state (_route->record_enabled() ? on : off));
+	if (_route && _recenable)  {
+		_surface->write (_recenable->led().set_state (_route->record_enabled() ? on : off));
 	}
 }
 
@@ -350,19 +342,12 @@ Strip::notify_gain_changed (bool force_update)
 	if (_route) {
 		Fader & fader = gain();
 
-		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("route %1 gain change, update fader %2 on port %3 in-use ? %4\n", 
-								   _route->name(), 
-								   fader.raw_id(),
-								   _surface->port().output_port().name(),
-								   fader.in_use()));
 		if (!fader.in_use()) {
-			float gain_value = gain_to_slider_position (_route->gain_control()->get_value());
+			float position = gain_to_slider_position (_route->gain_control()->get_value());
 			// check that something has actually changed
-			if (force_update || gain_value != _last_gain_written) {
-				_surface->write (builder.build_fader (fader, gain_value));
-				_last_gain_written = gain_value;
-			} else {
-				DEBUG_TRACE (DEBUG::MackieControl, string_compose ("fader not updated because gain still equals %1\n", gain_value));
+			if (force_update || position != _last_gain_written) {
+				_surface->write (fader.set_position (position));
+				_last_gain_written = position;
 			}
 		}
 	}
@@ -385,8 +370,8 @@ Strip::notify_property_changed (const PropertyChange& what_changed)
 			line1 = PBD::short_version (fullname, 6);
 		}
 		
-		_surface->write (builder.strip_display (*_surface, *this, 0, line1));
-		_surface->write (builder.strip_display_blank (*_surface, *this, 1));
+		_surface->write (display (0, line1));
+		_surface->write (blank_display (1));
 	}
 }
 
@@ -396,13 +381,16 @@ Strip::notify_panner_changed (bool force_update)
 	if (_route) {
 		Pot & pot = vpot();
 		boost::shared_ptr<Panner> panner = _route->panner();
+
 		if (panner) {
 			double pos = panner->position ();
 
 			// cache the MidiByteArray here, because the mackie led control is much lower
 			// resolution than the panner control. So we save lots of byte
 			// sends in spite of more work on the comparison
-			MidiByteArray bytes = builder.build_led_ring (pot, ControlState (on, pos), MackieMidiBuilder::midi_pot_mode_dot);
+
+			MidiByteArray bytes = pot.set_all (pos, true, Pot::dot);
+
 			// check that something has actually changed
 			if (force_update || bytes != _last_pan_written)
 			{
@@ -410,7 +398,7 @@ Strip::notify_panner_changed (bool force_update)
 				_last_pan_written = bytes;
 			}
 		} else {
-			_surface->write (builder.zero_control (pot));
+			_surface->write (pot.zero());
 		}
 	}
 }
@@ -418,10 +406,16 @@ Strip::notify_panner_changed (bool force_update)
 bool 
 Strip::handle_button (SurfacePort & port, Control & control, ButtonState bs)
 {
+	Button* button = dynamic_cast<Button*>(&control);
+	
+	if (!button) {
+		return false;
+	}
+
 	if (!_route) {
 		// no route so always switch the light off
 		// because no signals will be emitted by a non-route
-		_surface->write (control.led().set_state  (off));
+		_surface->write (button->led().set_state  (off));
 		return false;
 	}
 
@@ -499,4 +493,62 @@ Strip::update_meter ()
 {
 	float dB = const_cast<PeakMeter&> (_route->peak_meter()).peak_power (0);
 	_surface->write (meter().update_message (dB));
+}
+
+MidiByteArray
+Strip::zero ()
+{
+	MidiByteArray retval;
+
+	for (Group::Controls::const_iterator it = _controls.begin(); it != _controls.end(); ++it) {
+		retval << (*it)->zero ();
+	}
+
+	retval << blank_display (0);
+	retval << blank_display (1);
+	
+	return retval;
+}
+
+MidiByteArray
+Strip::blank_display (uint32_t line_number)
+{
+	return display (line_number, string());
+}
+
+MidiByteArray
+Strip::display (uint32_t line_number, const std::string& line)
+{
+	assert (line_number <= 1);
+
+	MidiByteArray retval;
+
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("strip_display index: %1, line %2 = %3\n", _index, line_number, line));
+
+	// sysex header
+	retval << _surface->sysex_hdr();
+	
+	// code for display
+	retval << 0x12;
+	// offset (0 to 0x37 first line, 0x38 to 0x6f for second line)
+	retval << (_index * 7 + (line_number * 0x38));
+	
+	// ascii data to display
+	retval << line;
+	// pad with " " out to 6 chars
+	for (int i = line.length(); i < 6; ++i) {
+		retval << ' ';
+	}
+	
+	// column spacer, unless it's the right-hand column
+	if (_index < 7) {
+		retval << ' ';
+	}
+
+	// sysex trailer
+	retval << MIDI::eox;
+	
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("MackieMidiBuilder::strip_display midi: %1\n", retval));
+
+	return retval;
 }

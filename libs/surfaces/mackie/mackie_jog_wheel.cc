@@ -3,7 +3,6 @@
 #include "ardour/session.h"
 
 #include "mackie_jog_wheel.h"
-
 #include "mackie_control_protocol.h"
 #include "surface_port.h"
 #include "controls.h"

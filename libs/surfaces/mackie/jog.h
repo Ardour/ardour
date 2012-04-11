@@ -33,7 +33,7 @@ public:
 	{
 	}
 
-	virtual bool is_jog() const { return true; }
+	MidiByteArray zero() { return MidiByteArray(); }
 
 	static Control* factory (Surface&, int id, const char*, Group&);
 };

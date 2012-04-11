@@ -102,9 +102,9 @@ public:
 		, _led  (id, name + "_led", group) {}
 	
 	virtual Led & led() { return _led; }
-	
-	virtual type_t type() const { return type_button; };
 
+	MidiByteArray zero() { return _led.set_state (off); }
+	
 	MidiByteArray update_message () const;
 
 	static Control* factory (Surface&, int id, const char*, Group&);

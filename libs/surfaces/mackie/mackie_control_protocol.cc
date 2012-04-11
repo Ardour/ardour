@@ -55,7 +55,6 @@
 
 #include "midi_byte_array.h"
 #include "mackie_control_exception.h"
-#include "mackie_midi_builder.h"
 #include "surface_port.h"
 #include "surface.h"
 
@@ -365,8 +364,6 @@ MackieControlProtocol::periodic ()
 		(*s)->periodic ();
 	}
 	
-	update_timecode_display();
-
 	return true;
 }
 

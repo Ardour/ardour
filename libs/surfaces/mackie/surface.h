@@ -7,7 +7,6 @@
 
 #include "controls.h"
 #include "types.h"
-#include "mackie_midi_builder.h"
 #include "mackie_jog_wheel.h"
 
 namespace MIDI {
@@ -33,7 +32,6 @@ class Fader;
 class Jog;
 class Pot;
 class Led;
-class LedRing;
 
 class Surface : public PBD::ScopedConnectionList
 {
@@ -132,6 +130,19 @@ public:
 
 	void handle_control_event (Mackie::Control & control, const Mackie::ControlState & state);
 
+	// display the first 2 chars of the msg in the 2 char display
+	// . is appended to the previous character, so A.B. would
+	// be two characters
+	MidiByteArray two_char_display (const std::string & msg, const std::string & dots = "  ");
+	MidiByteArray two_char_display (unsigned int value, const std::string & dots = "  ");
+	
+	/**
+		Timecode display. Only the difference between timecode and last_timecode will
+		be encoded, to save midi bandwidth. If they're the same, an empty array will
+		be returned
+	*/
+	MidiByteArray timecode_display (const std::string & timecode, const std::string & last_timecode = "");
+
   protected:
 	void init_controls();
 	void init_strips ();
@@ -144,7 +155,6 @@ public:
 	bool _active;
 	bool _connected;
 	Mackie::JogWheel* _jog_wheel;
-	MackieMidiBuilder builder;
 
 	void jog_wheel_state_display (Mackie::JogWheel::State state);
 };

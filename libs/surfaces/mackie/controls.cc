@@ -22,13 +22,11 @@
 
 #include "controls.h"
 #include "types.h"
-#include "mackie_midi_builder.h"
 #include "surface.h"
 #include "control_group.h"
 
 #include "button.h"
 #include "led.h"
-#include "ledring.h"
 #include "pot.h"
 #include "fader.h"
 #include "jog.h"
@@ -75,26 +73,12 @@ ostream & Mackie::operator <<  (ostream & os, const Mackie::Control & control)
 	os << " { ";
 	os << "name: " << control.name();
 	os << ", ";
-	os << "id: " << "0x" << setw(4) << setfill('0') << hex << control.id() << setfill(' ');
-	os << ", ";
-	os << "type: " << "0x" << setw(2) << setfill('0') << hex << control.type() << setfill(' ');
-	os << ", ";
 	os << "raw_id: " << "0x" << setw(2) << setfill('0') << hex << control.raw_id() << setfill(' ');
 	os << ", ";
 	os << "group: " << control.group().name();
 	os << " }";
 	
 	return os;
-}
-
-Control*
-Pot::factory (Surface& surface, int id, const char* name, Group& group)
-{
-	Pot* p = new Pot (id, name, group);
-	surface.pots[id] = p;
-	surface.controls.push_back (p);
-	group.add (*p);
-	return p;
 }
 
 Control*

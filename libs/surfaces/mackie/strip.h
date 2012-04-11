@@ -5,9 +5,11 @@
 #include <iostream>
 
 #include "pbd/property_basics.h"
+#include "pbd/signals.h"
 
 #include "control_group.h"
-#include "mackie_midi_builder.h"
+#include "types.h"
+#include "midi_byte_array.h"
 
 namespace ARDOUR {
 	class Route;
@@ -21,6 +23,7 @@ class Button;
 class Pot;
 class Fader;
 class Meter;
+class SurfacePort;
 
 struct StripControlDefinition {
     const char* name;
@@ -78,6 +81,10 @@ public:
 
 	void periodic ();
 
+	MidiByteArray display (uint32_t line_number, const std::string&);
+	MidiByteArray blank_display (uint32_t line_number);
+	MidiByteArray zero ();
+
 private:
 	Button* _solo;
 	Button* _recenable;
@@ -90,8 +97,6 @@ private:
 	Meter*  _meter;
 	int     _index;
 	Surface* _surface;
-
-	MackieMidiBuilder builder;
 
 	boost::shared_ptr<ARDOUR::Route> _route;
 	PBD::ScopedConnectionList route_connections;

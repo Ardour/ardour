@@ -17,14 +17,12 @@
 #include "surface_port.h"
 #include "surface.h"
 #include "strip.h"
-#include "mackie_midi_builder.h"
 #include "mackie_control_protocol.h"
 #include "mackie_jog_wheel.h"
 
 #include "strip.h"
 #include "button.h"
 #include "led.h"
-#include "ledring.h"
 #include "pot.h"
 #include "fader.h"
 #include "jog.h"
@@ -260,14 +258,6 @@ Surface::init_strips ()
 	}
 }
 
-void 
-Surface::display_timecode (const std::string & timecode, const std::string & timecode_last)
-{
-	if (has_timecode_display()) {
-		_port->write (builder.timecode_display (*this, timecode, timecode_last));
-	}
-}
-
 float 
 Surface::scaled_delta (const ControlState & state, float current_speed)
 {
@@ -279,10 +269,10 @@ Surface::display_bank_start (uint32_t current_bank)
 {
 	if  (current_bank == 0) {
 		// send Ar. to 2-char display on the master
-		_port->write (builder.two_char_display ("Ar", ".."));
+		_port->write (two_char_display ("Ar", ".."));
 	} else {
 		// write the current first remote_id to the 2-char display
-		_port->write (builder.two_char_display (current_bank));
+		_port->write (two_char_display (current_bank));
 	}
 }
 
@@ -292,7 +282,10 @@ Surface::blank_jog_ring ()
 	Control* control = controls_by_name["jog"];
 
 	if (control) {
-		_port->write (builder.build_led_ring (*(dynamic_cast<Pot*> (control)), off));
+		Pot* pot = dynamic_cast<Pot*> (control);
+		if (pot) {
+			_port->write (pot->set_onoff (false));
+		}
 	}
 }
 
@@ -423,8 +416,11 @@ Surface::handle_control_event (Control & control, const ControlState & state)
 	// the state of the controls on the surface is usually updated
 	// from UI events.
 
-	switch (control.type()) {
-	case Control::type_fader:
+	Fader* fader = dynamic_cast<Fader*> (&control);
+	Button* button = dynamic_cast<Button*> (&control);
+	Pot* pot = dynamic_cast<Pot*> (&control);
+
+	if (fader) {
 		// find the route in the route table for the id
 		// if the route isn't available, skip it
 		// at which point the fader should just reset itself
@@ -441,25 +437,25 @@ Surface::handle_control_event (Control & control, const ControlState & state)
 			// must echo bytes back to slider now, because
 			// the notifier only works if the fader is not being
 			// touched. Which it is if we're getting input.
-			_port->write (builder.build_fader ((Fader&)control, state.pos));
+			_port->write (fader->set_position (state.pos));
 		}
-		break;
-		
-	case Control::type_button:
+	}
+
+	if (button) {
 		if (strip) {
 			strip->handle_button (*_port, control, state.button_state);
 		} else {
 			// handle all non-strip buttons
-			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("global button %1\n", control.id()));
+			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("global button %1\n", control.raw_id()));
 			_mcp.handle_button_event (*this, dynamic_cast<Button&>(control), state.button_state);
 			
 		}
-		break;
-		
+	}
 		// pot (jog wheel, external control)
-	case Control::type_pot:
+
+	if (pot) {
 		if (strip) {
-			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("strip pot %1\n", control.id()));
+			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("strip pot %1\n", control.raw_id()));
 			if (route) {
 				boost::shared_ptr<Panner> panner = route->panner_shell()->panner();
 				// pan for mono input routes, or stereo linked panners
@@ -474,23 +470,21 @@ Surface::handle_control_event (Control & control, const ControlState & state)
 				}
 			} else {
 				// it's a pot for an umnapped route, so turn all the lights off
-				_port->write (builder.build_led_ring (dynamic_cast<Pot &> (control), off));
+				Pot* pot = dynamic_cast<Pot*> (&control);
+				if (pot) {
+					_port->write (pot->set_onoff (false));
+				}
 			}
 		} else {
-			if (control.is_jog()) {
+			JogWheel* wheel = dynamic_cast<JogWheel*> (pot);
+			if (wheel) {
 				DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Jog wheel moved %1\n", state.ticks));
-				if (_jog_wheel) {
-					_jog_wheel->jog_event (*_port, control, state);
-				}
+				wheel->jog_event (*_port, control, state);
 			} else {
 				DEBUG_TRACE (DEBUG::MackieControl, string_compose ("External controller moved %1\n", state.ticks));
 				cout << "external controller" << state.ticks * state.sign << endl;
 			}
 		}
-		break;
-		
-	default:
-		break;
 	}
 }
 
@@ -550,7 +544,7 @@ Surface::zero_all ()
 
 	// zero all strips
 	for (Strips::iterator it = strips.begin(); it != strips.end(); ++it) {
-		_port->write (builder.zero_strip (*this, **it));
+		_port->write ((*it)->zero());
 	}
 
 	// turn off global buttons and leds
@@ -560,13 +554,13 @@ Surface::zero_all ()
 	for (Controls::iterator it = controls.begin(); it != controls.end(); ++it) {
 		Control & control = **it;
 		if (!control.group().is_strip() && control.accepts_feedback()) {
-			_port->write (builder.zero_control (control));
+			_port->write (control.zero());
 		}
 	}
 
 	// any hardware-specific stuff
 	// clear 2-char display
-	_port->write (builder.two_char_display ("LC"));
+	_port->write (two_char_display ("  "));
 
 	// and the led ring for the master strip
 	blank_jog_ring ();
@@ -578,6 +572,7 @@ Surface::periodic ()
 	for (Strips::iterator s = strips.begin(); s != strips.end(); ++s) {
 		(*s)->periodic ();
 	}
+
 }
 
 void
@@ -591,22 +586,22 @@ Surface::jog_wheel_state_display (JogWheel::State state)
 {
 	switch (state) {
 	case JogWheel::zoom:
-			_port->write (builder.two_char_display ("Zm"));
+			_port->write (two_char_display ("Zm"));
 			break;
 		case JogWheel::scroll:
-			_port->write (builder.two_char_display ("Sc"));
+			_port->write (two_char_display ("Sc"));
 			break;
 		case JogWheel::scrub:
-			_port->write (builder.two_char_display ("Sb"));
+			_port->write (two_char_display ("Sb"));
 			break;
 		case JogWheel::shuttle:
-			_port->write (builder.two_char_display ("Sh"));
+			_port->write (two_char_display ("Sh"));
 			break;
 		case JogWheel::speed:
-			_port->write (builder.two_char_display ("Sp"));
+			_port->write (two_char_display ("Sp"));
 			break;
 		case JogWheel::select:
-			_port->write (builder.two_char_display ("Se"));
+			_port->write (two_char_display ("Se"));
 			break;
 	}
 }
@@ -625,3 +620,90 @@ Surface::map_routes (const vector<boost::shared_ptr<Route> >& routes)
 		(*s)->set_route (*r);
 	}
 }
+
+static char translate_seven_segment (char achar)
+{
+	achar = toupper (achar);
+	if  (achar >= 0x40 && achar <= 0x60)
+		return achar - 0x40;
+	else if  (achar >= 0x21 && achar <= 0x3f)
+      return achar;
+	else
+      return 0x00;
+}
+
+MidiByteArray 
+Surface::two_char_display (const std::string & msg, const std::string & dots)
+{
+	if  (msg.length() != 2) throw MackieControlException ("MackieMidiBuilder::two_char_display: msg must be exactly 2 characters");
+	if  (dots.length() != 2) throw MackieControlException ("MackieMidiBuilder::two_char_display: dots must be exactly 2 characters");
+	
+	MidiByteArray bytes (6, 0xb0, 0x4a, 0x00, 0xb0, 0x4b, 0x00);
+	
+	// chars are understood by the surface in right-to-left order
+	// could also exchange the 0x4a and 0x4b, above
+	bytes[5] = translate_seven_segment (msg[0]) +  (dots[0] == '.' ? 0x40 : 0x00);
+	bytes[2] = translate_seven_segment (msg[1]) +  (dots[1] == '.' ? 0x40 : 0x00);
+	
+	return bytes;
+}
+
+MidiByteArray 
+Surface::two_char_display (unsigned int value, const std::string & /*dots*/)
+{
+	ostringstream os;
+	os << setfill('0') << setw(2) << value % 100;
+	return two_char_display (os.str());
+}
+
+void 
+Surface::display_timecode (const std::string & timecode, const std::string & timecode_last)
+{
+	if (has_timecode_display()) {
+		_port->write (timecode_display (timecode, timecode_last));
+	}
+}
+
+MidiByteArray 
+Surface::timecode_display (const std::string & timecode, const std::string & last_timecode)
+{
+	// if there's no change, send nothing, not even sysex header
+	if  (timecode == last_timecode) return MidiByteArray();
+	
+	// length sanity checking
+	string local_timecode = timecode;
+
+	// truncate to 10 characters
+	if  (local_timecode.length() > 10) {
+		local_timecode = local_timecode.substr (0, 10);
+	}
+
+	// pad to 10 characters
+	while  (local_timecode.length() < 10) { 
+		local_timecode += " ";
+	}
+		
+	// find the suffix of local_timecode that differs from last_timecode
+	std::pair<string::const_iterator,string::iterator> pp = mismatch (last_timecode.begin(), last_timecode.end(), local_timecode.begin());
+	
+	MidiByteArray retval;
+	
+	// sysex header
+	retval << sysex_hdr();
+	
+	// code for timecode display
+	retval << 0x10;
+	
+	// translate characters. These are sent in reverse order of display
+	// hence the reverse iterators
+	string::reverse_iterator rend = reverse_iterator<string::iterator> (pp.second);
+	for  (string::reverse_iterator it = local_timecode.rbegin(); it != rend; ++it) {
+		retval << translate_seven_segment (*it);
+	}
+	
+	// sysex trailer
+	retval << MIDI::eox;
+	
+	return retval;
+}
+

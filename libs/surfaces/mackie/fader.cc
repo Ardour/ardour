@@ -34,3 +34,16 @@ Fader::factory (Surface& surface, int id, const char* name, Group& group)
 	return f;
 }
 
+MidiByteArray
+Fader::set_position (float normalized)
+{
+	position = normalized;
+	return update_message ();
+}
+
+MidiByteArray
+Fader::update_message ()
+{
+	int posi = int (0x3fff * position);
+	return MidiByteArray  (3, raw_id(), posi & 0x7f, posi >> 7);
+}

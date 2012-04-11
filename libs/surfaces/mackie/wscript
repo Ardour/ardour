@@ -29,10 +29,10 @@ def build(bld):
             led.cc
             mackie_control_protocol.cc
             mackie_jog_wheel.cc
-            mackie_midi_builder.cc
             mcp_buttons.cc
             meter.cc
             midi_byte_array.cc
+            pot.cc
             strip.cc
             surface.cc
             surface_port.cc

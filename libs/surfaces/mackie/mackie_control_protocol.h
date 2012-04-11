@@ -33,12 +33,12 @@
 #include "midi++/types.h"
 
 #include "ardour/types.h"
-
 #include "control_protocol/control_protocol.h"
+
+#include "types.h"
 #include "midi_byte_array.h"
 #include "controls.h"
 #include "mackie_jog_wheel.h"
-#include "mackie_midi_builder.h"
 #include "timer.h"
 
 namespace MIDI {
@@ -370,8 +370,6 @@ class MackieControlProtocol
 	static const int MODIFIER_CMDALT;
 
 	int  _modifier_state;
-
-	Mackie::MackieMidiBuilder builder;
 
 	typedef std::list<GSource*> PortSources;
 	PortSources port_sources;
