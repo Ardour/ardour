@@ -748,29 +748,36 @@ MackieControlProtocol::notify_transport_state_changed()
 	update_global_button ("ffwd", session->transport_speed() > 1.0);
 
 	_transport_previously_rolling = session->transport_rolling();
-
 }
 
 void
 MackieControlProtocol::notify_record_state_changed ()
 {
+	/* rec is a tristate */
+
+
 	Button * rec = reinterpret_cast<Button*> (surfaces.front()->controls_by_name["record"]);
 	if (rec) {
 		LedState ls;
 
 		switch (session->record_status()) {
 		case Session::Disabled:
+			DEBUG_TRACE (DEBUG::MackieControl, "record state changed to disabled, LED off\n");
 			ls = off;
 			break;
 		case Session::Recording:
+			DEBUG_TRACE (DEBUG::MackieControl, "record state changed to recording, LED on\n");
 			ls = on;
 			break;
 		case Session::Enabled:
+			DEBUG_TRACE (DEBUG::MackieControl, "record state changed to enabled, LED flashing\n");
 			ls = flashing;
 			break;
 		}
 
 		surfaces.front()->write (builder.build_led (*rec, ls));
+	} else {
+		DEBUG_TRACE (DEBUG::MackieControl, "record button control not found\n");
 	}
 }
 
@@ -872,6 +879,12 @@ MackieControlProtocol::update_led (Surface& surface, Button& button, Mackie::Led
 	if (ls != none) {
 		surface.port().write (builder.build_led (button, ls));
 	}
+}
+
+void
+MackieControlProtocol::build_button_map ()
+{
+	button_map.insert (pair<int,ButtonHandlers> (Button::Io, ButtonHandlers (&MackieControlProtocol::io_press, &MackieControlProtocol::io_release)));
 }
 
 void 
@@ -995,134 +1008,6 @@ MackieControlProtocol::handle_button_event (Surface& surface, Button& button, Bu
 		switch  (bs) {
 		case press: ls = timecode_beats_press (button); break;
 		case release: ls = timecode_beats_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case 0x36: // F1
-		switch  (bs) {
-		case press: ls = F1_press (button); break;
-		case release: ls = F1_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case 0x37: // F2
-		switch  (bs) {
-		case press: ls = F2_press (button); break;
-		case release: ls = F2_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case 0x38: // F3
-		switch  (bs) {
-		case press: ls = F3_press (button); break;
-		case release: ls = F3_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case 0x39: // F4
-		switch  (bs) {
-		case press: ls = F4_press (button); break;
-		case release: ls = F4_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case 0x3a: // F5
-		switch  (bs) {
-		case press: ls = F5_press (button); break;
-		case release: ls = F5_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case 0x3b: // F6
-		switch  (bs) {
-		case press: ls = F6_press (button); break;
-		case release: ls = F6_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case 0x3c: // F7
-		switch  (bs) {
-		case press: ls = F7_press (button); break;
-		case release: ls = F7_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case 0x3d: // F8
-		switch  (bs) {
-		case press: ls = F8_press (button); break;
-		case release: ls = F8_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case 0x3e: // F9
-		switch  (bs) {
-		case press: ls = F9_press (button); break;
-		case release: ls = F9_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case 0x3f: // F10
-		switch  (bs) {
-		case press: ls = F10_press (button); break;
-		case release: ls = F10_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case 0x40: // F11
-		switch  (bs) {
-		case press: ls = F11_press (button); break;
-		case release: ls = F11_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case 0x41: // F12
-		switch  (bs) {
-		case press: ls = F12_press (button); break;
-		case release: ls = F12_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case 0x42: // F13
-		switch  (bs) {
-		case press: ls = F13_press (button); break;
-		case release: ls = F13_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case 0x43: // F14
-		switch  (bs) {
-		case press: ls = F14_press (button); break;
-		case release: ls = F14_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case 0x44: // F15
-		switch  (bs) {
-		case press: ls = F15_press (button); break;
-		case release: ls = F15_release (button); break;
-		case neither: break;
-		}
-		break;
-
-	case 0x45: // F16
-		switch  (bs) {
-		case press: ls = F16_press (button); break;
-		case release: ls = F16_release (button); break;
 		case neither: break;
 		}
 		break;
@@ -1395,6 +1280,134 @@ MackieControlProtocol::handle_button_event (Surface& surface, Button& button, Bu
 		switch  (bs) {
 		case press: ls = user_b_press (button); break;
 		case release: ls = user_b_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case Button::F1:
+		switch  (bs) {
+		case press: ls = F1_press (button); break;
+		case release: ls = F1_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case Button::F2:
+		switch  (bs) {
+		case press: ls = F2_press (button); break;
+		case release: ls = F2_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case Button::F3:
+		switch  (bs) {
+		case press: ls = F3_press (button); break;
+		case release: ls = F3_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case Button::F4:
+		switch  (bs) {
+		case press: ls = F4_press (button); break;
+		case release: ls = F4_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case Button::F5:
+		switch  (bs) {
+		case press: ls = F5_press (button); break;
+		case release: ls = F5_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case Button::F6:
+		switch  (bs) {
+		case press: ls = F6_press (button); break;
+		case release: ls = F6_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case Button::F7:
+		switch  (bs) {
+		case press: ls = F7_press (button); break;
+		case release: ls = F7_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case Button::F8:
+		switch  (bs) {
+		case press: ls = F8_press (button); break;
+		case release: ls = F8_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case Button::F9:
+		switch  (bs) {
+		case press: ls = F9_press (button); break;
+		case release: ls = F9_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case Button::F10:
+		switch  (bs) {
+		case press: ls = F10_press (button); break;
+		case release: ls = F10_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case Button::F11:
+		switch  (bs) {
+		case press: ls = F11_press (button); break;
+		case release: ls = F11_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case Button::F12:
+		switch  (bs) {
+		case press: ls = F12_press (button); break;
+		case release: ls = F12_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case Button::F13:
+		switch  (bs) {
+		case press: ls = F13_press (button); break;
+		case release: ls = F13_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case Button::F14:
+		switch  (bs) {
+		case press: ls = F14_press (button); break;
+		case release: ls = F14_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case Button::F15:
+		switch  (bs) {
+		case press: ls = F15_press (button); break;
+		case release: ls = F15_release (button); break;
+		case neither: break;
+		}
+		break;
+
+	case Button::F16:
+		switch  (bs) {
+		case press: ls = F16_press (button); break;
+		case release: ls = F16_release (button); break;
 		case neither: break;
 		}
 		break;

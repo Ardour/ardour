@@ -20,6 +20,7 @@
 #define ardour_mackie_control_protocol_h
 
 #include <vector>
+#include <map>
 
 #include <sys/time.h>
 #include <pthread.h>
@@ -48,6 +49,7 @@ namespace Mackie {
 	class Surface;
 	class Control;
 	class SurfacePort;
+	class Button;
 }
 
 /**
@@ -377,6 +379,22 @@ class MackieControlProtocol
 	bool midi_input_handler (Glib::IOCondition ioc, MIDI::Port* port);
 	void clear_ports ();
 
+	struct ButtonHandlers {
+	    Mackie::LedState (MackieControlProtocol::*press) (Mackie::Button&);
+	    Mackie::LedState (MackieControlProtocol::*release) (Mackie::Button&);
+	    
+	    ButtonHandlers (Mackie::LedState (MackieControlProtocol::*p) (Mackie::Button&),
+			    Mackie::LedState (MackieControlProtocol::*r) (Mackie::Button&)) 
+	    : press (p)
+	    , release (r) {}
+	};
+
+	typedef std::map<int,ButtonHandlers> ButtonMap;
+	ButtonMap button_map;
+
+	void build_button_map ();
 };
+
+
 
 #endif // ardour_mackie_control_protocol_h

@@ -19,6 +19,7 @@
 
 #include "pbd/memento_command.h"
 
+#include "ardour/debug.h"
 #include "ardour/session.h"
 #include "ardour/route.h"
 #include "ardour/location.h"
@@ -35,6 +36,7 @@
 
 using namespace Mackie;
 using namespace ARDOUR;
+using namespace PBD;
 using std::string;
 
 LedState
@@ -92,6 +94,9 @@ MackieControlProtocol::left_press (Button &)
 	Sorted sorted = get_sorted_routes();
 	uint32_t strip_cnt = n_strips ();
 
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("bank left with current initial = %1 nstrips = %2 tracks/busses = %3\n",
+							   _current_initial_bank, strip_cnt, sorted.size()));
+
 	if (sorted.size() > strip_cnt) {
 		int new_initial = _current_initial_bank - strip_cnt;
 		if (new_initial < 0) {
@@ -119,6 +124,9 @@ MackieControlProtocol::right_press (Button &)
 {
 	Sorted sorted = get_sorted_routes();
 	uint32_t strip_cnt = n_strips();
+
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("bank right with current initial = %1 nstrips = %2 tracks/busses = %3\n",
+							   _current_initial_bank, strip_cnt, sorted.size()));
 
 	if (sorted.size() > strip_cnt) {
 		uint32_t delta = sorted.size() - (strip_cnt + _current_initial_bank);
