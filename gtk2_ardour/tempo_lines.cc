@@ -174,6 +174,7 @@ TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 			// Steal from the right
 			if (left->first > needed_left && li != steal && steal->first > needed_right) {
 				//cout << "*** STEALING FROM RIGHT" << endl;
+				double const x = steal->first;
 				line = steal->second;
 				_lines.erase(steal);
 				line->property_x1() = xpos;
@@ -185,7 +186,7 @@ TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 				
 				// Shift clean range left
 				_clean_left = min(_clean_left, xpos);
-				_clean_right = min(_clean_right, steal->first);
+				_clean_right = min(_clean_right, x);
 				
 				// Move this line to where we need it
 			} else {
@@ -230,6 +231,7 @@ TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 			//cout << "*** STEALING FROM LEFT" << endl;
 			assert(_lines.find(xpos) == _lines.end());
 			Lines::iterator steal = _lines.begin();
+			double const x = steal->first;
 			line = steal->second;
 			_lines.erase(steal);
 			line->property_color_rgba() = color;
@@ -240,7 +242,7 @@ TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 			invalidated = true;
 			
 			// Shift clean range right
-			_clean_left = max(_clean_left, steal->first);
+			_clean_left = max(_clean_left, x);
 			_clean_right = max(_clean_right, xpos);
 		}
 	}
