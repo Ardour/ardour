@@ -331,9 +331,6 @@ MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 		}
 	}
 
-	// display the current start bank.
-	surfaces.front()->display_bank_start (_current_initial_bank);
-
 	/* reset this to get the right display of view mode after the switch */
 	set_view_mode (_view_mode);
 }
@@ -427,7 +424,7 @@ MackieControlProtocol::update_global_button (const string & name, LedState ls)
 
 	if (surface->controls_by_name.find (name) != surface->controls_by_name.end()) {
 		Button * button = dynamic_cast<Button*> (surface->controls_by_name[name]);
-		surface->write (button->led().set_state (ls));
+		surface->write (button->set_state (ls));
 	} else {
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Button %1 not found\n", name));
 	}
@@ -818,7 +815,7 @@ MackieControlProtocol::notify_record_state_changed ()
 			break;
 		}
 
-		surfaces.front()->write (rec->led().set_state (ls));
+		surfaces.front()->write (rec->set_state (ls));
 	} else {
 		DEBUG_TRACE (DEBUG::MackieControl, "record button control not found\n");
 	}
@@ -918,7 +915,7 @@ void
 MackieControlProtocol::update_led (Surface& surface, Button& button, Mackie::LedState ls)
 {
 	if (ls != none) {
-		surface.port().write (button.led().set_state (ls));
+		surface.port().write (button.set_state (ls));
 	}
 }
 
@@ -1011,9 +1008,9 @@ MackieControlProtocol::handle_button_event (Surface& surface, Button& button, Bu
 
 		switch  (bs) {
 		case press: 
-			surface.write (button.led().set_state ((this->*(bh.press)) (button)));
+			surface.write (button.set_state ((this->*(bh.press)) (button)));
 		case release: 
-			surface.write (button.led().set_state ((this->*(bh.release)) (button)));
+			surface.write (button.set_state ((this->*(bh.release)) (button)));
 			break;
 		default:
 			break;

@@ -36,10 +36,6 @@ Led::factory (Surface& surface, int id, const char* name, Group& group)
 MidiByteArray 
 Led::set_state (LedState new_state)
 {
-	if (new_state != state) {
-		return MidiByteArray();
-	}
-	
 	state = new_state;
 
 	MIDI::byte msg = 0;

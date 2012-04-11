@@ -110,11 +110,8 @@ public:
 		: Control (id, name, group)
 		, _led  (id, name + "_led", group) {}
 	
-	virtual Led & led() { return _led; }
-
-	MidiByteArray zero() { return _led.set_state (off); }
-	
-	MidiByteArray update_message () const;
+	MidiByteArray zero() { return _led.zero (); }
+	MidiByteArray set_state (LedState ls) { return _led.set_state (ls); }
 
 	static Control* factory (Surface&, int id, const char*, Group&);
 	

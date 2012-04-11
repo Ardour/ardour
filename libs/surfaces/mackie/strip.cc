@@ -333,7 +333,7 @@ void
 Strip::notify_solo_changed ()
 {
 	if (_route && _solo) {
-		_surface->write (_solo->led().set_state (_route->soloed() ? on : off));
+		_surface->write (_solo->set_state (_route->soloed() ? on : off));
 	}
 }
 
@@ -343,9 +343,9 @@ Strip::notify_mute_changed ()
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Strip %1 mute changed\n", _index));
 	if (_route && _mute) {
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("\troute muted ? %1\n", _route->muted()));
-		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("mute message: %1\n", _mute->led().set_state (_route->muted() ? on : off)));
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("mute message: %1\n", _mute->set_state (_route->muted() ? on : off)));
 
-		_surface->write (_mute->led().set_state (_route->muted() ? on : off));
+		_surface->write (_mute->set_state (_route->muted() ? on : off));
 	}
 }
 
@@ -353,7 +353,7 @@ void
 Strip::notify_record_enable_changed ()
 {
 	if (_route && _recenable)  {
-		_surface->write (_recenable->led().set_state (_route->record_enabled() ? on : off));
+		_surface->write (_recenable->set_state (_route->record_enabled() ? on : off));
 	}
 }
 
@@ -443,7 +443,7 @@ Strip::handle_button (Button& button, ButtonState bs)
 	if (!_route) {
 		// no route so always switch the light off
 		// because no signals will be emitted by a non-route
-		_surface->write (button.led().set_state  (off));
+		_surface->write (button.set_state  (off));
 		return;
 	}
 
