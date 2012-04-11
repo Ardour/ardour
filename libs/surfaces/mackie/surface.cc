@@ -231,13 +231,13 @@ Surface::init_controls()
 
 static StripControlDefinition mackie_strip_controls[] = {
 	{ "gain", 0, Fader::factory, },
-	{ "vpot", Control::pot_base_id, Pot::factory, },
-	{ "recenable", Control::recenable_button_base_id, Button::factory, },
-	{ "solo", Control::solo_button_base_id, Button::factory, },
-	{ "mute", Control::mute_button_base_id, Button::factory, },
-	{ "select", Control::select_button_base_id, Button::factory, },
-	{ "vselect", Control::vselect_button_base_id, Button::factory, },
-	{ "fader_touch", Control::fader_touch_button_base_id, Button::factory, },
+	{ "vpot", Pot::base_id, Pot::factory, },
+	{ "recenable", Button::recenable_base_id, Button::factory, },
+	{ "solo", Button::solo_base_id, Button::factory, },
+	{ "mute", Button::mute_base_id, Button::factory, },
+	{ "select", Button::select_base_id, Button::factory, },
+	{ "vselect", Button::vselect_base_id, Button::factory, },
+	{ "fader_touch", Button::fader_touch_base_id, Button::factory, },
 	{ "meter", 0, Meter::factory, },
 	{ "", 0, Button::factory, }
 };
@@ -385,9 +385,9 @@ Surface::handle_midi_controller_message (MIDI::Parser &, MIDI::EventTwoBytes* ev
 {
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("SurfacePort::handle_midi_controller %1 = %2\n", ev->controller_number, ev->value));
 
-	Pot* pot = pots[Control::pot_base_id | ev->controller_number];
+	Pot* pot = pots[ev->controller_number];
 
-	if (!pot && ev->controller_number == Control::jog_base_id) {
+	if (!pot && ev->controller_number == Jog::base_id) {
 		pot = dynamic_cast<Pot*> (controls_by_name["jog"]);
 	}
 

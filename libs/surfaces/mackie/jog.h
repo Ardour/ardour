@@ -28,6 +28,10 @@ namespace Mackie {
 class Jog : public Pot
 {
 public:
+	enum base_id_t {
+		base_id = 0x3c
+	};
+
 	Jog (int id, std::string name, Group & group)
 		: Pot  (id, name, group)
 	{

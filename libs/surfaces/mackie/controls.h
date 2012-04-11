@@ -40,19 +40,6 @@ class Surface;
 class Control
 {
 public:
-	enum base_id_t {
-		/* ID's associated with pot (Controller) messages */
-		pot_base_id = 0x30,
-		jog_base_id = 0x3c,
-		/* ID's associated with button (NoteOn) messages */
-		recenable_button_base_id = 0x0,
-		solo_button_base_id = 0x08,
-		mute_button_base_id = 0x10,
-		select_button_base_id = 0x18,
-		vselect_button_base_id = 0x20,
-		fader_touch_button_base_id = 0xe0,
-	};
-	
 	Control (int id, std::string name, Group& group);
 	virtual ~Control() {}
 	

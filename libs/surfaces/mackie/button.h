@@ -30,6 +30,15 @@ class Surface;
 class Button : public Control
 {
 public:
+	enum base_id_t {
+		recenable_base_id = 0x0,
+		solo_base_id = 0x08,
+		mute_base_id = 0x10,
+		select_base_id = 0x18,
+		vselect_base_id = 0x20,
+		fader_touch_base_id = 0xe0,
+	};
+
 	enum ButtonID {
 		Io = 0x28,
 		Sends = 0x29,

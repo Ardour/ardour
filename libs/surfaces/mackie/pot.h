@@ -8,6 +8,10 @@ namespace Mackie {
 class Pot : public Control
 {
 public:
+	enum base_id_t {
+		base_id = 0x30,
+	};
+
 	enum Mode {
 		dot = 0,
 		boost_cut = 1,
