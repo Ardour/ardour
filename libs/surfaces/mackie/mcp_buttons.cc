@@ -386,17 +386,11 @@ MackieControlProtocol::timecode_beats_release (Button &)
 LedState 
 MackieControlProtocol::marker_press (Button &)
 {
-	// cut'n'paste from LocationUI::add_new_location()
 	string markername;
-	framepos_t where = session->audible_frame();
-	session->locations()->next_available_name(markername,"mcu");
-	Location *location = new Location (*session, where, where, markername, Location::IsMark);
-	session->begin_reversible_command (_("add marker"));
-	XMLNode &before = session->locations()->get_state();
-	session->locations()->add (location, true);
-	XMLNode &after = session->locations()->get_state();
-	session->add_command (new MementoCommand<Locations>(*(session->locations()), &before, &after));
-	session->commit_reversible_command ();
+
+	session->locations()->next_available_name (markername,"mcu");
+	add_marker (markername);
+
 	return on;
 }
 

@@ -474,7 +474,9 @@ Strip::handle_button (Button& button, ButtonState bs)
 			int lock_mod = (MackieControlProtocol::MODIFIER_CONTROL|MackieControlProtocol::MODIFIER_SHIFT);
 
 			if ((_surface->mcp().modifier_state() & lock_mod) == lock_mod) {
-				_route_locked = !_route_locked;
+				if (_route) {
+					_route_locked = !_route_locked;
+				}
 			} else {
 				_surface->mcp().select_track (_route);
 			}
@@ -666,7 +668,10 @@ Strip::display (uint32_t line_number, const std::string& line)
 void
 Strip::lock_route ()
 {
-	_route_locked = true;
+	/* don't lock unless we have a route */
+	if (_route) {
+		_route_locked = true;
+	}
 }
 
 void
