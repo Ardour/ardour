@@ -100,7 +100,7 @@ BasicUI::add_marker ()
 void
 BasicUI::rewind ()
 {
-	session->request_transport_speed (session->transport_speed() * 1.5);
+	session->request_transport_speed (session->transport_speed() - 1.5);
 }
 
 void

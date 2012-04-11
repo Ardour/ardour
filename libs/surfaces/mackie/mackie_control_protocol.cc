@@ -1095,3 +1095,33 @@ MackieControlProtocol::set_view_mode (ViewMode m)
 	}
 	
 }
+
+void
+MackieControlProtocol::set_master_on_surface_strip (uint32_t surface, uint32_t strip_number)
+{
+	force_special_route_to_strip (session->master_out(), surface, strip_number);
+}
+
+void
+MackieControlProtocol::set_monitor_on_surface_strip (uint32_t surface, uint32_t strip_number)
+{
+	force_special_route_to_strip (session->monitor_out(), surface, strip_number);
+}
+
+void
+MackieControlProtocol::force_special_route_to_strip (boost::shared_ptr<Route> r, uint32_t surface, uint32_t strip_number)
+{
+	if (!r) {
+		return;
+	}
+
+	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
+		if ((*s)->number() == surface) {
+			Strip* strip = (*s)->nth_strip (strip_number);
+			if (strip) {
+				strip->set_route (session->master_out());
+				strip->lock_route ();
+			}
+		}
+	}
+}

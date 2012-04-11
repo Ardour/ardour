@@ -69,6 +69,7 @@ Strip::Strip (Surface& s, const std::string& name, int index, StripControlDefini
 	, _gain (0)
 	, _index (index)
 	, _surface (&s)
+	, _route_locked (false)
 {
 	/* build the controls for this track, which will automatically add them
 	   to the Group 
@@ -250,6 +251,10 @@ std::ostream & Mackie::operator <<  (std::ostream & os, const Strip & strip)
 void
 Strip::set_route (boost::shared_ptr<Route> r)
 {
+	if (_route_locked) {
+		return;
+	}
+
 	route_connections.drop_connections ();
 
 	_route = r;
@@ -466,7 +471,13 @@ Strip::handle_button (Button& button, ButtonState bs)
 		} else if (button.id() >= Button::select_base_id &&
 			   button.id() < Button::select_base_id + 8) {
 
-			_surface->mcp().select_track (_route);
+			int lock_mod = (MackieControlProtocol::MODIFIER_CONTROL|MackieControlProtocol::MODIFIER_SHIFT);
+
+			if ((_surface->mcp().modifier_state() & lock_mod) == lock_mod) {
+				_route_locked = !_route_locked;
+			} else {
+				_surface->mcp().select_track (_route);
+			}
 
 		} else if (button.id() >= Button::vselect_base_id &&
 			   button.id() < Button::vselect_base_id + 8) {
@@ -650,4 +661,16 @@ Strip::display (uint32_t line_number, const std::string& line)
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("MackieMidiBuilder::strip_display midi: %1\n", retval));
 
 	return retval;
+}
+
+void
+Strip::lock_route ()
+{
+	_route_locked = true;
+}
+
+void
+Strip::unlock_route ()
+{
+	_route_locked = false;
 }

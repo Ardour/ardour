@@ -87,6 +87,9 @@ public:
 	MidiByteArray blank_display (uint32_t line_number);
 	MidiByteArray zero ();
 
+	void lock_route ();
+	void unlock_route ();
+	
 private:
 	Button* _solo;
 	Button* _recenable;
@@ -99,6 +102,7 @@ private:
 	Meter*  _meter;
 	int     _index;
 	Surface* _surface;
+	bool     _route_locked;
 
 	boost::shared_ptr<ARDOUR::Route> _route;
 	PBD::ScopedConnectionList route_connections;

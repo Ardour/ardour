@@ -129,6 +129,9 @@ class MackieControlProtocol
 
 	std::list<boost::shared_ptr<ARDOUR::Bundle> > bundles ();
 
+	void set_master_on_surface_strip (uint32_t surface, uint32_t strip);
+	void set_monitor_on_surface_strip (uint32_t surface, uint32_t strip);
+	
 	uint32_t n_strips () const;
 	
 	bool has_editor () const { return true; }
@@ -267,6 +270,12 @@ class MackieControlProtocol
 	bool midi_input_handler (Glib::IOCondition ioc, MIDI::Port* port);
 	void clear_ports ();
 
+	std::vector<std::string> _f_actions;
+
+	void force_special_route_to_strip (boost::shared_ptr<ARDOUR::Route> r, uint32_t surface, uint32_t strip_number);
+
+	/* BUTTON HANDLING */
+
 	struct ButtonHandlers {
 	    Mackie::LedState (MackieControlProtocol::*press) (Mackie::Button&);
 	    Mackie::LedState (MackieControlProtocol::*release) (Mackie::Button&);
@@ -281,8 +290,6 @@ class MackieControlProtocol
 	ButtonMap button_map;
 
 	void build_button_map ();
-
-	std::vector<std::string> _f_actions;
 
 	/* implemented button handlers */
 	Mackie::LedState frm_left_press(Mackie::Button &);
