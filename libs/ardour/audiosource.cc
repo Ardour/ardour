@@ -139,10 +139,10 @@ AudioSource::length (framepos_t /*pos*/) const
 }
 
 void
-AudioSource::update_length (framepos_t pos, framecnt_t cnt)
+AudioSource::update_length (framecnt_t len)
 {
-	if (pos + cnt > _length) {
-		_length = pos + cnt;
+	if (len > _length) {
+		_length = len;
 	}
 }
 

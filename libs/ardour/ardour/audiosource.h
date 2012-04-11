@@ -51,7 +51,7 @@ class AudioSource : virtual public Source,
 
 	virtual bool       empty() const;
 	framecnt_t length (framepos_t pos) const;
-	void       update_length (framepos_t pos, framecnt_t cnt);
+	void       update_length (framecnt_t cnt);
 
 	virtual framecnt_t available_peaks (double zoom) const;
 

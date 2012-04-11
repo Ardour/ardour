@@ -176,7 +176,7 @@ MidiSource::length (framepos_t pos) const
 }
 
 void
-MidiSource::update_length (framepos_t /*pos*/, framecnt_t /*cnt*/)
+MidiSource::update_length (framecnt_t)
 {
 	// You're not the boss of me!
 }
