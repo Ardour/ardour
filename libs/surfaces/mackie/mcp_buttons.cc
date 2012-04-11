@@ -178,7 +178,7 @@ MackieControlProtocol::cursor_left_press (Button& )
 			page_fraction = 0.25;
 		}
 
-		ScrollTimeline (page_fraction);
+		ScrollTimeline (-page_fraction);
 	}
 
 	return off;
