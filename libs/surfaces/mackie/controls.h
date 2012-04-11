@@ -41,7 +41,6 @@ class Control
 {
 public:
 	enum base_id_t {
-		fader_base_id = 0xe0,
 		pot_base_id = 0x30,
 		jog_base_id = 0x3c,
 		fader_touch_button_base_id = 0xe0,

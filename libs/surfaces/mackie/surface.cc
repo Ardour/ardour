@@ -230,7 +230,7 @@ Surface::init_controls()
 }
 
 static StripControlDefinition mackie_strip_controls[] = {
-	{ "gain", Control::fader_base_id, Fader::factory, },
+	{ "gain", 0, Fader::factory, },
 	{ "vpot", Control::pot_base_id, Pot::factory, },
 	{ "recenable", Control::recenable_button_base_id, Button::factory, },
 	{ "solo", Control::solo_button_base_id, Button::factory, },
@@ -332,10 +332,18 @@ Surface::connect_to_signals ()
 void
 Surface::handle_midi_pitchbend_message (MIDI::Parser&, MIDI::pitchbend_t pb, uint32_t fader_id)
 {
+	/* Pitchbend messages are fader messages. Nothing in the data we get
+	 * from the MIDI::Parser conveys the fader ID, which was given by the
+	 * channel ID in the status byte.
+	 *
+	 * Instead, we have used bind() to supply the fader-within-strip ID 
+	 * when we connected to the per-channel pitchbend events.
+	 */
+
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("handle_midi pitchbend on port %3, fader = %1 value = %2\n", 
 							   fader_id, pb, _number));
 	
-	Fader* fader = faders[Control::fader_base_id | fader_id];
+	Fader* fader = faders[fader_id];
 
 	if (fader) {
 		Strip* strip = dynamic_cast<Strip*> (&fader->group());
