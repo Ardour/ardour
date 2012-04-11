@@ -45,28 +45,33 @@ void JogWheel::scroll_event (SurfacePort &, Control &, const ControlState &)
 {
 }
 
-void JogWheel::jog_event (SurfacePort &, Control &, const ControlState & state)
+void JogWheel::jog_event (SurfacePort &, Control &, float delta)
 {
 	// TODO use current snap-to setting?
 	switch  (jog_wheel_state())
 	{
 	case scroll:
-		_mcp.ScrollTimeline (state.delta * state.sign);
+		_mcp.ScrollTimeline (delta);
 		break;
 	
 	case zoom:
 		// Chunky Zoom.
 		// TODO implement something similar to ScrollTimeline which
 		// ends up in Editor::control_scroll for smoother zooming.
-		if  (state.sign > 0)
-			for  (unsigned int i = 0; i < state.ticks; ++i) _mcp.ZoomIn();
-		else
-			for  (unsigned int i = 0; i < state.ticks; ++i) _mcp.ZoomOut();
+		if  (delta > 0) {
+			for  (unsigned int i = 0; i < fabs (delta); ++i) {
+				_mcp.ZoomIn();
+			}
+		} else {
+			for  (unsigned int i = 0; i < fabs (delta); ++i) {
+				_mcp.ZoomOut();
+			}
+		}
 		break;
 		
 	case speed:
 		// locally, _transport_speed is an positive value
-		_transport_speed += _mcp.surfaces.front()->scaled_delta (state, _mcp.get_session().transport_speed());
+		_transport_speed += _mcp.surfaces.front()->scaled_delta (delta, _mcp.get_session().transport_speed());
 
 		// make sure no weirdness gets to the session
 		if  (_transport_speed < 0 || isnan (_transport_speed))
@@ -80,12 +85,11 @@ void JogWheel::jog_event (SurfacePort &, Control &, const ControlState & state)
 	
 	case scrub:
 	{
-		if  (state.sign != 0)
-		{
+		if  (delta != 0) {
 			add_scrub_interval (_scrub_timer.restart());
 			// x clicks per second => speed == 1.0
-			float speed = _mcp.surfaces.front()->scrub_scaling_factor() / average_scrub_interval() * state.ticks;
-			_mcp.get_session().request_transport_speed_nonzero (speed * state.sign);
+			float speed = _mcp.surfaces.front()->scrub_scaling_factor() / average_scrub_interval() * delta;
+			_mcp.get_session().request_transport_speed_nonzero (speed);
 		}
 		else
 		{
@@ -97,7 +101,7 @@ void JogWheel::jog_event (SurfacePort &, Control &, const ControlState & state)
 	
 	case shuttle:
 		_shuttle_speed = _mcp.get_session().transport_speed();
-		_shuttle_speed += _mcp.surfaces.front()->scaled_delta (state, _mcp.get_session().transport_speed());
+		_shuttle_speed += _mcp.surfaces.front()->scaled_delta (delta, _mcp.get_session().transport_speed());
 		_mcp.get_session().request_transport_speed_nonzero (_shuttle_speed);
 		break;
 	

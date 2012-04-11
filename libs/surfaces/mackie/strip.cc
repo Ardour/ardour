@@ -498,6 +498,20 @@ Strip::handle_fader (Fader& fader, float position)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("fader to %1\n", position));
 
+	switch (_surface->mcp().flip_mode()) {
+	case MackieControlProtocol::Normal:
+		break;
+	case MackieControlProtocol::Zero:
+		break;
+	case MackieControlProtocol::Mirror:
+		break;
+	case MackieControlProtocol::Swap:
+		if (_vpot) {
+			handle_pot (*_vpot, 1.0);
+		}
+		return;
+	}
+
 	if (_route) {
 		_route->gain_control()->set_value (slider_position_to_gain (position));
 	}
@@ -515,7 +529,7 @@ Strip::handle_fader (Fader& fader, float position)
 }
 
 void
-Strip::handle_pot (Pot& pot, ControlState& state)
+Strip::handle_pot (Pot& pot, float delta)
 {
 	if (!_route) {
 		_surface->write (pot.set_onoff (false));
@@ -536,7 +550,7 @@ Strip::handle_pot (Pot& pot, ControlState& state)
 		double p = ac->get_value();
                 
 		// calculate new value, and adjust
-		p += state.delta * state.sign;
+		p += delta;
 		p = min (1.0, p);
 		p = max (0.0, p);
 

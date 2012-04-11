@@ -79,7 +79,7 @@ public:
 
 	void handle_button (Button&, ButtonState bs);
 	void handle_fader (Fader&, float position);
-	void handle_pot (Pot&, ControlState&);
+	void handle_pot (Pot&, float delta);
 
 	void periodic ();
 

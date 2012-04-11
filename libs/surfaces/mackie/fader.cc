@@ -20,6 +20,7 @@
 #include "fader.h"
 #include "surface.h"
 #include "control_group.h"
+#include "mackie_control_protocol.h"
 
 using namespace Mackie;
 
@@ -44,6 +45,11 @@ Fader::set_position (float normalized)
 MidiByteArray
 Fader::update_message ()
 {
+	if (MackieControlProtocol::instance()->flip_mode() == MackieControlProtocol::Zero) {
+		/* do not send messages to move the faders when in this mode */
+		return MidiByteArray();
+	}
+
 	int posi = int (0x3fff * position);
 	return MidiByteArray  (3, 0xe0 | id(), posi & 0x7f, posi >> 7);
 }

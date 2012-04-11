@@ -126,7 +126,7 @@ public:
 		high definition control at low speeds and quick speed changes to/from
 		higher speeds.
 	*/
-	float scaled_delta (const ControlState & state, float current_speed);
+	float scaled_delta (float delta, float current_speed);
 
 	// display the first 2 chars of the msg in the 2 char display
 	// . is appended to the previous character, so A.B. would

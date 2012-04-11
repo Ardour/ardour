@@ -99,7 +99,8 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 	, _gui (0)
 	, _zoom_mode (false)
 	, _scrub_mode (false)
-	, _flip_mode (false)
+	, _flip_mode (Normal)
+	, _view_mode (Global)
 	, _current_selected_track (-1)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::MackieControlProtocol\n");
@@ -1056,5 +1057,48 @@ MackieControlProtocol::f_press (uint32_t fn)
 	string action = f_action (0);
 	if (!action.empty()) {
 		access_action (action);
+	}
+}
+
+void
+MackieControlProtocol::set_view_mode (ViewMode m)
+{
+	_view_mode = m;
+
+	if (surfaces.empty()) {
+		return;
+	}
+
+	boost::shared_ptr<Surface> surface = surfaces.front();
+
+	if (surface->type() != mcu) {
+		return;
+	}
+
+	switch (_view_mode) {
+	case Global:
+		surface->write (surface->two_char_display ("Gl"));
+		break;
+	case Dynamics:
+		surface->write (surface->two_char_display ("Dy"));
+		break;
+	case EQ:
+		surface->write (surface->two_char_display ("EQ"));
+		break;
+	case Loop:
+		surface->write (surface->two_char_display ("LP"));
+		break;
+	case AudioTracks:
+		surface->write (surface->two_char_display ("AT"));
+		break;
+	case MidiTracks:
+		surface->write (surface->two_char_display ("MT"));
+		break;
+	case Busses:
+		surface->write (surface->two_char_display ("Bs"));
+		break;
+	case Sends:
+		surface->write (surface->two_char_display ("Sn"));
+		break;
 	}
 }

@@ -88,12 +88,35 @@ class MackieControlProtocol
 	static const int MODIFIER_SHIFT;
 	static const int MODIFIER_CMDALT;
 
+	enum ViewMode {
+		Global,
+		Dynamics,
+		EQ,
+		Loop,
+		AudioTracks,
+		MidiTracks,
+		Busses,
+		Sends,
+	};
+
+	enum FlipMode {
+		Normal,
+		Mirror,
+		Swap,
+		Zero,
+	};
+	
 	MackieControlProtocol(ARDOUR::Session &);
 	virtual ~MackieControlProtocol();
 
 	static MackieControlProtocol* instance() { return _instance; }
 
 	int set_active (bool yn);
+
+	FlipMode flip_mode () const { return _flip_mode; }
+	ViewMode view_mode () const { return _view_mode; }
+
+	void set_view_mode (ViewMode);
 
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
@@ -139,6 +162,126 @@ class MackieControlProtocol
   
 	void update_global_button(const std::string & name, Mackie::LedState);
 	void update_global_led(const std::string & name, Mackie::LedState);
+
+	ARDOUR::Session & get_session() { return *session; }
+ 
+	void add_in_use_timeout (Mackie::Surface& surface, Mackie::Control& in_use_control, Mackie::Control* touch_control);
+
+	int modifier_state() const { return _modifier_state; }
+	
+  protected:
+	// shut down the surface
+	void close();
+  
+	// This sets up the notifications and sets the
+	// controls to the correct values
+	void update_surfaces();
+	
+	// connects global (not strip) signals from the Session to here
+	// so the surface can be notified of changes from the other UIs.
+	void connect_session_signals();
+	
+	// set all controls to their zero position
+	void zero_all();
+	
+	/**
+	   Fetch the set of routes to be considered for control by the
+	   surface. Excluding master, hidden and control routes, and inactive routes
+	*/
+	typedef std::vector<boost::shared_ptr<ARDOUR::Route> > Sorted;
+	Sorted get_sorted_routes();
+  
+	// bank switching
+	void switch_banks (uint32_t first_remote_id, bool force = false);
+	void prev_track ();
+	void next_track ();
+  
+	// also called from poll_automation to update timecode display
+	void update_timecode_display();
+
+	std::string format_bbt_timecode (ARDOUR::framepos_t now_frame);
+	std::string format_timecode_timecode (ARDOUR::framepos_t now_frame);
+	
+	void do_request (MackieControlUIRequest*);
+	int stop ();
+
+	void thread_init ();
+
+	/* handling function key presses */
+
+	std::string f_action (uint32_t fn);
+	void f_press (uint32_t fn);
+
+  private:
+
+	static MackieControlProtocol* _instance;
+
+	void create_surfaces ();
+	void port_connected_or_disconnected (std::string, std::string, bool);
+	bool control_in_use_timeout (Mackie::Surface*, Mackie::Control *, Mackie::Control *);
+
+	bool periodic();
+	sigc::connection periodic_connection;
+
+	/// The initial remote_id of the currently switched in bank.
+	uint32_t _current_initial_bank;
+	
+	/// protects the port list
+	Glib::Mutex update_mutex;
+
+	PBD::ScopedConnectionList audio_engine_connections;
+	PBD::ScopedConnectionList session_connections;
+	PBD::ScopedConnectionList port_connections;
+	PBD::ScopedConnectionList route_connections;
+	
+	bool _transport_previously_rolling;
+	
+	// timer for two quick marker left presses
+	Mackie::Timer _frm_left_last;
+	
+	// last written timecode string
+	std::string _timecode_last;
+	
+	// Which timecode are we displaying? BBT or Timecode
+	ARDOUR::AnyTime::Type _timecode_type;
+
+	// Bundle to represent our input ports
+	boost::shared_ptr<ARDOUR::Bundle> _input_bundle;
+	// Bundle to represent our output ports
+	boost::shared_ptr<ARDOUR::Bundle> _output_bundle;
+
+	void build_gui ();
+	void* _gui;
+
+	bool _zoom_mode;
+	bool _scrub_mode;
+	FlipMode _flip_mode;
+	ViewMode _view_mode;
+	int  _current_selected_track;
+	int  _modifier_state;
+
+	typedef std::list<GSource*> PortSources;
+	PortSources port_sources;
+
+	bool midi_input_handler (Glib::IOCondition ioc, MIDI::Port* port);
+	void clear_ports ();
+
+	struct ButtonHandlers {
+	    Mackie::LedState (MackieControlProtocol::*press) (Mackie::Button&);
+	    Mackie::LedState (MackieControlProtocol::*release) (Mackie::Button&);
+	    
+	    ButtonHandlers (Mackie::LedState (MackieControlProtocol::*p) (Mackie::Button&),
+			    Mackie::LedState (MackieControlProtocol::*r) (Mackie::Button&)) 
+	    : press (p)
+	    , release (r) {}
+	};
+
+	typedef std::map<int,ButtonHandlers> ButtonMap;
+	ButtonMap button_map;
+
+	void build_button_map ();
+
+	std::vector<std::string> _f_actions;
 
 	/* implemented button handlers */
 	Mackie::LedState frm_left_press(Mackie::Button &);
@@ -280,125 +423,6 @@ class MackieControlProtocol
 	Mackie::LedState user_b_release (Mackie::Button &);
 	Mackie::LedState fader_touch_press (Mackie::Button &);
 	Mackie::LedState fader_touch_release (Mackie::Button &);
-
-	ARDOUR::Session & get_session() { return *session; }
- 
-	void add_in_use_timeout (Mackie::Surface& surface, Mackie::Control& in_use_control, Mackie::Control* touch_control);
-
-	int modifier_state() const { return _modifier_state; }
-	
-  protected:
-	// shut down the surface
-	void close();
-  
-	// This sets up the notifications and sets the
-	// controls to the correct values
-	void update_surfaces();
-	
-	// connects global (not strip) signals from the Session to here
-	// so the surface can be notified of changes from the other UIs.
-	void connect_session_signals();
-	
-	// set all controls to their zero position
-	void zero_all();
-	
-	/**
-	   Fetch the set of routes to be considered for control by the
-	   surface. Excluding master, hidden and control routes, and inactive routes
-	*/
-	typedef std::vector<boost::shared_ptr<ARDOUR::Route> > Sorted;
-	Sorted get_sorted_routes();
-  
-	// bank switching
-	void switch_banks (uint32_t first_remote_id, bool force = false);
-	void prev_track ();
-	void next_track ();
-  
-	// also called from poll_automation to update timecode display
-	void update_timecode_display();
-
-	std::string format_bbt_timecode (ARDOUR::framepos_t now_frame);
-	std::string format_timecode_timecode (ARDOUR::framepos_t now_frame);
-	
-	void do_request (MackieControlUIRequest*);
-	int stop ();
-
-	void thread_init ();
-
-	/* handling function key presses */
-
-	std::string f_action (uint32_t fn);
-	void f_press (uint32_t fn);
-
-  private:
-
-	static MackieControlProtocol* _instance;
-
-	void create_surfaces ();
-	void port_connected_or_disconnected (std::string, std::string, bool);
-	bool control_in_use_timeout (Mackie::Surface*, Mackie::Control *, Mackie::Control *);
-
-	bool periodic();
-	sigc::connection periodic_connection;
-
-	/// The initial remote_id of the currently switched in bank.
-	uint32_t _current_initial_bank;
-	
-	/// protects the port list
-	Glib::Mutex update_mutex;
-
-	PBD::ScopedConnectionList audio_engine_connections;
-	PBD::ScopedConnectionList session_connections;
-	PBD::ScopedConnectionList port_connections;
-	PBD::ScopedConnectionList route_connections;
-	
-	bool _transport_previously_rolling;
-	
-	// timer for two quick marker left presses
-	Mackie::Timer _frm_left_last;
-	
-	// last written timecode string
-	std::string _timecode_last;
-	
-	// Which timecode are we displaying? BBT or Timecode
-	ARDOUR::AnyTime::Type _timecode_type;
-
-	// Bundle to represent our input ports
-	boost::shared_ptr<ARDOUR::Bundle> _input_bundle;
-	// Bundle to represent our output ports
-	boost::shared_ptr<ARDOUR::Bundle> _output_bundle;
-
-	void build_gui ();
-	void* _gui;
-
-	bool _zoom_mode;
-	bool _scrub_mode;
-	bool _flip_mode;
-	int  _current_selected_track;
-	int  _modifier_state;
-
-	typedef std::list<GSource*> PortSources;
-	PortSources port_sources;
-
-	bool midi_input_handler (Glib::IOCondition ioc, MIDI::Port* port);
-	void clear_ports ();
-
-	struct ButtonHandlers {
-	    Mackie::LedState (MackieControlProtocol::*press) (Mackie::Button&);
-	    Mackie::LedState (MackieControlProtocol::*release) (Mackie::Button&);
-	    
-	    ButtonHandlers (Mackie::LedState (MackieControlProtocol::*p) (Mackie::Button&),
-			    Mackie::LedState (MackieControlProtocol::*r) (Mackie::Button&)) 
-	    : press (p)
-	    , release (r) {}
-	};
-
-	typedef std::map<int,ButtonHandlers> ButtonMap;
-	ButtonMap button_map;
-
-	void build_button_map ();
-
-	std::vector<std::string> _f_actions;
 };
 
 

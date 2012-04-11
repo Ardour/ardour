@@ -31,17 +31,17 @@ class JogWheel
 public:
 	enum State { scroll, zoom, speed, scrub, shuttle, select };
 	
-	JogWheel( MackieControlProtocol & mcp );
+	JogWheel (MackieControlProtocol & mcp);
 
 	/// As the wheel turns...
-	void jog_event( SurfacePort & port, Control & control, const ControlState & state );
+	void jog_event (SurfacePort & port, Control & control, float delta);
 	
 	// These are for incoming button presses that change the internal state
 	// but they're not actually used at the moment.
-	void zoom_event( SurfacePort & port, Control & control, const ControlState & state );
-	void scrub_event( SurfacePort & port, Control & control, const ControlState & state );
-	void speed_event( SurfacePort & port, Control & control, const ControlState & state );
-	void scroll_event( SurfacePort & port, Control & control, const ControlState & state );
+	void zoom_event (SurfacePort & port, Control & control, const ControlState & state);
+	void scrub_event (SurfacePort & port, Control & control, const ControlState & state);
+	void speed_event (SurfacePort & port, Control & control, const ControlState & state);
+	void scroll_event (SurfacePort & port, Control & control, const ControlState & state);
 
 	/// Return the current jog wheel mode, which defaults to Scroll
 	State jog_wheel_state() const;
@@ -52,9 +52,9 @@ public:
 	
 	/// one of -1,0,1
 	int transport_direction() const { return _transport_direction; }
-	void transport_direction( int rhs ) { _transport_direction = rhs; }
+	void transport_direction (int rhs) { _transport_direction = rhs; }
 	
-	void push( State state );
+	void push (State state);
 	void pop();
 	
 	/// Turn zoom mode on and off
@@ -72,7 +72,7 @@ public:
 	void check_scrubbing();
 
 protected:
-	void add_scrub_interval( unsigned long elapsed );
+	void add_scrub_interval (unsigned long elapsed);
 	float average_scrub_interval();
 	float std_dev_scrub_interval();
 

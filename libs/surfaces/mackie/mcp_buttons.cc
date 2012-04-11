@@ -530,8 +530,13 @@ MackieControlProtocol::ffwd_release (Button &)
 LedState 
 MackieControlProtocol::loop_press (Button &)
 {
-	session->request_play_loop (!session->get_play_loop());
-	return none;
+	if (_modifier_state & MODIFIER_CONTROL) {
+		set_view_mode (Loop);
+		return on;
+	} else {
+		session->request_play_loop (!session->get_play_loop());
+		return none;
+	}
 }
 
 LedState 
@@ -736,12 +741,13 @@ MackieControlProtocol::io_release (Button &)
 LedState
 MackieControlProtocol::sends_press (Button &) 
 { 
-	return off; 
+	set_view_mode (Sends);
+	return on;
 }
 LedState
 MackieControlProtocol::sends_release (Button &) 
 { 
-	return off; 
+	return none; 
 }
 LedState
 MackieControlProtocol::pan_press (Button &) 
@@ -766,33 +772,44 @@ MackieControlProtocol::plugin_release (Button &)
 LedState
 MackieControlProtocol::eq_press (Button &) 
 { 
-	return off; 
+	set_view_mode (EQ);
+	return on;
 }
 LedState
 MackieControlProtocol::eq_release (Button &) 
 { 
-	return off; 
+	return none;
 }
 LedState
 MackieControlProtocol::dyn_press (Button &) 
 { 
-	return off; 
+	set_view_mode (Dynamics);
+	return on;
 }
 LedState
 MackieControlProtocol::dyn_release (Button &) 
 { 
-	return off; 
+	return none;
 }
 LedState
 MackieControlProtocol::flip_press (Button &) 
 { 
-	_flip_mode = !_flip_mode;
-	return (_flip_mode ? on : off);
+	if (_modifier_state == 0) {
+		if (_flip_mode != Normal) {
+			_flip_mode = Normal;
+		} else {
+			_flip_mode = Swap;
+		}
+	} else if (_modifier_state & MODIFIER_CONTROL) {
+		_flip_mode = Zero;
+	}
+
+	return (_flip_mode != Normal ? on : off);
 }
 LedState
 MackieControlProtocol::flip_release (Button &) 
 { 
-	return (_flip_mode ? on : off);
+	return none;
 }
 LedState
 MackieControlProtocol::edit_press (Button &) 

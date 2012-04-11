@@ -259,9 +259,10 @@ Surface::init_strips ()
 }
 
 float 
-Surface::scaled_delta (const ControlState & state, float current_speed)
+Surface::scaled_delta (float delta, float current_speed)
 {
-	return state.sign *  (std::pow (float(state.ticks + 1), 2) + current_speed) / 100.0;
+	/* XXX needs work before use */
+	return (std::pow (float(delta + 1), 2) + current_speed) / 100.0;
 }
 
 void 
@@ -396,35 +397,36 @@ Surface::handle_midi_controller_message (MIDI::Parser &, MIDI::EventTwoBytes* ev
 	if (pot) {
 		ControlState state;
 		
-		// bytes[2] & 0b01000000 (0x40) give sign
-		state.sign = (ev->value & 0x40) == 0 ? 1 : -1; 
-		// bytes[2] & 0b00111111 (0x3f) gives delta
-		state.ticks = (ev->value & 0x3f);
-		if (state.ticks == 0) {
+		// bit 6 gives the sign
+		float sign = (ev->value & 0x40) == 0 ? 1.0 : -1.0; 
+		// bits 0..3 give the velocity. we interpret this as "ticks
+		// moved before this message was sent"
+		float ticks = (ev->value & 0xf);
+		if (ticks == 0) {
 			/* euphonix and perhaps other devices send zero
 			   when they mean 1, we think.
 			*/
-			state.ticks = 1;
+			ticks = 1;
 		}
-		state.delta = float (state.ticks) / float (0x3f);
+		float delta = sign * (ticks / (float) 0x3f);
 		
 		/* Pots only emit events when they move, not when they
 		   stop moving. So to get a stop event, we need to use a timeout.
 		*/
-
+		
 		_mcp.add_in_use_timeout (*this, *pot, pot);
 
 		Strip* strip = dynamic_cast<Strip*> (&pot->group());
 		if (strip) {
-			strip->handle_pot (*pot, state);
+			strip->handle_pot (*pot, delta);
 		} else {
 			JogWheel* wheel = dynamic_cast<JogWheel*> (pot);
 			if (wheel) {
 				DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Jog wheel moved %1\n", state.ticks));
-				wheel->jog_event (*_port, *pot, state);
+				wheel->jog_event (*_port, *pot, delta);
 			} else {
 				DEBUG_TRACE (DEBUG::MackieControl, string_compose ("External controller moved %1\n", state.ticks));
-				cout << "external controller" << state.ticks * state.sign << endl;
+				cout << "external controller" << delta << endl;
 			}
 		}
 	} else {
