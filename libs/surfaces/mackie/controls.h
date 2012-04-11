@@ -41,15 +41,16 @@ class Control
 {
 public:
 	enum base_id_t {
+		/* ID's associated with pot (Controller) messages */
 		pot_base_id = 0x30,
 		jog_base_id = 0x3c,
-		fader_touch_button_base_id = 0xe0,
-		vselect_button_base_id = 0x20,
-		select_button_base_id = 0x18,
-		mute_button_base_id = 0x10,
-		solo_button_base_id = 0x08,
+		/* ID's associated with button (NoteOn) messages */
 		recenable_button_base_id = 0x0,
-		meter_base_id = 0xd0,
+		solo_button_base_id = 0x08,
+		mute_button_base_id = 0x10,
+		select_button_base_id = 0x18,
+		vselect_button_base_id = 0x20,
+		fader_touch_button_base_id = 0xe0,
 	};
 	
 	Control (int id, std::string name, Group& group);

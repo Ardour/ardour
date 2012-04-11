@@ -700,10 +700,10 @@ MackieControlProtocol::notify_solo_active_changed (bool active)
 {
 	boost::shared_ptr<Surface> surface = surfaces.front();
 	
-	Button * rude_solo = reinterpret_cast<Button*> (surface->controls_by_name["solo"]);
+	Led* rude_solo = dynamic_cast<Led*> (surface->controls_by_name["solo"]);
 
 	if (rude_solo) {
-		surface->write (rude_solo->led().set_state (active ? flashing : off));
+		surface->write (rude_solo->set_state (active ? flashing : off));
 	}
 }
 

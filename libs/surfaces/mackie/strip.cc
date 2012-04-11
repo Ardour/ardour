@@ -413,20 +413,33 @@ Strip::handle_button (Button& button, ButtonState bs)
 		// no route so always switch the light off
 		// because no signals will be emitted by a non-route
 		_surface->write (button.led().set_state  (off));
+		return;
 	}
 
 	if (bs == press) {
-		if (button.name() == "recenable") {
+		if (button.raw_id() >= Control::recenable_button_base_id &&
+		    button.raw_id() < Control::recenable_button_base_id + 8) {
+
 			_route->set_record_enabled (!_route->record_enabled(), this);
-		} else if (button.name() == "mute") {
+
+		} else if (button.raw_id() >= Control::mute_button_base_id &&
+			   button.raw_id() < Control::mute_button_base_id + 8) {
+
 			_route->set_mute (!_route->muted(), this);
-		} else if (button.name() == "solo") {
+
+		} else if (button.raw_id() >= Control::solo_button_base_id &&
+			   button.raw_id() < Control::solo_button_base_id + 8) {
+
 			_route->set_solo (!_route->soloed(), this);
-		} else if (button.name() == "select") {
+
+		} else if (button.raw_id() >= Control::select_button_base_id &&
+			   button.raw_id() < Control::select_button_base_id + 8) {
+
 			_surface->mcp().select_track (_route);
-		} else if (button.name() == "vselect") {
-			// TODO could be used to select different things to apply the pot to?
-			//state = default_button_press (dynamic_cast<Button&> (control));
+
+		} else if (button.raw_id() >= Control::vselect_button_base_id &&
+			   button.raw_id() < Control::vselect_button_base_id + 8) {
+
 		}
 	}
 
