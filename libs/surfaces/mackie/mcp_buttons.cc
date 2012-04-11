@@ -166,6 +166,19 @@ MackieControlProtocol::cursor_left_press (Button& )
 		} else {
 			ZoomOut (); /* EMIT SIGNAL */
 		}
+	} else {
+		float page_fraction;
+		if (_modifier_state == MODIFIER_CONTROL) {
+			page_fraction = 1.0;
+		} else if (_modifier_state == MODIFIER_OPTION) {
+			page_fraction = 0.1;
+		} else if (_modifier_state == MODIFIER_SHIFT) {
+			page_fraction = 2.0;
+		} else {
+			page_fraction = 0.25;
+		}
+
+		ScrollTimeline (page_fraction);
 	}
 
 	return off;
@@ -187,8 +200,21 @@ MackieControlProtocol::cursor_right_press (Button& )
 		} else {
 			ZoomIn (); /* EMIT SIGNAL */
 		}
-	}
+	} else {
+		float page_fraction;
+		if (_modifier_state == MODIFIER_CONTROL) {
+			page_fraction = 1.0;
+		} else if (_modifier_state == MODIFIER_OPTION) {
+			page_fraction = 0.1;
+		} else if (_modifier_state == MODIFIER_SHIFT) {
+			page_fraction = 2.0;
+		} else {
+			page_fraction = 0.25;
+		}
 
+		ScrollTimeline (page_fraction);
+	}
+			
 	return off;
 }
 
