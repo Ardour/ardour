@@ -83,6 +83,11 @@ class MackieControlProtocol
 	, public AbstractUI<MackieControlUIRequest>
 {
   public:
+	static const int MODIFIER_OPTION;
+	static const int MODIFIER_CONTROL;
+	static const int MODIFIER_SHIFT;
+	static const int MODIFIER_CMDALT;
+
 	MackieControlProtocol(ARDOUR::Session &);
 	virtual ~MackieControlProtocol();
 
@@ -279,6 +284,8 @@ class MackieControlProtocol
 	ARDOUR::Session & get_session() { return *session; }
  
 	void add_in_use_timeout (Mackie::Surface& surface, Mackie::Control& in_use_control, Mackie::Control* touch_control);
+
+	int modifier_state();
 	
   protected:
 	// shut down the surface
@@ -363,12 +370,6 @@ class MackieControlProtocol
 	bool _scrub_mode;
 	bool _flip_mode;
 	int  _current_selected_track;
-	
-	static const int MODIFIER_OPTION;
-	static const int MODIFIER_CONTROL;
-	static const int MODIFIER_SHIFT;
-	static const int MODIFIER_CMDALT;
-
 	int  _modifier_state;
 
 	typedef std::list<GSource*> PortSources;

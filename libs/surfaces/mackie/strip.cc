@@ -520,16 +520,25 @@ Strip::handle_pot (Pot& pot, ControlState& state)
 		return;
 	}
 
-	boost::shared_ptr<Panner> panner = _route->panner_shell()->panner();
-	// pan for mono input routes, or stereo linked panners
-	if (panner) {
-		double p = panner->position ();
+	boost::shared_ptr<Pannable> pannable = _route->pannable();
+
+	if (pannable) {
+		boost::shared_ptr<AutomationControl> ac;
+		
+		if (_surface->mcp().modifier_state() & MackieControlProtocol::MODIFIER_CONTROL) {
+			ac = pannable->pan_width_control;
+		} else {
+			ac = pannable->pan_azimuth_control;
+		}
+		
+		double p = ac->get_value();
                 
 		// calculate new value, and adjust
 		p += state.delta * state.sign;
 		p = min (1.0, p);
 		p = max (0.0, p);
-		panner->set_position (p);
+
+		ac->set_value (p);
 	}
 }
 
