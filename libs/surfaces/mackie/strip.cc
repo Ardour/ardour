@@ -259,7 +259,7 @@ Strip::notify_route_deleted ()
 void 
 Strip::notify_gain_changed (bool force_update)
 {
-	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("gain changed for strip %1\n", _index));
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("gain changed for strip %1, flip mode\n", _index, _surface->mcp().flip_mode()));
 
 	if (_route && _fader) {
 		
@@ -282,11 +282,16 @@ Strip::notify_gain_changed (bool force_update)
 			}
 			
 			pos = gain_to_slider_position (pos);
+
 			if (force_update || pos != _last_fader_position_written) {
 				_surface->write (_fader->set_position (pos));
 				_last_fader_position_written = pos;
+			} else {
+				DEBUG_TRACE (DEBUG::MackieControl, "value is stale, no message sent\n");
 			}
-		} 
+		} else {
+			DEBUG_TRACE (DEBUG::MackieControl, "fader in use, no message sent\n");
+		}
 	}
 }
 

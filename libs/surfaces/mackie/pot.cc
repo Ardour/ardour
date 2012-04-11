@@ -81,7 +81,10 @@ Pot::update_message ()
 		msg +=  (lrintf (value * 10.0) + 1) & 0x0f; // 0b00001111
 	}
 
-	return MidiByteArray (3, 0xb0, id(), msg);
+	/* outbound LED message requires 0x20 to be added to the LED's id
+	 */
+
+	return MidiByteArray (3, 0xb0, 0x20 + id(), msg);
 
 }
 	
