@@ -247,6 +247,8 @@ intptr_t Session::vst_callback (
 
 	case audioMasterOfflineStart:
 		SHOW_CALLBACK ("amc: audioMasterOfflineStart\n");
+		return 0;
+		
 	case audioMasterOfflineRead:
 		SHOW_CALLBACK ("amc: audioMasterOfflineRead\n");
 	       // ptr points to offline structure, see below. return 0: error, 1 ok
@@ -259,6 +261,8 @@ intptr_t Session::vst_callback (
 
 	case audioMasterOfflineGetCurrentPass:
 		SHOW_CALLBACK ("amc: audioMasterOfflineGetCurrentPass\n");
+		return 0;
+		
 	case audioMasterOfflineGetCurrentMetaPass:
 		SHOW_CALLBACK ("amc: audioMasterOfflineGetCurrentMetaPass\n");
 		return 0;
