@@ -572,12 +572,17 @@ MackieControlProtocol::set_state (const XMLNode & node, int /*version*/)
 	_f_actions.resize (16);
 
 	for (uint32_t n = 0; n < 16; ++n) {
-		ostringstream s;
-		s << string_compose ("f%1-action", n+1);
-		
-		if ((prop = node.property (s.str())) != 0) {
-			_f_actions[n] = prop->value();
+		string action;
+		if ((prop = node.property (string_compose ("f%1-action", n+1))) != 0) {
+			action = prop->value();
 		}
+
+		if (action.empty()) {
+			/* default action if nothing is specified */
+			action = string_compose ("goto-visual-state-%1", n+1);
+		}
+
+		_f_actions[n] = action;
 	}
 
 	return retval;
