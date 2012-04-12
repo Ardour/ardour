@@ -7,4 +7,5 @@
   <TimecodeDisplay value="yes"/>
   <TwoCharacterDisplay value="yes"/>
   <Extenders value="0"/>
+  <GlobalControls value="yes"/>
 </MackieProtocolDevice>

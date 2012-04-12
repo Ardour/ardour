@@ -507,9 +507,11 @@ MackieControlProtocol::set_device (const string& device_name)
 	
 	_device_info = d->second;
 
-	surfaces.clear ();
-	create_surfaces ();
-	switch_banks (0, true);
+	if (_active) {
+		surfaces.clear ();
+		create_surfaces ();
+		switch_banks (0, true);
+	}
 }
 
 void 

@@ -40,6 +40,7 @@ std::map<std::string,DeviceInfo> DeviceInfo::device_info;
 
 DeviceInfo::DeviceInfo()
 	: _strip_cnt (8)
+	, _extenders (0)
 	, _has_two_character_display (true)
 	, _has_master_fader (true)
 	, _has_segmented_display (false)
