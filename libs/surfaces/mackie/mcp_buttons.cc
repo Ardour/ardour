@@ -67,12 +67,14 @@ LedState
 MackieControlProtocol::control_press (Button &)
 {
 	_modifier_state |= MODIFIER_CONTROL;
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("CONTROL Press: modifier state now set to %1\n", _modifier_state));
 	return on;
 }
 LedState
 MackieControlProtocol::control_release (Button &)
 {
 	_modifier_state &= ~MODIFIER_CONTROL;
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("CONTROL Release: modifier state now set to %1\n", _modifier_state));
 	return on;
 }
 LedState
