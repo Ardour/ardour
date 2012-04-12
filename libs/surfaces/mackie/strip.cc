@@ -582,7 +582,7 @@ Strip::flip_mode_changed (bool notify)
 		_vpot->set_normal_control (_route->gain_control());
 		_vpot->set_modified_control (boost::shared_ptr<AutomationControl>());
 
-		_surface->write (display (1, "Pan"));
+		_surface->write (display (1, "Fader"));
 
 	} else {
 
@@ -593,7 +593,7 @@ Strip::flip_mode_changed (bool notify)
 		_fader->set_normal_control (_route->gain_control());
 		_fader->set_modified_control (boost::shared_ptr<AutomationControl>());
 
-		_surface->write (display (1, "Fdr"));
+		_surface->write (display (1, "PanDir"));
 	}
 
 	if (notify) {
