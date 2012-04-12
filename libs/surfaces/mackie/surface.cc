@@ -388,7 +388,7 @@ Surface::handle_midi_controller_message (MIDI::Parser &, MIDI::EventTwoBytes* ev
 {
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("SurfacePort::handle_midi_controller %1 = %2\n", (int) ev->controller_number, (int) ev->value));
 
-	Pot* pot = pots[Pot::base_id + ev->controller_number];
+	Pot* pot = pots[ev->controller_number];
 
 	if (!pot && ev->controller_number == Jog::base_id) {
 		pot = dynamic_cast<Pot*> (controls_by_name["jog"]);
