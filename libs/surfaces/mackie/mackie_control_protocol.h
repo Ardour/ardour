@@ -112,9 +112,8 @@ class MackieControlProtocol
 	virtual ~MackieControlProtocol();
 
 	static MackieControlProtocol* instance() { return _instance; }
-
-	const std::string& device_name() const { return _device_name; }
-	static std::vector<std::string> get_possible_devices ();
+	
+	const Mackie::DeviceInfo& device_info() const { return _device_info; }
 
 	int set_active (bool yn);
 
@@ -238,7 +237,6 @@ class MackieControlProtocol
 
 	static MackieControlProtocol* _instance;
 	
-	std::string              _device_name;
 	Mackie::DeviceInfo       _device_info;
 	sigc::connection          periodic_connection;
 	uint32_t                 _current_initial_bank;
@@ -268,7 +266,6 @@ class MackieControlProtocol
 	std::vector<std::string> _f_actions;
 	ButtonMap                 button_map;
 
-	std::string find_device_info_file (const std::string& name);
 	void load_device_info (const std::string&);
 	void create_surfaces ();
 	void port_connected_or_disconnected (std::string, std::string, bool);

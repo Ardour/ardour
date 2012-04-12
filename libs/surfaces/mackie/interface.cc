@@ -15,14 +15,15 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#include "control_protocol/control_protocol.h"
-#include "mackie_control_protocol.h"
 
-#include "ardour/rc_configuration.h"
+#include <stdexcept>
 
 #include "pbd/error.h"
 
-#include <stdexcept>
+#include "ardour/rc_configuration.h"
+
+#include "control_protocol/control_protocol.h"
+#include "mackie_control_protocol.h"
 
 using namespace ARDOUR;
 using namespace PBD;

@@ -17,7 +17,14 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <cstring>
+#include <glibmm/miscutils.h>
+
 #include "pbd/xml++.h"
+#include "pbd/error.h"
+#include "pbd/pathscanner.h"
+
+#include "ardour/filesystem_paths.h"
 
 #include "device_info.h"
 
@@ -25,7 +32,11 @@
 
 using namespace Mackie;
 using namespace PBD;
+using namespace ARDOUR;
 using std::string;
+using std::vector;
+
+std::map<std::string,DeviceInfo> DeviceInfo::device_info;
 
 DeviceInfo::DeviceInfo()
 	: _strip_cnt (8)
@@ -46,34 +57,53 @@ int
 DeviceInfo::set_state (const XMLNode& node, int /* version */)
 {
 	const XMLProperty* prop;
-
-	if ((prop = node.property ("strips")) != 0) {
-		if ((_strip_cnt = atoi (prop->value())) == 0) {
-			_strip_cnt = 8;
+	const XMLNode* child;
+	
+	if ((child = node.child ("Strips")) != 0) {
+		if ((prop = node.property ("value")) != 0) {
+			if ((_strip_cnt = atoi (prop->value())) == 0) {
+				_strip_cnt = 8;
+			}
 		}
 	}
 
-	if ((prop = node.property ("two-character-display")) != 0) {
-		_has_two_character_display = string_is_affirmative (prop->value());
+	if ((child = node.child ("TwoCharacterDisplay")) != 0) {
+		if ((prop = node.property ("value")) != 0) {
+			_has_two_character_display = string_is_affirmative (prop->value());
+		}
 	}
 
-	if ((prop = node.property ("master-fader")) != 0) {
-		_has_master_fader = string_is_affirmative (prop->value());
+	if ((child = node.child ("MasterFader")) != 0) {
+		if ((prop = node.property ("value")) != 0) {
+			_has_master_fader = string_is_affirmative (prop->value());
+		}
 	}
 
-	if ((prop = node.property ("display-segmented")) != 0) {
-		_has_segmented_display = string_is_affirmative (prop->value());
+	if ((child = node.child ("DisplaySegments")) != 0) {
+		if ((prop = node.property ("value")) != 0) {
+			_has_segmented_display = string_is_affirmative (prop->value());
+		}
 	}
 
-	if ((prop = node.property ("timecode-display")) != 0) {
-		_has_timecode_display = string_is_affirmative (prop->value());
+	if ((child = node.child ("TimecodeDisplay")) != 0) {
+		if ((prop = node.property ("value")) != 0) {
+			_has_timecode_display = string_is_affirmative (prop->value());
+		}
 	}
 
-	if ((prop = node.property ("name")) != 0) {
-		_name = prop->value();
+	if ((child = node.child ("Name")) != 0) {
+		if ((prop = node.property ("value")) != 0) {
+			_name = prop->value();
+		}
 	}
-
+	
 	return 0;
+}
+
+const string&
+DeviceInfo::name() const
+{
+	return _name;
 }
 
 uint32_t
@@ -104,5 +134,93 @@ bool
 DeviceInfo::has_timecode_display () const
 {
 	return _has_timecode_display;
+}
+
+static const char * const devinfo_env_variable_name = "ARDOUR_MCP_DEVINFO_PATH";
+static const char* const devinfo_dir_name = "mcp_devices";
+static const char* const devinfo_suffix = ".xml";
+
+static sys::path
+system_devinfo_search_path ()
+{
+	bool devinfo_path_defined = false;
+        sys::path spath_env (Glib::getenv (devinfo_env_variable_name, devinfo_path_defined));
+
+	if (devinfo_path_defined) {
+		return spath_env;
+	}
+
+	SearchPath spath (system_data_search_path());
+	spath.add_subdirectory_to_paths(devinfo_dir_name);
+
+	// just return the first directory in the search path that exists
+	SearchPath::const_iterator i = std::find_if(spath.begin(), spath.end(), sys::exists);
+
+	if (i == spath.end()) return sys::path();
+
+	return *i;
+}
+
+static sys::path
+user_devinfo_directory ()
+{
+	sys::path p(user_config_directory());
+	p /= devinfo_dir_name;
+
+	return p;
+}
+
+static bool
+devinfo_filter (const string &str, void */*arg*/)
+{
+	return (str.length() > strlen(devinfo_suffix) &&
+		str.find (devinfo_suffix) == (str.length() - strlen (devinfo_suffix)));
+}
+
+void
+DeviceInfo::reload_device_info ()
+{
+	DeviceInfo di;
+	vector<string> s;
+	vector<string *> *devinfos;
+	PathScanner scanner;
+	SearchPath spath (system_devinfo_search_path());
+	spath += user_devinfo_directory ();
+
+	devinfos = scanner (spath.to_string(), devinfo_filter, 0, false, true);
+	device_info.clear ();
+
+	if (!devinfos) {
+		error << "No MCP device info files found using " << spath.to_string() << endmsg;
+		std::cerr << "No MCP device info files found using " << spath.to_string() << std::endl;
+		return;
+	}
+
+	if (devinfos->empty()) {
+		error << "No MCP device info files found using " << spath.to_string() << endmsg;
+		std::cerr << "No MCP device info files found using " << spath.to_string() << std::endl;
+		return;
+	}
+
+	for (vector<string*>::iterator i = devinfos->begin(); i != devinfos->end(); ++i) {
+		string fullpath = *(*i);
+
+		XMLTree tree;
+
+		if (!tree.read (fullpath.c_str())) {
+			continue;
+		}
+
+		XMLNode* root = tree.root ();
+		if (!root) {
+			continue;
+		}
+
+		di.set_state (*root, 3000); /* version is ignored for now */
+
+		device_info[di.name()] = di;
+	}
+
+	delete devinfos;
 }
 

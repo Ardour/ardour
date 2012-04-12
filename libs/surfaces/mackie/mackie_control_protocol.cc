@@ -92,7 +92,6 @@ bool MackieControlProtocol::probe()
 MackieControlProtocol::MackieControlProtocol (Session& session)
 	: ControlProtocol (session, X_("Mackie"), this)
 	, AbstractUI<MackieControlUIRequest> ("mackie")
-	, _device_name (get_possible_devices().front())
 	, _current_initial_bank (0)
 	, _timecode_type (ARDOUR::AnyTime::BBT)
 	, _input_bundle (new ARDOUR::Bundle (_("Mackie Control In"), true))
@@ -105,6 +104,8 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 	, _current_selected_track (-1)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::MackieControlProtocol\n");
+
+	DeviceInfo::reload_device_info ();
 
 	AudioEngine::instance()->PortConnectedOrDisconnected.connect (
 		audio_engine_connections, MISSING_INVALIDATOR, ui_bind (&MackieControlProtocol::port_connected_or_disconnected, this, _2, _4, _5),
@@ -563,7 +564,7 @@ MackieControlProtocol::get_state()
 	XMLNode* node = new XMLNode (X_("Protocol"));
 	node->add_property (X_("name"), ARDOUR::ControlProtocol::_name);
 
-	node->add_property (X_("device"), _device_name);
+	node->add_property (X_("device"), _device_info.name());
 
 	// add current bank
 	ostringstream os;
@@ -1145,45 +1146,15 @@ MackieControlProtocol::force_special_route_to_strip (boost::shared_ptr<Route> r,
 	}
 }
 
-vector<string>
-MackieControlProtocol::get_possible_devices ()
-{
-	vector<string> s;
-		
-	s.push_back (X_("Mackie Control Universal Pro"));
-	s.push_back (X_("Behringer BCF2000"));
-	s.push_back (X_("SSL Nucleus"));
-	s.push_back (X_("Presonus FaderPort"));
-
-	return s;
-}
-
-string
-MackieControlProtocol::find_device_info_file (const string& name)
-{
-	return string();
-}
-
 void
 MackieControlProtocol::load_device_info (const string& name)
 {
-	string path = find_device_info_file (name);
+	map<string,DeviceInfo>::iterator i = DeviceInfo::device_info.find (name);
 
-	if (path.empty()) {
+	if (i == DeviceInfo::device_info.end()) {
 		error << string_compose (_("No device info for Mackie Control device \"%1\" - ignored"), name) << endmsg;
 		return;
 	}
 
-	XMLTree tree;
-	if (tree.read (path)) {
-		error << string_compose (_("Cannot load device info file %1 - ignored"), path) << endmsg;
-		return;
-	}
-
-	XMLNode* root = tree.root();
-	if (root) {
-		if (_device_info.set_state (*root, 3000)) { // version is currently ignored
-			_device_name = name;
-		}
-	}
+	_device_info = i->second;
 }

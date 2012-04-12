@@ -22,6 +22,7 @@
 
 #include <stdint.h>
 #include <string>
+#include <map>
 
 class XMLNode;
 
@@ -41,6 +42,9 @@ class DeviceInfo
 	bool has_segmented_display() const;
 	bool has_timecode_display() const;
 	const std::string& name() const;
+
+	static std::map<std::string,DeviceInfo> device_info;
+	static void reload_device_info();
 
   private:
 	uint32_t _strip_cnt;

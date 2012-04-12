@@ -22,10 +22,14 @@
 #include <gtkmm/table.h>
 #include "gtkmm2ext/utils.h"
 #include "ardour/rc_configuration.h"
+
 #include "mackie_control_protocol.h"
+#include "device_info.h"
+
 #include "i18n.h"
 
 using namespace std;
+using namespace Mackie;
 
 class MackieControlProtocolGUI : public Gtk::VBox
 {
@@ -73,9 +77,13 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 	table->attach (*manage (new Gtk::Label (_("Surface type:"))), 0, 1, 0, 1);
 	table->attach (_surface_combo, 1, 2, 0, 1);
 
-	vector<string> surfaces = p.get_possible_devices ();
+	vector<string> surfaces;
+
+	for (std::map<std::string,DeviceInfo>::iterator i = DeviceInfo::device_info.begin(); i != DeviceInfo::device_info.end(); ++i) {
+		surfaces.push_back (i->first);
+	}
 	Gtkmm2ext::set_popdown_strings (_surface_combo, surfaces);
-	_surface_combo.set_active_text (p.device_name());
+	_surface_combo.set_active_text (p.device_info().name());
 
 	_extenders.set_range (0, 8);
 	_extenders.set_increments (1, 4);
