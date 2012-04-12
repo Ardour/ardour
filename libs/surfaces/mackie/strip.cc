@@ -364,6 +364,12 @@ Strip::handle_button (Button& button, ButtonState bs)
 {
 	button.set_in_use (bs == press);
 
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("strip %1 handling button %2\n", _index, button.id()));
+
+	if (bs != press) {
+		return;
+	}
+
 	int lock_mod = (MackieControlProtocol::MODIFIER_CONTROL|MackieControlProtocol::MODIFIER_SHIFT);
 	int ms = _surface->mcp().modifier_state();
 	bool modified = (ms & MackieControlProtocol::MODIFIER_CONTROL);
