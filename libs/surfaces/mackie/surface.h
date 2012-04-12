@@ -142,6 +142,7 @@ public:
 	MidiByteArray timecode_display (const std::string & timecode, const std::string & last_timecode = "");
 
 	void update_view_mode_display ();
+	void update_flip_mode_display ();
 
   protected:
 	void init_controls();

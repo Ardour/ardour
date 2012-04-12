@@ -659,6 +659,14 @@ Surface::timecode_display (const std::string & timecode, const std::string & las
 }
 
 void
+Surface::update_flip_mode_display ()
+{
+	for (Strips::iterator s = strips.begin(); s != strips.end(); ++s) {
+		(*s)->notify_all ();
+	}
+}
+
+void
 Surface::update_view_mode_display ()
 {
 	string text;
