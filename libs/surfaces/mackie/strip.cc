@@ -414,12 +414,9 @@ Strip::handle_button (Button& button, ButtonState bs)
 
 		_fader->set_in_use (state);
 		
-		if (ARDOUR::Config->get_mackie_emulation() == "bcf" && state) {
-
-			/* BCF faders don't support touch, so add a timeout to reset
-			   their `in_use' state.
+		if (!_surface->mcp().device_info().has_touch_sense_faders()) {
+			/* add a timeout to reset their `in_use' state.
 			*/
-
 			_surface->mcp().add_in_use_timeout (*_surface, *_fader, _fader_touch);
 		}
 	}
@@ -447,7 +444,7 @@ Strip::handle_fader (Fader& fader, float position)
 		return;
 	}
 
-	if (ARDOUR::Config->get_mackie_emulation() == "bcf") {
+	if (!_surface->mcp().device_info().has_touch_sense_faders()) {
 		/* reset the timeout while we're still moving the fader */
 		_surface->mcp().add_in_use_timeout (*_surface, fader, fader.in_use_touch_control);
 	}

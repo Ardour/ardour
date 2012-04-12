@@ -105,6 +105,7 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::MackieControlProtocol\n");
 
 	DeviceInfo::reload_device_info ();
+	set_device (Config->get_mackie_device_name());
 
 	AudioEngine::instance()->PortConnectedOrDisconnected.connect (
 		audio_engine_connections, MISSING_INVALIDATOR, ui_bind (&MackieControlProtocol::port_connected_or_disconnected, this, _2, _4, _5),
@@ -506,6 +507,10 @@ MackieControlProtocol::set_device (const string& device_name)
 	
 	_device_info = d->second;
 
+	/* store it away in a global location */
+	
+	Config->set_mackie_device_name (device_name);
+
 	if (_active) {
 		clear_ports ();
 		surfaces.clear ();
@@ -595,8 +600,6 @@ MackieControlProtocol::get_state()
 	XMLNode* node = new XMLNode (X_("Protocol"));
 	node->add_property (X_("name"), ARDOUR::ControlProtocol::_name);
 
-	node->add_property (X_("device"), _device_info.name());
-
 	// add current bank
 	ostringstream os;
 	os << _current_initial_bank;
@@ -644,10 +647,6 @@ MackieControlProtocol::set_state (const XMLNode & node, int /*version*/)
 		}
 
 		_f_actions[n] = action;
-	}
-
-	if ((prop = node.property (X_("device"))) != 0) {
-		set_device (prop->value ());
 	}
 
 	return retval;

@@ -45,6 +45,7 @@ class DeviceInfo
 	bool has_timecode_display() const;
 	bool has_global_controls() const;
 	bool has_jog_wheel () const;
+	bool has_touch_sense_faders() const;
 	const std::string& name() const;
 
 	static std::map<std::string,DeviceInfo> device_info;
@@ -59,6 +60,7 @@ class DeviceInfo
 	bool     _has_timecode_display;
 	bool     _has_global_controls;
 	bool     _has_jog_wheel;
+	bool     _has_touch_sense_faders;
 	std::string _name;
 };
 

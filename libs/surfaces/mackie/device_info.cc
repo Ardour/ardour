@@ -47,6 +47,7 @@ DeviceInfo::DeviceInfo()
 	, _has_timecode_display (true)
 	, _has_global_controls (true)
 	, _has_jog_wheel (true)
+	, _has_touch_sense_faders (true)
 	, _name (X_("Mackie Control Universal Pro"))
 {
 	
@@ -128,6 +129,12 @@ DeviceInfo::set_state (const XMLNode& node, int /* version */)
 		}
 	}
 
+	if ((child = node.child ("TouchSenseFaders")) != 0) {
+		if ((prop = child->property ("value")) != 0) {
+			_has_touch_sense_faders = string_is_affirmative (prop->value());
+		}
+	}
+
 	return 0;
 }
 
@@ -183,6 +190,12 @@ bool
 DeviceInfo::has_jog_wheel () const
 {
 	return _has_jog_wheel;
+}
+
+bool
+DeviceInfo::has_touch_sense_faders () const
+{
+	return _has_touch_sense_faders;
 }
 
 static const char * const devinfo_env_variable_name = "ARDOUR_MCP_DEVINFO_PATH";
