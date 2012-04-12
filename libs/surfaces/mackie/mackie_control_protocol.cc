@@ -517,8 +517,15 @@ MackieControlProtocol::set_device (const string& device_name)
 void 
 MackieControlProtocol::create_surfaces ()
 {
-	string device_name = X_("MC Main");
+	string device_name;
 	surface_type_t stype = mcu;
+	char buf[128];
+
+	if (_device_info.extenders() == 0) {
+		device_name = X_("mackie control");
+	} else {
+		device_name = X_("mackie control #1");
+	}
 
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Create %1 surfaces\n", 1 + _device_info.extenders()));
 
@@ -529,7 +536,12 @@ MackieControlProtocol::create_surfaces ()
 
 		/* next device will be an extender */
 		
-		device_name = X_("MC Extender");
+		if (_device_info.extenders() < 2) {
+			device_name = X_("mackie control #2");
+		} else {
+			snprintf (buf, sizeof (buf), X_("mackie control #%d"), n+2);
+			device_name = buf;
+		}
 		stype = ext;
 
 		_input_bundle->add_channel (
@@ -1087,6 +1099,9 @@ MackieControlProtocol::midi_input_handler (IOCondition ioc, MIDI::Port* port)
 void
 MackieControlProtocol::clear_ports ()
 {
+	_input_bundle->remove_channels ();
+	_output_bundle->remove_channels ();
+
 	for (PortSources::iterator i = port_sources.begin(); i != port_sources.end(); ++i) {
 		g_source_destroy (*i);
 		g_source_unref (*i);

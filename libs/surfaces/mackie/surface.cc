@@ -154,6 +154,17 @@ Surface::Surface (MackieControlProtocol& mcp, const std::string& device_name, ui
 
 	connect_to_signals ();
 
+	/* wakey wakey */
+
+	MidiByteArray wakeup (7, MIDI::sysex, 0x00, 0x00, 0x66, 0x14, 0x00, MIDI::eox);
+	_port->write (wakeup);
+	wakeup[4] = 0x15; /* wakup Mackie XT */
+	_port->write (wakeup);
+	wakeup[4] = 0x10; /* wakupe Logic Control */
+	_port->write (wakeup);
+	wakeup[4] = 0x11; /* wakeup Logic Control XT */
+	_port->write (wakeup);
+
 	DEBUG_TRACE (DEBUG::MackieControl, "Surface::init finish\n");
 }
 
