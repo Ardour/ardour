@@ -229,7 +229,7 @@ MackieControlProtocol::cursor_up_press (Button&)
 {
 	if (_zoom_mode) {
 		
-		if (_modifier_state & MODIFIER_OPTION) {
+		if (_modifier_state & MODIFIER_CONTROL) {
 			VerticalZoomInSelected (); /* EMIT SIGNAL */
 		} else {
 			VerticalZoomInAll (); /* EMIT SIGNAL */

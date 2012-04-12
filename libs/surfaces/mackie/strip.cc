@@ -259,7 +259,7 @@ Strip::notify_route_deleted ()
 void 
 Strip::notify_gain_changed (bool force_update)
 {
-	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("gain changed for strip %1, flip mode\n", _index, _surface->mcp().flip_mode()));
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("gain changed for strip %1, flip mode %2\n", _index, _surface->mcp().flip_mode()));
 
 	if (_route && _fader) {
 		
@@ -292,6 +292,8 @@ Strip::notify_gain_changed (bool force_update)
 		} else {
 			DEBUG_TRACE (DEBUG::MackieControl, "fader in use, no message sent\n");
 		}
+	} else {
+		DEBUG_TRACE (DEBUG::MackieControl, "no route or no fader\n");
 	}
 }
 
