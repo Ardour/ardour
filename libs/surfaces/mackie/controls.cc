@@ -111,7 +111,7 @@ Control::set_value (float val, bool modified)
 	if (modified && modified_ac) {
 		modified_ac->set_value (modified_ac->interface_to_internal (val));
 	} else if (normal_ac) {
-		normal_ac->set_value (modified_ac->interface_to_internal (val));
+		normal_ac->set_value (normal_ac->interface_to_internal (val));
 	}
 }
 
