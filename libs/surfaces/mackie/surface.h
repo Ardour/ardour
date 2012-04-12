@@ -151,7 +151,7 @@ public:
 
   protected:
 	void init_controls();
-	void init_strips ();
+	void init_strips (uint32_t n);
 
   private:
 	MackieControlProtocol& _mcp;

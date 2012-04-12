@@ -138,23 +138,18 @@ Surface::Surface (MackieControlProtocol& mcp, const std::string& device_name, ui
 	
 	_port = new SurfacePort (*this);
 
-	switch (stype) {
-	case mcu:
+	if (_mcp.device_info().has_global_controls()) {
 		init_controls ();
-		_jog_wheel = new Mackie::JogWheel (_mcp);
-		break;
-	default:
-		break;
 	}
 
-	switch (stype) {
-	case mcu:
-	case ext:
-		strips.resize (8);
-		init_strips ();
-		break;
-	default:
-		break;
+	if (_mcp.device_info().has_jog_wheel()) {
+		_jog_wheel = new Mackie::JogWheel (_mcp);
+	}
+
+	uint32_t n = _mcp.device_info().strip_cnt();
+	
+	if (n) {
+		init_strips (n);
 	}
 
 	connect_to_signals ();
@@ -237,9 +232,9 @@ static StripControlDefinition mackie_strip_controls[] = {
 };
 
 void 
-Surface::init_strips ()
+Surface::init_strips (uint32_t n)
 {
-	for (uint32_t i = 0; i < 8; ++i) {
+	for (uint32_t i = 0; i < n; ++i) {
 
 		char name[32];
 		
@@ -248,7 +243,7 @@ Surface::init_strips ()
 		Strip* strip = new Strip (*this, name, i, mackie_strip_controls);
 		
 		groups[name] = strip;
-		strips[i] = strip;
+		strips.push_back (strip);
 	}
 }
 
@@ -833,12 +828,8 @@ Surface::update_view_mode_display ()
 void
 Surface::gui_selection_changed (ARDOUR::RouteNotificationListPtr routes)
 {
-	MidiByteArray msg;
-
 	for (Strips::iterator s = strips.begin(); s != strips.end(); ++s) {
-		msg << (*s)->gui_selection_changed (routes);
+		_port->write ((*s)->gui_selection_changed (routes));
 	}
-
-	_port->write (msg);
 }
 

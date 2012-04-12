@@ -8,4 +8,5 @@
   <TwoCharacterDisplay value="yes"/>
   <Extenders value="0"/>
   <GlobalControls value="yes"/>
+  <JogWheel value="yes"/>
 </MackieProtocolDevice>

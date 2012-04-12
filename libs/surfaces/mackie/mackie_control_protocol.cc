@@ -354,7 +354,6 @@ MackieControlProtocol::set_active (bool yn)
 
 			create_surfaces ();
 			connect_session_signals ();
-			
 			_active = true;
 			update_surfaces ();
 
@@ -508,6 +507,7 @@ MackieControlProtocol::set_device (const string& device_name)
 	_device_info = d->second;
 
 	if (_active) {
+		clear_ports ();
 		surfaces.clear ();
 		create_surfaces ();
 		switch_banks (0, true);
@@ -517,9 +517,8 @@ MackieControlProtocol::set_device (const string& device_name)
 void 
 MackieControlProtocol::create_surfaces ()
 {
-	string device_name = _device_info.name();
+	string device_name = X_("MC Main");
 	surface_type_t stype = mcu;
-	char buf[128];
 
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Create %1 surfaces\n", 1 + _device_info.extenders()));
 
@@ -530,8 +529,7 @@ MackieControlProtocol::create_surfaces ()
 
 		/* next device will be an extender */
 		
-		snprintf (buf, sizeof (buf), "%s XT%d", _device_info.name().c_str(), n+1);
-		device_name = buf;
+		device_name = X_("MC Extender");
 		stype = ext;
 
 		_input_bundle->add_channel (
