@@ -86,7 +86,11 @@ LV2PluginUI::touch(void*    controller,
                    uint32_t port_index,
                    bool     grabbed)
 {
-	LV2PluginUI*    me      = (LV2PluginUI*)controller;
+	LV2PluginUI* me = (LV2PluginUI*)controller;
+	if (port_index >= me->_controllables.size()) {
+		return;
+	}
+
 	ControllableRef control = me->_controllables[port_index];
 	if (grabbed) {
 		control->start_touch(control->session().transport_frame());
