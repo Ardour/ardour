@@ -473,6 +473,7 @@ Strip::handle_pot (Pot& pot, float delta)
 		case MackieControlProtocol::Normal: /* pot controls pan */
 		case MackieControlProtocol::Mirror: /* pot + fader control pan */
 		case MackieControlProtocol::Zero:   /* pot controls pan, faders don't move */
+			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("modifier state %1\n", _surface->mcp().modifier_state()));
 			if (_surface->mcp().modifier_state() & MackieControlProtocol::MODIFIER_CONTROL) {
 				DEBUG_TRACE (DEBUG::MackieControl, "pot using control to alter width\n");
 				ac = pannable->pan_width_control;
@@ -486,14 +487,16 @@ Strip::handle_pot (Pot& pot, float delta)
 			break;
 		}
 
-		double p = ac->get_value();
-                
-		// calculate new value, and adjust
-		p += delta;
-		p = min (1.0, p);
-		p = max (0.0, p);
-
-		ac->set_value (p);
+		if (ac) {
+			double p = ac->get_value();
+			
+			// calculate new value, and adjust
+			p += delta;
+			p = min (1.0, p);
+			p = max (0.0, p);
+			
+			ac->set_value (p);
+		}
 	}
 }
 
