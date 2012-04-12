@@ -392,6 +392,9 @@ Strip::handle_button (Button& button, ButtonState bs)
 				if (_route) {
 					_route_locked = !_route_locked;
 				}
+			} else if (_surface->mcp().modifier_state() == MackieControlProtocol::MODIFIER_SHIFT) {
+				/* reset gain value to unity */
+				_route->set_gain (1.0, this);
 			} else {
 				_surface->mcp().select_track (_route);
 			}

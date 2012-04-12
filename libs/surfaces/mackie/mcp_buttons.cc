@@ -500,11 +500,11 @@ MackieControlProtocol::stop_release (Button &)
 LedState 
 MackieControlProtocol::play_press (Button &)
 {
-	/* if we're already rolling, and we're pressed
+	/* if we're already rolling at normal speed, and we're pressed
 	   again, jump back to where we started last time
 	*/
 
-	transport_play (session->transport_rolling());
+	transport_play (session->transport_rolling() == 1.0);
 	return none;
 }
 
@@ -530,7 +530,6 @@ MackieControlProtocol::record_release (Button &)
 LedState 
 MackieControlProtocol::rewind_press (Button &)
 {
-	DEBUG_TRACE (DEBUG::MackieControl, "REWIND PRESS\n");
 	rewind ();
 	return none;
 }
@@ -995,6 +994,7 @@ MackieControlProtocol::mixer_release (Button &)
 LedState
 MackieControlProtocol::user_a_press (Button &) 
 { 
+	transport_play (session->transport_speed() == 1.0);
 	return off; 
 }
 LedState
@@ -1005,6 +1005,7 @@ MackieControlProtocol::user_a_release (Button &)
 LedState
 MackieControlProtocol::user_b_press (Button &) 
 { 
+	transport_stop();
 	return off; 
 }
 LedState
