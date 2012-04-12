@@ -380,6 +380,12 @@ Strip::handle_button (Button& button, ButtonState bs)
 			_controls_locked = !_controls_locked;
 			return;
 		}
+		
+		if (_route) {
+			_surface->mcp().select_track (_route);
+		}
+
+		return;
 	}
 
 	if (button.id() >= Button::fader_touch_base_id &&
