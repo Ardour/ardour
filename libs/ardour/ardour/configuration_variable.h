@@ -24,6 +24,7 @@
 #include <sstream>
 
 #include "pbd/xml++.h"
+#include "pbd/convert.h"
 #include "ardour/types.h"
 #include "ardour/utils.h"
 
@@ -153,7 +154,7 @@ class ConfigVariable<bool> : public ConfigVariableBase
 	}
 
 	void set_from_string (std::string const & s) {
-		value = string_is_affirmative (s);
+		value = PBD::string_is_affirmative (s);
 	}
 
   protected:

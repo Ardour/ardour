@@ -23,6 +23,7 @@ def build(bld):
     obj.source = '''
             button.cc
             controls.cc
+            device_info.cc
             fader.cc
             gui.cc
             interface.cc

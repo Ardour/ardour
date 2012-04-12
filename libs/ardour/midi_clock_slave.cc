@@ -26,6 +26,7 @@
 #include "pbd/error.h"
 #include "pbd/failed_constructor.h"
 #include "pbd/pthread_utils.h"
+#include "pbd/convert.h"
 
 #include "midi++/port.h"
 
