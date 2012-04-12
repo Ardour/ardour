@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MackieProtocolDevice>
+  <Name value="SSL Nucleus"/>
+  <Strips value="8"/>
+  <MasterFader value="no"/>
+  <SegmentedDisplay value="yes"/>
+  <TimecodeDisplay value="no"/>
+  <TwoCharacterDisplay value="yes"/>
+  <Extenders value="1"/>
+</MackieProtocolDevice>
