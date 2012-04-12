@@ -7,6 +7,8 @@
 #include "pbd/property_basics.h"
 #include "pbd/signals.h"
 
+#include "control_protocol/types.h"
+
 #include "control_group.h"
 #include "types.h"
 #include "midi_byte_array.h"
@@ -70,6 +72,8 @@ public:
 	void lock_route ();
 	void unlock_route ();
 	
+	MidiByteArray gui_selection_changed (ARDOUR::RouteNotificationListPtr);
+
 private:
 	Button* _solo;
 	Button* _recenable;
@@ -101,7 +105,6 @@ private:
 	
 	void update_automation ();
 	void update_meter ();
-
 };
 
 }

@@ -46,6 +46,7 @@ PBD::Signal0<void> ControlProtocol::VerticalZoomInAll;
 PBD::Signal0<void> ControlProtocol::VerticalZoomOutAll;
 PBD::Signal0<void> ControlProtocol::VerticalZoomInSelected;
 PBD::Signal0<void> ControlProtocol::VerticalZoomOutSelected;
+PBD::Signal1<void,RouteNotificationListPtr> ControlProtocol::TrackSelectionChanged;
 
 ControlProtocol::ControlProtocol (Session& s, string str, EventLoop* evloop)
 	: BasicUI (s),

@@ -5,6 +5,8 @@
 
 #include "midi++/types.h"
 
+#include "control_protocol/types.h"
+
 #include "controls.h"
 #include "types.h"
 #include "mackie_jog_wheel.h"
@@ -143,6 +145,8 @@ public:
 
 	void update_view_mode_display ();
 	void update_flip_mode_display ();
+
+	void gui_selection_changed (ARDOUR::RouteNotificationListPtr);
 
   protected:
 	void init_controls();

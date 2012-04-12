@@ -29,6 +29,8 @@
 #include "ardour/midi_region.h"
 #include "ardour/audioplaylist.h"
 
+#include "control_protocol/control_protocol.h"
+
 #include "editor.h"
 #include "actions.h"
 #include "audio_time_axis.h"
@@ -965,6 +967,8 @@ Editor::track_selection_changed ()
 		break;
 	}
 
+	RouteNotificationListPtr routes (new RouteNotificationList);
+
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 
 		bool yn = (find (selection->tracks.begin(), selection->tracks.end(), *i) != selection->tracks.end());
@@ -983,9 +987,21 @@ Editor::track_selection_changed ()
 		} else {
 			(*i)->hide_selection ();
 		}
+
+
+		if (yn) {
+			RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*> (*i);
+			if (rtav) {
+				routes->push_back (rtav->route());
+			}
+		}
 	}
 
 	ActionManager::set_sensitive (ActionManager::track_selection_sensitive_actions, !selection->tracks.empty());
+
+	/* notify control protocols */
+	
+	ControlProtocol::TrackSelectionChanged (routes);
 }
 
 void

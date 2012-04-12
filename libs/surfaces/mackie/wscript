@@ -41,7 +41,8 @@ def build(bld):
     '''
     obj.export_includes = ['./mackie']
     obj.cxxflags     = '-DPACKAGE="ardour_mackie"'
-    obj.includes     = ['.', './mackie']
+    # need ../libs because some GTK2 header files require stuff there
+    obj.includes     = ['.', '../libs']
     obj.name         = 'libardour_mcp'
     obj.target       = 'ardour_mcp'
     obj.uselib       = 'GTKMM'

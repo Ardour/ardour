@@ -24,10 +24,14 @@
 #include <string>
 #include <vector>
 #include <list>
+
 #include <boost/shared_ptr.hpp>
+
 #include "pbd/stateful.h"
 #include "pbd/signals.h"
+
 #include "control_protocol/basic_ui.h"
+#include "control_protocol/types.h"
 
 namespace ARDOUR {
 
@@ -71,6 +75,13 @@ class ControlProtocol : virtual public sigc::trackable, public PBD::Stateful, pu
 	static PBD::Signal0<void> VerticalZoomOutAll;
 	static PBD::Signal0<void> VerticalZoomInSelected;
 	static PBD::Signal0<void> VerticalZoomOutSelected;
+
+	/* signals that one UI (e.g. the GUI) can emit to get all other UI's to 
+	   respond. Typically this will always be GUI->"others" - the GUI pays
+	   no attention to these signals.
+	*/
+	
+	static PBD::Signal1<void,RouteNotificationListPtr> TrackSelectionChanged;
 
 	/* the model here is as follows:
 

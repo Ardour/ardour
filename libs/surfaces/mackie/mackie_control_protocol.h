@@ -42,6 +42,8 @@
 #include "timer.h"
 #include "device_info.h"
 
+class RouteTimeAxisView;
+
 namespace MIDI {
 	class Port;
 }
@@ -244,6 +246,7 @@ class MackieControlProtocol
 	PBD::ScopedConnectionList session_connections;
 	PBD::ScopedConnectionList port_connections;
 	PBD::ScopedConnectionList route_connections;
+	PBD::ScopedConnectionList gui_connections;
 	bool _transport_previously_rolling;
 	// timer for two quick marker left presses
 	Mackie::Timer            _frm_left_last;
@@ -276,6 +279,8 @@ class MackieControlProtocol
 	void clear_ports ();
 	void force_special_route_to_strip (boost::shared_ptr<ARDOUR::Route> r, uint32_t surface, uint32_t strip_number);
 	void build_button_map ();
+
+	void gui_track_selection_changed (ARDOUR::RouteNotificationListPtr);
 
 	/* BUTTON HANDLING */
 

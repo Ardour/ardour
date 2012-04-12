@@ -57,7 +57,6 @@
 #include "mackie_control_exception.h"
 #include "surface_port.h"
 #include "surface.h"
-
 #include "strip.h"
 #include "control_group.h"
 #include "meter.h"
@@ -111,6 +110,8 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 		audio_engine_connections, MISSING_INVALIDATOR, ui_bind (&MackieControlProtocol::port_connected_or_disconnected, this, _2, _4, _5),
 		this
 		);
+
+	TrackSelectionChanged.connect (gui_connections, MISSING_INVALIDATOR, ui_bind (&MackieControlProtocol::gui_track_selection_changed, this, _1), this);
 
 	_instance = this;
 
@@ -1157,4 +1158,12 @@ MackieControlProtocol::load_device_info (const string& name)
 	}
 
 	_device_info = i->second;
+}
+
+void
+MackieControlProtocol::gui_track_selection_changed (ARDOUR::RouteNotificationListPtr rl)
+{
+	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
+		(*s)->gui_selection_changed (rl);
+	}
 }

@@ -725,3 +725,15 @@ Surface::update_view_mode_display ()
 		_port->write ((*s)->display (1, text));
 	}
 }
+
+void
+Surface::gui_selection_changed (ARDOUR::RouteNotificationListPtr routes)
+{
+	MidiByteArray msg;
+
+	for (Strips::iterator s = strips.begin(); s != strips.end(); ++s) {
+		msg << (*s)->gui_selection_changed (routes);
+	}
+
+	_port->write (msg);
+}
