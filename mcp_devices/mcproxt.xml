@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MackieProtocolDevice>
+  <Name value="Mackie Control Universal Pro XT"/>
+  <Strips value="8"/>
+  <MasterFader value="no"/>
+  <SegmentedDisplay value="no"/>
+  <TimecodeDisplay value="yes"/>
+  <TwoCharacterDisplay value="yes"/>
+  <Extenders value="0"/>
+  <GlobalControls value="no"/>
+  <JogWheel value="no"/>
+</MackieProtocolDevice>
