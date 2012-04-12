@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MackieProtocolDevice>
+  <Name value="Mackie Control Universal Pro"/>
+  <Strips value="8"/>
+  <MasterFader value="yes"/>
+  <SegmentedDisplay value="no"/>
+  <TimecodeDisplay value="yes"/>
+  <TwoCharacterDisplay value="yes"/>
+</MackieProtocolDevice>
