@@ -40,6 +40,7 @@
 #include "controls.h"
 #include "mackie_jog_wheel.h"
 #include "timer.h"
+#include "device_info.h"
 
 namespace MIDI {
 	class Port;
@@ -111,6 +112,9 @@ class MackieControlProtocol
 	virtual ~MackieControlProtocol();
 
 	static MackieControlProtocol* instance() { return _instance; }
+
+	const std::string& device_name() const { return _device_name; }
+	static std::vector<std::string> get_possible_devices ();
 
 	int set_active (bool yn);
 
@@ -219,64 +223,6 @@ class MackieControlProtocol
 
   private:
 
-	static MackieControlProtocol* _instance;
-
-	void create_surfaces ();
-	void port_connected_or_disconnected (std::string, std::string, bool);
-	bool control_in_use_timeout (Mackie::Surface*, Mackie::Control *, Mackie::Control *);
-
-	bool periodic();
-	sigc::connection periodic_connection;
-
-	/// The initial remote_id of the currently switched in bank.
-	uint32_t _current_initial_bank;
-	
-	/// protects the port list
-	Glib::Mutex update_mutex;
-
-	PBD::ScopedConnectionList audio_engine_connections;
-	PBD::ScopedConnectionList session_connections;
-	PBD::ScopedConnectionList port_connections;
-	PBD::ScopedConnectionList route_connections;
-	
-	bool _transport_previously_rolling;
-	
-	// timer for two quick marker left presses
-	Mackie::Timer _frm_left_last;
-	
-	// last written timecode string
-	std::string _timecode_last;
-	
-	// Which timecode are we displaying? BBT or Timecode
-	ARDOUR::AnyTime::Type _timecode_type;
-
-	// Bundle to represent our input ports
-	boost::shared_ptr<ARDOUR::Bundle> _input_bundle;
-	// Bundle to represent our output ports
-	boost::shared_ptr<ARDOUR::Bundle> _output_bundle;
-
-	void build_gui ();
-	void* _gui;
-
-	bool _zoom_mode;
-	bool _scrub_mode;
-	FlipMode _flip_mode;
-	ViewMode _view_mode;
-	int  _current_selected_track;
-	int  _modifier_state;
-
-	typedef std::list<GSource*> PortSources;
-	PortSources port_sources;
-
-	bool midi_input_handler (Glib::IOCondition ioc, MIDI::Port* port);
-	void clear_ports ();
-
-	std::vector<std::string> _f_actions;
-
-	void force_special_route_to_strip (boost::shared_ptr<ARDOUR::Route> r, uint32_t surface, uint32_t strip_number);
-
-	/* BUTTON HANDLING */
-
 	struct ButtonHandlers {
 	    Mackie::LedState (MackieControlProtocol::*press) (Mackie::Button&);
 	    Mackie::LedState (MackieControlProtocol::*release) (Mackie::Button&);
@@ -288,9 +234,53 @@ class MackieControlProtocol
 	};
 
 	typedef std::map<int,ButtonHandlers> ButtonMap;
-	ButtonMap button_map;
+	typedef std::list<GSource*> PortSources;
 
+	static MackieControlProtocol* _instance;
+	
+	std::string              _device_name;
+	Mackie::DeviceInfo       _device_info;
+	sigc::connection          periodic_connection;
+	uint32_t                 _current_initial_bank;
+	PBD::ScopedConnectionList audio_engine_connections;
+	PBD::ScopedConnectionList session_connections;
+	PBD::ScopedConnectionList port_connections;
+	PBD::ScopedConnectionList route_connections;
+	bool _transport_previously_rolling;
+	// timer for two quick marker left presses
+	Mackie::Timer            _frm_left_last;
+	// last written timecode string
+	std::string              _timecode_last;
+	// Which timecode are we displaying? BBT or Timecode
+	ARDOUR::AnyTime::Type    _timecode_type;
+	// Bundle to represent our input ports
+	boost::shared_ptr<ARDOUR::Bundle> _input_bundle;
+	// Bundle to represent our output ports
+	boost::shared_ptr<ARDOUR::Bundle> _output_bundle;
+	void*                    _gui;
+	bool                     _zoom_mode;
+	bool                     _scrub_mode;
+	FlipMode                 _flip_mode;
+	ViewMode                 _view_mode;
+	int                      _current_selected_track;
+	int                      _modifier_state;
+	PortSources               port_sources;
+	std::vector<std::string> _f_actions;
+	ButtonMap                 button_map;
+
+	std::string find_device_info_file (const std::string& name);
+	void load_device_info (const std::string&);
+	void create_surfaces ();
+	void port_connected_or_disconnected (std::string, std::string, bool);
+	bool control_in_use_timeout (Mackie::Surface*, Mackie::Control *, Mackie::Control *);
+	bool periodic();
+	void build_gui ();
+	bool midi_input_handler (Glib::IOCondition ioc, MIDI::Port* port);
+	void clear_ports ();
+	void force_special_route_to_strip (boost::shared_ptr<ARDOUR::Route> r, uint32_t surface, uint32_t strip_number);
 	void build_button_map ();
+
+	/* BUTTON HANDLING */
 
 	/* implemented button handlers */
 	Mackie::LedState frm_left_press(Mackie::Button &);

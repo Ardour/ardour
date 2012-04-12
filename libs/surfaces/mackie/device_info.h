@@ -31,8 +31,9 @@ class DeviceInfo
 {
   public:
 	DeviceInfo();
-	DeviceInfo(const XMLNode&);
 	~DeviceInfo();
+
+	int set_state (const XMLNode&, int version);
 
 	uint32_t strip_cnt () const;
 	bool has_two_character_display() const; 

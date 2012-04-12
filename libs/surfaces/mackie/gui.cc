@@ -73,16 +73,9 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 	table->attach (*manage (new Gtk::Label (_("Surface type:"))), 0, 1, 0, 1);
 	table->attach (_surface_combo, 1, 2, 0, 1);
 
-	vector<string> surfaces;
-	surfaces.push_back (_("Mackie Control"));
-	surfaces.push_back (_("Behringer BCF2000"));
+	vector<string> surfaces = p.get_possible_devices ();
 	Gtkmm2ext::set_popdown_strings (_surface_combo, surfaces);
-
-	if (ARDOUR::Config->get_mackie_emulation () == X_("mcu")) {
-		_surface_combo.set_active_text (surfaces.front ());
-	} else {
-		_surface_combo.set_active_text (surfaces.back ());
-	}
+	_surface_combo.set_active_text (p.device_name());
 
 	_extenders.set_range (0, 8);
 	_extenders.set_increments (1, 4);

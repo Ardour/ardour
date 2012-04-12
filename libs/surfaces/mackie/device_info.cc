@@ -38,13 +38,12 @@ DeviceInfo::DeviceInfo()
 	
 }
 
-DeviceInfo::DeviceInfo (const XMLNode& node)
-	: _strip_cnt (8)
-	, _has_two_character_display (true)
-	, _has_master_fader (true)
-	, _has_segmented_display (false)
-	, _has_timecode_display (true)
-	, _name (X_("Mackie Control Universal Pro"))
+DeviceInfo::~DeviceInfo()
+{
+}
+
+int
+DeviceInfo::set_state (const XMLNode& node, int /* version */)
 {
 	const XMLProperty* prop;
 
@@ -73,6 +72,8 @@ DeviceInfo::DeviceInfo (const XMLNode& node)
 	if ((prop = node.property ("name")) != 0) {
 		_name = prop->value();
 	}
+
+	return 0;
 }
 
 uint32_t
