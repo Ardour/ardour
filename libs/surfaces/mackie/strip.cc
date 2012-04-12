@@ -555,12 +555,10 @@ Strip::gui_selection_changed (ARDOUR::RouteNotificationListPtr rl)
 {
 	for (ARDOUR::RouteNotificationList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		if ((*i) == _route) {
-			std::cerr << "Strip " << _index << " selected, route = " << (*i)->name() << std::endl;
 			return _select->set_state (on);
 		}
 	}
 
-	std::cerr << "Strip " << _index << " NOT selected\n";
 	return _select->set_state (off);
 }
 
@@ -593,7 +591,7 @@ Strip::flip_mode_changed (bool notify)
 		_fader->set_normal_control (_route->gain_control());
 		_fader->set_modified_control (boost::shared_ptr<AutomationControl>());
 
-		_surface->write (display (1, "PanDir"));
+		_surface->write (display (1, "Pan"));
 	}
 
 	if (notify) {
