@@ -270,7 +270,7 @@ Strip::notify_gain_changed (bool force_update)
 			switch (_surface->mcp().flip_mode()) {
 			case MackieControlProtocol::Normal:
 				pos = _route->gain_control()->get_value();
-				return;
+				break;
 				
 			case MackieControlProtocol::Swap:
 			case MackieControlProtocol::Zero:
@@ -323,6 +323,8 @@ Strip::notify_panner_changed (bool force_update)
 {
 	if (_route && _vpot) {
 
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("pan change for strip %1\n", _index));
+
 		boost::shared_ptr<Pannable> pannable = _route->pannable();
 
 		if (!pannable) {
@@ -343,6 +345,8 @@ Strip::notify_panner_changed (bool force_update)
 			pos = pannable->pan_azimuth_control->get_value();
 			break;
 		}
+
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("\t\tnew position %1\n", pos));
 
 		if (force_update || pos != _last_vpot_position_written) {
 			_surface->write (_vpot->set_all (pos, true, Pot::dot));
