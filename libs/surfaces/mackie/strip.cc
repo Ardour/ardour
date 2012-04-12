@@ -283,7 +283,7 @@ Strip::notify_gain_changed (bool force_update)
 			if (force_update || pos != _last_gain_position_written) {
 
 				if (_surface->mcp().flip_mode()) {
-					_surface->write (_vpot->set_all (pos, true, Pot::boost_cut));
+					_surface->write (_vpot->set_all (pos, true, Pot::wrap));
 				} else {
 					_surface->write (_fader->set_position (pos));
 				}
