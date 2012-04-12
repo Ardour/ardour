@@ -58,45 +58,61 @@ DeviceInfo::set_state (const XMLNode& node, int /* version */)
 {
 	const XMLProperty* prop;
 	const XMLNode* child;
-	
+
+	if (node.name() != "MackieProtocolDevice") {
+		return -1;
+	}
+
+	/* name is mandatory */
+ 
+	if ((child = node.child ("Name")) != 0) {
+		if ((prop = child->property ("value")) != 0) {
+			_name = prop->value();
+		} else {
+			return -1;
+		}
+	}
+
 	if ((child = node.child ("Strips")) != 0) {
-		if ((prop = node.property ("value")) != 0) {
+		if ((prop = child->property ("value")) != 0) {
 			if ((_strip_cnt = atoi (prop->value())) == 0) {
 				_strip_cnt = 8;
 			}
 		}
 	}
 
+	if ((child = node.child ("Extenders")) != 0) {
+		if ((prop = child->property ("value")) != 0) {
+			if ((_extenders = atoi (prop->value())) == 0) {
+				_extenders = 0;
+			}
+		}
+	}
+
 	if ((child = node.child ("TwoCharacterDisplay")) != 0) {
-		if ((prop = node.property ("value")) != 0) {
+		if ((prop = child->property ("value")) != 0) {
 			_has_two_character_display = string_is_affirmative (prop->value());
 		}
 	}
 
 	if ((child = node.child ("MasterFader")) != 0) {
-		if ((prop = node.property ("value")) != 0) {
+		if ((prop = child->property ("value")) != 0) {
 			_has_master_fader = string_is_affirmative (prop->value());
 		}
 	}
 
 	if ((child = node.child ("DisplaySegments")) != 0) {
-		if ((prop = node.property ("value")) != 0) {
+		if ((prop = child->property ("value")) != 0) {
 			_has_segmented_display = string_is_affirmative (prop->value());
 		}
 	}
 
 	if ((child = node.child ("TimecodeDisplay")) != 0) {
-		if ((prop = node.property ("value")) != 0) {
+		if ((prop = child->property ("value")) != 0) {
 			_has_timecode_display = string_is_affirmative (prop->value());
 		}
 	}
 
-	if ((child = node.child ("Name")) != 0) {
-		if ((prop = node.property ("value")) != 0) {
-			_name = prop->value();
-		}
-	}
-	
 	return 0;
 }
 
@@ -110,6 +126,12 @@ uint32_t
 DeviceInfo::strip_cnt() const
 {
 	return _strip_cnt;
+}
+
+uint32_t
+DeviceInfo::extenders() const
+{
+	return _extenders;
 }
 
 bool
@@ -207,6 +229,7 @@ DeviceInfo::reload_device_info ()
 
 		XMLTree tree;
 
+
 		if (!tree.read (fullpath.c_str())) {
 			continue;
 		}
@@ -216,11 +239,20 @@ DeviceInfo::reload_device_info ()
 			continue;
 		}
 
-		di.set_state (*root, 3000); /* version is ignored for now */
-
-		device_info[di.name()] = di;
+		if (di.set_state (*root, 3000) == 0) { /* version is ignored for now */
+			device_info[di.name()] = di;
+			std::cerr << di << '\n';
+		}
 	}
 
 	delete devinfos;
 }
 
+std::ostream& operator<< (std::ostream& os, const Mackie::DeviceInfo& di)
+{
+	os << di.name() << ' ' 
+	   << di.strip_cnt() << ' '
+	   << di.extenders() << ' '
+		;
+	return os;
+}

@@ -118,6 +118,7 @@ class MackieControlProtocol
 	const Mackie::DeviceInfo& device_info() const { return _device_info; }
 
 	int set_active (bool yn);
+	void set_device (const std::string&);
 
 	FlipMode flip_mode () const { return _flip_mode; }
 	ViewMode view_mode () const { return _view_mode; }
@@ -269,7 +270,6 @@ class MackieControlProtocol
 	std::vector<std::string> _f_actions;
 	ButtonMap                 button_map;
 
-	void load_device_info (const std::string&);
 	void create_surfaces ();
 	void port_connected_or_disconnected (std::string, std::string, bool);
 	bool control_in_use_timeout (Mackie::Surface*, Mackie::Control *, Mackie::Control *);

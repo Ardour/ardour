@@ -39,11 +39,9 @@ public:
 private:
 
 	void surface_combo_changed ();
-	void extenders_changed ();
 	
 	MackieControlProtocol& _cp;
 	Gtk::ComboBoxText _surface_combo;
-	Gtk::SpinButton _extenders;
 };
 
 void*
@@ -78,46 +76,27 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 	table->attach (_surface_combo, 1, 2, 0, 1);
 
 	vector<string> surfaces;
-
+	
 	for (std::map<std::string,DeviceInfo>::iterator i = DeviceInfo::device_info.begin(); i != DeviceInfo::device_info.end(); ++i) {
+		std::cerr << "Dveice known: " << i->first << endl;
 		surfaces.push_back (i->first);
 	}
 	Gtkmm2ext::set_popdown_strings (_surface_combo, surfaces);
 	_surface_combo.set_active_text (p.device_info().name());
 
-	_extenders.set_range (0, 8);
-	_extenders.set_increments (1, 4);
-
-	Gtk::Label* l = manage (new Gtk::Label (_("Extenders:")));
-	l->set_alignment (0, 0.5);
-	table->attach (*l, 0, 1, 1, 2);
-	table->attach (_extenders, 1, 2, 1, 2);
-
 	pack_start (*table);
 
-	Gtk::Label* cop_out = manage (new Gtk::Label (_("<i>You must restart Ardour for changes\nto these settings to take effect.</i>")));
-	cop_out->set_use_markup (true);
-	pack_start (*cop_out);
-
 	set_spacing (4);
+	set_border_width (12);
 	show_all ();
 
 	_surface_combo.signal_changed().connect (sigc::mem_fun (*this, &MackieControlProtocolGUI::surface_combo_changed));
-	_extenders.signal_changed().connect (sigc::mem_fun (*this, &MackieControlProtocolGUI::extenders_changed));
 }
 
 void
 MackieControlProtocolGUI::surface_combo_changed ()
 {
-	if (_surface_combo.get_active_text() == _("Mackie Control")) {
-		ARDOUR::Config->set_mackie_emulation (X_("mcu"));
-	} else {
-		ARDOUR::Config->set_mackie_emulation (X_("bcf"));
-	}
+	_cp.set_device (_surface_combo.get_active_text());
 }
 
-void
-MackieControlProtocolGUI::extenders_changed ()
-{
-	ARDOUR::Config->set_mackie_extenders (_extenders.get_value_as_int ());
-}
+

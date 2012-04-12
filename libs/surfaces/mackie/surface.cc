@@ -38,11 +38,15 @@ using ARDOUR::Panner;
 using ARDOUR::Pannable;
 using ARDOUR::PannerShell;
 
-// The MCU sysex header
-static MidiByteArray mackie_sysex_hdr  (5, MIDI::sysex, 0x0, 0x0, 0x66, 0x10);
+// The MCU sysex header.4th byte Will be overwritten
+// when we get an incoming sysex that identifies
+// the device type
+static MidiByteArray mackie_sysex_hdr  (5, MIDI::sysex, 0x0, 0x0, 0x66, 0x14);
 
-// The MCU extender sysex header
-static MidiByteArray mackie_sysex_hdr_xt  (5, MIDI::sysex, 0x0, 0x0, 0x66, 0x11);
+// The MCU extender sysex header.4th byte Will be overwritten
+// when we get an incoming sysex that identifies
+// the device type
+static MidiByteArray mackie_sysex_hdr_xt  (5, MIDI::sysex, 0x0, 0x0, 0x66, 0x15);
 
 static MidiByteArray empty_midi_byte_array;
 
@@ -121,33 +125,18 @@ static GlobalControlDefinition mackie_global_controls[] = {
 	{ "", 0, Button::factory, "" }
 };
 	
-Surface::Surface (MackieControlProtocol& mcp, jack_client_t* jack, const std::string& device_name, uint32_t number, surface_type_t stype)
+Surface::Surface (MackieControlProtocol& mcp, const std::string& device_name, uint32_t number, surface_type_t stype)
 	: _mcp (mcp)
 	, _stype (stype)
 	, _number (number)
-	, _active (false)
+	, _name (device_name)
+	, _active (true)
 	, _connected (false)
 	, _jog_wheel (0)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, "Surface::init\n");
 	
-	MIDI::Manager * mm = MIDI::Manager::instance();
-
-	MIDI::Port * input = new MIDI::Port (string_compose (_("%1 in"), device_name), MIDI::Port::IsInput, jack);
-	MIDI::Port * output =new MIDI::Port (string_compose (_("%1 out"), device_name), MIDI::Port::IsOutput, jack);
-
-	input->set_centrally_parsed (false);
-	output->set_centrally_parsed (false);
-	
-	mm->add_port (input);
-	mm->add_port (output);
-
-	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("surface has ports named %1 and %2\n",
-							   input->name(), output->name()));
-
-	_port = new SurfacePort (*this, *input, *output);
-	_port->open();
-	_port->inactive_event.connect_same_thread (*this, boost::bind (&Surface::handle_port_inactive, this, _port));
+	_port = new SurfacePort (*this);
 
 	switch (stype) {
 	case mcu:
@@ -177,7 +166,12 @@ Surface::~Surface ()
 {
 	DEBUG_TRACE (DEBUG::MackieControl, "Surface: destructor\n");
 
-	zero_all ();
+	// faders to minimum
+	write_sysex (0x61);
+	// All LEDs off
+	write_sysex (0x62);
+	// Reset (reboot into offline mode)
+	// _write_sysex (0x63);
 
 	// delete groups
 	for (Groups::iterator it = groups.begin(); it != groups.end(); ++it) {
@@ -307,11 +301,14 @@ Surface::connect_to_signals ()
 {
 	if (!_connected) {
 
+
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Surface %1 connecting to signals on port %2\n", 
 								   number(), _port->input_port().name()));
 
 		MIDI::Parser* p = _port->input_port().parser();
 
+		/* Incoming sysex */
+		p->sysex.connect_same_thread (*this, boost::bind (&Surface::handle_midi_sysex, this, _1, _2, _3));
 		/* V-Pot messages are Controller */
 		p->controller.connect_same_thread (*this, boost::bind (&Surface::handle_midi_controller_message, this, _1, _2));
 		/* Button messages are NoteOn */
@@ -433,6 +430,113 @@ Surface::handle_midi_controller_message (MIDI::Parser &, MIDI::EventTwoBytes* ev
 	} else {
 		DEBUG_TRACE (DEBUG::MackieControl, "pot not found\n");
 	}
+}
+
+void 
+Surface::handle_midi_sysex (MIDI::Parser &, MIDI::byte * raw_bytes, size_t count)
+{
+	MidiByteArray bytes (count, raw_bytes);
+
+
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("handle_midi_sysex: %1\n", bytes));
+
+	/* always save the device type ID so that our outgoing sysex messages
+	 * are correct 
+	 */
+
+	if (_stype == mcu) {
+		mackie_sysex_hdr[3] = bytes[4];
+	} else {
+		mackie_sysex_hdr_xt[3] = bytes[4];
+	}
+
+	switch (bytes[5]) {
+	case 0x01:
+		/* MCP: Device Ready 
+		   LCP: Connection Challenge 
+		*/
+		if (bytes[4] == 0x10 || bytes[4] == 0x11) {
+			write_sysex (host_connection_query (bytes));
+		} else {
+			_active = true;
+		}
+		break;
+
+	case 0x03: /* LCP Connection Confirmation */
+		if (bytes[4] == 0x10 || bytes[4] == 0x11) {
+			write_sysex (host_connection_confirmation (bytes));
+			_active = true;
+		}
+		break;
+
+	case 0x04: /* LCP: Confirmation Denied */
+		_active = false;
+		break;
+	default:
+		error << "MCP: unknown sysex: " << bytes << endmsg;
+	}
+}
+
+static MidiByteArray 
+calculate_challenge_response (MidiByteArray::iterator begin, MidiByteArray::iterator end)
+{
+	MidiByteArray l;
+	back_insert_iterator<MidiByteArray> back  (l);
+	copy (begin, end, back);
+	
+	MidiByteArray retval;
+	
+	// this is how to calculate the response to the challenge.
+	// from the Logic docs.
+	retval <<  (0x7f &  (l[0] +  (l[1] ^ 0xa) - l[3]));
+	retval <<  (0x7f &  ( (l[2] >> l[3]) ^  (l[0] + l[3])));
+	retval <<  (0x7f &  ((l[3] -  (l[2] << 2)) ^  (l[0] | l[1])));
+	retval <<  (0x7f &  (l[1] - l[2] +  (0xf0 ^  (l[3] << 4))));
+	
+	return retval;
+}
+
+// not used right now
+MidiByteArray 
+Surface::host_connection_query (MidiByteArray & bytes)
+{
+	MidiByteArray response;
+	
+	if (bytes[4] != 0x10 && bytes[4] != 0x11) {
+		/* not a Logic Control device - no response required */
+		return response;
+	}
+
+	// handle host connection query
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("host connection query: %1\n", bytes));
+	
+	if  (bytes.size() != 18) {
+		cerr << "expecting 18 bytes, read " << bytes << " from " << _port->input_port().name() << endl;
+		return response;
+	}
+
+	// build and send host connection reply
+	response << 0x02;
+	copy (bytes.begin() + 6, bytes.begin() + 6 + 7, back_inserter (response));
+	response << calculate_challenge_response (bytes.begin() + 6 + 7, bytes.begin() + 6 + 7 + 4);
+	return response;
+}
+
+// not used right now
+MidiByteArray 
+Surface::host_connection_confirmation (const MidiByteArray & bytes)
+{
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("host_connection_confirmation: %1\n", bytes));
+	
+	// decode host connection confirmation
+	if  (bytes.size() != 14) {
+		ostringstream os;
+		os << "expecting 14 bytes, read " << bytes << " from " << _port->input_port().name();
+		throw MackieControlException (os.str());
+	}
+	
+	// send version request
+	return MidiByteArray (2, 0x13, 0x00);
 }
 
 void 
@@ -737,3 +841,4 @@ Surface::gui_selection_changed (ARDOUR::RouteNotificationListPtr routes)
 
 	_port->write (msg);
 }
+

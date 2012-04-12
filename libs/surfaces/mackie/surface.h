@@ -38,13 +38,12 @@ class Led;
 class Surface : public PBD::ScopedConnectionList
 {
 public:
-	Surface (MackieControlProtocol&, jack_client_t* jack, const std::string& device_name, uint32_t number, surface_type_t stype);
+	Surface (MackieControlProtocol&, const std::string& name, uint32_t number, surface_type_t stype);
 	virtual ~Surface();
 
 	surface_type_t type() const { return _stype; }
 	uint32_t number() const { return _number; }
-
-	MackieControlProtocol& mcp() const { return _mcp; }
+	const std::string& name() { return _name; }
 
 	bool active() const { return _active; }
 	void drop_routes ();
@@ -148,20 +147,26 @@ public:
 
 	void gui_selection_changed (ARDOUR::RouteNotificationListPtr);
 
+	MackieControlProtocol& mcp() const { return _mcp; }
+
   protected:
 	void init_controls();
 	void init_strips ();
 
   private:
 	MackieControlProtocol& _mcp;
-	SurfacePort* _port;
-	surface_type_t _stype;
-	uint32_t _number;
-	bool _active;
-	bool _connected;
-	Mackie::JogWheel* _jog_wheel;
+	SurfacePort*           _port;
+	surface_type_t         _stype;
+	uint32_t               _number;
+	std::string            _name;
+	bool                   _active;
+	bool                   _connected;
+	Mackie::JogWheel*      _jog_wheel;
 
 	void jog_wheel_state_display (Mackie::JogWheel::State state);
+	void handle_midi_sysex (MIDI::Parser&, MIDI::byte *, size_t count);
+	MidiByteArray host_connection_query (MidiByteArray& bytes);
+	MidiByteArray host_connection_confirmation (const MidiByteArray& bytes);
 };
 
 }

@@ -20,6 +20,7 @@
 #ifndef __ardour_mackie_control_protocol_device_info_h__
 #define __ardour_mackie_control_protocol_device_info_h__
 
+#include <iostream>
 #include <stdint.h>
 #include <string>
 #include <map>
@@ -37,6 +38,7 @@ class DeviceInfo
 	int set_state (const XMLNode&, int version);
 
 	uint32_t strip_cnt () const;
+	uint32_t extenders() const;
 	bool has_two_character_display() const; 
 	bool has_master_fader () const;
 	bool has_segmented_display() const;
@@ -48,6 +50,7 @@ class DeviceInfo
 
   private:
 	uint32_t _strip_cnt;
+	uint32_t _extenders;
 	bool     _has_two_character_display;
 	bool     _has_master_fader;
 	bool     _has_segmented_display;
@@ -66,5 +69,7 @@ class DeviceProfile
 };
 
 }
+
+std::ostream& operator<< (std::ostream& os, const Mackie::DeviceInfo& di);
 
 #endif /* __ardour_mackie_control_protocol_device_info_h__ */

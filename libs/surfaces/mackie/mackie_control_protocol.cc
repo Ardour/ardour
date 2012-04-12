@@ -321,7 +321,6 @@ MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 
 			for (; r != sorted.end() && added < (*si)->n_strips(); ++r, ++added) {
 				routes.push_back (*r);
-				cerr << "\t\tadded " << (*r)->name() << endl;
 			}
 
 			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("give surface %1 routes\n", routes.size()));
@@ -497,21 +496,40 @@ MackieControlProtocol::connect_session_signals()
 	}
 }
 
+void
+MackieControlProtocol::set_device (const string& device_name)
+{
+	map<string,DeviceInfo>::iterator d = DeviceInfo::device_info.find (device_name);
+
+	if (d == DeviceInfo::device_info.end()) {
+		return;
+	}
+	
+	_device_info = d->second;
+
+	surfaces.clear ();
+	create_surfaces ();
+	switch_banks (0, true);
+}
+
 void 
 MackieControlProtocol::create_surfaces ()
 {
-	string device_name = "mcu";
+	string device_name = _device_info.name();
 	surface_type_t stype = mcu;
+	char buf[128];
 
-	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Create %1 surfaces\n",
-							   1 + ARDOUR::Config->get_mackie_extenders()));
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Create %1 surfaces\n", 1 + _device_info.extenders()));
 
-	for (uint32_t n = 0; n < 1 + ARDOUR::Config->get_mackie_extenders(); ++n) {
+	for (uint32_t n = 0; n < 1 + _device_info.extenders(); ++n) {
 
-		boost::shared_ptr<Surface> surface (new Surface (*this, session->engine().jack(), device_name, n, stype));
+		boost::shared_ptr<Surface> surface (new Surface (*this, device_name, n, stype));
 		surfaces.push_back (surface);
+
+		/* next device will be an extender */
 		
-		device_name = "mcu_xt";
+		snprintf (buf, sizeof (buf), "%s XT%d", _device_info.name().c_str(), n+1);
+		device_name = buf;
 		stype = ext;
 
 		_input_bundle->add_channel (
@@ -589,10 +607,6 @@ MackieControlProtocol::set_state (const XMLNode & node, int /*version*/)
 	int retval = 0;
 	const XMLProperty* prop;
 
-	if ((prop = node.property (X_("device"))) != 0) {
-		load_device_info (prop->value());
-	}
-
 	// fetch current bank
 	if ((prop = node.property (X_("bank"))) != 0) {
 		string bank = prop->value();
@@ -618,6 +632,10 @@ MackieControlProtocol::set_state (const XMLNode & node, int /*version*/)
 		}
 
 		_f_actions[n] = action;
+	}
+
+	if ((prop = node.property (X_("device"))) != 0) {
+		set_device (prop->value ());
 	}
 
 	return retval;
@@ -1145,19 +1163,6 @@ MackieControlProtocol::force_special_route_to_strip (boost::shared_ptr<Route> r,
 			}
 		}
 	}
-}
-
-void
-MackieControlProtocol::load_device_info (const string& name)
-{
-	map<string,DeviceInfo>::iterator i = DeviceInfo::device_info.find (name);
-
-	if (i == DeviceInfo::device_info.end()) {
-		error << string_compose (_("No device info for Mackie Control device \"%1\" - ignored"), name) << endmsg;
-		return;
-	}
-
-	_device_info = i->second;
 }
 
 void

@@ -44,42 +44,23 @@ class Surface;
 class SurfacePort 
 {
 public:
-	SurfacePort (Mackie::Surface&, MIDI::Port& input_port, MIDI::Port& output_port);
+	SurfacePort (Mackie::Surface&);
 	virtual ~SurfacePort();
 	
-	void open();
-	void close();
-
-	/// read bytes from the port. They'll either end up in the
-	/// parser, or if that's not active they'll be returned
-	MidiByteArray read();
-	
 	/// an easier way to output bytes via midi
-	void write (const MidiByteArray&);
+	int write (const MidiByteArray&);
 	
 	MIDI::Port& input_port() { return *_input_port; }
 	const MIDI::Port& input_port() const { return *_input_port; }
 	MIDI::Port& output_port() { return *_output_port; }
 	const MIDI::Port& output_port() const { return *_output_port; }
 
-	// emitted when the port goes inactive (ie a read or write failed)
-	PBD::Signal0<void> inactive_event;
-	
-	void handle_midi_sysex (MIDI::Parser&, MIDI::byte *, size_t count);
-
-	bool active() const { return _active; }
-
 protected:
-	MidiByteArray host_connection_query (MidiByteArray& bytes);
-	MidiByteArray host_connection_confirmation (const MidiByteArray& bytes);
 
 private:
 	Mackie::Surface* _surface;
 	MIDI::Port*      _input_port;
 	MIDI::Port*      _output_port;
-	bool             _active;
-
-	PBD::ScopedConnection sysex_connection;
 };	
 
 std::ostream& operator <<  (std::ostream& , const SurfacePort& port);
