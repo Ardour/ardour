@@ -474,12 +474,14 @@ Strip::handle_pot (Pot& pot, float delta)
 		case MackieControlProtocol::Mirror: /* pot + fader control pan */
 		case MackieControlProtocol::Zero:   /* pot controls pan, faders don't move */
 			if (_surface->mcp().modifier_state() & MackieControlProtocol::MODIFIER_CONTROL) {
+				DEBUG_TRACE (DEBUG::MackieControl, "pot using control to alter width\n");
 				ac = pannable->pan_width_control;
 			} else {
+				DEBUG_TRACE (DEBUG::MackieControl, "pot using control to alter position\n");
 				ac = pannable->pan_azimuth_control;
 			}
 			break;
-		case MackieControlProtocol::Swap:
+		case MackieControlProtocol::Swap: /* pot controls gain */
 			ac = _route->gain_control();
 			break;
 		}

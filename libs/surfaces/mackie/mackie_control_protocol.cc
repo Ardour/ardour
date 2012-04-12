@@ -1099,6 +1099,16 @@ MackieControlProtocol::set_view_mode (ViewMode m)
 }
 
 void
+MackieControlProtocol::set_flip_mode (FlipMode m)
+{
+	_flip_mode = m;
+	
+	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
+		(*s)->update_flip_mode_display ();
+	}
+}
+	
+void
 MackieControlProtocol::set_master_on_surface_strip (uint32_t surface, uint32_t strip_number)
 {
 	force_special_route_to_strip (session->master_out(), surface, strip_number);
@@ -1127,3 +1137,4 @@ MackieControlProtocol::force_special_route_to_strip (boost::shared_ptr<Route> r,
 		}
 	}
 }
+

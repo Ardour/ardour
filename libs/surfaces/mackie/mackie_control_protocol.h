@@ -118,6 +118,7 @@ class MackieControlProtocol
 	ViewMode view_mode () const { return _view_mode; }
 
 	void set_view_mode (ViewMode);
+	void set_flip_mode (FlipMode);
 
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);

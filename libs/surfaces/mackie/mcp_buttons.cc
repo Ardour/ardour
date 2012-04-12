@@ -819,15 +819,19 @@ MackieControlProtocol::dyn_release (Button &)
 LedState
 MackieControlProtocol::flip_press (Button &) 
 { 
+	FlipMode m;
+
 	if (_modifier_state == 0) {
 		if (_flip_mode != Normal) {
-			_flip_mode = Normal;
+			m = Normal;
 		} else {
-			_flip_mode = Swap;
+			m = Swap;
 		}
 	} else if (_modifier_state & MODIFIER_CONTROL) {
-		_flip_mode = Zero;
+		m = Zero;
 	}
+
+	set_flip_mode (m);
 
 	return (_flip_mode != Normal ? on : off);
 }
