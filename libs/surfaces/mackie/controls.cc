@@ -20,11 +20,12 @@
 #include <iomanip>
 #include <sstream>
 
+#include "ardour/automation_control.h"
+
 #include "controls.h"
 #include "types.h"
 #include "surface.h"
 #include "control_group.h"
-
 #include "button.h"
 #include "led.h"
 #include "pot.h"
@@ -35,6 +36,7 @@
 
 using namespace Mackie;
 using namespace std;
+using ARDOUR::AutomationControl;
 
 void Group::add (Control& control)
 {
@@ -91,3 +93,57 @@ Jog::factory (Surface& surface, int id, const char* name, Group& group)
 	return j;
 }
 
+void
+Control::set_normal_control (boost::shared_ptr<AutomationControl> ac)
+{
+	normal_ac = ac;
+}
+
+void
+Control::set_modified_control (boost::shared_ptr<AutomationControl> ac)
+{
+	modified_ac = ac;
+}
+
+void
+Control::set_value (float val, bool modified)
+{
+	if (modified && modified_ac) {
+		modified_ac->set_value (modified_ac->interface_to_internal (val));
+	} else if (normal_ac) {
+		normal_ac->set_value (modified_ac->interface_to_internal (val));
+	}
+}
+
+float
+Control::get_value (bool modified)
+{
+	if (modified && modified_ac) {
+		return modified_ac->internal_to_interface (modified_ac->get_value());
+	} else if (normal_ac) {
+		return normal_ac->internal_to_interface (normal_ac->get_value());
+	}
+
+	return 0.0;
+}
+
+void
+Control::start_touch (double when, bool modified)
+{
+	if (modified && modified_ac) {
+		return modified_ac->start_touch (when);
+	} else if (normal_ac) {
+		return normal_ac->start_touch (when);
+	}
+}
+	
+void
+Control::stop_touch (double when, bool mark, bool modified)
+{
+	if (modified && modified_ac) {
+		return modified_ac->stop_touch (when, mark);
+	} else if (normal_ac) {
+		return normal_ac->stop_touch (when, mark);
+	}
+}
+	

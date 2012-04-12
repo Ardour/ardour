@@ -39,6 +39,7 @@
 #include "pbd/memento_command.h"
 #include "pbd/convert.h"
 
+#include "ardour/automation_control.h"
 #include "ardour/dB.h"
 #include "ardour/debug.h"
 #include "ardour/location.h"
@@ -98,8 +99,8 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 	, _gui (0)
 	, _zoom_mode (false)
 	, _scrub_mode (false)
-	, _flip_mode (Normal)
-	, _view_mode (Global)
+	, _flip_mode (false)
+	, _view_mode (Mixer)
 	, _current_selected_track (-1)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::MackieControlProtocol\n");
@@ -227,7 +228,7 @@ MackieControlProtocol::get_sorted_routes()
 		}
 
 		switch (_view_mode) {
-		case Global:
+		case Mixer:
 			break;
 		case AudioTracks:
 			break;
@@ -914,19 +915,18 @@ MackieControlProtocol::stop ()
  *  @param touch_control a touch control to emit an event for, or 0.
  */
 void
-MackieControlProtocol::add_in_use_timeout (Surface& surface, Control& in_use_control, Control* touch_control)
+MackieControlProtocol::add_in_use_timeout (Surface& surface, Control& in_use_control, boost::weak_ptr<AutomationControl> touched)
 {
 	Glib::RefPtr<Glib::TimeoutSource> timeout (Glib::TimeoutSource::create (250)); // milliseconds
 
 	in_use_control.in_use_connection.disconnect ();
 	in_use_control.in_use_connection = timeout->connect (
-		sigc::bind (sigc::mem_fun (*this, &MackieControlProtocol::control_in_use_timeout), &surface, &in_use_control, touch_control));
-	in_use_control.in_use_touch_control = touch_control;
+		sigc::bind (sigc::mem_fun (*this, &MackieControlProtocol::control_in_use_timeout), &surface, &in_use_control, touched));
 	
 	timeout->attach (main_loop()->get_context());
 
-	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("timeout queued for surface %1, control %2 touch control %3\n",
-							   surface.number(), &in_use_control, touch_control));}
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("timeout queued for surface %1, control %2\n",
+							   surface.number(), &in_use_control));}
 
 /** Handle timeouts to reset in_use for controls that can't
  *  do this by themselves (e.g. pots, and faders without touch support).
@@ -934,15 +934,17 @@ MackieControlProtocol::add_in_use_timeout (Surface& surface, Control& in_use_con
  *  @param touch_control a touch control to emit an event for, or 0.
  */
 bool
-MackieControlProtocol::control_in_use_timeout (Surface* surface, Control* in_use_control, Control* touch_control)
+MackieControlProtocol::control_in_use_timeout (Surface* surface, Control* in_use_control, boost::weak_ptr<AutomationControl> wtouched)
 {
-	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("timeout elapsed for surface %1, control %2 touch control %3\n",
-							   surface->number(), in_use_control, touch_control));
+	boost::shared_ptr<AutomationControl> touched (wtouched.lock());
+
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("timeout elapsed for surface %1, control %2\n", surface->number(), in_use_control));
 
 	in_use_control->set_in_use (false);
 
-	if (touch_control) {
-		/* figure out what to do here */
+	if (touched) {
+		/* end the touch, and mark the end */
+		touched->stop_touch (session->transport_frame(), true);
 	}
 	
 	// only call this method once from the timer
@@ -1140,9 +1142,9 @@ MackieControlProtocol::set_view_mode (ViewMode m)
 }
 
 void
-MackieControlProtocol::set_flip_mode (FlipMode m)
+MackieControlProtocol::set_flip_mode (bool yn)
 {
-	_flip_mode = m;
+	_flip_mode = yn;
 	
 	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
 		(*s)->update_flip_mode_display ();
@@ -1173,7 +1175,7 @@ MackieControlProtocol::force_special_route_to_strip (boost::shared_ptr<Route> r,
 			Strip* strip = (*s)->nth_strip (strip_number);
 			if (strip) {
 				strip->set_route (session->master_out());
-				strip->lock_route ();
+				strip->lock_controls ();
 			}
 		}
 	}
@@ -1185,4 +1187,10 @@ MackieControlProtocol::gui_track_selection_changed (ARDOUR::RouteNotificationLis
 	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
 		(*s)->gui_selection_changed (rl);
 	}
+}
+
+framepos_t
+MackieControlProtocol::transport_frame() const
+{
+	return session->transport_frame();
 }

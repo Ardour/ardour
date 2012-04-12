@@ -412,12 +412,6 @@ Surface::handle_midi_controller_message (MIDI::Parser &, MIDI::EventTwoBytes* ev
 			ticks = 1;
 		}
 		float delta = sign * (ticks / (float) 0x3f);
-		
-		/* Pots only emit events when they move, not when they
-		   stop moving. So to get a stop event, we need to use a timeout.
-		*/
-		
-		_mcp.add_in_use_timeout (*this, *pot, pot);
 
 		Strip* strip = dynamic_cast<Strip*> (&pot->group());
 
@@ -772,7 +766,7 @@ void
 Surface::update_flip_mode_display ()
 {
 	for (Strips::iterator s = strips.begin(); s != strips.end(); ++s) {
-		(*s)->notify_all ();
+		(*s)->flip_mode_changed (true);
 	}
 }
 
@@ -783,47 +777,38 @@ Surface::update_view_mode_display ()
 	Button* button = 0;
 
 	switch (_mcp.view_mode()) {
-	case MackieControlProtocol::Global:
-		_port->write (two_char_display ("Gl"));
+	case MackieControlProtocol::Mixer:
+		_port->write (two_char_display ("Mx"));
 		button = buttons[Button::Pan];
-		text = _("Pan");
 		break;
 	case MackieControlProtocol::Dynamics:
 		_port->write (two_char_display ("Dy"));
 		button = buttons[Button::Dyn];
-		text = _("");
 		break;
 	case MackieControlProtocol::EQ:
 		_port->write (two_char_display ("EQ"));
 		button = buttons[Button::Eq];
-		text = _("");
 		break;
 	case MackieControlProtocol::Loop:
 		_port->write (two_char_display ("LP"));
 		button = buttons[Button::Loop];
-		text = _("");
 		break;
 	case MackieControlProtocol::AudioTracks:
 		_port->write (two_char_display ("AT"));
-		text = _("");
 		break;
 	case MackieControlProtocol::MidiTracks:
 		_port->write (two_char_display ("MT"));
-		text = _("");
 		break;
 	case MackieControlProtocol::Busses:
 		_port->write (two_char_display ("Bs"));
-		text = _("");
 		break;
 	case MackieControlProtocol::Sends:
 		_port->write (two_char_display ("Sn"));
 		button = buttons[Button::Sends];
-		text = _("");
 		break;
 	case MackieControlProtocol::Plugins:
 		_port->write (two_char_display ("Pl"));
 		button = buttons[Button::Plugin];
-		text = _("");
 		break;
 	}
 
@@ -831,8 +816,10 @@ Surface::update_view_mode_display ()
 		_port->write (button->set_state (on));
 	}
 
-	for (Strips::iterator s = strips.begin(); s != strips.end(); ++s) {
-		_port->write ((*s)->display (1, text));
+	if (!text.empty()) {
+		for (Strips::iterator s = strips.begin(); s != strips.end(); ++s) {
+			_port->write ((*s)->display (1, text));
+		}
 	}
 }
 

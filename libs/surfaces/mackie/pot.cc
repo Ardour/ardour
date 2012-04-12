@@ -48,17 +48,10 @@ Pot::set_onoff (bool onoff)
 	return update_message ();
 }
 
-MidiByteArray 
-Pot::set_value (float normalized)
-{
-	value = normalized;
-	return update_message ();
-}
-
 MidiByteArray
 Pot::set_all (float val, bool onoff, Mode m)
 {
-	value = val;
+	position = val;
 	on = onoff;
 	mode = m;
 	return update_message ();
@@ -70,15 +63,15 @@ Pot::update_message ()
 	// TODO do an exact calc for 0.50? To allow manually re-centering the port.
 
 	// center on or off
-	MIDI::byte msg =  (value > 0.45 && value < 0.55 ? 1 : 0) << 6;
+	MIDI::byte msg =  (position > 0.45 && position < 0.55 ? 1 : 0) << 6;
 	
 	// mode
 	msg |=  (mode << 4);
 	
-	// value, but only if off hasn't explicitly been set
+	// position, but only if off hasn't explicitly been set
 
 	if  (on) {
-		msg +=  (lrintf (value * 10.0) + 1) & 0x0f; // 0b00001111
+		msg +=  (lrintf (position * 10.0) + 1) & 0x0f; // 0b00001111
 	}
 
 	/* outbound LED message requires 0x20 to be added to the LED's id

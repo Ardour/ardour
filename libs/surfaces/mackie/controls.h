@@ -25,10 +25,16 @@
 #include <string>
 #include <stdint.h>
 
+#include <boost/smart_ptr.hpp>
+
 #include "pbd/signals.h"
 
 #include "mackie_control_exception.h"
 #include "midi_byte_array.h"
+
+namespace ARDOUR {
+	class AutomationControl;
+}
 
 namespace Mackie
 {
@@ -60,7 +66,25 @@ public:
 	 */
 	Control* in_use_touch_control;
 
-private:
+	boost::shared_ptr<ARDOUR::AutomationControl> control (bool modified) const { return modified ? modified_ac : normal_ac; }
+
+	virtual void set_normal_control (boost::shared_ptr<ARDOUR::AutomationControl>);
+	virtual void set_modified_control (boost::shared_ptr<ARDOUR::AutomationControl>);
+
+	float get_value (bool modified = false);
+	void set_value (float val, bool modified = false);
+	
+	virtual void start_touch (double when, bool modified);
+	virtual void stop_touch (double when, bool mark, bool modified);
+
+  protected:
+	/* a control can operate up to 2 different AutomationControls
+	   in any given mode. both of them may be unset at any time.
+	*/
+	boost::shared_ptr<ARDOUR::AutomationControl> normal_ac;
+	boost::shared_ptr<ARDOUR::AutomationControl> modified_ac;
+
+  private:
 	int _id;
 	std::string _name;
 	Group& _group;

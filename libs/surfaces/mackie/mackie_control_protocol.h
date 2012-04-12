@@ -42,7 +42,9 @@
 #include "timer.h"
 #include "device_info.h"
 
-class RouteTimeAxisView;
+namespace ARDOUR {
+	class AutomationControl;
+}
 
 namespace MIDI {
 	class Port;
@@ -92,7 +94,7 @@ class MackieControlProtocol
 	static const int MODIFIER_CMDALT;
 
 	enum ViewMode {
-		Global,
+		Mixer,
 		Dynamics,
 		EQ,
 		Loop,
@@ -120,11 +122,11 @@ class MackieControlProtocol
 	int set_active (bool yn);
 	void set_device (const std::string&);
 
-	FlipMode flip_mode () const { return _flip_mode; }
+	bool     flip_mode () const { return _flip_mode; }
 	ViewMode view_mode () const { return _view_mode; }
 
 	void set_view_mode (ViewMode);
-	void set_flip_mode (FlipMode);
+	void set_flip_mode (bool);
 
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
@@ -175,8 +177,9 @@ class MackieControlProtocol
 	void update_global_led(const std::string & name, Mackie::LedState);
 
 	ARDOUR::Session & get_session() { return *session; }
- 
-	void add_in_use_timeout (Mackie::Surface& surface, Mackie::Control& in_use_control, Mackie::Control* touch_control);
+	framepos_t transport_frame() const;
+
+	void add_in_use_timeout (Mackie::Surface& surface, Mackie::Control& in_use_control, boost::weak_ptr<ARDOUR::AutomationControl> touched);
 
 	int modifier_state() const { return _modifier_state; }
 	
@@ -262,7 +265,7 @@ class MackieControlProtocol
 	void*                    _gui;
 	bool                     _zoom_mode;
 	bool                     _scrub_mode;
-	FlipMode                 _flip_mode;
+	bool                     _flip_mode;
 	ViewMode                 _view_mode;
 	int                      _current_selected_track;
 	int                      _modifier_state;
@@ -272,7 +275,7 @@ class MackieControlProtocol
 
 	void create_surfaces ();
 	void port_connected_or_disconnected (std::string, std::string, bool);
-	bool control_in_use_timeout (Mackie::Surface*, Mackie::Control *, Mackie::Control *);
+	bool control_in_use_timeout (Mackie::Surface*, Mackie::Control *, boost::weak_ptr<ARDOUR::AutomationControl>);
 	bool periodic();
 	void build_gui ();
 	bool midi_input_handler (Glib::IOCondition ioc, MIDI::Port* port);

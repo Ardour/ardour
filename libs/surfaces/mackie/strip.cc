@@ -69,9 +69,9 @@ Strip::Strip (Surface& s, const std::string& name, int index, StripControlDefini
 	, _fader (0)
 	, _index (index)
 	, _surface (&s)
-	, _route_locked (false)
-	, _last_fader_position_written (-1.0)
-	, _last_vpot_position_written (-1.0)
+	, _controls_locked (false)
+	, _last_gain_position_written (-1.0)
+	, _last_pan_position_written (-1.0)
 {
 	/* build the controls for this track, which will automatically add them
 	   to the Group 
@@ -84,7 +84,6 @@ Strip::Strip (Surface& s, const std::string& name, int index, StripControlDefini
 
 Strip::~Strip ()
 {
-	
 }
 
 /**
@@ -149,7 +148,7 @@ void Strip::add (Control & control)
 void
 Strip::set_route (boost::shared_ptr<Route> r)
 {
-	if (_route_locked) {
+	if (_controls_locked) {
 		return;
 	}
 
@@ -158,16 +157,18 @@ Strip::set_route (boost::shared_ptr<Route> r)
 	_route = r;
 
 	if (r) {
-		
+
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Surface %1 strip %2 now mapping route %3\n",
 								   _surface->number(), _index, _route->name()));
 		
 
 		if (_solo) {
+			_solo->set_normal_control (_route->solo_control());
 			_route->solo_control()->Changed.connect(route_connections, invalidator(), ui_bind (&Strip::notify_solo_changed, this), ui_context());
 		}
 
 		if (_mute) {
+			_mute->set_normal_control (_route->mute_control());
 			_route->mute_control()->Changed.connect(route_connections, invalidator(), ui_bind (&Strip::notify_mute_changed, this), ui_context());
 		}
 		
@@ -179,10 +180,14 @@ Strip::set_route (boost::shared_ptr<Route> r)
 			_route->pannable()->pan_azimuth_control->Changed.connect(route_connections, invalidator(), ui_bind (&Strip::notify_panner_changed, this, false), ui_context());
 			_route->pannable()->pan_width_control->Changed.connect(route_connections, invalidator(), ui_bind (&Strip::notify_panner_changed, this, false), ui_context());
 		}
+
+		flip_mode_changed (false);
 		
 		boost::shared_ptr<Track> trk = boost::dynamic_pointer_cast<ARDOUR::Track>(_route);
 	
 		if (trk) {
+			// XXX FIX ME WHEN rec-enable IS-A AutomationControl
+			// _recenable->set_normal_control (trk->rec_enable_control());
 			trk->rec_enable_control()->Changed .connect(route_connections, invalidator(), ui_bind (&Strip::notify_record_enable_changed, this), ui_context());
 		}
 		
@@ -261,31 +266,29 @@ Strip::notify_gain_changed (bool force_update)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("gain changed for strip %1, flip mode %2\n", _index, _surface->mcp().flip_mode()));
 
-	if (_route && _fader) {
+	if (_route) {
 		
-		if (!_fader->in_use()) {
+		Control* control;
 
-			double pos;
+		if (_surface->mcp().flip_mode()) {
+			control = _vpot;
+		} else {
+			control = _fader;
+		}
 
-			switch (_surface->mcp().flip_mode()) {
-			case MackieControlProtocol::Normal:
-				pos = _route->gain_control()->get_value();
-				break;
-				
-			case MackieControlProtocol::Swap:
-			case MackieControlProtocol::Zero:
-			case MackieControlProtocol::Mirror:
-				/* fader is used for something else and/or
-				   should not move.
-				*/
-				return;
-			}
-			
-			pos = gain_to_slider_position (pos);
+		if (!control->in_use()) {
 
-			if (force_update || pos != _last_fader_position_written) {
-				_surface->write (_fader->set_position (pos));
-				_last_fader_position_written = pos;
+			float pos = _route->gain_control()->internal_to_interface (_route->gain_control()->get_value());
+
+			if (force_update || pos != _last_gain_position_written) {
+
+				if (_surface->mcp().flip_mode()) {
+					_surface->write (_vpot->set_all (pos, true, Pot::boost_cut));
+				} else {
+					_surface->write (_fader->set_position (pos));
+				}
+				_last_gain_position_written = pos;
+
 			} else {
 				DEBUG_TRACE (DEBUG::MackieControl, "value is stale, no message sent\n");
 			}
@@ -321,7 +324,7 @@ Strip::notify_property_changed (const PropertyChange& what_changed)
 void 
 Strip::notify_panner_changed (bool force_update)
 {
-	if (_route && _vpot) {
+	if (_route) {
 
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("pan change for strip %1\n", _index));
 
@@ -332,25 +335,26 @@ Strip::notify_panner_changed (bool force_update)
 			return;
 		}
 
-		double pos;
+		Control* control;
 
-		switch (_surface->mcp().flip_mode()) {
-		case MackieControlProtocol::Swap:
-			/* pot is controlling the gain */
-			return;
-			
-		case MackieControlProtocol::Normal:
-		case MackieControlProtocol::Zero:
-		case MackieControlProtocol::Mirror:
-			pos = pannable->pan_azimuth_control->get_value();
-			break;
+		if (_surface->mcp().flip_mode()) {
+			control = _fader;
+		} else {
+			control = _vpot;
 		}
 
-		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("\t\tnew position %1\n", pos));
-
-		if (force_update || pos != _last_vpot_position_written) {
-			_surface->write (_vpot->set_all (pos, true, Pot::dot));
-			_last_vpot_position_written = pos;
+		if (!control->in_use()) {
+			
+			double pos = pannable->pan_azimuth_control->internal_to_interface (pannable->pan_azimuth_control->get_value());
+			
+			if (force_update || pos != _last_pan_position_written) {
+				if (_surface->mcp().flip_mode()) {
+					_surface->write (_fader->set_position (pos));
+				} else {
+					_surface->write (_vpot->set_all (pos, true, Pot::dot));
+				}
+				_last_pan_position_written = pos;
+			}
 		}
 	}
 }
@@ -360,48 +364,15 @@ Strip::handle_button (Button& button, ButtonState bs)
 {
 	button.set_in_use (bs == press);
 
-	if (!_route) {
-		// no route so always switch the light off
-		// because no signals will be emitted by a non-route
-		_surface->write (button.set_state  (off));
-		return;
-	}
+	int lock_mod = (MackieControlProtocol::MODIFIER_CONTROL|MackieControlProtocol::MODIFIER_SHIFT);
+	int ms = _surface->mcp().modifier_state();
+	bool modified = (ms & MackieControlProtocol::MODIFIER_CONTROL);
 
-	if (bs == press) {
-		if (button.id() >= Button::recenable_base_id &&
-		    button.id() < Button::recenable_base_id + 8) {
-
-			_route->set_record_enabled (!_route->record_enabled(), this);
-
-		} else if (button.id() >= Button::mute_base_id &&
-			   button.id() < Button::mute_base_id + 8) {
-
-			_route->set_mute (!_route->muted(), this);
-
-		} else if (button.id() >= Button::solo_base_id &&
-			   button.id() < Button::solo_base_id + 8) {
-
-			_route->set_solo (!_route->soloed(), this);
-
-		} else if (button.id() >= Button::select_base_id &&
-			   button.id() < Button::select_base_id + 8) {
-
-			int lock_mod = (MackieControlProtocol::MODIFIER_CONTROL|MackieControlProtocol::MODIFIER_SHIFT);
-
-			if ((_surface->mcp().modifier_state() & lock_mod) == lock_mod) {
-				if (_route) {
-					_route_locked = !_route_locked;
-				}
-			} else if (_surface->mcp().modifier_state() == MackieControlProtocol::MODIFIER_SHIFT) {
-				/* reset gain value to unity */
-				_route->set_gain (1.0, this);
-			} else {
-				_surface->mcp().select_track (_route);
-			}
-
-		} else if (button.id() >= Button::vselect_base_id &&
-			   button.id() < Button::vselect_base_id + 8) {
-
+	if (button.id() >= Button::select_base_id &&
+	    button.id() < Button::select_base_id + 8) {
+		if ((ms & lock_mod) == lock_mod) {
+			_controls_locked = !_controls_locked;
+			return;
 		}
 	}
 
@@ -411,13 +382,24 @@ Strip::handle_button (Button& button, ButtonState bs)
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("fader touch, press ? %1\n", (bs == press)));
 
 		bool state = (bs == press);
-
-		_fader->set_in_use (state);
 		
+		_fader->set_in_use (state);
+		_fader->start_touch (_surface->mcp().transport_frame(), modified);
+
 		if (!_surface->mcp().device_info().has_touch_sense_faders()) {
-			/* add a timeout to reset their `in_use' state.
-			*/
-			_surface->mcp().add_in_use_timeout (*_surface, *_fader, _fader_touch);
+			_surface->mcp().add_in_use_timeout (*_surface, *_fader, _fader->control (modified));
+		}
+
+		return;
+	}
+
+	if (ms & MackieControlProtocol::MODIFIER_OPTION) {
+		/* reset to default/normal value */
+
+		boost::shared_ptr<AutomationControl> control = button.control (modified);
+
+		if (control) {
+			control->set_value (!control->get_value());
 		}
 	}
 }
@@ -427,26 +409,13 @@ Strip::handle_fader (Fader& fader, float position)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("fader to %1\n", position));
 
-	if (!_route) {
-		return;
-	}
+	bool modified = (_surface->mcp().modifier_state() & MackieControlProtocol::MODIFIER_CONTROL);
 
-	switch (_surface->mcp().flip_mode()) {
-	case MackieControlProtocol::Normal:
-		_route->gain_control()->set_value (slider_position_to_gain (position));
-		break;
-	case MackieControlProtocol::Zero:
-		break;
-	case MackieControlProtocol::Mirror:
-		break;
-	case MackieControlProtocol::Swap:
-		_route->pannable()->pan_azimuth_control->set_value (position);
-		return;
-	}
+	fader.set_value (position, modified);
+	fader.start_touch (_surface->mcp().transport_frame(), modified);
 
 	if (!_surface->mcp().device_info().has_touch_sense_faders()) {
-		/* reset the timeout while we're still moving the fader */
-		_surface->mcp().add_in_use_timeout (*_surface, fader, fader.in_use_touch_control);
+		_surface->mcp().add_in_use_timeout (*_surface, fader, fader.control (modified));
 	}
 	
 	// must echo bytes back to slider now, because
@@ -459,45 +428,19 @@ Strip::handle_fader (Fader& fader, float position)
 void
 Strip::handle_pot (Pot& pot, float delta)
 {
-	if (!_route) {
-		_surface->write (pot.set_onoff (false));
-		return;
-	}
+	/* Pots only emit events when they move, not when they
+	   stop moving. So to get a stop event, we need to use a timeout.
+	*/
+	
+	bool modified = (_surface->mcp().modifier_state() & MackieControlProtocol::MODIFIER_CONTROL);
+	pot.start_touch (_surface->mcp().transport_frame(), modified);
+	_surface->mcp().add_in_use_timeout (*_surface, pot, pot.control (modified));
 
-	boost::shared_ptr<Pannable> pannable = _route->pannable();
-
-	if (pannable) {
-		boost::shared_ptr<AutomationControl> ac;
-
-		switch (_surface->mcp().flip_mode()) {
-		case MackieControlProtocol::Normal: /* pot controls pan */
-		case MackieControlProtocol::Mirror: /* pot + fader control pan */
-		case MackieControlProtocol::Zero:   /* pot controls pan, faders don't move */
-			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("modifier state %1\n", _surface->mcp().modifier_state()));
-			if (_surface->mcp().modifier_state() & MackieControlProtocol::MODIFIER_CONTROL) {
-				DEBUG_TRACE (DEBUG::MackieControl, "pot using control to alter width\n");
-				ac = pannable->pan_width_control;
-			} else {
-				DEBUG_TRACE (DEBUG::MackieControl, "pot using control to alter position\n");
-				ac = pannable->pan_azimuth_control;
-			}
-			break;
-		case MackieControlProtocol::Swap: /* pot controls gain */
-			ac = _route->gain_control();
-			break;
-		}
-
-		if (ac) {
-			double p = ac->get_value();
-			
-			// calculate new value, and adjust
-			p += delta;
-			p = min (1.0, p);
-			p = max (0.0, p);
-			
-			ac->set_value (p);
-		}
-	}
+	double p = pot.get_value (modified);
+	p += delta;
+	p = min (1.0, p);
+	p = max (0.0, p);
+	pot.set_value (p, modified);
 }
 
 void
@@ -596,18 +539,15 @@ Strip::display (uint32_t line_number, const std::string& line)
 }
 
 void
-Strip::lock_route ()
+Strip::lock_controls ()
 {
-	/* don't lock unless we have a route */
-	if (_route) {
-		_route_locked = true;
-	}
+	_controls_locked = true;
 }
 
 void
-Strip::unlock_route ()
+Strip::unlock_controls ()
 {
-	_route_locked = false;
+	_controls_locked = false;
 }
 
 MidiByteArray
@@ -622,4 +562,41 @@ Strip::gui_selection_changed (ARDOUR::RouteNotificationListPtr rl)
 
 	std::cerr << "Strip " << _index << " NOT selected\n";
 	return _select->set_state (off);
+}
+
+void
+Strip::flip_mode_changed (bool notify)
+{
+	if (!_route) {
+		return;
+	}
+
+	boost::shared_ptr<Pannable> pannable = _route->pannable();
+
+	if (_surface->mcp().flip_mode()) {
+
+		if (pannable) {
+			_fader->set_normal_control (pannable->pan_azimuth_control);
+			_fader->set_modified_control (pannable->pan_width_control);
+		}
+		_vpot->set_normal_control (_route->gain_control());
+		_vpot->set_modified_control (boost::shared_ptr<AutomationControl>());
+
+		_surface->write (display (1, "Pan"));
+
+	} else {
+
+		if (pannable) {
+			_vpot->set_normal_control (pannable->pan_azimuth_control);
+			_vpot->set_modified_control (pannable->pan_width_control);
+		}
+		_fader->set_normal_control (_route->gain_control());
+		_fader->set_modified_control (boost::shared_ptr<AutomationControl>());
+
+		_surface->write (display (1, "Fdr"));
+	}
+
+	if (notify) {
+		notify_all ();
+	}
 }

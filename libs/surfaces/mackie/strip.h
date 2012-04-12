@@ -69,30 +69,32 @@ public:
 	MidiByteArray blank_display (uint32_t line_number);
 	MidiByteArray zero ();
 
-	void lock_route ();
-	void unlock_route ();
+	void flip_mode_changed (bool notify=false);
+
+	void lock_controls ();
+	void unlock_controls ();
 	
 	MidiByteArray gui_selection_changed (ARDOUR::RouteNotificationListPtr);
 
 private:
-	Button* _solo;
-	Button* _recenable;
-	Button* _mute;
-	Button* _select;
-	Button* _vselect;
-	Button* _fader_touch;
-	Pot*    _vpot;
-	Fader*  _fader;
-	Meter*  _meter;
-	int     _index;
+	Button*  _solo;
+	Button*  _recenable;
+	Button*  _mute;
+	Button*  _select;
+	Button*  _vselect;
+	Button*  _fader_touch;
+	Pot*     _vpot;
+	Fader*   _fader;
+	Meter*   _meter;
+	int      _index;
 	Surface* _surface;
-	bool     _route_locked;
+	bool     _controls_locked;
 
 	boost::shared_ptr<ARDOUR::Route> _route;
 	PBD::ScopedConnectionList route_connections;
 
-	float _last_fader_position_written;
-	float _last_vpot_position_written;
+	float _last_gain_position_written;
+	float _last_pan_position_written;
 
 	void notify_solo_changed ();
 	void notify_mute_changed ();
