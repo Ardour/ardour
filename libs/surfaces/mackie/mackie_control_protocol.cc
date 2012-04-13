@@ -1194,3 +1194,181 @@ MackieControlProtocol::transport_frame() const
 {
 	return session->transport_frame();
 }
+
+void
+MackieControlProtocol::add_down_select_button (int surface, int strip)
+{
+	_down_select_buttons.push_back ((surface<<8)|(strip&0xf));
+}
+
+void
+MackieControlProtocol::remove_down_select_button (int surface, int strip)
+{
+	list<uint32_t>::iterator x = find (_down_select_buttons.begin(), _down_select_buttons.end(), (surface<<8)|(strip&0xf));
+	if (x != _down_select_buttons.end()) {
+		_down_select_buttons.erase (x);
+	}
+}
+
+bool
+MackieControlProtocol::select_range ()
+{
+	vector<boost::shared_ptr<Route> > routes;
+	pull_route_range (_down_select_buttons, routes);
+
+	if (routes.empty()) {
+		return false;
+	}
+
+	/* do something */
+
+	return true;
+}
+
+void
+MackieControlProtocol::add_down_solo_button (int surface, int strip)
+{
+	_down_solo_buttons.push_back ((surface<<8)|(strip&0xf));
+}
+
+void
+MackieControlProtocol::remove_down_solo_button (int surface, int strip)
+{
+	list<uint32_t>::iterator x = find (_down_solo_buttons.begin(), _down_solo_buttons.end(), (surface<<8)|(strip&0xf));
+	if (x != _down_solo_buttons.end()) {
+		_down_solo_buttons.erase (x);
+	}
+}
+
+bool
+MackieControlProtocol::solo_range ()
+{
+	vector<boost::shared_ptr<Route> > routes;
+	pull_route_range (_down_solo_buttons, routes);
+
+	if (routes.empty()) {
+		return false;
+	}
+
+	/* do something */
+
+	return true;
+}
+
+void
+MackieControlProtocol::add_down_mute_button (int surface, int strip)
+{
+	_down_mute_buttons.push_back ((surface<<8)|(strip&0xf));
+}
+
+void
+MackieControlProtocol::remove_down_mute_button (int surface, int strip)
+{
+	list<uint32_t>::iterator x = find (_down_mute_buttons.begin(), _down_mute_buttons.end(), (surface<<8)|(strip&0xf));
+	if (x != _down_mute_buttons.end()) {
+		_down_mute_buttons.erase (x);
+	}
+}
+
+bool
+MackieControlProtocol::mute_range ()
+{
+	vector<boost::shared_ptr<Route> > routes;
+	pull_route_range (_down_mute_buttons, routes);
+
+	if (routes.empty()) {
+		return false;
+	}
+
+	/* do something */
+
+	return true;
+}
+
+void
+MackieControlProtocol::add_down_recenable_button (int surface, int strip)
+{
+	_down_recenable_buttons.push_back ((surface<<8)|(strip&0xf));
+}
+
+void
+MackieControlProtocol::remove_down_recenable_button (int surface, int strip)
+{
+	list<uint32_t>::iterator x = find (_down_recenable_buttons.begin(), _down_recenable_buttons.end(), (surface<<8)|(strip&0xf));
+	if (x != _down_recenable_buttons.end()) {
+		_down_recenable_buttons.erase (x);
+	}
+}
+
+bool
+MackieControlProtocol::recenable_range ()
+{
+	vector<boost::shared_ptr<Route> > routes;
+	pull_route_range (_down_recenable_buttons, routes);
+
+	if (routes.empty()) {
+		return false;
+	}
+
+	/* do something */
+
+	return true;
+}
+
+
+struct ButtonRangeSorter {
+    bool operator() (const uint32_t& a, const uint32_t& b) {
+	    return (a>>8) < (b>>8) // a.surface < b.surface
+		    ||
+		    ((a>>8) == (b>>8) && (a&0xf) < (b&0xf)); // a.surface == b.surface && a.strip < b.strip
+    }
+};
+
+void
+MackieControlProtocol::pull_route_range (list<uint32_t>& down, vector<boost::shared_ptr<Route> >& selected)
+{
+	ButtonRangeSorter cmp;
+
+	if (down.empty()) {
+		return;
+	}
+
+	down.sort (cmp);
+
+	uint32_t first = down.front();
+	uint32_t last = down.back ();
+	
+	uint32_t first_surface = first>>8;
+	uint32_t first_strip = first&0x8;
+
+	uint32_t last_surface = last>>8;
+	uint32_t last_strip = last&0x8;
+	
+	for (Surfaces::const_iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
+		
+		if ((*s)->number() >= first_surface && (*s)->number() <= last_surface) {
+
+			uint32_t fs;
+			uint32_t ls;
+
+			if ((*s)->number() == first_surface) {
+				fs = first_strip;
+			} else {
+				fs = 0;
+			}
+
+			if ((*s)->number() == last_surface) {
+				ls = last_strip;
+			} else {
+				ls = (*s)->n_strips ();
+			}
+
+			for (uint32_t n = fs; n < ls; ++n) {
+				boost::shared_ptr<Route> r = (*s)->nth_strip (n)->route();
+				if (r) {
+					selected.push_back (r);
+				}
+			}
+		}
+	}
+}

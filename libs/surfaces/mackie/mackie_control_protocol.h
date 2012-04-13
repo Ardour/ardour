@@ -21,6 +21,7 @@
 
 #include <vector>
 #include <map>
+#include <list>
 
 #include <sys/time.h>
 #include <pthread.h>
@@ -182,6 +183,22 @@ class MackieControlProtocol
 	void add_in_use_timeout (Mackie::Surface& surface, Mackie::Control& in_use_control, boost::weak_ptr<ARDOUR::AutomationControl> touched);
 
 	int modifier_state() const { return _modifier_state; }
+
+	void add_down_select_button (int surface, int strip);
+	void remove_down_select_button (int surface, int strip);
+	bool select_range ();
+
+	void add_down_solo_button (int surface, int strip);
+	void remove_down_solo_button (int surface, int strip);
+	bool solo_range ();
+
+	void add_down_mute_button (int surface, int strip);
+	void remove_down_mute_button (int surface, int strip);
+	bool mute_range ();
+
+	void add_down_recenable_button (int surface, int strip);
+	void remove_down_recenable_button (int surface, int strip);
+	bool recenable_range ();
 	
   protected:
 	// shut down the surface
@@ -286,6 +303,13 @@ class MackieControlProtocol
 	void gui_track_selection_changed (ARDOUR::RouteNotificationListPtr);
 
 	/* BUTTON HANDLING */
+	
+	std::list<uint32_t> _down_select_buttons;
+	std::list<uint32_t> _down_solo_buttons;
+	std::list<uint32_t> _down_mute_buttons;
+	std::list<uint32_t> _down_recenable_buttons;
+
+	void pull_route_range (std::list<uint32_t>& down, std::vector<boost::shared_ptr<ARDOUR::Route> >& selected);
 
 	/* implemented button handlers */
 	Mackie::LedState frm_left_press(Mackie::Button &);

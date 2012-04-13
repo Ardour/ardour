@@ -291,8 +291,19 @@ Strip::notify_gain_changed (bool force_update)
 				} else {
 					_surface->write (_fader->set_position (pos));
 				}
-				_last_gain_position_written = pos;
 
+				float dB = fast_coefficient_to_dB (pos);
+				if (pos == 0.0) {
+					_surface->write (display (1, "   0.0"));
+				} else {
+					char buf[16];
+					
+					snprintf (buf, sizeof (buf), "%6.1f", dB);
+					_surface->write (display (1, buf));
+				}
+					
+				_last_gain_position_written = pos;
+				
 			} else {
 				DEBUG_TRACE (DEBUG::MackieControl, "value is stale, no message sent\n");
 			}
@@ -370,10 +381,6 @@ Strip::handle_button (Button& button, ButtonState bs)
 
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("strip %1 handling button %2\n", _index, button.id()));
 
-	if (bs != press) {
-		return;
-	}
-
 	int lock_mod = (MackieControlProtocol::MODIFIER_CONTROL|MackieControlProtocol::MODIFIER_SHIFT);
 	int ms = _surface->mcp().modifier_state();
 	bool modified = (ms & MackieControlProtocol::MODIFIER_CONTROL);
@@ -383,13 +390,16 @@ Strip::handle_button (Button& button, ButtonState bs)
 
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("select touch, lock ? %1\n", ((ms & lock_mod) == lock_mod) ? 1 : 0));
 
-		if ((ms & lock_mod) == lock_mod) {
-			_controls_locked = !_controls_locked;
-			return;
-		}
-		
-		if (_route) {
-			_surface->mcp().select_track (_route);
+		if (bs == press) {
+
+			if ((ms & lock_mod) == lock_mod) {
+				_controls_locked = !_controls_locked;
+				return;
+			}
+			
+			if (_route) {
+				_surface->mcp().select_track (_route);
+			}
 		}
 
 		return;
@@ -409,6 +419,11 @@ Strip::handle_button (Button& button, ButtonState bs)
 			_surface->mcp().add_in_use_timeout (*_surface, *_fader, _fader->control (modified));
 		}
 
+		if (bs != press) {
+			/* fader touch ended, revert back to label display for fader */
+			_surface->write (display (1, static_display_string()));
+		}
+		
 		return;
 	}
 
@@ -586,6 +601,16 @@ Strip::gui_selection_changed (ARDOUR::RouteNotificationListPtr rl)
 	return _select->set_state (off);
 }
 
+string
+Strip::static_display_string () const
+{
+	if (_surface->mcp().flip_mode()) {
+		return "Pan";
+	} else {
+		return "Fader";
+	}
+}
+
 void
 Strip::flip_mode_changed (bool notify)
 {
@@ -604,7 +629,7 @@ Strip::flip_mode_changed (bool notify)
 		_vpot->set_normal_control (_route->gain_control());
 		_vpot->set_modified_control (boost::shared_ptr<AutomationControl>());
 
-		_surface->write (display (1, "Fader"));
+		_surface->write (display (1, static_display_string ()));
 
 	} else {
 
@@ -615,7 +640,7 @@ Strip::flip_mode_changed (bool notify)
 		_fader->set_normal_control (_route->gain_control());
 		_fader->set_modified_control (boost::shared_ptr<AutomationControl>());
 
-		_surface->write (display (1, "Pan"));
+		_surface->write (display (1, static_display_string()));
 	}
 
 	if (notify) {

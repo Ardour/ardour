@@ -107,6 +107,8 @@ private:
 	
 	void update_automation ();
 	void update_meter ();
+
+	std::string static_display_string () const;
 };
 
 }
