@@ -61,10 +61,8 @@
 #include <suil/suil.h>
 #endif
 
-#define NS_DC      "http://dublincore.org/documents/dcmi-namespace/"
-#define NS_OLDPSET "http://lv2plug.in/ns/dev/presets#"
-#define NS_PSET    "http://lv2plug.in/ns/ext/presets#"
-#define NS_UI      "http://lv2plug.in/ns/extensions/ui#"
+#define NS_PSET "http://lv2plug.in/ns/ext/presets#"
+#define NS_UI   "http://lv2plug.in/ns/extensions/ui#"
 
 using namespace std;
 using namespace ARDOUR;
@@ -789,50 +787,35 @@ get_value(LilvWorld* world, const LilvNode* subject, const LilvNode* predicate)
 	return vs ? lilv_nodes_get_first(vs) : NULL;
 }
 
-static void
-find_presets_helper(LilvWorld*                                   world,
-                    LilvPlugin*                                  plugin,
-                    std::map<std::string, Plugin::PresetRecord>& out,
-                    LilvNode*                                    preset_pred,
-                    LilvNode*                                    title_pred)
+void
+LV2Plugin::find_presets()
 {
-	LilvNodes* presets = lilv_plugin_get_value(plugin, preset_pred);
+	LilvNode* lv2_appliesTo = lilv_new_uri(_world.world, LILV_NS_LV2  "appliesTo");
+	LilvNode* pset_Preset   = lilv_new_uri(_world.world, NS_PSET "Preset");
+	LilvNode* rdfs_label    = lilv_new_uri(_world.world, LILV_NS_RDFS "label");
+
+	LilvNodes* presets = lilv_plugin_get_related(_impl->plugin, pset_Preset);
 	LILV_FOREACH(nodes, i, presets) {
 		const LilvNode* preset = lilv_nodes_get(presets, i);
-		const LilvNode* name   = get_value(world, preset, title_pred);
+		lilv_world_load_resource(_world.world, preset);
+		const LilvNode* name = get_value(_world.world, preset, rdfs_label);
 		if (name) {
-			out.insert(std::make_pair(lilv_node_as_string(preset),
-			                          Plugin::PresetRecord(
-				                          lilv_node_as_string(preset),
-				                          lilv_node_as_string(name))));
+			_presets.insert(std::make_pair(lilv_node_as_string(preset),
+			                               Plugin::PresetRecord(
+				                               lilv_node_as_string(preset),
+				                               lilv_node_as_string(name))));
 		} else {
 			warning << string_compose(
 			    _("Plugin \"%1\% preset \"%2%\" is missing a label\n"),
-			    lilv_node_as_string(lilv_plugin_get_uri(plugin)),
+			    lilv_node_as_string(lilv_plugin_get_uri(_impl->plugin)),
 			    lilv_node_as_string(preset)) << endmsg;
 		}
 	}
 	lilv_nodes_free(presets);
-}
-
-void
-LV2Plugin::find_presets()
-{
-	LilvNode* dc_title          = lilv_new_uri(_world.world, NS_DC   "title");
-	LilvNode* oldpset_hasPreset = lilv_new_uri(_world.world, NS_OLDPSET "hasPreset");
-	LilvNode* pset_hasPreset    = lilv_new_uri(_world.world, NS_PSET "hasPreset");
-	LilvNode* rdfs_label        = lilv_new_uri(_world.world, LILV_NS_RDFS "label");
-
-	find_presets_helper(_world.world, _impl->plugin, _presets,
-	                    oldpset_hasPreset, dc_title);
-
-	find_presets_helper(_world.world, _impl->plugin, _presets,
-	                    pset_hasPreset, rdfs_label);
 
 	lilv_node_free(rdfs_label);
-	lilv_node_free(pset_hasPreset);
-	lilv_node_free(oldpset_hasPreset);
-	lilv_node_free(dc_title);
+	lilv_node_free(pset_Preset);
+	lilv_node_free(lv2_appliesTo);
 }
 
 bool
@@ -842,20 +825,16 @@ LV2Plugin::load_preset(PresetRecord r)
 
 	std::map<std::string,uint32_t>::iterator it;
 
-	LilvNode* lv2_port      = lilv_new_uri(_world.world, LILV_NS_LV2 "port");
-	LilvNode* lv2_symbol    = lilv_new_uri(_world.world, LILV_NS_LV2 "symbol");
-	LilvNode* oldpset_value = lilv_new_uri(_world.world, NS_OLDPSET "value");
-	LilvNode* preset        = lilv_new_uri(_world.world, r.uri.c_str());
-	LilvNode* pset_value    = lilv_new_uri(_world.world, NS_PSET "value");
+	LilvNode* lv2_port   = lilv_new_uri(_world.world, LILV_NS_LV2 "port");
+	LilvNode* lv2_symbol = lilv_new_uri(_world.world, LILV_NS_LV2 "symbol");
+	LilvNode* preset     = lilv_new_uri(_world.world, r.uri.c_str());
+	LilvNode* pset_value = lilv_new_uri(_world.world, NS_PSET "value");
 
 	LilvNodes* ports = lilv_world_find_nodes(_world.world, preset, lv2_port, NULL);
 	LILV_FOREACH(nodes, i, ports) {
 		const LilvNode* port   = lilv_nodes_get(ports, i);
 		const LilvNode* symbol = get_value(_world.world, port, lv2_symbol);
 		const LilvNode* value  = get_value(_world.world, port, pset_value);
-		if (!value) {
-			value = get_value(_world.world, port, oldpset_value);
-		}
 		if (value && lilv_node_is_float(value)) {
 		        it = _port_indices.find(lilv_node_as_string(symbol));
 			if (it != _port_indices.end())
@@ -866,7 +845,6 @@ LV2Plugin::load_preset(PresetRecord r)
 
 	lilv_node_free(pset_value);
 	lilv_node_free(preset);
-	lilv_node_free(oldpset_value);
 	lilv_node_free(lv2_symbol);
 	lilv_node_free(lv2_port);
 
