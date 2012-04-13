@@ -67,14 +67,17 @@ class ControlProtocol : virtual public sigc::trackable, public PBD::Stateful, pu
 	static PBD::Signal0<void> Undo;
 	static PBD::Signal0<void> Redo;
 	static PBD::Signal1<void,float> ScrollTimeline;
-	static PBD::Signal1<void,uint32_t> SelectByRID;
-	static PBD::Signal0<void> UnselectTrack;
 	static PBD::Signal1<void,uint32_t> GotoView;
 	static PBD::Signal0<void> CloseDialog;
 	static PBD::Signal0<void> VerticalZoomInAll;
 	static PBD::Signal0<void> VerticalZoomOutAll;
 	static PBD::Signal0<void> VerticalZoomInSelected;
 	static PBD::Signal0<void> VerticalZoomOutSelected;
+
+	static PBD::Signal1<void,uint32_t> AddRouteToSelection;
+	static PBD::Signal1<void,uint32_t> SetRouteSelection;
+	static PBD::Signal1<void,uint32_t> RemoveRouteFromSelection;
+	static PBD::Signal0<void>          ClearRouteSelection;
 
 	/* signals that one UI (e.g. the GUI) can emit to get all other UI's to 
 	   respond. Typically this will always be GUI->"others" - the GUI pays

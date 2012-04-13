@@ -618,10 +618,10 @@ Surface::zero_all ()
 }
 
 void
-Surface::periodic ()
+Surface::periodic (uint64_t now_usecs)
 {
 	for (Strips::iterator s = strips.begin(); s != strips.end(); ++s) {
-		(*s)->periodic ();
+		(*s)->periodic (now_usecs);
 	}
 
 }

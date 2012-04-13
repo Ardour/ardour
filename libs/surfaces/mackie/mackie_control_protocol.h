@@ -30,9 +30,7 @@
 #include <glibmm/thread.h>
 
 #include "pbd/abstract_ui.h"
-
 #include "midi++/types.h"
-
 #include "ardour/types.h"
 #include "control_protocol/control_protocol.h"
 
@@ -148,8 +146,6 @@ class MackieControlProtocol
 	void* get_gui () const;
 	void tear_down_gui ();
 
-	void select_track (boost::shared_ptr<ARDOUR::Route> r);
-	
 	void handle_button_event (Mackie::Surface&, Mackie::Button& button, Mackie::ButtonState);
 
 	void notify_route_added (ARDOUR::RouteList &);
@@ -184,21 +180,15 @@ class MackieControlProtocol
 
 	int modifier_state() const { return _modifier_state; }
 
+	typedef std::list<boost::shared_ptr<ARDOUR::AutomationControl> > ControlList;
+
+	void add_down_button (ARDOUR::AutomationType, int surface, int strip);
+	void remove_down_button (ARDOUR::AutomationType, int surface, int strip);
+	ControlList down_controls (ARDOUR::AutomationType);
+	
 	void add_down_select_button (int surface, int strip);
 	void remove_down_select_button (int surface, int strip);
-	bool select_range ();
-
-	void add_down_solo_button (int surface, int strip);
-	void remove_down_solo_button (int surface, int strip);
-	bool solo_range ();
-
-	void add_down_mute_button (int surface, int strip);
-	void remove_down_mute_button (int surface, int strip);
-	bool mute_range ();
-
-	void add_down_recenable_button (int surface, int strip);
-	void remove_down_recenable_button (int surface, int strip);
-	bool recenable_range ();
+	void select_range ();
 	
   protected:
 	// shut down the surface
@@ -302,14 +292,15 @@ class MackieControlProtocol
 
 	void gui_track_selection_changed (ARDOUR::RouteNotificationListPtr);
 
-	/* BUTTON HANDLING */
-	
-	std::list<uint32_t> _down_select_buttons;
-	std::list<uint32_t> _down_solo_buttons;
-	std::list<uint32_t> _down_mute_buttons;
-	std::list<uint32_t> _down_recenable_buttons;
 
-	void pull_route_range (std::list<uint32_t>& down, std::vector<boost::shared_ptr<ARDOUR::Route> >& selected);
+	/* BUTTON HANDLING */
+
+	typedef std::list<uint32_t> DownButtonList;
+	typedef std::map<ARDOUR::AutomationType,DownButtonList> DownButtonMap;
+	DownButtonMap  _down_buttons;
+	DownButtonList _down_select_buttons; 
+
+	void pull_route_range (DownButtonList&, ARDOUR::RouteList&);
 
 	/* implemented button handlers */
 	Mackie::LedState frm_left_press(Mackie::Button &);

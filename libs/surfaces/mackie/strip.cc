@@ -21,6 +21,8 @@
 #include <stdint.h>
 #include "strip.h"
 
+#include <sys/time.h>
+
 #include "midi++/port.h"
 
 #include "pbd/compose.h"
@@ -70,6 +72,7 @@ Strip::Strip (Surface& s, const std::string& name, int index, StripControlDefini
 	, _index (index)
 	, _surface (&s)
 	, _controls_locked (false)
+	, _reset_display_at (0)
 	, _last_gain_position_written (-1.0)
 	, _last_pan_position_written (-1.0)
 {
@@ -301,7 +304,8 @@ Strip::notify_gain_changed (bool force_update)
 					snprintf (buf, sizeof (buf), "%6.1f", dB);
 					_surface->write (display (1, buf));
 				}
-					
+
+				queue_display_reset (500);
 				_last_gain_position_written = pos;
 				
 			} else {
@@ -363,11 +367,21 @@ Strip::notify_panner_changed (bool force_update)
 			double pos = pannable->pan_azimuth_control->internal_to_interface (pannable->pan_azimuth_control->get_value());
 			
 			if (force_update || pos != _last_pan_position_written) {
+				
 				if (_surface->mcp().flip_mode()) {
+					
 					_surface->write (_fader->set_position (pos));
+					
 				} else {
 					_surface->write (_vpot->set_all (pos, true, Pot::dot));
 				}
+				
+				if (pannable->panner()) {
+					string str = pannable->panner()->value_as_string (pannable->pan_azimuth_control);
+					_surface->write (display (1, str));
+					queue_display_reset (500);
+				}
+				
 				_last_pan_position_written = pos;
 			}
 		}
@@ -377,7 +391,11 @@ Strip::notify_panner_changed (bool force_update)
 void
 Strip::handle_button (Button& button, ButtonState bs)
 {
-	button.set_in_use (bs == press);
+	if (bs == press) {
+		button.set_in_use (true);
+	} else {
+		button.set_in_use (false);
+	}
 
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("strip %1 handling button %2\n", _index, button.id()));
 
@@ -397,9 +415,11 @@ Strip::handle_button (Button& button, ButtonState bs)
 				return;
 			}
 			
-			if (_route) {
-				_surface->mcp().select_track (_route);
-			}
+			_surface->mcp().add_down_select_button (_surface->number(), _index);			
+			_surface->mcp().select_range ();
+
+		} else {
+			_surface->mcp().remove_down_select_button (_surface->number(), _index);			
 		}
 
 		return;
@@ -415,10 +435,6 @@ Strip::handle_button (Button& button, ButtonState bs)
 		_fader->set_in_use (state);
 		_fader->start_touch (_surface->mcp().transport_frame(), modified);
 
-		if (!_surface->mcp().device_info().has_touch_sense_faders()) {
-			_surface->mcp().add_in_use_timeout (*_surface, *_fader, _fader->control (modified));
-		}
-
 		if (bs != press) {
 			/* fader touch ended, revert back to label display for fader */
 			_surface->write (display (1, static_display_string()));
@@ -430,14 +446,37 @@ Strip::handle_button (Button& button, ButtonState bs)
 	boost::shared_ptr<AutomationControl> control = button.control (modified);
 		
 	if (control) {
-		if (ms & MackieControlProtocol::MODIFIER_OPTION) {
-			/* reset to default/normal value */
-			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("reset %1 to default of %2\n", control->name(), control->normal()));
-			control->set_value (control->normal());
+
+		if (bs == press) {
+			_surface->mcp().add_down_button ((AutomationType) control->parameter().type(), _surface->number(), _index);
+			
+			float new_value;
+
+			if (ms & MackieControlProtocol::MODIFIER_OPTION) {
+				/* reset to default/normal value */
+				new_value = control->normal();
+			} else {
+				new_value = control->get_value() ? 0.0 : 1.0;
+			}
+
+			/* get all controls that either have their
+			 * button down or are within a range of
+			 * several down buttons
+			 */
+			
+			MackieControlProtocol::ControlList controls = _surface->mcp().down_controls ((AutomationType) control->parameter().type());
+			
+			
+			/* apply change */
+
+			for (MackieControlProtocol::ControlList::iterator c = controls.begin(); c != controls.end(); ++c) {
+				(*c)->set_value (new_value);
+			}
+
 		} else {
-			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("toggle %1 to default of %2\n", control->name(), control->get_value() ? 0.0 : 1.0));
-			control->set_value (control->get_value() ? 0.0 : 1.0);
+			_surface->mcp().remove_down_button ((AutomationType) control->parameter().type(), _surface->number(), _index);
 		}
+			
 	} else {
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("button has no control at present (modified ? %1)\n", modified));
 	}
@@ -483,7 +522,7 @@ Strip::handle_pot (Pot& pot, float delta)
 }
 
 void
-Strip::periodic ()
+Strip::periodic (uint64_t usecs)
 {
 	if (!_route) {
 		return;
@@ -491,6 +530,10 @@ Strip::periodic ()
 
 	update_automation ();
 	update_meter ();
+
+	if (_reset_display_at && _reset_display_at < usecs) {
+		reset_display ();
+	}
 }
 
 void 
@@ -605,9 +648,9 @@ string
 Strip::static_display_string () const
 {
 	if (_surface->mcp().flip_mode()) {
-		return "Pan";
-	} else {
 		return "Fader";
+	} else {
+		return "Pan";
 	}
 }
 
@@ -647,3 +690,33 @@ Strip::flip_mode_changed (bool notify)
 		notify_all ();
 	}
 }
+
+void
+Strip::queue_display_reset (uint32_t msecs)
+{
+	struct timeval now;
+	struct timeval delta;
+	struct timeval when;
+	gettimeofday (&now, 0);
+	
+	delta.tv_sec = msecs/1000;
+	delta.tv_usec = (msecs - ((msecs/1000) * 1000)) * 1000;
+	
+	timeradd (&now, &delta, &when);
+
+	_reset_display_at = (when.tv_sec * 1000000) + when.tv_usec;
+}
+
+void
+Strip::clear_display_reset ()
+{
+	_reset_display_at = 0;
+}
+
+void
+Strip::reset_display ()
+{
+	_surface->write (display (1, static_display_string()));
+	clear_display_reset ();
+}
+			 

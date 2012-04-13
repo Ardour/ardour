@@ -389,8 +389,14 @@ MackieControlProtocol::periodic ()
 		return false;
 	}
 
+	struct timeval now;
+	uint64_t now_usecs;
+	gettimeofday (&now, 0);
+
+	now_usecs = (now.tv_sec * 1000000) + now.tv_usec;
+
 	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
-		(*s)->periodic ();
+		(*s)->periodic (now_usecs);
 	}
 	
 	return true;
@@ -1060,22 +1066,6 @@ MackieControlProtocol::handle_button_event (Surface& surface, Button& button, Bu
 	}
 }
 
-void
-MackieControlProtocol::select_track (boost::shared_ptr<Route> r)
-{
-	if (_modifier_state == MODIFIER_SHIFT) {
-		r->gain_control()->set_value (0.0);
-	} else {
-		if (_current_selected_track > 0 && r->remote_control_id() == (uint32_t) _current_selected_track) {
-			UnselectTrack (); /* EMIT SIGNAL */
-			_current_selected_track = -1;
-		} else {
-			SelectByRID (r->remote_control_id()); /* EMIT SIGNAL */
-			_current_selected_track = r->remote_control_id();;
-		}
-	}
-}
-
 bool
 MackieControlProtocol::midi_input_handler (IOCondition ioc, MIDI::Port* port)
 {
@@ -1210,112 +1200,91 @@ MackieControlProtocol::remove_down_select_button (int surface, int strip)
 	}
 }
 
-bool
+void
 MackieControlProtocol::select_range ()
 {
-	vector<boost::shared_ptr<Route> > routes;
+	RouteList routes;
+
 	pull_route_range (_down_select_buttons, routes);
 
-	if (routes.empty()) {
-		return false;
+	if (!routes.empty()) {
+		for (RouteList::iterator r = routes.begin(); r != routes.end(); ++r) {
+			if (r == routes.begin()) {
+				SetRouteSelection ((*r)->remote_control_id());
+			} else {
+				AddRouteToSelection ((*r)->remote_control_id());
+			}
+		}
 	}
-
-	/* do something */
-
-	return true;
 }
 
 void
-MackieControlProtocol::add_down_solo_button (int surface, int strip)
+MackieControlProtocol::add_down_button (AutomationType a, int surface, int strip)
 {
-	_down_solo_buttons.push_back ((surface<<8)|(strip&0xf));
+	DownButtonMap::iterator m = _down_buttons.find (a);
+
+	if (m == _down_buttons.end()) {
+		_down_buttons[a] = DownButtonList();
+	}
+
+	_down_buttons[a].push_back ((surface<<8)|(strip&0xf));
 }
 
 void
-MackieControlProtocol::remove_down_solo_button (int surface, int strip)
+MackieControlProtocol::remove_down_button (AutomationType a, int surface, int strip)
 {
-	list<uint32_t>::iterator x = find (_down_solo_buttons.begin(), _down_solo_buttons.end(), (surface<<8)|(strip&0xf));
-	if (x != _down_solo_buttons.end()) {
-		_down_solo_buttons.erase (x);
+	DownButtonMap::iterator m = _down_buttons.find (a);
+
+	if (m == _down_buttons.end()) {
+		return;
+	}
+
+	DownButtonList& l (m->second);
+	list<uint32_t>::iterator x = find (l.begin(), l.end(), (surface<<8)|(strip&0xf));
+
+	if (x != l.end()) {
+		l.erase (x);
 	}
 }
 
-bool
-MackieControlProtocol::solo_range ()
+MackieControlProtocol::ControlList
+MackieControlProtocol::down_controls (AutomationType p)
 {
-	vector<boost::shared_ptr<Route> > routes;
-	pull_route_range (_down_solo_buttons, routes);
+	ControlList controls;
+	RouteList routes;
 
-	if (routes.empty()) {
-		return false;
+	DownButtonMap::iterator m = _down_buttons.find (p);
+
+	if (m == _down_buttons.end()) {
+		return controls;
+	}
+	
+	pull_route_range (m->second, routes);
+	
+	switch (p) {
+	case GainAutomation:
+		for (RouteList::iterator r = routes.begin(); r != routes.end(); ++r) {
+			controls.push_back ((*r)->gain_control());
+		}
+		break;
+	case SoloAutomation:
+		for (RouteList::iterator r = routes.begin(); r != routes.end(); ++r) {
+			controls.push_back ((*r)->solo_control());
+		}
+		break;
+	case MuteAutomation:
+		for (RouteList::iterator r = routes.begin(); r != routes.end(); ++r) {
+			controls.push_back ((*r)->mute_control());
+		}
+		break;
+	default:
+		break;
 	}
 
-	/* do something */
+	return controls;
 
-	return true;
 }
-
-void
-MackieControlProtocol::add_down_mute_button (int surface, int strip)
-{
-	_down_mute_buttons.push_back ((surface<<8)|(strip&0xf));
-}
-
-void
-MackieControlProtocol::remove_down_mute_button (int surface, int strip)
-{
-	list<uint32_t>::iterator x = find (_down_mute_buttons.begin(), _down_mute_buttons.end(), (surface<<8)|(strip&0xf));
-	if (x != _down_mute_buttons.end()) {
-		_down_mute_buttons.erase (x);
-	}
-}
-
-bool
-MackieControlProtocol::mute_range ()
-{
-	vector<boost::shared_ptr<Route> > routes;
-	pull_route_range (_down_mute_buttons, routes);
-
-	if (routes.empty()) {
-		return false;
-	}
-
-	/* do something */
-
-	return true;
-}
-
-void
-MackieControlProtocol::add_down_recenable_button (int surface, int strip)
-{
-	_down_recenable_buttons.push_back ((surface<<8)|(strip&0xf));
-}
-
-void
-MackieControlProtocol::remove_down_recenable_button (int surface, int strip)
-{
-	list<uint32_t>::iterator x = find (_down_recenable_buttons.begin(), _down_recenable_buttons.end(), (surface<<8)|(strip&0xf));
-	if (x != _down_recenable_buttons.end()) {
-		_down_recenable_buttons.erase (x);
-	}
-}
-
-bool
-MackieControlProtocol::recenable_range ()
-{
-	vector<boost::shared_ptr<Route> > routes;
-	pull_route_range (_down_recenable_buttons, routes);
-
-	if (routes.empty()) {
-		return false;
-	}
-
-	/* do something */
-
-	return true;
-}
-
-
+	
 struct ButtonRangeSorter {
     bool operator() (const uint32_t& a, const uint32_t& b) {
 	    return (a>>8) < (b>>8) // a.surface < b.surface
@@ -1325,7 +1294,7 @@ struct ButtonRangeSorter {
 };
 
 void
-MackieControlProtocol::pull_route_range (list<uint32_t>& down, vector<boost::shared_ptr<Route> >& selected)
+MackieControlProtocol::pull_route_range (list<uint32_t>& down, RouteList& selected)
 {
 	ButtonRangeSorter cmp;
 

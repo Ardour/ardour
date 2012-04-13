@@ -63,7 +63,7 @@ public:
 	void handle_fader (Fader&, float position);
 	void handle_pot (Pot&, float delta);
 
-	void periodic ();
+	void periodic (uint64_t now_usecs);
 
 	MidiByteArray display (uint32_t line_number, const std::string&);
 	MidiByteArray blank_display (uint32_t line_number);
@@ -89,6 +89,7 @@ private:
 	int      _index;
 	Surface* _surface;
 	bool     _controls_locked;
+	uint64_t _reset_display_at;
 
 	boost::shared_ptr<ARDOUR::Route> _route;
 	PBD::ScopedConnectionList route_connections;
@@ -109,6 +110,10 @@ private:
 	void update_meter ();
 
 	std::string static_display_string () const;
+
+	void queue_display_reset (uint32_t msecs);
+	void clear_display_reset ();
+	void reset_display ();
 };
 
 }

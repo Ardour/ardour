@@ -38,8 +38,6 @@ Signal0<void>       ControlProtocol::Enter;
 Signal0<void>       ControlProtocol::Undo;
 Signal0<void>       ControlProtocol::Redo;
 Signal1<void,float> ControlProtocol::ScrollTimeline;
-Signal1<void,uint32_t> ControlProtocol::SelectByRID;
-Signal0<void> ControlProtocol::UnselectTrack;
 Signal1<void,uint32_t> ControlProtocol::GotoView;
 Signal0<void> ControlProtocol::CloseDialog;
 PBD::Signal0<void> ControlProtocol::VerticalZoomInAll;
@@ -47,6 +45,10 @@ PBD::Signal0<void> ControlProtocol::VerticalZoomOutAll;
 PBD::Signal0<void> ControlProtocol::VerticalZoomInSelected;
 PBD::Signal0<void> ControlProtocol::VerticalZoomOutSelected;
 PBD::Signal1<void,RouteNotificationListPtr> ControlProtocol::TrackSelectionChanged;
+PBD::Signal1<void,uint32_t> ControlProtocol::AddRouteToSelection;
+PBD::Signal1<void,uint32_t> ControlProtocol::SetRouteSelection;
+PBD::Signal1<void,uint32_t> ControlProtocol::RemoveRouteFromSelection;
+PBD::Signal0<void>          ControlProtocol::ClearRouteSelection;
 
 ControlProtocol::ControlProtocol (Session& s, string str, EventLoop* evloop)
 	: BasicUI (s),

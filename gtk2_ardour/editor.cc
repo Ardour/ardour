@@ -712,14 +712,17 @@ Editor::Editor ()
 	ControlProtocol::Undo.connect (*this, invalidator (*this), boost::bind (&Editor::undo, this, true), gui_context());
 	ControlProtocol::Redo.connect (*this, invalidator (*this), boost::bind (&Editor::redo, this, true), gui_context());
 	ControlProtocol::ScrollTimeline.connect (*this, invalidator (*this), ui_bind (&Editor::control_scroll, this, _1), gui_context());
-	ControlProtocol::SelectByRID.connect (*this, invalidator (*this), ui_bind (&Editor::control_select, this, _1), gui_context());
-	ControlProtocol::UnselectTrack.connect (*this, invalidator (*this), ui_bind (&Editor::control_unselect, this), gui_context());
 	ControlProtocol::GotoView.connect (*this, invalidator (*this), ui_bind (&Editor::control_view, this, _1), gui_context());
 	ControlProtocol::CloseDialog.connect (*this, invalidator (*this), Keyboard::close_current_dialog, gui_context());
 	ControlProtocol::VerticalZoomInAll.connect (*this, invalidator (*this), ui_bind (&Editor::control_vertical_zoom_in_all, this), gui_context());
 	ControlProtocol::VerticalZoomOutAll.connect (*this, invalidator (*this), ui_bind (&Editor::control_vertical_zoom_out_all, this), gui_context());
 	ControlProtocol::VerticalZoomInSelected.connect (*this, invalidator (*this), ui_bind (&Editor::control_vertical_zoom_in_selected, this), gui_context());
 	ControlProtocol::VerticalZoomOutSelected.connect (*this, invalidator (*this), ui_bind (&Editor::control_vertical_zoom_out_selected, this), gui_context());
+
+	ControlProtocol::AddRouteToSelection.connect (*this, invalidator (*this), ui_bind (&Editor::control_select, this, _1, Selection::Add), gui_context());
+	ControlProtocol::RemoveRouteFromSelection.connect (*this, invalidator (*this), ui_bind (&Editor::control_select, this, _1, Selection::Toggle), gui_context());
+	ControlProtocol::SetRouteSelection.connect (*this, invalidator (*this), ui_bind (&Editor::control_select, this, _1, Selection::Set), gui_context());
+	ControlProtocol::ClearRouteSelection.connect (*this, invalidator (*this), ui_bind (&Editor::control_unselect, this), gui_context());
 
 	BasicUI::AccessAction.connect (*this, invalidator (*this), ui_bind (&Editor::access_action, this, _1, _2), gui_context());
 
@@ -966,7 +969,7 @@ Editor::control_unselect ()
 }
 
 void
-Editor::control_select (uint32_t rid) 
+Editor::control_select (uint32_t rid, Selection::Operation op) 
 {
 	/* handles the (static) signal from the ControlProtocol class that
 	 * requests setting the selected track to a given RID
@@ -985,7 +988,19 @@ Editor::control_select (uint32_t rid)
 	TimeAxisView* tav = axis_view_from_route (r);
 
 	if (tav) {
-		selection->set (tav);
+		switch (op) {
+		case Selection::Add:
+			selection->add (tav);
+			break;
+		case Selection::Toggle:
+			selection->toggle (tav);
+			break;
+		case Selection::Extend:
+			break;
+		case Selection::Set:
+			selection->set (tav);
+			break;
+		}
 	} else {
 		selection->clear_tracks ();
 	}

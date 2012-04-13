@@ -281,7 +281,6 @@ DeviceInfo::reload_device_info ()
 
 		if (di.set_state (*root, 3000) == 0) { /* version is ignored for now */
 			device_info[di.name()] = di;
-			std::cerr << di << '\n';
 		}
 	}
 
