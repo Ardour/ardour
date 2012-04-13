@@ -69,8 +69,8 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 	Gtk::Table* table = Gtk::manage (new Gtk::Table (2, 2));
 	table->set_spacings (4);
 	
-	table->attach (*manage (new Gtk::Label (_("Surface type:"))), 0, 1, 0, 1);
-	table->attach (_surface_combo, 1, 2, 0, 1);
+	table->attach (*manage (new Gtk::Label (_("Surface type:"))), 0, 1, 0, 1, AttachOptions(FILL|EXPAND), AttachOptions(0));
+	table->attach (_surface_combo, 1, 2, 0, 1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 
 	vector<string> surfaces;
 	
@@ -123,12 +123,51 @@ MackieControlProtocolGUI::rebuild_function_key_editor ()
 
 	function_key_editor.append_column (_("Key"), function_key_columns.name);
 
-	CellRendererCombo* plain_renderer = manage (new CellRendererCombo);
-	plain_renderer->property_model() = available_action_model;
-	plain_renderer->property_editable() = true;
-	plain_renderer->property_text_column() = 1;
-	TreeViewColumn* plain_column = manage (new TreeViewColumn (_("plain"), *plain_renderer));
+	CellRendererCombo* action_renderer = manage (new CellRendererCombo);
+	action_renderer->property_model() = available_action_model;
+	action_renderer->property_editable() = true;
+	action_renderer->property_text_column() = 0;
+
+	TreeViewColumn* plain_column = manage (new TreeViewColumn (_("Plain"), *action_renderer));
 	function_key_editor.append_column (*plain_column);
+	
+	TreeViewColumn* shift_column = manage (new TreeViewColumn (_("Shift"), *action_renderer));
+	function_key_editor.append_column (*shift_column);
+
+	TreeViewColumn* control_column = manage (new TreeViewColumn (_("Control"), *action_renderer));
+	function_key_editor.append_column (*control_column);
+
+	TreeViewColumn* option_column = manage (new TreeViewColumn (_("Option"), *action_renderer));
+	function_key_editor.append_column (*option_column);
+
+	TreeViewColumn* cmdalt_column = manage (new TreeViewColumn (_("Cmd/Alt"), *action_renderer));
+	function_key_editor.append_column (*cmdalt_column);
+
+	TreeViewColumn* shiftcontrol_column = manage (new TreeViewColumn (_("Shift+Control"), *action_renderer));
+	function_key_editor.append_column (*shiftcontrol_column);
+
+	/* now fill with data */
+
+	function_key_model = ListStore::create (function_key_columns);
+
+	r = *(function_key_model->append());
+	r[function_key_columns.name] = "F1";
+	r = *(function_key_model->append());
+	r[function_key_columns.name] = "F2";
+	r = *(function_key_model->append());
+	r[function_key_columns.name] = "F3";
+	r = *(function_key_model->append());
+	r[function_key_columns.name] = "F4";
+	r = *(function_key_model->append());
+	r[function_key_columns.name] = "F5";
+	r = *(function_key_model->append());
+	r[function_key_columns.name] = "F6";
+	r = *(function_key_model->append());
+	r[function_key_columns.name] = "F7";
+	r = *(function_key_model->append());
+	r[function_key_columns.name] = "F8";
+
+	function_key_editor.set_model (function_key_model);
 }
 
 void

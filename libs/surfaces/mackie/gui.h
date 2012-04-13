@@ -52,7 +52,7 @@ class MackieControlProtocolGUI : public Gtk::Notebook
     struct FunctionKeyColumns : public Gtk::TreeModel::ColumnRecord {
 	FunctionKeyColumns() {
 		add (name);
-		add (unmodified);
+		add (plain);
 		add (shift);
 		add (control);
 		add (option);
@@ -60,7 +60,7 @@ class MackieControlProtocolGUI : public Gtk::Notebook
 		add (shiftcontrol);
 	};
 	Gtk::TreeModelColumn<std::string> name;
-	Gtk::TreeModelColumn<std::string> unmodified;
+	Gtk::TreeModelColumn<std::string> plain;
 	Gtk::TreeModelColumn<std::string> shift;
 	Gtk::TreeModelColumn<std::string> control;
 	Gtk::TreeModelColumn<std::string> option;

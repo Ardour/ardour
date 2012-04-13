@@ -415,10 +415,13 @@ Strip::handle_button (Button& button, ButtonState bs)
 				return;
 			}
 			
+			DEBUG_TRACE (DEBUG::MackieControl, "add select button on press\n");
 			_surface->mcp().add_down_select_button (_surface->number(), _index);			
+
 			_surface->mcp().select_range ();
 
 		} else {
+			DEBUG_TRACE (DEBUG::MackieControl, "remove select button on release\n");
 			_surface->mcp().remove_down_select_button (_surface->number(), _index);			
 		}
 
@@ -448,6 +451,7 @@ Strip::handle_button (Button& button, ButtonState bs)
 	if (control) {
 
 		if (bs == press) {
+			DEBUG_TRACE (DEBUG::MackieControl, "add button on release\n");
 			_surface->mcp().add_down_button ((AutomationType) control->parameter().type(), _surface->number(), _index);
 			
 			float new_value;
@@ -467,6 +471,9 @@ Strip::handle_button (Button& button, ButtonState bs)
 			MackieControlProtocol::ControlList controls = _surface->mcp().down_controls ((AutomationType) control->parameter().type());
 			
 			
+			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("there are %1 buttons down for control type %2, new value = %3\n",
+									    controls.size(), control->parameter().type(), new_value));
+
 			/* apply change */
 
 			for (MackieControlProtocol::ControlList::iterator c = controls.begin(); c != controls.end(); ++c) {
@@ -474,6 +481,7 @@ Strip::handle_button (Button& button, ButtonState bs)
 			}
 
 		} else {
+			DEBUG_TRACE (DEBUG::MackieControl, "remove button on release\n");
 			_surface->mcp().remove_down_button ((AutomationType) control->parameter().type(), _surface->number(), _index);
 		}
 			

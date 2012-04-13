@@ -1208,6 +1208,8 @@ MackieControlProtocol::select_range ()
 
 	pull_route_range (_down_select_buttons, routes);
 
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("select range: found %1 routes\n", routes.size()));
+
 	if (!routes.empty()) {
 		for (RouteList::iterator r = routes.begin(); r != routes.end(); ++r) {
 			if (r == routes.begin()) {
