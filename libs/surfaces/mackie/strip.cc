@@ -505,7 +505,7 @@ Strip::do_parameter_display (AutomationType type, float val)
 	case PanAzimuthAutomation:
 		if (_route) {
 			boost::shared_ptr<Pannable> p = _route->pannable();
-			if (p) {
+			if (p && p->panner()) {
 				string str = p->panner()->value_as_string (p->pan_azimuth_control);
 				_surface->write (display (1, str));
 			}

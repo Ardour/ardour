@@ -187,6 +187,7 @@ MackieControlProtocolGUI::rebuild_function_key_editor ()
 	action_renderer->property_editable() = true;
 	action_renderer->property_text_column() = 0;
 	action_renderer->property_has_entry() = false;
+	action_renderer->signal_edited().connect (sigc::mem_fun(*this, &MackieControlProtocolGUI::action_changed));
 
 	TreeViewColumn* col;
 
@@ -222,22 +223,39 @@ MackieControlProtocolGUI::rebuild_function_key_editor ()
 	
 	row = *(function_key_model->append());
 	row[function_key_columns.name] = "F1";
+	row[function_key_columns.number] = 0;
 	row = *(function_key_model->append());
 	row[function_key_columns.name] = "F2";
+	row[function_key_columns.number] = 1;
 	row = *(function_key_model->append());
 	row[function_key_columns.name] = "F3";
+	row[function_key_columns.number] = 2;
 	row = *(function_key_model->append());
 	row[function_key_columns.name] = "F4";
+	row[function_key_columns.number] = 3;
 	row = *(function_key_model->append());
 	row[function_key_columns.name] = "F5";
+	row[function_key_columns.number] = 4;
 	row = *(function_key_model->append());
 	row[function_key_columns.name] = "F6";
+	row[function_key_columns.number] = 5;
 	row = *(function_key_model->append());
 	row[function_key_columns.name] = "F7";
+	row[function_key_columns.number] = 6;
 	row = *(function_key_model->append());
 	row[function_key_columns.name] = "F8";
+	row[function_key_columns.number] = 7;
 
 	function_key_editor.set_model (function_key_model);
+}
+
+void 
+MackieControlProtocolGUI::action_changed (const Glib::ustring &sPath, const Glib::ustring &text)
+{
+	Gtk::TreePath path(sPath);
+	Gtk::TreeModel::iterator row = function_key_model->get_iter(path);
+
+	cerr << sPath << " changed to " << text << endl;
 }
 
 void
