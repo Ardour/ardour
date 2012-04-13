@@ -790,6 +790,7 @@ get_value(LilvWorld* world, const LilvNode* subject, const LilvNode* predicate)
 void
 LV2Plugin::find_presets()
 {
+#ifdef HAVE_NEW_LILV
 	LilvNode* lv2_appliesTo = lilv_new_uri(_world.world, LILV_NS_LV2  "appliesTo");
 	LilvNode* pset_Preset   = lilv_new_uri(_world.world, NS_PSET "Preset");
 	LilvNode* rdfs_label    = lilv_new_uri(_world.world, LILV_NS_RDFS "label");
@@ -816,6 +817,7 @@ LV2Plugin::find_presets()
 	lilv_node_free(rdfs_label);
 	lilv_node_free(pset_Preset);
 	lilv_node_free(lv2_appliesTo);
+#endif  /* HAVE_NEW_LILV */
 }
 
 bool
