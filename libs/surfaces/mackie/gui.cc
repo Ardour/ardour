@@ -26,6 +26,8 @@
 #include <gtkmm/notebook.h>
 #include <gtkmm/cellrenderercombo.h>
 
+#include "pbd/strsplit.h"
+
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/actions.h"
 
@@ -103,22 +105,79 @@ MackieControlProtocolGUI::rebuild_function_key_editor ()
 
 	available_action_model = TreeStore::create (available_action_columns);
 
-	vector<string> a_names;
-	vector<string> a_paths;
-	vector<string> a_tooltips;
-	vector<string> a_keys;
-	vector<Gtk::AccelKey> a_bindings;
+	vector<string> paths;
+	vector<string> labels;
+	vector<string> tooltips;
+	vector<string> keys;
+	vector<AccelKey> bindings;
+	typedef std::map<string,TreeIter> NodeMap;
+	NodeMap nodes;
+	NodeMap::iterator r;
 
-	ActionManager::get_all_actions (a_names, a_paths, a_tooltips, a_keys, a_bindings);
+	ActionManager::get_all_actions (labels, paths, tooltips, keys, bindings);
 
-	vector<string>::iterator n = a_names.begin();
-	vector<string>::iterator p = a_paths.begin();
-	TreeModel::Row r;
+	vector<string>::iterator k;
+	vector<string>::iterator p;
+	vector<string>::iterator t;
+	vector<string>::iterator l;
 
-	for (; n != a_names.end(); ++n, ++p) {
-		r = *(available_action_model->append());
-		r[available_action_columns.name] = (*n);
-		r[available_action_columns.path] = (*p);
+	available_action_model->clear ();
+
+	for (l = labels.begin(), k = keys.begin(), p = paths.begin(), t = tooltips.begin(); l != labels.end(); ++k, ++p, ++t, ++l) {
+
+		TreeModel::Row row;
+		vector<string> parts;
+
+		parts.clear ();
+
+		split (*p, parts, '/');
+
+		if (parts.empty()) {
+			continue;
+		}
+
+		//kinda kludgy way to avoid displaying menu items as mappable
+		if ( parts[1] == _("Main_menu") )
+			continue;
+		if ( parts[1] == _("JACK") )
+			continue;
+		if ( parts[1] == _("redirectmenu") )
+			continue;
+		if ( parts[1] == _("Editor_menus") )
+			continue;
+		if ( parts[1] == _("RegionList") )
+			continue;
+		if ( parts[1] == _("ProcessorMenu") )
+			continue;
+
+		if ((r = nodes.find (parts[1])) == nodes.end()) {
+
+			/* top level is missing */
+
+			TreeIter rowp;
+			TreeModel::Row parent;
+			rowp = available_action_model->append();
+			nodes[parts[1]] = rowp;
+			parent = *(rowp);
+			parent[available_action_columns.name] = parts[1];
+
+			row = *(available_action_model->append (parent.children()));
+
+		} else {
+
+			row = *(available_action_model->append ((*r->second)->children()));
+
+		}
+
+		/* add this action */
+
+		if (l->empty ()) {
+			row[available_action_columns.name] = *t;
+		} else {
+			row[available_action_columns.name] = *l;
+		}
+
+		row[available_action_columns.path] = (*p);
 	}
 
 	function_key_editor.append_column (_("Key"), function_key_columns.name);
@@ -126,7 +185,7 @@ MackieControlProtocolGUI::rebuild_function_key_editor ()
 	CellRendererCombo* action_renderer = manage (new CellRendererCombo);
 	action_renderer->property_model() = available_action_model;
 	action_renderer->property_editable() = true;
-	action_renderer->property_text_column() = 1;
+	action_renderer->property_text_column() = 0;
 	action_renderer->property_has_entry() = false;
 
 	TreeViewColumn* col;
@@ -159,22 +218,24 @@ MackieControlProtocolGUI::rebuild_function_key_editor ()
 
 	function_key_model = ListStore::create (function_key_columns);
 
-	r = *(function_key_model->append());
-	r[function_key_columns.name] = "F1";
-	r = *(function_key_model->append());
-	r[function_key_columns.name] = "F2";
-	r = *(function_key_model->append());
-	r[function_key_columns.name] = "F3";
-	r = *(function_key_model->append());
-	r[function_key_columns.name] = "F4";
-	r = *(function_key_model->append());
-	r[function_key_columns.name] = "F5";
-	r = *(function_key_model->append());
-	r[function_key_columns.name] = "F6";
-	r = *(function_key_model->append());
-	r[function_key_columns.name] = "F7";
-	r = *(function_key_model->append());
-	r[function_key_columns.name] = "F8";
+	TreeModel::Row row;
+	
+	row = *(function_key_model->append());
+	row[function_key_columns.name] = "F1";
+	row = *(function_key_model->append());
+	row[function_key_columns.name] = "F2";
+	row = *(function_key_model->append());
+	row[function_key_columns.name] = "F3";
+	row = *(function_key_model->append());
+	row[function_key_columns.name] = "F4";
+	row = *(function_key_model->append());
+	row[function_key_columns.name] = "F5";
+	row = *(function_key_model->append());
+	row[function_key_columns.name] = "F6";
+	row = *(function_key_model->append());
+	row[function_key_columns.name] = "F7";
+	row = *(function_key_model->append());
+	row[function_key_columns.name] = "F8";
 
 	function_key_editor.set_model (function_key_model);
 }

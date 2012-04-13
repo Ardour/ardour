@@ -291,21 +291,13 @@ Strip::notify_gain_changed (bool force_update)
 
 				if (_surface->mcp().flip_mode()) {
 					_surface->write (_vpot->set_all (pos, true, Pot::wrap));
+					do_parameter_display (GainAutomation, pos);
 				} else {
 					_surface->write (_fader->set_position (pos));
+					do_parameter_display (GainAutomation, pos);
 				}
 
-				float dB = fast_coefficient_to_dB (pos);
-				if (pos == 0.0) {
-					_surface->write (display (1, "   0.0"));
-				} else {
-					char buf[16];
-					
-					snprintf (buf, sizeof (buf), "%6.1f", dB);
-					_surface->write (display (1, buf));
-				}
-
-				queue_display_reset (500);
+				queue_display_reset (3000);
 				_last_gain_position_written = pos;
 				
 			} else {
@@ -371,17 +363,13 @@ Strip::notify_panner_changed (bool force_update)
 				if (_surface->mcp().flip_mode()) {
 					
 					_surface->write (_fader->set_position (pos));
-					
+					do_parameter_display (PanAzimuthAutomation, pos);
 				} else {
 					_surface->write (_vpot->set_all (pos, true, Pot::dot));
+					do_parameter_display (PanAzimuthAutomation, pos);
 				}
-				
-				if (pannable->panner()) {
-					string str = pannable->panner()->value_as_string (pannable->pan_azimuth_control);
-					_surface->write (display (1, str));
-					queue_display_reset (500);
-				}
-				
+
+				queue_display_reset (3000);
 				_last_pan_position_written = pos;
 			}
 		}
@@ -433,14 +421,20 @@ Strip::handle_button (Button& button, ButtonState bs)
 
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("fader touch, press ? %1\n", (bs == press)));
 
-		bool state = (bs == press);
-		
-		_fader->set_in_use (state);
-		_fader->start_touch (_surface->mcp().transport_frame(), modified);
+		/* never use the modified control for fader stuff */
 
-		if (bs != press) {
-			/* fader touch ended, revert back to label display for fader */
-			_surface->write (display (1, static_display_string()));
+		if (bs == press) {
+
+			_fader->set_in_use (true);
+			_fader->start_touch (_surface->mcp().transport_frame(), false);
+			boost::shared_ptr<AutomationControl> ac = _fader->control (false);
+			if (ac) {
+				do_parameter_display ((AutomationType) ac->parameter().type(), ac->internal_to_interface (ac->get_value()));
+				queue_display_reset (3000);
+			}
+		} else {
+			_fader->set_in_use (false);
+			_fader->stop_touch (_surface->mcp().transport_frame(), true, false);
 		}
 		
 		return;
@@ -491,6 +485,37 @@ Strip::handle_button (Button& button, ButtonState bs)
 }
 
 void
+Strip::do_parameter_display (AutomationType type, float val)
+{
+	float dB;
+
+	switch (type) {
+	case GainAutomation:
+		dB = fast_coefficient_to_dB (val);
+		if (val == 0.0) {
+			_surface->write (display (1, " -inf "));
+		} else {
+			char buf[16];
+			
+			snprintf (buf, sizeof (buf), "%6.1f", dB);
+			_surface->write (display (1, buf));
+		}		
+		break;
+
+	case PanAzimuthAutomation:
+		if (_route) {
+			boost::shared_ptr<Pannable> p = _route->pannable();
+			if (p) {
+				string str = p->panner()->value_as_string (p->pan_azimuth_control);
+				_surface->write (display (1, str));
+			}
+		}
+	default:
+		break;
+	}
+}
+
+void
 Strip::handle_fader (Fader& fader, float position)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("fader to %1\n", position));
@@ -499,11 +524,8 @@ Strip::handle_fader (Fader& fader, float position)
 
 	fader.set_value (position, modified);
 	fader.start_touch (_surface->mcp().transport_frame(), modified);
+	queue_display_reset (3000);
 
-	if (!_surface->mcp().device_info().has_touch_sense_faders()) {
-		_surface->mcp().add_in_use_timeout (*_surface, fader, fader.control (modified));
-	}
-	
 	// must echo bytes back to slider now, because
 	// the notifier only works if the fader is not being
 	// touched. Which it is if we're getting input.

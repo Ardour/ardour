@@ -1341,6 +1341,8 @@ MackieControlProtocol::pull_route_range (list<uint32_t>& down, RouteList& select
 				ls = (*s)->n_strips ();
 			}
 
+			ls += 1;
+
 			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("adding strips for surface %1 (%2 .. %3)\n",
 									   (*s)->number(), fs, ls));
 

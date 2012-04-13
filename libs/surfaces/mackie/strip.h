@@ -7,6 +7,7 @@
 #include "pbd/property_basics.h"
 #include "pbd/signals.h"
 
+#include "ardour/types.h"
 #include "control_protocol/types.h"
 
 #include "control_group.h"
@@ -114,6 +115,7 @@ private:
 	void queue_display_reset (uint32_t msecs);
 	void clear_display_reset ();
 	void reset_display ();
+	void do_parameter_display (ARDOUR::AutomationType, float val);
 };
 
 }
