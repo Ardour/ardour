@@ -1357,11 +1357,10 @@ MackieControlProtocol::pull_route_range (DownButtonList& down, RouteList& select
 
 			if ((*s)->number() == last_surface) {
 				ls = last_strip;
+				ls += 1;
 			} else {
 				ls = (*s)->n_strips ();
 			}
-
-			ls += 1;
 
 			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("adding strips for surface %1 (%2 .. %3)\n",
 									   (*s)->number(), fs, ls));
