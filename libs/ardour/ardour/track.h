@@ -102,7 +102,7 @@ class Track : public Route, public PublicDiskstream
 	virtual int set_state (const XMLNode&, int version);
 	static void zero_diskstream_id_in_xml (XMLNode&);
 
-	boost::shared_ptr<PBD::Controllable> rec_enable_control() { return _rec_enable_control; }
+	boost::shared_ptr<AutomationControl> rec_enable_control() { return _rec_enable_control; }
 
 	bool record_enabled() const;
 	void set_record_enabled (bool yn, void *src);
@@ -201,13 +201,13 @@ class Track : public Route, public PublicDiskstream
 		FreezeState                        state;
 	};
 
-	struct RecEnableControllable : public PBD::Controllable {
-		RecEnableControllable (Track&);
+	struct RecEnableControl : public AutomationControl {
+		RecEnableControl (boost::shared_ptr<Track> t);
 
 		void set_value (double);
 		double get_value (void) const;
 
-		Track& track;
+		boost::shared_ptr<Track> track;
 	};
 
 	virtual void set_state_part_two () = 0;
@@ -218,7 +218,7 @@ class Track : public Route, public PublicDiskstream
 
 	void maybe_declick (BufferSet&, framecnt_t, int);
 
-	boost::shared_ptr<RecEnableControllable> _rec_enable_control;
+	boost::shared_ptr<RecEnableControl> _rec_enable_control;
 	
 	framecnt_t check_initial_delay (framecnt_t nframes, framecnt_t&);
 

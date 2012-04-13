@@ -145,7 +145,8 @@ namespace ARDOUR {
 		MidiSystemExclusiveAutomation,
 		FadeInAutomation,
 		FadeOutAutomation,
-		EnvelopeAutomation
+		EnvelopeAutomation,
+		RecEnableAutomation
 	};
 
 	enum AutoState {

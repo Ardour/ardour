@@ -38,9 +38,9 @@ class AutomationControl : public PBD::Controllable, public Evoral::Control
 {
 public:
 	AutomationControl(ARDOUR::Session&,
-			const Evoral::Parameter& parameter,
-			boost::shared_ptr<ARDOUR::AutomationList> l=boost::shared_ptr<ARDOUR::AutomationList>(),
-			const std::string& name="");
+			  const Evoral::Parameter& parameter,
+			  boost::shared_ptr<ARDOUR::AutomationList> l=boost::shared_ptr<ARDOUR::AutomationList>(),
+			  const std::string& name="");
 
 	boost::shared_ptr<AutomationList> alist() const {
 		return boost::dynamic_pointer_cast<AutomationList>(_list);

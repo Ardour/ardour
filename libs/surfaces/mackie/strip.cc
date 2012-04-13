@@ -164,11 +164,13 @@ Strip::set_route (boost::shared_ptr<Route> r)
 
 		if (_solo) {
 			_solo->set_normal_control (_route->solo_control());
+			_solo->set_modified_control (boost::shared_ptr<AutomationControl>());
 			_route->solo_control()->Changed.connect(route_connections, invalidator(), ui_bind (&Strip::notify_solo_changed, this), ui_context());
 		}
 
 		if (_mute) {
 			_mute->set_normal_control (_route->mute_control());
+			_mute->set_modified_control (boost::shared_ptr<AutomationControl>());
 			_route->mute_control()->Changed.connect(route_connections, invalidator(), ui_bind (&Strip::notify_mute_changed, this), ui_context());
 		}
 		
@@ -181,13 +183,15 @@ Strip::set_route (boost::shared_ptr<Route> r)
 			_route->pannable()->pan_width_control->Changed.connect(route_connections, invalidator(), ui_bind (&Strip::notify_panner_changed, this, false), ui_context());
 		}
 
+		/* bind fader & pan pot, as appropriate for current flip mode */
+
 		flip_mode_changed (false);
 		
 		boost::shared_ptr<Track> trk = boost::dynamic_pointer_cast<ARDOUR::Track>(_route);
 	
 		if (trk) {
-			// XXX FIX ME WHEN rec-enable IS-A AutomationControl
-			// _recenable->set_normal_control (trk->rec_enable_control());
+			_recenable->set_normal_control (trk->rec_enable_control());
+			_recenable->set_modified_control (boost::shared_ptr<AutomationControl>());
 			trk->rec_enable_control()->Changed .connect(route_connections, invalidator(), ui_bind (&Strip::notify_record_enable_changed, this), ui_context());
 		}
 		
@@ -376,6 +380,9 @@ Strip::handle_button (Button& button, ButtonState bs)
 
 	if (button.id() >= Button::select_base_id &&
 	    button.id() < Button::select_base_id + 8) {
+
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("select touch, lock ? %1\n", ((ms & lock_mod) == lock_mod) ? 1 : 0));
+
 		if ((ms & lock_mod) == lock_mod) {
 			_controls_locked = !_controls_locked;
 			return;
@@ -405,14 +412,19 @@ Strip::handle_button (Button& button, ButtonState bs)
 		return;
 	}
 
-	if (ms & MackieControlProtocol::MODIFIER_OPTION) {
-		/* reset to default/normal value */
-
-		boost::shared_ptr<AutomationControl> control = button.control (modified);
-
-		if (control) {
-			control->set_value (!control->get_value());
+	boost::shared_ptr<AutomationControl> control = button.control (modified);
+		
+	if (control) {
+		if (ms & MackieControlProtocol::MODIFIER_OPTION) {
+			/* reset to default/normal value */
+			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("reset %1 to default of %2\n", control->name(), control->normal()));
+			control->set_value (control->normal());
+		} else {
+			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("toggle %1 to default of %2\n", control->name(), control->get_value() ? 0.0 : 1.0));
+			control->set_value (control->get_value() ? 0.0 : 1.0);
 		}
+	} else {
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("button has no control at present (modified ? %1)\n", modified));
 	}
 }
 
