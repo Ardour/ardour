@@ -191,6 +191,8 @@ class MackieControlProtocol
 	void remove_down_select_button (int surface, int strip);
 	void select_range ();
 	
+	std::string f_action (uint32_t fn, uint32_t modifier = 0);
+
   protected:
 	// shut down the surface
 	void close();
@@ -231,7 +233,6 @@ class MackieControlProtocol
 
 	/* handling function key presses */
 
-	std::string f_action (uint32_t fn);
 	void f_press (uint32_t fn);
 
   private:

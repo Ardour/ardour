@@ -337,7 +337,6 @@ MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 	set_view_mode (_view_mode);
 	
 	/* current bank has not been saved */
-
 	session->set_dirty();
 }
 
@@ -1104,7 +1103,7 @@ MackieControlProtocol::clear_ports ()
 }
 
 string
-MackieControlProtocol::f_action (uint32_t fn)
+MackieControlProtocol::f_action (uint32_t fn, uint32_t /* modifier */)
 {
 	if (fn >= _f_actions.size()) {
 		return string();
