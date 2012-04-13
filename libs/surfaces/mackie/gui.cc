@@ -96,6 +96,19 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 	function_key_scroller.show_all();
 }
 
+CellRendererCombo*
+MackieControlProtocolGUI::make_action_renderer (Glib::RefPtr<TreeStore> model, Gtk::TreeModelColumnBase column)
+{
+	CellRendererCombo* renderer = manage (new CellRendererCombo);
+	renderer->property_model() = model;
+	renderer->property_editable() = true;
+	renderer->property_text_column() = 0;
+	renderer->property_has_entry() = false;
+	renderer->signal_edited().connect (sigc::bind (sigc::mem_fun(*this, &MackieControlProtocolGUI::action_changed), column));
+
+	return renderer;
+}
+
 void
 MackieControlProtocolGUI::rebuild_function_key_editor ()
 {
@@ -182,37 +195,38 @@ MackieControlProtocolGUI::rebuild_function_key_editor ()
 
 	function_key_editor.append_column (_("Key"), function_key_columns.name);
 
-	CellRendererCombo* action_renderer = manage (new CellRendererCombo);
-	action_renderer->property_model() = available_action_model;
-	action_renderer->property_editable() = true;
-	action_renderer->property_text_column() = 0;
-	action_renderer->property_has_entry() = false;
-	action_renderer->signal_edited().connect (sigc::mem_fun(*this, &MackieControlProtocolGUI::action_changed));
 
 	TreeViewColumn* col;
+	CellRendererCombo* renderer;
 
-	col = manage (new TreeViewColumn (_("Plain"), *action_renderer));
-	col->add_attribute (action_renderer->property_text(), function_key_columns.plain);
+	renderer = make_action_renderer (available_action_model, function_key_columns.plain);
+	col = manage (new TreeViewColumn (_("Plain"), *renderer));
+	col->add_attribute (renderer->property_text(), function_key_columns.plain);
 	function_key_editor.append_column (*col);
 	
-	col = manage (new TreeViewColumn (_("Shift"), *action_renderer));
-	col->add_attribute (action_renderer->property_text(), function_key_columns.shift);
+	renderer = make_action_renderer (available_action_model, function_key_columns.shift);
+	col = manage (new TreeViewColumn (_("Shift"), *renderer));
+	col->add_attribute (renderer->property_text(), function_key_columns.shift);
 	function_key_editor.append_column (*col);
 
-	col = manage (new TreeViewColumn (_("Control"), *action_renderer));
-	col->add_attribute (action_renderer->property_text(), function_key_columns.control);
+	renderer = make_action_renderer (available_action_model, function_key_columns.control);
+	col = manage (new TreeViewColumn (_("Control"), *renderer));
+	col->add_attribute (renderer->property_text(), function_key_columns.control);
 	function_key_editor.append_column (*col);
 
-	col = manage (new TreeViewColumn (_("Option"), *action_renderer));
-	col->add_attribute (action_renderer->property_text(), function_key_columns.option);
+	renderer = make_action_renderer (available_action_model, function_key_columns.option);
+	col = manage (new TreeViewColumn (_("Option"), *renderer));
+	col->add_attribute (renderer->property_text(), function_key_columns.option);
 	function_key_editor.append_column (*col);
 
-	col = manage (new TreeViewColumn (_("Cmd/Alt"), *action_renderer));
-	col->add_attribute (action_renderer->property_text(), function_key_columns.cmdalt);
+	renderer = make_action_renderer (available_action_model, function_key_columns.cmdalt);
+	col = manage (new TreeViewColumn (_("Cmd/Alt"), *renderer));
+	col->add_attribute (renderer->property_text(), function_key_columns.cmdalt);
 	function_key_editor.append_column (*col);
 
-	col = manage (new TreeViewColumn (_("Shift+Control"), *action_renderer));
-	col->add_attribute (action_renderer->property_text(), function_key_columns.shiftcontrol);
+	renderer = make_action_renderer (available_action_model, function_key_columns.shiftcontrol);
+	col = manage (new TreeViewColumn (_("Shift+Control"), *renderer));
+	col->add_attribute (renderer->property_text(), function_key_columns.shiftcontrol);
 	function_key_editor.append_column (*col);
 
 	/* now fill with data */
@@ -221,41 +235,32 @@ MackieControlProtocolGUI::rebuild_function_key_editor ()
 
 	TreeModel::Row row;
 	
-	row = *(function_key_model->append());
-	row[function_key_columns.name] = "F1";
-	row[function_key_columns.number] = 0;
-	row = *(function_key_model->append());
-	row[function_key_columns.name] = "F2";
-	row[function_key_columns.number] = 1;
-	row = *(function_key_model->append());
-	row[function_key_columns.name] = "F3";
-	row[function_key_columns.number] = 2;
-	row = *(function_key_model->append());
-	row[function_key_columns.name] = "F4";
-	row[function_key_columns.number] = 3;
-	row = *(function_key_model->append());
-	row[function_key_columns.name] = "F5";
-	row[function_key_columns.number] = 4;
-	row = *(function_key_model->append());
-	row[function_key_columns.name] = "F6";
-	row[function_key_columns.number] = 5;
-	row = *(function_key_model->append());
-	row[function_key_columns.name] = "F7";
-	row[function_key_columns.number] = 6;
-	row = *(function_key_model->append());
-	row[function_key_columns.name] = "F8";
-	row[function_key_columns.number] = 7;
+	for (uint32_t n = 0; n < 16; ++n) {
+
+		row = *(function_key_model->append());
+		row[function_key_columns.name] = string_compose ("F%1", n+1);
+		row[function_key_columns.number] = n;
+		row[function_key_columns.control] = "c";
+		row[function_key_columns.option] = "o";
+		row[function_key_columns.shift] = "s";
+		row[function_key_columns.cmdalt] = "ca";
+		row[function_key_columns.shiftcontrol] = "sc";
+	}
 
 	function_key_editor.set_model (function_key_model);
 }
 
 void 
-MackieControlProtocolGUI::action_changed (const Glib::ustring &sPath, const Glib::ustring &text)
+MackieControlProtocolGUI::action_changed (const Glib::ustring &sPath, const Glib::ustring &text, TreeModelColumnBase col)
 {
 	Gtk::TreePath path(sPath);
 	Gtk::TreeModel::iterator row = function_key_model->get_iter(path);
 
-	cerr << sPath << " changed to " << text << endl;
+	cerr << sPath << '-' << col.index() <<  " changed to " << text << endl;
+	
+	if (row) {
+		(*row).set_value (col.index(), text);
+	}
 }
 
 void

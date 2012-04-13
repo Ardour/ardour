@@ -297,7 +297,7 @@ Strip::notify_gain_changed (bool force_update)
 					do_parameter_display (GainAutomation, pos);
 				}
 
-				queue_display_reset (3000);
+				queue_display_reset (2000);
 				_last_gain_position_written = pos;
 				
 			} else {
@@ -369,7 +369,7 @@ Strip::notify_panner_changed (bool force_update)
 					do_parameter_display (PanAzimuthAutomation, pos);
 				}
 
-				queue_display_reset (3000);
+				queue_display_reset (2000);
 				_last_pan_position_written = pos;
 			}
 		}
@@ -385,7 +385,7 @@ Strip::handle_button (Button& button, ButtonState bs)
 		button.set_in_use (false);
 	}
 
-	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("strip %1 handling button %2\n", _index, button.id()));
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("strip %1 handling button %2 press ? %3\n", _index, button.id(), (bs == press)));
 
 	int lock_mod = (MackieControlProtocol::MODIFIER_CONTROL|MackieControlProtocol::MODIFIER_SHIFT);
 	int ms = _surface->mcp().modifier_state();
@@ -430,11 +430,14 @@ Strip::handle_button (Button& button, ButtonState bs)
 			boost::shared_ptr<AutomationControl> ac = _fader->control (false);
 			if (ac) {
 				do_parameter_display ((AutomationType) ac->parameter().type(), ac->internal_to_interface (ac->get_value()));
-				queue_display_reset (3000);
+				queue_display_reset (2000);
 			}
+
 		} else {
+
 			_fader->set_in_use (false);
 			_fader->stop_touch (_surface->mcp().transport_frame(), true, false);
+
 		}
 		
 		return;
@@ -524,7 +527,7 @@ Strip::handle_fader (Fader& fader, float position)
 
 	fader.set_value (position, modified);
 	fader.start_touch (_surface->mcp().transport_frame(), modified);
-	queue_display_reset (3000);
+	queue_display_reset (2000);
 
 	// must echo bytes back to slider now, because
 	// the notifier only works if the fader is not being

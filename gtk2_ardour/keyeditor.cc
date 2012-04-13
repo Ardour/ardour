@@ -193,17 +193,13 @@ KeyEditor::on_key_release_event (GdkEventKey* ev)
 			goto out;
 		}
 
-		cerr << "real lkeyval: " << ev->keyval << endl;
                 Gtkmm2ext::possibly_translate_keyval_to_make_legal_accelerator (ev->keyval);
-		cerr << "using keyval = " << ev->keyval << endl;
 
 
 		bool result = AccelMap::change_entry (path,
 						      ev->keyval,
 						      ModifierType (Keyboard::RelevantModifierKeyMask & ev->state),
 						      true);
-
-		cerr << "New binding to " << ev->keyval << " worked: " << result << endl;
 
 		if (result) {
 			AccelKey key;

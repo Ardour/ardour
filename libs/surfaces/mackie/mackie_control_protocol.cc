@@ -49,6 +49,7 @@
 #include "ardour/route.h"
 #include "ardour/session.h"
 #include "ardour/tempo.h"
+#include "ardour/track.h"
 #include "ardour/types.h"
 #include "ardour/audioengine.h"
 
@@ -1189,15 +1190,19 @@ MackieControlProtocol::transport_frame() const
 void
 MackieControlProtocol::add_down_select_button (int surface, int strip)
 {
-	_down_select_buttons.push_back ((surface<<8)|(strip&0xf));
+	_down_select_buttons.insert ((surface<<8)|(strip&0xf));
 }
 
 void
 MackieControlProtocol::remove_down_select_button (int surface, int strip)
 {
-	list<uint32_t>::iterator x = find (_down_select_buttons.begin(), _down_select_buttons.end(), (surface<<8)|(strip&0xf));
+	DownButtonList::iterator x = find (_down_select_buttons.begin(), _down_select_buttons.end(), (surface<<8)|(strip&0xf));
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("removing surface %1 strip %2 from down select buttons\n", surface, strip));
 	if (x != _down_select_buttons.end()) {
 		_down_select_buttons.erase (x);
+	} else {
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("surface %1 strip %2 not found in down select buttons\n",
+								   surface, strip));
 	}
 }
 
@@ -1230,7 +1235,7 @@ MackieControlProtocol::add_down_button (AutomationType a, int surface, int strip
 		_down_buttons[a] = DownButtonList();
 	}
 
-	_down_buttons[a].push_back ((surface<<8)|(strip&0xf));
+	_down_buttons[a].insert ((surface<<8)|(strip&0xf));
 }
 
 void
@@ -1238,15 +1243,20 @@ MackieControlProtocol::remove_down_button (AutomationType a, int surface, int st
 {
 	DownButtonMap::iterator m = _down_buttons.find (a);
 
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("removing surface %1 strip %2 from down buttons for %3\n", surface, strip, (int) a));
+
 	if (m == _down_buttons.end()) {
 		return;
 	}
 
 	DownButtonList& l (m->second);
-	list<uint32_t>::iterator x = find (l.begin(), l.end(), (surface<<8)|(strip&0xf));
+	DownButtonList::iterator x = find (l.begin(), l.end(), (surface<<8)|(strip&0xf));
 
 	if (x != l.end()) {
 		l.erase (x);
+	} else {
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("surface %1 strip %2 not found in down buttons for %3\n",
+								   surface, strip, (int) a));
 	}
 }
 
@@ -1283,6 +1293,14 @@ MackieControlProtocol::down_controls (AutomationType p)
 			controls.push_back ((*r)->mute_control());
 		}
 		break;
+	case RecEnableAutomation:
+		for (RouteList::iterator r = routes.begin(); r != routes.end(); ++r) {
+			boost::shared_ptr<Track> trk = boost::dynamic_pointer_cast<Track> (*r);
+			if (trk) {
+				controls.push_back (trk->rec_enable_control());
+			}
+		}
+		break;
 	default:
 		break;
 	}
@@ -1300,7 +1318,7 @@ struct ButtonRangeSorter {
 };
 
 void
-MackieControlProtocol::pull_route_range (list<uint32_t>& down, RouteList& selected)
+MackieControlProtocol::pull_route_range (DownButtonList& down, RouteList& selected)
 {
 	ButtonRangeSorter cmp;
 
@@ -1308,10 +1326,12 @@ MackieControlProtocol::pull_route_range (list<uint32_t>& down, RouteList& select
 		return;
 	}
 
-	down.sort (cmp);
+	list<uint32_t> ldown;
+	ldown.insert (ldown.end(), down.begin(), down.end());
+	ldown.sort (cmp);
 
-	uint32_t first = down.front();
-	uint32_t last = down.back ();
+	uint32_t first = ldown.front();
+	uint32_t last = ldown.back ();
 	
 	uint32_t first_surface = first>>8;
 	uint32_t first_strip = first&0xf;

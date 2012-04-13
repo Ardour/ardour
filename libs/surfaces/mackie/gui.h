@@ -16,6 +16,7 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+
 #include <gtkmm/comboboxtext.h>
 #include <gtkmm/box.h>
 #include <gtkmm/spinbutton.h>
@@ -24,6 +25,10 @@
 #include <gtkmm/liststore.h>
 #include <gtkmm/notebook.h>
 #include <gtkmm/scrolledwindow.h>
+
+namespace Gtk {
+	class CellRendererCombo;
+}
 
 class MackieControlProtocol;
 
@@ -79,6 +84,7 @@ class MackieControlProtocolGUI : public Gtk::Notebook
     Glib::RefPtr<Gtk::TreeStore> available_action_model;
 
     void rebuild_function_key_editor ();
-    void action_changed (const Glib::ustring &sPath, const Glib::ustring &text);
+    void action_changed (const Glib::ustring &sPath, const Glib::ustring &text, Gtk::TreeModelColumnBase);
+    Gtk::CellRendererCombo* make_action_renderer (Glib::RefPtr<Gtk::TreeStore> model, Gtk::TreeModelColumnBase);
 };
 

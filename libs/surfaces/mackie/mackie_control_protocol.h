@@ -22,6 +22,7 @@
 #include <vector>
 #include <map>
 #include <list>
+#include <set>
 
 #include <sys/time.h>
 #include <pthread.h>
@@ -295,7 +296,7 @@ class MackieControlProtocol
 
 	/* BUTTON HANDLING */
 
-	typedef std::list<uint32_t> DownButtonList;
+	typedef std::set<uint32_t> DownButtonList;
 	typedef std::map<ARDOUR::AutomationType,DownButtonList> DownButtonMap;
 	DownButtonMap  _down_buttons;
 	DownButtonList _down_select_buttons; 
