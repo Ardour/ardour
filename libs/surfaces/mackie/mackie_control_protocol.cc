@@ -102,6 +102,7 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 	, _flip_mode (false)
 	, _view_mode (Mixer)
 	, _current_selected_track (-1)
+	, _modifier_state (0)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::MackieControlProtocol\n");
 
