@@ -126,25 +126,34 @@ MackieControlProtocolGUI::rebuild_function_key_editor ()
 	CellRendererCombo* action_renderer = manage (new CellRendererCombo);
 	action_renderer->property_model() = available_action_model;
 	action_renderer->property_editable() = true;
-	action_renderer->property_text_column() = 0;
+	action_renderer->property_text_column() = 1;
+	action_renderer->property_has_entry() = false;
 
-	TreeViewColumn* plain_column = manage (new TreeViewColumn (_("Plain"), *action_renderer));
-	function_key_editor.append_column (*plain_column);
+	TreeViewColumn* col;
+
+	col = manage (new TreeViewColumn (_("Plain"), *action_renderer));
+	col->add_attribute (action_renderer->property_text(), function_key_columns.plain);
+	function_key_editor.append_column (*col);
 	
-	TreeViewColumn* shift_column = manage (new TreeViewColumn (_("Shift"), *action_renderer));
-	function_key_editor.append_column (*shift_column);
+	col = manage (new TreeViewColumn (_("Shift"), *action_renderer));
+	col->add_attribute (action_renderer->property_text(), function_key_columns.shift);
+	function_key_editor.append_column (*col);
 
-	TreeViewColumn* control_column = manage (new TreeViewColumn (_("Control"), *action_renderer));
-	function_key_editor.append_column (*control_column);
+	col = manage (new TreeViewColumn (_("Control"), *action_renderer));
+	col->add_attribute (action_renderer->property_text(), function_key_columns.control);
+	function_key_editor.append_column (*col);
 
-	TreeViewColumn* option_column = manage (new TreeViewColumn (_("Option"), *action_renderer));
-	function_key_editor.append_column (*option_column);
+	col = manage (new TreeViewColumn (_("Option"), *action_renderer));
+	col->add_attribute (action_renderer->property_text(), function_key_columns.option);
+	function_key_editor.append_column (*col);
 
-	TreeViewColumn* cmdalt_column = manage (new TreeViewColumn (_("Cmd/Alt"), *action_renderer));
-	function_key_editor.append_column (*cmdalt_column);
+	col = manage (new TreeViewColumn (_("Cmd/Alt"), *action_renderer));
+	col->add_attribute (action_renderer->property_text(), function_key_columns.cmdalt);
+	function_key_editor.append_column (*col);
 
-	TreeViewColumn* shiftcontrol_column = manage (new TreeViewColumn (_("Shift+Control"), *action_renderer));
-	function_key_editor.append_column (*shiftcontrol_column);
+	col = manage (new TreeViewColumn (_("Shift+Control"), *action_renderer));
+	col->add_attribute (action_renderer->property_text(), function_key_columns.shiftcontrol);
+	function_key_editor.append_column (*col);
 
 	/* now fill with data */
 

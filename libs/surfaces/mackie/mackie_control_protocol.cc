@@ -1262,6 +1262,9 @@ MackieControlProtocol::down_controls (AutomationType p)
 		return controls;
 	}
 	
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("looking for down buttons for %1, got %2\n",
+							   p, m->second.size()));
+
 	pull_route_range (m->second, routes);
 	
 	switch (p) {
@@ -1311,10 +1314,13 @@ MackieControlProtocol::pull_route_range (list<uint32_t>& down, RouteList& select
 	uint32_t last = down.back ();
 	
 	uint32_t first_surface = first>>8;
-	uint32_t first_strip = first&0x8;
+	uint32_t first_strip = first&0xf;
 
 	uint32_t last_surface = last>>8;
-	uint32_t last_strip = last&0x8;
+	uint32_t last_strip = last&0xf;
+
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("PRR %5 in list %1.%2 - %3.%4\n", first_surface, first_strip, last_surface, last_strip,
+							   down.size()));
 	
 	for (Surfaces::const_iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
 		
@@ -1334,6 +1340,9 @@ MackieControlProtocol::pull_route_range (list<uint32_t>& down, RouteList& select
 			} else {
 				ls = (*s)->n_strips ();
 			}
+
+			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("adding strips for surface %1 (%2 .. %3)\n",
+									   (*s)->number(), fs, ls));
 
 			for (uint32_t n = fs; n < ls; ++n) {
 				boost::shared_ptr<Route> r = (*s)->nth_strip (n)->route();
