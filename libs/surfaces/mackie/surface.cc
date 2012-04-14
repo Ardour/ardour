@@ -7,11 +7,13 @@
 #include "midi++/port.h"
 #include "midi++/manager.h"
 
+#include "ardour/automation_control.h"
 #include "ardour/debug.h"
 #include "ardour/route.h"
 #include "ardour/panner.h"
 #include "ardour/panner_shell.h"
 #include "ardour/rc_configuration.h"
+#include "ardour/session.h"
 
 #include "control_group.h"
 #include "surface_port.h"
@@ -36,7 +38,12 @@ using namespace Mackie;
 using ARDOUR::Route;
 using ARDOUR::Panner;
 using ARDOUR::Pannable;
-using ARDOUR::PannerShell;
+using ARDOUR::AutomationControl;
+
+#define ui_context() MackieControlProtocol::instance() /* a UICallback-derived object that specifies the event loop for signal handling */
+#define ui_bind(f, ...) boost::protect (boost::bind (f, __VA_ARGS__))
+extern PBD::EventLoop::InvalidationRecord* __invalidator (sigc::trackable& trackable, const char*, int);
+#define invalidator() __invalidator (*(MackieControlProtocol::instance()), __FILE__, __LINE__)
 
 // The MCU sysex header.4th byte Will be overwritten
 // when we get an incoming sysex that identifies
@@ -69,6 +76,10 @@ Surface::Surface (MackieControlProtocol& mcp, const std::string& device_name, ui
 		if (_mcp.device_info().has_global_controls()) {
 			init_controls ();
 		}
+
+		if (_mcp.device_info().has_master_fader()) {
+			setup_master ();
+		}
 	}
 
 	uint32_t n = _mcp.device_info().strip_cnt();
@@ -76,7 +87,7 @@ Surface::Surface (MackieControlProtocol& mcp, const std::string& device_name, ui
 	if (n) {
 		init_strips (n);
 	}
-
+	
 	connect_to_signals ();
 
 	/* wakey wakey */
@@ -194,6 +205,33 @@ Surface::init_strips (uint32_t n)
 	}
 }
 
+void
+Surface::setup_master ()
+{
+	_master_fader = dynamic_cast<Fader*> (Fader::factory (*this, 8, "master", *groups["master"]));
+	
+	boost::shared_ptr<Route> m;
+	
+	if ((m = _mcp.get_session().monitor_out()) == 0) {
+		m = _mcp.get_session().master_out();
+	} 
+	
+	if (!m) {
+		return;
+	}
+	
+	_master_fader->set_normal_control (m->gain_control());
+	m->gain_control()->Changed.connect (*this, invalidator(), ui_bind (&Surface::master_gain_changed, this), ui_context());
+}
+
+void
+Surface::master_gain_changed ()
+{
+	boost::shared_ptr<AutomationControl> ac = _master_fader->control(false);
+	float pos = ac->internal_to_interface (ac->get_value());
+	_port->write (_master_fader->set_position (pos));
+}
+
 float 
 Surface::scaled_delta (float delta, float current_speed)
 {
@@ -289,11 +327,13 @@ Surface::handle_midi_pitchbend_message (MIDI::Parser&, MIDI::pitchbend_t pb, uin
 
 	if (fader) {
 		Strip* strip = dynamic_cast<Strip*> (&fader->group());
+		float pos = (pb >> 4)/1023.0; // only the top 10 bytes are used
 		if (strip) {
-			float midi_pos = pb >> 4; // only the top 10 bytes are used
-			strip->handle_fader (*fader, midi_pos/1023.0);
+			strip->handle_fader (*fader, pos);
 		} else {
 			/* master fader */
+			fader->set_value (pos, false); // alter master gain
+			_port->write (fader->set_position (pos)); // write back value (required for servo)
 		}
 	} else {
 		DEBUG_TRACE (DEBUG::MackieControl, "fader not found\n");

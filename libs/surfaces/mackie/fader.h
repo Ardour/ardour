@@ -8,6 +8,7 @@ namespace Mackie {
 class Fader : public Control
 {
   public:
+	
 	Fader (int id, std::string name, Group & group)
 		: Control (id, name, group)
 		, position (0.0)

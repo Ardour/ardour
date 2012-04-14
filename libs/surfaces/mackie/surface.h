@@ -59,9 +59,9 @@ public:
 	std::map<int,Control*> controls_by_device_independent_id;
 	
 	Mackie::JogWheel* jog_wheel() const { return _jog_wheel; }
+	Fader* master_fader() const { return _master_fader; }
 
-	/// The collection of all numbered strips. No master
-	/// strip in here.
+	/// The collection of all numbered strips.
 	typedef std::vector<Strip*> Strips;
 	Strips strips;
 
@@ -147,9 +147,7 @@ public:
 	MackieControlProtocol& mcp() const { return _mcp; }
 
   protected:
-	void init_controls();
-	void init_strips (uint32_t n);
-
+	
   private:
 	MackieControlProtocol& _mcp;
 	SurfacePort*           _port;
@@ -159,11 +157,17 @@ public:
 	bool                   _active;
 	bool                   _connected;
 	Mackie::JogWheel*      _jog_wheel;
+	Fader*                 _master_fader;
 
 	void jog_wheel_state_display (Mackie::JogWheel::State state);
 	void handle_midi_sysex (MIDI::Parser&, MIDI::byte *, size_t count);
 	MidiByteArray host_connection_query (MidiByteArray& bytes);
 	MidiByteArray host_connection_confirmation (const MidiByteArray& bytes);
+
+	void init_controls();
+	void init_strips (uint32_t n);
+	void setup_master ();
+	void master_gain_changed ();
 };
 
 }

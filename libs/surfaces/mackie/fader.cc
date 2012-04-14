@@ -17,6 +17,8 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <cmath>
+
 #include "fader.h"
 #include "surface.h"
 #include "control_group.h"
@@ -50,6 +52,6 @@ Fader::update_message ()
 		return MidiByteArray();
 	}
 
-	int posi = int (0x3fff * position);
-	return MidiByteArray  (3, 0xe0 | id(), posi & 0x7f, posi >> 7);
+	int posi = lrintf (0x3fff * position);
+	return MidiByteArray  (3, 0xe0 + id(), posi & 0x7f, posi >> 7);
 }
