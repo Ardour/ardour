@@ -417,9 +417,7 @@ Strip::handle_button (Button& button, ButtonState bs)
 	}
 
 	if ((button.id() >= Button::fader_touch_base_id &&
-	     button.id() < Button::fader_touch_base_id + 8) ||
-	    /* Hack for SSL Nucleus */
-	    (button.id() >= 104 && button.id() < 112)) {
+	     button.id() < Button::fader_touch_base_id + 8)) {
 
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("fader touch, press ? %1\n", (bs == press)));
 

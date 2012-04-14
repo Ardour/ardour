@@ -36,7 +36,7 @@ public:
 		mute_base_id = 0x10,
 		select_base_id = 0x18,
 		vselect_base_id = 0x20,
-		fader_touch_base_id = 0xe0,
+		fader_touch_base_id = 0x68, // 0xe0,
 	};
 
 	enum ButtonID {
