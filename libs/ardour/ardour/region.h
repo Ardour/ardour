@@ -128,7 +128,7 @@ class Region
 	float stretch () const { return _stretch; }
 	float shift ()   const { return _shift; }
 
-	void set_ancestral_data (framepos_t start, framepos_t length, float stretch, float shift);
+	void set_ancestral_data (framepos_t start, framecnt_t length, float stretch, float shift);
 
 	frameoffset_t sync_offset (int& dir) const;
 	framepos_t sync_position () const;
@@ -282,7 +282,7 @@ class Region
 		return 0;
 	}
 
-	virtual int adjust_transients (framepos_t /*delta*/) {
+	virtual int adjust_transients (frameoffset_t /*delta*/) {
 		// no transients, but its OK
 		return 0;
 	}

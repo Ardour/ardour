@@ -2964,7 +2964,7 @@ Route::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, in
 		return 0;
 	}
 
-	framecnt_t unused = 0;
+	framepos_t unused = 0;
 
 	if ((nframes = check_initial_delay (nframes, unused)) == 0) {
 		return 0;

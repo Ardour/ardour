@@ -132,7 +132,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 
 	/* end of vfunc-based API */
 
-	void shift (framepos_t, framepos_t);
+	void shift (framepos_t, framecnt_t);
 
 	void set_gain (gain_t val, void *src);
 	void inc_gain (gain_t delta, void *src);
@@ -435,7 +435,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	virtual void set_block_size (pframes_t nframes);
 
   protected:
-	virtual framecnt_t check_initial_delay (framecnt_t nframes, framecnt_t&) { return nframes; }
+	virtual framecnt_t check_initial_delay (framecnt_t nframes, framepos_t&) { return nframes; }
 
 	void passthru (framepos_t start_frame, framepos_t end_frame,
 			pframes_t nframes, int declick);

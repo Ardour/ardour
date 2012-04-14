@@ -77,7 +77,7 @@ class MidiRegion : public Region
 	                    NoteMode  mode = Sustained,
 	                    MidiStateTracker* tracker = 0) const;
 
-	framepos_t master_read_at (MidiRingBuffer<framepos_t>& dst,
+	framecnt_t master_read_at (MidiRingBuffer<framepos_t>& dst,
 	                           framepos_t position,
 	                           framecnt_t dur,
 	                           uint32_t  chan_n = 0,

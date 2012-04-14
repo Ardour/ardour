@@ -2953,7 +2953,7 @@ MidiRegionView::nudge_notes (bool forward)
 
 	framepos_t ref_point = source_beats_to_absolute_frames ((*(_selection.begin()))->note()->time());
 	framepos_t unused;
-	framepos_t distance;
+	framecnt_t distance;
 
 	if (trackview.editor().snap_mode() == Editing::SnapOff) {
 

@@ -166,7 +166,7 @@ class AudioRegion : public Region
 	int set_transients (AnalysisFeatureList&);
 	int get_transients (AnalysisFeatureList&, bool force_new = false);
 	int update_transient (framepos_t old_position, framepos_t new_position);
-	int adjust_transients (framepos_t delta);
+	int adjust_transients (frameoffset_t delta);
 
 	AudioIntervalResult find_silence (Sample, framecnt_t, InterThreadInfo&) const;
 

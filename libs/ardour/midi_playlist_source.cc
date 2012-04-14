@@ -126,7 +126,7 @@ MidiPlaylistSource::length (framepos_t)  const
 	return extent.second - extent.first;
 }
 
-framepos_t
+framecnt_t
 MidiPlaylistSource::read_unlocked (Evoral::EventSink<framepos_t>& dst,
 				   framepos_t /*position*/,
 				   framepos_t start, framecnt_t cnt,
@@ -141,7 +141,7 @@ MidiPlaylistSource::read_unlocked (Evoral::EventSink<framepos_t>& dst,
 	return mp->read (dst, start, cnt);
 }
 
-framepos_t
+framecnt_t
 MidiPlaylistSource::write_unlocked (MidiRingBuffer<framepos_t>& dst,
 				    framepos_t,
 				    framecnt_t)

@@ -324,7 +324,7 @@ Crossfade::initialize ()
 }
 
 framecnt_t
-Crossfade::read_raw_internal (Sample* buf, framecnt_t start, framecnt_t cnt, int channel) const
+Crossfade::read_raw_internal (Sample* buf, framepos_t start, framecnt_t cnt, int channel) const
 {
 	Sample* mixdown = new Sample[cnt];
 	float* gain = new float[cnt];

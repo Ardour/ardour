@@ -478,7 +478,7 @@ MidiTrack::write_out_of_band_data (BufferSet& bufs, framepos_t /*start*/, framep
 }
 
 int
-MidiTrack::export_stuff (BufferSet& /*bufs*/, framecnt_t /*nframes*/, framepos_t /*end_frame*/, 
+MidiTrack::export_stuff (BufferSet& /*bufs*/, framepos_t /*start_frame*/, framecnt_t /*nframes*/, 
 			 boost::shared_ptr<Processor> /*endpoint*/, bool /*include_endpoint*/, bool /*forexport*/)
 {
 	return -1;

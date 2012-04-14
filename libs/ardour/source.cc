@@ -263,7 +263,7 @@ Source::mark_for_remove ()
 }
 
 void
-Source::set_timeline_position (int64_t pos)
+Source::set_timeline_position (framepos_t pos)
 {
 	_timeline_position = pos;
 }

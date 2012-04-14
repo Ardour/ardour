@@ -577,13 +577,13 @@ Track::hidden () const
 }
 
 int
-Track::can_internal_playback_seek (framepos_t p)
+Track::can_internal_playback_seek (framecnt_t p)
 {
 	return _diskstream->can_internal_playback_seek (p);
 }
 
 int
-Track::internal_playback_seek (framepos_t p)
+Track::internal_playback_seek (framecnt_t p)
 {
 	return _diskstream->internal_playback_seek (p);
 }
@@ -859,7 +859,7 @@ Track::maybe_declick (BufferSet& bufs, framecnt_t nframes, int declick)
 }
 
 framecnt_t
-Track::check_initial_delay (framecnt_t nframes, framecnt_t& transport_frame)
+Track::check_initial_delay (framecnt_t nframes, framepos_t& transport_frame)
 {
 	if (_roll_delay > nframes) {
 

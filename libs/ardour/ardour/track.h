@@ -220,7 +220,7 @@ class Track : public Route, public PublicDiskstream
 
 	boost::shared_ptr<RecEnableControl> _rec_enable_control;
 	
-	framecnt_t check_initial_delay (framecnt_t nframes, framecnt_t&);
+	framecnt_t check_initial_delay (framecnt_t nframes, framepos_t&);
 
 private:
 

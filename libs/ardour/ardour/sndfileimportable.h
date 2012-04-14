@@ -37,7 +37,7 @@ class SndFileImportableSource : public ImportableSource {
 	uint32_t   channels() const;
 	framecnt_t length() const;
 	framecnt_t samplerate() const;
-	void       seek (framecnt_t pos);
+	void       seek (framepos_t pos);
 	framepos_t natural_position() const;
 	bool       clamped_at_unity () const;
 

@@ -321,7 +321,7 @@ TimeAxisViewItem::get_position() const
  */
 
 bool
-TimeAxisViewItem::set_duration (framepos_t dur, void* src)
+TimeAxisViewItem::set_duration (framecnt_t dur, void* src)
 {
 	if ((dur > max_item_duration) || (dur < min_item_duration)) {
 		warning << string_compose (_("new duration %1 frames is out of bounds for %2"), get_item_name(), dur)
