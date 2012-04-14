@@ -127,8 +127,8 @@ class Track : public Route, public PublicDiskstream
 	void set_pending_overwrite (bool);
 	int seek (framepos_t, bool complete_refill = false);
 	bool hidden () const;
-	int can_internal_playback_seek (framepos_t);
-	int internal_playback_seek (framepos_t);
+	int can_internal_playback_seek (framecnt_t);
+	int internal_playback_seek (framecnt_t);
 	void non_realtime_input_change ();
 	void non_realtime_locate (framepos_t);
 	void non_realtime_set_speed ();

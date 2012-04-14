@@ -324,7 +324,7 @@ class Region
 	virtual int _set_state (const XMLNode&, int version, PBD::PropertyChange& what_changed, bool send_signal);
 	void post_set (const PBD::PropertyChange&);
 	virtual void set_position_internal (framepos_t pos, bool allow_bbt_recompute);
-	virtual void set_length_internal (framepos_t pos);
+	virtual void set_length_internal (framecnt_t);
 	
 	DataType _type;
 

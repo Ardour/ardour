@@ -142,12 +142,12 @@ class MidiSource : virtual public Source, public boost::enable_shared_from_this<
   protected:
 	virtual void flush_midi() = 0;
 
-	virtual framepos_t read_unlocked (Evoral::EventSink<framepos_t>& dst,
+	virtual framecnt_t read_unlocked (Evoral::EventSink<framepos_t>& dst,
 					  framepos_t position,
 					  framepos_t start, framecnt_t cnt,
 					  MidiStateTracker* tracker) const = 0;
 
-	virtual framepos_t write_unlocked (MidiRingBuffer<framepos_t>& dst,
+	virtual framecnt_t write_unlocked (MidiRingBuffer<framepos_t>& dst,
 					   framepos_t position,
 					   framecnt_t cnt) = 0;
 
