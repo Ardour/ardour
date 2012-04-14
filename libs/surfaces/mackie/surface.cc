@@ -376,12 +376,12 @@ Surface::handle_midi_note_on_message (MIDI::Parser &, MIDI::EventTwoBytes* ev)
 
 		if (strip) {
 			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("strip %1 button %2 pressed ? %3\n",
-									   strip->index(), button->name(), (ev->velocity == 0x7f)));
-			strip->handle_button (*button, ev->velocity == 0x7f ? press : release);
+									   strip->index(), button->name(), (ev->velocity > 64)));
+			strip->handle_button (*button, ev->velocity > 64 ? press : release);
 		} else {
 			/* global button */
 			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("global button %1\n", button->id()));
-			_mcp.handle_button_event (*this, *button, ev->velocity == 0x7f ? press : release);
+			_mcp.handle_button_event (*this, *button, ev->velocity > 64 ? press : release);
 		}
 	} else {
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("no button found for %1\n", ev->note_number));
