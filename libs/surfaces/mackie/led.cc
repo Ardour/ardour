@@ -23,6 +23,12 @@
 
 using namespace Mackie;
 
+const int Led::FaderTouch = 0x70;
+const int Led::Timecode = 0x71;
+const int Led::Beats = 0x72;
+const int Led::RudeSolo = 0x73;
+const int Led::RelayClick = 0x74;
+
 Control*
 Led::factory (Surface& surface, int id, const char* name, Group& group)
 {

@@ -50,81 +50,6 @@ static MidiByteArray mackie_sysex_hdr_xt  (5, MIDI::sysex, 0x0, 0x0, 0x66, 0x15)
 
 static MidiByteArray empty_midi_byte_array;
 
-static GlobalControlDefinition mackie_global_controls[] = {
-	{ "jog", 0x3c, Jog::factory, "none" },
-	{ "external", 0x2e, Pot::factory, "none" },
-	{ "io", 0x28, Button::factory, "assignment" },
-	{ "sends", 0x29, Button::factory, "assignment" },
-	{ "pan", 0x2a, Button::factory, "assignment" },
-	{ "plugin", 0x2b, Button::factory, "assignment" },
-	{ "eq", 0x2c, Button::factory, "assignment" },
-	{ "dyn", 0x2d, Button::factory, "assignment" },
-	{ "left", 0x2e, Button::factory, "bank" },
-	{ "right", 0x2f, Button::factory, "bank" },
-	{ "channel_left", 0x30, Button::factory, "bank" },
-	{ "channel_right", 0x31, Button::factory, "bank" },
-	{ "flip", 0x32, Button::factory, "none" },
-	{ "edit", 0x33, Button::factory, "none" },
-	{ "name_value", 0x34, Button::factory, "display" },
-	{ "timecode_beats", 0x35, Button::factory, "display" },
-	{ "F1", Button::F1, Button::factory, "none" },
-	{ "F2", Button::F2, Button::factory, "none" },
-	{ "F3", Button::F3, Button::factory, "none" },
-	{ "F4", Button::F4, Button::factory, "none" },
-	{ "F5", Button::F5, Button::factory, "none" },
-	{ "F6", Button::F6, Button::factory, "none" },
-	{ "F7", Button::F7, Button::factory, "none" },
-	{ "F8", Button::F8, Button::factory, "none" },
-	{ "F9", Button::F9, Button::factory, "none" },
-	{ "F10", Button::F10, Button::factory, "none" },
-	{ "F11", Button::F11, Button::factory, "none" },
-	{ "F12", Button::F12, Button::factory, "none" },
-	{ "F13", Button::F13, Button::factory, "none" },
-	{ "F14", Button::F14, Button::factory, "none" },
-	{ "F15", Button::F15, Button::factory, "none" },
-	{ "F16", Button::F16, Button::factory, "none" },
-	{ "shift", 0x46, Button::factory, "modifiers" },
-	{ "option", 0x47, Button::factory, "modifiers" },
-	{ "control", 0x48, Button::factory, "modifiers" },
-	{ "cmd_alt", 0x49, Button::factory, "modifiers" },
-	{ "on", 0x4a, Button::factory, "automation" },
-	{ "rec_ready", 0x4b, Button::factory, "automation" },
-	{ "undo", 0x4c, Button::factory, "functions" },
-	{ "save", Button::Save, Button::factory, "automation" },
-	{ "touch", Button::Touch, Button::factory, "automation" },
-	{ "redo", Button::Redo, Button::factory, "functions" },
-	{ "marker", Button::Marker, Button::factory, "functions" },
-	{ "enter", Button::Enter, Button::factory, "functions" },
-	{ "cancel", Button::Cancel, Button::factory, "functions" },
-	{ "mixer", Button::Mixer, Button::factory, "functions" },
-	{ "frm_left", 0x54, Button::factory, "transport" },
-	{ "frm_right", 0x55, Button::factory, "transport" },
-	{ "loop", Button::Loop, Button::factory, "transport" },
-	{ "punch_in", 0x57, Button::factory, "transport" },
-	{ "punch_out", 0x58, Button::factory, "transport" },
-	{ "home", Button::Home, Button::factory, "transport" },
-	{ "end", Button::End, Button::factory, "transport" },
-	{ "rewind", Button::Rewind, Button::factory, "transport" },
-	{ "ffwd", Button::Ffwd, Button::factory, "transport" },
-	{ "stop", Button::Stop, Button::factory, "transport" },
-	{ "play", Button::Play, Button::factory, "transport" },
-	{ "record", Button::Record, Button::factory, "transport" },
-	{ "cursor_up", Button::CursorUp, Button::factory, "cursor" },
-	{ "cursor_down", Button::CursorDown, Button::factory, "cursor" },
-	{ "cursor_left", Button::CursorLeft, Button::factory, "cursor" },
-	{ "cursor_right", Button::CursorRight, Button::factory, "cursor" },
-	{ "zoom", Button::Zoom, Button::factory, "none" },
-	{ "scrub", Button::Scrub, Button::factory, "none" },
-	{ "user_a", Button::UserA, Button::factory, "user" },
-	{ "user_b", Button::UserB, Button::factory, "user" },
-	{ "fader_touch", 0x70, Led::factory, "master" },
-	{ "timecode", 0x71, Led::factory, "none" },
-	{ "beats", 0x72, Led::factory, "none" },
-	{ "solo", 0x73, Led::factory, "none" },
-	{ "relay_click", 0x73, Led::factory, "none" },
-	{ "", 0, Button::factory, "" }
-};
-	
 Surface::Surface (MackieControlProtocol& mcp, const std::string& device_name, uint32_t number, surface_type_t stype)
 	: _mcp (mcp)
 	, _stype (stype)
@@ -138,12 +63,12 @@ Surface::Surface (MackieControlProtocol& mcp, const std::string& device_name, ui
 	
 	_port = new SurfacePort (*this);
 
-	if (_mcp.device_info().has_global_controls()) {
-		init_controls ();
-	}
+	/* only the first Surface object has global controls */
 
-	if (_mcp.device_info().has_jog_wheel()) {
-		_jog_wheel = new Mackie::JogWheel (_mcp);
+	if (_number == 0) {
+		if (_mcp.device_info().has_global_controls()) {
+			init_controls ();
+		}
 	}
 
 	uint32_t n = _mcp.device_info().strip_cnt();
@@ -204,6 +129,16 @@ Surface::sysex_hdr() const
 	return mackie_sysex_hdr;
 }
 
+static GlobalControlDefinition mackie_global_controls[] = {
+	{ "external", Pot::External, Pot::factory, "none" },
+	{ "fader_touch", Led::FaderTouch, Led::factory, "master" },
+	{ "timecode", Led::Timecode, Led::factory, "none" },
+	{ "beats", Led::Beats, Led::factory, "none" },
+	{ "solo", Led::RudeSolo, Led::factory, "none" },
+	{ "relay_click", Led::RelayClick, Led::factory, "none" },
+	{ "", 0, Led::factory, "" }
+};
+
 void 
 Surface::init_controls()
 {
@@ -220,38 +155,39 @@ Surface::init_controls()
 	groups["transport"] = new Group  ("transport");
 	groups["user"] = new Group  ("user");
 	groups["master"] = new Group ("master");
+		
+	if (_mcp.device_info().has_jog_wheel()) {
+		_jog_wheel = new Mackie::JogWheel (_mcp);
+	}
 
 	for (uint32_t n = 0; mackie_global_controls[n].name[0]; ++n) {
 		group = groups[mackie_global_controls[n].group_name];
 		Control* control = mackie_global_controls[n].factory (*this, mackie_global_controls[n].id, mackie_global_controls[n].name, *group);
-		controls_by_name[mackie_global_controls[n].name] = control;
-		group->add (*control);
+		controls_by_device_independent_id[mackie_global_controls[n].id] = control;
+	}
+
+	/* add global buttons */
+
+	const map<Button::ID,GlobalButtonInfo>& global_buttons (_mcp.device_info().global_buttons());
+
+	for (map<Button::ID,GlobalButtonInfo>::const_iterator b = global_buttons.begin(); b != global_buttons.end(); ++b){
+		group = groups[b->second.group];
+		controls_by_device_independent_id[b->first] = Button::factory (*this, b->first, b->second.id, b->second.label, *group);
 	}
 }
-
-static StripControlDefinition mackie_strip_controls[] = {
-	{ "gain", 0, Fader::factory, },
-	{ "vpot", Pot::base_id, Pot::factory, },
-	{ "recenable", Button::recenable_base_id, Button::factory, },
-	{ "solo", Button::solo_base_id, Button::factory, },
-	{ "mute", Button::mute_base_id, Button::factory, },
-	{ "select", Button::select_base_id, Button::factory, },
-	{ "vselect", Button::vselect_base_id, Button::factory, },
-	{ "fader_touch", Button::fader_touch_base_id, Button::factory, },
-	{ "meter", 0, Meter::factory, },
-	{ "", 0, Button::factory, }
-};
 
 void 
 Surface::init_strips (uint32_t n)
 {
+	const map<Button::ID,StripButtonInfo>& strip_buttons (_mcp.device_info().strip_buttons());
+
 	for (uint32_t i = 0; i < n; ++i) {
 
 		char name[32];
 		
 		snprintf (name, sizeof (name), "strip_%d", (8* _number) + i);
 
-		Strip* strip = new Strip (*this, name, i, mackie_strip_controls);
+		Strip* strip = new Strip (*this, name, i, strip_buttons);
 		
 		groups[name] = strip;
 		strips.push_back (strip);
@@ -280,7 +216,7 @@ Surface::display_bank_start (uint32_t current_bank)
 void 
 Surface::blank_jog_ring ()
 {
-	Control* control = controls_by_name["jog"];
+	Control* control = controls_by_device_independent_id[Jog::ID];
 
 	if (control) {
 		Pot* pot = dynamic_cast<Pot*> (control);
@@ -394,10 +330,6 @@ Surface::handle_midi_controller_message (MIDI::Parser &, MIDI::EventTwoBytes* ev
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("SurfacePort::handle_midi_controller %1 = %2\n", (int) ev->controller_number, (int) ev->value));
 
 	Pot* pot = pots[ev->controller_number];
-
-	if (!pot && ev->controller_number == Jog::base_id) {
-		pot = dynamic_cast<Pot*> (controls_by_name["jog"]);
-	}
 
 	if (pot) {
 		ControlState state;

@@ -85,7 +85,7 @@ public:
 	boost::shared_ptr<ARDOUR::AutomationControl> modified_ac;
 
   private:
-	int _id;
+	int _id; /* possibly device-dependent ID */
 	std::string _name;
 	Group& _group;
 	bool _in_use;

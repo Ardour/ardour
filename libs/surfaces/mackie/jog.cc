@@ -17,29 +17,20 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef __ardour_mackie_control_protocol_jog_h__
-#define __ardour_mackie_control_protocol_jog_h__
+#include "jog.h"
+#include "surface.h"
+#include "control_group.h"
 
-#include "controls.h"
-#include "pot.h"
+using namespace Mackie;
 
-namespace Mackie {
+const int Jog::ID = 0x3c;
 
-class Jog : public Pot
+Control*
+Jog::factory (Surface& surface, int id, const char* name, Group& group)
 {
-public:
-	static const int ID;
-
-	Jog (int id, std::string name, Group & group)
-		: Pot  (id, name, group)
-	{
-	}
-
-	MidiByteArray zero() { return MidiByteArray(); }
-
-	static Control* factory (Surface&, int id, const char*, Group&);
-};
-
+	Jog* j = new Jog (id, name, group);
+	surface.pots[id] = j;
+	surface.controls.push_back (j);
+	group.add (*j);
+	return j;
 }
-
-#endif /* __ardour_mackie_control_protocol_jog_h__ */

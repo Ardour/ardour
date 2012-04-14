@@ -53,13 +53,10 @@ public:
 
 	std::map<int,Fader*> faders;
 	std::map<int,Pot*> pots;
-	std::map<int,Button*> buttons;
+	std::map<int,Button*> buttons; // index is device-DEPENDENT
 	std::map<int,Led*> leds;
 	std::map<int,Meter*> meters;
-
-	/// no strip controls in here because they usually
-	/// have the same names.
-	std::map<std::string,Control*> controls_by_name;
+	std::map<int,Control*> controls_by_device_independent_id;
 	
 	Mackie::JogWheel* jog_wheel() const { return _jog_wheel; }
 

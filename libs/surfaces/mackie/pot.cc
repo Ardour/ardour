@@ -24,6 +24,8 @@
 
 using namespace Mackie;
 
+int const Pot::External = 0x2e;
+
 Control*
 Pot::factory (Surface& surface, int id, const char* name, Group& group)
 {

@@ -29,6 +29,12 @@ namespace Mackie {
 class Led : public Control
 {
 public:
+	static const int FaderTouch;
+	static const int Timecode;
+	static const int Beats;
+	static const int RudeSolo;
+	static const int RelayClick;
+
 	Led (int id, std::string name, Group & group)
 		: Control (id, name, group)
 		, state (off)

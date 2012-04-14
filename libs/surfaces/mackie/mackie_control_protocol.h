@@ -171,8 +171,8 @@ class MackieControlProtocol
 	/// this is called to generate the midi to send in response to a button press.
 	void update_led(Mackie::Surface&, Mackie::Button & button, Mackie::LedState);
   
-	void update_global_button(const std::string & name, Mackie::LedState);
-	void update_global_led(const std::string & name, Mackie::LedState);
+	void update_global_button (int id, Mackie::LedState);
+	void update_global_led (int id, Mackie::LedState);
 
 	ARDOUR::Session & get_session() { return *session; }
 	framepos_t transport_frame() const;
@@ -247,7 +247,7 @@ class MackieControlProtocol
 	    , release (r) {}
 	};
 
-	typedef std::map<int,ButtonHandlers> ButtonMap;
+	typedef std::map<Mackie::Button::ID,ButtonHandlers> ButtonMap;
 	typedef std::list<GSource*> PortSources;
 
 	static MackieControlProtocol* _instance;

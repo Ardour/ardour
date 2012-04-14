@@ -409,12 +409,12 @@ MackieControlProtocol::update_timecode_beats_led()
 {
 	switch (_timecode_type) {
 		case ARDOUR::AnyTime::BBT:
-			update_global_led ("beats", on);
-			update_global_led ("timecode", off);
+			update_global_led (Led::Beats, on);
+			update_global_led (Led::Timecode, off);
 			break;
 		case ARDOUR::AnyTime::Timecode:
-			update_global_led ("timecode", on);
-			update_global_led ("beats", off);
+			update_global_led (Led::Timecode, on);
+			update_global_led (Led::Beats, off);
 			break;
 		default:
 			ostringstream os;
@@ -424,7 +424,7 @@ MackieControlProtocol::update_timecode_beats_led()
 }
 
 void 
-MackieControlProtocol::update_global_button (const string & name, LedState ls)
+MackieControlProtocol::update_global_button (int id, LedState ls)
 {
 	boost::shared_ptr<Surface> surface = surfaces.front();
 
@@ -432,16 +432,17 @@ MackieControlProtocol::update_global_button (const string & name, LedState ls)
 		return;
 	}
 
-	if (surface->controls_by_name.find (name) != surface->controls_by_name.end()) {
-		Button * button = dynamic_cast<Button*> (surface->controls_by_name[name]);
+	map<int,Control*>::iterator x = surface->controls_by_device_independent_id.find (id);
+	if (x != surface->controls_by_device_independent_id.end()) {
+		Button * button = dynamic_cast<Button*> (x->second);
 		surface->write (button->set_state (ls));
 	} else {
-		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Button %1 not found\n", name));
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Button %1 not found\n", id));
 	}
 }
 
 void 
-MackieControlProtocol::update_global_led (const string & name, LedState ls)
+MackieControlProtocol::update_global_led (int id, LedState ls)
 {
 	boost::shared_ptr<Surface> surface = surfaces.front();
 
@@ -449,11 +450,12 @@ MackieControlProtocol::update_global_led (const string & name, LedState ls)
 		return;
 	}
 
-	if (surface->controls_by_name.find (name) != surface->controls_by_name.end()) {
-		Led * led = dynamic_cast<Led*> (surface->controls_by_name[name]);
+	map<int,Control*>::iterator x = surface->controls_by_device_independent_id.find (id);
+	if (x != surface->controls_by_device_independent_id.end()) {
+		Led * led = dynamic_cast<Led*> (x->second);
 		surface->write (led->set_state (ls));
 	} else {
-		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Led %1 not found\n", name));
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Led %1 not found\n", id));
 	}
 }
 
@@ -755,11 +757,11 @@ MackieControlProtocol::update_timecode_display()
 void MackieControlProtocol::notify_parameter_changed (std::string const & p)
 {
 	if (p == "punch-in") {
-		update_global_button ("punch_in", session->config.get_punch_in());
+		update_global_button (Button::PunchIn, session->config.get_punch_in());
 	} else if (p == "punch-out") {
-		update_global_button ("punch_out", session->config.get_punch_out());
+		update_global_button (Button::PunchOut, session->config.get_punch_out());
 	} else if (p == "clicking") {
-		update_global_button ("clicking", Config->get_clicking());
+		// update_global_button (Button::RelayClick, Config->get_clicking());
 	} else {
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("parameter changed: %1\n", p));
 	}
@@ -789,10 +791,12 @@ MackieControlProtocol::notify_solo_active_changed (bool active)
 {
 	boost::shared_ptr<Surface> surface = surfaces.front();
 	
-	Led* rude_solo = dynamic_cast<Led*> (surface->controls_by_name["solo"]);
-
-	if (rude_solo) {
-		surface->write (rude_solo->set_state (active ? flashing : off));
+	map<int,Control*>::iterator x = surface->controls_by_device_independent_id.find (Led::RudeSolo);
+	if (x != surface->controls_by_device_independent_id.end()) {
+		Led* rude_solo = dynamic_cast<Led*> (x->second);
+		if (rude_solo) {
+			surface->write (rude_solo->set_state (active ? flashing : off));
+		}
 	}
 }
 
@@ -821,17 +825,17 @@ MackieControlProtocol::notify_remote_id_changed()
 void 
 MackieControlProtocol::notify_loop_state_changed()
 {
-	update_global_button ("loop", session->get_play_loop());
+	update_global_button (Button::Loop, session->get_play_loop());
 }
 
 void 
 MackieControlProtocol::notify_transport_state_changed()
 {
 	// switch various play and stop buttons on / off
-	update_global_button ("play", session->transport_speed() == 1.0);
-	update_global_button ("stop", !session->transport_rolling());
-	update_global_button ("rewind", session->transport_speed() < 0.0);
-	update_global_button ("ffwd", session->transport_speed() > 1.0);
+	update_global_button (Button::Play, session->transport_speed() == 1.0);
+	update_global_button (Button::Stop, !session->transport_rolling());
+	update_global_button (Button::Rewind, session->transport_speed() < 0.0);
+	update_global_button (Button::Ffwd, session->transport_speed() > 1.0);
 
 	_transport_previously_rolling = session->transport_rolling();
 }
@@ -839,31 +843,33 @@ MackieControlProtocol::notify_transport_state_changed()
 void
 MackieControlProtocol::notify_record_state_changed ()
 {
+	boost::shared_ptr<Surface> surface = surfaces.front();
+
 	/* rec is a tristate */
 
-
-	Button * rec = reinterpret_cast<Button*> (surfaces.front()->controls_by_name["record"]);
-	if (rec) {
-		LedState ls;
-
-		switch (session->record_status()) {
-		case Session::Disabled:
-			DEBUG_TRACE (DEBUG::MackieControl, "record state changed to disabled, LED off\n");
-			ls = off;
-			break;
-		case Session::Recording:
-			DEBUG_TRACE (DEBUG::MackieControl, "record state changed to recording, LED on\n");
-			ls = on;
-			break;
-		case Session::Enabled:
-			DEBUG_TRACE (DEBUG::MackieControl, "record state changed to enabled, LED flashing\n");
-			ls = flashing;
-			break;
+	map<int,Control*>::iterator x = surface->controls_by_device_independent_id.find (Button::Record);
+	if (x != surface->controls_by_device_independent_id.end()) {
+		Button * rec = dynamic_cast<Button*> (x->second);
+		if (rec) {
+			LedState ls;
+			
+			switch (session->record_status()) {
+			case Session::Disabled:
+				DEBUG_TRACE (DEBUG::MackieControl, "record state changed to disabled, LED off\n");
+				ls = off;
+				break;
+			case Session::Recording:
+				DEBUG_TRACE (DEBUG::MackieControl, "record state changed to recording, LED on\n");
+				ls = on;
+				break;
+			case Session::Enabled:
+				DEBUG_TRACE (DEBUG::MackieControl, "record state changed to enabled, LED flashing\n");
+				ls = flashing;
+				break;
+			}
+			
+			surface->write (rec->set_state (ls));
 		}
-
-		surfaces.front()->write (rec->set_state (ls));
-	} else {
-		DEBUG_TRACE (DEBUG::MackieControl, "record button control not found\n");
 	}
 }
 
@@ -969,9 +975,9 @@ MackieControlProtocol::update_led (Surface& surface, Button& button, Mackie::Led
 void
 MackieControlProtocol::build_button_map ()
 {
-#define DEFINE_BUTTON_HANDLER(b,p,r) button_map.insert (pair<int,ButtonHandlers> ((b), ButtonHandlers ((p),(r))));
+#define DEFINE_BUTTON_HANDLER(b,p,r) button_map.insert (pair<Button::ID,ButtonHandlers> ((b), ButtonHandlers ((p),(r))));
 
-	DEFINE_BUTTON_HANDLER (Button::Io, &MackieControlProtocol::io_press, &MackieControlProtocol::io_release);
+	DEFINE_BUTTON_HANDLER (Button::IO, &MackieControlProtocol::io_press, &MackieControlProtocol::io_release);
 	DEFINE_BUTTON_HANDLER (Button::Sends, &MackieControlProtocol::sends_press, &MackieControlProtocol::sends_release);
 	DEFINE_BUTTON_HANDLER (Button::Pan, &MackieControlProtocol::pan_press, &MackieControlProtocol::pan_release);
 	DEFINE_BUTTON_HANDLER (Button::Plugin, &MackieControlProtocol::plugin_press, &MackieControlProtocol::plugin_release);
@@ -1047,7 +1053,9 @@ MackieControlProtocol::handle_button_event (Surface& surface, Button& button, Bu
 	
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Handling %1 for button %2\n", (bs == press ? "press" : "release"), button.id()));
 
-	ButtonMap::iterator b = button_map.find (button.id());
+	/* lookup using the device-INDEPENDENT button ID */
+
+	ButtonMap::iterator b = button_map.find (button.bid());
 
 	if (b != button_map.end()) {
 

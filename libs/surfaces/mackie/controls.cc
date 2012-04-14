@@ -83,16 +83,6 @@ ostream & Mackie::operator <<  (ostream & os, const Mackie::Control & control)
 	return os;
 }
 
-Control*
-Jog::factory (Surface& surface, int id, const char* name, Group& group)
-{
-	Jog* j = new Jog (id, name, group);
-	surface.controls.push_back (j);
-	surface.controls_by_name["jog"] = j;
-	group.add (*j);
-	return j;
-}
-
 void
 Control::set_normal_control (boost::shared_ptr<AutomationControl> ac)
 {

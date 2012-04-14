@@ -24,11 +24,92 @@
 using namespace Mackie;
 
 Control*
-Button::factory (Surface& surface, int id, const char* name, Group& group)
+Button::factory (Surface& surface, Button::ID bid, int id, const std::string& name, Group& group)
 {
-	Button* b = new Button (id, name, group);
+	Button* b = new Button (bid, id, name, group);
+	/* store button with the device-specific ID */
 	surface.buttons[id] = b;
 	surface.controls.push_back (b);
 	group.add (*b);
 	return b;
+}
+
+int
+Button::name_to_id (const std::string& name)
+{
+	if (name == "IO") { return IO; }
+	if (name == "Sends") { return Sends; }
+	if (name == "Pan") { return Pan; }
+	if (name == "Plugin") { return Plugin; }
+	if (name == "Eq") { return Eq; }
+	if (name == "Dyn") { return Dyn; }
+	if (name == "Left") { return Left; }
+	if (name == "Right") { return Right; }
+	if (name == "ChannelLeft") { return ChannelLeft; }
+	if (name == "ChannelRight") { return ChannelRight; }
+	if (name == "Flip") { return Flip; }
+	if (name == "Edit") { return Edit; }
+	if (name == "NameValue") { return NameValue; }
+	if (name == "TimecodeBeats") { return TimecodeBeats; }
+	if (name == "F1") { return F1; }
+	if (name == "F2") { return F2; }
+	if (name == "F3") { return F3; }
+	if (name == "F4") { return F4; }
+	if (name == "F5") { return F5; }
+	if (name == "F6") { return F6; }
+	if (name == "F7") { return F7; }
+	if (name == "F8") { return F8; }
+	if (name == "F9") { return F9; }
+	if (name == "F10") { return F10; }
+	if (name == "F11") { return F11; }
+	if (name == "F12") { return F12; }
+	if (name == "F13") { return F13; }
+	if (name == "F14") { return F14; }
+	if (name == "F15") { return F15; }
+	if (name == "F16") { return F16; }
+	if (name == "Shift") { return Shift; }
+	if (name == "Option") { return Option; }
+	if (name == "Ctrl") { return Ctrl; }
+	if (name == "CmdAlt") { return CmdAlt; }
+	if (name == "On") { return On; }
+	if (name == "RecReady") { return RecReady; }
+	if (name == "Undo") { return Undo; }
+	if (name == "Save") { return Save; }
+	if (name == "Touch") { return Touch; }
+	if (name == "Redo") { return Redo; }
+	if (name == "Marker") { return Marker; }
+	if (name == "Enter") { return Enter; }
+	if (name == "Cancel") { return Cancel; }
+	if (name == "Mixer") { return Mixer; }
+	if (name == "FrmLeft") { return FrmLeft; }
+	if (name == "FrmRight") { return FrmRight; }
+	if (name == "Loop") { return Loop; }
+	if (name == "PunchIn") { return PunchIn; }
+	if (name == "PunchOut") { return PunchOut; }
+	if (name == "Home") { return Home; }
+	if (name == "End") { return End; }
+	if (name == "Rewind") { return Rewind; }
+	if (name == "Ffwd") { return Ffwd; }
+	if (name == "Stop") { return Stop; }
+	if (name == "Play") { return Play; }
+	if (name == "Record") { return Record; }
+	if (name == "CursorUp") { return CursorUp; }
+	if (name == "CursorDown") { return CursorDown; }
+	if (name == "CursorLeft") { return CursorLeft; }
+	if (name == "CursorRight") { return CursorRight; }
+	if (name == "Zoom") { return Zoom; }
+	if (name == "Scrub") { return Scrub; }
+	if (name == "UserA") { return UserA; }
+	if (name == "UserB") { return UserB; }
+		
+		/* Strip buttons */
+		
+	if (name == "RecEnable") { return RecEnable; }
+	if (name == "Solo") { return Solo; }
+	if (name == "Mute") { return Mute; }
+	if (name == "Select") { return Select; }
+	if (name == "VSelect") { return VSelect; }
+	if (name == "FaderTouch") { return FaderTouch; }
+
+	return -1;
 }

@@ -13,6 +13,7 @@
 #include "control_group.h"
 #include "types.h"
 #include "midi_byte_array.h"
+#include "device_info.h"
 
 namespace ARDOUR {
 	class Route;
@@ -47,7 +48,7 @@ struct GlobalControlDefinition {
 class Strip : public Group
 {
 public:
-	Strip (Surface&, const std::string & name, int index, StripControlDefinition* ctls);
+	Strip (Surface&, const std::string & name, int index, const std::map<Button::ID,StripButtonInfo>&);
 	~Strip();
 
 	boost::shared_ptr<ARDOUR::Route> route() const { return _route; }

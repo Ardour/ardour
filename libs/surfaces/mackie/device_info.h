@@ -25,9 +25,30 @@
 #include <string>
 #include <map>
 
+#include "button.h"
+
 class XMLNode;
 
 namespace Mackie {
+
+struct GlobalButtonInfo {
+    std::string label; // visible to user
+    std::string group; // in case we want to present in a GUI
+    int32_t id;       // value sent by device
+    
+    GlobalButtonInfo () : id (-1) {}
+    GlobalButtonInfo (const std::string& l, const std::string& g, uint32_t i)
+            : label (l), group (g), id (i) {}
+};
+        
+struct StripButtonInfo {
+    int32_t base_id;
+    std::string name;
+    
+    StripButtonInfo () : base_id (-1) {}
+    StripButtonInfo (uint32_t i, const std::string& n)
+            : base_id (i), name (n) {}
+};
 
 class DeviceInfo 
 {
@@ -51,6 +72,9 @@ class DeviceInfo
 	static std::map<std::string,DeviceInfo> device_info;
 	static void reload_device_info();
 
+    const std::map<Button::ID,GlobalButtonInfo>& global_buttons() const { return _global_buttons; }
+    const std::map<Button::ID,StripButtonInfo>& strip_buttons() const { return _strip_buttons; }
+	
   private:
 	uint32_t _strip_cnt;
 	uint32_t _extenders;
@@ -62,6 +86,9 @@ class DeviceInfo
 	bool     _has_jog_wheel;
 	bool     _has_touch_sense_faders;
 	std::string _name;
+
+    std::map<Button::ID,GlobalButtonInfo> _global_buttons;
+    std::map<Button::ID,StripButtonInfo>  _strip_buttons;
 };
 
 class DeviceProfile

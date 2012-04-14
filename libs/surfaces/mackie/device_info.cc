@@ -17,6 +17,7 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <cstdlib>
 #include <cstring>
 #include <glibmm/miscutils.h>
 
@@ -50,7 +51,83 @@ DeviceInfo::DeviceInfo()
 	, _has_touch_sense_faders (true)
 	, _name (X_("Mackie Control Universal Pro"))
 {
-	
+	/* these definitions are based on Mackie's specification for Mackie
+	 * Control Protocol.
+	 *
+	 * Any given device info file can override any or all of these for any reason.
+	 */
+
+	_global_buttons[Button::IO] = GlobalButtonInfo ("io", "assignment", 0x28);
+	_global_buttons[Button::Sends] = GlobalButtonInfo ("sends", "assignment", 0x29);
+	_global_buttons[Button::Pan] = GlobalButtonInfo ("pan", "assignment", 0x2a);
+	_global_buttons[Button::Plugin] = GlobalButtonInfo ("plugin", "assignment", 0x2b);
+	_global_buttons[Button::Eq] = GlobalButtonInfo ("eq", "assignment", 0x2c);
+	_global_buttons[Button::Dyn] = GlobalButtonInfo ("dyn", "assignment", 0x2d);
+	_global_buttons[Button::Left] = GlobalButtonInfo ("left", "bank", 0x2e);
+	_global_buttons[Button::Right] = GlobalButtonInfo ("right", "bank", 0x2f);
+	_global_buttons[Button::ChannelLeft] = GlobalButtonInfo ("channel left", "bank", 0x30);
+	_global_buttons[Button::ChannelRight] = GlobalButtonInfo ("channelright", "bank", 0x31);
+	_global_buttons[Button::Flip] = GlobalButtonInfo ("flip", "none", 0x32);
+	_global_buttons[Button::Edit] = GlobalButtonInfo ("edit", "none", 0x33);
+	_global_buttons[Button::NameValue] = GlobalButtonInfo ("name/value", "display", 0x34);
+	_global_buttons[Button::TimecodeBeats] = GlobalButtonInfo ("timecode/beats", "display", 0x35);
+	_global_buttons[Button::F1] = GlobalButtonInfo ("F1", "none", 0x36);
+	_global_buttons[Button::F2] = GlobalButtonInfo ("F2", "none", 0x37);
+	_global_buttons[Button::F3] = GlobalButtonInfo ("F3", "none", 0x38);
+	_global_buttons[Button::F4] = GlobalButtonInfo ("F4", "none", 0x39);
+	_global_buttons[Button::F5] = GlobalButtonInfo ("F5", "none", 0x3a);
+	_global_buttons[Button::F6] = GlobalButtonInfo ("F6", "none", 0x3b);
+	_global_buttons[Button::F7] = GlobalButtonInfo ("F7", "none", 0x3c);
+	_global_buttons[Button::F8] = GlobalButtonInfo ("F8", "none", 0x3d);
+	_global_buttons[Button::F9] = GlobalButtonInfo ("F9", "none", 0x3e);
+	_global_buttons[Button::F10] = GlobalButtonInfo ("F10", "none", 0x3f);
+	_global_buttons[Button::F11] = GlobalButtonInfo ("F11", "none", 0x40);
+	_global_buttons[Button::F12] = GlobalButtonInfo ("F12", "none", 0x41);
+	_global_buttons[Button::F13] = GlobalButtonInfo ("F13", "none", 0x42);
+	_global_buttons[Button::F14] = GlobalButtonInfo ("F14", "none", 0x43);
+	_global_buttons[Button::F15] = GlobalButtonInfo ("F15", "none", 0x44);
+	_global_buttons[Button::F16] = GlobalButtonInfo ("F16", "none", 0x45);
+	_global_buttons[Button::Shift] = GlobalButtonInfo ("shift", "modifiers", 0x46);
+	_global_buttons[Button::Option] = GlobalButtonInfo ("option", "modifiers", 0x47);
+	_global_buttons[Button::Ctrl] = GlobalButtonInfo ("control", "modifiers", 0x48);
+	_global_buttons[Button::CmdAlt] = GlobalButtonInfo ("cmd_alt", "modifiers", 0x49);
+	_global_buttons[Button::On] = GlobalButtonInfo ("on", "automation", 0x4a);
+	_global_buttons[Button::RecReady] = GlobalButtonInfo ("rec_ready", "automation", 0x4b);
+	_global_buttons[Button::Undo] = GlobalButtonInfo ("undo", "functions", 0x4c);
+	_global_buttons[Button::Save] = GlobalButtonInfo ("save", "automation", 0x4d);
+	_global_buttons[Button::Touch] = GlobalButtonInfo ("touch", "automation", 0x4e);
+	_global_buttons[Button::Redo] = GlobalButtonInfo ("redo", "functions", 0x4f);
+	_global_buttons[Button::Marker] = GlobalButtonInfo ("marker", "functions", 0x50);
+	_global_buttons[Button::Enter] = GlobalButtonInfo ("enter", "functions", 0x51);
+	_global_buttons[Button::Cancel] = GlobalButtonInfo ("cancel", "functions", 0x52);
+	_global_buttons[Button::Mixer] = GlobalButtonInfo ("mixer", "functions", 0x53);
+	_global_buttons[Button::FrmLeft] = GlobalButtonInfo ("frm left", "transport", 0x54);
+	_global_buttons[Button::FrmRight] = GlobalButtonInfo ("frm right", "transport", 0x55);
+	_global_buttons[Button::Loop] = GlobalButtonInfo ("loop", "transport", 0x56);
+	_global_buttons[Button::PunchIn] = GlobalButtonInfo ("punch in", "transport", 0x57);
+	_global_buttons[Button::PunchOut] = GlobalButtonInfo ("punch out", "transport", 0x58);
+	_global_buttons[Button::Home] = GlobalButtonInfo ("home", "transport", 0x59);
+	_global_buttons[Button::End] = GlobalButtonInfo ("end", "transport", 0x5a);
+	_global_buttons[Button::Rewind] = GlobalButtonInfo ("rewind", "transport", 0x5b);
+	_global_buttons[Button::Ffwd] = GlobalButtonInfo ("ffwd", "transport", 0x5c);
+	_global_buttons[Button::Stop] = GlobalButtonInfo ("stop", "transport", 0x5d);
+	_global_buttons[Button::Play] = GlobalButtonInfo ("play", "transport", 0x5e);
+	_global_buttons[Button::Record] = GlobalButtonInfo ("record", "transport", 0x5f);
+	_global_buttons[Button::CursorUp] = GlobalButtonInfo ("cursor up", "cursor", 0x60);
+	_global_buttons[Button::CursorDown] = GlobalButtonInfo ("cursor down", "cursor", 0x61);
+	_global_buttons[Button::CursorLeft] = GlobalButtonInfo ("cursor left", "cursor", 0x62);
+	_global_buttons[Button::CursorRight] = GlobalButtonInfo ("cursor right", "cursor", 0x63);
+	_global_buttons[Button::Zoom] = GlobalButtonInfo ("zoom", "none", 0x64);
+	_global_buttons[Button::Scrub] = GlobalButtonInfo ("scrub", "none", 0x65);
+	_global_buttons[Button::UserA] = GlobalButtonInfo ("user a", "user", 0x66);
+	_global_buttons[Button::UserB] = GlobalButtonInfo ("user b", "user", 0x67);
+
+	_strip_buttons[Button::RecEnable], StripButtonInfo (0x0, "recenable");
+	_strip_buttons[Button::Solo] = StripButtonInfo (0x08, "solo");
+	_strip_buttons[Button::Mute] = StripButtonInfo (0x10, "mute");
+	_strip_buttons[Button::Select] = StripButtonInfo (0x18, "select");
+	_strip_buttons[Button::VSelect] = StripButtonInfo (0x20, "vselect");
+	_strip_buttons[Button::FaderTouch] = StripButtonInfo (0x68, "fader touch");
 }
 
 DeviceInfo::~DeviceInfo()
@@ -132,6 +209,50 @@ DeviceInfo::set_state (const XMLNode& node, int /* version */)
 	if ((child = node.child ("TouchSenseFaders")) != 0) {
 		if ((prop = child->property ("value")) != 0) {
 			_has_touch_sense_faders = string_is_affirmative (prop->value());
+		}
+	}
+	if ((child = node.child ("Buttons")) != 0) {
+		XMLNodeConstIterator i;
+		const XMLNodeList& nlist (child->children());
+
+		for (i = nlist.begin(); i != nlist.end(); ++i) {
+			if ((*i)->name() == "GlobalButton") {
+				if ((prop = (*i)->property ("name")) != 0) {
+					int id = Button::name_to_id (prop->value());
+					if (id >= 0) {
+						Button::ID bid = (Button::ID) id;
+						if ((prop = (*i)->property ("id")) != 0) {
+							int val = strtol (prop->value().c_str(), 0, 0);
+							std::map<Button::ID,GlobalButtonInfo>::iterator b = _global_buttons.find (bid);
+							if (b != _global_buttons.end()) {
+								b->second.id = val;
+								
+								if ((prop = (*i)->property ("label")) != 0) {
+									b->second.label = prop->value();
+								}
+							}
+						}
+					}
+					
+				}
+				
+			} else if ((*i)->name() == "StripButton") {
+				if ((prop = (*i)->property ("name")) != 0) {
+					int id = Button::name_to_id (prop->value());
+					if (id >= 0) {
+						Button::ID bid = (Button::ID) id;
+						if ((prop = (*i)->property ("baseid")) != 0) {
+							int val = strtol (prop->value().c_str(), 0, 0);
+							std::map<Button::ID,StripButtonInfo>::iterator b = _strip_buttons.find (bid);
+							if (b != _strip_buttons.end()) {
+								b->second.base_id = val;
+							}
+						}
+					}
+					
+				}
+				
+			}
 		}
 	}
 

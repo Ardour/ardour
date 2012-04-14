@@ -59,7 +59,7 @@ using namespace PBD;
 extern PBD::EventLoop::InvalidationRecord* __invalidator (sigc::trackable& trackable, const char*, int);
 #define invalidator() __invalidator (*(MackieControlProtocol::instance()), __FILE__, __LINE__)
 
-Strip::Strip (Surface& s, const std::string& name, int index, StripControlDefinition* ctls)
+Strip::Strip (Surface& s, const std::string& name, int index, const map<Button::ID,StripButtonInfo>& strip_buttons)
 	: Group (name)
 	, _solo (0)
 	, _recenable (0)
@@ -76,75 +76,51 @@ Strip::Strip (Surface& s, const std::string& name, int index, StripControlDefini
 	, _last_gain_position_written (-1.0)
 	, _last_pan_position_written (-1.0)
 {
-	/* build the controls for this track, which will automatically add them
-	   to the Group 
-	*/
+	_fader = dynamic_cast<Fader*> (Fader::factory (*_surface, index, "fader", *this));
+	_vpot = dynamic_cast<Pot*> (Pot::factory (*_surface, index, "vpot", *this));
+	_meter = dynamic_cast<Meter*> (Meter::factory (*_surface, index, "meter", *this));
 
-	for (uint32_t i = 0; ctls[i].name[0]; ++i) {
-		ctls[i].factory (*_surface, ctls[i].base_id + index, ctls[i].name, *this);
+	for (map<Button::ID,StripButtonInfo>::const_iterator b = strip_buttons.begin(); b != strip_buttons.end(); ++b) {
+		(void) Button::factory (*_surface, b->first, b->second.base_id + index, b->second.name, *this);
 	}
 }	
 
 Strip::~Strip ()
 {
+	/* surface is responsible for deleting all controls */
 }
 
-/**
-	TODO could optimise this to use enum, but it's only
-	called during the protocol class instantiation.
-*/
-void Strip::add (Control & control)
+void 
+Strip::add (Control & control)
 {
+	Button* button;
+
 	Group::add (control);
 
-	Fader* fader;
-	Pot* pot;
-	Button* button;
-	Meter* meter;
+	/* fader, vpot, meter were all set explicitly */
 
-	if ((fader = dynamic_cast<Fader*>(&control)) != 0) {
-
-		_fader = fader;
-
-	} else if ((pot = dynamic_cast<Pot*>(&control)) != 0) {
-
-		_vpot = pot;
-
-	} else if ((button = dynamic_cast<Button*>(&control)) != 0) {
-
-		if (control.id() >= Button::recenable_base_id &&
-		    control.id() < Button::recenable_base_id + 8) {
-			
+	if ((button = dynamic_cast<Button*>(&control)) != 0) {
+		switch (button->bid()) {
+		case Button::RecEnable:
 			_recenable = button;
-
-		} else if (control.id() >= Button::mute_base_id &&
-			   control.id() < Button::mute_base_id + 8) {
-
+			break;
+		case Button::Mute:
 			_mute = button;
-
-		} else if (control.id() >= Button::solo_base_id &&
-			   control.id() < Button::solo_base_id + 8) {
-
+			break;
+		case Button::Solo:
 			_solo = button;
-
-		} else if (control.id() >= Button::select_base_id &&
-			   control.id() < Button::select_base_id + 8) {
-
+			break;
+		case Button::Select:
 			_select = button;
-
-		} else if (control.id() >= Button::vselect_base_id &&
-			   control.id() < Button::vselect_base_id + 8) {
-
+			break;
+		case Button::VSelect:
 			_vselect = button;
-
-		} else if (control.id() >= Button::fader_touch_base_id &&
-			   control.id() < Button::fader_touch_base_id + 8) {
-
+			break;
+		case Button::FaderTouch:
 			_fader_touch = button;
+		default:
+			break;
 		}
-
-	} else if ((meter = dynamic_cast<Meter*>(&control)) != 0) {
-		_meter = meter;
 	}
 }
 
@@ -385,14 +361,13 @@ Strip::handle_button (Button& button, ButtonState bs)
 		button.set_in_use (false);
 	}
 
-	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("strip %1 handling button %2 press ? %3\n", _index, button.id(), (bs == press)));
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("strip %1 handling button %2 press ? %3\n", _index, button.bid(), (bs == press)));
 
 	int lock_mod = (MackieControlProtocol::MODIFIER_CONTROL|MackieControlProtocol::MODIFIER_SHIFT);
 	int ms = _surface->mcp().modifier_state();
 	bool modified = (ms & MackieControlProtocol::MODIFIER_CONTROL);
 
-	if (button.id() >= Button::select_base_id &&
-	    button.id() < Button::select_base_id + 8) {
+	if (button.bid() == Button::Select) {
 
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("select touch, lock ? %1\n", ((ms & lock_mod) == lock_mod) ? 1 : 0));
 
@@ -415,9 +390,8 @@ Strip::handle_button (Button& button, ButtonState bs)
 
 		return;
 	}
-
-	if ((button.id() >= Button::fader_touch_base_id &&
-	     button.id() < Button::fader_touch_base_id + 8)) {
+	
+	if (button.bid() == Button::FaderTouch) {
 
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("fader touch, press ? %1\n", (bs == press)));
 

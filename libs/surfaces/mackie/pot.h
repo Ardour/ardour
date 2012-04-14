@@ -27,9 +27,7 @@ namespace Mackie {
 class Pot : public Control
 {
 public:
-	enum base_id_t {
-		base_id = 0x10,
-	};
+	static int const External;
 
 	enum Mode {
 		dot = 0,

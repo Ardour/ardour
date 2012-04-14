@@ -2,12 +2,20 @@
 <MackieProtocolDevice>
   <Name value="SSL Nucleus"/>
   <Strips value="8"/>
+  <Extenders value="1"/>
   <MasterFader value="no"/>
   <SegmentedDisplay value="yes"/>
   <TimecodeDisplay value="no"/>
   <TwoCharacterDisplay value="yes"/>
-  <Extenders value="1"/>
   <GlobalControls value="yes"/>
-  <JogWheel value="no"/>
+  <JogWheel value="yes"/>
   <TouchSenseFaders value="yes"/>
+  <SendsModifiers value="0x3"/>
+  <Quirks>
+    <ButtonOffNonZero/>
+  </Quirks>
+  <Buttons>
+    <GlobalButton name="Marker" id="0x48" label="instrument"/>
+    <StripButton name="FaderTouch" baseid="0x68"/>
+  </Buttons>
 </MackieProtocolDevice>

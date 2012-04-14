@@ -20,7 +20,7 @@ class Fader : public Control
 	MidiByteArray update_message ();
 
 	static Control* factory (Surface&, int id, const char*, Group&);
-
+	
   private:
 	float position;
 };
