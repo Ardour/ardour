@@ -351,8 +351,6 @@ class MackieControlProtocol
 	Mackie::LedState global_solo_release(Mackie::Button &);
 	Mackie::LedState marker_press(Mackie::Button &);
 	Mackie::LedState marker_release(Mackie::Button &);
-	Mackie::LedState drop_press(Mackie::Button &);
-	Mackie::LedState drop_release(Mackie::Button &);
 	Mackie::LedState save_press(Mackie::Button &);
 	Mackie::LedState save_release(Mackie::Button &);
 	Mackie::LedState timecode_beats_press(Mackie::Button &);
@@ -428,8 +426,6 @@ class MackieControlProtocol
 	Mackie::LedState on_release (Mackie::Button &);
 	Mackie::LedState rec_ready_press (Mackie::Button &);
 	Mackie::LedState rec_ready_release (Mackie::Button &);
-	Mackie::LedState snapshot_press (Mackie::Button &);
-	Mackie::LedState snapshot_release (Mackie::Button &);
 	Mackie::LedState touch_press (Mackie::Button &);
 	Mackie::LedState touch_release (Mackie::Button &);
 	Mackie::LedState enter_press (Mackie::Button &);
@@ -444,6 +440,52 @@ class MackieControlProtocol
 	Mackie::LedState user_b_release (Mackie::Button &);
 	Mackie::LedState fader_touch_press (Mackie::Button &);
 	Mackie::LedState fader_touch_release (Mackie::Button &);
+
+	Mackie::LedState snapshot_press (Mackie::Button&);
+	Mackie::LedState snapshot_release (Mackie::Button&);
+	Mackie::LedState read_press (Mackie::Button&);
+	Mackie::LedState read_release (Mackie::Button&);
+	Mackie::LedState write_press (Mackie::Button&);
+	Mackie::LedState write_release (Mackie::Button&);
+	Mackie::LedState fdrgroup_press (Mackie::Button&);
+	Mackie::LedState fdrgroup_release (Mackie::Button&);
+	Mackie::LedState clearsolo_press (Mackie::Button&);
+	Mackie::LedState clearsolo_release (Mackie::Button&);
+	Mackie::LedState track_press (Mackie::Button&);
+	Mackie::LedState track_release (Mackie::Button&);
+	Mackie::LedState send_press (Mackie::Button&);
+	Mackie::LedState send_release (Mackie::Button&);
+	Mackie::LedState miditracks_press (Mackie::Button&);
+	Mackie::LedState miditracks_release (Mackie::Button&);
+	Mackie::LedState inputs_press (Mackie::Button&);
+	Mackie::LedState inputs_release (Mackie::Button&);
+	Mackie::LedState audiotracks_press (Mackie::Button&);
+	Mackie::LedState audiotracks_release (Mackie::Button&);
+	Mackie::LedState audioinstruments_press (Mackie::Button&);
+	Mackie::LedState audioinstruments_release (Mackie::Button&);
+	Mackie::LedState aux_press (Mackie::Button&);
+	Mackie::LedState aux_release (Mackie::Button&);
+	Mackie::LedState busses_press (Mackie::Button&);
+	Mackie::LedState busses_release (Mackie::Button&);
+	Mackie::LedState outputs_press (Mackie::Button&);
+	Mackie::LedState outputs_release (Mackie::Button&);
+	Mackie::LedState user_press (Mackie::Button&);
+	Mackie::LedState user_release (Mackie::Button&);
+	Mackie::LedState trim_press (Mackie::Button&);
+	Mackie::LedState trim_release (Mackie::Button&);
+	Mackie::LedState latch_press (Mackie::Button&);
+	Mackie::LedState latch_release (Mackie::Button&);
+	Mackie::LedState grp_press (Mackie::Button&);
+	Mackie::LedState grp_release (Mackie::Button&);
+	Mackie::LedState nudge_press (Mackie::Button&);
+	Mackie::LedState nudge_release (Mackie::Button&);
+	Mackie::LedState drop_press (Mackie::Button&);
+	Mackie::LedState drop_release (Mackie::Button&);
+	Mackie::LedState replace_press (Mackie::Button&);
+	Mackie::LedState replace_release (Mackie::Button&);
+	Mackie::LedState click_press (Mackie::Button&);
+	Mackie::LedState click_release (Mackie::Button&);
+
 };
 
 

@@ -1000,3 +1000,214 @@ MackieControlProtocol::user_b_release (Button &)
 { 
 	return off; 
 }
+
+Mackie::LedState 
+MackieControlProtocol::snapshot_press (Mackie::Button&) 
+{
+	return none;
+}
+Mackie::LedState 
+MackieControlProtocol::snapshot_release (Mackie::Button&) 
+{
+	return none;
+}
+Mackie::LedState 
+MackieControlProtocol::read_press (Mackie::Button&) 
+{
+	return none;
+}
+Mackie::LedState 
+MackieControlProtocol::read_release (Mackie::Button&) 
+{
+	return none;
+}
+Mackie::LedState 
+MackieControlProtocol::write_press (Mackie::Button&) 
+{
+	return none;
+}
+Mackie::LedState 
+MackieControlProtocol::write_release (Mackie::Button&) 
+{
+	return none;
+}
+Mackie::LedState 
+MackieControlProtocol::fdrgroup_press (Mackie::Button&) 
+{
+	return none;
+}
+Mackie::LedState 
+MackieControlProtocol::fdrgroup_release (Mackie::Button&) 
+{
+	return none;
+}
+Mackie::LedState 
+MackieControlProtocol::clearsolo_press (Mackie::Button&) 
+{
+	return none;
+}
+Mackie::LedState 
+MackieControlProtocol::clearsolo_release (Mackie::Button&) 
+{
+	return none;
+}
+Mackie::LedState 
+MackieControlProtocol::track_press (Mackie::Button&) 
+{
+	return none;
+}
+Mackie::LedState 
+MackieControlProtocol::track_release (Mackie::Button&) 
+{
+	return none;
+}
+Mackie::LedState 
+MackieControlProtocol::send_press (Mackie::Button&) 
+{
+	return none;
+}
+Mackie::LedState 
+MackieControlProtocol::send_release (Mackie::Button&) 
+{
+	return none;
+}
+Mackie::LedState 
+MackieControlProtocol::miditracks_press (Mackie::Button&) 
+{
+	return none;
+}
+Mackie::LedState 
+MackieControlProtocol::miditracks_release (Mackie::Button&) 
+{
+	return none;
+}
+Mackie::LedState 
+MackieControlProtocol::inputs_press (Mackie::Button&) 
+{
+	return none;
+}
+Mackie::LedState 
+MackieControlProtocol::inputs_release (Mackie::Button&) 
+{
+	return none;
+}
+Mackie::LedState 
+MackieControlProtocol::audiotracks_press (Mackie::Button&) 
+{
+	return none;
+}
+Mackie::LedState 
+MackieControlProtocol::audiotracks_release (Mackie::Button&) 
+{
+	return none;
+}
+Mackie::LedState 
+MackieControlProtocol::audioinstruments_press (Mackie::Button&) 
+{
+	return none;
+}
+Mackie::LedState 
+MackieControlProtocol::audioinstruments_release (Mackie::Button&) 
+{
+	return none;
+}
+Mackie::LedState 
+MackieControlProtocol::aux_press (Mackie::Button&) 
+{
+	return none;
+}
+Mackie::LedState 
+MackieControlProtocol::aux_release (Mackie::Button&) 
+{
+	return none;
+}
+Mackie::LedState 
+MackieControlProtocol::busses_press (Mackie::Button&) 
+{
+	return none;
+}
+Mackie::LedState 
+MackieControlProtocol::busses_release (Mackie::Button&) 
+{
+	return none;
+}
+Mackie::LedState 
+MackieControlProtocol::outputs_press (Mackie::Button&) 
+{
+	return none;
+}
+Mackie::LedState 
+MackieControlProtocol::outputs_release (Mackie::Button&) 
+{
+	return none;
+}
+Mackie::LedState 
+MackieControlProtocol::user_press (Mackie::Button&) 
+{
+	return none;
+}
+Mackie::LedState 
+MackieControlProtocol::user_release (Mackie::Button&) 
+{
+	return none;
+}
+Mackie::LedState 
+MackieControlProtocol::trim_press (Mackie::Button&) 
+{
+	return none;
+}
+Mackie::LedState 
+MackieControlProtocol::trim_release (Mackie::Button&) 
+{
+	return none;
+}
+Mackie::LedState 
+MackieControlProtocol::latch_press (Mackie::Button&) 
+{
+	return none;
+}
+Mackie::LedState 
+MackieControlProtocol::latch_release (Mackie::Button&) 
+{
+	return none;
+}
+Mackie::LedState 
+MackieControlProtocol::grp_press (Mackie::Button&) 
+{
+	return none;
+}
+Mackie::LedState 
+MackieControlProtocol::grp_release (Mackie::Button&) 
+{
+	return none;
+}
+Mackie::LedState 
+MackieControlProtocol::nudge_press (Mackie::Button&) 
+{
+	return none;
+}
+Mackie::LedState 
+MackieControlProtocol::nudge_release (Mackie::Button&) 
+{
+	return none;
+}
+Mackie::LedState 
+MackieControlProtocol::replace_press (Mackie::Button&) 
+{
+	return none;
+}
+Mackie::LedState 
+MackieControlProtocol::replace_release (Mackie::Button&) 
+{
+	return none;
+}
+Mackie::LedState 
+MackieControlProtocol::click_press (Mackie::Button&) 
+{
+	return none;
+}
+Mackie::LedState 
+MackieControlProtocol::click_release (Mackie::Button&) 
+{
+	return none;
+}

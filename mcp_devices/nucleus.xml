@@ -10,12 +10,5 @@
   <GlobalControls value="yes"/>
   <JogWheel value="yes"/>
   <TouchSenseFaders value="yes"/>
-  <SendsModifiers value="0x3"/>
-  <Quirks>
-    <ButtonOffNonZero/>
-  </Quirks>
-  <Buttons>
-    <GlobalButton name="Marker" id="0x48" label="instrument"/>
-    <StripButton name="FaderTouch" baseid="0x68"/>
-  </Buttons>
+  <LogicControlButtons/>
 </MackieProtocolDevice>

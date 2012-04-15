@@ -76,19 +76,23 @@ class DeviceInfo
     const std::map<Button::ID,StripButtonInfo>& strip_buttons() const { return _strip_buttons; }
 	
   private:
-	uint32_t _strip_cnt;
-	uint32_t _extenders;
-	bool     _has_two_character_display;
-	bool     _has_master_fader;
-	bool     _has_segmented_display;
-	bool     _has_timecode_display;
-	bool     _has_global_controls;
-	bool     _has_jog_wheel;
-	bool     _has_touch_sense_faders;
-	std::string _name;
+    uint32_t _strip_cnt;
+    uint32_t _extenders;
+    bool     _has_two_character_display;
+    bool     _has_master_fader;
+    bool     _has_segmented_display;
+    bool     _has_timecode_display;
+    bool     _has_global_controls;
+    bool     _has_jog_wheel;
+    bool     _has_touch_sense_faders;
+    bool     _uses_logic_control_buttons;
+    std::string _name;
 
     std::map<Button::ID,GlobalButtonInfo> _global_buttons;
     std::map<Button::ID,StripButtonInfo>  _strip_buttons;
+
+    void logic_control_buttons ();
+    void mackie_control_buttons ();
 };
 
 class DeviceProfile

@@ -166,6 +166,7 @@ Surface::init_controls()
 	groups["transport"] = new Group  ("transport");
 	groups["user"] = new Group  ("user");
 	groups["master"] = new Group ("master");
+	groups["view"] = new Group ("view");
 		
 	if (_mcp.device_info().has_jog_wheel()) {
 		_jog_wheel = new Mackie::JogWheel (_mcp);
