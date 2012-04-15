@@ -362,25 +362,34 @@ Strip::handle_button (Button& button, ButtonState bs)
 	}
 
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("strip %1 handling button %2 press ? %3\n", _index, button.bid(), (bs == press)));
-
-	int lock_mod = (MackieControlProtocol::MODIFIER_CONTROL|MackieControlProtocol::MODIFIER_SHIFT);
+	
 	int ms = _surface->mcp().modifier_state();
 	bool modified = (ms & MackieControlProtocol::MODIFIER_CONTROL);
 
 	if (button.bid() == Button::Select) {
 
-		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("select touch, lock ? %1\n", ((ms & lock_mod) == lock_mod) ? 1 : 0));
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("select touch, modifiers %1\n", ms));
 
 		if (bs == press) {
 
-			if ((ms & lock_mod) == lock_mod) {
+			if (ms & MackieControlProtocol::MODIFIER_CMDALT) {
 				_controls_locked = !_controls_locked;
+				_surface->write (display (1,_controls_locked ?  "Locked" : "Unlock"));
+				queue_display_reset (1000);
+				return;
+			}
+
+			if (ms & MackieControlProtocol::MODIFIER_SHIFT) {
+				/* reset to default */
+				boost::shared_ptr<AutomationControl> ac = _vpot->control (modified);
+				if (ac) {
+					ac->set_value (ac->normal());
+				}
 				return;
 			}
 			
 			DEBUG_TRACE (DEBUG::MackieControl, "add select button on press\n");
 			_surface->mcp().add_down_select_button (_surface->number(), _index);			
-
 			_surface->mcp().select_range ();
 
 		} else {
