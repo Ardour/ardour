@@ -102,8 +102,6 @@ public:
 		Scrub,
 		UserA,
 		UserB,
-		Assign1,
-		Assign2,
 		Snapshot,
 		Read,
 		Write,

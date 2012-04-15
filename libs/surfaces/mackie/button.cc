@@ -101,6 +101,29 @@ Button::name_to_id (const std::string& name)
 	if (name == "Scrub") { return Scrub; }
 	if (name == "UserA") { return UserA; }
 	if (name == "UserB") { return UserB; }
+	if (name == "Snapshot") { return Snapshot; }
+	if (name == "Read") { return Read; }
+	if (name == "Write") { return Write; }
+	if (name == "FdrGroup") { return FdrGroup; }
+	if (name == "ClearSolo") { return ClearSolo; }
+	if (name == "Track") { return Track; }
+	if (name == "Send") { return Send; }
+	if (name == "MidiTracks") { return MidiTracks; }
+	if (name == "Inputs") { return Inputs; }
+	if (name == "AudioTracks") { return AudioTracks; }
+	if (name == "AudioInstruments") { return AudioInstruments; }
+	if (name == "Aux") { return Aux; }
+	if (name == "Busses") { return Busses; }
+	if (name == "Outputs") { return Outputs; }
+	if (name == "User") { return User; }
+	if (name == "Trim") { return Trim; }
+	if (name == "Latch") { return Latch; }
+	if (name == "Grp") { return Grp; }
+	if (name == "Nudge") { return Nudge; }
+	if (name == "Drop") { return Drop; }
+	if (name == "Replace") { return Replace; }
+	if (name == "Click") { return Click; }
+	if (name == "View") { return View; }
 		
 		/* Strip buttons */
 		
