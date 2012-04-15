@@ -28,6 +28,7 @@ class Pot : public Control
 {
 public:
 	static int const External;
+	static int const ID;
 
 	enum Mode {
 		dot = 0,

@@ -24,7 +24,8 @@
 
 using namespace Mackie;
 
-int const Pot::External = 0x2e;
+int const Pot::External = 0x2e; /* specific ID for "vpot" representing external control */
+int const Pot::ID       = 0x10; /* base value for v-pot IDs */
 
 Control*
 Pot::factory (Surface& surface, int id, const char* name, Group& group)

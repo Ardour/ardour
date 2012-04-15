@@ -77,7 +77,7 @@ Strip::Strip (Surface& s, const std::string& name, int index, const map<Button::
 	, _last_pan_position_written (-1.0)
 {
 	_fader = dynamic_cast<Fader*> (Fader::factory (*_surface, index, "fader", *this));
-	_vpot = dynamic_cast<Pot*> (Pot::factory (*_surface, index, "vpot", *this));
+	_vpot = dynamic_cast<Pot*> (Pot::factory (*_surface, Pot::ID + index, "vpot", *this));
 	_meter = dynamic_cast<Meter*> (Meter::factory (*_surface, index, "meter", *this));
 
 	for (map<Button::ID,StripButtonInfo>::const_iterator b = strip_buttons.begin(); b != strip_buttons.end(); ++b) {
