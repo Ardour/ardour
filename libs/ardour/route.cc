@@ -522,10 +522,13 @@ Route::process_output_buffers (BufferSet& bufs,
 		/* if it has any inputs, make sure they match */
 		if (boost::dynamic_pointer_cast<UnknownProcessor> (*i) == 0 && (*i)->input_streams() != ChanCount::ZERO) {
 			if (bufs.count() != (*i)->input_streams()) {
-				cerr << _name << " bufs = " << bufs.count()
-				     << " input for " << (*i)->name() << " = " << (*i)->input_streams()
-				     << endl;
-				abort ();
+				DEBUG_TRACE (
+					DEBUG::Processors, string_compose (
+						"%1 bufs = %2 input for %3 = %4\n",
+						_name, bufs.count(), (*i)->name(), (*i)->input_streams()
+						)
+					);
+				continue;
 			}
 		}
 #endif
