@@ -2177,10 +2177,18 @@ TempoMap::framewalk_to_beats (framepos_t pos, framecnt_t distance) const
 	while (distance) {
 
 		/* End of this section */
-		framepos_t const end = ((next_tempo == metrics.end()) ? max_framepos : (*next_tempo)->frame ());
+		framepos_t end;
+		/* Distance to `end' in frames */
+		framepos_t distance_to_end;
 
-		/* Distance to the end in frames */
-		framecnt_t const distance_to_end = end - pos;
+		if (next_tempo == metrics.end ()) {
+			/* We can't do (end - pos) if end is max_framepos, as it will overflow if pos is -ve */
+			end = max_framepos;
+			distance_to_end = max_framepos;
+		} else {
+			end = (*next_tempo)->frame ();
+			distance_to_end = end - pos;
+		}
 
 		/* Amount to subtract this time */
 		double const sub = min (distance, distance_to_end);
