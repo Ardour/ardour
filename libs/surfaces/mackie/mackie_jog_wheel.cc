@@ -11,7 +11,6 @@
 #include <algorithm>
 
 using namespace Mackie;
-using std::isnan;
 
 JogWheel::JogWheel (MackieControlProtocol & mcp)
 : _mcp (mcp)

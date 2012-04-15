@@ -41,14 +41,14 @@ MouseCursors::MouseCursors ()
 	Color ffg ("#000000");
 
 	{
-		RefPtr<Bitmap> source = Bitmap::create (fader_cursor_bits, fader_cursor_width, fader_cursor_height);
-		RefPtr<Bitmap> mask = Bitmap::create (fader_cursor_mask_bits, fader_cursor_width, fader_cursor_height);
+		RefPtr<Bitmap> source = Bitmap::create ((char const *) fader_cursor_bits, fader_cursor_width, fader_cursor_height);
+		RefPtr<Bitmap> mask = Bitmap::create ((char const *) fader_cursor_mask_bits, fader_cursor_width, fader_cursor_height);
 		fader = new Cursor (source, mask, ffg, fbg, fader_cursor_x_hot, fader_cursor_y_hot);
 	}
 
 	{
-		RefPtr<Bitmap> source = Bitmap::create (speaker_cursor_bits, speaker_cursor_width, speaker_cursor_height);
-		RefPtr<Bitmap> mask = Bitmap::create (speaker_cursor_mask_bits, speaker_cursor_width, speaker_cursor_height);
+		RefPtr<Bitmap> source = Bitmap::create ((char const *) speaker_cursor_bits, speaker_cursor_width, speaker_cursor_height);
+		RefPtr<Bitmap> mask = Bitmap::create ((char const *) speaker_cursor_mask_bits, speaker_cursor_width, speaker_cursor_height);
 		speaker = new Cursor (source, mask, ffg, fbg, speaker_cursor_x_hot, speaker_cursor_y_hot);
 	}
 

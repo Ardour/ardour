@@ -679,7 +679,7 @@ ControlList::modify (iterator iter, double when, double val)
 		(*iter)->when = when;
 		(*iter)->value = val;
 
-		if (isnan (val)) {
+		if (std::isnan (val)) {
 			abort ();
 		}
 

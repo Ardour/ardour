@@ -57,8 +57,8 @@ public:
 			Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK
 			);
 
-		signal_button_press_event().connect (bind (mem_fun (*this, &DnDVBox::button_press), (T *) 0));
-		signal_button_release_event().connect (bind (mem_fun (*this, &DnDVBox::button_release), (T *) 0));
+		signal_button_press_event().connect (sigc::bind (mem_fun (*this, &DnDVBox::button_press), (T *) 0));
+		signal_button_release_event().connect (sigc::bind (mem_fun (*this, &DnDVBox::button_release), (T *) 0));
 		signal_drag_motion().connect (mem_fun (*this, &DnDVBox::drag_motion));
 		signal_drag_leave().connect (mem_fun (*this, &DnDVBox::drag_leave));
 

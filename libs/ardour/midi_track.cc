@@ -525,7 +525,7 @@ MidiTrack::midi_panic()
 {
 	DEBUG_TRACE (DEBUG::MidiIO, string_compose ("%1 delivers panic data\n", name()));
 	for (uint8_t channel = 0; channel <= 0xF; channel++) {
-		uint8_t ev[3] = { MIDI_CMD_CONTROL | channel, MIDI_CTL_SUSTAIN, 0 };
+		uint8_t ev[3] = { ((uint8_t) (MIDI_CMD_CONTROL | channel)), ((uint8_t) MIDI_CTL_SUSTAIN), 0 };
 		write_immediate_event(3, ev);
 		ev[1] = MIDI_CTL_ALL_NOTES_OFF;
 		write_immediate_event(3, ev);
@@ -551,9 +551,9 @@ void
 MidiTrack::MidiControl::set_value(double val)
 {
 	bool valid = false;
-	if (isinf(val)) {
+	if (std::isinf(val)) {
 		cerr << "MIDIControl value is infinity" << endl;
-	} else if (isnan(val)) {
+	} else if (std::isnan(val)) {
 		cerr << "MIDIControl value is NaN" << endl;
 	} else if (val < _list->parameter().min()) {
 		cerr << "MIDIControl value is < " << _list->parameter().min() << endl;
@@ -570,7 +570,7 @@ MidiTrack::MidiControl::set_value(double val)
 	assert(val <= _list->parameter().max());
 	if ( ! automation_playback()) {
 		size_t size = 3;
-		uint8_t ev[3] = { _list->parameter().channel(), int(val), 0 };
+		uint8_t ev[3] = { _list->parameter().channel(), uint8_t (val), 0 };
 		switch(_list->parameter().type()) {
 		case MidiCCAutomation:
 			ev[0] += MIDI_CMD_CONTROL;
@@ -733,7 +733,7 @@ MidiTrack::act_on_mute ()
 			if ((1<<channel) & mask) {
 
 				DEBUG_TRACE (DEBUG::MidiIO, string_compose ("%1 delivers mute message to channel %2\n", name(), channel+1));
-				uint8_t ev[3] = { MIDI_CMD_CONTROL | channel, MIDI_CTL_SUSTAIN, 0 };
+				uint8_t ev[3] = { ((uint8_t) (MIDI_CMD_CONTROL | channel)), MIDI_CTL_SUSTAIN, 0 };
 				write_immediate_event (3, ev);
 				ev[1] = MIDI_CTL_ALL_NOTES_OFF;
 				write_immediate_event (3, ev);

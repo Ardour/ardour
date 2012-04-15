@@ -830,7 +830,7 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 
 		model_to_view_coord (tx, ty);
 
-		if (isnan (tx) || isnan (ty)) {
+		if (std::isnan (tx) || std::isnan (ty)) {
 			warning << string_compose (_("Ignoring illegal points on AutomationLine \"%1\""),
 						   _name) << endmsg;
 			continue;

@@ -63,7 +63,7 @@ class RouteParams_UI : public ArdourWindow, public PBD::ScopedConnectionList
 
 	void set_session (ARDOUR::Session*);
 	void session_going_away ();
-	PluginSelector*  plugin_selector() { return _plugin_selector; }
+	PluginSelector* plugin_selector() { return _plugin_selector; }
 
   private:
 	Gtk::HBox                global_hpacker;

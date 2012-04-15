@@ -112,7 +112,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Route> rt
 	, RouteUI (sess)
 	, _mixer(mx)
 	, _mixer_owned (in_mixer)
-	, processor_box (sess, sigc::mem_fun(*this, &MixerStrip::plugin_selector), mx.selection(), this, in_mixer)
+	, processor_box (sess, boost::bind (&MixerStrip::plugin_selector, this), mx.selection(), this, in_mixer)
 	, gpm (sess, 250)
 	, panners (sess)
 	, button_size_group (Gtk::SizeGroup::create (Gtk::SIZE_GROUP_HORIZONTAL))

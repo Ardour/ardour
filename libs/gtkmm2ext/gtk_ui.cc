@@ -104,7 +104,7 @@ UI::UI (string namestr, int *argc, char ***argv)
 	errors->set_title (title.get_string());
 
 	errors->dismiss_button().set_name ("ErrorLogCloseButton");
-	errors->signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), (Window *) errors));
+	errors->signal_delete_event().connect (sigc::bind (sigc::ptr_fun (just_hide_it), (Window *) errors));
 	errors->set_type_hint (Gdk::WINDOW_TYPE_HINT_UTILITY);
 
 	//load_rcfile (rcfile);
