@@ -325,6 +325,7 @@ class Region
 	void post_set (const PBD::PropertyChange&);
 	virtual void set_position_internal (framepos_t pos, bool allow_bbt_recompute);
 	virtual void set_length_internal (framecnt_t);
+	virtual void set_start_internal (framecnt_t);
 	
 	DataType _type;
 

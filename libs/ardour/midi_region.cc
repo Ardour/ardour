@@ -153,7 +153,7 @@ void
 MidiRegion::post_set (const PropertyChange& pc)
 {
 	Region::post_set (pc);
-	
+
 	if (pc.contains (Properties::length) && !pc.contains (Properties::length_beats)) {
 		update_length_beats ();
 	} else if (pc.contains (Properties::start) && !pc.contains (Properties::start_beats)) {
@@ -424,6 +424,7 @@ MidiRegion::fix_negative_start ()
 
 	model()->insert_silence_at_start (c.from (-_start));
 	_start = 0;
+	_start_beats = 0;
 }
 
 /** Transpose the notes in this region by a given number of semitones */
@@ -432,4 +433,11 @@ MidiRegion::transpose (int semitones)
 {
 	BeatsFramesConverter c (_session.tempo_map(), _start);
 	model()->transpose (c.from (_start), c.from (_start + _length), semitones);
+}
+
+void
+MidiRegion::set_start_internal (framecnt_t s)
+{
+	Region::set_start_internal (s);
+	set_start_beats_from_start_frames ();
 }

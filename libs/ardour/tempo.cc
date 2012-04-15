@@ -1889,7 +1889,7 @@ TempoMap::framepos_plus_beats (framepos_t pos, Evoral::MusicalTime beats) const
 	return pos;
 }
 
-/** Subtract some (fractional) beats to a frame position, and return the result in frames */
+/** Subtract some (fractional) beats from a frame position, and return the result in frames */
 framepos_t
 TempoMap::framepos_minus_beats (framepos_t pos, Evoral::MusicalTime beats) const
 {
