@@ -93,6 +93,7 @@ class DeviceInfo
 
     void logic_control_buttons ();
     void mackie_control_buttons ();
+    void shared_buttons ();
 };
 
 class DeviceProfile

@@ -63,35 +63,10 @@ void
 DeviceInfo::mackie_control_buttons ()
 {
 	_global_buttons.clear ();
+	shared_buttons ();
 
-	/* these definitions are based on Mackie's specification for Mackie
-	 * Control Protocol.
-	 *
-	 * Any given device info file can override any or all of these for any reason.
-	 */
-
-	_global_buttons[Button::Track] = GlobalButtonInfo ("track", "assignment", 0x28);
-	_global_buttons[Button::Send] = GlobalButtonInfo ("send", "assignment", 0x29);
-	_global_buttons[Button::Pan] = GlobalButtonInfo ("pan", "assignment", 0x2a);
-	_global_buttons[Button::Plugin] = GlobalButtonInfo ("plugin", "assignment", 0x2b);
-	_global_buttons[Button::Eq] = GlobalButtonInfo ("eq", "assignment", 0x2c);
-	_global_buttons[Button::Dyn] = GlobalButtonInfo ("dyn", "assignment", 0x2d);
-	_global_buttons[Button::Left] = GlobalButtonInfo ("left", "bank", 0x2e);
-	_global_buttons[Button::Right] = GlobalButtonInfo ("right", "bank", 0x2f);
-	_global_buttons[Button::ChannelLeft] = GlobalButtonInfo ("channelleft", "bank", 0x30);
-	_global_buttons[Button::ChannelRight] = GlobalButtonInfo ("channelright", "bank", 0x31);
-	_global_buttons[Button::Flip] = GlobalButtonInfo ("flip", "none", 0x32);
 	_global_buttons[Button::Edit] = GlobalButtonInfo ("edit", "none", 0x33);
-	_global_buttons[Button::NameValue] = GlobalButtonInfo ("name/value", "display", 0x34);
-	_global_buttons[Button::TimecodeBeats] = GlobalButtonInfo ("timecode/beats", "display", 0x35);
-	_global_buttons[Button::F1] = GlobalButtonInfo ("F1", "none", 0x36);
-	_global_buttons[Button::F2] = GlobalButtonInfo ("F2", "none", 0x37);
-	_global_buttons[Button::F3] = GlobalButtonInfo ("F3", "none", 0x38);
-	_global_buttons[Button::F4] = GlobalButtonInfo ("F4", "none", 0x39);
-	_global_buttons[Button::F5] = GlobalButtonInfo ("F5", "none", 0x3a);
-	_global_buttons[Button::F6] = GlobalButtonInfo ("F6", "none", 0x3b);
-	_global_buttons[Button::F7] = GlobalButtonInfo ("F7", "none", 0x3c);
-	_global_buttons[Button::F8] = GlobalButtonInfo ("F8", "none", 0x3d);
+
 	_global_buttons[Button::F9] = GlobalButtonInfo ("F9", "none", 0x3e);
 	_global_buttons[Button::F10] = GlobalButtonInfo ("F10", "none", 0x3f);
 	_global_buttons[Button::F11] = GlobalButtonInfo ("F11", "none", 0x40);
@@ -122,25 +97,7 @@ DeviceInfo::mackie_control_buttons ()
 	_global_buttons[Button::PunchOut] = GlobalButtonInfo ("punch out", "transport", 0x59);
 	_global_buttons[Button::Loop] = GlobalButtonInfo ("loop", "transport", 0x59);
 	_global_buttons[Button::Home] = GlobalButtonInfo ("home", "transport", 0x5a);
-	_global_buttons[Button::Rewind] = GlobalButtonInfo ("rewind", "transport", 0x5b);
-	_global_buttons[Button::Ffwd] = GlobalButtonInfo ("ffwd", "transport", 0x5c);
-	_global_buttons[Button::Stop] = GlobalButtonInfo ("stop", "transport", 0x5d);
-	_global_buttons[Button::Play] = GlobalButtonInfo ("play", "transport", 0x5e);
-	_global_buttons[Button::Record] = GlobalButtonInfo ("record", "transport", 0x5f);
-	_global_buttons[Button::CursorUp] = GlobalButtonInfo ("cursor up", "cursor", 0x60);
-	_global_buttons[Button::CursorDown] = GlobalButtonInfo ("cursor down", "cursor", 0x61);
-	_global_buttons[Button::CursorLeft] = GlobalButtonInfo ("cursor left", "cursor", 0x62);
-	_global_buttons[Button::CursorRight] = GlobalButtonInfo ("cursor right", "cursor", 0x63);
-	_global_buttons[Button::Zoom] = GlobalButtonInfo ("zoom", "none", 0x64);
-	_global_buttons[Button::Scrub] = GlobalButtonInfo ("scrub", "none", 0x65);
-	_global_buttons[Button::UserA] = GlobalButtonInfo ("user a", "user", 0x66);
-	_global_buttons[Button::UserB] = GlobalButtonInfo ("user b", "user", 0x67);
 
-	_strip_buttons[Button::RecEnable], StripButtonInfo (0x0, "recenable");
-	_strip_buttons[Button::Solo] = StripButtonInfo (0x08, "solo");
-	_strip_buttons[Button::Mute] = StripButtonInfo (0x10, "mute");
-	_strip_buttons[Button::Select] = StripButtonInfo (0x18, "select");
-	_strip_buttons[Button::VSelect] = StripButtonInfo (0x20, "vselect");
 	_strip_buttons[Button::FaderTouch] = StripButtonInfo (0xe0, "fader touch");
 }
 
@@ -148,37 +105,10 @@ void
 DeviceInfo::logic_control_buttons ()
 {
 	_global_buttons.clear ();
+	shared_buttons ();
 
-	/* these definitions are based on Mackie's specification for Mackie
-	 * Control Protocol, Logic Control "variant" and corroborated 
-	 * with Apple's Logic Control manual.
-	 *
-	 * Any given device info file can override any or all of these for any reason.
-	 */
+	_global_buttons[Button::View] = GlobalButtonInfo ("view", "view", 0x33);
 
-	_global_buttons[Button::Track] = GlobalButtonInfo ("track", "assignment", 0x2a);
-	_global_buttons[Button::Send] = GlobalButtonInfo ("send", "assignment", 0x2b);
-	_global_buttons[Button::Pan] = GlobalButtonInfo ("pan", "assignment", 0x2a);
-	_global_buttons[Button::Plugin] = GlobalButtonInfo ("plugin", "assignment", 0x2b);
-	_global_buttons[Button::Eq] = GlobalButtonInfo ("eq", "assignment", 0x2c);
-	_global_buttons[Button::Dyn] = GlobalButtonInfo ("dyn", "assignment", 0x2d);
-	_global_buttons[Button::Left] = GlobalButtonInfo ("left", "bank", 0x2e);
-	_global_buttons[Button::Right] = GlobalButtonInfo ("right", "bank", 0x2f);
-	_global_buttons[Button::ChannelLeft] = GlobalButtonInfo ("channel left", "bank", 0x30);
-	_global_buttons[Button::ChannelRight] = GlobalButtonInfo ("channelright", "bank", 0x31);
-	_global_buttons[Button::Flip] = GlobalButtonInfo ("flip", "none", 0x32);
-	_global_buttons[Button::Edit] = GlobalButtonInfo ("edit", "none", 0x33);
-	_global_buttons[Button::NameValue] = GlobalButtonInfo ("name/value", "display", 0x34);
-	_global_buttons[Button::TimecodeBeats] = GlobalButtonInfo ("timecode/beats", "display", 0x35);
-	_global_buttons[Button::F1] = GlobalButtonInfo ("F1", "none", 0x36);
-	_global_buttons[Button::F2] = GlobalButtonInfo ("F2", "none", 0x37);
-	_global_buttons[Button::F3] = GlobalButtonInfo ("F3", "none", 0x38);
-	_global_buttons[Button::F4] = GlobalButtonInfo ("F4", "none", 0x39);
-	_global_buttons[Button::F5] = GlobalButtonInfo ("F5", "none", 0x3a);
-	_global_buttons[Button::F6] = GlobalButtonInfo ("F6", "none", 0x3b);
-	_global_buttons[Button::F7] = GlobalButtonInfo ("F7", "none", 0x3c);
-	_global_buttons[Button::F8] = GlobalButtonInfo ("F8", "none", 0x3d);
-	/**/
 	_global_buttons[Button::MidiTracks] = GlobalButtonInfo ("miditracks", "view", 0x3e);
 	_global_buttons[Button::Inputs] = GlobalButtonInfo ("inputs", "view", 0x3f);
 	_global_buttons[Button::AudioTracks] = GlobalButtonInfo ("audiotracks", "view", 0x40);
@@ -208,6 +138,36 @@ DeviceInfo::logic_control_buttons ()
 	_global_buttons[Button::Replace] = GlobalButtonInfo ("replace", "transport", 0x58);
 	_global_buttons[Button::Click] = GlobalButtonInfo ("click", "transport", 0x59);
 	_global_buttons[Button::Solo] = GlobalButtonInfo ("solo", "transport", 0x5a);
+
+	_strip_buttons[Button::FaderTouch] = StripButtonInfo (0x68, "fader touch");
+}
+
+void
+DeviceInfo::shared_buttons ()
+{
+	_global_buttons[Button::Track] = GlobalButtonInfo ("track", "assignment", 0x28);
+	_global_buttons[Button::Send] = GlobalButtonInfo ("send", "assignment", 0x29);
+	_global_buttons[Button::Pan] = GlobalButtonInfo ("pan", "assignment", 0x2a);
+	_global_buttons[Button::Plugin] = GlobalButtonInfo ("plugin", "assignment", 0x2b);
+	_global_buttons[Button::Eq] = GlobalButtonInfo ("eq", "assignment", 0x2c);
+	_global_buttons[Button::Dyn] = GlobalButtonInfo ("dyn", "assignment", 0x2d);
+	_global_buttons[Button::Left] = GlobalButtonInfo ("left", "bank", 0x2e);
+	_global_buttons[Button::Right] = GlobalButtonInfo ("right", "bank", 0x2f);
+	_global_buttons[Button::ChannelLeft] = GlobalButtonInfo ("channelleft", "bank", 0x30);
+	_global_buttons[Button::ChannelRight] = GlobalButtonInfo ("channelright", "bank", 0x31);
+	_global_buttons[Button::Flip] = GlobalButtonInfo ("flip", "none", 0x32);
+
+	_global_buttons[Button::NameValue] = GlobalButtonInfo ("name/value", "display", 0x34);
+	_global_buttons[Button::TimecodeBeats] = GlobalButtonInfo ("timecode/beats", "display", 0x35);
+	_global_buttons[Button::F1] = GlobalButtonInfo ("F1", "none", 0x36);
+	_global_buttons[Button::F2] = GlobalButtonInfo ("F2", "none", 0x37);
+	_global_buttons[Button::F3] = GlobalButtonInfo ("F3", "none", 0x38);
+	_global_buttons[Button::F4] = GlobalButtonInfo ("F4", "none", 0x39);
+	_global_buttons[Button::F5] = GlobalButtonInfo ("F5", "none", 0x3a);
+	_global_buttons[Button::F6] = GlobalButtonInfo ("F6", "none", 0x3b);
+	_global_buttons[Button::F7] = GlobalButtonInfo ("F7", "none", 0x3c);
+	_global_buttons[Button::F8] = GlobalButtonInfo ("F8", "none", 0x3d);
+
 	_global_buttons[Button::Rewind] = GlobalButtonInfo ("rewind", "transport", 0x5b);
 	_global_buttons[Button::Ffwd] = GlobalButtonInfo ("ffwd", "transport", 0x5c);
 	_global_buttons[Button::Stop] = GlobalButtonInfo ("stop", "transport", 0x5d);
@@ -227,7 +187,6 @@ DeviceInfo::logic_control_buttons ()
 	_strip_buttons[Button::Mute] = StripButtonInfo (0x10, "mute");
 	_strip_buttons[Button::Select] = StripButtonInfo (0x18, "select");
 	_strip_buttons[Button::VSelect] = StripButtonInfo (0x20, "vselect");
-	_strip_buttons[Button::FaderTouch] = StripButtonInfo (0x68, "fader touch");
 }
 
 int

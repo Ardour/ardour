@@ -485,7 +485,8 @@ class MackieControlProtocol
 	Mackie::LedState replace_release (Mackie::Button&);
 	Mackie::LedState click_press (Mackie::Button&);
 	Mackie::LedState click_release (Mackie::Button&);
-
+	Mackie::LedState view_press (Mackie::Button&);
+	Mackie::LedState view_release (Mackie::Button&);
 };
 
 

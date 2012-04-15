@@ -1211,3 +1211,13 @@ MackieControlProtocol::click_release (Mackie::Button&)
 {
 	return none;
 }
+Mackie::LedState 
+MackieControlProtocol::view_press (Mackie::Button&) 
+{
+	return none;
+}
+Mackie::LedState 
+MackieControlProtocol::view_release (Mackie::Button&) 
+{
+	return none;
+}

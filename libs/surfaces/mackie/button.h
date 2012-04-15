@@ -126,6 +126,7 @@ public:
 		Drop,
 		Replace,
 		Click,
+		View,
 
 		/* Strip buttons */
 		
