@@ -515,7 +515,7 @@ Strip::handle_button (Button& button, ButtonState bs)
 	default:
 		if ((control = button.control ())) {
 			if (bs == press) {
-				DEBUG_TRACE (DEBUG::MackieControl, "add button on release\n");
+				DEBUG_TRACE (DEBUG::MackieControl, "add button on press\n");
 				_surface->mcp().add_down_button ((AutomationType) control->parameter().type(), _surface->number(), _index);
 				
 				float new_value;
