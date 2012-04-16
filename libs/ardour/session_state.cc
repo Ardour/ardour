@@ -83,7 +83,6 @@
 #include "ardour/butler.h"
 #include "ardour/configuration.h"
 #include "ardour/control_protocol_manager.h"
-#include "ardour/crossfade.h"
 #include "ardour/cycle_timer.h"
 #include "ardour/directory_names.h"
 #include "ardour/filename_extensions.h"
@@ -232,7 +231,6 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 
 	/* default short fade = 15ms */
 
-	Crossfade::set_short_xfade_length ((framecnt_t) floor (config.get_short_xfade_seconds() * frame_rate()));
 	SndFileSource::setup_standard_crossfades (*this, frame_rate());
 
 	last_mmc_step.tv_sec = 0;

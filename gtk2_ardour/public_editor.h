@@ -73,7 +73,6 @@ class Selection;
 class AutomationLine;
 class ControlPoint;
 class SelectionRect;
-class CrossfadeView;
 class RouteTimeAxisView;
 class RegionView;
 class AudioRegionView;
@@ -315,7 +314,6 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 	virtual bool canvas_selection_rect_event (GdkEvent* event, ArdourCanvas::Item*, SelectionRect*) = 0;
 	virtual bool canvas_selection_start_trim_event (GdkEvent* event, ArdourCanvas::Item*, SelectionRect*) = 0;
 	virtual bool canvas_selection_end_trim_event (GdkEvent* event, ArdourCanvas::Item*, SelectionRect*) = 0;
-	virtual bool canvas_crossfade_view_event (GdkEvent* event, ArdourCanvas::Item*, CrossfadeView*) = 0;
 	virtual bool canvas_fade_in_event (GdkEvent* event, ArdourCanvas::Item*, AudioRegionView*) = 0;
 	virtual bool canvas_fade_in_handle_event (GdkEvent* event, ArdourCanvas::Item*, AudioRegionView*) = 0;
 	virtual bool canvas_fade_out_event (GdkEvent* event, ArdourCanvas::Item*, AudioRegionView*) = 0;

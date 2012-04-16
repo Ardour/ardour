@@ -68,7 +68,6 @@
 #include "route_time_axis.h"
 #include "automation_time_axis.h"
 #include "canvas_impl.h"
-#include "crossfade_view.h"
 #include "enums.h"
 #include "gui_thread.h"
 #include "keyboard.h"

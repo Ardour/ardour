@@ -124,6 +124,7 @@ def build(bld):
         obj.source       = '''
                 test/SequenceTest.cpp
                 test/SMFTest.cpp
+                test/RangeTest.cpp
                 test/testrunner.cpp
         '''
         obj.includes     = ['.', './src']

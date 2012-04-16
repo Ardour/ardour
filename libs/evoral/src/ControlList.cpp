@@ -465,6 +465,8 @@ ControlList::fast_simple_add (double when, double value)
 	/* to be used only for loading pre-sorted data from saved state */
 	_events.insert (_events.end(), new ControlEvent (when, value));
 	assert(_events.back());
+
+	mark_dirty ();
 }
 
 void

@@ -38,7 +38,6 @@
 #include "audio_streamview.h"
 #include "automation_line.h"
 #include "control_point.h"
-#include "crossfade_view.h"
 #include "editor_regions.h"
 #include "editor_cursors.h"
 #include "midi_region_view.h"
@@ -479,32 +478,6 @@ Editor::mapped_get_equivalent_regions (RouteTimeAxisView& tv, uint32_t, RegionVi
 }
 
 void
-Editor::mapped_get_equivalent_crossfades (
-	RouteTimeAxisView& tv, uint32_t, boost::shared_ptr<Crossfade> basis, vector<boost::shared_ptr<Crossfade> >* equivs
-	) const
-{
-	boost::shared_ptr<Playlist> pl;
-	vector<boost::shared_ptr<Crossfade> > results;
-	boost::shared_ptr<Track> tr;
-
-	if ((tr = tv.track()) == 0) {
-		/* bus */
-		return;
-	}
-
-	if ((pl = tr->playlist()) != 0) {
-		boost::shared_ptr<AudioPlaylist> apl = boost::dynamic_pointer_cast<AudioPlaylist> (pl);
-		if (apl) {
-			apl->get_equivalent_crossfades (basis, *equivs);
-		}
-	}
-
-	/* We might have just checked basis for equivalency with itself, so we need to remove dupes */
-	sort (equivs->begin (), equivs->end ());
-	unique (equivs->begin (), equivs->end ());
-}
-
-void
 Editor::get_equivalent_regions (RegionView* basis, vector<RegionView*>& equivalent_regions, PBD::PropertyID property) const
 {
 	mapover_tracks_with_unique_playlists (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_get_equivalent_regions), basis, &equivalent_regions), &basis->get_time_axis_view(), property);
@@ -535,19 +508,6 @@ Editor::get_equivalent_regions (RegionSelection & basis, PBD::PropertyID prop) c
 	}
 
 	return equivalent;
-}
-
-vector<boost::shared_ptr<Crossfade> >
-Editor::get_equivalent_crossfades (RouteTimeAxisView& v, boost::shared_ptr<Crossfade> c, PBD::PropertyID prop) const
-{
-	vector<boost::shared_ptr<Crossfade> > e;
-	mapover_tracks_with_unique_playlists (
-		sigc::bind (sigc::mem_fun (*this, &Editor::mapped_get_equivalent_crossfades), c, &e),
-		&v,
-		prop
-		);
-
-	return e;
 }
 
 int
@@ -700,7 +660,7 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op)
 			/* 2. figure out the boundaries for our search for new objects */
 
 			switch (clicked_regionview->region()->coverage (first_frame, last_frame)) {
-			case OverlapNone:
+			case Evoral::OverlapNone:
 				if (last_frame < clicked_regionview->region()->first_frame()) {
 					first_frame = last_frame;
 					last_frame = clicked_regionview->region()->last_frame();
@@ -710,7 +670,7 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op)
 				}
 				break;
 
-			case OverlapExternal:
+			case Evoral::OverlapExternal:
 				if (last_frame < clicked_regionview->region()->first_frame()) {
 					first_frame = last_frame;
 					last_frame = clicked_regionview->region()->last_frame();
@@ -720,7 +680,7 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op)
 				}
 				break;
 
-			case OverlapInternal:
+			case Evoral::OverlapInternal:
 				if (last_frame < clicked_regionview->region()->first_frame()) {
 					first_frame = last_frame;
 					last_frame = clicked_regionview->region()->last_frame();
@@ -730,8 +690,8 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op)
 				}
 				break;
 
-			case OverlapStart:
-			case OverlapEnd:
+			case Evoral::OverlapStart:
+			case Evoral::OverlapEnd:
 				/* nothing to do except add clicked region to selection, since it
 				   overlaps with the existing selection in this track.
 				*/

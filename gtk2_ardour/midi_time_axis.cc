@@ -63,7 +63,6 @@
 #include "automation_time_axis.h"
 #include "canvas-note-event.h"
 #include "canvas_impl.h"
-#include "crossfade_view.h"
 #include "editor.h"
 #include "enums.h"
 #include "ghostregion.h"

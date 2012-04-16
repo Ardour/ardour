@@ -66,7 +66,6 @@
 #include "ardour/click.h"
 #include "ardour/configuration.h"
 #include "ardour/control_protocol_manager.h"
-#include "ardour/crossfade.h"
 #include "ardour/cycle_timer.h"
 #include "ardour/data_type.h"
 #include "ardour/debug.h"
@@ -327,8 +326,6 @@ Session::destroy ()
 
 		delete *i;
 	}
-
-	Crossfade::set_buffer_size (0);
 
 	/* not strictly necessary, but doing it here allows the shared_ptr debugging to work */
 	playlists.reset ();

@@ -4117,7 +4117,7 @@ AutomationRangeDrag::setup (list<boost::shared_ptr<AutomationLine> > const & lin
 		/* check this range against all the AudioRanges that we are using */
 		list<AudioRange>::const_iterator k = _ranges.begin ();
 		while (k != _ranges.end()) {
-			if (k->coverage (r.first, r.second) != OverlapNone) {
+			if (k->coverage (r.first, r.second) != Evoral::OverlapNone) {
 				break;
 			}
 			++k;

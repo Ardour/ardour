@@ -2510,7 +2510,7 @@ static void
 add_if_covered (RegionView* rv, const AudioRange* ar, RegionSelection* rs)
 {
 	switch (rv->region()->coverage (ar->start, ar->end - 1)) {
-	case OverlapNone:
+	case Evoral::OverlapNone:
 		break;
 	default:
 		rs->push_back (rv);
@@ -3263,7 +3263,7 @@ Editor::trim_region_to_location (const Location& loc, const char* str)
 
 		/* require region to span proposed trim */
 		switch (rv->region()->coverage (loc.start(), loc.end())) {
-		case OverlapInternal:
+		case Evoral::OverlapInternal:
 			break;
 		default:
 			continue;
@@ -5240,24 +5240,6 @@ Editor::update_region_fade_visibility ()
 				v->audio_view()->show_all_fades ();
 			} else {
 				v->audio_view()->hide_all_fades ();
-			}
-		}
-	}
-}
-
-/** Update crossfade visibility after its configuration has been changed */
-void
-Editor::update_xfade_visibility ()
-{
-	_xfade_visibility = _session->config.get_xfades_visible ();
-
-	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-		AudioTimeAxisView* v = dynamic_cast<AudioTimeAxisView*>(*i);
-		if (v) {
-			if (_xfade_visibility) {
-				v->show_all_xfades ();
-			} else {
-				v->hide_all_xfades ();
 			}
 		}
 	}

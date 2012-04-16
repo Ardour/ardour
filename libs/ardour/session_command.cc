@@ -34,8 +34,6 @@
 #include "ardour/session_playlists.h"
 #include "ardour/region_factory.h"
 #include "ardour/midi_automation_list_binder.h"
-#include "ardour/crossfade_binder.h"
-#include "ardour/crossfade.h"
 #include "pbd/error.h"
 #include "pbd/id.h"
 #include "pbd/statefuldestructible.h"
@@ -142,19 +140,6 @@ Session::memento_command_factory(XMLNode *n)
 	    }
 
 	    cerr << "Alist " << id << " not found\n";
-
-    } else if (obj_T == "ARDOUR::Crossfade") {
-	    if (have_id) {
-		    boost::shared_ptr<Crossfade> c = playlists->find_crossfade (id);
-		    if (c) {
-			    return new MementoCommand<Crossfade> (*c.get(), before, after);
-		    }
-	    } else {
-		    return new MementoCommand<Crossfade> (
-			    new CrossfadeBinder (n, playlists),
-			    before, after
-			    );
-	    }
 
     } else if (registry.count(id)) { // For Editor and AutomationLine which are off-limits herea
 	    return new MementoCommand<PBD::StatefulDestructible>(*registry[id], before, after);

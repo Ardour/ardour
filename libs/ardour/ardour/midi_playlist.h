@@ -63,12 +63,6 @@ public:
 
 protected:
 
-	/* playlist "callbacks" */
-
-	void finalize_split_region (boost::shared_ptr<Region> original, boost::shared_ptr<Region> left, boost::shared_ptr<Region> right);
-
-	void check_dependents (boost::shared_ptr<Region> region, bool norefresh);
-	void refresh_dependents (boost::shared_ptr<Region> region);
 	void remove_dependents (boost::shared_ptr<Region> region);
 
 private:

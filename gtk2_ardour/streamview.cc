@@ -547,7 +547,7 @@ StreamView::get_selectables (framepos_t start, framepos_t end, double top, doubl
 			layer_ok = (min_layer <= l && l <= max_layer);
 		}
 
-		if ((*i)->region()->coverage (start, end) != OverlapNone && layer_ok) {
+		if ((*i)->region()->coverage (start, end) != Evoral::OverlapNone && layer_ok) {
 			results.push_back (*i);
 		}
 	}

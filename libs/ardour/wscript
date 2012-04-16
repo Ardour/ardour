@@ -18,7 +18,7 @@ LIBARDOUR_VERSION = "%s.%s.%s" % (MAJOR, MINOR, MICRO)
 LIBARDOUR_LIB_VERSION = '3.0.0'
 
 # default state file version for this build
-CURRENT_SESSION_FILE_VERSION = 3000
+CURRENT_SESSION_FILE_VERSION = 3001
 
 # Variables for 'waf dist'
 APPNAME = 'libardour3'
@@ -70,8 +70,6 @@ libardour_sources = [
         'config_text.cc',
         'control_protocol_manager.cc',
         'control_protocol_search_path.cc',
-        'crossfade.cc',
-        'crossfade_binder.cc',
         'cycle_timer.cc',
         'data_type.cc',
         'default_click.cc',
@@ -408,8 +406,7 @@ def build(bld):
         obj.source += [ 'audio_unit.cc' ]
 
     if Options.options.fpu_optimization:
-        if (bld.env['build_target'] == 'i386'
-            or bld.env['build_target'] == 'i686'):
+        if (bld.env['build_target'] == 'i386' or bld.env['build_target'] == 'i686'):
             obj.source += [ 'sse_functions_xmm.cc', 'sse_functions.s' ]
         elif bld.env['build_target'] == 'x86_64':
             obj.source += [ 'sse_functions_xmm.cc', 'sse_functions_64bit.s' ]
@@ -430,6 +427,8 @@ def build(bld):
                 test/dummy_lxvst.cc
                 test/test_needing_session.cc
                 test/test_needing_playlist_and_regions.cc
+                test/test_globals.cc
+                test/audio_region_test.cc
                 test/bbt_test.cc
                 test/tempo_test.cc
                 test/interpolation_test.cc
@@ -439,6 +438,7 @@ def build(bld):
                 test/framepos_plus_beats_test.cc
                 test/framepos_minus_beats_test.cc
                 test/playlist_layering_test.cc
+                test/playlist_read_test.cc
                 test/testrunner.cc
         '''.split()
 

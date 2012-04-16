@@ -41,15 +41,6 @@ TempoTest::recomputeMapTest ()
 	Meter meterB (3, 4);
 	map.add_meter (meterB, BBT_Time (4, 1, 0));
 
-	cout << "\n\n\n";
-	for (list<MetricSection*>::iterator i = map.metrics.begin(); i != map.metrics.end(); ++i) {
-		if (dynamic_cast<TempoSection*> (*i)) {
-			cout << "\tTempo MS @ " << (*i)->start() << " " << (*i)->frame() << "\n";
-		} else {
-			cout << "\tMeter MS @ " << (*i)->start() << " " << (*i)->frame() << "\n";
-		}
-	}
-	
 	list<MetricSection*>::iterator i = map.metrics.begin();
 	CPPUNIT_ASSERT_EQUAL (framepos_t (0), (*i)->frame ());
 

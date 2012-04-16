@@ -26,6 +26,7 @@
 #include <glibmm/thread.h>
 #include "pbd/signals.h"
 #include "evoral/types.hpp"
+#include "evoral/Range.hpp"
 #include "evoral/Parameter.hpp"
 
 namespace Evoral {

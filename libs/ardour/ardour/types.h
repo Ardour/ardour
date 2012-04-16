@@ -36,6 +36,8 @@
 
 #include "pbd/id.h"
 
+#include "evoral/Range.hpp"
+
 #include "ardour/chan_count.h"
 
 #include <map>
@@ -100,17 +102,6 @@ namespace ARDOUR {
 		/** channel count of IO after a ConfigurationChanged, if appropriate */
 		ARDOUR::ChanCount after;
 	};
-
-	enum OverlapType {
-		OverlapNone,      // no overlap
-		OverlapInternal,  // the overlap is 100% with the object
-		OverlapStart,     // overlap covers start, but ends within
-		OverlapEnd,       // overlap begins within and covers end
-		OverlapExternal   // overlap extends to (at least) begin+end
-	};
-
-	ARDOUR::OverlapType coverage (framepos_t sa, framepos_t ea,
-	                              framepos_t sb, framepos_t eb);
 
 	/* policies for inserting/pasting material where overlaps
 	   might be an issue.
@@ -278,6 +269,9 @@ namespace ARDOUR {
 		}
 	};
 
+	/* XXX: slightly unfortunate that there is this and Evoral::Range<>,
+	   but this has a uint32_t id which Evoral::Range<> does not.
+	*/
 	struct AudioRange {
 		framepos_t start;
 		framepos_t end;
@@ -295,8 +289,8 @@ namespace ARDOUR {
 			return start == other.start && end == other.end;
 		}
 
-		OverlapType coverage (framepos_t s, framepos_t e) const {
-			return ARDOUR::coverage (start, end, s, e);
+		Evoral::OverlapType coverage (framepos_t s, framepos_t e) const {
+			return Evoral::coverage (start, end, s, e);
 		}
 	};
 

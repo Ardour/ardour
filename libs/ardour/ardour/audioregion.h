@@ -34,7 +34,8 @@
 #include "ardour/region.h"
 
 class XMLNode;
-
+class AudioRegionTest;
+class PlaylistReadTest;
 
 namespace ARDOUR {
 
@@ -92,6 +93,8 @@ class AudioRegion : public Region
 	boost::shared_ptr<AutomationList> fade_out() { return _fade_out; }
 	boost::shared_ptr<AutomationList> envelope() { return _envelope; }
 
+	Evoral::Range<framepos_t> body_range () const;
+
 	virtual framecnt_t read_peaks (PeakData *buf, framecnt_t npeaks,
 			framecnt_t offset, framecnt_t cnt,
 			uint32_t chan_n=0, double samples_per_unit= 1.0) const;
@@ -137,6 +140,9 @@ class AudioRegion : public Region
 	void set_fade_out (FadeShape, framecnt_t);
 	void set_fade_out (boost::shared_ptr<AutomationList>);
 
+	void set_default_fade_in ();
+	void set_default_fade_out ();
+	
 	void set_envelope_active (bool yn);
 	void set_default_envelope ();
 
@@ -182,6 +188,9 @@ class AudioRegion : public Region
 	AudioRegion (SourceList &);
 
   private:
+	friend class ::AudioRegionTest;
+	friend class ::PlaylistReadTest;
+	
 	PBD::Property<bool>     _envelope_active;
 	PBD::Property<bool>     _default_fade_in;
 	PBD::Property<bool>     _default_fade_out;
@@ -195,8 +204,6 @@ class AudioRegion : public Region
 
 	void init ();
 	void set_default_fades ();
-	void set_default_fade_in ();
-	void set_default_fade_out ();
 
 	void recompute_gain_at_end ();
 	void recompute_gain_at_start ();

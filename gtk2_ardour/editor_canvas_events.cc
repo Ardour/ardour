@@ -35,7 +35,6 @@
 #include "audio_region_view.h"
 #include "audio_streamview.h"
 #include "canvas-noevent-text.h"
-#include "crossfade_view.h"
 #include "audio_time_axis.h"
 #include "region_gain_line.h"
 #include "automation_line.h"
@@ -516,127 +515,6 @@ struct DescendingRegionLayerSorter {
 	    return a->layer() > b->layer();
     }
 };
-
-bool
-Editor::canvas_crossfade_view_event (GdkEvent* event, ArdourCanvas::Item* item, CrossfadeView* xfv)
-{
-	/* we handle only button 3 press/release events */
-
-	switch (event->type) {
-	case GDK_BUTTON_PRESS:
-		clicked_crossfadeview = xfv;
-		clicked_axisview = &clicked_crossfadeview->get_time_axis_view();
-		clicked_routeview = dynamic_cast<RouteTimeAxisView*>(clicked_axisview);
-		if (event->button.button == 3) {
-			return button_press_handler (item, event, CrossfadeViewItem);
-		}
-		break;
-
-	case GDK_BUTTON_RELEASE:
-		if (event->button.button == 3) {
-			bool ret = button_release_handler (item, event, CrossfadeViewItem);
-			return ret;
-		}
-		break;
-
-	default:
-		break;
-
-	}
-
-	/* XXX do not forward double clicks */
-
-	if (event->type == GDK_2BUTTON_PRESS) {
-		return false;
-	}
-
-	/* proxy for an underlying regionview */
-
-	/* XXX really need to check if we are in the name highlight,
-	   and proxy to that when required.
-
-	   XXX or in the trim rectangles
-	*/
-
-	TimeAxisView& tv (xfv->get_time_axis_view());
-	AudioTimeAxisView* atv;
-
-	if ((atv = dynamic_cast<AudioTimeAxisView*>(&tv)) != 0) {
-
-		if (atv->is_audio_track()) {
-
-			boost::shared_ptr<AudioPlaylist> pl;
-			if ((pl = boost::dynamic_pointer_cast<AudioPlaylist> (atv->track()->playlist())) != 0) {
-
-				boost::shared_ptr<RegionList> rl = pl->regions_at (event_frame (event));
-				if (!rl->empty()) {
-
-					if (atv->layer_display() == Overlaid) {
-
-						/* we're in overlaid mode; proxy to the uppermost region view */
-
-						DescendingRegionLayerSorter cmp;
-						rl->sort (cmp);
-
-						RegionView* rv = atv->view()->find_view (rl->front());
-
-						/* proxy */
-						return canvas_region_view_event (event, rv->get_canvas_group(), rv);
-
-					} else {
-
-						/* we're in stacked mode; proxy to the region view under the mouse */
-
-						double cx = 0;
-						double cy = 0;
-						switch (event->type) {
-						case GDK_BUTTON_PRESS:
-						case GDK_BUTTON_RELEASE:
-							cx = event->button.x;
-							cy = event->button.y;
-							break;
-						case GDK_MOTION_NOTIFY:
-							cx = event->motion.x;
-							cy = event->motion.y;
-							break;
-						case GDK_ENTER_NOTIFY:
-						case GDK_LEAVE_NOTIFY:
-							cx = event->crossing.x;
-							cy = event->crossing.y;
-							break;
-						default:
-							/* XXX: this may be wrong for some events */
-							cx = event->button.x;
-							cy = event->button.y;
-						}
-
-						/* position of the event within the track */
-						atv->view()->canvas_item()->w2i (cx, cy);
-
-						/* hence layer that we're over */
-						double const c = atv->view()->child_height ();
-						layer_t const l = pl->top_layer () + 1 - (cy / c);
-
-						/* hence region */
-						RegionList::iterator i = rl->begin();
-						while (i != rl->end() && (*i)->layer() != l) {
-							++i;
-						}
-
-						if (i != rl->end()) {
-							RegionView* rv = atv->view()->find_view (*i);
-
-							/* proxy */
-							return canvas_region_view_event (event, rv->get_canvas_group(), rv);
-						}
-					}
-				}
-			}
-		}
-	}
-
-	return TRUE;
-}
 
 bool
 Editor::canvas_control_point_event (GdkEvent *event, ArdourCanvas::Item* item, ControlPoint* cp)

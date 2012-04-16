@@ -1312,7 +1312,7 @@ Region::send_change (const PropertyChange& what_changed)
 bool
 Region::overlap_equivalent (boost::shared_ptr<const Region> other) const
 {
-	return coverage (other->first_frame(), other->last_frame()) != OverlapNone;
+	return coverage (other->first_frame(), other->last_frame()) != Evoral::OverlapNone;
 }
 
 bool

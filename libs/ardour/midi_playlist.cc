@@ -128,13 +128,13 @@ MidiPlaylist::read (Evoral::EventSink<framepos_t>& dst, framepos_t start, framec
 		 */
 
 		switch ((*i)->coverage (start, end)) {
-		case OverlapStart:
-		case OverlapInternal:
-		case OverlapExternal:
+		case Evoral::OverlapStart:
+		case Evoral::OverlapInternal:
+		case Evoral::OverlapExternal:
 			regs.push_back (*i);
 			break;
 
-		case OverlapEnd:
+		case Evoral::OverlapEnd:
 			/* this region ends within the read range */
 			regs.push_back (*i);
 			ended.push_back (*i);
@@ -315,26 +315,6 @@ MidiPlaylist::remove_dependents (boost::shared_ptr<Region> region)
 		_note_trackers.erase (t);
 	}
 }
-
-
-void
-MidiPlaylist::refresh_dependents (boost::shared_ptr<Region> /*r*/)
-{
-	/* MIDI regions have no dependents (crossfades) */
-}
-
-void
-MidiPlaylist::finalize_split_region (boost::shared_ptr<Region> /*original*/, boost::shared_ptr<Region> /*left*/, boost::shared_ptr<Region> /*right*/)
-{
-	/* No MIDI crossfading (yet?), so nothing to do here */
-}
-
-void
-MidiPlaylist::check_dependents (boost::shared_ptr<Region> /*r*/, bool /*norefresh*/)
-{
-	/* MIDI regions have no dependents (crossfades) */
-}
-
 
 int
 MidiPlaylist::set_state (const XMLNode& node, int version)

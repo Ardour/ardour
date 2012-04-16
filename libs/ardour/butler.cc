@@ -24,7 +24,6 @@
 #include "pbd/error.h"
 #include "pbd/pthread_utils.h"
 #include "ardour/butler.h"
-#include "ardour/crossfade.h"
 #include "ardour/io.h"
 #include "ardour/midi_diskstream.h"
 #include "ardour/session.h"
@@ -85,8 +84,6 @@ Butler::start_thread()
 	midi_dstream_buffer_size = (uint32_t) floor (Config->get_midi_track_buffer_seconds() * rate);
 
 	MidiDiskstream::set_readahead_frames ((framecnt_t) (Config->get_midi_readahead() * rate));
-
-	Crossfade::set_buffer_size (audio_dstream_playback_buffer_size);
 
 	should_run = false;
 

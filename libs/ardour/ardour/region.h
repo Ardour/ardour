@@ -141,6 +141,14 @@ class Region
 	framepos_t first_frame () const { return _position; }
 	framepos_t last_frame ()  const { return _position + _length - 1; }
 
+	Evoral::Range<framepos_t> last_range () const {
+		return Evoral::Range<framepos_t> (_last_position, _last_position + _last_length - 1);
+	}
+	
+	Evoral::Range<framepos_t> range () const {
+		return Evoral::Range<framepos_t> (first_frame(), last_frame());
+	}
+
 	bool hidden ()           const { return _hidden; }
 	bool muted ()            const { return _muted; }
 	bool opaque ()           const { return _opaque; }
@@ -168,8 +176,14 @@ class Region
 		return first_frame() <= frame && frame <= last_frame();
 	}
 
-	OverlapType coverage (framepos_t start, framepos_t end) const {
-		return ARDOUR::coverage (first_frame(), last_frame(), start, end);
+	/** @return coverage of this region with the given range;
+	 *  OverlapInternal: the range is internal to this region.
+	 *  OverlapStart:    the range overlaps the start of this region.
+	 *  OverlapEnd:      the range overlaps the end of this region.
+	 *  OverlapExternal: the range overlaps all of this region.
+	 */
+	Evoral::OverlapType coverage (framepos_t start, framepos_t end) const {
+		return Evoral::coverage (first_frame(), last_frame(), start, end);
 	}
 
 	bool equivalent (boost::shared_ptr<const Region>) const;

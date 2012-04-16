@@ -73,10 +73,6 @@ class AudioTimeAxisView : public RouteTimeAxisView
 	AudioStreamView* audio_view();
 
 	void set_show_waveforms_recording (bool yn);
-	void show_all_xfades (bool apply_to_selection = false);
-	void hide_all_xfades (bool apply_to_selection = false);
-	void hide_dependent_views (TimeAxisViewItem&);
-	void reveal_dependent_views (TimeAxisViewItem&);
 
 	/* Overridden from parent to store display state */
 	guint32 show_at (double y, int& nth, Gtk::VBox *parent);
@@ -94,7 +90,6 @@ class AudioTimeAxisView : public RouteTimeAxisView
 
 	void route_active_changed ();
 
-	void append_extra_display_menu_items ();
 	Gtk::Menu* build_mode_menu();
 	void build_automation_action_menu (bool);
 
