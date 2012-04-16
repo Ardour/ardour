@@ -177,8 +177,6 @@ class MackieControlProtocol
 	ARDOUR::Session & get_session() { return *session; }
 	framepos_t transport_frame() const;
 
-	void add_in_use_timeout (Mackie::Surface& surface, Mackie::Control& in_use_control, boost::weak_ptr<ARDOUR::AutomationControl> touched);
-
 	int modifier_state() const { return _modifier_state; }
 
 	typedef std::list<boost::shared_ptr<ARDOUR::AutomationControl> > ControlList;
@@ -281,7 +279,6 @@ class MackieControlProtocol
 
 	void create_surfaces ();
 	void port_connected_or_disconnected (std::string, std::string, bool);
-	bool control_in_use_timeout (Mackie::Surface*, Mackie::Control *, boost::weak_ptr<ARDOUR::AutomationControl>);
 	bool periodic();
 	void build_gui ();
 	bool midi_input_handler (Glib::IOCondition ioc, MIDI::Port* port);

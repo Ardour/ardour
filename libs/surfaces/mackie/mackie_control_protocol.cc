@@ -900,47 +900,6 @@ MackieControlProtocol::stop ()
 	return 0;
 }
 
-/** Add a timeout so that a control's in_use flag will be reset some time in the future.
- *  @param in_use_control the control whose in_use flag to reset.
- *  @param touch_control a touch control to emit an event for, or 0.
- */
-void
-MackieControlProtocol::add_in_use_timeout (Surface& surface, Control& in_use_control, boost::weak_ptr<AutomationControl> touched)
-{
-	Glib::RefPtr<Glib::TimeoutSource> timeout (Glib::TimeoutSource::create (250)); // milliseconds
-
-	in_use_control.in_use_connection.disconnect ();
-	in_use_control.in_use_connection = timeout->connect (
-		sigc::bind (sigc::mem_fun (*this, &MackieControlProtocol::control_in_use_timeout), &surface, &in_use_control, touched));
-	
-	timeout->attach (main_loop()->get_context());
-
-	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("timeout queued for surface %1, control %2\n",
-							   surface.number(), &in_use_control));}
-
-/** Handle timeouts to reset in_use for controls that can't
- *  do this by themselves (e.g. pots, and faders without touch support).
- *  @param in_use_control the control whose in_use flag to reset.
- *  @param touch_control a touch control to emit an event for, or 0.
- */
-bool
-MackieControlProtocol::control_in_use_timeout (Surface* surface, Control* in_use_control, boost::weak_ptr<AutomationControl> wtouched)
-{
-	boost::shared_ptr<AutomationControl> touched (wtouched.lock());
-
-	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("timeout elapsed for surface %1, control %2\n", surface->number(), in_use_control));
-
-	in_use_control->set_in_use (false);
-
-	if (touched) {
-		/* end the touch, and mark the end */
-		touched->stop_touch (session->transport_frame(), true);
-	}
-	
-	// only call this method once from the timer
-	return false;
-}
-
 void 
 MackieControlProtocol::update_led (Surface& surface, Button& button, Mackie::LedState ls)
 {
