@@ -440,21 +440,23 @@ Strip::vselect_event (Button& button, ButtonState bs)
 {
 	if (bs == press) {
 
-		boost::shared_ptr<AutomationControl> ac = button.control ();
 
-		if (ac) {
-			
-			int ms = _surface->mcp().modifier_state();
-			
-			if (ms & MackieControlProtocol::MODIFIER_SHIFT) {
+		int ms = _surface->mcp().modifier_state();
+				
+		if (ms & MackieControlProtocol::MODIFIER_SHIFT) {
+			boost::shared_ptr<AutomationControl> ac = button.control ();
+
+			if (ac) {
+				
 				/* reset to default/normal value */
 				ac->set_value (ac->normal());
-
-			} else {
-				DEBUG_TRACE (DEBUG::MackieControl, "switching to next pot mode\n");
-				next_pot_mode ();
 			}
+
+		}  else {
+			DEBUG_TRACE (DEBUG::MackieControl, "switching to next pot mode\n");
+			next_pot_mode ();
 		}
+
 	}
 }
 
