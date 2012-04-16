@@ -606,7 +606,6 @@ Strip::handle_pot (Pot& pot, float delta)
 	*/
 	
 	pot.start_touch (_surface->mcp().transport_frame());
-	_surface->mcp().add_in_use_timeout (*_surface, pot, pot.control ());
 
 	double p = pot.get_value ();
 	p += delta;
