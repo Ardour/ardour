@@ -615,12 +615,6 @@ MackieControlProtocol::get_state()
 	os << _current_initial_bank;
 	node->add_property (X_("bank"), os.str());
 
-	for (uint32_t n = 0; n < 16; ++n) {
-		ostringstream s;
-		s << string_compose ("f%1-action", n+1);
-		node->add_property (s.str().c_str(), f_action (n));
-	}
-
 	return *node;
 }
 
@@ -640,23 +634,6 @@ MackieControlProtocol::set_state (const XMLNode & node, int /*version*/)
 		if (_current_initial_bank != new_bank) {
 			switch_banks (new_bank);
 		}
-	}
-
-	_f_actions.clear ();
-	_f_actions.resize (16);
-
-	for (uint32_t n = 0; n < 16; ++n) {
-		string action;
-		if ((prop = node.property (string_compose ("f%1-action", n+1))) != 0) {
-			action = prop->value();
-		}
-
-		if (action.empty()) {
-			/* default action if nothing is specified */
-			action = string_compose ("Editor/goto-visual-state-%1", n+1);
-		}
-
-		_f_actions[n] = action;
 	}
 
 	return retval;
@@ -1138,25 +1115,6 @@ MackieControlProtocol::clear_ports ()
 	}
 
 	port_sources.clear ();
-}
-
-string
-MackieControlProtocol::f_action (uint32_t fn, uint32_t /* modifier */)
-{
-	if (fn >= _f_actions.size()) {
-		return string();
-	}
-
-	return _f_actions[fn];
-}
-
-void
-MackieControlProtocol::f_press (uint32_t fn)
-{
-	string action = f_action (0);
-	if (!action.empty()) {
-		access_action (action);
-	}
 }
 
 void

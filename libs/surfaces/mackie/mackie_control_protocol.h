@@ -191,8 +191,6 @@ class MackieControlProtocol
 	void remove_down_select_button (int surface, int strip);
 	void select_range ();
 	
-	std::string f_action (uint32_t fn, uint32_t modifier = 0);
-
   protected:
 	// shut down the surface
 	void close();
@@ -279,7 +277,6 @@ class MackieControlProtocol
 	int                      _current_selected_track;
 	int                      _modifier_state;
 	PortSources               port_sources;
-	std::vector<std::string> _f_actions;
 	ButtonMap                 button_map;
 
 	void create_surfaces ();

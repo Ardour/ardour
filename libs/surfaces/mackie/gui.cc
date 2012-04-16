@@ -240,7 +240,7 @@ MackieControlProtocolGUI::rebuild_function_key_editor ()
 		row = *(function_key_model->append());
 		row[function_key_columns.name] = string_compose ("F%1", n+1);
 		row[function_key_columns.number] = n;
-		row[function_key_columns.plain] = _cp.f_action (n, 0);
+		row[function_key_columns.plain] = ""; // _cp.f_action (n, 0);
 		row[function_key_columns.control] = "c";
 		row[function_key_columns.option] = "o";
 		row[function_key_columns.shift] = "s";

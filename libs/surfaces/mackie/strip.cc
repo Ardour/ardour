@@ -399,7 +399,19 @@ Strip::handle_button (Button& button, ButtonState bs)
 
 		return;
 	}
-	
+
+	if (button.bid() == Button::VSelect) {
+		if (bs == press) {
+			/* swap controls on the vpot */
+			boost::shared_ptr<AutomationControl> ac = button.control (true);
+			button.set_modified_control (button.control (false));
+			button.set_normal_control (ac);
+			_surface->write (display (1, static_display_string ()));
+		}
+
+		return;
+	}
+
 	if (button.bid() == Button::FaderTouch) {
 
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("fader touch, press ? %1\n", (bs == press)));
@@ -663,11 +675,42 @@ Strip::gui_selection_changed (ARDOUR::RouteNotificationListPtr rl)
 string
 Strip::static_display_string () const
 {
-	if (_surface->mcp().flip_mode()) {
-		return "Fader";
-	} else {
-		return "Pan";
+	if (!_vpot) {
+		return string();
 	}
+
+	boost::shared_ptr<AutomationControl> ac = _vpot->control (false);
+
+	if (!ac) {
+		return string();
+	}
+	
+	/* don't use canonical controllable names here because we're
+	 * limited by space concerns
+	 */
+	
+	switch((AutomationType)ac->parameter().type()) {
+	case GainAutomation:
+		return "Fader";
+		break;
+	case PanAzimuthAutomation:
+		return "Pan";
+		break;
+	case PanWidthAutomation:
+		return "Width";
+		break;
+	case PanElevationAutomation:
+	case PanFrontBackAutomation:
+	case PanLFEAutomation:
+		break;
+	case PluginAutomation:
+		return string_compose ("Param %d", ac->parameter().id());
+		break;
+	default:
+		break;
+	}
+
+	return "???";
 }
 
 void

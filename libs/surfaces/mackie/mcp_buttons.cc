@@ -663,6 +663,17 @@ MackieControlProtocol::enter_release (Button &)
 { 
 	return off;
 }
+
+void
+MackieControlProtocol::f_press (uint32_t fn)
+{
+#if 0
+	string action = f_action (0);
+	if (!action.empty()) {
+		access_action (action);
+	}
+#endif
+}
 LedState
 MackieControlProtocol::F1_press (Button &) 
 { 
