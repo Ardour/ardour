@@ -451,6 +451,7 @@ Strip::vselect_event (Button& button, ButtonState bs)
 				ac->set_value (ac->normal());
 
 			} else {
+				DEBUG_TRACE (DEBUG::MackieControl, "switching to next pot mode\n");
 				next_pot_mode ();
 			}
 		}
@@ -911,6 +912,7 @@ Strip::next_pot_mode ()
 
 	if (_surface->mcp().flip_mode()) {
 		/* do not change vpot mode while in flipped mode */
+		DEBUG_TRACE (DEBUG::MackieControl, "not stepping pot mode - in flip mode\n");
 		_surface->write (display (1, "Flip"));
 		queue_display_reset (2000);
 		return;
@@ -943,6 +945,8 @@ Strip::set_vpot_mode (PotMode m)
 	boost::shared_ptr<Send> send;
 	boost::shared_ptr<Pannable> pannable;
 
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("switch to vpot mode %1\n", m));
+
 	if (!_route) {
 		return;
 	}
@@ -968,7 +972,6 @@ Strip::set_vpot_mode (PotMode m)
 				if (pannable) {
 					_vpot->set_control (pannable->pan_azimuth_control);
 				}
-				_vpot_mode = PanAzimuth;
 			}
 		}
 		break;
