@@ -28,15 +28,20 @@
 #include "pbd/compose.h"
 #include "pbd/convert.h"
 
+#include "ardour/amp.h"
+#include "ardour/bundle.h"
 #include "ardour/debug.h"
 #include "ardour/midi_ui.h"
-#include "ardour/route.h"
-#include "ardour/track.h"
+#include "ardour/meter.h"
 #include "ardour/pannable.h"
 #include "ardour/panner.h"
 #include "ardour/panner_shell.h"
 #include "ardour/rc_configuration.h"
-#include "ardour/meter.h"
+#include "ardour/route.h"
+#include "ardour/session.h"
+#include "ardour/send.h"
+#include "ardour/track.h"
+#include "ardour/user_bundle.h"
 
 #include "mackie_control_protocol.h"
 #include "surface_port.h"
@@ -68,6 +73,8 @@ Strip::Strip (Surface& s, const std::string& name, int index, const map<Button::
 	, _vselect (0)
 	, _fader_touch (0)
 	, _vpot (0)
+	, _vpot_mode (PanAzimuth)
+	, _preflip_vpot_mode (PanAzimuth)
 	, _fader (0)
 	, _index (index)
 	, _surface (&s)
@@ -132,64 +139,105 @@ Strip::set_route (boost::shared_ptr<Route> r)
 	}
 
 	route_connections.drop_connections ();
+	
+	_solo->set_control (boost::shared_ptr<AutomationControl>());
+	_mute->set_control (boost::shared_ptr<AutomationControl>());
+	_select->set_control (boost::shared_ptr<AutomationControl>());
+	_recenable->set_control (boost::shared_ptr<AutomationControl>());
+	_fader->set_control (boost::shared_ptr<AutomationControl>());
+	_vpot->set_control (boost::shared_ptr<AutomationControl>());
 
 	_route = r;
 
-	if (r) {
+	if (!r) {
+		return;
+	}
 
-		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Surface %1 strip %2 now mapping route %3\n",
-								   _surface->number(), _index, _route->name()));
-		
-
-		if (_solo) {
-			_solo->set_normal_control (_route->solo_control());
-			_solo->set_modified_control (boost::shared_ptr<AutomationControl>());
-			_route->solo_control()->Changed.connect(route_connections, invalidator(), ui_bind (&Strip::notify_solo_changed, this), ui_context());
-		}
-
-		if (_mute) {
-			_mute->set_normal_control (_route->mute_control());
-			_mute->set_modified_control (boost::shared_ptr<AutomationControl>());
-			_route->mute_control()->Changed.connect(route_connections, invalidator(), ui_bind (&Strip::notify_mute_changed, this), ui_context());
-		}
-		
-		_route->gain_control()->Changed.connect(route_connections, invalidator(), ui_bind (&Strip::notify_gain_changed, this, false), ui_context());
-		
-		_route->PropertyChanged.connect (route_connections, invalidator(), ui_bind (&Strip::notify_property_changed, this, _1), ui_context());
-		
-		if (_route->pannable()) {
-			_route->pannable()->pan_azimuth_control->Changed.connect(route_connections, invalidator(), ui_bind (&Strip::notify_panner_changed, this, false), ui_context());
-			_route->pannable()->pan_width_control->Changed.connect(route_connections, invalidator(), ui_bind (&Strip::notify_panner_changed, this, false), ui_context());
-		}
-
-		/* bind fader & pan pot, as appropriate for current flip mode */
-
-		flip_mode_changed (false);
-		
-		boost::shared_ptr<Track> trk = boost::dynamic_pointer_cast<ARDOUR::Track>(_route);
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Surface %1 strip %2 now mapping route %3\n",
+							   _surface->number(), _index, _route->name()));
 	
-		if (trk) {
-			_recenable->set_normal_control (trk->rec_enable_control());
-			_recenable->set_modified_control (boost::shared_ptr<AutomationControl>());
-			trk->rec_enable_control()->Changed .connect(route_connections, invalidator(), ui_bind (&Strip::notify_record_enable_changed, this), ui_context());
-		}
-		
-		// TODO this works when a currently-banked route is made inactive, but not
-		// when a route is activated which should be currently banked.
-		
-		_route->active_changed.connect (route_connections, invalidator(), ui_bind (&Strip::notify_active_changed, this), ui_context());
-		_route->DropReferences.connect (route_connections, invalidator(), ui_bind (&Strip::notify_route_deleted, this), ui_context());
+	_solo->set_control (_route->solo_control());
+	_mute->set_control (_route->mute_control());
+	set_vpot_mode (PanAzimuth);
 	
-		// TODO
-		// SelectedChanged
-		// RemoteControlIDChanged. Better handled at Session level.
+	_route->solo_control()->Changed.connect(route_connections, invalidator(), ui_bind (&Strip::notify_solo_changed, this), ui_context());
+	_route->mute_control()->Changed.connect(route_connections, invalidator(), ui_bind (&Strip::notify_mute_changed, this), ui_context());
 
-		/* Update */
+	boost::shared_ptr<Pannable> pannable = _route->pannable();
 
-		notify_all ();
-	} else {
-		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Surface %1 strip %2 now unmapped\n",
-								   _surface->number(), _index));
+	if (pannable) {
+		pannable->pan_azimuth_control->Changed.connect(route_connections, invalidator(), ui_bind (&Strip::notify_panner_changed, this, false), ui_context());
+		pannable->pan_width_control->Changed.connect(route_connections, invalidator(), ui_bind (&Strip::notify_panner_changed, this, false), ui_context());
+	}
+	_route->gain_control()->Changed.connect(route_connections, invalidator(), ui_bind (&Strip::notify_gain_changed, this, false), ui_context());
+	_route->PropertyChanged.connect (route_connections, invalidator(), ui_bind (&Strip::notify_property_changed, this, _1), ui_context());
+	
+	boost::shared_ptr<Track> trk = boost::dynamic_pointer_cast<ARDOUR::Track>(_route);
+	
+	if (trk) {
+		_recenable->set_control (trk->rec_enable_control());
+		trk->rec_enable_control()->Changed .connect(route_connections, invalidator(), ui_bind (&Strip::notify_record_enable_changed, this), ui_context());
+	}
+	
+	// TODO this works when a currently-banked route is made inactive, but not
+	// when a route is activated which should be currently banked.
+	
+	_route->active_changed.connect (route_connections, invalidator(), ui_bind (&Strip::notify_active_changed, this), ui_context());
+	_route->DropReferences.connect (route_connections, invalidator(), ui_bind (&Strip::notify_route_deleted, this), ui_context());
+	
+	/* Update */
+	
+	notify_all ();
+
+	/* setup legal VPot modes for this route */
+	
+	build_input_list (_route->input()->n_ports());
+	build_output_list (_route->output()->n_ports());
+
+	current_pot_modes.clear();
+
+	if (pannable) {
+		boost::shared_ptr<Panner> panner = pannable->panner();
+		if (panner) {
+			set<Evoral::Parameter> automatable = panner->what_can_be_automated ();
+			set<Evoral::Parameter>::iterator a;
+			
+			if ((a = automatable.find (PanAzimuthAutomation)) != automatable.end()) {
+				current_pot_modes.push_back (PanAzimuth);
+			}
+			
+			if ((a = automatable.find (PanWidthAutomation)) != automatable.end()) {
+				current_pot_modes.push_back (PanWidth);
+			}
+		}
+	}
+
+	current_pot_modes.push_back (Input);
+	current_pot_modes.push_back (Output);
+
+	if (_route->nth_send (0) != 0) {
+		current_pot_modes.push_back (Send1);
+	}
+	if (_route->nth_send (1) != 0) {
+		current_pot_modes.push_back (Send2);
+	}
+	if (_route->nth_send (2) != 0) {
+		current_pot_modes.push_back (Send3);
+	}
+	if (_route->nth_send (3) != 0) {
+		current_pot_modes.push_back (Send4);
+	}
+	if (_route->nth_send (4) != 0) {
+		current_pot_modes.push_back (Send5);
+	}
+	if (_route->nth_send (5) != 0) {
+		current_pot_modes.push_back (Send6);
+	}
+	if (_route->nth_send (6) != 0) {
+		current_pot_modes.push_back (Send7);
+	}
+	if (_route->nth_send (7) != 0) {
+		current_pot_modes.push_back (Send8);
 	}
 }
 
@@ -353,8 +401,93 @@ Strip::notify_panner_changed (bool force_update)
 }
 
 void
+Strip::select_event (Button& button, ButtonState bs)
+{
+	DEBUG_TRACE (DEBUG::MackieControl, "select button\n");
+	
+	if (bs == press) {
+		
+		int ms = _surface->mcp().modifier_state();
+
+		if (ms & MackieControlProtocol::MODIFIER_CMDALT) {
+			_controls_locked = !_controls_locked;
+			_surface->write (display (1,_controls_locked ?  "Locked" : "Unlock"));
+			queue_display_reset (1000);
+				return;
+		}
+		
+		if (ms & MackieControlProtocol::MODIFIER_SHIFT) {
+			/* reset to default */
+			boost::shared_ptr<AutomationControl> ac = _vpot->control ();
+			if (ac) {
+				ac->set_value (ac->normal());
+			}
+			return;
+		}
+		
+		DEBUG_TRACE (DEBUG::MackieControl, "add select button on press\n");
+		_surface->mcp().add_down_select_button (_surface->number(), _index);			
+		_surface->mcp().select_range ();
+		
+	} else {
+		DEBUG_TRACE (DEBUG::MackieControl, "remove select button on release\n");
+		_surface->mcp().remove_down_select_button (_surface->number(), _index);			
+	}
+}
+
+void
+Strip::vselect_event (Button& button, ButtonState bs)
+{
+	if (bs == press) {
+
+		boost::shared_ptr<AutomationControl> ac = button.control ();
+
+		if (ac) {
+			
+			int ms = _surface->mcp().modifier_state();
+			
+			if (ms & MackieControlProtocol::MODIFIER_SHIFT) {
+				/* reset to default/normal value */
+				ac->set_value (ac->normal());
+
+			} else {
+				next_pot_mode ();
+			}
+		}
+	}
+}
+
+void
+Strip::fader_touch_event (Button& button, ButtonState bs)
+{
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("fader touch, press ? %1\n", (bs == press)));
+	
+	/* never use the modified control for fader stuff */
+	
+	if (bs == press) {
+		
+		_fader->set_in_use (true);
+		_fader->start_touch (_surface->mcp().transport_frame());
+		boost::shared_ptr<AutomationControl> ac = _fader->control ();
+			if (ac) {
+				do_parameter_display ((AutomationType) ac->parameter().type(), ac->internal_to_interface (ac->get_value()));
+				queue_display_reset (2000);
+			}
+			
+	} else {
+		
+		_fader->set_in_use (false);
+		_fader->stop_touch (_surface->mcp().transport_frame(), true);
+		
+	}
+}	
+
+
+void
 Strip::handle_button (Button& button, ButtonState bs)
 {
+	boost::shared_ptr<AutomationControl> control;
+
 	if (bs == press) {
 		button.set_in_use (true);
 	} else {
@@ -363,122 +496,58 @@ Strip::handle_button (Button& button, ButtonState bs)
 
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("strip %1 handling button %2 press ? %3\n", _index, button.bid(), (bs == press)));
 	
-	int ms = _surface->mcp().modifier_state();
-	bool modified = (ms & MackieControlProtocol::MODIFIER_CONTROL);
+	switch (button.bid()) {
+	case Button::Select:
+		select_event (button, bs);
+		break;
+		
+	case Button::VSelect:
+		vselect_event (button, bs);
+		break;
 
-	if (button.bid() == Button::Select) {
+	case Button::FaderTouch:
+		fader_touch_event (button, bs);
+		break;
 
-		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("select touch, modifiers %1\n", ms));
-
-		if (bs == press) {
-
-			if (ms & MackieControlProtocol::MODIFIER_CMDALT) {
-				_controls_locked = !_controls_locked;
-				_surface->write (display (1,_controls_locked ?  "Locked" : "Unlock"));
-				queue_display_reset (1000);
-				return;
-			}
-
-			if (ms & MackieControlProtocol::MODIFIER_SHIFT) {
-				/* reset to default */
-				boost::shared_ptr<AutomationControl> ac = _vpot->control (modified);
-				if (ac) {
-					ac->set_value (ac->normal());
+	default:
+		if ((control = button.control ())) {
+			if (bs == press) {
+				DEBUG_TRACE (DEBUG::MackieControl, "add button on release\n");
+				_surface->mcp().add_down_button ((AutomationType) control->parameter().type(), _surface->number(), _index);
+				
+				float new_value;
+				int ms = _surface->mcp().modifier_state();
+				
+				if (ms & MackieControlProtocol::MODIFIER_SHIFT) {
+					/* reset to default/normal value */
+					new_value = control->normal();
+				} else {
+					new_value = control->get_value() ? 0.0 : 1.0;
 				}
-				return;
-			}
-			
-			DEBUG_TRACE (DEBUG::MackieControl, "add select button on press\n");
-			_surface->mcp().add_down_select_button (_surface->number(), _index);			
-			_surface->mcp().select_range ();
-
-		} else {
-			DEBUG_TRACE (DEBUG::MackieControl, "remove select button on release\n");
-			_surface->mcp().remove_down_select_button (_surface->number(), _index);			
-		}
-
-		return;
-	}
-
-	if (button.bid() == Button::VSelect) {
-		if (bs == press) {
-			/* swap controls on the vpot */
-			boost::shared_ptr<AutomationControl> ac = button.control (true);
-			button.set_modified_control (button.control (false));
-			button.set_normal_control (ac);
-			_surface->write (display (1, static_display_string ()));
-		}
-
-		return;
-	}
-
-	if (button.bid() == Button::FaderTouch) {
-
-		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("fader touch, press ? %1\n", (bs == press)));
-
-		/* never use the modified control for fader stuff */
-
-		if (bs == press) {
-
-			_fader->set_in_use (true);
-			_fader->start_touch (_surface->mcp().transport_frame(), false);
-			boost::shared_ptr<AutomationControl> ac = _fader->control (false);
-			if (ac) {
-				do_parameter_display ((AutomationType) ac->parameter().type(), ac->internal_to_interface (ac->get_value()));
-				queue_display_reset (2000);
-			}
-
-		} else {
-
-			_fader->set_in_use (false);
-			_fader->stop_touch (_surface->mcp().transport_frame(), true, false);
-
-		}
-		
-		return;
-	}
-
-	boost::shared_ptr<AutomationControl> control = button.control (modified);
-		
-	if (control) {
-
-		if (bs == press) {
-			DEBUG_TRACE (DEBUG::MackieControl, "add button on release\n");
-			_surface->mcp().add_down_button ((AutomationType) control->parameter().type(), _surface->number(), _index);
-			
-			float new_value;
-
-			if (ms & MackieControlProtocol::MODIFIER_OPTION) {
-				/* reset to default/normal value */
-				new_value = control->normal();
-			} else {
-				new_value = control->get_value() ? 0.0 : 1.0;
-			}
-
-			/* get all controls that either have their
-			 * button down or are within a range of
-			 * several down buttons
-			 */
-			
-			MackieControlProtocol::ControlList controls = _surface->mcp().down_controls ((AutomationType) control->parameter().type());
-			
-			
-			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("there are %1 buttons down for control type %2, new value = %3\n",
+				
+				/* get all controls that either have their
+				 * button down or are within a range of
+				 * several down buttons
+				 */
+				
+				MackieControlProtocol::ControlList controls = _surface->mcp().down_controls ((AutomationType) control->parameter().type());
+				
+				
+				DEBUG_TRACE (DEBUG::MackieControl, string_compose ("there are %1 buttons down for control type %2, new value = %3\n",
 									    controls.size(), control->parameter().type(), new_value));
 
-			/* apply change */
-
-			for (MackieControlProtocol::ControlList::iterator c = controls.begin(); c != controls.end(); ++c) {
-				(*c)->set_value (new_value);
+				/* apply change */
+				
+				for (MackieControlProtocol::ControlList::iterator c = controls.begin(); c != controls.end(); ++c) {
+					(*c)->set_value (new_value);
+				}
+				
+			} else {
+				DEBUG_TRACE (DEBUG::MackieControl, "remove button on release\n");
+				_surface->mcp().remove_down_button ((AutomationType) control->parameter().type(), _surface->number(), _index);
 			}
-
-		} else {
-			DEBUG_TRACE (DEBUG::MackieControl, "remove button on release\n");
-			_surface->mcp().remove_down_button ((AutomationType) control->parameter().type(), _surface->number(), _index);
 		}
-			
-	} else {
-		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("button has no control at present (modified ? %1)\n", modified));
+		break;
 	}
 }
 
@@ -518,10 +587,8 @@ Strip::handle_fader (Fader& fader, float position)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("fader to %1\n", position));
 
-	bool modified = (_surface->mcp().modifier_state() & MackieControlProtocol::MODIFIER_CONTROL);
-
-	fader.set_value (position, modified);
-	fader.start_touch (_surface->mcp().transport_frame(), modified);
+	fader.set_value (position);
+	fader.start_touch (_surface->mcp().transport_frame());
 	queue_display_reset (2000);
 
 	// must echo bytes back to slider now, because
@@ -538,15 +605,14 @@ Strip::handle_pot (Pot& pot, float delta)
 	   stop moving. So to get a stop event, we need to use a timeout.
 	*/
 	
-	bool modified = (_surface->mcp().modifier_state() & MackieControlProtocol::MODIFIER_CONTROL);
-	pot.start_touch (_surface->mcp().transport_frame(), modified);
-	_surface->mcp().add_in_use_timeout (*_surface, pot, pot.control (modified));
+	pot.start_touch (_surface->mcp().transport_frame());
+	_surface->mcp().add_in_use_timeout (*_surface, pot, pot.control ());
 
-	double p = pot.get_value (modified);
+	double p = pot.get_value ();
 	p += delta;
 	p = min (1.0, p);
 	p = max (0.0, p);
-	pot.set_value (p, modified);
+	pot.set_value (p);
 }
 
 void
@@ -673,41 +739,41 @@ Strip::gui_selection_changed (ARDOUR::RouteNotificationListPtr rl)
 }
 
 string
-Strip::static_display_string () const
+Strip::vpot_mode_string () const
 {
-	if (!_vpot) {
-		return string();
-	}
-
-	boost::shared_ptr<AutomationControl> ac = _vpot->control (false);
-
-	if (!ac) {
-		return string();
-	}
-	
-	/* don't use canonical controllable names here because we're
-	 * limited by space concerns
-	 */
-	
-	switch((AutomationType)ac->parameter().type()) {
-	case GainAutomation:
+	switch (_vpot_mode) {
+	case Gain:
 		return "Fader";
-		break;
-	case PanAzimuthAutomation:
+	case PanAzimuth:
 		return "Pan";
-		break;
-	case PanWidthAutomation:
+	case PanWidth:
 		return "Width";
-		break;
-	case PanElevationAutomation:
-	case PanFrontBackAutomation:
-	case PanLFEAutomation:
-		break;
-	case PluginAutomation:
-		return string_compose ("Param %d", ac->parameter().id());
-		break;
-	default:
-		break;
+	case PanElevation:
+		return "Elev";
+	case PanFrontBack:
+		return "F/Rear";
+	case PanLFE:
+		return "LFE";
+	case Input:
+		return "Input";
+	case Output:
+		return "Output";
+	case Send1:
+		return "Send 1";
+	case Send2:
+		return "Send 2";
+	case Send3:
+		return "Send 3";
+	case Send4:
+		return "Send 4";
+	case Send5:
+		return "Send 5";
+	case Send6:
+		return "Send 6";
+	case Send7:
+		return "Send 7";
+	case Send8:
+		return "Send 8";
 	}
 
 	return "???";
@@ -720,30 +786,13 @@ Strip::flip_mode_changed (bool notify)
 		return;
 	}
 
-	boost::shared_ptr<Pannable> pannable = _route->pannable();
+	boost::shared_ptr<AutomationControl> fader_controllable = _fader->control ();
+	boost::shared_ptr<AutomationControl> vpot_controllable = _vpot->control ();
 
-	if (_surface->mcp().flip_mode()) {
+	_fader->set_control (vpot_controllable);
+	_vpot->set_control (fader_controllable);
 
-		if (pannable) {
-			_fader->set_normal_control (pannable->pan_azimuth_control);
-			_fader->set_modified_control (pannable->pan_width_control);
-		}
-		_vpot->set_normal_control (_route->gain_control());
-		_vpot->set_modified_control (boost::shared_ptr<AutomationControl>());
-
-		_surface->write (display (1, static_display_string ()));
-
-	} else {
-
-		if (pannable) {
-			_vpot->set_normal_control (pannable->pan_azimuth_control);
-			_vpot->set_modified_control (pannable->pan_width_control);
-		}
-		_fader->set_normal_control (_route->gain_control());
-		_fader->set_modified_control (boost::shared_ptr<AutomationControl>());
-
-		_surface->write (display (1, static_display_string()));
-	}
+	_surface->write (display (1, vpot_mode_string ()));
 
 	if (notify) {
 		notify_all ();
@@ -775,7 +824,214 @@ Strip::clear_display_reset ()
 void
 Strip::reset_display ()
 {
-	_surface->write (display (1, static_display_string()));
+	_surface->write (display (1, vpot_mode_string()));
 	clear_display_reset ();
 }
 			 
+struct RouteCompareByName {
+	bool operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
+		return a->name().compare (b->name()) < 0;
+	}
+};
+
+void
+Strip::maybe_add_to_bundle_map (BundleMap& bm, boost::shared_ptr<Bundle> b, bool for_input, const ChanCount& channels)
+{
+	if (b->ports_are_outputs() == !for_input  || b->nchannels() != channels) {
+		return;
+	}
+
+	bm[b->name()] = b;
+}
+
+void
+Strip::build_input_list (const ChanCount& channels)
+{
+	boost::shared_ptr<ARDOUR::BundleList> b = _surface->mcp().get_session().bundles ();
+
+	input_bundles.clear ();
+
+	/* give user bundles first chance at being in the menu */
+	
+	for (ARDOUR::BundleList::iterator i = b->begin(); i != b->end(); ++i) {
+		if (boost::dynamic_pointer_cast<UserBundle> (*i)) {
+			maybe_add_to_bundle_map (input_bundles, *i, true, channels);
+		}
+	}
+	
+	for (ARDOUR::BundleList::iterator i = b->begin(); i != b->end(); ++i) {
+		if (boost::dynamic_pointer_cast<UserBundle> (*i) == 0) {
+			maybe_add_to_bundle_map (input_bundles, *i, true, channels);
+		}
+	}
+	
+	boost::shared_ptr<ARDOUR::RouteList> routes = _surface->mcp().get_session().get_routes ();
+	RouteList copy = *routes;
+	copy.sort (RouteCompareByName ());
+
+	for (ARDOUR::RouteList::const_iterator i = copy.begin(); i != copy.end(); ++i) {
+		maybe_add_to_bundle_map (input_bundles, (*i)->output()->bundle(), true, channels);
+	}
+
+}
+
+void
+Strip::build_output_list (const ChanCount& channels)
+{
+	boost::shared_ptr<ARDOUR::BundleList> b = _surface->mcp().get_session().bundles ();
+
+	output_bundles.clear ();
+
+	/* give user bundles first chance at being in the menu */
+	
+	for (ARDOUR::BundleList::iterator i = b->begin(); i != b->end(); ++i) {
+		if (boost::dynamic_pointer_cast<UserBundle> (*i)) {
+			maybe_add_to_bundle_map (output_bundles, *i, false, channels);
+		}
+	}
+	
+	for (ARDOUR::BundleList::iterator i = b->begin(); i != b->end(); ++i) {
+		if (boost::dynamic_pointer_cast<UserBundle> (*i) == 0) {
+			maybe_add_to_bundle_map (output_bundles, *i, false, channels);
+		}
+	}
+	
+	boost::shared_ptr<ARDOUR::RouteList> routes = _surface->mcp().get_session().get_routes ();
+	RouteList copy = *routes;
+	copy.sort (RouteCompareByName ());
+
+	for (ARDOUR::RouteList::const_iterator i = copy.begin(); i != copy.end(); ++i) {
+		maybe_add_to_bundle_map (output_bundles, (*i)->input()->bundle(), false, channels);
+	}
+}
+
+void
+Strip::next_pot_mode ()
+{
+	vector<PotMode>::iterator i;
+
+	if (_surface->mcp().flip_mode()) {
+		/* do not change vpot mode while in flipped mode */
+		_surface->write (display (1, "Flip"));
+		queue_display_reset (2000);
+		return;
+	}
+
+	for (i = current_pot_modes.begin(); i != current_pot_modes.end(); ++i) {
+		if ((*i) == _vpot_mode) {
+			break;
+		}
+	}
+
+	/* move to the next mode in the list, or back to the start (which will
+	   also happen if the current mode is not in the current pot mode list)
+	*/
+
+	if (i != current_pot_modes.end()) {
+		++i;
+	}
+
+	if (i == current_pot_modes.end()) {
+		i = current_pot_modes.begin();
+	}
+
+	set_vpot_mode (*i);
+}
+
+void
+Strip::set_vpot_mode (PotMode m)
+{
+	boost::shared_ptr<Send> send;
+	boost::shared_ptr<Pannable> pannable;
+
+	if (!_route) {
+		return;
+	}
+
+	_vpot_mode = m;
+
+	switch (_vpot_mode) {
+	case Gain:
+		break;
+	case PanAzimuth:
+		pannable = _route->pannable ();
+		if (pannable) {
+			if (_surface->mcp().flip_mode()) {
+				/* gain to vpot, pan azi to fader */
+				_vpot->set_control (_route->gain_control());
+				if (pannable) {
+					_fader->set_control (pannable->pan_azimuth_control);
+				}
+				_vpot_mode = Gain;
+			} else {
+				/* gain to fader, pan azi to vpot */
+				_fader->set_control (_route->gain_control());
+				if (pannable) {
+					_vpot->set_control (pannable->pan_azimuth_control);
+				}
+				_vpot_mode = PanAzimuth;
+			}
+		}
+		break;
+	case PanWidth:
+		pannable = _route->pannable ();
+		if (pannable) {
+			if (_surface->mcp().flip_mode()) {
+				/* gain to vpot, pan width to fader */
+				_vpot->set_control (_route->gain_control());
+				if (pannable) {
+					_fader->set_control (pannable->pan_width_control);
+				}
+				_vpot_mode = Gain;
+			} else {
+				/* gain to fader, pan width to vpot */
+				_fader->set_control (_route->gain_control());
+				if (pannable) {
+					_vpot->set_control (pannable->pan_width_control);
+				}
+			}
+		}
+		break;
+	case PanElevation:
+		break;
+	case PanFrontBack:
+		break;
+	case PanLFE:
+		break;
+	case Input:
+		break;
+	case Output:
+		break;
+	case Send1:
+		send = boost::dynamic_pointer_cast<Send> (_route->nth_send (0));
+		if (send) {
+			if (_surface->mcp().flip_mode()) {
+				/* route gain to vpot, send gain to fader */
+				_fader->set_control (send->amp()->gain_control());
+				_vpot->set_control (_route->gain_control());
+				_vpot_mode = Gain;
+				} else {
+				/* route gain to fader, send gain to vpot */
+				_vpot->set_control (send->amp()->gain_control());
+				_fader->set_control (_route->gain_control());
+			}
+		}
+		break;
+	case Send2:
+		break;
+	case Send3:
+		break;
+	case Send4:
+		break;
+	case Send5:
+		break;
+	case Send6:
+		break;
+	case Send7:
+		break;
+	case Send8:
+		break;
+	};
+
+	_surface->write (display (1, vpot_mode_string()));
+}

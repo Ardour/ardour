@@ -84,56 +84,32 @@ ostream & Mackie::operator <<  (ostream & os, const Mackie::Control & control)
 }
 
 void
-Control::set_normal_control (boost::shared_ptr<AutomationControl> ac)
+Control::set_control (boost::shared_ptr<AutomationControl> ac)
 {
 	normal_ac = ac;
 }
 
 void
-Control::set_modified_control (boost::shared_ptr<AutomationControl> ac)
+Control::set_value (float val)
 {
-	modified_ac = ac;
-}
-
-void
-Control::set_value (float val, bool modified)
-{
-	if (modified && modified_ac) {
-		modified_ac->set_value (modified_ac->interface_to_internal (val));
-	} else if (normal_ac) {
-		normal_ac->set_value (normal_ac->interface_to_internal (val));
-	}
+	normal_ac->set_value (normal_ac->interface_to_internal (val));
 }
 
 float
-Control::get_value (bool modified)
+Control::get_value ()
 {
-	if (modified && modified_ac) {
-		return modified_ac->internal_to_interface (modified_ac->get_value());
-	} else if (normal_ac) {
-		return normal_ac->internal_to_interface (normal_ac->get_value());
-	}
-
-	return 0.0;
+	return normal_ac->internal_to_interface (normal_ac->get_value());
 }
 
 void
-Control::start_touch (double when, bool modified)
+Control::start_touch (double when)
 {
-	if (modified && modified_ac) {
-		return modified_ac->start_touch (when);
-	} else if (normal_ac) {
-		return normal_ac->start_touch (when);
-	}
+	return normal_ac->start_touch (when);
 }
 	
 void
-Control::stop_touch (double when, bool mark, bool modified)
+Control::stop_touch (double when, bool mark)
 {
-	if (modified && modified_ac) {
-		return modified_ac->stop_touch (when, mark);
-	} else if (normal_ac) {
-		return normal_ac->stop_touch (when, mark);
-	}
+	return normal_ac->stop_touch (when, mark);
 }
 	

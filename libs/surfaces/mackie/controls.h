@@ -66,23 +66,17 @@ public:
 	 */
 	Control* in_use_touch_control;
 
-	boost::shared_ptr<ARDOUR::AutomationControl> control (bool modified) const { return modified ? modified_ac : normal_ac; }
+	boost::shared_ptr<ARDOUR::AutomationControl> control () const { return normal_ac; }
+	virtual void set_control (boost::shared_ptr<ARDOUR::AutomationControl>);
 
-	virtual void set_normal_control (boost::shared_ptr<ARDOUR::AutomationControl>);
-	virtual void set_modified_control (boost::shared_ptr<ARDOUR::AutomationControl>);
-
-	float get_value (bool modified = false);
-	void set_value (float val, bool modified = false);
+	float get_value ();
+	void set_value (float val);
 	
-	virtual void start_touch (double when, bool modified);
-	virtual void stop_touch (double when, bool mark, bool modified);
+	virtual void start_touch (double when);
+	virtual void stop_touch (double when, bool mark);
 
   protected:
-	/* a control can operate up to 2 different AutomationControls
-	   in any given mode. both of them may be unset at any time.
-	*/
 	boost::shared_ptr<ARDOUR::AutomationControl> normal_ac;
-	boost::shared_ptr<ARDOUR::AutomationControl> modified_ac;
 
   private:
 	int _id; /* possibly device-dependent ID */

@@ -17,6 +17,8 @@
 
 namespace ARDOUR {
 	class Route;
+	class Bundle;
+	class ChannelCount;
 }
 
 namespace Mackie {
@@ -79,6 +81,25 @@ public:
 	MidiByteArray gui_selection_changed (ARDOUR::RouteNotificationListPtr);
 
 private:
+	enum PotMode {
+		Gain,
+		PanAzimuth,
+		PanWidth,
+		PanElevation,
+		PanFrontBack,
+		PanLFE,
+		Input,
+		Output,
+		Send1,
+		Send2,
+		Send3,
+		Send4,
+		Send5,
+		Send6,
+		Send7,
+		Send8,
+	};
+		
 	Button*  _solo;
 	Button*  _recenable;
 	Button*  _mute;
@@ -86,13 +107,14 @@ private:
 	Button*  _vselect;
 	Button*  _fader_touch;
 	Pot*     _vpot;
+	PotMode  _vpot_mode;
+	PotMode  _preflip_vpot_mode;
 	Fader*   _fader;
 	Meter*   _meter;
 	int      _index;
 	Surface* _surface;
 	bool     _controls_locked;
 	uint64_t _reset_display_at;
-
 	boost::shared_ptr<ARDOUR::Route> _route;
 	PBD::ScopedConnectionList route_connections;
 
@@ -111,12 +133,28 @@ private:
 	void update_automation ();
 	void update_meter ();
 
-	std::string static_display_string () const;
+	std::string vpot_mode_string () const;
 
 	void queue_display_reset (uint32_t msecs);
 	void clear_display_reset ();
 	void reset_display ();
 	void do_parameter_display (ARDOUR::AutomationType, float val);
+	
+	typedef std::map<std::string,boost::shared_ptr<ARDOUR::Bundle> > BundleMap;
+	BundleMap input_bundles;
+	BundleMap output_bundles;
+
+	void build_input_list (const ARDOUR::ChanCount&);
+	void build_output_list (const ARDOUR::ChanCount&);
+	void maybe_add_to_bundle_map (BundleMap& bm, boost::shared_ptr<ARDOUR::Bundle>, bool for_input, const ARDOUR::ChanCount&);
+
+	void select_event (Button&, ButtonState);
+	void vselect_event (Button&, ButtonState);
+	void fader_touch_event (Button&, ButtonState);
+
+	std::vector<PotMode> current_pot_modes;
+	void next_pot_mode ();
+	void set_vpot_mode (PotMode);
 };
 
 }

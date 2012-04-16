@@ -221,14 +221,14 @@ Surface::setup_master ()
 		return;
 	}
 	
-	_master_fader->set_normal_control (m->gain_control());
+	_master_fader->set_control (m->gain_control());
 	m->gain_control()->Changed.connect (*this, invalidator(), ui_bind (&Surface::master_gain_changed, this), ui_context());
 }
 
 void
 Surface::master_gain_changed ()
 {
-	boost::shared_ptr<AutomationControl> ac = _master_fader->control(false);
+	boost::shared_ptr<AutomationControl> ac = _master_fader->control();
 	float pos = ac->internal_to_interface (ac->get_value());
 	_port->write (_master_fader->set_position (pos));
 }
@@ -333,7 +333,7 @@ Surface::handle_midi_pitchbend_message (MIDI::Parser&, MIDI::pitchbend_t pb, uin
 			strip->handle_fader (*fader, pos);
 		} else {
 			/* master fader */
-			fader->set_value (pos, false); // alter master gain
+			fader->set_value (pos); // alter master gain
 			_port->write (fader->set_position (pos)); // write back value (required for servo)
 		}
 	} else {
