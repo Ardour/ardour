@@ -244,6 +244,20 @@ ActionManager::get_widget (const char * name)
 }
 
 RefPtr<Action>
+ActionManager::get_action (const char* path)
+{
+	char copy[strlen(path)+1];
+	strcpy (copy, path);
+	char *slash = strchr (copy, '/');
+	if (!slash) {
+		return RefPtr<Action> ();
+	}
+	*slash = '\0';
+	return get_action (copy, ++slash);
+	
+}
+
+RefPtr<Action>
 ActionManager::get_action (const char* group_name, const char* action_name)
 {
 	/* the C++ API for functions used here appears to be broken in
