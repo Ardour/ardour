@@ -24,6 +24,7 @@ def build(bld):
             button.cc
             controls.cc
             device_info.cc
+            device_profile.cc
             fader.cc
             gui.cc
             interface.cc

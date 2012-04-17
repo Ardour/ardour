@@ -17,6 +17,8 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <glib.h>
+
 #include "button.h"
 #include "surface.h"
 #include "control_group.h"
@@ -37,102 +39,203 @@ Button::factory (Surface& surface, Button::ID bid, int id, const std::string& na
 int
 Button::name_to_id (const std::string& name)
 {
-	if (name == "IO") { return IO; }
-	if (name == "Sends") { return Sends; }
-	if (name == "Pan") { return Pan; }
-	if (name == "Plugin") { return Plugin; }
-	if (name == "Eq") { return Eq; }
-	if (name == "Dyn") { return Dyn; }
-	if (name == "Left") { return Left; }
-	if (name == "Right") { return Right; }
-	if (name == "ChannelLeft") { return ChannelLeft; }
-	if (name == "ChannelRight") { return ChannelRight; }
-	if (name == "Flip") { return Flip; }
-	if (name == "Edit") { return Edit; }
-	if (name == "NameValue") { return NameValue; }
-	if (name == "TimecodeBeats") { return TimecodeBeats; }
-	if (name == "F1") { return F1; }
-	if (name == "F2") { return F2; }
-	if (name == "F3") { return F3; }
-	if (name == "F4") { return F4; }
-	if (name == "F5") { return F5; }
-	if (name == "F6") { return F6; }
-	if (name == "F7") { return F7; }
-	if (name == "F8") { return F8; }
-	if (name == "F9") { return F9; }
-	if (name == "F10") { return F10; }
-	if (name == "F11") { return F11; }
-	if (name == "F12") { return F12; }
-	if (name == "F13") { return F13; }
-	if (name == "F14") { return F14; }
-	if (name == "F15") { return F15; }
-	if (name == "F16") { return F16; }
-	if (name == "Shift") { return Shift; }
-	if (name == "Option") { return Option; }
-	if (name == "Ctrl") { return Ctrl; }
-	if (name == "CmdAlt") { return CmdAlt; }
-	if (name == "On") { return On; }
-	if (name == "RecReady") { return RecReady; }
-	if (name == "Undo") { return Undo; }
-	if (name == "Save") { return Save; }
-	if (name == "Touch") { return Touch; }
-	if (name == "Redo") { return Redo; }
-	if (name == "Marker") { return Marker; }
-	if (name == "Enter") { return Enter; }
-	if (name == "Cancel") { return Cancel; }
-	if (name == "Mixer") { return Mixer; }
-	if (name == "FrmLeft") { return FrmLeft; }
-	if (name == "FrmRight") { return FrmRight; }
-	if (name == "Loop") { return Loop; }
-	if (name == "PunchIn") { return PunchIn; }
-	if (name == "PunchOut") { return PunchOut; }
-	if (name == "Home") { return Home; }
-	if (name == "End") { return End; }
-	if (name == "Rewind") { return Rewind; }
-	if (name == "Ffwd") { return Ffwd; }
-	if (name == "Stop") { return Stop; }
-	if (name == "Play") { return Play; }
-	if (name == "Record") { return Record; }
-	if (name == "CursorUp") { return CursorUp; }
-	if (name == "CursorDown") { return CursorDown; }
-	if (name == "CursorLeft") { return CursorLeft; }
-	if (name == "CursorRight") { return CursorRight; }
-	if (name == "Zoom") { return Zoom; }
-	if (name == "Scrub") { return Scrub; }
-	if (name == "UserA") { return UserA; }
-	if (name == "UserB") { return UserB; }
-	if (name == "Snapshot") { return Snapshot; }
-	if (name == "Read") { return Read; }
-	if (name == "Write") { return Write; }
-	if (name == "FdrGroup") { return FdrGroup; }
-	if (name == "ClearSolo") { return ClearSolo; }
-	if (name == "Track") { return Track; }
-	if (name == "Send") { return Send; }
-	if (name == "MidiTracks") { return MidiTracks; }
-	if (name == "Inputs") { return Inputs; }
-	if (name == "AudioTracks") { return AudioTracks; }
-	if (name == "AudioInstruments") { return AudioInstruments; }
-	if (name == "Aux") { return Aux; }
-	if (name == "Busses") { return Busses; }
-	if (name == "Outputs") { return Outputs; }
-	if (name == "User") { return User; }
-	if (name == "Trim") { return Trim; }
-	if (name == "Latch") { return Latch; }
-	if (name == "Grp") { return Grp; }
-	if (name == "Nudge") { return Nudge; }
-	if (name == "Drop") { return Drop; }
-	if (name == "Replace") { return Replace; }
-	if (name == "Click") { return Click; }
-	if (name == "View") { return View; }
+	if (!g_strcasecmp (name.c_str(), "IO")) { return IO; }
+	if (!g_strcasecmp (name.c_str(), "Sends")) { return Sends; }
+	if (!g_strcasecmp (name.c_str(), "Pan")) { return Pan; }
+	if (!g_strcasecmp (name.c_str(), "Plugin")) { return Plugin; }
+	if (!g_strcasecmp (name.c_str(), "Eq")) { return Eq; }
+	if (!g_strcasecmp (name.c_str(), "Dyn")) { return Dyn; }
+	if (!g_strcasecmp (name.c_str(), "Left")) { return Left; }
+	if (!g_strcasecmp (name.c_str(), "Right")) { return Right; }
+	if (!g_strcasecmp (name.c_str(), "ChannelLeft")) { return ChannelLeft; }
+	if (!g_strcasecmp (name.c_str(), "ChannelRight")) { return ChannelRight; }
+	if (!g_strcasecmp (name.c_str(), "Flip")) { return Flip; }
+	if (!g_strcasecmp (name.c_str(), "Edit")) { return Edit; }
+	if (!g_strcasecmp (name.c_str(), "NameValue")) { return NameValue; }
+	if (!g_strcasecmp (name.c_str(), "TimecodeBeats")) { return TimecodeBeats; }
+	if (!g_strcasecmp (name.c_str(), "F1")) { return F1; }
+	if (!g_strcasecmp (name.c_str(), "F2")) { return F2; }
+	if (!g_strcasecmp (name.c_str(), "F3")) { return F3; }
+	if (!g_strcasecmp (name.c_str(), "F4")) { return F4; }
+	if (!g_strcasecmp (name.c_str(), "F5")) { return F5; }
+	if (!g_strcasecmp (name.c_str(), "F6")) { return F6; }
+	if (!g_strcasecmp (name.c_str(), "F7")) { return F7; }
+	if (!g_strcasecmp (name.c_str(), "F8")) { return F8; }
+	if (!g_strcasecmp (name.c_str(), "F9")) { return F9; }
+	if (!g_strcasecmp (name.c_str(), "F10")) { return F10; }
+	if (!g_strcasecmp (name.c_str(), "F11")) { return F11; }
+	if (!g_strcasecmp (name.c_str(), "F12")) { return F12; }
+	if (!g_strcasecmp (name.c_str(), "F13")) { return F13; }
+	if (!g_strcasecmp (name.c_str(), "F14")) { return F14; }
+	if (!g_strcasecmp (name.c_str(), "F15")) { return F15; }
+	if (!g_strcasecmp (name.c_str(), "F16")) { return F16; }
+	if (!g_strcasecmp (name.c_str(), "Shift")) { return Shift; }
+	if (!g_strcasecmp (name.c_str(), "Option")) { return Option; }
+	if (!g_strcasecmp (name.c_str(), "Ctrl")) { return Ctrl; }
+	if (!g_strcasecmp (name.c_str(), "CmdAlt")) { return CmdAlt; }
+	if (!g_strcasecmp (name.c_str(), "On")) { return On; }
+	if (!g_strcasecmp (name.c_str(), "RecReady")) { return RecReady; }
+	if (!g_strcasecmp (name.c_str(), "Undo")) { return Undo; }
+	if (!g_strcasecmp (name.c_str(), "Save")) { return Save; }
+	if (!g_strcasecmp (name.c_str(), "Touch")) { return Touch; }
+	if (!g_strcasecmp (name.c_str(), "Redo")) { return Redo; }
+	if (!g_strcasecmp (name.c_str(), "Marker")) { return Marker; }
+	if (!g_strcasecmp (name.c_str(), "Enter")) { return Enter; }
+	if (!g_strcasecmp (name.c_str(), "Cancel")) { return Cancel; }
+	if (!g_strcasecmp (name.c_str(), "Mixer")) { return Mixer; }
+	if (!g_strcasecmp (name.c_str(), "FrmLeft")) { return FrmLeft; }
+	if (!g_strcasecmp (name.c_str(), "FrmRight")) { return FrmRight; }
+	if (!g_strcasecmp (name.c_str(), "Loop")) { return Loop; }
+	if (!g_strcasecmp (name.c_str(), "PunchIn")) { return PunchIn; }
+	if (!g_strcasecmp (name.c_str(), "PunchOut")) { return PunchOut; }
+	if (!g_strcasecmp (name.c_str(), "Home")) { return Home; }
+	if (!g_strcasecmp (name.c_str(), "End")) { return End; }
+	if (!g_strcasecmp (name.c_str(), "Rewind")) { return Rewind; }
+	if (!g_strcasecmp (name.c_str(), "Ffwd")) { return Ffwd; }
+	if (!g_strcasecmp (name.c_str(), "Stop")) { return Stop; }
+	if (!g_strcasecmp (name.c_str(), "Play")) { return Play; }
+	if (!g_strcasecmp (name.c_str(), "Record")) { return Record; }
+	if (!g_strcasecmp (name.c_str(), "CursorUp")) { return CursorUp; }
+	if (!g_strcasecmp (name.c_str(), "CursorDown")) { return CursorDown; }
+	if (!g_strcasecmp (name.c_str(), "CursorLeft")) { return CursorLeft; }
+	if (!g_strcasecmp (name.c_str(), "CursorRight")) { return CursorRight; }
+	if (!g_strcasecmp (name.c_str(), "Zoom")) { return Zoom; }
+	if (!g_strcasecmp (name.c_str(), "Scrub")) { return Scrub; }
+	if (!g_strcasecmp (name.c_str(), "UserA")) { return UserA; }
+	if (!g_strcasecmp (name.c_str(), "UserB")) { return UserB; }
+	if (!g_strcasecmp (name.c_str(), "Snapshot")) { return Snapshot; }
+	if (!g_strcasecmp (name.c_str(), "Read")) { return Read; }
+	if (!g_strcasecmp (name.c_str(), "Write")) { return Write; }
+	if (!g_strcasecmp (name.c_str(), "FdrGroup")) { return FdrGroup; }
+	if (!g_strcasecmp (name.c_str(), "ClearSolo")) { return ClearSolo; }
+	if (!g_strcasecmp (name.c_str(), "Track")) { return Track; }
+	if (!g_strcasecmp (name.c_str(), "Send")) { return Send; }
+	if (!g_strcasecmp (name.c_str(), "MidiTracks")) { return MidiTracks; }
+	if (!g_strcasecmp (name.c_str(), "Inputs")) { return Inputs; }
+	if (!g_strcasecmp (name.c_str(), "AudioTracks")) { return AudioTracks; }
+	if (!g_strcasecmp (name.c_str(), "AudioInstruments")) { return AudioInstruments; }
+	if (!g_strcasecmp (name.c_str(), "Aux")) { return Aux; }
+	if (!g_strcasecmp (name.c_str(), "Busses")) { return Busses; }
+	if (!g_strcasecmp (name.c_str(), "Outputs")) { return Outputs; }
+	if (!g_strcasecmp (name.c_str(), "User")) { return User; }
+	if (!g_strcasecmp (name.c_str(), "Trim")) { return Trim; }
+	if (!g_strcasecmp (name.c_str(), "Latch")) { return Latch; }
+	if (!g_strcasecmp (name.c_str(), "Grp")) { return Grp; }
+	if (!g_strcasecmp (name.c_str(), "Nudge")) { return Nudge; }
+	if (!g_strcasecmp (name.c_str(), "Drop")) { return Drop; }
+	if (!g_strcasecmp (name.c_str(), "Replace")) { return Replace; }
+	if (!g_strcasecmp (name.c_str(), "Click")) { return Click; }
+	if (!g_strcasecmp (name.c_str(), "View")) { return View; }
 		
 		/* Strip buttons */
 		
-	if (name == "RecEnable") { return RecEnable; }
-	if (name == "Solo") { return Solo; }
-	if (name == "Mute") { return Mute; }
-	if (name == "Select") { return Select; }
-	if (name == "VSelect") { return VSelect; }
-	if (name == "FaderTouch") { return FaderTouch; }
+	if (!g_strcasecmp (name.c_str(), "RecEnable")) { return RecEnable; }
+	if (!g_strcasecmp (name.c_str(), "Solo")) { return Solo; }
+	if (!g_strcasecmp (name.c_str(), "Mute")) { return Mute; }
+	if (!g_strcasecmp (name.c_str(), "Select")) { return Select; }
+	if (!g_strcasecmp (name.c_str(), "VSelect")) { return VSelect; }
+	if (!g_strcasecmp (name.c_str(), "FaderTouch")) { return FaderTouch; }
 
 	return -1;
+}
+
+std::string
+Button::id_to_name (Button::ID id)
+{
+	if (id == IO)  { return "IO"; }
+	if (id == Sends) { return "Sends"; }
+	if (id == Pan) { return "Pan"; }
+	if (id == Plugin) { return "Plugin"; }
+	if (id == Eq) { return "Eq"; }
+	if (id == Dyn) { return "Dyn"; }
+	if (id == Left) { return "Bank Left"; }
+	if (id == Right) { return "Bank Right"; }
+	if (id == ChannelLeft) { return "Channel Left"; }
+	if (id == ChannelRight) { return "Channel Right"; }
+	if (id == Flip) { return "Flip"; }
+	if (id == Edit) { return "Edit"; }
+	if (id == NameValue) { return "Name/Value"; }
+	if (id == TimecodeBeats) { return "Timecode/Beats"; }
+	if (id == F1) { return "F1"; }
+	if (id == F2) { return "F2"; }
+	if (id == F3) { return "F3"; }
+	if (id == F4) { return "F4"; }
+	if (id == F5) { return "F5"; }
+	if (id == F6) { return "F6"; }
+	if (id == F7) { return "F7"; }
+	if (id == F8) { return "F8"; }
+	if (id == F9) { return "F9"; }
+	if (id == F10) { return "F10"; }
+	if (id == F11) { return "F11"; }
+	if (id == F12) { return "F12"; }
+	if (id == F13) { return "F13"; }
+	if (id == F14) { return "F14"; }
+	if (id == F15) { return "F15"; }
+	if (id == F16) { return "F16"; }
+	if (id == Shift) { return "Shift"; }
+	if (id == Option) { return "Option"; }
+	if (id == Ctrl) { return "Ctrl"; }
+	if (id == CmdAlt) { return "CmdAlt"; }
+	if (id == On) { return "On"; }
+	if (id == RecReady) { return "Record"; }
+	if (id == Undo) { return "Undo"; }
+	if (id == Save) { return "Save"; }
+	if (id == Touch) { return "Touch"; }
+	if (id == Redo) { return "Redo"; }
+	if (id == Marker) { return "Marker"; }
+	if (id == Enter) { return "Enter"; }
+	if (id == Cancel) { return "Cancel"; }
+	if (id == Mixer) { return "Mixer"; }
+	if (id == FrmLeft) { return "Frm Left"; }
+	if (id == FrmRight) { return "Frm Right"; }
+	if (id == Loop) { return "Loop"; }
+	if (id == PunchIn) { return "Punch In"; }
+	if (id == PunchOut) { return "Punch Out"; }
+	if (id == Home) { return "Home"; }
+	if (id == End) { return "End"; }
+	if (id == Rewind) { return "Rewind"; }
+	if (id == Ffwd) { return "FFwd"; }
+	if (id == Stop) { return "Stop"; }
+	if (id == Play) { return "Play"; }
+	if (id == Record) { return "Record"; }
+	if (id == CursorUp) { return "Cursor Up"; }
+	if (id == CursorDown) { return "Cursor Down"; }
+	if (id == CursorLeft) { return "Cursor Left"; }
+	if (id == CursorRight) { return "Cursor Right"; }
+	if (id == Zoom) { return "Zoom"; }
+	if (id == Scrub) { return "Scrub"; }
+	if (id == UserA) { return "User A"; }
+	if (id == UserB) { return "User B"; }
+	if (id == Snapshot) { return "Snapshot"; }
+	if (id == Read) { return "Read"; }
+	if (id == Write) { return "Write"; }
+	if (id == FdrGroup) { return "Fader Group"; }
+	if (id == ClearSolo) { return "Clear Solo"; }
+	if (id == Track) { return "Track"; }
+	if (id == Send) { return "Send"; }
+	if (id == MidiTracks) { return "Midi Tracks"; }
+	if (id == Inputs) { return "Inputs"; }
+	if (id == AudioTracks) { return "Audio Tracks"; }
+	if (id == AudioInstruments) { return "Audio Instruments"; }
+	if (id == Aux) { return "Aux"; }
+	if (id == Busses) { return "Busses"; }
+	if (id == Outputs) { return "Outputs"; }
+	if (id == User) { return "User"; }
+	if (id == Trim) { return "Trim"; }
+	if (id == Latch) { return "Latch"; }
+	if (id == Grp) { return "Group"; }
+	if (id == Nudge) { return "Nudge"; }
+	if (id == Drop) { return "Drop"; }
+	if (id == Replace) { return "Replace"; }
+	if (id == Click) { return "Click"; }
+	if (id == View) { return "View"; }
+
+	if (id == RecEnable) { return "Record Enable"; }
+	if (id == Solo) { return "Solo"; }
+	if (id == Mute) { return "Mute"; }
+	if (id == Select) { return "Select"; }
+	if (id == VSelect) { return "V-Pot"; }
+	if (id == FaderTouch) { return "Fader Touch"; }
+
+	return "???";
 }

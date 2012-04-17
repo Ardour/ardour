@@ -51,6 +51,7 @@ CONFIG_VARIABLE (bool, first_midi_bank_is_zero, "diplay-first-midi-bank-as-zero"
 CONFIG_VARIABLE (uint32_t, feedback_interval_ms,  "feedback-interval-ms", 100)
 CONFIG_VARIABLE (bool, use_tranzport,  "use-tranzport", false)
 CONFIG_VARIABLE (std::string, mackie_device_name, "mackie-device-name", "Mackie Control Universal Pro")
+CONFIG_VARIABLE (std::string, mackie_device_profile, "mackie-device-profile", "default")
 CONFIG_VARIABLE (RemoteModel, remote_model, "remote-model", MixerOrdered)
 
 /* disk operations */

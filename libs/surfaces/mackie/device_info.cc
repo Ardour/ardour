@@ -182,7 +182,7 @@ DeviceInfo::shared_buttons ()
 	_global_buttons[Button::UserA] = GlobalButtonInfo ("user a", "user", 0x66);
 	_global_buttons[Button::UserB] = GlobalButtonInfo ("user b", "user", 0x67);
 
-	_strip_buttons[Button::RecEnable], StripButtonInfo (0x0, "recenable");
+	_strip_buttons[Button::RecEnable] = StripButtonInfo (0x0, "recenable");
 	_strip_buttons[Button::Solo] = StripButtonInfo (0x08, "solo");
 	_strip_buttons[Button::Mute] = StripButtonInfo (0x10, "mute");
 	_strip_buttons[Button::Select] = StripButtonInfo (0x18, "select");
@@ -387,9 +387,9 @@ DeviceInfo::has_touch_sense_faders () const
 	return _has_touch_sense_faders;
 }
 
-static const char * const devinfo_env_variable_name = "ARDOUR_MCP_DEVINFO_PATH";
-static const char* const devinfo_dir_name = "mcp_devices";
-static const char* const devinfo_suffix = ".xml";
+static const char * const devinfo_env_variable_name = "ARDOUR_MCP_PATH";
+static const char* const devinfo_dir_name = "mcp";
+static const char* const devinfo_suffix = ".device";
 
 static sys::path
 system_devinfo_search_path ()

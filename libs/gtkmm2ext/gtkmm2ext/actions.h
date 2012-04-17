@@ -43,6 +43,7 @@ namespace ActionManager {
 	extern Gtk::Widget* get_widget (const char * name);
 	extern Glib::RefPtr<Gtk::Action> get_action (const char* group, const char* name);
 	extern Glib::RefPtr<Gtk::Action> get_action (const char* path);
+	extern Glib::RefPtr<Gtk::Action> get_action_from_name (const char* name);
 	extern void do_action (const char* group, const char* name);
 	extern void set_toggle_action (const char* group, const char* name, bool);
 

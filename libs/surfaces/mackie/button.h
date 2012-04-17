@@ -120,11 +120,13 @@ public:
 		Trim,
 		Latch,
 		Grp,
-		Nudge, 
+		Nudge,
 		Drop,
 		Replace,
 		Click,
 		View,
+
+		FinalGlobalButton,
 
 		/* Strip buttons */
 		
@@ -149,6 +151,7 @@ public:
 	
 	static Control* factory (Surface& surface, Button::ID bid, int id, const std::string&, Group& group);
 	static int name_to_id (const std::string& name);
+	static std::string id_to_name (Button::ID);
 
 private:
 	ID  _bid; /* device independent button ID */

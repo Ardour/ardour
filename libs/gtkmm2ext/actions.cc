@@ -246,9 +246,23 @@ ActionManager::get_widget (const char * name)
 RefPtr<Action>
 ActionManager::get_action (const char* path)
 {
+	if (!path) {
+		return RefPtr<Action>();
+	}
+
 	char copy[strlen(path)+1];
-	strcpy (copy, path);
-	char *slash = strchr (copy, '/');
+
+	if (*path == '/') {
+		const char* cslash = strchr (path, '/');
+		if (!cslash) {
+			return RefPtr<Action> ();
+		}	
+		strcpy (copy, cslash+1);
+	} else {
+		strcpy (copy, path);
+	}
+
+	char* slash = strchr (copy, '/');
 	if (!slash) {
 		return RefPtr<Action> ();
 	}
@@ -288,6 +302,32 @@ ActionManager::get_action (const char* group_name, const char* action_name)
 	}
 
 	return act;
+}
+
+RefPtr<Action>
+ActionManager::get_action_from_name (const char* name)
+{
+	/* the C++ API for functions used here appears to be broken in
+	   gtkmm2.6, so we fall back to the C level.
+	*/
+
+	GList* list = gtk_ui_manager_get_action_groups (ui_manager->gobj());
+	GList* node;
+	GList* acts;
+
+	for (node = list; node; node = g_list_next (node)) {
+
+		GtkActionGroup* group = (GtkActionGroup*) node->data;
+
+		for (acts = gtk_action_group_list_actions (group); acts; acts = g_list_next (acts)) {
+			GtkAction* action = (GtkAction*) acts->data;
+			if (!strcmp (gtk_action_get_name (action), name)) {
+				return Glib::wrap (action, true);
+			}
+		}
+	}
+
+	return RefPtr<Action>();
 }
 
 void

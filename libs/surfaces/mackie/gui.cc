@@ -71,18 +71,31 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 	Gtk::Table* table = Gtk::manage (new Gtk::Table (2, 2));
 	table->set_spacings (4);
 	
-	table->attach (*manage (new Gtk::Label (_("Surface type:"))), 0, 1, 0, 1, AttachOptions(FILL|EXPAND), AttachOptions(0));
+	table->attach (*manage (new Gtk::Label (_("Device Type:"))), 0, 1, 0, 1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 	table->attach (_surface_combo, 1, 2, 0, 1, AttachOptions(FILL|EXPAND), AttachOptions(0));
+
+	table->attach (*manage (new Gtk::Label (_("Profile/Settings:"))), 0, 1, 1, 2, AttachOptions(FILL|EXPAND), AttachOptions(0));
+	table->attach (_profile_combo, 1, 2, 1, 2, AttachOptions(FILL|EXPAND), AttachOptions(0));
 
 	vector<string> surfaces;
 	
 	for (std::map<std::string,DeviceInfo>::iterator i = DeviceInfo::device_info.begin(); i != DeviceInfo::device_info.end(); ++i) {
-		std::cerr << "Dveice known: " << i->first << endl;
 		surfaces.push_back (i->first);
 	}
 	Gtkmm2ext::set_popdown_strings (_surface_combo, surfaces);
 	_surface_combo.set_active_text (p.device_info().name());
 	_surface_combo.signal_changed().connect (sigc::mem_fun (*this, &MackieControlProtocolGUI::surface_combo_changed));
+
+	vector<string> profiles;
+	
+	profiles.push_back ("default");
+
+	for (std::map<std::string,DeviceProfile>::iterator i = DeviceProfile::device_profiles.begin(); i != DeviceProfile::device_profiles.end(); ++i) {
+		profiles.push_back (i->first);
+	}
+	Gtkmm2ext::set_popdown_strings (_profile_combo, profiles);
+	_profile_combo.set_active_text (p.device_profile().name());
+	_profile_combo.signal_changed().connect (sigc::mem_fun (*this, &MackieControlProtocolGUI::profile_combo_changed));
 
 	append_page (*table, _("Device Selection"));
 	table->show_all();
@@ -92,7 +105,9 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 	append_page (function_key_scroller, _("Function Keys"));
 	function_key_scroller.add (function_key_editor);
 	
-	rebuild_function_key_editor ();
+	build_available_action_menu ();
+	build_function_key_editor ();
+	refresh_function_key_editor ();
 	function_key_scroller.show_all();
 }
 
@@ -110,7 +125,7 @@ MackieControlProtocolGUI::make_action_renderer (Glib::RefPtr<TreeStore> model, G
 }
 
 void
-MackieControlProtocolGUI::rebuild_function_key_editor ()
+MackieControlProtocolGUI::build_available_action_menu ()
 {
 	/* build a model of all available actions (needs to be tree structured
 	 * more) 
@@ -186,15 +201,20 @@ MackieControlProtocolGUI::rebuild_function_key_editor ()
 
 		if (l->empty ()) {
 			row[available_action_columns.name] = *t;
+			action_map[*t] = *p;
 		} else {
 			row[available_action_columns.name] = *l;
+			action_map[*l] = *p;
 		}
 
 		row[available_action_columns.path] = (*p);
 	}
+}
 
+void
+MackieControlProtocolGUI::build_function_key_editor ()
+{
 	function_key_editor.append_column (_("Key"), function_key_columns.name);
-
 
 	TreeViewColumn* col;
 	CellRendererCombo* renderer;
@@ -229,23 +249,106 @@ MackieControlProtocolGUI::rebuild_function_key_editor ()
 	col->add_attribute (renderer->property_text(), function_key_columns.shiftcontrol);
 	function_key_editor.append_column (*col);
 
+	function_key_model = ListStore::create (function_key_columns);
+	function_key_editor.set_model (function_key_model);
+}
+
+void
+MackieControlProtocolGUI::refresh_function_key_editor ()
+{
+	function_key_editor.set_model (Glib::RefPtr<TreeModel>());
+	function_key_model->clear ();
+
 	/* now fill with data */
 
-	function_key_model = ListStore::create (function_key_columns);
-
 	TreeModel::Row row;
-	
-	for (uint32_t n = 0; n < 16; ++n) {
+	DeviceProfile dp (_cp.device_profile());
+
+	for (int n = 0; n < Mackie::Button::FinalGlobalButton; ++n) {
+
+		Mackie::Button::ID bid = (Mackie::Button::ID) n;
 
 		row = *(function_key_model->append());
-		row[function_key_columns.name] = string_compose ("F%1", n+1);
-		row[function_key_columns.number] = n;
-		row[function_key_columns.plain] = ""; // _cp.f_action (n, 0);
-		row[function_key_columns.control] = "c";
-		row[function_key_columns.option] = "o";
-		row[function_key_columns.shift] = "s";
-		row[function_key_columns.cmdalt] = "ca";
-		row[function_key_columns.shiftcontrol] = "sc";
+		row[function_key_columns.name] = Mackie::Button::id_to_name (bid);
+		row[function_key_columns.id] = bid;
+
+		Glib::RefPtr<Gtk::Action> act;
+		string action;
+		const string defstring = "def";
+
+		action = dp.get_button_action (bid, 0);
+		if (action.empty()) {
+			row[function_key_columns.plain] = defstring;
+		} else {
+			std::cerr << "action = " << action << '\n';
+			act = ActionManager::get_action (action.c_str());
+			std::cerr << " action = " << act << endl;
+			if (act) {
+				row[function_key_columns.plain] = act->get_label();
+			} else {
+				row[function_key_columns.plain] = defstring;
+			}
+		}
+
+		action = dp.get_button_action (bid, MackieControlProtocol::MODIFIER_CONTROL);
+		if (action.empty()) {
+			row[function_key_columns.control] = defstring;
+		} else {
+			act = ActionManager::get_action (action.c_str());
+			if (act) {
+				row[function_key_columns.control] = act->get_label();
+			} else {
+				row[function_key_columns.control] = defstring;
+			}
+		}
+
+		action = dp.get_button_action (bid, MackieControlProtocol::MODIFIER_SHIFT);
+		if (action.empty()) {
+			row[function_key_columns.shift] = defstring;
+		} else {
+			act = ActionManager::get_action (action.c_str());
+			if (act) {
+				row[function_key_columns.shift] = act->get_label();
+			} else {
+				row[function_key_columns.shift] = defstring;
+			}
+		}
+
+		action = dp.get_button_action (bid, MackieControlProtocol::MODIFIER_OPTION);
+		if (action.empty()) {
+			row[function_key_columns.option] = defstring;
+		} else {
+			act = ActionManager::get_action (action.c_str());
+			if (act) {
+				row[function_key_columns.option] = act->get_label();
+			} else {
+				row[function_key_columns.option] = defstring;
+			}
+		}
+
+		action = dp.get_button_action (bid, MackieControlProtocol::MODIFIER_CMDALT);
+		if (action.empty()) {
+			row[function_key_columns.cmdalt] = defstring;
+		} else {
+			act = ActionManager::get_action (action.c_str());
+			if (act) {
+				row[function_key_columns.cmdalt] = act->get_label();
+			} else {
+				row[function_key_columns.cmdalt] = defstring;
+			}
+		}
+
+		action = dp.get_button_action (bid, (MackieControlProtocol::MODIFIER_SHIFT|MackieControlProtocol::MODIFIER_CONTROL));
+		if (action.empty()) {
+			row[function_key_columns.shiftcontrol] = defstring;
+		} else {
+			act = ActionManager::get_action (action.c_str());
+			if (act) {
+				row[function_key_columns.shiftcontrol] = act->get_label();
+			} else {
+				row[function_key_columns.shiftcontrol] = defstring;
+			}
+		}
 	}
 
 	function_key_editor.set_model (function_key_model);
@@ -257,10 +360,19 @@ MackieControlProtocolGUI::action_changed (const Glib::ustring &sPath, const Glib
 	Gtk::TreePath path(sPath);
 	Gtk::TreeModel::iterator row = function_key_model->get_iter(path);
 
-	cerr << sPath << '-' << col.index() <<  " changed to " << text << endl;
-	
 	if (row) {
-		(*row).set_value (col.index(), text);
+
+		std::map<std::string,std::string>::iterator i = action_map.find (text);
+
+		if (i == action_map.end()) {
+			return;
+		}
+
+		Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (i->second.c_str());
+
+		if (act) {
+			(*row).set_value (col.index(), text);
+		}
 	}
 }
 
@@ -268,6 +380,13 @@ void
 MackieControlProtocolGUI::surface_combo_changed ()
 {
 	_cp.set_device (_surface_combo.get_active_text());
+}
+
+void
+MackieControlProtocolGUI::profile_combo_changed ()
+{
+	_cp.set_profile (_profile_combo.get_active_text());
+	refresh_function_key_editor ();
 }
 
 

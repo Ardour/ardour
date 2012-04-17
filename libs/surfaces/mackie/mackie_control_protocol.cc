@@ -57,6 +57,7 @@
 
 #include "midi_byte_array.h"
 #include "mackie_control_exception.h"
+#include "device_profile.h"
 #include "surface_port.h"
 #include "surface.h"
 #include "strip.h"
@@ -108,7 +109,10 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::MackieControlProtocol\n");
 
 	DeviceInfo::reload_device_info ();
+	DeviceProfile::reload_device_profiles ();
+
 	set_device (Config->get_mackie_device_name());
+	set_profile (Config->get_mackie_device_profile());
 
 	AudioEngine::instance()->PortConnectedOrDisconnected.connect (
 		audio_engine_connections, MISSING_INVALIDATOR, ui_bind (&MackieControlProtocol::port_connected_or_disconnected, this, _2, _4, _5),
@@ -505,6 +509,23 @@ MackieControlProtocol::connect_session_signals()
 		(*it)->RemoteControlIDChanged.connect (route_connections, MISSING_INVALIDATOR, ui_bind(&MackieControlProtocol::notify_remote_id_changed, this), this);
 	}
 }
+
+void
+MackieControlProtocol::set_profile (const string& profile_name)
+{
+	if (profile_name == "default") {
+		/* reset to default */
+		_device_profile = DeviceProfile (profile_name);
+	}
+
+	map<string,DeviceProfile>::iterator d = DeviceProfile::device_profiles.find (profile_name);
+
+	if (d == DeviceProfile::device_profiles.end()) {
+		return;
+	}
+	
+	_device_profile = d->second;
+}	
 
 void
 MackieControlProtocol::set_device (const string& device_name)
@@ -1015,6 +1036,22 @@ MackieControlProtocol::handle_button_event (Surface& surface, Button& button, Bu
 	}
 	
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Handling %1 for button %2\n", (bs == press ? "press" : "release"), button.id()));
+
+	/* check profile first */
+	
+	string action = _device_profile.get_button_action (button.bid(), _modifier_state);
+	
+	if (!action.empty()) {
+		/* if there is a bound action for this button, and this is a press event,
+		   carry out the action. If its a release event, do nothing since we 
+		   don't bind to them at all but don't want any other handling to 
+		   occur either.
+		*/
+		if (bs == press) {
+			access_action (action);
+		}
+		return;
+	}
 
 	/* lookup using the device-INDEPENDENT button ID */
 

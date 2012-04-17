@@ -41,6 +41,7 @@
 #include "mackie_jog_wheel.h"
 #include "timer.h"
 #include "device_info.h"
+#include "device_profile.h"
 
 namespace ARDOUR {
 	class AutomationControl;
@@ -118,9 +119,11 @@ class MackieControlProtocol
 	static MackieControlProtocol* instance() { return _instance; }
 	
 	const Mackie::DeviceInfo& device_info() const { return _device_info; }
+	const Mackie::DeviceProfile& device_profile() const { return _device_profile; }
 
 	int set_active (bool yn);
 	void set_device (const std::string&);
+	void set_profile (const std::string&);
 
 	bool     flip_mode () const { return _flip_mode; }
 	ViewMode view_mode () const { return _view_mode; }
@@ -249,6 +252,7 @@ class MackieControlProtocol
 	static MackieControlProtocol* _instance;
 	
 	Mackie::DeviceInfo       _device_info;
+	Mackie::DeviceProfile    _device_profile;
 	sigc::connection          periodic_connection;
 	uint32_t                 _current_initial_bank;
 	PBD::ScopedConnectionList audio_engine_connections;

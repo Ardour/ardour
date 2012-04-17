@@ -96,27 +96,6 @@ class DeviceInfo
     void shared_buttons ();
 };
 
-class DeviceProfile
-{
-  public:
-	DeviceProfile (DeviceInfo& info);
-	~DeviceProfile();
-
-	const std::string& get_f_action (uint32_t fn, int modifier_state);
-	void set_f_action (uint32_t fn, int modifier_state, const std::string&);
-
-  private:
-    struct KeyActions {
-        std::string plain;
-        std::string control;
-        std::string shift;
-        std::string option;
-        std::string cmdalt;
-        std::string shiftcontrol;
-    };
-
-    typedef std::map<Button::ID,KeyActions> KeyActionMap;
-};
 
 }
 
