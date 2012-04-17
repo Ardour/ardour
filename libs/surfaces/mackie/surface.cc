@@ -199,8 +199,6 @@ Surface::init_strips (uint32_t n)
 		
 		snprintf (name, sizeof (name), "strip_%d", (8* _number) + i);
 
-		std::cerr << "*** Surface " << _number << " Setup strips for index " << i << endl;
-
 		Strip* strip = new Strip (*this, name, i, strip_buttons);
 		
 		groups[name] = strip;

@@ -4,6 +4,6 @@
   <MasterOn value="14"/>
   <MonitorOn value="15"/>
   <Buttons>
-    <Button name="f1" plain="Editor/goto-visual-view-1"/>
+    <Button name="f1" plain="Editor/goto-visual-state-1"/>
   </Buttons>
 </MackieDeviceProfile>

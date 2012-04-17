@@ -250,23 +250,29 @@ ActionManager::get_action (const char* path)
 		return RefPtr<Action>();
 	}
 
-	char copy[strlen(path)+1];
+	/* Skip <Actions>/ in path */
 
-	if (*path == '/') {
-		const char* cslash = strchr (path, '/');
-		if (!cslash) {
-			return RefPtr<Action> ();
-		}	
-		strcpy (copy, cslash+1);
-	} else {
-		strcpy (copy, path);
+	int len = strlen (path);
+
+	if (len < 3) {
+		/* shortest possible path: "a/b" */
+		return RefPtr<Action>();
 	}
 
+	if (len > 10 && !strncmp (path, "<Actions>/", 10 )) {
+		path = path+10;
+	} else if (path[0] == '/') {
+		path++;
+	}
+
+	char copy[len+1];
+	strcpy (copy, path);
 	char* slash = strchr (copy, '/');
 	if (!slash) {
 		return RefPtr<Action> ();
 	}
 	*slash = '\0';
+
 	return get_action (copy, ++slash);
 	
 }

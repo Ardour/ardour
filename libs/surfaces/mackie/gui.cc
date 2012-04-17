@@ -280,9 +280,7 @@ MackieControlProtocolGUI::refresh_function_key_editor ()
 		if (action.empty()) {
 			row[function_key_columns.plain] = defstring;
 		} else {
-			std::cerr << "action = " << action << '\n';
 			act = ActionManager::get_action (action.c_str());
-			std::cerr << " action = " << act << endl;
 			if (act) {
 				row[function_key_columns.plain] = act->get_label();
 			} else {
@@ -373,6 +371,7 @@ MackieControlProtocolGUI::action_changed (const Glib::ustring &sPath, const Glib
 		if (act) {
 			(*row).set_value (col.index(), text);
 		}
+			
 	}
 }
 
