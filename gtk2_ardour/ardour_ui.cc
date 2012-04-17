@@ -3628,7 +3628,7 @@ ARDOUR_UI::TransportControllable::get_value (void) const
 void
 ARDOUR_UI::setup_profile ()
 {
-	if (gdk_screen_width() < 1200) {
+	if (gdk_screen_width() < 1200 || getenv ("ARDOUR_NARROW_SCREEN")) {
 		Profile->set_small_screen ();
 	}
 
