@@ -244,19 +244,6 @@ ActionManager::get_widget (const char * name)
 }
 
 RefPtr<Action>
-ActionManager::get_action (const char* path)
-{
-	GtkAction* _act;
-	RefPtr<Action> act;
-
-	if ((_act = gtk_ui_manager_get_action (ui_manager->gobj(), path)) != 0) {
-		return Glib::wrap (_act, true);
-	}
-
-	return act;
-}
-
-RefPtr<Action>
 ActionManager::get_action (const char* group_name, const char* action_name)
 {
 	/* the C++ API for functions used here appears to be broken in
