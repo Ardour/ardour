@@ -94,5 +94,13 @@ class MackieControlProtocolGUI : public Gtk::Notebook
     void profile_combo_changed ();
 
     std::map<std::string,std::string> action_map; // map from action names to paths
+
+    Gtk::CheckButton relay_click_button;
+    Gtk::CheckButton backlight_button;
+    Gtk::RadioButton absolute_touch_mode_button;
+    Gtk::RadioButton touch_move_mode_button;
+    Gtk::Adjustment  touch_sensitivity_adjustment;
+    Gtk::HScale      touch_sensitivity_scale;
+    Gtk::Button      recalibrate_fader_button;
 };
 

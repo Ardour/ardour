@@ -331,7 +331,6 @@ Surface::handle_midi_pitchbend_message (MIDI::Parser&, MIDI::pitchbend_t pb, uin
 		Strip* strip = dynamic_cast<Strip*> (&fader->group());
 		float pos = (pb >> 4)/1023.0; // only the top 10 bytes are used
 		if (strip) {
-			std::cerr << "New fader position " << pos << " SPtG = " << slider_position_to_gain (pos) << std::endl;
 			strip->handle_fader (*fader, pos);
 		} else {
 			/* master fader */

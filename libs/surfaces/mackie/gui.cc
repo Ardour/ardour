@@ -25,6 +25,8 @@
 #include <gtkmm/treestore.h>
 #include <gtkmm/notebook.h>
 #include <gtkmm/cellrenderercombo.h>
+#include <gtkmm/scale.h>
+#include <gtkmm/alignment.h>
 
 #include "pbd/strsplit.h"
 
@@ -65,14 +67,21 @@ MackieControlProtocol::build_gui ()
 
 MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 	: _cp (p)
+	, touch_sensitivity_adjustment (0, 0, 9, 1, 4)
+	, touch_sensitivity_scale (touch_sensitivity_adjustment)
+	, recalibrate_fader_button (_("Recalibrate Faders"))
 {
+	Gtk::Label* l;
+	Gtk::Alignment* align;
+
 	set_border_width (12);
 
-	Gtk::Table* table = Gtk::manage (new Gtk::Table (2, 2));
-	table->set_spacings (4);
-	
-	table->attach (*manage (new Gtk::Label (_("Device Type:"))), 0, 1, 0, 1, AttachOptions(FILL|EXPAND), AttachOptions(0));
-	table->attach (_surface_combo, 1, 2, 0, 1, AttachOptions(FILL|EXPAND), AttachOptions(0));
+	Gtk::Table* table = Gtk::manage (new Gtk::Table (2, 7));
+	table->set_row_spacings (4);
+	table->set_col_spacings (6);
+	l = manage (new Gtk::Label (_("Device Type:")));
+	table->attach (*l, 0, 1, 0, 1, AttachOptions(FILL|EXPAND), AttachOptions(0));
+	table->attach (_surface_combo, 1, 2, 0, 1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 20);
 
 	vector<string> surfaces;
 	
@@ -82,6 +91,45 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 	Gtkmm2ext::set_popdown_strings (_surface_combo, surfaces);
 	_surface_combo.set_active_text (p.device_info().name());
 	_surface_combo.signal_changed().connect (sigc::mem_fun (*this, &MackieControlProtocolGUI::surface_combo_changed));
+
+	RadioButtonGroup rb_group = absolute_touch_mode_button.get_group();
+	touch_move_mode_button.set_group (rb_group);
+
+	l = manage (new Gtk::Label (_("Button click")));
+	l->set_alignment (1.0, 0.5);
+	table->attach (*l, 0, 1, 1, 2, AttachOptions(FILL|EXPAND), AttachOptions (0));
+	align = manage (new Alignment);
+	align->set (0.0, 0.5);
+	align->add (relay_click_button);
+	table->attach (*align, 1, 2, 1, 2, AttachOptions(FILL|EXPAND), AttachOptions (0));
+	l = manage (new Gtk::Label (_("Backlight")));
+	l->set_alignment (1.0, 0.5);
+	table->attach (*l, 0, 1, 2, 3, AttachOptions(FILL|EXPAND), AttachOptions (0));
+	align = manage (new Alignment);
+	align->set (0.0, 0.5);
+	align->add (backlight_button);
+	table->attach (*align, 1, 2, 2, 3, AttachOptions(FILL|EXPAND), AttachOptions (0));
+	l = manage (new Gtk::Label (_("Send Fader Position Only When Touched")));
+	l->set_alignment (1.0, 0.5);
+	table->attach (*l, 0, 1, 3, 4, AttachOptions(FILL|EXPAND), AttachOptions (0));
+	align = manage (new Alignment);
+	align->set (0.0, 0.5);
+	align->add (absolute_touch_mode_button);
+	table->attach (*align, 1, 2, 3, 4, AttachOptions(FILL|EXPAND), AttachOptions (0));
+	l = manage (new Gtk::Label (_("Send Fader Position When Moved")));
+	l->set_alignment (1.0, 0.5);
+	table->attach (*l, 0, 1, 4, 5, AttachOptions(FILL|EXPAND), AttachOptions (0));
+	align = manage (new Alignment);
+	align->set (0.0, 0.5);
+	align->add (touch_move_mode_button);
+	table->attach (*align, 1, 2, 4, 5, AttachOptions(FILL|EXPAND), AttachOptions (0));
+	l = manage (new Gtk::Label (_("Fader Touch Sense Sensitivity")));
+	l->set_alignment (1.0, 0.5);
+	table->attach (*l, 0, 1, 5, 6, AttachOptions(FILL|EXPAND), AttachOptions (0));
+	touch_sensitivity_scale.property_digits() = 0;
+	touch_sensitivity_scale.property_draw_value() = false;
+	table->attach (touch_sensitivity_scale, 1, 2, 5, 6, AttachOptions(FILL|EXPAND), AttachOptions (0));
+	table->attach (recalibrate_fader_button, 1, 2, 6, 7, AttachOptions(FILL|EXPAND), AttachOptions (0));
 
 	vector<string> profiles;
 	
@@ -102,8 +150,7 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 	VBox* fkey_packer = manage (new VBox);
 	HBox* profile_packer = manage (new HBox);
 
-
-	Label* l = manage (new Gtk::Label (_("Profile/Settings:")));
+	l = manage (new Gtk::Label (_("Profile/Settings:")));
 	profile_packer->pack_start (*l, false, false);
 	profile_packer->pack_start (_profile_combo, true, true);
 	profile_packer->set_spacing (12);
