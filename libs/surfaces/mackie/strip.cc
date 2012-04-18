@@ -612,12 +612,11 @@ Strip::handle_pot (Pot& pot, float delta)
 	   stop moving. So to get a stop event, we need to use a timeout.
 	*/
 	
-	pot.start_touch (_surface->mcp().transport_frame());
-
+	boost::shared_ptr<AutomationControl> ac = pot.control();
 	double p = pot.get_value ();
 	p += delta;
-	p = min (1.0, p);
-	p = max (0.0, p);
+	p = max (ac->lower(), p);
+	p = min (ac->upper(), p);
 	pot.set_value (p);
 }
 
