@@ -116,11 +116,11 @@ DeviceInfo::logic_control_buttons ()
 	_global_buttons[Button::Aux] = GlobalButtonInfo ("aux", "view", 0x42);
 	_global_buttons[Button::Busses] = GlobalButtonInfo ("busses", "view", 0x43);
 	_global_buttons[Button::Outputs] = GlobalButtonInfo ("outputs", "view", 0x44);
-	_global_buttons[Button::User] = GlobalButtonInfo ("user_ready", "view", 0x45);
-	_global_buttons[Button::Shift] = GlobalButtonInfo ("ctrl", "modifiers", 0x46);
+	_global_buttons[Button::User] = GlobalButtonInfo ("user", "view", 0x45);
+	_global_buttons[Button::Shift] = GlobalButtonInfo ("shift", "modifiers", 0x46);
 	_global_buttons[Button::Option] = GlobalButtonInfo ("option", "modifiers", 0x47);
-	_global_buttons[Button::Ctrl] = GlobalButtonInfo ("snapshot", "modifiers", 0x48);
-	_global_buttons[Button::CmdAlt] = GlobalButtonInfo ("shift", "modifiers", 0x49);
+	_global_buttons[Button::Ctrl] = GlobalButtonInfo ("ctrl", "modifiers", 0x48);
+	_global_buttons[Button::CmdAlt] = GlobalButtonInfo ("cmdalt", "modifiers", 0x49);
 	_global_buttons[Button::Read] = GlobalButtonInfo ("read", "automation", 0x4a);
 	_global_buttons[Button::Write] = GlobalButtonInfo ("write", "automation", 0x4b);
 	_global_buttons[Button::Trim] = GlobalButtonInfo ("trim", "automation", 0x4c);

@@ -1074,6 +1074,7 @@ MackieControlProtocol::handle_button_event (Surface& surface, Button& button, Bu
 		switch  (bs) {
 		case press: 
 			surface.write (button.set_state ((this->*(bh.press)) (button)));
+			break;
 		case release: 
 			surface.write (button.set_state ((this->*(bh.release)) (button)));
 			break;

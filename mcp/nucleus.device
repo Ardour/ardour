@@ -10,5 +10,5 @@
   <GlobalControls value="yes"/>
   <JogWheel value="yes"/>
   <TouchSenseFaders value="yes"/>
-  <LogicControlButtons/>
+  <LogicControlButtons value="yes"/>
 </MackieProtocolDevice>
