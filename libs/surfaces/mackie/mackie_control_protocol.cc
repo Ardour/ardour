@@ -1041,6 +1041,9 @@ MackieControlProtocol::handle_button_event (Surface& surface, Button& button, Bu
 	
 	string action = _device_profile.get_button_action (button.bid(), _modifier_state);
 	
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Looked up action for button %1 with modifier %2, got [%3]\n",
+							   button.bid(), _modifier_state, action));
+
 	if (!action.empty()) {
 		/* if there is a bound action for this button, and this is a press event,
 		   carry out the action. If its a release event, do nothing since we 
@@ -1048,6 +1051,7 @@ MackieControlProtocol::handle_button_event (Surface& surface, Button& button, Bu
 		   occur either.
 		*/
 		if (bs == press) {
+			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("executing action %1\n", action));
 			access_action (action);
 		}
 		return;

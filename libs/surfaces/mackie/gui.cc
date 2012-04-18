@@ -74,9 +74,6 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 	table->attach (*manage (new Gtk::Label (_("Device Type:"))), 0, 1, 0, 1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 	table->attach (_surface_combo, 1, 2, 0, 1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 
-	table->attach (*manage (new Gtk::Label (_("Profile/Settings:"))), 0, 1, 1, 2, AttachOptions(FILL|EXPAND), AttachOptions(0));
-	table->attach (_profile_combo, 1, 2, 1, 2, AttachOptions(FILL|EXPAND), AttachOptions(0));
-
 	vector<string> surfaces;
 	
 	for (std::map<std::string,DeviceInfo>::iterator i = DeviceInfo::device_info.begin(); i != DeviceInfo::device_info.end(); ++i) {
@@ -97,18 +94,33 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 	_profile_combo.set_active_text (p.device_profile().name());
 	_profile_combo.signal_changed().connect (sigc::mem_fun (*this, &MackieControlProtocolGUI::profile_combo_changed));
 
-	append_page (*table, _("Device Selection"));
+	append_page (*table, _("Device Setup"));
 	table->show_all();
 
 	/* function key editor */
 
-	append_page (function_key_scroller, _("Function Keys"));
+	VBox* fkey_packer = manage (new VBox);
+	HBox* profile_packer = manage (new HBox);
+
+
+	Label* l = manage (new Gtk::Label (_("Profile/Settings:")));
+	profile_packer->pack_start (*l, false, false);
+	profile_packer->pack_start (_profile_combo, true, true);
+	profile_packer->set_spacing (12);
+	profile_packer->set_border_width (12);
+
+	fkey_packer->pack_start (*profile_packer, false, false);
+	fkey_packer->pack_start (function_key_scroller, true, true);
+	fkey_packer->set_spacing (12);
+	function_key_scroller.set_size_request (700,700);
+	function_key_scroller.property_shadow_type() = Gtk::SHADOW_NONE;
 	function_key_scroller.add (function_key_editor);
+	append_page (*fkey_packer, _("Function Keys"));
 	
 	build_available_action_menu ();
 	build_function_key_editor ();
 	refresh_function_key_editor ();
-	function_key_scroller.show_all();
+	fkey_packer->show_all();
 }
 
 CellRendererCombo*
