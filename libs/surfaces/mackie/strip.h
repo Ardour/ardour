@@ -126,7 +126,8 @@ private:
 	void notify_record_enable_changed ();
 	void notify_gain_changed (bool force_update = true);
 	void notify_property_changed (const PBD::PropertyChange&);
-	void notify_panner_changed (bool force_update = true);
+	void notify_panner_azi_changed (bool force_update = true);
+	void notify_panner_width_changed (bool force_update = true);
 	void notify_active_changed ();
 	void notify_route_deleted ();
 	

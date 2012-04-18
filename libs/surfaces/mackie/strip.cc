@@ -169,8 +169,8 @@ Strip::set_route (boost::shared_ptr<Route> r)
 	boost::shared_ptr<Pannable> pannable = _route->pannable();
 
 	if (pannable) {
-		pannable->pan_azimuth_control->Changed.connect(route_connections, invalidator(), ui_bind (&Strip::notify_panner_changed, this, false), ui_context());
-		pannable->pan_width_control->Changed.connect(route_connections, invalidator(), ui_bind (&Strip::notify_panner_changed, this, false), ui_context());
+		pannable->pan_azimuth_control->Changed.connect(route_connections, invalidator(), ui_bind (&Strip::notify_panner_azi_changed, this, false), ui_context());
+		pannable->pan_width_control->Changed.connect(route_connections, invalidator(), ui_bind (&Strip::notify_panner_width_changed, this, false), ui_context());
 	}
 	_route->gain_control()->Changed.connect(route_connections, invalidator(), ui_bind (&Strip::notify_gain_changed, this, false), ui_context());
 	_route->PropertyChanged.connect (route_connections, invalidator(), ui_bind (&Strip::notify_property_changed, this, _1), ui_context());
@@ -251,7 +251,8 @@ Strip::notify_all()
 	notify_mute_changed ();
 	notify_gain_changed ();
 	notify_property_changed (PBD::PropertyChange (ARDOUR::Properties::name));
-	notify_panner_changed ();
+	notify_panner_azi_changed ();
+	notify_panner_width_changed ();
 	notify_record_enable_changed ();
 }
 
@@ -364,7 +365,7 @@ Strip::notify_property_changed (const PropertyChange& what_changed)
 }
 
 void 
-Strip::notify_panner_changed (bool force_update)
+Strip::notify_panner_azi_changed (bool force_update)
 {
 	if (_route) {
 
@@ -382,6 +383,9 @@ Strip::notify_panner_changed (bool force_update)
 		if (_surface->mcp().flip_mode()) {
 			control = _fader;
 		} else {
+			if (_vpot_mode != PanAzimuth) {
+				return;
+			}
 			control = _vpot;
 		}
 
@@ -398,6 +402,53 @@ Strip::notify_panner_changed (bool force_update)
 				} else {
 					_surface->write (_vpot->set_all (pos, true, Pot::dot));
 					do_parameter_display (PanAzimuthAutomation, pos);
+				}
+
+				queue_display_reset (2000);
+				_last_pan_position_written = pos;
+			}
+		}
+	}
+}
+
+void 
+Strip::notify_panner_width_changed (bool force_update)
+{
+	if (_route) {
+
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("pan width change for strip %1\n", _index));
+
+		boost::shared_ptr<Pannable> pannable = _route->pannable();
+
+		if (!pannable) {
+			_surface->write (_vpot->zero());
+			return;
+		}
+
+		Control* control;
+
+		if (_surface->mcp().flip_mode()) {
+			control = _fader;
+		} else {
+			if (_vpot_mode != PanWidth) {
+				return;
+			}
+			control = _vpot;
+		}
+
+		if (!control->in_use()) {
+			
+			double pos = pannable->pan_width_control->internal_to_interface (pannable->pan_width_control->get_value());
+			
+			if (force_update || pos != _last_pan_position_written) {
+				
+				if (_surface->mcp().flip_mode()) {
+					
+					_surface->write (_fader->set_position (pos));
+					do_parameter_display (PanWidthAutomation, pos);
+				} else {
+					_surface->write (_vpot->set_all (pos, true, Pot::dot));
+					do_parameter_display (PanWidthAutomation, pos);
 				}
 
 				queue_display_reset (2000);
@@ -584,6 +635,15 @@ Strip::do_parameter_display (AutomationType type, float val)
 				_surface->write (display (1, str));
 			}
 		}
+
+	case PanWidthAutomation:
+		if (_route) {
+			char buf[16];
+			snprintf (buf, sizeof (buf), "%6ld%%", lrintf (val * 100.0));
+			_surface->write (display (1, buf));
+		}
+		break;
+
 	default:
 		break;
 	}
@@ -647,7 +707,8 @@ Strip::update_automation ()
 	if (_route->panner()) {
 		ARDOUR::AutoState panner_state = _route->panner()->automation_state();
 		if (panner_state == Touch || panner_state == Play) {
-			notify_panner_changed (false);
+			notify_panner_azi_changed (false);
+			notify_panner_width_changed (false);
 		}
 	}
 }
@@ -958,6 +1019,14 @@ Strip::set_vpot_mode (PotMode m)
 
 	_vpot_mode = m;
 
+	/* one of these is unnecessary, but its not worth trying to find
+	   out which - it will just cause one additional message to be
+	   sent to the surface.
+	*/
+
+	_last_pan_position_written = -1;
+	_last_gain_position_written = -1;
+
 	switch (_vpot_mode) {
 	case Gain:
 		break;
@@ -970,11 +1039,13 @@ Strip::set_vpot_mode (PotMode m)
 				if (pannable) {
 					_fader->set_control (pannable->pan_azimuth_control);
 				}
+				_vpot->set_mode (Pot::boost_cut);
 				_vpot_mode = Gain;
 			} else {
 				/* gain to fader, pan azi to vpot */
 				_fader->set_control (_route->gain_control());
 				if (pannable) {
+					_vpot->set_mode (Pot::spread);
 					_vpot->set_control (pannable->pan_azimuth_control);
 				}
 			}
@@ -989,11 +1060,13 @@ Strip::set_vpot_mode (PotMode m)
 				if (pannable) {
 					_fader->set_control (pannable->pan_width_control);
 				}
+				_vpot->set_mode (Pot::boost_cut);
 				_vpot_mode = Gain;
 			} else {
 				/* gain to fader, pan width to vpot */
 				_fader->set_control (_route->gain_control());
 				if (pannable) {
+					_vpot->set_mode (Pot::spread);
 					_vpot->set_control (pannable->pan_width_control);
 				}
 			}
