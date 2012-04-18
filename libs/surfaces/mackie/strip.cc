@@ -312,20 +312,24 @@ Strip::notify_gain_changed (bool force_update)
 
 		if (!control->in_use()) {
 
-			float pos = _route->gain_control()->get_value();
+			boost::shared_ptr<AutomationControl> ac = _route->gain_control();
 
-			if (force_update || pos != _last_gain_position_written) {
+			float gain_coefficient = ac->get_value();
+			float normalized_position = ac->internal_to_interface (gain_coefficient);
+
+			if (force_update || normalized_position != _last_gain_position_written) {
+
 
 				if (_surface->mcp().flip_mode()) {
-					_surface->write (_vpot->set_all (pos, true, Pot::wrap));
-					do_parameter_display (GainAutomation, pos);
+					_surface->write (_vpot->set_all (normalized_position, true, Pot::wrap));
+					do_parameter_display (GainAutomation, gain_coefficient);
 				} else {
-					_surface->write (_fader->set_position (pos));
-					do_parameter_display (GainAutomation, pos);
+					_surface->write (_fader->set_position (normalized_position));
+					do_parameter_display (GainAutomation, gain_coefficient);
 				}
 
 				queue_display_reset (2000);
-				_last_gain_position_written = pos;
+				_last_gain_position_written = normalized_position;
 				
 			} else {
 				DEBUG_TRACE (DEBUG::MackieControl, "value is stale, no message sent\n");
@@ -560,18 +564,13 @@ Strip::handle_button (Button& button, ButtonState bs)
 void
 Strip::do_parameter_display (AutomationType type, float val)
 {
-	float dB;
-
 	switch (type) {
 	case GainAutomation:
-		std::cerr << "Updating displayed gain level from " << val;
-		dB = fast_coefficient_to_dB (val);
-		std::cerr << " dB = " << dB << std::endl;
 		if (val == 0.0) {
 			_surface->write (display (1, " -inf "));
 		} else {
 			char buf[16];
-			
+			float dB = accurate_coefficient_to_dB (val);
 			snprintf (buf, sizeof (buf), "%6.1f", dB);
 			_surface->write (display (1, buf));
 		}		
