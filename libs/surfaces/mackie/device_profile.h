@@ -40,7 +40,8 @@ class DeviceProfile
 	void set_button_action (Button::ID, int modifier_state, const std::string&);
 	
 	const std::string& name() const;
-	
+	void set_path (const std::string&);
+
 	static void reload_device_profiles ();
 	static std::map<std::string,DeviceProfile> device_profiles;
 	
@@ -57,10 +58,13 @@ class DeviceProfile
 	typedef std::map<Button::ID,ButtonActions> ButtonActionMap;
 	
 	std::string _name;
+	std::string _path;
 	ButtonActionMap _button_map;
 	
 	int set_state (const XMLNode&, int version);
 	XMLNode& get_state () const;
+
+	void save ();
 };
 
 }

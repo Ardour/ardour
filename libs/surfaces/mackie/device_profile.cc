@@ -17,6 +17,7 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <cerrno>
 #include <cstdlib>
 #include <cstring>
 #include <glibmm/miscutils.h>
@@ -24,6 +25,7 @@
 #include "pbd/xml++.h"
 #include "pbd/error.h"
 #include "pbd/pathscanner.h"
+#include "pbd/replace_all.h"
 
 #include "ardour/filesystem_paths.h"
 
@@ -123,18 +125,16 @@ DeviceProfile::reload_device_profiles ()
 		std::cerr << "Loading " << fullpath << std::endl;
 		
 		if (!tree.read (fullpath.c_str())) {
-			std::cerr << "XML read failed\n";
 			continue;
 		}
 
 		XMLNode* root = tree.root ();
 		if (!root) {
-			std::cerr << "no root\n";
 			continue;
 		}
 
 		if (dp.set_state (*root, 3000) == 0) { /* version is ignored for now */
-			std::cerr << "saved profile " << dp.name() << std::endl;
+			dp.set_path (fullpath);
 			device_profiles[dp.name()] = dp;
 		}
 	}
@@ -149,18 +149,15 @@ DeviceProfile::set_state (const XMLNode& node, int /* version */)
 	const XMLNode* child;
 
 	if (node.name() != "MackieDeviceProfile") {
-		std::cerr << "wrong root\n";
 		return -1;
 	}
 
 	/* name is mandatory */
  
 	if ((child = node.child ("Name")) == 0 || (prop = child->property ("value")) == 0) {
-		std::cerr << "no name\n";
 		return -1;
 	} else {
 		_name = prop->value();
-		std::cerr << "got name " << _name << std::endl;
 	}
 
 	if ((child = node.child ("Buttons")) != 0) {
@@ -170,8 +167,6 @@ DeviceProfile::set_state (const XMLNode& node, int /* version */)
 		for (i = nlist.begin(); i != nlist.end(); ++i) {
 
 			if ((*i)->name() == "Button") {
-
-				std::cerr << "foudn a button\n";
 
 				if ((prop = (*i)->property ("name")) == 0) {
 					error << string_compose ("Button without name in device profile \"%1\" - ignored", _name) << endmsg;
@@ -192,10 +187,7 @@ DeviceProfile::set_state (const XMLNode& node, int /* version */)
 					b = _button_map.insert (_button_map.end(), std::pair<Button::ID,ButtonActions> (bid, ButtonActions()));
 				}
 
-				std::cerr << "checking bindings for button " << bid << std::endl;
-
 				if ((prop = (*i)->property ("plain")) != 0) {
-					std::cerr << "Loaded binding between " << bid << " and " << prop->value() << std::endl;
 					b->second.plain = prop->value ();
 				}
 				if ((prop = (*i)->property ("control")) != 0) {
@@ -215,8 +207,6 @@ DeviceProfile::set_state (const XMLNode& node, int /* version */)
 				}
 			}
 		}
-	} else {
-		std::cerr << " no buttons\n";
 	}
 
 	return 0;
@@ -226,8 +216,10 @@ XMLNode&
 DeviceProfile::get_state () const
 {
 	XMLNode* node = new XMLNode ("MackieDeviceProfile");
+	XMLNode* child = new XMLNode ("Name");
 
-	node->add_property ("name", _name);
+	child->add_property ("value", _name);
+	node->add_child_nocopy (*child);
 
 	if (_button_map.empty()) {
 		return *node;
@@ -239,7 +231,7 @@ DeviceProfile::get_state () const
 	for (ButtonActionMap::const_iterator b = _button_map.begin(); b != _button_map.end(); ++b) {
 		XMLNode* n = new XMLNode ("Button");
 
-		n->add_property ("name", b->first);
+		n->add_property ("name", Button::id_to_name (b->first));
 
 		if (!b->second.plain.empty()) {
 			n->add_property ("plain", b->second.plain);
@@ -291,13 +283,16 @@ DeviceProfile::get_button_action (Button::ID id, int modifier_state) const
 }
 
 void
-DeviceProfile::set_button_action (Button::ID id, int modifier_state, const string& action)
+DeviceProfile::set_button_action (Button::ID id, int modifier_state, const string& act)
 {
 	ButtonActionMap::iterator i = _button_map.find (id);
 
 	if (i == _button_map.end()) {
 		return;
 	}
+
+	string action (act);
+	replace_all (action, "<Actions>/", "");
 
 	if (modifier_state == MackieControlProtocol::MODIFIER_CONTROL) {
 		i->second.control = action;
@@ -314,6 +309,8 @@ DeviceProfile::set_button_action (Button::ID id, int modifier_state, const strin
 	if (modifier_state == 0) {
 		i->second.plain = action;
 	}
+
+	save ();
 }
 
 const string&
@@ -321,3 +318,50 @@ DeviceProfile::name() const
 {
 	return _name;
 }
+
+void
+DeviceProfile::set_path (const string& p)
+{
+	_path = p;
+}
+
+/* XXX copied from libs/ardour/utils.cc */
+
+static string
+legalize_for_path (const string& str)
+{
+	string::size_type pos;
+	string illegal_chars = "/\\"; /* DOS, POSIX. Yes, we're going to ignore HFS */
+	string legal;
+
+	legal = str;
+	pos = 0;
+
+	while ((pos = legal.find_first_of (illegal_chars, pos)) != string::npos) {
+		legal.replace (pos, 1, "_");
+		pos += 1;
+	}
+
+	return string (legal);
+}
+
+
+void
+DeviceProfile::save ()
+{
+	sys::path fullpath = user_devprofile_directory();
+
+	if (g_mkdir_with_parents (fullpath.to_string().c_str(), 0755) < 0) {
+		error << string_compose(_("Session: cannot create user MCP profile folder \"%1\" (%2)"), fullpath.to_string(), strerror (errno)) << endmsg;
+		return;
+	}
+
+	fullpath /= legalize_for_path (_name) + ".profile";
+	
+	XMLTree tree;
+	tree.set_root (&get_state());
+	if (!tree.write (fullpath.to_string())) {
+		error << string_compose ("MCP profile not saved to %1", fullpath.to_string()) << endmsg;
+	}
+}
+

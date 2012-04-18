@@ -119,7 +119,7 @@ class MackieControlProtocol
 	static MackieControlProtocol* instance() { return _instance; }
 	
 	const Mackie::DeviceInfo& device_info() const { return _device_info; }
-	const Mackie::DeviceProfile& device_profile() const { return _device_profile; }
+	Mackie::DeviceProfile& device_profile() { return _device_profile; }
 
 	int set_active (bool yn);
 	void set_device (const std::string&);

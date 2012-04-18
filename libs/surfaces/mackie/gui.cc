@@ -361,6 +361,8 @@ MackieControlProtocolGUI::action_changed (const Glib::ustring &sPath, const Glib
 	if (row) {
 
 		std::map<std::string,std::string>::iterator i = action_map.find (text);
+		
+		cerr << "Changed to " << text << endl;
 
 		if (i == action_map.end()) {
 			return;
@@ -369,7 +371,39 @@ MackieControlProtocolGUI::action_changed (const Glib::ustring &sPath, const Glib
 		Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (i->second.c_str());
 
 		if (act) {
+			/* update visible text, using string supplied by
+			   available action model so that it matches and is found
+			   within the model.
+			*/
 			(*row).set_value (col.index(), text);
+
+			/* update the current DeviceProfile, using the full
+			 * path
+			 */
+
+			int modifier;
+
+			switch (col.index()) {
+			case 3:
+				modifier = MackieControlProtocol::MODIFIER_SHIFT;
+				break;
+			case 4:
+				modifier = MackieControlProtocol::MODIFIER_CONTROL;
+				break;
+			case 5:
+				modifier = MackieControlProtocol::MODIFIER_OPTION;
+				break;
+			case 6:
+				modifier = MackieControlProtocol::MODIFIER_CMDALT;
+				break;
+			case 7:
+				modifier = (MackieControlProtocol::MODIFIER_SHIFT|MackieControlProtocol::MODIFIER_CONTROL);
+				break;
+			default:
+				modifier = 0;
+			}
+
+			_cp.device_profile().set_button_action ((*row)[function_key_columns.id], modifier, i->second);
 		}
 			
 	}

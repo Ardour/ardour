@@ -81,8 +81,8 @@ using namespace Glib;
 
 const int MackieControlProtocol::MODIFIER_OPTION = 0x1;
 const int MackieControlProtocol::MODIFIER_CONTROL = 0x2;
-const int MackieControlProtocol::MODIFIER_SHIFT = 0x3;
-const int MackieControlProtocol::MODIFIER_CMDALT = 0x4;
+const int MackieControlProtocol::MODIFIER_SHIFT = 0x4;
+const int MackieControlProtocol::MODIFIER_CMDALT = 0x8;
 
 MackieControlProtocol* MackieControlProtocol::_instance = 0;
 
