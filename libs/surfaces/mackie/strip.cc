@@ -1046,7 +1046,7 @@ Strip::set_vpot_mode (PotMode m)
 				/* gain to fader, pan azi to vpot */
 				_fader->set_control (_route->gain_control());
 				if (pannable) {
-					_vpot->set_mode (Pot::spread);
+					_vpot->set_mode (Pot::dot);
 					_vpot->set_control (pannable->pan_azimuth_control);
 				}
 			}
@@ -1067,7 +1067,7 @@ Strip::set_vpot_mode (PotMode m)
 				/* gain to fader, pan width to vpot */
 				_fader->set_control (_route->gain_control());
 				if (pannable) {
-					_vpot->set_mode (Pot::spread);
+					_vpot->set_mode (Pot::dot);
 					_vpot->set_control (pannable->pan_width_control);
 				}
 			}
