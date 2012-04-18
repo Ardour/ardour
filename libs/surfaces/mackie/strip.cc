@@ -564,7 +564,9 @@ Strip::do_parameter_display (AutomationType type, float val)
 
 	switch (type) {
 	case GainAutomation:
+		std::cerr << "Updating displayed gain level from " << val;
 		dB = fast_coefficient_to_dB (val);
+		std::cerr << " dB = " << dB << std::endl;
 		if (val == 0.0) {
 			_surface->write (display (1, " -inf "));
 		} else {
