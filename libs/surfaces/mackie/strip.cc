@@ -312,7 +312,7 @@ Strip::notify_gain_changed (bool force_update)
 
 		if (!control->in_use()) {
 
-			float pos = _route->gain_control()->internal_to_interface (_route->gain_control()->get_value());
+			float pos = _route->gain_control()->get_value();
 
 			if (force_update || pos != _last_gain_position_written) {
 
