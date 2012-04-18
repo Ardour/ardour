@@ -447,7 +447,7 @@ Strip::notify_panner_width_changed (bool force_update)
 					_surface->write (_fader->set_position (pos));
 					do_parameter_display (PanWidthAutomation, pos);
 				} else {
-					_surface->write (_vpot->set_all (pos, true, Pot::dot));
+					_surface->write (_vpot->set_all (pos, true, Pot::spread));
 					do_parameter_display (PanWidthAutomation, pos);
 				}
 
@@ -853,6 +853,14 @@ Strip::flip_mode_changed (bool notify)
 		return;
 	}
 
+	if (_surface->mcp().flip_mode()) {
+		/* flip mode is on - save what it used to be */
+		_preflip_vpot_mode = _vpot_mode;
+	} else {
+		/* flip mode is off - restore flip mode to what it used to be */
+		_vpot_mode = _preflip_vpot_mode;
+	}
+
 	boost::shared_ptr<AutomationControl> fader_controllable = _fader->control ();
 	boost::shared_ptr<AutomationControl> vpot_controllable = _vpot->control ();
 
@@ -1067,7 +1075,7 @@ Strip::set_vpot_mode (PotMode m)
 				/* gain to fader, pan width to vpot */
 				_fader->set_control (_route->gain_control());
 				if (pannable) {
-					_vpot->set_mode (Pot::dot);
+					_vpot->set_mode (Pot::spread);
 					_vpot->set_control (pannable->pan_width_control);
 				}
 			}

@@ -74,7 +74,11 @@ Pot::update_message ()
 	// position, but only if off hasn't explicitly been set
 
 	if  (on) {
-		msg +=  (lrintf (position * 10.0) + 1) & 0x0f; // 0b00001111
+		if (mode == spread) {
+			msg +=  (lrintf (position * 6) + 1) & 0x0f; // 0b00001111
+		} else {
+			msg +=  (lrintf (position * 10.0) + 1) & 0x0f; // 0b00001111
+		}
 	}
 
 	/* outbound LED message requires 0x20 to be added to the LED's id
