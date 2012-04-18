@@ -635,6 +635,7 @@ Strip::do_parameter_display (AutomationType type, float val)
 				_surface->write (display (1, str));
 			}
 		}
+		break;
 
 	case PanWidthAutomation:
 		if (_route) {
