@@ -385,6 +385,10 @@ AudioRegion::_read_at (const SourceList& srcs, framecnt_t limit,
 	   The caller has verified that we cover the desired section.
 	*/
 
+	/* See doc/region_read.svg for a drawing which might help to explain
+	   what is going on.
+	*/
+
 	assert (cnt >= 0);
 	
 	if (n_channels() == 0) {
@@ -478,7 +482,7 @@ AudioRegion::_read_at (const SourceList& srcs, framecnt_t limit,
 
 	/* READ DATA FROM THE SOURCE INTO mixdown_buffer.
 	   We can never read directly into buf, since it may contain data
-	   from a transparent region `above' this one in the stack; we
+	   from a transparent region `below' this one in the stack; we
 	   must always mix.
 	*/
 
@@ -532,6 +536,12 @@ AudioRegion::_read_at (const SourceList& srcs, framecnt_t limit,
 	if (fade_in_limit != 0) {
 		_fade_in->curve().get_vector (internal_offset, internal_offset + fade_in_limit, gain_buffer, fade_in_limit);
 
+		/* Fade the current data out */
+		for (framecnt_t n = 0; n < fade_in_limit; ++n) {
+			buf[n] *= 1 - gain_buffer[n];
+		}
+
+		/* Mix our newly-read data in, with the fade */
 		for (framecnt_t n = 0; n < fade_in_limit; ++n) {
 			buf[n] += mixdown_buffer[n] * gain_buffer[n];
 		}
@@ -540,7 +550,13 @@ AudioRegion::_read_at (const SourceList& srcs, framecnt_t limit,
 	if (fade_out_limit != 0) {
 		framecnt_t const curve_offset = fade_interval_start - (limit - _fade_out->back()->when);
 		_fade_out->curve().get_vector (curve_offset, curve_offset + fade_out_limit, gain_buffer, fade_out_limit);
-		
+
+		/* Fade the current data in */
+		for (framecnt_t n = 0, m = fade_out_offset; n < fade_out_limit; ++n, ++m) {
+			buf[m] *= 1 - gain_buffer[n];
+		}
+
+		/* Mix our newly-read data in, with the fade */
 		for (framecnt_t n = 0, m = fade_out_offset; n < fade_out_limit; ++n, ++m) {
 			buf[m] += mixdown_buffer[m] * gain_buffer[n];
 		}

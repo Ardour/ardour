@@ -149,6 +149,17 @@ struct ReadSorter {
     }
 };
 
+/** A segment of region that needs to be read */
+struct Segment {
+	Segment (boost::shared_ptr<AudioRegion> r, Evoral::Range<framepos_t> a) : region (r), range (a) {}
+	
+	boost::shared_ptr<AudioRegion> region; ///< the region
+	Evoral::Range<framepos_t> range;       ///< range of the region to read, in session frames
+};
+
+/** @param start Start position in session frames.
+ *  @param cnt Number of frames to read.
+ */
 ARDOUR::framecnt_t
 AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, framepos_t start,
 		     framecnt_t cnt, unsigned chan_n)
@@ -184,15 +195,17 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, fr
 	all->sort (ReadSorter ());
 
 	/* This will be a list of the bits of our read range that we have
-	   read completely (ie for which no more regions need to be read).
+	   handled completely (ie for which no more regions need to be read).
 	   It is a list of ranges in session frames.
 	*/
 	Evoral::RangeList<framepos_t> done;
+
+	/* This will be a list of the bits of regions that we need to read */
+	list<Segment> to_do;
 	
+	/* Now go through the `all' list filling in `to_do' and `done' */
 	for (RegionList::iterator i = all->begin(); i != all->end(); ++i) {
 		boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (*i);
-
-		/* Trim region range to the bit we are reading */
 
 		/* Work out which bits of this region need to be read;
 		   first, trim to the range we are reading...
@@ -202,19 +215,17 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, fr
 		region_range.to = min (region_range.to, start + cnt - 1);
 
 		/* ... and then remove the bits that are already done */
-		Evoral::RangeList<framepos_t> to_do = Evoral::subtract (region_range, done);
+		Evoral::RangeList<framepos_t> region_to_do = Evoral::subtract (region_range, done);
 
 		/* Read those bits, adding their bodies (the parts between end-of-fade-in
 		   and start-of-fade-out) to the `done' list.
 		*/
 
-		Evoral::RangeList<framepos_t>::List t = to_do.get ();
+		Evoral::RangeList<framepos_t>::List t = region_to_do.get ();
 
-		for (Evoral::RangeList<framepos_t>::List::iterator i = t.begin(); i != t.end(); ++i) {
-			Evoral::Range<framepos_t> d = *i;
-
-			/* Read the whole range, possibly including fades */
-			ar->read_at (buf + d.from - start, mixdown_buffer, gain_buffer, d.from, d.to - d.from + 1, chan_n);
+		for (Evoral::RangeList<framepos_t>::List::iterator j = t.begin(); j != t.end(); ++j) {
+			Evoral::Range<framepos_t> d = *j;
+			to_do.push_back (Segment (ar, d));
 
 			if (ar->opaque ()) {
 				/* Cut this range down to just the body and mark it done */
@@ -226,6 +237,11 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, fr
 				}
 			}
 		}
+	}
+
+	/* Now go backwards through the to_do list doing the actual reads */
+	for (list<Segment>::reverse_iterator i = to_do.rbegin(); i != to_do.rend(); ++i) {
+		i->region->read_at (buf + i->range.from - start, mixdown_buffer, gain_buffer, i->range.from, i->range.to - i->range.from + 1, chan_n);
 	}
 
 	return cnt;

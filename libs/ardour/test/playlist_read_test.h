@@ -5,6 +5,7 @@ class PlaylistReadTest : public TestNeedingPlaylistAndRegions
 {
 	CPPUNIT_TEST_SUITE (PlaylistReadTest);
 	CPPUNIT_TEST (singleReadTest);
+	CPPUNIT_TEST (overlappingReadTest);
 	CPPUNIT_TEST (transparentReadTest);
 	CPPUNIT_TEST_SUITE_END ();
 
