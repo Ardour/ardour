@@ -403,6 +403,8 @@ MackieControlProtocol::periodic ()
 	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
 		(*s)->periodic (now_usecs);
 	}
+
+	update_timecode_display ();
 	
 	return true;
 }
@@ -719,6 +721,10 @@ MackieControlProtocol::format_timecode_timecode (framepos_t now_frame)
 void 
 MackieControlProtocol::update_timecode_display()
 {
+	if (surfaces.empty()) {
+		return;
+	}
+
 	boost::shared_ptr<Surface> surface = surfaces.front();
 
 	if (surface->type() != mcu || !surface->has_timecode_display()) {
