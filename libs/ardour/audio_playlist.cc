@@ -313,12 +313,21 @@ AudioPlaylist::check_crossfades (Evoral::Range<framepos_t> range)
 				 */
 
 				if (done_start.find (top) == done_start.end() && done_end.find (bottom) == done_end.end ()) {
-					framecnt_t const len = bottom->last_frame () - top->first_frame ();
+					/* Top's fade-in will cause an implicit fade-out of bottom */
+
+					framecnt_t len = 0;
+					switch (_session.config.get_xfade_model()) {
+					case FullCrossfade:
+						len = bottom->last_frame () - top->first_frame ();
+						break;
+					case ShortCrossfade:
+						len = _session.config.get_short_xfade_seconds() * _session.frame_rate();
+						break;
+					}
+						
 					top->set_fade_in_length (len);
 					top->set_fade_in_active (true);
 					done_start.insert (top);
-					bottom->set_fade_out_length (len);
-					bottom->set_fade_out_active (true);
 					done_end.insert (bottom);
 				}
 
@@ -331,12 +340,21 @@ AudioPlaylist::check_crossfades (Evoral::Range<framepos_t> range)
 				 */
 
 				if (done_end.find (top) == done_end.end() && done_start.find (bottom) == done_start.end ()) {
-					framecnt_t const len = top->last_frame () - bottom->first_frame ();
+					/* Top's fade-out will cause an implicit fade-in of bottom */
+					
+					framecnt_t len = 0;
+					switch (_session.config.get_xfade_model()) {
+					case FullCrossfade:
+						len = bottom->last_frame () - top->first_frame ();
+						break;
+					case ShortCrossfade:
+						len = _session.config.get_short_xfade_seconds() * _session.frame_rate();
+						break;
+					}
+
 					top->set_fade_out_length (len);
 					top->set_fade_out_active (true);
 					done_end.insert (top);
-					bottom->set_fade_in_length (len);
-					bottom->set_fade_in_active (true);
 					done_start.insert (bottom);
 				}
 			}
