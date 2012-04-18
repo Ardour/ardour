@@ -94,7 +94,6 @@
 #include "ardour/session.h"
 #include "ardour/session_directory.h"
 #include "ardour/session_directory.h"
-#include "ardour/session_metadata.h"
 #include "ardour/session_playlists.h"
 #include "ardour/slave.h"
 #include "ardour/smf_source.h"
@@ -162,7 +161,6 @@ Session::Session (AudioEngine &eng,
 	, click_data (0)
 	, click_emphasis_data (0)
 	, main_outs (0)
-	, _metadata (new SessionMetadata())
 	, _have_rec_enabled_track (false)
 	, _suspend_timecode_transmission (0)
 {

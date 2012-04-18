@@ -36,6 +36,7 @@
 #include "ardour/audio_diskstream.h"
 #include "ardour/control_protocol_manager.h"
 #include "ardour/filesystem_paths.h"
+#include "ardour/session_metadata.h"
 
 #include "i18n.h"
 
@@ -208,6 +209,8 @@ RCConfiguration::get_state ()
 
 	root->add_child_nocopy (get_variables ());
 
+	root->add_child_nocopy (SessionMetadata::Metadata()->get_user_state());
+
 	if (_extra_xml) {
 		root->add_child_copy (*_extra_xml);
 	}
@@ -239,7 +242,7 @@ RCConfiguration::get_variables ()
 }
 
 int
-RCConfiguration::set_state (const XMLNode& root, int /*version*/)
+RCConfiguration::set_state (const XMLNode& root, int version)
 {
 	if (root.name() != "Ardour") {
 		return -1;
@@ -263,6 +266,8 @@ RCConfiguration::set_state (const XMLNode& root, int /*version*/)
 
 		if (node->name() == "Config") {
 			set_variables (*node);
+		} else if (node->name() == "Metadata") {
+			SessionMetadata::Metadata()->set_state (*node, version);
 		} else if (node->name() == ControlProtocolManager::state_node_name) {
 			_control_protocol_state = new XMLNode (*node);
 		} else if (node->name() == MIDI::Port::state_node_name) {

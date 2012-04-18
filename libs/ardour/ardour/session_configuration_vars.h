@@ -45,8 +45,6 @@ CONFIG_VARIABLE (TimecodeFormat, timecode_format, "timecode-format", timecode_30
 CONFIG_VARIABLE_SPECIAL(std::string, raid_path, "raid-path", "", path_expand)
 CONFIG_VARIABLE_SPECIAL(std::string, audio_search_path, "audio-search-path", "", search_path_expand)
 CONFIG_VARIABLE_SPECIAL(std::string, midi_search_path, "midi-search-path", "", search_path_expand)
-CONFIG_VARIABLE (std::string, bwf_country_code, "bwf-country-code", "US")
-CONFIG_VARIABLE (std::string, bwf_organization_code, "bwf-organization-code", "US")
 CONFIG_VARIABLE (std::string, auditioner_output_left, "auditioner-output-left", "default")
 CONFIG_VARIABLE (std::string, auditioner_output_right, "auditioner-output-right", "default")
 CONFIG_VARIABLE (bool, timecode_source_is_synced, "timecode-source-is-synced", true)

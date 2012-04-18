@@ -566,10 +566,6 @@ Session::create (const string& session_template, BusProfile* bus_profile)
 
 	}
 
-	/* Instantiate metadata */
-
-	_metadata = new SessionMetadata ();
-
 	/* set initial start + end point */
 
 	_state_of_the_state = Clean;
@@ -1058,7 +1054,7 @@ Session::state(bool full_state)
 
 	node->add_child_nocopy (config.get_variables ());
 
-	node->add_child_nocopy (_metadata->get_state());
+	node->add_child_nocopy (ARDOUR::SessionMetadata::Metadata()->get_state());
 
 	child = node->add_child ("Sources");
 
@@ -1275,7 +1271,7 @@ Session::set_state (const XMLNode& node, int version)
 	if (version >= 3000) {
 		if ((child = find_named_node (node, "Metadata")) == 0) {
 			warning << _("Session: XML state has no metadata section") << endmsg;
-		} else if (_metadata->set_state (*child, version)) {
+		} else if ( ARDOUR::SessionMetadata::Metadata()->set_state (*child, version) ) {
 			goto out;
 		}
 	}
