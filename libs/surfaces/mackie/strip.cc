@@ -640,7 +640,7 @@ Strip::do_parameter_display (AutomationType type, float val)
 	case PanWidthAutomation:
 		if (_route) {
 			char buf[16];
-			snprintf (buf, sizeof (buf), "%6ld%%", lrintf (val * 100.0));
+			snprintf (buf, sizeof (buf), "%5ld%%", lrintf (val * 100.0));
 			_surface->write (display (1, buf));
 		}
 		break;
