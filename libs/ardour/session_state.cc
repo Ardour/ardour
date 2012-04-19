@@ -925,39 +925,38 @@ Session::load_state (string snapshot_name)
 		/* no version implies very old version of Ardour */
 		Stateful::loading_state_version = 1000;
 	} else {
-		int major;
-		int minor;
-		int micro;
-
-		sscanf (prop->value().c_str(), "%d.%d.%d", &major, &minor, &micro);
-		Stateful::loading_state_version = (major * 1000) + minor;
+		if (prop->value().find ('.')) {
+			/* old school version format - lock at 3000 */
+			Stateful::loading_state_version = 3000;
+		} else {
+			Stateful::loading_state_version = atoi (prop->value());
+		}
 	}
 
 	if (Stateful::loading_state_version < CURRENT_SESSION_FILE_VERSION) {
 
 		sys::path backup_path(_session_dir->root_path());
 
-		backup_path /= legalize_for_path (snapshot_name) + "-1" + statefile_suffix;
+		backup_path /= string_compose ("%1-%2%3", legalize_for_path (snapshot_name), Stateful::loading_state_version, statefile_suffix);
 
-		// only create a backup once
-		if (sys::exists (backup_path)) {
-			return 0;
-		}
+		// only create a backup for a given statefile version once
 
-		info << string_compose (_("Copying old session file %1 to %2\nUse %2 with %3 versions before 2.0 from now on"),
-					xmlpath.to_string(), backup_path.to_string(), PROGRAM_NAME)
-		     << endmsg;
-
-		try
-		{
-			sys::copy_file (xmlpath, backup_path);
-		}
-		catch(sys::filesystem_error& ex)
-		{
-			error << string_compose (_("Unable to make backup of state file %1 (%2)"),
-					xmlpath.to_string(), ex.what())
-				<< endmsg;
-			return -1;
+		if (!sys::exists (backup_path)) {
+			
+			info << string_compose (_("Copying old session file %1 to %2\nUse %2 with %3 versions before 2.0 from now on"),
+						xmlpath.to_string(), backup_path.to_string(), PROGRAM_NAME)
+			     << endmsg;
+			
+			try {
+				sys::copy_file (xmlpath, backup_path);
+				
+			} catch (sys::filesystem_error& ex) {
+				
+				error << string_compose (_("Unable to make backup of state file %1 (%2)"),
+							 xmlpath.to_string(), ex.what())
+				      << endmsg;
+				return -1;
+			}
 		}
 	}
 
@@ -992,15 +991,14 @@ Session::get_template()
 }
 
 XMLNode&
-Session::state(bool full_state)
+Session::state (bool full_state)
 {
 	XMLNode* node = new XMLNode("Session");
 	XMLNode* child;
 
-	// store libardour version, just in case
 	char buf[16];
-	snprintf(buf, sizeof(buf), "%d.%d.%d", libardour3_major_version, libardour3_minor_version, libardour3_micro_version);
-	node->add_property("version", string(buf));
+	snprintf(buf, sizeof(buf), "%d", CURRENT_SESSION_FILE_VERSION);
+	node->add_property("version", buf);
 
 	/* store configuration settings */
 
@@ -1214,10 +1212,6 @@ Session::set_state (const XMLNode& node, int version)
 	if (node.name() != X_("Session")) {
 		fatal << _("programming error: Session: incorrect XML node sent to set_state()") << endmsg;
 		return -1;
-	}
-
-	if ((prop = node.property ("version")) != 0) {
-		version = atoi (prop->value ()) * 1000;
 	}
 
 	if ((prop = node.property ("name")) != 0) {
