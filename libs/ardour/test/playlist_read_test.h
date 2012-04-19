@@ -7,6 +7,7 @@ class PlaylistReadTest : public TestNeedingPlaylistAndRegions
 	CPPUNIT_TEST (singleReadTest);
 	CPPUNIT_TEST (overlappingReadTest);
 	CPPUNIT_TEST (transparentReadTest);
+	CPPUNIT_TEST (miscReadTest);
 	CPPUNIT_TEST_SUITE_END ();
 
 public:
@@ -16,6 +17,7 @@ public:
 	void singleReadTest ();
 	void overlappingReadTest ();
 	void transparentReadTest ();
+	void miscReadTest ();
 
 private:
 	int _N;

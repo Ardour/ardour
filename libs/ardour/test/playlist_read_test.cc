@@ -171,6 +171,31 @@ PlaylistReadTest::transparentReadTest ()
 	}
 }
 
+/* A few tests just to check that nothing nasty is happening with
+   memory corruption, really (for running with valgrind).
+*/
+void
+PlaylistReadTest::miscReadTest ()
+{
+	boost::shared_ptr<AudioRegion> ar0 = boost::dynamic_pointer_cast<AudioRegion> (_region[0]);
+	ar0->set_name ("ar0");
+	_apl->add_region (ar0, 0);
+	ar0->set_default_fade_in ();
+	ar0->set_default_fade_out ();
+	CPPUNIT_ASSERT_EQUAL (double (64), ar0->_fade_in->back()->when);
+	CPPUNIT_ASSERT_EQUAL (double (64), ar0->_fade_out->back()->when);
+	ar0->set_length (128);
+
+	/* Read for just longer than the region */
+	_apl->read (_buf, _mbuf, _gbuf, 0, 129, 0);
+
+	/* Read for much longer than the region */
+	_apl->read (_buf, _mbuf, _gbuf, 0, 1024, 0);
+
+	/* Read one sample */
+	_apl->read (_buf, _mbuf, _gbuf, 53, 54, 0);
+}
+
 void
 PlaylistReadTest::check_staircase (Sample* b, int offset, int N)
 {
