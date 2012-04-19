@@ -301,7 +301,7 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen)
 				vec[i] = (lx * (m_num / m_den) + m_num * i * dx_num / (m_den * dx_den)) + c;
 			}
 		} else {
-			vec[i] = lx;
+			vec[0] = lx;
 		}
 
 		return;
