@@ -668,7 +668,7 @@ EngineControl::enumerate_coreaudio_devices ()
 	// (code snippet gently "borrowed" from St?hane Letz jackdmp;)
 	OSStatus err;
 	Boolean isWritable;
-	size_t outSize = sizeof(isWritable);
+	UInt32 outSize = sizeof(isWritable);
 
 	backend_devs.clear ();
 
@@ -684,8 +684,8 @@ EngineControl::enumerate_coreaudio_devices ()
 		if (err == noErr) {
 			// Look for the CoreAudio device name...
 			char coreDeviceName[256];
-			size_t nameSize;
-
+			UInt32 nameSize;
+			
 			for (int i = 0; i < numCoreDevices; i++) {
 
 				nameSize = sizeof (coreDeviceName);

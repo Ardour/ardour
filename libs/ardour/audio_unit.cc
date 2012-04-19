@@ -46,6 +46,7 @@
 #include <appleutility/CAAUParameter.h>
 
 #include <CoreFoundation/CoreFoundation.h>
+#include <CoreFoundation/CFRunLoop.h>
 #include <CoreServices/CoreServices.h>
 
 #include "i18n.h"
@@ -2495,7 +2496,7 @@ AUPluginInfo::stringify_descriptor (const CAComponentDescription& desc)
 int
 AUPlugin::create_parameter_listener (AUEventListenerProc cb, void* arg, float interval_secs)
 {
-	CFRunLoopRef run_loop = (CFRunLoopRef) GetCFRunLoopFromEventLoop(GetCurrentEventLoop()); 
+        CFRunLoopRef run_loop =  CFRunLoopGetCurrent ();
 	CFStringRef  loop_mode = kCFRunLoopDefaultMode;
 
 	if (AUEventListenerCreate (cb, arg, run_loop, loop_mode, interval_secs, interval_secs, &_parameter_listener) != noErr) {

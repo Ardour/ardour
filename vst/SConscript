@@ -46,7 +46,6 @@ ardour_vst.Merge ([
     libraries['gtk2'],
     libraries['xml'],
     libraries['xslt'],
-    libraries['soundtouch'],
     libraries['samplerate'],
     libraries['jack']
 ])

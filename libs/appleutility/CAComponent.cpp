@@ -91,7 +91,7 @@ CAComponent::~CAComponent ()
 OSStatus		CAComponent::GetResourceVersion (UInt32 &outVersion) const
 {
 	bool versionFound = false;
-	short componentResFileID = kResFileNotOpened;
+	ResFileRefNum componentResFileID = kResFileNotOpened;
 	OSStatus result;
 	short thngResourceCount;
 	
@@ -247,7 +247,7 @@ void	_ShowCF (FILE* file, CFStringRef str)
 
 void	CAComponent::Print(FILE* file) const
 {
-	fprintf (file, "CAComponent: 0x%X", int(Comp()));
+        fprintf (file, "CAComponent: %p", (void*) (Comp()));
 	if (mManuName) {
 		fprintf (file, ", Manu:"); _ShowCF (file, mManuName);
 		if (mAUName) fprintf (file, ", Name:"); _ShowCF (file, mAUName);

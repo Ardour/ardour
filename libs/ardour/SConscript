@@ -339,9 +339,6 @@ ardour.Merge ([
 if ardour['RUBBERBAND']:
 	ardour.Merge ([ libraries['rubberband']])
 	timefx_sources += [ 'rb_effect.cc' ]
-else:
-	ardour.Merge ([ libraries['soundtouch'] ])
-	timefx_sources += [ 'st_stretch.cc', 'st_pitch.cc' ]
 	
 if ardour['LV2']:
 	ardour.Merge ([ libraries['lilv'] ])

@@ -37,7 +37,7 @@ opts.AddVariables(
     ('DIST_LIBDIR', 'Explicitly set library dir. If not set, Fedora-style defaults are used (typically lib or lib64)', ''),
     PathVariable('DESTDIR', 'Set the intermediate install "prefix"', '/'),
     PathVariable('PREFIX', 'Set the install "prefix"', '/usr/local'),
-    EnumVariable('DIST_TARGET', 'Build target for cross compiling packagers', 'auto', allowed_values=('auto', 'i386', 'i686', 'x86_64', 'powerpc', 'tiger', 'panther', 'leopard', 'none' ), ignorecase=2),
+    EnumVariable('DIST_TARGET', 'Build target for cross compiling packagers', 'auto', allowed_values=('auto', 'i386', 'i686', 'x86_64', 'powerpc', 'tiger', 'osx', 'none' ), ignorecase=2),
     BoolVariable('AUDIOUNITS', 'Compile with Apple\'s AudioUnit library. (experimental)', 0),
     BoolVariable('COREAUDIO', 'Compile with Apple\'s CoreAudio library', 0),
     BoolVariable('GTKOSX', 'Compile for use with GTK-OSX, not GTK-X11', 0),
@@ -238,7 +238,14 @@ env.Append(BUILDERS = {'PotBuild' : pot_bld})
 def i18n (buildenv, sources, installenv):
     domain = buildenv['PACKAGE']
     potfile = buildenv['POTFILE']
+
+    #
+    # on glibc systems, libintl is part of libc. not true on OS X
+    #
     
+    if re.search ("darwin[0-9]", config[config_kernel]):
+        buildenv.Merge ([ libraries['intl'] ])
+
     installenv.Alias ('potupdate', buildenv.PotBuild (potfile, sources))
     
     p_oze = [ os.path.basename (po) for po in glob.glob ('po/*.po') ]
@@ -672,15 +679,11 @@ config = config_guess.split ("-")
 print "system triple: " + config_guess
 
 # Autodetect
+print 'dist target: ', env['DIST_TARGET'], '\n'
 if env['DIST_TARGET'] == 'auto':
+    print '\n\n\n\n\n', 'kernel is ', config[config_kernel], '\n'
     if config[config_arch] == 'apple':
-        # The [.] matches to the dot after the major version, "." would match any character
-        if re.search ("darwin[0-7][.]", config[config_kernel]) != None:
-            env['DIST_TARGET'] = 'panther'
-        if re.search ("darwin8[.]", config[config_kernel]) != None:
-            env['DIST_TARGET'] = 'tiger'
-        else:
-            env['DIST_TARGET'] = 'leopard'
+            env['DIST_TARGET'] = 'osx'
     else:
         if re.search ("x86_64", config[config_cpu]) != None:
             env['DIST_TARGET'] = 'x86_64'
@@ -694,7 +697,7 @@ if env['DIST_TARGET'] == 'auto':
     print "detected DIST_TARGET = " + env['DIST_TARGET']
     print "*******************************\n"
 
-if env['DIST_TARGET'] != 'tiger' and env['DIST_TARGET'] != 'leopard':
+if re.search ("darwin[0-9]", config[config_kernel]) == None:
 	# make sure this is all disabled for non-OS X builds
 	env['GTKOSX'] = 0
 	env['COREAUDIO'] = 0
@@ -708,6 +711,7 @@ if config[config_cpu] == 'powerpc' and env['DIST_TARGET'] != 'none':
     opt_flags.extend ([ "-mcpu=7450", "-mcpu=7450" ])
 
 elif ((re.search ("i[0-9]86", config[config_cpu]) != None) or (re.search ("x86_64", config[config_cpu]) != None)) and env['DIST_TARGET'] != 'none':
+    print 'Config CPU is', config[config_cpu], '\n'
     
     build_host_supports_sse = 0
     
@@ -734,14 +738,14 @@ elif ((re.search ("i[0-9]86", config[config_cpu]) != None) or (re.search ("x86_6
             if "3dnow" in x86_flags:
                 opt_flags.append ("-m3dnow")
             
-            if config[config_cpu] == "i586":
-                opt_flags.append ("-march=i586")
-            elif config[config_cpu] == "i686":
-                opt_flags.append ("-march=i686")
-    
     if ((env['DIST_TARGET'] == 'i686') or (env['DIST_TARGET'] == 'x86_64')) and build_host_supports_sse:
         opt_flags.extend (["-msse", "-mfpmath=sse", "-DUSE_XMMINTRIN"])
         debug_flags.extend (["-msse", "-mfpmath=sse", "-DUSE_XMMINTRIN"])
+
+    if config[config_cpu] == "i586":
+        opt_flags.append ("-march=i586")
+    elif config[config_cpu] == "i686":
+        opt_flags.append ("-march=i686")
 
     if (env['VST']):
         #
@@ -754,9 +758,12 @@ elif ((re.search ("i[0-9]86", config[config_cpu]) != None) or (re.search ("x86_6
 
 # optimization section
 if env['FPU_OPTIMIZATION']:
-    if env['DIST_TARGET'] == 'tiger' or env['DIST_TARGET'] == 'leopard':
+    if env['DIST_TARGET'] in [ 'tiger', 'osx' ]:
         opt_flags.append ("-DBUILD_VECLIB_OPTIMIZATIONS");
         debug_flags.append ("-DBUILD_VECLIB_OPTIMIZATIONS");
+        if config[config_cpu] == 'x86_64':
+            opt_flags.append ("-DUSE_X86_64_ASM")
+            debug_flags.append ("-DUSE_X86_64_ASM")
         libraries['core'].Append(LINKFLAGS= '-framework Accelerate')
     elif env['DIST_TARGET'] == 'i686' or env['DIST_TARGET'] == 'x86_64':
         opt_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
@@ -793,17 +800,17 @@ if env['DIST_TARGET'] == 'x86_64' and env['VST']:
 # a single way to test if we're on OS X
 #
 
-if env['DIST_TARGET'] in ['panther', 'tiger', 'leopard' ]:
+if env['DIST_TARGET'] in [ 'tiger', 'osx' ]:
     env['IS_OSX'] = 1
     # force tiger or later, to avoid issues on PPC which defaults
     # back to 10.1 if we don't tell it otherwise.
     env.Append (CCFLAGS="-DMAC_OS_X_VERSION_MIN_REQUIRED=1040")
 
-    if env['DIST_TARGET'] == 'leopard':
+    #if env['DIST_TARGET'] == 'leopard':
         # need this to really build against the 10.4 SDK when building on leopard
         # ideally this would be configurable, but lets just do that later when we need it
-        env.Append(CCFLAGS="-mmacosx-version-min=10.4 -isysroot /Developer/SDKs/MacOSX10.4u.sdk")
-        env.Append(LINKFLAGS="-mmacosx-version-min=10.4 -isysroot /Developer/SDKs/MacOSX10.4u.sdk")
+        #env.Append(CCFLAGS="-mmacosx-version-min=10.4 -isysroot /Developer/SDKs/MacOSX10.4u.sdk")
+        #env.Append(LINKFLAGS="-mmacosx-version-min=10.4 -isysroot /Developer/SDKs/MacOSX10.4u.sdk")
 
 else:
     env['IS_OSX'] = 0
@@ -886,14 +893,19 @@ env.Append(CCFLAGS="-D__STDC_FORMAT_MACROS")
 #
 
 def prep_libcheck(topenv, libinfo):
-    if topenv['IS_OSX']:
+    if os.path.exists (os.path.expanduser ('~/gtk/inst')):
 	#
-	# rationale: GTK-Quartz uses jhbuild and installs to ~/gtk/inst by default.
-	# All libraries needed should be built against this location
-	if topenv['GTKOSX']:
-            GTKROOT = os.path.expanduser ('~/gtk/inst')
-            libinfo.Append(CPPPATH= GTKROOT + "/include", LIBPATH= GTKROOT + "/lib")
-            libinfo.Append(CXXFLAGS="-I" + GTKROOT + "/include", LINKFLAGS="-L" + GTKROOT + "/lib")
+        # build-gtk-stack puts the GTK stack under ~/gtk/inst
+        # build-ardour-stack puts other Ardour deps under ~/a3/inst
+        #
+        # things need to build with this in mind
+        #
+        GTKROOT = os.path.expanduser ('~/gtk/inst')
+        libinfo.Append(CPPPATH= GTKROOT + "/include", LIBPATH= GTKROOT + "/lib")
+        libinfo.Append(CXXFLAGS="-I" + GTKROOT + "/include", LINKFLAGS="-L" + GTKROOT + "/lib")
+        ARDOURDEP_ROOT = os.path.expanduser ('~/a3/inst')
+        libinfo.Append(CPPPATH= ARDOURDEP_ROOT + "/include", LIBPATH= ARDOURDEP_ROOT + "/lib")
+        libinfo.Append(CXXFLAGS="-I" + ARDOURDEP_ROOT + "/include", LINKFLAGS="-L" + ARDOURDEP_ROOT + "/lib")
 	    
 prep_libcheck(env, env)
 
@@ -987,14 +999,7 @@ libraries['boost'] = conf.Finish ()
 
 if env['LIBLO']:
     libraries['lo'] = LibraryInfo ()
-    prep_libcheck(env, libraries['lo'])
-
-    conf = Configure (libraries['lo'])
-    if conf.CheckLib ('lo', 'lo_server_new') == False:
-        print "liblo does not appear to be installed."
-        sys.exit (1)
-    
-    libraries['lo'] = conf.Finish ()
+    libraries['lo'].ParseConfig ('pkg-config --cflags --libs liblo')
 
 #
 # Check for dmalloc
@@ -1112,10 +1117,6 @@ if env['SYSLIBS']:
 #    libraries['libglademm'].ParseConfig ('pkg-config --cflags --libs libglademm-2.4')
 
 #    libraries['flowcanvas'] = LibraryInfo(LIBS='flowcanvas', LIBPATH='#/libs/flowcanvas', CPPPATH='#libs/flowcanvas')
-    libraries['soundtouch'] = LibraryInfo()
-    libraries['soundtouch'].ParseConfig ('pkg-config --cflags --libs soundtouch')
-    # Comment the previous line and uncomment this for old versions of Debian:
-    #libraries['soundtouch'].ParseConfig ('pkg-config --cflags --libs libSoundTouch')
 
     libraries['appleutility'] = LibraryInfo(LIBS='libappleutility',
                                             LIBPATH='#libs/appleutility',
@@ -1176,9 +1177,6 @@ else:
                                                 LIBPATH='#libs/libgnomecanvasmm',
                                                 CPPPATH='#libs/libgnomecanvasmm')
     
-    libraries['soundtouch'] = LibraryInfo(LIBS='soundtouch',
-                                          LIBPATH='#libs/soundtouch',
-                                          CPPPATH=['#libs', '#libs/soundtouch'])
 #    libraries['libglademm'] = LibraryInfo(LIBS='libglademm',
 #                                          LIBPATH='#libs/libglademm',
 #                                          CPPPATH='#libs/libglademm')
@@ -1259,7 +1257,7 @@ else:
 # timestretch libraries
 #
 
-timefx_subdirs = ['libs/soundtouch']
+timefx_subdirs = []
 if env['RUBBERBAND']:
     timefx_subdirs += ['libs/rubberband']
 
@@ -1329,6 +1327,7 @@ if env['NLS']:
     if env['NLS'] == 0:
         print nls_error
     else:
+        libraries['intl'] = LibraryInfo (LIBS='intl')
         print "International version will be built."
 env = conf.Finish()
 

@@ -23,8 +23,8 @@
 #define __GTK_APPLICATION_MM_H__
 
 #include <string>
-#include <gtkmm2ext/gtkapplication.h> // for GtkApplicationGroup typedef
 #include <sigc++/signal.h>
+#include <gtkmm2ext/gtkapplication.h> // for GtkApplicationGroup typedef
 
 namespace Gtk {
 	class MenuItem;
