@@ -392,7 +392,12 @@ AUPluginUI::create_cocoa_view ()
 	// watch for size changes of the view
 
 	 [[NSNotificationCenter defaultCenter] addObserver:_notify
-	       selector:@selector(auViewResized:) name:NSWindowDidResizeNotification
+	       selector:@selector(auViewResized:) name:NSViewBoundsDidChangeNotification
+	       object:au_view];
+
+
+	 [[NSNotificationCenter defaultCenter] addObserver:_notify
+	       selector:@selector(auViewResized:) name:NSViewFrameDidChangeNotification
 	       object:au_view];
 
 	// Get the size of the new AU View's frame 
@@ -410,6 +415,9 @@ void
 AUPluginUI::cocoa_view_resized ()
 {
 	NSRect packFrame = [au_view frame];
+	prefwidth = packFrame.size.width;
+	prefheight = packFrame.size.height;
+	low_box.set_size_request (prefwidth, prefheight);
 }
 
 int
