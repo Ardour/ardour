@@ -397,6 +397,15 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	boost::shared_ptr<AutomationControl> gain_control() const;
 	boost::shared_ptr<Pannable> pannable() const;
 
+	/**
+	   Return the first processor that accepts has at least one MIDI input
+	   and at least one audio output. In the vast majority of cases, this
+	   will be "the instrument". This does not preclude other MIDI->audio
+	   processors later in the processing chain, but that would be a
+	   special case not covered by this utility function.
+	*/
+	boost::shared_ptr<Processor> the_instrument() const;
+
 	void automation_snapshot (framepos_t now, bool force=false);
 	void protect_automation ();
 

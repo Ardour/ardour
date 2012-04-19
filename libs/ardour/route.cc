@@ -4054,3 +4054,15 @@ Route::has_external_redirects () const
 	return false;
 }
 
+boost::shared_ptr<Processor>
+Route::the_instrument () const
+{
+	Glib::RWLock::WriterLock lm (_processor_lock);
+	for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
+		if ((*i)->input_streams().n_midi() > 0 &&
+		    (*i)->output_streams().n_audio() > 0) {
+			return (*i);
+		}
+	}
+	return boost::shared_ptr<Processor>();
+}
