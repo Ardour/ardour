@@ -85,7 +85,7 @@ SessionMetadata::SessionMetadata ()
 	//map.insert (Property ("album_sort", ""));
 	//map.insert (Property ("album_artist_sort", ""));
 	//map.insert (Property ("artist_sort", ""));
-	//map.insert (Property ("title_sort", ""));\
+	//map.insert (Property ("title_sort", ""));
 	
 	/*** Globals ***/
 	user_map.insert (Property ("user_name", ""));
