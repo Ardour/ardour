@@ -207,7 +207,7 @@ class Track : public Route, public PublicDiskstream
 		void set_value (double);
 		double get_value (void) const;
 
-		boost::shared_ptr<Track> track;
+		boost::weak_ptr<Track> track;
 	};
 
 	virtual void set_state_part_two () = 0;

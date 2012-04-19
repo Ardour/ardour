@@ -214,14 +214,23 @@ Track::RecEnableControl::RecEnableControl (boost::shared_ptr<Track> t)
 void
 Track::RecEnableControl::set_value (double val)
 {
-	cerr << "Track " << track->name() << " rec-enable set to " << val << endl;
-	track->set_record_enabled (val >= 0.5 ? true : false, this);
+	boost::shared_ptr<Track> t = track.lock ();
+	if (!t) {
+		return;
+	}
+	
+	t->set_record_enabled (val >= 0.5 ? true : false, this);
 }
 
 double
-Track::RecEnableControl::get_value (void) const
+Track::RecEnableControl::get_value () const
 {
-	return (track->record_enabled() ? 1.0 : 0.0);
+	boost::shared_ptr<Track> t = track.lock ();
+	if (!t) {
+		return 0;
+	}
+	
+	return (t->record_enabled() ? 1.0 : 0.0);
 }
 
 bool
