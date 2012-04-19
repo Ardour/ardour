@@ -1,0 +1,275 @@
+--- shared_ptr.hpp.KEEP	2011-02-09 11:54:05.203963701 -0500
++++ shared_ptr.hpp	2011-02-10 08:27:24.643133773 -0500
+@@ -55,6 +55,13 @@
+ # pragma warning(disable:4284) // odd return type for operator->
+ #endif
+ 
++#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
++void boost_debug_shared_ptr_operator_equals (void const *, void const *, int, void const*, int);
++void boost_debug_shared_ptr_reset (void const *, void const *, int, void const*, int);
++void boost_debug_shared_ptr_destructor (void const *, void const *, int);
++void boost_debug_shared_ptr_constructor (void const *, void const *, int);
++#endif
++
+ namespace boost
+ {
+ 
+@@ -181,12 +188,31 @@
+ 
+     shared_ptr(): px(0), pn() // never throws in 1.30+
+     {
++#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
++        boost_debug_shared_ptr_constructor (this, px, use_count());
++#endif
++    }
++
++    ~shared_ptr()
++    {
++#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
++	boost_debug_shared_ptr_destructor (this, get(), use_count()); 
++#endif
++    }
++
++    shared_ptr(const shared_ptr<T>& r ) : px (r.px), pn (r.pn) {
++#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
++	    boost_debug_shared_ptr_constructor (this, px, use_count());
++#endif
+     }
+ 
+     template<class Y>
+     explicit shared_ptr( Y * p ): px( p ), pn( p ) // Y must be complete
+     {
+         boost::detail::sp_enable_shared_from_this( this, p, p );
++#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
++	    boost_debug_shared_ptr_constructor (this, px, use_count());
++#endif
+     }
+ 
+     //
+@@ -197,7 +223,10 @@
+ 
+     template<class Y, class D> shared_ptr(Y * p, D d): px(p), pn(p, d)
+     {
+-        boost::detail::sp_enable_shared_from_this( this, p, p );
++        boost::detail::sp_enable_shared_from_this( this, p, p );        
++#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
++	boost_debug_shared_ptr_constructor (this, px, 9249 /*use_count()*/);
++#endif
+     }
+ 
+     // As above, but with allocator. A's copy constructor shall not throw.
+@@ -205,6 +234,9 @@
+     template<class Y, class D, class A> shared_ptr( Y * p, D d, A a ): px( p ), pn( p, d, a )
+     {
+         boost::detail::sp_enable_shared_from_this( this, p, p );
++#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
++        boost_debug_shared_ptr_constructor (this, px, use_count());
++#endif
+     }
+ 
+ //  generated copy constructor, destructor are fine
+@@ -214,6 +246,9 @@
+     {
+         // it is now safe to copy r.px, as pn(r.pn) did not throw
+         px = r.px;
++#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
++        boost_debug_shared_ptr_constructor (this, px, use_count());
++#endif
+     }
+ 
+     template<class Y>
+@@ -223,6 +258,9 @@
+         {
+             px = r.px;
+         }
++#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
++        boost_debug_shared_ptr_constructor (this, px, use_count());
++#endif
+     }
+ 
+     template<class Y>
+@@ -237,22 +275,34 @@
+ #endif
+     : px( r.px ), pn( r.pn ) // never throws
+     {
++#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
++        boost_debug_shared_ptr_constructor (this, px, use_count());
++#endif
+     }
+ 
+     // aliasing
+     template< class Y >
+     shared_ptr( shared_ptr<Y> const & r, T * p ): px( p ), pn( r.pn ) // never throws
+     {
++#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
++        boost_debug_shared_ptr_constructor (this, px, use_count());
++#endif
+     }
+ 
+     template<class Y>
+     shared_ptr(shared_ptr<Y> const & r, boost::detail::static_cast_tag): px(static_cast<element_type *>(r.px)), pn(r.pn)
+     {
++#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
++        boost_debug_shared_ptr_constructor (this, px, use_count());
++#endif
+     }
+ 
+     template<class Y>
+     shared_ptr(shared_ptr<Y> const & r, boost::detail::const_cast_tag): px(const_cast<element_type *>(r.px)), pn(r.pn)
+     {
++#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
++        boost_debug_shared_ptr_constructor (this, px, use_count());
++#endif
+     }
+ 
+     template<class Y>
+@@ -262,6 +312,9 @@
+         {
+             pn = boost::detail::shared_count();
+         }
++#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
++        boost_debug_shared_ptr_constructor (this, px, use_count());
++#endif
+     }
+ 
+     template<class Y>
+@@ -271,6 +324,9 @@
+         {
+             boost::throw_exception(std::bad_cast());
+         }
++#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
++        boost_debug_shared_ptr_constructor (this, px, use_count());
++#endif
+     }
+ 
+ #ifndef BOOST_NO_AUTO_PTR
+@@ -281,6 +337,9 @@
+         Y * tmp = r.get();
+         pn = boost::detail::shared_count(r);
+         boost::detail::sp_enable_shared_from_this( this, tmp, tmp );
++#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
++        boost_debug_shared_ptr_constructor (this, px, use_count());
++#endif
+     }
+ 
+ #if !defined( BOOST_NO_SFINAE ) && !defined( BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION )
+@@ -291,6 +350,9 @@
+         typename Ap::element_type * tmp = r.get();
+         pn = boost::detail::shared_count( r );
+         boost::detail::sp_enable_shared_from_this( this, tmp, tmp );
++#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
++        boost_debug_shared_ptr_constructor (this, px, use_count());
++#endif
+     }
+ 
+ 
+@@ -302,6 +364,9 @@
+ 
+     shared_ptr & operator=( shared_ptr const & r ) // never throws
+     {
++#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
++	boost_debug_shared_ptr_operator_equals (this, get(), use_count(), r.get(), r.use_count());
++#endif
+         this_type(r).swap(*this);
+         return *this;
+     }
+@@ -311,6 +376,9 @@
+     template<class Y>
+     shared_ptr & operator=(shared_ptr<Y> const & r) // never throws
+     {
++#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
++	boost_debug_shared_ptr_operator_equals (this, get(), use_count(), r.get(), r.use_count());
++#endif
+         this_type(r).swap(*this);
+         return *this;
+     }
+@@ -322,6 +390,9 @@
+     template<class Y>
+     shared_ptr & operator=( std::auto_ptr<Y> & r )
+     {
++#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
++        boost_debug_shared_ptr_operator_equals (this, get(), use_count(), r.get(), r.use_count());
++#endif
+         this_type(r).swap(*this);
+         return *this;
+     }
+@@ -348,6 +419,9 @@
+     {
+         pn.swap( r.pn );
+         r.px = 0;
++#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
++        boost_debug_shared_ptr_constructor (this, px, use_count());
++#endif
+     }
+ 
+     template<class Y>
+@@ -364,10 +438,16 @@
+     {
+         pn.swap( r.pn );
+         r.px = 0;
++#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
++        boost_debug_shared_ptr_constructor (this, px, use_count());
++#endif
+     }
+ 
+     shared_ptr & operator=( shared_ptr && r ) // never throws
+     {
++#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
++	boost_debug_shared_ptr_operator_equals (this, get(), use_count(), r.get(), r.use_count());
++#endif
+         this_type( static_cast< shared_ptr && >( r ) ).swap( *this );
+         return *this;
+     }
+@@ -375,6 +455,9 @@
+     template<class Y>
+     shared_ptr & operator=( shared_ptr<Y> && r ) // never throws
+     {
++#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
++	    boost_debug_shared_ptr_operator_equals (this, get(), use_count(), r.get(), r.use_count());
++#endif
+         this_type( static_cast< shared_ptr<Y> && >( r ) ).swap( *this );
+         return *this;
+     }
+@@ -383,27 +466,42 @@
+ 
+     void reset() // never throws in 1.30+
+     {
++#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
++	    boost_debug_shared_ptr_reset (this, get(), use_count(), 0, 0);
++#endif
+         this_type().swap(*this);
+     }
+ 
+     template<class Y> void reset(Y * p) // Y must be complete
+     {
+         BOOST_ASSERT(p == 0 || p != px); // catch self-reset errors
++#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
++	boost_debug_shared_ptr_reset (this, get(), use_count(), p, 0);
++#endif
+         this_type(p).swap(*this);
+     }
+ 
+     template<class Y, class D> void reset( Y * p, D d )
+     {
++#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
++	    boost_debug_shared_ptr_reset (this, get(), use_count(), p, 0);
++#endif
+         this_type( p, d ).swap( *this );
+     }
+ 
+     template<class Y, class D, class A> void reset( Y * p, D d, A a )
+     {
++#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
++	    boost_debug_shared_ptr_reset (this, get(), use_count(), p, 0);
++#endif
+         this_type( p, d, a ).swap( *this );
+     }
+ 
+     template<class Y> void reset( shared_ptr<Y> const & r, T * p )
+     {
++#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
++	    boost_debug_shared_ptr_reset (this, get(), use_count(), r.get(), r.use_count());
++#endif
+         this_type( r, p ).swap( *this );
+     }
+ 
