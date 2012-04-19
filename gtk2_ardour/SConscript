@@ -296,7 +296,10 @@ if env['LV2_UI']:
 	gtkardour.Append (CCFLAGS="-DHAVE_SUIL")
 	gtkardour.Merge ([libraries['suil']])
 
-if gtkardour['GTKOSX']:
+if env['WITH_CARBON']:
+    gtkardour.Append(CXXFLAGS="-DWITH_CARBON")
+
+if env['GTKOSX']:
 	extra_sources += gtkosx_files
 	gtkardour.Append (CCFLAGS="-DTOP_MENUBAR -DGTKOSX")
 	gtkardour.Append (LINKFLAGS=" -framework AppKit -framework CoreAudioKit")

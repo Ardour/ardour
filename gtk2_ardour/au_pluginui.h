@@ -4,9 +4,12 @@
 #include <vector>
 #include <string>
 
-#include <AppKit/AppKit.h>
+#ifdef WITH_CARBON
 #include <Carbon/Carbon.h>
 #include <AudioUnit/AudioUnitCarbonView.h>
+#include <AppKit/AppKit.h>
+#endif
+
 #include <AudioUnit/AudioUnit.h>
 
 /* fix up stupid apple macros */
@@ -65,7 +68,9 @@ class AUPluginUI : public PlugUIBase, public Gtk::VBox
 	bool on_focus_out_event (GdkEventFocus*);
 	void forward_key_event (GdkEventKey*);
 
+#ifdef WITH_CARBON
 	OSStatus carbon_event (EventHandlerCallRef nextHandlerRef, EventRef event);
+#endif
 
   private:
 	boost::shared_ptr<ARDOUR::AUPlugin> au;
@@ -83,26 +88,31 @@ class AUPluginUI : public PlugUIBase, public Gtk::VBox
 
 	/* Cocoa */
 
-	NSWindow*           cocoa_window;
-	NSView*             au_view;
+	NSWindow* cocoa_parent;
+	NSWindow* cocoa_window;
+	NSView*   au_view;
 
+	bool test_cocoa_view_support ();
+	int  create_cocoa_view ();
+	int  parent_cocoa_window ();
+
+	NotificationObject* _notify;
+
+#ifdef WITH_CARBON
 	/* Carbon */
 
-	NSWindow*            cocoa_parent;
 	ComponentDescription carbon_descriptor;
 	AudioUnitCarbonView  editView;
 	WindowRef            carbon_window;	
  	EventHandlerRef      carbon_event_handler;
 	bool                 _activating_from_app;
-	NotificationObject* _notify;
 
-	bool test_cocoa_view_support ();
+#endif
+
 	bool test_carbon_view_support ();
 	int  create_carbon_view ();
-	int  create_cocoa_view ();
+	int  parent_carbon_window ();
 
-	int parent_carbon_window ();
-	int parent_cocoa_window ();
 	NSWindow* get_nswindow();
 
 	bool plugin_class_valid (Class pluginClass);

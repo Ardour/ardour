@@ -63,7 +63,8 @@ opts.AddVariables(
     BoolVariable('FREEDESKTOP', 'Install MIME type, icons and .desktop file as per the freedesktop.org spec (requires xdg-utils and shared-mime-info). "scons uninstall" removes associations in desktop database', 0),
     BoolVariable('TRANZPORT', 'Compile with support for Frontier Designs (if libusb is available)', 1),
     BoolVariable('AUBIO', "Use Paul Brossier's aubio library for feature detection", 1),
-    BoolVariable('AUSTATE', "Build with support for AU settings & presets saving/loading", 0)
+    BoolVariable('AUSTATE', "Build with support for AU settings & presets saving/loading", 0),
+    BoolVariable('WITH_CARBON', "Build with support for Carbon AU GUIs", 1),
 )
 
 #----------------------------------------------------------------------
@@ -703,6 +704,7 @@ if re.search ("darwin[0-9]", config[config_kernel]) == None:
 	env['COREAUDIO'] = 0
 	env['AUDIOUNITS'] = 0
 	env['AUSTATE'] = 0
+	env['WITH_CARBON'] = 0
 
 if config[config_cpu] == 'powerpc' and env['DIST_TARGET'] != 'none':
     #
