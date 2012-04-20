@@ -264,6 +264,11 @@ GenericPluginUI::build ()
 				continue;
 			}
 
+			const std::string param_docs = plugin->get_parameter_docs(i);
+			if (param_docs != "") {
+				ARDOUR_UI::instance()->set_tip(cui, param_docs.c_str());
+			}
+
 			if (cui->controller || cui->clickbox || cui->combo) {
 				// Get all of the controls into a list, so that
 				// we can lay them out a bit more nicely later.

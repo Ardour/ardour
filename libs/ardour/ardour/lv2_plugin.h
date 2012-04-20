@@ -50,14 +50,15 @@ class LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	const char* name () const;
 	const char* maker () const;
 
-	uint32_t   num_ports () const;
-	uint32_t   parameter_count () const;
-	float      default_value (uint32_t port);
-	framecnt_t signal_latency () const;
-	void       set_parameter (uint32_t port, float val);
-	float      get_parameter (uint32_t port) const;
-	int        get_parameter_descriptor (uint32_t which, ParameterDescriptor&) const;
-	uint32_t   nth_parameter (uint32_t port, bool& ok) const;
+	uint32_t    num_ports () const;
+	uint32_t    parameter_count () const;
+	float       default_value (uint32_t port);
+	framecnt_t  signal_latency () const;
+	void        set_parameter (uint32_t port, float val);
+	float       get_parameter (uint32_t port) const;
+	std::string get_parameter_docs(uint32_t which) const;
+	int         get_parameter_descriptor (uint32_t which, ParameterDescriptor&) const;
+	uint32_t    nth_parameter (uint32_t port, bool& ok) const;
 
 	const void* extension_data (const char* uri) const;
 

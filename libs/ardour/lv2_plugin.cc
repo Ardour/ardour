@@ -108,6 +108,7 @@ public:
 	LilvNode* lv2_sampleRate;
 	LilvNode* lv2_toggled;
 	LilvNode* midi_MidiEvent;
+	LilvNode* rdfs_comment;
 	LilvNode* ui_GtkUI;
 	LilvNode* ui_external;
 };
@@ -581,6 +582,23 @@ LV2Plugin::get_parameter(uint32_t which) const
 		return (float)_control_data[which];
 	}
 	return 0.0f;
+}
+
+std::string
+LV2Plugin::get_parameter_docs(uint32_t which) const
+{
+	LilvNodes* comments = lilv_port_get_value(
+		_impl->plugin,
+		lilv_plugin_get_port_by_index(_impl->plugin, which),
+		_world.rdfs_comment);
+
+	if (comments) {
+		const std::string docs(lilv_node_as_string(lilv_nodes_get_first(comments)));
+		lilv_nodes_free(comments);
+		return docs;
+	}
+
+	return "";
 }
 
 uint32_t
@@ -1466,6 +1484,7 @@ LV2World::LV2World()
 	lv2_toggled        = lilv_new_uri(world, LILV_NS_LV2 "toggled");
 	lv2_enumeration    = lilv_new_uri(world, LILV_NS_LV2 "enumeration");
 	midi_MidiEvent     = lilv_new_uri(world, LILV_URI_MIDI_EVENT);
+	rdfs_comment       = lilv_new_uri(world, LILV_NS_RDFS "comment");
 	ui_GtkUI           = lilv_new_uri(world, NS_UI "GtkUI");
 	ui_external        = lilv_new_uri(world, NS_UI "external");
 }
