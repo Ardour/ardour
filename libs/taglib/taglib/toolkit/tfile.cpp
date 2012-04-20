@@ -114,8 +114,9 @@ File::FilePrivate::FilePrivate(FileName fileName) :
   else
     file = fopen(name, "rb");
 
-  if(!file)
+  if(!file) {
     debug("Could not open file " + String((const char *) name));
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

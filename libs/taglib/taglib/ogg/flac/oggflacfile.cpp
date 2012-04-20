@@ -256,8 +256,9 @@ void Ogg::FLAC::File::scan()
       d->hasXiphComment = true;
       d->commentPacket = ipacket;
     }
-    else if(blockType > 5)
+    else if(blockType > 5) {
       debug("Ogg::FLAC::File::scan() -- Unknown metadata block");
+    }
 
   }
 

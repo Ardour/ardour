@@ -151,8 +151,9 @@ ByteVectorList Ogg::Page::packets() const
     for(; it != packetSizes.end(); ++it)
       l.append(d->file->readBlock(*it));
   }
-  else
+  else {
     debug("Ogg::Page::packets() -- attempting to read packets from an invalid page.");
+  }
 
   return l;
 }
@@ -173,8 +174,9 @@ ByteVector Ogg::Page::render() const
       d->file->seek(d->packetOffset);
       data.append(d->file->readBlock(d->dataSize));
     }
-    else
+    else {
       debug("Ogg::Page::render() -- this page is empty!");
+    }
   }
   else {
     ByteVectorList::ConstIterator it = d->packets.begin();
