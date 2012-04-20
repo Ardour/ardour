@@ -1806,7 +1806,7 @@ TempoMap::framepos_plus_beats (framepos_t pos, Evoral::MusicalTime beats) const
 {
 	Glib::RWLock::ReaderLock lm (lock);
 	Metrics::const_iterator next_tempo;
-	const TempoSection* tempo;
+	const TempoSection* tempo = 0;
 
 	/* Find the starting tempo metric */
 

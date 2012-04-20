@@ -422,9 +422,9 @@ ControlList::thin ()
 {
 	Glib::Mutex::Lock lm (_lock);
 
-	ControlEvent* prevprev;
-	ControlEvent* cur;
-	ControlEvent* prev;
+	ControlEvent* prevprev = 0;
+	ControlEvent* cur = 0;
+	ControlEvent* prev = 0;
 	iterator pprev;
 	int counter = 0;
 
