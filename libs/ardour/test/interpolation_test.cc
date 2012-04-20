@@ -54,15 +54,13 @@ InterpolationTest::linearInterpolationTest ()
 	result = linear.interpolate (0, NUM_SAMPLES, input, output);
 	CPPUNIT_ASSERT_EQUAL ((framecnt_t)(NUM_SAMPLES * linear.speed()), result);
 
-	/* This one fails due too error accumulation
-	   cout << "\nSpeed: 0.002";
-	   linear.reset();
-	   linear.set_speed (0.002);
-	   linear.set_target_speed (linear.speed());
-	   result = linear.interpolate (0, NUM_SAMPLES, input, output);
-	   linear.speed();
-	   CPPUNIT_ASSERT_EQUAL ((framecnt_t)(NUM_SAMPLES * linear.speed()), result);
-	   */
+//	cout << "\nSpeed: 0.002";
+	linear.reset();
+	linear.set_speed (0.002);
+	linear.set_target_speed (linear.speed());
+	result = linear.interpolate (0, NUM_SAMPLES, input, output);
+	linear.speed();
+	CPPUNIT_ASSERT_EQUAL ((framecnt_t)(NUM_SAMPLES * linear.speed()), result);
 
 //	cout << "\nSpeed: 2.0";
 	linear.reset();

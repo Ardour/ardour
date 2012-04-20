@@ -10,21 +10,18 @@ framecnt_t
 LinearInterpolation::interpolate (int channel, framecnt_t nframes, Sample *input, Sample *output)
 {
 	// index in the input buffers
-	framecnt_t   i = 0;
+	framecnt_t i = 0;
 
-	double acceleration;
-	double distance = 0.0;
+	double acceleration = 0;
 
 	if (_speed != _target_speed) {
 		acceleration = _target_speed - _speed;
-	} else {
-		acceleration = 0.0;
 	}
 
-	distance = phase[channel];
 	for (framecnt_t outsample = 0; outsample < nframes; ++outsample) {
-		i = floor(distance);
-		Sample fractional_phase_part = distance - i;
+		double const d = phase[channel] + outsample * (_speed + acceleration);
+		i = floor(d);
+		Sample fractional_phase_part = d - i;
 		if (fractional_phase_part >= 1.0) {
 			fractional_phase_part -= 1.0;
 			i++;
@@ -36,12 +33,11 @@ LinearInterpolation::interpolate (int channel, framecnt_t nframes, Sample *input
 				input[i] * (1.0f - fractional_phase_part) +
 				input[i+1] * fractional_phase_part;
 		}
-		distance += _speed + acceleration;
 	}
 
+	double const distance = phase[channel] + nframes * (_speed + acceleration);
 	i = floor(distance);
-	phase[channel] = distance - floor(distance);
-
+	phase[channel] = distance - i;
 	return i;
 }
 
