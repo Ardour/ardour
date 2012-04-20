@@ -585,6 +585,19 @@ LV2Plugin::get_parameter(uint32_t which) const
 }
 
 std::string
+LV2Plugin::get_docs() const
+{
+	LilvNodes* comments = lilv_plugin_get_value(_impl->plugin, _world.rdfs_comment);
+	if (comments) {
+		const std::string docs(lilv_node_as_string(lilv_nodes_get_first(comments)));
+		lilv_nodes_free(comments);
+		return docs;
+	}
+
+	return "";
+}
+	
+std::string
 LV2Plugin::get_parameter_docs(uint32_t which) const
 {
 	LilvNodes* comments = lilv_port_get_value(

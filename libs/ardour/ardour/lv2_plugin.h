@@ -56,6 +56,7 @@ class LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	framecnt_t  signal_latency () const;
 	void        set_parameter (uint32_t port, float val);
 	float       get_parameter (uint32_t port) const;
+	std::string get_docs() const;
 	std::string get_parameter_docs(uint32_t which) const;
 	int         get_parameter_descriptor (uint32_t which, ParameterDescriptor&) const;
 	uint32_t    nth_parameter (uint32_t port, bool& ok) const;

@@ -452,6 +452,7 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	, save_button (_("Save"))
 	, delete_button (_("Delete"))
 	, bypass_button (ArdourButton::led_default_elements)
+	, description_expander (_("Description"))
 	, plugin_analysis_expander (_("Plugin analysis"))
 	, latency_gui (0)
 	, latency_dialog (0)
@@ -498,6 +499,9 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 
 	ARDOUR_UI::instance()->set_tip (focus_button, string_compose (_("Click to allow the plugin to receive keyboard events that %1 would normally use as a shortcut"), PROGRAM_NAME));
 	ARDOUR_UI::instance()->set_tip (bypass_button, _("Click to enable/disable this plugin"));
+
+	description_expander.property_expanded().signal_changed().connect( sigc::mem_fun(*this, &PlugUIBase::toggle_description));
+	description_expander.set_expanded(false);
 
 	plugin_analysis_expander.property_expanded().signal_changed().connect( sigc::mem_fun(*this, &PlugUIBase::toggle_plugin_analysis));
 	plugin_analysis_expander.set_expanded(false);
@@ -663,10 +667,33 @@ PlugUIBase::focus_toggled (GdkEventButton*)
 }
 
 void
+PlugUIBase::toggle_description()
+{
+	if (description_expander.get_expanded() &&
+	    !description_expander.get_child()) {
+		const std::string text = plugin->get_docs();
+		if (text.empty()) {
+			return;
+		}
+
+		Gtk::Label* label = manage(new Gtk::Label(text));
+		label->set_line_wrap(true);
+		label->set_line_wrap_mode(Pango::WRAP_WORD);
+		description_expander.add(*label);
+		description_expander.show_all();
+	}
+	
+	if (!description_expander.get_expanded()) {
+		description_expander.remove();
+	}
+}
+
+
+void
 PlugUIBase::toggle_plugin_analysis()
 {
 	if (plugin_analysis_expander.get_expanded() &&
-            !plugin_analysis_expander.get_child()) {
+	    !plugin_analysis_expander.get_child()) {
 		// Create the GUI
 		if (eqgui == 0) {
 			eqgui = new PluginEqGui (insert);
@@ -684,7 +711,6 @@ PlugUIBase::toggle_plugin_analysis()
 	}
 
 	if (!plugin_analysis_expander.get_expanded()) {
-
 		// Hide & remove from expander
 
 		eqgui->hide ();

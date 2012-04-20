@@ -101,6 +101,9 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	VBox* v1_box = manage (new VBox);
 	VBox* v2_box = manage (new VBox);
 	pack_end (plugin_analysis_expander, false, false);
+	if (!plugin->get_docs().empty()) {
+		pack_end (description_expander, false, false);
+	}
 
 	v1_box->pack_start (*smaller_hbox, false, true);
 	v2_box->pack_start (focus_button, false, true);
@@ -265,7 +268,7 @@ GenericPluginUI::build ()
 			}
 
 			const std::string param_docs = plugin->get_parameter_docs(i);
-			if (param_docs != "") {
+			if (!param_docs.empty()) {
 				ARDOUR_UI::instance()->set_tip(cui, param_docs.c_str());
 			}
 
