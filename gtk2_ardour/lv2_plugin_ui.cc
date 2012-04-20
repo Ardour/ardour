@@ -26,7 +26,7 @@
 #include "gui_thread.h"
 #include "lv2_plugin_ui.h"
 
-#include "lv2_ui.h"
+#include "lv2/lv2plug.in/ns/extensions/ui/ui.h"
 
 #include <lilv/lilv.h>
 #include <suil/suil.h>
@@ -223,9 +223,7 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 		ui_host = suil_host_new(LV2PluginUI::write_from_ui,
 		                        LV2PluginUI::port_index,
 		                        NULL, NULL);
-#ifdef HAVE_NEW_SUIL
 		suil_host_set_touch_func(ui_host, LV2PluginUI::touch);
-#endif
 	}
 	const char* container_type = (is_external_ui)
 		? NS_UI "external"

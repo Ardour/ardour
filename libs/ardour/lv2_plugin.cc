@@ -151,9 +151,7 @@ work_respond(LV2_Worker_Respond_Handle handle,
 struct LV2Plugin::Impl {
 	Impl() : plugin(0), ui(0), ui_type(0), name(0), author(0), instance(0)
 	       , work_iface(0)
-#ifdef HAVE_NEW_LILV
 	       , state(0)
-#endif
 	{}
 	
 	/** Find the LV2 input port with the given designation.
@@ -168,9 +166,7 @@ struct LV2Plugin::Impl {
 	LilvNode*             author;
 	LilvInstance*         instance;
 	LV2_Worker_Interface* work_iface;
-#ifdef HAVE_NEW_LILV
 	LilvState*            state;
-#endif
 };
 
 LV2Plugin::LV2Plugin (AudioEngine& engine,
@@ -228,7 +224,6 @@ LV2Plugin::init(void* c_plugin, framecnt_t rate)
 
 	LilvPlugin* plugin = _impl->plugin;
 
-#ifdef HAVE_NEW_LILV
 	LilvNode* state_iface_uri = lilv_new_uri(_world.world, LV2_STATE__interface);
 	LilvNode* state_uri       = lilv_new_uri(_world.world, LV2_STATE_URI);
 	_has_state_interface =
@@ -238,7 +233,6 @@ LV2Plugin::init(void* c_plugin, framecnt_t rate)
 		|| lilv_plugin_has_feature(plugin, state_uri);
 	lilv_node_free(state_uri);
 	lilv_node_free(state_iface_uri);
-#endif
 
 	_features    = (LV2_Feature**)malloc(sizeof(LV2_Feature*) * 8);
 	_features[0] = &_instance_access_feature;
@@ -727,7 +721,6 @@ LV2Plugin::add_state(XMLNode* root) const
 
 	if (_has_state_interface) {
 		cout << "LV2 " << name() << " has state interface" << endl;
-#ifdef HAVE_NEW_LILV
 		// Provisionally increment state version and create directory
 		const std::string new_dir = state_dir(++_state_version);
 		g_mkdir_with_parents(new_dir.c_str(), 0744);
@@ -769,12 +762,6 @@ LV2Plugin::add_state(XMLNode* root) const
 		}
 
 		root->add_property("state-dir", string_compose("state%1", _state_version));
-
-#else  /* !HAVE_NEW_LILV */
-		warning << string_compose(
-			_("Plugin \"%1\" has state, but Lilv is too old to save it"),
-			unique_id()) << endmsg;
-#endif  /* HAVE_NEW_LILV */
 	} else {
 		cout << "LV2 " << name() << " has no state interface." << endl;
 	}
@@ -790,7 +777,6 @@ get_value(LilvWorld* world, const LilvNode* subject, const LilvNode* predicate)
 void
 LV2Plugin::find_presets()
 {
-#ifdef HAVE_NEW_LILV
 	LilvNode* lv2_appliesTo = lilv_new_uri(_world.world, LILV_NS_LV2  "appliesTo");
 	LilvNode* pset_Preset   = lilv_new_uri(_world.world, NS_PSET "Preset");
 	LilvNode* rdfs_label    = lilv_new_uri(_world.world, LILV_NS_RDFS "label");
@@ -817,7 +803,6 @@ LV2Plugin::find_presets()
 	lilv_node_free(rdfs_label);
 	lilv_node_free(pset_Preset);
 	lilv_node_free(lv2_appliesTo);
-#endif  /* HAVE_NEW_LILV */
 }
 
 bool
@@ -1037,7 +1022,6 @@ LV2Plugin::set_state(const XMLNode& node, int version)
 		set_parameter(port_id, atof(value));
 	}
 
-#ifdef HAVE_NEW_LILV
 	_state_version = 0;
 	if ((prop = node.property("state-dir")) != 0) {
 		if (sscanf(prop->value().c_str(), "state%u", &_state_version) != 1) {
@@ -1056,7 +1040,6 @@ LV2Plugin::set_state(const XMLNode& node, int version)
 
 		lilv_state_restore(state, _impl->instance, NULL, NULL, 0, NULL);
 	}
-#endif
 
 	latency_compute_run();
 
@@ -1451,8 +1434,7 @@ LV2Plugin::latency_compute_run()
 LilvPort*
 LV2Plugin::Impl::designated_input (const char* uri, void** bufptrs[], void** bufptr)
 {
-	LilvPort* port = NULL;
-#ifdef HAVE_NEW_LILV
+	LilvPort* port        = NULL;
 	LilvNode* designation = lilv_new_uri(_world.world, uri);
 	port = lilv_plugin_get_port_by_designation(
 		plugin, _world.lv2_InputPort, designation);
@@ -1460,7 +1442,6 @@ LV2Plugin::Impl::designated_input (const char* uri, void** bufptrs[], void** buf
 	if (port) {
 		bufptrs[lilv_port_get_index(plugin, port)] = bufptr;
 	}
-#endif
 	return port;
 }
 

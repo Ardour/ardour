@@ -643,7 +643,6 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('JACK session support',  conf.is_defined('JACK_SESSION'))
     write_config_text('LV2 UI embedding',      conf.is_defined('HAVE_SUIL'))
     write_config_text('LV2 support',           conf.is_defined('LV2_SUPPORT'))
-    write_config_text('LV2 state support',     conf.is_defined('HAVE_NEW_LILV'))
     write_config_text('LXVST support',         conf.is_defined('LXVST_SUPPORT'))
     write_config_text('OGG',                   conf.is_defined('HAVE_OGG'))
     write_config_text('Phone home',            conf.is_defined('PHONE_HOME'))
