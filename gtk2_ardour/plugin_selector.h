@@ -118,7 +118,6 @@ class PluginSelector : public ArdourDialog
 	Gtk::Menu* _plugin_menu;
 	ARDOUR::PluginManager& manager;
 
-	void row_clicked(GdkEventButton *);
 	void row_activated(Gtk::TreeModel::Path path, Gtk::TreeViewColumn* col);
 	void btn_add_clicked();
 	void btn_remove_clicked();
