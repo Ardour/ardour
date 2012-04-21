@@ -52,17 +52,18 @@
 #include <lilv/lilv.h>
 
 #include "lv2/lv2plug.in/ns/ext/atom/atom.h"
+#include "lv2/lv2plug.in/ns/ext/port-props/port-props.h"
+#include "lv2/lv2plug.in/ns/ext/presets/presets.h"
 #include "lv2/lv2plug.in/ns/ext/state/state.h"
+#include "lv2/lv2plug.in/ns/ext/time/time.h"
 #include "lv2/lv2plug.in/ns/ext/worker/worker.h"
+#include "lv2/lv2plug.in/ns/extensions/ui/ui.h"
 
 #include "lv2_evbuf.h"
 
 #ifdef HAVE_SUIL
 #include <suil/suil.h>
 #endif
-
-#define NS_PSET "http://lv2plug.in/ns/ext/presets#"
-#define NS_UI   "http://lv2plug.in/ns/extensions/ui#"
 
 using namespace std;
 using namespace ARDOUR;
@@ -340,15 +341,13 @@ LV2Plugin::init(void* c_plugin, framecnt_t rate)
 		? lilv_plugin_get_latency_port_index(plugin)
 		: 0;
 
-#define NS_TIME "http://lv2plug.in/ns/ext/time#"
-	
 	// Build an array of pointers to special parameter buffers
 	void*** params = new void**[num_ports];
 	for (uint32_t i = 0; i < num_ports; ++i) {
 		params[i] = NULL;
 	}
-	_impl->designated_input (NS_TIME "beatsPerMinute", params, (void**)&_bpm_control_port);
-	_impl->designated_input (LILV_NS_LV2 "freeWheeling", params, (void**)&_freewheel_control_port);
+	_impl->designated_input (LV2_TIME__beatsPerMinute, params, (void**)&_bpm_control_port);
+	_impl->designated_input (LV2_CORE__freeWheeling, params, (void**)&_freewheel_control_port);
 
 	for (uint32_t i = 0; i < num_ports; ++i) {
 		const LilvPort* port = lilv_plugin_get_port_by_index(plugin, i);
@@ -468,9 +467,9 @@ bool
 LV2Plugin::ui_is_resizable () const
 {
 	const LilvNode* s   = lilv_ui_get_uri(_impl->ui);
-	LilvNode*       p   = lilv_new_uri(_world.world, NS_UI "optionalFeature");
-	LilvNode*       fs  = lilv_new_uri(_world.world, NS_UI "fixedSize");
-	LilvNode*       nrs = lilv_new_uri(_world.world, NS_UI "noUserResize");
+	LilvNode*       p   = lilv_new_uri(_world.world, LV2_CORE__optionalFeature);
+	LilvNode*       fs  = lilv_new_uri(_world.world, LV2_UI__fixedSize);
+	LilvNode*       nrs = lilv_new_uri(_world.world, LV2_UI__noUserResize);
 
 	LilvNodes* fs_matches = lilv_world_find_nodes(_world.world, s, p, fs);
 	LilvNodes* nrs_matches = lilv_world_find_nodes(_world.world, s, p, nrs);
@@ -809,8 +808,8 @@ get_value(LilvWorld* world, const LilvNode* subject, const LilvNode* predicate)
 void
 LV2Plugin::find_presets()
 {
-	LilvNode* lv2_appliesTo = lilv_new_uri(_world.world, LILV_NS_LV2  "appliesTo");
-	LilvNode* pset_Preset   = lilv_new_uri(_world.world, NS_PSET "Preset");
+	LilvNode* lv2_appliesTo = lilv_new_uri(_world.world, LV2_CORE__appliesTo);
+	LilvNode* pset_Preset   = lilv_new_uri(_world.world, LV2_PRESETS__Preset);
 	LilvNode* rdfs_label    = lilv_new_uri(_world.world, LILV_NS_RDFS "label");
 
 	LilvNodes* presets = lilv_plugin_get_related(_impl->plugin, pset_Preset);
@@ -847,7 +846,7 @@ LV2Plugin::load_preset(PresetRecord r)
 	LilvNode* lv2_port   = lilv_new_uri(_world.world, LILV_NS_LV2 "port");
 	LilvNode* lv2_symbol = lilv_new_uri(_world.world, LILV_NS_LV2 "symbol");
 	LilvNode* preset     = lilv_new_uri(_world.world, r.uri.c_str());
-	LilvNode* pset_value = lilv_new_uri(_world.world, NS_PSET "value");
+	LilvNode* pset_value = lilv_new_uri(_world.world, LV2_PRESETS__value);
 
 	LilvNodes* ports = lilv_world_find_nodes(_world.world, preset, lv2_port, NULL);
 	LILV_FOREACH(nodes, i, ports) {
@@ -1487,20 +1486,20 @@ LV2World::LV2World()
 	atom_bufferType    = lilv_new_uri(world, LV2_ATOM__bufferType);
 	atom_eventTransfer = lilv_new_uri(world, LV2_ATOM__eventTransfer);
 	ev_EventPort       = lilv_new_uri(world, LILV_URI_EVENT_PORT);
-	ext_logarithmic    = lilv_new_uri(world, "http://lv2plug.in/ns/dev/extportinfo#logarithmic");
+	ext_logarithmic    = lilv_new_uri(world, LV2_PORT_PROPS__logarithmic);
 	lv2_AudioPort      = lilv_new_uri(world, LILV_URI_AUDIO_PORT);
 	lv2_ControlPort    = lilv_new_uri(world, LILV_URI_CONTROL_PORT);
 	lv2_InputPort      = lilv_new_uri(world, LILV_URI_INPUT_PORT);
 	lv2_OutputPort     = lilv_new_uri(world, LILV_URI_OUTPUT_PORT);
-	lv2_inPlaceBroken  = lilv_new_uri(world, LILV_NS_LV2 "inPlaceBroken");
-	lv2_integer        = lilv_new_uri(world, LILV_NS_LV2 "integer");
-	lv2_sampleRate     = lilv_new_uri(world, LILV_NS_LV2 "sampleRate");
-	lv2_toggled        = lilv_new_uri(world, LILV_NS_LV2 "toggled");
-	lv2_enumeration    = lilv_new_uri(world, LILV_NS_LV2 "enumeration");
+	lv2_inPlaceBroken  = lilv_new_uri(world, LV2_CORE__inPlaceBroken);
+	lv2_integer        = lilv_new_uri(world, LV2_CORE__integer);
+	lv2_sampleRate     = lilv_new_uri(world, LV2_CORE__sampleRate);
+	lv2_toggled        = lilv_new_uri(world, LV2_CORE__toggled);
+	lv2_enumeration    = lilv_new_uri(world, LV2_CORE__enumeration);
 	midi_MidiEvent     = lilv_new_uri(world, LILV_URI_MIDI_EVENT);
 	rdfs_comment       = lilv_new_uri(world, LILV_NS_RDFS "comment");
-	ui_GtkUI           = lilv_new_uri(world, NS_UI "GtkUI");
-	ui_external        = lilv_new_uri(world, NS_UI "external");
+	ui_GtkUI           = lilv_new_uri(world, LV2_UI__GtkUI);
+	ui_external        = lilv_new_uri(world, "http://lv2plug.in/ns/extensions/ui#external");
 }
 
 LV2World::~LV2World()
