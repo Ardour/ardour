@@ -222,6 +222,7 @@ LV2Plugin::init(void* c_plugin, framecnt_t rate)
 	_data_access_feature.URI     = "http://lv2plug.in/ns/ext/data-access";
 	_make_path_feature.URI       = LV2_STATE__makePath;
 	_work_schedule_feature.URI   = LV2_WORKER__schedule;
+	_work_schedule_feature.data  = NULL;
 
 	LilvPlugin* plugin = _impl->plugin;
 
