@@ -1108,20 +1108,6 @@ AutomationLine::add_visible_control_point (uint32_t view_index, uint32_t pi, dou
 }
 
 void
-AutomationLine::add_always_in_view (double x)
-{
-	_always_in_view.push_back (x);
-	alist->apply_to_points (*this, &AutomationLine::reset_callback);
-}
-
-void
-AutomationLine::clear_always_in_view ()
-{
-	_always_in_view.clear ();
-	alist->apply_to_points (*this, &AutomationLine::reset_callback);
-}
-
-void
 AutomationLine::connect_to_list ()
 {
 	_list_connections.drop_connections ();

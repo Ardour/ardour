@@ -4186,9 +4186,7 @@ AutomationRangeDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 				double const q = j->line->time_converter().from (a - j->line->time_converter().origin_b ());
 
 				the_list->add (p, the_list->eval (p));
-				j->line->add_always_in_view (p);
 				the_list->add (q, the_list->eval (q));
-				j->line->add_always_in_view (q);
 			}
 
 			/* same thing for the end */
@@ -4214,9 +4212,7 @@ AutomationRangeDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 				double const q = j->line->time_converter().from (i->end - j->line->time_converter().origin_b ());
 
 				the_list->add (p, the_list->eval (p));
-				j->line->add_always_in_view (p);
 				the_list->add (q, the_list->eval (q));
-				j->line->add_always_in_view (q);
 			}
 		}
 
@@ -4284,7 +4280,6 @@ AutomationRangeDrag::finished (GdkEvent* event, bool)
 	motion (event, false);
 	for (list<Line>::iterator i = _lines.begin(); i != _lines.end(); ++i) {
 		i->line->end_drag ();
-		i->line->clear_always_in_view ();
 	}
 
 	_editor->session()->commit_reversible_command ();
@@ -4294,7 +4289,6 @@ void
 AutomationRangeDrag::aborted (bool)
 {
 	for (list<Line>::iterator i = _lines.begin(); i != _lines.end(); ++i) {
-		i->line->clear_always_in_view ();
 		i->line->reset ();
 	}
 }

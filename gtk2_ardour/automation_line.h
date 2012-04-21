@@ -129,9 +129,6 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 
 	void modify_point_y (ControlPoint&, double);
 
-	void add_always_in_view (double);
-	void clear_always_in_view ();
-
 	virtual MementoCommandBinder<ARDOUR::AutomationList>* memento_command_binder ();
 
 	const Evoral::TimeConverter<double, ARDOUR::framepos_t>& time_converter () const {
@@ -192,7 +189,6 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 	double _drag_x; ///< last x position of the drag, in units
 	double _drag_distance; ///< total x movement of the drag, in units
 	double _last_drag_fraction; ///< last y position of the drag, as a fraction
-	std::list<double> _always_in_view;
 	/** offset from the start of the automation list to the start of the line, so that
 	 *  a +ve offset means that the 0 on the line is at _offset in the list
 	 */
