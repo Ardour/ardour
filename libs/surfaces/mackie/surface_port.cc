@@ -101,7 +101,7 @@ SurfacePort::write (const MidiByteArray & mba)
 	}
 
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("port %1 write %2\n", output_port().name(), mba));
-	
+
 	int count = output_port().write (mba.bytes().get(), mba.size(), 0);
 
 	if  (count != (int)mba.size()) {

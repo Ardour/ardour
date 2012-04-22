@@ -38,25 +38,13 @@ public:
 	};
 
 	Pot (int id, std::string name, Group & group)
-		: Control (id, name, group)
-		, position (0.0)
-		, mode (dot)
-		, on (true) {}
+		: Control (id, name, group) {}
 
-	MidiByteArray set_mode (Mode);
-	MidiByteArray set_onoff (bool);
-	MidiByteArray set_all (float, bool, Mode);
-
-	MidiByteArray zero() { return set_all (0.0, on, mode); }
-	
-	MidiByteArray update_message ();
+	MidiByteArray set (float, bool, Mode);
+	MidiByteArray zero() { return set (0.0, false, Pot::spread); }
 
 	static Control* factory (Surface&, int id, const char*, Group&);
 
-  private:
-	float position;
-	Mode mode;
-	bool on;
 };
 
 }

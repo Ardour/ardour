@@ -63,7 +63,7 @@ Surface::Surface (MackieControlProtocol& mcp, const std::string& device_name, ui
 	, _stype (stype)
 	, _number (number)
 	, _name (device_name)
-	, _active (true)
+	, _active (false)
 	, _connected (false)
 	, _jog_wheel (0)
 {
@@ -91,17 +91,6 @@ Surface::Surface (MackieControlProtocol& mcp, const std::string& device_name, ui
 	
 	connect_to_signals ();
 
-	/* wakey wakey */
-
-	MidiByteArray wakeup (7, MIDI::sysex, 0x00, 0x00, 0x66, 0x14, 0x00, MIDI::eox);
-	_port->write (wakeup);
-	wakeup[4] = 0x15; /* wakup Mackie XT */
-	_port->write (wakeup);
-	wakeup[4] = 0x10; /* wakupe Logic Control */
-	_port->write (wakeup);
-	wakeup[4] = 0x11; /* wakeup Logic Control XT */
-	_port->write (wakeup);
-
 	DEBUG_TRACE (DEBUG::MackieControl, "Surface::init finish\n");
 }
 
@@ -109,12 +98,7 @@ Surface::~Surface ()
 {
 	DEBUG_TRACE (DEBUG::MackieControl, "Surface: destructor\n");
 
-	// faders to minimum
-	write_sysex (0x61);
-	// All LEDs off
-	write_sysex (0x62);
-	// Reset (reboot into offline mode)
-	// _write_sysex (0x63);
+	zero_all ();
 
 	// delete groups
 	for (Groups::iterator it = groups.begin(); it != groups.end(); ++it) {
@@ -127,7 +111,8 @@ Surface::~Surface ()
 	}
 	
 	delete _jog_wheel;
-	delete _port;
+
+	/* don't delete the port, because we want its output to remain queued */
 }
 
 const MidiByteArray& 
@@ -261,15 +246,9 @@ Surface::blank_jog_ring ()
 	if (control) {
 		Pot* pot = dynamic_cast<Pot*> (control);
 		if (pot) {
-			_port->write (pot->set_onoff (false));
+			_port->write (pot->set (0.0, false, Pot::spread));
 		}
 	}
-}
-
-bool 
-Surface::has_timecode_display () const
-{
-	return false;
 }
 
 float
@@ -413,7 +392,6 @@ Surface::handle_midi_sysex (MIDI::Parser &, MIDI::byte * raw_bytes, size_t count
 {
 	MidiByteArray bytes (count, raw_bytes);
 
-
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("handle_midi_sysex: %1\n", bytes));
 
 	/* always save the device type ID so that our outgoing sysex messages
@@ -434,7 +412,15 @@ Surface::handle_midi_sysex (MIDI::Parser &, MIDI::byte * raw_bytes, size_t count
 		if (bytes[4] == 0x10 || bytes[4] == 0x11) {
 			write_sysex (host_connection_query (bytes));
 		} else {
-			_active = true;
+			if (!_active) {
+				_active = true;
+				std::cerr << "Surface " << _number << " Now active!\n";
+				zero_controls ();
+				for (Strips::iterator s = strips.begin(); s != strips.end(); ++s) {
+					(*s)->notify_all ();
+				}
+				update_view_mode_display ();
+			}
 		}
 		break;
 
@@ -541,14 +527,6 @@ Surface::write_sysex (MIDI::byte msg)
 	_port->write (buf);
 }
 
-void
-Surface::drop_routes ()
-{
-	for (Strips::iterator s = strips.begin(); s != strips.end(); ++s) {
-		(*s)->set_route (boost::shared_ptr<Route>());
-	}
-}
-
 uint32_t
 Surface::n_strips () const
 {
@@ -569,9 +547,21 @@ Surface::zero_all ()
 {
 	// TODO turn off Timecode displays
 
+	std::cerr << "Surface " << number() << " ZERO\n";
+
 	// zero all strips
 	for (Strips::iterator it = strips.begin(); it != strips.end(); ++it) {
-		_port->write ((*it)->zero());
+		(*it)->zero();
+	}
+
+	zero_controls ();
+}
+
+void
+Surface::zero_controls ()
+{
+	if (_stype != mcu || !_mcp.device_info().has_global_controls()) {
+		return;
 	}
 
 	// turn off global buttons and leds
@@ -585,9 +575,11 @@ Surface::zero_all ()
 		}
 	}
 
-	// any hardware-specific stuff
-	// clear 2-char display
-	_port->write (two_char_display ("  "));
+	if (_number == 0 && _mcp.device_info().has_two_character_display()) {
+		// any hardware-specific stuff
+		// clear 2-char display
+		_port->write (two_char_display ("aa"));
+	}
 
 	// and the led ring for the master strip
 	blank_jog_ring ();
@@ -599,13 +591,14 @@ Surface::periodic (uint64_t now_usecs)
 	for (Strips::iterator s = strips.begin(); s != strips.end(); ++s) {
 		(*s)->periodic (now_usecs);
 	}
-
 }
 
 void
 Surface::write (const MidiByteArray& data) 
 {
-	_port->write (data);
+	if (_active) {
+		_port->write (data);
+	}
 }
 
 void 
@@ -639,13 +632,15 @@ Surface::map_routes (const vector<boost::shared_ptr<Route> >& routes)
 	vector<boost::shared_ptr<Route> >::const_iterator r;
 	Strips::iterator s;
 
-	for (s = strips.begin(); s != strips.end(); ++s) {
-		(*s)->set_route (boost::shared_ptr<Route>());
-	}
-
 	for (r = routes.begin(), s = strips.begin(); r != routes.end() && s != strips.end(); ++r, ++s) {
 		(*s)->set_route (*r);
 	}
+
+	for (; s != strips.end(); ++s) {
+		(*s)->set_route (boost::shared_ptr<Route>());
+	}
+
+
 }
 
 static char translate_seven_segment (char achar)
@@ -662,7 +657,7 @@ static char translate_seven_segment (char achar)
 MidiByteArray 
 Surface::two_char_display (const std::string & msg, const std::string & dots)
 {
-	if (_stype != mcu) {
+	if (_stype != mcu || !_mcp.device_info().has_two_character_display()) {
 		return MidiByteArray();
 	}
 
@@ -690,7 +685,7 @@ Surface::two_char_display (unsigned int value, const std::string & /*dots*/)
 void 
 Surface::display_timecode (const std::string & timecode, const std::string & timecode_last)
 {
-	if (has_timecode_display()) {
+	if (_active && _mcp.device_info().has_timecode_display()) {
 		_port->write (timecode_display (timecode, timecode_last));
 	}
 }
@@ -752,6 +747,10 @@ Surface::update_view_mode_display ()
 	string text;
 	Button* button = 0;
 
+	if (!_active) {
+		return;
+	}
+
 	switch (_mcp.view_mode()) {
 	case MackieControlProtocol::Mixer:
 		_port->write (two_char_display ("Mx"));
@@ -807,3 +806,19 @@ Surface::gui_selection_changed (ARDOUR::RouteNotificationListPtr routes)
 	}
 }
 
+void
+Surface::say_hello ()
+{
+	/* wakey wakey */
+
+	MidiByteArray wakeup (7, MIDI::sysex, 0x00, 0x00, 0x66, 0x14, 0x00, MIDI::eox);
+	_port->write (wakeup);
+	wakeup[4] = 0x15; /* wakup Mackie XT */
+	_port->write (wakeup);
+	wakeup[4] = 0x10; /* wakupe Logic Control */
+	_port->write (wakeup);
+	wakeup[4] = 0x11; /* wakeup Logic Control XT */
+	_port->write (wakeup);
+
+	zero_all ();
+}

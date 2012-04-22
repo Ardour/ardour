@@ -33,6 +33,8 @@
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/actions.h"
 
+#include "ardour/rc_configuration.h"
+
 #include "mackie_control_protocol.h"
 #include "device_info.h"
 #include "gui.h"
@@ -477,8 +479,10 @@ MackieControlProtocolGUI::surface_combo_changed ()
 void
 MackieControlProtocolGUI::profile_combo_changed ()
 {
-	_cp.set_profile (_profile_combo.get_active_text());
+	string profile = _profile_combo.get_active_text();
+
+	_cp.set_profile (profile);
+	ARDOUR::Config->set_mackie_device_profile (profile);
+
 	refresh_function_key_editor ();
 }
-
-

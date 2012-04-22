@@ -438,9 +438,7 @@ MackieControlProtocol::frm_left_press (Button &)
 	// can use first_mark_before/after as well
 	unsigned long elapsed = _frm_left_last.restart();
 
-	Location * loc = session->locations()->first_location_before (
-		session->transport_frame()
-	);
+	Location * loc = session->locations()->first_location_before (session->transport_frame());
 
 	// allow a quick double to go past a previous mark
 	if (session->transport_rolling() && elapsed < 500 && loc != 0) {
@@ -454,6 +452,8 @@ MackieControlProtocol::frm_left_press (Button &)
 	// move to the location, if it's valid
 	if (loc != 0) {
 		session->request_locate (loc->start(), session->transport_rolling());
+	} else {
+		session->request_locate (session->locations()->session_range_location()->start(), session->transport_rolling());
 	}
 
 	return on;
@@ -473,6 +473,8 @@ MackieControlProtocol::frm_right_press (Button &)
 	
 	if (loc != 0) {
 		session->request_locate (loc->start(), session->transport_rolling());
+	} else {
+		session->request_locate (session->locations()->session_range_location()->end(), session->transport_rolling());
 	}
 		
 	return on;
@@ -530,7 +532,11 @@ MackieControlProtocol::record_release (Button &)
 LedState 
 MackieControlProtocol::rewind_press (Button &)
 {
-	rewind ();
+	if (_modifier_state == MODIFIER_CONTROL) {
+		goto_start ();
+	} else {
+		rewind ();
+	}
 	return none;
 }
 
@@ -543,7 +549,11 @@ MackieControlProtocol::rewind_release (Button &)
 LedState 
 MackieControlProtocol::ffwd_press (Button &)
 {
-	ffwd ();
+	if (_modifier_state == MODIFIER_CONTROL) {
+		goto_end();
+	} else {
+		ffwd ();
+	}
 	return none;
 }
 
@@ -664,20 +674,9 @@ MackieControlProtocol::enter_release (Button &)
 	return off;
 }
 
-void
-MackieControlProtocol::f_press (uint32_t fn)
-{
-#if 0
-	string action = f_action (0);
-	if (!action.empty()) {
-		access_action (action);
-	}
-#endif
-}
 LedState
 MackieControlProtocol::F1_press (Button &) 
 { 
-	f_press (0);
 	return off; 
 }
 LedState
@@ -688,7 +687,6 @@ MackieControlProtocol::F1_release (Button &)
 LedState
 MackieControlProtocol::F2_press (Button &) 
 { 
-	f_press (1);
 	return off; 
 }
 LedState
@@ -699,7 +697,6 @@ MackieControlProtocol::F2_release (Button &)
 LedState
 MackieControlProtocol::F3_press (Button &) 
 { 
-	f_press (2);
 	return off; 
 }
 LedState
@@ -710,7 +707,6 @@ MackieControlProtocol::F3_release (Button &)
 LedState
 MackieControlProtocol::F4_press (Button &) 
 { 
-	f_press (3);
 	return off; 
 }
 LedState
@@ -721,7 +717,6 @@ MackieControlProtocol::F4_release (Button &)
 LedState
 MackieControlProtocol::F5_press (Button &) 
 { 
-	f_press (4);
 	return off; 
 }
 LedState
@@ -732,7 +727,6 @@ MackieControlProtocol::F5_release (Button &)
 LedState
 MackieControlProtocol::F6_press (Button &) 
 { 
-	f_press (5);
 	return off; 
 }
 LedState
@@ -743,7 +737,6 @@ MackieControlProtocol::F6_release (Button &)
 LedState
 MackieControlProtocol::F7_press (Button &) 
 { 
-	f_press (6);
 	return off; 
 }
 LedState

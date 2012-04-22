@@ -137,7 +137,7 @@ Strip::add (Control & control)
 }
 
 void
-Strip::set_route (boost::shared_ptr<Route> r)
+Strip::set_route (boost::shared_ptr<Route> r, bool with_messages)
 {
 	if (_controls_locked) {
 		return;
@@ -216,39 +216,16 @@ Strip::set_route (boost::shared_ptr<Route> r)
 			}
 		}
 	}
-
-	current_pot_modes.push_back (Input);
-	current_pot_modes.push_back (Output);
-
-	if (_route->nth_send (0) != 0) {
-		current_pot_modes.push_back (Send1);
-	}
-	if (_route->nth_send (1) != 0) {
-		current_pot_modes.push_back (Send2);
-	}
-	if (_route->nth_send (2) != 0) {
-		current_pot_modes.push_back (Send3);
-	}
-	if (_route->nth_send (3) != 0) {
-		current_pot_modes.push_back (Send4);
-	}
-	if (_route->nth_send (4) != 0) {
-		current_pot_modes.push_back (Send5);
-	}
-	if (_route->nth_send (5) != 0) {
-		current_pot_modes.push_back (Send6);
-	}
-	if (_route->nth_send (6) != 0) {
-		current_pot_modes.push_back (Send7);
-	}
-	if (_route->nth_send (7) != 0) {
-		current_pot_modes.push_back (Send8);
-	}
 }
 
 void 
 Strip::notify_all()
 {
+	if (!_route) {
+		zero ();
+		return;
+	}
+
 	notify_solo_changed ();
 	notify_mute_changed ();
 	notify_gain_changed ();
@@ -301,8 +278,6 @@ Strip::notify_route_deleted ()
 void 
 Strip::notify_gain_changed (bool force_update)
 {
-	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("gain changed for strip %1, flip mode %2\n", _index, _surface->mcp().flip_mode()));
-
 	if (_route) {
 		
 		Control* control;
@@ -313,35 +288,29 @@ Strip::notify_gain_changed (bool force_update)
 			control = _fader;
 		}
 
-		if (!control->in_use()) {
 
-			boost::shared_ptr<AutomationControl> ac = _route->gain_control();
-
-			float gain_coefficient = ac->get_value();
-			float normalized_position = ac->internal_to_interface (gain_coefficient);
-
-			if (force_update || normalized_position != _last_gain_position_written) {
-
-
-				if (_surface->mcp().flip_mode()) {
-					_surface->write (_vpot->set_all (normalized_position, true, Pot::wrap));
-					do_parameter_display (GainAutomation, gain_coefficient);
-				} else {
-					_surface->write (_fader->set_position (normalized_position));
-					do_parameter_display (GainAutomation, gain_coefficient);
+		boost::shared_ptr<AutomationControl> ac = _route->gain_control();
+		
+		float gain_coefficient = ac->get_value();
+		float normalized_position = ac->internal_to_interface (gain_coefficient);
+		
+		if (force_update || normalized_position != _last_gain_position_written) {
+			
+			if (_surface->mcp().flip_mode()) {
+				if (!control->in_use()) {
+					_surface->write (_vpot->set (normalized_position, true, Pot::wrap));
 				}
-
-				queue_display_reset (2000);
-				_last_gain_position_written = normalized_position;
-				
+				do_parameter_display (GainAutomation, gain_coefficient);
 			} else {
-				DEBUG_TRACE (DEBUG::MackieControl, "value is stale, no message sent\n");
+				if (!control->in_use()) {
+					_surface->write (_fader->set_position (normalized_position));
+				}
+				do_parameter_display (GainAutomation, gain_coefficient);
 			}
-		} else {
-			DEBUG_TRACE (DEBUG::MackieControl, "fader in use, no message sent\n");
+
+			queue_display_reset (2000);
+			_last_gain_position_written = normalized_position;
 		}
-	} else {
-		DEBUG_TRACE (DEBUG::MackieControl, "no route or no fader\n");
 	}
 }
 
@@ -361,7 +330,7 @@ Strip::notify_property_changed (const PropertyChange& what_changed)
 		} else {
 			line1 = PBD::short_version (fullname, 6);
 		}
-		
+
 		_surface->write (display (0, line1));
 	}
 }
@@ -402,7 +371,7 @@ Strip::notify_panner_azi_changed (bool force_update)
 					_surface->write (_fader->set_position (pos));
 					do_parameter_display (PanAzimuthAutomation, pos);
 				} else {
-					_surface->write (_vpot->set_all (pos, true, Pot::dot));
+					_surface->write (_vpot->set (pos, true, Pot::dot));
 					do_parameter_display (PanAzimuthAutomation, pos);
 				}
 
@@ -449,7 +418,7 @@ Strip::notify_panner_width_changed (bool force_update)
 					_surface->write (_fader->set_position (pos));
 					do_parameter_display (PanWidthAutomation, pos);
 				} else {
-					_surface->write (_vpot->set_all (pos, true, Pot::spread));
+					_surface->write (_vpot->set (pos, true, Pot::spread));
 					do_parameter_display (PanWidthAutomation, pos);
 				}
 
@@ -725,19 +694,15 @@ Strip::update_meter ()
 	}
 }
 
-MidiByteArray
+void
 Strip::zero ()
 {
-	MidiByteArray retval;
-
 	for (Group::Controls::const_iterator it = _controls.begin(); it != _controls.end(); ++it) {
-		retval << (*it)->zero ();
+		_surface->write ((*it)->zero ());
 	}
 
-	retval << blank_display (0);
-	retval << blank_display (1);
-	
-	return retval;
+	_surface->write (blank_display (0));
+	_surface->write (blank_display (1));
 }
 
 MidiByteArray
@@ -778,8 +743,6 @@ Strip::display (uint32_t line_number, const std::string& line)
 	// sysex trailer
 	retval << MIDI::eox;
 	
-	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("MackieMidiBuilder::strip_display midi: %1\n", retval));
-
 	return retval;
 }
 
@@ -901,7 +864,12 @@ Strip::clear_display_reset ()
 void
 Strip::reset_display ()
 {
-	_surface->write (display (1, vpot_mode_string()));
+	if (_route) {
+		_surface->write (display (1, vpot_mode_string()));
+	} else {
+		_surface->write (blank_display (1));
+	}
+		
 	clear_display_reset ();
 }
 			 
@@ -991,7 +959,7 @@ Strip::next_pot_mode ()
 		/* do not change vpot mode while in flipped mode */
 		DEBUG_TRACE (DEBUG::MackieControl, "not stepping pot mode - in flip mode\n");
 		_surface->write (display (1, "Flip"));
-		queue_display_reset (2000);
+		queue_display_reset (1000);
 		return;
 	}
 
@@ -1050,13 +1018,11 @@ Strip::set_vpot_mode (PotMode m)
 				if (pannable) {
 					_fader->set_control (pannable->pan_azimuth_control);
 				}
-				_vpot->set_mode (Pot::boost_cut);
 				_vpot_mode = Gain;
 			} else {
 				/* gain to fader, pan azi to vpot */
 				_fader->set_control (_route->gain_control());
 				if (pannable) {
-					_vpot->set_mode (Pot::dot);
 					_vpot->set_control (pannable->pan_azimuth_control);
 				}
 			}
@@ -1071,13 +1037,11 @@ Strip::set_vpot_mode (PotMode m)
 				if (pannable) {
 					_fader->set_control (pannable->pan_width_control);
 				}
-				_vpot->set_mode (Pot::boost_cut);
 				_vpot_mode = Gain;
 			} else {
 				/* gain to fader, pan width to vpot */
 				_fader->set_control (_route->gain_control());
 				if (pannable) {
-					_vpot->set_mode (Pot::spread);
 					_vpot->set_control (pannable->pan_width_control);
 				}
 			}

@@ -229,10 +229,7 @@ class MackieControlProtocol
 	int stop ();
 
 	void thread_init ();
-
-	/* handling function key presses */
-
-	void f_press (uint32_t fn);
+	void midi_connectivity_established ();
 
   private:
 
@@ -282,7 +279,6 @@ class MackieControlProtocol
 	ButtonMap                 button_map;
 
 	void create_surfaces ();
-	void port_connected_or_disconnected (std::string, std::string, bool);
 	bool periodic();
 	void build_gui ();
 	bool midi_input_handler (Glib::IOCondition ioc, MIDI::Port* port);

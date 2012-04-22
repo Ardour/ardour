@@ -58,7 +58,7 @@ public:
 	void add (Control & control);
 	int index() const { return _index; } // zero based
 	
-	void set_route (boost::shared_ptr<ARDOUR::Route>);
+	void set_route (boost::shared_ptr<ARDOUR::Route>, bool with_messages = true);
 
 	// call all signal handlers manually
 	void notify_all();
@@ -71,7 +71,8 @@ public:
 
 	MidiByteArray display (uint32_t line_number, const std::string&);
 	MidiByteArray blank_display (uint32_t line_number);
-	MidiByteArray zero ();
+
+	void zero ();
 
 	void flip_mode_changed (bool notify=false);
 

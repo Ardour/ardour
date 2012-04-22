@@ -1,5 +1,6 @@
 /*
 	Copyright (C) 2006,2007 John Anderson
+	Copyright (C) 2012 Paul Davis
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -114,11 +115,6 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 	set_device (Config->get_mackie_device_name());
 	set_profile (Config->get_mackie_device_profile());
 
-	AudioEngine::instance()->PortConnectedOrDisconnected.connect (
-		audio_engine_connections, MISSING_INVALIDATOR, ui_bind (&MackieControlProtocol::port_connected_or_disconnected, this, _2, _4, _5),
-		this
-		);
-
 	TrackSelectionChanged.connect (gui_connections, MISSING_INVALIDATOR, ui_bind (&MackieControlProtocol::gui_track_selection_changed, this, _1), this);
 
 	_instance = this;
@@ -163,6 +159,14 @@ MackieControlProtocol::thread_init ()
 	if (pthread_setschedparam (pthread_self(), SCHED_FIFO, &rtparam) != 0) {
 		// do we care? not particularly.
 	}
+}
+
+void
+MackieControlProtocol::midi_connectivity_established ()
+{
+	/* may need to tell surfaces because they may need to wake up the
+	 * device 
+	 */
 }
 
 // go to the previous track.
@@ -306,10 +310,6 @@ MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 
 	_current_initial_bank = initial;
 	_current_selected_track = -1;
-
-	for (Surfaces::iterator si = surfaces.begin(); si != surfaces.end(); ++si) {
-		(*si)->drop_routes ();
-	}
 
 	// Map current bank of routes onto each surface(+strip)
 
@@ -472,6 +472,8 @@ MackieControlProtocol::update_surfaces()
 	if (!_active) {
 		return;
 	}
+
+
 
 	// do the initial bank switch to connect signals
 	// _current_initial_bank is initialised by set_state
@@ -727,7 +729,7 @@ MackieControlProtocol::update_timecode_display()
 
 	boost::shared_ptr<Surface> surface = surfaces.front();
 
-	if (surface->type() != mcu || !surface->has_timecode_display()) {
+	if (surface->type() != mcu || !_device_info.has_timecode_display()) {
 		return;
 	}
 
@@ -884,26 +886,6 @@ MackieControlProtocol::bundles ()
 	b.push_back (_input_bundle);
 	b.push_back (_output_bundle);
 	return b;
-}
-
-void
-MackieControlProtocol::port_connected_or_disconnected (string a, string b, bool connected)
-{
-	/* If something is connected to one of our output ports, send MIDI to update the surface
-	   to whatever state it should have.
-	*/
-
-	if (!connected) {
-		return;
-	}
-
-	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
-		string const n = AudioEngine::instance()->make_port_name_non_relative ((*s)->port().output_port().name ());
-		if (a == n || b == n) {
-			update_surfaces ();
-			return;
-		}
-	}
 }
 
 void

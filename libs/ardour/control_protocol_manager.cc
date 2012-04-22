@@ -401,3 +401,13 @@ ControlProtocolManager::instance ()
 
 	return *_instance;
 }
+
+void
+ControlProtocolManager::midi_connectivity_established ()
+{
+	Glib::Mutex::Lock lm (protocols_lock);
+
+	for (list<ControlProtocol*>::iterator p = control_protocols.begin(); p != control_protocols.end(); ++p) {
+		(*p)->midi_connectivity_established ();
+	}
+}

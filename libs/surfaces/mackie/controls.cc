@@ -92,24 +92,33 @@ Control::set_control (boost::shared_ptr<AutomationControl> ac)
 void
 Control::set_value (float val)
 {
-	normal_ac->set_value (normal_ac->interface_to_internal (val));
+	if (normal_ac) {
+		normal_ac->set_value (normal_ac->interface_to_internal (val));
+	}
 }
 
 float
 Control::get_value ()
 {
+	if (!normal_ac) {
+		return 0.0f;
+	}
 	return normal_ac->internal_to_interface (normal_ac->get_value());
 }
 
 void
 Control::start_touch (double when)
 {
-	return normal_ac->start_touch (when);
+	if (normal_ac) {
+		return normal_ac->start_touch (when);
+	}
 }
 	
 void
 Control::stop_touch (double when, bool mark)
 {
-	return normal_ac->stop_touch (when, mark);
+	if (normal_ac) {
+		return normal_ac->stop_touch (when, mark);
+	}
 }
 	

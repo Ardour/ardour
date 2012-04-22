@@ -54,6 +54,8 @@ class ControlProtocol : virtual public sigc::trackable, public PBD::Stateful, pu
 
 	virtual void route_list_changed () {}
 
+	virtual void midi_connectivity_established () {}
+
 	PBD::Signal0<void> ActiveChanged;
 
 	/* signals that a control protocol can emit and other (presumably graphical)

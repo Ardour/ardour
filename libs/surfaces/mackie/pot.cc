@@ -38,46 +38,23 @@ Pot::factory (Surface& surface, int id, const char* name, Group& group)
 }
 
 MidiByteArray
-Pot::set_mode (Pot::Mode m)
-{
-	mode = m;
-	return update_message ();
-}
-
-MidiByteArray
-Pot::set_onoff (bool onoff)
-{
-	on = onoff;
-	return update_message ();
-}
-
-MidiByteArray
-Pot::set_all (float val, bool onoff, Mode m)
-{
-	position = val;
-	on = onoff;
-	mode = m;
-	return update_message ();
-}
-
-MidiByteArray
-Pot::update_message ()
+Pot::set (float val, bool onoff, Mode mode)
 {
 	// TODO do an exact calc for 0.50? To allow manually re-centering the port.
 
 	// center on or off
-	MIDI::byte msg =  (position > 0.45 && position < 0.55 ? 1 : 0) << 6;
+	MIDI::byte msg =  (val > 0.45 && val < 0.55 ? 1 : 0) << 6;
 	
 	// mode
-	msg |=  (mode << 4);
+	msg |=  (onoff << 4);
 	
-	// position, but only if off hasn't explicitly been set
+	// val, but only if off hasn't explicitly been set
 
-	if  (on) {
+	if  (onoff) {
 		if (mode == spread) {
-			msg +=  (lrintf (position * 6) + 1) & 0x0f; // 0b00001111
+			msg +=  (lrintf (val * 6) + 1) & 0x0f; // 0b00001111
 		} else {
-			msg +=  (lrintf (position * 10.0) + 1) & 0x0f; // 0b00001111
+			msg +=  (lrintf (val * 10.0) + 1) & 0x0f; // 0b00001111
 		}
 	}
 

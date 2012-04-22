@@ -537,11 +537,17 @@ Session::when_engine_running ()
 
 	BootMessage (_("Setup signal flow and plugins"));
 
+	/* this will cause the CPM to instantiate any protocols that are in use
+	 * (or mandatory), which will pass it this Session, and then call
+	 * set_state() on each instantiated protocol to match stored state.
+	 */
+
 	ControlProtocolManager::instance().set_session (this);
 
 	/* This must be done after the ControlProtocolManager set_session above,
 	   as it will set states for ports which the ControlProtocolManager creates.
 	*/
+
 	MIDI::Manager::instance()->set_port_states (Config->midi_port_states ());
 
 	/* And this must be done after the MIDI::Manager::set_port_states as
@@ -549,6 +555,12 @@ Session::when_engine_running ()
 	 */
 
 	hookup_io ();
+
+	/* Let control protocols know that we are now all connected, so they
+	 * could start talking to surfaces if they want to.
+	 */
+
+	ControlProtocolManager::instance().midi_connectivity_established ();
 
 	if (_is_new && !no_auto_connect()) {
 		Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock());

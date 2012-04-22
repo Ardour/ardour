@@ -45,6 +45,8 @@ public:
 	uint32_t number() const { return _number; }
 	const std::string& name() { return _name; }
 
+	void say_hello ();
+
 	bool active() const { return _active; }
 	void drop_routes ();
 
@@ -102,12 +104,12 @@ public:
 		
 	/// called from MackieControlProtocol::zero_all to turn things off
 	void zero_all ();
+	void zero_controls ();
 
 	/// turn off leds around the jog wheel. This is for surfaces that use a pot
 	/// pretending to be a jog wheel.
 	void blank_jog_ring ();
 
-	bool has_timecode_display() const;
 	void display_timecode (const std::string & /*timecode*/, const std::string & /*timecode_last*/);
 
 	/**
