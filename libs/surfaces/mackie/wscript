@@ -29,9 +29,9 @@ def build(bld):
             gui.cc
             interface.cc
             jog.cc
+            jog_wheel.cc
             led.cc
             mackie_control_protocol.cc
-            mackie_jog_wheel.cc
             mcp_buttons.cc
             meter.cc
             midi_byte_array.cc

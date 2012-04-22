@@ -21,7 +21,7 @@
 #include "surface.h"
 #include "strip.h"
 #include "mackie_control_protocol.h"
-#include "mackie_jog_wheel.h"
+#include "jog_wheel.h"
 
 #include "strip.h"
 #include "button.h"
@@ -223,7 +223,9 @@ float
 Surface::scaled_delta (float delta, float current_speed)
 {
 	/* XXX needs work before use */
-	return (std::pow (float(delta + 1), 2) + current_speed) / 100.0;
+	const float sign = delta < 0.0 ? -1.0 : 1.0;
+
+	return ((sign * std::pow (delta + 1.0, 2.0)) + current_speed) / 100.0;
 }
 
 void 
@@ -231,10 +233,10 @@ Surface::display_bank_start (uint32_t current_bank)
 {
 	if  (current_bank == 0) {
 		// send Ar. to 2-char display on the master
-		_port->write (two_char_display ("Ar", ".."));
+		show_two_char_display ("Ar", "..");
 	} else {
 		// write the current first remote_id to the 2-char display
-		_port->write (two_char_display (current_bank));
+		show_two_char_display (current_bank);
 	}
 }
 
@@ -352,9 +354,29 @@ Surface::handle_midi_controller_message (MIDI::Parser &, MIDI::EventTwoBytes* ev
 
 	Pot* pot = pots[ev->controller_number];
 
+	if (!pot) {
+		if (ev->controller_number == Jog::ID && _jog_wheel) {
+
+			// bit 6 gives the sign
+			float sign = (ev->value & 0x40) == 0 ? 1.0 : -1.0; 
+			// bits 0..5 give the velocity. we interpret this as "ticks
+			// moved before this message was sent"
+			float ticks = (ev->value & 0x3f);
+			if (ticks == 0) {
+				/* euphonix and perhaps other devices send zero
+				   when they mean 1, we think.
+				*/
+				ticks = 1;
+			}
+			float delta = sign * (ticks / (float) 0x3f);
+
+			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Jog wheel moved %1\n", ticks));
+			_jog_wheel->jog_event (delta);
+			return;
+		}
+	}
+
 	if (pot) {
-		ControlState state;
-		
 		// bit 6 gives the sign
 		float sign = (ev->value & 0x40) == 0 ? 1.0 : -1.0; 
 		// bits 0..5 give the velocity. we interpret this as "ticks
@@ -372,16 +394,7 @@ Surface::handle_midi_controller_message (MIDI::Parser &, MIDI::EventTwoBytes* ev
 
 		if (strip) {
 			strip->handle_pot (*pot, delta);
-		} else {
-			JogWheel* wheel = dynamic_cast<JogWheel*> (pot);
-			if (wheel) {
-				DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Jog wheel moved %1\n", state.ticks));
-				wheel->jog_event (*_port, *pot, delta);
-			} else {
-				DEBUG_TRACE (DEBUG::MackieControl, string_compose ("External controller moved %1\n", state.ticks));
-				cout << "external controller" << delta << endl;
-			}
-		}
+		} 
 	} else {
 		DEBUG_TRACE (DEBUG::MackieControl, "pot not found\n");
 	}
@@ -578,7 +591,7 @@ Surface::zero_controls ()
 	if (_number == 0 && _mcp.device_info().has_two_character_display()) {
 		// any hardware-specific stuff
 		// clear 2-char display
-		_port->write (two_char_display ("aa"));
+		show_two_char_display ("aa");
 	}
 
 	// and the led ring for the master strip
@@ -601,31 +614,6 @@ Surface::write (const MidiByteArray& data)
 	}
 }
 
-void 
-Surface::jog_wheel_state_display (JogWheel::State state)
-{
-	switch (state) {
-	case JogWheel::zoom:
-			_port->write (two_char_display ("Zm"));
-			break;
-		case JogWheel::scroll:
-			_port->write (two_char_display ("Sc"));
-			break;
-		case JogWheel::scrub:
-			_port->write (two_char_display ("Sb"));
-			break;
-		case JogWheel::shuttle:
-			_port->write (two_char_display ("Sh"));
-			break;
-		case JogWheel::speed:
-			_port->write (two_char_display ("Sp"));
-			break;
-		case JogWheel::select:
-			_port->write (two_char_display ("Se"));
-			break;
-	}
-}
-
 void
 Surface::map_routes (const vector<boost::shared_ptr<Route> >& routes)
 {
@@ -643,43 +631,43 @@ Surface::map_routes (const vector<boost::shared_ptr<Route> >& routes)
 
 }
 
-static char translate_seven_segment (char achar)
+static char 
+translate_seven_segment (char achar)
 {
 	achar = toupper (achar);
-	if  (achar >= 0x40 && achar <= 0x60)
+
+	if  (achar >= 0x40 && achar <= 0x60) {
 		return achar - 0x40;
-	else if  (achar >= 0x21 && achar <= 0x3f)
-      return achar;
-	else
-      return 0x00;
-}
-
-MidiByteArray 
-Surface::two_char_display (const std::string & msg, const std::string & dots)
-{
-	if (_stype != mcu || !_mcp.device_info().has_two_character_display()) {
-		return MidiByteArray();
+	} else if  (achar >= 0x21 && achar <= 0x3f) {
+		return achar;
+	} else {
+		return 0x00;
 	}
-
-	if  (msg.length() != 2) throw MackieControlException ("MackieMidiBuilder::two_char_display: msg must be exactly 2 characters");
-	if  (dots.length() != 2) throw MackieControlException ("MackieMidiBuilder::two_char_display: dots must be exactly 2 characters");
-	
-	MidiByteArray bytes (6, 0xb0, 0x4a, 0x00, 0xb0, 0x4b, 0x00);
-	
-	// chars are understood by the surface in right-to-left order
-	// could also exchange the 0x4a and 0x4b, above
-	bytes[5] = translate_seven_segment (msg[0]) +  (dots[0] == '.' ? 0x40 : 0x00);
-	bytes[2] = translate_seven_segment (msg[1]) +  (dots[1] == '.' ? 0x40 : 0x00);
-	
-	return bytes;
 }
 
-MidiByteArray 
-Surface::two_char_display (unsigned int value, const std::string & /*dots*/)
+void
+Surface::show_two_char_display (const std::string & msg, const std::string & dots)
+{
+	if (_stype != mcu || !_mcp.device_info().has_two_character_display() || msg.length() != 2 || dots.length() != 2) {
+		return;
+	}
+	
+	MidiByteArray right (3, 0xb0, 0x4b, 0x00);
+	MidiByteArray left (3, 0xb0, 0x4a, 0x00);
+	
+	right[2] = translate_seven_segment (msg[0]) +  (dots[0] == '.' ? 0x40 : 0x00);
+	left[2] = translate_seven_segment (msg[1]) +  (dots[1] == '.' ? 0x40 : 0x00);
+	
+	_port->write (right);
+	_port->write (left);
+}
+
+void
+Surface::show_two_char_display (unsigned int value, const std::string & /*dots*/)
 {
 	ostringstream os;
 	os << setfill('0') << setw(2) << value % 100;
-	return two_char_display (os.str());
+	show_two_char_display (os.str());
 }
 
 void 
@@ -753,37 +741,36 @@ Surface::update_view_mode_display ()
 
 	switch (_mcp.view_mode()) {
 	case MackieControlProtocol::Mixer:
-		_port->write (two_char_display ("Mx"));
+		show_two_char_display ("Mx");
 		button = buttons[Button::Pan];
 		break;
 	case MackieControlProtocol::Dynamics:
-		_port->write (two_char_display ("Dy"));
+		show_two_char_display ("Dy");
 		button = buttons[Button::Dyn];
 		break;
 	case MackieControlProtocol::EQ:
-		_port->write (two_char_display ("EQ"));
+		show_two_char_display ("EQ");
 		button = buttons[Button::Eq];
 		break;
 	case MackieControlProtocol::Loop:
-		_port->write (two_char_display ("LP"));
+		show_two_char_display ("LP");
 		button = buttons[Button::Loop];
 		break;
 	case MackieControlProtocol::AudioTracks:
-		_port->write (two_char_display ("AT"));
+		show_two_char_display ("AT");
 		break;
 	case MackieControlProtocol::MidiTracks:
-		_port->write (two_char_display ("MT"));
-		break;
-	case MackieControlProtocol::Busses:
-		_port->write (two_char_display ("Bs"));
+		show_two_char_display ("MT");
 		break;
 	case MackieControlProtocol::Sends:
-		_port->write (two_char_display ("Sn"));
+		show_two_char_display ("Sn");
 		button = buttons[Button::Sends];
 		break;
 	case MackieControlProtocol::Plugins:
-		_port->write (two_char_display ("Pl"));
+		show_two_char_display ("Pl");
 		button = buttons[Button::Plugin];
+		break;
+	default:
 		break;
 	}
 
@@ -802,7 +789,7 @@ void
 Surface::gui_selection_changed (ARDOUR::RouteNotificationListPtr routes)
 {
 	for (Strips::iterator s = strips.begin(); s != strips.end(); ++s) {
-		_port->write ((*s)->gui_selection_changed (routes));
+		(*s)->gui_selection_changed (routes);
 	}
 }
 
@@ -822,3 +809,13 @@ Surface::say_hello ()
 
 	zero_all ();
 }
+
+void
+Surface::next_jog_mode ()
+{
+}
+
+void
+Surface::set_jog_mode (JogWheel::Mode m)
+{
+}	

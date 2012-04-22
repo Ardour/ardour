@@ -1023,7 +1023,8 @@ MackieControlProtocol::handle_button_event (Surface& surface, Button& button, Bu
 		return;
 	}
 	
-	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Handling %1 for button %2\n", (bs == press ? "press" : "release"), button.id()));
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Handling %1 for button %2 (%3)\n", (bs == press ? "press" : "release"), button.id(),
+							   Button::id_to_name (button.bid())));
 
 	/* check profile first */
 	
@@ -1160,6 +1161,8 @@ MackieControlProtocol::force_special_route_to_strip (boost::shared_ptr<Route> r,
 void
 MackieControlProtocol::gui_track_selection_changed (ARDOUR::RouteNotificationListPtr rl)
 {
+	cerr << "GUI Selection changed, " << rl->size() << " routes\n";
+
 	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
 		(*s)->gui_selection_changed (rl);
 	}

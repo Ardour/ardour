@@ -4,6 +4,8 @@
 #include <string>
 #include <iostream>
 
+#include "evoral/Parameter.hpp"
+
 #include "pbd/property_basics.h"
 #include "pbd/signals.h"
 
@@ -79,28 +81,9 @@ public:
 	void lock_controls ();
 	void unlock_controls ();
 	
-	MidiByteArray gui_selection_changed (ARDOUR::RouteNotificationListPtr);
+	void gui_selection_changed (ARDOUR::RouteNotificationListPtr);
 
 private:
-	enum PotMode {
-		Gain,
-		PanAzimuth,
-		PanWidth,
-		PanElevation,
-		PanFrontBack,
-		PanLFE,
-		Input,
-		Output,
-		Send1,
-		Send2,
-		Send3,
-		Send4,
-		Send5,
-		Send6,
-		Send7,
-		Send8,
-	};
-		
 	Button*  _solo;
 	Button*  _recenable;
 	Button*  _mute;
@@ -108,8 +91,6 @@ private:
 	Button*  _vselect;
 	Button*  _fader_touch;
 	Pot*     _vpot;
-	PotMode  _vpot_mode;
-	PotMode  _preflip_vpot_mode;
 	Fader*   _fader;
 	Meter*   _meter;
 	int      _index;
@@ -120,7 +101,8 @@ private:
 	PBD::ScopedConnectionList route_connections;
 
 	float _last_gain_position_written;
-	float _last_pan_position_written;
+	float _last_pan_azi_position_written;
+	float _last_pan_width_position_written;
 
 	void notify_solo_changed ();
 	void notify_mute_changed ();
@@ -154,9 +136,13 @@ private:
 	void vselect_event (Button&, ButtonState);
 	void fader_touch_event (Button&, ButtonState);
 
-	std::vector<PotMode> current_pot_modes;
+	std::vector<Evoral::Parameter> current_pot_modes;
 	void next_pot_mode ();
-	void set_vpot_mode (PotMode);
+	void set_vpot_parameter (Evoral::Parameter);
+
+	void reset_saved_values ();
+
+	std::map<Evoral::Parameter,Control*> control_by_parameter;
 };
 
 }

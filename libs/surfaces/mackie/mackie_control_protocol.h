@@ -38,7 +38,7 @@
 #include "types.h"
 #include "midi_byte_array.h"
 #include "controls.h"
-#include "mackie_jog_wheel.h"
+#include "jog_wheel.h"
 #include "timer.h"
 #include "device_info.h"
 #include "device_profile.h"
@@ -127,6 +127,7 @@ class MackieControlProtocol
 
 	bool     flip_mode () const { return _flip_mode; }
 	ViewMode view_mode () const { return _view_mode; }
+	bool zoom_mode () const { return _zoom_mode; }
 
 	void set_view_mode (ViewMode);
 	void set_flip_mode (bool);

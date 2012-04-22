@@ -9,7 +9,7 @@
 
 #include "controls.h"
 #include "types.h"
-#include "mackie_jog_wheel.h"
+#include "jog_wheel.h"
 
 namespace MIDI {
 	class Parser;
@@ -131,8 +131,8 @@ public:
 	// display the first 2 chars of the msg in the 2 char display
 	// . is appended to the previous character, so A.B. would
 	// be two characters
-	MidiByteArray two_char_display (const std::string & msg, const std::string & dots = "  ");
-	MidiByteArray two_char_display (unsigned int value, const std::string & dots = "  ");
+	void show_two_char_display (const std::string & msg, const std::string & dots = "  ");
+	void show_two_char_display (unsigned int value, const std::string & dots = "  ");
 	
 	/**
 		Timecode display. Only the difference between timecode and last_timecode will
@@ -148,6 +148,9 @@ public:
 
 	MackieControlProtocol& mcp() const { return _mcp; }
 
+	void next_jog_mode ();
+	void set_jog_mode (Mackie::JogWheel::Mode);
+
   protected:
 	
   private:
@@ -161,7 +164,6 @@ public:
 	Mackie::JogWheel*      _jog_wheel;
 	Fader*                 _master_fader;
 
-	void jog_wheel_state_display (Mackie::JogWheel::State state);
 	void handle_midi_sysex (MIDI::Parser&, MIDI::byte *, size_t count);
 	MidiByteArray host_connection_query (MidiByteArray& bytes);
 	MidiByteArray host_connection_confirmation (const MidiByteArray& bytes);

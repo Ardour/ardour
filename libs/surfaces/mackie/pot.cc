@@ -46,7 +46,7 @@ Pot::set (float val, bool onoff, Mode mode)
 	MIDI::byte msg =  (val > 0.45 && val < 0.55 ? 1 : 0) << 6;
 	
 	// mode
-	msg |=  (onoff << 4);
+	msg |=  (mode << 4);
 	
 	// val, but only if off hasn't explicitly been set
 

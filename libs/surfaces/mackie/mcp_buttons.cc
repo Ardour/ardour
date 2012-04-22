@@ -317,14 +317,16 @@ MackieControlProtocol::zoom_release (Mackie::Button &)
 Mackie::LedState 
 MackieControlProtocol::scrub_press (Mackie::Button &)
 {
-	_scrub_mode = !_scrub_mode;
-	return (_scrub_mode ? on : off);
+	if (!surfaces.empty()) {
+		surfaces.front()->next_jog_mode ();
+	}
+	return none;
 }
 
 Mackie::LedState 
 MackieControlProtocol::scrub_release (Mackie::Button &)
 {
-	return (_scrub_mode ? on : off);
+	return none;
 }
 
 LedState

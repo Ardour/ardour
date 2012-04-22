@@ -73,15 +73,14 @@ Strip::Strip (Surface& s, const std::string& name, int index, const map<Button::
 	, _vselect (0)
 	, _fader_touch (0)
 	, _vpot (0)
-	, _vpot_mode (PanAzimuth)
-	, _preflip_vpot_mode (PanAzimuth)
 	, _fader (0)
 	, _index (index)
 	, _surface (&s)
 	, _controls_locked (false)
 	, _reset_display_at (0)
 	, _last_gain_position_written (-1.0)
-	, _last_pan_position_written (-1.0)
+	, _last_pan_azi_position_written (-1.0)
+	, _last_pan_width_position_written (-1.0)
 {
 	_fader = dynamic_cast<Fader*> (Fader::factory (*_surface, index, "fader", *this));
 	_vpot = dynamic_cast<Pot*> (Pot::factory (*_surface, Pot::ID + index, "vpot", *this));
@@ -154,6 +153,9 @@ Strip::set_route (boost::shared_ptr<Route> r, bool with_messages)
 
 	_route = r;
 
+	control_by_parameter.clear ();
+	reset_saved_values ();
+
 	if (!r) {
 		return;
 	}
@@ -163,7 +165,8 @@ Strip::set_route (boost::shared_ptr<Route> r, bool with_messages)
 	
 	_solo->set_control (_route->solo_control());
 	_mute->set_control (_route->mute_control());
-	set_vpot_mode (PanAzimuth);
+
+	set_vpot_parameter (PanAzimuthAutomation);
 	
 	_route->solo_control()->Changed.connect(route_connections, invalidator(), ui_bind (&Strip::notify_solo_changed, this), ui_context());
 	_route->mute_control()->Changed.connect(route_connections, invalidator(), ui_bind (&Strip::notify_mute_changed, this), ui_context());
@@ -182,6 +185,8 @@ Strip::set_route (boost::shared_ptr<Route> r, bool with_messages)
 	if (trk) {
 		_recenable->set_control (trk->rec_enable_control());
 		trk->rec_enable_control()->Changed .connect(route_connections, invalidator(), ui_bind (&Strip::notify_record_enable_changed, this), ui_context());
+
+		
 	}
 	
 	// TODO this works when a currently-banked route is made inactive, but not
@@ -208,11 +213,11 @@ Strip::set_route (boost::shared_ptr<Route> r, bool with_messages)
 			set<Evoral::Parameter>::iterator a;
 			
 			if ((a = automatable.find (PanAzimuthAutomation)) != automatable.end()) {
-				current_pot_modes.push_back (PanAzimuth);
+				current_pot_modes.push_back (PanAzimuthAutomation);
 			}
 			
 			if ((a = automatable.find (PanWidthAutomation)) != automatable.end()) {
-				current_pot_modes.push_back (PanWidth);
+				current_pot_modes.push_back (PanWidthAutomation);
 			}
 		}
 	}
@@ -349,35 +354,27 @@ Strip::notify_panner_azi_changed (bool force_update)
 			return;
 		}
 
-		Control* control;
+		Control* control = control_by_parameter[PanAzimuthAutomation];
 
-		if (_surface->mcp().flip_mode()) {
-			control = _fader;
-		} else {
-			if (_vpot_mode != PanAzimuth) {
-				return;
-			}
-			control = _vpot;
+		if (!control) {
+			return;
 		}
 
-		if (!control->in_use()) {
-			
-			double pos = pannable->pan_azimuth_control->internal_to_interface (pannable->pan_azimuth_control->get_value());
-			
-			if (force_update || pos != _last_pan_position_written) {
-				
-				if (_surface->mcp().flip_mode()) {
-					
-					_surface->write (_fader->set_position (pos));
-					do_parameter_display (PanAzimuthAutomation, pos);
-				} else {
-					_surface->write (_vpot->set (pos, true, Pot::dot));
-					do_parameter_display (PanAzimuthAutomation, pos);
-				}
+		double pos = pannable->pan_azimuth_control->internal_to_interface (pannable->pan_azimuth_control->get_value());
+		
+		if (force_update || pos != _last_pan_azi_position_written) {
 
-				queue_display_reset (2000);
-				_last_pan_position_written = pos;
+			if (control == _fader) {
+				if (!_fader->in_use()) {
+					_surface->write (_fader->set_position (pos));
+				}
+			} else if (control == _vpot) {
+				_surface->write (_vpot->set (pos, true, Pot::dot));
 			}
+			
+			do_parameter_display (PanAzimuthAutomation, pos);
+			queue_display_reset (2000);
+			_last_pan_azi_position_written = pos;
 		}
 	}
 }
@@ -396,35 +393,32 @@ Strip::notify_panner_width_changed (bool force_update)
 			return;
 		}
 
-		Control* control;
 
-		if (_surface->mcp().flip_mode()) {
-			control = _fader;
-		} else {
-			if (_vpot_mode != PanWidth) {
-				return;
-			}
-			control = _vpot;
-		}
+		Control* control = control_by_parameter[PanWidthAutomation];
 
-		if (!control->in_use()) {
+		if (!control) {
+			return;
+		}	
 			
-			double pos = pannable->pan_width_control->internal_to_interface (pannable->pan_width_control->get_value());
+		double pos = pannable->pan_width_control->internal_to_interface (pannable->pan_width_control->get_value());
+		
+		if (force_update || pos != _last_pan_azi_position_written) {
 			
-			if (force_update || pos != _last_pan_position_written) {
-				
-				if (_surface->mcp().flip_mode()) {
-					
-					_surface->write (_fader->set_position (pos));
-					do_parameter_display (PanWidthAutomation, pos);
-				} else {
-					_surface->write (_vpot->set (pos, true, Pot::spread));
-					do_parameter_display (PanWidthAutomation, pos);
+			if (_surface->mcp().flip_mode()) {
+
+				if (control == _fader) {
+					if (!control->in_use()) {
+						_surface->write (_fader->set_position (pos));
+					}
 				}
 
-				queue_display_reset (2000);
-				_last_pan_position_written = pos;
+			} else if (control == _vpot) {
+				_surface->write (_vpot->set (pos, true, Pot::spread));
 			}
+			
+			do_parameter_display (PanWidthAutomation, pos);
+			queue_display_reset (2000);
+			_last_pan_azi_position_written = pos;
 		}
 	}
 }
@@ -442,12 +436,12 @@ Strip::select_event (Button& button, ButtonState bs)
 			_controls_locked = !_controls_locked;
 			_surface->write (display (1,_controls_locked ?  "Locked" : "Unlock"));
 			queue_display_reset (1000);
-				return;
+			return;
 		}
 		
 		if (ms & MackieControlProtocol::MODIFIER_SHIFT) {
 			/* reset to default */
-			boost::shared_ptr<AutomationControl> ac = _vpot->control ();
+			boost::shared_ptr<AutomationControl> ac = _fader->control ();
 			if (ac) {
 				ac->set_value (ac->normal());
 			}
@@ -494,17 +488,24 @@ Strip::fader_touch_event (Button& button, ButtonState bs)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("fader touch, press ? %1\n", (bs == press)));
 	
-	/* never use the modified control for fader stuff */
-	
 	if (bs == press) {
-		
-		_fader->set_in_use (true);
-		_fader->start_touch (_surface->mcp().transport_frame());
+
 		boost::shared_ptr<AutomationControl> ac = _fader->control ();
+
+		if (_surface->mcp().modifier_state() == MackieControlProtocol::MODIFIER_SHIFT) {
+			if (ac) {
+				ac->set_value (ac->normal());
+			}
+		} else {
+		
+			_fader->set_in_use (true);
+			_fader->start_touch (_surface->mcp().transport_frame());
+			
 			if (ac) {
 				do_parameter_display ((AutomationType) ac->parameter().type(), ac->internal_to_interface (ac->get_value()));
 				queue_display_reset (2000);
 			}
+		}
 			
 	} else {
 		
@@ -758,54 +759,43 @@ Strip::unlock_controls ()
 	_controls_locked = false;
 }
 
-MidiByteArray
+void
 Strip::gui_selection_changed (ARDOUR::RouteNotificationListPtr rl)
 {
 	for (ARDOUR::RouteNotificationList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		if ((*i) == _route) {
-			return _select->set_state (on);
+			cerr << "Surface " << _surface->number() << "Strip " << _index << " found its route in the selection, turn button on\n";
+			_surface->write (_select->set_state (on));
+			return;
 		}
 	}
 
-	return _select->set_state (off);
+	cerr << "Surface " << _surface->number() << "Strip " << _index << " did NOT find its route in the selection, turn button OFF\n";
+	_surface->write (_select->set_state (off));
 }
 
 string
 Strip::vpot_mode_string () const
 {
-	switch (_vpot_mode) {
-	case Gain:
+	boost::shared_ptr<AutomationControl> ac = _vpot->control();
+	
+	if (!ac) {
+		return string();
+	}
+
+	switch (ac->parameter().type()) {
+	case GainAutomation:
 		return "Fader";
-	case PanAzimuth:
+	case PanAzimuthAutomation:
 		return "Pan";
-	case PanWidth:
+	case PanWidthAutomation:
 		return "Width";
-	case PanElevation:
+	case PanElevationAutomation:
 		return "Elev";
-	case PanFrontBack:
+	case PanFrontBackAutomation:
 		return "F/Rear";
-	case PanLFE:
+	case PanLFEAutomation:
 		return "LFE";
-	case Input:
-		return "Input";
-	case Output:
-		return "Output";
-	case Send1:
-		return "Send 1";
-	case Send2:
-		return "Send 2";
-	case Send3:
-		return "Send 3";
-	case Send4:
-		return "Send 4";
-	case Send5:
-		return "Send 5";
-	case Send6:
-		return "Send 6";
-	case Send7:
-		return "Send 7";
-	case Send8:
-		return "Send 8";
 	}
 
 	return "???";
@@ -818,19 +808,16 @@ Strip::flip_mode_changed (bool notify)
 		return;
 	}
 
-	if (_surface->mcp().flip_mode()) {
-		/* flip mode is on - save what it used to be */
-		_preflip_vpot_mode = _vpot_mode;
-	} else {
-		/* flip mode is off - restore flip mode to what it used to be */
-		_vpot_mode = _preflip_vpot_mode;
-	}
+	reset_saved_values ();
 
 	boost::shared_ptr<AutomationControl> fader_controllable = _fader->control ();
 	boost::shared_ptr<AutomationControl> vpot_controllable = _vpot->control ();
 
 	_fader->set_control (vpot_controllable);
 	_vpot->set_control (fader_controllable);
+
+	control_by_parameter[fader_controllable->parameter()] = _vpot;
+	control_by_parameter[vpot_controllable->parameter()] = _fader;
 
 	_surface->write (display (1, vpot_mode_string ()));
 
@@ -953,7 +940,7 @@ Strip::build_output_list (const ChanCount& channels)
 void
 Strip::next_pot_mode ()
 {
-	vector<PotMode>::iterator i;
+	vector<Evoral::Parameter>::iterator i;
 
 	if (_surface->mcp().flip_mode()) {
 		/* do not change vpot mode while in flipped mode */
@@ -963,8 +950,14 @@ Strip::next_pot_mode ()
 		return;
 	}
 
+	boost::shared_ptr<AutomationControl> ac = _vpot->control();
+
+	if (!ac) {
+		return;
+	}
+
 	for (i = current_pot_modes.begin(); i != current_pot_modes.end(); ++i) {
-		if ((*i) == _vpot_mode) {
+		if ((*i) == ac->parameter()) {
 			break;
 		}
 	}
@@ -981,112 +974,91 @@ Strip::next_pot_mode ()
 		i = current_pot_modes.begin();
 	}
 
-	set_vpot_mode (*i);
+	set_vpot_parameter (*i);
 }
 
 void
-Strip::set_vpot_mode (PotMode m)
+Strip::set_vpot_parameter (Evoral::Parameter p)
 {
-	boost::shared_ptr<Send> send;
 	boost::shared_ptr<Pannable> pannable;
 
-	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("switch to vpot mode %1\n", m));
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("switch to vpot mode %1\n", p));
 
-	if (!_route) {
-		return;
-	}
+	reset_saved_values ();
 
-	_vpot_mode = m;
-
-	/* one of these is unnecessary, but its not worth trying to find
-	   out which - it will just cause one additional message to be
-	   sent to the surface.
-	*/
-
-	_last_pan_position_written = -1;
-	_last_gain_position_written = -1;
-
-	switch (_vpot_mode) {
-	case Gain:
-		break;
-	case PanAzimuth:
+	switch (p.type()) {
+	case PanAzimuthAutomation:
 		pannable = _route->pannable ();
 		if (pannable) {
 			if (_surface->mcp().flip_mode()) {
 				/* gain to vpot, pan azi to fader */
 				_vpot->set_control (_route->gain_control());
+				control_by_parameter[GainAutomation] = _vpot;
 				if (pannable) {
 					_fader->set_control (pannable->pan_azimuth_control);
+					control_by_parameter[PanAzimuthAutomation] = _fader;
+				} else {
+					_fader->set_control (boost::shared_ptr<AutomationControl>());
+					control_by_parameter[PanAzimuthAutomation] = 0;
 				}
-				_vpot_mode = Gain;
 			} else {
 				/* gain to fader, pan azi to vpot */
 				_fader->set_control (_route->gain_control());
+				control_by_parameter[GainAutomation] = _fader;
 				if (pannable) {
 					_vpot->set_control (pannable->pan_azimuth_control);
+					control_by_parameter[PanAzimuthAutomation] = _vpot;
+				} else {
+					_vpot->set_control (boost::shared_ptr<AutomationControl>());
+					control_by_parameter[PanAzimuthAutomation] = 0;
 				}
 			}
 		}
 		break;
-	case PanWidth:
+	case PanWidthAutomation:
 		pannable = _route->pannable ();
 		if (pannable) {
 			if (_surface->mcp().flip_mode()) {
 				/* gain to vpot, pan width to fader */
 				_vpot->set_control (_route->gain_control());
+				control_by_parameter[GainAutomation] = _vpot;
 				if (pannable) {
 					_fader->set_control (pannable->pan_width_control);
+					control_by_parameter[PanWidthAutomation] = _fader;
+				} else {
+					_fader->set_control (boost::shared_ptr<AutomationControl>());
+					control_by_parameter[PanWidthAutomation] = 0;
 				}
-				_vpot_mode = Gain;
 			} else {
 				/* gain to fader, pan width to vpot */
 				_fader->set_control (_route->gain_control());
+				control_by_parameter[GainAutomation] = _fader;
 				if (pannable) {
 					_vpot->set_control (pannable->pan_width_control);
+					control_by_parameter[PanWidthAutomation] = _vpot;
+				} else {
+					_vpot->set_control (boost::shared_ptr<AutomationControl>());
+					control_by_parameter[PanWidthAutomation] = 0;
 				}
 			}
 		}
 		break;
-	case PanElevation:
+	case PanElevationAutomation:
 		break;
-	case PanFrontBack:
+	case PanFrontBackAutomation:
 		break;
-	case PanLFE:
+	case PanLFEAutomation:
 		break;
-	case Input:
-		break;
-	case Output:
-		break;
-	case Send1:
-		send = boost::dynamic_pointer_cast<Send> (_route->nth_send (0));
-		if (send) {
-			if (_surface->mcp().flip_mode()) {
-				/* route gain to vpot, send gain to fader */
-				_fader->set_control (send->amp()->gain_control());
-				_vpot->set_control (_route->gain_control());
-				_vpot_mode = Gain;
-				} else {
-				/* route gain to fader, send gain to vpot */
-				_vpot->set_control (send->amp()->gain_control());
-				_fader->set_control (_route->gain_control());
-			}
-		}
-		break;
-	case Send2:
-		break;
-	case Send3:
-		break;
-	case Send4:
-		break;
-	case Send5:
-		break;
-	case Send6:
-		break;
-	case Send7:
-		break;
-	case Send8:
-		break;
-	};
+	}
 
 	_surface->write (display (1, vpot_mode_string()));
+}
+
+void
+Strip::reset_saved_values ()
+{
+	_last_pan_azi_position_written = -1.0;
+	_last_pan_width_position_written = -1.0;
+	_last_gain_position_written = -1.0;
+
 }
