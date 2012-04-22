@@ -314,10 +314,14 @@ Editor::set_selected_track_from_click (bool press, Selection::Operation op, bool
 }
 
 bool
-Editor::set_selected_control_point_from_click (Selection::Operation op, bool /*no_remove*/)
+Editor::set_selected_control_point_from_click (bool press, Selection::Operation op)
 {
 	if (!clicked_control_point) {
 		return false;
+	}
+
+	if (!press) {
+		return true;
 	}
 
 	switch (op) {
