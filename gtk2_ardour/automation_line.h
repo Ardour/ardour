@@ -66,7 +66,6 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 	void reset ();
 	void clear ();
 
-	std::list<ControlPoint*> point_selection_to_control_points (PointSelection const &);
 	void set_selected_points (PointSelection const &);
 	void get_selectables (ARDOUR::framepos_t, ARDOUR::framepos_t, double, double, std::list<Selectable*>&);
 	void get_inverted_selectables (Selection&, std::list<Selectable*>& results);
@@ -145,6 +144,8 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 	void set_offset (ARDOUR::framecnt_t);
 	void set_width (ARDOUR::framecnt_t);
 
+	framepos_t session_position (ARDOUR::AutomationList::const_iterator) const;
+
   protected:
 
 	std::string    _name;
@@ -153,7 +154,7 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 
 	boost::shared_ptr<ARDOUR::AutomationList> alist;
 	Evoral::TimeConverter<double, ARDOUR::framepos_t>* _time_converter;
-	/** true if _time_converter belongs to us (ie we should delete it) */
+	/** true if _time_converter belongs to us (ie we should delete it on destruction) */
 	bool _our_time_converter;
 
 	bool    _visible                  : 1;

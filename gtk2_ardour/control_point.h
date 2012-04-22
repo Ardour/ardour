@@ -83,6 +83,8 @@ class ControlPoint : public Selectable
 	ARDOUR::AutomationList::iterator model() const { return _model; }
 	AutomationLine&                  line()  const { return _line; }
 
+	static PBD::Signal1<void, ControlPoint *> CatchDeletion;
+	
   private:
 	ArdourCanvas::SimpleRect*        _item;
 	AutomationLine&                  _line;

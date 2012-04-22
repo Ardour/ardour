@@ -558,37 +558,6 @@ ControlList::erase (double when, double value)
 }
 
 void
-ControlList::reset_range (double start, double endt)
-{
-	bool reset = false;
-
-	{
-		Glib::Mutex::Lock lm (_lock);
-		ControlEvent cp (start, 0.0f);
-		iterator s;
-		iterator e;
-
-		if ((s = lower_bound (_events.begin(), _events.end(), &cp, time_comparator)) != _events.end()) {
-
-			cp.when = endt;
-			e = upper_bound (_events.begin(), _events.end(), &cp, time_comparator);
-
-			for (iterator i = s; i != e; ++i) {
-				(*i)->value = _default_value;
-			}
-
-			reset = true;
-
-			mark_dirty ();
-		}
-	}
-
-	if (reset) {
-		maybe_signal_changed ();
-	}
-}
-
-void
 ControlList::erase_range (double start, double endt)
 {
 	bool erased = false;

@@ -123,7 +123,6 @@ public:
 	void fast_simple_add (double when, double value);
 	void merge_nascent (double when);
 
-	void reset_range (double start, double end);
 	void erase_range (double start, double end);
 	void erase (iterator);
 	void erase (iterator, iterator);

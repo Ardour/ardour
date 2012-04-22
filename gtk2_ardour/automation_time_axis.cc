@@ -44,6 +44,7 @@
 #include "rgb_macros.h"
 #include "point_selection.h"
 #include "canvas_impl.h"
+#include "control_point.h"
 #include "utils.h"
 
 #include "i18n.h"
@@ -592,172 +593,6 @@ AutomationTimeAxisView::add_automation_event (GdkEvent* event, framepos_t when, 
 	_session->set_dirty ();
 }
 
-void
-AutomationTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
-{
-	list<boost::shared_ptr<AutomationLine> > lines;
-	if (_line) {
-		lines.push_back (_line);
-	} else if (_view) {
-		lines = _view->get_lines ();
-	}
-
-	for (list<boost::shared_ptr<AutomationLine> >::iterator i = lines.begin(); i != lines.end(); ++i) {
-		cut_copy_clear_one (**i, selection, op);
-	}
-}
-
-void
-AutomationTimeAxisView::cut_copy_clear_one (AutomationLine& line, Selection& selection, CutCopyOp op)
-{
-	boost::shared_ptr<Evoral::ControlList> what_we_got;
-	boost::shared_ptr<AutomationList> alist (line.the_list());
-
-	XMLNode &before = alist->get_state();
-
-	/* convert time selection to automation list model coordinates */
-	const Evoral::TimeConverter<double, ARDOUR::framepos_t>& tc = line.time_converter ();
-	double const start = tc.from (selection.time.front().start - tc.origin_b ());
-	double const end = tc.from (selection.time.front().end - tc.origin_b ());
-
-	switch (op) {
-	case Delete:
-		if (alist->cut (start, end) != 0) {
-			_session->add_command(new MementoCommand<AutomationList>(*alist.get(), &before, &alist->get_state()));
-		}
-		break;
-
-	case Cut:
-
-		if ((what_we_got = alist->cut (start, end)) != 0) {
-			_editor.get_cut_buffer().add (what_we_got);
-			_session->add_command(new MementoCommand<AutomationList>(*alist.get(), &before, &alist->get_state()));
-		}
-		break;
-	case Copy:
-		if ((what_we_got = alist->copy (start, end)) != 0) {
-			_editor.get_cut_buffer().add (what_we_got);
-		}
-		break;
-
-	case Clear:
-		if ((what_we_got = alist->cut (start, end)) != 0) {
-			_session->add_command(new MementoCommand<AutomationList>(*alist.get(), &before, &alist->get_state()));
-		}
-		break;
-	}
-
-	if (what_we_got) {
-		for (AutomationList::iterator x = what_we_got->begin(); x != what_we_got->end(); ++x) {
-			double when = (*x)->when;
-			double val  = (*x)->value;
-			line.model_to_view_coord (when, val);
-			(*x)->when = when;
-			(*x)->value = val;
-		}
-	}
-}
-
-void
-AutomationTimeAxisView::reset_objects (PointSelection& selection)
-{
-	list<boost::shared_ptr<AutomationLine> > lines;
-	if (_line) {
-		lines.push_back (_line);
-	} else if (_view) {
-		lines = _view->get_lines ();
-	}
-
-	for (list<boost::shared_ptr<AutomationLine> >::iterator i = lines.begin(); i != lines.end(); ++i) {
-		reset_objects_one (**i, selection);
-	}
-}
-
-void
-AutomationTimeAxisView::reset_objects_one (AutomationLine& line, PointSelection& selection)
-{
-	boost::shared_ptr<AutomationList> alist(line.the_list());
-
-	_session->add_command (new MementoCommand<AutomationList>(*alist.get(), &alist->get_state(), 0));
-
-	for (PointSelection::iterator i = selection.begin(); i != selection.end(); ++i) {
-
-		if ((*i).track != this) {
-			continue;
-		}
-
-		alist->reset_range ((*i).start, (*i).end);
-	}
-}
-
-void
-AutomationTimeAxisView::cut_copy_clear_objects (PointSelection& selection, CutCopyOp op)
-{
-	list<boost::shared_ptr<AutomationLine> > lines;
-	if (_line) {
-		lines.push_back (_line);
-	} else if (_view) {
-		lines = _view->get_lines ();
-	}
-
-	for (list<boost::shared_ptr<AutomationLine> >::iterator i = lines.begin(); i != lines.end(); ++i) {
-		cut_copy_clear_objects_one (**i, selection, op);
-	}
-}
-
-void
-AutomationTimeAxisView::cut_copy_clear_objects_one (AutomationLine& line, PointSelection& selection, CutCopyOp op)
-{
-	boost::shared_ptr<Evoral::ControlList> what_we_got;
-	boost::shared_ptr<AutomationList> alist(line.the_list());
-
-	XMLNode &before = alist->get_state();
-
-	for (PointSelection::iterator i = selection.begin(); i != selection.end(); ++i) {
-
-		if ((*i).track != this) {
-			continue;
-		}
-
-		switch (op) {
-		case Delete:
-			if (alist->cut ((*i).start, (*i).end) != 0) {
-				_session->add_command (new MementoCommand<AutomationList>(*alist.get(), new XMLNode (before), &alist->get_state()));
-			}
-			break;
-		case Cut:
-			if ((what_we_got = alist->cut ((*i).start, (*i).end)) != 0) {
-				_editor.get_cut_buffer().add (what_we_got);
-				_session->add_command (new MementoCommand<AutomationList>(*alist.get(), new XMLNode (before), &alist->get_state()));
-			}
-			break;
-		case Copy:
-			if ((what_we_got = alist->copy ((*i).start, (*i).end)) != 0) {
-				_editor.get_cut_buffer().add (what_we_got);
-			}
-			break;
-
-		case Clear:
-			if ((what_we_got = alist->cut ((*i).start, (*i).end)) != 0) {
-				_session->add_command (new MementoCommand<AutomationList>(*alist.get(), new XMLNode (before), &alist->get_state()));
-			}
-			break;
-		}
-	}
-
-	delete &before;
-
-	if (what_we_got) {
-		for (AutomationList::iterator x = what_we_got->begin(); x != what_we_got->end(); ++x) {
-			double when = (*x)->when;
-			double val  = (*x)->value;
-			line.model_to_view_coord (when, val);
-			(*x)->when = when;
-			(*x)->value = val;
-		}
-	}
-}
-
 /** Paste a selection.
  *  @param pos Position to paste to (session frames).
  *  @param times Number of times to paste.
@@ -794,25 +629,10 @@ AutomationTimeAxisView::paste_one (AutomationLine& line, framepos_t pos, float t
 		return false;
 	}
 
-	/* Make a copy of the list because we have to scale the
-	   values from view coordinates to model coordinates, and we're
-	   not supposed to modify the points in the selection.
-	*/
-
-	AutomationList copy (**p);
-
-	for (AutomationList::iterator x = copy.begin(); x != copy.end(); ++x) {
-		double when = (*x)->when;
-		double val  = (*x)->value;
-		line.view_to_model_coord (when, val);
-		(*x)->when = when;
-		(*x)->value = val;
-	}
-
 	double const model_pos = line.time_converter().from (pos - line.time_converter().origin_b ());
 
 	XMLNode &before = alist->get_state();
-	alist->paste (copy, model_pos, times);
+	alist->paste (**p, model_pos, times);
 	_session->add_command (new MementoCommand<AutomationList>(*alist.get(), &before, &alist->get_state()));
 
 	return true;

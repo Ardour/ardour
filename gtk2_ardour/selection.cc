@@ -62,6 +62,9 @@ Selection::Selection (const PublicEditor* e)
 
 	void (Selection::*marker_remove)(Marker*) = &Selection::remove;
 	Marker::CatchDeletion.connect (*this, MISSING_INVALIDATOR, ui_bind (marker_remove, this, _1), gui_context());
+
+	void (Selection::*point_remove)(ControlPoint*) = &Selection::remove;
+	ControlPoint::CatchDeletion.connect (*this, MISSING_INVALIDATOR, ui_bind (point_remove, this, _1), gui_context());
 }
 
 #if 0
@@ -516,7 +519,6 @@ Selection::add (boost::shared_ptr<Evoral::ControlList> cl)
 	if (!al) {
 		warning << "Programming error: Selected list is not an ARDOUR::AutomationList" << endmsg;
 		return;
-		return;
 	}
 	if (find (lines.begin(), lines.end(), al) == lines.end()) {
 		lines.push_back (al);
@@ -533,6 +535,15 @@ Selection::remove (TimeAxisView* track)
 		if (!_no_tracks_changed) {
 			TracksChanged();
 		}
+	}
+}
+
+void
+Selection::remove (ControlPoint* p)
+{
+	PointSelection::iterator i = find (points.begin(), points.end(), p);
+	if (i != points.end ()) {
+		points.erase (i);
 	}
 }
 
@@ -879,17 +890,22 @@ void
 Selection::toggle (ControlPoint* cp)
 {
 	cp->set_selected (!cp->get_selected ());
-	set_point_selection_from_line (cp->line ());
+	PointSelection::iterator i = find (points.begin(), points.end(), cp);
+	if (i == points.end()) {
+		points.push_back (cp);
+	} else {
+		points.erase (i);
+	}
+
+	PointsChanged (); /* EMIT SIGNAL */
 }
 
 void
 Selection::toggle (vector<ControlPoint*> const & cps)
 {
 	for (vector<ControlPoint*>::const_iterator i = cps.begin(); i != cps.end(); ++i) {
-		(*i)->set_selected (!(*i)->get_selected ());
+		toggle (*i);
 	}
-
-	set_point_selection_from_line (cps.front()->line ());
 }
 
 void
@@ -935,6 +951,13 @@ Selection::set (list<Selectable*> const & selectables)
 	add (selectables);
 }
 
+void
+Selection::add (PointSelection const & s)
+{
+	for (PointSelection::const_iterator i = s.begin(); i != s.end(); ++i) {
+		points.push_back (*i);
+	}
+}
 
 void
 Selection::add (list<Selectable*> const & selectables)
@@ -979,17 +1002,16 @@ void
 Selection::add (ControlPoint* cp)
 {
 	cp->set_selected (true);
-	set_point_selection_from_line (cp->line ());
+	points.push_back (cp);
+	PointsChanged (); /* EMIT SIGNAL */
 }
 
 void
 Selection::add (vector<ControlPoint*> const & cps)
 {
 	for (vector<ControlPoint*>::const_iterator i = cps.begin(); i != cps.end(); ++i) {
-		(*i)->set_selected (true);
+		add (*i);
 	}
-
-	set_point_selection_from_line (cps.front()->line ());
 }
 
 void
@@ -999,18 +1021,11 @@ Selection::set (ControlPoint* cp)
 		return;
 	}
 
-	/* We're going to set up the PointSelection from the selected ControlPoints
-	   on this point's line, so we need to deselect all ControlPoints before
-	   we re-add this one.
-	*/
-
 	for (uint32_t i = 0; i < cp->line().npoints(); ++i) {
 		cp->line().nth (i)->set_selected (false);
 	}
 
-	vector<ControlPoint*> cps;
-	cps.push_back (cp);
-	add (cps);
+	add (cp);
 }
 
 void
@@ -1081,73 +1096,6 @@ MarkerSelection::range (framepos_t& s, framepos_t& e)
 
 	s = std::min (s, e);
 	e = std::max (s, e);
-}
-
-/** Automation control point selection is mostly manipulated using the selected state
- *  of the ControlPoints themselves.  For example, to add a point to a selection, its
- *  ControlPoint is marked as selected and then this method is called.  It sets up
- *  our PointSelection from the selected ControlPoints of a given AutomationLine.
- *
- *  We can't use ControlPoints directly in the selection, as we need to express a
- *  selection of not just a visible ControlPoint but also (possibly) some invisible
- *  points nearby.  Hence the selection stores AutomationRanges, and these are synced
- *  with ControlPoint selection state using AutomationLine::set_selected_points.
- */
-
-void
-Selection::set_point_selection_from_line (AutomationLine const & line)
-{
-	points.clear ();
-
-	AutomationRange current (DBL_MAX, 0, 1, 0, &line.trackview);
-
-	for (uint32_t i = 0; i < line.npoints(); ++i) {
-		ControlPoint const * cp = line.nth (i);
-
-		if (cp->get_selected()) {
-			/* x and y position of this control point in coordinates suitable for
-			   an AutomationRange (ie model time and fraction of track height)
-			*/
-			double const x = (*(cp->model()))->when;
-			double const y = 1 - (cp->get_y() / line.trackview.current_height ());
-
-			/* work out the position of a rectangle the size of a control point centred
-			   on this point
-			*/
-
-			double const size = cp->size ();
-			double const x_size = line.time_converter().from (line.trackview.editor().pixel_to_frame (size));
-			double const y_size = size / line.trackview.current_height ();
-
-			double const x1 = max (0.0, x - x_size / 2);
-			double const x2 = x + x_size / 2;
-			double const y1 = max (0.0, y - y_size / 2);
-			double const y2 = y + y_size / 2;
-
-			/* extend the current AutomationRange to put this point in */
-			current.start = min (current.start, x1);
-			current.end = max (current.end, x2);
-			current.low_fract = min (current.low_fract, y1);
-			current.high_fract = max (current.high_fract, y2);
-
-		} else {
-			/* this point isn't selected; if the current AutomationRange has some
-			   stuff in it, push it onto the list and make a new one
-			*/
-			if (current.start < DBL_MAX) {
-				points.push_back (current);
-				current = AutomationRange (DBL_MAX, 0, 1, 0, &line.trackview);
-			}
-		}
-	}
-
-	/* Maybe push the current AutomationRange, as above */
-	if (current.start < DBL_MAX) {
-		points.push_back (current);
-		current = AutomationRange (DBL_MAX, 0, 1, 0, &line.trackview);
-	}
-
-	PointsChanged (); /* EMIT SIGNAL */
 }
 
 XMLNode&

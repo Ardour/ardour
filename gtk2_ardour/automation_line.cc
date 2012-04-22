@@ -731,38 +731,6 @@ AutomationLine::get_inverted_selectables (Selection&, list<Selectable*>& /*resul
 	// hmmm ....
 }
 
-/** Take a PointSelection and find ControlPoints that fall within it */
-list<ControlPoint*>
-AutomationLine::point_selection_to_control_points (PointSelection const & s)
-{
-	list<ControlPoint*> cp;
-
-	for (PointSelection::const_iterator i = s.begin(); i != s.end(); ++i) {
-
-		if (i->track != &trackview) {
-			continue;
-		}
-
-		double const bot = (1 - i->high_fract) * trackview.current_height ();
-		double const top = (1 - i->low_fract) * trackview.current_height ();
-
-		for (vector<ControlPoint*>::iterator j = control_points.begin(); j != control_points.end(); ++j) {
-
-			double const rstart = trackview.editor().frame_to_unit (_time_converter->to (i->start) - _offset);
-			double const rend = trackview.editor().frame_to_unit (_time_converter->to (i->end) - _offset);
-
-			if ((*j)->get_x() >= rstart && (*j)->get_x() <= rend) {
-				if ((*j)->get_y() >= bot && (*j)->get_y() <= top) {
-					cp.push_back (*j);
-				}
-			}
-		}
-
-	}
-
-	return cp;
-}
-
 void
 AutomationLine::set_selected_points (PointSelection const & points)
 {
@@ -770,11 +738,8 @@ AutomationLine::set_selected_points (PointSelection const & points)
 		(*i)->set_selected (false);
 	}
 
-	if (!points.empty()) {
-		list<ControlPoint*> cp = point_selection_to_control_points (points);
-		for (list<ControlPoint*>::iterator i = cp.begin(); i != cp.end(); ++i) {
-			(*i)->set_selected (true);
-		}
+	for (PointSelection::const_iterator i = points.begin(); i != points.end(); ++i) {
+		(*i)->set_selected (true);
 	}
 
 	set_colors ();
@@ -1147,11 +1112,17 @@ AutomationLine::get_point_x_range () const
 	pair<framepos_t, framepos_t> r (max_framepos, 0);
 
 	for (AutomationList::const_iterator i = the_list()->begin(); i != the_list()->end(); ++i) {
-		r.first = min (r.first, _time_converter->to ((*i)->when) + _offset + _time_converter->origin_b ());
-		r.second = max (r.second, _time_converter->to ((*i)->when) + _offset + _time_converter->origin_b ());
+		r.first = min (r.first, session_position (i));
+		r.second = max (r.second, session_position (i));
 	}
 
 	return r;
+}
+
+framepos_t
+AutomationLine::session_position (AutomationList::const_iterator p) const
+{
+	return _time_converter->to ((*p)->when) + _offset + _time_converter->origin_b ();
 }
 
 void
