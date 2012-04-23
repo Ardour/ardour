@@ -2981,14 +2981,7 @@ LineDrag::motion (GdkEvent* event, bool)
 	cy = min ((double) _line->height(), cy);
 
 	double const fraction = 1.0 - (cy / _line->height());
-
-	bool push;
-
-	if (Keyboard::modifier_state_contains (event->button.state, Keyboard::PrimaryModifier)) {
-		push = false;
-	} else {
-		push = true;
-	}
+	bool const push = !Keyboard::modifier_state_contains (event->button.state, Keyboard::PrimaryModifier);
 
 	/* we are ignoring x position for this drag, so we can just pass in anything */
 	_line->drag_motion (0, fraction, true, push);
