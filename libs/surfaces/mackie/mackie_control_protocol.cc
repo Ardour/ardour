@@ -93,7 +93,7 @@ bool MackieControlProtocol::probe()
 }
 
 MackieControlProtocol::MackieControlProtocol (Session& session)
-	: ControlProtocol (session, X_("Mackie"), this)
+	: ControlProtocol (session, X_("Mackie"))
 	, AbstractUI<MackieControlUIRequest> ("mackie")
 	, _current_initial_bank (0)
 	, _timecode_type (ARDOUR::AnyTime::BBT)
@@ -164,9 +164,9 @@ MackieControlProtocol::thread_init ()
 void
 MackieControlProtocol::midi_connectivity_established ()
 {
-	/* may need to tell surfaces because they may need to wake up the
-	 * device 
-	 */
+	for (Surfaces::const_iterator si = surfaces.begin(); si != surfaces.end(); ++si) {
+		(*si)->say_hello ();
+	}
 }
 
 // go to the previous track.

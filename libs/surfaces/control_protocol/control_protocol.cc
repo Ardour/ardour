@@ -50,34 +50,17 @@ PBD::Signal1<void,uint32_t> ControlProtocol::SetRouteSelection;
 PBD::Signal1<void,uint32_t> ControlProtocol::RemoveRouteFromSelection;
 PBD::Signal0<void>          ControlProtocol::ClearRouteSelection;
 
-ControlProtocol::ControlProtocol (Session& s, string str, EventLoop* evloop)
-	: BasicUI (s),
-	  _name (str)
+ControlProtocol::ControlProtocol (Session& s, string str)
+	: BasicUI (s)
+	, _name (str)
+	, _active (false)
 {
-	if (evloop) {
-		_own_event_loop = false;
-		_event_loop = evloop;
-	} else {
-		_own_event_loop = true;
-		fatal << "programming error: cannot create control protocols without an existing event loop (yet)" << endmsg;
-		/*NOTREACHED*/
-	}
-
-	_active = false;
-	
-	session->RouteAdded.connect (*this, MISSING_INVALIDATOR, boost::protect (boost::bind (&ControlProtocol::add_strip, this, _1)), _event_loop);
 }
 
 ControlProtocol::~ControlProtocol ()
 {
 }
 
-void
-ControlProtocol::add_strip (ARDOUR::RouteList&)
-{
-	route_list_changed();
-}
-	
 void
 ControlProtocol::next_track (uint32_t initial_id)
 {

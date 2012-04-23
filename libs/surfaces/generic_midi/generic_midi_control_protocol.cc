@@ -54,7 +54,7 @@ using namespace std;
 #define ui_bind(x) boost::protect (boost::bind ((x)))
 
 GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s)
-	: ControlProtocol (s, _("Generic MIDI"), midi_ui_context())
+	: ControlProtocol (s, _("Generic MIDI"))
 	, _motorised (false)
 	, gui (0)
 {

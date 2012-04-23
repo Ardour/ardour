@@ -73,7 +73,7 @@ static void error_callback(int, const char *, const char *)
 #endif
 
 OSC::OSC (Session& s, uint32_t port)
-	: ControlProtocol (s, "OSC", this)
+	: ControlProtocol (s, "OSC")
 	, AbstractUI<OSCUIRequest> ("osc")
 	, _port(port)
 {

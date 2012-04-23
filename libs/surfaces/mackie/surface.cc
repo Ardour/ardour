@@ -43,8 +43,6 @@ using ARDOUR::AutomationControl;
 
 #define ui_context() MackieControlProtocol::instance() /* a UICallback-derived object that specifies the event loop for signal handling */
 #define ui_bind(f, ...) boost::protect (boost::bind (f, __VA_ARGS__))
-extern PBD::EventLoop::InvalidationRecord* __invalidator (sigc::trackable& trackable, const char*, int);
-#define invalidator() __invalidator (*(MackieControlProtocol::instance()), __FILE__, __LINE__)
 
 // The MCU sysex header.4th byte Will be overwritten
 // when we get an incoming sysex that identifies
@@ -208,7 +206,7 @@ Surface::setup_master ()
 	}
 	
 	_master_fader->set_control (m->gain_control());
-	m->gain_control()->Changed.connect (*this, invalidator(), ui_bind (&Surface::master_gain_changed, this), ui_context());
+	m->gain_control()->Changed.connect (*this, MISSING_INVALIDATOR, ui_bind (&Surface::master_gain_changed, this), ui_context());
 }
 
 void
@@ -796,8 +794,7 @@ Surface::gui_selection_changed (ARDOUR::RouteNotificationListPtr routes)
 void
 Surface::say_hello ()
 {
-	/* wakey wakey */
-
+	/* wakeup for Mackie Control */
 	MidiByteArray wakeup (7, MIDI::sysex, 0x00, 0x00, 0x66, 0x14, 0x00, MIDI::eox);
 	_port->write (wakeup);
 	wakeup[4] = 0x15; /* wakup Mackie XT */
@@ -806,8 +803,6 @@ Surface::say_hello ()
 	_port->write (wakeup);
 	wakeup[4] = 0x11; /* wakeup Logic Control XT */
 	_port->write (wakeup);
-
-	zero_all ();
 }
 
 void

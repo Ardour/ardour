@@ -39,9 +39,9 @@ class Route;
 class Session;
 class Bundle;
 
-class ControlProtocol : virtual public sigc::trackable, public PBD::Stateful, public PBD::ScopedConnectionList, public BasicUI {
+class ControlProtocol : public PBD::Stateful, public PBD::ScopedConnectionList, public BasicUI {
   public:
-	ControlProtocol (Session&, std::string name, PBD::EventLoop* event_loop);
+	ControlProtocol (Session&, std::string name);
 	virtual ~ControlProtocol();
 
 	std::string name() const { return _name; }
@@ -51,8 +51,6 @@ class ControlProtocol : virtual public sigc::trackable, public PBD::Stateful, pu
 
 	virtual int set_feedback (bool /*yn*/) { return 0; }
 	virtual bool get_feedback () const { return false; }
-
-	virtual void route_list_changed () {}
 
 	virtual void midi_connectivity_established () {}
 
@@ -132,13 +130,9 @@ class ControlProtocol : virtual public sigc::trackable, public PBD::Stateful, pu
 	virtual void  tear_down_gui() { }
 
   protected:
-	PBD::EventLoop* _event_loop;
-	bool _own_event_loop;
 	std::vector<boost::shared_ptr<ARDOUR::Route> > route_table;
 	std::string _name;
 	bool _active;
-
-	void add_strip (std::list<boost::shared_ptr<ARDOUR::Route> >&);
 
 	void next_track (uint32_t initial_id);
 	void prev_track (uint32_t initial_id);
