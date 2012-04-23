@@ -168,19 +168,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	, _feedback_exists (false)
 
 {
-	using namespace Gtk::Menu_Helpers;
-
 	Gtkmm2ext::init();
-
-
-#ifdef TOP_MENUBAR
-	// _auto_display_errors = false;
-	/*
-	 * This was commented out as it wasn't defined
-	 * in A3 IIRC.  If this is not needed it should
-	 * be completely removed.
-	 */
-#endif
 
 	about = 0;
 	splash = 0;
@@ -360,7 +348,7 @@ ARDOUR_UI::run_startup (bool should_be_new, string load_template)
 
 	_startup->set_new_only (should_be_new);
 	if (!load_template.empty()) {
-		_startup->set_load_template( load_template );
+		_startup->set_load_template (load_template);
 	}
 	_startup->present ();
 
@@ -530,7 +518,6 @@ ARDOUR_UI::configure_timeout ()
 		return true;
 	} else {
 		have_configure_timeout = false;
-		cerr << "config event-driven save\n";
 		save_ardour_state ();
 		return false;
 	}
@@ -578,7 +565,6 @@ ARDOUR_UI::set_transport_controllable_state (const XMLNode& node)
 	if ((prop = node.property ("shuttle")) != 0) {
 		shuttle_box->controllable()->set_id (prop->value());
 	}
-
 }
 
 XMLNode&
@@ -1112,15 +1098,6 @@ ARDOUR_UI::update_disk_space()
 	}
 
 	disk_space_label.set_markup (buf);
-
-	// An attempt to make the disk space label flash red when space has run out.
-
-	if (frames < fr * 60 * 5) {
-	/*	disk_space_box.style ("disk_space_label_empty"); */
-	} else {
-	/*	disk_space_box.style ("disk_space_label"); */
-	}
-
 }
 
 gint
@@ -1155,7 +1132,7 @@ ARDOUR_UI::redisplay_recent_sessions ()
 		recent_session_display.set_model (recent_session_model);
 		return;
 	}
-	//
+
 	// sort them alphabetically
 	sort (rs.begin(), rs.end(), cmp);
 
@@ -1174,12 +1151,12 @@ ARDOUR_UI::redisplay_recent_sessions ()
 
 		vector<string*>* states;
 		vector<const gchar*> item;
-		string fullpath = (*i).to_string();
+		string fullpath = i->to_string();
 
 		/* remove any trailing / */
 
-		if (fullpath[fullpath.length()-1] == '/') {
-			fullpath = fullpath.substr (0, fullpath.length()-1);
+		if (fullpath[fullpath.length() - 1] == '/') {
+			fullpath = fullpath.substr (0, fullpath.length() - 1);
 		}
 
 		/* check whether session still exists */
@@ -1249,7 +1226,6 @@ ARDOUR_UI::build_session_selector ()
 
 	recent_session_display.show();
 	scroller->show();
-	//session_selector_window->get_vbox()->show();
 }
 
 void
@@ -1416,11 +1392,7 @@ ARDOUR_UI::session_add_midi_route (bool disk, RouteGroup* route_group, uint32_t 
 				}
 			}
 			
-		} /*else {
-			if ((route = _session->new_midi_route ()) == 0) {
-				error << _("could not create new midi bus") << endmsg;
-			}
-		}*/
+		}
 	}
 
 	catch (...) {
@@ -1612,7 +1584,6 @@ ARDOUR_UI::transport_record (bool roll)
 			_session->disable_record (false, true);
 		}
 	}
-	//cerr << "ARDOUR_UI::transport_record () called roll = " << roll << " _session->record_status() = " << _session->record_status() << endl;
 }
 
 void
@@ -1787,35 +1758,34 @@ ARDOUR_UI::transport_rewind (int option)
 void
 ARDOUR_UI::transport_forward (int option)
 {
-	float current_transport_speed;
-
-	if (_session) {
-		current_transport_speed = _session->transport_speed();
-
-		if (current_transport_speed <= 0.0f) {
-			switch (option) {
-			case 0:
-				_session->request_transport_speed (1.0f);
-				break;
-			case 1:
-				_session->request_transport_speed (4.0f);
-				break;
-			case -1:
-				_session->request_transport_speed (0.5f);
-				break;
-			}
-		} else {
-			/* speed up */
-			_session->request_transport_speed (current_transport_speed * 1.5f);
+	if (!_session) {
+		return;
+	}
+	
+	float current_transport_speed = _session->transport_speed();
+	
+	if (current_transport_speed <= 0.0f) {
+		switch (option) {
+		case 0:
+			_session->request_transport_speed (1.0f);
+			break;
+		case 1:
+			_session->request_transport_speed (4.0f);
+			break;
+		case -1:
+			_session->request_transport_speed (0.5f);
+			break;
 		}
-
+	} else {
+		/* speed up */
+		_session->request_transport_speed (current_transport_speed * 1.5f);
 	}
 }
 
 void
 ARDOUR_UI::toggle_record_enable (uint32_t rid)
 {
-	if (_session == 0) {
+	if (!_session) {
 		return;
 	}
 
@@ -1828,9 +1798,6 @@ ARDOUR_UI::toggle_record_enable (uint32_t rid)
 		if ((t = dynamic_cast<Track*>(r.get())) != 0) {
 			t->set_record_enabled (!t->record_enabled(), this);
 		}
-	}
-	if (_session == 0) {
-		return;
 	}
 }
 
@@ -2032,7 +1999,6 @@ ARDOUR_UI::stop_clocking ()
 
 gint
 ARDOUR_UI::_blink (void *arg)
-
 {
 	((ARDOUR_UI *) arg)->blink ();
 	return TRUE;
@@ -2424,27 +2390,9 @@ ARDOUR_UI::idle_load (const std::string& path)
 			/* /path/to/foo/foo.ardour => /path/to/foo, foo */
 			load_session (Glib::path_get_dirname (path), basename_nosuffix (path));
 		}
+
 	} else {
-
 		ARDOUR_COMMAND_LINE::session_name = path;
-
-		/*
-		 * new_session_dialog doens't exist in A3
-		 * Try to remove all references to it to
-		 * see if it will compile.  NOTE: this will
-		 * likely cause a runtime issue is my somewhat
-		 * uneducated guess.
-		 */
-
-		//if (new_session_dialog) {
-
-
-			/* make it break out of Dialog::run() and
-			   start again.
-			 */
-
-			//new_session_dialog->response (1);
-		//}
 	}
 }
 
@@ -2850,7 +2798,7 @@ ARDOUR_UI::show_about ()
 {
 	if (about == 0) {
 		about = new About;
-		about->signal_response().connect(sigc::mem_fun (*this, &ARDOUR_UI::about_signal_response) );
+		about->signal_response().connect (sigc::mem_fun (*this, &ARDOUR_UI::about_signal_response));
 	}
 
 	about->set_transient_for(*editor);
@@ -3427,7 +3375,7 @@ void
 ARDOUR_UI::disconnect_from_jack ()
 {
 	if (engine) {
-		if( engine->disconnect_from_jack ()) {
+		if (engine->disconnect_from_jack ()) {
 			MessageDialog msg (*editor, _("Could not disconnect from JACK"));
 			msg.run ();
 		}
@@ -3632,7 +3580,6 @@ ARDOUR_UI::setup_profile ()
 		Profile->set_small_screen ();
 	}
 
-
 	if (getenv ("ARDOUR_SAE")) {
 		Profile->set_sae ();
 		Profile->set_single_package ();
@@ -3654,11 +3601,11 @@ ARDOUR_UI::toggle_translations ()
 			bool already_enabled = !ARDOUR::translations_are_disabled ();
 
 			if (ract->get_active ()) {
-/* we don't care about errors */
+				/* we don't care about errors */
 				int fd = ::open (i18n_killer.c_str(), O_RDONLY|O_CREAT, 0644);
 				close (fd);
 			} else {
-/* we don't care about errors */
+				/* we don't care about errors */
 				unlink (i18n_killer.c_str());
 			}
 
