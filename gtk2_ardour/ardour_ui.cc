@@ -796,10 +796,10 @@ ARDOUR_UI::finish()
 				if (save_state_canfail ("")) {
 					/* failed - don't quit */
 					MessageDialog msg (*editor,
-							   _("\
-Ardour was unable to save your session.\n\n\
+							   string_compose (_("\
+%1 was unable to save your session.\n\n\
 If you still wish to quit, please use the\n\n\
-\"Just quit\" option."));
+\"Just quit\" option."), PROGRAM_NAME));
 					pop_back_splash(msg);
 					msg.run ();
 					return;
@@ -3363,14 +3363,14 @@ ARDOUR_UI::pending_state_dialog ()
  	HBox* hbox = new HBox();
 	Image* image = new Image (Stock::DIALOG_QUESTION, ICON_SIZE_DIALOG);
 	ArdourDialog dialog (_("Crash Recovery"), true);
-	Label  message (_("\
+	Label  message (string_compose (_("\
 This session appears to have been in\n\
 middle of recording when ardour or\n\
 the computer was shutdown.\n\
 \n\
-Ardour can recover any captured audio for\n\
+%1 can recover any captured audio for\n\
 you, or it can ignore it. Please decide\n\
-what you would like to do.\n"));
+what you would like to do.\n"), PROGRAM_NAME));
 	image->set_alignment(ALIGN_CENTER, ALIGN_TOP);
 	hbox->pack_start (*image, PACK_EXPAND_WIDGET, 12);
 	hbox->pack_end (message, PACK_EXPAND_PADDING, 12);
@@ -3398,9 +3398,9 @@ ARDOUR_UI::sr_mismatch_dialog (framecnt_t desired, framecnt_t actual)
 	Image* image = new Image (Stock::DIALOG_QUESTION, ICON_SIZE_DIALOG);
 	ArdourDialog dialog (_("Sample Rate Mismatch"), true);
 	Label  message (string_compose (_("\
-This session was created with a sample rate of %1 Hz\n\
-\n\
-The audioengine is currently running at %2 Hz\n"), desired, actual));
+This session was created with a sample rate of %1 Hz, but\n\
+%2 is currently running at %3 Hz.  If you load this session,\n\
+audio may be played at the wrong sample rate.\n"), desired, PROGRAM_NAME, actual));
 
 	image->set_alignment(ALIGN_CENTER, ALIGN_TOP);
 	hbox->pack_start (*image, PACK_EXPAND_WIDGET, 12);
