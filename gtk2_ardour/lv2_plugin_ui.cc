@@ -310,18 +310,18 @@ LV2PluginUI::lv2ui_free()
 
 	if (_gui_widget) {
 		remove (*_gui_widget);
+		_gui_widget = NULL;
 	}
 
 	if (_ardour_buttons_box) {
 		remove (*_ardour_buttons_box);
-		delete _ardour_buttons_box;
-		_ardour_buttons_box = 0;
+		_ardour_buttons_box = NULL;
 	}
 
-	suil_instance_free((SuilInstance*)_inst);
-
-	_inst = NULL;
-	_gui_widget = NULL;
+	if (_inst) {
+		suil_instance_free((SuilInstance*)_inst);
+		_inst = NULL;
+	}
 }
 
 LV2PluginUI::~LV2PluginUI ()
