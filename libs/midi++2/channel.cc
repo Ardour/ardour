@@ -25,7 +25,8 @@
 
 using namespace MIDI;
 
-Channel::Channel (byte channelnum, Port &p) : _port (p)
+Channel::Channel (byte channelnum, PortBase &p) 
+	: _port (p)
 {
 	_channel_number = channelnum;
 

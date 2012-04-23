@@ -30,7 +30,7 @@
 
 #include "midi++/types.h"
 #include "midi++/parser.h"
-#include "midi++/port.h"
+#include "midi++/port_base.h"
 #include "midi++/mmc.h"
 #include "pbd/transmitter.h"
 
@@ -104,9 +104,8 @@ Parser::midi_event_type_name (eventType t)
 	}
 }
 
-Parser::Parser (Port &p) 
-	: _port (p)
-
+Parser::Parser (PortBase &p) 
+	: _port(p)
 {
 	trace_stream = 0;
 	trace_prefix = "";

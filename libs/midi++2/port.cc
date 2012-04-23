@@ -43,34 +43,30 @@ using namespace PBD;
 pthread_t Port::_process_thread;
 Signal0<void> Port::JackHalted;
 Signal0<void> Port::MakeConnections;
-string Port::state_node_name = "MIDI-port";
 
 Port::Port (string const & name, Flags flags, jack_client_t* jack_client)
-	: _currently_in_cycle (false)
+	: PortBase (name, flags)
+	, _currently_in_cycle (false)
 	, _nframes_this_cycle (0)
 	, _jack_client (jack_client)
 	, _jack_port (0)
-	, _last_read_index (0)
 	, output_fifo (512)
 	, input_fifo (1024)
 	, xthread (true)
-	, _flags (flags)
-	, _centrally_parsed (true)
 {
 	assert (jack_client);
 	init (name, flags);
 }
 
 Port::Port (const XMLNode& node, jack_client_t* jack_client)
-	: _currently_in_cycle (false)
+	: PortBase (node)
+	, _currently_in_cycle (false)
 	, _nframes_this_cycle (0)
 	, _jack_client (jack_client)
 	, _jack_port (0)
-	, _last_read_index (0)
 	, output_fifo (512)
 	, input_fifo (1024)
 	, xthread (true)
-	, _centrally_parsed (true)
 {
 	assert (jack_client);
 	
@@ -84,21 +80,7 @@ Port::Port (const XMLNode& node, jack_client_t* jack_client)
 void
 Port::init (string const & name, Flags flags)
 {
-	_ok = false;  /* derived class must set to true if constructor
-			 succeeds.
-		      */
-
-	_parser = 0;
-
-	_tagname = name;
-	_flags = flags;
-
-	_parser = new Parser (*this);
-
-	for (int i = 0; i < 16; i++) {
-		_channel[i] = new Channel (i, *this);
-		_channel[i]->connect_signals ();
-	}
+	PortBase::init (name, flags);
 
 	if (!create_port ()) {
 		_ok = true;
@@ -160,21 +142,6 @@ Port::parse (framecnt_t timestamp)
 	}
 }
 
-/** Send a clock tick message.
- * \return true on success.
- */
-bool
-Port::clock (timestamp_t timestamp)
-{
-	static byte clockmsg = 0xf8;
-	
-	if (sends_output()) {
-		return midimsg (&clockmsg, 1, timestamp);
-	}
-	
-	return false;
-}
-
 void
 Port::cycle_start (pframes_t nframes)
 {
@@ -184,8 +151,6 @@ Port::cycle_start (pframes_t nframes)
 	_nframes_this_cycle = nframes;
 
 	assert(_nframes_this_cycle == nframes);
-	_last_read_index = 0;
-	_last_write_timestamp = 0;
 
 	if (sends_output()) {
 		void *buffer = jack_port_get_buffer (_jack_port, nframes);
@@ -222,50 +187,30 @@ Port::cycle_end ()
 	_nframes_this_cycle = 0;
 }
 
-std::ostream & MIDI::operator << ( std::ostream & os, const MIDI::Port & port )
-{
-	using namespace std;
-	os << "MIDI::Port { ";
-	os << "name: " << port.name();
-	os << "; ";
-	os << "ok: " << port.ok();
-	os << "; ";
-	os << " }";
-	return os;
-}
-
-Port::Descriptor::Descriptor (const XMLNode& node)
-{
-	const XMLProperty *prop;
-	bool have_tag = false;
-	bool have_mode = false;
-
-	if ((prop = node.property ("tag")) != 0) {
-		tag = prop->value();
-		have_tag = true;
-	}
-
-	if ((prop = node.property ("mode")) != 0) {
-
-		if (strings_equal_ignore_case (prop->value(), "output") || strings_equal_ignore_case (prop->value(), "out")) {
-			flags = IsOutput;
-		} else if (strings_equal_ignore_case (prop->value(), "input") || strings_equal_ignore_case (prop->value(), "in")) {
-			flags = IsInput;
-		}
-
-		have_mode = true;
-	}
-
-	if (!have_tag || !have_mode) {
-		throw failed_constructor();
-	}
-}
-
 void
 Port::jack_halted ()
 {
 	_jack_client = 0;
 	_jack_port = 0;
+}
+
+void
+Port::drain (int check_interval_usecs)
+{
+	RingBuffer< Evoral::Event<double> >::rw_vector vec = { { 0, 0 }, { 0, 0} };
+
+	if (is_process_thread()) {
+		error << "Process thread called MIDI::Port::drain() - this cannot work" << endmsg;
+		return;
+	}
+
+	while (1) {
+		output_fifo.get_write_vector (&vec);
+		if (vec.len[0] + vec.len[1] >= output_fifo.bufsize() - 1) {
+			break;
+		}
+		usleep (check_interval_usecs);
+	}
 }
 
 int
@@ -304,6 +249,8 @@ Port::write(byte * msg, size_t msglen, timestamp_t timestamp)
 		output_fifo.increment_write_idx (1);
 		
 		ret = msglen;
+
+		usleep (5000);
 
 	} else {
 
@@ -359,7 +306,7 @@ Port::flush (void* jack_port_buffer)
 	output_fifo.get_read_vector (&vec);
 
 	if (vec.len[0] + vec.len[1]) {
-		// cerr << "Flush " << vec.len[0] + vec.len[1] << " events from non-process FIFO\n";
+		cerr << "Flush " << vec.len[0] + vec.len[1] << " events from non-process FIFO\n";
 	}
 
 	if (vec.len[0]) {
@@ -417,14 +364,7 @@ Port::create_port ()
 XMLNode& 
 Port::get_state () const
 {
-	XMLNode* root = new XMLNode (state_node_name);
-	root->add_property ("tag", _tagname);
-
-	if (_flags == IsInput) {
-		root->add_property ("mode", "input");
-	} else {
-		root->add_property ("mode", "output");
-	}
+	XMLNode& root = PortBase::get_state ();
 	
 #if 0
 	byte device_inquiry[6];
@@ -454,15 +394,15 @@ Port::get_state () const
 		}
 		
 		if (!connection_string.empty()) {
-			root->add_property ("connections", connection_string);
+			root.add_property ("connections", connection_string);
 		}
 	} else {
 		if (!_connections.empty()) {
-			root->add_property ("connections", _connections);
+			root.add_property ("connections", _connections);
 		}
 	}
 
-	return *root;
+	return root;
 }
 
 void
@@ -470,9 +410,7 @@ Port::set_state (const XMLNode& node)
 {
 	const XMLProperty* prop;
 
-	if ((prop = node.property ("tag")) == 0 || prop->value() != _tagname) {
-		return;
-	}
+	PortBase::set_state (node);
 
 	if ((prop = node.property ("connections")) != 0 && _jack_port) {
 		_connections = prop->value ();

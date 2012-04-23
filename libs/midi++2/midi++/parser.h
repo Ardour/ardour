@@ -29,7 +29,7 @@
 
 namespace MIDI {
 
-class Port;
+class PortBase;
 class Parser;
 
 typedef PBD::Signal1<void,Parser&>                   ZeroByteSignal;
@@ -41,7 +41,7 @@ typedef PBD::Signal3<void,Parser &, byte *, size_t>  Signal;
 
 class Parser {
  public:
-	Parser (Port &p);
+	Parser (PortBase &p);
 	~Parser ();
 
 	/* sets the time that will be reported for any MTC or MIDI Clock
@@ -105,7 +105,7 @@ class Parser {
 	const char *midi_event_type_name (MIDI::eventType);
 	void trace (bool onoff, std::ostream *o, const std::string &prefix = "");
 	bool tracing() { return trace_stream != 0; }
-	Port &port() { return _port; }
+	PortBase &port() { return _port; }
 
 	void set_offline (bool);
 	bool offline() const { return _offline; }
@@ -136,9 +136,9 @@ class Parser {
 	void reset_mtc_state ();
 	
   private:
-	Port &_port;
+	PortBase&_port;
 	/* tracing */
-
+	
 	std::ostream *trace_stream;
 	std::string trace_prefix;
 	void trace_event (Parser &p, byte *msg, size_t len);

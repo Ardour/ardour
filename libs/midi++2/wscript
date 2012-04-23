@@ -49,6 +49,7 @@ def build(bld):
             channel.cc
             manager.cc
             parser.cc
+            port_base.cc
             port.cc
             midnam_patch.cc
             mmc.cc

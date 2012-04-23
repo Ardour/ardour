@@ -34,98 +34,30 @@
 
 #include "midi++/types.h"
 #include "midi++/parser.h"
+#include "midi++/port_base.h"
 
 namespace MIDI {
 
 class Channel;
 class PortRequest;
 
-class Port {
+class Port : public PortBase {
   public:
-	enum Flags {
-		IsInput = JackPortIsInput,
-		IsOutput = JackPortIsOutput,
-	};
-	
-	Port (std::string const &, Flags, jack_client_t *);
+	Port (std::string const &, PortBase::Flags, jack_client_t *);
 	Port (const XMLNode&, jack_client_t *);
 	~Port ();
 
 	XMLNode& get_state () const;
 	void set_state (const XMLNode&);
 
-	// FIXME: make Manager a friend of port so these can be hidden?
-
-	/* Only for use by MidiManager.  Don't ever call this. */
 	void cycle_start (pframes_t nframes);
-	/* Only for use by MidiManager.  Don't ever call this. */
 	void cycle_end ();
 
-	/** Write a message to port.
-	 * @param msg Raw MIDI message to send
-	 * @param msglen Size of @a msg
-	 * @param timestamp Time stamp in frames of this message (relative to cycle start)
-	 * @return number of bytes successfully written
-	 */
-	int write (byte *msg, size_t msglen, timestamp_t timestamp);
-
-	/** Read raw bytes from a port.
-	 * @param buf memory to store read data in
-	 * @param bufsize size of @a buf
-	 * @return number of bytes successfully read, negative if error
-	 */
-	int read (byte *buf, size_t bufsize);
-
 	void parse (framecnt_t timestamp);
-	
-	/** Write a message to port.
-	 * @return true on success.
-	 * FIXME: describe semantics here
-	 */
-	int midimsg (byte *msg, size_t len, timestamp_t timestamp) {
-		return !(write (msg, len, timestamp) == (int) len);
-	} 
-
-	bool clock (timestamp_t timestamp);
-
-	/* select(2)/poll(2)-based I/O */
-
-	/** Get the file descriptor for port.
-	 * @return File descriptor, or -1 if not selectable. 
-	 */
-	int selectable () const {
-		return xthread.selectable();
-	}
-
-	Channel *channel (channel_t chn) { 
-		return _channel[chn&0x7F];
-	}
-	
-	Parser* parser () {
-		return _parser;
-	}
-	
-	const char *name () const   { return _tagname.c_str(); }
-	bool   ok ()   const        { return _ok; }
-
-	bool centrally_parsed() const { return _centrally_parsed; }
-	void set_centrally_parsed(bool yn) { _centrally_parsed = yn; }
-
-	bool receives_input () const {
-		return _flags == IsInput;
-	}
-
-	bool sends_output () const {
-		return _flags == IsOutput;
-	}
-
-	struct Descriptor {
-	    std::string tag;
-	    Flags flags;
-
-	    Descriptor (const XMLNode&);
-	    XMLNode& get_state();
-	};
+	int write (byte *msg, size_t msglen, timestamp_t timestamp);
+	int read (byte *buf, size_t bufsize);
+	void drain (int check_interval_usecs);
+	int selectable () const { return xthread.selectable(); }
 
 	pframes_t nframes_this_cycle() const { return _nframes_this_cycle; }
 
@@ -136,30 +68,19 @@ class Port {
 	static pthread_t get_process_thread () { return _process_thread; }
 	static bool is_process_thread();
 
-	static std::string state_node_name;
-	
 	static PBD::Signal0<void> MakeConnections;
 	static PBD::Signal0<void> JackHalted;
 
 private:	
-	bool              _ok;
 	bool              _currently_in_cycle;
 	pframes_t         _nframes_this_cycle;
-	std::string       _tagname;
-	size_t            _number;
-	Channel*          _channel[16];
-	Parser*           _parser;
 	jack_client_t*    _jack_client;
 	jack_port_t*      _jack_port;
-	framecnt_t        _last_read_index;
 	timestamp_t       _last_write_timestamp;
 	RingBuffer< Evoral::Event<double> > output_fifo;
 	Evoral::EventRingBuffer<timestamp_t> input_fifo;
 	Glib::Mutex output_fifo_lock;
 	CrossThreadChannel xthread;
-	Flags             _flags;
-	bool              _centrally_parsed;
-
 
 	int create_port ();
 
@@ -176,15 +97,6 @@ private:
 	static pthread_t _process_thread;
 
 };
-
-struct PortSet {
-    PortSet (std::string str) : owner (str) { }
-    
-    std::string owner;
-    std::list<XMLNode> ports;
-};
-
-std::ostream & operator << ( std::ostream & os, const Port & port );
 
 } // namespace MIDI
 
