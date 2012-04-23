@@ -62,8 +62,6 @@ Session::process (pframes_t nframes)
 {
 	framepos_t transport_at_start = _transport_frame;
 
-	MIDI::Manager::instance()->cycle_start(nframes);
-
 	_silent = false;
 
 	if (processing_blocked()) {
@@ -99,7 +97,6 @@ Session::process (pframes_t nframes)
 
 	SendFeedback (); /* EMIT SIGNAL */
 
-	MIDI::Manager::instance()->cycle_end();
 }
 
 int

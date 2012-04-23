@@ -476,8 +476,17 @@ AudioEngine::process_callback (pframes_t nframes)
 		next_processed_frames = _processed_frames + nframes;
 	}
 
-	if (!tm.locked() || _session == 0) {
+	if (!tm.locked()) {
 		/* return having done nothing */
+		_processed_frames = next_processed_frames;
+		return 0;
+	}
+
+	if (_session == 0) {
+		if (!_freewheeling) {
+			MIDI::Manager::instance()->cycle_start(nframes);
+			MIDI::Manager::instance()->cycle_end();
+		}
 		_processed_frames = next_processed_frames;
 		return 0;
 	}
@@ -518,9 +527,13 @@ AudioEngine::process_callback (pframes_t nframes)
 		}
 
 	} else {
+		MIDI::Manager::instance()->cycle_start(nframes);
+
 		if (_session) {
 			_session->process (nframes);
 		}
+
+		MIDI::Manager::instance()->cycle_end();
 	}
 
 	if (_freewheeling) {
