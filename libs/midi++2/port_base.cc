@@ -52,12 +52,11 @@ PortBase::PortBase (string const & name, Flags flags)
 PortBase::PortBase (const XMLNode& node)
 	: _centrally_parsed (true)
 {
-	
 	Descriptor desc (node);
 
 	init (desc.tag, desc.flags);
 
-	set_state (node);
+	/* derived class must call ::set_state() */
 }
 
 void

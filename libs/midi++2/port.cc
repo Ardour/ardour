@@ -69,19 +69,15 @@ Port::Port (const XMLNode& node, jack_client_t* jack_client)
 	, xthread (true)
 {
 	assert (jack_client);
-	
+
 	Descriptor desc (node);
-
 	init (desc.tag, desc.flags);
-
 	set_state (node);
 }
 
 void
 Port::init (string const & name, Flags flags)
 {
-	PortBase::init (name, flags);
-
 	if (!create_port ()) {
 		_ok = true;
 	}
@@ -250,8 +246,6 @@ Port::write(byte * msg, size_t msglen, timestamp_t timestamp)
 		
 		ret = msglen;
 
-		usleep (5000);
-
 	} else {
 
 		// XXX This had to be temporarily commented out to make export work again
@@ -306,7 +300,7 @@ Port::flush (void* jack_port_buffer)
 	output_fifo.get_read_vector (&vec);
 
 	if (vec.len[0] + vec.len[1]) {
-		cerr << "Flush " << vec.len[0] + vec.len[1] << " events from non-process FIFO\n";
+		// cerr << "Flush " << vec.len[0] + vec.len[1] << " events from non-process FIFO\n";
 	}
 
 	if (vec.len[0]) {
@@ -410,9 +404,13 @@ Port::set_state (const XMLNode& node)
 {
 	const XMLProperty* prop;
 
+	if ((prop = node.property ("tag")) == 0 || prop->value() != _tagname) {
+		return;
+	}
+	
 	PortBase::set_state (node);
 
-	if ((prop = node.property ("connections")) != 0 && _jack_port) {
+	if ((prop = node.property ("connections")) != 0) {
 		_connections = prop->value ();
 	}
 }

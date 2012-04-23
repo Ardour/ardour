@@ -141,7 +141,7 @@ class PortBase {
 	Flags             _flags;
 	bool              _centrally_parsed;
 
-	virtual void init (std::string const &, Flags);
+	void init (std::string const &, Flags);
 };
 
 struct PortSet {
