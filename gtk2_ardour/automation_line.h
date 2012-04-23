@@ -172,8 +172,8 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 	ArdourCanvas::Points        line_points; /* coordinates for canvas line */
 	std::vector<ControlPoint*>  control_points; /* visible control points */
 
-	void sync_model_with_view_point (ControlPoint&, bool, int64_t);
-	void sync_model_with_view_points (std::list<ControlPoint*>, bool, int64_t);
+	void sync_model_with_view_point (ControlPoint&, ARDOUR::framecnt_t);
+	void sync_model_with_view_points (std::list<ControlPoint*>, ARDOUR::framecnt_t);
 	void start_drag_common (double, float);
 
 	virtual void change_model (ARDOUR::AutomationList::iterator, double x, double y);
@@ -188,7 +188,7 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 	std::list<ControlPoint*> _push_points; ///< additional points we are dragging if "push" is enabled
 	bool _drag_had_movement; ///< true if the drag has seen movement, otherwise false
 	double _drag_x; ///< last x position of the drag, in units
-	double _drag_distance; ///< total x movement of the drag, in units
+	double _drag_distance; ///< total x movement of the drag, in canvas units
 	double _last_drag_fraction; ///< last y position of the drag, as a fraction
 	/** offset from the start of the automation list to the start of the line, so that
 	 *  a +ve offset means that the 0 on the line is at _offset in the list

@@ -254,7 +254,7 @@ AutomationLine::modify_point_y (ControlPoint& cp, double y)
 	}
 
 	alist->freeze ();
-	sync_model_with_view_point (cp, false, 0);
+	sync_model_with_view_point (cp, 0);
 	alist->thaw ();
 
 	update_pending = false;
@@ -277,12 +277,12 @@ AutomationLine::reset_line_coords (ControlPoint& cp)
 }
 
 void
-AutomationLine::sync_model_with_view_points (list<ControlPoint*> cp, bool did_push, int64_t distance)
+AutomationLine::sync_model_with_view_points (list<ControlPoint*> cp, int64_t distance)
 {
 	update_pending = true;
 
 	for (list<ControlPoint*>::iterator i = cp.begin(); i != cp.end(); ++i) {
-		sync_model_with_view_point (**i, did_push, distance);
+		sync_model_with_view_point (**i, distance);
 	}
 }
 
@@ -452,7 +452,7 @@ AutomationLine::start_drag_common (double x, float fraction)
 }
 
 /** Should be called to indicate motion during a drag.
- *  @param x New x position of the drag in units, or undefined if ignore_x == true.
+ *  @param x New x position of the drag in canvas units, or undefined if ignore_x == true.
  *  @param fraction New y fraction.
  *  @return x position and y fraction that were actually used (once clamped).
  */
@@ -570,7 +570,7 @@ AutomationLine::end_drag ()
 		points.sort (ControlPointSorter ());
 	}
 
-	sync_model_with_view_points (points, did_push, rint (_drag_distance * trackview.editor().get_current_zoom ()));
+	sync_model_with_view_points (points, trackview.editor().unit_to_frame (_drag_distance));
 
 	alist->thaw ();
 
@@ -581,10 +581,11 @@ AutomationLine::end_drag ()
 		);
 
 	trackview.editor().session()->set_dirty ();
+	did_push = false;
 }
 
 void
-AutomationLine::sync_model_with_view_point (ControlPoint& cp, bool did_push, int64_t distance)
+AutomationLine::sync_model_with_view_point (ControlPoint& cp, framecnt_t distance)
 {
 	/* find out where the visual control point is.
 	   initial results are in canvas units. ask the
@@ -610,11 +611,8 @@ AutomationLine::sync_model_with_view_point (ControlPoint& cp, bool did_push, int
 	alist->modify (cp.model(), view_x, view_y);
 
 	if (did_push) {
-
-		/* move all points after cp by the same distance
-		*/
-
-		alist->slide (cp.model()++, distance);
+		/* move all points after cp by the same distance */
+		alist->slide (cp.model()++, _time_converter->from (distance));
 	}
 }
 
