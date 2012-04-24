@@ -761,13 +761,11 @@ Strip::gui_selection_changed (ARDOUR::RouteNotificationListPtr rl)
 {
 	for (ARDOUR::RouteNotificationList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		if ((*i) == _route) {
-			cerr << "Surface " << _surface->number() << "Strip " << _index << " found its route in the selection, turn button on\n";
 			_surface->write (_select->set_state (on));
 			return;
 		}
 	}
 
-	cerr << "Surface " << _surface->number() << "Strip " << _index << " did NOT find its route in the selection, turn button OFF\n";
 	_surface->write (_select->set_state (off));
 }
 
