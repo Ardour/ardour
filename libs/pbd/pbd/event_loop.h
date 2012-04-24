@@ -27,6 +27,15 @@
 namespace PBD
 {
 
+/** An EventLoop is as basic abstraction designed to be used with any "user
+ * interface" (not necessarily graphical) that needs to wait on
+ * events/requests and dispatch/process them as they arrive.
+ *
+ * This is a very basic class that doesn't by itself provide an actual
+ * event loop or thread. See BaseUI for the "real" object to be used
+ * when something like this is needed (it inherits from EventLoop).
+ */
+
 class EventLoop 
 {
   public:

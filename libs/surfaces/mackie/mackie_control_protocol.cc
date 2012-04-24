@@ -1081,7 +1081,7 @@ MackieControlProtocol::handle_button_event (Surface& surface, Button& button, Bu
 bool
 MackieControlProtocol::midi_input_handler (IOCondition ioc, MIDI::Port* port)
 {
-	DEBUG_TRACE (DEBUG::MidiIO, string_compose ("something happend on  %1\n", port->name()));
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("something happend on  %1\n", port->name()));
 
 	if (ioc & ~IO_IN) {
 		return false;
@@ -1089,7 +1089,7 @@ MackieControlProtocol::midi_input_handler (IOCondition ioc, MIDI::Port* port)
 
 	if (ioc & IO_IN) {
 
-		DEBUG_TRACE (DEBUG::MidiIO, string_compose ("data available on %1\n", port->name()));
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("data available on %1\n", port->name()));
 		framepos_t now = session->engine().frame_time();
 		port->parse (now);
 	}

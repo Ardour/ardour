@@ -271,6 +271,7 @@ JackMIDIPort::write(byte * msg, size_t msglen, timestamp_t timestamp)
 				cerr << "write of " << msglen << " failed, port holds "
 					<< jack_midi_get_event_count (jack_port_get_buffer (_jack_port, _nframes_this_cycle))
 					<< endl;
+				// PBD::stacktrace (cerr, 20);
 			}
 		} else {
 			cerr << "write to JACK midi port failed: not currently in a process cycle." << endl;

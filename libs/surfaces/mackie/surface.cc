@@ -585,7 +585,7 @@ Surface::zero_controls ()
 	if (_number == 0 && _mcp.device_info().has_two_character_display()) {
 		// any hardware-specific stuff
 		// clear 2-char display
-		show_two_char_display ("aa");
+		show_two_char_display (" ");
 	}
 
 	// and the led ring for the master strip

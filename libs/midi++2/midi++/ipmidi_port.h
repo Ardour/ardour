@@ -28,6 +28,8 @@
 #include <net/if.h>
 #endif
 
+#include <glibmm/thread.h>
+
 #include <jack/types.h>
 
 #include "pbd/xml++.h"
@@ -64,7 +66,8 @@ private:
     int sockin;
     int sockout;
     struct sockaddr_in addrout;
-    
+    Glib::Mutex write_lock;    
+
     bool open_sockets (int base_port, const std::string& ifname);
     void close_sockets ();
 

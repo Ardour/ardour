@@ -313,7 +313,6 @@ MidiTimeAxisView::model_changed()
 
 	for (std::list<std::string>::const_iterator i = device_modes.begin();
 			i != device_modes.end(); ++i) {
-		cerr << "found custom device mode " << *i << " thread_id: " << pthread_self() << endl;
 		_custom_device_mode_selector.append_text(*i);
 	}
 
