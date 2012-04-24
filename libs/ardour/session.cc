@@ -538,6 +538,10 @@ Session::when_engine_running ()
 
 	BootMessage (_("Setup signal flow and plugins"));
 
+/* Reset all panners */
+
+	Delivery::reset_panners ();
+
 	/* this will cause the CPM to instantiate any protocols that are in use
 	 * (or mandatory), which will pass it this Session, and then call
 	 * set_state() on each instantiated protocol to match stored state.
@@ -839,10 +843,6 @@ Session::hookup_io ()
 
 	IO::enable_connecting ();
 	MIDI::JackMIDIPort::MakeConnections ();
-
-	/* Now reset all panners */
-
-	Delivery::reset_panners ();
 
 	/* Anyone who cares about input state, wake up and do something */
 
