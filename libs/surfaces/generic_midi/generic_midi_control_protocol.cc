@@ -75,7 +75,15 @@ GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s)
 	Controllable::CreateBinding.connect_same_thread (*this, boost::bind (&GenericMidiControlProtocol::create_binding, this, _1, _2, _3));
 	Controllable::DeleteBinding.connect_same_thread (*this, boost::bind (&GenericMidiControlProtocol::delete_binding, this, _1));
 
-	Session::SendFeedback.connect (*this, MISSING_INVALIDATOR, ui_bind (&GenericMidiControlProtocol::send_feedback, this), midi_ui_context());;
+	/* this signal is emitted by the process() callback, and if
+	 * send_feedback() is going to do anything, it should do it in the
+	 * context of the process() callback itself.
+	 */
+
+	Session::SendFeedback.connect_same_thread (*this, boost::bind (&GenericMidiControlProtocol::send_feedback, this));
+
+	/* this one is cross-thread */
+
 	Route::RemoteControlIDChange.connect (*this, MISSING_INVALIDATOR, ui_bind (&GenericMidiControlProtocol::reset_controllables, this), midi_ui_context());
 
 	reload_maps ();
