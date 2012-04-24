@@ -96,7 +96,6 @@ Session::process (pframes_t nframes)
 	}
 
 	SendFeedback (); /* EMIT SIGNAL */
-
 }
 
 int

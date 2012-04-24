@@ -538,7 +538,7 @@ Session::when_engine_running ()
 
 	BootMessage (_("Setup signal flow and plugins"));
 
-/* Reset all panners */
+	/* Reset all panners */
 
 	Delivery::reset_panners ();
 
