@@ -556,8 +556,6 @@ Surface::zero_all ()
 {
 	// TODO turn off Timecode displays
 
-	std::cerr << "Surface " << number() << " ZERO\n";
-
 	// zero all strips
 	for (Strips::iterator it = strips.begin(); it != strips.end(); ++it) {
 		(*it)->zero();
