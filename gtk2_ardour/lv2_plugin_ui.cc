@@ -272,7 +272,7 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 			pack_start(*_ardour_buttons_box, false, false);
 
 			GtkWidget* c_widget = (GtkWidget*)GET_WIDGET(_inst);
-			_gui_widget = Glib::wrap(c_widget);
+			_gui_widget = Gtk::manage(Glib::wrap(c_widget));
 			_gui_widget->show_all();
 			pack_start(*_gui_widget, true, true);
 		} else {
@@ -311,11 +311,6 @@ LV2PluginUI::lv2ui_free()
 	if (_gui_widget) {
 		remove (*_gui_widget);
 		_gui_widget = NULL;
-	}
-
-	if (_ardour_buttons_box) {
-		remove (*_ardour_buttons_box);
-		_ardour_buttons_box = NULL;
 	}
 
 	if (_inst) {
