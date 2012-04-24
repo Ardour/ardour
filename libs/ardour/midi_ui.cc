@@ -69,7 +69,13 @@ MidiControlUI::do_request (MidiUIRequest* req)
 
 	} else if (req->type == CallSlot) {
 
-		// req->the_slot ();
+#ifndef NDEBUG
+		if (getenv ("DEBUG_THREADED_SIGNALS")) {
+			cerr << "MIDI UI calls a slot\n";
+		}
+#endif
+
+		req->the_slot ();
 
 	} else if (req->type == Quit) {
 
