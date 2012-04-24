@@ -109,8 +109,7 @@ Surface::~Surface ()
 	}
 	
 	delete _jog_wheel;
-
-	/* don't delete the port, because we want its output to remain queued */
+	delete _port;
 }
 
 const MidiByteArray& 

@@ -34,6 +34,7 @@
 #include <jack/weakjack.h>
 
 #include "midi++/port.h"
+#include "midi++/jack_midi_port.h"
 #include "midi++/mmc.h"
 #include "midi++/manager.h"
 
@@ -133,7 +134,7 @@ _thread_init_callback (void * /*arg*/)
 
 	SessionEvent::create_per_thread_pool (X_("Audioengine"), 512);
 
-	MIDI::Port::set_process_thread (pthread_self());
+	MIDI::JackMIDIPort::set_process_thread (pthread_self());
 }
 
 static void
@@ -233,7 +234,7 @@ AudioEngine::stop (bool forever)
 		} else {
 			jack_deactivate (_priv_jack);
 			Stopped(); /* EMIT SIGNAL */
-			MIDI::Port::JackHalted (); /* EMIT SIGNAL */
+			MIDI::JackMIDIPort::JackHalted (); /* EMIT SIGNAL */
 		}
 	}
 
@@ -1106,7 +1107,7 @@ AudioEngine::halted (void *arg)
 
 	if (was_running) {
 		ae->Halted(""); /* EMIT SIGNAL */
-		MIDI::Port::JackHalted (); /* EMIT SIGNAL */
+		MIDI::JackMIDIPort::JackHalted (); /* EMIT SIGNAL */
 	}
 }
 
@@ -1356,7 +1357,7 @@ AudioEngine::disconnect_from_jack ()
 	if (_running) {
 		_running = false;
 		Stopped(); /* EMIT SIGNAL */
-		MIDI::Port::JackHalted (); /* EMIT SIGNAL */
+		MIDI::JackMIDIPort::JackHalted (); /* EMIT SIGNAL */
 	}
 
 	return 0;

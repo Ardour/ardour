@@ -50,6 +50,7 @@ DeviceInfo::DeviceInfo()
 	, _has_jog_wheel (true)
 	, _has_touch_sense_faders (true)
 	, _uses_logic_control_buttons (false)
+	, _uses_ipmidi (false)
 	, _name (X_("Mackie Control Universal Pro"))
 {
 	mackie_control_buttons ();
@@ -267,6 +268,12 @@ DeviceInfo::set_state (const XMLNode& node, int /* version */)
 		}
 	}
 
+	if ((child = node.child ("UsesIPMIDI")) != 0) {
+		if ((prop = child->property ("value")) != 0) {
+			_uses_ipmidi = string_is_affirmative (prop->value());
+		}
+	}
+
 	if ((child = node.child ("LogicControlButtons")) != 0) {
 		if ((prop = child->property ("value")) != 0) {
 			_uses_logic_control_buttons = string_is_affirmative (prop->value());
@@ -367,6 +374,12 @@ bool
 DeviceInfo::has_timecode_display () const
 {
 	return _has_timecode_display;
+}
+
+bool
+DeviceInfo::uses_ipmidi () const
+{
+	return _uses_ipmidi;
 }
 
 bool

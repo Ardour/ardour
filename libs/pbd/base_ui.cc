@@ -74,7 +74,9 @@ BaseUI::main_thread ()
 {
 	set_event_loop_for_thread (this);
 	thread_init ();
+	std::cerr << pthread_self() << ' ' << _name << " running event loop\n";
 	_main_loop->run ();
+	std::cerr << pthread_self() << ' ' << _name << " event loop finished\n";
 }
 
 void
@@ -104,7 +106,7 @@ BaseUI::quit ()
 bool
 BaseUI::request_handler (Glib::IOCondition ioc)
 {
-	/* check the transport request pipe */
+	/* check the request pipe */
 
 	if (ioc & ~IO_IN) {
 		_main_loop->quit ();

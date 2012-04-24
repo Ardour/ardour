@@ -20,6 +20,7 @@
 #include "pbd/stacktrace.h"
 
 #include "midi++/port.h"
+#include "midi++/jack_midi_port.h"
 #include "midi++/manager.h"
 
 #include "evoral/midi_events.h"
@@ -152,13 +153,13 @@ void MidiClockTicker::tick (const framepos_t& transport_frame)
 		double next_tick = _last_tick + one_ppqn_in_frames (transport_frame);
 		frameoffset_t next_tick_offset = llrint (next_tick) - transport_frame;
 
+		MIDI::JackMIDIPort* mp = dynamic_cast<MIDI::JackMIDIPort*> (_midi_port);
+		
 		DEBUG_TRACE (PBD::DEBUG::MidiClock,
 			     string_compose ("Transport: %1, last tick time: %2, next tick time: %3, offset: %4, cycle length: %5\n",
-					     transport_frame, _last_tick, next_tick, next_tick_offset, _midi_port->nframes_this_cycle()
-				     )
-			);
+					     transport_frame, _last_tick, next_tick, next_tick_offset, mp ? mp->nframes_this_cycle() : 0));
 
-		if (next_tick_offset >= _midi_port->nframes_this_cycle()) {
+		if (!mp || (next_tick_offset >= mp->nframes_this_cycle())) {
 			break;
 		}
 

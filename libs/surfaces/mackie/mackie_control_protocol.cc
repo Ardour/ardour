@@ -114,7 +114,7 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 
 	set_device (Config->get_mackie_device_name());
 	set_profile (Config->get_mackie_device_profile());
-
+	
 	TrackSelectionChanged.connect (gui_connections, MISSING_INVALIDATOR, ui_bind (&MackieControlProtocol::gui_track_selection_changed, this, _1), this);
 
 	_instance = this;
@@ -127,6 +127,10 @@ MackieControlProtocol::~MackieControlProtocol()
 	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::~MackieControlProtocol\n");
 
 	_active = false;
+
+	/* stop event loop */
+
+	BaseUI::quit ();
 
 	try {
 		close();
@@ -584,21 +588,23 @@ MackieControlProtocol::create_surfaces ()
 		}
 		stype = ext;
 
-		_input_bundle->add_channel (
-			surface->port().input_port().name(),
-			ARDOUR::DataType::MIDI,
-			session->engine().make_port_name_non_relative (surface->port().input_port().name())
-			);
-		
-		_output_bundle->add_channel (
-			surface->port().output_port().name(),
-			ARDOUR::DataType::MIDI,
-			session->engine().make_port_name_non_relative (surface->port().output_port().name())
-			);
+		if (!_device_info.uses_ipmidi()) {
+			_input_bundle->add_channel (
+				surface->port().input_port().name(),
+				ARDOUR::DataType::MIDI,
+				session->engine().make_port_name_non_relative (surface->port().input_port().name())
+				);
+			
+			_output_bundle->add_channel (
+				surface->port().output_port().name(),
+				ARDOUR::DataType::MIDI,
+				session->engine().make_port_name_non_relative (surface->port().output_port().name())
+				);
+		}
 
 		int fd;
 		MIDI::Port& input_port (surface->port().input_port());
-		
+
 		if ((fd = input_port.selectable ()) >= 0) {
 			Glib::RefPtr<IOSource> psrc = IOSource::create (fd, IO_IN|IO_HUP|IO_ERR);
 
@@ -1082,8 +1088,6 @@ MackieControlProtocol::midi_input_handler (IOCondition ioc, MIDI::Port* port)
 	}
 
 	if (ioc & IO_IN) {
-
-		CrossThreadChannel::drain (port->selectable());
 
 		DEBUG_TRACE (DEBUG::MidiIO, string_compose ("data available on %1\n", port->name()));
 		framepos_t now = session->engine().frame_time();

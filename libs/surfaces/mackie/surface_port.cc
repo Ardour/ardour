@@ -25,6 +25,8 @@
 
 #include "midi++/types.h"
 #include "midi++/port.h"
+#include "midi++/jack_midi_port.h"
+#include "midi++/ipmidi_port.h"
 #include "midi++/manager.h"
 
 #include "ardour/debug.h"
@@ -51,38 +53,49 @@ using namespace PBD;
 SurfacePort::SurfacePort (Surface& s)
 	: _surface (&s)
 {
-	jack_client_t* jack = MackieControlProtocol::instance()->get_session().engine().jack();
-
-	_input_port = new MIDI::Port (string_compose (_("%1 in"),  _surface->name()), MIDI::Port::IsInput, jack);
-	_output_port =new MIDI::Port (string_compose (_("%1 out"), _surface->name()), MIDI::Port::IsOutput, jack);
-
-	/* MackieControl has its own thread for handling input from the input
-	 * port, and we don't want anything handling output from the output
-	 * port. This stops the Generic MIDI UI event loop in ardour from
-	 * attempting to handle these ports.
-	 */
-
-	_input_port->set_centrally_parsed (false);
-	_output_port->set_centrally_parsed (false);
-	
-	MIDI::Manager * mm = MIDI::Manager::instance();
-
-	mm->add_port (_input_port);
-	mm->add_port (_output_port);
+	if (_surface->mcp().device_info().uses_ipmidi()) {
+		_input_port = new MIDI::IPMIDIPort (MIDI::IPMIDIPort::lowest_ipmidi_port_default+_surface->number());
+		_output_port = _input_port;
+	} else {
+		jack_client_t* jack = MackieControlProtocol::instance()->get_session().engine().jack();
+		
+		_input_port = new MIDI::JackMIDIPort (string_compose (_("%1 in"),  _surface->name()), MIDI::Port::IsInput, jack);
+		_output_port =new MIDI::JackMIDIPort (string_compose (_("%1 out"), _surface->name()), MIDI::Port::IsOutput, jack);
+		
+		/* MackieControl has its own thread for handling input from the input
+		 * port, and we don't want anything handling output from the output
+		 * port. This stops the Generic MIDI UI event loop in ardour from
+		 * attempting to handle these ports.
+		 */
+		
+		_input_port->set_centrally_parsed (false);
+		_output_port->set_centrally_parsed (false);
+		
+		MIDI::Manager * mm = MIDI::Manager::instance();
+		
+		mm->add_port (_input_port);
+		mm->add_port (_output_port);
+	}
 }
 
 SurfacePort::~SurfacePort()
 {
-	MIDI::Manager* mm = MIDI::Manager::instance ();
-	
-	if (_input_port) {
-		mm->remove_port (_input_port);
+	if (_surface->mcp().device_info().uses_ipmidi()) {
 		delete _input_port;
-	}
+	} else {
 
-	if (_output_port) {
-		mm->remove_port (_output_port);
-		delete _output_port;
+		MIDI::Manager* mm = MIDI::Manager::instance ();
+		
+		if (_input_port) {
+			mm->remove_port (_input_port);
+			delete _input_port;
+		}
+		
+		if (_output_port) {
+			_output_port->drain (10000);
+			mm->remove_port (_output_port);
+			delete _output_port;
+		}
 	}
 }
 

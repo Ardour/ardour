@@ -59,8 +59,8 @@ protected:
 
 private:
 	Mackie::Surface* _surface;
-	MIDI::Port*      _input_port;
-	MIDI::Port*      _output_port;
+	MIDI::Port*  _input_port;
+	MIDI::Port*  _output_port;
 };	
 
 std::ostream& operator <<  (std::ostream& , const SurfacePort& port);

@@ -67,6 +67,7 @@ class DeviceInfo
 	bool has_global_controls() const;
 	bool has_jog_wheel () const;
 	bool has_touch_sense_faders() const;
+	bool uses_ipmidi() const;
 	const std::string& name() const;
 
 	static std::map<std::string,DeviceInfo> device_info;
@@ -86,6 +87,7 @@ class DeviceInfo
     bool     _has_jog_wheel;
     bool     _has_touch_sense_faders;
     bool     _uses_logic_control_buttons;
+    bool     _uses_ipmidi;
     std::string _name;
 
     std::map<Button::ID,GlobalButtonInfo> _global_buttons;
