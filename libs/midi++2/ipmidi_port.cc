@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012 Paul Davie
+    Copyright (C) 2012 Paul Davis
 
     Using code from Rui Nuno Capela's qmidinet as inspiration.
     
