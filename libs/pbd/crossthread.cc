@@ -81,7 +81,6 @@ RefPtr<IOSource>
 CrossThreadChannel::ios () 
 {
 	if (!_ios) {
-		std::cerr << "New x-channel fd " << fds[0] << std::endl;
 		_ios = new RefPtr<IOSource> (IOSource::create (fds[0], IOCondition(IO_IN|IO_PRI|IO_ERR|IO_HUP|IO_NVAL)));
 	}
 	return *_ios;

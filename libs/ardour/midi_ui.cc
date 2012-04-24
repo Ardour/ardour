@@ -143,8 +143,6 @@ MidiControlUI::reset_ports ()
 		if ((fd = (*i)->selectable ()) >= 0) {
 			Glib::RefPtr<IOSource> psrc = IOSource::create (fd, IO_IN|IO_HUP|IO_ERR);
 
-			cerr << "MIDI UI listening to " << (*i)->name() << endl;
-
 			psrc->connect (sigc::bind (sigc::mem_fun (this, &MidiControlUI::midi_input_handler), *i));
 			psrc->attach (_main_loop->get_context());
 

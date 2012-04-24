@@ -424,7 +424,6 @@ Surface::handle_midi_sysex (MIDI::Parser &, MIDI::byte * raw_bytes, size_t count
 		} else {
 			if (!_active) {
 				_active = true;
-				std::cerr << "Surface " << _number << " Now active!\n";
 				zero_controls ();
 				for (Strips::iterator s = strips.begin(); s != strips.end(); ++s) {
 					(*s)->notify_all ();
