@@ -72,7 +72,7 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 	, touch_sensitivity_adjustment (0, 0, 9, 1, 4)
 	, touch_sensitivity_scale (touch_sensitivity_adjustment)
 	, recalibrate_fader_button (_("Recalibrate Faders"))
-	, ipmidi_base_port_adjustment (MIDI::IPMIDIPort::lowest_ipmidi_port_default, 0, 32767, 1, 1000)
+	, ipmidi_base_port_adjustment (21928, 0, 32767, 1, 1000)
 	, ipmidi_base_port_spinner (ipmidi_base_port_adjustment)
 {
 	Gtk::Label* l;
