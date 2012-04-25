@@ -56,7 +56,7 @@ SurfacePort::SurfacePort (Surface& s)
 	, _output_port (0)
 {
 	if (_surface->mcp().device_info().uses_ipmidi()) {
-		_input_port = new MIDI::IPMIDIPort (MIDI::IPMIDIPort::lowest_ipmidi_port_default+_surface->number());
+		_input_port = new MIDI::IPMIDIPort (_surface->mcp().ipmidi_base() +_surface->number());
 		_output_port = _input_port;
 	} else {
 		jack_client_t* jack = MackieControlProtocol::instance()->get_session().engine().jack();

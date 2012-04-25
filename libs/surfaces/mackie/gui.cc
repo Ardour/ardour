@@ -72,7 +72,7 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 	, touch_sensitivity_adjustment (0, 0, 9, 1, 4)
 	, touch_sensitivity_scale (touch_sensitivity_adjustment)
 	, recalibrate_fader_button (_("Recalibrate Faders"))
-	, ipmidi_base_port_adjustment (21928, 0, 32767, 1, 1000)
+	, ipmidi_base_port_adjustment (_cp.ipmidi_base(), 0, 32767, 1, 1000)
 	, ipmidi_base_port_spinner (ipmidi_base_port_adjustment)
 {
 	Gtk::Label* l;
@@ -141,6 +141,7 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 	table->attach (ipmidi_base_port_spinner, 1, 2, 7, 8, AttachOptions(FILL|EXPAND), AttachOptions (0));
 
 	ipmidi_base_port_spinner.set_sensitive (_cp.device_info().uses_ipmidi());
+	ipmidi_base_port_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &MackieControlProtocolGUI::ipmidi_spinner_changed));
 
 	vector<string> profiles;
 	
@@ -344,7 +345,7 @@ MackieControlProtocolGUI::refresh_function_key_editor ()
 
 		Glib::RefPtr<Gtk::Action> act;
 		string action;
-		const string defstring = "def";
+		const string defstring = "\u2022";
 
 		action = dp.get_button_action (bid, 0);
 		if (action.empty()) {
@@ -432,11 +433,11 @@ MackieControlProtocolGUI::action_changed (const Glib::ustring &sPath, const Glib
 
 		std::map<std::string,std::string>::iterator i = action_map.find (text);
 		
-		cerr << "Changed to " << text << endl;
-
 		if (i == action_map.end()) {
 			return;
 		}
+
+		cerr << "Changed to " << i->first << " aka " << i->second << endl;
 
 		Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (i->second.c_str());
 
@@ -474,8 +475,9 @@ MackieControlProtocolGUI::action_changed (const Glib::ustring &sPath, const Glib
 			}
 
 			_cp.device_profile().set_button_action ((*row)[function_key_columns.id], modifier, i->second);
+		} else {
+			std::cerr << "no such action\n";
 		}
-			
 	}
 }
 
@@ -497,7 +499,13 @@ MackieControlProtocolGUI::profile_combo_changed ()
 	string profile = _profile_combo.get_active_text();
 
 	_cp.set_profile (profile);
-	ARDOUR::Config->set_mackie_device_profile (profile);
 
 	refresh_function_key_editor ();
+}
+
+void
+MackieControlProtocolGUI::ipmidi_spinner_changed ()
+{
+	cerr << "Set IP MIDI base to " << ipmidi_base_port_spinner.get_value() << endl;
+	_cp.set_ipmidi_base ((int16_t) lrintf (ipmidi_base_port_spinner.get_value()));
 }

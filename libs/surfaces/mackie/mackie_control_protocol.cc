@@ -35,6 +35,7 @@
 
 #include "midi++/types.h"
 #include "midi++/port.h"
+#include "midi++/ipmidi_port.h"
 #include "pbd/pthread_utils.h"
 #include "pbd/error.h"
 #include "pbd/memento_command.h"
@@ -104,15 +105,14 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 	, _view_mode (Mixer)
 	, _current_selected_track (-1)
 	, _modifier_state (0)
+	, _ipmidi_base (MIDI::IPMIDIPort::lowest_ipmidi_port_default)
+	, needs_ipmidi_restart (false)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::MackieControlProtocol\n");
 
 	DeviceInfo::reload_device_info ();
 	DeviceProfile::reload_device_profiles ();
 
-	set_device (Config->get_mackie_device_name());
-	set_profile (Config->get_mackie_device_profile());
-	
 	TrackSelectionChanged.connect (gui_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::gui_track_selection_changed, this, _1), this);
 
 	_instance = this;
@@ -353,37 +353,30 @@ MackieControlProtocol::set_active (bool yn)
 		return 0;
 	}
 
-	try
-	{
-		if (yn) {
+	if (yn) {
+		
+		/* start event loop */
+		
+		BaseUI::run ();
+		
+		create_surfaces ();
+		connect_session_signals ();
+		_active = true;
+		update_surfaces ();
+		
+		/* set up periodic task for metering and automation
+		 */
+		
+		Glib::RefPtr<Glib::TimeoutSource> periodic_timeout = Glib::TimeoutSource::create (100); // milliseconds
+		periodic_connection = periodic_timeout->connect (sigc::mem_fun (*this, &MackieControlProtocol::periodic));
+		periodic_timeout->attach (main_loop()->get_context());
+		
+	} else {
 
-			/* start event loop */
-
-			BaseUI::run ();
-
-			create_surfaces ();
-			connect_session_signals ();
-			_active = true;
-			update_surfaces ();
-
-			/* set up periodic task for metering and automation
-			 */
-
-			Glib::RefPtr<Glib::TimeoutSource> periodic_timeout = Glib::TimeoutSource::create (100); // milliseconds
-			periodic_connection = periodic_timeout->connect (sigc::mem_fun (*this, &MackieControlProtocol::periodic));
-			periodic_timeout->attach (main_loop()->get_context());
-
-		} else {
-			BaseUI::quit ();
-			close();
-			_active = false;
-		}
-	}
-	
-	catch (exception & e) {
-		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("set_active to false because exception caught: %1\n", e.what()));
+		BaseUI::quit ();
+		close ();
 		_active = false;
-		throw;
+
 	}
 
 	return 0;
@@ -394,6 +387,11 @@ MackieControlProtocol::periodic ()
 {
 	if (!_active) {
 		return false;
+	}
+
+	if (needs_ipmidi_restart) {
+		ipmidi_restart ();
+		return true;
 	}
 
 	struct timeval now;
@@ -475,8 +473,6 @@ MackieControlProtocol::update_surfaces()
 		return;
 	}
 
-
-
 	// do the initial bank switch to connect signals
 	// _current_initial_bank is initialised by set_state
 	switch_banks (_current_initial_bank, true);
@@ -548,10 +544,6 @@ MackieControlProtocol::set_device (const string& device_name)
 	}
 
 	_device_info = d->second;
-
-	/* store it away in a global location */
-	
-	Config->set_mackie_device_name (device_name);
 
 	if (_active) {
 		create_surfaces ();
@@ -637,15 +629,22 @@ XMLNode&
 MackieControlProtocol::get_state()
 {
 	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::get_state\n");
+	char buf[16];
 
 	// add name of protocol
 	XMLNode* node = new XMLNode (X_("Protocol"));
 	node->add_property (X_("name"), ARDOUR::ControlProtocol::_name);
 
 	// add current bank
-	ostringstream os;
-	os << _current_initial_bank;
-	node->add_property (X_("bank"), os.str());
+	snprintf (buf, sizeof (buf), "%d", _current_initial_bank);
+	node->add_property (X_("bank"), buf);
+
+	// ipMIDI base port (possibly not used)
+	snprintf (buf, sizeof (buf), "%d", _ipmidi_base);
+	node->add_property (X_("ipmidi-base"), buf);
+
+	node->add_property (X_("device-profile"), _device_profile.name());
+	node->add_property (X_("device-name"), _device_info.name());
 
 	return *node;
 }
@@ -657,15 +656,34 @@ MackieControlProtocol::set_state (const XMLNode & node, int /*version*/)
 
 	int retval = 0;
 	const XMLProperty* prop;
+	uint32_t bank;
+	bool active = _active;
+
+	if ((prop = node.property (X_("ipmidi-base"))) != 0) {
+		set_ipmidi_base (atoi (prop->value()));
+	}
 
 	// fetch current bank
 	if ((prop = node.property (X_("bank"))) != 0) {
-		string bank = prop->value();
-		set_active (true);
-		uint32_t new_bank = atoi (bank.c_str());
-		if (_current_initial_bank != new_bank) {
-			switch_banks (new_bank);
-		}
+		bank = atoi (prop->value());
+	}
+	
+	if ((prop = node.property (X_("active"))) != 0) {
+		active = string_is_affirmative (prop->value());
+	}
+
+	if ((prop = node.property (X_("device-name"))) != 0) {
+		set_device (prop->value());
+	}
+
+	if ((prop = node.property (X_("device-profile"))) != 0) {
+		set_profile (prop->value());
+	}
+
+	set_active (active);
+
+	if (_active) {
+		switch_banks (bank, true);
 	}
 
 	return retval;
@@ -1166,8 +1184,6 @@ MackieControlProtocol::force_special_route_to_strip (boost::shared_ptr<Route> r,
 void
 MackieControlProtocol::gui_track_selection_changed (ARDOUR::RouteNotificationListPtr rl)
 {
-	cerr << "GUI Selection changed, " << rl->size() << " routes\n";
-
 	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
 		(*s)->gui_selection_changed (rl);
 	}
@@ -1365,4 +1381,32 @@ MackieControlProtocol::pull_route_range (DownButtonList& down, RouteList& select
 			}
 		}
 	}
+}
+
+void
+MackieControlProtocol::set_ipmidi_base (int16_t portnum)
+{
+	/* this will not be saved without a session save, so .. */
+
+	session->set_dirty ();
+
+	_ipmidi_base = portnum;
+
+	/* if the current device uses ipMIDI we need
+	   to restart.
+	*/
+
+	if (_active && _device_info.uses_ipmidi()) {
+		needs_ipmidi_restart = true;
+	}
+}
+
+void
+MackieControlProtocol::ipmidi_restart ()
+{
+	clear_ports ();
+	surfaces.clear ();	
+	create_surfaces ();
+	switch_banks (_current_initial_bank, true);
+	needs_ipmidi_restart = false;
 }

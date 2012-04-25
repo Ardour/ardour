@@ -134,8 +134,6 @@ MidiControlUI::reset_ports ()
 
 	for (MIDI::Manager::PortList::const_iterator i = plist->begin(); i != plist->end(); ++i) {
 
-		cerr << "MIDI UI looking at port " << (*i)->name() << endl;
-
 		if (!(*i)->centrally_parsed()) {
 			continue;
 		}

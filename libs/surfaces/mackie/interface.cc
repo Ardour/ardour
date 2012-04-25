@@ -36,7 +36,7 @@ new_mackie_protocol (ControlProtocolDescriptor*, Session* s)
 	
 	try {
 		mcp = new MackieControlProtocol (*s);
-		mcp->set_active (true);
+		/* do not set active here - wait for set_state() */
 	}
 	catch (exception & e) {
 		error << "Error instantiating MackieControlProtocol: " << e.what() << endmsg;

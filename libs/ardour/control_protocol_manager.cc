@@ -75,8 +75,16 @@ ControlProtocolManager::set_session (Session* s)
 				instantiate (**i);
 				(*i)->requested = false;
 
-				if ((*i)->protocol && (*i)->state) {
-					(*i)->protocol->set_state (*(*i)->state, Stateful::loading_state_version);
+				if ((*i)->protocol) {
+					if ((*i)->state) {
+						(*i)->protocol->set_state (*(*i)->state, Stateful::loading_state_version);
+					} else {
+						/* guarantee a call to
+						   set_state() whether we have
+						   existing state or not
+						*/
+						(*i)->protocol->set_state (XMLNode(""), Stateful::loading_state_version);
+					}
 				}
 			}
 		}

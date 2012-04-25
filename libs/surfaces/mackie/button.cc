@@ -51,8 +51,8 @@ Button::name_to_id (const std::string& name)
 	if (!g_strcasecmp (name.c_str(), "ChannelRight")) { return ChannelRight; }
 	if (!g_strcasecmp (name.c_str(), "Flip")) { return Flip; }
 	if (!g_strcasecmp (name.c_str(), "Edit")) { return Edit; }
-	if (!g_strcasecmp (name.c_str(), "NameValue")) { return NameValue; }
-	if (!g_strcasecmp (name.c_str(), "TimecodeBeats")) { return TimecodeBeats; }
+	if (!g_strcasecmp (name.c_str(), "Name/Value")) { return NameValue; }
+	if (!g_strcasecmp (name.c_str(), "Timecode/Beats")) { return TimecodeBeats; }
 	if (!g_strcasecmp (name.c_str(), "F1")) { return F1; }
 	if (!g_strcasecmp (name.c_str(), "F2")) { return F2; }
 	if (!g_strcasecmp (name.c_str(), "F3")) { return F3; }

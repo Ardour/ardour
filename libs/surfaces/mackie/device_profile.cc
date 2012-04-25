@@ -107,13 +107,11 @@ DeviceProfile::reload_device_profiles ()
 
 	if (!devprofiles) {
 		error << "No MCP device info files found using " << spath.to_string() << endmsg;
-		std::cerr << "No MCP device info files found using " << spath.to_string() << std::endl;
 		return;
 	}
 
 	if (devprofiles->empty()) {
 		error << "No MCP device info files found using " << spath.to_string() << endmsg;
-		std::cerr << "No MCP device info files found using " << spath.to_string() << std::endl;
 		return;
 	}
 
@@ -288,7 +286,7 @@ DeviceProfile::set_button_action (Button::ID id, int modifier_state, const strin
 	ButtonActionMap::iterator i = _button_map.find (id);
 
 	if (i == _button_map.end()) {
-		return;
+		i = _button_map.insert (std::make_pair (id, ButtonActions())).first;
 	}
 
 	string action (act);
@@ -360,6 +358,7 @@ DeviceProfile::save ()
 	
 	XMLTree tree;
 	tree.set_root (&get_state());
+
 	if (!tree.write (fullpath.to_string())) {
 		error << string_compose ("MCP profile not saved to %1", fullpath.to_string()) << endmsg;
 	}

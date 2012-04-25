@@ -192,6 +192,9 @@ class MackieControlProtocol
 	void add_down_select_button (int surface, int strip);
 	void remove_down_select_button (int surface, int strip);
 	void select_range ();
+
+	int16_t ipmidi_base() const { return _ipmidi_base; }
+	void    set_ipmidi_base (int16_t);
 	
   protected:
 	// shut down the surface
@@ -278,6 +281,8 @@ class MackieControlProtocol
 	int                      _modifier_state;
 	PortSources               port_sources;
 	ButtonMap                 button_map;
+	int16_t                  _ipmidi_base;
+	bool                      needs_ipmidi_restart;
 
 	void create_surfaces ();
 	bool periodic();
@@ -286,10 +291,9 @@ class MackieControlProtocol
 	void clear_ports ();
 	void force_special_route_to_strip (boost::shared_ptr<ARDOUR::Route> r, uint32_t surface, uint32_t strip_number);
 	void build_button_map ();
-
 	void gui_track_selection_changed (ARDOUR::RouteNotificationListPtr);
-
-
+	void ipmidi_restart ();
+	
 	/* BUTTON HANDLING */
 
 	typedef std::set<uint32_t> DownButtonList;

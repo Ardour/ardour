@@ -92,6 +92,7 @@ class MackieControlProtocolGUI : public Gtk::Notebook
 
     void surface_combo_changed ();
     void profile_combo_changed ();
+    void ipmidi_spinner_changed ();
 
     std::map<std::string,std::string> action_map; // map from action names to paths
 
