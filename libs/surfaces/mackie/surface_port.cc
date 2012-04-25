@@ -52,6 +52,8 @@ using namespace PBD;
  */
 SurfacePort::SurfacePort (Surface& s)
 	: _surface (&s)
+	, _input_port (0)
+	, _output_port (0)
 {
 	if (_surface->mcp().device_info().uses_ipmidi()) {
 		_input_port = new MIDI::IPMIDIPort (MIDI::IPMIDIPort::lowest_ipmidi_port_default+_surface->number());

@@ -62,7 +62,6 @@ class DeviceInfo
 	uint32_t extenders() const;
 	bool has_two_character_display() const; 
 	bool has_master_fader () const;
-	bool has_segmented_display() const;
 	bool has_timecode_display() const;
 	bool has_global_controls() const;
 	bool has_jog_wheel () const;
@@ -81,7 +80,6 @@ class DeviceInfo
     uint32_t _extenders;
     bool     _has_two_character_display;
     bool     _has_master_fader;
-    bool     _has_segmented_display;
     bool     _has_timecode_display;
     bool     _has_global_controls;
     bool     _has_jog_wheel;

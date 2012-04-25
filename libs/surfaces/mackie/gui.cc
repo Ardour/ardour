@@ -72,13 +72,15 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 	, touch_sensitivity_adjustment (0, 0, 9, 1, 4)
 	, touch_sensitivity_scale (touch_sensitivity_adjustment)
 	, recalibrate_fader_button (_("Recalibrate Faders"))
+	, ipmidi_base_port_adjustment (MIDI::IPMIDIPort::lowest_ipmidi_port_default, 0, 32767, 1, 1000)
+	, ipmidi_base_port_spinner (ipmidi_base_port_adjustment)
 {
 	Gtk::Label* l;
 	Gtk::Alignment* align;
 
 	set_border_width (12);
 
-	Gtk::Table* table = Gtk::manage (new Gtk::Table (2, 7));
+	Gtk::Table* table = Gtk::manage (new Gtk::Table (2, 8));
 	table->set_row_spacings (4);
 	table->set_col_spacings (6);
 	l = manage (new Gtk::Label (_("Device Type:")));
@@ -132,6 +134,13 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 	touch_sensitivity_scale.property_draw_value() = false;
 	table->attach (touch_sensitivity_scale, 1, 2, 5, 6, AttachOptions(FILL|EXPAND), AttachOptions (0));
 	table->attach (recalibrate_fader_button, 1, 2, 6, 7, AttachOptions(FILL|EXPAND), AttachOptions (0));
+
+	l = manage (new Gtk::Label (_("ipMIDI Port (lowest)")));
+	l->set_alignment (1.0, 0.5);
+	table->attach (*l, 0, 1, 7, 8, AttachOptions(FILL|EXPAND), AttachOptions (0));
+	table->attach (ipmidi_base_port_spinner, 1, 2, 7, 8, AttachOptions(FILL|EXPAND), AttachOptions (0));
+
+	ipmidi_base_port_spinner.set_sensitive (_cp.device_info().uses_ipmidi());
 
 	vector<string> profiles;
 	
@@ -474,6 +483,12 @@ void
 MackieControlProtocolGUI::surface_combo_changed ()
 {
 	_cp.set_device (_surface_combo.get_active_text());
+
+	/* update ipMIDI field */
+
+	cerr << "New device called " << _cp.device_info().name() << " with ipMIDI ? " << _cp.device_info().uses_ipmidi() << endl;
+
+	ipmidi_base_port_spinner.set_sensitive (_cp.device_info().uses_ipmidi());
 }
 
 void

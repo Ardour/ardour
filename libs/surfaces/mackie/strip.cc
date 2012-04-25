@@ -59,7 +59,6 @@ using namespace ARDOUR;
 using namespace PBD;
 
 #define ui_context() MackieControlProtocol::instance() /* a UICallback-derived object that specifies the event loop for signal handling */
-#define ui_bind(f, ...) boost::protect (boost::bind (f, __VA_ARGS__))
 
 Strip::Strip (Surface& s, const std::string& name, int index, const map<Button::ID,StripButtonInfo>& strip_buttons)
 	: Group (name)
@@ -83,14 +82,12 @@ Strip::Strip (Surface& s, const std::string& name, int index, const map<Button::
 	_vpot = dynamic_cast<Pot*> (Pot::factory (*_surface, Pot::ID + index, "vpot", *this));
 	_meter = dynamic_cast<Meter*> (Meter::factory (*_surface, index, "meter", *this));
 
-#ifndef NDEBUG	
 	for (map<Button::ID,StripButtonInfo>::const_iterator b = strip_buttons.begin(); b != strip_buttons.end(); ++b) {
 		Button* bb = dynamic_cast<Button*> (Button::factory (*_surface, b->first, b->second.base_id + index, b->second.name, *this));
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("surface %1 strip %2 new button BID %3 id %4 from base %5\n",
 								   _surface->number(), index, Button::id_to_name (bb->bid()), 
 								   bb->id(), b->second.base_id));
 	}
-#endif	
 }	
 
 Strip::~Strip ()
@@ -165,23 +162,23 @@ Strip::set_route (boost::shared_ptr<Route> r, bool with_messages)
 
 	set_vpot_parameter (PanAzimuthAutomation);
 	
-	_route->solo_control()->Changed.connect(route_connections, MISSING_INVALIDATOR, ui_bind (&Strip::notify_solo_changed, this), ui_context());
-	_route->mute_control()->Changed.connect(route_connections, MISSING_INVALIDATOR, ui_bind (&Strip::notify_mute_changed, this), ui_context());
+	_route->solo_control()->Changed.connect(route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_solo_changed, this), ui_context());
+	_route->mute_control()->Changed.connect(route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_mute_changed, this), ui_context());
 
 	boost::shared_ptr<Pannable> pannable = _route->pannable();
 
 	if (pannable) {
-		pannable->pan_azimuth_control->Changed.connect(route_connections, MISSING_INVALIDATOR, ui_bind (&Strip::notify_panner_azi_changed, this, false), ui_context());
-		pannable->pan_width_control->Changed.connect(route_connections, MISSING_INVALIDATOR, ui_bind (&Strip::notify_panner_width_changed, this, false), ui_context());
+		pannable->pan_azimuth_control->Changed.connect(route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_panner_azi_changed, this, false), ui_context());
+		pannable->pan_width_control->Changed.connect(route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_panner_width_changed, this, false), ui_context());
 	}
-	_route->gain_control()->Changed.connect(route_connections, MISSING_INVALIDATOR, ui_bind (&Strip::notify_gain_changed, this, false), ui_context());
-	_route->PropertyChanged.connect (route_connections, MISSING_INVALIDATOR, ui_bind (&Strip::notify_property_changed, this, _1), ui_context());
+	_route->gain_control()->Changed.connect(route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_gain_changed, this, false), ui_context());
+	_route->PropertyChanged.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_property_changed, this, _1), ui_context());
 	
 	boost::shared_ptr<Track> trk = boost::dynamic_pointer_cast<ARDOUR::Track>(_route);
 	
 	if (trk) {
 		_recenable->set_control (trk->rec_enable_control());
-		trk->rec_enable_control()->Changed .connect(route_connections, MISSING_INVALIDATOR, ui_bind (&Strip::notify_record_enable_changed, this), ui_context());
+		trk->rec_enable_control()->Changed .connect(route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_record_enable_changed, this), ui_context());
 
 		
 	}
@@ -189,8 +186,8 @@ Strip::set_route (boost::shared_ptr<Route> r, bool with_messages)
 	// TODO this works when a currently-banked route is made inactive, but not
 	// when a route is activated which should be currently banked.
 	
-	_route->active_changed.connect (route_connections, MISSING_INVALIDATOR, ui_bind (&Strip::notify_active_changed, this), ui_context());
-	_route->DropReferences.connect (route_connections, MISSING_INVALIDATOR, ui_bind (&Strip::notify_route_deleted, this), ui_context());
+	_route->active_changed.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_active_changed, this), ui_context());
+	_route->DropReferences.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_route_deleted, this), ui_context());
 	
 	/* Update */
 	

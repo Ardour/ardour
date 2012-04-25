@@ -102,5 +102,7 @@ class MackieControlProtocolGUI : public Gtk::Notebook
     Gtk::Adjustment  touch_sensitivity_adjustment;
     Gtk::HScale      touch_sensitivity_scale;
     Gtk::Button      recalibrate_fader_button;
+    Gtk::Adjustment  ipmidi_base_port_adjustment;
+    Gtk::SpinButton  ipmidi_base_port_spinner;
 };
 
