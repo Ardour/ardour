@@ -320,6 +320,8 @@ elif [ -d /usr/lib/pango ]; then
 	PANGOROOT="/usr/lib"
 elif [ -d /usr/local/lib/pango ]; then
 	PANGOROOT="/usr/local/lib"
+elif [ -d /usr/lib/x86_64-linux-gnu/pango ]; then
+	PANGOROOT="/usr/lib/x86_64-linux-gnu"
 else
 	echo ""
 	echo "!!! ERROR !!! - Unable to locate pango directory. Packager will exit"
@@ -351,9 +353,9 @@ GDKPIXBUFROOT=`pkg-config --libs-only-L gdk-pixbuf-2.0 | sed -e "s/-L//" -e "s/[
 if [ ! -z "$GDKPIXBUFROOT" ]; then
 	echo "Found GDKPIXBUFROOT using pkg-config"
 elif [ -d /usr/lib/gdk-pixbuf-2.0 ]; then
-	GDKPIXBUFROOT="/usr/lib/gdk-pixbuf-2.0"
+	GDKPIXBUFROOT="/usr/lib"
 elif [ -d /usr/local/lib/gdk-pixbuf-2.0 ]; then
-	GDKPIXBUFROOT="/usr/local/lib/gdk-pixbuf-2.0"
+	GDKPIXBUFROOT="/usr/local/lib"
 elif [ -d ${GTKLIB}/loaders ]; then  #odd ball case
 	GDKPIXBUFROOT=${GTKROOT}
 	GDKPIXBUFLIB=${GTKLIB}
