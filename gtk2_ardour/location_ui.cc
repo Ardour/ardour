@@ -328,13 +328,13 @@ LocationEditRow::set_location (Location *loc)
 
 	--i_am_the_modifier;
 
-	location->start_changed.connect (connections, invalidator (*this), ui_bind (&LocationEditRow::start_changed, this, _1), gui_context());
-	location->end_changed.connect (connections, invalidator (*this), ui_bind (&LocationEditRow::end_changed, this, _1), gui_context());
-	location->name_changed.connect (connections, invalidator (*this), ui_bind (&LocationEditRow::name_changed, this, _1), gui_context());
-	location->changed.connect (connections, invalidator (*this), ui_bind (&LocationEditRow::location_changed, this, _1), gui_context());
-	location->FlagsChanged.connect (connections, invalidator (*this), ui_bind (&LocationEditRow::flags_changed, this, _1, _2), gui_context());
-	location->LockChanged.connect (connections, invalidator (*this), ui_bind (&LocationEditRow::lock_changed, this, _1), gui_context());
-	location->PositionLockStyleChanged.connect (connections, invalidator (*this), ui_bind (&LocationEditRow::position_lock_style_changed, this, _1), gui_context());
+	location->start_changed.connect (connections, invalidator (*this), boost::bind (&LocationEditRow::start_changed, this, _1), gui_context());
+	location->end_changed.connect (connections, invalidator (*this), boost::bind (&LocationEditRow::end_changed, this, _1), gui_context());
+	location->name_changed.connect (connections, invalidator (*this), boost::bind (&LocationEditRow::name_changed, this, _1), gui_context());
+	location->changed.connect (connections, invalidator (*this), boost::bind (&LocationEditRow::location_changed, this, _1), gui_context());
+	location->FlagsChanged.connect (connections, invalidator (*this), boost::bind (&LocationEditRow::flags_changed, this, _1, _2), gui_context());
+	location->LockChanged.connect (connections, invalidator (*this), boost::bind (&LocationEditRow::lock_changed, this, _1), gui_context());
+	location->PositionLockStyleChanged.connect (connections, invalidator (*this), boost::bind (&LocationEditRow::position_lock_style_changed, this, _1), gui_context());
 }
 
 void
@@ -1056,8 +1056,8 @@ LocationUI::set_session(ARDOUR::Session* s)
 	if (_session) {
 		_session->locations()->changed.connect (_session_connections, invalidator (*this), boost::bind (&LocationUI::locations_changed, this, _1), gui_context());
 		_session->locations()->StateChanged.connect (_session_connections, invalidator (*this), boost::bind (&LocationUI::refresh_location_list, this), gui_context());
-		_session->locations()->added.connect (_session_connections, invalidator (*this), ui_bind (&LocationUI::location_added, this, _1), gui_context());
-		_session->locations()->removed.connect (_session_connections, invalidator (*this), ui_bind (&LocationUI::location_removed, this, _1), gui_context());
+		_session->locations()->added.connect (_session_connections, invalidator (*this), boost::bind (&LocationUI::location_added, this, _1), gui_context());
+		_session->locations()->removed.connect (_session_connections, invalidator (*this), boost::bind (&LocationUI::location_removed, this, _1), gui_context());
 		_clock_group->set_clock_mode (clock_mode_from_session_instant_xml ());
 	}
 

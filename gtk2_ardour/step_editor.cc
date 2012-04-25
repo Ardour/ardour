@@ -388,7 +388,7 @@ StepEditor::playlist_changed ()
 {
         step_edit_region_connection.disconnect ();
         _track->playlist()->RegionRemoved.connect (step_edit_region_connection, invalidator (*this),
-                                                   ui_bind (&StepEditor::region_removed, this, _1),
+                                                   boost::bind (&StepEditor::region_removed, this, _1),
                                                    gui_context());
 }
 

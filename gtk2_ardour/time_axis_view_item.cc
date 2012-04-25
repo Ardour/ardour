@@ -228,7 +228,7 @@ TimeAxisViewItem::init (
 	set_duration (item_duration, this);
 	set_position (start, this);
 
-	Config->ParameterChanged.connect (*this, invalidator (*this), ui_bind (&TimeAxisViewItem::parameter_changed, this, _1), gui_context ());
+	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&TimeAxisViewItem::parameter_changed, this, _1), gui_context ());
 }
 
 TimeAxisViewItem::~TimeAxisViewItem()

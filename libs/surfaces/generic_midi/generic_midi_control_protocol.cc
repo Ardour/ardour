@@ -51,7 +51,6 @@ using namespace std;
 #include "i18n.h"
 
 #define midi_ui_context() MidiControlUI::instance() /* a UICallback-derived object that specifies the event loop for signal handling */
-#define ui_bind(f, ...) boost::protect (boost::bind (f, __VA_ARGS__))
 
 GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s)
 	: ControlProtocol (s, _("Generic MIDI"))
@@ -78,7 +77,7 @@ GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s)
 	Controllable::CreateBinding.connect_same_thread (*this, boost::bind (&GenericMidiControlProtocol::create_binding, this, _1, _2, _3));
 	Controllable::DeleteBinding.connect_same_thread (*this, boost::bind (&GenericMidiControlProtocol::delete_binding, this, _1));
 
-	Session::SendFeedback.connect (*this, MISSING_INVALIDATOR, ui_bind (&GenericMidiControlProtocol::send_feedback, this), midi_ui_context());;
+	Session::SendFeedback.connect (*this, MISSING_INVALIDATOR, boost::bind (&GenericMidiControlProtocol::send_feedback, this), midi_ui_context());;
 #if 0
 	/* XXXX SOMETHING GOES WRONG HERE (april 2012) - STILL DEBUGGING */
 	/* this signal is emitted by the process() callback, and if
@@ -90,7 +89,7 @@ GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s)
 #endif
 	/* this one is cross-thread */
 
-	Route::RemoteControlIDChange.connect (*this, MISSING_INVALIDATOR, ui_bind (&GenericMidiControlProtocol::reset_controllables, this), midi_ui_context());
+	Route::RemoteControlIDChange.connect (*this, MISSING_INVALIDATOR, boost::bind (&GenericMidiControlProtocol::reset_controllables, this), midi_ui_context());
 
 	reload_maps ();
 }

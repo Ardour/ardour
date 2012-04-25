@@ -240,7 +240,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 
 	/* handle dialog requests */
 
-	ARDOUR::Session::Dialog.connect (forever_connections, MISSING_INVALIDATOR, ui_bind (&ARDOUR_UI::session_dialog, this, _1), gui_context());
+	ARDOUR::Session::Dialog.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::session_dialog, this, _1), gui_context());
 
 	/* handle pending state with a dialog (PROBLEM: needs to return a value and thus cannot be x-thread) */
 
@@ -252,12 +252,12 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 
 	/* handle requests to quit (coming from JACK session) */
 
-	ARDOUR::Session::Quit.connect (forever_connections, MISSING_INVALIDATOR, ui_bind (&ARDOUR_UI::finish, this), gui_context ());
+	ARDOUR::Session::Quit.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::finish, this), gui_context ());
 
 	/* tell the user about feedback */
 
-	ARDOUR::Session::FeedbackDetected.connect (forever_connections, MISSING_INVALIDATOR, ui_bind (&ARDOUR_UI::feedback_detected, this), gui_context ());
-	ARDOUR::Session::SuccessfulGraphSort.connect (forever_connections, MISSING_INVALIDATOR, ui_bind (&ARDOUR_UI::successful_graph_sort, this), gui_context ());
+	ARDOUR::Session::FeedbackDetected.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::feedback_detected, this), gui_context ());
+	ARDOUR::Session::SuccessfulGraphSort.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::successful_graph_sort, this), gui_context ());
 
 	/* handle requests to deal with missing files */
 
@@ -385,7 +385,7 @@ ARDOUR_UI::create_engine ()
 
 	engine->Stopped.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::engine_stopped, this), gui_context());
 	engine->Running.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::engine_running, this), gui_context());
-	engine->SampleRateChanged.connect (forever_connections, MISSING_INVALIDATOR, ui_bind (&ARDOUR_UI::update_sample_rate, this, _1), gui_context());
+	engine->SampleRateChanged.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::update_sample_rate, this, _1), gui_context());
 
 	engine->Halted.connect_same_thread (forever_connections, boost::bind (&ARDOUR_UI::engine_halted, this, _1, false));
 
@@ -471,7 +471,7 @@ ARDOUR_UI::post_engine ()
 	update_cpu_load ();
 	update_sample_rate (engine->frame_rate());
 
-	Config->ParameterChanged.connect (forever_connections, MISSING_INVALIDATOR, ui_bind (&ARDOUR_UI::parameter_changed, this, _1), gui_context());
+	Config->ParameterChanged.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::parameter_changed, this, _1), gui_context());
 	boost::function<void (string)> pc (boost::bind (&ARDOUR_UI::parameter_changed, this, _1));
 	Config->map_parameters (pc);
 

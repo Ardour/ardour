@@ -296,9 +296,9 @@ CrossfadeEditor::CrossfadeEditor (Session* s, boost::shared_ptr<Crossfade> xf, d
 
 	curve_select_clicked (In);
 
-	xfade->PropertyChanged.connect (state_connection, invalidator (*this), ui_bind (&CrossfadeEditor::xfade_changed, this, _1), gui_context());
+	xfade->PropertyChanged.connect (state_connection, invalidator (*this), boost::bind (&CrossfadeEditor::xfade_changed, this, _1), gui_context());
 
-	_session->AuditionActive.connect (_session_connections, invalidator (*this), ui_bind (&CrossfadeEditor::audition_state_changed, this, _1), gui_context());
+	_session->AuditionActive.connect (_session_connections, invalidator (*this), boost::bind (&CrossfadeEditor::audition_state_changed, this, _1), gui_context());
 	show_all_children();
 }
 

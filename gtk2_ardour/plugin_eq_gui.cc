@@ -141,7 +141,7 @@ PluginEqGui::start_listening ()
 	_plugin->activate();
 	set_buffer_size(4096, 16384);
 	// Connect the realtime signal collection callback
-	_plugin_insert->AnalysisDataGathered.connect (analysis_connection, invalidator (*this), ui_bind (&PluginEqGui::signal_collect_callback, this, _1, _2), gui_context());
+	_plugin_insert->AnalysisDataGathered.connect (analysis_connection, invalidator (*this), boost::bind (&PluginEqGui::signal_collect_callback, this, _1, _2), gui_context());
 }
 
 void

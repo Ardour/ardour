@@ -52,7 +52,7 @@ ImageFrameTimeAxisGroup::ImageFrameTimeAxisGroup(ImageFrameTimeAxisView& iftav, 
 	selected_imageframe_item = 0;
 	is_selected = false;
 
-	ImageFrameView::CatchDeletion.connect (*this, ui_bind (&ImageFrameTimeAxisGroup::remove_imageframe_item, this, _1), gui_context());
+	ImageFrameView::CatchDeletion.connect (*this, boost::bind (&ImageFrameTimeAxisGroup::remove_imageframe_item, this, _1), gui_context());
 }
 
 /**

@@ -113,7 +113,7 @@ StripSilenceDialog::StripSilenceDialog (Session* s, list<RegionView*> const & v)
 	update_threshold_line ();
 
 	/* Create a thread which runs while the dialogue is open to compute the silence regions */
-	Completed.connect (_completed_connection, MISSING_INVALIDATOR, ui_bind (&StripSilenceDialog::update, this), gui_context ());
+	Completed.connect (_completed_connection, MISSING_INVALIDATOR, boost::bind (&StripSilenceDialog::update, this), gui_context ());
 	_thread_should_finish = false;
 	pthread_create (&_thread, 0, StripSilenceDialog::_detection_thread_work, this);
 }

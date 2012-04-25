@@ -24,7 +24,7 @@
 
 MidiRegionSelection::MidiRegionSelection ()
 {
-	RegionView::RegionViewGoingAway.connect (_death_connection, MISSING_INVALIDATOR, ui_bind (&MidiRegionSelection::remove_it, this, _1), gui_context());
+	RegionView::RegionViewGoingAway.connect (_death_connection, MISSING_INVALIDATOR, boost::bind (&MidiRegionSelection::remove_it, this, _1), gui_context());
 }
 
 /** Copy constructor.
@@ -33,7 +33,7 @@ MidiRegionSelection::MidiRegionSelection ()
 MidiRegionSelection::MidiRegionSelection (MidiRegionSelection const & other)
 	: std::list<MidiRegionView*> (other)
 {
-	RegionView::RegionViewGoingAway.connect (_death_connection, MISSING_INVALIDATOR, ui_bind (&MidiRegionSelection::remove_it, this, _1), gui_context());
+	RegionView::RegionViewGoingAway.connect (_death_connection, MISSING_INVALIDATOR, boost::bind (&MidiRegionSelection::remove_it, this, _1), gui_context());
 }
 
 

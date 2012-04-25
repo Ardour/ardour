@@ -56,8 +56,6 @@ using namespace Glib;
 
 #include "pbd/abstract_ui.cc" // instantiate template
 
-#define ui_bind(f, ...) boost::protect (boost::bind (f, __VA_ARGS__))
-
 OSC* OSC::_instance = 0;
 
 #ifdef DEBUG
@@ -90,7 +88,7 @@ OSC::OSC (Session& s, uint32_t port)
 
 	// "Application Hooks"
 	session_loaded (s);
-	session->Exported.connect (*this, MISSING_INVALIDATOR, ui_bind (&OSC::session_exported, this, _1, _2), this);
+	session->Exported.connect (*this, MISSING_INVALIDATOR, boost::bind (&OSC::session_exported, this, _1, _2), this);
 }
 
 OSC::~OSC()

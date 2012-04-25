@@ -189,7 +189,7 @@ RegionEditor::RegionEditor (Session* s, boost::shared_ptr<Region> r)
 
 	bounds_changed (change);
 
-	_region->PropertyChanged.connect (state_connection, invalidator (*this), ui_bind (&RegionEditor::region_changed, this, _1), gui_context());
+	_region->PropertyChanged.connect (state_connection, invalidator (*this), boost::bind (&RegionEditor::region_changed, this, _1), gui_context());
 
 	spin_arrow_grab = false;
 
@@ -266,7 +266,7 @@ RegionEditor::connect_editor_events ()
 
 	audition_button.signal_toggled().connect (sigc::mem_fun(*this, &RegionEditor::audition_button_toggled));
 
-	_session->AuditionActive.connect (audition_connection, invalidator (*this), ui_bind (&RegionEditor::audition_state_changed, this, _1), gui_context());
+	_session->AuditionActive.connect (audition_connection, invalidator (*this), boost::bind (&RegionEditor::audition_state_changed, this, _1), gui_context());
 }
 
 void

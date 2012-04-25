@@ -63,7 +63,7 @@ AudioStreamView::AudioStreamView (AudioTimeAxisView& tv)
 	color_handler ();
 	_amplitude_above_axis = 1.0;
 
-	Config->ParameterChanged.connect (*this, invalidator (*this), ui_bind (&AudioStreamView::parameter_changed, this, _1), gui_context());
+	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&AudioStreamView::parameter_changed, this, _1), gui_context());
 }
 
 int
@@ -269,7 +269,7 @@ AudioStreamView::setup_rec_box ()
 						sources.push_back (src);
 						src->PeakRangeReady.connect (rec_data_ready_connections,
 						                             invalidator (*this),
-						                             ui_bind (&AudioStreamView::rec_peak_range_ready, this, _1, _2, boost::weak_ptr<Source>(src)),
+						                             boost::bind (&AudioStreamView::rec_peak_range_ready, this, _1, _2, boost::weak_ptr<Source>(src)),
 						                             gui_context());
 					}
 				}

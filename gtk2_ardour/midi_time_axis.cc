@@ -159,7 +159,7 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
 	processors_changed (RouteProcessorChange ());
 
-	_route->processors_changed.connect (*this, invalidator (*this), ui_bind (&MidiTimeAxisView::processors_changed, this, _1), gui_context());
+	_route->processors_changed.connect (*this, invalidator (*this), boost::bind (&MidiTimeAxisView::processors_changed, this, _1), gui_context());
 
 	if (is_track()) {
 		_piano_roll_header->SetNoteSelection.connect (sigc::mem_fun (*this, &MidiTimeAxisView::set_note_selection));

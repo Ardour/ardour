@@ -89,10 +89,6 @@ JackMIDIPort::init (string const & name, Flags flags)
 
 JackMIDIPort::~JackMIDIPort ()
 {
-	for (int i = 0; i < 16; i++) {
-		delete _channel[i];
-	}
-
 	if (_jack_port) {
 		if (_jack_client) {
 			jack_port_unregister (_jack_client, _jack_port);

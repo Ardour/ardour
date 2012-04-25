@@ -321,7 +321,7 @@ MonitorSection::MonitorSection (Session* s)
 
         /* catch changes that affect us */
 
-        Config->ParameterChanged.connect (config_connection, invalidator (*this), ui_bind (&MonitorSection::parameter_changed, this, _1), gui_context());
+        Config->ParameterChanged.connect (config_connection, invalidator (*this), boost::bind (&MonitorSection::parameter_changed, this, _1), gui_context());
 }
 
 MonitorSection::~MonitorSection ()

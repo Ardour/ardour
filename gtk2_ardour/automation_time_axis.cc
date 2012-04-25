@@ -227,7 +227,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	ColorsChanged.connect (sigc::mem_fun (*this, &AutomationTimeAxisView::color_handler));
 
 	_route->DropReferences.connect (
-		_route_connections, invalidator (*this), ui_bind (&AutomationTimeAxisView::route_going_away, this), gui_context ()
+		_route_connections, invalidator (*this), boost::bind (&AutomationTimeAxisView::route_going_away, this), gui_context ()
 		);
 }
 
