@@ -17,6 +17,7 @@
 */
 
 #include <cerrno>
+#include <unistd.h>
 
 #include <glib.h>
 #include <glib/gstdio.h>
