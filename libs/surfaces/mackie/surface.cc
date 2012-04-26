@@ -520,9 +520,20 @@ Surface::write_sysex (MIDI::byte msg)
 }
 
 uint32_t
-Surface::n_strips () const
+Surface::n_strips (bool with_locked_strips) const
 {
-	return strips.size();
+	if (with_locked_strips) {
+		return strips.size();
+	} 
+
+	uint32_t n = 0;
+
+	for (Strips::const_iterator it = strips.begin(); it != strips.end(); ++it) {
+		if (!(*it)->locked()) {
+			++n;
+		}
+	}
+	return n;
 }
 
 Strip*
@@ -597,8 +608,17 @@ Surface::map_routes (const vector<boost::shared_ptr<Route> >& routes)
 	vector<boost::shared_ptr<Route> >::const_iterator r;
 	Strips::iterator s;
 
-	for (r = routes.begin(), s = strips.begin(); r != routes.end() && s != strips.end(); ++r, ++s) {
-		(*s)->set_route (*r);
+	for (r = routes.begin(), s = strips.begin(); r != routes.end() && s != strips.end(); ++s) {
+
+		/* don't try to assign routes to a locked strip. it won't
+		   use it anyway, but if we do, then we get out of sync
+		   with the proposed mapping.
+		*/
+
+		if (!(*s)->locked()) {
+			(*s)->set_route (*r);
+			++r;
+		}
 	}
 
 	for (; s != strips.end(); ++s) {
@@ -803,3 +823,14 @@ void
 Surface::set_jog_mode (JogWheel::Mode m)
 {
 }	
+
+bool
+Surface::route_is_locked_to_strip (boost::shared_ptr<Route> r) const
+{
+	for (Strips::const_iterator s = strips.begin(); s != strips.end(); ++s) {
+		if ((*s)->route() == r && (*s)->locked()) {
+			return true;
+		}
+	}
+	return false;
+}

@@ -192,6 +192,17 @@ MackieControlProtocol::next_track()
 	}
 }
 
+bool
+MackieControlProtocol::route_is_locked_to_strip (boost::shared_ptr<Route> r) const
+{
+	for (Surfaces::const_iterator si = surfaces.begin(); si != surfaces.end(); ++si) {
+		if ((*si)->route_is_locked_to_strip (r)) {
+			return true;
+		}
+	}
+	return false;
+}
+
 // predicate for sort call in get_sorted_routes
 struct RouteByRemoteId
 {
@@ -229,13 +240,19 @@ MackieControlProtocol::get_sorted_routes()
 
 	for (RouteList::iterator it = routes->begin(); it != routes->end(); ++it) {
 
-		Route & route = **it;
+		boost::shared_ptr<Route> route = *it;
 
-		if (remote_ids.find (route.remote_control_id()) != remote_ids.end()) {
+		if (remote_ids.find (route->remote_control_id()) != remote_ids.end()) {
 			continue;
 		}
 
-		if (route.is_hidden() || route.is_master() || route.is_monitor()) {
+		if (route->is_hidden() || route->is_master() || route->is_monitor()) {
+			continue;
+		}
+
+		/* don't include locked routes */
+
+		if (route_is_locked_to_strip(route)) {
 			continue;
 		}
 
@@ -261,7 +278,7 @@ MackieControlProtocol::get_sorted_routes()
 		}
 
 		sorted.push_back (*it);
-		remote_ids.insert (route.remote_control_id());
+		remote_ids.insert (route->remote_control_id());
 	}
 
 	sort (sorted.begin(), sorted.end(), RouteByRemoteId());
@@ -275,12 +292,12 @@ MackieControlProtocol::refresh_current_bank()
 }
 
 uint32_t
-MackieControlProtocol::n_strips() const
+MackieControlProtocol::n_strips (bool with_locked_strips) const
 {
 	uint32_t strip_count = 0;
 
 	for (Surfaces::const_iterator si = surfaces.begin(); si != surfaces.end(); ++si) {
-		strip_count += (*si)->n_strips ();
+		strip_count += (*si)->n_strips (with_locked_strips);
 	}
 
 	return strip_count;
@@ -296,7 +313,8 @@ MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 	}
 
 	Sorted sorted = get_sorted_routes();
-	uint32_t strip_cnt = n_strips();
+	uint32_t strip_cnt = n_strips (false); // do not include locked strips
+					       // in this count
 
 	if (sorted.size() <= strip_cnt && !force) {
 		/* no banking - not enough routes to fill all strips */
@@ -327,9 +345,9 @@ MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 			vector<boost::shared_ptr<Route> > routes;
 			uint32_t added = 0;
 
-			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("surface has %1 strips\n", (*si)->n_strips()));
+			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("surface has %1 unlockedstrips\n", (*si)->n_strips (false)));
 
-			for (; r != sorted.end() && added < (*si)->n_strips(); ++r, ++added) {
+			for (; r != sorted.end() && added < (*si)->n_strips (false); ++r, ++added) {
 				routes.push_back (*r);
 			}
 

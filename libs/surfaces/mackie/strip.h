@@ -80,7 +80,8 @@ public:
 
 	void lock_controls ();
 	void unlock_controls ();
-	
+	bool locked() const { return _controls_locked; }
+
 	void gui_selection_changed (ARDOUR::RouteNotificationListPtr);
 
 private:

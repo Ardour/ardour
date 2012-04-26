@@ -145,7 +145,7 @@ class MackieControlProtocol
 	void set_master_on_surface_strip (uint32_t surface, uint32_t strip);
 	void set_monitor_on_surface_strip (uint32_t surface, uint32_t strip);
 	
-	uint32_t n_strips () const;
+	uint32_t n_strips (bool with_locked_strips = true) const;
 	
 	bool has_editor () const { return true; }
 	void* get_gui () const;
@@ -234,6 +234,8 @@ class MackieControlProtocol
 
 	void thread_init ();
 	void midi_connectivity_established ();
+
+	bool route_is_locked_to_strip (boost::shared_ptr<ARDOUR::Route>) const;
 
   private:
 

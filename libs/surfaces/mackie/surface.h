@@ -67,8 +67,10 @@ public:
 	typedef std::vector<Strip*> Strips;
 	Strips strips;
 
-	uint32_t n_strips () const;
+	uint32_t n_strips (bool with_locked_strips = true) const;
 	Strip* nth_strip (uint32_t n) const;
+
+	bool route_is_locked_to_strip (boost::shared_ptr<ARDOUR::Route>) const;
 
 	/// This collection owns the groups
 	typedef std::map<std::string,Group*> Groups;
