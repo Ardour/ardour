@@ -151,6 +151,7 @@ Strip::set_route (boost::shared_ptr<Route> r, bool with_messages)
 	reset_saved_values ();
 
 	if (!r) {
+		zero ();
 		return;
 	}
 
@@ -213,8 +214,6 @@ Strip::set_route (boost::shared_ptr<Route> r, bool with_messages)
 			if ((a = automatable.find (PanWidthAutomation)) != automatable.end()) {
 				possible_pot_parameters.push_back (PanWidthAutomation);
 			}
-		} else {
-			std::cerr << "connected to route without a panner\n";
 		}
 	}
 }

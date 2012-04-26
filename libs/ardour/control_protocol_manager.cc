@@ -41,7 +41,6 @@ const string ControlProtocolManager::state_node_name = X_("ControlProtocols");
 
 ControlProtocolManager::ControlProtocolManager ()
 {
-
 }
 
 ControlProtocolManager::~ControlProtocolManager()
@@ -320,12 +319,14 @@ ControlProtocolManager::set_state (const XMLNode& node, int /*version*/)
 			if (prop && string_is_affirmative (prop->value())) {
 				if ((prop = (*citer)->property (X_("name"))) != 0) {
 					ControlProtocolInfo* cpi = cpi_by_name (prop->value());
+
 					if (cpi) {
-						if (!(*citer)->children().empty()) {
-							cpi->state = (*citer)->children().front ();
-						} else {
-							cpi->state = 0;
+
+						if (cpi->state) {
+							delete cpi->state;
 						}
+
+						cpi->state = new XMLNode (**citer);
 
 						if (_session) {
 							instantiate (*cpi);

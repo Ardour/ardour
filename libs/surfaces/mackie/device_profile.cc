@@ -120,8 +120,6 @@ DeviceProfile::reload_device_profiles ()
 
 		XMLTree tree;
 
-		std::cerr << "Loading " << fullpath << std::endl;
-		
 		if (!tree.read (fullpath.c_str())) {
 			continue;
 		}

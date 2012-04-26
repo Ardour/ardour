@@ -84,6 +84,7 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 	table->set_row_spacings (4);
 	table->set_col_spacings (6);
 	l = manage (new Gtk::Label (_("Device Type:")));
+	l->set_alignment (1.0, 0.5);
 	table->attach (*l, 0, 1, 0, 1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 	table->attach (_surface_combo, 1, 2, 0, 1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 20);
 

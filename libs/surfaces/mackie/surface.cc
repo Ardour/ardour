@@ -606,9 +606,9 @@ void
 Surface::map_routes (const vector<boost::shared_ptr<Route> >& routes)
 {
 	vector<boost::shared_ptr<Route> >::const_iterator r;
-	Strips::iterator s;
+	Strips::iterator s = strips.begin();
 
-	for (r = routes.begin(), s = strips.begin(); r != routes.end() && s != strips.end(); ++s) {
+	for (r = routes.begin(); r != routes.end() && s != strips.end(); ++s) {
 
 		/* don't try to assign routes to a locked strip. it won't
 		   use it anyway, but if we do, then we get out of sync

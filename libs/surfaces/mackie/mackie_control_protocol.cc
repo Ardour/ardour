@@ -321,13 +321,6 @@ MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 		return;
 	}
 
-	uint32_t delta = sorted.size() - strip_cnt;
-
-	if (delta > 0 && initial > delta) {
-		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("not switching to %1\n", initial));
-		return;
-	}
-
 	_current_initial_bank = initial;
 	_current_selected_track = -1;
 
@@ -548,7 +541,7 @@ MackieControlProtocol::set_profile (const string& profile_name)
 }	
 
 void
-MackieControlProtocol::set_device (const string& device_name)
+MackieControlProtocol::set_device (const string& device_name, bool allow_activation)
 {
 	map<string,DeviceInfo>::iterator d = DeviceInfo::device_info.find (device_name);
 
@@ -563,9 +556,13 @@ MackieControlProtocol::set_device (const string& device_name)
 
 	_device_info = d->second;
 
-	if (_active) {
-		create_surfaces ();
-		switch_banks (0, true);
+	if (allow_activation) {
+		set_active (true);
+	} else {
+		if (_active) {
+			create_surfaces ();
+			switch_banks (0, true);
+		}
 	}
 }
 
@@ -691,7 +688,7 @@ MackieControlProtocol::set_state (const XMLNode & node, int /*version*/)
 	}
 
 	if ((prop = node.property (X_("device-name"))) != 0) {
-		set_device (prop->value());
+		set_device (prop->value(), false);
 	}
 
 	if ((prop = node.property (X_("device-profile"))) != 0) {

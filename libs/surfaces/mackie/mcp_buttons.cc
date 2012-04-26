@@ -17,6 +17,8 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <algorithm>
+
 #include "pbd/memento_command.h"
 
 #include "ardour/debug.h"
@@ -94,25 +96,22 @@ LedState
 MackieControlProtocol::left_press (Button &)
 {
 	Sorted sorted = get_sorted_routes();
-	uint32_t strip_cnt = n_strips ();
+	uint32_t strip_cnt = n_strips (); 
+	uint32_t route_cnt = sorted.size();
 
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("bank left with current initial = %1 nstrips = %2 tracks/busses = %3\n",
-							   _current_initial_bank, strip_cnt, sorted.size()));
+							   _current_initial_bank, strip_cnt, route_cnt));
 
-	if (sorted.size() > strip_cnt) {
-		int new_initial = _current_initial_bank - strip_cnt;
-		if (new_initial < 0) {
-			new_initial = 0;
-		}
-		
-		if (new_initial != int (_current_initial_bank)) {
-			switch_banks (new_initial);
+	if (route_cnt && route_cnt > strip_cnt) {
+		if (_current_initial_bank > strip_cnt) {
+			switch_banks (_current_initial_bank - strip_cnt);
+		} else {
+			switch_banks (0);
 		}
 
 		return on;
-	} else {
-		return flashing;
 	}
+	return off;
 }
 
 LedState 
@@ -126,25 +125,17 @@ MackieControlProtocol::right_press (Button &)
 {
 	Sorted sorted = get_sorted_routes();
 	uint32_t strip_cnt = n_strips();
+	uint32_t route_cnt = sorted.size();
 
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("bank right with current initial = %1 nstrips = %2 tracks/busses = %3\n",
 							   _current_initial_bank, strip_cnt, sorted.size()));
 
-	if (sorted.size() > strip_cnt) {
-		uint32_t delta = sorted.size() - (strip_cnt + _current_initial_bank);
-
-		if (delta > strip_cnt) {
-			delta = strip_cnt;
-		}
-		
-		if (delta > 0) {
-			switch_banks (_current_initial_bank + delta);
-		}
-
+	if (route_cnt && route_cnt > strip_cnt) {
+		uint32_t new_initial = std::min (_current_initial_bank + strip_cnt, route_cnt - 1);
+		switch_banks (new_initial);
 		return on;
-	} else {
-		return flashing;
 	}
+
 	return off;
 }
 
