@@ -721,6 +721,7 @@ Editor::Editor ()
 	ControlProtocol::AddRouteToSelection.connect (*this, invalidator (*this), boost::bind (&Editor::control_select, this, _1, Selection::Add), gui_context());
 	ControlProtocol::RemoveRouteFromSelection.connect (*this, invalidator (*this), boost::bind (&Editor::control_select, this, _1, Selection::Toggle), gui_context());
 	ControlProtocol::SetRouteSelection.connect (*this, invalidator (*this), boost::bind (&Editor::control_select, this, _1, Selection::Set), gui_context());
+	ControlProtocol::ToggleRouteSelection.connect (*this, invalidator (*this), boost::bind (&Editor::control_select, this, _1, Selection::Toggle), gui_context());
 	ControlProtocol::ClearRouteSelection.connect (*this, invalidator (*this), boost::bind (&Editor::control_unselect, this), gui_context());
 
 	BasicUI::AccessAction.connect (*this, invalidator (*this), boost::bind (&Editor::access_action, this, _1, _2), gui_context());

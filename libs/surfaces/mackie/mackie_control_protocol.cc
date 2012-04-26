@@ -1247,10 +1247,15 @@ MackieControlProtocol::select_range ()
 
 	if (!routes.empty()) {
 		for (RouteList::iterator r = routes.begin(); r != routes.end(); ++r) {
-			if (r == routes.begin()) {
-				SetRouteSelection ((*r)->remote_control_id());
+
+			if (_modifier_state == MODIFIER_CONTROL) {
+				ToggleRouteSelection ((*r)->remote_control_id ());
 			} else {
-				AddRouteToSelection ((*r)->remote_control_id());
+				if (r == routes.begin()) {
+					SetRouteSelection ((*r)->remote_control_id());
+				} else {
+					AddRouteToSelection ((*r)->remote_control_id());
+				}
 			}
 		}
 	}

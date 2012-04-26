@@ -47,6 +47,7 @@ PBD::Signal0<void> ControlProtocol::VerticalZoomOutSelected;
 PBD::Signal1<void,RouteNotificationListPtr> ControlProtocol::TrackSelectionChanged;
 PBD::Signal1<void,uint32_t> ControlProtocol::AddRouteToSelection;
 PBD::Signal1<void,uint32_t> ControlProtocol::SetRouteSelection;
+PBD::Signal1<void,uint32_t> ControlProtocol::ToggleRouteSelection;
 PBD::Signal1<void,uint32_t> ControlProtocol::RemoveRouteFromSelection;
 PBD::Signal0<void>          ControlProtocol::ClearRouteSelection;
 PBD::Signal0<void>          ControlProtocol::StepTracksDown;
