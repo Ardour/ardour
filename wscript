@@ -548,6 +548,14 @@ def configure(conf):
     autowaf.check_pkg(conf, 'sndfile', uselib_store='SNDFILE', atleast_version='1.0.18')
     autowaf.check_pkg(conf, 'giomm-2.4', uselib_store='GIOMM', atleast_version='2.2')
 
+    conf.check_cxx(fragment = '#include <glibmm/threads.h>\nstatic Glib::Threads::RecMutex foo;\nint main () {}',
+                   uselib = ['GLIBMM'],
+                   msg = 'Checking for Glib::Threads::RecMutex',
+                   mandatory = False,
+                   okmsg = 'yes',
+                   errmsg = 'no; using deprecated API',
+                   define_name = 'HAVE_GLIB_THREADS_RECMUTEX')
+
     for i in children:
         sub_config_and_use(conf, i)
 

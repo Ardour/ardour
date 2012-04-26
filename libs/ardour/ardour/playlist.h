@@ -31,7 +31,9 @@
 #include <sys/stat.h>
 
 #include <glib.h>
-
+#ifdef HAVE_GLIB_THREADS_RECMUTEX
+#include <glibmm/threads.h>
+#endif
 
 #include "pbd/undo.h"
 #include "pbd/stateful.h"
@@ -253,7 +255,11 @@ public:
 	int             _sort_id;
 	mutable gint    block_notifications;
 	mutable gint    ignore_state_changes;
+#ifdef HAVE_GLIB_THREADS_RECMUTEX
+	mutable Glib::Threads::RecMutex region_lock;
+#else
 	mutable Glib::RecMutex region_lock;
+#endif	
 	std::set<boost::shared_ptr<Region> > pending_adds;
 	std::set<boost::shared_ptr<Region> > pending_removes;
 	RegionList       pending_bounds;
