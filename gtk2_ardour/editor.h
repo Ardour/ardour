@@ -978,6 +978,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void control_vertical_zoom_out_all ();
 	void control_vertical_zoom_in_selected ();
 	void control_vertical_zoom_out_selected ();
+	void control_step_tracks_up ();
+	void control_step_tracks_down ();
 	void control_view (uint32_t);
 	void control_scroll (float);
 	void control_select (uint32_t rid, Selection::Operation);

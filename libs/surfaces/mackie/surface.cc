@@ -350,50 +350,34 @@ Surface::handle_midi_controller_message (MIDI::Parser &, MIDI::EventTwoBytes* ev
 
 	Pot* pot = pots[ev->controller_number];
 
+	// bit 6 gives the sign
+	float sign = (ev->value & 0x40) == 0 ? 1.0 : -1.0; 
+	// bits 0..5 give the velocity. we interpret this as "ticks
+	// moved before this message was sent"
+	float ticks = (ev->value & 0x3f);
+	if (ticks == 0) {
+		/* euphonix and perhaps other devices send zero
+		   when they mean 1, we think.
+		*/
+		ticks = 1;
+	}
+	float delta = sign * (ticks / (float) 0x3f);
+	
 	if (!pot) {
 		if (ev->controller_number == Jog::ID && _jog_wheel) {
-
-			// bit 6 gives the sign
-			float sign = (ev->value & 0x40) == 0 ? 1.0 : -1.0; 
-			// bits 0..5 give the velocity. we interpret this as "ticks
-			// moved before this message was sent"
-			float ticks = (ev->value & 0x3f);
-			if (ticks == 0) {
-				/* euphonix and perhaps other devices send zero
-				   when they mean 1, we think.
-				*/
-				ticks = 1;
-			}
-			float delta = sign * (ticks / (float) 0x3f);
 
 			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Jog wheel moved %1\n", ticks));
 			_jog_wheel->jog_event (delta);
 			return;
 		}
+
+		return;
 	}
 
-	if (pot) {
-		// bit 6 gives the sign
-		float sign = (ev->value & 0x40) == 0 ? 1.0 : -1.0; 
-		// bits 0..5 give the velocity. we interpret this as "ticks
-		// moved before this message was sent"
-		float ticks = (ev->value & 0x3f);
-		if (ticks == 0) {
-			/* euphonix and perhaps other devices send zero
-			   when they mean 1, we think.
-			*/
-			ticks = 1;
-		}
-		float delta = sign * (ticks / (float) 0x3f);
-
-		Strip* strip = dynamic_cast<Strip*> (&pot->group());
-
-		if (strip) {
-			strip->handle_pot (*pot, delta);
-		} 
-	} else {
-		DEBUG_TRACE (DEBUG::MackieControl, "pot not found\n");
-	}
+	Strip* strip = dynamic_cast<Strip*> (&pot->group());
+	if (strip) {
+		strip->handle_pot (*pot, delta);
+	} 
 }
 
 void 
@@ -726,7 +710,7 @@ void
 Surface::update_view_mode_display ()
 {
 	string text;
-	Button* button = 0;
+	int id = -1;
 
 	if (!_active) {
 		return;
@@ -735,19 +719,19 @@ Surface::update_view_mode_display ()
 	switch (_mcp.view_mode()) {
 	case MackieControlProtocol::Mixer:
 		show_two_char_display ("Mx");
-		button = buttons[Button::Pan];
+		id = Button::Pan;
 		break;
 	case MackieControlProtocol::Dynamics:
 		show_two_char_display ("Dy");
-		button = buttons[Button::Dyn];
+		id = Button::Dyn;
 		break;
 	case MackieControlProtocol::EQ:
 		show_two_char_display ("EQ");
-		button = buttons[Button::Eq];
+		id = Button::Eq;
 		break;
 	case MackieControlProtocol::Loop:
 		show_two_char_display ("LP");
-		button = buttons[Button::Loop];
+		id = Button::Loop;
 		break;
 	case MackieControlProtocol::AudioTracks:
 		show_two_char_display ("AT");
@@ -757,18 +741,28 @@ Surface::update_view_mode_display ()
 		break;
 	case MackieControlProtocol::Sends:
 		show_two_char_display ("Sn");
-		button = buttons[Button::Sends];
+		id = Button::Sends;
 		break;
 	case MackieControlProtocol::Plugins:
 		show_two_char_display ("Pl");
-		button = buttons[Button::Plugin];
+		id = Button::Plugin;
 		break;
 	default:
 		break;
 	}
 
-	if (button) {
-		_port->write (button->set_state (on));
+	if (id >= 0) {
+		
+		/* we are attempting to turn a global button/LED on */
+
+		map<int,Control*>::iterator x = controls_by_device_independent_id.find (id);
+
+		if (x != controls_by_device_independent_id.end()) {
+			Button* button = dynamic_cast<Button*> (x->second);
+			if (button) {
+				_port->write (button->set_state (on));
+			}
+		}
 	}
 
 	if (!text.empty()) {

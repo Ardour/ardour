@@ -167,7 +167,7 @@ Strip::set_route (boost::shared_ptr<Route> r, bool with_messages)
 
 	boost::shared_ptr<Pannable> pannable = _route->pannable();
 
-	if (pannable) {
+	if (pannable && pannable->panner()) {
 		pannable->pan_azimuth_control->Changed.connect(route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_panner_azi_changed, this, false), ui_context());
 		pannable->pan_width_control->Changed.connect(route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_panner_width_changed, this, false), ui_context());
 	}
@@ -198,7 +198,7 @@ Strip::set_route (boost::shared_ptr<Route> r, bool with_messages)
 	build_input_list (_route->input()->n_ports());
 	build_output_list (_route->output()->n_ports());
 
-	current_pot_modes.clear();
+	possible_pot_parameters.clear();
 
 	if (pannable) {
 		boost::shared_ptr<Panner> panner = pannable->panner();
@@ -207,11 +207,11 @@ Strip::set_route (boost::shared_ptr<Route> r, bool with_messages)
 			set<Evoral::Parameter>::iterator a;
 			
 			if ((a = automatable.find (PanAzimuthAutomation)) != automatable.end()) {
-				current_pot_modes.push_back (PanAzimuthAutomation);
+				possible_pot_parameters.push_back (PanAzimuthAutomation);
 			}
 			
 			if ((a = automatable.find (PanWidthAutomation)) != automatable.end()) {
-				current_pot_modes.push_back (PanWidthAutomation);
+				possible_pot_parameters.push_back (PanWidthAutomation);
 			}
 		} else {
 			std::cerr << "connected to route without a panner\n";
@@ -345,7 +345,7 @@ Strip::notify_panner_azi_changed (bool force_update)
 
 		boost::shared_ptr<Pannable> pannable = _route->pannable();
 
-		if (!pannable) {
+		if (!pannable || !pannable->panner()) {
 			_surface->write (_vpot->zero());
 			return;
 		}
@@ -384,7 +384,7 @@ Strip::notify_panner_width_changed (bool force_update)
 
 		boost::shared_ptr<Pannable> pannable = _route->pannable();
 
-		if (!pannable) {
+		if (!pannable || !pannable->panner()) {
 			_surface->write (_vpot->zero());
 			return;
 		}
@@ -458,7 +458,6 @@ void
 Strip::vselect_event (Button& button, ButtonState bs)
 {
 	if (bs == press) {
-
 
 		int ms = _surface->mcp().modifier_state();
 				
@@ -944,13 +943,18 @@ Strip::next_pot_mode ()
 		return;
 	}
 
+
 	boost::shared_ptr<AutomationControl> ac = _vpot->control();
 
 	if (!ac) {
 		return;
 	}
 
-	for (i = current_pot_modes.begin(); i != current_pot_modes.end(); ++i) {
+	if (possible_pot_parameters.empty() || (possible_pot_parameters.size() == 1 && possible_pot_parameters.front() == ac->parameter())) {
+		return;
+	}
+
+	for (i = possible_pot_parameters.begin(); i != possible_pot_parameters.end(); ++i) {
 		if ((*i) == ac->parameter()) {
 			break;
 		}
@@ -960,12 +964,12 @@ Strip::next_pot_mode ()
 	   also happen if the current mode is not in the current pot mode list)
 	*/
 
-	if (i != current_pot_modes.end()) {
+	if (i != possible_pot_parameters.end()) {
 		++i;
 	}
 
-	if (i == current_pot_modes.end()) {
-		i = current_pot_modes.begin();
+	if (i == possible_pot_parameters.end()) {
+		i = possible_pot_parameters.begin();
 	}
 
 	set_vpot_parameter (*i);

@@ -863,6 +863,7 @@ void
 MackieControlProtocol::notify_transport_state_changed()
 {
 	// switch various play and stop buttons on / off
+	update_global_button (Button::Loop, session->get_play_loop());
 	update_global_button (Button::Play, session->transport_speed() == 1.0);
 	update_global_button (Button::Stop, !session->transport_rolling());
 	update_global_button (Button::Rewind, session->transport_speed() < 0.0);

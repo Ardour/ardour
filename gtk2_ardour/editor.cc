@@ -709,6 +709,8 @@ Editor::Editor ()
 	ControlProtocol::Undo.connect (*this, invalidator (*this), boost::bind (&Editor::undo, this, true), gui_context());
 	ControlProtocol::Redo.connect (*this, invalidator (*this), boost::bind (&Editor::redo, this, true), gui_context());
 	ControlProtocol::ScrollTimeline.connect (*this, invalidator (*this), boost::bind (&Editor::control_scroll, this, _1), gui_context());
+	ControlProtocol::StepTracksUp.connect (*this, invalidator (*this), boost::bind (&Editor::control_step_tracks_up, this), gui_context());
+	ControlProtocol::StepTracksDown.connect (*this, invalidator (*this), boost::bind (&Editor::control_step_tracks_down, this), gui_context());
 	ControlProtocol::GotoView.connect (*this, invalidator (*this), boost::bind (&Editor::control_view, this, _1), gui_context());
 	ControlProtocol::CloseDialog.connect (*this, invalidator (*this), Keyboard::close_current_dialog, gui_context());
 	ControlProtocol::VerticalZoomInAll.connect (*this, invalidator (*this), boost::bind (&Editor::control_vertical_zoom_in_all, this), gui_context());
@@ -1001,6 +1003,18 @@ Editor::control_select (uint32_t rid, Selection::Operation op)
 	} else {
 		selection->clear_tracks ();
 	}
+}
+
+void
+Editor::control_step_tracks_up ()
+{
+	scroll_tracks_up_line ();
+}
+
+void
+Editor::control_step_tracks_down ()
+{
+	scroll_tracks_down_line ();
 }
 
 void

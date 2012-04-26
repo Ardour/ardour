@@ -49,6 +49,8 @@ PBD::Signal1<void,uint32_t> ControlProtocol::AddRouteToSelection;
 PBD::Signal1<void,uint32_t> ControlProtocol::SetRouteSelection;
 PBD::Signal1<void,uint32_t> ControlProtocol::RemoveRouteFromSelection;
 PBD::Signal0<void>          ControlProtocol::ClearRouteSelection;
+PBD::Signal0<void>          ControlProtocol::StepTracksDown;
+PBD::Signal0<void>          ControlProtocol::StepTracksUp;
 
 ControlProtocol::ControlProtocol (Session& s, string str)
 	: BasicUI (s)

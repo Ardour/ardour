@@ -236,6 +236,8 @@ MackieControlProtocol::cursor_up_press (Button&)
 		} else {
 			VerticalZoomInAll (); /* EMIT SIGNAL */
 		}
+	} else {
+		StepTracksUp (); /* EMIT SIGNAL */
 	}
 	return off;
 }
@@ -255,6 +257,8 @@ MackieControlProtocol::cursor_down_press (Button&)
 		} else {
 			VerticalZoomOutAll (); /* EMIT SIGNAL */
 		}
+	} else {
+		StepTracksDown (); /* EMIT SIGNAL */
 	}
 	return off;
 }

@@ -73,6 +73,8 @@ class ControlProtocol : public PBD::Stateful, public PBD::ScopedConnectionList, 
 	static PBD::Signal0<void> VerticalZoomOutAll;
 	static PBD::Signal0<void> VerticalZoomInSelected;
 	static PBD::Signal0<void> VerticalZoomOutSelected;
+	static PBD::Signal0<void> StepTracksDown;
+	static PBD::Signal0<void> StepTracksUp;
 
 	static PBD::Signal1<void,uint32_t> AddRouteToSelection;
 	static PBD::Signal1<void,uint32_t> SetRouteSelection;

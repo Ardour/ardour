@@ -42,19 +42,18 @@ Pot::set (float val, bool onoff, Mode mode)
 {
 	// TODO do an exact calc for 0.50? To allow manually re-centering the port.
 
-	// center on or off
-	MIDI::byte msg =  (val > 0.45 && val < 0.55 ? 1 : 0) << 6;
+	// center on if val is "very close" to 0.50
+	MIDI::byte msg =  (val > 0.48 && val < 0.58 ? 1 : 0) << 6;
 	
-	// mode
+	// Pot/LED mode
 	msg |=  (mode << 4);
 	
 	// val, but only if off hasn't explicitly been set
-
-	if  (onoff) {
+	if (onoff) {
 		if (mode == spread) {
-			msg +=  (lrintf (val * 6) + 1) & 0x0f; // 0b00001111
+			msg |=  (lrintf (val * 6) + 1) & 0x0f; // 0b00001111
 		} else {
-			msg +=  (lrintf (val * 10.0) + 1) & 0x0f; // 0b00001111
+			msg |=  (lrintf (val * 10.0) + 1) & 0x0f; // 0b00001111
 		}
 	}
 

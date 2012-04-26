@@ -136,7 +136,7 @@ private:
 	void vselect_event (Button&, ButtonState);
 	void fader_touch_event (Button&, ButtonState);
 
-	std::vector<Evoral::Parameter> current_pot_modes;
+	std::vector<Evoral::Parameter> possible_pot_parameters;
 	void next_pot_mode ();
 	void set_vpot_parameter (Evoral::Parameter);
 
