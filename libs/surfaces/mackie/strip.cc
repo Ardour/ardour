@@ -462,20 +462,12 @@ Strip::vselect_event (Button& button, ButtonState bs)
 				
 		if (ms & MackieControlProtocol::MODIFIER_SHIFT) {
 
-			/* get the corresponding vpot and whatever its
-			 * controlling
-			 */
-
-			Pot* pot = _surface->pots[Pot::ID + _index];
-
-			if (pot) {
-				boost::shared_ptr<AutomationControl> ac = pot->control ();
+			boost::shared_ptr<AutomationControl> ac = _vpot->control ();
 				
-				if (ac) {
-					
-					/* reset to default/normal value */
-					ac->set_value (ac->normal());
-				}
+			if (ac) {
+				
+				/* reset to default/normal value */
+				ac->set_value (ac->normal());
 			}
 
 		}  else {

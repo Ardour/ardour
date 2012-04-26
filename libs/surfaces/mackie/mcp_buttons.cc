@@ -503,7 +503,7 @@ MackieControlProtocol::play_press (Button &)
 	   again, jump back to where we started last time
 	*/
 
-	transport_play (session->transport_rolling() == 1.0);
+	transport_play (session->transport_speed() == 1.0);
 	return none;
 }
 
