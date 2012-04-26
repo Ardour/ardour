@@ -47,6 +47,8 @@
 
 #include "i18n.h"
 
+#include <xmmintrin.h>
+
 using namespace ARDOUR;
 using namespace PBD;
 using namespace std;
@@ -59,8 +61,6 @@ void
 Session::process (pframes_t nframes)
 {
 	framepos_t transport_at_start = _transport_frame;
-
-	MIDI::Manager::instance()->cycle_start(nframes);
 
 	_silent = false;
 
@@ -96,8 +96,6 @@ Session::process (pframes_t nframes)
 	}
 
 	SendFeedback (); /* EMIT SIGNAL */
-
-	MIDI::Manager::instance()->cycle_end();
 }
 
 int

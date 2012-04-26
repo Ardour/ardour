@@ -453,7 +453,7 @@ RegionDrag::RegionDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<Re
 		_views.push_back (DraggingView (*i, this));
 	}
 
-	RegionView::RegionViewGoingAway.connect (death_connection, invalidator (*this), ui_bind (&RegionDrag::region_going_away, this, _1), gui_context());
+	RegionView::RegionViewGoingAway.connect (death_connection, invalidator (*this), boost::bind (&RegionDrag::region_going_away, this, _1), gui_context());
 }
 
 void
@@ -2981,14 +2981,7 @@ LineDrag::motion (GdkEvent* event, bool)
 	cy = min ((double) _line->height(), cy);
 
 	double const fraction = 1.0 - (cy / _line->height());
-
-	bool push;
-
-	if (Keyboard::modifier_state_contains (event->button.state, Keyboard::PrimaryModifier)) {
-		push = false;
-	} else {
-		push = true;
-	}
+	bool const push = !Keyboard::modifier_state_contains (event->button.state, Keyboard::PrimaryModifier);
 
 	/* we are ignoring x position for this drag, so we can just pass in anything */
 	_line->drag_motion (0, fraction, true, push);
@@ -4117,7 +4110,7 @@ AutomationRangeDrag::setup (list<boost::shared_ptr<AutomationLine> > const & lin
 		/* check this range against all the AudioRanges that we are using */
 		list<AudioRange>::const_iterator k = _ranges.begin ();
 		while (k != _ranges.end()) {
-			if (k->coverage (r.first, r.second) != OverlapNone) {
+			if (k->coverage (r.first, r.second) != Evoral::OverlapNone) {
 				break;
 			}
 			++k;
@@ -4186,9 +4179,7 @@ AutomationRangeDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 				double const q = j->line->time_converter().from (a - j->line->time_converter().origin_b ());
 
 				the_list->add (p, the_list->eval (p));
-				j->line->add_always_in_view (p);
 				the_list->add (q, the_list->eval (q));
-				j->line->add_always_in_view (q);
 			}
 
 			/* same thing for the end */
@@ -4214,9 +4205,7 @@ AutomationRangeDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 				double const q = j->line->time_converter().from (i->end - j->line->time_converter().origin_b ());
 
 				the_list->add (p, the_list->eval (p));
-				j->line->add_always_in_view (p);
 				the_list->add (q, the_list->eval (q));
-				j->line->add_always_in_view (q);
 			}
 		}
 
@@ -4284,7 +4273,6 @@ AutomationRangeDrag::finished (GdkEvent* event, bool)
 	motion (event, false);
 	for (list<Line>::iterator i = _lines.begin(); i != _lines.end(); ++i) {
 		i->line->end_drag ();
-		i->line->clear_always_in_view ();
 	}
 
 	_editor->session()->commit_reversible_command ();
@@ -4294,7 +4282,6 @@ void
 AutomationRangeDrag::aborted (bool)
 {
 	for (list<Line>::iterator i = _lines.begin(); i != _lines.end(); ++i) {
-		i->line->clear_always_in_view ();
 		i->line->reset ();
 	}
 }

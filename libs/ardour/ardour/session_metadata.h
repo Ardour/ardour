@@ -37,6 +37,9 @@ namespace ARDOUR {
 class SessionMetadata : public PBD::StatefulDestructible
 {
   public:
+	//singleton instance:
+	static SessionMetadata *Metadata() { if (_metadata == NULL) _metadata = new SessionMetadata();  return _metadata; }
+
 	SessionMetadata ();
 	~SessionMetadata ();
 
@@ -72,6 +75,15 @@ class SessionMetadata : public PBD::StatefulDestructible
 
 	std::string genre () const;
 
+	std::string instructor () const;
+	std::string course () const;
+
+	std::string user_name () const;
+	std::string user_email () const;
+	std::string user_web () const;
+	std::string organization () const;
+	std::string country () const;
+
 	/*** Editing ***/
 	void set_comment (const std::string &);
 	void set_copyright (const std::string &);
@@ -104,15 +116,28 @@ class SessionMetadata : public PBD::StatefulDestructible
 
 	void set_genre (const std::string &);
 
+	void set_instructor (const std::string &);
+	void set_course (const std::string &);
+
+	void set_user_name (const std::string &);
+	void set_user_email (const std::string &);
+	void set_user_web (const std::string &);
+	void set_organization (const std::string &);
+	void set_country (const std::string &);
+
 	/*** Serialization ***/
-	XMLNode & get_state ();
-	int set_state (const XMLNode &, int version);
+	XMLNode & get_state ();  //serializes stuff in the map, to be stored in session file
+	XMLNode & get_user_state ();  //serializes stuff in the user_map, to be stored in user's config file
+	int set_state (const XMLNode &, int version_num);
 
   private:
+
+	static SessionMetadata *_metadata;  //singleton instance 
 
 	typedef std::pair<std::string, std::string> Property;
 	typedef std::map<std::string, std::string> PropertyMap;
 	PropertyMap map;
+	PropertyMap user_map;
 
 	XMLNode * get_xml (const std::string & name);
 

@@ -834,7 +834,11 @@ RubberBandStretcher::Impl::study(const float *const *input, size_t samples, bool
             // cd.accumulator is not otherwise used during studying,
             // so we can use it as a temporary buffer here
 
+#ifdef NDEBUG
+            inbuf.peek(cd.accumulator, m_windowSize);
+#else            
             size_t got = inbuf.peek(cd.accumulator, m_windowSize);
+#endif            
             assert(final || got == m_windowSize);
 
             m_window->cut(cd.accumulator);

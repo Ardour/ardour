@@ -5,6 +5,7 @@
 
 #include "pbd/abstract_ui.h"
 #include "pbd/signals.h"
+#include "pbd/stacktrace.h"
 
 namespace MIDI {
 	class Port;
@@ -21,8 +22,8 @@ class Session;
 
 struct MidiUIRequest : public BaseUI::BaseRequestObject {
   public:
-	MidiUIRequest () {}
-	~MidiUIRequest() {}
+	MidiUIRequest () { }
+	~MidiUIRequest() { }
 };
 
 class MidiControlUI : public AbstractUI<MidiUIRequest>

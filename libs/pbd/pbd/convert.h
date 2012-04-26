@@ -53,6 +53,8 @@ to_string (T t, std::ios_base & (*f)(std::ios_base&))
 	return oss.str();
 }
 
+bool string_is_affirmative (const std::string&);
+
 const char *
 sgettext (const char *, const char *);
 

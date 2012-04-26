@@ -66,7 +66,6 @@
 #include "ardour/click.h"
 #include "ardour/configuration.h"
 #include "ardour/control_protocol_manager.h"
-#include "ardour/crossfade.h"
 #include "ardour/cycle_timer.h"
 #include "ardour/data_type.h"
 #include "ardour/debug.h"
@@ -95,7 +94,6 @@
 #include "ardour/session.h"
 #include "ardour/session_directory.h"
 #include "ardour/session_directory.h"
-#include "ardour/session_metadata.h"
 #include "ardour/session_playlists.h"
 #include "ardour/slave.h"
 #include "ardour/smf_source.h"
@@ -108,6 +106,7 @@
 #include "ardour/operations.h"
 
 #include "midi++/port.h"
+#include "midi++/jack_midi_port.h"
 #include "midi++/mmc.h"
 #include "midi++/manager.h"
 
@@ -163,7 +162,6 @@ Session::Session (AudioEngine &eng,
 	, click_data (0)
 	, click_emphasis_data (0)
 	, main_outs (0)
-	, _metadata (new SessionMetadata())
 	, _have_rec_enabled_track (false)
 	, _suspend_timecode_transmission (0)
 {
@@ -327,8 +325,6 @@ Session::destroy ()
 
 		delete *i;
 	}
-
-	Crossfade::set_buffer_size (0);
 
 	/* not strictly necessary, but doing it here allows the shared_ptr debugging to work */
 	playlists.reset ();
@@ -542,11 +538,21 @@ Session::when_engine_running ()
 
 	BootMessage (_("Setup signal flow and plugins"));
 
+	/* Reset all panners */
+
+	Delivery::reset_panners ();
+
+	/* this will cause the CPM to instantiate any protocols that are in use
+	 * (or mandatory), which will pass it this Session, and then call
+	 * set_state() on each instantiated protocol to match stored state.
+	 */
+
 	ControlProtocolManager::instance().set_session (this);
 
 	/* This must be done after the ControlProtocolManager set_session above,
 	   as it will set states for ports which the ControlProtocolManager creates.
 	*/
+
 	MIDI::Manager::instance()->set_port_states (Config->midi_port_states ());
 
 	/* And this must be done after the MIDI::Manager::set_port_states as
@@ -554,6 +560,12 @@ Session::when_engine_running ()
 	 */
 
 	hookup_io ();
+
+	/* Let control protocols know that we are now all connected, so they
+	 * could start talking to surfaces if they want to.
+	 */
+
+	ControlProtocolManager::instance().midi_connectivity_established ();
 
 	if (_is_new && !no_auto_connect()) {
 		Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock());
@@ -830,11 +842,7 @@ Session::hookup_io ()
 	/* Tell all IO objects to connect themselves together */
 
 	IO::enable_connecting ();
-	MIDI::Port::MakeConnections ();
-
-	/* Now reset all panners */
-
-	Delivery::reset_panners ();
+	MIDI::JackMIDIPort::MakeConnections ();
 
 	/* Anyone who cares about input state, wake up and do something */
 
@@ -2990,7 +2998,7 @@ Session::remove_source (boost::weak_ptr<Source> src)
 		}
 	}
 
-	if (!_state_of_the_state & InCleanup) {
+	if (!(_state_of_the_state & InCleanup)) {
 
 		/* save state so we don't end up with a session file
 		   referring to non-existent sources.
@@ -3419,12 +3427,9 @@ Session::audition_playlist ()
 void
 Session::non_realtime_set_audition ()
 {
-	if (!pending_audition_region) {
-		auditioner->audition_current_playlist ();
-	} else {
-		auditioner->audition_region (pending_audition_region);
-		pending_audition_region.reset ();
-	}
+	assert (pending_audition_region);
+	auditioner->audition_region (pending_audition_region);
+	pending_audition_region.reset ();
 	AuditionActive (true); /* EMIT SIGNAL */
 }
 
@@ -4364,7 +4369,7 @@ Session::start_time_changed (framepos_t old)
 
 	Location* l = _locations->auto_loop_location ();
 
-	if (l->start() == old) {
+	if (l && l->start() == old) {
 		l->set_start (s->start(), true);
 	}
 }

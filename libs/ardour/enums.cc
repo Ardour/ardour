@@ -53,7 +53,6 @@ setup_enum_writer ()
 	vector<int> i;
 	vector<string> s;
 
-	OverlapType _OverlapType;
 	AlignStyle _AlignStyle;
 	AlignChoice _AlignChoice;
 	MeterPoint _MeterPoint;
@@ -131,13 +130,6 @@ setup_enum_writer ()
 #define REGISTER_BITS(e) enum_writer.register_bits (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_ENUM(e) i.push_back (e); s.push_back (#e)
 #define REGISTER_CLASS_ENUM(t,e) i.push_back (t::e); s.push_back (#e)
-
-	REGISTER_ENUM (OverlapNone);
-	REGISTER_ENUM (OverlapInternal);
-	REGISTER_ENUM (OverlapStart);
-	REGISTER_ENUM (OverlapEnd);
-	REGISTER_ENUM (OverlapExternal);
-	REGISTER (_OverlapType);
 
 	REGISTER_ENUM (GainAutomation);
 	REGISTER_ENUM (PanAzimuthAutomation);

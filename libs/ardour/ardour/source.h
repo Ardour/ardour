@@ -62,7 +62,7 @@ class Source : public SessionObject
 
 	virtual bool       empty () const = 0;
 	virtual framecnt_t length (framepos_t pos) const = 0;
-	virtual void       update_length (framepos_t pos, framecnt_t cnt) = 0;
+	virtual void       update_length (framecnt_t cnt) = 0;
 
 	virtual framepos_t natural_position() const { return 0; }
 

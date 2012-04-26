@@ -128,10 +128,9 @@ MidiPort::cycle_split ()
 void
 MidiPort::resolve_notes (void* jack_buffer, MidiBuffer::TimeType when)
 {
-
 	for (uint8_t channel = 0; channel <= 0xF; channel++) {
 
-		uint8_t ev[3] = { MIDI_CMD_CONTROL | channel, MIDI_CTL_SUSTAIN, 0 };
+		uint8_t ev[3] = { ((uint8_t) (MIDI_CMD_CONTROL | channel)), MIDI_CTL_SUSTAIN, 0 };
 
 		/* we need to send all notes off AND turn the
 		 * sustain/damper pedal off to handle synths
@@ -151,7 +150,7 @@ MidiPort::resolve_notes (void* jack_buffer, MidiBuffer::TimeType when)
 }
 
 void
-MidiPort::flush_buffers (pframes_t nframes, framepos_t /*time*/)
+MidiPort::flush_buffers (pframes_t nframes)
 {
 	if (sends_output ()) {
 

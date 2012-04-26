@@ -66,7 +66,7 @@ class TestSlaveSessionProxy : public ISlaveSessionProxy {
 	framepos_t audible_frame ()            const { return _transport_frame; }
 	framepos_t transport_frame ()          const { return _transport_frame; }
 	pframes_t  frames_since_cycle_start () const { return 0; }
-	framecnt_t frame_time ()               const { return _frame_time; }
+	framepos_t frame_time ()               const { return _frame_time; }
 
 	void request_locate (framepos_t frame, bool with_roll = false) { 
           _transport_frame = frame; 

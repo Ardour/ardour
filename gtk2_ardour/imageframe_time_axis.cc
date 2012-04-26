@@ -81,7 +81,7 @@ ImageFrameTimeAxis::ImageFrameTimeAxis(const string & track_id, PublicEditor& ed
 	// set the initial height of this time axis
 	set_height(hNormal) ;
 
-	TimeAxisView::CatchDeletion.connect (*this, ui_bind (&ImageFrameTimeAxis::remove_time_axis_view, this, _1), gui_context());
+	TimeAxisView::CatchDeletion.connect (*this, boost::bind (&ImageFrameTimeAxis::remove_time_axis_view, this, _1), gui_context());
 }
 
 /**

@@ -124,29 +124,6 @@ Auditioner::prepare_playlist ()
 }
 
 void
-Auditioner::audition_current_playlist ()
-{
-	if (g_atomic_int_get (&_auditioning)) {
-		/* don't go via session for this, because we are going
-		   to remain active.
-		*/
-		cancel_audition ();
-	}
-
-	Glib::Mutex::Lock lm (lock);
-	_diskstream->seek (0);
-	length = _diskstream->playlist()->get_extent().second;
-	current_frame = 0;
-
-	/* force a panner reset now that we have all channels */
-
-	_main_outs->panner_shell()->configure_io (ChanCount (DataType::AUDIO, _diskstream->n_channels().n_audio()),
-                                                  ChanCount (DataType::AUDIO, n_outputs().n_audio()));
-
-	g_atomic_int_set (&_auditioning, 1);
-}
-
-void
 Auditioner::audition_region (boost::shared_ptr<Region> region)
 {
 	if (g_atomic_int_get (&_auditioning)) {

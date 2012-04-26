@@ -67,7 +67,7 @@ ImageFrameTimeAxisView::ImageFrameTimeAxisView (ImageFrameTimeAxis& tv)
 	selected_imageframe_group = 0 ;
 	selected_imageframe_view = 0 ;
 
-	ImageFrameTimeAxisGroup::CatchDeletion.connect (*this, ui_bind (&ImageFrameTimeAxisView::remove_imageframe_group, this, _1), gui_context());
+	ImageFrameTimeAxisGroup::CatchDeletion.connect (*this, boost::bind (&ImageFrameTimeAxisView::remove_imageframe_group, this, _1), gui_context());
 }
 
 /**

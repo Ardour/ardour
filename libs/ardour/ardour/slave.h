@@ -155,7 +155,7 @@ class Slave {
 	 * only if requires_seekahead() returns true.
 	 */
 
-	virtual framepos_t seekahead_distance() const { return 0; }
+	virtual framecnt_t seekahead_distance() const { return 0; }
 
 	/**
 	 * @return - when returning true, ARDOUR will use transport speed 1.0 no matter what
@@ -235,7 +235,7 @@ class MTC_Slave : public Slave {
 
 	framecnt_t resolution () const;
 	bool requires_seekahead () const { return true; }
-	framepos_t seekahead_distance() const;
+	framecnt_t seekahead_distance() const;
 	bool give_slave_full_control_over_transport_speed() const;
 
   private:

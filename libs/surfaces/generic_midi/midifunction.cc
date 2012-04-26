@@ -131,8 +131,9 @@ MIDIFunction::execute ()
 		if (!_argument.empty()) {
 			uint32_t rid;
 			sscanf (_argument.c_str(), "%d", &rid);
-			_ui->SelectByRID (rid);
+			_ui->SetRouteSelection (rid);
 		}
+		break;
 	case TrackSetMute:
 		break;
 	case TrackSetSolo:

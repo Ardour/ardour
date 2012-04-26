@@ -241,7 +241,7 @@ class TempoMap : public PBD::StatefulDestructible
 	   to provide an answer.
 	*/
 	void       bbt_time_rt (framepos_t when, Timecode::BBT_Time&);
-        framecnt_t frame_time (const Timecode::BBT_Time&);
+        framepos_t frame_time (const Timecode::BBT_Time&);
 	framecnt_t bbt_duration_at (framepos_t, const Timecode::BBT_Time&, int dir);
 
 	/* TEMPO-SENSITIVE FUNCTIONS

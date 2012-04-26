@@ -101,6 +101,9 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	VBox* v1_box = manage (new VBox);
 	VBox* v2_box = manage (new VBox);
 	pack_end (plugin_analysis_expander, false, false);
+	if (!plugin->get_docs().empty()) {
+		pack_end (description_expander, false, false);
+	}
 
 	v1_box->pack_start (*smaller_hbox, false, true);
 	v2_box->pack_start (focus_button, false, true);
@@ -262,6 +265,11 @@ GenericPluginUI::build ()
 			if ((cui = build_control_ui (i, c)) == 0) {
 				error << string_compose(_("Plugin Editor: could not build control element for port %1"), i) << endmsg;
 				continue;
+			}
+
+			const std::string param_docs = plugin->get_parameter_docs(i);
+			if (!param_docs.empty()) {
+				ARDOUR_UI::instance()->set_tip(cui, param_docs.c_str());
 			}
 
 			if (cui->controller || cui->clickbox || cui->combo) {

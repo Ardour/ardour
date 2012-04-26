@@ -51,10 +51,9 @@ using namespace std;
 #include "i18n.h"
 
 #define midi_ui_context() MidiControlUI::instance() /* a UICallback-derived object that specifies the event loop for signal handling */
-#define ui_bind(x) boost::protect (boost::bind ((x)))
 
 GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s)
-	: ControlProtocol (s, _("Generic MIDI"), midi_ui_context())
+	: ControlProtocol (s, _("Generic MIDI"))
 	, _motorised (false)
 	, gui (0)
 {
@@ -68,7 +67,10 @@ GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s)
 	_current_bank = 0;
 	_bank_size = 0;
 
-	/* XXX is it right to do all these in the same thread as whatever emits the signal? */
+	/* these signals are emitted by the MidiControlUI's event loop thread
+	 * and we may as well handle them right there in the same the same
+	 * thread
+	 */
 
 	Controllable::StartLearning.connect_same_thread (*this, boost::bind (&GenericMidiControlProtocol::start_learning, this, _1));
 	Controllable::StopLearning.connect_same_thread (*this, boost::bind (&GenericMidiControlProtocol::stop_learning, this, _1));
@@ -76,6 +78,17 @@ GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s)
 	Controllable::DeleteBinding.connect_same_thread (*this, boost::bind (&GenericMidiControlProtocol::delete_binding, this, _1));
 
 	Session::SendFeedback.connect (*this, MISSING_INVALIDATOR, boost::bind (&GenericMidiControlProtocol::send_feedback, this), midi_ui_context());;
+#if 0
+	/* XXXX SOMETHING GOES WRONG HERE (april 2012) - STILL DEBUGGING */
+	/* this signal is emitted by the process() callback, and if
+	 * send_feedback() is going to do anything, it should do it in the
+	 * context of the process() callback itself.
+	 */
+
+	Session::SendFeedback.connect_same_thread (*this, boost::bind (&GenericMidiControlProtocol::send_feedback, this));
+#endif
+	/* this one is cross-thread */
+
 	Route::RemoteControlIDChange.connect (*this, MISSING_INVALIDATOR, boost::bind (&GenericMidiControlProtocol::reset_controllables, this), midi_ui_context());
 
 	reload_maps ();
@@ -236,6 +249,9 @@ GenericMidiControlProtocol::set_feedback_interval (microseconds_t ms)
 void 
 GenericMidiControlProtocol::send_feedback ()
 {
+	/* This is executed in RT "process" context", so no blocking calls
+	 */
+
 	if (!do_feedback) {
 		return;
 	}
@@ -256,6 +272,9 @@ GenericMidiControlProtocol::send_feedback ()
 void 
 GenericMidiControlProtocol::_send_feedback ()
 {
+	/* This is executed in RT "process" context", so no blocking calls
+	 */
+
 	const int32_t bufsize = 16 * 1024; /* XXX too big */
 	MIDI::byte buf[bufsize];
 	int32_t bsize = bufsize;

@@ -28,21 +28,18 @@
 
 #include "i18n.h"
 
-#define ui_bind(f, ...) boost::protect (boost::bind (f, __VA_ARGS__))
-
 using namespace std;
 using namespace sigc;
 using namespace PBD;
 using namespace ARDOUR;
 using namespace boost;
 
-
 OSCRouteObserver::OSCRouteObserver (boost::shared_ptr<Route> r, lo_address a)
 	: _route (r)
 {
 	addr = lo_address_new (lo_address_get_hostname(a) , lo_address_get_port(a));
 	
-	_route->PropertyChanged.connect (name_changed_connection, MISSING_INVALIDATOR, ui_bind (&OSCRouteObserver::name_changed, this, boost::lambda::_1), OSC::instance());
+	_route->PropertyChanged.connect (name_changed_connection, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::name_changed, this, boost::lambda::_1), OSC::instance());
 
 	if (dynamic_pointer_cast<AudioTrack>(_route) || dynamic_pointer_cast<MidiTrack>(_route)) {
 

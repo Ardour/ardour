@@ -243,8 +243,10 @@ class Diskstream : public SessionObject, public PublicDiskstream
 	virtual void use_destructive_playlist () {}
 	virtual void prepare_to_stop (framepos_t pos);
 
-	void calculate_record_range(OverlapType ot, framepos_t transport_frame, framecnt_t nframes,
-			framecnt_t& rec_nframes, framecnt_t& rec_offset);
+	void calculate_record_range (
+		Evoral::OverlapType ot, framepos_t transport_frame, framecnt_t nframes,
+		framecnt_t& rec_nframes, framecnt_t& rec_offset
+		);
 
 	static framecnt_t disk_io_chunk_frames;
 	std::vector<CaptureInfo*> capture_info;

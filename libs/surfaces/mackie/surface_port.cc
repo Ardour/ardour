@@ -15,180 +15,131 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#include "surface_port.h"
-
-#include "mackie_control_exception.h"
-#include "controls.h"
-
-#include "midi++/types.h"
-#include "midi++/port.h"
-#include "midi++/manager.h"
-#include <sigc++/sigc++.h>
-#include <boost/shared_array.hpp>
-
-#include "i18n.h"
 
 #include <sstream>
-
 #include <cstring>
 #include <cerrno>
 
+#include <sigc++/sigc++.h>
+#include <boost/shared_array.hpp>
+
+#include "midi++/types.h"
+#include "midi++/port.h"
+#include "midi++/jack_midi_port.h"
+#include "midi++/ipmidi_port.h"
+#include "midi++/manager.h"
+
+#include "ardour/debug.h"
+#include "ardour/rc_configuration.h"
+#include "ardour/session.h"
+#include "ardour/audioengine.h"
+
+#include "controls.h"
+#include "mackie_control_protocol.h"
+#include "surface.h"
+#include "surface_port.h"
+
+
+#include "i18n.h"
+
 using namespace std;
 using namespace Mackie;
+using namespace PBD;
 
-SurfacePort::SurfacePort()
-	: _input_port (0), _output_port (0), _number (0), _active (false)
-{
-}
-
-/** @param input_port Input MIDI::Port; this object takes responsibility for removing it from
- *  the MIDI::Manager and destroying it.
- *  @param output_port Output MIDI::Port; responsibility similarly taken.
+/** @param input_port Input MIDI::Port; this object takes responsibility for
+ *  adding & removing it from the MIDI::Manager and destroying it.  @param
+ *  output_port Output MIDI::Port; responsibility similarly taken.
  */
-SurfacePort::SurfacePort (MIDI::Port & input_port, MIDI::Port & output_port, int number)
-	: _input_port (&input_port), _output_port (&output_port), _number (number), _active (false)
+SurfacePort::SurfacePort (Surface& s)
+	: _surface (&s)
+	, _input_port (0)
+	, _output_port (0)
 {
+	if (_surface->mcp().device_info().uses_ipmidi()) {
+		_input_port = new MIDI::IPMIDIPort (_surface->mcp().ipmidi_base() +_surface->number());
+		_output_port = _input_port;
+	} else {
+		jack_client_t* jack = MackieControlProtocol::instance()->get_session().engine().jack();
+		
+		_input_port = new MIDI::JackMIDIPort (string_compose (_("%1 in"),  _surface->name()), MIDI::Port::IsInput, jack);
+		_output_port =new MIDI::JackMIDIPort (string_compose (_("%1 out"), _surface->name()), MIDI::Port::IsOutput, jack);
+		
+		/* MackieControl has its own thread for handling input from the input
+		 * port, and we don't want anything handling output from the output
+		 * port. This stops the Generic MIDI UI event loop in ardour from
+		 * attempting to handle these ports.
+		 */
+		
+		_input_port->set_centrally_parsed (false);
+		_output_port->set_centrally_parsed (false);
+		
+		MIDI::Manager * mm = MIDI::Manager::instance();
+		
+		mm->add_port (_input_port);
+		mm->add_port (_output_port);
+	}
 }
 
 SurfacePort::~SurfacePort()
 {
-#ifdef PORT_DEBUG
-	cout << "~SurfacePort::SurfacePort()" << endl;
-#endif
-	// make sure another thread isn't reading or writing as we close the port
-	Glib::RecMutex::Lock lock( _rwlock );
-	_active = false;
-
-	MIDI::Manager* mm = MIDI::Manager::instance ();
-	
-	if (_input_port) {
-		mm->remove_port (_input_port);
+	if (_surface->mcp().device_info().uses_ipmidi()) {
 		delete _input_port;
-	}
+	} else {
 
-	if (_output_port) {
-		mm->remove_port (_output_port);
-		delete _output_port;
+		MIDI::Manager* mm = MIDI::Manager::instance ();
+		
+		if (_input_port) {
+			mm->remove_port (_input_port);
+			delete _input_port;
+		}
+		
+		if (_output_port) {
+			_output_port->drain (10000);
+			mm->remove_port (_output_port);
+			delete _output_port;
+		}
 	}
-	
-#ifdef PORT_DEBUG
-	cout << "~SurfacePort::SurfacePort() finished" << endl;
-#endif
 }
 
 // wrapper for one day when strerror_r is working properly
-string fetch_errmsg( int error_number )
+string fetch_errmsg (int error_number)
 {
-	char * msg = strerror( error_number );
+	char * msg = strerror (error_number);
 	return msg;
 }
 	
-MidiByteArray SurfacePort::read()
+int 
+SurfacePort::write (const MidiByteArray & mba)
 {
-	const int max_buf_size = 512;
-	MIDI::byte buf[max_buf_size];
-	MidiByteArray retval;
-
-	// check active. Mainly so that the destructor
-	// doesn't destroy the mutex while it's still locked
-	if ( !active() ) return retval;
-	
-	// return nothing read if the lock isn't acquired
-#if 0
-	Glib::RecMutex::Lock lock( _rwlock, Glib::TRY_LOCK );
-		
-	if ( !lock.locked() )
-	{
-		cout << "SurfacePort::read not locked" << endl;
-		return retval;
+	if (mba.empty()) {
+		return 0;
 	}
-	
-	// check active again - destructor sequence
-	if ( !active() ) return retval;
-#endif
-	
-	// read port and copy to return value
-	int nread = input_port().read( buf, sizeof (buf) );
 
-	if (nread >= 0) {
-		retval.copy( nread, buf );
-		if ((size_t) nread == sizeof (buf))
-		{
-#ifdef PORT_DEBUG
-			cout << "SurfacePort::read recursive" << endl;
-#endif
-			retval << read();
-		}
-	}
-	else
-	{
-		if ( errno != EAGAIN )
-		{
-			ostringstream os;
-			os << "Surface: error reading from port: " << input_port().name();
-			os << ": " << errno << fetch_errmsg( errno );
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("port %1 write %2\n", output_port().name(), mba));
 
-			cout << os.str() << endl;
-			inactive_event();
-			throw MackieControlException( os.str() );
-		}
-	}
-#ifdef PORT_DEBUG
-	cout << "SurfacePort::read: " << retval << endl;
-#endif
-	return retval;
-}
+	int count = output_port().write (mba.bytes().get(), mba.size(), 0);
 
-void SurfacePort::write( const MidiByteArray & mba )
-{
-#ifdef PORT_DEBUG
-	cout << "SurfacePort::write: " << mba << " to " << output_port().name() << endl;
-#endif
-	
-	// check active before and after lock - to make sure
-	// that the destructor doesn't destroy the mutex while
-	// it's still in use
-	if ( !active() ) return;
-	Glib::RecMutex::Lock lock( _rwlock );
-	if ( !active() ) return;
+	if  (count != (int)mba.size()) {
 
-	int count = output_port().write( mba.bytes().get(), mba.size(), 0);
-	if ( count != (int)mba.size() )
-	{
-		if ( errno == 0 )
-		{
+		if  (errno == 0) {
+
 			cout << "port overflow on " << output_port().name() << ". Did not write all of " << mba << endl;
-		}
-		else if ( errno != EAGAIN )
-		{
+
+		} else if  (errno != EAGAIN) {
 			ostringstream os;
 			os << "Surface: couldn't write to port " << output_port().name();
-			os << ", error: " << fetch_errmsg( errno ) << "(" << errno << ")";
-			
+			os << ", error: " << fetch_errmsg (errno) << "(" << errno << ")";
 			cout << os.str() << endl;
-			inactive_event();
 		}
+
+		return -1;
 	}
-#ifdef PORT_DEBUG
-	cout << "SurfacePort::wrote " << count << endl;
-#endif
+
+	return 0;
 }
 
-void SurfacePort::write_sysex( const MidiByteArray & mba )
-{
-	MidiByteArray buf;
-	buf << sysex_hdr() << mba << MIDI::eox;
-	write( buf );
-}
-
-void SurfacePort::write_sysex( MIDI::byte msg )
-{
-	MidiByteArray buf;
-	buf << sysex_hdr() << msg << MIDI::eox;
-	write( buf );
-}
-
-ostream & Mackie::operator << ( ostream & os, const SurfacePort & port )
+ostream & 
+Mackie::operator <<  (ostream & os, const SurfacePort & port)
 {
 	os << "{ ";
 	os << "name: " << port.input_port().name() << " " << port.output_port().name();
@@ -197,42 +148,3 @@ ostream & Mackie::operator << ( ostream & os, const SurfacePort & port )
 	return os;
 }
 
-/** Handle timeouts to reset in_use for controls that can't
- *  do this by themselves (e.g. pots, and faders without touch support).
- *  @param in_use_control the control whose in_use flag to reset.
- *  @param touch_control a touch control to emit an event for, or 0.
- */
-bool
-SurfacePort::control_in_use_timeout (Control* in_use_control, Control* touch_control)
-{
-	in_use_control->set_in_use (false);
-
-	if (touch_control) {
-		// empty control_state
-		ControlState control_state;
-		control_event (*this, *touch_control, control_state);
-	}
-	
-	// only call this method once from the timer
-	return false;
-}
-
-/** Add a timeout so that a control's in_use flag will be reset some time in the future.
- *  @param in_use_control the control whose in_use flag to reset.
- *  @param touch_control a touch control to emit an event for, or 0.
- */
-void
-SurfacePort::add_in_use_timeout (Control& in_use_control, Control* touch_control)
-{
-	in_use_control.in_use_connection.disconnect ();
-
-	/* XXX should this use the GUI event loop (default) or the MIDI UI event loop? */
-	
-	/* timeout after 250ms */
-	in_use_control.in_use_connection = Glib::signal_timeout().connect (
-		sigc::bind (sigc::mem_fun (*this, &SurfacePort::control_in_use_timeout), &in_use_control, touch_control),
-		250
-		);
-	
-	in_use_control.in_use_touch_control = touch_control;
-}

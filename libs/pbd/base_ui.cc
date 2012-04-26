@@ -25,6 +25,7 @@
 #include <cstring>
 
 #include "pbd/base_ui.h"
+#include "pbd/debug.h"
 #include "pbd/pthread_utils.h"
 #include "pbd/error.h"
 #include "pbd/compose.h"
@@ -72,6 +73,7 @@ BaseUI::new_request_type ()
 void
 BaseUI::main_thread ()
 {
+	DEBUG_TRACE (DEBUG::EventLoop, string_compose ("%1: event loop running in thread %2\n", name(), pthread_self()));
 	set_event_loop_for_thread (this);
 	thread_init ();
 	_main_loop->run ();
@@ -104,7 +106,7 @@ BaseUI::quit ()
 bool
 BaseUI::request_handler (Glib::IOCondition ioc)
 {
-	/* check the transport request pipe */
+	/* check the request pipe */
 
 	if (ioc & ~IO_IN) {
 		_main_loop->quit ();

@@ -549,6 +549,7 @@ StereoPanner::on_key_press_event (GdkEventKey* ev)
 		} else {
 			width_control->set_value (wv - step);
 		}
+		break;
 
 	case GDK_Left:
 		pv -= step;
@@ -557,8 +558,6 @@ StereoPanner::on_key_press_event (GdkEventKey* ev)
 	case GDK_Right:
 		pv += step;
 		position_control->set_value (pv);
-		break;
-
 		break;
 	case GDK_0:
 	case GDK_KP_0:

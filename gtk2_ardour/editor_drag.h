@@ -310,7 +310,7 @@ public:
 
 protected:
 
-	double compute_x_delta (GdkEvent const *, ARDOUR::framecnt_t *);
+	double compute_x_delta (GdkEvent const *, ARDOUR::framepos_t *);
 	bool y_movement_allowed (int, double) const;
 
 	bool _brushing;

@@ -41,7 +41,6 @@ const string ControlProtocolManager::state_node_name = X_("ControlProtocols");
 
 ControlProtocolManager::ControlProtocolManager ()
 {
-
 }
 
 ControlProtocolManager::~ControlProtocolManager()
@@ -75,8 +74,16 @@ ControlProtocolManager::set_session (Session* s)
 				instantiate (**i);
 				(*i)->requested = false;
 
-				if ((*i)->protocol && (*i)->state) {
-					(*i)->protocol->set_state (*(*i)->state, Stateful::loading_state_version);
+				if ((*i)->protocol) {
+					if ((*i)->state) {
+						(*i)->protocol->set_state (*(*i)->state, Stateful::loading_state_version);
+					} else {
+						/* guarantee a call to
+						   set_state() whether we have
+						   existing state or not
+						*/
+						(*i)->protocol->set_state (XMLNode(""), Stateful::loading_state_version);
+					}
 				}
 			}
 		}
@@ -312,12 +319,14 @@ ControlProtocolManager::set_state (const XMLNode& node, int /*version*/)
 			if (prop && string_is_affirmative (prop->value())) {
 				if ((prop = (*citer)->property (X_("name"))) != 0) {
 					ControlProtocolInfo* cpi = cpi_by_name (prop->value());
+
 					if (cpi) {
-						if (!(*citer)->children().empty()) {
-							cpi->state = (*citer)->children().front ();
-						} else {
-							cpi->state = 0;
+
+						if (cpi->state) {
+							delete cpi->state;
 						}
+
+						cpi->state = new XMLNode (**citer);
 
 						if (_session) {
 							instantiate (*cpi);
@@ -400,4 +409,14 @@ ControlProtocolManager::instance ()
 	}
 
 	return *_instance;
+}
+
+void
+ControlProtocolManager::midi_connectivity_established ()
+{
+	Glib::Mutex::Lock lm (protocols_lock);
+
+	for (list<ControlProtocol*>::iterator p = control_protocols.begin(); p != control_protocols.end(); ++p) {
+		(*p)->midi_connectivity_established ();
+	}
 }

@@ -41,7 +41,7 @@ class Channel : public PBD::ScopedConnectionList {
   public:
 	Channel (byte channel_number, Port &);
 
-	Port &midi_port()               { return _port; }
+	Port &midi_port()           { return _port; }
 	byte channel()                  { return _channel_number; }
 	byte program()                  { return _program_number; }
 	byte bank()                     { return _bank_number; }
@@ -115,7 +115,7 @@ class Channel : public PBD::ScopedConnectionList {
 	void connect_signals ();
 
   private:
-	Port & _port;
+	Port& _port;
 
 	/* Current channel values */
 	byte               _channel_number;

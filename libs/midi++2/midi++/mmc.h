@@ -145,9 +145,9 @@ class MachineControl
 	MMCSignal Wait;
 	MMCSignal Resume;
 
-	TimestampedSignal SPPStart;
-	TimestampedSignal SPPContinue;
-	TimestampedSignal SPPStop;
+	PBD::Signal0<void> SPPStart;
+	PBD::Signal0<void> SPPContinue;
+	PBD::Signal0<void> SPPStop;
 
 	/* The second argument is the shuttle speed, the third is
 	   true if the direction is "forwards", false for "reverse"
@@ -271,9 +271,9 @@ class MachineControl
 	int  do_shuttle (byte *, size_t len);
 	
 	void write_track_status (byte *, size_t len, byte reg);
-	void spp_start (Parser&, framecnt_t);
-	void spp_continue (Parser&, framecnt_t);
-	void spp_stop (Parser&, framecnt_t);
+	void spp_start ();
+	void spp_continue ();
+	void spp_stop ();
 };
 
 /** Class to describe a MIDI machine control command to be sent.

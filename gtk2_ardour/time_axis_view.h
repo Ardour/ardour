@@ -286,7 +286,6 @@ class TimeAxisView : public virtual AxisView
 	bool in_destructor;
 	NamePackingBits name_packing;
 
-	void set_heights (uint32_t h);
 	void color_handler ();
 
 	void conditionally_add_to_selection ();

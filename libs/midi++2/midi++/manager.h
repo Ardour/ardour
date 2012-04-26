@@ -88,12 +88,12 @@ class Manager {
 	static Manager *theManager;
 
 	MIDI::MachineControl*   _mmc;
-	MIDI::Port*             _mtc_input_port;
-	MIDI::Port*             _mtc_output_port;
-	MIDI::Port*             _midi_input_port;
-	MIDI::Port*             _midi_output_port;
-	MIDI::Port*             _midi_clock_input_port;
-	MIDI::Port*             _midi_clock_output_port;
+	MIDI::Port*         _mtc_input_port;
+	MIDI::Port*         _mtc_output_port;
+	MIDI::Port*         _midi_input_port;
+	MIDI::Port*         _midi_output_port;
+	MIDI::Port*         _midi_clock_input_port;
+	MIDI::Port*         _midi_clock_output_port;
 
 	SerializedRCUManager<PortList> _ports;
 };

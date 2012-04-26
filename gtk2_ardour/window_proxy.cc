@@ -19,6 +19,9 @@
 
 #include <gtkmm/window.h>
 #include "window_proxy.h"
+
+#include "pbd/convert.h"
+
 #include "i18n.h"
 
 using namespace std;
@@ -57,7 +60,7 @@ WindowProxyBase::WindowProxyBase (string const & name, XMLNode const * node)
 		XMLProperty* prop;
 
 		if ((prop = (*i)->property (X_("visible"))) != 0) {
-			_visible = string_is_affirmative (prop->value ());
+			_visible = PBD::string_is_affirmative (prop->value ());
 		}
 
 		if ((prop = (*i)->property (X_("x-off"))) != 0) {

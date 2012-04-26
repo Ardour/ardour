@@ -55,9 +55,9 @@ TimeSelection::consolidate ()
 				continue;
 			}
 
-			if ((*a).coverage ((*b).start, (*b).end) != OverlapNone) {
-				(*a).start = std::min ((*a).start, (*b).start);
-				(*a).end = std::max ((*a).end, (*b).end);
+			if (a->coverage (b->start, b->end) != Evoral::OverlapNone) {
+				a->start = std::min (a->start, b->start);
+				a->end = std::max (a->end, b->end);
 				erase (b);
 				changed = true;
 				goto restart;

@@ -42,7 +42,7 @@ class BasicUI {
 	BasicUI (ARDOUR::Session&);
 	virtual ~BasicUI ();
 	
-	void add_marker ();
+	void add_marker (const std::string& = std::string());
 
 	void register_thread (std::string name);
 

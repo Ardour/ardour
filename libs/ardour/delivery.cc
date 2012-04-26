@@ -446,7 +446,7 @@ Delivery::reset_panners ()
 }
 
 void
-Delivery::flush_buffers (framecnt_t nframes, framepos_t time)
+Delivery::flush_buffers (framecnt_t nframes)
 {
 	/* io_lock, not taken: function must be called from Session::process() calltree */
 
@@ -457,7 +457,7 @@ Delivery::flush_buffers (framecnt_t nframes, framepos_t time)
 	PortSet& ports (_output->ports());
 
 	for (PortSet::iterator i = ports.begin(); i != ports.end(); ++i) {
-		i->flush_buffers (nframes, time);
+		i->flush_buffers (nframes);
 	}
 }
 

@@ -34,6 +34,7 @@
 #include <jack/weakjack.h>
 
 #include "midi++/port.h"
+#include "midi++/jack_midi_port.h"
 #include "midi++/mmc.h"
 #include "midi++/manager.h"
 
@@ -133,7 +134,7 @@ _thread_init_callback (void * /*arg*/)
 
 	SessionEvent::create_per_thread_pool (X_("Audioengine"), 512);
 
-	MIDI::Port::set_process_thread (pthread_self());
+	MIDI::JackMIDIPort::set_process_thread (pthread_self());
 }
 
 static void
@@ -233,7 +234,7 @@ AudioEngine::stop (bool forever)
 		} else {
 			jack_deactivate (_priv_jack);
 			Stopped(); /* EMIT SIGNAL */
-			MIDI::Port::JackHalted (); /* EMIT SIGNAL */
+			MIDI::JackMIDIPort::JackHalted (); /* EMIT SIGNAL */
 		}
 	}
 
@@ -476,8 +477,17 @@ AudioEngine::process_callback (pframes_t nframes)
 		next_processed_frames = _processed_frames + nframes;
 	}
 
-	if (!tm.locked() || _session == 0) {
+	if (!tm.locked()) {
 		/* return having done nothing */
+		_processed_frames = next_processed_frames;
+		return 0;
+	}
+
+	if (_session == 0) {
+		if (!_freewheeling) {
+			MIDI::Manager::instance()->cycle_start(nframes);
+			MIDI::Manager::instance()->cycle_end();
+		}
 		_processed_frames = next_processed_frames;
 		return 0;
 	}
@@ -518,9 +528,13 @@ AudioEngine::process_callback (pframes_t nframes)
 		}
 
 	} else {
+		MIDI::Manager::instance()->cycle_start(nframes);
+
 		if (_session) {
 			_session->process (nframes);
 		}
+
+		MIDI::Manager::instance()->cycle_end();
 	}
 
 	if (_freewheeling) {
@@ -1093,7 +1107,7 @@ AudioEngine::halted (void *arg)
 
 	if (was_running) {
 		ae->Halted(""); /* EMIT SIGNAL */
-		MIDI::Port::JackHalted (); /* EMIT SIGNAL */
+		MIDI::JackMIDIPort::JackHalted (); /* EMIT SIGNAL */
 	}
 }
 
@@ -1343,7 +1357,7 @@ AudioEngine::disconnect_from_jack ()
 	if (_running) {
 		_running = false;
 		Stopped(); /* EMIT SIGNAL */
-		MIDI::Port::JackHalted (); /* EMIT SIGNAL */
+		MIDI::JackMIDIPort::JackHalted (); /* EMIT SIGNAL */
 	}
 
 	return 0;

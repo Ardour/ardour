@@ -30,7 +30,7 @@ namespace ARDOUR {
  *  supplied to the constructor.  Returns the equivalent number of frames,
  *  taking tempo changes into account.
  */
-framecnt_t
+framepos_t
 BeatsFramesConverter::to (double beats) const
 {
 	if (beats < 0) {
@@ -47,7 +47,7 @@ BeatsFramesConverter::to (double beats) const
  *  taking tempo changes into account.
  */
 double
-BeatsFramesConverter::from (framecnt_t frames) const
+BeatsFramesConverter::from (framepos_t frames) const
 {
 	double b = _tempo_map.framewalk_to_beats (_origin_b, frames);
 	return b;

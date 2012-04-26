@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MackieProtocolDevice>
+  <Name value="SSL Nucleus"/>
+  <Strips value="8"/>
+  <Extenders value="1"/>
+  <MasterFader value="no"/>
+  <SegmentedDisplay value="yes"/>
+  <TimecodeDisplay value="no"/>
+  <TwoCharacterDisplay value="yes"/>
+  <GlobalControls value="yes"/>
+  <JogWheel value="yes"/>
+  <TouchSenseFaders value="yes"/>
+  <LogicControlButtons value="yes"/>
+  <UsesIPMIDI value="yes"/>
+</MackieProtocolDevice>

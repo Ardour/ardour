@@ -56,7 +56,7 @@ Splash::Splash ()
 	set_default_size (pixbuf->get_width(), pixbuf->get_height());
 	the_splash = this;
 
-	ARDOUR::BootMessage.connect (msg_connection, invalidator (*this), ui_bind (&Splash::boot_message, this, _1), gui_context());
+	ARDOUR::BootMessage.connect (msg_connection, invalidator (*this), boost::bind (&Splash::boot_message, this, _1), gui_context());
 }
 
 void

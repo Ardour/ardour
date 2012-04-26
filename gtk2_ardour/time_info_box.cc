@@ -32,6 +32,8 @@
 #include "time_info_box.h"
 #include "audio_clock.h"
 #include "editor.h"
+#include "control_point.h"
+#include "automation_line.h"
 
 #include "i18n.h"
 
@@ -142,7 +144,7 @@ TimeInfoBox::TimeInfoBox ()
 	Editor::instance().get_selection().TimeChanged.connect (sigc::mem_fun (*this, &TimeInfoBox::selection_changed));
 	Editor::instance().get_selection().RegionsChanged.connect (sigc::mem_fun (*this, &TimeInfoBox::selection_changed));
 
-	Editor::instance().MouseModeChanged.connect (editor_connections, invalidator(*this), ui_bind (&TimeInfoBox::track_mouse_mode, this), gui_context());
+	Editor::instance().MouseModeChanged.connect (editor_connections, invalidator(*this), boost::bind (&TimeInfoBox::track_mouse_mode, this), gui_context());
 }
 
 TimeInfoBox::~TimeInfoBox ()
@@ -267,8 +269,9 @@ TimeInfoBox::selection_changed ()
 					s = max_framepos;
 					e = 0;
 					for (PointSelection::iterator i = selection.points.begin(); i != selection.points.end(); ++i) {
-						s = min (s, (framepos_t) i->start);
-						e = max (e, (framepos_t) i->end);
+						framepos_t const p = (*i)->line().session_position ((*i)->model ());
+						s = min (s, p);
+						e = max (e, p);
 					}
 					selection_start->set_off (false);
 					selection_end->set_off (false);

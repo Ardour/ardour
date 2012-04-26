@@ -136,9 +136,9 @@ class Parser {
 	void reset_mtc_state ();
 	
   private:
-	Port &_port;
+	Port&_port;
 	/* tracing */
-
+	
 	std::ostream *trace_stream;
 	std::string trace_prefix;
 	void trace_event (Parser &p, byte *msg, size_t len);

@@ -455,7 +455,7 @@ EditorRouteGroups::add (RouteGroup* group)
 		focus = true;
 	}
 
-	group->PropertyChanged.connect (_property_changed_connections, MISSING_INVALIDATOR, ui_bind (&EditorRouteGroups::property_changed, this, group, _1), gui_context());
+	group->PropertyChanged.connect (_property_changed_connections, MISSING_INVALIDATOR, boost::bind (&EditorRouteGroups::property_changed, this, group, _1), gui_context());
 
 	if (focus) {
 		TreeViewColumn* col = _display.get_column (0);
@@ -567,9 +567,9 @@ EditorRouteGroups::set_session (Session* s)
 
 		RouteGroup& arg (_session->all_route_group());
 
-		arg.PropertyChanged.connect (all_route_groups_changed_connection, MISSING_INVALIDATOR, ui_bind (&EditorRouteGroups::all_group_changed, this, _1), gui_context());
+		arg.PropertyChanged.connect (all_route_groups_changed_connection, MISSING_INVALIDATOR, boost::bind (&EditorRouteGroups::all_group_changed, this, _1), gui_context());
 
-		_session->route_group_added.connect (_session_connections, MISSING_INVALIDATOR, ui_bind (&EditorRouteGroups::add, this, _1), gui_context());
+		_session->route_group_added.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&EditorRouteGroups::add, this, _1), gui_context());
 		_session->route_group_removed.connect (
 			_session_connections, MISSING_INVALIDATOR, boost::bind (&EditorRouteGroups::groups_changed, this), gui_context()
 			);

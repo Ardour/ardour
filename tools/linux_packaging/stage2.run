@@ -241,7 +241,7 @@ else
 	if [ ${FREE_BYTES} -le ${REQUIRED_BYTES} ] ; then
 		echo ""
 		echo "!!! ERROR !!! - Insufficient disk space in ${PKG_PATH}"
-		echo "Install requires ${REQUIRED_BYTES} bytes and
+		echo "Install requires ${REQUIRED_BYTES} bytes and"
 		echo "there is only ${FREE_BYTES} bytes of free space"
 		echo ""
 		read -p "Press ENTER to exit installer:" BLAH
@@ -254,7 +254,7 @@ else
 	if [ ${FREE_BYTES} -le ${REQUIRED_BYTES} ] ; then
 		echo ""
 		echo "!!! ERROR !!! - Insufficient disk space in ${INSTALL_DEST_BASE}"
-		echo "Install requires ${REQUIRED_BYTES} bytes and
+		echo "Install requires ${REQUIRED_BYTES} bytes and"
 		echo "there is only ${FREE_BYTES} bytes of free space"
 		echo ""
 		read -p "Press ENTER to exit installer:" BLAH

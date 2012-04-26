@@ -35,7 +35,6 @@
 #include "ardour/audioengine.h"
 #include "ardour/butler.h"
 #include "ardour/configuration.h"
-#include "ardour/crossfade.h"
 #include "ardour/io.h"
 #include "ardour/midi_diskstream.h"
 #include "ardour/session.h"

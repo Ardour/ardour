@@ -165,6 +165,7 @@ class Selection : public sigc::trackable, public PBD::ScopedConnectionList
 	void add (Marker*);
 	void add (const std::list<Marker*>&);
 	void add (const RegionSelection&);
+	void add (const PointSelection&);
 	void remove (TimeAxisView*);
 	void remove (const TrackViewList&);
 	void remove (const MidiNoteSelection&);
@@ -178,6 +179,7 @@ class Selection : public sigc::trackable, public PBD::ScopedConnectionList
 	void remove (const std::list<boost::shared_ptr<ARDOUR::Playlist> >&);
 	void remove (const std::list<Selectable*>&);
 	void remove (Marker*);
+	void remove (ControlPoint *);
 
 	void remove_regions (TimeAxisView *);
 
@@ -202,8 +204,6 @@ class Selection : public sigc::trackable, public PBD::ScopedConnectionList
 	int set_state (XMLNode const &, int);
 
   private:
-	void set_point_selection_from_line (AutomationLine const &);
-
 	PublicEditor const * editor;
 	uint32_t next_time_id;
 	bool _no_tracks_changed;

@@ -74,7 +74,7 @@ public:
 
 	/* supplemental method used with MIDI */
 
-	void flush_buffers (framecnt_t nframes, framepos_t time);
+	void flush_buffers (framecnt_t nframes);
 	void no_outs_cuz_we_no_monitor(bool);
 	void transport_stopped (framepos_t frame);
 	void realtime_locate ();

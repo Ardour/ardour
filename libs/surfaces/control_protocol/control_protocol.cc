@@ -35,37 +35,34 @@ Signal0<void>       ControlProtocol::ZoomToSession;
 Signal0<void>       ControlProtocol::ZoomOut;
 Signal0<void>       ControlProtocol::ZoomIn;
 Signal0<void>       ControlProtocol::Enter;
+Signal0<void>       ControlProtocol::Undo;
+Signal0<void>       ControlProtocol::Redo;
 Signal1<void,float> ControlProtocol::ScrollTimeline;
-Signal1<void,uint32_t> ControlProtocol::SelectByRID;
+Signal1<void,uint32_t> ControlProtocol::GotoView;
+Signal0<void> ControlProtocol::CloseDialog;
+PBD::Signal0<void> ControlProtocol::VerticalZoomInAll;
+PBD::Signal0<void> ControlProtocol::VerticalZoomOutAll;
+PBD::Signal0<void> ControlProtocol::VerticalZoomInSelected;
+PBD::Signal0<void> ControlProtocol::VerticalZoomOutSelected;
+PBD::Signal1<void,RouteNotificationListPtr> ControlProtocol::TrackSelectionChanged;
+PBD::Signal1<void,uint32_t> ControlProtocol::AddRouteToSelection;
+PBD::Signal1<void,uint32_t> ControlProtocol::SetRouteSelection;
+PBD::Signal1<void,uint32_t> ControlProtocol::RemoveRouteFromSelection;
+PBD::Signal0<void>          ControlProtocol::ClearRouteSelection;
+PBD::Signal0<void>          ControlProtocol::StepTracksDown;
+PBD::Signal0<void>          ControlProtocol::StepTracksUp;
 
-ControlProtocol::ControlProtocol (Session& s, string str, EventLoop* evloop)
-	: BasicUI (s),
-	  _name (str)
+ControlProtocol::ControlProtocol (Session& s, string str)
+	: BasicUI (s)
+	, _name (str)
+	, _active (false)
 {
-	if (evloop) {
-		_own_event_loop = false;
-		_event_loop = evloop;
-	} else {
-		_own_event_loop = true;
-		fatal << "programming error: cannot create control protocols without an existing event loop (yet)" << endmsg;
-		/*NOTREACHED*/
-	}
-
-	_active = false;
-	
-	session->RouteAdded.connect (*this, MISSING_INVALIDATOR, boost::protect (boost::bind (&ControlProtocol::add_strip, this, _1)), _event_loop);
 }
 
 ControlProtocol::~ControlProtocol ()
 {
 }
 
-void
-ControlProtocol::add_strip (ARDOUR::RouteList&)
-{
-	route_list_changed();
-}
-	
 void
 ControlProtocol::next_track (uint32_t initial_id)
 {

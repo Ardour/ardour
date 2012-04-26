@@ -223,6 +223,7 @@ AudioTrackImporter::get_info () const
 	return name;
 }
 
+/** @return true if everything is ok */
 bool
 AudioTrackImporter::_prepare_move ()
 {
@@ -247,7 +248,21 @@ AudioTrackImporter::_prepare_move ()
 		}
 		name = rename_pair.second;
 	}
-	xml_track.child ("IO")->property ("name")->set_value (name);
+	
+	XMLNode* c = xml_track.child ("IO");
+	if (!c) {
+		error << _("badly-formed XML in imported track") << endmsg;
+		return false;
+	}
+
+	XMLProperty* p = c->property ("name");
+	if (!p) {
+		error << _("badly-formed XML in imported track") << endmsg;
+		return false;
+	}
+	
+	p->set_value (name);
+	
 	track_handler.add_name (name);
 
 	return true;
@@ -275,7 +290,9 @@ AudioTrackImporter::_move ()
 	}
 
 	boost::shared_ptr<XMLNode> ds_node = ds_node_list->front();
-	ds_node->property ("id")->set_value (new_ds_id.to_s());
+	XMLProperty* p = ds_node->property (X_("id"));
+	assert (p);
+	p->set_value (new_ds_id.to_s());
 
 	boost::shared_ptr<Diskstream> new_ds (new AudioDiskstream (session, *ds_node));
 	new_ds->set_name (name);

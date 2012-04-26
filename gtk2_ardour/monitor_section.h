@@ -59,6 +59,7 @@ class MonitorSection : public RouteUI
         Gtk::Table channel_table;
         Gtk::Table channel_table_header;
 	Gtk::ScrolledWindow channel_table_scroller;
+	Gtk::Viewport channel_table_viewport;
 	Glib::RefPtr<Gtk::SizeGroup> channel_size_group;
 
         struct ChannelButtonSet {

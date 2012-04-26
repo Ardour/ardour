@@ -77,7 +77,7 @@ class MidiRegion : public Region
 	                    NoteMode  mode = Sustained,
 	                    MidiStateTracker* tracker = 0) const;
 
-	framepos_t master_read_at (MidiRingBuffer<framepos_t>& dst,
+	framecnt_t master_read_at (MidiRingBuffer<framepos_t>& dst,
 	                           framepos_t position,
 	                           framecnt_t dur,
 	                           uint32_t  chan_n = 0,
@@ -132,6 +132,7 @@ class MidiRegion : public Region
 
 	void set_position_internal (framepos_t pos, bool allow_bbt_recompute);
 	void set_length_internal (framecnt_t len);
+	void set_start_internal (framecnt_t);
 	void update_length_beats ();
 
 	void model_changed ();

@@ -27,6 +27,7 @@
 #include "ardour/session.h"
 #include "ardour/session_directory.h"
 #include "ardour/session_utils.h"
+#include "ardour/configuration.h"
 
 #include "i18n.h"
 
@@ -81,8 +82,8 @@ TextMetadataField::load_data (ARDOUR::SessionMetadata const & data)
 Gtk::Widget &
 TextMetadataField::name_widget ()
 {
-	label = Gtk::manage (new Gtk::Label(_name + ':', Gtk::ALIGN_LEFT));
-	label->set_alignment (0, 0.5);
+	label = Gtk::manage (new Gtk::Label(_name + ':'));
+	label->set_alignment (1, 0.5);
 	return *label;
 }
 
@@ -160,8 +161,8 @@ NumberMetadataField::update_value ()
 Gtk::Widget &
 NumberMetadataField::name_widget ()
 {
-	label = Gtk::manage (new Gtk::Label(_name + ':', Gtk::ALIGN_LEFT));
-	label->set_alignment (0, 0.5);
+	label = Gtk::manage (new Gtk::Label(_name + ':'));
+	label->set_alignment (1, 0.5);
 	return *label;
 }
 
@@ -255,7 +256,7 @@ SessionMetadataSetEditable::set_session (ARDOUR::Session * s)
 		return;
 	}
 
-	ARDOUR::SessionMetadata const & data = _session->metadata();
+	ARDOUR::SessionMetadata const & data = *(ARDOUR::SessionMetadata::Metadata());
 
 	table.resize (list.size(), 2);
 	uint32_t row = 0;
@@ -272,7 +273,7 @@ SessionMetadataSetEditable::set_session (ARDOUR::Session * s)
 void
 SessionMetadataSetEditable::save_data ()
 {
-	ARDOUR::SessionMetadata & data = _session->metadata();
+	ARDOUR::SessionMetadata & data = *(ARDOUR::SessionMetadata::Metadata());
 	for (DataList::const_iterator it = list.begin(); it != list.end(); ++it) {
 		(*it)->save_data(data);
 	}
@@ -330,7 +331,7 @@ SessionMetadataSetImportable::load_extra_data (ARDOUR::SessionMetadata const & d
 		return;
 	}
 
-	ARDOUR::SessionMetadata & session_data = _session->metadata();
+	ARDOUR::SessionMetadata const & session_data = *(ARDOUR::SessionMetadata::Metadata());
 
 	MetadataPtr session_field;
 	MetadataPtr import_field;
@@ -378,7 +379,7 @@ SessionMetadataSetImportable::save_data ()
 		return;
 	}
 
-	ARDOUR::SessionMetadata & session_data = _session->metadata();
+	ARDOUR::SessionMetadata & session_data = *(ARDOUR::SessionMetadata::Metadata());
 
 	Gtk::TreeModel::Children fields = tree->children();
 	Gtk::TreeModel::Children::iterator it;
@@ -421,22 +422,25 @@ SessionMetadataDialog<DataSet>::SessionMetadataDialog (string const & name) :
 {
 	cancel_button = add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 	cancel_button->signal_clicked().connect (sigc::mem_fun(*this, &SessionMetadataDialog::end_dialog));
-	save_button = add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
+	save_button = add_button (Gtk::Stock::OK, Gtk::RESPONSE_ACCEPT);
 	save_button->signal_clicked().connect (sigc::mem_fun(*this, &SessionMetadataDialog::save_and_close));
 }
 
 template <typename DataSet>
 void
-SessionMetadataDialog<DataSet>::init_data ()
+SessionMetadataDialog<DataSet>::init_data ( bool skip_user )
 {
 	if (!_session) {
 		std::cerr << "Programming error: no session set for SessionMetaDataDialog (in init_data)!" << std::endl;
 		return;
 	}
 
+	if (!skip_user)
+		init_user_data ();
 	init_track_data ();
 	init_album_data ();
 	init_people_data ();
+	init_school_data ();
 
 	for (DataSetList::iterator it = data_list.begin(); it != data_list.end(); ++it) {
 		(*it)->set_session (_session);
@@ -468,6 +472,7 @@ void
 SessionMetadataDialog<DataSet>::save_and_close ()
 {
 	save_data ();
+	_session->set_dirty();
 	end_dialog ();
 }
 
@@ -505,6 +510,32 @@ void
 SessionMetadataDialog<DataSet>::add_widget (Gtk::Widget & widget)
 {
 	get_vbox()->pack_start (widget, true, true, 0);
+}
+
+template <typename DataSet>
+void
+SessionMetadataDialog<DataSet>::init_user_data ()
+{
+	DataSetPtr data_set (new DataSet (_("User")));
+	data_list.push_back (data_set);
+
+	MetadataPtr ptr;
+
+	ptr = MetadataPtr (new TextMetadataField (&ARDOUR::SessionMetadata::user_name, &ARDOUR::SessionMetadata::set_user_name, _("Name")));
+	data_set->add_data_field (ptr);
+
+	ptr = MetadataPtr (new TextMetadataField (&ARDOUR::SessionMetadata::user_email, &ARDOUR::SessionMetadata::set_user_email, _("Email")));
+	data_set->add_data_field (ptr);
+
+	ptr = MetadataPtr (new TextMetadataField (&ARDOUR::SessionMetadata::user_web, &ARDOUR::SessionMetadata::set_user_web, _("Web")));
+	data_set->add_data_field (ptr);
+
+	ptr = MetadataPtr (new TextMetadataField (&ARDOUR::SessionMetadata::organization, &ARDOUR::SessionMetadata::set_organization, _("Organization")));
+	data_set->add_data_field (ptr);
+
+	ptr = MetadataPtr (new TextMetadataField (&ARDOUR::SessionMetadata::country, &ARDOUR::SessionMetadata::set_country, _("Country")));
+	data_set->add_data_field (ptr);
+
 }
 
 template <typename DataSet>
@@ -615,6 +646,23 @@ SessionMetadataDialog<DataSet>::init_people_data ()
 	data_set->add_data_field (ptr);
 }
 
+template <typename DataSet>
+void
+SessionMetadataDialog<DataSet>::init_school_data ()
+{
+	DataSetPtr data_set (new DataSet (_("School")));
+	data_list.push_back (data_set);
+
+	MetadataPtr ptr;
+
+	ptr = MetadataPtr (new TextMetadataField (&ARDOUR::SessionMetadata::instructor, &ARDOUR::SessionMetadata::set_instructor, _("Instructor")));
+	data_set->add_data_field (ptr);
+
+	ptr = MetadataPtr (new TextMetadataField (&ARDOUR::SessionMetadata::course, &ARDOUR::SessionMetadata::set_course, _("Course")));
+	data_set->add_data_field (ptr);
+
+}
+
 /* SessionMetadataEditor */
 
 SessionMetadataEditor::SessionMetadataEditor () :
@@ -722,10 +770,10 @@ SessionMetadataImporter::run ()
 		return;
 	}
 
+	//create a temporary 
 	ARDOUR::SessionMetadata data;
 	data.set_state (*node, version);
-
-	init_data ();
+	init_data ( true );  //skip user data here
 	load_extra_data (data);
 	init_gui();
 

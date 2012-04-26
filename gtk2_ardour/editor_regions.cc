@@ -212,11 +212,11 @@ EditorRegions::EditorRegions (Editor* e)
 
 	//ARDOUR_UI::instance()->secondary_clock.mode_changed.connect (sigc::mem_fun(*this, &Editor::redisplay_regions));
 	ARDOUR_UI::instance()->secondary_clock->mode_changed.connect (sigc::mem_fun(*this, &EditorRegions::update_all_rows));
-	ARDOUR::Region::RegionPropertyChanged.connect (region_property_connection, MISSING_INVALIDATOR, ui_bind (&EditorRegions::region_changed, this, _1, _2), gui_context());
-	ARDOUR::RegionFactory::CheckNewRegion.connect (check_new_region_connection, MISSING_INVALIDATOR, ui_bind (&EditorRegions::add_region, this, _1), gui_context());
+	ARDOUR::Region::RegionPropertyChanged.connect (region_property_connection, MISSING_INVALIDATOR, boost::bind (&EditorRegions::region_changed, this, _1, _2), gui_context());
+	ARDOUR::RegionFactory::CheckNewRegion.connect (check_new_region_connection, MISSING_INVALIDATOR, boost::bind (&EditorRegions::add_region, this, _1), gui_context());
 
-	e->EditorFreeze.connect (editor_freeze_connection, MISSING_INVALIDATOR, ui_bind (&EditorRegions::freeze_tree_model, this), gui_context());
-	e->EditorThaw.connect (editor_thaw_connection, MISSING_INVALIDATOR, ui_bind (&EditorRegions::thaw_tree_model, this), gui_context());
+	e->EditorFreeze.connect (editor_freeze_connection, MISSING_INVALIDATOR, boost::bind (&EditorRegions::freeze_tree_model, this), gui_context());
+	e->EditorThaw.connect (editor_thaw_connection, MISSING_INVALIDATOR, boost::bind (&EditorRegions::thaw_tree_model, this), gui_context());
 }
 
 bool

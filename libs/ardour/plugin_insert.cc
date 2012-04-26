@@ -340,9 +340,12 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 
 		/* copy the first stream's buffer contents to the others */
 		/* XXX: audio only */
-		Sample const * mono = bufs.get_audio (in_map.get (DataType::AUDIO, 0, &valid)).data (offset);
-		for (uint32_t i = in_streams.n_audio(); i < natural_input_streams().n_audio(); ++i) {
-			memcpy (bufs.get_audio (in_map.get (DataType::AUDIO, i, &valid)).data (offset), mono, sizeof (Sample) * nframes);
+		uint32_t first_idx = in_map.get (DataType::AUDIO, 0, &valid);
+		if (valid) {
+			Sample const * mono = bufs.get_audio (first_idx).data (offset);
+			for (uint32_t i = in_streams.n_audio(); i < natural_input_streams().n_audio(); ++i) {
+				memcpy (bufs.get_audio (in_map.get (DataType::AUDIO, i, &valid)).data (offset), mono, sizeof (Sample) * nframes);
+			}
 		}
 	}
 

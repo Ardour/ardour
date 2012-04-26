@@ -23,6 +23,11 @@
 namespace Mackie
 {
 
+enum surface_type_t { 
+	mcu, 
+	ext, 
+};
+
 /**
 	This started off as an enum, but it got really annoying
 	typing ? on : off
@@ -31,16 +36,18 @@ class LedState
 {
 public:
 	enum state_t { none, off, flashing, on };
-	LedState()  : _state( none ) {}
-	LedState( bool yn ): _state( yn ? on : off ) {}
-	LedState( state_t state ): _state( state ) {}
+	LedState()  : _state (none) {}
+	LedState (bool yn): _state (yn ? on : off) {}
+	LedState (state_t state): _state (state) {}
 
-	bool operator == ( const LedState & other ) const
+	LedState& operator= (state_t s) { _state = s; return *this;  }
+		
+	bool operator ==  (const LedState & other) const
 	{
 		return state() == other.state();
 	}
 	
-	bool operator != ( const LedState & other ) const
+	bool operator !=  (const LedState & other) const
 	{
 		return state() != other.state();
 	}
@@ -66,13 +73,13 @@ struct ControlState
 {
 	ControlState(): pos(0.0), sign(0), delta(0.0), ticks(0), led_state(off), button_state(neither) {}
 	
-	ControlState( LedState ls ): pos(0.0), delta(0.0), led_state(ls), button_state(neither) {}
+	ControlState (LedState ls): pos(0.0), delta(0.0), led_state(ls), button_state(neither) {}
 	
 	// Note that this sets both pos and delta to the flt value
-	ControlState( LedState ls, float flt ): pos(flt), delta(flt), ticks(0), led_state(ls), button_state(neither) {}
-	ControlState( float flt ): pos(flt), delta(flt), ticks(0), led_state(none), button_state(neither) {}
-	ControlState( float flt, unsigned int tcks ): pos(flt), delta(flt), ticks(tcks), led_state(none), button_state(neither) {}
-	ControlState( ButtonState bs ): pos(0.0), delta(0.0), ticks(0), led_state(none), button_state(bs) {}
+	ControlState (LedState ls, float flt): pos(flt), delta(flt), ticks(0), led_state(ls), button_state(neither) {}
+	ControlState (float flt): pos(flt), delta(flt), ticks(0), led_state(none), button_state(neither) {}
+	ControlState (float flt, unsigned int tcks): pos(flt), delta(flt), ticks(tcks), led_state(none), button_state(neither) {}
+	ControlState (ButtonState bs): pos(0.0), delta(0.0), ticks(0), led_state(none), button_state(bs) {}
 	
 	/// For faders. Between 0 and 1.
 	float pos;
@@ -90,7 +97,7 @@ struct ControlState
 	ButtonState button_state;
 };
 
-std::ostream & operator << ( std::ostream &, const ControlState & );
+std::ostream & operator <<  (std::ostream &, const ControlState &);
 
 class Control;
 class Fader;
@@ -99,7 +106,6 @@ class Strip;
 class Group;
 class Pot;
 class Led;
-class LedRing;
 
 }
 

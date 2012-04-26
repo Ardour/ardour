@@ -282,7 +282,7 @@ EditorRoutes::EditorRoutes (Editor* e)
 
         _display.set_enable_search (false);
 
-	Route::SyncOrderKeys.connect (*this, MISSING_INVALIDATOR, ui_bind (&EditorRoutes::sync_order_keys, this, _1), gui_context());
+	Route::SyncOrderKeys.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::sync_order_keys, this, _1), gui_context());
 }
 
 bool
@@ -660,8 +660,8 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 
 		boost::weak_ptr<Route> wr ((*x)->route());
 
-		(*x)->route()->gui_changed.connect (*this, MISSING_INVALIDATOR, ui_bind (&EditorRoutes::handle_gui_changes, this, _1, _2), gui_context());
-		(*x)->route()->PropertyChanged.connect (*this, MISSING_INVALIDATOR, ui_bind (&EditorRoutes::route_property_changed, this, _1, wr), gui_context());
+		(*x)->route()->gui_changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::handle_gui_changes, this, _1, _2), gui_context());
+		(*x)->route()->PropertyChanged.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::route_property_changed, this, _1, wr), gui_context());
 
 		if ((*x)->is_track()) {
 			boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> ((*x)->route());
@@ -675,8 +675,8 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 		}
 
 		(*x)->route()->mute_changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_mute_display, this), gui_context());
-		(*x)->route()->solo_changed.connect (*this, MISSING_INVALIDATOR, ui_bind (&EditorRoutes::update_solo_display, this, _1), gui_context());
-		(*x)->route()->listen_changed.connect (*this, MISSING_INVALIDATOR, ui_bind (&EditorRoutes::update_solo_display, this, _1), gui_context());
+		(*x)->route()->solo_changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_solo_display, this, _1), gui_context());
+		(*x)->route()->listen_changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_solo_display, this, _1), gui_context());
 		(*x)->route()->solo_isolated_changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_solo_isolate_display, this), gui_context());
 		(*x)->route()->solo_safe_changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_solo_safe_display, this), gui_context());
 		(*x)->route()->active_changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_active_display, this), gui_context ());

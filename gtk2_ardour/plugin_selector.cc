@@ -181,7 +181,7 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	//plugin_display.set_name("PluginSelectorList");
 	added_list.set_name("PluginSelectorList");
 
-	plugin_display.signal_button_press_event().connect_notify (sigc::mem_fun(*this, &PluginSelector::row_clicked));
+	plugin_display.signal_row_activated().connect_notify (sigc::mem_fun(*this, &PluginSelector::row_activated));
 	plugin_display.get_selection()->signal_changed().connect (sigc::mem_fun(*this, &PluginSelector::display_selection_changed));
 	plugin_display.grab_focus();
 
@@ -199,11 +199,9 @@ PluginSelector::~PluginSelector ()
 }
 
 void
-PluginSelector::row_clicked(GdkEventButton* event)
+PluginSelector::row_activated(Gtk::TreeModel::Path path, Gtk::TreeViewColumn* col)
 {
-	if (event->type == GDK_2BUTTON_PRESS) {
-		btn_add_clicked();
-	}
+	btn_add_clicked();
 }
 
 bool

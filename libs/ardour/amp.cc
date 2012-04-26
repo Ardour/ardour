@@ -47,6 +47,8 @@ Amp::Amp (Session& s)
 	p.set_range (0, 1.99526231f, 1, false);
 	boost::shared_ptr<AutomationList> gl (new AutomationList (p));
 	_gain_control = boost::shared_ptr<GainControl> (new GainControl (X_("gaincontrol"), s, this, p, gl));
+	_gain_control->set_flags (Controllable::GainLike);
+
 	add_control(_gain_control);
 }
 

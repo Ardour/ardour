@@ -777,8 +777,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	boost::shared_ptr<PBD::Controllable> solo_cut_control() const;
 
-	SessionMetadata & metadata () { return *_metadata; }
-
 	SessionConfiguration config;
 
 	bool exporting () const {
@@ -1126,9 +1124,9 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	/* MIDI Machine Control */
 
-	void spp_start (MIDI::Parser&, framepos_t timestamp);
-	void spp_continue (MIDI::Parser&, framepos_t timestamp);
-	void spp_stop (MIDI::Parser&, framepos_t timestamp);
+	void spp_start ();
+	void spp_continue ();
+	void spp_stop ();
 
 	void mmc_deferred_play (MIDI::MachineControl &);
 	void mmc_stop (MIDI::MachineControl &);
@@ -1465,8 +1463,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void sync_order_keys ();
 
 	static bool _disable_all_loaded_plugins;
-
-	SessionMetadata * _metadata;
 
 	mutable bool have_looped; ///< Used in ::audible_frame(*)
 

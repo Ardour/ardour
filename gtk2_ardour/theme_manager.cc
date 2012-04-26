@@ -334,7 +334,7 @@ ThemeManager::setup_theme ()
 
 	if (rcfile == "ardour3_ui_dark.rc" || rcfile == "ardour3_ui_dark_sae.rc") {
 		dark_button.set_active();
-	} else if (rcfile == "ardour3_ui_light.rc" || "ardour3_ui_light_sae.rc") {
+	} else if (rcfile == "ardour3_ui_light.rc" || rcfile == "ardour3_ui_light_sae.rc") {
 		light_button.set_active();
 	}
 

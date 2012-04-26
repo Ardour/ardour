@@ -24,10 +24,14 @@
 #include <string>
 #include <vector>
 #include <list>
+
 #include <boost/shared_ptr.hpp>
+
 #include "pbd/stateful.h"
 #include "pbd/signals.h"
+
 #include "control_protocol/basic_ui.h"
+#include "control_protocol/types.h"
 
 namespace ARDOUR {
 
@@ -35,9 +39,9 @@ class Route;
 class Session;
 class Bundle;
 
-class ControlProtocol : virtual public sigc::trackable, public PBD::Stateful, public PBD::ScopedConnectionList, public BasicUI {
+class ControlProtocol : public PBD::Stateful, public PBD::ScopedConnectionList, public BasicUI {
   public:
-	ControlProtocol (Session&, std::string name, PBD::EventLoop* event_loop);
+	ControlProtocol (Session&, std::string name);
 	virtual ~ControlProtocol();
 
 	std::string name() const { return _name; }
@@ -48,7 +52,7 @@ class ControlProtocol : virtual public sigc::trackable, public PBD::Stateful, pu
 	virtual int set_feedback (bool /*yn*/) { return 0; }
 	virtual bool get_feedback () const { return false; }
 
-	virtual void route_list_changed () {}
+	virtual void midi_connectivity_established () {}
 
 	PBD::Signal0<void> ActiveChanged;
 
@@ -60,8 +64,29 @@ class ControlProtocol : virtual public sigc::trackable, public PBD::Stateful, pu
 	static PBD::Signal0<void> ZoomIn;
 	static PBD::Signal0<void> ZoomOut;
 	static PBD::Signal0<void> Enter;
+	static PBD::Signal0<void> Undo;
+	static PBD::Signal0<void> Redo;
 	static PBD::Signal1<void,float> ScrollTimeline;
-	static PBD::Signal1<void,uint32_t> SelectByRID;
+	static PBD::Signal1<void,uint32_t> GotoView;
+	static PBD::Signal0<void> CloseDialog;
+	static PBD::Signal0<void> VerticalZoomInAll;
+	static PBD::Signal0<void> VerticalZoomOutAll;
+	static PBD::Signal0<void> VerticalZoomInSelected;
+	static PBD::Signal0<void> VerticalZoomOutSelected;
+	static PBD::Signal0<void> StepTracksDown;
+	static PBD::Signal0<void> StepTracksUp;
+
+	static PBD::Signal1<void,uint32_t> AddRouteToSelection;
+	static PBD::Signal1<void,uint32_t> SetRouteSelection;
+	static PBD::Signal1<void,uint32_t> RemoveRouteFromSelection;
+	static PBD::Signal0<void>          ClearRouteSelection;
+
+	/* signals that one UI (e.g. the GUI) can emit to get all other UI's to 
+	   respond. Typically this will always be GUI->"others" - the GUI pays
+	   no attention to these signals.
+	*/
+	
+	static PBD::Signal1<void,RouteNotificationListPtr> TrackSelectionChanged;
 
 	/* the model here is as follows:
 
@@ -107,13 +132,9 @@ class ControlProtocol : virtual public sigc::trackable, public PBD::Stateful, pu
 	virtual void  tear_down_gui() { }
 
   protected:
-	PBD::EventLoop* _event_loop;
-	bool _own_event_loop;
 	std::vector<boost::shared_ptr<ARDOUR::Route> > route_table;
 	std::string _name;
 	bool _active;
-
-	void add_strip (std::list<boost::shared_ptr<ARDOUR::Route> >&);
 
 	void next_track (uint32_t initial_id);
 	void prev_track (uint32_t initial_id);

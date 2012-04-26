@@ -1428,8 +1428,6 @@ Editor::parameter_changed (std::string p)
 		update_punch_range_view (true);
 	} else if (p == "timecode-format") {
 		update_just_timecode ();
-	} else if (p == "xfades-visible") {
-		update_xfade_visibility ();
 	} else if (p == "show-region-fades") {
 		update_region_fade_visibility ();
 	} else if (p == "edit-mode") {

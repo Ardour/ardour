@@ -112,7 +112,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Route> rt
 	, RouteUI (sess)
 	, _mixer(mx)
 	, _mixer_owned (in_mixer)
-	, processor_box (sess, sigc::mem_fun(*this, &MixerStrip::plugin_selector), mx.selection(), this, in_mixer)
+	, processor_box (sess, boost::bind (&MixerStrip::plugin_selector, this), mx.selection(), this, in_mixer)
 	, gpm (sess, 250)
 	, panners (sess)
 	, button_size_group (Gtk::SizeGroup::create (Gtk::SIZE_GROUP_HORIZONTAL))
@@ -355,7 +355,7 @@ MixerStrip::init ()
 
 	parameter_changed (X_("mixer-strip-visibility"));
 
-	Config->ParameterChanged.connect (_config_connection, MISSING_INVALIDATOR, ui_bind (&MixerStrip::parameter_changed, this, _1), gui_context());
+	Config->ParameterChanged.connect (_config_connection, MISSING_INVALIDATOR, boost::bind (&MixerStrip::parameter_changed, this, _1), gui_context());
 
 	gpm.LevelMeterButtonPress.connect_same_thread (_level_meter_connection, boost::bind (&MixerStrip::level_meter_button_press, this, _1));
 }
@@ -509,8 +509,8 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		audio_track()->DiskstreamChanged.connect (route_connections, invalidator (*this), boost::bind (&MixerStrip::diskstream_changed, this), gui_context());
 	}
 
-	_route->comment_changed.connect (route_connections, invalidator (*this), ui_bind (&MixerStrip::comment_changed, this, _1), gui_context());
-	_route->PropertyChanged.connect (route_connections, invalidator (*this), ui_bind (&MixerStrip::property_changed, this, _1), gui_context());
+	_route->comment_changed.connect (route_connections, invalidator (*this), boost::bind (&MixerStrip::comment_changed, this, _1), gui_context());
+	_route->PropertyChanged.connect (route_connections, invalidator (*this), boost::bind (&MixerStrip::property_changed, this, _1), gui_context());
 
 	set_stuff_from_route ();
 

@@ -111,7 +111,7 @@ RouteProcessorSelection::add (RouteUI* r)
 			MixerStrip* ms = dynamic_cast<MixerStrip*> (r);
 			
 			if (ms) {
-				ms->CatchDeletion.connect (*this, invalidator (*this), ui_bind (&RouteProcessorSelection::remove, this, _1), gui_context());
+				ms->CatchDeletion.connect (*this, invalidator (*this), boost::bind (&RouteProcessorSelection::remove, this, _1), gui_context());
 			}
 			
 			if (!_no_route_change_signal) {

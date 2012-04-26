@@ -24,6 +24,7 @@
 #include "ardour/audioregion.h"
 #include "ardour/session.h"
 
+#include "control_point.h"
 #include "region_gain_line.h"
 #include "audio_region_view.h"
 #include "utils.h"
@@ -69,10 +70,6 @@ AudioRegionGainLine::start_drag_single (ControlPoint* cp, double x, float fracti
 void
 AudioRegionGainLine::remove_point (ControlPoint& cp)
 {
-	ModelRepresentation mr;
-
-	model_representation (cp, mr);
-
 	trackview.editor().session()->begin_reversible_command (_("remove control point"));
 	XMLNode &before = alist->get_state();
 
@@ -82,7 +79,7 @@ AudioRegionGainLine::remove_point (ControlPoint& cp)
 		trackview.session()->add_command(new StatefulDiffCommand (rv.audio_region()));
 	}
 
-	alist->erase (mr.start, mr.end);
+	alist->erase (cp.model());
 
 	trackview.editor().session()->add_command (new MementoCommand<AutomationList>(*alist.get(), &before, &alist->get_state()));
 	trackview.editor().session()->commit_reversible_command ();

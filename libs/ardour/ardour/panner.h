@@ -142,9 +142,6 @@ public:
 	
 	boost::shared_ptr<Pannable> pannable() const { return _pannable; }
 
-	//virtual std::string describe_parameter (Evoral::Parameter);
-	//virtual std::string value_as_string (Evoral::Parameter, double val);
-
 	static bool equivalent (pan_t a, pan_t b) {
 		return fabsf (a - b) < 0.002; // about 1 degree of arc for a stereo panner
 	}

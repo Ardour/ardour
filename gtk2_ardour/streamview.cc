@@ -336,9 +336,9 @@ StreamView::playlist_switched (boost::weak_ptr<Track> wtr)
 	/* catch changes */
 
 	tr->playlist()->LayeringChanged.connect (playlist_connections, invalidator (*this), boost::bind (&StreamView::playlist_layered, this, boost::weak_ptr<Track> (tr)), gui_context());
-	tr->playlist()->RegionAdded.connect (playlist_connections, invalidator (*this), ui_bind (&StreamView::add_region_view, this, _1), gui_context());
-	tr->playlist()->RegionRemoved.connect (playlist_connections, invalidator (*this), ui_bind (&StreamView::remove_region_view, this, _1), gui_context());
-	tr->playlist()->ContentsChanged.connect (playlist_connections, invalidator (*this), ui_bind (&StreamView::update_coverage_frames, this), gui_context());
+	tr->playlist()->RegionAdded.connect (playlist_connections, invalidator (*this), boost::bind (&StreamView::add_region_view, this, _1), gui_context());
+	tr->playlist()->RegionRemoved.connect (playlist_connections, invalidator (*this), boost::bind (&StreamView::remove_region_view, this, _1), gui_context());
+	tr->playlist()->ContentsChanged.connect (playlist_connections, invalidator (*this), boost::bind (&StreamView::update_coverage_frames, this), gui_context());
 }
 
 
@@ -547,7 +547,7 @@ StreamView::get_selectables (framepos_t start, framepos_t end, double top, doubl
 			layer_ok = (min_layer <= l && l <= max_layer);
 		}
 
-		if ((*i)->region()->coverage (start, end) != OverlapNone && layer_ok) {
+		if ((*i)->region()->coverage (start, end) != Evoral::OverlapNone && layer_ok) {
 			results.push_back (*i);
 		}
 	}

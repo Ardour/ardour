@@ -63,6 +63,7 @@
 #include "route_time_axis.h"
 #include "audio_time_axis.h"
 #include "automation_time_axis.h"
+#include "control_point.h"
 #include "streamview.h"
 #include "audio_streamview.h"
 #include "audio_region_view.h"
@@ -1278,13 +1279,51 @@ Editor::scroll_tracks_up_line ()
 void
 Editor::tav_zoom_step (bool coarser)
 {
-	ENSURE_GUI_THREAD (*this, &Editor::temporal_zoom_step, coarser)
-
 	_routes->suspend_redisplay ();
 
-	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+	TrackViewList* ts;
+
+	if (selection->tracks.empty()) {
+		ts = &track_views;
+	} else {
+		ts = &selection->tracks;
+	}
+	
+	for (TrackViewList::iterator i = ts->begin(); i != ts->end(); ++i) {
 		TimeAxisView *tv = (static_cast<TimeAxisView*>(*i));
 			tv->step_height (coarser);
+	}
+
+	_routes->resume_redisplay ();
+}
+
+void
+Editor::tav_zoom_smooth (bool coarser, bool force_all)
+{
+	_routes->suspend_redisplay ();
+
+	TrackViewList* ts;
+
+	if (selection->tracks.empty() || force_all) {
+		ts = &track_views;
+	} else {
+		ts = &selection->tracks;
+	}
+	
+	for (TrackViewList::iterator i = ts->begin(); i != ts->end(); ++i) {
+		TimeAxisView *tv = (static_cast<TimeAxisView*>(*i));
+		uint32_t h = tv->current_height ();
+
+		if (coarser) {
+			if (h > 5) {
+				h -= 5; // pixels
+				if (h >= TimeAxisView::preset_height (HeightSmall)) {
+					tv->set_height (h);
+				}
+			}
+		} else {
+			tv->set_height (h + 5);
+		}
 	}
 
 	_routes->resume_redisplay ();
@@ -2472,7 +2511,7 @@ static void
 add_if_covered (RegionView* rv, const AudioRange* ar, RegionSelection* rs)
 {
 	switch (rv->region()->coverage (ar->start, ar->end - 1)) {
-	case OverlapNone:
+	case Evoral::OverlapNone:
 		break;
 	default:
 		rs->push_back (rv);
@@ -3225,7 +3264,7 @@ Editor::trim_region_to_location (const Location& loc, const char* str)
 
 		/* require region to span proposed trim */
 		switch (rv->region()->coverage (loc.start(), loc.end())) {
-		case OverlapInternal:
+		case Evoral::OverlapInternal:
 			break;
 		default:
 			continue;
@@ -3355,9 +3394,10 @@ Editor::freeze_thread ()
 	SessionEvent::create_per_thread_pool ("freeze events", 64);
 	/* create per-thread buffers for process() tree to use */
 	current_interthread_info->process_thread.init ();
-
+	current_interthread_info->process_thread.get_buffers ();
 	clicked_routeview->audio_track()->freeze_me (*current_interthread_info);
 	current_interthread_info->done = true;
+	current_interthread_info->process_thread.drop_buffers();
 	return 0;
 }
 
@@ -3682,19 +3722,87 @@ Editor::cut_copy (CutCopyOp op)
 	}
 }
 
+struct AutomationRecord {
+	AutomationRecord () : state (0) {}
+	AutomationRecord (XMLNode* s) : state (s) {}
+	
+	XMLNode* state; ///< state before any operation
+	boost::shared_ptr<Evoral::ControlList> copy; ///< copied events for the cut buffer
+};
+
 /** Cut, copy or clear selected automation points.
- * @param op Operation (Cut, Copy or Clear)
+ *  @param op Operation (Cut, Copy or Clear)
  */
 void
 Editor::cut_copy_points (CutCopyOp op)
 {
+	if (selection->points.empty ()) {
+		return;
+	}
+
+	/* XXX: not ideal, as there may be more than one track involved in the point selection */
+	_last_cut_copy_source_track = &selection->points.front()->line().trackview;
+
+	/* Keep a record of the AutomationLists that we end up using in this operation */
+	typedef std::map<boost::shared_ptr<AutomationList>, AutomationRecord> Lists;
+	Lists lists;
+
+	/* Go through all selected points, making an AutomationRecord for each distinct AutomationList */
 	for (PointSelection::iterator i = selection->points.begin(); i != selection->points.end(); ++i) {
+		boost::shared_ptr<AutomationList> al = (*i)->line().the_list();
+		if (lists.find (al) == lists.end ()) {
+			/* We haven't seen this list yet, so make a record for it.  This includes
+			   taking a copy of its current state, in case this is needed for undo later.
+			*/
+			lists[al] = AutomationRecord (&al->get_state ());
+		}
+	}
 
-		AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*>((*i).track);
-		_last_cut_copy_source_track = atv;
+	if (op == Cut || op == Copy) {
+		/* This operation will involve putting things in the cut buffer, so create an empty
+		   ControlList for each of our source lists to put the cut buffer data in.
+		*/
+		for (Lists::iterator i = lists.begin(); i != lists.end(); ++i) {
+			i->second.copy = i->first->create (i->first->parameter ());
+		}
 
-		if (atv) {
-			atv->cut_copy_clear_objects (selection->points, op);
+		/* Add all selected points to the relevant copy ControlLists */
+		for (PointSelection::iterator i = selection->points.begin(); i != selection->points.end(); ++i) {
+			boost::shared_ptr<AutomationList> al = (*i)->line().the_list();
+			AutomationList::const_iterator j = (*i)->model ();
+			lists[al].copy->add ((*j)->when, (*j)->value);
+		}
+
+		for (Lists::iterator i = lists.begin(); i != lists.end(); ++i) {
+			/* Correct this copy list so that it starts at time 0 */
+			double const start = i->second.copy->front()->when;
+			for (AutomationList::iterator j = i->second.copy->begin(); j != i->second.copy->end(); ++j) {
+				(*j)->when -= start;
+			}
+
+			/* And add it to the cut buffer */
+			cut_buffer->add (i->second.copy);
+		}
+	}
+		
+	if (op == Delete || op == Cut) {
+		/* This operation needs to remove things from the main AutomationList, so do that now */
+		
+		for (Lists::iterator i = lists.begin(); i != lists.end(); ++i) {
+			i->first->freeze ();
+		}
+
+		/* Remove each selected point from its AutomationList */
+		for (PointSelection::iterator i = selection->points.begin(); i != selection->points.end(); ++i) {
+			boost::shared_ptr<AutomationList> al = (*i)->line().the_list();
+			al->erase ((*i)->model ());
+		}
+
+		/* Thaw the lists and add undo records for them */
+		for (Lists::iterator i = lists.begin(); i != lists.end(); ++i) {
+			boost::shared_ptr<AutomationList> al = i->first;
+			al->thaw ();
+			_session->add_command (new MementoCommand<AutomationList> (*al.get(), i->second.state, &(al->get_state ())));
 		}
 	}
 }
@@ -4190,18 +4298,13 @@ Editor::duplicate_selection (float times)
 	commit_reversible_command ();
 }
 
+/** Reset all selected points to the relevant default value */
 void
 Editor::reset_point_selection ()
 {
-	/* reset all selected points to the relevant default value */
-
 	for (PointSelection::iterator i = selection->points.begin(); i != selection->points.end(); ++i) {
-
-		AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*>((*i).track);
-
-		if (atv) {
-			atv->reset_objects (selection->points);
-		}
+		ARDOUR::AutomationList::iterator j = (*i)->model ();
+		(*j)->value = (*i)->line().the_list()->default_value ();
 	}
 }
 
@@ -5202,24 +5305,6 @@ Editor::update_region_fade_visibility ()
 				v->audio_view()->show_all_fades ();
 			} else {
 				v->audio_view()->hide_all_fades ();
-			}
-		}
-	}
-}
-
-/** Update crossfade visibility after its configuration has been changed */
-void
-Editor::update_xfade_visibility ()
-{
-	_xfade_visibility = _session->config.get_xfades_visible ();
-
-	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-		AudioTimeAxisView* v = dynamic_cast<AudioTimeAxisView*>(*i);
-		if (v) {
-			if (_xfade_visibility) {
-				v->show_all_xfades ();
-			} else {
-				v->hide_all_xfades ();
 			}
 		}
 	}

@@ -60,12 +60,12 @@ protected:
 
 	void flush_midi();
 
-	framepos_t read_unlocked (Evoral::EventSink<framepos_t>& dst,
+	framecnt_t read_unlocked (Evoral::EventSink<framepos_t>& dst,
 	                          framepos_t position,
 	                          framepos_t start, framecnt_t cnt,
 	                          MidiStateTracker* tracker) const;
 
-	framepos_t write_unlocked (MidiRingBuffer<framepos_t>& dst,
+	framecnt_t write_unlocked (MidiRingBuffer<framepos_t>& dst,
 	                           framepos_t position,
 	                           framecnt_t cnt);
 

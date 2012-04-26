@@ -41,6 +41,8 @@ namespace PBD {
                 extern uint64_t Properties;
 		extern uint64_t FileManager;
 		extern uint64_t Pool;
+		extern uint64_t EventLoop;
+		extern uint64_t AbstractUI;
 	}
 }
 

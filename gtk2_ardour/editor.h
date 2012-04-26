@@ -83,7 +83,6 @@ namespace ARDOUR {
 	class NamedSelection;
 	class Session;
 	class Filter;
-	class Crossfade;
 	class ChanCount;
 	class MidiOperator;
 	class Track;
@@ -106,7 +105,6 @@ class AutomationTimeAxisView;
 class BundleManager;
 class ButtonJoiner;
 class ControlPoint;
-class CrossfadeView;
 class DragManager;
 class GroupedButtons;
 class GUIObjectState;
@@ -318,6 +316,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void temporal_zoom_step (bool coarser);
 	void tav_zoom_step (bool coarser);
+	void tav_zoom_smooth (bool coarser, bool force_all);
 
 	/* stuff that AudioTimeAxisView and related classes use */
 
@@ -369,12 +368,10 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void toggle_measure_visibility ();
 	void toggle_logo_visibility ();
 
-	/* fades/xfades */
+	/* fades */
 
  	void toggle_region_fades (int dir);
  	void update_region_fade_visibility ();
-	bool xfade_visibility() const { return _xfade_visibility; }
-	void update_xfade_visibility ();
 
 	/* redirect shared ops menu. caller must free returned menu */
 
@@ -631,16 +628,12 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	RegionView*        clicked_regionview;
 	RegionSelection    latest_regionviews;
 	uint32_t           clicked_selection;
-	CrossfadeView*     clicked_crossfadeview;
 	ControlPoint*      clicked_control_point;
 
 	void sort_track_selection (TrackViewList&);
 
 	void get_equivalent_regions (RegionView* rv, std::vector<RegionView*> &, PBD::PropertyID) const;
 	RegionSelection get_equivalent_regions (RegionSelection &, PBD::PropertyID) const;
-	std::vector<boost::shared_ptr<ARDOUR::Crossfade> > get_equivalent_crossfades (
-		RouteTimeAxisView&, boost::shared_ptr<ARDOUR::Crossfade>, PBD::PropertyID
-		) const;
 	void mapover_tracks (sigc::slot<void,RouteTimeAxisView&,uint32_t> sl, TimeAxisView*, PBD::PropertyID) const;
 	void mapover_tracks_with_unique_playlists (sigc::slot<void,RouteTimeAxisView&,uint32_t> sl, TimeAxisView*, PBD::PropertyID) const;
 
@@ -649,9 +642,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void mapped_use_new_playlist (RouteTimeAxisView&, uint32_t, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
 	void mapped_use_copy_playlist (RouteTimeAxisView&, uint32_t, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
 	void mapped_clear_playlist (RouteTimeAxisView&, uint32_t);
-	void mapped_get_equivalent_crossfades (
-		RouteTimeAxisView&, uint32_t, boost::shared_ptr<ARDOUR::Crossfade>, std::vector<boost::shared_ptr<ARDOUR::Crossfade> >*
-		) const;
 	
 	void button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type);
 	bool button_release_can_deselect;
@@ -662,7 +652,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void select_all_tracks ();
 	void select_all_internal_edit (Selection::Operation);
 
-	bool set_selected_control_point_from_click (Selection::Operation op = Selection::Set, bool no_remove=false);
+	bool set_selected_control_point_from_click (bool press, Selection::Operation op = Selection::Set);
 	void set_selected_track_from_click (bool press, Selection::Operation op = Selection::Set, bool no_remove=false);
 	void set_selected_track_as_side_effect (Selection::Operation op);
 	bool set_selected_regionview_from_click (bool press, Selection::Operation op = Selection::Set);
@@ -674,7 +664,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtk::Menu track_context_menu;
 	Gtk::Menu track_region_context_menu;
 	Gtk::Menu track_selection_context_menu;
-	Gtk::Menu track_crossfade_context_menu;
 
 	Gtk::MenuItem* region_edit_menu_split_item;
 	Gtk::MenuItem* region_edit_menu_split_multichannel_item;
@@ -688,12 +677,10 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtk::Menu* build_track_context_menu ();
 	Gtk::Menu* build_track_bus_context_menu ();
 	Gtk::Menu* build_track_region_context_menu ();
-	Gtk::Menu* build_track_crossfade_context_menu ();
 	Gtk::Menu* build_track_selection_context_menu ();
 	void add_dstream_context_items (Gtk::Menu_Helpers::MenuList&);
 	void add_bus_context_items (Gtk::Menu_Helpers::MenuList&);
 	void add_region_context_items (Gtk::Menu_Helpers::MenuList&, boost::shared_ptr<ARDOUR::Track>);
-	void add_crossfade_context_items (AudioStreamView*, boost::shared_ptr<ARDOUR::Crossfade>, Gtk::Menu_Helpers::MenuList&, bool many);
 	void add_selection_context_items (Gtk::Menu_Helpers::MenuList&);
 	Gtk::MenuItem* _popup_region_menu_item;
 
@@ -987,8 +974,16 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtk::VBox           edit_controls_vbox;
 	Gtk::HBox           edit_controls_hbox;
 
+	void control_vertical_zoom_in_all ();
+	void control_vertical_zoom_out_all ();
+	void control_vertical_zoom_in_selected ();
+	void control_vertical_zoom_out_selected ();
+	void control_step_tracks_up ();
+	void control_step_tracks_down ();
+	void control_view (uint32_t);
 	void control_scroll (float);
-	void control_select (uint32_t rid);
+	void control_select (uint32_t rid, Selection::Operation);
+	void control_unselect ();
 	void access_action (std::string,std::string);
 	bool deferred_control_scroll (framepos_t);
 	sigc::connection control_scroll_connection;
@@ -1379,7 +1374,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	bool canvas_selection_rect_event (GdkEvent* event,ArdourCanvas::Item*, SelectionRect*);
 	bool canvas_selection_start_trim_event (GdkEvent* event,ArdourCanvas::Item*, SelectionRect*);
 	bool canvas_selection_end_trim_event (GdkEvent* event,ArdourCanvas::Item*, SelectionRect*);
-	bool canvas_crossfade_view_event (GdkEvent* event,ArdourCanvas::Item*, CrossfadeView*);
 	bool canvas_fade_in_event (GdkEvent* event,ArdourCanvas::Item*, AudioRegionView*);
 	bool canvas_fade_in_handle_event (GdkEvent* event,ArdourCanvas::Item*, AudioRegionView*);
 	bool canvas_fade_out_event (GdkEvent* event,ArdourCanvas::Item*, AudioRegionView*);
@@ -1857,10 +1851,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void nudge_track (bool use_edit_point, bool forwards);
 
-	/* xfades */
-
-	bool _xfade_visibility;
-
 #ifdef WITH_CMT
 	void handle_new_imageframe_time_axis_view(const std::string & track_name, void* src) ;
 	void handle_new_imageframe_marker_time_axis_view(const std::string & track_name, TimeAxisView* marked_track) ;
@@ -1901,12 +1891,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	ImageFrameSocketHandler* image_socket_listener ;
 #endif
-
-	void toggle_xfade_active (RouteTimeAxisView *, boost::weak_ptr<ARDOUR::Crossfade>);
-	void toggle_xfade_length (RouteTimeAxisView *, boost::weak_ptr<ARDOUR::Crossfade>);
-	void edit_xfade (boost::weak_ptr<ARDOUR::Crossfade>);
-	void xfade_edit_left_region ();
-	void xfade_edit_right_region ();
 
 	static const int32_t default_width = 995;
 	static const int32_t default_height = 765;

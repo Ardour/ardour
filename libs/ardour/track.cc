@@ -44,7 +44,6 @@ Track::Track (Session& sess, string name, Route::Flag flag, TrackMode mode, Data
         , _saved_meter_point (_meter_point)
         , _mode (mode)
 	, _monitoring (MonitorAuto)
-	, _rec_enable_control (new RecEnableControllable(*this))
 {
 	_freeze_record.state = NoFreeze;
         _declickable = true;
@@ -63,6 +62,15 @@ Track::init ()
         if (Route::init ()) {
                 return -1;
         }
+
+	boost::shared_ptr<Route> rp (shared_from_this());
+	boost::shared_ptr<Track> rt = boost::dynamic_pointer_cast<Track> (rp);
+	_rec_enable_control = boost::shared_ptr<RecEnableControl> (new RecEnableControl(rt));
+	_rec_enable_control->set_flags (Controllable::Toggle);
+
+	/* don't add rec_enable_control to controls because we don't want it to
+	 * appear as an automatable parameter
+	 */
 
         return 0;
 }
@@ -195,23 +203,34 @@ Track::freeze_state() const
 	return _freeze_record.state;
 }
 
-Track::RecEnableControllable::RecEnableControllable (Track& s)
-	: Controllable (X_("recenable"), Controllable::Toggle), track (s)
+Track::RecEnableControl::RecEnableControl (boost::shared_ptr<Track> t)
+	: AutomationControl (t->session(), RecEnableAutomation, boost::shared_ptr<AutomationList>(), X_("recenable"))
+	, track (t)
 {
+	boost::shared_ptr<AutomationList> gl(new AutomationList(Evoral::Parameter(RecEnableAutomation)));
+	set_list (gl);
 }
 
 void
-Track::RecEnableControllable::set_value (double val)
+Track::RecEnableControl::set_value (double val)
 {
-	bool bval = ((val >= 0.5) ? true: false);
-	track.set_record_enabled (bval, this);
+	boost::shared_ptr<Track> t = track.lock ();
+	if (!t) {
+		return;
+	}
+	
+	t->set_record_enabled (val >= 0.5 ? true : false, this);
 }
 
 double
-Track::RecEnableControllable::get_value (void) const
+Track::RecEnableControl::get_value () const
 {
-	if (track.record_enabled()) { return 1.0; }
-	return 0.0;
+	boost::shared_ptr<Track> t = track.lock ();
+	if (!t) {
+		return 0;
+	}
+	
+	return (t->record_enabled() ? 1.0 : 0.0);
 }
 
 bool
@@ -406,7 +425,7 @@ Track::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		boost::shared_ptr<Delivery> d = boost::dynamic_pointer_cast<Delivery> (*i);
 		if (d) {
-			d->flush_buffers (nframes, end_frame - start_frame - 1);
+			d->flush_buffers (nframes);
 		}
 	}
 
@@ -568,13 +587,13 @@ Track::hidden () const
 }
 
 int
-Track::can_internal_playback_seek (framepos_t p)
+Track::can_internal_playback_seek (framecnt_t p)
 {
 	return _diskstream->can_internal_playback_seek (p);
 }
 
 int
-Track::internal_playback_seek (framepos_t p)
+Track::internal_playback_seek (framecnt_t p)
 {
 	return _diskstream->internal_playback_seek (p);
 }
@@ -850,7 +869,7 @@ Track::maybe_declick (BufferSet& bufs, framecnt_t nframes, int declick)
 }
 
 framecnt_t
-Track::check_initial_delay (framecnt_t nframes, framecnt_t& transport_frame)
+Track::check_initial_delay (framecnt_t nframes, framepos_t& transport_frame)
 {
 	if (_roll_delay > nframes) {
 

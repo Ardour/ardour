@@ -8,6 +8,7 @@ export ARDOUR_PATH=$TOP/gtk2_ardour/icons:$TOP/gtk2_ardour/pixmaps:$TOP/build/gt
 export ARDOUR_SURFACES_PATH=$libs/surfaces/osc:$libs/surfaces/generic_midi:$libs/surfaces/tranzport:$libs/surfaces/powermate:$libs/surfaces/mackie
 export ARDOUR_PANNER_PATH=$libs/panners/2in2out:$libs/panners/1in2out:$libs/panners/vbap
 export ARDOUR_DATA_PATH=$TOP/gtk2_ardour:build/gtk2_ardour:.
+export ARDOUR_MCP_PATH=$TOP/mcp:.
 
 if test -d $HOME/gtk/inst ; then
     export GTK_PATH=~/.ardour3:$libs/clearlooks-newer

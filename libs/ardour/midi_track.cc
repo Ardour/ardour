@@ -107,16 +107,21 @@ MidiTrack::set_record_enabled (bool yn, void *src)
 void
 MidiTrack::set_diskstream (boost::shared_ptr<Diskstream> ds)
 {
+	/* We have to do this here, as Track::set_diskstream will cause a buffer refill,
+	   and the diskstream must be set up to fill its buffers using the correct _note_mode.
+	*/
+	boost::shared_ptr<MidiDiskstream> mds = boost::dynamic_pointer_cast<MidiDiskstream> (ds);
+	mds->set_note_mode (_note_mode);
+	
 	Track::set_diskstream (ds);
 
-	midi_diskstream()->reset_tracker ();	
+	mds->reset_tracker ();	
 
 	_diskstream->set_track (this);
 	_diskstream->set_destructive (_mode == Destructive);
 	_diskstream->set_record_enabled (false);
 
 	_diskstream_data_recorded_connection.disconnect ();
-	boost::shared_ptr<MidiDiskstream> mds = boost::dynamic_pointer_cast<MidiDiskstream> (ds);
 	mds->DataRecorded.connect_same_thread (
 		_diskstream_data_recorded_connection,
 		boost::bind (&MidiTrack::diskstream_data_recorded, this, _1));
@@ -135,18 +140,22 @@ MidiTrack::set_state (const XMLNode& node, int version)
 {
 	const XMLProperty *prop;
 
+	/* This must happen before Track::set_state(), as there will be a buffer
+	   fill during that call, and we must fill buffers using the correct
+	   _note_mode.
+	*/
+	if ((prop = node.property (X_("note-mode"))) != 0) {
+		_note_mode = NoteMode (string_2_enum (prop->value(), _note_mode));
+	} else {
+		_note_mode = Sustained;
+	}
+
 	if (Track::set_state (node, version)) {
 		return -1;
 	}
 
 	// No destructive MIDI tracks (yet?)
 	_mode = Normal;
-
-	if ((prop = node.property (X_("note-mode"))) != 0) {
-		_note_mode = NoteMode (string_2_enum (prop->value(), _note_mode));
-	} else {
-		_note_mode = Sustained;
-	}
 
 	if ((prop = node.property ("midi-thru")) != 0) {
 		set_midi_thru (string_is_affirmative (prop->value()));
@@ -369,7 +378,7 @@ MidiTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		boost::shared_ptr<Delivery> d = boost::dynamic_pointer_cast<Delivery> (*i);
 		if (d) {
-			d->flush_buffers (nframes, end_frame - start_frame - 1);
+			d->flush_buffers (nframes);
 		}
 	}
 
@@ -478,7 +487,7 @@ MidiTrack::write_out_of_band_data (BufferSet& bufs, framepos_t /*start*/, framep
 }
 
 int
-MidiTrack::export_stuff (BufferSet& /*bufs*/, framecnt_t /*nframes*/, framepos_t /*end_frame*/, 
+MidiTrack::export_stuff (BufferSet& /*bufs*/, framepos_t /*start_frame*/, framecnt_t /*nframes*/, 
 			 boost::shared_ptr<Processor> /*endpoint*/, bool /*include_endpoint*/, bool /*forexport*/)
 {
 	return -1;
@@ -525,7 +534,7 @@ MidiTrack::midi_panic()
 {
 	DEBUG_TRACE (DEBUG::MidiIO, string_compose ("%1 delivers panic data\n", name()));
 	for (uint8_t channel = 0; channel <= 0xF; channel++) {
-		uint8_t ev[3] = { MIDI_CMD_CONTROL | channel, MIDI_CTL_SUSTAIN, 0 };
+		uint8_t ev[3] = { ((uint8_t) (MIDI_CMD_CONTROL | channel)), ((uint8_t) MIDI_CTL_SUSTAIN), 0 };
 		write_immediate_event(3, ev);
 		ev[1] = MIDI_CTL_ALL_NOTES_OFF;
 		write_immediate_event(3, ev);
@@ -551,9 +560,9 @@ void
 MidiTrack::MidiControl::set_value(double val)
 {
 	bool valid = false;
-	if (isinf(val)) {
+	if (std::isinf(val)) {
 		cerr << "MIDIControl value is infinity" << endl;
-	} else if (isnan(val)) {
+	} else if (std::isnan(val)) {
 		cerr << "MIDIControl value is NaN" << endl;
 	} else if (val < _list->parameter().min()) {
 		cerr << "MIDIControl value is < " << _list->parameter().min() << endl;
@@ -570,7 +579,7 @@ MidiTrack::MidiControl::set_value(double val)
 	assert(val <= _list->parameter().max());
 	if ( ! automation_playback()) {
 		size_t size = 3;
-		uint8_t ev[3] = { _list->parameter().channel(), int(val), 0 };
+		uint8_t ev[3] = { _list->parameter().channel(), uint8_t (val), 0 };
 		switch(_list->parameter().type()) {
 		case MidiCCAutomation:
 			ev[0] += MIDI_CMD_CONTROL;
@@ -733,7 +742,7 @@ MidiTrack::act_on_mute ()
 			if ((1<<channel) & mask) {
 
 				DEBUG_TRACE (DEBUG::MidiIO, string_compose ("%1 delivers mute message to channel %2\n", name(), channel+1));
-				uint8_t ev[3] = { MIDI_CMD_CONTROL | channel, MIDI_CTL_SUSTAIN, 0 };
+				uint8_t ev[3] = { ((uint8_t) (MIDI_CMD_CONTROL | channel)), MIDI_CTL_SUSTAIN, 0 };
 				write_immediate_event (3, ev);
 				ev[1] = MIDI_CTL_ALL_NOTES_OFF;
 				write_immediate_event (3, ev);

@@ -36,7 +36,6 @@ namespace Gdk {
 
 namespace ARDOUR {
 	class Route;
-	class Crossfade;
 	class PeakData;
 	class AudioRegion;
 	class Source;
@@ -47,32 +46,20 @@ class Selectable;
 class AudioTimeAxisView;
 class AudioRegionView;
 class RegionSelection;
-class CrossfadeView;
 class Selection;
 
 class AudioStreamView : public StreamView
 {
   public:
 	AudioStreamView (AudioTimeAxisView&);
-	~AudioStreamView ();
-
-	int set_samples_per_unit (gdouble spp);
-	void horizontal_position_changed ();
 
 	int     set_amplitude_above_axis (gdouble app);
 	gdouble get_amplitude_above_axis () { return _amplitude_above_axis; }
 
 	void set_show_waveforms (bool yn);
 
-	void foreach_crossfadeview (void (CrossfadeView::*pmf)(void));
-
 	void show_all_fades ();
 	void hide_all_fades ();
-
-	void show_all_xfades ();
-	void hide_all_xfades ();
-	void hide_xfades_involving (AudioRegionView&);
-	void reveal_xfades_involving (AudioRegionView&);
 
 	RegionView* create_region_view (boost::shared_ptr<ARDOUR::Region>, bool, bool);
 
@@ -82,31 +69,17 @@ class AudioStreamView : public StreamView
 	void update_rec_regions (ARDOUR::framepos_t, ARDOUR::framecnt_t);
 
 	RegionView* add_region_view_internal (boost::shared_ptr<ARDOUR::Region>, bool wait_for_waves, bool recording = false);
-	void remove_region_view (boost::weak_ptr<ARDOUR::Region> );
 	void remove_audio_region_view (boost::shared_ptr<ARDOUR::AudioRegion> );
 
-	void undisplay_track ();
 	void redisplay_track ();
-	void playlist_layered (boost::weak_ptr<ARDOUR::Track>);
-	void playlist_switched (boost::weak_ptr<ARDOUR::Track>);
-
-	void add_crossfade (boost::weak_ptr<ARDOUR::Crossfade>);
-	void remove_crossfade (boost::shared_ptr<ARDOUR::Region>);
 
 	void color_handler ();
-
-	void update_contents_height ();
-	void update_content_height (CrossfadeView *);
 
 	void parameter_changed (std::string const &);
 	void set_waveform_shape (ARDOUR::WaveformShape);
 	void set_waveform_scale (ARDOUR::WaveformScale);
 
 	double _amplitude_above_axis;
-
-	typedef std::map<boost::shared_ptr<ARDOUR::Crossfade>, CrossfadeView*> CrossfadeViewList;
-	CrossfadeViewList crossfade_views;
-	bool              crossfades_visible;
 
 	std::map<boost::shared_ptr<ARDOUR::Source>, bool> rec_data_ready_map;
 

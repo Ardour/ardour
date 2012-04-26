@@ -83,21 +83,21 @@ class ControlPoint : public Selectable
 	ARDOUR::AutomationList::iterator model() const { return _model; }
 	AutomationLine&                  line()  const { return _line; }
 
+	static PBD::Signal1<void, ControlPoint *> CatchDeletion;
+	
   private:
-	ArdourCanvas::SimpleRect* _item;
-
-	AutomationLine& _line;
-
+	ArdourCanvas::SimpleRect*        _item;
+	AutomationLine&                  _line;
 	ARDOUR::AutomationList::iterator _model;
-	uint32_t _view_index;
-	bool     _can_slide;
+	uint32_t                         _view_index;
+	bool                             _can_slide;
+	double                           _x;
+	double                           _y;
+	double                           _size;
+	ShapeType                        _shape;
 
 	virtual bool event_handler (GdkEvent*);
 
-	double    _x;
-	double    _y;
-	double    _size;
-	ShapeType _shape;
 };
 
 

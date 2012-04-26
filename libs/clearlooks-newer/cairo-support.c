@@ -491,7 +491,7 @@ void ge_cairo_polygon (cairo_t *cr,
 		}
 	}
 	
-	if ((points[npoints-1].x != points[0].y) ||
+	if ((points[npoints-1].x != points[0].x) ||
 		(points[npoints-1].y != points[0].y))
 	{
 		cairo_line_to(cr, points[0].x, points[0].y);

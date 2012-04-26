@@ -26,6 +26,7 @@
 #include <list>
 
 #include "pbd/error.h"
+#include "pbd/convert.h"
 
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/selector.h>
@@ -74,14 +75,14 @@ bool
 AxisView::marked_for_display () const
 {
 	string const v = gui_property ("visible");
-	return (v == "" || string_is_affirmative (v));
+	return (v == "" || PBD::string_is_affirmative (v));
 }
 
 bool
 AxisView::set_marked_for_display (bool yn)
 {
 	string const v = gui_property ("visible");
-	if (v == "" || yn != string_is_affirmative (v)) {
+	if (v == "" || yn != PBD::string_is_affirmative (v)) {
 		set_gui_property ("visible", yn);
 		return true; // things changed
 	}

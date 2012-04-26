@@ -180,8 +180,8 @@ MidiListEditor::scroll_event (GdkEventScroll* ev)
 	TreeViewColumn* col;
 	int cellx;
 	int celly;
-	int idelta;
-	double fdelta;
+	int idelta = 0;
+	double fdelta = 0;
 	MidiModel::NoteDiffCommand::Property prop (MidiModel::NoteDiffCommand::NoteNumber);
 	bool apply = false;
 	bool was_selected = false;
@@ -586,8 +586,8 @@ MidiListEditor::edited (const std::string& path, const std::string& text)
 	double fval;
 	int    ival;
 	bool   apply = false;
-	int    idelta;
-	double fdelta;
+	int    idelta = 0;
+	double fdelta = 0;
 	char*  opname;
 	switch (edit_column) {
 	case 0: // start

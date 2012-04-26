@@ -54,7 +54,7 @@ EditorSummary::EditorSummary (Editor* e)
 	  _old_follow_playhead (false)
 {
 	Region::RegionPropertyChanged.connect (region_property_connection, invalidator (*this), boost::bind (&CairoWidget::set_dirty, this), gui_context());
-	_editor->playhead_cursor->PositionChanged.connect (position_connection, invalidator (*this), ui_bind (&EditorSummary::playhead_position_changed, this, _1), gui_context());
+	_editor->playhead_cursor->PositionChanged.connect (position_connection, invalidator (*this), boost::bind (&EditorSummary::playhead_position_changed, this, _1), gui_context());
 
 	add_events (Gdk::POINTER_MOTION_MASK);
 }
@@ -930,10 +930,10 @@ EditorSummary::routes_added (list<RouteTimeAxisView*> const & r)
 {
 	for (list<RouteTimeAxisView*>::const_iterator i = r.begin(); i != r.end(); ++i) {
 		/* Connect to gui_changed() on the route so that we know when their colour has changed */
-		(*i)->route()->gui_changed.connect (*this, invalidator (*this), ui_bind (&EditorSummary::route_gui_changed, this, _1), gui_context ());
+		(*i)->route()->gui_changed.connect (*this, invalidator (*this), boost::bind (&EditorSummary::route_gui_changed, this, _1), gui_context ());
 		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> ((*i)->route ());
 		if (tr) {
-			tr->PlaylistChanged.connect (*this, invalidator (*this), ui_bind (&CairoWidget::set_dirty, this), gui_context ());
+			tr->PlaylistChanged.connect (*this, invalidator (*this), boost::bind (&CairoWidget::set_dirty, this), gui_context ());
 		}
 	}
 

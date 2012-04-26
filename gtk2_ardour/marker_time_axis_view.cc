@@ -67,7 +67,7 @@ MarkerTimeAxisView::MarkerTimeAxisView(MarkerTimeAxis& tv)
 	_samples_per_unit = _trackview.editor.get_current_zoom() ;
 
 	_trackview.editor.ZoomChanged.connect (sigc::mem_fun(*this, &MarkerTimeAxisView::reset_samples_per_unit));
-	MarkerView::CatchDeletion.connect (*this, ui_bind (&MarkerTimeAxisView::remove_marker_view, this, _1), gui_context());
+	MarkerView::CatchDeletion.connect (*this, boost::bind (&MarkerTimeAxisView::remove_marker_view, this, _1), gui_context());
 }
 
 /**

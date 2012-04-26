@@ -209,7 +209,7 @@ class SessionMetadataDialog : public ArdourDialog
 	SessionMetadataDialog (std::string const & name);
 
   protected:
-	void init_data ();
+	void init_data ( bool skip_user = false );
 	void load_extra_data (ARDOUR::SessionMetadata const & data);
 	void save_data ();
 
@@ -232,9 +232,11 @@ class SessionMetadataDialog : public ArdourDialog
 	Gtk::Notebook     notebook;
 
   private:
+	void init_user_data ();
 	void init_track_data ();
 	void init_album_data ();
 	void init_people_data ();
+	void init_school_data ();
 
 	typedef boost::shared_ptr<SessionMetadataSet> DataSetPtr;
 	typedef std::list<DataSetPtr> DataSetList;

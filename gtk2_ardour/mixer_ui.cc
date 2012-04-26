@@ -95,7 +95,7 @@ Mixer_UI::Mixer_UI ()
 	strip_redisplay_does_not_sync_order_keys = false;
 	ignore_sync = false;
 
-	Route::SyncOrderKeys.connect (*this, invalidator (*this), ui_bind (&Mixer_UI::sync_order_keys, this, _1), gui_context());
+	Route::SyncOrderKeys.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::sync_order_keys, this, _1), gui_context());
 
 	scroller_base.set_flags (Gtk::CAN_FOCUS);
 	scroller_base.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
@@ -239,7 +239,7 @@ Mixer_UI::Mixer_UI ()
 
 	_in_group_rebuild_or_clear = false;
 
-	MixerStrip::CatchDeletion.connect (*this, invalidator (*this), ui_bind (&Mixer_UI::remove_strip, this, _1), gui_context());
+	MixerStrip::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::remove_strip, this, _1), gui_context());
 
         MonitorSection::setup_knob_images ();
 
@@ -340,7 +340,7 @@ Mixer_UI::add_strip (RouteList& routes)
 			_monitor_section->set_session (_session);
                         _monitor_section->tearoff().show_all ();
 
-			route->DropReferences.connect (*this, invalidator(*this), ui_bind (&Mixer_UI::monitor_section_going_away, this), gui_context());
+			route->DropReferences.connect (*this, invalidator(*this), boost::bind (&Mixer_UI::monitor_section_going_away, this), gui_context());
 
                         /* no regular strip shown for control out */
 
@@ -368,7 +368,7 @@ Mixer_UI::add_strip (RouteList& routes)
 			route->set_order_key (N_("signal"), track_model->children().size()-1);
 		}
 
-		route->PropertyChanged.connect (*this, invalidator (*this), ui_bind (&Mixer_UI::strip_property_changed, this, _1, strip), gui_context());
+		route->PropertyChanged.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::strip_property_changed, this, _1, strip), gui_context());
 
 		strip->WidthChanged.connect (sigc::mem_fun(*this, &Mixer_UI::strip_width_changed));
 		strip->signal_button_release_event().connect (sigc::bind (sigc::mem_fun(*this, &Mixer_UI::strip_button_release_event), strip));
@@ -583,15 +583,15 @@ Mixer_UI::set_session (Session* sess)
 
 	initial_track_display ();
 
-	_session->RouteAdded.connect (_session_connections, invalidator (*this), ui_bind (&Mixer_UI::add_strip, this, _1), gui_context());
-	_session->route_group_added.connect (_session_connections, invalidator (*this), ui_bind (&Mixer_UI::add_route_group, this, _1), gui_context());
+	_session->RouteAdded.connect (_session_connections, invalidator (*this), boost::bind (&Mixer_UI::add_strip, this, _1), gui_context());
+	_session->route_group_added.connect (_session_connections, invalidator (*this), boost::bind (&Mixer_UI::add_route_group, this, _1), gui_context());
 	_session->route_group_removed.connect (_session_connections, invalidator (*this), boost::bind (&Mixer_UI::route_groups_changed, this), gui_context());
 	_session->route_groups_reordered.connect (_session_connections, invalidator (*this), boost::bind (&Mixer_UI::route_groups_changed, this), gui_context());
-	_session->config.ParameterChanged.connect (_session_connections, invalidator (*this), ui_bind (&Mixer_UI::parameter_changed, this, _1), gui_context());
+	_session->config.ParameterChanged.connect (_session_connections, invalidator (*this), boost::bind (&Mixer_UI::parameter_changed, this, _1), gui_context());
 	_session->DirtyChanged.connect (_session_connections, invalidator (*this), boost::bind (&Mixer_UI::update_title, this), gui_context());
-	_session->StateSaved.connect (_session_connections, invalidator (*this), ui_bind (&Mixer_UI::update_title, this), gui_context());
+	_session->StateSaved.connect (_session_connections, invalidator (*this), boost::bind (&Mixer_UI::update_title, this), gui_context());
 
-	Config->ParameterChanged.connect (*this, invalidator (*this), ui_bind (&Mixer_UI::parameter_changed, this, _1), gui_context ());
+	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::parameter_changed, this, _1), gui_context ());
 
 	route_groups_changed ();
 
@@ -1395,7 +1395,7 @@ Mixer_UI::add_route_group (RouteGroup* group)
 		focus = true;
 	}
 
-	group->PropertyChanged.connect (*this, invalidator (*this), ui_bind (&Mixer_UI::route_group_property_changed, this, group, _1), gui_context());
+	group->PropertyChanged.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::route_group_property_changed, this, group, _1), gui_context());
 
 	if (focus) {
 		TreeViewColumn* col = group_display.get_column (0);

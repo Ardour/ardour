@@ -255,6 +255,26 @@ strings_equal_ignore_case (const string& a, const string& b)
 	return false;
 }
 
+bool
+string_is_affirmative (const std::string& str)
+{
+	/* to be used only with XML data - not intended to handle user input */
+
+	if (str.empty ()) {
+		return false;
+	}
+
+	/* the use of g_strncasecmp() is solely to get around issues with
+	 * charsets posed by trying to use C++ for the same
+	 * comparison. switching a std::string to its lower- or upper-case
+	 * version has several issues, but handled by default
+	 * in the way we desire when doing it in C.
+	 */
+
+	return str == "1" || str == "y" || str == "Y" || (!g_strncasecmp(str.c_str(), "yes", str.length())) ||
+		(!g_strncasecmp(str.c_str(), "true", str.length()));
+}
+
 /** A wrapper for dgettext that takes a msgid of the form Context|Text.
  *  If Context|Text is translated, the translation is returned, otherwise
  *  just Text is returned.  Useful for getting translations of words or phrases

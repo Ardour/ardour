@@ -26,6 +26,8 @@ using namespace std;
 using namespace Glib;
 using namespace ARDOUR;
 
+SessionMetadata *SessionMetadata::_metadata = NULL;  //singleton instance
+
 SessionMetadata::SessionMetadata ()
 {
 	/*** General ***/
@@ -52,6 +54,10 @@ SessionMetadata::SessionMetadata ()
 	map.insert (Property ("dj_mixer", ""));
 	map.insert (Property ("mixer", ""));
 	//map.insert (Property ("performers", "")); // Multiple values [instrument]
+
+	/*** Education... ***/
+	map.insert (Property ("instructor", ""));
+	map.insert (Property ("course", ""));
 
 	/*** Album info ***/
 	map.insert (Property ("album", ""));
@@ -80,6 +86,13 @@ SessionMetadata::SessionMetadata ()
 	//map.insert (Property ("album_artist_sort", ""));
 	//map.insert (Property ("artist_sort", ""));
 	//map.insert (Property ("title_sort", ""));
+	
+	/*** Globals ***/
+	user_map.insert (Property ("user_name", ""));
+	user_map.insert (Property ("user_email", ""));
+	user_map.insert (Property ("user_web", ""));
+	user_map.insert (Property ("user_organization", ""));
+	user_map.insert (Property ("user_country", ""));
 }
 
 SessionMetadata::~SessionMetadata ()
@@ -107,9 +120,12 @@ SessionMetadata::get_value (const string & name) const
 {
 	PropertyMap::const_iterator it = map.find (name);
 	if (it == map.end()) {
-		// Should not be reached!
-		std::cerr << "Programming error in SessionMetadata::get_value" << std::endl;
-		return "";
+		it = user_map.find (name);
+		if (it == user_map.end()) {
+			// Should not be reached!
+			std::cerr << "Programming error in SessionMetadata::get_value" << std::endl;
+			return "";
+		}
 	}
 
 	return it->second;
@@ -126,9 +142,12 @@ SessionMetadata::set_value (const string & name, const string & value)
 {
 	PropertyMap::iterator it = map.find (name);
 	if (it == map.end()) {
-		// Should not be reached!
-		std::cerr << "Programming error in SessionMetadata::set_value" << std::endl;
-		return;
+		it = user_map.find (name);
+		if (it == user_map.end()) {
+			// Should not be reached!
+			std::cerr << "Programming error in SessionMetadata::set_value" << std::endl;
+			return;
+		}
 	}
 
 	it->second = value;
@@ -163,7 +182,7 @@ SessionMetadata::get_state ()
 }
 
 int
-SessionMetadata::set_state (const XMLNode & state, int /*version*/)
+SessionMetadata::set_state (const XMLNode & state, int version_num)
 {
 	const XMLNodeList & children = state.children();
 	string name;
@@ -184,6 +203,22 @@ SessionMetadata::set_state (const XMLNode & state, int /*version*/)
 	}
 
 	return 0;
+}
+
+
+XMLNode &
+SessionMetadata::get_user_state ()
+{
+	XMLNode * node = new XMLNode ("Metadata");
+	XMLNode * prop;
+
+	for (PropertyMap::const_iterator it = user_map.begin(); it != user_map.end(); ++it) {
+		if ((prop = get_xml (it->first))) {
+			node->add_child_nocopy (*prop);
+		}
+	}
+
+	return *node;
 }
 
 /*** Accessing ***/
@@ -343,6 +378,51 @@ SessionMetadata::genre () const
 	return get_value("genre");
 }
 
+string
+SessionMetadata::instructor () const
+{
+	return get_value("instructor");
+}
+
+string
+SessionMetadata::course () const
+{
+	return get_value("course");
+}
+
+
+string
+SessionMetadata::user_name () const
+{
+	return get_value("user_name");
+}
+
+string
+SessionMetadata::user_email () const
+{
+	return get_value("user_email");
+}
+
+string
+SessionMetadata::user_web () const
+{
+	return get_value("user_web");
+}
+
+string
+SessionMetadata::organization () const
+{
+	return get_value("user_organization");
+}
+
+string
+SessionMetadata::country () const
+{
+	return get_value("user_country");
+}
+
+
+
 /*** Editing ***/
 void
 SessionMetadata::set_comment (const string & v)
@@ -498,4 +578,45 @@ void
 SessionMetadata::set_genre (const string & v)
 {
 	set_value ("genre", v);
+}
+
+void
+SessionMetadata::set_instructor (const string & v)
+{
+	set_value ("instructor", v);
+}
+
+void
+SessionMetadata::set_course (const string & v)
+{
+	set_value ("course", v);
+}
+
+void
+SessionMetadata::set_user_name (const string & v)
+{
+	set_value ("user_name", v);
+}
+
+void
+SessionMetadata::set_user_email (const string & v)
+{
+	set_value ("user_email", v);
+}
+
+void
+SessionMetadata::set_user_web (const string & v)
+{
+	set_value ("user_web", v);
+}
+
+void
+SessionMetadata::set_organization (const string & v)
+{
+	set_value ("user_organization", v);
+}
+void
+SessionMetadata::set_country (const string & v)
+{
+	set_value ("user_country", v);
 }

@@ -142,7 +142,7 @@ protected:
 	void         diskstream_changed ();
 	void         layer_regions ();
 
-	virtual void playlist_switched (boost::weak_ptr<ARDOUR::Track>);
+	void playlist_switched (boost::weak_ptr<ARDOUR::Track>);
 
 	virtual void color_handler () = 0;
 

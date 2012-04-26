@@ -20,6 +20,7 @@
 
 #include "pbd/enumwriter.h"
 #include "pbd/xml++.h"
+#include "pbd/convert.h"
 
 #include "ardour/types.h"
 #include "ardour/mute_master.h"
@@ -144,7 +145,7 @@ MuteMaster::set_state (const XMLNode& node, int /*version*/)
 	}
 
 	if ((prop = node.property ("muted")) != 0) {
-		_muted_by_self = string_is_affirmative (prop->value());
+		_muted_by_self = PBD::string_is_affirmative (prop->value());
 	} else {
                 _muted_by_self = (_mute_point != MutePoint (0));
         }

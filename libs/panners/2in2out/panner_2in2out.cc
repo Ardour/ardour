@@ -478,11 +478,15 @@ Panner2in2out::value_as_string (boost::shared_ptr<AutomationControl> ac) const
                    
                    This is pretty wierd, but its the way audio engineers expect it. Just remember that
                    the center of the USA isn't Kansas, its (50LA, 50NY) and it will all make sense.
+                
+		   This is designed to be as narrow as possible. Dedicated
+		   panner GUIs can do their own version of this if they need
+		   something less compact.
                 */
                 
-                return string_compose (_("L:%1 R:%2"), (int) rint (100.0 * (1.0 - val)),
+                return string_compose (_("L%1R%2"), (int) rint (100.0 * (1.0 - val)),
                                        (int) rint (100.0 * val));
-                
+
         case PanWidthAutomation:
                 return string_compose (_("Width: %1%%"), (int) floor (100.0 * val));
                 

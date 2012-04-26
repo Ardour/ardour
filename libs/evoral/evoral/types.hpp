@@ -46,23 +46,6 @@ static inline bool musical_time_equal (MusicalTime a, MusicalTime b) {
 /** Type of an event (opaque, mapped by application) */
 typedef uint32_t EventType;
 
-/** Type to describe a time range */
-template<typename T>
-struct Range {
-	Range (T f, T t) : from (f), to (t) {}
-	T from; ///< start of the range
-	T to;   ///< end of the range
-};
-
-/** Type to describe the movement of a time range */
-template<typename T>
-struct RangeMove {
-	RangeMove (T f, double l, T t) : from (f), length (l), to (t) {}
-	T         from;   ///< start of the range
-	double    length; ///< length of the range
-	T         to;     ///< new start of the range
-};
-
 } // namespace Evoral
 
 namespace PBD {

@@ -144,7 +144,7 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 
   protected:
 	TimeAxisViewItem(const std::string &, ArdourCanvas::Group&, TimeAxisView&, double, Gdk::Color const &,
-			 framepos_t, framepos_t, bool recording = false, bool automation = false, Visibility v = Visibility (0));
+			 framepos_t, framecnt_t, bool recording = false, bool automation = false, Visibility v = Visibility (0));
 
 	TimeAxisViewItem (const TimeAxisViewItem&);
 

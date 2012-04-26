@@ -19,6 +19,7 @@
 */
 
 #include "pbd/pthread_utils.h"
+#include "pbd/memento_command.h"
 
 #include "ardour/session.h"
 #include "ardour/location.h"
@@ -91,22 +92,29 @@ BasicUI::goto_end ()
 }
 
 void       
-BasicUI::add_marker ()
+BasicUI::add_marker (const std::string& markername)
 {
-	framepos_t when = session->audible_frame();
-	session->locations()->add (new Location (*session, when, when, _("unnamed"), Location::IsMark));
+	framepos_t where = session->audible_frame();
+	Location *location = new Location (*session, where, where, markername, Location::IsMark);
+	session->begin_reversible_command (_("add marker"));
+	XMLNode &before = session->locations()->get_state();
+	session->locations()->add (location, true);
+	XMLNode &after = session->locations()->get_state();
+	session->add_command (new MementoCommand<Locations>(*(session->locations()), &before, &after));
+	session->commit_reversible_command ();
 }
 
 void
 BasicUI::rewind ()
 {
-	session->request_transport_speed (-2.0f);
+	std::cerr << "request transport speed of " << session->transport_speed() - 1.5 << std::endl;
+	session->request_transport_speed (session->transport_speed() - 1.5);
 }
 
 void
 BasicUI::ffwd ()
 {
-	session->request_transport_speed (2.0f);
+	session->request_transport_speed (session->transport_speed() + 1.5);
 }
 
 void

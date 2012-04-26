@@ -133,6 +133,11 @@ MidiControlUI::reset_ports ()
 	boost::shared_ptr<const MIDI::Manager::PortList> plist = MIDI::Manager::instance()->get_midi_ports ();
 
 	for (MIDI::Manager::PortList::const_iterator i = plist->begin(); i != plist->end(); ++i) {
+
+		if (!(*i)->centrally_parsed()) {
+			continue;
+		}
+
 		int fd;
 
 		if ((fd = (*i)->selectable ()) >= 0) {

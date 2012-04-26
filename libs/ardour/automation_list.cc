@@ -156,7 +156,6 @@ AutomationList::operator= (const AutomationList& other)
 
 		_min_yval = other._min_yval;
 		_max_yval = other._max_yval;
-		_max_xval = other._max_xval;
 		_default_value = other._default_value;
 
 		mark_dirty ();
@@ -278,8 +277,6 @@ AutomationList::state (bool full)
 	root->add_property ("min-yval", buf);
 	snprintf (buf, sizeof (buf), "%.12g", _max_yval);
 	root->add_property ("max-yval", buf);
-	snprintf (buf, sizeof (buf), "%.12g", _max_xval);
-	root->add_property ("max-xval", buf);
 
 	root->add_property ("interpolation-style", enum_2_string (_interpolation));
 
@@ -489,12 +486,6 @@ AutomationList::set_state (const XMLNode& node, int version)
 		_max_yval = atof (prop->value ().c_str());
 	} else {
 		_max_yval = FLT_MAX;
-	}
-
-	if ((prop = node.property (X_("max-xval"))) != 0) {
-		_max_xval = atof (prop->value ().c_str());
-	} else {
-		_max_xval = 0; // means "no limit ;
 	}
 
 	bool have_events = false;

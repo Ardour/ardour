@@ -20,12 +20,13 @@
 #include "ardour/lv2_plugin.h"
 #include "ardour/plugin_manager.h"
 #include "ardour/processor.h"
+#include "ardour/session.h"
 
 #include "ardour_ui.h"
 #include "gui_thread.h"
 #include "lv2_plugin_ui.h"
 
-#include "lv2_ui.h"
+#include "lv2/lv2plug.in/ns/extensions/ui/ui.h"
 
 #include <lilv/lilv.h>
 #include <suil/suil.h>
@@ -68,10 +69,33 @@ LV2PluginUI::write_to_ui(void*       controller,
                          const void* buffer)
 {
 	LV2PluginUI* me = (LV2PluginUI*)controller;
-
 	if (me->_inst) {
 		suil_instance_port_event((SuilInstance*)me->_inst,
 					 port_index, buffer_size, format, buffer);
+	}
+}
+
+uint32_t
+LV2PluginUI::port_index(void* controller, const char* symbol)
+{
+	return ((LV2PluginUI*)controller)->_lv2->port_index(symbol);
+}
+
+void
+LV2PluginUI::touch(void*    controller,
+                   uint32_t port_index,
+                   bool     grabbed)
+{
+	LV2PluginUI* me = (LV2PluginUI*)controller;
+	if (port_index >= me->_controllables.size()) {
+		return;
+	}
+
+	ControllableRef control = me->_controllables[port_index];
+	if (grabbed) {
+		control->start_touch(control->session().transport_frame());
+	} else {
+		control->stop_touch(false, control->session().transport_frame());
 	}
 }
 
@@ -196,7 +220,10 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 	}
 
 	if (!ui_host) {
-		ui_host = suil_host_new(LV2PluginUI::write_from_ui, NULL, NULL, NULL);
+		ui_host = suil_host_new(LV2PluginUI::write_from_ui,
+		                        LV2PluginUI::port_index,
+		                        NULL, NULL);
+		suil_host_set_touch_func(ui_host, LV2PluginUI::touch);
 	}
 	const char* container_type = (is_external_ui)
 		? NS_UI "external"
@@ -245,7 +272,7 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 			pack_start(*_ardour_buttons_box, false, false);
 
 			GtkWidget* c_widget = (GtkWidget*)GET_WIDGET(_inst);
-			_gui_widget = Glib::wrap(c_widget);
+			_gui_widget = Gtk::manage(Glib::wrap(c_widget));
 			_gui_widget->show_all();
 			pack_start(*_gui_widget, true, true);
 		} else {
@@ -283,18 +310,13 @@ LV2PluginUI::lv2ui_free()
 
 	if (_gui_widget) {
 		remove (*_gui_widget);
+		_gui_widget = NULL;
 	}
 
-	if (_ardour_buttons_box) {
-		remove (*_ardour_buttons_box);
-		delete _ardour_buttons_box;
-		_ardour_buttons_box = 0;
+	if (_inst) {
+		suil_instance_free((SuilInstance*)_inst);
+		_inst = NULL;
 	}
-
-	suil_instance_free((SuilInstance*)_inst);
-
-	_inst = NULL;
-	_gui_widget = NULL;
 }
 
 LV2PluginUI::~LV2PluginUI ()

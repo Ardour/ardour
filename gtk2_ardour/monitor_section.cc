@@ -36,6 +36,8 @@ MonitorSection::MonitorSection (Session* s)
         : AxisView (s)
         , RouteUI (s)
         , _tearoff (0)
+	, channel_table_viewport (*channel_table_scroller.get_hadjustment(),
+				  *channel_table_scroller.get_vadjustment ())
         , gain_control (0)
         , dim_control (0)
         , solo_boost_control (0)
@@ -257,7 +259,8 @@ MonitorSection::MonitorSection (Session* s)
 	channel_table_scroller.set_size_request (-1, 150);
 	channel_table_scroller.set_shadow_type (Gtk::SHADOW_NONE);
 	channel_table_scroller.show ();
-	
+	channel_table_scroller.add (channel_table_viewport);
+
 	channel_size_group  = SizeGroup::create (SIZE_GROUP_HORIZONTAL);
 	channel_size_group->add_widget (channel_table_header);
 	channel_size_group->add_widget (channel_table);
@@ -318,7 +321,7 @@ MonitorSection::MonitorSection (Session* s)
 
         /* catch changes that affect us */
 
-        Config->ParameterChanged.connect (config_connection, invalidator (*this), ui_bind (&MonitorSection::parameter_changed, this, _1), gui_context());
+        Config->ParameterChanged.connect (config_connection, invalidator (*this), boost::bind (&MonitorSection::parameter_changed, this, _1), gui_context());
 }
 
 MonitorSection::~MonitorSection ()
@@ -357,23 +360,24 @@ MonitorSection::set_session (Session* s)
 		if (channel_table_scroller.get_parent()) {
 			/* scroller is packed, so remove it */
 			channel_table_packer.remove (channel_table_scroller);
-			/* remove the table_hpacker from the scroller */
-			channel_table_scroller.remove ();
 		} 
 
-		if (table_hpacker.get_parent ()) {
+		if (table_hpacker.get_parent () == &channel_table_packer) {
 			/* this occurs when the table hpacker is directly
 			   packed, so remove it.
 			*/
 			channel_table_packer.remove (table_hpacker);
+		} else if (table_hpacker.get_parent()) {
+			channel_table_viewport.remove ();
 		}
 		
 		if (_monitor->output_streams().n_audio() > 7) {
 			/* put the table into a scrolled window, and then put
 			 * that into the channel vpacker, after the table header
 			 */
-			channel_table_scroller.add (table_hpacker);
+			channel_table_viewport.add (table_hpacker);
 			channel_table_packer.pack_start (channel_table_scroller, true, true);
+			channel_table_viewport.show ();
 			channel_table_scroller.show ();
 
 		} else {

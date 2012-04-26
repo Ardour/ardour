@@ -294,22 +294,6 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 
 	add_option (_("Misc"), li);
 
-	add_option (_("Misc"), new OptionEditorHeading (_("Broadcast WAVE metadata")));
-
-	add_option (_("Misc"), new EntryOption (
-			    "bwf-country-code",
-			    _("Country code"),
-			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_bwf_country_code),
-			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_bwf_country_code)
-			    ));
-
-	add_option (_("Misc"), new EntryOption (
-			    "bwf-organization-code",
-			    _("Organization code"),
-			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_bwf_organization_code),
-			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_bwf_organization_code)
-			    ));
-
 	add_option (_("Misc"), new OptionEditorHeading (_("Glue to bars and beats")));
 
 	add_option (_("Misc"), new BoolOption (

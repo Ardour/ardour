@@ -128,7 +128,7 @@ class Region
 	float stretch () const { return _stretch; }
 	float shift ()   const { return _shift; }
 
-	void set_ancestral_data (framepos_t start, framepos_t length, float stretch, float shift);
+	void set_ancestral_data (framepos_t start, framecnt_t length, float stretch, float shift);
 
 	frameoffset_t sync_offset (int& dir) const;
 	framepos_t sync_position () const;
@@ -140,6 +140,14 @@ class Region
 
 	framepos_t first_frame () const { return _position; }
 	framepos_t last_frame ()  const { return _position + _length - 1; }
+
+	Evoral::Range<framepos_t> last_range () const {
+		return Evoral::Range<framepos_t> (_last_position, _last_position + _last_length - 1);
+	}
+	
+	Evoral::Range<framepos_t> range () const {
+		return Evoral::Range<framepos_t> (first_frame(), last_frame());
+	}
 
 	bool hidden ()           const { return _hidden; }
 	bool muted ()            const { return _muted; }
@@ -168,8 +176,14 @@ class Region
 		return first_frame() <= frame && frame <= last_frame();
 	}
 
-	OverlapType coverage (framepos_t start, framepos_t end) const {
-		return ARDOUR::coverage (first_frame(), last_frame(), start, end);
+	/** @return coverage of this region with the given range;
+	 *  OverlapInternal: the range is internal to this region.
+	 *  OverlapStart:    the range overlaps the start of this region.
+	 *  OverlapEnd:      the range overlaps the end of this region.
+	 *  OverlapExternal: the range overlaps all of this region.
+	 */
+	Evoral::OverlapType coverage (framepos_t start, framepos_t end) const {
+		return Evoral::coverage (first_frame(), last_frame(), start, end);
 	}
 
 	bool equivalent (boost::shared_ptr<const Region>) const;
@@ -282,7 +296,7 @@ class Region
 		return 0;
 	}
 
-	virtual int adjust_transients (framepos_t /*delta*/) {
+	virtual int adjust_transients (frameoffset_t /*delta*/) {
 		// no transients, but its OK
 		return 0;
 	}
@@ -324,7 +338,8 @@ class Region
 	virtual int _set_state (const XMLNode&, int version, PBD::PropertyChange& what_changed, bool send_signal);
 	void post_set (const PBD::PropertyChange&);
 	virtual void set_position_internal (framepos_t pos, bool allow_bbt_recompute);
-	virtual void set_length_internal (framepos_t pos);
+	virtual void set_length_internal (framecnt_t);
+	virtual void set_start_internal (framecnt_t);
 	
 	DataType _type;
 

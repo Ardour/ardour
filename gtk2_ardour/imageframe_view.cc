@@ -104,7 +104,7 @@ ImageFrameView::ImageFrameView(const string & item_id,
 	set_position(start, this);
 	set_duration(duration, this);
 
-	MarkerView::CatchDeletion.connect (*this, ui_bind (&ImageFrameView::remove_marker_view_item, this, _1), gui_context());
+	MarkerView::CatchDeletion.connect (*this, boost::bind (&ImageFrameView::remove_marker_view_item, this, _1), gui_context());
 }
 
 /**

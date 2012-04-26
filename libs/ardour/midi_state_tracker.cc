@@ -131,7 +131,7 @@ MidiStateTracker::resolve_notes (MidiBuffer &dst, framepos_t time)
 	for (int channel = 0; channel < 16; ++channel) {
 		for (int note = 0; note < 128; ++note) {
 			while (_active_notes[note + 128 * channel]) {
-				uint8_t buffer[3] = { MIDI_CMD_NOTE_OFF | channel, note, 0 };
+				uint8_t buffer[3] = { ((uint8_t) (MIDI_CMD_NOTE_OFF | channel)), uint8_t (note), 0 };
 				Evoral::MIDIEvent<MidiBuffer::TimeType> noteoff
 					(MIDI_CMD_NOTE_OFF, time, 3, buffer, false);
 				/* note that we do not care about failure from

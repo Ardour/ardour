@@ -159,6 +159,9 @@ EventTypeMap::new_parameter(uint32_t type, uint8_t channel, uint32_t id) const
         case PanFrontBackAutomation:
         case PanLFEAutomation:
                 break;
+	case RecEnableAutomation:
+		/* default 0.0 - 1.0 is fine */
+		break;
 	case PluginAutomation:
 	case SoloAutomation:
 	case MuteAutomation:

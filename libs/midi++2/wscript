@@ -47,6 +47,8 @@ def build(bld):
     obj.source = '''
             midi.cc
             channel.cc
+            ipmidi_port.cc
+            jack_midi_port.cc
             manager.cc
             parser.cc
             port.cc

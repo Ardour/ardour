@@ -20,27 +20,32 @@
 #define ardour_mackie_control_protocol_h
 
 #include <vector>
+#include <map>
+#include <list>
+#include <set>
 
 #include <sys/time.h>
 #include <pthread.h>
+#include <boost/smart_ptr.hpp>
 
 #include <glibmm/thread.h>
 
 #include "pbd/abstract_ui.h"
-
-#include "ardour/types.h"
-#include "ardour/midi_ui.h"
 #include "midi++/types.h"
-
+#include "ardour/types.h"
 #include "control_protocol/control_protocol.h"
+
+#include "types.h"
 #include "midi_byte_array.h"
 #include "controls.h"
-#include "dummy_port.h"
-#include "route_signal.h"
-#include "mackie_button_handler.h"
-#include "mackie_port.h"
-#include "mackie_jog_wheel.h"
+#include "jog_wheel.h"
 #include "timer.h"
+#include "device_info.h"
+#include "device_profile.h"
+
+namespace ARDOUR {
+	class AutomationControl;
+}
 
 namespace MIDI {
 	class Port;
@@ -48,6 +53,9 @@ namespace MIDI {
 
 namespace Mackie {
 	class Surface;
+	class Control;
+	class SurfacePort;
+	class Button;
 }
 
 /**
@@ -79,61 +87,83 @@ public:
 class MackieControlProtocol 
 	: public ARDOUR::ControlProtocol
 	, public AbstractUI<MackieControlUIRequest>
-	, public Mackie::MackieButtonHandler
 {
   public:
+	static const int MODIFIER_OPTION;
+	static const int MODIFIER_CONTROL;
+	static const int MODIFIER_SHIFT;
+	static const int MODIFIER_CMDALT;
+
+	enum ViewMode {
+		Mixer,
+		Dynamics,
+		EQ,
+		Loop,
+		AudioTracks,
+		MidiTracks,
+		Busses,
+		Sends,
+		Plugins,
+	};
+
+	enum FlipMode {
+		Normal, /* fader controls primary, vpot controls secondary */
+		Mirror, /* fader + vpot control secondary */
+		Swap,   /* fader controls secondary, vpot controls primary */
+		Zero,   /* fader controls primary, but doesn't move, vpot controls secondary */
+	};
+	
 	MackieControlProtocol(ARDOUR::Session &);
 	virtual ~MackieControlProtocol();
 
+	static MackieControlProtocol* instance() { return _instance; }
+	
+	const Mackie::DeviceInfo& device_info() const { return _device_info; }
+	Mackie::DeviceProfile& device_profile() { return _device_profile; }
+
 	int set_active (bool yn);
+	void set_device (const std::string&, bool allow_activation = true);
+	void set_profile (const std::string&);
+
+	bool     flip_mode () const { return _flip_mode; }
+	ViewMode view_mode () const { return _view_mode; }
+	bool zoom_mode () const { return _zoom_mode; }
+
+	void set_view_mode (ViewMode);
+	void set_flip_mode (bool);
 
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
   
 	static bool probe();
 	
-	Mackie::Surface & surface();
+	typedef std::list<boost::shared_ptr<Mackie::Surface> > Surfaces;
+	Surfaces surfaces;
 
 	std::list<boost::shared_ptr<ARDOUR::Bundle> > bundles ();
 
+	void set_master_on_surface_strip (uint32_t surface, uint32_t strip);
+	void set_monitor_on_surface_strip (uint32_t surface, uint32_t strip);
+	
+	uint32_t n_strips (bool with_locked_strips = true) const;
+	
 	bool has_editor () const { return true; }
 	void* get_gui () const;
 	void tear_down_gui ();
-	
-	// control events
-	void handle_control_event(Mackie::SurfacePort & port, Mackie::Control & control, const Mackie::ControlState & state);
 
-	// strip/route related stuff
-  public:	
-	/// Signal handler for Route::solo
-	void notify_solo_changed(Mackie::RouteSignal *);
-	/// Signal handler for Route::mute
-	void notify_mute_changed(Mackie::RouteSignal *);
-	/// Signal handler for Route::record_enable_changed
-	void notify_record_enable_changed(Mackie::RouteSignal *);
-	/// Signal handler for Route::gain_changed (from IO)
-	void notify_gain_changed(Mackie::RouteSignal *, bool force_update = true);
-	/// Signal handler for Route::name_change
-	void notify_property_changed(const PBD::PropertyChange&, Mackie::RouteSignal *);
-	/// Signal handler from Panner::Change
-	void notify_panner_changed(Mackie::RouteSignal *, bool force_update = true);
-	/// Signal handler for new routes added
-	void notify_route_added(ARDOUR::RouteList &);
-	/// Signal handler for Route::active_changed
-	void notify_active_changed(Mackie::RouteSignal *);
- 
+	void handle_button_event (Mackie::Surface&, Mackie::Button& button, Mackie::ButtonState);
+
+	void notify_route_added (ARDOUR::RouteList &);
 	void notify_remote_id_changed();
 
 	/// rebuild the current bank. Called on route added/removed and
 	/// remote id changed.
 	void refresh_current_bank();
 
-	// global buttons (ie button not part of strips)
-
-  public:
 	// button-related signals
 	void notify_record_state_changed();
 	void notify_transport_state_changed();
+	void notify_loop_state_changed();
 	// mainly to pick up punch-in and punch-out
 	void notify_parameter_changed(std::string const &);
 	void notify_solo_active_changed(bool);
@@ -143,108 +173,36 @@ class MackieControlProtocol
 	void update_timecode_beats_led();
   
 	/// this is called to generate the midi to send in response to a button press.
-	void update_led(Mackie::Button & button, Mackie::LedState);
+	void update_led(Mackie::Surface&, Mackie::Button & button, Mackie::LedState);
   
-	void update_global_button(const std::string & name, Mackie::LedState);
-	void update_global_led(const std::string & name, Mackie::LedState);
-  
-	// transport button handler methods from MackieButtonHandler
-	virtual Mackie::LedState frm_left_press(Mackie::Button &);
-	virtual Mackie::LedState frm_left_release(Mackie::Button &);
+	void update_global_button (int id, Mackie::LedState);
+	void update_global_led (int id, Mackie::LedState);
 
-	virtual Mackie::LedState frm_right_press(Mackie::Button &);
-	virtual Mackie::LedState frm_right_release(Mackie::Button &);
-
-	virtual Mackie::LedState stop_press(Mackie::Button &);
-	virtual Mackie::LedState stop_release(Mackie::Button &);
-
-	virtual Mackie::LedState play_press(Mackie::Button &);
-	virtual Mackie::LedState play_release(Mackie::Button &);
-
-	virtual Mackie::LedState record_press(Mackie::Button &);
-	virtual Mackie::LedState record_release(Mackie::Button &);
-
-	virtual Mackie::LedState loop_press(Mackie::Button &);
-	virtual Mackie::LedState loop_release(Mackie::Button &);
-
-	virtual Mackie::LedState punch_in_press(Mackie::Button &);
-	virtual Mackie::LedState punch_in_release(Mackie::Button &);
-
-	virtual Mackie::LedState punch_out_press(Mackie::Button &);
-	virtual Mackie::LedState punch_out_release(Mackie::Button &);
-
-	virtual Mackie::LedState home_press(Mackie::Button &);
-	virtual Mackie::LedState home_release(Mackie::Button &);
-
-	virtual Mackie::LedState end_press(Mackie::Button &);
-	virtual Mackie::LedState end_release(Mackie::Button &);
-	
-	virtual Mackie::LedState rewind_press(Mackie::Button & button);
-	virtual Mackie::LedState rewind_release(Mackie::Button & button);
-
-	virtual Mackie::LedState ffwd_press(Mackie::Button & button);
-	virtual Mackie::LedState ffwd_release(Mackie::Button & button);
-
-	// bank switching button handler methods from MackieButtonHandler
-	virtual Mackie::LedState left_press(Mackie::Button &);
-	virtual Mackie::LedState left_release(Mackie::Button &);
-
-	virtual Mackie::LedState right_press(Mackie::Button &);
-	virtual Mackie::LedState right_release(Mackie::Button &);
-
-	virtual Mackie::LedState channel_left_press(Mackie::Button &);
-	virtual Mackie::LedState channel_left_release(Mackie::Button &);
-
-	virtual Mackie::LedState channel_right_press(Mackie::Button &);
-	virtual Mackie::LedState channel_right_release(Mackie::Button &);
-	
-	virtual Mackie::LedState clicking_press(Mackie::Button &);
-	virtual Mackie::LedState clicking_release(Mackie::Button &);
-	
-	virtual Mackie::LedState global_solo_press(Mackie::Button &);
-	virtual Mackie::LedState global_solo_release(Mackie::Button &);
-	
-	// function buttons
-	virtual Mackie::LedState marker_press(Mackie::Button &);
-	virtual Mackie::LedState marker_release(Mackie::Button &);
-
-	virtual Mackie::LedState drop_press(Mackie::Button &);
-	virtual Mackie::LedState drop_release(Mackie::Button &);
-
-	virtual Mackie::LedState save_press(Mackie::Button &);
-	virtual Mackie::LedState save_release(Mackie::Button &);
-
-	virtual Mackie::LedState timecode_beats_press(Mackie::Button &);
-	virtual Mackie::LedState timecode_beats_release(Mackie::Button &);
-
-	// jog wheel states
-	virtual Mackie::LedState zoom_press(Mackie::Button &);
-	virtual Mackie::LedState zoom_release(Mackie::Button &);
-
-	virtual Mackie::LedState scrub_press(Mackie::Button &);
-	virtual Mackie::LedState scrub_release(Mackie::Button &);
-	
-	/// This is the main MCU port, ie not an extender port
-	/// Only for use by JogWheel
-	const Mackie::SurfacePort & mcu_port() const;
-	Mackie::SurfacePort & mcu_port();
 	ARDOUR::Session & get_session() { return *session; }
- 
+	framepos_t transport_frame() const;
+
+	int modifier_state() const { return _modifier_state; }
+
+	typedef std::list<boost::shared_ptr<ARDOUR::AutomationControl> > ControlList;
+
+	void add_down_button (ARDOUR::AutomationType, int surface, int strip);
+	void remove_down_button (ARDOUR::AutomationType, int surface, int strip);
+	ControlList down_controls (ARDOUR::AutomationType);
+	
+	void add_down_select_button (int surface, int strip);
+	void remove_down_select_button (int surface, int strip);
+	void select_range ();
+
+	int16_t ipmidi_base() const { return _ipmidi_base; }
+	void    set_ipmidi_base (int16_t);
+	
   protected:
-	// create instances of MackiePort, depending on what's found in ardour.rc
-	void create_ports();
-  
 	// shut down the surface
 	void close();
   
-	// create the Surface object, with the correct number
-	// of strips for the currently connected ports and 
-	// hook up the control event notification
-	void initialize_surface();
-  
 	// This sets up the notifications and sets the
 	// controls to the correct values
-	void update_surface();
+	void update_surfaces();
 	
 	// connects global (not strip) signals from the Session to here
 	// so the surface can be notified of changes from the other UIs.
@@ -261,112 +219,277 @@ class MackieControlProtocol
 	Sorted get_sorted_routes();
   
 	// bank switching
-	void switch_banks(int initial);
-	void prev_track();
-	void next_track();
+	void switch_banks (uint32_t first_remote_id, bool force = false);
+	void prev_track ();
+	void next_track ();
   
-	// delete all RouteSignal objects connecting Routes to Strips
-	void clear_route_signals();
-	
-	typedef std::vector<Mackie::RouteSignal*> RouteSignals;
-	RouteSignals route_signals;
-	
-	// return which of the ports a particular route_table
-	// index belongs to
-	Mackie::MackiePort & port_for_id(uint32_t index);
-
-	/**
-	   Handle a button press for the control and return whether
-	   the corresponding light should be on or off.
-	*/
-	bool handle_strip_button (Mackie::SurfacePort &, Mackie::Control &, Mackie::ButtonState, boost::shared_ptr<ARDOUR::Route>);
-
-	void add_port (MIDI::Port &, MIDI::Port &, int number);
-
-	/**
-	   Read session data and send to surface. Includes
-	   automation from the currently active routes and
-	   timecode displays.
-	*/
-	void poll_session_data();
-	
-	// called from poll_automation to figure out which automations need to be sent
-	void update_automation(Mackie::RouteSignal &);
-	
 	// also called from poll_automation to update timecode display
 	void update_timecode_display();
 
 	std::string format_bbt_timecode (ARDOUR::framepos_t now_frame);
 	std::string format_timecode_timecode (ARDOUR::framepos_t now_frame);
 	
-	/**
-	   notification that the port is about to start it's init sequence.
-	   We must make sure that before this exits, the port is being polled
-	   for new data.
-	*/
-	void handle_port_init(Mackie::SurfacePort *);
-
-	/// notification from a MackiePort that it's now active
-	void handle_port_active(Mackie::SurfacePort *);
-	
-	/// notification from a MackiePort that it's now inactive
-	void handle_port_inactive(Mackie::SurfacePort *);
-	
-	boost::shared_ptr<ARDOUR::Route> master_route();
-	Mackie::Strip & master_strip();
-
 	void do_request (MackieControlUIRequest*);
 	int stop ();
-	
+
+	void thread_init ();
+	void midi_connectivity_established ();
+
+	bool route_is_locked_to_strip (boost::shared_ptr<ARDOUR::Route>) const;
+
   private:
 
-	void port_connected_or_disconnected (std::string, std::string, bool);
-	
-	boost::shared_ptr<Mackie::RouteSignal> master_route_signal;
-	
-	static const char * default_port_name;
-	
-	/// The Midi port(s) connected to the units
-	typedef std::vector<Mackie::MackiePort*> MackiePorts;
-	MackiePorts _ports;
-  
-	/// Sometimes the real port goes away, and we want to contain the breakage
-	Mackie::DummyPort _dummy_port;
-  
-	/// The initial remote_id of the currently switched in bank.
-	uint32_t _current_initial_bank;
-	
-	/// protects the port list
-	Glib::Mutex update_mutex;
+	struct ButtonHandlers {
+	    Mackie::LedState (MackieControlProtocol::*press) (Mackie::Button&);
+	    Mackie::LedState (MackieControlProtocol::*release) (Mackie::Button&);
+	    
+	    ButtonHandlers (Mackie::LedState (MackieControlProtocol::*p) (Mackie::Button&),
+			    Mackie::LedState (MackieControlProtocol::*r) (Mackie::Button&)) 
+	    : press (p)
+	    , release (r) {}
+	};
 
+	typedef std::map<Mackie::Button::ID,ButtonHandlers> ButtonMap;
+	typedef std::list<GSource*> PortSources;
+
+	static MackieControlProtocol* _instance;
+	
+	Mackie::DeviceInfo       _device_info;
+	Mackie::DeviceProfile    _device_profile;
+	sigc::connection          periodic_connection;
+	uint32_t                 _current_initial_bank;
 	PBD::ScopedConnectionList audio_engine_connections;
 	PBD::ScopedConnectionList session_connections;
 	PBD::ScopedConnectionList port_connections;
 	PBD::ScopedConnectionList route_connections;
-	
-	/// The representation of the physical controls on the surface.
-  	Mackie::Surface * _surface;
-	
+	PBD::ScopedConnectionList gui_connections;
 	bool _transport_previously_rolling;
-	
 	// timer for two quick marker left presses
-	Mackie::Timer _frm_left_last;
-	
-	Mackie::JogWheel _jog_wheel;
-	
+	Mackie::Timer            _frm_left_last;
 	// last written timecode string
-	std::string _timecode_last;
-	
+	std::string              _timecode_last;
 	// Which timecode are we displaying? BBT or Timecode
-	ARDOUR::AnyTime::Type _timecode_type;
-
+	ARDOUR::AnyTime::Type    _timecode_type;
 	// Bundle to represent our input ports
 	boost::shared_ptr<ARDOUR::Bundle> _input_bundle;
 	// Bundle to represent our output ports
 	boost::shared_ptr<ARDOUR::Bundle> _output_bundle;
+	void*                    _gui;
+	bool                     _zoom_mode;
+	bool                     _scrub_mode;
+	bool                     _flip_mode;
+	ViewMode                 _view_mode;
+	int                      _current_selected_track;
+	int                      _modifier_state;
+	PortSources               port_sources;
+	ButtonMap                 button_map;
+	int16_t                  _ipmidi_base;
+	bool                      needs_ipmidi_restart;
 
+	void create_surfaces ();
+	bool periodic();
 	void build_gui ();
-	void* _gui;
+	bool midi_input_handler (Glib::IOCondition ioc, MIDI::Port* port);
+	void clear_ports ();
+	void force_special_route_to_strip (boost::shared_ptr<ARDOUR::Route> r, uint32_t surface, uint32_t strip_number);
+	void build_button_map ();
+	void gui_track_selection_changed (ARDOUR::RouteNotificationListPtr);
+	void ipmidi_restart ();
+	
+	/* BUTTON HANDLING */
+
+	typedef std::set<uint32_t> DownButtonList;
+	typedef std::map<ARDOUR::AutomationType,DownButtonList> DownButtonMap;
+	DownButtonMap  _down_buttons;
+	DownButtonList _down_select_buttons; 
+
+	void pull_route_range (DownButtonList&, ARDOUR::RouteList&);
+
+	/* implemented button handlers */
+	Mackie::LedState frm_left_press(Mackie::Button &);
+	Mackie::LedState frm_left_release(Mackie::Button &);
+	Mackie::LedState frm_right_press(Mackie::Button &);
+	Mackie::LedState frm_right_release(Mackie::Button &);
+	Mackie::LedState stop_press(Mackie::Button &);
+	Mackie::LedState stop_release(Mackie::Button &);
+	Mackie::LedState play_press(Mackie::Button &);
+	Mackie::LedState play_release(Mackie::Button &);
+	Mackie::LedState record_press(Mackie::Button &);
+	Mackie::LedState record_release(Mackie::Button &);
+	Mackie::LedState loop_press(Mackie::Button &);
+	Mackie::LedState loop_release(Mackie::Button &);
+	Mackie::LedState punch_in_press(Mackie::Button &);
+	Mackie::LedState punch_in_release(Mackie::Button &);
+	Mackie::LedState punch_out_press(Mackie::Button &);
+	Mackie::LedState punch_out_release(Mackie::Button &);
+	Mackie::LedState home_press(Mackie::Button &);
+	Mackie::LedState home_release(Mackie::Button &);
+	Mackie::LedState end_press(Mackie::Button &);
+	Mackie::LedState end_release(Mackie::Button &);
+	Mackie::LedState rewind_press(Mackie::Button & button);
+	Mackie::LedState rewind_release(Mackie::Button & button);
+	Mackie::LedState ffwd_press(Mackie::Button & button);
+	Mackie::LedState ffwd_release(Mackie::Button & button);
+	Mackie::LedState cursor_up_press (Mackie::Button &);
+	Mackie::LedState cursor_up_release (Mackie::Button &);
+	Mackie::LedState cursor_down_press (Mackie::Button &);
+	Mackie::LedState cursor_down_release (Mackie::Button &);
+	Mackie::LedState cursor_left_press (Mackie::Button &);
+	Mackie::LedState cursor_left_release (Mackie::Button &);
+	Mackie::LedState cursor_right_press (Mackie::Button &);
+	Mackie::LedState cursor_right_release (Mackie::Button &);
+	Mackie::LedState left_press(Mackie::Button &);
+	Mackie::LedState left_release(Mackie::Button &);
+	Mackie::LedState right_press(Mackie::Button &);
+	Mackie::LedState right_release(Mackie::Button &);
+	Mackie::LedState channel_left_press(Mackie::Button &);
+	Mackie::LedState channel_left_release(Mackie::Button &);
+	Mackie::LedState channel_right_press(Mackie::Button &);
+	Mackie::LedState channel_right_release(Mackie::Button &);
+	Mackie::LedState clicking_press(Mackie::Button &);
+	Mackie::LedState clicking_release(Mackie::Button &);
+	Mackie::LedState global_solo_press(Mackie::Button &);
+	Mackie::LedState global_solo_release(Mackie::Button &);
+	Mackie::LedState marker_press(Mackie::Button &);
+	Mackie::LedState marker_release(Mackie::Button &);
+	Mackie::LedState save_press(Mackie::Button &);
+	Mackie::LedState save_release(Mackie::Button &);
+	Mackie::LedState timecode_beats_press(Mackie::Button &);
+	Mackie::LedState timecode_beats_release(Mackie::Button &);
+	Mackie::LedState zoom_press(Mackie::Button &);
+	Mackie::LedState zoom_release(Mackie::Button &);
+	Mackie::LedState scrub_press(Mackie::Button &);
+	Mackie::LedState scrub_release(Mackie::Button &);
+	Mackie::LedState undo_press (Mackie::Button &);
+	Mackie::LedState undo_release (Mackie::Button &);
+	Mackie::LedState redo_press (Mackie::Button &);
+	Mackie::LedState redo_release (Mackie::Button &);
+	Mackie::LedState shift_press (Mackie::Button &);
+	Mackie::LedState shift_release (Mackie::Button &);
+	Mackie::LedState option_press (Mackie::Button &);
+	Mackie::LedState option_release (Mackie::Button &);
+	Mackie::LedState control_press (Mackie::Button &);
+	Mackie::LedState control_release (Mackie::Button &);
+	Mackie::LedState cmd_alt_press (Mackie::Button &);
+	Mackie::LedState cmd_alt_release (Mackie::Button &);
+
+	Mackie::LedState io_press (Mackie::Button &);
+	Mackie::LedState io_release (Mackie::Button &);
+	Mackie::LedState sends_press (Mackie::Button &);
+	Mackie::LedState sends_release (Mackie::Button &);
+	Mackie::LedState pan_press (Mackie::Button &);
+	Mackie::LedState pan_release (Mackie::Button &);
+	Mackie::LedState plugin_press (Mackie::Button &);
+	Mackie::LedState plugin_release (Mackie::Button &);
+	Mackie::LedState eq_press (Mackie::Button &);
+	Mackie::LedState eq_release (Mackie::Button &);
+	Mackie::LedState dyn_press (Mackie::Button &);
+	Mackie::LedState dyn_release (Mackie::Button &);
+	Mackie::LedState flip_press (Mackie::Button &);
+	Mackie::LedState flip_release (Mackie::Button &);
+	Mackie::LedState edit_press (Mackie::Button &);
+	Mackie::LedState edit_release (Mackie::Button &);
+	Mackie::LedState name_value_press (Mackie::Button &);
+	Mackie::LedState name_value_release (Mackie::Button &);
+	Mackie::LedState F1_press (Mackie::Button &);
+	Mackie::LedState F1_release (Mackie::Button &);
+	Mackie::LedState F2_press (Mackie::Button &);
+	Mackie::LedState F2_release (Mackie::Button &);
+	Mackie::LedState F3_press (Mackie::Button &);
+	Mackie::LedState F3_release (Mackie::Button &);
+	Mackie::LedState F4_press (Mackie::Button &);
+	Mackie::LedState F4_release (Mackie::Button &);
+	Mackie::LedState F5_press (Mackie::Button &);
+	Mackie::LedState F5_release (Mackie::Button &);
+	Mackie::LedState F6_press (Mackie::Button &);
+	Mackie::LedState F6_release (Mackie::Button &);
+	Mackie::LedState F7_press (Mackie::Button &);
+	Mackie::LedState F7_release (Mackie::Button &);
+	Mackie::LedState F8_press (Mackie::Button &);
+	Mackie::LedState F8_release (Mackie::Button &);
+	Mackie::LedState F9_press (Mackie::Button &);
+	Mackie::LedState F9_release (Mackie::Button &);
+	Mackie::LedState F10_press (Mackie::Button &);
+	Mackie::LedState F10_release (Mackie::Button &);
+	Mackie::LedState F11_press (Mackie::Button &);
+	Mackie::LedState F11_release (Mackie::Button &);
+	Mackie::LedState F12_press (Mackie::Button &);
+	Mackie::LedState F12_release (Mackie::Button &);
+	Mackie::LedState F13_press (Mackie::Button &);
+	Mackie::LedState F13_release (Mackie::Button &);
+	Mackie::LedState F14_press (Mackie::Button &);
+	Mackie::LedState F14_release (Mackie::Button &);
+	Mackie::LedState F15_press (Mackie::Button &);
+	Mackie::LedState F15_release (Mackie::Button &);
+	Mackie::LedState F16_press (Mackie::Button &);
+	Mackie::LedState F16_release (Mackie::Button &);
+	Mackie::LedState on_press (Mackie::Button &);
+	Mackie::LedState on_release (Mackie::Button &);
+	Mackie::LedState rec_ready_press (Mackie::Button &);
+	Mackie::LedState rec_ready_release (Mackie::Button &);
+	Mackie::LedState touch_press (Mackie::Button &);
+	Mackie::LedState touch_release (Mackie::Button &);
+	Mackie::LedState enter_press (Mackie::Button &);
+	Mackie::LedState enter_release (Mackie::Button &);
+	Mackie::LedState cancel_press (Mackie::Button &);
+	Mackie::LedState cancel_release (Mackie::Button &);
+	Mackie::LedState mixer_press (Mackie::Button &);
+	Mackie::LedState mixer_release (Mackie::Button &);
+	Mackie::LedState user_a_press (Mackie::Button &);
+	Mackie::LedState user_a_release (Mackie::Button &);
+	Mackie::LedState user_b_press (Mackie::Button &);
+	Mackie::LedState user_b_release (Mackie::Button &);
+	Mackie::LedState fader_touch_press (Mackie::Button &);
+	Mackie::LedState fader_touch_release (Mackie::Button &);
+
+	Mackie::LedState snapshot_press (Mackie::Button&);
+	Mackie::LedState snapshot_release (Mackie::Button&);
+	Mackie::LedState read_press (Mackie::Button&);
+	Mackie::LedState read_release (Mackie::Button&);
+	Mackie::LedState write_press (Mackie::Button&);
+	Mackie::LedState write_release (Mackie::Button&);
+	Mackie::LedState fdrgroup_press (Mackie::Button&);
+	Mackie::LedState fdrgroup_release (Mackie::Button&);
+	Mackie::LedState clearsolo_press (Mackie::Button&);
+	Mackie::LedState clearsolo_release (Mackie::Button&);
+	Mackie::LedState track_press (Mackie::Button&);
+	Mackie::LedState track_release (Mackie::Button&);
+	Mackie::LedState send_press (Mackie::Button&);
+	Mackie::LedState send_release (Mackie::Button&);
+	Mackie::LedState miditracks_press (Mackie::Button&);
+	Mackie::LedState miditracks_release (Mackie::Button&);
+	Mackie::LedState inputs_press (Mackie::Button&);
+	Mackie::LedState inputs_release (Mackie::Button&);
+	Mackie::LedState audiotracks_press (Mackie::Button&);
+	Mackie::LedState audiotracks_release (Mackie::Button&);
+	Mackie::LedState audioinstruments_press (Mackie::Button&);
+	Mackie::LedState audioinstruments_release (Mackie::Button&);
+	Mackie::LedState aux_press (Mackie::Button&);
+	Mackie::LedState aux_release (Mackie::Button&);
+	Mackie::LedState busses_press (Mackie::Button&);
+	Mackie::LedState busses_release (Mackie::Button&);
+	Mackie::LedState outputs_press (Mackie::Button&);
+	Mackie::LedState outputs_release (Mackie::Button&);
+	Mackie::LedState user_press (Mackie::Button&);
+	Mackie::LedState user_release (Mackie::Button&);
+	Mackie::LedState trim_press (Mackie::Button&);
+	Mackie::LedState trim_release (Mackie::Button&);
+	Mackie::LedState latch_press (Mackie::Button&);
+	Mackie::LedState latch_release (Mackie::Button&);
+	Mackie::LedState grp_press (Mackie::Button&);
+	Mackie::LedState grp_release (Mackie::Button&);
+	Mackie::LedState nudge_press (Mackie::Button&);
+	Mackie::LedState nudge_release (Mackie::Button&);
+	Mackie::LedState drop_press (Mackie::Button&);
+	Mackie::LedState drop_release (Mackie::Button&);
+	Mackie::LedState replace_press (Mackie::Button&);
+	Mackie::LedState replace_release (Mackie::Button&);
+	Mackie::LedState click_press (Mackie::Button&);
+	Mackie::LedState click_release (Mackie::Button&);
+	Mackie::LedState view_press (Mackie::Button&);
+	Mackie::LedState view_release (Mackie::Button&);
 };
+
+
 
 #endif // ardour_mackie_control_protocol_h

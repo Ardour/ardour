@@ -190,7 +190,7 @@ Curve::get_vector (double x0, double x1, float *vec, int32_t veclen)
 void
 Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen)
 {
-	double rx, dx, lx, hx, max_x, min_x;
+	double rx, lx, hx, max_x, min_x;
 	int32_t i;
 	int32_t original_veclen;
 	int32_t npoints;
@@ -276,26 +276,34 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen)
 
 		/* linear interpolation between 2 points */
 
-		/* XXX I'm not sure that this is the right thing to
-		   do here. but its not a common case for the envisaged
-		   uses.
+		/* XXX: this numerator / denominator stuff is pretty grim, but it's the only
+		   way I could get the maths to be accurate; doing everything with pure doubles
+		   gives ~1e-17 errors in the vec[i] computation.
 		*/
 
+		/* gradient of the line */
+		double const m_num = _list.events().back()->value - _list.events().front()->value;
+		double const m_den = _list.events().back()->when - _list.events().front()->when;
+
+		/* y intercept of the line */
+		double const c = double (_list.events().back()->value) - (m_num * _list.events().back()->when / m_den);
+
+		/* dx that we are using */
+		double dx_num = 0;
+		double dx_den = 1;
 		if (veclen > 1) {
-			dx = (hx - lx) / (veclen - 1) ;
+			dx_num = hx - lx;
+			dx_den = veclen - 1;
+		}
+
+		if (veclen > 1) {
+			for (int i = 0; i < veclen; ++i) {
+				vec[i] = (lx * (m_num / m_den) + m_num * i * dx_num / (m_den * dx_den)) + c;
+			}
 		} else {
-			dx = 0; // not used
+			vec[0] = lx;
 		}
 
-		double slope = (_list.events().back()->value - _list.events().front()->value)/
-			(_list.events().back()->when - _list.events().front()->when);
-		double yfrac = dx*slope;
-
-		vec[0] = _list.events().front()->value + slope * (lx - _list.events().front()->when);
-
-		for (i = 1; i < veclen; ++i) {
-			vec[i] = vec[i-1] + yfrac;
-		}
 		return;
 	}
 
@@ -305,10 +313,9 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen)
 
 	rx = lx;
 
+	double dx = 0;
 	if (veclen > 1) {
 		dx = (hx - lx) / (veclen - 1);
-	} else {
-		dx = 0;
 	}
 
 	for (i = 0; i < veclen; ++i, rx += dx) {

@@ -177,7 +177,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 
 	ColorsChanged.connect (sigc::mem_fun (*this, &TimeAxisView::color_handler));
 
-	GhostRegion::CatchDeletion.connect (*this, invalidator (*this), ui_bind (&TimeAxisView::erase_ghost, this, _1), gui_context());
+	GhostRegion::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&TimeAxisView::erase_ghost, this, _1), gui_context());
 }
 
 TimeAxisView::~TimeAxisView()
@@ -492,16 +492,6 @@ TimeAxisView::step_height (bool coarser)
 			set_height (height + step);
 		}
 
-	}
-}
-
-void
-TimeAxisView::set_heights (uint32_t h)
-{
-	TrackSelection& ts (_editor.get_selection().tracks);
-
-	for (TrackSelection::iterator i = ts.begin(); i != ts.end(); ++i) {
-		(*i)->set_height (h);
 	}
 }
 

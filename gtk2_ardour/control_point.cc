@@ -30,6 +30,8 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Gnome; // for Canvas
 
+PBD::Signal1<void, ControlPoint *> ControlPoint::CatchDeletion;
+
 ControlPoint::ControlPoint (AutomationLine& al)
 	: _line (al)
 {
@@ -82,6 +84,8 @@ ControlPoint::ControlPoint (const ControlPoint& other, bool /*dummy_arg_to_force
 
 ControlPoint::~ControlPoint ()
 {
+	CatchDeletion (this); /* EMIT SIGNAL */
+	
 	delete _item;
 }
 

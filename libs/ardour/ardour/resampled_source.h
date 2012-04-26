@@ -39,7 +39,7 @@ class ResampledImportableSource : public ImportableSource
 	uint32_t   channels() const { return source->channels(); }
 	framecnt_t length() const { return source->length(); }
 	framecnt_t samplerate() const { return source->samplerate(); }
-	void       seek (framecnt_t);
+	void       seek (framepos_t);
 	framepos_t natural_position() const;
 
 	bool clamped_at_unity () const {

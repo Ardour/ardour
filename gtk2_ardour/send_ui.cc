@@ -72,7 +72,7 @@ SendUI::SendUI (Gtk::Window* parent, boost::shared_ptr<Send> s, Session* session
 
 	_send->set_metering (true);
 
-	_send->output()->changed.connect (connections, invalidator (*this), ui_bind (&SendUI::outs_changed, this, _1, _2), gui_context());
+	_send->output()->changed.connect (connections, invalidator (*this), boost::bind (&SendUI::outs_changed, this, _1, _2), gui_context());
 
 	_panners.set_width (Wide);
 	_panners.setup_pan ();

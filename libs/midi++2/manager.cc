@@ -27,6 +27,7 @@
 #include "midi++/manager.h"
 #include "midi++/channel.h"
 #include "midi++/port.h"
+#include "midi++/jack_midi_port.h"
 #include "midi++/mmc.h"
 
 using namespace std;
@@ -40,12 +41,12 @@ Manager::Manager (jack_client_t* jack)
 {
 	_mmc = new MachineControl (this, jack);
 	
-	_mtc_input_port = add_port (new MIDI::Port ("MTC in", Port::IsInput, jack));
-	_mtc_output_port = add_port (new MIDI::Port ("MTC out", Port::IsOutput, jack));
-	_midi_input_port = add_port (new MIDI::Port ("MIDI control in", Port::IsInput, jack));
-	_midi_output_port = add_port (new MIDI::Port ("MIDI control out", Port::IsOutput, jack));
-	_midi_clock_input_port = add_port (new MIDI::Port ("MIDI clock in", Port::IsInput, jack));
-	_midi_clock_output_port = add_port (new MIDI::Port ("MIDI clock out", Port::IsOutput, jack));
+	_mtc_input_port = add_port (new MIDI::JackMIDIPort ("MTC in", Port::IsInput, jack));
+	_mtc_output_port = add_port (new MIDI::JackMIDIPort ("MTC out", Port::IsOutput, jack));
+	_midi_input_port = add_port (new MIDI::JackMIDIPort ("MIDI control in", Port::IsInput, jack));
+	_midi_output_port = add_port (new MIDI::JackMIDIPort ("MIDI control out", Port::IsOutput, jack));
+	_midi_clock_input_port = add_port (new MIDI::JackMIDIPort ("MIDI clock in", Port::IsInput, jack));
+	_midi_clock_output_port = add_port (new MIDI::JackMIDIPort ("MIDI clock out", Port::IsOutput, jack));
 }
 
 Manager::~Manager ()
@@ -117,7 +118,10 @@ Manager::reestablish (jack_client_t* jack)
 	boost::shared_ptr<PortList> pr = _ports.reader ();
 
 	for (PortList::const_iterator p = pr->begin(); p != pr->end(); ++p) {
-		(*p)->reestablish (jack);
+		JackMIDIPort* pp = dynamic_cast<JackMIDIPort*> (*p);
+		if (pp) {
+			pp->reestablish (jack);
+		}
 	}
 }
 
@@ -128,7 +132,10 @@ Manager::reconnect ()
 	boost::shared_ptr<PortList> pr = _ports.reader ();
 
 	for (PortList::const_iterator p = pr->begin(); p != pr->end(); ++p) {
-		(*p)->reconnect ();
+		JackMIDIPort* pp = dynamic_cast<JackMIDIPort*> (*p);
+		if (pp) {
+			pp->reconnect ();
+		}
 	}
 }
 

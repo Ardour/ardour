@@ -33,6 +33,21 @@ inline bool event_time_less_than (ControlEvent* a, ControlEvent* b)
 	return a->when < b->when;
 }
 
+/* this has no units but corresponds to the area of a rectangle
+   computed between three points in the list. If the area is
+   large, it indicates significant non-linearity between the
+   points. 
+
+   during automation recording we thin the recorded points
+   using this value. if a point is sufficiently co-linear 
+   with its neighbours (as defined by the area of the rectangle
+   formed by three of them), we will not include it in the
+   ControlList. a smaller value will exclude less points,
+   a larger value will exclude more points, so it effectively
+   measures the amount of thinning to be done.
+*/
+
+double ControlList::_thinning_factor = 20.0; 
 
 ControlList::ControlList (const Parameter& id)
 	: _parameter(id)
@@ -43,7 +58,6 @@ ControlList::ControlList (const Parameter& id)
 	_changed_when_thawed = false;
 	_min_yval = id.min();
 	_max_yval = id.max();
-	_max_xval = 0; // means "no limit"
 	_default_value = 0;
 	_lookup_cache.left = -1;
 	_lookup_cache.range.first = _events.end();
@@ -61,7 +75,6 @@ ControlList::ControlList (const ControlList& other)
 	_changed_when_thawed = false;
 	_min_yval = other._min_yval;
 	_max_yval = other._max_yval;
-	_max_xval = other._max_xval;
 	_default_value = other._default_value;
 	_lookup_cache.range.first = _events.end();
 	_search_cache.first = _events.end();
@@ -83,7 +96,6 @@ ControlList::ControlList (const ControlList& other, double start, double end)
 	_changed_when_thawed = false;
 	_min_yval = other._min_yval;
 	_max_yval = other._max_yval;
-	_max_xval = other._max_xval;
 	_default_value = other._default_value;
 	_lookup_cache.range.first = _events.end();
 	_search_cache.first = _events.end();
@@ -143,7 +155,6 @@ ControlList::operator= (const ControlList& other)
 
 		_min_yval = other._min_yval;
 		_max_yval = other._max_yval;
-		_max_xval = other._max_xval;
 		_default_value = other._default_value;
 
 		mark_dirty ();
@@ -411,9 +422,9 @@ ControlList::thin ()
 {
 	Glib::Mutex::Lock lm (_lock);
 
-	ControlEvent* prevprev;
-	ControlEvent* cur;
-	ControlEvent* prev;
+	ControlEvent* prevprev = 0;
+	ControlEvent* cur = 0;
+	ControlEvent* prev = 0;
 	iterator pprev;
 	int counter = 0;
 
@@ -424,17 +435,11 @@ ControlList::thin ()
 
 		if (counter > 2) {
 			
-			double area = fabs (0.5 * 
-					    (prevprev->when * (prev->value - cur->value)) + 
+			double area = fabs ((prevprev->when * (prev->value - cur->value)) + 
 					    (prev->when * (cur->value - prevprev->value)) + 
 					    (cur->when * (prevprev->value - prev->value)));
 			
-			/* the number 10.0 is an arbitrary value that needs to
-			 * be controlled by some user-controllable
-			 * configuration utility.
-			 */
-
-			if (area < 10.0) {
+			if (area < _thinning_factor) {
 				iterator tmp = pprev;
 
 				/* pprev will change to current
@@ -460,6 +465,8 @@ ControlList::fast_simple_add (double when, double value)
 	/* to be used only for loading pre-sorted data from saved state */
 	_events.insert (_events.end(), new ControlEvent (when, value));
 	assert(_events.back());
+
+	mark_dirty ();
 }
 
 void
@@ -548,37 +555,6 @@ ControlList::erase (double when, double value)
 	}
 
 	maybe_signal_changed ();
-}
-
-void
-ControlList::reset_range (double start, double endt)
-{
-	bool reset = false;
-
-	{
-		Glib::Mutex::Lock lm (_lock);
-		ControlEvent cp (start, 0.0f);
-		iterator s;
-		iterator e;
-
-		if ((s = lower_bound (_events.begin(), _events.end(), &cp, time_comparator)) != _events.end()) {
-
-			cp.when = endt;
-			e = upper_bound (_events.begin(), _events.end(), &cp, time_comparator);
-
-			for (iterator i = s; i != e; ++i) {
-				(*i)->value = _default_value;
-			}
-
-			reset = true;
-
-			mark_dirty ();
-		}
-	}
-
-	if (reset) {
-		maybe_signal_changed ();
-	}
 }
 
 void
@@ -674,7 +650,7 @@ ControlList::modify (iterator iter, double when, double val)
 		(*iter)->when = when;
 		(*iter)->value = val;
 
-		if (isnan (val)) {
+		if (std::isnan (val)) {
 			abort ();
 		}
 
@@ -721,12 +697,6 @@ ControlList::control_points_adjacent (double xval)
 	}
 
 	return ret;
-}
-
-void
-ControlList::set_max_xval (double x)
-{
-	_max_xval = x;
 }
 
 void
@@ -1548,6 +1518,12 @@ ControlList::set_interpolation (InterpolationStyle s)
 
 	_interpolation = s;
 	InterpolationChanged (s); /* EMIT SIGNAL */
+}
+
+void
+ControlList::set_thinning_factor (double v)
+{
+	_thinning_factor = v;
 }
 
 } // namespace Evoral

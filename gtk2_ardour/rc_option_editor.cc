@@ -903,7 +903,7 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_periodic_safety_backups)
 		     ));
 
-	add_option (_("Misc"), new OptionEditorHeading (_("Misc")));
+	add_option (_("Misc"), new OptionEditorHeading (_("Session Management")));
 
 	add_option (_("Misc"),
 	     new BoolOption (
@@ -939,6 +939,17 @@ RCOptionEditor::RCOptionEditor ()
 		     _("Click Gain Level"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_click_gain),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_click_gain)
+		     ));
+
+	add_option (_("Misc"), new OptionEditorHeading (_("Automation")));
+
+	add_option (_("Misc"),
+	     new SpinOption<double> (
+		     "automation-thinning-factor",
+		     _("Thinning factor (larger value => less data)"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_automation_thinning_factor),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_automation_thinning_factor),
+		     0, 1000, 1, 20
 		     ));
 
 	/* TRANSPORT */

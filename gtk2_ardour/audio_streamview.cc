@@ -46,7 +46,6 @@
 #include "selection.h"
 #include "public_editor.h"
 #include "ardour_ui.h"
-#include "crossfade_view.h"
 #include "rgb_macros.h"
 #include "gui_thread.h"
 #include "utils.h"
@@ -61,30 +60,10 @@ using namespace Editing;
 AudioStreamView::AudioStreamView (AudioTimeAxisView& tv)
 	: StreamView (tv)
 {
-	crossfades_visible = tv.session()->config.get_xfades_visible ();
 	color_handler ();
 	_amplitude_above_axis = 1.0;
 
-	Config->ParameterChanged.connect (*this, invalidator (*this), ui_bind (&AudioStreamView::parameter_changed, this, _1), gui_context());
-}
-
-AudioStreamView::~AudioStreamView ()
-{
-	for (CrossfadeViewList::iterator xi = crossfade_views.begin(); xi != crossfade_views.end(); ++xi) {
-		delete xi->second;
-	}
-}
-
-int
-AudioStreamView::set_samples_per_unit (gdouble spp)
-{
-	StreamView::set_samples_per_unit(spp);
-
-	for (CrossfadeViewList::iterator xi = crossfade_views.begin(); xi != crossfade_views.end(); ++xi) {
-		xi->second->set_samples_per_unit (spp);
-	}
-
-	return 0;
+	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&AudioStreamView::parameter_changed, this, _1), gui_context());
 }
 
 int
@@ -210,162 +189,9 @@ AudioStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wai
 }
 
 void
-AudioStreamView::remove_region_view (boost::weak_ptr<Region> weak_r)
-{
-	ENSURE_GUI_THREAD (*this, &AudioStreamView::remove_region_view, weak_r);
-
-	boost::shared_ptr<Region> r (weak_r.lock());
-
-	if (!r) {
-		return;
-	}
-
-	if (!_trackview.session()->deletion_in_progress()) {
-
-		for (CrossfadeViewList::iterator i = crossfade_views.begin(); i != crossfade_views.end();) {
-			CrossfadeViewList::iterator tmp;
-
-			tmp = i;
-			++tmp;
-
-			boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion>(r);
-			if (ar && i->second->crossfade->involves (ar)) {
-				delete i->second;
-				crossfade_views.erase (i);
-			}
-
-			i = tmp;
-		}
-	}
-
-	StreamView::remove_region_view(r);
-}
-
-void
-AudioStreamView::undisplay_track ()
-{
-	StreamView::undisplay_track ();
-
-	for (CrossfadeViewList::iterator i = crossfade_views.begin(); i != crossfade_views.end(); ++i) {
-		delete i->second;
-	}
-
-	crossfade_views.clear ();
-}
-
-void
-AudioStreamView::playlist_layered (boost::weak_ptr<Track> wtr)
-{
-	boost::shared_ptr<Track> tr (wtr.lock());
-
-	if (!tr) {
-		return;
-	}
-
-	StreamView::playlist_layered (wtr);
-
-	/* make sure xfades are on top and all the regionviews are stacked correctly. */
-
-	for (CrossfadeViewList::iterator i = crossfade_views.begin(); i != crossfade_views.end(); ++i) {
-		i->second->get_canvas_group()->raise_to_top();
-	}
-}
-
-void
-AudioStreamView::playlist_switched (boost::weak_ptr<Track> wtr)
-{
-	boost::shared_ptr<Track> tr (wtr.lock());
-
-	if (!tr) {
-		return;
-	}
-
-	playlist_connections.drop_connections ();
-
-	StreamView::playlist_switched (tr);
-
-	boost::shared_ptr<AudioPlaylist> apl = boost::dynamic_pointer_cast<AudioPlaylist> (tr->playlist());
-
-	if (apl) {
-		apl->NewCrossfade.connect (playlist_connections, invalidator (*this), ui_bind (&AudioStreamView::add_crossfade, this, _1), gui_context());
-	}
-}
-
-void
-AudioStreamView::add_crossfade (boost::weak_ptr<Crossfade> wc)
-{
-	boost::shared_ptr<Crossfade> crossfade (wc.lock());
-
-	if (!crossfade) {
-		return;
-	}
-
-	AudioRegionView* lview = 0;
-	AudioRegionView* rview = 0;
-
-	/* first see if we already have a CrossfadeView for this Crossfade */
-
-	CrossfadeViewList::iterator i = crossfade_views.find (crossfade);
-	if (i != crossfade_views.end()) {
-		if (!crossfades_visible) {
-			i->second->hide();
-		} else {
-			i->second->show ();
-		}
-		i->second->set_valid (true);
-		return;
-	}
-
-	/* create a new one */
-
-	for (list<RegionView *>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
-		AudioRegionView* arv = dynamic_cast<AudioRegionView*>(*i);
-
-		if (!lview && arv && (arv->region() == crossfade->out())) {
-			lview = arv;
-		}
-		if (!rview && arv && (arv->region() == crossfade->in())) {
-			rview = arv;
-		}
-	}
-
-	CrossfadeView *cv = new CrossfadeView (_trackview.canvas_display (),
-					       _trackview,
-					        crossfade,
-					       _samples_per_unit,
-					       region_color,
-					       *lview, *rview);
-	cv->set_valid (true);
-	crossfade->Invalidated.connect (*this, invalidator (*this), ui_bind (&AudioStreamView::remove_crossfade, this, _1), gui_context());
-	crossfade_views[cv->crossfade] = cv;
-	if (!crossfades_visible) {
-		cv->hide ();
-	}
-
-	update_content_height (cv);
-}
-
-void
-AudioStreamView::remove_crossfade (boost::shared_ptr<Region> r)
-{
-	ENSURE_GUI_THREAD (*this, &AudioStreamView::remove_crossfade, r)
-
-	boost::shared_ptr<Crossfade> xfade = boost::dynamic_pointer_cast<Crossfade> (r);
-
-	for (CrossfadeViewList::iterator i = crossfade_views.begin(); i != crossfade_views.end(); ++i) {
-		if (i->second->crossfade == xfade) {
-			delete i->second;
-			crossfade_views.erase (i);
-			break;
-		}
-	}
-}
-
-void
 AudioStreamView::redisplay_track ()
 {
 	list<RegionView *>::iterator i;
-	CrossfadeViewList::iterator xi, tmpx;
 
 	// Flag region views as invalid and disable drawing
 	for (i = region_views.begin(); i != region_views.end(); ++i) {
@@ -373,41 +199,11 @@ AudioStreamView::redisplay_track ()
 		(*i)->enable_display (false);
 	}
 
-	// Flag crossfade views as invalid
-	for (xi = crossfade_views.begin(); xi != crossfade_views.end(); ++xi) {
-		xi->second->set_valid (false);
-		if (xi->second->visible()) {
-			xi->second->show ();
-		}
-	}
-
-	// Add and display region and crossfade views, and flag them as valid
-
+	// Add and display views, and flag them as valid
 	if (_trackview.is_audio_track()) {
 		_trackview.track()->playlist()->foreach_region(
 			sigc::hide_return (sigc::mem_fun (*this, &StreamView::add_region_view))
 			);
-
-		boost::shared_ptr<AudioPlaylist> apl = boost::dynamic_pointer_cast<AudioPlaylist>(
-				_trackview.track()->playlist()
-			);
-
-		if (apl) {
-			apl->foreach_crossfade (sigc::mem_fun (*this, &AudioStreamView::add_crossfade));
-		}
-	}
-
-	// Remove invalid crossfade views
-	for (xi = crossfade_views.begin(); xi != crossfade_views.end();) {
-		tmpx = xi;
-		tmpx++;
-
-		if (!xi->second->valid()) {
-			delete xi->second;
-			crossfade_views.erase (xi);
-		}
-
-		xi = tmpx;
 	}
 
 	// Stack regions by layer, and remove invalid regions
@@ -473,7 +269,7 @@ AudioStreamView::setup_rec_box ()
 						sources.push_back (src);
 						src->PeakRangeReady.connect (rec_data_ready_connections,
 						                             invalidator (*this),
-						                             ui_bind (&AudioStreamView::rec_peak_range_ready, this, _1, _2, boost::weak_ptr<Source>(src)),
+						                             boost::bind (&AudioStreamView::rec_peak_range_ready, this, _1, _2, boost::weak_ptr<Source>(src)),
 						                             gui_context());
 					}
 				}
@@ -597,14 +393,6 @@ AudioStreamView::setup_rec_box ()
 			rec_rects.clear();
 
 		}
-	}
-}
-
-void
-AudioStreamView::foreach_crossfadeview (void (CrossfadeView::*pmf)(void))
-{
-	for (CrossfadeViewList::iterator i = crossfade_views.begin(); i != crossfade_views.end(); ++i) {
-		(i->second->*pmf) ();
 	}
 }
 
@@ -745,40 +533,6 @@ AudioStreamView::hide_all_fades ()
 }
 
 void
-AudioStreamView::show_all_xfades ()
-{
-	foreach_crossfadeview (&CrossfadeView::show);
-	crossfades_visible = true;
-}
-
-void
-AudioStreamView::hide_all_xfades ()
-{
-	foreach_crossfadeview (&CrossfadeView::hide);
-	crossfades_visible = false;
-}
-
-void
-AudioStreamView::hide_xfades_involving (AudioRegionView& rv)
-{
-	for (CrossfadeViewList::iterator i = crossfade_views.begin(); i != crossfade_views.end(); ++i) {
-		if (i->second->crossfade->involves (rv.audio_region())) {
-			i->second->fake_hide ();
-		}
-	}
-}
-
-void
-AudioStreamView::reveal_xfades_involving (AudioRegionView& rv)
-{
-	for (CrossfadeViewList::iterator i = crossfade_views.begin(); i != crossfade_views.end(); ++i) {
-		if (i->second->crossfade->involves (rv.audio_region()) && i->second->visible()) {
-			i->second->show ();
-		}
-	}
-}
-
-void
 AudioStreamView::color_handler ()
 {
 	//case cAudioTrackBase:
@@ -797,45 +551,6 @@ AudioStreamView::color_handler ()
 }
 
 void
-AudioStreamView::update_contents_height ()
-{
-	StreamView::update_contents_height ();
-
-	for (CrossfadeViewList::iterator i = crossfade_views.begin(); i != crossfade_views.end(); ++i) {
-		update_content_height (i->second);
-	}
-}
-
-void
-AudioStreamView::update_content_height (CrossfadeView* cv)
-{
-	switch (_layer_display) {
-	case Overlaid:
-		cv->set_y (0);
-		cv->set_heights (height, height);
-		break;
-
-	case Stacked:
-	case Expanded:
-		layer_t const inl = cv->crossfade->in()->layer ();
-		layer_t const outl = cv->crossfade->out()->layer ();
-
-		layer_t const high = max (inl, outl);
-		layer_t const low = min (inl, outl);
-
-		const double h = child_height ();
-
-		if (_layer_display == Stacked) {
-			cv->set_y ((_layers - high - 1) * h);
-			cv->set_heights ((high - low + 1) * h, h);
-		} else {
-			cv->set_y (((_layers - high) * 2 - 1) * h);
-			cv->set_heights (((high - low) * 2 + 1) * h, h);
-		}
-	}
-}
-
-void
 AudioStreamView::parameter_changed (string const & p)
 {
 	if (p == "show-waveforms") {
@@ -844,16 +559,6 @@ AudioStreamView::parameter_changed (string const & p)
 		set_waveform_scale (Config->get_waveform_scale ());
 	} else if (p == "waveform-shape") {
 		set_waveform_shape (Config->get_waveform_shape ());
-	}
-}
-
-void
-AudioStreamView::horizontal_position_changed ()
-{
-	/* we only `draw' the bit of the curve that is visible, so we need to update here */
-
-	for (CrossfadeViewList::iterator i = crossfade_views.begin(); i != crossfade_views.end(); ++i) {
-		i->second->horizontal_position_changed ();
 	}
 }
 

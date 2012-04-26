@@ -32,8 +32,6 @@
 #include <CoreFoundation/CoreFoundation.h>
 #endif /* __APPLE__ */
 
-bool string_is_affirmative (const std::string&);
-
 #include "ardour/ardour.h"
 #include "ardour/data_type.h"
 #include "ardour/dB.h"

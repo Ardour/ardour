@@ -116,10 +116,10 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	_note_group->raise_to_top();
 	PublicEditor::DropDownKeys.connect (sigc::mem_fun (*this, &MidiRegionView::drop_down_keys));
 
-	Config->ParameterChanged.connect (*this, invalidator (*this), ui_bind (&MidiRegionView::parameter_changed, this, _1), gui_context());
+	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&MidiRegionView::parameter_changed, this, _1), gui_context());
 	connect_to_diskstream ();
 
-	SelectionCleared.connect (_selection_cleared_connection, invalidator (*this), ui_bind (&MidiRegionView::selection_cleared, this, _1), gui_context ());
+	SelectionCleared.connect (_selection_cleared_connection, invalidator (*this), boost::bind (&MidiRegionView::selection_cleared, this, _1), gui_context ());
 }
 
 MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv,
@@ -155,7 +155,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 
 	connect_to_diskstream ();
 
-	SelectionCleared.connect (_selection_cleared_connection, invalidator (*this), ui_bind (&MidiRegionView::selection_cleared, this, _1), gui_context ());
+	SelectionCleared.connect (_selection_cleared_connection, invalidator (*this), boost::bind (&MidiRegionView::selection_cleared, this, _1), gui_context ());
 }
 
 void
@@ -245,7 +245,7 @@ MidiRegionView::init (Gdk::Color const & basic_color, bool wfd)
 	PublicEditor::DropDownKeys.connect (sigc::mem_fun (*this, &MidiRegionView::drop_down_keys));
 
 	CanvasNoteEvent::CanvasNoteEventDeleted.connect (note_delete_connection, MISSING_INVALIDATOR,
-	                                                 ui_bind (&MidiRegionView::maybe_remove_deleted_note_from_selection, this, _1),
+	                                                 boost::bind (&MidiRegionView::maybe_remove_deleted_note_from_selection, this, _1),
 	                                                 gui_context());
 
 	if (wfd) {
@@ -288,13 +288,13 @@ MidiRegionView::init (Gdk::Color const & basic_color, bool wfd)
 		sigc::mem_fun(this, &MidiRegionView::midi_patch_settings_changed));
 
 	trackview.editor().SnapChanged.connect(snap_changed_connection, invalidator(*this),
-	                                       ui_bind(&MidiRegionView::snap_changed, this),
+	                                       boost::bind (&MidiRegionView::snap_changed, this),
 	                                       gui_context());
 
-	Config->ParameterChanged.connect (*this, invalidator (*this), ui_bind (&MidiRegionView::parameter_changed, this, _1), gui_context());
+	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&MidiRegionView::parameter_changed, this, _1), gui_context());
 	connect_to_diskstream ();
 
-	SelectionCleared.connect (_selection_cleared_connection, invalidator (*this), ui_bind (&MidiRegionView::selection_cleared, this, _1), gui_context ());
+	SelectionCleared.connect (_selection_cleared_connection, invalidator (*this), boost::bind (&MidiRegionView::selection_cleared, this, _1), gui_context ());
 }
 
 const boost::shared_ptr<ARDOUR::MidiRegion>
@@ -308,7 +308,7 @@ MidiRegionView::connect_to_diskstream ()
 {
 	midi_view()->midi_track()->DataRecorded.connect(
 		*this, invalidator(*this),
-		ui_bind(&MidiRegionView::data_recorded, this, _1),
+		boost::bind (&MidiRegionView::data_recorded, this, _1),
 		gui_context());
 }
 
@@ -380,7 +380,7 @@ bool
 MidiRegionView::enter_notify (GdkEventCrossing* ev)
 {
 	trackview.editor().MouseModeChanged.connect (
-		_mouse_mode_connection, invalidator (*this), ui_bind (&MidiRegionView::mouse_mode_changed, this), gui_context ()
+		_mouse_mode_connection, invalidator (*this), boost::bind (&MidiRegionView::mouse_mode_changed, this), gui_context ()
 		);
 
 	if (trackview.editor().current_mouse_mode() == MouseDraw && _mouse_state != AddDragging) {
@@ -1396,7 +1396,7 @@ MidiRegionView::add_ghost (TimeAxisView& tv)
 	ghost->set_duration (_region->length() / samples_per_unit);
 	ghosts.push_back (ghost);
 
-	GhostRegion::CatchDeletion.connect (*this, invalidator (*this), ui_bind (&RegionView::remove_ghost, this, _1), gui_context());
+	GhostRegion::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&RegionView::remove_ghost, this, _1), gui_context());
 
 	return ghost;
 }
@@ -2953,7 +2953,7 @@ MidiRegionView::nudge_notes (bool forward)
 
 	framepos_t ref_point = source_beats_to_absolute_frames ((*(_selection.begin()))->note()->time());
 	framepos_t unused;
-	framepos_t distance;
+	framecnt_t distance;
 
 	if (trackview.editor().snap_mode() == Editing::SnapOff) {
 

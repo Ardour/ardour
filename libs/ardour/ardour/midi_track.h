@@ -62,7 +62,7 @@ public:
 	boost::shared_ptr<Region> bounce (InterThreadInfo&);
 	boost::shared_ptr<Region> bounce_range (framepos_t start, framepos_t end, InterThreadInfo&, 
 						boost::shared_ptr<Processor> endpoint, bool include_endpoint);
-	int export_stuff (BufferSet& bufs, framecnt_t nframes, framepos_t end_frame, 
+	int export_stuff (BufferSet& bufs, framepos_t start_frame, framecnt_t end_frame, 
 			  boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export);
 
 	int set_state (const XMLNode&, int version);

@@ -10,6 +10,7 @@
   <accelerator action='focus-on-clock'/>
   <accelerator action='track-solo-toggle'/>
   <accelerator action='track-mute-toggle'/>
+  <accelerator action='toggle-edit-mode'/>
   
   <menubar name='Main' action='MainMenu'>
     <menu name='Session' action='Session'>
@@ -213,7 +214,6 @@
         <menuitem action='cycle-edit-point'/>
         <menuitem action='cycle-edit-point-with-marker'/>
       </menu>
-      <menuitem action='toggle-edit-mode'/>
       <separator/>
       <menu action="TempoMenu">
         <menuitem action='set-tempo-from-region'/>

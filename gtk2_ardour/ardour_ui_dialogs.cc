@@ -161,15 +161,15 @@ ARDOUR_UI::set_session (Session *s)
 	_session->TransportStateChange.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::map_transport_state, this), gui_context());
 	_session->DirtyChanged.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::update_autosave, this), gui_context());
 
-	_session->Xrun.connect (_session_connections, MISSING_INVALIDATOR, ui_bind (&ARDOUR_UI::xrun_handler, this, _1), gui_context());
-	_session->SoloActive.connect (_session_connections, MISSING_INVALIDATOR, ui_bind (&ARDOUR_UI::soloing_changed, this, _1), gui_context());
-	_session->AuditionActive.connect (_session_connections, MISSING_INVALIDATOR, ui_bind (&ARDOUR_UI::auditioning_changed, this, _1), gui_context());
-	_session->locations()->added.connect (_session_connections, MISSING_INVALIDATOR, ui_bind (&ARDOUR_UI::handle_locations_change, this, _1), gui_context());
-	_session->locations()->removed.connect (_session_connections, MISSING_INVALIDATOR, ui_bind (&ARDOUR_UI::handle_locations_change, this, _1), gui_context());
-	_session->config.ParameterChanged.connect (_session_connections, MISSING_INVALIDATOR, ui_bind (&ARDOUR_UI::session_parameter_changed, this, _1), gui_context ());
+	_session->Xrun.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::xrun_handler, this, _1), gui_context());
+	_session->SoloActive.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::soloing_changed, this, _1), gui_context());
+	_session->AuditionActive.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::auditioning_changed, this, _1), gui_context());
+	_session->locations()->added.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::handle_locations_change, this, _1), gui_context());
+	_session->locations()->removed.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::handle_locations_change, this, _1), gui_context());
+	_session->config.ParameterChanged.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::session_parameter_changed, this, _1), gui_context ());
 
 #ifdef HAVE_JACK_SESSION
-	engine->JackSessionEvent.connect (*_session, MISSING_INVALIDATOR, ui_bind (&Session::jack_session_event, _session, _1), gui_context());
+	engine->JackSessionEvent.connect (*_session, MISSING_INVALIDATOR, boost::bind (&Session::jack_session_event, _session, _1), gui_context());
 #endif
 
 	/* Clocks are on by default after we are connected to a session, so show that here.

@@ -91,7 +91,7 @@ Session::setup_midi_control ()
 }
 
 void
-Session::spp_start (Parser &, framepos_t /*timestamp*/)
+Session::spp_start ()
 {
 	if (Config->get_mmc_control ()) {
 		request_transport_speed (1.0);
@@ -99,13 +99,13 @@ Session::spp_start (Parser &, framepos_t /*timestamp*/)
 }
 
 void
-Session::spp_continue (Parser& ignored, framepos_t timestamp)
+Session::spp_continue ()
 {
-	spp_start (ignored, timestamp);
+	spp_start ();
 }
 
 void
-Session::spp_stop (Parser&, framepos_t /*timestamp*/)
+Session::spp_stop ()
 {
 	if (Config->get_mmc_control ()) {
 		request_stop ();

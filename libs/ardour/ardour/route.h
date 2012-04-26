@@ -132,7 +132,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 
 	/* end of vfunc-based API */
 
-	void shift (framepos_t, framepos_t);
+	void shift (framepos_t, framecnt_t);
 
 	void set_gain (gain_t val, void *src);
 	void inc_gain (gain_t delta, void *src);
@@ -397,6 +397,15 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	boost::shared_ptr<AutomationControl> gain_control() const;
 	boost::shared_ptr<Pannable> pannable() const;
 
+	/**
+	   Return the first processor that accepts has at least one MIDI input
+	   and at least one audio output. In the vast majority of cases, this
+	   will be "the instrument". This does not preclude other MIDI->audio
+	   processors later in the processing chain, but that would be a
+	   special case not covered by this utility function.
+	*/
+	boost::shared_ptr<Processor> the_instrument() const;
+
 	void automation_snapshot (framepos_t now, bool force=false);
 	void protect_automation ();
 
@@ -435,7 +444,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	virtual void set_block_size (pframes_t nframes);
 
   protected:
-	virtual framecnt_t check_initial_delay (framecnt_t nframes, framecnt_t&) { return nframes; }
+	virtual framecnt_t check_initial_delay (framecnt_t nframes, framepos_t&) { return nframes; }
 
 	void passthru (framepos_t start_frame, framepos_t end_frame,
 			pframes_t nframes, int declick);
