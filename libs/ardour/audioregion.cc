@@ -531,7 +531,12 @@ AudioRegion::_read_at (const SourceList& srcs, framecnt_t limit,
 	}
 
 
-	/* APPLY FADES TO THE DATA IN mixdown_buffer AND MIX THE RESULTS INTO buf */
+	/* APPLY FADES TO THE DATA IN mixdown_buffer AND MIX THE RESULTS INTO
+	 * buf. The key things to realize here: (1) the fade being applied is
+	 * (as of April 26th 2012) just the inverse of the fade in curve (2) 
+	 * "buf" contains data from lower regions already. So this operation
+	 * fades out the existing material.
+	 */
 
 	if (fade_in_limit != 0) {
 		_fade_in->curve().get_vector (internal_offset, internal_offset + fade_in_limit, gain_buffer, fade_in_limit);
