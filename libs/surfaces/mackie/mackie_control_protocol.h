@@ -285,7 +285,7 @@ class MackieControlProtocol
 	ButtonMap                 button_map;
 	int16_t                  _ipmidi_base;
 	bool                      needs_ipmidi_restart;
-
+	
 	void create_surfaces ();
 	bool periodic();
 	void build_gui ();

@@ -352,6 +352,10 @@ MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 
 	/* reset this to get the right display of view mode after the switch */
 	set_view_mode (_view_mode);
+
+	/* make sure selection is correct */
+	
+	// gui_track_selection_changed (_last_selected_routes);
 	
 	/* current bank has not been saved */
 	session->set_dirty();
@@ -1203,6 +1207,8 @@ MackieControlProtocol::gui_track_selection_changed (ARDOUR::RouteNotificationLis
 	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
 		(*s)->gui_selection_changed (rl);
 	}
+	
+	// _last_selected_routes = *rl;
 }
 
 framepos_t
