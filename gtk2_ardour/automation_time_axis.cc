@@ -900,3 +900,69 @@ AutomationTimeAxisView::parse_state_id (
 
 	return true;
 }
+
+void
+AutomationTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
+{
+	list<boost::shared_ptr<AutomationLine> > lines;
+	if (_line) {
+		lines.push_back (_line);
+	} else if (_view) {
+		lines = _view->get_lines ();
+	}
+
+	for (list<boost::shared_ptr<AutomationLine> >::iterator i = lines.begin(); i != lines.end(); ++i) {
+		cut_copy_clear_one (**i, selection, op);
+	}
+}
+
+void
+AutomationTimeAxisView::cut_copy_clear_one (AutomationLine& line, Selection& selection, CutCopyOp op)
+{
+	boost::shared_ptr<Evoral::ControlList> what_we_got;
+	boost::shared_ptr<AutomationList> alist (line.the_list());
+
+	XMLNode &before = alist->get_state();
+
+	/* convert time selection to automation list model coordinates */
+	const Evoral::TimeConverter<double, ARDOUR::framepos_t>& tc = line.time_converter ();
+	double const start = tc.from (selection.time.front().start - tc.origin_b ());
+	double const end = tc.from (selection.time.front().end - tc.origin_b ());
+
+	switch (op) {
+	case Delete:
+		if (alist->cut (start, end) != 0) {
+			_session->add_command(new MementoCommand<AutomationList>(*alist.get(), &before, &alist->get_state()));
+		}
+		break;
+
+	case Cut:
+
+		if ((what_we_got = alist->cut (start, end)) != 0) {
+			_editor.get_cut_buffer().add (what_we_got);
+			_session->add_command(new MementoCommand<AutomationList>(*alist.get(), &before, &alist->get_state()));
+		}
+		break;
+	case Copy:
+		if ((what_we_got = alist->copy (start, end)) != 0) {
+			_editor.get_cut_buffer().add (what_we_got);
+		}
+		break;
+
+	case Clear:
+		if ((what_we_got = alist->cut (start, end)) != 0) {
+			_session->add_command(new MementoCommand<AutomationList>(*alist.get(), &before, &alist->get_state()));
+		}
+		break;
+	}
+
+	if (what_we_got) {
+		for (AutomationList::iterator x = what_we_got->begin(); x != what_we_got->end(); ++x) {
+			double when = (*x)->when;
+			double val  = (*x)->value;
+			line.model_to_view_coord (when, val);
+			(*x)->when = when;
+			(*x)->value = val;
+		}
+	}
+}
