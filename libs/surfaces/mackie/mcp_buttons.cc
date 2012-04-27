@@ -102,16 +102,13 @@ MackieControlProtocol::left_press (Button &)
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("bank left with current initial = %1 nstrips = %2 tracks/busses = %3\n",
 							   _current_initial_bank, strip_cnt, route_cnt));
 
-	if (route_cnt && route_cnt > strip_cnt) {
-		if (_current_initial_bank > strip_cnt) {
-			switch_banks (_current_initial_bank - strip_cnt);
-		} else {
-			switch_banks (0);
-		}
-
-		return on;
+	if (_current_initial_bank > strip_cnt) {
+		switch_banks (_current_initial_bank - strip_cnt);
+	} else {
+		switch_banks (0);
 	}
-	return off;
+
+	return on;
 }
 
 LedState 
@@ -128,15 +125,12 @@ MackieControlProtocol::right_press (Button &)
 	uint32_t route_cnt = sorted.size();
 
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("bank right with current initial = %1 nstrips = %2 tracks/busses = %3\n",
-							   _current_initial_bank, strip_cnt, sorted.size()));
+							   _current_initial_bank, strip_cnt, route_cnt));
 
-	if (route_cnt && route_cnt > strip_cnt) {
-		uint32_t new_initial = std::min (_current_initial_bank + strip_cnt, route_cnt - 1);
-		switch_banks (new_initial);
-		return on;
-	}
+	uint32_t new_initial = std::min (_current_initial_bank + strip_cnt, route_cnt - 1);
+	switch_banks (new_initial);
 
-	return off;
+	return on;
 }
 
 LedState 

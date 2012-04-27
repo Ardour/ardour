@@ -316,8 +316,10 @@ MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 	uint32_t strip_cnt = n_strips (false); // do not include locked strips
 					       // in this count
 
-	if (sorted.size() <= strip_cnt && !force) {
-		/* no banking - not enough routes to fill all strips */
+	if (sorted.size() <= strip_cnt && _current_initial_bank == 0 && !force) {
+		/* no banking - not enough routes to fill all strips and we're
+		 * not at the first one.
+		 */
 		return;
 	}
 
