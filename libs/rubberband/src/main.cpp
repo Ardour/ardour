@@ -21,7 +21,7 @@
 #include <time.h>
 #include <cstdlib>
 #include <cstring>
-#include <cunistd.h>
+#include <cunistd>
 #include "sysutils.h"
 
 #ifdef __MSVC__
