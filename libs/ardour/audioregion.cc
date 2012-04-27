@@ -137,6 +137,8 @@ AudioRegion::AudioRegion (Session& s, framepos_t start, framecnt_t len, std::str
 	, _envelope (new AutomationList(Evoral::Parameter(EnvelopeAutomation)))
 	, _fade_in_suspended (0)
 	, _fade_out_suspended (0)
+	, _fade_in_is_xfade (false)
+	, _fade_out_is_xfade (false)
 {
 	init ();
 	assert (_sources.size() == _master_sources.size());
@@ -152,6 +154,8 @@ AudioRegion::AudioRegion (const SourceList& srcs)
 	, _envelope (new AutomationList(Evoral::Parameter(EnvelopeAutomation)))
 	, _fade_in_suspended (0)
 	, _fade_out_suspended (0)
+	, _fade_in_is_xfade (false)
+	, _fade_out_is_xfade (false)
 {
 	init ();
 	assert (_sources.size() == _master_sources.size());
@@ -169,6 +173,8 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other)
 	, _envelope (new AutomationList (*other->_envelope, 0, other->_length))
 	, _fade_in_suspended (0)
 	, _fade_out_suspended (0)
+	, _fade_in_is_xfade (false)
+	, _fade_out_is_xfade (false)
 {
 	/* don't use init here, because we got fade in/out from the other region
 	*/
@@ -193,6 +199,8 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, framecnt_t
 	, _envelope (new AutomationList (*other->_envelope, offset, other->_length))
 	, _fade_in_suspended (0)
 	, _fade_out_suspended (0)
+	, _fade_in_is_xfade (false)
+	, _fade_out_is_xfade (false)
 {
 	/* don't use init here, because we got fade in/out from the other region
 	*/
@@ -214,6 +222,8 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, const Sour
 	, _envelope (new AutomationList (*other->_envelope))
 	, _fade_in_suspended (0)
 	, _fade_out_suspended (0)
+	, _fade_in_is_xfade (false)
+	, _fade_out_is_xfade (false)
 {
 	/* make-a-sort-of-copy-with-different-sources constructor (used by audio filter) */
 
@@ -235,6 +245,8 @@ AudioRegion::AudioRegion (SourceList& srcs)
 	, _envelope (new AutomationList(Evoral::Parameter(EnvelopeAutomation)))
 	, _fade_in_suspended (0)
 	, _fade_out_suspended (0)
+	, _fade_in_is_xfade (false)
+	, _fade_out_is_xfade (false)
 {
 	init ();
 
@@ -818,6 +830,26 @@ AudioRegion::set_fade_in (FadeShape shape, framecnt_t len)
 		_fade_in->fast_simple_add (len * 0.919355, 0.730556);
 		_fade_in->fast_simple_add (len, 1);
 		break;
+
+	case FadeConstantPowerMinus3dB:
+		_fade_in->fast_simple_add (0.0, 0.0);
+		_fade_in->fast_simple_add ((len * 0.166667), 0.282192);
+		_fade_in->fast_simple_add ((len * 0.333333), 0.518174);
+		_fade_in->fast_simple_add ((len * 0.500000), 0.707946);
+		_fade_in->fast_simple_add ((len * 0.666667), 0.851507);
+		_fade_in->fast_simple_add ((len * 0.833333), 0.948859);
+		_fade_in->fast_simple_add (len, 1.0);
+		break;
+		
+	case FadeConstantPowerMinus6dB:
+		_fade_in->fast_simple_add (0.0, 0.0);
+		_fade_in->fast_simple_add ((len * 0.166667), 0.166366);
+		_fade_in->fast_simple_add ((len * 0.333333), 0.332853);
+		_fade_in->fast_simple_add ((len * 0.500000), 0.499459);
+		_fade_in->fast_simple_add ((len * 0.666667), 0.666186);
+		_fade_in->fast_simple_add ((len * 0.833333), 0.833033);
+		_fade_in->fast_simple_add (len, 1.0);
+		break;
 	}
 
 	_fade_in->thaw ();
@@ -842,47 +874,67 @@ AudioRegion::set_fade_out (FadeShape shape, framecnt_t len)
 
 	switch (shape) {
 	case FadeFast:
-		_fade_out->fast_simple_add (len * 0, 1);
+		_fade_out->fast_simple_add (0.0, 1.0);
 		_fade_out->fast_simple_add (len * 0.023041, 0.697222);
 		_fade_out->fast_simple_add (len * 0.0553,   0.483333);
 		_fade_out->fast_simple_add (len * 0.170507, 0.233333);
 		_fade_out->fast_simple_add (len * 0.370968, 0.0861111);
 		_fade_out->fast_simple_add (len * 0.610599, 0.0333333);
-		_fade_out->fast_simple_add (len * 1, 0);
+		_fade_out->fast_simple_add (1.0, 0.0);
 		break;
 
 	case FadeLogA:
-		_fade_out->fast_simple_add (len * 0, 1);
+		_fade_out->fast_simple_add (0, 1.0);
 		_fade_out->fast_simple_add (len * 0.228111, 0.988889);
 		_fade_out->fast_simple_add (len * 0.347926, 0.972222);
 		_fade_out->fast_simple_add (len * 0.529954, 0.886111);
 		_fade_out->fast_simple_add (len * 0.753456, 0.658333);
 		_fade_out->fast_simple_add (len * 0.9262673, 0.308333);
-		_fade_out->fast_simple_add (len * 1, 0);
+		_fade_out->fast_simple_add (len, 0.0);
 		break;
 
 	case FadeSlow:
-		_fade_out->fast_simple_add (len * 0, 1);
+		_fade_out->fast_simple_add (0.0, 1.0);
 		_fade_out->fast_simple_add (len * 0.305556, 1);
 		_fade_out->fast_simple_add (len * 0.548611, 0.991736);
 		_fade_out->fast_simple_add (len * 0.759259, 0.931129);
 		_fade_out->fast_simple_add (len * 0.918981, 0.68595);
 		_fade_out->fast_simple_add (len * 0.976852, 0.22865);
-		_fade_out->fast_simple_add (len * 1, 0);
+		_fade_out->fast_simple_add (len, 0.0);
 		break;
 
 	case FadeLogB:
-		_fade_out->fast_simple_add (len * 0, 1);
+		_fade_out->fast_simple_add (0.0, 1.0);
 		_fade_out->fast_simple_add (len * 0.080645, 0.730556);
 		_fade_out->fast_simple_add (len * 0.277778, 0.289256);
 		_fade_out->fast_simple_add (len * 0.470046, 0.152778);
 		_fade_out->fast_simple_add (len * 0.695853, 0.0694444);
-		_fade_out->fast_simple_add (len * 1, 0);
+		_fade_out->fast_simple_add (len, 0.0);
 		break;
 
 	case FadeLinear:
-		_fade_out->fast_simple_add (len * 0, 1);
-		_fade_out->fast_simple_add (len * 1, 0);
+		_fade_out->fast_simple_add (0.0, 1.0);
+		_fade_out->fast_simple_add (len, 0.0);
+		break;
+
+	case FadeConstantPowerMinus3dB:
+		_fade_out->fast_simple_add (0.0, 1.0);
+		_fade_out->fast_simple_add ((len * 0.166667), 0.948859);
+		_fade_out->fast_simple_add ((len * 0.333333), 0.851507);
+		_fade_out->fast_simple_add ((len * 0.500000), 0.707946);
+		_fade_out->fast_simple_add ((len * 0.666667), 0.518174);
+		_fade_out->fast_simple_add ((len * 0.833333), 0.282192);
+		_fade_out->fast_simple_add (len, 0.0);
+		break;
+
+	case FadeConstantPowerMinus6dB:
+		_fade_out->fast_simple_add (0.0, 1.0);
+		_fade_out->fast_simple_add ((len * 0.166667), 0.833033);
+		_fade_out->fast_simple_add ((len * 0.333333), 0.666186);
+		_fade_out->fast_simple_add ((len * 0.500000), 0.499459);
+		_fade_out->fast_simple_add ((len * 0.666667), 0.332853);
+		_fade_out->fast_simple_add ((len * 0.833333), 0.166366);
+		_fade_out->fast_simple_add (len, 0.0);
 		break;
 	}
 
@@ -957,6 +1009,7 @@ void
 AudioRegion::set_default_fade_in ()
 {
 	_fade_in_suspended = 0;
+	_fade_in_is_xfade = false;
 	set_fade_in (FadeLinear, 64);
 }
 
@@ -964,6 +1017,7 @@ void
 AudioRegion::set_default_fade_out ()
 {
 	_fade_out_suspended = 0;
+	_fade_out_is_xfade = false;
 	set_fade_out (FadeLinear, 64);
 }
 
@@ -1530,6 +1584,18 @@ Evoral::Range<framepos_t>
 AudioRegion::body_range () const
 {
 	return Evoral::Range<framepos_t> (first_frame() + _fade_in->back()->when, last_frame() - _fade_out->back()->when);
+}
+
+void
+AudioRegion::set_fade_in_is_xfade (bool yn)
+{
+	_fade_in_is_xfade = yn;
+}
+
+void
+AudioRegion::set_fade_out_is_xfade (bool yn)
+{
+	_fade_out_is_xfade = yn;
 }
 
 extern "C" {

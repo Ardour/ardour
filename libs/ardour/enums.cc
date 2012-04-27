@@ -73,6 +73,7 @@ setup_enum_writer ()
 	RemoteModel _RemoteModel;
 	DenormalModel _DenormalModel;
 	CrossfadeModel _CrossfadeModel;
+	CrossfadeChoice _CrossfadeChoice;
 	InsertMergePolicy _InsertMergePolicy;
 	ListenPosition _ListenPosition;
 	SampleFormat _SampleFormat;
@@ -257,6 +258,11 @@ setup_enum_writer ()
 	REGISTER_ENUM (ShortCrossfade);
 	REGISTER (_CrossfadeModel);
 
+	REGISTER_ENUM (RegionFades);
+	REGISTER_ENUM (ConstantPowerMinus3dB);
+	REGISTER_ENUM (ConstantPowerMinus6dB);
+	REGISTER (_CrossfadeChoice);
+
         REGISTER_ENUM (InsertMergeReject);
         REGISTER_ENUM (InsertMergeRelax);
         REGISTER_ENUM (InsertMergeReplace);
@@ -411,6 +417,8 @@ setup_enum_writer ()
 	REGISTER_ENUM (FadeSlow);
 	REGISTER_ENUM (FadeLogA);
 	REGISTER_ENUM (FadeLogB);
+	REGISTER_ENUM (FadeConstantPowerMinus3dB);
+	REGISTER_ENUM (FadeConstantPowerMinus6dB);
 	REGISTER (_FadeShape);
 
 	REGISTER_CLASS_ENUM (Diskstream, Recordable);
@@ -732,6 +740,21 @@ std::ostream& operator<<(std::ostream& o, const CrossfadeModel& var)
 	std::string s = enum_2_string (var);
 	return o << s;
 }
+
+std::istream& operator>>(std::istream& o, CrossfadeChoice& var)
+{
+	std::string s;
+	o >> s;
+	var = (CrossfadeChoice) string_2_enum (s, var);
+	return o;
+}
+
+std::ostream& operator<<(std::ostream& o, const CrossfadeChoice& var)
+{
+	std::string s = enum_2_string (var);
+	return o << s;
+}
+
 std::istream& operator>>(std::istream& o, SyncSource& var)
 {
 	std::string s;

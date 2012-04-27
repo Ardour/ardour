@@ -367,7 +367,7 @@ public:
 
 private:
 
-	void setup_layering_indices (RegionList const &) const;
+	void setup_layering_indices (RegionList const &);
 	void coalesce_and_check_crossfades (std::list<Evoral::Range<framepos_t> >);
 	boost::shared_ptr<RegionList> find_regions_at (framepos_t);
 };

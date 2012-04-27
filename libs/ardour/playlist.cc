@@ -608,11 +608,7 @@ Playlist::flush_notifications (bool from_undo)
 		*/
 	}
 
-	if (
-		((regions_changed || pending_contents_change) && !in_set_state) ||
-		pending_layering
-		) {
-		
+	if (((regions_changed || pending_contents_change) && !in_set_state) || pending_layering) {
 		relayer ();
 	}
 
@@ -2276,14 +2272,22 @@ Playlist::set_layer (boost::shared_ptr<Region> region, double new_layer)
 }
 
 void
-Playlist::setup_layering_indices (RegionList const & regions) const
+Playlist::setup_layering_indices (RegionList const & regions)
 {
 	uint64_t j = 0;
+	list<Evoral::Range<framepos_t> > xf;
+
 	for (RegionList::const_iterator k = regions.begin(); k != regions.end(); ++k) {
 		(*k)->set_layering_index (j++);
-	}
-}
 
+		Evoral::Range<framepos_t> r ((*k)->first_frame(), (*k)->last_frame());
+		xf.push_back (r);
+	}
+
+	/* now recheck the entire playlist for crossfades */
+
+	coalesce_and_check_crossfades (xf);
+}
 
 /** Take the layering indices of each of our regions, compute the layers
  *  that they should be on, and write the layers back to the regions.
@@ -2677,12 +2681,6 @@ Playlist::shuffle (boost::shared_ptr<Region> region, int dir)
 	if (moved) {
 
 		relayer ();
-
-		list<Evoral::Range<framepos_t> > xf;
-		xf.push_back (old_range);
-		xf.push_back (region->range ());
-		coalesce_and_check_crossfades (xf);
-
 		notify_contents_changed();
 	}
 

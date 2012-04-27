@@ -154,6 +154,19 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 
 	add_option (_("Fades"), cfm);
 
+	ComboOption<CrossfadeChoice>* cfc = new ComboOption<CrossfadeChoice> (
+		"xfade-choice",
+		_("Crossfade Type"),
+		sigc::mem_fun (*_session_config, &SessionConfiguration::get_xfade_choice),
+		sigc::mem_fun (*_session_config, &SessionConfiguration::set_xfade_choice)
+		);
+
+	cfc->add (ConstantPowerMinus3dB, _("Constant Power (-3dB)"));
+	cfc->add (ConstantPowerMinus6dB, _("Constant Power (-6dB)"));
+	cfc->add (RegionFades, _("Use existing Region fade shape"));
+
+	add_option (_("Fades"), cfc);
+
 	add_option (_("Fades"), new SpinOption<float> (
 		_("short-xfade-seconds"),
 		_("Short crossfade length"),

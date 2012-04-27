@@ -89,6 +89,11 @@ class AudioRegion : public Region
 	bool fade_in_active ()  const { return _fade_in_active; }
 	bool fade_out_active () const { return _fade_out_active; }
 
+	bool fade_in_is_xfade() const { return _fade_in_is_xfade; }
+	void set_fade_in_is_xfade (bool yn);
+	bool fade_out_is_xfade() const { return _fade_out_is_xfade; }
+	void set_fade_out_is_xfade (bool yn);
+
 	boost::shared_ptr<AutomationList> fade_in()  { return _fade_in; }
 	boost::shared_ptr<AutomationList> fade_out() { return _fade_out; }
 	boost::shared_ptr<AutomationList> envelope() { return _envelope; }
@@ -232,6 +237,11 @@ class AudioRegion : public Region
 	boost::shared_ptr<AutomationList> _envelope;
 	uint32_t                          _fade_in_suspended;
 	uint32_t                          _fade_out_suspended;
+	/* This is not a Property because its not subject to user control,
+	   or undo/redo. XXX this may prove to be a mistake.
+	*/
+	bool                              _fade_in_is_xfade;
+	bool                              _fade_out_is_xfade;
 
   protected:
 	/* default constructor for derived (compound) types */

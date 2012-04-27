@@ -290,7 +290,6 @@ AudioPlaylist::check_crossfades (Evoral::Range<framepos_t> range)
 				continue;
 			}
 			
-
 			boost::shared_ptr<AudioRegion> top;
 			boost::shared_ptr<AudioRegion> bottom;
 		
@@ -317,8 +316,9 @@ AudioPlaylist::check_crossfades (Evoral::Range<framepos_t> range)
 				 */
 
 				if (done_start.find (top) == done_start.end() && done_end.find (bottom) == done_end.end ()) {
-					/* Top's fade-in will cause an implicit fade-out of bottom */
 
+					/* Top's fade-in will cause an implicit fade-out of bottom */
+					
 					framecnt_t len = 0;
 					switch (_session.config.get_xfade_model()) {
 					case FullCrossfade:
@@ -328,11 +328,22 @@ AudioPlaylist::check_crossfades (Evoral::Range<framepos_t> range)
 						len = _session.config.get_short_xfade_seconds() * _session.frame_rate();
 						break;
 					}
-						
-					top->set_fade_in_length (len);
+					
+					switch (_session.config.get_xfade_choice ()) {
+					case ConstantPowerMinus3dB:
+						top->set_fade_in (FadeConstantPowerMinus3dB, len);
+						break;
+					case ConstantPowerMinus6dB:
+						top->set_fade_in (FadeConstantPowerMinus6dB, len);
+						break;
+					case RegionFades:
+						top->set_fade_in_length (len);
+						break;
+					}
 					top->set_fade_in_active (true);
+					top->set_fade_in_is_xfade (true);
+					
 					done_start.insert (top);
-					done_end.insert (bottom);
 				}
 
 			} else if (c == Evoral::OverlapEnd) {
@@ -349,17 +360,28 @@ AudioPlaylist::check_crossfades (Evoral::Range<framepos_t> range)
 					framecnt_t len = 0;
 					switch (_session.config.get_xfade_model()) {
 					case FullCrossfade:
-						len = bottom->last_frame () - top->first_frame ();
+						len = top->last_frame () - bottom->first_frame ();
 						break;
 					case ShortCrossfade:
 						len = _session.config.get_short_xfade_seconds() * _session.frame_rate();
 						break;
 					}
-
-					top->set_fade_out_length (len);
+					
+					switch (_session.config.get_xfade_choice ()) {
+					case ConstantPowerMinus3dB:
+						top->set_fade_out (FadeConstantPowerMinus3dB, len);
+						break;
+					case ConstantPowerMinus6dB:
+						top->set_fade_out (FadeConstantPowerMinus6dB, len);
+						break;
+					case RegionFades:
+						top->set_fade_out_length (len);
+						break;
+					}
 					top->set_fade_out_active (true);
+					top->set_fade_out_is_xfade (true);
+
 					done_end.insert (top);
-					done_start.insert (bottom);
 				}
 			}
 		}

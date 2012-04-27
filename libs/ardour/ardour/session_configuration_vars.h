@@ -26,6 +26,7 @@
 *****************************************************/
 
 CONFIG_VARIABLE (CrossfadeModel, xfade_model, "xfade-model", FullCrossfade)
+CONFIG_VARIABLE (CrossfadeChoice, xfade_choice, "xfade-choice", ConstantPowerMinus3dB)
 CONFIG_VARIABLE (bool, auto_xfade, "auto-xfade", true)
 CONFIG_VARIABLE (float, short_xfade_seconds, "short-xfade-seconds", 0.015)
 CONFIG_VARIABLE (bool, xfades_active, "xfades-active", true)
