@@ -926,8 +926,12 @@ Session::load_state (string snapshot_name)
 		Stateful::loading_state_version = 1000;
 	} else {
 		if (prop->value().find ('.')) {
-			/* old school version format - lock at 3000 */
-			Stateful::loading_state_version = 3000;
+			/* old school version format */
+			if (prop->value()[0] == '2') {
+				Stateful::loading_state_version = 2000;
+			} else {
+				Stateful::loading_state_version = 3000;
+			}
 		} else {
 			Stateful::loading_state_version = atoi (prop->value());
 		}
