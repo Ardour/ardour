@@ -548,7 +548,7 @@ Editor::Editor ()
 	add_notebook_page (_("Regions"), _regions->widget ());
 	add_notebook_page (_("Tracks & Busses"), _routes->widget ());
 	add_notebook_page (_("Snapshots"), _snapshots->widget ());
-	add_notebook_page (_("Route Groups"), _route_groups->widget ());
+	add_notebook_page (_("Track & Bus Groups"), _route_groups->widget ());
 	add_notebook_page (_("Ranges & Marks"), _locations->widget ());
 
 	_the_notebook.set_show_tabs (true);

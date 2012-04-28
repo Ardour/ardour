@@ -33,7 +33,7 @@ using namespace std;
 using namespace PBD;
 
 RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
-	: ArdourDialog (_("Route Group"))
+	: ArdourDialog (_("Track/bus Group"))
 	, _group (g)
 	, _initial_name (g->name ())
 	, _active (_("Active"))
@@ -44,7 +44,7 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
 	, _rec_enable (_("Record enable"))
 	, _select (_("Selection"))
 	, _edit (_("Editing"))
-	, _route_active (_("Route active state"))
+	, _route_active (_("Active state"))
 	, _share_color (_("Color"))
 	, _share_monitoring (_("Monitoring"))
 {
