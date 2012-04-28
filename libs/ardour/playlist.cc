@@ -2581,8 +2581,6 @@ Playlist::shuffle (boost::shared_ptr<Region> region, int dir)
 
 	_shuffling = true;
 
-	Evoral::Range<framepos_t> old_range = region->range ();
-
 	{
 		RegionLock rlock (const_cast<Playlist*> (this));
 
