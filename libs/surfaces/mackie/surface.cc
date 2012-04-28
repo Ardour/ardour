@@ -793,7 +793,7 @@ Surface::update_view_mode_display ()
 }
 
 void
-Surface::gui_selection_changed (ARDOUR::RouteNotificationListPtr routes)
+Surface::gui_selection_changed (const ARDOUR::StrongRouteNotificationList& routes)
 {
 	for (Strips::iterator s = strips.begin(); s != strips.end(); ++s) {
 		(*s)->gui_selection_changed (routes);

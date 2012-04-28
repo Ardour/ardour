@@ -146,7 +146,7 @@ public:
 	void update_view_mode_display ();
 	void update_flip_mode_display ();
 
-	void gui_selection_changed (ARDOUR::RouteNotificationListPtr);
+	void gui_selection_changed (const ARDOUR::StrongRouteNotificationList&);
 
 	MackieControlProtocol& mcp() const { return _mcp; }
 

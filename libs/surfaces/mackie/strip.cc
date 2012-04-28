@@ -756,9 +756,9 @@ Strip::unlock_controls ()
 }
 
 void
-Strip::gui_selection_changed (ARDOUR::RouteNotificationListPtr rl)
+Strip::gui_selection_changed (const ARDOUR::StrongRouteNotificationList& rl)
 {
-	for (ARDOUR::RouteNotificationList::iterator i = rl->begin(); i != rl->end(); ++i) {
+	for (ARDOUR::StrongRouteNotificationList::const_iterator i = rl.begin(); i != rl.end(); ++i) {
 		if ((*i) == _route) {
 			_surface->write (_select->set_state (on));
 			return;

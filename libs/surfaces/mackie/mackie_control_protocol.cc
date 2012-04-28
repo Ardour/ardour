@@ -113,7 +113,7 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 	DeviceInfo::reload_device_info ();
 	DeviceProfile::reload_device_profiles ();
 
-	TrackSelectionChanged.connect (gui_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::gui_track_selection_changed, this, _1), this);
+	TrackSelectionChanged.connect (gui_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::gui_track_selection_changed, this, _1, true), this);
 
 	_instance = this;
 
@@ -357,7 +357,7 @@ MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 
 	/* make sure selection is correct */
 	
-	// gui_track_selection_changed (_last_selected_routes);
+	_gui_track_selection_changed (&_last_selected_routes, false);
 	
 	/* current bank has not been saved */
 	session->set_dirty();
@@ -1204,13 +1204,40 @@ MackieControlProtocol::force_special_route_to_strip (boost::shared_ptr<Route> r,
 }
 
 void
-MackieControlProtocol::gui_track_selection_changed (ARDOUR::RouteNotificationListPtr rl)
+MackieControlProtocol::gui_track_selection_changed (ARDOUR::RouteNotificationListPtr rl, bool save_list)
 {
+	_gui_track_selection_changed (rl.get(), save_list);
+}
+
+void
+MackieControlProtocol::_gui_track_selection_changed (ARDOUR::RouteNotificationList* rl, bool save_list)
+{
+
+	/* We need to keep a list of the most recently selected routes around,
+	   but we are not allowed to keep shared_ptr<Route> unless we want to
+	   handle the complexities of route deletion. So instead, the GUI sends
+	   us a notification using weak_ptr<Route>, which we keep a copy
+	   of. For efficiency's sake, however, we convert the weak_ptr's into
+	   shared_ptr<Route> before passing them to however many surfaces (and
+	   thus strips) that we have.
+	*/
+
+	StrongRouteNotificationList srl;
+
+	for (ARDOUR::RouteNotificationList::const_iterator i = rl->begin(); i != rl->end(); ++i) {
+		boost::shared_ptr<ARDOUR::Route> r = (*i).lock();
+		if (r) {
+			srl.push_back (r);
+		}
+	}
+
 	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
-		(*s)->gui_selection_changed (rl);
+		(*s)->gui_selection_changed (srl);
 	}
 	
-	// _last_selected_routes = *rl;
+	if (save_list) {
+		_last_selected_routes = *rl;
+	}
 }
 
 framepos_t
