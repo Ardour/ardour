@@ -32,6 +32,7 @@
 #include "pbd/failed_constructor.h"
 #include "pbd/stateful_diff_command.h"
 #include "pbd/xml++.h"
+#include "pbd/stacktrace.h"
 
 #include "ardour/debug.h"
 #include "ardour/playlist.h"
@@ -2279,14 +2280,7 @@ Playlist::setup_layering_indices (RegionList const & regions)
 
 	for (RegionList::const_iterator k = regions.begin(); k != regions.end(); ++k) {
 		(*k)->set_layering_index (j++);
-
-		Evoral::Range<framepos_t> r ((*k)->first_frame(), (*k)->last_frame());
-		xf.push_back (r);
 	}
-
-	/* now recheck the entire playlist for crossfades */
-
-	coalesce_and_check_crossfades (xf);
 }
 
 /** Take the layering indices of each of our regions, compute the layers
@@ -2404,7 +2398,7 @@ Playlist::relayer ()
 	notify_layering_changed ();
 
 	/* This relayer() may have been called as a result of a region removal, in which
-	   case we need to setup layering indices so account for the one that has just
+	   case we need to setup layering indices to account for the one that has just
 	   gone away.
 	*/
 	setup_layering_indices (copy);
@@ -2415,6 +2409,7 @@ Playlist::raise_region (boost::shared_ptr<Region> region)
 {
 	set_layer (region, region->layer() + 1.5);
 	relayer ();
+	check_crossfades (region->range ());
 }
 
 void
@@ -2422,6 +2417,7 @@ Playlist::lower_region (boost::shared_ptr<Region> region)
 {
 	set_layer (region, region->layer() - 1.5);
 	relayer ();
+	check_crossfades (region->range ());
 }
 
 void
@@ -2429,6 +2425,7 @@ Playlist::raise_region_to_top (boost::shared_ptr<Region> region)
 {
 	set_layer (region, DBL_MAX);
 	relayer ();
+	check_crossfades (region->range ());
 }
 
 void
@@ -2436,6 +2433,7 @@ Playlist::lower_region_to_bottom (boost::shared_ptr<Region> region)
 {
 	set_layer (region, -0.5);
 	relayer ();
+	check_crossfades (region->range ());
 }
 
 void
@@ -3076,6 +3074,9 @@ Playlist::set_orig_track_id (const PBD::ID& id)
 	_orig_track_id = id;
 }
 
+/** Take a list of ranges, coalesce any that can be coalesced, then call
+ *  check_crossfades for each one.
+ */
 void
 Playlist::coalesce_and_check_crossfades (list<Evoral::Range<framepos_t> > ranges)
 {
