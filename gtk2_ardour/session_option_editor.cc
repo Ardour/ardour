@@ -192,20 +192,6 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_auto_xfade)
 			    ));
 
-        add_option (_("Fades"), new BoolOption (
-			    "xfades-active",
-			    _("Crossfades active"),
-			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_xfades_active),
-			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_xfades_active)
-			    ));
-
-	add_option (_("Fades"), new BoolOption (
-			    "xfades-visible",
-			    _("Crossfades visible"),
-			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_xfades_visible),
-			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_xfades_visible)
-			    ));
-
 	add_option (_("Fades"), new BoolOption (
 			    "use-region-fades",
 			    _("Region fades active"),
