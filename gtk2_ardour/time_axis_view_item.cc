@@ -52,7 +52,8 @@ using namespace Gtkmm2ext;
 
 Pango::FontDescription TimeAxisViewItem::NAME_FONT;
 const double TimeAxisViewItem::NAME_X_OFFSET = 15.0;
-const double TimeAxisViewItem::GRAB_HANDLE_LENGTH = 6;
+const double TimeAxisViewItem::GRAB_HANDLE_TOP = 6;
+const double TimeAxisViewItem::GRAB_HANDLE_WIDTH = 5;
 
 int    TimeAxisViewItem::NAME_HEIGHT;
 double TimeAxisViewItem::NAME_Y_OFFSET;
@@ -215,9 +216,12 @@ TimeAxisViewItem::init (
 
 	/* create our grab handles used for trimming/duration etc */
 	if (!_recregion && !_automation) {
-		frame_handle_start = new ArdourCanvas::SimpleRect (*group, 0.0, TimeAxisViewItem::GRAB_HANDLE_LENGTH, 5.0, trackview.current_height());
+		double top   = TimeAxisViewItem::GRAB_HANDLE_TOP;
+		double width = TimeAxisViewItem::GRAB_HANDLE_WIDTH;
+
+		frame_handle_start = new ArdourCanvas::SimpleRect (*group, 0.0, top, width, trackview.current_height());
 		frame_handle_start->property_outline_what() = 0x0;
-		frame_handle_end = new ArdourCanvas::SimpleRect (*group, 0.0, TimeAxisViewItem::GRAB_HANDLE_LENGTH, 5.0, trackview.current_height());
+		frame_handle_end = new ArdourCanvas::SimpleRect (*group, 0.0, top, width, trackview.current_height());
 		frame_handle_end->property_outline_what() = 0x0;
 	} else {
 		frame_handle_start = frame_handle_end = 0;
@@ -807,14 +811,6 @@ TimeAxisViewItem::set_samples_per_unit (double spu)
 void
 TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 {
-	if (pixel_width < GRAB_HANDLE_LENGTH * 2) {
-
-		if (frame_handle_start) {
-			frame_handle_start->hide();
-			frame_handle_end->hide();
-		}
-
-	}
 
 	if (pixel_width < 2.0) {
 
@@ -862,14 +858,20 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 		}
 
 		if (frame_handle_start) {
-			if (pixel_width < (2*TimeAxisViewItem::GRAB_HANDLE_LENGTH)) {
+			if (pixel_width < (3 * TimeAxisViewItem::GRAB_HANDLE_WIDTH)) {
+				/*
+				 * there's less than GRAB_HANDLE_WIDTH of the region between 
+				 * the right-hand end of frame_handle_start and the left-hand
+				 * end of frame_handle_end, so disable the handles
+				 */
 				frame_handle_start->hide();
 				frame_handle_end->hide();
+			} else {
+				frame_handle_start->show();
+				frame_handle_end->property_x1() = pixel_width - (TimeAxisViewItem::GRAB_HANDLE_WIDTH);
+				frame_handle_end->property_x2() = pixel_width;
+				frame_handle_end->show();
 			}
-			frame_handle_start->show();
-			frame_handle_end->property_x1() = pixel_width - (TimeAxisViewItem::GRAB_HANDLE_LENGTH);
-			frame_handle_end->show();
-			frame_handle_end->property_x2() = pixel_width;
 		}
 
 		wide_enough_for_name = true;

@@ -93,7 +93,8 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	static Pango::FontDescription NAME_FONT;
 	static void set_constant_heights ();
 	static const double NAME_X_OFFSET;
-	static const double GRAB_HANDLE_LENGTH;
+	static const double GRAB_HANDLE_TOP;
+	static const double GRAB_HANDLE_WIDTH;
 
 	/* these are not constant, but vary with the pixel size
 	   of the font used to display the item name.
