@@ -106,13 +106,6 @@ class AudioRegion : public Region
 
 	/* Readable interface */
 
-	enum ReadOps {
-		ReadOpsNone = 0x0,
-		ReadOpsOwnAutomation = 0x1,
-		ReadOpsOwnScaling = 0x2,
-		ReadOpsFades = 0x4
-	};
-
 	virtual framecnt_t read (Sample*, framepos_t pos, framecnt_t cnt, int channel) const;
 	virtual framecnt_t readable_length() const { return length(); }
 
@@ -213,11 +206,7 @@ class AudioRegion : public Region
 	void recompute_gain_at_end ();
 	void recompute_gain_at_start ();
 
-	framecnt_t _read_at (const SourceList&, framecnt_t limit,
-			     Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
-			     framepos_t position, framecnt_t cnt,
-			     uint32_t chan_n = 0,
-			     ReadOps readops = ReadOps (~0)) const;
+	framecnt_t read_from_sources (SourceList const &, framecnt_t, Sample *, framepos_t, framecnt_t, uint32_t) const;
 
 	void recompute_at_start ();
 	void recompute_at_end ();

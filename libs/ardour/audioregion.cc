@@ -353,21 +353,16 @@ AudioRegion::read_peaks (PeakData *buf, framecnt_t npeaks, framecnt_t offset, fr
 	}
 }
 
+/** @param buf Buffer to write data to (existing data will be overwritten).
+ *  @param pos Position to read from as an offset from the region position.
+ *  @param cnt Number of frames to read.
+ *  @param channel Channel to read from.
+ */
 framecnt_t
-AudioRegion::read (Sample* buf, framepos_t timeline_position, framecnt_t cnt, int channel) const
+AudioRegion::read (Sample* buf, framepos_t pos, framecnt_t cnt, int channel) const
 {
 	/* raw read, no fades, no gain, nada */
-	/* XXX: xfade: passes no mixbuf... */
-	return _read_at (_sources, _length, buf, 0, 0, _position + timeline_position, cnt, channel, ReadOps (0));
-}
-
-framecnt_t
-AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
-		      framepos_t position, framecnt_t cnt, uint32_t chan_n) const
-{
-	/* regular diskstream/butler read complete with fades etc */
-	return _read_at (_sources, _length, buf, mixdown_buffer, gain_buffer,
-			 position, cnt, chan_n, ReadOps (~0));
+	return read_from_sources (_sources, _length, buf, _position + pos, cnt, channel);
 }
 
 framecnt_t
@@ -377,21 +372,24 @@ AudioRegion::master_read_at (Sample *buf, Sample *mixdown_buffer, float *gain_bu
 	/* do not read gain/scaling/fades and do not count this disk i/o in statistics */
 
 	assert (cnt >= 0);
-
-	return _read_at (_master_sources, _master_sources.front()->length(_master_sources.front()->timeline_position()),
-			 buf, mixdown_buffer, gain_buffer, position, cnt, chan_n, ReadOps (0));
+	return read_from_sources (
+		_master_sources, _master_sources.front()->length (_master_sources.front()->timeline_position()),
+		buf, position, cnt, chan_n
+		);
 }
 
-/** @param position Position within the session to read from.
+/** @param buf Buffer to mix data into.
+ *  @param mixdown_buffer Scratch buffer for audio data.
+ *  @param gain_buffer Scratch buffer for gain data.
+ *  @param position Position within the session to read from.
  *  @param cnt Number of frames to read.
+ *  @param chan_n Channel number to read.
  */
 framecnt_t
-AudioRegion::_read_at (const SourceList& srcs, framecnt_t limit,
-		       Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
-		       framepos_t position,
-		       framecnt_t cnt,
-		       uint32_t chan_n,
-		       ReadOps rops) const
+AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
+		      framepos_t position,
+		      framecnt_t cnt,
+		      uint32_t chan_n) const
 {
 	/* We are reading data from this region into buf (possibly via mixdown_buffer).
 	   The caller has verified that we cover the desired section.
@@ -407,7 +405,7 @@ AudioRegion::_read_at (const SourceList& srcs, framecnt_t limit,
 		return 0;
 	}
 
-	if (muted() && rops != ReadOpsNone) {
+	if (muted()) {
 		return 0; /* read nothing */
 	}
 
@@ -419,11 +417,11 @@ AudioRegion::_read_at (const SourceList& srcs, framecnt_t limit,
 	assert (position >= _position);
 	frameoffset_t const internal_offset = position - _position;
 
-	if (internal_offset >= limit) {
+	if (internal_offset >= _length) {
 		return 0; /* read nothing */
 	}
 
-	if ((to_read = min (cnt, limit - internal_offset)) == 0) {
+	if ((to_read = min (cnt, _length - internal_offset)) == 0) {
 		return 0; /* read nothing */
 	}
 
@@ -443,52 +441,49 @@ AudioRegion::_read_at (const SourceList& srcs, framecnt_t limit,
 
 	framecnt_t fade_interval_start = 0;
 
-	if (rops & ReadOpsFades) {
-
-		/* Fade in */
+	/* Fade in */
+	
+	if (_fade_in_active && _session.config.get_use_region_fades()) {
 		
-		if (_fade_in_active && _session.config.get_use_region_fades()) {
-
-			framecnt_t fade_in_length = (framecnt_t) _fade_in->back()->when;
-
-			/* see if this read is within the fade in */
-
-			if (internal_offset < fade_in_length) {
-				fade_in_limit = min (to_read, fade_in_length - internal_offset);
-			}
+		framecnt_t fade_in_length = (framecnt_t) _fade_in->back()->when;
+		
+		/* see if this read is within the fade in */
+		
+		if (internal_offset < fade_in_length) {
+			fade_in_limit = min (to_read, fade_in_length - internal_offset);
 		}
-
-		/* Fade out */
-
-		if (_fade_out_active && _session.config.get_use_region_fades()) {
-
-			/* see if some part of this read is within the fade out */
+	}
+	
+	/* Fade out */
+	
+	if (_fade_out_active && _session.config.get_use_region_fades()) {
+		
+		/* see if some part of this read is within the fade out */
 
 		/* .................        >|            REGION
-		                             limit
+		                             _length
 
                                  {           }            FADE
 				             fade_out_length
                                  ^
-                                 limit - fade_out_length
+                                 _length - fade_out_length
                         |--------------|
                         ^internal_offset
                                        ^internal_offset + to_read
 
 				       we need the intersection of [internal_offset,internal_offset+to_read] with
-				       [limit - fade_out_length, limit]
+				       [_length - fade_out_length, _length]
 
 		*/
 
 
-			fade_interval_start = max (internal_offset, limit - framecnt_t (_fade_out->back()->when));
-			framecnt_t fade_interval_end   = min(internal_offset + to_read, limit);
-
-			if (fade_interval_end > fade_interval_start) {
-				/* (part of the) the fade out is in this buffer */
-				fade_out_limit = fade_interval_end - fade_interval_start;
-				fade_out_offset = fade_interval_start - internal_offset;
-			}
+		fade_interval_start = max (internal_offset, _length - framecnt_t (_fade_out->back()->when));
+		framecnt_t fade_interval_end = min(internal_offset + to_read, _length.val());
+		
+		if (fade_interval_end > fade_interval_start) {
+			/* (part of the) the fade out is in this buffer */
+			fade_out_limit = fade_interval_end - fade_interval_start;
+			fade_out_offset = fade_interval_start - internal_offset;
 		}
 	}
 
@@ -498,38 +493,16 @@ AudioRegion::_read_at (const SourceList& srcs, framecnt_t limit,
 	   must always mix.
 	*/
 
-	if (chan_n < n_channels()) {
-
-		boost::shared_ptr<AudioSource> src = boost::dynamic_pointer_cast<AudioSource> (srcs[chan_n]);
-		if (src->read (mixdown_buffer, _start + internal_offset, to_read) != to_read) {
-			return 0; /* "read nothing" */
-		}
-
-	} else {
-
-		/* track is N-channel, this region has fewer channels; silence the ones
-		   we don't have.
-		*/
-
-		if (Config->get_replicate_missing_region_channels()) {
-			/* track is N-channel, this region has less channels, so use a relevant channel
-			 */
-
-			uint32_t channel = n_channels() % chan_n;
-			boost::shared_ptr<AudioSource> src = boost::dynamic_pointer_cast<AudioSource> (srcs[channel]);
-
-			if (src->read (mixdown_buffer, _start + internal_offset, to_read) != to_read) {
-				return 0; /* "read nothing" */
-			}
-		}
+	if (read_from_sources (_sources, _length, mixdown_buffer, position, to_read, chan_n) != to_read) {
+		return 0;
 	}
 
 	/* APPLY REGULAR GAIN CURVES AND SCALING TO mixdown_buffer */
 
-	if ((rops & ReadOpsOwnAutomation) && envelope_active())  {
+	if (envelope_active())  {
 		_envelope->curve().get_vector (internal_offset, internal_offset + to_read, gain_buffer, to_read);
 
-		if ((rops & ReadOpsOwnScaling) && _scale_amplitude != 1.0f) {
+		if (_scale_amplitude != 1.0f) {
 			for (framecnt_t n = 0; n < to_read; ++n) {
 				mixdown_buffer[n] *= gain_buffer[n] * _scale_amplitude;
 			}
@@ -538,7 +511,7 @@ AudioRegion::_read_at (const SourceList& srcs, framecnt_t limit,
 				mixdown_buffer[n] *= gain_buffer[n];
 			}
 		}
-	} else if ((rops & ReadOpsOwnScaling) && _scale_amplitude != 1.0f) {
+	} else if (_scale_amplitude != 1.0f) {
 		apply_gain_to_buffer (mixdown_buffer, to_read, _scale_amplitude);
 	}
 
@@ -589,7 +562,7 @@ AudioRegion::_read_at (const SourceList& srcs, framecnt_t limit,
 
 	if (fade_out_limit != 0) {
 
-		framecnt_t const curve_offset = fade_interval_start - (limit - _fade_out->back()->when);
+		framecnt_t const curve_offset = fade_interval_start - (_length - _fade_out->back()->when);
 
 		if (_inverse_fade_out) {
 
@@ -627,6 +600,60 @@ AudioRegion::_read_at (const SourceList& srcs, framecnt_t limit,
 	/* MIX THE REGION BODY FROM mixdown_buffer INTO buf */
 
 	mix_buffers_no_gain (buf + fade_in_limit, mixdown_buffer + fade_in_limit, to_read - fade_in_limit - fade_out_limit);
+
+	return to_read;
+}
+
+/** Read data directly from one of our sources, accounting for the situation when the track has a different channel
+ *  count to the region.
+ *
+ *  @param srcs Source list to get our source from.
+ *  @param limit Furthest that we should read, as an offset from the region position.
+ *  @param buf Buffer to write data into (existing contents of the buffer will be overwritten)
+ *  @param position Position to read from, in session frames.
+ *  @param cnt Number of frames to read.
+ *  @param chan_n Channel to read from.
+ *  @return Number of frames read.
+ */
+
+framecnt_t
+AudioRegion::read_from_sources (SourceList const & srcs, framecnt_t limit, Sample* buf, framepos_t position, framecnt_t cnt, uint32_t chan_n) const
+{
+	frameoffset_t const internal_offset = position - _position;
+	if (internal_offset >= limit) {
+		return 0;
+	}
+
+	framecnt_t const to_read = min (cnt, limit - internal_offset);
+	if (to_read == 0) {
+		return 0;
+	}
+	
+	if (chan_n < n_channels()) {
+
+		boost::shared_ptr<AudioSource> src = boost::dynamic_pointer_cast<AudioSource> (srcs[chan_n]);
+		if (src->read (buf, _start + internal_offset, to_read) != to_read) {
+			return 0; /* "read nothing" */
+		}
+
+	} else {
+
+		/* track is N-channel, this region has fewer channels; silence the ones
+		   we don't have.
+		*/
+
+		if (Config->get_replicate_missing_region_channels()) {
+			/* track is N-channel, this region has less channels, so use a relevant channel
+			 */
+
+			uint32_t channel = n_channels() % chan_n;
+			boost::shared_ptr<AudioSource> src = boost::dynamic_pointer_cast<AudioSource> (srcs[channel]);
+
+			if (src->read (buf, _start + internal_offset, to_read) != to_read) {
+				return 0; /* "read nothing" */
+			}
+		}
+	}
 
 	return to_read;
 }

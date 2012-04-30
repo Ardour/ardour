@@ -74,6 +74,7 @@ void
 TestNeedingSession::tearDown ()
 {
 	AudioEngine::instance()->remove_session ();
+	AudioEngine::instance()->stop (true);
 	
 	delete _session;
 
