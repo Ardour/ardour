@@ -233,7 +233,9 @@ class AudioRegion : public Region
 	Automatable _automatable;
 
 	boost::shared_ptr<AutomationList> _fade_in;
+	boost::shared_ptr<AutomationList> _inverse_fade_in;
 	boost::shared_ptr<AutomationList> _fade_out;
+	boost::shared_ptr<AutomationList> _inverse_fade_out;
 	boost::shared_ptr<AutomationList> _envelope;
 	uint32_t                          _fade_in_suspended;
 	uint32_t                          _fade_out_suspended;

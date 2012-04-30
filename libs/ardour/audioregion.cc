@@ -551,11 +551,34 @@ AudioRegion::_read_at (const SourceList& srcs, framecnt_t limit,
 	 */
 
 	if (fade_in_limit != 0) {
-		_fade_in->curve().get_vector (internal_offset, internal_offset + fade_in_limit, gain_buffer, fade_in_limit);
+		if (_inverse_fade_in) {
 
-		/* Fade the current data out */
-		for (framecnt_t n = 0; n < fade_in_limit; ++n) {
-			buf[n] *= 1 - gain_buffer[n];
+			/* explicit inverse fade in curve (e.g. for constant
+			 * power), so we have to fetch it.
+			 */
+
+			_inverse_fade_in->curve().get_vector (internal_offset, internal_offset + fade_in_limit, gain_buffer, fade_in_limit);
+
+			/* Fade the data from lower layers out */
+			for (framecnt_t n = 0; n < fade_in_limit; ++n) {
+				buf[n] *= gain_buffer[n];
+			}
+
+			/* refill gain buffer with the fade in */
+
+			_fade_in->curve().get_vector (internal_offset, internal_offset + fade_in_limit, gain_buffer, fade_in_limit);
+
+		} else {
+
+			/* no explicit inverse fade in, so just use (1 - fade
+			 * in) for the fade out of lower layers
+			 */
+
+			_fade_in->curve().get_vector (internal_offset, internal_offset + fade_in_limit, gain_buffer, fade_in_limit);
+
+			for (framecnt_t n = 0; n < fade_in_limit; ++n) {
+				buf[n] *= 1 - gain_buffer[n];
+			}
 		}
 
 		/* Mix our newly-read data in, with the fade */
@@ -565,15 +588,36 @@ AudioRegion::_read_at (const SourceList& srcs, framecnt_t limit,
 	}
 
 	if (fade_out_limit != 0) {
-		framecnt_t const curve_offset = fade_interval_start - (limit - _fade_out->back()->when);
-		_fade_out->curve().get_vector (curve_offset, curve_offset + fade_out_limit, gain_buffer, fade_out_limit);
 
-		/* Fade the current data in */
-		for (framecnt_t n = 0, m = fade_out_offset; n < fade_out_limit; ++n, ++m) {
-			buf[m] *= 1 - gain_buffer[n];
+		framecnt_t const curve_offset = fade_interval_start - (limit - _fade_out->back()->when);
+
+		if (_inverse_fade_out) {
+
+			_inverse_fade_out->curve().get_vector (curve_offset, curve_offset + fade_out_limit, gain_buffer, fade_out_limit);
+
+			/* Fade the data from lower levels out */
+			for (framecnt_t n = 0, m = fade_out_offset; n < fade_out_limit; ++n, ++m) {
+				buf[m] *= gain_buffer[n];
+			}
+
+			/* fetch the actual fade out */
+
+			_fade_out->curve().get_vector (curve_offset, curve_offset + fade_out_limit, gain_buffer, fade_out_limit);
+
+		} else {
+			
+			/* no explicit inverse fade out, so just use (1 - fade
+			 * out) for the fade in of lower layers
+			 */
+
+			_fade_out->curve().get_vector (curve_offset, curve_offset + fade_out_limit, gain_buffer, fade_out_limit);
+		
+			for (framecnt_t n = 0, m = fade_out_offset; n < fade_out_limit; ++n, ++m) {
+				buf[m] *= 1 - gain_buffer[n];
+			}
 		}
 
-		/* Mix our newly-read data in, with the fade */
+		/* Mix our newly-read data out, with the fade */
 		for (framecnt_t n = 0, m = fade_out_offset; n < fade_out_limit; ++n, ++m) {
 			buf[m] += mixdown_buffer[m] * gain_buffer[n];
 		}
@@ -788,6 +832,7 @@ AudioRegion::set_fade_in (FadeShape shape, framecnt_t len)
 	case FadeLinear:
 		_fade_in->fast_simple_add (0.0, 0.0);
 		_fade_in->fast_simple_add (len, 1.0);
+		_inverse_fade_in.reset ();
 		break;
 
 	case FadeFast:
@@ -798,6 +843,7 @@ AudioRegion::set_fade_in (FadeShape shape, framecnt_t len)
 		_fade_in->fast_simple_add (len * 0.9447, 0.483333);
 		_fade_in->fast_simple_add (len * 0.976959, 0.697222);
 		_fade_in->fast_simple_add (len, 1);
+		_inverse_fade_in.reset ();
 		break;
 
 	case FadeSlow:
@@ -809,6 +855,7 @@ AudioRegion::set_fade_in (FadeShape shape, framecnt_t len)
 		_fade_in->fast_simple_add (len * 0.481567, 0.980556);
 		_fade_in->fast_simple_add (len * 0.767281, 1);
 		_fade_in->fast_simple_add (len, 1);
+		_inverse_fade_in.reset ();
 		break;
 
 	case FadeLogA:
@@ -819,6 +866,7 @@ AudioRegion::set_fade_in (FadeShape shape, framecnt_t len)
 		_fade_in->fast_simple_add (len * 0.652074, 0.972222);
 		_fade_in->fast_simple_add (len * 0.771889, 0.988889);
 		_fade_in->fast_simple_add (len, 1);
+		_inverse_fade_in.reset ();
 		break;
 
 	case FadeLogB:
@@ -829,6 +877,7 @@ AudioRegion::set_fade_in (FadeShape shape, framecnt_t len)
 		_fade_in->fast_simple_add (len * 0.847926, 0.558333);
 		_fade_in->fast_simple_add (len * 0.919355, 0.730556);
 		_fade_in->fast_simple_add (len, 1);
+		_inverse_fade_in.reset ();
 		break;
 
 	case FadeConstantPowerMinus3dB:
@@ -839,6 +888,22 @@ AudioRegion::set_fade_in (FadeShape shape, framecnt_t len)
 		_fade_in->fast_simple_add ((len * 0.666667), 0.851507);
 		_fade_in->fast_simple_add ((len * 0.833333), 0.948859);
 		_fade_in->fast_simple_add (len, 1.0);
+
+		/* setup complementary fade out for lower layers */
+
+		if (!_inverse_fade_in) {
+			_inverse_fade_in.reset (new AutomationList (Evoral::Parameter (FadeInAutomation)));
+		}
+
+		_inverse_fade_in->clear ();
+		_inverse_fade_in->fast_simple_add (0.0, 1.0);
+		_inverse_fade_in->fast_simple_add ((len * 0.166667), 0.948859);
+		_inverse_fade_in->fast_simple_add ((len * 0.333333), 0.851507);
+		_inverse_fade_in->fast_simple_add ((len * 0.500000), 0.707946);
+		_inverse_fade_in->fast_simple_add ((len * 0.666667), 0.518174);
+		_inverse_fade_in->fast_simple_add ((len * 0.833333), 0.282192);
+		_inverse_fade_in->fast_simple_add (len, 0.0);
+
 		break;
 		
 	case FadeConstantPowerMinus6dB:
@@ -849,6 +914,22 @@ AudioRegion::set_fade_in (FadeShape shape, framecnt_t len)
 		_fade_in->fast_simple_add ((len * 0.666667), 0.666186);
 		_fade_in->fast_simple_add ((len * 0.833333), 0.833033);
 		_fade_in->fast_simple_add (len, 1.0);
+
+		/* setup complementary fade out for lower layers */
+
+		if (!_inverse_fade_in) {
+			_inverse_fade_in.reset (new AutomationList (Evoral::Parameter (FadeInAutomation)));
+		}
+
+		_inverse_fade_in->clear ();
+		_inverse_fade_in->fast_simple_add (0.0, 1.0);
+		_inverse_fade_in->fast_simple_add ((len * 0.166667), 0.833033);
+		_inverse_fade_in->fast_simple_add ((len * 0.333333), 0.666186);
+		_inverse_fade_in->fast_simple_add ((len * 0.500000), 0.499459);
+		_inverse_fade_in->fast_simple_add ((len * 0.666667), 0.332853);
+		_inverse_fade_in->fast_simple_add ((len * 0.833333), 0.166366);
+		_inverse_fade_in->fast_simple_add (len, 0.0);
+
 		break;
 	}
 
@@ -881,6 +962,7 @@ AudioRegion::set_fade_out (FadeShape shape, framecnt_t len)
 		_fade_out->fast_simple_add (len * 0.370968, 0.0861111);
 		_fade_out->fast_simple_add (len * 0.610599, 0.0333333);
 		_fade_out->fast_simple_add (1.0, 0.0);
+		_inverse_fade_out.reset ();
 		break;
 
 	case FadeLogA:
@@ -891,6 +973,7 @@ AudioRegion::set_fade_out (FadeShape shape, framecnt_t len)
 		_fade_out->fast_simple_add (len * 0.753456, 0.658333);
 		_fade_out->fast_simple_add (len * 0.9262673, 0.308333);
 		_fade_out->fast_simple_add (len, 0.0);
+		_inverse_fade_out.reset ();
 		break;
 
 	case FadeSlow:
@@ -901,6 +984,7 @@ AudioRegion::set_fade_out (FadeShape shape, framecnt_t len)
 		_fade_out->fast_simple_add (len * 0.918981, 0.68595);
 		_fade_out->fast_simple_add (len * 0.976852, 0.22865);
 		_fade_out->fast_simple_add (len, 0.0);
+		_inverse_fade_out.reset ();
 		break;
 
 	case FadeLogB:
@@ -910,11 +994,13 @@ AudioRegion::set_fade_out (FadeShape shape, framecnt_t len)
 		_fade_out->fast_simple_add (len * 0.470046, 0.152778);
 		_fade_out->fast_simple_add (len * 0.695853, 0.0694444);
 		_fade_out->fast_simple_add (len, 0.0);
+		_inverse_fade_out.reset ();	
 		break;
 
 	case FadeLinear:
 		_fade_out->fast_simple_add (0.0, 1.0);
 		_fade_out->fast_simple_add (len, 0.0);
+		_inverse_fade_out.reset ();
 		break;
 
 	case FadeConstantPowerMinus3dB:
@@ -925,6 +1011,22 @@ AudioRegion::set_fade_out (FadeShape shape, framecnt_t len)
 		_fade_out->fast_simple_add ((len * 0.666667), 0.518174);
 		_fade_out->fast_simple_add ((len * 0.833333), 0.282192);
 		_fade_out->fast_simple_add (len, 0.0);
+
+		/* setup complementary fade in for lower layers */
+
+		if (!_inverse_fade_out) {
+			_inverse_fade_out.reset (new AutomationList (Evoral::Parameter (FadeInAutomation)));
+		}
+
+		_inverse_fade_out->clear ();
+		_inverse_fade_out->fast_simple_add (0.0, 0.0);
+		_inverse_fade_out->fast_simple_add ((len * 0.166667), 0.166366);
+		_inverse_fade_out->fast_simple_add ((len * 0.333333), 0.332853);
+		_inverse_fade_out->fast_simple_add ((len * 0.500000), 0.499459);
+		_inverse_fade_out->fast_simple_add ((len * 0.666667), 0.666186);
+		_inverse_fade_out->fast_simple_add ((len * 0.833333), 0.833033);
+		_inverse_fade_out->fast_simple_add (len, 1.0);
+
 		break;
 
 	case FadeConstantPowerMinus6dB:
@@ -935,6 +1037,22 @@ AudioRegion::set_fade_out (FadeShape shape, framecnt_t len)
 		_fade_out->fast_simple_add ((len * 0.666667), 0.332853);
 		_fade_out->fast_simple_add ((len * 0.833333), 0.166366);
 		_fade_out->fast_simple_add (len, 0.0);
+
+		/* setup complementary fade in for lower layers */
+
+		if (!_inverse_fade_out) {
+			_inverse_fade_out.reset (new AutomationList (Evoral::Parameter (FadeInAutomation)));
+		}
+
+		_inverse_fade_out->clear ();
+		_inverse_fade_out->fast_simple_add (0.0, 0.0);
+		_inverse_fade_out->fast_simple_add ((len * 0.166667), 0.166366);
+		_inverse_fade_out->fast_simple_add ((len * 0.333333), 0.332853);
+		_inverse_fade_out->fast_simple_add ((len * 0.500000), 0.499459);
+		_inverse_fade_out->fast_simple_add ((len * 0.666667), 0.666186);
+		_inverse_fade_out->fast_simple_add ((len * 0.833333), 0.833033);
+		_inverse_fade_out->fast_simple_add (len, 1.0);
+
 		break;
 	}
 
