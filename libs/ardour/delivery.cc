@@ -47,7 +47,7 @@ using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
 
-PBD::Signal0<int>             Delivery::PannersLegal;
+PBD::Signal0<void>            Delivery::PannersLegal;
 bool                          Delivery::panners_legal = false;
 
 /* deliver to an existing IO object */
@@ -402,7 +402,7 @@ Delivery::reset_panner ()
 	}
 }
 
-int
+void
 Delivery::panners_became_legal ()
 {
 	if (_panshell) {
@@ -414,7 +414,6 @@ Delivery::panners_became_legal ()
 	}
 
 	panner_legal_c.disconnect ();
-	return 0;
 }
 
 void
@@ -438,11 +437,11 @@ Delivery::disable_panners ()
 	return 0;
 }
 
-int
+void
 Delivery::reset_panners ()
 {
 	panners_legal = true;
-	return *PannersLegal ();
+	PannersLegal ();
 }
 
 void
