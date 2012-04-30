@@ -334,6 +334,7 @@ AnalysisWindow::analyze_data (Gtk::Button */*button*/)
 								n = length - x;
 							}
 
+							memset (buf, 0, n * sizeof (Sample));
 							n = arv->audio_region()->read_at(buf, mixbuf, gain, arv->region()->position() + x, n, channel);
 
 							if (n == 0)
