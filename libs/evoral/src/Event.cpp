@@ -118,7 +118,7 @@ Event<Timestamp>::operator=(const Event& copy)
 
 template<typename Timestamp>
 void
-Event<Timestamp>::set(uint8_t* buf, uint32_t size, Timestamp t)
+Event<Timestamp>::set (const uint8_t* buf, uint32_t size, Timestamp t)
 {
 	if (_owns_buf) {
 		if (_size < size) {
@@ -126,7 +126,11 @@ Event<Timestamp>::set(uint8_t* buf, uint32_t size, Timestamp t)
 		}
 		memcpy (_buf, buf, size);
 	} else {
-		_buf = buf;
+		/* XXX this is really dangerous given the
+		   const-ness of buf. The API should really
+		   intervene here.
+		*/
+		_buf = const_cast<uint8_t*> (buf);
 	}
 
 	_original_time = t;

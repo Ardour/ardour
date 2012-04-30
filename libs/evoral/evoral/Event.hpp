@@ -60,7 +60,7 @@ struct Event {
 
 	const Event& operator=(const Event& copy);
 
-	void set(uint8_t* buf, uint32_t size, Time t);
+	void set(const uint8_t* buf, uint32_t size, Time t);
 
 	inline bool operator==(const Event& other) const {
 		if (_type != other._type)

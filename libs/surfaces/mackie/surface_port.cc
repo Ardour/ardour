@@ -117,11 +117,19 @@ SurfacePort::write (const MidiByteArray & mba)
 
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("port %1 write %2\n", output_port().name(), mba));
 
-	int count = output_port().write (mba.bytes().get(), mba.size(), 0);
+	if (mba[0] != 0xf0 && mba.size() > 3) {
+		std::cerr << "TOO LONG WRITE: " << mba << std::endl;
+	}
+		
+	/* this call relies on std::vector<T> using contiguous storage. not
+	 * actually guaranteed by the standard, but way, way beyond likely.
+	 */
 
-	if  (count != (int)mba.size()) {
+	int count = output_port().write (&mba[0], mba.size(), 0);
 
-		if  (errno == 0) {
+	if  (count != (int) mba.size()) {
+
+		if (errno == 0) {
 
 			cout << "port overflow on " << output_port().name() << ". Did not write all of " << mba << endl;
 

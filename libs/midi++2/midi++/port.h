@@ -67,7 +67,7 @@ class Port {
 	 * @param timestamp Time stamp in frames of this message (relative to cycle start)
 	 * @return number of bytes successfully written
 	 */
-	virtual int write (byte *msg, size_t msglen, timestamp_t timestamp) = 0;
+	virtual int write (const byte *msg, size_t msglen, timestamp_t timestamp) = 0;
 
 	/** Read raw bytes from a port.
 	 * @param buf memory to store read data in

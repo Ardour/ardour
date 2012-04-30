@@ -55,7 +55,7 @@ class IPMIDIPort : public Port {
     XMLNode& get_state () const;
     void set_state (const XMLNode&);
     
-    int write (byte *msg, size_t msglen, timestamp_t timestamp);
+    int write (const byte *msg, size_t msglen, timestamp_t timestamp);
     int read (byte *buf, size_t bufsize);
     void parse (framecnt_t timestamp);
     int selectable () const;

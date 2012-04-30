@@ -54,7 +54,7 @@ class JackMIDIPort : public Port {
 	void cycle_end ();
 
 	void parse (framecnt_t timestamp);
-	int write (byte *msg, size_t msglen, timestamp_t timestamp);
+	int write (const byte *msg, size_t msglen, timestamp_t timestamp);
 	int read (byte *buf, size_t bufsize);
 	void drain (int check_interval_usecs);
 	int selectable () const { return xthread.selectable(); }

@@ -11,5 +11,5 @@
   <JogWheel value="yes"/>
   <TouchSenseFaders value="yes"/>
   <LogicControlButtons value="yes"/>
-  <UsesIPMIDI value="yes"/>
+  <UsesIPMIDI value="no"/>
 </MackieProtocolDevice>
