@@ -89,7 +89,6 @@ PBD::Signal1<void, MidiRegionView *> MidiRegionView::SelectionCleared;
 MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv,
                                 boost::shared_ptr<MidiRegion> r, double spu, Gdk::Color const & basic_color)
 	: RegionView (parent, tv, r, spu, basic_color)
-	, _force_channel(-1)
 	, _last_channel_selection(0xFFFF)
 	, _current_range_min(0)
 	, _current_range_max(0)
@@ -126,7 +125,6 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
                                 boost::shared_ptr<MidiRegion> r, double spu, Gdk::Color& basic_color,
                                 TimeAxisViewItem::Visibility visibility)
 	: RegionView (parent, tv, r, spu, basic_color, false, visibility)
-	, _force_channel(-1)
 	, _last_channel_selection(0xFFFF)
 	, _current_range_min(0)
 	, _current_range_max(0)
@@ -171,7 +169,6 @@ MidiRegionView::parameter_changed (std::string const & p)
 MidiRegionView::MidiRegionView (const MidiRegionView& other)
 	: sigc::trackable(other)
 	, RegionView (other)
-	, _force_channel(-1)
 	, _last_channel_selection(0xFFFF)
 	, _current_range_min(0)
 	, _current_range_max(0)
@@ -206,7 +203,6 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other)
 
 MidiRegionView::MidiRegionView (const MidiRegionView& other, boost::shared_ptr<MidiRegion> region)
 	: RegionView (other, boost::shared_ptr<Region> (region))
-	, _force_channel(-1)
 	, _last_channel_selection(0xFFFF)
 	, _current_range_min(0)
 	, _current_range_max(0)
@@ -3109,15 +3105,9 @@ MidiRegionView::set_frame_color()
 void
 MidiRegionView::midi_channel_mode_changed(ChannelMode mode, uint16_t mask)
 {
-	switch (mode) {
-	case AllChannels:
-	case FilterChannels:
-		_force_channel = -1;
-		break;
-	case ForceChannel:
-		_force_channel = mask;
+	if (mode == ForceChannel) {
 		mask = 0xFFFF; // Show all notes as active (below)
-	};
+	}
 
 	// Update notes for selection
 	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
