@@ -279,7 +279,7 @@ if [ x$need_iconv != x ] ; then
 fi
 
 tar  xf intltool-0.50.2.tar.gz && (cd intltool-0.50.2  && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "intltool build failed"
-tar  xf gettext-0.18.1.1.tar.gz && (cd gettext-0.18.1.1  && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "gettext build failed"
+tar  xf gettext-0.18.1.1.tar.gz && (cd gettext-0.18.1.1  && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure --with-libiconv-prefix=$PREFIX --with-libintl-prefix=$PREFIX $GLOBAL_CONF && make && make install) || die "gettext build failed"
 tar  xf tiff-4.0.1.tar.gz && (cd tiff-4.0.1 && CFLAGS="$GLOBAL_CFLAGS -DHAVE_APPLE_OPENGL_FRAMEWORK" LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "tiff build failed"
 tar  xf libpng-1.5.10.tar.xz && (cd libpng-1.5.10 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure --with-zlib-prefix=$PREFIX $GLOBAL_CONF && make && make install) || die "libpng build failed"
 tar  xf jpegsrc.v8d.tar.gz && (cd jpeg-8d && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "jpegsrc build failed"
