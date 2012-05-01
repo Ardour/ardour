@@ -107,7 +107,7 @@ if [ ! -f bison-2.5.tar.bz2 ] ; then
 fi
 if [ ! -f glib-2.32.2.tar.xz ] ; then
     echo glib
-    curl -LO http://ftp.gnome.org/pub/gnome/sources/glib/2.31/glib-2.32.2.tar.xz
+    curl -LO http://ftp.gnome.org/pub/gnome/sources/glib/2.32/glib-2.32.2.tar.xz
 fi
 if [ ! -f pkg-config-0.26.tar.gz ] ; then
     echo pkg-config
@@ -308,7 +308,7 @@ tar xf pkg-config-0.26.tar.gz && (cd pkg-config-0.26 && GLIB_CFLAGS="-I$PREFIX/i
 # 
 # step three: rebuild glib (still need CFLAGS in order to find libintl)
 #
-tar xf glib-2.32.2.tar.bz2 && (cd glib-2.32.2 && LDFLAGS="$GLOBAL_LDFLAGS -L$PREFIX/lib -lintl" CFLAGS="$GLOBAL_CFLAGS -I$PREFIX/include" ./configure --prefix=$HOME/gtk/inst && make && make install) || die "glib build failed"
+tar xf glib-2.32.2.tar.xz && (cd glib-2.32.2 && LDFLAGS="$GLOBAL_LDFLAGS -L$PREFIX/lib -lintl" CFLAGS="$GLOBAL_CFLAGS -I$PREFIX/include" ./configure --prefix=$HOME/gtk/inst && make && make install) || die "glib build failed"
 #
 # step four: rebuilding pkg-config now that glib is all set
 #
