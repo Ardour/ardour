@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 function die () {
     echo $*
@@ -102,9 +102,9 @@ if [ ! -f bison-2.5.tar.bz2 ] ; then
     echo bison
     curl -LO ftp://ftp.gnu.org/gnu/bison/bison-2.5.tar.bz2
 fi
-if [ ! -f glib-2.31.2.tar.bz2 ] ; then
+if [ ! -f glib-2.32.2.tar.bz2 ] ; then
     echo glib
-    curl -LO http://ftp.gnome.org/pub/gnome/sources/glib/2.31/glib-2.31.2.tar.bz2
+    curl -LO http://ftp.gnome.org/pub/gnome/sources/glib/2.31/glib-2.32.2.tar.bz2
 fi
 if [ ! -f pkg-config-0.26.tar.gz ] ; then
     echo pkg-config
@@ -138,9 +138,9 @@ if [ ! -f tiff-4.0.1.tar.gz ] ; then
     echo tiff
     curl -LO ftp://ftp.remotesensing.org/pub/libtiff/tiff-4.0.1.tar.gz
 fi
-if [ ! -f libpng-1.5.9.tar.gz ] ; then
+if [ ! -f libpng-1.5.10.tar.gz ] ; then
     echo png
-    curl -LO ftp://ftp.simplesystems.org/pub/libpng/png/src/libpng-1.5.9.tar.gz
+    curl -LO ftp://ftp.simplesystems.org/pub/libpng/png/src/libpng-1.5.10.tar.xz
 fi
 if [ ! -f jpegsrc.v8d.tar.gz ] ; then
     echo jpeg
@@ -271,7 +271,7 @@ tar  xf libiconv-1.14.tar.gz && (cd libiconv-1.14  && CFLAGS=$GLOBAL_CFLAGS LDFL
 tar  xf intltool-0.50.2.tar.gz && (cd intltool-0.50.2  && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "intltool build failed"
 tar  xf gettext-0.18.1.1.tar.gz && (cd gettext-0.18.1.1  && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "gettext build failed"
 tar  xf tiff-4.0.1.tar.gz && (cd tiff-4.0.1 && CFLAGS="$GLOBAL_CFLAGS -DHAVE_APPLE_OPENGL_FRAMEWORK" LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "tiff build failed"
-tar  xf libpng-1.5.9.tar.gz && (cd libpng-1.5.9 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "libpng build failed"
+tar  xf libpng-1.5.10.tar.gz && (cd libpng-1.5.10 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "libpng build failed"
 tar  xf jpegsrc.v8d.tar.gz && (cd jpeg-8d && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "jpegsrc build failed"
 tar xf XML-Simple-2.18.tar.gz && (cd XML-Simple-2.18 && perl Makefile.PL PREFIX=$PREFIX && make && make install) || die "XML-Simple build failed"
 tar xf XML-Parser-2.41.tar.gz && (cd XML-Parser-2.41 && perl Makefile.PL PREFIX=$PREFIX && make && make install) || die "XML-Parser build failed"
@@ -285,7 +285,7 @@ tar xf libffi-3.0.10.tar.gz && (cd libffi-3.0.10 && CFLAGS=$GLOBAL_CFLAGS LDFLAG
 #
 # step one: build glib with everything specified so that pkg-config is not used or required
 #
-tar xf glib-2.31.2.tar.bz2 && (cd glib-2.31.2 && LDFLAGS=-L$PREFIX/lib CFLAGS=-I$PREFIX/include ZLIB_CFLAGS=-I$PREFIX/include ZLIB_LIBS=-I$PREFIX/lib LIBFFI_CFLAGS=-I$PREFIX/lib/libffi-3.0.10/include LIBFFI_LIBS="-L$PREFIX/lib -lffi" ./configure $GLOBAL_CONF --with-pcre=internal --disable-silent-rules && make && make install) && rm -rf glib-2.31.2 || die "glib build1 failed"
+tar xf glib-2.32.2.tar.bz2 && (cd glib-2.32.2 && LDFLAGS=-L$PREFIX/lib CFLAGS=-I$PREFIX/include ZLIB_CFLAGS=-I$PREFIX/include ZLIB_LIBS=-I$PREFIX/lib LIBFFI_CFLAGS=-I$PREFIX/lib/libffi-3.0.10/include LIBFFI_LIBS="-L$PREFIX/lib -lffi" ./configure $GLOBAL_CONF --with-pcre=internal --disable-silent-rules && make && make install) && rm -rf glib-2.32.2 || die "glib build1 failed"
 #
 # step two: build pkg-config with glib flags specified so that pkg-config is not used or required
 #
@@ -293,7 +293,7 @@ tar xf pkg-config-0.26.tar.gz && (cd pkg-config-0.26 && GLIB_CFLAGS="-I$PREFIX/i
 # 
 # step three: rebuild glib (still need CFLAGS in order to find libintl)
 #
-tar xf glib-2.31.2.tar.bz2 && (cd glib-2.31.2 && LDFLAGS="$GLOBAL_LDFLAGS -L$PREFIX/lib -lintl" CFLAGS="$GLOBAL_CFLAGS -I$PREFIX/include" ./configure --prefix=$HOME/gtk/inst && make && make install) || die "glib build failed"
+tar xf glib-2.32.2.tar.bz2 && (cd glib-2.32.2 && LDFLAGS="$GLOBAL_LDFLAGS -L$PREFIX/lib -lintl" CFLAGS="$GLOBAL_CFLAGS -I$PREFIX/include" ./configure --prefix=$HOME/gtk/inst && make && make install) || die "glib build failed"
 #
 # step four: rebuilding pkg-config now that glib is all set
 #
