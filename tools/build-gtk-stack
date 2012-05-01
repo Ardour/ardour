@@ -105,9 +105,9 @@ if [ ! -f bison-2.5.tar.bz2 ] ; then
     echo bison
     curl -LO ftp://ftp.gnu.org/gnu/bison/bison-2.5.tar.bz2
 fi
-if [ ! -f glib-2.32.2.tar.bz2 ] ; then
+if [ ! -f glib-2.32.2.tar.xz ] ; then
     echo glib
-    curl -LO http://ftp.gnome.org/pub/gnome/sources/glib/2.31/glib-2.32.2.tar.bz2
+    curl -LO http://ftp.gnome.org/pub/gnome/sources/glib/2.31/glib-2.32.2.tar.xz
 fi
 if [ ! -f pkg-config-0.26.tar.gz ] ; then
     echo pkg-config
