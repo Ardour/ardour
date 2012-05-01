@@ -59,12 +59,15 @@ if uname -a | grep --silent arwin ; then
 
     CAIRO_CONF="--enable-xlib=no --enable-quartz=yes --enable-xcb=no"
     PANGO_CONF="--without-x"
+    
+    need_iconv=yes
 else 
     export LD_LIBRARY_PATH=$PREFIX/lib{$LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
     GLOBAL_CFLAGS=
     GLOBAL_LDFLAGS=
     CAIRO_CONF=
     PANGO_CONF=
+    need_iconv=
 fi
 
 export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
@@ -267,14 +270,21 @@ tar  xf bison-2.5.tar.bz2 && (cd bison-2.5  && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$G
 tar  xf libxml2-2.7.8.tar.gz && (cd libxml2-2.7.8 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF --with-zlib=$PREFIX ${PYTHON:+--with-python=$PYTHON} && make && sudo make install && sudo chown -R `whoami` $PREFIX) || die "libxml2 build failed"
 tar  xf libxslt-1.1.26.tar.gz && (cd libxslt-1.1.26 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "libxslt build failed"
 tar  xf readline-6.2.tar.gz && (cd readline-6.2  && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "readline build failed"
-tar  xf libiconv-1.14.tar.gz && (cd libiconv-1.14  && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "libiconv build failed"
+
+#
+# Don't build and install libiconv on systems where it is part of glibc
+#
+if [ x$need_iconv != x ] ; then 
+    tar  xf libiconv-1.14.tar.gz && (cd libiconv-1.14  && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "libiconv build failed"
+fi
+
 tar  xf intltool-0.50.2.tar.gz && (cd intltool-0.50.2  && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "intltool build failed"
 tar  xf gettext-0.18.1.1.tar.gz && (cd gettext-0.18.1.1  && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "gettext build failed"
 tar  xf tiff-4.0.1.tar.gz && (cd tiff-4.0.1 && CFLAGS="$GLOBAL_CFLAGS -DHAVE_APPLE_OPENGL_FRAMEWORK" LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "tiff build failed"
-tar  xf libpng-1.5.10.tar.xz && (cd libpng-1.5.10 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "libpng build failed"
+tar  xf libpng-1.5.10.tar.xz && (cd libpng-1.5.10 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure --with-zlib-prefix=$PREFIX $GLOBAL_CONF && make && make install) || die "libpng build failed"
 tar  xf jpegsrc.v8d.tar.gz && (cd jpeg-8d && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "jpegsrc build failed"
-tar xf XML-Simple-2.18.tar.gz && (cd XML-Simple-2.18 && perl Makefile.PL PREFIX=$PREFIX && make && make install) || die "XML-Simple build failed"
-tar xf XML-Parser-2.41.tar.gz && (cd XML-Parser-2.41 && perl Makefile.PL PREFIX=$PREFIX && make && make install) || die "XML-Parser build failed"
+tar xf XML-Parser-2.41.tar.gz && (cd XML-Parser-2.41 && unset MACOSX_DEPLOYMENT_TARGET && perl Makefile.PL PREFIX=$PREFIX && make && make install) || die "XML-Parser build failed"
+tar xf XML-Simple-2.18.tar.gz && (cd XML-Simple-2.18 && unset MACOSX_DEPLOYMENT_TARGET && perl Makefile.PL PREFIX=$PREFIX && make && make install) || die "XML-Simple build failed"
 #
 # libffi has a bug that is caused by it depending on the output format of GNU wc(1)
 #  it can be avoided by changing into the target build directory, re-running configure and then running make from there.
