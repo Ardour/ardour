@@ -20,6 +20,8 @@
 #include <cassert>
 #include <algorithm>
 
+#include <boost/scoped_ptr.hpp>
+
 #include <gtkmm.h>
 
 #include <gtkmm2ext/gtk_ui.h>
@@ -73,6 +75,12 @@ AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView
 	, fade_in_handle(0)
 	, fade_out_handle(0)
 	, fade_position_line(0)
+	, start_xfade_in (0)
+	, start_xfade_out (0)
+	, start_xfade_rect (0)
+	, end_xfade_in (0)
+	, end_xfade_out (0)
+	, end_xfade_rect (0)
 	, _amplitude_above_axis(1.0)
 	, _flags(0)
 	, fade_color(0)
@@ -89,6 +97,12 @@ AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView
 	, fade_in_handle(0)
 	, fade_out_handle(0)
 	, fade_position_line(0)
+	, start_xfade_in (0)
+	, start_xfade_out (0)
+	, start_xfade_rect (0)
+	, end_xfade_in (0)
+	, end_xfade_out (0)
+	, end_xfade_rect (0)
 	, _amplitude_above_axis(1.0)
 	, _flags(0)
 	, fade_color(0)
@@ -102,6 +116,12 @@ AudioRegionView::AudioRegionView (const AudioRegionView& other, boost::shared_pt
 	, fade_in_handle(0)
 	, fade_out_handle(0)
 	, fade_position_line(0)
+	, start_xfade_in (0)
+	, start_xfade_out (0)
+	, start_xfade_rect (0)
+	, end_xfade_in (0)
+	, end_xfade_out (0)
+	, end_xfade_rect (0)
 	, _amplitude_above_axis (other._amplitude_above_axis)
 	, _flags (other._flags)
 	, fade_color(0)
@@ -534,9 +554,23 @@ AudioRegionView::reset_fade_in_shape ()
 void
 AudioRegionView::reset_fade_in_shape_width (framecnt_t width)
 {
+	if (audio_region()->fade_in_is_xfade()) {
+		fade_in_handle->hide ();
+		fade_in_shape->hide ();
+		redraw_start_xfade ();
+		return;
+	} else {
+		if (start_xfade_in) {
+			start_xfade_in->hide ();
+			start_xfade_out->hide ();
+		}
+	}
+
 	if (fade_in_handle == 0) {
 		return;
 	}
+
+	fade_in_handle->show ();
 
 	/* smallest size for a fade is 64 frames */
 
@@ -621,9 +655,23 @@ AudioRegionView::reset_fade_out_shape ()
 void
 AudioRegionView::reset_fade_out_shape_width (framecnt_t width)
 {
+	if (audio_region()->fade_out_is_xfade()) {
+		fade_out_handle->hide ();
+		fade_out_shape->hide ();
+		redraw_end_xfade ();
+		return;
+	} else {
+		if (end_xfade_in) {
+			end_xfade_in->hide ();
+			end_xfade_out->hide ();
+		}
+	}
+
 	if (fade_out_handle == 0) {
 		return;
 	}
+
+	fade_out_handle->show ();
 
 	/* smallest size for a fade is 64 frames */
 
@@ -1464,4 +1512,152 @@ AudioRegionView::thaw_after_trim ()
 	RegionView::thaw_after_trim ();
 
 	unhide_envelope ();
+}
+
+void
+AudioRegionView::redraw_start_xfade ()
+{
+	boost::shared_ptr<AudioRegion> ar (audio_region());
+
+	if (!ar->fade_in() || ar->fade_in()->empty()) {
+		return;
+	}
+
+	int32_t const npoints = trackview.editor().frame_to_pixel (ar->fade_in()->back()->when);
+
+	if (npoints < 3) {
+		return;
+	}
+
+	if (!start_xfade_in) {
+		start_xfade_in = new ArdourCanvas::Line (*group);
+		start_xfade_in->property_width_pixels() = 1;
+		start_xfade_in->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_GainLine.get();
+	}
+
+	if (!start_xfade_out) {
+		start_xfade_out = new ArdourCanvas::Line (*group);
+		start_xfade_out->property_width_pixels() = 1;
+		start_xfade_out->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_GainLine.get();
+	}
+
+	Points* points = get_canvas_points ("xfade edit redraw", npoints);
+	boost::scoped_ptr<float> vec (new float[npoints]);
+
+	ar->fade_in()->curve().get_vector (0, ar->fade_in()->back()->when, vec.get(), npoints);
+
+	for (int i = 0, pci = 0; i < npoints; ++i) {
+		Gnome::Art::Point &p ((*points)[pci++]);
+		p.set_x (i);
+		p.set_y (_height - (_height * vec.get()[i]));
+	}
+
+	start_xfade_in->property_points() = *points;
+	start_xfade_in->show ();
+	start_xfade_in->raise_to_top ();
+
+	/* fade out line */
+
+	boost::shared_ptr<AutomationList> inverse = ar->inverse_fade_in();
+
+	if (!inverse) {
+
+		for (int i = 0, pci = 0; i < npoints; ++i) {
+			Gnome::Art::Point &p ((*points)[pci++]);
+			p.set_x (i);
+			p.set_y (_height - (_height * (1.0 - vec.get()[i])));
+		}
+
+	} else {
+
+		inverse->curve().get_vector (0, inverse->back()->when, vec.get(), npoints);
+
+		for (int i = 0, pci = 0; i < npoints; ++i) {
+			Gnome::Art::Point &p ((*points)[pci++]);
+			p.set_x (i);
+			p.set_y (_height - (_height * vec.get()[i]));
+		}
+	}
+
+	start_xfade_out->property_points() = *points;
+	start_xfade_out->show ();
+	start_xfade_out->raise_to_top ();
+
+	delete points;
+}
+
+void
+AudioRegionView::redraw_end_xfade ()
+{
+	boost::shared_ptr<AudioRegion> ar (audio_region());
+
+	if (!ar->fade_out() || ar->fade_out()->empty()) {
+		return;
+	}
+
+	int32_t const npoints = trackview.editor().frame_to_pixel (ar->fade_out()->back()->when);
+
+	if (npoints < 3) {
+		return;
+	}
+
+	if (!end_xfade_in) {
+		end_xfade_in = new ArdourCanvas::Line (*group);
+		end_xfade_in->property_width_pixels() = 1;
+		end_xfade_in->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_GainLine.get();
+	}
+
+	if (!end_xfade_out) {
+		end_xfade_out = new ArdourCanvas::Line (*group);
+		end_xfade_out->property_width_pixels() = 1;
+		end_xfade_out->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_GainLine.get();
+	}
+
+	Points* points = get_canvas_points ("xfade edit redraw", npoints);
+	boost::scoped_ptr<float> vec (new float[npoints]);
+
+	ar->fade_out()->curve().get_vector (0, ar->fade_out()->back()->when, vec.get(), npoints);
+
+	double rend = trackview.editor().frame_to_pixel (_region->length() - ar->fade_out()->back()->when);
+
+	for (int i = 0, pci = 0; i < npoints; ++i) {
+		Gnome::Art::Point &p ((*points)[pci++]);
+		p.set_x (rend + i);
+		p.set_y (_height - (_height * vec.get()[i]));
+	}
+
+	end_xfade_in->property_points() = *points;
+	end_xfade_in->show ();
+	end_xfade_in->raise_to_top ();
+
+	/* fade in line */
+
+	boost::shared_ptr<AutomationList> inverse = ar->inverse_fade_out ();
+
+	if (!inverse) {
+
+		for (int i = 0, pci = 0; i < npoints; ++i) {
+			Gnome::Art::Point &p ((*points)[pci++]);
+			p.set_x (rend + i);
+			p.set_y (_height - (_height * (1.0 - vec.get()[i])));
+		}
+
+	} else {
+
+		rend = trackview.editor().frame_to_pixel (_region->length() - inverse->back()->when);
+		inverse->curve().get_vector (inverse->front()->when, inverse->back()->when, vec.get(), npoints);
+		
+		for (int i = 0, pci = 0; i < npoints; ++i) {
+			Gnome::Art::Point &p ((*points)[pci++]);
+			p.set_x (rend + i);
+			p.set_y (_height - (_height * vec.get()[i]));
+		}
+	}
+
+	end_xfade_out->property_points() = *points;
+	end_xfade_out->show ();
+	end_xfade_out->raise_to_top ();
+
+
+	delete points;
 }

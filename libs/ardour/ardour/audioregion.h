@@ -95,7 +95,9 @@ class AudioRegion : public Region
 	void set_fade_out_is_xfade (bool yn);
 
 	boost::shared_ptr<AutomationList> fade_in()  { return _fade_in; }
+	boost::shared_ptr<AutomationList> inverse_fade_in()  { return _inverse_fade_in; }
 	boost::shared_ptr<AutomationList> fade_out() { return _fade_out; }
+	boost::shared_ptr<AutomationList> inverse_fade_out()  { return _inverse_fade_out; }
 	boost::shared_ptr<AutomationList> envelope() { return _envelope; }
 
 	Evoral::Range<framepos_t> body_range () const;

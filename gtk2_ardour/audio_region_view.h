@@ -142,6 +142,14 @@ class AudioRegionView : public RegionView
 	ArdourCanvas::SimpleRect*        fade_out_handle; ///< fade out handle, or 0
 	ArdourCanvas::SimpleLine*        fade_position_line;
 
+	ArdourCanvas::Line *start_xfade_in;
+	ArdourCanvas::Line *start_xfade_out;
+	ArdourCanvas::SimpleRect* start_xfade_rect;
+
+	ArdourCanvas::Line *end_xfade_in;
+	ArdourCanvas::Line *end_xfade_out;
+	ArdourCanvas::SimpleRect* end_xfade_rect;
+
 	boost::shared_ptr<AudioRegionGainLine> gain_line;
 
 	double _amplitude_above_axis;
@@ -178,6 +186,9 @@ class AudioRegionView : public RegionView
 	std::vector<GnomeCanvasWaveViewCache*> wave_caches;
 
 	void transients_changed();
+
+	void redraw_start_xfade ();
+	void redraw_end_xfade ();
 
 private:
 

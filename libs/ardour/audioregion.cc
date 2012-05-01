@@ -1042,16 +1042,16 @@ AudioRegion::set_fade_out (FadeShape shape, framecnt_t len)
 		/* setup complementary fade in for lower layers */
 
 		if (!_inverse_fade_out) {
-			_inverse_fade_out.reset (new AutomationList (Evoral::Parameter (FadeInAutomation)));
+			_inverse_fade_out.reset (new AutomationList (Evoral::Parameter (FadeOutAutomation)));
 		}
 
 		_inverse_fade_out->clear ();
 		_inverse_fade_out->fast_simple_add (0.0, 0.0);
-		_inverse_fade_out->fast_simple_add ((len * 0.166667), 0.166366);
-		_inverse_fade_out->fast_simple_add ((len * 0.333333), 0.332853);
-		_inverse_fade_out->fast_simple_add ((len * 0.500000), 0.499459);
-		_inverse_fade_out->fast_simple_add ((len * 0.666667), 0.666186);
-		_inverse_fade_out->fast_simple_add ((len * 0.833333), 0.833033);
+		_inverse_fade_out->fast_simple_add ((len * 0.166667), 0.282192);
+		_inverse_fade_out->fast_simple_add ((len * 0.333333), 0.518174);
+		_inverse_fade_out->fast_simple_add ((len * 0.500000), 0.707946);
+		_inverse_fade_out->fast_simple_add ((len * 0.666667), 0.851507);
+		_inverse_fade_out->fast_simple_add ((len * 0.833333), 0.948859);
 		_inverse_fade_out->fast_simple_add (len, 1.0);
 
 		break;
@@ -1068,7 +1068,7 @@ AudioRegion::set_fade_out (FadeShape shape, framecnt_t len)
 		/* setup complementary fade in for lower layers */
 
 		if (!_inverse_fade_out) {
-			_inverse_fade_out.reset (new AutomationList (Evoral::Parameter (FadeInAutomation)));
+			_inverse_fade_out.reset (new AutomationList (Evoral::Parameter (FadeOutAutomation)));
 		}
 
 		_inverse_fade_out->clear ();
