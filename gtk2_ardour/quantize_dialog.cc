@@ -46,20 +46,11 @@ static const gchar *_grid_strings[] = {
 	0
 };
 
-static const gchar *_type_strings[] = {
-	N_("Grid"),
-	N_("Legato"),
-	N_("Groove"),
-	0
-};
-
 std::vector<std::string> QuantizeDialog::grid_strings;
-std::vector<std::string> QuantizeDialog::type_strings;
 
 QuantizeDialog::QuantizeDialog (PublicEditor& e)
 	: ArdourDialog (_("Quantize"), false, false)
 	, editor (e)
-	, type_label (_("Quantize Type"))
 	, strength_adjustment (100.0, 0.0, 100.0, 1.0, 10.0)
 	, strength_spinner (strength_adjustment)
 	, strength_label (_("Strength"))
@@ -74,7 +65,6 @@ QuantizeDialog::QuantizeDialog (PublicEditor& e)
 {
 	if (grid_strings.empty()) {
 		grid_strings =  I18N (_grid_strings);
-		type_strings =  I18N (_type_strings);
 	}
 
 	set_popdown_strings (start_grid_combo, grid_strings);
@@ -82,19 +72,11 @@ QuantizeDialog::QuantizeDialog (PublicEditor& e)
 	set_popdown_strings (end_grid_combo, grid_strings);
 	end_grid_combo.set_active_text (grid_strings.front());
 
-	set_popdown_strings (type_combo, type_strings);
-	type_combo.set_active_text (type_strings.front());
-
 	Table* table = manage (new Table (6, 2));
 	table->set_spacings (12);
 	table->set_border_width (12);
 
 	int r = 0;
-
-	type_label.set_alignment (0, 0.5);
-	table->attach (type_label, 0, 1, r, r + 1);
-	table->attach (type_combo, 1, 2, r, r + 1);
-	++r;
 
 	table->attach (snap_start_button, 0, 1, r, r + 1);
 	table->attach (start_grid_combo, 1, 2, r, r + 1);

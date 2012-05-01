@@ -30,8 +30,7 @@ class Session;
 
 class Quantize : public MidiOperator {
 public:
-	Quantize (ARDOUR::Session&, QuantizeType type,
-			bool snap_start, bool snap_end,
+	Quantize (ARDOUR::Session&, bool snap_start, bool snap_end,
 			double start_grid, double end_grid,
 			float strength, float swing, float threshold);
 	~Quantize ();

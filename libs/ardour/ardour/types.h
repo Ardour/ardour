@@ -510,12 +510,6 @@ namespace ARDOUR {
 		Rectified
 	};
 
-	enum QuantizeType {
-		Plain,
-		Legato,
-		Groove
-	};
-
 	struct CleanupReport {
 		std::vector<std::string> paths;
 		size_t                   space;
