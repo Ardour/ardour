@@ -39,6 +39,7 @@
 #include "pbd/stateful.h"
 #include "pbd/statefuldestructible.h"
 #include "pbd/sequence_property.h"
+#include "pbd/stacktrace.h"
 
 #include "evoral/types.hpp"
 
@@ -231,7 +232,10 @@ public:
   protected:
 	struct RegionLock {
 		RegionLock (Playlist *pl, bool do_block_notify = true) : playlist (pl), block_notify (do_block_notify) {
-			playlist->region_lock.lock();
+			if (!playlist->region_lock.trylock()) {
+				std::cerr << "Lock for playlist " << pl->name() << " already held\n";
+				PBD::stacktrace (std::cerr, 10);
+			}	
 			if (block_notify) {
 				playlist->delay_notifications();
 			}
@@ -246,8 +250,6 @@ public:
 		bool block_notify;
 	};
 
-	friend class RegionLock;
-
 	RegionListProperty   regions;  /* the current list of regions in the playlist */
 	std::set<boost::shared_ptr<Region> > all_regions; /* all regions ever added to this playlist */
 	PBD::ScopedConnectionList region_state_changed_connections;
@@ -255,11 +257,6 @@ public:
 	int             _sort_id;
 	mutable gint    block_notifications;
 	mutable gint    ignore_state_changes;
-#ifdef HAVE_GLIB_THREADS_RECMUTEX
-	mutable Glib::Threads::RecMutex region_lock;
-#else
-	mutable Glib::RecMutex region_lock;
-#endif	
 	std::set<boost::shared_ptr<Region> > pending_adds;
 	std::set<boost::shared_ptr<Region> > pending_removes;
 	RegionList       pending_bounds;
@@ -302,6 +299,8 @@ public:
 	void clear_pending ();
 
 	void _set_sort_id ();
+
+	boost::shared_ptr<RegionList> regions_touched_locked (framepos_t start, framepos_t end);
 
 	void notify_region_removed (boost::shared_ptr<Region>);
 	void notify_region_added (boost::shared_ptr<Region>);
@@ -365,8 +364,11 @@ public:
 	*/
 	virtual void pre_uncombine (std::vector<boost::shared_ptr<Region> >&, boost::shared_ptr<Region>) {}
 
-private:
+  private:
+	friend class RegionLock;
+	mutable Glib::Mutex region_lock;
 
+  private:
 	void setup_layering_indices (RegionList const &);
 	void coalesce_and_check_crossfades (std::list<Evoral::Range<framepos_t> >);
 	boost::shared_ptr<RegionList> find_regions_at (framepos_t);

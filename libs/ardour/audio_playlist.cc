@@ -186,16 +186,12 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, fr
 	   its OK to block (for short intervals).
 	*/
 
-#ifdef HAVE_GLIB_THREADS_RECMUTEX
-	Glib::Threads::RecMutex::Lock lm (region_lock);
-#else	
-	Glib::RecMutex::Lock rm (region_lock);
-#endif	
+	Playlist::RegionLock rl (this, false);
 
 	/* Find all the regions that are involved in the bit we are reading,
 	   and sort them by descending layer and ascending position.
 	*/
-	boost::shared_ptr<RegionList> all = regions_touched (start, start + cnt - 1);
+	boost::shared_ptr<RegionList> all = regions_touched_locked (start, start + cnt - 1);
 	all->sort (ReadSorter ());
 
 	/* This will be a list of the bits of our read range that we have

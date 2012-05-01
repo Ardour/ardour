@@ -1758,6 +1758,12 @@ boost::shared_ptr<RegionList>
 Playlist::regions_touched (framepos_t start, framepos_t end)
 {
 	RegionLock rlock (this);
+	return regions_touched_locked (start, end);
+}
+
+boost::shared_ptr<RegionList>
+Playlist::regions_touched_locked (framepos_t start, framepos_t end)
+{
 	boost::shared_ptr<RegionList> rlist (new RegionList);
 	
 	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
@@ -1769,126 +1775,125 @@ Playlist::regions_touched (framepos_t start, framepos_t end)
 	return rlist;
 }
 
- framepos_t
- Playlist::find_next_transient (framepos_t from, int dir)
- {
-	 RegionLock rlock (this);
-	 AnalysisFeatureList points;
-	 AnalysisFeatureList these_points;
+framepos_t
+Playlist::find_next_transient (framepos_t from, int dir)
+{
+	RegionLock rlock (this);
+	AnalysisFeatureList points;
+	AnalysisFeatureList these_points;
+	
+	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
+		if (dir > 0) {
+			if ((*i)->last_frame() < from) {
+				continue;
+			}
+		} else {
+			if ((*i)->first_frame() > from) {
+				continue;
+			}
+		}
+		
+		(*i)->get_transients (these_points);
+		
+		/* add first frame, just, err, because */
+		
+		these_points.push_back ((*i)->first_frame());
+		
+		points.insert (points.end(), these_points.begin(), these_points.end());
+		these_points.clear ();
+	}
+	
+	if (points.empty()) {
+		return -1;
+	}
+	
+	TransientDetector::cleanup_transients (points, _session.frame_rate(), 3.0);
+	bool reached = false;
+	
+	if (dir > 0) {
+		for (AnalysisFeatureList::iterator x = points.begin(); x != points.end(); ++x) {
+			if ((*x) >= from) {
+				reached = true;
+			}
+			
+			if (reached && (*x) > from) {
+				return *x;
+			}
+		}
+	} else {
+		for (AnalysisFeatureList::reverse_iterator x = points.rbegin(); x != points.rend(); ++x) {
+			if ((*x) <= from) {
+				reached = true;
+			}
+			
+			if (reached && (*x) < from) {
+				return *x;
+			}
+		}
+	}
+	
+	return -1;
+}
 
-	 for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
-		 if (dir > 0) {
-			 if ((*i)->last_frame() < from) {
-				 continue;
-			 }
-		 } else {
-			 if ((*i)->first_frame() > from) {
-				 continue;
-			 }
-		 }
-
-		 (*i)->get_transients (these_points);
-
-		 /* add first frame, just, err, because */
-
-		 these_points.push_back ((*i)->first_frame());
-
-		 points.insert (points.end(), these_points.begin(), these_points.end());
-		 these_points.clear ();
-	 }
-
-	 if (points.empty()) {
-		 return -1;
-	 }
-
-	 TransientDetector::cleanup_transients (points, _session.frame_rate(), 3.0);
-	 bool reached = false;
-
-	 if (dir > 0) {
-		 for (AnalysisFeatureList::iterator x = points.begin(); x != points.end(); ++x) {
-			 if ((*x) >= from) {
-				 reached = true;
-			 }
-
-			 if (reached && (*x) > from) {
-				 return *x;
-			 }
-		 }
-	 } else {
-		 for (AnalysisFeatureList::reverse_iterator x = points.rbegin(); x != points.rend(); ++x) {
-			 if ((*x) <= from) {
-				 reached = true;
-			 }
-
-			 if (reached && (*x) < from) {
-				 return *x;
-			 }
-		 }
-	 }
-
-	 return -1;
- }
-
- boost::shared_ptr<Region>
- Playlist::find_next_region (framepos_t frame, RegionPoint point, int dir)
- {
-	 RegionLock rlock (this);
-	 boost::shared_ptr<Region> ret;
-	 framepos_t closest = max_framepos;
-
-	 bool end_iter = false;
-
-	 for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
-
-		 if(end_iter) break;
-
-		 frameoffset_t distance;
-		 boost::shared_ptr<Region> r = (*i);
-		 framepos_t pos = 0;
-
-		 switch (point) {
-		 case Start:
-			 pos = r->first_frame ();
-			 break;
-		 case End:
-			 pos = r->last_frame ();
-			 break;
-		 case SyncPoint:
-			 pos = r->sync_position ();
-			 break;
-		 }
-
-		 switch (dir) {
-		 case 1: /* forwards */
-
-			 if (pos > frame) {
-				 if ((distance = pos - frame) < closest) {
-					 closest = distance;
-					 ret = r;
-					 end_iter = true;
-				 }
-			 }
-
-			 break;
-
-		 default: /* backwards */
-
-			 if (pos < frame) {
-				 if ((distance = frame - pos) < closest) {
-					 closest = distance;
-					 ret = r;
-				 }
-			 }
-			 else {
-				 end_iter = true;
-			 }
-
-			 break;
-		 }
-	 }
-
-	 return ret;
- }
+boost::shared_ptr<Region>
+Playlist::find_next_region (framepos_t frame, RegionPoint point, int dir)
+{
+	RegionLock rlock (this);
+	boost::shared_ptr<Region> ret;
+	framepos_t closest = max_framepos;
+	
+	bool end_iter = false;
+	
+	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
+		
+		if(end_iter) break;
+		
+		frameoffset_t distance;
+		boost::shared_ptr<Region> r = (*i);
+		framepos_t pos = 0;
+		
+		switch (point) {
+		case Start:
+			pos = r->first_frame ();
+			break;
+		case End:
+			pos = r->last_frame ();
+			break;
+		case SyncPoint:
+			pos = r->sync_position ();
+			break;
+		}
+		
+		switch (dir) {
+		case 1: /* forwards */
+			
+			if (pos > frame) {
+				if ((distance = pos - frame) < closest) {
+					closest = distance;
+					ret = r;
+					end_iter = true;
+				}
+			}
+			
+			break;
+			
+		default: /* backwards */
+			
+			if (pos < frame) {
+				if ((distance = frame - pos) < closest) {
+					closest = distance;
+					ret = r;
+				}
+			} else {
+				end_iter = true;
+			}
+			
+			break;
+		}
+	}
+	
+	return ret;
+}
 
  framepos_t
  Playlist::find_next_region_boundary (framepos_t frame, int dir)
