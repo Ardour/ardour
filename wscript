@@ -473,6 +473,10 @@ def configure(conf):
         conf.define ('TOP_MENUBAR',1)
         conf.define ('GTKOSX',1)
 
+        #
+        # need this on OS X to pick up long long variants of several math functions
+        #
+
         conf.env.append_value('CXXFLAGS_APPLEUTILITY', '-I../libs')
         #
         #       Define OSX as a uselib to use when compiling

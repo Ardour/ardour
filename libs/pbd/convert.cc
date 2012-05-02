@@ -28,6 +28,8 @@
 #endif
 #include <inttypes.h>
 
+#include <glib.h>
+
 #include "pbd/convert.h"
 
 #include "i18n.h"
@@ -264,15 +266,15 @@ string_is_affirmative (const std::string& str)
 		return false;
 	}
 
-	/* the use of g_strncasecmp() is solely to get around issues with
+	/* the use of g_ascii_strncasecmp() is solely to get around issues with
 	 * charsets posed by trying to use C++ for the same
 	 * comparison. switching a std::string to its lower- or upper-case
 	 * version has several issues, but handled by default
 	 * in the way we desire when doing it in C.
 	 */
 
-	return str == "1" || str == "y" || str == "Y" || (!g_strncasecmp(str.c_str(), "yes", str.length())) ||
-		(!g_strncasecmp(str.c_str(), "true", str.length()));
+	return str == "1" || str == "y" || str == "Y" || (!g_ascii_strncasecmp(str.c_str(), "yes", str.length())) ||
+		(!g_ascii_strncasecmp(str.c_str(), "true", str.length()));
 }
 
 /** A wrapper for dgettext that takes a msgid of the form Context|Text.

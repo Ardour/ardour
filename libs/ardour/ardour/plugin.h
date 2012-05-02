@@ -118,8 +118,8 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 	virtual uint32_t parameter_count () const = 0;
 	virtual float default_value (uint32_t port) = 0;
 	virtual float get_parameter(uint32_t which) const = 0;
-	virtual std::string get_docs() const { return ""; }
-	virtual std::string get_parameter_docs(uint32_t which) const { return ""; }
+	virtual std::string get_docs () const { return ""; }
+	virtual std::string get_parameter_docs (uint32_t /*which*/) const { return ""; }
 
 	virtual int get_parameter_descriptor (uint32_t which, ParameterDescriptor&) const = 0;
 	virtual uint32_t nth_parameter (uint32_t which, bool& ok) const = 0;

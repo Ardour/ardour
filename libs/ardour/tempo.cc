@@ -19,10 +19,9 @@
 
 #include <algorithm>
 #include <stdexcept>
+#include <cmath>
 
 #include <unistd.h>
-
-#include <cmath>
 
 #include <glibmm/thread.h>
 #include "pbd/xml++.h"

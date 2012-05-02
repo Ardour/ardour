@@ -81,7 +81,7 @@ BroadcastInfo::set_originator (std::string const & str)
 }
 
 void
-BroadcastInfo::set_originator_ref_from_session (Session const & session)
+BroadcastInfo::set_originator_ref_from_session (Session const & /*session*/)
 {
 	_has_info = true;
 

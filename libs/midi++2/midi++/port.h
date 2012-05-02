@@ -57,7 +57,7 @@ class Port {
 	// FIXME: make Manager a friend of port so these can be hidden?
 
 	/* Only for use by MidiManager.  Don't ever call this. */
-	virtual void cycle_start (pframes_t nframes) {}
+	virtual void cycle_start (pframes_t) {}
 	/* Only for use by MidiManager.  Don't ever call this. */
 	virtual void cycle_end () {}
 
@@ -82,7 +82,7 @@ class Port {
 	 * executes any part of a JACK process callback (will 
 	 * simply return immediately in that situation).
 	 */
-	virtual void drain (int check_interval_usecs) {}
+	virtual void drain (int /* check_interval_usecs */) {}
 
 	/** Write a message to port.
 	 * @return true on success.
