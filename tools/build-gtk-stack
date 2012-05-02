@@ -203,7 +203,7 @@ if [ ! -f gdk-pixbuf-2.25.0.tar.xz ] ; then
 fi
 if [ ! -f intltool-0.50.2.tar.gz ] ; then
     echo intltool
-    curl -LO https://launchpad.net/intltool/trunk/0.50.2/+download/intltool-0.50.2.tar.gz
+    curl -LO http://launchpad.net/intltool/trunk/0.50.2/+download/intltool-0.50.2.tar.gz
 fi
 if [ ! -f gtk-osx-docbook-1.0.tar.gz ] ; then
     echo gtk-osx-docbook
