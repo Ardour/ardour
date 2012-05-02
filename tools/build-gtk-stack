@@ -13,7 +13,7 @@ function fetch_as_is() {
     fi
 }
 
-function fetch_as_() {
+function fetch_as () {
     if uname -a | grep --silent arwin ; then
         curl -L -o $1 $2
     else
