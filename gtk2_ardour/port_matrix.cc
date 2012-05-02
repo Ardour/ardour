@@ -444,10 +444,8 @@ PortMatrix::popup_menu (BundleChannel column, BundleChannel row, uint32_t t)
 				if (bc[dim].channel != -1) {
 					add_remove_option (sub, w, bc[dim].channel);
 				} else {
-
-					snprintf (buf, sizeof (buf), _("Remove all"));
 					sub.push_back (
-						MenuElem (buf, sigc::bind (sigc::mem_fun (*this, &PortMatrix::remove_all_channels), w))
+						MenuElem (_("Remove all"), sigc::bind (sigc::mem_fun (*this, &PortMatrix::remove_all_channels), w))
 						);
 
 					if (bc[dim].bundle->nchannels().n_total() > 1) {

@@ -130,7 +130,7 @@ Strip::add (Control & control)
 }
 
 void
-Strip::set_route (boost::shared_ptr<Route> r, bool with_messages)
+Strip::set_route (boost::shared_ptr<Route> r, bool /*with_messages*/)
 {
 	if (_controls_locked) {
 		return;
@@ -419,7 +419,7 @@ Strip::notify_panner_width_changed (bool force_update)
 }
 
 void
-Strip::select_event (Button& button, ButtonState bs)
+Strip::select_event (Button&, ButtonState bs)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, "select button\n");
 	
@@ -454,7 +454,7 @@ Strip::select_event (Button& button, ButtonState bs)
 }
 
 void
-Strip::vselect_event (Button& button, ButtonState bs)
+Strip::vselect_event (Button&, ButtonState bs)
 {
 	if (bs == press) {
 
@@ -480,7 +480,7 @@ Strip::vselect_event (Button& button, ButtonState bs)
 }
 
 void
-Strip::fader_touch_event (Button& button, ButtonState bs)
+Strip::fader_touch_event (Button&, ButtonState bs)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("fader touch, press ? %1\n", (bs == press)));
 	

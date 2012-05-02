@@ -36,7 +36,7 @@ using namespace Gtkmm2ext;
 using namespace ARDOUR;
 using namespace PBD;
 
-TempoDialog::TempoDialog (TempoMap& map, framepos_t frame, const string & action)
+TempoDialog::TempoDialog (TempoMap& map, framepos_t frame, const string&)
 	: ArdourDialog (_("New Tempo"))
 	, bpm_adjustment (60.0, 1.0, 999.9, 0.1, 1.0)
 	, bpm_spinner (bpm_adjustment)
@@ -51,7 +51,7 @@ TempoDialog::TempoDialog (TempoMap& map, framepos_t frame, const string & action
 	init (when, tempo.beats_per_minute(), tempo.note_type(), true);
 }
 
-TempoDialog::TempoDialog (TempoSection& section, const string & action)
+TempoDialog::TempoDialog (TempoSection& section, const string&)
 	: ArdourDialog ("Edit Tempo")
 	, bpm_adjustment (60.0, 1.0, 999.9, 0.1, 1.0)
 	, bpm_spinner (bpm_adjustment)
@@ -251,7 +251,7 @@ TempoDialog::pulse_change ()
 }
 
 
-MeterDialog::MeterDialog (TempoMap& map, framepos_t frame, const string & action)
+MeterDialog::MeterDialog (TempoMap& map, framepos_t frame, const string&)
 	: ArdourDialog ("New Meter")
 {
 	Timecode::BBT_Time when;
@@ -262,7 +262,7 @@ MeterDialog::MeterDialog (TempoMap& map, framepos_t frame, const string & action
 	init (when, meter.divisions_per_bar(), meter.note_divisor(), true);
 }
 
-MeterDialog::MeterDialog (MeterSection& section, const string & action)
+MeterDialog::MeterDialog (MeterSection& section, const string&)
 	: ArdourDialog ("Edit Meter")
 {
 	init (section.start(), section.divisions_per_bar(), section.note_divisor(), section.movable());

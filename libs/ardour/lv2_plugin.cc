@@ -175,7 +175,8 @@ LV2Plugin::LV2Plugin (AudioEngine& engine,
                       Session&     session,
                       void*        c_plugin,
                       framecnt_t   rate)
-	: Plugin(engine, session)
+	: Plugin (engine, session)
+	, Workee ()
 	, _impl(new Impl())
 	, _features(NULL)
 	, _worker(NULL)
@@ -185,7 +186,8 @@ LV2Plugin::LV2Plugin (AudioEngine& engine,
 }
 
 LV2Plugin::LV2Plugin (const LV2Plugin& other)
-	: Plugin(other)
+	: Plugin (other)
+	, Workee ()
 	, _impl(new Impl())
 	, _features(NULL)
 	, _worker(NULL)

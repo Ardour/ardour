@@ -494,7 +494,7 @@ Surface::host_connection_confirmation (const MidiByteArray & bytes)
 }
 
 void 
-Surface::handle_port_inactive (SurfacePort * port)
+Surface::handle_port_inactive (SurfacePort*)
 {
 	_active = false;
 }
@@ -820,7 +820,7 @@ Surface::next_jog_mode ()
 }
 
 void
-Surface::set_jog_mode (JogWheel::Mode m)
+Surface::set_jog_mode (JogWheel::Mode)
 {
 }	
 

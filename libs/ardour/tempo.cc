@@ -1195,7 +1195,7 @@ TempoMap::bbt_duration_at (framepos_t pos, const BBT_Time& bbt, int dir)
 }
 
 framecnt_t
-TempoMap::bbt_duration_at_unlocked (const BBT_Time& when, const BBT_Time& bbt, int dir) 
+TempoMap::bbt_duration_at_unlocked (const BBT_Time& when, const BBT_Time& bbt, int /*dir*/) 
 {
 	if (bbt.bars == 0 && bbt.beats == 0 && bbt.ticks == 0) {
 		return 0;

@@ -706,7 +706,7 @@ ARDOUR_UI::float_big_clock (Gtk::Window* parent)
 }
 
 void
-ARDOUR_UI::big_clock_size_allocate (Gtk::Allocation& alloc)
+ARDOUR_UI::big_clock_size_allocate (Gtk::Allocation&)
 {
 	if (!big_clock_resize_in_progress) {
 		Glib::signal_idle().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::idle_big_clock_text_resizer), 0, 0));

@@ -522,7 +522,7 @@ ShuttleControl::on_expose_event (GdkEventExpose*)
 		if (Config->get_shuttle_units() == Percentage) {
 
 			if (speed == 1.0) {
-				snprintf (buf, sizeof (buf), _("Playing"));
+				snprintf (buf, sizeof (buf), "%s", _("Playing"));
 			} else {
 				if (speed < 0.0) {
 					snprintf (buf, sizeof (buf), "<<< %d%%", (int) round (-speed * 100));
@@ -544,7 +544,7 @@ ShuttleControl::on_expose_event (GdkEventExpose*)
 		}
 
 	} else {
-		snprintf (buf, sizeof (buf), _("Stopped"));
+		snprintf (buf, sizeof (buf), "%s", _("Stopped"));
 	}
 
 	last_speed_displayed = speed;
@@ -559,10 +559,10 @@ ShuttleControl::on_expose_event (GdkEventExpose*)
 
 	switch (Config->get_shuttle_behaviour()) {
 	case Sprung:
-		snprintf (buf, sizeof (buf), _("Sprung"));
+		snprintf (buf, sizeof (buf), "%s", _("Sprung"));
 		break;
 	case Wheel:
-		snprintf (buf, sizeof (buf), _("Wheel"));
+		snprintf (buf, sizeof (buf), "%s", _("Wheel"));
 		break;
 	}
 

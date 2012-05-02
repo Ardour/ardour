@@ -111,7 +111,7 @@ StereoPanner::set_drag_data ()
 }
 
 bool
-StereoPanner::on_expose_event (GdkEventExpose* ev)
+StereoPanner::on_expose_event (GdkEventExpose*)
 {
 	Glib::RefPtr<Gdk::Window> win (get_window());
 	Glib::RefPtr<Gdk::GC> gc (get_style()->get_base_gc (get_state()));

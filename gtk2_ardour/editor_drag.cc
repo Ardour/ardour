@@ -4360,7 +4360,7 @@ MidiRubberbandSelectDrag::MidiRubberbandSelectDrag (Editor* e, MidiRegionView* r
 }
 
 void
-MidiRubberbandSelectDrag::select_things (int button_state, framepos_t x1, framepos_t x2, double y1, double y2, bool drag_in_progress)
+MidiRubberbandSelectDrag::select_things (int button_state, framepos_t x1, framepos_t x2, double y1, double y2, bool /*drag_in_progress*/)
 {
 	framepos_t const p = _region_view->region()->position ();
 	double const y = _region_view->midi_view()->y_position ();
@@ -4393,7 +4393,7 @@ MidiVerticalSelectDrag::MidiVerticalSelectDrag (Editor* e, MidiRegionView* rv)
 }
 
 void
-MidiVerticalSelectDrag::select_things (int button_state, framepos_t x1, framepos_t x2, double y1, double y2, bool drag_in_progress)
+MidiVerticalSelectDrag::select_things (int button_state, framepos_t /*x1*/, framepos_t /*x2*/, double y1, double y2, bool /*drag_in_progress*/)
 {
 	double const y = _region_view->midi_view()->y_position ();
 
@@ -4516,7 +4516,7 @@ NoteCreateDrag::motion (GdkEvent* event, bool)
 }
 
 void
-NoteCreateDrag::finished (GdkEvent* event, bool had_movement)
+NoteCreateDrag::finished (GdkEvent*, bool had_movement)
 {
 	if (!had_movement) {
 		return;

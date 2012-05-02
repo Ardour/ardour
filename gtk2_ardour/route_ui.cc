@@ -629,7 +629,7 @@ RouteUI::update_monitoring_display ()
 }
 
 bool
-RouteUI::monitor_input_press(GdkEventButton* ev)
+RouteUI::monitor_input_press(GdkEventButton*)
 {
 	return true;
 }
@@ -641,7 +641,7 @@ RouteUI::monitor_input_release(GdkEventButton* ev)
 }
 
 bool
-RouteUI::monitor_disk_press (GdkEventButton* ev)
+RouteUI::monitor_disk_press (GdkEventButton*)
 {
 	return true;
 }

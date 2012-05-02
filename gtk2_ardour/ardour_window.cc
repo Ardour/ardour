@@ -36,7 +36,7 @@ ArdourWindow::ArdourWindow (string title)
 	init ();
 }
 
-ArdourWindow::ArdourWindow (Gtk::Window& parent, string title)
+ArdourWindow::ArdourWindow (Gtk::Window& parent, string /*title*/)
 	: Window ()
 {
 	init ();

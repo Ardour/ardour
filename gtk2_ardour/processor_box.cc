@@ -965,7 +965,7 @@ ProcessorBox::enter_notify (GdkEventCrossing*)
 }
 
 bool
-ProcessorBox::leave_notify (GdkEventCrossing* ev)
+ProcessorBox::leave_notify (GdkEventCrossing*)
 {
 	return false;
 }

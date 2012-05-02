@@ -925,7 +925,7 @@ ARDOUR_UI::update_sample_rate (framecnt_t)
 
 	if (!engine->connected()) {
 
-		snprintf (buf, sizeof (buf), _("disconnected"));
+		snprintf (buf, sizeof (buf), "%s", _("disconnected"));
 
 	} else {
 
@@ -1063,7 +1063,7 @@ ARDOUR_UI::update_disk_space()
 	framecnt_t fr = _session->frame_rate();
 
 	if (frames == max_framecnt) {
-		snprintf (buf, sizeof (buf), _("Disk: <span foreground=\"green\">24hrs+</span>"));
+		snprintf (buf, sizeof (buf), "%s", _("Disk: <span foreground=\"green\">24hrs+</span>"));
 	} else {
 		rec_enabled_streams = 0;
 		_session->foreach_route (this, &ARDOUR_UI::count_recenabled_streams);
@@ -1079,7 +1079,7 @@ ARDOUR_UI::update_disk_space()
 		hrs  = frames / (fr * 3600);
 
 		if (hrs > 24) {
-			snprintf (buf, sizeof (buf), _("Disk: <span foreground=\"green\">&gt;24 hrs</span>"));
+			snprintf (buf, sizeof (buf), "%s", _("Disk: <span foreground=\"green\">&gt;24 hrs</span>"));
 		} else {
 			frames -= hrs * fr * 3600;
 			mins = frames / (fr * 60);

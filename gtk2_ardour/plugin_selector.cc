@@ -199,7 +199,7 @@ PluginSelector::~PluginSelector ()
 }
 
 void
-PluginSelector::row_activated(Gtk::TreeModel::Path path, Gtk::TreeViewColumn* col)
+PluginSelector::row_activated(Gtk::TreeModel::Path, Gtk::TreeViewColumn*)
 {
 	btn_add_clicked();
 }
