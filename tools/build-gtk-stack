@@ -9,7 +9,7 @@ function fetch_as_is() {
     if uname -a | grep --silent arwin ; then
         curl -LO $1
     else
-        wget $1
+        wget --no-check-certificate $1
     fi
 }
 
@@ -17,7 +17,7 @@ function fetch_as () {
     if uname -a | grep --silent arwin ; then
         curl -L -o $1 $2
     else
-        wget $1 -O $1 $2
+        wget --no-check-certificate -O $1 $2
     fi
 }
     
