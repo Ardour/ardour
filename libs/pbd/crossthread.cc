@@ -104,7 +104,7 @@ CrossThreadChannel::drain (int fd)
 {
 	/* drain selectable fd */
 	char buf[64];
-	while (::read (fd, buf, sizeof (buf)) > 0);
+	while (::read (fd, buf, sizeof (buf)) > 0) {};
 }
 
 int
