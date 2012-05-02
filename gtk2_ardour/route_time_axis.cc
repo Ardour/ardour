@@ -2362,13 +2362,16 @@ RouteTimeAxisView::set_button_names ()
                         switch (Config->get_listen_position()) {
                         case AfterFaderListen:
                                 solo_button->set_text (_("A"));
+				ARDOUR_UI::instance()->set_tip (*solo_button, _("After-fade listen (AFL)"));
                                 break;
                         case PreFaderListen:
                                 solo_button->set_text (_("P"));
+				ARDOUR_UI::instance()->set_tip (*solo_button, _("Pre-fade listen (PFL)"));
                                 break;
                         }
                 } else {
                         solo_button->set_text (_("s"));
+			ARDOUR_UI::instance()->set_tip (*solo_button, _("Solo"));
                 }
         }
 	mute_button->set_text (_("m"));
