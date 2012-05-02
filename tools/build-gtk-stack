@@ -91,79 +91,79 @@ GLOBAL_CONF="--prefix=$PREFIX"
 
 if [ ! -f xz-5.0.3.tar.bz2 ] ; then
     echo xz
-    fetch_asis http://tukaani.org/xz/xz-5.0.3.tar.bz2
+    fetch_as_is http://tukaani.org/xz/xz-5.0.3.tar.bz2
 fi
 if [ ! -f tar-1.26.tar.bz2 ] ; then
     echo tar
-    fetch_asis http://ftp.gnu.org/gnu/tar/tar-1.26.tar.bz2
+    fetch_as_is http://ftp.gnu.org/gnu/tar/tar-1.26.tar.bz2
 fi
 if [ ! -f m4-1.4.16.tar.bz2 ] ; then
     echo m4
-    fetch_asis http://ftp.gnu.org/gnu/m4/m4-1.4.16.tar.bz2
+    fetch_as_is http://ftp.gnu.org/gnu/m4/m4-1.4.16.tar.bz2
 fi
 if [ ! -f automake-1.11.3.tar.gz ] ; then
     echo automake
-    fetch_asis http://ftp.gnu.org/gnu/automake/automake-1.11.3.tar.gz
+    fetch_as_is http://ftp.gnu.org/gnu/automake/automake-1.11.3.tar.gz
 fi
 if [ ! -f autoconf-2.68.tar.bz2 ] ; then
     echo autoconf
-    fetch_asis http://ftp.gnu.org/gnu/autoconf/autoconf-2.68.tar.bz2
+    fetch_as_is http://ftp.gnu.org/gnu/autoconf/autoconf-2.68.tar.bz2
 fi
 if [ ! -f libtool-2.4.2.tar.gz ] ; then
     echo libtool
-    fetch_asis http://ftp.gnu.org/gnu/libtool/libtool-2.4.2.tar.gz
+    fetch_as_is http://ftp.gnu.org/gnu/libtool/libtool-2.4.2.tar.gz
 fi
 if [ ! -f make-3.82.tar.bz2 ] ; then
     echo make
-    fetch_asis http://ftp.gnu.org/gnu/make/make-3.82.tar.bz2
+    fetch_as_is http://ftp.gnu.org/gnu/make/make-3.82.tar.bz2
 fi
 if [ ! -f bison-2.5.tar.bz2 ] ; then
     echo bison
-    fetch_asis ftp://ftp.gnu.org/gnu/bison/bison-2.5.tar.bz2
+    fetch_as_is ftp://ftp.gnu.org/gnu/bison/bison-2.5.tar.bz2
 fi
 if [ ! -f glib-2.32.2.tar.xz ] ; then
     echo glib
-    fetch_asis http://ftp.gnome.org/pub/gnome/sources/glib/2.32/glib-2.32.2.tar.xz
+    fetch_as_is http://ftp.gnome.org/pub/gnome/sources/glib/2.32/glib-2.32.2.tar.xz
 fi
 if [ ! -f pkg-config-0.26.tar.gz ] ; then
     echo pkg-config
-    fetch_asis http://pkgconfig.freedesktop.org/releases/pkg-config-0.26.tar.gz
+    fetch_as_is http://pkgconfig.freedesktop.org/releases/pkg-config-0.26.tar.gz
 fi
 if [ ! -f readline-6.2.tar.gz ] ; then
     echo readline
-    fetch_asis ftp://ftp.cwru.edu/pub/bash/readline-6.2.tar.gz
+    fetch_as_is ftp://ftp.cwru.edu/pub/bash/readline-6.2.tar.gz
 fi
 if [ ! -f zlib-1.2.6.tar.bz2 ] ; then
     echo zlib
-    fetch_asis http://zlib.net/zlib-1.2.6.tar.bz2
+    fetch_as_is http://zlib.net/zlib-1.2.6.tar.bz2
 fi
 if [ ! -f libiconv-1.14.tar.gz ] ; then
     echo libiconv
-    fetch_asis ftp://ftp.gnu.org/gnu/libiconv/libiconv-1.14.tar.gz
+    fetch_as_is ftp://ftp.gnu.org/gnu/libiconv/libiconv-1.14.tar.gz
 fi
 if [ ! -f gettext-0.18.1.1.tar.gz ] ; then
     echo gettext
-    fetch_asis http://ftp.gnu.org/pub/gnu/gettext/gettext-0.18.1.1.tar.gz
+    fetch_as_is http://ftp.gnu.org/pub/gnu/gettext/gettext-0.18.1.1.tar.gz
 fi
 if [ ! -f libxml2-2.7.8.tar.gz ] ; then
     echo libxml2
-    fetch_asis ftp://xmlsoft.org/libxslt/libxml2-2.7.8.tar.gz
+    fetch_as_is ftp://xmlsoft.org/libxslt/libxml2-2.7.8.tar.gz
 fi
 if [ ! -f libxslt-1.1.26.tar.gz ] ; then
     echo libxslt
-    fetch_asis ftp://xmlsoft.org/libxslt/libxslt-1.1.26.tar.gz
+    fetch_as_is ftp://xmlsoft.org/libxslt/libxslt-1.1.26.tar.gz
 fi
 if [ ! -f tiff-4.0.1.tar.gz ] ; then
     echo tiff
-    fetch_asis ftp://ftp.remotesensing.org/pub/libtiff/tiff-4.0.1.tar.gz
+    fetch_as_is ftp://ftp.remotesensing.org/pub/libtiff/tiff-4.0.1.tar.gz
 fi
 if [ ! -f libpng-1.5.10.tar.xz ] ; then
     echo png
-    fetch_asis ftp://ftp.simplesystems.org/pub/libpng/png/src/libpng-1.5.10.tar.xz
+    fetch_as_is ftp://ftp.simplesystems.org/pub/libpng/png/src/libpng-1.5.10.tar.xz
 fi
 if [ ! -f jpegsrc.v8d.tar.gz ] ; then
     echo jpeg
-    fetch_asis http://www.ijg.org/files/jpegsrc.v8d.tar.gz
+    fetch_as_is http://www.ijg.org/files/jpegsrc.v8d.tar.gz
 fi
 if [ ! -f XML-Parser-2.41.tar.gz ] ; then
     echo perl xml parser
@@ -175,27 +175,27 @@ if [ ! -f XML-Simple-2.18.tar.gz ] ; then
 fi
 if [ ! -f atk-2.2.0.tar.bz2 ] ; then
     echo atk
-    fetch_asis http://ftp.gnome.org/pub/GNOME/sources/atk/2.2/atk-2.2.0.tar.bz2
+    fetch_as_is http://ftp.gnome.org/pub/GNOME/sources/atk/2.2/atk-2.2.0.tar.bz2
 fi
 if [ ! -f gnome-common-2.34.0.tar.bz2 ] ; then
     echo gnome-common
-    fetch_asis http://ftp.acc.umu.se/pub/gnome/sources/gnome-common/2.34/gnome-common-2.34.0.tar.bz2
+    fetch_as_is http://ftp.acc.umu.se/pub/gnome/sources/gnome-common/2.34/gnome-common-2.34.0.tar.bz2
 fi
 if [ ! -f gtk-doc-1.18.tar.bz2 ] ; then
     echo gtk-doc
-    fetch_asis http://ftp.gnome.org/pub/GNOME/sources/gtk-doc/1.18/gtk-doc-1.18.tar.bz2
+    fetch_as_is http://ftp.gnome.org/pub/GNOME/sources/gtk-doc/1.18/gtk-doc-1.18.tar.bz2
 fi
 if [ ! -f gnome-doc-utils-0.20.6.tar.bz2 ] ; then
     echo gnome-doc
-    fetch_asis http://ftp.acc.umu.se/pub/gnome/sources/gnome-doc-utils/0.20/gnome-doc-utils-0.20.6.tar.bz2
+    fetch_as_is http://ftp.acc.umu.se/pub/gnome/sources/gnome-doc-utils/0.20/gnome-doc-utils-0.20.6.tar.bz2
 fi
 if [ ! -f pixman-0.24.4.tar.gz ] ; then
     echo pixman
-    fetch_asis http://cgit.freedesktop.org/pixman/snapshot/pixman-0.24.4.tar.gz
+    fetch_as_is http://cgit.freedesktop.org/pixman/snapshot/pixman-0.24.4.tar.gz
 fi
 if [ ! -f libffi-3.0.10.tar.gz ] ; then
     echo ffi
-    fetch_asis ftp://sourceware.org/pub/libffi/libffi-3.0.10.tar.gz
+    fetch_as_is ftp://sourceware.org/pub/libffi/libffi-3.0.10.tar.gz
 fi
 if [ ! -f freetype-2.4.8.tar.bz2 ] ; then
     echo freetype
@@ -203,23 +203,23 @@ if [ ! -f freetype-2.4.8.tar.bz2 ] ; then
 fi
 if [ ! -f fontconfig-2.8.0.tar.gz ] ; then
     echo fontconfig
-    fetch_asis http://www.freedesktop.org/software/fontconfig/release/fontconfig-2.8.0.tar.gz
+    fetch_as_is http://www.freedesktop.org/software/fontconfig/release/fontconfig-2.8.0.tar.gz
 fi
 if [ ! -f cairo-1.10.2.tar.gz ] ; then
     echo cairo
-    fetch_asis http://cairographics.org/releases/cairo-1.10.2.tar.gz
+    fetch_as_is http://cairographics.org/releases/cairo-1.10.2.tar.gz
 fi
 if [ ! -f pango-1.29.5.tar.bz2 ] ; then
     echo pango
-    fetch_asis http://ftp.gnome.org/pub/GNOME/sources/pango/1.29/pango-1.29.5.tar.bz2
+    fetch_as_is http://ftp.gnome.org/pub/GNOME/sources/pango/1.29/pango-1.29.5.tar.bz2
 fi
 if [ ! -f gdk-pixbuf-2.25.0.tar.xz ] ; then
     echo gdk-pixbuf
-    fetch_asis http://ftp.gnome.org/pub/GNOME/sources/gdk-pixbuf/2.25/gdk-pixbuf-2.25.0.tar.xz
+    fetch_as_is http://ftp.gnome.org/pub/GNOME/sources/gdk-pixbuf/2.25/gdk-pixbuf-2.25.0.tar.xz
 fi
 if [ ! -f intltool-0.50.2.tar.gz ] ; then
     echo intltool
-    fetch_asis http://launchpad.net/intltool/trunk/0.50.2/+download/intltool-0.50.2.tar.gz
+    fetch_as_is http://launchpad.net/intltool/trunk/0.50.2/+download/intltool-0.50.2.tar.gz
 fi
 if [ ! -f gtk-osx-docbook-1.0.tar.gz ] ; then
     echo gtk-osx-docbook
@@ -227,7 +227,7 @@ if [ ! -f gtk-osx-docbook-1.0.tar.gz ] ; then
 fi
 if [ ! -f gobject-introspection-1.31.10.tar.xz ] ; then
     echo gobject-introspection
-    fetch_asis http://ftp.gnome.org/pub/GNOME/sources/gobject-introspection/1.31/gobject-introspection-1.31.10.tar.xz
+    fetch_as_is http://ftp.gnome.org/pub/GNOME/sources/gobject-introspection/1.31/gobject-introspection-1.31.10.tar.xz
 fi
 
 if [ ! -d gtk+ ] ; then
