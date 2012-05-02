@@ -95,7 +95,7 @@ if [ ! -f autoconf-2.68.tar.bz2 ] ; then
 fi
 if [ ! -f libtool-2.4.2.tar.gz ] ; then
     echo libtool
-    curl -LO http://mirrors.ibiblio.org/pub/mirrors/gnu/ftp/gnu/libtool/libtool-2.4.2.tar.gz
+    curl -LO http://ftp.gnu.org/gnu/libtool/libtool-2.4.2.tar.gz
 fi
 if [ ! -f make-3.82.tar.bz2 ] ; then
     echo make
@@ -280,13 +280,13 @@ fi
 
 tar  xf intltool-0.50.2.tar.gz && (cd intltool-0.50.2  && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "intltool build failed"
 if [ x$need_iconv != x ] ; then 
-    tar  xf gettext-0.18.1.1.tar.gz && (cd gettext-0.18.1.1  && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure --with-libiconv-prefix=$PREFIX --with-libintl-prefix=$PREFIX $GLOBAL_CONF && make && make install) || die "gettext build failed"
+    tar  xf gettext-0.18.1.1.tar.gz && (cd gettext-0.18.1.1  && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure --with-libiconv-prefix=$PREFIX $GLOBAL_CONF && make && make install) || die "gettext build failed"
 else
-    tar  xf gettext-0.18.1.1.tar.gz && (cd gettext-0.18.1.1  && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure --with-libintl-prefix=$PREFIX $GLOBAL_CONF && make && make install) || die "gettext build failed"
+    tar  xf gettext-0.18.1.1.tar.gz && (cd gettext-0.18.1.1  && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "gettext build failed"
 fi
 
 tar  xf tiff-4.0.1.tar.gz && (cd tiff-4.0.1 && CFLAGS="$GLOBAL_CFLAGS -DHAVE_APPLE_OPENGL_FRAMEWORK" LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "tiff build failed"
-tar  xf libpng-1.5.10.tar.xz && (cd libpng-1.5.10 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure --with-zlib-prefix=$PREFIX $GLOBAL_CONF && make && make install) || die "libpng build failed"
+tar  xf libpng-1.5.10.tar.xz && (cd libpng-1.5.10 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "libpng build failed"
 tar  xf jpegsrc.v8d.tar.gz && (cd jpeg-8d && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "jpegsrc build failed"
 tar xf XML-Parser-2.41.tar.gz && (cd XML-Parser-2.41 && unset MACOSX_DEPLOYMENT_TARGET && perl Makefile.PL PREFIX=$PREFIX && make && make install) || die "XML-Parser build failed"
 tar xf XML-Simple-2.18.tar.gz && (cd XML-Simple-2.18 && unset MACOSX_DEPLOYMENT_TARGET && perl Makefile.PL PREFIX=$PREFIX && make && make install) || die "XML-Simple build failed"
@@ -300,7 +300,7 @@ tar xf libffi-3.0.10.tar.gz && (cd libffi-3.0.10 && CFLAGS=$GLOBAL_CFLAGS LDFLAG
 #
 # step one: build glib with everything specified so that pkg-config is not used or required
 #
-tar xf glib-2.32.2.tar.xz && (cd glib-2.32.2 && LDFLAGS=-L$PREFIX/lib CFLAGS=-I$PREFIX/include ZLIB_CFLAGS=-I$PREFIX/include ZLIB_LIBS=-I$PREFIX/lib LIBFFI_CFLAGS=-I$PREFIX/lib/libffi-3.0.10/include LIBFFI_LIBS="-L$PREFIX/lib -lffi" ./configure $GLOBAL_CONF --with-pcre=internal --disable-silent-rules && make && make install) && rm -rf glib-2.32.2 || die "glib build1 failed"
+tar xf glib-2.32.2.tar.xz && (cd glib-2.32.2 && LDFLAGS=-L$PREFIX/lib CFLAGS=-I$PREFIX/include ZLIB_CFLAGS=-I$PREFIX/include ZLIB_LIBS="-L$PREFIX/lib -lz" LIBFFI_CFLAGS=-I$PREFIX/lib/libffi-3.0.10/include LIBFFI_LIBS="-L$PREFIX/lib -lffi" ./configure $GLOBAL_CONF --with-pcre=internal --disable-silent-rules && make && make install) && rm -rf glib-2.32.2 || die "glib build1 failed"
 #
 # step two: build pkg-config with glib flags specified so that pkg-config is not used or required
 #
@@ -317,7 +317,7 @@ tar xf pkg-config-0.26.tar.gz && (cd pkg-config-0.26 && CFLAGS=$GLOBAL_CFLAGS LD
 # now we can start on the GTK stack itself
 # 
 tar xf atk-2.2.0.tar.bz2 && (cd atk-2.2.0 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "atk build failed"
-tar xf gnome-common-2.34.0.tar.bz2 && (cd gnome-common-2.34.0 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "gnome build failed"
+tar xf gnome-common-2.34.0.tar.bz2 && (cd gnome-common-2.34.0 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && export MAKEFLAGS= make && MAKEFLAGS= make install) || die "gnome build failed"
 tar xf gtk-osx-docbook-1.0.tar.gz && (cd gtk-osx-docbook-1.0 && JHBUILD_PREFIX=$PREFIX make install) || die "gtk build failed"
 # gnome-doc-utils is not parallel-build safe so turn off make -j2
 tar xf gnome-doc-utils-0.20.6.tar.bz2 && (cd gnome-doc-utils-0.20.6 && PYTHONPATH=$PREFIX/lib/python2.7/site-packages CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF --disable-scrollkeeper && PYTHONPATH=$PREFIX/lib/python2.7/site-packages MAKEFLAGS= make && PYTHONPATH=$PREFIX/lib/python2.7/site-packages MAKEFLAGS= make install) || die "gnome build failed"
