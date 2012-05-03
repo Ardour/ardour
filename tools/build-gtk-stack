@@ -83,7 +83,9 @@ else
     GLOBAL_LDFLAGS=
     CAIRO_CONF=
     PANGO_CONF=
-    need_iconv=
+    
+    # normal linux platforms won't need this
+    need_iconv=yes
 fi
 
 export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
