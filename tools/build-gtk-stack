@@ -44,7 +44,12 @@ if [ $clean ] ; then
         echo "This doesn't appear to be your source directory. Don't run --clean here."
         exit 1
     fi
-    rm -rf `ls -ld * | awk '/^d/ {print $9;}' | grep -v gtk+`
+    rm -rf `find -maxdepth 1 -type d | grep -v -e "gtk+" -e "^.$"`
+    pushd gtk+
+    if [ -e Makefile ] ; then
+        make clean
+    fi
+    popd
     # have to use sudo because we used sudo for libxml2 install, sigh.
     sudo rm -rf $PREFIX
     exit 0
@@ -78,7 +83,7 @@ if uname -a | grep --silent arwin ; then
     
     need_iconv=yes
 else 
-    export LD_LIBRARY_PATH=$PREFIX/lib{$LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+    export LD_LIBRARY_PATH=$PREFIX/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
     GLOBAL_CFLAGS=
     GLOBAL_LDFLAGS=
     CAIRO_CONF=
