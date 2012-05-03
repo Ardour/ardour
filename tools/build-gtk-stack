@@ -323,7 +323,7 @@ fi
 #
 # step one: build glib with everything specified so that pkg-config is not used or required
 #
-tar xf glib-2.32.2.tar.xz && (cd glib-2.32.2 && LDFLAGS=-L$PREFIX/lib CFLAGS=-I$PREFIX/include ZLIB_CFLAGS=-I$PREFIX/include ZLIB_LIBS="-L$PREFIX/lib -lz" LIBFFI_CFLAGS=-I$PREFIX/lib/libffi-3.0.10/include LIBFFI_LIBS="-L$PREFIX/lib -lffi" ./configure $GLOBAL_CONF --with-pcre=internal --disable-silent-rules && make && make install) && rm -rf glib-2.32.2 || die "glib build1 failed"
+tar xf glib-2.32.2.tar.xz && (cd glib-2.32.2 && LDFLAGS=-L$PREFIX/lib CFLAGS=-I$PREFIX/include ZLIB_CFLAGS=-I$PREFIX/include ZLIB_LIBS="-L$PREFIX/lib -lz" LIBFFI_CFLAGS=-I$PREFIX/lib/libffi-3.0.10/include LIBFFI_LIBS="-L$PREFIX/lib -lffi" ./configure $GLOBAL_CONF --with-pcre=internal --with-libiconv=no --disable-silent-rules && make && make install) && rm -rf glib-2.32.2 || die "glib build1 failed"
 #
 # step two: build pkg-config with glib flags specified so that pkg-config is not used or required
 #
