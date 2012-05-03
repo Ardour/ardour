@@ -85,7 +85,7 @@ else
     PANGO_CONF=
     
     # normal linux platforms won't need this
-    need_iconv=yes
+    need_iconv=
 fi
 
 export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
