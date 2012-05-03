@@ -1,5 +1,11 @@
 #!/bin/bash
 
+which python >/dev/null 2>&1
+if [ $? -ne 0 ] ; then
+    echo "You do not have Python installed"
+    exit 1
+fi
+
 function die () {
     echo $*
     exit 1
@@ -21,8 +27,6 @@ function fetch_as () {
     fi
 }
     
-set -e
-
 clean=
 parallel=2
 patch_gtk_osx=
@@ -35,9 +39,9 @@ while [ $# -gt 0 ] ; do
     --patch*) patch_gtk_osx=1 ; shift ;;
     --unpatch*) patch_gtk_osx=1 ; unpatch=-R; shift ;;
     -j*) parallel=`echo $1 | sed 's/-j//'` ; shift ;;
+    *) echo "Unknown argument $1" ; exit 1 ;;   
    esac
 done
-
 
 if [ $clean ] ; then
     if [ ! -d gtk+ ] ; then
@@ -46,7 +50,7 @@ if [ $clean ] ; then
     fi
     rm -rf `find -maxdepth 1 -type d | grep -v -e "gtk+" -e "^.$"`
     pushd gtk+
-    if [ -e Makefile ] ; then
+    if [ -e Makefile -a Makefile -nt configure ] ; then
         make clean
     fi
     popd
@@ -75,23 +79,50 @@ if uname -a | grep --silent arwin ; then
     export MACOSX_DEPLOYMENT_TARGET=10.4
     # If the default python is not new enough, set PYTHON to point to a 
     # suitably new (2.7 or later) version of Python's framework
-    #PYTHON=
-    PYTHON=/Library/Frameworks/Python.framework/Versions/2.7
+    #
+    # this is very crude versioning test
+    if python --version | grep --silent '2\.7' ; then
+        :
+    else
+        PYTHON=/Library/Frameworks/Python.framework/Versions/2.7
+    fi
 
     CAIRO_CONF="--enable-xlib=no --enable-quartz=yes --enable-xcb=no"
     PANGO_CONF="--without-x"
-    
+    GTK_BACKEND=quartz
+    AVOID_ICONV=
     need_iconv=yes
+
 else 
+
     export LD_LIBRARY_PATH=$PREFIX/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
     GLOBAL_CFLAGS=
     GLOBAL_LDFLAGS=
     CAIRO_CONF=
     PANGO_CONF=
+    GTK_BACKEND=x11
+    AVOID_ICONV="--with-libiconv=no"
     
     # normal linux platforms won't need this
     need_iconv=
+
+    # this is very crude versioning test
+    python --version >/dev/null 2>&1
+    if [ $? -ne 0 ] ; then
+        echo "There's a problem with your Python installation"x
+        exit 1
+    fi
+    if python --version | grep --silent '2\.7' ; then
+        echo "You do not have a new enough version of Python"
+        exit 1
+    fi
+    pythondir=`dirname $(which python)`
+    if [ $pythondir != "/usr/bin" ] ; then
+        PYTHON=`dirname $pythondir`
+    fi
 fi
+
+set -e
 
 export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
 GLOBAL_CONF="--prefix=$PREFIX"
@@ -124,6 +155,10 @@ if [ ! -f make-3.82.tar.bz2 ] ; then
     echo make
     fetch_as_is http://ftp.gnu.org/gnu/make/make-3.82.tar.bz2
 fi
+if [ ! -f flex-2.5.35.tar.gz ] ; then 
+    echo flex
+    fetch_as_is http://prdownloads.sourceforge.net/flex/flex-2.5.35.tar.gz
+fi
 if [ ! -f bison-2.5.tar.bz2 ] ; then
     echo bison
     fetch_as_is ftp://ftp.gnu.org/gnu/bison/bison-2.5.tar.bz2
@@ -151,6 +186,10 @@ fi
 if [ ! -f gettext-0.18.1.1.tar.gz ] ; then
     echo gettext
     fetch_as_is http://ftp.gnu.org/pub/gnu/gettext/gettext-0.18.1.1.tar.gz
+fi
+if [ ! -f expat-2.1.0.tar.gz ] ; then 
+    echo expat
+    fetch_as_is http://prdownloads.sourceforge.net/expat/expat-2.1.0.tar.gz
 fi
 if [ ! -f libxml2-2.7.8.tar.gz ] ; then
     echo libxml2
@@ -285,7 +324,9 @@ tar xf autoconf-2.68.tar.bz2 && (cd autoconf-2.68 && CFLAGS=$GLOBAL_CFLAGS LDFLA
 tar  xf automake-1.11.3.tar.gz && (cd automake-1.11.3 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "automake build failed"
 tar  xf libtool-2.4.2.tar.gz && (cd libtool-2.4.2 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "libtool build failed"
 tar  xf make-3.82.tar.bz2 && (cd make-3.82 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "make build failed"
+tar  xf flex-2.5.35.tar.gz && (cd flex-2.5.35  && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "flex build failed"
 tar  xf bison-2.5.tar.bz2 && (cd bison-2.5  && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "bison build failed"
+tar  xf expat-2.1.0.tar.gz && (cd expat-2.1.0  && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "expat build failed"
 #
 # libxml2 tries to install python modules in the system python folders and thus needs sudo for the install step. 
 # clean up afterwards to reset ownership on dirs and files created under $PREFIX as root
@@ -328,7 +369,7 @@ fi
 #
 # step one: build glib with everything specified so that pkg-config is not used or required
 #
-tar xf glib-2.32.2.tar.xz && (cd glib-2.32.2 && LDFLAGS=-L$PREFIX/lib CFLAGS=-I$PREFIX/include ZLIB_CFLAGS=-I$PREFIX/include ZLIB_LIBS="-L$PREFIX/lib -lz" LIBFFI_CFLAGS=-I$PREFIX/lib/libffi-3.0.10/include LIBFFI_LIBS="-L$PREFIX/lib -lffi" ./configure $GLOBAL_CONF --with-pcre=internal --with-libiconv=no --disable-silent-rules && make && make install) && rm -rf glib-2.32.2 || die "glib build1 failed"
+tar xf glib-2.32.2.tar.xz && (cd glib-2.32.2 && LDFLAGS=-L$PREFIX/lib CFLAGS=-I$PREFIX/include ZLIB_CFLAGS=-I$PREFIX/include ZLIB_LIBS="-L$PREFIX/lib -lz" LIBFFI_CFLAGS=-I$PREFIX/lib/libffi-3.0.10/include LIBFFI_LIBS="-L$PREFIX/lib -lffi" ./configure $GLOBAL_CONF --with-pcre=internal $AVOID_ICONV --disable-silent-rules && make && make install) && rm -rf glib-2.32.2 || die "glib build1 failed"
 #
 # step two: build pkg-config with glib flags specified so that pkg-config is not used or required
 #
@@ -358,14 +399,18 @@ tar xf pango-1.29.5.tar.bz2 && (cd pango-1.29.5 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS
 
 tar xf gdk-pixbuf-2.25.0.tar.xz && (cd gdk-pixbuf-2.25.0 && LDFLAGS="$GLOBAL_LDFLAGS -L$PREFIX/lib" CFLAGS="-I$PREFIX/include $GLOBAL_CFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "gdk build failed"
 # gobject-introspection uses #include <libintl.h> and there's no way to force the "scanner" to look outside the system tree
+remove_libintl_h=
 if [ ! -f /usr/include/libintl.h ] ; then 
     sudo ln -s $PREFIX/include/libintl.h /usr/include
+    remove_libintl_h=yes
 fi
 tar xf gobject-introspection-1.31.10.tar.xz && (cd gobject-introspection-1.31.10 && LDFLAGS="$GLOBAL_LDFLAGS -L$PREFIX/lib -lintl" CFLAGS="-I$PREFIX/include $GLOBAL_CFLAGS" ./configure $GLOBAL_CONF --disable-silent-rules && make && make install) || die "gobject build failed"
-sudo rm /usr/include/libintl.h
+if [ x$remove_libintl_h != x ] ; then
+    sudo rm /usr/include/libintl.h
+fi
 #
 # now gtk itself
 # 
 #
-(cd gtk+ && CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" sh autogen.sh --enable-maintainer-mode --prefix=$PREFIX --libdir=$PREFIX/lib --disable-cups --disable-papi --disable-introspection --with-gdktarget=quartz && make && make install) || die "GTK build failed"
+(cd gtk+ && CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" sh autogen.sh --enable-maintainer-mode --prefix=$PREFIX --libdir=$PREFIX/lib --disable-cups --disable-papi --disable-introspection --with-gdktarget=$GTK_BACKEND && make && make install) || die "GTK build failed"
 
