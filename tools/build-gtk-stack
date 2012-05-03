@@ -306,12 +306,17 @@ tar  xf libpng-1.5.10.tar.xz && (cd libpng-1.5.10 && CFLAGS=$GLOBAL_CFLAGS LDFLA
 tar  xf jpegsrc.v8d.tar.gz && (cd jpeg-8d && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "jpegsrc build failed"
 tar xf XML-Parser-2.41.tar.gz && (cd XML-Parser-2.41 && unset MACOSX_DEPLOYMENT_TARGET && perl Makefile.PL PREFIX=$PREFIX && make && make install) || die "XML-Parser build failed"
 tar xf XML-Simple-2.18.tar.gz && (cd XML-Simple-2.18 && unset MACOSX_DEPLOYMENT_TARGET && perl Makefile.PL PREFIX=$PREFIX && make && make install) || die "XML-Simple build failed"
+
+if uname -a | grep --silent arwin ; then
 #
 # libffi has a bug that is caused by it depending on the output format of GNU wc(1)
-#  it can be avoided by changing into the target build directory, re-running configure and then running make from there.
-#  the target dir gets built by the first invocation of configure, and is the newest dir, so we find its name with ls and awk.
+# it can be avoided by changing into the target build directory, re-running configure and then running make from there.
+# the target dir gets built by the first invocation of configure, and is the newest dir, so we find its name with ls and awk.
 #
-tar xf libffi-3.0.10.tar.gz && (cd libffi-3.0.10 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && cd `ls -ltd * | awk '/^d/ {print $9; exit}'` && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ../configure $GLOBAL_CONF && make && make install) || die "libffi build failed"
+    tar xf libffi-3.0.10.tar.gz && (cd libffi-3.0.10 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && cd `ls -ltd * | awk '/^d/ {print $9; exit}'` && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ../configure $GLOBAL_CONF && make && make install) || die "libffi build failed"
+else 
+    tar xf libffi-3.0.10.tar.gz && (cd libffi-3.0.10 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "libffi build failed"
+fi
 # time to bootstrap the circular dependency between pkg-config and glib.
 #
 # step one: build glib with everything specified so that pkg-config is not used or required
