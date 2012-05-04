@@ -150,6 +150,7 @@ Panners=$APPLIB/panners
 ExportFormats=$Shared/export
 Locale=$Shared/locale
 MidiMaps=$Shared/midi_maps
+MackieControl=$Shared/mcp
 Modules=$Libraries/modules
 Loaders=$Libraries/loaders
 
@@ -186,6 +187,7 @@ mkdir -p $Shared
 mkdir -p $Locale
 mkdir -p $Surfaces
 mkdir -p $MidiMaps
+mkdir -p $MackieControl
 mkdir -p $ExportFormats
 mkdir -p $Panners
 mkdir -p $Shared/templates
@@ -443,6 +445,13 @@ mv $Surfaces/libardourcp.so* $Libraries
 for x in $BUILD_ROOT/../midi_maps/*.map ; do
     cp "$x" $MidiMaps
     echo Copied MIDI map $x 
+done
+
+# MackieControl data
+# got to be careful with names here
+for x in $BUILD_ROOT/../mcp/*.device $BUILD_ROOT/../mcp/*.profile ; do
+    cp "$x" $MackieControl
+    echo Copied Mackie Control file $x 
 done
 
 # ExportFormats
