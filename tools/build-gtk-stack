@@ -28,34 +28,33 @@ function fetch_as () {
 }
     
 clean=
+makespace=
 parallel=2
 patch_gtk_osx=
 PREFIX=$HOME/gtk/inst
 unpatch=
 while [ $# -gt 0 ] ; do
-   case $1 in
-    --clean*) clean=1 ; shift ;;
-    --prefix*) PREFIX=`echo $1 | sed 's/--prefix=//'` ; shift ;;
-    --patch*) patch_gtk_osx=1 ; shift ;;
-    --unpatch*) patch_gtk_osx=1 ; unpatch=-R; shift ;;
-    -j*) parallel=`echo $1 | sed 's/-j//'` ; shift ;;
-    *) echo "Unknown argument $1" ; exit 1 ;;   
-   esac
+    case $1 in
+        --clean*) clean=1 ; shift ;;
+        --space*) makespace=1 ; shift ;;
+        --prefix*) PREFIX=`echo $1 | sed 's/--prefix=//'` ; shift ;;
+        --patch*) patch_gtk_osx=1 ; shift ;;
+        --unpatch*) patch_gtk_osx=1 ; unpatch=-R; shift ;;
+        -j*) parallel=`echo $1 | sed 's/-j//'` ; shift ;;
+        *) echo "Unknown argument $1" ; exit 1 ;;   
+    esac
 done
 
-if [ $clean ] ; then
-    if [ ! -d gtk+ ] ; then
-        echo "This doesn't appear to be your source directory. Don't run --clean here."
+if [ $clean -o $makespace ] ; then
+    if [ ! -d gtk+ ] ; then 
+        echo "This doesn't appear to be your source directory. Don't run --clean or --space here."
         exit 1
     fi
     rm -rf `find . -maxdepth 1 -type d | grep -v -e "gtk+" -e "^.$"`
-    pushd gtk+
-    if [ -e Makefile -a Makefile -nt configure ] ; then
-        make clean
+    # sudo required because of its use during the libxml2 install step
+    if [ $clean ] ; then
+        sudo rm -rf $PREFIX
     fi
-    popd
-    # have to use sudo because we used sudo for libxml2 install, sigh.
-    sudo rm -rf $PREFIX
     exit 0
 fi
 

@@ -22,6 +22,7 @@ function fetch_as () {
 }
 
 clean=
+makespace=
 parallel=2
 PREFIX=$HOME/a3/inst
 
@@ -29,19 +30,22 @@ while [ $# -gt 0 ] ; do
    case $1 in
     --clean*) clean=1 ; shift ;;
     --prefix*) PREFIX=`echo $1 | sed 's/--prefix=//'` ; shift ;;
+    --space*) makespace=1 ; shift ;;
     -j*) parallel=`echo $1 | sed 's/-j//'` ; shift ;;
    esac
 done
 
 
-if [ $clean ] ; then
+if [ $clean -o $makespace ] ; then
     if [ ! -d LRDF ] ; then 
-        echo "This doesn't appear to be your source directory. Don't run --clean here."
+        echo "This doesn't appear to be your source directory. Don't run --clean or --space here."
         exit 1
     fi
-    rm -rf `find . -maxdepth 1 -type d | grep -v -e "gtk+" -e "^.$"`
+    rm -rf `find . -maxdepth 1 -type d`
     # sudo required because of its use during the python install step
-    sudo rm -rf $PREFIX
+    if [ $clean ] ; then
+        sudo rm -rf $PREFIX
+    fi
     exit 0
 fi
 
