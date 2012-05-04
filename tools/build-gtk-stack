@@ -48,7 +48,7 @@ if [ $clean ] ; then
         echo "This doesn't appear to be your source directory. Don't run --clean here."
         exit 1
     fi
-    rm -rf `find -maxdepth 1 -type d | grep -v -e "gtk+" -e "^.$"`
+    rm -rf `find . -maxdepth 1 -type d | grep -v -e "gtk+" -e "^.$"`
     pushd gtk+
     if [ -e Makefile -a Makefile -nt configure ] ; then
         make clean
