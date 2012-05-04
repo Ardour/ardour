@@ -413,7 +413,9 @@ def options(opt):
     opt.add_option('--boost-include', type='string', action='store', dest='boost_include', default='',
                     help='directory where Boost header files can be found')
     opt.add_option('--also-include', type='string', action='store', dest='also_include', default='',
-                    help='additional include directory where header files can be found')
+                    help='additional include directory where header files can be found (split multiples with commas)')
+    opt.add_option('--also-libdir', type='string', action='store', dest='also_libdir', default='',
+                    help='additional include directory where shared libraries can be found (split multiples with commas)')
     opt.add_option('--wine-include', type='string', action='store', dest='wine_include', default='/usr/include/wine/windows',
                     help='directory where Wine\'s Windows header files can be found')
     opt.add_option('--noconfirm', action='store_true', default=False, dest='noconfirm',
@@ -530,6 +532,9 @@ def configure(conf):
     if Options.options.also_include != '':
         conf.env.append_value('CXXFLAGS', '-I' + Options.options.also_include)
         conf.env.append_value('CFLAGS', '-I' + Options.options.also_include)
+
+    if Options.options.also_libdir != '':
+        conf.env.append_value('LDFLAGS', '-L' + Options.options.also_libdir)
 
     autowaf.check_header(conf, 'cxx', 'boost/signals2.hpp', mandatory = True)
 
