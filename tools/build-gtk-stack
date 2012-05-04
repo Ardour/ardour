@@ -344,9 +344,9 @@ fi
 
 tar  xf intltool-0.50.2.tar.gz && (cd intltool-0.50.2  && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "intltool build failed"
 if [ x$need_iconv != x ] ; then 
-    tar  xf gettext-0.18.1.1.tar.gz && (cd gettext-0.18.1.1  && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure --with-included-gettext --with-libiconv-prefix=$PREFIX $GLOBAL_CONF && make && make install) || die "gettext build failed"
+    tar  xf gettext-0.18.1.1.tar.gz && (cd gettext-0.18.1.1  && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure --with-included-gettext --with-libiconv-prefix=$PREFIX --enable-shared $GLOBAL_CONF && make && make install) || die "gettext build failed"
 else
-    tar  xf gettext-0.18.1.1.tar.gz && (cd gettext-0.18.1.1  && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure --with-included-gettext $GLOBAL_CONF && make && make install) || die "gettext build failed"
+    tar  xf gettext-0.18.1.1.tar.gz && (cd gettext-0.18.1.1  && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure --with-included-gettext --enable-shared $GLOBAL_CONF && make && make install) || die "gettext build failed"
 fi
 
 tar  xf tiff-4.0.1.tar.gz && (cd tiff-4.0.1 && CFLAGS="$GLOBAL_CFLAGS -DHAVE_APPLE_OPENGL_FRAMEWORK" LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "tiff build failed"
