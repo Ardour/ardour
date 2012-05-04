@@ -564,7 +564,14 @@ def configure(conf):
     conf.env['INCLUDES_FLAC'] = []
 
     conf.check_cc(function_name='dlopen', header_name='dlfcn.h', linkflags='-ldl', uselib_store='DL')
-    conf.check_cc(function_name='curl_global_init', header_name='curl/curl.h', linkflags='-lcurl', uselib_store='CURL')
+    #
+    # finding curl can be tricky
+    # 
+    if Options.options.also_libdir != '':
+        curl_linkflags = "-L" + Options.options.also_libdir + " -lcurl"
+    else:
+        curl_linkflags = "-lcurl"
+    conf.check_cc(function_name='curl_global_init', header_name='curl/curl.h', linkflags=curl_linkflags, uselib_store='CURL')
 
     # Tell everyone that this is a waf build
 
