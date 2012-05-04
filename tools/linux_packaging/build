@@ -402,15 +402,21 @@ gdk-pixbuf-query-loaders | sed "s?$GDKPIXBUFLIB/?@ROOTDIR@/?" > $Etc/gdk-pixbuf.
 # this one is special - we will set GTK_PATH to $Libraries/clearlooks
 
 if [ ! -e ${GTKLIB}/engines/libclearlooks.so ]; then
+    if [ ! -e $BUILD_ROOT/libs/clearlooks-newer/libclearlooks.so ] ; then 
 	echo ""
 	echo "!!! ERROR !!! - not able to locate libclearlooks.so"
 	echo ""
 	echo "Packager with exit"
 	exit 1
+    else 
+        clearlooks_so=$BUILD_ROOT/libs/clearlooks-newer/libclearlooks.so
+    fi
+else
+    clearlooks_so=${GTKLIB}/engines/libclearlooks.so
 fi
 
 echo "Copying clearlooks ..."
-cp ${GTKLIB}/engines/libclearlooks.so $Libraries
+cp $clearlooks_so $Libraries
 mkdir -p $Libraries/clearlooks/engines
 (cd $Libraries/clearlooks/engines && ln -s ../../libclearlooks* libclearlooks.so )
 
