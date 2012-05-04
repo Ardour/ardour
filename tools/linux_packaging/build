@@ -542,10 +542,14 @@ echo
 # strip libraries
 if test x$STRIP = xall ; then
     echo Stripping all libraries
+    # Must be writable so that we can strip
+    find $APPLIB/ -name "*.so*" | xargs chmod u+w
+    # and strip ...
     find $APPLIB/ -name "*.so*" | xargs strip
 elif test x$STRIP = xsome ; then
     echo Stripping dependent libraries
     for l in $deplibs ; do
+        chmod u+w $APPLIB/$l
         strip $APPLIB/$l
     done
 fi
