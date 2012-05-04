@@ -556,6 +556,7 @@ def configure(conf):
     autowaf.check_pkg(conf, 'glibmm-2.4', uselib_store='GLIBMM', atleast_version='2.14.0')
     autowaf.check_pkg(conf, 'sndfile', uselib_store='SNDFILE', atleast_version='1.0.18')
     autowaf.check_pkg(conf, 'giomm-2.4', uselib_store='GIOMM', atleast_version='2.2')
+    autowaf.check_pkg(conf, 'libcurl', uselib_store='CURL', atleast_version='7.0.0')
 
     for i in children:
         sub_config_and_use(conf, i)
@@ -564,14 +565,6 @@ def configure(conf):
     conf.env['INCLUDES_FLAC'] = []
 
     conf.check_cc(function_name='dlopen', header_name='dlfcn.h', linkflags='-ldl', uselib_store='DL')
-    #
-    # finding curl can be tricky
-    # 
-    if Options.options.also_libdir != '':
-        curl_linkflags = [ '-L' + Options.options.also_libdir, '-lcurl', '-lssl', '-lcrypto' ]
-    else:
-        curl_linkflags = [ '-lcurl', '-lssl', '-lcrypto' ]
-    conf.check_cc(function_name='curl_global_init', header_name='curl/curl.h', linkflags=curl_linkflags, uselib_store='CURL')
 
     # Tell everyone that this is a waf build
 
