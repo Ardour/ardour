@@ -36,7 +36,7 @@ while [ $# -gt 0 ] ; do
 done
 
 
-if [ $clean -o $makespace ] ; then
+if [ x$clean != x -o x$makespace != x ] ; then
     if [ ! -d LRDF ] ; then 
         echo "This doesn't appear to be your source directory. Don't run --clean or --space here."
         exit 1
