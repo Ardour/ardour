@@ -568,9 +568,9 @@ def configure(conf):
     # finding curl can be tricky
     # 
     if Options.options.also_libdir != '':
-        curl_linkflags = "-L" + Options.options.also_libdir + " -lcurl -lssl -lcrypto"
+        curl_linkflags = [ '-L' + Options.options.also_libdir, '-lcurl', '-lssl', '-lcrypto' ]
     else:
-        curl_linkflags = "-lcurl -lssl -lcrypto"
+        curl_linkflags = [ '-lcurl', '-lssl', '-lcrypto' ]
     conf.check_cc(function_name='curl_global_init', header_name='curl/curl.h', linkflags=curl_linkflags, uselib_store='CURL')
 
     # Tell everyone that this is a waf build
