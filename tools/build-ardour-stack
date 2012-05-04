@@ -41,7 +41,8 @@ if [ x$clean != x -o x$makespace != x ] ; then
         echo "This doesn't appear to be your source directory. Don't run --clean or --space here."
         exit 1
     fi
-    rm -rf `find . -maxdepth 1 -type d`
+    # sudo required because of sudo while installing some python/perl stuff
+    sudo rm -rf `find . -maxdepth 1 -type d | grep -v "^.$"`
     # sudo required because of its use during the python install step
     if [ $clean ] ; then
         sudo rm -rf $PREFIX
