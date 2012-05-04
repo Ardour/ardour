@@ -216,13 +216,15 @@ if [ ! -f curl-7.25.0.tar.bz2 ] ; then
     fetch_as_is http://curl.haxx.se/download/curl-7.25.0.tar.bz2
 fi
 
-if [ ! -f  util-linux-2.21.tar.xz ] ; then
-    echo util-linux/uuid
-    fetch_as_is http://www.kernel.org/pub/linux/utils/util-linux/v2.21/util-linux-2.21.tar.xz
+if [ x$OSX = x ] ; then 
+    if [ ! -f  util-linux-2.21.tar.xz ] ; then
+        echo util-linux/uuid
+        fetch_as_is http://www.kernel.org/pub/linux/utils/util-linux/v2.21/util-linux-2.21.tar.xz
+    fi
+    
+    tar xf util-linux-2.21.tar.xz && \
+        (set -e && cd util-linux-2.21 && ./configure --prefix=$PREFIX --enable-shared --disable-most-builds --without-ncurses --enable-libuuid && cd libuuid && make && make install) || die "uuid build failed"
 fi
-
-tar xf util-linux-2.21.tar.xz && \
-    (set -e && cd util-linux-2.21 && ./configure --prefix=$PREFIX --enable-shared --disable-most-builds --without-ncurses --enable-libuuid && cd libuuid && make && make install) || die "uuid build failed"
 
 tar xf boost_1_49_0.tar.bz2 && \
   (set -e && cd boost_1_49_0 && ./bootstrap.sh --prefix=$PREFIX --with-libraries=exception && ./b2 && ./b2 install) || die "boost build failed"
