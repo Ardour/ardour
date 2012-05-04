@@ -300,7 +300,7 @@ tar xf aubio-0.3.2.tar.gz
    (set -e && cd aubio-0.3.2 && sed '/no-long-double/d' < ./configure > ./configure.XXX && mv ./configure.XXX ./configure && chmod +x ./configure && \
        CFLAGS="$GLOBAL_CFLAGS -I$PREFIX" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && MAKEFLAGS=-j1 make install) || die "aubio build failed"
 if [ x$remove_fftw3_h != x ] ; then
-    rm /usr/include/fftw3.h
+    sudo rm /usr/include/fftw3.h
 fi
 
 # these python lib wants to install to a system-wide location
