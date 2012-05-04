@@ -11,7 +11,7 @@ fi
 
 cd $BASE || exit 1
 svn update || exit 1
-./waf configure --strict --noconfirm --also-include=$HOME/a3/inst/include --also-libdir=$HOME/gtk/inst/lib || exit 1
+./waf configure --strict --noconfirm --also-libdir=$HOME/a3/inst/include --also-include=$HOME/gtk/inst/lib || exit 1
 ./waf || exit 1
 cd tools/linux_packaging || exit 1
 ./build --public --strip some || exit 1
