@@ -21,6 +21,7 @@
 #include <signal.h>
 #include <cerrno>
 #include <fstream>
+#include <vector>
 
 #include <sigc++/bind.h>
 #include <gtkmm/settings.h>
@@ -289,6 +290,10 @@ fixup_bundle_environment (int, char* [])
 void
 fixup_bundle_environment (int /*argc*/, char* argv[])
 {
+	/* THIS IS FOR LINUX - its just about the only place where its
+	 * acceptable to build paths directly using '/'.
+	 */
+
 	if (!getenv ("ARDOUR_BUNDLED")) {
 		return;
 	}
@@ -370,32 +375,45 @@ fixup_bundle_environment (int /*argc*/, char* argv[])
 	if (g_mkdir_with_parents (userconfigdir.c_str(), 0755) < 0) {
 		error << string_compose (_("cannot create user ardour folder %1 (%2)"), userconfigdir, strerror (errno))
 		      << endmsg;
+		return;
+	} 
+
+	Glib::ustring mpath;
+	
+	path = Glib::build_filename (userconfigdir, "pango.rc");
+	
+	std::ofstream pangorc (path.c_str());
+	if (!pangorc) {
+		error << string_compose (_("cannot open pango.rc file %1") , path) << endmsg;
 	} else {
-
-		Glib::ustring mpath;
-
-		path = Glib::build_filename (userconfigdir, "pango.rc");
-
-		std::ofstream pangorc (path.c_str());
-		if (!pangorc) {
-			error << string_compose (_("cannot open pango.rc file %1") , path) << endmsg;
-		} else {
-			mpath = Glib::build_filename (userconfigdir, "pango.modules");
-
-			pangorc << "[Pango]\nModuleFiles=";
-			pangorc << mpath << endl;
-			pangorc.close ();
-		}
-
-		setenv ("PANGO_RC_FILE", path.c_str(), 1);
-
-		/* similar for GDK pixbuf loaders, but there's no RC file required
-		   to specify where it lives.
-		*/
-
-		mpath = Glib::build_filename (userconfigdir, "gdk-pixbuf.loaders");
-		setenv ("GDK_PIXBUF_MODULE_FILE", mpath.c_str(), 1);
+		mpath = Glib::build_filename (userconfigdir, "pango.modules");
+		
+		pangorc << "[Pango]\nModuleFiles=";
+		pangorc << mpath << endl;
+		pangorc.close ();
 	}
+	
+	setenv ("PANGO_RC_FILE", path.c_str(), 1);
+
+	/* Tell fontconfig where to find fonts.conf. Use the system version
+	   if it exists, otherwise use the stuff we included in t
+	*/
+
+	if (Glib::file_test ("/etc/fonts/fonts.conf", Glib::FILE_TEST_EXISTS)) {
+		setenv ("/etc/fonts/fonts.conf", path.c_str(), 1);
+	} else {
+		/* use the one included in the bundle */
+		
+		path = Glib::build_filename (dir_path, "etc/fonts/fonts.conf");
+		setenv ("FONTCONFIG_FILE", path.c_str(), 1);
+	}
+	
+	/* similar for GDK pixbuf loaders, but there's no RC file required
+	   to specify where it lives.
+	*/
+	
+	mpath = Glib::build_filename (userconfigdir, "gdk-pixbuf.loaders");
+	setenv ("GDK_PIXBUF_MODULE_FILE", mpath.c_str(), 1);
 }
 
 #endif

@@ -280,6 +280,25 @@ else
 	echo "Skipping NLS support"
 fi
 
+### Find fontconfig ###
+FCROOT=`pkg-config --libs-only-L fontconfig | sed -e "s/-L//" -e "s/[[:space:]]//g"`
+if [ ! -z "$FCROOT" ]; then
+	echo "Found FCOOT using pkg-config"
+        FCETC=`dirname $FCROOT`/etc
+elif [ -d /usr/lib/gtk-2.0 ]; then
+	FCETC="/etc"
+elif [ -d /usr/local/lib/gtk-2.0 ]; then
+	FCETC="/usr/local/etc"
+else
+	echo ""
+	echo "!!! ERROR !!! - Unable to locate fontconfig directory. Packager will exit"
+	echo ""
+	exit 1
+fi
+
+echo "Copying Fontconfig files to $Etc ..."
+cp -r $FCETC/fonts $Etc
+
 ### Find gtk ###
 GTKROOT=`pkg-config --libs-only-L gtk+-2.0 | sed -e "s/-L//" -e "s/[[:space:]]//g"`
 if [ ! -z "$GTKROOT" ]; then
