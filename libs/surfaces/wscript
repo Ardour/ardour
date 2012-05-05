@@ -48,9 +48,8 @@ def configure(conf):
     if Options.options.tranzport and conf.is_defined('HAVE_USB'):
         conf.define('BUILD_TRANZPORT', 1)
 
-    #conf.check_cc (lib='libusb', header_name='libusb.h', function_name='usb_interrupt_write', define_name='BUILD_TRANZPORT')
     conf.check_cc (header_name='linux/input.h', define_name='BUILD_POWERMATE',mandatory=False)
-    conf.check_cc (lib='lo', header_name='lo/lo.h', function_name='lo_server_new', define_name='BUILD_OSC',mandatory=False)
+    autowaf.check_pkg (conf, 'liblo', mandatory=False, uselib_store="LO", atleast_version="0.24")
 
     if Options.options.wiimote:
         conf.check_cc (header_name='cwiid.h', define_name='HAVE_CWIID_H')
@@ -67,7 +66,7 @@ def build(bld):
     bld.recurse('control_protocol')
     bld.recurse('generic_midi')
     bld.recurse('mackie')
-    if bld.is_defined ('BUILD_OSC'):
+    if bld.is_defined ('HAVE_LO'):
         bld.recurse('osc')
     if bld.is_defined('BUILD_POWERMATE'):
         bld.recurse('powermate')
