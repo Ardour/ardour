@@ -364,6 +364,19 @@ fixup_bundle_environment (int /*argc*/, char* argv[])
 		setenv ("GTK_LOCALEDIR", localedir, 1);
 	}
 
+	/* Tell fontconfig where to find fonts.conf. Use the system version
+	   if it exists, otherwise use the stuff we included in t
+	*/
+
+	if (Glib::file_test ("/etc/fonts/fonts.conf", Glib::FILE_TEST_EXISTS)) {
+		setenv ("FONTCONFIG_FILE", "/etc/fonts/fonts.conf", 1);
+	} else {
+		/* use the one included in the bundle */
+		
+		path = Glib::build_filename (dir_path, "etc/fonts/fonts.conf");
+		setenv ("FONTCONFIG_FILE", path.c_str(), 1);
+	}
+	
 	/* write a pango.rc file and tell pango to use it. we'd love
 	   to put this into the Ardour.app bundle and leave it there,
 	   but the user may not have write permission. so ...
@@ -395,19 +408,6 @@ fixup_bundle_environment (int /*argc*/, char* argv[])
 	
 	setenv ("PANGO_RC_FILE", path.c_str(), 1);
 
-	/* Tell fontconfig where to find fonts.conf. Use the system version
-	   if it exists, otherwise use the stuff we included in t
-	*/
-
-	if (Glib::file_test ("/etc/fonts/fonts.conf", Glib::FILE_TEST_EXISTS)) {
-		setenv ("/etc/fonts/fonts.conf", path.c_str(), 1);
-	} else {
-		/* use the one included in the bundle */
-		
-		path = Glib::build_filename (dir_path, "etc/fonts/fonts.conf");
-		setenv ("FONTCONFIG_FILE", path.c_str(), 1);
-	}
-	
 	/* similar for GDK pixbuf loaders, but there's no RC file required
 	   to specify where it lives.
 	*/
