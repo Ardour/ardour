@@ -370,14 +370,14 @@ fixup_bundle_environment (int /*argc*/, char* argv[])
 
 	if (Glib::file_test ("/etc/fonts/fonts.conf", Glib::FILE_TEST_EXISTS)) {
 		setenv ("FONTCONFIG_FILE", "/etc/fonts/fonts.conf", 1);
-		setenv ("FONTCONFIG_PATH, "/etc/fonts", 1);
+		setenv ("FONTCONFIG_PATH", "/etc/fonts", 1);
 	} else {
 		/* use the one included in the bundle */
 		
 		path = Glib::build_filename (dir_path, "etc/fonts/fonts.conf");
 		setenv ("FONTCONFIG_FILE", path.c_str(), 1);
 		path = Glib::build_filename (dir_path, "etc/fonts");
-		setenv ("FONTCONFIG_PATH, "/etc/fonts", 1);
+		setenv ("FONTCONFIG_PATH", "/etc/fonts", 1);
 	}
 
 	/* write a pango.rc file and tell pango to use it. we'd love
