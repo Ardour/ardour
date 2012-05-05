@@ -405,7 +405,7 @@ static const char * const devinfo_env_variable_name = "ARDOUR_MCP_PATH";
 static const char* const devinfo_dir_name = "mcp";
 static const char* const devinfo_suffix = ".device";
 
-static sys::path
+static SearchPath
 system_devinfo_search_path ()
 {
 	bool devinfo_path_defined = false;
@@ -418,12 +418,7 @@ system_devinfo_search_path ()
 	SearchPath spath (system_data_search_path());
 	spath.add_subdirectory_to_paths(devinfo_dir_name);
 
-	// just return the first directory in the search path that exists
-	SearchPath::const_iterator i = std::find_if(spath.begin(), spath.end(), sys::exists);
-
-	if (i == spath.end()) return sys::path();
-
-	return *i;
+	return spath;
 }
 
 static sys::path
