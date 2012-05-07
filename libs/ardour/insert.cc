@@ -298,8 +298,10 @@ PluginInsert::connect_and_run (vector<Sample*>& bufs, uint32_t nbufs, nframes_t 
 	/* Note that we've already required that plugins
 	   be able to handle in-place processing.
 	*/
-
-	// cerr << "Connect and run for " << _plugins[0]->name() << " auto ? " << with_auto << " nf = " << nframes << " off = " << offset << endl;
+        
+	// cerr << "Connect and run for " << _plugins[0]->name() << " auto ? " << with_auto << " nf = " << nframes << " off = " << offset 
+        // << " nbufs = " << nbufs << " of " << bufs.size() << " with ninputs = " << input_streams() 
+        // << endl;
 	
 	if (with_auto) {
 

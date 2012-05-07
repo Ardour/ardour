@@ -2177,14 +2177,8 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 		
 		if (cached_io_configuration (info->unique_id, info->version, cacomp, info->cache, info->name)) {
 
-			/* here we have to map apple's wildcard system to a simple pair
-			   of values. in ::can_do() we use the whole system, but here
-			   we need a single pair of values. XXX probably means we should
-			   remove any use of these values.
-			*/
-
-			info->n_inputs = info->cache.io_configs.front().first;
-			info->n_outputs = info->cache.io_configs.front().second;
+			info->n_inputs = -1;
+			info->n_outputs = -1;
 
 			cerr << "detected AU: " << info->name.c_str() << "  (" << info->cache.io_configs.size() << " i/o configurations) - " << info->unique_id << endl;
 
