@@ -1055,6 +1055,10 @@ Editor::sensitize_the_right_region_actions ()
 	bool have_envelope_inactive = false;
 	bool have_non_unity_scale_amplitude = false;
 	bool have_compound_regions = false;
+	bool have_inactive_fade_in = false;
+	bool have_inactive_fade_out = false;
+	bool have_active_fade_in = false;
+	bool have_active_fade_out = false;
 
 	for (list<RegionView*>::const_iterator i = rs.begin(); i != rs.end(); ++i) {
 
@@ -1114,6 +1118,18 @@ Editor::sensitize_the_right_region_actions ()
 			if (ar->scale_amplitude() != 1) {
 				have_non_unity_scale_amplitude = true;
 			}
+
+			if (ar->fade_in_active ()) {
+				have_active_fade_in = true;
+			} else {
+				have_inactive_fade_in = true;
+			}
+
+			if (ar->fade_out_active ()) {
+				have_active_fade_out = true;
+			} else {
+				have_inactive_fade_out = true;
+			}
 		}
 	}
 
@@ -1168,7 +1184,7 @@ Editor::sensitize_the_right_region_actions ()
 		if (have_envelope_active && !have_envelope_inactive) {
 			Glib::RefPtr<ToggleAction>::cast_dynamic (_region_actions->get_action("toggle-region-gain-envelope-active"))->set_active ();
 		} else if (have_envelope_active && have_envelope_inactive) {
-			// _region_actions->get_action("toggle-region-gain-envelope-active")->set_inconsistent ();
+			// Glib::RefPtr<ToggleAction>::cast_dynamic (_region_actions->get_action("toggle-region-gain-envelope-active"))->set_inconsistent ();
 		}
 
 	} else {
@@ -1184,25 +1200,29 @@ Editor::sensitize_the_right_region_actions ()
 		_region_actions->get_action("reset-region-scale-amplitude")->set_sensitive (false);
 	}
 
-	Glib::RefPtr<ToggleAction>::cast_dynamic (_region_actions->get_action("toggle-region-lock"))->set_active (have_locked && !have_unlocked);
+	Glib::RefPtr<ToggleAction> a = Glib::RefPtr<ToggleAction>::cast_dynamic (_region_actions->get_action("toggle-region-lock"));
+	a->set_active (have_locked && !have_unlocked);
 	if (have_locked && have_unlocked) {
-		// _region_actions->get_action("toggle-region-lock")->set_inconsistent ();
+		// a->set_inconsistent ();
 	}
 
-	Glib::RefPtr<ToggleAction>::cast_dynamic (_region_actions->get_action("toggle-region-lock-style"))->set_active (have_position_lock_style_music && !have_position_lock_style_audio);
+	a = Glib::RefPtr<ToggleAction>::cast_dynamic (_region_actions->get_action("toggle-region-lock-style"));
+	a->set_active (have_position_lock_style_music && !have_position_lock_style_audio);
 
 	if (have_position_lock_style_music && have_position_lock_style_audio) {
-		// _region_actions->get_action("toggle-region-lock-style")->set_inconsistent ();
+		// a->set_inconsistent ();
 	}
 
-	Glib::RefPtr<ToggleAction>::cast_dynamic (_region_actions->get_action("toggle-region-mute"))->set_active (have_muted && !have_unmuted);
+	a = Glib::RefPtr<ToggleAction>::cast_dynamic (_region_actions->get_action("toggle-region-mute"));
+	a->set_active (have_muted && !have_unmuted);
 	if (have_muted && have_unmuted) {
-		// _region_actions->get_action("toggle-region-mute")->set_inconsistent ();
+		// a->set_inconsistent ();
 	}
 
-	Glib::RefPtr<ToggleAction>::cast_dynamic (_region_actions->get_action("toggle-opaque-region"))->set_active (have_opaque && !have_non_opaque);
+	a = Glib::RefPtr<ToggleAction>::cast_dynamic (_region_actions->get_action("toggle-opaque-region"));
+	a->set_active (have_opaque && !have_non_opaque);
 	if (have_opaque && have_non_opaque) {
-		// _region_actions->get_action("toggle-opaque-region")->set_inconsistent ();
+		// a->set_inconsistent ();
 	}
 
 	if (!have_not_at_natural_position) {
@@ -1216,6 +1236,29 @@ Editor::sensitize_the_right_region_actions ()
 		_region_actions->get_action("insert-region-from-region-list")->set_sensitive (true);
 	}
 
+	a = Glib::RefPtr<ToggleAction>::cast_dynamic (_region_actions->get_action("toggle-region-fade-in"));
+	a->set_active (have_active_fade_in && !have_inactive_fade_in);
+	if (have_active_fade_in && have_inactive_fade_in) {
+		// a->set_inconsistent ();
+	}
+
+	a = Glib::RefPtr<ToggleAction>::cast_dynamic (_region_actions->get_action("toggle-region-fade-out"));
+	a->set_active (have_active_fade_out && !have_inactive_fade_out);
+
+	if (have_active_fade_out && have_inactive_fade_out) {
+		// a->set_inconsistent ();
+	}
+	
+	bool const have_active_fade = have_active_fade_in || have_active_fade_out;
+	bool const have_inactive_fade = have_inactive_fade_in || have_inactive_fade_out;
+
+	a = Glib::RefPtr<ToggleAction>::cast_dynamic (_region_actions->get_action("toggle-region-fades"));
+	a->set_active (have_active_fade && !have_inactive_fade);
+
+	if (have_active_fade && have_inactive_fade) {
+		// a->set_inconsistent ();
+	}
+	
 	_ignore_region_action = false;
 
 	_all_region_actions_sensitized = false;

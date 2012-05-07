@@ -5249,6 +5249,10 @@ Editor::set_fade_out_active (bool yn)
 void
 Editor::toggle_region_fades (int dir)
 {
+	if (_ignore_region_action) {
+		return;
+	}
+	
 	boost::shared_ptr<AudioRegion> ar;
 	bool yn = false;
 
