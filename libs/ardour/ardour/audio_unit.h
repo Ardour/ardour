@@ -104,7 +104,6 @@ class AUPlugin : public ARDOUR::Plugin
 
 	bool has_editor () const;
 
-	bool reconfigurable_io() const { return true; }
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const;
 	ChanCount output_streams() const;
 	ChanCount input_streams() const;
@@ -240,6 +239,8 @@ class AUPluginInfo : public PluginInfo {
 	bool is_instrument () const;
 
 	AUPluginCachedInfo cache;
+
+	bool reconfigurable_io() const { return true; }
 
 	static PluginInfoList* discover ();
 	static void get_names (CAComponentDescription&, std::string& name, std::string& maker);
