@@ -117,6 +117,9 @@ class AudioRegionView : public RegionView
 
 	void thaw_after_trim ();
 
+	void drag_start ();
+	void drag_end ();
+
   protected:
 
 	/* this constructor allows derived types
@@ -191,7 +194,6 @@ class AudioRegionView : public RegionView
 	void redraw_end_xfade ();
 
 private:
-
 	void setup_fade_handle_positions ();
 
 	/** A ScopedConnection for each PeaksReady callback (one per channel).  Each member

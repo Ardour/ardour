@@ -78,6 +78,10 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 
 	double get_samples_per_unit();
 
+	virtual void drag_start() { _dragging = true; }
+	virtual void drag_end() { _dragging = false; }
+	bool dragging() const { return _dragging; }
+
 	virtual void raise () { return; }
 	virtual void raise_to_top () { return; }
 	virtual void lower () { return; }
@@ -240,6 +244,7 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	Visibility visibility;
 	bool _recregion;
 	bool _automation; ///< true if this is an automation region view
+	bool _dragging;
 
 private:
 

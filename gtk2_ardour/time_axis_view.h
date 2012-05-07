@@ -160,9 +160,6 @@ class TimeAxisView : public virtual AxisView
 	virtual void show_timestretch (framepos_t start, framepos_t end);
 	virtual void hide_timestretch ();
 
-	virtual void hide_dependent_views (TimeAxisViewItem&) {}
-	virtual void reveal_dependent_views (TimeAxisViewItem&) {}
-
 	/* editing operations */
 
 	virtual void cut_copy_clear (Selection&, Editing::CutCopyOp) {}

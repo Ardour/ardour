@@ -663,7 +663,7 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 
 		if (first_move) {
 
-			rv->get_time_axis_view().hide_dependent_views (*rv);
+			rv->drag_start (); 
 
 			/* Absolutely no idea why this is necessary, but it is; without
 			   it, the region view disappears after the reparent.
@@ -698,15 +698,15 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 		if (tv->view()->layer_display() == Stacked) {
 			tv->view()->set_layer_display (Expanded);
 		}
-
+		
 		/* We're only allowed to go -ve in layer on Expanded views */
 		if (tv->view()->layer_display() != Expanded && (i->layer + this_delta_layer) < 0) {
 			this_delta_layer = - i->layer;
 		}
-			
+		
 		/* Set height */
 		rv->set_height (tv->view()->child_height ());
-
+		
 		/* Update show/hidden status as the region view may have come from a hidden track,
 		   or have moved to one.
 		*/
@@ -1063,7 +1063,7 @@ RegionMoveDrag::finished_no_copy (
 
 			rv->get_canvas_group()->reparent (*dest_rtv->view()->canvas_item());
 			rv->get_canvas_group()->property_y() = i->initial_y;
-			rv->get_time_axis_view().reveal_dependent_views (*rv);
+			rv->drag_end ();
 
 			/* just change the model */
 
@@ -1277,7 +1277,7 @@ RegionMotionDrag::aborted (bool)
 		assert (rtv);
 		rv->get_canvas_group()->reparent (*rtv->view()->canvas_item());
 		rv->get_canvas_group()->property_y() = 0;
-		rv->get_time_axis_view().reveal_dependent_views (*rv);
+		rv->drag_end ();
 		rv->fake_set_opaque (false);
 		rv->move (-_total_x_delta, 0);
 		rv->set_height (rtv->view()->child_height ());
@@ -1706,6 +1706,7 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 
 			if (arv) {
 				arv->temporarily_hide_envelope ();
+				arv->drag_start ();
 			}
 
 			boost::shared_ptr<Playlist> pl = rv->region()->playlist();

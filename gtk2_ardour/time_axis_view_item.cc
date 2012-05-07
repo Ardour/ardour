@@ -103,6 +103,7 @@ TimeAxisViewItem::TimeAxisViewItem(
 	, _height (1.0)
 	, _recregion (recording)
 	, _automation (automation)
+	, _dragging (false)
 {
 	group = new ArdourCanvas::Group (parent);
 
@@ -116,6 +117,7 @@ TimeAxisViewItem::TimeAxisViewItem (const TimeAxisViewItem& other)
 	, trackview (other.trackview)
 	, _recregion (other._recregion)
 	, _automation (other._automation)
+	, _dragging (other._dragging)
 {
 
 	Gdk::Color c;
@@ -132,10 +134,8 @@ TimeAxisViewItem::TimeAxisViewItem (const TimeAxisViewItem& other)
 
 	_selected = other._selected;
 
-	init (
-		other.item_name, other.samples_per_unit, c, other.frame_position,
-		other.item_duration, other.visibility, other.wide_enough_for_name, other.high_enough_for_name
-		);
+	init (other.item_name, other.samples_per_unit, c, other.frame_position,
+	      other.item_duration, other.visibility, other.wide_enough_for_name, other.high_enough_for_name);
 }
 
 void

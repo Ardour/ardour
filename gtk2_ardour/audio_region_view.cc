@@ -87,7 +87,6 @@ AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView
 {
 }
 
-
 AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv, boost::shared_ptr<AudioRegion> r, double spu,
 				  Gdk::Color const & basic_color, bool recording, TimeAxisViewItem::Visibility visibility)
 	: RegionView (parent, tv, r, spu, basic_color, recording, visibility)
@@ -554,6 +553,10 @@ AudioRegionView::reset_fade_in_shape ()
 void
 AudioRegionView::reset_fade_in_shape_width (framecnt_t width)
 {
+	if (dragging()) {
+		return;
+	}
+
 	if (audio_region()->fade_in_is_xfade()) {
 		fade_in_handle->hide ();
 		fade_in_shape->hide ();
@@ -655,6 +658,10 @@ AudioRegionView::reset_fade_out_shape ()
 void
 AudioRegionView::reset_fade_out_shape_width (framecnt_t width)
 {
+	if (dragging()) {
+		return;
+	}
+
 	if (audio_region()->fade_out_is_xfade()) {
 		fade_out_handle->hide ();
 		fade_out_shape->hide ();
@@ -1510,7 +1517,6 @@ void
 AudioRegionView::thaw_after_trim ()
 {
 	RegionView::thaw_after_trim ();
-
 	unhide_envelope ();
 }
 
@@ -1518,6 +1524,8 @@ void
 AudioRegionView::redraw_start_xfade ()
 {
 	boost::shared_ptr<AudioRegion> ar (audio_region());
+	
+	cerr << ":RSX\n";
 
 	if (!ar->fade_in() || ar->fade_in()->empty()) {
 		return;
@@ -1660,4 +1668,41 @@ AudioRegionView::redraw_end_xfade ()
 
 
 	delete points;
+}
+void
+AudioRegionView::drag_start ()
+{
+	TimeAxisViewItem::drag_start ();
+	
+	if (start_xfade_in) {
+		start_xfade_in->hide();
+	}
+	if (start_xfade_out) {
+		start_xfade_out->hide();
+	}
+	if (end_xfade_in) {
+		end_xfade_in->hide();
+	}
+	if (end_xfade_out) {
+		end_xfade_out->hide();
+	}
+}
+
+void
+AudioRegionView::drag_end ()
+{
+	TimeAxisViewItem::drag_end ();
+
+	if (start_xfade_in) {
+		start_xfade_in->show();
+	}
+	if (start_xfade_out) {
+		start_xfade_out->show();
+	}
+	if (end_xfade_in) {
+		end_xfade_in->show();
+	}
+	if (end_xfade_out) {
+		end_xfade_out->show();
+	}
 }
