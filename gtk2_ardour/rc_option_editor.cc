@@ -1573,7 +1573,7 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (S_("Visual|Interface"),
 		    new BoolOption (
 			    "use-own-plugin-gui",
-			    _("Use plugins' own interface instead of a builtin one"),
+			    _("Use plugins' own interfaces instead of Ardour's"),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_use_plugin_own_gui),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_use_plugin_own_gui)
 			    ));
