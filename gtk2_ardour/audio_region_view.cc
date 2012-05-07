@@ -566,6 +566,7 @@ AudioRegionView::reset_fade_in_shape_width (framecnt_t width)
 		if (start_xfade_in) {
 			start_xfade_in->hide ();
 			start_xfade_out->hide ();
+			start_xfade_rect->hide ();
 		}
 	}
 
@@ -671,6 +672,7 @@ AudioRegionView::reset_fade_out_shape_width (framecnt_t width)
 		if (end_xfade_in) {
 			end_xfade_in->hide ();
 			end_xfade_out->hide ();
+			end_xfade_rect->hide ();
 		}
 	}
 
@@ -1525,8 +1527,6 @@ AudioRegionView::redraw_start_xfade ()
 {
 	boost::shared_ptr<AudioRegion> ar (audio_region());
 	
-	cerr << ":RSX\n";
-
 	if (!ar->fade_in() || ar->fade_in()->empty()) {
 		return;
 	}
@@ -1549,6 +1549,14 @@ AudioRegionView::redraw_start_xfade ()
 		start_xfade_out->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_GainLine.get();
 	}
 
+	if (!start_xfade_rect) {
+		start_xfade_rect = new ArdourCanvas::SimpleRect (*group);
+		start_xfade_rect->property_draw() = true;
+		start_xfade_rect->property_fill() = true;;
+		start_xfade_rect->property_fill_color_rgba() =  ARDOUR_UI::config()->canvasvar_ActiveCrossfade.get();
+		start_xfade_rect->property_outline_pixels() = 0;
+	}
+
 	Points* points = get_canvas_points ("xfade edit redraw", npoints);
 	boost::scoped_ptr<float> vec (new float[npoints]);
 
@@ -1559,6 +1567,13 @@ AudioRegionView::redraw_start_xfade ()
 		p.set_x (i);
 		p.set_y (_height - (_height * vec.get()[i]));
 	}
+
+	start_xfade_rect->property_x1() = ((*points)[0]).get_x();
+	start_xfade_rect->property_y1() = 0;
+	start_xfade_rect->property_x2() = ((*points)[npoints-1]).get_x();
+	start_xfade_rect->property_y2() = _height;
+	start_xfade_rect->show ();
+	start_xfade_rect->raise_to_top ();
 
 	start_xfade_in->property_points() = *points;
 	start_xfade_in->show ();
@@ -1621,6 +1636,14 @@ AudioRegionView::redraw_end_xfade ()
 		end_xfade_out->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_GainLine.get();
 	}
 
+	if (!end_xfade_rect) {
+		end_xfade_rect = new ArdourCanvas::SimpleRect (*group);
+		end_xfade_rect->property_draw() = true;
+		end_xfade_rect->property_fill() = true;;
+		end_xfade_rect->property_fill_color_rgba() =  ARDOUR_UI::config()->canvasvar_ActiveCrossfade.get();
+		end_xfade_rect->property_outline_pixels() = 0;
+	}
+
 	Points* points = get_canvas_points ("xfade edit redraw", npoints);
 	boost::scoped_ptr<float> vec (new float[npoints]);
 
@@ -1633,6 +1656,13 @@ AudioRegionView::redraw_end_xfade ()
 		p.set_x (rend + i);
 		p.set_y (_height - (_height * vec.get()[i]));
 	}
+
+	end_xfade_rect->property_x1() = ((*points)[0]).get_x();
+	end_xfade_rect->property_y1() = 0;
+	end_xfade_rect->property_x2() = ((*points)[npoints-1]).get_x();
+	end_xfade_rect->property_y2() = _height;
+	end_xfade_rect->show ();
+	end_xfade_rect->raise_to_top ();
 
 	end_xfade_in->property_points() = *points;
 	end_xfade_in->show ();
@@ -1680,11 +1710,17 @@ AudioRegionView::drag_start ()
 	if (start_xfade_out) {
 		start_xfade_out->hide();
 	}
+	if (start_xfade_rect) {
+		start_xfade_rect->hide ();
+	}
 	if (end_xfade_in) {
 		end_xfade_in->hide();
 	}
 	if (end_xfade_out) {
 		end_xfade_out->hide();
+	}
+	if (end_xfade_rect) {
+		end_xfade_rect->hide ();
 	}
 }
 
@@ -1699,10 +1735,16 @@ AudioRegionView::drag_end ()
 	if (start_xfade_out) {
 		start_xfade_out->show();
 	}
+	if (start_xfade_rect) {
+		start_xfade_rect->show ();
+	}
 	if (end_xfade_in) {
 		end_xfade_in->show();
 	}
 	if (end_xfade_out) {
 		end_xfade_out->show();
+	}
+	if (end_xfade_rect) {
+		end_xfade_rect->show ();
 	}
 }
