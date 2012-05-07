@@ -212,10 +212,6 @@ if [ ! -f suil-0.6.0.tar.bz2 ] ; then
     echo Suil
     fetch_as_is http://download.drobilla.net/suil-0.6.0.tar.bz2
 fi
-if [ ! -f openssl-1.0.1b.tar.gz ] ; then
-    echo Suil
-    fetch_as_is http://www.openssl.org/source/openssl-1.0.1b.tar.gz
-fi
 if [ ! -f curl-7.25.0.tar.bz2 ] ; then
     echo Suil
     fetch_as_is http://curl.haxx.se/download/curl-7.25.0.tar.bz2
@@ -234,8 +230,6 @@ fi
 tar xf boost_1_49_0.tar.bz2 && \
   (set -e && cd boost_1_49_0 && ./bootstrap.sh --prefix=$PREFIX --with-libraries=exception && ./b2 && ./b2 install) || die "boost build failed"
 
-tar xf openssl-1.0.1b.tar.gz && \
-    (set -e && cd openssl-1.0.1b && CXXFLAGS="$GLOBAL_CFLAGS" CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./config --prefix=$PREFIX shared threads no-sse2 && MAKEFLAGS= make && make install) || die "opensl build failed"
 tar xf curl-7.25.0.tar.bz2 && \
     (set -e && cd curl-7.25.0 && CXXFLAGS="$GLOBAL_CFLAGS" CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install) || die "curl build failed"
 
