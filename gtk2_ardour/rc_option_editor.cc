@@ -723,6 +723,7 @@ private:
 				ControlProtocolManager::instance().instantiate (*cpi);
 			} else {
 				ControlProtocolManager::instance().teardown (*cpi);
+				cpi->requested = false;
 			}
 		}
 

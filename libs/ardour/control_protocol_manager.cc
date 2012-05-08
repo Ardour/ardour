@@ -169,6 +169,8 @@ ControlProtocolManager::teardown (ControlProtocolInfo& cpi)
 	}
 
 	cpi.protocol = 0;
+	delete cpi.state;
+	cpi.state = 0;
 	dlclose (cpi.descriptor->module);
 	return 0;
 }
