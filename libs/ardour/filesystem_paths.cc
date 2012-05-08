@@ -30,8 +30,6 @@
 
 #include "i18n.h"
 
-#define WITH_STATIC_PATHS 1
-
 using namespace PBD;
 
 namespace ARDOUR {
@@ -109,11 +107,7 @@ ardour_search_path ()
 SearchPath
 system_config_search_path ()
 {
-#ifdef WITH_STATIC_PATHS
-	SearchPath config_path(string(CONFIG_DIR));
-#else
 	SearchPath config_path(system_config_directories());
-#endif
 
 	config_path.add_subdirectory_to_paths("ardour3");
 
@@ -123,11 +117,7 @@ system_config_search_path ()
 SearchPath
 system_data_search_path ()
 {
-#ifdef WITH_STATIC_PATHS
-	SearchPath data_path(string(DATA_DIR));
-#else
 	SearchPath data_path(system_data_directories());
-#endif
 
 	data_path.add_subdirectory_to_paths("ardour3");
 
