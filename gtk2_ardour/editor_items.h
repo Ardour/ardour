@@ -50,6 +50,8 @@ enum ItemType {
 	FeatureLineItem,
         LeftFrameHandle,
         RightFrameHandle,
+	StartCrossFadeItem,
+	EndCrossFadeItem,
 
 #ifdef WITH_CMT
 	MarkerViewItem,

@@ -641,6 +641,10 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 		break;
 
 
+	case StartCrossFadeItem:
+	case EndCrossFadeItem:
+		break;
+
 	case FadeInHandleItem:
 	case FadeInItem:
 	case FadeOutHandleItem:

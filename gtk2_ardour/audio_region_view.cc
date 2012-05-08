@@ -1555,6 +1555,7 @@ AudioRegionView::redraw_start_xfade ()
 		start_xfade_rect->property_fill() = true;;
 		start_xfade_rect->property_fill_color_rgba() =  ARDOUR_UI::config()->canvasvar_ActiveCrossfade.get();
 		start_xfade_rect->property_outline_pixels() = 0;
+		start_xfade_rect->signal_event().connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_start_xfade_event), start_xfade_rect, this));
 	}
 
 	Points* points = get_canvas_points ("xfade edit redraw", npoints);
@@ -1642,6 +1643,8 @@ AudioRegionView::redraw_end_xfade ()
 		end_xfade_rect->property_fill() = true;;
 		end_xfade_rect->property_fill_color_rgba() =  ARDOUR_UI::config()->canvasvar_ActiveCrossfade.get();
 		end_xfade_rect->property_outline_pixels() = 0;
+
+		end_xfade_rect->signal_event().connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_end_xfade_event), end_xfade_rect, this));
 	}
 
 	Points* points = get_canvas_points ("xfade edit redraw", npoints);

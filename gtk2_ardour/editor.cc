@@ -1358,6 +1358,9 @@ Editor::popup_fade_context_menu (int button, int32_t time, ArdourCanvas::Item* i
 	items.clear ();
 
 	switch (item_type) {
+	case StartCrossFadeItem:
+	case EndCrossFadeItem:
+		break;
 	case FadeInItem:
 	case FadeInHandleItem:
 		if (arv->audio_region()->fade_in_active()) {
