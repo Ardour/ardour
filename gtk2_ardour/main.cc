@@ -198,6 +198,7 @@ fixup_bundle_environment (int, char* [])
 	export_search_path (dir_path, "ARDOUR_PANNER_PATH", "/../Panners");
 	export_search_path (dir_path, "ARDOUR_SURFACES_PATH", "/../Surfaces");
 	export_search_path (dir_path, "ARDOUR_MIDIMAPS_PATH", "/../MidiMaps");
+	export_search_path (dir_path, "ARDOUR_MCP_PATH", "../MCP");
 	export_search_path (dir_path, "ARDOUR_EXPORT_FORMATS_PATH", "/../ExportFormats");
 
 	path = dir_path;
@@ -345,6 +346,7 @@ fixup_bundle_environment (int /*argc*/, char* argv[])
 	export_search_path (dir_path, "ARDOUR_PANNER_PATH", "/lib/panners");
 	export_search_path (dir_path, "ARDOUR_SURFACES_PATH", "/lib/surfaces");
 	export_search_path (dir_path, "ARDOUR_MIDIMAPS_PATH", "/share/midi_maps");
+	export_search_path (dir_path, "ARDOUR_MCP_PATH", "/share/mcp");
 	export_search_path (dir_path, "ARDOUR_EXPORT_FORMATS_PATH", "/share/export");
 
 	path = dir_path;
