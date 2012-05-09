@@ -97,7 +97,7 @@ BaseUI::run ()
 void
 BaseUI::quit ()
 {
-	if (_main_loop->is_running()) {
+	if (_main_loop && _main_loop->is_running()) {
 		_main_loop->quit ();
 		run_loop_thread->join ();
 	}
