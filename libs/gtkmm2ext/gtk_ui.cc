@@ -356,7 +356,7 @@ UI::set_tip (Widget *w, const gchar *tip, const gchar *hlp)
 				if (!abbrev.empty()) {
 					replace_all (abbrev, "<", "");
 					replace_all (abbrev, ">", "-");
-					msg.append("\n\nKey: ").append (abbrev);
+					msg.append(_("\n\nKey: ")).append (abbrev);
 				}
 			}
 		}
