@@ -76,9 +76,8 @@ public:
     Signal0 () {}
     typedef boost::signals2::signal<R()> SignalType;
 
-    /** Arrange for @a slot to be executed in the context of @a event_loop
-	whenever this signal is emitted. Store the connection that represents
-	this arrangement to @a c.
+    /** Arrange for @a slot to be executed whenever this signal is emitted. 
+	Store the connection that represents this arrangement in @a c.
 
 	NOTE: @a slot will be executed in the same thread that the signal is
 	emitted in.
@@ -89,9 +88,8 @@ public:
 	    c = _signal.connect (slot);
     }
 
-    /** Arrange for @a slot to be executed in the context of @a event_loop
-	whenever this signal is emitted. Add the connection that represents
-	this arrangement to @a clist.
+    /** Arrange for @a slot to be executed whenever this signal is emitted. 
+	Add the connection that represents this arrangement to @a clist.
 
 	NOTE: @a slot will be executed in the same thread that the signal is
 	emitted in.
