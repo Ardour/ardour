@@ -849,7 +849,7 @@ MidiRegionView::create_note_at (framepos_t t, double y, double length, bool snap
 
 	view->update_note_range(new_note->note());
 
-	MidiModel::NoteDiffCommand* cmd = _model->new_note_diff_command("add note");
+	MidiModel::NoteDiffCommand* cmd = _model->new_note_diff_command(_("add note"));
 	cmd->add (new_note);
 	_model->apply_command(*trackview.session(), cmd);
 
