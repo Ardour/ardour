@@ -1137,10 +1137,17 @@ AudioRegion::set_fade_in_length (framecnt_t len)
 	if (len > _length) {
 		len = _length - 1;
 	}
+	
+	if (len < 64) {
+		len = 64;
+	}
 
 	bool changed = _fade_in->extend_to (len);
 
 	if (changed) {
+		if (_inverse_fade_in) {
+			_inverse_fade_in->extend_to (len);
+		}
 		_default_fade_in = false;
 		send_change (PropertyChange (Properties::fade_in));
 	}
@@ -1153,9 +1160,16 @@ AudioRegion::set_fade_out_length (framecnt_t len)
 		len = _length - 1;
 	}
 
+	if (len < 64) {
+		len = 64;
+	}
+
 	bool changed =	_fade_out->extend_to (len);
 
 	if (changed) {
+		if (_inverse_fade_out) {
+			_inverse_fade_out->extend_to (len);
+		}
 		_default_fade_out = false;
 		send_change (PropertyChange (Properties::fade_out));
 	}
