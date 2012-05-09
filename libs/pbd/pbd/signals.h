@@ -76,15 +76,56 @@ public:
     Signal0 () {}
     typedef boost::signals2::signal<R()> SignalType;
 
+    /** Arrange for @a slot to be executed in the context of @a event_loop
+	whenever this signal is emitted. Store the connection that represents
+	this arrangement to @a c.
+
+	NOTE: @a slot will be executed in the same thread that the signal is
+	emitted in.
+    */
+
     void connect_same_thread (ScopedConnection& c, 
 		  const typename SignalType::slot_function_type& slot) {
 	    c = _signal.connect (slot);
     }
 
+    /** Arrange for @a slot to be executed in the context of @a event_loop
+	whenever this signal is emitted. Add the connection that represents
+	this arrangement to @a clist.
+
+	NOTE: @a slot will be executed in the same thread that the signal is
+	emitted in.
+    */
+	
     void connect_same_thread (ScopedConnectionList& clist, 
 		  const typename SignalType::slot_function_type& slot) {
 	    clist.add_connection (_signal.connect (slot));
     }
+
+    /** Arrange for @a slot to be executed in the context of @a event_loop
+	whenever this signal is emitted. Add the connection that represents
+	this arrangement to @a clist.
+	
+	If the event loop/thread in which @a slot will be executed will
+	outlive the lifetime of any object referenced in @a slot,
+	then an InvalidationRecord should be passed, allowing
+	any request sent to the @a event_loop and not executed
+	before the object is destroyed to be marked invalid.
+	
+	"outliving the lifetime" doesn't have a specific, detailed meaning,
+	but is best illustrated by two contrasting examples:
+	
+	1) the main GUI event loop/thread - this will outlive more or 
+	less all objects in the application, and thus when arranging for
+	@a slot to be called in that context, an invalidation record is 
+	highly advisable.
+	
+	2) a secondary event loop/thread which will be destroyed along
+	with the objects that are typically referenced by @a slot.
+	Assuming that the event loop is stopped before the objects are
+	destroyed, there is no reason to pass in an invalidation record,
+	and MISSING_INVALIDATOR may be used.
+    */
 
     void connect (ScopedConnectionList& clist, 
                   PBD::EventLoop::InvalidationRecord* ir, 
@@ -95,7 +136,12 @@ public:
 	    }
 	    clist.add_connection (_signal.connect (boost::bind (&EventLoop::call_slot, event_loop, ir, slot)));
     }
-    
+
+    /** See notes for the ScopedConnectionList variant of this function. This
+     * differs in that it stores the connection to the signal in a single
+     * ScopedConnection rather than a ScopedConnectionList.
+     */
+
     void connect (ScopedConnection& c, 
                   PBD::EventLoop::InvalidationRecord* ir, 
 		  const typename SignalType::slot_function_type& slot,
@@ -105,10 +151,19 @@ public:
 	    }
 	    c = _signal.connect (boost::bind (&EventLoop::call_slot, event_loop, ir, slot));
     }
+
+    /** Emit this signal. This will cause all slots connected to it be executed
+	in the order that they were connected (cross-thread issues may alter
+	the precise execution time of cross-thread slots).
+    */
     
     typename SignalType::result_type operator()() {
 	    return _signal ();
     }
+
+    /** Return true if there is nothing connected to this signal, false
+     *  otherwise.
+     */
 
     bool empty() const { return _signal.empty(); }
     
