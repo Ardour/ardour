@@ -693,6 +693,7 @@ AudioRegion::state ()
 	}
 
 	child = node.add_child (X_("FadeIn"));
+	child->add_property ("is-xfade", (_fade_in_is_xfade ? "yes" : "no"));
 
 	if (_default_fade_in) {
 		child->add_property ("default", "yes");
@@ -700,12 +701,23 @@ AudioRegion::state ()
 		child->add_child_nocopy (_fade_in->get_state ());
 	}
 
+	if (_inverse_fade_in) {
+		child = node.add_child (X_("InvFadeIn"));
+		child->add_child_nocopy (_inverse_fade_in->get_state ());
+	}
+
 	child = node.add_child (X_("FadeOut"));
+	child->add_property ("is-xfade", (_fade_out_is_xfade ? "yes" : "no"));
 
 	if (_default_fade_out) {
 		child->add_property ("default", "yes");
 	} else {
 		child->add_child_nocopy (_fade_out->get_state ());
+	}
+
+	if (_inverse_fade_out) {
+		child = node.add_child (X_("InvFadeOut"));
+		child->add_child_nocopy (_inverse_fade_out->get_state ());
 	}
 
 	return node;
@@ -765,13 +777,19 @@ AudioRegion::_set_state (const XMLNode& node, int version, PropertyChange& what_
 
 			_fade_in->clear ();
 
-			if ((prop = child->property ("default")) != 0 || (prop = child->property ("steepness")) != 0) {
+			if (((prop = child->property ("default")) != 0 && string_is_affirmative (prop->value())) || (prop = child->property ("steepness")) != 0) {
 				set_default_fade_in ();
 			} else {
 				XMLNode* grandchild = child->child ("AutomationList");
 				if (grandchild) {
 					_fade_in->set_state (*grandchild, version);
 				}
+			}
+
+			if ((prop = child->property ("is-xfade")) != 0) {
+				_fade_in_is_xfade = string_is_affirmative (prop->value());
+			} else {
+				_fade_in_is_xfade = false;
 			}
 
 			if ((prop = child->property ("active")) != 0) {
@@ -786,7 +804,7 @@ AudioRegion::_set_state (const XMLNode& node, int version, PropertyChange& what_
 
 			_fade_out->clear ();
 
-			if ((prop = child->property ("default")) != 0 || (prop = child->property ("steepness")) != 0) {
+			if (((prop = child->property ("default")) != 0 && (string_is_affirmative (prop->value()))) || (prop = child->property ("steepness")) != 0) {
 				set_default_fade_out ();
 			} else {
 				XMLNode* grandchild = child->child ("AutomationList");
@@ -795,7 +813,13 @@ AudioRegion::_set_state (const XMLNode& node, int version, PropertyChange& what_
 				}
 			}
 
-			if ((prop = child->property ("active")) != 0) {
+			if ((prop = child->property ("is-xfade")) != 0) {
+				_fade_out_is_xfade = string_is_affirmative (prop->value());
+			} else {
+				_fade_out_is_xfade = false;
+			}
+	
+		if ((prop = child->property ("active")) != 0) {
 				if (string_is_affirmative (prop->value())) {
 					set_fade_out_active (true);
 				} else {
@@ -803,6 +827,22 @@ AudioRegion::_set_state (const XMLNode& node, int version, PropertyChange& what_
 				}
 			}
 
+		} else if (child->name() == "InvFadeIn") {
+			XMLNode* grandchild = child->child ("AutomationList");
+			if (grandchild) {
+				if (!_inverse_fade_in) {
+					_inverse_fade_in.reset (new AutomationList (Evoral::Parameter (FadeInAutomation)));
+				}
+				_inverse_fade_in->set_state (*grandchild, version);
+			}
+		} else if (child->name() == "InvFadeOut") {
+			XMLNode* grandchild = child->child ("AutomationList");
+			if (grandchild) {
+				if (!_inverse_fade_out) {
+					_inverse_fade_out.reset (new AutomationList (Evoral::Parameter (FadeOutAutomation)));
+				}
+				_inverse_fade_out->set_state (*grandchild, version);
+			}
 		}
 	}
 
@@ -845,6 +885,7 @@ AudioRegion::set_fade_in (boost::shared_ptr<AutomationList> f)
 	_fade_in->freeze ();
 	*_fade_in = *f;
 	_fade_in->thaw ();
+	_default_fade_in = false;
 
 	send_change (PropertyChange (Properties::fade_in));
 }
@@ -960,6 +1001,7 @@ AudioRegion::set_fade_in (FadeShape shape, framecnt_t len)
 		break;
 	}
 
+	_default_fade_in = false;
 	_fade_in->thaw ();
 	send_change (PropertyChange (Properties::fade_in));
 }
@@ -970,6 +1012,7 @@ AudioRegion::set_fade_out (boost::shared_ptr<AutomationList> f)
 	_fade_out->freeze ();
 	*_fade_out = *f;
 	_fade_out->thaw ();
+	_default_fade_out = false;
 
 	send_change (PropertyChange (Properties::fade_in));
 }
@@ -1083,6 +1126,7 @@ AudioRegion::set_fade_out (FadeShape shape, framecnt_t len)
 		break;
 	}
 
+	_default_fade_out = false;
 	_fade_out->thaw ();
 	send_change (PropertyChange (Properties::fade_in));
 }

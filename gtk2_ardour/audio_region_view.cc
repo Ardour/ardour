@@ -558,8 +558,10 @@ AudioRegionView::reset_fade_in_shape_width (framecnt_t width)
 	}
 
 	if (audio_region()->fade_in_is_xfade()) {
-		fade_in_handle->hide ();
-		fade_in_shape->hide ();
+		if (fade_in_handle) {
+			fade_in_handle->hide ();
+			fade_in_shape->hide ();
+		}
 		redraw_start_xfade ();
 		return;
 	} else {
@@ -664,8 +666,10 @@ AudioRegionView::reset_fade_out_shape_width (framecnt_t width)
 	}
 
 	if (audio_region()->fade_out_is_xfade()) {
-		fade_out_handle->hide ();
-		fade_out_shape->hide ();
+		if (fade_out_handle) {
+			fade_out_handle->hide ();
+			fade_out_shape->hide ();
+		}
 		redraw_end_xfade ();
 		return;
 	} else {
