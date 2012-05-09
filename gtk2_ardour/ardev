@@ -1,6 +1,4 @@
 #!/bin/sh
 . `dirname "$0"`/../build/gtk2_ardour/ardev_common_waf.sh
 LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
-ldd $TOP/$EXECUTABLE | grep boost
-ldd $TOP/build/libs/ardour/libardour.so | grep boost
 exec $TOP/$EXECUTABLE "$@"
