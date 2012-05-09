@@ -803,6 +803,8 @@ Surface::gui_selection_changed (const ARDOUR::StrongRouteNotificationList& route
 void
 Surface::say_hello ()
 {
+	cerr << "Sending hello to port " << _port->output_port().name() << endl;
+
 	/* wakeup for Mackie Control */
 	MidiByteArray wakeup (7, MIDI::sysex, 0x00, 0x00, 0x66, 0x14, 0x00, MIDI::eox);
 	_port->write (wakeup);

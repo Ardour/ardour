@@ -195,6 +195,8 @@ class MackieControlProtocol
 
 	int16_t ipmidi_base() const { return _ipmidi_base; }
 	void    set_ipmidi_base (int16_t);
+
+	void midi_connectivity_established ();
 	
   protected:
 	// shut down the surface
@@ -233,7 +235,6 @@ class MackieControlProtocol
 	int stop ();
 
 	void thread_init ();
-	void midi_connectivity_established ();
 
 	bool route_is_locked_to_strip (boost::shared_ptr<ARDOUR::Route>) const;
 
