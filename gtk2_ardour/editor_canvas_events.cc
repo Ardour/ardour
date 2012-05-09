@@ -377,9 +377,7 @@ Editor::canvas_start_xfade_event (GdkEvent *event, ArdourCanvas::Item* item, Aud
 
 	}
 
-	/* proxy for the regionview */
-
-	return canvas_region_view_event (event, rv->get_canvas_group(), rv);
+	return typed_event (item, event, StartCrossFadeItem);
 }
 
 bool
@@ -411,9 +409,7 @@ Editor::canvas_end_xfade_event (GdkEvent *event, ArdourCanvas::Item* item, Audio
 
 	}
 
-	/* proxy for the regionview */
-
-	return canvas_region_view_event (event, rv->get_canvas_group(), rv);
+	return typed_event (item, event, EndCrossFadeItem);
 }
 
 bool

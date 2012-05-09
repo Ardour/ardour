@@ -972,5 +972,27 @@ private:
 	bool _nothing_to_drag;
 };
 
+/** Drag of one edge of an xfade
+ */
+class CrossfadeEdgeDrag : public Drag
+{
+  public:
+	CrossfadeEdgeDrag (Editor*, AudioRegionView*, ArdourCanvas::Item*, bool start);
+	~CrossfadeEdgeDrag ();
+
+	void start_grab (GdkEvent*, Gdk::Cursor* c = 0);
+	void motion (GdkEvent*, bool);
+	void finished (GdkEvent*, bool);
+	void aborted (bool);
+	
+	bool x_movement_matters () const {
+		return false;
+	}
+
+  private:
+	AudioRegionView* arv;
+	bool start;
+};
+
 #endif /* __gtk2_ardour_editor_drag_h_ */
 

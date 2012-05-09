@@ -935,6 +935,14 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				return true;
 			}
 
+			case StartCrossFadeItem:
+				_drags->set (new CrossfadeEdgeDrag (this, reinterpret_cast<AudioRegionView*>(item->get_data("regionview")), item, true), event, 0);
+				break;
+
+			case EndCrossFadeItem:
+				_drags->set (new CrossfadeEdgeDrag (this, reinterpret_cast<AudioRegionView*>(item->get_data("regionview")), item, true), event, 0);
+				break;
+
 			case FeatureLineItem:
 			{
 				if (Keyboard::modifier_state_contains (event->button.state, Keyboard::TertiaryModifier)) {

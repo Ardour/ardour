@@ -4551,3 +4551,40 @@ NoteCreateDrag::aborted (bool)
 {
 	
 }
+
+/*------------*/
+
+CrossfadeEdgeDrag::CrossfadeEdgeDrag (Editor* e, AudioRegionView* rv, ArdourCanvas::Item* i, bool start_yn)
+	: Drag (e, i)
+	, arv (rv)
+	, start (start_yn)
+{
+	cerr << "new xfade drag\n";
+}
+
+CrossfadeEdgeDrag::~CrossfadeEdgeDrag ()
+{
+	cerr << "destory xfade drag\n";
+}
+
+void
+CrossfadeEdgeDrag::start_grab (GdkEvent* event, Gdk::Cursor *cursor)
+{
+	Drag::start_grab (event, cursor);
+}
+
+void
+CrossfadeEdgeDrag::motion (GdkEvent*, bool)
+{
+}
+
+void
+CrossfadeEdgeDrag::finished (GdkEvent*, bool)
+{
+}
+
+void
+CrossfadeEdgeDrag::aborted (bool)
+{
+}
+
