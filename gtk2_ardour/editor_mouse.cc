@@ -1483,6 +1483,14 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				popup_fade_context_menu (1, event->button.time, item, item_type);
 				break;
 
+			case StartCrossFadeItem:
+				popup_xfade_context_menu (1, event->button.time, item, item_type);
+				break;
+
+			case EndCrossFadeItem:
+				popup_xfade_context_menu (1, event->button.time, item, item_type);
+				break;
+
 			case StreamItem:
 				popup_track_context_menu (1, event->button.time, item_type, false);
 				break;
@@ -1498,7 +1506,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			case SelectionItem:
 				popup_track_context_menu (1, event->button.time, item_type, true);
 				break;
-
+				
 			case AutomationTrackItem:
 				popup_track_context_menu (1, event->button.time, item_type, false);
 				break;

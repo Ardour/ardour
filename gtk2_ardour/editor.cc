@@ -1341,6 +1341,67 @@ Editor::action_pre_activated (Glib::RefPtr<Action> const & a)
 	}
 }
 
+/** Pop up a context menu for when the user clicks on a crossfade */
+void
+Editor::popup_xfade_context_menu (int button, int32_t time, ArdourCanvas::Item* item, ItemType item_type)
+{
+	using namespace Menu_Helpers;
+
+	MenuList& items (xfade_context_menu.items());
+	
+	if (items.empty()) {
+		items.push_back (
+			ImageMenuElem (
+				_("Linear (for highly correlated material)"),
+				*_xfade_images[FadeLinear],
+				sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_shape), FadeLinear)
+				)
+			);
+		
+		dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
+		
+		items.push_back (
+			ImageMenuElem (
+				_("ConstantPower (-6dB)"),
+				*_xfade_images[FadeFast],
+				sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_shape), FadeFast)
+				));
+		
+		dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
+		
+		items.push_back (
+			ImageMenuElem (
+				_("Linear-dB"),
+				*_xfade_images[FadeSlow],
+				sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_shape), FadeSlow)
+				)
+			);
+		
+		dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
+
+		items.push_back (
+			ImageMenuElem (
+				_("Smooth"),
+				*_xfade_images[FadeLogB],
+				sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_shape), FadeLogB)
+				));
+		
+		dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
+		
+		items.push_back (
+			ImageMenuElem (
+				_("Fast"),
+				*_xfade_images[FadeLogA],
+				sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_shape), FadeLogA)
+				));
+		
+		dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
+	}
+
+	xfade_context_menu.popup (button, time);
+}
+
+
 /** Pop up a context menu for when the user clicks on a fade in or fade out */
 void
 Editor::popup_fade_context_menu (int button, int32_t time, ArdourCanvas::Item* item, ItemType item_type)
@@ -1358,9 +1419,6 @@ Editor::popup_fade_context_menu (int button, int32_t time, ArdourCanvas::Item* i
 	items.clear ();
 
 	switch (item_type) {
-	case StartCrossFadeItem:
-	case EndCrossFadeItem:
-		break;
 	case FadeInItem:
 	case FadeInHandleItem:
 		if (arv->audio_region()->fade_in_active()) {
@@ -5297,6 +5355,13 @@ Editor::setup_fade_images ()
 	_fade_out_images[FadeLogB] = new Gtk::Image (get_icon_path (X_("crossfade-out-slow-cut")));
 	_fade_out_images[FadeLogA] = new Gtk::Image (get_icon_path (X_("crossfade-out-fast-cut")));
 	_fade_out_images[FadeSlow] = new Gtk::Image (get_icon_path (X_("crossfade-out-long-cut")));
+
+	_xfade_images[FadeLinear] = new Gtk::Image (get_icon_path (X_("crossfade-out-linear")));
+	_xfade_images[FadeFast] = new Gtk::Image (get_icon_path (X_("crossfade-out-short-cut")));
+	_xfade_images[FadeLogB] = new Gtk::Image (get_icon_path (X_("crossfade-out-slow-cut")));
+	_xfade_images[FadeLogA] = new Gtk::Image (get_icon_path (X_("crossfade-out-fast-cut")));
+	_xfade_images[FadeSlow] = new Gtk::Image (get_icon_path (X_("crossfade-out-long-cut")));
+
 }
 
 /** @return Gtk::manage()d menu item for a given action from `editor_actions' */

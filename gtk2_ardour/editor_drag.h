@@ -989,7 +989,7 @@ class CrossfadeEdgeDrag : public Drag
 	}
 
 	virtual std::pair<ARDOUR::framecnt_t, int> move_threshold () const {
-		return std::make_pair (1, 1);
+		return std::make_pair (4, 4);
 	}
 
   private:
