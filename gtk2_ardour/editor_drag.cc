@@ -4618,11 +4618,24 @@ CrossfadeEdgeDrag::finished (GdkEvent*, bool)
 
 	new_length = ar->verify_xfade_bounds (len + _editor->unit_to_frame (distance), start);
 	
+	_editor->begin_reversible_command ("xfade trim");
+	ar->playlist()->clear_owned_changes ();	
+
 	if (start) {
 		ar->set_fade_in_length (new_length);
 	} else {
 		ar->set_fade_out_length (new_length);
 	}
+
+	/* Adjusting the xfade may affect other regions in the playlist, so we need
+	   to get undo Commands from the whole playlist rather than just the
+	   region.
+	*/
+
+	vector<Command*> cmds;
+	ar->playlist()->rdiff (cmds);
+	_editor->session()->add_commands (cmds);
+
 }
 
 void
