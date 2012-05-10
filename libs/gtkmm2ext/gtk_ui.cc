@@ -565,10 +565,15 @@ UI::process_error_message (Transmitter::Channel chn, const char *str)
 		handle_fatal (str);
 	} else {
 
-		display_message (prefix, prefix_len, ptag, mtag, str);
-
-		if (!errors->is_visible() && chn != Transmitter::Info) {
-			show_errors ();
+		if (!ptag || !mtag) {
+			/* oops, message sent before we set up tags - don't crash */
+			cerr << prefix << str << endl;
+		} else {
+			display_message (prefix, prefix_len, ptag, mtag, str);
+			
+			if (!errors->is_visible() && chn != Transmitter::Info) {
+				show_errors ();
+			}
 		}
 	}
 
