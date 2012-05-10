@@ -5344,23 +5344,23 @@ Editor::update_region_layering_order_editor ()
 void
 Editor::setup_fade_images ()
 {
-	_fade_in_images[FadeLinear] = new Gtk::Image (get_icon_path (X_("crossfade-in-linear")));
-	_fade_in_images[FadeFast] = new Gtk::Image (get_icon_path (X_("crossfade-in-short-cut")));
-	_fade_in_images[FadeLogB] = new Gtk::Image (get_icon_path (X_("crossfade-in-slow-cut")));
-	_fade_in_images[FadeLogA] = new Gtk::Image (get_icon_path (X_("crossfade-in-fast-cut")));
-	_fade_in_images[FadeSlow] = new Gtk::Image (get_icon_path (X_("crossfade-in-long-cut")));
+	_fade_in_images[FadeLinear] = new Gtk::Image (get_icon_path (X_("fadein-linear")));
+	_fade_in_images[FadeFast] = new Gtk::Image (get_icon_path (X_("fadein-short-cut")));
+	_fade_in_images[FadeLogB] = new Gtk::Image (get_icon_path (X_("fadein-slow-cut")));
+	_fade_in_images[FadeLogA] = new Gtk::Image (get_icon_path (X_("fadein-fast-cut")));
+	_fade_in_images[FadeSlow] = new Gtk::Image (get_icon_path (X_("fadein-long-cut")));
 
-	_fade_out_images[FadeLinear] = new Gtk::Image (get_icon_path (X_("crossfade-out-linear")));
-	_fade_out_images[FadeFast] = new Gtk::Image (get_icon_path (X_("crossfade-out-short-cut")));
-	_fade_out_images[FadeLogB] = new Gtk::Image (get_icon_path (X_("crossfade-out-slow-cut")));
-	_fade_out_images[FadeLogA] = new Gtk::Image (get_icon_path (X_("crossfade-out-fast-cut")));
-	_fade_out_images[FadeSlow] = new Gtk::Image (get_icon_path (X_("crossfade-out-long-cut")));
+	_fade_out_images[FadeLinear] = new Gtk::Image (get_icon_path (X_("fadeout-linear")));
+	_fade_out_images[FadeFast] = new Gtk::Image (get_icon_path (X_("fadeout-short-cut")));
+	_fade_out_images[FadeLogB] = new Gtk::Image (get_icon_path (X_("fadeout-slow-cut")));
+	_fade_out_images[FadeLogA] = new Gtk::Image (get_icon_path (X_("fadeout-fast-cut")));
+	_fade_out_images[FadeSlow] = new Gtk::Image (get_icon_path (X_("fadeout-long-cut")));
 
-	_xfade_images[FadeLinear] = new Gtk::Image (get_icon_path (X_("crossfade-out-linear")));
-	_xfade_images[FadeFast] = new Gtk::Image (get_icon_path (X_("crossfade-out-short-cut")));
-	_xfade_images[FadeLogB] = new Gtk::Image (get_icon_path (X_("crossfade-out-slow-cut")));
-	_xfade_images[FadeLogA] = new Gtk::Image (get_icon_path (X_("crossfade-out-fast-cut")));
-	_xfade_images[FadeSlow] = new Gtk::Image (get_icon_path (X_("crossfade-out-long-cut")));
+	_xfade_images[FadeLinear] = new Gtk::Image (get_icon_path (X_("fadeout-linear")));
+	_xfade_images[FadeFast] = new Gtk::Image (get_icon_path (X_("fadeout-short-cut")));
+	_xfade_images[FadeLogB] = new Gtk::Image (get_icon_path (X_("fadeout-slow-cut")));
+	_xfade_images[FadeLogA] = new Gtk::Image (get_icon_path (X_("fadeout-fast-cut")));
+	_xfade_images[FadeSlow] = new Gtk::Image (get_icon_path (X_("fadeout-long-cut")));
 
 }
 
