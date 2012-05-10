@@ -1530,12 +1530,18 @@ void
 AudioRegionView::redraw_start_xfade ()
 {
 	boost::shared_ptr<AudioRegion> ar (audio_region());
-	
+
 	if (!ar->fade_in() || ar->fade_in()->empty()) {
 		return;
 	}
 
-	int32_t const npoints = trackview.editor().frame_to_pixel (ar->fade_in()->back()->when);
+	redraw_start_xfade_to (ar, ar->fade_in()->back()->when);
+}
+
+void
+AudioRegionView::redraw_start_xfade_to (boost::shared_ptr<AudioRegion> ar, framecnt_t len)
+{
+	int32_t const npoints = trackview.editor().frame_to_pixel (len);
 
 	if (npoints < 3) {
 		return;
@@ -1560,6 +1566,7 @@ AudioRegionView::redraw_start_xfade ()
 		start_xfade_rect->property_fill_color_rgba() =  ARDOUR_UI::config()->canvasvar_ActiveCrossfade.get();
 		start_xfade_rect->property_outline_pixels() = 0;
 		start_xfade_rect->signal_event().connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_start_xfade_event), start_xfade_rect, this));
+		start_xfade_rect->set_data ("regionview", this);
 	}
 
 	Points* points = get_canvas_points ("xfade edit redraw", npoints);
@@ -1623,7 +1630,13 @@ AudioRegionView::redraw_end_xfade ()
 		return;
 	}
 
-	int32_t const npoints = trackview.editor().frame_to_pixel (ar->fade_out()->back()->when);
+	redraw_end_xfade_to (ar, ar->fade_out()->back()->when);
+}
+
+void
+AudioRegionView::redraw_end_xfade_to (boost::shared_ptr<AudioRegion> ar, framecnt_t len)
+{
+	int32_t const npoints = trackview.editor().frame_to_pixel (len);
 
 	if (npoints < 3) {
 		return;
@@ -1647,8 +1660,8 @@ AudioRegionView::redraw_end_xfade ()
 		end_xfade_rect->property_fill() = true;;
 		end_xfade_rect->property_fill_color_rgba() =  ARDOUR_UI::config()->canvasvar_ActiveCrossfade.get();
 		end_xfade_rect->property_outline_pixels() = 0;
-
 		end_xfade_rect->signal_event().connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_end_xfade_event), end_xfade_rect, this));
+		end_xfade_rect->set_data ("regionview", this);
 	}
 
 	Points* points = get_canvas_points ("xfade edit redraw", npoints);
@@ -1656,7 +1669,7 @@ AudioRegionView::redraw_end_xfade ()
 
 	ar->fade_out()->curve().get_vector (0, ar->fade_out()->back()->when, vec.get(), npoints);
 
-	double rend = trackview.editor().frame_to_pixel (_region->length() - ar->fade_out()->back()->when);
+	double rend = trackview.editor().frame_to_pixel (_region->length() - len);
 
 	for (int i = 0, pci = 0; i < npoints; ++i) {
 		Gnome::Art::Point &p ((*points)[pci++]);
@@ -1706,6 +1719,7 @@ AudioRegionView::redraw_end_xfade ()
 
 	delete points;
 }
+
 void
 AudioRegionView::drag_start ()
 {
@@ -1755,3 +1769,4 @@ AudioRegionView::drag_end ()
 		end_xfade_rect->show ();
 	}
 }
+

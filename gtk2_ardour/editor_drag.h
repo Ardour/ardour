@@ -985,8 +985,12 @@ class CrossfadeEdgeDrag : public Drag
 	void finished (GdkEvent*, bool);
 	void aborted (bool);
 	
-	bool x_movement_matters () const {
+	bool y_movement_matters () const {
 		return false;
+	}
+
+	virtual std::pair<ARDOUR::framecnt_t, int> move_threshold () const {
+		return std::make_pair (1, 1);
 	}
 
   private:

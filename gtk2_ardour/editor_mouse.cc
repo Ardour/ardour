@@ -940,7 +940,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				break;
 
 			case EndCrossFadeItem:
-				_drags->set (new CrossfadeEdgeDrag (this, reinterpret_cast<AudioRegionView*>(item->get_data("regionview")), item, true), event, 0);
+				_drags->set (new CrossfadeEdgeDrag (this, reinterpret_cast<AudioRegionView*>(item->get_data("regionview")), item, false), event, 0);
 				break;
 
 			case FeatureLineItem:

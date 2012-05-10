@@ -120,6 +120,11 @@ class AudioRegionView : public RegionView
 	void drag_start ();
 	void drag_end ();
 
+	void redraw_start_xfade_to (boost::shared_ptr<ARDOUR::AudioRegion>, framecnt_t);
+	void redraw_end_xfade_to (boost::shared_ptr<ARDOUR::AudioRegion>, framecnt_t);
+	void redraw_start_xfade ();
+	void redraw_end_xfade ();
+
   protected:
 
 	/* this constructor allows derived types
@@ -189,9 +194,6 @@ class AudioRegionView : public RegionView
 	std::vector<GnomeCanvasWaveViewCache*> wave_caches;
 
 	void transients_changed();
-
-	void redraw_start_xfade ();
-	void redraw_end_xfade ();
 
 private:
 	void setup_fade_handle_positions ();

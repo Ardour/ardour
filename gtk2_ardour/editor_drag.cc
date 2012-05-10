@@ -4576,15 +4576,60 @@ CrossfadeEdgeDrag::start_grab (GdkEvent* event, Gdk::Cursor *cursor)
 void
 CrossfadeEdgeDrag::motion (GdkEvent*, bool)
 {
+	double distance = _drags->current_pointer_x() - grab_x();
+	double new_length;
+	framecnt_t len;
+
+	boost::shared_ptr<AudioRegion> ar (arv->audio_region());
+
+	if (start) {
+		len = ar->fade_in()->back()->when;
+	} else {
+		len = ar->fade_out()->back()->when;
+	}
+
+	new_length = len + _editor->unit_to_frame (distance);
+	
+	if (start) {
+		arv->redraw_start_xfade_to (ar, new_length);
+	} else {
+		arv->redraw_end_xfade_to (ar, new_length);
+	}
+
+	// _editor->update_canvas_now ();
 }
 
 void
 CrossfadeEdgeDrag::finished (GdkEvent*, bool)
 {
+	double distance = _drags->current_pointer_x() - grab_x();
+	double new_length;
+	framecnt_t len;
+
+	boost::shared_ptr<AudioRegion> ar (arv->audio_region());
+
+	if (start) {
+		len = ar->fade_in()->back()->when;
+	} else {
+		len = ar->fade_out()->back()->when;
+	}
+
+	new_length = len + _editor->unit_to_frame (distance);
+	
+	if (start) {
+		ar->set_fade_in_length (new_length);
+	} else {
+		ar->set_fade_out_length (new_length);
+	}
 }
 
 void
 CrossfadeEdgeDrag::aborted (bool)
 {
+	if (start) {
+		arv->redraw_start_xfade ();
+	} else {
+		arv->redraw_end_xfade ();
+	}
 }
 
