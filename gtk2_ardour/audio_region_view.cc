@@ -1583,18 +1583,18 @@ AudioRegionView::redraw_start_xfade_to (boost::shared_ptr<AudioRegion> ar, frame
 
 	Points* points = get_canvas_points ("xfade edit redraw", npoints);
 	boost::scoped_ptr<float> vec (new float[npoints]);
-	double effective_height = _height - NAME_HIGHLIGHT_SIZE;
+	double effective_height = _height - NAME_HIGHLIGHT_SIZE - 1.0;
 
 	ar->fade_in()->curve().get_vector (0, ar->fade_in()->back()->when, vec.get(), npoints);
 
 	for (int i = 0, pci = 0; i < npoints; ++i) {
 		Gnome::Art::Point &p ((*points)[pci++]);
 		p.set_x (i);
-		p.set_y (effective_height - (effective_height * vec.get()[i]));
+		p.set_y (1.0 + effective_height - (effective_height * vec.get()[i]));
 	}
 
 	start_xfade_rect->property_x1() = ((*points)[0]).get_x();
-	start_xfade_rect->property_y1() = 0;
+	start_xfade_rect->property_y1() = 1.0;
 	start_xfade_rect->property_x2() = ((*points)[npoints-1]).get_x();
 	start_xfade_rect->property_y2() = effective_height;
 	start_xfade_rect->show ();
@@ -1613,7 +1613,7 @@ AudioRegionView::redraw_start_xfade_to (boost::shared_ptr<AudioRegion> ar, frame
 		for (int i = 0, pci = 0; i < npoints; ++i) {
 			Gnome::Art::Point &p ((*points)[pci++]);
 			p.set_x (i);
-			p.set_y (effective_height - (effective_height * (1.0 - vec.get()[i])));
+			p.set_y (1.0 + effective_height - (effective_height * (1.0 - vec.get()[i])));
 		}
 
 	} else {
@@ -1623,7 +1623,7 @@ AudioRegionView::redraw_start_xfade_to (boost::shared_ptr<AudioRegion> ar, frame
 		for (int i = 0, pci = 0; i < npoints; ++i) {
 			Gnome::Art::Point &p ((*points)[pci++]);
 			p.set_x (i);
-			p.set_y (effective_height - (effective_height * vec.get()[i]));
+			p.set_y (1.0 + effective_height - (effective_height * vec.get()[i]));
 		}
 	}
 
@@ -1692,16 +1692,16 @@ AudioRegionView::redraw_end_xfade_to (boost::shared_ptr<AudioRegion> ar, framecn
 	ar->fade_out()->curve().get_vector (0, ar->fade_out()->back()->when, vec.get(), npoints);
 
 	double rend = trackview.editor().frame_to_pixel (_region->length() - len);
-	double effective_height = _height - NAME_HIGHLIGHT_SIZE;
+	double effective_height = _height - NAME_HIGHLIGHT_SIZE - 1;
 
 	for (int i = 0, pci = 0; i < npoints; ++i) {
 		Gnome::Art::Point &p ((*points)[pci++]);
 		p.set_x (rend + i);
-		p.set_y (effective_height - (effective_height * vec.get()[i]));
+		p.set_y (1.0 + effective_height - (effective_height * vec.get()[i]));
 	}
 
 	end_xfade_rect->property_x1() = ((*points)[0]).get_x();
-	end_xfade_rect->property_y1() = 0;
+	end_xfade_rect->property_y1() = 1;
 	end_xfade_rect->property_x2() = ((*points)[npoints-1]).get_x();
 	end_xfade_rect->property_y2() = effective_height;
 	end_xfade_rect->show ();
@@ -1720,7 +1720,7 @@ AudioRegionView::redraw_end_xfade_to (boost::shared_ptr<AudioRegion> ar, framecn
 		for (int i = 0, pci = 0; i < npoints; ++i) {
 			Gnome::Art::Point &p ((*points)[pci++]);
 			p.set_x (rend + i);
-			p.set_y (_height - (_height * (1.0 - vec.get()[i])));
+			p.set_y (1.0 + effective_height - (effective_height * (1.0 - vec.get()[i])));
 		}
 
 	} else {
@@ -1730,7 +1730,7 @@ AudioRegionView::redraw_end_xfade_to (boost::shared_ptr<AudioRegion> ar, framecn
 		for (int i = 0, pci = 0; i < npoints; ++i) {
 			Gnome::Art::Point &p ((*points)[pci++]);
 			p.set_x (rend + i);
-			p.set_y (effective_height - (effective_height * vec.get()[i]));
+			p.set_y (1.0 + effective_height - (effective_height * vec.get()[i]));
 		}
 	}
 

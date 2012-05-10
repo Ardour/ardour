@@ -1149,7 +1149,9 @@ AudioRegion::set_fade_in_length (framecnt_t len)
 			_inverse_fade_in->extend_to (len);
 		}
 
-		if (_fade_in_is_xfade) {
+		if (_session.config.get_xfade_model() == FullCrossfade &&
+		    _session.config.get_auto_xfade() && 
+		    _fade_in_is_xfade) {
 
 			/* trim a single other region below us to the new start
 			   of the fade.
@@ -1160,7 +1162,6 @@ AudioRegion::set_fade_in_length (framecnt_t len)
 				other->trim_end (position() + len);
 			}
 		}
-
 
 		_default_fade_in = false;
 		send_change (PropertyChange (Properties::fade_in));
@@ -1186,8 +1187,10 @@ AudioRegion::set_fade_out_length (framecnt_t len)
 			_inverse_fade_out->extend_to (len);
 		}
 		_default_fade_out = false;
-
-		if (_fade_out_is_xfade) {
+		
+		if (_session.config.get_xfade_model() == FullCrossfade &&
+		    _session.config.get_auto_xfade() && 
+		    _fade_out_is_xfade) {
 
 			/* trim a single other region below us to the new start
 			   of the fade.
