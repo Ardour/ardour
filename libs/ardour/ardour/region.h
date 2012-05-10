@@ -141,6 +141,15 @@ class Region
 	framepos_t first_frame () const { return _position; }
 	framepos_t last_frame ()  const { return _position + _length - 1; }
 
+	/** Return the earliest possible value of _position given the
+	 *  value of _start within the region's sources
+	 */
+	framepos_t earliest_possible_position () const;
+	/** Return the last possible value of _last_frame given the
+	 *  value of _startin the regions's sources
+	 */
+	framepos_t latest_possible_frame () const;
+
 	Evoral::Range<framepos_t> last_range () const {
 		return Evoral::Range<framepos_t> (_last_position, _last_position + _last_length - 1);
 	}

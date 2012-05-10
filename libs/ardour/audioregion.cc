@@ -1148,6 +1148,20 @@ AudioRegion::set_fade_in_length (framecnt_t len)
 		if (_inverse_fade_in) {
 			_inverse_fade_in->extend_to (len);
 		}
+
+		if (_fade_in_is_xfade) {
+
+			/* trim a single other region below us to the new start
+			   of the fade.
+			*/
+
+			boost::shared_ptr<Region> other = get_single_other_xfade_region (true);
+			if (other) {
+				other->trim_end (position() + len);
+			}
+		}
+
+
 		_default_fade_in = false;
 		send_change (PropertyChange (Properties::fade_in));
 	}
@@ -1167,10 +1181,24 @@ AudioRegion::set_fade_out_length (framecnt_t len)
 	bool changed =	_fade_out->extend_to (len);
 
 	if (changed) {
+		
 		if (_inverse_fade_out) {
 			_inverse_fade_out->extend_to (len);
 		}
 		_default_fade_out = false;
+
+		if (_fade_out_is_xfade) {
+
+			/* trim a single other region below us to the new start
+			   of the fade.
+			*/
+
+			boost::shared_ptr<Region> other = get_single_other_xfade_region (false);
+			if (other) {
+				other->trim_front (last_frame() - len);
+			}
+		}
+
 		send_change (PropertyChange (Properties::fade_out));
 	}
 }
@@ -1801,8 +1829,8 @@ AudioRegion::set_fade_out_is_xfade (bool yn)
 	_fade_out_is_xfade = yn;
 }
 
-framecnt_t
-AudioRegion::verify_xfade_bounds (framecnt_t len, bool start)
+boost::shared_ptr<Region>
+AudioRegion::get_single_other_xfade_region (bool start) const
 {
 	boost::shared_ptr<Playlist> pl (playlist());
 
@@ -1810,11 +1838,10 @@ AudioRegion::verify_xfade_bounds (framecnt_t len, bool start)
 		/* not currently in a playlist - xfade length is unbounded
 		   (and irrelevant)
 		*/
-		return len;
+		return boost::shared_ptr<AudioRegion> ();
 	}
 
 	boost::shared_ptr<RegionList> rl;
-	framecnt_t maxlen;
 
 	if (start) {
 		rl = pl->regions_at (position());
@@ -1837,17 +1864,27 @@ AudioRegion::verify_xfade_bounds (framecnt_t len, bool start)
 
 	if (n != 2) {
 		/* zero or multiple regions stacked here - don't care about xfades */
-		return len;
+		return boost::shared_ptr<AudioRegion> ();
 	}
 
+	return other;
+}
+
+framecnt_t
+AudioRegion::verify_xfade_bounds (framecnt_t len, bool start)
+{
+	boost::shared_ptr<Region> other = get_single_other_xfade_region (start);
+	framecnt_t maxlen;
+
 	/* we overlap a single region. clamp the length of an xfade to
-	   the duration of the overlap.
+	   the maximum possible duration of the overlap (if the other
+	   region were trimmed appropriately).
 	*/
 
 	if (start) {
-		maxlen = other->last_frame() - position();
+		maxlen = other->latest_possible_frame() - position();
 	} else {
-		maxlen = last_frame() - other->position();
+		maxlen = last_frame() - other->earliest_possible_position();
 	}
 
 	return min (maxlen, len);

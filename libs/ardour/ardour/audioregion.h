@@ -238,6 +238,8 @@ class AudioRegion : public Region
 	bool                              _fade_in_is_xfade;
 	bool                              _fade_out_is_xfade;
 
+	boost::shared_ptr<ARDOUR::Region> get_single_other_xfade_region (bool start) const;
+
   protected:
 	/* default constructor for derived (compound) types */
 
