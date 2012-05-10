@@ -45,6 +45,7 @@
 #include "waveview.h"
 #include "public_editor.h"
 #include "audio_region_editor.h"
+#include "audio_streamview.h"
 #include "region_gain_line.h"
 #include "control_point.h"
 #include "ghostregion.h"
@@ -307,6 +308,7 @@ AudioRegionView::fade_out_changed ()
 {
 	reset_fade_out_shape ();
 }
+
 void
 AudioRegionView::fade_in_active_changed ()
 {
@@ -1524,6 +1526,7 @@ AudioRegionView::thaw_after_trim ()
 {
 	RegionView::thaw_after_trim ();
 	unhide_envelope ();
+	drag_end ();
 }
 
 void
@@ -1532,6 +1535,15 @@ AudioRegionView::redraw_start_xfade ()
 	boost::shared_ptr<AudioRegion> ar (audio_region());
 
 	if (!ar->fade_in() || ar->fade_in()->empty()) {
+		return;
+	}
+
+	if (!ar->fade_in_is_xfade()) {
+		if (start_xfade_in) {
+			start_xfade_in->hide ();
+			start_xfade_out->hide ();
+			start_xfade_rect->hide ();
+		}
 		return;
 	}
 
@@ -1631,6 +1643,15 @@ AudioRegionView::redraw_end_xfade ()
 		return;
 	}
 
+	if (!ar->fade_out_is_xfade()) {
+		if (end_xfade_in) {
+			end_xfade_in->hide ();
+			end_xfade_out->hide ();
+			end_xfade_rect->hide ();
+		}
+		return;
+	}
+
 	redraw_end_xfade_to (ar, ar->fade_out()->back()->when);
 }
 
@@ -1722,10 +1743,8 @@ AudioRegionView::redraw_end_xfade_to (boost::shared_ptr<AudioRegion> ar, framecn
 }
 
 void
-AudioRegionView::drag_start ()
+AudioRegionView::hide_xfades ()
 {
-	TimeAxisViewItem::drag_start ();
-	
 	if (start_xfade_in) {
 		start_xfade_in->hide();
 	}
@@ -1747,10 +1766,8 @@ AudioRegionView::drag_start ()
 }
 
 void
-AudioRegionView::drag_end ()
+AudioRegionView::show_xfades ()
 {
-	TimeAxisViewItem::drag_end ();
-
 	if (start_xfade_in) {
 		start_xfade_in->show();
 	}
@@ -1769,5 +1786,27 @@ AudioRegionView::drag_end ()
 	if (end_xfade_rect) {
 		end_xfade_rect->show ();
 	}
+}
+
+void
+AudioRegionView::drag_start ()
+{
+	TimeAxisViewItem::drag_start ();
+	AudioTimeAxisView* atav = dynamic_cast<AudioTimeAxisView*> (&trackview);
+
+	if (atav) {
+		AudioStreamView* av = atav->audio_view();
+		if (av) {
+			/* this will hide our xfades too */
+			av->hide_xfades_with (audio_region());
+		}
+	}
+}
+
+void
+AudioRegionView::drag_end ()
+{
+	TimeAxisViewItem::drag_end ();
+	/* fades will be redrawn if they changed */
 }
 

@@ -124,6 +124,9 @@ class AudioRegionView : public RegionView
 	void redraw_end_xfade_to (boost::shared_ptr<ARDOUR::AudioRegion>, framecnt_t);
 	void redraw_start_xfade ();
 	void redraw_end_xfade ();
+	
+	void hide_xfades ();
+	void show_xfades ();
 
   protected:
 
