@@ -142,6 +142,8 @@ class AudioRegion : public Region
 
 	void set_default_fade_in ();
 	void set_default_fade_out ();
+
+	framecnt_t verify_xfade_bounds (framecnt_t, bool start);
 	
 	void set_envelope_active (bool yn);
 	void set_default_envelope ();

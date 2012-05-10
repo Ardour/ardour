@@ -1801,6 +1801,59 @@ AudioRegion::set_fade_out_is_xfade (bool yn)
 	_fade_out_is_xfade = yn;
 }
 
+framecnt_t
+AudioRegion::verify_xfade_bounds (framecnt_t len, bool start)
+{
+	boost::shared_ptr<Playlist> pl (playlist());
+
+	if (!pl) {
+		/* not currently in a playlist - xfade length is unbounded
+		   (and irrelevant)
+		*/
+		return len;
+	}
+
+	boost::shared_ptr<RegionList> rl;
+	framecnt_t maxlen;
+
+	if (start) {
+		rl = pl->regions_at (position());
+	} else {
+		rl = pl->regions_at (last_frame());
+	}
+	
+	RegionList::iterator i;
+	boost::shared_ptr<Region> other;
+	uint32_t n = 0;
+
+	/* count and find the other region in a single pass through the list */
+
+	for (i = rl->begin(); i != rl->end(); ++i) {
+		if ((*i).get() != this) {
+			other = *i;
+		}
+		++n;
+	}
+
+	if (n != 2) {
+		/* zero or multiple regions stacked here - don't care about xfades */
+		return len;
+	}
+
+	/* we overlap a single region. clamp the length of an xfade to
+	   the duration of the overlap.
+	*/
+
+	if (start) {
+		maxlen = other->last_frame() - position();
+	} else {
+		maxlen = last_frame() - other->position();
+	}
+
+	return min (maxlen, len);
+		
+}
+
 extern "C" {
 
 	int region_read_peaks_from_c (void *arg, uint32_t npeaks, uint32_t start, uint32_t cnt, intptr_t data, uint32_t n_chan, double samples_per_unit)

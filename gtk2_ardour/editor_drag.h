@@ -978,7 +978,6 @@ class CrossfadeEdgeDrag : public Drag
 {
   public:
 	CrossfadeEdgeDrag (Editor*, AudioRegionView*, ArdourCanvas::Item*, bool start);
-	~CrossfadeEdgeDrag ();
 
 	void start_grab (GdkEvent*, Gdk::Cursor* c = 0);
 	void motion (GdkEvent*, bool);

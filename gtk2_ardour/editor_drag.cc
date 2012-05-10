@@ -4559,12 +4559,6 @@ CrossfadeEdgeDrag::CrossfadeEdgeDrag (Editor* e, AudioRegionView* rv, ArdourCanv
 	, arv (rv)
 	, start (start_yn)
 {
-	cerr << "new xfade drag\n";
-}
-
-CrossfadeEdgeDrag::~CrossfadeEdgeDrag ()
-{
-	cerr << "destory xfade drag\n";
 }
 
 void
@@ -4590,8 +4584,14 @@ CrossfadeEdgeDrag::motion (GdkEvent*, bool)
 		len = ar->fade_out()->back()->when;
 	}
 
+	/* how long should it be ? */
+
 	new_length = len + _editor->unit_to_frame (distance);
-	
+
+	/* now check with the region that this is legal */
+
+	new_length = ar->verify_xfade_bounds (new_length, start);
+
 	if (start) {
 		arv->redraw_start_xfade_to (ar, new_length);
 	} else {
@@ -4616,7 +4616,7 @@ CrossfadeEdgeDrag::finished (GdkEvent*, bool)
 		len = ar->fade_out()->back()->when;
 	}
 
-	new_length = len + _editor->unit_to_frame (distance);
+	new_length = ar->verify_xfade_bounds (len + _editor->unit_to_frame (distance), start);
 	
 	if (start) {
 		ar->set_fade_in_length (new_length);
