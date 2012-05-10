@@ -1702,7 +1702,6 @@ AudioRegionView::redraw_end_xfade_to (boost::shared_ptr<AudioRegion> ar, framecn
 
 	} else {
 
-		rend = trackview.editor().frame_to_pixel (_region->length() - inverse->back()->when);
 		inverse->curve().get_vector (inverse->front()->when, inverse->back()->when, vec.get(), npoints);
 		
 		for (int i = 0, pci = 0; i < npoints; ++i) {
