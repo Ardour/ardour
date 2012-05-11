@@ -987,8 +987,6 @@ AudioRegion::set_fade_in (FadeShape shape, framecnt_t len)
 	boost::shared_ptr<Evoral::ControlList> c2 (new Evoral::ControlList (FadeInAutomation));
 	boost::shared_ptr<Evoral::ControlList> c3 (new Evoral::ControlList (FadeInAutomation));
 
-	cerr << "Resetting fade in to " << shape << " len = " << len << endl;
-
 	_fade_in->freeze ();
 	_fade_in->clear ();
 	_inverse_fade_in->clear ();
@@ -1044,9 +1042,7 @@ AudioRegion::set_fade_in (FadeShape shape, framecnt_t len)
 
 	_default_fade_in = false;
 	_fade_in->thaw ();
-	cerr << "SEND CHANGE SIGNAL\n";
 	send_change (PropertyChange (Properties::fade_in));
-	cerr << "DONE CHANGE SIGNAL\n";
 }
 
 void
