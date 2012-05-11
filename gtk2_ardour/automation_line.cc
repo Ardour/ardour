@@ -69,8 +69,7 @@ ControlPoint::ControlPoint (AutomationLine& al)
 	item = new Canvas::SimpleRect (line.canvas_group());
 	item->property_draw() = true;
 	item->property_fill() = false;
-	item->property_fill_color_rgba() =  ARDOUR_UI::config()->canvasvar_ControlPointFill.get();
-	item->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_ControlPointOutline.get();
+	item->property_fill_color_rgba() =  ARDOUR_UI::config()->canvasvar_ActiveCrossfade.get();
 	item->property_outline_pixels() = 1;
 	item->set_data ("control_point", this);
 	item->signal_event().connect (mem_fun (this, &ControlPoint::event_handler));

@@ -35,7 +35,7 @@ using namespace PBD;
 
 #define NS_UI "http://lv2plug.in/ns/extensions/ui#"
 
-static SuilHost* ui_host = NULL;
+static SuilHost* ui_host = 0;
 
 void
 LV2PluginUI::lv2_ui_write(LV2UI_Controller controller,
@@ -60,7 +60,7 @@ void LV2PluginUI::on_external_ui_closed(LV2UI_Controller controller)
 {
 	LV2PluginUI* me = (LV2PluginUI*)controller;
 	me->_screen_update_connection.disconnect();
-	me->_external_ui_ptr = NULL;
+	me->_external_ui_ptr = 0;
 }
 
 void
@@ -131,9 +131,10 @@ LV2PluginUI::LV2PluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_ptr<
 	: PlugUIBase (pi)
 	, _lv2(lv2p)
         , _current_ui_thread (0)
-	, _inst(NULL)
-	, _values(NULL)
-	, _external_ui_ptr(NULL)
+	, _inst (0)
+	, _values (0)
+        , _gui_widget (0)
+	, _external_ui_ptr (0)
 {
 	if (!_lv2->is_external_ui()) {
 		lv2ui_instantiate("gtk2gui");
@@ -165,7 +166,7 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 		}
 
 		features_dst = features = (LV2_Feature**)malloc(sizeof(LV2_Feature*) * features_count);
-		features_dst[--features_count] = NULL;
+		features_dst[--features_count] = 0;
 		features_dst[--features_count] = &_external_ui_feature;
 		while (features_count--) {
 			*features++ = *features_src++;
@@ -175,7 +176,7 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 	}
 
 	if (!ui_host) {
-		ui_host = suil_host_new(LV2PluginUI::lv2_ui_write, NULL, NULL, NULL);
+		ui_host = suil_host_new(LV2PluginUI::lv2_ui_write, 0, 0, 0);
 	}
 	const char* container_type = (is_external_ui)
 		? NS_UI "external"
@@ -204,7 +205,7 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 		}
 	}
 
-	_external_ui_ptr = NULL;
+	_external_ui_ptr = 0;
 	if (_inst) {
 		if (!is_external_ui) {
 			GtkWidget* c_widget = (GtkWidget*)suil_instance_get_widget(_inst);
@@ -242,11 +243,9 @@ LV2PluginUI::lv2ui_free()
 
 	suil_instance_free((SuilInstance*)_inst);
 
-	_inst = NULL;
-	_gui_widget = NULL;
+	_inst = 0;
+	_gui_widget = 0;
 }
-
-
 
 LV2PluginUI::~LV2PluginUI ()
 {
@@ -262,8 +261,8 @@ LV2PluginUI::~LV2PluginUI ()
 	_screen_update_connection.disconnect();		
 
 	if (_lv2->is_external_ui()) {
-		/*external UI is no longer valid - on_window_hide() will not try to use it if is NULL*/
-		_external_ui_ptr = NULL;
+		/*external UI is no longer valid - on_window_hide() will not try to use it if is 0*/
+		_external_ui_ptr = 0;
 	}
 }
 
@@ -343,7 +342,7 @@ LV2PluginUI::on_window_hide()
 	if (_external_ui_ptr) {
 		LV2_EXTERNAL_UI_HIDE(_external_ui_ptr);
 		//suil_instance_get_descriptor(_inst)->cleanup(_inst);
-		//_external_ui_ptr = NULL;
+		//_external_ui_ptr = 0;
 		//_screen_update_connection.disconnect();
 	}
 }
