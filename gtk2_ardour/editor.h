@@ -1337,8 +1337,11 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtk::Menu fade_context_menu;
 	void popup_fade_context_menu (int, int, ArdourCanvas::Item*, ItemType);
 
-	Gtk::Menu xfade_context_menu;
-	void popup_xfade_context_menu (int, int, ArdourCanvas::Item*, ItemType);
+	Gtk::Menu xfade_in_context_menu;
+	Gtk::Menu xfade_out_context_menu;
+	void popup_xfade_in_context_menu (int, int, ArdourCanvas::Item*, ItemType);
+	void popup_xfade_out_context_menu (int, int, ArdourCanvas::Item*, ItemType);
+	void fill_xfade_menu (Gtk::Menu_Helpers::MenuList& items, bool start);
 
 	void set_fade_in_shape (ARDOUR::FadeShape);
 	void set_fade_out_shape (ARDOUR::FadeShape);
@@ -2062,7 +2065,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void setup_fade_images ();
 	std::map<ARDOUR::FadeShape, Gtk::Image*> _fade_in_images;
 	std::map<ARDOUR::FadeShape, Gtk::Image*> _fade_out_images;
-	std::map<ARDOUR::FadeShape, Gtk::Image*> _xfade_images;
+	std::map<ARDOUR::FadeShape, Gtk::Image*> _xfade_in_images;
+	std::map<ARDOUR::FadeShape, Gtk::Image*> _xfade_out_images;
 
 	Gtk::MenuItem& action_menu_item (std::string const &);
 	void action_pre_activated (Glib::RefPtr<Gtk::Action> const &);

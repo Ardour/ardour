@@ -328,12 +328,16 @@ AudioPlaylist::check_crossfades (Evoral::Range<framepos_t> range)
 					top->set_fade_in_active (true);
 					top->set_fade_in_is_xfade (true);
 
+					/* XXX may 2012: -3dB and -6dB curves
+					 * are the same right now 
+					 */
+
 					switch (_session.config.get_xfade_choice ()) {
 					case ConstantPowerMinus3dB:
-						top->set_fade_in (FadeConstantPowerMinus3dB, len);
+						top->set_fade_in (FadeConstantPower, len);
 						break;
 					case ConstantPowerMinus6dB:
-						top->set_fade_in (FadeConstantPowerMinus6dB, len);
+						top->set_fade_in (FadeConstantPower, len);
 						break;
 					case RegionFades:
 						top->set_fade_in_length (len);
@@ -369,10 +373,10 @@ AudioPlaylist::check_crossfades (Evoral::Range<framepos_t> range)
 
 					switch (_session.config.get_xfade_choice ()) {
 					case ConstantPowerMinus3dB:
-						top->set_fade_out (FadeConstantPowerMinus3dB, len);
+						top->set_fade_out (FadeConstantPower, len);
 						break;
 					case ConstantPowerMinus6dB:
-						top->set_fade_out (FadeConstantPowerMinus6dB, len);
+						top->set_fade_out (FadeConstantPower, len);
 						break;
 					case RegionFades:
 						top->set_fade_out_length (len);

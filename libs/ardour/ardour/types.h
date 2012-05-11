@@ -557,10 +557,8 @@ namespace ARDOUR {
 		FadeLinear,
 		FadeFast,
 		FadeSlow,
-		FadeLogA,
-		FadeLogB,
-		FadeConstantPowerMinus3dB,
-		FadeConstantPowerMinus6dB,
+		FadeConstantPower,
+		FadeSymmetric,
 	};
 
 } // namespace ARDOUR

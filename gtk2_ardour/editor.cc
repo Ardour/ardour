@@ -1341,64 +1341,98 @@ Editor::action_pre_activated (Glib::RefPtr<Action> const & a)
 	}
 }
 
-/** Pop up a context menu for when the user clicks on a crossfade */
 void
-Editor::popup_xfade_context_menu (int button, int32_t time, ArdourCanvas::Item* item, ItemType item_type)
+Editor::fill_xfade_menu (Menu_Helpers::MenuList& items, bool start)
 {
 	using namespace Menu_Helpers;
 
-	MenuList& items (xfade_context_menu.items());
-	
-	if (items.empty()) {
-		items.push_back (
-			ImageMenuElem (
-				_("Linear (for highly correlated material)"),
-				*_xfade_images[FadeLinear],
-				sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_shape), FadeLinear)
-				)
-			);
-		
-		dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
-		
-		items.push_back (
-			ImageMenuElem (
-				_("ConstantPower (-6dB)"),
-				*_xfade_images[FadeFast],
-				sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_shape), FadeFast)
-				));
-		
-		dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
-		
-		items.push_back (
-			ImageMenuElem (
-				_("Linear-dB"),
-				*_xfade_images[FadeSlow],
-				sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_shape), FadeSlow)
-				)
-			);
-		
-		dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
+	void (Editor::*emf)(FadeShape);
+	std::map<ARDOUR::FadeShape,Gtk::Image*>* images;
 
-		items.push_back (
-			ImageMenuElem (
-				_("Smooth"),
-				*_xfade_images[FadeLogB],
-				sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_shape), FadeLogB)
-				));
-		
-		dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
-		
-		items.push_back (
-			ImageMenuElem (
-				_("Fast"),
-				*_xfade_images[FadeLogA],
-				sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_shape), FadeLogA)
-				));
-		
-		dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
+	if (start) {
+		images = &_xfade_in_images;
+		emf = &Editor::set_fade_in_shape;
+	} else {
+		images = &_xfade_out_images;
+		emf = &Editor::set_fade_out_shape;
 	}
 
-	xfade_context_menu.popup (button, time);
+	items.push_back (
+		ImageMenuElem (
+			_("Linear (for highly correlated material)"),
+			*(*images)[FadeLinear],
+			sigc::bind (sigc::mem_fun (*this, emf), FadeLinear)
+			)
+		);
+	
+	dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
+	
+	items.push_back (
+		ImageMenuElem (
+			_("ConstantPower"),
+			*(*images)[FadeConstantPower],
+			sigc::bind (sigc::mem_fun (*this, emf), FadeConstantPower)
+			));
+	
+	dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
+	
+	items.push_back (
+		ImageMenuElem (
+			_("Symmetric"),
+			*(*images)[FadeSymmetric],
+			sigc::bind (sigc::mem_fun (*this, emf), FadeSymmetric)
+			)
+		);
+	
+	dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
+	
+	items.push_back (
+		ImageMenuElem (
+			_("Slow"),
+			*(*images)[FadeSlow],
+			sigc::bind (sigc::mem_fun (*this, emf), FadeSlow)
+			));
+	
+	dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
+	
+	items.push_back (
+		ImageMenuElem (
+			_("Fast"),
+			*(*images)[FadeFast],
+			sigc::bind (sigc::mem_fun (*this, emf), FadeFast)
+			));
+	
+	dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
+}
+
+/** Pop up a context menu for when the user clicks on a start crossfade */
+void
+Editor::popup_xfade_in_context_menu (int button, int32_t time, ArdourCanvas::Item* item, ItemType item_type)
+{
+	using namespace Menu_Helpers;
+
+	MenuList& items (xfade_in_context_menu.items());
+
+	if (items.empty()) {
+		fill_xfade_menu (items, true);
+	}
+
+	xfade_in_context_menu.popup (button, time);
+}
+
+/** Pop up a context menu for when the user clicks on an end crossfade */
+void
+Editor::popup_xfade_out_context_menu (int button, int32_t time, ArdourCanvas::Item* item, ItemType item_type)
+{
+	using namespace Menu_Helpers;
+
+	MenuList& items (xfade_out_context_menu.items());
+
+	if (items.empty()) {
+		fill_xfade_menu (items, false);
+	}
+
+	xfade_out_context_menu.popup (button, time);
 }
 
 
@@ -1448,7 +1482,16 @@ Editor::popup_fade_context_menu (int button, int32_t time, ArdourCanvas::Item* i
 
 			items.push_back (
 				ImageMenuElem (
-					_("Slowest"),
+					_("Slow"),
+					*_fade_in_images[FadeSlow],
+					sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_shape), FadeSlow)
+					));
+
+			dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
+
+			items.push_back (
+				ImageMenuElem (
+					_("Fast"),
 					*_fade_in_images[FadeFast],
 					sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_shape), FadeFast)
 					));
@@ -1457,27 +1500,16 @@ Editor::popup_fade_context_menu (int button, int32_t time, ArdourCanvas::Item* i
 
 			items.push_back (
 				ImageMenuElem (
-					_("Slow"),
-					*_fade_in_images[FadeLogB],
-					sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_shape), FadeLogB)
-					));
-
-			dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
-
-			items.push_back (
-				ImageMenuElem (
-					_("Fast"),
-					*_fade_in_images[FadeLogA],
-					sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_shape), FadeLogA)
-					));
-
-			dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
-
-			items.push_back (
-				ImageMenuElem (
-					_("Fastest"),
+					_("Symmetric"),
 					*_fade_in_images[FadeSlow],
-					sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_shape), FadeSlow)
+					sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_shape), FadeSymmetric)
+					));
+
+			items.push_back (
+				ImageMenuElem (
+					_("Constant Power"),
+					*_fade_in_images[FadeConstantPower],
+					sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_shape), FadeConstantPower)
 					));
 
 			dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
@@ -1512,8 +1544,8 @@ Editor::popup_fade_context_menu (int button, int32_t time, ArdourCanvas::Item* i
 
 			items.push_back (
 				ImageMenuElem (
-					_("Slowest"),
-					*_fade_out_images[FadeFast],
+					_("Slow"),
+					*_fade_out_images[FadeSlow],
 					sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_out_shape), FadeSlow)
 					));
 
@@ -1521,27 +1553,25 @@ Editor::popup_fade_context_menu (int button, int32_t time, ArdourCanvas::Item* i
 
 			items.push_back (
 				ImageMenuElem (
-					_("Slow"),
-					*_fade_out_images[FadeLogB],
-					sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_out_shape), FadeLogA)
-					));
-
-			dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
-
-			items.push_back (
-				ImageMenuElem (
 					_("Fast"),
-					*_fade_out_images[FadeLogA],
-					sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_out_shape), FadeLogB)
+					*_fade_out_images[FadeFast],
+					sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_out_shape), FadeFast)
 					));
 
 			dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
 
 			items.push_back (
 				ImageMenuElem (
-					_("Fastest"),
+					_("Symmetric"),
 					*_fade_out_images[FadeSlow],
-					sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_out_shape), FadeFast)
+					sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_out_shape), FadeSymmetric)
+					));
+
+			items.push_back (
+				ImageMenuElem (
+					_("Constant Power"),
+					*_fade_out_images[FadeConstantPower],
+					sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_out_shape), FadeConstantPower)
 					));
 
 			dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
@@ -5345,22 +5375,28 @@ void
 Editor::setup_fade_images ()
 {
 	_fade_in_images[FadeLinear] = new Gtk::Image (get_icon_path (X_("fadein-linear")));
-	_fade_in_images[FadeFast] = new Gtk::Image (get_icon_path (X_("fadein-short-cut")));
-	_fade_in_images[FadeLogB] = new Gtk::Image (get_icon_path (X_("fadein-slow-cut")));
-	_fade_in_images[FadeLogA] = new Gtk::Image (get_icon_path (X_("fadein-fast-cut")));
-	_fade_in_images[FadeSlow] = new Gtk::Image (get_icon_path (X_("fadein-long-cut")));
+	_fade_in_images[FadeSymmetric] = new Gtk::Image (get_icon_path (X_("fadein-short-cut")));
+	_fade_in_images[FadeFast] = new Gtk::Image (get_icon_path (X_("fadein-slow-cut")));
+	_fade_in_images[FadeSlow] = new Gtk::Image (get_icon_path (X_("fadein-fast-cut")));
+	_fade_in_images[FadeConstantPower] = new Gtk::Image (get_icon_path (X_("fadein-long-cut")));
 
 	_fade_out_images[FadeLinear] = new Gtk::Image (get_icon_path (X_("fadeout-linear")));
-	_fade_out_images[FadeFast] = new Gtk::Image (get_icon_path (X_("fadeout-short-cut")));
-	_fade_out_images[FadeLogB] = new Gtk::Image (get_icon_path (X_("fadeout-slow-cut")));
-	_fade_out_images[FadeLogA] = new Gtk::Image (get_icon_path (X_("fadeout-fast-cut")));
-	_fade_out_images[FadeSlow] = new Gtk::Image (get_icon_path (X_("fadeout-long-cut")));
+	_fade_out_images[FadeSymmetric] = new Gtk::Image (get_icon_path (X_("fadeout-short-cut")));
+	_fade_out_images[FadeFast] = new Gtk::Image (get_icon_path (X_("fadeout-slow-cut")));
+	_fade_out_images[FadeSlow] = new Gtk::Image (get_icon_path (X_("fadeout-fast-cut")));
+	_fade_out_images[FadeConstantPower] = new Gtk::Image (get_icon_path (X_("fadeout-long-cut")));
+	
+	_xfade_in_images[FadeLinear] = new Gtk::Image (get_icon_path (X_("fadeout-linear")));
+	_xfade_in_images[FadeSymmetric] = new Gtk::Image (get_icon_path (X_("fadeout-short-cut")));
+	_xfade_in_images[FadeFast] = new Gtk::Image (get_icon_path (X_("fadeout-slow-cut")));
+	_xfade_in_images[FadeSlow] = new Gtk::Image (get_icon_path (X_("fadeout-fast-cut")));
+	_xfade_in_images[FadeConstantPower] = new Gtk::Image (get_icon_path (X_("fadeout-long-cut")));
 
-	_xfade_images[FadeLinear] = new Gtk::Image (get_icon_path (X_("fadeout-linear")));
-	_xfade_images[FadeFast] = new Gtk::Image (get_icon_path (X_("fadeout-short-cut")));
-	_xfade_images[FadeLogB] = new Gtk::Image (get_icon_path (X_("fadeout-slow-cut")));
-	_xfade_images[FadeLogA] = new Gtk::Image (get_icon_path (X_("fadeout-fast-cut")));
-	_xfade_images[FadeSlow] = new Gtk::Image (get_icon_path (X_("fadeout-long-cut")));
+	_xfade_out_images[FadeLinear] = new Gtk::Image (get_icon_path (X_("fadeout-linear")));
+	_xfade_out_images[FadeSymmetric] = new Gtk::Image (get_icon_path (X_("fadeout-short-cut")));
+	_xfade_out_images[FadeFast] = new Gtk::Image (get_icon_path (X_("fadeout-slow-cut")));
+	_xfade_out_images[FadeSlow] = new Gtk::Image (get_icon_path (X_("fadeout-fast-cut")));
+	_xfade_out_images[FadeConstantPower] = new Gtk::Image (get_icon_path (X_("fadeout-long-cut")));
 
 }
 

@@ -640,15 +640,12 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 		}
 		break;
 
-
-	case StartCrossFadeItem:
-	case EndCrossFadeItem:
-		break;
-
 	case FadeInHandleItem:
 	case FadeInItem:
 	case FadeOutHandleItem:
 	case FadeOutItem:
+	case StartCrossFadeItem:
+	case EndCrossFadeItem:
 		if (doing_object_stuff() || (mouse_mode != MouseRange && mouse_mode != MouseObject)) {
 			set_selected_regionview_from_click (press, op);
 		} else if (event->type == GDK_BUTTON_PRESS) {
@@ -1484,11 +1481,11 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				break;
 
 			case StartCrossFadeItem:
-				popup_xfade_context_menu (1, event->button.time, item, item_type);
+				popup_xfade_in_context_menu (1, event->button.time, item, item_type);
 				break;
 
 			case EndCrossFadeItem:
-				popup_xfade_context_menu (1, event->button.time, item, item_type);
+				popup_xfade_out_context_menu (1, event->button.time, item, item_type);
 				break;
 
 			case StreamItem:

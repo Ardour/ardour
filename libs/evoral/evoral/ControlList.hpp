@@ -95,6 +95,7 @@ public:
 
 	ControlList& operator= (const ControlList&);
 	bool operator== (const ControlList&);
+        void copy_events (const ControlList&);
 
 	virtual void freeze();
 	virtual void thaw ();

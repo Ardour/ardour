@@ -65,6 +65,90 @@ namespace ARDOUR {
 	}
 }
 
+static const double VERY_SMALL_SIGNAL = 0.0000001;  //-140dB
+
+/* Curve manipulations */
+
+static void
+reverse_curve (boost::shared_ptr<Evoral::ControlList> dst, boost::shared_ptr<const Evoral::ControlList> src)
+{
+	size_t len = src->back()->when;
+	
+	for (Evoral::ControlList::const_iterator it = src->begin(); it!=src->end(); it++) {
+		dst->add ( len - (*it)->when, (*it)->value );
+	}
+}
+
+static void
+generate_inverse_power_curve (boost::shared_ptr<Evoral::ControlList> dst, boost::shared_ptr<const Evoral::ControlList> src)
+{
+	//calc inverse curve using sum of squares
+	for (Evoral::ControlList::const_iterator it = src->begin(); it!=src->end(); ++it ) {
+		float value = (*it)->value;
+		value = 1 - powf(value,2);
+		value = sqrtf(value);
+		dst->fast_simple_add ( (*it)->when, value );
+	}
+}
+
+/*
+static void
+generate_inverse_coefficient_curve (boost::shared_ptr<Evoral::ControlList> dst, boost::shared_ptr<const Evoral::ControlList> src)
+{
+	//calc inverse gain coefficient curve
+	for (Evoral::ControlList::const_iterator it = src->begin(); it!=src->end(); ++it ) {
+		float value = 1.0 - (*it)->value;
+		dst->fast_simple_add ( (*it)->when, value );
+	}
+}
+*/
+
+static void
+generate_db_fade (boost::shared_ptr<Evoral::ControlList> dst, double len, int num_steps, float dB_drop)
+{
+	dst->fast_simple_add (0, 1);
+
+	//generate a fade-out curve by successively applying a gain drop
+	float fade_speed = dB_to_coefficient(dB_drop / (float) num_steps);
+	for (int i = 1; i < (num_steps-1); i++) {
+		float coeff = 1.0;
+		for (int j = 0; j < i; j++) {
+			coeff *= fade_speed;
+		}
+		dst->fast_simple_add (len*(double)i/(double)num_steps, coeff);
+	}
+
+	dst->fast_simple_add (len, VERY_SMALL_SIGNAL);
+}
+
+static void
+merge_curves (boost::shared_ptr<Evoral::ControlList> dst, 
+	      boost::shared_ptr<const Evoral::ControlList> curve1, 
+	      boost::shared_ptr<const Evoral::ControlList> curve2)
+{
+	Evoral::ControlList::EventList::size_type size = curve1->size();
+
+	//curve lengths must match for now
+	if (size != curve2->size()) {
+		return;
+	}
+	
+	Evoral::ControlList::const_iterator c1 = curve1->begin();
+	int count = 0;
+	for (Evoral::ControlList::const_iterator c2 = curve2->begin(); c2!=curve2->end(); c2++ ) {
+		float v1 = accurate_coefficient_to_dB((*c1)->value);
+		float v2 = accurate_coefficient_to_dB((*c2)->value);
+		
+		double interp = v1 * ( 1.0-( (double)count / (double)size) );
+		interp += v2 * ( (double)count / (double)size );
+
+		interp = dB_to_coefficient(interp);
+		dst->add ( (*c1)->when, interp );
+		c1++;
+		count++;
+	}
+}
+
 void
 AudioRegion::make_property_quarks ()
 {
@@ -133,7 +217,9 @@ AudioRegion::AudioRegion (Session& s, framepos_t start, framecnt_t len, std::str
 	, AUDIOREGION_STATE_DEFAULT
 	, _automatable (s)
 	, _fade_in (new AutomationList(Evoral::Parameter(FadeInAutomation)))
+	, _inverse_fade_in (new AutomationList(Evoral::Parameter(FadeInAutomation)))
 	, _fade_out (new AutomationList(Evoral::Parameter(FadeOutAutomation)))
+	, _inverse_fade_out (new AutomationList(Evoral::Parameter(FadeOutAutomation)))
 	, _envelope (new AutomationList(Evoral::Parameter(EnvelopeAutomation)))
 	, _fade_in_suspended (0)
 	, _fade_out_suspended (0)
@@ -150,7 +236,9 @@ AudioRegion::AudioRegion (const SourceList& srcs)
 	, AUDIOREGION_STATE_DEFAULT
 	, _automatable(srcs[0]->session())
 	, _fade_in (new AutomationList(Evoral::Parameter(FadeInAutomation)))
+	, _inverse_fade_in (new AutomationList(Evoral::Parameter(FadeInAutomation)))
 	, _fade_out (new AutomationList(Evoral::Parameter(FadeOutAutomation)))
+	, _inverse_fade_out (new AutomationList(Evoral::Parameter(FadeOutAutomation)))
 	, _envelope (new AutomationList(Evoral::Parameter(EnvelopeAutomation)))
 	, _fade_in_suspended (0)
 	, _fade_out_suspended (0)
@@ -166,7 +254,9 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other)
 	, AUDIOREGION_COPY_STATE (other)
 	, _automatable (other->session())
 	, _fade_in (new AutomationList (*other->_fade_in))
+	, _inverse_fade_in (new AutomationList(*other->_inverse_fade_in))
 	, _fade_out (new AutomationList (*other->_fade_out))
+	, _inverse_fade_out (new AutomationList (*other->_inverse_fade_out))
 	  /* As far as I can see, the _envelope's times are relative to region position, and have nothing
 	     to do with sources (and hence _start).  So when we copy the envelope, we just use the supplied offset.
 	  */
@@ -192,7 +282,9 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, framecnt_t
 	, AUDIOREGION_COPY_STATE (other)
 	, _automatable (other->session())
 	, _fade_in (new AutomationList (*other->_fade_in))
+	, _inverse_fade_in (new AutomationList(*other->_inverse_fade_in))
 	, _fade_out (new AutomationList (*other->_fade_out))
+	, _inverse_fade_out (new AutomationList (*other->_inverse_fade_out))
 	  /* As far as I can see, the _envelope's times are relative to region position, and have nothing
 	     to do with sources (and hence _start).  So when we copy the envelope, we just use the supplied offset.
 	  */
@@ -218,7 +310,9 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, const Sour
 	, AUDIOREGION_COPY_STATE (other)
 	, _automatable (other->session())
 	, _fade_in (new AutomationList (*other->_fade_in))
+	, _inverse_fade_in (new AutomationList(*other->_inverse_fade_in))
 	, _fade_out (new AutomationList (*other->_fade_out))
+	, _inverse_fade_out (new AutomationList (*other->_inverse_fade_out))
 	, _envelope (new AutomationList (*other->_envelope))
 	, _fade_in_suspended (0)
 	, _fade_out_suspended (0)
@@ -241,7 +335,9 @@ AudioRegion::AudioRegion (SourceList& srcs)
 	, AUDIOREGION_STATE_DEFAULT
 	, _automatable(srcs[0]->session())
 	, _fade_in (new AutomationList(Evoral::Parameter(FadeInAutomation)))
+	, _inverse_fade_in (new AutomationList(Evoral::Parameter(FadeInAutomation)))
 	, _fade_out (new AutomationList(Evoral::Parameter(FadeOutAutomation)))
+	, _inverse_fade_out (new AutomationList(Evoral::Parameter(FadeOutAutomation)))
 	, _envelope (new AutomationList(Evoral::Parameter(EnvelopeAutomation)))
 	, _fade_in_suspended (0)
 	, _fade_out_suspended (0)
@@ -830,17 +926,11 @@ AudioRegion::_set_state (const XMLNode& node, int version, PropertyChange& what_
 		} else if (child->name() == "InvFadeIn") {
 			XMLNode* grandchild = child->child ("AutomationList");
 			if (grandchild) {
-				if (!_inverse_fade_in) {
-					_inverse_fade_in.reset (new AutomationList (Evoral::Parameter (FadeInAutomation)));
-				}
 				_inverse_fade_in->set_state (*grandchild, version);
 			}
 		} else if (child->name() == "InvFadeOut") {
 			XMLNode* grandchild = child->child ("AutomationList");
 			if (grandchild) {
-				if (!_inverse_fade_out) {
-					_inverse_fade_out.reset (new AutomationList (Evoral::Parameter (FadeOutAutomation)));
-				}
 				_inverse_fade_out->set_state (*grandchild, version);
 			}
 		}
@@ -893,117 +983,70 @@ AudioRegion::set_fade_in (boost::shared_ptr<AutomationList> f)
 void
 AudioRegion::set_fade_in (FadeShape shape, framecnt_t len)
 {
+	boost::shared_ptr<Evoral::ControlList> c1 (new Evoral::ControlList (FadeInAutomation));
+	boost::shared_ptr<Evoral::ControlList> c2 (new Evoral::ControlList (FadeInAutomation));
+	boost::shared_ptr<Evoral::ControlList> c3 (new Evoral::ControlList (FadeInAutomation));
+
+	cerr << "Resetting fade in to " << shape << " len = " << len << endl;
+
 	_fade_in->freeze ();
 	_fade_in->clear ();
+	_inverse_fade_in->clear ();
 
 	switch (shape) {
 	case FadeLinear:
 		_fade_in->fast_simple_add (0.0, 0.0);
 		_fade_in->fast_simple_add (len, 1.0);
-		_inverse_fade_in.reset ();
+		reverse_curve (_inverse_fade_in, _fade_in);
 		break;
 
 	case FadeFast:
-		_fade_in->fast_simple_add (0, 0);
-		_fade_in->fast_simple_add (len * 0.389401, 0.0333333);
-		_fade_in->fast_simple_add (len * 0.629032, 0.0861111);
-		_fade_in->fast_simple_add (len * 0.829493, 0.233333);
-		_fade_in->fast_simple_add (len * 0.9447, 0.483333);
-		_fade_in->fast_simple_add (len * 0.976959, 0.697222);
-		_fade_in->fast_simple_add (len, 1);
-		_inverse_fade_in.reset ();
+		generate_db_fade (_fade_in, len, 10, -60);
+		reverse_curve (c1, _fade_in);
+		_fade_in->copy_events (*c1);
+		generate_inverse_power_curve (_inverse_fade_in, _fade_in);
 		break;
 
 	case FadeSlow:
-		_fade_in->fast_simple_add (0, 0);
-		_fade_in->fast_simple_add (len * 0.0207373, 0.197222);
-		_fade_in->fast_simple_add (len * 0.0645161, 0.525);
-		_fade_in->fast_simple_add (len * 0.152074, 0.802778);
-		_fade_in->fast_simple_add (len * 0.276498, 0.919444);
-		_fade_in->fast_simple_add (len * 0.481567, 0.980556);
-		_fade_in->fast_simple_add (len * 0.767281, 1);
-		_fade_in->fast_simple_add (len, 1);
-		_inverse_fade_in.reset ();
+		generate_db_fade (c1, len, 10, -1);  // start off with a slow fade
+		generate_db_fade (c2, len, 10, -80); // end with a fast fade
+		merge_curves (_fade_in, c1, c2);
+		generate_inverse_power_curve (_inverse_fade_in, _fade_in);
 		break;
 
-	case FadeLogA:
-		_fade_in->fast_simple_add (0, 0);
-		_fade_in->fast_simple_add (len * 0.0737327, 0.308333);
-		_fade_in->fast_simple_add (len * 0.246544, 0.658333);
-		_fade_in->fast_simple_add (len * 0.470046, 0.886111);
-		_fade_in->fast_simple_add (len * 0.652074, 0.972222);
-		_fade_in->fast_simple_add (len * 0.771889, 0.988889);
-		_fade_in->fast_simple_add (len, 1);
-		_inverse_fade_in.reset ();
-		break;
-
-	case FadeLogB:
-		_fade_in->fast_simple_add (0, 0);
-		_fade_in->fast_simple_add (len * 0.304147, 0.0694444);
-		_fade_in->fast_simple_add (len * 0.529954, 0.152778);
-		_fade_in->fast_simple_add (len * 0.725806, 0.333333);
-		_fade_in->fast_simple_add (len * 0.847926, 0.558333);
-		_fade_in->fast_simple_add (len * 0.919355, 0.730556);
-		_fade_in->fast_simple_add (len, 1);
-		_inverse_fade_in.reset ();
-		break;
-
-	case FadeConstantPowerMinus3dB:
-		_fade_in->fast_simple_add (0.0, 0.0);
-		_fade_in->fast_simple_add ((len * 0.166667), 0.282192);
-		_fade_in->fast_simple_add ((len * 0.333333), 0.518174);
-		_fade_in->fast_simple_add ((len * 0.500000), 0.707946);
-		_fade_in->fast_simple_add ((len * 0.666667), 0.851507);
-		_fade_in->fast_simple_add ((len * 0.833333), 0.948859);
-		_fade_in->fast_simple_add (len, 1.0);
-
-		/* setup complementary fade out for lower layers */
-
-		if (!_inverse_fade_in) {
-			_inverse_fade_in.reset (new AutomationList (Evoral::Parameter (FadeInAutomation)));
+	case FadeConstantPower:
+		for (int i = 0; i < 9; ++i) {
+			float dist = (float) i / 10.0f;
+			_fade_in->fast_simple_add (len*dist, sin (dist*M_PI/2));
 		}
-
-		_inverse_fade_in->clear ();
-		_inverse_fade_in->fast_simple_add (0.0, 1.0);
-		_inverse_fade_in->fast_simple_add ((len * 0.166667), 0.948859);
-		_inverse_fade_in->fast_simple_add ((len * 0.333333), 0.851507);
-		_inverse_fade_in->fast_simple_add ((len * 0.500000), 0.707946);
-		_inverse_fade_in->fast_simple_add ((len * 0.666667), 0.518174);
-		_inverse_fade_in->fast_simple_add ((len * 0.833333), 0.282192);
-		_inverse_fade_in->fast_simple_add (len, 0.0);
-
+		_fade_in->fast_simple_add (len, 1.0);
+		generate_inverse_power_curve (_inverse_fade_in, _fade_in);
 		break;
 		
-	case FadeConstantPowerMinus6dB:
-		_fade_in->fast_simple_add (0.0, 0.0);
-		_fade_in->fast_simple_add ((len * 0.166667), 0.166366);
-		_fade_in->fast_simple_add ((len * 0.333333), 0.332853);
-		_fade_in->fast_simple_add ((len * 0.500000), 0.499459);
-		_fade_in->fast_simple_add ((len * 0.666667), 0.666186);
-		_fade_in->fast_simple_add ((len * 0.833333), 0.833033);
-		_fade_in->fast_simple_add (len, 1.0);
-
-		/* setup complementary fade out for lower layers */
-
-		if (!_inverse_fade_in) {
-			_inverse_fade_in.reset (new AutomationList (Evoral::Parameter (FadeInAutomation)));
+	case FadeSymmetric:
+		// starts kind of like a constant power but has a slower fadeout
+		// however it is NOT constant power and there will be a level drop in the middle of the crossfade
+		c1->fast_simple_add (0.0, 1.0);
+		for ( int i = 1; i < 9; i++ ) {
+			float dist = (float)i/10.0;
+			c1->fast_simple_add ((len * dist), cos(dist*M_PI/10.0));
 		}
+		c1->fast_simple_add (len, VERY_SMALL_SIGNAL);
 
-		_inverse_fade_in->clear ();
-		_inverse_fade_in->fast_simple_add (0.0, 1.0);
-		_inverse_fade_in->fast_simple_add ((len * 0.166667), 0.833033);
-		_inverse_fade_in->fast_simple_add ((len * 0.333333), 0.666186);
-		_inverse_fade_in->fast_simple_add ((len * 0.500000), 0.499459);
-		_inverse_fade_in->fast_simple_add ((len * 0.666667), 0.332853);
-		_inverse_fade_in->fast_simple_add ((len * 0.833333), 0.166366);
-		_inverse_fade_in->fast_simple_add (len, 0.0);
+		//curve 2 is a slow fade at end
+		generate_db_fade (c2, len, 10, -30 );
 
+		merge_curves (c3, c1, c2);
+		reverse_curve (_fade_in, c3);
+		reverse_curve (_inverse_fade_in, _fade_in );
 		break;
 	}
 
 	_default_fade_in = false;
 	_fade_in->thaw ();
+	cerr << "SEND CHANGE SIGNAL\n";
 	send_change (PropertyChange (Properties::fade_in));
+	cerr << "DONE CHANGE SIGNAL\n";
 }
 
 void
@@ -1020,115 +1063,65 @@ AudioRegion::set_fade_out (boost::shared_ptr<AutomationList> f)
 void
 AudioRegion::set_fade_out (FadeShape shape, framecnt_t len)
 {
+	boost::shared_ptr<Evoral::ControlList> c1 (new Evoral::ControlList (FadeOutAutomation));
+	boost::shared_ptr<Evoral::ControlList> c2 (new Evoral::ControlList (FadeOutAutomation));
+
 	_fade_out->freeze ();
 	_fade_out->clear ();
+	_inverse_fade_out->clear ();
 
 	switch (shape) {
-	case FadeFast:
-		_fade_out->fast_simple_add (0.0, 1.0);
-		_fade_out->fast_simple_add (len * 0.023041, 0.697222);
-		_fade_out->fast_simple_add (len * 0.0553,   0.483333);
-		_fade_out->fast_simple_add (len * 0.170507, 0.233333);
-		_fade_out->fast_simple_add (len * 0.370968, 0.0861111);
-		_fade_out->fast_simple_add (len * 0.610599, 0.0333333);
-		_fade_out->fast_simple_add (1.0, 0.0);
-		_inverse_fade_out.reset ();
-		break;
-
-	case FadeLogA:
-		_fade_out->fast_simple_add (0, 1.0);
-		_fade_out->fast_simple_add (len * 0.228111, 0.988889);
-		_fade_out->fast_simple_add (len * 0.347926, 0.972222);
-		_fade_out->fast_simple_add (len * 0.529954, 0.886111);
-		_fade_out->fast_simple_add (len * 0.753456, 0.658333);
-		_fade_out->fast_simple_add (len * 0.9262673, 0.308333);
-		_fade_out->fast_simple_add (len, 0.0);
-		_inverse_fade_out.reset ();
-		break;
-
-	case FadeSlow:
-		_fade_out->fast_simple_add (0.0, 1.0);
-		_fade_out->fast_simple_add (len * 0.305556, 1);
-		_fade_out->fast_simple_add (len * 0.548611, 0.991736);
-		_fade_out->fast_simple_add (len * 0.759259, 0.931129);
-		_fade_out->fast_simple_add (len * 0.918981, 0.68595);
-		_fade_out->fast_simple_add (len * 0.976852, 0.22865);
-		_fade_out->fast_simple_add (len, 0.0);
-		_inverse_fade_out.reset ();
-		break;
-
-	case FadeLogB:
-		_fade_out->fast_simple_add (0.0, 1.0);
-		_fade_out->fast_simple_add (len * 0.080645, 0.730556);
-		_fade_out->fast_simple_add (len * 0.277778, 0.289256);
-		_fade_out->fast_simple_add (len * 0.470046, 0.152778);
-		_fade_out->fast_simple_add (len * 0.695853, 0.0694444);
-		_fade_out->fast_simple_add (len, 0.0);
-		_inverse_fade_out.reset ();	
-		break;
-
 	case FadeLinear:
 		_fade_out->fast_simple_add (0.0, 1.0);
-		_fade_out->fast_simple_add (len, 0.0);
-		_inverse_fade_out.reset ();
+		_fade_out->fast_simple_add (len, VERY_SMALL_SIGNAL);
+		reverse_curve (_inverse_fade_out, _fade_out);
+		break;
+		
+	case FadeFast: 
+		generate_db_fade (_fade_out, len, 10, -60 );
+		generate_inverse_power_curve (_inverse_fade_out, _fade_out);
+		break;
+		
+	case FadeSlow: 
+		generate_db_fade (c1, len, 10, -1 );  //start off with a slow fade
+		generate_db_fade (c2, len, 10, -80 );  //end with a fast fade
+		merge_curves (_fade_out, c1, c2);
+		generate_inverse_power_curve (_inverse_fade_out, _fade_out);
 		break;
 
-	case FadeConstantPowerMinus3dB:
+	case FadeConstantPower:
+		//constant-power fades use a sin/cos relationship
+		//the cutoff is abrupt but it has the benefit of being symmetrical
 		_fade_out->fast_simple_add (0.0, 1.0);
-		_fade_out->fast_simple_add ((len * 0.166667), 0.948859);
-		_fade_out->fast_simple_add ((len * 0.333333), 0.851507);
-		_fade_out->fast_simple_add ((len * 0.500000), 0.707946);
-		_fade_out->fast_simple_add ((len * 0.666667), 0.518174);
-		_fade_out->fast_simple_add ((len * 0.833333), 0.282192);
-		_fade_out->fast_simple_add (len, 0.0);
-
-		/* setup complementary fade in for lower layers */
-
-		if (!_inverse_fade_out) {
-			_inverse_fade_out.reset (new AutomationList (Evoral::Parameter (FadeOutAutomation)));
+		for (int i = 1; i < 9; i++ ) {
+			float dist = (float)i/10.0;
+			_fade_out->fast_simple_add ((len * dist), cos(dist*M_PI/2));
 		}
-
-		_inverse_fade_out->clear ();
-		_inverse_fade_out->fast_simple_add (0.0, 0.0);
-		_inverse_fade_out->fast_simple_add ((len * 0.166667), 0.282192);
-		_inverse_fade_out->fast_simple_add ((len * 0.333333), 0.518174);
-		_inverse_fade_out->fast_simple_add ((len * 0.500000), 0.707946);
-		_inverse_fade_out->fast_simple_add ((len * 0.666667), 0.851507);
-		_inverse_fade_out->fast_simple_add ((len * 0.833333), 0.948859);
-		_inverse_fade_out->fast_simple_add (len, 1.0);
-
+		_fade_out->fast_simple_add (len, VERY_SMALL_SIGNAL);
+		generate_inverse_power_curve (_inverse_fade_out, _fade_out);
 		break;
-
-	case FadeConstantPowerMinus6dB:
-		_fade_out->fast_simple_add (0.0, 1.0);
-		_fade_out->fast_simple_add ((len * 0.166667), 0.833033);
-		_fade_out->fast_simple_add ((len * 0.333333), 0.666186);
-		_fade_out->fast_simple_add ((len * 0.500000), 0.499459);
-		_fade_out->fast_simple_add ((len * 0.666667), 0.332853);
-		_fade_out->fast_simple_add ((len * 0.833333), 0.166366);
-		_fade_out->fast_simple_add (len, 0.0);
-
-		/* setup complementary fade in for lower layers */
-
-		if (!_inverse_fade_out) {
-			_inverse_fade_out.reset (new AutomationList (Evoral::Parameter (FadeOutAutomation)));
+		
+	case FadeSymmetric:
+		//starts kind of like a constant power but has a slower fadeout
+		//however it is NOT constant power and there will be a level drop in the middle of the crossfade
+		c1->fast_simple_add (0.0, 1.0);
+		for ( int i = 1; i < 9; i++ ) {
+			float dist = (float)i/10.0;
+			c1->fast_simple_add ((len * dist), cos(dist*M_PI/10.0));  //cheesy way of making a flat line
 		}
+		c1->fast_simple_add (len, VERY_SMALL_SIGNAL);
 
-		_inverse_fade_out->clear ();
-		_inverse_fade_out->fast_simple_add (0.0, 0.0);
-		_inverse_fade_out->fast_simple_add ((len * 0.166667), 0.166366);
-		_inverse_fade_out->fast_simple_add ((len * 0.333333), 0.332853);
-		_inverse_fade_out->fast_simple_add ((len * 0.500000), 0.499459);
-		_inverse_fade_out->fast_simple_add ((len * 0.666667), 0.666186);
-		_inverse_fade_out->fast_simple_add ((len * 0.833333), 0.833033);
-		_inverse_fade_out->fast_simple_add (len, 1.0);
+		//curve 2 is a slow fade at end
+		generate_db_fade (c2, len, 10, -30);
 
+		merge_curves (_fade_out,  c1, c2);
+		reverse_curve (_inverse_fade_out, _fade_out);
 		break;
 	}
 
 	_default_fade_out = false;
 	_fade_out->thaw ();
-	send_change (PropertyChange (Properties::fade_in));
+	send_change (PropertyChange (Properties::fade_out));
 }
 
 void
@@ -1878,6 +1871,11 @@ AudioRegion::verify_xfade_bounds (framecnt_t len, bool start)
 {
 	boost::shared_ptr<Region> other = get_single_other_xfade_region (start);
 	framecnt_t maxlen;
+
+	if (!other) {
+		/* zero or > 2 regions here, don't care about len */
+		return len;
+	}
 
 	/* we overlap a single region. clamp the length of an xfade to
 	   the maximum possible duration of the overlap (if the other

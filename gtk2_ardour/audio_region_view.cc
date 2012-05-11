@@ -560,6 +560,7 @@ AudioRegionView::reset_fade_in_shape_width (framecnt_t width)
 	}
 
 	if (audio_region()->fade_in_is_xfade()) {
+		cerr << "Fade in changed, reset xfade\n";
 		if (fade_in_handle) {
 			fade_in_handle->hide ();
 			fade_in_shape->hide ();
@@ -668,6 +669,7 @@ AudioRegionView::reset_fade_out_shape_width (framecnt_t width)
 	}
 
 	if (audio_region()->fade_out_is_xfade()) {
+		cerr << "Fade out changed, reset xfade\n";
 		if (fade_out_handle) {
 			fade_out_handle->hide ();
 			fade_out_shape->hide ();

@@ -180,7 +180,6 @@ class AudioRegion : public Region
 
   private:
 	friend class RegionFactory;
-	friend class Crossfade;
 
 	AudioRegion (boost::shared_ptr<AudioSource>);
 	AudioRegion (const SourceList &);
