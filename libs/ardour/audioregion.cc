@@ -1018,7 +1018,7 @@ AudioRegion::set_fade_in (FadeShape shape, framecnt_t len)
 			_fade_in->fast_simple_add (len*dist, sin (dist*M_PI/2));
 		}
 		_fade_in->fast_simple_add (len, 1.0);
-		generate_inverse_power_curve (_inverse_fade_in, _fade_in);
+		reverse_curve (_inverse_fade_in, _fade_in);
 		break;
 		
 	case FadeSymmetric:
@@ -1094,7 +1094,7 @@ AudioRegion::set_fade_out (FadeShape shape, framecnt_t len)
 			_fade_out->fast_simple_add ((len * dist), cos(dist*M_PI/2));
 		}
 		_fade_out->fast_simple_add (len, VERY_SMALL_SIGNAL);
-		generate_inverse_power_curve (_inverse_fade_out, _fade_out);
+		reverse_curve (_inverse_fade_out, _fade_out);
 		break;
 		
 	case FadeSymmetric:
