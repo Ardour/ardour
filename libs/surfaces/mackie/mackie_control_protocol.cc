@@ -124,6 +124,9 @@ MackieControlProtocol::~MackieControlProtocol()
 {
 	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::~MackieControlProtocol\n");
 
+	drop_connections ();
+	tear_down_gui ();
+
 	_active = false;
 
 	/* stop event loop */
