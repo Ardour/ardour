@@ -19,6 +19,8 @@
 
 #include <dlfcn.h>
 
+#include <glibmm/fileutils.h>
+
 #include "pbd/compose.h"
 #include "pbd/file_utils.h"
 #include "pbd/error.h"
@@ -202,10 +204,10 @@ ControlProtocolManager::discover_control_protocols ()
 	Glib::PatternSpec dylib_extension_pattern("*.dylib");
 
 	find_matching_files_in_search_path (control_protocol_search_path (),
-			so_extension_pattern, cp_modules);
+					    so_extension_pattern, cp_modules);
 
 	find_matching_files_in_search_path (control_protocol_search_path (),
-			dylib_extension_pattern, cp_modules);
+					    dylib_extension_pattern, cp_modules);
 
 	DEBUG_TRACE (DEBUG::ControlProtocols, 
 		     string_compose (_("looking for control protocols in %1"), control_protocol_search_path().to_string()));
@@ -219,6 +221,13 @@ int
 ControlProtocolManager::control_protocol_discover (string path)
 {
 	ControlProtocolDescriptor* descriptor;
+
+	/* don't load shared objects that are just symlinks to the real thing.
+	 */
+
+	if (Glib::file_test (path, Glib::FILE_TEST_IS_SYMLINK)) {
+		return 0;
+	}
 
 	if ((descriptor = get_descriptor (path)) != 0) {
 
