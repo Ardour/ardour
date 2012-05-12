@@ -722,7 +722,17 @@ private:
 			if (!was_enabled) {
 				ControlProtocolManager::instance().instantiate (*cpi);
 			} else {
+				Gtk::Window* win = r[_model.editor];
+				if (win) {
+					win->hide ();
+				}
+
 				ControlProtocolManager::instance().teardown (*cpi);
+					
+				if (win) {
+					delete win;
+				}
+				r[_model.editor] = 0;
 				cpi->requested = false;
 			}
 		}
