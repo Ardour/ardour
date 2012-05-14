@@ -29,7 +29,6 @@
 #include <fcntl.h>
 
 #include <glibmm/miscutils.h>
-#include <boost/signals2.hpp>
 
 #include <pbd/pthread_utils.h>
 #include <pbd/file_utils.h>
