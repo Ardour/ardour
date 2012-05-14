@@ -107,7 +107,6 @@ BasicUI::add_marker (const std::string& markername)
 void
 BasicUI::rewind ()
 {
-	std::cerr << "request transport speed of " << session->transport_speed() - 1.5 << std::endl;
 	session->request_transport_speed (session->transport_speed() - 1.5);
 }
 

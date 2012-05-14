@@ -73,6 +73,7 @@ setup_enum_writer ()
 	RemoteModel _RemoteModel;
 	DenormalModel _DenormalModel;
 	CrossfadeModel _CrossfadeModel;
+	CrossfadeChoice _CrossfadeChoice;
 	InsertMergePolicy _InsertMergePolicy;
 	ListenPosition _ListenPosition;
 	SampleFormat _SampleFormat;
@@ -121,7 +122,6 @@ setup_enum_writer ()
 	MidiModel::PatchChangeDiffCommand::Property _MidiModel_PatchChangeDiffCommand_Property;
 	WaveformScale _WaveformScale;
 	WaveformShape _WaveformShape;
-	QuantizeType _QuantizeType;
 	Session::PostTransportWork _Session_PostTransportWork;
 	Session::SlaveState _Session_SlaveState;
 	MTC_Status _MIDI_MTC_Status;
@@ -256,6 +256,11 @@ setup_enum_writer ()
 	REGISTER_ENUM (FullCrossfade);
 	REGISTER_ENUM (ShortCrossfade);
 	REGISTER (_CrossfadeModel);
+
+	REGISTER_ENUM (RegionFades);
+	REGISTER_ENUM (ConstantPowerMinus3dB);
+	REGISTER_ENUM (ConstantPowerMinus6dB);
+	REGISTER (_CrossfadeChoice);
 
         REGISTER_ENUM (InsertMergeReject);
         REGISTER_ENUM (InsertMergeRelax);
@@ -409,8 +414,8 @@ setup_enum_writer ()
 	REGISTER_ENUM (FadeLinear);
 	REGISTER_ENUM (FadeFast);
 	REGISTER_ENUM (FadeSlow);
-	REGISTER_ENUM (FadeLogA);
-	REGISTER_ENUM (FadeLogB);
+	REGISTER_ENUM (FadeConstantPower);
+	REGISTER_ENUM (FadeSymmetric);
 	REGISTER (_FadeShape);
 
 	REGISTER_CLASS_ENUM (Diskstream, Recordable);
@@ -568,11 +573,6 @@ setup_enum_writer ()
 	REGISTER_ENUM(Traditional);
 	REGISTER_ENUM(Rectified);
 	REGISTER(_WaveformShape);
-
-	REGISTER_ENUM(Plain);
-	REGISTER_ENUM(Legato);
-	REGISTER_ENUM(Groove);
-	REGISTER(_QuantizeType);
 
 	REGISTER_ENUM(AudioTime);
 	REGISTER_ENUM(MusicTime);
@@ -732,6 +732,21 @@ std::ostream& operator<<(std::ostream& o, const CrossfadeModel& var)
 	std::string s = enum_2_string (var);
 	return o << s;
 }
+
+std::istream& operator>>(std::istream& o, CrossfadeChoice& var)
+{
+	std::string s;
+	o >> s;
+	var = (CrossfadeChoice) string_2_enum (s, var);
+	return o;
+}
+
+std::ostream& operator<<(std::ostream& o, const CrossfadeChoice& var)
+{
+	std::string s = enum_2_string (var);
+	return o << s;
+}
+
 std::istream& operator>>(std::istream& o, SyncSource& var)
 {
 	std::string s;

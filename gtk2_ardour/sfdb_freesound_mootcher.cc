@@ -369,7 +369,7 @@ std::string Mootcher::getAudioFile(std::string originalFileName, std::string ID,
 }
 
 //---------
-int Mootcher::progress_callback(void *caller, double dltotal, double dlnow, double ultotal, double ulnow)
+int Mootcher::progress_callback(void *caller, double dltotal, double dlnow, double /*ultotal*/, double /*ulnow*/)
 {
 
 SoundFileBrowser *sfb = (SoundFileBrowser *) caller;

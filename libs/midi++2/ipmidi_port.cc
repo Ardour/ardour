@@ -246,11 +246,11 @@ IPMIDIPort::open_sockets (int base_port, const string& ifname)
 }
 
 int
-IPMIDIPort::write (byte* msg, size_t msglen, timestamp_t /* ignored */) {
+IPMIDIPort::write (const byte* msg, size_t msglen, timestamp_t /* ignored */) {
 
 	if (sockout) {
 		Glib::Mutex::Lock lm (write_lock);
-		if (::sendto (sockout, (char *) msg, msglen, 0, (struct sockaddr *) &addrout, sizeof(struct sockaddr_in)) < 0) {
+		if (::sendto (sockout, (const char *) msg, msglen, 0, (struct sockaddr *) &addrout, sizeof(struct sockaddr_in)) < 0) {
 			::perror("sendto");
 			return -1;
 		}
@@ -260,7 +260,7 @@ IPMIDIPort::write (byte* msg, size_t msglen, timestamp_t /* ignored */) {
 }
 
 int
-IPMIDIPort::read (byte* buf, size_t bufsize)
+IPMIDIPort::read (byte* /*buf*/, size_t /*bufsize*/)
 {
 	/* nothing to do here - all handled by parse() */
 	return 0;

@@ -195,6 +195,8 @@ class MackieControlProtocol
 
 	int16_t ipmidi_base() const { return _ipmidi_base; }
 	void    set_ipmidi_base (int16_t);
+
+	void midi_connectivity_established ();
 	
   protected:
 	// shut down the surface
@@ -233,7 +235,6 @@ class MackieControlProtocol
 	int stop ();
 
 	void thread_init ();
-	void midi_connectivity_established ();
 
 	bool route_is_locked_to_strip (boost::shared_ptr<ARDOUR::Route>) const;
 
@@ -286,6 +287,8 @@ class MackieControlProtocol
 	int16_t                  _ipmidi_base;
 	bool                      needs_ipmidi_restart;
 
+	ARDOUR::RouteNotificationList _last_selected_routes;
+
 	void create_surfaces ();
 	bool periodic();
 	void build_gui ();
@@ -293,7 +296,8 @@ class MackieControlProtocol
 	void clear_ports ();
 	void force_special_route_to_strip (boost::shared_ptr<ARDOUR::Route> r, uint32_t surface, uint32_t strip_number);
 	void build_button_map ();
-	void gui_track_selection_changed (ARDOUR::RouteNotificationListPtr);
+	void gui_track_selection_changed (ARDOUR::RouteNotificationListPtr, bool save_list);
+	void _gui_track_selection_changed (ARDOUR::RouteNotificationList*, bool save_list);
 	void ipmidi_restart ();
 	
 	/* BUTTON HANDLING */

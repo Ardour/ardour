@@ -80,9 +80,7 @@ ControlList::ControlList (const ControlList& other)
 	_search_cache.first = _events.end();
 	_sort_pending = false;
 
-	for (const_iterator i = other._events.begin(); i != other._events.end(); ++i) {
-		_events.push_back (new ControlEvent (**i));
-	}
+	copy_events (other);
 
 	mark_dirty ();
 }
@@ -106,9 +104,7 @@ ControlList::ControlList (const ControlList& other, double start, double end)
 	boost::shared_ptr<ControlList> section = const_cast<ControlList*>(&other)->copy (start, end);
 
 	if (!section->empty()) {
-		for (iterator i = section->begin(); i != section->end(); ++i) {
-			_events.push_back (new ControlEvent ((*i)->when, (*i)->value));
-		}
+		copy_events (*(section.get()));
 	}
 
 	mark_dirty ();
@@ -147,21 +143,28 @@ ControlList::operator= (const ControlList& other)
 {
 	if (this != &other) {
 
-		_events.clear ();
-
-		for (const_iterator i = other._events.begin(); i != other._events.end(); ++i) {
-			_events.push_back (new ControlEvent (**i));
-		}
-
 		_min_yval = other._min_yval;
 		_max_yval = other._max_yval;
 		_default_value = other._default_value;
-
-		mark_dirty ();
-		maybe_signal_changed ();
+		
+		copy_events (other);
 	}
 
 	return *this;
+}
+
+void
+ControlList::copy_events (const ControlList& other)
+{
+	{
+		Glib::Mutex::Lock lm (_lock);
+		_events.clear ();
+		for (const_iterator i = other.begin(); i != other.end(); ++i) {
+			_events.push_back (new ControlEvent ((*i)->when, (*i)->value));
+		}
+		mark_dirty ();
+	}
+	maybe_signal_changed ();
 }
 
 void

@@ -23,19 +23,10 @@ AudioRegionTest::readTest ()
 
 	/* Simple read: 256 frames from start of region, no fades */
 
-	/* gbuf should be ignored; set it to 0 to ensure that it is */
-	for (int i = 0; i < N; ++i) {
-		gbuf[i] = 0;
-	}
-
 	ar->set_position (P);
 	ar->set_length (1024);
 
-	for (int i = 0; i < N; ++i) {
-		buf[i] = 0;
-	}
-	
-	ar->_read_at (ar->_sources, ar->_length, buf, mbuf, gbuf, P, 256, 0, AudioRegion::ReadOps (0));
+	ar->read_from_sources (ar->_sources, ar->_length, buf, P, 256, 0);
 	check_staircase (buf, 0, 256);
 
 	for (int i = 0; i < N; ++i) {
@@ -43,7 +34,7 @@ AudioRegionTest::readTest ()
 	}
 
 	/* Offset read: 256 frames from 128 frames into the region, no fades */
-	ar->_read_at (ar->_sources, ar->_length, buf, mbuf, gbuf, P + 128, 256, 0, AudioRegion::ReadOps (0));
+	ar->read_from_sources (ar->_sources, ar->_length, buf, P + 128, 256, 0);
 	check_staircase (buf, 128, 256);
 
 	/* Simple read with a fade-in: 256 frames from start of region, with fades */

@@ -1654,3 +1654,33 @@ Region::set_start_internal (framecnt_t s)
 {
 	_start = s;
 }
+
+framepos_t
+Region::earliest_possible_position () const
+{
+	if (_start > _position) {
+		return 0;
+	} else {
+		return _position - _start;
+	}
+}
+
+framecnt_t
+Region::latest_possible_frame () const
+{
+	framecnt_t minlen = max_framecnt;
+
+	for (SourceList::const_iterator i = _sources.begin(); i != _sources.end(); ++i) {
+		/* non-audio regions have a length that may vary based on their
+		 * position, so we have to pass it in the call.
+		 */
+		minlen = min (minlen, (*i)->length (_position));
+	}
+
+	/* the latest possible last frame is determined by the current
+	 * position, plus the shortest source extent past _start.
+	 */
+
+	return _position + (minlen - _start) - 1;
+}
+	

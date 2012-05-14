@@ -416,7 +416,9 @@ def options(opt):
     opt.add_option('--boost-include', type='string', action='store', dest='boost_include', default='',
                     help='directory where Boost header files can be found')
     opt.add_option('--also-include', type='string', action='store', dest='also_include', default='',
-                    help='additional include directory where header files can be found')
+                    help='additional include directory where header files can be found (split multiples with commas)')
+    opt.add_option('--also-libdir', type='string', action='store', dest='also_libdir', default='',
+                    help='additional include directory where shared libraries can be found (split multiples with commas)')
     opt.add_option('--wine-include', type='string', action='store', dest='wine_include', default='/usr/include/wine/windows',
                     help='directory where Wine\'s Windows header files can be found')
     opt.add_option('--noconfirm', action='store_true', default=False, dest='noconfirm',
@@ -476,6 +478,10 @@ def configure(conf):
         conf.define ('TOP_MENUBAR',1)
         conf.define ('GTKOSX',1)
 
+        #
+        # need this on OS X to pick up long long variants of several math functions
+        #
+
         conf.env.append_value('CXXFLAGS_APPLEUTILITY', '-I../libs')
         #
         #       Define OSX as a uselib to use when compiling
@@ -534,6 +540,9 @@ def configure(conf):
         conf.env.append_value('CXXFLAGS', '-I' + Options.options.also_include)
         conf.env.append_value('CFLAGS', '-I' + Options.options.also_include)
 
+    if Options.options.also_libdir != '':
+        conf.env.append_value('LDFLAGS', '-L' + Options.options.also_libdir)
+
     autowaf.check_header(conf, 'cxx', 'boost/signals2.hpp', mandatory = True)
 
     if Options.options.boost_sp_debug:
@@ -554,14 +563,7 @@ def configure(conf):
     autowaf.check_pkg(conf, 'glibmm-2.4', uselib_store='GLIBMM', atleast_version='2.14.0')
     autowaf.check_pkg(conf, 'sndfile', uselib_store='SNDFILE', atleast_version='1.0.18')
     autowaf.check_pkg(conf, 'giomm-2.4', uselib_store='GIOMM', atleast_version='2.2')
-
-    conf.check_cxx(fragment = '#include <glibmm/threads.h>\nstatic Glib::Threads::RecMutex foo;\nint main () {}',
-                   uselib = ['GLIBMM'],
-                   msg = 'Checking for Glib::Threads::RecMutex',
-                   mandatory = False,
-                   okmsg = 'yes',
-                   errmsg = 'no; using deprecated API',
-                   define_name = 'HAVE_GLIB_THREADS_RECMUTEX')
+    autowaf.check_pkg(conf, 'libcurl', uselib_store='CURL', atleast_version='7.0.0')
 
     for i in children:
         sub_config_and_use(conf, i)
@@ -570,7 +572,6 @@ def configure(conf):
     conf.env['INCLUDES_FLAC'] = []
 
     conf.check_cc(function_name='dlopen', header_name='dlfcn.h', linkflags='-ldl', uselib_store='DL')
-    conf.check_cc(function_name='curl_global_init', header_name='curl/curl.h', linkflags='-lcurl', uselib_store='CURL')
 
     # Tell everyone that this is a waf build
 
@@ -737,3 +738,12 @@ def i18n_po(bld):
 
 def i18n_mo(bld):
     bld.recurse (i18n_children)
+
+def install_not_supported(bld):
+    print 'Installing Ardour 3 is currently unsupported. Run it via the command ./ardev from within the gtk2_ardour directory.'
+    sys.exit (1)
+
+from waflib import Build
+class install(Build.InstallContext):
+    cmd = 'install'
+    fun = 'install_not_supported'

@@ -54,6 +54,10 @@ def configure(conf):
     # autowaf.check_header(conf, 'cxx', 'boost/uuid/uuid.hpp')
 
 def build(bld):
+    
+    # Make signal.h using signal.h.py
+    bld(rule = 'python ${SRC} ${TGT}', source = 'pbd/signal.h.py', target = 'pbd/signal.h')
+
     # Library
     obj = bld(features = 'cxx cxxshlib')
     obj.source = '''
@@ -142,7 +146,9 @@ def build(bld):
         testobj.includes     = obj.includes + ['test', '../pbd']
         testobj.uselib       = 'CPPUNIT XML SNDFILE'
         testobj.use          = 'libpbd'
-
+        testobj.name         = 'libpbd-tests'
+        if sys.platform != 'darwin':
+            testobj.linkflags    = ['-lrt']
 
 def shutdown():
     autowaf.shutdown()

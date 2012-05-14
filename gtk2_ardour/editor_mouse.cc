@@ -640,11 +640,12 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 		}
 		break;
 
-
 	case FadeInHandleItem:
 	case FadeInItem:
 	case FadeOutHandleItem:
 	case FadeOutItem:
+	case StartCrossFadeItem:
+	case EndCrossFadeItem:
 		if (doing_object_stuff() || (mouse_mode != MouseRange && mouse_mode != MouseObject)) {
 			set_selected_regionview_from_click (press, op);
 		} else if (event->type == GDK_BUTTON_PRESS) {
@@ -930,6 +931,14 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				_drags->set (new FadeOutDrag (this, item, reinterpret_cast<RegionView*> (item->get_data("regionview")), s), event, _cursors->fade_out);
 				return true;
 			}
+
+			case StartCrossFadeItem:
+				_drags->set (new CrossfadeEdgeDrag (this, reinterpret_cast<AudioRegionView*>(item->get_data("regionview")), item, true), event, 0);
+				break;
+
+			case EndCrossFadeItem:
+				_drags->set (new CrossfadeEdgeDrag (this, reinterpret_cast<AudioRegionView*>(item->get_data("regionview")), item, false), event, 0);
+				break;
 
 			case FeatureLineItem:
 			{
@@ -1471,6 +1480,14 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				popup_fade_context_menu (1, event->button.time, item, item_type);
 				break;
 
+			case StartCrossFadeItem:
+				popup_xfade_in_context_menu (1, event->button.time, item, item_type);
+				break;
+
+			case EndCrossFadeItem:
+				popup_xfade_out_context_menu (1, event->button.time, item, item_type);
+				break;
+
 			case StreamItem:
 				popup_track_context_menu (1, event->button.time, item_type, false);
 				break;
@@ -1486,7 +1503,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			case SelectionItem:
 				popup_track_context_menu (1, event->button.time, item_type, true);
 				break;
-
+				
 			case AutomationTrackItem:
 				popup_track_context_menu (1, event->button.time, item_type, false);
 				break;

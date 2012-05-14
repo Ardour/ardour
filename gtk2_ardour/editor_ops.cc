@@ -4708,8 +4708,7 @@ Editor::quantize_region ()
 	qd->hide ();
 
 	if (r == Gtk::RESPONSE_OK) {
-		Quantize quant (*_session, Plain,
-				qd->snap_start(), qd->snap_end(),
+		Quantize quant (*_session, qd->snap_start(), qd->snap_end(),
 				qd->start_grid_size(), qd->end_grid_size(),
 				qd->strength(), qd->swing(), qd->threshold());
 
@@ -5250,6 +5249,10 @@ Editor::set_fade_out_active (bool yn)
 void
 Editor::toggle_region_fades (int dir)
 {
+	if (_ignore_region_action) {
+		return;
+	}
+	
 	boost::shared_ptr<AudioRegion> ar;
 	bool yn = false;
 

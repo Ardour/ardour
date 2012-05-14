@@ -74,13 +74,14 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 	, recalibrate_fader_button (_("Recalibrate Faders"))
 	, ipmidi_base_port_adjustment (_cp.ipmidi_base(), 0, 32767, 1, 1000)
 	, ipmidi_base_port_spinner (ipmidi_base_port_adjustment)
+	, discover_button (_("Discover Mackie Devices"))
 {
 	Gtk::Label* l;
 	Gtk::Alignment* align;
 
 	set_border_width (12);
 
-	Gtk::Table* table = Gtk::manage (new Gtk::Table (2, 8));
+	Gtk::Table* table = Gtk::manage (new Gtk::Table (2, 9));
 	table->set_row_spacings (4);
 	table->set_col_spacings (6);
 	l = manage (new Gtk::Label (_("Device Type:")));
@@ -143,6 +144,10 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 
 	ipmidi_base_port_spinner.set_sensitive (_cp.device_info().uses_ipmidi());
 	ipmidi_base_port_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &MackieControlProtocolGUI::ipmidi_spinner_changed));
+
+	
+	table->attach (discover_button, 1, 2, 8, 9, AttachOptions(FILL|EXPAND), AttachOptions (0));
+	discover_button.signal_clicked().connect (sigc::mem_fun (*this, &MackieControlProtocolGUI::discover_clicked));
 
 	vector<string> profiles;
 	
@@ -509,4 +514,11 @@ MackieControlProtocolGUI::ipmidi_spinner_changed ()
 {
 	cerr << "Set IP MIDI base to " << ipmidi_base_port_spinner.get_value() << endl;
 	_cp.set_ipmidi_base ((int16_t) lrintf (ipmidi_base_port_spinner.get_value()));
+}
+
+void
+MackieControlProtocolGUI::discover_clicked ()
+{
+	/* this should help to get things started */
+	_cp.midi_connectivity_established ();
 }

@@ -101,6 +101,7 @@ Plugins=$APPROOT/Plugins
 Surfaces=$APPROOT/Surfaces
 Panners=$APPROOT/Panners
 MidiMaps=$APPROOT/MidiMaps
+MCP=$APPROOT/MCP
 ExportFormats=$APPROOT/ExportFormats
 Templates=$APPROOT/Templates
 Shared=$Resources/share
@@ -305,6 +306,9 @@ done)
 
 # MIDI maps
 cp ../../midi_maps/*.map $MidiMaps
+
+# Mackie support files
+cp ../../mcp/*.{device,profile} $MCP
 
 # VAMP plugins that we use
 cp $BUILD_ROOT/libs/vamp-plugins/libardourvampplugins.dylib $Frameworks

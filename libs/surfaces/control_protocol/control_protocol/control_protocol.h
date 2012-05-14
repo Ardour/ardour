@@ -39,7 +39,8 @@ class Route;
 class Session;
 class Bundle;
 
-class ControlProtocol : public PBD::Stateful, public PBD::ScopedConnectionList, public BasicUI {
+class ControlProtocol : public PBD::Stateful, public PBD::ScopedConnectionList, public BasicUI
+{
   public:
 	ControlProtocol (Session&, std::string name);
 	virtual ~ControlProtocol();
@@ -78,6 +79,7 @@ class ControlProtocol : public PBD::Stateful, public PBD::ScopedConnectionList, 
 
 	static PBD::Signal1<void,uint32_t> AddRouteToSelection;
 	static PBD::Signal1<void,uint32_t> SetRouteSelection;
+	static PBD::Signal1<void,uint32_t> ToggleRouteSelection;
 	static PBD::Signal1<void,uint32_t> RemoveRouteFromSelection;
 	static PBD::Signal0<void>          ClearRouteSelection;
 

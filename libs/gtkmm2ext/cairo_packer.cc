@@ -3,7 +3,7 @@
 #include "gtkmm2ext/cairo_packer.h"
 
 void
-CairoPacker::draw_background (Gtk::Widget& w, GdkEventExpose* ev)
+CairoPacker::draw_background (Gtk::Widget& w, GdkEventExpose*)
 {
 	int x, y;
 	Gtk::Widget* window_parent;

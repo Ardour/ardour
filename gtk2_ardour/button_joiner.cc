@@ -138,7 +138,7 @@ ButtonJoiner::on_size_allocate (Allocation& alloc)
 }
 
 bool
-ButtonJoiner::on_button_release_event (GdkEventButton* ev)
+ButtonJoiner::on_button_release_event (GdkEventButton*)
 {
 	if (_action) {
 		_action->activate ();

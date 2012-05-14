@@ -359,7 +359,7 @@ InternalSend::set_can_pan (bool yn)
 }
 
 void
-InternalSend::cycle_start (pframes_t nframes)
+InternalSend::cycle_start (pframes_t /*nframes*/)
 {
 	for (BufferSet::audio_iterator b = mixbufs.audio_begin(); b != mixbufs.audio_end(); ++b) {
 		b->prepare ();

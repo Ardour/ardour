@@ -76,7 +76,17 @@ BaseUI::main_thread ()
 	DEBUG_TRACE (DEBUG::EventLoop, string_compose ("%1: event loop running in thread %2\n", name(), pthread_self()));
 	set_event_loop_for_thread (this);
 	thread_init ();
+	_main_loop->get_context()->signal_idle().connect (sigc::mem_fun (*this, &BaseUI::signal_running));
 	_main_loop->run ();
+}
+
+bool
+BaseUI::signal_running ()
+{
+	Glib::Mutex::Lock lm (_run_lock);
+	_running.signal ();
+	
+	return false; // don't call it again
 }
 
 void
@@ -91,13 +101,15 @@ BaseUI::run ()
 	/* glibmm hack - drop the refptr to the IOSource now before it can hurt */
 	request_channel.drop_ios ();
 
+	Glib::Mutex::Lock lm (_run_lock);
 	run_loop_thread = Thread::create (mem_fun (*this, &BaseUI::main_thread), true);
+	_running.wait (_run_lock);
 }
 
 void
 BaseUI::quit ()
 {
-	if (_main_loop->is_running()) {
+	if (_main_loop && _main_loop->is_running()) {
 		_main_loop->quit ();
 		run_loop_thread->join ();
 	}

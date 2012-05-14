@@ -349,6 +349,70 @@ Editor::canvas_automation_track_event (GdkEvent *event, ArdourCanvas::Item* item
 }
 
 bool
+Editor::canvas_start_xfade_event (GdkEvent *event, ArdourCanvas::Item* item, AudioRegionView *rv)
+{
+	if (!rv->sensitive()) {
+		return false;
+	}
+
+	switch (event->type) {
+	case GDK_BUTTON_PRESS:
+		clicked_regionview = rv;
+		clicked_control_point = 0;
+		clicked_axisview = &rv->get_time_axis_view();
+		clicked_routeview = dynamic_cast<RouteTimeAxisView*>(clicked_axisview);
+		if (event->button.button == 3) {
+			return button_press_handler (item, event, StartCrossFadeItem);
+		}
+		break;
+
+	case GDK_BUTTON_RELEASE:
+		if (event->button.button == 3) {
+			return button_release_handler (item, event, StartCrossFadeItem);
+		}
+		break;
+
+	default:
+		break;
+
+	}
+
+	return typed_event (item, event, StartCrossFadeItem);
+}
+
+bool
+Editor::canvas_end_xfade_event (GdkEvent *event, ArdourCanvas::Item* item, AudioRegionView *rv)
+{
+	if (!rv->sensitive()) {
+		return false;
+	}
+
+	switch (event->type) {
+	case GDK_BUTTON_PRESS:
+		clicked_regionview = rv;
+		clicked_control_point = 0;
+		clicked_axisview = &rv->get_time_axis_view();
+		clicked_routeview = dynamic_cast<RouteTimeAxisView*>(clicked_axisview);
+		if (event->button.button == 3) {
+			return button_press_handler (item, event, EndCrossFadeItem);
+		}
+		break;
+
+	case GDK_BUTTON_RELEASE:
+		if (event->button.button == 3) {
+			return button_release_handler (item, event, EndCrossFadeItem);
+		}
+		break;
+
+	default:
+		break;
+
+	}
+
+	return typed_event (item, event, EndCrossFadeItem);
+}
+
+bool
 Editor::canvas_fade_in_event (GdkEvent *event, ArdourCanvas::Item* item, AudioRegionView *rv)
 {
 	/* we handle only button 3 press/release events */

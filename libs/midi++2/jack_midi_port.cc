@@ -76,7 +76,7 @@ JackMIDIPort::JackMIDIPort (const XMLNode& node, jack_client_t* jack_client)
 }
 
 void
-JackMIDIPort::init (string const & name, Flags flags)
+JackMIDIPort::init (const string& /*name*/, Flags /*flags*/)
 {
 	if (!create_port ()) {
 		_ok = true;
@@ -206,7 +206,7 @@ JackMIDIPort::drain (int check_interval_usecs)
 }
 
 int
-JackMIDIPort::write(byte * msg, size_t msglen, timestamp_t timestamp)
+JackMIDIPort::write (const byte * msg, size_t msglen, timestamp_t timestamp)
 {
 	int ret = 0;
 

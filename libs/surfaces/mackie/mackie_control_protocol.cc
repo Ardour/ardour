@@ -113,7 +113,7 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 	DeviceInfo::reload_device_info ();
 	DeviceProfile::reload_device_profiles ();
 
-	TrackSelectionChanged.connect (gui_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::gui_track_selection_changed, this, _1), this);
+	TrackSelectionChanged.connect (gui_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::gui_track_selection_changed, this, _1, true), this);
 
 	_instance = this;
 
@@ -123,6 +123,9 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 MackieControlProtocol::~MackieControlProtocol()
 {
 	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::~MackieControlProtocol\n");
+
+	drop_connections ();
+	tear_down_gui ();
 
 	_active = false;
 
@@ -316,8 +319,10 @@ MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 	uint32_t strip_cnt = n_strips (false); // do not include locked strips
 					       // in this count
 
-	if (sorted.size() <= strip_cnt && !force) {
-		/* no banking - not enough routes to fill all strips */
+	if (sorted.size() <= strip_cnt && _current_initial_bank == 0 && !force) {
+		/* no banking - not enough routes to fill all strips and we're
+		 * not at the first one.
+		 */
 		return;
 	}
 
@@ -352,6 +357,10 @@ MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 
 	/* reset this to get the right display of view mode after the switch */
 	set_view_mode (_view_mode);
+
+	/* make sure selection is correct */
+	
+	_gui_track_selection_changed (&_last_selected_routes, false);
 	
 	/* current bank has not been saved */
 	session->set_dirty();
@@ -1198,10 +1207,39 @@ MackieControlProtocol::force_special_route_to_strip (boost::shared_ptr<Route> r,
 }
 
 void
-MackieControlProtocol::gui_track_selection_changed (ARDOUR::RouteNotificationListPtr rl)
+MackieControlProtocol::gui_track_selection_changed (ARDOUR::RouteNotificationListPtr rl, bool save_list)
 {
+	_gui_track_selection_changed (rl.get(), save_list);
+}
+
+void
+MackieControlProtocol::_gui_track_selection_changed (ARDOUR::RouteNotificationList* rl, bool save_list)
+{
+
+	/* We need to keep a list of the most recently selected routes around,
+	   but we are not allowed to keep shared_ptr<Route> unless we want to
+	   handle the complexities of route deletion. So instead, the GUI sends
+	   us a notification using weak_ptr<Route>, which we keep a copy
+	   of. For efficiency's sake, however, we convert the weak_ptr's into
+	   shared_ptr<Route> before passing them to however many surfaces (and
+	   thus strips) that we have.
+	*/
+
+	StrongRouteNotificationList srl;
+
+	for (ARDOUR::RouteNotificationList::const_iterator i = rl->begin(); i != rl->end(); ++i) {
+		boost::shared_ptr<ARDOUR::Route> r = (*i).lock();
+		if (r) {
+			srl.push_back (r);
+		}
+	}
+
 	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
-		(*s)->gui_selection_changed (rl);
+		(*s)->gui_selection_changed (srl);
+	}
+	
+	if (save_list) {
+		_last_selected_routes = *rl;
 	}
 }
 
@@ -1241,10 +1279,15 @@ MackieControlProtocol::select_range ()
 
 	if (!routes.empty()) {
 		for (RouteList::iterator r = routes.begin(); r != routes.end(); ++r) {
-			if (r == routes.begin()) {
-				SetRouteSelection ((*r)->remote_control_id());
+
+			if (_modifier_state == MODIFIER_CONTROL) {
+				ToggleRouteSelection ((*r)->remote_control_id ());
 			} else {
-				AddRouteToSelection ((*r)->remote_control_id());
+				if (r == routes.begin()) {
+					SetRouteSelection ((*r)->remote_control_id());
+				} else {
+					AddRouteToSelection ((*r)->remote_control_id());
+				}
 			}
 		}
 	}

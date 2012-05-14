@@ -45,7 +45,6 @@ class QuantizeDialog : public ArdourDialog
 	QuantizeDialog (PublicEditor&);
 	~QuantizeDialog ();
 
-	ARDOUR::QuantizeType type() const;
 	double start_grid_size() const;
 	double end_grid_size() const;
 	bool   snap_start() const { return snap_start_button.get_active(); }
@@ -57,10 +56,8 @@ class QuantizeDialog : public ArdourDialog
   private:
 	PublicEditor& editor;
 
-	Gtk::ComboBoxText type_combo;
 	Gtk::ComboBoxText start_grid_combo;
 	Gtk::ComboBoxText end_grid_combo;
-	Gtk::Label type_label;
 	Gtk::Adjustment strength_adjustment;
 	Gtk::SpinButton strength_spinner;
 	Gtk::Label strength_label;

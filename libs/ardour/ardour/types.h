@@ -406,6 +406,12 @@ namespace ARDOUR {
 		ShortCrossfade
 	};
 
+	enum CrossfadeChoice {
+		RegionFades,
+		ConstantPowerMinus3dB,
+		ConstantPowerMinus6dB,
+	};
+
 	enum ListenPosition {
 		AfterFaderListen,
 		PreFaderListen
@@ -504,12 +510,6 @@ namespace ARDOUR {
 		Rectified
 	};
 
-	enum QuantizeType {
-		Plain,
-		Legato,
-		Groove
-	};
-
 	struct CleanupReport {
 		std::vector<std::string> paths;
 		size_t                   space;
@@ -557,8 +557,8 @@ namespace ARDOUR {
 		FadeLinear,
 		FadeFast,
 		FadeSlow,
-		FadeLogA,
-		FadeLogB
+		FadeConstantPower,
+		FadeSymmetric,
 	};
 
 } // namespace ARDOUR
@@ -579,6 +579,7 @@ std::istream& operator>>(std::istream& o, ARDOUR::RemoteModel& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::ListenPosition& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::InsertMergePolicy& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::CrossfadeModel& sf);
+std::istream& operator>>(std::istream& o, ARDOUR::CrossfadeChoice& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::SyncSource& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::ShuttleBehaviour& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::ShuttleUnits& sf);
@@ -599,6 +600,7 @@ std::ostream& operator<<(std::ostream& o, const ARDOUR::RemoteModel& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::ListenPosition& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::InsertMergePolicy& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::CrossfadeModel& sf);
+std::ostream& operator<<(std::ostream& o, const ARDOUR::CrossfadeChoice& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::SyncSource& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::ShuttleBehaviour& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::ShuttleUnits& sf);

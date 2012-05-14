@@ -41,7 +41,7 @@
  */
 
 
-class BaseUI : virtual public sigc::trackable, public PBD::EventLoop
+class BaseUI : public sigc::trackable, public PBD::EventLoop
 {
   public:
 	BaseUI (const std::string& name);
@@ -76,6 +76,14 @@ class BaseUI : virtual public sigc::trackable, public PBD::EventLoop
 
 	Glib::RefPtr<Glib::MainLoop> _main_loop;
 	Glib::Thread*                 run_loop_thread;
+	Glib::Mutex                  _run_lock;
+	Glib::Cond                   _running;
+
+	/* this signals _running from within the event loop,
+	   from an idle callback 
+	*/
+
+	bool signal_running ();
 
 	/** Derived UI objects can implement thread_init()
 	 * which will be called by the event loop thread

@@ -105,5 +105,8 @@ class MackieControlProtocolGUI : public Gtk::Notebook
     Gtk::Button      recalibrate_fader_button;
     Gtk::Adjustment  ipmidi_base_port_adjustment;
     Gtk::SpinButton  ipmidi_base_port_spinner;
+    Gtk::Button      discover_button;
+
+    void discover_clicked ();
 };
 

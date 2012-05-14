@@ -67,6 +67,18 @@ class PluginInfo {
 	virtual PluginPtr load (Session& session) = 0;
 	virtual bool is_instrument() const; 
 
+	/* NOTE: this block of virtual methods looks like the interface
+	   to a Processor, but Plugin does not inherit from Processor.
+	   It is therefore not required that these precisely match
+	   the interface, but it is likely that they will evolve together.
+	*/
+
+	/* this returns true if the plugin can change its inputs or outputs on demand.
+	   LADSPA, LV2 and VST plugins cannot do this. AudioUnits can.
+	*/
+
+	virtual bool reconfigurable_io() const { return false; }
+
   protected:
 	friend class PluginManager;
 	uint32_t index;
@@ -118,8 +130,8 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 	virtual uint32_t parameter_count () const = 0;
 	virtual float default_value (uint32_t port) = 0;
 	virtual float get_parameter(uint32_t which) const = 0;
-	virtual std::string get_docs() const { return ""; }
-	virtual std::string get_parameter_docs(uint32_t which) const { return ""; }
+	virtual std::string get_docs () const { return ""; }
+	virtual std::string get_parameter_docs (uint32_t /*which*/) const { return ""; }
 
 	virtual int get_parameter_descriptor (uint32_t which, ParameterDescriptor&) const = 0;
 	virtual uint32_t nth_parameter (uint32_t which, bool& ok) const = 0;
@@ -203,19 +215,6 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 	/** Emitted when any parameter changes */
 	PBD::Signal2<void, uint32_t, float> ParameterChanged;
 
-	/* NOTE: this block of virtual methods looks like the interface
-	   to a Processor, but Plugin does not inherit from Processor.
-	   It is therefore not required that these precisely match
-	   the interface, but it is likely that they will evolve together.
-	*/
-
-	/* this returns true if the plugin can change its inputs or outputs on demand.
-	   LADSPA, LV2 and VST plugins cannot do this. AudioUnits can.
-	*/
-
-	virtual bool reconfigurable_io() const { return false; }
-
-	/* this is only called if reconfigurable_io() returns true */
 	virtual bool configure_io (ChanCount /*in*/, ChanCount /*out*/) { return true; }
 
 	/* specific types of plugins can overload this. As of September 2008, only

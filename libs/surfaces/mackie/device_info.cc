@@ -50,6 +50,7 @@ DeviceInfo::DeviceInfo()
 	, _has_touch_sense_faders (true)
 	, _uses_logic_control_buttons (false)
 	, _uses_ipmidi (false)
+	, _no_handshake (false)
 	, _name (X_("Mackie Control Universal Pro"))
 {
 	mackie_control_buttons ();
@@ -281,6 +282,14 @@ DeviceInfo::set_state (const XMLNode& node, int /* version */)
 		_uses_ipmidi = false;
 	}
 
+	if ((child = node.child ("NoHandShake")) != 0) {
+		if ((prop = child->property ("value")) != 0) {
+			_no_handshake = string_is_affirmative (prop->value());
+		}
+	} else {
+		_no_handshake = false;
+	}
+
 	if ((child = node.child ("LogicControlButtons")) != 0) {
 		if ((prop = child->property ("value")) != 0) {
 			_uses_logic_control_buttons = string_is_affirmative (prop->value());
@@ -396,6 +405,12 @@ DeviceInfo::has_jog_wheel () const
 }
 
 bool
+DeviceInfo::no_handshake () const
+{
+	return _no_handshake;
+}
+
+bool
 DeviceInfo::has_touch_sense_faders () const
 {
 	return _has_touch_sense_faders;
@@ -405,7 +420,7 @@ static const char * const devinfo_env_variable_name = "ARDOUR_MCP_PATH";
 static const char* const devinfo_dir_name = "mcp";
 static const char* const devinfo_suffix = ".device";
 
-static sys::path
+static SearchPath
 system_devinfo_search_path ()
 {
 	bool devinfo_path_defined = false;
@@ -418,12 +433,7 @@ system_devinfo_search_path ()
 	SearchPath spath (system_data_search_path());
 	spath.add_subdirectory_to_paths(devinfo_dir_name);
 
-	// just return the first directory in the search path that exists
-	SearchPath::const_iterator i = std::find_if(spath.begin(), spath.end(), sys::exists);
-
-	if (i == spath.end()) return sys::path();
-
-	return *i;
+	return spath;
 }
 
 static sys::path

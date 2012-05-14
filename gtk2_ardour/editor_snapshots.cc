@@ -121,7 +121,7 @@ EditorSnapshots::popup_context_menu (int button, int32_t time, std::string snaps
 
 	add_item_with_sensitivity (items, MenuElem (_("Remove"), sigc::bind (sigc::mem_fun (*this, &EditorSnapshots::remove), snapshot_name)), modification_allowed);
 
-	add_item_with_sensitivity (items, MenuElem (_("Rename"), sigc::bind (sigc::mem_fun (*this, &EditorSnapshots::rename), snapshot_name)), modification_allowed);
+	add_item_with_sensitivity (items, MenuElem (_("Rename..."), sigc::bind (sigc::mem_fun (*this, &EditorSnapshots::rename), snapshot_name)), modification_allowed);
 
 	_menu.popup (button, time);
 }
@@ -134,6 +134,7 @@ EditorSnapshots::rename (std::string old_name)
 	string new_name;
 
 	prompter.set_name ("Prompter");
+	prompter.set_title (_("Rename Snapshot"));
 	prompter.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
 	prompter.set_prompt (_("New name of snapshot"));
 	prompter.set_initial_text (old_name);

@@ -182,7 +182,7 @@ SessionMetadata::get_state ()
 }
 
 int
-SessionMetadata::set_state (const XMLNode & state, int version_num)
+SessionMetadata::set_state (const XMLNode & state, int /*version_num*/)
 {
 	const XMLNodeList & children = state.children();
 	string name;

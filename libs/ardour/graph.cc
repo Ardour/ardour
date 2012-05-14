@@ -108,14 +108,18 @@ Graph::reset_thread_list ()
                 drop_threads ();
         }
 
-	if (AudioEngine::instance()->create_process_thread (boost::bind (&Graph::main_thread, this), &a_thread, 100000) == 0) {
-		_thread_list.push_back (a_thread);
+	if (AudioEngine::instance()->create_process_thread (boost::bind (&Graph::main_thread, this), &a_thread, 100000) != 0) {
+		throw failed_constructor ();
 	}
 
+	_thread_list.push_back (a_thread);
+
         for (uint32_t i = 1; i < num_threads; ++i) {
-		if (AudioEngine::instance()->create_process_thread (boost::bind (&Graph::helper_thread, this), &a_thread, 100000) == 0) {
-			_thread_list.push_back (a_thread);
+		if (AudioEngine::instance()->create_process_thread (boost::bind (&Graph::helper_thread, this), &a_thread, 100000) != 0) {
+			throw failed_constructor ();
 		}
+		
+		_thread_list.push_back (a_thread);
         }
 }
 

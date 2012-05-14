@@ -796,7 +796,7 @@ AudioClock::parse_as_timecode_distance (const std::string& str)
 }
 
 framecnt_t 
-AudioClock::parse_as_bbt_distance (const std::string& str)
+AudioClock::parse_as_bbt_distance (const std::string&)
 {
 	return 0;
 }
@@ -1001,7 +1001,7 @@ AudioClock::set_frames (framepos_t when, bool /*force*/)
 }
 
 void
-AudioClock::set_minsec (framepos_t when, bool force)
+AudioClock::set_minsec (framepos_t when, bool /*force*/)
 {
 	char buf[32];
 	framecnt_t left;
@@ -1046,7 +1046,7 @@ AudioClock::set_minsec (framepos_t when, bool force)
 }
 
 void
-AudioClock::set_timecode (framepos_t when, bool force)
+AudioClock::set_timecode (framepos_t when, bool /*force*/)
 {
 	char buf[32];
 	Timecode::Time TC;
@@ -1112,7 +1112,7 @@ AudioClock::set_timecode (framepos_t when, bool force)
 }
 
 void
-AudioClock::set_bbt (framepos_t when, bool force)
+AudioClock::set_bbt (framepos_t when, bool /*force*/)
 {
 	char buf[16];
 	Timecode::BBT_Time BBT;
@@ -1740,7 +1740,7 @@ AudioClock::get_frame_step (Field field, framepos_t pos, int dir)
 }
 
 framepos_t
-AudioClock::current_time (framepos_t pos) const
+AudioClock::current_time (framepos_t) const
 {
 	return last_when;
 }
@@ -1795,7 +1795,7 @@ AudioClock::bbt_validate_edit (const string& str)
 }
 
 bool
-AudioClock::timecode_validate_edit (const string& str)
+AudioClock::timecode_validate_edit (const string&)
 {
 	Timecode::Time TC;
 

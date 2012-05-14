@@ -28,7 +28,7 @@
 
 class strstream;
 
-class Receiver : virtual public sigc::trackable
+class Receiver : public sigc::trackable
 {
   public:
 	Receiver ();

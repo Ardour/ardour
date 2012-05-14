@@ -363,7 +363,6 @@ private:
 	void show_verbose_cursor (std::string const &, double, double) const;
 	void show_verbose_cursor (boost::shared_ptr<NoteType>) const;
 
-	int8_t   _force_channel;
 	uint16_t _last_channel_selection;
 	uint8_t  _current_range_min;
 	uint8_t  _current_range_max;

@@ -28,80 +28,67 @@
 
 using namespace std;
 
-MidiByteArray::MidiByteArray( size_t size, MIDI::byte array[] )
-: std::vector<MIDI::byte>()
+MidiByteArray::MidiByteArray (size_t size, MIDI::byte array[])
+  : std::vector<MIDI::byte>()
 {
-	for ( size_t i = 0; i < size; ++i )
+	for  (size_t i = 0; i < size; ++i)
 	{
-		push_back( array[i] );
+		push_back (array[i]);
 	}			
 }
 
-MidiByteArray::MidiByteArray( size_t count, MIDI::byte first, ... )
-: vector<MIDI::byte>()
+MidiByteArray::MidiByteArray (size_t count, MIDI::byte first, ...)
+  : vector<MIDI::byte>()
 {
-	push_back( first );
+	push_back (first);
 	va_list var_args;
-	va_start( var_args, first );
-	for ( size_t i = 1; i < count; ++i )
+	va_start (var_args, first);
+	for  (size_t i = 1; i < count; ++i)
 	{
-		MIDI::byte b = va_arg( var_args, int );
-		push_back( b );
+		MIDI::byte b = va_arg (var_args, int);
+		push_back (b);
 	}
-	va_end( var_args );
+	va_end (var_args);
 }
 
-boost::shared_array<MIDI::byte> MidiByteArray::bytes() const
-{
-	MIDI::byte * buf = new MIDI::byte[size()];
-	const_iterator it = begin();
-	for( MIDI::byte * ptr = buf; it != end(); ++it )
-	{
-		*ptr++ = *it;
-	}
-	return boost::shared_array<MIDI::byte>( buf );
-}
 
-void MidiByteArray::copy( size_t count, MIDI::byte * arr )
+void MidiByteArray::copy (size_t count, MIDI::byte * arr)
 {
-	for( size_t i = 0; i < count; ++i )
-	{
-		push_back( arr[i] );
+	for (size_t i = 0; i < count; ++i) {
+		push_back (arr[i]);
 	}
 }
 
-MidiByteArray & operator << ( MidiByteArray & mba, const MIDI::byte & b )
+MidiByteArray & operator <<  (MidiByteArray & mba, const MIDI::byte & b)
 {
-	mba.push_back( b );
+	mba.push_back (b);
 	return mba;
 }
 
-MidiByteArray & operator << ( MidiByteArray & mba, const MidiByteArray & barr )
+MidiByteArray & operator <<  (MidiByteArray & mba, const MidiByteArray & barr)
 {
-	back_insert_iterator<MidiByteArray> bit( mba );
-	copy( barr.begin(), barr.end(), bit );
+	back_insert_iterator<MidiByteArray> bit (mba);
+	copy (barr.begin(), barr.end(), bit);
 	return mba;
 }
 
-ostream & operator << ( ostream & os, const MidiByteArray & mba )
+ostream & operator <<  (ostream & os, const MidiByteArray & mba)
 {
 	os << "[";
 	char fill = os.fill('0');
-	for( MidiByteArray::const_iterator it = mba.begin(); it != mba.end(); ++it )
-	{
-		if ( it != mba.begin() ) os << " ";
+	for (MidiByteArray::const_iterator it = mba.begin(); it != mba.end(); ++it) {
+		if  (it != mba.begin()) os << " ";
 		os << hex << setw(2) << (int)*it;
 	}
-	os.fill( fill );
+	os.fill (fill);
 	os << dec;
 	os << "]";
 	return os;
 }
 
-MidiByteArray & operator << ( MidiByteArray & mba, const std::string & st )
+MidiByteArray & operator <<  (MidiByteArray & mba, const std::string & st)
 {
-	for ( string::const_iterator it = st.begin(); it != st.end(); ++it )
-	{
+	for  (string::const_iterator it = st.begin(); it != st.end(); ++it) {
 		mba << *it;
 	}
 	return mba;

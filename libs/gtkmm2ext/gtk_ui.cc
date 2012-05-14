@@ -64,6 +64,8 @@ BaseUI::RequestType Gtkmm2ext::AddTimeout = BaseUI::new_request_type();
 
 UI::UI (string namestr, int *argc, char ***argv)
 	: AbstractUI<UIRequest> (namestr)
+	, _receiver (*this)
+	  
 {
 	theMain = new Main (argc, argv);
 
@@ -252,10 +254,10 @@ UI::load_rcfile (string path, bool themechange)
 void
 UI::run (Receiver &old_receiver)
 {
-	listen_to (error);
-	listen_to (info);
-	listen_to (warning);
-	listen_to (fatal);
+	_receiver.listen_to (error);
+	_receiver.listen_to (info);
+	_receiver.listen_to (warning);
+	_receiver.listen_to (fatal);
 
 	/* stop the old receiver (text/console) once we hit the first idle */
 
@@ -266,7 +268,7 @@ UI::run (Receiver &old_receiver)
 	theMain->run ();
 	_active = false;
 	stopping ();
-	hangup ();
+	_receiver.hangup ();
 	return;
 }
 
@@ -356,7 +358,7 @@ UI::set_tip (Widget *w, const gchar *tip, const gchar *hlp)
 				if (!abbrev.empty()) {
 					replace_all (abbrev, "<", "");
 					replace_all (abbrev, ">", "-");
-					msg.append("\n\nKey: ").append (abbrev);
+					msg.append(_("\n\nKey: ")).append (abbrev);
 				}
 			}
 		}
@@ -565,10 +567,15 @@ UI::process_error_message (Transmitter::Channel chn, const char *str)
 		handle_fatal (str);
 	} else {
 
-		display_message (prefix, prefix_len, ptag, mtag, str);
-
-		if (!errors->is_visible() && chn != Transmitter::Info) {
-			show_errors ();
+		if (!ptag || !mtag) {
+			/* oops, message sent before we set up tags - don't crash */
+			cerr << prefix << str << endl;
+		} else {
+			display_message (prefix, prefix_len, ptag, mtag, str);
+			
+			if (!errors->is_visible() && chn != Transmitter::Info) {
+				show_errors ();
+			}
 		}
 	}
 

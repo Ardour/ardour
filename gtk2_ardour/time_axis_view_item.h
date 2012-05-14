@@ -78,6 +78,10 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 
 	double get_samples_per_unit();
 
+	virtual void drag_start() { _dragging = true; }
+	virtual void drag_end() { _dragging = false; }
+	bool dragging() const { return _dragging; }
+
 	virtual void raise () { return; }
 	virtual void raise_to_top () { return; }
 	virtual void lower () { return; }
@@ -93,7 +97,8 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	static Pango::FontDescription NAME_FONT;
 	static void set_constant_heights ();
 	static const double NAME_X_OFFSET;
-	static const double GRAB_HANDLE_LENGTH;
+	static const double GRAB_HANDLE_TOP;
+	static const double GRAB_HANDLE_WIDTH;
 
 	/* these are not constant, but vary with the pixel size
 	   of the font used to display the item name.
@@ -239,6 +244,7 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	Visibility visibility;
 	bool _recregion;
 	bool _automation; ///< true if this is an automation region view
+	bool _dragging;
 
 private:
 

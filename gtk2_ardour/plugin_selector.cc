@@ -199,7 +199,7 @@ PluginSelector::~PluginSelector ()
 }
 
 void
-PluginSelector::row_activated(Gtk::TreeModel::Path path, Gtk::TreeViewColumn* col)
+PluginSelector::row_activated(Gtk::TreeModel::Path, Gtk::TreeViewColumn*)
 {
 	btn_add_clicked();
 }
@@ -319,15 +319,22 @@ PluginSelector::refiller (const PluginInfoList& plugs, const::std::string& filte
 
 			newrow[plugin_columns.creator] = creator;
 
-			snprintf (buf, sizeof(buf), "%d", (*i)->n_inputs.n_audio());
-			newrow[plugin_columns.audio_ins] = buf;
-			snprintf (buf, sizeof(buf), "%d", (*i)->n_inputs.n_midi());
-			newrow[plugin_columns.midi_ins] = buf;
-
-			snprintf (buf, sizeof(buf), "%d", (*i)->n_outputs.n_audio());
-			newrow[plugin_columns.audio_outs] = buf;
-			snprintf (buf, sizeof(buf), "%d", (*i)->n_outputs.n_midi());
-			newrow[plugin_columns.midi_outs] = buf;
+			if ((*i)->reconfigurable_io ()) {
+				newrow[plugin_columns.audio_ins] = _("variable");
+				newrow[plugin_columns.midi_ins] = _("variable");
+				newrow[plugin_columns.audio_outs] = _("variable");
+				newrow[plugin_columns.midi_outs] = _("variable");
+			} else {
+				snprintf (buf, sizeof(buf), "%d", (*i)->n_inputs.n_audio());
+				newrow[plugin_columns.audio_ins] = buf;
+				snprintf (buf, sizeof(buf), "%d", (*i)->n_inputs.n_midi());
+				newrow[plugin_columns.midi_ins] = buf;
+				
+				snprintf (buf, sizeof(buf), "%d", (*i)->n_outputs.n_audio());
+				newrow[plugin_columns.audio_outs] = buf;
+				snprintf (buf, sizeof(buf), "%d", (*i)->n_outputs.n_midi());
+				newrow[plugin_columns.midi_outs] = buf;
+			}
 
 			newrow[plugin_columns.plugin] = *i;
 		}

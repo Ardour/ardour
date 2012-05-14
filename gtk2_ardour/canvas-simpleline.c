@@ -389,8 +389,8 @@ gnome_canvas_simpleline_render (GnomeCanvasItem *item,
 }
 
 static void
-gnome_canvas_simpleline_draw (GnomeCanvasItem *canvas,
-                              GdkDrawable *drawable,
+gnome_canvas_simpleline_draw (GnomeCanvasItem* canvas,
+                              GdkDrawable* drawable,
                               int x, int y,
                               int width, int height)
 {

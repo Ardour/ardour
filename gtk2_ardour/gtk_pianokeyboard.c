@@ -527,7 +527,7 @@ piano_keyboard_expose(GtkWidget *widget, GdkEventExpose *event)
 }
 
 static void
-piano_keyboard_size_request(GtkWidget* widget, GtkRequisition *requisition)
+piano_keyboard_size_request(GtkWidget* w, GtkRequisition *requisition)
 {
 	requisition->width = PIANO_KEYBOARD_DEFAULT_WIDTH;
 	requisition->height = PIANO_KEYBOARD_DEFAULT_HEIGHT;

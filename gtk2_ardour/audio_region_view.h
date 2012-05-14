@@ -117,6 +117,17 @@ class AudioRegionView : public RegionView
 
 	void thaw_after_trim ();
 
+	void drag_start ();
+	void drag_end ();
+
+	void redraw_start_xfade_to (boost::shared_ptr<ARDOUR::AudioRegion>, framecnt_t);
+	void redraw_end_xfade_to (boost::shared_ptr<ARDOUR::AudioRegion>, framecnt_t);
+	void redraw_start_xfade ();
+	void redraw_end_xfade ();
+	
+	void hide_xfades ();
+	void show_xfades ();
+
   protected:
 
 	/* this constructor allows derived types
@@ -141,6 +152,14 @@ class AudioRegionView : public RegionView
 	ArdourCanvas::SimpleRect*        fade_in_handle; ///< fade in handle, or 0
 	ArdourCanvas::SimpleRect*        fade_out_handle; ///< fade out handle, or 0
 	ArdourCanvas::SimpleLine*        fade_position_line;
+
+	ArdourCanvas::Line *start_xfade_in;
+	ArdourCanvas::Line *start_xfade_out;
+	ArdourCanvas::SimpleRect* start_xfade_rect;
+
+	ArdourCanvas::Line *end_xfade_in;
+	ArdourCanvas::Line *end_xfade_out;
+	ArdourCanvas::SimpleRect* end_xfade_rect;
 
 	boost::shared_ptr<AudioRegionGainLine> gain_line;
 
@@ -180,7 +199,6 @@ class AudioRegionView : public RegionView
 	void transients_changed();
 
 private:
-
 	void setup_fade_handle_positions ();
 
 	/** A ScopedConnection for each PeaksReady callback (one per channel).  Each member

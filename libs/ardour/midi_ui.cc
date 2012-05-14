@@ -45,7 +45,7 @@ MidiControlUI* MidiControlUI::_instance = 0;
 #include "pbd/abstract_ui.cc"  /* instantiate the template */
 
 MidiControlUI::MidiControlUI (Session& s)
-	: AbstractUI<MidiUIRequest> (_("midiui"))
+	: AbstractUI<MidiUIRequest> (X_("midiui"))
 	, _session (s)
 {
 	MIDI::Manager::instance()->PortsChanged.connect_same_thread (rebind_connection, boost::bind (&MidiControlUI::change_midi_ports, this));

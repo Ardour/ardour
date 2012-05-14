@@ -142,7 +142,7 @@ MidiPlaylistSource::read_unlocked (Evoral::EventSink<framepos_t>& dst,
 }
 
 framecnt_t
-MidiPlaylistSource::write_unlocked (MidiRingBuffer<framepos_t>& dst,
+MidiPlaylistSource::write_unlocked (MidiRingBuffer<framepos_t>&,
 				    framepos_t,
 				    framecnt_t)
 {

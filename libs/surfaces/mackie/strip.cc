@@ -130,7 +130,7 @@ Strip::add (Control & control)
 }
 
 void
-Strip::set_route (boost::shared_ptr<Route> r, bool with_messages)
+Strip::set_route (boost::shared_ptr<Route> r, bool /*with_messages*/)
 {
 	if (_controls_locked) {
 		return;
@@ -419,7 +419,7 @@ Strip::notify_panner_width_changed (bool force_update)
 }
 
 void
-Strip::select_event (Button& button, ButtonState bs)
+Strip::select_event (Button&, ButtonState bs)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, "select button\n");
 	
@@ -454,15 +454,16 @@ Strip::select_event (Button& button, ButtonState bs)
 }
 
 void
-Strip::vselect_event (Button& button, ButtonState bs)
+Strip::vselect_event (Button&, ButtonState bs)
 {
 	if (bs == press) {
 
 		int ms = _surface->mcp().modifier_state();
 				
 		if (ms & MackieControlProtocol::MODIFIER_SHIFT) {
-			boost::shared_ptr<AutomationControl> ac = button.control ();
 
+			boost::shared_ptr<AutomationControl> ac = _vpot->control ();
+				
 			if (ac) {
 				
 				/* reset to default/normal value */
@@ -470,6 +471,7 @@ Strip::vselect_event (Button& button, ButtonState bs)
 			}
 
 		}  else {
+
 			DEBUG_TRACE (DEBUG::MackieControl, "switching to next pot mode\n");
 			next_pot_mode ();
 		}
@@ -478,7 +480,7 @@ Strip::vselect_event (Button& button, ButtonState bs)
 }
 
 void
-Strip::fader_touch_event (Button& button, ButtonState bs)
+Strip::fader_touch_event (Button&, ButtonState bs)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("fader touch, press ? %1\n", (bs == press)));
 	
@@ -754,9 +756,9 @@ Strip::unlock_controls ()
 }
 
 void
-Strip::gui_selection_changed (ARDOUR::RouteNotificationListPtr rl)
+Strip::gui_selection_changed (const ARDOUR::StrongRouteNotificationList& rl)
 {
-	for (ARDOUR::RouteNotificationList::iterator i = rl->begin(); i != rl->end(); ++i) {
+	for (ARDOUR::StrongRouteNotificationList::const_iterator i = rl.begin(); i != rl.end(); ++i) {
 		if ((*i) == _route) {
 			_surface->write (_select->set_state (on));
 			return;

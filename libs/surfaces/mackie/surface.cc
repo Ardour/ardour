@@ -299,9 +299,14 @@ Surface::handle_midi_pitchbend_message (MIDI::Parser&, MIDI::pitchbend_t pb, uin
 	 * when we connected to the per-channel pitchbend events.
 	 */
 
+
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("handle_midi pitchbend on port %3, fader = %1 value = %2\n", 
 							   fader_id, pb, _number));
 	
+	if (_mcp.device_info().no_handshake()) {
+		turn_it_on ();
+	}
+
 	Fader* fader = faders[fader_id];
 
 	if (fader) {
@@ -324,6 +329,10 @@ Surface::handle_midi_note_on_message (MIDI::Parser &, MIDI::EventTwoBytes* ev)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("SurfacePort::handle_note_on %1 = %2\n", (int) ev->note_number, (int) ev->velocity));
 	
+	if (_mcp.device_info().no_handshake()) {
+		turn_it_on ();
+	}
+
 	Button* button = buttons[ev->note_number];
 
 	if (button) {
@@ -347,6 +356,10 @@ void
 Surface::handle_midi_controller_message (MIDI::Parser &, MIDI::EventTwoBytes* ev)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("SurfacePort::handle_midi_controller %1 = %2\n", (int) ev->controller_number, (int) ev->value));
+
+	if (_mcp.device_info().no_handshake()) {
+		turn_it_on ();
+	}
 
 	Pot* pot = pots[ev->controller_number];
 
@@ -387,6 +400,10 @@ Surface::handle_midi_sysex (MIDI::Parser &, MIDI::byte * raw_bytes, size_t count
 
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("handle_midi_sysex: %1\n", bytes));
 
+	if (_mcp.device_info().no_handshake()) {
+		turn_it_on ();
+	}
+
 	/* always save the device type ID so that our outgoing sysex messages
 	 * are correct 
 	 */
@@ -406,12 +423,7 @@ Surface::handle_midi_sysex (MIDI::Parser &, MIDI::byte * raw_bytes, size_t count
 			write_sysex (host_connection_query (bytes));
 		} else {
 			if (!_active) {
-				_active = true;
-				zero_controls ();
-				for (Strips::iterator s = strips.begin(); s != strips.end(); ++s) {
-					(*s)->notify_all ();
-				}
-				update_view_mode_display ();
+				turn_it_on ();
 			}
 		}
 		break;
@@ -493,8 +505,21 @@ Surface::host_connection_confirmation (const MidiByteArray & bytes)
 	return MidiByteArray (2, 0x13, 0x00);
 }
 
+void
+Surface::turn_it_on ()
+{
+	if (!_active) {
+		_active = true;
+		zero_controls ();
+		for (Strips::iterator s = strips.begin(); s != strips.end(); ++s) {
+			(*s)->notify_all ();
+		}
+		update_view_mode_display ();
+	}
+}
+
 void 
-Surface::handle_port_inactive (SurfacePort * port)
+Surface::handle_port_inactive (SurfacePort*)
 {
 	_active = false;
 }
@@ -793,7 +818,7 @@ Surface::update_view_mode_display ()
 }
 
 void
-Surface::gui_selection_changed (ARDOUR::RouteNotificationListPtr routes)
+Surface::gui_selection_changed (const ARDOUR::StrongRouteNotificationList& routes)
 {
 	for (Strips::iterator s = strips.begin(); s != strips.end(); ++s) {
 		(*s)->gui_selection_changed (routes);
@@ -820,7 +845,7 @@ Surface::next_jog_mode ()
 }
 
 void
-Surface::set_jog_mode (JogWheel::Mode m)
+Surface::set_jog_mode (JogWheel::Mode)
 {
 }	
 

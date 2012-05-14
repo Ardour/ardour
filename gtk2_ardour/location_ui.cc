@@ -687,8 +687,9 @@ LocationEditRow::position_lock_style_changed (ARDOUR::Location*)
 }
 
 void
-LocationEditRow::focus_name() {
-	name_entry.grab_focus();
+LocationEditRow::focus_name()
+{
+	name_entry.grab_focus ();
 }
 
 void
@@ -862,9 +863,9 @@ LocationUI::location_redraw_ranges ()
 }
 
 struct LocationSortByStart {
-    bool operator() (Location *a, Location *b) {
-	    return a->start() < b->start();
-    }
+	bool operator() (Location *a, Location *b) {
+		return a->start() < b->start();
+	}
 };
 
 void
@@ -879,7 +880,7 @@ LocationUI::location_added (Location* location)
 		loc.sort (LocationSortByStart ());
 
 		LocationEditRow* erow = manage (new LocationEditRow (_session, location));
-
+		
                 erow->set_clock_group (*_clock_group);
 		erow->remove_requested.connect (sigc::mem_fun (*this, &LocationUI::location_remove_requested));
 
@@ -910,6 +911,11 @@ LocationUI::location_added (Location* location)
 
 		range_rows.show_all ();
 		location_rows.show_all ();
+
+		if (location == newest_location) {
+			newest_location = 0;
+			erow->focus_name();
+		}
 	}
 }
 
@@ -959,10 +965,6 @@ LocationUI::map_locations (Locations::LocationList& locations)
 
                         Box_Helpers::BoxList & loc_children = location_rows.children();
 			loc_children.push_back(Box_Helpers::Element(*erow, PACK_SHRINK, 1, PACK_START));
-			if (location == newest_location) {
-				newest_location = 0;
-				erow->focus_name();
-			}
 		} else if (location->is_auto_punch()) {
 			punch_edit_row.set_session (_session);
 			punch_edit_row.set_location (location);

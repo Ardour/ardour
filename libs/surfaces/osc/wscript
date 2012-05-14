@@ -17,7 +17,6 @@ def options(opt):
 
 def configure(conf):
     autowaf.configure(conf)
-    autowaf.check_pkg(conf, 'liblo', uselib_store='LO', linkflags='-llo')
 
 def build(bld):
     obj = bld(features = 'cxx cxxshlib')

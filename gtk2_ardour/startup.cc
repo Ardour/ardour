@@ -511,7 +511,7 @@ greater control in monitoring without affecting the mix."));
 	use_monitor_section_button.signal_toggled().connect (sigc::mem_fun (*this, &ArdourStartup::config_changed));
 	no_monitor_section_button.signal_toggled().connect (sigc::mem_fun (*this, &ArdourStartup::config_changed));
 
-	monitor_section_label.set_markup(_("<i>You can change this preference at any time, via the Preferences dialog). You can also add or remove the monitor section to/from any session.</i>\n\n\
+	monitor_section_label.set_markup(_("<i>You can change this preference at any time via the Preferences dialog.\nYou can also add or remove the monitor section to/from any session.</i>\n\n\
 <i>If you do not understand what this is about, just accept the default.</i>"));
 	monitor_section_label.set_alignment (0.0, 0.0);
 

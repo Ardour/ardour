@@ -61,6 +61,8 @@ class AudioStreamView : public StreamView
 	void show_all_fades ();
 	void hide_all_fades ();
 
+	void hide_xfades_with (boost::shared_ptr<ARDOUR::AudioRegion> ar);
+
 	RegionView* create_region_view (boost::shared_ptr<ARDOUR::Region>, bool, bool);
 
   private:

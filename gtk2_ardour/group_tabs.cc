@@ -180,7 +180,7 @@ GroupTabs::on_motion_notify_event (GdkEventMotion* ev)
 
 
 bool
-GroupTabs::on_button_release_event (GdkEventButton* ev)
+GroupTabs::on_button_release_event (GdkEventButton*)
 {
 	if (_dragging == 0) {
 		return false;

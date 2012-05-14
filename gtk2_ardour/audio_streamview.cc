@@ -533,6 +533,23 @@ AudioStreamView::hide_all_fades ()
 }
 
 void
+AudioStreamView::hide_xfades_with (boost::shared_ptr<AudioRegion> ar)
+{
+	for (list<RegionView*>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
+		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
+		if (arv) {
+			switch (arv->region()->coverage (ar->position(), ar->last_frame())) {
+			case Evoral::OverlapNone:
+				break;
+			default:
+				arv->hide_xfades ();
+				break;
+			}
+		}
+	}
+}
+
+void
 AudioStreamView::color_handler ()
 {
 	//case cAudioTrackBase:

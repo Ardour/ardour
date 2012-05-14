@@ -81,7 +81,7 @@ private:
 inline
 Semaphore::Semaphore(unsigned initial)
 {
-	if (semaphore_create(mach_task_self(), &sem->sem, SYNC_POLICY_FIFO, 0)) {
+	if (semaphore_create(mach_task_self(), &_sem, SYNC_POLICY_FIFO, initial)) {
 		throw failed_constructor();
 	}
 }
@@ -148,7 +148,7 @@ Semaphore::wait()
 inline bool
 Semaphore::try_wait()
 {
-	return WaitForSingleObject(sem->sem, 0) == WAIT_OBJECT_0;
+	return WaitForSingleObject(_sem, 0) == WAIT_OBJECT_0;
 }
 
 #else  /* !defined(__APPLE__) && !defined(_WIN32) */

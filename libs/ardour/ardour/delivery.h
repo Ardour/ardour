@@ -89,7 +89,7 @@ public:
 	/* Panning */
 
 	static int  disable_panners (void);
-	static int  reset_panners (void);
+	static void reset_panners ();
 
 	boost::shared_ptr<PannerShell> panner_shell() const { return _panshell; }
 	boost::shared_ptr<Panner> panner() const;
@@ -115,9 +115,9 @@ public:
 	boost::shared_ptr<MuteMaster> _mute_master;
 	
 	static bool panners_legal;
-	static PBD::Signal0<int> PannersLegal;
+	static PBD::Signal0<void> PannersLegal;
 
-	int panners_became_legal ();
+	void panners_became_legal ();
 	PBD::ScopedConnection panner_legal_c;
 	void output_changed (IOChange, void*);
 

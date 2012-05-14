@@ -85,7 +85,7 @@ if test x$STRIP != xall -a x$STRIP != xnone -a x$STRIP != xsome ; then
 fi
 
 release_version=`grep -m 1 '^VERSION' ../../wscript | awk '{print $3}' | sed "s/'//g"`
-svn_version=`grep -m 1 'svn_revision =' ../../libs/ardour/svn_revision.cc | cut -d"\"" -f 2`
+svn_version=`grep -m 1 'svn_revision =' ../../libs/ardour/svn_revision.cc | cut -d"'" -f 2`
 echo "Version is $release_version / $svn_version"
 info_string="$release_version/$svn_version built on `hostname` by `whoami` on `date`"
 echo "Info string is $info_string"
@@ -150,6 +150,7 @@ Panners=$APPLIB/panners
 ExportFormats=$Shared/export
 Locale=$Shared/locale
 MidiMaps=$Shared/midi_maps
+MackieControl=$Shared/mcp
 Modules=$Libraries/modules
 Loaders=$Libraries/loaders
 
@@ -186,6 +187,7 @@ mkdir -p $Shared
 mkdir -p $Locale
 mkdir -p $Surfaces
 mkdir -p $MidiMaps
+mkdir -p $MackieControl
 mkdir -p $ExportFormats
 mkdir -p $Panners
 mkdir -p $Shared/templates
@@ -277,6 +279,25 @@ if test x$WITH_NLS != x ; then
 else
 	echo "Skipping NLS support"
 fi
+
+### Find fontconfig ###
+FCROOT=`pkg-config --libs-only-L fontconfig | sed -e "s/-L//" -e "s/[[:space:]]//g"`
+if [ ! -z "$FCROOT" ]; then
+	echo "Found FCOOT using pkg-config"
+        FCETC=`dirname $FCROOT`/etc
+elif [ -d /usr/lib/gtk-2.0 ]; then
+	FCETC="/etc"
+elif [ -d /usr/local/lib/gtk-2.0 ]; then
+	FCETC="/usr/local/etc"
+else
+	echo ""
+	echo "!!! ERROR !!! - Unable to locate fontconfig directory. Packager will exit"
+	echo ""
+	exit 1
+fi
+
+echo "Copying Fontconfig files to $Etc ..."
+cp -r $FCETC/fonts $Etc
 
 ### Find gtk ###
 GTKROOT=`pkg-config --libs-only-L gtk+-2.0 | sed -e "s/-L//" -e "s/[[:space:]]//g"`
@@ -402,15 +423,21 @@ gdk-pixbuf-query-loaders | sed "s?$GDKPIXBUFLIB/?@ROOTDIR@/?" > $Etc/gdk-pixbuf.
 # this one is special - we will set GTK_PATH to $Libraries/clearlooks
 
 if [ ! -e ${GTKLIB}/engines/libclearlooks.so ]; then
+    if [ ! -e $BUILD_ROOT/libs/clearlooks-newer/libclearlooks.so ] ; then 
 	echo ""
 	echo "!!! ERROR !!! - not able to locate libclearlooks.so"
 	echo ""
 	echo "Packager with exit"
 	exit 1
+    else 
+        clearlooks_so=$BUILD_ROOT/libs/clearlooks-newer/libclearlooks.so
+    fi
+else
+    clearlooks_so=${GTKLIB}/engines/libclearlooks.so
 fi
 
 echo "Copying clearlooks ..."
-cp ${GTKLIB}/engines/libclearlooks.so $Libraries
+cp $clearlooks_so $Libraries
 mkdir -p $Libraries/clearlooks/engines
 (cd $Libraries/clearlooks/engines && ln -s ../../libclearlooks* libclearlooks.so )
 
@@ -437,6 +464,13 @@ mv $Surfaces/libardourcp.so* $Libraries
 for x in $BUILD_ROOT/../midi_maps/*.map ; do
     cp "$x" $MidiMaps
     echo Copied MIDI map $x 
+done
+
+# MackieControl data
+# got to be careful with names here
+for x in $BUILD_ROOT/../mcp/*.device $BUILD_ROOT/../mcp/*.profile ; do
+    cp "$x" $MackieControl
+    echo Copied Mackie Control file $x 
 done
 
 # ExportFormats
@@ -536,10 +570,14 @@ echo
 # strip libraries
 if test x$STRIP = xall ; then
     echo Stripping all libraries
+    # Must be writable so that we can strip
+    find $APPLIB/ -name "*.so*" | xargs chmod u+w
+    # and strip ...
     find $APPLIB/ -name "*.so*" | xargs strip
 elif test x$STRIP = xsome ; then
     echo Stripping dependent libraries
     for l in $deplibs ; do
+        chmod u+w $APPLIB/$l
         strip $APPLIB/$l
     done
 fi

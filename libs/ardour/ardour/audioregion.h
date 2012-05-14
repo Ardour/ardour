@@ -89,8 +89,15 @@ class AudioRegion : public Region
 	bool fade_in_active ()  const { return _fade_in_active; }
 	bool fade_out_active () const { return _fade_out_active; }
 
+	bool fade_in_is_xfade() const { return _fade_in_is_xfade; }
+	void set_fade_in_is_xfade (bool yn);
+	bool fade_out_is_xfade() const { return _fade_out_is_xfade; }
+	void set_fade_out_is_xfade (bool yn);
+
 	boost::shared_ptr<AutomationList> fade_in()  { return _fade_in; }
+	boost::shared_ptr<AutomationList> inverse_fade_in()  { return _inverse_fade_in; }
 	boost::shared_ptr<AutomationList> fade_out() { return _fade_out; }
+	boost::shared_ptr<AutomationList> inverse_fade_out()  { return _inverse_fade_out; }
 	boost::shared_ptr<AutomationList> envelope() { return _envelope; }
 
 	Evoral::Range<framepos_t> body_range () const;
@@ -100,13 +107,6 @@ class AudioRegion : public Region
 			uint32_t chan_n=0, double samples_per_unit= 1.0) const;
 
 	/* Readable interface */
-
-	enum ReadOps {
-		ReadOpsNone = 0x0,
-		ReadOpsOwnAutomation = 0x1,
-		ReadOpsOwnScaling = 0x2,
-		ReadOpsFades = 0x4
-	};
 
 	virtual framecnt_t read (Sample*, framepos_t pos, framecnt_t cnt, int channel) const;
 	virtual framecnt_t readable_length() const { return length(); }
@@ -142,6 +142,8 @@ class AudioRegion : public Region
 
 	void set_default_fade_in ();
 	void set_default_fade_out ();
+
+	framecnt_t verify_xfade_bounds (framecnt_t, bool start);
 	
 	void set_envelope_active (bool yn);
 	void set_default_envelope ();
@@ -178,7 +180,6 @@ class AudioRegion : public Region
 
   private:
 	friend class RegionFactory;
-	friend class Crossfade;
 
 	AudioRegion (boost::shared_ptr<AudioSource>);
 	AudioRegion (const SourceList &);
@@ -208,11 +209,7 @@ class AudioRegion : public Region
 	void recompute_gain_at_end ();
 	void recompute_gain_at_start ();
 
-	framecnt_t _read_at (const SourceList&, framecnt_t limit,
-			     Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
-			     framepos_t position, framecnt_t cnt,
-			     uint32_t chan_n = 0,
-			     ReadOps readops = ReadOps (~0)) const;
+	framecnt_t read_from_sources (SourceList const &, framecnt_t, Sample *, framepos_t, framecnt_t, uint32_t) const;
 
 	void recompute_at_start ();
 	void recompute_at_end ();
@@ -228,10 +225,19 @@ class AudioRegion : public Region
 	Automatable _automatable;
 
 	boost::shared_ptr<AutomationList> _fade_in;
+	boost::shared_ptr<AutomationList> _inverse_fade_in;
 	boost::shared_ptr<AutomationList> _fade_out;
+	boost::shared_ptr<AutomationList> _inverse_fade_out;
 	boost::shared_ptr<AutomationList> _envelope;
 	uint32_t                          _fade_in_suspended;
 	uint32_t                          _fade_out_suspended;
+	/* This is not a Property because its not subject to user control,
+	   or undo/redo. XXX this may prove to be a mistake.
+	*/
+	bool                              _fade_in_is_xfade;
+	bool                              _fade_out_is_xfade;
+
+	boost::shared_ptr<ARDOUR::Region> get_single_other_xfade_region (bool start) const;
 
   protected:
 	/* default constructor for derived (compound) types */

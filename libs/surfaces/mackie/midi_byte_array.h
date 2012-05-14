@@ -57,9 +57,6 @@ public:
 	*/
 	MidiByteArray( size_t count, MIDI::byte first, ... );
 	
-	/// return smart pointer to a copy of the bytes
-	boost::shared_array<MIDI::byte> bytes() const;
-		
 	/// copy the given number of bytes from the given array
 	void copy( size_t count, MIDI::byte arr[] );
 };
