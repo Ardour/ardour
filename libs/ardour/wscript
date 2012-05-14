@@ -359,6 +359,8 @@ def build(bld):
     obj.use          = ['libpbd','libmidipp','libevoral','libvamphost',
                         'libvampplugin','libtaglib','librubberband',
                         'libaudiographer']
+    if bld.is_defined ('HAVE_SOUNDGRID'):
+        obj.uselib      += [ 'SOUNDGRID' ]
     obj.vnum         = LIBARDOUR_LIB_VERSION
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
     obj.defines      = [

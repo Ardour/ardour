@@ -530,8 +530,13 @@ def configure(conf):
             conf.env.append_value('LINKFLAGS_AUDIOUNITS', ['-framework', 'Carbon'])
 
     if Options.options.soundgrid:
-        conf.env.append_value ('CXXFLAGS', '-DUSE_SOUNDGRID')
-        conf.env.append_value ('CFLAGS', '-DUSE_SOUNDGRID')
+        conf.env.append_value ('CXXFLAGS_SOUNDGRID', [ '-D__MACOS__', '-DUSE_SOUNDGRID', '-I/Volumes/Work/paul/ardour/3.0-SG/soundgrid' ])
+        conf.env.append_value ('CFLAGS_SOUNDGRID', [ '-D__MACOS__', '-DUSE_SOUNDGRID', '-I/Volumes/Work/paul/ardour/3.0-SG/soundgrid' ])
+        sglib = ''.join ([ '-L', os.path.expanduser ('/Volumes/Work/paul/ardour/3.0-SG/soundgrid') ])
+        conf.env.append_value ('LINKFLAGS_SOUNDGRID', [ sglib, '-lmixerapplicationcore' ])
+        conf.check_cxx (header_name='WavesPublicAPI/WavesMixerAPI/1.0/WavesMixerAPI.h', 
+                        mandatory=True, use='SOUNDGRID')
+        conf.define('HAVE_SOUNDGRID', 1)
 
     if Options.options.boost_include != '':
         conf.env.append_value('CXXFLAGS', '-I' + Options.options.boost_include)
