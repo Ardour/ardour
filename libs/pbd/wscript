@@ -54,6 +54,10 @@ def configure(conf):
     # autowaf.check_header(conf, 'cxx', 'boost/uuid/uuid.hpp')
 
 def build(bld):
+    
+    # Make signal.h using signal.h.py
+    bld(rule = 'python ${SRC} ${TGT}', source = 'pbd/signal.h.py', target = 'pbd/signal.h')
+
     # Library
     obj = bld(features = 'cxx cxxshlib')
     obj.source = '''
