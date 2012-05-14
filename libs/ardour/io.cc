@@ -256,8 +256,8 @@ IO::remove_port (boost::shared_ptr<Port> port, void* src)
 	ChanCount after = before;
 	after.set (port->type(), after.get (port->type()) - 1);
 
-	bool const r = PortCountChanging (after); /* EMIT SIGNAL */
-	if (r) {
+	boost::optional<bool> const r = PortCountChanging (after); /* EMIT SIGNAL */
+	if (r.get_value_or (false)) {
 		return -1;
 	}
 

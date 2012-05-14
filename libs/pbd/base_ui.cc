@@ -74,7 +74,6 @@ void
 BaseUI::main_thread ()
 {
 	DEBUG_TRACE (DEBUG::EventLoop, string_compose ("%1: event loop running in thread %2\n", name(), pthread_self()));
-	std::cerr << string_compose ("%1: event loop running in thread %2\n", name(), pthread_self());
 	set_event_loop_for_thread (this);
 	thread_init ();
 	_main_loop->get_context()->signal_idle().connect (sigc::mem_fun (*this, &BaseUI::signal_running));
@@ -104,9 +103,7 @@ BaseUI::run ()
 
 	Glib::Mutex::Lock lm (_run_lock);
 	run_loop_thread = Thread::create (mem_fun (*this, &BaseUI::main_thread), true);
-	std::cerr << "wait for " << name() << " thread to start\n";
 	_running.wait (_run_lock);
-	std::cerr << "\tthread now running\n";
 }
 
 void

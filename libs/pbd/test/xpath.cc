@@ -13,12 +13,12 @@ static string const prefix = "../libs/pbd/test/";
 void
 XPathTest::testMisc ()
 {
-	cout << "Test 1: RosegardenPatchFile.xml: Find all banks in the file" << endl;
+//	cout << "Test 1: RosegardenPatchFile.xml: Find all banks in the file" << endl;
 	XMLTree  doc(prefix + "RosegardenPatchFile.xml");
 	// "//bank" gives as last element an empty element libxml bug????
 	boost::shared_ptr<XMLSharedNodeList> result = doc.find("//bank[@name]");
 	
-	cout << "Found " << result->size() << " banks" << endl;
+//	cout << "Found " << result->size() << " banks" << endl;
 	assert(result->size() == 8);
 //	int counter = 1;
 	for(XMLSharedNodeList::const_iterator i = result->begin(); i != result->end(); ++i) {
@@ -31,7 +31,7 @@ XPathTest::testMisc ()
 		}
 	}
 	
-	cout << endl << endl << "Test 2: RosegardenPatchFile.xml: Find all programs whose program name contains 'Latin'" << endl;
+//	cout << endl << endl << "Test 2: RosegardenPatchFile.xml: Find all programs whose program name contains 'Latin'" << endl;
 	
 	result = doc.find("/rosegarden-data/studio/device/bank/program[contains(@name, 'Latin')]");
 	assert(result->size() == 5);
@@ -53,7 +53,7 @@ XPathTest::testMisc ()
 //		        "' with id: " << (*i)->property("id")->value() << endl;
 	}
 	
-	cout << endl << endl << "Test 4: TestSession.ardour: Find all elements with an 'id' and 'name' attribute" << endl;
+//	cout << endl << endl << "Test 4: TestSession.ardour: Find all elements with an 'id' and 'name' attribute" << endl;
 	
 	result = doc2.find("//*[@id and @name]");
 	
@@ -65,7 +65,7 @@ XPathTest::testMisc ()
 //		      		"' and name: " << (*i)->property("name")->value() << endl;
 	}
 	
-	cout << endl << endl << "Test 5: ProtoolsPatchFile.midnam: Get Banks and Patches for 'Name Set 1'" << endl;
+//	cout << endl << endl << "Test 5: ProtoolsPatchFile.midnam: Get Banks and Patches for 'Name Set 1'" << endl;
 	
 	// We have to allocate a new document here, or we get segfaults
 	XMLTree doc3(prefix + "ProtoolsPatchFile.midnam");
@@ -81,7 +81,7 @@ XPathTest::testMisc ()
 		}
 	}
 
-	cout << endl << endl << "Test 5: ProtoolsPatchFile.midnam: Find attribute nodes" << endl;
+//	cout << endl << endl << "Test 5: ProtoolsPatchFile.midnam: Find attribute nodes" << endl;
 	result = doc3.find("//@Value");
 	
 	for(XMLSharedNodeList::const_iterator i = result->begin(); i != result->end(); ++i) {
@@ -90,7 +90,7 @@ XPathTest::testMisc ()
 //		     << " value: " << node->attribute_value() << endl;
 	}	
 	
-	cout << endl << endl << "Test 6: ProtoolsPatchFile.midnam: Find available channels on 'Name Set 1'" << endl;
+//	cout << endl << endl << "Test 6: ProtoolsPatchFile.midnam: Find available channels on 'Name Set 1'" << endl;
 	result = doc3.find(
 		"//ChannelNameSet[@Name = 'Name Set 1']//AvailableChannel[@Available = 'true']/@Channel");
 	

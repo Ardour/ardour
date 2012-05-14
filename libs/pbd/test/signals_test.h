@@ -4,9 +4,13 @@
 class SignalsTest : public CppUnit::TestFixture
 {
 	CPPUNIT_TEST_SUITE (SignalsTest);
+	CPPUNIT_TEST (testEmission);
 	CPPUNIT_TEST (testDestruction);
+	CPPUNIT_TEST (testScopedConnectionList);
 	CPPUNIT_TEST_SUITE_END ();
 
 public:
+	void testEmission ();
 	void testDestruction ();
+	void testScopedConnectionList ();
 };

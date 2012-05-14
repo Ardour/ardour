@@ -152,7 +152,7 @@ class IO : public SessionObject, public Latent
 		typedef bool result_type;
 
 		template <typename Iter>
-		bool operator() (Iter first, Iter last) const {
+		result_type operator() (Iter first, Iter last) const {
 			bool r = false;
 			while (first != last) {
 				if (*first) {
