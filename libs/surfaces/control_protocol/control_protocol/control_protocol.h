@@ -39,7 +39,8 @@ class Route;
 class Session;
 class Bundle;
 
-class ControlProtocol : public PBD::Stateful, public PBD::ScopedConnectionList, public BasicUI {
+class ControlProtocol : public PBD::Stateful, public PBD::ScopedConnectionList, public BasicUI
+{
   public:
 	ControlProtocol (Session&, std::string name);
 	virtual ~ControlProtocol();

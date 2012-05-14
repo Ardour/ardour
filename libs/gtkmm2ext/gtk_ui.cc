@@ -64,6 +64,8 @@ BaseUI::RequestType Gtkmm2ext::AddTimeout = BaseUI::new_request_type();
 
 UI::UI (string namestr, int *argc, char ***argv)
 	: AbstractUI<UIRequest> (namestr)
+	, _receiver (*this)
+	  
 {
 	theMain = new Main (argc, argv);
 
@@ -252,10 +254,10 @@ UI::load_rcfile (string path, bool themechange)
 void
 UI::run (Receiver &old_receiver)
 {
-	listen_to (error);
-	listen_to (info);
-	listen_to (warning);
-	listen_to (fatal);
+	_receiver.listen_to (error);
+	_receiver.listen_to (info);
+	_receiver.listen_to (warning);
+	_receiver.listen_to (fatal);
 
 	/* stop the old receiver (text/console) once we hit the first idle */
 
@@ -266,7 +268,7 @@ UI::run (Receiver &old_receiver)
 	theMain->run ();
 	_active = false;
 	stopping ();
-	hangup ();
+	_receiver.hangup ();
 	return;
 }
 
