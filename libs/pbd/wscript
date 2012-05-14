@@ -142,7 +142,8 @@ def build(bld):
         testobj.includes     = obj.includes + ['test', '../pbd']
         testobj.uselib       = 'CPPUNIT XML SNDFILE'
         testobj.use          = 'libpbd'
-        testobj.linkflags    = ['-lrt']
+        if sys.platform != 'darwin':
+            testobj.linkflags    = ['-lrt']
 
 
 def shutdown():
