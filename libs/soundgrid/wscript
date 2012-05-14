@@ -43,20 +43,18 @@ def configure(conf):
 
 def build(bld):
     # Library
-    driver = bld(features = 'cxx cxxshlib')
-    driver.source = '''
-               driver.cc
-    '''
-
-    driver.export_includes = ['.']
-    driver.includes     = ['.']
-    driver.name         = 'libsgardour'
-    driver.target       = 'sgardour'
-    driver.uselib       = [ 'SOUNDGRID', 'GLIBMM', 'SIGCPP', 'XML', 'UUID', 'SNDFILE', 'GIOMM' ]
-    driver.use          = [ 'libardour' ]
-    driver.vnum         = LIBSGARDOUR_LIB_VERSION
-    driver.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
-    driver.defines     = ['PACKAGE="' + I18N_PACKAGE + '"']
+    if bld.is_defined ('HAVE_SOUNDGRID'):
+	driver = bld(features = 'cxx cxxshlib')
+        driver.source = [ 'driver.cc' ]
+        driver.export_includes = ['.']
+        driver.includes     = ['.']
+        driver.name         = 'libsgardour'
+        driver.target       = 'sgardour'
+        driver.uselib       = [ 'SOUNDGRID', 'GLIBMM', 'SIGCPP', 'XML', 'UUID', 'SNDFILE', 'GIOMM' ]
+        driver.use          = [ 'libardour' ]
+        driver.vnum         = LIBSGARDOUR_LIB_VERSION
+        driver.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
+        driver.defines     = ['PACKAGE="' + I18N_PACKAGE + '"']
 
 def shutdown():
     autowaf.shutdown()
