@@ -728,7 +728,7 @@ def i18n_mo(bld):
     bld.recurse (i18n_children)
 
 def install_not_supported(bld):
-    print 'Installing Ardour 3 is currently unsupported. Run it via the command ./ardev from within the gtk2_ardour directory.'
+    print ('Installing Ardour 3 is currently unsupported. Run it via the command ./ardev from within the gtk2_ardour directory.')
     sys.exit (1)
 
 from waflib import Build
