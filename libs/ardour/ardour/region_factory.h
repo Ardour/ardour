@@ -83,7 +83,7 @@ public:
 	static void get_regions_using_source (boost::shared_ptr<Source>, std::set<boost::shared_ptr<Region> >& );
 	static void remove_regions_using_source (boost::shared_ptr<Source>);
 
-	static void map_remove (boost::shared_ptr<Region>);
+	static void map_remove (boost::weak_ptr<Region>);
 	static void map_remove_with_equivalents (boost::shared_ptr<Region>);
 	static void delete_all_regions ();
 	static const RegionMap& regions() { return region_map; }

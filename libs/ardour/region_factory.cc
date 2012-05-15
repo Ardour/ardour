@@ -321,7 +321,7 @@ RegionFactory::map_add (boost::shared_ptr<Region> r)
 		region_map.insert (p);
 	}
 
-	r->DropReferences.connect_same_thread (region_list_connections, boost::bind (&RegionFactory::map_remove, r));
+	r->DropReferences.connect_same_thread (region_list_connections, boost::bind (&RegionFactory::map_remove, boost::weak_ptr<Region> (r)));
 
 	r->PropertyChanged.connect_same_thread (
 		region_list_connections,
@@ -332,8 +332,13 @@ RegionFactory::map_add (boost::shared_ptr<Region> r)
 }
 
 void
-RegionFactory::map_remove (boost::shared_ptr<Region> r)
+RegionFactory::map_remove (boost::weak_ptr<Region> w)
 {
+	boost::shared_ptr<Region> r = w.lock ();
+	if (!r) {
+		return;
+	}
+	
 	Glib::Mutex::Lock lm (region_map_lock);
 	RegionMap::iterator i = region_map.find (r->id());
 
