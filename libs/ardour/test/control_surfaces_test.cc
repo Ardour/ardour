@@ -7,16 +7,16 @@ CPPUNIT_TEST_SUITE_REGISTRATION (ControlSurfacesTest);
 using namespace std;
 using namespace ARDOUR;
 
+/** Instantiate and then immediately tear down all our control surfaces.
+ *  This is to check that there are no crashes when doing this ...
+ */
 void
 ControlSurfacesTest::instantiateAndTeardownTest ()
 {
-	cout << "HELLO!\n";
 	_session->new_audio_track (1, 2, Normal, 0, 1, "Test");
 	
 	ControlProtocolManager& m = ControlProtocolManager::instance ();
-	cout << "CST: Test " << m.control_protocol_info.size() << "\n";
 	for (list<ControlProtocolInfo*>::iterator i = m.control_protocol_info.begin(); i != m.control_protocol_info.end(); ++i) {
-		cout << "CST: Test " << (*i)->name << "\n";
 		m.instantiate (**i);
 		m.teardown (**i);
 	}
