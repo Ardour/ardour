@@ -720,8 +720,8 @@ ExportDialog::export_toc_file (Locations::LocationList& locations, const string&
 				if ((*i)->cd_info.find("performer") != (*i)->cd_info.end()) {
 					out << "     PERFORMER \"" << (*i)->cd_info["performer"]  << "\"" << endl;
 				}
-				if ((*i)->cd_info.find("string_composer") != (*i)->cd_info.end()) {
-					out  << "     COMPOSER \"" << (*i)->cd_info["string_composer"] << "\"" << endl;
+				if ((*i)->cd_info.find("composer") != (*i)->cd_info.end()) {
+					out  << "     COMPOSER \"" << (*i)->cd_info["composer"] << "\"" << endl;
 				}
 				
 				if ((*i)->cd_info.find("isrc") != (*i)->cd_info.end()) {			  
@@ -934,8 +934,8 @@ ExportDialog::export_cue_file (Locations::LocationList& locations, const string&
 					out << "    PERFORMER \"" <<  (*i)->cd_info["performer"] << "\"" << endl;
 				}
 				
-				if ((*i)->cd_info.find("string_composer") != (*i)->cd_info.end()) {
-					out << "    SONGWRITER \"" << (*i)->cd_info["string_composer"]  << "\"" << endl;
+				if ((*i)->cd_info.find("composer") != (*i)->cd_info.end()) {
+					out << "    SONGWRITER \"" << (*i)->cd_info["composer"]  << "\"" << endl;
 				}
 
 				/* only print "Index 00" if not at the same position as "Index 01" */
