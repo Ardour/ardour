@@ -309,7 +309,7 @@ AutomationList::extend_to (double when)
 void AutomationList::_x_scale (double factor)
 {
 	for (AutomationList::iterator i = events.begin(); i != events.end(); ++i) {
-		(*i)->when = floor ((*i)->when * factor);
+		(*i)->when *= factor;
 	}
 
 	mark_dirty ();
