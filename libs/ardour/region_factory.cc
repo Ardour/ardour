@@ -347,25 +347,6 @@ RegionFactory::map_remove (boost::weak_ptr<Region> w)
 	}
 }
 
-void
-RegionFactory::map_remove_with_equivalents (boost::shared_ptr<Region> r)
-{
-	Glib::Mutex::Lock lm (region_map_lock);
-
-	for (RegionMap::iterator i = region_map.begin(); i != region_map.end(); ) {
-		RegionMap::iterator tmp = i;
-		++tmp;
-
-		if (r->region_list_equivalent (i->second)) {
-			region_map.erase (i);
-		} else if (r == i->second) {
-			region_map.erase (i);
-		}
-
-		i = tmp;
-	}
-}
-
 boost::shared_ptr<Region>
 RegionFactory::region_by_id (const PBD::ID& id)
 {
