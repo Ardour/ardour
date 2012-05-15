@@ -536,8 +536,6 @@ def configure(conf):
     if Options.options.also_libdir != '':
         conf.env.append_value('LDFLAGS', '-L' + Options.options.also_libdir)
 
-    autowaf.check_header(conf, 'cxx', 'boost/signals2.hpp', mandatory = True)
-
     if Options.options.boost_sp_debug:
         conf.env.append_value('CXXFLAGS', '-DBOOST_SP_ENABLE_DEBUG_HOOKS')
 

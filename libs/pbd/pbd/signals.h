@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Paul Davis 
+    Copyright (C) 2009-2012 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -26,13 +26,71 @@
 #include <boost/noncopyable.hpp>
 #include <boost/bind.hpp>
 #include <boost/bind/protect.hpp>
+#include <boost/function.hpp>
+#include <boost/thread/mutex.hpp>
+#include <boost/enable_shared_from_this.hpp>
+#include <boost/optional.hpp>
 
 #include "pbd/event_loop.h"
-#include "pbd/signal.h"
 
 namespace PBD {
 
+class Connection;
+
+class SignalBase
+{
+public:
+	virtual ~SignalBase () {}
+	virtual void disconnect (boost::shared_ptr<Connection>) = 0;
+
+protected:
+	boost::mutex _mutex;
+};
+
+class Connection : public boost::enable_shared_from_this<Connection>
+{
+public:
+	Connection (SignalBase* b) : _signal (b) {}
+
+	void disconnect ()
+	{
+		boost::mutex::scoped_lock lm (_mutex);
+		if (_signal) {
+			_signal->disconnect (shared_from_this ());
+		} 
+	}
+
+	void signal_going_away ()
+	{
+		boost::mutex::scoped_lock lm (_mutex);
+		_signal = 0;
+	}
+
+private:
+	boost::mutex _mutex;
+	SignalBase* _signal;
+};
+
+template<typename R>
+class OptionalLastValue
+{
+public:
+	typedef boost::optional<R> result_type;
+
+	template <typename Iter>
+	result_type operator() (Iter first, Iter last) const {
+		result_type r;
+		while (first != last) {
+			r = *first;
+			++first;
+		}
+
+		return r;
+	}
+};
+	
 typedef boost::shared_ptr<Connection> UnscopedConnection;
+	
 class ScopedConnection
 {
 public:
@@ -94,364 +152,7 @@ class ScopedConnectionList  : public boost::noncopyable
 	ConnectionList _list;
 };
 
-template<typename R>
-class Signal0 {
-public:
-    typedef SimpleSignal0<R> SignalType;
-	
-    Signal0 () : _signal (SignalType::create ()) {}
-
-    /** Arrange for @a slot to be executed whenever this signal is emitted. 
-	Store the connection that represents this arrangement in @a c.
-
-	NOTE: @a slot will be executed in the same thread that the signal is
-	emitted in.
-    */
-
-    void connect_same_thread (ScopedConnection& c, 
-		  const typename SignalType::slot_function_type& slot) {
-	    c = _signal->connect (slot);
-    }
-
-    /** Arrange for @a slot to be executed whenever this signal is emitted. 
-	Add the connection that represents this arrangement to @a clist.
-
-	NOTE: @a slot will be executed in the same thread that the signal is
-	emitted in.
-    */
-	
-    void connect_same_thread (ScopedConnectionList& clist, 
-		  const typename SignalType::slot_function_type& slot) {
-	    clist.add_connection (_signal->connect (slot));
-    }
-
-    /** Arrange for @a slot to be executed in the context of @a event_loop
-	whenever this signal is emitted. Add the connection that represents
-	this arrangement to @a clist.
-	
-	If the event loop/thread in which @a slot will be executed will
-	outlive the lifetime of any object referenced in @a slot,
-	then an InvalidationRecord should be passed, allowing
-	any request sent to the @a event_loop and not executed
-	before the object is destroyed to be marked invalid.
-	
-	"outliving the lifetime" doesn't have a specific, detailed meaning,
-	but is best illustrated by two contrasting examples:
-	
-	1) the main GUI event loop/thread - this will outlive more or 
-	less all objects in the application, and thus when arranging for
-	@a slot to be called in that context, an invalidation record is 
-	highly advisable.
-	
-	2) a secondary event loop/thread which will be destroyed along
-	with the objects that are typically referenced by @a slot.
-	Assuming that the event loop is stopped before the objects are
-	destroyed, there is no reason to pass in an invalidation record,
-	and MISSING_INVALIDATOR may be used.
-    */
-
-    void connect (ScopedConnectionList& clist, 
-                  PBD::EventLoop::InvalidationRecord* ir, 
-		  const typename SignalType::slot_function_type& slot,
-		  PBD::EventLoop* event_loop) {
-	    if (ir) {
-		    ir->event_loop = event_loop;
-	    }
-	    clist.add_connection (_signal->connect (boost::bind (&EventLoop::call_slot, event_loop, ir, slot)));
-    }
-
-    /** See notes for the ScopedConnectionList variant of this function. This
-     * differs in that it stores the connection to the signal in a single
-     * ScopedConnection rather than a ScopedConnectionList.
-     */
-
-    void connect (ScopedConnection& c, 
-                  PBD::EventLoop::InvalidationRecord* ir, 
-		  const typename SignalType::slot_function_type& slot,
-		  PBD::EventLoop* event_loop) {
-	    if (ir) {
-		    ir->event_loop = event_loop;
-	    }
-	    c = _signal->connect (boost::bind (&EventLoop::call_slot, event_loop, ir, slot));
-    }
-
-    /** Emit this signal. This will cause all slots connected to it be executed
-	in the order that they were connected (cross-thread issues may alter
-	the precise execution time of cross-thread slots).
-    */
-    
-    typename SignalType::result_type operator()() {
-	    return _signal->emit ();
-    }
-
-    /** Return true if there is nothing connected to this signal, false
-     *  otherwise.
-     */
-
-    bool empty() const { return _signal->empty(); }
-    
-private:
-   boost::shared_ptr<SignalType> _signal;
-};
-
-template<typename R, typename A, typename C = OptionalLastValue<R> >
-class Signal1 {
-public:
-    typedef SimpleSignal1<R, A, C> SignalType;
-    Signal1 () : _signal (SignalType::create()) {}
-
-    void connect_same_thread (ScopedConnectionList& clist, 
-		  const typename SignalType::slot_function_type& slot) {
-	    clist.add_connection (_signal->connect (slot));
-    }
-
-    void connect_same_thread (ScopedConnection& c, 
-		     const typename SignalType::slot_function_type& slot) {
-	    c = _signal->connect (slot);
-    }
-
-    static void compositor (typename boost::function<void(A)> f, EventLoop* event_loop, EventLoop::InvalidationRecord* ir, A arg) {
-	    event_loop->call_slot (ir, boost::bind (f, arg));
-    }
-
-    void connect (ScopedConnectionList& clist, 
-                  PBD::EventLoop::InvalidationRecord* ir, 
-		  const typename SignalType::slot_function_type& slot,
-		  PBD::EventLoop* event_loop) {
-	    if (ir) {
-		    ir->event_loop = event_loop;
-	    }
-	    clist.add_connection (_signal->connect (boost::bind (&compositor, slot, event_loop, ir, _1)));
-    }
-
-    void connect (ScopedConnection& c, 
-                  PBD::EventLoop::InvalidationRecord* ir, 
-		  const typename SignalType::slot_function_type& slot,
-		  PBD::EventLoop* event_loop) {
-	    if (ir) {
-		    ir->event_loop = event_loop;
-	    }
-	    c = _signal->connect (boost::bind (&compositor, slot, event_loop, ir, _1));
-
-    }
-    
-    typename SignalType::result_type operator()(A arg1) {
-	    return _signal->emit (arg1);
-    }
-    
-    bool empty() const { return _signal->empty(); }
-
-private:
-    boost::shared_ptr<SignalType> _signal;
-};
-
-template<typename R, typename A1, typename A2>
-class Signal2 {
-public:
-    typedef SimpleSignal2<R, A1, A2> SignalType;
-    Signal2 () : _signal (SignalType::create()) {}
-
-    void connect_same_thread (ScopedConnectionList& clist, 
-		  const typename SignalType::slot_function_type& slot) {
-	    clist.add_connection (_signal->connect (slot));
-    }
-
-    void connect_same_thread (ScopedConnection& c, 
-		     const typename SignalType::slot_function_type& slot) {
-	    c = _signal->connect (slot);
-    }
-
-    static void compositor (typename boost::function<void(A1,A2)> f, PBD::EventLoop* event_loop, 
-                            EventLoop::InvalidationRecord* ir,
-                            A1 arg1, A2 arg2) {
-	    event_loop->call_slot (ir, boost::bind (f, arg1, arg2));
-    }
-
-    void connect (ScopedConnectionList& clist, 
-                  PBD::EventLoop::InvalidationRecord* ir, 
-		  const typename SignalType::slot_function_type& slot,
-		  PBD::EventLoop* event_loop) {
-	    if (ir) {
-		    ir->event_loop = event_loop;
-	    }
-	    clist.add_connection (_signal->connect (boost::bind (&compositor, slot, event_loop, ir, _1, _2)));
-    }
-
-    void connect (ScopedConnection& c, 
-                  PBD::EventLoop::InvalidationRecord* ir, 
-		  const typename SignalType::slot_function_type& slot,
-		  PBD::EventLoop* event_loop) {
-	    if (ir) {
-		    ir->event_loop = event_loop;
-	    }
-	    c = _signal->connect (boost::bind (&compositor, slot, event_loop, ir, _1, _2));
-    }
-
-    typename SignalType::result_type operator()(A1 arg1, A2 arg2) {
-	    return _signal->emit (arg1, arg2);
-    }
-    
-    bool empty() const { return _signal->empty(); }
-
-private:
-    boost::shared_ptr<SignalType> _signal;
-};
-
-template<typename R, typename A1, typename A2, typename A3>
-class Signal3 {
-public:
-    typedef SimpleSignal3<R, A1, A2, A3> SignalType;
-    Signal3 () : _signal (SignalType::create()) {}
-
-    void connect_same_thread (ScopedConnectionList& clist, 
-		  const typename SignalType::slot_function_type& slot) {
-	    clist.add_connection (_signal->connect (slot));
-    }
-
-    void connect_same_thread (ScopedConnection& c, 
-			      const typename SignalType::slot_function_type& slot) {
-	    c = _signal->connect (slot);
-    }
-
-    static void compositor (typename boost::function<void(A1,A2,A3)> f, PBD::EventLoop* event_loop, 
-                            EventLoop::InvalidationRecord* ir, 
-                            A1 arg1, A2 arg2, A3 arg3) {
-	    event_loop->call_slot (ir, boost::bind (f, arg1, arg2, arg3));
-    }
-
-    void connect (ScopedConnectionList& clist, 
-                  PBD::EventLoop::InvalidationRecord* ir, 
-		  const typename SignalType::slot_function_type& slot,
-		  PBD::EventLoop* event_loop) {
-	    if (ir) {
-		    ir->event_loop = event_loop;
-	    }
-	    clist.add_connection (_signal->connect (boost::bind (&compositor, slot, event_loop, ir, _1, _2, _3)));
-    }
-    
-    void connect (ScopedConnection& c, 
-                  PBD::EventLoop::InvalidationRecord* ir, 
-		  const typename SignalType::slot_function_type& slot,
-		  PBD::EventLoop* event_loop) {
-	    if (ir) {
-		    ir->event_loop = event_loop;
-	    }
-	    c = _signal->connect (_signal->connect (boost::bind (&compositor, slot, event_loop, ir, _1, _2, _3)));
-    }
-    
-    typename SignalType::result_type operator()(A1 arg1, A2 arg2, A3 arg3) {
-	    return _signal->emit (arg1, arg2, arg3);
-    }
-    
-    bool empty() const { return _signal->empty(); }
-
-private:
-    boost::shared_ptr<SignalType> _signal;
-};
-
-template<typename R, typename A1, typename A2, typename A3, typename A4>
-class Signal4 {
-public:
-    typedef SimpleSignal4<R, A1, A2, A3, A4> SignalType;
-    Signal4 () : _signal (SignalType::create()) {}
-
-    void connect_same_thread (ScopedConnectionList& clist, 
-		  const typename SignalType::slot_function_type& slot) {
-	    clist.add_connection (_signal->connect (slot));
-    }
-
-    void connect_same_thread (ScopedConnection& c, 
-			      const typename SignalType::slot_function_type& slot) {
-	    c = _signal->connect (slot);
-    }
-
-    static void compositor (typename boost::function<void(A1,A2,A3)> f, PBD::EventLoop* event_loop, 
-                            EventLoop::InvalidationRecord* ir, 
-                            A1 arg1, A2 arg2, A3 arg3, A4 arg4) {
-	    event_loop->call_slot (ir, boost::bind (f, arg1, arg2, arg3, arg4));
-    }
-
-    void connect (ScopedConnectionList& clist, 
-                  PBD::EventLoop::InvalidationRecord* ir, 
-		  const typename SignalType::slot_function_type& slot,
-		  PBD::EventLoop* event_loop) {
-	    if (ir) {
-		    ir->event_loop = event_loop;
-	    }
-	    clist.add_connection (_signal->connect (boost::bind (&compositor, slot, event_loop, ir, _1, _2, _3, _4)));
-    }
-    
-    void connect (ScopedConnection& c, 
-                  PBD::EventLoop::InvalidationRecord* ir, 
-		  const typename SignalType::slot_function_type& slot,
-		  PBD::EventLoop* event_loop) {
-	    if (ir) {
-		    ir->event_loop = event_loop;
-	    }
-	    c = _signal->connect (_signal->connect (boost::bind (&compositor, slot, event_loop, ir, _1, _2, _3, _4)));
-    }
-    
-    typename SignalType::result_type operator()(A1 arg1, A2 arg2, A3 arg3, A4 arg4) {
-	    return _signal->emit (arg1, arg2, arg3, arg4);
-    }
-    
-    bool empty() const { return _signal->empty(); }
-
-private:
-    boost::shared_ptr<SignalType> _signal;
-};
-
-template<typename R, typename A1, typename A2, typename A3, typename A4, typename A5>
-class Signal5 {
-public:
-    typedef SimpleSignal5<R, A1, A2, A3, A4, A5> SignalType;
-    Signal5 () : _signal (SignalType::create()) {}
-
-    void connect_same_thread (ScopedConnectionList& clist, 
-		  const typename SignalType::slot_function_type& slot) {
-	    clist.add_connection (_signal->connect (slot));
-    }
-
-    void connect_same_thread (ScopedConnection& c, 
-			      const typename SignalType::slot_function_type& slot) {
-	    c = _signal->connect (slot);
-    }
-
-    static void compositor (typename boost::function<void(A1,A2,A3,A4,A5)> f, PBD::EventLoop* event_loop, 
-                            EventLoop::InvalidationRecord* ir, 
-                            A1 arg1, A2 arg2, A3 arg3, A4 arg4, A5 arg5) {
-	    event_loop->call_slot (ir, boost::bind (f, arg1, arg2, arg3, arg4, arg5));
-    }
-
-    void connect (ScopedConnectionList& clist, 
-                  PBD::EventLoop::InvalidationRecord* ir, 
-		  const typename SignalType::slot_function_type& slot,
-		  PBD::EventLoop* event_loop) {
-	    if (ir) {
-		    ir->event_loop = event_loop;
-	    }
-	    clist.add_connection (_signal->connect (boost::bind (&compositor, slot, event_loop, ir, _1, _2, _3, _4, _5)));
-    }
-    
-    void connect (ScopedConnection& c, 
-                  PBD::EventLoop::InvalidationRecord* ir, 
-		  const typename SignalType::slot_function_type& slot,
-		  PBD::EventLoop* event_loop) {
-	    if (ir) {
-		    ir->event_loop = event_loop;
-	    }
-	    c = _signal->connect (_signal->connect (boost::bind (&compositor, slot, event_loop, ir, _1, _2, _3, _4, _5)));
-    }
-    
-    typename SignalType::result_type operator()(A1 arg1, A2 arg2, A3 arg3, A4 arg4, A5 arg5) {
-	    return _signal->emit (arg1, arg2, arg3, arg4, arg5);
-    }
-    
-    bool empty() const { return _signal->empty(); }
-
-private:
-    boost::shared_ptr<SignalType> _signal;
-};
+#include "pbd/signals_generated.h"	
 	
 } /* namespace */
 
