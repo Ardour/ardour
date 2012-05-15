@@ -22,8 +22,6 @@
 
 using namespace PBD;
 
-Glib::StaticMutex ScopedConnectionList::_lock = GLIBMM_STATIC_MUTEX_INIT;
-
 ScopedConnectionList::ScopedConnectionList()
 {
 }

@@ -130,12 +130,7 @@ class ScopedConnectionList  : public boost::noncopyable
 	/* this class is not copyable */
 	ScopedConnectionList(const ScopedConnectionList&);
 
-	/* this lock is shared by all instances of a ScopedConnectionList.
-	   We do not want one mutex per list, and since we only need the lock
-	   when adding or dropping connections, which are generally occuring
-	   in object creation and UI operations, the contention on this 
-	   lock is low and not of significant consequence. Even though
-	   boost::signals2 is thread-safe, this additional list of
+	/* Even though our signals code is thread-safe, this additional list of
 	   scoped connections needs to be protected in 2 cases:
 
 	   (1) (unlikely) we make a connection involving a callback on the
@@ -146,7 +141,7 @@ class ScopedConnectionList  : public boost::noncopyable
 	       one from another.
 	 */
 
-	static Glib::StaticMutex _lock;
+	Glib::Mutex _lock;
 
 	typedef std::list<ScopedConnection*> ConnectionList;
 	ConnectionList _list;
