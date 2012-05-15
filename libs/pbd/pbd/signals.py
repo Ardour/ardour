@@ -66,6 +66,14 @@ def signal(f, n, v):
     for a in An:
         an.append(a.lower())
 
+    # If the template is fully specialized, use of typename SomeTypedef::iterator is illegal
+    # in c++03 (should use just SomeTypedef::iterator) [although use of typename is ok in c++0x]
+    # http://stackoverflow.com/questions/6076015/typename-outside-of-template
+    if n == 0 and v:
+        typename = ""
+    else:
+        typename = "typename "
+
     if v:
         print >>f,"template <%s>" % comma_separated(An, "typename ")
         print >>f,"class Signal%d<%s> : public SignalBase" % (n, comma_separated(["void"] + An))
@@ -94,19 +102,14 @@ def signal(f, n, v):
 
     print >>f,"public:"
     print >>f,""
-    print >>f,"\t~Signal%d () {" % n,
+    print >>f,"\t~Signal%d () {" % n
 
-    print >>f,"""
-		boost::mutex::scoped_lock lm (_mutex);
-#if __GNUC__ > 4 || (__GNUC__ == 4 && (__GNUC_MINOR__ >= 6))                                                                      
-                for (typename Slots::iterator i = _slots.begin(); i != _slots.end(); ++i) {                                                 
-#else                                                                                                                             
-                for (Slots::iterator i = _slots.begin(); i != _slots.end(); ++i) {                                                          
-#endif                                                                                                                               
-			i->first->signal_going_away ();
-		}
-	}
-"""
+    print >>f,"\t\tboost::mutex::scoped_lock lm (_mutex);"
+    print >>f,"\t\tfor (%sSlots::iterator i = _slots.begin(); i != _slots.end(); ++i) {" % typename
+
+    print >>f,"\t\t\ti->first->signal_going_away ();"
+    print >>f,"\t\t}"
+    print >>f,"\t}"
 
     if n == 0:
         p = ""
@@ -115,7 +118,7 @@ def signal(f, n, v):
         p = ", %s" % comma_separated(Anan)
         q = ", %s" % comma_separated(an)
     
-    print >>f,"\tstatic void compositor (typename boost::function<void(%s)> f, EventLoop* event_loop, EventLoop::InvalidationRecord* ir%s) {" % (comma_separated(An), p)
+    print >>f,"\tstatic void compositor (%sboost::function<void(%s)> f, EventLoop* event_loop, EventLoop::InvalidationRecord* ir%s) {" % (typename, comma_separated(An), p)
     print >>f,"\t\tevent_loop->call_slot (ir, boost::bind (f%s));" % q
     print >>f,"\t}"
 
@@ -227,17 +230,7 @@ def signal(f, n, v):
     print >>f,"\t\t}"
     if not v:
         print >>f,"\t\tstd::list<R> r;"
-    if n == 0 and v:
-        print >>f,"""
-#if __GNUC__ > 4 || (__GNUC__ == 4 && (__GNUC_MINOR__ >= 6))                                                                      
-                for (typename Slots::iterator i = s.begin(); i != s.end(); ++i) {                                                 
-#else                                                                                                                             
-                for (Slots::iterator i = s.begin(); i != s.end(); ++i) {                                                          
-#endif                                                                                                                               
-"""
-    else:
-        print >>f,"\t\tfor (typename Slots::iterator i = s.begin(); i != s.end(); ++i) {"
-
+    print >>f,"for (%sSlots::iterator i = s.begin(); i != s.end(); ++i) {" % typename
     print >>f,"""
 			bool still_there = false;
 			{
