@@ -2013,7 +2013,7 @@ ARDOUR_UI::snapshot_session (bool switch_to_it)
 		
 		time (&n);
 		localtime_r (&n, &local_time);
-		strftime (timebuf, sizeof(timebuf), "%FT%T", &local_time);
+		strftime (timebuf, sizeof(timebuf), "%FT%H.%M.%S", &local_time);
 		
 		prompter.set_initial_text (timebuf);
 	}
@@ -2032,6 +2032,12 @@ ARDOUR_UI::snapshot_session (bool switch_to_it)
 			if (snapname.find ('\\') != string::npos) {
 				MessageDialog msg (_("To ensure compatibility with various systems\n"
 						     "snapshot names may not contain a '\\' character"));
+				msg.run ();
+				goto again;
+			}
+			if (snapname.find (':') != string::npos) {
+				MessageDialog msg (_("To ensure compatibility with various systems\n"
+						     "snapshot names may not contain a ':' character"));
 				msg.run ();
 				goto again;
 			}
