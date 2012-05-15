@@ -117,7 +117,7 @@ PlaylistReadTest::overlappingReadTest ()
 	/* ar1's fade in with faded-out ar0 */
 	for (int i = 0; i < 64; ++i) {
 		/* Similar carry-on to above with float rounding */
-		float const from_ar0 = (128 + i) * float (1 - float (i / (double) 63));
+		float const from_ar0 = (128 + i) * float (1 - (i / (double) 63));
 		float const from_ar1 = i * float (i / (double) 63);
 		CPPUNIT_ASSERT_DOUBLES_EQUAL (from_ar0 + from_ar1, _buf[i + 128], 1e-16);
 	}
@@ -147,12 +147,13 @@ PlaylistReadTest::transparentReadTest ()
 
 	_apl->read (_buf, _mbuf, _gbuf, 0, 1024, 0);
 
-	/* ar0 and ar1 fade-ins; ar1 is on top, so its fade in will implicitly
-	   fade in ar0
+	/* ar0 and ar1 fade-ins; ar1 is on top, but it is transparent, so
+	   its fade in will not affect ar0; ar0 will just fade in by itself,
+	   and the two will be mixed.
 	*/
 	for (int i = 0; i < 64; ++i) {
 		float const fade = i / (double) 63;
-		float const ar0 = i * fade * (1 - fade);
+		float const ar0 = i * fade;
 		float const ar1 = i * fade;
 		CPPUNIT_ASSERT_DOUBLES_EQUAL (ar0 + ar1, _buf[i], 1e-16);
 	}
@@ -162,10 +163,13 @@ PlaylistReadTest::transparentReadTest ()
 		CPPUNIT_ASSERT_DOUBLES_EQUAL (float (i * 2), _buf[i], 1e-16);
 	}
 
-	/* ar0 and ar1 fade-outs, mixed (with implicit fade-in of ar0) */
+	/* ar0 and ar1 fade-outs, mixed */
 	for (int i = (1024 - 64); i < 1024; ++i) {
-		float const fade = (1023 - i) / (double) 63;
-		float const ar0 = i * fade * (1 - fade);
+		/* Ardour fades out from 1 to VERY_SMALL_SIGNAL, which is 0.0000001,
+		   so this fade out expression is a little long-winded.
+		*/
+		float const fade = (((double) 1 - 0.0000001) / 63) * (1023 - i) + 0.0000001;
+		float const ar0 = i * fade;
 		float const ar1 = i * fade;
 		CPPUNIT_ASSERT_DOUBLES_EQUAL (ar0 + ar1, _buf[i], 1e-16);
 	}
