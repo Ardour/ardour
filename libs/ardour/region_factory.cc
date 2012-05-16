@@ -321,7 +321,7 @@ RegionFactory::map_add (boost::shared_ptr<Region> r)
 		region_map.insert (p);
 	}
 
-	r->DropReferences.connect_same_thread (region_list_connections, boost::bind (&RegionFactory::map_remove, r));
+	r->DropReferences.connect_same_thread (region_list_connections, boost::bind (&RegionFactory::map_remove, boost::weak_ptr<Region> (r)));
 
 	r->PropertyChanged.connect_same_thread (
 		region_list_connections,
@@ -332,32 +332,18 @@ RegionFactory::map_add (boost::shared_ptr<Region> r)
 }
 
 void
-RegionFactory::map_remove (boost::shared_ptr<Region> r)
+RegionFactory::map_remove (boost::weak_ptr<Region> w)
 {
+	boost::shared_ptr<Region> r = w.lock ();
+	if (!r) {
+		return;
+	}
+	
 	Glib::Mutex::Lock lm (region_map_lock);
 	RegionMap::iterator i = region_map.find (r->id());
 
 	if (i != region_map.end()) {
 		region_map.erase (i);
-	}
-}
-
-void
-RegionFactory::map_remove_with_equivalents (boost::shared_ptr<Region> r)
-{
-	Glib::Mutex::Lock lm (region_map_lock);
-
-	for (RegionMap::iterator i = region_map.begin(); i != region_map.end(); ) {
-		RegionMap::iterator tmp = i;
-		++tmp;
-
-		if (r->region_list_equivalent (i->second)) {
-			region_map.erase (i);
-		} else if (r == i->second) {
-			region_map.erase (i);
-		}
-
-		i = tmp;
 	}
 }
 

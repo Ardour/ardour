@@ -22,15 +22,12 @@
 
 using namespace PBD;
 
-Glib::StaticMutex ScopedConnectionList::_lock = GLIBMM_STATIC_MUTEX_INIT;
-
 ScopedConnectionList::ScopedConnectionList()
 {
 }
 
 ScopedConnectionList::~ScopedConnectionList()
 {
-	std::cout << "~ScopedConnectionList " << this << " " << PBD::demangled_name (*this) << "\n";
 	drop_connections ();
 }
 
