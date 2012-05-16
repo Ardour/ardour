@@ -230,25 +230,30 @@ public:
 	friend class Session;
 
   protected:
-	struct RegionLock {
-		RegionLock (Playlist *pl, bool do_block_notify = true) : playlist (pl), block_notify (do_block_notify) {
-			if (!playlist->region_lock.trylock()) {
-				std::cerr << "Lock for playlist " << pl->name() << " already held\n";
-				PBD::stacktrace (std::cerr, 10);
-			}	
-			if (block_notify) {
-				playlist->delay_notifications();
-			}
-		}
-		~RegionLock() {
-			playlist->region_lock.unlock();
-			if (block_notify) {
-				playlist->release_notifications ();
-			}
-		}
-		Playlist *playlist;
-		bool block_notify;
-	};
+    struct RegionReadLock : public Glib::RWLock::ReaderLock {
+        RegionReadLock (Playlist *pl) : Glib::RWLock::ReaderLock (pl->region_lock) {}
+        ~RegionReadLock() { Glib::RWLock::ReaderLock::release (); }
+    };
+
+    struct RegionWriteLock : public Glib::RWLock::WriterLock {
+	    RegionWriteLock (Playlist *pl, bool do_block_notify = true) 
+                    : Glib::RWLock::WriterLock (pl->region_lock)
+                    , playlist (pl)
+                    , block_notify (do_block_notify) {
+                    if (block_notify) {
+                            playlist->delay_notifications();
+                    }
+            }
+
+        ~RegionWriteLock() {
+                Glib::RWLock::WriterLock::release ();
+                if (block_notify) {
+                        playlist->release_notifications ();
+                }
+        }
+        Playlist *playlist;
+        bool block_notify;
+    };
 
 	RegionListProperty   regions;  /* the current list of regions in the playlist */
 	std::set<boost::shared_ptr<Region> > all_regions; /* all regions ever added to this playlist */
@@ -365,8 +370,9 @@ public:
 	virtual void pre_uncombine (std::vector<boost::shared_ptr<Region> >&, boost::shared_ptr<Region>) {}
 
   private:
-	friend class RegionLock;
-	mutable Glib::Mutex region_lock;
+	friend class RegionReadLock;
+	friend class RegionWriteLock;
+	mutable Glib::RWLock region_lock;
 
   private:
 	void setup_layering_indices (RegionList const &);
