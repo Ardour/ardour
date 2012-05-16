@@ -712,6 +712,11 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	bool _feedback_exists;
 
 	void resize_text_widgets ();
+
+#ifdef USE_SOUNDGRID
+        void soundgrid_init ();
+#endif
+
 };
 
 #endif /* __ardour_gui_h__ */

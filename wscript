@@ -542,10 +542,20 @@ def configure(conf):
             print ('No Carbon support available for this build\n')
 
     if Options.options.soundgrid:
-        conf.env.append_value ('CXXFLAGS_SOUNDGRID', [ '-D__MACOS__', '-DUSE_SOUNDGRID', '-I/Volumes/Work/paul/ardour/3.0-SG/soundgrid' ])
-        conf.env.append_value ('CFLAGS_SOUNDGRID', [ '-D__MACOS__', '-DUSE_SOUNDGRID', '-I/Volumes/Work/paul/ardour/3.0-SG/soundgrid' ])
-        sglib = ''.join ([ '-L', os.path.expanduser ('/Volumes/Work/paul/ardour/3.0-SG/soundgrid') ])
-        conf.env.append_value ('LINKFLAGS_SOUNDGRID', [ sglib, '-lmixerapplicationcore' ])
+        conf.env.append_value ('CXXFLAGS_SOUNDGRID', 
+                               [ '-D__MACOS__', 
+                                 '-DUSE_SOUNDGRID', 
+                                 '-I/Volumes/Work/paul/ardour/3.0-SG/soundgrid', 
+                                 '-I/Volumes/Work/paul/ardour/3.0-SG/soundgrid/WavesPublicAPI/WavesMixerAPI/1.0',
+                                 '-I/Volumes/Work/paul/ardour/3.0-SG/soundgrid/WavesPublicAPI/1.0',
+                                 ])
+        conf.env.append_value ('CFLAGS_SOUNDGRID', 
+                               [ '-D__MACOS__', 
+                                 '-DUSE_SOUNDGRID', 
+                                 '-I/Volumes/Work/paul/ardour/3.0-SG/soundgrid', 
+                                 '-I/Volumes/Work/paul/ardour/3.0-SG/soundgrid/WavesPublicAPI/WavesMixerAPI/1.0',
+                                 '-I/Volumes/Work/paul/ardour/3.0-SG/soundgrid/WavesPublicAPI/1.0',
+                                 ])
         conf.check_cxx (header_name='WavesPublicAPI/WavesMixerAPI/1.0/WavesMixerAPI.h', 
                         mandatory=True, use='SOUNDGRID')
         conf.define('HAVE_SOUNDGRID', 1)

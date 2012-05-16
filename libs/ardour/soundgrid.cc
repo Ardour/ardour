@@ -18,28 +18,35 @@
 */
 
 #include <dlfcn.h>
+#include <iostream>
+
+#include <WavesPublicAPI/WCMixerCore_API.h>
 
 #include "ardour/soundgrid.h"
 
 #ifdef __APPLE__
-const char* sndgrid_dll_name = "sndgrid.dylib";
+const char* sndgrid_dll_name = "mixerapplicationcore.dylib";
 #else
-const char* sndgrid_dll_name = "sndgrid.so";
+const char* sndgrid_dll_name = "mixerapplicationcore.so";
 #endif
 
 using namespace ARDOUR;
 using std::vector;
 using std::string;
+using std::cerr;
+using std::endl;
 
 SoundGrid* SoundGrid::_instance = 0;
 
 SoundGrid::SoundGrid ()
 	: dl_handle (0)
 {
+        cerr << "Loading " << sndgrid_dll_name << endl;
 	if ((dl_handle = dlopen (sndgrid_dll_name, RTLD_NOW)) == 0) {
+                cerr << "...failed\n";
 		return;
 	}
-
+        cerr << "...worked\n";
 }
 
 SoundGrid::~SoundGrid()
@@ -47,6 +54,28 @@ SoundGrid::~SoundGrid()
 	if (dl_handle) {
 		dlclose (dl_handle);
 	}
+}
+
+int
+SoundGrid::initialize (void* window_handle)
+{
+        WTErr ret;
+        ret = InitializeMixerCoreDLL (window_handle, sg_callback, &_sg);
+        cerr << "Initialized SG core, ret = " << ret << endl;
+        return 0;
+}
+
+int
+SoundGrid::teardown ()
+{
+        WTErr retval = eNoErr;
+
+        if (_sg) {
+                retval = UnInitializeMixerCoreDLL (_sg);
+                _sg = 0;
+	}
+
+        return retval == eNoErr ? 0 : -1;
 }
 
 SoundGrid&
@@ -141,4 +170,22 @@ uint32_t
 SoundGrid::current_network_buffer_size ()
 {
 	return 256;
+}
+
+/* callback */
+WTErr 
+SoundGrid::_sg_callback (const WSControlID* cid)
+{
+        return SoundGrid::instance().sg_callback (cid);
+}
+
+WTErr
+SoundGrid::sg_callback (const WSControlID* cid)
+{
+        cerr << "SG Callback, cluster " << cid->clusterID.clusterType << " (index " 
+             << cid->clusterID.clusterTypeIndex
+             << ") control " << cid->clusterControlID.controlType
+             << " (index " << cid->clusterControlID.controlTypeIndex << ')'
+             << endl;
+        return eNoErr;
 }

@@ -24,6 +24,9 @@
 #include <string>
 #include <boost/utility.hpp>
 
+#include <WavesPublicAPI/WTErr.h>
+#include <WavesPublicAPI/WavesMixerAPI/1.0/WavesMixerAPI.h>
+
 #include "ardour/ardour.h"
 
 namespace ARDOUR {
@@ -32,6 +35,9 @@ class SoundGrid : public boost::noncopyable
 {
   public:
 	~SoundGrid ();
+
+        int initialize (void* window_handle);
+        int teardown ();
 
 	static SoundGrid& instance();
 	static bool available ();
@@ -64,11 +70,15 @@ class SoundGrid : public boost::noncopyable
   private:
 	SoundGrid ();
 	static SoundGrid* _instance;
-
+        
 	void* dl_handle;
-	
+	void* _sg; // handle managed by SoundGrid library
+
 	void display_update ();
 	static void _display_update ();
+
+        static WTErr _sg_callback (const WSControlID* pControlID);
+        static WTErr sg_callback (const WSControlID* pControlID);
 };
 
 } // namespace ARDOUR

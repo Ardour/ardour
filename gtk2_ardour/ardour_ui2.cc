@@ -603,6 +603,10 @@ ARDOUR_UI::editor_realized ()
 	boost::function<void (string)> pc (boost::bind (&ARDOUR_UI::parameter_changed, this, _1));
 	Config->map_parameters (pc);
 
+#ifdef USE_SOUNDGRID
+        soundgrid_init ();
+#endif
+
 	reset_dpi ();
 }
 
