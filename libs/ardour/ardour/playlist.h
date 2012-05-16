@@ -232,7 +232,7 @@ public:
   protected:
     struct RegionReadLock : public Glib::RWLock::ReaderLock {
         RegionReadLock (Playlist *pl) : Glib::RWLock::ReaderLock (pl->region_lock) {}
-        ~RegionReadLock() { Glib::RWLock::ReaderLock::release (); }
+        ~RegionReadLock() {}
     };
 
     struct RegionWriteLock : public Glib::RWLock::WriterLock {
