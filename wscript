@@ -328,9 +328,9 @@ def set_compiler_flags (conf,opt):
                 conf.env.append_value('LINKFLAGS', ["-arch", "x86_64", "-arch", "i386", "-arch", "ppc"])
     else:
         if opt.generic:
-            conf.env.append_value('CFLAGS', ['-mtune=generic'])
-            conf.env.append_value('CXXFLAGS', ['-mtune=generic'])
-            conf.env.append_value('LINKFLAGS', ['-mtune=generic'])
+            conf.env.append_value('CFLAGS', ['-arch', 'i386'])
+            conf.env.append_value('CXXFLAGS', ['-arch', 'i386'])
+            conf.env.append_value('LINKFLAGS', ['-arch', 'i386'])
 
     #
     # warnings flags
@@ -410,7 +410,7 @@ def options(opt):
     opt.add_option('--universal', action='store_true', default=False, dest='universal',
                     help='Compile as universal binary (OS X ONLY, requires that external libraries are universal)')
     opt.add_option('--generic', action='store_true', default=False, dest='generic',
-                    help='Compile with -march=generic')
+                    help='Compile with -arch i386 (OS X ONLY)')
     opt.add_option('--versioned', action='store_true', default=False, dest='versioned',
                     help='Add revision information to executable name inside the build directory')
     opt.add_option('--windows-vst', action='store_true', default=False, dest='windows_vst',
@@ -568,12 +568,6 @@ def configure(conf):
     autowaf.check_pkg(conf, 'giomm-2.4', uselib_store='GIOMM', atleast_version='2.2')
     autowaf.check_pkg(conf, 'libcurl', uselib_store='CURL', atleast_version='7.0.0')
 
-    for i in children:
-        sub_config_and_use(conf, i)
-
-    # Fix utterly braindead FLAC include path to not smash assert.h
-    conf.env['INCLUDES_FLAC'] = []
-
     conf.check_cc(function_name='dlopen', header_name='dlfcn.h', linkflags='-ldl', uselib_store='DL')
 
     # Tell everyone that this is a waf build
@@ -628,6 +622,12 @@ def configure(conf):
         conf.env['BUILD_TESTS'] = False
 
     set_compiler_flags (conf, Options.options)
+
+    for i in children:
+        sub_config_and_use(conf, i)
+
+    # Fix utterly braindead FLAC include path to not smash assert.h
+    conf.env['INCLUDES_FLAC'] = []
 
     config_text = open('libs/ardour/config_text.cc', "w")
     config_text.write('''#include "ardour/ardour.h"
