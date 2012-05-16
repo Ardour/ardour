@@ -66,7 +66,7 @@ AudioPlaylist::AudioPlaylist (boost::shared_ptr<const AudioPlaylist> other, stri
 AudioPlaylist::AudioPlaylist (boost::shared_ptr<const AudioPlaylist> other, framepos_t start, framecnt_t cnt, string name, bool hidden)
 	: Playlist (other, start, cnt, name, hidden)
 {
-	RegionLock rlock2 (const_cast<AudioPlaylist*> (other.get()));
+	RegionReadLock rlock2 (const_cast<AudioPlaylist*> (other.get()));
 	in_set_state++;
 
 	framepos_t const end = start + cnt - 1;
@@ -186,7 +186,7 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, fr
 	   its OK to block (for short intervals).
 	*/
 
-	Playlist::RegionLock rl (this, false);
+	Playlist::RegionReadLock rl (this);
 
 	/* Find all the regions that are involved in the bit we are reading,
 	   and sort them by descending layer and ascending position.
@@ -437,7 +437,7 @@ AudioPlaylist::destroy_region (boost::shared_ptr<Region> region)
 	bool changed = false;
 
 	{
-		RegionLock rlock (this);
+		RegionWriteLock rlock (this);
 
 		for (RegionList::iterator i = regions.begin(); i != regions.end(); ) {
 

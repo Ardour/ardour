@@ -1,6 +1,6 @@
 /*
     Copyright (C) 2009-2012 Paul Davis 
-
+    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -57,7 +57,8 @@ public:
 		boost::mutex::scoped_lock lm (_mutex);
 		if (_signal) {
 			_signal->disconnect (shared_from_this ());
-		} 
+			_signal = 0;
+		}
 	}
 
 	void signal_going_away ()

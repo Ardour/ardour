@@ -153,7 +153,7 @@ def set_compiler_flags (conf,opt):
                 conf.env['build_target'] = 'x86_64'
             elif re.search("i[0-5]86", cpu) != None:
                 conf.env['build_target'] = 'i386'
-            elif re.search("powerpc", config_cpu) != None:
+            elif re.search("powerpc", cpu) != None:
                 conf.env['build_target'] = 'powerpc'
             else:
                 conf.env['build_target'] = 'i686'
@@ -413,7 +413,7 @@ def options(opt):
     opt.add_option('--universal', action='store_true', default=False, dest='universal',
                     help='Compile as universal binary (OS X ONLY, requires that external libraries are universal)')
     opt.add_option('--generic', action='store_true', default=False, dest='generic',
-                    help='Compile with -march=generic')
+                    help='Compile with -arch i386 (OS X ONLY)')
     opt.add_option('--versioned', action='store_true', default=False, dest='versioned',
                     help='Add revision information to executable name inside the build directory')
     opt.add_option('--windows-vst', action='store_true', default=False, dest='windows_vst',

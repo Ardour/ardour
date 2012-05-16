@@ -36,7 +36,7 @@ PBD::Signal1<void,Controllable*> Controllable::DeleteBinding;
 
 Glib::StaticRWLock Controllable::registry_lock = GLIBMM_STATIC_RW_LOCK_INIT;
 Controllable::Controllables Controllable::registry;
-PBD::ScopedConnectionList registry_connections;
+PBD::ScopedConnectionList* registry_connections = 0;
 const std::string Controllable::xml_node_name = X_("Controllable");
 
 Controllable::Controllable (const string& name, Flag f)
@@ -55,9 +55,13 @@ Controllable::add (Controllable& ctl)
 	Glib::RWLock::WriterLock lm (registry_lock);
 	registry.insert (&ctl);
 
+	if (!registry_connections) {
+		registry_connections = new ScopedConnectionList;
+	}
+
 	/* Controllable::remove() is static - no need to manage this connection */
 
-	ctl.DropReferences.connect_same_thread (registry_connections, boost::bind (&Controllable::remove, &ctl));
+	ctl.DropReferences.connect_same_thread (*registry_connections, boost::bind (&Controllable::remove, &ctl));
 }
 
 void

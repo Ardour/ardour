@@ -41,7 +41,7 @@ using namespace std;
 PBD::Signal1<void,boost::shared_ptr<Region> > RegionFactory::CheckNewRegion;
 Glib::StaticMutex                             RegionFactory::region_map_lock;
 RegionFactory::RegionMap                      RegionFactory::region_map;
-PBD::ScopedConnectionList                     RegionFactory::region_list_connections;
+PBD::ScopedConnectionList*                    RegionFactory::region_list_connections = 0;
 Glib::StaticMutex                             RegionFactory::region_name_map_lock;
 std::map<std::string, uint32_t>               RegionFactory::region_name_map;
 RegionFactory::CompoundAssociations           RegionFactory::_compound_associations;
@@ -321,12 +321,12 @@ RegionFactory::map_add (boost::shared_ptr<Region> r)
 		region_map.insert (p);
 	}
 
-	r->DropReferences.connect_same_thread (region_list_connections, boost::bind (&RegionFactory::map_remove, boost::weak_ptr<Region> (r)));
+	if (!region_list_connections) {
+		region_list_connections = new ScopedConnectionList;
+	}
 
-	r->PropertyChanged.connect_same_thread (
-		region_list_connections,
-		boost::bind (&RegionFactory::region_changed, _1, boost::weak_ptr<Region> (r))
-		);
+	r->DropReferences.connect_same_thread (*region_list_connections, boost::bind (&RegionFactory::map_remove, boost::weak_ptr<Region> (r)));
+	r->PropertyChanged.connect_same_thread (*region_list_connections, boost::bind (&RegionFactory::region_changed, _1, boost::weak_ptr<Region> (r)));
 
 	update_region_name_map (r);
 }
@@ -384,7 +384,9 @@ RegionFactory::region_by_name (const std::string& name)
 void
 RegionFactory::clear_map ()
 {
-	region_list_connections.drop_connections ();
+	if (region_list_connections) {
+		region_list_connections->drop_connections ();
+	}
 
 	{
 		Glib::Mutex::Lock lm (region_map_lock);

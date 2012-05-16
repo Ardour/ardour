@@ -124,7 +124,7 @@ public:
 	static std::map<std::string, uint32_t> region_name_map;
 	static void update_region_name_map (boost::shared_ptr<Region>);
 
-	static PBD::ScopedConnectionList region_list_connections;
+	static PBD::ScopedConnectionList* region_list_connections;
 	static CompoundAssociations _compound_associations;
 };
 

@@ -620,35 +620,41 @@ AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 	 */
 
 	if (fade_in_limit != 0) {
-		if (_inverse_fade_in) {
 
-			/* explicit inverse fade in curve (e.g. for constant
-			 * power), so we have to fetch it.
-			 */
-
-			_inverse_fade_in->curve().get_vector (internal_offset, internal_offset + fade_in_limit, gain_buffer, fade_in_limit);
-
-			/* Fade the data from lower layers out */
-			for (framecnt_t n = 0; n < fade_in_limit; ++n) {
-				buf[n] *= gain_buffer[n];
+		if (opaque()) {
+			if (_inverse_fade_in) {
+				
+				/* explicit inverse fade in curve (e.g. for constant
+				 * power), so we have to fetch it.
+				 */
+				
+				_inverse_fade_in->curve().get_vector (internal_offset, internal_offset + fade_in_limit, gain_buffer, fade_in_limit);
+				
+				/* Fade the data from lower layers out */
+				for (framecnt_t n = 0; n < fade_in_limit; ++n) {
+					buf[n] *= gain_buffer[n];
+				}
+				
+				/* refill gain buffer with the fade in */
+				
+				_fade_in->curve().get_vector (internal_offset, internal_offset + fade_in_limit, gain_buffer, fade_in_limit);
+				
+			} else {
+				
+				/* no explicit inverse fade in, so just use (1 - fade
+				 * in) for the fade out of lower layers
+				 */
+				
+				_fade_in->curve().get_vector (internal_offset, internal_offset + fade_in_limit, gain_buffer, fade_in_limit);
+				
+				for (framecnt_t n = 0; n < fade_in_limit; ++n) {
+					buf[n] *= 1 - gain_buffer[n];
+				}
 			}
-
-			/* refill gain buffer with the fade in */
-
-			_fade_in->curve().get_vector (internal_offset, internal_offset + fade_in_limit, gain_buffer, fade_in_limit);
-
 		} else {
-
-			/* no explicit inverse fade in, so just use (1 - fade
-			 * in) for the fade out of lower layers
-			 */
-
 			_fade_in->curve().get_vector (internal_offset, internal_offset + fade_in_limit, gain_buffer, fade_in_limit);
-
-			for (framecnt_t n = 0; n < fade_in_limit; ++n) {
-				buf[n] *= 1 - gain_buffer[n];
-			}
 		}
+
 
 		/* Mix our newly-read data in, with the fade */
 		for (framecnt_t n = 0; n < fade_in_limit; ++n) {
@@ -660,30 +666,34 @@ AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 
 		framecnt_t const curve_offset = fade_interval_start - (_length - _fade_out->back()->when);
 
-		if (_inverse_fade_out) {
-
-			_inverse_fade_out->curve().get_vector (curve_offset, curve_offset + fade_out_limit, gain_buffer, fade_out_limit);
-
-			/* Fade the data from lower levels out */
-			for (framecnt_t n = 0, m = fade_out_offset; n < fade_out_limit; ++n, ++m) {
-				buf[m] *= gain_buffer[n];
+		if (opaque()) {
+			if (_inverse_fade_out) {
+				
+				_inverse_fade_out->curve().get_vector (curve_offset, curve_offset + fade_out_limit, gain_buffer, fade_out_limit);
+				
+				/* Fade the data from lower levels out */
+				for (framecnt_t n = 0, m = fade_out_offset; n < fade_out_limit; ++n, ++m) {
+					buf[m] *= gain_buffer[n];
+				}
+				
+				/* fetch the actual fade out */
+				
+				_fade_out->curve().get_vector (curve_offset, curve_offset + fade_out_limit, gain_buffer, fade_out_limit);
+				
+			} else {
+				
+				/* no explicit inverse fade out, so just use (1 - fade
+				 * out) for the fade in of lower layers
+				 */
+				
+				_fade_out->curve().get_vector (curve_offset, curve_offset + fade_out_limit, gain_buffer, fade_out_limit);
+				
+				for (framecnt_t n = 0, m = fade_out_offset; n < fade_out_limit; ++n, ++m) {
+					buf[m] *= 1 - gain_buffer[n];
+				}
 			}
-
-			/* fetch the actual fade out */
-
-			_fade_out->curve().get_vector (curve_offset, curve_offset + fade_out_limit, gain_buffer, fade_out_limit);
-
 		} else {
-			
-			/* no explicit inverse fade out, so just use (1 - fade
-			 * out) for the fade in of lower layers
-			 */
-
 			_fade_out->curve().get_vector (curve_offset, curve_offset + fade_out_limit, gain_buffer, fade_out_limit);
-		
-			for (framecnt_t n = 0, m = fade_out_offset; n < fade_out_limit; ++n, ++m) {
-				buf[m] *= 1 - gain_buffer[n];
-			}
 		}
 
 		/* Mix our newly-read data out, with the fade */
