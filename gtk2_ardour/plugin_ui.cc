@@ -526,7 +526,6 @@ PlugUIBase::plugin_going_away ()
 	/* drop references to the plugin/insert */
 	insert.reset ();
 	plugin.reset ();
-	death_connection.disconnect ();
 }
 
 void
