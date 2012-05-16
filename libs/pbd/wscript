@@ -55,7 +55,7 @@ def configure(conf):
 
 def build(bld):
     
-    # Make signal.h using signal.h.py
+    # Make signals_generated.h using signals.py
     bld(rule = 'python ${SRC} ${TGT}', source = 'pbd/signals.py', target = 'pbd/signals_generated.h')
 
     # Library
