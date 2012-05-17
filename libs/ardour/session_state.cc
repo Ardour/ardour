@@ -925,7 +925,7 @@ Session::load_state (string snapshot_name)
 		/* no version implies very old version of Ardour */
 		Stateful::loading_state_version = 1000;
 	} else {
-		if (prop->value().find ('.')) {
+		if (prop->value().find ('.') != string::npos) {
 			/* old school version format */
 			if (prop->value()[0] == '2') {
 				Stateful::loading_state_version = 2000;
