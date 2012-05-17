@@ -228,17 +228,17 @@ Editor::register_actions ()
 		reg_sens (editor_actions, a.c_str(), n.c_str(), sigc::bind (sigc::mem_fun (*this, &Editor::goto_nth_marker), i - 1));
 	}
 
-	reg_sens (editor_actions, "jump-forward-to-mark", _("Jump Later to Mark"), sigc::mem_fun(*this, &Editor::jump_forward_to_mark));
-	reg_sens (editor_actions, "jump-backward-to-mark", _("Jump Earlier to Mark"), sigc::mem_fun(*this, &Editor::jump_backward_to_mark));
+	reg_sens (editor_actions, "jump-forward-to-mark", _("Jump to Next Mark"), sigc::mem_fun(*this, &Editor::jump_forward_to_mark));
+	reg_sens (editor_actions, "jump-backward-to-mark", _("Jump to Previous Mark"), sigc::mem_fun(*this, &Editor::jump_backward_to_mark));
 	reg_sens (editor_actions, "add-location-from-playhead", _("Add Mark from Playhead"), sigc::mem_fun(*this, &Editor::add_location_from_playhead_cursor));
 
 	reg_sens (editor_actions, "nudge-next-forward", _("Nudge Next Later"), sigc::bind (sigc::mem_fun(*this, &Editor::nudge_forward), true, false));
 	reg_sens (editor_actions, "nudge-next-backward", _("Nudge Next Earlier"), sigc::bind (sigc::mem_fun(*this, &Editor::nudge_backward), true, false));
 
-	reg_sens (editor_actions, "nudge-playhead-forward", _("Nudge Playhead Later"), sigc::bind (sigc::mem_fun(*this, &Editor::nudge_forward), false, true));
-	reg_sens (editor_actions, "nudge-playhead-backward", _("Nudge Playhead Earlier"), sigc::bind (sigc::mem_fun(*this, &Editor::nudge_backward), false, true));
-	reg_sens (editor_actions, "playhead-forward-to-grid", _("Later to Grid"), sigc::mem_fun(*this, &Editor::playhead_forward_to_grid));
-	reg_sens (editor_actions, "playhead-backward-to-grid", _("Earlier to Grid"), sigc::mem_fun(*this, &Editor::playhead_backward_to_grid));
+	reg_sens (editor_actions, "nudge-playhead-forward", _("Nudge Playhead Forward"), sigc::bind (sigc::mem_fun(*this, &Editor::nudge_forward), false, true));
+	reg_sens (editor_actions, "nudge-playhead-backward", _("Nudge Playhead Backward"), sigc::bind (sigc::mem_fun(*this, &Editor::nudge_backward), false, true));
+	reg_sens (editor_actions, "playhead-forward-to-grid", _("Playhead To Next Grid"), sigc::mem_fun(*this, &Editor::playhead_forward_to_grid));
+	reg_sens (editor_actions, "playhead-backward-to-grid", _("Playhead To Previous Grid"), sigc::mem_fun(*this, &Editor::playhead_backward_to_grid));
 
 	reg_sens (editor_actions, "temporal-zoom-out", _("Zoom Out"), sigc::bind (sigc::mem_fun(*this, &Editor::temporal_zoom_step), true));
 	reg_sens (editor_actions, "temporal-zoom-in", _("Zoom In"), sigc::bind (sigc::mem_fun(*this, &Editor::temporal_zoom_step), false));
@@ -264,13 +264,13 @@ Editor::register_actions ()
 	act = reg_sens (editor_actions, "step-tracks-down", _("Step Tracks Down"), sigc::mem_fun(*this, &Editor::scroll_tracks_down_line));
 	ActionManager::track_selection_sensitive_actions.push_back (act);
 
-	reg_sens (editor_actions, "scroll-backward", _("Scroll Earlier"), sigc::bind (sigc::mem_fun(*this, &Editor::scroll_backward), 0.8f));
-	reg_sens (editor_actions, "scroll-forward", _("Scroll Later"), sigc::bind (sigc::mem_fun(*this, &Editor::scroll_forward), 0.8f));
+	reg_sens (editor_actions, "scroll-backward", _("Scroll Backward"), sigc::bind (sigc::mem_fun(*this, &Editor::scroll_backward), 0.8f));
+	reg_sens (editor_actions, "scroll-forward", _("Scroll Forward"), sigc::bind (sigc::mem_fun(*this, &Editor::scroll_forward), 0.8f));
 	reg_sens (editor_actions, "center-playhead", _("Center Playhead"), sigc::mem_fun(*this, &Editor::center_playhead));
 	reg_sens (editor_actions, "center-edit-cursor", _("Center Edit Point"), sigc::mem_fun(*this, &Editor::center_edit_point));
 
-	reg_sens (editor_actions, "scroll-playhead-forward", _("Playhead Later"), sigc::bind (sigc::mem_fun(*this, &Editor::scroll_playhead), true));;
-	reg_sens (editor_actions, "scroll-playhead-backward", _("Playhead Earlier"), sigc::bind (sigc::mem_fun(*this, &Editor::scroll_playhead), false));
+	reg_sens (editor_actions, "scroll-playhead-forward", _("Playhead Forward"), sigc::bind (sigc::mem_fun(*this, &Editor::scroll_playhead), true));;
+	reg_sens (editor_actions, "scroll-playhead-backward", _("Playhead Backward"), sigc::bind (sigc::mem_fun(*this, &Editor::scroll_playhead), false));
 
 	reg_sens (editor_actions, "playhead-to-edit", _("Playhead to Active Mark"), sigc::bind (sigc::mem_fun(*this, &Editor::cursor_align), true));
 	reg_sens (editor_actions, "edit-to-playhead", _("Active Mark to Playhead"), sigc::bind (sigc::mem_fun(*this, &Editor::cursor_align), false));
