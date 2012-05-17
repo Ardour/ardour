@@ -17,6 +17,7 @@ export LD_LIBRARY_PATH=$libs/audiographer:$libs/vamp-sdk:$libs/surfaces:$libs/su
 
 export ARDOUR_PANNER_PATH=$libs/panners/2in2out:$libs/panners/1in2out:$libs/panners/vbap
 export ARDOUR_SURFACES_PATH=$libs/surfaces/osc:$libs/surfaces/generic_midi:$libs/surfaces/tranzport:$libs/surfaces/powermate:$libs/surfaces/mackie
+export ARDOUR_MCP_PATH="../mcp"
 
 if [ "$1" == "--debug" ]; then
         gdb ./libs/ardour/run-tests
