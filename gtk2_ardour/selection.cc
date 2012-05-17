@@ -1025,6 +1025,7 @@ Selection::set (ControlPoint* cp)
 		cp->line().nth (i)->set_selected (false);
 	}
 
+	clear_points ();
 	add (cp);
 }
 
