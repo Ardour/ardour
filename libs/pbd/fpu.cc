@@ -80,7 +80,7 @@ FPU::FPU ()
 		   supported, otherwise, it isn't.
 		*/
 		
-#ifdef NO_POSIX_MEMALIGN
+#ifndef HAVE_POSIX_MEMALIGN
 		fxbuf = (char **) malloc (sizeof (char *));
 		assert (fxbuf);
 		*fxbuf = (char *) malloc (512);
