@@ -455,16 +455,21 @@ def configure(conf):
         print('Please use a different version or re-configure with --debug')
         exit (1)
 
-    if sys.platform == 'darwin':
+    # libintl may or may not be trivially locatable. On OS X this is always
+    # true. On Linux it will depend on whether we're on a normal Linux distro,
+    # in which case libintl.h is going to be available in /usr/include and
+    # the library itself is part of glibc, or on a bare-bones build system
+    # where we need to pick it up from the GTK dependency stack.
+    #
+    if not os.path.isfile ('/usr/include/libintl.h'):
+        # XXXX hack hack hack
+        prefinclude = ''.join ([ '-I', os.path.expanduser ('~/gtk/inst/include') ])
+        preflib = ''.join ([ '-L', os.path.expanduser ('~/gtk/inst/lib') ])
+        conf.env.append_value('CFLAGS', [ prefinclude ])
+        conf.env.append_value('CXXFLAGS',  [prefinclude ])
+        conf.env.append_value('LINKFLAGS', [ preflib ])
 
-        # libintl may or may not be trivially locatable
-        if not os.path.isfile ('/usr/include/libintl.h'):
-            # XXXX hack hack hack
-            prefinclude = ''.join ([ '-I', os.path.expanduser ('~/gtk/inst/include') ])
-            preflib = ''.join ([ '-L', os.path.expanduser ('~/gtk/inst/lib') ])
-            conf.env.append_value('CFLAGS', [ prefinclude ])
-            conf.env.append_value('CXXFLAGS',  [prefinclude ])
-            conf.env.append_value('LINKFLAGS', [ preflib ])
+    if sys.platform == 'darwin':
 
         # this is required, potentially, for anything we link and then relocate into a bundle
         conf.env.append_value('LINKFLAGS', [ '-Xlinker', '-headerpad_max_install_names' ])
@@ -479,12 +484,6 @@ def configure(conf):
         conf.define ('TOP_MENUBAR',1)
         conf.define ('GTKOSX',1)
 
-        #
-        # need this on OS X to pick up long long variants of several math functions
-        #
-
-        conf.env.append_value('CXXFLAGS_APPLEUTILITY', '-I../libs')
-        #
         #       Define OSX as a uselib to use when compiling
         #       on Darwin to add all applicable flags at once
         #
@@ -493,10 +492,13 @@ def configure(conf):
         conf.env.append_value('CXXFLAGS_OSX', '-mmacosx-version-min=10.4')
         conf.env.append_value('CFLAGS_OSX', '-mmacosx-version-min=10.4')
 
+        # It would be nice to be able to use this to force back-compatibility with 10.4
+        # but even by the time of 11, the 10.4 SDK is no longer available in any normal
+        # way.
+        #
         #conf.env.append_value('CXXFLAGS_OSX', "-isysroot /Developer/SDKs/MacOSX10.4u.sdk")
         #conf.env.append_value('CFLAGS_OSX', "-isysroot /Developer/SDKs/MacOSX10.4u.sdk")
-        #conf.env.append_value('LINKFLAGS_OSX', "-isysroot /Developer/SDKs/MacOSX10.4u.sdk")
-
+        #conf.env.append_value('LINKFLAGS_OSX', "-sysroot /Developer/SDKs/MacOSX10.4u.sdk")
         #conf.env.append_value('LINKFLAGS_OSX', "-sysroot /Developer/SDKs/MacOSX10.4u.sdk")
 
         conf.env.append_value('CXXFLAGS_OSX', "-msse")
