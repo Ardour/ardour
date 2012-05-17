@@ -447,6 +447,9 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 	{
 		chooser.set_border_width (12);
 
+		audio_and_midi_filter.add_custom (FILE_FILTER_FILENAME, sigc::mem_fun (*this, &SoundFileBrowser::on_audio_and_midi_filter));
+		audio_and_midi_filter.set_name (_("Audio and MIDI files"));
+
 		audio_filter.add_custom (FILE_FILTER_FILENAME, sigc::mem_fun(*this, &SoundFileBrowser::on_audio_filter));
 		audio_filter.set_name (_("Audio files"));
 
@@ -456,6 +459,7 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 		matchall_filter.add_pattern ("*.*");
 		matchall_filter.set_name (_("All files"));
 
+		chooser.add_filter (audio_and_midi_filter);
 		chooser.add_filter (audio_filter);
 		chooser.add_filter (midi_filter);
 		chooser.add_filter (matchall_filter);
@@ -698,6 +702,12 @@ bool
 SoundFileBrowser::on_midi_filter (const FileFilter::Info& filter_info)
 {
 	return SMFSource::safe_midi_file_extension (filter_info.filename);
+}
+
+bool
+SoundFileBrowser::on_audio_and_midi_filter (const FileFilter::Info& filter_info)
+{
+	return on_audio_filter (filter_info) || on_midi_filter (filter_info);
 }
 
 void

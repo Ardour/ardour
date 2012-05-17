@@ -182,6 +182,7 @@ class SoundFileBrowser : public ArdourDialog
   protected:
 	bool resetting_ourselves;
 
+	Gtk::FileFilter audio_and_midi_filter;
 	Gtk::FileFilter audio_filter;
 	Gtk::FileFilter midi_filter;
 	Gtk::FileFilter custom_filter;
@@ -216,6 +217,7 @@ class SoundFileBrowser : public ArdourDialog
 
 	bool on_audio_filter (const Gtk::FileFilter::Info& filter_info);
 	bool on_midi_filter (const Gtk::FileFilter::Info& filter_info);
+	bool on_audio_and_midi_filter (const Gtk::FileFilter::Info& filter_info);
 
 	virtual bool reset_options() { return true; }
 
