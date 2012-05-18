@@ -72,9 +72,7 @@ ActionManager::init ()
 
 	ui_manager = UIManager::create ();
 
-	SearchPath spath = ardour_search_path() + user_config_directory() + system_config_search_path();
-
-	find_file_in_search_path (spath, "ardour.menus", ui_file);
+	find_file_in_search_path (ardour_config_search_path(), "ardour.menus", ui_file);
 
 	bool loaded = false;
 

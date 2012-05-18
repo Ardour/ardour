@@ -84,7 +84,7 @@ RCConfiguration::load_state ()
 
 	/* load system configuration first */
 
-	if (find_file_in_search_path (ardour_search_path() + system_config_search_path(), "ardour_system.rc", system_rc_file)) {
+	if (find_file_in_search_path (ardour_config_search_path(), "ardour_system.rc", system_rc_file)) {
 		string rcfile = system_rc_file.to_string();
 
 		/* stupid XML Parser hates empty files */
@@ -115,7 +115,7 @@ RCConfiguration::load_state ()
 
 	sys::path user_rc_file;
 
-	if (find_file_in_search_path (ardour_search_path() + user_config_directory(), "ardour.rc", user_rc_file)) {
+	if (find_file_in_search_path (ardour_config_search_path(), "ardour.rc", user_rc_file)) {
 		string rcfile = user_rc_file.to_string();
 
 		/* stupid XML parser hates empty files */

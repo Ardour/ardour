@@ -17,10 +17,11 @@
 
 */
 #include <cstdlib>
+#include <iostream>
 
 #include "pbd/error.h"
 #include "pbd/compose.h"
-#include "pbd/filesystem_paths.h"
+#include "pbd/strsplit.h"
 
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>
@@ -90,38 +91,72 @@ user_config_directory ()
 }
 
 sys::path
-ardour_module_directory ()
+ardour_dll_directory ()
 {
-	sys::path module_directory(MODULE_DIR);
-	module_directory /= "ardour3";
-	return module_directory;
+	std::string s = Glib::getenv("ARDOUR_DLL_PATH");
+	if (s.empty()) {
+		std::cerr << _("ARDOUR_CONFIG_PATH not set in environment - exiting\n");
+		::exit (1);
+	}	
+	return sys::path (s);
 }
 
 SearchPath
-ardour_search_path ()
+ardour_config_search_path ()
 {
-	SearchPath spath_env(Glib::getenv("ARDOUR_PATH"));
-	return spath_env;
+	static bool have_path = false;
+	static SearchPath search_path;
+
+	if (!have_path) {
+		SearchPath sp (user_config_directory());
+		
+		std::string s = Glib::getenv("ARDOUR_CONFIG_PATH");
+		if (s.empty()) {
+			std::cerr << _("ARDOUR_CONFIG_PATH not set in environment - exiting\n");
+			::exit (1);
+		}
+		
+		std::vector<string> ss;
+		split (s, ss, ':');
+		for (std::vector<string>::iterator i = ss.begin(); i != ss.end(); ++i) {
+			sp += sys::path (*i);
+		}
+		
+		search_path = sp;
+		have_path = true;
+		std::cerr << "CONFIG PATH: " << search_path.to_string() << std::endl;
+	}
+
+	return search_path;
 }
 
 SearchPath
-system_config_search_path ()
+ardour_data_search_path ()
 {
-	SearchPath config_path(system_config_directories());
+	static bool have_path = false;
+	static SearchPath search_path;
 
-	config_path.add_subdirectory_to_paths("ardour3");
+	if (!have_path) {
+		SearchPath sp (user_config_directory());
+		
+		std::string s = Glib::getenv("ARDOUR_DATA_PATH");
+		if (s.empty()) {
+			std::cerr << _("ARDOUR_DATA_PATH not set in environment - exiting\n");
+			::exit (1);
+		}
+		
+		std::vector<string> ss;
+		split (s, ss, ':');
+		for (std::vector<string>::iterator i = ss.begin(); i != ss.end(); ++i) {
+			sp += sys::path (*i);
+		}
+		
+		search_path = sp;
+		have_path = true;
+		std::cerr << "DATA PATH: " << search_path.to_string() << std::endl;
+	}
 
-	return config_path;
-}
-
-SearchPath
-system_data_search_path ()
-{
-	SearchPath data_path(system_data_directories());
-
-	data_path.add_subdirectory_to_paths("ardour3");
-
-	return data_path;
+	return search_path;
 }
 
 } // namespace ARDOUR

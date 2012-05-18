@@ -114,7 +114,7 @@ system_midi_map_search_path ()
 		return spath_env;
 	}
 
-	SearchPath spath (system_data_search_path());
+	SearchPath spath (ardour_data_search_path());
 	spath.add_subdirectory_to_paths(midi_map_dir_name);
 
 	// just return the first directory in the search path that exists

@@ -36,7 +36,7 @@ panner_search_path ()
 {
 	SearchPath spath (user_config_directory ());
 
-	spath += ardour_module_directory ();
+	spath += ardour_dll_directory ();
 	spath.add_subdirectory_to_paths(panner_dir_name);
 
 	bool panner_path_defined = false;

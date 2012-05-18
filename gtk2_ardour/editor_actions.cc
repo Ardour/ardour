@@ -643,13 +643,12 @@ Editor::load_bindings ()
         key_bindings.set_action_map (editor_action_map);
 
 	sys::path binding_file;
-	SearchPath spath = ardour_search_path() + user_config_directory() + system_config_search_path();
 
-	if (find_file_in_search_path (spath, "editor.bindings", binding_file)) {
+	if (find_file_in_search_path (ardour_config_search_path(), "editor.bindings", binding_file)) {
                 key_bindings.load (binding_file.to_string());
 		info << string_compose (_("Loaded editor bindings from %1"), binding_file.to_string()) << endmsg;
         } else {
-		error << string_compose (_("Could not find editor.bindings in search path %1"), spath.to_string()) << endmsg;
+		error << string_compose (_("Could not find editor.bindings in search path %1"), ardour_config_search_path().to_string()) << endmsg;
 	}
 }
 

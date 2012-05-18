@@ -79,7 +79,6 @@ def build(bld):
             epa.cc
             error.cc
             filesystem.cc
-            filesystem_paths.cc
             file_manager.cc
             file_utils.cc
             fpu.cc

@@ -35,6 +35,7 @@ children = [
         'templates',
         'export',
         'midi_maps',
+        'mcp',
         'manual'
 ]
 
@@ -737,11 +738,3 @@ def i18n_po(bld):
 def i18n_mo(bld):
     bld.recurse (i18n_children)
 
-def install_not_supported(bld):
-    print ('Installing Ardour 3 is currently unsupported. Run it via the command ./ardev from within the gtk2_ardour directory.')
-    sys.exit (1)
-
-from waflib import Build
-class install(Build.InstallContext):
-    cmd = 'install'
-    fun = 'install_not_supported'

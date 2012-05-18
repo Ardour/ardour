@@ -210,7 +210,7 @@ ControlProtocolManager::discover_control_protocols ()
 					    dylib_extension_pattern, cp_modules);
 
 	DEBUG_TRACE (DEBUG::ControlProtocols, 
-		     string_compose (_("looking for control protocols in %1"), control_protocol_search_path().to_string()));
+		     string_compose (_("looking for control protocols in %1\n"), control_protocol_search_path().to_string()));
 	
 	for (vector<sys::path>::iterator i = cp_modules.begin(); i != cp_modules.end(); ++i) {
 		control_protocol_discover ((*i).to_string());
@@ -222,12 +222,14 @@ ControlProtocolManager::control_protocol_discover (string path)
 {
 	ControlProtocolDescriptor* descriptor;
 
-	/* don't load shared objects that are just symlinks to the real thing.
+#ifdef __APPLE__
+	/* don't load OS X shared objects that are just symlinks to the real thing.
 	 */
 
-	if (Glib::file_test (path, Glib::FILE_TEST_IS_SYMLINK)) {
+	if (path.find (".dylib") && Glib::file_test (path, Glib::FILE_TEST_IS_SYMLINK)) {
 		return 0;
 	}
+#endif
 
 	if ((descriptor = get_descriptor (path)) != 0) {
 

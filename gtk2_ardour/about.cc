@@ -559,7 +559,7 @@ About::About ()
 
 	sys::path splash_file;
 
-	SearchPath spath(ardour_search_path() + system_data_search_path());
+	SearchPath spath(ardour_data_search_path());
 
 	if (find_file_in_search_path (spath, "splash.png", splash_file)) {
 		set_logo (Gdk::Pixbuf::create_from_file (splash_file.to_string()));
