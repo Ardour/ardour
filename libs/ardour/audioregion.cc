@@ -1875,12 +1875,20 @@ AudioRegion::get_single_other_xfade_region (bool start) const
 framecnt_t
 AudioRegion::verify_xfade_bounds (framecnt_t len, bool start)
 {
+	/* this is called from a UI to check on whether a new proposed
+	   length for an xfade is legal or not. it returns the legal
+	   length corresponding to @a len which may be shorter than or
+	   equal to @a len itself.
+	*/
+
 	boost::shared_ptr<Region> other = get_single_other_xfade_region (start);
 	framecnt_t maxlen;
 
 	if (!other) {
-		/* zero or > 2 regions here, don't care about len */
-		return len;
+		/* zero or > 2 regions here, don't care about len, but
+		   it can't be longer than the region itself.
+		 */
+		return min (length(), len);
 	}
 
 	/* we overlap a single region. clamp the length of an xfade to
@@ -1894,7 +1902,7 @@ AudioRegion::verify_xfade_bounds (framecnt_t len, bool start)
 		maxlen = last_frame() - other->earliest_possible_position();
 	}
 
-	return min (maxlen, len);
+	return min (length(), min (maxlen, len));
 		
 }
 
