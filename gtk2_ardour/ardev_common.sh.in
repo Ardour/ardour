@@ -23,7 +23,7 @@ export ARDOUR_MCP_PATH=$TOP/mcp:.
 # two also be set. the above settings will override them.
 #
 
-export ARDOUR_CONFIG_PATH=$TOP:$TOP/gtk2_ardour:../build:../build/gtk2_ardour
+export ARDOUR_CONFIG_PATH=$TOP:$TOP/gtk2_ardour:$TOP/build:$TOP/build/gtk2_ardour
 export ARDOUR_DLL_PATH=$libs
 
 if test -d $HOME/gtk/inst ; then
