@@ -317,12 +317,6 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization)
 	AUPluginInfo::load_cached_info ();
 #endif
 
-	/* Make VAMP look in our library ahead of anything else */
-
-	SearchPath sp (ardour_dll_directory());
-	sp.add_subdirectory_to_paths ("vamp");
-	setenv ("VAMP_PATH", sp.to_string().c_str(), 1);
-
 	setup_hardware_optimization (try_optimization);
 
 	SourceFactory::init ();
