@@ -150,10 +150,10 @@ Panners=$APPLIB/panners
 ExportFormats=$Shared/export
 Locale=$Shared/locale
 MidiMaps=$Shared/midi_maps
+PatchFiles=$Shared/patchfiles
 MackieControl=$Shared/mcp
 Modules=$Libraries/modules
 Loaders=$Libraries/loaders
-
 
 if [ x$PRINT_SYSDEPS != x ] ; then
 #
@@ -187,6 +187,7 @@ mkdir -p $Shared
 mkdir -p $Locale
 mkdir -p $Surfaces
 mkdir -p $MidiMaps
+mkdir -p $PatchFiles
 mkdir -p $MackieControl
 mkdir -p $ExportFormats
 mkdir -p $Panners
@@ -464,6 +465,13 @@ mv $Surfaces/libardourcp.so* $Libraries
 for x in $BUILD_ROOT/../midi_maps/*.map ; do
     cp "$x" $MidiMaps
     echo Copied MIDI map $x 
+done
+
+# MIDNAM Patch Files
+# got to be careful with names here
+for x in $BUILD_ROOT/../patchfiles/*.midnam ; do
+    cp "$x" $PatchFiles
+    echo Copied MIDNAM file "$x"
 done
 
 # MackieControl data

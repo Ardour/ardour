@@ -101,6 +101,7 @@ Plugins=$APPROOT/Plugins
 Surfaces=$APPROOT/Surfaces
 Panners=$APPROOT/Panners
 MidiMaps=$APPROOT/MidiMaps
+PatchFiles=$APPROOT/PatchFiles
 MCP=$APPROOT/MCP
 ExportFormats=$APPROOT/ExportFormats
 Templates=$APPROOT/Templates
@@ -291,12 +292,19 @@ cp $BUILD_ROOT/libs/clearlooks-newer/libclearlooks.dylib $Frameworks
 mkdir -p $Frameworks/clearlooks/engines
 (cd $Frameworks/clearlooks/engines && ln -s $BUILD_ROOT/libclearlooks.dylib libclearlooks.dylib && ln -s ../../libclearlooks.dylib libclearlooks.so)
 
+# Control Surface shared libraries
 cp $BUILD_ROOT/libs/surfaces/*/libardour_*.dylib $Surfaces
+# hack ... move libardour_cp back into Frameworks
+mv $Surfaces/libardourcp*.dylib $Frameworks
+
+# Export formats
 cp $BUILD_ROOT/libs/panners/*/lib*.dylib $Panners
 (cd ../../export && 
     for f in *.preset ; do 
 	echo ExportFormat: $f; cp "$f" ../tools/osx_packaging/$ExportFormats ; 
 done)
+
+# Session and Route templates
 (cd $BUILD_ROOT/../templates && \
     for f in * ; do 
 	if [ -d "$f" ] ; then
@@ -304,11 +312,26 @@ done)
 	fi
 done)
 
-# MIDI maps
-cp ../../midi_maps/*.map $MidiMaps
+# MidiMaps
+# got to be careful with names here
+for x in $BUILD_ROOT/../midi_maps/*.map ; do
+    cp "$x" $MidiMaps
+    echo Copied MIDI map $x 
+done
 
-# Mackie support files
-cp ../../mcp/*.{device,profile} $MCP
+# MIDNAM Patch Files
+# got to be careful with names here
+for x in $BUILD_ROOT/../patchfiles/*.midnam ; do
+    cp "$x" $PatchFiles
+    echo Copied MIDNAM file "$x"
+done
+
+# MackieControl data
+# got to be careful with names here
+for x in $BUILD_ROOT/../mcp/*.device $BUILD_ROOT/../mcp/*.profile ; do
+    cp "$x" $MCP
+    echo Copied Mackie Control file $x 
+done
 
 # VAMP plugins that we use
 cp $BUILD_ROOT/libs/vamp-plugins/libardourvampplugins.dylib $Frameworks
