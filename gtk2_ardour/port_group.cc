@@ -321,9 +321,12 @@ public:
 
 /** Gather ports from around the system and put them in this PortGroupList.
  *  @param type Type of ports to collect, or NIL for all types.
+ *  @param use_session_bundles true to use the session's non-user bundles.  Doing this will mean that
+ *  hardware ports will be gathered into stereo pairs, as the session sets up bundles for these pairs.
+ *  Not using the session bundles will mean that all hardware IO will be presented separately.
  */
 void
-PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inputs, bool allow_dups)
+PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inputs, bool allow_dups, bool use_session_bundles)
 {
 	clear ();
 
@@ -408,9 +411,12 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 		}
 	}
 
-	for (BundleList::iterator i = b->begin(); i != b->end(); ++i) {
-		if (boost::dynamic_pointer_cast<UserBundle> (*i) == 0 && (*i)->ports_are_inputs() == inputs) {
-			system->add_bundle (*i, allow_dups);
+	/* Only look for non-user bundles if instructed to do so */
+	if (use_session_bundles) {
+		for (BundleList::iterator i = b->begin(); i != b->end(); ++i) {
+			if (boost::dynamic_pointer_cast<UserBundle> (*i) == 0 && (*i)->ports_are_inputs() == inputs) {
+				system->add_bundle (*i, allow_dups);
+			}
 		}
 	}
 

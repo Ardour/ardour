@@ -623,6 +623,11 @@ PortMatrix::toggle_show_only_bundles ()
 	_show_only_bundles = !_show_only_bundles;
 
 	setup ();
+
+	/* The way in which hardware ports are grouped changes depending on the _show_only_bundles
+	   setting, so we need to set things up again now.
+	*/
+	setup_all_ports ();
 }
 
 pair<uint32_t, uint32_t>

@@ -118,7 +118,7 @@ IOSelector::setup_ports (int dim)
 
 	if (dim == _other) {
 
-		_ports[_other].gather (_session, type(), _find_inputs_for_io_outputs, false);
+		_ports[_other].gather (_session, type(), _find_inputs_for_io_outputs, false, show_only_bundles ());
 
 	} else {
 

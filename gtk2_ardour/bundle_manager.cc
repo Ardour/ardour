@@ -60,7 +60,7 @@ BundleEditorMatrix::setup_ports (int dim)
 		   otherwise in some cases the basic system IO ports may be hidden, making
 		   the bundle editor useless */
 
-		_ports[OTHER].gather (_session, DataType::NIL, _bundle->ports_are_inputs(), true);
+		_ports[OTHER].gather (_session, DataType::NIL, _bundle->ports_are_inputs(), true, show_only_bundles ());
 		_ports[OTHER].remove_bundle (_bundle);
 		_ports[OTHER].resume_signals ();
 	}
