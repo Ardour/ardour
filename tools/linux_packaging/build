@@ -195,6 +195,7 @@ mkdir -p $PatchFiles
 mkdir -p $MackieControl
 mkdir -p $ExportFormats
 mkdir -p $Panners
+mkdir -p $Templates
 mkdir -p $Shared/templates
 mkdir -p $Shared/doc
 
