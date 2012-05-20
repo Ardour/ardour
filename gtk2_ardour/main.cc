@@ -166,13 +166,7 @@ fixup_bundle_environment (int, char* [])
 	}
 	setenv ("PATH", path.c_str(), 1);
 
-	path = dir_path;
-	path += "/../Surfaces";
-	path += ':';
-	path += dir_path;
-	path += "/../Panners";
-
-	setenv ("ARDOUR_DLL_PATH", path.c_str(), 1);
+	export_search_path (dir_path, "ARDOUR_DLL_PATH", "/../Frameworks");
 
 	path += dir_path;
 	path += "/../Resources";
@@ -183,31 +177,15 @@ fixup_bundle_environment (int, char* [])
 	   machine-independent shared data.
 	*/
 
-	setenv ("ARDOUR_DATA_PATH", path.c_str(), 1);
-	setenv ("ARDOUR_CONFIG_PATH", path.c_str(), 1);
-	setenv ("ARDOUR_INSTANT_XML_PATH", path.c_str(), 1);
+	export_search_path (dir_path, "ARDOUR_DATA_PATH", "/../Resources");
+	export_search_path (dir_path, "ARDOUR_CONFIG_PATH", "/../Resources");
+	export_search_path (dir_path, "ARDOUR_INSTANT_XML_PATH", "/../Resources");
 
 	export_search_path (dir_path, "LADSPA_PATH", "/../Plugins");
 	export_search_path (dir_path, "VAMP_PATH", "/../Frameworks");
 
-	/* in theory these do not need to be set since they would be found
-	   using ARDOUR_DATA_PATH or ARDOUR_CONFIG_PATH suffixed by a suitable
-	   folder/directory name. However, the way we bundle Ardour on OS X
-	   uses Capitalized names for these folders which differs from
-	   the hard-coded folder/directory name. In addition each of them
-	   lives at the top level of the .app/Contents tree, rather
-	   than within Resources or Frameworks.
-	*/
-	
-	export_search_path (dir_path, "ARDOUR_PANNER_PATH", "/../Panners");
-	export_search_path (dir_path, "ARDOUR_SURFACES_PATH", "/../Surfaces");
-	export_search_path (dir_path, "ARDOUR_MIDIMAPS_PATH", "/../MidiMaps");
-	export_search_path (dir_path, "ARDOUR_MCP_PATH", "../MCP");
-	export_search_path (dir_path, "ARDOUR_EXPORT_FORMATS_PATH", "/../ExportFormats");
-
 	path = dir_path;
 	path += "/../Frameworks/clearlooks";
-
 	setenv ("GTK_PATH", path.c_str(), 1);
 
 	/* unset GTK_RC_FILES so that we only load the RC files that we define

@@ -97,17 +97,25 @@ APPDIR=${APPNAME}.app
 APPROOT=$APPDIR/Contents
 Frameworks=$APPROOT/Frameworks
 Resources=$APPROOT/Resources
-Plugins=$APPROOT/Plugins
-Surfaces=$APPROOT/Surfaces
-Panners=$APPROOT/Panners
-MidiMaps=$APPROOT/MidiMaps
-PatchFiles=$APPROOT/PatchFiles
-MCP=$APPROOT/MCP
-ExportFormats=$APPROOT/ExportFormats
-Templates=$APPROOT/Templates
-Shared=$Resources/share
-Etc=$Resources/etc
+#
+# Since this is OS X, don't try to distinguish between etc and shared
+# (machine dependent and independent data) - just put everything
+# into Resources.
+# 
+Shared=$Resources
+Etc=$Resources
 Locale=$Resources/locale
+#
+# Bundled Plugins live in a top level folder
+# 
+Plugins=$APPROOT/Plugins
+Surfaces=$Frameworks/surfaces
+Panners=$Frameworks/panners
+MidiMaps=$Shared/midi_maps
+ExportFormats=$Shared/export
+Templates=$Shared/templates
+PatchFiles=$Shared/patchfiles
+MCP=$Shared/mcp
 
 if [ x$PRINT_SYSDEPS != x ] ; then
 #

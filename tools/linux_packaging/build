@@ -144,16 +144,20 @@ APPLIB=$APPDIR/lib
 Libraries=$APPLIB
 Etc=$APPDIR/etc
 Shared=$APPDIR/share
+
 Plugins=$APPLIB/plugins
 Surfaces=$APPLIB/surfaces
 Panners=$APPLIB/panners
+
+Modules=$Libraries/modules
+Loaders=$Libraries/loaders
+
+Templates=$Shared/templates
 ExportFormats=$Shared/export
 Locale=$Shared/locale
 MidiMaps=$Shared/midi_maps
 PatchFiles=$Shared/patchfiles
 MackieControl=$Shared/mcp
-Modules=$Libraries/modules
-Loaders=$Libraries/loaders
 
 if [ x$PRINT_SYSDEPS != x ] ; then
 #
@@ -622,8 +626,9 @@ fi
 # share stuff
 
 cp -R ../../gtk2_ardour/splash.png $Shared
-# currently no templates
-#cp ../../templates/*.template $Shared/templates/
+
+# Templates
+cp ../../templates/*.template $Templates
 
 # go through and recursively remove any .svn dirs in the bundle
 for svndir in `find $APPDIR -name .svn -type d`; do
