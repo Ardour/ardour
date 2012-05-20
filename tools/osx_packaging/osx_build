@@ -308,15 +308,17 @@ mv $Surfaces/libardourcp*.dylib $Frameworks
 # Export formats
 cp $BUILD_ROOT/libs/panners/*/lib*.dylib $Panners
 (cd ../../export && 
-    for f in *.preset ; do 
-	echo ExportFormat: $f; cp "$f" ../tools/osx_packaging/$ExportFormats ; 
+    for f in *.preset *.format ; do 
+	echo ExportFormat: $f 
+        cp "$f" $ExportFormats ; 
 done)
 
 # Session and Route templates
 (cd $BUILD_ROOT/../templates && \
     for f in * ; do 
 	if [ -d "$f" ] ; then
-	    echo Template: $f ; cp -r "$f" ../tools/osx_packaging/$Templates ; 
+	    echo Template: $f 
+            cp -r "$f" $Templates ; 
 	fi
 done)
 

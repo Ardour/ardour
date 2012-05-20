@@ -486,6 +486,13 @@ for x in $BUILD_ROOT/../mcp/*.device $BUILD_ROOT/../mcp/*.profile ; do
     echo Copied Mackie Control file $x 
 done
 
+# Templates
+for f in * ; do 
+    if [ -d "$f" ] ; then
+	echo Template: $f ; cp -r "$f" $Templates ; 
+    fi
+done
+
 # ExportFormats
 # got to be careful with names here
 for x in $BUILD_ROOT/../export/*.preset $BUILD_ROOT/../export/*.format ; do
@@ -627,9 +634,6 @@ fi
 # share stuff
 
 cp -R ../../gtk2_ardour/splash.png $Shared
-
-# Templates
-cp ../../templates/*.template $Templates
 
 # go through and recursively remove any .svn dirs in the bundle
 for svndir in `find $APPDIR -name .svn -type d`; do
