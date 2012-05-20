@@ -600,8 +600,12 @@ Session::import_audiofiles (ImportStatus& status)
 
 		std::copy (all_new_sources.begin(), all_new_sources.end(), std::back_inserter(status.sources));
 	} else {
-		// this can throw...but it seems very unlikely
-		std::for_each (all_new_sources.begin(), all_new_sources.end(), remove_file_source);
+		try {
+			std::for_each (all_new_sources.begin(), all_new_sources.end(), remove_file_source);
+		} catch (...) {
+			error << _("Failed to remove some files after failed/cancelled import operation") << endmsg;
+		}
+				
 	}
 
 	status.done = true;
