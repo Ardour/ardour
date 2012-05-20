@@ -597,10 +597,10 @@ cp $BUILD_ROOT/gtk2_ardour/ardour3*.rc $Etc
 cp ../../gtk2_ardour/ardour3_ui_default.conf $Etc/ardour3_ui_default.conf
 cp ../../gtk2_ardour/ardour3_ui_default.conf $Etc/ardour3_ui.conf
 cp ../../instant.xml $Etc/instant.xml
-cp -r ../../gtk2_ardour/icons $Etc
-cp -r ../../gtk2_ardour/pixmaps $Etc
 cp ../../gtk2_ardour/step_editing.bindings $Etc
 cp ../../gtk2_ardour/mixer.bindings $Etc
+cp -r ../../gtk2_ardour/icons $Shared
+cp -r ../../gtk2_ardour/pixmaps $Shared
 
 
 #
