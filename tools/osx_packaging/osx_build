@@ -3,6 +3,7 @@
 # script for pulling together a MacOSX app bundle.
 
 GTKQUARTZ_ROOT=$HOME/gtk/inst
+ARDOURSTACK_ROOT=$HOME/a3/inst
 
 if pkg-config --modversion gtk+-2.0 | grep -s 2.22 ; then
     # older GTK
@@ -95,7 +96,7 @@ echo "Info string is $info_string"
 
 APPDIR=${APPNAME}.app
 APPROOT=$APPDIR/Contents
-Frameworks=$APPROOT/Frameworks
+Frameworks=$APPROOT/lib
 Resources=$APPROOT/Resources
 #
 # Since this is OS X, don't try to distinguish between etc and shared
@@ -115,7 +116,7 @@ MidiMaps=$Shared/midi_maps
 ExportFormats=$Shared/export
 Templates=$Shared/templates
 PatchFiles=$Shared/patchfiles
-MCP=$Shared/mcp
+MackieControl=$Shared/mcp
 
 if [ x$PRINT_SYSDEPS != x ] ; then
 #
@@ -150,6 +151,7 @@ mkdir -p $Templates
 mkdir -p $Frameworks/modules
 mkdir -p $Shared/templates
 mkdir -p $Etc
+mkdir -p $MackieControl
 
 # maybe set variables
 env=""
@@ -289,11 +291,11 @@ cat > pangorc <<EOF
 [Pango]
 ModulesPath=$GTKQUARTZ_ROOT/lib/pango/1.6.0/modules
 EOF
-env PANGO_RC_FILE=pangorc $GTKQUARTZ_ROOT/bin/pango-querymodules | sed "s?$GTKQUARTZ_ROOT/lib/pango/1.6.0/modules/?@executable_path/../Frameworks/modules/?" > $Resources/pango.modules
+env PANGO_RC_FILE=pangorc $GTKQUARTZ_ROOT/bin/pango-querymodules | sed "s?$GTKQUARTZ_ROOT/lib/pango/1.6.0/modules/?@executable_path/../lib/modules/?" > $Resources/pango.modules
 rm pangorc
 
 # generate a new GDK pixbufs loaders file
-gdk-pixbuf-query-loaders | sed "s?$GDKPIXBUF_LOADERS/?@executable_path/../Frameworks/modules/?" > $Resources/gdk-pixbuf.loaders
+gdk-pixbuf-query-loaders | sed "s?$GDKPIXBUF_LOADERS/?@executable_path/../lib/modules/?" > $Resources/gdk-pixbuf.loaders
 
 # this one is special - we will set GTK_PATH to $Frameworks/clearlooks
 cp $BUILD_ROOT/libs/clearlooks-newer/libclearlooks.dylib $Frameworks
@@ -340,7 +342,7 @@ done
 # MackieControl data
 # got to be careful with names here
 for x in $BUILD_ROOT/../mcp/*.device $BUILD_ROOT/../mcp/*.profile ; do
-    cp "$x" $MCP
+    cp "$x" $MackieControl
     echo Copied Mackie Control file $x 
 done
 
@@ -353,7 +355,7 @@ while [ true ] ; do
 	if ! file $file | grep -qs Mach-O ; then
 	    continue
 	fi
-	deps=`otool -L $file | awk '{print $1}' | egrep "($GTKQUARTZ_ROOT|/opt/|/local/|libs/)" | grep -v 'libjack\.'`
+	deps=`otool -L $file | awk '{print $1}' | egrep "($GTKQUARTZ_ROOT|$ARDOURSTACK_ROOT|/opt/|/local/|libs/)" | grep -v 'libjack\.'`
 	# echo -n "."
 	for dep in $deps ; do
 	    base=`basename $dep`
@@ -424,9 +426,9 @@ fi
 for exe in $executables; do
     EXE=$APPROOT/MacOS/$exe
     changes=""
-    for lib in `otool -L $EXE | egrep "($GTKQUARTZ_ROOT|/opt/|/local/|libs/)" | awk '{print $1}' | grep -v 'libjack\.'` ; do
+    for lib in `otool -L $EXE | egrep "($GTKQUARTZ_ROOT|$ARDOURSTACK_ROOT|/opt/|/local/|libs/)" | awk '{print $1}' | grep -v 'libjack\.'` ; do
       base=`basename $lib`
-      changes="$changes -change $lib @executable_path/../Frameworks/$base"
+      changes="$changes -change $lib @executable_path/../lib/$base"
     done
     if test "x$changes" != "x" ; then
 	install_name_tool $changes $EXE
@@ -450,12 +452,12 @@ for libdir in $Frameworks $Frameworks/modules $Surfaces $Panners ; do
         # change all the dependencies
 	
 	changes=""
-	for lib in `otool -L $dylib | egrep "($GTKQUARTZ_ROOT|/opt/|/local/|libs/)" | awk '{print $1}' | grep -v 'libjack\.'` ; do
+	for lib in `otool -L $dylib | egrep "($GTKQUARTZ_ROOT|$ARDOURSTACK_ROOT|/opt/|/local/|libs/)" | awk '{print $1}' | grep -v 'libjack\.'` ; do
 	    base=`basename $lib`
 	    if echo $lib | grep -s libbase; then
 		changes="$changes -change $lib @executable_path/../$libbase/$base"
 	    else
-		changes="$changes -change $lib @executable_path/../Frameworks/$base"
+		changes="$changes -change $lib @executable_path/../lib/$base"
 	    fi
 	done
 	

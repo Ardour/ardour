@@ -166,7 +166,7 @@ fixup_bundle_environment (int, char* [])
 	}
 	setenv ("PATH", path.c_str(), 1);
 
-	export_search_path (dir_path, "ARDOUR_DLL_PATH", "/../Frameworks");
+	export_search_path (dir_path, "ARDOUR_DLL_PATH", "/../lib");
 
 	path += dir_path;
 	path += "/../Resources";
@@ -185,7 +185,7 @@ fixup_bundle_environment (int, char* [])
 	export_search_path (dir_path, "VAMP_PATH", "/../Frameworks");
 
 	path = dir_path;
-	path += "/../Frameworks/clearlooks";
+	path += "/../lib/clearlooks";
 	setenv ("GTK_PATH", path.c_str(), 1);
 
 	/* unset GTK_RC_FILES so that we only load the RC files that we define
