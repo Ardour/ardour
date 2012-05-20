@@ -101,13 +101,13 @@ BundleEditorMatrix::get_state (BundleChannel c[2]) const
 }
 
 bool
-BundleEditorMatrix::can_add_channel (boost::shared_ptr<Bundle> b) const
+BundleEditorMatrix::can_add_channels (boost::shared_ptr<Bundle> b) const
 {
 	if (b == _bundle) {
 		return true;
 	}
 
-	return PortMatrix::can_add_channel (b);
+	return PortMatrix::can_add_channels (b);
 }
 
 void

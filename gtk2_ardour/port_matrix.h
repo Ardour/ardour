@@ -141,7 +141,7 @@ public:
 	virtual PortMatrixNode::State get_state (ARDOUR::BundleChannel c[2]) const = 0;
 	virtual bool list_is_global (int) const = 0;
 
-	virtual bool can_add_channel (boost::shared_ptr<ARDOUR::Bundle>) const;
+	virtual bool can_add_channels (boost::shared_ptr<ARDOUR::Bundle>) const;
 	virtual void add_channel (boost::shared_ptr<ARDOUR::Bundle>, ARDOUR::DataType);
 	virtual bool can_remove_channels (boost::shared_ptr<ARDOUR::Bundle>) const;
 	virtual void remove_channel (ARDOUR::BundleChannel);
