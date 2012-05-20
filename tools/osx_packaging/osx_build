@@ -305,22 +305,23 @@ cp $BUILD_ROOT/libs/surfaces/*/libardour_*.dylib $Surfaces
 # hack ... move libardour_cp back into Frameworks
 mv $Surfaces/libardourcp*.dylib $Frameworks
 
-# Export formats
+# Panners
 cp $BUILD_ROOT/libs/panners/*/lib*.dylib $Panners
-(cd ../../export && 
-    for f in *.preset *.format ; do 
-	echo ExportFormat: $f 
-        cp "$f" $ExportFormats ; 
-done)
+
+
+# Export Formats/Presets
+for f in $BUILD_ROOT/../export/*.preset $BUILD_ROOT/../export/*.format ; do 
+    echo ExportFormat: $f 
+    cp "$f" $ExportFormats ; 
+done
 
 # Session and Route templates
-(cd $BUILD_ROOT/../templates && \
-    for f in * ; do 
-	if [ -d "$f" ] ; then
-	    echo Template: $f 
-            cp -r "$f" $Templates ; 
-	fi
-done)
+for f in $BUILD_ROOT/../templates/* ; do 
+    if [ -d "$f" ] ; then
+	echo Template: $f 
+        cp -r "$f" $Templates ; 
+    fi
+done
 
 # MidiMaps
 # got to be careful with names here
