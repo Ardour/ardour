@@ -213,6 +213,7 @@ PortMatrix::setup ()
 
 	_body->setup ();
 	setup_scrollbars ();
+	update_tab_highlighting ();
 	queue_draw ();
 }
 
@@ -777,6 +778,7 @@ PortMatrix::setup_notebooks ()
 		dummy->show ();
 		Label* label = manage (new Label ((*i)->name));
 		label->set_angle (_arrangement == LEFT_TO_BOTTOM ? 90 : -90);
+		label->set_use_markup ();
 		label->show ();
 		if (_arrangement == LEFT_TO_BOTTOM) {
 			_vnotebook.prepend_page (*dummy, *label);
@@ -792,7 +794,10 @@ PortMatrix::setup_notebooks ()
 	for (PortGroupList::List::const_iterator i = _ports[_column_index].begin(); i != _ports[_column_index].end(); ++i) {
 		HBox* dummy = manage (new HBox);
 		dummy->show ();
-		_hnotebook.append_page (*dummy, (*i)->name);
+		Label* label = manage (new Label ((*i)->name));
+		label->set_use_markup ();
+		label->show ();
+		_hnotebook.append_page (*dummy, *label);
 	}
 
 	_ignore_notebook_page_selected = false;
@@ -954,6 +959,55 @@ void
 PortMatrix::port_connected_or_disconnected ()
 {
 	_body->rebuild_and_draw_grid ();
+	update_tab_highlighting ();
+}
+
+/** Update the highlighting of tab names to reflect which ones
+ *  have connections.  This is pretty inefficient, unfortunately,
+ *  but maybe that doesn't matter too much.
+ */
+void
+PortMatrix::update_tab_highlighting ()
+{
+	for (int i = 0; i < 2; ++i) {
+
+		Gtk::Notebook* notebook = row_index() == i ? &_vnotebook : &_hnotebook;
+		
+		PortGroupList const * gl = ports (i);
+		int p = 0;
+		for (PortGroupList::List::const_iterator j = gl->begin(); j != gl->end(); ++j) {
+			bool has_connection = false;
+			PortGroup::BundleList const & bl = (*j)->bundles ();
+			PortGroup::BundleList::const_iterator k = bl.begin ();
+			while (k != bl.end()) {
+				if ((*k)->bundle->connected_to_anything (_session->engine())) {
+					has_connection = true;
+					break;
+				}
+				++k;
+			}
+
+			/* Find the page index that we should update; this is backwards
+			   for the vertical tabs in the LEFT_TO_BOTTOM arrangement.
+			*/
+			int page = p;
+			if (i == row_index() && _arrangement == LEFT_TO_BOTTOM) {
+				page = notebook->get_n_pages() - p - 1;
+			}
+
+			Gtk::Label* label = dynamic_cast<Gtk::Label*> (notebook->get_tab_label(*notebook->get_nth_page (page)));
+			string c = label->get_label ();
+			if (c.length() && c[0] == '<' && !has_connection) {
+				/* this label is marked up with <b> but shouldn't be */
+				label->set_markup ((*j)->name);
+			} else if (c.length() && c[0] != '<' && has_connection) {
+				/* this label is not marked up with <b> but should be */
+				label->set_markup (string_compose ("<b>%1</b>", (*j)->name));
+			}
+
+			++p;
+		}
+	}
 }
 
 string

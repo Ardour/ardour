@@ -198,6 +198,7 @@ private:
 	void add_remove_option (Gtk::Menu_Helpers::MenuList &, boost::weak_ptr<ARDOUR::Bundle>, int);
 	void add_disassociate_option (Gtk::Menu_Helpers::MenuList &, boost::weak_ptr<ARDOUR::Bundle>, int, int);
 	void port_connected_or_disconnected ();
+	void update_tab_highlighting ();
 
 	Gtk::Window* _parent;
 
