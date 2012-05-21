@@ -44,6 +44,9 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 	static Element led_default_elements;
 	static Element just_led_default_elements;
 
+	static void set_flat_buttons (bool yn);
+	static bool flat_buttons() { return _flat_buttons; }
+
 	ArdourButton (Element e = default_elements);
 	ArdourButton (const std::string&, Element e = default_elements);
 	virtual ~ArdourButton ();
@@ -141,6 +144,8 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 	bool _fixed_diameter;
 	bool _distinct_led_click;
 	bool _hovering;
+
+	static bool _flat_buttons;
 
 	void setup_led_rect ();
 	void set_colors ();
