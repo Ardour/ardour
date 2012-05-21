@@ -687,7 +687,7 @@ Strip::update_meter ()
 {
 	if (_meter) {
 		float dB = const_cast<PeakMeter&> (_route->peak_meter()).peak_power (0);
-		_surface->write (_meter->update_message (dB));
+		_meter->send_update (*_surface, dB);
 	}
 }
 
