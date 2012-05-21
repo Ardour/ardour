@@ -341,6 +341,14 @@ SndFileSource::read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) con
 				sf_error_str (0, errbuf, sizeof (errbuf) - 1);
 				error << string_compose(_("SndFileSource: @ %1 could not read %2 within %3 (%4) (len = %5, ret was %6)"), start, file_cnt, _name.val().substr (1), errbuf, _length, ret) << endl;
 			}
+			if (id() == ID ("148")) {
+				cerr << "src 148, first sample of read @ " << start << " = " << dst[0] << " aka " << hex
+				     <<  (int) (((char*) dst)[0]) << ' '
+				     <<  (int) (((char*) dst)[1]) << ' '
+				     <<  (int) (((char*) dst)[2]) << ' '
+				     <<  (int) (((char*) dst)[3]) << dec
+				     << endl;
+			}
 			_descriptor->release ();
 			return ret;
 		}
