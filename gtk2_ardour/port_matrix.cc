@@ -429,7 +429,7 @@ PortMatrix::popup_menu (BundleChannel column, BundleChannel row, uint32_t t)
 				}
 			}
 
-			if (can_rename_channels (bc[dim].bundle)) {
+			if (can_rename_channels (bc[dim].bundle) && bc[dim].channel != -1) {
 				snprintf (
 					buf, sizeof (buf), _("Rename '%s'..."),
 					escape_underscores (bc[dim].bundle->channel_name (bc[dim].channel)).c_str()
