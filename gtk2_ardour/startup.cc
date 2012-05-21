@@ -575,7 +575,7 @@ ArdourStartup::setup_initial_choice_page ()
 bool
 ArdourStartup::initial_button_press (GdkEventButton *event)
 {
-	if (event && event->type == GDK_2BUTTON_PRESS && session_page_index != -1) {
+	if (event && session_page_index != -1) {
 		set_current_page(session_page_index);
 		return true;
 	} else {
@@ -586,7 +586,9 @@ ArdourStartup::initial_button_press (GdkEventButton *event)
 void
 ArdourStartup::initial_button_activated ()
 {
-	set_current_page(session_page_index);
+	if (session_page_index != -1) {
+		set_current_page(session_page_index);
+	}
 }
 
 void
