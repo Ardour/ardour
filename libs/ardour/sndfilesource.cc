@@ -341,14 +341,6 @@ SndFileSource::read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) con
 				sf_error_str (0, errbuf, sizeof (errbuf) - 1);
 				error << string_compose(_("SndFileSource: @ %1 could not read %2 within %3 (%4) (len = %5, ret was %6)"), start, file_cnt, _name.val().substr (1), errbuf, _length, ret) << endl;
 			}
-			if (id() == ID ("148")) {
-				cerr << "src 148, first sample of read @ " << start << " = " << dst[0] << " aka " << hex
-				     <<  (int) (((char*) dst)[0]) << ' '
-				     <<  (int) (((char*) dst)[1]) << ' '
-				     <<  (int) (((char*) dst)[2]) << ' '
-				     <<  (int) (((char*) dst)[3]) << dec
-				     << endl;
-			}
 			_descriptor->release ();
 			return ret;
 		}
@@ -538,6 +530,7 @@ SndFileSource::flush_header ()
 		return -1;
 	}
 
+	std::cerr << "Flushing header of " << _path << " with length @ " << _length << endl;
 	int const r = sf_command (sf, SFC_UPDATE_HEADER_NOW, 0, 0) != SF_TRUE;
 	_descriptor->release ();
 
@@ -593,7 +586,7 @@ SndFileSource::set_header_timeline_position ()
 	_broadcast_info->set_time_reference (_timeline_position);
 
 	SNDFILE* sf = _descriptor->allocate ();
-
+	
 	if (sf == 0 || !_broadcast_info->write_to_file (sf)) {
 		error << string_compose (_("cannot set broadcast info for audio file %1 (%2); dropping broadcast info for this file"),
 		                           _path, _broadcast_info->get_error())
