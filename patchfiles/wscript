@@ -1,0 +1,16 @@
+#!/usr/bin/python
+
+import os
+
+top = '.'
+out = 'build'
+
+def configure(conf):
+    pass
+
+def build(bld):
+    patchfiles = bld.path.ant_glob ('*.midnam')
+    bld.install_files (os.path.join(bld.env['DATADIR'], 'ardour3', 'patchfiles'), patchfiles)
+
+def options(opt):
+    pass
