@@ -549,10 +549,10 @@ ArdourStartup::setup_initial_choice_page ()
 	centering_vbox->pack_start (ic_new_session_button, false, true);
 	centering_vbox->pack_start (ic_existing_session_button, false, true);
 
-	ic_new_session_button.signal_button_press_event().connect(sigc::mem_fun(*this, &ArdourStartup::initial_button_press), false);
+	ic_new_session_button.signal_clicked().connect(sigc::mem_fun(*this, &ArdourStartup::initial_button_clicked));
 	ic_new_session_button.signal_activate().connect(sigc::mem_fun(*this, &ArdourStartup::initial_button_activated), false);
 
-	ic_existing_session_button.signal_button_press_event().connect(sigc::mem_fun(*this, &ArdourStartup::initial_button_press), false);
+	ic_existing_session_button.signal_clicked().connect(sigc::mem_fun(*this, &ArdourStartup::initial_button_clicked));
 	ic_existing_session_button.signal_activate().connect(sigc::mem_fun(*this, &ArdourStartup::initial_button_activated), false);
 
 	centering_hbox->pack_start (*centering_vbox, true, true);
@@ -572,14 +572,11 @@ ArdourStartup::setup_initial_choice_page ()
 	set_page_complete (ic_vbox, true);
 }
 
-bool
-ArdourStartup::initial_button_press (GdkEventButton *event)
+void
+ArdourStartup::initial_button_clicked ()
 {
-	if (event && session_page_index != -1) {
+	if (session_page_index != -1) {
 		set_current_page(session_page_index);
-		return true;
-	} else {
-		return false;
 	}
 }
 
