@@ -44,9 +44,9 @@ def configure(conf):
     for i in children:
         sub_config_and_use(conf, i)
 
-    autowaf.check_pkg(conf, 'libusb-1.0', uselib_store='USB', mandatory=False)
-    if Options.options.tranzport and conf.is_defined('HAVE_USB'):
-        conf.define('BUILD_TRANZPORT', 1)
+    #autowaf.check_pkg(conf, 'libusb-1.0', uselib_store='USB', mandatory=False)
+    #if Options.options.tranzport and conf.is_defined('HAVE_USB'):
+    #    conf.define('BUILD_TRANZPORT', 1)
 
     conf.check_cc (header_name='linux/input.h', define_name='BUILD_POWERMATE',mandatory=False)
     autowaf.check_pkg (conf, 'liblo', mandatory=False, uselib_store="LO", atleast_version="0.24")
