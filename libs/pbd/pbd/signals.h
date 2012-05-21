@@ -110,6 +110,11 @@ public:
 
 	ScopedConnection& operator= (UnscopedConnection const & o)
 	{
+		if (_c == o) {
+			return *this;
+		}
+		
+		disconnect ();
 		_c = o;
 		return *this;
 	}
