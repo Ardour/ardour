@@ -296,7 +296,7 @@ tar xf libsamplerate-0.1.8.tar.gz && \
     (set -e && cd libsamplerate-0.1.8 && CFLAGS="$GLOBAL_CFLAGS -I/System/Library/Frameworks/Carbon.framework/Headers" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install) || die "samplerate build failed"
 else 
     tar xf libsndfile-1.0.25.tar.gz && \
-        (set -e && cd libsndfile-1.0.25 && patch -p0 $sndfile_patch && CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX --disable-silent-rules && make && make install) || die "sndfile build failed"
+        (set -e && cd libsndfile-1.0.25 && patch -p0 < $sndfile_patch && CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX --disable-silent-rules && make && make install) || die "sndfile build failed"
     tar xf libsamplerate-0.1.8.tar.gz && \
         (set -e && cd libsamplerate-0.1.8 && CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install) || die "samplerate build failed"
 fi
