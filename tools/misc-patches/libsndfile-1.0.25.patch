@@ -1,0 +1,15 @@
+--- src/broadcast.c~	2011-03-27 23:53:08.000000000 -0400
++++ src/broadcast.c	2012-05-21 21:23:11.914815287 -0400
+@@ -82,8 +82,10 @@
+ 
+ 	/* Force coding_history_size to be even. */
+ 	len = strlen (psf->broadcast_16k->coding_history) ;
+-	len += (len & 1) ? 1 : 2 ;
+-	psf->broadcast_16k->coding_history_size = len ;
++        if (len && ( len & 1)) {
++                len += 1;
++        }
++        psf->broadcast_16k->coding_history_size = len ;
+ 
+ 	/* Currently writing this version. */
+ 	psf->broadcast_16k->version = 1 ;
