@@ -1,0 +1,11 @@
+--- include/freetype/config/ftoption.h~	2011-07-19 23:46:15.000000000 -0500
++++ include/freetype/config/ftoption.h	2012-05-22 06:42:55.000000000 -0500
+@@ -555,7 +555,7 @@
+   /*   Do not #undef this macro here, since the build system might         */
+   /*   define it for certain configurations only.                          */
+   /*                                                                       */
+-#define TT_CONFIG_OPTION_BYTECODE_INTERPRETER
++/*#define TT_CONFIG_OPTION_BYTECODE_INTERPRETER*/
+ 
+ 
+   /*************************************************************************/
