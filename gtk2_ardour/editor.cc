@@ -786,7 +786,6 @@ Editor::button_settings () const
 	XMLNode* node = find_named_node (*settings, X_("Buttons"));
 
 	if (!node) {
-                cerr << "new empty Button node\n";
 		node = new XMLNode (X_("Buttons"));
 	}
 

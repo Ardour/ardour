@@ -3202,14 +3202,9 @@ Editor::trim_region (bool front)
 	framepos_t where = get_preferred_edit_position();
 	RegionSelection rs = get_regions_from_selection_and_edit_point ();
 
-	cerr << "trim regions\n";
-
 	if (rs.empty()) {
-		cerr << " no regions\n";
 		return;
 	}
-
-	cerr << "where = " << where << endl;
 
 	begin_reversible_command (front ? _("trim front") : _("trim back"));
 

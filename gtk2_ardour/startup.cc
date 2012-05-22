@@ -715,7 +715,7 @@ ArdourStartup::populate_session_templates ()
 static bool
 lost_name_entry_focus (GdkEventFocus*)
 {
-	cerr << "lost focus\n";
+	// cerr << "lost focus\n";
 	return false;
 }
 
@@ -891,7 +891,7 @@ ArdourStartup::setup_new_session_page ()
 void
 ArdourStartup::new_name_mapped ()
 {
-	cerr << "Grab new name focus\n";
+	// cerr << "Grab new name focus\n";
 	new_name_entry.grab_focus ();
 }
 

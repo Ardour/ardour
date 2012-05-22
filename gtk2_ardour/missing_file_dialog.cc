@@ -59,7 +59,6 @@ MissingFileDialog::MissingFileDialog (Session* s, const std::string& path, DataT
         string dirstr;
 
         dirstr = s->source_search_path (type);
-        cerr << "Search path = " << dirstr << endl;
         replace_all (dirstr, ":", "\n");
 
         msg.set_justify (JUSTIFY_CENTER);

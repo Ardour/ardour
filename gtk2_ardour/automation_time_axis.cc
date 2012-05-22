@@ -442,8 +442,6 @@ AutomationTimeAxisView::set_height (uint32_t h)
 			auto_button.hide();
 			hide_button.hide();
 		}
-	} else if (h >= preset_height (HeightNormal)) {
-		cerr << "track grown, but neither changed_between_small_and_normal nor first_call_to_set_height set!" << endl;
 	}
 
 	if (changed) {

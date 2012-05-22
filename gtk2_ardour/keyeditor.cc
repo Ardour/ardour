@@ -109,8 +109,6 @@ KeyEditor::unbind ()
 
 	unbind_button.set_sensitive (false);
 
-	cerr << "trying to unbind\n";
-
 	if (i != model->children().end()) {
 		string path = (*i)[columns.path];
 

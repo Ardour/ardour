@@ -2430,10 +2430,6 @@ Editor::point_trim (GdkEvent* event, framepos_t new_bound)
 			for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin();
 			     i != selection->regions.by_layer().end(); ++i)
 			{
-				if ( (*i) == NULL){
-				    cerr << "region view contains null region" << endl;
-				}
-
 				if (!(*i)->region()->locked()) {
 					(*i)->region()->clear_changes ();
 					(*i)->region()->trim_front (new_bound);

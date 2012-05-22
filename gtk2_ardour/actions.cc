@@ -157,11 +157,7 @@ ActionManager::map_some_state (const char* group, const char* action, bool (RCCo
 			if (tact->get_active() != x) {
 				tact->set_active (x);
 			}
-		} else {
-			cerr << group << ':' << action << " is not a toggle\n";
 		}
-	} else {
-		cerr << group << ':' << action << " not an action\n";
 	}
 }
 
