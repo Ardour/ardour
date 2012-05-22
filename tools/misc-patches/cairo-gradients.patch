@@ -1,0 +1,16 @@
+--- src/cairo-xlib-display.c	2010-09-09 10:56:24.000000000 -0500
++++ ../../Current/cairo-1.10.2/src/cairo-xlib-display.c	2011-11-16 11:19:08.000000000 -0600
+@@ -356,7 +356,12 @@
+ #if RENDER_MAJOR == 0 && RENDER_MINOR < 10
+     display->buggy_gradients = TRUE;
+ #else
+-    display->buggy_gradients = FALSE;
++    if (getenv ("FORCE_BUGGY_GRADIENTS")) {
++        display->buggy_gradients = TRUE;
++    }
++    else {
++        display->buggy_gradients = FALSE;
++    }
+ #endif
+     display->buggy_pad_reflect = FALSE;
+     display->buggy_repeat = FALSE;
