@@ -530,7 +530,6 @@ SndFileSource::flush_header ()
 		return -1;
 	}
 
-	std::cerr << "Flushing header of " << _path << " with length @ " << _length << endl;
 	int const r = sf_command (sf, SFC_UPDATE_HEADER_NOW, 0, 0) != SF_TRUE;
 	_descriptor->release ();
 
