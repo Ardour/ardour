@@ -33,6 +33,8 @@ parallel=2
 patch_gtk_osx=
 PREFIX=$HOME/gtk/inst
 unpatch=
+this_script_dir="`/usr/bin/dirname \"$0\"`"
+
 while [ $# -gt 0 ] ; do
     case $1 in
         --clean*) clean=1 ; shift ;;
@@ -283,7 +285,6 @@ fi
 
 if [ x$patch_gtk_osx != x ] ; then
 
-    this_script_dir="`/usr/bin/dirname \"$0\"`"
     cd gtk+
     echo "Testing ($unpatch) patches ... "
 
@@ -384,6 +385,10 @@ tar xf pkg-config-0.26.tar.gz && (cd pkg-config-0.26 && CFLAGS=$GLOBAL_CFLAGS LD
 #
 # now we can start on the GTK stack itself
 # 
+
+freetype_bytecode_patch=$this_script_dir/misc-patches/freetype-bytecode.patch
+cairo_gradient_patch=$this_script_dir/misc-patches/cairo-gradients.patch
+
 tar xf atk-2.2.0.tar.bz2 && (cd atk-2.2.0 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "atk build failed"
 tar xf gnome-common-2.34.0.tar.bz2 && (cd gnome-common-2.34.0 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && export MAKEFLAGS= make && MAKEFLAGS= make install) || die "gnome build failed"
 tar xf gtk-osx-docbook-1.0.tar.gz && (cd gtk-osx-docbook-1.0 && JHBUILD_PREFIX=$PREFIX make install) || die "gtk build failed"
@@ -391,9 +396,9 @@ tar xf gtk-osx-docbook-1.0.tar.gz && (cd gtk-osx-docbook-1.0 && JHBUILD_PREFIX=$
 tar xf gnome-doc-utils-0.20.6.tar.bz2 && (cd gnome-doc-utils-0.20.6 && PYTHONPATH=$PREFIX/lib/python2.7/site-packages CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF --disable-scrollkeeper && PYTHONPATH=$PREFIX/lib/python2.7/site-packages MAKEFLAGS= make && PYTHONPATH=$PREFIX/lib/python2.7/site-packages MAKEFLAGS= make install) || die "gnome build failed"
 tar xf gtk-doc-1.18.tar.bz2 && (cd gtk-doc-1.18 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure --disable-scrollkeeper --with-xml-catalog=$PREFIX/etc/xml/catalog --prefix=$PREFIX && PYTHONPATH=$PREFIX/lib/python2.7/site-packages make && make install) || die "gtk build failed"
 tar xf pixman-0.24.4.tar.gz && (cd pixman-0.24.4 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" sh ./autogen.sh --prefix=$PREFIX && make && make install) || die "pixman build failed"
-tar xf freetype-2.4.8.tar.bz2 && (cd freetype-2.4.8 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "freetype build failed"
+tar xf freetype-2.4.8.tar.bz2 && (cd freetype-2.4.8 && patch -p0 < $freetype_bytecode_patch && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "freetype build failed"
 tar xf fontconfig-2.8.0.tar.gz && (cd fontconfig-2.8.0 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "fontconfig build failed"
-tar xf cairo-1.10.2.tar.gz && (cd cairo-1.10.2 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF $CAIRO_CONF && make && make install) || die "cairo build failed"
+tar xf cairo-1.10.2.tar.gz && (cd cairo-1.10.2 && patch -p0 < $cairo_gradient_patch && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF $CAIRO_CONF && make && make install) || die "cairo build failed"
 tar xf pango-1.29.5.tar.bz2 && (cd pango-1.29.5 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF $PANGO_CONF && make && make install) || die "pango build failed"
 
 tar xf gdk-pixbuf-2.25.0.tar.xz && (cd gdk-pixbuf-2.25.0 && LDFLAGS="$GLOBAL_LDFLAGS -L$PREFIX/lib" CFLAGS="-I$PREFIX/include $GLOBAL_CFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "gdk build failed"
@@ -403,7 +408,7 @@ if [ ! -f /usr/include/libintl.h ] ; then
     sudo ln -s $PREFIX/include/libintl.h /usr/include
     remove_libintl_h=yes
 fi
-tar xf gobject-introspection-1.31.10.tar.xz && (cd gobject-introspection-1.31.10 && LDFLAGS="$GLOBAL_LDFLAGS -L$PREFIX/lib -lintl" CFLAGS="-I$PREFIX/include $GLOBAL_CFLAGS" ./configure $GLOBAL_CONF --disable-silent-rules && make && make install) || die "gobject build failed"
+tar xf gobject-introspection-1.31.10.tar.xz && (cd gobject-introspection-1.31.10 && LDFLAGS="$GLOBAL_LDFLAGS -L$PREFIX/lib -lintl" CFLAGS="-I$PREFIX/include $GLOBAL_CFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "gobject build failed"
 if [ x$remove_libintl_h != x ] ; then
     sudo rm /usr/include/libintl.h
 fi
