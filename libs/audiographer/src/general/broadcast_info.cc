@@ -168,7 +168,6 @@ BroadcastInfo::write_to_file (std::string const & filename)
 bool
 BroadcastInfo::write_to_file (SNDFILE* sf)
 {
-	std::cerr << "AG set BWF as " << sizeof(*info) << std::endl;
 	if (sf_command (sf, SFC_SET_BROADCAST_INFO, info, sizeof (*info)) != SF_TRUE) {
 		update_error();
 		return false;
