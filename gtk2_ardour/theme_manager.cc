@@ -36,6 +36,7 @@
 #include "ardour/filesystem_paths.h"
 #include "ardour/profile.h"
 
+#include "ardour_button.h"
 #include "theme_manager.h"
 #include "rgb_macros.h"
 #include "ardour_ui.h"
@@ -52,10 +53,11 @@ sigc::signal<void> ColorsChanged;
 sigc::signal<void,uint32_t> ColorChanged;
 
 ThemeManager::ThemeManager()
-	: ArdourWindow (_("Theme Manager")),
-	  dark_button (_("Dark Theme")),
-	  light_button (_("Light Theme")),
-	  reset_button (_("Restore Defaults"))
+	: ArdourWindow (_("Theme Manager"))
+	, dark_button (_("Dark Theme"))
+	, light_button (_("Light Theme"))
+	, reset_button (_("Restore Defaults"))
+	, flat_buttons (_("Draw \"flat\" buttons"))
 {
 	set_title (_("Theme Manager"));
 
@@ -90,6 +92,7 @@ ThemeManager::ThemeManager()
 	vbox->set_homogeneous (false);
 	vbox->pack_start (theme_selection_hbox, PACK_SHRINK);
 	vbox->pack_start (reset_button, PACK_SHRINK);
+	vbox->pack_start (flat_buttons, PACK_SHRINK);
 	vbox->pack_start (scroller);
 	add (*vbox);
 
@@ -103,6 +106,7 @@ ThemeManager::ThemeManager()
 	dark_button.signal_toggled().connect (sigc::mem_fun (*this, &ThemeManager::on_dark_theme_button_toggled));
 	light_button.signal_toggled().connect (sigc::mem_fun (*this, &ThemeManager::on_light_theme_button_toggled));
 	reset_button.signal_clicked().connect (sigc::mem_fun (*this, &ThemeManager::reset_canvas_colors));
+	flat_buttons.signal_toggled().connect (sigc::mem_fun (*this, &ThemeManager::on_flat_buttons_toggled));
 
 	set_size_request (-1, 400);
 	setup_theme ();
@@ -227,6 +231,16 @@ load_rc_file (const string& filename, bool themechange)
 #define HACK_PROFILE_IS_SAE() (getenv("ARDOUR_SAE")!=0)
 
 void
+ThemeManager::on_flat_buttons_toggled ()
+{
+	ARDOUR_UI::config()->flat_buttons.set (flat_buttons.get_active());
+	ARDOUR_UI::config()->set_dirty ();
+	ArdourButton::set_flat_buttons (flat_buttons.get_active());
+	/* force a redraw */
+	gtk_rc_reset_styles (gtk_settings_get_default());
+}
+
+void
 ThemeManager::on_dark_theme_button_toggled()
 {
 	if (!dark_button.get_active()) return;
@@ -333,7 +347,9 @@ ThemeManager::setup_theme ()
 	} else if (rcfile == "ardour3_ui_light.rc" || rcfile == "ardour3_ui_light_sae.rc") {
 		light_button.set_active();
 	}
-
+	
+	flat_buttons.set_active (ARDOUR_UI::config()->flat_buttons.get());
+	
 	load_rc_file(rcfile, false);
 }
 

@@ -49,7 +49,7 @@ using namespace std;
 ArdourButton::Element ArdourButton::default_elements = ArdourButton::Element (ArdourButton::Edge|ArdourButton::Body|ArdourButton::Text);
 ArdourButton::Element ArdourButton::led_default_elements = ArdourButton::Element (ArdourButton::default_elements|ArdourButton::Indicator);
 ArdourButton::Element ArdourButton::just_led_default_elements = ArdourButton::Element (ArdourButton::Edge|ArdourButton::Body|ArdourButton::Indicator);
-bool ArdourButton::_flat_buttons = true;
+bool ArdourButton::_flat_buttons = false;
 
 ArdourButton::ArdourButton (Element e)
 	: _elements (e)

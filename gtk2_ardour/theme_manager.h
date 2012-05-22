@@ -42,6 +42,7 @@ class ThemeManager : public ArdourWindow
 
 	void on_dark_theme_button_toggled ();
 	void on_light_theme_button_toggled ();
+	void on_flat_buttons_toggled ();
 
   private:
 	struct ColorDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {
@@ -67,6 +68,7 @@ class ThemeManager : public ArdourWindow
 	Gtk::RadioButton dark_button;
 	Gtk::RadioButton light_button;
 	Gtk::Button reset_button;
+	Gtk::CheckButton flat_buttons;
 
 	bool button_press_event (GdkEventButton*);
 };
