@@ -106,6 +106,7 @@ generate_inverse_coefficient_curve (boost::shared_ptr<Evoral::ControlList> dst, 
 static void
 generate_db_fade (boost::shared_ptr<Evoral::ControlList> dst, double len, int num_steps, float dB_drop)
 {
+	dst->clear ();
 	dst->fast_simple_add (0, 1);
 
 	//generate a fade-out curve by successively applying a gain drop
@@ -1019,6 +1020,8 @@ AudioRegion::set_fade_in (FadeShape shape, framecnt_t len)
 		generate_db_fade (c1, len, 10, -1);  // start off with a slow fade
 		generate_db_fade (c2, len, 10, -80); // end with a fast fade
 		merge_curves (_fade_in, c1, c2);
+		reverse_curve (c3, _fade_in);
+		_fade_in->copy_events (*c3);
 		generate_inverse_power_curve (_inverse_fade_in, _fade_in);
 		break;
 
@@ -1032,20 +1035,22 @@ AudioRegion::set_fade_in (FadeShape shape, framecnt_t len)
 		break;
 		
 	case FadeSymmetric:
-		// starts kind of like a constant power but has a slower fadeout
-		// however it is NOT constant power and there will be a level drop in the middle of the crossfade
-		c1->fast_simple_add (0.0, 1.0);
-		for ( int i = 1; i < 9; i++ ) {
-			float dist = (float)i/10.0;
-			c1->fast_simple_add ((len * dist), cos(dist*M_PI/10.0));
+		//start with a nearly linear cuve
+		_fade_in->fast_simple_add (0, 1);
+		_fade_in->fast_simple_add (0.5*len, 0.6);
+		//now generate a fade-out curve by successively applying a gain drop
+		const float breakpoint = 0.7;  //linear for first 70%
+		const int num_steps = 9;
+		for (int i = 2; i < num_steps; i++) {
+			float coeff = (1.0-breakpoint);
+			for (int j = 0; j < i; j++) {
+				coeff *= 0.5;  //6dB drop per step
+			}
+			_fade_in->fast_simple_add (len* (breakpoint+((1.0-breakpoint)*(double)i/(double)num_steps)), coeff);
 		}
-		c1->fast_simple_add (len, VERY_SMALL_SIGNAL);
-
-		//curve 2 is a slow fade at end
-		generate_db_fade (c2, len, 10, -30 );
-
-		merge_curves (c3, c1, c2);
-		reverse_curve (_fade_in, c3);
+		_fade_in->fast_simple_add (len, VERY_SMALL_SIGNAL);
+		reverse_curve (c3, _fade_in);
+		_fade_in->copy_events (*c3);
 		reverse_curve (_inverse_fade_in, _fade_in );
 		break;
 	}
@@ -1084,13 +1089,13 @@ AudioRegion::set_fade_out (FadeShape shape, framecnt_t len)
 		break;
 		
 	case FadeFast: 
-		generate_db_fade (_fade_out, len, 10, -60 );
+		generate_db_fade (_fade_out, len, 10, -60);
 		generate_inverse_power_curve (_inverse_fade_out, _fade_out);
 		break;
 		
 	case FadeSlow: 
-		generate_db_fade (c1, len, 10, -1 );  //start off with a slow fade
-		generate_db_fade (c2, len, 10, -80 );  //end with a fast fade
+		generate_db_fade (c1, len, 10, -1);  //start off with a slow fade
+		generate_db_fade (c2, len, 10, -80);  //end with a fast fade
 		merge_curves (_fade_out, c1, c2);
 		generate_inverse_power_curve (_inverse_fade_out, _fade_out);
 		break;
@@ -1108,19 +1113,21 @@ AudioRegion::set_fade_out (FadeShape shape, framecnt_t len)
 		break;
 		
 	case FadeSymmetric:
-		//starts kind of like a constant power but has a slower fadeout
-		//however it is NOT constant power and there will be a level drop in the middle of the crossfade
-		c1->fast_simple_add (0.0, 1.0);
-		for ( int i = 1; i < 9; i++ ) {
-			float dist = (float)i/10.0;
-			c1->fast_simple_add ((len * dist), cos(dist*M_PI/10.0));  //cheesy way of making a flat line
+		//start with a nearly linear cuve
+		_fade_out->fast_simple_add (0, 1);
+		_fade_out->fast_simple_add (0.5*len, 0.6);
+
+		//now generate a fade-out curve by successively applying a gain drop
+		const float breakpoint = 0.7;  //linear for first 70%
+		const int num_steps = 9;
+		for (int i = 2; i < num_steps; i++) {
+			float coeff = (1.0-breakpoint);
+			for (int j = 0; j < i; j++) {
+				coeff *= 0.5;  //6dB drop per step
+			}
+			_fade_out->fast_simple_add (len* (breakpoint+((1.0-breakpoint)*(double)i/(double)num_steps)), coeff);
 		}
-		c1->fast_simple_add (len, VERY_SMALL_SIGNAL);
-
-		//curve 2 is a slow fade at end
-		generate_db_fade (c2, len, 10, -30);
-
-		merge_curves (_fade_out,  c1, c2);
+		_fade_out->fast_simple_add (len, VERY_SMALL_SIGNAL);
 		reverse_curve (_inverse_fade_out, _fade_out);
 		break;
 	}
