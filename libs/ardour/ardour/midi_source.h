@@ -48,7 +48,8 @@ class MidiSource : virtual public Source, public boost::enable_shared_from_this<
 	MidiSource (Session& session, const XMLNode&);
 	virtual ~MidiSource ();
 
-	boost::shared_ptr<MidiSource> clone (Evoral::MusicalTime begin = Evoral::MinMusicalTime,
+	boost::shared_ptr<MidiSource> clone (const std::string& path,
+					     Evoral::MusicalTime begin = Evoral::MinMusicalTime,
 	                                     Evoral::MusicalTime end = Evoral::MaxMusicalTime);
 
 	/** Read the data in a given time range from the MIDI source.

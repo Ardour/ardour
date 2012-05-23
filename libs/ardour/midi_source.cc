@@ -328,21 +328,26 @@ MidiSource::mark_streaming_write_completed ()
 }
 
 boost::shared_ptr<MidiSource>
-MidiSource::clone (Evoral::MusicalTime begin, Evoral::MusicalTime end)
+MidiSource::clone (const string& path, Evoral::MusicalTime begin, Evoral::MusicalTime end)
 {
 	string newname = PBD::basename_nosuffix(_name.val());
 	string newpath;
 
-	/* get a new name for the MIDI file we're going to write to
-	 */
+	if (path.empty()) {
 
-	do {
-
-		newname = bump_name_once (newname, '-');
-		/* XXX build path safely */
-		newpath = _session.session_directory().midi_path().to_string() +"/"+ newname + ".mid";
-
-	} while (Glib::file_test (newpath, Glib::FILE_TEST_EXISTS));
+		/* get a new name for the MIDI file we're going to write to
+		 */
+		
+		do {
+			newname = bump_name_once (newname, '-');
+			/* XXX build path safely */
+			newpath = _session.session_directory().midi_path().to_string() +"/"+ newname + ".mid";
+			
+		} while (Glib::file_test (newpath, Glib::FILE_TEST_EXISTS));
+	} else {
+		/* caller must check for pre-existing file */
+		newpath = path;
+	}
 
 	boost::shared_ptr<MidiSource> newsrc = boost::dynamic_pointer_cast<MidiSource>(
 		SourceFactory::createWritable(DataType::MIDI, _session,
