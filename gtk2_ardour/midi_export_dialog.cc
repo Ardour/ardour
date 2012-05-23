@@ -19,7 +19,9 @@
 
 #include <gtkmm/stock.h>
 
+#include "ardour/directory_names.h"
 #include "ardour/midi_region.h"
+#include "ardour/session.h"
 
 #include "midi_export_dialog.h"
 
@@ -29,15 +31,32 @@ MidiExportDialog::MidiExportDialog (PublicEditor&, boost::shared_ptr<MidiRegion>
 	: ArdourDialog (string_compose (_("Export MIDI: %1"), region->name()))
 	, file_chooser (Gtk::FILE_CHOOSER_ACTION_SAVE)
 {
+	set_border_width (12);
+
 	add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
 	add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+
+	get_vbox()->set_border_width (12);
 	get_vbox()->pack_start (file_chooser);
-	file_chooser.set_filename (region->name() + ".mid");
+
+	set_default_response (Gtk::RESPONSE_ACCEPT);
+
+	file_chooser.set_current_name (region->name() + ".mid");
 	file_chooser.show ();
+
+	file_chooser.signal_file_activated().connect (sigc::bind (sigc::mem_fun (*this, &MidiExportDialog::response), Gtk::RESPONSE_ACCEPT));
 }
 
 MidiExportDialog::~MidiExportDialog ()
 {
+}
+
+void
+MidiExportDialog::set_session (Session* s)
+{
+	ArdourDialog::set_session (s);
+
+	file_chooser.set_current_folder (Glib::build_filename (Glib::path_get_dirname (s->path()), ARDOUR::export_dir_name));
 }
 
 std::string

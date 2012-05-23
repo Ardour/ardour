@@ -32,6 +32,8 @@ class MidiExportDialog : public ArdourDialog {
 	MidiExportDialog (PublicEditor& editor, boost::shared_ptr<ARDOUR::MidiRegion>);
 	~MidiExportDialog ();
 
+	void set_session (ARDOUR::Session*);
+
 	std::string get_path() const;
 
   private:

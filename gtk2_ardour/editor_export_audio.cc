@@ -136,7 +136,42 @@ Editor::export_region ()
 			return;
 		}
 
+		dialog.hide ();
+
 		string path = dialog.get_path ();
+
+		if (Glib::file_test (path, Glib::FILE_TEST_EXISTS)) {
+
+			MessageDialog checker (_("File Exists!"),
+					       true,
+					       Gtk::MESSAGE_WARNING,
+					       Gtk::BUTTONS_NONE);
+			
+			checker.set_title (_("File Exists!"));
+
+			checker.add_button (Stock::CANCEL, RESPONSE_CANCEL);
+			checker.add_button (_("Overwrite Existing File"), RESPONSE_ACCEPT);
+			checker.set_default_response (RESPONSE_CANCEL);
+			
+			checker.set_wmclass (X_("midi_export_file_exists"), PROGRAM_NAME);
+			checker.set_position (Gtk::WIN_POS_MOUSE);
+
+			ret = checker.run ();
+
+			switch (ret) {
+			case Gtk::RESPONSE_ACCEPT:
+				/* force unlink because the backend code will
+				   go wrong if it tries to open an existing
+				   file for writing.
+				*/
+				::unlink (path.c_str());
+				break;
+			default:
+				return;
+			}
+			
+		}
+
 		(void) midi_region->clone (path);
 	}
 }
