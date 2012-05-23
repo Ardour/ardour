@@ -34,9 +34,7 @@ namespace ARDOUR {
 SearchPath
 midi_patch_search_path ()
 {
-	SearchPath spath (user_config_directory ());
-
-	spath += ardour_dll_directory ();
+	SearchPath spath (ardour_config_search_path());
 	spath.add_subdirectory_to_paths(midi_patch_dir_name);
 
 	bool midi_patch_path_defined = false;
