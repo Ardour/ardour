@@ -558,6 +558,7 @@ while [ true ] ; do
 			# don't include any X Window libraries
 			if echo $dep | grep -qs libX\. ; then continue; fi  
 			if echo $dep | grep -qs libxcb ; then continue; fi  
+			if echo $dep | grep -qs libICE\. ; then continue; fi  
 			if echo $dep | grep -qs libSM\. ; then continue; fi  
 			# don't include libc
 			if echo $dep | grep -qs 'libc\.' ; then continue; fi
