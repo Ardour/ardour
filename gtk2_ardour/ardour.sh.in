@@ -1,10 +1,13 @@
 #!/bin/sh
 
-export GTK_PATH=@LIBDIR@/ardour3${GTK_PATH:+:$GTK_PATH}
+#
+# This script runs an installed version of Ardour. It sets a few environment variables
+# and does a few checks before exec'ing the real executable.
+# 
+
+export GTK_PATH=@SYSCONFDIR@/ardour3${GTK_PATH:+:$GTK_PATH}
 
 export LD_LIBRARY_PATH=@LIBDIR@/ardour3${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
-# DYLD_LIBRARY_PATH is for Darwin
-export DYLD_LIBRARY_PATH=$LD_LIBRARY_PATH
 
 ## Memlock check
 
@@ -35,6 +38,14 @@ elif [ $(nm -D --radix=dec --defined-only -S $GLIB | grep -w g_atomic_int_add | 
 	echo "         the case with your system."
 	echo ""
 fi
+
+#
+# Running Ardour requires these 3 variables to be set
+#
+
+export ARDOUR_DATA_PATH=@DATADIR@/ardour3
+export ARDOUR_CONFIG_PATH=@SYSCONFDIR@/ardour3
+export ARDOUR_DLL_PATH=@LIBDIR@/ardour3
 
 exec @LIBDIR@/ardour3/ardour-@VERSION@ "$@"
 

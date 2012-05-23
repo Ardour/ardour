@@ -3,6 +3,7 @@
 # script for pulling together a MacOSX app bundle.
 
 GTKQUARTZ_ROOT=$HOME/gtk/inst
+ARDOURSTACK_ROOT=$HOME/a3/inst
 
 if pkg-config --modversion gtk+-2.0 | grep -s 2.22 ; then
     # older GTK
@@ -95,18 +96,27 @@ echo "Info string is $info_string"
 
 APPDIR=${APPNAME}.app
 APPROOT=$APPDIR/Contents
-Frameworks=$APPROOT/Frameworks
+Frameworks=$APPROOT/lib
 Resources=$APPROOT/Resources
-Plugins=$APPROOT/Plugins
-Surfaces=$APPROOT/Surfaces
-Panners=$APPROOT/Panners
-MidiMaps=$APPROOT/MidiMaps
-MCP=$APPROOT/MCP
-ExportFormats=$APPROOT/ExportFormats
-Templates=$APPROOT/Templates
-Shared=$Resources/share
-Etc=$Resources/etc
+#
+# Since this is OS X, don't try to distinguish between etc and shared
+# (machine dependent and independent data) - just put everything
+# into Resources.
+# 
+Shared=$Resources
+Etc=$Resources
 Locale=$Resources/locale
+#
+# Bundled Plugins live in a top level folder
+# 
+Plugins=$APPROOT/Plugins
+Surfaces=$Frameworks/surfaces
+Panners=$Frameworks/panners
+MidiMaps=$Shared/midi_maps
+ExportFormats=$Shared/export
+Templates=$Shared/templates
+PatchFiles=$Shared/patchfiles
+MackieControl=$Shared/mcp
 
 if [ x$PRINT_SYSDEPS != x ] ; then
 #
@@ -141,6 +151,7 @@ mkdir -p $Templates
 mkdir -p $Frameworks/modules
 mkdir -p $Shared/templates
 mkdir -p $Etc
+mkdir -p $MackieControl
 
 # maybe set variables
 env=""
@@ -280,35 +291,60 @@ cat > pangorc <<EOF
 [Pango]
 ModulesPath=$GTKQUARTZ_ROOT/lib/pango/1.6.0/modules
 EOF
-env PANGO_RC_FILE=pangorc $GTKQUARTZ_ROOT/bin/pango-querymodules | sed "s?$GTKQUARTZ_ROOT/lib/pango/1.6.0/modules/?@executable_path/../Frameworks/modules/?" > $Resources/pango.modules
+env PANGO_RC_FILE=pangorc $GTKQUARTZ_ROOT/bin/pango-querymodules | sed "s?$GTKQUARTZ_ROOT/lib/pango/1.6.0/modules/?@executable_path/../lib/modules/?" > $Resources/pango.modules
 rm pangorc
 
 # generate a new GDK pixbufs loaders file
-gdk-pixbuf-query-loaders | sed "s?$GDKPIXBUF_LOADERS/?@executable_path/../Frameworks/modules/?" > $Resources/gdk-pixbuf.loaders
+gdk-pixbuf-query-loaders | sed "s?$GDKPIXBUF_LOADERS/?@executable_path/../lib/modules/?" > $Resources/gdk-pixbuf.loaders
 
 # this one is special - we will set GTK_PATH to $Frameworks/clearlooks
 cp $BUILD_ROOT/libs/clearlooks-newer/libclearlooks.dylib $Frameworks
 mkdir -p $Frameworks/clearlooks/engines
 (cd $Frameworks/clearlooks/engines && ln -s $BUILD_ROOT/libclearlooks.dylib libclearlooks.dylib && ln -s ../../libclearlooks.dylib libclearlooks.so)
 
+# Control Surface shared libraries
 cp $BUILD_ROOT/libs/surfaces/*/libardour_*.dylib $Surfaces
+# hack ... move libardour_cp back into Frameworks
+mv $Surfaces/libardourcp*.dylib $Frameworks
+
+# Panners
 cp $BUILD_ROOT/libs/panners/*/lib*.dylib $Panners
-(cd ../../export && 
-    for f in *.preset ; do 
-	echo ExportFormat: $f; cp "$f" ../tools/osx_packaging/$ExportFormats ; 
-done)
-(cd $BUILD_ROOT/../templates && \
-    for f in * ; do 
-	if [ -d "$f" ] ; then
-	    echo Template: $f ; cp -r "$f" ../tools/osx_packaging/$Templates ; 
-	fi
-done)
 
-# MIDI maps
-cp ../../midi_maps/*.map $MidiMaps
 
-# Mackie support files
-cp ../../mcp/*.{device,profile} $MCP
+# Export Formats/Presets
+for f in $BUILD_ROOT/../export/*.preset $BUILD_ROOT/../export/*.format ; do 
+    echo ExportFormat: $f 
+    cp "$f" $ExportFormats ; 
+done
+
+# Session and Route templates
+for f in $BUILD_ROOT/../templates/* ; do 
+    if [ -d "$f" ] ; then
+	echo Template: $f 
+        cp -r "$f" $Templates ; 
+    fi
+done
+
+# MidiMaps
+# got to be careful with names here
+for x in $BUILD_ROOT/../midi_maps/*.map ; do
+    cp "$x" $MidiMaps
+    echo Copied MIDI map $x 
+done
+
+# MIDNAM Patch Files
+# got to be careful with names here
+for x in $BUILD_ROOT/../patchfiles/*.midnam ; do
+    cp "$x" $PatchFiles
+    echo Copied MIDNAM file "$x"
+done
+
+# MackieControl data
+# got to be careful with names here
+for x in $BUILD_ROOT/../mcp/*.device $BUILD_ROOT/../mcp/*.profile ; do
+    cp "$x" $MackieControl
+    echo Copied Mackie Control file $x 
+done
 
 # VAMP plugins that we use
 cp $BUILD_ROOT/libs/vamp-plugins/libardourvampplugins.dylib $Frameworks
@@ -319,7 +355,7 @@ while [ true ] ; do
 	if ! file $file | grep -qs Mach-O ; then
 	    continue
 	fi
-	deps=`otool -L $file | awk '{print $1}' | egrep "($GTKQUARTZ_ROOT|/opt/|/local/|libs/)" | grep -v 'libjack\.'`
+	deps=`otool -L $file | awk '{print $1}' | egrep "($GTKQUARTZ_ROOT|$ARDOURSTACK_ROOT|/opt/|/local/|libs/)" | grep -v 'libjack\.'`
 	# echo -n "."
 	for dep in $deps ; do
 	    base=`basename $dep`
@@ -390,9 +426,9 @@ fi
 for exe in $executables; do
     EXE=$APPROOT/MacOS/$exe
     changes=""
-    for lib in `otool -L $EXE | egrep "($GTKQUARTZ_ROOT|/opt/|/local/|libs/)" | awk '{print $1}' | grep -v 'libjack\.'` ; do
+    for lib in `otool -L $EXE | egrep "($GTKQUARTZ_ROOT|$ARDOURSTACK_ROOT|/opt/|/local/|libs/)" | awk '{print $1}' | grep -v 'libjack\.'` ; do
       base=`basename $lib`
-      changes="$changes -change $lib @executable_path/../Frameworks/$base"
+      changes="$changes -change $lib @executable_path/../lib/$base"
     done
     if test "x$changes" != "x" ; then
 	install_name_tool $changes $EXE
@@ -416,12 +452,12 @@ for libdir in $Frameworks $Frameworks/modules $Surfaces $Panners ; do
         # change all the dependencies
 	
 	changes=""
-	for lib in `otool -L $dylib | egrep "($GTKQUARTZ_ROOT|/opt/|/local/|libs/)" | awk '{print $1}' | grep -v 'libjack\.'` ; do
+	for lib in `otool -L $dylib | egrep "($GTKQUARTZ_ROOT|$ARDOURSTACK_ROOT|/opt/|/local/|libs/)" | awk '{print $1}' | grep -v 'libjack\.'` ; do
 	    base=`basename $lib`
 	    if echo $lib | grep -s libbase; then
 		changes="$changes -change $lib @executable_path/../$libbase/$base"
 	    else
-		changes="$changes -change $lib @executable_path/../Frameworks/$base"
+		changes="$changes -change $lib @executable_path/../lib/$base"
 	    fi
 	done
 	

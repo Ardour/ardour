@@ -18,7 +18,7 @@ static const int CPU_CACHE_ALIGN = 16; /* arguably 32 on most arches, but it mat
 
 int cache_aligned_malloc (void** memptr, size_t size)
 {
-#ifdef NO_POSIX_MEMALIGN
+#ifndef HAVE_POSIX_MEMALIGN
 	if (((*memptr) = malloc (size)) == 0) {
 		fatal << string_compose (_("Memory allocation error: malloc (%1 * %2) failed (%3)"),
 					 CPU_CACHE_ALIGN, size, strerror (errno)) << endmsg;

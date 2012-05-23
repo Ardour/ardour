@@ -564,6 +564,7 @@ Session::import_audiofiles (ImportStatus& status)
 		/* flush the final length(s) to the header(s) */
 
 		for (Sources::iterator x = all_new_sources.begin(); x != all_new_sources.end(); ) {
+
 			if ((afs = boost::dynamic_pointer_cast<AudioFileSource>(*x)) != 0) {
 				afs->update_header((*x)->natural_position(), *now, xnow);
 				afs->done_with_peakfile_writes ();
@@ -573,6 +574,15 @@ Session::import_audiofiles (ImportStatus& status)
 				if (Config->get_auto_analyse_audio()) {
 					Analyser::queue_source_for_analysis (boost::static_pointer_cast<Source>(*x), false);
 				}
+			}
+			
+			/* imported, copied files cannot be written or removed
+			 */
+
+			boost::shared_ptr<FileSource> fs = boost::dynamic_pointer_cast<FileSource>(*x);
+			if (fs) {
+				fs->mark_immutable ();
+				fs->mark_nonremovable ();
 			}
 
 			/* don't create tracks for empty MIDI sources (channels) */
@@ -590,8 +600,12 @@ Session::import_audiofiles (ImportStatus& status)
 
 		std::copy (all_new_sources.begin(), all_new_sources.end(), std::back_inserter(status.sources));
 	} else {
-		// this can throw...but it seems very unlikely
-		std::for_each (all_new_sources.begin(), all_new_sources.end(), remove_file_source);
+		try {
+			std::for_each (all_new_sources.begin(), all_new_sources.end(), remove_file_source);
+		} catch (...) {
+			error << _("Failed to remove some files after failed/cancelled import operation") << endmsg;
+		}
+				
 	}
 
 	status.done = true;

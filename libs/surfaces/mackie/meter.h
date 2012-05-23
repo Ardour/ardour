@@ -35,9 +35,9 @@ public:
 		, last_segment_value_sent (-1)
 		, overload_on (false) {}
 	
-	MidiByteArray update_message (float dB);
+	void send_update (Surface&, float dB);
 
-	MidiByteArray zero() { return update_message (-99999999.0); }
+	MidiByteArray zero();
 
 	static Control* factory (Surface&, int id, const char*, Group&);
 	

@@ -60,7 +60,7 @@ BundleEditorMatrix::setup_ports (int dim)
 		   otherwise in some cases the basic system IO ports may be hidden, making
 		   the bundle editor useless */
 
-		_ports[OTHER].gather (_session, DataType::NIL, _bundle->ports_are_inputs(), true);
+		_ports[OTHER].gather (_session, DataType::NIL, _bundle->ports_are_inputs(), true, show_only_bundles ());
 		_ports[OTHER].remove_bundle (_bundle);
 		_ports[OTHER].resume_signals ();
 	}
@@ -101,13 +101,13 @@ BundleEditorMatrix::get_state (BundleChannel c[2]) const
 }
 
 bool
-BundleEditorMatrix::can_add_channel (boost::shared_ptr<Bundle> b) const
+BundleEditorMatrix::can_add_channels (boost::shared_ptr<Bundle> b) const
 {
 	if (b == _bundle) {
 		return true;
 	}
 
-	return PortMatrix::can_add_channel (b);
+	return PortMatrix::can_add_channels (b);
 }
 
 void

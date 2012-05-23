@@ -2909,7 +2909,7 @@ MidiRegionView::change_note_lengths (bool fine, bool shorter, Evoral::MusicalTim
 			delta = trackview.editor().get_grid_type_as_beats (success, _region->position());
 			if (!success) {
 				/* XXX cannot get grid type as beats ... should always be possible ... FIX ME */
-				cerr << "Grid type not available as beats - TO BE FIXED\n";
+				error << string_compose (_("programming error: %1"), "Grid type not available as beats - TO BE FIXED") << endmsg;
 				return;
 			}
 		}

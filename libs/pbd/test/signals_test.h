@@ -10,6 +10,7 @@ class SignalsTest : public CppUnit::TestFixture
 	CPPUNIT_TEST_SUITE_END ();
 
 public:
+	void setUp ();
 	void testEmission ();
 	void testDestruction ();
 	void testScopedConnectionList ();

@@ -321,17 +321,6 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization)
 	AUPluginInfo::load_cached_info ();
 #endif
 
-	/* Make VAMP look in our library ahead of anything else */
-
-	char *p = getenv ("VAMP_PATH");
-	string vamppath = VAMP_DIR;
-	if (p) {
-		vamppath += ':';
-		vamppath += p;
-	}
-	setenv ("VAMP_PATH", vamppath.c_str(), 1);
-
-
 	setup_hardware_optimization (try_optimization);
 
 	SourceFactory::init ();
@@ -404,7 +393,7 @@ void
 ARDOUR::find_bindings_files (map<string,string>& files)
 {
 	vector<sys::path> found;
-	SearchPath spath = ardour_search_path() + user_config_directory() + system_config_search_path();
+	SearchPath spath = ardour_config_search_path();
 
 	if (getenv ("ARDOUR_SAE")) {
 		Glib::PatternSpec pattern("*SAE-*.bindings");

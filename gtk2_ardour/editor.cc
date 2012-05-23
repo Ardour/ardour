@@ -786,7 +786,6 @@ Editor::button_settings () const
 	XMLNode* node = find_named_node (*settings, X_("Buttons"));
 
 	if (!node) {
-                cerr << "new empty Button node\n";
 		node = new XMLNode (X_("Buttons"));
 	}
 
@@ -1449,141 +1448,140 @@ Editor::popup_fade_context_menu (int button, int32_t time, ArdourCanvas::Item* i
 	}
 
 	MenuList& items (fade_context_menu.items());
+	items.clear ();
 
-	if (items.empty()) {
-		switch (item_type) {
-		case FadeInItem:
-		case FadeInHandleItem:
-			if (arv->audio_region()->fade_in_active()) {
-				items.push_back (MenuElem (_("Deactivate"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_active), false)));
-			} else {
-				items.push_back (MenuElem (_("Activate"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_active), true)));
-			}
-			
-			items.push_back (SeparatorElem());
-			
-			if (Profile->get_sae()) {
-				
-				items.push_back (MenuElem (_("Linear"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_shape), FadeLinear)));
-				items.push_back (MenuElem (_("Slowest"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_shape), FadeFast)));
-				
-			} else {
-				
-				items.push_back (
-					ImageMenuElem (
-						_("Linear"),
-						*_fade_in_images[FadeLinear],
-						sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_shape), FadeLinear)
-						)
-					);
-				
-				dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
-				
-				items.push_back (
-					ImageMenuElem (
-						_("Slow"),
-						*_fade_in_images[FadeSlow],
-						sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_shape), FadeSlow)
-						));
-				
-				dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
-				
-				items.push_back (
-					ImageMenuElem (
-						_("Fast"),
-						*_fade_in_images[FadeFast],
-						sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_shape), FadeFast)
-						));
-				
-				dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
-				
-				items.push_back (
-					ImageMenuElem (
-						_("Symmetric"),
-						*_fade_in_images[FadeSymmetric],
-						sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_shape), FadeSymmetric)
-						));
-				
-				items.push_back (
-					ImageMenuElem (
-						_("Constant Power"),
-						*_fade_in_images[FadeConstantPower],
-						sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_shape), FadeConstantPower)
-						));
-
-				dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
-			}
-
-			break;
-
-		case FadeOutItem:
-		case FadeOutHandleItem:
-			if (arv->audio_region()->fade_out_active()) {
-				items.push_back (MenuElem (_("Deactivate"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_out_active), false)));
-			} else {
-				items.push_back (MenuElem (_("Activate"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_out_active), true)));
-			}
-
-			items.push_back (SeparatorElem());
-
-			if (Profile->get_sae()) {
-				items.push_back (MenuElem (_("Linear"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_out_shape), FadeLinear)));
-				items.push_back (MenuElem (_("Slowest"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_out_shape), FadeSlow)));
-			} else {
-
-				items.push_back (
-					ImageMenuElem (
-						_("Linear"),
-						*_fade_out_images[FadeLinear],
-						sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_out_shape), FadeLinear)
-						)
-					);
-
-				dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
-
-				items.push_back (
-					ImageMenuElem (
-						_("Slow"),
-						*_fade_out_images[FadeSlow],
-						sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_out_shape), FadeSlow)
-						));
-
-				dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
-
-				items.push_back (
-					ImageMenuElem (
-						_("Fast"),
-						*_fade_out_images[FadeFast],
-						sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_out_shape), FadeFast)
-						));
-
-				dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
-
-				items.push_back (
-					ImageMenuElem (
-						_("Symmetric"),
-						*_fade_out_images[FadeSymmetric],
-						sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_out_shape), FadeSymmetric)
-						));
-
-				items.push_back (
-					ImageMenuElem (
-						_("Constant Power"),
-						*_fade_out_images[FadeConstantPower],
-						sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_out_shape), FadeConstantPower)
-						));
-
-				dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
-			}
-
-			break;
-
-		default:
-			fatal << _("programming error: ")
-			      << X_("non-fade canvas item passed to popup_fade_context_menu()")
-			      << endmsg;
-			/*NOTREACHED*/
+	switch (item_type) {
+	case FadeInItem:
+	case FadeInHandleItem:
+		if (arv->audio_region()->fade_in_active()) {
+			items.push_back (MenuElem (_("Deactivate"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_active), false)));
+		} else {
+			items.push_back (MenuElem (_("Activate"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_active), true)));
 		}
+		
+		items.push_back (SeparatorElem());
+		
+		if (Profile->get_sae()) {
+			
+			items.push_back (MenuElem (_("Linear"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_shape), FadeLinear)));
+			items.push_back (MenuElem (_("Slowest"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_shape), FadeFast)));
+			
+		} else {
+			
+			items.push_back (
+				ImageMenuElem (
+					_("Linear"),
+					*_fade_in_images[FadeLinear],
+					sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_shape), FadeLinear)
+					)
+				);
+				
+			dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
+				
+			items.push_back (
+				ImageMenuElem (
+					_("Slow"),
+					*_fade_in_images[FadeSlow],
+					sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_shape), FadeSlow)
+					));
+				
+			dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
+				
+			items.push_back (
+				ImageMenuElem (
+					_("Fast"),
+					*_fade_in_images[FadeFast],
+					sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_shape), FadeFast)
+					));
+				
+			dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
+				
+			items.push_back (
+				ImageMenuElem (
+					_("Symmetric"),
+					*_fade_in_images[FadeSymmetric],
+					sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_shape), FadeSymmetric)
+					));
+				
+			items.push_back (
+				ImageMenuElem (
+					_("Constant Power"),
+					*_fade_in_images[FadeConstantPower],
+					sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_shape), FadeConstantPower)
+					));
+
+			dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
+		}
+
+		break;
+
+	case FadeOutItem:
+	case FadeOutHandleItem:
+		if (arv->audio_region()->fade_out_active()) {
+			items.push_back (MenuElem (_("Deactivate"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_out_active), false)));
+		} else {
+			items.push_back (MenuElem (_("Activate"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_out_active), true)));
+		}
+
+		items.push_back (SeparatorElem());
+
+		if (Profile->get_sae()) {
+			items.push_back (MenuElem (_("Linear"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_out_shape), FadeLinear)));
+			items.push_back (MenuElem (_("Slowest"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_out_shape), FadeSlow)));
+		} else {
+
+			items.push_back (
+				ImageMenuElem (
+					_("Linear"),
+					*_fade_out_images[FadeLinear],
+					sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_out_shape), FadeLinear)
+					)
+				);
+
+			dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
+
+			items.push_back (
+				ImageMenuElem (
+					_("Slow"),
+					*_fade_out_images[FadeSlow],
+					sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_out_shape), FadeSlow)
+					));
+
+			dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
+
+			items.push_back (
+				ImageMenuElem (
+					_("Fast"),
+					*_fade_out_images[FadeFast],
+					sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_out_shape), FadeFast)
+					));
+
+			dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
+
+			items.push_back (
+				ImageMenuElem (
+					_("Symmetric"),
+					*_fade_out_images[FadeSymmetric],
+					sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_out_shape), FadeSymmetric)
+					));
+
+			items.push_back (
+				ImageMenuElem (
+					_("Constant Power"),
+					*_fade_out_images[FadeConstantPower],
+					sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_out_shape), FadeConstantPower)
+					));
+
+			dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
+		}
+
+		break;
+
+	default:
+		fatal << _("programming error: ")
+		      << X_("non-fade canvas item passed to popup_fade_context_menu()")
+		      << endmsg;
+		/*NOTREACHED*/
 	}
 
 	fade_context_menu.popup (button, time);
@@ -1997,10 +1995,10 @@ Editor::add_dstream_context_items (Menu_Helpers::MenuList& edit_items)
 	nudge_menu->set_name ("ArdourContextMenu");
 
 	edit_items.push_back (SeparatorElem());
-	nudge_items.push_back (MenuElem (_("Nudge Entire Track Forward"), (sigc::bind (sigc::mem_fun(*this, &Editor::nudge_track), false, true))));
-	nudge_items.push_back (MenuElem (_("Nudge Track After Edit Point Forward"), (sigc::bind (sigc::mem_fun(*this, &Editor::nudge_track), true, true))));
-	nudge_items.push_back (MenuElem (_("Nudge Entire Track Backward"), (sigc::bind (sigc::mem_fun(*this, &Editor::nudge_track), false, false))));
-	nudge_items.push_back (MenuElem (_("Nudge Track After Edit Point Backward"), (sigc::bind (sigc::mem_fun(*this, &Editor::nudge_track), true, false))));
+	nudge_items.push_back (MenuElem (_("Nudge Entire Track Later"), (sigc::bind (sigc::mem_fun(*this, &Editor::nudge_track), false, true))));
+	nudge_items.push_back (MenuElem (_("Nudge Track After Edit Point Later"), (sigc::bind (sigc::mem_fun(*this, &Editor::nudge_track), true, true))));
+	nudge_items.push_back (MenuElem (_("Nudge Entire Track Earlier"), (sigc::bind (sigc::mem_fun(*this, &Editor::nudge_track), false, false))));
+	nudge_items.push_back (MenuElem (_("Nudge Track After Edit Point Earlier"), (sigc::bind (sigc::mem_fun(*this, &Editor::nudge_track), true, false))));
 
 	edit_items.push_back (MenuElem (_("Nudge"), *nudge_menu));
 }
@@ -2053,10 +2051,10 @@ Editor::add_bus_context_items (Menu_Helpers::MenuList& edit_items)
 	nudge_menu->set_name ("ArdourContextMenu");
 
 	edit_items.push_back (SeparatorElem());
-	nudge_items.push_back (MenuElem (_("Nudge Entire Track Forward"), (sigc::bind (sigc::mem_fun(*this, &Editor::nudge_track), false, true))));
-	nudge_items.push_back (MenuElem (_("Nudge Track After Edit Point Forward"), (sigc::bind (sigc::mem_fun(*this, &Editor::nudge_track), true, true))));
-	nudge_items.push_back (MenuElem (_("Nudge Entire Track Backward"), (sigc::bind (sigc::mem_fun(*this, &Editor::nudge_track), false, false))));
-	nudge_items.push_back (MenuElem (_("Nudge Track After Edit Point Backward"), (sigc::bind (sigc::mem_fun(*this, &Editor::nudge_track), true, false))));
+	nudge_items.push_back (MenuElem (_("Nudge Entire Track Later"), (sigc::bind (sigc::mem_fun(*this, &Editor::nudge_track), false, true))));
+	nudge_items.push_back (MenuElem (_("Nudge Track After Edit Point Later"), (sigc::bind (sigc::mem_fun(*this, &Editor::nudge_track), true, true))));
+	nudge_items.push_back (MenuElem (_("Nudge Entire Track Earlier"), (sigc::bind (sigc::mem_fun(*this, &Editor::nudge_track), false, false))));
+	nudge_items.push_back (MenuElem (_("Nudge Track After Edit Point Earlier"), (sigc::bind (sigc::mem_fun(*this, &Editor::nudge_track), true, false))));
 
 	edit_items.push_back (MenuElem (_("Nudge"), *nudge_menu));
 }
@@ -3061,8 +3059,8 @@ Editor::setup_tooltips ()
 	ARDOUR_UI::instance()->set_tip (smart_mode_joiner, _("Smart Mode (Select/Move Objects + Ranges)"));
 	ARDOUR_UI::instance()->set_tip (internal_edit_button, _("Edit Region Contents (e.g. notes)"));
 	ARDOUR_UI::instance()->set_tip (*_group_tabs, _("Groups: click to (de)activate\nContext-click for other operations"));
-	ARDOUR_UI::instance()->set_tip (nudge_forward_button, _("Nudge Region/Selection Forwards"));
-	ARDOUR_UI::instance()->set_tip (nudge_backward_button, _("Nudge Region/Selection Backwards"));
+	ARDOUR_UI::instance()->set_tip (nudge_forward_button, _("Nudge Region/Selection Later"));
+	ARDOUR_UI::instance()->set_tip (nudge_backward_button, _("Nudge Region/Selection Earlier"));
 	ARDOUR_UI::instance()->set_tip (zoom_in_button, _("Zoom In"));
 	ARDOUR_UI::instance()->set_tip (zoom_out_button, _("Zoom Out"));
 	ARDOUR_UI::instance()->set_tip (zoom_out_full_button, _("Zoom to Session"));

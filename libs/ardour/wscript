@@ -367,11 +367,7 @@ def build(bld):
         'PACKAGE="' + I18N_PACKAGE + '"',
         'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
         'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
-        'MODULE_DIR="' + os.path.normpath(bld.env['LIBDIR']) + '"',
-        'LOCALEDIR="' + os.path.join(
-            os.path.normpath(bld.env['DATADIR']), 'locale') + '"',
-        'VAMP_DIR="' + os.path.join(
-            os.path.normpath(bld.env['LIBDIR']), 'ardour3', 'vamp') + '"',
+        'LOCALEDIR="' + os.path.join(os.path.normpath(bld.env['DATADIR']), 'locale') + '"',
         'PROGRAM_NAME="' + bld.env['PROGRAM_NAME'] + '"'
         ]
 
@@ -456,7 +452,6 @@ def build(bld):
             'PACKAGE="libardour3test"',
             'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
             'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
-            'MODULE_DIR="' + os.path.normpath(bld.env['LIBDIR']) + '"',
             'LOCALEDIR="' + os.path.join(
                 os.path.normpath(bld.env['DATADIR']), 'locale') + '"',
             'VAMP_DIR="' + os.path.join(
@@ -488,7 +483,6 @@ def build(bld):
             'PACKAGE="libardour3profile"',
             'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
             'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
-            'MODULE_DIR="' + os.path.normpath(bld.env['LIBDIR']) + '"',
             'LOCALEDIR="' + os.path.join(
                 os.path.normpath(bld.env['DATADIR']), 'locale') + '"',
             'VAMP_DIR="' + os.path.join(

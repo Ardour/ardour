@@ -163,7 +163,9 @@ Strip::set_route (boost::shared_ptr<Route> r, bool /*with_messages*/)
 
 	set_vpot_parameter (PanAzimuthAutomation);
 	
-	_route->solo_control()->Changed.connect(route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_solo_changed, this), ui_context());
+	_route->solo_changed.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_solo_changed, this), ui_context());
+	_route->listen_changed.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_solo_changed, this), ui_context());
+
 	_route->mute_control()->Changed.connect(route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_mute_changed, this), ui_context());
 
 	boost::shared_ptr<Pannable> pannable = _route->pannable();
@@ -239,7 +241,7 @@ void
 Strip::notify_solo_changed ()
 {
 	if (_route && _solo) {
-		_surface->write (_solo->set_state (_route->soloed() ? on : off));
+		_surface->write (_solo->set_state ((_route->soloed() || _route->listening_via_monitor()) ? on : off));
 	}
 }
 
@@ -687,7 +689,7 @@ Strip::update_meter ()
 {
 	if (_meter) {
 		float dB = const_cast<PeakMeter&> (_route->peak_meter()).peak_power (0);
-		_surface->write (_meter->update_message (dB));
+		_meter->send_update (*_surface, dB);
 	}
 }
 

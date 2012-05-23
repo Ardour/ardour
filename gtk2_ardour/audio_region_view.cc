@@ -1568,7 +1568,8 @@ AudioRegionView::redraw_start_xfade_to (boost::shared_ptr<AudioRegion> ar, frame
 	if (!start_xfade_out) {
 		start_xfade_out = new ArdourCanvas::Line (*group);
 		start_xfade_out->property_width_pixels() = 1;
-		start_xfade_out->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_GainLine.get();
+		uint32_t col = UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->canvasvar_GainLine.get(), 125);
+		start_xfade_out->property_fill_color_rgba() = col;
 	}
 
 	if (!start_xfade_rect) {
@@ -1673,7 +1674,8 @@ AudioRegionView::redraw_end_xfade_to (boost::shared_ptr<AudioRegion> ar, framecn
 	if (!end_xfade_out) {
 		end_xfade_out = new ArdourCanvas::Line (*group);
 		end_xfade_out->property_width_pixels() = 1;
-		end_xfade_out->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_GainLine.get();
+		uint32_t col UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->canvasvar_GainLine.get(), 125);
+		end_xfade_out->property_fill_color_rgba() = col;
 	}
 
 	if (!end_xfade_rect) {

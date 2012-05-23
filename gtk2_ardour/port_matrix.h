@@ -141,7 +141,7 @@ public:
 	virtual PortMatrixNode::State get_state (ARDOUR::BundleChannel c[2]) const = 0;
 	virtual bool list_is_global (int) const = 0;
 
-	virtual bool can_add_channel (boost::shared_ptr<ARDOUR::Bundle>) const;
+	virtual bool can_add_channels (boost::shared_ptr<ARDOUR::Bundle>) const;
 	virtual void add_channel (boost::shared_ptr<ARDOUR::Bundle>, ARDOUR::DataType);
 	virtual bool can_remove_channels (boost::shared_ptr<ARDOUR::Bundle>) const;
 	virtual void remove_channel (ARDOUR::BundleChannel);
@@ -198,6 +198,7 @@ private:
 	void add_remove_option (Gtk::Menu_Helpers::MenuList &, boost::weak_ptr<ARDOUR::Bundle>, int);
 	void add_disassociate_option (Gtk::Menu_Helpers::MenuList &, boost::weak_ptr<ARDOUR::Bundle>, int, int);
 	void port_connected_or_disconnected ();
+	void update_tab_highlighting ();
 
 	Gtk::Window* _parent;
 

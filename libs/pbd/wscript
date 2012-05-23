@@ -43,8 +43,7 @@ def configure(conf):
     conf.check(function_name='getmntent', header_name='mntent.h', define_name='HAVE_GETMNTENT',mandatory=False)
     conf.check(header_name='execinfo.h', define_name='HAVE_EXECINFO',mandatory=False)
     conf.check(header_name='unistd.h', define_name='HAVE_UNISTD',mandatory=False)
-    if conf.check_cc(function_name='posix_memalign', header_name='stdlib.h', cflags='-D_XOPEN_SOURCE=600',mandatory=False) == False:
-        conf.define ('NO_POSIX_MEMALIGN',1)
+    conf.check_cc(function_name='posix_memalign', header_name='stdlib.h', cflags='-D_XOPEN_SOURCE=600', define_name='HAVE_POSIX_MEMALIGN', mandatory=False)
 
     conf.write_config_header('libpbd-config.h', remove=False)
 
@@ -55,7 +54,7 @@ def configure(conf):
 
 def build(bld):
     
-    # Make signal.h using signal.h.py
+    # Make signals_generated.h using signals.py
     bld(rule = 'python ${SRC} ${TGT}', source = 'pbd/signals.py', target = 'pbd/signals_generated.h')
 
     # Library
@@ -80,7 +79,6 @@ def build(bld):
             epa.cc
             error.cc
             filesystem.cc
-            filesystem_paths.cc
             file_manager.cc
             file_utils.cc
             fpu.cc

@@ -166,44 +166,26 @@ fixup_bundle_environment (int, char* [])
 	}
 	setenv ("PATH", path.c_str(), 1);
 
-	path = dir_path;
-	path += "/../Resources";
-	path += dir_path;
-	path += "/../Surfaces";
-	path += dir_path;
-	path += "/../Panners";
+	export_search_path (dir_path, "ARDOUR_DLL_PATH", "/../lib");
 
-	setenv ("ARDOUR_MODULE_PATH", path.c_str(), 1);
-
-	path = user_config_directory().to_string();
-	path += ':';
-	path += dir_path;
-	path += "/../Resources/icons:";
-	path += dir_path;
-	path += "/../Resources/pixmaps:";
-	path += dir_path;
-	path += "/../Resources/share:";
 	path += dir_path;
 	path += "/../Resources";
 
-	setenv ("ARDOUR_PATH", path.c_str(), 1);
-	setenv ("ARDOUR_CONFIG_PATH", path.c_str(), 1);
+	/* inside an OS X .app bundle, there is no difference
+	   between DATA and CONFIG locations, since OS X doesn't
+	   attempt to do anything to expose the notion of
+	   machine-independent shared data.
+	*/
 
-	path = dir_path;
-	path += "/../Resources";
-	setenv ("ARDOUR_INSTANT_XML_PATH", path.c_str(), 1);
+	export_search_path (dir_path, "ARDOUR_DATA_PATH", "/../Resources");
+	export_search_path (dir_path, "ARDOUR_CONFIG_PATH", "/../Resources");
+	export_search_path (dir_path, "ARDOUR_INSTANT_XML_PATH", "/../Resources");
 
 	export_search_path (dir_path, "LADSPA_PATH", "/../Plugins");
 	export_search_path (dir_path, "VAMP_PATH", "/../Frameworks");
-	export_search_path (dir_path, "ARDOUR_PANNER_PATH", "/../Panners");
-	export_search_path (dir_path, "ARDOUR_SURFACES_PATH", "/../Surfaces");
-	export_search_path (dir_path, "ARDOUR_MIDIMAPS_PATH", "/../MidiMaps");
-	export_search_path (dir_path, "ARDOUR_MCP_PATH", "../MCP");
-	export_search_path (dir_path, "ARDOUR_EXPORT_FORMATS_PATH", "/../ExportFormats");
 
 	path = dir_path;
-	path += "/../Frameworks/clearlooks";
-
+	path += "/../lib/clearlooks";
 	setenv ("GTK_PATH", path.c_str(), 1);
 
 	/* unset GTK_RC_FILES so that we only load the RC files that we define
@@ -305,49 +287,17 @@ fixup_bundle_environment (int /*argc*/, char* argv[])
 	Glib::ustring path;
 	Glib::ustring userconfigdir = user_config_directory().to_string();
 
-	/* ensure that we find any bundled executables (e.g. JACK),
-	   and find them before any instances of the same name
-	   elsewhere in PATH
-	*/
-
 	/* note that this function is POSIX/Linux specific, so using / as
 	   a dir separator in this context is just fine.
 	*/
 
-	path = dir_path;
-	path += "/etc:";
-	path += dir_path;
-	path += "/lib/surfaces:";
-	path += dir_path;
-	path += "/lib/panners:";
-
-	setenv ("ARDOUR_MODULE_PATH", path.c_str(), 1);
-
-	path = userconfigdir;
-	path += ':';
-	path += dir_path;
-	path += "/etc/icons:";
-	path += dir_path;
-	path += "/etc/pixmaps:";
-	path += dir_path;
-	path += "/share:";
-	path += dir_path;
-	path += "/etc";
-
-	setenv ("ARDOUR_PATH", path.c_str(), 1);
-	setenv ("ARDOUR_CONFIG_PATH", path.c_str(), 1);
-
-	path = dir_path;
-	path += "/etc";
-	setenv ("ARDOUR_INSTANT_XML_PATH", path.c_str(), 1);
+	export_search_path (dir_path, "ARDOUR_DLL_PATH", "/lib");
+	export_search_path (dir_path, "ARDOUR_CONFIG_PATH", "/etc");
+	export_search_path (dir_path, "ARDOUR_INSTANT_XML_PATH", "/share");
+	export_search_path (dir_path, "ARDOUR_DATA_PATH", "/share");
 
 	export_search_path (dir_path, "LADSPA_PATH", "/../plugins");
 	export_search_path (dir_path, "VAMP_PATH", "/lib");
-	export_search_path (dir_path, "ARDOUR_PANNER_PATH", "/lib/panners");
-	export_search_path (dir_path, "ARDOUR_SURFACES_PATH", "/lib/surfaces");
-	export_search_path (dir_path, "ARDOUR_MIDIMAPS_PATH", "/share/midi_maps");
-	export_search_path (dir_path, "ARDOUR_MCP_PATH", "/share/mcp");
-	export_search_path (dir_path, "ARDOUR_EXPORT_FORMATS_PATH", "/share/export");
 
 	path = dir_path;
 	path += "/lib/clearlooks";
@@ -367,7 +317,7 @@ fixup_bundle_environment (int /*argc*/, char* argv[])
 	}
 
 	/* Tell fontconfig where to find fonts.conf. Use the system version
-	   if it exists, otherwise use the stuff we included in t
+	   if it exists, otherwise use the stuff we included in the bundle
 	*/
 
 	if (Glib::file_test ("/etc/fonts/fonts.conf", Glib::FILE_TEST_EXISTS)) {

@@ -8,7 +8,7 @@ import subprocess
 import sys
 
 # Variables for 'waf dist'
-VERSION = '3.0beta3'
+VERSION = '3.0beta4'
 APPNAME = 'Ardour3'
 
 # Mandatory variables
@@ -36,6 +36,7 @@ children = [
         'templates',
         'export',
         'midi_maps',
+        'mcp',
         'manual'
 ]
 
@@ -232,11 +233,6 @@ def set_compiler_flags (conf,opt):
         if not build_host_supports_sse:
             print("\nWarning: you are building Ardour with SSE support even though your system does not support these instructions. (This may not be an error, especially if you are a package maintainer)")
 
-    # check this even if we aren't using FPU optimization
-    if not conf.is_defined('HAVE_POSIX_MEMALIGN'):
-        optimization_flags.append("-DNO_POSIX_MEMALIGN")
-        debug_flags.append("-DNO_POSIX_MEMALIGN")
-
     # end optimization section
 
     #
@@ -408,8 +404,8 @@ def options(opt):
                     help='Raise a floating point exception if a denormal is detected')
     opt.add_option('--test', action='store_true', default=False, dest='build_tests',
                     help="Build unit tests")
-    opt.add_option('--tranzport', action='store_true', default=False, dest='tranzport',
-                    help='Compile with support for Frontier Designs Tranzport (if libusb is available)')
+    #opt.add_option('--tranzport', action='store_true', default=False, dest='tranzport',
+    # help='Compile with support for Frontier Designs Tranzport (if libusb is available)')
     opt.add_option('--universal', action='store_true', default=False, dest='universal',
                     help='Compile as universal binary (OS X ONLY, requires that external libraries are universal)')
     opt.add_option('--generic', action='store_true', default=False, dest='generic',
@@ -463,16 +459,21 @@ def configure(conf):
         print('Please use a different version or re-configure with --debug')
         exit (1)
 
-    if sys.platform == 'darwin':
+    # libintl may or may not be trivially locatable. On OS X this is always
+    # true. On Linux it will depend on whether we're on a normal Linux distro,
+    # in which case libintl.h is going to be available in /usr/include and
+    # the library itself is part of glibc, or on a bare-bones build system
+    # where we need to pick it up from the GTK dependency stack.
+    #
+    if not os.path.isfile ('/usr/include/libintl.h'):
+        # XXXX hack hack hack
+        prefinclude = ''.join ([ '-I', os.path.expanduser ('~/gtk/inst/include') ])
+        preflib = ''.join ([ '-L', os.path.expanduser ('~/gtk/inst/lib') ])
+        conf.env.append_value('CFLAGS', [ prefinclude ])
+        conf.env.append_value('CXXFLAGS',  [prefinclude ])
+        conf.env.append_value('LINKFLAGS', [ preflib ])
 
-        # libintl may or may not be trivially locatable
-        if not os.path.isfile ('/usr/include/libintl.h'):
-            # XXXX hack hack hack
-            prefinclude = ''.join ([ '-I', os.path.expanduser ('~/gtk/inst/include') ])
-            preflib = ''.join ([ '-L', os.path.expanduser ('~/gtk/inst/lib') ])
-            conf.env.append_value('CFLAGS', [ prefinclude ])
-            conf.env.append_value('CXXFLAGS',  [prefinclude ])
-            conf.env.append_value('LINKFLAGS', [ preflib ])
+    if sys.platform == 'darwin':
 
         # this is required, potentially, for anything we link and then relocate into a bundle
         conf.env.append_value('LINKFLAGS', [ '-Xlinker', '-headerpad_max_install_names' ])
@@ -487,12 +488,6 @@ def configure(conf):
         conf.define ('TOP_MENUBAR',1)
         conf.define ('GTKOSX',1)
 
-        #
-        # need this on OS X to pick up long long variants of several math functions
-        #
-
-        conf.env.append_value('CXXFLAGS_APPLEUTILITY', '-I../libs')
-        #
         #       Define OSX as a uselib to use when compiling
         #       on Darwin to add all applicable flags at once
         #
@@ -501,10 +496,13 @@ def configure(conf):
         conf.env.append_value('CXXFLAGS_OSX', '-mmacosx-version-min=10.4')
         conf.env.append_value('CFLAGS_OSX', '-mmacosx-version-min=10.4')
 
+        # It would be nice to be able to use this to force back-compatibility with 10.4
+        # but even by the time of 11, the 10.4 SDK is no longer available in any normal
+        # way.
+        #
         #conf.env.append_value('CXXFLAGS_OSX', "-isysroot /Developer/SDKs/MacOSX10.4u.sdk")
         #conf.env.append_value('CFLAGS_OSX', "-isysroot /Developer/SDKs/MacOSX10.4u.sdk")
-        #conf.env.append_value('LINKFLAGS_OSX', "-isysroot /Developer/SDKs/MacOSX10.4u.sdk")
-
+        #conf.env.append_value('LINKFLAGS_OSX', "-sysroot /Developer/SDKs/MacOSX10.4u.sdk")
         #conf.env.append_value('LINKFLAGS_OSX', "-sysroot /Developer/SDKs/MacOSX10.4u.sdk")
 
         conf.env.append_value('CXXFLAGS_OSX', "-msse")
@@ -613,8 +611,8 @@ def configure(conf):
         conf.env['ENABLE_NLS'] = True
     if opts.build_tests:
         conf.env['BUILD_TESTS'] = opts.build_tests
-    if opts.tranzport:
-        conf.env['TRANZPORT'] = 1
+    #if opts.tranzport:
+    #    conf.env['TRANZPORT'] = 1
     if opts.windows_vst:
         conf.define('WINDOWS_VST_SUPPORT', 1)
         conf.env['WINDOWS_VST_SUPPORT'] = True
@@ -692,8 +690,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('Samplerate',            conf.is_defined('HAVE_SAMPLERATE'))
 #    write_config_text('Soundtouch',            conf.is_defined('HAVE_SOUNDTOUCH'))
     write_config_text('Translation',           opts.nls)
-    write_config_text('SoundGrid support',     opts.soundgrid)
-    write_config_text('Tranzport',             opts.tranzport)
+#    write_config_text('Tranzport',             opts.tranzport)
     write_config_text('Unit tests',            conf.env['BUILD_TESTS'])
     write_config_text('Universal binary',      opts.universal)
     write_config_text('Generic x86 CPU',       opts.generic)
@@ -763,11 +760,3 @@ def i18n_po(bld):
 def i18n_mo(bld):
     bld.recurse (i18n_children)
 
-def install_not_supported(bld):
-    print ('Installing Ardour 3 is currently unsupported. Run it via the command ./ardev from within the gtk2_ardour directory.')
-    sys.exit (1)
-
-from waflib import Build
-class install(Build.InstallContext):
-    cmd = 'install'
-    fun = 'install_not_supported'

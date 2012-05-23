@@ -447,6 +447,9 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 	{
 		chooser.set_border_width (12);
 
+		audio_and_midi_filter.add_custom (FILE_FILTER_FILENAME, sigc::mem_fun (*this, &SoundFileBrowser::on_audio_and_midi_filter));
+		audio_and_midi_filter.set_name (_("Audio and MIDI files"));
+
 		audio_filter.add_custom (FILE_FILTER_FILENAME, sigc::mem_fun(*this, &SoundFileBrowser::on_audio_filter));
 		audio_filter.set_name (_("Audio files"));
 
@@ -456,6 +459,7 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 		matchall_filter.add_pattern ("*.*");
 		matchall_filter.set_name (_("All files"));
 
+		chooser.add_filter (audio_and_midi_filter);
 		chooser.add_filter (audio_filter);
 		chooser.add_filter (midi_filter);
 		chooser.add_filter (matchall_filter);
@@ -698,6 +702,12 @@ bool
 SoundFileBrowser::on_midi_filter (const FileFilter::Info& filter_info)
 {
 	return SMFSource::safe_midi_file_extension (filter_info.filename);
+}
+
+bool
+SoundFileBrowser::on_audio_and_midi_filter (const FileFilter::Info& filter_info)
+{
+	return on_audio_filter (filter_info) || on_midi_filter (filter_info);
 }
 
 void
@@ -1043,6 +1053,8 @@ SoundFileOmega::reset_options ()
 	string existing_choice;
 	vector<string> action_strings;
 
+	resetting_ourselves = true;
+
 	if (chooser.get_filter() == &audio_filter) {
 
 		/* AUDIO */
@@ -1071,10 +1083,10 @@ SoundFileOmega::reset_options ()
 				}
 			}
 		}
-
+		
 	}  else {
 
-		/* MIDI */
+		/* MIDI ONLY */
 
 		if (selected_midi_track_cnt > 0) {
 			action_strings.push_back (importmode2string (ImportToTrack));
@@ -1084,8 +1096,6 @@ SoundFileOmega::reset_options ()
 	action_strings.push_back (importmode2string (ImportAsTrack));
 	action_strings.push_back (importmode2string (ImportAsRegion));
 	action_strings.push_back (importmode2string (ImportAsTapeTrack));
-
-	resetting_ourselves = true;
 
 	existing_choice = action_combo.get_active_text();
 
@@ -1573,6 +1583,15 @@ SoundFileOmega::reset (uint32_t selected_audio_tracks, uint32_t selected_midi_tr
 {
 	selected_audio_track_cnt = selected_audio_tracks;
 	selected_midi_track_cnt = selected_midi_tracks;
+
+	if (selected_audio_track_cnt == 0 && selected_midi_track_cnt > 0) {
+		chooser.set_filter (midi_filter);
+	} else if (selected_midi_track_cnt == 0 && selected_audio_track_cnt > 0) {
+		chooser.set_filter (audio_filter);
+	} else {
+		chooser.set_filter (audio_and_midi_filter);
+	}
+
 	reset_options ();
 }
 

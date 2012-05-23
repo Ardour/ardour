@@ -19,32 +19,20 @@ using namespace PBD;
 
 namespace ARDOUR {
 
-sys::path
-system_template_directory ()
+SearchPath
+template_search_path ()
 {
-	SearchPath spath(system_data_search_path());
+	SearchPath spath (ardour_data_search_path());
 	spath.add_subdirectory_to_paths(templates_dir_name);
-
-	// just return the first directory in the search path that exists
-	SearchPath::const_iterator i = std::find_if(spath.begin(), spath.end(), sys::exists);
-
-	if (i == spath.end()) return sys::path();
-
-	return *i;
+	return spath;
 }
 
-sys::path
-system_route_template_directory ()
+SearchPath
+route_template_search_path ()
 {
-	SearchPath spath(system_data_search_path());
+	SearchPath spath (ardour_data_search_path());
 	spath.add_subdirectory_to_paths(route_templates_dir_name);
-
-	// just return the first directory in the search path that exists
-	SearchPath::const_iterator i = std::find_if(spath.begin(), spath.end(), sys::exists);
-
-	if (i == spath.end()) return sys::path();
-
-	return *i;
+	return spath;
 }
 
 sys::path
@@ -61,7 +49,7 @@ user_route_template_directory ()
 {
 	sys::path p(user_config_directory());
 	p /= route_templates_dir_name;
-
+	
 	return p;
 }
 
@@ -100,8 +88,7 @@ find_session_templates (vector<TemplateInfo>& template_names)
 {
 	vector<string *> *templates;
 	PathScanner scanner;
-	SearchPath spath (system_template_directory());
-	spath += user_template_directory ();
+	SearchPath spath (template_search_path());
 
 	templates = scanner (spath.to_string(), template_filter, 0, true, true);
 
@@ -137,8 +124,7 @@ find_route_templates (vector<TemplateInfo>& template_names)
 {
 	vector<string *> *templates;
 	PathScanner scanner;
-	SearchPath spath (system_route_template_directory());
-	spath += user_route_template_directory ();
+	SearchPath spath (route_template_search_path());
 
 	templates = scanner (spath.to_string(), route_template_filter, 0, false, true);
 

@@ -107,7 +107,7 @@ class PortGroupList : public sigc::trackable
 
 	void add_group (boost::shared_ptr<PortGroup>);
 	void add_group_if_not_empty (boost::shared_ptr<PortGroup>);
-	void gather (ARDOUR::Session *, ARDOUR::DataType, bool, bool);
+	void gather (ARDOUR::Session *, ARDOUR::DataType, bool, bool, bool);
 	PortGroup::BundleList const & bundles () const;
 	void clear ();
 	void remove_bundle (boost::shared_ptr<ARDOUR::Bundle>);

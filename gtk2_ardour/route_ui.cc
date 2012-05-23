@@ -1287,10 +1287,13 @@ RouteUI::solo_isolate_button_release (GdkEventButton* ev)
 }
 
 bool
-RouteUI::solo_safe_button_release (GdkEventButton*)
+RouteUI::solo_safe_button_release (GdkEventButton* ev)
 {
-        _route->set_solo_safe (!solo_safe_led->active_state(), this);
-        return true;
+	if (ev->button == 1) {
+		_route->set_solo_safe (!solo_safe_led->active_state(), this);
+		return true;
+	}
+	return false;
 }
 
 void

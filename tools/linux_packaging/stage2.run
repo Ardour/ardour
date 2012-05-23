@@ -377,7 +377,7 @@ else
 fi
 
 PGM_EXEC_PATH="${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/bin/${PGM_EXEC_FILE}"
-ICON_PATH="${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/etc/icons"
+ICON_PATH="${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/share/icons"
 MENU_FILE_PATH="${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/share"
 
 ################################

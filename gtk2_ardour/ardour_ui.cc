@@ -1162,7 +1162,6 @@ ARDOUR_UI::redisplay_recent_sessions ()
 		/* check whether session still exists */
 		if (!Glib::file_test(fullpath.c_str(), Glib::FILE_TEST_EXISTS)) {
 			/* session doesn't exist */
-			cerr << "skipping non-existent session " << fullpath << endl;
 			continue;
 		}
 
@@ -2839,7 +2838,6 @@ ARDOUR_UI::show_splash ()
 		try {
 			splash = new Splash;
 		} catch (...) {
-			cerr << "Splash could not be created\n";
 			return;
 		}
 	}

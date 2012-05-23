@@ -144,16 +144,20 @@ APPLIB=$APPDIR/lib
 Libraries=$APPLIB
 Etc=$APPDIR/etc
 Shared=$APPDIR/share
+
 Plugins=$APPLIB/plugins
 Surfaces=$APPLIB/surfaces
 Panners=$APPLIB/panners
-ExportFormats=$Shared/export
-Locale=$Shared/locale
-MidiMaps=$Shared/midi_maps
-MackieControl=$Shared/mcp
+
 Modules=$Libraries/modules
 Loaders=$Libraries/loaders
 
+Templates=$Shared/templates
+ExportFormats=$Shared/export
+Locale=$Shared/locale
+MidiMaps=$Shared/midi_maps
+PatchFiles=$Shared/patchfiles
+MackieControl=$Shared/mcp
 
 if [ x$PRINT_SYSDEPS != x ] ; then
 #
@@ -187,9 +191,11 @@ mkdir -p $Shared
 mkdir -p $Locale
 mkdir -p $Surfaces
 mkdir -p $MidiMaps
+mkdir -p $PatchFiles
 mkdir -p $MackieControl
 mkdir -p $ExportFormats
 mkdir -p $Panners
+mkdir -p $Templates
 mkdir -p $Shared/templates
 mkdir -p $Shared/doc
 
@@ -466,11 +472,25 @@ for x in $BUILD_ROOT/../midi_maps/*.map ; do
     echo Copied MIDI map $x 
 done
 
+# MIDNAM Patch Files
+# got to be careful with names here
+for x in $BUILD_ROOT/../patchfiles/*.midnam ; do
+    cp "$x" $PatchFiles
+    echo Copied MIDNAM file "$x"
+done
+
 # MackieControl data
 # got to be careful with names here
 for x in $BUILD_ROOT/../mcp/*.device $BUILD_ROOT/../mcp/*.profile ; do
     cp "$x" $MackieControl
     echo Copied Mackie Control file $x 
+done
+
+# Templates
+for f in $BUILD_ROOT/../templates/* ; do 
+    if [ -d "$f" ] ; then
+	echo Template: $f ; cp -r "$f" $Templates ; 
+    fi
 done
 
 # ExportFormats
@@ -515,7 +535,6 @@ while [ true ] ; do
 		# do not include libjack
 		deps=`LD_LIBRARY_PATH=$OURLIBS${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} ldd $file | awk '{print $3}'`
 
-		# LD_LIBRARY_PATH=$OURLIBS${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} ldd $file | egrep "(/opt/|/local/|libs/|/usr/lib|/gtk)" | grep -v 'libjack\.'
 		echo -n "."
 		for dep in $deps ; do
 			if test "not" = ${dep}; then 
@@ -534,9 +553,13 @@ while [ true ] ; do
 			if echo $dep | grep -qs "^/lib/" ; then continue; fi
 			# don't include jack
 			if echo $dep | grep -qs libjack ; then continue; fi
+			# don't include ALSA
+			if echo $dep | grep -qs libasound ; then continue; fi
 			# don't include any X Window libraries
-			if echo $dep | grep -qs libX ; then continue; fi  
+			if echo $dep | grep -qs libX\. ; then continue; fi  
 			if echo $dep | grep -qs libxcb ; then continue; fi  
+			if echo $dep | grep -qs libICE\. ; then continue; fi  
+			if echo $dep | grep -qs libSM\. ; then continue; fi  
 			# don't include libc
 			if echo $dep | grep -qs 'libc\.' ; then continue; fi
 			# don't include libstdc++
@@ -597,10 +620,10 @@ cp $BUILD_ROOT/gtk2_ardour/ardour3*.rc $Etc
 cp ../../gtk2_ardour/ardour3_ui_default.conf $Etc/ardour3_ui_default.conf
 cp ../../gtk2_ardour/ardour3_ui_default.conf $Etc/ardour3_ui.conf
 cp ../../instant.xml $Etc/instant.xml
-cp -r ../../gtk2_ardour/icons $Etc
-cp -r ../../gtk2_ardour/pixmaps $Etc
 cp ../../gtk2_ardour/step_editing.bindings $Etc
 cp ../../gtk2_ardour/mixer.bindings $Etc
+cp -r ../../gtk2_ardour/icons $Shared
+cp -r ../../gtk2_ardour/pixmaps $Shared
 
 
 #
@@ -614,8 +637,6 @@ fi
 # share stuff
 
 cp -R ../../gtk2_ardour/splash.png $Shared
-# currently no templates
-#cp ../../templates/*.template $Shared/templates/
 
 # go through and recursively remove any .svn dirs in the bundle
 for svndir in `find $APPDIR -name .svn -type d`; do

@@ -264,7 +264,6 @@ Editor::set_selected_track_as_side_effect (Selection::Operation op)
 
 	case Selection::Extend:
 		selection->clear();
-		cerr << ("Editor::set_selected_track_as_side_effect  case  Selection::Add  not yet implemented\n");
 		break;
 	}
 }

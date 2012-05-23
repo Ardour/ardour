@@ -709,9 +709,8 @@ StepEntry::load_bindings ()
         bindings.set_action_map (myactions);
 
 	sys::path binding_file;
-	SearchPath spath = ardour_search_path() + user_config_directory() + system_config_search_path();
 
-	if (find_file_in_search_path (spath, "step_editing.bindings", binding_file)) {
+	if (find_file_in_search_path (ardour_config_search_path(), "step_editing.bindings", binding_file)) {
                 bindings.load (binding_file.to_string());
         }
 }

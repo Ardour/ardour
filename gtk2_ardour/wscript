@@ -406,9 +406,7 @@ def build(bld):
         'VERSIONSTRING="' + bld.env['VERSION'] + '"',
         'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
         'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
-        'MODULE_DIR="' + os.path.normpath(bld.env['LIBDIR']) + '"',
-        'LOCALEDIR="' + os.path.join(os.path.normpath(bld.env['DATADIR']),
-                                     'locale') + '"',
+        'LOCALEDIR="' + os.path.join(os.path.normpath(bld.env['DATADIR']), 'locale') + '"',
         'PROGRAM_NAME="' + bld.env['PROGRAM_NAME'] + '"'
         ]
     obj.includes += ['../libs']
@@ -450,6 +448,8 @@ def build(bld):
     wrapper_subst_dict = {
             'INSTALL_PREFIX' : bld.env['PREFIX'],
             'LIBDIR'         : os.path.normpath(bld.env['LIBDIR']),
+            'DATADIR'        : os.path.normpath(bld.env['DATADIR']),
+            'SYSCONFDIR'     : os.path.normpath(bld.env['SYSCONFDIR']),
             'LIBS'           : 'build/libs',
             'VERSION'        : '3.0',
             'EXECUTABLE'     : 'build/gtk2_ardour/ardour-3.0'
@@ -645,8 +645,6 @@ def build(bld):
 
     # Default UI configuration
     bld.install_files('${SYSCONFDIR}/ardour3', 'ardour3_ui_default.conf')
-    # Generic widget style mappings
-    bld.install_files('${SYSCONFDIR}/ardour3', 'ardour3_widgets.rc')
 
     # Default export stuff
     bld.install_files('${SYSCONFDIR}/ardour3/export', bld.path.ant_glob('export/*.format'))

@@ -4,6 +4,7 @@
 #include <cstring> // for memset
 #include <cstdlib>
 #include <stdint.h>
+#include <assert.h>
 
 #include "pbd/fpu.h"
 #include "pbd/error.h"
@@ -67,7 +68,7 @@ FPU::FPU ()
 
 	if (cpuflags & (1 << 24)) {
 		
-		char* fxbuf = 0;
+		char** fxbuf = 0;
 		
 		/* DAZ wasn't available in the first version of SSE. Since
 		   setting a reserved bit in MXCSR causes a general protection
@@ -79,38 +80,41 @@ FPU::FPU ()
 		   supported, otherwise, it isn't.
 		*/
 		
-#ifdef NO_POSIX_MEMALIGN
-		if ((fxbuf = (char *) malloc(512)) == 0)
+#ifndef HAVE_POSIX_MEMALIGN
+		fxbuf = (char **) malloc (sizeof (char *));
+		assert (fxbuf);
+		*fxbuf = (char *) malloc (512);
+		assert (*fxbuf);
 #else
-		if (posix_memalign ((void**)&fxbuf, 16, 512)) 
+		posix_memalign ((void **) &fxbuf, 16, sizeof (char *));
+		assert (fxbuf);
+		posix_memalign ((void **) fxbuf, 16, 512);
+		assert (*fxbuf);
 #endif			
-		{
-			error << _("cannot allocate 16 byte aligned buffer for h/w feature detection") << endmsg;
-		} else {
-			
-			memset (fxbuf, 0, 512);
-
-			asm volatile (
-				"fxsave (%0)"
-				:
-				: "r" (fxbuf)
-				: "memory"
-				);
-			
-			uint32_t mxcsr_mask = *((uint32_t*) &fxbuf[28]);
-			
-			/* if the mask is zero, set its default value (from intel specs) */
-			
-			if (mxcsr_mask == 0) {
-				mxcsr_mask = 0xffbf;
-			}
-			
-			if (mxcsr_mask & (1<<6)) {
-				_flags = Flags (_flags | HasDenormalsAreZero);
-			} 
-
-			free (fxbuf);
+		
+		memset (*fxbuf, 0, 512);
+		
+		asm volatile (
+			"fxsave (%0)"
+			:
+			: "r" (*fxbuf)
+			: "memory"
+			);
+		
+		uint32_t mxcsr_mask = *((uint32_t*) &((*fxbuf)[28]));
+		
+		/* if the mask is zero, set its default value (from intel specs) */
+		
+		if (mxcsr_mask == 0) {
+			mxcsr_mask = 0xffbf;
 		}
+		
+		if (mxcsr_mask & (1<<6)) {
+			_flags = Flags (_flags | HasDenormalsAreZero);
+		} 
+		
+		free (*fxbuf);
+		free (fxbuf);
 	}
 #endif
 }			

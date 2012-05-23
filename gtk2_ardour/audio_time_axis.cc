@@ -179,7 +179,6 @@ void
 AudioTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool show)
 {
 	if (param.type() == NullAutomation) {
-		cerr << "WARNING: Attempt to create NullAutomation child, ignoring" << endl;
 		return;
 	}
 

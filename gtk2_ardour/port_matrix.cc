@@ -213,6 +213,7 @@ PortMatrix::setup ()
 
 	_body->setup ();
 	setup_scrollbars ();
+	update_tab_highlighting ();
 	queue_draw ();
 }
 
@@ -411,23 +412,25 @@ PortMatrix::popup_menu (BundleChannel column, BundleChannel row, uint32_t t)
 
 			boost::weak_ptr<Bundle> w (bc[dim].bundle);
 
-			/* Start off with options for the `natural' port type */
-			for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
-				if (should_show (*i)) {
-					snprintf (buf, sizeof (buf), _("Add %s %s"), (*i).to_i18n_string(), channel_noun().c_str());
-					sub.push_back (MenuElem (buf, sigc::bind (sigc::mem_fun (*this, &PortMatrix::add_channel_proxy), w, *i)));
+			if (can_add_channels (bc[dim].bundle)) {
+				/* Start off with options for the `natural' port type */
+				for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
+					if (should_show (*i)) {
+						snprintf (buf, sizeof (buf), _("Add %s %s"), (*i).to_i18n_string(), channel_noun().c_str());
+						sub.push_back (MenuElem (buf, sigc::bind (sigc::mem_fun (*this, &PortMatrix::add_channel_proxy), w, *i)));
+					}
+				}
+				
+				/* Now add other ones */
+				for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
+					if (!should_show (*i)) {
+						snprintf (buf, sizeof (buf), _("Add %s %s"), (*i).to_i18n_string(), channel_noun().c_str());
+						sub.push_back (MenuElem (buf, sigc::bind (sigc::mem_fun (*this, &PortMatrix::add_channel_proxy), w, *i)));
+					}
 				}
 			}
 
-			/* Now add other ones */
-			for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
-				if (!should_show (*i)) {
-					snprintf (buf, sizeof (buf), _("Add %s %s"), (*i).to_i18n_string(), channel_noun().c_str());
-					sub.push_back (MenuElem (buf, sigc::bind (sigc::mem_fun (*this, &PortMatrix::add_channel_proxy), w, *i)));
-				}
-			}
-
-			if (can_rename_channels (bc[dim].bundle)) {
+			if (can_rename_channels (bc[dim].bundle) && bc[dim].channel != -1) {
 				snprintf (
 					buf, sizeof (buf), _("Rename '%s'..."),
 					escape_underscores (bc[dim].bundle->channel_name (bc[dim].channel)).c_str()
@@ -623,6 +626,11 @@ PortMatrix::toggle_show_only_bundles ()
 	_show_only_bundles = !_show_only_bundles;
 
 	setup ();
+
+	/* The way in which hardware ports are grouped changes depending on the _show_only_bundles
+	   setting, so we need to set things up again now.
+	*/
+	setup_all_ports ();
 }
 
 pair<uint32_t, uint32_t>
@@ -672,7 +680,7 @@ PortMatrix::io_from_bundle (boost::shared_ptr<Bundle> b) const
 }
 
 bool
-PortMatrix::can_add_channel (boost::shared_ptr<Bundle> b) const
+PortMatrix::can_add_channels (boost::shared_ptr<Bundle> b) const
 {
 	return io_from_bundle (b);
 }
@@ -770,6 +778,7 @@ PortMatrix::setup_notebooks ()
 		dummy->show ();
 		Label* label = manage (new Label ((*i)->name));
 		label->set_angle (_arrangement == LEFT_TO_BOTTOM ? 90 : -90);
+		label->set_use_markup ();
 		label->show ();
 		if (_arrangement == LEFT_TO_BOTTOM) {
 			_vnotebook.prepend_page (*dummy, *label);
@@ -785,7 +794,10 @@ PortMatrix::setup_notebooks ()
 	for (PortGroupList::List::const_iterator i = _ports[_column_index].begin(); i != _ports[_column_index].end(); ++i) {
 		HBox* dummy = manage (new HBox);
 		dummy->show ();
-		_hnotebook.append_page (*dummy, (*i)->name);
+		Label* label = manage (new Label ((*i)->name));
+		label->set_use_markup ();
+		label->show ();
+		_hnotebook.append_page (*dummy, *label);
 	}
 
 	_ignore_notebook_page_selected = false;
@@ -947,6 +959,55 @@ void
 PortMatrix::port_connected_or_disconnected ()
 {
 	_body->rebuild_and_draw_grid ();
+	update_tab_highlighting ();
+}
+
+/** Update the highlighting of tab names to reflect which ones
+ *  have connections.  This is pretty inefficient, unfortunately,
+ *  but maybe that doesn't matter too much.
+ */
+void
+PortMatrix::update_tab_highlighting ()
+{
+	for (int i = 0; i < 2; ++i) {
+
+		Gtk::Notebook* notebook = row_index() == i ? &_vnotebook : &_hnotebook;
+		
+		PortGroupList const * gl = ports (i);
+		int p = 0;
+		for (PortGroupList::List::const_iterator j = gl->begin(); j != gl->end(); ++j) {
+			bool has_connection = false;
+			PortGroup::BundleList const & bl = (*j)->bundles ();
+			PortGroup::BundleList::const_iterator k = bl.begin ();
+			while (k != bl.end()) {
+				if ((*k)->bundle->connected_to_anything (_session->engine())) {
+					has_connection = true;
+					break;
+				}
+				++k;
+			}
+
+			/* Find the page index that we should update; this is backwards
+			   for the vertical tabs in the LEFT_TO_BOTTOM arrangement.
+			*/
+			int page = p;
+			if (i == row_index() && _arrangement == LEFT_TO_BOTTOM) {
+				page = notebook->get_n_pages() - p - 1;
+			}
+
+			Gtk::Label* label = dynamic_cast<Gtk::Label*> (notebook->get_tab_label(*notebook->get_nth_page (page)));
+			string c = label->get_label ();
+			if (c.length() && c[0] == '<' && !has_connection) {
+				/* this label is marked up with <b> but shouldn't be */
+				label->set_markup ((*j)->name);
+			} else if (c.length() && c[0] != '<' && has_connection) {
+				/* this label is not marked up with <b> but should be */
+				label->set_markup (string_compose ("<b>%1</b>", (*j)->name));
+			}
+
+			++p;
+		}
+	}
 }
 
 string
