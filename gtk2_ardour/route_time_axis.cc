@@ -665,30 +665,30 @@ RouteTimeAxisView::build_display_menu ()
 		build_playlist_menu ();
 		items.push_back (MenuElem (_("Playlist"), *playlist_action_menu));
 		items.back().set_sensitive (_editor.get_selection().tracks.size() <= 1);
-
-		route_group_menu->detach ();
-
-		WeakRouteList r;
-		for (TrackSelection::iterator i = _editor.get_selection().tracks.begin(); i != _editor.get_selection().tracks.end(); ++i) {
-			RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
-			if (rtv) {
-				r.push_back (rtv->route ());
-			}
-		}
-
-		if (r.empty ()) {
-			r.push_back (route ());
-		}
-
-		route_group_menu->build (r);
-		items.push_back (MenuElem (_("Route Group"), *route_group_menu->menu ()));
-
-		build_automation_action_menu (true);
-		items.push_back (MenuElem (_("Automation"), *automation_action_menu));
-
-		items.push_back (SeparatorElem());
 	}
 
+	route_group_menu->detach ();
+	
+	WeakRouteList r;
+	for (TrackSelection::iterator i = _editor.get_selection().tracks.begin(); i != _editor.get_selection().tracks.end(); ++i) {
+		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
+		if (rtv) {
+			r.push_back (rtv->route ());
+		}
+	}
+	
+	if (r.empty ()) {
+		r.push_back (route ());
+	}
+
+	route_group_menu->build (r);
+	items.push_back (MenuElem (_("Group"), *route_group_menu->menu ()));
+	
+	build_automation_action_menu (true);
+	items.push_back (MenuElem (_("Automation"), *automation_action_menu));
+	
+	items.push_back (SeparatorElem());
+	
 	int active = 0;
 	int inactive = 0;
 	TrackSelection const & s = _editor.get_selection().tracks;
