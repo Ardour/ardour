@@ -512,9 +512,13 @@ while [ true ] ; do
 			if echo $dep | grep -qs "^/lib/" ; then continue; fi
 			# don't include jack
 			if echo $dep | grep -qs libjack ; then continue; fi
+			# don't include ALSA
+			if echo $dep | grep -qs libasound ; then continue; fi
 			# don't include any X Window libraries
-			if echo $dep | grep -qs libX ; then continue; fi  
+			if echo $dep | grep -qs libX\. ; then continue; fi  
 			if echo $dep | grep -qs libxcb ; then continue; fi  
+			if echo $dep | grep -qs libICE\. ; then continue; fi  
+			if echo $dep | grep -qs libSM\. ; then continue; fi  
 			# don't include libc
 			if echo $dep | grep -qs 'libc\.' ; then continue; fi
 			# don't include libstdc++
