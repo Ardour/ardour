@@ -42,7 +42,8 @@ SignalsTest::testEmission ()
 	e->emit ();
 	CPPUNIT_ASSERT_EQUAL (2, N);
 
-	e->Fred.connect_same_thread (c, boost::bind (&receiver));
+	PBD::ScopedConnection d;
+	e->Fred.connect_same_thread (d, boost::bind (&receiver));
 	N = 0;
 	e->emit ();
 	CPPUNIT_ASSERT_EQUAL (2, N);
@@ -69,7 +70,6 @@ public:
 	}
 
 	void receiver () {
-		cout << "Receiver::receiver\n";
 		++N;
 	}
 };
