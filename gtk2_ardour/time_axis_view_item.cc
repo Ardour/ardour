@@ -916,9 +916,12 @@ TimeAxisViewItem::reset_name_width (double /*pixel_width*/)
 	}
 
 	update_name_pixbuf_visibility ();
-	if (pb_width > 0) {
-		name_pixbuf->property_pixbuf() = pixbuf_from_string(item_name, NAME_FONT, pb_width, NAME_HEIGHT, Gdk::Color ("#000000"));
+
+	if (pb_width < 1) {
+		pb_width = 1;
 	}
+
+	name_pixbuf->property_pixbuf() = pixbuf_from_string(item_name, NAME_FONT, pb_width, NAME_HEIGHT, Gdk::Color ("#000000"));
 }
 
 /**
