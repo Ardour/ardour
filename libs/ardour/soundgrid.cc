@@ -17,6 +17,8 @@
 
 */
 
+#include <glibmm/miscutils.h>
+
 #include <dlfcn.h>
 #include <iostream>
 
@@ -41,11 +43,26 @@ SoundGrid* SoundGrid::_instance = 0;
 SoundGrid::SoundGrid ()
 	: dl_handle (0)
 {
-        cerr << "Loading " << sndgrid_dll_name << endl;
-	if ((dl_handle = dlopen (sndgrid_dll_name, RTLD_NOW)) == 0) {
+        const char *s =  getenv ("SOUNDGRID_PATH");
+
+        if (!s) {
+                cerr << "SOUNDGRID_PATH not defined - exiting\n";
+                ::exit (1);
+        }
+
+        vector<string> p;
+        p.push_back (s);
+        p.push_back (sndgrid_dll_name);
+
+        string path = Glib::build_filename (p);
+
+        cerr << "Loading " << path << endl;
+
+	if ((dl_handle = dlopen (path.c_str(), RTLD_NOW)) == 0) {
                 cerr << "...failed\n";
 		return;
 	}
+
         cerr << "...worked\n";
 }
 
