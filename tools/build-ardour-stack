@@ -285,7 +285,7 @@ fi
 tar xf libvorbis-1.3.2.tar.bz2 && \
     (set -e && cd libvorbis-1.3.2 && CXXFLAGS="$GLOBAL_CFLAGS" CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install) || die "vorbis build failed"
 
-sndfile_patch=`ls $this_script_dir/misc-patches/libsndfile-1.0.25.patch`
+sndfile_patch=../`ls $this_script_dir/misc-patches/libsndfile-1.0.25.patch`
 
 if [ x$OSX != x ] ; then
     # sndfile-play incorrectly includes <Carbon.h> which no longer works on Lion
