@@ -535,7 +535,6 @@ while [ true ] ; do
 		# do not include libjack
 		deps=`LD_LIBRARY_PATH=$OURLIBS${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} ldd $file | awk '{print $3}'`
 
-		# LD_LIBRARY_PATH=$OURLIBS${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} ldd $file | egrep "(/opt/|/local/|libs/|/usr/lib|/gtk)" | grep -v 'libjack\.'
 		echo -n "."
 		for dep in $deps ; do
 			if test "not" = ${dep}; then 
@@ -554,9 +553,13 @@ while [ true ] ; do
 			if echo $dep | grep -qs "^/lib/" ; then continue; fi
 			# don't include jack
 			if echo $dep | grep -qs libjack ; then continue; fi
+			# don't include ALSA
+			if echo $dep | grep -qs libasound ; then continue; fi
 			# don't include any X Window libraries
-			if echo $dep | grep -qs libX ; then continue; fi  
-			if echo $dep | grep -qs libxcb ; then continue; fi  
+			if echo $dep | grep -qs libX\. ; then continue; fi  
+			if echo $dep | grep -qs libxcb- ; then continue; fi  
+			if echo $dep | grep -qs libICE\. ; then continue; fi  
+			if echo $dep | grep -qs libSM\. ; then continue; fi  
 			# don't include libc
 			if echo $dep | grep -qs 'libc\.' ; then continue; fi
 			# don't include libstdc++
