@@ -253,28 +253,6 @@ cp -R $GTKSTACK_ROOT/lib/gdk-pixbuf-2.0/2.10.0/loaders/*.so $Frameworks/modules
 # charset alias file
 cp -R $GTKSTACK_ROOT/lib/charset.alias $Resources
 
-# We rely on clearlooks, so include a version from our own build tree
-# this one is special - we will set GTK_PATH to $Libraries/clearlooks
-
-echo "Copying clearlooks ..."
-cp $BUILD_ROOT/libs/clearlooks-newer/libclearlooks.so $Libraries
-mkdir -p $Libraries/clearlooks/engines
-(cd $Libraries/clearlooks/engines && ln -s ../../libclearlooks.so . )
-
-if test x$WITH_LADSPA != x ; then
-    if test x$SAE != x ; then
-	plugdir=sae_ladspa
-    elif test x$MIXBUS != x ; then
-	plugdir=mixbus_ladspa
-    else
-	plugdir=ladspa
-    fi
-    if [ -d $plugdir ] ; then 
-        echo "Copying `ls $plugdir | wc -l` plugins ..."
-        cp -r $plugdir/* $Plugins
-    fi
-fi
-
 # generate new Pango module file
 cat > pangorc <<EOF 
 [Pango]
@@ -284,17 +262,33 @@ env PANGO_RC_FILE=pangorc $GTKSTACK_ROOT/bin/pango-querymodules | sed "s?$GTKSTA
 rm pangorc
 
 # generate a new GDK pixbufs loaders file
-gdk-pixbuf-query-loaders | sed "s?$GDKPIXBUF_LOADERS/?@executable_path/../lib/modules/?" > $Resources/gdk-pixbuf.loaders
+gdk-pixbuf-query-loaders | sed "s?$GTKSTACK_ROOT/lib/gdk-pixbuf-2.0/2.10.0/loaders/?@executable_path/../lib/modules/?" > $Resources/gdk-pixbuf.loaders
 
-# this one is special - we will set GTK_PATH to $Frameworks/clearlooks
+# We rely on clearlooks, so include a version from our own build tree
+# this one is special - we will set GTK_PATH to $Libraries/clearlooks
+
+echo "Copying clearlooks ..."
 cp $BUILD_ROOT/libs/clearlooks-newer/libclearlooks.dylib $Frameworks
 mkdir -p $Frameworks/clearlooks/engines
-(cd $Frameworks/clearlooks/engines && ln -s $BUILD_ROOT/libclearlooks.dylib libclearlooks.dylib && ln -s ../../libclearlooks.dylib libclearlooks.so)
+(cd $Frameworks/clearlooks/engines && ln -s ../../libclearlooks.dylib libclearlooks.dylib && ln -s ../../libclearlooks.dylib libclearlooks.so)
+
+if test x$WITH_LADSPA != x ; then
+    if test x$SAE != x ; then
+	plugdir=sae_ladspa
+    elif test x$MIXBUS != x ; then
+	plugdir=mixbus_ladspa
+    else
+	plugdir=ladspa
+    fi
+    if [ -d $plugdir -a x`ls $plugdir` != x ] ; then 
+        echo "Copying `ls $plugdir | wc -l` plugins ..."
+        cp -r $plugdir/* $Plugins
+    fi
+fi
 
 # Control Surface shared libraries
 cp $BUILD_ROOT/libs/surfaces/*/libardour_*.dylib $Surfaces
-# hack ... move libardour_cp back into Frameworks
-mv $Surfaces/libardourcp*.dylib $Frameworks
+cp $BUILD_ROOT/libs/surfaces/control_protocol/libardourcp*.dylib $Frameworks
 
 # Panners
 cp $BUILD_ROOT/libs/panners/*/lib*.dylib $Panners
@@ -302,14 +296,12 @@ cp $BUILD_ROOT/libs/panners/*/lib*.dylib $Panners
 
 # Export Formats/Presets
 for f in $BUILD_ROOT/../export/*.preset $BUILD_ROOT/../export/*.format ; do 
-    echo ExportFormat: $f 
     cp "$f" $ExportFormats ; 
 done
 
 # Session and Route templates
 for f in $BUILD_ROOT/../templates/* ; do 
     if [ -d "$f" ] ; then
-	echo Template: $f 
         cp -r "$f" $Templates ; 
     fi
 done
@@ -318,21 +310,18 @@ done
 # got to be careful with names here
 for x in $BUILD_ROOT/../midi_maps/*.map ; do
     cp "$x" $MidiMaps
-    echo Copied MIDI map $x 
 done
 
 # MIDNAM Patch Files
 # got to be careful with names here
 for x in $BUILD_ROOT/../patchfiles/*.midnam ; do
     cp "$x" $PatchFiles
-    echo Copied MIDNAM file "$x"
 done
 
 # MackieControl data
 # got to be careful with names here
 for x in $BUILD_ROOT/../mcp/*.device $BUILD_ROOT/../mcp/*.profile ; do
     cp "$x" $MackieControl
-    echo Copied Mackie Control file $x 
 done
 
 # VAMP plugins that we use
