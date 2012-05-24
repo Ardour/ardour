@@ -21,6 +21,7 @@
 #include "ardour/plugin_manager.h"
 #include "ardour/processor.h"
 #include "ardour/session.h"
+#include "pbd/error.h"
 
 #include "ardour_ui.h"
 #include "gui_thread.h"
@@ -30,6 +31,8 @@
 
 #include <lilv/lilv.h>
 #include <suil/suil.h>
+
+#include "i18n.h"
 
 using namespace ARDOUR;
 using namespace Gtk;
@@ -272,6 +275,12 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 			pack_start(*_ardour_buttons_box, false, false);
 
 			GtkWidget* c_widget = (GtkWidget*)GET_WIDGET(_inst);
+			if (!c_widget) {
+				error << _("failed to get LV2 UI widget") << endmsg;
+				suil_instance_free((SuilInstance*)_inst);
+				_inst = NULL;
+				return;
+			}
 			_gui_widget = Gtk::manage(Glib::wrap(c_widget));
 			_gui_widget->show_all();
 			pack_start(*_gui_widget, true, true);
