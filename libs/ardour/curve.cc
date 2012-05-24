@@ -418,7 +418,7 @@ Curve::multipoint_eval (double x)
 		if (range.first == events.begin()) {
 			/* we're before the first point */
 			// return default_value;
-			events.front()->value;
+			return events.front()->value;
 		}
 		
 		if (range.second == events.end()) {
