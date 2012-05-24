@@ -68,6 +68,7 @@ class DeviceInfo
 	bool has_touch_sense_faders() const;
 	bool uses_ipmidi() const;
 	bool no_handshake() const;
+	bool has_meters() const;
 	const std::string& name() const;
 
 	static std::map<std::string,DeviceInfo> device_info;
@@ -88,6 +89,7 @@ class DeviceInfo
     bool     _uses_logic_control_buttons;
     bool     _uses_ipmidi;
     bool     _no_handshake;
+    bool     _has_meters;
     std::string _name;
 
     std::map<Button::ID,GlobalButtonInfo> _global_buttons;
