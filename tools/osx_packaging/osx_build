@@ -349,8 +349,8 @@ done
 # VAMP plugins that we use
 cp $BUILD_ROOT/libs/vamp-plugins/libardourvampplugins.dylib $Frameworks
 
-# SUIL Modules
-cp $ARDOURSTACK_ROOT/lib/suil-0/libsuil* $Frameworks
+# Suil modules
+cp $ARDOURSTACK_ROOT/lib/suil-0/lib* $Frameworks
 
 while [ true ] ; do 
     missing=false

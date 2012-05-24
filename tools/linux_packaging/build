@@ -505,7 +505,7 @@ cp $BUILD_ROOT/libs/panners/*/lib*.so* $Panners
 # VAMP plugins that we use
 cp $BUILD_ROOT/libs/vamp-plugins/libardourvampplugins.so* $Libraries
 
-# SUIL GUI sub-libraries
+# Suil modules
 cp $HOME/a3/inst/lib/suil-0/lib* $Libraries
 
 OURLIBDIR=$BUILD_ROOT/libs
