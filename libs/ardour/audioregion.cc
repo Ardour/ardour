@@ -586,8 +586,8 @@ AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 
 	/* READ DATA FROM THE SOURCE INTO mixdown_buffer.
 	   We can never read directly into buf, since it may contain data
-	   from a transparent region `below' this one in the stack; we
-	   must always mix.
+	   from a region `below' this one in the stack, and our fades (if they exist)
+	   may need to mix with the existing data.
 	*/
 
 	if (read_from_sources (_sources, _length, mixdown_buffer, position, to_read, chan_n) != to_read) {
@@ -706,7 +706,14 @@ AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 	
 	/* MIX THE REGION BODY FROM mixdown_buffer INTO buf */
 
-	mix_buffers_no_gain (buf + fade_in_limit, mixdown_buffer + fade_in_limit, to_read - fade_in_limit - fade_out_limit);
+	framecnt_t const N = to_read - fade_in_limit - fade_out_limit;
+	if (N > 0) {
+		if (opaque ()) {
+			memcpy (buf + fade_in_limit, mixdown_buffer + fade_in_limit, N * sizeof (Sample));
+		} else {
+			mix_buffers_no_gain (buf + fade_in_limit, mixdown_buffer + fade_in_limit, N);
+		}
+	}
 
 	return to_read;
 }
