@@ -165,6 +165,10 @@ fixup_bundle_environment (int argc, char* argv[])
 	
 	setenv ("VAMP_PATH", path.c_str(), 1);
 
+	path += dir_path;
+	path += "/../Frameworks";
+	setenv ("SUIL_MODULE_DIR", path.c_str(), 1);
+
 	cstr = getenv ("ARDOUR_CONTROL_SURFACE_PATH");
 	if (cstr) {
 		path = cstr;
@@ -332,6 +336,18 @@ fixup_bundle_environment (int argc, char* argv[])
 	path += "/lib";
 	
 	setenv ("VAMP_PATH", path.c_str(), 1);
+
+	cstr = getenv ("SUIL_MODULE_DIR");
+	if (cstr) {
+		path = cstr;
+		path += ':';
+	} else {
+		path = "";
+	}
+	path += dir_path;
+	path += "/lib";
+	
+	setenv ("SUIL_MODULE_DIR", path.c_str(), 1);
 
 	cstr = getenv ("ARDOUR_CONTROL_SURFACE_PATH");
 	if (cstr) {
