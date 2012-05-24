@@ -305,7 +305,7 @@ cat > pangorc <<EOF
 [Pango]
 ModulesPath=$GTKSTACK_ROOT/lib/pango/1.6.0/modules
 EOF
-env PANGO_RC_FILE=pangorc $GTKSTACK_ROOT/bin/pango-querymodules | sed "s?$GTKSTACK_ROOT/lib/pango/1.6.0/?@ROOTDIR@/?" > $Etc/pango.modules
+env PANGO_RC_FILE=pangorc $GTKSTACK_ROOT/bin/pango-querymodules | sed "s?$GTKSTACK_ROOT/lib/pango/1.6.0/?@ROOTDIR@/?" > $Etc/pango.modules.in
 rm pangorc
 
 # Ditto for gdk-pixbuf loaders
