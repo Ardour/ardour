@@ -289,31 +289,21 @@ fi
 # Copy stuff that may be dynamically loaded
 # 
 
-cp -R $GTKSTACK_ROOT/etc/fonts $Etc
 cp -R $GTKSTACK_ROOT/etc/* $Etc
 echo "Copying all Pango modules ..."
 cp -R $GTKSTACK_ROOT/lib/pango/1.6.0/modules/*.so $Modules
 echo "Copying all GDK Pixbuf loaders ..."
 cp -R $GTKSTACK_ROOT/lib/gdk-pixbuf-2.0/2.10.0/loaders/*.so $Loaders
 # charset alias file
-cp -R $GTKSTACK_ROOT/lib/charset.alias $Etc
 
 pango-querymodules | sed "s?$GTKSTACK_ROOT/lib/pango/1.6.0/?@ROOTDIR@/?" > $Etc/pango.modules.in
 gdk-pixbuf-query-loaders | sed "s?$GTKSTACK_ROOT/lib/gdk-pixbuf-2.0/2.10.0/?@ROOTDIR@/?" > $Etc/gdk-pixbuf.loaders.in
 
-# We sort of rely on clearlooks, so include a version
+# We rely on clearlooks, so include a version from our own build tree
 # this one is special - we will set GTK_PATH to $Libraries/clearlooks
 
-clearlooks_so=${GTKLIB}/engines/libclearlooks.so
-if [ ! -e $clearlooks.so ]; then
-	echo "!!! ERROR !!! - not able to locate libclearlooks.so"
-	echo ""
-	echo "Packager with exit"
-	exit 1
-fi
-
 echo "Copying clearlooks ..."
-cp $clearlooks_so $Libraries
+cp $BUILD_ROOT/lib/clearlooks-newer/libclearlooks.so $Libraries
 mkdir -p $Libraries/clearlooks/engines
 (cd $Libraries/clearlooks/engines && ln -s ../../libclearlooks* libclearlooks.so )
 
