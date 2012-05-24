@@ -305,7 +305,7 @@ gdk-pixbuf-query-loaders | sed "s?$GTKSTACK_ROOT/lib/gdk-pixbuf-2.0/2.10.0/?@ROO
 echo "Copying clearlooks ..."
 cp $BUILD_ROOT/lib/clearlooks-newer/libclearlooks.so $Libraries
 mkdir -p $Libraries/clearlooks/engines
-(cd $Libraries/clearlooks/engines && ln -s ../../libclearlooks* libclearlooks.so )
+(cd $Libraries/clearlooks/engines && ln -s ../../libclearlooks.so . )
 
 # LADSPA
 if test x$WITH_LADSPA != x ; then
