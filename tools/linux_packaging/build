@@ -310,7 +310,6 @@ if [ ! -e $clearlooks.so ]; then
 	echo ""
 	echo "Packager with exit"
 	exit 1
-else
 fi
 
 echo "Copying clearlooks ..."
