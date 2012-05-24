@@ -703,7 +703,7 @@ AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 	}
 
 	
-	/* MIX THE REGION BODY FROM mixdown_buffer INTO buf */
+	/* MIX OR COPY THE REGION BODY FROM mixdown_buffer INTO buf */
 
 	framecnt_t const N = to_read - fade_in_limit - fade_out_limit;
 	if (N > 0) {
