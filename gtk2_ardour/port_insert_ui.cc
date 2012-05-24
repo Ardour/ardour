@@ -22,17 +22,10 @@
 
 #include <gtkmm2ext/doi.h>
 
+#include "ardour/audioengine.h"
+#include "ardour/mtdm.h"
 #include "ardour/port_insert.h"
 #include "ardour/session.h"
-#include "ardour/io.h"
-#include "ardour/audioengine.h"
-#include "ardour/track.h"
-#include "ardour/audio_track.h"
-#include "ardour/midi_track.h"
-#include "ardour/mtdm.h"
-#include "ardour/data_type.h"
-#include "ardour/port.h"
-#include "ardour/bundle.h"
 
 #include "port_insert_ui.h"
 #include "utils.h"
@@ -170,7 +163,7 @@ PortInsertWindow::PortInsertWindow (ARDOUR::Session* sess, boost::shared_ptr<ARD
 {
 
 	set_name ("IOSelectorWindow");
-	string title = _("Port Insert ");
+	std::string title = _("Port Insert ");
 	title += pi->name();
 	set_title (title);
 

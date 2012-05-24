@@ -6,8 +6,6 @@
 #include <libgnomecanvasmm/widget.h>
 #include <libgnomecanvasmm/text.h>
 
-#include "ardour/midi_model.h"
-
 #include "simplerect.h"
 #include "simpleline.h"
 
@@ -20,19 +18,19 @@ class CanvasFlag : public Group
 {
 public:
 	CanvasFlag(MidiRegionView& region,
-                   Group&          parent,
-                   double          height,
-                   guint           outline_color_rgba = 0xc0c0c0ff,
-                   guint           fill_color_rgba = 0x07070707,
-                   double          x = 0.0,
-                   double          y = 0.0);
+	           Group&          parent,
+	           double          height,
+	           guint           outline_color_rgba = 0xc0c0c0ff,
+	           guint           fill_color_rgba = 0x07070707,
+	           double          x = 0.0,
+	           double          y = 0.0);
 
 	virtual ~CanvasFlag();
 
 	virtual bool on_event(GdkEvent* ev);
 
 	virtual void set_text(const std::string& a_text);
-        virtual void set_height (double);
+	virtual void set_height (double);
 
 protected:
 	Text*            _text;

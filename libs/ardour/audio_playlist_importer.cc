@@ -28,7 +28,6 @@
 
 #include "ardour/audio_region_importer.h"
 #include "ardour/session.h"
-#include "ardour/playlist.h"
 #include "ardour/playlist_factory.h"
 #include "ardour/session_playlists.h"
 

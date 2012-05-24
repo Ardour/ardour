@@ -36,11 +36,9 @@
 #include <gtkmm2ext/tearoff.h>
 #include <gtkmm2ext/window_title.h>
 
-#include "ardour/audio_track.h"
 #include "ardour/plugin_manager.h"
 #include "ardour/route_group.h"
 #include "ardour/session.h"
-#include "ardour/session_route.h"
 
 #include "keyboard.h"
 #include "mixer_ui.h"

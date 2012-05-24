@@ -24,17 +24,16 @@
 #include "pbd/enumwriter.h"
 
 #include <gtkmm/style.h>
+#include <sigc++/bind.h>
 
 #include "gtkmm2ext/cairocell.h"
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/rgb_macros.h"
 
-#include "ardour/ardour.h"
+#include "ardour/types.h"
 #include "ardour/session.h"
 #include "ardour/tempo.h"
 #include "ardour/profile.h"
-#include "ardour/slave.h"
-#include <sigc++/bind.h>
 
 #include "ardour_ui.h"
 #include "audio_clock.h"

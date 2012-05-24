@@ -22,9 +22,10 @@
 #include "pbd/compose.h"
 #include "pbd/stacktrace.h"
 
+#include "evoral/EventSink.hpp"
+
 #include "ardour/debug.h"
 #include "ardour/event_type_map.h"
-#include "ardour/midi_ring_buffer.h"
 #include "ardour/midi_source.h"
 #include "ardour/midi_state_tracker.h"
 

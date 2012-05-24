@@ -19,7 +19,7 @@
 */
 
 #include <iostream>
-#include "ardour/automatable.h"
+
 #include "ardour/automation_control.h"
 #include "ardour/event_type_map.h"
 #include "ardour/session.h"
@@ -27,7 +27,6 @@
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
-
 
 AutomationControl::AutomationControl(
 		ARDOUR::Session& session,

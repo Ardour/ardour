@@ -30,7 +30,6 @@
 #include "pbd/xml++.h"
 #include "pbd/id.h"
 #include "pbd/filesystem.h"
-#include "ardour/types.h"
 #include "ardour/element_importer.h"
 #include "ardour/element_import_handler.h"
 #include "ardour/import_status.h"
@@ -38,6 +37,8 @@
 namespace ARDOUR {
 
 class Region;
+class Session;
+class Source;
 
 class AudioRegionImportHandler : public ElementImportHandler
 {

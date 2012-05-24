@@ -21,7 +21,6 @@
 #ifndef __ardour_fft_result_h
 #define __ardour_fft_result_h
 
-#include "ardour/types.h"
 #include <fftw3.h>
 
 #include <gdkmm/color.h>

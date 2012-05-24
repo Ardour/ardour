@@ -20,7 +20,6 @@
 
 #include "ardour/export_format_manager.h"
 
-#include "ardour/types.h"
 #include "ardour/export_format_specification.h"
 #include "ardour/export_format_compatibility.h"
 

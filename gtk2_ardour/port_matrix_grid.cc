@@ -20,7 +20,6 @@
 #include <iostream>
 #include <cairo/cairo.h>
 #include "ardour/bundle.h"
-#include "ardour/types.h"
 #include "port_matrix_grid.h"
 #include "port_matrix.h"
 #include "port_matrix_body.h"

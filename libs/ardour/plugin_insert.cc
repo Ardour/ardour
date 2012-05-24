@@ -35,8 +35,6 @@
 #include "ardour/ladspa_plugin.h"
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
-#include "ardour/port.h"
-#include "ardour/route.h"
 
 #ifdef LV2_SUPPORT
 #include "ardour/lv2_plugin.h"
@@ -54,7 +52,6 @@
 #include "ardour/audio_unit.h"
 #endif
 
-#include "ardour/audioengine.h"
 #include "ardour/session.h"
 #include "ardour/types.h"
 

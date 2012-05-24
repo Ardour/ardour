@@ -22,7 +22,6 @@
 #include "pbd/compose.h"
 
 #include "ardour/buffer_manager.h"
-#include "ardour/debug.h"
 #include "ardour/thread_buffers.h"
 
 using namespace ARDOUR;

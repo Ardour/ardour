@@ -27,18 +27,13 @@
 #include <glibmm/miscutils.h>
 
 #include "pbd/error.h"
-#include "pbd/convert.h"
-#include "pbd/enumwriter.h"
 
 #include "ardour/audioplaylist.h"
 #include "ardour/audio_playlist_source.h"
 #include "ardour/audioregion.h"
-#include "ardour/debug.h"
 #include "ardour/filename_extensions.h"
 #include "ardour/session.h"
 #include "ardour/session_directory.h"
-#include "ardour/session_playlists.h"
-#include "ardour/source_factory.h"
 
 #include "i18n.h"
 

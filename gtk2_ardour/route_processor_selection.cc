@@ -21,10 +21,6 @@
 #include <sigc++/bind.h>
 #include "pbd/error.h"
 
-#include "ardour/playlist.h"
-#include "ardour/processor.h"
-#include "ardour/route.h"
-
 #include "gui_thread.h"
 #include "mixer_strip.h"
 #include "route_processor_selection.h"

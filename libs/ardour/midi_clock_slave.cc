@@ -32,11 +32,7 @@
 
 #include "ardour/debug.h"
 #include "ardour/slave.h"
-#include "ardour/session.h"
-#include "ardour/audioengine.h"
-#include "ardour/cycles.h"
 #include "ardour/tempo.h"
-
 
 #include "i18n.h"
 

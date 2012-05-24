@@ -19,18 +19,15 @@
 
 #include <algorithm>
 
-#include "pbd/basename.h"
-
-#include "ardour/types.h"
-#include "ardour/reverse.h"
-#include "ardour/audiofilesource.h"
-#include "ardour/session.h"
 #include "ardour/audioregion.h"
-
-#include "i18n.h"
+#include "ardour/audiosource.h"
+#include "ardour/reverse.h"
+#include "ardour/types.h"
 
 using namespace std;
 using namespace ARDOUR;
+
+namespace ARDOUR { class Progress; class Session; }
 
 Reverse::Reverse (Session& s)
 	: Filter (s)

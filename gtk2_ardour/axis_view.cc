@@ -32,9 +32,6 @@
 #include <gtkmm2ext/selector.h>
 #include <gtkmm2ext/gtk_ui.h>
 
-#include "ardour/session.h"
-#include "ardour/utils.h"
-
 #include "public_editor.h"
 #include "ardour_ui.h"
 #include "gui_object.h"

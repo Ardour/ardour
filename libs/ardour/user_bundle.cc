@@ -1,13 +1,9 @@
-#include <cassert>
-#include "pbd/failed_constructor.h"
-#include "pbd/compose.h"
-#include "pbd/xml++.h"
 #include "ardour/user_bundle.h"
-#include "ardour/port_set.h"
-#include "ardour/io.h"
-#include "ardour/session.h"
-#include "ardour/audioengine.h"
 #include "i18n.h"
+#include "pbd/compose.h"
+#include "pbd/error.h"
+#include "pbd/failed_constructor.h"
+#include "pbd/xml++.h"
 
 ARDOUR::UserBundle::UserBundle (std::string const & n)
 	: Bundle (n)

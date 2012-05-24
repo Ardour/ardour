@@ -17,18 +17,16 @@
 
 */
 
+#include <cmath>
+
+#include <gtkmm/listviewtext.h>
+
 #include "pbd/memento_command.h"
 #include "pbd/stateful_diff_command.h"
 
-#include "ardour/session.h"
 #include "ardour/region.h"
-#include "ardour/playlist.h"
-#include "ardour/utils.h"
-#include "ardour/dB.h"
+#include "ardour/session.h"
 #include "ardour/source.h"
-#include "gtkmm2ext/utils.h"
-#include <gtkmm/listviewtext.h>
-#include <cmath>
 
 #include "ardour_ui.h"
 #include "clock_group.h"

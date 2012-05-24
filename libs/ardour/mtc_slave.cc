@@ -23,9 +23,6 @@
 #include <unistd.h>
 
 #include "pbd/error.h"
-#include "pbd/enumwriter.h"
-#include "pbd/failed_constructor.h"
-#include "pbd/pthread_utils.h"
 
 #include "midi++/port.h"
 #include "ardour/debug.h"

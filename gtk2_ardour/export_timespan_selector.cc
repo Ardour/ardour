@@ -22,7 +22,6 @@
 
 #include "ardour_ui.h"
 
-#include "ardour/tempo.h"
 #include "ardour/location.h"
 #include "ardour/types.h"
 #include "ardour/session.h"

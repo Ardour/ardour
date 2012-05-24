@@ -62,20 +62,14 @@
 #include "editor_cursors.h"
 #include "verbose_cursor.h"
 
-#include "ardour/types.h"
-#include "ardour/profile.h"
-#include "ardour/route.h"
-#include "ardour/audio_track.h"
-#include "ardour/playlist.h"
-#include "ardour/audioplaylist.h"
 #include "ardour/audioregion.h"
-#include "ardour/midi_region.h"
-#include "ardour/dB.h"
-#include "ardour/utils.h"
-#include "ardour/region_factory.h"
-#include "ardour/source_factory.h"
-#include "ardour/session.h"
 #include "ardour/operations.h"
+#include "ardour/playlist.h"
+#include "ardour/profile.h"
+#include "ardour/region_factory.h"
+#include "ardour/route.h"
+#include "ardour/session.h"
+#include "ardour/types.h"
 
 #include <bitset>
 

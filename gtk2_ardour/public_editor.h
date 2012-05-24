@@ -36,7 +36,6 @@
 #include <sigc++/signal.h>
 
 #include "evoral/types.hpp"
-#include "ardour/route_group.h"
 
 #include "pbd/statefuldestructible.h"
 

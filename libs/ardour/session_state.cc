@@ -57,6 +57,8 @@
 #include "midi++/port.h"
 #include "midi++/manager.h"
 
+#include "evoral/SMF.hpp"
+
 #include "pbd/boost_debug.h"
 #include "pbd/basename.h"
 #include "pbd/controllable_descriptor.h"
@@ -71,34 +73,26 @@
 
 #include "ardour/amp.h"
 #include "ardour/audio_diskstream.h"
-#include "ardour/audio_playlist_source.h"
 #include "ardour/audio_track.h"
 #include "ardour/audioengine.h"
 #include "ardour/audiofilesource.h"
-#include "ardour/audioplaylist.h"
 #include "ardour/audioregion.h"
-#include "ardour/auditioner.h"
 #include "ardour/automation_control.h"
-#include "ardour/buffer.h"
 #include "ardour/butler.h"
-#include "ardour/configuration.h"
 #include "ardour/control_protocol_manager.h"
-#include "ardour/cycle_timer.h"
 #include "ardour/directory_names.h"
 #include "ardour/filename_extensions.h"
-#include "ardour/io_processor.h"
 #include "ardour/location.h"
-#include "ardour/midi_diskstream.h"
 #include "ardour/midi_model.h"
 #include "ardour/midi_patch_manager.h"
-#include "ardour/midi_playlist.h"
 #include "ardour/midi_region.h"
 #include "ardour/midi_source.h"
 #include "ardour/midi_track.h"
 #include "ardour/named_selection.h"
 #include "ardour/pannable.h"
-#include "ardour/processor.h"
+#include "ardour/playlist_factory.h"
 #include "ardour/port.h"
+#include "ardour/processor.h"
 #include "ardour/proxy_controllable.h"
 #include "ardour/recent_sessions.h"
 #include "ardour/region_factory.h"
@@ -107,13 +101,10 @@
 #include "ardour/session.h"
 #include "ardour/session_directory.h"
 #include "ardour/session_metadata.h"
-#include "ardour/session_state_utils.h"
 #include "ardour/session_playlists.h"
+#include "ardour/session_state_utils.h"
 #include "ardour/session_utils.h"
 #include "ardour/silentfilesource.h"
-#include "ardour/slave.h"
-#include "ardour/smf_source.h"
-#include "ardour/sndfile_helpers.h"
 #include "ardour/sndfilesource.h"
 #include "ardour/source_factory.h"
 #include "ardour/speakers.h"
@@ -121,10 +112,6 @@
 #include "ardour/tempo.h"
 #include "ardour/ticker.h"
 #include "ardour/user_bundle.h"
-#include "ardour/utils.h"
-#include "ardour/utils.h"
-#include "ardour/version.h"
-#include "ardour/playlist_factory.h"
 
 #include "control_protocol/control_protocol.h"
 
@@ -782,7 +769,7 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 		} catch (Evoral::SMF::FileError& e) {
 			error << string_compose ("Could not write to MIDI file %1; MIDI data not saved.", e.file_name ()) << endmsg;
 		}
-        }
+	}
 
 	tree.set_root (&get_state());
 

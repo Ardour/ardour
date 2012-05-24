@@ -19,12 +19,9 @@
 
 #include <algorithm>
 
-#include "pbd/failed_constructor.h"
-#include "ardour/ardour.h"
 #include "ardour/bundle.h"
 #include "ardour/audioengine.h"
 #include "ardour/port.h"
-#include "pbd/xml++.h"
 
 #include "i18n.h"
 

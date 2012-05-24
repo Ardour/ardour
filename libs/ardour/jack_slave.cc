@@ -24,9 +24,6 @@
 #include <jack/transport.h>
 
 #include "ardour/slave.h"
-#include "ardour/session.h"
-
-#include "i18n.h"
 
 using namespace std;
 using namespace ARDOUR;

@@ -37,9 +37,7 @@
 
 #include "midi++/manager.h"
 
-#include "ardour/ardour.h"
 #include "ardour/session.h"
-#include "ardour/audioengine.h"
 #include "ardour/ladspa_plugin.h"
 #include "ardour/buffer_set.h"
 #include "ardour/audio_buffer.h"

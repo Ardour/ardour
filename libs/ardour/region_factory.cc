@@ -20,17 +20,14 @@
 #include <inttypes.h>
 
 #include "pbd/error.h"
-#include "pbd/boost_debug.h"
 
-#include "ardour/session.h"
-
-#include "ardour/region_factory.h"
-#include "ardour/region.h"
 #include "ardour/audioregion.h"
 #include "ardour/audiosource.h"
-#include "ardour/midi_source.h"
 #include "ardour/midi_region.h"
-#include "ardour/utils.h"
+#include "ardour/midi_source.h"
+#include "ardour/region.h"
+#include "ardour/region_factory.h"
+#include "ardour/session.h"
 
 #include "i18n.h"
 

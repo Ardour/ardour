@@ -23,20 +23,12 @@
 
 #include <string>
 
-
-#include "pbd/failed_constructor.h"
-#include "pbd/enumwriter.h"
 #include "pbd/xml++.h"
 
+#include "ardour/automatable.h"
+#include "ardour/chan_count.h"
 #include "ardour/processor.h"
-#include "ardour/plugin.h"
-#include "ardour/port.h"
-#include "ardour/route.h"
-#include "ardour/ladspa_plugin.h"
-#include "ardour/buffer_set.h"
-#include "ardour/send.h"
-#include "ardour/port_insert.h"
-#include "ardour/plugin_insert.h"
+#include "ardour/types.h"
 
 #ifdef WINDOWS_VST_SUPPORT
 #include "ardour/windows_vst_plugin.h"
@@ -55,6 +47,8 @@
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR { class Session; }
 
 // Always saved as Processor, but may be IOProcessor or Send in legacy sessions
 const string Processor::state_node_name = "Processor";

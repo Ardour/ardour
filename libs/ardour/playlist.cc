@@ -19,20 +19,14 @@
 
 #include <stdint.h>
 #include <set>
-#include <fstream>
 #include <algorithm>
-#include <unistd.h>
-#include <cerrno>
 #include <string>
-#include <climits>
 
 #include <boost/lexical_cast.hpp>
 
 #include "pbd/convert.h"
-#include "pbd/failed_constructor.h"
 #include "pbd/stateful_diff_command.h"
 #include "pbd/xml++.h"
-#include "pbd/stacktrace.h"
 
 #include "ardour/debug.h"
 #include "ardour/playlist.h"

@@ -26,17 +26,13 @@
 
 #include <glibmm/thread.h>
 
-#include "pbd/basename.h"
 #include "pbd/xml++.h"
-#include "pbd/enumwriter.h"
 
 #include "ardour/automation_control.h"
-#include "ardour/dB.h"
 #include "ardour/midi_model.h"
 #include "ardour/midi_region.h"
 #include "ardour/midi_ring_buffer.h"
 #include "ardour/midi_source.h"
-#include "ardour/playlist.h"
 #include "ardour/region_factory.h"
 #include "ardour/session.h"
 #include "ardour/tempo.h"

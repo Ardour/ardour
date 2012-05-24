@@ -22,12 +22,8 @@
 #define __ardour_broadcast_info_h__
 
 #include <string>
-#include <ctime>
-
-#include <sndfile.h>
 
 #include "audiographer/broadcast_info.h"
-#include "ardour/types.h"
 
 namespace ARDOUR
 {

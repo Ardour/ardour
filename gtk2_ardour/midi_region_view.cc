@@ -31,8 +31,6 @@
 #include "pbd/memento_command.h"
 #include "pbd/stateful_diff_command.h"
 
-#include "ardour/playlist.h"
-#include "ardour/tempo.h"
 #include "ardour/midi_region.h"
 #include "ardour/midi_source.h"
 #include "ardour/midi_model.h"

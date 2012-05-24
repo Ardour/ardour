@@ -28,21 +28,13 @@
 #include <boost/enable_shared_from_this.hpp>
 
 #include "ardour/export_channel.h"
-#include "ardour/export_status.h"
-#include "ardour/ardour.h"
+#include "ardour/export_pointers.h"
 
 #include "pbd/xml++.h"
 
 namespace ARDOUR
 {
 
-class ExportHandler;
-class AudioPort;
-class ExportChannel;
-class ExportFormatSpecification;
-class ExportFilename;
-class ExportProcessor;
-class ExportTimespan;
 class Session;
 
 class ExportChannelConfiguration : public boost::enable_shared_from_this<ExportChannelConfiguration>

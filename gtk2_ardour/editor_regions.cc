@@ -28,10 +28,9 @@
 
 #include "ardour/audioregion.h"
 #include "ardour/audiofilesource.h"
+#include "ardour/silentfilesource.h"
 #include "ardour/region_factory.h"
 #include "ardour/session.h"
-#include "ardour/session_playlists.h"
-#include "ardour/silentfilesource.h"
 #include "ardour/profile.h"
 
 #include "gtkmm2ext/choice.h"

@@ -24,9 +24,7 @@
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/window_title.h>
 
-#include "ardour/ardour.h"
 #include "ardour/audioengine.h"
-#include "ardour/audio_track.h"
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
 #include "ardour/plugin_manager.h"
@@ -34,9 +32,6 @@
 #include "ardour/return.h"
 #include "ardour/route.h"
 #include "ardour/send.h"
-#include "ardour/session.h"
-#include "ardour/session.h"
-#include "ardour/session_route.h"
 
 #include "ardour_ui.h"
 #include "gui_thread.h"

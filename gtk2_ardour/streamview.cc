@@ -25,7 +25,6 @@
 
 #include "ardour/playlist.h"
 #include "ardour/region.h"
-#include "ardour/source.h"
 #include "ardour/track.h"
 #include "ardour/session.h"
 

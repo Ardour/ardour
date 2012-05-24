@@ -29,9 +29,7 @@
 
 #include "pbd/pthread_utils.h"
 
-#include "ardour/audio_diskstream.h"
 #include "ardour/audio_track.h"
-#include "ardour/audiofilesource.h"
 #include "ardour/audiofilesource.h"
 #include "ardour/audioplaylist.h"
 #include "ardour/audioregion.h"

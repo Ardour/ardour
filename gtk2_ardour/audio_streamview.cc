@@ -26,11 +26,9 @@
 
 #include "pbd/stacktrace.h"
 
-#include "ardour/audioplaylist.h"
 #include "ardour/audioregion.h"
 #include "ardour/audiofilesource.h"
 #include "ardour/audio_track.h"
-#include "ardour/source.h"
 #include "ardour/region_factory.h"
 #include "ardour/profile.h"
 #include "ardour/rc_configuration.h"

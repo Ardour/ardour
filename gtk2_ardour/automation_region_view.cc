@@ -26,7 +26,6 @@
 #include "ardour/midi_automation_list_binder.h"
 #include "ardour/midi_region.h"
 #include "ardour/session.h"
-#include "ardour/source.h"
 
 #include "automation_region_view.h"
 #include "editing.h"

@@ -34,18 +34,17 @@
 #include "pbd/pthread_utils.h"
 #include "pbd/basename.h"
 
-#include "ardour/audioengine.h"
 #include "ardour/debug.h"
 #include "ardour/midi_model.h"
-#include "ardour/midi_ring_buffer.h"
 #include "ardour/midi_state_tracker.h"
 #include "ardour/midi_source.h"
 #include "ardour/session.h"
 #include "ardour/session_directory.h"
 #include "ardour/source_factory.h"
-#include "ardour/tempo.h"
 
 #include "i18n.h"
+
+namespace ARDOUR { template <typename T> class MidiRingBuffer; }
 
 using namespace std;
 using namespace ARDOUR;

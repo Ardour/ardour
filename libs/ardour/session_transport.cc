@@ -17,14 +17,13 @@
 
 */
 
-#include <cmath>
-#include <cerrno>
-#include <unistd.h>
-
 #ifdef WAF_BUILD
 #include "libardour-config.h"
 #endif
 
+#include <cmath>
+#include <cerrno>
+#include <unistd.h>
 
 #include "pbd/undo.h"
 #include "pbd/error.h"
@@ -36,7 +35,6 @@
 #include "midi++/port.h"
 #include "midi++/manager.h"
 
-#include "ardour/ardour.h"
 #include "ardour/audioengine.h"
 #include "ardour/auditioner.h"
 #include "ardour/butler.h"

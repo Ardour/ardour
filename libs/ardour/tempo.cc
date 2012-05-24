@@ -28,7 +28,6 @@
 #include "evoral/types.hpp"
 #include "ardour/debug.h"
 #include "ardour/tempo.h"
-#include "ardour/utils.h"
 
 #include "i18n.h"
 #include <locale.h>

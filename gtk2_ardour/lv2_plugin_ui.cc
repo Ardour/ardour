@@ -18,13 +18,10 @@
 */
 
 #include "ardour/lv2_plugin.h"
-#include "ardour/plugin_manager.h"
-#include "ardour/processor.h"
 #include "ardour/session.h"
 #include "pbd/error.h"
 
 #include "ardour_ui.h"
-#include "gui_thread.h"
 #include "lv2_plugin_ui.h"
 
 #include "lv2/lv2plug.in/ns/extensions/ui/ui.h"

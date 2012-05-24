@@ -17,34 +17,32 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "pbd/error.h"
-
 #include "pbd/enumwriter.h"
 #include "pbd/convert.h"
-#include "midi++/events.h"
 #include "evoral/midi_util.h"
 
-#include "ardour/amp.h"
 #include "ardour/buffer_set.h"
 #include "ardour/debug.h"
 #include "ardour/delivery.h"
-#include "ardour/io_processor.h"
 #include "ardour/meter.h"
 #include "ardour/midi_diskstream.h"
 #include "ardour/midi_playlist.h"
 #include "ardour/midi_port.h"
-#include "ardour/midi_region.h"
-#include "ardour/midi_source.h"
 #include "ardour/midi_track.h"
-#include "ardour/panner.h"
 #include "ardour/port.h"
 #include "ardour/processor.h"
-#include "ardour/route_group_specialized.h"
 #include "ardour/session.h"
 #include "ardour/session_playlists.h"
 #include "ardour/utils.h"
 
 #include "i18n.h"
+
+namespace ARDOUR {
+class InterThreadInfo;
+class MidiSource;
+class Region;
+class SMFSource;
+}
 
 using namespace std;
 using namespace ARDOUR;

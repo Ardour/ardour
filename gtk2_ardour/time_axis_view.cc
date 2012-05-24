@@ -33,12 +33,6 @@
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/selector.h>
 
-#include "ardour/session.h"
-#include "ardour/utils.h"
-#include "ardour/ladspa_plugin.h"
-#include "ardour/processor.h"
-#include "ardour/location.h"
-
 #include "ardour_ui.h"
 #include "global_signals.h"
 #include "gui_thread.h"

@@ -2,9 +2,6 @@
 #ifndef __ardour_directory_names_h__
 #define __ardour_directory_names_h__
 
-#include <string>
-#include <stdint.h>
-
 namespace ARDOUR {
 
 extern const char* const old_sound_dir_name;

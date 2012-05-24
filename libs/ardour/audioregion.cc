@@ -37,7 +37,6 @@
 #include "evoral/Curve.hpp"
 
 #include "ardour/audioregion.h"
-#include "ardour/debug.h"
 #include "ardour/session.h"
 #include "ardour/dB.h"
 #include "ardour/playlist.h"

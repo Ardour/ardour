@@ -20,7 +20,7 @@
 #include <algorithm>
 
 #include "pbd/error.h"
-#include "ardour/ardour.h"
+#include "ardour/types.h"
 
 #include "time_selection.h"
 

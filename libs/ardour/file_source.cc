@@ -38,12 +38,11 @@
 #include <glibmm/fileutils.h>
 #include <glibmm/thread.h>
 
+#include "ardour/data_type.h"
 #include "ardour/file_source.h"
-#include "ardour/directory_names.h"
 #include "ardour/session.h"
-#include "ardour/session_directory.h"
-#include "ardour/source_factory.h"
-#include "ardour/filename_extensions.h"
+#include "ardour/source.h"
+#include "ardour/utils.h"
 
 #include "i18n.h"
 

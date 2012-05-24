@@ -31,7 +31,6 @@
 #include <sys/stat.h>
 #include <sys/mman.h>
 
-
 #include <glibmm/thread.h>
 
 #include "pbd/error.h"
@@ -40,22 +39,12 @@
 #include "pbd/xml++.h"
 #include "pbd/stacktrace.h"
 
-#include "ardour/ardour.h"
-#include "ardour/audioengine.h"
 #include "ardour/debug.h"
 #include "ardour/diskstream.h"
-#include "ardour/utils.h"
-#include "ardour/configuration.h"
-#include "ardour/audiofilesource.h"
-#include "ardour/send.h"
-#include "ardour/pannable.h"
-#include "ardour/panner_shell.h"
-#include "ardour/playlist.h"
-#include "ardour/cycle_timer.h"
-#include "ardour/region.h"
-#include "ardour/panner.h"
-#include "ardour/session.h"
 #include "ardour/io.h"
+#include "ardour/pannable.h"
+#include "ardour/playlist.h"
+#include "ardour/session.h"
 #include "ardour/track.h"
 
 #include "i18n.h"

@@ -28,7 +28,6 @@
 #include "pbd/file_utils.h"
 
 #include "ardour/svn_revision.h"
-#include "ardour/ardour.h"
 #include "ardour/version.h"
 #include "ardour/filesystem_paths.h"
 

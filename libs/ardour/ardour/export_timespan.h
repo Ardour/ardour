@@ -21,17 +21,16 @@
 #ifndef __ardour_export_timespan_h__
 #define __ardour_export_timespan_h__
 
-#include <map>
-#include <list>
 #include <string>
 
-#include "ardour/export_status.h"
-#include "ardour/export_channel.h"
-#include "ardour/ardour.h"
+#include <boost/shared_ptr.hpp>
+
+#include "ardour/types.h"
 
 namespace ARDOUR
 {
 
+class ExportStatus;
 class ExportChannel;
 class ExportTempFile;
 

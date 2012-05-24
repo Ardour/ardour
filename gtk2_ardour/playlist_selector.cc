@@ -20,12 +20,10 @@
 
 #include <gtkmm/button.h>
 
-#include "ardour/session_playlist.h"
-#include "ardour/audio_diskstream.h"
-#include "ardour/playlist.h"
 #include "ardour/audio_track.h"
 #include "ardour/audioplaylist.h"
-#include "ardour/configuration.h"
+#include "ardour/playlist.h"
+#include "ardour/session_playlist.h"
 
 #include <gtkmm2ext/gtk_ui.h>
 

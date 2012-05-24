@@ -22,9 +22,6 @@
 #include "ardour/session_event.h"
 #include "ardour/transient_detector.h"
 
-#include "pbd/pthread_utils.h"
-#include "pbd/convert.h"
-
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;

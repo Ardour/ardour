@@ -23,13 +23,13 @@
 #include "pbd/error.h"
 #include "rubberband/RubberBandStretcher.h"
 
-#include "ardour/types.h"
-#include "ardour/stretch.h"
-#include "ardour/pitch.h"
-#include "ardour/audiofilesource.h"
-#include "ardour/session.h"
 #include "ardour/audioregion.h"
+#include "ardour/audiosource.h"
+#include "ardour/pitch.h"
 #include "ardour/progress.h"
+#include "ardour/session.h"
+#include "ardour/stretch.h"
+#include "ardour/types.h"
 
 #include "i18n.h"
 

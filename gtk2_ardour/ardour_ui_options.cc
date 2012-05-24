@@ -26,10 +26,8 @@
 
 #include <gtkmm2ext/utils.h>
 
-#include "ardour/configuration.h"
-#include "ardour/session.h"
-#include "ardour/audioengine.h"
 #include "ardour/rc_configuration.h"
+#include "ardour/session.h"
 
 #ifdef HAVE_LIBLO
 #include "ardour/osc.h"

@@ -46,11 +46,8 @@
 
 #include "ardour/audiofilesource.h"
 #include "ardour/debug.h"
-#include "ardour/sndfile_helpers.h"
 #include "ardour/sndfilesource.h"
 #include "ardour/session.h"
-#include "ardour/session_directory.h"
-#include "ardour/source_factory.h"
 #include "ardour/filename_extensions.h"
 
 // if these headers come before sigc++ is included

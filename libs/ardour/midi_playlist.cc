@@ -25,17 +25,12 @@
 
 #include <stdlib.h>
 
-#include "pbd/error.h"
-
 #include "evoral/EventList.hpp"
 
-#include "ardour/configuration.h"
 #include "ardour/debug.h"
 #include "ardour/midi_model.h"
 #include "ardour/midi_playlist.h"
 #include "ardour/midi_region.h"
-#include "ardour/midi_ring_buffer.h"
-#include "ardour/session.h"
 #include "ardour/types.h"
 
 #include "i18n.h"

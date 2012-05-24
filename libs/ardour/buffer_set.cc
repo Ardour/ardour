@@ -33,7 +33,6 @@
 #include "ardour/midi_buffer.h"
 #include "ardour/port.h"
 #include "ardour/port_set.h"
-#include "ardour/audioengine.h"
 #ifdef LV2_SUPPORT
 #include "ardour/lv2_plugin.h"
 #include "lv2_evbuf.h"

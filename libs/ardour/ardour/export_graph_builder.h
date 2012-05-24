@@ -21,10 +21,7 @@
 #ifndef __ardour_export_graph_builder_h__
 #define __ardour_export_graph_builder_h__
 
-#include "ardour/ardour.h"
 #include "ardour/export_handler.h"
-#include "ardour/export_channel.h"
-#include "ardour/export_format_base.h"
 
 #include "audiographer/utils/identity_vertex.h"
 
@@ -46,6 +43,9 @@ namespace AudioGrapher {
 
 namespace ARDOUR
 {
+
+class ExportTimespan;
+class Session;
 
 class ExportGraphBuilder
 {

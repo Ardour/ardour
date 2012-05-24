@@ -27,7 +27,6 @@
 
 #include "ardour/session.h"
 #include "ardour/user_bundle.h"
-#include "ardour/audioengine.h"
 #include "bundle_manager.h"
 #include "gui_thread.h"
 #include "i18n.h"

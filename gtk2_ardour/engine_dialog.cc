@@ -39,7 +39,6 @@
 #include <alsa/asoundlib.h>
 #endif
 
-#include "ardour/profile.h"
 #include <jack/jack.h>
 
 #include <gtkmm/stock.h>

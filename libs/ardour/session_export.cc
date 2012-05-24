@@ -26,12 +26,11 @@
 
 #include "ardour/audioengine.h"
 #include "ardour/butler.h"
-#include "ardour/export_failed.h"
 #include "ardour/export_handler.h"
 #include "ardour/export_status.h"
+#include "ardour/process_thread.h"
 #include "ardour/session.h"
 #include "ardour/track.h"
-#include "ardour/process_thread.h"
 
 #include "i18n.h"
 

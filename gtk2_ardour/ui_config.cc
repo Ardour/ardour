@@ -31,7 +31,6 @@
 
 #include "gtkmm2ext/rgb_macros.h"
 
-#include "ardour/ardour.h"
 #include "ardour/filesystem_paths.h"
 
 #include "ui_config.h"

@@ -20,10 +20,7 @@
 #include <limits.h>
 
 #include "ardour/amp.h"
-#include "ardour/io.h"
-#include "ardour/route.h"
 #include "ardour/route_group.h"
-#include "ardour/session.h"
 #include "ardour/session_route.h"
 #include "ardour/dB.h"
 #include "ardour/utils.h"

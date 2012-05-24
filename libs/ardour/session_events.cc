@@ -20,15 +20,10 @@
 #include <cmath>
 #include <unistd.h>
 
-#include "ardour/timestamps.h"
-
 #include "pbd/error.h"
 #include "pbd/enumwriter.h"
 #include "pbd/stacktrace.h"
 
-#include "ardour/ardour.h"
-#include "ardour/audio_diskstream.h"
-#include "ardour/butler.h"
 #include "ardour/debug.h"
 #include "ardour/session_event.h"
 

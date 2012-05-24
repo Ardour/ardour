@@ -22,7 +22,6 @@
 #include "gtkmm2ext/utils.h"
 
 #include "ardour/route_group.h"
-#include "ardour/session.h"
 #include "mixer_group_tabs.h"
 #include "mixer_strip.h"
 #include "mixer_ui.h"

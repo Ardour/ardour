@@ -21,7 +21,6 @@
 #ifndef __export_timespan_selector_h__
 #define __export_timespan_selector_h__
 
-#include "public_editor.h"
 #include "audio_clock.h"
 
 #include <list>
@@ -40,6 +39,7 @@ namespace ARDOUR {
 }
 
 using ARDOUR::CDMarkerFormat;
+using ARDOUR::framecnt_t;
 
 /// Timespan Selector base
 class ExportTimespanSelector : public Gtk::VBox, public ARDOUR::SessionHandlePtr

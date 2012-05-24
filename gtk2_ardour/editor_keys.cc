@@ -21,17 +21,17 @@
 #include <cmath>
 #include <string>
 
+#include <gtkmm/treeview.h>
+
 #include "pbd/error.h"
 
 #include "ardour/session.h"
-#include "ardour/region.h"
-#include <gtkmm/treeview.h>
 
 #include "ardour_ui.h"
 #include "editor.h"
-#include "time_axis_view.h"
 #include "region_view.h"
 #include "selection.h"
+#include "time_axis_view.h"
 
 #include "i18n.h"
 

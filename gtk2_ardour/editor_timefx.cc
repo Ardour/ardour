@@ -37,14 +37,12 @@
 #include "region_selection.h"
 #include "time_fx_dialog.h"
 
-#include "ardour/session.h"
-#include "ardour/region.h"
-#include "ardour/audioplaylist.h"
-#include "ardour/audio_track.h"
 #include "ardour/audioregion.h"
-#include "ardour/stretch.h"
 #include "ardour/midi_stretch.h"
 #include "ardour/pitch.h"
+#include "ardour/region.h"
+#include "ardour/session.h"
+#include "ardour/stretch.h"
 
 #ifdef USE_RUBBERBAND
 #include "rubberband/RubberBandStretcher.h"

@@ -23,8 +23,6 @@
 
 #include <map>
 
-#include "ardour/profile.h"
-
 #include <gtkmm/stock.h>
 #include <gtkmm/label.h>
 #include <gtkmm/accelkey.h>

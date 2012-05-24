@@ -30,13 +30,13 @@
 
 #include "ardour/element_importer.h"
 #include "ardour/element_import_handler.h"
-#include "ardour/types.h"
 
 namespace ARDOUR {
 
 class AudioRegionImportHandler;
 class AudioRegionImporter;
 class AudioPlaylistImporter;
+class Session;
 
 class AudioPlaylistImportHandler : public ElementImportHandler
 {

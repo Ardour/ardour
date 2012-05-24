@@ -20,6 +20,7 @@
 #ifndef __libardour_route_group_member_h__
 #define __libardour_route_group_member_h__
 
+#include "pbd/signals.h"
 
 namespace ARDOUR  {
 

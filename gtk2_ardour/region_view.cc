@@ -26,8 +26,6 @@
 #include <gtkmm2ext/gtk_ui.h>
 
 #include "ardour/playlist.h"
-#include "ardour/audioregion.h"
-#include "ardour/audiosource.h"
 #include "ardour/session.h"
 
 #include "ardour_ui.h"

@@ -23,9 +23,8 @@
 #include <sstream>
 
 #include "ardour/session.h"
+#include "ardour/tempo.h"
 #include "pbd/failed_constructor.h"
-#include "pbd/compose.h"
-#include "pbd/error.h"
 
 #include "i18n.h"
 

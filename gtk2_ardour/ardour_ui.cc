@@ -60,26 +60,18 @@
 #include "midi++/manager.h"
 
 #include "ardour/ardour.h"
-#include "ardour/callback.h"
+#include "ardour/audioengine.h"
+#include "ardour/audiofilesource.h"
+#include "ardour/diskstream.h"
+#include "ardour/filename_extensions.h"
+#include "ardour/port.h"
+#include "ardour/process_thread.h"
 #include "ardour/profile.h"
-#include "ardour/plugin_manager.h"
+#include "ardour/recent_sessions.h"
 #include "ardour/session_directory.h"
 #include "ardour/session_route.h"
 #include "ardour/session_state_utils.h"
 #include "ardour/session_utils.h"
-#include "ardour/port.h"
-#include "ardour/audioengine.h"
-#include "ardour/playlist.h"
-#include "ardour/utils.h"
-#include "ardour/audio_diskstream.h"
-#include "ardour/audiofilesource.h"
-#include "ardour/recent_sessions.h"
-#include "ardour/port.h"
-#include "ardour/audio_track.h"
-#include "ardour/midi_track.h"
-#include "ardour/filesystem_paths.h"
-#include "ardour/filename_extensions.h"
-#include "ardour/process_thread.h"
 
 typedef uint64_t microseconds_t;
 
@@ -121,6 +113,7 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtkmm2ext;
 using namespace Gtk;
+using namespace std;
 
 ARDOUR_UI *ARDOUR_UI::theArdourUI = 0;
 UIConfiguration *ARDOUR_UI::ui_config = 0;
@@ -130,7 +123,7 @@ sigc::signal<void>      ARDOUR_UI::RapidScreenUpdate;
 sigc::signal<void>      ARDOUR_UI::SuperRapidScreenUpdate;
 sigc::signal<void, framepos_t, bool, framepos_t> ARDOUR_UI::Clock;
 
-bool could_be_a_valid_path (const string& path);
+bool could_be_a_valid_path (const std::string& path);
 
 ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 
@@ -335,7 +328,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 
 /** @return true if a session was chosen and `apply' clicked, otherwise false if `cancel' was clicked */
 bool
-ARDOUR_UI::run_startup (bool should_be_new, string load_template)
+ARDOUR_UI::run_startup (bool should_be_new, std::string load_template)
 {
 	delete _startup;
 	_startup = new ArdourStartup ();

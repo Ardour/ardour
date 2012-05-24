@@ -21,14 +21,19 @@
 #ifndef __ardour_plugin_eq_gui_h
 #define __ardour_plugin_eq_gui_h
 
+#include "pbd/signals.h"
+
 #include "ardour/buffer_set.h"
-#include "ardour/plugin_insert.h"
-#include "ardour/plugin.h"
 
 #include <gtkmm/table.h>
 #include <gtkmm/drawingarea.h>
 #include <gtkmm/combobox.h>
 #include <gtkmm/liststore.h>
+
+namespace ARDOUR {
+	class Plugin;
+	class PluginInsert;
+}
 
 namespace GTKArdour {
         class FFT;

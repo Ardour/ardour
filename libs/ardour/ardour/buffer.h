@@ -19,15 +19,12 @@
 #ifndef __ardour_buffer_h__
 #define __ardour_buffer_h__
 
-#include <cstdlib>
-#include <cassert>
-#include <cstring>
-#include <iostream>
+#include <stddef.h>
+
 #include <boost/utility.hpp>
 
 #include "ardour/types.h"
 #include "ardour/data_type.h"
-#include "ardour/runtime_functions.h"
 
 namespace ARDOUR {
 

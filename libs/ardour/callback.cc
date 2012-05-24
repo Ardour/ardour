@@ -16,7 +16,6 @@
 #include "pbd/strsplit.h"
 #include "pbd/convert.h"
 
-#include "ardour/callback.h"
 #include "ardour/filesystem_paths.h"
 
 using namespace std;

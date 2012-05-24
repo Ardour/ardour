@@ -18,8 +18,9 @@
 */
 
 #include <iostream>
-#include "ardour/session_object.h"
+
 #include "ardour/debug.h"
+#include "ardour/session_object.h"
 
 #include "i18n.h"
 

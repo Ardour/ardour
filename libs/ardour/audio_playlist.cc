@@ -23,12 +23,10 @@
 
 #include "ardour/types.h"
 #include "ardour/debug.h"
-#include "ardour/configuration.h"
 #include "ardour/audioplaylist.h"
 #include "ardour/audioregion.h"
 #include "ardour/region_sorters.h"
 #include "ardour/session.h"
-#include "pbd/enumwriter.h"
 
 #include "i18n.h"
 

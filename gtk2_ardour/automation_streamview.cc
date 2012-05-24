@@ -26,7 +26,6 @@
 
 #include "ardour/midi_region.h"
 #include "ardour/midi_source.h"
-#include "ardour/region_factory.h"
 
 #include "automation_streamview.h"
 #include "region_view.h"

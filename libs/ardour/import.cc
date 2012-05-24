@@ -52,6 +52,7 @@
 #include "ardour/import_status.h"
 #include "ardour/region_factory.h"
 #include "ardour/resampled_source.h"
+#include "ardour/runtime_functions.h"
 #include "ardour/session.h"
 #include "ardour/session_directory.h"
 #include "ardour/smf_source.h"

@@ -17,31 +17,28 @@
 
 */
 
-#include <fstream>
-#include <algorithm>
+#include <list>
 #include <string>
-#include <cerrno>
-#include <unistd.h>
-#include <sstream>
-
 
 #include "pbd/xml++.h"
 #include "pbd/enumwriter.h"
 
-#include "ardour/io_processor.h"
-#include "ardour/session.h"
-#include "ardour/utils.h"
-#include "ardour/send.h"
-#include "ardour/port_insert.h"
-#include "ardour/plugin_insert.h"
+#include "ardour/chan_count.h"
+#include "ardour/data_type.h"
 #include "ardour/io.h"
+#include "ardour/io_processor.h"
+#include "ardour/processor.h"
 #include "ardour/route.h"
+#include "ardour/session_object.h"
+#include "ardour/types.h"
 
 #include "i18n.h"
 
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR { class Session; }
 
 /* create an IOProcessor that proxies to a new IO object */
 
