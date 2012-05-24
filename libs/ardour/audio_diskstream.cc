@@ -1476,6 +1476,7 @@ AudioDiskstream::transport_stopped_wallclock (struct tm& when, time_t twhen, boo
 		// cerr << _name << ": there are " << capture_info.size() << " capture_info records\n";
 
 		_playlist->clear_changes ();
+		_playlist->set_capture_insertion_in_progress (true);
 		_playlist->freeze ();
 
 		for (buffer_position = c->front()->write_source->last_capture_start_frame(), ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
@@ -1514,6 +1515,7 @@ AudioDiskstream::transport_stopped_wallclock (struct tm& when, time_t twhen, boo
 		}
 
 		_playlist->thaw ();
+		_playlist->set_capture_insertion_in_progress (false);
 		_session.add_command (new StatefulDiffCommand (_playlist));
 	}
 

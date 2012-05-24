@@ -222,6 +222,8 @@ public:
 	uint32_t combine_ops() const { return _combine_ops; }
 
 	void set_layer (boost::shared_ptr<Region>, double);
+
+	void set_capture_insertion_in_progress (bool yn);
 	
   protected:
 	friend class Session;
@@ -286,6 +288,7 @@ public:
 	bool             in_flush;
 	bool             in_partition;
 	bool            _frozen;
+	bool            _capture_insertion_underway;
 	uint32_t         subcnt;
 	PBD::ID         _orig_track_id;
 	uint32_t        _combine_ops;
