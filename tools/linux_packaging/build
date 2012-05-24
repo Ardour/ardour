@@ -1,8 +1,7 @@
 #!/bin/bash
 
-#
-
-. ./buildenv
+GTKSTACK_ROOT=$HOME/gtk/inst
+ARDOURSTACK_ROOT=$HOME/a3/inst
 
 # script for pulling together a Linux app bundle.
 #
@@ -306,139 +305,35 @@ else
 	echo "Skipping NLS support"
 fi
 
-### Find gtk ###
-GTKROOT=`pkg-config --libs-only-L gtk+-2.0 | sed -e "s/-L//" -e "s/[[:space:]]//g"`
-if [ ! -z "$GTKROOT" ]; then
-	echo "Found GTKROOT using pkg-config"
-elif [ -d /usr/lib/gtk-2.0 ]; then
-	GTKROOT="/usr/lib"
-elif [ -d /usr/local/lib/gtk-2.0 ]; then
-	GTKROOT="/usr/local/lib"
-else
-	echo ""
-	echo "!!! ERROR !!! - Unable to locate gtk-2.0 directory. Packager will exit"
-	echo ""
-	exit 1
-fi
+#
+# Copy stuff that may be dynamically loaded
+# 
 
-echo "GTKROOT is ${GTKROOT}"
-versionDir=`ls ${GTKROOT}/gtk-2.0/ | grep "[0-9]*\.[0-9]*\.[0-9]*"`
-
-num=0
-for name in $versionDir ; do
-	num=$(($num + 1))
-done
-
-if [ $num -eq 1 ]; then
-	GTKLIB=${GTKROOT}/gtk-2.0/$versionDir
-	echo "GTKLIB is ${GTKLIB}"
-else
-	echo ""
-	echo "!!! ERROR !!! - More than one gtk-2.0 version found in ${GTKROOT}/gtk-2.0/  ( $versionDir ). Packager will exit"
-	echo ""
-	exit 1
-fi
-
-
-### Find pango ###
-PANGOROOT=`pkg-config --libs-only-L pango | sed -e "s/-L//" -e "s/[[:space:]]//g"`
-if [ ! -z "$PANGOROOT" ]; then
-	echo "Found PANGOROOT using pkg-config"
-elif [ -d /usr/lib/pango ]; then
-	PANGOROOT="/usr/lib"
-elif [ -d /usr/local/lib/pango ]; then
-	PANGOROOT="/usr/local/lib"
-else
-	echo ""
-	echo "!!! ERROR !!! - Unable to locate pango directory. Packager will exit"
-	echo ""
-	exit 1
-fi
-
-echo "PANGOROOT is ${PANGOROOT}"
-versionDir=`ls ${PANGOROOT}/pango/ | grep "[0-9]*\.[0-9]*\.[0-9]*"`
-
-num=0
-for name in $versionDir ; do
-	num=$(($num + 1))
-done
-
-if [ $num -eq 1 ]; then
-	PANGOLIB=${PANGOROOT}/pango/$versionDir
-	echo "PANGOLIB is ${PANGOLIB}"
-else
-	echo ""
-	echo "!!! ERROR !!! - More than one pango version found in ${PANGOROOT}/pango/  ( $versionDir ). Packager will exit"
-	echo ""
-	exit 1
-fi
-
-
-### Find gdk-pixbuf ###
-GDKPIXBUFROOT=`pkg-config --libs-only-L gdk-pixbuf-2.0 | sed -e "s/-L//" -e "s/[[:space:]]//g"`
-if [ ! -z "$GDKPIXBUFROOT" ]; then
-	echo "Found GDKPIXBUFROOT using pkg-config"
-elif [ -d /usr/lib/gdk-pixbuf-2.0 ]; then
-	GDKPIXBUFROOT="/usr/lib/gdk-pixbuf-2.0"
-elif [ -d /usr/local/lib/gdk-pixbuf-2.0 ]; then
-	GDKPIXBUFROOT="/usr/local/lib/gdk-pixbuf-2.0"
-elif [ -d ${GTKLIB}/loaders ]; then  #odd ball case
-	GDKPIXBUFROOT=${GTKROOT}
-	GDKPIXBUFLIB=${GTKLIB}
-else
-	echo ""
-	echo "!!! ERROR !!! - Unable to locate gdk-pixbuf-2.0 directory. Packager will exit"
-	echo ""
-	exit 1
-fi
-
-echo "GDKPIXBUFROOT is ${GDKPIXBUFROOT}"
-
-if [ -z ${GDKPIXBUFLIB} ]; then
-	versionDir=`ls ${GDKPIXBUFROOT}/gdk-pixbuf-2.0/ | grep "[0-9]*\.[0-9]*\.[0-9]*"`
-
-	num=0
-	for name in $versionDir ; do
-		num=$(($num + 1))
-	done
-
-	if [ $num -eq 1 ]; then
-		GDKPIXBUFLIB=${GDKPIXBUFROOT}/gdk-pixbuf-2.0/$versionDir
-		echo "GDKPIXBUFLIB is ${GDKPIXBUFLIB}"
-	else
-		echo ""
-		echo "!!! ERROR !!! - More than one gdk-pixbuf-2.0 version found in ${GDKPIXBUFROOT}/pango/  ( $versionDir ). Packager will exit"
-		echo ""
-		exit 1
-	fi
-fi
-
-
-
+cp -R $GTKSTACK_ROOT/etc/* $Etc
 echo "Copying all Pango modules ..."
-cp -R $PANGOLIB/modules/*.so $Modules
-
+cp -R $GTKSTACK_ROOT/lib/pango/1.6.0/modules/*.so $Modules
 echo "Copying all GDK Pixbuf loaders ..."
-cp -R $GDKPIXBUFLIB/loaders/*.so $Loaders
+cp -R $GTKSTACK_ROOT/lib/gdk-pixbuf-2.0/2.10.0/loaders/*.so $Loaders
 
-pango-querymodules | sed "s?$PANGOLIB/?@ROOTDIR@/?" > $Etc/pango.modules.in
-gdk-pixbuf-query-loaders | sed "s?$GDKPIXBUFLIB/?@ROOTDIR@/?" > $Etc/gdk-pixbuf.loaders.in
+# Generate a pango module file using the actual Pango that we're going to bundle
 
-# We sort of rely on clearlooks, so include a version
+cat > pangorc <<EOF 
+[Pango]
+ModulesPath=$GTKSTACK_ROOT/lib/pango/1.6.0/modules
+EOF
+env PANGO_RC_FILE=pangorc $GTKSTACK_ROOT/bin/pango-querymodules | sed "s?$GTKSTACK_ROOT/lib/pango/1.6.0/?@ROOTDIR@/?" > $Etc/pango.modules.in
+rm pangorc
+
+# Ditto for gdk-pixbuf loaders
+gdk-pixbuf-query-loaders | sed "s?$GTKSTACK_ROOT/lib/gdk-pixbuf-2.0/2.10.0/?@ROOTDIR@/?" > $Etc/gdk-pixbuf.loaders.in
+
+# We rely on clearlooks, so include a version from our own build tree
 # this one is special - we will set GTK_PATH to $Libraries/clearlooks
 
-if [ ! -e ${GTKLIB}/engines/libclearlooks.so ]; then
-	echo ""
-	echo "!!! ERROR !!! - not able to locate libclearlooks.so"
-	echo ""
-	echo "Packager with exit"
-	exit 1
-fi
-
 echo "Copying clearlooks ..."
-cp ${GTKLIB}/engines/libclearlooks.so $Libraries
+cp $BUILD_ROOT/libs/clearlooks-newer/libclearlooks.so $Libraries
 mkdir -p $Libraries/clearlooks/engines
-(cd $Libraries/clearlooks/engines && ln -s ../../libclearlooks* libclearlooks.so )
+(cd $Libraries/clearlooks/engines && ln -s ../../libclearlooks.so . )
 
 # LADSPA
 if test x$WITH_LADSPA != x ; then
@@ -455,7 +350,6 @@ if test x$WITH_LADSPA != x ; then
 	fi
 fi
 
-# XXX STILL NEED TO DO PANNERS FOR TRUNK
 cp ../../libs/surfaces/*/libardour_*.so* $Surfaces
 # hack ... move libardour_cp back into Libraries
 mv $Surfaces/libardour_cp.so* $Libraries
@@ -464,7 +358,7 @@ mv $Surfaces/libardour_cp.so* $Libraries
 cp ../../libs/vamp-plugins/libardourvampplugins.so* $Libraries
 
 # SUIL modules
-cp $GTKROOT/suil-0/libsuil* $Libraries
+cp $ARDOURSTACK_ROOT/lib/suil-0/libsuil* $Libraries
 
 OURLIBDIR=../../libs
 OURLIBS=$OURLIBDIR/vamp-sdk:$OURLIBDIR/surfaces/control_protocol:$OURLIBDIR/ardour:$OURLIBDIR/midi++2:$OURLIBDIR/pbd:$OURLIBDIR/rubberband:$OURLIBDIR/soundtouch:$OURLIBDIR/gtkmm2ext:$OURLIBDIR/sigc++2:$OURLIBDIR/glibmm2:$OURLIBDIR/gtkmm2/atk:$OURLIBDIR/gtkmm2/pango:$OURLIBDIR/gtkmm2/gdk:$OURLIBDIR/gtkmm2/gtk:$OURLIBDIR/libgnomecanvasmm:$OURLIBDIR/libsndfile

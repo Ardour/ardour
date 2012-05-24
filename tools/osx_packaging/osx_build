@@ -3,6 +3,7 @@
 # script for pulling together a MacOSX app bundle.
 
 GTKQUARTZ_ROOT=$HOME/gtk/inst
+GTKQUARTZ_ROOT=$HOME/gtk/inst
 
 if pkg-config --modversion gtk+-2.0 | grep -s 2.22 ; then
     # older GTK
