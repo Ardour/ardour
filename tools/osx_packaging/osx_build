@@ -36,6 +36,10 @@ STRIP=1
 PRINT_SYSDEPS=
 WITH_NLS=
 EXTERNAL_JACK=
+BINNAME=Ardour2
+APPNAME=Ardour
+BUILT_EXECUTABLE=ardour
+GDK_LOADERS=gdk-pixbuf-2.0/2.10.0
 
 while [ $# -gt 0 ] ; do
     echo "arg = $1"
@@ -51,16 +55,17 @@ while [ $# -gt 0 ] ; do
 	       WITH_LADSPA=1; 
                STRIP= ; 
 	       PRODUCT_PKG_DIR=ArdourSAE ; 
-	       APPNAME=Ardour ;
 	       shift ;;
 	--mixbus) MIXBUS=1; 
 	          WITH_NLS=1 ; 
                   SAE= ; 
                   INTERNAL_JACK=; 
                   WITH_LADSPA=; 
-                  STRIP= ; 
-		  PRODUCT_PKG_DIR=MixBus;
-		  APPNAME=Mixbus ;
+                  STRIP=1 ; 
+		  PRODUCT_PKG_DIR=Mixbus2;
+		  APPNAME=Mixbus2 ;
+  	          BINNAME=Mixbus2 ;
+		  BUILT_EXECUTABLE=mixbus ;
                   shift ;;
 	--public) WITH_NLS=1 ; 
 	          SAE= ; 
@@ -68,7 +73,6 @@ while [ $# -gt 0 ] ; do
                   WITH_LADSPA=1; 
                   STRIP= ; 
 		  PRODUCT_PKG_DIR=Ardour;
-		  APPNAME=Ardour ;
 		  shift ;;
 	--allinone) SAE= ; 
 	            WITH_NLS= ; 
@@ -78,6 +82,8 @@ while [ $# -gt 0 ] ; do
 		    PRODUCT_PKG_DIR=Ardour ;
 		    shift ;;
 	--test) SAE= ; INTERNAL_JACK=; WITH_LADSPA=; STRIP= ; shift ;;
+	
+	--old-stack) GDK_LOADERS=gtk-2.0/2.10.0 ; shift ;;
 
 	#
 	# specific build flags
@@ -96,9 +102,14 @@ if [ x$EXTERNAL_JACK != x -a x$INTERNAL_JACK != x ] ; then
     echo "It makes no sense to package JACK internally and externally. Please pick one."
 fi
 
-release_version=`grep -m 1 '^ardour_version' ../../SConstruct | cut -d' ' -f 3 | sed "s/'//g"`
+if [ x$MIXBUS != x ] ; then
+    release_version=`grep -m 1 '^mixbus_version' ../../SConstruct | cut -d' ' -f 3 | sed "s/'//g"`
+else
+    release_version=`grep -m 1 '^ardour_version' ../../SConstruct | cut -d' ' -f 3 | sed "s/'//g"`
+fi
 svn_version=`grep -m 1 'svn_revision =' ../../libs/ardour/svn_revision.cc | cut -d' ' -f 6 | sed 's/[";]//g'`
 echo "Version is $release_version / $svn_version"
+
 info_string="$release_version/$svn_version built on `hostname` by `whoami` on `date`"
 echo "Info string is $info_string"
 
@@ -106,7 +117,7 @@ echo "Info string is $info_string"
 
 APPDIR=${APPNAME}.app
 APPROOT=$APPDIR/Contents
-Frameworks=$APPROOT/Frameworks
+Frameworks=$APPROOT/lib
 Resources=$APPROOT/Resources
 Plugins=$APPROOT/Plugins
 Surfaces=$APPROOT/Surfaces
@@ -156,14 +167,12 @@ if test x$SAE != x ; then
     env="$env<key>ARDOUR_UI_CONF</key><string>ardour2_ui_sae.conf</string>"
     env="$env<key>ARDOUR2_UI_RC</key><string>ardour2_ui_dark_sae.rc</string>"
 elif test x$MIXBUS != x ; then
-    appname="Ardour2/Mixbus"
+    appname="Mixbus2"
     env="$env<key>ARDOUR_MIXBUS</key><string>true</string>"
     #
     # current default for MIXBUS version is US keyboard layout without a keypad
     #
     env="$env<key>ARDOUR_KEYBOARD_LAYOUT</key><string>us-nokeypad</string>"
-    env="$env<key>ARDOUR_UI_CONF</key><string>ardour2_ui.conf</string>"
-    env="$env<key>ARDOUR2_UI_RC</key><string>ardour2_ui_dark.rc</string>"
 else
     appname="Ardour2"
 fi
@@ -176,14 +185,15 @@ fi
 if test x$INTERNAL_JACK != x ; then
     env="$env<key>ARDOUR_INTERNAL_JACK</key><string>true</string>"
 else
-    env="$env<key>PATH</key><string>/usr/local/bin:/opt/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>"
+    env="$env<key>PATH</key><string>/usr/local/bin:/opt/bin</string>"
     env="$env<key>DYLIB_FALLBACK_LIBRARY_PATH</key><string>/usr/local/lib:/opt/lib</string>"
 fi
 
-env="<key>LSEnvironment</key><dict>$env<key>ARDOUR_BUNDLED</key><string>true</string></dict>"
+env="<key>LSEnvironment</key><dict><key>ARDOUR_BUNDLED</key><string>true</string>$env</dict>"
 
 # edit plist
 sed -e "s?@ENV@?$env?g" \
+    -e "s?@APPNAME@?$appname?g" \
     -e "s?@VERSION@?$release_version/$svn_version?g" \
     -e "s?@INFOSTRING@?$info_string?g" < Info.plist.in > Info.plist
 # and plist strings
@@ -205,15 +215,15 @@ cp -R Resources $APPROOT
 #
 
 if test x$INTERNAL_JACK != x ; then
-    MAIN_EXECUTABLE=Ardour2
+    MAIN_EXECUTABLE=$BINNAME
 else
     cp startup_script $APPROOT/MacOS/Ardour2
-    chmod 775 $APPROOT/MacOS/Ardour2
-    MAIN_EXECUTABLE=Ardour2.bin
+    chmod 775 $APPROOT/MacOS/$BINNAME
+    MAIN_EXECUTABLE=$BINNAME.bin
 fi
 
-echo "Copying ardour executable ...."
-cp ../../gtk2_ardour/ardour-$release_version $APPROOT/MacOS/$MAIN_EXECUTABLE
+echo "Copying main executable ...."
+cp ../../gtk2_ardour/$BUILT_EXECUTABLE-$release_version $APPROOT/MacOS/$MAIN_EXECUTABLE
 if test x$SAE != x ; then
     # cp ../../gtk2_ardour/evtest $APPROOT/MacOS/gtkevents
     cp  Ardour2-SAE.icns $Resources/appIcon.icns
@@ -223,7 +233,7 @@ else
     cp  Ardour2.icns $Resources/appIcon.icns
 fi
 if test x$STRIP != x ; then
-    strip $APPROOT/MacOS/Ardour2
+    strip $APPROOT/MacOS/$MAIN_EXECUTABLE
 fi
 if test x$INTERNAL_JACK != x ; then
     if [ -f /usr/local/lib/jack/jack_coreaudio.so ] ; then 
@@ -262,6 +272,17 @@ if test x$WITH_NLS != x ; then
 	  if [ -d $GTKSTACK_ROOT/share/locale/$just_lang ] ; then
 	      echo "Copying GTK i18n files for $l..."
 	      cp -r $GTKSTACK_ROOT/share/locale/$just_lang $Locale
+	  fi
+      fi
+      if [ -d $ARDOURSTACK_ROOT/share/locale/$l ] ; then
+	  echo "Copying ardour-dep i18n files for $l..."
+	  cp -r $ARDOURSTACK_ROOT/share/locale/$l $Locale
+      else
+	  # try with just the language spec
+	  just_lang=`echo $l | sed 's/_[A-Z][A-Z]$//'`
+	  if [ -d $ARDOURSTACK_ROOT/share/locale/$just_lang ] ; then
+	      echo "Copying ardour-dep i18n files for $l..."
+	      cp -r $ARDOURSTACK_ROOT/share/locale/$just_lang $Locale
 	  fi
       fi
     done
@@ -309,7 +330,7 @@ if test x$WITH_LADSPA != x ; then
     else
 	plugdir=ladspa
     fi
-    if [ -d $plugdir -a x`ls $plugdir` != x ] ; then 
+    if [ -d $plugdir -a "x$(ls $plugdir)" != x ] ; then 
         echo "Copying `ls $plugdir | wc -l` plugins ..."
         cp -r $plugdir/* $Plugins
     fi
@@ -317,7 +338,7 @@ fi
 
 # Control Surface shared libraries
 cp $BUILD_ROOT/libs/surfaces/*/libardour_*.dylib $Surfaces
-cp $BUILD_ROOT/libs/surfaces/control_protocol/libardourcp*.dylib $Frameworks
+mv $Surfaces/libardour_cp*.dylib $Frameworks
 
 # VAMP plugins that we use
 cp $BUILD_ROOT/libs/vamp-plugins/libardourvampplugins.dylib $Frameworks
@@ -359,12 +380,7 @@ echo
 
 echo "Copying other stuff to $APPDIR  ..."
 
-cp ../../gtk2_ardour/ergonomic-us.bindings  $Resources
-cp ../../gtk2_ardour/mnemonic-us.bindings  $Resources
-cp ../../gtk2_ardour/SAE-de-keypad.bindings  $Resources
-cp ../../gtk2_ardour/SAE-de-nokeypad.bindings  $Resources
-cp ../../gtk2_ardour/SAE-us-keypad.bindings  $Resources
-cp ../../gtk2_ardour/SAE-us-nokeypad.bindings  $Resources
+cp ../../gtk2_ardour/*bindings  $Resources
 cp ../../gtk2_ardour/ardour.menus $Resources
 cp ../../gtk2_ardour/ardour-sae.menus $Resources
 if test x$SAE != x ; then
@@ -423,12 +439,12 @@ for exe in $executables; do
     if test x$INTERNAL_JACK != x ; then
 	for lib in `otool -L $EXE | egrep "($GTKSTACK_ROOT|$ARDOURSTACK_ROOT|/opt/|/local/|libs/)" | awk '{print $1}'` ; do
 	    base=`basename $lib`
-	    changes="$changes -change $lib @executable_path/../Frameworks/$base"
+	    changes="$changes -change $lib @executable_path/../lib/$base"
 	done
     else
 	for lib in `otool -L $EXE | egrep "($GTKSTACK_ROOT|$ARDOURSTACK_ROOT|/opt/|/local/|libs/)" | awk '{print $1}' | grep -v 'libjack\.'` ; do
 	    base=`basename $lib`
-	    changes="$changes -change $lib @executable_path/../Frameworks/$base"
+	    changes="$changes -change $lib @executable_path/../lib/$base"
 	done
     fi
     if test "x$changes" != "x" ; then
@@ -448,12 +464,12 @@ for dylib in $JACK_SHARED_OBJECTS $Frameworks/*.dylib $Frameworks/modules/*.so $
 	if test x$INTERNAL_JACK != x ; then
 	    for lib in `otool -L $dylib | egrep "($GTKSTACK_ROOT|$ARDOURSTACK_ROOT|/opt/|/local/|libs/)" | awk '{print $1}'` ; do
 		base=`basename $lib`
-		changes="$changes -change $lib @executable_path/../Frameworks/$base"
+		changes="$changes -change $lib @executable_path/../lib/$base"
 	    done
 	else
 	    for lib in `otool -L $dylib | egrep "($GTKSTACK_ROOT|$ARDOURSTACK_ROOT|/opt/|/local/|libs/)" | awk '{print $1}' | grep -v 'libjack\.'` ; do
 		base=`basename $lib`
-		changes="$changes -change $lib @executable_path/../Frameworks/$base"
+		changes="$changes -change $lib @executable_path/../lib/$base"
 	    done
 	fi
 
@@ -468,7 +484,7 @@ for dylib in $JACK_SHARED_OBJECTS $Frameworks/*.dylib $Frameworks/modules/*.so $
 	# now the change what the library thinks its own name is
 
 	base=`basename $dylib`
-	install_name_tool -id @executable_path/../Frameworks/$base $dylib
+	install_name_tool -id @executable_path/../lib/$base $dylib
     fi
 done
 
@@ -496,12 +512,7 @@ elif [ x$MIXBUS != x ] ; then
     echo "Creating Mixbus packaging directory"
     mv $APPDIR $PRODUCT_PKG_DIR/
     cp MixBus_Install_QuickStart.pdf "$PRODUCT_PKG_DIR/Mixbus Install & Quick Start Guide.pdf"
-    
-    if [ -x $EXTERNAL_JACK != x ] ; then
-	cp $EXTERNAL_JACK $PRODUCT_PKG_DIR
-    fi
-    
-	# create dmg
+   
 else 
 
     echo "Creating $APPNAME packaging directory"
@@ -509,20 +520,22 @@ else
 
 fi
 
-echo "Building DMG ..."
+#echo bzipping ...
+#ZIPFILE=$APPNAME-${release_version}-${svn_version}.bz2
+#tar cpf - $PRODUCT_PKG_DIR | bzip2 > $ZIPFILE
 
-# UC_DMG=$APPNAME-${release_version}-${svn_version}-UC.dmg
-# FINAL_DMG=$APPNAME-${release_version}-${svn_version}.dmg
+#echo "Building DMG ..."
+
 UC_DMG=$APPNAME-${release_version}-${svn_version}.dmg
 
 rm -f $UC_DMG
-echo hdiutil create $UC_DMG -volname $APPNAME-$release_version -fs HFS+ -srcfolder $PRODUCT_PKG_DIR
-hdiutil create $UC_DMG -volname $APPNAME-$release_version -fs HFS+ -srcfolder $PRODUCT_PKG_DIR
+echo hdiutil create $UC_DMG -volname $APPNAME-${release_version} -fs HFS+ -srcfolder $PRODUCT_PKG_DIR
+hdiutil create $UC_DMG -volname $APPNAME-${release_version} -fs HFS+ -srcfolder $PRODUCT_PKG_DIR
 
 # compress it
-# echo "Compressing DMG ..."
-# rm -f $FINAL_DMG
-# hdiutil convert $UC_DMG -format UDBZ -o $FINAL_DMG
+#echo "Compressing DMG ..."
+#rm -f $FINAL_DMG
+#hdiutil convert $UC_DMG -format UDBZ -o $FINAL_DMG
 
 echo "Done."
 
