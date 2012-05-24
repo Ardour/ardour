@@ -269,8 +269,10 @@ if test x$WITH_LADSPA != x ; then
     else
 	plugdir=ladspa
     fi
-    echo "Copying `ls $plugdir | wc -l` plugins ..."
-    cp -r $plugdir/* $Plugins
+    if [ -d $plugdir ] ; then 
+        echo "Copying `ls $plugdir | wc -l` plugins ..."
+        cp -r $plugdir/* $Plugins
+    fi
 fi
 
 # generate new Pango module file

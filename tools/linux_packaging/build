@@ -297,7 +297,6 @@ echo "Copying all Pango modules ..."
 cp -R $GTKSTACK_ROOT/lib/pango/1.6.0/modules/*.so $Modules
 echo "Copying all GDK Pixbuf loaders ..."
 cp -R $GTKSTACK_ROOT/lib/gdk-pixbuf-2.0/2.10.0/loaders/*.so $Loaders
-# charset alias file
 
 # Generate a pango module file using the actual Pango that we're going to bundle
 
