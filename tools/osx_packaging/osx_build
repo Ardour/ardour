@@ -2,30 +2,9 @@
 
 # script for pulling together a MacOSX app bundle.
 
-GTKQUARTZ_ROOT=$HOME/gtk/inst
+GTKSTACK_ROOT=$HOME/gtk/inst
 ARDOURSTACK_ROOT=$HOME/a3/inst
-
-if pkg-config --modversion gtk+-2.0 | grep -s 2.22 ; then
-    # older GTK
-    GDKPIXBUF_LOADERS=$GTKQUARTZ_ROOT/lib/gtk-2.0/2.10.0/loaders
-    echo 
-    echo
-    echo "*****************************************************"
-    echo "You are building with the OLD GTK stack. I hope that is ok"
-    echo "*****************************************************"
-    echo
-    echo
-else
-    # newer GTK
-    GDKPIXBUF_LOADERS=$GTKQUARTZ_ROOT/lib/gdk-pixbuf-2.0/2.10.0/loaders
-    echo 
-    echo
-    echo "*****************************************************"
-    echo "You are building with the NEW GTK stack. I hope that is ok"
-    echo "*****************************************************"
-    echo
-    echo
-fi
+BUILD_ROOT=../../build
 
 SAE=
 MIXBUS=
@@ -82,8 +61,6 @@ while [ $# -gt 0 ] ; do
 	--nls) WITH_NLS=1 ; shift ;;
     esac
 done
-
-BUILD_ROOT=../../build
 
 #release_version=`grep -m 1 '^VERSION' ../../wscript | cut -d' ' -f 3 | sed "s/'//g"`
 release_version=3.0
@@ -248,15 +225,15 @@ if test x$WITH_NLS != x ; then
     done
     for l in $LINGUAS
     do
-      if [ -d $GTKQUARTZ_ROOT/share/locale/$l ] ; then
+      if [ -d $GTKSTACK_ROOT/share/locale/$l ] ; then
 	  echo "Copying GTK i18n files for $l..."
-	  cp -r $GTKQUARTZ_ROOT/share/locale/$l $Locale
+	  cp -r $GTKSTACK_ROOT/share/locale/$l $Locale
       else
 	  # try with just the language spec
 	  just_lang=`echo $l | sed 's/_[A-Z][A-Z]$//'`
-	  if [ -d $GTKQUARTZ_ROOT/share/locale/$just_lang ] ; then
+	  if [ -d $GTKSTACK_ROOT/share/locale/$just_lang ] ; then
 	      echo "Copying GTK i18n files for $l..."
-	      cp -r $GTKQUARTZ_ROOT/share/locale/$just_lang $Locale
+	      cp -r $GTKSTACK_ROOT/share/locale/$just_lang $Locale
 	  fi
       fi
     done
@@ -264,15 +241,25 @@ else
     echo "Skipping NLS support"
 fi
 
-cp -R $GTKQUARTZ_ROOT/etc/* $Etc
-echo "Copying all Pango modules ..."
-cp -R $GTKQUARTZ_ROOT/lib/pango/1.6.0/modules/*.so $Frameworks/modules
-echo "Copying all GDK Pixbuf loaders ..."
-cp -R $GDKPIXBUF_LOADERS/*.so $Frameworks/modules
-# charset alias file
-cp -R $GTKQUARTZ_ROOT/lib/charset.alias $Resources
+#
+# Copy stuff that may be dynamically loaded
+# 
 
-pwd=`pwd`
+cp -R $GTKSTACK_ROOT/etc/* $Etc
+echo "Copying all Pango modules ..."
+cp -R $GTKSTACK_ROOT/lib/pango/1.6.0/modules/*.so $Frameworks/modules
+echo "Copying all GDK Pixbuf loaders ..."
+cp -R $GTKSTACK_ROOT/lib/gdk-pixbuf-2.0/2.10.0/loaders/*.so $Frameworks/modules
+# charset alias file
+cp -R $GTKSTACK_ROOT/lib/charset.alias $Resources
+
+# We rely on clearlooks, so include a version from our own build tree
+# this one is special - we will set GTK_PATH to $Libraries/clearlooks
+
+echo "Copying clearlooks ..."
+cp $BUILD_ROOT/libs/clearlooks-newer/libclearlooks.so $Libraries
+mkdir -p $Libraries/clearlooks/engines
+(cd $Libraries/clearlooks/engines && ln -s ../../libclearlooks.so . )
 
 if test x$WITH_LADSPA != x ; then
     if test x$SAE != x ; then
@@ -289,9 +276,9 @@ fi
 # generate new Pango module file
 cat > pangorc <<EOF 
 [Pango]
-ModulesPath=$GTKQUARTZ_ROOT/lib/pango/1.6.0/modules
+ModulesPath=$GTKSTACK_ROOT/lib/pango/1.6.0/modules
 EOF
-env PANGO_RC_FILE=pangorc $GTKQUARTZ_ROOT/bin/pango-querymodules | sed "s?$GTKQUARTZ_ROOT/lib/pango/1.6.0/modules/?@executable_path/../lib/modules/?" > $Resources/pango.modules
+env PANGO_RC_FILE=pangorc $GTKSTACK_ROOT/bin/pango-querymodules | sed "s?$GTKSTACK_ROOT/lib/pango/1.6.0/modules/?@executable_path/../lib/modules/?" > $Resources/pango.modules
 rm pangorc
 
 # generate a new GDK pixbufs loaders file
@@ -358,7 +345,7 @@ while [ true ] ; do
 	if ! file $file | grep -qs Mach-O ; then
 	    continue
 	fi
-	deps=`otool -L $file | awk '{print $1}' | egrep "($GTKQUARTZ_ROOT|$ARDOURSTACK_ROOT|/opt/|/local/|libs/)" | grep -v 'libjack\.'`
+	deps=`otool -L $file | awk '{print $1}' | egrep "($GTKSTACK_ROOT|$ARDOURSTACK_ROOT|/opt/|/local/|libs/)" | grep -v 'libjack\.'`
 	# echo -n "."
 	for dep in $deps ; do
 	    base=`basename $dep`
@@ -429,7 +416,7 @@ fi
 for exe in $executables; do
     EXE=$APPROOT/MacOS/$exe
     changes=""
-    for lib in `otool -L $EXE | egrep "($GTKQUARTZ_ROOT|$ARDOURSTACK_ROOT|/opt/|/local/|libs/)" | awk '{print $1}' | grep -v 'libjack\.'` ; do
+    for lib in `otool -L $EXE | egrep "($GTKSTACK_ROOT|$ARDOURSTACK_ROOT|/opt/|/local/|libs/)" | awk '{print $1}' | grep -v 'libjack\.'` ; do
       base=`basename $lib`
       changes="$changes -change $lib @executable_path/../lib/$base"
     done
@@ -455,7 +442,7 @@ for libdir in $Frameworks $Frameworks/modules $Surfaces $Panners ; do
         # change all the dependencies
 	
 	changes=""
-	for lib in `otool -L $dylib | egrep "($GTKQUARTZ_ROOT|$ARDOURSTACK_ROOT|/opt/|/local/|libs/)" | awk '{print $1}' | grep -v 'libjack\.'` ; do
+	for lib in `otool -L $dylib | egrep "($GTKSTACK_ROOT|$ARDOURSTACK_ROOT|/opt/|/local/|libs/)" | awk '{print $1}' | grep -v 'libjack\.'` ; do
 	    base=`basename $lib`
 	    if echo $lib | grep -s libbase; then
 		changes="$changes -change $lib @executable_path/../$libbase/$base"
