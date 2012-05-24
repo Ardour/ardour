@@ -31,9 +31,6 @@
 #include <sys/stat.h>
 
 #include <glib.h>
-#ifdef HAVE_GLIB_THREADS_RECMUTEX
-#include <glibmm/threads.h>
-#endif
 
 #include "pbd/undo.h"
 #include "pbd/stateful.h"
