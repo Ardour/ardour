@@ -34,12 +34,12 @@ namespace Gdk {
 }
 
 namespace ARDOUR {
-	class Route;
 	class Crossfade;
-	class PeakData;
-	class MidiRegion;
-	class Source;
 	class MidiModel;
+	class MidiRegion;
+	class Route;
+	class Source;
+	struct PeakData;
 }
 
 class PublicEditor;

@@ -35,7 +35,7 @@
 
 namespace ARDOUR {
 	class AudioRegion;
-	class PeakData;
+	struct PeakData;
 };
 
 class AudioTimeAxisView;

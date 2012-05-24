@@ -121,8 +121,9 @@ protected:
 
 /// A process context that allocates and owns it's data buffer
 template <typename T = DefaultSampleType>
-struct AllocatingProcessContext : public ProcessContext<T>
+class AllocatingProcessContext : public ProcessContext<T>
 {
+public:
 	/// Allocates uninitialized memory
 	AllocatingProcessContext (framecnt_t frames, ChannelCount channels)
 		: ProcessContext<T> (new T[frames], frames, channels) {}

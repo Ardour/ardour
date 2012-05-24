@@ -21,12 +21,13 @@
 
 class Editor;
 
-struct EditorCursor {
-	Editor&               editor;
-	ArdourCanvas::Points  points;
-	ArdourCanvas::Line    canvas_item;
+class EditorCursor {
+public:
+	Editor&              editor;
+	ArdourCanvas::Points points;
+	ArdourCanvas::Line   canvas_item;
 	framepos_t           current_frame;
-	double		  length;
+	double               length;
 
 	EditorCursor (Editor&, bool (Editor::*)(GdkEvent*,ArdourCanvas::Item*));
 	~EditorCursor ();
@@ -35,5 +36,5 @@ struct EditorCursor {
 	void set_length (double units);
 	void set_y_axis (double position);
 
-        PBD::Signal1<void, framepos_t> PositionChanged;
+	PBD::Signal1<void, framepos_t> PositionChanged;
 };

@@ -22,8 +22,9 @@
 
 #include "ardour/bundle.h"
 
-struct PortMatrixNode
+class PortMatrixNode
 {
+public:
 	PortMatrixNode () {}
 	PortMatrixNode (ARDOUR::BundleChannel r, ARDOUR::BundleChannel c) : row (r), column (c) {}
 

@@ -1347,7 +1347,7 @@ RouteUI::set_color (const Gdk::Color & c)
 	   the time axis view and the mixer strip
 	*/
 	
-	gui_object_state().set<string> (route_state_id(), X_("color"), buf);
+	gui_object_state().set_property<string> (route_state_id(), X_("color"), buf);
 	_route->gui_changed ("color", (void *) 0); /* EMIT_SIGNAL */
 }
 

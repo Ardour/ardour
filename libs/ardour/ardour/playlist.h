@@ -230,12 +230,14 @@ public:
 	friend class Session;
 
   protected:
-    struct RegionReadLock : public Glib::RWLock::ReaderLock {
+    class RegionReadLock : public Glib::RWLock::ReaderLock {
+    public:
         RegionReadLock (Playlist *pl) : Glib::RWLock::ReaderLock (pl->region_lock) {}
         ~RegionReadLock() {}
     };
 
-    struct RegionWriteLock : public Glib::RWLock::WriterLock {
+    class RegionWriteLock : public Glib::RWLock::WriterLock {
+    public:
 	    RegionWriteLock (Playlist *pl, bool do_block_notify = true) 
                     : Glib::RWLock::WriterLock (pl->region_lock)
                     , playlist (pl)

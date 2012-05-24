@@ -27,14 +27,15 @@
 
 namespace ARDOUR {
 
-	struct InterThreadInfo {
+	class InterThreadInfo {
+	public:
 		InterThreadInfo () : done (false), cancel (false), progress (0), thread (0) {}
 
 		volatile bool  done;
 		volatile bool  cancel;
 		volatile float progress;
 		pthread_t      thread;
-	        ProcessThread  process_thread;
+		ProcessThread  process_thread;
 	};
 
 } // namespace

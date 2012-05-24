@@ -300,7 +300,7 @@ Parser::process_mtc_quarter_frame (byte *msg)
 
 	switch (_mtc_running) {
 	case MTC_Forward:
-		if ((which_quarter_frame == 7)) {
+		if (which_quarter_frame == 7) {
 			
 			/* we've reached the final of 8 quarter frame messages.
 			   store the time, reset the pending time holder,

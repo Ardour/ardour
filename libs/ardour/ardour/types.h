@@ -213,7 +213,8 @@ namespace ARDOUR {
 		timecode_60
 	};
 
-	struct AnyTime {
+	class AnyTime {
+	public:
 		enum Type {
 			Timecode,
 			BBT,

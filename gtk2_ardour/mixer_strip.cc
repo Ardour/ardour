@@ -1171,7 +1171,7 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width widt
 	}
 
 	if (each_io_has_one_connection) {
-		if ((total_connection_count == ardour_connection_count)) {
+		if (total_connection_count == ardour_connection_count) {
 			// all connections are to the same track in ardour
 			// "ardour:Master/" -> "Master"
 			string::size_type slash = ardour_track_name.find("/");

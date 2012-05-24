@@ -47,7 +47,7 @@ public:
 	EventRingBuffer(size_t capacity) : PBD::RingBufferNPT<uint8_t>(capacity)
 	{}
 
-	size_t capacity() const { return bufsize(); }
+	inline size_t capacity() const { return bufsize(); }
 
 	/** Peek at the ringbuffer (read w/o advancing read pointer).
 	 * @return how much has been peeked (wraps around if read exceeds
@@ -57,10 +57,10 @@ public:
 	 *            read-pointer---^
 	 * </pre>
 	 */
-	bool peek (uint8_t*, size_t size);
+	inline bool peek (uint8_t*, size_t size);
 
-	uint32_t write(Time  time, EventType  type, uint32_t  size, const uint8_t* buf);
-	bool     read (Time* time, EventType* type, uint32_t* size,       uint8_t* buf);
+	inline uint32_t write(Time  time, EventType  type, uint32_t  size, const uint8_t* buf);
+	inline bool     read (Time* time, EventType* type, uint32_t* size,       uint8_t* buf);
 };
 
 template<typename Time>

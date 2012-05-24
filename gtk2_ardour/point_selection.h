@@ -24,7 +24,7 @@
 
 class ControlPoint;
 
-struct PointSelection : public std::list<ControlPoint *>
+class PointSelection : public std::list<ControlPoint *>
 {
 };
 

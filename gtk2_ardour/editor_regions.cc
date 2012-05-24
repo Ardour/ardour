@@ -303,7 +303,6 @@ EditorRegions::add_region (boost::shared_ptr<Region> region)
 
 		TreeModel::iterator iter = _model->get_iter ("0");
 		TreeModel::Row parent;
-		TreeModel::Row child;
 
 		if (!iter) {
 			parent = *(_model->append());
@@ -550,7 +549,7 @@ EditorRegions::selection_changed ()
 
 		for (TreeView::Selection::ListHandle_Path::iterator i = rows.begin(); i != rows.end(); ++i) {
 
-			if (iter = _model->get_iter (*i)) {
+			if ((iter = _model->get_iter (*i))) {
 				boost::shared_ptr<Region> region = (*iter)[_columns.region];
 
 				// they could have clicked on a row that is just a placeholder, like "Hidden"

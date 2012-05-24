@@ -149,8 +149,9 @@ class Bundle : public PBD::ScopedConnectionList
 	Change _pending_change;
 };
 
-struct BundleChannel
+class BundleChannel
 {
+public:
 	BundleChannel () : channel (-1) {}
 
 	BundleChannel (boost::shared_ptr<Bundle> b, int c)

@@ -393,7 +393,7 @@ ExportFormatDialog::init_format_table ()
 
 		boost::shared_ptr<HasSampleFormat> hsf;
 
-		if (hsf = boost::dynamic_pointer_cast<HasSampleFormat> (*it)) {
+		if ((hsf = boost::dynamic_pointer_cast<HasSampleFormat> (*it))) {
 			hsf->SampleFormatSelectChanged.connect (*this, invalidator (*this), boost::bind (&ExportFormatDialog::change_sample_format_selection, this, _1, _2), gui_context());
 			hsf->SampleFormatCompatibleChanged.connect (*this, invalidator (*this), boost::bind (&ExportFormatDialog::change_sample_format_compatibility, this, _1, _2), gui_context());
 
@@ -832,13 +832,13 @@ ExportFormatDialog::change_encoding_options (ExportFormatPtr ptr)
 	boost::shared_ptr<ARDOUR::ExportFormatFLAC> flac_ptr;
 	boost::shared_ptr<ARDOUR::ExportFormatBWF> bwf_ptr;
 
-	if (linear_ptr = boost::dynamic_pointer_cast<ExportFormatLinear> (ptr)) {
+	if ((linear_ptr = boost::dynamic_pointer_cast<ExportFormatLinear> (ptr))) {
 		show_linear_enconding_options (linear_ptr);
-	} else if (ogg_ptr = boost::dynamic_pointer_cast<ExportFormatOggVorbis> (ptr)) {
+	} else if ((ogg_ptr = boost::dynamic_pointer_cast<ExportFormatOggVorbis> (ptr))) {
 		show_ogg_enconding_options (ogg_ptr);
-	} else if (flac_ptr = boost::dynamic_pointer_cast<ExportFormatFLAC> (ptr)) {
+	} else if ((flac_ptr = boost::dynamic_pointer_cast<ExportFormatFLAC> (ptr))) {
 		show_flac_enconding_options (flac_ptr);
-	} else if (bwf_ptr = boost::dynamic_pointer_cast<ExportFormatBWF> (ptr)) {
+	} else if ((bwf_ptr = boost::dynamic_pointer_cast<ExportFormatBWF> (ptr))) {
 		show_bwf_enconding_options (bwf_ptr);
 	} else {
 		std::cout << "Unrecognized format!" << std::endl;

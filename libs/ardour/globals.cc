@@ -112,7 +112,9 @@ mix_buffers_no_gain_t   ARDOUR::mix_buffers_no_gain = 0;
 
 PBD::Signal1<void,std::string> ARDOUR::BootMessage;
 
-void ARDOUR::setup_enum_writer ();
+namespace ARDOUR {
+extern void setup_enum_writer ();
+}
 
 /* this is useful for quite a few things that want to check
    if any bounds-related property has changed
@@ -277,7 +279,7 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization)
 
 	Stateful::current_state_version = CURRENT_SESSION_FILE_VERSION;
 
-	setup_enum_writer ();
+	ARDOUR::setup_enum_writer ();
 
 	// allow ardour the absolute maximum number of open files
 	lotsa_files_please ();

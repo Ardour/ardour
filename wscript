@@ -128,10 +128,11 @@ def set_compiler_flags (conf,opt):
     platform = u[0].lower()
     version = u[2]
 
+    is_clang = conf.env['CXX'][0].endswith('clang++')
     if opt.gprofile:
         debug_flags = [ '-pg' ]
     else:
-        if platform != 'darwin':
+        if platform != 'darwin' and not is_clang:
             debug_flags = [ '-rdynamic' ] # waf adds -O0 -g itself. thanks waf!
 
     # Autodetect
@@ -214,7 +215,7 @@ def set_compiler_flags (conf,opt):
             elif cpu == "i686":
                 optimization_flags.append ("-march=i686")
 
-        if ((conf.env['build_target'] == 'i686') or (conf.env['build_target'] == 'x86_64')) and build_host_supports_sse:
+        if not is_clang and ((conf.env['build_target'] == 'i686') or (conf.env['build_target'] == 'x86_64')) and build_host_supports_sse:
             optimization_flags.extend (["-msse", "-mfpmath=sse", "-DUSE_XMMINTRIN"])
             debug_flags.extend (["-msse", "-mfpmath=sse", "-DUSE_XMMINTRIN"])
 

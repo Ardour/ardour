@@ -31,8 +31,8 @@
 namespace ARDOUR
 {
 
-struct ExportStatus {
-
+class ExportStatus {
+  public:
 	ExportStatus ();
 	void init ();
 

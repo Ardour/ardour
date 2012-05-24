@@ -29,9 +29,6 @@
 #include "pbd/signals.h"
 #include "pbd/ringbuffer.h"
 
-#include "evoral/Event.hpp"
-#include "evoral/EventRingBuffer.hpp"
-
 #include "midi++/types.h"
 #include "midi++/parser.h"
 

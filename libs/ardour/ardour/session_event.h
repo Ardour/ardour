@@ -16,7 +16,8 @@ namespace ARDOUR {
 class Slave;
 class Region;
 
-struct SessionEvent {
+class SessionEvent {
+public:
 	enum Type {
 		SetTransportSpeed,
 		SetTrackSpeed,

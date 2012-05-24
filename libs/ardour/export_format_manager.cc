@@ -239,7 +239,7 @@ ExportFormatManager::add_format (ExportFormatPtr ptr)
 
 	boost::shared_ptr<HasSampleFormat> hsf;
 
-	if (hsf = boost::dynamic_pointer_cast<HasSampleFormat> (ptr)) {
+	if ((hsf = boost::dynamic_pointer_cast<HasSampleFormat> (ptr))) {
 		hsf->SampleFormatSelectChanged.connect_same_thread (*this, boost::bind (&ExportFormatManager::change_sample_format_selection, this, _1, _2));
 		hsf->DitherTypeSelectChanged.connect_same_thread (*this, boost::bind (&ExportFormatManager::change_dither_type_selection, this, _1, _2));
 	}
@@ -682,7 +682,7 @@ ExportFormatManager::selection_changed ()
 	}
 
 	boost::shared_ptr<HasSampleFormat> hsf;
-	if (hsf = boost::dynamic_pointer_cast<HasSampleFormat> (get_selected_format())) {
+	if ((hsf = boost::dynamic_pointer_cast<HasSampleFormat> (get_selected_format()))) {
 
 		SampleFormatList sf_list = hsf->get_sample_formats();
 		for (SampleFormatList::iterator it = sf_list.begin(); it != sf_list.end(); ++it) {
@@ -747,7 +747,7 @@ ExportFormatManager::get_selected_sample_format ()
 {
 	boost::shared_ptr<HasSampleFormat> hsf;
 
-	if (hsf = boost::dynamic_pointer_cast<HasSampleFormat> (get_selected_format())) {
+	if ((hsf = boost::dynamic_pointer_cast<HasSampleFormat> (get_selected_format()))) {
 		return hsf->get_selected_sample_format ();
 	} else {
 		return SampleFormatPtr ();

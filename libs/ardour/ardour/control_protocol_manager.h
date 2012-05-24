@@ -35,7 +35,8 @@ class ControlProtocol;
 class ControlProtocolDescriptor;
 class Session;
 
-struct ControlProtocolInfo {
+class ControlProtocolInfo {
+public:
     ControlProtocolDescriptor* descriptor;
     ControlProtocol* protocol;
     std::string name;

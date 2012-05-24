@@ -53,7 +53,8 @@ public:
 	bool merge_in_place(const MidiBuffer &other);
 
 	template<typename BufferType, typename EventType>
-	struct iterator_base {
+	class iterator_base {
+	public:
 		iterator_base<BufferType, EventType>(BufferType& b, framecnt_t o) : buffer(b), offset(o) {}
 		inline EventType operator*() const {
 			uint8_t* ev_start = buffer._data + offset + sizeof(TimeType);

@@ -242,8 +242,9 @@ private:
 class RegionDrag;
 
 /** Container for details about a region being dragged */
-struct DraggingView
+class DraggingView
 {
+public:
 	DraggingView (RegionView *, RegionDrag *);
 
 	RegionView* view; ///< the view
