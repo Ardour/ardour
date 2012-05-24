@@ -298,24 +298,19 @@ cp -R $GTKSTACK_ROOT/lib/gdk-pixbuf-2.0/2.10.0/loaders/*.so $Loaders
 # charset alias file
 cp -R $GTKSTACK_ROOT/lib/charset.alias $Etc
 
-pango-querymodules | sed "s?$PANGOLIB/?@ROOTDIR@/?" > $Etc/pango.modules.in
-gdk-pixbuf-query-loaders | sed "s?$GDKPIXBUFLIB/?@ROOTDIR@/?" > $Etc/gdk-pixbuf.loaders.in
+pango-querymodules | sed "s?$GTKSTACK_ROOT/lib/pango/1.6.0/?@ROOTDIR@/?" > $Etc/pango.modules.in
+gdk-pixbuf-query-loaders | sed "s?$GTKSTACK_ROOT/lib/gdk-pixbuf-2.0/2.10.0/?@ROOTDIR@/?" > $Etc/gdk-pixbuf.loaders.in
 
 # We sort of rely on clearlooks, so include a version
 # this one is special - we will set GTK_PATH to $Libraries/clearlooks
 
-if [ ! -e ${GTKLIB}/engines/libclearlooks.so ]; then
-    if [ ! -e $BUILD_ROOT/libs/clearlooks-newer/libclearlooks.so ] ; then 
-	echo ""
+clearlooks_so=${GTKLIB}/engines/libclearlooks.so
+if [ ! -e $clearlooks.so ]; then
 	echo "!!! ERROR !!! - not able to locate libclearlooks.so"
 	echo ""
 	echo "Packager with exit"
 	exit 1
-    else 
-        clearlooks_so=$BUILD_ROOT/libs/clearlooks-newer/libclearlooks.so
-    fi
 else
-    clearlooks_so=${GTKLIB}/engines/libclearlooks.so
 fi
 
 echo "Copying clearlooks ..."
