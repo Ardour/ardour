@@ -208,3 +208,74 @@ PlaylistReadTest::check_staircase (Sample* b, int offset, int N)
 		CPPUNIT_ASSERT_EQUAL (j, int (b[i]));
 	}
 }
+
+/* Check the case where we have
+ *    |----------- Region A (transparent) ------------------|
+ *                     |---- Region B (opaque) --|
+ *
+ * The result should be a mix of the two during region B's time.
+ */
+
+void
+PlaylistReadTest::enclosedTransparentReadTest ()
+{
+	boost::shared_ptr<AudioRegion> ar0 = boost::dynamic_pointer_cast<AudioRegion> (_region[0]);
+	ar0->set_name ("ar0");
+	_apl->add_region (ar0, 256);
+	/* These calls will result in a 64-sample fade */
+	ar0->set_fade_in_length (0);
+	ar0->set_fade_out_length (0);
+	ar0->set_length (256);
+	
+	boost::shared_ptr<AudioRegion> ar1 = boost::dynamic_pointer_cast<AudioRegion> (_region[1]);
+	ar1->set_name ("ar1");
+	_apl->add_region (ar1, 0);
+	/* These calls will result in a 64-sample fade */
+	ar1->set_fade_in_length (0);
+	ar1->set_fade_out_length (0);
+	ar1->set_length (1024);
+	ar1->set_opaque (false);
+
+	_apl->read (_buf, _mbuf, _gbuf, 0, 1024, 0);
+
+	/* First 64 samples should just be ar1, faded in */
+	for (int i = 0; i < 64; ++i) {
+		CPPUNIT_ASSERT_DOUBLES_EQUAL (float (i * float (i / 63.0)), _buf[i], 1e-16);
+	}
+
+	/* Then some of ar1 with no fade */
+	for (int i = 64; i < 256; ++i) {
+		CPPUNIT_ASSERT_DOUBLES_EQUAL (i, _buf[i], 1e-16);
+	}
+
+	/* Then ar1 + ar0 (faded in) for 64 samples */
+	for (int i = 256; i < (256 + 64); ++i) {
+		CPPUNIT_ASSERT_DOUBLES_EQUAL (i + float ((i - 256) * float ((i - 256) / 63.0)), _buf[i], 1e-16);
+	}
+
+	/* Then ar1 + ar0 for 128 samples */
+	for (int i = (256 + 64); i < (256 + 64 + 128); ++i) {
+		CPPUNIT_ASSERT_DOUBLES_EQUAL (i + i - (256 + 64) + 64, _buf[i], 1e-16);
+	}
+	
+	/* Then ar1 + ar0 (faded out) for 64 samples */
+	for (int i = (256 + 64 + 128); i < 512; ++i) {
+		float const ar0_without_fade = i - 256;
+		/* See above regarding VERY_SMALL_SIGNAL SNAFU */
+		float const fade = (((double) 1 - 0.0000001) / 63) * (511 - i) + 0.0000001;
+		CPPUNIT_ASSERT_DOUBLES_EQUAL (i + float (ar0_without_fade * fade), _buf[i], 1e-16);
+	}
+
+	/* Then just ar1 for a while */
+	for (int i = 512; i < (1024 - 64); ++i) {
+		CPPUNIT_ASSERT_DOUBLES_EQUAL (i, _buf[i], 1e-16);
+	}
+
+	/* And finally ar1's fade out */
+	for (int i = (1024 - 64); i < 1024; ++i) {
+		/* See above regarding VERY_SMALL_SIGNAL SNAFU */
+		float const fade = (((double) 1 - 0.0000001) / 63) * (1023 - i) + 0.0000001;
+		CPPUNIT_ASSERT_DOUBLES_EQUAL (i * fade, _buf[i], 1e-16);
+
+	}
+}
