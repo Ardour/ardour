@@ -22,7 +22,6 @@
 #include <vector>
 #include "ardour/types.h"
 #include "ardour/processor.h"
-#include "pbd/signals.h"
 #include "pbd/fastlog.h"
 
 namespace ARDOUR {

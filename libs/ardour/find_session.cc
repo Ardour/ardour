@@ -10,7 +10,6 @@
 #include "pbd/compose.h"
 #include "pbd/error.h"
 
-#include "ardour/session_utils.h"
 #include "ardour/filename_extensions.h"
 #include "ardour/utils.h"
 
@@ -19,8 +18,10 @@
 using namespace std;
 using namespace PBD;
 
+namespace ARDOUR {
+
 int
-ARDOUR::find_session (string str, string& path, string& snapshot, bool& isnew)
+find_session (string str, string& path, string& snapshot, bool& isnew)
 {
 	struct stat statbuf;
 	char buf[PATH_MAX+1];
@@ -164,3 +165,5 @@ ARDOUR::find_session (string str, string& path, string& snapshot, bool& isnew)
 
 	return 0;
 }
+
+}  // namespace ARDOUR

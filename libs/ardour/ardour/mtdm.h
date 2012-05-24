@@ -19,10 +19,7 @@
 #ifndef __libardour_mtdm_h__
 #define __libardour_mtdm_h__
 
-#include <cstdlib>
-#include <cstdio>
-#include <cmath>
-#include <unistd.h>
+#include <stddef.h>
 
 class MTDM {
 public:

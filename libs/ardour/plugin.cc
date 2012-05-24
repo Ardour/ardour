@@ -38,12 +38,16 @@
 #include "pbd/error.h"
 #include "pbd/xml++.h"
 
-#include "ardour/ardour.h"
-#include "ardour/session.h"
-#include "ardour/audioengine.h"
+#include "ardour/buffer_set.h"
+#include "ardour/chan_count.h"
+#include "ardour/chan_mapping.h"
+#include "ardour/data_type.h"
+#include "ardour/midi_buffer.h"
+#include "ardour/midi_state_tracker.h"
 #include "ardour/plugin.h"
-#include "ardour/ladspa_plugin.h"
 #include "ardour/plugin_manager.h"
+#include "ardour/session.h"
+#include "ardour/types.h"
 
 #ifdef AUDIOUNIT_SUPPORT
 #include "ardour/audio_unit.h"
@@ -61,6 +65,8 @@
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR { class AudioEngine; }
 
 bool
 PluginInfo::is_instrument () const

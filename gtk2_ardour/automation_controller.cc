@@ -23,12 +23,8 @@
 
 #include "pbd/error.h"
 
-#include "ardour/automation_list.h"
-#include "ardour/automation_control.h"
-#include "ardour/event_type_map.h"
 #include "ardour/automatable.h"
-#include "ardour/panner.h"
-#include "ardour/pan_controllable.h"
+#include "ardour/automation_control.h"
 #include "ardour/session.h"
 
 #include "ardour_ui.h"

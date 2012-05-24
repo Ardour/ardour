@@ -20,8 +20,9 @@
 #ifndef __midinames_h__
 #define __midinames_h__
 
-#include "events.h"
+#include <stdint.h>
 
+#include "events.h"
 
 /** \group midi
  */

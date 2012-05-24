@@ -20,17 +20,16 @@
 #include <gio/gio.h>
 #include <gtk/gtkiconfactory.h>
 
-
 #include "pbd/filesystem.h"
 #include "pbd/file_utils.h"
 #include "pbd/search_path.h"
 
 #include "gtkmm2ext/tearoff.h"
 
-#include "ardour/ardour.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/profile.h"
 #include "ardour/session.h"
+#include "ardour/types.h"
 
 #include "actions.h"
 #include "ardour_ui.h"

@@ -4,13 +4,10 @@
 #include "pbd/memento_command.h"
 #include "pbd/convert.h"
 
-#include "ardour/transient_detector.h"
-#include "ardour/onset_detector.h"
-#include "ardour/audiosource.h"
 #include "ardour/audioregion.h"
-#include "ardour/playlist.h"
-#include "ardour/region_factory.h"
+#include "ardour/onset_detector.h"
 #include "ardour/session.h"
+#include "ardour/transient_detector.h"
 
 #include "rhythm_ferret.h"
 #include "audio_region_view.h"

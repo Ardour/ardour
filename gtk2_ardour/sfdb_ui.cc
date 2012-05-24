@@ -43,7 +43,6 @@
 
 #include "evoral/SMF.hpp"
 
-#include "ardour/amp.h"
 #include "ardour/audio_library.h"
 #include "ardour/auditioner.h"
 #include "ardour/audioregion.h"
@@ -53,7 +52,6 @@
 #include "ardour/source_factory.h"
 #include "ardour/session.h"
 #include "ardour/session_directory.h"
-#include "ardour/profile.h"
 
 #include "ardour_ui.h"
 #include "editing.h"

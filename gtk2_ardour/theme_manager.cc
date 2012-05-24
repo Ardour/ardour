@@ -32,9 +32,7 @@
 
 #include "pbd/file_utils.h"
 
-#include "ardour/configuration.h"
 #include "ardour/filesystem_paths.h"
-#include "ardour/profile.h"
 
 #include "ardour_button.h"
 #include "theme_manager.h"

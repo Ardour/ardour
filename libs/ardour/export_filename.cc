@@ -30,7 +30,6 @@
 #include "ardour/export_timespan.h"
 #include "ardour/export_format_specification.h"
 #include "ardour/export_channel_configuration.h"
-#include "ardour/export_failed.h"
 
 #include "i18n.h"
 

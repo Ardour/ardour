@@ -19,9 +19,6 @@
 
 #include <strings.h>
 #include <map>
-#include <vector>
-
-#include "pbd/convert.h"
 
 #include <sndfile.h>
 #include "ardour/sndfile_helpers.h"

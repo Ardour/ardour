@@ -18,10 +18,6 @@
 */
 
 #include "ardour/session.h"
-#include "ardour/io.h"
-#include "ardour/auditioner.h"
-#include "ardour/audioengine.h"
-#include "ardour/port.h"
 
 #include "gui_thread.h"
 #include "session_option_editor.h"

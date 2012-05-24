@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002 Paul Davis
+    Copyright (C) 2012 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,27 +17,27 @@
 
 */
 
-#ifndef __libardour_interthread_h__
-#define __libardour_interthread_h__
+#ifndef __gtk2_ardour_midi_export_dialog_h__
+#define __gtk2_ardour_midi_export_dialog_h__
 
-#include <pthread.h>
+#include <boost/shared_ptr.hpp>
 
-#include "ardour/types.h"
-#include "ardour/process_thread.h"
+#include <gtkmm/filechooser.h>
 
-namespace ARDOUR {
+#include "ardour_dialog.h"
+#include "public_editor.h"
 
-	class InterThreadInfo {
-	public:
-		InterThreadInfo () : done (false), cancel (false), progress (0), thread (0) {}
+class MidiExportDialog : public ArdourDialog {
+  public:
+	MidiExportDialog (PublicEditor& editor, boost::shared_ptr<ARDOUR::MidiRegion>);
+	~MidiExportDialog ();
 
-		volatile bool  done;
-		volatile bool  cancel;
-		volatile float progress;
-		pthread_t      thread;
-		ProcessThread  process_thread;
-	};
+	void set_session (ARDOUR::Session*);
 
-} // namespace
+	std::string get_path() const;
 
-#endif /* __libardour_interthread_h__ */
+  private:
+	Gtk::FileChooserWidget file_chooser;
+};
+
+#endif /* __gtk2_ardour_midi_export_dialog_h__ */

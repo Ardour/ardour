@@ -31,15 +31,12 @@
 #include "pbd/pthread_utils.h"
 #include "pbd/stacktrace.h"
 
-#include "ardour/audio_diskstream.h"
-#include "ardour/audioengine.h"
 #include "ardour/butler.h"
-#include "ardour/configuration.h"
-#include "ardour/io.h"
-#include "ardour/midi_diskstream.h"
+#include "ardour/route.h"
 #include "ardour/session.h"
-#include "ardour/timestamps.h"
+#include "ardour/session_event.h"
 #include "ardour/track.h"
+#include "ardour/types.h"
 
 #include "i18n.h"
 

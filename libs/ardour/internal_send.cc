@@ -25,13 +25,14 @@
 #include "ardour/internal_return.h"
 #include "ardour/internal_send.h"
 #include "ardour/meter.h"
-#include "ardour/panner.h"
 #include "ardour/panner_shell.h"
 #include "ardour/route.h"
 #include "ardour/session.h"
 #include "ardour/audioengine.h"
 
 #include "i18n.h"
+
+namespace ARDOUR { class MuteMaster; class Pannable; }
 
 using namespace PBD;
 using namespace ARDOUR;

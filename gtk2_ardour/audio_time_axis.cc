@@ -36,19 +36,10 @@
 #include <gtkmm2ext/bindable_button.h>
 #include <gtkmm2ext/utils.h>
 
-#include "ardour/amp.h"
-#include "ardour/audioplaylist.h"
 #include "ardour/event_type_map.h"
-#include "ardour/location.h"
 #include "ardour/pannable.h"
 #include "ardour/panner.h"
 #include "ardour/panner_shell.h"
-#include "ardour/playlist.h"
-#include "ardour/processor.h"
-#include "ardour/profile.h"
-#include "ardour/session.h"
-#include "ardour/session_playlist.h"
-#include "ardour/utils.h"
 
 #include "ardour_button.h"
 #include "ardour_ui.h"
@@ -66,8 +57,6 @@
 #include "simplerect.h"
 #include "audio_streamview.h"
 #include "utils.h"
-
-#include "ardour/audio_track.h"
 
 #include "i18n.h"
 

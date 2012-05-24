@@ -17,29 +17,28 @@
 
 */
 
-#include "ardour/session.h"
-#include "ardour/route.h"
-#include "pbd/memento_command.h"
-#include "ardour/diskstream.h"
-#include "ardour/playlist.h"
-#include "ardour/audioplaylist.h"
-#include "ardour/audio_track.h"
-#include "ardour/midi_playlist.h"
-#include "ardour/midi_track.h"
-#include "ardour/tempo.h"
-#include "ardour/audiosource.h"
-#include "ardour/audioregion.h"
-#include "ardour/midi_source.h"
-#include "ardour/midi_region.h"
-#include "ardour/session_playlists.h"
-#include "ardour/region_factory.h"
+#include <string>
+
+#include "ardour/automation_list.h"
+#include "ardour/location.h"
 #include "ardour/midi_automation_list_binder.h"
-#include "pbd/error.h"
-#include "pbd/id.h"
-#include "pbd/statefuldestructible.h"
-#include "pbd/failed_constructor.h"
-#include "pbd/stateful_diff_command.h"
+#include "ardour/playlist.h"
+#include "ardour/region.h"
+#include "ardour/region_factory.h"
+#include "ardour/route.h"
+#include "ardour/session.h"
+#include "ardour/session_playlists.h"
+#include "ardour/source.h"
+#include "ardour/tempo.h"
 #include "evoral/Curve.hpp"
+#include "pbd/error.h"
+#include "pbd/failed_constructor.h"
+#include "pbd/id.h"
+#include "pbd/memento_command.h"
+#include "pbd/stateful_diff_command.h"
+#include "pbd/statefuldestructible.h"
+
+class Command;
 
 using namespace PBD;
 using namespace ARDOUR;
@@ -90,7 +89,7 @@ Session::memento_command_factory(XMLNode *n)
     }
 
     /* create command */
-    string obj_T = n->property ("type-name")->value();
+    std::string obj_T = n->property ("type-name")->value();
 
     if (obj_T == "ARDOUR::AudioRegion" || obj_T == "ARDOUR::MidiRegion" || obj_T == "ARDOUR::Region") {
 	    boost::shared_ptr<Region> r = RegionFactory::region_by_id (id);
@@ -139,7 +138,7 @@ Session::memento_command_factory(XMLNode *n)
 			    );
 	    }
 
-	    cerr << "Alist " << id << " not found\n";
+	    std::cerr << "Alist " << id << " not found\n";
 
     } else if (registry.count(id)) { // For Editor and AutomationLine which are off-limits herea
 	    return new MementoCommand<PBD::StatefulDestructible>(*registry[id], before, after);
@@ -156,7 +155,7 @@ Session::stateful_diff_command_factory (XMLNode* n)
 {
 	PBD::ID const id (n->property("obj-id")->value ());
 
-	string const obj_T = n->property ("type-name")->value ();
+	std::string const obj_T = n->property ("type-name")->value ();
 	if ((obj_T == "ARDOUR::AudioRegion" || obj_T == "ARDOUR::MidiRegion")) {
 		boost::shared_ptr<Region> r = RegionFactory::region_by_id (id);
 		if (r) {
@@ -164,13 +163,13 @@ Session::stateful_diff_command_factory (XMLNode* n)
 		}
 
 	} else if (obj_T == "ARDOUR::AudioPlaylist" ||  obj_T == "ARDOUR::MidiPlaylist") {
-                boost::shared_ptr<Playlist> p = playlists->by_id (id);
-                if (p) {
-                        return new StatefulDiffCommand (p, *n);
-                } else {
-                        cerr << "Playlist with ID = " << id << " not found\n";
-                }
-        }
+		boost::shared_ptr<Playlist> p = playlists->by_id (id);
+		if (p) {
+			return new StatefulDiffCommand (p, *n);
+		} else {
+			std::cerr << "Playlist with ID = " << id << " not found\n";
+		}
+	}
 
 	/* we failed */
 

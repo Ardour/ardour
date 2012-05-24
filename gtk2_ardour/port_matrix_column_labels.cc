@@ -20,7 +20,6 @@
 #include <iostream>
 #include "gtkmm2ext/keyboard.h"
 #include "ardour/bundle.h"
-#include "ardour/types.h"
 #include "port_matrix_column_labels.h"
 #include "port_matrix.h"
 #include "port_matrix_body.h"

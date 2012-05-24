@@ -27,10 +27,11 @@
 #include <boost/shared_ptr.hpp>
 
 #include "pbd/xml++.h"
-#include "ardour/location.h"
-#include "ardour/types.h"
 
 namespace ARDOUR {
+
+class Location;
+class Session;
 
 class LocationImportHandler : public ElementImportHandler
 {

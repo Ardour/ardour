@@ -25,6 +25,7 @@
 #include <glibmm/thread.h>
 
 #include "pbd/id.h"
+#include "pbd/property_list.h"
 #include "pbd/signals.h"
 
 #include "ardour/types.h"

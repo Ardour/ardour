@@ -22,16 +22,12 @@
 #include "pbd/xml++.h"
 
 #include "ardour/amp.h"
-#include "ardour/audio_port.h"
+#include "ardour/audioengine.h"
 #include "ardour/buffer_set.h"
 #include "ardour/io.h"
 #include "ardour/meter.h"
-#include "ardour/panner.h"
-#include "ardour/port.h"
 #include "ardour/return.h"
 #include "ardour/session.h"
-#include "ardour/mute_master.h"
-#include "ardour/audioengine.h"
 
 #include "i18n.h"
 

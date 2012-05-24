@@ -8,10 +8,8 @@
 #include "gtkmm2ext/actions.h"
 #include "gtkmm2ext/motionfeedback.h"
 
-#include "ardour/dB.h"
 #include "ardour/monitor_processor.h"
 #include "ardour/route.h"
-#include "ardour/utils.h"
 
 #include "ardour_ui.h"
 #include "gui_thread.h"

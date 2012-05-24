@@ -20,16 +20,6 @@
 
 #include "ardour/export_channel_configuration.h"
 
-#include "ardour/export_handler.h"
-#include "ardour/export_filename.h"
-#include "ardour/export_timespan.h"
-
-#include "ardour/audio_port.h"
-#include "ardour/export_failed.h"
-#include "ardour/midi_port.h"
-#include "ardour/session.h"
-#include "ardour/audioengine.h"
-
 #include "pbd/convert.h"
 #include "pbd/enumwriter.h"
 #include "pbd/pthread_utils.h"

@@ -38,7 +38,6 @@
 #include "ardour/midi_source.h"
 #include "ardour/midi_state_tracker.h"
 #include "ardour/session.h"
-#include "ardour/smf_source.h"
 #include "ardour/types.h"
 
 #include "i18n.h"

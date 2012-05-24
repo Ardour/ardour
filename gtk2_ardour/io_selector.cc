@@ -17,21 +17,18 @@
 
 */
 
+#include <stdint.h>
+
 #include <glibmm/objectbase.h>
 
 #include <gtkmm2ext/doi.h>
 
-#include "ardour/port_insert.h"
-#include "ardour/session.h"
-#include "ardour/io.h"
 #include "ardour/audioengine.h"
-#include "ardour/track.h"
-#include "ardour/audio_track.h"
-#include "ardour/midi_track.h"
-#include "ardour/mtdm.h"
-#include "ardour/data_type.h"
-#include "ardour/port.h"
 #include "ardour/bundle.h"
+#include "ardour/data_type.h"
+#include "ardour/io.h"
+#include "ardour/port.h"
+#include "ardour/session.h"
 
 #include "io_selector.h"
 #include "utils.h"
@@ -207,13 +204,13 @@ IOSelector::list_is_global (int dim) const
 	return (dim == _other);
 }
 
-string
+std::string
 IOSelector::disassociation_verb () const
 {
 	return _("Disconnect");
 }
 
-string
+std::string
 IOSelector::channel_noun () const
 {
 	return _("port");
@@ -256,7 +253,7 @@ void
 IOSelectorWindow::on_show ()
 {
 	Gtk::Window::on_show ();
-	pair<uint32_t, uint32_t> const pm_max = _selector.max_size ();
+	std::pair<uint32_t, uint32_t> const pm_max = _selector.max_size ();
 	resize_window_to_proportion_of_monitor (this, pm_max.first, pm_max.second);
 }
 
@@ -264,8 +261,8 @@ void
 IOSelectorWindow::io_name_changed (void*)
 {
 	ENSURE_GUI_THREAD (*this, &IOSelectorWindow::io_name_changed, src)
-
-	string title;
+		
+	std::string title;
 
 	if (!_selector.find_inputs_for_io_outputs()) {
 		title = string_compose(_("%1 input"), _selector.io()->name());

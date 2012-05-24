@@ -63,7 +63,7 @@ class AxisView : public virtual Selectable, public PBD::ScopedConnectionList, pu
 	std::string gui_property (const std::string& property_name) const;
 	
 	template<typename T> void set_gui_property (const std::string& property_name, const T& value) {
-		gui_object_state().set<T> (state_id(), property_name, value);
+		gui_object_state().set_property<T> (state_id(), property_name, value);
 	}
 
 	bool marked_for_display () const;

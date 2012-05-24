@@ -25,8 +25,9 @@
 #include "ardour/event_type_map.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 /** Read a block of MIDI events from this buffer into a MidiBuffer.
  *
@@ -279,3 +280,4 @@ MidiRingBuffer<T>::reset_tracker ()
 
 template class MidiRingBuffer<framepos_t>;
 
+}  // namespace ARDOUR

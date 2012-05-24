@@ -43,18 +43,13 @@
 #include "evoral/Curve.hpp"
 
 #include "ardour/audio_buffer.h"
-#include "ardour/audio_buffer.h"
-#include "ardour/automatable.h"
 #include "ardour/buffer_set.h"
 #include "ardour/debug.h"
-#include "ardour/pannable.h"
 #include "ardour/panner.h"
 #include "ardour/panner_manager.h"
 #include "ardour/panner_shell.h"
-#include "ardour/runtime_functions.h"
 #include "ardour/session.h"
 #include "ardour/speakers.h"
-#include "ardour/utils.h"
 
 #include "i18n.h"
 

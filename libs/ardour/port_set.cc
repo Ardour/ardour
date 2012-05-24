@@ -18,9 +18,10 @@
 
 #include <string>
 
-#include "ardour/port_set.h"
-#include "ardour/midi_port.h"
 #include "ardour/audio_port.h"
+#include "ardour/midi_port.h"
+#include "ardour/port.h"
+#include "ardour/port_set.h"
 
 using std::string;
 

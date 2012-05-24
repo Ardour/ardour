@@ -22,12 +22,10 @@
 #include <gtkmm/table.h>
 #include <gtkmm/label.h>
 #include <gtkmm/stock.h>
-#include "ardour/audioregion.h"
-#include "ardour/audiosource.h"
 
+#include "ardour/audioregion.h"
 #include "ardour/dB.h"
 #include "ardour_ui.h"
-#include "ardour/session.h"
 
 #include "audio_clock.h"
 #include "gui_thread.h"

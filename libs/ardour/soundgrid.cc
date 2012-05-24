@@ -27,9 +27,9 @@
 #include "ardour/soundgrid.h"
 
 #ifdef __APPLE__
-const char* sndgrid_dll_name = "mixerapplicationcore.dylib";
+const char* sndgrid_dll_name = "mixerapplicationcoresg.dylib";
 #else
-const char* sndgrid_dll_name = "mixerapplicationcore.so";
+const char* sndgrid_dll_name = "mixerapplicationcoresg.so";
 #endif
 
 using namespace ARDOUR;

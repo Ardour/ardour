@@ -30,7 +30,8 @@
 
 namespace ARDOUR {
 
-struct ImportStatus : public InterThreadInfo {
+class ImportStatus : public InterThreadInfo {
+public:
 	std::string doing_what;
 
 	/* control info */

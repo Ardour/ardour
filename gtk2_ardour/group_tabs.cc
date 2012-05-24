@@ -545,7 +545,7 @@ GroupTabs::set_group_color (RouteGroup* group, Gdk::Color color)
 
 	char buf[64];
 	snprintf (buf, sizeof (buf), "%d:%d:%d", color.get_red(), color.get_green(), color.get_blue());
-	gui_state.set (group_gui_id (group), "color", buf);
+	gui_state.set_property (group_gui_id (group), "color", buf);
 	
 	/* the group color change notification */
 	

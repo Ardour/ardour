@@ -20,7 +20,6 @@
 #include "ardour/types.h"
 #include "ardour/utils.h"
 #include "ardour/session_configuration.h"
-#include "ardour/ardour.h"
 #include "i18n.h"
 
 using namespace ARDOUR;

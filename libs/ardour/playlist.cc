@@ -19,20 +19,14 @@
 
 #include <stdint.h>
 #include <set>
-#include <fstream>
 #include <algorithm>
-#include <unistd.h>
-#include <cerrno>
 #include <string>
-#include <climits>
 
 #include <boost/lexical_cast.hpp>
 
 #include "pbd/convert.h"
-#include "pbd/failed_constructor.h"
 #include "pbd/stateful_diff_command.h"
 #include "pbd/xml++.h"
-#include "pbd/stacktrace.h"
 
 #include "ardour/debug.h"
 #include "ardour/playlist.h"
@@ -1196,7 +1190,6 @@ Playlist::flush_notifications (bool from_undo)
 	 times = fabs (times);
 
 	 {
-		 RegionWriteLock rl1 (this);
 		 RegionReadLock rl2 (other.get());
 
 		 int itimes = (int) floor (times);
@@ -1204,18 +1197,21 @@ Playlist::flush_notifications (bool from_undo)
 		 framecnt_t const shift = other->_get_extent().second;
 		 layer_t top = top_layer ();
 
-		 while (itimes--) {
-			 for (RegionList::iterator i = other->regions.begin(); i != other->regions.end(); ++i) {
-				 boost::shared_ptr<Region> copy_of_region = RegionFactory::create (*i, true);
-
-				 /* put these new regions on top of all existing ones, but preserve
-				    the ordering they had in the original playlist.
-				 */
-
-				 add_region_internal (copy_of_region, (*i)->position() + pos);
-				 set_layer (copy_of_region, copy_of_region->layer() + top);
+		 {
+			 RegionWriteLock rl1 (this);
+			 while (itimes--) {
+				 for (RegionList::iterator i = other->regions.begin(); i != other->regions.end(); ++i) {
+					 boost::shared_ptr<Region> copy_of_region = RegionFactory::create (*i, true);
+					 
+					 /* put these new regions on top of all existing ones, but preserve
+					    the ordering they had in the original playlist.
+					 */
+					 
+					 add_region_internal (copy_of_region, (*i)->position() + pos);
+					 set_layer (copy_of_region, copy_of_region->layer() + top);
+				 }
+				 pos += shift;
 			 }
-			 pos += shift;
 		 }
 	 }
 

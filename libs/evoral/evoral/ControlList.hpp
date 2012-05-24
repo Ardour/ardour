@@ -35,7 +35,8 @@ class Curve;
 
 /** A single event (time-stamped value) for a control
  */
-struct ControlEvent {
+class ControlEvent {
+public:
 	ControlEvent (double w, double v)
 		: when (w), value (v), coeff (0)
 	{}

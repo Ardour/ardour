@@ -17,7 +17,6 @@
 #include "ardour/export_format_specification.h"
 #include "ardour/export_timespan.h"
 #include "ardour/sndfile_helpers.h"
-#include "ardour/utils.h"
 
 #include "pbd/filesystem.h"
 #include "pbd/cpus.h"

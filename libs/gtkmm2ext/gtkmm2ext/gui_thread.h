@@ -26,7 +26,7 @@
 #include <boost/bind/protect.hpp>
 
 namespace sigc {
-        class trackable;
+	struct trackable;
 }
 
 #define ENSURE_GUI_THREAD(obj,method, ...) if (!Gtkmm2ext::UI::instance()->caller_is_self()) { abort (); } 

@@ -21,15 +21,16 @@
 #include <cerrno>
 
 #include "pbd/basename.h"
-#include "ardour/sndfilesource.h"
-#include "ardour/smf_source.h"
-#include "ardour/session.h"
-#include "ardour/region.h"
-#include "ardour/filter.h"
-#include "ardour/region_factory.h"
-#include "ardour/source_factory.h"
+
 #include "ardour/analyser.h"
+#include "ardour/audiofilesource.h"
 #include "ardour/audioregion.h"
+#include "ardour/filter.h"
+#include "ardour/region.h"
+#include "ardour/region_factory.h"
+#include "ardour/session.h"
+#include "ardour/smf_source.h"
+#include "ardour/source_factory.h"
 
 #include "i18n.h"
 

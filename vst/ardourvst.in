@@ -1,5 +1,13 @@
 #!/bin/sh
 
+#
+# Running Ardour requires these 3 variables to be set
+#
+
+export ARDOUR_DATA_PATH=@DATADIR@/ardour3
+export ARDOUR_CONFIG_PATH=@SYSCONFDIR@/ardour3
+export ARDOUR_DLL_PATH=@LIBDIR@/ardour3
+
 export GTK_PATH=@LIBDIR@/ardour3${GTK_PATH:+:$GTK_PATH}
 export LD_LIBRARY_PATH=@LIBDIR@/ardour3${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 

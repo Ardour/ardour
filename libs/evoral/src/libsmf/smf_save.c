@@ -180,7 +180,6 @@ smf_format_vlq(unsigned char *buf, int length, unsigned long value)
 	}
 
 	assert(i <= length);
-	length = length; // get rid of stupid gcc warnings about unused params if assert() is null
 
 	/* + 1, because "i" is an offset, not a count. */
 	return (i + 1);

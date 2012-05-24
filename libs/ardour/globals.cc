@@ -62,32 +62,26 @@
 #include "midi++/mmc.h"
 
 #include "ardour/analyser.h"
-#include "ardour/ardour.h"
 #include "ardour/audio_library.h"
 #include "ardour/audioengine.h"
+#include "ardour/audioplaylist.h"
 #include "ardour/audioregion.h"
-#include "ardour/audiosource.h"
 #include "ardour/buffer_manager.h"
 #include "ardour/control_protocol_manager.h"
-#include "ardour/dB.h"
-#include "ardour/debug.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/midi_region.h"
 #include "ardour/mix.h"
-#include "ardour/audioplaylist.h"
 #include "ardour/panner_manager.h"
 #include "ardour/plugin_manager.h"
 #include "ardour/process_thread.h"
 #include "ardour/profile.h"
-#include "ardour/region.h"
 #include "ardour/rc_configuration.h"
+#include "ardour/region.h"
 #include "ardour/route_group.h"
 #include "ardour/runtime_functions.h"
-#include "ardour/session.h"
 #include "ardour/session_event.h"
 #include "ardour/soundgrid.h"
 #include "ardour/source_factory.h"
-#include "ardour/utils.h"
 
 #include "audiographer/routines.h"
 
@@ -113,7 +107,9 @@ mix_buffers_no_gain_t   ARDOUR::mix_buffers_no_gain = 0;
 
 PBD::Signal1<void,std::string> ARDOUR::BootMessage;
 
-void ARDOUR::setup_enum_writer ();
+namespace ARDOUR {
+extern void setup_enum_writer ();
+}
 
 /* this is useful for quite a few things that want to check
    if any bounds-related property has changed
@@ -278,7 +274,7 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization)
 
 	Stateful::current_state_version = CURRENT_SESSION_FILE_VERSION;
 
-	setup_enum_writer ();
+	ARDOUR::setup_enum_writer ();
 
 	// allow ardour the absolute maximum number of open files
 	lotsa_files_please ();

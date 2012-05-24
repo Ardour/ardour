@@ -18,14 +18,8 @@
 
 #include <glibmm/thread.h>
 
-#include "pbd/failed_constructor.h"
-
-#include "ardour/audio_buffer.h"
 #include "ardour/internal_return.h"
-#include "ardour/mute_master.h"
-#include "ardour/session.h"
 #include "ardour/internal_send.h"
-#include "ardour/audioengine.h"
 
 using namespace std;
 using namespace ARDOUR;

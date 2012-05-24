@@ -146,7 +146,8 @@ class ControlProtocol : public PBD::Stateful, public PBD::ScopedConnectionList, 
 };
 
 extern "C" {
-	struct ControlProtocolDescriptor {
+	class ControlProtocolDescriptor {
+	public:
 	    const char* name;      /* descriptive */
 	    const char* id;        /* unique and version-specific */
 	    void*       ptr;       /* protocol can store a value here */

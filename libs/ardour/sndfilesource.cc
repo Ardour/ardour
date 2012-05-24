@@ -35,8 +35,6 @@
 #include "ardour/sndfilesource.h"
 #include "ardour/sndfile_helpers.h"
 #include "ardour/utils.h"
-#include "ardour/version.h"
-#include "ardour/rc_configuration.h"
 #include "ardour/session.h"
 
 #include "i18n.h"

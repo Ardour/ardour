@@ -22,8 +22,6 @@
 #include "ardour/strip_silence.h"
 #include "ardour/audioregion.h"
 #include "ardour/region_factory.h"
-#include "ardour/session.h"
-#include "ardour/dB.h"
 #include "ardour/progress.h"
 
 using namespace ARDOUR;

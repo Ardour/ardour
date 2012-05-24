@@ -22,8 +22,6 @@
 
 #include <gtkmm2ext/utils.h>
 
-#include "ardour/utils.h"
-#include "ardour/configuration.h"
 #include "ardour/session.h"
 #include "pbd/memento_command.h"
 

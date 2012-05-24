@@ -33,9 +33,6 @@
 #include "ardour/playlist.h"
 #include "ardour/playlist_source.h"
 #include "ardour/playlist_factory.h"
-#include "ardour/session.h"
-#include "ardour/session_playlists.h"
-#include "ardour/source_factory.h"
 
 #include "i18n.h"
 

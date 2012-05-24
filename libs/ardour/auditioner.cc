@@ -30,8 +30,6 @@
 #include "ardour/auditioner.h"
 #include "ardour/audioplaylist.h"
 #include "ardour/audio_port.h"
-#include "ardour/panner_shell.h"
-#include "ardour/panner.h"
 #include "ardour/data_type.h"
 #include "ardour/region_factory.h"
 

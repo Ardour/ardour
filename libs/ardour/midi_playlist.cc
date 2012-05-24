@@ -21,20 +21,16 @@
 
 #include <algorithm>
 #include <iostream>
+#include <utility>
 
 #include <stdlib.h>
 
-#include "pbd/error.h"
-
 #include "evoral/EventList.hpp"
 
-#include "ardour/configuration.h"
 #include "ardour/debug.h"
 #include "ardour/midi_model.h"
 #include "ardour/midi_playlist.h"
 #include "ardour/midi_region.h"
-#include "ardour/midi_ring_buffer.h"
-#include "ardour/session.h"
 #include "ardour/types.h"
 
 #include "i18n.h"
@@ -257,10 +253,7 @@ MidiPlaylist::read (Evoral::EventSink<framepos_t>& dst, framepos_t start, framec
 			} else {
 
 				if (new_tracker) {
-					pair<Region*,MidiStateTracker*> newpair;
-					newpair.first = mr.get();
-					newpair.second = tracker;
-					_note_trackers.insert (newpair).first;
+					_note_trackers.insert (make_pair (mr.get(), tracker));
 					DEBUG_TRACE (DEBUG::MidiPlaylistIO, "\tadded tracker to trackers\n");
 				}
 			}

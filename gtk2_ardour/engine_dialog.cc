@@ -43,8 +43,8 @@
 #include <alsa/asoundlib.h>
 #endif
 
-#include "ardour/profile.h"
 #include "ardour/soundgrid.h"
+
 #include <jack/jack.h>
 
 #include "gtkmm2ext/utils.h"

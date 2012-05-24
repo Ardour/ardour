@@ -19,9 +19,9 @@
 
 #include <boost/scoped_array.hpp>
 
-#include "pbd/error.h"
-#include "pbd/enumwriter.h"
 #include "pbd/boost_debug.h"
+#include "pbd/enumwriter.h"
+#include "pbd/error.h"
 
 #include "evoral/Curve.hpp"
 
@@ -30,23 +30,18 @@
 #include "ardour/audio_diskstream.h"
 #include "ardour/audio_track.h"
 #include "ardour/audioplaylist.h"
-#include "ardour/audioregion.h"
-#include "ardour/audiosource.h"
 #include "ardour/buffer_set.h"
-#include "ardour/io_processor.h"
-#include "ardour/panner.h"
-#include "ardour/meter.h"
-#include "ardour/playlist_factory.h"
-#include "ardour/plugin_insert.h"
-#include "ardour/port_insert.h"
-#include "ardour/processor.h"
-#include "ardour/region_factory.h"
-#include "ardour/route_group_specialized.h"
-#include "ardour/session.h"
-#include "ardour/utils.h"
-#include "ardour/session_playlists.h"
 #include "ardour/delivery.h"
 #include "ardour/meter.h"
+#include "ardour/playlist_factory.h"
+#include "ardour/processor.h"
+#include "ardour/region.h"
+#include "ardour/region_factory.h"
+#include "ardour/session.h"
+#include "ardour/session_playlists.h"
+#include "ardour/source.h"
+#include "ardour/utils.h"
+
 #include "i18n.h"
 
 using namespace std;

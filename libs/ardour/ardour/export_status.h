@@ -21,7 +21,6 @@
 #ifndef __ardour_export_status_h__
 #define __ardour_export_status_h__
 
-#include <list>
 #include <stdint.h>
 
 #include "ardour/types.h"
@@ -31,8 +30,8 @@
 namespace ARDOUR
 {
 
-struct ExportStatus {
-
+class ExportStatus {
+  public:
 	ExportStatus ();
 	void init ();
 

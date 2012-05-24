@@ -7,7 +7,6 @@
 
 #include "pbd/openuri.h"
 
-#include "ardour/ardour.h"
 #include "ardour/filesystem_paths.h"
 
 #include "nag.h"

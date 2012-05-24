@@ -17,17 +17,17 @@
 
 */
 
+#include <cmath>
+
+#include <gtkmm2ext/utils.h>
+
 #include "pbd/memento_command.h"
 #include "pbd/stateful_diff_command.h"
 #include "pbd/pthread_utils.h"
 
-#include "ardour/session.h"
 #include "ardour/audioregion.h"
-#include "ardour/playlist.h"
-#include "ardour/utils.h"
+#include "ardour/session_event.h"
 #include "ardour/dB.h"
-#include <gtkmm2ext/utils.h>
-#include <cmath>
 
 #include "audio_region_editor.h"
 #include "audio_region_view.h"

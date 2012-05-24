@@ -17,15 +17,10 @@
 
 */
 
-#include "pbd/boost_debug.h"
-
-#include "ardour/audio_buffer.h"
 #include "ardour/buffer_set.h"
 #include "ardour/debug.h"
 #include "ardour/panner.h"
 #include "ardour/pannable.h"
-#include "ardour/session.h"
-#include "ardour/utils.h"
 
 #include "i18n.h"
 

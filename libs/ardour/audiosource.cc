@@ -35,13 +35,9 @@
 #include <glibmm/miscutils.h>
 
 #include "pbd/xml++.h"
-#include "pbd/pthread_utils.h"
 
 #include "ardour/audiosource.h"
-#include "ardour/audio_diskstream.h"
-#include "ardour/cycle_timer.h"
-#include "ardour/session.h"
-#include "ardour/transient_detector.h"
+#include "ardour/rc_configuration.h"
 #include "ardour/runtime_functions.h"
 
 #include "i18n.h"

@@ -19,9 +19,6 @@
 
 #include <limits.h>
 
-#include "ardour/session.h"
-#include "ardour/session_route.h"
-#include "ardour/dB.h"
 #include "ardour/meter.h"
 
 #include <gtkmm2ext/utils.h>
@@ -38,8 +35,6 @@
 #include "gui_thread.h"
 #include "keyboard.h"
 #include "public_editor.h"
-
-#include "ardour/session.h"
 
 #include "i18n.h"
 

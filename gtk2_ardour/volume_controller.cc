@@ -101,7 +101,7 @@ VolumeController::dB_printer (char buf[32], const boost::shared_ptr<PBD::Control
 			}
 		}
 	} else {
-		snprintf (buf, sizeof (buf), "--");
+		snprintf (buf, 32, "--");
 	}
 }
 

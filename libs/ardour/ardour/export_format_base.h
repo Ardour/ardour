@@ -22,21 +22,20 @@
 #define __ardour_export_format_base_h__
 
 #include <set>
-#include <algorithm>
-#include <boost/shared_ptr.hpp>
 #include <string>
+
+#include <boost/shared_ptr.hpp>
 
 #include <sndfile.h>
 #include <samplerate.h>
 
-#include "ardour/ardour.h"
+#include "pbd/signals.h"
+#include "ardour/types.h"
 
 #include "audiographer/general/sample_format_converter.h"
 
 namespace ARDOUR
 {
-
-class HasSampleFormat;
 
 class ExportFormatBase {
   public:

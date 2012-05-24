@@ -60,20 +60,14 @@
 #include "gtkmm2ext/cell_renderer_pixbuf_toggle.h"
 
 #include "ardour/audio_track.h"
-#include "ardour/audioplaylist.h"
+#include "ardour/audioengine.h"
 #include "ardour/audioregion.h"
 #include "ardour/location.h"
-#include "ardour/midi_region.h"
-#include "ardour/plugin_manager.h"
 #include "ardour/profile.h"
 #include "ardour/route_group.h"
-#include "ardour/session_directory.h"
-#include "ardour/session_route.h"
-#include "ardour/session_state_utils.h"
+#include "ardour/session_playlists.h"
 #include "ardour/tempo.h"
 #include "ardour/utils.h"
-#include "ardour/session_playlists.h"
-#include "ardour/audioengine.h"
 
 #include "control_protocol/control_protocol.h"
 

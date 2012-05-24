@@ -34,8 +34,9 @@ namespace ARDOUR
 class Session;
 class Playlist;
 
-struct NamedSelection : public PBD::Stateful
+class NamedSelection : public PBD::Stateful
 {
+public:
 	NamedSelection (std::string, std::list<boost::shared_ptr<Playlist> >&);
 	NamedSelection (Session&, const XMLNode&);
 	virtual ~NamedSelection ();

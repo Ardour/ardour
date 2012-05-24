@@ -20,10 +20,6 @@
 
 #include "ardour/export_timespan.h"
 
-#include "ardour/export_channel_configuration.h"
-#include "ardour/export_filename.h"
-#include "ardour/export_failed.h"
-
 namespace ARDOUR
 {
 

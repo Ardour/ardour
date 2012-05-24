@@ -8,7 +8,7 @@ import subprocess
 import sys
 
 # Variables for 'waf dist'
-VERSION = '3.0beta4'
+VERSION = '3.0beta4a'
 APPNAME = 'Ardour3'
 
 # Mandatory variables
@@ -129,10 +129,11 @@ def set_compiler_flags (conf,opt):
     platform = u[0].lower()
     version = u[2]
 
+    is_clang = conf.env['CXX'][0].endswith('clang++')
     if opt.gprofile:
         debug_flags = [ '-pg' ]
     else:
-        if platform != 'darwin':
+        if platform != 'darwin' and not is_clang:
             debug_flags = [ '-rdynamic' ] # waf adds -O0 -g itself. thanks waf!
 
     # Autodetect
@@ -215,7 +216,7 @@ def set_compiler_flags (conf,opt):
             elif cpu == "i686":
                 optimization_flags.append ("-march=i686")
 
-        if ((conf.env['build_target'] == 'i686') or (conf.env['build_target'] == 'x86_64')) and build_host_supports_sse:
+        if not is_clang and ((conf.env['build_target'] == 'i686') or (conf.env['build_target'] == 'x86_64')) and build_host_supports_sse:
             optimization_flags.extend (["-msse", "-mfpmath=sse", "-DUSE_XMMINTRIN"])
             debug_flags.extend (["-msse", "-mfpmath=sse", "-DUSE_XMMINTRIN"])
 
@@ -369,7 +370,7 @@ def options(opt):
                     help='Compile without support for AU Plugins with only CARBON UI (needed for 64bit)')
     opt.add_option('--boost-sp-debug', action='store_true', default=False, dest='boost_sp_debug',
                     help='Compile with Boost shared pointer debugging')
-    opt.add_option('--soundgrid', action='store_true', default=False, dest='soundgrid',
+    opt.add_option('--soundgrid', action='store_true', default=True, dest='soundgrid',
                     help='Compile with support for Waves SoundGrid')
     opt.add_option('--dist-target', type='string', default='auto', dest='dist_target',
                     help='Specify the target for cross-compiling [auto,none,x86,i386,i686,x86_64,powerpc,tiger,leopard]')
@@ -408,7 +409,7 @@ def options(opt):
     # help='Compile with support for Frontier Designs Tranzport (if libusb is available)')
     opt.add_option('--universal', action='store_true', default=False, dest='universal',
                     help='Compile as universal binary (OS X ONLY, requires that external libraries are universal)')
-    opt.add_option('--generic', action='store_true', default=False, dest='generic',
+    opt.add_option('--generic', action='store_true', default=True, dest='generic',
                     help='Compile with -arch i386 (OS X ONLY)')
     opt.add_option('--versioned', action='store_true', default=False, dest='versioned',
                     help='Add revision information to executable name inside the build directory')
@@ -688,6 +689,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('Program name',          opts.program_name)
     write_config_text('Rubberband',            conf.is_defined('HAVE_RUBBERBAND'))
     write_config_text('Samplerate',            conf.is_defined('HAVE_SAMPLERATE'))
+    write_config_text('SoundGrid support',     conf.is_defined('HAVE_SOUNDGRID'))
 #    write_config_text('Soundtouch',            conf.is_defined('HAVE_SOUNDTOUCH'))
     write_config_text('Translation',           opts.nls)
 #    write_config_text('Tranzport',             opts.tranzport)

@@ -40,13 +40,10 @@
 #include <gtkmm2ext/doi.h>
 
 #include "ardour/amp.h"
-#include "ardour/ardour.h"
 #include "ardour/audio_track.h"
 #include "ardour/audioengine.h"
-#include "ardour/internal_send.h"
 #include "ardour/internal_return.h"
-#include "ardour/ladspa_plugin.h"
-#include "ardour/meter.h"
+#include "ardour/internal_send.h"
 #include "ardour/plugin_insert.h"
 #include "ardour/port_insert.h"
 #include "ardour/profile.h"
@@ -54,7 +51,7 @@
 #include "ardour/route.h"
 #include "ardour/send.h"
 #include "ardour/session.h"
-#include "ardour/dB.h"
+#include "ardour/types.h"
 
 #include "actions.h"
 #include "ardour_dialog.h"

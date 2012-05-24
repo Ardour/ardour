@@ -208,7 +208,7 @@ static gchar* cairo_value_color_lcopy_value (const GValue* value, guint n_collec
 	}
 	if (!value->data[0].v_pointer) {
 		*object_p = NULL;
-	} else if (collect_flags && G_VALUE_NOCOPY_CONTENTS) {
+	} else if (collect_flags & G_VALUE_NOCOPY_CONTENTS) {
 		*object_p = value->data[0].v_pointer;
 	} else {
 		*object_p = cairo_color_ref (value->data[0].v_pointer);
@@ -795,7 +795,7 @@ static gchar* prolooks_value_hsl_lcopy_value (const GValue* value, guint n_colle
 	}
 	if (!value->data[0].v_pointer) {
 		*object_p = NULL;
-	} else if (collect_flags && G_VALUE_NOCOPY_CONTENTS) {
+	} else if (collect_flags & G_VALUE_NOCOPY_CONTENTS) {
 		*object_p = value->data[0].v_pointer;
 	} else {
 		*object_p = prolooks_hsl_ref (value->data[0].v_pointer);
@@ -1203,7 +1203,7 @@ static gchar* prolooks_value_hsv_lcopy_value (const GValue* value, guint n_colle
 	}
 	if (!value->data[0].v_pointer) {
 		*object_p = NULL;
-	} else if (collect_flags && G_VALUE_NOCOPY_CONTENTS) {
+	} else if (collect_flags & G_VALUE_NOCOPY_CONTENTS) {
 		*object_p = value->data[0].v_pointer;
 	} else {
 		*object_p = prolooks_hsv_ref (value->data[0].v_pointer);

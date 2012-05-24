@@ -43,7 +43,7 @@ public:
 
 	std::string get_string (const std::string& id, const std::string& prop_name, bool* empty = 0);
 
-	template<typename T> void set (const std::string& id, const std::string& prop_name, const T& val) {
+	template<typename T> void set_property (const std::string& id, const std::string& prop_name, const T& val) {
 		XMLNode* child = get_or_add_node (id);
 		std::stringstream s;
 		s << val;

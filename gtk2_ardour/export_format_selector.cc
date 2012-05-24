@@ -24,7 +24,6 @@
 
 #include "ardour/export_format_specification.h"
 #include "ardour/export_profile_manager.h"
-#include "ardour/session.h"
 
 #include "i18n.h"
 

@@ -34,24 +34,21 @@
 #include <gtkmm2ext/slider_controller.h>
 #include <gtkmm2ext/bindable_button.h>
 
-#include "ardour/ardour.h"
-#include "ardour/amp.h"
-#include "ardour/session.h"
+#include "ardour/audio_track.h"
 #include "ardour/audioengine.h"
 #include "ardour/internal_send.h"
-#include "ardour/route.h"
-#include "ardour/route_group.h"
-#include "ardour/audio_track.h"
 #include "ardour/midi_track.h"
 #include "ardour/pannable.h"
 #include "ardour/panner.h"
 #include "ardour/panner_shell.h"
-#include "ardour/send.h"
-#include "ardour/processor.h"
-#include "ardour/profile.h"
-#include "ardour/ladspa_plugin.h"
-#include "ardour/user_bundle.h"
 #include "ardour/port.h"
+#include "ardour/profile.h"
+#include "ardour/route.h"
+#include "ardour/route_group.h"
+#include "ardour/send.h"
+#include "ardour/session.h"
+#include "ardour/types.h"
+#include "ardour/user_bundle.h"
 
 #include "ardour_ui.h"
 #include "ardour_window.h"
@@ -1171,7 +1168,7 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width widt
 	}
 
 	if (each_io_has_one_connection) {
-		if ((total_connection_count == ardour_connection_count)) {
+		if (total_connection_count == ardour_connection_count) {
 			// all connections are to the same track in ardour
 			// "ardour:Master/" -> "Master"
 			string::size_type slash = ardour_track_name.find("/");

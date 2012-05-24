@@ -49,12 +49,10 @@
 #include "ardour/quantize.h"
 #include "ardour/region_factory.h"
 #include "ardour/reverse.h"
-#include "ardour/route_group.h"
 #include "ardour/session.h"
 #include "ardour/session_playlists.h"
 #include "ardour/strip_silence.h"
 #include "ardour/transient_detector.h"
-#include "ardour/utils.h"
 
 #include "ardour_ui.h"
 #include "debug.h"

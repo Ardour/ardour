@@ -20,13 +20,8 @@
 
 #include "pbd/basename.h"
 
-#include "ardour/types.h"
 #include "ardour/quantize.h"
-#include "ardour/session.h"
-#include "ardour/smf_source.h"
 #include "ardour/midi_model.h"
-#include "ardour/midi_region.h"
-#include "ardour/tempo.h"
 
 #include "i18n.h"
 

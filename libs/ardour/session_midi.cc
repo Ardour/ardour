@@ -38,16 +38,13 @@
 
 #include "timecode/time.h"
 
-#include "ardour/configuration.h"
-#include "ardour/debug.h"
-#include "ardour/audioengine.h"
-#include "ardour/session.h"
 #include "ardour/audio_track.h"
+#include "ardour/audioengine.h"
+#include "ardour/debug.h"
 #include "ardour/midi_track.h"
 #include "ardour/midi_ui.h"
-#include "ardour/audio_diskstream.h"
+#include "ardour/session.h"
 #include "ardour/slave.h"
-#include "ardour/cycles.h"
 
 #include "i18n.h"
 

@@ -20,7 +20,6 @@
 #include <glibmm/main.h>
 
 #include "ardour/midi_track.h"
-#include "ardour/session.h"
 
 #include "note_player.h"
 

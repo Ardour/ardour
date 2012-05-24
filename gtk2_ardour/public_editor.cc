@@ -18,7 +18,6 @@
 */
 
 #include "public_editor.h"
-#include "editor.h"
 
 PublicEditor* PublicEditor::_instance = 0;
 

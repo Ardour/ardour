@@ -22,11 +22,9 @@
 
 #include <gtkmm.h>
 
-#include "ardour/playlist.h"
 #include "ardour/timefx_request.h"
 
 #include "ardour_dialog.h"
-#include "region_selection.h"
 #include "progress_reporter.h"
 
 class Editor;

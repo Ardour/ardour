@@ -26,17 +26,13 @@
 
 #include <glibmm/thread.h>
 
-#include "pbd/basename.h"
 #include "pbd/xml++.h"
-#include "pbd/enumwriter.h"
 
 #include "ardour/automation_control.h"
-#include "ardour/dB.h"
 #include "ardour/midi_model.h"
 #include "ardour/midi_region.h"
 #include "ardour/midi_ring_buffer.h"
 #include "ardour/midi_source.h"
-#include "ardour/playlist.h"
 #include "ardour/region_factory.h"
 #include "ardour/session.h"
 #include "ardour/tempo.h"
@@ -128,13 +124,13 @@ MidiRegion::~MidiRegion ()
 /** Create a new MidiRegion that has its own version of some/all of the Source used by another.
  */
 boost::shared_ptr<MidiRegion>
-MidiRegion::clone () const
+MidiRegion::clone (string path) const
 {
 	BeatsFramesConverter bfc (_session.tempo_map(), _position);
 	Evoral::MusicalTime const bbegin = bfc.from (_start);
 	Evoral::MusicalTime const bend = bfc.from (_start + _length);
 
-	boost::shared_ptr<MidiSource> ms = midi_source(0)->clone (bbegin, bend);
+	boost::shared_ptr<MidiSource> ms = midi_source(0)->clone (path, bbegin, bend);
 
 	PropertyList plist;
 

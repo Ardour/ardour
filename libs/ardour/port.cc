@@ -21,17 +21,15 @@
 #include "libardour-config.h"
 #endif
 
-#include <stdexcept>
-
 #include <jack/weakjack.h> // so that we can test for new functions at runtime
 
-#include "pbd/error.h"
 #include "pbd/compose.h"
+#include "pbd/error.h"
+#include "pbd/failed_constructor.h"
 
+#include "ardour/audioengine.h"
 #include "ardour/debug.h"
 #include "ardour/port.h"
-#include "ardour/audioengine.h"
-#include "pbd/failed_constructor.h"
 
 #include "i18n.h"
 

@@ -22,12 +22,11 @@
 
 #include "pbd/stacktrace.h"
 
-#include "ardour/session.h"
-#include "ardour/playlist.h"
-#include "ardour/route_group.h"
-#include "ardour/profile.h"
 #include "ardour/midi_region.h"
-#include "ardour/audioplaylist.h"
+#include "ardour/playlist.h"
+#include "ardour/profile.h"
+#include "ardour/route_group.h"
+#include "ardour/session.h"
 
 #include "control_protocol/control_protocol.h"
 

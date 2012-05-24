@@ -32,9 +32,6 @@
 #include "pbd/enumwriter.h"
 #include "pbd/stacktrace.h"
 
-#include "ardour/ardour.h"
-#include "ardour/configuration.h"
-#include "ardour/audioengine.h"
 #include "ardour/session.h"
 #include "ardour/tempo.h"
 

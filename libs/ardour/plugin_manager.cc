@@ -53,7 +53,7 @@
 #include "ardour/ladspa_plugin.h"
 #include "ardour/plugin.h"
 #include "ardour/plugin_manager.h"
-#include "ardour/session.h"
+#include "ardour/rc_configuration.h"
 
 #ifdef LV2_SUPPORT
 #include "ardour/lv2_plugin.h"

@@ -235,7 +235,7 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 	unit_position = editor.frame_to_unit (frame);
 	unit_position -= _shift;
 
-	group = new Group (parent, unit_position, 1.0);
+	group = new Group (parent, unit_position, 0);
 
 	_name_background = new ArdourCanvas::SimpleRect (*group);
 	_name_background->property_outline_pixels() = 1;

@@ -20,10 +20,9 @@
 
 #include "pbd/stacktrace.h"
 
-#include "ardour/audio_port.h"
-#include "ardour/audioengine.h"
-#include "ardour/data_type.h"
 #include "ardour/audio_buffer.h"
+#include "ardour/audio_port.h"
+#include "ardour/data_type.h"
 
 using namespace ARDOUR;
 using namespace std;

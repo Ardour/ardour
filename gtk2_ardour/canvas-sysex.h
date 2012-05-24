@@ -20,6 +20,8 @@
 #ifndef CANVAS_SYSEX_H_
 #define CANVAS_SYSEX_H_
 
+#include <string>
+
 #include "canvas-flag.h"
 
 class MidiRegionView;
@@ -33,7 +35,7 @@ public:
 	CanvasSysEx(
 			MidiRegionView& region,
 			Group&          parent,
-			string&         text,
+			std::string&    text,
 			double          height,
 			double          x,
 			double          y);

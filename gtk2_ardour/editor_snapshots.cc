@@ -25,7 +25,6 @@
 #include "editor_snapshots.h"
 #include "ardour_ui.h"
 #include "i18n.h"
-#include "editor.h"
 #include "utils.h"
 #include "prompter.h"
 

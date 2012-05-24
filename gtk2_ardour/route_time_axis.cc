@@ -43,22 +43,12 @@
 #include <gtkmm2ext/utils.h>
 
 #include "ardour/amp.h"
-#include "ardour/audioplaylist.h"
-#include "ardour/diskstream.h"
 #include "ardour/event_type_map.h"
-#include "ardour/ladspa_plugin.h"
-#include "ardour/location.h"
-#include "ardour/panner.h"
-#include "ardour/playlist.h"
-#include "ardour/playlist.h"
 #include "ardour/processor.h"
 #include "ardour/profile.h"
-#include "ardour/region_factory.h"
 #include "ardour/route_group.h"
 #include "ardour/session.h"
-#include "ardour/session_playlist.h"
-#include "ardour/debug.h"
-#include "ardour/utils.h"
+#include "ardour/session_playlists.h"
 #include "evoral/Parameter.hpp"
 
 #include "ardour_ui.h"
@@ -665,30 +655,30 @@ RouteTimeAxisView::build_display_menu ()
 		build_playlist_menu ();
 		items.push_back (MenuElem (_("Playlist"), *playlist_action_menu));
 		items.back().set_sensitive (_editor.get_selection().tracks.size() <= 1);
-
-		route_group_menu->detach ();
-
-		WeakRouteList r;
-		for (TrackSelection::iterator i = _editor.get_selection().tracks.begin(); i != _editor.get_selection().tracks.end(); ++i) {
-			RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
-			if (rtv) {
-				r.push_back (rtv->route ());
-			}
-		}
-
-		if (r.empty ()) {
-			r.push_back (route ());
-		}
-
-		route_group_menu->build (r);
-		items.push_back (MenuElem (_("Route Group"), *route_group_menu->menu ()));
-
-		build_automation_action_menu (true);
-		items.push_back (MenuElem (_("Automation"), *automation_action_menu));
-
-		items.push_back (SeparatorElem());
 	}
 
+	route_group_menu->detach ();
+	
+	WeakRouteList r;
+	for (TrackSelection::iterator i = _editor.get_selection().tracks.begin(); i != _editor.get_selection().tracks.end(); ++i) {
+		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
+		if (rtv) {
+			r.push_back (rtv->route ());
+		}
+	}
+	
+	if (r.empty ()) {
+		r.push_back (route ());
+	}
+
+	route_group_menu->build (r);
+	items.push_back (MenuElem (_("Group"), *route_group_menu->menu ()));
+	
+	build_automation_action_menu (true);
+	items.push_back (MenuElem (_("Automation"), *automation_action_menu));
+	
+	items.push_back (SeparatorElem());
+	
 	int active = 0;
 	int inactive = 0;
 	TrackSelection const & s = _editor.get_selection().tracks;

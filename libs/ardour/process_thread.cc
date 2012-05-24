@@ -18,7 +18,7 @@
 */
 
 #include <iostream>
-#include "ardour/audioengine.h"
+
 #include "ardour/buffer.h"
 #include "ardour/buffer_manager.h"
 #include "ardour/buffer_set.h"

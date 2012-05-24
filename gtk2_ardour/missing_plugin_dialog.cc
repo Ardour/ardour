@@ -17,7 +17,6 @@
 */
 
 #include <gtkmm/label.h>
-#include "ardour/session.h"
 #include "missing_plugin_dialog.h"
 #include "i18n.h"
 

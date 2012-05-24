@@ -22,26 +22,21 @@
 #include "pbd/enumwriter.h"
 #include "pbd/convert.h"
 
-#include "ardour/midi_buffer.h"
-
+#include "ardour/amp.h"
+#include "ardour/audioengine.h"
+#include "ardour/buffer_set.h"
 #include "ardour/debug.h"
 #include "ardour/delivery.h"
-#include "ardour/audio_buffer.h"
-#include "ardour/audio_port.h"
-#include "ardour/amp.h"
-#include "ardour/buffer_set.h"
-#include "ardour/configuration.h"
 #include "ardour/io.h"
-#include "ardour/meter.h"
 #include "ardour/mute_master.h"
-#include "ardour/panner.h"
-#include "ardour/panner_shell.h"
 #include "ardour/pannable.h"
+#include "ardour/panner_shell.h"
 #include "ardour/port.h"
 #include "ardour/session.h"
-#include "ardour/audioengine.h"
 
 #include "i18n.h"
+
+namespace ARDOUR { class Panner; }
 
 using namespace std;
 using namespace PBD;

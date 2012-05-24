@@ -31,7 +31,6 @@
 #include "pbd/error.h"
 #include "pbd/file_utils.h"
 
-#include "ardour/ardour.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/rc_configuration.h"
 

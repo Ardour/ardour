@@ -26,8 +26,6 @@
 #include "ardour/amp.h"
 #include "ardour/audio_buffer.h"
 #include "ardour/buffer_set.h"
-#include "ardour/configuration.h"
-#include "ardour/io.h"
 #include "ardour/midi_buffer.h"
 #include "ardour/session.h"
 

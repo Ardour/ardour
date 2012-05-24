@@ -26,11 +26,8 @@
 #include <glibmm.h>
 
 #include "ardour/svn_revision.h"
-#include "ardour/ardour.h"
 #include "ardour/session.h"
 #include "ardour/session_metadata.h"
-
-#include "pbd/convert.h"
 
 using namespace PBD;
 

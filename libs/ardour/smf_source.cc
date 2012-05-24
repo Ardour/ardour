@@ -34,7 +34,6 @@
 
 #include "evoral/Control.hpp"
 
-#include "ardour/audioengine.h"
 #include "ardour/event_type_map.h"
 #include "ardour/midi_model.h"
 #include "ardour/midi_ring_buffer.h"

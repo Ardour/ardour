@@ -29,9 +29,7 @@
 
 #include "pbd/pthread_utils.h"
 
-#include "ardour/audio_diskstream.h"
 #include "ardour/audio_track.h"
-#include "ardour/audiofilesource.h"
 #include "ardour/audiofilesource.h"
 #include "ardour/audioplaylist.h"
 #include "ardour/audioregion.h"
@@ -46,6 +44,7 @@
 #include "audio_time_axis.h"
 #include "editor.h"
 #include "export_dialog.h"
+#include "midi_export_dialog.h"
 #include "midi_region_view.h"
 #include "public_editor.h"
 #include "selection.h"
@@ -110,20 +109,68 @@ Editor::export_region ()
 		return;
 	}
 
-	try {
-		boost::shared_ptr<Region> r = selection->regions.front()->region();
-		AudioRegion & region (dynamic_cast<AudioRegion &> (*r));
-
+	boost::shared_ptr<Region> r = selection->regions.front()->region();
+	boost::shared_ptr<AudioRegion> audio_region = boost::dynamic_pointer_cast<AudioRegion>(r);
+	boost::shared_ptr<MidiRegion> midi_region = boost::dynamic_pointer_cast<MidiRegion>(r);
+	
+	if (audio_region) {
+		
 		RouteTimeAxisView & rtv (dynamic_cast<RouteTimeAxisView &> (selection->regions.front()->get_time_axis_view()));
 		AudioTrack & track (dynamic_cast<AudioTrack &> (*rtv.route()));
-
-		ExportRegionDialog dialog (*this, region, track);
+		
+		ExportRegionDialog dialog (*this, *(audio_region.get()), track);
 		dialog.set_session (_session);
-		dialog.run();
+		dialog.run ();
+		
+	} else if (midi_region) {
 
-	} catch (std::bad_cast & e) {
-		error << "Exporting Region failed!" << endmsg;
-		return;
+		MidiExportDialog dialog (*this, midi_region);
+		dialog.set_session (_session);
+		int ret = dialog.run ();
+		switch (ret) {
+		case Gtk::RESPONSE_ACCEPT:
+			break;
+		default:
+			return;
+		}
+
+		dialog.hide ();
+
+		string path = dialog.get_path ();
+
+		if (Glib::file_test (path, Glib::FILE_TEST_EXISTS)) {
+
+			MessageDialog checker (_("File Exists!"),
+					       true,
+					       Gtk::MESSAGE_WARNING,
+					       Gtk::BUTTONS_NONE);
+			
+			checker.set_title (_("File Exists!"));
+
+			checker.add_button (Stock::CANCEL, RESPONSE_CANCEL);
+			checker.add_button (_("Overwrite Existing File"), RESPONSE_ACCEPT);
+			checker.set_default_response (RESPONSE_CANCEL);
+			
+			checker.set_wmclass (X_("midi_export_file_exists"), PROGRAM_NAME);
+			checker.set_position (Gtk::WIN_POS_MOUSE);
+
+			ret = checker.run ();
+
+			switch (ret) {
+			case Gtk::RESPONSE_ACCEPT:
+				/* force unlink because the backend code will
+				   go wrong if it tries to open an existing
+				   file for writing.
+				*/
+				::unlink (path.c_str());
+				break;
+			default:
+				return;
+			}
+			
+		}
+
+		(void) midi_region->clone (path);
 	}
 }
 

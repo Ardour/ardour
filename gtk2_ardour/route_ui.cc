@@ -46,16 +46,13 @@
 #include "route_time_axis.h"
 #include "group_tabs.h"
 
-#include "ardour/route.h"
-#include "ardour/event_type_map.h"
-#include "ardour/session.h"
-#include "ardour/audioengine.h"
 #include "ardour/audio_track.h"
-#include "ardour/midi_track.h"
-#include "ardour/template_utils.h"
+#include "ardour/audioengine.h"
 #include "ardour/filename_extensions.h"
-#include "ardour/directory_names.h"
-#include "ardour/profile.h"
+#include "ardour/midi_track.h"
+#include "ardour/route.h"
+#include "ardour/session.h"
+#include "ardour/template_utils.h"
 
 #include "i18n.h"
 using namespace Gtk;
@@ -1347,7 +1344,7 @@ RouteUI::set_color (const Gdk::Color & c)
 	   the time axis view and the mixer strip
 	*/
 	
-	gui_object_state().set<string> (route_state_id(), X_("color"), buf);
+	gui_object_state().set_property<string> (route_state_id(), X_("color"), buf);
 	_route->gui_changed ("color", (void *) 0); /* EMIT_SIGNAL */
 }
 

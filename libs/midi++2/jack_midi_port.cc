@@ -40,6 +40,10 @@ using namespace MIDI;
 using namespace std;
 using namespace PBD;
 
+namespace Evoral {
+template class EventRingBuffer<timestamp_t>;
+}
+
 pthread_t JackMIDIPort::_process_thread;
 Signal0<void> JackMIDIPort::JackHalted;
 Signal0<void> JackMIDIPort::MakeConnections;

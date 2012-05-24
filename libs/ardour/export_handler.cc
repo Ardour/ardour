@@ -26,15 +26,12 @@
 #include "pbd/convert.h"
 #include "pbd/filesystem.h"
 
-#include "ardour/ardour.h"
-#include "ardour/configuration.h"
 #include "ardour/export_graph_builder.h"
 #include "ardour/export_timespan.h"
 #include "ardour/export_channel_configuration.h"
 #include "ardour/export_status.h"
 #include "ardour/export_format_specification.h"
 #include "ardour/export_filename.h"
-#include "ardour/export_failed.h"
 
 #include "i18n.h"
 

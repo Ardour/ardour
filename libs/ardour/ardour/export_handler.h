@@ -22,13 +22,11 @@
 #define __ardour_export_handler_h__
 
 #include <map>
-#include <list>
 #include <fstream>
 
 #include <boost/operators.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include "ardour/ardour.h"
 #include "ardour/export_pointers.h"
 #include "ardour/session.h"
 #include "ardour/types.h"
@@ -45,7 +43,7 @@ class ExportChannelConfiguration;
 class ExportFormatSpecification;
 class ExportFilename;
 class ExportGraphBuilder;
-
+class Location;
 
 class ExportElementFactory
 {

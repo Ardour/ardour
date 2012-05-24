@@ -16,15 +16,15 @@
     675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "ardour/meter.h"
 #include <algorithm>
 #include <cmath>
-#include "ardour/buffer_set.h"
-#include "ardour/peak.h"
-#include "ardour/dB.h"
-#include "ardour/session.h"
-#include "ardour/midi_buffer.h"
+
 #include "ardour/audio_buffer.h"
+#include "ardour/buffer_set.h"
+#include "ardour/dB.h"
+#include "ardour/meter.h"
+#include "ardour/midi_buffer.h"
+#include "ardour/rc_configuration.h"
 #include "ardour/runtime_functions.h"
 
 using namespace std;

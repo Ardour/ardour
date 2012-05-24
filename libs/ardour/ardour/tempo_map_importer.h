@@ -27,10 +27,10 @@
 
 #include "ardour/element_importer.h"
 #include "ardour/element_import_handler.h"
-#include "ardour/tempo.h"
-#include "ardour/types.h"
 
 namespace ARDOUR {
+
+class Session;
 
 class TempoMapImportHandler : public ElementImportHandler
 {

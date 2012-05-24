@@ -25,11 +25,8 @@
 
 #include <glibmm/thread.h>
 #include "pbd/xml++.h"
-#include "pbd/stacktrace.h"
-#include "pbd/enumwriter.h"
 
 #include "ardour/debug.h"
-#include "ardour/file_source.h"
 #include "ardour/filter.h"
 #include "ardour/playlist.h"
 #include "ardour/playlist_source.h"
@@ -38,9 +35,7 @@
 #include "ardour/region_factory.h"
 #include "ardour/session.h"
 #include "ardour/source.h"
-#include "ardour/source_factory.h"
 #include "ardour/tempo.h"
-#include "ardour/utils.h"
 
 #include "i18n.h"
 
@@ -49,6 +44,7 @@ using namespace ARDOUR;
 using namespace PBD;
 
 namespace ARDOUR {
+	class Progress;
 	namespace Properties {
 		PBD::PropertyDescriptor<bool> muted;
 		PBD::PropertyDescriptor<bool> opaque;

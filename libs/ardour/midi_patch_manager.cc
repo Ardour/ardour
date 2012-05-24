@@ -20,7 +20,6 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "pbd/compose.h"
 #include "pbd/file_utils.h"
 #include "pbd/error.h"
 
@@ -28,8 +27,6 @@
 #include "ardour/session_directory.h"
 #include "ardour/midi_patch_manager.h"
 #include "ardour/midi_patch_search_path.h"
-
-#include "i18n.h"
 
 using namespace std;
 using namespace ARDOUR;

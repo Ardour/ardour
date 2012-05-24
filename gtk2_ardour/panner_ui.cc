@@ -18,12 +18,16 @@
 
 #include <limits.h>
 
-#include "ardour/io.h"
-#include "ardour/dB.h"
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/barcontroller.h>
+
 #include "midi++/manager.h"
 #include "pbd/fastlog.h"
+
+#include "ardour/pannable.h"
+#include "ardour/panner.h"
+#include "ardour/panner_shell.h"
+#include "ardour/session.h"
 
 #include "ardour_ui.h"
 #include "panner_ui.h"
@@ -33,12 +37,6 @@
 #include "stereo_panner.h"
 #include "mono_panner.h"
 
-#include "ardour/delivery.h"
-#include "ardour/session.h"
-#include "ardour/panner.h"
-#include "ardour/pannable.h"
-#include "ardour/panner_shell.h"
-#include "ardour/route.h"
 
 #include "i18n.h"
 

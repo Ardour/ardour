@@ -18,17 +18,14 @@
 */
 #include <vector>
 
-#include "pbd/xml++.h"
-#include "pbd/compose.h"
 #include "ardour/debug.h"
-#include "ardour/session_playlists.h"
 #include "ardour/playlist.h"
-#include "ardour/region.h"
 #include "ardour/playlist_factory.h"
-#include "ardour/session.h"
-#include "ardour/source.h"
+#include "ardour/session_playlists.h"
 #include "ardour/track.h"
 #include "i18n.h"
+#include "pbd/compose.h"
+#include "pbd/xml++.h"
 
 using namespace std;
 using namespace PBD;

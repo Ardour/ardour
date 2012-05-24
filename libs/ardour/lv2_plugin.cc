@@ -31,13 +31,11 @@
 
 #include "pbd/compose.h"
 #include "pbd/error.h"
-#include "pbd/pathscanner.h"
-#include "pbd/stl_delete.h"
 #include "pbd/xml++.h"
 
 #include "libardour-config.h"
 
-#include "ardour/ardour.h"
+#include "ardour/types.h"
 #include "ardour/audio_buffer.h"
 #include "ardour/audioengine.h"
 #include "ardour/debug.h"

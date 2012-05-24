@@ -21,17 +21,14 @@
 
 #include <algorithm>
 
-
 #include "pbd/error.h"
 #include "pbd/enumwriter.h"
 #include "pbd/strsplit.h"
 
 #include "ardour/amp.h"
-#include "ardour/debug.h"
-#include "ardour/route_group.h"
 #include "ardour/audio_track.h"
-#include "ardour/audio_diskstream.h"
-#include "ardour/configuration.h"
+#include "ardour/route.h"
+#include "ardour/route_group.h"
 #include "ardour/session.h"
 
 #include "i18n.h"
