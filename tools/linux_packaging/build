@@ -87,6 +87,9 @@ if test x$STRIP != xall -a x$STRIP != xnone -a x$STRIP != xsome ; then
     exit 1
 fi
 
+# Error out whenever possible
+set -e
+
 release_version=`grep -m 1 '^VERSION' ../../wscript | awk '{print $3}' | sed "s/'//g"`
 svn_version=`grep -m 1 'svn_revision =' ../../libs/ardour/svn_revision.cc | cut -d"'" -f 2`
 echo "Version is $release_version / $svn_version"
@@ -303,7 +306,7 @@ gdk-pixbuf-query-loaders | sed "s?$GTKSTACK_ROOT/lib/gdk-pixbuf-2.0/2.10.0/?@ROO
 # this one is special - we will set GTK_PATH to $Libraries/clearlooks
 
 echo "Copying clearlooks ..."
-cp $BUILD_ROOT/lib/clearlooks-newer/libclearlooks.so $Libraries
+cp $BUILD_ROOT/libs/clearlooks-newer/libclearlooks.so $Libraries
 mkdir -p $Libraries/clearlooks/engines
 (cd $Libraries/clearlooks/engines && ln -s ../../libclearlooks.so . )
 
