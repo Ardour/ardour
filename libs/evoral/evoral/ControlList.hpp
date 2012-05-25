@@ -106,6 +106,10 @@ public:
 	void             set_parameter(const Parameter& p) { _parameter = p; }
 
 	EventList::size_type size() const { return _events.size(); }
+        double length() const { 		
+		Glib::Mutex::Lock lm (_lock);
+		return _events.empty() ? 0.0 : _events.back()->when;
+	}
 	bool empty() const { return _events.empty(); }
 
 	void reset_default (double val) {
