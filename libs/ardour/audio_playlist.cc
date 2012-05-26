@@ -313,40 +313,51 @@ AudioPlaylist::check_crossfades (Evoral::Range<framepos_t> range)
 
 					/* Top's fade-in will cause an implicit fade-out of bottom */
 					
-					framecnt_t len = 0;
+					if (top->fade_in_is_xfade() && top->fade_in_is_short()) {
 
-					if (_capture_insertion_underway) {
-						len = _session.config.get_short_xfade_seconds() * _session.frame_rate();
+						/* its already an xfade. if its
+						 * really short, leave it
+						 * alone.
+						 */
+
 					} else {
-						switch (_session.config.get_xfade_model()) {
-						case FullCrossfade:
-							len = bottom->last_frame () - top->first_frame ();
-							break;
-						case ShortCrossfade:
+						framecnt_t len = 0;
+						
+						if (_capture_insertion_underway) {
 							len = _session.config.get_short_xfade_seconds() * _session.frame_rate();
+						} else {
+							switch (_session.config.get_xfade_model()) {
+							case FullCrossfade:
+								len = bottom->last_frame () - top->first_frame ();
+								top->set_fade_in_is_short (false);
+								break;
+							case ShortCrossfade:
+								len = _session.config.get_short_xfade_seconds() * _session.frame_rate();
+								top->set_fade_in_is_short (true);
+								break;
+							}
+						}
+						
+						top->set_fade_in_active (true);
+						top->set_fade_in_is_xfade (true);
+						
+						/* XXX may 2012: -3dB and -6dB curves
+						 * are the same right now 
+						 */
+						
+						switch (_session.config.get_xfade_choice ()) {
+						case ConstantPowerMinus3dB:
+							top->set_fade_in (FadeConstantPower, len);
+							break;
+						case ConstantPowerMinus6dB:
+							top->set_fade_in (FadeConstantPower, len);
+							break;
+						case RegionFades:
+							top->set_fade_in_length (len);
 							break;
 						}
 					}
-					
-					top->set_fade_in_active (true);
-					top->set_fade_in_is_xfade (true);
 
-					/* XXX may 2012: -3dB and -6dB curves
-					 * are the same right now 
-					 */
-
-					switch (_session.config.get_xfade_choice ()) {
-					case ConstantPowerMinus3dB:
-						top->set_fade_in (FadeConstantPower, len);
-						break;
-					case ConstantPowerMinus6dB:
-						top->set_fade_in (FadeConstantPower, len);
-						break;
-					case RegionFades:
-						top->set_fade_in_length (len);
-						break;
-					}
-					
 					done_start.insert (top);
 				}
 
@@ -361,34 +372,44 @@ AudioPlaylist::check_crossfades (Evoral::Range<framepos_t> range)
 				if (done_end.find (top) == done_end.end() && done_start.find (bottom) == done_start.end ()) {
 					/* Top's fade-out will cause an implicit fade-in of bottom */
 					
-					framecnt_t len = 0;
+					
+					if (top->fade_out_is_xfade() && top->fade_out_is_short()) {
 
-					if (_capture_insertion_underway) {
-						len = _session.config.get_short_xfade_seconds() * _session.frame_rate();
+						/* its already an xfade. if its
+						 * really short, leave it
+						 * alone.
+						 */
+
 					} else {
-						switch (_session.config.get_xfade_model()) {
-						case FullCrossfade:
-							len = top->last_frame () - bottom->first_frame ();
-							break;
-						case ShortCrossfade:
+						framecnt_t len = 0;
+						
+						if (_capture_insertion_underway) {
 							len = _session.config.get_short_xfade_seconds() * _session.frame_rate();
+						} else {
+							switch (_session.config.get_xfade_model()) {
+							case FullCrossfade:
+								len = top->last_frame () - bottom->first_frame ();
+								break;
+							case ShortCrossfade:
+								len = _session.config.get_short_xfade_seconds() * _session.frame_rate();
+								break;
+							}
+						}
+						
+						top->set_fade_out_active (true);
+						top->set_fade_out_is_xfade (true);
+						
+						switch (_session.config.get_xfade_choice ()) {
+						case ConstantPowerMinus3dB:
+							top->set_fade_out (FadeConstantPower, len);
+							break;
+						case ConstantPowerMinus6dB:
+							top->set_fade_out (FadeConstantPower, len);
+							break;
+						case RegionFades:
+							top->set_fade_out_length (len);
 							break;
 						}
-					}
-					
-					top->set_fade_out_active (true);
-					top->set_fade_out_is_xfade (true);
-
-					switch (_session.config.get_xfade_choice ()) {
-					case ConstantPowerMinus3dB:
-						top->set_fade_out (FadeConstantPower, len);
-						break;
-					case ConstantPowerMinus6dB:
-						top->set_fade_out (FadeConstantPower, len);
-						break;
-					case RegionFades:
-						top->set_fade_out_length (len);
-						break;
 					}
 
 					done_end.insert (top);
