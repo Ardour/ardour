@@ -2818,6 +2818,10 @@ ControlPointDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 					event->button.x + 10, event->button.y + 10);
 
 	_editor->verbose_cursor()->show ();
+
+	if (!_point->can_slide ()) {
+		_x_constrained = true;
+	}
 }
 
 void
