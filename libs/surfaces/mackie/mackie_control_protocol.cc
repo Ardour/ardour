@@ -1133,6 +1133,8 @@ MackieControlProtocol::midi_input_handler (IOCondition ioc, MIDI::Port* port)
 
 	if (ioc & IO_IN) {
 
+		CrossThreadChannel::drain (port->selectable());
+
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("data available on %1\n", port->name()));
 		framepos_t now = session->engine().frame_time();
 		port->parse (now);
