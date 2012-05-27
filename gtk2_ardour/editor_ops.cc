@@ -5916,6 +5916,10 @@ Editor::split_region_at_points (boost::shared_ptr<Region> r, AnalysisFeatureList
 		plist.add (ARDOUR::Properties::layer, 0);
 
 		boost::shared_ptr<Region> nr = RegionFactory::create (r->sources(), plist, false);
+		/* because we set annouce to false, manually add the new region to the
+		   RegionFactory map
+		*/
+		RegionFactory::map_add (nr);
 
 		pl->add_region (nr, r->position() + pos);
 
@@ -5940,6 +5944,10 @@ Editor::split_region_at_points (boost::shared_ptr<Region> r, AnalysisFeatureList
 	plist.add (ARDOUR::Properties::layer, 0);
 
 	boost::shared_ptr<Region> nr = RegionFactory::create (r->sources(), plist, false);
+	/* because we set annouce to false, manually add the new region to the
+	   RegionFactory map
+	*/
+	RegionFactory::map_add (nr);
 	pl->add_region (nr, r->position() + pos);
 
 	if (select_new) {
