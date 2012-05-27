@@ -86,7 +86,7 @@ class AutomationTimeAxisView : public TimeAxisView {
 	void get_selectables (ARDOUR::framepos_t start, ARDOUR::framepos_t end, double top, double bot, std::list<Selectable *>&);
 	void get_inverted_selectables (Selection&, std::list<Selectable*>& results);
 
-	void show_timestretch (framepos_t /*start*/, framepos_t /*end*/) {}
+	void show_timestretch (framepos_t /*start*/, framepos_t /*end*/, int /*layers*/, int /*layer*/) {}
 	void hide_timestretch () {}
 
 	/* editing operations */

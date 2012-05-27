@@ -764,10 +764,10 @@ TimeAxisView::set_samples_per_unit (double spu)
 }
 
 void
-TimeAxisView::show_timestretch (framepos_t start, framepos_t end)
+TimeAxisView::show_timestretch (framepos_t start, framepos_t end, int layers, int layer)
 {
 	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
-		(*i)->show_timestretch (start, end);
+		(*i)->show_timestretch (start, end, layers, layer);
 	}
 }
 

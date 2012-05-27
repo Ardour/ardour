@@ -250,7 +250,7 @@ class VisualTimeAxis : public TimeAxisView
 		 *
 		 * @todo should VisualTimeAxis handle this?
 		 */
-		void show_timestretch (nframes_t start, nframes_t end);
+		void show_timestretch (nframes_t start, nframes_t end, int layers, int layer);
 
 		/**
 		 * Not handle by purely visual TimeAxis
