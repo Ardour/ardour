@@ -269,7 +269,7 @@ BufferSet::get_lv2_midi(bool input, size_t i, bool old_api)
 		                           mbuf.size(), (void*) mbuf.data()));
 		
 		LV2_Evbuf_Iterator i    = lv2_evbuf_begin(evbuf);
-		const uint32_t     type = LV2Plugin::midi_event_type(old_api);
+		const uint32_t     type = LV2Plugin::midi_event_type();
 		for (MidiBuffer::iterator e = mbuf.begin(); e != mbuf.end(); ++e) {
 			const Evoral::MIDIEvent<framepos_t> ev(*e, false);
 #ifndef NDEBUG
