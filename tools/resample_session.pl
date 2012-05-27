@@ -99,15 +99,17 @@ while ( my $file=readdir(DOT_ARDOUR) ) {
 }
 close(DOT_ARDOUR);
 
-# Read the names of all automation files in /automation/
-opendir(AUTOMATION,$sourceDirectory."/automation/") || die ($sourceDirectory."/automation: could not open!");
-while ( my $file=readdir(AUTOMATION) ) {
-	if ( -f $sourceDirectory."/automation/".$file && 
-	     index($file,".automation") eq (length($file)-11)) {
-		push(@automation,$file);
+if ( -d $sourceDirectory."/automation/") {
+	# Read the names of all automation files in /automation/
+	opendir(AUTOMATION,$sourceDirectory."/automation/") || die ($sourceDirectory."/automation: could not open!");
+	while ( my $file=readdir(AUTOMATION) ) {
+		if ( -f $sourceDirectory."/automation/".$file && 
+		     index($file,".automation") eq (length($file)-11)) {
+			push(@automation,$file);
+		}
 	}
+	close(AUTOMATION);
 }
-close(AUTOMATION);
 
 # Check for /peaks/
 if ( ! -d $sourceDirectory."/peaks" ) {
