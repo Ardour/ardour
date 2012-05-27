@@ -122,11 +122,7 @@ FileSource::init (const string& pathstr, bool must_exist)
         }
 
 	set_within_session_from_path (_path);
-
-        if (!within_session()) {
-                _session.ensure_search_path_includes (Glib::path_get_dirname (_path), _type);
-        }
-
+	
         _name = Glib::path_get_basename (_path);
 
 	if (_file_is_new && must_exist) {

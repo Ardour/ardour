@@ -2952,6 +2952,14 @@ Session::add_source (boost::shared_ptr<Source> source)
 
 		/* yay, new source */
 
+		boost::shared_ptr<FileSource> fs = boost::dynamic_pointer_cast<FileSource> (source);
+		
+		if (fs) {
+			if (!fs->within_session()) {
+				ensure_search_path_includes (Glib::path_get_dirname (fs->path()), fs->type());
+			}
+		}
+		
 		set_dirty();
 
 		boost::shared_ptr<AudioFileSource> afs;
