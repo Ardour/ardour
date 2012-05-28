@@ -1,4 +1,4 @@
-# German translations for gtk-ardour
+# Czech translations for gtk-ardour
 # Copyright (C) 2003 Paul Davis
 # This file is distributed under the same license as the gtk-ardour package.
 #
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Lokalize 1.1\n"
-"X-Poedit-Country: GERMANY\n"
+"X-Poedit-Country: CZECH REPUBLIC\n"
 "X-Poedit-Basepath: ../../\n"
 "X-Poedit-SearchPath-0: gtk2_ardour\n"
 
@@ -7049,7 +7049,7 @@ msgstr "L"
 #: gtk2_ardour/panner_ui.cc:398
 #, c-format
 msgid "panner for channel %zu"
-msgstr "Ovladač vyvážení (panorama) pro kanál %"
+msgstr "Ovladač vyvážení (panorama) pro kanál %zu"
 
 #: gtk2_ardour/panner_ui.cc:487
 msgid "Reset all"
