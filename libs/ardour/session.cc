@@ -4478,7 +4478,7 @@ Session::ensure_search_path_includes (const string& path, DataType type)
 		search_path = config.get_midi_search_path ();
 		break;
 	}
-	
+
 	split (search_path, dirs, ':');
 
 	for (vector<string>::iterator i = dirs.begin(); i != dirs.end(); ++i) {
@@ -4488,7 +4488,7 @@ Session::ensure_search_path_includes (const string& path, DataType type)
 
 		   On Windows, I think we could just do if (*i == path) here.
 		*/
-		if (inodes_same (*i, path)) {
+		if (PBD::sys::inodes_same (*i, path)) {
 			return;
 		}
 	}

@@ -745,18 +745,6 @@ double slider_position_to_gain_with_max (double g, double max_gain)
 	return slider_position_to_gain (g * max_gain/2.0);
 }
 
-/** @return true if files a and b have the same inode */
-bool
-inodes_same (const string& a, const string& b)
-{
-	struct stat bA;
-	int const rA = stat (a.c_str(), &bA);
-	struct stat bB;
-	int const rB = stat (b.c_str(), &bB);
-
-	return (rA == 0 && rB == 0 && bA.st_ino == bB.st_ino);
-}
-
 extern "C" {
 	void c_stacktrace() { stacktrace (cerr); }
 }

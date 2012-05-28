@@ -254,6 +254,39 @@ get_absolute_path (const path & p)
 	return f->get_path ();
 }
 
+/** @return true if a and b have the same inode */
+bool
+inodes_same (const path& a, const path& b)
+{
+	struct stat bA;
+	int const rA = stat (a.to_string().c_str(), &bA);
+	struct stat bB;
+	int const rB = stat (b.to_string().c_str(), &bB);
+
+	return (rA == 0 && rB == 0 && bA.st_ino == bB.st_ino);
+}
+
+/** Find out if `needle' is a file or directory within the
+ *  directory `haystack'.
+ *  @return true if it is.
+ */
+bool
+path_is_within (path const & haystack, path needle)
+{
+	while (1) {
+		if (inodes_same (haystack, needle)) {
+			return true;
+		}
+
+		needle = needle.branch_path ();
+		if (needle.to_string().empty() || needle.to_string() == "/") {
+			break;
+		}
+	}
+
+	return false;
+}
+
 } // namespace sys
 
 } // namespace PBD

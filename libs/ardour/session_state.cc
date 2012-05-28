@@ -428,7 +428,7 @@ bool
 Session::path_is_within_session (const std::string& path)
 {
 	for (vector<space_and_path>::const_iterator i = session_dirs.begin(); i != session_dirs.end(); ++i) {
-		if (path.find ((*i).path) == 0) {
+		if (PBD::sys::path_is_within (i->path, path)) {
 			return true;
 		}
 	}
