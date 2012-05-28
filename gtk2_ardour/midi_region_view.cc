@@ -596,8 +596,8 @@ MidiRegionView::motion (GdkEventMotion* ev)
 				editor.verbose_cursor()->hide ();
 				return true;
 			} else if (m == MouseObject) {
-				
 				editor.drags()->set (new MidiRubberbandSelectDrag (dynamic_cast<Editor *> (&editor), this), (GdkEvent *) ev);
+				clear_selection ();
 				_mouse_state = SelectRectDragging;
 				return true;
 			} else if (m == MouseRange) {
@@ -1939,17 +1939,7 @@ MidiRegionView::delete_note (boost::shared_ptr<NoteType> n)
 void
 MidiRegionView::clear_selection_except (ArdourCanvas::CanvasNoteEvent* ev, bool signal)
 {
-	bool changed = false;
-
-	if (ev && !ev->selected ()) {
-		/* We're selecting this note, so the selection has changed; if
-		   there is nothing else currently selected, the loop below will
-		   not pick up on the change.
-		*/
-		changed = true;
-	}
-
-	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ) {
+ 	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ) {
 		if ((*i) != ev) {
 			Selection::iterator tmp = i;
 			++tmp;
@@ -1957,7 +1947,6 @@ MidiRegionView::clear_selection_except (ArdourCanvas::CanvasNoteEvent* ev, bool 
 			(*i)->set_selected (false);
 			(*i)->hide_velocity ();
 			_selection.erase (i);
-			changed = true;
 
 			i = tmp;
 		} else {
@@ -1969,7 +1958,7 @@ MidiRegionView::clear_selection_except (ArdourCanvas::CanvasNoteEvent* ev, bool 
 	   selection.
 	*/
 
-	if (changed && signal) {
+	if (signal) {
 		SelectionCleared (this); /* EMIT SIGNAL */
 	}
 }
