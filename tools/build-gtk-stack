@@ -65,9 +65,13 @@ mkdir -p $PREFIX
 export MAKEFLAGS=-j$parallel
 PATH=$PREFIX/bin:$PATH
 
+OSX=
+
 if uname -a | grep --silent arwin ; then
     
     # its OS X! run for the hills !!
+
+    OSX=1
 
     export DYLD_FALLBACK_LIBRARY_PATH=$PREFIX/lib${DYLD_FALLBACK_LIBRARY_PATH:+:$DYLD_FALLBACK_LIBRARY_PATH}
     # force compilation to use 10.4 APIs only. could be overkill, but better safe than sorry
@@ -386,9 +390,6 @@ tar xf pkg-config-0.26.tar.gz && (cd pkg-config-0.26 && CFLAGS=$GLOBAL_CFLAGS LD
 # now we can start on the GTK stack itself
 # 
 
-freetype_bytecode_patch=$this_script_dir/misc-patches/freetype-bytecode.patch
-cairo_gradient_patch=$this_script_dir/misc-patches/cairo-gradients.patch
-
 tar xf atk-2.2.0.tar.bz2 && (cd atk-2.2.0 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "atk build failed"
 tar xf gnome-common-2.34.0.tar.bz2 && (cd gnome-common-2.34.0 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && export MAKEFLAGS= make && MAKEFLAGS= make install) || die "gnome build failed"
 tar xf gtk-osx-docbook-1.0.tar.gz && (cd gtk-osx-docbook-1.0 && JHBUILD_PREFIX=$PREFIX make install) || die "gtk build failed"
@@ -396,9 +397,28 @@ tar xf gtk-osx-docbook-1.0.tar.gz && (cd gtk-osx-docbook-1.0 && JHBUILD_PREFIX=$
 tar xf gnome-doc-utils-0.20.6.tar.bz2 && (cd gnome-doc-utils-0.20.6 && PYTHONPATH=$PREFIX/lib/python2.7/site-packages CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF --disable-scrollkeeper && PYTHONPATH=$PREFIX/lib/python2.7/site-packages MAKEFLAGS= make && PYTHONPATH=$PREFIX/lib/python2.7/site-packages MAKEFLAGS= make install) || die "gnome build failed"
 tar xf gtk-doc-1.18.tar.bz2 && (cd gtk-doc-1.18 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure --disable-scrollkeeper --with-xml-catalog=$PREFIX/etc/xml/catalog --prefix=$PREFIX && PYTHONPATH=$PREFIX/lib/python2.7/site-packages make && make install) || die "gtk build failed"
 tar xf pixman-0.24.4.tar.gz && (cd pixman-0.24.4 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" sh ./autogen.sh --prefix=$PREFIX && make && make install) || die "pixman build failed"
-tar xf freetype-2.4.8.tar.bz2 && (cd freetype-2.4.8 && patch -p0 < $freetype_bytecode_patch && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "freetype build failed"
+
+if [ x$OSX = x ] ; then
+    freetype_bytecode_patch=$this_script_dir/misc-patches/freetype-bytecode.patch
+    tar xf freetype-2.4.8.tar.bz2 && (cd freetype-2.4.8 && patch -p0 < $freetype_bytecode_patch && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "freetype build failed"
+else 
+    tar xf freetype-2.4.8.tar.bz2 && (cd freetype-2.4.8 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "freetype build failed"
+endif
+
 tar xf fontconfig-2.8.0.tar.gz && (cd fontconfig-2.8.0 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "fontconfig build failed"
-tar xf cairo-1.10.2.tar.gz && (cd cairo-1.10.2 && patch -p0 < $cairo_gradient_patch && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF $CAIRO_CONF && make && make install) || die "cairo build failed"
+
+if [ x$OSX = x ] ; then 
+    #
+    # some linux nvidia drivers have buggy support for gradients. this patch
+    # lets the user set an environment variable that will force a Cairo workaround
+    # to the issue.
+    #
+    cairo_gradient_patch=$this_script_dir/misc-patches/cairo-gradients.patch
+    tar xf cairo-1.10.2.tar.gz && (cd cairo-1.10.2 && patch -p0 < $cairo_gradient_patch && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF $CAIRO_CONF && make && make install) || die "cairo build failed"
+else 
+    tar xf cairo-1.10.2.tar.gz && (cd cairo-1.10.2 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF $CAIRO_CONF && make && make install) || die "cairo build failed"
+fi
+
 tar xf pango-1.29.5.tar.bz2 && (cd pango-1.29.5 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF $PANGO_CONF && make && make install) || die "pango build failed"
 
 tar xf gdk-pixbuf-2.25.0.tar.xz && (cd gdk-pixbuf-2.25.0 && LDFLAGS="$GLOBAL_LDFLAGS -L$PREFIX/lib" CFLAGS="-I$PREFIX/include $GLOBAL_CFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "gdk build failed"
