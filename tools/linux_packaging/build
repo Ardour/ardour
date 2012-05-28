@@ -351,8 +351,7 @@ if test x$WITH_LADSPA != x ; then
 fi
 
 cp ../../libs/surfaces/*/libardour_*.so* $Surfaces
-# hack ... move libardour_cp back into Libraries
-mv $Surfaces/libardour_cp.so* $Libraries
+cp ../../libs/surfaces/control_protocol/libardourcp.so* $Libraries
 
 # VAMP plugins that we use
 cp ../../libs/vamp-plugins/libardourvampplugins.so* $Libraries
