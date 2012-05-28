@@ -423,10 +423,6 @@ sigpipe_handler (int /*signal*/)
 	}
 }
 
-#ifdef HAVE_LV2
-void close_external_ui_windows();
-#endif
-
 #ifdef WINDOWS_VST_SUPPORT
 
 extern int windows_vst_gui_init (int* argc, char** argv[]);
@@ -534,9 +530,6 @@ int main (int argc, char *argv[])
 	ARDOUR::cleanup ();
 	pthread_cancel_all ();
 
-#ifdef HAVE_LV2
-	close_external_ui_windows();
-#endif
 	return 0;
 }
 #ifdef WINDOWS_VST_SUPPORT
