@@ -1941,6 +1941,14 @@ MidiRegionView::clear_selection_except (ArdourCanvas::CanvasNoteEvent* ev, bool 
 {
 	bool changed = false;
 
+	if (ev && !ev->selected ()) {
+		/* We're selecting this note, so the selection has changed; if
+		   there is nothing else currently selected, the loop below will
+		   not pick up on the change.
+		*/
+		changed = true;
+	}
+
 	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ) {
 		if ((*i) != ev) {
 			Selection::iterator tmp = i;
