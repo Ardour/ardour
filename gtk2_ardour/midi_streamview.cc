@@ -647,3 +647,14 @@ MidiStreamView::resume_updates ()
 	draw_note_lines ();
 	apply_note_range_to_regions ();
 }
+
+void
+MidiStreamView::leave_internal_edit_mode ()
+{
+	StreamView::leave_internal_edit_mode ();
+	for (RegionViewList::iterator i = region_views.begin(); i != region_views.end(); ++i) {
+		MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (*i);
+		assert (mrv);
+		mrv->clear_selection ();
+	}
+}
