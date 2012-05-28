@@ -320,7 +320,10 @@ private:
 	friend class MidiRubberbandSelectDrag;
 	friend class MidiVerticalSelectDrag;
 
-	/** Emitted when the selection has been cleared in one MidiRegionView */
+	/** Emitted when the selection has been cleared in one MidiRegionView,
+	 *  with the expectation that others will clear their selections in
+	 *  sympathy.
+	 */
 	static PBD::Signal1<void, MidiRegionView*> SelectionCleared;
 	PBD::ScopedConnection _selection_cleared_connection;
 	void selection_cleared (MidiRegionView *);
