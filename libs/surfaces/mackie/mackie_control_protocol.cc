@@ -726,27 +726,24 @@ string
 MackieControlProtocol::format_bbt_timecode (framepos_t now_frame)
 {
 	Timecode::BBT_Time bbt_time;
+
 	session->bbt_time (now_frame, bbt_time);
 
-	// According to the Logic docs
-	// digits: 888/88/88/888
-	// BBT mode: Bars/Beats/Subdivisions/Ticks
+	// The Mackie protocol spec is built around a BBT time display of
+	//
+	// digits:     888/88/88/888
+	// semantics:  BBB/bb/ss/ttt
+	//
+	// The third field is "subdivisions" which is a concept found in Logic
+	// but not present in Ardour. Instead Ardour displays a 4 digit tick
+	// count, which we need to spread across the 5 digits of ss/ttt.
+
 	ostringstream os;
+
 	os << setw(3) << setfill('0') << bbt_time.bars;
 	os << setw(2) << setfill('0') << bbt_time.beats;
-
-	// figure out subdivisions per beat
-	const ARDOUR::Meter & meter = session->tempo_map().meter_at (now_frame);
-	int subdiv = 2;
-	if (meter.note_divisor() == 8 && (meter.divisions_per_bar() == 12.0 || meter.divisions_per_bar() == 9.0 || meter.divisions_per_bar() == 6.0)) {
-		subdiv = 3;
-	}
-
-	uint32_t subdivisions = bbt_time.ticks / uint32_t (Timecode::BBT_Time::ticks_per_beat / subdiv);
-	uint32_t ticks = bbt_time.ticks % uint32_t (Timecode::BBT_Time::ticks_per_beat / subdiv);
-
-	os << setw(2) << setfill('0') << subdivisions + 1;
-	os << setw(3) << setfill('0') << ticks;
+	os << setw(2) << setfill('0') << bbt_time.ticks / 1000;
+	os << setw(3) << setfill('0') << bbt_time.ticks % 1000;
 
 	return os.str();
 }
