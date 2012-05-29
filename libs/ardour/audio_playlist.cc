@@ -421,14 +421,18 @@ AudioPlaylist::check_crossfades (Evoral::Range<framepos_t> range)
 	for (RegionList::iterator i = starts->begin(); i != starts->end(); ++i) {
 		if (done_start.find (*i) == done_start.end()) {
 			boost::shared_ptr<AudioRegion> r = boost::dynamic_pointer_cast<AudioRegion> (*i);
-			r->set_default_fade_in ();
+			if (r->fade_in_is_xfade()) {
+				r->set_default_fade_in ();
+			}
 		}
 	}
 
 	for (RegionList::iterator i = ends->begin(); i != ends->end(); ++i) {
 		if (done_end.find (*i) == done_end.end()) {
 			boost::shared_ptr<AudioRegion> r = boost::dynamic_pointer_cast<AudioRegion> (*i);
-			r->set_default_fade_out ();
+			if (r->fade_out_is_xfade()) {
+				r->set_default_fade_out ();
+			}
 		}
 	}
 }
