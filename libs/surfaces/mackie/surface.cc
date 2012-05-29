@@ -695,7 +695,7 @@ Surface::show_two_char_display (unsigned int value, const std::string & /*dots*/
 void
 Surface::display_timecode (const std::string & timecode, const std::string & last_timecode)
 {
-	if (!_active || _mcp.device_info().has_timecode_display()) {
+	if (!_active || !_mcp.device_info().has_timecode_display()) {
 		return;
 	}
 	// if there's no change, send nothing, not even sysex header
