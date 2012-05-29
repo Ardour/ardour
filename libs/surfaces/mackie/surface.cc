@@ -409,9 +409,9 @@ Surface::handle_midi_sysex (MIDI::Parser &, MIDI::byte * raw_bytes, size_t count
 	 */
 
 	if (_stype == mcu) {
-		mackie_sysex_hdr[3] = bytes[4];
+		mackie_sysex_hdr[4] = bytes[4];
 	} else {
-		mackie_sysex_hdr_xt[3] = bytes[4];
+		mackie_sysex_hdr_xt[4] = bytes[4];
 	}
 
 	switch (bytes[5]) {

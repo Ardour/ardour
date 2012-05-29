@@ -1133,7 +1133,17 @@ MackieControlProtocol::midi_input_handler (IOCondition ioc, MIDI::Port* port)
 
 	if (ioc & IO_IN) {
 
-		CrossThreadChannel::drain (port->selectable());
+		/* Devices using regular JACK MIDI ports will need to have
+		   the x-thread FIFO drained to avoid burning endless CPU.
+
+		   Devices using ipMIDI have port->selectable() as the same
+		   file descriptor that data arrives on, so doing this
+		   for them will simply throw all incoming data away.
+		*/
+
+		if (!_device_info.uses_ipmidi()) {
+			CrossThreadChannel::drain (port->selectable());
+		}
 
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("data available on %1\n", port->name()));
 		framepos_t now = session->engine().frame_time();
