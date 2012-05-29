@@ -199,13 +199,8 @@ AudioRegionView::init (Gdk::Color const & basic_color, bool wfd)
 	if (!Profile->get_sae()) {
 		gain_line.reset (new AudioRegionGainLine (line_name, *this, *group, audio_region()->envelope()));
 	}
-
-	if (Config->get_show_region_gain()) {
-		gain_line->show ();
-	} else {
-		gain_line->hide ();
-	}
-
+	
+	gain_line->set_visibility (automation_line_visibility());
 	gain_line->reset ();
 
 	set_height (trackview.current_height());
@@ -499,9 +494,7 @@ AudioRegionView::set_height (gdouble height)
 		if ((height/wcnt) < NAME_HIGHLIGHT_THRESH) {
 			gain_line->hide ();
 		} else {
-			if (Config->get_show_region_gain ()) {
-				gain_line->show ();
-			}
+			gain_line->set_visibility (automation_line_visibility());
 		}
 
 		gain_line->set_height ((uint32_t) rint (height - NAME_HIGHLIGHT_SIZE) - 2);
@@ -858,19 +851,15 @@ void
 AudioRegionView::unhide_envelope ()
 {
 	if (gain_line) {
-		gain_line->show ();
+		gain_line->set_visibility (automation_line_visibility());
 	}
 }
 
 void
-AudioRegionView::set_envelope_visible (bool yn)
+AudioRegionView::update_envelope_visible ()
 {
 	if (gain_line) {
-		if (yn) {
-			gain_line->show ();
-		} else {
-			gain_line->hide ();
-		}
+		gain_line->set_visibility (automation_line_visibility());
 	}
 }
 
@@ -1035,7 +1024,7 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev)
 
 	/* don't create points that can't be seen */
 
-	set_envelope_visible (true);
+	gain_line->set_visibility (automation_line_visibility());
 
 	x = ev->button.x;
 	y = ev->button.y;
@@ -1222,9 +1211,9 @@ AudioRegionView::entered (bool internal_editing)
 {
 	trackview.editor().set_current_trimmable (_region);
 	trackview.editor().set_current_movable (_region);
-
-	if (gain_line && Config->get_show_region_gain ()) {
-		gain_line->show_all_control_points ();
+	
+	if (gain_line && trackview.editor().current_mouse_mode() == Editing::MouseGain) {
+		gain_line->add_visibility (AutomationLine::ControlPoints);
 	}
 
 	if (fade_in_handle && !internal_editing) {
@@ -1239,8 +1228,8 @@ AudioRegionView::exited ()
 	trackview.editor().set_current_trimmable (boost::shared_ptr<Trimmable>());
 	trackview.editor().set_current_movable (boost::shared_ptr<Movable>());
 
-	if (gain_line) {
-		gain_line->hide_all_but_selected_control_points ();
+	if (gain_line && trackview.editor().current_mouse_mode() == Editing::MouseGain) {
+		gain_line->remove_visibility (AutomationLine::ControlPoints);
 	}
 
 	if (fade_in_handle) {
@@ -1812,3 +1801,12 @@ AudioRegionView::drag_end ()
 	/* fades will be redrawn if they changed */
 }
 
+AutomationLine::VisibleAspects
+AudioRegionView::automation_line_visibility () const
+{
+	if (Config->get_show_region_gain() || trackview.editor().current_mouse_mode() == Editing::MouseGain) {
+		return AutomationLine::Line;
+	} else {
+		return AutomationLine::VisibleAspects (0);
+	}
+}

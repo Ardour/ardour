@@ -76,11 +76,11 @@ AutomationLine::AutomationLine (const string& name, TimeAxisView& tv, ArdourCanv
 		_our_time_converter = true;
 	}
 	
-	points_visible = false;
+	_visible = Line;
+
 	update_pending = false;
 	_uses_gain_mapping = false;
 	no_draw = false;
-	_visible = true;
 	_is_boolean = false;
 	terminal_points_can_slide = true;
 	_height = 0;
@@ -135,27 +135,36 @@ AutomationLine::queue_reset ()
 void
 AutomationLine::show ()
 {
-	if (alist->interpolation() != AutomationList::Discrete) {
-		line->show();
+	if (_visible & Line) {
+		if (alist->interpolation() != AutomationList::Discrete) {
+			line->show();
+		} else {
+			line->hide ();
+		}
+	} else {
+		line->hide();
 	}
 
-	if (points_visible) {
+	if (_visible & ControlPoints) {
 		for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
+			(*i)->set_visible (true);
 			(*i)->show ();
 		}
+	} else if (_visible & SelectedControlPoints) {
+		for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
+			(*i)->set_visible ((*i)->get_selected());
+		}
+	} else {
+		for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
+			(*i)->set_visible (false);
+		}
 	}
-
-	_visible = true;
 }
 
 void
 AutomationLine::hide ()
 {
-	line->hide();
-	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
-		(*i)->hide();
-	}
-	_visible = false;
+	set_visibility (VisibleAspects (0));
 }
 
 double
@@ -895,44 +904,31 @@ AutomationLine::set_list (boost::shared_ptr<ARDOUR::AutomationList> list)
 }
 
 void
-AutomationLine::show_all_control_points ()
+AutomationLine::add_visibility (VisibleAspects va)
 {
-	if (_is_boolean) {
-		// show the line but don't allow any control points
-		return;
-	}
-
-	points_visible = true;
-
-	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
-		if (!(*i)->visible()) {
-			(*i)->show ();
-			(*i)->set_visible (true);
-		}
-	}
+	_visible = VisibleAspects (_visible | va);
+	show ();
 }
 
 void
-AutomationLine::hide_all_but_selected_control_points ()
+AutomationLine::set_visibility (VisibleAspects va)
 {
-	if (alist->interpolation() == AutomationList::Discrete) {
-		return;
-	}
+	_visible = va;
+	show ();
+}
 
-	points_visible = false;
-
-	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
-		if (!(*i)->get_selected()) {
-			(*i)->set_visible (false);
-		}
-	}
+void
+AutomationLine::remove_visibility (VisibleAspects va)
+{
+	_visible = VisibleAspects (_visible & ~va);
+	show ();
 }
 
 void
 AutomationLine::track_entered()
 {
 	if (alist->interpolation() != AutomationList::Discrete) {
-		show_all_control_points();
+		add_visibility (ControlPoints);
 	}
 }
 
@@ -940,7 +936,7 @@ void
 AutomationLine::track_exited()
 {
 	if (alist->interpolation() != AutomationList::Discrete) {
-		hide_all_but_selected_control_points();
+		remove_visibility (ControlPoints);
 	}
 }
 
@@ -1011,11 +1007,10 @@ void
 AutomationLine::interpolation_changed (AutomationList::InterpolationStyle style)
 {
 	if (style == AutomationList::Discrete) {
-		show_all_control_points();
+		set_visibility (ControlPoints);
 		line->hide();
 	} else {
-		hide_all_but_selected_control_points();
-		line->show();
+		set_visibility (Line);
 	}
 }
 
@@ -1059,13 +1054,11 @@ AutomationLine::add_visible_control_point (uint32_t view_index, uint32_t pi, dou
 
 	/* finally, control visibility */
 
-	if (_visible && points_visible) {
+	if (_visible & ControlPoints) {
 		control_points[view_index]->show ();
 		control_points[view_index]->set_visible (true);
 	} else {
-		if (!points_visible) {
-			control_points[view_index]->set_visible (false);
-		}
+		control_points[view_index]->set_visible (false);
 	}
 }
 

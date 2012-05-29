@@ -1951,8 +1951,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	gint left_automation_track ();
 
 	void reset_canvas_action_sensitivity (bool);
-	void set_gain_envelope_visibility (bool);
-	void set_region_gain_visibility (RegionView*, bool);
+	void set_gain_envelope_visibility ();
+	void set_region_gain_visibility (RegionView*);
 	void toggle_gain_envelope_active ();
 	void reset_region_gain_envelopes ();
 

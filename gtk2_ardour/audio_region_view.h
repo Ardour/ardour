@@ -79,7 +79,7 @@ class AudioRegionView : public RegionView
 	void temporarily_hide_envelope (); ///< Dangerous!
 	void unhide_envelope ();           ///< Dangerous!
 
-	void set_envelope_visible (bool);
+	void update_envelope_visible ();
 	void set_waveform_visible (bool yn);
 	void set_waveform_shape (ARDOUR::WaveformShape);
 	void set_waveform_scale (ARDOUR::WaveformScale);
@@ -197,6 +197,8 @@ class AudioRegionView : public RegionView
 	std::vector<GnomeCanvasWaveViewCache*> wave_caches;
 
 	void transients_changed();
+
+	AutomationLine::VisibleAspects automation_line_visibility () const;
 
 private:
 	void setup_fade_handle_positions ();

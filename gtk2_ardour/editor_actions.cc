@@ -1483,7 +1483,7 @@ Editor::parameter_changed (std::string p)
 			}
 		}
 	} else if (p == "show-region-gain") {
-		set_gain_envelope_visibility (Config->get_show_region_gain ());
+		set_gain_envelope_visibility ();
 	}
 }
 

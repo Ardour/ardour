@@ -89,8 +89,7 @@ AutomationRegionView::create_line (boost::shared_ptr<ARDOUR::AutomationList> lis
 				&_source_relative_time_converter));
 	_line->set_colors();
 	_line->set_height ((uint32_t)rint(trackview.current_height() - NAME_HIGHLIGHT_SIZE));
-	_line->show();
-	_line->show_all_control_points();
+	_line->set_visibility (AutomationLine::VisibleAspects (AutomationLine::Line|AutomationLine::ControlPoints));
 	_line->set_maximum_time (_region->length());
 	_line->set_offset (_region->start ());
 }
