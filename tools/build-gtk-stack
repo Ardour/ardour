@@ -403,7 +403,7 @@ if [ x$OSX = x ] ; then
     tar xf freetype-2.4.8.tar.bz2 && (cd freetype-2.4.8 && patch -p0 < $freetype_bytecode_patch && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "freetype build failed"
 else 
     tar xf freetype-2.4.8.tar.bz2 && (cd freetype-2.4.8 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "freetype build failed"
-endif
+fi
 
 tar xf fontconfig-2.8.0.tar.gz && (cd fontconfig-2.8.0 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "fontconfig build failed"
 
