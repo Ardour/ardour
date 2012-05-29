@@ -692,19 +692,14 @@ Surface::show_two_char_display (unsigned int value, const std::string & /*dots*/
 	show_two_char_display (os.str());
 }
 
-void 
-Surface::display_timecode (const std::string & timecode, const std::string & timecode_last)
+void
+Surface::display_timecode (const std::string & timecode, const std::string & last_timecode)
 {
-	if (_active && _mcp.device_info().has_timecode_display()) {
-		_port->write (timecode_display (timecode, timecode_last));
+	if (!_active || _mcp.device_info().has_timecode_display()) {
+		return;
 	}
-}
-
-MidiByteArray 
-Surface::timecode_display (const std::string & timecode, const std::string & last_timecode)
-{
 	// if there's no change, send nothing, not even sysex header
-	if  (timecode == last_timecode) return MidiByteArray();
+	if  (timecode == last_timecode) return;
 	
 	// length sanity checking
 	string local_timecode = timecode;
@@ -722,25 +717,16 @@ Surface::timecode_display (const std::string & timecode, const std::string & las
 	// find the suffix of local_timecode that differs from last_timecode
 	std::pair<string::const_iterator,string::iterator> pp = mismatch (last_timecode.begin(), last_timecode.end(), local_timecode.begin());
 	
-	MidiByteArray retval;
-	
-	// sysex header
-	retval << sysex_hdr();
-	
-	// code for timecode display
-	retval << 0x10;
-	
+	int position = 0x40;
+
 	// translate characters. These are sent in reverse order of display
 	// hence the reverse iterators
 	string::reverse_iterator rend = reverse_iterator<string::iterator> (pp.second);
 	for  (string::reverse_iterator it = local_timecode.rbegin(); it != rend; ++it) {
+		MidiByteArray retval (2, 0xb0, position++);
 		retval << translate_seven_segment (*it);
+		_port->write (retval);
 	}
-	
-	// sysex trailer
-	retval << MIDI::eox;
-	
-	return retval;
 }
 
 void
