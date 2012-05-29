@@ -4855,7 +4855,7 @@ Editor::set_region_gain_visibility (RegionView* rv)
 {
 	AudioRegionView* arv = dynamic_cast<AudioRegionView*> (rv);
 	if (arv) {
-		arv->update_envelope_visible ();
+		arv->update_envelope_visibility();
 	}
 }
 

@@ -79,7 +79,7 @@ class AudioRegionView : public RegionView
 	void temporarily_hide_envelope (); ///< Dangerous!
 	void unhide_envelope ();           ///< Dangerous!
 
-	void update_envelope_visible ();
+	void update_envelope_visibility ();
 	void set_waveform_visible (bool yn);
 	void set_waveform_shape (ARDOUR::WaveformShape);
 	void set_waveform_scale (ARDOUR::WaveformScale);

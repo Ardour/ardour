@@ -200,7 +200,7 @@ AudioRegionView::init (Gdk::Color const & basic_color, bool wfd)
 		gain_line.reset (new AudioRegionGainLine (line_name, *this, *group, audio_region()->envelope()));
 	}
 	
-	gain_line->set_visibility (automation_line_visibility());
+	update_envelope_visibility ();
 	gain_line->reset ();
 
 	set_height (trackview.current_height());
@@ -494,7 +494,7 @@ AudioRegionView::set_height (gdouble height)
 		if ((height/wcnt) < NAME_HIGHLIGHT_THRESH) {
 			gain_line->hide ();
 		} else {
-			gain_line->set_visibility (automation_line_visibility());
+			update_envelope_visibility ();
 		}
 
 		gain_line->set_height ((uint32_t) rint (height - NAME_HIGHLIGHT_SIZE) - 2);
@@ -850,16 +850,20 @@ AudioRegionView::temporarily_hide_envelope ()
 void
 AudioRegionView::unhide_envelope ()
 {
-	if (gain_line) {
-		gain_line->set_visibility (automation_line_visibility());
-	}
+	update_envelope_visibility ();
 }
 
 void
-AudioRegionView::update_envelope_visible ()
+AudioRegionView::update_envelope_visibility ()
 {
-	if (gain_line) {
-		gain_line->set_visibility (automation_line_visibility());
+	if (!gain_line) {
+		return;
+	}
+
+	if (Config->get_show_region_gain() || trackview.editor().current_mouse_mode() == Editing::MouseGain) {
+		gain_line->add_visibility (AutomationLine::Line);
+	} else {
+		gain_line->hide ();
 	}
 }
 
@@ -1024,7 +1028,7 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev)
 
 	/* don't create points that can't be seen */
 
-	gain_line->set_visibility (automation_line_visibility());
+	update_envelope_visibility ();
 
 	x = ev->button.x;
 	y = ev->button.y;
@@ -1801,12 +1805,3 @@ AudioRegionView::drag_end ()
 	/* fades will be redrawn if they changed */
 }
 
-AutomationLine::VisibleAspects
-AudioRegionView::automation_line_visibility () const
-{
-	if (Config->get_show_region_gain() || trackview.editor().current_mouse_mode() == Editing::MouseGain) {
-		return AutomationLine::Line;
-	} else {
-		return AutomationLine::VisibleAspects (0);
-	}
-}

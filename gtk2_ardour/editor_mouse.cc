@@ -473,7 +473,6 @@ Editor::mouse_mode_toggled (MouseMode m)
 	}
 
 	set_canvas_cursor ();
-	cerr << "mouse-driven sgev\n";
 	set_gain_envelope_visibility ();
 
 	MouseModeChanged (); /* EMIT SIGNAL */
