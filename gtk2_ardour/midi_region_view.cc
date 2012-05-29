@@ -327,7 +327,10 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 		return trackview.editor().toggle_internal_editing_from_double_click (ev);
 	}
 
-	if (!trackview.editor().internal_editing()) {
+	if ((!trackview.editor().internal_editing() && trackview.editor().current_mouse_mode() != MouseGain) ||
+		(trackview.editor().current_mouse_mode() == MouseTimeFX) ||
+		(trackview.editor().current_mouse_mode() == MouseZoom)) {
+		// handle non-draw modes elsewhere
 		return false;
 	}
 
@@ -388,6 +391,13 @@ MidiRegionView::enter_notify (GdkEventCrossing* ev)
 		group->grab_focus();
 	}
 
+	// if current operation is non-operational in a midi region, change the cursor to so indicate
+	if (trackview.editor().current_mouse_mode() == MouseGain) {
+		Editor* editor = dynamic_cast<Editor *> (&trackview.editor());
+		pre_enter_cursor = editor->get_canvas_cursor();
+		editor->set_canvas_cursor(editor->cursors()->timebar);
+	}
+
 	return false;
 }
 
@@ -398,6 +408,11 @@ MidiRegionView::leave_notify (GdkEventCrossing*)
 
 	trackview.editor().verbose_cursor()->hide ();
 	remove_ghost_note ();
+
+	if (pre_enter_cursor) {
+		Editor* editor = dynamic_cast<Editor *> (&trackview.editor());
+		editor->set_canvas_cursor(pre_enter_cursor);
+	}
 
 	return false;
 }
