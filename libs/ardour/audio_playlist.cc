@@ -669,46 +669,46 @@ AudioPlaylist::set_state (const XMLNode& node, int version)
 
 			XMLProperty* p = (*i)->property (X_("active"));
 			assert (p);
+
 			if (!string_is_affirmative (p->value())) {
 				continue;
 			}
+			
+			if ((p = (*i)->property (X_("in"))) == 0) {
+				continue;
+			}
 
-			p = (*i)->property (X_("in"));
-			assert (p);
 			boost::shared_ptr<Region> in = region_by_id (PBD::ID (p->value ()));
+
 			if (!in) {
 				warning << string_compose (_("Legacy crossfade involved an incoming region not present in playlist \"%1\" - crossfade discarded"),
 							   name()) 
 					<< endmsg;
 				continue;
 			}
+
 			boost::shared_ptr<AudioRegion> in_a = boost::dynamic_pointer_cast<AudioRegion> (in);
 			assert (in_a);
+			
+			const XMLNodeList c = (*i)->children ();
 
-			p = (*i)->property (X_("out"));
-			assert (p);
-			boost::shared_ptr<Region> out = region_by_id (PBD::ID (p->value ()));
-			if (!in) {
-				warning << string_compose (_("Legacy crossfade involved an outgoing region not present in playlist \"%1\" - crossfade discarded"),
-							   name()) 
-					<< endmsg;
-				continue;
-			}
-			boost::shared_ptr<AudioRegion> out_a = boost::dynamic_pointer_cast<AudioRegion> (out);
-			assert (out_a);
-
-			XMLNodeList c = (*i)->children ();
 			for (XMLNodeConstIterator j = c.begin(); j != c.end(); ++j) {
 				if ((*j)->name() == X_("FadeIn")) {
 					in_a->fade_in()->set_state (**j, version);
-					in_a->set_fade_in_active (true);
-					in_a->set_fade_in_is_xfade (true);
 				} else if ((*j)->name() == X_("FadeOut")) {
-					out_a->fade_out()->set_state (**j, version);
-					out_a->set_fade_out_active (true);
-					out_a->set_fade_out_is_xfade (true);
+					in_a->inverse_fade_in()->set_state (**j, version);
 				}
 			}
+
+			if ((p = (*i)->property ("follow-overlap")) != 0) {
+				in_a->set_fade_in_is_short (!string_is_affirmative (p->value()));
+			} else {
+				in_a->set_fade_in_is_short (false);
+			}
+
+			in_a->set_fade_in_is_xfade (true);
+			in_a->set_fade_in_active (true);
+			cerr << in_a->name() << " from playlist fade in  = xfade false\n";
 		}
 	}
 

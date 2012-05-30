@@ -78,14 +78,14 @@ reverse_curve (boost::shared_ptr<Evoral::ControlList> dst, boost::shared_ptr<con
 	size_t len = src->back()->when;
 	
 	for (Evoral::ControlList::const_iterator it = src->begin(); it!=src->end(); it++) {
-		dst->add ( len - (*it)->when, (*it)->value );
+		dst->add (len - (*it)->when, (*it)->value);
 	}
 }
 
 static void
 generate_inverse_power_curve (boost::shared_ptr<Evoral::ControlList> dst, boost::shared_ptr<const Evoral::ControlList> src)
 {
-	//calc inverse curve using sum of squares
+	// calc inverse curve using sum of squares
 	for (Evoral::ControlList::const_iterator it = src->begin(); it!=src->end(); ++it ) {
 		float value = (*it)->value;
 		value = 1 - powf(value,2);
@@ -93,18 +93,6 @@ generate_inverse_power_curve (boost::shared_ptr<Evoral::ControlList> dst, boost:
 		dst->fast_simple_add ( (*it)->when, value );
 	}
 }
-
-/*
-static void
-generate_inverse_coefficient_curve (boost::shared_ptr<Evoral::ControlList> dst, boost::shared_ptr<const Evoral::ControlList> src)
-{
-	//calc inverse gain coefficient curve
-	for (Evoral::ControlList::const_iterator it = src->begin(); it!=src->end(); ++it ) {
-		float value = 1.0 - (*it)->value;
-		dst->fast_simple_add ( (*it)->when, value );
-	}
-}
-*/
 
 static void
 generate_db_fade (boost::shared_ptr<Evoral::ControlList> dst, double len, int num_steps, float dB_drop)
@@ -921,8 +909,6 @@ AudioRegion::_set_state (const XMLNode& node, int version, PropertyChange& what_
 
 			if ((prop = child->property ("is-xfade")) != 0) {
 				_fade_in_is_xfade = string_is_affirmative (prop->value());
-			} else {
-				_fade_in_is_xfade = false;
 			}
 
 		} else if (child->name() == "FadeOut") {
@@ -950,8 +936,6 @@ AudioRegion::_set_state (const XMLNode& node, int version, PropertyChange& what_
 
 			if ((prop = child->property ("is-xfade")) != 0) {
 				_fade_out_is_xfade = string_is_affirmative (prop->value());
-			} else {
-				_fade_out_is_xfade = false;
 			}
 			
 		} else if (child->name() == "InvFadeIn") {
