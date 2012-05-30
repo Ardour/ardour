@@ -426,7 +426,7 @@ AutomationList::set_state (const XMLNode& node, int version)
 			fast_simple_add (x, y);
 		}
 
-		thin ();
+		// thin ();
 
                 thaw ();
 
