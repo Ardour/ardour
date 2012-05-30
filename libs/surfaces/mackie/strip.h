@@ -83,6 +83,8 @@ public:
 	bool locked() const { return _controls_locked; }
 
 	void gui_selection_changed (const ARDOUR::StrongRouteNotificationList&);
+  
+	void notify_transport_state_changed();
 
 private:
 	Button*  _solo;

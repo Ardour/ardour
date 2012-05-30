@@ -32,7 +32,6 @@ class Meter : public Control
 public:
 	Meter (int id, std::string name, Group & group)
 		: Control  (id, name, group)
-		, last_segment_value_sent (-1)
 		, overload_on (false) {}
 	
 	void send_update (Surface&, float dB);
@@ -40,11 +39,12 @@ public:
 	MidiByteArray zero();
 
 	static Control* factory (Surface&, int id, const char*, Group&);
-	
-	int last_segment_value_sent;
+  
+	void update_transport_rolling(Surface& surface);
 
   private:
 	bool overload_on;
+	bool _transport_is_rolling;
 };
 
 }

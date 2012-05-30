@@ -1066,3 +1066,11 @@ Strip::reset_saved_values ()
 	_last_gain_position_written = -1.0;
 
 }
+
+void 
+Strip::notify_transport_state_changed()
+{
+	if (_meter) {
+		_meter->update_transport_rolling (*_surface);
+	}
+}

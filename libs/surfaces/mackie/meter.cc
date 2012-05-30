@@ -22,6 +22,7 @@
 #include "pbd/compose.h"
 #include "ardour/debug.h"
 
+#include "mackie_control_protocol.h"
 #include "meter.h"
 #include "surface.h"
 #include "surface_port.h"
@@ -40,12 +41,67 @@ Meter::factory (Surface& surface, int id, const char* name, Group& group)
 	return m;
 }
 
+void 
+Meter::update_transport_rolling(Surface& surface)
+{
+	bool transport_is_rolling = (surface.mcp().get_transport_speed () != 0.0f);
+	
+	if (_transport_is_rolling == transport_is_rolling) {
+		return;
+	}
+	if (transport_is_rolling) {
+		MidiByteArray enable_msg;
+		
+		// sysex header
+		enable_msg << surface.sysex_hdr();
+		
+		// code for Channel Meter Enable Message
+		enable_msg << 0x20;
+		
+		// Channel identification
+		enable_msg << id();
+		
+		// Enabling level meter on LCD, peak hold display on horizontal meter and signal LED
+		enable_msg << 0x07;
+		
+		// sysex trailer
+		enable_msg << MIDI::eox;
+		
+		surface.write (enable_msg);
+		
+	} else {
+		MidiByteArray disable_msg;
+		
+		// sysex header
+		disable_msg << surface.sysex_hdr();
+		
+		// code for Channel Meter Enable Message
+		disable_msg << 0x20;
+		
+		// Channel identification
+		disable_msg << id();
+		
+		// Disabling level meter on LCD, peak hold display on horizontal meter and signal LED
+		disable_msg << 0x00;
+		
+		// sysex trailer
+		disable_msg << MIDI::eox;
+		
+		surface.write (disable_msg);		
+	}
+	_transport_is_rolling = transport_is_rolling;
+}
+
 void
 Meter::send_update (Surface& surface, float dB)
 {
 	float def = 0.0f; /* Meter deflection %age */
 
 	// DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Meter ID %1 dB %2\n", id(), dB));
+	
+	if (!_transport_is_rolling) {
+		return;
+	}
 	
 	if (dB < -70.0f) {
 		def = 0.0f;
@@ -89,10 +145,7 @@ Meter::send_update (Surface& surface, float dB)
 
 	int segment = lrintf ((def/115.0) * 13.0);
 	
-	if (last_segment_value_sent != segment) {
-		last_segment_value_sent = segment;
-		surface.write (MidiByteArray (2, 0xD0, (id()<<4) | segment));
-	}
+	surface.write (MidiByteArray (2, 0xd0, (id()<<4) | segment));
 }
 
 MidiByteArray

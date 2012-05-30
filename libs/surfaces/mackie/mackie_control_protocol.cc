@@ -880,7 +880,11 @@ MackieControlProtocol::notify_transport_state_changed()
 	update_global_button (Button::Stop, !session->transport_rolling());
 	update_global_button (Button::Rewind, session->transport_speed() < 0.0);
 	update_global_button (Button::Ffwd, session->transport_speed() > 1.0);
-
+	
+	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
+		(*s)->notify_transport_state_changed ();
+	}
+	
 	_transport_previously_rolling = session->transport_rolling();
 }
 

@@ -845,3 +845,11 @@ Surface::route_is_locked_to_strip (boost::shared_ptr<Route> r) const
 	}
 	return false;
 }
+
+void 
+Surface::notify_transport_state_changed()
+{
+	for (Strips::const_iterator s = strips.begin(); s != strips.end(); ++s) {
+		(*s)->notify_transport_state_changed ();
+	}
+}

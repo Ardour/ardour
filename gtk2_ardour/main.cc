@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2001-2007 Paul Davis
+    Copyright (C) 2001-2012 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -180,14 +180,10 @@ fixup_bundle_environment (int, char* [])
 	export_search_path (dir_path, "ARDOUR_DATA_PATH", "/../Resources");
 	export_search_path (dir_path, "ARDOUR_CONFIG_PATH", "/../Resources");
 	export_search_path (dir_path, "ARDOUR_INSTANT_XML_PATH", "/../Resources");
-
 	export_search_path (dir_path, "LADSPA_PATH", "/../Plugins");
 	export_search_path (dir_path, "VAMP_PATH", "/../lib");
 	export_search_path (dir_path, "SUIL_MODULE_DIR", "/../lib");
-
-	path = dir_path;
-	path += "/../lib/clearlooks";
-	setenv ("GTK_PATH", path.c_str(), 1);
+	export_search_path (dir_path, "GTK_PATH", "/../lib/clearlooks");
 
 	/* unset GTK_RC_FILES so that we only load the RC files that we define
 	 */
@@ -195,12 +191,7 @@ fixup_bundle_environment (int, char* [])
 	unsetenv ("GTK_RC_FILES");
 
 	if (!ARDOUR::translations_are_disabled ()) {
-
-		path = dir_path;
-		path += "/../Resources/locale";
-
-		localedir = strdup (path.c_str());
-		setenv ("GTK_LOCALEDIR", localedir, 1);
+		expoirt_search_path (dir_path, "GTK_LOCALEDIR", "/../Resources/locale");
 	}
 
 	/* write a pango.rc file and tell pango to use it. we'd love
@@ -246,18 +237,8 @@ fixup_bundle_environment (int, char* [])
 	setenv ("CHARSETALIASDIR", path.c_str(), 1);
 
 	// font config
-
-	path = dir_path;
-	path += "/../Resources/fonts.conf";
-
-	setenv ("FONTCONFIG_FILE", path.c_str(), 1);
-
-	// GDK Pixbuf loader module file
-
-	path = dir_path;
-	path += "/../Resources/gdk-pixbuf.loaders";
-
-	setenv ("GDK_PIXBUF_MODULE_FILE", path.c_str(), 1);
+	export_search_path (dir_path, "FONTCONFIG_FILE", "/../Resources/fonts.conf");
+	export_search_path (dir_path, "GDK_PIXBUF_MODULE_FILE", "/../Resources/gdk-pixbuf.loaders");
 
 	if (getenv ("ARDOUR_WITH_JACK")) {
 		// JACK driver dir
