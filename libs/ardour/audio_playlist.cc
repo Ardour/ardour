@@ -675,17 +675,25 @@ AudioPlaylist::set_state (const XMLNode& node, int version)
 
 			p = (*i)->property (X_("in"));
 			assert (p);
-			cerr << "Looking for in xfade region " << p->value() << endl;
 			boost::shared_ptr<Region> in = region_by_id (PBD::ID (p->value ()));
-			assert (in);
+			if (!in) {
+				warning << string_compose (_("Legacy crossfade involved an incoming region not present in playlist \"%1\" - crossfade discarded"),
+							   name()) 
+					<< endmsg;
+				continue;
+			}
 			boost::shared_ptr<AudioRegion> in_a = boost::dynamic_pointer_cast<AudioRegion> (in);
 			assert (in_a);
 
 			p = (*i)->property (X_("out"));
 			assert (p);
-			cerr << "Looking for out xfade region " << p->value() << endl;
 			boost::shared_ptr<Region> out = region_by_id (PBD::ID (p->value ()));
-			assert (out);
+			if (!in) {
+				warning << string_compose (_("Legacy crossfade involved an outgoing region not present in playlist \"%1\" - crossfade discarded"),
+							   name()) 
+					<< endmsg;
+				continue;
+			}
 			boost::shared_ptr<AudioRegion> out_a = boost::dynamic_pointer_cast<AudioRegion> (out);
 			assert (out_a);
 
