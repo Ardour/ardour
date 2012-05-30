@@ -170,7 +170,7 @@ fixup_bundle_environment (int, char* [])
 	unsetenv ("GTK_RC_FILES");
 
 	if (!ARDOUR::translations_are_disabled ()) {
-		expoirt_search_path (bundle_dir, "GTK_LOCALEDIR", "/Resources/locale");
+		export_search_path (bundle_dir, "GTK_LOCALEDIR", "/Resources/locale");
 	}
 
 	/* write a pango.rc file and tell pango to use it. we'd love
