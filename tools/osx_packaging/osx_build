@@ -280,7 +280,7 @@ if test x$WITH_LADSPA != x ; then
     else
 	plugdir=ladspa
     fi
-    if [ -d $plugdir -a x`ls $plugdir` != x ] ; then 
+    if [ -d $plugdir -a "x$(ls $plugdir)" != x ] ; then 
         echo "Copying `ls $plugdir | wc -l` plugins ..."
         cp -r $plugdir/* $Plugins
     fi
