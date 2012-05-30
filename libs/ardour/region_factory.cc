@@ -284,7 +284,9 @@ RegionFactory::create (SourceList& srcs, const XMLNode& node)
 	if (ret) {
 		if (ret->set_state (node, Stateful::loading_state_version)) {
 			ret.reset ();
+			cerr << "set state on region failed\n";
 		} else {
+			cerr << "add region " << ret->id() << " to region map\n";
 			map_add (ret);
 
 			/* Don't fiddle with position_lock_style here as the region

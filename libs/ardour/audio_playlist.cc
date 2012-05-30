@@ -694,9 +694,11 @@ AudioPlaylist::set_state (const XMLNode& node, int version)
 				if ((*j)->name() == X_("FadeIn")) {
 					in_a->fade_in()->set_state (**j, version);
 					in_a->set_fade_in_active (true);
+					in_a->set_fade_in_is_xfade (true);
 				} else if ((*j)->name() == X_("FadeOut")) {
 					out_a->fade_out()->set_state (**j, version);
 					out_a->set_fade_out_active (true);
+					out_a->set_fade_out_is_xfade (true);
 				}
 			}
 		}
