@@ -141,35 +141,14 @@ fixup_bundle_environment (int, char* [])
 
 	_NSGetExecutablePath (execpath, &pathsz);
 
-	std::string dir_path = Glib::path_get_dirname (execpath);
 	std::string path;
-	const char *cstr = getenv ("PATH");
+	std::string exec_dir = Glib::path_get_dirname (execpath);
+	std::string bundle_dir;
+	std::string userconfigdir = user_config_directory().to_string();
 
-	/* ensure that we find any bundled executables (e.g. JACK),
-	   and find them before any instances of the same name
-	   elsewhere in PATH
-	*/
+	bundle_dir = Glib::path_get_dirname (exec_dir);
 
-	path = dir_path;
-
-	/* JACK is often in /usr/local/bin and since Info.plist refuses to
-	   set PATH, we have to force this in order to discover a running
-	   instance of JACK ...
-	*/
-
-	path += ':';
-	path += "/usr/local/bin";
-
-	if (cstr) {
-		path += ':';
-		path += cstr;
-	}
-	setenv ("PATH", path.c_str(), 1);
-
-	export_search_path (dir_path, "ARDOUR_DLL_PATH", "/../lib");
-
-	path += dir_path;
-	path += "/../Resources";
+	export_search_path (bundle_dir, "ARDOUR_DLL_PATH", "/lib");
 
 	/* inside an OS X .app bundle, there is no difference
 	   between DATA and CONFIG locations, since OS X doesn't
@@ -177,13 +156,13 @@ fixup_bundle_environment (int, char* [])
 	   machine-independent shared data.
 	*/
 
-	export_search_path (dir_path, "ARDOUR_DATA_PATH", "/../Resources");
-	export_search_path (dir_path, "ARDOUR_CONFIG_PATH", "/../Resources");
-	export_search_path (dir_path, "ARDOUR_INSTANT_XML_PATH", "/../Resources");
-	export_search_path (dir_path, "LADSPA_PATH", "/../Plugins");
-	export_search_path (dir_path, "VAMP_PATH", "/../lib");
-	export_search_path (dir_path, "SUIL_MODULE_DIR", "/../lib");
-	export_search_path (dir_path, "GTK_PATH", "/../lib/clearlooks");
+	export_search_path (bundle_dir, "ARDOUR_DATA_PATH", "/Resources");
+	export_search_path (bundle_dir, "ARDOUR_CONFIG_PATH", "/Resources");
+	export_search_path (bundle_dir, "ARDOUR_INSTANT_XML_PATH", "/Resources");
+	export_search_path (bundle_dir, "LADSPA_PATH", "/Plugins");
+	export_search_path (bundle_dir, "VAMP_PATH", "/lib");
+	export_search_path (bundle_dir, "SUIL_MODULE_DIR", "/lib");
+	export_search_path (bundle_dir, "GTK_PATH", "/lib/clearlooks");
 
 	/* unset GTK_RC_FILES so that we only load the RC files that we define
 	 */
@@ -191,7 +170,7 @@ fixup_bundle_environment (int, char* [])
 	unsetenv ("GTK_RC_FILES");
 
 	if (!ARDOUR::translations_are_disabled ()) {
-		expoirt_search_path (dir_path, "GTK_LOCALEDIR", "/../Resources/locale");
+		expoirt_search_path (bundle_dir, "GTK_LOCALEDIR", "/Resources/locale");
 	}
 
 	/* write a pango.rc file and tell pango to use it. we'd love
@@ -202,52 +181,35 @@ fixup_bundle_environment (int, char* [])
 	   actually exists ...
 	*/
 
-	try {
-		sys::create_directories (user_config_directory ());
-	}
-	catch (const sys::filesystem_error& ex) {
-		error << _("Could not create user configuration directory") << endmsg;
-	}
+	if (g_mkdir_with_parents (userconfigdir.c_str(), 0755) < 0) {
+		error << string_compose (_("cannot create user ardour folder %1 (%2)"), userconfigdir, strerror (errno))
+		      << endmsg;
+		return;
+	} 
 
-	sys::path pangopath = user_config_directory();
-	pangopath /= "pango.rc";
-	path = pangopath.to_string();
-
+	path = Glib::build_filename (userconfigdir, "pango.rc");
 	std::ofstream pangorc (path.c_str());
 	if (!pangorc) {
 		error << string_compose (_("cannot open pango.rc file %1") , path) << endmsg;
-		return;
 	} else {
-		pangorc << "[Pango]\nModuleFiles=";
-
-		pangopath = dir_path;
-		pangopath /= "..";
-		pangopath /= "Resources";
-		pangopath /= "pango.modules";
-
-		pangorc << pangopath.to_string() << endl;
-
+		pangorc << "[Pango]\nModuleFiles="
+			<< Glib::build_filename (bundle_dir, "Resources/pango.modules") 
+			<< endl;
 		pangorc.close ();
 
 		setenv ("PANGO_RC_FILE", path.c_str(), 1);
 	}
 
-	// gettext charset aliases
+	// gettext charset aliases XXX do we really need this, since the path
+	// is totally wrong?
 
 	setenv ("CHARSETALIASDIR", path.c_str(), 1);
 
-	// font config
-	export_search_path (dir_path, "FONTCONFIG_FILE", "/../Resources/fonts.conf");
-	export_search_path (dir_path, "GDK_PIXBUF_MODULE_FILE", "/../Resources/gdk-pixbuf.loaders");
+	setenv ("FONTCONFIG_FILE", Glib::build_filename (bundle_dir, "Resources/fonts.conf").c_str(), 1);
 
-	if (getenv ("ARDOUR_WITH_JACK")) {
-		// JACK driver dir
+	// GDK Pixbuf loader module file
 
-		path = dir_path;
-		path += "/../lib";
-
-		setenv ("JACK_DRIVER_DIR", path.c_str(), 1);
-	}
+	setenv ("GDK_PIXBUF_MODULE_FILE", Glib::build_filename (bundle_dir, "Resources/gdk-pixbuf.loaders").c_str(), 1);
 }
 
 #else
@@ -265,9 +227,9 @@ fixup_bundle_environment (int /*argc*/, char* argv[])
 
 	EnvironmentalProtectionAgency::set_global_epa (new EnvironmentalProtectionAgency (true, "PREBUNDLE_ENV"));
 
-	Glib::ustring dir_path = Glib::path_get_dirname (Glib::path_get_dirname (argv[0]));
-	Glib::ustring path;
-	Glib::ustring userconfigdir = user_config_directory().to_string();
+	std::string path;
+	std::string dir_path = Glib::path_get_dirname (Glib::path_get_dirname (argv[0]));
+	std::string userconfigdir = user_config_directory().to_string();
 
 	/* note that this function is POSIX/Linux specific, so using / as
 	   a dir separator in this context is just fine.
@@ -277,14 +239,11 @@ fixup_bundle_environment (int /*argc*/, char* argv[])
 	export_search_path (dir_path, "ARDOUR_CONFIG_PATH", "/etc");
 	export_search_path (dir_path, "ARDOUR_INSTANT_XML_PATH", "/share");
 	export_search_path (dir_path, "ARDOUR_DATA_PATH", "/share");
-
-	export_search_path (dir_path, "LADSPA_PATH", "/../plugins");
+	export_search_path (dir_path, "LADSPA_PATH", "/plugins");
 	export_search_path (dir_path, "VAMP_PATH", "/lib");
 	export_search_path (dir_path, "SUIL_MODULE_DIR", "/lib");
 
-	path = dir_path;
-	path += "/lib/clearlooks";
-	setenv ("GTK_PATH", path.c_str(), 1);
+	export_search_path (dir_path, "GTK_PATH", "/lib/clearlooks");
 
 	/* unset GTK_RC_FILES so that we only load the RC files that we define
 	 */
@@ -292,11 +251,7 @@ fixup_bundle_environment (int /*argc*/, char* argv[])
 	unsetenv ("GTK_RC_FILES");
 
 	if (!ARDOUR::translations_are_disabled ()) {
-		path = dir_path;
-		path += "/share/locale";
-
-		localedir = strdup (path.c_str());
-		setenv ("GTK_LOCALEDIR", localedir, 1);
+		export_search_path (dir_path, "GTK_LOCALEDIR", "/share/locale");
 	}
 
 	/* Tell fontconfig where to find fonts.conf. Use the system version
@@ -311,8 +266,7 @@ fixup_bundle_environment (int /*argc*/, char* argv[])
 		
 		path = Glib::build_filename (dir_path, "etc/fonts/fonts.conf");
 		setenv ("FONTCONFIG_FILE", path.c_str(), 1);
-		path = Glib::build_filename (dir_path, "etc/fonts");
-		setenv ("FONTCONFIG_PATH", "/etc/fonts", 1);
+		export_search_path (dir_path, "FONTCONFIG_PATH", "/etc/fonts");
 	}
 
 	/* write a pango.rc file and tell pango to use it. we'd love
@@ -329,18 +283,14 @@ fixup_bundle_environment (int /*argc*/, char* argv[])
 		return;
 	} 
 
-	Glib::ustring mpath;
-	
 	path = Glib::build_filename (userconfigdir, "pango.rc");
-	
 	std::ofstream pangorc (path.c_str());
 	if (!pangorc) {
 		error << string_compose (_("cannot open pango.rc file %1") , path) << endmsg;
 	} else {
-		mpath = Glib::build_filename (userconfigdir, "pango.modules");
-		
-		pangorc << "[Pango]\nModuleFiles=";
-		pangorc << mpath << endl;
+		pangorc << "[Pango]\nModuleFiles="
+			<< Glib::build_filename (userconfigdir, "pango.modules")
+			<< endl;
 		pangorc.close ();
 	}
 	
@@ -350,8 +300,7 @@ fixup_bundle_environment (int /*argc*/, char* argv[])
 	   to specify where it lives.
 	*/
 	
-	mpath = Glib::build_filename (userconfigdir, "gdk-pixbuf.loaders");
-	setenv ("GDK_PIXBUF_MODULE_FILE", mpath.c_str(), 1);
+	setenv ("GDK_PIXBUF_MODULE_FILE", Glib::build_filename (userconfigdir, "gdk-pixbuf.loaders").c_str(), 1);
 }
 
 #endif
