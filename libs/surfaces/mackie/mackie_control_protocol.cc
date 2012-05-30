@@ -713,15 +713,6 @@ MackieControlProtocol::set_state (const XMLNode & node, int /*version*/)
 	return retval;
 }
 
-
-/////////////////////////////////////////////////
-// handlers for Route signals
-// TODO should these be part of RouteSignal?
-// They started off as signal/slot handlers for signals
-// from Route, but they're also used in polling for automation
-/////////////////////////////////////////////////
-
-// TODO handle plugin automation polling
 string 
 MackieControlProtocol::format_bbt_timecode (framepos_t now_frame)
 {
