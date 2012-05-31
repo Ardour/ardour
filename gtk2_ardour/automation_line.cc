@@ -558,7 +558,9 @@ AutomationLine::drag_motion (double const x, float fraction, bool ignore_x, bool
 	}
 
 	_drag_had_movement = true;
-	did_push = with_push;
+	if (with_push) {
+		did_push = with_push;
+	}
 
 	return clamped;
 }

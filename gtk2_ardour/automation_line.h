@@ -170,6 +170,7 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 	bool    update_pending            : 1;
 	bool    no_draw                   : 1;
 	bool    _is_boolean               : 1;
+	/** true if we did a push at any point during the current drag */
 	bool    did_push;
 
 	ArdourCanvas::Group&        _parent_group;
