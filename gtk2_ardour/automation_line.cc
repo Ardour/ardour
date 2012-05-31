@@ -478,7 +478,9 @@ AutomationLine::drag_motion (double const x, float fraction, bool ignore_x, bool
 	double dy = fraction - _last_drag_fraction;
 
 	for (list<ControlPoint*>::iterator i = points.begin(); i != points.end(); ++i) {
-		/* Find the points before and after this one on the control_points list */
+		/* Find the points that aren't being moved before and after
+		   this one on the control_points list
+		*/
 
 		ControlPoint* before = 0;
 		ControlPoint* after = 0;
@@ -487,16 +489,29 @@ AutomationLine::drag_motion (double const x, float fraction, bool ignore_x, bool
 		for (vector<ControlPoint*>::iterator j = control_points.begin(); j != control_points.end(); ++j) {
 
 			if (*j == *i) {
+				
 				before = last;
+				
 				vector<ControlPoint*>::iterator k = j;
+
+				/* Next point */
 				++k;
+
+				/* Now move past any points that are being moved this time */
+				while (find (points.begin(), points.end(), *k) != points.end() && k != control_points.end ()) {
+					++k;
+				}
+				
 				if (k != control_points.end()) {
 					after = *k;
 				}
 				break;
 			}
 
-			last = *j;
+			if (find (points.begin(), points.end(), *j) == points.end ()) {
+				/* This point isn't being moved, so it's the `last' point we've seen */
+				last = *j;
+			}
 		}
 
 		/* Clamp dx for this point */
