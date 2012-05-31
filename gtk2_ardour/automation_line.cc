@@ -495,30 +495,9 @@ AutomationLine::drag_motion (double x, float fraction, bool ignore_x, bool with_
 
 	/* clamp x */
 	for (list<ControlPoint*>::iterator i = points.begin(); i != points.end(); ++i) {
-
 		if ((*i)->can_slide() && !ignore_x) {
-
-			/* clamp min x */
-			double const a = (*i)->get_x() + dx;
-			double const b = before_x + 1;
-			if (a < b) {
-				dx += b - a;
-			}
-
-			/* clamp max x */
-			if (after) {
-
-				if (after_x - before_x < 2) {
-					/* after and before are very close, so just leave this alone */
-					dx = 0;
-				} else {
-					double const a = (*i)->get_x() + dx;
-					double const b = after_x - 1;
-					if (a > b) {
-						dx -= a - b;
-					}
-				}
-			}
+			x = max (x, before_x);
+			x = min (x, after_x);
 		}
 	}
 
