@@ -465,7 +465,7 @@ AutomationLine::start_drag_common (double x, float fraction)
  *  @return x position and y fraction that were actually used (once clamped).
  */
 pair<double, float>
-AutomationLine::drag_motion (double x, float fraction, bool ignore_x, bool with_push)
+AutomationLine::drag_motion (double const x, float fraction, bool ignore_x, bool with_push)
 {
 	/* setup the points that are to be moved this time round */
 	list<ControlPoint*> points = _drag_points;
@@ -477,28 +477,36 @@ AutomationLine::drag_motion (double x, float fraction, bool ignore_x, bool with_
 	double dx = ignore_x ? 0 : (x - _drag_x);
 	double dy = fraction - _last_drag_fraction;
 
-	/* find x limits */
-	ControlPoint* before = 0;
-	ControlPoint* after = 0;
-
-	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
-		if ((*i)->get_x() < points.front()->get_x()) {
-			before = *i;
-		}
-		if ((*i)->get_x() > points.back()->get_x() && after == 0) {
-			after = *i;
-		}
-	}
-
-	double const before_x = before ? before->get_x() : 0;
-	double const after_x = after ? after->get_x() : DBL_MAX;
-
-	/* clamp x */
 	for (list<ControlPoint*>::iterator i = points.begin(); i != points.end(); ++i) {
-		if ((*i)->can_slide() && !ignore_x) {
-			x = max (x, before_x);
-			x = min (x, after_x);
+		/* Find the points before and after this one on the control_points list */
+
+		ControlPoint* before = 0;
+		ControlPoint* after = 0;
+
+		ControlPoint* last = 0;
+		for (vector<ControlPoint*>::iterator j = control_points.begin(); j != control_points.end(); ++j) {
+
+			if (*j == *i) {
+				before = last;
+				vector<ControlPoint*>::iterator k = j;
+				++k;
+				if (k != control_points.end()) {
+					after = *k;
+				}
+				break;
+			}
+
+			last = *j;
 		}
+
+		/* Clamp dx for this point */
+		double const before_x = before ? before->get_x() : 0;
+		double const after_x = after ? after->get_x() : DBL_MAX;
+
+		double tx = (*i)->get_x() + dx;
+		tx = max (tx, before_x);
+		tx = min (tx, after_x);
+		dx = tx - (*i)->get_x ();
 	}
 
 	/* clamp y */
@@ -514,7 +522,7 @@ AutomationLine::drag_motion (double x, float fraction, bool ignore_x, bool with_
 
 	pair<double, float> const clamped (_drag_x + dx, _last_drag_fraction + dy);
 	_drag_distance += dx;
-	_drag_x = x;
+	_drag_x += dx;
 	_last_drag_fraction = fraction;
 
 	for (list<ControlPoint*>::iterator i = _drag_points.begin(); i != _drag_points.end(); ++i) {
