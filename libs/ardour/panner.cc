@@ -28,6 +28,7 @@ using namespace std;
 using namespace ARDOUR;
 
 Panner::Panner (boost::shared_ptr<Pannable> p)
+	: _frozen (0)
 {
 	// boost_debug_shared_ptr_mark_interesting (this, "panner");
 	_pannable = p;
