@@ -239,6 +239,10 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 		return rint ((double) frame / (double) frames_per_unit);
 	}
 
+	double frame_to_unit_unrounded (framepos_t frame) const {
+		return frame / frames_per_unit;
+	}
+	
 	double frame_to_unit (double frame) const {
 		return rint (frame / frames_per_unit);
 	}

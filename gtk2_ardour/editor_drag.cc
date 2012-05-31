@@ -2875,7 +2875,7 @@ ControlPointDrag::motion (GdkEvent* event, bool)
 
 	bool const push = Keyboard::modifier_state_contains (event->button.state, Keyboard::PrimaryModifier);
 
-	_point->line().drag_motion (_editor->frame_to_unit (cx_frames), fraction, false, push);
+	_point->line().drag_motion (_editor->frame_to_unit_unrounded (cx_frames), fraction, false, push);
 
 	_editor->verbose_cursor()->set_text (_point->line().get_verbose_cursor_string (fraction));
 }
