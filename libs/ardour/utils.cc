@@ -120,46 +120,6 @@ bump_name_once (const std::string& name, char delimiter)
 
 }
 
-bool
-could_be_a_valid_path (const string& path)
-{
-        vector<string> posix_dirs;
-        vector<string> dos_dirs;
-        string testpath;
-
-        split (path, posix_dirs, '/');
-        split (path, dos_dirs, '\\');
-
-        /* remove the last component of each */
-
-        posix_dirs.erase (--posix_dirs.end());
-        dos_dirs.erase (--dos_dirs.end());
-
-        if (G_DIR_SEPARATOR == '/') {
-                for (vector<string>::iterator x = posix_dirs.begin(); x != posix_dirs.end(); ++x) {
-                        testpath = Glib::build_filename (testpath, *x);
-                        cerr << "Testing " << testpath << endl;
-                        if (!Glib::file_test (testpath, Glib::FILE_TEST_IS_DIR|Glib::FILE_TEST_EXISTS)) {
-                                return false;
-                        }
-                }
-        }
-
-        if (G_DIR_SEPARATOR == '\\') {
-                testpath = "";
-                for (vector<string>::iterator x = dos_dirs.begin(); x != dos_dirs.end(); ++x) {
-                        testpath = Glib::build_filename (testpath, *x);
-                        cerr << "Testing " << testpath << endl;
-                        if (!Glib::file_test (testpath, Glib::FILE_TEST_IS_DIR|Glib::FILE_TEST_EXISTS)) {
-                                return false;
-                        }
-                }
-        }
-
-        return true;
-}
-
-
 XMLNode *
 find_named_node (const XMLNode& node, string name)
 {

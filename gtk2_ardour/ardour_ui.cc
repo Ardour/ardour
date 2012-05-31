@@ -123,8 +123,6 @@ sigc::signal<void>      ARDOUR_UI::RapidScreenUpdate;
 sigc::signal<void>      ARDOUR_UI::SuperRapidScreenUpdate;
 sigc::signal<void, framepos_t, bool, framepos_t> ARDOUR_UI::Clock;
 
-bool could_be_a_valid_path (const std::string& path);
-
 ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 
 	: Gtkmm2ext::UI (PROGRAM_NAME, argcp, argvp)
