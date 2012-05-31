@@ -381,23 +381,25 @@ MotionFeedback::pixwin_scroll_event (GdkEventScroll* ev)
 		return false;
 	}
 
-	if ((ev->state & (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier)) == (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier)) {
-		scale = 0.01;
-	} else if (ev->state & Keyboard::PrimaryModifier) {
-		scale = 0.1;
+	if (ev->state & Keyboard::GainFineScaleModifier) {
+		if (ev->state & Keyboard::GainExtraFineScaleModifier) {
+			scale = 0.01;
+		} else {
+			scale = 0.05;
+		}
 	} else {
-		scale = 1.0;
+		scale = 0.25;
 	}
 
 	switch (ev->direction) {
 	case GDK_SCROLL_UP:
 	case GDK_SCROLL_RIGHT:
-		_controllable->set_value (adjust (scale * step_inc));
+		_controllable->set_value (adjust (scale * page_inc));
 		break;
 
 	case GDK_SCROLL_DOWN:
 	case GDK_SCROLL_LEFT:
-		_controllable->set_value (adjust (-scale * step_inc));
+		_controllable->set_value (adjust (-scale * page_inc));
 		break;
 	}
 

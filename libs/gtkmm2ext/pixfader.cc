@@ -28,9 +28,6 @@ using namespace Gtkmm2ext;
 using namespace Gtk;
 using namespace std;
 
-int PixFader::fine_scale_modifier = Keyboard::PrimaryModifier;
-int PixFader::extra_fine_scale_modifier = Keyboard::SecondaryModifier;
-
 PixFader::PixFader (Glib::RefPtr<Gdk::Pixbuf> belt, Gtk::Adjustment& adj, int orientation, int fader_length)
 
 	: adjustment (adj),
@@ -221,7 +218,7 @@ PixFader::on_button_release_event (GdkEventButton* ev)
 
 				if (ev->state & Keyboard::TertiaryModifier) {
 					adjustment.set_value (default_value);
-				} else if (ev->state & fine_scale_modifier) {
+				} else if (ev->state & Keyboard::GainFineScaleModifier) {
 					adjustment.set_value (adjustment.get_lower());
 				} else if ((_orien == VERT && ev_pos < span - display_span()) || (_orien == HORIZ && ev_pos > span - display_span())) {
 					/* above the current display height, remember X Window coords */
@@ -255,8 +252,8 @@ PixFader::on_scroll_event (GdkEventScroll* ev)
 	double scale;
 	bool ret = false;
 
-	if (ev->state & fine_scale_modifier) {
-		if (ev->state & extra_fine_scale_modifier) {
+	if (ev->state & Keyboard::GainFineScaleModifier) {
+		if (ev->state & Keyboard::GainExtraFineScaleModifier) {
 			scale = 0.01;
 		} else {
 			scale = 0.05;
@@ -320,8 +317,8 @@ PixFader::on_motion_notify_event (GdkEventMotion* ev)
 			return true;
 		}
 		
-		if (ev->state & fine_scale_modifier) {
-			if (ev->state & extra_fine_scale_modifier) {
+		if (ev->state & Keyboard::GainFineScaleModifier) {
+			if (ev->state & Keyboard::GainExtraFineScaleModifier) {
 				scale = 0.05;
 			} else {
 				scale = 0.1;
