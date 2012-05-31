@@ -318,19 +318,39 @@ Editor::set_selected_control_point_from_click (bool press, Selection::Operation 
 		return false;
 	}
 
-	if (!press) {
-		return true;
-	}
-
 	switch (op) {
 	case Selection::Set:
-		selection->set (clicked_control_point);
+		if (press) {
+			selection->set (clicked_control_point);
+		}
 		break;
 	case Selection::Add:
-		selection->add (clicked_control_point);
+		if (press) {
+			selection->add (clicked_control_point);
+		}
 		break;
 	case Selection::Toggle:
-		selection->toggle (clicked_control_point);
+		/* This is a bit of a hack; if we Primary-Click-Drag a control
+		   point (for push drag) we want the point we clicked on to be
+		   selected, otherwise we end up confusingly dragging an
+		   unselected point.  So here we ensure that the point is selected
+		   after the press, and if we subsequently get a release (meaning no
+		   drag occurred) we set things up so that the toggle has happened.
+		*/
+		if (press && !selection->selected (clicked_control_point)) {
+			/* This is the button press, and the control point is not selected; make it so,
+			   in case this press leads to a drag.  Also note that having done this, we don't
+			   need to toggle again on release.
+			*/
+			selection->toggle (clicked_control_point);
+			_control_point_toggled_on_press = true;
+		} else if (!press && !_control_point_toggled_on_press) {
+			/* This is the release, and the point wasn't toggled on the press, so do it now */
+			selection->toggle (clicked_control_point);
+		} else {
+			/* Reset our flag */
+			_control_point_toggled_on_press = false;
+		}
 		break;
 	case Selection::Extend:
 		/* XXX */

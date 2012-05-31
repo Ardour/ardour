@@ -2092,6 +2092,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void toggle_sound_midi_notes ();
 
+	/** Flag for a bit of a hack wrt control point selection; see set_selected_control_point_from_click */
+	bool _control_point_toggled_on_press;
+
 	friend class Drag;
 	friend class RegionDrag;
 	friend class RegionMoveDrag;

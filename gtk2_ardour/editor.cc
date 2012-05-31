@@ -281,6 +281,7 @@ Editor::Editor ()
 
 	, _region_selection_change_updates_region_list (true)
 	, _following_mixer_selection (false)
+	, _control_point_toggled_on_press (false)
 {
 	constructed = false;
 
