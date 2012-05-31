@@ -184,7 +184,10 @@ MotionFeedback::pixwin_button_release_event (GdkEventButton *ev)
                         /* shift click back to the default */
                         _controllable->set_value (default_value);
                         return true;
-                }
+                } else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+			/* ctrl click back to the minimum value */
+			_controllable->set_value (_controllable->lower ());
+		}
 		break;
 		
 	case 3:
