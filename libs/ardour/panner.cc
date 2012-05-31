@@ -118,3 +118,17 @@ Panner::set_state (XMLNode const &, int)
 {
 	return 0;
 }
+
+void
+Panner::freeze ()
+{
+	_frozen++;
+}
+
+void
+Panner::thaw ()
+{
+	if (_frozen > 0.0) {
+		_frozen--;
+	}
+}
