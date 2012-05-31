@@ -202,6 +202,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 	virtual framepos_t unit_to_frame (double unit) const = 0;
 	virtual double frame_to_unit (framepos_t frame) const = 0;
 	virtual double frame_to_unit (double frame) const = 0;
+	virtual double frame_to_unit_unrounded (framepos_t frame) const = 0;
 	virtual framepos_t pixel_to_frame (double pixel) const = 0;
 	virtual gulong frame_to_pixel (framepos_t frame) const = 0;
 	virtual Selection& get_selection () const = 0;
