@@ -619,11 +619,6 @@ AutomationLine::sync_model_with_view_point (ControlPoint& cp, framecnt_t distanc
 	view_to_model_coord_y (view_y);
 
 	alist->modify (cp.model(), view_x, view_y);
-
-	if (did_push) {
-		/* move all points after cp by the same distance */
-		alist->slide (cp.model()++, _time_converter->from (distance));
-	}
 }
 
 bool
