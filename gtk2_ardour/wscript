@@ -132,6 +132,7 @@ gtk2_ardour_sources = [
         'lineset.cc',
         'location_ui.cc',
         'main.cc',
+        'main_clock.cc',
         'marker.cc',
         'midi_automation_line.cc',
         'midi_channel_dialog.cc',

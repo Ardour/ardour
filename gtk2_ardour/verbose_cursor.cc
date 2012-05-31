@@ -26,6 +26,7 @@
 #include "audio_clock.h"
 #include "editor.h"
 #include "editor_drag.h"
+#include "main_clock.h"
 #include "utils.h"
 #include "verbose_cursor.h"
 

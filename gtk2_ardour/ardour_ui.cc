@@ -89,6 +89,7 @@ typedef uint64_t microseconds_t;
 #include "gui_thread.h"
 #include "keyboard.h"
 #include "location_ui.h"
+#include "main_clock.h"
 #include "missing_file_dialog.h"
 #include "missing_plugin_dialog.h"
 #include "mixer_ui.h"
@@ -128,8 +129,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	: Gtkmm2ext::UI (PROGRAM_NAME, argcp, argvp)
 
 	, gui_object_state (new GUIObjectState)
-	, primary_clock (new AudioClock (X_("primary"), false, X_("transport"), true, true, false, true))
-	, secondary_clock (new AudioClock (X_("secondary"), false, X_("secondary"), true, true, false, true))
+	, primary_clock (new MainClock (X_("primary"), false, X_("transport"), true, true, true, false, true))
+	, secondary_clock (new MainClock (X_("secondary"), false, X_("secondary"), true, true, false, false, true))
 
 	  /* big clock */
 

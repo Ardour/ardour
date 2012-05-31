@@ -35,6 +35,7 @@
 #include "gui_thread.h"
 #include "keyeditor.h"
 #include "location_ui.h"
+#include "main_clock.h"
 #include "midi_tracer.h"
 #include "mixer_ui.h"
 #include "public_editor.h"
