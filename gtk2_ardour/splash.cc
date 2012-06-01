@@ -39,7 +39,7 @@ Splash* Splash::the_splash = 0;
 
 Splash::Splash ()
 {
-	assert (the_splash = 0);
+	assert (the_splash == 0);
 	
 	sys::path splash_file;
 
