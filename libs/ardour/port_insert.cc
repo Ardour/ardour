@@ -62,10 +62,7 @@ PortInsert::~PortInsert ()
 void
 PortInsert::start_latency_detection ()
 {
-        if (_mtdm != 0) {
-                delete _mtdm;
-        }
-
+	delete _mtdm;
         _mtdm = new MTDM;
         _latency_flush_frames = false;
         _latency_detect = true;
@@ -118,7 +115,7 @@ PortInsert::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, 
                         Sample* out = outbuf.data();
 
                         _mtdm->process (nframes, in, out);
-
+			
                         outbuf.set_is_silent (false);
                 }
 
