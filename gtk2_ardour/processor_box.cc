@@ -91,6 +91,7 @@ RefPtr<Action> ProcessorBox::rename_action;
 RefPtr<Action> ProcessorBox::edit_action;
 RefPtr<Action> ProcessorBox::edit_generic_action;
 Glib::RefPtr<Gdk::Pixbuf> ProcessorEntry::_slider_pixbuf;
+Glib::RefPtr<Gdk::Pixbuf> ProcessorEntry::_slider_pixbuf_desensitised;
 
 ProcessorEntry::ProcessorEntry (ProcessorBox* parent, boost::shared_ptr<Processor> p, Width w)
 	: _button (ArdourButton::led_default_elements)
@@ -121,7 +122,13 @@ ProcessorEntry::ProcessorEntry (ProcessorBox* parent, boost::shared_ptr<Processo
 		set<Evoral::Parameter> p = _processor->what_can_be_automated ();
 		for (set<Evoral::Parameter>::iterator i = p.begin(); i != p.end(); ++i) {
 			
-			Control* c = new Control (_slider_pixbuf, _processor->automation_control (*i), _processor->describe_parameter (*i));
+			Control* c = new Control (
+				_slider_pixbuf,
+				_slider_pixbuf_desensitised,
+				_processor->automation_control (*i),
+				_processor->describe_parameter (*i)
+				);
+			
 			_controls.push_back (c);
 
 			if (boost::dynamic_pointer_cast<Amp> (_processor) == 0) {
@@ -301,6 +308,8 @@ ProcessorEntry::setup_slider_pix ()
 {
 	_slider_pixbuf = ::get_icon ("fader_belt_h_thin");
 	assert (_slider_pixbuf);
+	_slider_pixbuf_desensitised = ::get_icon ("fader_belt_h_thin_desensitised");
+	assert (_slider_pixbuf_desensitised);
 }
 
 void
@@ -398,10 +407,10 @@ ProcessorEntry::toggle_control_visibility (Control* c)
 	_parent->update_gui_object_state (this);
 }
 
-ProcessorEntry::Control::Control (Glib::RefPtr<Gdk::Pixbuf> s, boost::shared_ptr<AutomationControl> c, string const & n)
+ProcessorEntry::Control::Control (Glib::RefPtr<Gdk::Pixbuf> s, Glib::RefPtr<Gdk::Pixbuf> sd, boost::shared_ptr<AutomationControl> c, string const & n)
 	: _control (c)
 	, _adjustment (gain_to_slider_position_with_max (1.0, Config->get_max_gain()), 0, 1, 0.01, 0.1)
-	, _slider (s, &_adjustment, 0, false)
+	, _slider (s, sd, &_adjustment, 0, false)
 	, _button (ArdourButton::Element (ArdourButton::Text | ArdourButton::Indicator))
 	, _ignore_ui_adjustment (false)
 	, _visible (false)

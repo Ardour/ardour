@@ -296,6 +296,7 @@ protected:
 	GainMeterBase gm;
 
 	static Glib::RefPtr<Gdk::Pixbuf> slider;
+	static Glib::RefPtr<Gdk::Pixbuf> slider_desensitised;
 
 	XMLNode* underlay_xml_node;
 	bool set_underlay_state();

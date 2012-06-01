@@ -86,11 +86,16 @@ using namespace std;
 using std::list;
 
 Glib::RefPtr<Gdk::Pixbuf> RouteTimeAxisView::slider;
+Glib::RefPtr<Gdk::Pixbuf> RouteTimeAxisView::slider_desensitised;
 
 void
 RouteTimeAxisView::setup_slider_pix ()
 {
 	if ((slider = ::get_icon ("fader_belt_h")) == 0) {
+		throw failed_constructor ();
+	}
+
+	if ((slider_desensitised = ::get_icon ("fader_belt_h_desensitised")) == 0) {
 		throw failed_constructor ();
 	}
 }
@@ -112,7 +117,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, Canvas& c
 	, playlist_action_menu (0)
 	, mode_menu (0)
 	, color_mode_menu (0)
-	, gm (sess, slider, true, 115)
+	, gm (sess, slider, slider_desensitised, true, 115)
 {
 }
 
@@ -124,6 +129,7 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	gm.set_controls (_route, _route->shared_peak_meter(), _route->amp());
 	gm.get_level_meter().set_no_show_all();
 	gm.get_level_meter().setup_meters(50);
+	gm.update_gain_sensitive ();
 
 	string str = gui_property ("height");
 	if (!str.empty()) {

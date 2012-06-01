@@ -39,7 +39,7 @@ namespace Gtkmm2ext {
 class SliderController : public Gtkmm2ext::PixFader
 {
   public:
-	SliderController (Glib::RefPtr<Gdk::Pixbuf> image, Gtk::Adjustment* adj, int orientation, int);
+	SliderController (Glib::RefPtr<Gdk::Pixbuf>, Glib::RefPtr<Gdk::Pixbuf>, Gtk::Adjustment* adj, int orientation, int);
 	
         virtual ~SliderController () {}
 
@@ -66,6 +66,7 @@ class VSliderController : public SliderController
 {
   public:
 	VSliderController (Glib::RefPtr<Gdk::Pixbuf> image,
+			   Glib::RefPtr<Gdk::Pixbuf> image_desensitised,
 			   Gtk::Adjustment *adj, int,
 			   bool with_numeric = true);
 };
@@ -74,6 +75,7 @@ class HSliderController : public SliderController
 {
   public:
 	HSliderController (Glib::RefPtr<Gdk::Pixbuf> image,
+			   Glib::RefPtr<Gdk::Pixbuf> image_desensitised,
 			   Gtk::Adjustment *adj, int,
 			   bool with_numeric = true);
 };

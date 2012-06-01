@@ -65,7 +65,7 @@ namespace Gtk {
 class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 {
   public:
-	GainMeterBase (ARDOUR::Session*, const Glib::RefPtr<Gdk::Pixbuf>& pix,
+	GainMeterBase (ARDOUR::Session*, const Glib::RefPtr<Gdk::Pixbuf>&, const Glib::RefPtr<Gdk::Pixbuf> &,
 		       bool horizontal, int);
 	virtual ~GainMeterBase ();
 
@@ -231,6 +231,7 @@ class GainMeter : public GainMeterBase, public Gtk::VBox
 	std::vector<ARDOUR::DataType> _types;
 
 	static Glib::RefPtr<Gdk::Pixbuf> slider;
+	static Glib::RefPtr<Gdk::Pixbuf> slider_desensitised;
 };
 
 #endif /* __ardour_gtk_gain_meter_h__ */
