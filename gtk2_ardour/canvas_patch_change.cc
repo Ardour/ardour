@@ -213,6 +213,9 @@ CanvasPatchChange::on_event (GdkEvent* ev)
 		_region.patch_left (this);
 		break;
 
+	case GDK_BUTTON_RELEASE:
+		return true;
+
 	default:
 		break;
 	}
