@@ -2844,10 +2844,8 @@ ARDOUR_UI::show_splash ()
 void
 ARDOUR_UI::hide_splash ()
 {
-	if (splash) {
-                delete splash;
-                splash = 0;
-	}
+        delete splash;
+        splash = 0;
 }
 
 void
