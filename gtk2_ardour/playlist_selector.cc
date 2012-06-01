@@ -62,7 +62,7 @@ PlaylistSelector::PlaylistSelector ()
 
 	get_vbox()->pack_start (scroller);
 
-	Button* b = add_button (_("close"), RESPONSE_CANCEL);
+	Button* b = add_button (_("Close"), RESPONSE_CANCEL);
 	b->signal_clicked().connect (sigc::mem_fun(*this, &PlaylistSelector::close_button_click));
 
 }
