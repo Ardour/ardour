@@ -2845,7 +2845,8 @@ void
 ARDOUR_UI::hide_splash ()
 {
 	if (splash) {
-		splash->hide();
+                delete splash;
+                splash = 0;
 	}
 }
 
