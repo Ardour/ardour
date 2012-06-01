@@ -125,10 +125,6 @@ MackieControlProtocol::~MackieControlProtocol()
 {
 	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::~MackieControlProtocol\n");
 	
-	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
-		(*s)->zero_all ();
-	}
-	
 	drop_connections ();
 	tear_down_gui ();
 
