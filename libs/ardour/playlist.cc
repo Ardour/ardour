@@ -2180,6 +2180,16 @@ Playlist::n_regions() const
 	return regions.size();
 }
 
+/** @return true if the all_regions list is empty, ie this playlist
+ *  has never had a region added to it.
+ */
+bool
+Playlist::all_regions_empty() const
+{
+	RegionReadLock rl (const_cast<Playlist *> (this));
+	return all_regions.empty();
+}
+
 pair<framepos_t, framepos_t>
 Playlist::get_extent () const
 {

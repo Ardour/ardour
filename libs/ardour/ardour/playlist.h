@@ -118,6 +118,7 @@ public:
 	bool hidden() const { return _hidden; }
 	bool empty() const;
 	uint32_t n_regions() const;
+	bool all_regions_empty() const;
 	std::pair<framepos_t, framepos_t> get_extent () const;
 	layer_t top_layer() const;
 
