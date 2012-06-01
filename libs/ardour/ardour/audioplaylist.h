@@ -59,7 +59,8 @@ private:
 	int set_state (const XMLNode&, int version);
 	void dump () const;
 	bool region_changed (const PBD::PropertyChange&, boost::shared_ptr<Region>);
-	void source_offset_changed (boost::shared_ptr<AudioRegion> region);
+	void source_offset_changed (boost::shared_ptr<AudioRegion>);
+        void load_legacy_crossfades (const XMLNode&, int version);
 };
 
 } /* namespace ARDOUR */

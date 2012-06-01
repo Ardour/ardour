@@ -524,7 +524,7 @@ AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 
 	/* COMPUTE DETAILS OF ANY FADES INVOLVED IN THIS READ */
 
-	/* Amount of fade in that we are dealing with in this read */
+	/* Amount (length) of fade in that we are dealing with in this read */
 	framecnt_t fade_in_limit = 0;
 
 	/* Offset from buf / mixdown_buffer of the start
@@ -532,7 +532,7 @@ AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 	*/
 	frameoffset_t fade_out_offset = 0;
 	
-	/* Amount of fade in that we are dealing with in this read */
+	/* Amount (length) of fade out that we are dealing with in this read */
 	framecnt_t fade_out_limit = 0;
 
 	framecnt_t fade_interval_start = 0;
@@ -542,7 +542,7 @@ AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 	if (_fade_in_active && _session.config.get_use_region_fades()) {
 		
 		framecnt_t fade_in_length = (framecnt_t) _fade_in->back()->when;
-		
+
 		/* see if this read is within the fade in */
 		
 		if (internal_offset < fade_in_length) {
@@ -611,7 +611,6 @@ AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 		apply_gain_to_buffer (mixdown_buffer, to_read, _scale_amplitude);
 	}
 
-
 	/* APPLY FADES TO THE DATA IN mixdown_buffer AND MIX THE RESULTS INTO
 	 * buf. The key things to realize here: (1) the fade being applied is
 	 * (as of April 26th 2012) just the inverse of the fade in curve (2) 
@@ -623,6 +622,7 @@ AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 
 		if (opaque()) {
 			if (_inverse_fade_in) {
+
 				
 				/* explicit inverse fade in curve (e.g. for constant
 				 * power), so we have to fetch it.
@@ -671,7 +671,7 @@ AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 				
 				_inverse_fade_out->curve().get_vector (curve_offset, curve_offset + fade_out_limit, gain_buffer, fade_out_limit);
 				
-				/* Fade the data from lower levels out */
+				/* Fade the data from lower levels in */
 				for (framecnt_t n = 0, m = fade_out_offset; n < fade_out_limit; ++n, ++m) {
 					buf[m] *= gain_buffer[n];
 				}
@@ -682,7 +682,8 @@ AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 				
 			} else {
 				
-				/* no explicit inverse fade out, so just use (1 - fade
+				/* no explicit inverse fade out (which is
+				 * actually a fade in), so just use (1 - fade
 				 * out) for the fade in of lower layers
 				 */
 				
@@ -696,12 +697,13 @@ AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 			_fade_out->curve().get_vector (curve_offset, curve_offset + fade_out_limit, gain_buffer, fade_out_limit);
 		}
 
-		/* Mix our newly-read data out, with the fade */
+		/* Mix our newly-read data with whatever was already there,
+		   with the fade out applied to our data.
+		*/
 		for (framecnt_t n = 0, m = fade_out_offset; n < fade_out_limit; ++n, ++m) {
 			buf[m] += mixdown_buffer[m] * gain_buffer[n];
 		}
 	}
-
 	
 	/* MIX OR COPY THE REGION BODY FROM mixdown_buffer INTO buf */
 

@@ -49,6 +49,8 @@ AudioPlaylist::AudioPlaylist (Session& session, const XMLNode& node, bool hidden
 	in_set_state--;
 
 	relayer ();
+
+	load_legacy_crossfades (node, Stateful::loading_state_version);
 }
 
 AudioPlaylist::AudioPlaylist (Session& session, string name, bool hidden)
@@ -200,7 +202,7 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, fr
 
 	/* This will be a list of the bits of regions that we need to read */
 	list<Segment> to_do;
-	
+
 	/* Now go through the `all' list filling in `to_do' and `done' */
 	for (RegionList::iterator i = all->begin(); i != all->end(); ++i) {
 		boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (*i);
@@ -213,6 +215,7 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, fr
 		region_range.to = min (region_range.to, start + cnt - 1);
 
 		/* ... and then remove the bits that are already done */
+
 		Evoral::RangeList<framepos_t> region_to_do = Evoral::subtract (region_range, done);
 
 		/* Read those bits, adding their bodies (the parts between end-of-fade-in
@@ -239,6 +242,10 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, fr
 
 	/* Now go backwards through the to_do list doing the actual reads */
 	for (list<Segment>::reverse_iterator i = to_do.rbegin(); i != to_do.rend(); ++i) {
+		DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("\tPlaylist %1 read %2 @ %3 for %4, channel %5, buf @ %6 offset %7\n",
+								   name(), i->region->name(), i->range.from,
+								   i->range.to - i->range.from + 1, (int) chan_n,
+								   buf, i->range.from - start));
 		i->region->read_at (buf + i->range.from - start, mixdown_buffer, gain_buffer, i->range.from, i->range.to - i->range.from + 1, chan_n);
 	}
 
@@ -656,11 +663,12 @@ AudioPlaylist::pre_uncombine (vector<boost::shared_ptr<Region> >& originals, boo
 int
 AudioPlaylist::set_state (const XMLNode& node, int version)
 {
-	int const r = Playlist::set_state (node, version);
-	if (r) {
-		return r;
-	}
+	return Playlist::set_state (node, version);
+}
 
+void
+AudioPlaylist::load_legacy_crossfades (const XMLNode& node, int version)
+{
 	/* Read legacy Crossfade nodes and set up region fades accordingly */
 
 	XMLNodeList children = node.children ();
@@ -689,28 +697,77 @@ AudioPlaylist::set_state (const XMLNode& node, int version)
 
 			boost::shared_ptr<AudioRegion> in_a = boost::dynamic_pointer_cast<AudioRegion> (in);
 			assert (in_a);
-			
-			const XMLNodeList c = (*i)->children ();
 
-			for (XMLNodeConstIterator j = c.begin(); j != c.end(); ++j) {
-				if ((*j)->name() == X_("FadeIn")) {
-					in_a->fade_in()->set_state (**j, version);
-				} else if ((*j)->name() == X_("FadeOut")) {
-					in_a->inverse_fade_in()->set_state (**j, version);
+			if ((p = (*i)->property (X_("out"))) == 0) {
+				continue;
+			}
+
+			boost::shared_ptr<Region> out = region_by_id (PBD::ID (p->value ()));
+
+			if (!out) {
+				warning << string_compose (_("Legacy crossfade involved an outgoing region not present in playlist \"%1\" - crossfade discarded"),
+							   name()) 
+					<< endmsg;
+				continue;
+			}
+
+			boost::shared_ptr<AudioRegion> out_a = boost::dynamic_pointer_cast<AudioRegion> (out);
+			assert (out_a);
+
+			/* now decide whether to add a fade in or fade out
+			 * xfade and to which region
+			 */
+
+			if (in->layer() <= out->layer()) {
+
+				/* incoming region is below the outgoing one,
+				 * so apply a fade out to the outgoing one 
+				 */
+
+				const XMLNodeList c = (*i)->children ();
+				
+				for (XMLNodeConstIterator j = c.begin(); j != c.end(); ++j) {
+					if ((*j)->name() == X_("FadeOut")) {
+						out_a->fade_out()->set_state (**j, version);
+					} else if ((*j)->name() == X_("FadeIn")) {
+						out_a->inverse_fade_out()->set_state (**j, version);
+					}
 				}
-			}
+				
+				if ((p = (*i)->property ("follow-overlap")) != 0) {
+					out_a->set_fade_out_is_short (!string_is_affirmative (p->value()));
+				} else {
+					out_a->set_fade_out_is_short (false);
+				}
+				
+				out_a->set_fade_out_is_xfade (true);
+				out_a->set_fade_out_active (true);
 
-			if ((p = (*i)->property ("follow-overlap")) != 0) {
-				in_a->set_fade_in_is_short (!string_is_affirmative (p->value()));
 			} else {
-				in_a->set_fade_in_is_short (false);
-			}
 
-			in_a->set_fade_in_is_xfade (true);
-			in_a->set_fade_in_active (true);
-			cerr << in_a->name() << " from playlist fade in  = xfade false\n";
+				/* apply a fade in to the incoming region,
+				 * since its above the outgoing one
+				 */
+
+				const XMLNodeList c = (*i)->children ();
+				
+				for (XMLNodeConstIterator j = c.begin(); j != c.end(); ++j) {
+					if ((*j)->name() == X_("FadeIn")) {
+						in_a->fade_in()->set_state (**j, version);
+					} else if ((*j)->name() == X_("FadeOut")) {
+						in_a->inverse_fade_in()->set_state (**j, version);
+					}
+				}
+				
+				if ((p = (*i)->property ("follow-overlap")) != 0) {
+					in_a->set_fade_in_is_short (!string_is_affirmative (p->value()));
+				} else {
+					in_a->set_fade_in_is_short (false);
+				}
+				
+				in_a->set_fade_in_is_xfade (true);
+				in_a->set_fade_in_active (true);
+			}
 		}
 	}
-
-	return 0;
 }
