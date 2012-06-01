@@ -107,6 +107,7 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 	, _modifier_state (0)
 	, _ipmidi_base (MIDI::IPMIDIPort::lowest_ipmidi_port_default)
 	, needs_ipmidi_restart (false)
+	, _metering_active (true)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::MackieControlProtocol\n");
 
@@ -123,7 +124,11 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 MackieControlProtocol::~MackieControlProtocol()
 {
 	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::~MackieControlProtocol\n");
-
+	
+	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
+		(*s)->zero_all ();
+	}
+	
 	drop_connections ();
 	tear_down_gui ();
 
@@ -880,12 +885,18 @@ MackieControlProtocol::notify_transport_state_changed()
 	update_global_button (Button::Stop, !session->transport_rolling());
 	update_global_button (Button::Rewind, session->transport_speed() < 0.0);
 	update_global_button (Button::Ffwd, session->transport_speed() > 1.0);
-	
-	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
-		(*s)->notify_transport_state_changed ();
-	}
+
+	notify_metering_state_changed ();
 	
 	_transport_previously_rolling = session->transport_rolling();
+}
+
+void 
+MackieControlProtocol::notify_metering_state_changed()
+{
+	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
+		(*s)->notify_metering_state_changed ();
+	}	
 }
 
 void

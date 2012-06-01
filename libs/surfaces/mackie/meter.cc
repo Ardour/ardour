@@ -22,7 +22,6 @@
 #include "pbd/compose.h"
 #include "ardour/debug.h"
 
-#include "mackie_control_protocol.h"
 #include "meter.h"
 #include "surface.h"
 #include "surface_port.h"
@@ -42,54 +41,26 @@ Meter::factory (Surface& surface, int id, const char* name, Group& group)
 }
 
 void 
-Meter::update_transport_rolling(Surface& surface)
-{
-	bool transport_is_rolling = (surface.mcp().get_transport_speed () != 0.0f);
-	
-	if (_transport_is_rolling == transport_is_rolling) {
-		return;
-	}
-	if (transport_is_rolling) {
-		MidiByteArray enable_msg;
+Meter::notify_metering_state_changed(Surface& surface, bool transport_is_rolling, bool metering_active)
+{	
+	MidiByteArray msg;
 		
-		// sysex header
-		enable_msg << surface.sysex_hdr();
+	// sysex header
+	msg << surface.sysex_hdr();
 		
-		// code for Channel Meter Enable Message
-		enable_msg << 0x20;
+	// code for Channel Meter Enable Message
+	msg << 0x20;
 		
-		// Channel identification
-		enable_msg << id();
+	// Channel identification
+	msg << id();
 		
-		// Enabling level meter on LCD, peak hold display on horizontal meter and signal LED
-		enable_msg << 0x07;
+	// Enable (0x07) / Disable (0x00) level meter on LCD, peak hold display on horizontal meter and signal LED
+	msg << ((transport_is_rolling && metering_active) ? 0x07 : 0x00);
 		
-		// sysex trailer
-		enable_msg << MIDI::eox;
+	// sysex trailer
+	msg << MIDI::eox;
 		
-		surface.write (enable_msg);
-		
-	} else {
-		MidiByteArray disable_msg;
-		
-		// sysex header
-		disable_msg << surface.sysex_hdr();
-		
-		// code for Channel Meter Enable Message
-		disable_msg << 0x20;
-		
-		// Channel identification
-		disable_msg << id();
-		
-		// Disabling level meter on LCD, peak hold display on horizontal meter and signal LED
-		disable_msg << 0x00;
-		
-		// sysex trailer
-		disable_msg << MIDI::eox;
-		
-		surface.write (disable_msg);		
-	}
-	_transport_is_rolling = transport_is_rolling;
+	surface.write (msg);
 }
 
 void
@@ -98,10 +69,6 @@ Meter::send_update (Surface& surface, float dB)
 	float def = 0.0f; /* Meter deflection %age */
 
 	// DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Meter ID %1 dB %2\n", id(), dB));
-	
-	if (!_transport_is_rolling) {
-		return;
-	}
 	
 	if (dB < -70.0f) {
 		def = 0.0f;

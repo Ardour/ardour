@@ -40,11 +40,10 @@ public:
 
 	static Control* factory (Surface&, int id, const char*, Group&);
   
-	void update_transport_rolling(Surface& surface);
+	void notify_metering_state_changed(Surface& surface, bool transport_is_rolling, bool metering_active);
 
   private:
 	bool overload_on;
-	bool _transport_is_rolling;
 };
 
 }

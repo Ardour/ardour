@@ -128,6 +128,7 @@ class MackieControlProtocol
 	bool     flip_mode () const { return _flip_mode; }
 	ViewMode view_mode () const { return _view_mode; }
 	bool zoom_mode () const { return _zoom_mode; }
+	bool     metering_active () const { return _metering_active; }
 
 	void set_view_mode (ViewMode);
 	void set_flip_mode (bool);
@@ -164,6 +165,7 @@ class MackieControlProtocol
 	void notify_record_state_changed();
 	void notify_transport_state_changed();
 	void notify_loop_state_changed();
+	void notify_metering_state_changed();
 	// mainly to pick up punch-in and punch-out
 	void notify_parameter_changed(std::string const &);
 	void notify_solo_active_changed(bool);
@@ -171,7 +173,7 @@ class MackieControlProtocol
 	/// Turn timecode on and beats off, or vice versa, depending
 	/// on state of _timecode_type
 	void update_timecode_beats_led();
-  
+	
 	/// this is called to generate the midi to send in response to a button press.
 	void update_led(Mackie::Surface&, Mackie::Button & button, Mackie::LedState);
   
@@ -286,6 +288,7 @@ class MackieControlProtocol
 	ButtonMap                 button_map;
 	int16_t                  _ipmidi_base;
 	bool                      needs_ipmidi_restart;
+	bool                     _metering_active;
 
 	ARDOUR::RouteNotificationList _last_selected_routes;
 

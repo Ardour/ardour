@@ -1009,12 +1009,14 @@ MackieControlProtocol::snapshot_release (Mackie::Button&)
 Mackie::LedState 
 MackieControlProtocol::read_press (Mackie::Button&) 
 {
-	return none;
+	_metering_active = !_metering_active;
+	notify_metering_state_changed ();
+	return _metering_active;
 }
 Mackie::LedState 
 MackieControlProtocol::read_release (Mackie::Button&) 
 {
-	return none;
+	return _metering_active;
 }
 Mackie::LedState 
 MackieControlProtocol::write_press (Mackie::Button&) 

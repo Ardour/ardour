@@ -573,8 +573,18 @@ Surface::nth_strip (uint32_t n) const
 void
 Surface::zero_all ()
 {
-	// TODO turn off Timecode displays
+	if (_mcp.device_info().has_timecode_display ()) {
+		display_timecode (string (10, '0'), string (10, ' '));
+	}
+	
+	if (_mcp.device_info().has_two_character_display()) {
+		show_two_char_display (string (2, ' '), string (2, '.'));
+	}
 
+	if (_mcp.device_info().has_master_fader ()) {
+		_port->write (_master_fader->zero ());
+	}
+	
 	// zero all strips
 	for (Strips::iterator it = strips.begin(); it != strips.end(); ++it) {
 		(*it)->zero();
@@ -591,7 +601,7 @@ Surface::zero_controls ()
 	}
 
 	// turn off global buttons and leds
-        // global buttons are only ever on mcu_port, so we don't have
+	// global buttons are only ever on mcu_port, so we don't have
 	// to figure out which port.
 
 	for (Controls::iterator it = controls.begin(); it != controls.end(); ++it) {
@@ -599,12 +609,6 @@ Surface::zero_controls ()
 		if (!control.group().is_strip()) {
 			_port->write (control.zero());
 		}
-	}
-
-	if (_number == 0 && _mcp.device_info().has_two_character_display()) {
-		// any hardware-specific stuff
-		// clear 2-char display
-		show_two_char_display (" ");
 	}
 
 	// and the led ring for the master strip
@@ -847,9 +851,9 @@ Surface::route_is_locked_to_strip (boost::shared_ptr<Route> r) const
 }
 
 void 
-Surface::notify_transport_state_changed()
+Surface::notify_metering_state_changed()
 {
 	for (Strips::const_iterator s = strips.begin(); s != strips.end(); ++s) {
-		(*s)->notify_transport_state_changed ();
+		(*s)->notify_metering_state_changed ();
 	}
 }
