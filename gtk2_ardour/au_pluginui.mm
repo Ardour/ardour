@@ -195,11 +195,13 @@ AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> insert)
 
 AUPluginUI::~AUPluginUI ()
 {
+        if (_notify) {
+                [[NSNotificationCenter defaultCenter] removeObserver:_notify];
+        }
+
 	if (cocoa_parent) {
 		NSWindow* win = get_nswindow();
-		[[NSNotificationCenter defaultCenter] removeObserver:_notify];
 		[win removeChildWindow:cocoa_parent];
-
 	} 
 
 #ifdef WITH_CARBON
