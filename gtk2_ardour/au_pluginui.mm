@@ -659,15 +659,6 @@ AUPluginUI::forward_key_event (GdkEventKey* ev)
 		} else if ([nsevent type] == NSFlagsChanged) {
 			[[[au_view window] firstResponder] flagsChanged:nsevent];
 		}
-
-                NSRect frame = [au_view frame];
-                if (ev->keyval == GDK_Down || ev->keyval == GDK_downarrow) {
-                        frame.size.height += 1;
-                } else if (ev->keyval == GDK_Up || ev->keyval == GDK_uparrow) {
-                        frame.size.height -= 1;
-                }
-                [au_view setFrameSize:frame.size];
-
 	}
 }
 
