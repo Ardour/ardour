@@ -87,6 +87,5 @@ Editor::keyboard_selection_begin ()
 void
 Editor::keyboard_paste ()
 {
-	ensure_entered_track_selected (true);
 	paste (1);
 }

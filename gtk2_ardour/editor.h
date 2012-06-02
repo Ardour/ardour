@@ -1944,8 +1944,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	*/
 	RegionView*   entered_regionview;
 
-
-	void ensure_entered_track_selected (bool op_acts_on_objects = false);
 	bool clear_entered_track;
 	bool left_track_canvas (GdkEventCrossing*);
 	bool entered_track_canvas (GdkEventCrossing*);
