@@ -294,6 +294,14 @@ public:
 	void create_note_at (framepos_t, double, double, bool);
 
 	void clear_selection (bool signal = true) { clear_selection_except (0, signal); }
+
+	std::string model_name () const {
+		return _model_name;
+	}
+
+	std::string custom_device_mode () const {
+		return _custom_device_mode;
+	}
 	
 protected:
 	/** Allows derived types to specify their visibility requirements

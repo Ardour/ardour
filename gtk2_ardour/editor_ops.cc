@@ -4720,8 +4720,14 @@ Editor::insert_patch_change (bool from_context)
 
 	const framepos_t p = get_preferred_edit_position (false, from_context);
 
+	/* XXX: bit of a hack; use the MIDNAM from the first selected region;
+	   there may be more than one, but the PatchChangeDialog can only offer
+	   one set of patch menus.
+	*/
+	MidiRegionView* first = dynamic_cast<MidiRegionView*> (rs.front ());
+
 	Evoral::PatchChange<Evoral::MusicalTime> empty (0, 0, 0, 0);
-	PatchChangeDialog d (0, _session, empty, Gtk::Stock::ADD);
+	PatchChangeDialog d (0, _session, empty, first->model_name(), first->custom_device_mode(), Gtk::Stock::ADD);
 
 	if (d.run() == RESPONSE_CANCEL) {
 		return;
