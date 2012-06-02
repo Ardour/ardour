@@ -656,7 +656,8 @@ AudioRegionView::reset_fade_out_shape ()
 void
 AudioRegionView::reset_fade_out_shape_width (framecnt_t width)
 {
-	if (dragging()) {
+	if (dragging() && audio_region()->fade_out_is_xfade()) {
+		/* we hide xfades while dragging regions */
 		return;
 	}
 
