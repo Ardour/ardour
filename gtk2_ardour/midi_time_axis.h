@@ -102,6 +102,9 @@ class MidiTimeAxisView : public RouteTimeAxisView
 
 	uint8_t get_channel_for_add () const;
 
+	std::string midi_patch_model () const;
+	std::string midi_patch_custom_device_node () const;
+
   protected:
 	void start_step_editing ();
 	void stop_step_editing ();
