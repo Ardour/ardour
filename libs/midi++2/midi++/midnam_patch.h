@@ -74,7 +74,7 @@ public:
 			return true;
 		} else if (msb == id.msb && lsb < id.lsb) {
 			return true;
-		} else if (lsb == id.lsb && program_number < id.program_number) {
+		} else if (msb == id.msb && lsb == id.lsb && program_number < id.program_number) {
 			return true;
 		}
 		
