@@ -114,6 +114,7 @@ class Selection : public sigc::trackable, public PBD::ScopedConnectionList
 	bool selected (TimeAxisView*);
 	bool selected (RegionView*);
 	bool selected (Marker*);
+	bool selected (ControlPoint*);
 
 	void set (std::list<Selectable*> const &);
 	void add (std::list<Selectable*> const &);

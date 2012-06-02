@@ -20,7 +20,7 @@
 
 #include "ardour/mtdm.h"
 
-MTDM::MTDM (void)
+MTDM::MTDM ()
 	: _cnt (0)
 	, _inv (0)
 {

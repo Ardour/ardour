@@ -61,7 +61,8 @@ const double AudioClock::x_leading_padding = 6.0;
 
 AudioClock::AudioClock (const string& clock_name, bool transient, const string& widget_name,
 			bool allow_edit, bool follows_playhead, bool duration, bool with_info)
-	: _name (clock_name)
+	: ops_menu (0)
+	, _name (clock_name)
 	, is_transient (transient)
 	, is_duration (duration)
 	, editable (allow_edit)
@@ -71,7 +72,6 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	, layout_x_offset (0)
 	, em_width (0)
 	, _edit_by_click_field (false)
-	, ops_menu (0)
 	, editing_attr (0)
 	, foreground_attr (0)
 	, first_height (0)

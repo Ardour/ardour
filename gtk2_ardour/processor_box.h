@@ -140,6 +140,7 @@ protected:
 	virtual void setup_visuals ();
 
 	static Glib::RefPtr<Gdk::Pixbuf> _slider_pixbuf;
+	static Glib::RefPtr<Gdk::Pixbuf> _slider_pixbuf_desensitised;
 
 private:
 	void led_clicked();
@@ -157,7 +158,7 @@ private:
 
 	class Control {
 	public:
-		Control (Glib::RefPtr<Gdk::Pixbuf>, boost::shared_ptr<ARDOUR::AutomationControl>, std::string const &);
+		Control (Glib::RefPtr<Gdk::Pixbuf>, Glib::RefPtr<Gdk::Pixbuf>, boost::shared_ptr<ARDOUR::AutomationControl>, std::string const &);
 
 		void set_pixel_width (int);
 		void set_visible (bool);

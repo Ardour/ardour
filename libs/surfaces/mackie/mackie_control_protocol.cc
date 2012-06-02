@@ -107,6 +107,7 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 	, _modifier_state (0)
 	, _ipmidi_base (MIDI::IPMIDIPort::lowest_ipmidi_port_default)
 	, needs_ipmidi_restart (false)
+	, _metering_active (true)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::MackieControlProtocol\n");
 
@@ -123,7 +124,7 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 MackieControlProtocol::~MackieControlProtocol()
 {
 	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::~MackieControlProtocol\n");
-
+	
 	drop_connections ();
 	tear_down_gui ();
 
@@ -472,7 +473,7 @@ MackieControlProtocol::update_global_led (int id, LedState ls)
 {
 	boost::shared_ptr<Surface> surface = surfaces.front();
 
-	if (!surface->type() == mcu) {
+	if (surface->type() != mcu) {
 		return;
 	}
 
@@ -713,40 +714,29 @@ MackieControlProtocol::set_state (const XMLNode & node, int /*version*/)
 	return retval;
 }
 
-
-/////////////////////////////////////////////////
-// handlers for Route signals
-// TODO should these be part of RouteSignal?
-// They started off as signal/slot handlers for signals
-// from Route, but they're also used in polling for automation
-/////////////////////////////////////////////////
-
-// TODO handle plugin automation polling
 string 
 MackieControlProtocol::format_bbt_timecode (framepos_t now_frame)
 {
 	Timecode::BBT_Time bbt_time;
+
 	session->bbt_time (now_frame, bbt_time);
 
-	// According to the Logic docs
-	// digits: 888/88/88/888
-	// BBT mode: Bars/Beats/Subdivisions/Ticks
+	// The Mackie protocol spec is built around a BBT time display of
+	//
+	// digits:     888/88/88/888
+	// semantics:  BBB/bb/ss/ttt
+	//
+	// The third field is "subdivisions" which is a concept found in Logic
+	// but not present in Ardour. Instead Ardour displays a 4 digit tick
+	// count, which we need to spread across the 5 digits of ss/ttt.
+
 	ostringstream os;
+
 	os << setw(3) << setfill('0') << bbt_time.bars;
 	os << setw(2) << setfill('0') << bbt_time.beats;
-
-	// figure out subdivisions per beat
-	const ARDOUR::Meter & meter = session->tempo_map().meter_at (now_frame);
-	int subdiv = 2;
-	if (meter.note_divisor() == 8 && (meter.divisions_per_bar() == 12.0 || meter.divisions_per_bar() == 9.0 || meter.divisions_per_bar() == 6.0)) {
-		subdiv = 3;
-	}
-
-	uint32_t subdivisions = bbt_time.ticks / uint32_t (Timecode::BBT_Time::ticks_per_beat / subdiv);
-	uint32_t ticks = bbt_time.ticks % uint32_t (Timecode::BBT_Time::ticks_per_beat / subdiv);
-
-	os << setw(2) << setfill('0') << subdivisions + 1;
-	os << setw(3) << setfill('0') << ticks;
+	os << ' ';
+	os << setw(1) << setfill('0') << bbt_time.ticks / 1000;
+	os << setw(3) << setfill('0') << bbt_time.ticks % 1000;
 
 	return os.str();
 }
@@ -761,10 +751,12 @@ MackieControlProtocol::format_timecode_timecode (framepos_t now_frame)
 	// digits: 888/88/88/888
 	// Timecode mode: Hours/Minutes/Seconds/Frames
 	ostringstream os;
-	os << setw(3) << setfill('0') << timecode.hours;
+	os << ' ';
+	os << setw(2) << setfill('0') << timecode.hours;
 	os << setw(2) << setfill('0') << timecode.minutes;
 	os << setw(2) << setfill('0') << timecode.seconds;
-	os << setw(3) << setfill('0') << timecode.frames;
+	os << ' ';
+	os << setw(2) << setfill('0') << timecode.frames;
 
 	return os.str();
 }
@@ -778,7 +770,7 @@ MackieControlProtocol::update_timecode_display()
 
 	boost::shared_ptr<Surface> surface = surfaces.front();
 
-	if (surface->type() != mcu || !_device_info.has_timecode_display()) {
+	if (surface->type() != mcu || !_device_info.has_timecode_display() || !surface->active ()) {
 		return;
 	}
 
@@ -893,7 +885,17 @@ MackieControlProtocol::notify_transport_state_changed()
 	update_global_button (Button::Rewind, session->transport_speed() < 0.0);
 	update_global_button (Button::Ffwd, session->transport_speed() > 1.0);
 
+	notify_metering_state_changed ();
+	
 	_transport_previously_rolling = session->transport_rolling();
+}
+
+void 
+MackieControlProtocol::notify_metering_state_changed()
+{
+	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
+		(*s)->notify_metering_state_changed ();
+	}	
 }
 
 void
@@ -1132,6 +1134,18 @@ MackieControlProtocol::midi_input_handler (IOCondition ioc, MIDI::Port* port)
 	}
 
 	if (ioc & IO_IN) {
+
+		/* Devices using regular JACK MIDI ports will need to have
+		   the x-thread FIFO drained to avoid burning endless CPU.
+
+		   Devices using ipMIDI have port->selectable() as the same
+		   file descriptor that data arrives on, so doing this
+		   for them will simply throw all incoming data away.
+		*/
+
+		if (!_device_info.uses_ipmidi()) {
+			CrossThreadChannel::drain (port->selectable());
+		}
 
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("data available on %1\n", port->name()));
 		framepos_t now = session->engine().frame_time();

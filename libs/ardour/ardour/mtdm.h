@@ -27,11 +27,11 @@ public:
 	MTDM ();
 
 	int process (size_t len, float *inp, float *out);
-	int resolve (void);
-	void invert (void) { _inv ^= 1; }
-	int    inv (void) { return _inv; }
-	double del (void) { return _del; }
-	double err (void) { return _err; }
+	int resolve ();
+	void invert () { _inv ^= 1; }
+	int    inv () { return _inv; }
+	double del () { return _del; }
+	double err () { return _err; }
 
 private:
 	class Freq {

@@ -120,46 +120,6 @@ bump_name_once (const std::string& name, char delimiter)
 
 }
 
-bool
-could_be_a_valid_path (const string& path)
-{
-        vector<string> posix_dirs;
-        vector<string> dos_dirs;
-        string testpath;
-
-        split (path, posix_dirs, '/');
-        split (path, dos_dirs, '\\');
-
-        /* remove the last component of each */
-
-        posix_dirs.erase (--posix_dirs.end());
-        dos_dirs.erase (--dos_dirs.end());
-
-        if (G_DIR_SEPARATOR == '/') {
-                for (vector<string>::iterator x = posix_dirs.begin(); x != posix_dirs.end(); ++x) {
-                        testpath = Glib::build_filename (testpath, *x);
-                        cerr << "Testing " << testpath << endl;
-                        if (!Glib::file_test (testpath, Glib::FILE_TEST_IS_DIR|Glib::FILE_TEST_EXISTS)) {
-                                return false;
-                        }
-                }
-        }
-
-        if (G_DIR_SEPARATOR == '\\') {
-                testpath = "";
-                for (vector<string>::iterator x = dos_dirs.begin(); x != dos_dirs.end(); ++x) {
-                        testpath = Glib::build_filename (testpath, *x);
-                        cerr << "Testing " << testpath << endl;
-                        if (!Glib::file_test (testpath, Glib::FILE_TEST_IS_DIR|Glib::FILE_TEST_EXISTS)) {
-                                return false;
-                        }
-                }
-        }
-
-        return true;
-}
-
-
 XMLNode *
 find_named_node (const XMLNode& node, string name)
 {
@@ -743,18 +703,6 @@ double gain_to_slider_position_with_max (double g, double max_gain)
 double slider_position_to_gain_with_max (double g, double max_gain)
 {
 	return slider_position_to_gain (g * max_gain/2.0);
-}
-
-/** @return true if files a and b have the same inode */
-bool
-inodes_same (const string& a, const string& b)
-{
-	struct stat bA;
-	int const rA = stat (a.c_str(), &bA);
-	struct stat bB;
-	int const rB = stat (b.c_str(), &bB);
-
-	return (rA == 0 && rB == 0 && bA.st_ino == bB.st_ino);
 }
 
 extern "C" {

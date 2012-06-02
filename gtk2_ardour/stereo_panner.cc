@@ -476,35 +476,67 @@ StereoPanner::on_motion_notify_event (GdkEventMotion* ev)
 	if (dragging_left) {
 		delta = -delta;
 	}
-
+	
 	if (dragging_left || dragging_right) {
 
-		/* maintain position as invariant as we change the width */
+		if (Keyboard::modifier_state_contains (ev->state, Keyboard::SecondaryModifier)) {
 
+			/* change width and position in a way that keeps the
+			 * other side in the same place
+			 */
 
-		/* create a detent close to the center */
+			_panner->freeze ();
+			
+			double pv = position_control->get_value();
 
-		if (!detented && fabs (current_width) < 0.02) {
-			detented = true;
-			/* snap to zero */
-			width_control->set_value (0);
-		}
-
-		if (detented) {
-
-			accumulated_delta += delta;
-
-			/* have we pulled far enough to escape ? */
-
-			if (fabs (accumulated_delta) >= 0.025) {
-				width_control->set_value (current_width + accumulated_delta);
-				detented = false;
-				accumulated_delta = false;
+			if (dragging_left) {
+				position_control->set_value (pv - delta);
+			} else {
+				position_control->set_value (pv + delta);
 			}
 
+			if (delta > 0.0) {
+				/* delta is positive, so we're about to
+				   increase the width. But we need to increase it
+				   by twice the required value so that the
+				   other side remains in place when we set
+				   the position as well.
+				*/
+				width_control->set_value (current_width + (delta * 2.0));
+			} else {
+				width_control->set_value (current_width + delta);
+			}
+
+			_panner->thaw ();
+
 		} else {
-			/* width needs to change by 2 * delta because both L & R move */
-			width_control->set_value (current_width + delta * 2);
+
+			/* maintain position as invariant as we change the width */
+			
+			/* create a detent close to the center */
+			
+			if (!detented && fabs (current_width) < 0.02) {
+				detented = true;
+				/* snap to zero */
+				width_control->set_value (0);
+			}
+			
+			if (detented) {
+				
+				accumulated_delta += delta;
+				
+				/* have we pulled far enough to escape ? */
+				
+				if (fabs (accumulated_delta) >= 0.025) {
+					width_control->set_value (current_width + accumulated_delta);
+					detented = false;
+					accumulated_delta = false;
+				}
+				
+			} else {
+				/* width needs to change by 2 * delta because both L & R move */
+				width_control->set_value (current_width + (delta * 2.0));
+			}
 		}
 
 	} else if (dragging_position) {

@@ -83,6 +83,7 @@ class ButtonJoiner;
 class ConnectionEditor;
 class KeyEditor;
 class LocationUIWindow;
+class MainClock;
 class Mixer_UI;
 class PublicEditor;
 class RCOptionEditor;
@@ -194,8 +195,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	GUIObjectState* gui_object_state;
 
-	AudioClock* primary_clock;
-	AudioClock* secondary_clock;
+	MainClock* primary_clock;
+	MainClock* secondary_clock;
 	void focus_on_clock ();
 
 	TimeInfoBox* time_info_box;

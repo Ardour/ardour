@@ -18,112 +18,94 @@
 */
 
 #include <cassert>
-#include <iostream>
+#include <string>
+#include <utility>
 
 #include <stdint.h>
 #include <string.h>
-
-#include <glib.h>
 
 #include "pbd/error.h"
 
 #include "ardour/uri_map.h"
 
-using namespace std;
-
 namespace ARDOUR {
 
+static uint32_t
+c_uri_map_uri_to_id(LV2_URI_Map_Callback_Data callback_data,
+                    const char*               map,
+                    const char*               uri)
+{
+	URIMap* const me = (URIMap*)callback_data;
+	const uint32_t id = me->uri_to_id(uri);
+
+	/* The event context with the uri-map extension guarantees a value in the
+	   range of uint16_t.  Ardour used to map to a separate range to achieve
+	   this, but unfortunately some plugins are broken and use the incorrect
+	   context.  To compensate, we simply use the same context for everything
+	   and hope that anything in the event context gets mapped before
+	   UINT16_MAX is reached (which will be fine unless something seriously
+	   weird is going on).  If this fails there is nothing we can do, die.
+	*/
+	assert(!map || strcmp(map, "http://lv2plug.in/ns/ext/event")
+	       || id < UINT16_MAX);
+
+	return id;
+}
+
+static LV2_URID
+c_urid_map(LV2_URID_Map_Handle handle,
+           const char*         uri)
+{
+	URIMap* const me = (URIMap*)handle;
+	return me->uri_to_id(uri);
+}
+
+static const char*
+c_urid_unmap(LV2_URID_Unmap_Handle handle,
+           LV2_URID              urid)
+{
+	URIMap* const me = (URIMap*)handle;
+	return me->id_to_uri(urid);
+}
 
 URIMap::URIMap()
 {
-	_uri_map_feature_data.uri_to_id     = &URIMap::uri_map_uri_to_id;
+	_uri_map_feature_data.uri_to_id     = c_uri_map_uri_to_id;
 	_uri_map_feature_data.callback_data = this;
 	_uri_map_feature.URI                = LV2_URI_MAP_URI;
 	_uri_map_feature.data               = &_uri_map_feature_data;
 
-	_urid_map_feature_data.map    = &URIMap::urid_map;
+	_urid_map_feature_data.map    = c_urid_map;
 	_urid_map_feature_data.handle = this;
 	_urid_map_feature.URI         = LV2_URID_MAP_URI;
 	_urid_map_feature.data        = &_urid_map_feature_data;
 
-	_urid_unmap_feature_data.unmap  = &URIMap::urid_unmap;
+	_urid_unmap_feature_data.unmap  = c_urid_unmap;
 	_urid_unmap_feature_data.handle = this;
 	_urid_unmap_feature.URI         = LV2_URID_UNMAP_URI;
 	_urid_unmap_feature.data        = &_urid_unmap_feature_data;
 }
 
-
 uint32_t
-URIMap::uri_to_id(const char* map,
-                  const char* uri)
+URIMap::uri_to_id(const char* uri)
 {
-	const uint32_t id = static_cast<uint32_t>(g_quark_from_string(uri));
-	if (map && !strcmp(map, "http://lv2plug.in/ns/ext/event")) {
-		GlobalToEvent::iterator i = _global_to_event.find(id);
-		if (i != _global_to_event.end()) {
-			return i->second;
-		} else {
-			if (_global_to_event.size() + 1 > UINT16_MAX) {
-				PBD::error << "Event URI " << uri << " ID out of range." << endl;
-				return 0;
-			}
-			const uint16_t ev_id = _global_to_event.size() + 1;
-			assert(_event_to_global.find(ev_id) == _event_to_global.end());
-			_global_to_event.insert(make_pair(id, ev_id));
-			_event_to_global.insert(make_pair(ev_id, id));
-			return ev_id;
-		}
-	} else {
-		return id;
+	const std::string urimm(uri);
+	const Map::const_iterator i = _map.find(urimm);
+	if (i != _map.end()) {
+		return i->second;
 	}
+	const uint32_t id = _map.size() + 1;
+	_map.insert(std::make_pair(urimm, id));
+	_unmap.insert(std::make_pair(id, urimm));
+	return id;
 }
-
 
 const char*
-URIMap::id_to_uri(const char*    map,
-                  const uint32_t id)
+URIMap::id_to_uri(const uint32_t id) const
 {
-	if (map && !strcmp(map, "http://lv2plug.in/ns/ext/event")) {
-		EventToGlobal::iterator i = _event_to_global.find(id);
-		if (i == _event_to_global.end()) {
-			PBD::error << "Failed to unmap event URI " << id << endl;
-			return NULL;
-		}
-		return g_quark_to_string(i->second);
-	} else {
-		return g_quark_to_string(id);
-	}
-
+	const Unmap::const_iterator i = _unmap.find(id);
+	return (i != _unmap.end()) ? i->second.c_str() : NULL;
 }
-
-
-uint32_t
-URIMap::uri_map_uri_to_id(LV2_URI_Map_Callback_Data callback_data,
-                          const char*               map,
-                          const char*               uri)
-{
-	URIMap* const me = (URIMap*)callback_data;
-	return me->uri_to_id(map, uri);
-}
-
-
-LV2_URID
-URIMap::urid_map(LV2_URID_Map_Handle handle,
-                 const char*         uri)
-{
-	URIMap* const me = (URIMap*)handle;
-	return me->uri_to_id(NULL, uri);
-}
-
-
-const char*
-URIMap::urid_unmap(LV2_URID_Unmap_Handle handle,
-                   LV2_URID              urid)
-{
-	URIMap* const me = (URIMap*)handle;
-	return me->id_to_uri(NULL, urid);
-}
-
 
 } // namespace ARDOUR
 

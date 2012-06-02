@@ -124,8 +124,21 @@ Panner2in2out::set_width (double p)
 }
 
 void
+Panner2in2out::thaw ()
+{
+	Panner::thaw ();
+	if (_frozen == 0) {
+		update ();
+	}
+}
+
+void
 Panner2in2out::update ()
 {
+	if (_frozen) {
+		return;
+	}
+
         /* it would be very nice to split this out into a virtual function
            that can be accessed from BaseStereoPanner and used in do_distribute_automated().
            

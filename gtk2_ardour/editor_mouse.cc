@@ -247,61 +247,38 @@ Editor::set_current_movable (boost::shared_ptr<Movable> m)
 void
 Editor::set_canvas_cursor ()
 {
-	if (_internal_editing) {
+	switch (mouse_mode) {
+	case MouseRange:
+		current_canvas_cursor = _cursors->selector;
+		break;
 
-		switch (mouse_mode) {
-		case MouseDraw:
-			current_canvas_cursor = _cursors->midi_pencil;
-			break;
+	case MouseObject:
+		current_canvas_cursor = which_grabber_cursor();
+		break;
 
-		case MouseObject:
-			current_canvas_cursor = which_grabber_cursor();
-			break;
+	case MouseDraw:
+		current_canvas_cursor = _cursors->midi_pencil;
+		break;
 
-		case MouseTimeFX:
-			current_canvas_cursor = _cursors->midi_resize;
-			break;
+	case MouseGain:
+		current_canvas_cursor = _cursors->cross_hair;
+		break;
 
-		default:
-			return;
+	case MouseZoom:
+		if (Keyboard::the_keyboard().key_is_down (GDK_Control_L)) {
+			current_canvas_cursor = _cursors->zoom_out;
+		} else {
+			current_canvas_cursor = _cursors->zoom_in;
 		}
+		break;
 
-	} else {
+	case MouseTimeFX:
+		current_canvas_cursor = _cursors->time_fx; // just use playhead
+		break;
 
-		switch (mouse_mode) {
-		case MouseRange:
-			current_canvas_cursor = _cursors->selector;
-			break;
-
-		case MouseObject:
-			current_canvas_cursor = which_grabber_cursor();
-			break;
-
-		case MouseDraw:
-			/* shouldn't be possible, but just cover it anyway ... */
-			current_canvas_cursor = _cursors->midi_pencil;
-			break;
-
-		case MouseGain:
-			current_canvas_cursor = _cursors->cross_hair;
-			break;
-
-		case MouseZoom:
-			if (Keyboard::the_keyboard().key_is_down (GDK_Control_L)) {
-				current_canvas_cursor = _cursors->zoom_out;
-			} else {
-				current_canvas_cursor = _cursors->zoom_in;
-			}
-			break;
-
-		case MouseTimeFX:
-			current_canvas_cursor = _cursors->time_fx; // just use playhead
-			break;
-
-		case MouseAudition:
-			current_canvas_cursor = _cursors->speaker;
-			break;
-		}
+	case MouseAudition:
+		current_canvas_cursor = _cursors->speaker;
+		break;
 	}
 
 	switch (_join_object_range_state) {
@@ -473,6 +450,7 @@ Editor::mouse_mode_toggled (MouseMode m)
 	}
 
 	set_canvas_cursor ();
+	set_gain_envelope_visibility ();
 
 	MouseModeChanged (); /* EMIT SIGNAL */
 }
@@ -583,7 +561,7 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 	     (mouse_mode != MouseRange) &&
 	     (mouse_mode != MouseDraw)) ||
 	    ((event->type != GDK_BUTTON_PRESS && event->type != GDK_BUTTON_RELEASE) || event->button.button > 3) ||
-	    internal_editing()) {
+	    (internal_editing() && mouse_mode != MouseTimeFX)) {
 
 		return;
 	}
@@ -1157,8 +1135,8 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			/* drag notes if we're in internal edit mode */
 			_drags->set (new NoteResizeDrag (this, item), event, current_canvas_cursor);
 			return true;
-		} else if ((!internal_editing() || dynamic_cast<AudioRegionView*> (clicked_regionview)) && clicked_regionview) {
-			/* do time-FX if we're not in internal edit mode, or we are but we clicked on an audio region */
+		} else if (clicked_regionview) {
+			/* do time-FX  */
 			_drags->set (new TimeFXDrag (this, item, clicked_regionview, selection->regions.by_layer()), event);
 			return true;
 		}

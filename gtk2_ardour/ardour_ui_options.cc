@@ -38,6 +38,7 @@
 #include "actions.h"
 #include "gui_thread.h"
 #include "public_editor.h"
+#include "main_clock.h"
 
 #include "i18n.h"
 

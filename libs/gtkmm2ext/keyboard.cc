@@ -58,9 +58,9 @@ guint Keyboard::snap_mod = GDK_MOD3_MASK;
 #ifdef GTKOSX
 
 uint Keyboard::PrimaryModifier = GDK_MOD2_MASK;   // Command
-guint Keyboard::SecondaryModifier = GDK_CONTROL_MASK; // Alt/Option
+guint Keyboard::SecondaryModifier = GDK_CONTROL_MASK; // Control
 guint Keyboard::TertiaryModifier = GDK_SHIFT_MASK; // Shift
-guint Keyboard::Level4Modifier = GDK_MOD1_MASK; // Control
+guint Keyboard::Level4Modifier = GDK_MOD1_MASK; // Alt/Option
 guint Keyboard::CopyModifier = GDK_CONTROL_MASK;      // Control
 guint Keyboard::RangeSelectModifier = GDK_SHIFT_MASK;
 guint Keyboard::button2_modifiers = Keyboard::SecondaryModifier|Keyboard::Level4Modifier;
@@ -90,6 +90,9 @@ const char* Keyboard::copy_modifier_name() { return _("Control"); }
 const char* Keyboard::rangeselect_modifier_name() { return S_("Key|Shift"); }
 
 #endif
+
+guint Keyboard::GainFineScaleModifier = Keyboard::PrimaryModifier;
+guint Keyboard::GainExtraFineScaleModifier = Keyboard::SecondaryModifier;
 
 Keyboard*    Keyboard::_the_keyboard = 0;
 Gtk::Window* Keyboard::current_window = 0;

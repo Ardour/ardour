@@ -409,9 +409,9 @@ Surface::handle_midi_sysex (MIDI::Parser &, MIDI::byte * raw_bytes, size_t count
 	 */
 
 	if (_stype == mcu) {
-		mackie_sysex_hdr[3] = bytes[4];
+		mackie_sysex_hdr[4] = bytes[4];
 	} else {
-		mackie_sysex_hdr_xt[3] = bytes[4];
+		mackie_sysex_hdr_xt[4] = bytes[4];
 	}
 
 	switch (bytes[5]) {
@@ -515,6 +515,15 @@ Surface::turn_it_on ()
 			(*s)->notify_all ();
 		}
 		update_view_mode_display ();
+		if (_mcp.device_info ().has_master_fader ()) {
+			master_gain_changed ();
+		}
+		
+		if (_mcp.device_info ().has_global_controls ()) {
+			_mcp.update_global_button (Button::Read, _mcp.metering_active ());
+			_mcp.update_global_button (Button::Stop, _mcp.get_session ().transport_stopped ());
+			_mcp.update_global_button (Button::Play, (_mcp.get_session ().transport_speed () == 1.0f));
+		}
 	}
 }
 
@@ -573,8 +582,18 @@ Surface::nth_strip (uint32_t n) const
 void
 Surface::zero_all ()
 {
-	// TODO turn off Timecode displays
+	if (_mcp.device_info().has_timecode_display ()) {
+		display_timecode (string (10, '0'), string (10, ' '));
+	}
+	
+	if (_mcp.device_info().has_two_character_display()) {
+		show_two_char_display (string (2, '0'), string (2, ' '));
+	}
 
+	if (_mcp.device_info().has_master_fader ()) {
+		_port->write (_master_fader->zero ());
+	}
+	
 	// zero all strips
 	for (Strips::iterator it = strips.begin(); it != strips.end(); ++it) {
 		(*it)->zero();
@@ -591,7 +610,7 @@ Surface::zero_controls ()
 	}
 
 	// turn off global buttons and leds
-        // global buttons are only ever on mcu_port, so we don't have
+	// global buttons are only ever on mcu_port, so we don't have
 	// to figure out which port.
 
 	for (Controls::iterator it = controls.begin(); it != controls.end(); ++it) {
@@ -599,12 +618,6 @@ Surface::zero_controls ()
 		if (!control.group().is_strip()) {
 			_port->write (control.zero());
 		}
-	}
-
-	if (_number == 0 && _mcp.device_info().has_two_character_display()) {
-		// any hardware-specific stuff
-		// clear 2-char display
-		show_two_char_display (" ");
 	}
 
 	// and the led ring for the master strip
@@ -692,19 +705,14 @@ Surface::show_two_char_display (unsigned int value, const std::string & /*dots*/
 	show_two_char_display (os.str());
 }
 
-void 
-Surface::display_timecode (const std::string & timecode, const std::string & timecode_last)
+void
+Surface::display_timecode (const std::string & timecode, const std::string & last_timecode)
 {
-	if (_active && _mcp.device_info().has_timecode_display()) {
-		_port->write (timecode_display (timecode, timecode_last));
+	if (!_active || !_mcp.device_info().has_timecode_display()) {
+		return;
 	}
-}
-
-MidiByteArray 
-Surface::timecode_display (const std::string & timecode, const std::string & last_timecode)
-{
 	// if there's no change, send nothing, not even sysex header
-	if  (timecode == last_timecode) return MidiByteArray();
+	if  (timecode == last_timecode) return;
 	
 	// length sanity checking
 	string local_timecode = timecode;
@@ -718,29 +726,20 @@ Surface::timecode_display (const std::string & timecode, const std::string & las
 	while  (local_timecode.length() < 10) { 
 		local_timecode += " ";
 	}
-		
-	// find the suffix of local_timecode that differs from last_timecode
-	std::pair<string::const_iterator,string::iterator> pp = mismatch (last_timecode.begin(), last_timecode.end(), local_timecode.begin());
 	
-	MidiByteArray retval;
-	
-	// sysex header
-	retval << sysex_hdr();
-	
-	// code for timecode display
-	retval << 0x10;
-	
-	// translate characters. These are sent in reverse order of display
-	// hence the reverse iterators
-	string::reverse_iterator rend = reverse_iterator<string::iterator> (pp.second);
-	for  (string::reverse_iterator it = local_timecode.rbegin(); it != rend; ++it) {
-		retval << translate_seven_segment (*it);
+	// translate characters.
+	// Only the characters that actually changed are sent.
+	int position = 0x3f;
+	int i;
+	for (i = local_timecode.length () - 1; i >= 0; i--) {
+		position++;
+		if (local_timecode[i] == last_timecode[i]) {
+			continue;
+		}
+		MidiByteArray retval (2, 0xb0, position);
+		retval << translate_seven_segment (local_timecode[i]);
+		_port->write (retval);
 	}
-	
-	// sysex trailer
-	retval << MIDI::eox;
-	
-	return retval;
 }
 
 void
@@ -858,4 +857,12 @@ Surface::route_is_locked_to_strip (boost::shared_ptr<Route> r) const
 		}
 	}
 	return false;
+}
+
+void 
+Surface::notify_metering_state_changed()
+{
+	for (Strips::const_iterator s = strips.begin(); s != strips.end(); ++s) {
+		(*s)->notify_metering_state_changed ();
+	}
 }

@@ -21,6 +21,7 @@
 #ifndef MIDNAM_PATCH_H_
 #define MIDNAM_PATCH_H_
 
+#include <iostream>
 #include <string>
 #include <list>
 #include <set>
@@ -73,7 +74,7 @@ public:
 			return true;
 		} else if (msb == id.msb && lsb < id.lsb) {
 			return true;
-		} else if (lsb == id.lsb && program_number < id.program_number) {
+		} else if (msb == id.msb && lsb == id.lsb && program_number < id.program_number) {
 			return true;
 		}
 		
@@ -138,8 +139,6 @@ private:
 	PatchPrimaryKey*  _id;
 	std::string       _patch_list_name;
 };
-
-#include <iostream>
 
 class ChannelNameSet
 {

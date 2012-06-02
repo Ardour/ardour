@@ -40,6 +40,29 @@ Meter::factory (Surface& surface, int id, const char* name, Group& group)
 	return m;
 }
 
+void 
+Meter::notify_metering_state_changed(Surface& surface, bool transport_is_rolling, bool metering_active)
+{	
+	MidiByteArray msg;
+		
+	// sysex header
+	msg << surface.sysex_hdr();
+		
+	// code for Channel Meter Enable Message
+	msg << 0x20;
+		
+	// Channel identification
+	msg << id();
+		
+	// Enable (0x07) / Disable (0x00) level meter on LCD, peak hold display on horizontal meter and signal LED
+	msg << ((transport_is_rolling && metering_active) ? 0x07 : 0x00);
+		
+	// sysex trailer
+	msg << MIDI::eox;
+		
+	surface.write (msg);
+}
+
 void
 Meter::send_update (Surface& surface, float dB)
 {
@@ -89,10 +112,7 @@ Meter::send_update (Surface& surface, float dB)
 
 	int segment = lrintf ((def/115.0) * 13.0);
 	
-	if (last_segment_value_sent != segment) {
-		last_segment_value_sent = segment;
-		surface.write (MidiByteArray (2, 0xD0, (id()<<4) | segment));
-	}
+	surface.write (MidiByteArray (2, 0xd0, (id()<<4) | segment));
 }
 
 MidiByteArray

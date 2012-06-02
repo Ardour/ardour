@@ -47,6 +47,7 @@
 #include "utils.h"
 #include "editor_regions.h"
 #include "editor_drag.h"
+#include "main_clock.h"
 
 #include "i18n.h"
 

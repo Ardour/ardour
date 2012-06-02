@@ -61,6 +61,10 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<bool> fade_in_active;
 		PBD::PropertyDescriptor<bool> fade_out_active;
 		PBD::PropertyDescriptor<float> scale_amplitude;
+		PBD::PropertyDescriptor<bool> fade_out_is_xfade;
+		PBD::PropertyDescriptor<bool> fade_out_is_short;
+		PBD::PropertyDescriptor<bool> fade_in_is_xfade;
+		PBD::PropertyDescriptor<bool> fade_in_is_short;
 	}
 }
 
@@ -74,14 +78,14 @@ reverse_curve (boost::shared_ptr<Evoral::ControlList> dst, boost::shared_ptr<con
 	size_t len = src->back()->when;
 	
 	for (Evoral::ControlList::const_iterator it = src->begin(); it!=src->end(); it++) {
-		dst->add ( len - (*it)->when, (*it)->value );
+		dst->add (len - (*it)->when, (*it)->value);
 	}
 }
 
 static void
 generate_inverse_power_curve (boost::shared_ptr<Evoral::ControlList> dst, boost::shared_ptr<const Evoral::ControlList> src)
 {
-	//calc inverse curve using sum of squares
+	// calc inverse curve using sum of squares
 	for (Evoral::ControlList::const_iterator it = src->begin(); it!=src->end(); ++it ) {
 		float value = (*it)->value;
 		value = 1 - powf(value,2);
@@ -89,18 +93,6 @@ generate_inverse_power_curve (boost::shared_ptr<Evoral::ControlList> dst, boost:
 		dst->fast_simple_add ( (*it)->when, value );
 	}
 }
-
-/*
-static void
-generate_inverse_coefficient_curve (boost::shared_ptr<Evoral::ControlList> dst, boost::shared_ptr<const Evoral::ControlList> src)
-{
-	//calc inverse gain coefficient curve
-	for (Evoral::ControlList::const_iterator it = src->begin(); it!=src->end(); ++it ) {
-		float value = 1.0 - (*it)->value;
-		dst->fast_simple_add ( (*it)->when, value );
-	}
-}
-*/
 
 static void
 generate_db_fade (boost::shared_ptr<Evoral::ControlList> dst, double len, int num_steps, float dB_drop)
@@ -164,6 +156,14 @@ AudioRegion::make_property_quarks ()
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for fade-out-active = %1\n", 	Properties::fade_out_active.property_id));
 	Properties::scale_amplitude.property_id = g_quark_from_static_string (X_("scale-amplitude"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for scale-amplitude = %1\n", 	Properties::scale_amplitude.property_id));
+	Properties::fade_out_is_xfade.property_id = g_quark_from_static_string (X_("fade-out-is-xfade"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for fade-out-is-xfade = %1\n", 	Properties::fade_out_is_xfade.property_id));
+	Properties::fade_out_is_short.property_id = g_quark_from_static_string (X_("fade-out-is-short"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for fade-out-is-short = %1\n", 	Properties::fade_out_is_short.property_id));
+	Properties::fade_in_is_xfade.property_id = g_quark_from_static_string (X_("fade-in-is-xfade"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for fade-in-is-xfade = %1\n", 	Properties::fade_in_is_xfade.property_id));
+	Properties::fade_in_is_short.property_id = g_quark_from_static_string (X_("fade-in-is-short"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for fade-in-is-short = %1\n", 	Properties::fade_in_is_short.property_id));
 }
 
 void
@@ -177,6 +177,10 @@ AudioRegion::register_properties ()
 	add_property (_fade_in_active);
 	add_property (_fade_out_active);
 	add_property (_scale_amplitude);
+	add_property (_fade_out_is_xfade);
+	add_property (_fade_out_is_short);
+	add_property (_fade_in_is_xfade);
+	add_property (_fade_in_is_short);
 }
 
 #define AUDIOREGION_STATE_DEFAULT \
@@ -185,7 +189,11 @@ AudioRegion::register_properties ()
 	, _default_fade_out (Properties::default_fade_out, true) \
 	, _fade_in_active (Properties::fade_in_active, true) \
 	, _fade_out_active (Properties::fade_out_active, true) \
-	, _scale_amplitude (Properties::scale_amplitude, 1.0)
+	, _scale_amplitude (Properties::scale_amplitude, 1.0) \
+	, _fade_in_is_xfade (Properties::fade_in_is_xfade, false) \
+	, _fade_out_is_xfade (Properties::fade_out_is_xfade, false) \
+	, _fade_in_is_short (Properties::fade_in_is_short, false) \
+	, _fade_out_is_short (Properties::fade_out_is_short, false) 
 
 #define AUDIOREGION_COPY_STATE(other) \
 	_envelope_active (Properties::envelope_active, other->_envelope_active) \
@@ -193,7 +201,11 @@ AudioRegion::register_properties ()
 	, _default_fade_out (Properties::default_fade_out, other->_default_fade_out) \
 	, _fade_in_active (Properties::fade_in_active, other->_fade_in_active) \
 	, _fade_out_active (Properties::fade_out_active, other->_fade_out_active) \
-	, _scale_amplitude (Properties::scale_amplitude, other->_scale_amplitude)
+	, _scale_amplitude (Properties::scale_amplitude, other->_scale_amplitude) \
+	, _fade_in_is_xfade (Properties::fade_in_is_xfade, other->_fade_in_is_xfade) \
+	, _fade_out_is_xfade (Properties::fade_out_is_xfade, other->_fade_out_is_xfade) \
+	, _fade_in_is_short (Properties::fade_in_is_short, other->_fade_in_is_short) \
+	, _fade_out_is_short (Properties::fade_out_is_short, other->_fade_out_is_short)
 /* a Session will reset these to its chosen defaults by calling AudioRegion::set_default_fade() */
 
 void
@@ -223,8 +235,6 @@ AudioRegion::AudioRegion (Session& s, framepos_t start, framecnt_t len, std::str
 	, _envelope (new AutomationList(Evoral::Parameter(EnvelopeAutomation)))
 	, _fade_in_suspended (0)
 	, _fade_out_suspended (0)
-	, _fade_in_is_xfade (false)
-	, _fade_out_is_xfade (false)
 {
 	init ();
 	assert (_sources.size() == _master_sources.size());
@@ -242,8 +252,6 @@ AudioRegion::AudioRegion (const SourceList& srcs)
 	, _envelope (new AutomationList(Evoral::Parameter(EnvelopeAutomation)))
 	, _fade_in_suspended (0)
 	, _fade_out_suspended (0)
-	, _fade_in_is_xfade (false)
-	, _fade_out_is_xfade (false)
 {
 	init ();
 	assert (_sources.size() == _master_sources.size());
@@ -263,8 +271,6 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other)
 	, _envelope (new AutomationList (*other->_envelope, 0, other->_length))
 	, _fade_in_suspended (0)
 	, _fade_out_suspended (0)
-	, _fade_in_is_xfade (false)
-	, _fade_out_is_xfade (false)
 {
 	/* don't use init here, because we got fade in/out from the other region
 	*/
@@ -291,8 +297,6 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, framecnt_t
 	, _envelope (new AutomationList (*other->_envelope, offset, other->_length))
 	, _fade_in_suspended (0)
 	, _fade_out_suspended (0)
-	, _fade_in_is_xfade (false)
-	, _fade_out_is_xfade (false)
 {
 	/* don't use init here, because we got fade in/out from the other region
 	*/
@@ -316,8 +320,6 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, const Sour
 	, _envelope (new AutomationList (*other->_envelope))
 	, _fade_in_suspended (0)
 	, _fade_out_suspended (0)
-	, _fade_in_is_xfade (false)
-	, _fade_out_is_xfade (false)
 {
 	/* make-a-sort-of-copy-with-different-sources constructor (used by audio filter) */
 
@@ -341,8 +343,6 @@ AudioRegion::AudioRegion (SourceList& srcs)
 	, _envelope (new AutomationList(Evoral::Parameter(EnvelopeAutomation)))
 	, _fade_in_suspended (0)
 	, _fade_out_suspended (0)
-	, _fade_in_is_xfade (false)
-	, _fade_out_is_xfade (false)
 {
 	init ();
 
@@ -524,7 +524,7 @@ AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 
 	/* COMPUTE DETAILS OF ANY FADES INVOLVED IN THIS READ */
 
-	/* Amount of fade in that we are dealing with in this read */
+	/* Amount (length) of fade in that we are dealing with in this read */
 	framecnt_t fade_in_limit = 0;
 
 	/* Offset from buf / mixdown_buffer of the start
@@ -532,7 +532,7 @@ AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 	*/
 	frameoffset_t fade_out_offset = 0;
 	
-	/* Amount of fade in that we are dealing with in this read */
+	/* Amount (length) of fade out that we are dealing with in this read */
 	framecnt_t fade_out_limit = 0;
 
 	framecnt_t fade_interval_start = 0;
@@ -542,7 +542,7 @@ AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 	if (_fade_in_active && _session.config.get_use_region_fades()) {
 		
 		framecnt_t fade_in_length = (framecnt_t) _fade_in->back()->when;
-		
+
 		/* see if this read is within the fade in */
 		
 		if (internal_offset < fade_in_length) {
@@ -611,7 +611,6 @@ AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 		apply_gain_to_buffer (mixdown_buffer, to_read, _scale_amplitude);
 	}
 
-
 	/* APPLY FADES TO THE DATA IN mixdown_buffer AND MIX THE RESULTS INTO
 	 * buf. The key things to realize here: (1) the fade being applied is
 	 * (as of April 26th 2012) just the inverse of the fade in curve (2) 
@@ -623,6 +622,7 @@ AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 
 		if (opaque()) {
 			if (_inverse_fade_in) {
+
 				
 				/* explicit inverse fade in curve (e.g. for constant
 				 * power), so we have to fetch it.
@@ -671,7 +671,7 @@ AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 				
 				_inverse_fade_out->curve().get_vector (curve_offset, curve_offset + fade_out_limit, gain_buffer, fade_out_limit);
 				
-				/* Fade the data from lower levels out */
+				/* Fade the data from lower levels in */
 				for (framecnt_t n = 0, m = fade_out_offset; n < fade_out_limit; ++n, ++m) {
 					buf[m] *= gain_buffer[n];
 				}
@@ -682,7 +682,8 @@ AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 				
 			} else {
 				
-				/* no explicit inverse fade out, so just use (1 - fade
+				/* no explicit inverse fade out (which is
+				 * actually a fade in), so just use (1 - fade
 				 * out) for the fade in of lower layers
 				 */
 				
@@ -696,12 +697,13 @@ AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 			_fade_out->curve().get_vector (curve_offset, curve_offset + fade_out_limit, gain_buffer, fade_out_limit);
 		}
 
-		/* Mix our newly-read data out, with the fade */
+		/* Mix our newly-read data with whatever was already there,
+		   with the fade out applied to our data.
+		*/
 		for (framecnt_t n = 0, m = fade_out_offset; n < fade_out_limit; ++n, ++m) {
 			buf[m] += mixdown_buffer[m] * gain_buffer[n];
 		}
 	}
-
 	
 	/* MIX OR COPY THE REGION BODY FROM mixdown_buffer INTO buf */
 
@@ -806,7 +808,6 @@ AudioRegion::state ()
 	}
 
 	child = node.add_child (X_("FadeIn"));
-	child->add_property ("is-xfade", (_fade_in_is_xfade ? "yes" : "no"));
 
 	if (_default_fade_in) {
 		child->add_property ("default", "yes");
@@ -820,7 +821,6 @@ AudioRegion::state ()
 	}
 
 	child = node.add_child (X_("FadeOut"));
-	child->add_property ("is-xfade", (_fade_out_is_xfade ? "yes" : "no"));
 
 	if (_default_fade_out) {
 		child->add_property ("default", "yes");
@@ -899,18 +899,18 @@ AudioRegion::_set_state (const XMLNode& node, int version, PropertyChange& what_
 				}
 			}
 
-			if ((prop = child->property ("is-xfade")) != 0) {
-				_fade_in_is_xfade = string_is_affirmative (prop->value());
-			} else {
-				_fade_in_is_xfade = false;
-			}
-
 			if ((prop = child->property ("active")) != 0) {
 				if (string_is_affirmative (prop->value())) {
 					set_fade_in_active (true);
 				} else {
 					set_fade_in_active (false);
 				}
+			}
+
+			/* legacy a3 */
+
+			if ((prop = child->property ("is-xfade")) != 0) {
+				_fade_in_is_xfade = string_is_affirmative (prop->value());
 			}
 
 		} else if (child->name() == "FadeOut") {
@@ -925,14 +925,8 @@ AudioRegion::_set_state (const XMLNode& node, int version, PropertyChange& what_
 					_fade_out->set_state (*grandchild, version);
 				}
 			}
-
-			if ((prop = child->property ("is-xfade")) != 0) {
-				_fade_out_is_xfade = string_is_affirmative (prop->value());
-			} else {
-				_fade_out_is_xfade = false;
-			}
-	
-		if ((prop = child->property ("active")) != 0) {
+			
+			if ((prop = child->property ("active")) != 0) {
 				if (string_is_affirmative (prop->value())) {
 					set_fade_out_active (true);
 				} else {
@@ -940,6 +934,12 @@ AudioRegion::_set_state (const XMLNode& node, int version, PropertyChange& what_
 				}
 			}
 
+			/* legacy a3 */
+
+			if ((prop = child->property ("is-xfade")) != 0) {
+				_fade_out_is_xfade = string_is_affirmative (prop->value());
+			}
+			
 		} else if (child->name() == "InvFadeIn") {
 			XMLNode* grandchild = child->child ("AutomationList");
 			if (grandchild) {
@@ -1163,7 +1163,7 @@ AudioRegion::set_fade_in_length (framecnt_t len)
 
 		if (_session.config.get_xfade_model() == FullCrossfade &&
 		    _session.config.get_auto_xfade() && 
-		    _fade_in_is_xfade) {
+		    _fade_in_is_xfade && !_fade_in_is_short) {
 
 			/* trim a single other region below us to the new start
 			   of the fade.
@@ -1202,7 +1202,7 @@ AudioRegion::set_fade_out_length (framecnt_t len)
 		
 		if (_session.config.get_xfade_model() == FullCrossfade &&
 		    _session.config.get_auto_xfade() && 
-		    _fade_out_is_xfade) {
+		    _fade_out_is_xfade && !_fade_out_is_short) {
 
 			/* trim a single other region below us to the new start
 			   of the fade.
@@ -1256,6 +1256,7 @@ AudioRegion::set_default_fade_in ()
 {
 	_fade_in_suspended = 0;
 	_fade_in_is_xfade = false;
+	_fade_in_is_short = true;
 	set_fade_in (FadeLinear, 64);
 }
 
@@ -1264,6 +1265,7 @@ AudioRegion::set_default_fade_out ()
 {
 	_fade_out_suspended = 0;
 	_fade_out_is_xfade = false;
+	_fade_out_is_short = true;
 	set_fade_out (FadeLinear, 64);
 }
 
@@ -1835,13 +1837,46 @@ AudioRegion::body_range () const
 void
 AudioRegion::set_fade_in_is_xfade (bool yn)
 {
+	if (yn == _fade_in_is_xfade) {
+		return;
+	}
+
 	_fade_in_is_xfade = yn;
+	send_change (PropertyChange (Properties::fade_in_is_xfade));
 }
 
 void
 AudioRegion::set_fade_out_is_xfade (bool yn)
 {
+	if (yn == _fade_out_is_xfade) {
+		return;
+	}
+
 	_fade_out_is_xfade = yn;
+	send_change (PropertyChange (Properties::fade_out_is_xfade));
+}
+
+void
+AudioRegion::set_fade_in_is_short (bool yn)
+{
+	if (yn == _fade_in_is_short) {
+		return;
+	}
+
+	_fade_in_is_short = yn;
+	send_change (PropertyChange (Properties::fade_in_is_short));
+
+}
+
+void
+AudioRegion::set_fade_out_is_short (bool yn)
+{
+	if (yn == _fade_out_is_short) {
+		return;
+	}
+
+	_fade_out_is_short = yn;
+	send_change (PropertyChange (Properties::fade_out_is_short));
 }
 
 boost::shared_ptr<Region>

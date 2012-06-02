@@ -68,20 +68,16 @@ using namespace ARDOUR;
 using namespace PBD;
 
 URIMap LV2Plugin::_uri_map;
-uint32_t LV2Plugin::_midi_event_type_ev = _uri_map.uri_to_id(
-	"http://lv2plug.in/ns/ext/event",
-	"http://lv2plug.in/ns/ext/midi#MidiEvent");
 uint32_t LV2Plugin::_midi_event_type = _uri_map.uri_to_id(
-	NULL,
 	"http://lv2plug.in/ns/ext/midi#MidiEvent");
 uint32_t LV2Plugin::_chunk_type = _uri_map.uri_to_id(
-	NULL, LV2_ATOM__Chunk);
+	LV2_ATOM__Chunk);
 uint32_t LV2Plugin::_sequence_type = _uri_map.uri_to_id(
-	NULL, LV2_ATOM__Sequence);
+	LV2_ATOM__Sequence);
 uint32_t LV2Plugin::_event_transfer_type = _uri_map.uri_to_id(
-	NULL, LV2_ATOM__eventTransfer);
+	LV2_ATOM__eventTransfer);
 uint32_t LV2Plugin::_path_type = _uri_map.uri_to_id(
-	NULL, LV2_ATOM__Path);
+	LV2_ATOM__Path);
 
 class LV2World : boost::noncopyable {
 public:

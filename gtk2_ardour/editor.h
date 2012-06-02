@@ -239,6 +239,10 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 		return rint ((double) frame / (double) frames_per_unit);
 	}
 
+	double frame_to_unit_unrounded (framepos_t frame) const {
+		return frame / frames_per_unit;
+	}
+	
 	double frame_to_unit (double frame) const {
 		return rint (frame / frames_per_unit);
 	}
@@ -1951,8 +1955,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	gint left_automation_track ();
 
 	void reset_canvas_action_sensitivity (bool);
-	void set_gain_envelope_visibility (bool);
-	void set_region_gain_visibility (RegionView*, bool);
+	void set_gain_envelope_visibility ();
+	void set_region_gain_visibility (RegionView*);
 	void toggle_gain_envelope_active ();
 	void reset_region_gain_envelopes ();
 
@@ -2091,6 +2095,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	}
 
 	void toggle_sound_midi_notes ();
+
+	/** Flag for a bit of a hack wrt control point selection; see set_selected_control_point_from_click */
+	bool _control_point_toggled_on_press;
 
 	friend class Drag;
 	friend class RegionDrag;

@@ -28,6 +28,7 @@ using namespace std;
 using namespace ARDOUR;
 
 Panner::Panner (boost::shared_ptr<Pannable> p)
+	: _frozen (0)
 {
 	// boost_debug_shared_ptr_mark_interesting (this, "panner");
 	_pannable = p;
@@ -117,4 +118,18 @@ int
 Panner::set_state (XMLNode const &, int)
 {
 	return 0;
+}
+
+void
+Panner::freeze ()
+{
+	_frozen++;
+}
+
+void
+Panner::thaw ()
+{
+	if (_frozen > 0.0) {
+		_frozen--;
+	}
 }

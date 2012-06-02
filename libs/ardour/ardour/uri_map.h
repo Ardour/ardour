@@ -30,8 +30,10 @@
 
 namespace ARDOUR {
 
-
 /** Implementation of the LV2 uri-map and urid extensions.
+ *
+ * This just uses a pair of std::map and is not so great in the space overhead
+ * department, but it's fast enough and not really performance critical anyway.
  */
 class URIMap : public boost::noncopyable {
 public:
@@ -44,26 +46,15 @@ public:
 	LV2_URID_Map*   urid_map()   { return &_urid_map_feature_data; }
 	LV2_URID_Unmap* urid_unmap() { return &_urid_unmap_feature_data; }
 
-	uint32_t uri_to_id(const char* map, const char* uri);
-
-	const char* id_to_uri(const char* map, uint32_t id);
+	uint32_t    uri_to_id(const char* uri);
+	const char* id_to_uri(uint32_t id) const;
 
 private:
-	static uint32_t uri_map_uri_to_id(LV2_URI_Map_Callback_Data callback_data,
-	                                  const char*               map,
-	                                  const char*               uri);
+	typedef std::map<const std::string, uint32_t> Map;
+	typedef std::map<uint32_t, const std::string> Unmap;
 
-	static LV2_URID urid_map(LV2_URID_Map_Handle handle,
-	                         const char*         uri);
-
-	static const char* urid_unmap(LV2_URID_Unmap_Handle handle,
-	                              LV2_URID              urid);
-
-	typedef std::map<uint16_t, uint32_t> EventToGlobal;
-	typedef std::map<uint32_t, uint16_t> GlobalToEvent;
-
-	EventToGlobal _event_to_global;
-	GlobalToEvent _global_to_event;
+	Map   _map;
+	Unmap _unmap;
 
 	LV2_Feature         _uri_map_feature;
 	LV2_URI_Map_Feature _uri_map_feature_data;
@@ -72,7 +63,6 @@ private:
 	LV2_Feature         _urid_unmap_feature;
 	LV2_URID_Unmap      _urid_unmap_feature_data;
 };
-
 
 } // namespace ARDOUR
 

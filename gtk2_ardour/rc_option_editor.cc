@@ -1007,22 +1007,6 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Transport"),
 	     new BoolOption (
-		     "primary-clock-delta-edit-cursor",
-		     _("Primary clock delta to edit cursor"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_primary_clock_delta_edit_cursor),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_primary_clock_delta_edit_cursor)
-		     ));
-
-	add_option (_("Transport"),
-	     new BoolOption (
-		     "secondary-clock-delta-edit-cursor",
-		     _("Secondary clock delta to edit cursor"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_secondary_clock_delta_edit_cursor),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_secondary_clock_delta_edit_cursor)
-		     ));
-
-	add_option (_("Transport"),
-	     new BoolOption (
 		     "disable-disarm-during-roll",
 		     _("Disable per-track record disarm while rolling"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_disable_disarm_during_roll),

@@ -61,6 +61,7 @@
 #include "editing.h"
 #include "utils.h"
 #include "gain_meter.h"
+#include "main_clock.h"
 
 #ifdef FREESOUND
 #include "sfdb_freesound_mootcher.h"

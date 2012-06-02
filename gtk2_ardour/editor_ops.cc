@@ -1369,6 +1369,13 @@ Editor::temporal_zoom (gdouble fpu)
 	}
 
 	nfpu = fpu;
+	
+	// Imposing an arbitrary limit to zoom out as too much zoom out produces 
+	// segfaults for lack of memory. If somebody decides this is not high enough I
+	// believe it can be raisen to higher values but some limit must be in place.
+	if (nfpu > 8e+08) {
+		nfpu = 8e+08;
+	}
 
 	new_page_size = (framepos_t) floor (_canvas_width * nfpu);
 	half_page_size = new_page_size / 2;
@@ -4720,8 +4727,14 @@ Editor::insert_patch_change (bool from_context)
 
 	const framepos_t p = get_preferred_edit_position (false, from_context);
 
+	/* XXX: bit of a hack; use the MIDNAM from the first selected region;
+	   there may be more than one, but the PatchChangeDialog can only offer
+	   one set of patch menus.
+	*/
+	MidiRegionView* first = dynamic_cast<MidiRegionView*> (rs.front ());
+
 	Evoral::PatchChange<Evoral::MusicalTime> empty (0, 0, 0, 0);
-	PatchChangeDialog d (0, _session, empty, Gtk::Stock::ADD);
+	PatchChangeDialog d (0, _session, empty, first->model_name(), first->custom_device_mode(), Gtk::Stock::ADD);
 
 	if (d.run() == RESPONSE_CANCEL) {
 		return;
@@ -4851,16 +4864,16 @@ Editor::reset_region_gain_envelopes ()
 }
 
 void
-Editor::set_region_gain_visibility (RegionView* rv, bool yn)
+Editor::set_region_gain_visibility (RegionView* rv)
 {
 	AudioRegionView* arv = dynamic_cast<AudioRegionView*> (rv);
 	if (arv) {
-		arv->set_envelope_visible (yn);
+		arv->update_envelope_visibility();
 	}
 }
 
 void
-Editor::set_gain_envelope_visibility (bool yn)
+Editor::set_gain_envelope_visibility ()
 {
 	if (!_session) {
 		return;
@@ -4869,7 +4882,7 @@ Editor::set_gain_envelope_visibility (bool yn)
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 		AudioTimeAxisView* v = dynamic_cast<AudioTimeAxisView*>(*i);
 		if (v) {
-			v->audio_view()->foreach_regionview (sigc::bind (sigc::mem_fun (this, &Editor::set_region_gain_visibility), yn));
+			v->audio_view()->foreach_regionview (sigc::mem_fun (this, &Editor::set_region_gain_visibility));
 		}
 	}
 }
@@ -5916,6 +5929,10 @@ Editor::split_region_at_points (boost::shared_ptr<Region> r, AnalysisFeatureList
 		plist.add (ARDOUR::Properties::layer, 0);
 
 		boost::shared_ptr<Region> nr = RegionFactory::create (r->sources(), plist, false);
+		/* because we set annouce to false, manually add the new region to the
+		   RegionFactory map
+		*/
+		RegionFactory::map_add (nr);
 
 		pl->add_region (nr, r->position() + pos);
 
@@ -5940,6 +5957,10 @@ Editor::split_region_at_points (boost::shared_ptr<Region> r, AnalysisFeatureList
 	plist.add (ARDOUR::Properties::layer, 0);
 
 	boost::shared_ptr<Region> nr = RegionFactory::create (r->sources(), plist, false);
+	/* because we set annouce to false, manually add the new region to the
+	   RegionFactory map
+	*/
+	RegionFactory::map_add (nr);
 	pl->add_region (nr, r->position() + pos);
 
 	if (select_new) {

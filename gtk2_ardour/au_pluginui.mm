@@ -57,20 +57,23 @@ static const gchar* _automation_mode_strings[] = {
 	self = [ super init ];
 
 	if (self) {
-		plugin_ui = apluginui;
-		cocoa_parent = cp;
+		plugin_ui = apluginui; 
 		top_level_parent = tlp;
-
-		[[NSNotificationCenter defaultCenter] addObserver:self
-		 selector:@selector(cocoaParentActivationHandler:)
-		 name:NSWindowDidBecomeMainNotification
-		 object:nil];
-
-		[[NSNotificationCenter defaultCenter] addObserver:self
-		 selector:@selector(cocoaParentBecameKeyHandler:)
-		 name:NSWindowDidBecomeKeyNotification
-		 object:nil];
-	}
+                
+                if (cp) {
+                        cocoa_parent = cp;
+                        
+                        [[NSNotificationCenter defaultCenter] addObserver:self
+                         selector:@selector(cocoaParentActivationHandler:)
+                         name:NSWindowDidBecomeMainNotification
+                         object:nil];
+                        
+                        [[NSNotificationCenter defaultCenter] addObserver:self
+                         selector:@selector(cocoaParentBecameKeyHandler:)
+                         name:NSWindowDidBecomeKeyNotification
+                         object:nil];
+                }
+        }
 
 	return self;
 }
@@ -103,7 +106,7 @@ static const gchar* _automation_mode_strings[] = {
 
 - (void)auViewResized:(NSNotification *)notification;
 {
-	(void) notification;
+        (void) notification; // stop complaints about unusued argument
 	plugin_ui->cocoa_view_resized();
 }
 
@@ -192,11 +195,13 @@ AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> insert)
 
 AUPluginUI::~AUPluginUI ()
 {
+        if (_notify) {
+                [[NSNotificationCenter defaultCenter] removeObserver:_notify];
+        }
+
 	if (cocoa_parent) {
 		NSWindow* win = get_nswindow();
-		[[NSNotificationCenter defaultCenter] removeObserver:_notify];
 		[win removeChildWindow:cocoa_parent];
-
 	} 
 
 #ifdef WITH_CARBON
@@ -302,6 +307,7 @@ AUPluginUI::create_cocoa_view ()
 			    string_compose ( "based on %1, there are %2 cocoa UI classes\n", dataSize, numberOfClasses));
 
 		cocoaViewInfo = (AudioUnitCocoaViewInfo *)malloc(dataSize);
+
 		if(AudioUnitGetProperty(*au->get_au(),
 					kAudioUnitProperty_CocoaUI,
 					kAudioUnitScope_Global,
@@ -315,8 +321,8 @@ AUPluginUI::create_cocoa_view ()
 			factoryClassName	= (NSString *)cocoaViewInfo->mCocoaAUViewClass[0];
 			
 			DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("the factory name is %1 bundle is %2\n",
-									factoryClassName, CocoaViewBundlePath));
-
+									[factoryClassName UTF8String], CocoaViewBundlePath));
+                        
 		} else {
 
 			DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("No cocoaUI property cocoaViewInfo = %1\n", cocoaViewInfo));
@@ -327,8 +333,6 @@ AUPluginUI::create_cocoa_view ()
 			}
 		}
 	}
-
-	NSRect crect = { { 0, 0 }, { 1, 1} };
 
 	// [A] Show custom UI if view has it
 
@@ -354,8 +358,8 @@ AUPluginUI::create_cocoa_view ()
 				return -1;
 			}
 			// make a factory
-			id factoryInstance = [[[factoryClass alloc] init] autorelease];
-			if (factoryInstance == nil) {
+			id factory = [[[factoryClass alloc] init] autorelease];
+			if (factory == nil) {
 				error << _("AUPluginUI: Could not create an instance of the AU view factory") << endmsg;
 				return -1;
 			}
@@ -363,7 +367,7 @@ AUPluginUI::create_cocoa_view ()
 			DEBUG_TRACE (DEBUG::AudioUnits, "got a factory instance\n");
 
 			// make a view
-			au_view = [factoryInstance uiViewForAudioUnit:*au->get_au() withSize:crect.size];
+			au_view = [factory uiViewForAudioUnit:*au->get_au() withSize:NSZeroSize];
 
 			DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("view created @ %1\n", au_view));
 			
@@ -389,24 +393,10 @@ AUPluginUI::create_cocoa_view ()
 		[(AUGenericView *)au_view setShowsExpertParameters:YES];
 	}
 
-	// watch for size changes of the view
-
-	 [[NSNotificationCenter defaultCenter] addObserver:_notify
-	       selector:@selector(auViewResized:) name:NSViewBoundsDidChangeNotification
-	       object:au_view];
-
-
-	 [[NSNotificationCenter defaultCenter] addObserver:_notify
-	       selector:@selector(auViewResized:) name:NSViewFrameDidChangeNotification
-	       object:au_view];
-
-	// Get the size of the new AU View's frame 
+	// Get the initial size of the new AU View's frame 
 	
-	NSRect packFrame;
-	packFrame = [au_view frame];
-	prefwidth = packFrame.size.width;
-	prefheight = packFrame.size.height;
-	low_box.set_size_request (prefwidth, prefheight);
+	NSRect rect = [au_view frame];
+	low_box.set_size_request (rect.size.width, rect.size.height);
 	
 	return 0;
 }
@@ -414,10 +404,35 @@ AUPluginUI::create_cocoa_view ()
 void
 AUPluginUI::cocoa_view_resized ()
 {
-	NSRect packFrame = [au_view frame];
-	prefwidth = packFrame.size.width;
-	prefheight = packFrame.size.height;
-	low_box.set_size_request (prefwidth, prefheight);
+        GtkRequisition topsize = top_box.size_request ();
+        NSWindow* window = get_nswindow ();
+        NSSize oldContentSize= [window contentRectForFrameRect:[window frame]].size;
+        NSSize newContentSize= [au_view frame].size;
+        NSRect windowFrame= [window frame];
+        
+        oldContentSize.height -= topsize.height;
+
+        float dy = oldContentSize.height - newContentSize.height;
+        float dx = oldContentSize.width - newContentSize.width;
+
+        windowFrame.origin.y    += dy;
+        windowFrame.origin.x    += dx;
+        windowFrame.size.height -= dy;
+        windowFrame.size.width  -= dx;
+        
+        [[NSNotificationCenter defaultCenter] removeObserver:_notify
+         name:NSViewFrameDidChangeNotification 
+         object:au_view];
+
+        NSUInteger old_auto_resize = [au_view autoresizingMask];
+
+        [au_view setAutoresizingMask:NSViewNotSizable];
+        [window setFrame:windowFrame display:YES];
+        [au_view setAutoresizingMask:old_auto_resize];
+
+        [[NSNotificationCenter defaultCenter] addObserver:_notify
+         selector:@selector(auViewResized:) name:NSViewFrameDidChangeNotification
+         object:au_view];
 }
 
 int
@@ -597,7 +612,15 @@ AUPluginUI::parent_cocoa_window ()
 	NSPoint origin = { 0, a.height };
 
 	[au_view setFrameOrigin:origin];
-	[view addSubview:au_view]; 
+	[view addSubview:au_view positioned:NSWindowBelow relativeTo:nil]; 
+
+	// watch for size changes of the view
+
+	_notify = [ [NotificationObject alloc] initWithPluginUI:this andCocoaParent:nil andTopLevelParent:win ]; 
+
+        [[NSNotificationCenter defaultCenter] addObserver:_notify
+         selector:@selector(auViewResized:) name:NSViewFrameDidChangeNotification
+         object:au_view];
 
 	return 0;
 }

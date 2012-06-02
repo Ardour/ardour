@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MackieProtocolDevice>
+  <Name value="Behringer BCF2000"/>
+  <Strips value="8"/>
+  <MasterFader value="yes"/>
+  <TimecodeDisplay value="no"/>
+  <TwoCharacterDisplay value="yes"/>
+  <Extenders value="0"/>
+  <GlobalControls value="yes"/>
+  <JogWheel value="yes"/>
+  <TouchSenseFaders value="no"/>
+  <NoHandShake value="yes"/>
+  <HasMeters value="no"/>
+</MackieProtocolDevice>

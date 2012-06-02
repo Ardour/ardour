@@ -31,9 +31,6 @@
 #include <sys/stat.h>
 
 #include <glib.h>
-#ifdef HAVE_GLIB_THREADS_RECMUTEX
-#include <glibmm/threads.h>
-#endif
 
 #include "pbd/undo.h"
 #include "pbd/stateful.h"
@@ -121,6 +118,7 @@ public:
 	bool hidden() const { return _hidden; }
 	bool empty() const;
 	uint32_t n_regions() const;
+	bool all_regions_empty() const;
 	std::pair<framepos_t, framepos_t> get_extent () const;
 	layer_t top_layer() const;
 
@@ -228,6 +226,8 @@ public:
 	uint64_t highest_layering_index () const;
 
 	void set_layer (boost::shared_ptr<Region>, double);
+
+	void set_capture_insertion_in_progress (bool yn);
 	
   protected:
 	friend class Session;
@@ -294,6 +294,7 @@ public:
 	bool             in_flush;
 	bool             in_partition;
 	bool            _frozen;
+	bool            _capture_insertion_underway;
 	uint32_t         subcnt;
 	PBD::ID         _orig_track_id;
 	bool             auto_partition;

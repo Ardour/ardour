@@ -3,7 +3,6 @@
   <Strips value="1"/>
   <Extenders value="0"/>
   <MasterFader value="yes"/>
-  <SegmentedDisplay value="no"/>
   <TimecodeDisplay value="no"/>
   <TwoCharacterDisplay value="no"/>
   <GlobalControls value="yes"/>

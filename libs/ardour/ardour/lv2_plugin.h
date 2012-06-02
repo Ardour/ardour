@@ -104,10 +104,7 @@ class LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	boost::shared_ptr<Plugin::ScalePoints>
 	get_scale_points(uint32_t port_index) const;
 
-	/// Return the URID of midi:MidiEvent
-	static uint32_t midi_event_type (bool event_api) {
-		return event_api ? _midi_event_type_ev : _midi_event_type;
-	}
+	static uint32_t midi_event_type() { return _midi_event_type; }
 
 	void set_insert_info(const PluginInsert* insert);
 
@@ -140,7 +137,6 @@ class LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 
 	static URIMap _uri_map;
 
-	static uint32_t _midi_event_type_ev;
 	static uint32_t _midi_event_type;
 	static uint32_t _chunk_type;
 	static uint32_t _sequence_type;

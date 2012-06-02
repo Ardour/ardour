@@ -2952,6 +2952,14 @@ Session::add_source (boost::shared_ptr<Source> source)
 
 		/* yay, new source */
 
+		boost::shared_ptr<FileSource> fs = boost::dynamic_pointer_cast<FileSource> (source);
+		
+		if (fs) {
+			if (!fs->within_session()) {
+				ensure_search_path_includes (Glib::path_get_dirname (fs->path()), fs->type());
+			}
+		}
+		
 		set_dirty();
 
 		boost::shared_ptr<AudioFileSource> afs;
@@ -4470,7 +4478,7 @@ Session::ensure_search_path_includes (const string& path, DataType type)
 		search_path = config.get_midi_search_path ();
 		break;
 	}
-	
+
 	split (search_path, dirs, ':');
 
 	for (vector<string>::iterator i = dirs.begin(); i != dirs.end(); ++i) {
@@ -4480,7 +4488,7 @@ Session::ensure_search_path_includes (const string& path, DataType type)
 
 		   On Windows, I think we could just do if (*i == path) here.
 		*/
-		if (inodes_same (*i, path)) {
+		if (PBD::sys::inodes_same (*i, path)) {
 			return;
 		}
 	}

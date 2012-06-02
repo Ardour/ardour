@@ -86,11 +86,16 @@ using namespace std;
 using std::list;
 
 Glib::RefPtr<Gdk::Pixbuf> RouteTimeAxisView::slider;
+Glib::RefPtr<Gdk::Pixbuf> RouteTimeAxisView::slider_desensitised;
 
 void
 RouteTimeAxisView::setup_slider_pix ()
 {
 	if ((slider = ::get_icon ("fader_belt_h")) == 0) {
+		throw failed_constructor ();
+	}
+
+	if ((slider_desensitised = ::get_icon ("fader_belt_h_desensitised")) == 0) {
 		throw failed_constructor ();
 	}
 }
@@ -112,7 +117,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, Canvas& c
 	, playlist_action_menu (0)
 	, mode_menu (0)
 	, color_mode_menu (0)
-	, gm (sess, slider, true, 115)
+	, gm (sess, slider, slider_desensitised, true, 115)
 {
 }
 
@@ -124,6 +129,7 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	gm.set_controls (_route, _route->shared_peak_meter(), _route->amp());
 	gm.get_level_meter().set_no_show_all();
 	gm.get_level_meter().setup_meters(50);
+	gm.update_gain_sensitive ();
 
 	string str = gui_property ("height");
 	if (!str.empty()) {
@@ -757,13 +763,9 @@ RouteTimeAxisView::set_track_mode (TrackMode mode, bool apply_to_selection)
 }
 
 void
-RouteTimeAxisView::show_timestretch (framepos_t start, framepos_t end)
+RouteTimeAxisView::show_timestretch (framepos_t start, framepos_t end, int layers, int layer)
 {
-	double x1;
-	double x2;
-	double y2;
-
-	TimeAxisView::show_timestretch (start, end);
+	TimeAxisView::show_timestretch (start, end, layers, layer);
 
 	hide_timestretch ();
 
@@ -802,14 +804,13 @@ RouteTimeAxisView::show_timestretch (framepos_t start, framepos_t end)
 	timestretch_rect->show ();
 	timestretch_rect->raise_to_top ();
 
-	x1 = start / _editor.get_current_zoom();
-	x2 = (end - 1) / _editor.get_current_zoom();
-	y2 = current_height() - 2;
+	double const x1 = start / _editor.get_current_zoom();
+	double const x2 = (end - 1) / _editor.get_current_zoom();
 
 	timestretch_rect->property_x1() = x1;
-	timestretch_rect->property_y1() = 1.0;
+	timestretch_rect->property_y1() = current_height() * (layers - layer - 1) / layers;
 	timestretch_rect->property_x2() = x2;
-	timestretch_rect->property_y2() = y2;
+	timestretch_rect->property_y2() = current_height() * (layers - layer) / layers;
 }
 
 void

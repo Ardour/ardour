@@ -19,6 +19,8 @@
 */
 
 #include <gtkmm/spinbutton.h>
+#include <gtkmm/comboboxtext.h>
+#include "midi++/midnam_patch.h"
 #include "evoral/PatchChange.hpp"
 #include "ardour_dialog.h"
 #include "audio_clock.h"
@@ -28,6 +30,12 @@ namespace ARDOUR {
 	class Session;
 }
 
+namespace MIDI {
+	namespace Name {
+		class PatchBank;
+	}
+}
+
 class PatchChangeDialog : public ArdourDialog
 {
 public:
@@ -35,15 +43,36 @@ public:
 		const ARDOUR::BeatsFramesConverter *,
 		ARDOUR::Session *,
 		Evoral::PatchChange<Evoral::MusicalTime> const &,
+		std::string const &,
+		std::string const &,
 		const Gtk::BuiltinStockID &
 		);
 
 	Evoral::PatchChange<Evoral::MusicalTime> patch () const;
 
 private:
+	void fill_bank_combo ();
+	void set_active_bank_combo ();
+	void fill_patch_combo ();
+	void set_active_patch_combo ();
+	void bank_combo_changed ();
+	void patch_combo_changed ();
+	void channel_changed ();
+	void bank_changed ();
+	void program_changed ();
+
+	MIDI::Name::ChannelNameSet::PatchBanks const * get_banks ();
+	
 	const ARDOUR::BeatsFramesConverter* _time_converter;
+	std::string _model_name;
+	std::string _custom_device_mode;
 	AudioClock _time;
 	Gtk::SpinButton _channel;
 	Gtk::SpinButton _program;
 	Gtk::SpinButton _bank;
+	Gtk::ComboBoxText _bank_combo;
+	Gtk::ComboBoxText _patch_combo;
+
+	boost::shared_ptr<MIDI::Name::PatchBank> _current_patch_bank;
+	bool _ignore_signals;
 };

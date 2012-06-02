@@ -29,7 +29,7 @@ MouseCursors::MouseCursors ()
 
 	{
 		RefPtr<Pixbuf> p (::get_icon ("zoom_in_cursor"));
-		zoom_in = new Cursor (Display::get_default(), p, 5, 5);
+		zoom_in = new Cursor (Display::get_default(), p, 10, 5);
 	}
 
 	{
@@ -49,7 +49,7 @@ MouseCursors::MouseCursors ()
 	{
 		RefPtr<Bitmap> source = Bitmap::create ((char const *) speaker_cursor_bits, speaker_cursor_width, speaker_cursor_height);
 		RefPtr<Bitmap> mask = Bitmap::create ((char const *) speaker_cursor_mask_bits, speaker_cursor_width, speaker_cursor_height);
-		speaker = new Cursor (source, mask, ffg, fbg, speaker_cursor_x_hot, speaker_cursor_y_hot);
+		speaker = new Cursor (source, mask, ffg, fbg, speaker_cursor_width >> 1, speaker_cursor_height >> 1);
 	}
 
 	{

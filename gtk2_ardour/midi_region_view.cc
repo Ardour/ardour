@@ -113,6 +113,10 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	_note_group->raise_to_top();
 	PublicEditor::DropDownKeys.connect (sigc::mem_fun (*this, &MidiRegionView::drop_down_keys));
 
+	/* Look up MIDNAM details from our MidiTimeAxisView */
+	MidiTimeAxisView& mtv = dynamic_cast<MidiTimeAxisView&> (tv);
+	midi_patch_settings_changed (mtv.midi_patch_model (), mtv.midi_patch_custom_device_node ());
+
 	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&MidiRegionView::parameter_changed, this, _1), gui_context());
 	connect_to_diskstream ();
 
@@ -149,6 +153,10 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	_note_group->raise_to_top();
 	PublicEditor::DropDownKeys.connect (sigc::mem_fun (*this, &MidiRegionView::drop_down_keys));
 
+	/* Look up MIDNAM details from our MidiTimeAxisView */
+	MidiTimeAxisView& mtv = dynamic_cast<MidiTimeAxisView&> (tv);
+	midi_patch_settings_changed (mtv.midi_patch_model (), mtv.midi_patch_custom_device_node ());
+	
 	connect_to_diskstream ();
 
 	SelectionCleared.connect (_selection_cleared_connection, invalidator (*this), boost::bind (&MidiRegionView::selection_cleared, this, _1), gui_context ());
@@ -327,7 +335,10 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 		return trackview.editor().toggle_internal_editing_from_double_click (ev);
 	}
 
-	if (!trackview.editor().internal_editing()) {
+	if ((!trackview.editor().internal_editing() && trackview.editor().current_mouse_mode() != MouseGain) ||
+		(trackview.editor().current_mouse_mode() == MouseTimeFX) ||
+		(trackview.editor().current_mouse_mode() == MouseZoom)) {
+		// handle non-draw modes elsewhere
 		return false;
 	}
 
@@ -388,6 +399,13 @@ MidiRegionView::enter_notify (GdkEventCrossing* ev)
 		group->grab_focus();
 	}
 
+	// if current operation is non-operational in a midi region, change the cursor to so indicate
+	if (trackview.editor().current_mouse_mode() == MouseGain) {
+		Editor* editor = dynamic_cast<Editor *> (&trackview.editor());
+		pre_enter_cursor = editor->get_canvas_cursor();
+		editor->set_canvas_cursor(editor->cursors()->timebar);
+	}
+
 	return false;
 }
 
@@ -398,6 +416,11 @@ MidiRegionView::leave_notify (GdkEventCrossing*)
 
 	trackview.editor().verbose_cursor()->hide ();
 	remove_ghost_note ();
+
+	if (pre_enter_cursor) {
+		Editor* editor = dynamic_cast<Editor *> (&trackview.editor());
+		editor->set_canvas_cursor(pre_enter_cursor);
+	}
 
 	return false;
 }
@@ -596,8 +619,8 @@ MidiRegionView::motion (GdkEventMotion* ev)
 				editor.verbose_cursor()->hide ();
 				return true;
 			} else if (m == MouseObject) {
-				
 				editor.drags()->set (new MidiRubberbandSelectDrag (dynamic_cast<Editor *> (&editor), this), (GdkEvent *) ev);
+				clear_selection ();
 				_mouse_state = SelectRectDragging;
 				return true;
 			} else if (m == MouseRange) {
@@ -1939,9 +1962,7 @@ MidiRegionView::delete_note (boost::shared_ptr<NoteType> n)
 void
 MidiRegionView::clear_selection_except (ArdourCanvas::CanvasNoteEvent* ev, bool signal)
 {
-	bool changed = false;
-
-	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ) {
+ 	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ) {
 		if ((*i) != ev) {
 			Selection::iterator tmp = i;
 			++tmp;
@@ -1949,7 +1970,6 @@ MidiRegionView::clear_selection_except (ArdourCanvas::CanvasNoteEvent* ev, bool 
 			(*i)->set_selected (false);
 			(*i)->hide_velocity ();
 			_selection.erase (i);
-			changed = true;
 
 			i = tmp;
 		} else {
@@ -1961,7 +1981,7 @@ MidiRegionView::clear_selection_except (ArdourCanvas::CanvasNoteEvent* ev, bool 
 	   selection.
 	*/
 
-	if (changed && signal) {
+	if (signal) {
 		SelectionCleared (this); /* EMIT SIGNAL */
 	}
 }
@@ -3628,7 +3648,7 @@ MidiRegionView::trim_front_ending ()
 void
 MidiRegionView::edit_patch_change (ArdourCanvas::CanvasPatchChange* pc)
 {
-	PatchChangeDialog d (&_source_relative_time_converter, trackview.session(), *pc->patch (), Gtk::Stock::APPLY);
+	PatchChangeDialog d (&_source_relative_time_converter, trackview.session(), *pc->patch (), _model_name, _custom_device_mode, Gtk::Stock::APPLY);
 	if (d.run () != Gtk::RESPONSE_ACCEPT) {
 		return;
 	}

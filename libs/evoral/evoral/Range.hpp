@@ -139,7 +139,6 @@ public:
 		return _list.empty ();
 	}
 
-private:
 	void coalesce () {
 		if (!_dirty) {
 			return;
@@ -164,6 +163,8 @@ private:
 
 		_dirty = false;
 	}
+
+private:
 	
 	List _list;
 	bool _dirty;
@@ -178,37 +179,71 @@ struct RangeMove {
 	T         to;     ///< new start of the range
 };
 
+/** Subtract the ranges in `sub' from that in `range',
+ *  returning the result.
+ */
 template<typename T>
 RangeList<T> subtract (Range<T> range, RangeList<T> sub)
 {
+	/* Start with the input range */
 	RangeList<T> result;
+	result.add (range);
 
 	if (sub.empty ()) {
-		result.add (range);
 		return result;
 	}
-			
-	T x = range.from;
 
 	typename RangeList<T>::List s = sub.get ();
+
+	/* The basic idea here is to keep a list of the result ranges, and subtract
+	   the bits of `sub' from them one by one.
+	*/
 	
 	for (typename RangeList<T>::List::const_iterator i = s.begin(); i != s.end(); ++i) {
 
-		if (coverage (range.from, range.to, i->from, i->to) == OverlapNone) {
-			continue;
+		/* Here's where we'll put the new current result after subtracting *i from it */
+		RangeList<T> new_result;
+
+		typename RangeList<T>::List r = result.get ();
+
+		/* Work on all parts of the current result using this range *i */
+		for (typename RangeList<T>::List::const_iterator j = r.begin(); j != r.end(); ++j) {
+
+			switch (coverage (j->from, j->to, i->from, i->to)) {
+			case OverlapNone:
+				/* The thing we're subtracting does not overlap this bit of the result,
+				   so pass it through.
+				*/
+				new_result.add (*j);
+				break;
+			case OverlapInternal:
+				/* Internal overlap of the thing we're subtracting from this bit of the result,
+				   so we might end up with two bits left over.
+				*/
+				if (j->from < (i->from - 1)) {
+					new_result.add (Range<T> (j->from, i->from - 1));
+				}
+				if (j->to != i->to) {
+					new_result.add (Range<T> (i->to, j->to));
+				}
+				break;
+			case OverlapStart:
+				/* The bit we're subtracting overlaps the start of the bit of the result */
+				new_result.add (Range<T> (i->to, j->to - 1));
+				break;
+			case OverlapEnd:
+				/* The bit we're subtracting overlaps the end of the bit of the result */
+				new_result.add (Range<T> (j->from, i->from - 1));
+				break;
+			case OverlapExternal:
+				/* total overlap of the bit we're subtracting with the result bit, so the
+				   result bit is completely removed; do nothing */
+				break;
+			}
 		}
 
-		Range<T> clamped (std::max (range.from, i->from), std::min (range.to, i->to));
-		
-		if (clamped.from != x) {
-			result.add (Range<T> (x, clamped.from - 1));
-		}
-		
-		x = clamped.to;
-	}
-
-	if (s.back().to < range.to) {
-		result.add (Range<T> (x, range.to));
+		new_result.coalesce ();
+		result = new_result;
 	}
 
 	return result;

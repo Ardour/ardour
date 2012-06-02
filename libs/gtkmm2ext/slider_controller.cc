@@ -28,9 +28,14 @@
 using namespace Gtkmm2ext;
 using namespace PBD;
 
-SliderController::SliderController (Glib::RefPtr<Gdk::Pixbuf> image, Gtk::Adjustment *adj, int orientation, int fader_length)
-
-	: PixFader (image, *adj, orientation, fader_length),
+SliderController::SliderController (
+	Glib::RefPtr<Gdk::Pixbuf> image,
+	Glib::RefPtr<Gdk::Pixbuf> image_desensitised,
+	Gtk::Adjustment *adj,
+	int orientation,
+	int fader_length
+	)
+	: PixFader (image, image_desensitised, *adj, orientation, fader_length),
 	  spin (*adj, 0, 2)
 {			  
 	spin.set_name ("SliderControllerValue");
@@ -55,11 +60,11 @@ SliderController::on_button_press_event (GdkEventButton *ev)
 	return PixFader::on_button_press_event (ev);
 }
 
-VSliderController::VSliderController (Glib::RefPtr<Gdk::Pixbuf> image,
+VSliderController::VSliderController (Glib::RefPtr<Gdk::Pixbuf> image, Glib::RefPtr<Gdk::Pixbuf> image_desensitised,
 				      Gtk::Adjustment *adj, int fader_length,
 				      bool with_numeric)
 
-	: SliderController (image, adj, VERT, fader_length)
+	: SliderController (image, image_desensitised, adj, VERT, fader_length)
 {
 	if (with_numeric) {
 		spin_frame.add (spin);
@@ -70,11 +75,11 @@ VSliderController::VSliderController (Glib::RefPtr<Gdk::Pixbuf> image,
 	}
 }
 
-HSliderController::HSliderController (Glib::RefPtr<Gdk::Pixbuf> image,
+HSliderController::HSliderController (Glib::RefPtr<Gdk::Pixbuf> image, Glib::RefPtr<Gdk::Pixbuf> image_desensitised,
 				      Gtk::Adjustment *adj, int fader_length,
 				      bool with_numeric)
 	
-	: SliderController (image, adj, HORIZ, fader_length)
+	: SliderController (image, image_desensitised, adj, HORIZ, fader_length)
 {
 	if (with_numeric) {
 		spin_frame.add (spin);

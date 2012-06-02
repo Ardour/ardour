@@ -57,6 +57,12 @@ namespace Gnome {
 class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 {
   public:
+	enum VisibleAspects {
+		Line = 0x1,
+		ControlPoints = 0x2,
+		SelectedControlPoints = 0x4
+	};
+	
 	AutomationLine (const std::string& name, TimeAxisView&, ArdourCanvas::Group&,
 			boost::shared_ptr<ARDOUR::AutomationList>,
 			Evoral::TimeConverter<double, ARDOUR::framepos_t>* converter = 0);
@@ -85,17 +91,20 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 	uint32_t npoints() const { return control_points.size(); }
 
 	std::string  name()    const { return _name; }
-	bool    visible() const { return _visible; }
+	bool    visible() const { return _visible != VisibleAspects(0); }
 	guint32 height()  const { return _height; }
 
 	void     set_line_color (uint32_t);
 	uint32_t get_line_color() const { return _line_color; }
 
-	void    show ();
-	void    hide ();
-	void    set_height (guint32);
-	void    set_uses_gain_mapping (bool yn);
-	bool    get_uses_gain_mapping () const { return _uses_gain_mapping; }
+	void set_visibility (VisibleAspects);
+	void add_visibility (VisibleAspects);
+	void remove_visibility (VisibleAspects);
+
+	void hide ();
+	void set_height (guint32);
+	void set_uses_gain_mapping (bool yn);
+	bool get_uses_gain_mapping () const { return _uses_gain_mapping; }
 
 	TimeAxisView& trackview;
 
@@ -112,9 +121,6 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 
 	void set_list(boost::shared_ptr<ARDOUR::AutomationList> list);
 	boost::shared_ptr<ARDOUR::AutomationList> the_list() const { return alist; }
-
-	void show_all_control_points ();
-	void hide_all_but_selected_control_points ();
 
 	void track_entered();
 	void track_exited();
@@ -157,13 +163,14 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 	/** true if _time_converter belongs to us (ie we should delete it on destruction) */
 	bool _our_time_converter;
 
-	bool    _visible                  : 1;
+	VisibleAspects _visible;
+
 	bool    _uses_gain_mapping        : 1;
 	bool    terminal_points_can_slide : 1;
 	bool    update_pending            : 1;
 	bool    no_draw                   : 1;
 	bool    _is_boolean               : 1;
-	bool    points_visible            : 1;
+	/** true if we did a push at any point during the current drag */
 	bool    did_push;
 
 	ArdourCanvas::Group&        _parent_group;
@@ -195,6 +202,7 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 	 */
 	ARDOUR::framecnt_t _offset;
 
+	void show ();
 	void reset_line_coords (ControlPoint&);
 	void add_visible_control_point (uint32_t, uint32_t, double, double, ARDOUR::AutomationList::iterator, uint32_t);
 	double control_point_box_size ();

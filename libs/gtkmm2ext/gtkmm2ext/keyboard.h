@@ -56,6 +56,8 @@ class Keyboard : public sigc::trackable, PBD::Stateful
 	static uint32_t Level4Modifier;
 	static uint32_t CopyModifier;
 	static uint32_t RangeSelectModifier;
+	static uint32_t GainFineScaleModifier;
+	static uint32_t GainExtraFineScaleModifier;
 
 	static const char* primary_modifier_name ();
 	static const char* secondary_modifier_name ();

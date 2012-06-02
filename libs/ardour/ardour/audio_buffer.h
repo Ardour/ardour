@@ -173,6 +173,7 @@ public:
 
 	void prepare () { _written = false; _silent = false; }
 	bool written() const { return _written; }
+	void set_written(bool w) { _written = w; }
 
   private:
 	bool    _owns_data;

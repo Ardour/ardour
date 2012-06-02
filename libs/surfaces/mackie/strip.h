@@ -83,6 +83,8 @@ public:
 	bool locked() const { return _controls_locked; }
 
 	void gui_selection_changed (const ARDOUR::StrongRouteNotificationList&);
+  
+	void notify_metering_state_changed();
 
 private:
 	Button*  _solo;
@@ -97,6 +99,8 @@ private:
 	int      _index;
 	Surface* _surface;
 	bool     _controls_locked;
+	bool     _transport_is_rolling;
+	bool     _metering_active;
 	uint64_t _reset_display_at;
 	boost::shared_ptr<ARDOUR::Route> _route;
 	PBD::ScopedConnectionList route_connections;

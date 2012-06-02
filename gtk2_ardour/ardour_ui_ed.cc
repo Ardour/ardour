@@ -55,6 +55,7 @@
 #include "window_proxy.h"
 #include "global_port_matrix.h"
 #include "location_ui.h"
+#include "main_clock.h"
 
 #include <gtkmm2ext/application.h>
 

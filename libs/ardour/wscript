@@ -259,11 +259,19 @@ def configure(conf):
     autowaf.check_pkg(conf, 'sigc++-2.0', uselib_store='SIGCPP',
                       atleast_version='2.0')
     if Options.options.lv2:
+        autowaf.check_pkg(conf, 'lv2', uselib_store='LV2',
+                          atleast_version='1.0.0', mandatory=True)
+        autowaf.check_pkg(conf, 'serd-0', uselib_store='SERD',
+                          atleast_version='0.14.0', mandatory=True)
+        autowaf.check_pkg(conf, 'sord-0', uselib_store='SORD',
+                          atleast_version='0.8.0', mandatory=True)
+        autowaf.check_pkg(conf, 'sratom-0', uselib_store='SRATOM',
+                          atleast_version='0.2.0', mandatory=True)
         autowaf.check_pkg(conf, 'lilv-0', uselib_store='LILV',
-                          atleast_version='0.14.0', mandatory=False)
-        if conf.is_defined('HAVE_LILV'):
-            autowaf.check_pkg(conf, 'suil-0', uselib_store='SUIL',
-                              atleast_version='0.6.0', mandatory=False)
+                          atleast_version='0.14.0', mandatory=True)
+        autowaf.check_pkg(conf, 'suil-0', uselib_store='SUIL',
+                          atleast_version='0.6.0', mandatory=False)
+        conf.define ('LV2_SUPPORT', 1)
 
 #    autowaf.check_pkg(conf, 'soundtouch-1.0', uselib_store='SOUNDTOUCH',
 #                      mandatory=False)
@@ -334,9 +342,6 @@ int main(int argc, char **argv) {
         conf.define ('HAVE_FLAC', 1)
     if ogg_supported():
         conf.define ('HAVE_OGG', 1)
-
-    if Options.options.lv2 and conf.is_defined('HAVE_LILV'):
-        conf.define ('LV2_SUPPORT', 1)
 
     conf.write_config_header('libardour-config.h', remove=False)
 
@@ -437,6 +442,7 @@ def build(bld):
                 test/playlist_layering_test.cc
                 test/playlist_read_test.cc
                 test/control_surfaces_test.cc
+                test/mtdm_test.cc
                 test/testrunner.cc
         '''.split()
 

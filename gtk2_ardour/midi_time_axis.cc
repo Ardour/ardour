@@ -199,14 +199,14 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		_model_selector.append_text(m->c_str());
 	}
 
+
 	_model_selector.signal_changed().connect(sigc::mem_fun(*this, &MidiTimeAxisView::model_changed));
 
 	_custom_device_mode_selector.signal_changed().connect(
 			sigc::mem_fun(*this, &MidiTimeAxisView::custom_device_mode_changed));
 
-	// TODO: persist the choice
-	// this initializes the comboboxes and sends out the signal
-	_model_selector.set_active(0);
+	_model_selector.set_active_text (gui_property (X_("midnam-model-name")));
+	_custom_device_mode_selector.set_active_text (gui_property (X_("midnam-custom-device-mode")));
 
 	midi_controls_hbox->pack_start(_channel_selector, true, false);
 	if (!patch_manager.all_models().empty()) {
@@ -317,12 +317,15 @@ MidiTimeAxisView::model_changed()
 	}
 
 	_custom_device_mode_selector.set_active(0);
+
+	set_gui_property (X_("midnam-model-name"), midi_patch_model ());
 }
 
-void MidiTimeAxisView::custom_device_mode_changed()
+void
+MidiTimeAxisView::custom_device_mode_changed()
 {
-	_midi_patch_settings_changed.emit(_model_selector.get_active_text(),
-			_custom_device_mode_selector.get_active_text());
+	_midi_patch_settings_changed.emit (midi_patch_model (), midi_patch_custom_device_node ());
+	set_gui_property (X_("midnam-custom-device-mode"), midi_patch_custom_device_node ());
 }
 
 MidiStreamView*
@@ -1202,4 +1205,16 @@ MidiTimeAxisView::note_range_changed ()
 {
 	set_gui_property ("note-range-min", (int) midi_view()->lowest_note ());
 	set_gui_property ("note-range-max", (int) midi_view()->highest_note ());
+}
+
+string
+MidiTimeAxisView::midi_patch_model () const
+{
+	return _model_selector.get_active_text ();
+}
+
+string
+MidiTimeAxisView::midi_patch_custom_device_node () const
+{
+	return _custom_device_mode_selector.get_active_text ();
 }

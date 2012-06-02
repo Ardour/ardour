@@ -48,8 +48,8 @@ class Port {
 	Port (const XMLNode&);
 	virtual ~Port ();
 
-	XMLNode& get_state () const;
-	void set_state (const XMLNode&);
+	virtual XMLNode& get_state () const;
+	virtual void set_state (const XMLNode&);
 
 	// FIXME: make Manager a friend of port so these can be hidden?
 

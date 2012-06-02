@@ -34,7 +34,7 @@ class Splash : public Gtk::Window
 {
   public:
 	Splash ();
-	~Splash () {}
+	~Splash ();
 
 	static Splash* instance() { return the_splash; }
 

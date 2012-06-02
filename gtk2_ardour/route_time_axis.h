@@ -81,7 +81,7 @@ public:
 
 	void set_samples_per_unit (double);
  	void set_height (uint32_t h);
-	void show_timestretch (framepos_t start, framepos_t end);
+	void show_timestretch (framepos_t start, framepos_t end, int layers, int layer);
 	void hide_timestretch ();
 	void selection_click (GdkEventButton*);
 	void set_selected_points (PointSelection&);
@@ -296,6 +296,7 @@ protected:
 	GainMeterBase gm;
 
 	static Glib::RefPtr<Gdk::Pixbuf> slider;
+	static Glib::RefPtr<Gdk::Pixbuf> slider_desensitised;
 
 	XMLNode* underlay_xml_node;
 	bool set_underlay_state();

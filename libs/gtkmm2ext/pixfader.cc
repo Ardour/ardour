@@ -28,17 +28,19 @@ using namespace Gtkmm2ext;
 using namespace Gtk;
 using namespace std;
 
-int PixFader::fine_scale_modifier = Keyboard::PrimaryModifier;
-int PixFader::extra_fine_scale_modifier = Keyboard::SecondaryModifier;
-
-PixFader::PixFader (Glib::RefPtr<Gdk::Pixbuf> belt, Gtk::Adjustment& adj, int orientation, int fader_length)
-
+PixFader::PixFader (
+	Glib::RefPtr<Gdk::Pixbuf> belt,
+	Glib::RefPtr<Gdk::Pixbuf> belt_desensitised,
+	Gtk::Adjustment& adj,
+	int orientation,
+	int fader_length
+	)
 	: adjustment (adj),
-	  pixbuf (belt),
 	  _orien(orientation)
 {
-        Cairo::Format format;
-
+	pixbuf[NORMAL] = belt;
+	pixbuf[DESENSITISED] = belt_desensitised;
+	
 	dragging = false;
 	default_value = adjustment.get_value();
 	last_drawn = -1;
@@ -47,9 +49,9 @@ PixFader::PixFader (Glib::RefPtr<Gdk::Pixbuf> belt, Gtk::Adjustment& adj, int or
 	view.y = 0;
 
 	if (orientation == VERT) {
-		view.width = girth = pixbuf->get_width();
+		view.width = girth = pixbuf[0]->get_width();
 	} else {
-		view.height = girth = pixbuf->get_height();
+		view.height = girth = pixbuf[0]->get_height();
 	}
 
 	set_fader_length (fader_length);
@@ -59,16 +61,21 @@ PixFader::PixFader (Glib::RefPtr<Gdk::Pixbuf> belt, Gtk::Adjustment& adj, int or
 	adjustment.signal_value_changed().connect (mem_fun (*this, &PixFader::adjustment_changed));
 	adjustment.signal_changed().connect (mem_fun (*this, &PixFader::adjustment_changed));
 
-        if (pixbuf->get_has_alpha()) {
-                format = Cairo::FORMAT_ARGB32;
-        } else {
-                format = Cairo::FORMAT_RGB24;
-        }
-        belt_surface = Cairo::ImageSurface::create  (format, pixbuf->get_width(), pixbuf->get_height());
-        belt_context = Cairo::Context::create (belt_surface);
-        Gdk::Cairo::set_source_pixbuf (belt_context, pixbuf, 0.0, 0.0);
-        belt_context->paint();        
+	for (int i = 0; i < STATES; ++i) {
+		Cairo::Format format;
+			
+		if (pixbuf[i]->get_has_alpha()) {
+			format = Cairo::FORMAT_ARGB32;
+		} else {
+			format = Cairo::FORMAT_RGB24;
+		}
 
+		belt_surface[i] = Cairo::ImageSurface::create (format, pixbuf[i]->get_width(), pixbuf[i]->get_height());
+		belt_context[i] = Cairo::Context::create (belt_surface[i]);
+		Gdk::Cairo::set_source_pixbuf (belt_context[i], pixbuf[i], 0.0, 0.0);
+		belt_context[i]->paint();
+	}
+	
         left_r = 0;
         left_g = 0;
         left_b = 0;
@@ -99,6 +106,8 @@ PixFader::set_border_colors (uint32_t left, uint32_t right)
 bool
 PixFader::on_expose_event (GdkEventExpose* ev)
 {
+	int const pi = get_sensitive() ? NORMAL : DESENSITISED;
+	
         Cairo::RefPtr<Cairo::Context> context = get_window()->create_cairo_context();
 	int srcx, srcy;
 	int const ds = display_span ();
@@ -106,9 +115,9 @@ PixFader::on_expose_event (GdkEventExpose* ev)
 
 	/* account for fader lengths that are shorter than the fader pixbuf */
 	if (_orien == VERT) {
-		offset_into_pixbuf += pixbuf->get_height() / 2 - view.height;
+		offset_into_pixbuf += pixbuf[pi]->get_height() / 2 - view.height;
 	} else {
-		offset_into_pixbuf += pixbuf->get_width() / 2 - view.width;
+		offset_into_pixbuf += pixbuf[pi]->get_width() / 2 - view.width;
 	}
 
         context->rectangle (ev->area.x, ev->area.y, ev->area.width, ev->area.height);
@@ -125,7 +134,7 @@ PixFader::on_expose_event (GdkEventExpose* ev)
         /* fader */
 
         context->save();
-        context->set_source (belt_surface, -srcx, -srcy);
+        context->set_source (belt_surface[pi], -srcx, -srcy);
         context->rectangle (0, 0, get_width(), get_height());
         context->clip ();
         context->paint();
@@ -221,7 +230,7 @@ PixFader::on_button_release_event (GdkEventButton* ev)
 
 				if (ev->state & Keyboard::TertiaryModifier) {
 					adjustment.set_value (default_value);
-				} else if (ev->state & fine_scale_modifier) {
+				} else if (ev->state & Keyboard::GainFineScaleModifier) {
 					adjustment.set_value (adjustment.get_lower());
 				} else if ((_orien == VERT && ev_pos < span - display_span()) || (_orien == HORIZ && ev_pos > span - display_span())) {
 					/* above the current display height, remember X Window coords */
@@ -255,8 +264,8 @@ PixFader::on_scroll_event (GdkEventScroll* ev)
 	double scale;
 	bool ret = false;
 
-	if (ev->state & fine_scale_modifier) {
-		if (ev->state & extra_fine_scale_modifier) {
+	if (ev->state & Keyboard::GainFineScaleModifier) {
+		if (ev->state & Keyboard::GainExtraFineScaleModifier) {
 			scale = 0.01;
 		} else {
 			scale = 0.05;
@@ -320,8 +329,8 @@ PixFader::on_motion_notify_event (GdkEventMotion* ev)
 			return true;
 		}
 		
-		if (ev->state & fine_scale_modifier) {
-			if (ev->state & extra_fine_scale_modifier) {
+		if (ev->state & Keyboard::GainFineScaleModifier) {
+			if (ev->state & Keyboard::GainExtraFineScaleModifier) {
 				scale = 0.05;
 			} else {
 				scale = 0.1;

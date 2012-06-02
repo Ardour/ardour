@@ -111,6 +111,13 @@ public:
 
 	static void add_compound_association (boost::shared_ptr<Region>, boost::shared_ptr<Region>);
 
+	/* exposed because there may be cases where regions are created with
+	 * announce=false but they still need to be in the map soon after
+	 * creation.
+	 */
+	 
+	static void map_add (boost::shared_ptr<Region>);
+
   private:
 
 	static void region_changed (PBD::PropertyChange const &, boost::weak_ptr<Region>);
@@ -118,7 +125,6 @@ public:
 	static Glib::StaticMutex region_map_lock;
 
 	static RegionMap region_map;
-	static void map_add (boost::shared_ptr<Region>);
 
 	static Glib::StaticMutex region_name_map_lock;
 

@@ -94,6 +94,11 @@ class AudioRegion : public Region
 	bool fade_out_is_xfade() const { return _fade_out_is_xfade; }
 	void set_fade_out_is_xfade (bool yn);
 
+	bool fade_in_is_short() const { return _fade_in_is_short; }
+	void set_fade_in_is_short (bool yn);
+	bool fade_out_is_short() const { return _fade_out_is_short; }
+	void set_fade_out_is_short (bool yn);
+
 	boost::shared_ptr<AutomationList> fade_in()  { return _fade_in; }
 	boost::shared_ptr<AutomationList> inverse_fade_in()  { return _inverse_fade_in; }
 	boost::shared_ptr<AutomationList> fade_out() { return _fade_out; }
@@ -199,6 +204,10 @@ class AudioRegion : public Region
 	PBD::Property<bool>     _fade_out_active;
 	/** linear gain to apply to the whole region */
 	PBD::Property<gain_t>   _scale_amplitude;
+	PBD::Property<bool>     _fade_in_is_xfade;
+	PBD::Property<bool>     _fade_out_is_xfade;
+	PBD::Property<bool>     _fade_in_is_short;
+	PBD::Property<bool>     _fade_out_is_short;
 
 	void register_properties ();
 	void post_set (const PBD::PropertyChange&);
@@ -231,11 +240,6 @@ class AudioRegion : public Region
 	boost::shared_ptr<AutomationList> _envelope;
 	uint32_t                          _fade_in_suspended;
 	uint32_t                          _fade_out_suspended;
-	/* This is not a Property because its not subject to user control,
-	   or undo/redo. XXX this may prove to be a mistake.
-	*/
-	bool                              _fade_in_is_xfade;
-	bool                              _fade_out_is_xfade;
 
 	boost::shared_ptr<ARDOUR::Region> get_single_other_xfade_region (bool start) const;
 

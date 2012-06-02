@@ -62,6 +62,7 @@ sigc::signal<void,RouteGroup*> GainMeterBase::ResetGroupPeakDisplays;
 
 GainMeter::MetricPatterns GainMeter::metric_patterns;
 Glib::RefPtr<Gdk::Pixbuf> GainMeter::slider;
+Glib::RefPtr<Gdk::Pixbuf> GainMeter::slider_desensitised;
 
 
 void
@@ -70,10 +71,15 @@ GainMeter::setup_slider_pix ()
 	if ((slider = ::get_icon ("fader_belt")) == 0) {
 		throw failed_constructor();
 	}
+
+	if ((slider_desensitised = ::get_icon ("fader_belt_desensitised")) == 0) {
+		throw failed_constructor();
+	}
 }
 
 GainMeterBase::GainMeterBase (Session* s,
 			      const Glib::RefPtr<Gdk::Pixbuf>& pix,
+			      const Glib::RefPtr<Gdk::Pixbuf>& pix_desensitised,
 			      bool horizontal,
 			      int fader_length)
 	: gain_adjustment (gain_to_slider_position_with_max (1.0, Config->get_max_gain()), 0.0, 1.0, 0.01, 0.1)
@@ -95,11 +101,13 @@ GainMeterBase::GainMeterBase (Session* s,
 
 	if (horizontal) {
 		gain_slider = manage (new HSliderController (pix,
+							     pix_desensitised,
 							     &gain_adjustment,
 							     fader_length,
 							     false));
 	} else {
 		gain_slider = manage (new VSliderController (pix,
+							     pix_desensitised,
 							     &gain_adjustment,
 							     fader_length,
 							     false));
@@ -839,7 +847,7 @@ GainMeterBase::on_theme_changed()
 }
 
 GainMeter::GainMeter (Session* s, int fader_length)
-	: GainMeterBase (s, slider, false, fader_length)
+	: GainMeterBase (s, slider, slider_desensitised, false, fader_length)
 	, gain_display_box(true, 0)
 	, hbox(true, 2)
 {

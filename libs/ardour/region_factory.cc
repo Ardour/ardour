@@ -75,11 +75,10 @@ RegionFactory::create (boost::shared_ptr<const Region> region, bool announce)
 		if (ret->session().config.get_glue_new_regions_to_bars_and_beats ()) {
 			ret->set_position_lock_style (MusicTime);
 		}
-		
-		map_add (ret);
 
 		/* pure copy constructor - no property list */
 		if (announce) {
+			map_add (ret);
 			CheckNewRegion (ret);
 		}
 	}
@@ -119,9 +118,8 @@ RegionFactory::create (boost::shared_ptr<Region> region, const PropertyList& pli
 			ret->set_position_lock_style (MusicTime);
 		}
 		
-		map_add (ret);
-
 		if (announce) {
+			map_add (ret);
 			CheckNewRegion (ret);
 		}
 	}
@@ -161,9 +159,8 @@ RegionFactory::create (boost::shared_ptr<Region> region, frameoffset_t offset, c
 			ret->set_position_lock_style (MusicTime);
 		}
 
-		map_add (ret);
-
 		if (announce) {
+			map_add (ret);
 			CheckNewRegion (ret);
 		}
 	}
@@ -203,9 +200,8 @@ RegionFactory::create (boost::shared_ptr<Region> region, const SourceList& srcs,
 			ret->set_position_lock_style (MusicTime);
 		}
 
-		map_add (ret);
-
 		if (announce) {
+			map_add (ret);
 			CheckNewRegion (ret);
 		}
 	}
@@ -248,9 +244,8 @@ RegionFactory::create (const SourceList& srcs, const PropertyList& plist, bool a
 			ret->set_position_lock_style (MusicTime);
 		}
 		
-		map_add (ret);
-
 		if (announce) {
+			map_add (ret);
 			CheckNewRegion (ret);
 		}
 	}

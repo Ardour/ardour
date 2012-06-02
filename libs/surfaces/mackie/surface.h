@@ -136,13 +136,6 @@ public:
 	void show_two_char_display (const std::string & msg, const std::string & dots = "  ");
 	void show_two_char_display (unsigned int value, const std::string & dots = "  ");
 	
-	/**
-		Timecode display. Only the difference between timecode and last_timecode will
-		be encoded, to save midi bandwidth. If they're the same, an empty array will
-		be returned
-	*/
-	MidiByteArray timecode_display (const std::string & timecode, const std::string & last_timecode = "");
-
 	void update_view_mode_display ();
 	void update_flip_mode_display ();
 
@@ -152,6 +145,8 @@ public:
 
 	void next_jog_mode ();
 	void set_jog_mode (Mackie::JogWheel::Mode);
+  
+  void notify_metering_state_changed();
 
   protected:
 	

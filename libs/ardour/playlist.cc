@@ -47,9 +47,9 @@ using namespace ARDOUR;
 using namespace PBD;
 
 namespace ARDOUR {
-namespace Properties {
-PBD::PropertyDescriptor<bool> regions;
-}
+	namespace Properties {
+		PBD::PropertyDescriptor<bool> regions;
+	}
 }
 
 struct ShowMeTheList {
@@ -311,6 +311,7 @@ Playlist::init (bool hide)
 	in_partition = false;
 	subcnt = 0;
 	_frozen = false;
+	_capture_insertion_underway = false;
 	_combine_ops = 0;
 
 	_session.history().BeginUndoRedo.connect_same_thread (*this, boost::bind (&Playlist::begin_undo, this));
@@ -2179,6 +2180,16 @@ Playlist::n_regions() const
 	return regions.size();
 }
 
+/** @return true if the all_regions list is empty, ie this playlist
+ *  has never had a region added to it.
+ */
+bool
+Playlist::all_regions_empty() const
+{
+	RegionReadLock rl (const_cast<Playlist *> (this));
+	return all_regions.empty();
+}
+
 pair<framepos_t, framepos_t>
 Playlist::get_extent () const
 {
@@ -3123,4 +3134,10 @@ restart:
 	for (list<Evoral::Range<framepos_t> >::iterator i = ranges.begin(); i != ranges.end(); ++i) {
 		check_crossfades (*i);
 	}
+}
+
+void
+Playlist::set_capture_insertion_in_progress (bool yn)
+{
+	_capture_insertion_underway = yn;
 }

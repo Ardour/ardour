@@ -862,6 +862,12 @@ Selection::selected (RegionView* rv)
 }
 
 bool
+Selection::selected (ControlPoint* cp)
+{
+	return find (points.begin(), points.end(), cp) != points.end();
+}
+
+bool
 Selection::empty (bool internal_selection)
 {
 	bool object_level_empty =  regions.empty () &&

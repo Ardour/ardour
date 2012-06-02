@@ -730,7 +730,7 @@ AutomationTimeAxisView::add_line (boost::shared_ptr<AutomationLine> line)
 	/* pick up the current state */
 	automation_state_changed ();
 
-	line->show();
+	line->add_visibility (AutomationLine::Line);
 }
 
 void

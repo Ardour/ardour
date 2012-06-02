@@ -409,7 +409,7 @@ VisualTimeAxis::name_entry_key_release_handler(GdkEventKey* ev)
 // Super class methods not handled by VisualTimeAxis
 
 void
-VisualTimeAxis::show_timestretch (framepos_t start, framepos_t end)
+VisualTimeAxis::show_timestretch (framepos_t start, framepos_t end, int layers, int layer)
 {
 	// Not handled by purely visual TimeAxis
 }

@@ -332,29 +332,25 @@ if test x$WITH_LADSPA != x ; then
 fi
 
 # Control Surfaces
-cp $BUILD_ROOT/libs/surfaces/*/libardour*.so* $Surfaces
-# hack ... move libardour_cp back into Libraries
-mv $Surfaces/libardourcp.so* $Libraries
+cp $BUILD_ROOT/libs/surfaces/*/libardour_*.so* $Surfaces
+cp $BUILD_ROOT/libs/surfaces/control_protocol/libardourcp.so* $Libraries
 
 # MidiMaps
 # got to be careful with names here
 for x in $BUILD_ROOT/../midi_maps/*.map ; do
     cp "$x" $MidiMaps
-    echo Copied MIDI map $x 
 done
 
 # MIDNAM Patch Files
 # got to be careful with names here
 for x in $BUILD_ROOT/../patchfiles/*.midnam ; do
     cp "$x" $PatchFiles
-    echo Copied MIDNAM file "$x"
 done
 
 # MackieControl data
 # got to be careful with names here
 for x in $BUILD_ROOT/../mcp/*.device $BUILD_ROOT/../mcp/*.profile ; do
     cp "$x" $MackieControl
-    echo Copied Mackie Control file $x 
 done
 
 # Templates
@@ -414,6 +410,7 @@ while [ true ] ; do
 			if test "not" = ${dep}; then 
 				echo ""
 				echo "!!! ERROR !!! - Missing dependant library for $file."
+				echo "Searched: " $OURLIBS${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 				echo ""
 				(LD_LIBRARY_PATH=$OURLIBS${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} ldd $file)
 				echo ""
@@ -449,6 +446,11 @@ while [ true ] ; do
 					echo "Copying dependant lib $dep    (required by ${parent})"
 					cp $dep $Libraries
 				fi
+                                #
+                                # reset RPATH so that the runtime linker never looks
+                                # in places we don't want it to
+                                #
+                                patchelf --set-rpath $Libraries $Libraries/`basename $dep`
                                 if echo $dep | grep -sq '^/' ; then
                                     # absolute path, candidate for stripping
                                     deplibs="$deplibs $base"

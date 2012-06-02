@@ -87,6 +87,9 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
   protected:
 	void render (cairo_t*);
 
+	virtual void build_ops_menu ();
+	Gtk::Menu  *ops_menu;
+
   private:
 	Mode             _mode;
 	std::string      _name;
@@ -100,8 +103,6 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	int              layout_x_offset;
 	int              em_width;
 	bool             _edit_by_click_field;
-
-	Gtk::Menu  *ops_menu;
 
 	Glib::RefPtr<Pango::Layout> _layout;
 	Glib::RefPtr<Pango::Layout> _left_layout;
@@ -196,8 +197,6 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	framepos_t frame_duration_from_bbt_string (framepos_t, const std::string&) const;
 	framepos_t frames_from_minsec_string (const std::string&) const;
 	framepos_t frames_from_audioframes_string (const std::string&) const;
-
-	void build_ops_menu ();
 
 	void session_configuration_changed (std::string);
 

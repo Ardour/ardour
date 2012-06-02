@@ -139,6 +139,7 @@ def build(bld):
                 test/scalar_properties.cc
                 test/signals_test.cc
                 test/convert_test.cc
+                test/filesystem_test.cc
         '''.split()
         testobj.target       = 'run-tests'
         testobj.includes     = obj.includes + ['test', '../pbd']

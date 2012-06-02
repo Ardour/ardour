@@ -3,7 +3,6 @@
   <Name value="Mackie Control Universal Pro"/>
   <Strips value="8"/>
   <MasterFader value="yes"/>
-  <SegmentedDisplay value="no"/>
   <TimecodeDisplay value="yes"/>
   <TwoCharacterDisplay value="yes"/>
   <Extenders value="0"/>

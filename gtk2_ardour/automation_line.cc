@@ -42,7 +42,6 @@
 #include "time_axis_view.h"
 #include "point_selection.h"
 #include "automation_time_axis.h"
-#include "public_editor.h"
 
 #include "ardour/event_type_map.h"
 #include "ardour/session.h"
@@ -77,11 +76,11 @@ AutomationLine::AutomationLine (const string& name, TimeAxisView& tv, ArdourCanv
 		_our_time_converter = true;
 	}
 	
-	points_visible = false;
+	_visible = Line;
+
 	update_pending = false;
 	_uses_gain_mapping = false;
 	no_draw = false;
-	_visible = true;
 	_is_boolean = false;
 	terminal_points_can_slide = true;
 	_height = 0;
@@ -136,27 +135,36 @@ AutomationLine::queue_reset ()
 void
 AutomationLine::show ()
 {
-	if (alist->interpolation() != AutomationList::Discrete) {
-		line->show();
+	if (_visible & Line) {
+		if (alist->interpolation() != AutomationList::Discrete) {
+			line->show();
+		} else {
+			line->hide ();
+		}
+	} else {
+		line->hide();
 	}
 
-	if (points_visible) {
+	if (_visible & ControlPoints) {
 		for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
+			(*i)->set_visible (true);
 			(*i)->show ();
 		}
+	} else if (_visible & SelectedControlPoints) {
+		for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
+			(*i)->set_visible ((*i)->get_selected());
+		}
+	} else {
+		for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
+			(*i)->set_visible (false);
+		}
 	}
-
-	_visible = true;
 }
 
 void
 AutomationLine::hide ()
 {
-	line->hide();
-	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
-		(*i)->hide();
-	}
-	_visible = false;
+	set_visibility (VisibleAspects (0));
 }
 
 double
@@ -238,7 +246,7 @@ AutomationLine::modify_point_y (ControlPoint& cp, double y)
 	y = min (1.0, y);
 	y = _height - (y * _height);
 
-	double const x = trackview.editor().frame_to_unit (_time_converter->to((*cp.model())->when) - _offset);
+	double const x = trackview.editor().frame_to_unit_unrounded (_time_converter->to((*cp.model())->when) - _offset);
 
 	trackview.editor().session()->begin_reversible_command (_("automation event move"));
 	trackview.editor().session()->add_command (
@@ -457,7 +465,7 @@ AutomationLine::start_drag_common (double x, float fraction)
  *  @return x position and y fraction that were actually used (once clamped).
  */
 pair<double, float>
-AutomationLine::drag_motion (double x, float fraction, bool ignore_x, bool with_push)
+AutomationLine::drag_motion (double const x, float fraction, bool ignore_x, bool with_push)
 {
 	/* setup the points that are to be moved this time round */
 	list<ControlPoint*> points = _drag_points;
@@ -469,49 +477,51 @@ AutomationLine::drag_motion (double x, float fraction, bool ignore_x, bool with_
 	double dx = ignore_x ? 0 : (x - _drag_x);
 	double dy = fraction - _last_drag_fraction;
 
-	/* find x limits */
-	ControlPoint* before = 0;
-	ControlPoint* after = 0;
-
-	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
-		if ((*i)->get_x() < points.front()->get_x()) {
-			before = *i;
-		}
-		if ((*i)->get_x() > points.back()->get_x() && after == 0) {
-			after = *i;
-		}
-	}
-
-	double const before_x = before ? before->get_x() : 0;
-	double const after_x = after ? after->get_x() : DBL_MAX;
-
-	/* clamp x */
 	for (list<ControlPoint*>::iterator i = points.begin(); i != points.end(); ++i) {
+		/* Find the points that aren't being moved before and after
+		   this one on the control_points list
+		*/
 
-		if ((*i)->can_slide() && !ignore_x) {
+		ControlPoint* before = 0;
+		ControlPoint* after = 0;
 
-			/* clamp min x */
-			double const a = (*i)->get_x() + dx;
-			double const b = before_x + 1;
-			if (a < b) {
-				dx += b - a;
+		ControlPoint* last = 0;
+		for (vector<ControlPoint*>::iterator j = control_points.begin(); j != control_points.end(); ++j) {
+
+			if (*j == *i) {
+				
+				before = last;
+				
+				vector<ControlPoint*>::iterator k = j;
+
+				/* Next point */
+				++k;
+
+				/* Now move past any points that are being moved this time */
+				while (find (points.begin(), points.end(), *k) != points.end() && k != control_points.end ()) {
+					++k;
+				}
+				
+				if (k != control_points.end()) {
+					after = *k;
+				}
+				break;
 			}
 
-			/* clamp max x */
-			if (after) {
-
-				if (after_x - before_x < 2) {
-					/* after and before are very close, so just leave this alone */
-					dx = 0;
-				} else {
-					double const a = (*i)->get_x() + dx;
-					double const b = after_x - 1;
-					if (a > b) {
-						dx -= a - b;
-					}
-				}
+			if (find (points.begin(), points.end(), *j) == points.end ()) {
+				/* This point isn't being moved, so it's the `last' point we've seen */
+				last = *j;
 			}
 		}
+
+		/* Clamp dx for this point */
+		double const before_x = before ? before->get_x() : 0;
+		double const after_x = after ? after->get_x() : DBL_MAX;
+
+		double tx = (*i)->get_x() + dx;
+		tx = max (tx, before_x);
+		tx = min (tx, after_x);
+		dx = tx - (*i)->get_x ();
 	}
 
 	/* clamp y */
@@ -527,7 +537,7 @@ AutomationLine::drag_motion (double x, float fraction, bool ignore_x, bool with_
 
 	pair<double, float> const clamped (_drag_x + dx, _last_drag_fraction + dy);
 	_drag_distance += dx;
-	_drag_x = x;
+	_drag_x += dx;
 	_last_drag_fraction = fraction;
 
 	for (list<ControlPoint*>::iterator i = _drag_points.begin(); i != _drag_points.end(); ++i) {
@@ -548,7 +558,9 @@ AutomationLine::drag_motion (double x, float fraction, bool ignore_x, bool with_
 	}
 
 	_drag_had_movement = true;
-	did_push = with_push;
+	if (with_push) {
+		did_push = with_push;
+	}
 
 	return clamped;
 }
@@ -597,7 +609,7 @@ AutomationLine::sync_model_with_view_point (ControlPoint& cp, framecnt_t distanc
 
 	/* if xval has not changed, set it directly from the model to avoid rounding errors */
 
-	if (view_x == trackview.editor().frame_to_unit (_time_converter->to ((*cp.model())->when)) - _offset) {
+	if (view_x == trackview.editor().frame_to_unit_unrounded (_time_converter->to ((*cp.model())->when)) - _offset) {
 		view_x = (*cp.model())->when - _offset;
 	} else {
 		view_x = trackview.editor().unit_to_frame (view_x);
@@ -609,11 +621,6 @@ AutomationLine::sync_model_with_view_point (ControlPoint& cp, framecnt_t distanc
 	view_to_model_coord_y (view_y);
 
 	alist->modify (cp.model(), view_x, view_y);
-
-	if (did_push) {
-		/* move all points after cp by the same distance */
-		alist->slide (cp.model()++, _time_converter->from (distance));
-	}
 }
 
 bool
@@ -623,7 +630,7 @@ AutomationLine::control_points_adjacent (double xval, uint32_t & before, uint32_
 	ControlPoint *acp = 0;
 	double unit_xval;
 
-	unit_xval = trackview.editor().frame_to_unit (xval);
+	unit_xval = trackview.editor().frame_to_unit_unrounded (xval);
 
 	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
 
@@ -807,7 +814,7 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 		 * zoom and scroll into account).
 		 */
 			
-		tx = trackview.editor().frame_to_unit (tx);
+		tx = trackview.editor().frame_to_unit_unrounded (tx);
 		
 		/* convert from canonical view height (0..1.0) to actual
 		 * height coordinates (using X11's top-left rooted system)
@@ -896,44 +903,31 @@ AutomationLine::set_list (boost::shared_ptr<ARDOUR::AutomationList> list)
 }
 
 void
-AutomationLine::show_all_control_points ()
+AutomationLine::add_visibility (VisibleAspects va)
 {
-	if (_is_boolean) {
-		// show the line but don't allow any control points
-		return;
-	}
-
-	points_visible = true;
-
-	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
-		if (!(*i)->visible()) {
-			(*i)->show ();
-			(*i)->set_visible (true);
-		}
-	}
+	_visible = VisibleAspects (_visible | va);
+	show ();
 }
 
 void
-AutomationLine::hide_all_but_selected_control_points ()
+AutomationLine::set_visibility (VisibleAspects va)
 {
-	if (alist->interpolation() == AutomationList::Discrete) {
-		return;
-	}
+	_visible = va;
+	show ();
+}
 
-	points_visible = false;
-
-	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
-		if (!(*i)->get_selected()) {
-			(*i)->set_visible (false);
-		}
-	}
+void
+AutomationLine::remove_visibility (VisibleAspects va)
+{
+	_visible = VisibleAspects (_visible & ~va);
+	show ();
 }
 
 void
 AutomationLine::track_entered()
 {
 	if (alist->interpolation() != AutomationList::Discrete) {
-		show_all_control_points();
+		add_visibility (ControlPoints);
 	}
 }
 
@@ -941,7 +935,7 @@ void
 AutomationLine::track_exited()
 {
 	if (alist->interpolation() != AutomationList::Discrete) {
-		hide_all_but_selected_control_points();
+		remove_visibility (ControlPoints);
 	}
 }
 
@@ -1012,11 +1006,10 @@ void
 AutomationLine::interpolation_changed (AutomationList::InterpolationStyle style)
 {
 	if (style == AutomationList::Discrete) {
-		show_all_control_points();
+		set_visibility (ControlPoints);
 		line->hide();
 	} else {
-		hide_all_but_selected_control_points();
-		line->show();
+		set_visibility (Line);
 	}
 }
 
@@ -1060,13 +1053,11 @@ AutomationLine::add_visible_control_point (uint32_t view_index, uint32_t pi, dou
 
 	/* finally, control visibility */
 
-	if (_visible && points_visible) {
+	if (_visible & ControlPoints) {
 		control_points[view_index]->show ();
 		control_points[view_index]->set_visible (true);
 	} else {
-		if (!points_visible) {
-			control_points[view_index]->set_visible (false);
-		}
+		control_points[view_index]->set_visible (false);
 	}
 }
 

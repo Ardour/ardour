@@ -329,7 +329,15 @@ Track::set_name (const string& str)
 		return false;
 	}
 
-	_diskstream->set_name (str);
+	if (_diskstream->playlist()->all_regions_empty ()) {
+		/* Only rename the diskstream (and therefore the playlist) if
+		   the playlist has never had a region added to it.  Otherwise
+		   people can get confused if, say, they have notes about a
+		   playlist with a given name and then it changes (see mantis
+		   #4759).
+		*/
+		_diskstream->set_name (str);
+	}
 
 	/* save state so that the statefile fully reflects any filename changes */
 

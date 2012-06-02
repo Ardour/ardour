@@ -73,6 +73,8 @@ Strip::Strip (Surface& s, const std::string& name, int index, const map<Button::
 	, _index (index)
 	, _surface (&s)
 	, _controls_locked (false)
+	, _transport_is_rolling (false)
+	, _metering_active (true)
 	, _reset_display_at (0)
 	, _last_gain_position_written (-1.0)
 	, _last_pan_azi_position_written (-1.0)
@@ -80,7 +82,10 @@ Strip::Strip (Surface& s, const std::string& name, int index, const map<Button::
 {
 	_fader = dynamic_cast<Fader*> (Fader::factory (*_surface, index, "fader", *this));
 	_vpot = dynamic_cast<Pot*> (Pot::factory (*_surface, Pot::ID + index, "vpot", *this));
-	_meter = dynamic_cast<Meter*> (Meter::factory (*_surface, index, "meter", *this));
+
+	if (s.mcp().device_info().has_meters()) {
+		_meter = dynamic_cast<Meter*> (Meter::factory (*_surface, index, "meter", *this));
+	}
 
 	for (map<Button::ID,StripButtonInfo>::const_iterator b = strip_buttons.begin(); b != strip_buttons.end(); ++b) {
 		Button* bb = dynamic_cast<Button*> (Button::factory (*_surface, b->first, b->second.base_id + index, b->second.name, *this));
@@ -687,7 +692,7 @@ Strip::update_automation ()
 void
 Strip::update_meter ()
 {
-	if (_meter) {
+	if (_meter && _transport_is_rolling && _metering_active) {
 		float dB = const_cast<PeakMeter&> (_route->peak_meter()).peak_power (0);
 		_meter->send_update (*_surface, dB);
 	}
@@ -1062,4 +1067,29 @@ Strip::reset_saved_values ()
 	_last_pan_width_position_written = -1.0;
 	_last_gain_position_written = -1.0;
 
+}
+
+void 
+Strip::notify_metering_state_changed()
+{
+	if (!_route || !_meter) {
+		return;
+	}
+	
+	bool transport_is_rolling = (_surface->mcp().get_transport_speed () != 0.0f);
+	bool metering_active = _surface->mcp().metering_active ();
+	
+	if ((_transport_is_rolling == transport_is_rolling) && (_metering_active == metering_active)) {
+		return;
+	}
+	
+	_meter->notify_metering_state_changed (*_surface, transport_is_rolling, metering_active);
+	
+	if (!transport_is_rolling || !metering_active) {
+		notify_property_changed (PBD::PropertyChange (ARDOUR::Properties::name));
+		notify_panner_azi_changed (true);
+	}
+	
+	_transport_is_rolling = transport_is_rolling;
+	_metering_active = metering_active;
 }
