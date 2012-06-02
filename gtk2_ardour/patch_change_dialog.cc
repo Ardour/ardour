@@ -151,7 +151,7 @@ PatchChangeDialog::fill_bank_combo ()
 	for (MIDI::Name::ChannelNameSet::PatchBanks::const_iterator i = banks->begin(); i != banks->end(); ++i) {
 		string n = (*i)->name ();
 		boost::replace_all (n, "_", " ");
-		_bank_combo.append (n);
+		_bank_combo.append_text (n);
 	}
 }
 
@@ -235,7 +235,7 @@ PatchChangeDialog::fill_patch_combo ()
 	for (MIDI::Name::PatchBank::PatchNameList::const_iterator j = patches.begin(); j != patches.end(); ++j) {
 		string n = (*j)->name ();
 		boost::replace_all (n, "_", " ");
-		_patch_combo.append (n);
+		_patch_combo.append_text (n);
 	}
 }
 

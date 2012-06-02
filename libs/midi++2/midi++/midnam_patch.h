@@ -21,6 +21,7 @@
 #ifndef MIDNAM_PATCH_H_
 #define MIDNAM_PATCH_H_
 
+#include <iostream>
 #include <string>
 #include <list>
 #include <set>
@@ -138,8 +139,6 @@ private:
 	PatchPrimaryKey*  _id;
 	std::string       _patch_list_name;
 };
-
-#include <iostream>
 
 class ChannelNameSet
 {
