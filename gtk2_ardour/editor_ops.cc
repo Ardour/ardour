@@ -1369,6 +1369,13 @@ Editor::temporal_zoom (gdouble fpu)
 	}
 
 	nfpu = fpu;
+	
+	// Imposing an arbitrary limit to zoom out as too much zoom out produces 
+	// segfaults for lack of memory. If somebody decides this is not high enough I
+	// believe it can be raisen to higher values but some limit must be in place.
+	if (nfpu > 8e+08) {
+		nfpu = 8e+08;
+	}
 
 	new_page_size = (framepos_t) floor (_canvas_width * nfpu);
 	half_page_size = new_page_size / 2;

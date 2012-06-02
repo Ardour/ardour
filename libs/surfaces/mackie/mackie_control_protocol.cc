@@ -473,7 +473,7 @@ MackieControlProtocol::update_global_led (int id, LedState ls)
 {
 	boost::shared_ptr<Surface> surface = surfaces.front();
 
-	if (!surface->type() == mcu) {
+	if (surface->type() != mcu) {
 		return;
 	}
 
@@ -734,7 +734,8 @@ MackieControlProtocol::format_bbt_timecode (framepos_t now_frame)
 
 	os << setw(3) << setfill('0') << bbt_time.bars;
 	os << setw(2) << setfill('0') << bbt_time.beats;
-	os << setw(2) << setfill('0') << bbt_time.ticks / 1000;
+	os << ' ';
+	os << setw(1) << setfill('0') << bbt_time.ticks / 1000;
 	os << setw(3) << setfill('0') << bbt_time.ticks % 1000;
 
 	return os.str();
@@ -750,10 +751,12 @@ MackieControlProtocol::format_timecode_timecode (framepos_t now_frame)
 	// digits: 888/88/88/888
 	// Timecode mode: Hours/Minutes/Seconds/Frames
 	ostringstream os;
-	os << setw(3) << setfill('0') << timecode.hours;
+	os << ' ';
+	os << setw(2) << setfill('0') << timecode.hours;
 	os << setw(2) << setfill('0') << timecode.minutes;
 	os << setw(2) << setfill('0') << timecode.seconds;
-	os << setw(3) << setfill('0') << timecode.frames;
+	os << ' ';
+	os << setw(2) << setfill('0') << timecode.frames;
 
 	return os.str();
 }
@@ -767,7 +770,7 @@ MackieControlProtocol::update_timecode_display()
 
 	boost::shared_ptr<Surface> surface = surfaces.front();
 
-	if (surface->type() != mcu || !_device_info.has_timecode_display()) {
+	if (surface->type() != mcu || !_device_info.has_timecode_display() || !surface->active ()) {
 		return;
 	}
 

@@ -515,6 +515,15 @@ Surface::turn_it_on ()
 			(*s)->notify_all ();
 		}
 		update_view_mode_display ();
+		if (_mcp.device_info ().has_master_fader ()) {
+			master_gain_changed ();
+		}
+		
+		if (_mcp.device_info ().has_global_controls ()) {
+			_mcp.update_global_button (Button::Read, _mcp.metering_active ());
+			_mcp.update_global_button (Button::Stop, _mcp.get_session ().transport_stopped ());
+			_mcp.update_global_button (Button::Play, (_mcp.get_session ().transport_speed () == 1.0f));
+		}
 	}
 }
 
@@ -578,7 +587,7 @@ Surface::zero_all ()
 	}
 	
 	if (_mcp.device_info().has_two_character_display()) {
-		show_two_char_display (string (2, ' '), string (2, '.'));
+		show_two_char_display (string (2, '0'), string (2, ' '));
 	}
 
 	if (_mcp.device_info().has_master_fader ()) {
@@ -717,18 +726,18 @@ Surface::display_timecode (const std::string & timecode, const std::string & las
 	while  (local_timecode.length() < 10) { 
 		local_timecode += " ";
 	}
-		
-	// find the suffix of local_timecode that differs from last_timecode
-	std::pair<string::const_iterator,string::iterator> pp = mismatch (last_timecode.begin(), last_timecode.end(), local_timecode.begin());
 	
-	int position = 0x40;
-
-	// translate characters. These are sent in reverse order of display
-	// hence the reverse iterators
-	string::reverse_iterator rend = reverse_iterator<string::iterator> (pp.second);
-	for  (string::reverse_iterator it = local_timecode.rbegin(); it != rend; ++it) {
-		MidiByteArray retval (2, 0xb0, position++);
-		retval << translate_seven_segment (*it);
+	// translate characters.
+	// Only the characters that actually changed are sent.
+	int position = 0x3f;
+	int i;
+	for (i = local_timecode.length () - 1; i >= 0; i--) {
+		position++;
+		if (local_timecode[i] == last_timecode[i]) {
+			continue;
+		}
+		MidiByteArray retval (2, 0xb0, position);
+		retval << translate_seven_segment (local_timecode[i]);
 		_port->write (retval);
 	}
 }
