@@ -44,6 +44,7 @@
 #include "ardour/audioengine.h"
 #include "ardour/internal_return.h"
 #include "ardour/internal_send.h"
+#include "ardour/midi_track.h"
 #include "ardour/plugin_insert.h"
 #include "ardour/port_insert.h"
 #include "ardour/profile.h"
@@ -858,7 +859,10 @@ ProcessorBox::build_possible_aux_menu ()
 {
 	boost::shared_ptr<RouteList> rl = _session->get_routes_with_internal_returns();
 
-	if (rl->empty()) {
+	if (rl->empty() || boost::dynamic_pointer_cast<MidiTrack> (_route)) {
+		/* No aux sends if there are no busses, or if this route is a MIDI track
+		   (one day, but not now ...)
+		*/
 		return 0;
 	}
 
