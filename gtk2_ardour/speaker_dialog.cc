@@ -34,7 +34,7 @@ using namespace Gtkmm2ext;
 
 SpeakerDialog::SpeakerDialog ()
         : ArdourWindow (_("Speaker Configuration"))
-        , aspect_frame ("", 0.5, 0.5, 1.0, false)
+        , aspect_frame ("", 0.5, 0.5, 1.5, false)
         , azimuth_adjustment (0, 0.0, 360.0, 10.0, 1.0)
         , azimuth_spinner (azimuth_adjustment)
         , add_speaker_button (_("Add Speaker"))
@@ -49,14 +49,14 @@ SpeakerDialog::SpeakerDialog ()
         side_vbox.set_spacing (6);
         side_vbox.pack_start (add_speaker_button, false, false);
 
-        aspect_frame.set_size_request (200, 200);
+        aspect_frame.set_size_request (300, 200);
         aspect_frame.set_shadow_type (SHADOW_NONE);
         aspect_frame.add (darea);
 
         hbox.set_spacing (6);
         hbox.set_border_width (6);
         hbox.pack_start (aspect_frame, true, true);
-        hbox.pack_start (side_vbox, true, true);
+        hbox.pack_start (side_vbox, false, false);
 
 	HBox* current_speaker_hbox = manage (new HBox);
 	current_speaker_hbox->set_spacing (4);
@@ -162,6 +162,12 @@ SpeakerDialog::darea_expose_event (GdkEventExpose* event)
 
                 cart_to_gtk (c);
 
+		/* We have already moved our plotting origin to x_origin, y_origin,
+		   so compensate for that.
+		*/
+		c.x -= x_origin;
+		c.y -= y_origin;
+
                 x = (gint) floor (c.x);
                 y = (gint) floor (c.y);
 
@@ -179,7 +185,11 @@ SpeakerDialog::darea_expose_event (GdkEventExpose* event)
                 cairo_move_to (cr, x + 6, y + 6);
 
                 char buf[256];
-                snprintf (buf, sizeof (buf), "%d:%d", n+1, (int) lrint (s.angles().azi));
+		if (n == selected_index) {
+			snprintf (buf, sizeof (buf), "%d:%d", n+1, (int) lrint (s.angles().azi));
+		} else {
+			snprintf (buf, sizeof (buf), "%d", n + 1);
+		}
                 cairo_show_text (cr, buf);
                 ++n;
         }
@@ -207,8 +217,8 @@ SpeakerDialog::cart_to_gtk (CartesianVector& c) const
 	   0,height
 	*/
 
-	c.x = (width / 2) * (c.x + 1);
-	c.y = (height / 2) * (1 - c.y);
+	c.x = (width / 2) * (c.x + 1) + x_origin;
+	c.y = (height / 2) * (1 - c.y) + y_origin;
 
 	/* XXX z-axis not handled - 2D for now */
 }
@@ -216,8 +226,8 @@ SpeakerDialog::cart_to_gtk (CartesianVector& c) const
 void
 SpeakerDialog::gtk_to_cart (CartesianVector& c) const
 {
-	c.x = (c.x / (width / 2.0)) - 1.0;
-	c.y = -((c.y / (height / 2.0)) - 1.0);
+	c.x = ((c.x - x_origin) / (width / 2.0)) - 1.0;
+	c.y = -(((c.y - y_origin) / (height / 2.0)) - 1.0);
 
 	/* XXX z-axis not handled - 2D for now */
 }
@@ -239,12 +249,19 @@ SpeakerDialog::darea_size_allocate (Gtk::Allocation& alloc)
   	width = alloc.get_width();
   	height = alloc.get_height();
 
+	/* The allocation will (should) be rectangualar, but make the basic
+	   drawing square; space to the right of the square is for over-hanging
+	   text labels.
+	*/
+	width = height;
+
 	if (height > 100) {
 		width -= 20;
 		height -= 20;
 	}
 
-	x_origin = (alloc.get_width() - width) / 2;
+	/* Put the x origin to the left of the rectangular allocation */
+	x_origin = (alloc.get_width() - width) / 3;
 	y_origin = (alloc.get_height() - height) / 2;
 }
 
