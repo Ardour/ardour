@@ -431,20 +431,6 @@
 				</MIDICommands>
 				<UsesPatchNameList Name="Techno Drums" />
 			</PatchBank>
-			<PatchBank Name="Dynamic Drums 1" ROM="false">
-				<MIDICommands>
-					<ControlChange Control="0" Value="92" />
-					<ControlChange Control="32" Value="0" />
-				</MIDICommands>
-				<UsesPatchNameList Name="Dynamic Drums 1 Patches" />
-			</PatchBank>
-			<PatchBank Name="Dynamic Drums 2" ROM="false">
-				<MIDICommands>
-					<ControlChange Control="0" Value="93" />
-					<ControlChange Control="32" Value="0" />
-				</MIDICommands>
-				<UsesPatchNameList Name="Dynamic Drums 2 Patches" />
-			</PatchBank>
 			<PatchBank Name="Studio SRX Drums" ROM="false">
 				<MIDICommands>
 					<ControlChange Control="0" Value="92" />
