@@ -144,8 +144,7 @@ int
 Editor::time_fx (RegionList& regions, float val, bool pitching)
 {
 	delete current_timefx;
-	current_timefx = new TimeFXDialog (*this, pitching);
-	current_timefx->regions = regions;
+	current_timefx = 0;
 
 	/* See if we have any audio regions on our list */
 	RegionList::iterator i = regions.begin ();
@@ -159,6 +158,9 @@ Editor::time_fx (RegionList& regions, float val, bool pitching)
 		return 0;
 	}
 	
+	current_timefx = new TimeFXDialog (*this, pitching);
+	current_timefx->regions = regions;
+
 	switch (current_timefx->run ()) {
 	case RESPONSE_ACCEPT:
 		break;
