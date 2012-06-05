@@ -6065,8 +6065,7 @@ Editor::close_region_gaps ()
 	Table table (2, 3);
 	table.set_spacings (12);
 	table.set_border_width (12);
-	Label* l = manage (new Label (_("Crossfade length")));
-	l->set_alignment (0, 0.5);
+	Label* l = manage (left_aligned_label (_("Crossfade length")));
 	table.attach (*l, 0, 1, 0, 1);
 
 	SpinButton spin_crossfade (1, 0);
@@ -6077,8 +6076,7 @@ Editor::close_region_gaps ()
 
 	table.attach (*manage (new Label (_("ms"))), 2, 3, 0, 1);
 
-	l = manage (new Label (_("Pull-back length")));
-	l->set_alignment (0, 0.5);
+	l = manage (left_aligned_label (_("Pull-back length")));
 	table.attach (*l, 0, 1, 1, 2);
 
 	SpinButton spin_pullback (1, 0);

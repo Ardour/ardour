@@ -21,6 +21,7 @@
 #include <gtkmm/stock.h>
 #include <gtkmm/table.h>
 #include <boost/algorithm/string.hpp>
+#include "gtkmm2ext/utils.h"
 #include "ardour/midi_patch_manager.h"
 #include "ardour/beats_frames_converter.h"
 #include "patch_change_dialog.h"
@@ -28,6 +29,7 @@
 
 using namespace std;
 using namespace Gtk;
+using namespace Gtkmm2ext;
 
 /** @param tc If non-0, a time converter for this patch change.  If 0, time control will be desensitized */
 PatchChangeDialog::PatchChangeDialog (
@@ -55,8 +57,7 @@ PatchChangeDialog::PatchChangeDialog (
 
 	if (_time_converter) {
 		
-		l = manage (new Label (_("Time")));
-		l->set_alignment (0, 0.5);
+		l = manage (left_aligned_label (_("Time")));
 		t->attach (*l, 0, 1, r, r + 1);
 		t->attach (_time, 1, 2, r, r + 1);
 		++r;
@@ -66,24 +67,21 @@ PatchChangeDialog::PatchChangeDialog (
 		_time.set (_time_converter->to (patch.time ()), true);
 	}
 
-	l = manage (new Label (_("Patch Bank")));
-	l->set_alignment (0, 0.5);
+	l = manage (left_aligned_label (_("Patch Bank")));
 	t->attach (*l, 0, 1, r, r + 1);
 	t->attach (_bank_combo, 1, 2, r, r + 1);
 	++r;
 
 	_bank_combo.signal_changed().connect (sigc::mem_fun (*this, &PatchChangeDialog::bank_combo_changed));
 
-	l = manage (new Label (_("Patch")));
-	l->set_alignment (0, 0.5);
+	l = manage (left_aligned_label (_("Patch")));
 	t->attach (*l, 0, 1, r, r + 1);
 	t->attach (_patch_combo, 1, 2, r, r + 1);
 	++r;
 	
 	_patch_combo.signal_changed().connect (sigc::mem_fun (*this, &PatchChangeDialog::patch_combo_changed));
 
-	l = manage (new Label (_("Channel")));
-	l->set_alignment (0, 0.5);
+	l = manage (left_aligned_label (_("Channel")));
 	t->attach (*l, 0, 1, r, r + 1);
 	t->attach (_channel, 1, 2, r, r + 1);
 	++r;
@@ -91,8 +89,7 @@ PatchChangeDialog::PatchChangeDialog (
 	_channel.set_value (patch.channel() + 1);
 	_channel.signal_changed().connect (sigc::mem_fun (*this, &PatchChangeDialog::channel_changed));
 
-	l = manage (new Label (_("Program")));
-	l->set_alignment (0, 0.5);
+	l = manage (left_aligned_label (_("Program")));
 	t->attach (*l, 0, 1, r, r + 1);
 	t->attach (_program, 1, 2, r, r + 1);
 	++r;
@@ -100,8 +97,7 @@ PatchChangeDialog::PatchChangeDialog (
 	_program.set_value (patch.program () + 1);
 	_program.signal_changed().connect (sigc::mem_fun (*this, &PatchChangeDialog::program_changed));
 
-	l = manage (new Label (_("Bank")));
-	l->set_alignment (0, 0.5);
+	l = manage (left_aligned_label (_("Bank")));
 	t->attach (*l, 0, 1, r, r + 1);
 	t->attach (_bank, 1, 2, r, r + 1);
 	++r;

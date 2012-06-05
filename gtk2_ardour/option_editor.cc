@@ -87,8 +87,7 @@ OptionEditorHeading::OptionEditorHeading (string const & h)
 {
 	std::stringstream s;
 	s << "<b>" << h << "</b>";
-	_label = manage (new Label (s.str()));
-	_label->set_alignment (0, 0.5);
+	_label = manage (left_aligned_label (s.str()));
 	_label->set_use_markup (true);
 }
 
@@ -141,8 +140,7 @@ EntryOption::EntryOption (string const & i, string const & n, sigc::slot<string>
 	  _get (g),
 	  _set (s)
 {
-	_label = manage (new Label (n + ":"));
-	_label->set_alignment (0, 0.5);
+	_label = manage (left_aligned_label (n + ":"));
 	_entry = manage (new Entry);
 	_entry->signal_activate().connect (sigc::mem_fun (*this, &EntryOption::activated));
 }
