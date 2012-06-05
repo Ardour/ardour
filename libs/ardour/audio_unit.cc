@@ -1019,7 +1019,8 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out) con
 
 	vector<pair<int,int> >& io_configs = pinfo->cache.io_configs;
 
-	DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("%1 has %2 IO configurations\n", name(), io_configs.size()));
+	DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("%1 has %2 IO configurations, looking for %3 in, %4 out\n", 
+							name(), io_configs.size(), in, out));
 
 	//Ardour expects the plugin to tell it the output
 	//configuration but AU plugins can have multiple I/O
@@ -1034,7 +1035,13 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out) con
 		int32_t possible_out = i->second;
 
 		if ((possible_in == audio_in) && (possible_out == audio_out)) {
-			DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("\tCHOSEN: in %1 out %2\n", in, out));
+			DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("\tCHOSEN: %1 in %2 out to match in %3 out %4\n", 
+									possible_in, possible_out,
+									in, out));
+
+			out.set (DataType::MIDI, 0);
+			out.set (DataType::AUDIO, audio_out);
+
 			return 1;
 		}
 	}
@@ -1300,19 +1307,20 @@ AUPlugin::connect_and_run (BufferSet& bufs, ChanMapping in_map, ChanMapping out_
 		_last_nframes = nframes;
 	}
 
+	DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("%1 in %2 out %3 MIDI %4 bufs %5 (available %6)\n",
+							name(), input_channels, output_channels, _has_midi_input,
+							bufs.count(), bufs.available()));
+
 	/* the apparent number of buffers matches our input configuration, but we know that the bufferset
 	   has the capacity to handle our outputs.
 	*/
+
 	assert (bufs.available() >= ChanCount (DataType::AUDIO, output_channels));
 
 	input_buffers = &bufs;
 	input_maxbuf = bufs.count().n_audio(); // number of input audio buffers
 	input_offset = offset;
 	cb_offset = 0;
-
-	DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("%1 in %2 out %3 MIDI %4 bufs %5 (available %6)\n",
-							name(), input_channels, output_channels, _has_midi_input,
-							bufs.count(), bufs.available()));
 
 	buffers->mNumberBuffers = output_channels;
 
