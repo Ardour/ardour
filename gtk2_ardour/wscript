@@ -147,6 +147,7 @@ gtk2_ardour_sources = [
         'midi_streamview.cc',
         'midi_time_axis.cc',
         'midi_tracer.cc',
+        'midi_velocity_dialog.cc',
         'missing_file_dialog.cc',
         'missing_plugin_dialog.cc',
         'mixer_actor.cc',

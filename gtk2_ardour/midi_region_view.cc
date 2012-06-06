@@ -61,6 +61,7 @@
 #include "midi_streamview.h"
 #include "midi_time_axis.h"
 #include "midi_util.h"
+#include "midi_velocity_dialog.h"
 #include "mouse_cursors.h"
 #include "note_player.h"
 #include "public_editor.h"
@@ -736,7 +737,7 @@ MidiRegionView::key_press (GdkEventKey* ev)
 
 		bool allow_smush = Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier);
 		bool fine = !Keyboard::modifier_state_contains (ev->state, Keyboard::SecondaryModifier);
-		bool together = Keyboard::modifier_state_contains (ev->state, Keyboard::PrimaryModifier);
+		bool together = Keyboard::modifier_state_contains (ev->state, Keyboard::Level4Modifier);
 
 		if (Keyboard::modifier_state_contains (ev->state, Keyboard::PrimaryModifier)) {
 			change_velocities (true, fine, allow_smush, together);
@@ -749,14 +750,13 @@ MidiRegionView::key_press (GdkEventKey* ev)
 
 		bool allow_smush = Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier);
 		bool fine = !Keyboard::modifier_state_contains (ev->state, Keyboard::SecondaryModifier);
-		bool together = Keyboard::modifier_state_contains (ev->state, Keyboard::PrimaryModifier);
+		bool together = Keyboard::modifier_state_contains (ev->state, Keyboard::Level4Modifier);
 
-		if (Keyboard::no_modifiers_active (ev->state)) {
-			transpose (false, fine, allow_smush);
-		} else {
+		if (Keyboard::modifier_state_contains (ev->state, Keyboard::PrimaryModifier)) {
 			change_velocities (false, fine, allow_smush, together);
+		} else {
+			transpose (false, fine, allow_smush);
 		}
-
 		return true;
 
 	} else if (ev->keyval == GDK_Left && unmodified) {
@@ -771,6 +771,10 @@ MidiRegionView::key_press (GdkEventKey* ev)
 
 	} else if (ev->keyval == GDK_c && unmodified) {
 		channel_edit ();
+		return true;
+
+	} else if (ev->keyval == GDK_v && unmodified) {
+		velocity_edit ();
 		return true;
 	}
 
@@ -790,20 +794,15 @@ MidiRegionView::key_release (GdkEventKey* ev)
 void
 MidiRegionView::channel_edit ()
 {
-	bool first = true;
-	uint8_t current_channel = 0;
-
 	if (_selection.empty()) {
 		return;
 	}
-	
-	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
-		if (first) {
-			current_channel = (*i)->note()->channel ();
-			first = false;
-		}
-	}
 
+	/* pick a note somewhat at random (since Selection is a set<>) to
+	 * provide the "current" channel for the dialog.
+	 */
+
+	uint8_t current_channel = (*_selection.begin())->note()->channel ();
 	MidiChannelDialog channel_dialog (current_channel);
 	int ret = channel_dialog.run ();
 
@@ -822,6 +821,42 @@ MidiRegionView::channel_edit ()
 		Selection::iterator next = i;
 		++next;
 		change_note_channel (*i, new_channel);
+		i = next;
+	}
+
+	apply_diff ();
+}
+
+void
+MidiRegionView::velocity_edit ()
+{
+	if (_selection.empty()) {
+		return;
+	}
+	
+	/* pick a note somewhat at random (since Selection is a set<>) to
+	 * provide the "current" velocity for the dialog.
+	 */
+
+	uint8_t current_velocity = (*_selection.begin())->note()->velocity ();
+	MidiVelocityDialog velocity_dialog (current_velocity);
+	int ret = velocity_dialog.run ();
+
+	switch (ret) {
+	case Gtk::RESPONSE_OK:
+		break;
+	default:
+		return;
+	}
+
+	uint8_t new_velocity = velocity_dialog.velocity ();
+
+	start_note_diff_command (_("velocity edit"));
+
+	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ) {
+		Selection::iterator next = i;
+		++next;
+		change_note_velocity (*i, new_velocity, false);
 		i = next;
 	}
 
@@ -1281,6 +1316,8 @@ MidiRegionView::~MidiRegionView ()
 	if (_active_notes) {
 		end_write();
 	}
+
+	_selection_cleared_connection.disconnect ();
 
 	_selection.clear();
 	clear_events();

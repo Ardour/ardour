@@ -278,6 +278,7 @@ public:
 	void transpose (bool up, bool fine, bool allow_smush);
 	void nudge_notes (bool forward);
 	void channel_edit ();
+	void velocity_edit ();
 
 	void show_list_editor ();
 
