@@ -71,12 +71,15 @@ Surface::Surface (MackieControlProtocol& mcp, const std::string& device_name, ui
 	/* only the first Surface object has global controls */
 
 	if (_number == 0) {
+		DEBUG_TRACE (DEBUG::MackieControl, "Surface has global controls\n");
 		if (_mcp.device_info().has_global_controls()) {
 			init_controls ();
+			DEBUG_TRACE (DEBUG::MackieControl, "init_controls done\n");
 		}
 
 		if (_mcp.device_info().has_master_fader()) {
 			setup_master ();
+			DEBUG_TRACE (DEBUG::MackieControl, "setup_master done\n");
 		}
 	}
 
@@ -84,6 +87,7 @@ Surface::Surface (MackieControlProtocol& mcp, const std::string& device_name, ui
 	
 	if (n) {
 		init_strips (n);
+		DEBUG_TRACE (DEBUG::MackieControl, "init_strips done\n");
 	}
 	
 	connect_to_signals ();
@@ -136,24 +140,28 @@ void
 Surface::init_controls()
 {
 	Group* group;
-
+	
+	DEBUG_TRACE (DEBUG::MackieControl, "Surface::init_controls: creating groups\n");
 	groups["assignment"] = new Group  ("assignment");
 	groups["automation"] = new Group  ("automation");
 	groups["bank"] = new Group  ("bank");
 	groups["cursor"] = new Group  ("cursor");
 	groups["display"] = new Group  ("display");
-	groups["functions"] = new Group  ("functions");
+	groups["function select"] = new Group  ("function select");
+	groups["global view"] = new Group ("global view");
+	groups["master"] = new Group ("master");
 	groups["modifiers"] = new Group  ("modifiers");
 	groups["none"] = new Group  ("none");
 	groups["transport"] = new Group  ("transport");
 	groups["user"] = new Group  ("user");
-	groups["master"] = new Group ("master");
-	groups["view"] = new Group ("view");
+	groups["utilities"] = new Group  ("utilities");
 		
+	DEBUG_TRACE (DEBUG::MackieControl, "Surface::init_controls: creating jog wheel\n");
 	if (_mcp.device_info().has_jog_wheel()) {
 		_jog_wheel = new Mackie::JogWheel (_mcp);
 	}
 
+	DEBUG_TRACE (DEBUG::MackieControl, "Surface::init_controls: creating global controls\n");
 	for (uint32_t n = 0; mackie_global_controls[n].name[0]; ++n) {
 		group = groups[mackie_global_controls[n].group_name];
 		Control* control = mackie_global_controls[n].factory (*this, mackie_global_controls[n].id, mackie_global_controls[n].name, *group);
@@ -161,7 +169,7 @@ Surface::init_controls()
 	}
 
 	/* add global buttons */
-
+	DEBUG_TRACE (DEBUG::MackieControl, "Surface::init_controls: adding global buttons\n");
 	const map<Button::ID,GlobalButtonInfo>& global_buttons (_mcp.device_info().global_buttons());
 
 	for (map<Button::ID,GlobalButtonInfo>::const_iterator b = global_buttons.begin(); b != global_buttons.end(); ++b){
@@ -508,22 +516,22 @@ Surface::host_connection_confirmation (const MidiByteArray & bytes)
 void
 Surface::turn_it_on ()
 {
-	if (!_active) {
-		_active = true;
-		zero_controls ();
-		for (Strips::iterator s = strips.begin(); s != strips.end(); ++s) {
-			(*s)->notify_all ();
-		}
-		update_view_mode_display ();
-		if (_mcp.device_info ().has_master_fader ()) {
-			master_gain_changed ();
-		}
-		
-		if (_mcp.device_info ().has_global_controls ()) {
-			_mcp.update_global_button (Button::Read, _mcp.metering_active ());
-			_mcp.update_global_button (Button::Stop, _mcp.get_session ().transport_stopped ());
-			_mcp.update_global_button (Button::Play, (_mcp.get_session ().transport_speed () == 1.0f));
-		}
+	if (_active) {
+		return;
+	}
+
+	_active = true;
+	zero_controls ();
+	for (Strips::iterator s = strips.begin(); s != strips.end(); ++s) {
+		(*s)->notify_all ();
+	}
+	update_view_mode_display ();
+	if (_mcp.device_info ().has_master_fader ()) {
+		master_gain_changed ();
+	}
+
+	if (_mcp.device_info ().has_global_controls ()) {
+		_mcp.update_global_button (Button::Read, _mcp.metering_active ());
 	}
 }
 
@@ -635,7 +643,9 @@ Surface::periodic (uint64_t now_usecs)
 void
 Surface::write (const MidiByteArray& data) 
 {
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Surface::write for %1\n", data));
 	if (_active) {
+		DEBUG_TRACE (DEBUG::MackieControl, "Surface::write surface active\n");
 		_port->write (data);
 	}
 }

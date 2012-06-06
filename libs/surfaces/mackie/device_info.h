@@ -73,6 +73,8 @@ class DeviceInfo
 
 	static std::map<std::string,DeviceInfo> device_info;
 	static void reload_device_info();
+	
+	std::string& get_global_button_name(Button::ID);
 
     const std::map<Button::ID,GlobalButtonInfo>& global_buttons() const { return _global_buttons; }
     const std::map<Button::ID,StripButtonInfo>& strip_buttons() const { return _strip_buttons; }
@@ -91,6 +93,7 @@ class DeviceInfo
     bool     _no_handshake;
     bool     _has_meters;
     std::string _name;
+		std::string _global_button_name;
 
     std::map<Button::ID,GlobalButtonInfo> _global_buttons;
     std::map<Button::ID,StripButtonInfo>  _strip_buttons;

@@ -108,6 +108,7 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 	, _ipmidi_base (MIDI::IPMIDIPort::lowest_ipmidi_port_default)
 	, needs_ipmidi_restart (false)
 	, _metering_active (true)
+	, _initialized (false)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::MackieControlProtocol\n");
 
@@ -414,6 +415,10 @@ MackieControlProtocol::periodic ()
 		ipmidi_restart ();
 		return true;
 	}
+	
+	if (!_initialized) {
+		initialize();
+	}
 
 	struct timeval now;
 	uint64_t now_usecs;
@@ -430,10 +435,10 @@ MackieControlProtocol::periodic ()
 	return true;
 }
 
-
 void 
 MackieControlProtocol::update_timecode_beats_led()
 {
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose("MackieControlProtocol::update_timecode_beats_led(): %1\n", _timecode_type));
 	switch (_timecode_type) {
 		case ARDOUR::AnyTime::BBT:
 			update_global_led (Led::Beats, on);
@@ -473,6 +478,8 @@ MackieControlProtocol::update_global_led (int id, LedState ls)
 {
 	boost::shared_ptr<Surface> surface = surfaces.front();
 
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("MackieControlProtocol::update_global_led (%1, %2)\n", id, ls));
+	
 	if (surface->type() != mcu) {
 		return;
 	}
@@ -480,6 +487,7 @@ MackieControlProtocol::update_global_led (int id, LedState ls)
 	map<int,Control*>::iterator x = surface->controls_by_device_independent_id.find (id);
 	if (x != surface->controls_by_device_independent_id.end()) {
 		Led * led = dynamic_cast<Led*> (x->second);
+		DEBUG_TRACE (DEBUG::MackieControl, "Writing LedState\n");
 		surface->write (led->set_state (ls));
 	} else {
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Led %1 not found\n", id));
@@ -490,6 +498,7 @@ MackieControlProtocol::update_global_led (int id, LedState ls)
 void 
 MackieControlProtocol::update_surfaces()
 {
+	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::update_surfaces() init\n");
 	if (!_active) {
 		return;
 	}
@@ -498,6 +507,15 @@ MackieControlProtocol::update_surfaces()
 	// _current_initial_bank is initialised by set_state
 	switch_banks (_current_initial_bank, true);
 	
+	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::update_surfaces() finished\n");
+}
+
+void
+MackieControlProtocol::initialize()
+{
+	if (!surfaces.front()->active ()) {
+		return;
+	}
 	// sometimes the jog wheel is a pot
 	surfaces.front()->blank_jog_ring ();
 	
@@ -506,6 +524,8 @@ MackieControlProtocol::update_surfaces()
 	notify_record_state_changed();
 	notify_transport_state_changed();
 	update_timecode_beats_led();
+	
+	_initialized = true;
 }
 
 void 
@@ -755,8 +775,8 @@ MackieControlProtocol::format_timecode_timecode (framepos_t now_frame)
 	os << setw(2) << setfill('0') << timecode.hours;
 	os << setw(2) << setfill('0') << timecode.minutes;
 	os << setw(2) << setfill('0') << timecode.seconds;
-	os << ' ';
 	os << setw(2) << setfill('0') << timecode.frames;
+	os << ' ';
 
 	return os.str();
 }
@@ -881,7 +901,7 @@ MackieControlProtocol::notify_transport_state_changed()
 	// switch various play and stop buttons on / off
 	update_global_button (Button::Loop, session->get_play_loop());
 	update_global_button (Button::Play, session->transport_speed() == 1.0);
-	update_global_button (Button::Stop, !session->transport_rolling());
+	update_global_button (Button::Stop, session->transport_stopped ());
 	update_global_button (Button::Rewind, session->transport_speed() < 0.0);
 	update_global_button (Button::Ffwd, session->transport_speed() > 1.0);
 
@@ -925,7 +945,7 @@ MackieControlProtocol::notify_record_state_changed ()
 				ls = flashing;
 				break;
 			}
-			
+
 			surface->write (rec->set_state (ls));
 		}
 	}

@@ -289,6 +289,7 @@ class MackieControlProtocol
 	int16_t                  _ipmidi_base;
 	bool                      needs_ipmidi_restart;
 	bool                     _metering_active;
+	bool                     _initialized;
 
 	ARDOUR::RouteNotificationList _last_selected_routes;
 
@@ -302,6 +303,7 @@ class MackieControlProtocol
 	void gui_track_selection_changed (ARDOUR::RouteNotificationListPtr, bool save_list);
 	void _gui_track_selection_changed (ARDOUR::RouteNotificationList*, bool save_list);
 	void ipmidi_restart ();
+	void initialize ();
 	
 	/* BUTTON HANDLING */
 
