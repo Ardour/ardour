@@ -1337,9 +1337,9 @@ Editor::temporal_zoom_step (bool coarser)
 	nfpu = frames_per_unit;
 
 	if (coarser) {
-		nfpu *= 1.61803399;
+		nfpu = min (9e6, nfpu * 1.61803399);
 	} else {
-		nfpu = max(1.0,(nfpu/1.61803399));
+		nfpu = max (1.0, nfpu / 1.61803399);
 	}
 
 	temporal_zoom (nfpu);
