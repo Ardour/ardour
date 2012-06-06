@@ -938,7 +938,7 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Misc"),
 	     new FaderOption (
 		     "click-gain",
-		     _("Click Gain Level"),
+		     _("Click gain level"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_click_gain),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_click_gain)
 		     ));
