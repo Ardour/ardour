@@ -312,6 +312,11 @@ class PluginUIWindow : public Gtk::Window
 	Gtk::VBox vbox;
 	bool was_visible;
 	bool _keyboard_focused;
+#ifdef AUDIOUNIT_SUPPORT
+        int pre_deactivate_x;
+        int pre_deactivate_y;
+#endif
+
 	void keyboard_focused (bool yn);
 
 	void app_activated (bool);
