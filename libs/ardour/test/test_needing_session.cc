@@ -6,8 +6,6 @@
 #include "ardour/audioengine.h"
 #include "test_needing_session.h"
 
-extern void setup_libpbd_enums ();
-
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
@@ -56,10 +54,7 @@ TestNeedingSession::setUp ()
 	string const test_session_path = "libs/ardour/test/test_session";
 	system (string_compose ("rm -rf %1", test_session_path).c_str());
 	
-	init (false, true);
 	SessionEvent::create_per_thread_pool ("test", 512);
-
-	setup_libpbd_enums ();
 
 	test_receiver.listen_to (error);
 	test_receiver.listen_to (info);
@@ -83,7 +78,6 @@ TestNeedingSession::tearDown ()
 	
 	delete _session;
 
-	EnumWriter::destroy ();
 	MIDI::Manager::destroy ();
 	AudioEngine::destroy ();
 }
