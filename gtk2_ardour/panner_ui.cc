@@ -176,13 +176,6 @@ PannerUI::build_astyle_menu ()
 	pan_astyle_menu->items().push_back (MenuElem (_("Abs")));
 }
 
-boost::shared_ptr<PBD::Controllable>
-PannerUI::get_controllable()
-{
-        assert (!pan_bars.empty());
-	return pan_bars[0]->get_controllable();
-}
-
 void
 PannerUI::on_size_allocate (Allocation& a)
 {
@@ -197,10 +190,6 @@ PannerUI::set_width (Width w)
 
 PannerUI::~PannerUI ()
 {
-	for (vector<MonoPanner*>::iterator i = pan_bars.begin(); i != pan_bars.end(); ++i) {
-		delete (*i);
-	}
-
 	delete twod_panner;
 	delete big_window;
 	delete pan_menu;
@@ -422,11 +411,7 @@ PannerUI::effective_pan_display ()
                 _stereo_panner->queue_draw ();
         } else if (twod_panner) {
                 twod_panner->queue_draw ();
-        } else {
-                for (vector<MonoPanner*>::iterator i = pan_bars.begin(); i != pan_bars.end(); ++i) {
-                        (*i)->queue_draw ();
-                }
-	}
+        }
 }
 
 void

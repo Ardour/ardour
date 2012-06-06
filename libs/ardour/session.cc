@@ -116,8 +116,6 @@ PBD::Signal3<int,Session*,std::string,DataType> Session::MissingFile;
 
 PBD::Signal1<void, framepos_t> Session::StartTimeChanged;
 PBD::Signal1<void, framepos_t> Session::EndTimeChanged;
-PBD::Signal0<void> Session::AutoBindingOn;
-PBD::Signal0<void> Session::AutoBindingOff;
 PBD::Signal2<void,std::string, std::string> Session::Exported;
 PBD::Signal1<int,boost::shared_ptr<Playlist> > Session::AskAboutPlaylistDeletion;
 PBD::Signal0<void> Session::Quit;

@@ -233,8 +233,6 @@ Mixer_UI::Mixer_UI ()
 	list_hpane.show();
 	group_display.show();
 
-	auto_rebinding = FALSE;
-
 	_in_group_rebuild_or_clear = false;
 
 	MixerStrip::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::remove_strip, this, _1), gui_context());
@@ -888,12 +886,6 @@ Mixer_UI::redisplay_track_list ()
 		_session->sync_order_keys (N_("signal"));
 	}
 
-	// Resigc::bind all of the midi controls automatically
-
-	if (auto_rebinding) {
-		auto_rebind_midi_controls ();
-	}
-
 	_group_tabs->set_dirty ();
 }
 
@@ -921,88 +913,6 @@ Mixer_UI::strip_width_changed ()
 		}
 	}
 #endif
-
-}
-
-void
-Mixer_UI::set_auto_rebinding( bool val )
-{
-	if( val == TRUE )
-	{
-		auto_rebinding = TRUE;
-		Session::AutoBindingOff();
-	}
-	else
-	{
-		auto_rebinding = FALSE;
-		Session::AutoBindingOn();
-	}
-}
-
-void
-Mixer_UI::toggle_auto_rebinding()
-{
-	if (auto_rebinding)
-	{
-		set_auto_rebinding( FALSE );
-	}
-
-	else
-	{
-		set_auto_rebinding( TRUE );
-	}
-
-	auto_rebind_midi_controls();
-}
-
-void
-Mixer_UI::auto_rebind_midi_controls ()
-{
-	TreeModel::Children rows = track_model->children();
-	TreeModel::Children::iterator i;
-	int pos;
-
-	// Create bindings for all visible strips and remove those that are not visible
-	pos = 1;  // 0 is reserved for the master strip
-	for (i = rows.begin(); i != rows.end(); ++i) {
-		MixerStrip* strip = (*i)[track_columns.strip];
-
-		if ( (*i)[track_columns.visible] == true ) {  // add bindings for
-			// make the actual binding
-			//cout<<"Auto Binding:  Visible Strip Found: "<<strip->name()<<endl;
-
-			int controlValue = pos;
-			if( strip->route()->is_master() ) {
-				controlValue = 0;
-			}
-			else {
-				pos++;
-			}
-
-			PBD::Controllable::CreateBinding ( strip->solo_button->get_controllable().get(), controlValue, 0);
-			PBD::Controllable::CreateBinding ( strip->mute_button->get_controllable().get(), controlValue, 1);
-
-			if( strip->is_audio_track() ) {
-				PBD::Controllable::CreateBinding ( strip->rec_enable_button->get_controllable().get(), controlValue, 2);
-			}
-
-			PBD::Controllable::CreateBinding ( strip->gpm.get_controllable().get(), controlValue, 3);
-			PBD::Controllable::CreateBinding ( strip->panners.get_controllable().get(), controlValue, 4);
-
-		}
-		else {  // Remove any existing binding
-			PBD::Controllable::DeleteBinding ( strip->solo_button->get_controllable().get() );
-			PBD::Controllable::DeleteBinding ( strip->mute_button->get_controllable().get() );
-
-			if( strip->is_audio_track() ) {
-				PBD::Controllable::DeleteBinding ( strip->rec_enable_button->get_controllable().get() );
-			}
-
-			PBD::Controllable::DeleteBinding ( strip->gpm.get_controllable().get() );
-			PBD::Controllable::DeleteBinding ( strip->panners.get_controllable().get() ); // This only takes the first panner if there are multiples...
-		}
-
-	} // for
 
 }
 
