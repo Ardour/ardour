@@ -38,6 +38,7 @@
 #include "ardour_ui.h"
 #include "global_signals.h"
 #include "mono_panner.h"
+#include "mono_panner_editor.h"
 #include "rgb_macros.h"
 #include "utils.h"
 
@@ -246,6 +247,10 @@ MonoPanner::on_expose_event (GdkEventExpose*)
 bool
 MonoPanner::on_button_press_event (GdkEventButton* ev)
 {
+	if (PannerInterface::on_button_press_event (ev)) {
+		return true;
+	}
+	
         drag_start_x = ev->x;
         last_drag_x = ev->x;
 
@@ -304,6 +309,10 @@ MonoPanner::on_button_press_event (GdkEventButton* ev)
 bool
 MonoPanner::on_button_release_event (GdkEventButton* ev)
 {
+	if (PannerInterface::on_button_release_event (ev)) {
+		return true;
+	}
+
         if (ev->button != 1) {
                 return false;
         }
@@ -440,3 +449,8 @@ MonoPanner::color_handler ()
 	queue_draw ();
 }
 
+PannerEditor*
+MonoPanner::editor ()
+{
+	return new MonoPannerEditor (this);
+}

@@ -20,6 +20,7 @@
 #include <gtkmm.h>
 #include "gtkmm2ext/keyboard.h"
 #include "panner_interface.h"
+#include "panner_editor.h"
 #include "global_signals.h"
 
 #include "i18n.h"
@@ -34,6 +35,7 @@ PannerInterface::PannerInterface (boost::shared_ptr<Panner> p)
 	, _drag_data_window (0)
 	, _drag_data_label (0)
         , _dragging (false)
+	, _editor (0)
 {
         set_flags (Gtk::CAN_FOCUS);
 
@@ -48,6 +50,7 @@ PannerInterface::PannerInterface (boost::shared_ptr<Panner> p)
 PannerInterface::~PannerInterface ()
 {
 	delete _drag_data_window;
+	delete _editor;
 }
 
 void
@@ -135,3 +138,32 @@ PannerInterface::value_change ()
 	queue_draw ();
 }
 
+bool
+PannerInterface::on_button_press_event (GdkEventButton* ev)
+{
+	if (Gtkmm2ext::Keyboard::is_edit_event (ev)) {
+		edit ();
+		return true;
+	}
+
+	return false;
+}
+
+bool
+PannerInterface::on_button_release_event (GdkEventButton* ev)
+{
+	if (Gtkmm2ext::Keyboard::is_edit_event (ev)) {
+		/* We edited on the press, so claim the release */
+		return true;
+	}
+
+	return false;
+}
+
+void
+PannerInterface::edit ()
+{
+	delete _editor;
+	_editor = editor ();
+	_editor->show ();
+}

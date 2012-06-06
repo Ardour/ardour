@@ -140,6 +140,7 @@ class PannerUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	void build_pan_menu ();
 	void pan_reset ();
 	void pan_bypass_toggle ();
+	void pan_edit ();
 
 	void pan_automation_state_changed();
 	void pan_automation_style_changed();

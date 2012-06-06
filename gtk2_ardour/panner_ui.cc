@@ -37,7 +37,6 @@
 #include "stereo_panner.h"
 #include "mono_panner.h"
 
-
 #include "i18n.h"
 
 using namespace std;
@@ -388,6 +387,7 @@ PannerUI::build_pan_menu ()
 	bypass_menu_item->signal_toggled().connect (sigc::mem_fun(*this, &PannerUI::pan_bypass_toggle));
 
 	items.push_back (MenuElem (_("Reset"), sigc::mem_fun (*this, &PannerUI::pan_reset)));
+	items.push_back (MenuElem (_("Edit..."), sigc::mem_fun (*this, &PannerUI::pan_edit)));
 }
 
 void
@@ -395,6 +395,16 @@ PannerUI::pan_bypass_toggle ()
 {
 	if (bypass_menu_item && (_panshell->bypassed() != bypass_menu_item->get_active())) {
 		_panshell->set_bypassed (!_panshell->bypassed());
+	}
+}
+
+void
+PannerUI::pan_edit ()
+{
+	if (_mono_panner) {
+		_mono_panner->edit ();
+	} else if (_stereo_panner) {
+		_stereo_panner->edit ();
 	}
 }
 

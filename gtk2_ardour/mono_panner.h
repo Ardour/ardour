@@ -52,6 +52,8 @@ class MonoPanner : public PannerInterface
         bool on_key_press_event (GdkEventKey*);
 
   private:
+	PannerEditor* editor ();
+	
         boost::shared_ptr<PBD::Controllable> position_control;
         PBD::ScopedConnectionList connections;
         int drag_start_x;

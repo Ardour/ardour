@@ -38,6 +38,9 @@ class StereoPanner : public PannerInterface
 	StereoPanner (boost::shared_ptr<ARDOUR::Panner>);
 	~StereoPanner ();
 
+        boost::shared_ptr<PBD::Controllable> get_position_controllable() const { return position_control; }
+        boost::shared_ptr<PBD::Controllable> get_width_controllable() const { return width_control; }
+
 	sigc::signal<void> StartPositionGesture;
 	sigc::signal<void> StopPositionGesture;
 	sigc::signal<void> StartWidthGesture;
@@ -52,6 +55,8 @@ class StereoPanner : public PannerInterface
         bool on_key_press_event (GdkEventKey*);
 
   private:
+	PannerEditor* editor ();
+		   
         boost::shared_ptr<PBD::Controllable> position_control;
         boost::shared_ptr<PBD::Controllable> width_control;
         PBD::ScopedConnectionList connections;

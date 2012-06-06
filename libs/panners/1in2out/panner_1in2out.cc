@@ -121,6 +121,12 @@ Panner1in2out::clamp_position (double& p)
         return true;
 }
 
+pair<double, double>
+Panner1in2out::position_range () const
+{
+	return make_pair (0, 1);
+}
+
 double 
 Panner1in2out::position () const
 {

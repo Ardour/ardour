@@ -23,21 +23,30 @@
 #include <boost/shared_ptr.hpp>
 #include <gtkmm/drawingarea.h>
 #include <gtkmm/label.h>
+#include "pbd/destructible.h"
 
 namespace ARDOUR {
 	class Panner;
 }
 
+class PannerEditor;
+
 /** Parent class for some panner UI classes that contains some common code */
-class PannerInterface : public Gtk::DrawingArea
+class PannerInterface : public Gtk::DrawingArea, public PBD::Destructible
 {
 public:
 	PannerInterface (boost::shared_ptr<ARDOUR::Panner>);
 	virtual ~PannerInterface ();
 
+	boost::shared_ptr<ARDOUR::Panner> panner () {
+		return _panner;
+	}
+
+	void edit ();
+
 protected:
 	virtual void set_drag_data () = 0;
-	
+
 	void show_drag_data_window ();
 	void hide_drag_data_window ();
 	void value_change ();
@@ -45,6 +54,8 @@ protected:
         bool on_enter_notify_event (GdkEventCrossing *);
         bool on_leave_notify_event (GdkEventCrossing *);
 	bool on_key_release_event  (GdkEventKey *);
+	bool on_button_press_event (GdkEventButton*);
+	bool on_button_release_event (GdkEventButton*);
 
 	boost::shared_ptr<ARDOUR::Panner> _panner;
         Gtk::Window* _drag_data_window;
@@ -54,6 +65,9 @@ protected:
 private:
 	bool drag_data_timeout ();
 	sigc::connection _drag_data_timeout;
+
+	virtual PannerEditor* editor () = 0;
+	PannerEditor* _editor;
 };
 
 #endif

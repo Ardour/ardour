@@ -49,6 +49,9 @@ class Panner2in2out : public Panner
         bool clamp_position (double&);
         bool clamp_width (double&);
 
+	std::pair<double, double> position_range () const;
+	std::pair<double, double> width_range () const;
+	
         void set_position (double);
         void set_width (double);
 
