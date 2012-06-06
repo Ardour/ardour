@@ -665,12 +665,13 @@ MidiRegionView::scroll (GdkEventScroll* ev)
 
 	trackview.editor().verbose_cursor()->hide ();
 
-	bool fine = !Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier);
+	bool fine = !Keyboard::modifier_state_contains (ev->state, Keyboard::SecondaryModifier);
+	bool together = Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier);
 
 	if (ev->direction == GDK_SCROLL_UP) {
-		change_velocities (true, fine, false);
+		change_velocities (true, fine, false, together);
 	} else if (ev->direction == GDK_SCROLL_DOWN) {
-		change_velocities (false, fine, false);
+		change_velocities (false, fine, false, together);
 	}
 	return true;
 }
@@ -735,9 +736,10 @@ MidiRegionView::key_press (GdkEventKey* ev)
 
 		bool allow_smush = Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier);
 		bool fine = !Keyboard::modifier_state_contains (ev->state, Keyboard::SecondaryModifier);
+		bool together = Keyboard::modifier_state_contains (ev->state, Keyboard::PrimaryModifier);
 
 		if (Keyboard::modifier_state_contains (ev->state, Keyboard::PrimaryModifier)) {
-			change_velocities (true, fine, allow_smush);
+			change_velocities (true, fine, allow_smush, together);
 		} else {
 			transpose (true, fine, allow_smush);
 		}
@@ -747,12 +749,14 @@ MidiRegionView::key_press (GdkEventKey* ev)
 
 		bool allow_smush = Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier);
 		bool fine = !Keyboard::modifier_state_contains (ev->state, Keyboard::SecondaryModifier);
+		bool together = Keyboard::modifier_state_contains (ev->state, Keyboard::PrimaryModifier);
 
-		if (Keyboard::modifier_state_contains (ev->state, Keyboard::PrimaryModifier)) {
-			change_velocities (false, fine, allow_smush);
-		} else {
+		if (Keyboard::no_modifiers_active (ev->state)) {
 			transpose (false, fine, allow_smush);
+		} else {
+			change_velocities (false, fine, allow_smush, together);
 		}
+
 		return true;
 
 	} else if (ev->keyval == GDK_Left && unmodified) {
@@ -2824,9 +2828,10 @@ MidiRegionView::change_note_length (CanvasNoteEvent* event, Evoral::MusicalTime 
 }
 
 void
-MidiRegionView::change_velocities (bool up, bool fine, bool allow_smush)
+MidiRegionView::change_velocities (bool up, bool fine, bool allow_smush, bool all_together)
 {
 	int8_t delta;
+	int8_t value;
 
 	if (_selection.empty()) {
 		return;
@@ -2855,7 +2860,19 @@ MidiRegionView::change_velocities (bool up, bool fine, bool allow_smush)
 	for (Selection::iterator i = _selection.begin(); i != _selection.end();) {
 		Selection::iterator next = i;
 		++next;
-		change_note_velocity (*i, delta, true);
+
+		if (all_together) {
+			if (i == _selection.begin()) {
+				change_note_velocity (*i, delta, true);
+				value = (*i)->note()->velocity() + delta;
+			} else {
+				change_note_velocity (*i, value, false);
+			}
+
+		} else {
+			change_note_velocity (*i, delta, true);
+		}
+
 		i = next;
 	}
 

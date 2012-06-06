@@ -274,7 +274,7 @@ public:
 	void goto_previous_note (bool add_to_selection);
 	void goto_next_note (bool add_to_selection);
 	void change_note_lengths (bool, bool, Evoral::MusicalTime beats, bool start, bool end);
-	void change_velocities (bool up, bool fine, bool allow_smush);
+        void change_velocities (bool up, bool fine, bool allow_smush, bool all_together);
 	void transpose (bool up, bool fine, bool allow_smush);
 	void nudge_notes (bool forward);
 	void channel_edit ();
