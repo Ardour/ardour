@@ -60,6 +60,8 @@ main(int argc, char* argv[])
 	
 	CppUnit::CompilerOutputter compileroutputter (&collectedresults, std::cerr);
 	compileroutputter.write ();
+
+	ARDOUR::cleanup ();
 	
 	return collectedresults.wasSuccessful () ? 0 : 1;
 }
