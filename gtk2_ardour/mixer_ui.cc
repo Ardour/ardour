@@ -593,6 +593,12 @@ Mixer_UI::set_session (Session* sess)
 
 	if (_visible) {
 		show_window();
+
+		/* Bit of a hack; if we're here, we're opening the mixer because of our
+		   instant XML state having a show-mixer property.  Fix up the corresponding
+		   action state.
+		*/
+		ActionManager::check_toggleaction ("<Actions>/Common/toggle-mixer");
 	}
 
 	start_updating ();

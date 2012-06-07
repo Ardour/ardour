@@ -345,7 +345,19 @@ ActionManager::set_sensitive (vector<RefPtr<Action> >& actions, bool state)
 }
 
 void
+ActionManager::check_toggleaction (string n)
+{
+	set_toggleaction_state (n, true);
+}
+
+void
 ActionManager::uncheck_toggleaction (string n)
+{
+	set_toggleaction_state (n, false);
+}
+
+void
+ActionManager::set_toggleaction_state (string n, bool s)
 {
 	char const * name = n.c_str ();
 	
@@ -369,7 +381,7 @@ ActionManager::uncheck_toggleaction (string n)
         RefPtr<Action> act = get_action (group_name, action_name);
 	if (act) {
 	        RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
-       		tact->set_active (false);
+       		tact->set_active (s);
 	} else {
 		error << string_compose (_("Unknown action name: %1"),  name) << endmsg;
 	}
