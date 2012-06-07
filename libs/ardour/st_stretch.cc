@@ -203,7 +203,5 @@ STStretch::run (boost::shared_ptr<Region> a_region, Progress* progress)
 		}
 	}
 
-	tsr.done = true;
-
 	return ret;
 }
