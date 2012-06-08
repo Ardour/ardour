@@ -69,21 +69,26 @@ class SoundGrid : public boost::noncopyable
 
         static void driver_register (const WSDCoreHandle, const WSCoreCallbackTable*, const WSMixerConfig*);
 
+        static void set_pool (void* pool);
+
   private:
 	SoundGrid ();
 	static SoundGrid* _instance;
         
 	void* dl_handle;
 	void* _sg; // handle managed by SoundGrid library
-        WSDCoreHandle              _host_handle;
-        const WSCoreCallbackTable* _callback_table;
-        const WSMixerConfig*       _mixer_config;
+        WSDCoreHandle        _host_handle;
+        WSCoreCallbackTable  _callback_table;
+        WSMixerConfig        _mixer_config;
+        void* _pool;
 
 	void display_update ();
 	static void _display_update ();
 
         static WTErr _sg_callback (const WSControlID* pControlID);
         static WTErr sg_callback (const WSControlID* pControlID);
+
+        WTErr get (WSControlID*, WSControlInfo*);
 };
 
 } // namespace ARDOUR

@@ -25,11 +25,15 @@
 #include <WavesPublicAPI/WCMixerCore_API.h>
 
 #include "pbd/compose.h"
+#include "pbd/stacktrace.h"
 
 #include "ardour/debug.h"
 #include "ardour/soundgrid.h"
 
 #ifdef __APPLE__
+
+#include <Foundation/Foundation.h>
+
 const char* sndgrid_dll_name = "mixerapplicationcoresg.dylib";
 #else
 const char* sndgrid_dll_name = "mixerapplicationcoresg.so";
@@ -48,8 +52,7 @@ SoundGrid::SoundGrid ()
 	: dl_handle (0)
         , _sg (0)
         , _host_handle (0)
-        , _callback_table (0)
-        , _mixer_config (0)
+        , _pool (0)
 {
         const char *s;
         string path;
@@ -86,15 +89,37 @@ SoundGrid::~SoundGrid()
 	if (dl_handle) {
 		dlclose (dl_handle);
 	}
+
+#ifdef __APPLE__
+        if (_pool) {
+                NSAutoreleasePool* p = (NSAutoreleasePool*) _pool;
+                [p release];
+                _pool = 0;
+        }
+#endif
+}
+
+void
+SoundGrid::set_pool (void* pool)
+{
+        instance()._pool = pool;
 }
 
 int
 SoundGrid::initialize (void* window_handle)
 {
-        WTErr ret;
-        DEBUG_TRACE (DEBUG::SoundGrid, "Initializing SG core...\n");
-        ret = InitializeMixerCoreDLL (window_handle, sg_callback, &_sg);
-        DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Initialized SG core, ret = %1 core handle %2\n", ret, _sg));
+        if (!_sg) {
+                WTErr ret;
+                DEBUG_TRACE (DEBUG::SoundGrid, "Initializing SG core...\n");
+                if ((ret = InitializeMixerCoreDLL (window_handle, sg_callback, &_sg)) != eNoErr) {
+                        DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Initialized SG core, ret = %1 core handle %2\n", ret, _sg));
+                        return -1;
+                }
+                DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Initialized SG core, core handle %2\n", _sg));
+        } else {
+                DEBUG_TRACE (DEBUG::SoundGrid, "SG core already initialized...\n");
+        }
+
         return 0;
 }
 
@@ -127,10 +152,34 @@ SoundGrid::available ()
 	return instance().dl_handle != 0;
 }
 
+int
+SoundGrid::get (WSControlID* id, WSControlInfo* info)
+{
+        if (!_host_handle) {
+                return -1;
+        }
+
+        if (_callback_table.getControlInfoProc (_host_handle, this, id, info) != eNoErr) {
+                return -1;
+        }
+
+        return 0;
+}
+
 vector<string>
 SoundGrid::lan_port_names ()
 {
+        WTErr eRetVal;
 	std::vector<string> names;
+
+        WSAudioDevicesControlInfo audioDevices;
+        Init_WSAudioDevicesControlInfo(&audioDevices);
+        eRetVal = instance().get (&audioDevices.m_controlInfo.m_controlID, (WSControlInfo*)&audioDevices);
+
+        for (uint32_t n = 0; n < audioDevices.m_audioDevices.numberOfDevices; ++n) {
+                cerr << "Discovered audio device [" << audioDevices.m_audioDevices.deviceNames[n] << "]\n";
+        }
+
 	names.push_back ("00:00:00:1e:af - builtin ethernet controller");
 	return names;
 }
@@ -228,7 +277,7 @@ SoundGrid::driver_register (const WSDCoreHandle ch, const WSCoreCallbackTable* c
 {
         if (_instance) {
                 _instance->_host_handle = ch;
-                _instance->_callback_table = ct;
-                _instance->_mixer_config = mc;
+                _instance->_callback_table = *ct;
+                _instance->_mixer_config = *mc;
         }
 }

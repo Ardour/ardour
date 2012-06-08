@@ -59,6 +59,8 @@
 #endif
 
 #include "engine_dialog.h"
+#include "soundgrid.h"
+
 #include "i18n.h"
 
 using namespace std;
@@ -694,6 +696,11 @@ EngineControl::enumerate_devices (const string& driver)
 	} else if (driver == "CoreAudio") {
 		devices[driver] = enumerate_coreaudio_devices ();
 	} else if (driver == "SoundGrid") {
+
+                cerr << "calling soundgrid_init()\n";
+                soundgrid_init ();
+                cerr << "done with soundgrid_init()\n";
+
 		devices[driver] = SoundGrid::lan_port_names ();
 
 #else
@@ -913,6 +920,8 @@ EngineControl::driver_changed ()
 	string::size_type maxlen = 0;
 	int n = 0;
 
+        cerr << "Driver has changed, now set to " << driver << endl;
+
 	enumerate_devices (driver);
 
 	vector<string>& strings = devices[driver];
@@ -928,6 +937,7 @@ EngineControl::driver_changed ()
 	}
 
 	if (driver == _("SoundGrid")) {
+                
 		device_label.set_text (_("LAN Port"));
 
 		if (soundgrid_vbox.children().empty()) {

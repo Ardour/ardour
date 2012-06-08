@@ -201,7 +201,7 @@ libardour_sources = [
         'sndfile_helpers.cc',
         'sndfileimportable.cc',
         'sndfilesource.cc',
-        'soundgrid.cc',
+        'soundgrid.mm',
         'source.cc',
         'source_factory.cc',
         'speakers.cc',
