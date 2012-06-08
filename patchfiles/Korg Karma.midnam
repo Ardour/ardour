@@ -47,21 +47,6 @@
 				<AvailableChannel Channel="15" Available="true" />
 				<AvailableChannel Channel="16" Available="true" />
 			</AvailableForChannels>
-
-			<PatchBank Name="Combinations 0000" ROM="false">
-				<MIDICommands>
-					<ControlChange Control="0" Value="0" />
-					<ControlChange Control="32" Value="0" />
-				</MIDICommands>
-				<UsesPatchNameList Name="Combinations 0000" />
-			</PatchBank>
-			<PatchBank Name="Combinations 0001" ROM="false">
-				<MIDICommands>
-					<ControlChange Control="0" Value="0" />
-					<ControlChange Control="32" Value="1" />
-				</MIDICommands>
-				<UsesPatchNameList Name="Combinations 0001" />
-			</PatchBank>
 		</ChannelNameSet>
 
 		<ChannelNameSet Name="Programs">

@@ -65,16 +65,14 @@ public:
 		Table* t = manage (new Table (2, 3));
 		t->set_spacings (4);
 
-		Label* l = manage (new Label (_("Click audio file:")));
-		l->set_alignment (0, 0.5);
+		Label* l = manage (left_aligned_label (_("Click audio file:")));
 		t->attach (*l, 0, 1, 0, 1, FILL);
 		t->attach (_click_path_entry, 1, 2, 0, 1, FILL);
 		Button* b = manage (new Button (_("Browse...")));
 		b->signal_clicked().connect (sigc::mem_fun (*this, &ClickOptions::click_browse_clicked));
 		t->attach (*b, 2, 3, 0, 1, FILL);
 
-		l = manage (new Label (_("Click emphasis audio file:")));
-		l->set_alignment (0, 0.5);
+		l = manage (left_aligned_label (_("Click emphasis audio file:")));
 		t->attach (*l, 0, 1, 1, 2, FILL);
 		t->attach (_click_emphasis_path_entry, 1, 2, 1, 2, FILL);
 		b = manage (new Button (_("Browse...")));
@@ -171,16 +169,14 @@ public:
 		_limit_undo_spin.set_range (0, 512);
 		_limit_undo_spin.set_increments (1, 10);
 		t->attach (_limit_undo_spin, 1, 2, 0, 1, FILL | EXPAND);
-		Label* l = manage (new Label (_("commands")));
-		l->set_alignment (0, 0.5);
+		Label* l = manage (left_aligned_label (_("commands")));
 		t->attach (*l, 2, 3, 0, 1);
 
 		t->attach (_save_undo_button, 0, 1, 1, 2, FILL);
 		_save_undo_spin.set_range (0, 512);
 		_save_undo_spin.set_increments (1, 10);
 		t->attach (_save_undo_spin, 1, 2, 1, 2, FILL | EXPAND);
-		l = manage (new Label (_("commands")));
-		l->set_alignment (0, 0.5);
+		l = manage (left_aligned_label (_("commands")));
 		t->attach (*l, 2, 3, 1, 2);
 
 		_box->pack_start (*t);
@@ -318,9 +314,8 @@ public:
 		Table* t = manage (new Table (4, 4));
 		t->set_spacings (4);
 
-		Label* l = manage (new Label (_("Edit using:")));
+		Label* l = manage (left_aligned_label (_("Edit using:")));
 		l->set_name ("OptionsLabel");
-		l->set_alignment (0, 0.5);
 
 		t->attach (*l, 0, 1, 0, 1, FILL | EXPAND, FILL);
 		t->attach (_edit_modifier_combo, 1, 2, 0, 1, FILL | EXPAND, FILL);
@@ -345,9 +340,8 @@ public:
 			}
 		}
 
-		l = manage (new Label (_("Delete using:")));
+		l = manage (left_aligned_label (_("Delete using:")));
 		l->set_name ("OptionsLabel");
-		l->set_alignment (0, 0.5);
 
 		t->attach (*l, 0, 1, 1, 2, FILL | EXPAND, FILL);
 		t->attach (_delete_modifier_combo, 1, 2, 1, 2, FILL | EXPAND, FILL);
@@ -373,9 +367,8 @@ public:
 			}
 		}
 
-		l = manage (new Label (_("Insert note using:")));
+		l = manage (left_aligned_label (_("Insert note using:")));
 		l->set_name ("OptionsLabel");
-		l->set_alignment (0, 0.5);
 
 		t->attach (*l, 0, 1, 2, 3, FILL | EXPAND, FILL);
 		t->attach (_insert_note_modifier_combo, 1, 2, 2, 3, FILL | EXPAND, FILL);
@@ -401,9 +394,8 @@ public:
 			}
 		}
 
-		l = manage (new Label (_("Toggle snap using:")));
+		l = manage (left_aligned_label (_("Toggle snap using:")));
 		l->set_name ("OptionsLabel");
-		l->set_alignment (0, 0.5);
 
 		t->attach (*l, 0, 1, 3, 4, FILL | EXPAND, FILL);
 		t->attach (_snap_modifier_combo, 1, 2, 3, 4, FILL | EXPAND, FILL);
@@ -418,9 +410,8 @@ public:
 		_keyboard_layout_selector.set_active_text (Keyboard::current_binding_name());
 		_keyboard_layout_selector.signal_changed().connect (sigc::mem_fun (*this, &KeyboardOptions::bindings_changed));
 
-		l = manage (new Label (_("Keyboard layout:")));
+		l = manage (left_aligned_label (_("Keyboard layout:")));
 		l->set_name ("OptionsLabel");
-		l->set_alignment (0, 0.5);
 
 		t->attach (*l, 0, 1, 4, 5, FILL | EXPAND, FILL);
 		t->attach (_keyboard_layout_selector, 1, 2, 4, 5, FILL | EXPAND, FILL);
@@ -947,7 +938,7 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Misc"),
 	     new FaderOption (
 		     "click-gain",
-		     _("Click Gain Level"),
+		     _("Click gain level"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_click_gain),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_click_gain)
 		     ));

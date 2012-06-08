@@ -89,6 +89,11 @@ PluginUIWindow::PluginUIWindow (
 	: parent (win)
 	, was_visible (false)
 	, _keyboard_focused (false)
+#ifdef AUDIOUNIT_SUPPORT
+        , pre_deactivate_x (-1)
+        , pre_deactivate_y (-1)
+#endif
+
 {
 	bool have_gui = false;
 
@@ -341,11 +346,15 @@ PluginUIWindow::app_activated (bool)
 		if (yn) {
 			if (was_visible) {
 				_pluginui->activate ();
+                                if (pre_deactivate_x >= 0) {
+                                        move (pre_deactivate_x, pre_deactivate_y);
+                                }
 				present ();
 				was_visible = true;
 			}
 		} else {
 			was_visible = is_visible();
+                        get_position (pre_deactivate_x, pre_deactivate_y);
 			hide ();
 			_pluginui->deactivate ();
 		}
@@ -783,3 +792,4 @@ PlugUIBase::preset_added_or_removed ()
 	update_preset_list ();
 	update_preset ();
 }
+

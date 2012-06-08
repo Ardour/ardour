@@ -243,6 +243,8 @@ ARDOUR_UI::unload_session (bool hide_stuff)
 	delete _session;
 	_session = 0;
 
+	session_loaded = false;
+
 	update_buffer_load ();
 
 	return 0;

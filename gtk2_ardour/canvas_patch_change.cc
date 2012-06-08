@@ -46,13 +46,18 @@ CanvasPatchChange::CanvasPatchChange(
 		double          y,
 		string&         model_name,
 		string&         custom_device_mode,
-		ARDOUR::MidiModel::PatchChangePtr patch)
+		ARDOUR::MidiModel::PatchChangePtr patch,
+		bool active_channel)
 	: CanvasFlag(
 			region,
 			parent,
 			height,
-			ARDOUR_UI::config()->canvasvar_MidiPatchChangeOutline.get(),
-			ARDOUR_UI::config()->canvasvar_MidiPatchChangeFill.get(),
+			active_channel ?
+			ARDOUR_UI::config()->canvasvar_MidiPatchChangeOutline.get() :
+			ARDOUR_UI::config()->canvasvar_MidiPatchChangeInactiveChannelOutline.get(),
+			active_channel ?
+			ARDOUR_UI::config()->canvasvar_MidiPatchChangeFill.get() :
+			ARDOUR_UI::config()->canvasvar_MidiPatchChangeInactiveChannelFill.get(),
 			x,
 			y)
 	, _model_name(model_name)

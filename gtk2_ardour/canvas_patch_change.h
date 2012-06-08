@@ -45,7 +45,8 @@ public:
 		double          y,
 		string&         model_name,
 		string&         custom_device_mode,
-		ARDOUR::MidiModel::PatchChangePtr patch
+		ARDOUR::MidiModel::PatchChangePtr patch,
+		bool
 		);
 
 	virtual ~CanvasPatchChange();

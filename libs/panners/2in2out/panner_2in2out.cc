@@ -152,8 +152,8 @@ Panner2in2out::update ()
         */
         
         float pos[2];
-        double width = _pannable->pan_width_control->get_value();
-        const double direction_as_lr_fract = _pannable->pan_azimuth_control->get_value();
+        double width = this->width ();
+        const double direction_as_lr_fract = position ();
 
         if (width < 0.0) {
                 width = -width;
@@ -189,15 +189,28 @@ Panner2in2out::update ()
 bool
 Panner2in2out::clamp_position (double& p)
 {
-        double w = _pannable->pan_width_control->get_value();
+        double w = width ();
         return clamp_stereo_pan (p, w);
 }
 
 bool
 Panner2in2out::clamp_width (double& w)
 {
-        double p = _pannable->pan_azimuth_control->get_value();
+        double p = position ();
         return clamp_stereo_pan (p, w);
+}
+
+pair<double, double>
+Panner2in2out::position_range () const
+{
+	return make_pair (0.5 - (1 - width()) / 2, 0.5 + (1 - width()) / 2);
+}
+
+pair<double, double>
+Panner2in2out::width_range () const
+{
+	double const w = min (position(), (1 - position())) * 2;
+	return make_pair (-w, w);
 }
 
 bool

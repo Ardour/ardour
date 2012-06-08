@@ -236,7 +236,7 @@ PatchBank::set_state (const XMLTree& tree, const XMLNode& node)
 	} else {
 		XMLNode* use_patch_name_list = node.child ("UsesPatchNameList");
 		if (use_patch_name_list) {
-			_patch_list_name = node.property ("Name")->value();
+			_patch_list_name = use_patch_name_list->property ("Name")->value();
 		} else {
 			error << "Patch without patch name list - patchfile will be ignored" << endmsg;
 			return -1;
@@ -475,7 +475,7 @@ MIDINameDocument::MIDINameDocument (const string& filename)
 	if (!_document.read (filename)) {
 		throw failed_constructor ();
 	}
-	
+
 	set_state (_document, *_document.root());
 }
 

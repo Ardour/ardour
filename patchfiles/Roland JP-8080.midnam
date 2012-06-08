@@ -98,28 +98,6 @@
 				<AvailableChannel Channel="15" Available="true" />
 				<AvailableChannel Channel="16" Available="true" />
 			</AvailableForChannels>
-
-			<PatchBank Name="User Performances" ROM="false">
-				<MIDICommands>
-					<ControlChange Control="0" Value="85" />
-					<ControlChange Control="32" Value="0" />
-				</MIDICommands>
-				<UsesPatchNameList Name="User Performances" />
-			</PatchBank>
-			<PatchBank Name="Preset A Performances" ROM="false">
-				<MIDICommands>
-					<ControlChange Control="0" Value="85" />
-					<ControlChange Control="32" Value="64" />
-				</MIDICommands>
-				<UsesPatchNameList Name="Preset A Performances" />
-			</PatchBank>
-			<PatchBank Name="Preset B Performances" ROM="false">
-				<MIDICommands>
-					<ControlChange Control="0" Value="85" />
-					<ControlChange Control="32" Value="65" />
-				</MIDICommands>
-				<UsesPatchNameList Name="Preset B Performances" />
-			</PatchBank>
 		</ChannelNameSet>
 
 		<ChannelNameSet Name="Drums">
@@ -142,13 +120,6 @@
 				<AvailableChannel Channel="16" Available="true" />
 			</AvailableForChannels>
 
-			<PatchBank Name="User Drums" ROM="false">
-				<MIDICommands>
-					<ControlChange Control="0" Value="86" />
-					<ControlChange Control="32" Value="0" />
-				</MIDICommands>
-				<UsesPatchNameList Name="User Drums" />
-			</PatchBank>
 		</ChannelNameSet>
 
 		<PatchNameList Name="User Patches">

@@ -43,6 +43,7 @@ class Panner1in2out : public Panner
 
         void set_position (double);
         bool clamp_position (double&);
+	std::pair<double, double> position_range () const;
 
         double position() const;
 

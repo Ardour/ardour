@@ -86,7 +86,9 @@ namespace ActionManager {
 				     std::vector<std::string>& tooltips,
 				     std::vector<Gtk::AccelKey>& bindings);
 
+	extern void check_toggleaction (std::string);
 	extern void uncheck_toggleaction (std::string);
+	extern void set_toggleaction_state (std::string, bool);
 };
 
 #endif /* __libgtkmm2ext_actions_h__ */

@@ -388,8 +388,6 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 		}
 	}
 
-	tsr.done = true;
-
 	return ret;
 }
 

@@ -177,9 +177,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	const SessionDirectory& session_directory () const { return *(_session_dir.get()); }
 
-	static PBD::Signal0<void> AutoBindingOn;
-	static PBD::Signal0<void> AutoBindingOff;
-
 	static PBD::Signal1<void,std::string> Dialog;
 
 	int ensure_subdirs ();

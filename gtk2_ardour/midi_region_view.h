@@ -64,6 +64,7 @@ class AutomationRegionView;
 class MidiCutBuffer;
 class MidiListEditor;
 class EditNoteDialog;
+class NotePlayer;
 
 class MidiRegionView : public RegionView
 {
@@ -118,11 +119,7 @@ public:
 	void cut_copy_clear (Editing::CutCopyOp);
 	void paste (framepos_t pos, float times, const MidiCutBuffer&);
 
-	/** Add a new patch change flag to the canvas.
-	 * @param patch the patch change to add
-	 * @param the text to display in the flag
-	 */
-	void add_canvas_patch_change (ARDOUR::MidiModel::PatchChangePtr patch, const std::string& displaytext);
+	void add_canvas_patch_change (ARDOUR::MidiModel::PatchChangePtr patch, const std::string& displaytext, bool);
 
 	/** Look up the given time and channel in the 'automation' and set keys accordingly.
 	 * @param time the time of the patch change event
@@ -236,6 +233,8 @@ public:
 
 	MouseState mouse_state() const { return _mouse_state; }
 
+	void note_button_release ();
+
 	struct NoteResizeData {
 		ArdourCanvas::CanvasNote  *canvas_note;
 		ArdourCanvas::SimpleRect  *resize_rect;
@@ -274,10 +273,11 @@ public:
 	void goto_previous_note (bool add_to_selection);
 	void goto_next_note (bool add_to_selection);
 	void change_note_lengths (bool, bool, Evoral::MusicalTime beats, bool start, bool end);
-	void change_velocities (bool up, bool fine, bool allow_smush);
+        void change_velocities (bool up, bool fine, bool allow_smush, bool all_together);
 	void transpose (bool up, bool fine, bool allow_smush);
 	void nudge_notes (bool forward);
 	void channel_edit ();
+	void velocity_edit ();
 
 	void show_list_editor ();
 
@@ -341,13 +341,9 @@ private:
 	/** Play the NoteOn event of the given note immediately
 	 * and schedule the playback of the corresponding NoteOff event.
 	 */
-	void play_midi_note(boost::shared_ptr<NoteType> note);
-	void play_midi_chord (std::vector<boost::shared_ptr<NoteType> > notes);
-
-	/** Play the NoteOff-Event of the given note immediately
-	 * (scheduled by @ref play_midi_note()).
-	 */
-	bool play_midi_note_off(boost::shared_ptr<NoteType> note);
+	void play_midi_note (boost::shared_ptr<NoteType> note);
+	void start_playing_midi_note (boost::shared_ptr<NoteType> note);
+	void start_playing_midi_chord (std::vector<boost::shared_ptr<NoteType> > notes);
 
 	void clear_events();
 
@@ -465,7 +461,7 @@ private:
 	void maybe_select_by_position (GdkEventButton* ev, double x, double y);
 	void get_events (Events& e, Evoral::Sequence<Evoral::MusicalTime>::NoteOperator op, uint8_t val, int chan_mask = 0);
 
-	void display_patch_changes_on_channel (uint8_t);
+	void display_patch_changes_on_channel (uint8_t, bool);
 
 	void connect_to_diskstream ();
 	void data_recorded (boost::weak_ptr<ARDOUR::MidiSource>);
@@ -481,6 +477,8 @@ private:
 
 	Gdk::Cursor* pre_enter_cursor;
 	Gdk::Cursor* pre_press_cursor;
+
+	NotePlayer* _note_player;
 };
 
 

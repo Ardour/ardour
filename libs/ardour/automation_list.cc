@@ -381,6 +381,7 @@ AutomationList::deserialize_events (const XMLNode& node)
 int
 AutomationList::set_state (const XMLNode& node, int version)
 {
+	LocaleGuard lg (X_("POSIX"));
 	XMLNodeList nlist = node.children();
 	XMLNode* nsos;
 	XMLNodeIterator niter;

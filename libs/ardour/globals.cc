@@ -382,6 +382,7 @@ ARDOUR::cleanup ()
 #ifdef LXVST_SUPPORT
 	vstfx_exit();
 #endif
+	EnumWriter::destroy ();
 	return 0;
 }
 

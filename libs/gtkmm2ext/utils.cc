@@ -624,3 +624,10 @@ Gtkmm2ext::fit_to_pixels (cairo_t* cr, std::string name, double avail)
 	return std::make_pair (name, width);
 }
 
+Gtk::Label *
+Gtkmm2ext::left_aligned_label (string const & t)
+{
+	Gtk::Label* l = new Gtk::Label (t);
+	l->set_alignment (0, 0.5);
+	return l;
+}

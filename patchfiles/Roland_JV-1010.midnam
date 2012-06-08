@@ -142,13 +142,6 @@
 				</MIDICommands>
 				<UsesPatchNameList Name="Performances PR-A" />
 			</PatchBank>
-			<PatchBank Name="Performances PR-B" ROM="false">
-				<MIDICommands>
-					<ControlChange Control="0" Value="81" />
-					<ControlChange Control="32" Value="1" />
-				</MIDICommands>
-				<UsesPatchNameList Name="Performances PR-B" />
-			</PatchBank>
 		</ChannelNameSet>
 
 		<ChannelNameSet Name="Drums">

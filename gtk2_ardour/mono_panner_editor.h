@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2011 Paul Davis
+    Copyright (C) 2012 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,41 +14,30 @@
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
 */
 
-#ifndef __gtk2_ardour_note_player_h__
-#define __gtk2_ardour_note_player_h__
+#include <gtkmm.h>
+#include "panner_editor.h"
 
-#include <vector>
-#include <boost/shared_ptr.hpp>
-#include <sigc++/trackable.h>
+class MonoPanner;
 
-#include "evoral/Note.hpp"
-
-namespace ARDOUR {
-	class MidiTrack;
-}
-
-class NotePlayer : public sigc::trackable {
+/** Editor dialog for the mono panner */
+class MonoPannerEditor : public PannerEditor
+{
 public:
-	typedef Evoral::Note<Evoral::MusicalTime> NoteType;
-
-	NotePlayer (boost::shared_ptr<ARDOUR::MidiTrack>);
-	~NotePlayer ();
-
-	void add (boost::shared_ptr<NoteType>);
-	void play ();
-	void on ();
-	void off ();
-	void clear ();
-
-	static bool _off (NotePlayer*);
+	MonoPannerEditor (MonoPanner *);
 
 private:
-	typedef std::vector< boost::shared_ptr<NoteType> > Notes;
+	void panner_going_away ();
+	void update_editor ();
+	void left_changed ();
+	void right_changed ();
+	
+	MonoPanner* _panner;
+	Gtk::SpinButton _left;
+	Gtk::SpinButton _right;
+	bool _ignore_changes;
 
-	boost::shared_ptr<ARDOUR::MidiTrack> track;
-	Notes notes;
+	PBD::ScopedConnectionList _connections;
 };
-
-#endif /* __gtk2_ardour_note_player_h__ */

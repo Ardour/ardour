@@ -95,7 +95,7 @@ WMSDErr
 WMSD_SurfaceDisplayUpdate (const WSDSurfaceHandle /*surfaceHandle*/, 
                            const struct WSControlID* /*pControlID*/)
 {
-        DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("SurfaceDriver:%1\n", __FUNCTION__));
+        // DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("SurfaceDriver:%1\n", __FUNCTION__));
         return eNoErr;
 }
 

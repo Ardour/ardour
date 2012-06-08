@@ -167,15 +167,20 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 
 	VBox* fkey_packer = manage (new VBox);
 	HBox* profile_packer = manage (new HBox);
-
+	HBox* observation_packer = manage (new HBox);
+	
 	l = manage (new Gtk::Label (_("Profile/Settings:")));
 	profile_packer->pack_start (*l, false, false);
 	profile_packer->pack_start (_profile_combo, true, true);
 	profile_packer->set_spacing (12);
 	profile_packer->set_border_width (12);
+	
+	l = manage (new Gtk::Label (_("* Button available at the original Mackie MCU PRO or current device if enabled (NOT implemented yet). Device specific name presented.")));
+	observation_packer->pack_start (*l, false, false);
 
 	fkey_packer->pack_start (*profile_packer, false, false);
 	fkey_packer->pack_start (function_key_scroller, true, true);
+	fkey_packer->pack_start (*observation_packer, false, false);
 	fkey_packer->set_spacing (12);
 	function_key_scroller.set_size_request (700,700);
 	function_key_scroller.property_shadow_type() = Gtk::SHADOW_NONE;
@@ -340,13 +345,18 @@ MackieControlProtocolGUI::refresh_function_key_editor ()
 
 	TreeModel::Row row;
 	DeviceProfile dp (_cp.device_profile());
+	DeviceInfo di;
 
 	for (int n = 0; n < Mackie::Button::FinalGlobalButton; ++n) {
 
 		Mackie::Button::ID bid = (Mackie::Button::ID) n;
 
 		row = *(function_key_model->append());
-		row[function_key_columns.name] = Mackie::Button::id_to_name (bid);
+		if (di.global_buttons().find (bid) == di.global_buttons().end()) {
+			row[function_key_columns.name] = Mackie::Button::id_to_name (bid);
+		} else {
+			row[function_key_columns.name] = di.get_global_button_name (bid) + "*";
+		}
 		row[function_key_columns.id] = bid;
 
 		Glib::RefPtr<Gtk::Action> act;

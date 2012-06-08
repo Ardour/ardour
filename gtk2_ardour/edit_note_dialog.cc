@@ -20,6 +20,8 @@
 #include <gtkmm/stock.h>
 #include <gtkmm/table.h>
 
+#include "gtkmm2ext/utils.h"
+
 #include "canvas-note-event.h"
 #include "edit_note_dialog.h"
 #include "midi_region_view.h"
@@ -27,6 +29,7 @@
 #include "i18n.h"
 
 using namespace Gtk;
+using namespace Gtkmm2ext;
 
 /**
  *    EditNoteDialog constructor.
@@ -46,8 +49,7 @@ EditNoteDialog::EditNoteDialog (MidiRegionView* rv, Gnome::Canvas::CanvasNoteEve
 
 	int r = 0;
 
-	Label* l = manage (new Label (_("Channel")));
-	l->set_alignment (0, 0.5);
+	Label* l = manage (left_aligned_label (_("Channel")));
 	table->attach (*l, 0, 1, r, r + 1);
 	table->attach (_channel, 1, 2, r, r + 1);
 	++r;
@@ -56,8 +58,7 @@ EditNoteDialog::EditNoteDialog (MidiRegionView* rv, Gnome::Canvas::CanvasNoteEve
 	_channel.set_increments (1, 2);
 	_channel.set_value (ev->note()->channel () + 1);
 
-	l = manage (new Label (_("Pitch")));
-	l->set_alignment (0, 0.5);
+	l = manage (left_aligned_label (_("Pitch")));
 	table->attach (*l, 0, 1, r, r + 1);
 	table->attach (_pitch, 1, 2, r, r + 1);
 	++r;
@@ -66,8 +67,7 @@ EditNoteDialog::EditNoteDialog (MidiRegionView* rv, Gnome::Canvas::CanvasNoteEve
 	_pitch.set_increments (1, 10);
 	_pitch.set_value (ev->note()->note ());
 
-	l = manage (new Label (_("Velocity")));
-	l->set_alignment (0, 0.5);
+	l = manage (left_aligned_label (_("Velocity")));
 	table->attach (*l, 0, 1, r, r + 1);
 	table->attach (_velocity, 1, 2, r, r + 1);
 	++r;
@@ -76,8 +76,7 @@ EditNoteDialog::EditNoteDialog (MidiRegionView* rv, Gnome::Canvas::CanvasNoteEve
 	_velocity.set_increments (1, 10);
 	_velocity.set_value (ev->note()->velocity ());
 
-	l = manage (new Label (_("Time")));
-	l->set_alignment (0, 0.5);
+	l = manage (left_aligned_label (_("Time")));
 	table->attach (*l, 0, 1, r, r + 1);
 	table->attach (_time_clock, 1, 2, r, r + 1);
 	++r;
@@ -86,8 +85,7 @@ EditNoteDialog::EditNoteDialog (MidiRegionView* rv, Gnome::Canvas::CanvasNoteEve
 	_time_clock.set_mode (AudioClock::BBT);
 	_time_clock.set (_region_view->source_relative_time_converter().to (ev->note()->time ()), true);
 
-	l = manage (new Label (_("Length")));
-	l->set_alignment (0, 0.5);
+	l = manage (left_aligned_label (_("Length")));
 	table->attach (*l, 0, 1, r, r + 1);
 	table->attach (_length_clock, 1, 2, r, r + 1);
 	++r;

@@ -41,7 +41,7 @@ public:
 		Gtk::Widget *,
 		std::string const &,
 		std::string const &,
-		bool visible = 0,
+		bool visible = false,
 		boost::function<boost::optional<bool> ()> = 0
 		);
 	

@@ -1337,9 +1337,9 @@ Editor::temporal_zoom_step (bool coarser)
 	nfpu = frames_per_unit;
 
 	if (coarser) {
-		nfpu *= 1.61803399;
+		nfpu = min (9e6, nfpu * 1.61803399);
 	} else {
-		nfpu = max(1.0,(nfpu/1.61803399));
+		nfpu = max (1.0, nfpu / 1.61803399);
 	}
 
 	temporal_zoom (nfpu);
@@ -4171,12 +4171,15 @@ Editor::paste_internal (framepos_t position, float times)
 
 	/* get everything in the correct order */
 
-	if (!selection->tracks.empty()) {
-		/* there are some selected tracks, so paste to them */
+	if (_edit_point == Editing::EditAtMouse && entered_track) {
+		/* With the mouse edit point, paste onto the track under the mouse */
+		ts.push_back (entered_track);
+	} else if (!selection->tracks.empty()) {
+		/* Otherwise, if there are some selected tracks, paste to them */
 		ts = selection->tracks.filter_to_unique_playlists ();
 		sort_track_selection (ts);
 	} else if (_last_cut_copy_source_track) {
-		/* otherwise paste to the track that the cut/copy came from;
+		/* Otherwise paste to the track that the cut/copy came from;
 		   see discussion in mantis #3333.
 		*/
 		ts.push_back (_last_cut_copy_source_track);
@@ -5388,24 +5391,6 @@ Editor::split_region ()
 	split_regions_at (where, rs);
 }
 
-void
-Editor::ensure_entered_track_selected (bool op_really_wants_one_track_if_none_are_selected)
-{
-	if (entered_track && mouse_mode == MouseObject) {
-		if (!selection->tracks.empty()) {
-			if (!selection->selected (entered_track)) {
-				selection->add (entered_track);
-			}
-		} else {
-			/* there is no selection, but this operation requires/prefers selected objects */
-
-			if (op_really_wants_one_track_if_none_are_selected) {
-				selection->set (entered_track);
-			}
-		}
-	}
-}
-
 struct EditorOrderRouteSorter {
     bool operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
 	    /* use of ">" forces the correct sort order */
@@ -6080,8 +6065,7 @@ Editor::close_region_gaps ()
 	Table table (2, 3);
 	table.set_spacings (12);
 	table.set_border_width (12);
-	Label* l = manage (new Label (_("Crossfade length")));
-	l->set_alignment (0, 0.5);
+	Label* l = manage (left_aligned_label (_("Crossfade length")));
 	table.attach (*l, 0, 1, 0, 1);
 
 	SpinButton spin_crossfade (1, 0);
@@ -6092,8 +6076,7 @@ Editor::close_region_gaps ()
 
 	table.attach (*manage (new Label (_("ms"))), 2, 3, 0, 1);
 
-	l = manage (new Label (_("Pull-back length")));
-	l->set_alignment (0, 0.5);
+	l = manage (left_aligned_label (_("Pull-back length")));
 	table.attach (*l, 0, 1, 1, 2);
 
 	SpinButton spin_pullback (1, 0);

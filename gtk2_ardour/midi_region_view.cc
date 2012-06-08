@@ -61,6 +61,7 @@
 #include "midi_streamview.h"
 #include "midi_time_axis.h"
 #include "midi_util.h"
+#include "midi_velocity_dialog.h"
 #include "mouse_cursors.h"
 #include "note_player.h"
 #include "public_editor.h"
@@ -109,6 +110,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	, _last_event_y (0)
 	, pre_enter_cursor (0)
 	, pre_press_cursor (0)
+	, _note_player (0)
 {
 	_note_group->raise_to_top();
 	PublicEditor::DropDownKeys.connect (sigc::mem_fun (*this, &MidiRegionView::drop_down_keys));
@@ -149,6 +151,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	, _last_event_y (0)
 	, pre_enter_cursor (0)
 	, pre_press_cursor (0)
+	, _note_player (0)
 {
 	_note_group->raise_to_top();
 	PublicEditor::DropDownKeys.connect (sigc::mem_fun (*this, &MidiRegionView::drop_down_keys));
@@ -197,6 +200,7 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other)
 	, _last_event_y (0)
 	, pre_enter_cursor (0)
 	, pre_press_cursor (0)
+	, _note_player (0)
 {
 	Gdk::Color c;
 	int r,g,b,a;
@@ -231,6 +235,7 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other, boost::shared_ptr<M
 	, _last_event_y (0)
 	, pre_enter_cursor (0)
 	, pre_press_cursor (0)
+	, _note_player (0)
 {
 	Gdk::Color c;
 	int r,g,b,a;
@@ -317,6 +322,8 @@ MidiRegionView::connect_to_diskstream ()
 bool
 MidiRegionView::canvas_event(GdkEvent* ev)
 {
+	bool r;
+	
 	switch (ev->type) {
 	case GDK_ENTER_NOTIFY:
 	case GDK_LEAVE_NOTIFY:
@@ -356,7 +363,10 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 		return button_press (&ev->button);
 
 	case GDK_BUTTON_RELEASE:
-		return button_release (&ev->button);
+		r = button_release (&ev->button);
+		delete _note_player;
+		_note_player = 0;
+		return r;
 
 	case GDK_ENTER_NOTIFY:
 		return enter_notify (&ev->crossing);
@@ -665,12 +675,13 @@ MidiRegionView::scroll (GdkEventScroll* ev)
 
 	trackview.editor().verbose_cursor()->hide ();
 
-	bool fine = !Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier);
+	bool fine = !Keyboard::modifier_state_contains (ev->state, Keyboard::SecondaryModifier);
+	bool together = Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier);
 
 	if (ev->direction == GDK_SCROLL_UP) {
-		change_velocities (true, fine, false);
+		change_velocities (true, fine, false, together);
 	} else if (ev->direction == GDK_SCROLL_DOWN) {
-		change_velocities (false, fine, false);
+		change_velocities (false, fine, false, together);
 	}
 	return true;
 }
@@ -735,9 +746,10 @@ MidiRegionView::key_press (GdkEventKey* ev)
 
 		bool allow_smush = Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier);
 		bool fine = !Keyboard::modifier_state_contains (ev->state, Keyboard::SecondaryModifier);
+		bool together = Keyboard::modifier_state_contains (ev->state, Keyboard::Level4Modifier);
 
 		if (Keyboard::modifier_state_contains (ev->state, Keyboard::PrimaryModifier)) {
-			change_velocities (true, fine, allow_smush);
+			change_velocities (true, fine, allow_smush, together);
 		} else {
 			transpose (true, fine, allow_smush);
 		}
@@ -747,9 +759,10 @@ MidiRegionView::key_press (GdkEventKey* ev)
 
 		bool allow_smush = Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier);
 		bool fine = !Keyboard::modifier_state_contains (ev->state, Keyboard::SecondaryModifier);
+		bool together = Keyboard::modifier_state_contains (ev->state, Keyboard::Level4Modifier);
 
 		if (Keyboard::modifier_state_contains (ev->state, Keyboard::PrimaryModifier)) {
-			change_velocities (false, fine, allow_smush);
+			change_velocities (false, fine, allow_smush, together);
 		} else {
 			transpose (false, fine, allow_smush);
 		}
@@ -767,6 +780,10 @@ MidiRegionView::key_press (GdkEventKey* ev)
 
 	} else if (ev->keyval == GDK_c && unmodified) {
 		channel_edit ();
+		return true;
+
+	} else if (ev->keyval == GDK_v && unmodified) {
+		velocity_edit ();
 		return true;
 	}
 
@@ -786,20 +803,15 @@ MidiRegionView::key_release (GdkEventKey* ev)
 void
 MidiRegionView::channel_edit ()
 {
-	bool first = true;
-	uint8_t current_channel = 0;
-
 	if (_selection.empty()) {
 		return;
 	}
-	
-	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
-		if (first) {
-			current_channel = (*i)->note()->channel ();
-			first = false;
-		}
-	}
 
+	/* pick a note somewhat at random (since Selection is a set<>) to
+	 * provide the "current" channel for the dialog.
+	 */
+
+	uint8_t current_channel = (*_selection.begin())->note()->channel ();
 	MidiChannelDialog channel_dialog (current_channel);
 	int ret = channel_dialog.run ();
 
@@ -818,6 +830,42 @@ MidiRegionView::channel_edit ()
 		Selection::iterator next = i;
 		++next;
 		change_note_channel (*i, new_channel);
+		i = next;
+	}
+
+	apply_diff ();
+}
+
+void
+MidiRegionView::velocity_edit ()
+{
+	if (_selection.empty()) {
+		return;
+	}
+	
+	/* pick a note somewhat at random (since Selection is a set<>) to
+	 * provide the "current" velocity for the dialog.
+	 */
+
+	uint8_t current_velocity = (*_selection.begin())->note()->velocity ();
+	MidiVelocityDialog velocity_dialog (current_velocity);
+	int ret = velocity_dialog.run ();
+
+	switch (ret) {
+	case Gtk::RESPONSE_OK:
+		break;
+	default:
+		return;
+	}
+
+	uint8_t new_velocity = velocity_dialog.velocity ();
+
+	start_note_diff_command (_("velocity edit"));
+
+	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ) {
+		Selection::iterator next = i;
+		++next;
+		change_note_velocity (*i, new_velocity, false);
 		i = next;
 	}
 
@@ -1145,15 +1193,15 @@ MidiRegionView::display_patch_changes ()
 	uint16_t chn_mask = mtv->channel_selector().get_selected_channels();
 
 	for (uint8_t i = 0; i < 16; ++i) {
-		if (chn_mask & (1<<i)) {
-			display_patch_changes_on_channel (i);
-		}
-		/* TODO gray-out patch instad of not displaying it */
+		display_patch_changes_on_channel (i, chn_mask & (1 << i));
 	}
 }
 
+/** @param active_channel true to display patch changes fully, false to display
+ * them `greyed-out' (as on an inactive channel)
+ */
 void
-MidiRegionView::display_patch_changes_on_channel (uint8_t channel)
+MidiRegionView::display_patch_changes_on_channel (uint8_t channel, bool active_channel)
 {
 	for (MidiModel::PatchChanges::const_iterator i = _model->patch_changes().begin(); i != _model->patch_changes().end(); ++i) {
 
@@ -1168,12 +1216,12 @@ MidiRegionView::display_patch_changes_on_channel (uint8_t channel)
 				_model_name, _custom_device_mode, channel, patch_key);
 
 		if (patch != 0) {
-			add_canvas_patch_change (*i, patch->name());
+			add_canvas_patch_change (*i, patch->name(), active_channel);
 		} else {
 			char buf[16];
 			/* program and bank numbers are zero-based: convert to one-based: MIDI_BP_ZERO */
 			snprintf (buf, 16, "%d %d", (*i)->program() + MIDI_BP_ZERO , (*i)->bank() + MIDI_BP_ZERO);
-			add_canvas_patch_change (*i, buf);
+			add_canvas_patch_change (*i, buf, active_channel);
 		}
 	}
 }
@@ -1277,6 +1325,8 @@ MidiRegionView::~MidiRegionView ()
 	if (_active_notes) {
 		end_write();
 	}
+
+	_selection_cleared_connection.disconnect ();
 
 	_selection.clear();
 	clear_events();
@@ -1498,13 +1548,15 @@ MidiRegionView::play_midi_note(boost::shared_ptr<NoteType> note)
 		return;
 	}
 
-	NotePlayer* np = new NotePlayer (route_ui->midi_track());
+	NotePlayer* np = new NotePlayer (route_ui->midi_track ());
 	np->add (note);
 	np->play ();
+
+	/* NotePlayer deletes itself */
 }
 
 void
-MidiRegionView::play_midi_chord (vector<boost::shared_ptr<NoteType> > notes)
+MidiRegionView::start_playing_midi_note(boost::shared_ptr<NoteType> note)
 {
 	if (_no_sound_notes || !Config->get_sound_midi_notes()) {
 		return;
@@ -1516,13 +1568,33 @@ MidiRegionView::play_midi_chord (vector<boost::shared_ptr<NoteType> > notes)
 		return;
 	}
 
-	NotePlayer* np = new NotePlayer (route_ui->midi_track());
+	delete _note_player;
+	_note_player = new NotePlayer (route_ui->midi_track ());
+	_note_player->add (note);
+	_note_player->on ();
+}
 
-	for (vector<boost::shared_ptr<NoteType> >::iterator n = notes.begin(); n != notes.end(); ++n) {
-		np->add (*n);
+void
+MidiRegionView::start_playing_midi_chord (vector<boost::shared_ptr<NoteType> > notes)
+{
+	if (_no_sound_notes || !Config->get_sound_midi_notes()) {
+		return;
 	}
 
-	np->play ();
+	RouteUI* route_ui = dynamic_cast<RouteUI*> (&trackview);
+
+	if (!route_ui || !route_ui->midi_track()) {
+		return;
+	}
+
+	delete _note_player;
+	_note_player = new NotePlayer (route_ui->midi_track());
+
+	for (vector<boost::shared_ptr<NoteType> >::iterator n = notes.begin(); n != notes.end(); ++n) {
+		_note_player->add (*n);
+	}
+
+	_note_player->on ();
 }
 
 
@@ -1715,8 +1787,13 @@ MidiRegionView::step_sustain (Evoral::MusicalTime beats)
 	change_note_lengths (false, false, beats, false, true);
 }
 
+/** Add a new patch change flag to the canvas.
+ * @param patch the patch change to add
+ * @param the text to display in the flag
+ * @param active_channel true to display the flag as on an active channel, false to grey it out for an inactive channel.
+ */
 void
-MidiRegionView::add_canvas_patch_change (MidiModel::PatchChangePtr patch, const string& displaytext)
+MidiRegionView::add_canvas_patch_change (MidiModel::PatchChangePtr patch, const string& displaytext, bool active_channel)
 {
 	assert (patch->time() >= 0);
 
@@ -1732,7 +1809,8 @@ MidiRegionView::add_canvas_patch_change (MidiModel::PatchChangePtr patch, const 
 		                      x, 1.0,
 		                      _model_name,
 		                      _custom_device_mode,
-		                      patch)
+		                      patch,
+				      active_channel)
 		          );
 
 	// Show unless patch change is beyond the region bounds
@@ -2291,7 +2369,7 @@ MidiRegionView::add_to_selection (CanvasNoteEvent* ev)
 
 	if (_selection.insert (ev).second) {
 		ev->set_selected (true);
-		play_midi_note ((ev)->note());
+		start_playing_midi_note ((ev)->note());
 	}
 
 	if (add_mrv_selection) {
@@ -2332,13 +2410,13 @@ MidiRegionView::move_selection(double dx, double dy, double cumulative_dy)
 				shifted.push_back (moved_note);
 			}
 
-			play_midi_chord (shifted);
+			start_playing_midi_chord (shifted);
 
 		} else if (!to_play.empty()) {
 
 			boost::shared_ptr<NoteType> moved_note (new NoteType (*to_play.front()));
 			moved_note->set_note (moved_note->note() + cumulative_dy);
-			play_midi_note (moved_note);
+			start_playing_midi_note (moved_note);
 		}
 	}
 }
@@ -2824,9 +2902,10 @@ MidiRegionView::change_note_length (CanvasNoteEvent* event, Evoral::MusicalTime 
 }
 
 void
-MidiRegionView::change_velocities (bool up, bool fine, bool allow_smush)
+MidiRegionView::change_velocities (bool up, bool fine, bool allow_smush, bool all_together)
 {
 	int8_t delta;
+	int8_t value;
 
 	if (_selection.empty()) {
 		return;
@@ -2855,7 +2934,19 @@ MidiRegionView::change_velocities (bool up, bool fine, bool allow_smush)
 	for (Selection::iterator i = _selection.begin(); i != _selection.end();) {
 		Selection::iterator next = i;
 		++next;
-		change_note_velocity (*i, delta, true);
+
+		if (all_together) {
+			if (i == _selection.begin()) {
+				change_note_velocity (*i, delta, true);
+				value = (*i)->note()->velocity() + delta;
+			} else {
+				change_note_velocity (*i, value, false);
+			}
+
+		} else {
+			change_note_velocity (*i, delta, true);
+		}
+
 		i = next;
 	}
 
@@ -3733,4 +3824,11 @@ MidiRegionView::selection_cleared (MidiRegionView* rv)
 
 	/* Clear our selection in sympathy; but don't signal the fact */
 	clear_selection (false);
+}
+
+void
+MidiRegionView::note_button_release ()
+{
+	delete _note_player;
+	_note_player = 0;
 }

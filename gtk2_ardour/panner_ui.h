@@ -77,7 +77,6 @@ class PannerUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	void effective_pan_display ();
 
 	void set_meter_strip_name (std::string name);
-	boost::shared_ptr<PBD::Controllable> get_controllable();
 
 	void on_size_allocate (Gtk::Allocation &);
 
@@ -122,8 +121,6 @@ class PannerUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	Gtk::Button pan_automation_style_button;
 	Gtk::ToggleButton pan_automation_state_button;
 
-	std::vector<MonoPanner*> pan_bars;
-
 	void pan_value_changed (uint32_t which);
 	void build_astate_menu ();
 	void build_astyle_menu ();
@@ -143,6 +140,7 @@ class PannerUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	void build_pan_menu ();
 	void pan_reset ();
 	void pan_bypass_toggle ();
+	void pan_edit ();
 
 	void pan_automation_state_changed();
 	void pan_automation_style_changed();

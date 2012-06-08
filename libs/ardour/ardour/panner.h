@@ -71,6 +71,10 @@ public:
 	virtual bool clamp_width (double&) { return true; }
 	virtual bool clamp_elevation (double&) { return true; }
 
+	virtual std::pair<double, double> position_range () const { return std::make_pair (-DBL_MAX, DBL_MAX); }
+	virtual std::pair<double, double> width_range () const { return std::make_pair (-DBL_MAX, DBL_MAX); }
+	virtual std::pair<double, double> elevation_range () const { return std::make_pair (-DBL_MAX, DBL_MAX); }
+
 	virtual void set_position (double) { }
 	virtual void set_width (double) { }
 	virtual void set_elevation (double) { }

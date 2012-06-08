@@ -308,6 +308,8 @@ Editor::time_fx (RegionList& regions, float val, bool pitching)
 		gtk_main_iteration ();
 	}
 
+	pthread_join (current_timefx->request.thread, 0);
+
 	current_timefx->hide ();
 	return current_timefx->status;
 }

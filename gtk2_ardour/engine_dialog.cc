@@ -180,41 +180,35 @@ EngineControl::EngineControl ()
 
 	row = 0;
 
-	label = manage (new Label (_("Driver:")));
-	label->set_alignment (0, 0.5);
+	label = manage (left_aligned_label (_("Driver:")));
 	basic_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	basic_packer.attach (driver_combo, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	row++;
 
-	device_label.set_text (_("Audio Interface:"));
-	device_label.set_alignment (0, 0.5);
-	basic_packer.attach (device_label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+	label = manage (left_aligned_label (_("Audio Interface:")));
+	basic_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	basic_packer.attach (interface_combo, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	row++;
 
-	label = manage (new Label (_("Sample rate:")));
-	label->set_alignment (0, 0.5);
+	label = manage (left_aligned_label (_("Sample rate:")));
 	basic_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	basic_packer.attach (sample_rate_combo, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	row++;
 
-	label = manage (new Label (_("Buffer size:")));
-	label->set_alignment (0, 0.5);
+	label = manage (left_aligned_label (_("Buffer size:")));
 	basic_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	basic_packer.attach (period_size_combo, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	row++;
 
 #ifndef __APPLE__
-	label = manage (new Label (_("Number of buffers:")));
-	label->set_alignment (0, 0.5);
+	label = manage (left_aligned_label (_("Number of buffers:")));
 	basic_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	basic_packer.attach (periods_spinner, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	periods_spinner.set_value (2);
 	row++;
 #endif
 
-	label = manage (new Label (_("Approximate latency:")));
-	label->set_alignment (0, 0.5);
+	label = manage (left_aligned_label (_("Approximate latency:")));
 	basic_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	basic_packer.attach (latency_label, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	row++;
@@ -227,8 +221,7 @@ EngineControl::EngineControl ()
 	/* no audio mode with CoreAudio, its duplex or nuthin' */
 
 #ifndef __APPLE__
-	label = manage (new Label (_("Audio mode:")));
-	label->set_alignment (0, 0.5);
+	label = manage (left_aligned_label (_("Audio mode:")));
 	basic_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	basic_packer.attach (audio_mode_combo, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	row++;
@@ -314,21 +307,18 @@ EngineControl::EngineControl ()
 	++row;
 
 #endif /* PROVIDE_TOO_MANY_OPTIONS */
-	label = manage (new Label (_("Number of ports:")));
-	label->set_alignment (0, 0.5);
+	label = manage (left_aligned_label (_("Number of ports:")));
 	options_packer.attach (ports_spinner, 1, 2, row, row + 1, FILL|EXPAND, AttachOptions(0));
 	options_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	++row;
 
-	label = manage (new Label (_("MIDI driver:")));
-	label->set_alignment (0, 0.5);
+	label = manage (left_aligned_label (_("MIDI driver:")));
 	options_packer.attach (midi_driver_combo, 1, 2, row, row + 1, FILL|EXPAND, AttachOptions(0));
 	options_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	++row;
 
 #ifndef __APPLE__
-	label = manage (new Label (_("Dither:")));
-	label->set_alignment (0, 0.5);
+	label = manage (left_aligned_label (_("Dither:")));
 	options_packer.attach (dither_mode_combo, 1, 2, row, row + 1, FILL|EXPAND, AttachOptions(0));
 	options_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	++row;
@@ -345,9 +335,8 @@ EngineControl::EngineControl ()
 	serverpath_combo.set_active_text (server_strings.front());
 
 	if (server_strings.size() > 1) {
-		label = manage (new Label (_("Server:")));
+		label = manage (left_aligned_label (_("Server:")));
 		options_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
-		label->set_alignment (0.0, 0.5);
 		options_packer.attach (serverpath_combo, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 		++row;
 	}
@@ -358,31 +347,25 @@ EngineControl::EngineControl ()
 	row = 0;
 
 #ifndef __APPLE__
-	label = manage (new Label (_("Input device:")));
-	label->set_alignment (0, 0.5);
+	label = manage (left_aligned_label (_("Input device:")));
 	device_packer.attach (*label, 0, 1, row, row+1, FILL|EXPAND, (AttachOptions) 0);
 	device_packer.attach (input_device_combo, 1, 2, row, row+1, FILL|EXPAND, (AttachOptions) 0);
 	++row;
-	label = manage (new Label (_("Output device:")));
-	label->set_alignment (0, 0.5);
+	label = manage (left_aligned_label (_("Output device:")));
 	device_packer.attach (*label, 0, 1, row, row+1, FILL|EXPAND, (AttachOptions) 0);
 	device_packer.attach (output_device_combo, 1, 2, row, row+1, FILL|EXPAND, (AttachOptions) 0);
 	++row;
 #endif
-	label = manage (new Label (_("Hardware input latency:")));
-	label->set_alignment (0, 0.5);
+	label = manage (left_aligned_label (_("Hardware input latency:")));
 	device_packer.attach (*label, 0, 1, row, row+1, FILL|EXPAND, (AttachOptions) 0);
 	device_packer.attach (input_latency, 1, 2, row, row+1, FILL|EXPAND, (AttachOptions) 0);
-	label = manage (new Label (_("samples")));
-	label->set_alignment (0, 0.5);
+	label = manage (left_aligned_label (_("samples")));
 	device_packer.attach (*label, 2, 3, row, row+1, FILL|EXPAND, (AttachOptions) 0);
 	++row;
-	label = manage (new Label (_("Hardware output latency:")));
-	label->set_alignment (0, 0.5);
+	label = manage (left_aligned_label (_("Hardware output latency:")));
 	device_packer.attach (*label, 0, 1, row, row+1, FILL|EXPAND, (AttachOptions) 0);
 	device_packer.attach (output_latency, 1, 2, row, row+1, FILL|EXPAND, (AttachOptions) 0);
-	label = manage (new Label (_("samples")));
-	label->set_alignment (0, 0.5);
+	label = manage (left_aligned_label (_("samples")));
 	device_packer.attach (*label, 2, 3, row, row+1, FILL|EXPAND, (AttachOptions) 0);
 	++row;
 

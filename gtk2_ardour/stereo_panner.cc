@@ -37,6 +37,7 @@
 #include "ardour_ui.h"
 #include "global_signals.h"
 #include "stereo_panner.h"
+#include "stereo_panner_editor.h"
 #include "rgb_macros.h"
 #include "utils.h"
 
@@ -263,6 +264,10 @@ StereoPanner::on_expose_event (GdkEventExpose*)
 bool
 StereoPanner::on_button_press_event (GdkEventButton* ev)
 {
+	if (PannerInterface::on_button_press_event (ev)) {
+		return true;
+	}
+	
 	drag_start_x = ev->x;
 	last_drag_x = ev->x;
 
@@ -398,6 +403,10 @@ StereoPanner::on_button_press_event (GdkEventButton* ev)
 bool
 StereoPanner::on_button_release_event (GdkEventButton* ev)
 {
+	if (PannerInterface::on_button_release_event (ev)) {
+		return true;
+	}
+	
 	if (ev->button != 1) {
 		return false;
 	}
@@ -630,4 +639,10 @@ StereoPanner::color_handler ()
 {
 	set_colors ();
 	queue_draw ();
+}
+
+PannerEditor*
+StereoPanner::editor ()
+{
+	return new StereoPannerEditor (this);
 }

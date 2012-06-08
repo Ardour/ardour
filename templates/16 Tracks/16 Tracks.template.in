@@ -53,7 +53,7 @@
   <Connections/>
   <Routes>
     <Route flags="MasterOut" default-type="audio" active="yes" muted="no" soloed="no" phase-invert="no" denormal-protection="no" mute-affects-pre-fader="yes" mute-affects-post-fader="yes" mute-affects-control-outs="yes" mute-affects-main-outs="yes" order-keys="editor=0:signal=0">
-      <IO name="master" id="1088698373992392" inputs="{Audio 16/out 1,Audio 15/out 1,Audio 14/out 1,Audio 13/out 1,Audio 12/out 1,Audio 11/out 1,Audio 10/out 1,Audio 9/out 1,Audio 8/out 1,Audio 7/out 1,Audio 6/out 1,Audio 5/out 1,Audio 4/out 1,Audio 3/out 1,Audio 2/out 1,Audio 1/out 1}{Audio 16/out 2,Audio 15/out 2,Audio 14/out 2,Audio 13/out 2,Audio 12/out 2,Audio 11/out 2,Audio 10/out 2,Audio 9/out 2,Audio 8/out 2,Audio 7/out 2,Audio 6/out 2,Audio 5/out 2,Audio 4/out 2,Audio 3/out 2,Audio 2/out 2,Audio 1/out 2}" outputs="{%JACK_INPUT%1}{%JACK_INPUT%2}" gain="1.000000000000" iolimits="-1,2,-1,2">
+      <IO name="master" id="1088698373992392" inputs="{Audio 16/out 1,Audio 15/out 1,Audio 14/out 1,Audio 13/out 1,Audio 12/out 1,Audio 11/out 1,Audio 10/out 1,Audio 9/out 1,Audio 8/out 1,Audio 7/out 1,Audio 6/out 1,Audio 5/out 1,Audio 4/out 1,Audio 3/out 1,Audio 2/out 1,Audio 1/out 1}{Audio 16/out 2,Audio 15/out 2,Audio 14/out 2,Audio 13/out 2,Audio 12/out 2,Audio 11/out 2,Audio 10/out 2,Audio 9/out 2,Audio 8/out 2,Audio 7/out 2,Audio 6/out 2,Audio 5/out 2,Audio 4/out 2,Audio 3/out 2,Audio 2/out 2,Audio 1/out 2}" outputs="{@JACK_INPUT@1}{@JACK_INPUT@2}" gain="1.000000000000" iolimits="-1,2,-1,2">
         <Panner linked="no" link_direction="SameDirection" bypassed="no">
           <Output x="0" y="0"/>
           <Output x="1" y="0"/>
@@ -83,7 +83,7 @@
       </extra>
     </Route>
     <Route default-type="audio" active="yes" muted="no" soloed="no" phase-invert="no" denormal-protection="no" mute-affects-pre-fader="yes" mute-affects-post-fader="yes" mute-affects-control-outs="yes" mute-affects-main-outs="yes" order-keys="editor=1:signal=1" mode="Normal" diskstream-id="1088698381595945">
-      <IO name="Audio 1" id="1088698381595877" inputs="{%JACK_OUTPUT%1}{%JACK_OUTPUT%2}" outputs="{master/in 1}{master/in 2}" gain="1.000000000000" iolimits="1,-1,-1,-1">
+      <IO name="Audio 1" id="1088698381595877" inputs="{@JACK_OUTPUT@1}{@JACK_OUTPUT@2}" outputs="{master/in 1}{master/in 2}" gain="1.000000000000" iolimits="1,-1,-1,-1">
         <Panner linked="no" link_direction="SameDirection" bypassed="no">
           <Output x="0" y="0"/>
           <Output x="1" y="0"/>
@@ -115,7 +115,7 @@
       <controllable name="recenable" id="1191241279"/>
     </Route>
     <Route default-type="audio" active="yes" muted="no" soloed="no" phase-invert="no" denormal-protection="no" mute-affects-pre-fader="yes" mute-affects-post-fader="yes" mute-affects-control-outs="yes" mute-affects-main-outs="yes" order-keys="editor=2:signal=2" mode="Normal" diskstream-id="1088698381722129">
-      <IO name="Audio 2" id="1088698381722065" inputs="{%JACK_OUTPUT%1}{%JACK_OUTPUT%2}" outputs="{master/in 1}{master/in 2}" gain="1.000000000000" iolimits="1,-1,-1,-1">
+      <IO name="Audio 2" id="1088698381722065" inputs="{@JACK_OUTPUT@1}{@JACK_OUTPUT@2}" outputs="{master/in 1}{master/in 2}" gain="1.000000000000" iolimits="1,-1,-1,-1">
         <Panner linked="no" link_direction="SameDirection" bypassed="no">
           <Output x="0" y="0"/>
           <Output x="1" y="0"/>
@@ -147,7 +147,7 @@
       <controllable name="recenable" id="1191241292"/>
     </Route>
     <Route default-type="audio" active="yes" muted="no" soloed="no" phase-invert="no" denormal-protection="no" mute-affects-pre-fader="yes" mute-affects-post-fader="yes" mute-affects-control-outs="yes" mute-affects-main-outs="yes" order-keys="editor=3:signal=3" mode="Normal" diskstream-id="1088698419793849">
-      <IO name="Audio 3" id="1088698419793786" inputs="{%JACK_OUTPUT%1}{%JACK_OUTPUT%2}" outputs="{master/in 1}{master/in 2}" gain="1.000000000000" iolimits="1,-1,-1,-1">
+      <IO name="Audio 3" id="1088698419793786" inputs="{@JACK_OUTPUT@1}{@JACK_OUTPUT@2}" outputs="{master/in 1}{master/in 2}" gain="1.000000000000" iolimits="1,-1,-1,-1">
         <Panner linked="no" link_direction="SameDirection" bypassed="no">
           <Output x="0" y="0"/>
           <Output x="1" y="0"/>
@@ -179,7 +179,7 @@
       <controllable name="recenable" id="1191241305"/>
     </Route>
     <Route default-type="audio" active="yes" muted="no" soloed="no" phase-invert="no" denormal-protection="no" mute-affects-pre-fader="yes" mute-affects-post-fader="yes" mute-affects-control-outs="yes" mute-affects-main-outs="yes" order-keys="editor=4:signal=4" mode="Normal" diskstream-id="1088698419943526">
-      <IO name="Audio 4" id="1088698419943460" inputs="{%JACK_OUTPUT%1}{%JACK_OUTPUT%2}" outputs="{master/in 1}{master/in 2}" gain="1.000000000000" iolimits="1,-1,-1,-1">
+      <IO name="Audio 4" id="1088698419943460" inputs="{@JACK_OUTPUT@1}{@JACK_OUTPUT@2}" outputs="{master/in 1}{master/in 2}" gain="1.000000000000" iolimits="1,-1,-1,-1">
         <Panner linked="no" link_direction="SameDirection" bypassed="no">
           <Output x="0" y="0"/>
           <Output x="1" y="0"/>
@@ -211,7 +211,7 @@
       <controllable name="recenable" id="1191241318"/>
     </Route>
     <Route default-type="audio" active="yes" muted="no" soloed="no" phase-invert="no" denormal-protection="no" mute-affects-pre-fader="yes" mute-affects-post-fader="yes" mute-affects-control-outs="yes" mute-affects-main-outs="yes" order-keys="editor=5:signal=5" mode="Normal" diskstream-id="1088698450528071">
-      <IO name="Audio 5" id="1088698450528006" inputs="{%JACK_OUTPUT%1}{%JACK_OUTPUT%2}" outputs="{master/in 1}{master/in 2}" gain="1.000000000000" iolimits="1,-1,-1,-1">
+      <IO name="Audio 5" id="1088698450528006" inputs="{@JACK_OUTPUT@1}{@JACK_OUTPUT@2}" outputs="{master/in 1}{master/in 2}" gain="1.000000000000" iolimits="1,-1,-1,-1">
         <Panner linked="no" link_direction="SameDirection" bypassed="no">
           <Output x="0" y="0"/>
           <Output x="1" y="0"/>
@@ -243,7 +243,7 @@
       <controllable name="recenable" id="1191241331"/>
     </Route>
     <Route default-type="audio" active="yes" muted="no" soloed="no" phase-invert="no" denormal-protection="no" mute-affects-pre-fader="yes" mute-affects-post-fader="yes" mute-affects-control-outs="yes" mute-affects-main-outs="yes" order-keys="editor=6:signal=6" mode="Normal" diskstream-id="1088698450754348">
-      <IO name="Audio 6" id="1088698450754242" inputs="{%JACK_OUTPUT%1}{%JACK_OUTPUT%2}" outputs="{master/in 1}{master/in 2}" gain="1.000000000000" iolimits="1,-1,-1,-1">
+      <IO name="Audio 6" id="1088698450754242" inputs="{@JACK_OUTPUT@1}{@JACK_OUTPUT@2}" outputs="{master/in 1}{master/in 2}" gain="1.000000000000" iolimits="1,-1,-1,-1">
         <Panner linked="no" link_direction="SameDirection" bypassed="no">
           <Output x="0" y="0"/>
           <Output x="1" y="0"/>
@@ -275,7 +275,7 @@
       <controllable name="recenable" id="1191241344"/>
     </Route>
     <Route default-type="audio" active="yes" muted="no" soloed="no" phase-invert="no" denormal-protection="no" mute-affects-pre-fader="yes" mute-affects-post-fader="yes" mute-affects-control-outs="yes" mute-affects-main-outs="yes" order-keys="editor=7:signal=7" mode="Normal" diskstream-id="1088698450937150">
-      <IO name="Audio 7" id="1088698450937083" inputs="{%JACK_OUTPUT%1}{%JACK_OUTPUT%2}" outputs="{master/in 1}{master/in 2}" gain="1.000000000000" iolimits="1,-1,-1,-1">
+      <IO name="Audio 7" id="1088698450937083" inputs="{@JACK_OUTPUT@1}{@JACK_OUTPUT@2}" outputs="{master/in 1}{master/in 2}" gain="1.000000000000" iolimits="1,-1,-1,-1">
         <Panner linked="no" link_direction="SameDirection" bypassed="no">
           <Output x="0" y="0"/>
           <Output x="1" y="0"/>
@@ -307,7 +307,7 @@
       <controllable name="recenable" id="1191241357"/>
     </Route>
     <Route default-type="audio" active="yes" muted="no" soloed="no" phase-invert="no" denormal-protection="no" mute-affects-pre-fader="yes" mute-affects-post-fader="yes" mute-affects-control-outs="yes" mute-affects-main-outs="yes" order-keys="editor=8:signal=8" mode="Normal" diskstream-id="1088698451167172">
-      <IO name="Audio 8" id="1088698451167106" inputs="{%JACK_OUTPUT%1}{%JACK_OUTPUT%2}" outputs="{master/in 1}{master/in 2}" gain="1.000000000000" iolimits="1,-1,-1,-1">
+      <IO name="Audio 8" id="1088698451167106" inputs="{@JACK_OUTPUT@1}{@JACK_OUTPUT@2}" outputs="{master/in 1}{master/in 2}" gain="1.000000000000" iolimits="1,-1,-1,-1">
         <Panner linked="no" link_direction="SameDirection" bypassed="no">
           <Output x="0" y="0"/>
           <Output x="1" y="0"/>
@@ -339,7 +339,7 @@
       <controllable name="recenable" id="1191241370"/>
     </Route>
     <Route default-type="audio" active="yes" muted="no" soloed="no" phase-invert="no" denormal-protection="no" mute-affects-pre-fader="yes" mute-affects-post-fader="yes" mute-affects-control-outs="yes" mute-affects-main-outs="yes" order-keys="editor=9:signal=9" mode="Normal" diskstream-id="1088698483525991">
-      <IO name="Audio 9" id="1088698483525928" inputs="{%JACK_OUTPUT%1}{%JACK_OUTPUT%2}" outputs="{master/in 1}{master/in 2}" gain="1.000000000000" iolimits="1,-1,-1,-1">
+      <IO name="Audio 9" id="1088698483525928" inputs="{@JACK_OUTPUT@1}{@JACK_OUTPUT@2}" outputs="{master/in 1}{master/in 2}" gain="1.000000000000" iolimits="1,-1,-1,-1">
         <Panner linked="no" link_direction="SameDirection" bypassed="no">
           <Output x="0" y="0"/>
           <Output x="1" y="0"/>
@@ -371,7 +371,7 @@
       <controllable name="recenable" id="1191241383"/>
     </Route>
     <Route default-type="audio" active="yes" muted="no" soloed="no" phase-invert="no" denormal-protection="no" mute-affects-pre-fader="yes" mute-affects-post-fader="yes" mute-affects-control-outs="yes" mute-affects-main-outs="yes" order-keys="editor=10:signal=10" mode="Normal" diskstream-id="1088698483801345">
-      <IO name="Audio 10" id="1088698483801234" inputs="{%JACK_OUTPUT%1}{%JACK_OUTPUT%2}" outputs="{master/in 1}{master/in 2}" gain="1.000000000000" iolimits="1,-1,-1,-1">
+      <IO name="Audio 10" id="1088698483801234" inputs="{@JACK_OUTPUT@1}{@JACK_OUTPUT@2}" outputs="{master/in 1}{master/in 2}" gain="1.000000000000" iolimits="1,-1,-1,-1">
         <Panner linked="no" link_direction="SameDirection" bypassed="no">
           <Output x="0" y="0"/>
           <Output x="1" y="0"/>
@@ -403,7 +403,7 @@
       <controllable name="recenable" id="1191241396"/>
     </Route>
     <Route default-type="audio" active="yes" muted="no" soloed="no" phase-invert="no" denormal-protection="no" mute-affects-pre-fader="yes" mute-affects-post-fader="yes" mute-affects-control-outs="yes" mute-affects-main-outs="yes" order-keys="editor=11:signal=11" mode="Normal" diskstream-id="1088698484086727">
-      <IO name="Audio 11" id="1088698484086663" inputs="{%JACK_OUTPUT%1}{%JACK_OUTPUT%2}" outputs="{master/in 1}{master/in 2}" gain="1.000000000000" iolimits="1,-1,-1,-1">
+      <IO name="Audio 11" id="1088698484086663" inputs="{@JACK_OUTPUT@1}{@JACK_OUTPUT@2}" outputs="{master/in 1}{master/in 2}" gain="1.000000000000" iolimits="1,-1,-1,-1">
         <Panner linked="no" link_direction="SameDirection" bypassed="no">
           <Output x="0" y="0"/>
           <Output x="1" y="0"/>
@@ -435,7 +435,7 @@
       <controllable name="recenable" id="1191241409"/>
     </Route>
     <Route default-type="audio" active="yes" muted="no" soloed="no" phase-invert="no" denormal-protection="no" mute-affects-pre-fader="yes" mute-affects-post-fader="yes" mute-affects-control-outs="yes" mute-affects-main-outs="yes" order-keys="editor=12:signal=12" mode="Normal" diskstream-id="1088698484325738">
-      <IO name="Audio 12" id="1088698484325672" inputs="{%JACK_OUTPUT%1}{%JACK_OUTPUT%2}" outputs="{master/in 1}{master/in 2}" gain="1.000000000000" iolimits="1,-1,-1,-1">
+      <IO name="Audio 12" id="1088698484325672" inputs="{@JACK_OUTPUT@1}{@JACK_OUTPUT@2}" outputs="{master/in 1}{master/in 2}" gain="1.000000000000" iolimits="1,-1,-1,-1">
         <Panner linked="no" link_direction="SameDirection" bypassed="no">
           <Output x="0" y="0"/>
           <Output x="1" y="0"/>
@@ -467,7 +467,7 @@
       <controllable name="recenable" id="1191241422"/>
     </Route>
     <Route default-type="audio" active="yes" muted="no" soloed="no" phase-invert="no" denormal-protection="no" mute-affects-pre-fader="yes" mute-affects-post-fader="yes" mute-affects-control-outs="yes" mute-affects-main-outs="yes" order-keys="editor=13:signal=13" mode="Normal" diskstream-id="1088698484576054">
-      <IO name="Audio 13" id="1088698484575978" inputs="{%JACK_OUTPUT%1}{%JACK_OUTPUT%2}" outputs="{master/in 1}{master/in 2}" gain="1.000000000000" iolimits="1,-1,-1,-1">
+      <IO name="Audio 13" id="1088698484575978" inputs="{@JACK_OUTPUT@1}{@JACK_OUTPUT@2}" outputs="{master/in 1}{master/in 2}" gain="1.000000000000" iolimits="1,-1,-1,-1">
         <Panner linked="no" link_direction="SameDirection" bypassed="no">
           <Output x="0" y="0"/>
           <Output x="1" y="0"/>
@@ -499,7 +499,7 @@
       <controllable name="recenable" id="1191241435"/>
     </Route>
     <Route default-type="audio" active="yes" muted="no" soloed="no" phase-invert="no" denormal-protection="no" mute-affects-pre-fader="yes" mute-affects-post-fader="yes" mute-affects-control-outs="yes" mute-affects-main-outs="yes" order-keys="editor=14:signal=14" mode="Normal" diskstream-id="1088698484839332">
-      <IO name="Audio 14" id="1088698484839137" inputs="{%JACK_OUTPUT%1}{%JACK_OUTPUT%2}" outputs="{master/in 1}{master/in 2}" gain="1.000000000000" iolimits="1,-1,-1,-1">
+      <IO name="Audio 14" id="1088698484839137" inputs="{@JACK_OUTPUT@1}{@JACK_OUTPUT@2}" outputs="{master/in 1}{master/in 2}" gain="1.000000000000" iolimits="1,-1,-1,-1">
         <Panner linked="no" link_direction="SameDirection" bypassed="no">
           <Output x="0" y="0"/>
           <Output x="1" y="0"/>
@@ -531,7 +531,7 @@
       <controllable name="recenable" id="1191241448"/>
     </Route>
     <Route default-type="audio" active="yes" muted="no" soloed="no" phase-invert="no" denormal-protection="no" mute-affects-pre-fader="yes" mute-affects-post-fader="yes" mute-affects-control-outs="yes" mute-affects-main-outs="yes" order-keys="editor=15:signal=15" mode="Normal" diskstream-id="1088698485116518">
-      <IO name="Audio 15" id="1088698485116451" inputs="{%JACK_OUTPUT%1}{%JACK_OUTPUT%2}" outputs="{master/in 1}{master/in 2}" gain="1.000000000000" iolimits="1,-1,-1,-1">
+      <IO name="Audio 15" id="1088698485116451" inputs="{@JACK_OUTPUT@1}{@JACK_OUTPUT@2}" outputs="{master/in 1}{master/in 2}" gain="1.000000000000" iolimits="1,-1,-1,-1">
         <Panner linked="no" link_direction="SameDirection" bypassed="no">
           <Output x="0" y="0"/>
           <Output x="1" y="0"/>
@@ -563,7 +563,7 @@
       <controllable name="recenable" id="1191241461"/>
     </Route>
     <Route default-type="audio" active="yes" muted="no" soloed="no" phase-invert="no" denormal-protection="no" mute-affects-pre-fader="yes" mute-affects-post-fader="yes" mute-affects-control-outs="yes" mute-affects-main-outs="yes" order-keys="editor=16:signal=16" mode="Normal" diskstream-id="1088698485412133">
-      <IO name="Audio 16" id="1088698485412068" inputs="{%JACK_OUTPUT%1}{%JACK_OUTPUT%2}" outputs="{master/in 1}{master/in 2}" gain="1.000000000000" iolimits="1,-1,-1,-1">
+      <IO name="Audio 16" id="1088698485412068" inputs="{@JACK_OUTPUT@1}{@JACK_OUTPUT@2}" outputs="{master/in 1}{master/in 2}" gain="1.000000000000" iolimits="1,-1,-1,-1">
         <Panner linked="no" link_direction="SameDirection" bypassed="no">
           <Output x="0" y="0"/>
           <Output x="1" y="0"/>
@@ -600,7 +600,7 @@
   <Playlists/>
   <UnusedPlaylists/>
   <Click>
-    <IO name="click" id="1088698373994975" inputs="" outputs="{%JACK_INPUT%1}" gain="1.000000000000" iolimits="0,0,-1,-1">
+    <IO name="click" id="1088698373994975" inputs="" outputs="{@JACK_INPUT@1}" gain="1.000000000000" iolimits="0,0,-1,-1">
       <Panner linked="no" link_direction="SameDirection" bypassed="no"/>
       <controllable name="gaincontrol" id="1191241476"/>
     </IO>
