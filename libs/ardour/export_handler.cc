@@ -103,7 +103,6 @@ ExportHandler::ExportHandler (Session & session)
   , session (session)
   , graph_builder (new ExportGraphBuilder (session))
   , export_status (session.get_export_status ())
-  , realtime (false)
   , normalizing (false)
   , cue_tracknum (0)
   , cue_indexnum (0)
@@ -112,23 +111,23 @@ ExportHandler::ExportHandler (Session & session)
 
 ExportHandler::~ExportHandler ()
 {
-	// TODO remove files that were written but not finsihed
+	// TODO remove files that were written but not finished
 }
 
+/** Add an export to the `to-do' list */
 bool
 ExportHandler::add_export_config (ExportTimespanPtr timespan, ExportChannelConfigPtr channel_config,
                                   ExportFormatSpecPtr format, ExportFilenamePtr filename,
                                   BroadcastInfoPtr broadcast_info)
 {
 	FileSpec spec (channel_config, format, filename, broadcast_info);
-	ConfigPair pair (timespan, spec);
-	config_map.insert (pair);
+	config_map.insert (make_pair (timespan, spec));
 
 	return true;
 }
 
 void
-ExportHandler::do_export (bool rt)
+ExportHandler::do_export ()
 {
 	/* Count timespans */
 
@@ -144,7 +143,6 @@ ExportHandler::do_export (bool rt)
 
 	/* Start export */
 
-	realtime = rt;
 	start_timespan ();
 }
 
@@ -159,13 +157,18 @@ ExportHandler::start_timespan ()
 		return;
 	}
 
+	/* finish_timespan pops the config_map entry that has been done, so
+	   this is the timespan to do this time
+	*/
 	current_timespan = config_map.begin()->first;
+	
 	export_status->total_frames_current_timespan = current_timespan->get_length();
 	export_status->timespan_name = current_timespan->name();
 	export_status->processed_frames_current_timespan = 0;
 
 	/* Register file configurations to graph builder */
 
+	/* Here's the config_map entries that use this timespan */
 	timespan_bounds = config_map.equal_range (current_timespan);
 	graph_builder->reset ();
 	graph_builder->set_current_timespan (current_timespan);
@@ -181,7 +184,7 @@ ExportHandler::start_timespan ()
 	normalizing = false;
 	session.ProcessExport.connect_same_thread (process_connection, boost::bind (&ExportHandler::process, this, _1));
 	process_position = current_timespan->get_start();
-	session.start_audio_export (process_position, realtime);
+	session.start_audio_export (process_position);
 }
 
 int

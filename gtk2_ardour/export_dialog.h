@@ -102,8 +102,7 @@ class ExportDialog : public ArdourDialog {
 	void update_warnings_and_example_filename ();
 	void show_conflicting_files ();
 
-	void export_rt ();
-	void export_fw ();
+	void do_export ();
 
 	void show_progress ();
 	gint progress_timeout ();
@@ -143,8 +142,7 @@ class ExportDialog : public ArdourDialog {
 	/* Buttons */
 
 	Gtk::Button *           cancel_button;
-	Gtk::Button *           rt_export_button;
-	Gtk::Button *           fast_export_button;
+	Gtk::Button *           export_button;
 
 };
 

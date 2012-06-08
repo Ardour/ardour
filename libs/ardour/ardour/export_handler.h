@@ -81,21 +81,10 @@ class ExportHandler : public ExportElementFactory
 			{}
 
 		ExportChannelConfigPtr channel_config;
-		ExportFormatSpecPtr        format;
+		ExportFormatSpecPtr    format;
 		ExportFilenamePtr      filename;
 		BroadcastInfoPtr       broadcast_info;
 	};
-
-  private:
-
-	/* Stuff for export configs
-	 * The multimap maps timespans to file specifications
-	 */
-
-	typedef std::pair<ExportTimespanPtr, FileSpec> ConfigPair;
-	typedef std::multimap<ExportTimespanPtr, FileSpec> ConfigMap;
-
-	typedef boost::shared_ptr<ExportGraphBuilder> GraphBuilderPtr;
 
   private:
 	/* Session::get_export_handler() should be used to obtain an export handler
@@ -111,7 +100,7 @@ class ExportHandler : public ExportElementFactory
 	bool add_export_config (ExportTimespanPtr timespan, ExportChannelConfigPtr channel_config,
 	                        ExportFormatSpecPtr format, ExportFilenamePtr filename,
 	                        BroadcastInfoPtr broadcast_info);
-	void do_export (bool rt = false);
+	void do_export ();
 
 	std::string get_cd_marker_filename(std::string filename, CDMarkerFormat format);
 
@@ -120,11 +109,15 @@ class ExportHandler : public ExportElementFactory
 	int process (framecnt_t frames);
 
 	Session &          session;
-	GraphBuilderPtr    graph_builder;
+	boost::shared_ptr<ExportGraphBuilder> graph_builder;
 	ExportStatusPtr    export_status;
+
+	/* The timespan and corresponding file specifications that we are exporting;
+	   there can be multiple FileSpecs for each ExportTimespan.
+	*/
+	typedef std::multimap<ExportTimespanPtr, FileSpec> ConfigMap;
 	ConfigMap          config_map;
 
-	bool               realtime;
 	bool               normalizing;
 
 	/* Timespan management */
