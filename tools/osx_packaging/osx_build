@@ -6,12 +6,13 @@ GTKSTACK_ROOT=$HOME/gtk/inst
 ARDOURSTACK_ROOT=$HOME/a3/inst
 BUILD_ROOT=../../build
 
-SAE=
 MIXBUS=
 WITH_LADSPA=1
 STRIP=1
 PRINT_SYSDEPS=
 WITH_NLS=
+DEVONLY=
+WITH_SOUNDGRID=
 
 while [ $# -gt 0 ] ; do
     echo "arg = $1"
@@ -21,35 +22,27 @@ while [ $# -gt 0 ] ; do
 	# top level build targets
 	#
 
-	--sae) WITH_NLS= ; 
-               SAE=1 ; 
-	       WITH_LADSPA=1; 
-               STRIP= ; 
-	       PRODUCT_PKG_DIR=ArdourSAE ; 
-	       APPNAME=Ardour ;
-	       shift ;;
 	--mixbus) MIXBUS=1; 
 	          WITH_NLS=1 ; 
-                  SAE= ; 
                   WITH_LADSPA=; 
                   STRIP= ; 
 		  PRODUCT_PKG_DIR=MixBus;
 		  APPNAME=Mixbus ;
                   shift ;;
 	--public) WITH_NLS= ; 
-	          SAE= ; 
                   WITH_LADSPA=1; 
                   STRIP= ; 
 		  PRODUCT_PKG_DIR=Ardour;
 		  APPNAME=Ardour ;
 		  shift ;;
-	--allinone) SAE= ; 
-	            WITH_NLS= ; 
-		    WITH_LADSPA=1; 
-		    STRIP= ; 
-		    PRODUCT_PKG_DIR=Ardour ;
-		    shift ;;
-	--test) SAE= ; WITH_LADSPA=; STRIP= ; shift ;;
+        --sg*)  WITH_SOUNDGRID=1
+                shift;;
+        --dev*) DEVONLY=1;
+                WITH_LADSPA=0
+                STRIP=
+                PRODUCT_PKG_DIR=Ardour;
+                APPNAME=Ardour;
+                shift;;
 
 	#
 	# specific build flags
@@ -132,16 +125,7 @@ mkdir -p $MackieControl
 
 # maybe set variables
 env=""
-if test x$SAE != x ; then
-    appname="Ardour3/SAE"
-    env="$env<key>ARDOUR_SAE</key><string>true</string>"
-    #
-    # current default for SAE version is German keyboard layout without a keypad
-    #
-    env="$env<key>ARDOUR_KEYBOARD_LAYOUT</key><string>de-nokeypad</string>"
-    env="$env<key>ARDOUR_UI_CONF</key><string>ardour3_ui_sae.conf</string>"
-    env="$env<key>ARDOUR3_UI_RC</key><string>ardour3_ui_dark_sae.rc</string>"
-elif test x$MIXBUS != x ; then
+if test x$MIXBUS != x ; then
     appname="Ardour3/Mixbus"
     env="$env<key>ARDOUR_MIXBUS</key><string>true</string>"
     #
@@ -192,10 +176,7 @@ MAIN_EXECUTABLE=Ardour3.bin
 
 echo "Copying ardour executable ...."
 cp $BUILD_ROOT/gtk2_ardour/ardour-$release_version $APPROOT/MacOS/$MAIN_EXECUTABLE
-if test x$SAE != x ; then
-    # cp $BUILD_ROOT/gtk2_ardour/evtest $APPROOT/MacOS/gtkevents
-    cp  Ardour3-SAE.icns $Resources/appIcon.icns
-elif test x$MIXBUS != x ; then
+if test x$MIXBUS != x ; then
     cp  Mixbus.icns $Resources/appIcon.icns
 else
     cp  Ardour3.icns $Resources/appIcon.icns
@@ -273,9 +254,7 @@ mkdir -p $Frameworks/clearlooks/engines
 (cd $Frameworks/clearlooks/engines && ln -s ../../libclearlooks.dylib libclearlooks.dylib && ln -s ../../libclearlooks.dylib libclearlooks.so)
 
 if test x$WITH_LADSPA != x ; then
-    if test x$SAE != x ; then
-	plugdir=sae_ladspa
-    elif test x$MIXBUS != x ; then
+    if test x$MIXBUS != x ; then
 	plugdir=mixbus_ladspa
     else
 	plugdir=ladspa
@@ -365,21 +344,8 @@ cp ../../gtk2_ardour/mixer.bindings $Resources
 cp ../../gtk2_ardour/step_editing.bindings $Resources
 cp $BUILD_ROOT/gtk2_ardour/ardour.menus $Resources
 
-if test x$SAE != x ; then
-    cp $BUILD_ROOT/gtk2_ardour/SAE-de-keypad.bindings  $Resources
-    cp $BUILD_ROOT/gtk2_ardour/SAE-de-nokeypad.bindings  $Resources
-    cp $BUILD_ROOT/gtk2_ardour/SAE-us-keypad.bindings  $Resources
-    cp $BUILD_ROOT/gtk2_ardour/SAE-us-nokeypad.bindings  $Resources
-    cp $BUILD_ROOT/ardour_system_sae.rc $Resources/ardour_system.rc
-    echo cp $BUILD_ROOT/ardour_system_sae.rc $Resources/ardour_system.rc
-    cp $BUILD_ROOT/instant.xml.sae $Resources/instant.xml
-    echo cp $BUILD_ROOT/instant.xml.sae $Resources/instant.xml
-else
-#    cp $BUILD_ROOT/ardour_system.rc $Resources/ardour_system.rc
-#    echo FOO cp $BUILD_ROOT/ardour_system.rc $Resources/ardour_system.rc
-    cp ../../instant.xml $Resources/instant.xml
-    echo cp ../../instant.xml $Resources/instant.xml
-fi
+# cp $BUILD_ROOT/ardour_system.rc $Resources/ardour_system.rc
+cp ../../instant.xml $Resources/instant.xml
 cp ../../gtk2_ardour/ardour3_ui_default.conf $Resources
 cp ../../gtk2_ardour/ardour3_ui_default.conf $Resources/ardour3_ui.conf
 cp $BUILD_ROOT/gtk2_ardour/ardour3_ui_light.rc $Resources
@@ -391,6 +357,13 @@ cp -r ../../gtk2_ardour/pixmaps $Resources
 # splash screen stuff
 cp -R ../../gtk2_ardour/splash.png $Shared
 
+if [ x$WITH_SOUNDGRID != x ] ; then
+    echo "Copying SoundGrid resources into app tree ..."
+    cp $BUILD_ROOT/../soundgrid/mixerapplicationcoresg.dylib $Frameworks
+    cp -R $BUILD_ROOT/../soundgrid/PMDF $Resources
+    cp -R $BUILD_ROOT/../soundgrid/XPll $Resources
+fi
+
 # go through and recursively remove any .svn dirs in the bundle
 for svndir in `find $APPDIR -name .svn -type dir`; do
     rm -rf $svndir
@@ -399,9 +372,6 @@ done
 # now fix up the executables
 echo "Fixing up executable dependency names ..."
 executables=$MAIN_EXECUTABLE
-if test x$SAE != x ; then
-    executables="$executables"
-fi
 
 for exe in $executables; do
     EXE=$APPROOT/MacOS/$exe
@@ -456,52 +426,30 @@ for libdir in $Frameworks $Frameworks/modules $Surfaces $Panners ; do
     done
 done
 
-#
-# and now ... the DMG
-# 
-
 rm -rf $PRODUCT_PKG_DIR
 mkdir $PRODUCT_PKG_DIR
 
-if [ x$SAE != x ] ; then
-	
-    # SAE packaging
-    
-    echo "Creating SAE packaging directory"
-    mv $APPDIR $PRODUCT_PKG_DIR/Ardour3-SAE.app
-    cp HowToInstallArdourSAE.pdf "$PRODUCT_PKG_DIR/How To Install Ardour SAE.pdf"
-    cp SAE-de-keypad.pdf "$PRODUCT_PKG_DIR/Ardour SAE Shortcuts (keypad).pdf"
-    cp SAE-de-nokeypad.pdf "$PRODUCT_PKG_DIR/Ardour SAE Shortcuts.pdf"
-    
-elif [ x$MIXBUS != x ] ; then
+if [ x$WITH_SOUNDGRID != x ] ; then
+    cp -R $BUILD_ROOT/libs/soundgrid/SurfaceDriver_App.bundle $PRODUCT_PKG_DIR
+fi
 
-     # Mixbus packaging
-
+if [ x$MIXBUS != x ] ; then
     echo "Creating Mixbus packaging directory"
     mv $APPDIR $PRODUCT_PKG_DIR/
     cp MixBus_Install_QuickStart.pdf "$PRODUCT_PKG_DIR/Mixbus Install & Quick Start Guide.pdf"
-
+    
 else 
-
     echo "Creating $APPNAME packaging directory"
     mv $APPDIR $PRODUCT_PKG_DIR/
-
 fi
 
-echo "Building DMG ..."
-
-# UC_DMG=$APPNAME-${release_version}-${svn_version}-UC.dmg
-# FINAL_DMG=$APPNAME-${release_version}-${svn_version}.dmg
-UC_DMG=$APPNAME-${release_version}-${svn_version}.dmg
-
-rm -f $UC_DMG
-echo hdiutil create $UC_DMG -volname $APPNAME-$release_version -fs HFS+ -srcfolder $PRODUCT_PKG_DIR
-hdiutil create $UC_DMG -volname $APPNAME-$release_version -fs HFS+ -srcfolder $PRODUCT_PKG_DIR
-
-# compress it
-# echo "Compressing DMG ..."
-# rm -f $FINAL_DMG
-# hdiutil convert $UC_DMG -format UDBZ -o $FINAL_DMG
+if [ x$DEVONLY = x ] ; then
+    echo "Building DMG ..."
+    
+    UC_DMG=$APPNAME-${release_version}-${svn_version}.dmg
+    rm -f $UC_DMG
+    hdiutil create $UC_DMG -volname $APPNAME-$release_version -fs HFS+ -srcfolder $PRODUCT_PKG_DIR
+fi
 
 echo "Done."
 
