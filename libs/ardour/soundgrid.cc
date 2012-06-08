@@ -24,6 +24,9 @@
 
 #include <WavesPublicAPI/WCMixerCore_API.h>
 
+#include "pbd/compose.h"
+
+#include "ardour/debug.h"
 #include "ardour/soundgrid.h"
 
 #ifdef __APPLE__
@@ -33,6 +36,7 @@ const char* sndgrid_dll_name = "mixerapplicationcoresg.so";
 #endif
 
 using namespace ARDOUR;
+using namespace PBD;
 using std::vector;
 using std::string;
 using std::cerr;
@@ -42,32 +46,43 @@ SoundGrid* SoundGrid::_instance = 0;
 
 SoundGrid::SoundGrid ()
 	: dl_handle (0)
+        , _sg (0)
+        , _host_handle (0)
+        , _callback_table (0)
+        , _mixer_config (0)
 {
-        const char *s =  getenv ("SOUNDGRID_PATH");
+        const char *s;
+        string path;
 
+        s =  getenv ("SOUNDGRID_PATH");
+        
+        /* Load from some defined location */
+        
         if (!s) {
                 cerr << "SOUNDGRID_PATH not defined - exiting\n";
                 ::exit (1);
         }
-
+        
         vector<string> p;
         p.push_back (s);
         p.push_back (sndgrid_dll_name);
-
-        string path = Glib::build_filename (p);
-
-        cerr << "Loading " << path << endl;
+        
+        path = Glib::build_filename (p);
+        
+        DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Loading dylib %1\n", path));
 
 	if ((dl_handle = dlopen (path.c_str(), RTLD_NOW)) == 0) {
-                cerr << "...failed\n";
+                DEBUG_TRACE (DEBUG::SoundGrid, "\tfailed\n");
 		return;
 	}
-
-        cerr << "...worked\n";
 }
 
 SoundGrid::~SoundGrid()
 {
+        if (_sg) {
+                UnInitializeMixerCoreDLL (_sg);
+        }
+
 	if (dl_handle) {
 		dlclose (dl_handle);
 	}
@@ -77,8 +92,9 @@ int
 SoundGrid::initialize (void* window_handle)
 {
         WTErr ret;
+        DEBUG_TRACE (DEBUG::SoundGrid, "Initializing SG core...\n");
         ret = InitializeMixerCoreDLL (window_handle, sg_callback, &_sg);
-        cerr << "Initialized SG core, ret = " << ret << endl;
+        DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Initialized SG core, ret = %1 core handle %2\n", ret, _sg));
         return 0;
 }
 
@@ -205,4 +221,14 @@ SoundGrid::sg_callback (const WSControlID* cid)
              << " (index " << cid->clusterControlID.controlTypeIndex << ')'
              << endl;
         return eNoErr;
+}
+
+void
+SoundGrid::driver_register (const WSDCoreHandle ch, const WSCoreCallbackTable* ct, const WSMixerConfig* mc)
+{
+        if (_instance) {
+                _instance->_host_handle = ch;
+                _instance->_callback_table = ct;
+                _instance->_mixer_config = mc;
+        }
 }

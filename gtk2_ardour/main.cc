@@ -164,6 +164,8 @@ fixup_bundle_environment (int, char* [])
 	export_search_path (bundle_dir, "SUIL_MODULE_DIR", "/lib");
 	export_search_path (bundle_dir, "GTK_PATH", "/lib/clearlooks");
 
+        
+
 	/* unset GTK_RC_FILES so that we only load the RC files that we define
 	 */
 
@@ -210,6 +212,10 @@ fixup_bundle_environment (int, char* [])
 	// GDK Pixbuf loader module file
 
 	setenv ("GDK_PIXBUF_MODULE_FILE", Glib::build_filename (bundle_dir, "Resources/gdk-pixbuf.loaders").c_str(), 1);
+
+        // Where to find soundgrid library (if it exists)
+
+	setenv ("SOUNDGRID_PATH", Glib::build_filename (bundle_dir, "lib").c_str(), 1);
 }
 
 #else

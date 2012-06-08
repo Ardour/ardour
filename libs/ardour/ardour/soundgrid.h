@@ -67,12 +67,17 @@ class SoundGrid : public boost::noncopyable
 	static void update_inventory (Inventory&);
 	static void clear_inventory (Inventory&);
 
+        static void driver_register (const WSDCoreHandle, const WSCoreCallbackTable*, const WSMixerConfig*);
+
   private:
 	SoundGrid ();
 	static SoundGrid* _instance;
         
 	void* dl_handle;
 	void* _sg; // handle managed by SoundGrid library
+        WSDCoreHandle              _host_handle;
+        const WSCoreCallbackTable* _callback_table;
+        const WSMixerConfig*       _mixer_config;
 
 	void display_update ();
 	static void _display_update ();
