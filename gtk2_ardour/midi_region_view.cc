@@ -1184,15 +1184,15 @@ MidiRegionView::display_patch_changes ()
 	uint16_t chn_mask = mtv->channel_selector().get_selected_channels();
 
 	for (uint8_t i = 0; i < 16; ++i) {
-		if (chn_mask & (1<<i)) {
-			display_patch_changes_on_channel (i);
-		}
-		/* TODO gray-out patch instad of not displaying it */
+		display_patch_changes_on_channel (i, chn_mask & (1 << i));
 	}
 }
 
+/** @param active_channel true to display patch changes fully, false to display
+ * them `greyed-out' (as on an inactive channel)
+ */
 void
-MidiRegionView::display_patch_changes_on_channel (uint8_t channel)
+MidiRegionView::display_patch_changes_on_channel (uint8_t channel, bool active_channel)
 {
 	for (MidiModel::PatchChanges::const_iterator i = _model->patch_changes().begin(); i != _model->patch_changes().end(); ++i) {
 
@@ -1207,12 +1207,12 @@ MidiRegionView::display_patch_changes_on_channel (uint8_t channel)
 				_model_name, _custom_device_mode, channel, patch_key);
 
 		if (patch != 0) {
-			add_canvas_patch_change (*i, patch->name());
+			add_canvas_patch_change (*i, patch->name(), active_channel);
 		} else {
 			char buf[16];
 			/* program and bank numbers are zero-based: convert to one-based: MIDI_BP_ZERO */
 			snprintf (buf, 16, "%d %d", (*i)->program() + MIDI_BP_ZERO , (*i)->bank() + MIDI_BP_ZERO);
-			add_canvas_patch_change (*i, buf);
+			add_canvas_patch_change (*i, buf, active_channel);
 		}
 	}
 }
@@ -1756,8 +1756,13 @@ MidiRegionView::step_sustain (Evoral::MusicalTime beats)
 	change_note_lengths (false, false, beats, false, true);
 }
 
+/** Add a new patch change flag to the canvas.
+ * @param patch the patch change to add
+ * @param the text to display in the flag
+ * @param active_channel true to display the flag as on an active channel, false to grey it out for an inactive channel.
+ */
 void
-MidiRegionView::add_canvas_patch_change (MidiModel::PatchChangePtr patch, const string& displaytext)
+MidiRegionView::add_canvas_patch_change (MidiModel::PatchChangePtr patch, const string& displaytext, bool active_channel)
 {
 	assert (patch->time() >= 0);
 
@@ -1773,7 +1778,8 @@ MidiRegionView::add_canvas_patch_change (MidiModel::PatchChangePtr patch, const 
 		                      x, 1.0,
 		                      _model_name,
 		                      _custom_device_mode,
-		                      patch)
+		                      patch,
+				      active_channel)
 		          );
 
 	// Show unless patch change is beyond the region bounds

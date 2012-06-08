@@ -118,11 +118,7 @@ public:
 	void cut_copy_clear (Editing::CutCopyOp);
 	void paste (framepos_t pos, float times, const MidiCutBuffer&);
 
-	/** Add a new patch change flag to the canvas.
-	 * @param patch the patch change to add
-	 * @param the text to display in the flag
-	 */
-	void add_canvas_patch_change (ARDOUR::MidiModel::PatchChangePtr patch, const std::string& displaytext);
+	void add_canvas_patch_change (ARDOUR::MidiModel::PatchChangePtr patch, const std::string& displaytext, bool);
 
 	/** Look up the given time and channel in the 'automation' and set keys accordingly.
 	 * @param time the time of the patch change event
@@ -466,7 +462,7 @@ private:
 	void maybe_select_by_position (GdkEventButton* ev, double x, double y);
 	void get_events (Events& e, Evoral::Sequence<Evoral::MusicalTime>::NoteOperator op, uint8_t val, int chan_mask = 0);
 
-	void display_patch_changes_on_channel (uint8_t);
+	void display_patch_changes_on_channel (uint8_t, bool);
 
 	void connect_to_diskstream ();
 	void data_recorded (boost::weak_ptr<ARDOUR::MidiSource>);
