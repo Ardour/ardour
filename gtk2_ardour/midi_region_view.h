@@ -341,11 +341,6 @@ private:
 	void play_midi_note(boost::shared_ptr<NoteType> note);
 	void play_midi_chord (std::vector<boost::shared_ptr<NoteType> > notes);
 
-	/** Play the NoteOff-Event of the given note immediately
-	 * (scheduled by @ref play_midi_note()).
-	 */
-	bool play_midi_note_off(boost::shared_ptr<NoteType> note);
-
 	void clear_events();
 
 	bool canvas_event(GdkEvent* ev);
