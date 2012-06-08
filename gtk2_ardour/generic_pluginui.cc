@@ -304,7 +304,7 @@ GenericPluginUI::ControlUI::ControlUI ()
 	   below). be sure to include a descender.
 	*/
 
-	set_size_request_to_display_given_text (automate_button, _("Manual"), 15, 10);
+	set_size_request_to_display_given_text (automate_button, _("Mgnual"), 15, 10);
 
 	ignore_change = 0;
 	display = 0;
