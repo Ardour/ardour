@@ -1036,19 +1036,6 @@ Editor::sensitize_all_region_actions (bool s)
 void
 Editor::sensitize_the_right_region_actions ()
 {
-	if ((mouse_mode == MouseRange) || (mouse_mode != MouseObject && _join_object_range_state == JOIN_OBJECT_RANGE_RANGE)) {
-		sensitize_all_region_actions (false);
-		if (!selection->time.empty()) {
-			_region_actions->get_action("split-region")->set_sensitive (true);
-		}
-		return;
-
-	} else if (mouse_mode != MouseObject) {
-		sensitize_all_region_actions (false);
-		return;
-	}
-
-	/* We get here if we are in Object mode */
 
 	RegionSelection rs = get_regions_from_selection_and_entered ();
 	sensitize_all_region_actions (!rs.empty ());
