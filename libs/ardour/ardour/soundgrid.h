@@ -52,15 +52,18 @@ class SoundGrid : public boost::noncopyable
 	    uint32_t    assign;
 	    std::string name;
 	    std::string mac;
+            std::string hostname;
 	    uint32_t    channels;
+	    std::string device;
+	    std::string status;
 	};
 
 	struct SGSInventoryItem : public InventoryItem {
 	};
 
 	struct IOInventoryItem : public InventoryItem {
-	    std::string device;
-	    std::string status;
+                int32_t sample_rate;
+                int32_t output_channels;
 	};
 
 	typedef std::vector<InventoryItem*> Inventory;

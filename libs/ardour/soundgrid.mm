@@ -30,6 +30,8 @@
 #include "ardour/debug.h"
 #include "ardour/soundgrid.h"
 
+#include "i18n.h"
+
 #ifdef __APPLE__
 
 #include <Foundation/Foundation.h>
@@ -177,10 +179,9 @@ SoundGrid::lan_port_names ()
         eRetVal = instance().get (&audioDevices.m_controlInfo.m_controlID, (WSControlInfo*)&audioDevices);
 
         for (uint32_t n = 0; n < audioDevices.m_audioDevices.numberOfDevices; ++n) {
-                cerr << "Discovered audio device [" << audioDevices.m_audioDevices.deviceNames[n] << "]\n";
+        	names.push_back (audioDevices.m_audioDevices.deviceNames[n]);
         }
 
-	names.push_back ("00:00:00:1e:af - builtin ethernet controller");
 	return names;
 }
 
@@ -193,37 +194,66 @@ SoundGrid::coreaudio_device_name ()
 void
 SoundGrid::update_inventory (Inventory& inventory)
 {
-	clear_inventory (inventory);
+        clear_inventory (inventory);
+        
+        WSSGDevices currentSGDevices;
+        Init_WSSGDevices(&currentSGDevices);
+        WTErr eRetVal;
 
-	IOInventoryItem* ii = new (IOInventoryItem);
+        eRetVal = instance().get (&currentSGDevices.m_controlInfo.m_controlID, (WSControlInfo*)&currentSGDevices);
 
-	ii->assign = 1;
-	ii->device = "IO: Waves Virtual IO";
-	ii->channels = 8;
-	ii->name = "Waves Virtual IO-1";
-	ii->mac = "00:16:cb:8a:e8:3e";
-	ii->status = "N/A";
+        if (eRetVal != eNoErr) {
+                error << string_compose (_("SoundGrid: could not retrieve inventory (%1)"), eRetVal) << endmsg;
+                return;
+        }
 
-	inventory.push_back (ii);
+        DEBUG_TRACE (PBD::DEBUG::SoundGrid, string_compose ("inventory contains %1 IO boxes and %2 servers\n",
+                                                            currentSGDevices.m_IOBoxs.m_numberOfDevices,
+                                                            currentSGDevices.m_SGServers.m_numberOfDevices));
 
-	ii = new IOInventoryItem;
-	ii->assign = 1;
-	ii->device = "IO: Yamaha Y16";
-	ii->channels = 32;
-	ii->name = "Yamaha/Waves Y16";
-	ii->mac = "00:16:cb:8a:e8:3e";
-	ii->status = "OK";
+        for (uint32_t n = 0; n < currentSGDevices.m_IOBoxs.m_numberOfDevices; ++n) {
+                IOInventoryItem* ii = new (IOInventoryItem);
+                WSIOBoxDevice* dev = &currentSGDevices.m_IOBoxs.m_ioBoxDevices[n];
 
-	inventory.push_back (ii);
+                ii->assign = dev->assignIndex;
+                ii->device = dev->type;
+                ii->channels = dev->channelCount;
+                ii->channels = dev->outputChannelCount;
+                ii->sample_rate = dev->sampleRate;
+                ii->name = dev->name;
+                ii->hostname = dev->hostname;
+                ii->mac = dev->mac;
+                if (dev->isIncompatible) {
+                        ii->status = _("Incompatible");
+                } else if (dev->isActive) {
+                        ii->status = _("Active");
+                } else {
+                        ii->status = _("Inactive");
+                }
+                
+                inventory.push_back (ii);
+        }
 
-	SGSInventoryItem* is = new (SGSInventoryItem);
-	
-	is->assign = 1;
-	is->name = "Waves Impact Server";
-	is->mac = "00:00:fe:ed:fa:ce";
-	is->channels = 16;
+        for (uint32_t n = 0; n < currentSGDevices.m_SGServers.m_numberOfDevices; ++n) {
+                SGSInventoryItem* is = new (SGSInventoryItem);
+                WSSGSDevice* dev = &currentSGDevices.m_SGServers.m_sgsDevices[n];
 
-	inventory.push_back (is);
+                is->assign = dev->assignIndex;
+                is->device = dev->type;
+                is->channels = dev->channelCount;
+                is->name = dev->name;
+                is->hostname = dev->hostname;
+                is->mac = dev->mac;
+                if (dev->isIncompatible) {
+                        is->status = _("Incompatible");
+                } else if (dev->isActive) {
+                        is->status = _("Active");
+                } else {
+                        is->status = _("Inactive");
+                }
+                
+                inventory.push_back (is);
+        }
 }
 
 void
