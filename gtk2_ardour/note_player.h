@@ -34,10 +34,11 @@ public:
 	typedef Evoral::Note<Evoral::MusicalTime> NoteType;
 
 	NotePlayer (boost::shared_ptr<ARDOUR::MidiTrack>);
-	~NotePlayer () {}
+	~NotePlayer ();
 
 	void add (boost::shared_ptr<NoteType>);
 	void play ();
+	void on ();
 	void off ();
 	void clear ();
 

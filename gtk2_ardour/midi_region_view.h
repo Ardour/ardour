@@ -64,6 +64,7 @@ class AutomationRegionView;
 class MidiCutBuffer;
 class MidiListEditor;
 class EditNoteDialog;
+class NotePlayer;
 
 class MidiRegionView : public RegionView
 {
@@ -232,6 +233,8 @@ public:
 
 	MouseState mouse_state() const { return _mouse_state; }
 
+	void note_button_release ();
+
 	struct NoteResizeData {
 		ArdourCanvas::CanvasNote  *canvas_note;
 		ArdourCanvas::SimpleRect  *resize_rect;
@@ -338,8 +341,9 @@ private:
 	/** Play the NoteOn event of the given note immediately
 	 * and schedule the playback of the corresponding NoteOff event.
 	 */
-	void play_midi_note(boost::shared_ptr<NoteType> note);
-	void play_midi_chord (std::vector<boost::shared_ptr<NoteType> > notes);
+	void play_midi_note (boost::shared_ptr<NoteType> note);
+	void start_playing_midi_note (boost::shared_ptr<NoteType> note);
+	void start_playing_midi_chord (std::vector<boost::shared_ptr<NoteType> > notes);
 
 	void clear_events();
 
@@ -473,6 +477,8 @@ private:
 
 	Gdk::Cursor* pre_enter_cursor;
 	Gdk::Cursor* pre_press_cursor;
+
+	NotePlayer* _note_player;
 };
 
 

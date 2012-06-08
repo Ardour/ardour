@@ -110,6 +110,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	, _last_event_y (0)
 	, pre_enter_cursor (0)
 	, pre_press_cursor (0)
+	, _note_player (0)
 {
 	_note_group->raise_to_top();
 	PublicEditor::DropDownKeys.connect (sigc::mem_fun (*this, &MidiRegionView::drop_down_keys));
@@ -150,6 +151,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	, _last_event_y (0)
 	, pre_enter_cursor (0)
 	, pre_press_cursor (0)
+	, _note_player (0)
 {
 	_note_group->raise_to_top();
 	PublicEditor::DropDownKeys.connect (sigc::mem_fun (*this, &MidiRegionView::drop_down_keys));
@@ -198,6 +200,7 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other)
 	, _last_event_y (0)
 	, pre_enter_cursor (0)
 	, pre_press_cursor (0)
+	, _note_player (0)
 {
 	Gdk::Color c;
 	int r,g,b,a;
@@ -232,6 +235,7 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other, boost::shared_ptr<M
 	, _last_event_y (0)
 	, pre_enter_cursor (0)
 	, pre_press_cursor (0)
+	, _note_player (0)
 {
 	Gdk::Color c;
 	int r,g,b,a;
@@ -318,6 +322,8 @@ MidiRegionView::connect_to_diskstream ()
 bool
 MidiRegionView::canvas_event(GdkEvent* ev)
 {
+	bool r;
+	
 	switch (ev->type) {
 	case GDK_ENTER_NOTIFY:
 	case GDK_LEAVE_NOTIFY:
@@ -357,7 +363,10 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 		return button_press (&ev->button);
 
 	case GDK_BUTTON_RELEASE:
-		return button_release (&ev->button);
+		r = button_release (&ev->button);
+		delete _note_player;
+		_note_player = 0;
+		return r;
 
 	case GDK_ENTER_NOTIFY:
 		return enter_notify (&ev->crossing);
@@ -1539,13 +1548,15 @@ MidiRegionView::play_midi_note(boost::shared_ptr<NoteType> note)
 		return;
 	}
 
-	NotePlayer* np = new NotePlayer (route_ui->midi_track());
+	NotePlayer* np = new NotePlayer (route_ui->midi_track ());
 	np->add (note);
 	np->play ();
+
+	/* NotePlayer deletes itself */
 }
 
 void
-MidiRegionView::play_midi_chord (vector<boost::shared_ptr<NoteType> > notes)
+MidiRegionView::start_playing_midi_note(boost::shared_ptr<NoteType> note)
 {
 	if (_no_sound_notes || !Config->get_sound_midi_notes()) {
 		return;
@@ -1557,13 +1568,33 @@ MidiRegionView::play_midi_chord (vector<boost::shared_ptr<NoteType> > notes)
 		return;
 	}
 
-	NotePlayer* np = new NotePlayer (route_ui->midi_track());
+	delete _note_player;
+	_note_player = new NotePlayer (route_ui->midi_track ());
+	_note_player->add (note);
+	_note_player->on ();
+}
 
-	for (vector<boost::shared_ptr<NoteType> >::iterator n = notes.begin(); n != notes.end(); ++n) {
-		np->add (*n);
+void
+MidiRegionView::start_playing_midi_chord (vector<boost::shared_ptr<NoteType> > notes)
+{
+	if (_no_sound_notes || !Config->get_sound_midi_notes()) {
+		return;
 	}
 
-	np->play ();
+	RouteUI* route_ui = dynamic_cast<RouteUI*> (&trackview);
+
+	if (!route_ui || !route_ui->midi_track()) {
+		return;
+	}
+
+	delete _note_player;
+	_note_player = new NotePlayer (route_ui->midi_track());
+
+	for (vector<boost::shared_ptr<NoteType> >::iterator n = notes.begin(); n != notes.end(); ++n) {
+		_note_player->add (*n);
+	}
+
+	_note_player->on ();
 }
 
 
@@ -2338,7 +2369,7 @@ MidiRegionView::add_to_selection (CanvasNoteEvent* ev)
 
 	if (_selection.insert (ev).second) {
 		ev->set_selected (true);
-		play_midi_note ((ev)->note());
+		start_playing_midi_note ((ev)->note());
 	}
 
 	if (add_mrv_selection) {
@@ -2379,13 +2410,13 @@ MidiRegionView::move_selection(double dx, double dy, double cumulative_dy)
 				shifted.push_back (moved_note);
 			}
 
-			play_midi_chord (shifted);
+			start_playing_midi_chord (shifted);
 
 		} else if (!to_play.empty()) {
 
 			boost::shared_ptr<NoteType> moved_note (new NoteType (*to_play.front()));
 			moved_note->set_note (moved_note->note() + cumulative_dy);
-			play_midi_note (moved_note);
+			start_playing_midi_note (moved_note);
 		}
 	}
 }
@@ -3793,4 +3824,11 @@ MidiRegionView::selection_cleared (MidiRegionView* rv)
 
 	/* Clear our selection in sympathy; but don't signal the fact */
 	clear_selection (false);
+}
+
+void
+MidiRegionView::note_button_release ()
+{
+	delete _note_player;
+	_note_player = 0;
 }

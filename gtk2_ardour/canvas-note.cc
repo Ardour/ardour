@@ -22,11 +22,17 @@ CanvasNote::CanvasNote (MidiRegionView&                   region,
 bool
 CanvasNote::on_event(GdkEvent* ev)
 {
+	bool r = true;
+
 	if (!CanvasNoteEvent::on_event (ev)) {
-		return _region.get_time_axis_view().editor().canvas_note_event (ev, this);
+		r = _region.get_time_axis_view().editor().canvas_note_event (ev, this);
 	}
 
-	return true;
+	if (ev->type == GDK_BUTTON_RELEASE) {
+		_region.note_button_release ();
+	}
+	
+	return r;
 }
 
 void

@@ -31,6 +31,11 @@ NotePlayer::NotePlayer (boost::shared_ptr<MidiTrack> mt)
 {
 }
 
+NotePlayer::~NotePlayer ()
+{
+	clear ();
+}
+
 void
 NotePlayer::add (boost::shared_ptr<NoteType> note)
 {
@@ -45,11 +50,17 @@ NotePlayer::clear ()
 }
 
 void
-NotePlayer::play ()
+NotePlayer::on ()
 {
 	for (Notes::iterator n = notes.begin(); n != notes.end(); ++n) {
 		track->write_immediate_event ((*n)->on_event().size(), (*n)->on_event().buffer());
 	}
+}
+
+void
+NotePlayer::play ()
+{
+	on ();
 
 	/* note: if there is more than 1 note, we will silence them all at the same time
 	 */
