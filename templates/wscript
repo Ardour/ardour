@@ -10,24 +10,21 @@ def configure(conf):
 
 def build(bld):
 
-    subst_dict = {}
     if bld.is_defined('COREAUDIO_SUPPORT'):
-        subst_dict['%JACK_INPUT%'] = 'coreaudio:Built-in Audio:in'
-        subst_dict['%JACK_OUTPUT%'] = 'coreaudio:Built-in Audio:out'
+        subst_dict = {'JACK_INPUT': 'coreaudio:Built-in Audio:in', 'JACK_OUTPUT': 'coreaudio:Built-in Audio:out'}
     else:
-        subst_dict['%JACK_INPUT%'] = 'alsa_pcm:playback_'
-        subst_dict['%JACK_OUTPUT%'] = 'alsa_pcm:capture_'
+        subst_dict = {'JACK_INPUT': 'system:playback_','JACK_OUTPUT': 'system:capture_'}
 
-    templates = bld.path.ant_glob('*.template.in')
+    templates = bld.path.ant_glob('*/*.template.in')
     for t in templates:
-        obj = bld(features = 'subst')
-        obj.name = 'template'
-        obj.source = [ t ]
         dir_name = os.path.basename(t.srcpath()).replace('.template.in', '')
         file_name = os.path.basename(t.srcpath()).replace('.in', '')
-        obj.target = [ os.path.join(dir_name, file_name) ]
-        obj.dict = subst_dict
-        obj.install_path = os.path.join(bld.env['DATADIR'], 'ardour3', os.path.join('templates', dir_name))
+        obj = bld(features = 'subst',
+                  name = 'template',
+                  source = [ t ],
+                  target = [ os.path.join(dir_name, file_name) ],
+                  install_path = os.path.join(bld.env['DATADIR'], 'ardour3', os.path.join('templates', dir_name)))
+        obj.__dict__.update(subst_dict)
 
 def options(opt):
     pass

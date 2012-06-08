@@ -39,7 +39,7 @@
   <Connections/>
   <Routes>
     <Route flags="MasterOut" default-type="audio" active="yes" muted="no" soloed="no" phase-invert="no" denormal-protection="no" mute-affects-pre-fader="yes" mute-affects-post-fader="yes" mute-affects-control-outs="yes" mute-affects-main-outs="yes" order-keys="editor=0:signal=0">
-      <IO name="master" id="1088698373992392" inputs="{Audio 2/out 1,Audio 1/out 1}{Audio 2/out 2,Audio 1/out 2}" outputs="{%JACK_INPUT%1}{%JACK_INPUT%2}" gain="1.000000000000" iolimits="-1,2,-1,2">
+      <IO name="master" id="1088698373992392" inputs="{Audio 2/out 1,Audio 1/out 1}{Audio 2/out 2,Audio 1/out 2}" outputs="{@JACK_INPUT@1}{@JACK_INPUT@2}" gain="1.000000000000" iolimits="-1,2,-1,2">
         <Panner linked="no" link_direction="SameDirection" bypassed="no">
           <Output x="0" y="0"/>
           <Output x="1" y="0"/>
@@ -69,7 +69,7 @@
       </extra>
     </Route>
     <Route default-type="audio" active="yes" muted="no" soloed="no" phase-invert="no" denormal-protection="no" mute-affects-pre-fader="yes" mute-affects-post-fader="yes" mute-affects-control-outs="yes" mute-affects-main-outs="yes" order-keys="editor=1:signal=1" mode="Normal" diskstream-id="1088698381595945">
-      <IO name="Audio 1" id="1088698381595877" inputs="{%JACK_OUTPUT%1}{%JACK_OUTPUT%2}" outputs="{master/in 1}{master/in 2}" gain="1.000000000000" iolimits="1,-1,-1,-1">
+      <IO name="Audio 1" id="1088698381595877" inputs="{@JACK_OUTPUT@1}{@JACK_OUTPUT@2}" outputs="{master/in 1}{master/in 2}" gain="1.000000000000" iolimits="1,-1,-1,-1">
         <Panner linked="no" link_direction="SameDirection" bypassed="no">
           <Output x="0" y="0"/>
           <Output x="1" y="0"/>
@@ -101,7 +101,7 @@
       <controllable name="recenable" id="1191241044"/>
     </Route>
     <Route default-type="audio" active="yes" muted="no" soloed="no" phase-invert="no" denormal-protection="no" mute-affects-pre-fader="yes" mute-affects-post-fader="yes" mute-affects-control-outs="yes" mute-affects-main-outs="yes" order-keys="editor=2:signal=2" mode="Normal" diskstream-id="1088698381722129">
-      <IO name="Audio 2" id="1088698381722065" inputs="{%JACK_OUTPUT%1}{%JACK_OUTPUT%2}" outputs="{master/in 1}{master/in 2}" gain="1.000000000000" iolimits="1,-1,-1,-1">
+      <IO name="Audio 2" id="1088698381722065" inputs="{@JACK_OUTPUT@1}{@JACK_OUTPUT@2}" outputs="{master/in 1}{master/in 2}" gain="1.000000000000" iolimits="1,-1,-1,-1">
         <Panner linked="no" link_direction="SameDirection" bypassed="no">
           <Output x="0" y="0"/>
           <Output x="1" y="0"/>
@@ -138,7 +138,7 @@
   <Playlists/>
   <UnusedPlaylists/>
   <Click>
-    <IO name="click" id="1088698373994975" inputs="" outputs="{%JACK_INPUT%1}" gain="1.000000000000" iolimits="0,0,-1,-1">
+    <IO name="click" id="1088698373994975" inputs="" outputs="{@JACK_INPUT@1}" gain="1.000000000000" iolimits="0,0,-1,-1">
       <Panner linked="no" link_direction="SameDirection" bypassed="no"/>
       <controllable name="gaincontrol" id="1191241059"/>
     </IO>
