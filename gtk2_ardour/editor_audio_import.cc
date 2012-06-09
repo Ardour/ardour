@@ -788,7 +788,7 @@ Editor::add_sources (vector<string> paths, SourceList& sources, framepos_t& pos,
 			*/
 			framecnt_t len = (*x)->length (pos);
 			if (len == 0) {
-				len = (60 / 120) * _session->frame_rate ();
+				len = (60.0 / 120.0) * _session->frame_rate ();
 			}
 
 			plist.add (ARDOUR::Properties::start, 0);
