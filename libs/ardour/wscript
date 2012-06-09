@@ -437,6 +437,7 @@ def build(bld):
                 test/playlist_layering_test.cc
                 test/playlist_read_test.cc
                 test/control_surfaces_test.cc
+                test/combine_regions_test.cc
                 test/mtdm_test.cc
                 test/testrunner.cc
         '''.split()
