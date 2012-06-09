@@ -1495,10 +1495,6 @@ RegionCreateDrag::finished (GdkEvent*, bool movement_occurred)
 	} else {
 		_view->playlist()->thaw ();
 	}
-
-	if (_region) {
-		_editor->commit_reversible_command ();
-	}
 }
 
 void
