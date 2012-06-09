@@ -16,30 +16,18 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "ardour/playlist.h"
-#include "ardour/region.h"
-#include "playlist_layering_test.h"
+#include "ardour/types.h"
+#include "audio_region_test.h"
 
-CPPUNIT_TEST_SUITE_REGISTRATION (PlaylistLayeringTest);
-
-using namespace std;
-using namespace ARDOUR;
-
-void
-PlaylistLayeringTest::basicsTest ()
+class AudioRegionReadTest : public AudioRegionTest
 {
-	_playlist->add_region (_r[0], 0);
-	_playlist->add_region (_r[1], 10);
-	_playlist->add_region (_r[2], 20);
+	CPPUNIT_TEST_SUITE (AudioRegionReadTest);
+	CPPUNIT_TEST (readTest);
+	CPPUNIT_TEST_SUITE_END ();
 
-	CPPUNIT_ASSERT_EQUAL (layer_t (0), _r[0]->layer ());
-	CPPUNIT_ASSERT_EQUAL (layer_t (1), _r[1]->layer ());
-	CPPUNIT_ASSERT_EQUAL (layer_t (2), _r[2]->layer ());
+public:
+	void readTest ();
 
-	_r[0]->set_position (5);
-
-	/* region move should have no effect */
-	CPPUNIT_ASSERT_EQUAL (layer_t (0), _r[0]->layer ());
-	CPPUNIT_ASSERT_EQUAL (layer_t (1), _r[1]->layer ());
-	CPPUNIT_ASSERT_EQUAL (layer_t (2), _r[2]->layer ());
-}
+private:
+	void check_staircase (ARDOUR::Sample *, int, int);
+};

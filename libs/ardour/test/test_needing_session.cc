@@ -61,6 +61,11 @@ TestNeedingSession::setUp ()
 	test_receiver.listen_to (fatal);
 	test_receiver.listen_to (warning);
 
+	/* We can't use VSTs here as we have a stub instead of the
+	   required bits in gtk2_ardour.
+	*/
+	Config->set_use_lxvst (false);
+
 	AudioEngine* engine = new AudioEngine ("test", "");
 	init_post_engine ();
 

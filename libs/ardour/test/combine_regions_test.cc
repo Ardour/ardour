@@ -1,3 +1,21 @@
+/*
+    Copyright (C) 2012 Paul Davis
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+*/
+
 #include "combine_regions_test.h"
 #include "ardour/types.h"
 #include "ardour/audioplaylist.h"
@@ -17,10 +35,8 @@ CombineRegionsTest::check_crossfade ()
 	ARDOUR::Sample mbuf[512];
 	float gbuf[512];
 
-	boost::shared_ptr<AudioPlaylist> apl = boost::dynamic_pointer_cast<AudioPlaylist> (_playlist);
-
 	/* Read from the playlist */
-	apl->read (buf, mbuf, gbuf, 0, 256 * 2 - 128, 0);
+	_audio_playlist->read (buf, mbuf, gbuf, 0, 256 * 2 - 128, 0);
 
 	/* region[0]'s fade in */
 	for (int i = 0; i < 64; ++i) {
@@ -34,14 +50,11 @@ CombineRegionsTest::check_crossfade ()
 		CPPUNIT_ASSERT_DOUBLES_EQUAL (i, buf[i], 1e-16);
 	}
 
-	boost::shared_ptr<AudioRegion> ar0 = boost::dynamic_pointer_cast<AudioRegion> (_region[0]);
-	boost::shared_ptr<AudioRegion> ar1 = boost::dynamic_pointer_cast<AudioRegion> (_region[1]);
-	
 	float fade_in[128];
 	float fade_out[128];
 	
-	ar1->fade_in()->curve().get_vector (0, 128, fade_in, 128);
-	ar1->inverse_fade_in()->curve().get_vector (0, 128, fade_out, 128);
+	_ar[1]->fade_in()->curve().get_vector (0, 128, fade_in, 128);
+	_ar[1]->inverse_fade_in()->curve().get_vector (0, 128, fade_out, 128);
 	
 	/* Crossfading region[0] to region[1] using region[1]'s fade in and inverse fade in.
 	   region[0] also has a standard region fade out to add to the fun.
@@ -83,27 +96,22 @@ CombineRegionsTest::crossfadeTest ()
 {
 	/* Two regions, both 256 frames in length, overlapping by 128 frames in the middle */
 
-	boost::shared_ptr<AudioRegion> ar0 = boost::dynamic_pointer_cast<AudioRegion> (_region[0]);
-	ar0->set_name ("ar0");
-	boost::shared_ptr<AudioRegion> ar1 = boost::dynamic_pointer_cast<AudioRegion> (_region[1]);
-	ar1->set_name ("ar1");
-
-	ar0->set_default_fade_in ();
-	ar0->set_default_fade_out ();
-	ar1->set_default_fade_out ();
+	_ar[0]->set_default_fade_in ();
+	_ar[0]->set_default_fade_out ();
+	_ar[1]->set_default_fade_out ();
 	
-	_playlist->add_region (_region[0], 0);
-	_region[0]->set_length (256);
+	_playlist->add_region (_r[0], 0);
+	_r[0]->set_length (256);
 
-	_playlist->add_region (_region[1], 128);
-	_region[1]->set_length (256);
+	_playlist->add_region (_r[1], 128);
+	_r[1]->set_length (256);
 
 	/* Check that the right fades have been set up */
 
-	CPPUNIT_ASSERT_EQUAL (false, ar0->fade_in_is_xfade ());
-	CPPUNIT_ASSERT_EQUAL (false, ar0->fade_out_is_xfade ());
-	CPPUNIT_ASSERT_EQUAL (true, ar1->fade_in_is_xfade ());
-	CPPUNIT_ASSERT_EQUAL (false, ar1->fade_out_is_xfade ());
+	CPPUNIT_ASSERT_EQUAL (false, _ar[0]->fade_in_is_xfade ());
+	CPPUNIT_ASSERT_EQUAL (false, _ar[0]->fade_out_is_xfade ());
+	CPPUNIT_ASSERT_EQUAL (true, _ar[1]->fade_in_is_xfade ());
+	CPPUNIT_ASSERT_EQUAL (false, _ar[1]->fade_out_is_xfade ());
 
 	/* Check that the read comes back correctly */
 	
@@ -112,8 +120,8 @@ CombineRegionsTest::crossfadeTest ()
 	/* Combine the two regions */
 
 	RegionList rl;
-	rl.push_back (_region[0]);
-	rl.push_back (_region[1]);
+	rl.push_back (_r[0]);
+	rl.push_back (_r[1]);
 	_playlist->combine (rl);
 
 	/* ...so we just have the one region... */

@@ -34,7 +34,7 @@
 #include "ardour/region.h"
 
 class XMLNode;
-class AudioRegionTest;
+class AudioRegionReadTest;
 class PlaylistReadTest;
 
 namespace ARDOUR {
@@ -194,7 +194,7 @@ class AudioRegion : public Region
 	AudioRegion (SourceList &);
 
   private:
-	friend class ::AudioRegionTest;
+	friend class ::AudioRegionReadTest;
 	friend class ::PlaylistReadTest;
 	
 	PBD::Property<bool>     _envelope_active;
