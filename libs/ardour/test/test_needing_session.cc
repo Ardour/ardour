@@ -74,10 +74,9 @@ void
 TestNeedingSession::tearDown ()
 {
 	AudioEngine::instance()->remove_session ();
+	delete _session;
 	AudioEngine::instance()->stop (true);
 	
-	delete _session;
-
 	MIDI::Manager::destroy ();
 	AudioEngine::destroy ();
 }
