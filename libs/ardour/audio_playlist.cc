@@ -218,7 +218,7 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, fr
 
 		Evoral::RangeList<framepos_t> region_to_do = Evoral::subtract (region_range, done);
 
-		/* Read those bits, adding their bodies (the parts between end-of-fade-in
+		/* Make a note to read those bits, adding their bodies (the parts between end-of-fade-in
 		   and start-of-fade-out) to the `done' list.
 		*/
 
@@ -258,7 +258,7 @@ AudioPlaylist::check_crossfades (Evoral::Range<framepos_t> range)
 	if (in_set_state || in_partition || !_session.config.get_auto_xfade ()) {
 		return;
 	}
-	
+
 	boost::shared_ptr<RegionList> starts = regions_with_start_within (range);
 	boost::shared_ptr<RegionList> ends = regions_with_end_within (range);
 
@@ -307,7 +307,7 @@ AudioPlaylist::check_crossfades (Evoral::Range<framepos_t> range)
 			}
 
 			Evoral::OverlapType const c = top->coverage (bottom->position(), bottom->last_frame());
-			
+
 			if (c == Evoral::OverlapStart) {
 				
 				/* top starts within bottom but covers bottom's end */
@@ -344,7 +344,7 @@ AudioPlaylist::check_crossfades (Evoral::Range<framepos_t> range)
 								break;
 							}
 						}
-						
+
 						top->set_fade_in_active (true);
 						top->set_fade_in_is_xfade (true);
 						
