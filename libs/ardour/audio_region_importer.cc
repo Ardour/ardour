@@ -356,7 +356,7 @@ AudioRegionImporter::prepare_sources ()
 
 	// import files
 	// TODO: threading & exception handling
-	session.import_audiofiles (status);
+	session.import_files (status);
 
 	// Add imported sources to handlers map
 	std::vector<string>::iterator file_it = status.paths.begin();

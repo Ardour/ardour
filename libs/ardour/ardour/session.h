@@ -529,7 +529,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	/* source management */
 
-	void import_audiofiles (ImportStatus&);
+	void import_files (ImportStatus&);
 	bool sample_rate_convert (ImportStatus&, std::string infile, std::string& outfile);
 	std::string build_tmp_convert_name (std::string file);
 

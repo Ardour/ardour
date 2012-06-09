@@ -474,7 +474,7 @@ remove_file_source (boost::shared_ptr<Source> source)
 // is disabled at the GUI until the Source implementations are able to provide
 // the necessary API.
 void
-Session::import_audiofiles (ImportStatus& status)
+Session::import_files (ImportStatus& status)
 {
 	typedef vector<boost::shared_ptr<Source> > Sources;
 	Sources all_new_sources;

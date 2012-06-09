@@ -209,7 +209,7 @@ Editor::session_import_dialog ()
 typedef std::map<PBD::ID,boost::shared_ptr<ARDOUR::Source> > SourceMap;
 
 /**
- * Updating is still disabled, see note in libs/ardour/import.cc Session::import_audiofiles()
+ * Updating is still disabled, see note in libs/ardour/import.cc Session::import_files()
  *
  * all_or_nothing:
  *   true  = show "Update", "Import" and "Skip"
@@ -546,7 +546,7 @@ Editor::import_sndfiles (vector<string> paths, ImportMode mode, SrcQuality quali
 	set_canvas_cursor (_cursors->wait);
 	gdk_flush ();
 
-	/* start import thread for this spec. this will ultimately call Session::import_audiofiles()
+	/* start import thread for this spec. this will ultimately call Session::import_files()
 	   which, if successful, will add the files as regions to the region list. its up to us
 	   (the GUI) to direct additional steps after that.
 	*/
@@ -989,7 +989,7 @@ Editor::_import_thread (void *arg)
 void *
 Editor::import_thread ()
 {
-	_session->import_audiofiles (import_status);
+	_session->import_files (import_status);
 	pthread_exit_pbd (0);
 	/*NOTREACHED*/
 	return 0;
