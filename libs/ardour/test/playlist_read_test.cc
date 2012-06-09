@@ -86,12 +86,20 @@ PlaylistReadTest::overlappingReadTest ()
 	CPPUNIT_ASSERT_EQUAL (double (64), ar0->_fade_in->back()->when);
 	CPPUNIT_ASSERT_EQUAL (double (64), ar0->_fade_out->back()->when);
 	ar0->set_length (1024);
+
+	/* Note: these are ordinary fades, not xfades */
+	CPPUNIT_ASSERT_EQUAL (false, ar0->fade_in_is_xfade());
+	CPPUNIT_ASSERT_EQUAL (false, ar0->fade_out_is_xfade());
 	
 	boost::shared_ptr<AudioRegion> ar1 = boost::dynamic_pointer_cast<AudioRegion> (_region[1]);
 	ar1->set_name ("ar1");
 	_apl->add_region (ar1, 128);
 	ar1->set_default_fade_in ();
 	ar1->set_default_fade_out ();
+
+	/* Note: these are ordinary fades, not xfades */
+	CPPUNIT_ASSERT_EQUAL (false, ar1->fade_in_is_xfade());
+	CPPUNIT_ASSERT_EQUAL (false, ar1->fade_out_is_xfade());
 	
 	CPPUNIT_ASSERT_EQUAL (double (64), ar1->_fade_in->back()->when);
 	CPPUNIT_ASSERT_EQUAL (double (64), ar1->_fade_out->back()->when);
