@@ -827,6 +827,8 @@ Editor::add_sources (vector<string> paths, SourceList& sources, framepos_t& pos,
 	int n = 0;
 	framepos_t rlen = 0;
 
+	begin_reversible_command (Operations::insert_file);
+	
 	for (vector<boost::shared_ptr<Region> >::iterator r = regions.begin(); r != regions.end(); ++r, ++n) {
 		boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (*r);
 
@@ -874,6 +876,8 @@ Editor::add_sources (vector<string> paths, SourceList& sources, framepos_t& pos,
 		}
 	}
 
+	commit_reversible_command ();
+	
 	/* setup peak file building in another thread */
 
 	for (SourceList::iterator x = sources.begin(); x != sources.end(); ++x) {
@@ -885,7 +889,7 @@ Editor::add_sources (vector<string> paths, SourceList& sources, framepos_t& pos,
 
 int
 Editor::finish_bringing_in_material (boost::shared_ptr<Region> region, uint32_t in_chans, uint32_t out_chans, framepos_t& pos,
-				  ImportMode mode, boost::shared_ptr<Track>& existing_track)
+				     ImportMode mode, boost::shared_ptr<Track>& existing_track)
 {
 	boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion>(region);
 	boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion>(region);
@@ -912,11 +916,9 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region, uint32_t 
 
 		boost::shared_ptr<Playlist> playlist = existing_track->playlist();
 		boost::shared_ptr<Region> copy (RegionFactory::create (region, region->properties()));
-		begin_reversible_command (Operations::insert_file);
 		playlist->clear_changes ();
 		playlist->add_region (copy, pos);
 		_session->add_command (new StatefulDiffCommand (playlist));
-		commit_reversible_command ();
 		break;
 	}
 
@@ -946,11 +948,9 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region, uint32_t 
 
 		boost::shared_ptr<Playlist> playlist = existing_track->playlist();
 		boost::shared_ptr<Region> copy (RegionFactory::create (region, true));
-		begin_reversible_command (Operations::insert_file);
 		playlist->clear_changes ();
 		playlist->add_region (copy, pos);
 		_session->add_command (new StatefulDiffCommand (playlist));
-		commit_reversible_command ();
 		break;
 	}
 
@@ -964,11 +964,9 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region, uint32_t 
 		if (!at.empty()) {
 			boost::shared_ptr<Playlist> playlist = at.front()->playlist();
 			boost::shared_ptr<Region> copy (RegionFactory::create (region, true));
-			begin_reversible_command (Operations::insert_file);
 			playlist->clear_changes ();
 			playlist->add_region (copy, pos);
 			_session->add_command (new StatefulDiffCommand (playlist));
-			commit_reversible_command ();
 		}
 		break;
 	}
