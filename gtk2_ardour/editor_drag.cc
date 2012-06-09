@@ -4557,8 +4557,6 @@ NoteCreateDrag::aborted (bool)
 	
 }
 
-/*------------*/
-
 CrossfadeEdgeDrag::CrossfadeEdgeDrag (Editor* e, AudioRegionView* rv, ArdourCanvas::Item* i, bool start_yn)
 	: Drag (e, i)
 	, arv (rv)
@@ -4640,6 +4638,7 @@ CrossfadeEdgeDrag::finished (GdkEvent*, bool)
 	vector<Command*> cmds;
 	ar->playlist()->rdiff (cmds);
 	_editor->session()->add_commands (cmds);
+	_editor->commit_reversible_command ();
 
 }
 
