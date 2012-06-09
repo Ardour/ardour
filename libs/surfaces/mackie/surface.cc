@@ -239,6 +239,9 @@ Surface::master_gain_changed ()
 	}
 
 	boost::shared_ptr<AutomationControl> ac = _master_fader->control();
+	if (!ac) {
+		return;
+	}
 
 	float normalized_position = ac->internal_to_interface (ac->get_value());
 	if (normalized_position == _last_master_gain_written) {
