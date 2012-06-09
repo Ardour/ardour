@@ -945,7 +945,7 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region, uint32_t 
 		}
 
 		boost::shared_ptr<Playlist> playlist = existing_track->playlist();
-		boost::shared_ptr<Region> copy (RegionFactory::create (region));
+		boost::shared_ptr<Region> copy (RegionFactory::create (region, true));
 		begin_reversible_command (Operations::insert_file);
 		playlist->clear_changes ();
 		playlist->add_region (copy, pos);
@@ -963,7 +963,7 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region, uint32_t 
 		list<boost::shared_ptr<AudioTrack> > at (_session->new_audio_track (in_chans, out_chans, Destructive));
 		if (!at.empty()) {
 			boost::shared_ptr<Playlist> playlist = at.front()->playlist();
-			boost::shared_ptr<Region> copy (RegionFactory::create (region));
+			boost::shared_ptr<Region> copy (RegionFactory::create (region, true));
 			begin_reversible_command (Operations::insert_file);
 			playlist->clear_changes ();
 			playlist->add_region (copy, pos);
