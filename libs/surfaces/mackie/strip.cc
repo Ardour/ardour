@@ -128,6 +128,7 @@ Strip::add (Control & control)
 			break;
 		case Button::FaderTouch:
 			_fader_touch = button;
+			break;
 		default:
 			break;
 		}

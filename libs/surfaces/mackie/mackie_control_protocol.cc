@@ -438,6 +438,10 @@ MackieControlProtocol::periodic ()
 void 
 MackieControlProtocol::update_timecode_beats_led()
 {
+	if (!_device_info.has_timecode_display()) {
+		return;
+	}
+
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose("MackieControlProtocol::update_timecode_beats_led(): %1\n", _timecode_type));
 	switch (_timecode_type) {
 		case ARDOUR::AnyTime::BBT:
@@ -458,11 +462,11 @@ MackieControlProtocol::update_timecode_beats_led()
 void 
 MackieControlProtocol::update_global_button (int id, LedState ls)
 {
-	boost::shared_ptr<Surface> surface = surfaces.front();
-
-	if (!surface->type() == mcu) {
+	if (!_device_info.has_global_controls()) {
 		return;
 	}
+
+	boost::shared_ptr<Surface> surface = surfaces.front();
 
 	map<int,Control*>::iterator x = surface->controls_by_device_independent_id.find (id);
 	if (x != surface->controls_by_device_independent_id.end()) {
@@ -476,15 +480,14 @@ MackieControlProtocol::update_global_button (int id, LedState ls)
 void 
 MackieControlProtocol::update_global_led (int id, LedState ls)
 {
-	boost::shared_ptr<Surface> surface = surfaces.front();
-
-	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("MackieControlProtocol::update_global_led (%1, %2)\n", id, ls));
-	
-	if (surface->type() != mcu) {
+	if (!_device_info.has_global_controls()) {
 		return;
 	}
 
+	boost::shared_ptr<Surface> surface = surfaces.front();
+
 	map<int,Control*>::iterator x = surface->controls_by_device_independent_id.find (id);
+
 	if (x != surface->controls_by_device_independent_id.end()) {
 		Led * led = dynamic_cast<Led*> (x->second);
 		DEBUG_TRACE (DEBUG::MackieControl, "Writing LedState\n");
@@ -516,8 +519,11 @@ MackieControlProtocol::initialize()
 	if (!surfaces.front()->active ()) {
 		return;
 	}
+
 	// sometimes the jog wheel is a pot
-	surfaces.front()->blank_jog_ring ();
+	if (_device_info.has_jog_wheel()) {
+		surfaces.front()->blank_jog_ring ();
+	}
 	
 	// update global buttons and displays
 
@@ -898,6 +904,10 @@ MackieControlProtocol::notify_loop_state_changed()
 void 
 MackieControlProtocol::notify_transport_state_changed()
 {
+	if (!_device_info.has_global_controls()) {
+		return;
+	}
+
 	// switch various play and stop buttons on / off
 	update_global_button (Button::Loop, session->get_play_loop());
 	update_global_button (Button::Play, session->transport_speed() == 1.0);
@@ -906,8 +916,6 @@ MackieControlProtocol::notify_transport_state_changed()
 	update_global_button (Button::Ffwd, session->transport_speed() > 1.0);
 
 	notify_metering_state_changed ();
-	
-	_transport_previously_rolling = session->transport_rolling();
 }
 
 void 
@@ -921,6 +929,9 @@ MackieControlProtocol::notify_metering_state_changed()
 void
 MackieControlProtocol::notify_record_state_changed ()
 {
+	if (!_device_info.has_global_controls()) {
+		return;
+	}
 	boost::shared_ptr<Surface> surface = surfaces.front();
 
 	/* rec is a tristate */
@@ -1061,6 +1072,7 @@ MackieControlProtocol::build_button_map ()
 	DEFINE_BUTTON_HANDLER (Button::Scrub, &MackieControlProtocol::scrub_press, &MackieControlProtocol::scrub_release);
 	DEFINE_BUTTON_HANDLER (Button::UserA, &MackieControlProtocol::user_a_press, &MackieControlProtocol::user_a_release);
 	DEFINE_BUTTON_HANDLER (Button::UserB, &MackieControlProtocol::user_b_press, &MackieControlProtocol::user_b_release);
+	DEFINE_BUTTON_HANDLER (Button::MasterFaderTouch, &MackieControlProtocol::master_fader_touch_press, &MackieControlProtocol::master_fader_touch_release);
 
 	DEFINE_BUTTON_HANDLER (Button::Snapshot, &MackieControlProtocol::snapshot_press, &MackieControlProtocol::snapshot_release);
 	DEFINE_BUTTON_HANDLER (Button::Read, &MackieControlProtocol::read_press, &MackieControlProtocol::read_release);

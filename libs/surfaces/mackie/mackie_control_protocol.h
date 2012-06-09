@@ -266,7 +266,6 @@ class MackieControlProtocol
 	PBD::ScopedConnectionList port_connections;
 	PBD::ScopedConnectionList route_connections;
 	PBD::ScopedConnectionList gui_connections;
-	bool _transport_previously_rolling;
 	// timer for two quick marker left presses
 	Mackie::Timer            _frm_left_last;
 	// last written timecode string
@@ -450,6 +449,8 @@ class MackieControlProtocol
 	Mackie::LedState user_b_release (Mackie::Button &);
 	Mackie::LedState fader_touch_press (Mackie::Button &);
 	Mackie::LedState fader_touch_release (Mackie::Button &);
+	Mackie::LedState master_fader_touch_press (Mackie::Button &);
+	Mackie::LedState master_fader_touch_release (Mackie::Button &);
 
 	Mackie::LedState snapshot_press (Mackie::Button&);
 	Mackie::LedState snapshot_release (Mackie::Button&);
@@ -498,7 +499,5 @@ class MackieControlProtocol
 	Mackie::LedState view_press (Mackie::Button&);
 	Mackie::LedState view_release (Mackie::Button&);
 };
-
-
 
 #endif // ardour_mackie_control_protocol_h

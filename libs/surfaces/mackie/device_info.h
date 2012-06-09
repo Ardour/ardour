@@ -75,9 +75,13 @@ class DeviceInfo
 	static void reload_device_info();
 	
 	std::string& get_global_button_name(Button::ID);
+	GlobalButtonInfo& get_global_button(Button::ID);
 
-    const std::map<Button::ID,GlobalButtonInfo>& global_buttons() const { return _global_buttons; }
-    const std::map<Button::ID,StripButtonInfo>& strip_buttons() const { return _strip_buttons; }
+  typedef std::map<Button::ID,GlobalButtonInfo> GlobalButtonsInfo;
+  typedef std::map<Button::ID,StripButtonInfo> StripButtonsInfo;
+
+  const GlobalButtonsInfo& global_buttons() const { return _global_buttons; }
+  const StripButtonsInfo& strip_buttons() const { return _strip_buttons; }
 	
   private:
     uint32_t _strip_cnt;
@@ -95,8 +99,8 @@ class DeviceInfo
     std::string _name;
 		std::string _global_button_name;
 
-    std::map<Button::ID,GlobalButtonInfo> _global_buttons;
-    std::map<Button::ID,StripButtonInfo>  _strip_buttons;
+		GlobalButtonsInfo _global_buttons;
+    StripButtonsInfo _strip_buttons;
 
     void logic_control_buttons ();
     void mackie_control_buttons ();
