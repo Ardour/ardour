@@ -33,16 +33,21 @@ namespace Gnome {
 class EditNoteDialog : public ArdourDialog
 {
 public:
-	EditNoteDialog (MidiRegionView *, Gnome::Canvas::CanvasNoteEvent *);
+	EditNoteDialog (MidiRegionView *, std::set<Gnome::Canvas::CanvasNoteEvent*>);
 
 	int run ();
 
 private:
 	MidiRegionView* _region_view;
-	Gnome::Canvas::CanvasNoteEvent* _event;
+	std::set<Gnome::Canvas::CanvasNoteEvent*> _events;
 	Gtk::SpinButton _channel;
+	Gtk::CheckButton _channel_all;
 	Gtk::SpinButton _pitch;
+	Gtk::CheckButton _pitch_all;
 	Gtk::SpinButton _velocity;
+	Gtk::CheckButton _velocity_all;
 	AudioClock _time_clock;
+	Gtk::CheckButton _time_all;
 	AudioClock _length_clock;
+	Gtk::CheckButton _length_all;
 };

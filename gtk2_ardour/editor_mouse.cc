@@ -1438,8 +1438,12 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			break;
 
 		case NoteItem:
-			edit_note (item);
+		{
+			ArdourCanvas::CanvasNoteEvent* e = dynamic_cast<ArdourCanvas::CanvasNoteEvent*> (item);
+			assert (e);
+			edit_notes (e->region_view().selection ());
 			break;
+		}
 
 		default:
 			break;
@@ -2307,12 +2311,13 @@ Editor::edit_control_point (ArdourCanvas::Item* item)
 }
 
 void
-Editor::edit_note (ArdourCanvas::Item* item)
+Editor::edit_notes (MidiRegionView::Selection const & s)
 {
-	ArdourCanvas::CanvasNoteEvent* e = dynamic_cast<ArdourCanvas::CanvasNoteEvent*> (item);
-	assert (e);
-
-	EditNoteDialog d (&e->region_view(), e);
+	if (s.empty ()) {
+		return;
+	}
+	
+	EditNoteDialog d (&(*s.begin())->region_view(), s);
 	d.set_position (Gtk::WIN_POS_MOUSE);
 	ensure_float (d);
 

@@ -281,6 +281,11 @@ public:
 
 	void show_list_editor ();
 
+	typedef std::set<ArdourCanvas::CanvasNoteEvent*> Selection;
+	Selection selection () const {
+		return _selection;
+	}
+	
 	void selection_as_notelist (Notes& selected, bool allow_all_if_none_selected = false);
 
 	void enable_display (bool);
@@ -409,8 +414,7 @@ private:
 	MouseState _mouse_state;
 	int _pressed_button;
 
-	typedef std::set<ArdourCanvas::CanvasNoteEvent*> Selection;
-	/// Currently selected CanvasNoteEvents
+	/** Currently selected CanvasNoteEvents */
 	Selection _selection;
 
 	bool _sort_needed;
