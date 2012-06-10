@@ -18,15 +18,22 @@
 
 #include "audio_region_test.h"
 
+namespace ARDOUR {
+	class AutomationList;
+}
+
 class CombineRegionsTest : public AudioRegionTest
 {
 	CPPUNIT_TEST_SUITE (CombineRegionsTest);
-	CPPUNIT_TEST (crossfadeTest);
+	CPPUNIT_TEST (crossfadeTest1);
+	CPPUNIT_TEST (crossfadeTest2);
 	CPPUNIT_TEST_SUITE_END ();
 
 public:
-	void crossfadeTest ();
+	void crossfadeTest1 ();
+	void crossfadeTest2 ();
 
 private:
-	void check_crossfade ();
+	void check_crossfade1 ();
+	void check_crossfade2 ();
 };
