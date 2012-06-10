@@ -335,7 +335,7 @@ AudioPlaylist::check_crossfades (Evoral::Range<framepos_t> range)
 						} else {
 							switch (_session.config.get_xfade_model()) {
 							case FullCrossfade:
-								len = bottom->last_frame () - top->first_frame ();
+								len = bottom->last_frame () - top->first_frame () + 1;
 								top->set_fade_in_is_short (false);
 								break;
 							case ShortCrossfade:
@@ -395,7 +395,7 @@ AudioPlaylist::check_crossfades (Evoral::Range<framepos_t> range)
 						} else {
 							switch (_session.config.get_xfade_model()) {
 							case FullCrossfade:
-								len = top->last_frame () - bottom->first_frame ();
+								len = top->last_frame () - bottom->first_frame () + 1;
 								break;
 							case ShortCrossfade:
 								len = _session.config.get_short_xfade_seconds() * _session.frame_rate();
