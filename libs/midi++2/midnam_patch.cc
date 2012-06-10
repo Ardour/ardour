@@ -78,10 +78,12 @@ int initialize_primary_key_from_commands (PatchPrimaryKey& id, const XMLNode* no
 			string value = node->property("Value")->value();
 			assert(value != "");
 
+			id.bank_number = 0;
+
 			if (control == "0") {
-				id.msb = PBD::atoi(value);
+				id.bank_number |= (PBD::atoi (value)<<7);
 			} else if (control == "32") {
-				id.lsb = PBD::atoi(value);
+				id.bank_number |= PBD::atoi (value);
 			}
 		} else if (node->name() == "ProgramChange") {
 			string number = node->property("Number")->value();
@@ -135,8 +137,7 @@ Patch::use_bank_info (PatchBank* bank)
 {
 	if (bank) {
 		if (bank->patch_primary_key() ) {
-			_id.msb = bank->patch_primary_key()->msb;
-			_id.lsb = bank->patch_primary_key()->lsb;
+			_id.bank_number = bank->patch_primary_key()->bank_number;
 		} else {
 			return -1;
 		}

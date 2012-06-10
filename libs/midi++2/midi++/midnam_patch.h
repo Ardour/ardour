@@ -39,42 +39,36 @@ namespace Name
 struct PatchPrimaryKey
 {
 public:
-	int msb;
-	int lsb;
+        int bank_number;
 	int program_number;
-	
-	PatchPrimaryKey(int a_msb = -1, int a_lsb = -1, int a_program_number = -1) {
-		msb = a_msb;
-		lsb = a_lsb;
+    
+	PatchPrimaryKey(int a_bank_number = -1, int a_program_number = -1) {
+		bank_number = a_bank_number;
 		program_number = a_program_number;
 	}
 	
 	bool is_sane() { 	
-		return ((msb >= 0) && (msb <= 127) &&
-			(lsb >= 0) && (lsb <= 127) &&
+		return ((bank_number >= 0) && (bank_number <= 16384) && 
 			(program_number >=0 ) && (program_number <= 127));
 	}
 	
 	inline PatchPrimaryKey& operator=(const PatchPrimaryKey& id) {
-		msb = id.msb;
-		lsb = id.lsb; 
+		bank_number = id.bank_number;
 		program_number = id.program_number;
 		return *this;
 	}
 	
 	inline bool operator==(const PatchPrimaryKey& id) const {
-		return (msb == id.msb && lsb == id.lsb && program_number == id.program_number);
+		return (bank_number == id.bank_number && program_number == id.program_number);
 	}
 	
 	/**
 	 * obey strict weak ordering or crash in STL containers
 	 */
 	inline bool operator<(const PatchPrimaryKey& id) const {
-		if (msb < id.msb) {
+		if (bank_number < id.bank_number) {
 			return true;
-		} else if (msb == id.msb && lsb < id.lsb) {
-			return true;
-		} else if (msb == id.msb && lsb == id.lsb && program_number < id.program_number) {
+		} else if (bank_number == id.bank_number && program_number < id.program_number) {
 			return true;
 		}
 		
@@ -168,7 +162,7 @@ public:
 	
 	boost::shared_ptr<Patch> previous_patch(PatchPrimaryKey& key) {
 		assert(key.is_sane());
-		std::cerr << "finding patch with "  << key.msb << "/" << key.lsb << "/" <<key.program_number << std::endl; 
+		std::cerr << "finding patch with "  << key.bank_number << "/" <<key.program_number << std::endl; 
 		for (PatchList::const_iterator i = _patch_list.begin();
 			 i != _patch_list.end();
 			 ++i) {
@@ -186,7 +180,7 @@ public:
 	
 	boost::shared_ptr<Patch> next_patch(PatchPrimaryKey& key) {
 		assert(key.is_sane());
-		std::cerr << "finding patch with "  << key.msb << "/" << key.lsb << "/" <<key.program_number << std::endl; 
+		std::cerr << "finding patch with "  << key.bank_number << "/" <<key.program_number << std::endl; 
 		for (PatchList::const_iterator i = _patch_list.begin();
 			 i != _patch_list.end();
 			 ++i) {

@@ -103,7 +103,8 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	uint8_t get_channel_for_add () const;
 
 	std::string midi_patch_model () const;
-	std::string midi_patch_custom_device_node () const;
+	std::string midi_patch_custom_device_mode () const;
+        std::string get_patch_name (uint16_t bank, uint8_t program, uint8_t channel) const;
 
   protected:
 	void start_step_editing ();

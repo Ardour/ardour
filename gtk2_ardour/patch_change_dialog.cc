@@ -167,7 +167,7 @@ PatchChangeDialog::set_active_bank_combo ()
 		boost::replace_all (n, "_", " ");
 
 		MIDI::Name::PatchPrimaryKey const * key = (*i)->patch_primary_key ();
-		if (key && ((key->msb << 7) | key->lsb) == _bank.get_value () - 1) {
+		if (key && (key->bank_number == _bank.get_value () - 1)) {
 			_current_patch_bank = *i;
 			_ignore_signals = true;
 			_bank_combo.set_active_text (n);
@@ -218,7 +218,7 @@ PatchChangeDialog::bank_combo_changed ()
 	MIDI::Name::PatchPrimaryKey const * key = _current_patch_bank->patch_primary_key ();
 	if (key) {
 		_ignore_signals = true;
-		_bank.set_value (((key->msb << 7) | key->lsb) + 1);
+		_bank.set_value (key->bank_number + 1);
 		_ignore_signals = false;
 	}
 }

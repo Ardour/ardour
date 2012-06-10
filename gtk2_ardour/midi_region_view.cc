@@ -117,7 +117,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 
 	/* Look up MIDNAM details from our MidiTimeAxisView */
 	MidiTimeAxisView& mtv = dynamic_cast<MidiTimeAxisView&> (tv);
-	midi_patch_settings_changed (mtv.midi_patch_model (), mtv.midi_patch_custom_device_node ());
+	midi_patch_settings_changed (mtv.midi_patch_model (), mtv.midi_patch_custom_device_mode ());
 
 	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&MidiRegionView::parameter_changed, this, _1), gui_context());
 	connect_to_diskstream ();
@@ -158,7 +158,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 
 	/* Look up MIDNAM details from our MidiTimeAxisView */
 	MidiTimeAxisView& mtv = dynamic_cast<MidiTimeAxisView&> (tv);
-	midi_patch_settings_changed (mtv.midi_patch_model (), mtv.midi_patch_custom_device_node ());
+	midi_patch_settings_changed (mtv.midi_patch_model (), mtv.midi_patch_custom_device_mode ());
 	
 	connect_to_diskstream ();
 
@@ -1209,20 +1209,10 @@ MidiRegionView::display_patch_changes_on_channel (uint8_t channel, bool active_c
 			continue;
 		}
 
-		MIDI::Name::PatchPrimaryKey patch_key ((*i)->bank_msb (), (*i)->bank_lsb (), (*i)->program ());
+		MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
+		string patch_name = mtv->get_patch_name ((*i)->bank(), (*i)->program(), channel);
 
-		boost::shared_ptr<MIDI::Name::Patch> patch =
-			MIDI::Name::MidiPatchManager::instance().find_patch(
-				_model_name, _custom_device_mode, channel, patch_key);
-
-		if (patch != 0) {
-			add_canvas_patch_change (*i, patch->name(), active_channel);
-		} else {
-			char buf[16];
-			/* program and bank numbers are zero-based: convert to one-based: MIDI_BP_ZERO */
-			snprintf (buf, 16, "%d %d", (*i)->program() + MIDI_BP_ZERO , (*i)->bank() + MIDI_BP_ZERO);
-			add_canvas_patch_change (*i, buf, active_channel);
-		}
+		add_canvas_patch_change (*i, patch_name, active_channel);
 	}
 }
 
@@ -1832,11 +1822,10 @@ MidiRegionView::get_patch_key_at (Evoral::MusicalTime time, uint8_t channel, MID
 	}
 
 	if (i != _model->patch_changes().end()) {
-		key.msb = (*i)->bank_msb ();
-		key.lsb = (*i)->bank_lsb ();
+		key.bank_number = (*i)->bank();
 		key.program_number = (*i)->program ();
 	} else {
-		key.msb = key.lsb = key.program_number = 0;
+		key.bank_number = key.program_number = 0;
 	}
 
 	assert (key.is_sane());
@@ -1852,7 +1841,7 @@ MidiRegionView::change_patch_change (CanvasPatchChange& pc, const MIDI::Name::Pa
 		c->change_program (pc.patch (), new_patch.program_number);
 	}
 
-	int const new_bank = (new_patch.msb << 7) | new_patch.lsb;
+	int const new_bank = new_patch.bank_number;
 	if (pc.patch()->bank() != new_bank) {
 		c->change_bank (pc.patch (), new_bank);
 	}
@@ -1965,15 +1954,9 @@ MidiRegionView::previous_bank (CanvasPatchChange& patch)
 	if (patch.patch()->program() < 127) {
 		MIDI::Name::PatchPrimaryKey key;
 		get_patch_key_at (patch.patch()->time(), patch.patch()->channel(), key);
-		if (key.lsb > 0) {
-			key.lsb--;
+		if (key.bank_number > 0) {
+			key.bank_number--;
 			change_patch_change (patch, key);
-		} else {
-			if (key.msb > 0) {
-				key.lsb = 127;
-				key.msb--;
-				change_patch_change (patch, key);
-			}
 		}
 	}
 }
@@ -1984,15 +1967,9 @@ MidiRegionView::next_bank (CanvasPatchChange& patch)
 	if (patch.patch()->program() > 0) {
 		MIDI::Name::PatchPrimaryKey key;
 		get_patch_key_at (patch.patch()->time(), patch.patch()->channel(), key);
-		if (key.lsb < 127) {
-			key.lsb++;
+		if (key.bank_number < 127) {
+			key.bank_number++;
 			change_patch_change (patch, key);
-		} else {
-			if (key.msb < 127) {
-				key.lsb = 0;
-				key.msb++;
-				change_patch_change (patch, key);
-			}
 		}
 	}
 }
