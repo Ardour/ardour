@@ -2837,6 +2837,7 @@ Playlist::combine (const RegionList& r)
 		/* make position relative to zero */
 
 		pl->add_region (copied_region, original_region->position() - earliest_position);
+		copied_region->set_layer (original_region->layer ());
 
 		/* use the maximum number of channels for any region */
 
