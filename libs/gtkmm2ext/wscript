@@ -45,6 +45,7 @@ gtkmm2ext_sources = [
         'idle_adjustment.cc',
         'keyboard.cc',
         'motionfeedback.cc',
+        'persistent_tooltip.cc',
         'prolooks_helpers.c',
         'pixfader.cc',
         'pixscroller.cc',

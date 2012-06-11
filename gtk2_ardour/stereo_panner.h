@@ -72,7 +72,7 @@ class StereoPanner : public PannerInterface
         BindingProxy position_binder;
         BindingProxy width_binder;
 
-        void set_drag_data ();
+        void set_tooltip ();
 
         struct ColorScheme {
             uint32_t outline;
@@ -87,6 +87,8 @@ class StereoPanner : public PannerInterface
                 Mono,
                 Inverted
         };
+
+	bool _dragging;
 
         static ColorScheme colors[3];
         static void set_colors ();

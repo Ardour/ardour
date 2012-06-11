@@ -411,6 +411,7 @@ ProcessorEntry::Control::Control (Glib::RefPtr<Gdk::Pixbuf> s, Glib::RefPtr<Gdk:
 	: _control (c)
 	, _adjustment (gain_to_slider_position_with_max (1.0, Config->get_max_gain()), 0, 1, 0.01, 0.1)
 	, _slider (s, sd, &_adjustment, 0, false)
+	, _slider_persistant_tooltip (&_slider)
 	, _button (ArdourButton::Element (ArdourButton::Text | ArdourButton::Indicator))
 	, _ignore_ui_adjustment (false)
 	, _visible (false)
@@ -454,6 +455,9 @@ ProcessorEntry::Control::Control (Glib::RefPtr<Gdk::Pixbuf> s, Glib::RefPtr<Gdk:
 	
 	control_changed ();
 	set_tooltip ();
+
+	/* We're providing our own PersistentTooltip */
+	set_no_tooltip_whatsoever (_slider);
 }
 
 void
@@ -470,11 +474,13 @@ ProcessorEntry::Control::set_tooltip ()
 	if (c->toggled ()) {
 		s << (c->get_value() > 0.5 ? _("on") : _("off"));
 	} else {
-		s << c->internal_to_interface (c->get_value ());
+		s << setprecision(2) << fixed;
+		s << c->internal_to_user (c->get_value ());
 	}
 	
 	ARDOUR_UI::instance()->set_tip (_label, s.str ());
-	ARDOUR_UI::instance()->set_tip (_slider, s.str ());
+	_slider_persistant_tooltip.set_tip (s.str ());
+//	ARDOUR_UI::instance()->set_tip (_slider, " ");
 	ARDOUR_UI::instance()->set_tip (_button, s.str ());
 }
 
@@ -498,6 +504,7 @@ ProcessorEntry::Control::slider_adjusted ()
 	}
 
 	c->set_value (c->interface_to_internal (_adjustment.get_value ()));
+	set_tooltip ();
 }
 
 void
@@ -537,8 +544,6 @@ ProcessorEntry::Control::control_changed ()
 		s.precision (1);
 		s.setf (ios::fixed, ios::floatfield);
 		s << c->internal_to_user (c->get_value ());
-		
-		_slider.set_tooltip_text (s.str ());
 	}
 	
 	_ignore_ui_adjustment = false;

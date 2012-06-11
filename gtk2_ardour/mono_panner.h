@@ -63,7 +63,7 @@ class MonoPanner : public PannerInterface
 
         BindingProxy position_binder;
 
-        void set_drag_data ();
+        void set_tooltip ();
 
         struct ColorScheme {
             uint32_t outline;
@@ -73,6 +73,8 @@ class MonoPanner : public PannerInterface
             uint32_t pos_outline;
             uint32_t pos_fill;
         };
+
+	bool _dragging;
 
         static ColorScheme colors;
         static void set_colors ();

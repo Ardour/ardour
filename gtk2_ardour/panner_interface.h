@@ -23,6 +23,7 @@
 #include <boost/shared_ptr.hpp>
 #include <gtkmm/drawingarea.h>
 #include <gtkmm/label.h>
+#include "gtkmm2ext/persistent_tooltip.h"
 #include "pbd/destructible.h"
 
 namespace ARDOUR {
@@ -30,6 +31,21 @@ namespace ARDOUR {
 }
 
 class PannerEditor;
+
+class PannerPersistentTooltip : public Gtkmm2ext::PersistentTooltip
+{
+public:
+	PannerPersistentTooltip (Gtk::Widget* w);
+
+	void target_start_drag ();
+	void target_stop_drag ();
+
+	bool dragging () const;
+
+private:
+	bool _dragging;
+};
+	
 
 /** Parent class for some panner UI classes that contains some common code */
 class PannerInterface : public Gtk::DrawingArea, public PBD::Destructible
@@ -45,10 +61,8 @@ public:
 	void edit ();
 
 protected:
-	virtual void set_drag_data () = 0;
+	virtual void set_tooltip () = 0;
 
-	void show_drag_data_window ();
-	void hide_drag_data_window ();
 	void value_change ();
 	
         bool on_enter_notify_event (GdkEventCrossing *);
@@ -58,14 +72,9 @@ protected:
 	bool on_button_release_event (GdkEventButton*);
 
 	boost::shared_ptr<ARDOUR::Panner> _panner;
-        Gtk::Window* _drag_data_window;
-        Gtk::Label*  _drag_data_label;
-        bool _dragging;
+	PannerPersistentTooltip _tooltip;
 
 private:
-	bool drag_data_timeout ();
-	sigc::connection _drag_data_timeout;
-
 	virtual PannerEditor* editor () = 0;
 	PannerEditor* _editor;
 };
