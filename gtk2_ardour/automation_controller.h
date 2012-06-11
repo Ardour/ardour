@@ -62,7 +62,6 @@ private:
 	void end_touch();
 
 	void value_changed();
-	void automation_state_changed();
 
 	bool                                         _ignore_change;
         boost::shared_ptr<ARDOUR::Automatable>       _printer;

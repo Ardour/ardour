@@ -138,23 +138,6 @@ AutomationController::end_touch ()
 }
 
 void
-AutomationController::automation_state_changed ()
-{
-	ENSURE_GUI_THREAD (*this, &AutomationController::automation_state_changed)
-
-	bool x = (_controllable->automation_state() != Off);
-
-	/* start watching automation so that things move */
-
-	_screen_update_connection.disconnect();
-
-	if (x) {
-		_screen_update_connection = ARDOUR_UI::RapidScreenUpdate.connect (
-				sigc::mem_fun (*this, &AutomationController::display_effective_value));
-	}
-}
-
-void
 AutomationController::value_changed ()
 {
 	Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&AutomationController::display_effective_value, this));
