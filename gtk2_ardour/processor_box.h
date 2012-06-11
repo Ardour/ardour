@@ -156,7 +156,7 @@ private:
 	PBD::ScopedConnection active_connection;
 	PBD::ScopedConnection name_connection;
 
-	class Control {
+	class Control : public sigc::trackable {
 	public:
 		Control (Glib::RefPtr<Gdk::Pixbuf>, Glib::RefPtr<Gdk::Pixbuf>, boost::shared_ptr<ARDOUR::AutomationControl>, std::string const &);
 

@@ -39,6 +39,7 @@ Amp::Amp (Session& s)
 	, _apply_gain(true)
 	, _apply_gain_automation(false)
 	, _current_gain(1.0)
+	, _gain_automation_buffer(0)
 {
 	Evoral::Parameter p (GainAutomation);
 	/* gain range of -inf to +6dB, default 0dB */
@@ -84,7 +85,8 @@ Amp::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_frame*/,
 
 		if (_apply_gain_automation) {
 
-			gain_t* gab = _session.gain_automation_buffer ();
+			gain_t* gab = _gain_automation_buffer;
+			assert (gab);
 
 			for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
 				Sample* const sp = i->data();
@@ -440,14 +442,19 @@ Amp::GainControl::internal_to_user (double v) const
 	return accurate_coefficient_to_dB (v);
 }
 
+/** Write gain automation for this cycle into the buffer previously passed in to
+ *  set_gain_automation_buffer (if we are in automation playback mode and the
+ *  transport is rolling).
+ */
 void
 Amp::setup_gain_automation (framepos_t start_frame, framepos_t end_frame, framecnt_t nframes)
 {
 	Glib::Mutex::Lock am (control_lock(), Glib::TRY_LOCK);
 
 	if (am.locked() && _session.transport_rolling() && _gain_control->automation_playback()) {
+		assert (_gain_automation_buffer);
 		_apply_gain_automation = _gain_control->list()->curve().rt_safe_get_vector (
-			start_frame, end_frame, _session.gain_automation_buffer(), nframes);
+			start_frame, end_frame, _gain_automation_buffer, nframes);
 	} else {
 		_apply_gain_automation = false;
 	}
@@ -470,4 +477,14 @@ Amp::value_as_string (boost::shared_ptr<AutomationControl> ac) const
 
 	return Automatable::value_as_string (ac);
 }
-	
+
+/** Sets up the buffer that setup_gain_automation and ::run will use for
+ *  gain automationc curves.  Must be called before setup_gain_automation,
+ *  and must be called with process lock held.
+ */
+
+void
+Amp::set_gain_automation_buffer (gain_t* g)
+{
+	_gain_automation_buffer = g;
+}

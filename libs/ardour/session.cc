@@ -4082,6 +4082,12 @@ Session::gain_automation_buffer() const
 	return ProcessThread::gain_automation_buffer ();
 }
 
+gain_t*
+Session::send_gain_automation_buffer() const
+{
+	return ProcessThread::send_gain_automation_buffer ();
+}
+
 pan_t**
 Session::pan_automation_buffer() const
 {

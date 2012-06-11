@@ -450,6 +450,8 @@ ProcessorEntry::Control::Control (Glib::RefPtr<Gdk::Pixbuf> s, Glib::RefPtr<Gdk:
 		c->Changed.connect (_connection, MISSING_INVALIDATOR, boost::bind (&Control::control_changed, this), gui_context ());
 	}
 
+	ARDOUR_UI::RapidScreenUpdate.connect (sigc::mem_fun (*this, &Control::control_changed));
+	
 	control_changed ();
 	set_tooltip ();
 }

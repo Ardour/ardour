@@ -48,6 +48,8 @@ public:
 	bool apply_gain () const  { return _apply_gain; }
 	void apply_gain (bool yn) { _apply_gain = yn; }
 
+	void set_gain_automation_buffer (gain_t *);
+
 	void setup_gain_automation (framepos_t start_frame, framepos_t end_frame, framecnt_t nframes);
 
 	bool apply_gain_automation() const  { return _apply_gain_automation; }
@@ -107,6 +109,9 @@ private:
 	float  _current_gain;
 
 	boost::shared_ptr<GainControl> _gain_control;
+
+	/** Buffer that we should use for gain automation */
+	gain_t* _gain_automation_buffer;
 };
 
 

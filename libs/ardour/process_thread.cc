@@ -134,6 +134,17 @@ ProcessThread::gain_automation_buffer()
         return g;
 }
 
+gain_t*
+ProcessThread::send_gain_automation_buffer()
+{
+        ThreadBuffers* tb = _private_thread_buffers->get();
+        assert (tb);
+
+        gain_t* g = tb->send_gain_automation_buffer;
+        assert (g);
+        return g;
+}
+
 pan_t**
 ProcessThread::pan_automation_buffer()
 {

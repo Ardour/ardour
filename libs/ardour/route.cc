@@ -423,6 +423,7 @@ Route::process_output_buffers (BufferSet& bufs,
 
 	/* figure out if we're going to use gain automation */
 	if (gain_automation_ok) {
+		_amp->set_gain_automation_buffer (_session.gain_automation_buffer ());
 		_amp->setup_gain_automation (start_frame, end_frame, nframes);
 	} else {
 		_amp->apply_gain_automation (false);

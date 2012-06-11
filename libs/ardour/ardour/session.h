@@ -743,6 +743,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	/* buffers for gain and pan */
 
 	gain_t* gain_automation_buffer () const;
+	gain_t* send_gain_automation_buffer () const;
 	pan_t** pan_automation_buffer () const;
 
 	void ensure_buffer_set (BufferSet& buffers, const ChanCount& howmany);
