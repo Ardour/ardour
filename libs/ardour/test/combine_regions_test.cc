@@ -245,7 +245,6 @@ CombineRegionsTest::crossfadeTest2 ()
 	CPPUNIT_ASSERT_EQUAL ((uint32_t) 1, _playlist->n_regions ());
 
 	/* And reading should give the same thing */
-	cout << "\n\n\SECOND READ\n";
 	check_crossfade2 ();
 }
 
