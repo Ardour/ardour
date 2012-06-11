@@ -208,8 +208,12 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	_model_selector.set_active_text (gui_property (X_("midnam-model-name")));
 	_custom_device_mode_selector.set_active_text (gui_property (X_("midnam-custom-device-mode")));
 
+	ARDOUR_UI::instance()->set_tip (_model_selector, _("external MIDI Device selector"));
+	ARDOUR_UI::instance()->set_tip (_custom_device_mode_selector, _("external MIDI Device Mode"));
+
 	midi_controls_hbox->pack_start(_channel_selector, true, false);
 	if (!patch_manager.all_models().empty()) {
+		_midi_controls_box.set_border_width (5);
 		_midi_controls_box.pack_start(_model_selector, true, false);
 		_midi_controls_box.pack_start(_custom_device_mode_selector, true, false);
 	}

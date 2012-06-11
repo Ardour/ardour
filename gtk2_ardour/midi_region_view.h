@@ -300,13 +300,7 @@ public:
 
 	void clear_selection (bool signal = true) { clear_selection_except (0, signal); }
 
-	std::string model_name () const {
-		return _model_name;
-	}
-
-	std::string custom_device_mode () const {
-		return _custom_device_mode;
-	}
+        ARDOUR::InstrumentInfo& instrument_info() const;
 	
 protected:
 	/** Allows derived types to specify their visibility requirements
@@ -380,12 +374,6 @@ private:
 	uint16_t _last_channel_selection;
 	uint8_t  _current_range_min;
 	uint8_t  _current_range_max;
-
-	/// MIDNAM information of the current track: Model name of MIDNAM file
-	std::string _model_name;
-
-	/// MIDNAM information of the current track: CustomDeviceMode
-	std::string _custom_device_mode;
 
 	typedef std::list<ArdourCanvas::CanvasNoteEvent*> Events;
 	typedef std::vector< boost::shared_ptr<ArdourCanvas::CanvasPatchChange> > PatchChanges;

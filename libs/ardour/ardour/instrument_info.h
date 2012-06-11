@@ -24,6 +24,8 @@
 
 #include "pbd/signals.h"
 
+#include "midi++/midnam_patch.h"
+
 #include <boost/weak_ptr.hpp>
 
 namespace ARDOUR {
@@ -41,13 +43,22 @@ class InstrumentInfo {
     std::string get_patch_name (uint16_t bank, uint8_t program, uint8_t channel) const;
     std::string get_instrument_name () const;
 
+    boost::shared_ptr<MIDI::Name::ChannelNameSet> get_patches (uint8_t channel);
+
     PBD::Signal0<void> Changed;
+
+    static const MIDI::Name::PatchBank::PatchNameList& general_midi_patches();
 
   private:
     std::string external_instrument_model;
     std::string external_instrument_mode;
 
     boost::weak_ptr<ARDOUR::Processor> internal_instrument;
+
+    boost::shared_ptr<MIDI::Name::ChannelNameSet> plugin_programs_to_channel_name_set (boost::shared_ptr<Processor> p);
+    std::string get_plugin_patch_name (boost::shared_ptr<ARDOUR::Processor>, uint16_t bank, uint8_t program, uint8_t channel) const;
+
+    static MIDI::Name::PatchBank::PatchNameList _gm_patches;
 };
 
 } /* namespace ARDOUR */

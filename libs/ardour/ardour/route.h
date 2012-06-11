@@ -603,6 +603,8 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	boost::weak_ptr<Processor> _processor_after_last_custom_meter;
 	/** true if the last custom meter position was at the end of the processor list */
 	bool _last_custom_meter_was_at_end;
+
+        void reset_instrument_info ();
 };
 
 } // namespace ARDOUR

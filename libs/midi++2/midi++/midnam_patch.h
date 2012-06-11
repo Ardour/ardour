@@ -200,6 +200,8 @@ public:
 	XMLNode& get_state (void);
 	int      set_state (const XMLTree&, const XMLNode&);
 
+        void set_patch_banks (const PatchBanks&);
+
 private:
 	std::string _name;
 	AvailableForChannels _available_for_channels;
@@ -351,6 +353,8 @@ private:
 	XMLTree                       _document;
 	MasterDeviceNames::Models     _all_models;
 };
+
+extern const char* general_midi_program_names[128]; /* 0 .. 127 */
 
 }
 

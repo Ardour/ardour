@@ -28,6 +28,7 @@
 namespace ARDOUR {
 	class BeatsFramesConverter;
 	class Session;
+	class InstrumentInfo;
 }
 
 namespace MIDI {
@@ -43,8 +44,7 @@ public:
 		const ARDOUR::BeatsFramesConverter *,
 		ARDOUR::Session *,
 		Evoral::PatchChange<Evoral::MusicalTime> const &,
-		std::string const &,
-		std::string const &,
+		ARDOUR::InstrumentInfo&,
 		const Gtk::BuiltinStockID &
 		);
 
@@ -61,11 +61,8 @@ private:
 	void bank_changed ();
 	void program_changed ();
 
-	MIDI::Name::ChannelNameSet::PatchBanks const * get_banks ();
-	
 	const ARDOUR::BeatsFramesConverter* _time_converter;
-	std::string _model_name;
-	std::string _custom_device_mode;
+        ARDOUR::InstrumentInfo& _info;
 	AudioClock _time;
 	Gtk::SpinButton _channel;
 	Gtk::SpinButton _program;

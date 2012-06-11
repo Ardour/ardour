@@ -20,11 +20,17 @@
 
 #include <gtkmm/stock.h>
 #include <gtkmm/table.h>
+
 #include <boost/algorithm/string.hpp>
+
 #include "gtkmm2ext/utils.h"
+
 #include "ardour/midi_patch_manager.h"
 #include "ardour/beats_frames_converter.h"
+#include "ardour/instrument_info.h"
+
 #include "patch_change_dialog.h"
+
 #include "i18n.h"
 
 using namespace std;
@@ -36,14 +42,12 @@ PatchChangeDialog::PatchChangeDialog (
 	const ARDOUR::BeatsFramesConverter* tc,
 	ARDOUR::Session* session,
 	Evoral::PatchChange<Evoral::MusicalTime> const & patch,
-	string const & model_name,
-	string const & custom_device_node,
+	ARDOUR::InstrumentInfo& info,
 	const Gtk::BuiltinStockID& ok
 	)
 	: ArdourDialog (_("Patch Change"), true)
 	, _time_converter (tc)
-	, _model_name (model_name)
-	, _custom_device_mode (custom_device_node)
+	, _info (info)
 	, _time (X_("patchchangetime"), true, "", true, false)
 	, _channel (*manage (new Adjustment (1, 1, 16, 1, 4)))
 	, _program (*manage (new Adjustment (1, 1, 128, 1, 16)))
@@ -139,12 +143,9 @@ PatchChangeDialog::patch () const
 void
 PatchChangeDialog::fill_bank_combo ()
 {
-	MIDI::Name::ChannelNameSet::PatchBanks const * banks = get_banks ();
-	if (banks == 0) {
-		return;
-	}
+	boost::shared_ptr<MIDI::Name::ChannelNameSet> cns = _info.get_patches (_channel.get_value_as_int() - 1);
 
-	for (MIDI::Name::ChannelNameSet::PatchBanks::const_iterator i = banks->begin(); i != banks->end(); ++i) {
+	for (MIDI::Name::ChannelNameSet::PatchBanks::const_iterator i = cns->patch_banks().begin(); i != cns->patch_banks().end(); ++i) {
 		string n = (*i)->name ();
 		boost::replace_all (n, "_", " ");
 		_bank_combo.append_text (n);
@@ -157,12 +158,10 @@ PatchChangeDialog::set_active_bank_combo ()
 {
 	_current_patch_bank.reset ();
 	
-	MIDI::Name::ChannelNameSet::PatchBanks const * banks = get_banks ();
-	if (banks == 0) {
-		return;
-	}
+	boost::shared_ptr<MIDI::Name::ChannelNameSet> cns = _info.get_patches (_channel.get_value_as_int() - 1);
 
-	for (MIDI::Name::ChannelNameSet::PatchBanks::const_iterator i = banks->begin(); i != banks->end(); ++i) {
+	for (MIDI::Name::ChannelNameSet::PatchBanks::const_iterator i = cns->patch_banks().begin(); i != cns->patch_banks().end(); ++i) {
+
 		string n = (*i)->name ();
 		boost::replace_all (n, "_", " ");
 
@@ -193,12 +192,9 @@ PatchChangeDialog::bank_combo_changed ()
 	
 	_current_patch_bank.reset ();
 
-	MIDI::Name::ChannelNameSet::PatchBanks const * banks = get_banks ();
-	if (banks == 0) {
-		return;
-	}
+	boost::shared_ptr<MIDI::Name::ChannelNameSet> cns = _info.get_patches (_channel.get_value_as_int() - 1);
 
-	for (MIDI::Name::ChannelNameSet::PatchBanks::const_iterator i = banks->begin(); i != banks->end(); ++i) {
+	for (MIDI::Name::ChannelNameSet::PatchBanks::const_iterator i = cns->patch_banks().begin(); i != cns->patch_banks().end(); ++i) {
 		string n = (*i)->name ();
 		boost::replace_all (n, "_", " ");
 		if (n == _bank_combo.get_active_text()) {
@@ -327,17 +323,3 @@ PatchChangeDialog::bank_changed ()
 	set_active_patch_combo ();
 }
 
-MIDI::Name::ChannelNameSet::PatchBanks const *
-PatchChangeDialog::get_banks ()
-{
-	MIDI::Name::MidiPatchManager& mpm = MIDI::Name::MidiPatchManager::instance ();
-	boost::shared_ptr<MIDI::Name::ChannelNameSet> channel_name_set = mpm.find_channel_name_set (
-		_model_name, _custom_device_mode, _channel.get_value_as_int() - 1
-		);
-
-	if (!channel_name_set) {
-		return 0;
-	}
-
-	return &channel_name_set->patch_banks ();
-}

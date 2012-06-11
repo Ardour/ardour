@@ -16,6 +16,8 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <algorithm>
+
 #include "pbd/compose.h"
 
 #include "midi++/midnam_patch.h"
@@ -23,12 +25,16 @@
 #include "ardour/instrument_info.h"
 #include "ardour/midi_patch_manager.h"
 #include "ardour/processor.h"
+#include "ardour/plugin.h"
 #include "ardour/rc_configuration.h"
 
 #include "i18n.h"
 
 using namespace ARDOUR;
+using namespace MIDI::Name;
 using std::string;
+
+MIDI::Name::PatchBank::PatchNameList InstrumentInfo::_gm_patches;
 
 InstrumentInfo::InstrumentInfo ()
 	: external_instrument_model (_("Unknown"))
@@ -79,7 +85,7 @@ InstrumentInfo::get_patch_name (uint16_t bank, uint8_t program, uint8_t channel)
 	boost::shared_ptr<Processor> p = internal_instrument.lock();
 
 	if (p) {
-		return "some plugin program";
+		return get_plugin_patch_name (p, bank, program, channel);
 	}
 
 	MIDI::Name::PatchPrimaryKey patch_key (bank, program);
@@ -95,6 +101,103 @@ InstrumentInfo::get_patch_name (uint16_t bank, uint8_t program, uint8_t channel)
 
 #define MIDI_BP_ZERO ((Config->get_first_midi_bank_is_zero())?0:1)
 
-		return string_compose ("%1 %2",program + MIDI_BP_ZERO , bank + MIDI_BP_ZERO);
+		return string_compose ("prg %1 bnk %2",program + MIDI_BP_ZERO , bank + MIDI_BP_ZERO);
 	}
 }	
+
+boost::shared_ptr<MIDI::Name::ChannelNameSet>
+InstrumentInfo::get_patches (uint8_t channel)
+{
+	boost::shared_ptr<Processor> p = internal_instrument.lock();
+
+	if (p) {
+		return plugin_programs_to_channel_name_set (p);
+	}
+
+	return MidiPatchManager::instance().find_channel_name_set (external_instrument_model,
+								   external_instrument_mode,
+								   channel);
+								   
+}
+
+boost::shared_ptr<MIDI::Name::ChannelNameSet>
+InstrumentInfo::plugin_programs_to_channel_name_set (boost::shared_ptr<Processor> p)
+{
+	PatchBank::PatchNameList patch_list;
+
+	boost::shared_ptr<PluginInsert> insert = boost::dynamic_pointer_cast<PluginInsert> (p);
+
+	if (!insert) {
+		return boost::shared_ptr<ChannelNameSet>();
+	}
+
+	boost::shared_ptr<Plugin> pp = insert->plugin();
+	
+	if (pp->current_preset_uses_general_midi()) {
+
+		patch_list = InstrumentInfo::general_midi_patches ();
+
+	} else if (pp->presets_are_MIDI_programs()) {
+
+		std::vector<Plugin::PresetRecord> presets = pp->get_presets ();
+		std::vector<Plugin::PresetRecord>::iterator i;
+		int n;
+		
+		/* XXX note the assumption that plugin presets start their numbering at
+		 * zero
+		 */
+		
+		for (n = 0, i = presets.begin(); i != presets.end(); ++i, ++n) {
+			if ((*i).number >= 0) {
+				patch_list.push_back (boost::shared_ptr<Patch> (new Patch (string_compose ("%1", n), (*i).label)));
+			} else {
+				patch_list.push_back (boost::shared_ptr<Patch> (new Patch (string_compose ("%1", n), 
+											   string_compose ("program %1", n))));
+			}
+		}
+	} else {
+		for (int n = 0; n < 127; ++n) {
+			patch_list.push_back (boost::shared_ptr<Patch> (new Patch (string_compose ("%1", n), 
+										   string_compose ("program %1", n))));
+		}
+	}
+
+	boost::shared_ptr<PatchBank> pb (new PatchBank (p->name()));
+	pb->set_patch_name_list (patch_list);
+
+	ChannelNameSet::PatchBanks patch_banks;
+	patch_banks.push_back (pb);
+
+	boost::shared_ptr<MIDI::Name::ChannelNameSet> cns (new ChannelNameSet);
+	cns->set_patch_banks (patch_banks);
+
+	return cns;
+}	
+
+const MIDI::Name::PatchBank::PatchNameList&
+InstrumentInfo::general_midi_patches()
+{
+	if (_gm_patches.empty()) {
+		for (int n = 0; n < 128; n++) {
+			_gm_patches.push_back (boost::shared_ptr<Patch> (new Patch (string_compose ("%1", n), general_midi_program_names[n])));
+		}
+	}
+
+	return _gm_patches;
+}
+
+string
+InstrumentInfo::get_plugin_patch_name (boost::shared_ptr<Processor> p, uint16_t bank, uint8_t program, uint8_t channel) const
+{
+	boost::shared_ptr<PluginInsert> insert = boost::dynamic_pointer_cast<PluginInsert> (p);
+
+	if (insert) {
+		boost::shared_ptr<Plugin> pp = insert->plugin();
+		
+		if (pp->current_preset_uses_general_midi()) {
+			return MIDI::Name::general_midi_program_names[std::min((uint8_t) 127,program)];
+		}
+	}
+
+	return string_compose (_("preset %1 (bank %2)"), (int) program, (int) bank);
+}

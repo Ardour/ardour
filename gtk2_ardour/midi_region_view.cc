@@ -283,11 +283,8 @@ MidiRegionView::init (Gdk::Color const & basic_color, bool wfd)
 	midi_view()->signal_channel_mode_changed().connect(
 		sigc::mem_fun(this, &MidiRegionView::midi_channel_mode_changed));
 
-	RouteUI* route_ui = dynamic_cast<RouteUI*> (&trackview);
-	if (route_ui) {
-		route_ui->route()->instrument_info().Changed.connect (_instrument_changed_connection, invalidator (*this),
-								      boost::bind (&MidiRegionView::instrument_settings_changed, this), gui_context());
-	}
+	instrument_info().Changed.connect (_instrument_changed_connection, invalidator (*this),
+					   boost::bind (&MidiRegionView::instrument_settings_changed, this), gui_context());
 
 	trackview.editor().SnapChanged.connect(snap_changed_connection, invalidator(*this),
 	                                       boost::bind (&MidiRegionView::snap_changed, this),
@@ -297,6 +294,13 @@ MidiRegionView::init (Gdk::Color const & basic_color, bool wfd)
 	connect_to_diskstream ();
 
 	SelectionCleared.connect (_selection_cleared_connection, invalidator (*this), boost::bind (&MidiRegionView::selection_cleared, this, _1), gui_context ());
+}
+
+InstrumentInfo&
+MidiRegionView::instrument_info () const
+{
+	RouteUI* route_ui = dynamic_cast<RouteUI*> (&trackview);
+	return route_ui->route()->instrument_info();
 }
 
 const boost::shared_ptr<ARDOUR::MidiRegion>
@@ -1204,10 +1208,8 @@ MidiRegionView::display_patch_changes_on_channel (uint8_t channel, bool active_c
 			continue;
 		}
 
-		// MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
-		//string patch_name = mtv->get_patch_name ((*i)->bank(), (*i)->program(), channel);
-
-		// add_canvas_patch_change (*i, patch_name, active_channel);
+		string patch_name = instrument_info().get_patch_name ((*i)->bank(), (*i)->program(), channel);
+		add_canvas_patch_change (*i, patch_name, active_channel);
 	}
 }
 
@@ -1792,8 +1794,7 @@ MidiRegionView::add_canvas_patch_change (MidiModel::PatchChangePtr patch, const 
 		                      displaytext,
 		                      height,
 		                      x, 1.0,
-		                      _model_name,
-		                      _custom_device_mode,
+				      instrument_info(),
 		                      patch,
 				      active_channel)
 		          );
@@ -3709,7 +3710,7 @@ MidiRegionView::trim_front_ending ()
 void
 MidiRegionView::edit_patch_change (ArdourCanvas::CanvasPatchChange* pc)
 {
-	PatchChangeDialog d (&_source_relative_time_converter, trackview.session(), *pc->patch (), _model_name, _custom_device_mode, Gtk::Stock::APPLY);
+	PatchChangeDialog d (&_source_relative_time_converter, trackview.session(), *pc->patch (), instrument_info(), Gtk::Stock::APPLY);
 	if (d.run () != Gtk::RESPONSE_ACCEPT) {
 		return;
 	}
