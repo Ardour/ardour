@@ -559,7 +559,6 @@ def configure(conf):
                   okmsg = 'ok',
                   errmsg = 'too old\nPlease install boost version 1.39 or higher.')
 
-    autowaf.check_pkg(conf, 'cppunit', uselib_store='CPPUNIT', atleast_version='1.12.0', mandatory=False)
     autowaf.check_pkg(conf, 'glib-2.0', uselib_store='GLIB', atleast_version='2.2')
     autowaf.check_pkg(conf, 'gthread-2.0', uselib_store='GTHREAD', atleast_version='2.2')
     autowaf.check_pkg(conf, 'glibmm-2.4', uselib_store='GLIBMM', atleast_version='2.14.0')
@@ -617,8 +616,8 @@ def configure(conf):
     if opts.denormal_exception:
         conf.define('DEBUG_DENORMAL_EXCEPTION', 1)
         conf.env['DEBUG_DENORMAL_EXCEPTION'] = True
-    if not conf.is_defined('HAVE_CPPUNIT'):
-        conf.env['BUILD_TESTS'] = False
+    if opts.build_tests:
+        autowaf.check_pkg(conf, 'cppunit', uselib_store='CPPUNIT', atleast_version='1.12.0', mandatory=True)
 
     set_compiler_flags (conf, Options.options)
 
