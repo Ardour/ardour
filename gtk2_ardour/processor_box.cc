@@ -480,7 +480,6 @@ ProcessorEntry::Control::set_tooltip ()
 	
 	ARDOUR_UI::instance()->set_tip (_label, s.str ());
 	_slider_persistant_tooltip.set_tip (s.str ());
-//	ARDOUR_UI::instance()->set_tip (_slider, " ");
 	ARDOUR_UI::instance()->set_tip (_button, s.str ());
 }
 
