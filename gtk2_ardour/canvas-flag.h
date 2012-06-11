@@ -8,6 +8,7 @@
 
 #include "simplerect.h"
 #include "simpleline.h"
+#include "canvas-noevent-text.h"
 
 class MidiRegionView;
 
@@ -33,7 +34,7 @@ public:
 	virtual void set_height (double);
 
 protected:
-	Text*            _text;
+	NoEventText*     _text;
 	double           _height;
 	guint            _outline_color_rgba;
 	guint            _fill_color_rgba;

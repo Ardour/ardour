@@ -1,6 +1,8 @@
-#include "canvas-flag.h"
 #include <iostream>
+
 #include "ardour_ui.h"
+#include "canvas-flag.h"
+#include "time_axis_view_item.h"
 
 using namespace Gnome::Canvas;
 using namespace std;
@@ -43,9 +45,10 @@ CanvasFlag::set_text(const string& a_text)
 {
 	delete_allocated_objects();
 
-	_text = new Text (*this, 0.0, 0.0, a_text);
+	_text = new NoEventText (*this, 0.0, 0.0, a_text);
 	_text->property_justification() = Gtk::JUSTIFY_CENTER;
 	_text->property_fill_color_rgba() = _outline_color_rgba;
+	_text->property_font_desc() = TimeAxisViewItem::NAME_FONT;
 	double flagwidth  = _text->property_text_width()  + 10.0;
 	double flagheight = _text->property_text_height() + 3.0;
 	_text->property_x() = flagwidth / 2.0;
