@@ -185,6 +185,11 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
                 }
 
 		rec_enable_button->set_sensitive (_session->writable());
+		
+		/* set playlist button tip to the current playlist, and make it update when it changes */
+		update_playlist_tip ();
+		track()->PlaylistChanged.connect (*this, invalidator (*this), ui_bind(&RouteTimeAxisView::update_playlist_tip, this), gui_context());
+		
 	}
 	
 	controls_hbox.pack_start(gm.get_level_meter(), false, false);
@@ -204,7 +209,6 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	ARDOUR_UI::instance()->set_tip(*solo_button,_("Solo"));
 	ARDOUR_UI::instance()->set_tip(*mute_button,_("Mute"));
 	ARDOUR_UI::instance()->set_tip(route_group_button, _("Route Group"));
-	ARDOUR_UI::instance()->set_tip(playlist_button,_("Playlist"));
 
 	if (is_midi_track()) {
 		ARDOUR_UI::instance()->set_tip(automation_button, _("MIDI Controllers and Automation"));
@@ -1571,6 +1575,31 @@ RouteTimeAxisView::use_playlist (RadioMenuItem *item, boost::weak_ptr<Playlist> 
 		}
 	}
 }
+
+void
+RouteTimeAxisView::update_playlist_tip ()
+{
+	RouteGroup* rg = route_group ();
+	if (rg && rg->is_active() && rg->enabled_property (ARDOUR::Properties::edit.property_id)) {
+		string group_string = "." + rg->name() + ".";
+		
+		string take_name = track()->playlist()->name();
+		string::size_type idx = take_name.find(group_string);
+		
+		if (idx != string::npos) {
+			/* find the bit containing the take number / name */
+			take_name = take_name.substr (idx + group_string.length());
+
+			/* set the playlist button tooltip to the take name */
+			ARDOUR_UI::instance()->set_tip (playlist_button,string_compose(_("Take: %1.%2"), rg->name(), take_name));
+			return;
+		}
+	}
+
+	/* set the playlist button tooltip to the playlist name */
+	ARDOUR_UI::instance()->set_tip (playlist_button, _("Playlist") + std::string(": ") + track()->playlist()->name());	
+}
+
 
 void
 RouteTimeAxisView::show_playlist_selector ()

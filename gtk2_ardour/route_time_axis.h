@@ -311,6 +311,7 @@ protected:
 private:
 
 	void remove_child (boost::shared_ptr<TimeAxisView>);
+	void update_playlist_tip ();
 };
 
 #endif /* __ardour_route_time_axis_h__ */
