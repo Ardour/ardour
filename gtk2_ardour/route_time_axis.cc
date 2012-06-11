@@ -1544,14 +1544,19 @@ RouteTimeAxisView::use_playlist (RadioMenuItem *item, boost::weak_ptr<Playlist> 
 		boost::shared_ptr<RouteList> rl (rg->route_list());
 		
 		for (RouteList::const_iterator i = rl->begin(); i != rl->end(); ++i) {
-			if ( (*i) == this->route()) {
+			if ((*i) == this->route()) {
 				continue;
 			}
-			
+
 			std::string playlist_name = (*i)->name()+group_string+take_name;
 			
 			boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track>(*i);
 			if (!track) {
+				continue;
+			}
+
+			if (track->freeze_state() == Track::Frozen) {
+				/* Don't change playlists of frozen tracks */
 				continue;
 			}
 			
