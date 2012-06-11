@@ -317,15 +317,14 @@ MidiTimeAxisView::model_changed()
 	}
 
 	_custom_device_mode_selector.set_active(0);
-
-	set_gui_property (X_("midnam-model-name"), midi_patch_model ());
+	
+	_route->instrument_info().set_external_instrument (_model_selector.get_active_text(), _custom_device_mode_selector.get_active_text());
 }
 
 void
 MidiTimeAxisView::custom_device_mode_changed()
 {
-	_midi_patch_settings_changed.emit (midi_patch_model (), midi_patch_custom_device_mode ());
-	set_gui_property (X_("midnam-custom-device-mode"), midi_patch_custom_device_mode ());
+	_route->instrument_info().set_external_instrument (_model_selector.get_active_text(), _custom_device_mode_selector.get_active_text());
 }
 
 MidiStreamView*
@@ -1207,33 +1206,3 @@ MidiTimeAxisView::note_range_changed ()
 	set_gui_property ("note-range-max", (int) midi_view()->highest_note ());
 }
 
-string
-MidiTimeAxisView::midi_patch_model () const
-{
-	return _model_selector.get_active_text ();
-}
-
-string
-MidiTimeAxisView::midi_patch_custom_device_mode () const
-{
-	return _custom_device_mode_selector.get_active_text ();
-}
-
-string
-MidiTimeAxisView::get_patch_name (uint16_t bank, uint8_t program, uint8_t channel) const
-{
-	MIDI::Name::PatchPrimaryKey patch_key (bank, program);
-	
-	boost::shared_ptr<MIDI::Name::Patch> patch =
-		MIDI::Name::MidiPatchManager::instance().find_patch (midi_patch_model(), midi_patch_custom_device_mode(), channel, patch_key);
-
-	if (patch) {
-		return patch->name();
-	} else {
-		/* program and bank numbers are zero-based: convert to one-based: MIDI_BP_ZERO */
-
-#define MIDI_BP_ZERO ((Config->get_first_midi_bank_is_zero())?0:1)
-
-		return string_compose ("%1 %2",program + MIDI_BP_ZERO , bank + MIDI_BP_ZERO);
-	}
-}	

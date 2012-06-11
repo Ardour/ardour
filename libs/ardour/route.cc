@@ -1014,6 +1014,11 @@ Route::add_processor (boost::shared_ptr<Processor> processor, boost::shared_ptr<
 		_output->set_user_latency (0);
 	}
 
+	boost::shared_ptr<Processor> instr = the_instrument();
+	if (instr) {
+		_instrument_info.set_internal_instrument (instr);
+	}
+
 	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
 	set_processor_positions ();
 
@@ -1160,6 +1165,11 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 		}
 
 		_output->set_user_latency (0);
+	}
+
+	boost::shared_ptr<Processor> instr = the_instrument();
+	if (instr) {
+		_instrument_info.set_internal_instrument (instr);
 	}
 
 	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
@@ -1368,6 +1378,8 @@ Route::clear_processors (Placement p)
 	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
 	set_processor_positions ();
 
+	_instrument_info.set_internal_instrument (boost::shared_ptr<Processor>());
+
 	if (!already_deleting) {
 		_session.clear_deletion_in_progress();
 	}
@@ -1464,6 +1476,11 @@ Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStream
 				}
 			}
 		}
+	}
+
+	boost::shared_ptr<Processor> instr = the_instrument();
+	if (instr) {
+		_instrument_info.set_internal_instrument (instr);
 	}
 
 	processor->drop_references ();

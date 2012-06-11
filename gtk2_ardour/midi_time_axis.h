@@ -86,11 +86,6 @@ class MidiTimeAxisView : public RouteTimeAxisView
 		return _channel_selector.mode_changed;
 	}
 
-	sigc::signal<void, std::string, std::string>& signal_midi_patch_settings_changed() {
-		return _midi_patch_settings_changed;
-	}
-
-
 	const MidiMultipleChannelSelector& channel_selector() { return _channel_selector; }
 
 	Gtk::CheckMenuItem* automation_child_menu_item (Evoral::Parameter);
@@ -101,10 +96,6 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	void first_idle ();
 
 	uint8_t get_channel_for_add () const;
-
-	std::string midi_patch_model () const;
-	std::string midi_patch_custom_device_mode () const;
-        std::string get_patch_name (uint16_t bank, uint8_t program, uint8_t channel) const;
 
   protected:
 	void start_step_editing ();

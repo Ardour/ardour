@@ -105,6 +105,7 @@ libardour_sources = [
         'graph.cc',
         'graphnode.cc',
         'import.cc',
+        'instrument_info.cc',
         'internal_return.cc',
         'internal_send.cc',
         'interpolation.cc',

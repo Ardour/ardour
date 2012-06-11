@@ -356,7 +356,8 @@ private:
 	bool note_canvas_event(GdkEvent* ev);
 
 	void midi_channel_mode_changed(ARDOUR::ChannelMode mode, uint16_t mask);
-	void midi_patch_settings_changed(std::string model, std::string custom_device_mode);
+	void instrument_settings_changed ();
+	PBD::ScopedConnection _instrument_changed_connection;
 
 	void change_note_channel (ArdourCanvas::CanvasNoteEvent *, int8_t, bool relative=false);
 	void change_note_velocity(ArdourCanvas::CanvasNoteEvent* ev, int8_t vel, bool relative=false);

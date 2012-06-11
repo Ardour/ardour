@@ -115,10 +115,6 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	_note_group->raise_to_top();
 	PublicEditor::DropDownKeys.connect (sigc::mem_fun (*this, &MidiRegionView::drop_down_keys));
 
-	/* Look up MIDNAM details from our MidiTimeAxisView */
-	MidiTimeAxisView& mtv = dynamic_cast<MidiTimeAxisView&> (tv);
-	midi_patch_settings_changed (mtv.midi_patch_model (), mtv.midi_patch_custom_device_mode ());
-
 	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&MidiRegionView::parameter_changed, this, _1), gui_context());
 	connect_to_diskstream ();
 
@@ -156,10 +152,6 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	_note_group->raise_to_top();
 	PublicEditor::DropDownKeys.connect (sigc::mem_fun (*this, &MidiRegionView::drop_down_keys));
 
-	/* Look up MIDNAM details from our MidiTimeAxisView */
-	MidiTimeAxisView& mtv = dynamic_cast<MidiTimeAxisView&> (tv);
-	midi_patch_settings_changed (mtv.midi_patch_model (), mtv.midi_patch_custom_device_mode ());
-	
 	connect_to_diskstream ();
 
 	SelectionCleared.connect (_selection_cleared_connection, invalidator (*this), boost::bind (&MidiRegionView::selection_cleared, this, _1), gui_context ());
@@ -291,8 +283,11 @@ MidiRegionView::init (Gdk::Color const & basic_color, bool wfd)
 	midi_view()->signal_channel_mode_changed().connect(
 		sigc::mem_fun(this, &MidiRegionView::midi_channel_mode_changed));
 
-	midi_view()->signal_midi_patch_settings_changed().connect(
-		sigc::mem_fun(this, &MidiRegionView::midi_patch_settings_changed));
+	RouteUI* route_ui = dynamic_cast<RouteUI*> (&trackview);
+	if (route_ui) {
+		route_ui->route()->instrument_info().Changed.connect (_instrument_changed_connection, invalidator (*this),
+								      boost::bind (&MidiRegionView::instrument_settings_changed, this), gui_context());
+	}
 
 	trackview.editor().SnapChanged.connect(snap_changed_connection, invalidator(*this),
 	                                       boost::bind (&MidiRegionView::snap_changed, this),
@@ -1209,10 +1204,10 @@ MidiRegionView::display_patch_changes_on_channel (uint8_t channel, bool active_c
 			continue;
 		}
 
-		MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
-		string patch_name = mtv->get_patch_name ((*i)->bank(), (*i)->program(), channel);
+		// MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
+		//string patch_name = mtv->get_patch_name ((*i)->bank(), (*i)->program(), channel);
 
-		add_canvas_patch_change (*i, patch_name, active_channel);
+		// add_canvas_patch_change (*i, patch_name, active_channel);
 	}
 }
 
@@ -3207,10 +3202,8 @@ MidiRegionView::midi_channel_mode_changed(ChannelMode mode, uint16_t mask)
 }
 
 void
-MidiRegionView::midi_patch_settings_changed(std::string model, std::string custom_device_mode)
+MidiRegionView::instrument_settings_changed ()
 {
-	_model_name         = model;
-	_custom_device_mode = custom_device_mode;
 	redisplay_model();
 }
 
