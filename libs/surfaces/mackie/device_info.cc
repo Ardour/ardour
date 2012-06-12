@@ -210,7 +210,6 @@ DeviceInfo::set_state (const XMLNode& node, int /* version */)
 	}
 
 	/* name is mandatory */
- 
 	if ((child = node.child ("Name")) != 0) {
 		if ((prop = child->property ("value")) != 0) {
 			_name = prop->value();
@@ -220,7 +219,6 @@ DeviceInfo::set_state (const XMLNode& node, int /* version */)
 	}
 
 	/* strip count is mandatory */
-
 	if ((child = node.child ("Strips")) != 0) {
 		if ((prop = child->property ("value")) != 0) {
 			if ((_strip_cnt = atoi (prop->value())) == 0) {
