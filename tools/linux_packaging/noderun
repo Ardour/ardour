@@ -13,7 +13,7 @@ NPROCS=`grep -c processor /proc/cpuinfo`
 
 cd $BASE || exit 1
 svn update || exit 1
-scons --config=force -j$NPROCS || exit 1
+scons SYSLIBS=1 --config=force -j$NPROCS || exit 1
 cd tools/linux_packaging || exit 1
 ./build --public --strip some || exit 1
 ./package --public --singlearch || exit 1
