@@ -1076,7 +1076,7 @@ env = conf.Finish()
 if env['GTKOSX']:
     clearlooks_version = 'libs/clearlooks-newer'
 else:
-    clearlooks_version = 'libs/clearlooks-older'
+    clearlooks_version = 'libs/clearlooks-newer'
 
 if env['SYSLIBS']:
 
