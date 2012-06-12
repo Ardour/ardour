@@ -1347,6 +1347,14 @@ MidiRegionView::reset_width_dependent_items (double pixel_width)
 		redisplay_model();
 	}
 
+	for (PatchChanges::iterator x = _patch_changes.begin(); x != _patch_changes.end(); ++x) {
+		if ((*x)->width() >= _pixel_width) {
+			(*x)->hide();
+		} else {
+			(*x)->show();
+		}
+	}
+
 	move_step_edit_cursor (_step_edit_cursor_position);
 	set_step_edit_cursor_width (_step_edit_cursor_width);
 }
