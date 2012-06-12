@@ -331,7 +331,7 @@ gdk-pixbuf-query-loaders | sed "s?$GTKSTACK_ROOT/lib/gdk-pixbuf-2.0/2.10.0/?@ROO
 # this one is special - we will set GTK_PATH to $Libraries/clearlooks
 
 echo "Copying clearlooks ..."
-cp $BUILD_ROOT/libs/clearlooks-newer/libclearlooks.so $Libraries
+cp ../../libs/clearlooks-older/libclearlooks.so $Libraries
 mkdir -p $Libraries/clearlooks/engines
 (cd $Libraries/clearlooks/engines && ln -s ../../libclearlooks.so . )
 
