@@ -9,7 +9,7 @@ if mount | grep --silent vmshare ; then
     sudo mount -t vboxsf vmshare $HOME/vmshare
 fi
 
-NPROCS=`grep -c processor /cpu/procinfo`
+NPROCS=`grep -c processor /proc/cpuinfo`
 
 cd $BASE || exit 1
 svn update || exit 1
