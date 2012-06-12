@@ -371,6 +371,21 @@ fixup_bundle_environment (int argc, char* argv[])
 
         unsetenv ("GTK_RC_FILES");
 
+	/* Tell fontconfig where to find fonts.conf. Use the system version
+	   if it exists, otherwise use the stuff we included in the bundle
+	*/
+
+	if (Glib::file_test ("/etc/fonts/fonts.conf", Glib::FILE_TEST_EXISTS)) {
+		setenv ("FONTCONFIG_FILE", "/etc/fonts/fonts.conf", 1);
+		setenv ("FONTCONFIG_PATH", "/etc/fonts", 1);
+	} else {
+		/* use the one included in the bundle */
+		
+		path = Glib::build_filename (dir_path, "etc/fonts/fonts.conf");
+		setenv ("FONTCONFIG_FILE", path.c_str(), 1);
+		setenv ("FONTCONFIG_PATH", Glib::build_filename (dir_path, "etc/fonts").c_str(), 1);
+	}
+
 	if (!ARDOUR::translations_are_disabled ()) {
                 path = dir_path;
                 path += "/share/locale";
