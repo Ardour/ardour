@@ -265,8 +265,6 @@ MidiRegionView::init (Gdk::Color const & basic_color, bool wfd)
 	region_resized (ARDOUR::bounds_change);
 	region_locked ();
 
-	reset_width_dependent_items (_pixel_width);
-
 	set_colors ();
 
 	_enable_display = true;
@@ -275,6 +273,8 @@ MidiRegionView::init (Gdk::Color const & basic_color, bool wfd)
 			display_model (_model);
 		}
 	}
+
+	reset_width_dependent_items (_pixel_width);
 
 	group->raise_to_top();
 	group->signal_event().connect(
@@ -1807,11 +1807,15 @@ MidiRegionView::add_canvas_patch_change (MidiModel::PatchChangePtr patch, const 
 				      active_channel)
 		          );
 
-	// Show unless patch change is beyond the region bounds
-	if (region_frames < 0 || region_frames >= _region->length()) {
-		patch_change->hide();
+	if (patch_change->width() < _pixel_width) {
+		// Show unless patch change is beyond the region bounds
+		if (region_frames < 0 || region_frames >= _region->length()) {
+			patch_change->hide();
+		} else {
+			patch_change->show();
+		}
 	} else {
-		patch_change->show();
+		patch_change->hide ();
 	}
 
 	_patch_changes.push_back (patch_change);
