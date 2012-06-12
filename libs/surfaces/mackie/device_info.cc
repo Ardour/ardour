@@ -174,7 +174,7 @@ DeviceInfo::shared_buttons ()
 	_global_buttons[Button::Drop] = GlobalButtonInfo ("Drop", "transport", 0x57);
 	_global_buttons[Button::Replace] = GlobalButtonInfo ("Replace", "transport", 0x58);
 	_global_buttons[Button::Click] = GlobalButtonInfo ("Click", "transport", 0x59);
-	_global_buttons[Button::Solo] = GlobalButtonInfo ("Solo", "transport", 0x5a);
+	_global_buttons[Button::ClearSolo] = GlobalButtonInfo ("Solo", "transport", 0x5a);
 	
 	_global_buttons[Button::Rewind] = GlobalButtonInfo ("Rewind", "transport", 0x5b);
 	_global_buttons[Button::Ffwd] = GlobalButtonInfo ("Fast Fwd", "transport", 0x5c);
