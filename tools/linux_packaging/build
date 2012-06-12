@@ -434,7 +434,7 @@ while [ true ] ; do
                                 # reset RPATH so that the runtime linker never looks
                                 # in places we don't want it to
                                 #
-                                chrpath -r $Libraries $Libraries/`basename $dep`
+                                chrpath -r foobar $Libraries/`basename $dep`
 				if echo $dep | grep -sq '^/' ; then
 					# absolute path, candidate for stripping
 					deplibs="$deplibs $base"
