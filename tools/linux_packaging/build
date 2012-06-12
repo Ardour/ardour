@@ -430,6 +430,11 @@ while [ true ] ; do
 					echo "Copying dependant lib $dep    (required by ${parent})"
 					cp $dep $Libraries
 				fi
+                                #
+                                # reset RPATH so that the runtime linker never looks
+                                # in places we don't want it to
+                                #
+                                chrpath -r $Libraries $Libraries/`basename $dep`
 				if echo $dep | grep -sq '^/' ; then
 					# absolute path, candidate for stripping
 					deplibs="$deplibs $base"
