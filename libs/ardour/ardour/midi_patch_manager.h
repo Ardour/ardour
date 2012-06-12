@@ -74,6 +74,7 @@ public:
 		if (master_device != 0 && custom_device_mode != "") {
 			return master_device->channel_name_set_by_device_mode_and_channel(custom_device_mode, channel);
 		} else {
+			std::cerr << "No MD for " << model << " + " << custom_device_mode << std::endl;
 			return boost::shared_ptr<ChannelNameSet>();
 		}
 	}
@@ -87,8 +88,10 @@ public:
 		boost::shared_ptr<ChannelNameSet> channel_name_set = find_channel_name_set(model, custom_device_mode, channel);
 
 		if (channel_name_set) {
+			std::cerr << "found CNS for " << model << " + " << custom_device_mode << std::endl;
 			return  channel_name_set->find_patch(patch_key);
 		} else {
+			std::cerr << "no CNS for " << model << " + " << custom_device_mode << std::endl;
 			return boost::shared_ptr<Patch>();
 		}
 	}

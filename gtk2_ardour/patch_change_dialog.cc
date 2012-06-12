@@ -30,6 +30,7 @@
 #include "ardour/instrument_info.h"
 
 #include "patch_change_dialog.h"
+#include "gui_thread.h"
 
 #include "i18n.h"
 
@@ -119,7 +120,19 @@ PatchChangeDialog::PatchChangeDialog (
 	set_active_bank_combo ();
 	bank_combo_changed ();
 
+	_info.Changed.connect (_info_changed_connection, invalidator (*this), 
+			       boost::bind (&PatchChangeDialog::instrument_info_changed, this), gui_context());
+
 	show_all ();
+}
+
+void
+PatchChangeDialog::instrument_info_changed ()
+{
+	_bank_combo.clear ();
+	_patch_combo.clear ();
+	fill_bank_combo ();
+	fill_patch_combo ();
 }
 
 Evoral::PatchChange<Evoral::MusicalTime>
@@ -145,6 +158,10 @@ PatchChangeDialog::fill_bank_combo ()
 {
 	boost::shared_ptr<MIDI::Name::ChannelNameSet> cns = _info.get_patches (_channel.get_value_as_int() - 1);
 
+	if (!cns) {
+		return;
+	}
+
 	for (MIDI::Name::ChannelNameSet::PatchBanks::const_iterator i = cns->patch_banks().begin(); i != cns->patch_banks().end(); ++i) {
 		string n = (*i)->name ();
 		boost::replace_all (n, "_", " ");
@@ -160,13 +177,16 @@ PatchChangeDialog::set_active_bank_combo ()
 	
 	boost::shared_ptr<MIDI::Name::ChannelNameSet> cns = _info.get_patches (_channel.get_value_as_int() - 1);
 
+	if (!cns) {
+		return;
+	}
+
 	for (MIDI::Name::ChannelNameSet::PatchBanks::const_iterator i = cns->patch_banks().begin(); i != cns->patch_banks().end(); ++i) {
 
 		string n = (*i)->name ();
 		boost::replace_all (n, "_", " ");
 
-		MIDI::Name::PatchPrimaryKey const * key = (*i)->patch_primary_key ();
-		if (key && (key->bank_number == _bank.get_value () - 1)) {
+		if ((*i)->number() == _bank.get_value () - 1) {
 			_current_patch_bank = *i;
 			_ignore_signals = true;
 			_bank_combo.set_active_text (n);
@@ -194,6 +214,10 @@ PatchChangeDialog::bank_combo_changed ()
 
 	boost::shared_ptr<MIDI::Name::ChannelNameSet> cns = _info.get_patches (_channel.get_value_as_int() - 1);
 
+	if (!cns) {
+		return;
+	}
+
 	for (MIDI::Name::ChannelNameSet::PatchBanks::const_iterator i = cns->patch_banks().begin(); i != cns->patch_banks().end(); ++i) {
 		string n = (*i)->name ();
 		boost::replace_all (n, "_", " ");
@@ -211,12 +235,9 @@ PatchChangeDialog::bank_combo_changed ()
 	fill_patch_combo ();
 	set_active_patch_combo ();
 
-	MIDI::Name::PatchPrimaryKey const * key = _current_patch_bank->patch_primary_key ();
-	if (key) {
-		_ignore_signals = true;
-		_bank.set_value (key->bank_number + 1);
-		_ignore_signals = false;
-	}
+	_ignore_signals = true;
+	_bank.set_value (_current_patch_bank->number() + 1);
+	_ignore_signals = false;
 }
 
 /** Fill the contents of the patch combo */
@@ -280,14 +301,17 @@ PatchChangeDialog::patch_combo_changed ()
 	}
 
 	const MIDI::Name::PatchBank::PatchNameList& patches = _current_patch_bank->patch_name_list ();
+
 	for (MIDI::Name::PatchBank::PatchNameList::const_iterator j = patches.begin(); j != patches.end(); ++j) {
 		string n = (*j)->name ();
 		boost::replace_all (n, "_", " ");
+		std::cerr << "Looking for " << n << " vs " << _patch_combo.get_active_text() << std::endl;
 		if (n == _patch_combo.get_active_text ()) {
-			MIDI::Name::PatchPrimaryKey const & key = (*j)->patch_primary_key ();
 			_ignore_signals = true;
-			_program.set_value (key.program_number + 1);
+			std::cerr << " reset pgm number to " << (int) (*j)->program_number() << std::endl;
+			_program.set_value ((*j)->program_number() + 1);
 			_ignore_signals = false;
+			break;
 		}
 	}
 }

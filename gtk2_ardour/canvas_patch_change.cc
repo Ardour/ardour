@@ -19,7 +19,7 @@
 
 #include <iostream>
 
-#include <glibmm/regex.h>
+#include <boost/algorithm/string.hpp>
 
 #include "gtkmm2ext/keyboard.h"
 #include "ardour/instrument_info.h"
@@ -87,9 +87,6 @@ CanvasPatchChange::initialize_popup_menus()
 	for (ChannelNameSet::PatchBanks::const_iterator bank = patch_banks.begin();
 	     bank != patch_banks.end();
 	     ++bank) {
-		Glib::RefPtr<Glib::Regex> underscores = Glib::Regex::create("_");
-		std::string replacement(" ");
-
 		Gtk::Menu& patch_bank_menu = *manage(new Gtk::Menu());
 
 		const PatchBank::PatchNameList& patches = (*bank)->patch_name_list();
@@ -98,7 +95,8 @@ CanvasPatchChange::initialize_popup_menus()
 		for (PatchBank::PatchNameList::const_iterator patch = patches.begin();
 		     patch != patches.end();
 		     ++patch) {
-			std::string name = underscores->replace((*patch)->name().c_str(), -1, 0, replacement);
+			std::string name = (*patch)->name();
+			boost::replace_all (name, "_", " ");
 
 			patch_menus.push_back(
 				Gtk::Menu_Helpers::MenuElem(
@@ -108,8 +106,8 @@ CanvasPatchChange::initialize_popup_menus()
 						(*patch)->patch_primary_key())) );
 		}
 
-
-		std::string name = underscores->replace((*bank)->name().c_str(), -1, 0, replacement);
+		std::string name = (*bank)->name();
+		boost::replace_all (name, "_", " ");
 
 		patch_bank_menus.push_back(
 			Gtk::Menu_Helpers::MenuElem(

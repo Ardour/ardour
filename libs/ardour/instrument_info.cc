@@ -88,7 +88,7 @@ InstrumentInfo::get_patch_name (uint16_t bank, uint8_t program, uint8_t channel)
 		return get_plugin_patch_name (p, bank, program, channel);
 	}
 
-	MIDI::Name::PatchPrimaryKey patch_key (bank, program);
+	MIDI::Name::PatchPrimaryKey patch_key (program, bank);
 	
 	boost::shared_ptr<MIDI::Name::Patch> patch =
 		MIDI::Name::MidiPatchManager::instance().find_patch (external_instrument_model, 
@@ -149,20 +149,18 @@ InstrumentInfo::plugin_programs_to_channel_name_set (boost::shared_ptr<Processor
 		
 		for (n = 0, i = presets.begin(); i != presets.end(); ++i, ++n) {
 			if ((*i).number >= 0) {
-				patch_list.push_back (boost::shared_ptr<Patch> (new Patch (string_compose ("%1", n), (*i).label)));
+				patch_list.push_back (boost::shared_ptr<Patch> (new Patch ((*i).label, n)));
 			} else {
-				patch_list.push_back (boost::shared_ptr<Patch> (new Patch (string_compose ("%1", n), 
-											   string_compose ("program %1", n))));
+				patch_list.push_back (boost::shared_ptr<Patch> (new Patch (string_compose ("program %1", n), n)));
 			}
 		}
 	} else {
 		for (int n = 0; n < 127; ++n) {
-			patch_list.push_back (boost::shared_ptr<Patch> (new Patch (string_compose ("%1", n), 
-										   string_compose ("program %1", n))));
+			patch_list.push_back (boost::shared_ptr<Patch> (new Patch (string_compose ("program %1", n), n)));
 		}
 	}
 
-	boost::shared_ptr<PatchBank> pb (new PatchBank (p->name()));
+	boost::shared_ptr<PatchBank> pb (new PatchBank (0, p->name()));
 	pb->set_patch_name_list (patch_list);
 
 	ChannelNameSet::PatchBanks patch_banks;
@@ -179,7 +177,7 @@ InstrumentInfo::general_midi_patches()
 {
 	if (_gm_patches.empty()) {
 		for (int n = 0; n < 128; n++) {
-			_gm_patches.push_back (boost::shared_ptr<Patch> (new Patch (string_compose ("%1", n), general_midi_program_names[n])));
+			_gm_patches.push_back (boost::shared_ptr<Patch> (new Patch (general_midi_program_names[n], n))); 
 		}
 	}
 

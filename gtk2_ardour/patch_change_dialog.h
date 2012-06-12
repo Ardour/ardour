@@ -72,4 +72,7 @@ private:
 
 	boost::shared_ptr<MIDI::Name::PatchBank> _current_patch_bank;
 	bool _ignore_signals;
+
+        void instrument_info_changed ();
+        PBD::ScopedConnection _info_changed_connection;
 };

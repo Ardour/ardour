@@ -21,11 +21,14 @@
 #ifndef MIDNAM_PATCH_H_
 #define MIDNAM_PATCH_H_
 
+#include <algorithm>
 #include <iostream>
 #include <string>
 #include <list>
 #include <set>
 #include <map>
+
+#include <stdint.h>
 
 #include "midi++/event.h"
 #include "pbd/xml++.h"
@@ -42,9 +45,9 @@ public:
         int bank_number;
 	int program_number;
     
-	PatchPrimaryKey(int a_bank_number = -1, int a_program_number = -1) {
-		bank_number = a_bank_number;
-		program_number = a_program_number;
+        PatchPrimaryKey (uint8_t a_program_number = 0, uint16_t a_bank_number = 0) {
+		bank_number = std::min (a_bank_number, (uint16_t) 16384);
+		program_number = std::min (a_program_number, (uint8_t) 127);
 	}
 	
 	bool is_sane() { 	
@@ -82,27 +85,26 @@ class Patch
 {
 public:
 
-	Patch (PatchBank* a_bank = 0);
-	Patch(std::string a_number, std::string a_name, PatchBank* a_bank = 0);
+        Patch (std::string a_name = std::string(), uint8_t a_number = 0, uint16_t bank_number = 0);
 	virtual ~Patch() {};
 
 	const std::string& name() const          { return _name; }
 	void set_name(const std::string a_name)       { _name = a_name; }
 
-	const std::string& number() const        { return _number; }
-	void set_number(const std::string a_number)   { _number = a_number; }
-	
+	uint8_t program_number() const       { return _id.program_number; }
+	void set_program_number(uint8_t n)   { _id.program_number = n; }
+
+	uint16_t bank_number() const       { return _id.bank_number; }
+        void set_bank_number (uint16_t n) { _id.bank_number = n; }
+
 	const PatchPrimaryKey&   patch_primary_key()   const { return _id; }
 
-	XMLNode& get_state (void);
+        XMLNode& get_state (void);
 	int      set_state (const XMLTree&, const XMLNode&);
 
-	int use_bank_info (PatchBank*);
-
 private:
-	std::string        _number;
-	std::string        _name;
-	PatchPrimaryKey   _id;
+	std::string     _name;
+	PatchPrimaryKey _id;
 };
 
 class PatchBank 
@@ -110,27 +112,26 @@ class PatchBank
 public:
 	typedef std::list<boost::shared_ptr<Patch> > PatchNameList;
 
-	PatchBank () : _id(0) {};
-	PatchBank (std::string a_name, PatchPrimaryKey* an_id = 0) : _name(a_name), _id(an_id) {};
-	virtual ~PatchBank() { delete _id; };
+        PatchBank (uint16_t n = 0, std::string a_name = std::string()) : _name(a_name), _number (n) {};
+        virtual ~PatchBank() { }
 
 	const std::string& name() const               { return _name; }
 	void set_name(const std::string a_name)       { _name = a_name; }
+
+        int number() const { return _number; }
 
 	const PatchNameList& patch_name_list() const { return _patch_name_list; }
 	const std::string& patch_list_name() const { return _patch_list_name; }
 
 	int set_patch_name_list (const PatchNameList&);
 
-	const PatchPrimaryKey* patch_primary_key()  const { return _id; }
-
-	XMLNode& get_state (void);
+        XMLNode& get_state (void);
 	int      set_state (const XMLTree&, const XMLNode&);
 
 private:
 	std::string       _name;
+        uint16_t          _number;
 	PatchNameList     _patch_name_list;
-	PatchPrimaryKey*  _id;
 	std::string       _patch_list_name;
 };
 
@@ -162,13 +163,11 @@ public:
 	
 	boost::shared_ptr<Patch> previous_patch(PatchPrimaryKey& key) {
 		assert(key.is_sane());
-		std::cerr << "finding patch with "  << key.bank_number << "/" <<key.program_number << std::endl; 
 		for (PatchList::const_iterator i = _patch_list.begin();
 			 i != _patch_list.end();
 			 ++i) {
 			if ((*i) == key) {
 				if (i != _patch_list.begin()) {
-					std::cerr << "got it!" << std::endl;
 					--i;
 					return  _patch_map[*i];
 				} 
@@ -180,13 +179,11 @@ public:
 	
 	boost::shared_ptr<Patch> next_patch(PatchPrimaryKey& key) {
 		assert(key.is_sane());
-		std::cerr << "finding patch with "  << key.bank_number << "/" <<key.program_number << std::endl; 
 		for (PatchList::const_iterator i = _patch_list.begin();
 			 i != _patch_list.end();
 			 ++i) {
 			if ((*i) == key) {
 				if (++i != _patch_list.end()) {
-					std::cerr << "got it!" << std::endl;
 					return  _patch_map[*i];
 				} else {
 					--i;

@@ -35,36 +35,11 @@ namespace MIDI
 
 namespace Name
 {
-
-Patch::Patch (PatchBank* b)
+	
+Patch::Patch (std::string name, uint8_t p_number, uint16_t b_number)
+	: _name (name)
+	, _id (p_number, b_number)
 {
-	use_bank_info (b);
-}
-
-Patch::Patch (std::string a_number, std::string a_name, PatchBank* a_bank)
-	: _number (a_number)
-	, _name (a_name)
-{
-	use_bank_info (a_bank);
-}
-
-XMLNode&
-Patch::get_state (void)
-{
-	XMLNode* node = new XMLNode("Patch");
-	node->add_property("Number", _number);
-	node->add_property("Name",   _name);
-	/*
-	typedef std::list< boost::shared_ptr< Evoral::MIDIEvent<double> > > PatchMidiCommands;
-	XMLNode* commands = node->add_child("PatchMIDICommands");
-	for (PatchMidiCommands::const_iterator event = _patch_midi_commands.begin();
-	    event != _patch_midi_commands.end();
-	    ++event) {
-		commands->add_child_copy(*((((Evoral::MIDIEvent&)*event)).to_xml()));
-	}
-	*/
-
-	return *node;
 }
 
 int initialize_primary_key_from_commands (PatchPrimaryKey& id, const XMLNode* node)
@@ -95,6 +70,29 @@ int initialize_primary_key_from_commands (PatchPrimaryKey& id, const XMLNode* no
 	return 0;
 }
 
+XMLNode&
+Patch::get_state (void)
+{
+	XMLNode* node = new XMLNode("Patch");
+
+	/* XXX this is totally wrong */
+
+	node->add_property("Number", string_compose ("%1", _id.program_number));
+	node->add_property("Name",   _name);
+
+	/*
+	typedef std::list< boost::shared_ptr< Evoral::MIDIEvent<double> > > PatchMidiCommands;
+	XMLNode* commands = node->add_child("PatchMIDICommands");
+	for (PatchMidiCommands::const_iterator event = _patch_midi_commands.begin();
+	    event != _patch_midi_commands.end();
+	    ++event) {
+		commands->add_child_copy(*((((Evoral::MIDIEvent&)*event)).to_xml()));
+	}
+	*/
+
+	return *node;
+}
+
 int
 Patch::set_state (const XMLTree&, const XMLNode& node)
 {
@@ -108,7 +106,7 @@ Patch::set_state (const XMLTree&, const XMLNode& node)
 	if (!prop) {
 		return -1;
 	}
-	_number = prop->value();
+	_id.program_number = PBD::atoi (prop->value());
 
 	prop = node.property ("Name");
 
@@ -129,23 +127,6 @@ Patch::set_state (const XMLTree&, const XMLNode& node)
 		_id.program_number = PBD::atoi(program_change);
 	}
 
-	return 0;
-}
-
-int
-Patch::use_bank_info (PatchBank* bank)
-{
-	if (bank) {
-		if (bank->patch_primary_key() ) {
-			_id.bank_number = bank->patch_primary_key()->bank_number;
-		} else {
-			return -1;
-		}
-	}
-
-	if (!_id.is_sane()) {
-		return -1;
-	}
 
 	return 0;
 }
@@ -159,6 +140,7 @@ Note::get_state (void)
 
 	return *node;
 }
+
 
 int
 Note::set_state (const XMLTree&, const XMLNode& node)
@@ -219,10 +201,11 @@ PatchBank::set_state (const XMLTree& tree, const XMLNode& node)
 
 	XMLNode* commands = node.child("MIDICommands");
 	if (commands) {
-		_id = new PatchPrimaryKey();
-		if (initialize_primary_key_from_commands(*_id, commands)) {
+		PatchPrimaryKey id (0, 0);
+		if (initialize_primary_key_from_commands (id, commands)) {
 			return -1;
 		}
+		_number = id.bank_number;
 	}
 
 	XMLNode* patch_name_list = node.child("PatchNameList");
@@ -230,7 +213,7 @@ PatchBank::set_state (const XMLTree& tree, const XMLNode& node)
 	if (patch_name_list) {
 		const XMLNodeList patches = patch_name_list->children();
 		for (XMLNodeList::const_iterator i = patches.begin(); i != patches.end(); ++i) {
-			boost::shared_ptr<Patch> patch(new Patch(this));
+			boost::shared_ptr<Patch> patch (new Patch (string(), 0, _number));
 			patch->set_state(tree, *(*i));
 			_patch_name_list.push_back(patch);
 		}
@@ -254,9 +237,7 @@ PatchBank::set_patch_name_list (const PatchNameList& pnl)
 	_patch_list_name = "";
 	
 	for (PatchNameList::iterator p = _patch_name_list.begin(); p != _patch_name_list.end(); p++) {
-		if ((*p)->use_bank_info (this)) {
-			return -1;
-		}
+		(*p)->set_bank_number (_number);
 	}
 
 	return 0;
@@ -335,7 +316,7 @@ ChannelNameSet::set_state (const XMLTree& tree, const XMLNode& node)
 		}
 
 		if (node->name() == "PatchBank") {
-			boost::shared_ptr<PatchBank> bank(new PatchBank());
+			boost::shared_ptr<PatchBank> bank (new PatchBank ());
 			bank->set_state(tree, *node);
 			_patch_banks.push_back(bank);
 			const PatchBank::PatchNameList& patches = bank->patch_name_list();
@@ -451,7 +432,7 @@ MasterDeviceNames::set_state(const XMLTree& tree, const XMLNode& a_node)
 		const XMLNodeList patches = (*i)->children();
 
 		for (XMLNodeList::const_iterator p = patches.begin(); p != patches.end(); ++p) {
-			boost::shared_ptr<Patch> patch(new Patch());
+			boost::shared_ptr<Patch> patch (new Patch ());
 			patch->set_state(tree, *(*p));
 			patch_name_list.push_back(patch);
 		}
