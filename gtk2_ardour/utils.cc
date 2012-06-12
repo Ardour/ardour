@@ -36,6 +36,7 @@
 #include <gtkmm/label.h>
 #include <gtkmm/paned.h>
 #include <gtk/gtkpaned.h>
+#include <boost/algorithm/string.hpp>
 
 #include "pbd/file_utils.h"
 
@@ -677,6 +678,16 @@ escape_underscores (string const & s)
 		}
 	}
 
+	return o;
+}
+
+/** Replace < and > with &lt; and &gt; respectively to make < > display correctly in markup strings */
+string
+escape_angled_brackets (string const & s)
+{
+	string o = s;
+	boost::replace_all (o, "<", "&lt;");
+	boost::replace_all (o, ">", "&gt;");
 	return o;
 }
 

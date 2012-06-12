@@ -79,6 +79,7 @@ void set_pango_fontsize ();
 void resize_window_to_proportion_of_monitor (Gtk::Window*, int, int);
 
 std::string escape_underscores (std::string const &);
+std::string escape_angled_brackets (std::string const &);
 
 Gdk::Color unique_random_color (std::list<Gdk::Color> &);
 

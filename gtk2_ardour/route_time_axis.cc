@@ -1591,13 +1591,17 @@ RouteTimeAxisView::update_playlist_tip ()
 			take_name = take_name.substr (idx + group_string.length());
 
 			/* set the playlist button tooltip to the take name */
-			ARDOUR_UI::instance()->set_tip (playlist_button,string_compose(_("Take: %1.%2"), rg->name(), take_name));
+			ARDOUR_UI::instance()->set_tip (
+				playlist_button,
+				string_compose(_("Take: %1.%2"), escape_angled_brackets (rg->name()), escape_angled_brackets (take_name))
+				);
+			
 			return;
 		}
 	}
 
 	/* set the playlist button tooltip to the playlist name */
-	ARDOUR_UI::instance()->set_tip (playlist_button, _("Playlist") + std::string(": ") + track()->playlist()->name());	
+	ARDOUR_UI::instance()->set_tip (playlist_button, _("Playlist") + std::string(": ") + escape_angled_brackets (track()->playlist()->name()));
 }
 
 
