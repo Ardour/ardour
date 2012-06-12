@@ -669,7 +669,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	/* s/w "RAID" management */
 
-	framecnt_t available_capture_duration();
+	boost::optional<framecnt_t> available_capture_duration();
 
 	/* I/O bundles */
 
@@ -1329,16 +1329,21 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	/* S/W RAID */
 
 	struct space_and_path {
-		uint32_t blocks; /* 4kB blocks */
+		uint32_t blocks;     ///< 4kB blocks
+		bool blocks_unknown; ///< true if blocks is unknown
 		std::string path;
 
-		space_and_path() {
-			blocks = 0;
-		}
+		space_and_path ()
+			: blocks (0)
+			, blocks_unknown (true)
+		{}
 	};
 
 	struct space_and_path_ascending_cmp {
 		bool operator() (space_and_path a, space_and_path b) {
+			if (a.blocks_unknown != b.blocks_unknown) {
+				return !a.blocks_unknown;
+			}
 			return a.blocks > b.blocks;
 		}
 	};
@@ -1348,6 +1353,11 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	std::vector<space_and_path> session_dirs;
 	std::vector<space_and_path>::iterator last_rr_session_dir;
 	uint32_t _total_free_4k_blocks;
+	/** If this is true, _total_free_4k_blocks is not definite,
+	    as one or more of the session directories' filesystems
+	    could not report free space.
+	*/
+	bool _total_free_4k_blocks_uncertain;
 	Glib::Mutex space_lock;
 
 	bool no_questions_about_missing_files;

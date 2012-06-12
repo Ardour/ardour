@@ -1050,15 +1050,20 @@ ARDOUR_UI::update_disk_space()
 		return;
 	}
 
-	framecnt_t frames = _session->available_capture_duration();
+	boost::optional<framecnt_t> opt_frames = _session->available_capture_duration();
 	char buf[64];
 	framecnt_t fr = _session->frame_rate();
 
-	if (frames == max_framecnt) {
+	if (!opt_frames) {
+		/* Available space is unknown */
+		snprintf (buf, sizeof (buf), "%s", _("Disk: <span foreground=\"green\">Unknown</span>"));
+	} else if (opt_frames.get_value_or (0) == max_framecnt) {
 		snprintf (buf, sizeof (buf), "%s", _("Disk: <span foreground=\"green\">24hrs+</span>"));
 	} else {
 		rec_enabled_streams = 0;
 		_session->foreach_route (this, &ARDOUR_UI::count_recenabled_streams);
+
+		framecnt_t frames = opt_frames.get_value_or (0);
 
 		if (rec_enabled_streams) {
 			frames /= rec_enabled_streams;

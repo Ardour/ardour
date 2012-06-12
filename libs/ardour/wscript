@@ -289,6 +289,7 @@ def configure(conf):
     conf.define('CURRENT_SESSION_FILE_VERSION', CURRENT_SESSION_FILE_VERSION)
 
     conf.check(header_name='sys/vfs.h', define_name='HAVE_SYS_VFS_H',mandatory=False)
+    conf.check(header_name='sys/statvfs.h', define_name='HAVE_SYS_STATVFS_H',mandatory=False)
 
     conf.check(header_name='jack/session.h', uselib = [ 'JACK' ],
                define_name='HAVE_JACK_SESSION')
