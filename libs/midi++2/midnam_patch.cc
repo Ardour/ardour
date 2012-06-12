@@ -235,12 +235,35 @@ PatchBank::set_patch_name_list (const PatchNameList& pnl)
 {
 	_patch_name_list = pnl;
 	_patch_list_name = "";
-	
+
 	for (PatchNameList::iterator p = _patch_name_list.begin(); p != _patch_name_list.end(); p++) {
 		(*p)->set_bank_number (_number);
 	}
 
 	return 0;
+}
+
+std::ostream&
+operator<< (std::ostream& os, const ChannelNameSet& cns)
+{
+	os << "Channel Name Set: name = " << cns._name << endl
+	   << "Map size " << cns._patch_map.size () << endl
+	   << "List size " << cns._patch_list.size() << endl
+	   << "Patch list name = [" << cns._patch_list_name << ']' << endl
+	   << "Available channels : ";
+	for (set<uint8_t>::iterator x = cns._available_for_channels.begin(); x != cns._available_for_channels.end(); ++x) {
+		os << (int) (*x) << ' ';
+	}
+	os << endl;
+	
+	for (ChannelNameSet::PatchBanks::const_iterator pbi = cns._patch_banks.begin(); pbi != cns._patch_banks.end(); ++pbi) {
+		os << "\tPatch Bank " << (*pbi)->name() << " with " << (*pbi)->patch_name_list().size() << " patches\n";
+		for (PatchBank::PatchNameList::const_iterator pni = (*pbi)->patch_name_list().begin(); pni != (*pbi)->patch_name_list().end(); ++pni) {
+			os << "\t\tPatch name " << (*pni)->name() << " prog " << (int) (*pni)->program_number() << " bank " << (*pni)->bank_number() << endl;
+		}
+	}
+
+	return os;
 }
 
 void
@@ -262,6 +285,15 @@ ChannelNameSet::set_patch_banks (const ChannelNameSet::PatchBanks& pb)
 
 	for (uint8_t n = 0; n < 16; ++n) {
 		_available_for_channels.insert (n);
+	}
+}
+
+void
+ChannelNameSet::use_patch_name_list (const PatchBank::PatchNameList& pnl)
+{
+	for (PatchBank::PatchNameList::const_iterator p = pnl.begin(); p != pnl.end(); ++p) {
+		_patch_map[(*p)->patch_primary_key()] = (*p);
+		_patch_list.push_back ((*p)->patch_primary_key());
 	}
 }
 
@@ -369,6 +401,27 @@ CustomDeviceMode::get_state(void)
 	return *custom_device_mode;
 }
 
+boost::shared_ptr<CustomDeviceMode> 
+MasterDeviceNames::custom_device_mode_by_name(std::string mode_name)
+{
+	assert(mode_name != "");
+	return _custom_device_modes[mode_name];
+}
+
+boost::shared_ptr<ChannelNameSet> 
+MasterDeviceNames::channel_name_set_by_device_mode_and_channel(std::string mode, uint8_t channel)
+{
+	boost::shared_ptr<CustomDeviceMode> cdm = custom_device_mode_by_name(mode);
+	boost::shared_ptr<ChannelNameSet> cns =  _channel_name_sets[cdm->channel_name_set_name_by_channel(channel)];
+	return cns;
+}
+
+boost::shared_ptr<Patch> 
+MasterDeviceNames::find_patch(std::string mode, uint8_t channel, PatchPrimaryKey& key) 
+{
+	return channel_name_set_by_device_mode_and_channel(mode, channel)->find_patch(key);
+}
+
 int
 MasterDeviceNames::set_state(const XMLTree& tree, const XMLNode& a_node)
 {
@@ -448,20 +501,23 @@ MasterDeviceNames::set_state(const XMLTree& tree, const XMLNode& a_node)
 
 	for (ChannelNameSets::iterator cns = _channel_name_sets.begin(); cns != _channel_name_sets.end(); ++cns) {
 		ChannelNameSet::PatchBanks pbs = cns->second->patch_banks();
+		PatchNameLists::iterator p;
+
 		for (ChannelNameSet::PatchBanks::iterator pb = pbs.begin(); pb != pbs.end(); ++pb) {
 			std::string pln = (*pb)->patch_list_name();
 			if (!pln.empty()) {
-				PatchNameLists::iterator p = _patch_name_lists.find (pln);
-				if (p != _patch_name_lists.end()) {
+				if ((p = _patch_name_lists.find (pln)) != _patch_name_lists.end()) {
 					if ((*pb)->set_patch_name_list (p->second)) {
 						return -1;
 					}
+					cns->second->use_patch_name_list (p->second);
 				} else {
 					error << string_compose ("Patch list name %1 was not found - patch file ignored", pln) << endmsg;
 					return -1;
 				}
 			}
 		}
+
 	}
 
 	return 0;

@@ -198,8 +198,10 @@ public:
 	int      set_state (const XMLTree&, const XMLNode&);
 
         void set_patch_banks (const PatchBanks&);
+        void use_patch_name_list (const PatchBank::PatchNameList&);
 
 private:
+        friend std::ostream& operator<< (std::ostream&, const ChannelNameSet&);
 	std::string _name;
 	AvailableForChannels _available_for_channels;
 	PatchBanks           _patch_banks;
@@ -207,6 +209,8 @@ private:
 	PatchList            _patch_list;
 	std::string          _patch_list_name;
 };
+
+std::ostream& operator<< (std::ostream&, const ChannelNameSet&);
 
 class Note
 {
@@ -298,18 +302,9 @@ public:
 	
 	const CustomDeviceModeNames& custom_device_mode_names() const { return _custom_device_mode_names; }
 	
-	boost::shared_ptr<CustomDeviceMode> custom_device_mode_by_name(std::string mode_name) {
-		assert(mode_name != "");
-		return _custom_device_modes[mode_name];
-	}
-	
-	boost::shared_ptr<ChannelNameSet> channel_name_set_by_device_mode_and_channel(std::string mode, uint8_t channel) {
-		return _channel_name_sets[custom_device_mode_by_name(mode)->channel_name_set_name_by_channel(channel)];
-	}
-	
-	boost::shared_ptr<Patch> find_patch(std::string mode, uint8_t channel, PatchPrimaryKey& key) {
-		return channel_name_set_by_device_mode_and_channel(mode, channel)->find_patch(key);
-	}
+        boost::shared_ptr<CustomDeviceMode> custom_device_mode_by_name(std::string mode_name);
+        boost::shared_ptr<ChannelNameSet> channel_name_set_by_device_mode_and_channel(std::string mode, uint8_t channel);
+        boost::shared_ptr<Patch> find_patch(std::string mode, uint8_t channel, PatchPrimaryKey& key);
 	
 	XMLNode& get_state (void);
 	int      set_state (const XMLTree&, const XMLNode&);

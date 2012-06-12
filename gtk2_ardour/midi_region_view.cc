@@ -1809,8 +1809,14 @@ MidiRegionView::add_canvas_patch_change (MidiModel::PatchChangePtr patch, const 
 	_patch_changes.push_back (patch_change);
 }
 
-void
-MidiRegionView::get_patch_key_at (Evoral::MusicalTime time, uint8_t channel, MIDI::Name::PatchPrimaryKey& key)
+MIDI::Name::PatchPrimaryKey
+MidiRegionView::patch_change_to_patch_key (MidiModel::PatchChangePtr p)
+{
+	return MIDI::Name::PatchPrimaryKey (p->program(), p->bank());
+}
+
+void 
+MidiRegionView::get_patch_key_at (double time, uint8_t channel, MIDI::Name::PatchPrimaryKey& key)
 {
 	MidiModel::PatchChanges::iterator i = _model->patch_change_lower_bound (time);
 	while (i != _model->patch_changes().end() && (*i)->channel() != channel) {
@@ -1826,7 +1832,6 @@ MidiRegionView::get_patch_key_at (Evoral::MusicalTime time, uint8_t channel, MID
 
 	assert (key.is_sane());
 }
-
 
 void
 MidiRegionView::change_patch_change (CanvasPatchChange& pc, const MIDI::Name::PatchPrimaryKey& new_patch)
@@ -1926,8 +1931,7 @@ void
 MidiRegionView::previous_patch (CanvasPatchChange& patch)
 {
 	if (patch.patch()->program() < 127) {
-		MIDI::Name::PatchPrimaryKey key;
-		get_patch_key_at (patch.patch()->time(), patch.patch()->channel(), key);
+		MIDI::Name::PatchPrimaryKey key = patch_change_to_patch_key (patch.patch());
 		key.program_number++;
 		change_patch_change (patch, key);
 	}
@@ -1937,8 +1941,7 @@ void
 MidiRegionView::next_patch (CanvasPatchChange& patch)
 {
 	if (patch.patch()->program() > 0) {
-		MIDI::Name::PatchPrimaryKey key;
-		get_patch_key_at (patch.patch()->time(), patch.patch()->channel(), key);
+		MIDI::Name::PatchPrimaryKey key = patch_change_to_patch_key (patch.patch());
 		key.program_number--;
 		change_patch_change (patch, key);
 	}
@@ -1948,8 +1951,7 @@ void
 MidiRegionView::previous_bank (CanvasPatchChange& patch)
 {
 	if (patch.patch()->program() < 127) {
-		MIDI::Name::PatchPrimaryKey key;
-		get_patch_key_at (patch.patch()->time(), patch.patch()->channel(), key);
+		MIDI::Name::PatchPrimaryKey key = patch_change_to_patch_key (patch.patch());
 		if (key.bank_number > 0) {
 			key.bank_number--;
 			change_patch_change (patch, key);
@@ -1961,8 +1963,7 @@ void
 MidiRegionView::next_bank (CanvasPatchChange& patch)
 {
 	if (patch.patch()->program() > 0) {
-		MIDI::Name::PatchPrimaryKey key;
-		get_patch_key_at (patch.patch()->time(), patch.patch()->channel(), key);
+		MIDI::Name::PatchPrimaryKey key = patch_change_to_patch_key (patch.patch());
 		if (key.bank_number < 127) {
 			key.bank_number++;
 			change_patch_change (patch, key);
