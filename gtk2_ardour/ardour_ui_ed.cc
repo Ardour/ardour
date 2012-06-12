@@ -225,7 +225,7 @@ ARDOUR_UI::install_actions ()
 	/* windows visibility actions */
 
 	ActionManager::register_toggle_action (common_actions, X_("ToggleMaximalEditor"), _("Maximise Editor Space"), sigc::mem_fun (*this, &ARDOUR_UI::toggle_editing_space));
-	act = ActionManager::register_toggle_action (common_actions, X_("KeepTearoffs"), _("Toolbars when Maximised"), mem_fun (*this, &ARDOUR_UI::toggle_keep_tearoffs));
+	act = ActionManager::register_toggle_action (common_actions, X_("KeepTearoffs"), _("Show Toolbars"), mem_fun (*this, &ARDOUR_UI::toggle_keep_tearoffs));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	ActionManager::register_toggle_action (common_actions, X_("toggle-mixer"), S_("Window|Mixer"),  sigc::mem_fun(*this, &ARDOUR_UI::toggle_mixer_window));

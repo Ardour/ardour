@@ -166,6 +166,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void new_midi_tracer_window ();
 	void toggle_route_params_window ();
 	void toggle_editing_space();
+	void toggle_editing_space_force(bool force);
 	void toggle_keep_tearoffs();
 
 	Gtk::Tooltips& tooltips() { return _tooltips; }
@@ -240,8 +241,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	gint exit_on_main_window_close (GdkEventAny *);
 
-	void maximise_editing_space ();
-	void restore_editing_space ();
+	void maximise_editing_space (bool force);
+	void restore_editing_space (bool force);
 
 	void setup_profile ();
 	void setup_tooltips ();

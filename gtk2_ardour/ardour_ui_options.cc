@@ -52,7 +52,7 @@ ARDOUR_UI::toggle_keep_tearoffs ()
 {
 	ActionManager::toggle_config_state ("Common", "KeepTearoffs", &RCConfiguration::set_keep_tearoffs, &RCConfiguration::get_keep_tearoffs);
 
-	ARDOUR_UI::toggle_editing_space ();
+	ARDOUR_UI::toggle_editing_space_force (true);
 }
 
 void
@@ -277,14 +277,20 @@ ARDOUR_UI::toggle_video_sync()
 void
 ARDOUR_UI::toggle_editing_space()
 {
+	toggle_editing_space_force(false);
+}
+
+void
+ARDOUR_UI::toggle_editing_space_force(bool force)
+{
 	Glib::RefPtr<Action> act = ActionManager::get_action ("Common", "ToggleMaximalEditor");
 
 	if (act) {
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
 		if (tact->get_active()) {
-			maximise_editing_space ();
+			maximise_editing_space (force);
 		} else {
-			restore_editing_space ();
+			restore_editing_space (force);
 		}
 	}
 }

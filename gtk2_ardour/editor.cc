@@ -3929,40 +3929,35 @@ Editor::session_state_saved (string)
 }
 
 void
-Editor::maximise_editing_space ()
+Editor::maximise_editing_space (bool force)
 {
-	if (_maximised) {
+	if (_maximised && !force) {
 		return;
 	}
 
 	fullscreen ();
 
-	if (!Config->get_keep_tearoffs()) {
-		/* these calls will leave each tearoff visible *if* it is torn off, 
-		   but invisible otherwise.
-		*/
-		_mouse_mode_tearoff->set_visible (false);
-		_tools_tearoff->set_visible (false);
-		_zoom_tearoff->set_visible (false);
-	}
+	bool visible = Config->get_keep_tearoffs();
+	_mouse_mode_tearoff->set_visible (visible);
+	_tools_tearoff->set_visible (visible);
+	_zoom_tearoff->set_visible (visible);
 
 	_maximised = true;
 }
 
 void
-Editor::restore_editing_space ()
+Editor::restore_editing_space (bool force)
 {
-	if (!_maximised) {
+	if (!_maximised && !force) {
 		return;
 	}
 
 	unfullscreen();
 
-	if (!Config->get_keep_tearoffs()) {
-		_mouse_mode_tearoff->set_visible (true);
-		_tools_tearoff->set_visible (true);
-		_zoom_tearoff->set_visible (true);
-	}
+	bool visible = Config->get_keep_tearoffs();
+	_mouse_mode_tearoff->set_visible (visible);
+	_tools_tearoff->set_visible (visible);
+	_zoom_tearoff->set_visible (visible);
 
 	_maximised = false;
 }

@@ -606,18 +606,18 @@ ARDOUR_UI::editor_realized ()
 }
 
 void
-ARDOUR_UI::maximise_editing_space ()
+ARDOUR_UI::maximise_editing_space (bool force)
 {
 	if (editor) {
-		editor->maximise_editing_space ();
+		editor->maximise_editing_space (force);
 	}
 }
 
 void
-ARDOUR_UI::restore_editing_space ()
+ARDOUR_UI::restore_editing_space (bool force)
 {
 	if (editor) {
-		editor->restore_editing_space ();
+		editor->restore_editing_space (force);
 	}
 }
 

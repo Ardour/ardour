@@ -397,8 +397,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void prepare_for_cleanup ();
 	void finish_cleanup ();
 
-	void maximise_editing_space();
-	void restore_editing_space();
+	void maximise_editing_space(bool force);
+	void restore_editing_space(bool force);
 
 	void reset_x_origin (framepos_t);
 	void reset_x_origin_to_follow_playhead ();
