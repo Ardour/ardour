@@ -789,12 +789,12 @@ MackieControlProtocol::format_timecode_timecode (framepos_t now_frame)
 	// digits: 888/88/88/888
 	// Timecode mode: Hours/Minutes/Seconds/Frames
 	ostringstream os;
-	os << ' ';
 	os << setw(2) << setfill('0') << timecode.hours;
+	os << ' ';
 	os << setw(2) << setfill('0') << timecode.minutes;
 	os << setw(2) << setfill('0') << timecode.seconds;
-	os << setw(2) << setfill('0') << timecode.frames;
 	os << ' ';
+	os << setw(2) << setfill('0') << timecode.frames;
 
 	return os.str();
 }
