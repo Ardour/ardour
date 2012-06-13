@@ -4309,7 +4309,9 @@ PatchChangeDrag::PatchChangeDrag (Editor* e, CanvasPatchChange* i, MidiRegionVie
 	, _patch_change (i)
 	, _cumulative_dx (0)
 {
-	DEBUG_TRACE (DEBUG::Drags, "New PatchChangeDrag\n");
+	DEBUG_TRACE (DEBUG::Drags, string_compose ("New PatchChangeDrag, patch @ %1, grab @ %2\n",
+						   _region_view->source_beats_to_absolute_frames (_patch_change->patch()->time()),
+						   grab_frame()));
 }
 
 void
@@ -4320,8 +4322,8 @@ PatchChangeDrag::motion (GdkEvent* ev, bool)
 	f = max (f, r->position ());
 	f = min (f, r->last_frame ());
 
-	framecnt_t const dxf = f - grab_frame();
-	double const dxu = _editor->frame_to_unit (dxf);
+	framecnt_t const dxf = f - grab_frame(); // permitted dx in frames
+	double const dxu = _editor->frame_to_unit (dxf); // permitted fx in units
 	_patch_change->move (dxu - _cumulative_dx, 0);
 	_cumulative_dx = dxu;
 }
@@ -4334,14 +4336,13 @@ PatchChangeDrag::finished (GdkEvent* ev, bool movement_occurred)
 	}
 
 	boost::shared_ptr<Region> r (_region_view->region ());
-
 	framepos_t f = adjusted_current_frame (ev);
 	f = max (f, r->position ());
 	f = min (f, r->last_frame ());
 
 	_region_view->move_patch_change (
 		*_patch_change,
-		_region_view->region_frames_to_region_beats (f - r->position() - r->start())
+		_region_view->region_frames_to_region_beats (f - (r->position() - r->start()))
 		);
 }
 

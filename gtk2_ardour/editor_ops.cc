@@ -4749,7 +4749,6 @@ Editor::insert_patch_change (bool from_context)
 		MidiRegionView* const mrv = dynamic_cast<MidiRegionView*> (*i);
 		if (mrv) {
 			if (p >= mrv->region()->first_frame() && p <= mrv->region()->last_frame()) {
-				cerr << "Adding patch change @ " << p << " to " << mrv->region()->name() << endl;
 				mrv->add_patch_change (p - mrv->region()->position(), d.patch ());
 			}
 		}
