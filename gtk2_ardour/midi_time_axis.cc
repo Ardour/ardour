@@ -172,14 +172,17 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		_range_scroomer->DragStarting.connect (sigc::mem_fun (*midi_view(), &MidiStreamView::suspend_updates));
 		_range_scroomer->DragFinishing.connect (sigc::mem_fun (*midi_view(), &MidiStreamView::resume_updates));
 
-		/* Put the scroomer in a VBox with a padding label so that it can be reduced in height
-		   for stacked-view tracks.
+		/* Put the scroomer and the keyboard in a VBox with a padding
+		   label so that they can be reduced in height for stacked-view
+		   tracks.
 		*/
-		VBox* b = manage (new VBox);
-		b->pack_start (*_range_scroomer, false, false);
-		b->pack_start (*manage (new Label ("")), true, true);
-		controls_hbox.pack_start(*b);
-		controls_hbox.pack_start(*_piano_roll_header);
+		VBox* v = manage (new VBox);
+		HBox* h = manage (new HBox);
+		h->pack_start (*_range_scroomer);
+		h->pack_start (*_piano_roll_header);
+		v->pack_start (*h, false, false);
+		v->pack_start (*manage (new Label ("")), true, true);
+		controls_hbox.pack_start(*v);
 
 		controls_ebox.set_name ("MidiTrackControlsBaseUnselected");
 		controls_base_selected_name = "MidiTrackControlsBaseSelected";
