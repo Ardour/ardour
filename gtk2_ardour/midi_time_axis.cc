@@ -182,6 +182,8 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		h->pack_start (*_piano_roll_header);
 		v->pack_start (*h, false, false);
 		v->pack_start (*manage (new Label ("")), true, true);
+		v->show ();
+		h->show ();
 		controls_hbox.pack_start(*v);
 
 		controls_ebox.set_name ("MidiTrackControlsBaseUnselected");
