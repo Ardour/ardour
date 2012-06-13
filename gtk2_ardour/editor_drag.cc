@@ -3999,7 +3999,15 @@ NoteDrag::total_dx () const
 int8_t
 NoteDrag::total_dy () const
 {
-	return ((int8_t) (grab_y() / _note_height)) - ((int8_t) (_drags->current_pointer_y() / _note_height));
+	MidiStreamView* msv = _region->midi_stream_view ();
+	double const y = _region->midi_view()->y_position ();
+	/* new current note */
+	uint8_t n = msv->y_to_note (_drags->current_pointer_y () - y);
+	/* clamp */
+	n = max (msv->lowest_note(), n);
+	n = min (msv->highest_note(), n);
+	/* and work out delta */
+	return n - msv->y_to_note (grab_y() - y);
 }
 
 void
