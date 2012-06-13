@@ -716,6 +716,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 		return _current_trans_quarks;
 	}
 
+	bool operation_in_progress (GQuark) const;
+
 	void add_commands (std::vector<Command*> const & cmds);
 
 	std::map<PBD::ID,PBD::StatefulDestructible*> registry;

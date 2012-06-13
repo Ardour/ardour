@@ -4758,3 +4758,9 @@ Session::next_control_id () const
 {
 	return ntracks() + nbusses() + 1;
 }
+
+bool
+Session::operation_in_progress (GQuark op) const
+{
+	return (find (_current_trans_quarks.begin(), _current_trans_quarks.end(), op) != _current_trans_quarks.end());
+}
