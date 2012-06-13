@@ -3929,35 +3929,34 @@ Editor::session_state_saved (string)
 }
 
 void
-Editor::maximise_editing_space (bool force)
+Editor::update_tearoff_visibility()
 {
-	if (_maximised && !force) {
+	bool visible = Config->get_keep_tearoffs();
+	_mouse_mode_tearoff->set_visible (visible);
+	_tools_tearoff->set_visible (visible);
+	_zoom_tearoff->set_visible (visible);
+}
+
+void
+Editor::maximise_editing_space ()
+{
+	if (_maximised) {
 		return;
 	}
 
 	fullscreen ();
 
-	bool visible = Config->get_keep_tearoffs();
-	_mouse_mode_tearoff->set_visible (visible);
-	_tools_tearoff->set_visible (visible);
-	_zoom_tearoff->set_visible (visible);
-
 	_maximised = true;
 }
 
 void
-Editor::restore_editing_space (bool force)
+Editor::restore_editing_space ()
 {
-	if (!_maximised && !force) {
+	if (!_maximised) {
 		return;
 	}
 
 	unfullscreen();
-
-	bool visible = Config->get_keep_tearoffs();
-	_mouse_mode_tearoff->set_visible (visible);
-	_tools_tearoff->set_visible (visible);
-	_zoom_tearoff->set_visible (visible);
 
 	_maximised = false;
 }

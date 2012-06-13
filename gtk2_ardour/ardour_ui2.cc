@@ -606,18 +606,26 @@ ARDOUR_UI::editor_realized ()
 }
 
 void
-ARDOUR_UI::maximise_editing_space (bool force)
+ARDOUR_UI::update_tearoff_visibility ()
 {
 	if (editor) {
-		editor->maximise_editing_space (force);
+		editor->update_tearoff_visibility ();
 	}
 }
 
 void
-ARDOUR_UI::restore_editing_space (bool force)
+ARDOUR_UI::maximise_editing_space ()
 {
 	if (editor) {
-		editor->restore_editing_space (force);
+		editor->maximise_editing_space ();
+	}
+}
+
+void
+ARDOUR_UI::restore_editing_space ()
+{
+	if (editor) {
+		editor->restore_editing_space ();
 	}
 }
 
