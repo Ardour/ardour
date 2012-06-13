@@ -383,11 +383,11 @@ MidiTimeAxisView::append_extra_display_menu_items ()
 	range_menu->set_name ("ArdourContextMenu");
 
 	range_items.push_back (MenuElem (_("Show Full Range"), sigc::bind (
-			sigc::mem_fun(*this, &MidiTimeAxisView::set_note_range),
+			sigc::mem_fun(*this, &MidiTimeAxisView::set_note_range_for_selection),
 			MidiStreamView::FullRange)));
 
 	range_items.push_back (MenuElem (_("Fit Contents"), sigc::bind (
-			sigc::mem_fun(*this, &MidiTimeAxisView::set_note_range),
+			sigc::mem_fun(*this, &MidiTimeAxisView::set_note_range_for_selection),
 			MidiStreamView::ContentsRange)));
 
 	items.push_back (MenuElem (_("Note Range"), *range_menu));
@@ -808,8 +808,23 @@ MidiTimeAxisView::set_color_mode (ColorMode mode, bool force, bool redisplay)
 void
 MidiTimeAxisView::set_note_range(MidiStreamView::VisibleNoteRange range)
 {
-	if (!_ignore_signals)
+	if (!_ignore_signals) {
 		midi_view()->set_note_range(range);
+	}
+}
+
+/** Set the note range for all selected MIDI tracks */
+void
+MidiTimeAxisView::set_note_range_for_selection (MidiStreamView::VisibleNoteRange range)
+{
+	TrackSelection& ts = _editor.get_selection().tracks;
+	
+	for (TrackSelection::iterator i = ts.begin(); i != ts.end(); ++i) {
+		MidiTimeAxisView* mtv = dynamic_cast<MidiTimeAxisView*> (*i);
+		if (mtv) {
+			mtv->set_note_range (range);
+		}
+	}
 }
 
 

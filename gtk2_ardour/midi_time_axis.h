@@ -115,6 +115,7 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	void set_note_mode (ARDOUR::NoteMode mode);
 	void set_color_mode (ARDOUR::ColorMode, bool force=false, bool redisplay=true);
 	void set_note_range(MidiStreamView::VisibleNoteRange range);
+	void set_note_range_for_selection (MidiStreamView::VisibleNoteRange range);
 
 	void route_active_changed ();
 	void note_range_changed ();
