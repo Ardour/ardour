@@ -118,6 +118,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, Canvas& c
 	, mode_menu (0)
 	, color_mode_menu (0)
 	, gm (sess, slider, slider_desensitised, true, 115)
+	, _ignore_set_layer_display (false)
 {
 }
 
