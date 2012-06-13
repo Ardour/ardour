@@ -55,6 +55,7 @@ using namespace std;
 GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s)
 	: ControlProtocol (s, _("Generic MIDI"))
 	, _motorised (false)
+	, _threshold (10)
 	, gui (0)
 {
 	_input_port = MIDI::Manager::instance()->midi_input_port ();
@@ -647,6 +648,13 @@ GenericMidiControlProtocol::load_bindings (const string& xmlpath)
 			} else {
 				_motorised = false;
 			}
+
+			if ((prop = (*citer)->property ("threshold")) != 0) {
+				_threshold = atoi (prop->value ());
+			} else {
+				_threshold = 10;
+			}
+
 		}
 
 		if ((*citer)->name() == "Binding") {
@@ -1010,4 +1018,10 @@ void
 GenericMidiControlProtocol::set_motorised (bool m)
 {
 	_motorised = m;
+}
+
+void
+GenericMidiControlProtocol::set_threshold (int t)
+{
+	_threshold = t;
 }

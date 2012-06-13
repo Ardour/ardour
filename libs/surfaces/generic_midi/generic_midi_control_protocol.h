@@ -87,6 +87,12 @@ class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
 		return _motorised;
 	}
 
+	void set_threshold (int);
+
+	int threshold () const {
+		return _threshold;
+	}
+
   private:
 	MIDI::Port* _input_port;
 	MIDI::Port* _output_port;
@@ -136,6 +142,7 @@ class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
 	    values jumping around when things are not in sync.
 	*/
 	bool _motorised;
+	int _threshold;
 
 	mutable void *gui;
 	void build_gui ();

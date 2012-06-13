@@ -46,10 +46,13 @@ private:
 	Gtk::Adjustment bank_adjustment;
 	Gtk::SpinButton bank_spinner;
 	Gtk::CheckButton motorised_button;
+	Gtk::Adjustment threshold_adjustment;
+	Gtk::SpinButton threshold_spinner;
 
 	void binding_changed ();
 	void bank_changed ();
 	void motorised_changed ();
+	void threshold_changed ();
 };
 
 using namespace PBD;
@@ -86,6 +89,8 @@ GMCPGUI::GMCPGUI (GenericMidiControlProtocol& p)
 	, bank_adjustment (1, 1, 100, 1, 10)
 	, bank_spinner (bank_adjustment)
 	, motorised_button ("Motorised")
+	, threshold_adjustment (1, 1, 127, 1, 10)
+	, threshold_spinner (threshold_adjustment)
 {
 	vector<string> popdowns;
 	popdowns.push_back (_("Reset All"));
@@ -140,7 +145,20 @@ GMCPGUI::GMCPGUI (GenericMidiControlProtocol& p)
 
 	motorised_button.show ();
 
+	threshold_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &GMCPGUI::threshold_changed));
+
+	label = manage (new Label (_("Threshold:")));
+	label->set_alignment (0, 0.5);
+	table->attach (*label, 0, 1, n, n + 1);
+	table->attach (threshold_spinner, 1, 2, n, n + 1);
+	++n;
+
+	threshold_spinner.show ();
+	label->show ();
+
 	pack_start (*table, false, false);
+
+	binding_changed ();
 }
 
 GMCPGUI::~GMCPGUI ()
@@ -166,6 +184,7 @@ GMCPGUI::binding_changed ()
 			if (str == x->name) {
 				cp.load_bindings (x->path);
 				motorised_button.set_active (cp.motorised ());
+				threshold_adjustment.set_value (cp.threshold ());
 				break;
 			}
 		}
@@ -176,4 +195,10 @@ void
 GMCPGUI::motorised_changed ()
 {
 	cp.set_motorised (motorised_button.get_active ());
+}
+
+void
+GMCPGUI::threshold_changed ()
+{
+	cp.set_threshold (threshold_adjustment.get_value());
 }
