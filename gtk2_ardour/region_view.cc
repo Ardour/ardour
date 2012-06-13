@@ -779,7 +779,7 @@ RegionView::update_coverage_frames (LayerDisplay d)
 	bool me = false;
 
 	/* the color that will be used to show parts of regions that will not be heard */
-	uint32_t non_playing_color = RGBA_TO_UINT (32, 32, 32, 192);
+	uint32_t const non_playing_color = ARDOUR_UI::config()->canvasvar_CoveredRegion.get ();
 
 	while (t < end) {
 
