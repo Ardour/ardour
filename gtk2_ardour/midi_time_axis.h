@@ -118,6 +118,7 @@ class MidiTimeAxisView : public RouteTimeAxisView
 
 	void route_active_changed ();
 	void note_range_changed ();
+	void contents_height_changed ();
 
 	bool                         _ignore_signals;
 	MidiScroomer*                _range_scroomer;

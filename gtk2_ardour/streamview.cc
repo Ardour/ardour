@@ -613,6 +613,8 @@ StreamView::update_contents_height ()
 			break;
 		}
 	}
+
+	ContentsHeightChanged (); /* EMIT SIGNAL */
 }
 
 void

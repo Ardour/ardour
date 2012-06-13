@@ -125,7 +125,7 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	_route = rt;
 	
 	_view = new MidiStreamView (*this);
-	
+
 	if (is_track ()) {
 		_piano_roll_header = new PianoRollHeader(*midi_view());
 		_range_scroomer = new MidiScroomer(midi_view()->note_range_adjustment);
@@ -145,6 +145,7 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		midi_view()->apply_note_range (atoi (gui_property ("note-range-min").c_str()), atoi (gui_property ("note-range-max").c_str()), true);
 	}
 	midi_view()->NoteRangeChanged.connect (sigc::mem_fun (*this, &MidiTimeAxisView::note_range_changed));
+	_view->ContentsHeightChanged.connect (sigc::mem_fun (*this, &MidiTimeAxisView::contents_height_changed));
 
 	ignore_toggle = false;
 
@@ -171,7 +172,13 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		_range_scroomer->DragStarting.connect (sigc::mem_fun (*midi_view(), &MidiStreamView::suspend_updates));
 		_range_scroomer->DragFinishing.connect (sigc::mem_fun (*midi_view(), &MidiStreamView::resume_updates));
 
-		controls_hbox.pack_start(*_range_scroomer);
+		/* Put the scroomer in a VBox with a padding label so that it can be reduced in height
+		   for stacked-view tracks.
+		*/
+		VBox* b = manage (new VBox);
+		b->pack_start (*_range_scroomer, false, false);
+		b->pack_start (*manage (new Label ("")), true, true);
+		controls_hbox.pack_start(*b);
 		controls_hbox.pack_start(*_piano_roll_header);
 
 		controls_ebox.set_name ("MidiTrackControlsBaseUnselected");
@@ -1227,3 +1234,8 @@ MidiTimeAxisView::note_range_changed ()
 	set_gui_property ("note-range-max", (int) midi_view()->highest_note ());
 }
 
+void
+MidiTimeAxisView::contents_height_changed ()
+{
+	_range_scroomer->set_size_request (-1, _view->child_height ());
+}
