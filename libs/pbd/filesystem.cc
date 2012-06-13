@@ -111,6 +111,13 @@ exists_and_writable (const path & p)
 			/* exists and is not writable */
 			return false;
 		}
+		/* filesystem may be mounted read-only, so even though file
+		 * permissions permit access, the mount status does not.
+		 * access(2) seems like the best test for this.
+		 */
+		if (g_access (p.to_string().c_str(), W_OK) != 0) {
+			return false;
+		}
 	}
 
 	return true;
