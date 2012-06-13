@@ -2891,7 +2891,7 @@ void
 MidiRegionView::change_velocities (bool up, bool fine, bool allow_smush, bool all_together)
 {
 	int8_t delta;
-	int8_t value;
+	int8_t value = 0;
 
 	if (_selection.empty()) {
 		return;

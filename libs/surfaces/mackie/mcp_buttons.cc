@@ -98,10 +98,9 @@ MackieControlProtocol::left_press (Button &)
 {
 	Sorted sorted = get_sorted_routes();
 	uint32_t strip_cnt = n_strips (); 
-	uint32_t route_cnt = sorted.size();
 
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("bank left with current initial = %1 nstrips = %2 tracks/busses = %3\n",
-							   _current_initial_bank, strip_cnt, route_cnt));
+							   _current_initial_bank, strip_cnt, sorted.size()));
 
 	if (_current_initial_bank > strip_cnt) {
 		switch_banks (_current_initial_bank - strip_cnt);
