@@ -65,7 +65,7 @@ Surface::Surface (MackieControlProtocol& mcp, const std::string& device_name, ui
 	, _jog_wheel (0)
 	, _last_master_gain_written (-0.0f)
 {
-	DEBUG_TRACE (DEBUG::MackieControl, "Surface::init\n");
+	DEBUG_TRACE (DEBUG::MackieControl, "Surface::Surface init\n");
 	
 	_port = new SurfacePort (*this);
 
@@ -93,12 +93,12 @@ Surface::Surface (MackieControlProtocol& mcp, const std::string& device_name, ui
 	
 	connect_to_signals ();
 
-	DEBUG_TRACE (DEBUG::MackieControl, "Surface::init finish\n");
+	DEBUG_TRACE (DEBUG::MackieControl, "Surface::Surface done\n");
 }
 
 Surface::~Surface ()
 {
-	DEBUG_TRACE (DEBUG::MackieControl, "Surface: destructor\n");
+	DEBUG_TRACE (DEBUG::MackieControl, "Surface::~Surface init\n");
 
 	zero_all ();
 
@@ -114,6 +114,8 @@ Surface::~Surface ()
 	
 	delete _jog_wheel;
 	delete _port;
+
+	DEBUG_TRACE (DEBUG::MackieControl, "Surface::~Surface done\n");
 }
 
 const MidiByteArray& 
@@ -200,8 +202,6 @@ Surface::init_strips (uint32_t n)
 void
 Surface::setup_master ()
 {
-	_master_fader = dynamic_cast<Fader*> (Fader::factory (*this, _mcp.device_info().strip_cnt(), "master", *groups["master"]));
-	
 	boost::shared_ptr<Route> m;
 	
 	if ((m = _mcp.get_session().monitor_out()) == 0) {
@@ -211,6 +211,8 @@ Surface::setup_master ()
 	if (!m) {
 		return;
 	}
+
+	_master_fader = dynamic_cast<Fader*> (Fader::factory (*this, _mcp.device_info().strip_cnt(), "master", *groups["master"]));
 	
 	_master_fader->set_control (m->gain_control());
 	m->gain_control()->Changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&Surface::master_gain_changed, this), ui_context());
@@ -626,7 +628,7 @@ Surface::zero_all ()
 		show_two_char_display (string (2, '0'), string (2, ' '));
 	}
 
-	if (_mcp.device_info().has_master_fader ()) {
+	if (_mcp.device_info().has_master_fader () && _master_fader) {
 		_port->write (_master_fader->zero ());
 	}
 

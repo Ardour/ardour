@@ -124,18 +124,22 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 
 MackieControlProtocol::~MackieControlProtocol()
 {
-	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::~MackieControlProtocol\n");
+	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::~MackieControlProtocol init\n");
 	
+	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::~MackieControlProtocol drop_connections ()\n");
 	drop_connections ();
+
+	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::~MackieControlProtocol tear_down_gui ()\n");
 	tear_down_gui ();
 
 	_active = false;
 
 	/* stop event loop */
-
+	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::~MackieControlProtocol BaseUI::quit ()\n");
 	BaseUI::quit ();
 
 	try {
+		DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::~MackieControlProtocol close()\n");
 		close();
 	}
 	catch (exception & e) {
@@ -145,9 +149,9 @@ MackieControlProtocol::~MackieControlProtocol()
 		cout << "~MackieControlProtocol caught unknown" << endl;
 	}
 
-	DEBUG_TRACE (DEBUG::MackieControl, "finished ~MackieControlProtocol::MackieControlProtocol\n");
-
 	_instance = 0;
+
+	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::~MackieControlProtocol done\n");
 }
 
 void
@@ -371,6 +375,8 @@ MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 int 
 MackieControlProtocol::set_active (bool yn)
 {
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose("MackieControlProtocol::set_active init with yn: '%1'\n", yn));
+
 	if (yn == _active) {
 		return 0;
 	}
@@ -400,6 +406,8 @@ MackieControlProtocol::set_active (bool yn)
 		_active = false;
 
 	}
+
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose("MackieControlProtocol::set_active done with yn: '%1'\n", yn));
 
 	return 0;
 }
@@ -679,7 +687,7 @@ MackieControlProtocol::close()
 XMLNode& 
 MackieControlProtocol::get_state()
 {
-	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::get_state\n");
+	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::get_state init\n");
 	char buf[16];
 
 	// add name of protocol
@@ -696,6 +704,8 @@ MackieControlProtocol::get_state()
 
 	node->add_property (X_("device-profile"), _device_profile.name());
 	node->add_property (X_("device-name"), _device_info.name());
+
+	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::get_state done\n");
 
 	return *node;
 }
@@ -736,6 +746,8 @@ MackieControlProtocol::set_state (const XMLNode & node, int /*version*/)
 	if (_active) {
 		switch_banks (bank, true);
 	}
+
+	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::set_state done\n");
 
 	return retval;
 }
