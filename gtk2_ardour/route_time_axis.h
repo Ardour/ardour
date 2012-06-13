@@ -306,7 +306,6 @@ protected:
 	typedef std::list<RouteTimeAxisView*> UnderlayMirrorList;
 	UnderlayMirrorList _underlay_mirrors;
 
-	bool _ignore_track_mode_change; ///< true to ignore track mode change signals
 	bool _ignore_set_layer_display;
 
 private:
