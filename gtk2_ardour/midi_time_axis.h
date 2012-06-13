@@ -112,10 +112,9 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	Gtk::Menu* build_note_mode_menu();
 	Gtk::Menu* build_color_mode_menu();
 
-	void set_note_mode (ARDOUR::NoteMode mode);
-	void set_color_mode (ARDOUR::ColorMode, bool force=false, bool redisplay=true);
-	void set_note_range(MidiStreamView::VisibleNoteRange range);
-	void set_note_range_for_selection (MidiStreamView::VisibleNoteRange range);
+	void set_note_mode (ARDOUR::NoteMode mode, bool apply_to_selection = false);
+	void set_color_mode (ARDOUR::ColorMode, bool force = false, bool redisplay = true, bool apply_to_selection = false);
+	void set_note_range (MidiStreamView::VisibleNoteRange range, bool apply_to_selection = false);
 
 	void route_active_changed ();
 	void note_range_changed ();

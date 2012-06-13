@@ -383,12 +383,12 @@ MidiTimeAxisView::append_extra_display_menu_items ()
 	range_menu->set_name ("ArdourContextMenu");
 
 	range_items.push_back (MenuElem (_("Show Full Range"), sigc::bind (
-			sigc::mem_fun(*this, &MidiTimeAxisView::set_note_range_for_selection),
-			MidiStreamView::FullRange)));
+			sigc::mem_fun(*this, &MidiTimeAxisView::set_note_range), 
+			MidiStreamView::FullRange, true)));
 
 	range_items.push_back (MenuElem (_("Fit Contents"), sigc::bind (
-			sigc::mem_fun(*this, &MidiTimeAxisView::set_note_range_for_selection),
-			MidiStreamView::ContentsRange)));
+			sigc::mem_fun(*this, &MidiTimeAxisView::set_note_range),
+			MidiStreamView::ContentsRange, true)));
 
 	items.push_back (MenuElem (_("Note Range"), *range_menu));
 	items.push_back (MenuElem (_("Note Mode"), *build_note_mode_menu()));
@@ -730,13 +730,13 @@ MidiTimeAxisView::build_note_mode_menu()
 	mode_menu->set_name ("ArdourContextMenu");
 
 	RadioMenuItem::Group mode_group;
-	items.push_back (RadioMenuElem (mode_group, _("Sustained"),
-				sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_note_mode), Sustained)));
+	items.push_back (RadioMenuElem (mode_group,_("Sustained"),
+				sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_note_mode), Sustained, true)));
 	_note_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
 	_note_mode_item->set_active(_note_mode == Sustained);
 
 	items.push_back (RadioMenuElem (mode_group, _("Percussive"),
-				sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_note_mode), Percussive)));
+				sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_note_mode), Percussive, true)));
 	_percussion_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
 	_percussion_mode_item->set_active(_note_mode == Percussive);
 
@@ -755,19 +755,19 @@ MidiTimeAxisView::build_color_mode_menu()
 	RadioMenuItem::Group mode_group;
 	items.push_back (RadioMenuElem (mode_group, _("Meter Colors"),
 	                                sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_color_mode),
-	                                            MeterColors, false, true)));
+	                                            MeterColors, false, true, true)));
 	_meter_color_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
 	_meter_color_mode_item->set_active(_color_mode == MeterColors);
 
 	items.push_back (RadioMenuElem (mode_group, _("Channel Colors"),
 	                                sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_color_mode),
-	                                            ChannelColors, false, true)));
+	                                            ChannelColors, false, true, true)));
 	_channel_color_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
 	_channel_color_mode_item->set_active(_color_mode == ChannelColors);
 
 	items.push_back (RadioMenuElem (mode_group, _("Track Color"),
 	                                sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_color_mode),
-	                                            TrackColor, false, true)));
+	                                            TrackColor, false, true, true)));
 	_channel_color_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
 	_channel_color_mode_item->set_active(_color_mode == TrackColor);
 
@@ -775,58 +775,60 @@ MidiTimeAxisView::build_color_mode_menu()
 }
 
 void
-MidiTimeAxisView::set_note_mode(NoteMode mode)
+MidiTimeAxisView::set_note_mode(NoteMode mode, bool apply_to_selection)
 {
-	if (_note_mode != mode || midi_track()->note_mode() != mode) {
-		_note_mode = mode;
-		midi_track()->set_note_mode(mode);
-		set_gui_property ("note-mode", enum_2_string(_note_mode));
-		_view->redisplay_track();
-	}
-}
-
-void
-MidiTimeAxisView::set_color_mode (ColorMode mode, bool force, bool redisplay)
-{
-	if (_color_mode == mode && !force) {
-		return;
-	}
-
-	if (mode == ChannelColors) {
-		_channel_selector.set_channel_colors(CanvasNoteEvent::midi_channel_colors);
+	if (apply_to_selection) {
+		_editor.get_selection().tracks.foreach_midi_time_axis (boost::bind (&MidiTimeAxisView::set_note_mode, _1, mode, false));
 	} else {
-		_channel_selector.set_default_channel_color();
-	}
-
-	_color_mode = mode;
-	set_gui_property ("color-mode", enum_2_string(_color_mode));
-	if (redisplay) {
-		_view->redisplay_track();
-	}
-}
-
-void
-MidiTimeAxisView::set_note_range(MidiStreamView::VisibleNoteRange range)
-{
-	if (!_ignore_signals) {
-		midi_view()->set_note_range(range);
-	}
-}
-
-/** Set the note range for all selected MIDI tracks */
-void
-MidiTimeAxisView::set_note_range_for_selection (MidiStreamView::VisibleNoteRange range)
-{
-	TrackSelection& ts = _editor.get_selection().tracks;
-	
-	for (TrackSelection::iterator i = ts.begin(); i != ts.end(); ++i) {
-		MidiTimeAxisView* mtv = dynamic_cast<MidiTimeAxisView*> (*i);
-		if (mtv) {
-			mtv->set_note_range (range);
+		if (_note_mode != mode || midi_track()->note_mode() != mode) {
+			_note_mode = mode;
+			midi_track()->set_note_mode(mode);
+			set_gui_property ("note-mode", enum_2_string(_note_mode));
+			_view->redisplay_track();
 		}
 	}
 }
 
+void
+MidiTimeAxisView::set_color_mode (ColorMode mode, bool force, bool redisplay, bool apply_to_selection)
+{
+	if (apply_to_selection) {
+		_editor.get_selection().tracks.foreach_midi_time_axis (
+			boost::bind (&MidiTimeAxisView::set_color_mode, _1, mode, force, redisplay, false)
+			);
+	} else {
+		
+		if (_color_mode == mode && !force) {
+			return;
+		}
+		
+		if (mode == ChannelColors) {
+			_channel_selector.set_channel_colors(CanvasNoteEvent::midi_channel_colors);
+		} else {
+			_channel_selector.set_default_channel_color();
+		}
+		
+		_color_mode = mode;
+		set_gui_property ("color-mode", enum_2_string(_color_mode));
+		if (redisplay) {
+			_view->redisplay_track();
+		}
+	}
+}
+
+void
+MidiTimeAxisView::set_note_range (MidiStreamView::VisibleNoteRange range, bool apply_to_selection)
+{
+	if (apply_to_selection) {
+		_editor.get_selection().tracks.foreach_midi_time_axis (
+			boost::bind (&MidiTimeAxisView::set_note_range, _1, range, false)
+			);
+	} else {
+		if (!_ignore_signals) {
+			midi_view()->set_note_range(range);
+		}
+	}
+}
 
 void
 MidiTimeAxisView::update_range()
