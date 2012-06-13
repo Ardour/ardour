@@ -281,6 +281,12 @@ if [ ! -f gobject-introspection-1.31.10.tar.xz ] ; then
     fetch_as_is http://ftp.gnome.org/pub/GNOME/sources/gobject-introspection/1.31/gobject-introspection-1.31.10.tar.xz
 fi
 
+if [ ! -d gtk-engines ] ; then
+    echo "gtk-engines (2.22 branch)"
+    git clone git://git.gnome.org/gtk-engines
+    (cd gtk-engines && git checkout --track -b gtk-engines-2-22 origin/gtk-engines-2-22)
+fi
+
 if [ ! -d gtk+ ] ; then
     echo "GTK+ (2.24 branch)"
     git clone git://git.gnome.org/gtk+
@@ -438,3 +444,8 @@ fi
 #
 (cd gtk+ && CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" sh autogen.sh --enable-maintainer-mode --prefix=$PREFIX --libdir=$PREFIX/lib --disable-cups --disable-papi --disable-introspection --with-gdktarget=$GTK_BACKEND && make && make install) || die "GTK build failed"
 
+#
+# now gtk-engines
+# 
+#
+(cd gtk-engines && CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" sh autogen.sh --enable-maintainer-mode --prefix=$PREFIX --libdir=$PREFIX/lib && make && make install) || die "GTK-engines build failed"
