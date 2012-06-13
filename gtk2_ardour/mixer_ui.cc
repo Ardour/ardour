@@ -1550,6 +1550,18 @@ Mixer_UI::on_key_press_event (GdkEventKey* ev)
 	}
 	
 	KeyboardKey k (ev->state, ev->keyval);
+
+	GtkAccelKey key;
+	
+	/* Handle toggle-mixer-on-top here, so it can do a different thing if the
+	   mixer is already on top and received this key press.
+	*/
+	if (gtk_accel_map_lookup_entry("<Actions>/Common/toggle-mixer-on-top", &key)) {
+		if (int (k.state()) == key.accel_mods && k.key() == key.accel_key) {
+			ARDOUR_UI::instance()->goto_editor_window();
+			return true;
+		}
+	} 
 	
 	if (bindings.activate (k, Bindings::Press)) {
 		return true;

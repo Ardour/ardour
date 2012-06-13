@@ -44,7 +44,6 @@ ARDOUR_UI::create_mixer ()
 
 	mixer->signal_window_state_event().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::main_window_state_event_handler), false));
 	mixer->signal_unmap().connect (sigc::bind (sigc::ptr_fun (&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/toggle-mixer")));
-	mixer->signal_unmap().connect (sigc::bind (sigc::ptr_fun (&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/toggle-mixer-on-top")));
 
 	return 0;
 }

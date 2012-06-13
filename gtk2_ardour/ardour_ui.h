@@ -256,6 +256,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void get_process_buffers ();
 	void drop_process_buffers ();
 
+	void goto_editor_window ();
+	
   protected:
 	friend class PublicEditor;
 
@@ -281,7 +283,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	ARDOUR::AudioEngine *engine;
 	Gtk::Tooltips        _tooltips;
 
-	void                goto_editor_window ();
 	void                goto_mixer_window ();
 	void                toggle_mixer_window ();
 	void                toggle_mixer_on_top ();
