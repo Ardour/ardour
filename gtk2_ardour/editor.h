@@ -63,9 +63,12 @@
 #include "canvas.h"
 #include "window_proxy.h"
 
-namespace Gnome { namespace Canvas {
-	class NoEventText;
-} }
+namespace Gnome {
+	namespace Canvas {
+		class NoEventText;
+		class CanvasNoteEvent;
+	}
+}
 
 namespace Gtkmm2ext {
 	class TearOff;
@@ -396,6 +399,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void maximise_editing_space();
 	void restore_editing_space();
+
+	void update_tearoff_visibility();
 
 	void reset_x_origin (framepos_t);
 	void reset_x_origin_to_follow_playhead ();
@@ -1489,7 +1494,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void edit_tempo_marker (ArdourCanvas::Item*);
 	void edit_meter_marker (ArdourCanvas::Item*);
 	void edit_control_point (ArdourCanvas::Item*);
-	void edit_note (ArdourCanvas::Item *);
+	void edit_notes (std::set<Gnome::Canvas::CanvasNoteEvent *> const &);
 
 	void marker_menu_edit ();
 	void marker_menu_remove ();

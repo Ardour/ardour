@@ -122,6 +122,8 @@ public:
 	
 	sigc::signal<void, RegionView*> RegionViewAdded;
 	sigc::signal<void> RegionViewRemoved;
+	/** Emitted when the height of regions has changed */
+	sigc::signal<void> ContentsHeightChanged;
 
 protected:
 	StreamView (RouteTimeAxisView&, ArdourCanvas::Group* background_group = 0, ArdourCanvas::Group* canvas_group = 0);

@@ -29,6 +29,7 @@
 
 #include "mackie_control_protocol.h"
 #include "surface.h"
+#include "fader.h"
 
 #include "i18n.h"
 
@@ -97,10 +98,9 @@ MackieControlProtocol::left_press (Button &)
 {
 	Sorted sorted = get_sorted_routes();
 	uint32_t strip_cnt = n_strips (); 
-	uint32_t route_cnt = sorted.size();
 
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("bank left with current initial = %1 nstrips = %2 tracks/busses = %3\n",
-							   _current_initial_bank, strip_cnt, route_cnt));
+							   _current_initial_bank, strip_cnt, sorted.size()));
 
 	if (_current_initial_bank > strip_cnt) {
 		switch_banks (_current_initial_bank - strip_cnt);
@@ -994,6 +994,33 @@ LedState
 MackieControlProtocol::user_b_release (Button &) 
 { 
 	return off; 
+}
+
+LedState
+MackieControlProtocol::master_fader_touch_press (Mackie::Button &)
+{
+	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::master_fader_touch_press\n");
+
+	Fader* master_fader = surfaces.front()->master_fader();
+
+	boost::shared_ptr<AutomationControl> ac = master_fader->control ();
+
+	master_fader->set_in_use (true);
+	master_fader->start_touch (transport_frame());
+
+	return none;
+}
+LedState
+MackieControlProtocol::master_fader_touch_release (Mackie::Button &)
+{
+	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::master_fader_touch_release\n");
+
+	Fader* master_fader = surfaces.front()->master_fader();
+
+	master_fader->set_in_use (false);
+	master_fader->stop_touch (transport_frame(), true);
+
+	return none;
 }
 
 Mackie::LedState 

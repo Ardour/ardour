@@ -27,6 +27,7 @@
 #include <glibmm/thread.h>
 
 #include "pbd/xml++.h"
+#include "pbd/filesystem.h"
 
 #include "ardour/automation_control.h"
 #include "ardour/midi_model.h"
@@ -134,7 +135,7 @@ MidiRegion::clone (string path) const
 
 	PropertyList plist;
 
-	plist.add (Properties::name, ms->name());
+	plist.add (Properties::name, sys::basename (ms->name()));
 	plist.add (Properties::whole_file, true);
 	plist.add (Properties::start, _start);
 	plist.add (Properties::start_beats, _start_beats);

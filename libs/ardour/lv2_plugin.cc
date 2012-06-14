@@ -1554,7 +1554,7 @@ LV2PluginInfo::discover()
 	PluginInfoList*    plugs   = new PluginInfoList;
 	const LilvPlugins* plugins = lilv_world_get_all_plugins(_world.world);
 
-	cerr << "LV2: Discovering " << lilv_plugins_size(plugins) << " plugins" << endl;
+	info << "LV2: Discovering " << lilv_plugins_size(plugins) << " plugins" << endmsg;
 
 	LILV_FOREACH(plugins, i, plugins) {
 		const LilvPlugin* p = lilv_plugins_get(plugins, i);
@@ -1604,8 +1604,6 @@ LV2PluginInfo::discover()
 
 		plugs->push_back(info);
 	}
-
-	cerr << "Done LV2 discovery" << endl;
 
 	return plugs;
 }

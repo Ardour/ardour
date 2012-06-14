@@ -1495,10 +1495,6 @@ RegionCreateDrag::finished (GdkEvent*, bool movement_occurred)
 	} else {
 		_view->playlist()->thaw ();
 	}
-
-	if (_region) {
-		_editor->commit_reversible_command ();
-	}
 }
 
 void
@@ -4003,7 +3999,15 @@ NoteDrag::total_dx () const
 int8_t
 NoteDrag::total_dy () const
 {
-	return ((int8_t) (grab_y() / _note_height)) - ((int8_t) (_drags->current_pointer_y() / _note_height));
+	MidiStreamView* msv = _region->midi_stream_view ();
+	double const y = _region->midi_view()->y_position ();
+	/* new current note */
+	uint8_t n = msv->y_to_note (_drags->current_pointer_y () - y);
+	/* clamp */
+	n = max (msv->lowest_note(), n);
+	n = min (msv->highest_note(), n);
+	/* and work out delta */
+	return n - msv->y_to_note (grab_y() - y);
 }
 
 void
@@ -4313,7 +4317,9 @@ PatchChangeDrag::PatchChangeDrag (Editor* e, CanvasPatchChange* i, MidiRegionVie
 	, _patch_change (i)
 	, _cumulative_dx (0)
 {
-	DEBUG_TRACE (DEBUG::Drags, "New PatchChangeDrag\n");
+	DEBUG_TRACE (DEBUG::Drags, string_compose ("New PatchChangeDrag, patch @ %1, grab @ %2\n",
+						   _region_view->source_beats_to_absolute_frames (_patch_change->patch()->time()),
+						   grab_frame()));
 }
 
 void
@@ -4324,8 +4330,8 @@ PatchChangeDrag::motion (GdkEvent* ev, bool)
 	f = max (f, r->position ());
 	f = min (f, r->last_frame ());
 
-	framecnt_t const dxf = f - grab_frame();
-	double const dxu = _editor->frame_to_unit (dxf);
+	framecnt_t const dxf = f - grab_frame(); // permitted dx in frames
+	double const dxu = _editor->frame_to_unit (dxf); // permitted fx in units
 	_patch_change->move (dxu - _cumulative_dx, 0);
 	_cumulative_dx = dxu;
 }
@@ -4338,14 +4344,13 @@ PatchChangeDrag::finished (GdkEvent* ev, bool movement_occurred)
 	}
 
 	boost::shared_ptr<Region> r (_region_view->region ());
-
 	framepos_t f = adjusted_current_frame (ev);
 	f = max (f, r->position ());
 	f = min (f, r->last_frame ());
 
 	_region_view->move_patch_change (
 		*_patch_change,
-		_region_view->region_frames_to_region_beats (f - r->position() - r->start())
+		_region_view->region_frames_to_region_beats (f - (r->position() - r->start()))
 		);
 }
 
@@ -4561,8 +4566,6 @@ NoteCreateDrag::aborted (bool)
 	
 }
 
-/*------------*/
-
 CrossfadeEdgeDrag::CrossfadeEdgeDrag (Editor* e, AudioRegionView* rv, ArdourCanvas::Item* i, bool start_yn)
 	: Drag (e, i)
 	, arv (rv)
@@ -4644,6 +4647,7 @@ CrossfadeEdgeDrag::finished (GdkEvent*, bool)
 	vector<Command*> cmds;
 	ar->playlist()->rdiff (cmds);
 	_editor->session()->add_commands (cmds);
+	_editor->commit_reversible_command ();
 
 }
 

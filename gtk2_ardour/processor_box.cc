@@ -44,7 +44,6 @@
 #include "ardour/audioengine.h"
 #include "ardour/internal_return.h"
 #include "ardour/internal_send.h"
-#include "ardour/midi_track.h"
 #include "ardour/plugin_insert.h"
 #include "ardour/port_insert.h"
 #include "ardour/profile.h"
@@ -412,6 +411,7 @@ ProcessorEntry::Control::Control (Glib::RefPtr<Gdk::Pixbuf> s, Glib::RefPtr<Gdk:
 	: _control (c)
 	, _adjustment (gain_to_slider_position_with_max (1.0, Config->get_max_gain()), 0, 1, 0.01, 0.1)
 	, _slider (s, sd, &_adjustment, 0, false)
+	, _slider_persistant_tooltip (&_slider)
 	, _button (ArdourButton::Element (ArdourButton::Text | ArdourButton::Indicator))
 	, _ignore_ui_adjustment (false)
 	, _visible (false)
@@ -451,8 +451,13 @@ ProcessorEntry::Control::Control (Glib::RefPtr<Gdk::Pixbuf> s, Glib::RefPtr<Gdk:
 		c->Changed.connect (_connection, MISSING_INVALIDATOR, boost::bind (&Control::control_changed, this), gui_context ());
 	}
 
+	ARDOUR_UI::RapidScreenUpdate.connect (sigc::mem_fun (*this, &Control::control_changed));
+	
 	control_changed ();
 	set_tooltip ();
+
+	/* We're providing our own PersistentTooltip */
+	set_no_tooltip_whatsoever (_slider);
 }
 
 void
@@ -469,11 +474,12 @@ ProcessorEntry::Control::set_tooltip ()
 	if (c->toggled ()) {
 		s << (c->get_value() > 0.5 ? _("on") : _("off"));
 	} else {
-		s << c->internal_to_interface (c->get_value ());
+		s << setprecision(2) << fixed;
+		s << c->internal_to_user (c->get_value ());
 	}
 	
 	ARDOUR_UI::instance()->set_tip (_label, s.str ());
-	ARDOUR_UI::instance()->set_tip (_slider, s.str ());
+	_slider_persistant_tooltip.set_tip (s.str ());
 	ARDOUR_UI::instance()->set_tip (_button, s.str ());
 }
 
@@ -497,6 +503,7 @@ ProcessorEntry::Control::slider_adjusted ()
 	}
 
 	c->set_value (c->interface_to_internal (_adjustment.get_value ()));
+	set_tooltip ();
 }
 
 void
@@ -536,8 +543,6 @@ ProcessorEntry::Control::control_changed ()
 		s.precision (1);
 		s.setf (ios::fixed, ios::floatfield);
 		s << c->internal_to_user (c->get_value ());
-		
-		_slider.set_tooltip_text (s.str ());
 	}
 	
 	_ignore_ui_adjustment = false;
@@ -859,10 +864,8 @@ ProcessorBox::build_possible_aux_menu ()
 {
 	boost::shared_ptr<RouteList> rl = _session->get_routes_with_internal_returns();
 
-	if (rl->empty() || boost::dynamic_pointer_cast<MidiTrack> (_route)) {
-		/* No aux sends if there are no busses, or if this route is a MIDI track
-		   (one day, but not now ...)
-		*/
+	if (rl->empty()) {
+		/* No aux sends if there are no busses */
 		return 0;
 	}
 

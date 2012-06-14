@@ -1003,8 +1003,23 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*> (clicked_axisview);
 				assert (atv);
 				if (parent && dynamic_cast<MidiTimeAxisView*> (parent) && atv->show_regions ()) {
-					/* create a MIDI region so that we have somewhere to put automation */
-					_drags->set (new RegionCreateDrag (this, item, parent), event);
+
+					RouteTimeAxisView* p = dynamic_cast<RouteTimeAxisView*> (parent);
+					assert (p);
+					boost::shared_ptr<Playlist> pl = p->track()->playlist ();
+					if (pl->n_regions() == 0) {
+						/* Parent has no regions; create one so that we have somewhere to put automation */
+						_drags->set (new RegionCreateDrag (this, item, parent), event);
+					} else {
+						/* See if there's a region before the click that we can extend, and extend it if so */
+						framepos_t const t = event_frame (event);
+						boost::shared_ptr<Region> prev = pl->find_next_region (t, End, -1);
+						if (!prev) {
+							_drags->set (new RegionCreateDrag (this, item, parent), event);
+						} else {
+							prev->set_length (t - prev->position ());
+						}
+					}
 				} else {
 					/* rubberband drag to select automation points */
 					_drags->set (new EditorRubberbandSelectDrag (this, item), event);
@@ -1423,8 +1438,12 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			break;
 
 		case NoteItem:
-			edit_note (item);
+		{
+			ArdourCanvas::CanvasNoteEvent* e = dynamic_cast<ArdourCanvas::CanvasNoteEvent*> (item);
+			assert (e);
+			edit_notes (e->region_view().selection ());
 			break;
+		}
 
 		default:
 			break;
@@ -2292,12 +2311,13 @@ Editor::edit_control_point (ArdourCanvas::Item* item)
 }
 
 void
-Editor::edit_note (ArdourCanvas::Item* item)
+Editor::edit_notes (MidiRegionView::Selection const & s)
 {
-	ArdourCanvas::CanvasNoteEvent* e = dynamic_cast<ArdourCanvas::CanvasNoteEvent*> (item);
-	assert (e);
-
-	EditNoteDialog d (&e->region_view(), e);
+	if (s.empty ()) {
+		return;
+	}
+	
+	EditNoteDialog d (&(*s.begin())->region_view(), s);
 	d.set_position (Gtk::WIN_POS_MOUSE);
 	ensure_float (d);
 

@@ -52,7 +52,7 @@ ARDOUR_UI::toggle_keep_tearoffs ()
 {
 	ActionManager::toggle_config_state ("Common", "KeepTearoffs", &RCConfiguration::set_keep_tearoffs, &RCConfiguration::get_keep_tearoffs);
 
-	ARDOUR_UI::toggle_editing_space ();
+	ARDOUR_UI::update_tearoff_visibility();
 }
 
 void

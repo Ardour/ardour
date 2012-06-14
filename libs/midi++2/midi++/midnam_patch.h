@@ -21,11 +21,14 @@
 #ifndef MIDNAM_PATCH_H_
 #define MIDNAM_PATCH_H_
 
+#include <algorithm>
 #include <iostream>
 #include <string>
 #include <list>
 #include <set>
 #include <map>
+
+#include <stdint.h>
 
 #include "midi++/event.h"
 #include "pbd/xml++.h"
@@ -39,42 +42,36 @@ namespace Name
 struct PatchPrimaryKey
 {
 public:
-	int msb;
-	int lsb;
+        int bank_number;
 	int program_number;
-	
-	PatchPrimaryKey(int a_msb = -1, int a_lsb = -1, int a_program_number = -1) {
-		msb = a_msb;
-		lsb = a_lsb;
-		program_number = a_program_number;
+    
+        PatchPrimaryKey (uint8_t a_program_number = 0, uint16_t a_bank_number = 0) {
+		bank_number = std::min (a_bank_number, (uint16_t) 16384);
+		program_number = std::min (a_program_number, (uint8_t) 127);
 	}
 	
 	bool is_sane() { 	
-		return ((msb >= 0) && (msb <= 127) &&
-			(lsb >= 0) && (lsb <= 127) &&
+		return ((bank_number >= 0) && (bank_number <= 16384) && 
 			(program_number >=0 ) && (program_number <= 127));
 	}
 	
 	inline PatchPrimaryKey& operator=(const PatchPrimaryKey& id) {
-		msb = id.msb;
-		lsb = id.lsb; 
+		bank_number = id.bank_number;
 		program_number = id.program_number;
 		return *this;
 	}
 	
 	inline bool operator==(const PatchPrimaryKey& id) const {
-		return (msb == id.msb && lsb == id.lsb && program_number == id.program_number);
+		return (bank_number == id.bank_number && program_number == id.program_number);
 	}
 	
 	/**
 	 * obey strict weak ordering or crash in STL containers
 	 */
 	inline bool operator<(const PatchPrimaryKey& id) const {
-		if (msb < id.msb) {
+		if (bank_number < id.bank_number) {
 			return true;
-		} else if (msb == id.msb && lsb < id.lsb) {
-			return true;
-		} else if (msb == id.msb && lsb == id.lsb && program_number < id.program_number) {
+		} else if (bank_number == id.bank_number && program_number < id.program_number) {
 			return true;
 		}
 		
@@ -88,27 +85,26 @@ class Patch
 {
 public:
 
-	Patch (PatchBank* a_bank = 0);
-	Patch(std::string a_number, std::string a_name, PatchBank* a_bank = 0);
+        Patch (std::string a_name = std::string(), uint8_t a_number = 0, uint16_t bank_number = 0);
 	virtual ~Patch() {};
 
 	const std::string& name() const          { return _name; }
 	void set_name(const std::string a_name)       { _name = a_name; }
 
-	const std::string& number() const        { return _number; }
-	void set_number(const std::string a_number)   { _number = a_number; }
-	
+	uint8_t program_number() const       { return _id.program_number; }
+	void set_program_number(uint8_t n)   { _id.program_number = n; }
+
+	uint16_t bank_number() const       { return _id.bank_number; }
+        void set_bank_number (uint16_t n) { _id.bank_number = n; }
+
 	const PatchPrimaryKey&   patch_primary_key()   const { return _id; }
 
-	XMLNode& get_state (void);
+        XMLNode& get_state (void);
 	int      set_state (const XMLTree&, const XMLNode&);
 
-	int use_bank_info (PatchBank*);
-
 private:
-	std::string        _number;
-	std::string        _name;
-	PatchPrimaryKey   _id;
+	std::string     _name;
+	PatchPrimaryKey _id;
 };
 
 class PatchBank 
@@ -116,27 +112,26 @@ class PatchBank
 public:
 	typedef std::list<boost::shared_ptr<Patch> > PatchNameList;
 
-	PatchBank () : _id(0) {};
-	PatchBank (std::string a_name, PatchPrimaryKey* an_id = 0) : _name(a_name), _id(an_id) {};
-	virtual ~PatchBank() { delete _id; };
+        PatchBank (uint16_t n = 0, std::string a_name = std::string()) : _name(a_name), _number (n) {};
+        virtual ~PatchBank() { }
 
 	const std::string& name() const               { return _name; }
 	void set_name(const std::string a_name)       { _name = a_name; }
+
+        int number() const { return _number; }
 
 	const PatchNameList& patch_name_list() const { return _patch_name_list; }
 	const std::string& patch_list_name() const { return _patch_list_name; }
 
 	int set_patch_name_list (const PatchNameList&);
 
-	const PatchPrimaryKey* patch_primary_key()  const { return _id; }
-
-	XMLNode& get_state (void);
+        XMLNode& get_state (void);
 	int      set_state (const XMLTree&, const XMLNode&);
 
 private:
 	std::string       _name;
+        uint16_t          _number;
 	PatchNameList     _patch_name_list;
-	PatchPrimaryKey*  _id;
 	std::string       _patch_list_name;
 };
 
@@ -168,13 +163,11 @@ public:
 	
 	boost::shared_ptr<Patch> previous_patch(PatchPrimaryKey& key) {
 		assert(key.is_sane());
-		std::cerr << "finding patch with "  << key.msb << "/" << key.lsb << "/" <<key.program_number << std::endl; 
 		for (PatchList::const_iterator i = _patch_list.begin();
 			 i != _patch_list.end();
 			 ++i) {
 			if ((*i) == key) {
 				if (i != _patch_list.begin()) {
-					std::cerr << "got it!" << std::endl;
 					--i;
 					return  _patch_map[*i];
 				} 
@@ -186,13 +179,11 @@ public:
 	
 	boost::shared_ptr<Patch> next_patch(PatchPrimaryKey& key) {
 		assert(key.is_sane());
-		std::cerr << "finding patch with "  << key.msb << "/" << key.lsb << "/" <<key.program_number << std::endl; 
 		for (PatchList::const_iterator i = _patch_list.begin();
 			 i != _patch_list.end();
 			 ++i) {
 			if ((*i) == key) {
 				if (++i != _patch_list.end()) {
-					std::cerr << "got it!" << std::endl;
 					return  _patch_map[*i];
 				} else {
 					--i;
@@ -206,7 +197,11 @@ public:
 	XMLNode& get_state (void);
 	int      set_state (const XMLTree&, const XMLNode&);
 
+        void set_patch_banks (const PatchBanks&);
+        void use_patch_name_list (const PatchBank::PatchNameList&);
+
 private:
+        friend std::ostream& operator<< (std::ostream&, const ChannelNameSet&);
 	std::string _name;
 	AvailableForChannels _available_for_channels;
 	PatchBanks           _patch_banks;
@@ -214,6 +209,8 @@ private:
 	PatchList            _patch_list;
 	std::string          _patch_list_name;
 };
+
+std::ostream& operator<< (std::ostream&, const ChannelNameSet&);
 
 class Note
 {
@@ -305,18 +302,9 @@ public:
 	
 	const CustomDeviceModeNames& custom_device_mode_names() const { return _custom_device_mode_names; }
 	
-	boost::shared_ptr<CustomDeviceMode> custom_device_mode_by_name(std::string mode_name) {
-		assert(mode_name != "");
-		return _custom_device_modes[mode_name];
-	}
-	
-	boost::shared_ptr<ChannelNameSet> channel_name_set_by_device_mode_and_channel(std::string mode, uint8_t channel) {
-		return _channel_name_sets[custom_device_mode_by_name(mode)->channel_name_set_name_by_channel(channel)];
-	}
-	
-	boost::shared_ptr<Patch> find_patch(std::string mode, uint8_t channel, PatchPrimaryKey& key) {
-		return channel_name_set_by_device_mode_and_channel(mode, channel)->find_patch(key);
-	}
+        boost::shared_ptr<CustomDeviceMode> custom_device_mode_by_name(std::string mode_name);
+        boost::shared_ptr<ChannelNameSet> channel_name_set_by_device_mode_and_channel(std::string mode, uint8_t channel);
+        boost::shared_ptr<Patch> find_patch(std::string mode, uint8_t channel, PatchPrimaryKey& key);
 	
 	XMLNode& get_state (void);
 	int      set_state (const XMLTree&, const XMLNode&);
@@ -357,6 +345,8 @@ private:
 	XMLTree                       _document;
 	MasterDeviceNames::Models     _all_models;
 };
+
+extern const char* general_midi_program_names[128]; /* 0 .. 127 */
 
 }
 

@@ -623,7 +623,6 @@ AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 		if (opaque()) {
 			if (_inverse_fade_in) {
 
-				
 				/* explicit inverse fade in curve (e.g. for constant
 				 * power), so we have to fetch it.
 				 */
@@ -655,7 +654,6 @@ AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 			_fade_in->curve().get_vector (internal_offset, internal_offset + fade_in_limit, gain_buffer, fade_in_limit);
 		}
 
-
 		/* Mix our newly-read data in, with the fade */
 		for (framecnt_t n = 0; n < fade_in_limit; ++n) {
 			buf[n] += mixdown_buffer[n] * gain_buffer[n];
@@ -677,11 +675,11 @@ AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 				}
 				
 				/* fetch the actual fade out */
-				
+
 				_fade_out->curve().get_vector (curve_offset, curve_offset + fade_out_limit, gain_buffer, fade_out_limit);
 				
 			} else {
-				
+
 				/* no explicit inverse fade out (which is
 				 * actually a fade in), so just use (1 - fade
 				 * out) for the fade in of lower layers
@@ -1831,7 +1829,7 @@ AudioRegion::find_silence (Sample threshold, framecnt_t min_length, InterThreadI
 Evoral::Range<framepos_t>
 AudioRegion::body_range () const
 {
-	return Evoral::Range<framepos_t> (first_frame() + _fade_in->back()->when, last_frame() - _fade_out->back()->when);
+	return Evoral::Range<framepos_t> (first_frame() + _fade_in->back()->when + 1, last_frame() - _fade_out->back()->when);
 }
 
 void

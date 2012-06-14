@@ -160,12 +160,13 @@ public:
 	bool                   _connected;
 	Mackie::JogWheel*      _jog_wheel;
 	Fader*                 _master_fader;
+	float                  _last_master_gain_written;
 
 	void handle_midi_sysex (MIDI::Parser&, MIDI::byte *, size_t count);
 	MidiByteArray host_connection_query (MidiByteArray& bytes);
 	MidiByteArray host_connection_confirmation (const MidiByteArray& bytes);
 
-	void init_controls();
+	void init_controls ();
 	void init_strips (uint32_t n);
 	void setup_master ();
 	void master_gain_changed ();

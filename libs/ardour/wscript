@@ -105,6 +105,7 @@ libardour_sources = [
         'graph.cc',
         'graphnode.cc',
         'import.cc',
+        'instrument_info.cc',
         'internal_return.cc',
         'internal_send.cc',
         'interpolation.cc',
@@ -291,6 +292,7 @@ def configure(conf):
     conf.define('CURRENT_SESSION_FILE_VERSION', CURRENT_SESSION_FILE_VERSION)
 
     conf.check(header_name='sys/vfs.h', define_name='HAVE_SYS_VFS_H',mandatory=False)
+    conf.check(header_name='sys/statvfs.h', define_name='HAVE_SYS_STATVFS_H',mandatory=False)
 
     conf.check(header_name='jack/session.h', uselib = [ 'JACK' ],
                define_name='HAVE_JACK_SESSION')
@@ -428,9 +430,9 @@ def build(bld):
         testobj.source       = '''
                 test/dummy_lxvst.cc
                 test/test_needing_session.cc
-                test/test_needing_playlist_and_regions.cc
-                test/test_globals.cc
                 test/audio_region_test.cc
+                test/test_globals.cc
+                test/audio_region_read_test.cc
                 test/bbt_test.cc
                 test/tempo_test.cc
                 test/interpolation_test.cc
@@ -442,6 +444,7 @@ def build(bld):
                 test/playlist_layering_test.cc
                 test/playlist_read_test.cc
                 test/control_surfaces_test.cc
+                test/combine_regions_test.cc
                 test/mtdm_test.cc
                 test/testrunner.cc
         '''.split()

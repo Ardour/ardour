@@ -115,10 +115,6 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	_note_group->raise_to_top();
 	PublicEditor::DropDownKeys.connect (sigc::mem_fun (*this, &MidiRegionView::drop_down_keys));
 
-	/* Look up MIDNAM details from our MidiTimeAxisView */
-	MidiTimeAxisView& mtv = dynamic_cast<MidiTimeAxisView&> (tv);
-	midi_patch_settings_changed (mtv.midi_patch_model (), mtv.midi_patch_custom_device_node ());
-
 	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&MidiRegionView::parameter_changed, this, _1), gui_context());
 	connect_to_diskstream ();
 
@@ -156,10 +152,6 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	_note_group->raise_to_top();
 	PublicEditor::DropDownKeys.connect (sigc::mem_fun (*this, &MidiRegionView::drop_down_keys));
 
-	/* Look up MIDNAM details from our MidiTimeAxisView */
-	MidiTimeAxisView& mtv = dynamic_cast<MidiTimeAxisView&> (tv);
-	midi_patch_settings_changed (mtv.midi_patch_model (), mtv.midi_patch_custom_device_node ());
-	
 	connect_to_diskstream ();
 
 	SelectionCleared.connect (_selection_cleared_connection, invalidator (*this), boost::bind (&MidiRegionView::selection_cleared, this, _1), gui_context ());
@@ -273,8 +265,6 @@ MidiRegionView::init (Gdk::Color const & basic_color, bool wfd)
 	region_resized (ARDOUR::bounds_change);
 	region_locked ();
 
-	reset_width_dependent_items (_pixel_width);
-
 	set_colors ();
 
 	_enable_display = true;
@@ -284,6 +274,8 @@ MidiRegionView::init (Gdk::Color const & basic_color, bool wfd)
 		}
 	}
 
+	reset_width_dependent_items (_pixel_width);
+
 	group->raise_to_top();
 	group->signal_event().connect(
 		sigc::mem_fun(this, &MidiRegionView::canvas_event), false);
@@ -291,8 +283,8 @@ MidiRegionView::init (Gdk::Color const & basic_color, bool wfd)
 	midi_view()->signal_channel_mode_changed().connect(
 		sigc::mem_fun(this, &MidiRegionView::midi_channel_mode_changed));
 
-	midi_view()->signal_midi_patch_settings_changed().connect(
-		sigc::mem_fun(this, &MidiRegionView::midi_patch_settings_changed));
+	instrument_info().Changed.connect (_instrument_changed_connection, invalidator (*this),
+					   boost::bind (&MidiRegionView::instrument_settings_changed, this), gui_context());
 
 	trackview.editor().SnapChanged.connect(snap_changed_connection, invalidator(*this),
 	                                       boost::bind (&MidiRegionView::snap_changed, this),
@@ -302,6 +294,13 @@ MidiRegionView::init (Gdk::Color const & basic_color, bool wfd)
 	connect_to_diskstream ();
 
 	SelectionCleared.connect (_selection_cleared_connection, invalidator (*this), boost::bind (&MidiRegionView::selection_cleared, this, _1), gui_context ());
+}
+
+InstrumentInfo&
+MidiRegionView::instrument_info () const
+{
+	RouteUI* route_ui = dynamic_cast<RouteUI*> (&trackview);
+	return route_ui->route()->instrument_info();
 }
 
 const boost::shared_ptr<ARDOUR::MidiRegion>
@@ -1209,20 +1208,8 @@ MidiRegionView::display_patch_changes_on_channel (uint8_t channel, bool active_c
 			continue;
 		}
 
-		MIDI::Name::PatchPrimaryKey patch_key ((*i)->bank_msb (), (*i)->bank_lsb (), (*i)->program ());
-
-		boost::shared_ptr<MIDI::Name::Patch> patch =
-			MIDI::Name::MidiPatchManager::instance().find_patch(
-				_model_name, _custom_device_mode, channel, patch_key);
-
-		if (patch != 0) {
-			add_canvas_patch_change (*i, patch->name(), active_channel);
-		} else {
-			char buf[16];
-			/* program and bank numbers are zero-based: convert to one-based: MIDI_BP_ZERO */
-			snprintf (buf, 16, "%d %d", (*i)->program() + MIDI_BP_ZERO , (*i)->bank() + MIDI_BP_ZERO);
-			add_canvas_patch_change (*i, buf, active_channel);
-		}
+		string patch_name = instrument_info().get_patch_name ((*i)->bank(), (*i)->program(), channel);
+		add_canvas_patch_change (*i, patch_name, active_channel);
 	}
 }
 
@@ -1358,6 +1345,14 @@ MidiRegionView::reset_width_dependent_items (double pixel_width)
 
 	if (_enable_display) {
 		redisplay_model();
+	}
+
+	for (PatchChanges::iterator x = _patch_changes.begin(); x != _patch_changes.end(); ++x) {
+		if ((*x)->width() >= _pixel_width) {
+			(*x)->hide();
+		} else {
+			(*x)->show();
+		}
 	}
 
 	move_step_edit_cursor (_step_edit_cursor_position);
@@ -1807,24 +1802,33 @@ MidiRegionView::add_canvas_patch_change (MidiModel::PatchChangePtr patch, const 
 		                      displaytext,
 		                      height,
 		                      x, 1.0,
-		                      _model_name,
-		                      _custom_device_mode,
+				      instrument_info(),
 		                      patch,
 				      active_channel)
 		          );
 
-	// Show unless patch change is beyond the region bounds
-	if (region_frames < 0 || region_frames >= _region->length()) {
-		patch_change->hide();
+	if (patch_change->width() < _pixel_width) {
+		// Show unless patch change is beyond the region bounds
+		if (region_frames < 0 || region_frames >= _region->length()) {
+			patch_change->hide();
+		} else {
+			patch_change->show();
+		}
 	} else {
-		patch_change->show();
+		patch_change->hide ();
 	}
 
 	_patch_changes.push_back (patch_change);
 }
 
-void
-MidiRegionView::get_patch_key_at (Evoral::MusicalTime time, uint8_t channel, MIDI::Name::PatchPrimaryKey& key)
+MIDI::Name::PatchPrimaryKey
+MidiRegionView::patch_change_to_patch_key (MidiModel::PatchChangePtr p)
+{
+	return MIDI::Name::PatchPrimaryKey (p->program(), p->bank());
+}
+
+void 
+MidiRegionView::get_patch_key_at (double time, uint8_t channel, MIDI::Name::PatchPrimaryKey& key)
 {
 	MidiModel::PatchChanges::iterator i = _model->patch_change_lower_bound (time);
 	while (i != _model->patch_changes().end() && (*i)->channel() != channel) {
@@ -1832,16 +1836,14 @@ MidiRegionView::get_patch_key_at (Evoral::MusicalTime time, uint8_t channel, MID
 	}
 
 	if (i != _model->patch_changes().end()) {
-		key.msb = (*i)->bank_msb ();
-		key.lsb = (*i)->bank_lsb ();
+		key.bank_number = (*i)->bank();
 		key.program_number = (*i)->program ();
 	} else {
-		key.msb = key.lsb = key.program_number = 0;
+		key.bank_number = key.program_number = 0;
 	}
 
 	assert (key.is_sane());
 }
-
 
 void
 MidiRegionView::change_patch_change (CanvasPatchChange& pc, const MIDI::Name::PatchPrimaryKey& new_patch)
@@ -1852,7 +1854,7 @@ MidiRegionView::change_patch_change (CanvasPatchChange& pc, const MIDI::Name::Pa
 		c->change_program (pc.patch (), new_patch.program_number);
 	}
 
-	int const new_bank = (new_patch.msb << 7) | new_patch.lsb;
+	int const new_bank = new_patch.bank_number;
 	if (pc.patch()->bank() != new_bank) {
 		c->change_bank (pc.patch (), new_bank);
 	}
@@ -1941,8 +1943,7 @@ void
 MidiRegionView::previous_patch (CanvasPatchChange& patch)
 {
 	if (patch.patch()->program() < 127) {
-		MIDI::Name::PatchPrimaryKey key;
-		get_patch_key_at (patch.patch()->time(), patch.patch()->channel(), key);
+		MIDI::Name::PatchPrimaryKey key = patch_change_to_patch_key (patch.patch());
 		key.program_number++;
 		change_patch_change (patch, key);
 	}
@@ -1952,8 +1953,7 @@ void
 MidiRegionView::next_patch (CanvasPatchChange& patch)
 {
 	if (patch.patch()->program() > 0) {
-		MIDI::Name::PatchPrimaryKey key;
-		get_patch_key_at (patch.patch()->time(), patch.patch()->channel(), key);
+		MIDI::Name::PatchPrimaryKey key = patch_change_to_patch_key (patch.patch());
 		key.program_number--;
 		change_patch_change (patch, key);
 	}
@@ -1963,17 +1963,10 @@ void
 MidiRegionView::previous_bank (CanvasPatchChange& patch)
 {
 	if (patch.patch()->program() < 127) {
-		MIDI::Name::PatchPrimaryKey key;
-		get_patch_key_at (patch.patch()->time(), patch.patch()->channel(), key);
-		if (key.lsb > 0) {
-			key.lsb--;
+		MIDI::Name::PatchPrimaryKey key = patch_change_to_patch_key (patch.patch());
+		if (key.bank_number > 0) {
+			key.bank_number--;
 			change_patch_change (patch, key);
-		} else {
-			if (key.msb > 0) {
-				key.lsb = 127;
-				key.msb--;
-				change_patch_change (patch, key);
-			}
 		}
 	}
 }
@@ -1982,17 +1975,10 @@ void
 MidiRegionView::next_bank (CanvasPatchChange& patch)
 {
 	if (patch.patch()->program() > 0) {
-		MIDI::Name::PatchPrimaryKey key;
-		get_patch_key_at (patch.patch()->time(), patch.patch()->channel(), key);
-		if (key.lsb < 127) {
-			key.lsb++;
+		MIDI::Name::PatchPrimaryKey key = patch_change_to_patch_key (patch.patch());
+		if (key.bank_number < 127) {
+			key.bank_number++;
 			change_patch_change (patch, key);
-		} else {
-			if (key.msb < 127) {
-				key.lsb = 0;
-				key.msb++;
-				change_patch_change (patch, key);
-			}
 		}
 	}
 }
@@ -2905,7 +2891,7 @@ void
 MidiRegionView::change_velocities (bool up, bool fine, bool allow_smush, bool all_together)
 {
 	int8_t delta;
-	int8_t value;
+	int8_t value = 0;
 
 	if (_selection.empty()) {
 		return;
@@ -3230,10 +3216,8 @@ MidiRegionView::midi_channel_mode_changed(ChannelMode mode, uint16_t mask)
 }
 
 void
-MidiRegionView::midi_patch_settings_changed(std::string model, std::string custom_device_mode)
+MidiRegionView::instrument_settings_changed ()
 {
-	_model_name         = model;
-	_custom_device_mode = custom_device_mode;
 	redisplay_model();
 }
 
@@ -3739,7 +3723,7 @@ MidiRegionView::trim_front_ending ()
 void
 MidiRegionView::edit_patch_change (ArdourCanvas::CanvasPatchChange* pc)
 {
-	PatchChangeDialog d (&_source_relative_time_converter, trackview.session(), *pc->patch (), _model_name, _custom_device_mode, Gtk::Stock::APPLY);
+	PatchChangeDialog d (&_source_relative_time_converter, trackview.session(), *pc->patch (), instrument_info(), Gtk::Stock::APPLY);
 	if (d.run () != Gtk::RESPONSE_ACCEPT) {
 		return;
 	}

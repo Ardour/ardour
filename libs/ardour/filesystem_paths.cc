@@ -124,7 +124,7 @@ ardour_config_search_path ()
 		
 		search_path = sp;
 		have_path = true;
-		std::cerr << "CONFIG PATH: " << search_path.to_string() << std::endl;
+		info << "CONFIG PATH: " << search_path.to_string() << endmsg;
 	}
 
 	return search_path;
@@ -153,7 +153,7 @@ ardour_data_search_path ()
 		
 		search_path = sp;
 		have_path = true;
-		std::cerr << "DATA PATH: " << search_path.to_string() << std::endl;
+		info << "DATA PATH: " << search_path.to_string() << endmsg;
 	}
 
 	return search_path;

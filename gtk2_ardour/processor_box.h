@@ -34,6 +34,7 @@
 #include "gtkmm2ext/click_box.h"
 #include "gtkmm2ext/dndvbox.h"
 #include "gtkmm2ext/pixfader.h"
+#include "gtkmm2ext/persistent_tooltip.h"
 
 #include "pbd/stateful.h"
 #include "pbd/signals.h"
@@ -156,7 +157,7 @@ private:
 	PBD::ScopedConnection active_connection;
 	PBD::ScopedConnection name_connection;
 
-	class Control {
+	class Control : public sigc::trackable {
 	public:
 		Control (Glib::RefPtr<Gdk::Pixbuf>, Glib::RefPtr<Gdk::Pixbuf>, boost::shared_ptr<ARDOUR::AutomationControl>, std::string const &);
 
@@ -189,6 +190,7 @@ private:
 		Gtk::Adjustment _adjustment;
 		Gtkmm2ext::HSliderController _slider;
 		Gtk::Label _label;
+		Gtkmm2ext::PersistentTooltip _slider_persistant_tooltip;
 		/* things for a button */
 		ArdourButton _button;
 		bool _ignore_ui_adjustment;

@@ -166,16 +166,17 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 	void monitoring_changed ();
 
 	struct PresetRecord {
-		PresetRecord () : user (true) {}
-		PresetRecord (const std::string& u, const std::string& l, bool s = true) : uri (u), label (l), user (s)  {}
-
-		bool operator!= (PresetRecord const & a) const {
-			return uri != a.uri || label != a.label;
-		}
-
-		std::string uri;
-		std::string label;
-		bool user;
+	    PresetRecord () : number (-1), user (true) {}
+	    PresetRecord (const std::string& u, const std::string& l, int n = -1, bool s = true) : uri (u), label (l), number (n), user (s)  {}
+	    
+	    bool operator!= (PresetRecord const & a) const {
+		    return number != a.number || uri != a.uri || label != a.label;
+	    }
+	    
+	    std::string uri;
+	    std::string label;
+	    int number; // if <0, invalid
+	    bool user;
 	};
 
 	PresetRecord save_preset (std::string);
@@ -187,6 +188,26 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 	const PresetRecord * preset_by_uri (const std::string &);
 
 	std::vector<PresetRecord> get_presets ();
+
+        /** @return true if this plugin will respond to MIDI program
+	 * change messages by changing presets.
+	 *
+	 * This is hard to return a correct value for because most plugin APIs
+	 * do not specify plugin behaviour. However, if you want to force
+         * the display of plugin built-in preset names rather than MIDI program
+         * numbers, return true. If you want a generic description, return
+	 * false.
+	*/
+        virtual bool presets_are_MIDI_programs() const { return false; }
+
+        /** @return true if this plugin is General MIDI compliant, false
+	 * otherwise.
+	 *
+	 * It is important to note that it is is almost impossible for a host
+	 * (e.g. Ardour) to determine this for just about any plugin API
+	 * known as of June 2012
+	 */
+        virtual bool current_preset_uses_general_midi() const { return false; }
 
 	/** @return Last preset to be requested; the settings may have
 	 * been changed since; find out with parameter_changed_since_last_preset.

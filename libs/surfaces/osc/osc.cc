@@ -187,7 +187,7 @@ OSC::start ()
 	}
 #endif
 	
-	cerr << "OSC @ " << get_server_url () << endl;
+	PBD::info << "OSC @ " << get_server_url () << endmsg;
 
 	PBD::sys::path url_file;
 

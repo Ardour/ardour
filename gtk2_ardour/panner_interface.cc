@@ -19,6 +19,7 @@
 
 #include <gtkmm.h>
 #include "gtkmm2ext/keyboard.h"
+#include "gtkmm2ext/persistent_tooltip.h"
 #include "panner_interface.h"
 #include "panner_editor.h"
 #include "global_signals.h"
@@ -32,9 +33,7 @@ using namespace Gtkmm2ext;
 
 PannerInterface::PannerInterface (boost::shared_ptr<Panner> p)
 	: _panner (p)
-	, _drag_data_window (0)
-	, _drag_data_label (0)
-        , _dragging (false)
+	, _tooltip (this)
 	, _editor (0)
 {
         set_flags (Gtk::CAN_FOCUS);
@@ -49,49 +48,7 @@ PannerInterface::PannerInterface (boost::shared_ptr<Panner> p)
 
 PannerInterface::~PannerInterface ()
 {
-	delete _drag_data_window;
 	delete _editor;
-}
-
-void
-PannerInterface::show_drag_data_window ()
-{
-        if (!_drag_data_window) {
-		_drag_data_window = new Window (WINDOW_POPUP);
-		_drag_data_window->set_name (X_("ContrastingPopup"));
-		_drag_data_window->set_position (WIN_POS_MOUSE);
-		_drag_data_window->set_decorated (false);
-		
-		_drag_data_label = manage (new Label);
-		_drag_data_label->set_use_markup (true);
-		
-		_drag_data_window->set_border_width (6);
-		_drag_data_window->add (*_drag_data_label);
-		_drag_data_label->show ();
-		
-		Window* toplevel = dynamic_cast<Window*> (get_toplevel());
-		if (toplevel) {
-			_drag_data_window->set_transient_for (*toplevel);
-		}
-	}
-
-	set_drag_data ();
-	
-        if (!_drag_data_window->is_visible ()) {
-                /* move the window a little away from the mouse */
-                int rx, ry;
-                get_window()->get_origin (rx, ry);
-                _drag_data_window->move (rx, ry + get_height());
-                _drag_data_window->present ();
-        }
-}
-
-void
-PannerInterface::hide_drag_data_window ()
-{
-        if (_drag_data_window) {
-                _drag_data_window->hide ();
-        }
 }
 
 bool
@@ -99,16 +56,6 @@ PannerInterface::on_enter_notify_event (GdkEventCrossing *)
 {
 	grab_focus ();
 	Keyboard::magic_widget_grab_focus ();
-
-	_drag_data_timeout = Glib::signal_timeout().connect (sigc::mem_fun (*this, &PannerInterface::drag_data_timeout), 500);
-	
-	return false;
-}
-
-bool
-PannerInterface::drag_data_timeout ()
-{
-	show_drag_data_window ();
 	return false;
 }
 
@@ -116,12 +63,6 @@ bool
 PannerInterface::on_leave_notify_event (GdkEventCrossing *)
 {
 	Keyboard::magic_widget_drop_focus ();
-
-	_drag_data_timeout.disconnect ();
-	if (!_dragging) {
-		hide_drag_data_window ();
-	}
-	
 	return false;
 }
 
@@ -134,7 +75,7 @@ PannerInterface::on_key_release_event (GdkEventKey*)
 void
 PannerInterface::value_change ()
 {
-	set_drag_data ();
+	set_tooltip ();
 	queue_draw ();
 }
 
@@ -166,4 +107,29 @@ PannerInterface::edit ()
 	delete _editor;
 	_editor = editor ();
 	_editor->show ();
+}
+
+PannerPersistentTooltip::PannerPersistentTooltip (Gtk::Widget* w)
+	: PersistentTooltip (w)
+	, _dragging (false)
+{
+
+}
+
+void
+PannerPersistentTooltip::target_start_drag ()
+{
+	_dragging = true;
+}
+
+void
+PannerPersistentTooltip::target_stop_drag ()
+{
+	_dragging = false;
+}
+
+bool
+PannerPersistentTooltip::dragging () const
+{
+	return _dragging;
 }

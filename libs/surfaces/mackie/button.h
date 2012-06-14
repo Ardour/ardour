@@ -136,6 +136,10 @@ public:
 		Select,
 		VSelect,
 		FaderTouch,
+
+		/* Master fader */
+
+		MasterFaderTouch,
 	};
 
 

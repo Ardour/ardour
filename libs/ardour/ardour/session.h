@@ -529,14 +529,14 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	/* source management */
 
-	void import_audiofiles (ImportStatus&);
+	void import_files (ImportStatus&);
 	bool sample_rate_convert (ImportStatus&, std::string infile, std::string& outfile);
 	std::string build_tmp_convert_name (std::string file);
 
 	boost::shared_ptr<ExportHandler> get_export_handler ();
 	boost::shared_ptr<ExportStatus> get_export_status ();
 
-	int start_audio_export (framepos_t position, bool realtime);
+	int start_audio_export (framepos_t position);
 
 	PBD::Signal1<int, framecnt_t> ProcessExport;
 	static PBD::Signal2<void,std::string, std::string> Exported;
@@ -669,7 +669,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	/* s/w "RAID" management */
 
-	framecnt_t available_capture_duration();
+	boost::optional<framecnt_t> available_capture_duration();
 
 	/* I/O bundles */
 
@@ -716,6 +716,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 		return _current_trans_quarks;
 	}
 
+	bool operation_in_progress (GQuark) const;
+
 	void add_commands (std::vector<Command*> const & cmds);
 
 	std::map<PBD::ID,PBD::StatefulDestructible*> registry;
@@ -743,6 +745,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	/* buffers for gain and pan */
 
 	gain_t* gain_automation_buffer () const;
+	gain_t* send_gain_automation_buffer () const;
 	pan_t** pan_automation_buffer () const;
 
 	void ensure_buffer_set (BufferSet& buffers, const ChanCount& howmany);
@@ -1328,16 +1331,21 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	/* S/W RAID */
 
 	struct space_and_path {
-		uint32_t blocks; /* 4kB blocks */
+		uint32_t blocks;     ///< 4kB blocks
+		bool blocks_unknown; ///< true if blocks is unknown
 		std::string path;
 
-		space_and_path() {
-			blocks = 0;
-		}
+		space_and_path ()
+			: blocks (0)
+			, blocks_unknown (true)
+		{}
 	};
 
 	struct space_and_path_ascending_cmp {
 		bool operator() (space_and_path a, space_and_path b) {
+			if (a.blocks_unknown != b.blocks_unknown) {
+				return !a.blocks_unknown;
+			}
 			return a.blocks > b.blocks;
 		}
 	};
@@ -1347,6 +1355,11 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	std::vector<space_and_path> session_dirs;
 	std::vector<space_and_path>::iterator last_rr_session_dir;
 	uint32_t _total_free_4k_blocks;
+	/** If this is true, _total_free_4k_blocks is not definite,
+	    as one or more of the session directories' filesystems
+	    could not report free space.
+	*/
+	bool _total_free_4k_blocks_uncertain;
 	Glib::Mutex space_lock;
 
 	bool no_questions_about_missing_files;

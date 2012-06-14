@@ -30,7 +30,6 @@ class MidiScroomer : public Gtkmm2ext::Scroomer {
 
 	bool on_expose_event(GdkEventExpose*);
 	void on_size_request(Gtk::Requisition*);
-	void on_size_allocate(Gtk::Allocation&);
 
 	void get_colors(double color[], Component comp);
 };

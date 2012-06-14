@@ -30,6 +30,7 @@
 #include <gtkmm/paned.h>
 #include <gtkmm/label.h>
 #include <gtkmm/comboboxtext.h>
+#include <gtkmm/tooltip.h>
 
 #include "i18n.h"
 
@@ -630,4 +631,22 @@ Gtkmm2ext::left_aligned_label (string const & t)
 	Gtk::Label* l = new Gtk::Label (t);
 	l->set_alignment (0, 0.5);
 	return l;
+}
+
+static bool
+make_null_tooltip (int, int, bool, const Glib::RefPtr<Gtk::Tooltip>& t)
+{
+	t->set_tip_area (Gdk::Rectangle (0, 0, 0, 0));
+	return true;
+}
+
+/** Hackily arrange for the provided widget to have no tooltip,
+ *  and also to stop any other widget from providing one while
+ * the mouse is over w.
+ */
+void
+Gtkmm2ext::set_no_tooltip_whatsoever (Gtk::Widget& w)
+{
+	w.property_has_tooltip() = true;
+	w.signal_query_tooltip().connect (sigc::ptr_fun (make_null_tooltip));
 }

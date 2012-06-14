@@ -1013,7 +1013,7 @@ Editor::track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const & /*c*/, 
 			return true;
 		}
 
-		boost::shared_ptr<Region> region_copy = RegionFactory::create (region);
+		boost::shared_ptr<Region> region_copy = RegionFactory::create (region, true);
 
 		if (boost::dynamic_pointer_cast<AudioRegion> (region_copy) != 0 &&
 		    dynamic_cast<AudioTimeAxisView*> (tv.first) == 0) {

@@ -165,12 +165,4 @@ void
 MidiScroomer::on_size_request(Gtk::Requisition* r)
 {
 	r->width = 12;
-	r->height = 100;
 }
-
-void
-MidiScroomer::on_size_allocate(Gtk::Allocation& a)
-{
-	Scroomer::on_size_allocate(a);
-}
-

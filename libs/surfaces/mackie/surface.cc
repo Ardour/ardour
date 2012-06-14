@@ -63,15 +63,16 @@ Surface::Surface (MackieControlProtocol& mcp, const std::string& device_name, ui
 	, _active (false)
 	, _connected (false)
 	, _jog_wheel (0)
+	, _last_master_gain_written (-0.0f)
 {
-	DEBUG_TRACE (DEBUG::MackieControl, "Surface::init\n");
+	DEBUG_TRACE (DEBUG::MackieControl, "Surface::Surface init\n");
 	
 	_port = new SurfacePort (*this);
 
 	/* only the first Surface object has global controls */
 
 	if (_number == 0) {
-		DEBUG_TRACE (DEBUG::MackieControl, "Surface has global controls\n");
+		DEBUG_TRACE (DEBUG::MackieControl, "Surface is first. Might have global controls.\n");
 		if (_mcp.device_info().has_global_controls()) {
 			init_controls ();
 			DEBUG_TRACE (DEBUG::MackieControl, "init_controls done\n");
@@ -92,12 +93,12 @@ Surface::Surface (MackieControlProtocol& mcp, const std::string& device_name, ui
 	
 	connect_to_signals ();
 
-	DEBUG_TRACE (DEBUG::MackieControl, "Surface::init finish\n");
+	DEBUG_TRACE (DEBUG::MackieControl, "Surface::Surface done\n");
 }
 
 Surface::~Surface ()
 {
-	DEBUG_TRACE (DEBUG::MackieControl, "Surface: destructor\n");
+	DEBUG_TRACE (DEBUG::MackieControl, "Surface::~Surface init\n");
 
 	zero_all ();
 
@@ -113,6 +114,8 @@ Surface::~Surface ()
 	
 	delete _jog_wheel;
 	delete _port;
+
+	DEBUG_TRACE (DEBUG::MackieControl, "Surface::~Surface done\n");
 }
 
 const MidiByteArray& 
@@ -199,8 +202,6 @@ Surface::init_strips (uint32_t n)
 void
 Surface::setup_master ()
 {
-	_master_fader = dynamic_cast<Fader*> (Fader::factory (*this, 8, "master", *groups["master"]));
-	
 	boost::shared_ptr<Route> m;
 	
 	if ((m = _mcp.get_session().monitor_out()) == 0) {
@@ -210,17 +211,49 @@ Surface::setup_master ()
 	if (!m) {
 		return;
 	}
+
+	_master_fader = dynamic_cast<Fader*> (Fader::factory (*this, _mcp.device_info().strip_cnt(), "master", *groups["master"]));
 	
 	_master_fader->set_control (m->gain_control());
 	m->gain_control()->Changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&Surface::master_gain_changed, this), ui_context());
+
+	Groups::iterator group_it;
+	group_it = groups.find("master");
+
+	DeviceInfo device_info = _mcp.device_info();
+	GlobalButtonInfo master_button = device_info.get_global_button(Button::MasterFaderTouch);
+	Button* bb = dynamic_cast<Button*> (Button::factory (
+		*this,
+		Button::MasterFaderTouch,
+		master_button.id,
+		master_button.label,
+		*(group_it->second)
+));
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("surface %1 Master Fader new button BID %2 id %3\n",
+		number(), Button::MasterFaderTouch, bb->id()));
 }
 
 void
 Surface::master_gain_changed ()
 {
+	if (!_master_fader) {
+		return;
+	}
+
 	boost::shared_ptr<AutomationControl> ac = _master_fader->control();
-	float pos = ac->internal_to_interface (ac->get_value());
-	_port->write (_master_fader->set_position (pos));
+	if (!ac) {
+		return;
+	}
+
+	float normalized_position = ac->internal_to_interface (ac->get_value());
+	if (normalized_position == _last_master_gain_written) {
+		return;
+	}
+
+	DEBUG_TRACE (DEBUG::MackieControl, "Surface::master_gain_changed: updating surface master fader\n");
+
+	_port->write (_master_fader->set_position (normalized_position));
+	_last_master_gain_written = normalized_position;
 }
 
 float 
@@ -283,14 +316,12 @@ Surface::connect_to_signals ()
 		/* Button messages are NoteOn. libmidi++ sends note-on w/velocity = 0 as note-off so catch them too */
 		p->note_off.connect_same_thread (*this, boost::bind (&Surface::handle_midi_note_on_message, this, _1, _2));
 		/* Fader messages are Pitchbend */
-		p->channel_pitchbend[0].connect_same_thread (*this, boost::bind (&Surface::handle_midi_pitchbend_message, this, _1, _2, 0U));
-		p->channel_pitchbend[1].connect_same_thread (*this, boost::bind (&Surface::handle_midi_pitchbend_message, this, _1, _2, 1U));
-		p->channel_pitchbend[2].connect_same_thread (*this, boost::bind (&Surface::handle_midi_pitchbend_message, this, _1, _2, 2U));
-		p->channel_pitchbend[3].connect_same_thread (*this, boost::bind (&Surface::handle_midi_pitchbend_message, this, _1, _2, 3U));
-		p->channel_pitchbend[4].connect_same_thread (*this, boost::bind (&Surface::handle_midi_pitchbend_message, this, _1, _2, 4U));
-		p->channel_pitchbend[5].connect_same_thread (*this, boost::bind (&Surface::handle_midi_pitchbend_message, this, _1, _2, 5U));
-		p->channel_pitchbend[6].connect_same_thread (*this, boost::bind (&Surface::handle_midi_pitchbend_message, this, _1, _2, 6U));
-		p->channel_pitchbend[7].connect_same_thread (*this, boost::bind (&Surface::handle_midi_pitchbend_message, this, _1, _2, 7U));
+		uint32_t i;
+		for (i = 0; i < _mcp.device_info().strip_cnt(); i++) {
+			p->channel_pitchbend[i].connect_same_thread (*this, boost::bind (&Surface::handle_midi_pitchbend_message, this, _1, _2, i));
+		}
+		// Master fader
+		p->channel_pitchbend[_mcp.device_info().strip_cnt()].connect_same_thread (*this, boost::bind (&Surface::handle_midi_pitchbend_message, this, _1, _2, _mcp.device_info().strip_cnt()));
 		
 		_connected = true;
 	}
@@ -308,7 +339,7 @@ Surface::handle_midi_pitchbend_message (MIDI::Parser&, MIDI::pitchbend_t pb, uin
 	 */
 
 
-	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("handle_midi pitchbend on port %3, fader = %1 value = %2\n", 
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Surface::handle_midi_pitchbend_message on port %3, fader = %1 value = %2\n",
 							   fader_id, pb, _number));
 	
 	if (_mcp.device_info().no_handshake()) {
@@ -323,6 +354,7 @@ Surface::handle_midi_pitchbend_message (MIDI::Parser&, MIDI::pitchbend_t pb, uin
 		if (strip) {
 			strip->handle_fader (*fader, pos);
 		} else {
+			DEBUG_TRACE (DEBUG::MackieControl, "Handling master fader\n");
 			/* master fader */
 			fader->set_value (pos); // alter master gain
 			_port->write (fader->set_position (pos)); // write back value (required for servo)
@@ -335,7 +367,7 @@ Surface::handle_midi_pitchbend_message (MIDI::Parser&, MIDI::pitchbend_t pb, uin
 void 
 Surface::handle_midi_note_on_message (MIDI::Parser &, MIDI::EventTwoBytes* ev)
 {
-	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("SurfacePort::handle_note_on %1 = %2\n", (int) ev->note_number, (int) ev->velocity));
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Surface::handle_midi_note_on_message %1 = %2\n", (int) ev->note_number, (int) ev->velocity));
 	
 	if (_mcp.device_info().no_handshake()) {
 		turn_it_on ();
@@ -356,7 +388,7 @@ Surface::handle_midi_note_on_message (MIDI::Parser &, MIDI::EventTwoBytes* ev)
 			_mcp.handle_button_event (*this, *button, ev->velocity > 64 ? press : release);
 		}
 	} else {
-		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("no button found for %1\n", ev->note_number));
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("no button found for %1\n", (int) ev->note_number));
 	}
 }
 
@@ -530,14 +562,12 @@ Surface::turn_it_on ()
 	}
 
 	_active = true;
-	zero_controls ();
+
 	for (Strips::iterator s = strips.begin(); s != strips.end(); ++s) {
 		(*s)->notify_all ();
 	}
+
 	update_view_mode_display ();
-	if (_mcp.device_info ().has_master_fader ()) {
-		master_gain_changed ();
-	}
 
 	if (_mcp.device_info ().has_global_controls ()) {
 		_mcp.update_global_button (Button::Read, _mcp.metering_active ());
@@ -607,10 +637,10 @@ Surface::zero_all ()
 		show_two_char_display (string (2, '0'), string (2, ' '));
 	}
 
-	if (_mcp.device_info().has_master_fader ()) {
+	if (_mcp.device_info().has_master_fader () && _master_fader) {
 		_port->write (_master_fader->zero ());
 	}
-	
+
 	// zero all strips
 	for (Strips::iterator it = strips.begin(); it != strips.end(); ++it) {
 		(*it)->zero();
@@ -622,7 +652,7 @@ Surface::zero_all ()
 void
 Surface::zero_controls ()
 {
-	if (_stype != mcu || !_mcp.device_info().has_global_controls()) {
+	if (!_mcp.device_info().has_global_controls()) {
 		return;
 	}
 
@@ -639,11 +669,14 @@ Surface::zero_controls ()
 
 	// and the led ring for the master strip
 	blank_jog_ring ();
+
+	_last_master_gain_written = 0.0f;
 }
 
 void
 Surface::periodic (uint64_t now_usecs)
 {
+	master_gain_changed();
 	for (Strips::iterator s = strips.begin(); s != strips.end(); ++s) {
 		(*s)->periodic (now_usecs);
 	}
@@ -652,9 +685,7 @@ Surface::periodic (uint64_t now_usecs)
 void
 Surface::write (const MidiByteArray& data) 
 {
-	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Surface::write for %1\n", data));
 	if (_active) {
-		DEBUG_TRACE (DEBUG::MackieControl, "Surface::write surface active\n");
 		_port->write (data);
 	}
 }

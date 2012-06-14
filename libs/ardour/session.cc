@@ -143,6 +143,7 @@ Session::Session (AudioEngine &eng,
 	, _all_route_group (new RouteGroup (*this, "all"))
 	, routes (new RouteList)
 	, _total_free_4k_blocks (0)
+	, _total_free_4k_blocks_uncertain (false)
 	, _bundles (new BundleList)
 	, _bundle_xml_node (0)
 	, _current_trans (0)
@@ -3501,9 +3502,16 @@ Session::graph_reordered ()
 	}
 }
 
-framecnt_t
+/** @return Number of frames that there is disk space available to write,
+ *  if known.
+ */
+boost::optional<framecnt_t>
 Session::available_capture_duration ()
 {
+	if (_total_free_4k_blocks_uncertain) {
+		return boost::optional<framecnt_t> ();
+	}
+	
 	float sample_bytes_on_disk = 4.0; // keep gcc happy
 
 	switch (config.get_native_file_data_format()) {
@@ -4080,6 +4088,12 @@ gain_t*
 Session::gain_automation_buffer() const
 {
 	return ProcessThread::gain_automation_buffer ();
+}
+
+gain_t*
+Session::send_gain_automation_buffer() const
+{
+	return ProcessThread::send_gain_automation_buffer ();
 }
 
 pan_t**
@@ -4743,4 +4757,10 @@ uint32_t
 Session::next_control_id () const
 {
 	return ntracks() + nbusses() + 1;
+}
+
+bool
+Session::operation_in_progress (GQuark op) const
+{
+	return (find (_current_trans_quarks.begin(), _current_trans_quarks.end(), op) != _current_trans_quarks.end());
 }

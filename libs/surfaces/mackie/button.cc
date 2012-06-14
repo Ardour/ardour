@@ -136,6 +136,10 @@ Button::name_to_id (const std::string& name)
 	if (!g_ascii_strcasecmp (name.c_str(), "VSelect")) { return VSelect; }
 	if (!g_ascii_strcasecmp (name.c_str(), "FaderTouch")) { return FaderTouch; }
 
+	/* Master Fader button */
+
+	if (!g_ascii_strcasecmp (name.c_str(), "MasterFaderTouch")) { return MasterFaderTouch; }
+
 	return -1;
 }
 
@@ -236,6 +240,8 @@ Button::id_to_name (Button::ID id)
 	if (id == Select) { return "Select"; }
 	if (id == VSelect) { return "V-Pot"; }
 	if (id == FaderTouch) { return "Fader Touch"; }
+
+	if (id == MasterFaderTouch) { return "Master Fader Touch"; }
 
 	return "???";
 }

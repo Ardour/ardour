@@ -19,10 +19,10 @@
 
 #include <iostream>
 
-#include <glibmm/regex.h>
+#include <boost/algorithm/string.hpp>
 
 #include "gtkmm2ext/keyboard.h"
-#include "ardour/midi_patch_manager.h"
+#include "ardour/instrument_info.h"
 
 #include "ardour_ui.h"
 #include "midi_region_view.h"
@@ -44,8 +44,7 @@ CanvasPatchChange::CanvasPatchChange(
 		double          height,
 		double          x,
 		double          y,
-		string&         model_name,
-		string&         custom_device_mode,
+		ARDOUR::InstrumentInfo& info,
 		ARDOUR::MidiModel::PatchChangePtr patch,
 		bool active_channel)
 	: CanvasFlag(
@@ -60,12 +59,11 @@ CanvasPatchChange::CanvasPatchChange(
 			ARDOUR_UI::config()->canvasvar_MidiPatchChangeInactiveChannelFill.get(),
 			x,
 			y)
-	, _model_name(model_name)
-	, _custom_device_mode(custom_device_mode)
+	, _info (info)
 	, _patch (patch)
 	, _popup_initialized(false)
 {
-	set_text(text);
+	set_text (text);
 }
 
 CanvasPatchChange::~CanvasPatchChange()
@@ -75,9 +73,7 @@ CanvasPatchChange::~CanvasPatchChange()
 void
 CanvasPatchChange::initialize_popup_menus()
 {
-	boost::shared_ptr<ChannelNameSet> channel_name_set =
-		MidiPatchManager::instance()
-		.find_channel_name_set(_model_name, _custom_device_mode, _patch->channel());
+	boost::shared_ptr<ChannelNameSet> channel_name_set = _info.get_patches (_patch->channel());
 
 	if (!channel_name_set) {
 		return;
@@ -91,9 +87,6 @@ CanvasPatchChange::initialize_popup_menus()
 	for (ChannelNameSet::PatchBanks::const_iterator bank = patch_banks.begin();
 	     bank != patch_banks.end();
 	     ++bank) {
-		Glib::RefPtr<Glib::Regex> underscores = Glib::Regex::create("_");
-		std::string replacement(" ");
-
 		Gtk::Menu& patch_bank_menu = *manage(new Gtk::Menu());
 
 		const PatchBank::PatchNameList& patches = (*bank)->patch_name_list();
@@ -102,7 +95,8 @@ CanvasPatchChange::initialize_popup_menus()
 		for (PatchBank::PatchNameList::const_iterator patch = patches.begin();
 		     patch != patches.end();
 		     ++patch) {
-			std::string name = underscores->replace((*patch)->name().c_str(), -1, 0, replacement);
+			std::string name = (*patch)->name();
+			boost::replace_all (name, "_", " ");
 
 			patch_menus.push_back(
 				Gtk::Menu_Helpers::MenuElem(
@@ -112,8 +106,8 @@ CanvasPatchChange::initialize_popup_menus()
 						(*patch)->patch_primary_key())) );
 		}
 
-
-		std::string name = underscores->replace((*bank)->name().c_str(), -1, 0, replacement);
+		std::string name = (*bank)->name();
+		boost::replace_all (name, "_", " ");
 
 		patch_bank_menus.push_back(
 			Gtk::Menu_Helpers::MenuElem(
@@ -193,22 +187,28 @@ CanvasPatchChange::on_event (GdkEvent* ev)
 		break;
 
 	case GDK_SCROLL:
-		if (ev->scroll.direction == GDK_SCROLL_UP) {
-			if (Keyboard::modifier_state_contains (ev->scroll.state, Keyboard::PrimaryModifier)) {
-				_region.previous_bank (*this);
-			} else {
-				_region.previous_patch (*this);
+	{
+		/* XXX: icky dcast */
+		Editor* e = dynamic_cast<Editor*> (&_region.get_time_axis_view().editor());
+		if (e->current_mouse_mode() == Editing::MouseObject && e->internal_editing()) {
+			if (ev->scroll.direction == GDK_SCROLL_UP) {
+				if (Keyboard::modifier_state_contains (ev->scroll.state, Keyboard::PrimaryModifier)) {
+					_region.previous_bank (*this);
+				} else {
+					_region.previous_patch (*this);
+				}
+				return true;
+			} else if (ev->scroll.direction == GDK_SCROLL_DOWN) {
+				if (Keyboard::modifier_state_contains (ev->scroll.state, Keyboard::PrimaryModifier)) {
+					_region.next_bank (*this);
+				} else {
+					_region.next_patch (*this);
+				}
+				return true;
 			}
-			return true;
-		} else if (ev->scroll.direction == GDK_SCROLL_DOWN) {
-			if (Keyboard::modifier_state_contains (ev->scroll.state, Keyboard::PrimaryModifier)) {
-				_region.next_bank (*this);
-			} else {
-				_region.next_patch (*this);
-			}
-			return true;
+			break;
 		}
-		break;
+        }
 
 	case GDK_ENTER_NOTIFY:
 		_region.patch_entered (this);
@@ -217,9 +217,6 @@ CanvasPatchChange::on_event (GdkEvent* ev)
 	case GDK_LEAVE_NOTIFY:
 		_region.patch_left (this);
 		break;
-
-	case GDK_BUTTON_RELEASE:
-		return true;
 
 	default:
 		break;

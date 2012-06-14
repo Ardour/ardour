@@ -30,6 +30,7 @@
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/keyboard.h"
 #include "gtkmm2ext/utils.h"
+#include "gtkmm2ext/persistent_tooltip.h"
 
 #include "ardour/pannable.h"
 #include "ardour/panner.h"
@@ -70,6 +71,7 @@ StereoPanner::StereoPanner (boost::shared_ptr<Panner> panner)
 	, detented (false)
 	, position_binder (position_control)
 	, width_binder (width_control)
+	, _dragging (false)
 {
 	if (!have_colors) {
 		set_colors ();
@@ -80,6 +82,8 @@ StereoPanner::StereoPanner (boost::shared_ptr<Panner> panner)
 	width_control->Changed.connect (connections, invalidator(*this), boost::bind (&StereoPanner::value_change, this), gui_context());
 
 	ColorsChanged.connect (sigc::mem_fun (*this, &StereoPanner::color_handler));
+
+	set_tooltip ();
 }
 
 StereoPanner::~StereoPanner ()
@@ -88,12 +92,8 @@ StereoPanner::~StereoPanner ()
 }
 
 void
-StereoPanner::set_drag_data ()
+StereoPanner::set_tooltip ()
 {
-	if (!_drag_data_label) {
-		return;
-	}
-
 	double pos = position_control->get_value(); // 0..1
 
 	/* We show the position of the center of the image relative to the left & right.
@@ -108,7 +108,7 @@ StereoPanner::set_drag_data ()
 	snprintf (buf, sizeof (buf), "L:%3d R:%3d Width:%d%%", (int) rint (100.0 * (1.0 - pos)),
 	          (int) rint (100.0 * pos),
 	          (int) floor (100.0 * width_control->get_value()));
-	_drag_data_label->set_markup (buf);
+	_tooltip.set_tip (buf);
 }
 
 bool
@@ -360,8 +360,6 @@ StereoPanner::on_button_press_event (GdkEventButton* ev)
 			return true;
 		}
 
-		show_drag_data_window ();
-
 		if (ev->y < 20) {
 			/* top section of widget is for position drags */
 			dragging_position = true;
@@ -395,6 +393,7 @@ StereoPanner::on_button_press_event (GdkEventButton* ev)
 		}
 
 		_dragging = true;
+		_tooltip.target_start_drag ();
 	}
 
 	return true;
@@ -414,13 +413,12 @@ StereoPanner::on_button_release_event (GdkEventButton* ev)
 	bool const dp = dragging_position;
 
 	_dragging = false;
+	_tooltip.target_stop_drag ();
 	dragging_position = false;
 	dragging_left = false;
 	dragging_right = false;
 	accumulated_delta = 0;
 	detented = false;
-
-	hide_drag_data_window ();
 
 	if (Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier)) {
 		_panner->reset ();

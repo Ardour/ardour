@@ -598,7 +598,7 @@ VSTPlugin::find_presets ()
 
 	int const vst_version = _plugin->dispatcher (_plugin, effGetVstVersion, 0, 0, NULL, 0);
 	for (int i = 0; i < _plugin->numPrograms; ++i) {
-		PresetRecord r (string_compose (X_("VST:%1:%2"), unique_id (), i), "", false);
+		PresetRecord r (string_compose (X_("VST:%1:%2"), unique_id (), i), "", -1, false);
 
 		if (vst_version >= 2) {
 			char buf[256];
@@ -628,7 +628,7 @@ VSTPlugin::find_presets ()
 			assert (uri);
 			assert (label);
 
-			PresetRecord r (uri->value(), label->value(), true);
+			PresetRecord r (uri->value(), label->value(), -1, true);
 			_presets.insert (make_pair (r.uri, r));
 		}
 	}

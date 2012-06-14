@@ -118,6 +118,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, Canvas& c
 	, mode_menu (0)
 	, color_mode_menu (0)
 	, gm (sess, slider, slider_desensitised, true, 115)
+	, _ignore_set_layer_display (false)
 {
 }
 
@@ -185,6 +186,11 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
                 }
 
 		rec_enable_button->set_sensitive (_session->writable());
+		
+		/* set playlist button tip to the current playlist, and make it update when it changes */
+		update_playlist_tip ();
+		track()->PlaylistChanged.connect (*this, invalidator (*this), ui_bind(&RouteTimeAxisView::update_playlist_tip, this), gui_context());
+		
 	}
 	
 	controls_hbox.pack_start(gm.get_level_meter(), false, false);
@@ -204,7 +210,6 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	ARDOUR_UI::instance()->set_tip(*solo_button,_("Solo"));
 	ARDOUR_UI::instance()->set_tip(*mute_button,_("Mute"));
 	ARDOUR_UI::instance()->set_tip(route_group_button, _("Route Group"));
-	ARDOUR_UI::instance()->set_tip(playlist_button,_("Playlist"));
 
 	if (is_midi_track()) {
 		ARDOUR_UI::instance()->set_tip(automation_button, _("MIDI Controllers and Automation"));
@@ -480,21 +485,21 @@ RouteTimeAxisView::build_display_menu ()
 		   select the active one, no toggled signal is emitted so nothing happens.
 		*/
 
+		_ignore_set_layer_display = true;
+		
 		layers_items.push_back (RadioMenuElem (layers_group, _("Overlaid")));
 		RadioMenuItem* i = dynamic_cast<RadioMenuItem*> (&layers_items.back ());
 		i->set_active (overlaid != 0 && stacked == 0);
 		i->set_inconsistent (overlaid != 0 && stacked != 0);
 		i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::set_layer_display), Overlaid, true));
 
-		layers_items.push_back (
-			RadioMenuElem (layers_group, _("Stacked"),
-				       sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::set_layer_display), Stacked, true))
-			);
-
+		layers_items.push_back (RadioMenuElem (layers_group, _("Stacked")));
 		i = dynamic_cast<RadioMenuItem*> (&layers_items.back ());
-		i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::set_layer_display), Stacked, true));
 		i->set_active (overlaid == 0 && stacked != 0);
 		i->set_inconsistent (overlaid != 0 && stacked != 0);
+		i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::set_layer_display), Stacked, true));
+		
+		_ignore_set_layer_display = false;
 
 		items.push_back (MenuElem (_("Layers"), *layers_menu));
 
@@ -1544,14 +1549,19 @@ RouteTimeAxisView::use_playlist (RadioMenuItem *item, boost::weak_ptr<Playlist> 
 		boost::shared_ptr<RouteList> rl (rg->route_list());
 		
 		for (RouteList::const_iterator i = rl->begin(); i != rl->end(); ++i) {
-			if ( (*i) == this->route()) {
+			if ((*i) == this->route()) {
 				continue;
 			}
-			
+
 			std::string playlist_name = (*i)->name()+group_string+take_name;
 			
 			boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track>(*i);
 			if (!track) {
+				continue;
+			}
+
+			if (track->freeze_state() == Track::Frozen) {
+				/* Don't change playlists of frozen tracks */
 				continue;
 			}
 			
@@ -1566,6 +1576,35 @@ RouteTimeAxisView::use_playlist (RadioMenuItem *item, boost::weak_ptr<Playlist> 
 		}
 	}
 }
+
+void
+RouteTimeAxisView::update_playlist_tip ()
+{
+	RouteGroup* rg = route_group ();
+	if (rg && rg->is_active() && rg->enabled_property (ARDOUR::Properties::edit.property_id)) {
+		string group_string = "." + rg->name() + ".";
+		
+		string take_name = track()->playlist()->name();
+		string::size_type idx = take_name.find(group_string);
+		
+		if (idx != string::npos) {
+			/* find the bit containing the take number / name */
+			take_name = take_name.substr (idx + group_string.length());
+
+			/* set the playlist button tooltip to the take name */
+			ARDOUR_UI::instance()->set_tip (
+				playlist_button,
+				string_compose(_("Take: %1.%2"), escape_angled_brackets (rg->name()), escape_angled_brackets (take_name))
+				);
+			
+			return;
+		}
+	}
+
+	/* set the playlist button tooltip to the playlist name */
+	ARDOUR_UI::instance()->set_tip (playlist_button, _("Playlist") + std::string(": ") + escape_angled_brackets (track()->playlist()->name()));
+}
+
 
 void
 RouteTimeAxisView::show_playlist_selector ()
@@ -2137,6 +2176,10 @@ RouteTimeAxisView::update_rec_display ()
 void
 RouteTimeAxisView::set_layer_display (LayerDisplay d, bool apply_to_selection)
 {
+	if (_ignore_set_layer_display) {
+		return;
+	}
+	
 	if (apply_to_selection) {
 		_editor.get_selection().tracks.foreach_route_time_axis (boost::bind (&RouteTimeAxisView::set_layer_display, _1, d, false));
 	} else {

@@ -1,6 +1,12 @@
-#include "canvas-flag.h"
 #include <iostream>
+
+#include "gtkmm2ext/utils.h"
+#include "gtkmm2ext/rgb_macros.h"
+
 #include "ardour_ui.h"
+#include "canvas-flag.h"
+#include "time_axis_view_item.h"
+#include "utils.h"
 
 using namespace Gnome::Canvas;
 using namespace std;
@@ -13,23 +19,23 @@ CanvasFlag::CanvasFlag (MidiRegionView& region,
                         double          x,
                         double          y)
 	: Group(parent, x, y)
-	, _text(0)
+	, _name_pixbuf(0)
 	, _height(height)
 	, _outline_color_rgba(outline_color_rgba)
 	, _fill_color_rgba(fill_color_rgba)
 	, _region(region)
+	, name_pixbuf_width (0)
 	, _line(0)
 	, _rect(0)
 {
-	/* XXX this connection is needed if ::on_event() is changed to actually do anything */
 	signal_event().connect (sigc::mem_fun (*this, &CanvasFlag::on_event));
 }
 
 void
 CanvasFlag::delete_allocated_objects()
 {
-	delete _text;
-	_text = 0;
+	delete _name_pixbuf;
+	_name_pixbuf = 0;
 
 	delete _line;
 	_line = 0;
@@ -39,28 +45,29 @@ CanvasFlag::delete_allocated_objects()
 }
 
 void
-CanvasFlag::set_text(const string& a_text)
+CanvasFlag::set_text (const string& text)
 {
 	delete_allocated_objects();
 
-	_text = new Text (*this, 0.0, 0.0, a_text);
-	_text->property_justification() = Gtk::JUSTIFY_CENTER;
-	_text->property_fill_color_rgba() = _outline_color_rgba;
-	double flagwidth  = _text->property_text_width()  + 10.0;
-	double flagheight = _text->property_text_height() + 3.0;
-	_text->property_x() = flagwidth / 2.0;
-	_text->property_y() = flagheight / 2.0;
-	_text->show();
+	_name_pixbuf = new ArdourCanvas::Pixbuf (*this);
+	name_pixbuf_width = Gtkmm2ext::pixel_width (text, TimeAxisViewItem::NAME_FONT) + 2;
+	Gdk::Color c;
+	set_color (c, _outline_color_rgba);
+	_name_pixbuf->property_pixbuf() = Gtkmm2ext::pixbuf_from_string (text, TimeAxisViewItem::NAME_FONT, name_pixbuf_width, 
+									 TimeAxisViewItem::NAME_HEIGHT, c);
+	_name_pixbuf->property_x() = 10.0;
+	_name_pixbuf->property_y() = 2.0;
+	_name_pixbuf->show();
+
+	double flagwidth  = name_pixbuf_width + 8.0;
+	double flagheight = TimeAxisViewItem::NAME_HEIGHT + 3.0;
 	_line = new SimpleLine(*this, 0.0, 0.0, 0.0, _height);
 	_line->property_color_rgba() = _outline_color_rgba;
 	_rect = new SimpleRect(*this, 0.0, 0.0, flagwidth, flagheight);
 	_rect->property_outline_color_rgba() = _outline_color_rgba;
 	_rect->property_fill_color_rgba() = _fill_color_rgba;
-	_text->raise_to_top();
 
-	/* XXX these two connections are needed if ::on_event() is changed to actually do anything */
-	//_rect->signal_event().connect (sigc::mem_fun (*this, &CanvasFlag::on_event));
-	//_text->signal_event().connect (sigc::mem_fun (*this, &CanvasFlag::on_event));
+	_name_pixbuf->raise_to_top();
 }
 
 CanvasFlag::~CanvasFlag()

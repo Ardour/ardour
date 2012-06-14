@@ -3929,6 +3929,15 @@ Editor::session_state_saved (string)
 }
 
 void
+Editor::update_tearoff_visibility()
+{
+	bool visible = Config->get_keep_tearoffs();
+	_mouse_mode_tearoff->set_visible (visible);
+	_tools_tearoff->set_visible (visible);
+	_zoom_tearoff->set_visible (visible);
+}
+
+void
 Editor::maximise_editing_space ()
 {
 	if (_maximised) {
@@ -3936,15 +3945,6 @@ Editor::maximise_editing_space ()
 	}
 
 	fullscreen ();
-
-	if (!Config->get_keep_tearoffs()) {
-		/* these calls will leave each tearoff visible *if* it is torn off, 
-		   but invisible otherwise.
-		*/
-		_mouse_mode_tearoff->set_visible (false);
-		_tools_tearoff->set_visible (false);
-		_zoom_tearoff->set_visible (false);
-	}
 
 	_maximised = true;
 }
@@ -3957,12 +3957,6 @@ Editor::restore_editing_space ()
 	}
 
 	unfullscreen();
-
-	if (!Config->get_keep_tearoffs()) {
-		_mouse_mode_tearoff->set_visible (true);
-		_tools_tearoff->set_visible (true);
-		_zoom_tearoff->set_visible (true);
-	}
 
 	_maximised = false;
 }

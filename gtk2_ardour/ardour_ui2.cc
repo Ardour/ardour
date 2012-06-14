@@ -605,6 +605,14 @@ ARDOUR_UI::editor_realized ()
 }
 
 void
+ARDOUR_UI::update_tearoff_visibility ()
+{
+	if (editor) {
+		editor->update_tearoff_visibility ();
+	}
+}
+
+void
 ARDOUR_UI::maximise_editing_space ()
 {
 	if (editor) {

@@ -27,6 +27,7 @@
 #include "ardour/midi_region.h"
 #include "ardour/midi_source.h"
 #include "ardour/midi_track.h"
+#include "ardour/operations.h"
 #include "ardour/region_factory.h"
 #include "ardour/session.h"
 #include "ardour/smf_source.h"
@@ -155,6 +156,11 @@ MidiStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wfd,
 
 	/* display events and find note range */
 	display_region (region_view, wfd);
+
+	/* fit note range if we are importing */
+	if (_trackview.session()->operation_in_progress (Operations::insert_file)) {
+		set_note_range (ContentsRange);
+	}
 
 	/* catch regionview going away */
 	region->DropReferences.connect (*this, invalidator (*this), boost::bind (&MidiStreamView::remove_region_view, this, region), gui_context());

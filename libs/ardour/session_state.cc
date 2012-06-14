@@ -46,6 +46,10 @@
 #include <sys/mount.h>
 #endif
 
+#ifdef HAVE_SYS_STATVFS_H
+#include <sys/statvfs.h>
+#endif
+
 #include <glib.h>
 
 #include <glibmm.h>
@@ -2079,23 +2083,48 @@ Session::save_template (string template_name)
 void
 Session::refresh_disk_space ()
 {
-#if HAVE_SYS_VFS_H
-	struct statfs statfsbuf;
-	vector<space_and_path>::iterator i;
+#if HAVE_SYS_VFS_H && HAVE_SYS_STATVFS_H
+	
 	Glib::Mutex::Lock lm (space_lock);
-	double scale;
 
 	/* get freespace on every FS that is part of the session path */
 
 	_total_free_4k_blocks = 0;
+	_total_free_4k_blocks_uncertain = false;
 
-	for (i = session_dirs.begin(); i != session_dirs.end(); ++i) {
-		statfs ((*i).path.c_str(), &statfsbuf);
+	for (vector<space_and_path>::iterator i = session_dirs.begin(); i != session_dirs.end(); ++i) {
 
-		scale = statfsbuf.f_bsize/4096.0;
+		struct statfs statfsbuf;
+		statfs (i->path.c_str(), &statfsbuf);
 
-		(*i).blocks = (uint32_t) floor (statfsbuf.f_bavail * scale);
-		_total_free_4k_blocks += (*i).blocks;
+		double const scale = statfsbuf.f_bsize / 4096.0;
+
+		/* See if this filesystem is read-only */
+		struct statvfs statvfsbuf;
+		statvfs (i->path.c_str(), &statvfsbuf);
+
+		/* f_bavail can be 0 if it is undefined for whatever
+		   filesystem we are looking at; Samba shares mounted
+		   via GVFS are an example of this.
+		*/
+		if (statfsbuf.f_bavail == 0) {
+			/* block count unknown */
+			i->blocks = 0;
+			i->blocks_unknown = true;
+		} else if (statvfsbuf.f_flag & ST_RDONLY) {
+			/* read-only filesystem */
+			i->blocks = 0;
+			i->blocks_unknown = false;
+		} else {
+			/* read/write filesystem with known space */
+			i->blocks = (uint32_t) floor (statfsbuf.f_bavail * scale);
+			i->blocks_unknown = false;
+		}
+
+		_total_free_4k_blocks += i->blocks;
+		if (i->blocks_unknown) {
+			_total_free_4k_blocks_uncertain = true;
+		}
 	}
 #endif
 }

@@ -47,7 +47,8 @@ Fader::set_position (float normalized)
 MidiByteArray
 Fader::update_message ()
 {
-	if (MackieControlProtocol::instance()->flip_mode() == MackieControlProtocol::Zero) {
+	MackieControlProtocol* mcp = MackieControlProtocol::instance ();
+	if (mcp && mcp->flip_mode() == MackieControlProtocol::Zero) {
 		/* do not send messages to move the faders when in this mode */
 		return MidiByteArray();
 	}

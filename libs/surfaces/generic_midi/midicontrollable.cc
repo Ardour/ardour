@@ -220,7 +220,7 @@ MIDIControllable::midi_sense_controller (Parser &, EventTwoBytes *msg)
 			float max_value = max(last_controllable_value, new_value);
 			float min_value = min(last_controllable_value, new_value);
 			float range = max_value - min_value;
-			float threshold = 10;
+			float threshold = (float) _surface->threshold ();
 
 			bool const in_sync = (
 				range < threshold &&

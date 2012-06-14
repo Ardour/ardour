@@ -176,10 +176,8 @@ InternalSend::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame
 		Amp::apply_simple_gain (mixbufs, nframes, tgain);
 	}
 
-	// Can't automate gain for sends or returns yet because we need different buffers
-	// so that we don't overwrite the main automation data for the route amp
-	// _amp->setup_gain_automation (start_frame, end_frame, nframes);
-
+	_amp->set_gain_automation_buffer (_session.send_gain_automation_buffer ());
+	_amp->setup_gain_automation (start_frame, end_frame, nframes);
 	_amp->run (mixbufs, start_frame, end_frame, nframes, true);
 
 	/* consider metering */

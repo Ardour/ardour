@@ -1038,9 +1038,14 @@ ArdourStartup::setup_existing_session_page ()
 
 		existing_session_chooser.set_title (_("Select session file"));
 		existing_session_chooser.signal_file_set().connect (sigc::mem_fun (*this, &ArdourStartup::existing_session_selected));
-		cerr << "Set existing chooser to " << Config->get_default_session_parent_dir() << endl;
 		existing_session_chooser.set_current_folder(poor_mans_glob (Config->get_default_session_parent_dir()));
 
+		FileFilter session_filter;
+		session_filter.add_pattern ("*.ardour");
+		session_filter.set_name (string_compose (_("%1 sessions"), PROGRAM_NAME));
+		existing_session_chooser.add_filter (session_filter);
+		existing_session_chooser.set_filter (session_filter);
+		
 #ifdef GTKOSX
 		existing_session_chooser.add_shortcut_folder ("/Volumes");
 #endif

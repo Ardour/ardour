@@ -125,7 +125,7 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	_route = rt;
 	
 	_view = new MidiStreamView (*this);
-	
+
 	if (is_track ()) {
 		_piano_roll_header = new PianoRollHeader(*midi_view());
 		_range_scroomer = new MidiScroomer(midi_view()->note_range_adjustment);
@@ -145,6 +145,7 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		midi_view()->apply_note_range (atoi (gui_property ("note-range-min").c_str()), atoi (gui_property ("note-range-max").c_str()), true);
 	}
 	midi_view()->NoteRangeChanged.connect (sigc::mem_fun (*this, &MidiTimeAxisView::note_range_changed));
+	_view->ContentsHeightChanged.connect (sigc::mem_fun (*this, &MidiTimeAxisView::contents_height_changed));
 
 	ignore_toggle = false;
 
@@ -171,8 +172,19 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		_range_scroomer->DragStarting.connect (sigc::mem_fun (*midi_view(), &MidiStreamView::suspend_updates));
 		_range_scroomer->DragFinishing.connect (sigc::mem_fun (*midi_view(), &MidiStreamView::resume_updates));
 
-		controls_hbox.pack_start(*_range_scroomer);
-		controls_hbox.pack_start(*_piano_roll_header);
+		/* Put the scroomer and the keyboard in a VBox with a padding
+		   label so that they can be reduced in height for stacked-view
+		   tracks.
+		*/
+		VBox* v = manage (new VBox);
+		HBox* h = manage (new HBox);
+		h->pack_start (*_range_scroomer);
+		h->pack_start (*_piano_roll_header);
+		v->pack_start (*h, false, false);
+		v->pack_start (*manage (new Label ("")), true, true);
+		v->show ();
+		h->show ();
+		controls_hbox.pack_start(*v);
 
 		controls_ebox.set_name ("MidiTrackControlsBaseUnselected");
 		controls_base_selected_name = "MidiTrackControlsBaseSelected";
@@ -208,8 +220,12 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	_model_selector.set_active_text (gui_property (X_("midnam-model-name")));
 	_custom_device_mode_selector.set_active_text (gui_property (X_("midnam-custom-device-mode")));
 
+	ARDOUR_UI::instance()->set_tip (_model_selector, _("External MIDI Device"));
+	ARDOUR_UI::instance()->set_tip (_custom_device_mode_selector, _("External Device Mode"));
+
 	midi_controls_hbox->pack_start(_channel_selector, true, false);
 	if (!patch_manager.all_models().empty()) {
+		_midi_controls_box.set_border_width (5);
 		_midi_controls_box.pack_start(_model_selector, true, false);
 		_midi_controls_box.pack_start(_custom_device_mode_selector, true, false);
 	}
@@ -317,15 +333,14 @@ MidiTimeAxisView::model_changed()
 	}
 
 	_custom_device_mode_selector.set_active(0);
-
-	set_gui_property (X_("midnam-model-name"), midi_patch_model ());
+	
+	_route->instrument_info().set_external_instrument (_model_selector.get_active_text(), _custom_device_mode_selector.get_active_text());
 }
 
 void
 MidiTimeAxisView::custom_device_mode_changed()
 {
-	_midi_patch_settings_changed.emit (midi_patch_model (), midi_patch_custom_device_node ());
-	set_gui_property (X_("midnam-custom-device-mode"), midi_patch_custom_device_node ());
+	_route->instrument_info().set_external_instrument (_model_selector.get_active_text(), _custom_device_mode_selector.get_active_text());
 }
 
 MidiStreamView*
@@ -380,12 +395,12 @@ MidiTimeAxisView::append_extra_display_menu_items ()
 	range_menu->set_name ("ArdourContextMenu");
 
 	range_items.push_back (MenuElem (_("Show Full Range"), sigc::bind (
-			sigc::mem_fun(*this, &MidiTimeAxisView::set_note_range),
-			MidiStreamView::FullRange)));
+			sigc::mem_fun(*this, &MidiTimeAxisView::set_note_range), 
+			MidiStreamView::FullRange, true)));
 
 	range_items.push_back (MenuElem (_("Fit Contents"), sigc::bind (
 			sigc::mem_fun(*this, &MidiTimeAxisView::set_note_range),
-			MidiStreamView::ContentsRange)));
+			MidiStreamView::ContentsRange, true)));
 
 	items.push_back (MenuElem (_("Note Range"), *range_menu));
 	items.push_back (MenuElem (_("Note Mode"), *build_note_mode_menu()));
@@ -727,13 +742,13 @@ MidiTimeAxisView::build_note_mode_menu()
 	mode_menu->set_name ("ArdourContextMenu");
 
 	RadioMenuItem::Group mode_group;
-	items.push_back (RadioMenuElem (mode_group, _("Sustained"),
-				sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_note_mode), Sustained)));
+	items.push_back (RadioMenuElem (mode_group,_("Sustained"),
+				sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_note_mode), Sustained, true)));
 	_note_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
 	_note_mode_item->set_active(_note_mode == Sustained);
 
 	items.push_back (RadioMenuElem (mode_group, _("Percussive"),
-				sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_note_mode), Percussive)));
+				sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_note_mode), Percussive, true)));
 	_percussion_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
 	_percussion_mode_item->set_active(_note_mode == Percussive);
 
@@ -752,19 +767,19 @@ MidiTimeAxisView::build_color_mode_menu()
 	RadioMenuItem::Group mode_group;
 	items.push_back (RadioMenuElem (mode_group, _("Meter Colors"),
 	                                sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_color_mode),
-	                                            MeterColors, false, true)));
+	                                            MeterColors, false, true, true)));
 	_meter_color_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
 	_meter_color_mode_item->set_active(_color_mode == MeterColors);
 
 	items.push_back (RadioMenuElem (mode_group, _("Channel Colors"),
 	                                sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_color_mode),
-	                                            ChannelColors, false, true)));
+	                                            ChannelColors, false, true, true)));
 	_channel_color_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
 	_channel_color_mode_item->set_active(_color_mode == ChannelColors);
 
 	items.push_back (RadioMenuElem (mode_group, _("Track Color"),
 	                                sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_color_mode),
-	                                            TrackColor, false, true)));
+	                                            TrackColor, false, true, true)));
 	_channel_color_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
 	_channel_color_mode_item->set_active(_color_mode == TrackColor);
 
@@ -772,43 +787,60 @@ MidiTimeAxisView::build_color_mode_menu()
 }
 
 void
-MidiTimeAxisView::set_note_mode(NoteMode mode)
+MidiTimeAxisView::set_note_mode(NoteMode mode, bool apply_to_selection)
 {
-	if (_note_mode != mode || midi_track()->note_mode() != mode) {
-		_note_mode = mode;
-		midi_track()->set_note_mode(mode);
-		set_gui_property ("note-mode", enum_2_string(_note_mode));
-		_view->redisplay_track();
-	}
-}
-
-void
-MidiTimeAxisView::set_color_mode (ColorMode mode, bool force, bool redisplay)
-{
-	if (_color_mode == mode && !force) {
-		return;
-	}
-
-	if (mode == ChannelColors) {
-		_channel_selector.set_channel_colors(CanvasNoteEvent::midi_channel_colors);
+	if (apply_to_selection) {
+		_editor.get_selection().tracks.foreach_midi_time_axis (boost::bind (&MidiTimeAxisView::set_note_mode, _1, mode, false));
 	} else {
-		_channel_selector.set_default_channel_color();
-	}
-
-	_color_mode = mode;
-	set_gui_property ("color-mode", enum_2_string(_color_mode));
-	if (redisplay) {
-		_view->redisplay_track();
+		if (_note_mode != mode || midi_track()->note_mode() != mode) {
+			_note_mode = mode;
+			midi_track()->set_note_mode(mode);
+			set_gui_property ("note-mode", enum_2_string(_note_mode));
+			_view->redisplay_track();
+		}
 	}
 }
 
 void
-MidiTimeAxisView::set_note_range(MidiStreamView::VisibleNoteRange range)
+MidiTimeAxisView::set_color_mode (ColorMode mode, bool force, bool redisplay, bool apply_to_selection)
 {
-	if (!_ignore_signals)
-		midi_view()->set_note_range(range);
+	if (apply_to_selection) {
+		_editor.get_selection().tracks.foreach_midi_time_axis (
+			boost::bind (&MidiTimeAxisView::set_color_mode, _1, mode, force, redisplay, false)
+			);
+	} else {
+		
+		if (_color_mode == mode && !force) {
+			return;
+		}
+		
+		if (mode == ChannelColors) {
+			_channel_selector.set_channel_colors(CanvasNoteEvent::midi_channel_colors);
+		} else {
+			_channel_selector.set_default_channel_color();
+		}
+		
+		_color_mode = mode;
+		set_gui_property ("color-mode", enum_2_string(_color_mode));
+		if (redisplay) {
+			_view->redisplay_track();
+		}
+	}
 }
 
+void
+MidiTimeAxisView::set_note_range (MidiStreamView::VisibleNoteRange range, bool apply_to_selection)
+{
+	if (apply_to_selection) {
+		_editor.get_selection().tracks.foreach_midi_time_axis (
+			boost::bind (&MidiTimeAxisView::set_note_range, _1, range, false)
+			);
+	} else {
+		if (!_ignore_signals) {
+			midi_view()->set_note_range(range);
+		}
+	}
+}
 
 void
 MidiTimeAxisView::update_range()
@@ -1207,14 +1239,8 @@ MidiTimeAxisView::note_range_changed ()
 	set_gui_property ("note-range-max", (int) midi_view()->highest_note ());
 }
 
-string
-MidiTimeAxisView::midi_patch_model () const
+void
+MidiTimeAxisView::contents_height_changed ()
 {
-	return _model_selector.get_active_text ();
-}
-
-string
-MidiTimeAxisView::midi_patch_custom_device_node () const
-{
-	return _custom_device_mode_selector.get_active_text ();
+	_range_scroomer->set_size_request (-1, _view->child_height ());
 }

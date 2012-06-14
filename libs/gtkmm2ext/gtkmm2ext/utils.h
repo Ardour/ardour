@@ -108,6 +108,8 @@ namespace Gtkmm2ext {
 	void rounded_bottom_half_rectangle (cairo_t*, double x, double y, double w, double h, double r=10);
 
 	Gtk::Label* left_aligned_label (std::string const &);
+
+	void set_no_tooltip_whatsoever (Gtk::Widget &);
 };
 
 #endif /*  __gtkmm2ext_utils_h__ */

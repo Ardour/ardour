@@ -35,36 +35,11 @@ namespace MIDI
 
 namespace Name
 {
-
-Patch::Patch (PatchBank* b)
+	
+Patch::Patch (std::string name, uint8_t p_number, uint16_t b_number)
+	: _name (name)
+	, _id (p_number, b_number)
 {
-	use_bank_info (b);
-}
-
-Patch::Patch (std::string a_number, std::string a_name, PatchBank* a_bank)
-	: _number (a_number)
-	, _name (a_name)
-{
-	use_bank_info (a_bank);
-}
-
-XMLNode&
-Patch::get_state (void)
-{
-	XMLNode* node = new XMLNode("Patch");
-	node->add_property("Number", _number);
-	node->add_property("Name",   _name);
-	/*
-	typedef std::list< boost::shared_ptr< Evoral::MIDIEvent<double> > > PatchMidiCommands;
-	XMLNode* commands = node->add_child("PatchMIDICommands");
-	for (PatchMidiCommands::const_iterator event = _patch_midi_commands.begin();
-	    event != _patch_midi_commands.end();
-	    ++event) {
-		commands->add_child_copy(*((((Evoral::MIDIEvent&)*event)).to_xml()));
-	}
-	*/
-
-	return *node;
 }
 
 int initialize_primary_key_from_commands (PatchPrimaryKey& id, const XMLNode* node)
@@ -78,10 +53,12 @@ int initialize_primary_key_from_commands (PatchPrimaryKey& id, const XMLNode* no
 			string value = node->property("Value")->value();
 			assert(value != "");
 
+			id.bank_number = 0;
+
 			if (control == "0") {
-				id.msb = PBD::atoi(value);
+				id.bank_number |= (PBD::atoi (value)<<7);
 			} else if (control == "32") {
-				id.lsb = PBD::atoi(value);
+				id.bank_number |= PBD::atoi (value);
 			}
 		} else if (node->name() == "ProgramChange") {
 			string number = node->property("Number")->value();
@@ -91,6 +68,29 @@ int initialize_primary_key_from_commands (PatchPrimaryKey& id, const XMLNode* no
 	}
 
 	return 0;
+}
+
+XMLNode&
+Patch::get_state (void)
+{
+	XMLNode* node = new XMLNode("Patch");
+
+	/* XXX this is totally wrong */
+
+	node->add_property("Number", string_compose ("%1", _id.program_number));
+	node->add_property("Name",   _name);
+
+	/*
+	typedef std::list< boost::shared_ptr< Evoral::MIDIEvent<double> > > PatchMidiCommands;
+	XMLNode* commands = node->add_child("PatchMIDICommands");
+	for (PatchMidiCommands::const_iterator event = _patch_midi_commands.begin();
+	    event != _patch_midi_commands.end();
+	    ++event) {
+		commands->add_child_copy(*((((Evoral::MIDIEvent&)*event)).to_xml()));
+	}
+	*/
+
+	return *node;
 }
 
 int
@@ -106,7 +106,7 @@ Patch::set_state (const XMLTree&, const XMLNode& node)
 	if (!prop) {
 		return -1;
 	}
-	_number = prop->value();
+	_id.program_number = PBD::atoi (prop->value());
 
 	prop = node.property ("Name");
 
@@ -127,24 +127,6 @@ Patch::set_state (const XMLTree&, const XMLNode& node)
 		_id.program_number = PBD::atoi(program_change);
 	}
 
-	return 0;
-}
-
-int
-Patch::use_bank_info (PatchBank* bank)
-{
-	if (bank) {
-		if (bank->patch_primary_key() ) {
-			_id.msb = bank->patch_primary_key()->msb;
-			_id.lsb = bank->patch_primary_key()->lsb;
-		} else {
-			return -1;
-		}
-	}
-
-	if (!_id.is_sane()) {
-		return -1;
-	}
 
 	return 0;
 }
@@ -158,6 +140,7 @@ Note::get_state (void)
 
 	return *node;
 }
+
 
 int
 Note::set_state (const XMLTree&, const XMLNode& node)
@@ -218,10 +201,11 @@ PatchBank::set_state (const XMLTree& tree, const XMLNode& node)
 
 	XMLNode* commands = node.child("MIDICommands");
 	if (commands) {
-		_id = new PatchPrimaryKey();
-		if (initialize_primary_key_from_commands(*_id, commands)) {
+		PatchPrimaryKey id (0, 0);
+		if (initialize_primary_key_from_commands (id, commands)) {
 			return -1;
 		}
+		_number = id.bank_number;
 	}
 
 	XMLNode* patch_name_list = node.child("PatchNameList");
@@ -229,7 +213,7 @@ PatchBank::set_state (const XMLTree& tree, const XMLNode& node)
 	if (patch_name_list) {
 		const XMLNodeList patches = patch_name_list->children();
 		for (XMLNodeList::const_iterator i = patches.begin(); i != patches.end(); ++i) {
-			boost::shared_ptr<Patch> patch(new Patch(this));
+			boost::shared_ptr<Patch> patch (new Patch (string(), 0, _number));
 			patch->set_state(tree, *(*i));
 			_patch_name_list.push_back(patch);
 		}
@@ -251,14 +235,66 @@ PatchBank::set_patch_name_list (const PatchNameList& pnl)
 {
 	_patch_name_list = pnl;
 	_patch_list_name = "";
-	
+
 	for (PatchNameList::iterator p = _patch_name_list.begin(); p != _patch_name_list.end(); p++) {
-		if ((*p)->use_bank_info (this)) {
-			return -1;
-		}
+		(*p)->set_bank_number (_number);
 	}
 
 	return 0;
+}
+
+std::ostream&
+operator<< (std::ostream& os, const ChannelNameSet& cns)
+{
+	os << "Channel Name Set: name = " << cns._name << endl
+	   << "Map size " << cns._patch_map.size () << endl
+	   << "List size " << cns._patch_list.size() << endl
+	   << "Patch list name = [" << cns._patch_list_name << ']' << endl
+	   << "Available channels : ";
+	for (set<uint8_t>::iterator x = cns._available_for_channels.begin(); x != cns._available_for_channels.end(); ++x) {
+		os << (int) (*x) << ' ';
+	}
+	os << endl;
+	
+	for (ChannelNameSet::PatchBanks::const_iterator pbi = cns._patch_banks.begin(); pbi != cns._patch_banks.end(); ++pbi) {
+		os << "\tPatch Bank " << (*pbi)->name() << " with " << (*pbi)->patch_name_list().size() << " patches\n";
+		for (PatchBank::PatchNameList::const_iterator pni = (*pbi)->patch_name_list().begin(); pni != (*pbi)->patch_name_list().end(); ++pni) {
+			os << "\t\tPatch name " << (*pni)->name() << " prog " << (int) (*pni)->program_number() << " bank " << (*pni)->bank_number() << endl;
+		}
+	}
+
+	return os;
+}
+
+void
+ChannelNameSet::set_patch_banks (const ChannelNameSet::PatchBanks& pb)
+{
+	_patch_banks = pb;
+	
+	_patch_map.clear ();
+	_patch_list.clear ();
+	_patch_list_name = "";
+	_available_for_channels.clear ();
+	
+	for (PatchBanks::const_iterator pbi = _patch_banks.begin(); pbi != _patch_banks.end(); ++pbi) {
+		for (PatchBank::PatchNameList::const_iterator pni = (*pbi)->patch_name_list().begin(); pni != (*pbi)->patch_name_list().end(); ++pni) {
+			_patch_map[(*pni)->patch_primary_key()] = (*pni);
+			_patch_list.push_back ((*pni)->patch_primary_key());
+		}
+	}
+
+	for (uint8_t n = 0; n < 16; ++n) {
+		_available_for_channels.insert (n);
+	}
+}
+
+void
+ChannelNameSet::use_patch_name_list (const PatchBank::PatchNameList& pnl)
+{
+	for (PatchBank::PatchNameList::const_iterator p = pnl.begin(); p != pnl.end(); ++p) {
+		_patch_map[(*p)->patch_primary_key()] = (*p);
+		_patch_list.push_back ((*p)->patch_primary_key());
+	}
 }
 
 XMLNode&
@@ -312,7 +348,7 @@ ChannelNameSet::set_state (const XMLTree& tree, const XMLNode& node)
 		}
 
 		if (node->name() == "PatchBank") {
-			boost::shared_ptr<PatchBank> bank(new PatchBank());
+			boost::shared_ptr<PatchBank> bank (new PatchBank ());
 			bank->set_state(tree, *node);
 			_patch_banks.push_back(bank);
 			const PatchBank::PatchNameList& patches = bank->patch_name_list();
@@ -363,6 +399,27 @@ CustomDeviceMode::get_state(void)
 	}
 
 	return *custom_device_mode;
+}
+
+boost::shared_ptr<CustomDeviceMode> 
+MasterDeviceNames::custom_device_mode_by_name(std::string mode_name)
+{
+	assert(mode_name != "");
+	return _custom_device_modes[mode_name];
+}
+
+boost::shared_ptr<ChannelNameSet> 
+MasterDeviceNames::channel_name_set_by_device_mode_and_channel(std::string mode, uint8_t channel)
+{
+	boost::shared_ptr<CustomDeviceMode> cdm = custom_device_mode_by_name(mode);
+	boost::shared_ptr<ChannelNameSet> cns =  _channel_name_sets[cdm->channel_name_set_name_by_channel(channel)];
+	return cns;
+}
+
+boost::shared_ptr<Patch> 
+MasterDeviceNames::find_patch(std::string mode, uint8_t channel, PatchPrimaryKey& key) 
+{
+	return channel_name_set_by_device_mode_and_channel(mode, channel)->find_patch(key);
 }
 
 int
@@ -428,7 +485,7 @@ MasterDeviceNames::set_state(const XMLTree& tree, const XMLNode& a_node)
 		const XMLNodeList patches = (*i)->children();
 
 		for (XMLNodeList::const_iterator p = patches.begin(); p != patches.end(); ++p) {
-			boost::shared_ptr<Patch> patch(new Patch());
+			boost::shared_ptr<Patch> patch (new Patch ());
 			patch->set_state(tree, *(*p));
 			patch_name_list.push_back(patch);
 		}
@@ -444,20 +501,23 @@ MasterDeviceNames::set_state(const XMLTree& tree, const XMLNode& a_node)
 
 	for (ChannelNameSets::iterator cns = _channel_name_sets.begin(); cns != _channel_name_sets.end(); ++cns) {
 		ChannelNameSet::PatchBanks pbs = cns->second->patch_banks();
+		PatchNameLists::iterator p;
+
 		for (ChannelNameSet::PatchBanks::iterator pb = pbs.begin(); pb != pbs.end(); ++pb) {
 			std::string pln = (*pb)->patch_list_name();
 			if (!pln.empty()) {
-				PatchNameLists::iterator p = _patch_name_lists.find (pln);
-				if (p != _patch_name_lists.end()) {
+				if ((p = _patch_name_lists.find (pln)) != _patch_name_lists.end()) {
 					if ((*pb)->set_patch_name_list (p->second)) {
 						return -1;
 					}
+					cns->second->use_patch_name_list (p->second);
 				} else {
 					error << string_compose ("Patch list name %1 was not found - patch file ignored", pln) << endmsg;
 					return -1;
 				}
 			}
 		}
+
 	}
 
 	return 0;
@@ -525,6 +585,136 @@ MIDINameDocument::get_state(void)
 	return nothing;
 }
 
+const char* general_midi_program_names[128] = {
+	"Acoustic Grand Piano",
+	"Bright Acoustic Piano",
+	"Electric Grand Piano",
+	"Honky-tonk Piano",
+	"Rhodes Piano",
+	"Chorused Piano",
+	"Harpsichord",
+	"Clavinet",
+	"Celesta",
+	"Glockenspiel",
+	"Music Box",
+	"Vibraphone",
+	"Marimba",
+	"Xylophone",
+	"Tubular Bells",
+	"Dulcimer",
+	"Hammond Organ",
+	"Percussive Organ",
+	"Rock Organ",
+	"Church Organ",
+	"Reed Organ",
+	"Accordion",
+	"Harmonica",
+	"Tango Accordion",
+	"Acoustic Guitar (nylon)",
+	"Acoustic Guitar (steel)",
+	"Electric Guitar (jazz)",
+	"Electric Guitar (clean)",
+	"Electric Guitar (muted)",
+	"Overdriven Guitar",
+	"Distortion Guitar",
+	"Guitar Harmonics",
+	"Acoustic Bass",
+	"Electric Bass (finger)",
+	"Electric Bass (pick)",
+	"Fretless Bass",
+	"Slap Bass 1",
+	"Slap Bass 2",
+	"Synth Bass 1",
+	"Synth Bass 2",
+	"Violin",
+	"Viola",
+	"Cello",
+	"Contrabass",
+	"Tremolo Strings",
+	"Pizzicato Strings",
+	"Orchestral Harp",
+	"Timpani",
+	"String Ensemble 1",
+	"String Ensemble 2",
+	"SynthStrings 1",
+	"SynthStrings 2",
+	"Choir Aahs",
+	"Voice Oohs",
+	"Synth Voice",
+	"Orchestra Hit",
+	"Trumpet",
+	"Trombone",
+	"Tuba",
+	"Muted Trumpet",
+	"French Horn",
+	"Brass Section",
+	"Synth Brass 1",
+	"Synth Brass 2",
+	"Soprano Sax",
+	"Alto Sax",
+	"Tenor Sax",
+	"Baritone Sax",
+	"Oboe",
+	"English Horn",
+	"Bassoon",
+	"Clarinet",
+	"Piccolo",
+	"Flute",
+	"Recorder",
+	"Pan Flute",
+	"Bottle Blow",
+	"Shakuhachi",
+	"Whistle",
+	"Ocarina",
+	"Lead 1 (square)",
+	"Lead 2 (sawtooth)",
+	"Lead 3 (calliope lead)",
+	"Lead 4 (chiff lead)",
+	"Lead 5 (charang)",
+	"Lead 6 (voice)",
+	"Lead 7 (fifths)",
+	"Lead 8 (bass + lead)",
+	"Pad 1 (new age)",
+	"Pad 2 (warm)",
+	"Pad 3 (polysynth)",
+	"Pad 4 (choir)",
+	"Pad 5 (bowed)",
+	"Pad 6 (metallic)",
+	"Pad 7 (halo)",
+	"Pad 8 (sweep)",
+	"FX 1 (rain)",
+	"FX 2 (soundtrack)",
+	"FX 3 (crystal)",
+	"FX 4 (atmosphere)",
+	"FX 5 (brightness)",
+	"FX 6 (goblins)",
+	"FX 7 (echoes)",
+	"FX 8 (sci-fi)",
+	"Sitar",
+	"Banjo",
+	"Shamisen",
+	"Koto",
+	"Kalimba",
+	"Bagpipe",
+	"Fiddle",
+	"Shanai",
+	"Tinkle Bell",
+	"Agogo",
+	"Steel Drums",
+	"Woodblock",
+	"Taiko Drum",
+	"Melodic Tom",
+	"Synth Drum",
+	"Reverse Cymbal",
+	"Guitar Fret Noise",
+	"Breath Noise",
+	"Seashore",
+	"Bird Tweet",
+	"Telephone Ring",
+	"Helicopter",
+	"Applause",
+	"Gunshot",
+};
 
 } //namespace Name
 

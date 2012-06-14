@@ -102,7 +102,7 @@ Session::pre_export ()
 
 /** Called for each range that is being exported */
 int
-Session::start_audio_export (framepos_t position, bool /* realtime */)
+Session::start_audio_export (framepos_t position)
 {
 	if (!_exporting) {
 		pre_export ();

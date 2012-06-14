@@ -423,6 +423,7 @@ Route::process_output_buffers (BufferSet& bufs,
 
 	/* figure out if we're going to use gain automation */
 	if (gain_automation_ok) {
+		_amp->set_gain_automation_buffer (_session.gain_automation_buffer ());
 		_amp->setup_gain_automation (start_frame, end_frame, nframes);
 	} else {
 		_amp->apply_gain_automation (false);
@@ -1013,6 +1014,7 @@ Route::add_processor (boost::shared_ptr<Processor> processor, boost::shared_ptr<
 		_output->set_user_latency (0);
 	}
 
+	reset_instrument_info ();
 	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
 	set_processor_positions ();
 
@@ -1161,6 +1163,7 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 		_output->set_user_latency (0);
 	}
 
+	reset_instrument_info ();
 	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
 	set_processor_positions ();
 
@@ -1367,6 +1370,8 @@ Route::clear_processors (Placement p)
 	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
 	set_processor_positions ();
 
+	reset_instrument_info ();
+
 	if (!already_deleting) {
 		_session.clear_deletion_in_progress();
 	}
@@ -1465,6 +1470,7 @@ Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStream
 		}
 	}
 
+	reset_instrument_info ();
 	processor->drop_references ();
 	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
 	set_processor_positions ();
@@ -1561,10 +1567,18 @@ Route::remove_processors (const ProcessorList& to_be_deleted, ProcessorStreams* 
 		(*i)->drop_references ();
 	}
 
+	reset_instrument_info ();
 	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
 	set_processor_positions ();
 
 	return 0;
+}
+
+void
+Route::reset_instrument_info ()
+{
+	boost::shared_ptr<Processor> instr = the_instrument();
+	_instrument_info.set_internal_instrument (instr);
 }
 
 /** Caller must hold process lock */
@@ -2525,6 +2539,7 @@ Route::set_processor_state (const XMLNode& node)
 		}
 	}
 
+	reset_instrument_info ();
 	processors_changed (RouteProcessorChange ());
 	set_processor_positions ();
 }
@@ -4049,9 +4064,11 @@ Route::the_instrument () const
 {
 	Glib::RWLock::WriterLock lm (_processor_lock);
 	for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		if ((*i)->input_streams().n_midi() > 0 &&
-		    (*i)->output_streams().n_audio() > 0) {
-			return (*i);
+		if (boost::dynamic_pointer_cast<PluginInsert>(*i)) {
+			if ((*i)->input_streams().n_midi() > 0 &&
+			    (*i)->output_streams().n_audio() > 0) {
+				return (*i);
+			}
 		}
 	}
 	return boost::shared_ptr<Processor>();

@@ -306,11 +306,12 @@ protected:
 	typedef std::list<RouteTimeAxisView*> UnderlayMirrorList;
 	UnderlayMirrorList _underlay_mirrors;
 
-	bool _ignore_track_mode_change; ///< true to ignore track mode change signals
+	bool _ignore_set_layer_display;
 
 private:
 
 	void remove_child (boost::shared_ptr<TimeAxisView>);
+	void update_playlist_tip ();
 };
 
 #endif /* __ardour_route_time_axis_h__ */

@@ -86,11 +86,6 @@ class MidiTimeAxisView : public RouteTimeAxisView
 		return _channel_selector.mode_changed;
 	}
 
-	sigc::signal<void, std::string, std::string>& signal_midi_patch_settings_changed() {
-		return _midi_patch_settings_changed;
-	}
-
-
 	const MidiMultipleChannelSelector& channel_selector() { return _channel_selector; }
 
 	Gtk::CheckMenuItem* automation_child_menu_item (Evoral::Parameter);
@@ -101,9 +96,6 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	void first_idle ();
 
 	uint8_t get_channel_for_add () const;
-
-	std::string midi_patch_model () const;
-	std::string midi_patch_custom_device_node () const;
 
   protected:
 	void start_step_editing ();
@@ -120,12 +112,13 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	Gtk::Menu* build_note_mode_menu();
 	Gtk::Menu* build_color_mode_menu();
 
-	void set_note_mode (ARDOUR::NoteMode mode);
-	void set_color_mode (ARDOUR::ColorMode, bool force=false, bool redisplay=true);
-	void set_note_range(MidiStreamView::VisibleNoteRange range);
+	void set_note_mode (ARDOUR::NoteMode mode, bool apply_to_selection = false);
+	void set_color_mode (ARDOUR::ColorMode, bool force = false, bool redisplay = true, bool apply_to_selection = false);
+	void set_note_range (MidiStreamView::VisibleNoteRange range, bool apply_to_selection = false);
 
 	void route_active_changed ();
 	void note_range_changed ();
+	void contents_height_changed ();
 
 	bool                         _ignore_signals;
 	MidiScroomer*                _range_scroomer;

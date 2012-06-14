@@ -127,7 +127,11 @@ public:
 	 * @key a reference to an instance of MIDI::Name::PatchPrimaryKey whose fields will
 	 *        will be set according to the result of the lookup
 	 */
-	void get_patch_key_at(double time, uint8_t channel, MIDI::Name::PatchPrimaryKey& key);
+        void get_patch_key_at (double time, uint8_t channel, MIDI::Name::PatchPrimaryKey& key);       
+
+        /** Convert a given PatchChange into a PatchPrimaryKey
+         */
+        MIDI::Name::PatchPrimaryKey patch_change_to_patch_key (ARDOUR::MidiModel::PatchChangePtr);
 
 	/** Change old_patch to new_patch.
 	 * @param old_patch the canvas patch change which is to be altered
@@ -281,6 +285,11 @@ public:
 
 	void show_list_editor ();
 
+	typedef std::set<ArdourCanvas::CanvasNoteEvent*> Selection;
+	Selection selection () const {
+		return _selection;
+	}
+	
 	void selection_as_notelist (Notes& selected, bool allow_all_if_none_selected = false);
 
 	void enable_display (bool);
@@ -295,13 +304,7 @@ public:
 
 	void clear_selection (bool signal = true) { clear_selection_except (0, signal); }
 
-	std::string model_name () const {
-		return _model_name;
-	}
-
-	std::string custom_device_mode () const {
-		return _custom_device_mode;
-	}
+        ARDOUR::InstrumentInfo& instrument_info() const;
 	
 protected:
 	/** Allows derived types to specify their visibility requirements
@@ -351,7 +354,8 @@ private:
 	bool note_canvas_event(GdkEvent* ev);
 
 	void midi_channel_mode_changed(ARDOUR::ChannelMode mode, uint16_t mask);
-	void midi_patch_settings_changed(std::string model, std::string custom_device_mode);
+	void instrument_settings_changed ();
+	PBD::ScopedConnection _instrument_changed_connection;
 
 	void change_note_channel (ArdourCanvas::CanvasNoteEvent *, int8_t, bool relative=false);
 	void change_note_velocity(ArdourCanvas::CanvasNoteEvent* ev, int8_t vel, bool relative=false);
@@ -374,12 +378,6 @@ private:
 	uint16_t _last_channel_selection;
 	uint8_t  _current_range_min;
 	uint8_t  _current_range_max;
-
-	/// MIDNAM information of the current track: Model name of MIDNAM file
-	std::string _model_name;
-
-	/// MIDNAM information of the current track: CustomDeviceMode
-	std::string _custom_device_mode;
 
 	typedef std::list<ArdourCanvas::CanvasNoteEvent*> Events;
 	typedef std::vector< boost::shared_ptr<ArdourCanvas::CanvasPatchChange> > PatchChanges;
@@ -409,8 +407,7 @@ private:
 	MouseState _mouse_state;
 	int _pressed_button;
 
-	typedef std::set<ArdourCanvas::CanvasNoteEvent*> Selection;
-	/// Currently selected CanvasNoteEvents
+	/** Currently selected CanvasNoteEvents */
 	Selection _selection;
 
 	bool _sort_needed;

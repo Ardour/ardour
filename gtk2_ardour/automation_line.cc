@@ -136,7 +136,11 @@ void
 AutomationLine::show ()
 {
 	if (_visible & Line) {
-		if (alist->interpolation() != AutomationList::Discrete) {
+		/* Only show the line there are some points, otherwise we may show an out-of-date line
+		   when automation points have been removed (the line will still follow the shape of the
+		   old points).
+		*/
+		if (alist->interpolation() != AutomationList::Discrete && control_points.size() >= 2) {
 			line->show();
 		} else {
 			line->hide ();

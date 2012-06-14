@@ -31,6 +31,7 @@
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/keyboard.h"
 #include "gtkmm2ext/utils.h"
+#include "gtkmm2ext/persistent_tooltip.h"
 
 #include "ardour/pannable.h"
 #include "ardour/panner.h"
@@ -64,6 +65,7 @@ MonoPanner::MonoPanner (boost::shared_ptr<ARDOUR::Panner> panner)
         , accumulated_delta (0)
         , detented (false)
         , position_binder (position_control)
+	, _dragging (false)
 {
         if (!have_colors) {
                 set_colors ();
@@ -73,6 +75,8 @@ MonoPanner::MonoPanner (boost::shared_ptr<ARDOUR::Panner> panner)
         position_control->Changed.connect (connections, invalidator(*this), boost::bind (&MonoPanner::value_change, this), gui_context());
 
 	ColorsChanged.connect (sigc::mem_fun (*this, &MonoPanner::color_handler));
+
+	set_tooltip ();
 }
 
 MonoPanner::~MonoPanner ()
@@ -81,12 +85,8 @@ MonoPanner::~MonoPanner ()
 }
 
 void
-MonoPanner::set_drag_data ()
+MonoPanner::set_tooltip ()
 {
-        if (!_drag_data_label) {
-                return;
-        }
-
         double pos = position_control->get_value(); // 0..1
 
         /* We show the position of the center of the image relative to the left & right.
@@ -101,7 +101,7 @@ MonoPanner::set_drag_data ()
         snprintf (buf, sizeof (buf), "L:%3d R:%3d",
                   (int) rint (100.0 * (1.0 - pos)),
                   (int) rint (100.0 * pos));
-        _drag_data_label->set_markup (buf);
+        _tooltip.set_tip (buf);
 }
 
 bool
@@ -255,6 +255,7 @@ MonoPanner::on_button_press_event (GdkEventButton* ev)
         last_drag_x = ev->x;
 
         _dragging = false;
+	_tooltip.target_stop_drag ();
         accumulated_delta = 0;
         detented = false;
 
@@ -290,6 +291,7 @@ MonoPanner::on_button_press_event (GdkEventButton* ev)
                 }
 
                 _dragging = false;
+		_tooltip.target_stop_drag ();
 
         } else if (ev->type == GDK_BUTTON_PRESS) {
 
@@ -299,8 +301,8 @@ MonoPanner::on_button_press_event (GdkEventButton* ev)
                 }
 
                 _dragging = true;
+		_tooltip.target_start_drag ();
                 StartGesture ();
-		show_drag_data_window ();
         }
 
         return true;
@@ -318,10 +320,9 @@ MonoPanner::on_button_release_event (GdkEventButton* ev)
         }
 
         _dragging = false;
+	_tooltip.target_stop_drag ();
         accumulated_delta = 0;
         detented = false;
-
-	hide_drag_data_window ();
 
         if (Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier)) {
 		_panner->reset ();

@@ -41,6 +41,7 @@
 #include "pbd/destructible.h"
 
 #include "ardour/ardour.h"
+#include "ardour/instrument_info.h"
 #include "ardour/io.h"
 #include "ardour/types.h"
 #include "ardour/mute_master.h"
@@ -405,6 +406,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	   special case not covered by this utility function.
 	*/
 	boost::shared_ptr<Processor> the_instrument() const;
+        InstrumentInfo& instrument_info() { return _instrument_info; }
 
 	void automation_snapshot (framepos_t now, bool force=false);
 	void protect_automation ();
@@ -499,6 +501,8 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	bool           _solo_safe;
 	DataType       _default_type;
 	FedBy          _fed_by;
+
+        InstrumentInfo _instrument_info;
 
 	virtual ChanCount input_streams () const;
 
@@ -599,6 +603,8 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	boost::weak_ptr<Processor> _processor_after_last_custom_meter;
 	/** true if the last custom meter position was at the end of the processor list */
 	bool _last_custom_meter_was_at_end;
+
+        void reset_instrument_info ();
 };
 
 } // namespace ARDOUR

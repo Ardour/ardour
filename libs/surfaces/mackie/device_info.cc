@@ -61,10 +61,20 @@ DeviceInfo::~DeviceInfo()
 {
 }
 
+GlobalButtonInfo&
+DeviceInfo::get_global_button(Button::ID id)
+{
+	GlobalButtonsInfo::iterator it;
+
+	it = _global_buttons.find (id);
+
+	return it->second;
+}
+
 std::string&
 DeviceInfo::get_global_button_name(Button::ID id)
 {
-	std::map<Button::ID,GlobalButtonInfo>::iterator it;
+	GlobalButtonsInfo::iterator it;
 	
 	it = _global_buttons.find (id);
 	if (it == _global_buttons.end ()) {
@@ -89,7 +99,6 @@ DeviceInfo::mackie_control_buttons ()
 	//TODO controller position value (0x00 to 0x7f)
 	
 	_strip_buttons[Button::RecEnable] = StripButtonInfo (0x0, "Rec");
-	_strip_buttons[Button::FaderTouch] = StripButtonInfo (0xe0, "Fader Touch");
 }
 
 void
@@ -102,7 +111,6 @@ DeviceInfo::logic_control_buttons ()
 	_global_buttons[Button::UserB] = GlobalButtonInfo ("User Switch B", "user", 0x67);
 
 	_strip_buttons[Button::RecEnable] = StripButtonInfo (0x0, "Rec/Rdy");
-	_strip_buttons[Button::FaderTouch] = StripButtonInfo (0x68, "Fader Touch");
 }
 
 void
@@ -166,7 +174,7 @@ DeviceInfo::shared_buttons ()
 	_global_buttons[Button::Drop] = GlobalButtonInfo ("Drop", "transport", 0x57);
 	_global_buttons[Button::Replace] = GlobalButtonInfo ("Replace", "transport", 0x58);
 	_global_buttons[Button::Click] = GlobalButtonInfo ("Click", "transport", 0x59);
-	_global_buttons[Button::Solo] = GlobalButtonInfo ("Solo", "transport", 0x5a);
+	_global_buttons[Button::ClearSolo] = GlobalButtonInfo ("Solo", "transport", 0x5a);
 	
 	_global_buttons[Button::Rewind] = GlobalButtonInfo ("Rewind", "transport", 0x5b);
 	_global_buttons[Button::Ffwd] = GlobalButtonInfo ("Fast Fwd", "transport", 0x5c);
@@ -185,6 +193,10 @@ DeviceInfo::shared_buttons ()
 	_strip_buttons[Button::Mute] = StripButtonInfo (0x10, "Mute");
 	_strip_buttons[Button::Select] = StripButtonInfo (0x18, "Select");
 	_strip_buttons[Button::VSelect] = StripButtonInfo (0x20, "V-Select");
+
+	_strip_buttons[Button::FaderTouch] = StripButtonInfo (0x68, "Fader Touch");
+
+	_global_buttons[Button::MasterFaderTouch] = GlobalButtonInfo ("Master Fader Touch", "master", 0x70);
 }
 
 int
@@ -198,7 +210,6 @@ DeviceInfo::set_state (const XMLNode& node, int /* version */)
 	}
 
 	/* name is mandatory */
- 
 	if ((child = node.child ("Name")) != 0) {
 		if ((prop = child->property ("value")) != 0) {
 			_name = prop->value();
@@ -208,7 +219,6 @@ DeviceInfo::set_state (const XMLNode& node, int /* version */)
 	}
 
 	/* strip count is mandatory */
-
 	if ((child = node.child ("Strips")) != 0) {
 		if ((prop = child->property ("value")) != 0) {
 			if ((_strip_cnt = atoi (prop->value())) == 0) {

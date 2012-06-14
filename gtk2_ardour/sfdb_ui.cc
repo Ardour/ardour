@@ -712,7 +712,7 @@ SoundFileBrowser::on_audio_and_midi_filter (const FileFilter::Info& filter_info)
 void
 SoundFileBrowser::update_preview ()
 {
-	if (preview.setup_labels (chooser.get_filename())) {
+	if (preview.setup_labels (chooser.get_preview_filename())) {
 		if (preview.autoplay()) {
 			Glib::signal_idle().connect (sigc::mem_fun (preview, &SoundFileBox::audition_oneshot));
 		}

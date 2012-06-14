@@ -209,7 +209,7 @@ Editor::session_import_dialog ()
 typedef std::map<PBD::ID,boost::shared_ptr<ARDOUR::Source> > SourceMap;
 
 /**
- * Updating is still disabled, see note in libs/ardour/import.cc Session::import_audiofiles()
+ * Updating is still disabled, see note in libs/ardour/import.cc Session::import_files()
  *
  * all_or_nothing:
  *   true  = show "Update", "Import" and "Skip"
@@ -546,7 +546,7 @@ Editor::import_sndfiles (vector<string> paths, ImportMode mode, SrcQuality quali
 	set_canvas_cursor (_cursors->wait);
 	gdk_flush ();
 
-	/* start import thread for this spec. this will ultimately call Session::import_audiofiles()
+	/* start import thread for this spec. this will ultimately call Session::import_files()
 	   which, if successful, will add the files as regions to the region list. its up to us
 	   (the GUI) to direct additional steps after that.
 	*/
@@ -788,7 +788,7 @@ Editor::add_sources (vector<string> paths, SourceList& sources, framepos_t& pos,
 			*/
 			framecnt_t len = (*x)->length (pos);
 			if (len == 0) {
-				len = (60 / 120) * _session->frame_rate ();
+				len = (60.0 / 120.0) * _session->frame_rate ();
 			}
 
 			plist.add (ARDOUR::Properties::start, 0);
@@ -827,6 +827,8 @@ Editor::add_sources (vector<string> paths, SourceList& sources, framepos_t& pos,
 	int n = 0;
 	framepos_t rlen = 0;
 
+	begin_reversible_command (Operations::insert_file);
+	
 	for (vector<boost::shared_ptr<Region> >::iterator r = regions.begin(); r != regions.end(); ++r, ++n) {
 		boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (*r);
 
@@ -874,6 +876,8 @@ Editor::add_sources (vector<string> paths, SourceList& sources, framepos_t& pos,
 		}
 	}
 
+	commit_reversible_command ();
+	
 	/* setup peak file building in another thread */
 
 	for (SourceList::iterator x = sources.begin(); x != sources.end(); ++x) {
@@ -885,7 +889,7 @@ Editor::add_sources (vector<string> paths, SourceList& sources, framepos_t& pos,
 
 int
 Editor::finish_bringing_in_material (boost::shared_ptr<Region> region, uint32_t in_chans, uint32_t out_chans, framepos_t& pos,
-				  ImportMode mode, boost::shared_ptr<Track>& existing_track)
+				     ImportMode mode, boost::shared_ptr<Track>& existing_track)
 {
 	boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion>(region);
 	boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion>(region);
@@ -912,11 +916,9 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region, uint32_t 
 
 		boost::shared_ptr<Playlist> playlist = existing_track->playlist();
 		boost::shared_ptr<Region> copy (RegionFactory::create (region, region->properties()));
-		begin_reversible_command (Operations::insert_file);
 		playlist->clear_changes ();
 		playlist->add_region (copy, pos);
 		_session->add_command (new StatefulDiffCommand (playlist));
-		commit_reversible_command ();
 		break;
 	}
 
@@ -945,12 +947,10 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region, uint32_t 
 		}
 
 		boost::shared_ptr<Playlist> playlist = existing_track->playlist();
-		boost::shared_ptr<Region> copy (RegionFactory::create (region));
-		begin_reversible_command (Operations::insert_file);
+		boost::shared_ptr<Region> copy (RegionFactory::create (region, true));
 		playlist->clear_changes ();
 		playlist->add_region (copy, pos);
 		_session->add_command (new StatefulDiffCommand (playlist));
-		commit_reversible_command ();
 		break;
 	}
 
@@ -963,12 +963,10 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region, uint32_t 
 		list<boost::shared_ptr<AudioTrack> > at (_session->new_audio_track (in_chans, out_chans, Destructive));
 		if (!at.empty()) {
 			boost::shared_ptr<Playlist> playlist = at.front()->playlist();
-			boost::shared_ptr<Region> copy (RegionFactory::create (region));
-			begin_reversible_command (Operations::insert_file);
+			boost::shared_ptr<Region> copy (RegionFactory::create (region, true));
 			playlist->clear_changes ();
 			playlist->add_region (copy, pos);
 			_session->add_command (new StatefulDiffCommand (playlist));
-			commit_reversible_command ();
 		}
 		break;
 	}
@@ -989,7 +987,7 @@ Editor::_import_thread (void *arg)
 void *
 Editor::import_thread ()
 {
-	_session->import_audiofiles (import_status);
+	_session->import_files (import_status);
 	pthread_exit_pbd (0);
 	/*NOTREACHED*/
 	return 0;

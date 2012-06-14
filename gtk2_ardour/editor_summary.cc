@@ -310,6 +310,8 @@ EditorSummary::centre_on_click (GdkEventButton* ev)
 bool
 EditorSummary::on_button_press_event (GdkEventButton* ev)
 {
+	_old_follow_playhead = _editor->follow_playhead ();
+	
 	if (ev->button == 1) {
 
 		pair<double, double> xr;
@@ -331,7 +333,6 @@ EditorSummary::on_button_press_event (GdkEventButton* ev)
 			_zoom_position = get_position (ev->x, ev->y);
 			_zoom_dragging = true;
 			_editor->_dragging_playhead = true;
-			_old_follow_playhead = _editor->follow_playhead ();
 			_editor->set_follow_playhead (false);
 
 			if (suspending_editor_updates ()) {
@@ -361,7 +362,6 @@ EditorSummary::on_button_press_event (GdkEventButton* ev)
 			_move_dragging = true;
 			_moved = false;
 			_editor->_dragging_playhead = true;
-			_old_follow_playhead = _editor->follow_playhead ();
 			_editor->set_follow_playhead (false);
 		}
 	}

@@ -29,6 +29,7 @@ public:
 	static BufferSet& get_scratch_buffers (ChanCount count = ChanCount::ZERO);
 	static BufferSet& get_mix_buffers (ChanCount count = ChanCount::ZERO);
 	static gain_t* gain_automation_buffer ();
+	static gain_t* send_gain_automation_buffer ();
 	static pan_t** pan_automation_buffer ();
 
 protected:

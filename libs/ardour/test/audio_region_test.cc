@@ -1,76 +1,85 @@
-#include "ardour/playlist.h"
+/*
+    Copyright (C) 2012 Paul Davis
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+*/
+
+#include "pbd/filesystem.h"
+#include "pbd/compose.h"
+#include "ardour/playlist_factory.h"
+#include "ardour/source_factory.h"
 #include "ardour/region.h"
+#include "ardour/region_factory.h"
+#include "ardour/sndfilesource.h"
 #include "ardour/audioregion.h"
+#include "ardour/audioplaylist.h"
 #include "audio_region_test.h"
 #include "test_globals.h"
 
-CPPUNIT_TEST_SUITE_REGISTRATION (AudioRegionTest);
-
 using namespace std;
+using namespace PBD;
 using namespace ARDOUR;
 
 void
-AudioRegionTest::readTest ()
+AudioRegionTest::setUp ()
 {
-	int const N = 1024;
+	TestNeedingSession::setUp ();
+
+	/* This is important, otherwise createWritable will mark the source immutable (hence unwritable) */
+	unlink ("libs/ardour/test/test.wav");
+	string const test_wav_path = "libs/ardour/test/test.wav";
+	_playlist = PlaylistFactory::create (DataType::AUDIO, *_session, "test");
+	_audio_playlist = boost::dynamic_pointer_cast<AudioPlaylist> (_playlist);
+	_source = SourceFactory::createWritable (DataType::AUDIO, *_session, test_wav_path, "", false, Fs);
+
+	/* Write a staircase to the source */
+
+	boost::shared_ptr<SndFileSource> s = boost::dynamic_pointer_cast<SndFileSource> (_source);
+	assert (s);
+
+	int const signal_length = 4096;
 	
-	Sample buf[N];
-	Sample mbuf[N];
-	float gbuf[N];
-
-	int const P = 100;
-	boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (_region[0]);
-
-	/* Simple read: 256 frames from start of region, no fades */
-
-	ar->set_position (P);
-	ar->set_length (1024);
-
-	ar->read_from_sources (ar->_sources, ar->_length, buf, P, 256, 0);
-	check_staircase (buf, 0, 256);
-
-	for (int i = 0; i < N; ++i) {
-		buf[i] = 0;
+	Sample staircase[signal_length];
+	for (int i = 0; i < signal_length; ++i) {
+		staircase[i] = i;
 	}
 
-	/* Offset read: 256 frames from 128 frames into the region, no fades */
-	ar->read_from_sources (ar->_sources, ar->_length, buf, P + 128, 256, 0);
-	check_staircase (buf, 128, 256);
-
-	/* Simple read with a fade-in: 256 frames from start of region, with fades */
-	ar->set_default_fade_in ();
-	CPPUNIT_ASSERT_EQUAL (double (64), ar->_fade_in->back()->when);
-
-	for (int i = 0; i < N; ++i) {
-		buf[i] = 0;
-	}
-
-	ar->read_at (buf, mbuf, gbuf, P, 256, 0);
-	for (int i = 0; i < 64; ++i) {
-		/* XXX: this isn't very accurate, but close enough for now; needs investigation */
-		CPPUNIT_ASSERT_DOUBLES_EQUAL (float (i * i / 63.0), buf[i], 1e-4);
-	}
-	for (int i = 64; i < P; ++i) {
-		CPPUNIT_ASSERT_EQUAL (i, int (buf[i]));
-	}
+	s->write (staircase, signal_length);
 	
-	/* Offset read: 256 frames from 128 frames into the region, with fades
-	   (though the fade should not affect it, as it is finished before the read starts)
-	*/
-
-	for (int i = 0; i < N; ++i) {
-		buf[i] = 0;
+	PropertyList plist;
+	plist.add (Properties::start, 0);
+	plist.add (Properties::length, 100);
+	for (int i = 0; i < 16; ++i) {
+		_r[i] = RegionFactory::create (_source, plist);
+		_ar[i] = boost::dynamic_pointer_cast<AudioRegion> (_r[i]);
+		_ar[i]->set_name (string_compose ("ar%1", i));
 	}
-	
-	ar->read_at (buf, mbuf, gbuf, P + 128, 256, 0);
-	check_staircase (buf, 128, 256);
 }
 
 void
-AudioRegionTest::check_staircase (Sample* b, int offset, int N)
+AudioRegionTest::tearDown ()
 {
-	for (int i = 0; i < N; ++i) {
-		int const j = i + offset;
-		CPPUNIT_ASSERT_EQUAL (j, int (b[i]));
+	_playlist.reset ();
+	_audio_playlist.reset ();
+	_source.reset ();
+	for (int i = 0; i < 16; ++i) {
+		_r[i].reset ();
+		_ar[i].reset ();
 	}
+
+	TestNeedingSession::tearDown ();
 }
+
+	
