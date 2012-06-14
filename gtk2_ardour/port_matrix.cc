@@ -969,6 +969,10 @@ PortMatrix::port_connected_or_disconnected ()
 void
 PortMatrix::update_tab_highlighting ()
 {
+	if (!_session) {
+		return;
+	}
+	
 	for (int i = 0; i < 2; ++i) {
 
 		Gtk::Notebook* notebook = row_index() == i ? &_vnotebook : &_hnotebook;
