@@ -248,6 +248,8 @@ Session::destroy ()
 
 	_butler->drop_references ();
 	delete _butler;
+	_butler = 0;
+	
 	delete midi_control_ui;
 	delete _all_route_group;
 
