@@ -136,7 +136,7 @@ soundgrid_init ()
 
         Glib::Thread* thr = Glib::Thread::create (sigc::ptr_fun (sg_init));
 
-        Glib::signal_timeout().connect (sigc::bind (sigc::ptr_fun (hack), sigc::mem_fun (progress, &Gtk::ProgressBar::pulse)), 500);
+        Glib::signal_timeout().connect (sigc::bind (sigc::ptr_fun (hack), sigc::mem_fun (progress, &Gtk::ProgressBar::pulse)), 100);
         
         while (sg_status == 0) {
                 gtk_main_iteration ();

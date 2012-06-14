@@ -93,9 +93,33 @@ WMSD_SetPreset (const WSDSurfaceHandle /*surfaceHandle*/, void* /*pPresetChunk*/
 
 WMSDErr 
 WMSD_SurfaceDisplayUpdate (const WSDSurfaceHandle /*surfaceHandle*/, 
-                           const struct WSControlID* /*pControlID*/)
+                           const struct WSControlID* pControlID)
 {
-        // DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("SurfaceDriver:%1\n", __FUNCTION__));
+        
+        switch (pControlID->clusterID.clusterType) {
+        case eClusterType_Global:
+                switch (pControlID->clusterID.clusterTypeIndex) {
+                case eClusterType_Global_Notification:
+                        DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Surface Update, notification event %1 state %2\n",
+                                                                       ((WSControlIDNotification*) pControlID)->pEventTicket,
+                                                                       ((WSControlIDNotification*) pControlID)->eventState));
+                        SoundGrid::finalize (((WSControlIDNotification*) pControlID)->pEventTicket, 
+                                             ((WSControlIDNotification*) pControlID)->eventState);
+
+                        break;
+                default:
+                        DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Surface Update, global index %1 ctype %2 cindex %3 cid %4\n",
+                                                               pControlID->clusterID.clusterTypeIndex,
+                                                               pControlID->clusterControlID.controlType,
+                                                               pControlID->clusterControlID.controlTypeIndex,
+                                                               pControlID->clusterControlID.controlID));
+                        break;
+                }
+                break;
+        default:
+                break;
+        };
+
         return eNoErr;
 }
 

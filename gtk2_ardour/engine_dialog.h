@@ -156,6 +156,7 @@ class EngineControl : public Gtk::VBox {
 	Gtk::VBox soundgrid_vbox;
 	void create_soundgrid_inventory ();
 	void refill_soundgrid_inventory ();
+        void set_soundgrid_parameters ();
 	void soundgrid_configure ();
 
 	Gtk::Notebook notebook;
@@ -164,6 +165,7 @@ class EngineControl : public Gtk::VBox {
 
 	void realtime_changed ();
 	void driver_changed ();
+        void interface_changed ();
 	void build_command_line (std::vector<std::string>&);
 
 	std::map<std::string,std::vector<std::string> > devices;

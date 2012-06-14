@@ -22,7 +22,11 @@
 
 #include <vector>
 #include <string>
+
+#include <glib.h>
+
 #include <boost/utility.hpp>
+#include <boost/function.hpp>
 
 #include <WavesPublicAPI/WTErr.h>
 #include <WavesPublicAPI/WavesMixerAPI/1.0/WavesMixerAPI.h>
@@ -42,9 +46,12 @@ class SoundGrid : public boost::noncopyable
 	static SoundGrid& instance();
 	static bool available ();
 	static std::vector<std::string> lan_port_names();
+        static std::string current_lan_port_name();
 	static std::string coreaudio_device_name ();
 	static uint32_t current_network_buffer_size ();
 	static std::vector<uint32_t> possible_network_buffer_sizes ();
+
+        static int set_parameters (const std::string& device, int sr, int bufsize);
 
 	struct InventoryItem {
 	    virtual ~InventoryItem() {}; /* force virtual so that we can use dynamic_cast<> */
@@ -73,7 +80,9 @@ class SoundGrid : public boost::noncopyable
         static void driver_register (const WSDCoreHandle, const WSCoreCallbackTable*, const WSMixerConfig*);
 
         static void set_pool (void* pool);
-
+        
+        static void finalize (void* ecc, int state);
+        
   private:
 	SoundGrid ();
 	static SoundGrid* _instance;
@@ -88,10 +97,25 @@ class SoundGrid : public boost::noncopyable
 	void display_update ();
 	static void _display_update ();
 
+        void _finalize (void* ecc, int state);
+        void event_completed (int);
+
         static WTErr _sg_callback (const WSControlID* pControlID);
         static WTErr sg_callback (const WSControlID* pControlID);
 
         WTErr get (WSControlID*, WSControlInfo*);
+        WTErr set (WSEvent*, const std::string&);
+
+        struct EventCompletionClosure {
+            std::string name;
+            boost::function<void(int)> func;
+            uint64_t id;
+
+            EventCompletionClosure (const std::string& n, boost::function<void(int)> f) 
+            : name (n), func (f), id (g_atomic_int_add (&id_counter, 1) + 1) {}
+
+            static int id_counter; 
+        };
 };
 
 } // namespace ARDOUR

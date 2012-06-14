@@ -50,6 +50,8 @@ using std::endl;
 
 SoundGrid* SoundGrid::_instance = 0;
 
+int SoundGrid::EventCompletionClosure::id_counter = 0;
+
 SoundGrid::SoundGrid ()
 	: dl_handle (0)
         , _sg (0)
@@ -168,6 +170,62 @@ SoundGrid::get (WSControlID* id, WSControlInfo* info)
         return 0;
 }
 
+void
+SoundGrid::event_completed (int)
+{
+        cerr << "CURRENT LAN PORT: " << current_lan_port_name() << endl;
+}
+
+void
+SoundGrid::finalize (void* ecc, int state)
+{
+        instance()._finalize (ecc, state);
+}
+
+void
+SoundGrid::_finalize (void* p, int state)
+{
+        EventCompletionClosure* ecc = (EventCompletionClosure*) p;
+        cerr << ecc->id << ": " << ecc->name << " finished, state = " << state << endl;
+        ecc->func (state);
+        delete ecc;
+}
+
+int
+SoundGrid::set (WSEvent* ev, const std::string& what)
+{
+        if (!_host_handle) {
+                return -1;
+        }
+
+        ev->sourceSurface = (WSDSurfaceHandle) this;
+        ev->eventTicket = new EventCompletionClosure (what, boost::bind (&SoundGrid::event_completed, this, _1));
+
+        if (_callback_table.setEventProc (_host_handle, this, ev) != eNoErr) {
+                return -1;
+        }
+
+        return 0;
+}
+
+#undef str
+#undef xstr
+#define xstr(s) str(s)
+#define str(s) #s
+#define __SG_WHERE __FILE__ ":" xstr(__LINE__)
+
+int
+SoundGrid::set_parameters (const std::string& device, int sr, int bufsize)
+{
+        WSAudioParamsEvent ev;
+        Init_WSAudioParamsEvent (&ev);
+        strncpy (ev.m_audioParams.deviceName, device.c_str(), sizeof (ev.m_audioParams.deviceName));
+        ev.m_audioParams.samplingRate = sr;
+        ev.m_audioParams.bufferSizeSampleFrames = bufsize;
+        
+        return instance().set ((WSEvent*) &ev, __SG_WHERE);
+}
+
 vector<string>
 SoundGrid::lan_port_names ()
 {
@@ -183,6 +241,23 @@ SoundGrid::lan_port_names ()
         }
 
 	return names;
+}
+
+std::string
+SoundGrid::current_lan_port_name()
+{
+        WTErr eRetVal;
+	std::vector<string> names;
+
+        WSAudioDevicesControlInfo audioDevices;
+        Init_WSAudioDevicesControlInfo(&audioDevices);
+        eRetVal = instance().get (&audioDevices.m_controlInfo.m_controlID, (WSControlInfo*)&audioDevices);
+
+        if (eRetVal != eNoErr || audioDevices.m_audioDevices.currentDeviceIndex >= audioDevices.m_audioDevices.numberOfDevices) {
+                return string();
+        }
+
+        return audioDevices.m_audioDevices.deviceNames[audioDevices.m_audioDevices.currentDeviceIndex];
 }
 
 string

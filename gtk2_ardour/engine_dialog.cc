@@ -173,6 +173,8 @@ EngineControl::EngineControl ()
 	audio_mode_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::audio_mode_changed));
 	audio_mode_changed ();
 
+        interface_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::interface_changed));
+
 	strings.clear ();
 	strings.push_back (_("None"));
 	strings.push_back (_("seq"));
@@ -914,6 +916,19 @@ EngineControl::enumerate_netjack_devices ()
 #endif
 
 void
+EngineControl::interface_changed ()
+{
+	string driver = driver_combo.get_active_text();
+        
+        if (driver != "SoundGrid") {
+                return; /* nothing to do - the interface name isn't used for anything except passing to JACK */
+        }
+
+        set_soundgrid_parameters ();
+        refill_soundgrid_inventory ();
+}
+
+void
 EngineControl::driver_changed ()
 {
 	string driver = driver_combo.get_active_text();
@@ -937,15 +952,8 @@ EngineControl::driver_changed ()
 	}
 
 	if (driver == _("SoundGrid")) {
-                
 		device_label.set_text (_("LAN Port"));
-
-		if (soundgrid_vbox.children().empty()) {
-			create_soundgrid_inventory ();
-		} else {
-			refill_soundgrid_inventory ();
-		}
-
+                interface_changed ();
 		notebook.insert_page (soundgrid_vbox, _("SoundGrid Inventory"), 1);
 	} else {
 		device_label.set_text (_("Audio Interface"));
@@ -1516,15 +1524,16 @@ EngineControl::create_soundgrid_inventory ()
 	soundgrid_server_display.append_column (_("MAC Address/\nComputer Name"), sg_server_columns.mac);
 
 	soundgrid_vbox.pack_start (soundgrid_server_display);
-
 	soundgrid_vbox.show_all ();
-
-	refill_soundgrid_inventory ();
 }
 
 void
 EngineControl::refill_soundgrid_inventory ()
 {
+        if (soundgrid_vbox.children().empty()) {
+                create_soundgrid_inventory ();
+        }
+
 	SoundGrid::Inventory inventory;
 	SoundGrid::update_inventory (inventory);
 
@@ -1578,6 +1587,18 @@ EngineControl::refill_soundgrid_inventory ()
 	soundgrid_server_display.set_model (soundgrid_server_model);
 
 	SoundGrid::clear_inventory (inventory);
+}
+
+void
+EngineControl::set_soundgrid_parameters ()
+{
+        string lan_port = interface_combo.get_active_text ();
+        int sr = atoi (sample_rate_combo.get_active_text());
+        int bufsize = atoi (period_size_combo.get_active_text());
+ 
+        cerr << "Calling soundgrid::set_parmeter...\n";
+        int ret = SoundGrid::set_parameters (lan_port, sr, bufsize);
+        cerr << "\treturned " << ret << endl;
 }
 
 void
