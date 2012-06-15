@@ -1794,7 +1794,7 @@ AudioRegionView::drag_start ()
 		AudioStreamView* av = atav->audio_view();
 		if (av) {
 			/* this will hide our xfades too */
-			av->hide_xfades_with (audio_region());
+			_hidden_xfades = av->hide_xfades_with (audio_region());
 		}
 	}
 }
@@ -1803,6 +1803,11 @@ void
 AudioRegionView::drag_end ()
 {
 	TimeAxisViewItem::drag_end ();
-	/* fades will be redrawn if they changed */
+
+	for (list<AudioRegionView*>::iterator i = _hidden_xfades.begin(); i != _hidden_xfades.end(); ++i) {
+		(*i)->show_xfades ();
+	}
+
+	_hidden_xfades.clear ();
 }
 

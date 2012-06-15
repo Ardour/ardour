@@ -207,6 +207,9 @@ private:
 	 *  may be 0 if no connection exists.
 	 */
 	std::vector<PBD::ScopedConnection*> _data_ready_connections;
+
+	/** RegionViews that we hid the xfades for at the start of the current drag */
+	std::list<AudioRegionView*> _hidden_xfades;
 };
 
 #endif /* __gtk_ardour_audio_region_view_h__ */

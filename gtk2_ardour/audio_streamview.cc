@@ -530,9 +530,14 @@ AudioStreamView::hide_all_fades ()
 	}
 }
 
-void
+/** Hide xfades for regions that overlap ar.
+ *  @return AudioRegionViews that xfades were hidden for.
+ */
+list<AudioRegionView*>
 AudioStreamView::hide_xfades_with (boost::shared_ptr<AudioRegion> ar)
 {
+	list<AudioRegionView*> hidden;
+	
 	for (list<RegionView*>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
 		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
 		if (arv) {
@@ -541,10 +546,13 @@ AudioStreamView::hide_xfades_with (boost::shared_ptr<AudioRegion> ar)
 				break;
 			default:
 				arv->hide_xfades ();
+				hidden.push_back (arv);
 				break;
 			}
 		}
 	}
+
+	return hidden;
 }
 
 void
