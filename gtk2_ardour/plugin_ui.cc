@@ -71,6 +71,10 @@ PluginUIWindow::PluginUIWindow (Gtk::Window* win, boost::shared_ptr<PluginInsert
 	: parent (win)
         , was_visible (false)
         , _keyboard_focused (false)
+#ifdef HAVE_AUDIOUNITS
+	, pre_deactivate_x (-1)                                                                                                          
+	, pre_deactivate_y (-1)                                                                                                          
+#endif                  
 {
 	bool have_gui = false;
 
@@ -199,6 +203,11 @@ PluginUIWindow::on_show ()
 	}
 
 	if (_pluginui) {
+#if defined (HAVE_AUDIOUNITS) && defined(GTKOSX)
+		if (pre_deactivate_x >= 0) {                                                                             
+			move (pre_deactivate_x, pre_deactivate_y);                                                       
+		}                                                      
+#endif
 		if (_pluginui->on_window_show (_title)) {
 			Window::on_show ();
 		}
@@ -212,6 +221,10 @@ PluginUIWindow::on_show ()
 void
 PluginUIWindow::on_hide ()
 {
+#if defined (HAVE_AUDIOUNITS) && defined(GTKOSX)
+	get_position (pre_deactivate_x, pre_deactivate_y);                                                               
+#endif
+
 	Window::on_hide ();
 
 	if (_pluginui) {
@@ -277,12 +290,16 @@ PluginUIWindow::app_activated (bool yn)
 		if (yn) {
 			if (was_visible) {
 				_pluginui->activate ();
+                                if (pre_deactivate_x >= 0) {                                                                             
+                                        move (pre_deactivate_x, pre_deactivate_y);                                                       
+                                }                                                      
 				// present ();
 				show ();
 				was_visible = true;
 			}
 		} else {
 			was_visible = is_visible();
+                        get_position (pre_deactivate_x, pre_deactivate_y);                                                               
 			hide ();
 			_pluginui->deactivate ();
 		}
