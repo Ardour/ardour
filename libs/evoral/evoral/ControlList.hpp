@@ -255,6 +255,8 @@ public:
         static void set_thinning_factor (double d);
         static double thinning_factor() { return _thinning_factor; }
 
+	bool operator!= (ControlList const &) const;
+
 protected:
 
 	/** Called by unlocked_eval() to handle cases of 3 or more control points. */

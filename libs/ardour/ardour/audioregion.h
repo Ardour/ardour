@@ -46,16 +46,11 @@ namespace Properties {
 	extern PBD::PropertyDescriptor<bool> fade_in_active;
 	extern PBD::PropertyDescriptor<bool> fade_out_active;
 	extern PBD::PropertyDescriptor<float> scale_amplitude;
-
-	/* the envelope and fades are not scalar items and so
-	   currently (2010/02) are not stored using Property.
-	   However, these descriptors enable us to notify
-	   about changes to them via PropertyChange.
-	*/
-
-	extern PBD::PropertyDescriptor<bool> envelope;
-	extern PBD::PropertyDescriptor<bool> fade_in;
-	extern PBD::PropertyDescriptor<bool> fade_out;
+	extern PBD::PropertyDescriptor<boost::shared_ptr<AutomationList> > fade_in;
+	extern PBD::PropertyDescriptor<boost::shared_ptr<AutomationList> > inverse_fade_in;
+	extern PBD::PropertyDescriptor<boost::shared_ptr<AutomationList> > fade_out;
+	extern PBD::PropertyDescriptor<boost::shared_ptr<AutomationList> > inverse_fade_out;
+	extern PBD::PropertyDescriptor<boost::shared_ptr<AutomationList> > envelope;
 }
 
 class Playlist;
@@ -99,11 +94,11 @@ class AudioRegion : public Region
 	bool fade_out_is_short() const { return _fade_out_is_short; }
 	void set_fade_out_is_short (bool yn);
 
-	boost::shared_ptr<AutomationList> fade_in()  { return _fade_in; }
-	boost::shared_ptr<AutomationList> inverse_fade_in()  { return _inverse_fade_in; }
-	boost::shared_ptr<AutomationList> fade_out() { return _fade_out; }
-	boost::shared_ptr<AutomationList> inverse_fade_out()  { return _inverse_fade_out; }
-	boost::shared_ptr<AutomationList> envelope() { return _envelope; }
+	boost::shared_ptr<AutomationList> fade_in()  { return _fade_in.val (); }
+	boost::shared_ptr<AutomationList> inverse_fade_in()  { return _inverse_fade_in.val (); }
+	boost::shared_ptr<AutomationList> fade_out() { return _fade_out.val (); }
+	boost::shared_ptr<AutomationList> inverse_fade_out()  { return _inverse_fade_out.val (); }
+	boost::shared_ptr<AutomationList> envelope() { return _envelope.val (); }
 
 	Evoral::Range<framepos_t> body_range () const;
 
@@ -231,15 +226,15 @@ class AudioRegion : public Region
 	void connect_to_analysis_changed ();
 	void connect_to_header_position_offset_changed ();
 
-	Automatable _automatable;
 
-	boost::shared_ptr<AutomationList> _fade_in;
-	boost::shared_ptr<AutomationList> _inverse_fade_in;
-	boost::shared_ptr<AutomationList> _fade_out;
-	boost::shared_ptr<AutomationList> _inverse_fade_out;
-	boost::shared_ptr<AutomationList> _envelope;
-	uint32_t                          _fade_in_suspended;
-	uint32_t                          _fade_out_suspended;
+	AutomationListProperty _fade_in;
+	AutomationListProperty _inverse_fade_in;
+	AutomationListProperty _fade_out;
+	AutomationListProperty _inverse_fade_out;
+	AutomationListProperty _envelope;
+	Automatable            _automatable;
+	uint32_t               _fade_in_suspended;
+	uint32_t               _fade_out_suspended;
 
 	boost::shared_ptr<ARDOUR::Region> get_single_other_xfade_region (bool start) const;
 

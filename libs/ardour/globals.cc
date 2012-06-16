@@ -115,34 +115,6 @@ extern void setup_enum_writer ();
 */
 PBD::PropertyChange ARDOUR::bounds_change;
 
-namespace ARDOUR {
-	namespace Properties {
-
-		/* the envelope and fades are not scalar items and so
-		   currently (2010/02) are not stored using Property.
-		   However, these descriptors enable us to notify
-		   about changes to them via PropertyChange.
-
-		   Declared in ardour/audioregion.h ...
-		*/
-
-		PBD::PropertyDescriptor<bool> fade_in;
-		PBD::PropertyDescriptor<bool> fade_out;
-		PBD::PropertyDescriptor<bool> envelope;
-	}
-}
-
-void
-ARDOUR::make_property_quarks ()
-{
-	Properties::fade_in.property_id = g_quark_from_static_string (X_("fade_in_FAKE"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for fade_in_FAKE = %1\n", 	Properties::fade_in.property_id));
-	Properties::fade_out.property_id = g_quark_from_static_string (X_("fade_out_FAKE"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for fade_out_FAKE = %1\n", 	Properties::fade_out.property_id));
-	Properties::envelope.property_id = g_quark_from_static_string (X_("envelope_FAKE"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for envelope_FAKE = %1\n", 	Properties::envelope.property_id));
-}
-
 void
 setup_hardware_optimization (bool try_optimization)
 {
@@ -248,7 +220,6 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization)
 	PBD::ID::init ();
 	SessionEvent::init_event_pool ();
 
-	make_property_quarks ();
 	SessionObject::make_property_quarks ();
 	Region::make_property_quarks ();
 	MidiRegion::make_property_quarks ();

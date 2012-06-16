@@ -424,10 +424,12 @@ def build(bld):
         testobj              = bld(features = 'cxx cxxprogram')
         testobj.source       = '''
                 test/dummy_lxvst.cc
+                test/test_util.cc
                 test/test_needing_session.cc
                 test/audio_region_test.cc
                 test/test_globals.cc
                 test/audio_region_read_test.cc
+                test/automation_list_property_test.cc
                 test/bbt_test.cc
                 test/tempo_test.cc
                 test/interpolation_test.cc
