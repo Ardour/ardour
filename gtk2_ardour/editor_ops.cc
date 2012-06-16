@@ -3393,7 +3393,6 @@ Editor::freeze_thread ()
 	/* create event pool because we may need to talk to the session */
 	SessionEvent::create_per_thread_pool ("freeze events", 64);
 	/* create per-thread buffers for process() tree to use */
-	current_interthread_info->process_thread.init ();
 	current_interthread_info->process_thread.get_buffers ();
 	clicked_routeview->audio_track()->freeze_me (*current_interthread_info);
 	current_interthread_info->done = true;

@@ -81,41 +81,60 @@ CanvasPatchChange::initialize_popup_menus()
 
 	const ChannelNameSet::PatchBanks& patch_banks = channel_name_set->patch_banks();
 
-	// fill popup menu:
-	Gtk::Menu::MenuList& patch_bank_menus = _popup.items();
+	if (patch_banks.size() > 1) {
+		// fill popup menu:
+		Gtk::Menu::MenuList& patch_bank_menus = _popup.items();
+		
+		for (ChannelNameSet::PatchBanks::const_iterator bank = patch_banks.begin();
+		     bank != patch_banks.end();
+		     ++bank) {
+			Gtk::Menu& patch_bank_menu = *manage(new Gtk::Menu());
+			
+			const PatchBank::PatchNameList& patches = (*bank)->patch_name_list();
+			Gtk::Menu::MenuList& patch_menus = patch_bank_menu.items();
+			
+			for (PatchBank::PatchNameList::const_iterator patch = patches.begin();
+			     patch != patches.end();
+			     ++patch) {
+				std::string name = (*patch)->name();
+				boost::replace_all (name, "_", " ");
+				
+				patch_menus.push_back(
+					Gtk::Menu_Helpers::MenuElem(
+						name,
+						sigc::bind(
+							sigc::mem_fun(*this, &CanvasPatchChange::on_patch_menu_selected),
+							(*patch)->patch_primary_key())) );
+			}
+			
+			std::string name = (*bank)->name();
+			boost::replace_all (name, "_", " ");
+			
+			patch_bank_menus.push_back(
+				Gtk::Menu_Helpers::MenuElem(
+					name,
+					patch_bank_menu) );
+		}
+	} else {
+		/* only one patch bank, so make it the initial menu */
 
-	for (ChannelNameSet::PatchBanks::const_iterator bank = patch_banks.begin();
-	     bank != patch_banks.end();
-	     ++bank) {
-		Gtk::Menu& patch_bank_menu = *manage(new Gtk::Menu());
-
-		const PatchBank::PatchNameList& patches = (*bank)->patch_name_list();
-		Gtk::Menu::MenuList& patch_menus = patch_bank_menu.items();
-
+		const PatchBank::PatchNameList& patches = patch_banks.front()->patch_name_list();
+		Gtk::Menu::MenuList& patch_menus = _popup.items();
+		
 		for (PatchBank::PatchNameList::const_iterator patch = patches.begin();
 		     patch != patches.end();
 		     ++patch) {
 			std::string name = (*patch)->name();
 			boost::replace_all (name, "_", " ");
-
-			patch_menus.push_back(
-				Gtk::Menu_Helpers::MenuElem(
-					name,
-					sigc::bind(
-						sigc::mem_fun(*this, &CanvasPatchChange::on_patch_menu_selected),
-						(*patch)->patch_primary_key())) );
+			
+			patch_menus.push_back (Gtk::Menu_Helpers::MenuElem (name, 
+									    sigc::bind (
+										    sigc::mem_fun(*this, &CanvasPatchChange::on_patch_menu_selected),
+										    (*patch)->patch_primary_key())));
 		}
-
-		std::string name = (*bank)->name();
-		boost::replace_all (name, "_", " ");
-
-		patch_bank_menus.push_back(
-			Gtk::Menu_Helpers::MenuElem(
-				name,
-				patch_bank_menu) );
 	}
 }
-
+	
 void
 CanvasPatchChange::on_patch_menu_selected(const PatchPrimaryKey& key)
 {
