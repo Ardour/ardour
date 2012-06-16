@@ -268,7 +268,7 @@ def fetch_svn_revision (path):
     cmd = "LANG= "
     cmd += "svn info "
     cmd += path
-    cmd += " | awk '/^Revision:/ { print $2}'"
+    cmd += " 2>/dev/null | awk '/^Revision:/ { print $2}'"
     return commands.getoutput (cmd)
 
 def create_stored_revision (target = None, source = None, env = None):
@@ -342,7 +342,7 @@ env.Append (BUILDERS = {'VersionBuild' : version_bld})
 #
 
 def versioned_builder(target,source,env):
-    w, r = os.popen2( "LANG= svn info | awk '/^Revision:/ { print $2}'")
+    w, r = os.popen2( "LANG= svn info 2>/dev/null | awk '/^Revision:/ { print $2}'")
     
     last_revision = r.readline().strip()
     w.close()
