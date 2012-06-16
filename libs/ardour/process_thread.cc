@@ -40,7 +40,9 @@ release_thread_buffer (void* arg)
 void
 ProcessThread::init ()
 {
-        _private_thread_buffers = new Private<ThreadBuffers> (release_thread_buffer);
+	if (_private_thread_buffers == 0) {
+		_private_thread_buffers = new Private<ThreadBuffers> (release_thread_buffer);
+	}
 }
 
 ProcessThread::ProcessThread ()
