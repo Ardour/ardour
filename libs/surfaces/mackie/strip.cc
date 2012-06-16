@@ -70,6 +70,7 @@ Strip::Strip (Surface& s, const std::string& name, int index, const map<Button::
 	, _fader_touch (0)
 	, _vpot (0)
 	, _fader (0)
+	, _meter (0)
 	, _index (index)
 	, _surface (&s)
 	, _controls_locked (false)

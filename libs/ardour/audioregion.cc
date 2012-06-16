@@ -760,8 +760,8 @@ AudioRegion::read_from_sources (SourceList const & srcs, framecnt_t limit, Sampl
 		*/
 
 		if (Config->get_replicate_missing_region_channels()) {
-			/* track is N-channel, this region has less channels, so use a relevant channel
-			 */
+
+			/* copy an existing channel's data in for this non-existant one */
 
 			uint32_t channel = n_channels() % chan_n;
 			boost::shared_ptr<AudioSource> src = boost::dynamic_pointer_cast<AudioSource> (srcs[channel]);
@@ -769,6 +769,11 @@ AudioRegion::read_from_sources (SourceList const & srcs, framecnt_t limit, Sampl
 			if (src->read (buf, _start + internal_offset, to_read) != to_read) {
 				return 0; /* "read nothing" */
 			}
+
+		} else {
+			
+			/* use silence */
+			memset (buf, 0, sizeof (Sample) * to_read);
 		}
 	}
 
