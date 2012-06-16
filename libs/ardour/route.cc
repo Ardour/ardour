@@ -2127,6 +2127,8 @@ Route::set_state (const XMLNode& node, int version)
 		} else if (child->name() == Controllable::xml_node_name && (prop = child->property("name")) != 0) {
 			if (prop->value() == "solo") {
 				_solo_control->set_state (*child, version);
+			} else if (prop->value() == "mute") {
+				_mute_control->set_state (*child, version);
 			}
 
 		} else if (child->name() == X_("RemoteControl")) {
