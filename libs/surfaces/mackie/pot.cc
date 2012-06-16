@@ -47,11 +47,20 @@ Pot::set (float val, bool onoff, Mode mode)
 	
 	// Pot/LED mode
 	msg |=  (mode << 4);
+
+	/*
+	 * Even though a width value may be negative, there is
+	 * technically still width there, it is just reversed,
+	 * so make sure to show it on the LED ring appropriately.
+	 */
+	if (val < 0){
+	  val = val * -1;
+	}
 	
 	// val, but only if off hasn't explicitly been set
 	if (onoff) {
 		if (mode == spread) {
-			msg |=  (lrintf (val * 6) + 1) & 0x0f; // 0b00001111
+			msg |=  (lrintf (val * 6)) & 0x0f; // 0b00001111
 		} else {
 			msg |=  (lrintf (val * 10.0) + 1) & 0x0f; // 0b00001111
 		}
