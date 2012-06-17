@@ -1,3 +1,7 @@
+#include <string>
+
+class XMLNode;
+
 namespace ARDOUR {
 	class Session;
 }

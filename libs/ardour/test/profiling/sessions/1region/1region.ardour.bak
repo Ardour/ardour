@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Session version="3001" name="1region" sample-rate="48000" id-counter="120" event-counter="0">
+  <Config>
+    <Option name="xfade-model" value="FullCrossfade"/>
+    <Option name="xfade-choice" value="ConstantPowerMinus3dB"/>
+    <Option name="auto-xfade" value="1"/>
+    <Option name="short-xfade-seconds" value="0.015"/>
+    <Option name="destructive-xfade-msecs" value="2"/>
+    <Option name="use-region-fades" value="1"/>
+    <Option name="show-region-fades" value="1"/>
+    <Option name="native-file-data-format" value="FormatFloat"/>
+    <Option name="native-file-header-format" value="WAVE"/>
+    <Option name="auto-play" value="0"/>
+    <Option name="auto-return" value="0"/>
+    <Option name="auto-input" value="1"/>
+    <Option name="punch-in" value="0"/>
+    <Option name="punch-out" value="0"/>
+    <Option name="subframes-per-frame" value="100"/>
+    <Option name="timecode-format" value="timecode_30"/>
+    <Option name="raid-path" value=""/>
+    <Option name="audio-search-path" value=""/>
+    <Option name="midi-search-path" value=""/>
+    <Option name="auditioner-output-left" value="default"/>
+    <Option name="auditioner-output-right" value="default"/>
+    <Option name="timecode-source-is-synced" value="1"/>
+    <Option name="jack-time-master" value="1"/>
+    <Option name="use-video-sync" value="0"/>
+    <Option name="video-pullup" value="0"/>
+    <Option name="show-summary" value="1"/>
+    <Option name="show-group-tabs" value="1"/>
+    <Option name="external-sync" value="0"/>
+    <Option name="sync-source" value="JACK"/>
+    <Option name="insert-merge-policy" value="InsertMergeRelax"/>
+    <Option name="timecode-offset" value="0"/>
+    <Option name="timecode-offset-negative" value="1"/>
+    <Option name="glue-new-markers-to-bars-and-beats" value="0"/>
+    <Option name="midi-copy-is-fork" value="0"/>
+    <Option name="glue-new-regions-to-bars-and-beats" value="0"/>
+  </Config>
+  <Metadata/>
+  <Sources/>
+  <Regions/>
+  <Locations>
+    <Location id="86" name="Loop" start="0" end="1" flags="IsAutoLoop,IsHidden" locked="no" position-lock-style="AudioTime"/>
+    <Location id="87" name="Punch" start="0" end="1" flags="IsAutoPunch,IsHidden" locked="no" position-lock-style="AudioTime"/>
+  </Locations>
+  <Bundles/>
+  <Routes>
+    <Route id="21" name="master" default-type="audio" flags="MasterOut" active="yes" phase-invert="00" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=0:signal=0" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no">
+      <IO name="master" id="38" direction="Input" default-type="audio" user-latency="0">
+        <Port type="audio" name="master/audio_in 1"/>
+        <Port type="audio" name="master/audio_in 2"/>
+      </IO>
+      <IO name="master" id="39" direction="Output" default-type="audio" user-latency="0">
+        <Port type="audio" name="master/audio_out 1">
+          <Connection other="system:playback_1"/>
+        </Port>
+        <Port type="audio" name="master/audio_out 2">
+          <Connection other="system:playback_2"/>
+        </Port>
+      </IO>
+      <Controllable name="solo" id="23" flags="Toggle" value="0.000000000000"/>
+      <Controllable name="mute" id="25" flags="Toggle" value="0.000000000000"/>
+      <MuteMaster mute-point="PreFader,PostFader,Listen,Main" muted="no"/>
+      <RemoteControl id="318"/>
+      <Pannable>
+        <Controllable name="pan-azimuth" id="29" flags="" value="0.500000000000"/>
+        <Controllable name="pan-width" id="33" flags="" value="1.000000000000"/>
+        <Controllable name="pan-elevation" id="31" flags="" value="0.000000000000"/>
+        <Controllable name="pan-frontback" id="35" flags="" value="0.000000000000"/>
+        <Controllable name="pan-lfe" id="37" flags="" value="0.000000000000"/>
+        <Automation/>
+      </Pannable>
+      <Processor id="40" name="Amp" active="yes" user-latency="0" type="amp">
+        <Controllable name="gaincontrol" id="42" flags="GainLike" value="1.000000000000"/>
+      </Processor>
+      <Processor id="43" name="Meter" active="yes" user-latency="0" type="meter"/>
+      <Processor id="44" name="master" active="yes" user-latency="0" own-input="yes" own-output="no" output="master" type="main-outs" role="Main">
+        <PannerShell bypassed="no">
+          <Panner type="Equal Power Stereo"/>
+        </PannerShell>
+      </Processor>
+    </Route>
+    <Route id="88" name="MIDI 1" default-type="midi" active="yes" phase-invert="" denormal-protection="no" meter-point="MeterPostFader" order-keys="signal=2" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" note-mode="Sustained" step-editing="no" midi-thru="yes" input-active="yes">
+      <IO name="MIDI 1" id="105" direction="Input" default-type="midi" user-latency="0">
+        <Port type="midi" name="MIDI 1/midi_in 1"/>
+      </IO>
+      <IO name="MIDI 1" id="106" direction="Output" default-type="midi" user-latency="0">
+        <Port type="midi" name="MIDI 1/midi_out 1"/>
+      </IO>
+      <Controllable name="solo" id="90" flags="Toggle" value="0.000000000000"/>
+      <Controllable name="mute" id="92" flags="Toggle" value="0.000000000000"/>
+      <MuteMaster mute-point="PreFader,PostFader,Listen,Main" muted="no"/>
+      <RemoteControl id="2"/>
+      <Pannable>
+        <Controllable name="pan-azimuth" id="96" flags="" value="0.500000000000"/>
+        <Controllable name="pan-width" id="100" flags="" value="0.000000000000"/>
+        <Controllable name="pan-elevation" id="98" flags="" value="0.000000000000"/>
+        <Controllable name="pan-frontback" id="102" flags="" value="0.000000000000"/>
+        <Controllable name="pan-lfe" id="104" flags="" value="0.000000000000"/>
+        <Automation/>
+      </Pannable>
+      <Processor id="107" name="Amp" active="yes" user-latency="0" type="amp">
+        <Controllable name="gaincontrol" id="109" flags="GainLike" value="1.000000000000"/>
+      </Processor>
+      <Processor id="110" name="Meter" active="yes" user-latency="0" type="meter"/>
+      <Processor id="111" name="MIDI 1" active="yes" user-latency="0" own-input="yes" own-output="no" output="MIDI 1" type="main-outs" role="Main">
+        <PannerShell bypassed="no"/>
+      </Processor>
+      <Controllable name="recenable" id="113" flags="Toggle" value="0.000000000000"/>
+      <Diskstream flags="Recordable" playlist="MIDI 1.1" name="MIDI 1" id="115" speed="1.000000" capture-alignment="Automatic" channel-mode="AllChannels" channel-mask="0xffff"/>
+    </Route>
+  </Routes>
+  <Playlists>
+    <Playlist id="116" name="MIDI 1.1" type="midi" orig-track-id="88" frozen="no" combine-ops="0"/>
+  </Playlists>
+  <UnusedPlaylists/>
+  <RouteGroups/>
+  <Click>
+    <IO name="click" id="46" direction="Output" default-type="audio" user-latency="0">
+      <Port type="audio" name="click/audio_out 1">
+        <Connection other="system:playback_1"/>
+      </Port>
+      <Port type="audio" name="click/audio_out 2">
+        <Connection other="system:playback_2"/>
+      </Port>
+    </IO>
+    <Processor id="47" name="Amp" active="yes" user-latency="0" type="amp">
+      <Controllable name="gaincontrol" id="49" flags="GainLike" value="1.000000000000"/>
+    </Processor>
+  </Click>
+  <NamedSelections/>
+  <Speakers>
+    <Speaker azimuth="0" elevation="0" distance="1"/>
+    <Speaker azimuth="180" elevation="0" distance="0"/>
+  </Speakers>
+  <TempoMap>
+    <Tempo start="1|1|0" beats-per-minute="120.000000" note-type="4.000000" movable="no"/>
+    <Meter start="1|1|0" note-type="4.000000" divisions-per-bar="4.000000" movable="no"/>
+  </TempoMap>
+  <ControlProtocols>
+    <Protocol name="Open Sound Control (OSC)" active="no"/>
+    <Protocol name="Generic MIDI" feedback="0" feedback-interval="10000" active="yes">
+      <Controls/>
+    </Protocol>
+    <Protocol name="Mackie" bank="0" ipmidi-base="21928" device-profile="" device-name="Mackie Control Universal Pro" active="yes"/>
+  </ControlProtocols>
+</Session>

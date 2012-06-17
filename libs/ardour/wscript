@@ -475,37 +475,39 @@ def build(bld):
                 testobj.source += [ 'sse_functions_64bit.s' ]
 
         # Profiling
-        profilingobj = bld(features = 'cxx cxxprogram')
-        profilingobj.source = '''
-                test/dummy_lxvst.cc
-                test/test_util.cc
-                test/profiling/runpc.cc
-        '''.split()
+        for p in ['runpc', 'lots_of_regions']:
+            profilingobj = bld(features = 'cxx cxxprogram')
+            profilingobj.source = '''
+                    test/dummy_lxvst.cc
+                    test/test_util.cc
+            '''.split()
 
-        profilingobj.includes  = obj.includes
-        profilingobj.includes.append ('test')
-        profilingobj.uselib    = ['CPPUNIT','SIGCPP','JACK','GLIBMM','GTHREAD',
+            profilingobj.source.append('test/profiling/%s.cc' % p)
+
+            profilingobj.includes  = obj.includes
+            profilingobj.includes.append ('test')
+            profilingobj.uselib    = ['CPPUNIT','SIGCPP','JACK','GLIBMM','GTHREAD',
                              'SAMPLERATE','XML','LRDF','COREAUDIO']
-        profilingobj.use       = ['libpbd','libmidipp','libardour']
-        profilingobj.name      = 'libardour-profiling'
-        profilingobj.target    = 'run-profiling'
-        profilingobj.install_path = ''
-        profilingobj.defines      = [
-            'PACKAGE="libardour3profile"',
-            'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
-            'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
-            'LOCALEDIR="' + os.path.join(
-                os.path.normpath(bld.env['DATADIR']), 'locale') + '"',
-            'VAMP_DIR="' + os.path.join(
-                os.path.normpath(bld.env['LIBDIR']), 'ardour3', 'vamp') + '"'
-            ]
-        if bld.env['FPU_OPTIMIZATION']:
-            profilingobj.source += [ 'sse_functions_xmm.cc' ]
-            if (bld.env['build_target'] == 'i386'
-                or bld.env['build_target'] == 'i686'):
-                profilingobj.source += [ 'sse_functions.s' ]
-            elif bld.env['build_target'] == 'x86_64':
-                profilingobj.source += [ 'sse_functions_64bit.s' ]
+            profilingobj.use       = ['libpbd','libmidipp','libardour']
+            profilingobj.name      = 'libardour-profiling'
+            profilingobj.target    = p
+            profilingobj.install_path = ''
+            profilingobj.defines      = [
+                'PACKAGE="libardour3profile"',
+                'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
+                'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
+                'LOCALEDIR="' + os.path.join(
+                    os.path.normpath(bld.env['DATADIR']), 'locale') + '"',
+                'VAMP_DIR="' + os.path.join(
+                    os.path.normpath(bld.env['LIBDIR']), 'ardour3', 'vamp') + '"'
+                ]
+            if bld.env['FPU_OPTIMIZATION']:
+                profilingobj.source += [ 'sse_functions_xmm.cc' ]
+                if (bld.env['build_target'] == 'i386'
+                    or bld.env['build_target'] == 'i686'):
+                    profilingobj.source += [ 'sse_functions.s' ]
+                elif bld.env['build_target'] == 'x86_64':
+                    profilingobj.source += [ 'sse_functions_64bit.s' ]
 
 def shutdown():
     autowaf.shutdown()

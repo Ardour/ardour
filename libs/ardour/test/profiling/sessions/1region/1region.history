@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<UndoHistory>
+  <UndoTransaction tv-sec="1339964796" tv-usec="189501" name="create region">
+    <StatefulDiffCommand obj-id="116" type-name="ARDOUR::MidiPlaylist">
+      <Changes>
+        <Regions>
+          <Add id="131"/>
+        </Regions>
+      </Changes>
+    </StatefulDiffCommand>
+  </UndoTransaction>
+  <UndoTransaction tv-sec="1339964800" tv-usec="298226" name="Region end trim">
+    <StatefulDiffCommand obj-id="131" type-name="ARDOUR::MidiRegion">
+      <Changes>
+        <length from="96000" to="484432"/>
+        <length-beats from="4" to="20.1846666667"/>
+      </Changes>
+    </StatefulDiffCommand>
+  </UndoTransaction>
+  <UndoTransaction tv-sec="1339964802" tv-usec="348425" name="add note">
+    <NoteDiffCommand midi-source="118">
+      <ChangedNotes/>
+      <AddedNotes>
+        <note id="0" note="69" channel="0" time="3.656" length="4.78183" velocity="64"/>
+      </AddedNotes>
+      <RemovedNotes/>
+    </NoteDiffCommand>
+  </UndoTransaction>
+  <UndoTransaction tv-sec="1339964802" tv-usec="958308" name="add note">
+    <NoteDiffCommand midi-source="118">
+      <ChangedNotes/>
+      <AddedNotes>
+        <note id="1" note="65" channel="0" time="5.31125" length="5.33358" velocity="64"/>
+      </AddedNotes>
+      <RemovedNotes/>
+    </NoteDiffCommand>
+  </UndoTransaction>
+</UndoHistory>
