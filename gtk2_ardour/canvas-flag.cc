@@ -5,6 +5,7 @@
 
 #include "ardour_ui.h"
 #include "canvas-flag.h"
+#include "canvas-noevent-pixbuf.h"
 #include "time_axis_view_item.h"
 #include "utils.h"
 
@@ -28,7 +29,6 @@ CanvasFlag::CanvasFlag (MidiRegionView& region,
 	, _line(0)
 	, _rect(0)
 {
-	signal_event().connect (sigc::mem_fun (*this, &CanvasFlag::on_event));
 }
 
 void
@@ -49,7 +49,7 @@ CanvasFlag::set_text (const string& text)
 {
 	delete_allocated_objects();
 
-	_name_pixbuf = new ArdourCanvas::Pixbuf (*this);
+	_name_pixbuf = new ArdourCanvas::NoEventPixbuf (*this);
 	name_pixbuf_width = Gtkmm2ext::pixel_width (text, TimeAxisViewItem::NAME_FONT) + 2;
 	Gdk::Color c;
 	set_color (c, _outline_color_rgba);
@@ -73,15 +73,6 @@ CanvasFlag::set_text (const string& text)
 CanvasFlag::~CanvasFlag()
 {
 	delete_allocated_objects();
-}
-
-bool
-CanvasFlag::on_event(GdkEvent* /*ev*/)
-{
-	/* XXX if you change this function to actually do anything, be sure
-	   to fix the connections commented out elsewhere in this file.
-	*/
-	return false;
 }
 
 void

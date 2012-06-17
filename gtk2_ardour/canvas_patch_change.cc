@@ -21,6 +21,8 @@
 
 #include <boost/algorithm/string.hpp>
 
+#include "pbd/stacktrace.h"
+
 #include "gtkmm2ext/keyboard.h"
 #include "ardour/instrument_info.h"
 
@@ -144,11 +146,12 @@ CanvasPatchChange::on_patch_menu_selected(const PatchPrimaryKey& key)
 bool
 CanvasPatchChange::on_event (GdkEvent* ev)
 {
+	Editor* e;
+
 	switch (ev->type) {
 	case GDK_BUTTON_PRESS:
-	{
 		/* XXX: icky dcast */
-		Editor* e = dynamic_cast<Editor*> (&_region.get_time_axis_view().editor());
+		e = dynamic_cast<Editor*> (&_region.get_time_axis_view().editor());
 		if (e->current_mouse_mode() == Editing::MouseObject && e->internal_editing()) {
 
 			if (Gtkmm2ext::Keyboard::is_delete_event (&ev->button)) {
@@ -178,7 +181,6 @@ CanvasPatchChange::on_event (GdkEvent* ev)
 			return true;
 		}
 		break;
-	}
 
 	case GDK_KEY_PRESS:
 		switch (ev->key.keyval) {
@@ -200,15 +202,18 @@ CanvasPatchChange::on_event (GdkEvent* ev)
 				_region.next_patch (*this);
 			}
 			break;
+		case GDK_Delete:
+		case GDK_BackSpace:
+			_region.delete_patch_change (this);
+			break;
 		default:
 			break;
 		}
 		break;
 
 	case GDK_SCROLL:
-	{
 		/* XXX: icky dcast */
-		Editor* e = dynamic_cast<Editor*> (&_region.get_time_axis_view().editor());
+		e = dynamic_cast<Editor*> (&_region.get_time_axis_view().editor());
 		if (e->current_mouse_mode() == Editing::MouseObject && e->internal_editing()) {
 			if (ev->scroll.direction == GDK_SCROLL_UP) {
 				if (Keyboard::modifier_state_contains (ev->scroll.state, Keyboard::PrimaryModifier)) {
@@ -216,25 +221,26 @@ CanvasPatchChange::on_event (GdkEvent* ev)
 				} else {
 					_region.previous_patch (*this);
 				}
-				return true;
 			} else if (ev->scroll.direction == GDK_SCROLL_DOWN) {
 				if (Keyboard::modifier_state_contains (ev->scroll.state, Keyboard::PrimaryModifier)) {
 					_region.next_bank (*this);
 				} else {
 					_region.next_patch (*this);
 				}
-				return true;
 			}
+			return true;
 			break;
 		}
-        }
+		break;
 
 	case GDK_ENTER_NOTIFY:
 		_region.patch_entered (this);
+                return true;
 		break;
 
 	case GDK_LEAVE_NOTIFY:
 		_region.patch_left (this);
+                return true;
 		break;
 
 	default:
