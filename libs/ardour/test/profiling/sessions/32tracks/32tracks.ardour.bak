@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Session version="3.0.0" name="32tracks" sample-rate="44100" id-counter="1107" event-counter="0">
+<Session version="3001" name="32tracks" sample-rate="44100" id-counter="2430" event-counter="0">
   <Config>
     <Option name="xfade-model" value="FullCrossfade"/>
+    <Option name="xfade-choice" value="ConstantPowerMinus3dB"/>
     <Option name="auto-xfade" value="1"/>
     <Option name="short-xfade-seconds" value="0.015"/>
-    <Option name="xfades-active" value="1"/>
-    <Option name="xfades-visible" value="1"/>
     <Option name="destructive-xfade-msecs" value="2"/>
     <Option name="use-region-fades" value="1"/>
     <Option name="show-region-fades" value="1"/>
@@ -21,8 +20,6 @@
     <Option name="raid-path" value=""/>
     <Option name="audio-search-path" value=""/>
     <Option name="midi-search-path" value=""/>
-    <Option name="bwf-country-code" value="US"/>
-    <Option name="bwf-organization-code" value="US"/>
     <Option name="auditioner-output-left" value="default"/>
     <Option name="auditioner-output-right" value="default"/>
     <Option name="timecode-source-is-synced" value="1"/>
@@ -52,72 +49,72 @@
     <Route id="22" name="master" default-type="audio" flags="MasterOut" active="yes" phase-invert="00" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=0:signal=0" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no">
       <IO name="master" id="39" direction="Input" default-type="audio" user-latency="0">
         <Port type="audio" name="master/audio_in 1">
-          <Connection other="Audio 32/audio_out 1"/>
-          <Connection other="Audio 31/audio_out 1"/>
-          <Connection other="Audio 30/audio_out 1"/>
-          <Connection other="Audio 29/audio_out 1"/>
-          <Connection other="Audio 28/audio_out 1"/>
-          <Connection other="Audio 27/audio_out 1"/>
-          <Connection other="Audio 26/audio_out 1"/>
-          <Connection other="Audio 25/audio_out 1"/>
-          <Connection other="Audio 24/audio_out 1"/>
-          <Connection other="Audio 23/audio_out 1"/>
-          <Connection other="Audio 22/audio_out 1"/>
-          <Connection other="Audio 21/audio_out 1"/>
-          <Connection other="Audio 20/audio_out 1"/>
-          <Connection other="Audio 19/audio_out 1"/>
-          <Connection other="Audio 18/audio_out 1"/>
-          <Connection other="Audio 17/audio_out 1"/>
-          <Connection other="Audio 16/audio_out 1"/>
-          <Connection other="Audio 15/audio_out 1"/>
-          <Connection other="Audio 14/audio_out 1"/>
-          <Connection other="Audio 13/audio_out 1"/>
-          <Connection other="Audio 12/audio_out 1"/>
-          <Connection other="Audio 11/audio_out 1"/>
-          <Connection other="Audio 10/audio_out 1"/>
-          <Connection other="Audio 9/audio_out 1"/>
-          <Connection other="Audio 8/audio_out 1"/>
-          <Connection other="Audio 7/audio_out 1"/>
-          <Connection other="Audio 6/audio_out 1"/>
-          <Connection other="Audio 5/audio_out 1"/>
-          <Connection other="Audio 4/audio_out 1"/>
-          <Connection other="Audio 3/audio_out 1"/>
-          <Connection other="Audio 2/audio_out 1"/>
           <Connection other="Audio 1/audio_out 1"/>
+          <Connection other="Audio 2/audio_out 1"/>
+          <Connection other="Audio 3/audio_out 1"/>
+          <Connection other="Audio 4/audio_out 1"/>
+          <Connection other="Audio 5/audio_out 1"/>
+          <Connection other="Audio 6/audio_out 1"/>
+          <Connection other="Audio 7/audio_out 1"/>
+          <Connection other="Audio 8/audio_out 1"/>
+          <Connection other="Audio 9/audio_out 1"/>
+          <Connection other="Audio 10/audio_out 1"/>
+          <Connection other="Audio 11/audio_out 1"/>
+          <Connection other="Audio 12/audio_out 1"/>
+          <Connection other="Audio 13/audio_out 1"/>
+          <Connection other="Audio 14/audio_out 1"/>
+          <Connection other="Audio 15/audio_out 1"/>
+          <Connection other="Audio 16/audio_out 1"/>
+          <Connection other="Audio 17/audio_out 1"/>
+          <Connection other="Audio 18/audio_out 1"/>
+          <Connection other="Audio 19/audio_out 1"/>
+          <Connection other="Audio 20/audio_out 1"/>
+          <Connection other="Audio 21/audio_out 1"/>
+          <Connection other="Audio 22/audio_out 1"/>
+          <Connection other="Audio 23/audio_out 1"/>
+          <Connection other="Audio 24/audio_out 1"/>
+          <Connection other="Audio 25/audio_out 1"/>
+          <Connection other="Audio 26/audio_out 1"/>
+          <Connection other="Audio 27/audio_out 1"/>
+          <Connection other="Audio 28/audio_out 1"/>
+          <Connection other="Audio 29/audio_out 1"/>
+          <Connection other="Audio 30/audio_out 1"/>
+          <Connection other="Audio 31/audio_out 1"/>
+          <Connection other="Audio 32/audio_out 1"/>
         </Port>
         <Port type="audio" name="master/audio_in 2">
-          <Connection other="Audio 32/audio_out 2"/>
-          <Connection other="Audio 31/audio_out 2"/>
-          <Connection other="Audio 30/audio_out 2"/>
-          <Connection other="Audio 29/audio_out 2"/>
-          <Connection other="Audio 28/audio_out 2"/>
-          <Connection other="Audio 27/audio_out 2"/>
-          <Connection other="Audio 26/audio_out 2"/>
-          <Connection other="Audio 25/audio_out 2"/>
-          <Connection other="Audio 24/audio_out 2"/>
-          <Connection other="Audio 23/audio_out 2"/>
-          <Connection other="Audio 22/audio_out 2"/>
-          <Connection other="Audio 21/audio_out 2"/>
-          <Connection other="Audio 20/audio_out 2"/>
-          <Connection other="Audio 19/audio_out 2"/>
-          <Connection other="Audio 18/audio_out 2"/>
-          <Connection other="Audio 17/audio_out 2"/>
-          <Connection other="Audio 16/audio_out 2"/>
-          <Connection other="Audio 15/audio_out 2"/>
-          <Connection other="Audio 14/audio_out 2"/>
-          <Connection other="Audio 13/audio_out 2"/>
-          <Connection other="Audio 12/audio_out 2"/>
-          <Connection other="Audio 11/audio_out 2"/>
-          <Connection other="Audio 10/audio_out 2"/>
-          <Connection other="Audio 9/audio_out 2"/>
-          <Connection other="Audio 8/audio_out 2"/>
-          <Connection other="Audio 7/audio_out 2"/>
-          <Connection other="Audio 6/audio_out 2"/>
-          <Connection other="Audio 5/audio_out 2"/>
-          <Connection other="Audio 4/audio_out 2"/>
-          <Connection other="Audio 3/audio_out 2"/>
-          <Connection other="Audio 2/audio_out 2"/>
           <Connection other="Audio 1/audio_out 2"/>
+          <Connection other="Audio 2/audio_out 2"/>
+          <Connection other="Audio 3/audio_out 2"/>
+          <Connection other="Audio 4/audio_out 2"/>
+          <Connection other="Audio 5/audio_out 2"/>
+          <Connection other="Audio 6/audio_out 2"/>
+          <Connection other="Audio 7/audio_out 2"/>
+          <Connection other="Audio 8/audio_out 2"/>
+          <Connection other="Audio 9/audio_out 2"/>
+          <Connection other="Audio 10/audio_out 2"/>
+          <Connection other="Audio 11/audio_out 2"/>
+          <Connection other="Audio 12/audio_out 2"/>
+          <Connection other="Audio 13/audio_out 2"/>
+          <Connection other="Audio 14/audio_out 2"/>
+          <Connection other="Audio 15/audio_out 2"/>
+          <Connection other="Audio 16/audio_out 2"/>
+          <Connection other="Audio 17/audio_out 2"/>
+          <Connection other="Audio 18/audio_out 2"/>
+          <Connection other="Audio 19/audio_out 2"/>
+          <Connection other="Audio 20/audio_out 2"/>
+          <Connection other="Audio 21/audio_out 2"/>
+          <Connection other="Audio 22/audio_out 2"/>
+          <Connection other="Audio 23/audio_out 2"/>
+          <Connection other="Audio 24/audio_out 2"/>
+          <Connection other="Audio 25/audio_out 2"/>
+          <Connection other="Audio 26/audio_out 2"/>
+          <Connection other="Audio 27/audio_out 2"/>
+          <Connection other="Audio 28/audio_out 2"/>
+          <Connection other="Audio 29/audio_out 2"/>
+          <Connection other="Audio 30/audio_out 2"/>
+          <Connection other="Audio 31/audio_out 2"/>
+          <Connection other="Audio 32/audio_out 2"/>
         </Port>
       </IO>
       <IO name="master" id="40" direction="Output" default-type="audio" user-latency="0">
@@ -150,7 +147,7 @@
         </PannerShell>
       </Processor>
     </Route>
-    <Route id="83" name="Audio 1" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="signal=2" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
+    <Route id="83" name="Audio 1" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=1:signal=1" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 1" id="101" direction="Input" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 1/audio_in 1">
           <Connection other="system:capture_1"/>
@@ -188,7 +185,7 @@
       <Controllable name="recenable" id="85" flags="" value="0.000000000000"/>
       <Diskstream flags="Recordable" playlist="Audio 1.1" name="Audio 1" id="109" speed="1.000000" capture-alignment="Automatic" channels="1"/>
     </Route>
-    <Route id="115" name="Audio 2" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="signal=3" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
+    <Route id="115" name="Audio 2" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=2:signal=2" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 2" id="133" direction="Input" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 2/audio_in 1">
           <Connection other="system:capture_2"/>
@@ -226,11 +223,9 @@
       <Controllable name="recenable" id="117" flags="" value="0.000000000000"/>
       <Diskstream flags="Recordable" playlist="Audio 2.1" name="Audio 2" id="141" speed="1.000000" capture-alignment="Automatic" channels="1"/>
     </Route>
-    <Route id="147" name="Audio 3" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="signal=4" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
+    <Route id="147" name="Audio 3" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=3:signal=3" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 3" id="165" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 3/audio_in 1">
-          <Connection other="system:capture_3"/>
-        </Port>
+        <Port type="audio" name="Audio 3/audio_in 1"/>
       </IO>
       <IO name="Audio 3" id="166" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 3/audio_out 1">
@@ -264,11 +259,9 @@
       <Controllable name="recenable" id="149" flags="" value="0.000000000000"/>
       <Diskstream flags="Recordable" playlist="Audio 3.1" name="Audio 3" id="173" speed="1.000000" capture-alignment="Automatic" channels="1"/>
     </Route>
-    <Route id="179" name="Audio 4" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="signal=5" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
+    <Route id="179" name="Audio 4" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=4:signal=4" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 4" id="197" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 4/audio_in 1">
-          <Connection other="system:capture_4"/>
-        </Port>
+        <Port type="audio" name="Audio 4/audio_in 1"/>
       </IO>
       <IO name="Audio 4" id="198" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 4/audio_out 1">
@@ -302,11 +295,9 @@
       <Controllable name="recenable" id="181" flags="" value="0.000000000000"/>
       <Diskstream flags="Recordable" playlist="Audio 4.1" name="Audio 4" id="205" speed="1.000000" capture-alignment="Automatic" channels="1"/>
     </Route>
-    <Route id="211" name="Audio 5" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="signal=6" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
+    <Route id="211" name="Audio 5" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=5:signal=5" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 5" id="229" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 5/audio_in 1">
-          <Connection other="system:capture_5"/>
-        </Port>
+        <Port type="audio" name="Audio 5/audio_in 1"/>
       </IO>
       <IO name="Audio 5" id="230" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 5/audio_out 1">
@@ -340,11 +331,9 @@
       <Controllable name="recenable" id="213" flags="" value="0.000000000000"/>
       <Diskstream flags="Recordable" playlist="Audio 5.1" name="Audio 5" id="237" speed="1.000000" capture-alignment="Automatic" channels="1"/>
     </Route>
-    <Route id="243" name="Audio 6" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="signal=7" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
+    <Route id="243" name="Audio 6" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=6:signal=6" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 6" id="261" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 6/audio_in 1">
-          <Connection other="system:capture_6"/>
-        </Port>
+        <Port type="audio" name="Audio 6/audio_in 1"/>
       </IO>
       <IO name="Audio 6" id="262" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 6/audio_out 1">
@@ -378,11 +367,9 @@
       <Controllable name="recenable" id="245" flags="" value="0.000000000000"/>
       <Diskstream flags="Recordable" playlist="Audio 6.1" name="Audio 6" id="269" speed="1.000000" capture-alignment="Automatic" channels="1"/>
     </Route>
-    <Route id="275" name="Audio 7" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="signal=8" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
+    <Route id="275" name="Audio 7" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=7:signal=7" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 7" id="293" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 7/audio_in 1">
-          <Connection other="system:capture_7"/>
-        </Port>
+        <Port type="audio" name="Audio 7/audio_in 1"/>
       </IO>
       <IO name="Audio 7" id="294" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 7/audio_out 1">
@@ -416,11 +403,9 @@
       <Controllable name="recenable" id="277" flags="" value="0.000000000000"/>
       <Diskstream flags="Recordable" playlist="Audio 7.1" name="Audio 7" id="301" speed="1.000000" capture-alignment="Automatic" channels="1"/>
     </Route>
-    <Route id="307" name="Audio 8" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="signal=9" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
+    <Route id="307" name="Audio 8" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=8:signal=8" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 8" id="325" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 8/audio_in 1">
-          <Connection other="system:capture_8"/>
-        </Port>
+        <Port type="audio" name="Audio 8/audio_in 1"/>
       </IO>
       <IO name="Audio 8" id="326" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 8/audio_out 1">
@@ -454,11 +439,9 @@
       <Controllable name="recenable" id="309" flags="" value="0.000000000000"/>
       <Diskstream flags="Recordable" playlist="Audio 8.1" name="Audio 8" id="333" speed="1.000000" capture-alignment="Automatic" channels="1"/>
     </Route>
-    <Route id="339" name="Audio 9" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="signal=10" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
+    <Route id="339" name="Audio 9" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=9:signal=9" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 9" id="357" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 9/audio_in 1">
-          <Connection other="system:capture_9"/>
-        </Port>
+        <Port type="audio" name="Audio 9/audio_in 1"/>
       </IO>
       <IO name="Audio 9" id="358" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 9/audio_out 1">
@@ -492,11 +475,9 @@
       <Controllable name="recenable" id="341" flags="" value="0.000000000000"/>
       <Diskstream flags="Recordable" playlist="Audio 9.1" name="Audio 9" id="365" speed="1.000000" capture-alignment="Automatic" channels="1"/>
     </Route>
-    <Route id="371" name="Audio 10" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="signal=11" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
+    <Route id="371" name="Audio 10" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=10:signal=10" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 10" id="389" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 10/audio_in 1">
-          <Connection other="system:capture_10"/>
-        </Port>
+        <Port type="audio" name="Audio 10/audio_in 1"/>
       </IO>
       <IO name="Audio 10" id="390" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 10/audio_out 1">
@@ -530,11 +511,9 @@
       <Controllable name="recenable" id="373" flags="" value="0.000000000000"/>
       <Diskstream flags="Recordable" playlist="Audio 10.1" name="Audio 10" id="397" speed="1.000000" capture-alignment="Automatic" channels="1"/>
     </Route>
-    <Route id="403" name="Audio 11" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="signal=12" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
+    <Route id="403" name="Audio 11" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=11:signal=11" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 11" id="421" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 11/audio_in 1">
-          <Connection other="system:capture_11"/>
-        </Port>
+        <Port type="audio" name="Audio 11/audio_in 1"/>
       </IO>
       <IO name="Audio 11" id="422" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 11/audio_out 1">
@@ -568,11 +547,9 @@
       <Controllable name="recenable" id="405" flags="" value="0.000000000000"/>
       <Diskstream flags="Recordable" playlist="Audio 11.1" name="Audio 11" id="429" speed="1.000000" capture-alignment="Automatic" channels="1"/>
     </Route>
-    <Route id="435" name="Audio 12" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="signal=13" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
+    <Route id="435" name="Audio 12" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=12:signal=12" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 12" id="453" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 12/audio_in 1">
-          <Connection other="system:capture_12"/>
-        </Port>
+        <Port type="audio" name="Audio 12/audio_in 1"/>
       </IO>
       <IO name="Audio 12" id="454" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 12/audio_out 1">
@@ -606,11 +583,9 @@
       <Controllable name="recenable" id="437" flags="" value="0.000000000000"/>
       <Diskstream flags="Recordable" playlist="Audio 12.1" name="Audio 12" id="461" speed="1.000000" capture-alignment="Automatic" channels="1"/>
     </Route>
-    <Route id="467" name="Audio 13" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="signal=14" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
+    <Route id="467" name="Audio 13" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=13:signal=13" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 13" id="485" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 13/audio_in 1">
-          <Connection other="system:capture_13"/>
-        </Port>
+        <Port type="audio" name="Audio 13/audio_in 1"/>
       </IO>
       <IO name="Audio 13" id="486" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 13/audio_out 1">
@@ -644,11 +619,9 @@
       <Controllable name="recenable" id="469" flags="" value="0.000000000000"/>
       <Diskstream flags="Recordable" playlist="Audio 13.1" name="Audio 13" id="493" speed="1.000000" capture-alignment="Automatic" channels="1"/>
     </Route>
-    <Route id="499" name="Audio 14" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="signal=15" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
+    <Route id="499" name="Audio 14" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=14:signal=14" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 14" id="517" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 14/audio_in 1">
-          <Connection other="system:capture_14"/>
-        </Port>
+        <Port type="audio" name="Audio 14/audio_in 1"/>
       </IO>
       <IO name="Audio 14" id="518" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 14/audio_out 1">
@@ -682,11 +655,9 @@
       <Controllable name="recenable" id="501" flags="" value="0.000000000000"/>
       <Diskstream flags="Recordable" playlist="Audio 14.1" name="Audio 14" id="525" speed="1.000000" capture-alignment="Automatic" channels="1"/>
     </Route>
-    <Route id="531" name="Audio 15" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="signal=16" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
+    <Route id="531" name="Audio 15" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=15:signal=15" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 15" id="549" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 15/audio_in 1">
-          <Connection other="system:capture_15"/>
-        </Port>
+        <Port type="audio" name="Audio 15/audio_in 1"/>
       </IO>
       <IO name="Audio 15" id="550" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 15/audio_out 1">
@@ -720,11 +691,9 @@
       <Controllable name="recenable" id="533" flags="" value="0.000000000000"/>
       <Diskstream flags="Recordable" playlist="Audio 15.1" name="Audio 15" id="557" speed="1.000000" capture-alignment="Automatic" channels="1"/>
     </Route>
-    <Route id="563" name="Audio 16" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="signal=17" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
+    <Route id="563" name="Audio 16" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=16:signal=16" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 16" id="581" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 16/audio_in 1">
-          <Connection other="system:capture_16"/>
-        </Port>
+        <Port type="audio" name="Audio 16/audio_in 1"/>
       </IO>
       <IO name="Audio 16" id="582" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 16/audio_out 1">
@@ -758,11 +727,9 @@
       <Controllable name="recenable" id="565" flags="" value="0.000000000000"/>
       <Diskstream flags="Recordable" playlist="Audio 16.1" name="Audio 16" id="589" speed="1.000000" capture-alignment="Automatic" channels="1"/>
     </Route>
-    <Route id="595" name="Audio 17" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="signal=18" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
+    <Route id="595" name="Audio 17" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=17:signal=17" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 17" id="613" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 17/audio_in 1">
-          <Connection other="system:capture_17"/>
-        </Port>
+        <Port type="audio" name="Audio 17/audio_in 1"/>
       </IO>
       <IO name="Audio 17" id="614" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 17/audio_out 1">
@@ -796,11 +763,9 @@
       <Controllable name="recenable" id="597" flags="" value="0.000000000000"/>
       <Diskstream flags="Recordable" playlist="Audio 17.1" name="Audio 17" id="621" speed="1.000000" capture-alignment="Automatic" channels="1"/>
     </Route>
-    <Route id="627" name="Audio 18" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="signal=19" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
+    <Route id="627" name="Audio 18" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=18:signal=18" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 18" id="645" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 18/audio_in 1">
-          <Connection other="system:capture_18"/>
-        </Port>
+        <Port type="audio" name="Audio 18/audio_in 1"/>
       </IO>
       <IO name="Audio 18" id="646" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 18/audio_out 1">
@@ -834,11 +799,9 @@
       <Controllable name="recenable" id="629" flags="" value="0.000000000000"/>
       <Diskstream flags="Recordable" playlist="Audio 18.1" name="Audio 18" id="653" speed="1.000000" capture-alignment="Automatic" channels="1"/>
     </Route>
-    <Route id="659" name="Audio 19" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="signal=20" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
+    <Route id="659" name="Audio 19" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=19:signal=19" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 19" id="677" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 19/audio_in 1">
-          <Connection other="system:capture_19"/>
-        </Port>
+        <Port type="audio" name="Audio 19/audio_in 1"/>
       </IO>
       <IO name="Audio 19" id="678" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 19/audio_out 1">
@@ -872,11 +835,9 @@
       <Controllable name="recenable" id="661" flags="" value="0.000000000000"/>
       <Diskstream flags="Recordable" playlist="Audio 19.1" name="Audio 19" id="685" speed="1.000000" capture-alignment="Automatic" channels="1"/>
     </Route>
-    <Route id="691" name="Audio 20" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="signal=21" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
+    <Route id="691" name="Audio 20" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=20:signal=20" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 20" id="709" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 20/audio_in 1">
-          <Connection other="system:capture_20"/>
-        </Port>
+        <Port type="audio" name="Audio 20/audio_in 1"/>
       </IO>
       <IO name="Audio 20" id="710" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 20/audio_out 1">
@@ -910,11 +871,9 @@
       <Controllable name="recenable" id="693" flags="" value="0.000000000000"/>
       <Diskstream flags="Recordable" playlist="Audio 20.1" name="Audio 20" id="717" speed="1.000000" capture-alignment="Automatic" channels="1"/>
     </Route>
-    <Route id="723" name="Audio 21" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="signal=22" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
+    <Route id="723" name="Audio 21" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=21:signal=21" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 21" id="741" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 21/audio_in 1">
-          <Connection other="system:capture_21"/>
-        </Port>
+        <Port type="audio" name="Audio 21/audio_in 1"/>
       </IO>
       <IO name="Audio 21" id="742" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 21/audio_out 1">
@@ -948,11 +907,9 @@
       <Controllable name="recenable" id="725" flags="" value="0.000000000000"/>
       <Diskstream flags="Recordable" playlist="Audio 21.1" name="Audio 21" id="749" speed="1.000000" capture-alignment="Automatic" channels="1"/>
     </Route>
-    <Route id="755" name="Audio 22" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="signal=23" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
+    <Route id="755" name="Audio 22" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=22:signal=22" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 22" id="773" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 22/audio_in 1">
-          <Connection other="system:capture_22"/>
-        </Port>
+        <Port type="audio" name="Audio 22/audio_in 1"/>
       </IO>
       <IO name="Audio 22" id="774" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 22/audio_out 1">
@@ -986,11 +943,9 @@
       <Controllable name="recenable" id="757" flags="" value="0.000000000000"/>
       <Diskstream flags="Recordable" playlist="Audio 22.1" name="Audio 22" id="781" speed="1.000000" capture-alignment="Automatic" channels="1"/>
     </Route>
-    <Route id="787" name="Audio 23" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="signal=24" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
+    <Route id="787" name="Audio 23" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=23:signal=23" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 23" id="805" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 23/audio_in 1">
-          <Connection other="system:capture_23"/>
-        </Port>
+        <Port type="audio" name="Audio 23/audio_in 1"/>
       </IO>
       <IO name="Audio 23" id="806" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 23/audio_out 1">
@@ -1024,11 +979,9 @@
       <Controllable name="recenable" id="789" flags="" value="0.000000000000"/>
       <Diskstream flags="Recordable" playlist="Audio 23.1" name="Audio 23" id="813" speed="1.000000" capture-alignment="Automatic" channels="1"/>
     </Route>
-    <Route id="819" name="Audio 24" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="signal=25" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
+    <Route id="819" name="Audio 24" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=24:signal=24" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 24" id="837" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 24/audio_in 1">
-          <Connection other="system:capture_24"/>
-        </Port>
+        <Port type="audio" name="Audio 24/audio_in 1"/>
       </IO>
       <IO name="Audio 24" id="838" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 24/audio_out 1">
@@ -1062,11 +1015,9 @@
       <Controllable name="recenable" id="821" flags="" value="0.000000000000"/>
       <Diskstream flags="Recordable" playlist="Audio 24.1" name="Audio 24" id="845" speed="1.000000" capture-alignment="Automatic" channels="1"/>
     </Route>
-    <Route id="851" name="Audio 25" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="signal=26" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
+    <Route id="851" name="Audio 25" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=25:signal=25" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 25" id="869" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 25/audio_in 1">
-          <Connection other="system:capture_25"/>
-        </Port>
+        <Port type="audio" name="Audio 25/audio_in 1"/>
       </IO>
       <IO name="Audio 25" id="870" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 25/audio_out 1">
@@ -1100,11 +1051,9 @@
       <Controllable name="recenable" id="853" flags="" value="0.000000000000"/>
       <Diskstream flags="Recordable" playlist="Audio 25.1" name="Audio 25" id="877" speed="1.000000" capture-alignment="Automatic" channels="1"/>
     </Route>
-    <Route id="883" name="Audio 26" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="signal=27" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
+    <Route id="883" name="Audio 26" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=26:signal=26" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 26" id="901" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 26/audio_in 1">
-          <Connection other="system:capture_26"/>
-        </Port>
+        <Port type="audio" name="Audio 26/audio_in 1"/>
       </IO>
       <IO name="Audio 26" id="902" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 26/audio_out 1">
@@ -1138,7 +1087,7 @@
       <Controllable name="recenable" id="885" flags="" value="0.000000000000"/>
       <Diskstream flags="Recordable" playlist="Audio 26.1" name="Audio 26" id="909" speed="1.000000" capture-alignment="Automatic" channels="1"/>
     </Route>
-    <Route id="915" name="Audio 27" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="signal=28" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
+    <Route id="915" name="Audio 27" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=27:signal=27" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 27" id="933" direction="Input" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 27/audio_in 1">
           <Connection other="system:capture_1"/>
@@ -1176,7 +1125,7 @@
       <Controllable name="recenable" id="917" flags="" value="0.000000000000"/>
       <Diskstream flags="Recordable" playlist="Audio 27.1" name="Audio 27" id="941" speed="1.000000" capture-alignment="Automatic" channels="1"/>
     </Route>
-    <Route id="947" name="Audio 28" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="signal=29" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
+    <Route id="947" name="Audio 28" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=28:signal=28" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 28" id="965" direction="Input" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 28/audio_in 1">
           <Connection other="system:capture_2"/>
@@ -1214,11 +1163,9 @@
       <Controllable name="recenable" id="949" flags="" value="0.000000000000"/>
       <Diskstream flags="Recordable" playlist="Audio 28.1" name="Audio 28" id="973" speed="1.000000" capture-alignment="Automatic" channels="1"/>
     </Route>
-    <Route id="979" name="Audio 29" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="signal=30" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
+    <Route id="979" name="Audio 29" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=29:signal=29" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 29" id="997" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 29/audio_in 1">
-          <Connection other="system:capture_3"/>
-        </Port>
+        <Port type="audio" name="Audio 29/audio_in 1"/>
       </IO>
       <IO name="Audio 29" id="998" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 29/audio_out 1">
@@ -1252,11 +1199,9 @@
       <Controllable name="recenable" id="981" flags="" value="0.000000000000"/>
       <Diskstream flags="Recordable" playlist="Audio 29.1" name="Audio 29" id="1005" speed="1.000000" capture-alignment="Automatic" channels="1"/>
     </Route>
-    <Route id="1011" name="Audio 30" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="signal=31" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
+    <Route id="1011" name="Audio 30" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=30:signal=30" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 30" id="1029" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 30/audio_in 1">
-          <Connection other="system:capture_4"/>
-        </Port>
+        <Port type="audio" name="Audio 30/audio_in 1"/>
       </IO>
       <IO name="Audio 30" id="1030" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 30/audio_out 1">
@@ -1290,11 +1235,9 @@
       <Controllable name="recenable" id="1013" flags="" value="0.000000000000"/>
       <Diskstream flags="Recordable" playlist="Audio 30.1" name="Audio 30" id="1037" speed="1.000000" capture-alignment="Automatic" channels="1"/>
     </Route>
-    <Route id="1043" name="Audio 31" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="signal=32" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
+    <Route id="1043" name="Audio 31" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=31:signal=31" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 31" id="1061" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 31/audio_in 1">
-          <Connection other="system:capture_5"/>
-        </Port>
+        <Port type="audio" name="Audio 31/audio_in 1"/>
       </IO>
       <IO name="Audio 31" id="1062" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 31/audio_out 1">
@@ -1328,11 +1271,9 @@
       <Controllable name="recenable" id="1045" flags="" value="0.000000000000"/>
       <Diskstream flags="Recordable" playlist="Audio 31.1" name="Audio 31" id="1069" speed="1.000000" capture-alignment="Automatic" channels="1"/>
     </Route>
-    <Route id="1075" name="Audio 32" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="signal=33" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
+    <Route id="1075" name="Audio 32" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=32:signal=32" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 32" id="1093" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 32/audio_in 1">
-          <Connection other="system:capture_6"/>
-        </Port>
+        <Port type="audio" name="Audio 32/audio_in 1"/>
       </IO>
       <IO name="Audio 32" id="1094" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 32/audio_out 1">
@@ -1368,38 +1309,38 @@
     </Route>
   </Routes>
   <Playlists>
-    <Playlist id="110" name="Audio 1.1" type="audio" orig-track-id="83" frozen="no" combine-ops="0"/>
     <Playlist id="142" name="Audio 2.1" type="audio" orig-track-id="115" frozen="no" combine-ops="0"/>
-    <Playlist id="174" name="Audio 3.1" type="audio" orig-track-id="147" frozen="no" combine-ops="0"/>
+    <Playlist id="110" name="Audio 1.1" type="audio" orig-track-id="83" frozen="no" combine-ops="0"/>
     <Playlist id="206" name="Audio 4.1" type="audio" orig-track-id="179" frozen="no" combine-ops="0"/>
-    <Playlist id="238" name="Audio 5.1" type="audio" orig-track-id="211" frozen="no" combine-ops="0"/>
+    <Playlist id="174" name="Audio 3.1" type="audio" orig-track-id="147" frozen="no" combine-ops="0"/>
     <Playlist id="270" name="Audio 6.1" type="audio" orig-track-id="243" frozen="no" combine-ops="0"/>
-    <Playlist id="302" name="Audio 7.1" type="audio" orig-track-id="275" frozen="no" combine-ops="0"/>
+    <Playlist id="238" name="Audio 5.1" type="audio" orig-track-id="211" frozen="no" combine-ops="0"/>
     <Playlist id="334" name="Audio 8.1" type="audio" orig-track-id="307" frozen="no" combine-ops="0"/>
-    <Playlist id="366" name="Audio 9.1" type="audio" orig-track-id="339" frozen="no" combine-ops="0"/>
+    <Playlist id="302" name="Audio 7.1" type="audio" orig-track-id="275" frozen="no" combine-ops="0"/>
     <Playlist id="398" name="Audio 10.1" type="audio" orig-track-id="371" frozen="no" combine-ops="0"/>
-    <Playlist id="430" name="Audio 11.1" type="audio" orig-track-id="403" frozen="no" combine-ops="0"/>
+    <Playlist id="366" name="Audio 9.1" type="audio" orig-track-id="339" frozen="no" combine-ops="0"/>
     <Playlist id="462" name="Audio 12.1" type="audio" orig-track-id="435" frozen="no" combine-ops="0"/>
-    <Playlist id="494" name="Audio 13.1" type="audio" orig-track-id="467" frozen="no" combine-ops="0"/>
+    <Playlist id="430" name="Audio 11.1" type="audio" orig-track-id="403" frozen="no" combine-ops="0"/>
     <Playlist id="526" name="Audio 14.1" type="audio" orig-track-id="499" frozen="no" combine-ops="0"/>
-    <Playlist id="558" name="Audio 15.1" type="audio" orig-track-id="531" frozen="no" combine-ops="0"/>
+    <Playlist id="494" name="Audio 13.1" type="audio" orig-track-id="467" frozen="no" combine-ops="0"/>
     <Playlist id="590" name="Audio 16.1" type="audio" orig-track-id="563" frozen="no" combine-ops="0"/>
-    <Playlist id="622" name="Audio 17.1" type="audio" orig-track-id="595" frozen="no" combine-ops="0"/>
+    <Playlist id="558" name="Audio 15.1" type="audio" orig-track-id="531" frozen="no" combine-ops="0"/>
     <Playlist id="654" name="Audio 18.1" type="audio" orig-track-id="627" frozen="no" combine-ops="0"/>
-    <Playlist id="686" name="Audio 19.1" type="audio" orig-track-id="659" frozen="no" combine-ops="0"/>
+    <Playlist id="622" name="Audio 17.1" type="audio" orig-track-id="595" frozen="no" combine-ops="0"/>
     <Playlist id="718" name="Audio 20.1" type="audio" orig-track-id="691" frozen="no" combine-ops="0"/>
-    <Playlist id="750" name="Audio 21.1" type="audio" orig-track-id="723" frozen="no" combine-ops="0"/>
+    <Playlist id="686" name="Audio 19.1" type="audio" orig-track-id="659" frozen="no" combine-ops="0"/>
     <Playlist id="782" name="Audio 22.1" type="audio" orig-track-id="755" frozen="no" combine-ops="0"/>
-    <Playlist id="814" name="Audio 23.1" type="audio" orig-track-id="787" frozen="no" combine-ops="0"/>
+    <Playlist id="750" name="Audio 21.1" type="audio" orig-track-id="723" frozen="no" combine-ops="0"/>
     <Playlist id="846" name="Audio 24.1" type="audio" orig-track-id="819" frozen="no" combine-ops="0"/>
-    <Playlist id="878" name="Audio 25.1" type="audio" orig-track-id="851" frozen="no" combine-ops="0"/>
+    <Playlist id="814" name="Audio 23.1" type="audio" orig-track-id="787" frozen="no" combine-ops="0"/>
     <Playlist id="910" name="Audio 26.1" type="audio" orig-track-id="883" frozen="no" combine-ops="0"/>
-    <Playlist id="942" name="Audio 27.1" type="audio" orig-track-id="915" frozen="no" combine-ops="0"/>
+    <Playlist id="878" name="Audio 25.1" type="audio" orig-track-id="851" frozen="no" combine-ops="0"/>
     <Playlist id="974" name="Audio 28.1" type="audio" orig-track-id="947" frozen="no" combine-ops="0"/>
-    <Playlist id="1006" name="Audio 29.1" type="audio" orig-track-id="979" frozen="no" combine-ops="0"/>
+    <Playlist id="942" name="Audio 27.1" type="audio" orig-track-id="915" frozen="no" combine-ops="0"/>
     <Playlist id="1038" name="Audio 30.1" type="audio" orig-track-id="1011" frozen="no" combine-ops="0"/>
-    <Playlist id="1070" name="Audio 31.1" type="audio" orig-track-id="1043" frozen="no" combine-ops="0"/>
+    <Playlist id="1006" name="Audio 29.1" type="audio" orig-track-id="979" frozen="no" combine-ops="0"/>
     <Playlist id="1102" name="Audio 32.1" type="audio" orig-track-id="1075" frozen="no" combine-ops="0"/>
+    <Playlist id="1070" name="Audio 31.1" type="audio" orig-track-id="1043" frozen="no" combine-ops="0"/>
   </Playlists>
   <UnusedPlaylists/>
   <RouteGroups/>
@@ -1412,6 +1353,9 @@
         <Connection other="system:playback_2"/>
       </Port>
     </IO>
+    <Processor id="2320" name="Amp" active="yes" user-latency="0" type="amp">
+      <Controllable name="gaincontrol" id="2322" flags="GainLike" value="1.000000000000"/>
+    </Processor>
   </Click>
   <NamedSelections/>
   <Speakers>
@@ -1424,7 +1368,349 @@
   </TempoMap>
   <ControlProtocols>
     <Protocol name="Open Sound Control (OSC)" active="no"/>
-    <Protocol name="Generic MIDI" active="no"/>
-    <Protocol name="Mackie" active="no"/>
+    <Protocol name="Generic MIDI" feedback="0" feedback-interval="10000" active="yes">
+      <Controls/>
+    </Protocol>
+    <Protocol name="Mackie" bank="0" ipmidi-base="21928" device-profile="" device-name="Mackie Control Universal Pro" active="yes"/>
   </ControlProtocols>
+  <Extra>
+    <UI>
+      <Window name="R-22-41" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="R-22-44" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="R-22-45" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-22-41" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-22-44" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-22-45" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-83-103" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-83-106" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-83-107" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-115-135" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-115-138" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-115-139" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-147-167" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-147-170" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-147-171" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-179-199" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-179-202" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-179-203" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-211-231" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-211-234" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-211-235" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-243-263" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-243-266" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-243-267" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-275-295" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-275-298" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-275-299" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-307-327" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-307-330" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-307-331" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-339-359" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-339-362" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-339-363" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-371-391" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-371-394" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-371-395" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-403-423" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-403-426" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-403-427" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-435-455" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-435-458" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-435-459" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-467-487" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-467-490" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-467-491" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-499-519" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-499-522" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-499-523" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-531-551" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-531-554" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-531-555" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-563-583" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-563-586" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-563-587" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-595-615" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-595-618" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-595-619" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-627-647" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-627-650" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-627-651" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-659-679" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-659-682" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-659-683" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-691-711" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-691-714" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-691-715" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-723-743" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-723-746" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-723-747" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-755-775" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-755-778" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-755-779" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-787-807" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-787-810" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-787-811" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-819-839" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-819-842" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-819-843" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-851-871" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-851-874" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-851-875" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-883-903" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-883-906" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-883-907" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-915-935" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-915-938" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-915-939" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-947-967" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-947-970" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-947-971" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-979-999" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-979-1002" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-979-1003" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-1011-1031" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-1011-1034" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-1011-1035" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-1043-1063" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-1043-1066" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-1043-1067" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-1075-1095" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-1075-1098" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <Window name="M-1075-1099" visible="no" x-off="-1" y-off="-1" x-size="-1" y-size="-1"/>
+      <GUIObjectState>
+        <Object id="route 22" color="28156:3060:40485"/>
+        <Object id="rtav 22" height="60" visible="1"/>
+        <Object id="automation 43" height="60" visible="0"/>
+        <Object id="automation 30" height="60" visible="0"/>
+        <Object id="automation 34" height="60" visible="0"/>
+        <Object id="strip 22" visible="1" strip-width="Wide">
+          <Object id="processor 41"/>
+        </Object>
+        <Object id="route 83" color="41214:6238:37268"/>
+        <Object id="rtav 83" height="60" visible="1"/>
+        <Object id="automation 105" height="60" visible="0"/>
+        <Object id="automation 92" height="60" visible="0"/>
+        <Object id="route 115" color="30107:2538:43272"/>
+        <Object id="rtav 115" height="60" visible="1"/>
+        <Object id="automation 137" height="60" visible="0"/>
+        <Object id="automation 124" height="60" visible="0"/>
+        <Object id="route 147" color="45907:43976:29990"/>
+        <Object id="rtav 147" height="60" visible="1"/>
+        <Object id="automation 169" height="60" visible="0"/>
+        <Object id="automation 156" height="60" visible="0"/>
+        <Object id="route 179" color="28824:2764:526"/>
+        <Object id="rtav 179" height="60" visible="1"/>
+        <Object id="automation 201" height="60" visible="0"/>
+        <Object id="automation 188" height="60" visible="0"/>
+        <Object id="route 211" color="3188:10144:2761"/>
+        <Object id="rtav 211" height="60" visible="1"/>
+        <Object id="automation 233" height="60" visible="0"/>
+        <Object id="automation 220" height="60" visible="0"/>
+        <Object id="route 243" color="8803:25061:18421"/>
+        <Object id="rtav 243" height="60" visible="1"/>
+        <Object id="automation 265" height="60" visible="0"/>
+        <Object id="automation 252" height="60" visible="0"/>
+        <Object id="route 275" color="45836:4494:3812"/>
+        <Object id="rtav 275" height="60" visible="1"/>
+        <Object id="automation 297" height="60" visible="0"/>
+        <Object id="automation 284" height="60" visible="0"/>
+        <Object id="route 307" color="45754:9969:15307"/>
+        <Object id="rtav 307" height="60" visible="1"/>
+        <Object id="automation 329" height="60" visible="0"/>
+        <Object id="automation 316" height="60" visible="0"/>
+        <Object id="route 339" color="34367:13830:24287"/>
+        <Object id="rtav 339" height="60" visible="1"/>
+        <Object id="automation 361" height="60" visible="0"/>
+        <Object id="automation 348" height="60" visible="0"/>
+        <Object id="route 371" color="37491:9780:8407"/>
+        <Object id="rtav 371" height="60" visible="1"/>
+        <Object id="automation 393" height="60" visible="0"/>
+        <Object id="automation 380" height="60" visible="0"/>
+        <Object id="route 403" color="12158:35400:1621"/>
+        <Object id="rtav 403" height="60" visible="1"/>
+        <Object id="automation 425" height="60" visible="0"/>
+        <Object id="automation 412" height="60" visible="0"/>
+        <Object id="route 435" color="6748:19025:20080"/>
+        <Object id="rtav 435" height="60" visible="1"/>
+        <Object id="automation 457" height="60" visible="0"/>
+        <Object id="automation 444" height="60" visible="0"/>
+        <Object id="route 467" color="45639:1015:17987"/>
+        <Object id="rtav 467" height="60" visible="1"/>
+        <Object id="automation 489" height="60" visible="0"/>
+        <Object id="automation 476" height="60" visible="0"/>
+        <Object id="route 499" color="41615:1541:46811"/>
+        <Object id="rtav 499" height="60" visible="1"/>
+        <Object id="automation 521" height="60" visible="0"/>
+        <Object id="automation 508" height="60" visible="0"/>
+        <Object id="route 531" color="44379:40654:38351"/>
+        <Object id="rtav 531" height="60" visible="1"/>
+        <Object id="automation 553" height="60" visible="0"/>
+        <Object id="automation 540" height="60" visible="0"/>
+        <Object id="route 563" color="42876:47427:47155"/>
+        <Object id="rtav 563" height="60" visible="1"/>
+        <Object id="automation 585" height="60" visible="0"/>
+        <Object id="automation 572" height="60" visible="0"/>
+        <Object id="route 595" color="8289:3239:44991"/>
+        <Object id="rtav 595" height="60" visible="1"/>
+        <Object id="automation 617" height="60" visible="0"/>
+        <Object id="automation 604" height="60" visible="0"/>
+        <Object id="route 627" color="12783:18546:42745"/>
+        <Object id="rtav 627" height="60" visible="1"/>
+        <Object id="automation 649" height="60" visible="0"/>
+        <Object id="automation 636" height="60" visible="0"/>
+        <Object id="route 659" color="11104:31186:29113"/>
+        <Object id="rtav 659" height="60" visible="1"/>
+        <Object id="automation 681" height="60" visible="0"/>
+        <Object id="automation 668" height="60" visible="0"/>
+        <Object id="route 691" color="24934:39593:18604"/>
+        <Object id="rtav 691" height="60" visible="1"/>
+        <Object id="automation 713" height="60" visible="0"/>
+        <Object id="automation 700" height="60" visible="0"/>
+        <Object id="route 723" color="23066:29567:19114"/>
+        <Object id="rtav 723" height="60" visible="1"/>
+        <Object id="automation 745" height="60" visible="0"/>
+        <Object id="automation 732" height="60" visible="0"/>
+        <Object id="route 755" color="10467:1647:25863"/>
+        <Object id="rtav 755" height="60" visible="1"/>
+        <Object id="automation 777" height="60" visible="0"/>
+        <Object id="automation 764" height="60" visible="0"/>
+        <Object id="route 787" color="29492:19635:23502"/>
+        <Object id="rtav 787" height="60" visible="1"/>
+        <Object id="automation 809" height="60" visible="0"/>
+        <Object id="automation 796" height="60" visible="0"/>
+        <Object id="route 819" color="30507:6798:5469"/>
+        <Object id="rtav 819" height="60" visible="1"/>
+        <Object id="automation 841" height="60" visible="0"/>
+        <Object id="automation 828" height="60" visible="0"/>
+        <Object id="route 851" color="20400:45150:38201"/>
+        <Object id="rtav 851" height="60" visible="1"/>
+        <Object id="automation 873" height="60" visible="0"/>
+        <Object id="automation 860" height="60" visible="0"/>
+        <Object id="route 883" color="1406:32657:33077"/>
+        <Object id="rtav 883" height="60" visible="1"/>
+        <Object id="automation 905" height="60" visible="0"/>
+        <Object id="automation 892" height="60" visible="0"/>
+        <Object id="route 915" color="833:18000:29718"/>
+        <Object id="rtav 915" height="60" visible="1"/>
+        <Object id="automation 937" height="60" visible="0"/>
+        <Object id="automation 924" height="60" visible="0"/>
+        <Object id="route 947" color="4072:12746:42501"/>
+        <Object id="rtav 947" height="60" visible="1"/>
+        <Object id="automation 969" height="60" visible="0"/>
+        <Object id="automation 956" height="60" visible="0"/>
+        <Object id="route 979" color="22618:30211:41958"/>
+        <Object id="rtav 979" height="60" visible="1"/>
+        <Object id="automation 1001" height="60" visible="0"/>
+        <Object id="automation 988" height="60" visible="0"/>
+        <Object id="route 1011" color="5804:37167:7244"/>
+        <Object id="rtav 1011" height="60" visible="1"/>
+        <Object id="automation 1033" height="60" visible="0"/>
+        <Object id="automation 1020" height="60" visible="0"/>
+        <Object id="route 1043" color="33750:44634:30311"/>
+        <Object id="rtav 1043" height="60" visible="1"/>
+        <Object id="automation 1065" height="60" visible="0"/>
+        <Object id="automation 1052" height="60" visible="0"/>
+        <Object id="route 1075" color="15317:22497:40778"/>
+        <Object id="rtav 1075" height="60" visible="1"/>
+        <Object id="automation 1097" height="60" visible="0"/>
+        <Object id="automation 1084" height="60" visible="0"/>
+        <Object id="strip 83" visible="1">
+          <Object id="processor 103"/>
+        </Object>
+        <Object id="strip 115" visible="1">
+          <Object id="processor 135"/>
+        </Object>
+        <Object id="strip 147" visible="1">
+          <Object id="processor 167"/>
+        </Object>
+        <Object id="strip 179" visible="1">
+          <Object id="processor 199"/>
+        </Object>
+        <Object id="strip 211" visible="1">
+          <Object id="processor 231"/>
+        </Object>
+        <Object id="strip 243" visible="1">
+          <Object id="processor 263"/>
+        </Object>
+        <Object id="strip 275" visible="1">
+          <Object id="processor 295"/>
+        </Object>
+        <Object id="strip 307" visible="1">
+          <Object id="processor 327"/>
+        </Object>
+        <Object id="strip 339" visible="1">
+          <Object id="processor 359"/>
+        </Object>
+        <Object id="strip 371" visible="1">
+          <Object id="processor 391"/>
+        </Object>
+        <Object id="strip 403" visible="1">
+          <Object id="processor 423"/>
+        </Object>
+        <Object id="strip 435" visible="1">
+          <Object id="processor 455"/>
+        </Object>
+        <Object id="strip 467" visible="1">
+          <Object id="processor 487"/>
+        </Object>
+        <Object id="strip 499" visible="1">
+          <Object id="processor 519"/>
+        </Object>
+        <Object id="strip 531" visible="1">
+          <Object id="processor 551"/>
+        </Object>
+        <Object id="strip 563" visible="1">
+          <Object id="processor 583"/>
+        </Object>
+        <Object id="strip 595" visible="1">
+          <Object id="processor 615"/>
+        </Object>
+        <Object id="strip 627" visible="1">
+          <Object id="processor 647"/>
+        </Object>
+        <Object id="strip 659" visible="1">
+          <Object id="processor 679"/>
+        </Object>
+        <Object id="strip 691" visible="1">
+          <Object id="processor 711"/>
+        </Object>
+        <Object id="strip 723" visible="1">
+          <Object id="processor 743"/>
+        </Object>
+        <Object id="strip 755" visible="1">
+          <Object id="processor 775"/>
+        </Object>
+        <Object id="strip 787" visible="1">
+          <Object id="processor 807"/>
+        </Object>
+        <Object id="strip 819" visible="1">
+          <Object id="processor 839"/>
+        </Object>
+        <Object id="strip 851" visible="1">
+          <Object id="processor 871"/>
+        </Object>
+        <Object id="strip 883" visible="1">
+          <Object id="processor 903"/>
+        </Object>
+        <Object id="strip 915" visible="1">
+          <Object id="processor 935"/>
+        </Object>
+        <Object id="strip 947" visible="1">
+          <Object id="processor 967"/>
+        </Object>
+        <Object id="strip 979" visible="1">
+          <Object id="processor 999"/>
+        </Object>
+        <Object id="strip 1011" visible="1">
+          <Object id="processor 1031"/>
+        </Object>
+        <Object id="strip 1043" visible="1">
+          <Object id="processor 1063"/>
+        </Object>
+        <Object id="strip 1075" visible="1">
+          <Object id="processor 1095"/>
+        </Object>
+      </GUIObjectState>
+    </UI>
+  </Extra>
 </Session>

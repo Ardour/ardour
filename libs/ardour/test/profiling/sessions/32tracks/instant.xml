@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <instant>
-  <Editor id="11" mixer-width="Wide" zoom-focus="3" zoom="30254.000336" snap-to="21" snap-mode="0" edit-point="EditAtPlayhead" playhead="0" left-frame="0" y-origin="0.000000" show-measures="yes" follow-playhead="no" stationary-playhead="no" xfades-visible="yes" region-list-sort-type="ByEndInFile" mouse-mode="MouseObject" internal-edit="no" join-object-range="no" show-editor-mixer="yes" show-editor-list="yes" editor-list-page="1" show-marker-lines="yes">
-    <geometry x-size="1272" y-size="996" x-pos="1280" y-pos="0" edit-horizontal-pane-pos="1121" notebook-shrunk="0" pre-maximal-horizontal-pane-position="826" edit-vertical-pane-pos="777"/>
+  <Editor id="11" mixer-width="Wide" zoom-focus="ZoomFocusPlayhead" zoom="30254.000336" snap-to="SnapToBeatDiv3" snap-mode="SnapOff" internal-snap-to="SnapToBeat" internal-snap-mode="SnapOff" pre-internal-snap-to="SnapToBeatDiv3" pre-internal-snap-mode="SnapOff" edit-point="EditAtPlayhead" playhead="0" left-frame="0" y-origin="0.000000" show-measures="yes" maximised="no" follow-playhead="no" stationary-playhead="no" region-list-sort-type="ByEndInFile" mouse-mode="MouseObject" internal-edit="no" join-object-range="no" show-editor-mixer="yes" show-editor-list="yes" editor-list-page="1" show-marker-lines="yes" nudge-clock-value="240000">
+    <geometry x-size="1366" y-size="714" x-pos="0" y-pos="27" edit-horizontal-pane-pos="1011" notebook-shrunk="0" edit-vertical-pane-pos="518"/>
     <Buttons>
       <Press/>
       <Release/>

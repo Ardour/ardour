@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Session version="3.0.0" name="32tracks" sample-rate="44100" id-counter="1235" event-counter="0">
+<Session version="3001" name="32tracks" sample-rate="44100" id-counter="2430" event-counter="0">
   <Config>
     <Option name="xfade-model" value="FullCrossfade"/>
+    <Option name="xfade-choice" value="ConstantPowerMinus3dB"/>
     <Option name="auto-xfade" value="1"/>
     <Option name="short-xfade-seconds" value="0.015"/>
-    <Option name="xfades-active" value="1"/>
-    <Option name="xfades-visible" value="1"/>
     <Option name="destructive-xfade-msecs" value="2"/>
     <Option name="use-region-fades" value="1"/>
     <Option name="show-region-fades" value="1"/>
@@ -21,8 +20,6 @@
     <Option name="raid-path" value=""/>
     <Option name="audio-search-path" value=""/>
     <Option name="midi-search-path" value=""/>
-    <Option name="bwf-country-code" value="US"/>
-    <Option name="bwf-organization-code" value="US"/>
     <Option name="auditioner-output-left" value="default"/>
     <Option name="auditioner-output-right" value="default"/>
     <Option name="timecode-source-is-synced" value="1"/>
@@ -52,72 +49,72 @@
     <Route id="22" name="master" default-type="audio" flags="MasterOut" active="yes" phase-invert="00" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=0:signal=0" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no">
       <IO name="master" id="39" direction="Input" default-type="audio" user-latency="0">
         <Port type="audio" name="master/audio_in 1">
-          <Connection other="Audio 32/audio_out 1"/>
-          <Connection other="Audio 31/audio_out 1"/>
-          <Connection other="Audio 30/audio_out 1"/>
-          <Connection other="Audio 29/audio_out 1"/>
-          <Connection other="Audio 28/audio_out 1"/>
-          <Connection other="Audio 27/audio_out 1"/>
-          <Connection other="Audio 26/audio_out 1"/>
-          <Connection other="Audio 25/audio_out 1"/>
-          <Connection other="Audio 24/audio_out 1"/>
-          <Connection other="Audio 23/audio_out 1"/>
-          <Connection other="Audio 22/audio_out 1"/>
-          <Connection other="Audio 21/audio_out 1"/>
-          <Connection other="Audio 20/audio_out 1"/>
-          <Connection other="Audio 19/audio_out 1"/>
-          <Connection other="Audio 18/audio_out 1"/>
-          <Connection other="Audio 17/audio_out 1"/>
-          <Connection other="Audio 16/audio_out 1"/>
-          <Connection other="Audio 15/audio_out 1"/>
-          <Connection other="Audio 14/audio_out 1"/>
-          <Connection other="Audio 13/audio_out 1"/>
-          <Connection other="Audio 12/audio_out 1"/>
-          <Connection other="Audio 11/audio_out 1"/>
-          <Connection other="Audio 10/audio_out 1"/>
-          <Connection other="Audio 9/audio_out 1"/>
-          <Connection other="Audio 8/audio_out 1"/>
-          <Connection other="Audio 7/audio_out 1"/>
-          <Connection other="Audio 6/audio_out 1"/>
-          <Connection other="Audio 5/audio_out 1"/>
-          <Connection other="Audio 4/audio_out 1"/>
-          <Connection other="Audio 3/audio_out 1"/>
-          <Connection other="Audio 2/audio_out 1"/>
           <Connection other="Audio 1/audio_out 1"/>
+          <Connection other="Audio 2/audio_out 1"/>
+          <Connection other="Audio 3/audio_out 1"/>
+          <Connection other="Audio 4/audio_out 1"/>
+          <Connection other="Audio 5/audio_out 1"/>
+          <Connection other="Audio 6/audio_out 1"/>
+          <Connection other="Audio 7/audio_out 1"/>
+          <Connection other="Audio 8/audio_out 1"/>
+          <Connection other="Audio 9/audio_out 1"/>
+          <Connection other="Audio 10/audio_out 1"/>
+          <Connection other="Audio 11/audio_out 1"/>
+          <Connection other="Audio 12/audio_out 1"/>
+          <Connection other="Audio 13/audio_out 1"/>
+          <Connection other="Audio 14/audio_out 1"/>
+          <Connection other="Audio 15/audio_out 1"/>
+          <Connection other="Audio 16/audio_out 1"/>
+          <Connection other="Audio 17/audio_out 1"/>
+          <Connection other="Audio 18/audio_out 1"/>
+          <Connection other="Audio 19/audio_out 1"/>
+          <Connection other="Audio 20/audio_out 1"/>
+          <Connection other="Audio 21/audio_out 1"/>
+          <Connection other="Audio 22/audio_out 1"/>
+          <Connection other="Audio 23/audio_out 1"/>
+          <Connection other="Audio 24/audio_out 1"/>
+          <Connection other="Audio 25/audio_out 1"/>
+          <Connection other="Audio 26/audio_out 1"/>
+          <Connection other="Audio 27/audio_out 1"/>
+          <Connection other="Audio 28/audio_out 1"/>
+          <Connection other="Audio 29/audio_out 1"/>
+          <Connection other="Audio 30/audio_out 1"/>
+          <Connection other="Audio 31/audio_out 1"/>
+          <Connection other="Audio 32/audio_out 1"/>
         </Port>
         <Port type="audio" name="master/audio_in 2">
-          <Connection other="Audio 32/audio_out 2"/>
-          <Connection other="Audio 31/audio_out 2"/>
-          <Connection other="Audio 30/audio_out 2"/>
-          <Connection other="Audio 29/audio_out 2"/>
-          <Connection other="Audio 28/audio_out 2"/>
-          <Connection other="Audio 27/audio_out 2"/>
-          <Connection other="Audio 26/audio_out 2"/>
-          <Connection other="Audio 25/audio_out 2"/>
-          <Connection other="Audio 24/audio_out 2"/>
-          <Connection other="Audio 23/audio_out 2"/>
-          <Connection other="Audio 22/audio_out 2"/>
-          <Connection other="Audio 21/audio_out 2"/>
-          <Connection other="Audio 20/audio_out 2"/>
-          <Connection other="Audio 19/audio_out 2"/>
-          <Connection other="Audio 18/audio_out 2"/>
-          <Connection other="Audio 17/audio_out 2"/>
-          <Connection other="Audio 16/audio_out 2"/>
-          <Connection other="Audio 15/audio_out 2"/>
-          <Connection other="Audio 14/audio_out 2"/>
-          <Connection other="Audio 13/audio_out 2"/>
-          <Connection other="Audio 12/audio_out 2"/>
-          <Connection other="Audio 11/audio_out 2"/>
-          <Connection other="Audio 10/audio_out 2"/>
-          <Connection other="Audio 9/audio_out 2"/>
-          <Connection other="Audio 8/audio_out 2"/>
-          <Connection other="Audio 7/audio_out 2"/>
-          <Connection other="Audio 6/audio_out 2"/>
-          <Connection other="Audio 5/audio_out 2"/>
-          <Connection other="Audio 4/audio_out 2"/>
-          <Connection other="Audio 3/audio_out 2"/>
-          <Connection other="Audio 2/audio_out 2"/>
           <Connection other="Audio 1/audio_out 2"/>
+          <Connection other="Audio 2/audio_out 2"/>
+          <Connection other="Audio 3/audio_out 2"/>
+          <Connection other="Audio 4/audio_out 2"/>
+          <Connection other="Audio 5/audio_out 2"/>
+          <Connection other="Audio 6/audio_out 2"/>
+          <Connection other="Audio 7/audio_out 2"/>
+          <Connection other="Audio 8/audio_out 2"/>
+          <Connection other="Audio 9/audio_out 2"/>
+          <Connection other="Audio 10/audio_out 2"/>
+          <Connection other="Audio 11/audio_out 2"/>
+          <Connection other="Audio 12/audio_out 2"/>
+          <Connection other="Audio 13/audio_out 2"/>
+          <Connection other="Audio 14/audio_out 2"/>
+          <Connection other="Audio 15/audio_out 2"/>
+          <Connection other="Audio 16/audio_out 2"/>
+          <Connection other="Audio 17/audio_out 2"/>
+          <Connection other="Audio 18/audio_out 2"/>
+          <Connection other="Audio 19/audio_out 2"/>
+          <Connection other="Audio 20/audio_out 2"/>
+          <Connection other="Audio 21/audio_out 2"/>
+          <Connection other="Audio 22/audio_out 2"/>
+          <Connection other="Audio 23/audio_out 2"/>
+          <Connection other="Audio 24/audio_out 2"/>
+          <Connection other="Audio 25/audio_out 2"/>
+          <Connection other="Audio 26/audio_out 2"/>
+          <Connection other="Audio 27/audio_out 2"/>
+          <Connection other="Audio 28/audio_out 2"/>
+          <Connection other="Audio 29/audio_out 2"/>
+          <Connection other="Audio 30/audio_out 2"/>
+          <Connection other="Audio 31/audio_out 2"/>
+          <Connection other="Audio 32/audio_out 2"/>
         </Port>
       </IO>
       <IO name="master" id="40" direction="Output" default-type="audio" user-latency="0">
@@ -228,9 +225,7 @@
     </Route>
     <Route id="147" name="Audio 3" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=3:signal=3" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 3" id="165" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 3/audio_in 1">
-          <Connection other="system:capture_3"/>
-        </Port>
+        <Port type="audio" name="Audio 3/audio_in 1"/>
       </IO>
       <IO name="Audio 3" id="166" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 3/audio_out 1">
@@ -266,9 +261,7 @@
     </Route>
     <Route id="179" name="Audio 4" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=4:signal=4" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 4" id="197" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 4/audio_in 1">
-          <Connection other="system:capture_4"/>
-        </Port>
+        <Port type="audio" name="Audio 4/audio_in 1"/>
       </IO>
       <IO name="Audio 4" id="198" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 4/audio_out 1">
@@ -304,9 +297,7 @@
     </Route>
     <Route id="211" name="Audio 5" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=5:signal=5" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 5" id="229" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 5/audio_in 1">
-          <Connection other="system:capture_5"/>
-        </Port>
+        <Port type="audio" name="Audio 5/audio_in 1"/>
       </IO>
       <IO name="Audio 5" id="230" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 5/audio_out 1">
@@ -342,9 +333,7 @@
     </Route>
     <Route id="243" name="Audio 6" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=6:signal=6" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 6" id="261" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 6/audio_in 1">
-          <Connection other="system:capture_6"/>
-        </Port>
+        <Port type="audio" name="Audio 6/audio_in 1"/>
       </IO>
       <IO name="Audio 6" id="262" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 6/audio_out 1">
@@ -380,9 +369,7 @@
     </Route>
     <Route id="275" name="Audio 7" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=7:signal=7" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 7" id="293" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 7/audio_in 1">
-          <Connection other="system:capture_7"/>
-        </Port>
+        <Port type="audio" name="Audio 7/audio_in 1"/>
       </IO>
       <IO name="Audio 7" id="294" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 7/audio_out 1">
@@ -418,9 +405,7 @@
     </Route>
     <Route id="307" name="Audio 8" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=8:signal=8" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 8" id="325" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 8/audio_in 1">
-          <Connection other="system:capture_8"/>
-        </Port>
+        <Port type="audio" name="Audio 8/audio_in 1"/>
       </IO>
       <IO name="Audio 8" id="326" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 8/audio_out 1">
@@ -456,9 +441,7 @@
     </Route>
     <Route id="339" name="Audio 9" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=9:signal=9" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 9" id="357" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 9/audio_in 1">
-          <Connection other="system:capture_9"/>
-        </Port>
+        <Port type="audio" name="Audio 9/audio_in 1"/>
       </IO>
       <IO name="Audio 9" id="358" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 9/audio_out 1">
@@ -494,9 +477,7 @@
     </Route>
     <Route id="371" name="Audio 10" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=10:signal=10" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 10" id="389" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 10/audio_in 1">
-          <Connection other="system:capture_10"/>
-        </Port>
+        <Port type="audio" name="Audio 10/audio_in 1"/>
       </IO>
       <IO name="Audio 10" id="390" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 10/audio_out 1">
@@ -532,9 +513,7 @@
     </Route>
     <Route id="403" name="Audio 11" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=11:signal=11" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 11" id="421" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 11/audio_in 1">
-          <Connection other="system:capture_11"/>
-        </Port>
+        <Port type="audio" name="Audio 11/audio_in 1"/>
       </IO>
       <IO name="Audio 11" id="422" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 11/audio_out 1">
@@ -570,9 +549,7 @@
     </Route>
     <Route id="435" name="Audio 12" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=12:signal=12" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 12" id="453" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 12/audio_in 1">
-          <Connection other="system:capture_12"/>
-        </Port>
+        <Port type="audio" name="Audio 12/audio_in 1"/>
       </IO>
       <IO name="Audio 12" id="454" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 12/audio_out 1">
@@ -608,9 +585,7 @@
     </Route>
     <Route id="467" name="Audio 13" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=13:signal=13" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 13" id="485" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 13/audio_in 1">
-          <Connection other="system:capture_13"/>
-        </Port>
+        <Port type="audio" name="Audio 13/audio_in 1"/>
       </IO>
       <IO name="Audio 13" id="486" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 13/audio_out 1">
@@ -646,9 +621,7 @@
     </Route>
     <Route id="499" name="Audio 14" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=14:signal=14" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 14" id="517" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 14/audio_in 1">
-          <Connection other="system:capture_14"/>
-        </Port>
+        <Port type="audio" name="Audio 14/audio_in 1"/>
       </IO>
       <IO name="Audio 14" id="518" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 14/audio_out 1">
@@ -684,9 +657,7 @@
     </Route>
     <Route id="531" name="Audio 15" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=15:signal=15" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 15" id="549" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 15/audio_in 1">
-          <Connection other="system:capture_15"/>
-        </Port>
+        <Port type="audio" name="Audio 15/audio_in 1"/>
       </IO>
       <IO name="Audio 15" id="550" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 15/audio_out 1">
@@ -722,9 +693,7 @@
     </Route>
     <Route id="563" name="Audio 16" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=16:signal=16" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 16" id="581" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 16/audio_in 1">
-          <Connection other="system:capture_16"/>
-        </Port>
+        <Port type="audio" name="Audio 16/audio_in 1"/>
       </IO>
       <IO name="Audio 16" id="582" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 16/audio_out 1">
@@ -760,9 +729,7 @@
     </Route>
     <Route id="595" name="Audio 17" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=17:signal=17" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 17" id="613" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 17/audio_in 1">
-          <Connection other="system:capture_17"/>
-        </Port>
+        <Port type="audio" name="Audio 17/audio_in 1"/>
       </IO>
       <IO name="Audio 17" id="614" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 17/audio_out 1">
@@ -798,9 +765,7 @@
     </Route>
     <Route id="627" name="Audio 18" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=18:signal=18" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 18" id="645" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 18/audio_in 1">
-          <Connection other="system:capture_18"/>
-        </Port>
+        <Port type="audio" name="Audio 18/audio_in 1"/>
       </IO>
       <IO name="Audio 18" id="646" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 18/audio_out 1">
@@ -836,9 +801,7 @@
     </Route>
     <Route id="659" name="Audio 19" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=19:signal=19" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 19" id="677" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 19/audio_in 1">
-          <Connection other="system:capture_19"/>
-        </Port>
+        <Port type="audio" name="Audio 19/audio_in 1"/>
       </IO>
       <IO name="Audio 19" id="678" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 19/audio_out 1">
@@ -874,9 +837,7 @@
     </Route>
     <Route id="691" name="Audio 20" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=20:signal=20" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 20" id="709" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 20/audio_in 1">
-          <Connection other="system:capture_20"/>
-        </Port>
+        <Port type="audio" name="Audio 20/audio_in 1"/>
       </IO>
       <IO name="Audio 20" id="710" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 20/audio_out 1">
@@ -912,9 +873,7 @@
     </Route>
     <Route id="723" name="Audio 21" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=21:signal=21" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 21" id="741" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 21/audio_in 1">
-          <Connection other="system:capture_21"/>
-        </Port>
+        <Port type="audio" name="Audio 21/audio_in 1"/>
       </IO>
       <IO name="Audio 21" id="742" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 21/audio_out 1">
@@ -950,9 +909,7 @@
     </Route>
     <Route id="755" name="Audio 22" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=22:signal=22" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 22" id="773" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 22/audio_in 1">
-          <Connection other="system:capture_22"/>
-        </Port>
+        <Port type="audio" name="Audio 22/audio_in 1"/>
       </IO>
       <IO name="Audio 22" id="774" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 22/audio_out 1">
@@ -988,9 +945,7 @@
     </Route>
     <Route id="787" name="Audio 23" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=23:signal=23" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 23" id="805" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 23/audio_in 1">
-          <Connection other="system:capture_23"/>
-        </Port>
+        <Port type="audio" name="Audio 23/audio_in 1"/>
       </IO>
       <IO name="Audio 23" id="806" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 23/audio_out 1">
@@ -1026,9 +981,7 @@
     </Route>
     <Route id="819" name="Audio 24" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=24:signal=24" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 24" id="837" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 24/audio_in 1">
-          <Connection other="system:capture_24"/>
-        </Port>
+        <Port type="audio" name="Audio 24/audio_in 1"/>
       </IO>
       <IO name="Audio 24" id="838" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 24/audio_out 1">
@@ -1064,9 +1017,7 @@
     </Route>
     <Route id="851" name="Audio 25" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=25:signal=25" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 25" id="869" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 25/audio_in 1">
-          <Connection other="system:capture_25"/>
-        </Port>
+        <Port type="audio" name="Audio 25/audio_in 1"/>
       </IO>
       <IO name="Audio 25" id="870" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 25/audio_out 1">
@@ -1102,9 +1053,7 @@
     </Route>
     <Route id="883" name="Audio 26" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=26:signal=26" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 26" id="901" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 26/audio_in 1">
-          <Connection other="system:capture_26"/>
-        </Port>
+        <Port type="audio" name="Audio 26/audio_in 1"/>
       </IO>
       <IO name="Audio 26" id="902" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 26/audio_out 1">
@@ -1216,9 +1165,7 @@
     </Route>
     <Route id="979" name="Audio 29" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=29:signal=29" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 29" id="997" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 29/audio_in 1">
-          <Connection other="system:capture_3"/>
-        </Port>
+        <Port type="audio" name="Audio 29/audio_in 1"/>
       </IO>
       <IO name="Audio 29" id="998" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 29/audio_out 1">
@@ -1254,9 +1201,7 @@
     </Route>
     <Route id="1011" name="Audio 30" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=30:signal=30" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 30" id="1029" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 30/audio_in 1">
-          <Connection other="system:capture_4"/>
-        </Port>
+        <Port type="audio" name="Audio 30/audio_in 1"/>
       </IO>
       <IO name="Audio 30" id="1030" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 30/audio_out 1">
@@ -1292,9 +1237,7 @@
     </Route>
     <Route id="1043" name="Audio 31" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=31:signal=31" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 31" id="1061" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 31/audio_in 1">
-          <Connection other="system:capture_5"/>
-        </Port>
+        <Port type="audio" name="Audio 31/audio_in 1"/>
       </IO>
       <IO name="Audio 31" id="1062" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 31/audio_out 1">
@@ -1330,9 +1273,7 @@
     </Route>
     <Route id="1075" name="Audio 32" default-type="audio" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=32:signal=32" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" mode="Normal">
       <IO name="Audio 32" id="1093" direction="Input" default-type="audio" user-latency="0">
-        <Port type="audio" name="Audio 32/audio_in 1">
-          <Connection other="system:capture_6"/>
-        </Port>
+        <Port type="audio" name="Audio 32/audio_in 1"/>
       </IO>
       <IO name="Audio 32" id="1094" direction="Output" default-type="audio" user-latency="0">
         <Port type="audio" name="Audio 32/audio_out 1">
@@ -1368,38 +1309,38 @@
     </Route>
   </Routes>
   <Playlists>
-    <Playlist id="110" name="Audio 1.1" type="audio" orig-track-id="83" frozen="no" combine-ops="0"/>
     <Playlist id="142" name="Audio 2.1" type="audio" orig-track-id="115" frozen="no" combine-ops="0"/>
-    <Playlist id="174" name="Audio 3.1" type="audio" orig-track-id="147" frozen="no" combine-ops="0"/>
+    <Playlist id="110" name="Audio 1.1" type="audio" orig-track-id="83" frozen="no" combine-ops="0"/>
     <Playlist id="206" name="Audio 4.1" type="audio" orig-track-id="179" frozen="no" combine-ops="0"/>
-    <Playlist id="238" name="Audio 5.1" type="audio" orig-track-id="211" frozen="no" combine-ops="0"/>
+    <Playlist id="174" name="Audio 3.1" type="audio" orig-track-id="147" frozen="no" combine-ops="0"/>
     <Playlist id="270" name="Audio 6.1" type="audio" orig-track-id="243" frozen="no" combine-ops="0"/>
-    <Playlist id="302" name="Audio 7.1" type="audio" orig-track-id="275" frozen="no" combine-ops="0"/>
+    <Playlist id="238" name="Audio 5.1" type="audio" orig-track-id="211" frozen="no" combine-ops="0"/>
     <Playlist id="334" name="Audio 8.1" type="audio" orig-track-id="307" frozen="no" combine-ops="0"/>
-    <Playlist id="366" name="Audio 9.1" type="audio" orig-track-id="339" frozen="no" combine-ops="0"/>
+    <Playlist id="302" name="Audio 7.1" type="audio" orig-track-id="275" frozen="no" combine-ops="0"/>
     <Playlist id="398" name="Audio 10.1" type="audio" orig-track-id="371" frozen="no" combine-ops="0"/>
-    <Playlist id="430" name="Audio 11.1" type="audio" orig-track-id="403" frozen="no" combine-ops="0"/>
+    <Playlist id="366" name="Audio 9.1" type="audio" orig-track-id="339" frozen="no" combine-ops="0"/>
     <Playlist id="462" name="Audio 12.1" type="audio" orig-track-id="435" frozen="no" combine-ops="0"/>
-    <Playlist id="494" name="Audio 13.1" type="audio" orig-track-id="467" frozen="no" combine-ops="0"/>
+    <Playlist id="430" name="Audio 11.1" type="audio" orig-track-id="403" frozen="no" combine-ops="0"/>
     <Playlist id="526" name="Audio 14.1" type="audio" orig-track-id="499" frozen="no" combine-ops="0"/>
-    <Playlist id="558" name="Audio 15.1" type="audio" orig-track-id="531" frozen="no" combine-ops="0"/>
+    <Playlist id="494" name="Audio 13.1" type="audio" orig-track-id="467" frozen="no" combine-ops="0"/>
     <Playlist id="590" name="Audio 16.1" type="audio" orig-track-id="563" frozen="no" combine-ops="0"/>
-    <Playlist id="622" name="Audio 17.1" type="audio" orig-track-id="595" frozen="no" combine-ops="0"/>
+    <Playlist id="558" name="Audio 15.1" type="audio" orig-track-id="531" frozen="no" combine-ops="0"/>
     <Playlist id="654" name="Audio 18.1" type="audio" orig-track-id="627" frozen="no" combine-ops="0"/>
-    <Playlist id="686" name="Audio 19.1" type="audio" orig-track-id="659" frozen="no" combine-ops="0"/>
+    <Playlist id="622" name="Audio 17.1" type="audio" orig-track-id="595" frozen="no" combine-ops="0"/>
     <Playlist id="718" name="Audio 20.1" type="audio" orig-track-id="691" frozen="no" combine-ops="0"/>
-    <Playlist id="750" name="Audio 21.1" type="audio" orig-track-id="723" frozen="no" combine-ops="0"/>
+    <Playlist id="686" name="Audio 19.1" type="audio" orig-track-id="659" frozen="no" combine-ops="0"/>
     <Playlist id="782" name="Audio 22.1" type="audio" orig-track-id="755" frozen="no" combine-ops="0"/>
-    <Playlist id="814" name="Audio 23.1" type="audio" orig-track-id="787" frozen="no" combine-ops="0"/>
+    <Playlist id="750" name="Audio 21.1" type="audio" orig-track-id="723" frozen="no" combine-ops="0"/>
     <Playlist id="846" name="Audio 24.1" type="audio" orig-track-id="819" frozen="no" combine-ops="0"/>
-    <Playlist id="878" name="Audio 25.1" type="audio" orig-track-id="851" frozen="no" combine-ops="0"/>
+    <Playlist id="814" name="Audio 23.1" type="audio" orig-track-id="787" frozen="no" combine-ops="0"/>
     <Playlist id="910" name="Audio 26.1" type="audio" orig-track-id="883" frozen="no" combine-ops="0"/>
-    <Playlist id="942" name="Audio 27.1" type="audio" orig-track-id="915" frozen="no" combine-ops="0"/>
+    <Playlist id="878" name="Audio 25.1" type="audio" orig-track-id="851" frozen="no" combine-ops="0"/>
     <Playlist id="974" name="Audio 28.1" type="audio" orig-track-id="947" frozen="no" combine-ops="0"/>
-    <Playlist id="1006" name="Audio 29.1" type="audio" orig-track-id="979" frozen="no" combine-ops="0"/>
+    <Playlist id="942" name="Audio 27.1" type="audio" orig-track-id="915" frozen="no" combine-ops="0"/>
     <Playlist id="1038" name="Audio 30.1" type="audio" orig-track-id="1011" frozen="no" combine-ops="0"/>
-    <Playlist id="1070" name="Audio 31.1" type="audio" orig-track-id="1043" frozen="no" combine-ops="0"/>
+    <Playlist id="1006" name="Audio 29.1" type="audio" orig-track-id="979" frozen="no" combine-ops="0"/>
     <Playlist id="1102" name="Audio 32.1" type="audio" orig-track-id="1075" frozen="no" combine-ops="0"/>
+    <Playlist id="1070" name="Audio 31.1" type="audio" orig-track-id="1043" frozen="no" combine-ops="0"/>
   </Playlists>
   <UnusedPlaylists/>
   <RouteGroups/>
@@ -1412,6 +1353,9 @@
         <Connection other="system:playback_2"/>
       </Port>
     </IO>
+    <Processor id="2320" name="Amp" active="yes" user-latency="0" type="amp">
+      <Controllable name="gaincontrol" id="2322" flags="GainLike" value="1.000000000000"/>
+    </Processor>
   </Click>
   <NamedSelections/>
   <Speakers>
@@ -1424,8 +1368,10 @@
   </TempoMap>
   <ControlProtocols>
     <Protocol name="Open Sound Control (OSC)" active="no"/>
-    <Protocol name="Generic MIDI" active="no"/>
-    <Protocol name="Mackie" active="no"/>
+    <Protocol name="Generic MIDI" feedback="0" feedback-interval="10000" active="yes">
+      <Controls/>
+    </Protocol>
+    <Protocol name="Mackie" bank="0" ipmidi-base="21928" device-profile="" device-name="Mackie Control Universal Pro" active="yes"/>
   </ControlProtocols>
   <Extra>
     <UI>

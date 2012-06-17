@@ -478,10 +478,12 @@ def build(bld):
         profilingobj = bld(features = 'cxx cxxprogram')
         profilingobj.source = '''
                 test/dummy_lxvst.cc
+                test/test_util.cc
                 test/profiling/runpc.cc
         '''.split()
 
         profilingobj.includes  = obj.includes
+        profilingobj.includes.append ('test')
         profilingobj.uselib    = ['CPPUNIT','SIGCPP','JACK','GLIBMM','GTHREAD',
                              'SAMPLERATE','XML','LRDF','COREAUDIO']
         profilingobj.use       = ['libpbd','libmidipp','libardour']
