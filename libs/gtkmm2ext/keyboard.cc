@@ -243,6 +243,14 @@ Keyboard::snooper (GtkWidget *widget, GdkEventKey *event)
 		keyval = event->keyval;
 	}
 
+	if (keyval == GDK_Shift_L) {
+		/* There is a special and rather hacky situation in Editor which makes
+		   it useful to know when a shift key has been released, so emit a signal
+		   here (see Editor::_stepping_axis_view)
+		*/
+		ShiftReleased (); /* EMIT SIGNAL */
+	}
+
 	if (event->type == GDK_KEY_PRESS) {
 
 		if (find (state.begin(), state.end(), keyval) == state.end()) {

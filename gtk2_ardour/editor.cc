@@ -282,6 +282,7 @@ Editor::Editor ()
 	, _region_selection_change_updates_region_list (true)
 	, _following_mixer_selection (false)
 	, _control_point_toggled_on_press (false)
+	, _stepping_axis_view (0)
 {
 	constructed = false;
 
@@ -696,6 +697,8 @@ Editor::Editor ()
 	signal_configure_event().connect (sigc::mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::configure_handler));
 	signal_delete_event().connect (sigc::mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::exit_on_main_window_close));
 
+	Gtkmm2ext::Keyboard::the_keyboard().ShiftReleased.connect (sigc::mem_fun (*this, &Editor::shift_key_released));
+	
 	/* allow external control surfaces/protocols to do various things */
 
 	ControlProtocol::ZoomToSession.connect (*this, invalidator (*this), boost::bind (&Editor::temporal_zoom_session, this), gui_context());
@@ -5473,3 +5476,8 @@ Editor::popup_control_point_context_menu (ArdourCanvas::Item* item, GdkEvent* ev
 	_control_point_context_menu.popup (event->button.button, event->button.time);
 }
 
+void
+Editor::shift_key_released ()
+{
+	_stepping_axis_view = 0;
+}

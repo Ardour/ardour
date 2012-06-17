@@ -48,6 +48,7 @@
 #include "utils.h"
 #include "streamview.h"
 #include "editor_drag.h"
+#include "editor.h"
 
 #include "i18n.h"
 
@@ -317,7 +318,12 @@ TimeAxisView::controls_ebox_scroll (GdkEventScroll* ev)
 	switch (ev->direction) {
 	case GDK_SCROLL_UP:
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
-			step_height (false);
+			/* See Editor::_stepping_axis_view for notes on this hack */
+			Editor& e = dynamic_cast<Editor&> (_editor);
+			if (!e.stepping_axis_view ()) {
+				e.set_stepping_axis_view (this);
+			}
+			e.stepping_axis_view()->step_height (false);
 			return true;
 		} else if (Keyboard::no_modifiers_active (ev->state)) {
 			_editor.scroll_tracks_up_line();
@@ -327,7 +333,12 @@ TimeAxisView::controls_ebox_scroll (GdkEventScroll* ev)
 
 	case GDK_SCROLL_DOWN:
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
-			step_height (true);
+			/* See Editor::_stepping_axis_view for notes on this hack */
+			Editor& e = dynamic_cast<Editor&> (_editor);
+			if (!e.stepping_axis_view ()) {
+				e.set_stepping_axis_view (this);
+			}
+			e.stepping_axis_view()->step_height (true);
 			return true;
 		} else if (Keyboard::no_modifiers_active (ev->state)) {
 			_editor.scroll_tracks_down_line();
