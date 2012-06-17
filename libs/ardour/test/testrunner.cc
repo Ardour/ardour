@@ -44,7 +44,7 @@ main(int argc, char* argv[])
 		}
 	}
 
-	ARDOUR::init (false, false);
+	ARDOUR::init (false, true);
 	
 	CppUnit::TestResult testresult;
 	
