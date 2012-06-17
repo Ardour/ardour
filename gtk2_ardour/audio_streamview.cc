@@ -60,8 +60,6 @@ AudioStreamView::AudioStreamView (AudioTimeAxisView& tv)
 {
 	color_handler ();
 	_amplitude_above_axis = 1.0;
-
-	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&AudioStreamView::parameter_changed, this, _1), gui_context());
 }
 
 int
@@ -131,10 +129,6 @@ AudioStreamView::create_region_view (boost::shared_ptr<Region> r, bool wait_for_
 	if (region->length() == 1) {
 		region_view->set_sensitive (false);
 	}
-
-	region_view->set_waveform_scale (Config->get_waveform_scale ());
-	region_view->set_waveform_shape (Config->get_waveform_shape ());
-	region_view->set_waveform_visible (Config->get_show_waveforms ());
 
 	return region_view;
 }
@@ -206,38 +200,6 @@ AudioStreamView::redisplay_track ()
 
 	// Stack regions by layer, and remove invalid regions
 	layer_regions();
-}
-
-void
-AudioStreamView::set_show_waveforms (bool yn)
-{
-	for (list<RegionView *>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
-		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
-		if (arv) {
-			arv->set_waveform_visible (yn);
-		}
-	}
-}
-
-void
-AudioStreamView::set_waveform_shape (WaveformShape shape)
-{
-	for (RegionViewList::iterator i = region_views.begin(); i != region_views.end(); ++i) {
-		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
-		if (arv)
-			arv->set_waveform_shape (shape);
-	}
-}
-
-void
-AudioStreamView::set_waveform_scale (WaveformScale scale)
-{
-	for (RegionViewList::iterator i = region_views.begin(); i != region_views.end(); ++i) {
-		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
-		if (arv) {
-			arv->set_waveform_scale (scale);
-		}
-	}
 }
 
 void
@@ -572,16 +534,3 @@ AudioStreamView::color_handler ()
 		}
 	}
 }
-
-void
-AudioStreamView::parameter_changed (string const & p)
-{
-	if (p == "show-waveforms") {
-		set_show_waveforms (Config->get_show_waveforms ());
-	} else if (p == "waveform-scale") {
-		set_waveform_scale (Config->get_waveform_scale ());
-	} else if (p == "waveform-shape") {
-		set_waveform_shape (Config->get_waveform_shape ());
-	}
-}
-

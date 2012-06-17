@@ -80,13 +80,6 @@ class AudioRegionView : public RegionView
 	void unhide_envelope ();           ///< Dangerous!
 
 	void update_envelope_visibility ();
-	void set_waveform_visible (bool yn);
-	void set_waveform_shape (ARDOUR::WaveformShape);
-	void set_waveform_scale (ARDOUR::WaveformScale);
-
-	bool waveform_rectified() const { return _flags & WaveformRectified; }
-	bool waveform_logscaled() const { return _flags & WaveformLogScaled; }
-	bool waveform_visible()   const { return _flags & WaveformVisible; }
 
 	void add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *event);
 	void remove_gain_point_event (ArdourCanvas::Item *item, GdkEvent *event);
@@ -165,7 +158,6 @@ class AudioRegionView : public RegionView
 
 	double _amplitude_above_axis;
 
-	uint32_t _flags;
 	uint32_t fade_color;
 
 	void reset_fade_shapes ();
@@ -183,8 +175,6 @@ class AudioRegionView : public RegionView
 
 	void create_one_wave (uint32_t, bool);
 	void peaks_ready_handler (uint32_t);
-	void set_flags (XMLNode *);
-	void store_flags ();
 
 	void set_colors ();
 	void compute_colors (Gdk::Color const &);
@@ -202,6 +192,11 @@ class AudioRegionView : public RegionView
 
 private:
 	void setup_fade_handle_positions ();
+
+	void parameter_changed (std::string const &);
+	void setup_waveform_visibility ();
+	void setup_waveform_shape ();
+	void setup_waveform_scale ();
 
 	/** A ScopedConnection for each PeaksReady callback (one per channel).  Each member
 	 *  may be 0 if no connection exists.
