@@ -406,7 +406,7 @@ Track::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 		*/
                 be_silent = (s == MonitoringSilence || s == MonitoringDisk);
 	}
-
+	
 	if (!_have_internal_generator && metering_state() == MeteringInput) {
 		_input->process_input (_meter, start_frame, end_frame, nframes);
 	}

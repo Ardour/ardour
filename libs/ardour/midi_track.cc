@@ -54,7 +54,6 @@ MidiTrack::MidiTrack (Session& sess, string name, Route::Flag flag, TrackMode mo
 	, _step_edit_ring_buffer(64) // FIXME: size?
 	, _note_mode(Sustained)
 	, _step_editing (false)
-	, _midi_thru (true)
 	, _input_active (true)
 {
 }
@@ -155,10 +154,6 @@ MidiTrack::set_state (const XMLNode& node, int version)
 	// No destructive MIDI tracks (yet?)
 	_mode = Normal;
 
-	if ((prop = node.property ("midi-thru")) != 0) {
-		set_midi_thru (string_is_affirmative (prop->value()));
-	}
-
 	if ((prop = node.property ("input-active")) != 0) {
 		set_input_active (string_is_affirmative (prop->value()));
 	}
@@ -205,7 +200,6 @@ MidiTrack::state(bool full_state)
 
 	root.add_property ("step-editing", (_step_editing ? "yes" : "no"));
 	root.add_property ("note-mode", enum_2_string (_note_mode));
-	root.add_property ("midi-thru", (_midi_thru ? "yes" : "no"));
 	root.add_property ("input-active", (_input_active ? "yes" : "no"));
 
 	return root;
@@ -477,11 +471,6 @@ MidiTrack::write_out_of_band_data (BufferSet& bufs, framepos_t /*start*/, framep
 
 		_immediate_events.read (buf, 0, 1, nframes-1, true);
 	}
-
-	// MIDI thru: send incoming data "through" output
-	if (_midi_thru && _session.transport_speed() != 0.0f && _input->n_ports().n_midi()) {
-		buf.merge_in_place (_input->midi(0)->get_midi_buffer(nframes));
-	}
 }
 
 int
@@ -623,12 +612,6 @@ MidiTrack::set_step_editing (bool yn)
 		_step_editing = yn;
 		StepEditStatusChange (yn);
 	}
-}
-
-void
-MidiTrack::set_midi_thru (bool yn)
-{
-	_midi_thru = yn;
 }
 
 boost::shared_ptr<SMFSource>

@@ -113,7 +113,6 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session* sess, Canvas& can
 	, _channel_color_mode_item(0)
 	, _track_color_mode_item(0)
 	, _step_edit_item (0)
-	, _midi_thru_item (0)
 	, controller_menu (0)
         , _step_editor (0)
 {
@@ -405,23 +404,7 @@ MidiTimeAxisView::append_extra_display_menu_items ()
 	items.push_back (MenuElem (_("Note Range"), *range_menu));
 	items.push_back (MenuElem (_("Note Mode"), *build_note_mode_menu()));
 
-	items.push_back (CheckMenuElem (_("MIDI Thru"), sigc::mem_fun(*this, &MidiTimeAxisView::toggle_midi_thru)));
-	_midi_thru_item = dynamic_cast<CheckMenuItem*>(&items.back());
-
 	items.push_back (SeparatorElem ());
-}
-
-void
-MidiTimeAxisView::toggle_midi_thru ()
-{
-	if (!_midi_thru_item) {
-		return;
-	}
-
-	bool view_yn = _midi_thru_item->get_active();
-	if (view_yn != midi_track()->midi_thru()) {
-		midi_track()->set_midi_thru (view_yn);
-	}
 }
 
 void
