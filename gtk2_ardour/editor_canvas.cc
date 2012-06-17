@@ -501,6 +501,10 @@ Editor::autoscroll_fudge_threshold () const
 void
 Editor::maybe_autoscroll (bool allow_horiz, bool allow_vert, bool moving_left, bool moving_up)
 {
+	if (!Config->get_autoscroll_editor ()) {
+		return;
+	}
+	
 	bool startit = false;
 
 	/* Work out the distance between the right hand edge of the trackview and the edge of

@@ -1150,6 +1150,14 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_name_new_markers)
 		     ));
 
+	add_option (_("Editor"),
+	    new BoolOption (
+		    "autoscroll-editor",
+		    _("Auto-scroll editor window when dragging near its edges"),
+		    sigc::mem_fun (*_rc_config, &RCConfiguration::get_autoscroll_editor),
+		    sigc::mem_fun (*_rc_config, &RCConfiguration::set_autoscroll_editor)
+		    ));
+
 	/* AUDIO */
 
 	add_option (_("Audio"), new OptionEditorHeading (_("Buffering")));
