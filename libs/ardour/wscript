@@ -475,6 +475,39 @@ def build(bld):
             elif bld.env['build_target'] == 'x86_64':
                 testobj.source += [ 'sse_functions_64bit.s' ]
 
+        # Tester to just load a session
+        session_load_tester = bld(features = 'cxx cxxprogram')
+        session_load_tester.source = '''
+                    test/test_util.cc
+                    test/load_session.cc
+                    test/dummy_lxvst.cc
+            '''.split()
+
+        session_load_tester.includes  = obj.includes
+        session_load_tester.includes.append ('test')
+        session_load_tester.uselib    = ['CPPUNIT','SIGCPP','JACK','GLIBMM','GTHREAD',
+                             'SAMPLERATE','XML','LRDF','COREAUDIO']
+        session_load_tester.use       = ['libpbd','libmidipp','libardour']
+        session_load_tester.name      = 'libardour-session-load-tester'
+        session_load_tester.target    = 'load-session'
+        session_load_tester.install_path = ''
+        session_load_tester.defines      = [
+            'PACKAGE="libardour3profile"',
+            'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
+            'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
+            'LOCALEDIR="' + os.path.join(
+                os.path.normpath(bld.env['DATADIR']), 'locale') + '"',
+            'VAMP_DIR="' + os.path.join(
+                os.path.normpath(bld.env['LIBDIR']), 'ardour3', 'vamp') + '"'
+            ]
+        if bld.env['FPU_OPTIMIZATION']:
+            session_load_tester.source += [ 'sse_functions_xmm.cc' ]
+            if (bld.env['build_target'] == 'i386'
+                or bld.env['build_target'] == 'i686'):
+                session_load_tester.source += [ 'sse_functions.s' ]
+            elif bld.env['build_target'] == 'x86_64':
+                session_load_tester.source += [ 'sse_functions_64bit.s' ]
+
         # Profiling
         for p in ['runpc', 'lots_of_regions']:
             profilingobj = bld(features = 'cxx cxxprogram')

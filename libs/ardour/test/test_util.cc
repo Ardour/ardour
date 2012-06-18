@@ -106,6 +106,9 @@ protected:
 
 TestReceiver test_receiver;
 
+/** @param dir Session directory.
+ *  @param state Session state file, without .ardour suffix.
+ */
 Session *
 load_session (string dir, string state)
 {
