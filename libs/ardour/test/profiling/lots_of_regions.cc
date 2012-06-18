@@ -14,7 +14,9 @@ int
 main (int argc, char* argv[])
 {
 	ARDOUR::init (false, true);
-	Session* session = load_session ("../libs/ardour/test/profiling/sessions/1region", "1region.ardour");
+	Session* session = load_session ("../libs/ardour/test/profiling/sessions/1region", "1region");
+
+	assert (session->get_routes()->size() == 2);
 
 	/* Find the track */
 	boost::shared_ptr<MidiTrack> track = boost::dynamic_pointer_cast<MidiTrack> (session->get_routes()->back());

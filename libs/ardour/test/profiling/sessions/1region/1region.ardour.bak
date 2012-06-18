@@ -81,7 +81,7 @@
         </PannerShell>
       </Processor>
     </Route>
-    <Route id="88" name="MIDI 1" default-type="midi" active="yes" phase-invert="" denormal-protection="no" meter-point="MeterPostFader" order-keys="signal=2" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" note-mode="Sustained" step-editing="no" midi-thru="yes" input-active="yes">
+    <Route id="88" name="MIDI 1" default-type="midi" active="yes" phase-invert="" denormal-protection="no" meter-point="MeterPostFader" order-keys="signal=2" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" solo-isolated="no" solo-safe="no" monitoring="" saved-meter-point="MeterPostFader" note-mode="Sustained" step-editing="no" input-active="yes">
       <IO name="MIDI 1" id="105" direction="Input" default-type="midi" user-latency="0">
         <Port type="midi" name="MIDI 1/midi_in 1"/>
       </IO>
