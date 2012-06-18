@@ -199,8 +199,8 @@ fixup_bundle_environment (int, char* [])
 			setenv ("PANGO_RC_FILE", path.c_str(), 1);
 		}
 	}
-
-	setenv ("CHARSETALIASDIR", dir_path.c_str(), 1);
+	
+	setenv ("CHARSETALIASDIR", bundle_dir.c_str(), 1);
 	setenv ("FONTCONFIG_FILE", Glib::build_filename (bundle_dir, "Resources/fonts.conf").c_str(), 1);
 	setenv ("GDK_PIXBUF_MODULE_FILE", Glib::build_filename (bundle_dir, "Resources/gdk-pixbuf.loaders").c_str(), 1);
 }
