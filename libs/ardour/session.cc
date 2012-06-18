@@ -125,7 +125,7 @@ PBD::Signal0<void> Session::SuccessfulGraphSort;
 static void clean_up_session_event (SessionEvent* ev) { delete ev; }
 const SessionEvent::RTeventCallback Session::rt_cleanup (clean_up_session_event);
 
-/** @param snapshot_name Snapshot name, without .ardour prefix */
+/** @param snapshot_name Snapshot name, without .ardour suffix */
 Session::Session (AudioEngine &eng,
                   const string& fullpath,
                   const string& snapshot_name,
