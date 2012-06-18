@@ -31,6 +31,7 @@
 #include "ardour/types.h"
 
 class XMLNode;
+class RegionNamingTest;
 
 namespace ARDOUR {
 
@@ -119,6 +120,7 @@ public:
 	static void map_add (boost::shared_ptr<Region>);
 
   private:
+	friend class ::RegionNamingTest;
 
 	static void region_changed (PBD::PropertyChange const &, boost::weak_ptr<Region>);
 
@@ -126,10 +128,15 @@ public:
 
 	static RegionMap region_map;
 
-	static Glib::StaticMutex region_name_map_lock;
-
-	static std::map<std::string, uint32_t> region_name_map;
-	static void update_region_name_map (boost::shared_ptr<Region>);
+	static Glib::StaticMutex region_name_maps_mutex;
+	/** map of partial region names and suffix numbers */
+	static std::map<std::string, uint32_t> region_name_number_map;
+	/** map of complete region names with their region ID */
+	static std::map<std::string, PBD::ID> region_name_map;
+	static void add_to_region_name_maps (boost::shared_ptr<Region>);
+	static void rename_in_region_name_maps (boost::shared_ptr<Region>);
+	static void update_region_name_number_map (boost::shared_ptr<Region>);
+	static void remove_from_region_name_map (std::string);
 
 	static PBD::ScopedConnectionList* region_list_connections;
 	static CompoundAssociations _compound_associations;

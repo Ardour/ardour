@@ -22,8 +22,10 @@ class RegionNamingTest : public AudioRegionTest
 {
 	CPPUNIT_TEST_SUITE (RegionNamingTest);
 	CPPUNIT_TEST (basicsTest);
+	CPPUNIT_TEST (cacheTest);
 	CPPUNIT_TEST_SUITE_END ();
 
 public:
 	void basicsTest ();
+	void cacheTest ();
 };

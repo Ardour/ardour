@@ -56,3 +56,15 @@ RegionNamingTest::basicsTest ()
 		CPPUNIT_ASSERT_EQUAL (s.str(), rA->name());
 	}
 }
+
+void
+RegionNamingTest::cacheTest ()
+{
+	/* Check that all the regions in the map are on the name list */
+
+	CPPUNIT_ASSERT_EQUAL (RegionFactory::region_map.size(), RegionFactory::region_name_map.size());
+
+	for (RegionFactory::RegionMap::iterator i = RegionFactory::region_map.begin(); i != RegionFactory::region_map.end(); ++i) {
+		CPPUNIT_ASSERT (RegionFactory::region_name_map.find (i->second->name()) != RegionFactory::region_name_map.end ());
+	}
+}
