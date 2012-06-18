@@ -26,6 +26,8 @@
 #include <cassert>
 #include <algorithm>
 
+#include <boost/algorithm/string.hpp>
+
 #include "pbd/xml++.h"
 #include "pbd/enumwriter.h"
 #include "pbd/memento_command.h"
@@ -2166,7 +2168,9 @@ Route::set_state_2X (const XMLNode& node, int version)
 	}
 
 	if ((prop = node.property (X_("flags"))) != 0) {
-		_flags = Flag (string_2_enum (prop->value(), _flags));
+		string f = prop->value ();
+		boost::replace_all (f, "ControlOut", "MonitorOut");
+		_flags = Flag (string_2_enum (f, _flags));
 	} else {
 		_flags = Flag (0);
 	}
