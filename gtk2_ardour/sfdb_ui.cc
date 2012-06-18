@@ -1028,7 +1028,7 @@ SoundFileOmega::reset_options ()
 
 		/* if we get through this function successfully, this may be
 		   reset at the end, once we know if we can use hard links
-		   to do embedding
+		   to do embedding (or if we are importing a MIDI file).
 		*/
 
 		if (Config->get_only_copy_imported_files()) {
@@ -1043,6 +1043,13 @@ SoundFileOmega::reset_options ()
 	bool selection_includes_multichannel;
 	bool selection_can_be_embedded_with_links = check_link_status (_session, paths);
 	ImportMode mode;
+
+	/* See if we are thinking about importing any MIDI files */
+	vector<string>::iterator i = paths.begin ();
+	while (i != paths.end() && SMFSource::safe_midi_file_extension (*i) == false) {
+		++i;
+	}
+	bool const have_a_midi_file = (i != paths.end ());
 
 	if (check_info (paths, same_size, src_needed, selection_includes_multichannel)) {
 		Glib::signal_idle().connect (sigc::mem_fun (*this, &SoundFileOmega::bad_file_message));
@@ -1196,7 +1203,7 @@ SoundFileOmega::reset_options ()
 
 	if (Config->get_only_copy_imported_files()) {
 
-		if (selection_can_be_embedded_with_links) {
+		if (selection_can_be_embedded_with_links && !have_a_midi_file) {
 			copy_files_btn.set_sensitive (true);
 		} else {
 			copy_files_btn.set_sensitive (false);
@@ -1204,7 +1211,7 @@ SoundFileOmega::reset_options ()
 
 	}  else {
 
-		copy_files_btn.set_sensitive (true);
+		copy_files_btn.set_sensitive (!have_a_midi_file);
 	}
 
 	return true;
