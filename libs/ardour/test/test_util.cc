@@ -10,17 +10,62 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-void
-check_xml (XMLNode* node, string ref_file)
+static void
+check_nodes (XMLNode const * p, XMLNode const * q, list<string> const & ignore_properties)
 {
-	system ("rm -f libs/ardour/test/test.xml");
-	ofstream f ("libs/ardour/test/test.xml");
-	node->dump (f);
-	f.close ();
+	CPPUNIT_ASSERT_EQUAL (p->is_content(), q->is_content());
+	if (!p->is_content()) {
+		CPPUNIT_ASSERT_EQUAL (p->name(), q->name());
+	} else {
+		CPPUNIT_ASSERT_EQUAL (p->content(), q->content());
+	}
 
-	stringstream cmd;
-	cmd << "diff -u libs/ardour/test/test.xml " << ref_file;
-	CPPUNIT_ASSERT_EQUAL (0, system (cmd.str().c_str ()));
+	XMLPropertyList const & pp = p->properties ();
+	XMLPropertyList const & qp = q->properties ();
+	CPPUNIT_ASSERT_EQUAL (pp.size(), qp.size());
+
+	XMLPropertyList::const_iterator i = pp.begin ();
+	XMLPropertyList::const_iterator j = qp.begin ();
+	while (i != pp.end ()) {
+		CPPUNIT_ASSERT_EQUAL ((*i)->name(), (*j)->name());
+		if (find (ignore_properties.begin(), ignore_properties.end(), (*i)->name ()) == ignore_properties.end ()) {
+			CPPUNIT_ASSERT_EQUAL ((*i)->value(), (*j)->value());
+		}
+		++i;
+		++j;
+	}
+
+	XMLNodeList const & pc = p->children ();
+	XMLNodeList const & qc = q->children ();
+
+	CPPUNIT_ASSERT_EQUAL (pc.size(), qc.size());
+	XMLNodeList::const_iterator k = pc.begin ();
+	XMLNodeList::const_iterator l = qc.begin ();
+	
+	while (k != pc.end ()) {
+		check_nodes (*k, *l, ignore_properties);
+		++k;
+		++l;
+	}
+}
+
+void
+check_xml (XMLNode* node, string ref_file, list<string> const & ignore_properties)
+{
+	XMLTree ref (ref_file);
+
+	XMLNode* p = node;
+	XMLNode* q = ref.root ();
+
+	check_nodes (p, q, ignore_properties);
+}
+
+void
+write_ref (XMLNode* node, string ref_file)
+{
+	XMLTree ref;
+	ref.set_root (node);
+	ref.write (ref_file);
 }
 
 class TestReceiver : public Receiver 

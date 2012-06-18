@@ -31,6 +31,9 @@ using namespace ARDOUR;
 void
 AutomationListPropertyTest::basicTest ()
 {
+	list<string> ignore_properties;
+	ignore_properties.push_back ("id");
+
 	PropertyDescriptor<boost::shared_ptr<AutomationList> > descriptor;
 	descriptor.property_id = g_quark_from_static_string ("FadeIn");
 	AutomationListProperty property (
@@ -51,7 +54,7 @@ AutomationListPropertyTest::basicTest ()
 
 	XMLNode* foo = new XMLNode ("test");
 	property.get_changes_as_xml (foo);
-	check_xml (foo, "../libs/ardour/test/data/automation_list_property_test1.ref");
+	check_xml (foo, "../libs/ardour/test/data/automation_list_property_test1.ref", ignore_properties);
 
 	/* Do some more */
 	property.clear_changes ();
@@ -61,7 +64,7 @@ AutomationListPropertyTest::basicTest ()
 	CPPUNIT_ASSERT_EQUAL (true, property.changed());
 	foo = new XMLNode ("test");
 	property.get_changes_as_xml (foo);
-	check_xml (foo, "../libs/ardour/test/data/automation_list_property_test2.ref");
+	check_xml (foo, "../libs/ardour/test/data/automation_list_property_test2.ref", ignore_properties);
 }
 
 /** Here's a StatefulDestructible class that has a AutomationListProperty */
@@ -99,6 +102,9 @@ PropertyDescriptor<boost::shared_ptr<AutomationList> > Fred::_descriptor;
 void
 AutomationListPropertyTest::undoTest ()
 {
+	list<string> ignore_properties;
+	ignore_properties.push_back ("id");
+
 	Fred::make_property_quarks ();
 
 	boost::shared_ptr<Fred> sheila (new Fred);
@@ -115,9 +121,9 @@ AutomationListPropertyTest::undoTest ()
 
 	/* Undo */
 	sdc.undo ();
-	check_xml (&sheila->get_state(), "../libs/ardour/test/data/automation_list_property_test3.ref");
+	check_xml (&sheila->get_state(), "../libs/ardour/test/data/automation_list_property_test3.ref", ignore_properties);
 
 	/* Redo */
 	sdc.redo ();
-	check_xml (&sheila->get_state(), "../libs/ardour/test/data/automation_list_property_test4.ref");
+	check_xml (&sheila->get_state(), "../libs/ardour/test/data/automation_list_property_test4.ref", ignore_properties);
 }
