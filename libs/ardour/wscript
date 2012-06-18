@@ -443,6 +443,7 @@ def build(bld):
                 test/playlist_equivalent_regions_test.cc
                 test/control_surfaces_test.cc
                 test/combine_regions_test.cc
+                test/region_naming_test.cc
                 test/mtdm_test.cc
                 test/testrunner.cc
         '''.split()
