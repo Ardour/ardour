@@ -311,7 +311,7 @@ if test x$WITH_NLS != x ; then
         # 
 
         ARDOURSTACK_MESSAGES="libgnomecanvas-2.0.mo"
-        ARDOURSTACK_LOCALEROOT=$ARDOURSTACK_ROOT/share/local
+        ARDOURSTACK_LOCALEROOT=$ARDOURSTACK_ROOT/share/locale
 
 	for l in $LINGUAS ; do
             for MO in $ARDOURSTACK_MESSAGES  ; do 
