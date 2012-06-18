@@ -234,7 +234,7 @@ fixup_bundle_environment (int argc, char* argv[])
 
 	// gettext charset aliases
 
-	setenv ("CHARSETALIASDIR", path.c_str(), 1);
+	setenv ("CHARSETALIASDIR", dir_path.c_str(), 1);
 
 	// font config
 	
@@ -431,6 +431,11 @@ fixup_bundle_environment (int argc, char* argv[])
                 mpath = Glib::build_filename (ARDOUR::get_user_ardour_path(), "gdk-pixbuf.loaders");
                 setenv ("GDK_PIXBUF_MODULE_FILE", mpath.c_str(), 1);
 	}
+
+        /* this doesn't do much but setting it should prevent various parts of the GTK/GNU stack
+           from looking outside the bundle to find the charset.alias file.
+        */
+        setenv ("CHARSETALIASDIR", dir_path.c_str(), 1);
 }
 
 #endif
