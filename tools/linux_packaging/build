@@ -284,6 +284,10 @@ if test x$WITH_NLS != x ; then
 		cp $file $Locale/$lang/LC_MESSAGES/libardour.mo
 	done
 
+        #
+        # copy any translations from the GTK stack
+        # 
+
 	GTK_MESSAGES="atk10.mo gdk-pixbuf.mo gtk20-properties.mo gtk20.mo atk10.mo glib20.mo"
 	GTKLOCALEROOT=$GTKSTACK_ROOT/share/locale
 
@@ -301,6 +305,28 @@ if test x$WITH_NLS != x ; then
 			fi
 		done
 	done
+
+        #
+        # now any translations from the Ardour stack
+        # 
+
+        ARDOURSTACK_MESSAGES="libgnomecanvas-2.0.mo"
+        ARDOURSTACK_LOCALEROOT=$ARDOURSTACK_ROOT/share/local
+
+	for l in $LINGUAS ; do
+            for MO in $ARDOURSTACK_MESSAGES  ; do 
+                if [ -f $ARDOURSTACK_LOCALEROOT/$l/LC_MESSAGES/$MO ] ; then 
+                    cp $ARDOURSTACK_LOCALEROOT/$l/LC_MESSAGES/$MO $Locale/$l/LC_MESSAGES
+                else
+		# try with just the language spec
+		    just_lang=`echo $l | sed 's/_[A-Z][A-Z]$//'`
+		    if [ -f $ARDOURSTACK_LOCALEROOT/$just_lang/LC_MESSAGES/$MO ] ; then
+			cp $ARDOURSTACK_LOCALEROOT/$just_lang/LC_MESSAGES/$MO $Locale/$just_lang/LC_MESSAGES
+		    fi
+		fi
+            done
+        done
+
 else
 	echo "Skipping NLS support"
 fi
