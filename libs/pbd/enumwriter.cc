@@ -127,7 +127,7 @@ EnumWriter::write (string type, int value)
 
 	if (x == registry.end()) {
 		error << string_compose (_("EnumWriter: unknown enumeration type \"%1\""), type) << endmsg;
-		throw unknown_enumeration();
+		throw unknown_enumeration (type);
 	}
 
 	if (x->second.bitwise) {
@@ -144,7 +144,7 @@ EnumWriter::read (string type, string value)
 
 	if (x == registry.end()) {
 		error << string_compose (_("EnumWriter: unknown enumeration type \"%1\""), type) << endmsg;
-		throw unknown_enumeration();
+		throw unknown_enumeration (type);
 	}
 
 	if (x->second.bitwise) {
@@ -267,7 +267,7 @@ EnumWriter::read_bits (EnumRegistration& er, string str)
 	} while (true);
 
 	if (!found) {
-		throw unknown_enumeration();
+		throw unknown_enumeration (str);
 	}
 
 	return result;
@@ -316,7 +316,7 @@ EnumWriter::read_distinct (EnumRegistration& er, string str)
 		}
 	}
 
-	throw unknown_enumeration();
+	throw unknown_enumeration(str);
 }
 
 void
