@@ -184,31 +184,24 @@ fixup_bundle_environment (int, char* [])
 	if (g_mkdir_with_parents (userconfigdir.c_str(), 0755) < 0) {
 		error << string_compose (_("cannot create user ardour folder %1 (%2)"), userconfigdir, strerror (errno))
 		      << endmsg;
-		return;
-	} 
-
-	path = Glib::build_filename (userconfigdir, "pango.rc");
-	std::ofstream pangorc (path.c_str());
-	if (!pangorc) {
-		error << string_compose (_("cannot open pango.rc file %1") , path) << endmsg;
 	} else {
-		pangorc << "[Pango]\nModuleFiles="
-			<< Glib::build_filename (bundle_dir, "Resources/pango.modules") 
-			<< endl;
-		pangorc.close ();
-
-		setenv ("PANGO_RC_FILE", path.c_str(), 1);
+		
+		path = Glib::build_filename (userconfigdir, "pango.rc");
+		std::ofstream pangorc (path.c_str());
+		if (!pangorc) {
+			error << string_compose (_("cannot open pango.rc file %1") , path) << endmsg;
+		} else {
+			pangorc << "[Pango]\nModuleFiles="
+				<< Glib::build_filename (bundle_dir, "Resources/pango.modules") 
+				<< endl;
+			pangorc.close ();
+			
+			setenv ("PANGO_RC_FILE", path.c_str(), 1);
+		}
 	}
 
-	// gettext charset aliases XXX do we really need this, since the path
-	// is totally wrong?
-
-	setenv ("CHARSETALIASDIR", path.c_str(), 1);
-
+	setenv ("CHARSETALIASDIR", dir_path.c_str(), 1);
 	setenv ("FONTCONFIG_FILE", Glib::build_filename (bundle_dir, "Resources/fonts.conf").c_str(), 1);
-
-	// GDK Pixbuf loader module file
-
 	setenv ("GDK_PIXBUF_MODULE_FILE", Glib::build_filename (bundle_dir, "Resources/gdk-pixbuf.loaders").c_str(), 1);
 }
 
@@ -280,27 +273,33 @@ fixup_bundle_environment (int /*argc*/, char* argv[])
 	if (g_mkdir_with_parents (userconfigdir.c_str(), 0755) < 0) {
 		error << string_compose (_("cannot create user ardour folder %1 (%2)"), userconfigdir, strerror (errno))
 		      << endmsg;
-		return;
-	} 
-
-	path = Glib::build_filename (userconfigdir, "pango.rc");
-	std::ofstream pangorc (path.c_str());
-	if (!pangorc) {
-		error << string_compose (_("cannot open pango.rc file %1") , path) << endmsg;
 	} else {
-		pangorc << "[Pango]\nModuleFiles="
-			<< Glib::build_filename (userconfigdir, "pango.modules")
-			<< endl;
-		pangorc.close ();
+		
+		path = Glib::build_filename (userconfigdir, "pango.rc");
+		std::ofstream pangorc (path.c_str());
+		if (!pangorc) {
+			error << string_compose (_("cannot open pango.rc file %1") , path) << endmsg;
+		} else {
+			pangorc << "[Pango]\nModuleFiles="
+				<< Glib::build_filename (userconfigdir, "pango.modules")
+				<< endl;
+			pangorc.close ();
+		}
+		
+		setenv ("PANGO_RC_FILE", path.c_str(), 1);
+		
+		/* similar for GDK pixbuf loaders, but there's no RC file required
+		   to specify where it lives.
+		*/
+		
+		setenv ("GDK_PIXBUF_MODULE_FILE", Glib::build_filename (userconfigdir, "gdk-pixbuf.loaders").c_str(), 1);
 	}
-	
-	setenv ("PANGO_RC_FILE", path.c_str(), 1);
 
-	/* similar for GDK pixbuf loaders, but there's no RC file required
-	   to specify where it lives.
-	*/
-	
-	setenv ("GDK_PIXBUF_MODULE_FILE", Glib::build_filename (userconfigdir, "gdk-pixbuf.loaders").c_str(), 1);
+        /* this doesn't do much but setting it should prevent various parts of the GTK/GNU stack
+           from looking outside the bundle to find the charset.alias file.
+        */
+        setenv ("CHARSETALIASDIR", dir_path.c_str(), 1);
+
 }
 
 #endif
