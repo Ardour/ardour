@@ -45,6 +45,7 @@ class MidiPort : public Port {
 	void transport_stopped ();
 	void realtime_locate ();
 	void reset ();
+        void require_resolve ();
 
 	bool input_active() const { return _input_active; }
 	void set_input_active (bool yn);

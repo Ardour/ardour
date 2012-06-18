@@ -309,6 +309,7 @@ MidiTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame
 		return dret;
 	}
 
+
 	_silent = false;
 
 	if ((dret = diskstream->process (transport_frame, nframes, playback_distance)) != 0) {
@@ -329,9 +330,18 @@ MidiTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame
 		   at least potentially (depending on monitoring options)
 		*/
 
+		/* because the playback buffer is event based and not a
+		 * continuous stream, we need to make sure that we empty
+		 * it of events every cycle to avoid it filling up with events
+		 * read from disk, while we are actually monitoring input
+		 */
+
+		diskstream->flush_playback (start_frame, end_frame);
+
 		passthru (start_frame, end_frame, nframes, 0);
 
 	} else {
+
 		/*
 		   XXX is it true that the earlier test on n_outputs()
 		   means that we can avoid checking it again here? i think
@@ -343,7 +353,6 @@ MidiTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame
 
 		/* copy the diskstream data to all output buffers */
 
-		//const size_t limit = n_process_buffers().n_audio();
 		BufferSet& bufs = _session.get_scratch_buffers (n_process_buffers());
 		MidiBuffer& mbuf (bufs.get_midi (0));
 
@@ -735,12 +744,28 @@ MidiTrack::act_on_mute ()
 void
 MidiTrack::set_monitoring (MonitorChoice mc)
 {
-	Track::set_monitoring (mc);
+	if (mc != _monitoring) {
 
-	boost::shared_ptr<MidiDiskstream> md (midi_diskstream());
+		Track::set_monitoring (mc);
+		
+		/* monitoring state changed, so flush out any on notes at the
+		 * port level.
+		 */
 
-	if (md) {
-		md->reset_tracker ();
+		PortSet& ports (_output->ports());
+		
+		for (PortSet::iterator p = ports.begin(); p != ports.end(); ++p) {
+			boost::shared_ptr<MidiPort> mp = boost::dynamic_pointer_cast<MidiPort> (*p);
+			if (mp) {
+				mp->require_resolve ();
+			}
+		}
+
+		boost::shared_ptr<MidiDiskstream> md (midi_diskstream());
+		
+		if (md) {
+			md->reset_tracker ();
+		}
 	}
 }
 

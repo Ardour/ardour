@@ -189,6 +189,12 @@ MidiPort::flush_buffers (pframes_t nframes)
 }
 
 void
+MidiPort::require_resolve ()
+{
+	_resolve_required = true;
+}
+
+void
 MidiPort::transport_stopped ()
 {
 	_resolve_required = true;

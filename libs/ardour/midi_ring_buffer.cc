@@ -98,7 +98,9 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, framepos_t start, framepos_t end, frame
 			break;
 		} else if (ev_time + loop_offset < start) {
 			DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("MRB event @ %1 before start @ %2\n", ev_time, start));
-			break;
+			this->increment_read_ptr (prefix_size);
+			this->increment_read_ptr (ev_size);
+			continue;
 		} else {
 			DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("MRB event @ %1 in range %2 .. %3\n", ev_time, start, end));
 		}
@@ -191,6 +193,36 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, framepos_t start, framepos_t end, frame
 	}
 
 	return count;
+}
+
+template<typename T>
+void
+MidiRingBuffer<T>::flush (framepos_t start, framepos_t end)
+{
+	const size_t prefix_size = sizeof(T) + sizeof(Evoral::EventType) + sizeof(uint32_t);
+
+	while (this->read_space() >= prefix_size) {
+		uint8_t  peekbuf[prefix_size];
+		bool     success;
+		uint32_t ev_size;
+		T        ev_time;
+
+		success = this->peek (peekbuf, prefix_size);
+		/* this cannot fail, because we've already verified that there
+		   is prefix_space to read
+		*/
+		assert (success);
+
+		ev_time = *((T*) peekbuf);
+		
+		if (ev_time >= end) {
+			break;
+		}
+
+		ev_size = *((uint32_t*)(peekbuf + sizeof(T) + sizeof (Evoral::EventType)));
+		this->increment_read_ptr (prefix_size);
+		this->increment_read_ptr (ev_size);
+	}
 }
 
 template<typename T>

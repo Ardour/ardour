@@ -506,6 +506,14 @@ MidiDiskstream::seek (framepos_t frame, bool complete_refill)
 	Glib::Mutex::Lock lm (state_lock);
 	int ret = -1;
 
+	if (g_atomic_int_get (&_frames_read_from_ringbuffer) == 0) {
+		/* we haven't read anything since the last seek,
+		   so flush all note trackers to prevent
+		   wierdness
+		*/
+		reset_tracker ();
+	}
+
 	_playback_buf->reset();
 	_capture_buf->reset();
 	g_atomic_int_set(&_frames_read_from_ringbuffer, 0);
@@ -1267,6 +1275,13 @@ int
 MidiDiskstream::use_pending_capture_data (XMLNode& /*node*/)
 {
 	return 0;
+}
+
+void
+MidiDiskstream::flush_playback (framepos_t start, framepos_t end)
+{
+	_playback_buf->flush (start, end);
+	g_atomic_int_add (&_frames_read_from_ringbuffer, end - start);
 }
 
 /** Writes playback events from playback_sample for nframes to dst, translating time stamps

@@ -55,6 +55,7 @@ public:
 
 	size_t read(MidiBuffer& dst, framepos_t start, framepos_t end, framecnt_t offset=0, bool stop_on_overflow_in_destination=false);
 	void dump(std::ostream& dst);
+        void flush (framepos_t start, framepos_t end); 
 
 	/** Set the channel filtering mode.
 	 * @param mask If mode is FilterChannels, each bit represents a midi channel:
