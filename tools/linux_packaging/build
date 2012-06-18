@@ -285,18 +285,18 @@ if test x$WITH_NLS != x ; then
 	done
 
 	GTK_MESSAGES="atk10.mo gdk-pixbuf.mo gtk20-properties.mo gtk20.mo atk10.mo glib20.mo"
-	LOCALEROOT=/usr/share/locale
+	GTKLOCALEROOT=GTKSTACK_ROOT/share/locale
 
 	for l in $LINGUAS ; do
 		echo "Copying GTK i18n files for $l..."
 		for MO in $GTK_MESSAGES ; do 
-			if [ -f $LOCALEROOT/$l/LC_MESSAGES/$MO ] ; then
-				cp $LOCALEROOT/$l/LC_MESSAGES/$MO $Locale/$l/LC_MESSAGES
+			if [ -f $GTKLOCALEROOT/$l/LC_MESSAGES/$MO ] ; then
+				cp $GTKLOCALEROOT/$l/LC_MESSAGES/$MO $Locale/$l/LC_MESSAGES
 			else
 				# try with just the language spec
 				just_lang=`echo $l | sed 's/_[A-Z][A-Z]$//'`
-				if [ -f $LOCALEROOT/$just_lang/LC_MESSAGES/$MO ] ; then
-					cp $LOCALEROOT/$just_lang/LC_MESSAGES/$MO $Locale/$just_lang/LC_MESSAGES
+				if [ -f $GTKLOCALEROOT/$just_lang/LC_MESSAGES/$MO ] ; then
+					cp $GTKLOCALEROOT/$just_lang/LC_MESSAGES/$MO $Locale/$just_lang/LC_MESSAGES
 				fi
 			fi
 		done
