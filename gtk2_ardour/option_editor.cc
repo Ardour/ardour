@@ -163,6 +163,60 @@ EntryOption::activated ()
 	_set (_entry->get_text ());
 }
 
+/** Construct a BoolComboOption.
+ *  @param i id
+ *  @param n User-visible name.
+ *  @param t Text to give for the variable being true.
+ *  @param f Text to give for the variable being false.
+ *  @param g Slot to get the variable's value.
+ *  @param s Slot to set the variable's value.
+ */
+BoolComboOption::BoolComboOption (
+	string const & i, string const & n, string const & t, string const & f, 
+	sigc::slot<bool> g, sigc::slot<bool, bool> s
+	)
+	: Option (i, n)
+	, _get (g)
+	, _set (s)
+{
+	_label = manage (new Label (n + ":"));
+	_label->set_alignment (0, 0.5);
+	_combo = manage (new ComboBoxText);
+
+	/* option 0 is the false option */
+	_combo->append_text (f);
+	/* and option 1 is the true */
+	_combo->append_text (t);
+	
+	_combo->signal_changed().connect (sigc::mem_fun (*this, &BoolComboOption::changed));
+}
+
+void
+BoolComboOption::set_state_from_config ()
+{
+	_combo->set_active (_get() ? 1 : 0);
+}
+
+void
+BoolComboOption::add_to_page (OptionEditorPage* p)
+{
+	add_widgets_to_page (p, _label, _combo);
+}
+
+void
+BoolComboOption::changed ()
+{
+	_set (_combo->get_active_row_number () == 0 ? false : true);
+}
+
+void
+BoolComboOption::set_sensitive (bool yn)
+{
+	_combo->set_sensitive (yn);
+}
+	
+
+	  
 FaderOption::FaderOption (string const & i, string const & n, sigc::slot<gain_t> g, sigc::slot<bool, gain_t> s)
 	: Option (i, n)
 	, _db_adjustment (gain_to_slider_position_with_max (1.0, Config->get_max_gain()), 0, 1, 0.01, 0.1)

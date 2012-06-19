@@ -1063,9 +1063,11 @@ RCOptionEditor::RCOptionEditor ()
 		     ));
 
 	add_option (_("Editor"),
-	     new BoolOption (
+	     new BoolComboOption (
 		     "show-region-gain-envelopes",
 		     _("Show gain envelopes in audio regions"),
+		     _("in all modes"),
+		     _("only in region gain mode"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_show_region_gain),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_show_region_gain)
 		     ));
