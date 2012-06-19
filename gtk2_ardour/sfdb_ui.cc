@@ -582,6 +582,9 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 
 
 	notebook.set_size_request (500, -1);
+	notebook.signal_switch_page().connect (
+		sigc::hide_return (sigc::hide (sigc::hide (sigc::mem_fun (*this, &SoundFileBrowser::reset_options))))
+		);
 
 	set_session (s);
 
@@ -1016,6 +1019,7 @@ SoundFileOmega::reset_options ()
 		channel_combo.set_sensitive (false);
 		action_combo.set_sensitive (false);
 		where_combo.set_sensitive (false);
+		copy_files_btn.set_active (true);
 		copy_files_btn.set_sensitive (false);
 
 		return false;
@@ -1201,17 +1205,26 @@ SoundFileOmega::reset_options ()
 		src_combo.set_sensitive (false);
 	}
 
+	/* We must copy MIDI files or those from Freesound */
+	bool const must_copy = have_a_midi_file || notebook.get_current_page() == 2;
+	
 	if (Config->get_only_copy_imported_files()) {
 
-		if (selection_can_be_embedded_with_links && !have_a_midi_file) {
+		if (selection_can_be_embedded_with_links && !must_copy) {
 			copy_files_btn.set_sensitive (true);
 		} else {
+			if (must_copy) {
+				copy_files_btn.set_active (true);
+			}
 			copy_files_btn.set_sensitive (false);
 		}
 
 	}  else {
 
-		copy_files_btn.set_sensitive (!have_a_midi_file);
+		if (must_copy) {
+			copy_files_btn.set_active (true);
+		}			
+		copy_files_btn.set_sensitive (!must_copy);
 	}
 
 	return true;
