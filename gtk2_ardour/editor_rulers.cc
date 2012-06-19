@@ -342,7 +342,7 @@ Editor::popup_ruler_menu (framepos_t where, ItemType t)
 		ruler_items.push_back (SeparatorElem ());
 		break;
 	case RangeMarkerBarItem:
-		//ruler_items.push_back (MenuElem (_("New Range")));
+		ruler_items.push_back (MenuElem (_("New range"), sigc::bind (sigc::mem_fun (*this, &Editor::mouse_add_new_range), where)));
 		ruler_items.push_back (MenuElem (_("Clear all ranges"), sigc::mem_fun(*this, &Editor::clear_ranges)));
 		ruler_items.push_back (MenuElem (_("Unhide ranges"), sigc::mem_fun(*this, &Editor::unhide_ranges)));
 		ruler_items.push_back (SeparatorElem ());
