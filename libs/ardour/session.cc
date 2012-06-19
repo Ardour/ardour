@@ -1485,7 +1485,7 @@ Session::resort_routes_using (boost::shared_ptr<RouteList> r)
 			trace_terminal (*i, *i);
 		}
 
-		r = sorted_routes;
+		*r = *sorted_routes;
 
 #ifndef NDEBUG
 		DEBUG_TRACE (DEBUG::Graph, "Routes resorted, order follows:\n");
