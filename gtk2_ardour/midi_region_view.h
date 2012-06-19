@@ -348,7 +348,7 @@ private:
 	void start_playing_midi_note (boost::shared_ptr<NoteType> note);
 	void start_playing_midi_chord (std::vector<boost::shared_ptr<NoteType> > notes);
 
-	void clear_events();
+	void clear_events (bool with_selection_signal = true);
 
 	bool canvas_event(GdkEvent* ev);
 	bool note_canvas_event(GdkEvent* ev);

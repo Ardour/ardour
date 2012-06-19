@@ -928,9 +928,9 @@ MidiRegionView::create_note_at (framepos_t t, double y, double length, bool snap
 }
 
 void
-MidiRegionView::clear_events()
+MidiRegionView::clear_events (bool with_selection_signal)
 {
-	clear_selection();
+	clear_selection (with_selection_signal);
 
 	MidiGhostRegion* gr;
 	for (std::vector<GhostRegion*>::iterator g = ghosts.begin(); g != ghosts.end(); ++g) {
@@ -1319,7 +1319,7 @@ MidiRegionView::~MidiRegionView ()
 	_selection_cleared_connection.disconnect ();
 
 	_selection.clear();
-	clear_events();
+	clear_events (false);
 
 	delete _note_group;
 	delete _note_diff_command;
