@@ -49,6 +49,7 @@ using std::cerr;
 using std::endl;
 
 SoundGrid* SoundGrid::_instance = 0;
+PBD::Signal0<void> SoundGrid::Shutdown;
 
 int SoundGrid::EventCompletionClosure::id_counter = 0;
 
@@ -136,6 +137,8 @@ SoundGrid::teardown ()
                 retval = UnInitializeMixerCoreDLL (_sg);
                 _sg = 0;
 	}
+
+        Shutdown(); /* EMIT SIGNAL */
 
         return retval == eNoErr ? 0 : -1;
 }
@@ -263,6 +266,9 @@ SoundGrid::current_lan_port_name()
 string
 SoundGrid::coreaudio_device_name () 
 {
+        /* this may be subject to change, but for now its the one that the SG CoreAudio driver ends up
+           with and thus the one we need to tell JACK to use in order to use SoundGrid.
+        */
 	return "com_waves_WCAudioGridEngine:0";
 }
 

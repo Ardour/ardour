@@ -50,108 +50,39 @@
 #include "ardour/debug.h"
 
 #include "ardour_window.h"
+#include "gui_thread.h"
 #include "soundgrid.h"
 
 using namespace PBD;
 using std::cerr;
 
-static int sg_status = -1;
+static NSWindow* sg_window = 0;
+static PBD::ScopedConnection sg_connection;
 
-static void sg_init ()
+void
+soundgrid_shutdown ()
 {
-        DEBUG_TRACE (PBD::DEBUG::SoundGrid, "thread starting SG init\n");
-
-        NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
-
-        NSWindow* window = [[NSWindow alloc] initWithContentRect:NSZeroRect 
-                                                       styleMask:NSTitledWindowMask 
-                                                         backing:NSBackingStoreBuffered 
-                                                           defer:1];
-
-        ARDOUR::SoundGrid::instance().set_pool (pool);
-
-        if (ARDOUR::SoundGrid::instance().initialize ([window contentView]) == 0) {
-                sg_status = 1;
-        } else {
-                sg_status = -1;
+        if (sg_window) {
+                [sg_window release];
+                sg_window = 0;
         }
-
-        cerr << "initialization done, status === " << sg_status << std::endl;
-}
-
-#ifdef __APPLE__
-
-@interface DummyThread : NSThread 
-{
-}
-@end
-
-@implementation DummyThread
-- (void) main
-{
-        printf ("dummy thread running\n");
-}
-@end
-
-#endif
-
-static bool hack (sigc::slot<void> theSlot)
-{
-        theSlot();
-        return true;
+        sg_connection.disconnect ();
 }
 
 int
 soundgrid_init ()
 {
-#ifdef __APPLE__
-        /* need to ensure that Cocoa is multithreaded */
-        if (![NSThread isMultiThreaded]) {
-                cerr << "Starting dummy thread\n";
-                NSThread* dummy = [[DummyThread alloc] init];
-                [dummy start];
-        } else {
-                cerr << "Already multithreaded\n";
-        }
-#endif
+        sg_window = [[NSWindow alloc] initWithContentRect:NSZeroRect 
+                                                       styleMask:NSTitledWindowMask 
+                                                         backing:NSBackingStoreBuffered 
+                                                           defer:1];
 
-        ArdourWindow win (_("Initializing SoundGrid"));
-        Gtk::Label label (_("Please wait while SoundGrid initializes"));
-        Gtk::VBox packer;
-        Gtk::ProgressBar progress;
+        [sg_window setReleasedWhenClosed:0];
+        [sg_window retain];
 
-        label.show ();
-        progress.show();
-        packer.show ();
-        packer.pack_start (label);
-        packer.pack_start (progress);
+        ARDOUR::SoundGrid::Shutdown.connect (sg_connection, MISSING_INVALIDATOR, soundgrid_shutdown, gui_context());
 
-        win.set_position (Gtk::WIN_POS_MOUSE);
-        win.add (packer);
-        win.present ();
-                
-        DEBUG_TRACE (DEBUG::SoundGrid, "Initializing SoundGrid instance\n");
-
-        sg_status = 0;
-
-        Glib::Thread* thr = Glib::Thread::create (sigc::ptr_fun (sg_init));
-
-        Glib::signal_timeout().connect (sigc::bind (sigc::ptr_fun (hack), sigc::mem_fun (progress, &Gtk::ProgressBar::pulse)), 100);
-        
-        while (sg_status == 0) {
-                gtk_main_iteration ();
-        }
-        
-        win.hide ();
-
-        while (gtk_events_pending ()) {
-                gtk_main_iteration ();
-        }
-
-        thr->join ();
-
-        DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("SG initialization returned %1\n", sg_status));
-        return sg_status;
+        return ARDOUR::SoundGrid::instance().initialize ([sg_window contentView]);
 }
 
 #endif

@@ -292,7 +292,7 @@ void
 Source::dec_use_count ()
 {
 #ifndef NDEBUG
-        gint oldval = g_atomic_int_exchange_and_add (&_use_count, -1);
+        gint oldval = g_atomic_int_add (&_use_count, -1);
         if (oldval <= 0) {
                 cerr << "Bad use dec for " << name() << endl;
                 abort ();

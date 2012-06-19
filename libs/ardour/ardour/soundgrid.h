@@ -31,6 +31,8 @@
 #include <WavesPublicAPI/WTErr.h>
 #include <WavesPublicAPI/WavesMixerAPI/1.0/WavesMixerAPI.h>
 
+#include "pbd/signals.h"
+
 #include "ardour/ardour.h"
 
 namespace ARDOUR {
@@ -82,6 +84,8 @@ class SoundGrid : public boost::noncopyable
         static void set_pool (void* pool);
         
         static void finalize (void* ecc, int state);
+
+        static PBD::Signal0<void> Shutdown;
         
   private:
 	SoundGrid ();
