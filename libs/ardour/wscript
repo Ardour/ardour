@@ -509,7 +509,7 @@ def build(bld):
                 session_load_tester.source += [ 'sse_functions_64bit.s' ]
 
         # Profiling
-        for p in ['runpc', 'lots_of_regions']:
+        for p in ['runpc', 'lots_of_regions', 'load_session']:
             profilingobj = bld(features = 'cxx cxxprogram')
             profilingobj.source = '''
                     test/dummy_lxvst.cc
