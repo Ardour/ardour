@@ -1595,7 +1595,7 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (S_("Visual|Interface"),
 	     new BoolOption (
 		     "default-narrow_ms",
-		     _("Use narrow mixer strips by default"),
+		     _("Use narrow strips in the mixer by default"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_default_narrow_ms),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_default_narrow_ms)
 		     ));
