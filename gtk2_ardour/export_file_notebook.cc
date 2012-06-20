@@ -37,7 +37,7 @@ ExportFileNotebook::ExportFileNotebook () :
 	/* Last page */
 
 	new_file_button.set_image (*Gtk::manage (new Gtk::Image (::get_icon("add"))));
-	new_file_button.set_label (_(" Click here to add another format"));
+	new_file_button.set_label (_("Add another format"));
 	new_file_button.set_alignment (0, 0.5);
 	new_file_button.set_relief (Gtk::RELIEF_NONE);
 
