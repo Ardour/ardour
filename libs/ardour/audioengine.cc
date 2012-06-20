@@ -1293,9 +1293,7 @@ AudioEngine::connect_to_jack (string client_name, string session_uuid)
 {
         EnvironmentalProtectionAgency* global_epa = EnvironmentalProtectionAgency::get_global_epa ();
         boost::scoped_ptr<EnvironmentalProtectionAgency> current_epa;
-	jack_options_t options = JackNullOption;
 	jack_status_t status;
-	const char *server_name = NULL;
 
         /* revert all environment settings back to whatever they were when ardour started
          */
@@ -1311,7 +1309,7 @@ AudioEngine::connect_to_jack (string client_name, string session_uuid)
 	    _jack = jack_client_open (jack_client_name.c_str(), JackSessionID, &status, session_uuid.c_str());
 	else
 #endif
-	    _jack = jack_client_open (jack_client_name.c_str(), options, &status, server_name);
+	_jack = jack_client_open (jack_client_name.c_str(), JackNullOption, &status, 0);
 
 	if (_jack == NULL) {
 		// error message is not useful here
