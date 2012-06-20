@@ -209,9 +209,9 @@ if [ ! -f lilv-0.14.2.tar.bz2 ] ; then
     echo Lilv
     fetch_as_is http://download.drobilla.net/lilv-0.14.2.tar.bz2
 fi
-if [ ! -f suil-0.6.0.tar.bz2 ] ; then
+if [ ! -f suil-0.6.2.tar.bz2 ] ; then
     echo Suil
-    fetch_as_is http://download.drobilla.net/suil-0.6.0.tar.bz2
+    fetch_as_is http://download.drobilla.net/suil-0.6.2.tar.bz2
 fi
 if [ ! -f curl-7.25.0.tar.bz2 ] ; then
     echo Suil
