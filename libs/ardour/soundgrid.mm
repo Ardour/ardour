@@ -376,9 +376,9 @@ WTErr
 SoundGrid::sg_callback (const WSControlID* cid)
 {
         cerr << "SG Callback, cluster " << cid->clusterID.clusterType << " (index " 
-             << cid->clusterID.clusterTypeIndex
-             << ") control " << cid->clusterControlID.controlType
-             << " (index " << cid->clusterControlID.controlTypeIndex << ')'
+             << cid->clusterID.clusterIndex
+             << ") control " << cid->sectionControlID.sectionType
+             << " (index " << cid->sectionControlID.sectionIndex << ')'
              << endl;
         return eNoErr;
 }

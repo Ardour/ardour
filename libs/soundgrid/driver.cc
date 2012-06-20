@@ -99,7 +99,7 @@ WMSD_SurfaceDisplayUpdate (const WSDSurfaceHandle /*surfaceHandle*/,
         switch (pControlID->clusterID.clusterType) {
 
         case eClusterType_Global:
-                switch (pControlID->clusterID.clusterTypeIndex) {
+                switch (pControlID->clusterID.clusterIndex) {
                 case eClusterType_Global_AudioSetup:
                         DEBUG_TRACE (DEBUG::SGSurface, "AudioSetup\n");
                         break;
@@ -149,35 +149,35 @@ WMSD_SurfaceDisplayUpdate (const WSDSurfaceHandle /*surfaceHandle*/,
                         break;
                 default:
                         DEBUG_TRACE (DEBUG::SGSurface, string_compose ("Surface Update, global index %1 ctype %2 cindex %3 cid %4\n",
-                                                               pControlID->clusterID.clusterTypeIndex,
-                                                               pControlID->clusterControlID.controlType,
-                                                               pControlID->clusterControlID.controlTypeIndex,
-                                                               pControlID->clusterControlID.controlID));
+                                                               pControlID->clusterID.clusterIndex,
+                                                               pControlID->sectionControlID.sectionType,
+                                                               pControlID->sectionControlID.sectionIndex,
+                                                               pControlID->sectionControlID.controlID));
                         break;
                 }
                 break;
-        case eClusterType_InputChannel:
+        case eClusterType_Input:
                 // DEBUG_TRACE (DEBUG::SGSurface, "update, InputChannel\n");
                 break;
-        case eClusterType_GroupChannel:
+        case eClusterType_Group:
                 // DEBUG_TRACE (DEBUG::SGSurface, "update, GroupChannel\n");
                 break;
-        case eClusterType_AuxChannel:
+        case eClusterType_Aux:
                 // DEBUG_TRACE (DEBUG::SGSurface, "update, AuxChannel\n");
                 break;
-        case eClusterType_MatrixChannel:
+        case eClusterType_Matrix:
                 // DEBUG_TRACE (DEBUG::SGSurface, "update, MatrixChannel\n");
                 break;
-        case eClusterType_LCRMChannel:
+        case eClusterType_LCRM:
                 // DEBUG_TRACE (DEBUG::SGSurface, "update, LCRMChannel\n");
                 break;
-        case eClusterType_DCAChannel:
+        case eClusterType_DCA:
                 // DEBUG_TRACE (DEBUG::SGSurface, "update, DCAChannel\n");
                 break;
-        case eClusterType_CueChannel:
+        case eClusterType_Cue:
                 // DEBUG_TRACE (DEBUG::SGSurface, "update, CueChannel\n");
                 break;
-        case eClusterType_TBChannel:
+        case eClusterType_TB:
                 // DEBUG_TRACE (DEBUG::SGSurface, "update, TBChannel\n");
                 break;
         case eClusterType_Inputs:
