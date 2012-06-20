@@ -504,12 +504,16 @@ PortMatrix::popup_menu (BundleChannel column, BundleChannel row, uint32_t t)
 	}
 
 	items.push_back (MenuElem (_("Rescan"), sigc::mem_fun (*this, &PortMatrix::setup_all_ports)));
+
 	items.push_back (CheckMenuElem (_("Show individual ports"), sigc::mem_fun (*this, &PortMatrix::toggle_show_only_bundles)));
 	CheckMenuItem* i = dynamic_cast<CheckMenuItem*> (&items.back());
 	_inhibit_toggle_show_only_bundles = true;
 	i->set_active (!_show_only_bundles);
 	_inhibit_toggle_show_only_bundles = false;
 
+	items.push_back (MenuElem (_("Flip"), sigc::mem_fun (*this, &PortMatrix::flip)));
+	items.back().set_sensitive (can_flip ());
+	
 	_menu->popup (1, t);
 }
 
@@ -1121,4 +1125,76 @@ bool
 PortMatrix::bundle_with_channels (boost::shared_ptr<ARDOUR::Bundle> b)
 {
 	return b && b->nchannels() != ARDOUR::ChanCount::ZERO;
+}
+
+/** See if a `flip' is possible.
+ *  @return If flip is possible, the new (row, column) notebook indices that
+ *  should be selected; otherwise, (-1, -1)
+ */
+pair<int, int>
+PortMatrix::check_flip () const
+{
+	/* Look for the row's port group name in the columns */
+	
+	int new_column = 0;
+	boost::shared_ptr<const PortGroup> r = visible_ports (_row_index);
+	PortGroupList::List::const_iterator i = _ports[_column_index].begin();
+	while (i != _ports[_column_index].end() && (*i)->name != r->name) {
+		++i;
+		++new_column;
+	}
+
+	if (i == _ports[_column_index].end ()) {
+		return make_pair (-1, -1);
+	}
+
+	/* Look for the column's port group name in the rows */
+	
+	int new_row = 0;
+	boost::shared_ptr<const PortGroup> c = visible_ports (_column_index);
+	i = _ports[_row_index].begin();
+	while (i != _ports[_row_index].end() && (*i)->name != c->name) {
+		++i;
+		++new_row;
+	}
+
+	if (i == _ports[_row_index].end ()) {
+		return make_pair (-1, -1);
+	}
+
+	if (_arrangement == LEFT_TO_BOTTOM) {
+		new_row = _ports[_row_index].size() - new_row - 1;
+	}
+
+	return make_pair (new_row, new_column);
+}
+
+bool
+PortMatrix::can_flip () const
+{
+	return check_flip().first != -1;
+}
+
+/** Flip the column and row pages around, if possible */
+void
+PortMatrix::flip ()
+{
+	pair<int, int> n = check_flip ();
+	if (n.first == -1) {
+		return;
+	}
+
+	_vnotebook.set_current_page (n.first);
+	_hnotebook.set_current_page (n.second);
+}
+
+bool
+PortMatrix::key_press (GdkEventKey* k)
+{
+	if (k->keyval == GDK_f) {
+		flip ();
+		return true;
+	}
+
+	return false;
 }

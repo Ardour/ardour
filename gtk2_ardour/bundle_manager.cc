@@ -221,6 +221,8 @@ BundleEditor::BundleEditor (Session* session, boost::shared_ptr<UserBundle> bund
 
 	add_button (Gtk::Stock::CLOSE, Gtk::RESPONSE_ACCEPT);
 	show_all ();
+
+	signal_key_press_event().connect (sigc::mem_fun (_matrix, &BundleEditorMatrix::key_press));
 }
 
 void
