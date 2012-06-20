@@ -917,12 +917,9 @@ Editor::zoom_adjustment_changed ()
 	}
 
 	double fpu = zoom_range_clock->current_duration() / _canvas_width;
-
-	if (fpu < 1.0) {
-		fpu = 1.0;
-		zoom_range_clock->set ((framepos_t) floor (fpu * _canvas_width));
-	} else if (fpu > _session->current_end_frame() / _canvas_width) {
-		fpu = _session->current_end_frame() / _canvas_width;
+	bool clamped = clamp_frames_per_unit (fpu);
+	
+	if (clamped) {
 		zoom_range_clock->set ((framepos_t) floor (fpu * _canvas_width));
 	}
 
@@ -4064,6 +4061,12 @@ Editor::reset_y_origin (double y)
 void
 Editor::reset_zoom (double fpu)
 {
+	clamp_frames_per_unit (fpu);
+
+	if (fpu == frames_per_unit) {
+		return;
+	}
+
 	pending_visual_change.add (VisualChange::ZoomLevel);
 	pending_visual_change.frames_per_unit = fpu;
 	ensure_visual_change_idle_handler ();
@@ -4171,41 +4174,20 @@ Editor::use_visual_state (VisualState& vs)
 	_routes->resume_redisplay ();
 }
 
+/** This is the core function that controls the zoom level of the canvas. It is called
+ *  whenever one or more calls are made to reset_zoom().  It executes in an idle handler.
+ *  @param fpu New frames per unit; should already have been clamped so that it is sensible.
+ */
 void
 Editor::set_frames_per_unit (double fpu)
 {
-	/* this is the core function that controls the zoom level of the canvas. it is called
-	   whenever one or more calls are made to reset_zoom(). it executes in an idle handler.
-	*/
-
-	if (fpu == frames_per_unit) {
-		return;
-	}
-
-	if (fpu < 2.0) {
-		fpu = 2.0;
-	}
-
-
-	/* don't allow zooms that fit more than the maximum number
-	   of frames into an 800 pixel wide space.
-	*/
-
-	if (max_framepos / fpu < 800.0) {
-		return;
-	}
-
-	if (tempo_lines)
+	if (tempo_lines) {
 		tempo_lines->tempo_map_changed();
+	}
 
 	frames_per_unit = fpu;
-	post_zoom ();
-}
 
-void
-Editor::post_zoom ()
-{
-	// convert fpu to frame count
+	/* convert fpu to frame count */
 
 	framepos_t frames = (framepos_t) floor (frames_per_unit * _canvas_width);
 

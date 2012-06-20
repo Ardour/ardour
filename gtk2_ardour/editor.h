@@ -525,7 +525,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Editing::ZoomFocus zoom_focus;
 
 	void set_frames_per_unit (double);
-	void post_zoom ();
+	bool clamp_frames_per_unit (double &) const;
 
 	Editing::MouseMode mouse_mode;
 	Editing::MouseMode pre_internal_mouse_mode;
@@ -1209,7 +1209,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void temporal_zoom_region (bool both_axes);
 	void zoom_to_region (bool both_axes);
 	void temporal_zoom_session ();
-	void temporal_zoom (gdouble scale);
+	void temporal_zoom (double scale);
 	void temporal_zoom_by_frame (framepos_t start, framepos_t end);
 	void temporal_zoom_to_frame (bool coarser, framepos_t frame);
 
