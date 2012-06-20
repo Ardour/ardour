@@ -990,6 +990,10 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	int  process_routes (pframes_t, bool& need_butler);
 	int  silent_process_routes (pframes_t, bool& need_butler);
 
+	/** @return 1 if there is a pending declick fade-in,
+	           -1 if there is a pending declick fade-out,
+		    0 if there is no pending declick.
+	*/
 	int get_transport_declick_required () {
 		if (transport_sub_state & PendingDeclickIn) {
 			transport_sub_state &= ~PendingDeclickIn;

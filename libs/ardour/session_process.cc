@@ -109,7 +109,7 @@ Session::no_roll (pframes_t nframes)
 	
 	framepos_t end_frame = _transport_frame + nframes; // FIXME: varispeed + no_roll ??
 	int ret = 0;
-	bool declick = get_transport_declick_required();
+	int declick = get_transport_declick_required();
 	boost::shared_ptr<RouteList> r = routes.reader ();
 
 	if (_click_io) {

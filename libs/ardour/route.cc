@@ -3290,19 +3290,20 @@ Route::protect_automation ()
 		(*i)->protect_automation();
 }
 
+/** @param declick 1 to set a pending declick fade-in,
+ *                -1 to set a pending declick fade-out
+ */
 void
 Route::set_pending_declick (int declick)
 {
 	if (_declickable) {
-		/* this call is not allowed to turn off a pending declick unless "force" is true */
+		/* this call is not allowed to turn off a pending declick */
 		if (declick) {
 			_pending_declick = declick;
 		}
-		// cerr << _name << ": after setting to " << declick << " pending declick = " << _pending_declick << endl;
 	} else {
 		_pending_declick = 0;
 	}
-
 }
 
 /** Shift automation forwards from a particular place, thereby inserting time.
