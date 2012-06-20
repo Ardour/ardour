@@ -1041,10 +1041,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	static int _idle_visual_changer (void *arg);
 	int idle_visual_changer ();
-
-	void queue_visual_change (framepos_t);
-	void queue_visual_change (double);
-	void queue_visual_change_y (double);
 	void ensure_visual_change_idle_handler ();
 
 	/* track views */

@@ -4048,19 +4048,25 @@ Editor::on_key_release_event (GdkEventKey* ev)
 void
 Editor::reset_x_origin (framepos_t frame)
 {
-	queue_visual_change (frame);
+	pending_visual_change.add (VisualChange::TimeOrigin);
+	pending_visual_change.time_origin = frame;
+	ensure_visual_change_idle_handler ();
 }
 
 void
 Editor::reset_y_origin (double y)
 {
-	queue_visual_change_y (y);
+	pending_visual_change.add (VisualChange::YOrigin);
+	pending_visual_change.y_origin = y;
+	ensure_visual_change_idle_handler ();
 }
 
 void
 Editor::reset_zoom (double fpu)
 {
-	queue_visual_change (fpu);
+	pending_visual_change.add (VisualChange::ZoomLevel);
+	pending_visual_change.frames_per_unit = fpu;
+	ensure_visual_change_idle_handler ();
 }
 
 void
@@ -4231,32 +4237,6 @@ Editor::post_zoom ()
 	update_marker_labels ();
 
 	instant_save ();
-}
-
-void
-Editor::queue_visual_change (framepos_t where)
-{
-	pending_visual_change.add (VisualChange::TimeOrigin);
-	pending_visual_change.time_origin = where;
-	ensure_visual_change_idle_handler ();
-}
-
-void
-Editor::queue_visual_change (double fpu)
-{
-	pending_visual_change.add (VisualChange::ZoomLevel);
-	pending_visual_change.frames_per_unit = fpu;
-
-	ensure_visual_change_idle_handler ();
-}
-
-void
-Editor::queue_visual_change_y (double y)
-{
-	pending_visual_change.add (VisualChange::YOrigin);
-	pending_visual_change.y_origin = y;
-
-	ensure_visual_change_idle_handler ();
 }
 
 void
