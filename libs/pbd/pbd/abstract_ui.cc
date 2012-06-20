@@ -4,6 +4,7 @@
 #include <pbd/abstract_ui.h>
 #include <pbd/pthread_utils.h>
 #include <pbd/failed_constructor.h>
+#include <pbd/stacktrace.h>
 
 #include "i18n.h"
 
@@ -102,6 +103,7 @@ AbstractUI<RequestObject>::get_request (RequestType rt)
 		if (vec.len[1] == 0) {
 			cerr << string_compose ("no space in %1-UI request buffer for thread %2", name(), pthread_name())
 			     << endl;
+                        PBD::stacktrace (std::cerr, 20);
 			return 0;
 		} else {
 			vec.buf[1]->type = rt;
