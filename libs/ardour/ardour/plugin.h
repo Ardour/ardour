@@ -183,6 +183,7 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 	void remove_preset (std::string);
 
 	virtual bool load_preset (PresetRecord);
+	void clear_preset ();
 
 	const PresetRecord * preset_by_label (const std::string &);
 	const PresetRecord * preset_by_uri (const std::string &);

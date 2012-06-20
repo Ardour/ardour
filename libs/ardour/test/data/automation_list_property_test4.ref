@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<State>
+  <FadeIn>
+    <AutomationList automation-id="fadein" id="167" default="0" min-yval="0" max-yval="2" interpolation-style="Linear" state="Off" style="Absolute">
+      <events>1 2
+3 4
+5 6
+7 8
+</events>
+    </AutomationList>
+  </FadeIn>
+</State>

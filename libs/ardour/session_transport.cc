@@ -1476,9 +1476,11 @@ Session::engine_halted ()
 	   the picture.
 	*/
 
-	g_atomic_int_set (&_butler->should_do_transport_work, 0);
-	set_post_transport_work (PostTransportWork (0));
-	_butler->stop ();
+	if (_butler) {
+		g_atomic_int_set (&_butler->should_do_transport_work, 0);
+		set_post_transport_work (PostTransportWork (0));
+		_butler->stop ();
+	}
 
 	realtime_stop (false, true);
 	non_realtime_stop (false, 0, ignored);

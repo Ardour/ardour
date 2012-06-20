@@ -92,9 +92,6 @@ public:
 
 	PBD::Signal1<void,bool> StepEditStatusChange;
 
-	bool midi_thru() const { return _midi_thru; }
-	void set_midi_thru (bool yn);
-
 	boost::shared_ptr<SMFSource> write_source (uint32_t n = 0);
 	void set_channel_mode (ChannelMode, uint16_t);
 	ChannelMode get_channel_mode ();
@@ -116,7 +113,7 @@ protected:
 
 	void act_on_mute ();
 
-  private:
+private:
 
 	virtual boost::shared_ptr<Diskstream> diskstream_factory (XMLNode const &);
 	
@@ -131,7 +128,6 @@ protected:
 	MidiRingBuffer<framepos_t> _step_edit_ring_buffer;
 	NoteMode                  _note_mode;
 	bool                      _step_editing;
-	bool                      _midi_thru;
 	bool                      _input_active;
 
 	int no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, bool state_changing);

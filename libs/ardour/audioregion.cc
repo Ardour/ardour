@@ -65,6 +65,11 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<bool> fade_out_is_short;
 		PBD::PropertyDescriptor<bool> fade_in_is_xfade;
 		PBD::PropertyDescriptor<bool> fade_in_is_short;
+		PBD::PropertyDescriptor<boost::shared_ptr<AutomationList> > fade_in;
+		PBD::PropertyDescriptor<boost::shared_ptr<AutomationList> > inverse_fade_in;
+		PBD::PropertyDescriptor<boost::shared_ptr<AutomationList> > fade_out;
+		PBD::PropertyDescriptor<boost::shared_ptr<AutomationList> > inverse_fade_out;
+		PBD::PropertyDescriptor<boost::shared_ptr<AutomationList> > envelope;
 	}
 }
 
@@ -164,6 +169,16 @@ AudioRegion::make_property_quarks ()
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for fade-in-is-xfade = %1\n", 	Properties::fade_in_is_xfade.property_id));
 	Properties::fade_in_is_short.property_id = g_quark_from_static_string (X_("fade-in-is-short"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for fade-in-is-short = %1\n", 	Properties::fade_in_is_short.property_id));
+	Properties::fade_in.property_id = g_quark_from_static_string (X_("FadeIn"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for FadeIn = %1\n",		Properties::fade_in.property_id));
+	Properties::inverse_fade_in.property_id = g_quark_from_static_string (X_("InverseFadeIn"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for InverseFadeIn = %1\n",	Properties::inverse_fade_in.property_id));
+	Properties::fade_out.property_id = g_quark_from_static_string (X_("FadeOut"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for FadeOut = %1\n",		Properties::fade_out.property_id));
+	Properties::inverse_fade_out.property_id = g_quark_from_static_string (X_("InverseFadeOut"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for InverseFadeOut = %1\n",	Properties::inverse_fade_out.property_id));
+	Properties::envelope.property_id = g_quark_from_static_string (X_("Envelope"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for Envelope = %1\n",		Properties::envelope.property_id));
 }
 
 void
@@ -181,6 +196,11 @@ AudioRegion::register_properties ()
 	add_property (_fade_out_is_short);
 	add_property (_fade_in_is_xfade);
 	add_property (_fade_in_is_short);
+	add_property (_fade_in);
+	add_property (_inverse_fade_in);
+	add_property (_fade_out);
+	add_property (_inverse_fade_out);
+	add_property (_envelope);
 }
 
 #define AUDIOREGION_STATE_DEFAULT \
@@ -193,7 +213,11 @@ AudioRegion::register_properties ()
 	, _fade_in_is_xfade (Properties::fade_in_is_xfade, false) \
 	, _fade_out_is_xfade (Properties::fade_out_is_xfade, false) \
 	, _fade_in_is_short (Properties::fade_in_is_short, false) \
-	, _fade_out_is_short (Properties::fade_out_is_short, false) 
+	, _fade_out_is_short (Properties::fade_out_is_short, false) \
+	, _fade_in (Properties::fade_in, boost::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter (FadeInAutomation)))) \
+	, _inverse_fade_in (Properties::inverse_fade_in, boost::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter (FadeInAutomation)))) \
+	, _fade_out (Properties::fade_out, boost::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter (FadeOutAutomation)))) \
+	, _inverse_fade_out (Properties::inverse_fade_out, boost::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter (FadeOutAutomation))))
 
 #define AUDIOREGION_COPY_STATE(other) \
 	_envelope_active (Properties::envelope_active, other->_envelope_active) \
@@ -205,7 +229,11 @@ AudioRegion::register_properties ()
 	, _fade_in_is_xfade (Properties::fade_in_is_xfade, other->_fade_in_is_xfade) \
 	, _fade_out_is_xfade (Properties::fade_out_is_xfade, other->_fade_out_is_xfade) \
 	, _fade_in_is_short (Properties::fade_in_is_short, other->_fade_in_is_short) \
-	, _fade_out_is_short (Properties::fade_out_is_short, other->_fade_out_is_short)
+	, _fade_out_is_short (Properties::fade_out_is_short, other->_fade_out_is_short) \
+	, _fade_in (Properties::fade_in, boost::shared_ptr<AutomationList> (new AutomationList (*other->_fade_in.val()))) \
+	, _inverse_fade_in (Properties::fade_in, boost::shared_ptr<AutomationList> (new AutomationList (*other->_inverse_fade_in.val()))) \
+	, _fade_out (Properties::fade_in, boost::shared_ptr<AutomationList> (new AutomationList (*other->_fade_out.val()))) \
+	, _inverse_fade_out (Properties::fade_in, boost::shared_ptr<AutomationList> (new AutomationList (*other->_inverse_fade_out.val())))
 /* a Session will reset these to its chosen defaults by calling AudioRegion::set_default_fade() */
 
 void
@@ -227,12 +255,8 @@ AudioRegion::init ()
 AudioRegion::AudioRegion (Session& s, framepos_t start, framecnt_t len, std::string name)
 	: Region (s, start, len, name, DataType::AUDIO)
 	, AUDIOREGION_STATE_DEFAULT
+	, _envelope (Properties::envelope, boost::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter(EnvelopeAutomation))))
 	, _automatable (s)
-	, _fade_in (new AutomationList(Evoral::Parameter(FadeInAutomation)))
-	, _inverse_fade_in (new AutomationList(Evoral::Parameter(FadeInAutomation)))
-	, _fade_out (new AutomationList(Evoral::Parameter(FadeOutAutomation)))
-	, _inverse_fade_out (new AutomationList(Evoral::Parameter(FadeOutAutomation)))
-	, _envelope (new AutomationList(Evoral::Parameter(EnvelopeAutomation)))
 	, _fade_in_suspended (0)
 	, _fade_out_suspended (0)
 {
@@ -244,12 +268,8 @@ AudioRegion::AudioRegion (Session& s, framepos_t start, framecnt_t len, std::str
 AudioRegion::AudioRegion (const SourceList& srcs)
 	: Region (srcs)
 	, AUDIOREGION_STATE_DEFAULT
+	, _envelope (Properties::envelope, boost::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter(EnvelopeAutomation))))
 	, _automatable(srcs[0]->session())
-	, _fade_in (new AutomationList(Evoral::Parameter(FadeInAutomation)))
-	, _inverse_fade_in (new AutomationList(Evoral::Parameter(FadeInAutomation)))
-	, _fade_out (new AutomationList(Evoral::Parameter(FadeOutAutomation)))
-	, _inverse_fade_out (new AutomationList(Evoral::Parameter(FadeOutAutomation)))
-	, _envelope (new AutomationList(Evoral::Parameter(EnvelopeAutomation)))
 	, _fade_in_suspended (0)
 	, _fade_out_suspended (0)
 {
@@ -260,15 +280,11 @@ AudioRegion::AudioRegion (const SourceList& srcs)
 AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other)
 	: Region (other)
 	, AUDIOREGION_COPY_STATE (other)
-	, _automatable (other->session())
-	, _fade_in (new AutomationList (*other->_fade_in))
-	, _inverse_fade_in (new AutomationList(*other->_inverse_fade_in))
-	, _fade_out (new AutomationList (*other->_fade_out))
-	, _inverse_fade_out (new AutomationList (*other->_inverse_fade_out))
 	  /* As far as I can see, the _envelope's times are relative to region position, and have nothing
 	     to do with sources (and hence _start).  So when we copy the envelope, we just use the supplied offset.
 	  */
-	, _envelope (new AutomationList (*other->_envelope, 0, other->_length))
+	, _envelope (Properties::envelope, boost::shared_ptr<AutomationList> (new AutomationList (*other->_envelope.val(), 0, other->_length)))
+	, _automatable (other->session())
 	, _fade_in_suspended (0)
 	, _fade_out_suspended (0)
 {
@@ -286,15 +302,11 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other)
 AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, framecnt_t offset)
 	: Region (other, offset)
 	, AUDIOREGION_COPY_STATE (other)
-	, _automatable (other->session())
-	, _fade_in (new AutomationList (*other->_fade_in))
-	, _inverse_fade_in (new AutomationList(*other->_inverse_fade_in))
-	, _fade_out (new AutomationList (*other->_fade_out))
-	, _inverse_fade_out (new AutomationList (*other->_inverse_fade_out))
 	  /* As far as I can see, the _envelope's times are relative to region position, and have nothing
 	     to do with sources (and hence _start).  So when we copy the envelope, we just use the supplied offset.
 	  */
-	, _envelope (new AutomationList (*other->_envelope, offset, other->_length))
+	, _envelope (Properties::envelope, boost::shared_ptr<AutomationList> (new AutomationList (*other->_envelope.val(), offset, other->_length)))
+	, _automatable (other->session())
 	, _fade_in_suspended (0)
 	, _fade_out_suspended (0)
 {
@@ -312,12 +324,8 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, framecnt_t
 AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, const SourceList& srcs)
 	: Region (boost::static_pointer_cast<const Region>(other), srcs)
 	, AUDIOREGION_COPY_STATE (other)
+	, _envelope (Properties::envelope, boost::shared_ptr<AutomationList> (new AutomationList (*other->_envelope.val())))
 	, _automatable (other->session())
-	, _fade_in (new AutomationList (*other->_fade_in))
-	, _inverse_fade_in (new AutomationList(*other->_inverse_fade_in))
-	, _fade_out (new AutomationList (*other->_fade_out))
-	, _inverse_fade_out (new AutomationList (*other->_inverse_fade_out))
-	, _envelope (new AutomationList (*other->_envelope))
 	, _fade_in_suspended (0)
 	, _fade_out_suspended (0)
 {
@@ -335,12 +343,8 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, const Sour
 AudioRegion::AudioRegion (SourceList& srcs)
 	: Region (srcs)
 	, AUDIOREGION_STATE_DEFAULT
+	, _envelope (Properties::envelope, boost::shared_ptr<AutomationList> (new AutomationList(Evoral::Parameter(EnvelopeAutomation))))
 	, _automatable(srcs[0]->session())
-	, _fade_in (new AutomationList(Evoral::Parameter(FadeInAutomation)))
-	, _inverse_fade_in (new AutomationList(Evoral::Parameter(FadeInAutomation)))
-	, _fade_out (new AutomationList(Evoral::Parameter(FadeOutAutomation)))
-	, _inverse_fade_out (new AutomationList(Evoral::Parameter(FadeOutAutomation)))
-	, _envelope (new AutomationList(Evoral::Parameter(EnvelopeAutomation)))
 	, _fade_in_suspended (0)
 	, _fade_out_suspended (0)
 {
@@ -756,8 +760,8 @@ AudioRegion::read_from_sources (SourceList const & srcs, framecnt_t limit, Sampl
 		*/
 
 		if (Config->get_replicate_missing_region_channels()) {
-			/* track is N-channel, this region has less channels, so use a relevant channel
-			 */
+
+			/* copy an existing channel's data in for this non-existant one */
 
 			uint32_t channel = n_channels() % chan_n;
 			boost::shared_ptr<AudioSource> src = boost::dynamic_pointer_cast<AudioSource> (srcs[channel]);
@@ -765,6 +769,11 @@ AudioRegion::read_from_sources (SourceList const & srcs, framecnt_t limit, Sampl
 			if (src->read (buf, _start + internal_offset, to_read) != to_read) {
 				return 0; /* "read nothing" */
 			}
+
+		} else {
+			
+			/* use silence */
+			memset (buf, 0, sizeof (Sample) * to_read);
 		}
 	}
 
@@ -988,7 +997,7 @@ void
 AudioRegion::set_fade_in (boost::shared_ptr<AutomationList> f)
 {
 	_fade_in->freeze ();
-	*_fade_in = *f;
+	*(_fade_in.val()) = *f;
 	_fade_in->thaw ();
 	_default_fade_in = false;
 
@@ -1010,23 +1019,23 @@ AudioRegion::set_fade_in (FadeShape shape, framecnt_t len)
 	case FadeLinear:
 		_fade_in->fast_simple_add (0.0, 0.0);
 		_fade_in->fast_simple_add (len, 1.0);
-		reverse_curve (_inverse_fade_in, _fade_in);
+		reverse_curve (_inverse_fade_in.val(), _fade_in.val());
 		break;
 
 	case FadeFast:
-		generate_db_fade (_fade_in, len, 10, -60);
-		reverse_curve (c1, _fade_in);
+		generate_db_fade (_fade_in.val(), len, 10, -60);
+		reverse_curve (c1, _fade_in.val());
 		_fade_in->copy_events (*c1);
-		generate_inverse_power_curve (_inverse_fade_in, _fade_in);
+		generate_inverse_power_curve (_inverse_fade_in.val(), _fade_in.val());
 		break;
 
 	case FadeSlow:
 		generate_db_fade (c1, len, 10, -1);  // start off with a slow fade
 		generate_db_fade (c2, len, 10, -80); // end with a fast fade
-		merge_curves (_fade_in, c1, c2);
-		reverse_curve (c3, _fade_in);
+		merge_curves (_fade_in.val(), c1, c2);
+		reverse_curve (c3, _fade_in.val());
 		_fade_in->copy_events (*c3);
-		generate_inverse_power_curve (_inverse_fade_in, _fade_in);
+		generate_inverse_power_curve (_inverse_fade_in.val(), _fade_in.val());
 		break;
 
 	case FadeConstantPower:
@@ -1035,7 +1044,7 @@ AudioRegion::set_fade_in (FadeShape shape, framecnt_t len)
 			_fade_in->fast_simple_add (len*dist, sin (dist*M_PI/2));
 		}
 		_fade_in->fast_simple_add (len, 1.0);
-		reverse_curve (_inverse_fade_in, _fade_in);
+		reverse_curve (_inverse_fade_in.val(), _fade_in.val());
 		break;
 		
 	case FadeSymmetric:
@@ -1053,9 +1062,9 @@ AudioRegion::set_fade_in (FadeShape shape, framecnt_t len)
 			_fade_in->fast_simple_add (len* (breakpoint+((1.0-breakpoint)*(double)i/(double)num_steps)), coeff);
 		}
 		_fade_in->fast_simple_add (len, VERY_SMALL_SIGNAL);
-		reverse_curve (c3, _fade_in);
+		reverse_curve (c3, _fade_in.val());
 		_fade_in->copy_events (*c3);
-		reverse_curve (_inverse_fade_in, _fade_in );
+		reverse_curve (_inverse_fade_in.val(), _fade_in.val());
 		break;
 	}
 
@@ -1068,7 +1077,7 @@ void
 AudioRegion::set_fade_out (boost::shared_ptr<AutomationList> f)
 {
 	_fade_out->freeze ();
-	*_fade_out = *f;
+	*(_fade_out.val()) = *f;
 	_fade_out->thaw ();
 	_default_fade_out = false;
 
@@ -1089,19 +1098,19 @@ AudioRegion::set_fade_out (FadeShape shape, framecnt_t len)
 	case FadeLinear:
 		_fade_out->fast_simple_add (0.0, 1.0);
 		_fade_out->fast_simple_add (len, VERY_SMALL_SIGNAL);
-		reverse_curve (_inverse_fade_out, _fade_out);
+		reverse_curve (_inverse_fade_out.val(), _fade_out.val());
 		break;
 		
 	case FadeFast: 
-		generate_db_fade (_fade_out, len, 10, -60);
-		generate_inverse_power_curve (_inverse_fade_out, _fade_out);
+		generate_db_fade (_fade_out.val(), len, 10, -60);
+		generate_inverse_power_curve (_inverse_fade_out.val(), _fade_out.val());
 		break;
 		
 	case FadeSlow: 
 		generate_db_fade (c1, len, 10, -1);  //start off with a slow fade
 		generate_db_fade (c2, len, 10, -80);  //end with a fast fade
-		merge_curves (_fade_out, c1, c2);
-		generate_inverse_power_curve (_inverse_fade_out, _fade_out);
+		merge_curves (_fade_out.val(), c1, c2);
+		generate_inverse_power_curve (_inverse_fade_out.val(), _fade_out.val());
 		break;
 
 	case FadeConstantPower:
@@ -1113,7 +1122,7 @@ AudioRegion::set_fade_out (FadeShape shape, framecnt_t len)
 			_fade_out->fast_simple_add ((len * dist), cos(dist*M_PI/2));
 		}
 		_fade_out->fast_simple_add (len, VERY_SMALL_SIGNAL);
-		reverse_curve (_inverse_fade_out, _fade_out);
+		reverse_curve (_inverse_fade_out.val(), _fade_out.val());
 		break;
 		
 	case FadeSymmetric:
@@ -1132,7 +1141,7 @@ AudioRegion::set_fade_out (FadeShape shape, framecnt_t len)
 			_fade_out->fast_simple_add (len* (breakpoint+((1.0-breakpoint)*(double)i/(double)num_steps)), coeff);
 		}
 		_fade_out->fast_simple_add (len, VERY_SMALL_SIGNAL);
-		reverse_curve (_inverse_fade_out, _fade_out);
+		reverse_curve (_inverse_fade_out.val(), _fade_out.val());
 		break;
 	}
 

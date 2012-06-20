@@ -1063,9 +1063,11 @@ RCOptionEditor::RCOptionEditor ()
 		     ));
 
 	add_option (_("Editor"),
-	     new BoolOption (
+	     new BoolComboOption (
 		     "show-region-gain-envelopes",
 		     _("Show gain envelopes in audio regions"),
+		     _("in all modes"),
+		     _("only in region gain mode"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_show_region_gain),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_show_region_gain)
 		     ));
@@ -1149,6 +1151,14 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_name_new_markers),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_name_new_markers)
 		     ));
+
+	add_option (_("Editor"),
+	    new BoolOption (
+		    "autoscroll-editor",
+		    _("Auto-scroll editor window when dragging near its edges"),
+		    sigc::mem_fun (*_rc_config, &RCConfiguration::get_autoscroll_editor),
+		    sigc::mem_fun (*_rc_config, &RCConfiguration::set_autoscroll_editor)
+		    ));
 
 	/* AUDIO */
 
@@ -1587,7 +1597,7 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (S_("Visual|Interface"),
 	     new BoolOption (
 		     "default-narrow_ms",
-		     _("Use narrow mixer strips by default"),
+		     _("Use narrow strips in the mixer by default"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_default_narrow_ms),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_default_narrow_ms)
 		     ));

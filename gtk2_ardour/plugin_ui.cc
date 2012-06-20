@@ -593,6 +593,9 @@ PlugUIBase::preset_selected ()
 			warning << string_compose(_("Plugin preset %1 not found"),
 						  _preset_combo.get_active_text()) << endmsg;
 		}
+	} else {
+		// blank selected = no preset
+		plugin->clear_preset();
 	}
 }
 
@@ -745,6 +748,8 @@ PlugUIBase::update_preset_list ()
 		preset_labels.push_back (i->label);
 	}
 
+	preset_labels.push_back("");
+
 	set_popdown_strings (_preset_combo, preset_labels);
 
 	--_no_load_preset;
@@ -768,6 +773,7 @@ PlugUIBase::update_preset ()
 void
 PlugUIBase::update_preset_modified ()
 {
+
 	if (plugin->last_preset().uri.empty()) {
 		_preset_modified.set_text ("");
 		return;

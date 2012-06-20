@@ -30,6 +30,7 @@
 #include "pbd/property_basics.h"
 #include "pbd/property_list.h"
 #include "pbd/enumwriter.h"
+#include "pbd/stateful.h"
 
 namespace PBD {
 
@@ -341,7 +342,121 @@ private:
 	/* no copy-construction */
 	EnumProperty (EnumProperty const &);
 };
+
+/** A Property which holds a shared_ptr to a Stateful object,
+ *  and handles undo using the somewhat inefficient approach
+ *  of saving the complete XML state of its object before and
+ *  after changes.  A sort of half-way house between the old
+ *  complete-state undo system and the new difference-based
+ *  one.
+ */
+template <class T>
+class SharedStatefulProperty : public PropertyBase
+{
+public:
+	typedef boost::shared_ptr<T> Ptr;
 	
+	SharedStatefulProperty (PropertyID d, Ptr p)
+		: PropertyBase (d)
+		, _current (p)
+	{
+		
+	}
+
+	SharedStatefulProperty (PropertyID d, Ptr o, Ptr c)
+		: PropertyBase (d)
+		, _old (o)
+		, _current (c)
+	{
+		
+	}
+
+	bool set_value (XMLNode const & node) {
+
+		/* Look for our node */
+		XMLNode* n = node.child (property_name ());
+		if (!n) {
+			return false;
+		}
+
+		/* And there should be one child which is the state of our T */
+		XMLNodeList const & children = n->children ();
+		if (children.size() != 1) {
+			return false;
+		}
+
+		_current->set_state (*children.front (), Stateful::current_state_version);
+		return true;
+	}
+
+	void get_value (XMLNode & node) const {
+		XMLNode* n = node.add_child (property_name ());
+		n->add_child_nocopy (_current->get_state ());
+	}
+
+	void clear_changes () {
+		/* We are starting to change things, so _old gets set up
+		   with the current state.
+		*/
+		_old.reset (new T (*_current.get()));
+	}
+
+	bool changed () const {
+		/* Expensive, but, hey; this requires operator!= in
+		   our T
+		*/
+		return (*_old != *_current);
+	}
+
+	void invert () {
+		_current.swap (_old);
+	}
+
+	void get_changes_as_xml (XMLNode* history_node) const {
+		/* We express the diff as before and after state, just
+		   as MementoCommand does.
+		*/
+		XMLNode* p = history_node->add_child (property_name ());
+		XMLNode* from = p->add_child ("from");
+		from->add_child_nocopy (_old->get_state ());
+		XMLNode* to = p->add_child ("to");
+		to->add_child_nocopy (_current->get_state ());
+	}
+
+	void get_changes_as_properties (PropertyList& changes, Command *) const {
+		if (changed ()) {
+			changes.add (clone ());
+		}
+	}
+
+	void apply_changes (PropertyBase const * p) {
+		*_current = *(dynamic_cast<SharedStatefulProperty const *> (p))->val ();
+	}
+
+	Ptr val () const {
+		return _current;
+	}
+
+	T* operator-> () const {
+		return _current.operator-> ();
+	}
+
+	operator bool () const {
+		return _current;
+	}
+
+protected:
+
+	Ptr _old;
+	Ptr _current;
+
+private:
+
+	/* No copy-construction nor assignment */
+	SharedStatefulProperty (SharedStatefulProperty<T> const &);
+	SharedStatefulProperty<T>& operator= (SharedStatefulProperty<T> const &);
+};
+
 } /* namespace PBD */
 
 #include "pbd/property_list_impl.h"

@@ -125,7 +125,7 @@ PBD::Signal0<void> Session::SuccessfulGraphSort;
 static void clean_up_session_event (SessionEvent* ev) { delete ev; }
 const SessionEvent::RTeventCallback Session::rt_cleanup (clean_up_session_event);
 
-/** @param snapshot_name Snapshot name, without .ardour prefix */
+/** @param snapshot_name Snapshot name, without .ardour suffix */
 Session::Session (AudioEngine &eng,
                   const string& fullpath,
                   const string& snapshot_name,
@@ -248,6 +248,8 @@ Session::destroy ()
 
 	_butler->drop_references ();
 	delete _butler;
+	_butler = 0;
+	
 	delete midi_control_ui;
 	delete _all_route_group;
 
@@ -1483,7 +1485,7 @@ Session::resort_routes_using (boost::shared_ptr<RouteList> r)
 			trace_terminal (*i, *i);
 		}
 
-		r = sorted_routes;
+		*r = *sorted_routes;
 
 #ifndef NDEBUG
 		DEBUG_TRACE (DEBUG::Graph, "Routes resorted, order follows:\n");

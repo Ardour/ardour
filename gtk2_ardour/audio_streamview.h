@@ -56,12 +56,10 @@ class AudioStreamView : public StreamView
 	int     set_amplitude_above_axis (gdouble app);
 	gdouble get_amplitude_above_axis () { return _amplitude_above_axis; }
 
-	void set_show_waveforms (bool yn);
-
 	void show_all_fades ();
 	void hide_all_fades ();
 
-	void hide_xfades_with (boost::shared_ptr<ARDOUR::AudioRegion> ar);
+	std::list<AudioRegionView*> hide_xfades_with (boost::shared_ptr<ARDOUR::AudioRegion> ar);
 
 	RegionView* create_region_view (boost::shared_ptr<ARDOUR::Region>, bool, bool);
 
@@ -76,10 +74,6 @@ class AudioStreamView : public StreamView
 	void redisplay_track ();
 
 	void color_handler ();
-
-	void parameter_changed (std::string const &);
-	void set_waveform_shape (ARDOUR::WaveformShape);
-	void set_waveform_scale (ARDOUR::WaveformScale);
 
 	double _amplitude_above_axis;
 

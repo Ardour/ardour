@@ -327,6 +327,16 @@ Plugin::load_preset (PresetRecord r)
 	return true;
 }
 
+void
+Plugin::clear_preset ()
+{
+	_last_preset.uri = "";
+	_last_preset.label = "";
+	_parameter_changed_since_last_preset = false;
+
+	PresetLoaded (); /* EMIT SIGNAL */
+}
+
 /** @param val `plugin' value */
 void
 Plugin::set_parameter (uint32_t which, float val)

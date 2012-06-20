@@ -675,7 +675,7 @@ Session::rename_state (string old_name, string new_name)
 void
 Session::remove_state (string snapshot_name)
 {
-	if (snapshot_name == _current_snapshot_name || snapshot_name == _name) {
+	if (!_writable || snapshot_name == _current_snapshot_name || snapshot_name == _name) {
 		// refuse to remove the current snapshot or the "main" one
 		return;
 	}

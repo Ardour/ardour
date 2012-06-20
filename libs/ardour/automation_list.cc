@@ -510,3 +510,24 @@ AutomationList::set_state (const XMLNode& node, int version)
 	return 0;
 }
 
+bool
+AutomationList::operator!= (AutomationList const & other) const
+{
+	return (
+		static_cast<ControlList const &> (*this) != static_cast<ControlList const &> (other) ||
+		_state != other._state ||
+		_style != other._style ||
+		_touching != other._touching
+		);
+}
+
+PBD::PropertyBase *
+AutomationListProperty::clone () const
+{
+	return new AutomationListProperty (
+		this->property_id(),
+		boost::shared_ptr<AutomationList> (new AutomationList (*this->_old.get())),
+		boost::shared_ptr<AutomationList> (new AutomationList (*this->_current.get()))
+		);
+}
+	

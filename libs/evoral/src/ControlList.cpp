@@ -1529,5 +1529,33 @@ ControlList::set_thinning_factor (double v)
 	_thinning_factor = v;
 }
 
+bool
+ControlList::operator!= (ControlList const & other) const
+{
+	if (_events.size() != other._events.size()) {
+		return true;
+	}
+
+	EventList::const_iterator i = _events.begin ();
+	EventList::const_iterator j = other._events.begin ();
+
+	while (i != _events.end() && (*i)->when == (*j)->when && (*i)->value == (*j)->value) {
+	        ++i;
+		++j;
+	}
+
+	if (i != _events.end ()) {
+		return true;
+	}
+	
+	return (
+		_parameter != other._parameter ||
+		_interpolation != other._interpolation ||
+		_min_yval != other._min_yval ||
+		_max_yval != other._max_yval ||
+		_default_value != other._default_value
+		);
+}
+
 } // namespace Evoral
 

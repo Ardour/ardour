@@ -76,8 +76,6 @@ CombineRegionsTest::check_crossfade1 ()
 		r0 *= fade_out[i - 128];
 		
 		float const r1 = (i - 128) * fade_in[i - 128];
-		cout << setprecision(12);
-		cout << "\t\ti=" << i << " fade_out=" << fade_out[i - 128] << " r1=" << r1 << " r0=" << r0 << "\n";
 		CPPUNIT_ASSERT_DOUBLES_EQUAL (r0 + r1, buf[i], 1e-16);
 	}
 
@@ -180,8 +178,6 @@ CombineRegionsTest::check_crossfade2 ()
 		float r1 = (i - 128) * region_fade_in;
 		r1 *= fade_in[i - 128];
 		
-		cout << setprecision(12);
-		cout << "\t\ti=" << i << " fade_out=" << fade_out[i - 128] << " r1=" << r1 << " r0=" << r0 << "\n";
 		CPPUNIT_ASSERT_DOUBLES_EQUAL (r0 + r1, buf[i], 1e-16);
 	}
 
@@ -203,8 +199,6 @@ CombineRegionsTest::check_crossfade2 ()
 void
 CombineRegionsTest::crossfadeTest2 ()
 {
-	cout << "\n\n\nCOMBINE\n";
-
 	/* Two regions, both 256 frames in length, overlapping by 128 frames in the middle */
 
 	_ar[0]->set_default_fade_in ();
@@ -231,7 +225,6 @@ CombineRegionsTest::crossfadeTest2 ()
 	CPPUNIT_ASSERT_EQUAL (false, _ar[1]->fade_out_is_xfade ());
 
 	/* Check that the read comes back correctly */
-	cout << "\n\n\nFIRST READ\n";
 	check_crossfade2 ();
 
 	/* Combine the two regions */

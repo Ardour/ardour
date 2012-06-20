@@ -26,6 +26,7 @@
 #include "pbd/compose.h"
 #include "pbd/file_utils.h"
 
+#include "ardour/debug.h"
 #include "ardour/panner_manager.h"
 #include "ardour/panner_search_path.h"
 
@@ -72,7 +73,7 @@ PannerManager::discover_panners ()
 	find_matching_files_in_search_path (panner_search_path (),
 	                                    dylib_extension_pattern, panner_modules);
 
-	info << string_compose (_("looking for panners in %1"), panner_search_path().to_string()) << endmsg;
+	DEBUG_TRACE (DEBUG::Panning, string_compose (_("looking for panners in %1"), panner_search_path().to_string()));
 
 	for (vector<sys::path>::iterator i = panner_modules.begin(); i != panner_modules.end(); ++i) {
 		panner_discover ((*i).to_string());
@@ -95,7 +96,7 @@ PannerManager::panner_discover (string path)
 
 		if (i == panner_info.end()) {
 			panner_info.push_back (pinfo);
-			info << string_compose(_("Panner discovered: \"%1\" in %2"), pinfo->descriptor.name, path) << endmsg;
+			DEBUG_TRACE (DEBUG::Panning, string_compose(_("Panner discovered: \"%1\" in %2"), pinfo->descriptor.name, path));
 		}
 	}
 

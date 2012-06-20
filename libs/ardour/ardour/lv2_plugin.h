@@ -31,6 +31,13 @@
 
 namespace ARDOUR {
 
+// a callback function for lilv_state_new_from_instance(). friend of LV2Plugin
+// so we can pass an LV2Plugin* in user_data and access its private members.
+const void* lv2plugin_get_port_value(const char* port_symbol,
+                                     void*       user_data,
+                                     uint32_t*   size,
+                                     uint32_t*   type);
+
 class AudioEngine;
 class Session;
 
@@ -158,6 +165,11 @@ class LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	float*        _freewheel_control_port;  ///< Special input set by ardour
 	float*        _latency_control_port;  ///< Special output set by ardour
 	PBD::ID       _insert_id;
+
+	friend const void* lv2plugin_get_port_value(const char* port_symbol,
+	                                            void*       user_data,
+	                                            uint32_t*   size,
+	                                            uint32_t*   type);
 
 	typedef enum {
 		PORT_INPUT   = 1,

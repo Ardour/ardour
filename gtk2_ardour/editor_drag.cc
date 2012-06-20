@@ -1823,6 +1823,10 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 		_editor->motion_frozen_playlists.clear ();
 		_editor->commit_reversible_command();
 
+		for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
+			i->view->drag_end ();
+		}
+
 	} else {
 		/* no mouse movement */
 		_editor->point_trim (event, adjusted_current_frame (event));

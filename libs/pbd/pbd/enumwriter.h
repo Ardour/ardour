@@ -25,13 +25,26 @@
 #include <string>
 #include <vector>
 #include <exception>
-
+#include <sstream>
 
 namespace PBD {
 
 class unknown_enumeration : public std::exception {
   public:
-	virtual const char *what() const throw() { return "unknown enumerator in PBD::EnumWriter"; }
+	unknown_enumeration (std::string const & e) throw() {
+		std::stringstream s;
+		s << "unknown enumerator " << e << " in PBD::EnumWriter";
+		_message = s.str ();
+	}
+
+	~unknown_enumeration () throw() {}
+	
+	virtual const char *what() const throw() {
+		return _message.c_str();
+	}
+
+private:
+	std::string _message;
 };
 
 class EnumWriter {

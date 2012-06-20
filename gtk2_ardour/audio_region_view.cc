@@ -83,9 +83,9 @@ AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView
 	, end_xfade_out (0)
 	, end_xfade_rect (0)
 	, _amplitude_above_axis(1.0)
-	, _flags(0)
 	, fade_color(0)
 {
+	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&AudioRegionView::parameter_changed, this, _1), gui_context());
 }
 
 AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv, boost::shared_ptr<AudioRegion> r, double spu,
@@ -104,9 +104,9 @@ AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView
 	, end_xfade_out (0)
 	, end_xfade_rect (0)
 	, _amplitude_above_axis(1.0)
-	, _flags(0)
 	, fade_color(0)
 {
+	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&AudioRegionView::parameter_changed, this, _1), gui_context());
 }
 
 AudioRegionView::AudioRegionView (const AudioRegionView& other, boost::shared_ptr<AudioRegion> other_region)
@@ -123,7 +123,6 @@ AudioRegionView::AudioRegionView (const AudioRegionView& other, boost::shared_pt
 	, end_xfade_out (0)
 	, end_xfade_rect (0)
 	, _amplitude_above_axis (other._amplitude_above_axis)
-	, _flags (other._flags)
 	, fade_color(0)
 {
 	Gdk::Color c;
@@ -133,6 +132,8 @@ AudioRegionView::AudioRegionView (const AudioRegionView& other, boost::shared_pt
 	c.set_rgb_p (r/255.0, g/255.0, b/255.0);
 
 	init (c, true);
+
+	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&AudioRegionView::parameter_changed, this, _1), gui_context());
 }
 
 void
@@ -143,17 +144,7 @@ AudioRegionView::init (Gdk::Color const & basic_color, bool wfd)
 
 	RegionView::init (basic_color, wfd);
 
-	XMLNode *node;
-
 	_amplitude_above_axis = 1.0;
-	_flags                = 0;
-
-	if ((node = _region->extra_xml ("GUI")) != 0) {
-		set_flags (node);
-	} else {
-		_flags = WaveformVisible;
-		store_flags ();
-	}
 
 	compute_colors (basic_color);
 
@@ -229,6 +220,10 @@ AudioRegionView::init (Gdk::Color const & basic_color, bool wfd)
 	}
 
 	set_colors ();
+
+	setup_waveform_visibility ();
+	setup_waveform_shape ();
+	setup_waveform_scale ();
 
 	/* XXX sync mark drag? */
 }
@@ -765,8 +760,8 @@ AudioRegionView::set_samples_per_unit (gdouble spu)
 {
 	RegionView::set_samples_per_unit (spu);
 
-	if (_flags & WaveformVisible) {
-		for (uint32_t n=0; n < waves.size(); ++n) {
+	if (Config->get_show_waveforms ()) {
+		for (uint32_t n = 0; n < waves.size(); ++n) {
 			waves[n]->property_samples_per_unit() = spu;
 		}
 	}
@@ -818,25 +813,20 @@ AudioRegionView::set_colors ()
 }
 
 void
-AudioRegionView::set_waveform_visible (bool yn)
+AudioRegionView::setup_waveform_visibility ()
 {
-	if (((_flags & WaveformVisible) != yn)) {
-		if (yn) {
-			for (uint32_t n=0; n < waves.size(); ++n) {
-				/* make sure the zoom level is correct, since we don't update
-				   this when waveforms are hidden.
-				*/
-				waves[n]->property_samples_per_unit() = samples_per_unit;
-				waves[n]->show();
-			}
-			_flags |= WaveformVisible;
-		} else {
-			for (uint32_t n=0; n < waves.size(); ++n) {
-				waves[n]->hide();
-			}
-			_flags &= ~WaveformVisible;
+	if (Config->get_show_waveforms ()) {
+		for (uint32_t n = 0; n < waves.size(); ++n) {
+			/* make sure the zoom level is correct, since we don't update
+			   this when waveforms are hidden.
+			*/
+			waves[n]->property_samples_per_unit() = samples_per_unit;
+			waves[n]->show();
 		}
-		store_flags ();
+	} else {
+		for (uint32_t n = 0; n < waves.size(); ++n) {
+			waves[n]->hide();
+		}
 	}
 }
 
@@ -971,10 +961,10 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 	wave->property_zero_color() = ARDOUR_UI::config()->canvasvar_ZeroLine.get();
 	wave->property_zero_line() = true;
 	wave->property_region_start() = _region->start();
-	wave->property_rectified() = (bool) (_flags & WaveformRectified);
-	wave->property_logscaled() = (bool) (_flags & WaveformLogScaled);
+	wave->property_rectified() = Config->get_waveform_shape() == Rectified;
+	wave->property_logscaled() = Config->get_waveform_scale() == Logarithmic;
 
-	if (!(_flags & WaveformVisible)) {
+	if (!Config->get_show_waveforms ()) {
 		wave->hide();
 	}
 
@@ -1079,90 +1069,18 @@ AudioRegionView::remove_gain_point_event (ArdourCanvas::Item *item, GdkEvent */*
 }
 
 void
-AudioRegionView::store_flags()
+AudioRegionView::setup_waveform_shape ()
 {
-	XMLNode *node = new XMLNode ("GUI");
-
-	node->add_property ("waveform-visible", (_flags & WaveformVisible) ? "yes" : "no");
-	node->add_property ("waveform-rectified", (_flags & WaveformRectified) ? "yes" : "no");
-	node->add_property ("waveform-logscaled", (_flags & WaveformLogScaled) ? "yes" : "no");
-
-	_region->add_extra_xml (*node);
-}
-
-void
-AudioRegionView::set_flags (XMLNode* node)
-{
-	XMLProperty *prop;
-
-	if ((prop = node->property ("waveform-visible")) != 0) {
-		if (string_is_affirmative (prop->value())) {
-			_flags |= WaveformVisible;
-		}
-	}
-
-	if ((prop = node->property ("waveform-rectified")) != 0) {
-		if (string_is_affirmative (prop->value())) {
-			_flags |= WaveformRectified;
-		}
-	}
-
-	if ((prop = node->property ("waveform-logscaled")) != 0) {
-		if (string_is_affirmative (prop->value())) {
-			_flags |= WaveformLogScaled;
-		}
+	for (vector<WaveView *>::iterator wave = waves.begin(); wave != waves.end() ; ++wave) {
+		(*wave)->property_rectified() = Config->get_waveform_shape() == Rectified;
 	}
 }
 
 void
-AudioRegionView::set_waveform_shape (WaveformShape shape)
+AudioRegionView::setup_waveform_scale ()
 {
-	bool yn;
-
-	/* this slightly odd approach is to leave the door open to
-	   other "shapes" such as spectral displays, etc.
-	*/
-
-	switch (shape) {
-	case Rectified:
-		yn = true;
-		break;
-
-	default:
-		yn = false;
-		break;
-	}
-
-	if (yn != (bool) (_flags & WaveformRectified)) {
-		for (vector<WaveView *>::iterator wave = waves.begin(); wave != waves.end() ; ++wave) {
-			(*wave)->property_rectified() = yn;
-		}
-
-		if (yn) {
-			_flags |= WaveformRectified;
-		} else {
-			_flags &= ~WaveformRectified;
-		}
-		store_flags ();
-	}
-}
-
-void
-AudioRegionView::set_waveform_scale (WaveformScale scale)
-{
-	bool yn = (scale == Logarithmic);
-
-	if (yn != (bool) (_flags & WaveformLogScaled)) {
-		for (vector<WaveView *>::iterator wave = waves.begin(); wave != waves.end() ; ++wave) {
-			(*wave)->property_logscaled() = yn;
-		}
-
-		if (yn) {
-			_flags |= WaveformLogScaled;
-		} else {
-			_flags &= ~WaveformLogScaled;
-		}
-		store_flags ();
+	for (vector<WaveView *>::iterator wave = waves.begin(); wave != waves.end() ; ++wave) {
+		(*wave)->property_logscaled() = Config->get_waveform_scale() == Logarithmic;
 	}
 }
 
@@ -1794,7 +1712,7 @@ AudioRegionView::drag_start ()
 		AudioStreamView* av = atav->audio_view();
 		if (av) {
 			/* this will hide our xfades too */
-			av->hide_xfades_with (audio_region());
+			_hidden_xfades = av->hide_xfades_with (audio_region());
 		}
 	}
 }
@@ -1803,5 +1721,22 @@ void
 AudioRegionView::drag_end ()
 {
 	TimeAxisViewItem::drag_end ();
-	/* fades will be redrawn if they changed */
+
+	for (list<AudioRegionView*>::iterator i = _hidden_xfades.begin(); i != _hidden_xfades.end(); ++i) {
+		(*i)->show_xfades ();
+	}
+
+	_hidden_xfades.clear ();
+}
+
+void
+AudioRegionView::parameter_changed (string const & p)
+{
+	if (p == "show-waveforms") {
+		setup_waveform_visibility ();
+	} else if (p == "waveform-scale") {
+		setup_waveform_scale ();
+	} else if (p == "waveform-shape") {
+		setup_waveform_shape ();
+	}
 }

@@ -470,6 +470,14 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void get_pointer_position (double &, double &) const;
 
+	TimeAxisView* stepping_axis_view () {
+		return _stepping_axis_view;
+	}
+	
+	void set_stepping_axis_view (TimeAxisView* v) {
+		_stepping_axis_view = v;
+	}
+
   protected:
 	void map_transport_state ();
 	void map_position_change (framepos_t);
@@ -624,6 +632,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void hide_marker (ArdourCanvas::Item*, GdkEvent*);
 	void clear_marker_display ();
 	void mouse_add_new_marker (framepos_t where, bool is_cd=false, bool is_xrun=false);
+	void mouse_add_new_range (framepos_t);
 	bool choose_new_marker_name(std::string &name);
 	void update_cd_marker_display ();
 	void ensure_cd_marker_updated (LocationMarkers * lam, ARDOUR::Location * location);
@@ -2101,6 +2110,17 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	/** Flag for a bit of a hack wrt control point selection; see set_selected_control_point_from_click */
 	bool _control_point_toggled_on_press;
+
+	/** This is used by TimeAxisView to keep a track of the TimeAxisView that is currently being
+	    stepped in height using Shift-Scrollwheel.  When a scroll event occurs, we do the step on
+	    this _stepping_axis_view if it is non-0 (and we set up this _stepping_axis_view with the
+	    TimeAxisView underneath the mouse if it is 0).  Then Editor resets _stepping_axis_view when
+	    the shift key is released.  In this (hacky) way, pushing shift and moving the scroll wheel
+	    will operate on the same track until shift is released (rather than skipping about to whatever
+	    happens to be underneath the mouse at the time).
+	*/
+	TimeAxisView* _stepping_axis_view;
+	void shift_key_released ();
 
 	friend class Drag;
 	friend class RegionDrag;

@@ -429,10 +429,12 @@ def build(bld):
         testobj              = bld(features = 'cxx cxxprogram')
         testobj.source       = '''
                 test/dummy_lxvst.cc
+                test/test_util.cc
                 test/test_needing_session.cc
                 test/audio_region_test.cc
                 test/test_globals.cc
                 test/audio_region_read_test.cc
+                test/automation_list_property_test.cc
                 test/bbt_test.cc
                 test/tempo_test.cc
                 test/interpolation_test.cc
@@ -443,8 +445,10 @@ def build(bld):
                 test/framepos_minus_beats_test.cc
                 test/playlist_layering_test.cc
                 test/playlist_read_test.cc
+                test/playlist_equivalent_regions_test.cc
                 test/control_surfaces_test.cc
                 test/combine_regions_test.cc
+                test/region_naming_test.cc
                 test/mtdm_test.cc
                 test/testrunner.cc
         '''.split()
@@ -476,21 +480,23 @@ def build(bld):
             elif bld.env['build_target'] == 'x86_64':
                 testobj.source += [ 'sse_functions_64bit.s' ]
 
-        # Profiling
-        profilingobj = bld(features = 'cxx cxxprogram')
-        profilingobj.source = '''
-                test/dummy_lxvst.cc
-                test/profiling/runpc.cc
-        '''.split()
+        # Tester to just load a session
+        session_load_tester = bld(features = 'cxx cxxprogram')
+        session_load_tester.source = '''
+                    test/test_util.cc
+                    test/load_session.cc
+                    test/dummy_lxvst.cc
+            '''.split()
 
-        profilingobj.includes  = obj.includes
-        profilingobj.uselib    = ['CPPUNIT','SIGCPP','JACK','GLIBMM','GTHREAD',
+        session_load_tester.includes  = obj.includes
+        session_load_tester.includes.append ('test')
+        session_load_tester.uselib    = ['CPPUNIT','SIGCPP','JACK','GLIBMM','GTHREAD',
                              'SAMPLERATE','XML','LRDF','COREAUDIO']
-        profilingobj.use       = ['libpbd','libmidipp','libardour']
-        profilingobj.name      = 'libardour-profiling'
-        profilingobj.target    = 'run-profiling'
-        profilingobj.install_path = ''
-        profilingobj.defines      = [
+        session_load_tester.use       = ['libpbd','libmidipp','libardour']
+        session_load_tester.name      = 'libardour-session-load-tester'
+        session_load_tester.target    = 'load-session'
+        session_load_tester.install_path = ''
+        session_load_tester.defines      = [
             'PACKAGE="libardour3profile"',
             'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
             'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
@@ -500,12 +506,47 @@ def build(bld):
                 os.path.normpath(bld.env['LIBDIR']), 'ardour3', 'vamp') + '"'
             ]
         if bld.env['FPU_OPTIMIZATION']:
-            profilingobj.source += [ 'sse_functions_xmm.cc' ]
+            session_load_tester.source += [ 'sse_functions_xmm.cc' ]
             if (bld.env['build_target'] == 'i386'
                 or bld.env['build_target'] == 'i686'):
-                profilingobj.source += [ 'sse_functions.s' ]
+                session_load_tester.source += [ 'sse_functions.s' ]
             elif bld.env['build_target'] == 'x86_64':
-                profilingobj.source += [ 'sse_functions_64bit.s' ]
+                session_load_tester.source += [ 'sse_functions_64bit.s' ]
+
+        # Profiling
+        for p in ['runpc', 'lots_of_regions', 'load_session']:
+            profilingobj = bld(features = 'cxx cxxprogram')
+            profilingobj.source = '''
+                    test/dummy_lxvst.cc
+                    test/test_util.cc
+            '''.split()
+
+            profilingobj.source.append('test/profiling/%s.cc' % p)
+
+            profilingobj.includes  = obj.includes
+            profilingobj.includes.append ('test')
+            profilingobj.uselib    = ['CPPUNIT','SIGCPP','JACK','GLIBMM','GTHREAD',
+                             'SAMPLERATE','XML','LRDF','COREAUDIO']
+            profilingobj.use       = ['libpbd','libmidipp','libardour']
+            profilingobj.name      = 'libardour-profiling'
+            profilingobj.target    = p
+            profilingobj.install_path = ''
+            profilingobj.defines      = [
+                'PACKAGE="libardour3profile"',
+                'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
+                'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
+                'LOCALEDIR="' + os.path.join(
+                    os.path.normpath(bld.env['DATADIR']), 'locale') + '"',
+                'VAMP_DIR="' + os.path.join(
+                    os.path.normpath(bld.env['LIBDIR']), 'ardour3', 'vamp') + '"'
+                ]
+            if bld.env['FPU_OPTIMIZATION']:
+                profilingobj.source += [ 'sse_functions_xmm.cc' ]
+                if (bld.env['build_target'] == 'i386'
+                    or bld.env['build_target'] == 'i686'):
+                    profilingobj.source += [ 'sse_functions.s' ]
+                elif bld.env['build_target'] == 'x86_64':
+                    profilingobj.source += [ 'sse_functions_64bit.s' ]
 
 def shutdown():
     autowaf.shutdown()

@@ -835,7 +835,6 @@ LV2Plugin::find_presets()
 bool
 LV2Plugin::load_preset(PresetRecord r)
 {
-	Plugin::load_preset(r);
 
 	std::map<std::string,uint32_t>::iterator it;
 
@@ -862,18 +861,97 @@ LV2Plugin::load_preset(PresetRecord r)
 	lilv_node_free(lv2_symbol);
 	lilv_node_free(lv2_port);
 
+	Plugin::load_preset(r);
+
 	return true;
 }
 
-std::string
-LV2Plugin::do_save_preset(string /*name*/)
+const void*
+ARDOUR::lv2plugin_get_port_value(const char* port_symbol,
+                                 void*       user_data,
+                                 uint32_t*   size,
+                                 uint32_t*   type)
 {
-	return "";
+	// cerr << "get_port_value(" << port_symbol << ", ...) ... ";
+	LV2Plugin *plugin = (LV2Plugin *) user_data;
+
+	uint32_t index = plugin->port_index(port_symbol);
+	if (index != (uint32_t) -1) {
+		if (plugin->parameter_is_input(index) && plugin->parameter_is_control(index)) {
+			float *value;
+			*size = sizeof(float);
+			*type = plugin->_uri_map.uri_to_id(LV2_ATOM__Float);
+			value = &plugin->_shadow_data[index];
+			// cerr << "index="<< index << ",*size=" << *size << ",*type=" << *type << ",*value=" << *value << endl;
+
+			return value;
+		}
+		// cerr << "port is not input control port! ";
+	}
+
+	// cerr << "returning NULL!" << endl;
+	*size = *type = 0;
+	return NULL;
+}
+
+
+std::string
+LV2Plugin::do_save_preset(string name)
+{
+	// cerr << "LV2Plugin::do_save_preset(" << name << ")" << endl;
+
+	string pset_uri = uri();
+	pset_uri += "#";
+	pset_uri += name;
+
+	string save_dir = Glib::build_filename(
+		Glib::get_home_dir(), 
+		Glib::build_filename(".lv2", "presets") 
+	);
+
+	LilvState* state = lilv_state_new_from_instance(
+		_impl->plugin,
+		_impl->instance,
+		_uri_map.urid_map(),
+		scratch_dir().c_str(),			// file_dir
+		NULL, 					// copy_dir
+		NULL, 					// link_dir
+		save_dir.c_str(),			// save_dir
+		lv2plugin_get_port_value,		// get_value
+		(void*) this,				// user_data
+		LV2_STATE_IS_POD|LV2_STATE_IS_PORTABLE,	// flags
+		_features				// features
+	);
+
+	lilv_state_set_label(state, name.c_str());
+	lilv_state_save(
+		_world.world,		// world
+		_uri_map.urid_map(),	// map
+		_uri_map.urid_unmap(),	// unmap
+		state,			// state
+		pset_uri.c_str(),	// uri
+		save_dir.c_str(),	// dir
+		(name + ".ttl").c_str()	// filename
+
+	);
+
+	lilv_state_free(state);
+	return pset_uri;
 }
 
 void
-LV2Plugin::do_remove_preset(string /*name*/)
-{}
+LV2Plugin::do_remove_preset(string name)
+{
+	string preset_file = Glib::build_filename(
+		Glib::get_home_dir(), 
+		Glib::build_filename(
+			Glib::build_filename(".lv2", "presets"),
+			name + ".ttl"
+		)
+	);
+	unlink(preset_file.c_str());
+
+}
 
 bool
 LV2Plugin::has_editor() const

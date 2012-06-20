@@ -29,12 +29,35 @@
 #include "pbd/undo.h"
 #include "pbd/xml++.h"
 #include "pbd/statefuldestructible.h"
+#include "pbd/properties.h"
 
 #include "ardour/ardour.h"
 
 #include "evoral/ControlList.hpp"
 
 namespace ARDOUR {
+
+class AutomationList;
+
+/** A SharedStatefulProperty for AutomationLists */
+class AutomationListProperty : public PBD::SharedStatefulProperty<AutomationList>
+{
+public:
+	AutomationListProperty (PBD::PropertyDescriptor<boost::shared_ptr<AutomationList> > d, Ptr p)
+		: PBD::SharedStatefulProperty<AutomationList> (d.property_id, p)
+	{}
+
+	AutomationListProperty (PBD::PropertyDescriptor<boost::shared_ptr<AutomationList> > d, Ptr o, Ptr c)
+		: PBD::SharedStatefulProperty<AutomationList> (d.property_id, o, c)
+	{}
+	
+	PBD::PropertyBase* clone () const;
+	
+private:
+	/* No copy-construction nor assignment */
+	AutomationListProperty (AutomationListProperty const &);
+	AutomationListProperty& operator= (AutomationListProperty const &);
+};
 
 class AutomationList : public PBD::StatefulDestructible, public Evoral::ControlList
 {
@@ -81,6 +104,8 @@ class AutomationList : public PBD::StatefulDestructible, public Evoral::ControlL
 	int set_state (const XMLNode &, int version);
 	XMLNode& state (bool full);
 	XMLNode& serialize_events ();
+
+	bool operator!= (const AutomationList &) const;
 
   private:
 	void create_curve_if_necessary ();

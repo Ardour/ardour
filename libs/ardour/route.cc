@@ -26,6 +26,8 @@
 #include <cassert>
 #include <algorithm>
 
+#include <boost/algorithm/string.hpp>
+
 #include "pbd/xml++.h"
 #include "pbd/enumwriter.h"
 #include "pbd/memento_command.h"
@@ -2127,6 +2129,8 @@ Route::set_state (const XMLNode& node, int version)
 		} else if (child->name() == Controllable::xml_node_name && (prop = child->property("name")) != 0) {
 			if (prop->value() == "solo") {
 				_solo_control->set_state (*child, version);
+			} else if (prop->value() == "mute") {
+				_mute_control->set_state (*child, version);
 			}
 
 		} else if (child->name() == X_("RemoteControl")) {
@@ -2164,7 +2168,9 @@ Route::set_state_2X (const XMLNode& node, int version)
 	}
 
 	if ((prop = node.property (X_("flags"))) != 0) {
-		_flags = Flag (string_2_enum (prop->value(), _flags));
+		string f = prop->value ();
+		boost::replace_all (f, "ControlOut", "MonitorOut");
+		_flags = Flag (string_2_enum (f, _flags));
 	} else {
 		_flags = Flag (0);
 	}

@@ -298,7 +298,7 @@ style "treeview_display" = "small_bold_text"
 	base[SELECTED] = { 0, 0.75, 0.75 }
 
 	# row text when in normal state and not a parent
-	text[NORMAL] = { 0.80, 0.80, 0.80 }
+	text[NORMAL] = { 0.20, 0.20, 0.20 }
 
 	# selected row text with window focus
 	text[SELECTED] = { 1.0, 1.0, 1.0 }  

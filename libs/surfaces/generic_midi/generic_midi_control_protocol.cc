@@ -545,13 +545,9 @@ GenericMidiControlProtocol::set_state (const XMLNode& node, int version)
 			
 			if ((prop = (*niter)->property ("id")) != 0) {
 
-                                cerr << "Looking for MIDI Controllable with ID " << prop->value() << endl;
-				
 				ID id = prop->value ();
 				Controllable* c = Controllable::by_id (id);
 
-                                cerr << "\tresult = " << c << endl;
-				
 				if (c) {
 					MIDIControllable* mc = new MIDIControllable (this, *_input_port, *c, false);
                                         

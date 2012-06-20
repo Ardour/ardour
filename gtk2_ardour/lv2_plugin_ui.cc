@@ -268,6 +268,7 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 			_ardour_buttons_box->pack_end (save_button, false, false);
 			_ardour_buttons_box->pack_end (add_button, false, false);
 			_ardour_buttons_box->pack_end (_preset_combo, false, false);
+			_ardour_buttons_box->pack_end (_preset_modified, false, false);
 			_ardour_buttons_box->show_all();
 			pack_start(*_ardour_buttons_box, false, false);
 

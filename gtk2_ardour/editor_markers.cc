@@ -662,6 +662,31 @@ Editor::mouse_add_new_marker (framepos_t where, bool is_cd, bool is_xrun)
 }
 
 void
+Editor::mouse_add_new_range (framepos_t where)
+{
+	if (!_session) {
+		return;
+	}
+
+	/* Make this marker 1/8th of the visible area of the session so that
+	   it's reasonably easy to manipulate after creation.
+	*/
+
+	framepos_t const end = where + current_page_frames() / 8;
+
+	string name;
+	_session->locations()->next_available_name (name, _("range"));
+	Location* loc = new Location (*_session, where, end, name, Location::IsRangeMarker);
+
+	begin_reversible_command (_("new range marker"));
+	XMLNode& before = _session->locations()->get_state ();
+	_session->locations()->add (loc, true);
+	XMLNode& after = _session->locations()->get_state ();
+	_session->add_command (new MementoCommand<Locations> (*_session->locations(), &before, &after));
+	commit_reversible_command ();
+}
+
+void
 Editor::remove_marker (ArdourCanvas::Item& item, GdkEvent*)
 {
 	Marker* marker;

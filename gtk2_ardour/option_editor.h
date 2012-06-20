@@ -192,7 +192,7 @@ private:
 };
 
 
-/** Component which provides the UI to handle an enumerated option using a GTK CheckButton.
+/** Component which provides the UI to handle an enumerated option using a GTK ComboBox.
  *  The template parameter is the enumeration.
  */
 template <class T>
@@ -271,6 +271,37 @@ private:
 	Gtk::ComboBoxText* _combo;
 	std::vector<T> _options;
 };
+
+
+/** Component which provides the UI to handle a boolean option which needs
+ *  to be represented as a ComboBox to be clear to the user.
+ */
+class BoolComboOption : public Option
+{
+public:
+
+	BoolComboOption (
+		std::string const &,
+		std::string const &,
+		std::string const &,
+		std::string const &,
+		sigc::slot<bool>,
+		sigc::slot<bool, bool>
+		);
+
+	void set_state_from_config ();
+	void add_to_page (OptionEditorPage *);
+	void changed ();
+	void set_sensitive (bool);
+
+private:
+
+	sigc::slot<bool> _get;
+	sigc::slot<bool, bool> _set;
+	Gtk::Label* _label;
+	Gtk::ComboBoxText* _combo;
+};
+
 
 
 /** Component which provides the UI to handle an numeric option using a GTK SpinButton */

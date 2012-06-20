@@ -76,6 +76,7 @@ CONFIG_VARIABLE (std::string, keyboard_layout_name, "keyboard-layout-name", "ans
 CONFIG_VARIABLE (bool, automation_follows_regions, "automation-follows-regions", true)
 CONFIG_VARIABLE (bool, region_boundaries_from_selected_tracks, "region-boundaries-from-selected-tracks", true)
 CONFIG_VARIABLE (bool, region_boundaries_from_onscreen_tracks, "region-boundaries-from-onscreen_tracks", true)
+CONFIG_VARIABLE (bool, autoscroll_editor, "autoscroll-editor", true)
 
 /* monitoring, mute, solo etc */
 

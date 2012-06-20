@@ -136,10 +136,7 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	Gtk::ComboBoxText            _custom_device_mode_selector;
 
 	Gtk::CheckMenuItem*          _step_edit_item;
-	Gtk::CheckMenuItem*          _midi_thru_item;
 	Gtk::Menu*                    default_channel_menu;
-
-	void toggle_midi_thru ();
 
 	void change_all_channel_tracks_visibility (bool yn, Evoral::Parameter param);
 	void add_basic_parameter_menu_item (Gtk::Menu_Helpers::MenuList& items, const std::string& label, Evoral::Parameter param);

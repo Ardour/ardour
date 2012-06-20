@@ -159,6 +159,8 @@ class Keyboard : public sigc::trackable, PBD::Stateful
 	    }
 	};
 
+	sigc::signal0<void> ShiftReleased;
+
   protected:
 	static Keyboard* _the_keyboard;
 

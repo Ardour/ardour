@@ -277,8 +277,7 @@ MidiRegionView::init (Gdk::Color const & basic_color, bool wfd)
 	reset_width_dependent_items (_pixel_width);
 
 	group->raise_to_top();
-	group->signal_event().connect(
-		sigc::mem_fun(this, &MidiRegionView::canvas_event), false);
+	group->signal_event().connect (sigc::mem_fun (this, &MidiRegionView::canvas_event), false);
 
 	midi_view()->signal_channel_mode_changed().connect(
 		sigc::mem_fun(this, &MidiRegionView::midi_channel_mode_changed));
@@ -322,7 +321,7 @@ bool
 MidiRegionView::canvas_event(GdkEvent* ev)
 {
 	bool r;
-	
+
 	switch (ev->type) {
 	case GDK_ENTER_NOTIFY:
 	case GDK_LEAVE_NOTIFY:
@@ -714,7 +713,11 @@ MidiRegionView::key_press (GdkEventKey* ev)
 
 		return true;
 
-	} else if (ev->keyval == GDK_Delete && unmodified) {
+	} else if ((ev->keyval == GDK_BackSpace || ev->keyval == GDK_Delete) && unmodified) {
+
+		if (_selection.empty()) {
+			return false;
+		}
 
 		delete_selection();
 		return true;
@@ -925,9 +928,9 @@ MidiRegionView::create_note_at (framepos_t t, double y, double length, bool snap
 }
 
 void
-MidiRegionView::clear_events()
+MidiRegionView::clear_events (bool with_selection_signal)
 {
-	clear_selection();
+	clear_selection (with_selection_signal);
 
 	MidiGhostRegion* gr;
 	for (std::vector<GhostRegion*>::iterator g = ghosts.begin(); g != ghosts.end(); ++g) {
@@ -1316,7 +1319,7 @@ MidiRegionView::~MidiRegionView ()
 	_selection_cleared_connection.disconnect ();
 
 	_selection.clear();
-	clear_events();
+	clear_events (false);
 
 	delete _note_group;
 	delete _note_diff_command;
@@ -1798,7 +1801,7 @@ MidiRegionView::add_canvas_patch_change (MidiModel::PatchChangePtr patch, const 
 	double const height = midi_stream_view()->contents_height();
 
 	boost::shared_ptr<CanvasPatchChange> patch_change = boost::shared_ptr<CanvasPatchChange>(
-		new CanvasPatchChange(*this, *_note_group,
+		new CanvasPatchChange(*this, *group,
 		                      displaytext,
 		                      height,
 		                      x, 1.0,
@@ -3139,18 +3142,24 @@ MidiRegionView::note_left (ArdourCanvas::CanvasNoteEvent*)
 }
 
 void
-MidiRegionView::patch_entered (ArdourCanvas::CanvasPatchChange* ev)
+MidiRegionView::patch_entered (ArdourCanvas::CanvasPatchChange* p)
 {
 	ostringstream s;
 	/* XXX should get patch name if we can */
-	s << _("Bank:") << (ev->patch()->bank() + MIDI_BP_ZERO) << '\n' << _("Program:") << ((int) ev->patch()->program()) + MIDI_BP_ZERO << '\n' << _("Channel:") << ((int) ev->patch()->channel() + 1);
+	s << _("Bank:") << (p->patch()->bank() + MIDI_BP_ZERO) << '\n' 
+	  << _("Program:") << ((int) p->patch()->program()) + MIDI_BP_ZERO << '\n' 
+	  << _("Channel:") << ((int) p->patch()->channel() + 1);
 	show_verbose_cursor (s.str(), 10, 20);
+	p->grab_focus();
 }
 
 void
 MidiRegionView::patch_left (ArdourCanvas::CanvasPatchChange *)
 {
 	trackview.editor().verbose_cursor()->hide ();
+	/* focus will transfer back via the enter-notify event sent to this
+	 * midi region view.
+	 */
 }
 
 void

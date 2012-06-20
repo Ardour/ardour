@@ -39,8 +39,9 @@ PBD::Signal1<void,boost::shared_ptr<Region> > RegionFactory::CheckNewRegion;
 Glib::StaticMutex                             RegionFactory::region_map_lock;
 RegionFactory::RegionMap                      RegionFactory::region_map;
 PBD::ScopedConnectionList*                    RegionFactory::region_list_connections = 0;
-Glib::StaticMutex                             RegionFactory::region_name_map_lock;
-std::map<std::string, uint32_t>               RegionFactory::region_name_map;
+Glib::StaticMutex                             RegionFactory::region_name_maps_mutex;
+std::map<std::string, uint32_t>               RegionFactory::region_name_number_map;
+std::map<std::string, PBD::ID>                RegionFactory::region_name_map;
 RegionFactory::CompoundAssociations           RegionFactory::_compound_associations;
 
 boost::shared_ptr<Region>
@@ -320,7 +321,7 @@ RegionFactory::map_add (boost::shared_ptr<Region> r)
 	r->DropReferences.connect_same_thread (*region_list_connections, boost::bind (&RegionFactory::map_remove, boost::weak_ptr<Region> (r)));
 	r->PropertyChanged.connect_same_thread (*region_list_connections, boost::bind (&RegionFactory::region_changed, _1, boost::weak_ptr<Region> (r)));
 
-	update_region_name_map (r);
+	add_to_region_name_maps (r);
 }
 
 void
@@ -335,6 +336,7 @@ RegionFactory::map_remove (boost::weak_ptr<Region> w)
 	RegionMap::iterator i = region_map.find (r->id());
 
 	if (i != region_map.end()) {
+		remove_from_region_name_map (i->second->name ());
 		region_map.erase (i);
 	}
 }
@@ -384,6 +386,7 @@ RegionFactory::clear_map ()
 		Glib::Mutex::Lock lm (region_map_lock);
 		region_map.clear ();
 		_compound_associations.clear ();
+		region_name_map.clear ();
 	}
 }
 
@@ -418,8 +421,49 @@ RegionFactory::nregions ()
 	return region_map.size ();
 }
 
+/** Add a region to the two region name maps */
 void
-RegionFactory::update_region_name_map (boost::shared_ptr<Region> region)
+RegionFactory::add_to_region_name_maps (boost::shared_ptr<Region> region)
+{
+	update_region_name_number_map (region);
+
+	Glib::Mutex::Lock lm (region_name_maps_mutex);
+	region_name_map[region->name()] = region->id ();
+}
+
+/** Account for a region rename in the two region name maps */
+void
+RegionFactory::rename_in_region_name_maps (boost::shared_ptr<Region> region)
+{
+	update_region_name_number_map (region);
+
+	Glib::Mutex::Lock lm (region_name_maps_mutex);
+	
+	map<string, PBD::ID>::iterator i = region_name_map.begin();
+	while (i != region_name_map.end() && i->second != region->id ()) {
+		++i;
+	}
+
+	/* Erase the entry for the old name and put in a new one */
+	if (i != region_name_map.end()) {
+		region_name_map.erase (i);
+		region_name_map[region->name()] = region->id ();
+	}
+}
+
+/** Remove a region's details from the region_name_map */
+void
+RegionFactory::remove_from_region_name_map (string n)
+{
+	map<string, PBD::ID>::iterator i = region_name_map.find (n);
+	if (i != region_name_map.end ()) {
+		region_name_map.erase (i);
+	}
+}
+
+/** Update a region's entry in the region_name_number_map */
+void
+RegionFactory::update_region_name_number_map (boost::shared_ptr<Region> region)
 {
 	string::size_type const last_period = region->name().find_last_of ('.');
 
@@ -432,8 +476,8 @@ RegionFactory::update_region_name_map (boost::shared_ptr<Region> region)
 		   which is just fine
 		*/
 
-		Glib::Mutex::Lock lm (region_name_map_lock);
-		region_name_map[base] = atoi (number.c_str ());
+		Glib::Mutex::Lock lm (region_name_maps_mutex);
+		region_name_number_map[base] = atoi (number.c_str ());
 	}
 }
 
@@ -446,7 +490,7 @@ RegionFactory::region_changed (PropertyChange const & what_changed, boost::weak_
 	}
 
 	if (what_changed.contains (Properties::name)) {
-		update_region_name_map (r);
+		rename_in_region_name_maps (r);
 	}
 }
 
@@ -482,15 +526,15 @@ RegionFactory::region_name (string& result, string base, bool newlevel)
 		}
 
 		{
-			Glib::Mutex::Lock lm (region_name_map_lock);
+			Glib::Mutex::Lock lm (region_name_maps_mutex);
 
 			map<string,uint32_t>::iterator x;
 
 			result = subbase;
 
-			if ((x = region_name_map.find (subbase)) == region_name_map.end()) {
+			if ((x = region_name_number_map.find (subbase)) == region_name_number_map.end()) {
 				result += ".1";
-				region_name_map[subbase] = 1;
+				region_name_number_map[subbase] = 1;
 			} else {
 				x->second++;
 				snprintf (buf, sizeof (buf), ".%d", x->second);
@@ -555,8 +599,6 @@ RegionFactory::new_region_name (string old)
 
 	while (number < (UINT_MAX-1)) {
 
-		const RegionMap& regions (RegionFactory::regions());
-		RegionMap::const_iterator i;
 		string sbuf;
 
 		number++;
@@ -564,13 +606,7 @@ RegionFactory::new_region_name (string old)
 		snprintf (buf, len, "%s%" PRIu32 "%s", old.substr (0, last_period + 1).c_str(), number, remainder.c_str());
 		sbuf = buf;
 
-		for (i = regions.begin(); i != regions.end(); ++i) {
-			if (i->second->name() == sbuf) {
-				break;
-			}
-		}
-
-		if (i == regions.end()) {
+		if (region_name_map.find (sbuf) == region_name_map.end ()) {
 			break;
 		}
 	}
@@ -607,6 +643,7 @@ RegionFactory::remove_regions_using_source (boost::shared_ptr<Source> src)
 		++j;
 		
 		if (i->second->uses_source (src)) {
+			remove_from_region_name_map (i->second->name ());
 			region_map.erase (i);
                 }
 

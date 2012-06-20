@@ -322,7 +322,7 @@ LocationEditRow::set_location (Location *loc)
 		length_clock.hide();
 	}
 
-	set_clock_sensitivity ();
+	set_clock_editable_status ();
 
 	--i_am_the_modifier;
 
@@ -632,7 +632,7 @@ LocationEditRow::location_changed (ARDOUR::Location*)
 	end_clock.set (location->end());
 	length_clock.set (location->length());
 
-	set_clock_sensitivity ();
+	set_clock_editable_status ();
 
 	i_am_the_modifier--;
 
@@ -665,7 +665,7 @@ LocationEditRow::lock_changed (ARDOUR::Location*)
 
 	lock_check_button.set_active (location->locked());
 
-	set_clock_sensitivity ();
+	set_clock_editable_status ();
 
 	i_am_the_modifier--;
 }
@@ -691,11 +691,11 @@ LocationEditRow::focus_name()
 }
 
 void
-LocationEditRow::set_clock_sensitivity ()
+LocationEditRow::set_clock_editable_status ()
 {
-	start_clock.set_sensitive (!location->locked());
-	end_clock.set_sensitive (!location->locked());
-	length_clock.set_sensitive (!location->locked());
+	start_clock.set_editable (!location->locked());
+	end_clock.set_editable (!location->locked());
+	length_clock.set_editable (!location->locked());
 }
 
 /*------------------------------------------------------------------------*/

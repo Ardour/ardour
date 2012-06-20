@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<test>
+  <FadeIn>
+    <from>
+      <AutomationList automation-id="fadein" id="164" default="0" min-yval="0" max-yval="2" interpolation-style="Linear" state="Off" style="Absolute"/>
+    </from>
+    <to>
+      <AutomationList automation-id="fadein" id="163" default="0" min-yval="0" max-yval="2" interpolation-style="Linear" state="Off" style="Absolute">
+        <events>1 2
+3 4
+</events>
+      </AutomationList>
+    </to>
+  </FadeIn>
+</test>

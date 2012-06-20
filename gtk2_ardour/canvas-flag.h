@@ -28,8 +28,6 @@ public:
 
 	virtual ~CanvasFlag();
 
-	virtual bool on_event(GdkEvent* ev);
-
 	virtual void set_text(const std::string& a_text);
 	virtual void set_height (double);
 
