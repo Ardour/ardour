@@ -871,10 +871,12 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void destroy ();
 
 	enum SubState {
-		PendingDeclickIn   = 0x1,
-		PendingDeclickOut  = 0x2,
-		StopPendingCapture = 0x4,
-		PendingLocate      = 0x20,
+		PendingDeclickIn      = 0x1,  ///< pending de-click fade-in for start
+		PendingDeclickOut     = 0x2,  ///< pending de-click fade-out for stop
+		StopPendingCapture    = 0x4,
+		PendingLoopDeclickIn  = 0x8,  ///< pending de-click fade-in at the start of a loop
+		PendingLoopDeclickOut = 0x10, ///< pending de-click fade-out at the end of a loop
+		PendingLocate         = 0x20,
 	};
 
 	/* stuff used in process() should be close together to
@@ -999,7 +1001,16 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 			transport_sub_state &= ~PendingDeclickIn;
 			return 1;
 		} else if (transport_sub_state & PendingDeclickOut) {
+			/* XXX: not entirely sure why we don't clear this */
 			return -1;
+		} else if (transport_sub_state & PendingLoopDeclickOut) {
+			/* Return the declick out first ... */
+			transport_sub_state &= ~PendingLoopDeclickOut;
+			return -1;
+		} else if (transport_sub_state & PendingLoopDeclickIn) {
+			/* ... then the declick in on the next call */
+			transport_sub_state &= ~PendingLoopDeclickIn;
+			return 1;
 		} else {
 			return 0;
 		}
@@ -1089,6 +1100,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	PBD::ScopedConnectionList loop_connections;
 	void             auto_loop_changed (Location *);
+	void             auto_loop_declick_range (Location *, framepos_t &, framepos_t &);
 
 	void first_stage_init (std::string path, std::string snapshot_name);
 	int  second_stage_init ();

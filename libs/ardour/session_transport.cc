@@ -662,7 +662,7 @@ Session::check_declick_out ()
 
 	/* this is called after a process() iteration. if PendingDeclickOut was set,
 	   it means that we were waiting to declick the output (which has just been
-	   done) before doing something else. this is where we do that "something else".
+	   done) before maybe doing something else. this is where we do that "something else".
 
 	   note: called from the audio thread.
 	*/
@@ -676,6 +676,10 @@ Session::check_declick_out ()
 			stop_transport (pending_abort);
 			transport_sub_state &= ~(PendingDeclickOut|PendingLocate);
 		}
+
+	} else if (transport_sub_state & PendingLoopDeclickOut) {
+		/* Nothing else to do here; we've declicked, and the loop event will be along shortly */
+		transport_sub_state &= ~PendingLoopDeclickOut;
 	}
 }
 
@@ -684,6 +688,7 @@ Session::unset_play_loop ()
 {
 	play_loop = false;
 	clear_events (SessionEvent::AutoLoop);
+	clear_events (SessionEvent::AutoLoopDeclick);
 
 	// set all tracks to NOT use internal looping
 	boost::shared_ptr<RouteList> rl = routes.reader ();
@@ -744,10 +749,16 @@ Session::set_play_loop (bool yn)
 				}
 			}
 
-			/* put the loop event into the event list */
+			/* Put the delick and loop events in into the event list.  The declick event will
+			   cause a de-clicking fade-out just before the end of the loop, and it will also result
+			   in a fade-in when the loop restarts.  The AutoLoop event will peform the actual loop.
+			*/
 
-			SessionEvent* event = new SessionEvent (SessionEvent::AutoLoop, SessionEvent::Replace, loc->end(), loc->start(), 0.0f);
-			merge_event (event);
+			framepos_t dcp;
+			framecnt_t dcl;
+			auto_loop_declick_range (loc, dcp, dcl);
+			merge_event (new SessionEvent (SessionEvent::AutoLoopDeclick, SessionEvent::Replace, dcp, dcl, 0.0f));
+			merge_event (new SessionEvent (SessionEvent::AutoLoop, SessionEvent::Replace, loc->end(), loc->start(), 0.0f));
 
 			/* locate to start of loop and roll. If doing seamless loop, force a
 			   locate+buffer refill even if we are positioned there already.
@@ -841,8 +852,11 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
 		return;
 	}
 
-	if (_transport_speed) {
-		/* schedule a declick. we'll be called again when its done */
+	if (_transport_speed && !with_loop) {
+		/* Schedule a declick.  We'll be called again when its done.
+		   We only do it this way for ordinary locates, not those
+		   due to loops.
+		*/
 
 		if (!(transport_sub_state & PendingDeclickOut)) {
 			transport_sub_state |= (PendingDeclickOut|PendingLocate);

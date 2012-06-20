@@ -929,10 +929,25 @@ Session::auto_punch_changed (Location* location)
 	replace_event (SessionEvent::PunchOut, when_to_stop);
 }
 
+/** @param loc A loop location.
+ *  @param pos Filled in with the start time of the required fade-out (in session frames).
+ *  @param length Filled in with the length of the required fade-out.
+ */
+void
+Session::auto_loop_declick_range (Location* loc, framepos_t & pos, framepos_t & length)
+{
+	pos = max (loc->start(), loc->end() - 64);
+	length = loc->end() - pos;
+}
+
 void
 Session::auto_loop_changed (Location* location)
 {
 	replace_event (SessionEvent::AutoLoop, location->end(), location->start());
+	framepos_t dcp;
+	framecnt_t dcl;
+	auto_loop_declick_range (location, dcp, dcl);
+	replace_event (SessionEvent::AutoLoopDeclick, dcp, dcl);
 
 	if (transport_rolling() && play_loop) {
 
@@ -1010,6 +1025,10 @@ Session::set_auto_loop_location (Location* location)
 		loop_connections.drop_connections ();
 		existing->set_auto_loop (false, this);
 		remove_event (existing->end(), SessionEvent::AutoLoop);
+		framepos_t dcp;
+		framecnt_t dcl;
+		auto_loop_declick_range (existing, dcp, dcl);
+		remove_event (dcp, SessionEvent::AutoLoopDeclick);
 		auto_loop_location_changed (0);
 	}
 
