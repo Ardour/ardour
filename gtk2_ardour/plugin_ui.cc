@@ -100,8 +100,6 @@ PluginUIWindow::PluginUIWindow (
 	Label* label = manage (new Label());
 	label->set_markup ("<b>THIS IS THE PLUGIN UI</b>");
 
-	std::cout << "SHOW UI " << insert->plugin()->unique_id()
-	          << " editor: " << editor << std::endl;
 	if (editor && insert->plugin()->has_editor()) {
 		switch (insert->type()) {
 		case ARDOUR::Windows_VST:
