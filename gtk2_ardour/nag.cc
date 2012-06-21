@@ -1,7 +1,9 @@
+#include <boost/scoped_ptr.hpp>
 #include <fstream>
 #include <gtkmm/stock.h>
 
 #include <ardour/ardour.h>
+#include <pbd/epa.h>
 
 #include "nag.h"
 #include "i18n.h"
@@ -10,6 +12,7 @@ using namespace ARDOUR;
 using namespace std;
 using namespace Glib;
 using namespace Gtk;
+using namespace PBD;
 
 NagScreen::NagScreen (std::string context, bool maybe_sub)
 	: ArdourDialog (string_compose (_("Support %1 Development"), PROGRAM_NAME), true)
@@ -187,19 +190,26 @@ NagScreen::offer_to_subscribe ()
 bool
 NagScreen::open_uri (const char* uri)
 {
-#ifdef HAVE_GTK_OPEN_URI
-	GError* err;
-	return gtk_open_uri (0, uri, GDK_CURRENT_TIME, &err);
-#else
 #ifndef __APPLE__
+	EnvironmentalProtectionAgency* global_epa = EnvironmentalProtectionAgency::get_global_epa ();
+	boost::scoped_ptr<EnvironmentalProtectionAgency> current_epa;
+
+	/* revert all environment settings back to whatever they were when ardour started
+	 */
+
+	if (global_epa) {
+			current_epa.reset (new EnvironmentalProtectionAgency(true)); /* will restore settings when we leave scope */
+			global_epa->restore ();
+	}
+
 	std::string command = "xdg-open ";
 	command += uri;
-	spawn_command_line_async (command);
+	command += " &";
+	system (command.c_str());
 
 	return true;
 #else
 	extern bool cocoa_open_url (const char*);
 	return cocoa_open_url (uri);
-#endif
 #endif
 }

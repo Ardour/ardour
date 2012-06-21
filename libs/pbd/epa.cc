@@ -124,7 +124,29 @@ EnvironmentalProtectionAgency::save ()
 void
 EnvironmentalProtectionAgency::restore () const
 {
+		clear ();
+
         for (map<string,string>::const_iterator i = e.begin(); i != e.end(); ++i) {
                 setenv (i->first.c_str(), i->second.c_str(), 1);
         }
-}                         
+} 
+
+void
+EnvironmentalProtectionAgency::clear () const
+{
+        char** the_environ = environ;
+
+        for (size_t i = 0; the_environ[i]; ++i) {
+			
+                string estring = the_environ[i];
+                string::size_type equal = estring.find_first_of ('=');
+			
+                if (equal == string::npos) {
+                        /* say what? an environ value without = ? */
+                        continue;
+                }
+			
+                string before = estring.substr (0, equal);
+                unsetenv(before.c_str());
+        }
+}                        
