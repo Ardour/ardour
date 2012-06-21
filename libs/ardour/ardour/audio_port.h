@@ -49,9 +49,12 @@ class AudioPort : public Port
 	friend class AudioEngine;
 
 	AudioPort (std::string const &, Flags);
+        /* special access for engine only */
+        Sample* engine_get_whole_audio_buffer ();
 
   private:
 	AudioBuffer* _buffer;
+        bool         _buf_valid; 
 };
 
 } // namespace ARDOUR

@@ -268,6 +268,9 @@ private:
 	Glib::Mutex               _process_lock;
 	Glib::Cond                 session_removed;
 	bool                       session_remove_pending;
+        frameoffset_t              session_removal_countdown;
+        gain_t                     session_removal_gain;
+        gain_t                     session_removal_gain_step;
 	bool                      _running;
 	bool                      _has_run;
 	mutable framecnt_t        _buffer_size;
@@ -283,6 +286,8 @@ private:
 	bool                      _pre_freewheel_mmc_enabled;
 	int                       _usecs_per_cycle;
 	bool                       port_remove_in_progress;
+	Glib::Thread*              m_meter_thread;
+	ProcessThread*            _main_thread;
 
 	SerializedRCUManager<Ports> ports;
 
@@ -331,10 +336,7 @@ private:
 	void start_metering_thread ();
 	void stop_metering_thread ();
 
-	Glib::Thread*    m_meter_thread;
 	static gint      m_meter_exit;
-
-	ProcessThread* _main_thread;
 
 	struct ThreadData {
 		AudioEngine* engine;

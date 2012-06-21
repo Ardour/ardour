@@ -755,11 +755,6 @@ ARDOUR_UI::finish()
 	if (_session) {
 		int tries = 0;
 
-		if (_session->transport_rolling() && (++tries < 8)) {
-			_session->request_stop (false, true);
-			usleep (10000);
-		}
-
 		if (_session->dirty()) {
 			vector<string> actions;
 			actions.push_back (_("Don't quit"));
