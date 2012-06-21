@@ -479,6 +479,21 @@ AudioEngine::process_callback (pframes_t nframes)
 		/* perform the actual session removal */
 		_session = 0;
 		session_remove_pending = false;
+
+		/* pump one cycle of silence into the ports
+		   before the session tears them all down
+		   (asynchronously).
+		*/
+
+		boost::shared_ptr<Ports> p = ports.reader();
+		
+		for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
+			
+			if (i->second->sends_output()) {
+				i->second->get_buffer (nframes).silence (nframes);
+			}
+		}
+
 		session_removed.signal();
 	}
 
@@ -486,15 +501,6 @@ AudioEngine::process_callback (pframes_t nframes)
 		if (!_freewheeling) {
 			MIDI::Manager::instance()->cycle_start(nframes);
 			MIDI::Manager::instance()->cycle_end();
-
-			boost::shared_ptr<Ports> p = ports.reader();
-			
-			for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
-				
-				if (i->second->sends_output()) {
-					i->second->get_buffer (nframes).silence (nframes);
-				}
-			}
 		}
 
 		_processed_frames = next_processed_frames;

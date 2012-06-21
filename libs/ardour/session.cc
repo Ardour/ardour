@@ -234,6 +234,12 @@ Session::destroy ()
 
 	_engine.remove_session ();
 
+	/* deregister all ports - there will be no process or any other
+	 * callbacks from the engine any more.
+	 */
+
+	Port::PortDrop (); /* EMIT SIGNAL */
+
 	/* clear history so that no references to objects are held any more */
 
 	_history.clear ();
