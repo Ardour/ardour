@@ -2,9 +2,11 @@
 #include "libpbd-config.h"
 #endif
 
+#include <boost/scoped_ptr.hpp>
 #include <string>
 #include <glibmm/spawn.h>
 
+#include "pbd/epa.h"
 #include "pbd/openuri.h"
 
 bool
