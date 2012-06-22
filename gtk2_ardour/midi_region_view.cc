@@ -680,7 +680,11 @@ MidiRegionView::scroll (GdkEventScroll* ev)
 		change_velocities (true, fine, false, together);
 	} else if (ev->direction == GDK_SCROLL_DOWN) {
 		change_velocities (false, fine, false, together);
+	} else {
+		/* left, right: we don't use them */
+		return false;
 	}
+
 	return true;
 }
 
