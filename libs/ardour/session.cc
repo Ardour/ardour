@@ -1595,7 +1595,8 @@ Session::count_existing_track_channels (ChanCount& in, ChanCount& out)
  *  @param instrument plugin info for the instrument to insert pre-fader, if any
  */
 list<boost::shared_ptr<MidiTrack> >
-Session::new_midi_track (boost::shared_ptr<PluginInfo> instrument, TrackMode mode, RouteGroup* route_group, uint32_t how_many, string name_template)
+Session::new_midi_track (const ChanCount& input, const ChanCount& output, boost::shared_ptr<PluginInfo> instrument, 
+			 TrackMode mode, RouteGroup* route_group, uint32_t how_many, string name_template)
 {
 	char track_name[32];
 	uint32_t track_id = 0;
@@ -1603,6 +1604,8 @@ Session::new_midi_track (boost::shared_ptr<PluginInfo> instrument, TrackMode mod
 	RouteList new_routes;
 	list<boost::shared_ptr<MidiTrack> > ret;
 	uint32_t control_id;
+
+	cerr << "Adding MIDI track with in = " << input << " out = " << output << endl;
 
 	control_id = next_control_id ();
 
@@ -1630,13 +1633,13 @@ Session::new_midi_track (boost::shared_ptr<PluginInfo> instrument, TrackMode mod
 #endif
 			{
 				Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
-				if (track->input()->ensure_io (ChanCount(DataType::MIDI, 1), false, this)) {
-					error << "cannot configure 1 in/1 out configuration for new midi track" << endmsg;
+				if (track->input()->ensure_io (input, false, this)) {
+					error << "cannot configure " << input << " out configuration for new midi track" << endmsg;	
 					goto failed;
 				}
 
-				if (track->output()->ensure_io (ChanCount(DataType::MIDI, 1), false, this)) {
-					error << "cannot configure 1 in/1 out configuration for new midi track" << endmsg;
+				if (track->output()->ensure_io (output, false, this)) {
+					error << "cannot configure " << output << " out configuration for new midi track" << endmsg;
 					goto failed;
 				}
 			}

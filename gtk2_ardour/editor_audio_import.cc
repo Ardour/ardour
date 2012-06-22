@@ -934,7 +934,10 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region, uint32_t 
 
 				existing_track = at.front();
 			} else if (mr) {
-				list<boost::shared_ptr<MidiTrack> > mt (_session->new_midi_track (boost::shared_ptr<PluginInfo>(), Normal, 0, 1));
+				list<boost::shared_ptr<MidiTrack> > mt (_session->new_midi_track (ChanCount (DataType::MIDI, 1),
+												  ChanCount (DataType::MIDI, 1),
+												  boost::shared_ptr<PluginInfo>(), 
+												  Normal, 0, 1));
 
 				if (mt.empty()) {
 					return -1;
