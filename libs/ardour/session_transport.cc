@@ -103,10 +103,11 @@ Session::request_sync_source (Slave* new_slave)
 }
 
 void
-Session::request_transport_speed (double speed)
+Session::request_transport_speed (double speed, bool as_default)
 {
 	SessionEvent* ev = new SessionEvent (SessionEvent::SetTransportSpeed, SessionEvent::Add, SessionEvent::Immediate, 0, speed);
-	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request transport speed = %1\n", speed));
+	ev->third_yes_or_no = true;
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request transport speed = %1 as default = %2\n", speed, as_default));
 	queue_event (ev);
 }
 
@@ -115,13 +116,13 @@ Session::request_transport_speed (double speed)
  *  be used by callers who are varying transport speed but don't ever want to stop it.
  */
 void
-Session::request_transport_speed_nonzero (double speed)
+Session::request_transport_speed_nonzero (double speed, bool as_default)
 {
 	if (speed == 0) {
 		speed = DBL_EPSILON;
 	}
 
-	request_transport_speed (speed);
+	request_transport_speed (speed, as_default);
 }
 
 void
@@ -995,10 +996,10 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
  *  @param speed New speed
  */
 void
-Session::set_transport_speed (double speed, bool abort, bool clear_state)
+Session::set_transport_speed (double speed, bool abort, bool clear_state, bool as_default)
 {
-	DEBUG_TRACE (DEBUG::Transport, string_compose ("@ %5 Set transport speed to %1, abort = %2 clear_state = %3, current = %4\n", 
-						       speed, abort, clear_state, _transport_speed, _transport_frame));
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("@ %5 Set transport speed to %1, abort = %2 clear_state = %3, current = %4 as_default %5\n", 
+						       speed, abort, clear_state, _transport_speed, _transport_frame, as_default));
 
 	if (_transport_speed == speed) {
 		return;
@@ -1097,6 +1098,10 @@ Session::set_transport_speed (double speed, bool abort, bool clear_state)
 
 		_last_transport_speed = _transport_speed;
 		_transport_speed = speed;
+
+		if (as_default) {
+			_default_transport_speed = speed;
+		}
 
 		boost::shared_ptr<RouteList> rl = routes.reader();
 		for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
@@ -1213,7 +1218,7 @@ Session::start_transport ()
 
 	transport_sub_state |= PendingDeclickIn;
 
-	_transport_speed = 1.0;
+	_transport_speed = _default_transport_speed;
 	_target_transport_speed = _transport_speed;
 
 	boost::shared_ptr<RouteList> rl = routes.reader();

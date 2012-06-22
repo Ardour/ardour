@@ -329,8 +329,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void goto_start ();
 	void use_rf_shuttle_speed ();
 	void allow_auto_play (bool yn);
-        void request_transport_speed (double speed);
-	void request_transport_speed_nonzero (double);
+        void request_transport_speed (double speed, bool as_default = false);
+        void request_transport_speed_nonzero (double, bool as_default = false);
 	void request_overwrite_buffer (Track *);
 	void adjust_playback_buffering();
 	void adjust_capture_buffering();
@@ -905,6 +905,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	// varispeed playback
 	double                  _transport_speed;
+	double                  _default_transport_speed;
 	double                  _last_transport_speed;
 	double                  _target_transport_speed;
 	CubicInterpolation       interpolation;
@@ -1210,7 +1211,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void start_locate (framepos_t, bool with_roll, bool with_flush, bool with_loop=false, bool force=false);
 	void force_locate (framepos_t frame, bool with_roll = false);
 	void set_track_speed (Track *, double speed);
-        void set_transport_speed (double speed, bool abort = false, bool clear_state = false);
+        void set_transport_speed (double speed, bool abort = false, bool clear_state = false, bool as_default = false);
 	void stop_transport (bool abort = false, bool clear_state = false);
 	void start_transport ();
 	void realtime_stop (bool abort, bool clear_state);

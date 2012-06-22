@@ -1065,7 +1065,7 @@ Session::process_event (SessionEvent* ev)
 
 
 	case SessionEvent::SetTransportSpeed:
-		set_transport_speed (ev->speed, ev->yes_or_no, ev->second_yes_or_no);
+		set_transport_speed (ev->speed, ev->yes_or_no, ev->second_yes_or_no, ev->third_yes_or_no);
 		break;
 
 	case SessionEvent::PunchIn:
