@@ -929,7 +929,7 @@ Session::load_state (string snapshot_name)
 		}
 	}
 
-	if (Stateful::loading_state_version < CURRENT_SESSION_FILE_VERSION) {
+	if (Stateful::loading_state_version < CURRENT_SESSION_FILE_VERSION && _writable) {
 
 		sys::path backup_path(_session_dir->root_path());
 
