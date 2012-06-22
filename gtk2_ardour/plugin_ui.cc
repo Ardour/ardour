@@ -558,6 +558,15 @@ PlugUIBase::latency_button_clicked ()
 	if (!latency_gui) {
 		latency_gui = new LatencyGUI (*(insert.get()), insert->session().frame_rate(), insert->session().get_block_size());
 		latency_dialog = new ArdourWindow (_("Edit Latency"));
+		latency_dialog->set_position (WIN_POS_MOUSE);
+		/* use both keep-above and transient for to try cover as many
+		   different WM's as possible.
+		*/
+		latency_dialog->set_keep_above (true);
+		Window* win = dynamic_cast<Window*> (bypass_button.get_toplevel ());
+		if (win) {
+			latency_dialog->set_transient_for (*win);
+		}
 		latency_dialog->add (*latency_gui);
 		latency_dialog->signal_hide().connect (sigc::mem_fun (*this, &PlugUIBase::set_latency_label));
 	}
