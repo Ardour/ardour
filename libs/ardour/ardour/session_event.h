@@ -85,7 +85,7 @@ public:
 
 	boost::shared_ptr<Region> region;
 
-	SessionEvent (Type t, Action a, framepos_t when, framepos_t where, double spd, bool yn = false, bool yn2 = false)
+    SessionEvent (Type t, Action a, framepos_t when, framepos_t where, double spd, bool yn = false, bool yn2 = false)
 		: type (t)
 		, action (a)
 		, action_frame (when)

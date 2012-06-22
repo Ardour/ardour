@@ -648,6 +648,9 @@ ShuttleControl::parameter_changed (std::string p)
 					if (_session->transport_speed() == 1.0) {
 						queue_draw ();
 					} else {
+						/* reset current speed and
+						   revert to 1.0 as the default
+						*/
 						_session->request_transport_speed (1.0);
 						/* redraw when speed changes */
 					}

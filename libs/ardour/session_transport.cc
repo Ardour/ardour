@@ -760,8 +760,9 @@ Session::set_play_loop (bool yn)
 			merge_event (new SessionEvent (SessionEvent::AutoLoopDeclick, SessionEvent::Replace, dcp, dcl, 0.0f));
 			merge_event (new SessionEvent (SessionEvent::AutoLoop, SessionEvent::Replace, loc->end(), loc->start(), 0.0f));
 
-			/* locate to start of loop and roll. If doing seamless loop, force a
-			   locate+buffer refill even if we are positioned there already.
+			/* locate to start of loop and roll. 
+
+			   args: positition, roll=true, flush=true, with_loop=false, force buffer refill if seamless looping
 			*/
 
 			start_locate (loc->start(), true, true, false, Config->get_seamless_loop());
@@ -837,13 +838,21 @@ Session::micro_locate (framecnt_t distance)
 
 /** @param with_mmc true to send a MMC locate command when the locate is done */
 void
-Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool with_loop, bool force, bool with_mmc)
+Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool for_seamless_loop, bool force, bool with_mmc)
 {
-	if (actively_recording() && !with_loop) {
+	/* Locates for seamless looping are fairly different from other
+	 * locates. They assume that the diskstream buffers for each track
+	 * already have the correct data in them, and thus there is no need to
+	 * actually tell the tracks to locate. What does need to be done,
+	 * though, is all the housekeeping that is associated with non-linear
+	 * changes in the value of _transport_frame. 
+	 */
+	 
+	if (actively_recording() && !for_seamless_loop) {
 		return;
 	}
 
-	if (!force && _transport_frame == target_frame && !loop_changing && !with_loop) {
+	if (!force && _transport_frame == target_frame && !loop_changing && !for_seamless_loop) {
 		if (with_roll) {
 			set_transport_speed (1.0, false);
 		}
@@ -852,10 +861,10 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
 		return;
 	}
 
-	if (_transport_speed && !with_loop) {
+	if (_transport_speed && !for_seamless_loop) {
 		/* Schedule a declick.  We'll be called again when its done.
 		   We only do it this way for ordinary locates, not those
-		   due to loops.
+		   due to **seamless** loops.
 		*/
 
 		if (!(transport_sub_state & PendingDeclickOut)) {
@@ -883,18 +892,21 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
          *
 	 */
 
-	if (transport_rolling() && (!auto_play_legal || !config.get_auto_play()) && !with_roll && !(synced_to_jack() && play_loop)) {
+	bool transport_was_stopped = !transport_rolling();
+
+	if (transport_was_stopped && (!auto_play_legal || !config.get_auto_play()) && !with_roll && !(synced_to_jack() && play_loop)) {
 		realtime_stop (false, true); // XXX paul - check if the 2nd arg is really correct
+		transport_was_stopped = true;
 	} else {
 		/* otherwise tell the world that we located */
 		realtime_locate ();
 	}
 
-	if (force || !with_loop || loop_changing) {
+	if (force || !for_seamless_loop || loop_changing) {
 
 		PostTransportWork todo = PostTransportLocate;
 
-		if (with_roll) {
+		if (with_roll && transport_was_stopped) {
 			todo = PostTransportWork (todo | PostTransportRoll);
 		}
 
@@ -931,27 +943,39 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
 
 	/* cancel looped playback if transport pos outside of loop range */
 	if (play_loop) {
+
 		Location* al = _locations->auto_loop_location();
 
-		if (al && (_transport_frame < al->start() || _transport_frame > al->end())) {
-			// cancel looping directly, this is called from event handling context
-			set_play_loop (false);
-		}
-		else if (al && _transport_frame == al->start()) {
-			if (with_loop) {
-				// this is only necessary for seamless looping
+		if (al) {
+			if (_transport_frame < al->start() || _transport_frame > al->end()) {
 
-				boost::shared_ptr<RouteList> rl = routes.reader();
-				for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-					boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
-					if (tr && tr->record_enabled ()) {
-						// tell it we've looped, so it can deal with the record state
-						tr->transport_looped(_transport_frame);
+				// located outside the loop: cancel looping directly, this is called from event handling context
+
+				set_play_loop (false);
+				
+			} else if (_transport_frame == al->start()) {
+
+				// located to start of loop - this is looping, basically
+
+				if (for_seamless_loop) {
+
+					// this is only necessary for seamless looping
+					
+					boost::shared_ptr<RouteList> rl = routes.reader();
+
+					for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+						boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+
+						if (tr && tr->record_enabled ()) {
+							// tell it we've looped, so it can deal with the record state
+							tr->transport_looped (_transport_frame);
+						}
 					}
 				}
+
+				have_looped = true;
+				TransportLooped(); // EMIT SIGNAL
 			}
-			have_looped = true;
-			TransportLooped(); // EMIT SIGNAL
 		}
 	}
 
@@ -1190,7 +1214,7 @@ Session::start_transport ()
 	transport_sub_state |= PendingDeclickIn;
 
 	_transport_speed = 1.0;
-	_target_transport_speed = 1.0;
+	_target_transport_speed = _transport_speed;
 
 	boost::shared_ptr<RouteList> rl = routes.reader();
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
@@ -1237,7 +1261,6 @@ Session::post_transport ()
 
 		if (((!config.get_external_sync() && (auto_play_legal && config.get_auto_play())) && !_exporting) || (ptw & PostTransportRoll)) {
 			start_transport ();
-
 		} else {
 			transport_sub_state = 0;
 		}

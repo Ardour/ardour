@@ -1015,6 +1015,9 @@ Session::process_event (SessionEvent* ev)
 
 	case SessionEvent::AutoLoop:
 		if (play_loop) {
+			/* roll after locate, do not flush, set "with loop"
+			   true only if we are seamless looping
+			*/
 			start_locate (ev->target_frame, true, false, Config->get_seamless_loop());
 		}
 		remove = false;
@@ -1034,10 +1037,10 @@ Session::process_event (SessionEvent* ev)
 
 	case SessionEvent::Locate:
 		if (ev->yes_or_no) {
-			// cerr << "forced locate to " << ev->target_frame << endl;
+			/* args: do not roll after locate, do flush, not with loop */
 			locate (ev->target_frame, false, true, false);
 		} else {
-			// cerr << "soft locate to " << ev->target_frame << endl;
+			/* args: do not roll after locate, do flush, not with loop */
 			start_locate (ev->target_frame, false, true, false);
 		}
 		_send_timecode_update = true;
@@ -1045,10 +1048,10 @@ Session::process_event (SessionEvent* ev)
 
 	case SessionEvent::LocateRoll:
 		if (ev->yes_or_no) {
-			// cerr << "forced locate to+roll " << ev->target_frame << endl;
+			/* args: roll after locate, do flush, not with loop */
 			locate (ev->target_frame, true, true, false);
 		} else {
-			// cerr << "soft locate to+roll " << ev->target_frame << endl;
+			/* args: roll after locate, do flush, not with loop */
 			start_locate (ev->target_frame, true, true, false);
 		}
 		_send_timecode_update = true;
@@ -1101,6 +1104,7 @@ Session::process_event (SessionEvent* ev)
 		break;
 
 	case SessionEvent::RangeLocate:
+		/* args: roll after locate, do flush, not with loop */
 		start_locate (ev->target_frame, true, true, false);
 		remove = false;
 		del = false;
