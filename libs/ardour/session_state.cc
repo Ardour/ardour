@@ -813,7 +813,10 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 
 	if (!tree.write (tmp_path.to_string())) {
 		error << string_compose (_("state could not be saved to %1"), tmp_path.to_string()) << endmsg;
-		sys::remove (tmp_path);
+		if (g_remove (tmp_path.to_string().c_str()) != 0) {
+			error << string_compose(_("Could not remove temporary state file at path \"%1\" (%2)"),
+					tmp_path.to_string(), g_strerror (errno)) << endmsg;
+		}
 		return -1;
 
 	} else {
@@ -821,7 +824,10 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 		if (::rename (tmp_path.to_string().c_str(), xml_path.c_str()) != 0) {
 			error << string_compose (_("could not rename temporary session file %1 to %2"),
 					tmp_path.to_string(), xml_path) << endmsg;
-			sys::remove (tmp_path);
+			if (g_remove (tmp_path.to_string().c_str()) != 0) {
+				error << string_compose(_("Could not remove temporary state file at path \"%1\" (%2)"),
+						tmp_path.to_string(), g_strerror (errno)) << endmsg;
+			}
 			return -1;
 		}
 	}
