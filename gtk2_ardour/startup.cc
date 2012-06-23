@@ -38,6 +38,7 @@
 #include "ardour/session.h"
 #include "ardour/session_state_utils.h"
 #include "ardour/template_utils.h"
+#include "ardour/filename_extensions.h"
 
 #include "ardour_ui.h"
 #include "startup.h"
@@ -246,8 +247,8 @@ std::string
 ArdourStartup::session_template_name ()
 {
 	if (!load_template_override.empty()) {
-		string the_path = (ARDOUR::user_template_directory()/ (load_template_override + ".template")).to_string();
-		return the_path;
+		string the_path(ARDOUR::user_template_directory());
+		return Glib::build_filename (the_path, load_template_override + ARDOUR::template_suffix);
 	}
 
 	if (ic_existing_session_button.get_active()) {

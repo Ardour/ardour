@@ -1628,14 +1628,14 @@ RouteUI::adjust_latency ()
 void
 RouteUI::save_as_template ()
 {
-	sys::path path;
+	std::string path;
 	std::string safe_name;
 	string name;
 
 	path = ARDOUR::user_route_template_directory ();
 
-	if (g_mkdir_with_parents (path.to_string().c_str(), 0755)) {
-		error << string_compose (_("Cannot create route template directory %1"), path.to_string()) << endmsg;
+	if (g_mkdir_with_parents (path.c_str(), 0755)) {
+		error << string_compose (_("Cannot create route template directory %1"), path) << endmsg;
 		return;
 	}
 
@@ -1657,9 +1657,9 @@ RouteUI::save_as_template ()
 	safe_name = legalize_for_path (name);
 	safe_name += template_suffix;
 
-	path /= safe_name;
+	path = Glib::build_filename (path, safe_name);
 
-	_route->save_as_template (path.to_string(), name);
+	_route->save_as_template (path, name);
 }
 
 void

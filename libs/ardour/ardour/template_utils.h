@@ -2,17 +2,16 @@
 #ifndef TEMPLATE_UTILS_INCLUDED
 #define TEMPLATE_UTILS_INCLUDED
 
+#include <string>
 #include <vector>
-
-#include "pbd/filesystem.h"
 
 namespace ARDOUR {
 
-	PBD::sys::path system_template_directory ();
-	PBD::sys::path system_route_template_directory ();
+	std::string system_template_directory ();
+	std::string system_route_template_directory ();
 
-	PBD::sys::path user_template_directory ();
-	PBD::sys::path user_route_template_directory ();
+	std::string user_template_directory ();
+	std::string user_route_template_directory ();
 
 	struct TemplateInfo {
 		std::string name;

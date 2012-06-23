@@ -68,6 +68,7 @@
 #include "pbd/controllable_descriptor.h"
 #include "pbd/enumwriter.h"
 #include "pbd/error.h"
+#include "pbd/filesystem.h"
 #include "pbd/pathscanner.h"
 #include "pbd/pthread_utils.h"
 #include "pbd/search_path.h"
