@@ -211,10 +211,10 @@ extension (const path & p)
 
 }
 
-path
-get_absolute_path (const path & p)
+std::string
+get_absolute_path (const std::string & p)
 {
-	Glib::RefPtr<Gio::File> f = Gio::File::create_for_path (p.to_string ());
+	Glib::RefPtr<Gio::File> f = Gio::File::create_for_path (p);
 	return f->get_path ();
 }
 

@@ -192,7 +192,7 @@ std::string extension (const path& p);
  * Take a (possibly) relative path and make it absolute
  * @return An absolute path
  */
-path get_absolute_path (const path &);
+std::string get_absolute_path (const std::string &);
 
 /**
  * Find out if `needle' is a file or directory within the
