@@ -127,20 +127,6 @@ create_directories(const path & p)
 	return true;
 }
 
-bool
-remove(const path & p)
-{
-	if(!exists(p)) return false;
-
-	int error = g_unlink (p.to_string().c_str());
-
-	if(error == -1)
-	{
-		throw filesystem_error(g_strerror(errno), errno);
-	}
-	return true;
-}
-
 void
 rename (const path & from_path, const path & to_path)
 {
