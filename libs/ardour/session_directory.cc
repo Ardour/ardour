@@ -22,7 +22,6 @@
 #include "pbd/error.h"
 #include "pbd/compose.h"
 #include "pbd/file_utils.h"
-#include "pbd/filesystem.h"
 
 #include "ardour/directory_names.h"
 #include "ardour/session_directory.h"
@@ -94,17 +93,17 @@ SessionDirectory::old_sound_path () const
 const std::string
 SessionDirectory::sources_root () const
 {
-	// fix this later
-	path p = m_root_path;
+	std::string p = m_root_path;
+	std::string filename = Glib::path_get_basename(p);
 
-	if (p.leaf() == ".") {
+	if (filename == ".") {
 		p = PBD::get_absolute_path (m_root_path);
 	}
 
-	const string legalized_root (legalize_for_path (p.leaf ()));
+	const string legalized_root (legalize_for_path (Glib::path_get_basename(p)));
 
-	path sources_root_path = m_root_path / interchange_dir_name / legalized_root;
-	return sources_root_path.to_string ();
+	std::string sources_root_path = Glib::build_filename (m_root_path, interchange_dir_name);
+	return Glib::build_filename (sources_root_path, legalized_root);
 }
 
 const std::string
