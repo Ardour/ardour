@@ -20,12 +20,14 @@
 
 #include <unistd.h>
 
+#include <glibmm/fileutils.h>
+#include <glibmm/miscutils.h>
+
 #include "pbd/debug.h"
 #include "pbd/stateful.h"
 #include "pbd/property_list.h"
 #include "pbd/properties.h"
 #include "pbd/destructible.h"
-#include "pbd/filesystem.h"
 #include "pbd/xml++.h"
 #include "pbd/error.h"
 
@@ -102,9 +104,14 @@ Stateful::save_extra_xml (const XMLNode& node)
 }
 
 void
-Stateful::add_instant_xml (XMLNode& node, const sys::path& directory_path)
+Stateful::add_instant_xml (XMLNode& node, const std::string& directory_path)
 {
-	sys::create_directories (directory_path); // may throw
+	if (!Glib::file_test (directory_path, Glib::FILE_TEST_IS_DIR)) {
+		if (g_mkdir_with_parents (directory_path.c_str(), 0755) != 0) {
+			error << string_compose(_("Error: could not create directory %1"), directory_path) << endmsg;
+			return;
+		}
+	}
 
 	if (_instant_xml == 0) {
 		_instant_xml = new XMLNode ("instant");
@@ -113,12 +120,10 @@ Stateful::add_instant_xml (XMLNode& node, const sys::path& directory_path)
 	_instant_xml->remove_nodes_and_delete (node.name());
 	_instant_xml->add_child_copy (node);
 
-	sys::path instant_xml_path(directory_path);
-
-	instant_xml_path /= "instant.xml";
+	std::string instant_xml_path = Glib::build_filename (directory_path, "instant.xml");
 	
 	XMLTree tree;
-	tree.set_filename(instant_xml_path.to_string());
+	tree.set_filename(instant_xml_path);
 
 	/* Important: the destructor for an XMLTree deletes
 	   all of its nodes, starting at _root. We therefore
@@ -134,24 +139,23 @@ Stateful::add_instant_xml (XMLNode& node, const sys::path& directory_path)
 	tree.set_root (copy);
 
 	if (!tree.write()) {
-		error << string_compose(_("Error: could not write %1"), instant_xml_path.to_string()) << endmsg;
+		error << string_compose(_("Error: could not write %1"), instant_xml_path) << endmsg;
 	}
 }
 
 XMLNode *
-Stateful::instant_xml (const string& str, const sys::path& directory_path)
+Stateful::instant_xml (const string& str, const std::string& directory_path)
 {
 	if (_instant_xml == 0) {
 
-		sys::path instant_xml_path(directory_path);
-		instant_xml_path /= "instant.xml";
+		std::string instant_xml_path = Glib::build_filename (directory_path, "instant.xml");
 
-		if (exists(instant_xml_path)) {
+		if (Glib::file_test (instant_xml_path, Glib::FILE_TEST_EXISTS)) {
 			XMLTree tree;
-			if (tree.read(instant_xml_path.to_string())) {
+			if (tree.read(instant_xml_path)) {
 				_instant_xml = new XMLNode(*(tree.root()));
 			} else {
-				warning << string_compose(_("Could not understand XML file %1"), instant_xml_path.to_string()) << endmsg;
+				warning << string_compose(_("Could not understand XML file %1"), instant_xml_path) << endmsg;
 				return 0;
 			}
 		} else {

@@ -95,8 +95,8 @@ class Stateful {
         
   protected:
 
-	void add_instant_xml (XMLNode&, const sys::path& directory_path);
-	XMLNode *instant_xml (const std::string& str, const sys::path& directory_path);
+	void add_instant_xml (XMLNode&, const std::string& directory_path);
+	XMLNode *instant_xml (const std::string& str, const std::string& directory_path);
 	void add_properties (XMLNode &);
 
 	PropertyChange set_values (XMLNode const &);
