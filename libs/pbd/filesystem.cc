@@ -64,12 +64,6 @@ path::operator/=(const char* rhs)
 }
 
 bool
-exists (const path & p)
-{
-	return Glib::file_test (p.to_string(), Glib::FILE_TEST_EXISTS);
-}
-
-bool
 is_directory (const path & p)
 {
 	return Glib::file_test (p.to_string(), Glib::FILE_TEST_IS_DIR);

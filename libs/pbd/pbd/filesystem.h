@@ -103,9 +103,6 @@ public:
 inline path operator/ (const path& lhs, const path& rhs)
 { return path(lhs) /= rhs; }
 
-/// @return true if path at p exists
-bool exists(const path & p);
-
 /// @return true if path at p is a directory.
 bool is_directory(const path & p);
 
