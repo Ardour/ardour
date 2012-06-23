@@ -22,8 +22,6 @@
 
 #include "ardour/export_format_specification.h"
 
-#include "pbd/filesystem.h"
-
 #include "gui_thread.h"
 #include "utils.h"
 #include "i18n.h"
@@ -281,8 +279,7 @@ ExportFileNotebook::FilePage::update_example_filename()
 		}
 		
 		if (example != "") {
-			sys::path path(example);
-			filename_selector.set_example_filename(path.leaf());
+			filename_selector.set_example_filename(Glib::path_get_basename (example));
 		} else {
 			filename_selector.set_example_filename("");
 		}
