@@ -121,7 +121,7 @@ bool exists(const path & p);
 
 
 /// @return true if path at p exists and is writable, false otherwise
-bool exists_and_writable(const path & p);
+bool exists_and_writable(const std::string & p);
 
 /// @return true if path at p is a directory.
 bool is_directory(const path & p);

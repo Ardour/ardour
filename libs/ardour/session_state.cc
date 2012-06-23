@@ -521,7 +521,7 @@ Session::create (const string& session_template, BusProfile* bus_profile)
 		return -1;
 	}
 
-	_writable = exists_and_writable (sys::path (_path));
+	_writable = sys::exists_and_writable (_path);
 
 	if (!session_template.empty()) {
 		std::string in_path = session_template_dir_to_file (session_template);
@@ -894,7 +894,7 @@ Session::load_state (string snapshot_name)
 
 	set_dirty();
 
-	_writable = exists_and_writable (xmlpath);
+	_writable = sys::exists_and_writable (xmlpath.to_string());
 
 	if (!state_tree->read (xmlpath.to_string())) {
 		error << string_compose(_("Could not understand ardour file %1"), xmlpath.to_string()) << endmsg;

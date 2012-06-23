@@ -94,7 +94,7 @@ exists (const path & p)
 }
 
 bool
-exists_and_writable (const path & p)
+exists_and_writable (const std::string & p)
 {
 	/* writable() really reflects the whole folder, but if for any
 	   reason the session state file can't be written to, still
@@ -103,7 +103,7 @@ exists_and_writable (const path & p)
 
 	struct stat statbuf;
 
-	if (g_stat (p.to_string().c_str(), &statbuf) != 0) {
+	if (g_stat (p.c_str(), &statbuf) != 0) {
 		/* doesn't exist - not writable */
 		return false;
 	} else {
