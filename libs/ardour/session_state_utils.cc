@@ -22,10 +22,10 @@
 
 #include <giomm/file.h>
 
+#include "pbd/basename.h"
 #include "pbd/compose.h"
 #include "pbd/error.h"
 #include "pbd/file_utils.h"
-#include "pbd/filesystem.h"
 
 #include "ardour/session_state_utils.h"
 #include "ardour/filename_extensions.h"
@@ -75,7 +75,7 @@ get_file_names_no_extension (const vector<std::string> & file_paths)
 	vector<string> result;
 
 	std::transform (file_paths.begin(), file_paths.end(),
-			std::back_inserter(result), sys::basename);
+			std::back_inserter(result), PBD::basename_nosuffix);
 
 	sort (result.begin(), result.end(), std::less<string>());
 
