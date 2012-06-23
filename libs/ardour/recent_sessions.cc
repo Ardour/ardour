@@ -22,8 +22,9 @@
 #include <fstream>
 #include <algorithm>
 
+#include <glibmm/miscutils.h>
+
 #include "pbd/error.h"
-#include "pbd/filesystem.h"
 
 #include "ardour/rc_configuration.h"
 #include "ardour/filesystem_paths.h"
@@ -44,11 +45,7 @@ namespace {
 int
 ARDOUR::read_recent_sessions (RecentSessions& rs)
 {
-	sys::path recent_file_path(user_config_directory());
-
-	recent_file_path /= recent_file_name;
-
-	const string path = recent_file_path.to_string();
+	std::string path = Glib::build_filename (user_config_directory(), recent_file_name);
 
 	ifstream recent (path.c_str());
 
@@ -90,11 +87,7 @@ ARDOUR::read_recent_sessions (RecentSessions& rs)
 int
 ARDOUR::write_recent_sessions (RecentSessions& rs)
 {
-	sys::path recent_file_path(user_config_directory());
-
-	recent_file_path /= recent_file_name;
-
-	const string path = recent_file_path.to_string();
+	std::string path = Glib::build_filename (user_config_directory(), recent_file_name);
 
 	ofstream recent (path.c_str());
 
