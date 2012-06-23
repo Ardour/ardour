@@ -84,12 +84,6 @@ public:
 
 	const std::string to_string() const { return m_path; }
 
-	/**
-	 * @return the last component of the path, if the path refers to
-	 * a file then it will be the entire filename including any extension.
-	 */
-	std::string leaf () const; 
-
 private:
 
 	std::string m_path;

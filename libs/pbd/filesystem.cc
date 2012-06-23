@@ -63,12 +63,6 @@ path::operator/=(const char* rhs)
 	return *this;
 }
 
-string
-path::leaf () const
-{
-	return Glib::path_get_basename(m_path);
-}
-
 bool
 exists (const path & p)
 {
