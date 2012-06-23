@@ -211,7 +211,6 @@ extension (const path & p)
 
 }
 
-/** Take a (possibly) relative path and make it absolute */
 path
 get_absolute_path (const path & p)
 {

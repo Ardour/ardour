@@ -188,6 +188,10 @@ std::string basename (const path& p);
  */
 std::string extension (const path& p);
 
+/**
+ * Take a (possibly) relative path and make it absolute
+ * @return An absolute path
+ */
 path get_absolute_path (const path &);
 
 /**
