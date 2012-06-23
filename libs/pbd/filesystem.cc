@@ -64,15 +64,9 @@ path::operator/=(const char* rhs)
 }
 
 bool
-is_directory (const path & p)
-{
-	return Glib::file_test (p.to_string(), Glib::FILE_TEST_IS_DIR);
-}
-
-bool
 create_directory(const path & p)
 {
-	if(is_directory(p)) return false;
+	if (Glib::file_test (p.to_string(), Glib::FILE_TEST_IS_DIR)) return false;
 
 	int error = g_mkdir (p.to_string().c_str(), S_IRWXU|S_IRWXG|S_IRWXO);
 
@@ -86,7 +80,7 @@ create_directory(const path & p)
 bool
 create_directories(const path & p)
 {
-	if(is_directory(p)) return false;
+	if (Glib::file_test (p.to_string(), Glib::FILE_TEST_IS_DIR)) return false;
 
 	int error = g_mkdir_with_parents (p.to_string().c_str(), S_IRWXU|S_IRWXG|S_IRWXO);
 

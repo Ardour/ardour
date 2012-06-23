@@ -103,9 +103,6 @@ public:
 inline path operator/ (const path& lhs, const path& rhs)
 { return path(lhs) /= rhs; }
 
-/// @return true if path at p is a directory.
-bool is_directory(const path & p);
-
 /**
  * Attempt to create a directory at p as if by the glib function g_mkdir 
  * with a second argument of S_IRWXU|S_IRWXG|S_IRWXO
