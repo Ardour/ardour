@@ -789,7 +789,7 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 
 		/* make a backup copy of the old file */
 
-		if (sys::exists(xml_path) && !create_backup_file (xml_path)) {
+		if (Glib::file_test (xml_path, Glib::FILE_TEST_EXISTS) && !create_backup_file (xml_path)) {
 			// create_backup_file will log the error
 			return -1;
 		}
@@ -868,7 +868,7 @@ Session::load_state (string snapshot_name)
 	sys::path xmlpath(_session_dir->root_path());
 	xmlpath /= legalize_for_path (snapshot_name) + pending_suffix;
 
-	if (sys::exists (xmlpath)) {
+	if (Glib::file_test (xmlpath.to_string(), Glib::FILE_TEST_EXISTS)) {
 
 		/* there is pending state from a crashed capture attempt */
 
@@ -883,10 +883,10 @@ Session::load_state (string snapshot_name)
 		xmlpath /= snapshot_name;
 	}
 
-        if (!sys::exists (xmlpath)) {
+	if (!Glib::file_test (xmlpath.to_string(), Glib::FILE_TEST_EXISTS)) {
                 xmlpath = _session_dir->root_path();
                 xmlpath /= legalize_for_path (snapshot_name) + statefile_suffix;
-                if (!sys::exists (xmlpath)) {
+		if (!Glib::file_test (xmlpath.to_string(), Glib::FILE_TEST_EXISTS)) {
                         error << string_compose(_("%1: session state information file \"%2\" doesn't exist!"), _name, xmlpath.to_string()) << endmsg;
                         return 1;
                 }
@@ -940,7 +940,7 @@ Session::load_state (string snapshot_name)
 
 		// only create a backup for a given statefile version once
 
-		if (!sys::exists (backup_path)) {
+		if (!Glib::file_test (backup_path.to_string(), Glib::FILE_TEST_EXISTS)) {
 			
 			info << string_compose (_("Copying old session file %1 to %2\nUse %2 with %3 versions before 2.0 from now on"),
 						xmlpath.to_string(), backup_path.to_string(), PROGRAM_NAME)
@@ -1931,7 +1931,7 @@ Session::path_from_region_name (DataType type, string name, string identifier)
 
 		sys::path source_path = source_dir / buf;
 
-		if (!sys::exists (source_path)) {
+		if (!Glib::file_test (source_path.to_string(), Glib::FILE_TEST_EXISTS)) {
 			return source_path.to_string();
 		}
 	}
@@ -2049,8 +2049,7 @@ Session::save_template (string template_name)
 	
 	/* directory to put the template in */
 	template_dir_path /= template_name;
-	if (sys::exists (template_dir_path))
-	{
+	if (Glib::file_test (template_dir_path.to_string(), Glib::FILE_TEST_EXISTS)) {
 		warning << string_compose(_("Template \"%1\" already exists - new version not created"),
 				template_dir_path.to_string()) << endmsg;
 		return -1;
@@ -3251,7 +3250,7 @@ Session::save_history (string snapshot_name)
 	const std::string xml_path(Glib::build_filename (_session_dir->root_path(), history_filename));
 	const std::string backup_path(Glib::build_filename (_session_dir->root_path(), backup_filename));
 
-	if (sys::exists (xml_path)) {
+	if (Glib::file_test (xml_path, Glib::FILE_TEST_EXISTS)) {
 		if (::g_rename (xml_path.c_str(), backup_path.c_str()) != 0) {
 			error << _("could not backup old history file, current history not saved") << endmsg;
 			return -1;
@@ -3297,7 +3296,7 @@ Session::restore_history (string snapshot_name)
 
 	info << "Loading history from " << xml_path.to_string() << endmsg;
 
-	if (!sys::exists (xml_path)) {
+	if (!Glib::file_test (xml_path.to_string(), Glib::FILE_TEST_EXISTS)) {
 		info << string_compose (_("%1: no history file \"%2\" for this session."),
 				_name, xml_path.to_string()) << endmsg;
 		return 1;
