@@ -3348,7 +3348,7 @@ Session::new_midi_source_name (const string& base)
 
 			snprintf (buf, sizeof(buf), "%s-%u.mid", p.to_string().c_str(), cnt);
 
-			if (sys::exists (buf)) {
+			if (Glib::file_test (buf, Glib::FILE_TEST_EXISTS)) {
 				existing++;
 			}
 		}
