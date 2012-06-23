@@ -722,13 +722,14 @@ Session::jack_session_event (jack_session_event_t * event)
                 if (save_state (timebuf)) {
                         event->flags = JackSessionSaveError;
                 } else {
-                        sys::path xml_path (_session_dir->root_path());
-                        xml_path /= legalize_for_path (timebuf) + statefile_suffix;
+			std::string xml_path (_session_dir->root_path());
+			std::string legalized_filename = legalize_for_path (timebuf) + statefile_suffix;
+			xml_path = Glib::build_filename (xml_path, legalized_filename);
 
                         string cmd ("ardour3 -P -U ");
                         cmd += event->client_uuid;
                         cmd += " \"";
-                        cmd += xml_path.to_string();
+                        cmd += xml_path;
                         cmd += '\"';
 
                         event->command_line = strdup (cmd.c_str());
