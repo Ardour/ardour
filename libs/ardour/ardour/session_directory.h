@@ -96,8 +96,8 @@ public:
 	/**
 	 * Create the session directory and all the subdirectories.
 	 *
-	 * @return true If a new session directory was created, otherwise
-	 * (if it already existed) false.
+	 * @return true If a new session directory and subdirectories were
+	 * created, otherwise false.
 	 *
 	 * @post is_valid ()
 	 */
