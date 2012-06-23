@@ -26,6 +26,7 @@
 #include "pbd/compose.h"
 #include "pbd/error.h"
 #include "pbd/file_utils.h"
+#include "pbd/filesystem.h"
 
 #include "ardour/session_state_utils.h"
 #include "ardour/filename_extensions.h"
@@ -40,23 +41,7 @@ namespace ARDOUR {
 bool
 create_backup_file (const std::string & file_path)
 {
-	if (!Glib::file_test (file_path, Glib::FILE_TEST_EXISTS)) return false;
-
-	Glib::RefPtr<Gio::File> backup_path = Gio::File::create_for_path(file_path + backup_suffix);
-	Glib::RefPtr<Gio::File> path = Gio::File::create_for_path(file_path);
-
-	try
-	{
-		path->copy (backup_path);
-	}
-	catch(const Glib::Exception& ex)
-	{
-		error << string_compose (_("Unable to create a backup copy of file %1 (%2)"),
-				file_path, ex.what())
-			<< endmsg;
-		return false;
-	}
-	return true;
+	return sys::copy_file (file_path, file_path + backup_suffix);
 }
 
 void
