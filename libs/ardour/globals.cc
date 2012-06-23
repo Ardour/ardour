@@ -56,7 +56,7 @@
 #include "pbd/fpu.h"
 #include "pbd/file_utils.h"
 #include "pbd/enumwriter.h"
-#include "pbd/filesystem.h"
+#include "pbd/basename.h"
 
 #include "midi++/port.h"
 #include "midi++/manager.h"
@@ -373,10 +373,10 @@ ARDOUR::find_bindings_files (map<string,string>& files)
 	}
 
 	for (vector<std::string>::iterator x = found.begin(); x != found.end(); ++x) {
-		sys::path path(*x);
+		std::string path(*x);
 		pair<string,string> namepath;
-		namepath.second = path.to_string();
-		namepath.first = path.leaf().substr (0, path.leaf().find_first_of ('.'));
+		namepath.second = path;
+		namepath.first = PBD::basename_nosuffix (path);
 		files.insert (namepath);
 	}
 }
