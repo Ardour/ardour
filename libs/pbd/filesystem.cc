@@ -228,7 +228,7 @@ inodes_same (const path& a, const path& b)
 	struct stat bB;
 	int const rB = g_stat (b.to_string().c_str(), &bB);
 
-	return (rA == 0 && rB == 0 && bA.st_ino == bB.st_ino);
+	return (rA == 0 && rB == 0 && bA.st_dev == bB.st_dev && bA.st_ino == bB.st_ino);
 }
 
 /** Find out if `needle' is a file or directory within the
