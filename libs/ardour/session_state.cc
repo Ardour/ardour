@@ -3248,16 +3248,11 @@ Session::save_history (string snapshot_name)
 
 	const string history_filename = legalize_for_path (snapshot_name) + history_suffix;
 	const string backup_filename = history_filename + backup_suffix;
-	const sys::path xml_path(Glib::build_filename (_session_dir->root_path(), history_filename));
-	const sys::path backup_path(Glib::build_filename (_session_dir->root_path(), backup_filename));
+	const std::string xml_path(Glib::build_filename (_session_dir->root_path(), history_filename));
+	const std::string backup_path(Glib::build_filename (_session_dir->root_path(), backup_filename));
 
 	if (sys::exists (xml_path)) {
-		try
-		{
-			sys::rename (xml_path, backup_path);
-		}
-		catch (const sys::filesystem_error& err)
-		{
+		if (::g_rename (xml_path.c_str(), backup_path.c_str()) != 0) {
 			error << _("could not backup old history file, current history not saved") << endmsg;
 			return -1;
 		}
@@ -3269,22 +3264,17 @@ Session::save_history (string snapshot_name)
 
 	tree.set_root (&_history.get_state (Config->get_saved_history_depth()));
 
-	if (!tree.write (xml_path.to_string()))
+	if (!tree.write (xml_path))
 	{
-		error << string_compose (_("history could not be saved to %1"), xml_path.to_string()) << endmsg;
+		error << string_compose (_("history could not be saved to %1"), xml_path) << endmsg;
 
-		try
-		{
-			if (g_remove (xml_path.to_string().c_str()) != 0) {
-				error << string_compose(_("Could not remove history file at path \"%1\" (%2)"),
-						xml_path.to_string(), g_strerror (errno)) << endmsg;
-			}
-			sys::rename (backup_path, xml_path);
+		if (g_remove (xml_path.c_str()) != 0) {
+			error << string_compose(_("Could not remove history file at path \"%1\" (%2)"),
+					xml_path, g_strerror (errno)) << endmsg;
 		}
-		catch (const sys::filesystem_error& err)
-		{
+		if (::g_rename (backup_path.c_str(), xml_path.c_str()) != 0) {
 			error << string_compose (_("could not restore history file from backup %1 (%2)"),
-					backup_path.to_string(), err.what()) << endmsg;
+					backup_path, g_strerror (errno)) << endmsg;
 		}
 
 		return -1;
