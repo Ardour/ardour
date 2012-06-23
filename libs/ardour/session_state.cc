@@ -3280,7 +3280,10 @@ Session::save_history (string snapshot_name)
 
 		try
 		{
-			sys::remove (xml_path);
+			if (g_remove (xml_path.to_string().c_str()) != 0) {
+				error << string_compose(_("Could not remove history file at path \"%1\" (%2)"),
+						xml_path.to_string(), g_strerror (errno)) << endmsg;
+			}
 			sys::rename (backup_path, xml_path);
 		}
 		catch (const sys::filesystem_error& err)
