@@ -20,7 +20,6 @@
 
 #include <cstdlib>
 #include <signal.h>
-#include <iostream>
 #include <string>
 
 #include "pbd/transmitter.h"

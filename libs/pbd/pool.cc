@@ -19,7 +19,6 @@
 */
 
 #include <cstdlib>
-#include <iostream>
 #include <vector>
 #include <cstdlib>
 #include <cassert>

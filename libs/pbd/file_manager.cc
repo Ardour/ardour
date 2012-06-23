@@ -23,7 +23,6 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <cassert>
-#include <iostream>
 #include <cstdio>
 
 #ifdef __APPLE__

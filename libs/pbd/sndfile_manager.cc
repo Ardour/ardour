@@ -27,7 +27,6 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <cassert>
-#include <iostream>
 #include "pbd/compose.h"
 #include "pbd/sndfile_manager.h"
 #include "pbd/debug.h"
