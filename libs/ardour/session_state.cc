@@ -801,28 +801,27 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 		xml_path = Glib::build_filename (xml_path, legalize_for_path (snapshot_name) + pending_suffix);
 	}
 
-	sys::path tmp_path(_session_dir->root_path());
+	std::string tmp_path(_session_dir->root_path());
+	tmp_path = Glib::build_filename (tmp_path, legalize_for_path (snapshot_name) + temp_suffix);
 
-	tmp_path /= legalize_for_path (snapshot_name) + temp_suffix;
+	// cerr << "actually writing state to " << xml_path << endl;
 
-	// cerr << "actually writing state to " << xml_path.to_string() << endl;
-
-	if (!tree.write (tmp_path.to_string())) {
-		error << string_compose (_("state could not be saved to %1"), tmp_path.to_string()) << endmsg;
-		if (g_remove (tmp_path.to_string().c_str()) != 0) {
+	if (!tree.write (tmp_path)) {
+		error << string_compose (_("state could not be saved to %1"), tmp_path) << endmsg;
+		if (g_remove (tmp_path.c_str()) != 0) {
 			error << string_compose(_("Could not remove temporary state file at path \"%1\" (%2)"),
-					tmp_path.to_string(), g_strerror (errno)) << endmsg;
+					tmp_path, g_strerror (errno)) << endmsg;
 		}
 		return -1;
 
 	} else {
 
-		if (::rename (tmp_path.to_string().c_str(), xml_path.c_str()) != 0) {
+		if (::rename (tmp_path.c_str(), xml_path.c_str()) != 0) {
 			error << string_compose (_("could not rename temporary session file %1 to %2"),
-					tmp_path.to_string(), xml_path) << endmsg;
-			if (g_remove (tmp_path.to_string().c_str()) != 0) {
+					tmp_path, xml_path) << endmsg;
+			if (g_remove (tmp_path.c_str()) != 0) {
 				error << string_compose(_("Could not remove temporary state file at path \"%1\" (%2)"),
-						tmp_path.to_string(), g_strerror (errno)) << endmsg;
+						tmp_path, g_strerror (errno)) << endmsg;
 			}
 			return -1;
 		}
