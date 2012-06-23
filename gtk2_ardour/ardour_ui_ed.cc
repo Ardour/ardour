@@ -134,7 +134,7 @@ ARDOUR_UI::install_actions ()
 
 #ifdef WITH_CMT
 
-	sys::path anicomp_file_path;
+	std::string anicomp_file_path;
 
 	if (PBD::find_file_in_search_path (Glib::getenv("PATH"), "AniComp", anicomp_file_path)) {
 		act = ActionManager::register_action (main_actions, X_("aniConnect"), _("Connect"),  (sigc::mem_fun (*editor, &PublicEditor::connect_to_image_compositor)));

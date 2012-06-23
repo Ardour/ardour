@@ -1110,7 +1110,7 @@ ARDOUR_UI::update_wall_clock ()
 void
 ARDOUR_UI::redisplay_recent_sessions ()
 {
-	std::vector<sys::path> session_directories;
+	std::vector<std::string> session_directories;
 	RecentSessionsSorter cmp;
 
 	recent_session_display.set_model (Glib::RefPtr<TreeModel>(0));
@@ -1131,18 +1131,18 @@ ARDOUR_UI::redisplay_recent_sessions ()
 		session_directories.push_back ((*i).second);
 	}
 
-	for (vector<sys::path>::const_iterator i = session_directories.begin();
+	for (vector<std::string>::const_iterator i = session_directories.begin();
 			i != session_directories.end(); ++i)
 	{
 		std::vector<std::string> state_file_paths;
 
 		// now get available states for this session
 
-		get_state_files_in_directory (i->to_string(), state_file_paths);
+		get_state_files_in_directory (*i, state_file_paths);
 
 		vector<string*>* states;
 		vector<const gchar*> item;
-		string fullpath = i->to_string();
+		string fullpath = *i;
 
 		/* remove any trailing / */
 

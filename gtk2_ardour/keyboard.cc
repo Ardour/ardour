@@ -19,7 +19,6 @@
 
 #include "pbd/error.h"
 #include "pbd/file_utils.h"
-#include "pbd/filesystem.h"
 
 #include "ardour/filesystem_paths.h"
 
@@ -60,10 +59,7 @@ ArdourKeyboard::setup_keybindings ()
 
 	/* set up the per-user bindings path */
 
-	sys::path p (user_config_directory ());
-	p /= "ardour.bindings";
-
-	user_keybindings_path = p.to_string ();
+	user_keybindings_path = Glib::build_filename (user_config_directory(), "ardour.bindings");
 
 	if (Glib::file_test (user_keybindings_path, Glib::FILE_TEST_EXISTS)) {
 		std::pair<string,string> newpair;
