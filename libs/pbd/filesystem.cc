@@ -164,22 +164,6 @@ basename (const path & p)
 	return base.substr (0, n);
 }
 
-string
-extension (const path & p)
-{
-	string base(p.leaf());
-
-	string::size_type n = base.rfind ('.');
-
-	if (n != string::npos)
-	{
-		return base.substr(n);
-	}
-
-	return string();
-
-}
-
 } // namespace sys
 
 } // namespace PBD
