@@ -194,7 +194,6 @@ libardour_sources = [
         'session_state_utils.cc',
         'session_time.cc',
         'session_transport.cc',
-        'session_utils.cc',
         'slave.cc',
         'smf_source.cc',
         'sndfile_helpers.cc',
