@@ -30,7 +30,6 @@
 #include "pbd/failed_constructor.h"
 #include "pbd/pathscanner.h"
 #include "pbd/xml++.h"
-#include "pbd/filesystem.h"
 
 #include "midi++/port.h"
 #include "midi++/manager.h"
@@ -107,11 +106,11 @@ static const char * const midimap_env_variable_name = "ARDOUR_MIDIMAPS_PATH";
 static const char* const midi_map_dir_name = "midi_maps";
 static const char* const midi_map_suffix = ".map";
 
-static sys::path
+static std::string
 system_midi_map_search_path ()
 {
 	bool midimap_path_defined = false;
-        sys::path spath_env (Glib::getenv (midimap_env_variable_name, midimap_path_defined));
+	std::string spath_env (Glib::getenv (midimap_env_variable_name, midimap_path_defined));
 
 	if (midimap_path_defined) {
 		return spath_env;
@@ -126,16 +125,13 @@ system_midi_map_search_path ()
 			return *i;
 		}
 	}
-	return sys::path();
+	return std::string();
 }
 
-static sys::path
+static std::string
 user_midi_map_directory ()
 {
-	sys::path p(user_config_directory());
-	p /= midi_map_dir_name;
-
-	return p;
+	return Glib::build_filename (user_config_directory(), midi_map_dir_name);
 }
 
 static bool
@@ -150,8 +146,8 @@ GenericMidiControlProtocol::reload_maps ()
 {
 	vector<string *> *midi_maps;
 	PathScanner scanner;
-	SearchPath spath (system_midi_map_search_path().to_string());
-	spath += user_midi_map_directory ().to_string();
+	SearchPath spath (system_midi_map_search_path());
+	spath += user_midi_map_directory ();
 
 	midi_maps = scanner (spath.to_string(), midi_map_filter, 0, false, true);
 
