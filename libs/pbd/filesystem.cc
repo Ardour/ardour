@@ -185,25 +185,26 @@ rename (const path & from_path, const path & to_path)
 	}
 }
 
-// XXX character encoding.
-void
-copy_file(const path & from_path, const path & to_path)
+bool
+copy_file(const std::string & from_path, const std::string & to_path)
 {
-	std::ifstream in(from_path.to_string().c_str());
-	std::ofstream out(to_path.to_string().c_str());
-	
-	if (!in || !out) {
-		throw filesystem_error(string_compose(_("Could not open files %1 and %2 for copying"),
-					from_path.to_string(), to_path.to_string()));
+	if (!Glib::file_test (from_path, Glib::FILE_TEST_EXISTS)) return false;
+
+	Glib::RefPtr<Gio::File> from_file = Gio::File::create_for_path(from_path);
+	Glib::RefPtr<Gio::File> to_file = Gio::File::create_for_path(to_path);
+
+	try
+	{
+		from_file->copy (to_file);
 	}
-	
-	out << in.rdbuf();
-	
-	if (!in || !out) {
-		remove (to_path);
-		throw filesystem_error(string_compose(_("Could not copy existing file %1 to %2"),
-					from_path.to_string(), to_path.to_string()));
+	catch(const Glib::Exception& ex)
+	{
+		error << string_compose (_("Unable to Copy file %1 to %2 (%3)"),
+				from_path, to_path, ex.what())
+			<< endmsg;
+		return false;
 	}
+	return true;
 }
 
 static
@@ -213,17 +214,17 @@ bool accept_all_files (string const &, void *)
 }
 	
 void
-copy_files(const path & from_path, const path & to_dir)
+copy_files(const std::string & from_path, const std::string & to_dir)
 {
 	PathScanner scanner;
-	vector<string*>* files = scanner (from_path.to_string(), accept_all_files, 0, true, false);
+	vector<string*>* files = scanner (from_path, accept_all_files, 0, true, false);
 	for (vector<string*>::iterator i = files->begin(); i != files->end(); ++i) {
 		sys::path from = from_path;
 		from /= **i;
 		sys::path to = to_dir;
 		to /= **i;
 
-		copy_file (from, to);
+		copy_file (from.to_string(), to.to_string());
 	}
 }
 

@@ -45,6 +45,8 @@
 #include <xmmintrin.h>
 #endif
 
+#include <giomm.h>
+
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 
@@ -215,6 +217,9 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization)
 	if (!Glib::thread_supported()) {
 		Glib::thread_init();
 	}
+
+	// this really should be in PBD::init..if there was one
+	Gio::init ();
 
 	(void) bindtextdomain(PACKAGE, LOCALEDIR);
 

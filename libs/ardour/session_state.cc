@@ -539,8 +539,7 @@ Session::create (const string& session_template, BusProfile* bus_profile)
                                 _is_new = false;
 
 				/* Copy plugin state files from template to new session */
-				sys::path template_plugins = session_template;
-				template_plugins /= X_("plugins");
+				std::string template_plugins = Glib::build_filename (session_template, X_("plugins"));
 				sys::copy_files (template_plugins, plugins_dir ());
 				
 				return 0;
@@ -944,14 +943,7 @@ Session::load_state (string snapshot_name)
 						xmlpath.to_string(), backup_path.to_string(), PROGRAM_NAME)
 			     << endmsg;
 			
-			try {
-				sys::copy_file (xmlpath, backup_path);
-				
-			} catch (sys::filesystem_error& ex) {
-				
-				error << string_compose (_("Unable to make backup of state file %1 (%2)"),
-							 xmlpath.to_string(), ex.what())
-				      << endmsg;
+			if (!sys::copy_file (xmlpath.to_string(), backup_path.to_string())) {;
 				return -1;
 			}
 		}
@@ -2077,7 +2069,7 @@ Session::save_template (string template_name)
 	sys::path template_plugin_state_path = template_dir_path;
 	template_plugin_state_path /= X_("plugins");
 	sys::create_directories (template_plugin_state_path);
-	sys::copy_files (plugins_dir(), template_plugin_state_path);
+	sys::copy_files (plugins_dir(), template_plugin_state_path.to_string());
 
 	return 0;
 }
