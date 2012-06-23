@@ -17,9 +17,15 @@
 
 */
 
+#include <glib.h>
+#include <glib/gstdio.h>
+
+#include <glibmm/fileutils.h>
+#include <glibmm/miscutils.h>
+
 #include "pbd/locale_guard.h"
 #include "pbd/pathscanner.h"
-#include "pbd/filesystem.h"
+
 #include "ardour/vst_plugin.h"
 #include "ardour/vestige/aeffectx.h"
 #include "ardour/session.h"
@@ -437,11 +443,10 @@ VSTPlugin::do_save_preset (string name)
 
 	t->root()->add_child_nocopy (*p);
 
-	sys::path f = ARDOUR::user_config_directory ();
-	f /= "presets";
-	f /= presets_file ();
+	std::string f = Glib::build_filename (ARDOUR::user_config_directory (), "presets");
+	f = Glib::build_filename (f, presets_file ());
 
-	t->write (f.to_string ());
+	t->write (f);
 	return uri;
 }
 
@@ -455,11 +460,10 @@ VSTPlugin::do_remove_preset (string name)
 
 	t->root()->remove_nodes_and_delete (X_("label"), name);
 
-	sys::path f = ARDOUR::user_config_directory ();
-	f /= "presets";
-	f /= presets_file ();
+	std::string f = Glib::build_filename (ARDOUR::user_config_directory (), "presets");
+	f = Glib::build_filename (f, presets_file ());
 
-	t->write (f.to_string ());
+	t->write (f);
 }
 
 string 
@@ -644,21 +648,22 @@ VSTPlugin::presets_tree () const
 {
 	XMLTree* t = new XMLTree;
 
-	sys::path p = ARDOUR::user_config_directory ();
-	p /= "presets";
+	std::string p = Glib::build_filename (ARDOUR::user_config_directory (), "presets");
 
-	if (!is_directory (p)) {
-		create_directory (p);
+	if (!Glib::file_test (p, Glib::FILE_TEST_IS_DIR)) {
+		if (g_mkdir_with_parents (p.c_str(), 0755) != 0) {
+			error << _("Unable to make VST presets directory") << endmsg;
+		};
 	}
 
-	p /= presets_file ();
+	p = Glib::build_filename (p, presets_file ());
 
-	if (!exists (p)) {
+	if (!Glib::file_test (p, Glib::FILE_TEST_EXISTS)) {
 		t->set_root (new XMLNode (X_("VSTPresets")));
 		return t;
 	}
 
-	t->set_filename (p.to_string ());
+	t->set_filename (p);
 	if (!t->read ()) {
 		delete t;
 		return 0;
