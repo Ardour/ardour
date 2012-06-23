@@ -108,7 +108,6 @@
 #include "ardour/session_metadata.h"
 #include "ardour/session_playlists.h"
 #include "ardour/session_state_utils.h"
-#include "ardour/session_utils.h"
 #include "ardour/silentfilesource.h"
 #include "ardour/sndfilesource.h"
 #include "ardour/source_factory.h"
@@ -2190,7 +2189,8 @@ Session::get_best_session_directory_for_new_source ()
 			}
 
 			if ((*i).blocks * 4096 >= Config->get_disk_choice_space_threshold()) {
-				if (create_session_directory ((*i).path)) {
+				SessionDirectory sdir(i->path);
+				if (sdir.create ()) {
 					result = (*i).path;
 					last_rr_session_dir = i;
 					return result;
@@ -2212,7 +2212,8 @@ Session::get_best_session_directory_for_new_source ()
 		sort (sorted.begin(), sorted.end(), cmp);
 
 		for (i = sorted.begin(); i != sorted.end(); ++i) {
-			if (create_session_directory ((*i).path)) {
+			SessionDirectory sdir(i->path);
+			if (sdir.create ()) {
 				result = (*i).path;
 				last_rr_session_dir = i;
 				return result;
