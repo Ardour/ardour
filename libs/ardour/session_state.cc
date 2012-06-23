@@ -655,17 +655,12 @@ Session::rename_state (string old_name, string new_name)
 	const string old_xml_filename = legalize_for_path (old_name) + statefile_suffix;
 	const string new_xml_filename = legalize_for_path (new_name) + statefile_suffix;
 
-	const sys::path old_xml_path(Glib::build_filename (_session_dir->root_path(), old_xml_filename));
-	const sys::path new_xml_path(Glib::build_filename (_session_dir->root_path(), new_xml_filename));
+	const std::string old_xml_path(Glib::build_filename (_session_dir->root_path(), old_xml_filename));
+	const std::string new_xml_path(Glib::build_filename (_session_dir->root_path(), new_xml_filename));
 
-	try
-	{
-		sys::rename (old_xml_path, new_xml_path);
-	}
-	catch (const sys::filesystem_error& err)
-	{
+	if (::g_rename (old_xml_path.c_str(), new_xml_path.c_str()) != 0) {
 		error << string_compose(_("could not rename snapshot %1 to %2 (%3)"),
-				old_name, new_name, err.what()) << endmsg;
+				old_name, new_name, g_strerror(errno)) << endmsg;
 	}
 }
 
