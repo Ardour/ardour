@@ -154,16 +154,6 @@ rename (const path & from_path, const path & to_path)
 	}
 }
 	
-string
-basename (const path & p)
-{
-	string base(p.leaf());
-
-	string::size_type n = base.rfind ('.');
-
-	return base.substr (0, n);
-}
-
 } // namespace sys
 
 } // namespace PBD

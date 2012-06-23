@@ -165,16 +165,6 @@ bool remove(const path & p);
  */
 void rename (const path& from_path, const path& to_path);
 
-/**
- * @return The substring of the filename component of the path, starting
- * at the beginning of the filename up to but not including the last dot.
- *
- * boost::filesystem::path::basename differs from g_path_get_basename and
- * ::basename and most other forms of basename in that it removes the
- * extension from the filename if the filename has one.
- */ 
-std::string basename (const path& p);
-
 } // namespace sys
 
 } // namespace PBD
