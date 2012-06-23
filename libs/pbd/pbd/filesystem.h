@@ -148,11 +148,6 @@ bool create_directory(const path & p);
  */
 bool create_directories(const path & p);
 
-/**
- * Renames from_path to to_path as if by the glib function g_rename.
- */
-void rename (const path& from_path, const path& to_path);
-
 } // namespace sys
 
 } // namespace PBD
