@@ -211,41 +211,6 @@ extension (const path & p)
 
 }
 
-std::string
-get_absolute_path (const std::string & p)
-{
-	Glib::RefPtr<Gio::File> f = Gio::File::create_for_path (p);
-	return f->get_path ();
-}
-
-bool
-equivalent_paths (const std::string& a, const std::string& b)
-{
-	struct stat bA;
-	int const rA = g_stat (a.c_str(), &bA);
-	struct stat bB;
-	int const rB = g_stat (b.c_str(), &bB);
-
-	return (rA == 0 && rB == 0 && bA.st_dev == bB.st_dev && bA.st_ino == bB.st_ino);
-}
-
-bool
-path_is_within (std::string const & haystack, std::string needle)
-{
-	while (1) {
-		if (equivalent_paths (haystack, needle)) {
-			return true;
-		}
-
-		needle = Glib::path_get_dirname (needle);
-		if (needle == "." || needle == "/") {
-			break;
-		}
-	}
-
-	return false;
-}
-
 } // namespace sys
 
 } // namespace PBD

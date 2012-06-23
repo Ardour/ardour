@@ -21,6 +21,7 @@
 
 #include "pbd/error.h"
 #include "pbd/compose.h"
+#include "pbd/file_utils.h"
 #include "pbd/filesystem.h"
 
 #include "ardour/directory_names.h"
@@ -97,7 +98,7 @@ SessionDirectory::sources_root () const
 	path p = m_root_path;
 
 	if (p.leaf() == ".") {
-		p = PBD::sys::get_absolute_path (m_root_path);
+		p = PBD::get_absolute_path (m_root_path);
 	}
 
 	const string legalized_root (legalize_for_path (p.leaf ()));

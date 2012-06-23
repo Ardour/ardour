@@ -188,28 +188,6 @@ std::string basename (const path& p);
  */
 std::string extension (const path& p);
 
-/**
- * Take a (possibly) relative path and make it absolute
- * @return An absolute path
- */
-std::string get_absolute_path (const std::string &);
-
-/**
- * Find out if `needle' is a file or directory within the
- * directory `haystack'.
- * @return true if it is.
- */
-bool path_is_within (const std::string &, std::string);
-
-/**
- * @return true if p1 and p2 both resolve to the same file
- * @param p1 a file path.
- * @param p2 a file path.
- *
- * Uses g_stat to check for identical st_dev and st_ino values.
- */
-bool equivalent_paths (const std::string &p1, const std::string &p2);
-
 } // namespace sys
 
 } // namespace PBD

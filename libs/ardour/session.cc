@@ -4528,7 +4528,7 @@ Session::ensure_search_path_includes (const string& path, DataType type)
 
 		   On Windows, I think we could just do if (*i == path) here.
 		*/
-		if (PBD::sys::equivalent_paths (*i, path)) {
+		if (PBD::equivalent_paths (*i, path)) {
 			return;
 		}
 	}
