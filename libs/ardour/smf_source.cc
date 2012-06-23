@@ -25,7 +25,6 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include "pbd/mountpoint.h"
 #include "pbd/pathscanner.h"
 #include "pbd/stl_delete.h"
 #include "pbd/strsplit.h"
