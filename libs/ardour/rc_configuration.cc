@@ -142,20 +142,7 @@ RCConfiguration::load_state ()
 int
 RCConfiguration::save_state()
 {
-	try
-	{
-		sys::create_directories (user_config_directory ());
-	}
-	catch (const sys::filesystem_error& ex)
-	{
-		error << "Could not create user configuration directory" << endmsg;
-		return -1;
-	}
-
-	sys::path rcfile_path(user_config_directory());
-
-	rcfile_path /= "ardour.rc";
-	const string rcfile = rcfile_path.to_string();
+	const std::string rcfile = Glib::build_filename (user_config_directory(), "ardour.rc");
 
 	// this test seems bogus?
 	if (!rcfile.empty()) {
