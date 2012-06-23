@@ -5,6 +5,7 @@
  * Modified for Ardour and released under the same terms.
  */
 
+#include <iostream>
 #include "pbd/xml++.h"
 #include <libxml/debugXML.h>
 #include <libxml/xpath.h>
