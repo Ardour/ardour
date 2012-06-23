@@ -190,7 +190,7 @@ std::string extension (const path& p);
 
 path get_absolute_path (const path &);
 
-bool path_is_within (const path &, path);	
+bool path_is_within (const std::string &, std::string);
 
 /**
  * @return true if p1 and p2 both resolve to the same file

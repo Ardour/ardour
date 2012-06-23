@@ -235,15 +235,15 @@ equivalent_paths (const std::string& a, const std::string& b)
  *  @return true if it is.
  */
 bool
-path_is_within (path const & haystack, path needle)
+path_is_within (std::string const & haystack, std::string needle)
 {
 	while (1) {
-		if (equivalent_paths (haystack.to_string(), needle.to_string())) {
+		if (equivalent_paths (haystack, needle)) {
 			return true;
 		}
 
-		needle = needle.branch_path ();
-		if (needle.to_string().empty() || needle.to_string() == "/") {
+		needle = Glib::path_get_dirname (needle);
+		if (needle == "." || needle == "/") {
 			break;
 		}
 	}
