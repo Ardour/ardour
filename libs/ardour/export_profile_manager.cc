@@ -21,12 +21,15 @@
 #include <cassert>
 #include <stdexcept>
 
+#include <glib.h>
+#include <glib/gstdio.h>
+
 #include <glibmm/fileutils.h>
+#include <glibmm/miscutils.h>
 
 #include "pbd/enumwriter.h"
 #include "pbd/xml++.h"
 #include "pbd/convert.h"
-#include "pbd/filesystem.h"
 
 #include "ardour/export_profile_manager.h"
 #include "ardour/export_format_specification.h"
@@ -37,6 +40,7 @@
 #include "ardour/export_preset.h"
 #include "ardour/export_handler.h"
 #include "ardour/export_failed.h"
+#include "ardour/directory_names.h"
 #include "ardour/filename_extensions.h"
 #include "ardour/route.h"
 #include "ardour/session.h"
@@ -64,8 +68,7 @@ ExportProfileManager::ExportProfileManager (Session & s, std::string xml_node_na
 {
 	/* Initialize path variables */
 
-	export_config_dir = user_config_directory();
-	export_config_dir /= "export";
+	export_config_dir = Glib::build_filename (user_config_directory(), export_dir_name);
 
 	search_path += export_formats_search_path();
 
@@ -73,8 +76,10 @@ ExportProfileManager::ExportProfileManager (Session & s, std::string xml_node_na
 
 	/* create export config directory if necessary */
 
-	if (!sys::exists (export_config_dir)) {
-		sys::create_directory (export_config_dir);
+	if (!Glib::file_test (export_config_dir, Glib::FILE_TEST_EXISTS)) {
+		if (g_mkdir_with_parents (export_config_dir.c_str(), 0755) != 0) {
+			error << string_compose (_("Unable to create export format directory %1: %2"), export_config_dir, g_strerror(errno)) << endmsg;
+		}
 	}
 
 	load_presets ();
@@ -177,7 +182,7 @@ std::string
 ExportProfileManager::preset_filename (std::string const & preset_name)
 {
 	string safe_name = legalize_for_path (preset_name);
-	return export_config_dir.to_string() + "/" + safe_name + export_preset_suffix;
+	return Glib::build_filename (export_config_dir, safe_name + export_preset_suffix);
 }
 
 ExportPresetPtr
@@ -229,7 +234,9 @@ ExportProfileManager::remove_preset ()
 
 	FileMap::iterator it = preset_file_map.find (current_preset->id());
 	if (it != preset_file_map.end()) {
-		sys::remove (it->second);
+		if (g_remove (it->second.c_str()) != 0) {
+			error << string_compose (_("Unable to remove export preset %1: %2"), it->second, g_strerror(errno)) << endmsg;
+		}
 		preset_file_map.erase (it);
 	}
 
@@ -238,9 +245,9 @@ ExportProfileManager::remove_preset ()
 }
 
 void
-ExportProfileManager::load_preset_from_disk (PBD::sys::path const & path)
+ExportProfileManager::load_preset_from_disk (std::string const & path)
 {
-	ExportPresetPtr preset (new ExportPreset (path.to_string(), session));
+	ExportPresetPtr preset (new ExportPreset (path, session));
 
 	/* Handle id to filename mapping and don't add duplicates to list */
 
@@ -518,7 +525,7 @@ ExportProfileManager::remove_format_state (FormatStatePtr state)
 	}
 }
 
-sys::path
+std::string
 ExportProfileManager::save_format_to_disk (ExportFormatSpecPtr format)
 {
 	// TODO filename character stripping
@@ -532,19 +539,18 @@ ExportProfileManager::save_format_to_disk (ExportFormatSpecPtr format)
 
         new_name = legalize_for_path (new_name);
 
-	sys::path new_path (export_config_dir);
-	new_path /= new_name;
+	std::string new_path = Glib::build_filename (export_config_dir, new_name);
 
 	/* Check if format is on disk already */
 	FileMap::iterator it;
 	if ((it = format_file_map.find (format->id())) != format_file_map.end()) {
 
 		/* Check if config is not in user config dir */
-		if (it->second.branch_path().to_string().compare (export_config_dir.to_string())) {
+		if (Glib::path_get_dirname (it->second) != export_config_dir) {
 
 			/* Write new file */
 
-			XMLTree tree (new_path.to_string());
+			XMLTree tree (new_path);
 			tree.set_root (&format->get_state());
 			tree.write();
 
@@ -552,12 +558,14 @@ ExportProfileManager::save_format_to_disk (ExportFormatSpecPtr format)
 
 			/* Update file and rename if necessary */
 
-			XMLTree tree (it->second.to_string());
+			XMLTree tree (it->second);
 			tree.set_root (&format->get_state());
 			tree.write();
 
-			if (new_name.compare (it->second.leaf())) {
-				sys::rename (it->second, new_path);
+			if (new_name != Glib::path_get_basename (it->second)) {
+				if (g_rename (it->second.c_str(), new_path.c_str()) != 0) {
+					error << string_compose (_("Unable to rename export format %1 to %2: %3"), it->second, new_path, g_strerror(errno)) << endmsg;
+				};
 			}
 		}
 
@@ -566,7 +574,7 @@ ExportProfileManager::save_format_to_disk (ExportFormatSpecPtr format)
 	} else {
 		/* Write new file */
 
-		XMLTree tree (new_path.to_string());
+		XMLTree tree (new_path);
 		tree.set_root (&format->get_state());
 		tree.write();
 	}
@@ -587,7 +595,10 @@ ExportProfileManager::remove_format_profile (ExportFormatSpecPtr format)
 
 	FileMap::iterator it = format_file_map.find (format->id());
 	if (it != format_file_map.end()) {
-		sys::remove (it->second);
+		if (g_remove (it->second.c_str()) != 0) {
+			error << string_compose (_("Unable to remove export profile %1: %2"), it->second, g_strerror(errno)) << endmsg;
+			return;
+		}
 		format_file_map.erase (it);
 	}
 
@@ -605,7 +616,7 @@ ExportProfileManager::get_new_format (ExportFormatSpecPtr original)
 		format->set_name ("empty format");
 	}
 
-	sys::path path = save_format_to_disk (format);
+	std::string path = save_format_to_disk (format);
 	FilePair pair (format->id(), path);
 	format_file_map.insert (pair);
 
@@ -678,9 +689,9 @@ ExportProfileManager::load_formats ()
 }
 
 void
-ExportProfileManager::load_format_from_disk (PBD::sys::path const & path)
+ExportProfileManager::load_format_from_disk (std::string const & path)
 {
-	XMLTree const tree (path.to_string());
+	XMLTree const tree (path);
 	ExportFormatSpecPtr format = handler->add_format (*tree.root());
 
 	/* Handle id to filename mapping and don't add duplicates to list */
@@ -838,20 +849,20 @@ ExportProfileManager::check_config (boost::shared_ptr<Warnings> warnings,
 
 		string path = *path_it;
 
-		if (sys::exists (sys::path (path))) {
+		if (Glib::file_test (path, Glib::FILE_TEST_EXISTS)) {
 			warnings->conflicting_filenames.push_back (path);
 		}
 
 		if (format->with_toc()) {
 			string marker_file = handler->get_cd_marker_filename(path, CDMarkerTOC);
-			if (sys::exists (sys::path (marker_file))) {
+			if (Glib::file_test (marker_file, Glib::FILE_TEST_EXISTS)) {
 				warnings->conflicting_filenames.push_back (marker_file);
 			}
 		}
 
 		if (format->with_cue()) {
 			string marker_file = handler->get_cd_marker_filename(path, CDMarkerCUE);
-			if (sys::exists (sys::path (marker_file))) {
+			if (Glib::file_test (marker_file, Glib::FILE_TEST_EXISTS)) {
 				warnings->conflicting_filenames.push_back (marker_file);
 			}
 		}
