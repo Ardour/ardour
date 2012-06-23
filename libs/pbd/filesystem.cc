@@ -219,12 +219,9 @@ copy_files(const std::string & from_path, const std::string & to_dir)
 	PathScanner scanner;
 	vector<string*>* files = scanner (from_path, accept_all_files, 0, true, false);
 	for (vector<string*>::iterator i = files->begin(); i != files->end(); ++i) {
-		sys::path from = from_path;
-		from /= **i;
-		sys::path to = to_dir;
-		to /= **i;
-
-		copy_file (from.to_string(), to.to_string());
+		std::string from = Glib::build_filename (from_path, **i);
+		std::string to = Glib::build_filename (to_dir, **i);
+		copy_file (from, to);
 	}
 }
 
