@@ -234,8 +234,7 @@ AudioRegionImporter::parse_source_xml ()
 {
 	uint32_t channels;
 	char buf[128];
-	PBD::sys::path source_dir = get_sound_dir (source);
-	PBD::sys::path source_path;
+	std::string source_dir(get_sound_dir (source));
 	XMLNode * source_node;
 	XMLProperty *prop;
 
@@ -268,15 +267,12 @@ AudioRegionImporter::parse_source_xml ()
 		for (XMLNodeList::const_iterator it = sources.begin(); it != sources.end(); ++it) {
 			prop = (*it)->property ("id");
 			if (prop && !source_id.compare (prop->value())) {
-				source_path = source_dir;
 				prop = (*it)->property ("name");
 				if (!prop) {
 					error << string_compose (X_("AudioRegionImporter (%1): source %2 has no \"name\" property"), name, source_id) << endmsg;
 					return false;
 				}
-				source_path /= prop->value();
-				filenames.push_back (source_path.to_string());
-
+				filenames.push_back (Glib::build_filename (source_dir, prop->value()));
 				source_found = true;
 				break;
 			}
@@ -291,7 +287,7 @@ AudioRegionImporter::parse_source_xml ()
 	return true;
 }
 
-PBD::sys::path
+std::string
 AudioRegionImporter::get_sound_dir (XMLTree const & tree)
 {
 	SessionDirectory session_dir(Glib::path_get_dirname (tree.filename()));
