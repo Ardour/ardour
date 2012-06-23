@@ -41,7 +41,7 @@ namespace ARDOUR {
 bool
 create_backup_file (const std::string & file_path)
 {
-	return sys::copy_file (file_path, file_path + backup_suffix);
+	return copy_file (file_path, file_path + backup_suffix);
 }
 
 void

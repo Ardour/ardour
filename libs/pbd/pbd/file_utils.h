@@ -90,7 +90,21 @@ bool
 find_file_in_search_path (const SearchPath& search_path,
                           const std::string& filename,
                           std::string& result);
-			
+
+/**
+ * Attempt to copy the contents of the file from_path to a new file
+ * at path to_path.
+ *
+ * @return true if file was successfully copied
+ */
+bool copy_file(const std::string & from_path, const std::string & to_path);
+
+/**
+ * Attempt to copy all regular files from from_path to a new directory.
+ * This method does not recurse.
+ */
+void copy_files(const std::string & from_path, const std::string & to_dir);
+
 } // namespace PBD
 
 #endif

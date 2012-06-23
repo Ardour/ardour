@@ -69,6 +69,7 @@
 #include "pbd/enumwriter.h"
 #include "pbd/error.h"
 #include "pbd/filesystem.h"
+#include "pbd/file_utils.h"
 #include "pbd/pathscanner.h"
 #include "pbd/pthread_utils.h"
 #include "pbd/search_path.h"
@@ -540,7 +541,7 @@ Session::create (const string& session_template, BusProfile* bus_profile)
 
 				/* Copy plugin state files from template to new session */
 				std::string template_plugins = Glib::build_filename (session_template, X_("plugins"));
-				sys::copy_files (template_plugins, plugins_dir ());
+				copy_files (template_plugins, plugins_dir ());
 				
 				return 0;
 
@@ -943,7 +944,7 @@ Session::load_state (string snapshot_name)
 						xmlpath.to_string(), backup_path.to_string(), PROGRAM_NAME)
 			     << endmsg;
 			
-			if (!sys::copy_file (xmlpath.to_string(), backup_path.to_string())) {;
+			if (!copy_file (xmlpath.to_string(), backup_path.to_string())) {;
 				return -1;
 			}
 		}
@@ -2069,7 +2070,7 @@ Session::save_template (string template_name)
 	sys::path template_plugin_state_path = template_dir_path;
 	template_plugin_state_path /= X_("plugins");
 	sys::create_directories (template_plugin_state_path);
-	sys::copy_files (plugins_dir(), template_plugin_state_path.to_string());
+	copy_files (plugins_dir(), template_plugin_state_path.to_string());
 
 	return 0;
 }

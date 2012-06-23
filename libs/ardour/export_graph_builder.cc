@@ -18,7 +18,7 @@
 #include "ardour/export_timespan.h"
 #include "ardour/sndfile_helpers.h"
 
-#include "pbd/filesystem.h"
+#include "pbd/file_utils.h"
 #include "pbd/cpus.h"
 
 using namespace AudioGrapher;
@@ -216,7 +216,7 @@ ExportGraphBuilder::Encoder::copy_files (std::string orig_path)
 {
 	while (filenames.size()) {
 		ExportFilenamePtr & filename = filenames.front();
-		PBD::sys::copy_file (orig_path, filename->get_path (config.format).c_str());
+		PBD::copy_file (orig_path, filename->get_path (config.format).c_str());
 		filenames.pop_front();
 	}
 }

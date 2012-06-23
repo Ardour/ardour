@@ -184,47 +184,7 @@ rename (const path & from_path, const path & to_path)
 		throw filesystem_error(g_strerror(errno), errno);
 	}
 }
-
-bool
-copy_file(const std::string & from_path, const std::string & to_path)
-{
-	if (!Glib::file_test (from_path, Glib::FILE_TEST_EXISTS)) return false;
-
-	Glib::RefPtr<Gio::File> from_file = Gio::File::create_for_path(from_path);
-	Glib::RefPtr<Gio::File> to_file = Gio::File::create_for_path(to_path);
-
-	try
-	{
-		from_file->copy (to_file);
-	}
-	catch(const Glib::Exception& ex)
-	{
-		error << string_compose (_("Unable to Copy file %1 to %2 (%3)"),
-				from_path, to_path, ex.what())
-			<< endmsg;
-		return false;
-	}
-	return true;
-}
-
-static
-bool accept_all_files (string const &, void *)
-{
-	return true;
-}
 	
-void
-copy_files(const std::string & from_path, const std::string & to_dir)
-{
-	PathScanner scanner;
-	vector<string*>* files = scanner (from_path, accept_all_files, 0, true, false);
-	for (vector<string*>::iterator i = files->begin(); i != files->end(); ++i) {
-		std::string from = Glib::build_filename (from_path, **i);
-		std::string to = Glib::build_filename (to_dir, **i);
-		copy_file (from, to);
-	}
-}
-
 string
 basename (const path & p)
 {

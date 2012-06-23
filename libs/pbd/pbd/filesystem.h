@@ -170,20 +170,6 @@ bool remove(const path & p);
 void rename (const path& from_path, const path& to_path);
 
 /**
- * Attempt to copy the contents of the file from_path to a new file 
- * at path to_path.
- *
- * @return true if file was successfully copied
- */
-bool copy_file(const std::string & from_path, const std::string & to_path);
-
-/**
- * Attempt to copy all regular files from from_path to a new directory.
- * This method does not recurse.
- */
-void copy_files(const std::string & from_path, const std::string & to_dir);
-
-/**
  * @return The substring of the filename component of the path, starting
  * at the beginning of the filename up to but not including the last dot.
  *
