@@ -63,34 +63,6 @@ path::operator/=(const char* rhs)
 	return *this;
 }
 
-bool
-create_directory(const path & p)
-{
-	if (Glib::file_test (p.to_string(), Glib::FILE_TEST_IS_DIR)) return false;
-
-	int error = g_mkdir (p.to_string().c_str(), S_IRWXU|S_IRWXG|S_IRWXO);
-
-	if(error == -1)
-	{
-		throw filesystem_error(g_strerror(errno), errno);
-	}
-	return true;
-}
-
-bool
-create_directories(const path & p)
-{
-	if (Glib::file_test (p.to_string(), Glib::FILE_TEST_IS_DIR)) return false;
-
-	int error = g_mkdir_with_parents (p.to_string().c_str(), S_IRWXU|S_IRWXG|S_IRWXO);
-
-	if(error == -1)
-	{
-		throw filesystem_error(g_strerror(errno), errno);
-	}
-	return true;
-}
-	
 } // namespace sys
 
 } // namespace PBD

@@ -103,32 +103,6 @@ public:
 inline path operator/ (const path& lhs, const path& rhs)
 { return path(lhs) /= rhs; }
 
-/**
- * Attempt to create a directory at p as if by the glib function g_mkdir 
- * with a second argument of S_IRWXU|S_IRWXG|S_IRWXO
- * 
- * @throw filesystem_error if mkdir fails for any other reason other than
- * the directory already exists.
- *
- * @return true If the directory p was created, otherwise false
- *
- * @post is_directory(p)
- */
-bool create_directory(const path & p);
-
-/**
- * Attempt to create a directory at p as if by the glib function 
- * g_mkdir_with_parents with a second argument of S_IRWXU|S_IRWXG|S_IRWXO
- * 
- * @throw filesystem_error if g_mkdir_with_parents fails for any other 
- * reason other than the directory already exists.
- *
- * @return true If the directory at p was created, otherwise false
- *
- * @post is_directory(p)
- */
-bool create_directories(const path & p);
-
 } // namespace sys
 
 } // namespace PBD
