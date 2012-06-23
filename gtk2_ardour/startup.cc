@@ -123,7 +123,7 @@ Ardour will play NO role in monitoring"))
 		set_default_icon_list (window_icons);
 	}
 
-	new_user = !exists (been_here_before_path ());
+	new_user = !Glib::file_test(been_here_before_path().to_string(), Glib::FILE_TEST_EXISTS);
 
 	bool need_audio_setup = !EngineControl::engine_running();
 
