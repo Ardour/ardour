@@ -69,24 +69,6 @@ path::leaf () const
 	return Glib::path_get_basename(m_path);
 }
 
-path
-path::branch_path () const
-{
-	string dir = Glib::path_get_dirname (m_path);
-
-	/*
-	 * glib returns "." to signify that the path
-	 * has no directory components(branch path)
-	 * whereas boost::filesystem returns an empty
-	 * string
-	 */
-	if(dir == ".")
-	{
-		return "";
-	}
-	return dir;
-}
-
 bool
 exists (const path & p)
 {

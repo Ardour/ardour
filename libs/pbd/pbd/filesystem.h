@@ -90,13 +90,6 @@ public:
 	 */
 	std::string leaf () const; 
 
-	/**
-	 * @returns the directory component of a path without any trailing
-	 * path separator or an empty string if the path has no directory
-	 * component(branch path).
-	 */
-	path branch_path () const;
-
 private:
 
 	std::string m_path;
