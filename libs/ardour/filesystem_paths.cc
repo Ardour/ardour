@@ -21,7 +21,6 @@
 
 #include "pbd/error.h"
 #include "pbd/compose.h"
-#include "pbd/strsplit.h"
 #include "pbd/filesystem.h"
 
 #include <glibmm/miscutils.h>
@@ -105,11 +104,10 @@ ardour_dll_directory ()
 SearchPath
 ardour_config_search_path ()
 {
-	static bool have_path = false;
 	static SearchPath search_path;
 
-	if (!have_path) {
-		SearchPath sp (user_config_directory());
+	if (search_path.empty()) {
+		search_path += user_config_directory();
 		
 		std::string s = Glib::getenv("ARDOUR_CONFIG_PATH");
 		if (s.empty()) {
@@ -117,14 +115,7 @@ ardour_config_search_path ()
 			::exit (1);
 		}
 		
-		std::vector<string> ss;
-		split (s, ss, ':');
-		for (std::vector<string>::iterator i = ss.begin(); i != ss.end(); ++i) {
-			sp += *i;
-		}
-		
-		search_path = sp;
-		have_path = true;
+		search_path += SearchPath (s);
 	}
 
 	return search_path;
@@ -133,11 +124,10 @@ ardour_config_search_path ()
 SearchPath
 ardour_data_search_path ()
 {
-	static bool have_path = false;
 	static SearchPath search_path;
 
-	if (!have_path) {
-		SearchPath sp (user_config_directory());
+	if (search_path.empty()) {
+		search_path += user_config_directory();
 		
 		std::string s = Glib::getenv("ARDOUR_DATA_PATH");
 		if (s.empty()) {
@@ -145,14 +135,7 @@ ardour_data_search_path ()
 			::exit (1);
 		}
 		
-		std::vector<string> ss;
-		split (s, ss, ':');
-		for (std::vector<string>::iterator i = ss.begin(); i != ss.end(); ++i) {
-			sp += *i;
-		}
-		
-		search_path = sp;
-		have_path = true;
+		search_path += SearchPath (s);
 	}
 
 	return search_path;
