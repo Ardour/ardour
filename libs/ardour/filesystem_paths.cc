@@ -21,7 +21,6 @@
 
 #include "pbd/error.h"
 #include "pbd/compose.h"
-#include "pbd/filesystem.h"
 
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>
@@ -40,12 +39,10 @@ using std::string;
 std::string
 user_config_directory ()
 {
-	sys::path p;
+	std::string p;
 
 #ifdef __APPLE__
-	p = Glib::get_home_dir();
-	p /= "Library/Preferences";
-
+	p = Glib::build_filename (Glib::get_home_dir(), "Library/Preferences");
 #else
 	const char* c = 0;
 
@@ -58,36 +55,30 @@ user_config_directory ()
 		const string home_dir = Glib::get_home_dir();
 
 		if (home_dir.empty ()) {
-			const string error_msg = "Unable to determine home directory";
-
-			// log the error
-			error << error_msg << endmsg;
-
-			throw sys::filesystem_error(error_msg);
+			error << "Unable to determine home directory" << endmsg;
+			exit (1);
 		}
 
 		p = home_dir;
-		p /= ".config";
+		p = Glib::build_filename (p, ".config");
 	}
 #endif
 
-	p /= user_config_dir_name;
+	p = Glib::build_filename (p, user_config_dir_name);
 
-	std::string ps (p.to_string());
-
-	if (!Glib::file_test (ps, Glib::FILE_TEST_EXISTS)) {
-		if (g_mkdir_with_parents (ps.c_str(), 0755)) {
+	if (!Glib::file_test (p, Glib::FILE_TEST_EXISTS)) {
+		if (g_mkdir_with_parents (p.c_str(), 0755)) {
 			error << string_compose (_("Cannot create Configuration directory %1 - cannot run"),
-						   ps) << endmsg;
+						   p) << endmsg;
 			exit (1);
 		}
-	} else if (!Glib::file_test (ps, Glib::FILE_TEST_IS_DIR)) {
+	} else if (!Glib::file_test (p, Glib::FILE_TEST_IS_DIR)) {
 		error << string_compose (_("Configuration directory %1 already exists and is not a directory/folder - cannot run"),
-					   ps) << endmsg;
+					   p) << endmsg;
 		exit (1);
 	}
 
-	return p.to_string();
+	return p;
 }
 
 std::string
