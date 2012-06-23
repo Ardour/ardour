@@ -3296,20 +3296,20 @@ Session::restore_history (string snapshot_name)
 		snapshot_name = _current_snapshot_name;
 	}
 
-	const string xml_filename = legalize_for_path (snapshot_name) + history_suffix;
-	const sys::path xml_path(Glib::build_filename (_session_dir->root_path(), xml_filename));
+	const std::string xml_filename = legalize_for_path (snapshot_name) + history_suffix;
+	const std::string xml_path(Glib::build_filename (_session_dir->root_path(), xml_filename));
 
-	info << "Loading history from " << xml_path.to_string() << endmsg;
+	info << "Loading history from " << xml_path << endmsg;
 
-	if (!Glib::file_test (xml_path.to_string(), Glib::FILE_TEST_EXISTS)) {
+	if (!Glib::file_test (xml_path, Glib::FILE_TEST_EXISTS)) {
 		info << string_compose (_("%1: no history file \"%2\" for this session."),
-				_name, xml_path.to_string()) << endmsg;
+				_name, xml_path) << endmsg;
 		return 1;
 	}
 
-	if (!tree.read (xml_path.to_string())) {
+	if (!tree.read (xml_path)) {
 		error << string_compose (_("Could not understand session history file \"%1\""),
-				xml_path.to_string()) << endmsg;
+				xml_path) << endmsg;
 		return -1;
 	}
 
