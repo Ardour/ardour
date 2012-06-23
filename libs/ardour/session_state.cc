@@ -51,6 +51,7 @@
 #endif
 
 #include <glib.h>
+#include <glib/gstdio.h>
 
 #include <glibmm.h>
 #include <glibmm/thread.h>
@@ -627,18 +628,13 @@ Session::maybe_write_autosave()
 void
 Session::remove_pending_capture_state ()
 {
-	sys::path pending_state_file_path(_session_dir->root_path());
+	std::string pending_state_file_path(_session_dir->root_path());
 
-	pending_state_file_path /= legalize_for_path (_current_snapshot_name) + pending_suffix;
+	pending_state_file_path = Glib::build_filename (pending_state_file_path, legalize_for_path (_current_snapshot_name) + pending_suffix);
 
-	try
-	{
-		sys::remove (pending_state_file_path);
-	}
-	catch(sys::filesystem_error& ex)
-	{
-		error << string_compose(_("Could remove pending capture state at path \"%1\" (%2)"),
-				pending_state_file_path.to_string(), ex.what()) << endmsg;
+	if (g_remove (pending_state_file_path.c_str()) != 0) {
+		error << string_compose(_("Could not remove pending capture state at path \"%1\" (%2)"),
+				pending_state_file_path, g_strerror (errno)) << endmsg;
 	}
 }
 
