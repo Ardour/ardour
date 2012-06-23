@@ -224,9 +224,9 @@ bool
 inodes_same (const path& a, const path& b)
 {
 	struct stat bA;
-	int const rA = stat (a.to_string().c_str(), &bA);
+	int const rA = g_stat (a.to_string().c_str(), &bA);
 	struct stat bB;
-	int const rB = stat (b.to_string().c_str(), &bB);
+	int const rB = g_stat (b.to_string().c_str(), &bB);
 
 	return (rA == 0 && rB == 0 && bA.st_ino == bB.st_ino);
 }
