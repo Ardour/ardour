@@ -27,6 +27,7 @@ namespace ARDOUR {
 	/**
 	 * @return the path to the directory used to store user specific ardour
 	 * configuration files.
+	 * @post user_config_directory() exists
 	 */
 	std::string user_config_directory ();
 
