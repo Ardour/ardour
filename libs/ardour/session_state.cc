@@ -72,7 +72,6 @@
 #include "pbd/file_utils.h"
 #include "pbd/pathscanner.h"
 #include "pbd/pthread_utils.h"
-#include "pbd/search_path.h"
 #include "pbd/stacktrace.h"
 #include "pbd/convert.h"
 #include "pbd/clear_dir.h"

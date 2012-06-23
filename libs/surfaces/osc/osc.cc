@@ -32,7 +32,6 @@
 
 #include <pbd/pthread_utils.h>
 #include <pbd/file_utils.h>
-#include <pbd/filesystem.h>
 #include <pbd/failed_constructor.h>
 
 #include "ardour/session.h"

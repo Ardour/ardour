@@ -23,9 +23,7 @@
 
 #include <boost/foreach.hpp>
 
-#include "pbd/filesystem.h"
 #include "pbd/file_utils.h"
-#include "pbd/search_path.h"
 #include "pbd/error.h"
 
 #include "ardour/filesystem_paths.h"

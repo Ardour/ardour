@@ -26,7 +26,6 @@
 #include "pbd/compose.h"
 #include "pbd/error.h"
 #include "pbd/file_utils.h"
-#include "pbd/filesystem.h"
 
 #include "ardour/session_state_utils.h"
 #include "ardour/filename_extensions.h"

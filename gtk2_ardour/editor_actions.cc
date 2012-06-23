@@ -20,9 +20,7 @@
 #include <gio/gio.h>
 #include <gtk/gtkiconfactory.h>
 
-#include "pbd/filesystem.h"
 #include "pbd/file_utils.h"
-#include "pbd/search_path.h"
 
 #include "gtkmm2ext/tearoff.h"
 

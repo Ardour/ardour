@@ -19,7 +19,6 @@
 
 #include <iostream>
 
-#include "pbd/filesystem.h"
 #include "pbd/file_utils.h"
 
 #include "gtkmm2ext/keyboard.h"

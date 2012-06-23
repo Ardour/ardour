@@ -45,9 +45,7 @@
 #include "pbd/file_utils.h"
 #include "pbd/convert.h"
 #include "pbd/strsplit.h"
-#include "pbd/strsplit.h"
 #include "pbd/unwind.h"
-#include "pbd/filesystem.h"
 
 #include "ardour/amp.h"
 #include "ardour/analyser.h"

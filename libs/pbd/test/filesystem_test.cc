@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include "filesystem_test.h"
 #include "pbd/file_utils.h"
-#include "pbd/filesystem.h"
 
 using namespace std;
 

@@ -22,8 +22,6 @@
 
 #include <sstream>
 
-#include "pbd/filesystem.h"
-
 #include "ardour/audioengine.h"
 #include "ardour/sndfile_helpers.h"
 
