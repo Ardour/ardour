@@ -39,7 +39,9 @@ using std::string;
 std::string
 user_config_directory ()
 {
-	std::string p;
+	static std::string p;
+
+	if (!p.empty()) return p;
 
 #ifdef __APPLE__
 	p = Glib::build_filename (Glib::get_home_dir(), "Library/Preferences");
