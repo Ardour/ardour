@@ -691,7 +691,10 @@ Session::remove_state (string snapshot_name)
 	}
 
 	// and delete it
-	sys::remove (xml_path);
+	if (g_remove (xml_path.c_str()) != 0) {
+		error << string_compose(_("Could not remove state file at path \"%1\" (%2)"),
+				xml_path, g_strerror (errno)) << endmsg;
+	}
 }
 
 #ifdef HAVE_JACK_SESSION
