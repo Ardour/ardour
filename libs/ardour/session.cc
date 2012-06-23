@@ -3343,10 +3343,9 @@ Session::new_midi_source_name (const string& base)
 
 			SessionDirectory sdir((*i).path);
 
-			sys::path p = sdir.midi_path();
-			p /= legalized;
+			std::string p = Glib::build_filename (sdir.midi_path(), legalized);
 
-			snprintf (buf, sizeof(buf), "%s-%u.mid", p.to_string().c_str(), cnt);
+			snprintf (buf, sizeof(buf), "%s-%u.mid", p.c_str(), cnt);
 
 			if (Glib::file_test (buf, Glib::FILE_TEST_EXISTS)) {
 				existing++;
