@@ -130,16 +130,6 @@ Ardour will play NO role in monitoring"))
         // setup_prerelease_page ();
 
 	if (new_user) {
-
-		/* Create the config directory so that we have somewhere to put the
-		   been_here_before file.
-		*/
-		try {
-			sys::create_directories (user_config_directory ());
-		}
-		catch (const sys::filesystem_error& ex) {
-			error << "Could not create user configuration directory" << endmsg;
-		}
 		
 		setup_new_user_page ();
 		setup_first_time_config_page ();
