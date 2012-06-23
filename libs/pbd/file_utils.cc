@@ -139,7 +139,7 @@ copy_file(const std::string & from_path, const std::string & to_path)
 
 	try
 	{
-		from_file->copy (to_file);
+		from_file->copy (to_file, Gio::FILE_COPY_OVERWRITE);
 	}
 	catch(const Glib::Exception& ex)
 	{

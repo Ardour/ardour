@@ -93,7 +93,7 @@ find_file_in_search_path (const SearchPath& search_path,
 
 /**
  * Attempt to copy the contents of the file from_path to a new file
- * at path to_path.
+ * at path to_path. If to_path exists it is overwritten.
  *
  * @return true if file was successfully copied
  */
