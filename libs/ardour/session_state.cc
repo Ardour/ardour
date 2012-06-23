@@ -632,6 +632,8 @@ Session::remove_pending_capture_state ()
 
 	pending_state_file_path = Glib::build_filename (pending_state_file_path, legalize_for_path (_current_snapshot_name) + pending_suffix);
 
+	if (!Glib::file_test (pending_state_file_path, Glib::FILE_TEST_EXISTS)) return;
+
 	if (g_remove (pending_state_file_path.c_str()) != 0) {
 		error << string_compose(_("Could not remove pending capture state at path \"%1\" (%2)"),
 				pending_state_file_path, g_strerror (errno)) << endmsg;
