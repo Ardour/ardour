@@ -25,7 +25,6 @@
 
 #include "pbd/failed_constructor.h"
 #include "pbd/xml++.h"
-#include "pbd/filesystem.h"
 #include "pbd/file_utils.h"
 #include "pbd/error.h"
 
@@ -160,10 +159,8 @@ UIConfiguration::save_state()
 {
 	XMLTree tree;
 
-	sys::path rcfile_path(user_config_directory());
-
-	rcfile_path /= "ardour3_ui.conf";
-	const string rcfile = rcfile_path.to_string();
+	std::string rcfile(user_config_directory());
+	rcfile = Glib::build_filename (rcfile, "ardour3_ui.conf");
 
 	// this test seems bogus?
 	if (rcfile.length()) {
