@@ -681,9 +681,9 @@ Session::remove_state (string snapshot_name)
 		return;
 	}
 
-	sys::path xml_path(_session_dir->root_path());
+	std::string xml_path(_session_dir->root_path());
 
-	xml_path /= legalize_for_path (snapshot_name) + statefile_suffix;
+	xml_path = Glib::build_filename (xml_path, legalize_for_path (snapshot_name) + statefile_suffix);
 
 	if (!create_backup_file (xml_path)) {
 		// don't remove it if a backup can't be made
@@ -753,7 +753,7 @@ int
 Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot)
 {
 	XMLTree tree;
-	sys::path xml_path(_session_dir->root_path());
+	std::string xml_path(_session_dir->root_path());
 
 	if (!_writable || (_state_of_the_state & CannotSave)) {
 		return 1;
@@ -788,7 +788,7 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 
 		/* proper save: use statefile_suffix (.ardour in English) */
 
-		xml_path /= legalize_for_path (snapshot_name) + statefile_suffix;
+		xml_path = Glib::build_filename (xml_path, legalize_for_path (snapshot_name) + statefile_suffix);
 
 		/* make a backup copy of the old file */
 
@@ -800,7 +800,7 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 	} else {
 
 		/* pending save: use pending_suffix (.pending in English) */
-		xml_path /= legalize_for_path (snapshot_name) + pending_suffix;
+		xml_path = Glib::build_filename (xml_path, legalize_for_path (snapshot_name) + pending_suffix);
 	}
 
 	sys::path tmp_path(_session_dir->root_path());
@@ -816,9 +816,9 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 
 	} else {
 
-		if (::rename (tmp_path.to_string().c_str(), xml_path.to_string().c_str()) != 0) {
+		if (::rename (tmp_path.to_string().c_str(), xml_path.c_str()) != 0) {
 			error << string_compose (_("could not rename temporary session file %1 to %2"),
-					tmp_path.to_string(), xml_path.to_string()) << endmsg;
+					tmp_path.to_string(), xml_path) << endmsg;
 			sys::remove (tmp_path);
 			return -1;
 		}

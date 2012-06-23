@@ -22,8 +22,6 @@
 #include <vector>
 #include <string>
 
-#include "pbd/filesystem.h"
-
 namespace ARDOUR {
 
 /**
@@ -34,7 +32,7 @@ namespace ARDOUR {
  *
  * @return true if successful, false otherwise.
  */
-bool create_backup_file (const PBD::sys::path & file_path);
+bool create_backup_file (const std::string & file_path);
 
 /**
  * Get the absolute paths to all state files in the directory

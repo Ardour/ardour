@@ -18,9 +18,12 @@
 
 #include <algorithm>
 
+#include <glibmm/fileutils.h>
+
 #include "pbd/compose.h"
 #include "pbd/error.h"
 #include "pbd/file_utils.h"
+#include "pbd/filesystem.h"
 
 #include "ardour/session_state_utils.h"
 #include "ardour/filename_extensions.h"
@@ -33,11 +36,11 @@ using namespace PBD;
 namespace ARDOUR {
 
 bool
-create_backup_file (const sys::path & file_path)
+create_backup_file (const std::string & file_path)
 {
-	if (!sys::exists (file_path)) return false;
+	if (!Glib::file_test (file_path, Glib::FILE_TEST_EXISTS)) return false;
 
-	sys::path backup_path(file_path.to_string() + backup_suffix);
+	std::string backup_path(file_path + backup_suffix);
 
 	try
 	{
@@ -46,7 +49,7 @@ create_backup_file (const sys::path & file_path)
 	catch(sys::filesystem_error& ex)
 	{
 		error << string_compose (_("Unable to create a backup copy of file %1 (%2)"),
-				file_path.to_string(), ex.what())
+				file_path, ex.what())
 			<< endmsg;
 		return false;
 	}
