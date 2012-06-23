@@ -192,7 +192,14 @@ path get_absolute_path (const path &);
 
 bool path_is_within (const path &, path);	
 
-bool equivalent_paths (const std::string &, const std::string &);
+/**
+ * @return true if p1 and p2 both resolve to the same file
+ * @param p1 a file path.
+ * @param p2 a file path.
+ *
+ * Uses g_stat to check for identical st_dev and st_ino values.
+ */
+bool equivalent_paths (const std::string &p1, const std::string &p2);
 
 } // namespace sys
 

@@ -219,7 +219,6 @@ get_absolute_path (const path & p)
 	return f->get_path ();
 }
 
-/** @return true if a and b have the same inode */
 bool
 equivalent_paths (const std::string& a, const std::string& b)
 {
