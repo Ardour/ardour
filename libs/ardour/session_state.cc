@@ -865,10 +865,10 @@ Session::load_state (string snapshot_name)
 
 	/* check for leftover pending state from a crashed capture attempt */
 
-	sys::path xmlpath(_session_dir->root_path());
-	xmlpath /= legalize_for_path (snapshot_name) + pending_suffix;
+	std::string xmlpath(_session_dir->root_path());
+	xmlpath = Glib::build_filename (xmlpath, legalize_for_path (snapshot_name) + pending_suffix);
 
-	if (Glib::file_test (xmlpath.to_string(), Glib::FILE_TEST_EXISTS)) {
+	if (Glib::file_test (xmlpath, Glib::FILE_TEST_EXISTS)) {
 
 		/* there is pending state from a crashed capture attempt */
 
@@ -879,15 +879,13 @@ Session::load_state (string snapshot_name)
 	}
 
 	if (!state_was_pending) {
-		xmlpath = _session_dir->root_path();
-		xmlpath /= snapshot_name;
+		xmlpath = Glib::build_filename (_session_dir->root_path(), snapshot_name);
 	}
 
-	if (!Glib::file_test (xmlpath.to_string(), Glib::FILE_TEST_EXISTS)) {
-                xmlpath = _session_dir->root_path();
-                xmlpath /= legalize_for_path (snapshot_name) + statefile_suffix;
-		if (!Glib::file_test (xmlpath.to_string(), Glib::FILE_TEST_EXISTS)) {
-                        error << string_compose(_("%1: session state information file \"%2\" doesn't exist!"), _name, xmlpath.to_string()) << endmsg;
+	if (!Glib::file_test (xmlpath, Glib::FILE_TEST_EXISTS)) {
+		xmlpath = Glib::build_filename (_session_dir->root_path(), legalize_for_path (snapshot_name) + statefile_suffix);
+		if (!Glib::file_test (xmlpath, Glib::FILE_TEST_EXISTS)) {
+                        error << string_compose(_("%1: session state information file \"%2\" doesn't exist!"), _name, xmlpath) << endmsg;
                         return 1;
                 }
         }
@@ -896,10 +894,10 @@ Session::load_state (string snapshot_name)
 
 	set_dirty();
 
-	_writable = exists_and_writable (xmlpath.to_string());
+	_writable = exists_and_writable (xmlpath);
 
-	if (!state_tree->read (xmlpath.to_string())) {
-		error << string_compose(_("Could not understand ardour file %1"), xmlpath.to_string()) << endmsg;
+	if (!state_tree->read (xmlpath)) {
+		error << string_compose(_("Could not understand ardour file %1"), xmlpath) << endmsg;
 		delete state_tree;
 		state_tree = 0;
 		return -1;
@@ -908,7 +906,7 @@ Session::load_state (string snapshot_name)
 	XMLNode& root (*state_tree->root());
 
 	if (root.name() != X_("Session")) {
-		error << string_compose (_("Session file %1 is not a session"), xmlpath.to_string()) << endmsg;
+		error << string_compose (_("Session file %1 is not a session"), xmlpath) << endmsg;
 		delete state_tree;
 		state_tree = 0;
 		return -1;
@@ -934,19 +932,19 @@ Session::load_state (string snapshot_name)
 
 	if (Stateful::loading_state_version < CURRENT_SESSION_FILE_VERSION && _writable) {
 
-		sys::path backup_path(_session_dir->root_path());
-
-		backup_path /= string_compose ("%1-%2%3", legalize_for_path (snapshot_name), Stateful::loading_state_version, statefile_suffix);
+		std::string backup_path(_session_dir->root_path());
+		std::string backup_filename = string_compose ("%1-%2%3", legalize_for_path (snapshot_name), Stateful::loading_state_version, statefile_suffix);
+		backup_path = Glib::build_filename (backup_path, backup_filename);
 
 		// only create a backup for a given statefile version once
 
-		if (!Glib::file_test (backup_path.to_string(), Glib::FILE_TEST_EXISTS)) {
+		if (!Glib::file_test (backup_path, Glib::FILE_TEST_EXISTS)) {
 			
 			info << string_compose (_("Copying old session file %1 to %2\nUse %2 with %3 versions before 2.0 from now on"),
-						xmlpath.to_string(), backup_path.to_string(), PROGRAM_NAME)
+						xmlpath, backup_path, PROGRAM_NAME)
 			     << endmsg;
 			
-			if (!copy_file (xmlpath.to_string(), backup_path.to_string())) {;
+			if (!copy_file (xmlpath, backup_path)) {;
 				return -1;
 			}
 		}
