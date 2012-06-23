@@ -12,7 +12,7 @@ void
 FilesystemTest::testPathIsWithin ()
 {
 	system ("rm -r foo");
-	PBD::sys::create_directories ("foo/bar/baz");
+	CPPUNIT_ASSERT (g_mkdir_with_parents ("foo/bar/baz", 0755) == 0);
 
 	CPPUNIT_ASSERT (PBD::path_is_within ("foo/bar/baz", "foo/bar/baz"));
 	CPPUNIT_ASSERT (PBD::path_is_within ("foo/bar", "foo/bar/baz"));

@@ -2032,14 +2032,9 @@ Session::save_template (string template_name)
 
 	sys::path user_template_dir(user_template_directory());
 
-	try
-	{
-		sys::create_directories (user_template_dir);
-	}
-	catch(sys::filesystem_error& ex)
-	{
+	if (g_mkdir_with_parents (user_template_dir.to_string().c_str(), 0755) != 0) {
 		error << string_compose(_("Could not create templates directory \"%1\" (%2)"),
-				user_template_dir.to_string(), ex.what()) << endmsg;
+				user_template_dir.to_string(), g_strerror (errno)) << endmsg;
 		return -1;
 	}
 
@@ -2055,7 +2050,11 @@ Session::save_template (string template_name)
 		return -1;
 	}
 	
-	sys::create_directories (template_dir_path);
+	if (g_mkdir_with_parents (template_dir_path.to_string().c_str(), 0755) != 0) {
+		error << string_compose(_("Could not create directory for Session template\"%1\" (%2)"),
+				template_dir_path.to_string(), g_strerror (errno)) << endmsg;
+		return -1;
+	}
 
 	/* file to write */
 	sys::path template_file_path = template_dir_path;
@@ -2070,7 +2069,13 @@ Session::save_template (string template_name)
 
 	sys::path template_plugin_state_path = template_dir_path;
 	template_plugin_state_path /= X_("plugins");
-	sys::create_directories (template_plugin_state_path);
+
+	if (g_mkdir_with_parents (template_plugin_state_path.to_string().c_str(), 0755) != 0) {
+		error << string_compose(_("Could not create directory for Session template plugin state\"%1\" (%2)"),
+				template_plugin_state_path.to_string(), g_strerror (errno)) << endmsg;
+		return -1;
+	}
+
 	copy_files (plugins_dir(), template_plugin_state_path.to_string());
 
 	return 0;
