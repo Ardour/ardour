@@ -1913,7 +1913,7 @@ Session::path_from_region_name (DataType type, string name, string identifier)
 	char buf[PATH_MAX+1];
 	uint32_t n;
 	SessionDirectory sdir(get_best_session_directory_for_new_source());
-	sys::path source_dir = ((type == DataType::AUDIO)
+	std::string source_dir = ((type == DataType::AUDIO)
 		? sdir.sound_path() : sdir.midi_path());
 
         string ext = native_header_format_extension (config.get_native_file_header_format(), type);
@@ -1927,10 +1927,10 @@ Session::path_from_region_name (DataType type, string name, string identifier)
 					n, ext.c_str());
 		}
 
-		sys::path source_path = source_dir / buf;
+		std::string source_path = Glib::build_filename (source_dir, buf);
 
-		if (!Glib::file_test (source_path.to_string(), Glib::FILE_TEST_EXISTS)) {
-			return source_path.to_string();
+		if (!Glib::file_test (source_path, Glib::FILE_TEST_EXISTS)) {
+			return source_path;
 		}
 	}
 
