@@ -160,14 +160,6 @@ UIConfiguration::save_state()
 {
 	XMLTree tree;
 
-	try {
-		sys::create_directories (user_config_directory ());
-	}
-	catch (const sys::filesystem_error& ex) {
-		error << "Could not create user configuration directory" << endmsg;
-		return -1;
-	}
-
 	sys::path rcfile_path(user_config_directory());
 
 	rcfile_path /= "ardour3_ui.conf";
