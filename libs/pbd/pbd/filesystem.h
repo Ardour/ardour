@@ -190,6 +190,11 @@ std::string extension (const path& p);
 
 path get_absolute_path (const path &);
 
+/**
+ * Find out if `needle' is a file or directory within the
+ * directory `haystack'.
+ * @return true if it is.
+ */
 bool path_is_within (const std::string &, std::string);
 
 /**

@@ -230,10 +230,6 @@ equivalent_paths (const std::string& a, const std::string& b)
 	return (rA == 0 && rB == 0 && bA.st_dev == bB.st_dev && bA.st_ino == bB.st_ino);
 }
 
-/** Find out if `needle' is a file or directory within the
- *  directory `haystack'.
- *  @return true if it is.
- */
 bool
 path_is_within (std::string const & haystack, std::string needle)
 {
