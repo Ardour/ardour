@@ -127,6 +127,9 @@ bool path_is_within (const std::string &, std::string);
  */
 bool equivalent_paths (const std::string &p1, const std::string &p2);
 
+/// @return true if path at p exists and is writable, false otherwise
+bool exists_and_writable(const std::string & p);
+
 } // namespace PBD
 
 #endif

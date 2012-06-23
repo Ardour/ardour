@@ -94,37 +94,6 @@ exists (const path & p)
 }
 
 bool
-exists_and_writable (const std::string & p)
-{
-	/* writable() really reflects the whole folder, but if for any
-	   reason the session state file can't be written to, still
-	   make us unwritable.
-	*/
-
-	struct stat statbuf;
-
-	if (g_stat (p.c_str(), &statbuf) != 0) {
-		/* doesn't exist - not writable */
-		return false;
-	} else {
-		if (!(statbuf.st_mode & S_IWUSR)) {
-			/* exists and is not writable */
-			return false;
-		}
-		/* filesystem may be mounted read-only, so even though file
-		 * permissions permit access, the mount status does not.
-		 * access(2) seems like the best test for this.
-		 */
-		if (g_access (p.to_string().c_str(), W_OK) != 0) {
-			return false;
-		}
-	}
-
-	return true;
-}
-
-
-bool
 is_directory (const path & p)
 {
 	return Glib::file_test (p.to_string(), Glib::FILE_TEST_IS_DIR);
