@@ -25,7 +25,6 @@
 #include <glibmm/miscutils.h>
 
 #include "pbd/xml++.h"
-#include "pbd/filesystem.h"
 #include "pbd/file_utils.h"
 
 #include "midi++/manager.h"
