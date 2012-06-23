@@ -221,12 +221,12 @@ get_absolute_path (const path & p)
 
 /** @return true if a and b have the same inode */
 bool
-inodes_same (const path& a, const path& b)
+equivalent_paths (const std::string& a, const std::string& b)
 {
 	struct stat bA;
-	int const rA = g_stat (a.to_string().c_str(), &bA);
+	int const rA = g_stat (a.c_str(), &bA);
 	struct stat bB;
-	int const rB = g_stat (b.to_string().c_str(), &bB);
+	int const rB = g_stat (b.c_str(), &bB);
 
 	return (rA == 0 && rB == 0 && bA.st_dev == bB.st_dev && bA.st_ino == bB.st_ino);
 }
@@ -239,7 +239,7 @@ bool
 path_is_within (path const & haystack, path needle)
 {
 	while (1) {
-		if (inodes_same (haystack, needle)) {
+		if (equivalent_paths (haystack.to_string(), needle.to_string())) {
 			return true;
 		}
 

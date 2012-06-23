@@ -277,7 +277,7 @@ FileSource::find (Session& s, DataType type, const string& path, bool must_exist
 			++j;
 			
 			while (j != hits.end()) {
-				if (PBD::sys::inodes_same (*i, *j)) {
+				if (PBD::sys::equivalent_paths (*i, *j)) {
 					/* *i and *j are the same file; break out of the loop early */
 					break;
 				}

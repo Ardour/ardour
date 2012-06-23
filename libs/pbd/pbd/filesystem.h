@@ -192,7 +192,7 @@ path get_absolute_path (const path &);
 
 bool path_is_within (const path &, path);	
 
-bool inodes_same (const path &, const path &);
+bool equivalent_paths (const std::string &, const std::string &);
 
 } // namespace sys
 
