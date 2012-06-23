@@ -23,6 +23,7 @@
 #include <algorithm>
 
 #include "pbd/error.h"
+#include "pbd/filesystem.h"
 
 #include "ardour/rc_configuration.h"
 #include "ardour/filesystem_paths.h"

@@ -26,6 +26,7 @@
 #include "pbd/error.h"
 #include "pbd/pathscanner.h"
 #include "pbd/replace_all.h"
+#include "pbd/filesystem.h"
 
 #include "ardour/filesystem_paths.h"
 
@@ -59,7 +60,7 @@ static SearchPath
 devprofile_search_path ()
 {
 	bool devprofile_path_defined = false;
-        sys::path spath_env (Glib::getenv (devprofile_env_variable_name, devprofile_path_defined));
+        std::string spath_env (Glib::getenv (devprofile_env_variable_name, devprofile_path_defined));
 
 	if (devprofile_path_defined) {
 		return spath_env;

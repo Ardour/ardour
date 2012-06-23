@@ -197,7 +197,7 @@ ControlProtocolManager::load_mandatory_protocols ()
 void
 ControlProtocolManager::discover_control_protocols ()
 {
-	vector<sys::path> cp_modules;
+	vector<std::string> cp_modules;
 
 	Glib::PatternSpec so_extension_pattern("*.so");
 	Glib::PatternSpec dylib_extension_pattern("*.dylib");
@@ -211,8 +211,8 @@ ControlProtocolManager::discover_control_protocols ()
 	DEBUG_TRACE (DEBUG::ControlProtocols, 
 		     string_compose (_("looking for control protocols in %1\n"), control_protocol_search_path().to_string()));
 	
-	for (vector<sys::path>::iterator i = cp_modules.begin(); i != cp_modules.end(); ++i) {
-		control_protocol_discover ((*i).to_string());
+	for (vector<std::string>::iterator i = cp_modules.begin(); i != cp_modules.end(); ++i) {
+		control_protocol_discover (*i);
 	}
 }
 

@@ -29,6 +29,7 @@
 #include "pbd/failed_constructor.h"
 #include "pbd/pathscanner.h"
 #include "pbd/xml++.h"
+#include "pbd/filesystem.h"
 
 #include "midi++/port.h"
 #include "midi++/manager.h"
@@ -147,8 +148,8 @@ GenericMidiControlProtocol::reload_maps ()
 {
 	vector<string *> *midi_maps;
 	PathScanner scanner;
-	SearchPath spath (system_midi_map_search_path());
-	spath += user_midi_map_directory ();
+	SearchPath spath (system_midi_map_search_path().to_string());
+	spath += user_midi_map_directory ().to_string();
 
 	midi_maps = scanner (spath.to_string(), midi_map_filter, 0, false, true);
 

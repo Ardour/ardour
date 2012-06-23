@@ -22,6 +22,7 @@
 #include "pbd/error.h"
 #include "pbd/compose.h"
 #include "pbd/strsplit.h"
+#include "pbd/filesystem.h"
 
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>
@@ -37,7 +38,7 @@ namespace ARDOUR {
 
 using std::string;
 
-sys::path
+std::string
 user_config_directory ()
 {
 	sys::path p;
@@ -87,10 +88,10 @@ user_config_directory ()
 		exit (1);
 	}
 
-	return p;
+	return p.to_string();
 }
 
-sys::path
+std::string
 ardour_dll_directory ()
 {
 	std::string s = Glib::getenv("ARDOUR_DLL_PATH");
@@ -98,7 +99,7 @@ ardour_dll_directory ()
 		std::cerr << _("ARDOUR_DLL_PATH not set in environment - exiting\n");
 		::exit (1);
 	}	
-	return sys::path (s);
+	return s;
 }
 
 SearchPath
@@ -119,7 +120,7 @@ ardour_config_search_path ()
 		std::vector<string> ss;
 		split (s, ss, ':');
 		for (std::vector<string>::iterator i = ss.begin(); i != ss.end(); ++i) {
-			sp += sys::path (*i);
+			sp += *i;
 		}
 		
 		search_path = sp;
@@ -147,7 +148,7 @@ ardour_data_search_path ()
 		std::vector<string> ss;
 		split (s, ss, ':');
 		for (std::vector<string>::iterator i = ss.begin(); i != ss.end(); ++i) {
-			sp += sys::path (*i);
+			sp += *i;
 		}
 		
 		search_path = sp;

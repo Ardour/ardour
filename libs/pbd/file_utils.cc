@@ -20,6 +20,7 @@
 #include <algorithm>
 
 #include <glibmm/fileutils.h>
+#include <glibmm/miscutils.h>
 #include <glibmm/pattern.h>
 
 #include "pbd/compose.h"
@@ -32,13 +33,13 @@ using namespace std;
 namespace PBD {
 
 void
-get_files_in_directory (const sys::path& directory_path, vector<string>& result)
+get_files_in_directory (const std::string& directory_path, vector<string>& result)
 {
-	if (!is_directory(directory_path)) return;
+	if (!Glib::file_test (directory_path, Glib::FILE_TEST_IS_DIR)) return;
 
 	try
 	{
-		Glib::Dir dir(directory_path.to_string());
+		Glib::Dir dir(directory_path);
 		std::copy(dir.begin(), dir.end(), std::back_inserter(result));
 	}
 	catch (Glib::FileError& err)
@@ -48,9 +49,9 @@ get_files_in_directory (const sys::path& directory_path, vector<string>& result)
 }
 
 void
-find_matching_files_in_directory (const sys::path& directory,
+find_matching_files_in_directory (const std::string& directory,
                                   const Glib::PatternSpec& pattern,
-                                  vector<sys::path>& result)
+                                  vector<std::string>& result)
 {
 	vector<string> tmp_files;
 
@@ -63,19 +64,19 @@ find_matching_files_in_directory (const sys::path& directory,
 	{
 		if (!pattern.match(*file_iter)) continue;
 
-		sys::path full_path(directory);
-		full_path /= *file_iter;
+		std::string full_path(directory);
+		full_path = Glib::build_filename (full_path, *file_iter);
 
 		result.push_back(full_path);
 	}
 }
 
 void
-find_matching_files_in_directories (const vector<sys::path>& paths,
+find_matching_files_in_directories (const vector<std::string>& paths,
                                     const Glib::PatternSpec& pattern,
-                                    vector<sys::path>& result)
+                                    vector<std::string>& result)
 {
-	for (vector<sys::path>::const_iterator path_iter = paths.begin();
+	for (vector<std::string>::const_iterator path_iter = paths.begin();
 			path_iter != paths.end();
 			++path_iter)
 	{
@@ -86,7 +87,7 @@ find_matching_files_in_directories (const vector<sys::path>& paths,
 void
 find_matching_files_in_search_path (const SearchPath& search_path,
                                     const Glib::PatternSpec& pattern,
-                                    vector<sys::path>& result)
+                                    vector<std::string>& result)
 {
 	find_matching_files_in_directories (search_path, pattern, result);    
 }
@@ -94,9 +95,9 @@ find_matching_files_in_search_path (const SearchPath& search_path,
 bool
 find_file_in_search_path(const SearchPath& search_path,
                          const string& filename,
-                         sys::path& result)
+                         std::string& result)
 {
-	vector<sys::path> tmp;
+	vector<std::string> tmp;
 	Glib::PatternSpec tmp_pattern(filename);
 
 	find_matching_files_in_search_path (search_path, tmp_pattern, tmp);
@@ -113,7 +114,7 @@ find_file_in_search_path(const SearchPath& search_path,
 			(
 			 "Found more than one file matching %1 in search path %2",
 			 filename,
-			 search_path.to_string ()
+			 search_path ()
 			)
 			<< endmsg;
 	}

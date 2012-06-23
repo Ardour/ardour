@@ -20,6 +20,8 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include <glibmm/fileutils.h>
+
 #include "pbd/file_utils.h"
 #include "pbd/error.h"
 
@@ -33,7 +35,6 @@ using namespace ARDOUR;
 using namespace MIDI;
 using namespace MIDI::Name;
 using namespace PBD;
-using namespace PBD::sys;
 
 MidiPatchManager* MidiPatchManager::_manager = 0;
 
@@ -56,23 +57,23 @@ MidiPatchManager::add_session_patches ()
 		return;
 	}
 	
-	path path_to_patches = _session->session_directory().midi_patch_path();
+	std::string path_to_patches = _session->session_directory().midi_patch_path();
 
-	if (!exists (path_to_patches)) {
+	if (!Glib::file_test (path_to_patches, Glib::FILE_TEST_EXISTS)) {
 		return;
 	}
 
-	assert(is_directory(path_to_patches));
+	assert (Glib::file_test (path_to_patches, Glib::FILE_TEST_IS_DIR));
 
 	Glib::PatternSpec pattern(string("*.midnam"));
-	vector<path> result;
+	vector<std::string> result;
 
 	find_matching_files_in_directory (path_to_patches, pattern, result);
 
-	info << "Loading " << result.size() << " MIDI patches from " << path_to_patches.to_string() << endmsg;
+	info << "Loading " << result.size() << " MIDI patches from " << path_to_patches << endmsg;
 
-	for (vector<path>::iterator i = result.begin(); i != result.end(); ++i) {
-		boost::shared_ptr<MIDINameDocument> document(new MIDINameDocument(i->to_string()));
+	for (vector<std::string>::iterator i = result.begin(); i != result.end(); ++i) {
+		boost::shared_ptr<MIDINameDocument> document(new MIDINameDocument(*i));
 		for (MIDINameDocument::MasterDeviceNamesList::const_iterator device =
 					document->master_device_names_by_model().begin();
 				device != document->master_device_names_by_model().end();
@@ -101,14 +102,14 @@ MidiPatchManager::refresh()
 
 	SearchPath search_path = midi_patch_search_path ();
 	Glib::PatternSpec pattern (string("*.midnam"));
-	vector<path> result;
+	vector<std::string> result;
 
 	find_matching_files_in_search_path (search_path, pattern, result);
 
 	info << "Loading " << result.size() << " MIDI patches from " << search_path.to_string() << endmsg;
 
-	for (vector<path>::iterator i = result.begin(); i != result.end(); ++i) {
-		boost::shared_ptr<MIDINameDocument> document(new MIDINameDocument(i->to_string()));
+	for (vector<std::string>::iterator i = result.begin(); i != result.end(); ++i) {
+		boost::shared_ptr<MIDINameDocument> document(new MIDINameDocument(*i));
 		for (MIDINameDocument::MasterDeviceNamesList::const_iterator device =
 					document->master_device_names_by_model().begin();
 				device != document->master_device_names_by_model().end();

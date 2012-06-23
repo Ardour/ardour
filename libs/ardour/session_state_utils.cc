@@ -54,8 +54,8 @@ create_backup_file (const sys::path & file_path)
 }
 
 void
-get_state_files_in_directory (const sys::path & directory_path,
-			      vector<sys::path> & result)
+get_state_files_in_directory (const std::string & directory_path,
+			      vector<std::string> & result)
 {
 	Glib::PatternSpec state_file_pattern('*' + string(statefile_suffix));
 
@@ -64,7 +64,7 @@ get_state_files_in_directory (const sys::path & directory_path,
 }
 
 vector<string>
-get_file_names_no_extension (const vector<sys::path> & file_paths)
+get_file_names_no_extension (const vector<std::string> & file_paths)
 {
 	vector<string> result;
 

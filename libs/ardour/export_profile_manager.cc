@@ -26,6 +26,7 @@
 #include "pbd/enumwriter.h"
 #include "pbd/xml++.h"
 #include "pbd/convert.h"
+#include "pbd/filesystem.h"
 
 #include "ardour/export_profile_manager.h"
 #include "ardour/export_format_specification.h"
@@ -165,9 +166,9 @@ ExportProfileManager::load_preset (ExportPresetPtr preset)
 void
 ExportProfileManager::load_presets ()
 {
-	vector<sys::path> found = find_file (string_compose (X_("*%1"),export_preset_suffix));
+	vector<std::string> found = find_file (string_compose (X_("*%1"),export_preset_suffix));
 
-	for (vector<sys::path>::iterator it = found.begin(); it != found.end(); ++it) {
+	for (vector<std::string>::iterator it = found.begin(); it != found.end(); ++it) {
 		load_preset_from_disk (*it);
 	}
 }
@@ -300,10 +301,10 @@ ExportProfileManager::serialize_local_profile (XMLNode & root)
 	}
 }
 
-std::vector<sys::path>
+std::vector<std::string>
 ExportProfileManager::find_file (std::string const & pattern)
 {
-	vector<sys::path> found;
+	vector<std::string> found;
 
 	Glib::PatternSpec pattern_spec (pattern);
 	find_matching_files_in_search_path (search_path, pattern_spec, found);
@@ -669,9 +670,9 @@ ExportProfileManager::serialize_format (FormatStatePtr state)
 void
 ExportProfileManager::load_formats ()
 {
-	vector<sys::path> found = find_file (string_compose ("*%1", export_format_suffix));
+	vector<std::string> found = find_file (string_compose ("*%1", export_format_suffix));
 
-	for (vector<sys::path>::iterator it = found.begin(); it != found.end(); ++it) {
+	for (vector<std::string>::iterator it = found.begin(); it != found.end(); ++it) {
 		load_format_from_disk (*it);
 	}
 }

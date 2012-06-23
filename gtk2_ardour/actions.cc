@@ -67,7 +67,7 @@ vector<RefPtr<Gtk::Action> > ActionManager::edit_point_in_region_sensitive_actio
 void
 ActionManager::init ()
 {
-	sys::path ui_file;
+	std::string ui_file;
 
 	ui_manager = UIManager::create ();
 
@@ -76,8 +76,8 @@ ActionManager::init ()
 	bool loaded = false;
 
 	try {
-		ui_manager->add_ui_from_file (ui_file.to_string());
-		info << string_compose (_("Loading menus from %1"), ui_file.to_string()) << endmsg;
+		ui_manager->add_ui_from_file (ui_file);
+		info << string_compose (_("Loading menus from %1"), ui_file) << endmsg;
 		loaded = true;
 	} catch (Glib::MarkupError& err) {
 		error << string_compose (_("badly formatted UI definition file: %1"), err.what()) << endmsg;

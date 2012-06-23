@@ -46,6 +46,7 @@
 
 #include "pbd/pathscanner.h"
 #include "pbd/whitespace.h"
+#include "pbd/filesystem.h"
 
 #include "ardour/debug.h"
 #include "ardour/filesystem_paths.h"

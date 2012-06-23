@@ -15,26 +15,7 @@ bool
 create_session_directory (const string& session_directory_path)
 {
 	SessionDirectory sdir(session_directory_path);
-
-	try
-	{
-		// create all the required session directories
-		sdir.create();
-	}
-	catch(sys::filesystem_error& ex)
-	{
-		// log the exception
-		warning << string_compose
-			(
-			 _("Unable to create session directory at path %1 : %2"),
-			 session_directory_path,
-			 ex.what()
-			);
-
-		return false;
-	}
-
-	// successfully created the session directory
+	sdir.create();
 	return true;
 }
 

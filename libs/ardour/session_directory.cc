@@ -16,6 +16,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <glibmm/fileutils.h>
+#include <glibmm/miscutils.h>
+
 #include "pbd/error.h"
 #include "pbd/compose.h"
 #include "pbd/filesystem.h"
@@ -31,7 +34,7 @@ namespace ARDOUR {
 using namespace std;
 using namespace PBD::sys;
 
-SessionDirectory::SessionDirectory (const path& session_path)
+SessionDirectory::SessionDirectory (const std::string& session_path)
 	: m_root_path(session_path)
 {
 
@@ -49,20 +52,16 @@ SessionDirectory::create ()
 {
 	bool is_new = false;
 
-	vector<path> sub_dirs = sub_directories ();
-	for (vector<path>::const_iterator i = sub_dirs.begin(); i != sub_dirs.end(); ++i)
+	vector<std::string> sub_dirs = sub_directories ();
+	for (vector<std::string>::const_iterator i = sub_dirs.begin(); i != sub_dirs.end(); ++i)
 	{
-		try
-		{
-			if(create_directories(*i)) is_new = true;
+		if (Glib::file_test (*i, Glib::FILE_TEST_EXISTS)) {
+			is_new = false;
 		}
-		catch (PBD::sys::filesystem_error& ex)
-		{
-			// log the error
-			PBD::error << string_compose(_("Cannot create Session directory at path %1 Error: %2"), (*i).to_string(), ex.what()) << endmsg;
 
-			// and rethrow
-			throw ex;
+		if (g_mkdir_with_parents (i->c_str(), 0755) != 0) {
+			PBD::error << string_compose(_("Cannot create Session directory at path %1 Error: %2"), *i, g_strerror(errno)) << endmsg;
+
 		}
 	}
 
@@ -72,82 +71,84 @@ SessionDirectory::create ()
 bool
 SessionDirectory::is_valid () const
 {
-	if (!is_directory (m_root_path)) return false;
+	if (!Glib::file_test (m_root_path, Glib::FILE_TEST_IS_DIR)) return false;
 
-	vector<path> sub_dirs = sub_directories ();
+	vector<std::string> sub_dirs = sub_directories ();
 
-	for (vector<path>::iterator i = sub_dirs.begin(); i != sub_dirs.end(); ++i) {
-		if (!is_directory (*i)) {
-			PBD::warning << string_compose(_("Session subdirectory does not exist at path %1"), (*i).to_string()) << endmsg;
+	for (vector<std::string>::iterator i = sub_dirs.begin(); i != sub_dirs.end(); ++i) {
+		if (!Glib::file_test (*i, Glib::FILE_TEST_IS_DIR)) {
+			PBD::warning << string_compose(_("Session subdirectory does not exist at path %1"), *i) << endmsg;
 			return false;
 		}
 	}
 	return true;
 }
 
-const path
+const std::string
 SessionDirectory::old_sound_path () const
 {
-	return m_root_path / old_sound_dir_name;
+	return Glib::build_filename (m_root_path, old_sound_dir_name);
 }
 
-const path
+const std::string
 SessionDirectory::sources_root () const
 {
+	// fix this later
 	path p = m_root_path;
 
 	if (p.leaf() == ".") {
 		p = PBD::sys::get_absolute_path (m_root_path);
 	}
-	
+
 	const string legalized_root (legalize_for_path (p.leaf ()));
 
-	return m_root_path / interchange_dir_name / legalized_root;
+	path sources_root_path = m_root_path / interchange_dir_name / legalized_root;
+	return sources_root_path.to_string ();
 }
 
-const path
+const std::string
 SessionDirectory::sound_path () const
 {
-	if(is_directory (old_sound_path ())) return old_sound_path();
+	if (Glib::file_test (old_sound_path (), Glib::FILE_TEST_IS_DIR)) return old_sound_path();
 
 	// the new style sound directory
-	return sources_root() / sound_dir_name;
+	return Glib::build_filename (sources_root(), sound_dir_name);
 }
 
-const path
+const std::string
 SessionDirectory::midi_path () const
 {
-	return sources_root() / midi_dir_name;
+	return Glib::build_filename (sources_root(), midi_dir_name);
 }
 
-const path
+const std::string
 SessionDirectory::midi_patch_path () const
 {
-	return sources_root() / midi_patch_dir_name;
+	return Glib::build_filename (sources_root(), midi_patch_dir_name);
 }
 
-const path
+const std::string
 SessionDirectory::peak_path () const
 {
-	return m_root_path / peak_dir_name;
+	return Glib::build_filename (m_root_path, peak_dir_name);
 }
 
-const path
+const std::string
 SessionDirectory::dead_path () const
 {
-	return m_root_path / dead_dir_name;
+	return Glib::build_filename (m_root_path, dead_dir_name);
 }
 
-const path
+const std::string
 SessionDirectory::export_path () const
 {
-	return m_root_path / export_dir_name;
+	return Glib::build_filename (m_root_path, export_dir_name);
 }
 
-const vector<path>
+const vector<std::string>
 SessionDirectory::sub_directories () const
 {
-	vector<path> tmp_paths;
+	vector<std::string> tmp_paths;
 
 	tmp_paths.push_back (sound_path ());
 	tmp_paths.push_back (midi_path ());

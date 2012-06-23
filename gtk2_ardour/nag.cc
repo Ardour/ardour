@@ -94,7 +94,7 @@ NagScreen::maybe_nag (std::string why)
 	bool really_subscribed;
 	bool maybe_subscribed;
 
-	path = Glib::build_filename (user_config_directory().to_string(), ".nevernag");
+	path = Glib::build_filename (user_config_directory(), ".nevernag");
 
 	if (Glib::file_test (path, Glib::FILE_TEST_EXISTS)) {
 		return 0;
@@ -114,7 +114,7 @@ NagScreen::mark_never_again ()
 {
 	std::string path;
 
-	path = Glib::build_filename (user_config_directory().to_string(), ".nevernag");
+	path = Glib::build_filename (user_config_directory(), ".nevernag");
 
 	ofstream nagfile (path.c_str());
 }
@@ -124,7 +124,7 @@ NagScreen::mark_subscriber ()
 {
 	std::string path;
 
-	path = Glib::build_filename (user_config_directory().to_string(), ".askedaboutsub");
+	path = Glib::build_filename (user_config_directory(), ".askedaboutsub");
 
 	ofstream subsfile (path.c_str());
 }
@@ -134,7 +134,7 @@ NagScreen::mark_affirmed_subscriber ()
 {
 	std::string path;
 
-	path = Glib::build_filename (user_config_directory().to_string(), ".isubscribe");
+	path = Glib::build_filename (user_config_directory(), ".isubscribe");
 
 	ofstream subsfile (path.c_str());
 }
@@ -152,13 +152,13 @@ NagScreen::is_subscribed (bool& really)
 	   subscribed. we try to trust our users :)
 	*/
 
-	path = Glib::build_filename (user_config_directory().to_string(), ".isubscribe");
+	path = Glib::build_filename (user_config_directory(), ".isubscribe");
 	if (file_test (path, FILE_TEST_EXISTS)) {
 		really = true;
 		return true;
 	}
 
-	path = Glib::build_filename (user_config_directory().to_string(), ".askedaboutsub");
+	path = Glib::build_filename (user_config_directory(), ".askedaboutsub");
 	if (file_test (path, FILE_TEST_EXISTS)) {
 		/* they never said they were subscribed but they
 		   did once express an interest in it.

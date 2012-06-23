@@ -36,17 +36,8 @@ SearchPath
 export_formats_search_path ()
 {
 	SearchPath spath;
-
-	spath = user_config_directory ();
-	spath.add_subdirectory_to_paths (export_formats_dir_name);
-
-	bool export_path_defined = false;
-	SearchPath spath_env = Glib::getenv (export_env_variable_name, export_path_defined);	
-
-	if (export_path_defined) {
-		spath += spath_env;
-	}
-
+	spath += Glib::build_filename (user_config_directory (), export_formats_dir_name);
+	spath += SearchPath(Glib::getenv (export_env_variable_name));
 	return spath;
 }
 

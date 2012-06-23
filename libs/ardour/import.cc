@@ -184,7 +184,7 @@ get_paths_for_new_sources (HeaderFormat hf, const bool allow_replacing, const st
 		const DataType type = SMFSource::safe_midi_file_extension (import_file_path) ? DataType::MIDI : DataType::AUDIO;
 
 		std::string filepath = (type == DataType::MIDI)
-			? sdir.midi_path().to_string() : sdir.sound_path().to_string();
+			? sdir.midi_path() : sdir.sound_path();
 
 		filepath = Glib::build_filename (filepath,
 		                                 get_non_existent_filename (hf, type, allow_replacing, filepath, basename, n, channels));

@@ -62,7 +62,7 @@ PannerManager::instance ()
 void
 PannerManager::discover_panners ()
 {
-	vector<sys::path> panner_modules;
+	vector<std::string> panner_modules;
 
 	Glib::PatternSpec so_extension_pattern("*.so");
 	Glib::PatternSpec dylib_extension_pattern("*.dylib");
@@ -75,8 +75,8 @@ PannerManager::discover_panners ()
 
 	DEBUG_TRACE (DEBUG::Panning, string_compose (_("looking for panners in %1"), panner_search_path().to_string()));
 
-	for (vector<sys::path>::iterator i = panner_modules.begin(); i != panner_modules.end(); ++i) {
-		panner_discover ((*i).to_string());
+	for (vector<std::string>::iterator i = panner_modules.begin(); i != panner_modules.end(); ++i) {
+		panner_discover (*i);
 	}
 }
 int

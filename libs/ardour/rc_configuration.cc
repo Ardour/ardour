@@ -77,13 +77,12 @@ RCConfiguration::~RCConfiguration ()
 int
 RCConfiguration::load_state ()
 {
-	sys::path system_rc_file;
+	std::string rcfile;
 	struct stat statbuf;
 
 	/* load system configuration first */
 
-	if (find_file_in_search_path (ardour_config_search_path(), "ardour_system.rc", system_rc_file)) {
-		string rcfile = system_rc_file.to_string();
+	if (find_file_in_search_path (ardour_config_search_path(), "ardour_system.rc", rcfile)) {
 
 		/* stupid XML Parser hates empty files */
 
@@ -111,10 +110,7 @@ RCConfiguration::load_state ()
 
 	/* now load configuration file for user */
 
-	sys::path user_rc_file;
-
-	if (find_file_in_search_path (ardour_config_search_path(), "ardour.rc", user_rc_file)) {
-		string rcfile = user_rc_file.to_string();
+	if (find_file_in_search_path (ardour_config_search_path(), "ardour.rc", rcfile)) {
 
 		/* stupid XML parser hates empty files */
 

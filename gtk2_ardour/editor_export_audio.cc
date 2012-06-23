@@ -232,7 +232,7 @@ Editor::write_region (string path, boost::shared_ptr<AudioRegion> region)
 	vector<boost::shared_ptr<AudioFileSource> > sources;
 	uint32_t nchans;
 
-	const string sound_directory = _session->session_directory().sound_path().to_string();
+	const string sound_directory = _session->session_directory().sound_path();
 
 	nchans = region->n_channels();
 
@@ -382,7 +382,7 @@ Editor::write_audio_range (AudioPlaylist& playlist, const ChanCount& count, list
 	string path;
 	vector<boost::shared_ptr<AudioFileSource> > sources;
 
-	const string sound_directory = _session->session_directory().sound_path().to_string();
+	const string sound_directory = _session->session_directory().sound_path();
 
 	uint32_t channels = count.n_audio();
 

@@ -933,11 +933,11 @@ ArdourStartup::redisplay_recent_sessions ()
 
 	for (vector<sys::path>::const_iterator i = session_directories.begin(); i != session_directories.end(); ++i)
 	{
-		std::vector<sys::path> state_file_paths;
+		std::vector<std::string> state_file_paths;
 
 		// now get available states for this session
 
-		get_state_files_in_directory (*i, state_file_paths);
+		get_state_files_in_directory ((*i).to_string (), state_file_paths);
 
 		vector<string*>* states;
 		vector<const gchar*> item;

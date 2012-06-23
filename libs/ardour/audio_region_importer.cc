@@ -22,6 +22,8 @@
 
 #include <sstream>
 
+#include <glibmm/miscutils.h>
+
 #include "pbd/failed_constructor.h"
 #include "pbd/compose.h"
 #include "pbd/error.h"
@@ -292,12 +294,8 @@ AudioRegionImporter::parse_source_xml ()
 PBD::sys::path
 AudioRegionImporter::get_sound_dir (XMLTree const & tree)
 {
-	PBD::sys::path source_dir = tree.filename();
-	source_dir = source_dir.branch_path();
-	SessionDirectory session_dir(source_dir);
-	source_dir = session_dir.sound_path();
-
-	return source_dir;
+	SessionDirectory session_dir(Glib::path_get_dirname (tree.filename()));
+	return session_dir.sound_path();
 }
 
 void

@@ -47,6 +47,7 @@
 #include "pbd/strsplit.h"
 #include "pbd/strsplit.h"
 #include "pbd/unwind.h"
+#include "pbd/filesystem.h"
 
 #include "ardour/amp.h"
 #include "ardour/analyser.h"
@@ -3199,7 +3200,7 @@ Session::new_source_path_from_name (DataType type, const string& name)
 
 	SessionDirectory sdir(get_best_session_directory_for_new_source());
 
-	sys::path p;
+	std::string p;
 	if (type == DataType::AUDIO) {
 		p = sdir.sound_path();
 	} else if (type == DataType::MIDI) {
@@ -3209,16 +3210,13 @@ Session::new_source_path_from_name (DataType type, const string& name)
 		return "";
 	}
 
-	p /= name;
-	return p.to_string();
+	return Glib::build_filename (p, name);
 }
 
 string
 Session::peak_path (string base) const
 {
-	sys::path peakfile_path(_session_dir->peak_path());
-	peakfile_path /= base + peakfile_suffix;
-	return peakfile_path.to_string();
+	return Glib::build_filename (_session_dir->peak_path(), base + peakfile_suffix);
 }
 
 /** Return a unique name based on \a base for a new internal audio source */
@@ -3282,7 +3280,7 @@ Session::new_audio_source_name (const string& base, uint32_t nchan, uint32_t cha
 
 			SessionDirectory sdir((*i).path);
 
-			string spath = sdir.sound_path().to_string();
+			string spath = sdir.sound_path();
 
 			/* note that we search *without* the extension so that
 			   we don't end up both "Audio 1-1.wav" and "Audio 1-1.caf"
@@ -3955,7 +3953,7 @@ Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
 	framepos_t to_do;
 	BufferSet buffers;
 	SessionDirectory sdir(get_best_session_directory_for_new_source ());
-	const string sound_dir = sdir.sound_path().to_string();
+	const string sound_dir = sdir.sound_path();
 	framepos_t len = end - start;
 	bool need_block_size_reset = false;
 	string ext;
@@ -4441,10 +4439,10 @@ Session::source_search_path (DataType type) const
 	if (session_dirs.size() == 1) {
 		switch (type) {
 		case DataType::AUDIO:
-			s.push_back ( _session_dir->sound_path().to_string());
+			s.push_back ( _session_dir->sound_path());
 			break;
 		case DataType::MIDI:
-			s.push_back (_session_dir->midi_path().to_string());
+			s.push_back (_session_dir->midi_path());
 			break;
 		}
 	} else {
@@ -4452,10 +4450,10 @@ Session::source_search_path (DataType type) const
 			SessionDirectory sdir (i->path);
 			switch (type) {
 			case DataType::AUDIO:
-				s.push_back (sdir.sound_path().to_string());
+				s.push_back (sdir.sound_path());
 				break;
 			case DataType::MIDI:
-			        s.push_back (sdir.midi_path().to_string());
+			        s.push_back (sdir.midi_path());
 				break;
 			}
 		}

@@ -498,14 +498,14 @@ get_xpm (std::string name)
 
 		spath.add_subdirectory_to_paths("pixmaps");
 
-		sys::path data_file_path;
+		std::string data_file_path;
 
 		if(!find_file_in_search_path (spath, name, data_file_path)) {
 			fatal << string_compose (_("cannot find XPM file for %1"), name) << endmsg;
 		}
 
 		try {
-			xpm_map[name] =  Gdk::Pixbuf::create_from_file (data_file_path.to_string());
+			xpm_map[name] =  Gdk::Pixbuf::create_from_file (data_file_path);
 		} catch(const Glib::Error& e)	{
 			warning << "Caught Glib::Error: " << e.what() << endmsg;
 		}
@@ -524,13 +524,13 @@ get_icon_path (const char* cname)
 
 	spath.add_subdirectory_to_paths("icons");
 
-	sys::path data_file_path;
+	std::string data_file_path;
 
 	if (!find_file_in_search_path (spath, name, data_file_path)) {
 		fatal << string_compose (_("cannot find icon image for %1 using %2"), name, spath.to_string()) << endmsg;
 	}
 
-	return data_file_path.to_string();
+	return data_file_path;
 }
 
 Glib::RefPtr<Gdk::Pixbuf>

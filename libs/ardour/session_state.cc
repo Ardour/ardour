@@ -288,7 +288,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 int
 Session::second_stage_init ()
 {
-	AudioFileSource::set_peak_dir (_session_dir->peak_path().to_string());
+	AudioFileSource::set_peak_dir (_session_dir->peak_path());
 
 	if (!_is_new) {
 		if (load_state (_current_snapshot_name)) {
@@ -392,7 +392,7 @@ Session::raid_path () const
 	SearchPath raid_search_path;
 
 	for (vector<space_and_path>::const_iterator i = session_dirs.begin(); i != session_dirs.end(); ++i) {
-		raid_search_path += sys::path((*i).path);
+		raid_search_path += (*i).path;
 	}
 
 	return raid_search_path.to_string ();
@@ -415,7 +415,7 @@ Session::setup_raid_path (string path)
 	SearchPath midi_search_path;
 
 	for (SearchPath::const_iterator i = search_path.begin(); i != search_path.end(); ++i) {
-		sp.path = (*i).to_string ();
+		sp.path = *i;
 		sp.blocks = 0; // not needed
 		session_dirs.push_back (sp);
 
@@ -445,35 +445,35 @@ Session::ensure_subdirs ()
 {
 	string dir;
 
-	dir = session_directory().peak_path().to_string();
+	dir = session_directory().peak_path();
 
 	if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
 		error << string_compose(_("Session: cannot create session peakfile folder \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
 		return -1;
 	}
 
-	dir = session_directory().sound_path().to_string();
+	dir = session_directory().sound_path();
 
 	if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
 		error << string_compose(_("Session: cannot create session sounds dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
 		return -1;
 	}
 
-	dir = session_directory().midi_path().to_string();
+	dir = session_directory().midi_path();
 
 	if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
 		error << string_compose(_("Session: cannot create session midi dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
 		return -1;
 	}
 
-	dir = session_directory().dead_path().to_string();
+	dir = session_directory().dead_path();
 
 	if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
 		error << string_compose(_("Session: cannot create session dead sounds folder \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
 		return -1;
 	}
 
-	dir = session_directory().export_path().to_string();
+	dir = session_directory().export_path();
 
 	if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
 		error << string_compose(_("Session: cannot create session export folder \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
@@ -656,8 +656,8 @@ Session::rename_state (string old_name, string new_name)
 	const string old_xml_filename = legalize_for_path (old_name) + statefile_suffix;
 	const string new_xml_filename = legalize_for_path (new_name) + statefile_suffix;
 
-	const sys::path old_xml_path = _session_dir->root_path() / old_xml_filename;
-	const sys::path new_xml_path = _session_dir->root_path() / new_xml_filename;
+	const sys::path old_xml_path(Glib::build_filename (_session_dir->root_path(), old_xml_filename));
+	const sys::path new_xml_path(Glib::build_filename (_session_dir->root_path(), new_xml_filename));
 
 	try
 	{
@@ -1226,7 +1226,7 @@ Session::set_state (const XMLNode& node, int version)
 		}
 	}
 
-	setup_raid_path(_session_dir->root_path().to_string());
+	setup_raid_path(_session_dir->root_path());
 
 	if ((prop = node.property (X_("id-counter"))) != 0) {
 		uint64_t x;
@@ -2134,7 +2134,7 @@ string
 Session::get_best_session_directory_for_new_source ()
 {
 	vector<space_and_path>::iterator i;
-	string result = _session_dir->root_path().to_string();
+	string result = _session_dir->root_path();
 
 	/* handle common case without system calls */
 
@@ -2750,7 +2750,7 @@ Session::cleanup_sources (CleanupReport& rep)
 		++nexti;
 
 		SessionDirectory sdir ((*i).path);
-		audio_path += sdir.sound_path().to_string();
+		audio_path += sdir.sound_path();
 
 		if (nexti != session_dirs.end()) {
 			audio_path += ':';
@@ -2768,7 +2768,7 @@ Session::cleanup_sources (CleanupReport& rep)
 		++nexti;
 
 		SessionDirectory sdir ((*i).path);
-		midi_path += sdir.midi_path().to_string();
+		midi_path += sdir.midi_path();
 
 		if (nexti != session_dirs.end()) {
 			midi_path += ':';
@@ -3252,8 +3252,8 @@ Session::save_history (string snapshot_name)
 
 	const string history_filename = legalize_for_path (snapshot_name) + history_suffix;
 	const string backup_filename = history_filename + backup_suffix;
-	const sys::path xml_path = _session_dir->root_path() / history_filename;
-	const sys::path backup_path = _session_dir->root_path() / backup_filename;
+	const sys::path xml_path(Glib::build_filename (_session_dir->root_path(), history_filename));
+	const sys::path backup_path(Glib::build_filename (_session_dir->root_path(), backup_filename));
 
 	if (sys::exists (xml_path)) {
 		try
@@ -3304,7 +3304,7 @@ Session::restore_history (string snapshot_name)
 	}
 
 	const string xml_filename = legalize_for_path (snapshot_name) + history_suffix;
-	const sys::path xml_path = _session_dir->root_path() / xml_filename;
+	const sys::path xml_path(Glib::build_filename (_session_dir->root_path(), xml_filename));
 
 	info << "Loading history from " << xml_path.to_string() << endmsg;
 
@@ -3681,7 +3681,7 @@ Session::rename (const std::string& new_name)
 	string newstr;
 	bool first = true;
 
-	string const old_sources_root = _session_dir->sources_root().to_string ();
+	string const old_sources_root = _session_dir->sources_root();
 
 #define RENAME ::rename
 
@@ -3810,7 +3810,7 @@ Session::rename (const std::string& new_name)
 		boost::shared_ptr<FileSource> fs = boost::dynamic_pointer_cast<FileSource> (i->second);
 		if (fs) {
 			string p = fs->path ();
-			boost::replace_all (p, old_sources_root, _session_dir->sources_root().to_string ());
+			boost::replace_all (p, old_sources_root, _session_dir->sources_root());
 			fs->set_path (p);
 		}
 	}

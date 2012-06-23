@@ -38,7 +38,7 @@ namespace PBD {
  * @param result A vector of filenames.
  */
 void
-get_files_in_directory (const sys::path& path,
+get_files_in_directory (const std::string& path,
                         std::vector<std::string>& result);
 
 /**
@@ -50,9 +50,9 @@ get_files_in_directory (const sys::path& path,
  * @param result A vector in which to place the resulting matches.
  */
 void
-find_matching_files_in_directory (const sys::path& directory,
+find_matching_files_in_directory (const std::string& directory,
                                   const Glib::PatternSpec& pattern,
-                                  std::vector<sys::path>& result);
+                                  std::vector<std::string>& result);
 
 /**
  * Takes a number of directory paths and returns all the files matching
@@ -63,9 +63,9 @@ find_matching_files_in_directory (const sys::path& directory,
  * @param result A vector in which to place the resulting matches.
  */
 void
-find_matching_files_in_directories (const std::vector<sys::path>& directory_paths,
+find_matching_files_in_directories (const std::vector<std::string>& directory_paths,
                                     const Glib::PatternSpec& pattern,
-                                    std::vector<sys::path>& result);
+                                    std::vector<std::string>& result);
 
 /**
  * Takes a SearchPath and puts a list of all the files in the search path
@@ -78,7 +78,7 @@ find_matching_files_in_directories (const std::vector<sys::path>& directory_path
 void
 find_matching_files_in_search_path (const SearchPath& search_path,
                                     const Glib::PatternSpec& pattern,
-                                    std::vector<sys::path>& result);
+                                    std::vector<std::string>& result);
 
 /**
  * Takes a search path and a file name and place the full path
@@ -89,7 +89,7 @@ find_matching_files_in_search_path (const SearchPath& search_path,
 bool
 find_file_in_search_path (const SearchPath& search_path,
                           const std::string& filename,
-                          sys::path& result);
+                          std::string& result);
 			
 } // namespace PBD
 

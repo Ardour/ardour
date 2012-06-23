@@ -19,6 +19,7 @@
 
 #include "pbd/error.h"
 #include "pbd/file_utils.h"
+#include "pbd/filesystem.h"
 
 #include "ardour/filesystem_paths.h"
 
@@ -124,7 +125,7 @@ ArdourKeyboard::setup_keybindings ()
 		if (!Glib::path_is_absolute (keybindings_path)) {
 
 			/* not absolute - look in the usual places */
-			sys::path keybindings_file;
+			std::string keybindings_file;
 
 			if ( ! find_file_in_search_path (ardour_config_search_path(), keybindings_path, keybindings_file)) {
 
@@ -142,7 +143,7 @@ ArdourKeyboard::setup_keybindings ()
 
 				/* use it */
 
-				keybindings_path = keybindings_file.to_string();
+				keybindings_path = keybindings_file;
 				break;
 
 			}

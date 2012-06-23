@@ -32,6 +32,7 @@
 #include "pbd/uuid.h"
 #include "pbd/file_utils.h"
 #include "pbd/xml++.h"
+#include "pbd/filesystem.h"
 
 #include "ardour/filesystem_paths.h"
 #include "ardour/location.h"
@@ -90,7 +91,7 @@ class ExportProfileManager
 	ExportPresetPtr current_preset;
 	FileMap         preset_file_map;
 
-	std::vector<PBD::sys::path> find_file (std::string const & pattern);
+	std::vector<std::string> find_file (std::string const & pattern);
 
 	PBD::sys::path  export_config_dir;
 	PBD::SearchPath search_path;

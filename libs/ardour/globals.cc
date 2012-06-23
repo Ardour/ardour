@@ -56,6 +56,7 @@
 #include "pbd/fpu.h"
 #include "pbd/file_utils.h"
 #include "pbd/enumwriter.h"
+#include "pbd/filesystem.h"
 
 #include "midi++/port.h"
 #include "midi++/manager.h"
@@ -356,7 +357,7 @@ ARDOUR::cleanup ()
 void
 ARDOUR::find_bindings_files (map<string,string>& files)
 {
-	vector<sys::path> found;
+	vector<std::string> found;
 	SearchPath spath = ardour_config_search_path();
 
 	if (getenv ("ARDOUR_SAE")) {
@@ -371,8 +372,8 @@ ARDOUR::find_bindings_files (map<string,string>& files)
 		return;
 	}
 
-	for (vector<sys::path>::iterator x = found.begin(); x != found.end(); ++x) {
-		sys::path path = *x;
+	for (vector<std::string>::iterator x = found.begin(); x != found.end(); ++x) {
+		sys::path path(*x);
 		pair<string,string> namepath;
 		namepath.second = path.to_string();
 		namepath.first = path.leaf().substr (0, path.leaf().find_first_of ('.'));
@@ -453,7 +454,7 @@ ARDOUR::setup_fpu ()
 string
 ARDOUR::translation_kill_path ()
 {
-        return Glib::build_filename (user_config_directory().to_string(), ".love_is_the_language_of_audio");
+        return Glib::build_filename (user_config_directory(), ".love_is_the_language_of_audio");
 }
 
 bool

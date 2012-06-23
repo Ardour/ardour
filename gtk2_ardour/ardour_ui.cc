@@ -1134,11 +1134,11 @@ ARDOUR_UI::redisplay_recent_sessions ()
 	for (vector<sys::path>::const_iterator i = session_directories.begin();
 			i != session_directories.end(); ++i)
 	{
-		std::vector<sys::path> state_file_paths;
+		std::vector<std::string> state_file_paths;
 
 		// now get available states for this session
 
-		get_state_files_in_directory (*i, state_file_paths);
+		get_state_files_in_directory (i->to_string(), state_file_paths);
 
 		vector<string*>* states;
 		vector<const gchar*> item;
@@ -2074,7 +2074,7 @@ ARDOUR_UI::snapshot_session (bool switch_to_it)
 			}
 		}
 
-		vector<sys::path> p;
+		vector<std::string> p;
 		get_state_files_in_directory (_session->session_directory().root_path(), p);
 		vector<string> n = get_file_names_no_extension (p);
 		if (find (n.begin(), n.end(), snapname) != n.end()) {
@@ -2913,7 +2913,7 @@ require some unused files to continue to exist."));
 
 	dimage->set_alignment(ALIGN_LEFT, ALIGN_TOP);
 
-	const string dead_directory = _session->session_directory().dead_path().to_string();
+	const string dead_directory = _session->session_directory().dead_path();
 
 	/* subst:
 	   %1 - number of files removed

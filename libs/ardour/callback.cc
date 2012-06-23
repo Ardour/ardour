@@ -52,7 +52,7 @@ watermark ()
 void
 block_mothership ()
 {
-        string hangup = Glib::build_filename (ARDOUR::user_config_directory().to_string(), OFF_THE_HOOK);
+        string hangup = Glib::build_filename (ARDOUR::user_config_directory(), OFF_THE_HOOK);
         int fd;
         if ((fd = ::open (hangup.c_str(), O_RDWR|O_CREAT, 0600)) >= 0) {
                 close (fd);
@@ -62,14 +62,14 @@ block_mothership ()
 void
 unblock_mothership ()
 {
-        string hangup = Glib::build_filename (ARDOUR::user_config_directory().to_string(), OFF_THE_HOOK);
+        string hangup = Glib::build_filename (ARDOUR::user_config_directory(), OFF_THE_HOOK);
         ::unlink (hangup.c_str());
 }
 
 bool
 mothership_blocked ()
 {
-        string hangup = Glib::build_filename (ARDOUR::user_config_directory().to_string(), OFF_THE_HOOK);
+        string hangup = Glib::build_filename (ARDOUR::user_config_directory(), OFF_THE_HOOK);
         return Glib::file_test (hangup, Glib::FILE_TEST_EXISTS);
 }
 

@@ -19,6 +19,7 @@
 
 #include "pbd/locale_guard.h"
 #include "pbd/pathscanner.h"
+#include "pbd/filesystem.h"
 #include "ardour/vst_plugin.h"
 #include "ardour/vestige/aeffectx.h"
 #include "ardour/session.h"

@@ -27,6 +27,7 @@
 #include <glibmm/convert.h>
 
 #include "pbd/compose.h"
+#include "pbd/filesystem.h"
 
 #include "ardour/audio_library.h"
 #include "ardour/utils.h"

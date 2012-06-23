@@ -82,11 +82,11 @@ MixerActor::load_bindings ()
 	
         bindings.set_action_map (myactions);
 
-	sys::path binding_file;
+	std::string binding_file;
 
 	if (find_file_in_search_path (ardour_config_search_path(), "mixer.bindings", binding_file)) {
-                bindings.load (binding_file.to_string());
-		info << string_compose (_("Loaded mixer bindings from %1"), binding_file.to_string()) << endmsg;
+                bindings.load (binding_file);
+		info << string_compose (_("Loaded mixer bindings from %1"), binding_file) << endmsg;
         } else {
 		error << string_compose (_("Could not find mixer.bindings in search path %1"), ardour_config_search_path().to_string()) << endmsg;
 	}
