@@ -22,6 +22,7 @@
 #include <sstream>
 #include <algorithm>
 
+#include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 
 #include "pbd/controllable_descriptor.h"
@@ -120,11 +121,12 @@ system_midi_map_search_path ()
 	spath.add_subdirectory_to_paths(midi_map_dir_name);
 
 	// just return the first directory in the search path that exists
-	SearchPath::const_iterator i = std::find_if(spath.begin(), spath.end(), sys::exists);
-
-	if (i == spath.end()) return sys::path();
-
-	return *i;
+	for (SearchPath::const_iterator i = spath.begin(); i != spath.end(); ++i) {
+		if (Glib::file_test (*i, Glib::FILE_TEST_EXISTS)) {
+			return *i;
+		}
+	}
+	return sys::path();
 }
 
 static sys::path
