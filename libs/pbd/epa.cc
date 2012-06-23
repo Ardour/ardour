@@ -18,7 +18,6 @@
 */
 
 #include <cstdlib>
-#include <iostream>
 
 #include "pbd/epa.h"
 #include "pbd/strsplit.h"
