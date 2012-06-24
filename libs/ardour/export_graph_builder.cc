@@ -1,6 +1,7 @@
 #include "ardour/export_graph_builder.h"
 
 #include "audiographer/process_context.h"
+#include "audiographer/general/chunker.h"
 #include "audiographer/general/interleaver.h"
 #include "audiographer/general/normalizer.h"
 #include "audiographer/general/peak_reader.h"
@@ -474,10 +475,17 @@ ExportGraphBuilder::ChannelConfig::ChannelConfig (ExportGraphBuilder & parent, F
 	typedef ExportChannelConfiguration::ChannelList ChannelList;
 
 	config = new_config;
-	max_frames = parent.session.engine().frames_per_cycle();
 
+	framecnt_t max_frames = parent.session.engine().frames_per_cycle();
 	interleaver.reset (new Interleaver<Sample> ());
 	interleaver->init (new_config.channel_config->get_n_chans(), max_frames);
+
+	// Make the chunk size divisible by the channel count
+	int chan_count = new_config.channel_config->get_n_chans();
+	max_frames_out = 8192;
+	max_frames_out -= max_frames_out % chan_count;
+	chunker.reset (new Chunker<Sample> (max_frames_out));
+	interleaver->add_output(chunker);
 
 	ChannelList const & channel_list = config.channel_config->get_channels();
 	unsigned chan = 0;
@@ -498,6 +506,8 @@ ExportGraphBuilder::ChannelConfig::ChannelConfig (ExportGraphBuilder & parent, F
 void
 ExportGraphBuilder::ChannelConfig::add_child (FileSpec const & new_config)
 {
+	assert (*this == new_config);
+
 	for (boost::ptr_list<SilenceHandler>::iterator it = children.begin(); it != children.end(); ++it) {
 		if (*it == new_config) {
 			it->add_child (new_config);
@@ -505,9 +515,8 @@ ExportGraphBuilder::ChannelConfig::add_child (FileSpec const & new_config)
 		}
 	}
 
-	framecnt_t const max_frames_out = new_config.channel_config->get_n_chans() * max_frames;
 	children.push_back (new SilenceHandler (parent, new_config, max_frames_out));
-	interleaver->add_output (children.back().sink ());
+	chunker->add_output (children.back().sink ());
 }
 
 bool

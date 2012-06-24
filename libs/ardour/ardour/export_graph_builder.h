@@ -32,6 +32,7 @@ namespace AudioGrapher {
 	class SampleRateConverter;
 	class PeakReader;
 	class Normalizer;
+	template <typename T> class Chunker;
 	template <typename T> class SampleFormatConverter;
 	template <typename T> class Interleaver;
 	template <typename T> class SndfileWriter;
@@ -209,12 +210,14 @@ class ExportGraphBuilder
 
 	  private:
 		typedef boost::shared_ptr<AudioGrapher::Interleaver<Sample> > InterleaverPtr;
+		typedef boost::shared_ptr<AudioGrapher::Chunker<Sample> > ChunkerPtr;
 
 		ExportGraphBuilder &      parent;
 		FileSpec                  config;
 		boost::ptr_list<SilenceHandler> children;
 		InterleaverPtr            interleaver;
-		framecnt_t                max_frames;
+		ChunkerPtr                chunker;
+		framecnt_t                max_frames_out;
 	};
 
 	Session const & session;
