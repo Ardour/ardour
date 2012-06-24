@@ -530,15 +530,15 @@ ExportFormatSpecification::description (bool include_name)
 	list<string> components;
 
 	if (_normalize) {
-		components.push_back (_("normalize, "));
+		components.push_back (_("normalize"));
 	}
 
 	if (_trim_beginning && _trim_end) {
-		components.push_back ( _("trim, "));
+		components.push_back ( _("trim"));
 	} else if (_trim_beginning) {
-		components.push_back (_("trim start, "));
+		components.push_back (_("trim start"));
 	} else if (_trim_end) {
-		components.push_back (_("trim end, "));
+		components.push_back (_("trim end"));
 	}
 
 	if (_format_name != "") {
