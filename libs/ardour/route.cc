@@ -1382,6 +1382,11 @@ Route::clear_processors (Placement p)
 int
 Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStreams* err, bool need_process_lock)
 {
+	// TODO once the export point can be configured properly, do something smarter here
+	if (processor == _capturing_processor) {
+		_capturing_processor.reset();
+	}
+
 	/* these can never be removed */
 
 	if (processor == _amp || processor == _meter || processor == _main_outs) {
@@ -2454,7 +2459,8 @@ Route::set_processor_state (const XMLNode& node)
 			}
 			_monitor_control->set_state (**niter, Stateful::current_state_version);
 		} else if (prop->value() == "capture") {
-			_capturing_processor.reset (new CapturingProcessor (_session));
+			/* CapturingProcessor should never be restored, it's always
+			   added explicitly when needed */
 		} else {
 			ProcessorList::iterator o;
 
