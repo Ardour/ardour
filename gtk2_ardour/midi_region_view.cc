@@ -3737,6 +3737,9 @@ void
 MidiRegionView::edit_patch_change (ArdourCanvas::CanvasPatchChange* pc)
 {
 	PatchChangeDialog d (&_source_relative_time_converter, trackview.session(), *pc->patch (), instrument_info(), Gtk::Stock::APPLY);
+
+        d.set_position (Gtk::WIN_POS_MOUSE);
+
 	if (d.run () != Gtk::RESPONSE_ACCEPT) {
 		return;
 	}
