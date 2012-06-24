@@ -144,7 +144,7 @@ fixup_bundle_environment (int, char* [])
 	std::string path;
 	std::string exec_dir = Glib::path_get_dirname (execpath);
 	std::string bundle_dir;
-	std::string userconfigdir = user_config_directory().to_string();
+	std::string userconfigdir = user_config_directory();
 
 	bundle_dir = Glib::path_get_dirname (exec_dir);
 
