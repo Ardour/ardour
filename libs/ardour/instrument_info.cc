@@ -185,7 +185,7 @@ InstrumentInfo::general_midi_patches()
 }
 
 string
-InstrumentInfo::get_plugin_patch_name (boost::shared_ptr<Processor> p, uint16_t bank, uint8_t program, uint8_t channel) const
+InstrumentInfo::get_plugin_patch_name (boost::shared_ptr<Processor> p, uint16_t bank, uint8_t program, uint8_t /*channel*/) const
 {
 	boost::shared_ptr<PluginInsert> insert = boost::dynamic_pointer_cast<PluginInsert> (p);
 
