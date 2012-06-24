@@ -103,7 +103,7 @@ class ExportFormatSpecification : public ExportFormatBase {
 
 	PBD::UUID const & id () { return _id; }
 	std::string const & name () const { return _name; }
-	std::string description ();
+	std::string description (bool include_name = true);
 
 	bool has_broadcast_info () const { return _has_broadcast_info; }
 	uint32_t channel_limit () const { return _channel_limit; }

@@ -110,6 +110,8 @@ class ExportFormatDialog : public ArdourDialog, public PBD::ScopedConnectionList
 	void change_compatibility (bool compatibility, boost::weak_ptr<T> w_ptr, Glib::RefPtr<Gtk::ListStore> & list, ColsT & cols,
 	                           std::string const & c_incompatible = "red", std::string const & c_compatible = "white");
 
+	void update_description();
+
 	uint32_t applying_changes_from_engine;
 
 	/*** Non-interactive selections ***/
@@ -151,6 +153,7 @@ class ExportFormatDialog : public ArdourDialog, public PBD::ScopedConnectionList
 
 	Gtk::Label name_label;
 	Gtk::Entry name_entry;
+	Gtk::Label name_generated_part;
 
 	/* Normalize */
 

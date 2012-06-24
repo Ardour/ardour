@@ -40,6 +40,8 @@ ExportFormatManager::ExportFormatManager (ExportFormatSpecPtr specification) :
 	init_qualities ();
 	init_formats ();
 	init_sample_rates ();
+
+	prev_description = current_selection->description();
 }
 
 ExportFormatManager::~ExportFormatManager ()
@@ -255,66 +257,77 @@ void
 ExportFormatManager::set_name (string name)
 {
 	current_selection->set_name (name);
+	check_for_description_change ();
 }
 
 void
 ExportFormatManager::select_src_quality (ExportFormatBase::SRCQuality value)
 {
 	current_selection->set_src_quality (value);
+	check_for_description_change ();
 }
 
 void
 ExportFormatManager::select_with_cue (bool value)
 {
 	current_selection->set_with_cue (value);
+	check_for_description_change ();
 }
 
 void
 ExportFormatManager::select_with_toc (bool value)
 {
 	current_selection->set_with_toc (value);
+	check_for_description_change ();
 }
 
 void
 ExportFormatManager::select_trim_beginning (bool value)
 {
 	current_selection->set_trim_beginning (value);
+	check_for_description_change ();
 }
 
 void
 ExportFormatManager::select_silence_beginning (AnyTime const & time)
 {
 	current_selection->set_silence_beginning (time);
+	check_for_description_change ();
 }
 
 void
 ExportFormatManager::select_trim_end (bool value)
 {
 	current_selection->set_trim_end (value);
+	check_for_description_change ();
 }
 
 void
 ExportFormatManager::select_silence_end (AnyTime const & time)
 {
 	current_selection->set_silence_end (time);
+	check_for_description_change ();
 }
 
 void
 ExportFormatManager::select_normalize (bool value)
 {
 	current_selection->set_normalize (value);
+	check_for_description_change ();
 }
 
 void
 ExportFormatManager::select_normalize_target (float value)
 {
 	current_selection->set_normalize_target (value);
+	check_for_description_change ();
 }
 
 void
 ExportFormatManager::select_tagging (bool tag)
 {
 	current_selection->set_tag (tag);
+	check_for_description_change ();
 }
 
 void
@@ -694,13 +707,24 @@ ExportFormatManager::selection_changed ()
 
 	}
 
-	/* Signal completeness */
+	/* Signal completeness and possible description change */
 
 	CompleteChanged (current_selection->is_complete());
+	check_for_description_change ();
 
 	/* Reset pending state */
 
 	pending_selection_change = false;
+}
+
+void
+ExportFormatManager::check_for_description_change ()
+{
+	std::string new_description = current_selection->description();
+	if (new_description == prev_description) { return; }
+
+	prev_description = new_description;
+	DescriptionChanged();
 }
 
 ExportFormatManager::QualityPtr

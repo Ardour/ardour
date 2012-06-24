@@ -524,11 +524,13 @@ ExportFormatSpecification::set_format (boost::shared_ptr<ExportFormat> format)
 }
 
 string
-ExportFormatSpecification::description ()
+ExportFormatSpecification::description (bool include_name)
 {
 	string desc;
 
-	desc = _name + ": ";
+	if (include_name) {
+		desc = _name + ": ";
+	}
 
 	if (_normalize) {
 		desc += _("normalize, ");
