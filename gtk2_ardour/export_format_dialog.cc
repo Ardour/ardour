@@ -720,10 +720,7 @@ ExportFormatDialog::update_with_toc ()
 void
 ExportFormatDialog::update_description()
 {
-	std::string text;
-	if (format->is_complete()) {
-		text = ": " + format->description(false);
-	}
+	std::string text = ": " + format->description(false);
 	name_generated_part.set_text(text);
 }
 
