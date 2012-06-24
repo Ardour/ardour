@@ -137,8 +137,7 @@ setup_hardware_optimization (bool try_optimization)
 			compute_peak          = x86_sse_compute_peak;
 			find_peaks            = x86_sse_find_peaks;
 			apply_gain_to_buffer  = x86_sse_apply_gain_to_buffer;
-			// mix_buffers_with_gain = x86_sse_mix_buffers_with_gain;
-			mix_buffers_with_gain = default_mix_buffers_with_gain;
+			mix_buffers_with_gain = x86_sse_mix_buffers_with_gain;
 			mix_buffers_no_gain   = x86_sse_mix_buffers_no_gain;
 
 			generic_mix_functions = false;
