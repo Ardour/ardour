@@ -55,6 +55,7 @@ class MIDIFunction : public MIDIInvokable
 		TransportRecordDisable,
 		/* 1 argument functions: RID */
 		Select,
+		SetBank,
 		/* 2 argument functions: RID, value */
 		TrackSetSolo, 
 		TrackSetMute,

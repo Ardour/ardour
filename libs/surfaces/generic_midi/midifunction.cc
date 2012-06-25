@@ -61,6 +61,11 @@ MIDIFunction::setup (GenericMidiControlProtocol& ui, const std::string& invokabl
 		_function = NextBank;
 	} else if (strcasecmp (_invokable_name.c_str(), "prev-bank") == 0) {
 		_function = PrevBank;
+	} else if (strcasecmp (_invokable_name.c_str(), "set-bank") == 0) {
+		if (_argument.empty()) {
+			return -1;
+		}
+		_function = SetBank;
 	} else if (strcasecmp (_invokable_name.c_str(), "select") == 0) {
 		if (_argument.empty()) {
 			return -1;
@@ -93,6 +98,14 @@ MIDIFunction::execute ()
 
 	case PrevBank:
 		_ui->prev_bank();
+		break;
+
+	case SetBank:
+		if (!_argument.empty()) {
+			uint32_t bank;
+			sscanf (_argument.c_str(), "%d", &bank);
+			_ui->set_current_bank (bank);
+		}
 		break;
 
 	case TransportStop:
