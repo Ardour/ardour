@@ -161,7 +161,7 @@ fixup_bundle_environment (int argc, char* argv[])
 		path = "";
 	}
 	path += dir_path;
-	path += "/../Frameworks";
+	path += "/../lib";
 	
 	setenv ("VAMP_PATH", path.c_str(), 1);
 
@@ -182,7 +182,7 @@ fixup_bundle_environment (int argc, char* argv[])
 	setenv ("ARDOUR_CONTROL_SURFACE_PATH", path.c_str(), 1);
 
 	path = dir_path;
-	path += "/../Frameworks/clearlooks";
+	path += "/../lib/clearlooks";
 
 	setenv ("GTK_PATH", path.c_str(), 1);
 
@@ -254,7 +254,7 @@ fixup_bundle_environment (int argc, char* argv[])
 		// JACK driver dir
 		
 		path = dir_path;
-		path += "/../Frameworks";
+		path += "/../lib";
 		
 		setenv ("JACK_DRIVER_DIR", path.c_str(), 1);
 	}
