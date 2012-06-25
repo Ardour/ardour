@@ -184,11 +184,31 @@ MIDIControllable::midi_sense_note_off (Parser &p, EventTwoBytes *tb)
 	midi_sense_note (p, tb, false);
 }
 
+int
+MIDIControllable::lookup_controllable()
+{
+	if (!_descriptor) {
+		return -1;
+	}
+
+	boost::shared_ptr<Controllable> c = _surface->lookup_controllable (*_descriptor);
+
+	if (!c) {
+		return -1;
+	}
+
+	controllable = c.get();
+
+	return 0;
+}
+
 void
 MIDIControllable::midi_sense_note (Parser &, EventTwoBytes *msg, bool /*is_on*/)
 {
 	if (!controllable) { 
-		return;
+		if (lookup_controllable()) {
+			return;
+		}
 	}
 
 	if (!controllable->is_toggle()) {
@@ -206,7 +226,9 @@ void
 MIDIControllable::midi_sense_controller (Parser &, EventTwoBytes *msg)
 {
 	if (!controllable) { 
-		return;
+		if (lookup_controllable ()) {
+			return;
+		}
 	}
 
 	if (controllable->touching()) {
@@ -254,7 +276,9 @@ void
 MIDIControllable::midi_sense_program_change (Parser &, byte msg)
 {
 	if (!controllable) { 
-		return;
+		if (lookup_controllable ()) {
+			return;
+		}
 	}
 
 	if (!controllable->is_toggle()) {
@@ -270,7 +294,9 @@ void
 MIDIControllable::midi_sense_pitchbend (Parser &, pitchbend_t pb)
 {
 	if (!controllable) { 
-		return;
+		if (lookup_controllable ()) {
+			return;
+		}
 	}
 
 	if (!controllable->is_toggle()) {
@@ -299,7 +325,9 @@ MIDIControllable::midi_receiver (Parser &, byte *msg, size_t /*len*/)
 
 	bind_midi ((channel_t) (msg[0] & 0xf), eventType (msg[0] & 0xF0), msg[1]);
 
-	controllable->LearningFinished ();
+	if (controllable) {
+		controllable->LearningFinished ();
+	}
 }
 
 void

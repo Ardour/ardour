@@ -773,20 +773,25 @@ GenericMidiControlProtocol::reset_controllables ()
 
 			/* its entirely possible that the session doesn't have
 			 * the specified controllable (e.g. it has too few
-			 * tracks). if we find this to be the case, drop any
-			 * bindings that would be left without controllables.
+			 * tracks). if we find this to be the case, we just leave
+			 * the binding around, unbound, and it will do "late
+			 * binding" (or "lazy binding") if/when any data arrives.
 			 */
 
 			boost::shared_ptr<Controllable> c = session->controllable_by_descriptor (desc);
 			if (c) {
 				existingBinding->set_controllable (c.get());
-			} else {
-				controllables.erase (iter);
-			}
+			} 
 		}
 
 		iter = next;
 	}
+}
+
+boost::shared_ptr<Controllable>
+GenericMidiControlProtocol::lookup_controllable (const ControllableDescriptor& desc) const
+{
+	return session->controllable_by_descriptor (desc);
 }
 
 MIDIFunction*

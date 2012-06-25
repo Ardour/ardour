@@ -32,6 +32,7 @@ namespace MIDI {
 
 namespace PBD {
 	class Controllable;
+	class ControllableDescriptor;
 }	
 
 namespace ARDOUR {
@@ -56,6 +57,8 @@ class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
 
 	int set_feedback (bool yn);
 	bool get_feedback () const;
+
+        boost::shared_ptr<PBD::Controllable> lookup_controllable (const PBD::ControllableDescriptor&) const;
 
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);

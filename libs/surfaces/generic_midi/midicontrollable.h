@@ -116,6 +116,8 @@ class MIDIControllable : public PBD::Stateful
 	uint32_t        _rid;
 	std::string     _what;
 	bool            _bank_relative;
+
+        int lookup_controllable();
 	
 	void midi_receiver (MIDI::Parser &p, MIDI::byte *, size_t);
 	void midi_sense_note (MIDI::Parser &, MIDI::EventTwoBytes *, bool is_on);
