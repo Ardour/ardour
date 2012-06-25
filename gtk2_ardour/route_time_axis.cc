@@ -91,11 +91,11 @@ Glib::RefPtr<Gdk::Pixbuf> RouteTimeAxisView::slider_desensitised;
 void
 RouteTimeAxisView::setup_slider_pix ()
 {
-	if ((slider = ::get_icon ("fader_belt_h")) == 0) {
+	if ((slider = ::get_icon ("fader_belt_h_medium")) == 0) {
 		throw failed_constructor ();
 	}
 
-	if ((slider_desensitised = ::get_icon ("fader_belt_h_desensitised")) == 0) {
+	if ((slider_desensitised = ::get_icon ("fader_belt_h_medium_desensitised")) == 0) {
 		throw failed_constructor ();
 	}
 }
