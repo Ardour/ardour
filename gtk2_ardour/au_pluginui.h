@@ -4,6 +4,8 @@
 #include <vector>
 #include <string>
 
+#define WITH_CARBON
+
 #ifdef WITH_CARBON
 #include <Carbon/Carbon.h>
 #include <AudioUnit/AudioUnitCarbonView.h>
