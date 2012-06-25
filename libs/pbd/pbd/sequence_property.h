@@ -32,6 +32,7 @@
 #include "pbd/property_basics.h"
 #include "pbd/property_list.h"
 #include "pbd/stateful_diff_command.h"
+#include "pbd/error.h"
 
 namespace PBD {
 
@@ -199,9 +200,10 @@ class SequenceProperty : public PropertyBase
 		for (XMLNodeList::const_iterator j = grandchildren.begin(); j != grandchildren.end(); ++j) {
 
 			typename Container::value_type v = get_content_from_xml (**j);
-			assert (v);
-			
-			if ((*j)->name() == "Add") {
+
+			if (!v) {
+				warning << "undo transaction references an unknown object" << endmsg;
+			} else if ((*j)->name() == "Add") {
 				p->_changes.added.insert (v);
 			} else if ((*j)->name() == "Remove") {
 				p->_changes.removed.insert (v);
