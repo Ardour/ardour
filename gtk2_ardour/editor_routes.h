@@ -55,7 +55,7 @@ public:
 	std::list<TimeAxisView*> views () const;
 	void hide_all_tracks (bool);
 	void clear ();
-	void sync_order_keys (std::string const &);
+        void sync_order_keys (ARDOUR::RouteSortOrderKey);
 
 private:
 

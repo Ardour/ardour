@@ -435,24 +435,23 @@ GroupTabs::subgroup (RouteGroup* g, bool aux, Placement placement)
 }
 
 struct CollectSorter {
-	CollectSorter (string const & key) : _key (key) {}
+	CollectSorter (RouteSortOrderKey key) : _key (key) {}
 
 	bool operator () (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
 		return a->order_key (_key) < b->order_key (_key);
 	}
 
-	string _key;
+        RouteSortOrderKey _key;
 };
 
 struct OrderSorter {
-	OrderSorter (string const & key) : _key (key) {}
+	OrderSorter (RouteSortOrderKey key) : _key (key) {}
 	
 	bool operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
-		/* use of ">" forces the correct sort order */
 		return a->order_key (_key) < b->order_key (_key);
 	}
 
-	string _key;
+	RouteSortOrderKey _key;
 };
 
 /** Collect all members of a RouteGroup so that they are together in the Editor or Mixer.

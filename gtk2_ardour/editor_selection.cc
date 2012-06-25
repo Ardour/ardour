@@ -779,7 +779,7 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op)
 
 					RouteTimeAxisView* closest = 0;
 					int distance = INT_MAX;
-					int key = rtv->route()->order_key ("editor");
+					int key = rtv->route()->order_key (EditorSort);
 
 					for (RegionSelection::iterator x = selection->regions.begin(); x != selection->regions.end(); ++x) {
 
@@ -794,7 +794,7 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op)
 							if (result.second) {
 								/* newly added to already_in_selection */
 
-								int d = artv->route()->order_key ("editor");
+								int d = artv->route()->order_key (EditorSort);
 
 								d -= key;
 
@@ -810,7 +810,7 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op)
 
 						/* now add all tracks between that one and this one */
 
-						int okey = closest->route()->order_key ("editor");
+						int okey = closest->route()->order_key (EditorSort);
 
 						if (okey > key) {
 							swap (okey, key);
@@ -820,7 +820,7 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op)
 							RouteTimeAxisView* artv = dynamic_cast<RouteTimeAxisView*>(*x);
 							if (artv && artv != rtv) {
 
-								int k = artv->route()->order_key ("editor");
+								int k = artv->route()->order_key (EditorSort);
 
 								if (k >= okey && k <= key) {
 

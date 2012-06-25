@@ -1515,7 +1515,7 @@ Session::resort_routes_using (boost::shared_ptr<RouteList> r)
 		DEBUG_TRACE (DEBUG::Graph, "Routes resorted, order follows:\n");
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 			DEBUG_TRACE (DEBUG::Graph, string_compose ("\t%1 signal order %2\n",
-								   (*i)->name(), (*i)->order_key ("signal")));
+								   (*i)->name(), (*i)->order_key (MixerSort)));
 		}
 #endif
 
@@ -1602,11 +1602,8 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output, boost:
 	string port;
 	RouteList new_routes;
 	list<boost::shared_ptr<MidiTrack> > ret;
-	uint32_t control_id;
 
 	cerr << "Adding MIDI track with in = " << input << " out = " << output << endl;
-
-	control_id = next_control_id ();
 
 	bool const use_number = (how_many != 1) || name_template.empty () || name_template == _("MIDI");
 
@@ -1650,7 +1647,10 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output, boost:
 			}
 
 			track->DiskstreamChanged.connect_same_thread (*this, boost::bind (&Session::resort_routes, this));
-			track->set_remote_control_id (control_id);
+
+			if (Config->get_remote_model() == UserOrdered) {
+				track->set_remote_control_id (next_control_id());
+			}
 
 			new_routes.push_back (track);
 			ret.push_back (track);
@@ -1839,9 +1839,6 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 	string port;
 	RouteList new_routes;
 	list<boost::shared_ptr<AudioTrack> > ret;
-	uint32_t control_id;
-
-	control_id = next_control_id ();
 
 	bool const use_number = (how_many != 1) || name_template.empty () || name_template == _("Audio");
 
@@ -1892,8 +1889,9 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 			track->non_realtime_input_change();
 
 			track->DiskstreamChanged.connect_same_thread (*this, boost::bind (&Session::resort_routes, this));
-			track->set_remote_control_id (control_id);
-			++control_id;
+			if (Config->get_remote_model() == UserOrdered) {
+				track->set_remote_control_id (next_control_id());
+			}
 
 			new_routes.push_back (track);
 			ret.push_back (track);
@@ -1921,33 +1919,6 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 	return ret;
 }
 
-void
-Session::set_remote_control_ids ()
-{
-	RemoteModel m = Config->get_remote_model();
-	bool emit_signal = false;
-
-	boost::shared_ptr<RouteList> r = routes.reader ();
-
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		if (MixerOrdered == m) {
-			int32_t order = (*i)->order_key(N_("signal"));
-			(*i)->set_remote_control_id (order+1, false);
-			emit_signal = true;
-		} else if (EditorOrdered == m) {
-			int32_t order = (*i)->order_key(N_("editor"));
-			(*i)->set_remote_control_id (order+1, false);
-			emit_signal = true;
-		} else if (UserOrdered == m) {
-			//do nothing ... only changes to remote id's are initiated by user
-		}
-	}
-
-	if (emit_signal) {
-		Route::RemoteControlIDChange();
-	}
-}
-
 /** Caller must not hold process lock.
  *  @param name_template string to use for the start of the name, or "" to use "Bus".
  */
@@ -1958,9 +1929,6 @@ Session::new_audio_route (int input_channels, int output_channels, RouteGroup* r
 	uint32_t bus_id = 0;
 	string port;
 	RouteList ret;
-	uint32_t control_id;
-
-	control_id = next_control_id ();
 
 	bool const use_number = (how_many != 1) || name_template.empty () || name_template == _("Bus");
 	
@@ -2002,8 +1970,9 @@ Session::new_audio_route (int input_channels, int output_channels, RouteGroup* r
 			if (route_group) {
 				route_group->add (bus);
 			}
-			bus->set_remote_control_id (control_id);
-			++control_id;
+			if (Config->get_remote_model() == UserOrdered) {
+				bus->set_remote_control_id (next_control_id());
+			}
 
 			bus->add_internal_return ();
 
@@ -2390,7 +2359,7 @@ Session::remove_route (boost::shared_ptr<Route> route)
 
 	route->drop_references ();
 
-	sync_order_keys (N_("session"));
+	sync_order_keys (UndefinedSort);
 
 	Route::RemoteControlIDChange(); /* EMIT SIGNAL */
 
@@ -3481,7 +3450,7 @@ Session::RoutePublicOrderSorter::operator() (boost::shared_ptr<Route> a, boost::
 	if (b->is_monitor()) {
 		return false;
 	}
-	return a->order_key(N_("signal")) < b->order_key(N_("signal"));
+	return a->order_key (MixerSort) < b->order_key (MixerSort);
 }
 
 bool
@@ -4182,7 +4151,7 @@ Session::add_automation_list(AutomationList *al)
 }
 
 void
-Session::sync_order_keys (std::string const & base)
+Session::sync_order_keys (RouteSortOrderKey base)
 {
 	if (deletion_in_progress()) {
 		return;
@@ -4200,10 +4169,6 @@ Session::sync_order_keys (std::string const & base)
 	}
 
 	Route::SyncOrderKeys (base); // EMIT SIGNAL
-
-	/* this might not do anything */
-
-	set_remote_control_ids ();
 }
 
 /** @return true if there is at least one record-enabled track, otherwise false */
@@ -4781,7 +4746,32 @@ Session::session_name_is_legal (const string& path)
 uint32_t 
 Session::next_control_id () const
 {
-	return ntracks() + nbusses() + 1;
+	int subtract = 0;
+
+	/* the master and monitor bus remote ID's occupy a different
+	 * "namespace" than regular routes. their existence doesn't
+	 * affect normal (low) numbered routes.
+	 */
+
+	if (_master_out) {
+		subtract++;
+	}
+
+	if (_monitor_out) {
+		subtract++;
+	}
+
+	/* remote control IDs are based either on this
+	   value, or signal order, which is zero-based. so we have
+	   to ensure consistency of zero-based-ness for both
+	   sources of the number.
+	   
+	   we actually add 1 to the value to form an actual
+	   remote control ID, which is 1-based.
+	*/
+
+	cerr << "Next control ID will be " << ntracks() + (nbusses() - subtract) << endl;
+	return ntracks() + (nbusses() - subtract);
 }
 
 bool

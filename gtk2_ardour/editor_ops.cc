@@ -5411,8 +5411,7 @@ Editor::split_region ()
 
 struct EditorOrderRouteSorter {
     bool operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
-	    /* use of ">" forces the correct sort order */
-	    return a->order_key ("editor") < b->order_key ("editor");
+	    return a->order_key (EditorSort) < b->order_key (EditorSort);
     }
 };
 

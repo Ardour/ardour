@@ -37,7 +37,7 @@ private:
 	}
 	void add_menu_items (Gtk::Menu *, ARDOUR::RouteGroup *);
 	PBD::PropertyList default_properties () const;
-	std::string order_key () const;
+        ARDOUR::RouteSortOrderKey order_key () const;
 	ARDOUR::RouteList selected_routes () const;
 	void sync_order_keys ();
 };

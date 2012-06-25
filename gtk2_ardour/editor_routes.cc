@@ -520,7 +520,14 @@ EditorRoutes::redisplay ()
 			/* this reorder is caused by user action, so reassign sort order keys
 			   to tracks.
 			*/
-			route->set_order_key (N_ ("editor"), order_key);
+			
+			if (route->is_master()) {
+				route->set_order_key (EditorSort, Route::MasterBusRemoteControlID);
+			} else if (route->is_monitor()) {
+				route->set_order_key (EditorSort, Route::MonitorBusRemoteControlID);
+			} else {
+				route->set_order_key (EditorSort, order_key++);
+			}
 		}
 
 		bool visible = tv->marked_for_display ();
@@ -534,7 +541,6 @@ EditorRoutes::redisplay ()
 		}
 
 		n++;
-		order_key++;
 	}
 
 	/* whenever we go idle, update the track view list to reflect the new order.
@@ -557,7 +563,7 @@ EditorRoutes::redisplay ()
 	}
 
 	if (!_redisplay_does_not_reset_order_keys && !_redisplay_does_not_sync_order_keys) {
-		_session->sync_order_keys (N_ ("editor"));
+		_session->sync_order_keys (EditorSort);
 	}
 }
 
@@ -569,7 +575,6 @@ EditorRoutes::route_deleted (Gtk::TreeModel::Path const &)
 	}
 
         /* this could require an order reset & sync */
-	_session->set_remote_control_ids();
 	_ignore_reorder = true;
 	redisplay ();
 	_ignore_reorder = false;
@@ -591,7 +596,6 @@ EditorRoutes::visible_changed (std::string const & path)
 
 			if (tv->set_marked_for_display (!visible)) {
 				_redisplay_does_not_reset_order_keys = true;
-				_session->set_remote_control_ids();
 				update_visibility ();
 				redisplay ();
 				_redisplay_does_not_reset_order_keys = false;
@@ -648,15 +652,6 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 		row[_columns.solo_isolate_state] = (*x)->route()->solo_isolated();
 		row[_columns.solo_safe_state] = (*x)->route()->solo_safe();
 		row[_columns.name_editable] = true;
-
-		_ignore_reorder = true;
-
-		/* added a new fresh one at the end */
-		if ((*x)->route()->order_key (N_ ("editor")) == -1) {
-			(*x)->route()->set_order_key (N_ ("editor"), _model->children().size()-1);
-		}
-
-		_ignore_reorder = false;
 
 		boost::weak_ptr<Route> wr ((*x)->route());
 
@@ -833,13 +828,13 @@ EditorRoutes::reordered (TreeModel::Path const &, TreeModel::iterator const &, i
  *  route list so that the visual arrangement of routes matches the order keys from the routes.
  */
 void
-EditorRoutes::sync_order_keys (string const & src)
+EditorRoutes::sync_order_keys (RouteSortOrderKey src)
 {
 	map<int, int> new_order;
 	TreeModel::Children rows = _model->children();
 	TreeModel::Children::iterator ri;
 
-	if (src == N_ ("editor") || !_session || (_session->state_of_the_state() & (Session::Loading|Session::Deletion)) || rows.empty()) {
+	if (src == EditorSort || !_session || (_session->state_of_the_state() & (Session::Loading|Session::Deletion)) || rows.empty()) {
 		return;
 	}
 
@@ -850,7 +845,7 @@ EditorRoutes::sync_order_keys (string const & src)
 		boost::shared_ptr<Route> route = (*ri)[_columns.route];
 
 		int const old_key = order;
-		int const new_key = route->order_key (N_ ("editor"));
+		int const new_key = route->order_key (EditorSort);
 
 		new_order[new_key] = old_key;
 
@@ -1193,7 +1188,7 @@ EditorRoutes::selection_filter (Glib::RefPtr<TreeModel> const &, TreeModel::Path
 struct EditorOrderRouteSorter {
     bool operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
 	    /* use of ">" forces the correct sort order */
-	    return a->order_key (N_ ("editor")) < b->order_key (N_ ("editor"));
+	    return a->order_key (EditorSort) < b->order_key (EditorSort);
     }
 };
 
@@ -1247,7 +1242,6 @@ void
 EditorRoutes::track_list_reorder (Gtk::TreeModel::Path const &, Gtk::TreeModel::iterator const &, int* /*new_order*/)
 {
 	_redisplay_does_not_sync_order_keys = true;
-	_session->set_remote_control_ids();
 	redisplay ();
 	_redisplay_does_not_sync_order_keys = false;
 }
@@ -1370,7 +1364,7 @@ EditorRoutes::move_selected_tracks (bool up)
 	}
 
 	for (leading = view_routes.begin(); leading != view_routes.end(); ++leading) {
-		neworder.push_back (leading->second->order_key (N_ ("editor")));
+		neworder.push_back (leading->second->order_key (EditorSort));
 	}
 
 #ifndef NDEBUG
@@ -1381,7 +1375,7 @@ EditorRoutes::move_selected_tracks (bool up)
 
 	_model->reorder (neworder);
 
-	_session->sync_order_keys (N_ ("editor"));
+	_session->sync_order_keys (EditorSort);
 }
 
 void

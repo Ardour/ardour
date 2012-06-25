@@ -307,13 +307,11 @@ Mixer_UI::hide_window (GdkEventAny *ev)
 void
 Mixer_UI::add_strip (RouteList& routes)
 {
-	ENSURE_GUI_THREAD (*this, &Mixer_UI::add_strip, routes)
-
 	MixerStrip* strip;
 
 	no_track_list_redisplay = true;
 	strip_redisplay_does_not_sync_order_keys = true;
-
+	
 	for (RouteList::iterator x = routes.begin(); x != routes.end(); ++x) {
 		boost::shared_ptr<Route> route = (*x);
 
@@ -360,10 +358,6 @@ Mixer_UI::add_strip (RouteList& routes)
 		row[track_columns.route] = route;
 		row[track_columns.strip] = strip;
 
-		if (route->order_key (N_("signal")) == -1) {
-			route->set_order_key (N_("signal"), track_model->children().size()-1);
-		}
-
 		route->PropertyChanged.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::strip_property_changed, this, _1, strip), gui_context());
 
 		strip->WidthChanged.connect (sigc::mem_fun(*this, &Mixer_UI::strip_width_changed));
@@ -406,12 +400,12 @@ Mixer_UI::remove_strip (MixerStrip* strip)
 }
 
 void
-Mixer_UI::sync_order_keys (string const & src)
+Mixer_UI::sync_order_keys (RouteSortOrderKey src)
 {
 	TreeModel::Children rows = track_model->children();
 	TreeModel::Children::iterator ri;
 
-	if (src == N_("signal") || !_session || (_session->state_of_the_state() & (Session::Loading|Session::Deletion)) || rows.empty()) {
+	if (src == MixerSort || !_session || (_session->state_of_the_state() & (Session::Loading|Session::Deletion)) || rows.empty()) {
 		return;
 	}
 
@@ -423,7 +417,7 @@ Mixer_UI::sync_order_keys (string const & src)
 	for (ri = rows.begin(); ri != rows.end(); ++ri, ++order) {
 		boost::shared_ptr<Route> route = (*ri)[track_columns.route];
 		unsigned int old_key = order;
-		unsigned int new_key = route->order_key (N_("signal"));
+		unsigned int new_key = route->order_key (MixerSort);
 
 		keys[new_key] = old_key;
 
@@ -802,7 +796,6 @@ void
 Mixer_UI::track_list_reorder (const TreeModel::Path&, const TreeModel::iterator&, int* /*new_order*/)
 {
 	strip_redisplay_does_not_sync_order_keys = true;
-	_session->set_remote_control_ids();
 	redisplay_track_list ();
 	strip_redisplay_does_not_sync_order_keys = false;
 }
@@ -812,7 +805,6 @@ Mixer_UI::track_list_change (const Gtk::TreeModel::Path&, const Gtk::TreeModel::
 {
 	// never reset order keys because of a property change
 	strip_redisplay_does_not_reset_order_keys = true;
-	_session->set_remote_control_ids();
 	redisplay_track_list ();
 	strip_redisplay_does_not_reset_order_keys = false;
 }
@@ -822,7 +814,6 @@ Mixer_UI::track_list_delete (const Gtk::TreeModel::Path&)
 {
 	/* this could require an order sync */
 	if (_session && !_session->deletion_in_progress()) {
-		_session->set_remote_control_ids();
 		redisplay_track_list ();
 	}
 }
@@ -832,22 +823,20 @@ Mixer_UI::redisplay_track_list ()
 {
 	TreeModel::Children rows = track_model->children();
 	TreeModel::Children::iterator i;
-	long order;
-
+	long regular_order = 0;
+	long hidden_order = 999999; // arbitary high number
+	
 	if (no_track_list_redisplay) {
 		return;
 	}
 
-	for (order = 0, i = rows.begin(); i != rows.end(); ++i, ++order) {
+	for (i = rows.begin(); i != rows.end(); ++i) {
+
 		MixerStrip* strip = (*i)[track_columns.strip];
 
 		if (strip == 0) {
 			/* we're in the middle of changing a row, don't worry */
 			continue;
-		}
-
-		if (!strip_redisplay_does_not_reset_order_keys) {
-			strip->route()->set_order_key (N_("signal"), order);
 		}
 
 		bool const visible = (*i)[track_columns.visible];
@@ -859,16 +848,41 @@ Mixer_UI::redisplay_track_list ()
 
 				if (strip->route()->is_master() || strip->route()->is_monitor()) {
 					out_packer.reorder_child (*strip, -1);
+					
+					if (!strip_redisplay_does_not_reset_order_keys) {
+						if (strip->route()->is_master()) {
+							strip->route()->set_order_key (MixerSort, Route::MasterBusRemoteControlID);
+						} else {
+							strip->route()->set_order_key (MixerSort, Route::MonitorBusRemoteControlID);
+						}
+					}
+
 				} else {
 					strip_packer.reorder_child (*strip, -1); /* put at end */
+
+					if (!strip_redisplay_does_not_reset_order_keys) {
+						strip->route()->set_order_key (MixerSort, regular_order++);
+					}
+
 				}
 
 			} else {
 
 				if (strip->route()->is_master() || strip->route()->is_monitor()) {
 					out_packer.pack_start (*strip, false, false);
+					if (!strip_redisplay_does_not_reset_order_keys) {
+						if (strip->route()->is_master()) {
+							strip->route()->set_order_key (MixerSort, Route::MasterBusRemoteControlID);
+						} else {
+							strip->route()->set_order_key (MixerSort, Route::MonitorBusRemoteControlID);
+						}
+					}
 				} else {
 					strip_packer.pack_start (*strip, false, false);
+
+					if (!strip_redisplay_does_not_reset_order_keys) {
+						strip->route()->set_order_key (MixerSort, regular_order++);
+					}
 				}
 				strip->set_packed (true);
 			}
@@ -884,12 +898,16 @@ Mixer_UI::redisplay_track_list ()
 					strip_packer.remove (*strip);
 					strip->set_packed (false);
 				}
+
+				if (!strip_redisplay_does_not_reset_order_keys) {
+					strip->route()->set_order_key (MixerSort, hidden_order++);
+				}
 			}
 		}
 	}
 
 	if (!strip_redisplay_does_not_reset_order_keys && !strip_redisplay_does_not_sync_order_keys) {
-		_session->sync_order_keys (N_("signal"));
+		_session->sync_order_keys (MixerSort);
 	}
 
 	_group_tabs->set_dirty ();
@@ -924,8 +942,7 @@ Mixer_UI::strip_width_changed ()
 
 struct SignalOrderRouteSorter {
     bool operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
-	    /* use of ">" forces the correct sort order */
-	    return a->order_key (N_("signal")) < b->order_key (N_("signal"));
+	    return a->order_key (MixerSort) < b->order_key (MixerSort);
     }
 };
 

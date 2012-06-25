@@ -37,6 +37,7 @@
 #include "pbd/signals.h"
 
 #include "ardour/ardour.h"
+#include "ardour/types.h"
 #include "ardour/session_handle.h"
 
 #include "enums.h"
@@ -244,7 +245,7 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 
 	Width _strip_width;
 
-	void sync_order_keys (std::string const &);
+        void sync_order_keys (ARDOUR::RouteSortOrderKey);
 	bool strip_redisplay_does_not_reset_order_keys;
 	bool strip_redisplay_does_not_sync_order_keys;
 	bool ignore_sync;

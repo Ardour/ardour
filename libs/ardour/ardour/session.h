@@ -235,7 +235,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 		bool operator() (boost::shared_ptr<Route>, boost::shared_ptr<Route> b);
 	};
 
-	void sync_order_keys (std::string const &);
+        void sync_order_keys (RouteSortOrderKey);
 
 	template<class T> void foreach_route (T *obj, void (T::*func)(Route&));
 	template<class T> void foreach_route (T *obj, void (T::*func)(boost::shared_ptr<Route>));
@@ -463,8 +463,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void   remove_route (boost::shared_ptr<Route>);
 	void   resort_routes ();
 	void   resort_routes_using (boost::shared_ptr<RouteList>);
-
-	void   set_remote_control_ids();
 
 	AudioEngine & engine() { return _engine; }
 	AudioEngine const & engine () const { return _engine; }
@@ -1488,7 +1486,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	XMLNode& get_control_protocol_state ();
 
 	void set_history_depth (uint32_t depth);
-	void sync_order_keys ();
 
 	static bool _disable_all_loaded_plugins;
 

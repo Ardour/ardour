@@ -67,7 +67,7 @@ using namespace ARDOUR;
 using namespace PBD;
 
 uint32_t Route::order_key_cnt = 0;
-PBD::Signal1<void,string const&> Route::SyncOrderKeys;
+PBD::Signal1<void,RouteSortOrderKey> Route::SyncOrderKeys;
 PBD::Signal0<void> Route::RemoteControlIDChange;
 
 Route::Route (Session& sess, string name, Flag flg, DataType default_type)
@@ -99,14 +99,6 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	, _last_custom_meter_was_at_end (false)
 {
 	processor_max_streams.reset();
-	order_keys[N_("signal")] = order_key_cnt++;
-
-	if (is_master()) {
-		set_remote_control_id (MasterBusRemoteControlID);
-	} else if (is_monitor()) {
-		set_remote_control_id (MonitorBusRemoteControlID);
-	}
-		
 }
 
 int
@@ -203,11 +195,22 @@ Route::~Route ()
 	}
 
 	_processors.clear ();
+
+	delete _remote_control_id;
 }
 
 void
 Route::set_remote_control_id (uint32_t id, bool notify_class_listeners)
 {
+	if (Config->get_remote_model() != UserOrdered) {
+		return;
+	}
+	
+	if (id < 1) {
+		error << _("Remote Control ID's start at one, not zero") << endmsg;
+		return;
+	}
+
 	/* force IDs for master/monitor busses and prevent 
 	   any other route from accidentally getting these IDs
 	   (i.e. legacy sessions)
@@ -228,8 +231,11 @@ Route::set_remote_control_id (uint32_t id, bool notify_class_listeners)
 		id += MonitorBusRemoteControlID;
 	}
 
-	if (id != _remote_control_id) {
-		_remote_control_id = id;
+	if (id != remote_control_id()) {
+		if (!_remote_control_id) {
+			_remote_control_id = new uint32_t;
+		}
+		*_remote_control_id = id;
 		RemoteControlIDChanged ();
 		if (notify_class_listeners) {
 			RemoteControlIDChange ();
@@ -240,13 +246,27 @@ Route::set_remote_control_id (uint32_t id, bool notify_class_listeners)
 uint32_t
 Route::remote_control_id() const
 {
-	return _remote_control_id;
+	switch (Config->get_remote_model()) {
+	case MixerOrdered:
+		return order_key (MixerSort) + 1;
+	case EditorOrdered:
+		return order_key (EditorSort) + 1;
+	case UserOrdered:
+		if (_remote_control_id) {
+			return *_remote_control_id;
+		}
+	}
+
+	/* fall back to MixerSort as the default */
+
+	return order_key (MixerSort) + 1;
 }
 
 int32_t
-Route::order_key (std::string const & name) const
+Route::order_key (RouteSortOrderKey key) const
 {
-	OrderKeys::const_iterator i = order_keys.find (name);
+	OrderKeys::const_iterator i = order_keys.find (key);
+
 	if (i == order_keys.end()) {
 		return -1;
 	}
@@ -255,7 +275,7 @@ Route::order_key (std::string const & name) const
 }
 
 void
-Route::set_order_key (std::string const & name, int32_t n)
+Route::set_order_key (RouteSortOrderKey key, int32_t n)
 {
 	bool changed = false;
 
@@ -265,16 +285,24 @@ Route::set_order_key (std::string const & name, int32_t n)
 	   signal.
 	*/
 
-	if (order_keys.find(name) == order_keys.end() || order_keys[name] != n) {
-		order_keys[name] = n;
+	if (order_keys.find (key) == order_keys.end() || order_keys[key] != n) {
+		order_keys[key] = n;
 		changed = true;
 	}
 
 	if (Config->get_sync_all_route_ordering()) {
 		for (OrderKeys::iterator x = order_keys.begin(); x != order_keys.end(); ++x) {
-			if (x->second != n) {
-				x->second = n;
-				changed = true;
+
+			/* we do not sync the signal order keys for mixer +
+			 * monitor because they are considered "external" to
+			 * the ordering of other routes.
+			 */
+			
+			if ((!is_master() && !is_monitor()) || x->first != MixerSort) {
+				if (x->second != n) {
+					x->second = n;
+					changed = true;
+				}
 			}
 		}
 	}
@@ -290,7 +318,7 @@ Route::set_order_key (std::string const & name, int32_t n)
  *  @param base Base key.
  */
 void
-Route::sync_order_keys (std::string const & base)
+Route::sync_order_keys (RouteSortOrderKey base)
 {
 	if (order_keys.empty()) {
 		return;
@@ -313,9 +341,17 @@ Route::sync_order_keys (std::string const & base)
 	bool changed = false;
 
 	for (; i != order_keys.end(); ++i) {
-		if (i->second != key) {
-			i->second = key;
-			changed = true;
+
+		/* we do not sync the signal order keys for mixer +
+		 * monitor because they are considered "external" to
+		 * the ordering of other routes.
+		 */
+
+		if ((!is_master() && !is_monitor()) || i->first != MixerSort) {
+			if (i->second != key) {
+				i->second = key;
+				changed = true;
+			}
 		}
 	}
 
@@ -1421,12 +1457,7 @@ Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStream
 				boost::shared_ptr<IOProcessor> iop;
 
 				if ((iop = boost::dynamic_pointer_cast<IOProcessor> (*i)) != 0) {
-					if (iop->input()) {
-						iop->input()->disconnect (this);
-					}
-					if (iop->output()) {
-						iop->output()->disconnect (this);
-					}
+					iop->disconnect ();
 				}
 
 				i = _processors.erase (i);
@@ -1867,9 +1898,9 @@ Route::state(bool full_state)
 	OrderKeys::iterator x = order_keys.begin();
 
 	while (x != order_keys.end()) {
-		order_string += string ((*x).first);
+		order_string += enum_2_string ((*x).first);
 		order_string += '=';
-		snprintf (buf, sizeof(buf), "%ld", (*x).second);
+		snprintf (buf, sizeof(buf), "%" PRId32, (*x).second);
 		order_string += buf;
 
 		++x;
@@ -1895,10 +1926,12 @@ Route::state(bool full_state)
 	node->add_child_nocopy (_mute_control->get_state ());
 	node->add_child_nocopy (_mute_master->get_state ());
 
-	XMLNode* remote_control_node = new XMLNode (X_("RemoteControl"));
-	snprintf (buf, sizeof (buf), "%d", _remote_control_id);
-	remote_control_node->add_property (X_("id"), buf);
-	node->add_child_nocopy (*remote_control_node);
+	if (_remote_control_id) {
+		XMLNode* remote_control_node = new XMLNode (X_("RemoteControl"));
+		snprintf (buf, sizeof (buf), "%d", *_remote_control_id);
+		remote_control_node->add_property (X_("id"), buf);
+		node->add_child_nocopy (*remote_control_node);
+	}
 
 	if (_comment.length()) {
 		XMLNode *cmt = node->add_child ("Comment");
@@ -2089,7 +2122,18 @@ Route::set_state (const XMLNode& node, int version)
 					error << string_compose (_("badly formed order key string in state file! [%1] ... ignored."), remaining)
 					      << endmsg;
 				} else {
-					set_order_key (remaining.substr (0, equal), n);
+					string keyname = remaining.substr (0, equal);
+					RouteSortOrderKey sk;
+
+					if (keyname == "signal") {
+						sk = MixerSort;
+					} else if (keyname == "editor") {
+						sk = EditorSort;
+					} else {
+						RouteSortOrderKey sk = (RouteSortOrderKey) string_2_enum (remaining.substr (0, equal), sk);
+					}
+
+					set_order_key (sk, n);
 				}
 			}
 
@@ -2285,7 +2329,18 @@ Route::set_state_2X (const XMLNode& node, int version)
 					error << string_compose (_("badly formed order key string in state file! [%1] ... ignored."), remaining)
 						<< endmsg;
 				} else {
-					set_order_key (remaining.substr (0, equal), n);
+					string keyname = remaining.substr (0, equal);
+					RouteSortOrderKey sk;
+
+					if (keyname == "signal") {
+						sk = MixerSort;
+					} else if (keyname == "editor") {
+						sk = EditorSort;
+					} else {
+						RouteSortOrderKey sk = (RouteSortOrderKey) string_2_enum (remaining.substr (0, equal), sk);
+					}
+
+					set_order_key (sk, n);
 				}
 			}
 

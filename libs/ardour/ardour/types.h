@@ -351,6 +351,12 @@ namespace ARDOUR {
 		PostFader
 	};
 
+        enum RouteSortOrderKey { 
+		UndefinedSort,
+		EditorSort,
+		MixerSort
+	};
+	    
 	enum MonitorModel {
 		HardwareMonitoring, ///< JACK does monitoring
 		SoftwareMonitoring, ///< Ardour does monitoring
