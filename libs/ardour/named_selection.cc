@@ -88,7 +88,7 @@ NamedSelection::NamedSelection (Session& session, const XMLNode& node)
 				warning << string_compose (_("Chunk %1 uses an unknown playlist \"%2\""), name, property->value()) << endmsg;
 			}
 		} else {
-			error << string_compose (_("Chunk %1 contains misformed playlist information"), name) << endmsg;
+			error << string_compose (_("Chunk %1 contains malformed playlist information"), name) << endmsg;
 			throw failed_constructor();
 		}
 	}

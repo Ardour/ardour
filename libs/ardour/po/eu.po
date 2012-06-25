@@ -823,7 +823,7 @@ msgid "Chunk %1 uses an unknown playlist \"%2\""
 msgstr ""
 
 #: libs/ardour/named_selection.cc:91
-msgid "Chunk %1 contains misformed playlist information"
+msgid "Chunk %1 contains malformed playlist information"
 msgstr ""
 
 #: libs/ardour/panner.cc:257

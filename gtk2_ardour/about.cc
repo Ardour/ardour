@@ -197,7 +197,7 @@ static const char* translators[] = {
 
 static const char* gpl = X_("\n\
 Ardour comes with NO WARRANTY. It is free software, and you are welcome to redistribute it\n\
-under the terms of the GNU Public License, shown below.\n\
+under the terms of the GNU General Public License, shown below.\n\
 \n\
 		    GNU GENERAL PUBLIC LICENSE\n\
 		       Version 2, June 1991\n\

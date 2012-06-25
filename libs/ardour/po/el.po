@@ -931,7 +931,7 @@ msgid "Chunk %1 uses an unknown playlist \"%2\""
 msgstr "Το κομμάτι %1 χρησιμοποιεί άγνωστη λίστα αναπαρ/γής \"%2\""
 
 #: libs/ardour/named_selection.cc:80
-msgid "Chunk %1 contains misformed playlist information"
+msgid "Chunk %1 contains malformed playlist information"
 msgstr "Το κομμάτι %1 περιέχει δύσμορφες πληροφορίες για τη λίστα αναπαρ/γής"
 
 #: libs/ardour/panner.cc:256
