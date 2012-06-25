@@ -337,7 +337,12 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 	}
 
 	if (ev->type == GDK_2BUTTON_PRESS) {
-		return trackview.editor().toggle_internal_editing_from_double_click (ev);
+		// cannot use double-click to exit internal mode if single-click is being used
+		MouseMode m = trackview.editor().current_mouse_mode();
+
+		if ((m != MouseObject || !Keyboard::modifier_state_contains (ev->button.state, Keyboard::insert_note_modifier())) && (m != MouseDraw)) {
+			return trackview.editor().toggle_internal_editing_from_double_click (ev);
+		}
 	}
 
 	if ((!trackview.editor().internal_editing() && trackview.editor().current_mouse_mode() != MouseGain) ||
