@@ -1052,6 +1052,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	int      load_state (std::string snapshot_name);
 
 	framepos_t _last_roll_location;
+	/** the session frame time at which we last rolled, located, or changed transport direction */
 	framepos_t _last_roll_or_reversal_location;
 	framepos_t _last_record_location;
 

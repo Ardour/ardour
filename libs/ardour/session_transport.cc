@@ -880,6 +880,7 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
 	// Update Timecode time
 	// [DR] FIXME: find out exactly where this should go below
 	_transport_frame = target_frame;
+	_last_roll_or_reversal_location = target_frame;
 	timecode_time(_transport_frame, transmitting_timecode_time);
 	outbound_mtc_timecode_frame = _transport_frame;
 	next_quarter_frame_to_send = 0;

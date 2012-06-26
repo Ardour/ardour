@@ -1263,7 +1263,7 @@ Session::audible_frame () const
 		   of audible frames, we have not moved yet.
 
 		   `Start position' in this context means the time we last
-		   either started or changed transport direction.
+		   either started, located, or changed transport direction.
 		*/
 
 		if (_transport_speed > 0.0f) {
