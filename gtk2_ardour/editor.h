@@ -1029,13 +1029,14 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 		double y_origin;
 
 		int idle_handler_id;
+		/** true if we are currently in the idle handler */
+		bool being_handled;
 
-		VisualChange() : pending ((VisualChange::Type) 0), time_origin (0), frames_per_unit (0), idle_handler_id (-1) {}
+		VisualChange() : pending ((VisualChange::Type) 0), time_origin (0), frames_per_unit (0), idle_handler_id (-1), being_handled (false) {}
 		void add (Type t) {
 			pending = Type (pending | t);
 		}
 	};
-
 
 	VisualChange pending_visual_change;
 

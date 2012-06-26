@@ -4241,6 +4241,18 @@ Editor::_idle_visual_changer (void* arg)
 int
 Editor::idle_visual_changer ()
 {
+	/* set_horizontal_position() below (and maybe other calls) call
+	   gtk_main_iteration(), so it's possible that a signal will be handled
+	   half-way through this method.  If this signal wants an
+	   idle_visual_changer we must schedule another one after this one, so
+	   mark the idle_handler_id as -1 here to allow that.  Also make a note
+	   that we are doing the visual change, so that changes in response to
+	   super-rapid-screen-update can be dropped if we are still processing
+	   the last one.
+	*/
+	pending_visual_change.idle_handler_id = -1;
+	pending_visual_change.being_handled = true;
+	
 	VisualChange::Type p = pending_visual_change.pending;
 	pending_visual_change.pending = (VisualChange::Type) 0;
 
@@ -4269,7 +4281,7 @@ Editor::idle_visual_changer ()
 
 	_summary->set_overlays_dirty ();
 
-	pending_visual_change.idle_handler_id = -1;
+	pending_visual_change.being_handled = false;
 	return 0; /* this is always a one-shot call */
 }
 
@@ -5191,7 +5203,14 @@ Editor::super_rapid_screen_update ()
 
 		if (!_stationary_playhead) {
 
-			if (!_dragging_playhead && _follow_playhead && _session->requested_return_frame() < 0) {
+			if (!_dragging_playhead && _follow_playhead && _session->requested_return_frame() < 0 && !pending_visual_change.being_handled) {
+				/* We only do this if we aren't already
+				   handling a visual change (ie if
+				   pending_visual_change.being_handled is
+				   false) so that these requests don't stack
+				   up there are too many of them to handle in
+				   time.
+				*/
 				reset_x_origin_to_follow_playhead ();
 			}
 
