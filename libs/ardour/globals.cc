@@ -52,6 +52,7 @@
 
 #include <lrdf.h>
 
+#include "pbd/cpus.h"
 #include "pbd/error.h"
 #include "pbd/id.h"
 #include "pbd/strsplit.h"
@@ -298,7 +299,7 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization)
 	(void) PluginManager::instance();
 
         ProcessThread::init ();
-        BufferManager::init (10); // XX should be num_processors_for_dsp + 1 for the GUI thread
+        BufferManager::init (hardware_concurrency() + 1); 
 
         PannerManager::instance().discover_panners();
 
