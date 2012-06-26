@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ArdourMIDIBindings version="1.0.0" name="Korg nanoKONTROL w/Master">
+
+
+<!-- 2012-6-25 James Roberts: Map file creation -->
+<!-- based on Korg_nanKONTROL.map by Chooch Schubert -->
+
+  <DeviceInfo bank-size="8" motorized="no" threshold="15"/>
+
+<!-- Transport Controls -->
+  <Binding channel="1" ctl="44" action="Transport/Record"/>
+  <Binding channel="1" ctl="45" action="Transport/TransitionToRoll"/>
+  <Binding channel="1" ctl="46" function="transport-stop"/>
+  <Binding channel="1" ctl="47" action="Transport/GotoStart"/>
+  <Binding channel="1" ctl="48" action="Transport/GotoEnd"/>
+  <Binding channel="1" ctl="49" action="Transport/Loop"/>
+
+<!-- The "Scene" button toggles between four banks. It implements this by   -->
+<!-- sending a bank assignment # corresponding to the current korg "Scene"  -->
+<!-- Downside is you are limited to 4 banks total (32 tracks.)              -->
+                                 
+<!-- Also, in order for this map to work you must have identical maps       -->
+<!-- assigned to each of the 4 scenes on the nano device.                   -->
+
+<Binding sysex="f0 42 40 0 1 4 0 5f 4f 0 f7" function="set-bank" argument="0"/>
+<Binding sysex="f0 42 40 0 1 4 0 5f 4f 1 f7" function="set-bank" argument="1"/>
+<Binding sysex="f0 42 40 0 1 4 0 5f 4f 2 f7" function="set-bank" argument="2"/>
+<Binding sysex="f0 42 40 0 1 4 0 5f 4f 3 f7" function="set-bank" argument="3"/>
+
+<!-- Strips 1-8:                                                            -->
+<!-- Rotary encoder assigned to Pan Direction                               -->
+<!-- Button 1 (top) assigned to Track Solo                                  -->
+<!-- Button 2 (bottom) assigned to Record Enable                            -->
+<!-- Fader assigned to Track Gain                                           -->
+
+<!-- Strip 9 - Master:                                                      -->
+<!-- Rotary encoder assigned to Master Pan Width (easy to audition in mono!)-->
+<!-- Button 1 (top) assigned to Toggle Mixer on Top                         -->
+<!-- Button 2 (bottom) assigned to Master Mute                              -->
+<!-- Fader assigned to Master Bus Gain                                      -->
+
+<!-- Strip 1 -->
+  <Binding channel="1" ctl="14" uri="/route/pandirection B1"/>
+  <Binding channel="1" ctl="23" uri="/route/solo B1"/>
+  <Binding channel="1" ctl="33" uri="/route/recenable B1"/>
+  <Binding channel="1" ctl="2" uri="/route/gain B1"/>
+
+<!-- Strip 2 -->
+  <Binding channel="1" ctl="15" uri="/route/pandirection B2"/>
+  <Binding channel="1" ctl="24" uri="/route/solo B2"/>
+  <Binding channel="1" ctl="34" uri="/route/recenable B2"/>
+  <Binding channel="1" ctl="3" uri="/route/gain B2"/>
+
+<!-- Strip 3 -->
+  <Binding channel="1" ctl="16" uri="/route/pandirection B3"/>
+  <Binding channel="1" ctl="25" uri="/route/solo B3"/>
+  <Binding channel="1" ctl="35" uri="/route/recenable B3"/>
+  <Binding channel="1" ctl="4" uri="/route/gain B3"/>
+
+<!-- Strip 4 -->
+  <Binding channel="1" ctl="17" uri="/route/pandirection B4"/>
+  <Binding channel="1" ctl="26" uri="/route/solo B4"/>
+  <Binding channel="1" ctl="36" uri="/route/recenable B4"/>
+  <Binding channel="1" ctl="5" uri="/route/gain B4"/>
+
+<!-- Strip 5 -->
+  <Binding channel="1" ctl="18" uri="/route/pandirection B5"/>
+  <Binding channel="1" ctl="27" uri="/route/solo B5"/>
+  <Binding channel="1" ctl="37" uri="/route/recenable B5"/>
+  <Binding channel="1" ctl="6" uri="/route/gain B5"/>
+
+<!-- Strip 6 -->
+  <Binding channel="1" ctl="19" uri="/route/pandirection B6"/>
+  <Binding channel="1" ctl="28" uri="/route/solo B6"/>
+  <Binding channel="1" ctl="38" uri="/route/recenable B6"/>
+  <Binding channel="1" ctl="8" uri="/route/gain B6"/>
+
+<!-- Strip 7 -->
+  <Binding channel="1" ctl="20" uri="/route/pandirection B7"/>
+  <Binding channel="1" ctl="29" uri="/route/solo B7"/>
+  <Binding channel="1" ctl="39" uri="/route/recenable B7"/>
+  <Binding channel="1" ctl="9" uri="/route/gain B7"/>
+
+<!-- Strip 8 -->
+  <Binding channel="1" ctl="21" uri="/route/pandirection B8"/>
+  <Binding channel="1" ctl="30" uri="/route/solo B8"/>
+  <Binding channel="1" ctl="40" uri="/route/recenable B8"/>
+  <Binding channel="1" ctl="12" uri="/route/gain B8"/>
+
+<!-- Strip 9 : Master -->
+  <Binding channel="1" ctl="22" uri="/bus/panwidth master"/>
+  <Binding channel="1" ctl="31" action="Common/toggle-mixer-on-top"/>
+  <Binding channel="1" ctl="41" uri="/bus/mute master"/>
+  <Binding channel="1" ctl="13" uri="/bus/gain master"/>
+
+
+</ArdourMIDIBindings>
