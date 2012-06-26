@@ -638,7 +638,7 @@ GenericMidiControlProtocol::load_bindings (const string& xmlpath)
 				_current_bank = 0;
 			}
 
-			if ((prop = (*citer)->property ("motorised")) != 0) {
+			if ((prop = (*citer)->property ("motorised")) != 0 || ((prop = (*citer)->property ("motorized")) != 0)) {
 				_motorised = string_is_affirmative (prop->value ());
 			} else {
 				_motorised = false;

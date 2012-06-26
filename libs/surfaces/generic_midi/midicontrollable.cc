@@ -25,6 +25,7 @@
 #include "pbd/error.h"
 #include "pbd/controllable_descriptor.h"
 #include "pbd/xml++.h"
+#include "pbd/stacktrace.h"
 
 #include "midi++/port.h"
 #include "midi++/channel.h"
@@ -77,7 +78,7 @@ MIDIControllable::MIDIControllable (GenericMidiControlProtocol* s, Port& p, Cont
 
 MIDIControllable::~MIDIControllable ()
 {
-	drop_controllable ();
+	drop_external_control ();
 }
 
 int
@@ -112,7 +113,6 @@ MIDIControllable::drop_external_control ()
 void
 MIDIControllable::set_controllable (Controllable* c)
 {
-	drop_controllable ();
 	controllable = c;
 }
 
@@ -210,7 +210,6 @@ MIDIControllable::lookup_controllable()
 void
 MIDIControllable::drop_controllable ()
 {
-	drop_external_control ();
 	controllable_death_connection.disconnect ();
 	controllable = 0;
 }
