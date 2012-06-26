@@ -107,6 +107,7 @@ class MIDIControllable : public PBD::Stateful
 	int              midi_msg_id;      /* controller ID or note number */
 	PBD::ScopedConnection midi_sense_connection[2];
 	PBD::ScopedConnection midi_learn_connection;
+        PBD::ScopedConnection controllable_death_connection;
 	/** the type of MIDI message that is used for this control */
 	MIDI::eventType  control_type;
 	MIDI::byte       control_additional;
@@ -118,7 +119,8 @@ class MIDIControllable : public PBD::Stateful
 	bool            _bank_relative;
 
         int lookup_controllable();
-	
+        void drop_controllable();
+
 	void midi_receiver (MIDI::Parser &p, MIDI::byte *, size_t);
 	void midi_sense_note (MIDI::Parser &, MIDI::EventTwoBytes *, bool is_on);
 	void midi_sense_note_on (MIDI::Parser &p, MIDI::EventTwoBytes *tb);

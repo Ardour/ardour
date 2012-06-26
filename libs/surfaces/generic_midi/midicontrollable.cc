@@ -30,6 +30,7 @@
 #include "midi++/channel.h"
 
 #include "ardour/automation_control.h"
+#include "ardour/midi_ui.h"
 #include "ardour/utils.h"
 
 #include "midicontrollable.h"
@@ -76,7 +77,7 @@ MIDIControllable::MIDIControllable (GenericMidiControlProtocol* s, Port& p, Cont
 
 MIDIControllable::~MIDIControllable ()
 {
-	drop_external_control ();
+	drop_controllable ();
 }
 
 int
@@ -111,6 +112,7 @@ MIDIControllable::drop_external_control ()
 void
 MIDIControllable::set_controllable (Controllable* c)
 {
+	drop_controllable ();
 	controllable = c;
 }
 
@@ -198,8 +200,19 @@ MIDIControllable::lookup_controllable()
 	}
 
 	controllable = c.get();
+	controllable->Destroyed.connect (controllable_death_connection, MISSING_INVALIDATOR,
+					 boost::bind (&MIDIControllable::drop_controllable, this), 
+					 MidiControlUI::instance());
 
 	return 0;
+}
+
+void
+MIDIControllable::drop_controllable ()
+{
+	drop_external_control ();
+	controllable_death_connection.disconnect ();
+	controllable = 0;
 }
 
 void
