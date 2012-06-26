@@ -111,7 +111,6 @@ class MidiControlUI;
 class MidiRegion;
 class MidiSource;
 class MidiTrack;
-class NamedSelection;
 class Playlist;
 class PluginInsert;
 class PluginInfo;
@@ -577,16 +576,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	uint32_t count_sources_by_origin (const std::string&);
 
 	void add_playlist (boost::shared_ptr<Playlist>, bool unused = false);
-
-	/* named selections */
-
-	boost::shared_ptr<NamedSelection> named_selection_by_name (std::string name);
-	void add_named_selection (boost::shared_ptr<NamedSelection>);
-	void remove_named_selection (boost::shared_ptr<NamedSelection>);
-
-	template<class T> void foreach_named_selection (T& obj, void (T::*func)(boost::shared_ptr<NamedSelection>));
-	PBD::Signal0<void> NamedSelectionAdded;
-	PBD::Signal0<void> NamedSelectionRemoved;
 
 	/* Curves and AutomationLists (TODO when they go away) */
 	void add_automation_list(AutomationList*);
@@ -1305,17 +1294,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void playlist_region_added (boost::weak_ptr<Region>);
 	void playlist_ranges_moved (std::list<Evoral::RangeMove<framepos_t> > const &);
 	void playlist_regions_extended (std::list<Evoral::Range<framepos_t> > const &);
-
-	/* NAMED SELECTIONS */
-
-	mutable Glib::Mutex named_selection_lock;
-	typedef std::set<boost::shared_ptr<NamedSelection> > NamedSelectionList;
-	NamedSelectionList named_selections;
-
-	int load_named_selections (const XMLNode&);
-
-	NamedSelection *named_selection_factory (std::string name);
-	NamedSelection *XMLNamedSelectionFactory (const XMLNode&);
 
 	/* CURVES and AUTOMATION LISTS */
 	std::map<PBD::ID, AutomationList*> automation_lists;

@@ -83,7 +83,6 @@ namespace ARDOUR {
 	class Region;
 	class Location;
 	class TempoSection;
-	class NamedSelection;
 	class Session;
 	class Filter;
 	class ChanCount;

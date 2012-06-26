@@ -68,7 +68,6 @@
 #include "ardour/graph.h"
 #include "ardour/midi_track.h"
 #include "ardour/midi_ui.h"
-#include "ardour/named_selection.h"
 #include "ardour/operations.h"
 #include "ardour/playlist.h"
 #include "ardour/plugin.h"
@@ -279,9 +278,6 @@ Session::destroy ()
 	drop_references ();
 
 	/* tell everyone to drop references and delete objects as we go */
-
-	DEBUG_TRACE (DEBUG::Destruction, "delete named selections\n");
-	named_selections.clear ();
 
 	DEBUG_TRACE (DEBUG::Destruction, "delete regions\n");
 	RegionFactory::delete_all_regions ();
@@ -3783,56 +3779,6 @@ Session::unmark_insert_id (uint32_t id)
 {
 	if (id < insert_bitset.size()) {
 		insert_bitset[id] = false;
-	}
-}
-
-
-/* Named Selection management */
-
-boost::shared_ptr<NamedSelection>
-Session::named_selection_by_name (string name)
-{
-	Glib::Mutex::Lock lm (named_selection_lock);
-	for (NamedSelectionList::iterator i = named_selections.begin(); i != named_selections.end(); ++i) {
-		if ((*i)->name == name) {
-			return *i;
-		}
-	}
-	return boost::shared_ptr<NamedSelection>();
-}
-
-void
-Session::add_named_selection (boost::shared_ptr<NamedSelection> named_selection)
-{
-	{
-		Glib::Mutex::Lock lm (named_selection_lock);
-		named_selections.insert (named_selections.begin(), named_selection);
-	}
-
-	set_dirty();
-
-	NamedSelectionAdded (); /* EMIT SIGNAL */
-}
-
-void
-Session::remove_named_selection (boost::shared_ptr<NamedSelection> named_selection)
-{
-	bool removed = false;
-
-	{
-		Glib::Mutex::Lock lm (named_selection_lock);
-
-		NamedSelectionList::iterator i = find (named_selections.begin(), named_selections.end(), named_selection);
-
-		if (i != named_selections.end()) {
-			named_selections.erase (i);
-			set_dirty();
-			removed = true;
-		}
-	}
-
-	if (removed) {
-		 NamedSelectionRemoved (); /* EMIT SIGNAL */
 	}
 }
 

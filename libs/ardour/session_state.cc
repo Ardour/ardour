@@ -93,7 +93,6 @@
 #include "ardour/midi_region.h"
 #include "ardour/midi_source.h"
 #include "ardour/midi_track.h"
-#include "ardour/named_selection.h"
 #include "ardour/pannable.h"
 #include "ardour/playlist_factory.h"
 #include "ardour/port.h"
@@ -1159,15 +1158,6 @@ Session::state (bool full_state)
 		gain_child->add_child_nocopy (_click_gain->state (full_state));
 	}
 
-	if (full_state) {
-		XMLNode* ns_child = node->add_child ("NamedSelections");
-		for (NamedSelectionList::iterator i = named_selections.begin(); i != named_selections.end(); ++i) {
-			if (full_state) {
-				ns_child->add_child_nocopy ((*i)->get_state());
-			}
-		}
-	}
-
         node->add_child_nocopy (_speakers->get_state());
 	node->add_child_nocopy (_tempo_map->get_state());
 	node->add_child_nocopy (get_control_protocol_state());
@@ -1323,12 +1313,6 @@ Session::set_state (const XMLNode& node, int version)
 
 	if ((child = find_named_node (node, "CompoundAssociations")) != 0) {
 		if (load_compounds (*child)) {
-			goto out;
-		}
-	}
-
-	if ((child = find_named_node (node, "NamedSelections")) != 0) {
-		if (load_named_selections (*child)) {
 			goto out;
 		}
 	}
@@ -2222,39 +2206,6 @@ Session::get_best_session_directory_for_new_source ()
 	}
 
 	return result;
-}
-
-int
-Session::load_named_selections (const XMLNode& node)
-{
-	XMLNodeList nlist;
-	XMLNodeConstIterator niter;
-	NamedSelection *ns;
-
-	nlist = node.children();
-
-	set_dirty();
-
-	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-
-		if ((ns = XMLNamedSelectionFactory (**niter)) == 0) {
-			error << _("Session: cannot create Named Selection from XML description.") << endmsg;
-		}
-	}
-
-	return 0;
-}
-
-NamedSelection *
-Session::XMLNamedSelectionFactory (const XMLNode& node)
-{
-	try {
-		return new NamedSelection (*this, node);
-	}
-
-	catch (failed_constructor& err) {
-		return 0;
-	}
 }
 
 string

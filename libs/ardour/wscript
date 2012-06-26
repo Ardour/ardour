@@ -138,7 +138,6 @@ libardour_sources = [
         'mtc_slave.cc',
         'mtdm.cc',
         'mute_master.cc',
-        'named_selection.cc',
         'onset_detector.cc',
         'operations.cc',
         'pan_controllable.cc',
