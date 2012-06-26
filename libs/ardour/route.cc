@@ -297,7 +297,7 @@ Route::set_order_key (RouteSortOrderKey key, int32_t n)
 			 * monitor because they are considered "external" to
 			 * the ordering of other routes.
 			 */
-			
+
 			if ((!is_master() && !is_monitor()) || x->first != MixerSort) {
 				if (x->second != n) {
 					x->second = n;
@@ -2130,7 +2130,7 @@ Route::set_state (const XMLNode& node, int version)
 					} else if (keyname == "editor") {
 						sk = EditorSort;
 					} else {
-						RouteSortOrderKey sk = (RouteSortOrderKey) string_2_enum (remaining.substr (0, equal), sk);
+						sk = (RouteSortOrderKey) string_2_enum (remaining.substr (0, equal), sk);
 					}
 
 					set_order_key (sk, n);
