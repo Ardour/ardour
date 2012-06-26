@@ -210,6 +210,7 @@ MIDIControllable::lookup_controllable()
 void
 MIDIControllable::drop_controllable ()
 {
+	cerr << "removed controllable\n";
 	controllable_death_connection.disconnect ();
 	controllable = 0;
 }
@@ -242,6 +243,8 @@ MIDIControllable::midi_sense_controller (Parser &, EventTwoBytes *msg)
 			return;
 		}
 	}
+
+	assert (controllable);
 
 	if (controllable->touching()) {
 		return; // to prevent feedback fights when e.g. dragging a UI slider
