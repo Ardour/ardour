@@ -806,8 +806,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void send_mmc_locate (framepos_t);
 	int send_full_time_code (framepos_t);
 
-	PBD::Signal0<void> RouteOrderKeyChanged;
-
 	bool step_editing() const { return (_step_editors > 0); }
 
 	void request_suspend_timecode_transmission ();
@@ -1502,8 +1500,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void add_session_range_location (framepos_t, framepos_t);
 
 	void setup_midi_machine_control ();
-
-	void route_order_key_changed ();
 
 	void step_edit_status_change (bool);
 	uint32_t _step_editors;

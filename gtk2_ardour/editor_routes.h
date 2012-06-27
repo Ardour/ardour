@@ -42,6 +42,10 @@ public:
 		_no_redisplay = true;
 	}
 
+        void allow_redisplay () { 
+		_no_redisplay = false;
+	}
+
 	void resume_redisplay () {
 		_no_redisplay = false;
 		redisplay ();
@@ -55,8 +59,8 @@ public:
 	std::list<TimeAxisView*> views () const;
 	void hide_all_tracks (bool);
 	void clear ();
-        void sync_order_keys (ARDOUR::RouteSortOrderKey);
-
+        uint32_t count_displayed_non_special_routes () const;
+        void sync_order_keys_from_model ();
 private:
 
 	void initial_display ();
@@ -68,6 +72,7 @@ private:
 	void on_tv_solo_safe_toggled (std::string const &);
 	void build_menu ();
 	void show_menu ();
+        void sync_model_from_order_keys (ARDOUR::RouteSortOrderKey);
 	void route_deleted (Gtk::TreeModel::Path const &);
 	void visible_changed (std::string const &);
 	void active_changed (std::string const &);
@@ -98,7 +103,6 @@ private:
 		Glib::RefPtr<Gdk::DragContext> const &, gint, gint, Gtk::SelectionData const &, guint, guint
 		);
 
-	void track_list_reorder (Gtk::TreeModel::Path const &, Gtk::TreeModel::iterator const & iter, int* new_order);
 	bool selection_filter (Glib::RefPtr<Gtk::TreeModel> const &, Gtk::TreeModel::Path const &, bool);
 	void name_edit (std::string const &, std::string const &);
 	void solo_changed_so_update_mute ();
@@ -150,8 +154,6 @@ private:
 
 	bool _ignore_reorder;
 	bool _no_redisplay;
-	bool _redisplay_does_not_sync_order_keys;
-	bool _redisplay_does_not_reset_order_keys;
 
 	Gtk::Menu* _menu;
         Gtk::Widget* old_focus;

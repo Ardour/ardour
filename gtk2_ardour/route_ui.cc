@@ -1738,9 +1738,12 @@ RouteUI::open_remote_control_id_dialog ()
 		dialog.add_button (Stock::APPLY, RESPONSE_ACCEPT);
 	} else {
 		Label* l = manage (new Label());
-		l->set_markup (string_compose (_("Remote Control IDs are currently determined by track/bus ordering in %1\n\n\n"
+		l->set_markup (string_compose (_("Remote Control IDs are currently determined by track/bus ordering in %1\n\n"
+						 "This %2 has remote control ID %3\n\n\n"
 						 "<span size=\"small\" style=\"italic\">Use the User Interaction tab of the Preferences window if you want to change this</span>"),
-					       (Config->get_remote_model() == MixerOrdered ? _("the mixer") : ("the editor"))));
+					       (Config->get_remote_model() == MixerOrdered ? _("the mixer") : ("the editor")),
+					       (is_track() ? _("track") : _("bus")),
+					       _route->remote_control_id()));
 		dialog.get_vbox()->pack_start (*l);
 		dialog.add_button (Stock::OK, RESPONSE_CANCEL);
 	}

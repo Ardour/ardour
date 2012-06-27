@@ -3142,8 +3142,6 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 		output_chan = input_chan;
 	}
 
-	cerr << "ARD said " << input_chan << " and " << output_chan << endl;
-
 	/* XXX do something with name template */
 
 	switch (add_route_dialog->type_wanted()) {

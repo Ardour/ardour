@@ -400,7 +400,7 @@ setup_enum_writer ()
 
 	REGISTER_ENUM (MixerSort);
 	REGISTER_ENUM (EditorSort);
-	REGISTER_BITS (_RouteSortOrderKey);
+	REGISTER (_RouteSortOrderKey);
 
 	REGISTER_CLASS_ENUM (Source, Writable);
 	REGISTER_CLASS_ENUM (Source, CanRename);

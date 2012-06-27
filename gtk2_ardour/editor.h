@@ -704,7 +704,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void popup_control_point_context_menu (ArdourCanvas::Item *, GdkEvent *);
 	Gtk::Menu _control_point_context_menu;
 
-	void handle_new_route (ARDOUR::RouteList&);
+	void add_routes (ARDOUR::RouteList&);
 	void timeaxisview_deleted (TimeAxisView *);
 
 	Gtk::HBox           global_hpacker;

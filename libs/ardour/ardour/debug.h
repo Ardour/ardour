@@ -59,6 +59,7 @@ namespace PBD {
 		extern uint64_t Layering;
 		extern uint64_t TempoMath;
 		extern uint64_t TempoMap;
+		extern uint64_t OrderKeys;
 	}
 }
 

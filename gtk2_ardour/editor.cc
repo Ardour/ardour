@@ -1271,7 +1271,7 @@ Editor::set_session (Session *t)
 	_session->StepEditStatusChange.connect (_session_connections, invalidator (*this), boost::bind (&Editor::step_edit_status_change, this, _1), gui_context());
 	_session->TransportStateChange.connect (_session_connections, invalidator (*this), boost::bind (&Editor::map_transport_state, this), gui_context());
 	_session->PositionChanged.connect (_session_connections, invalidator (*this), boost::bind (&Editor::map_position_change, this, _1), gui_context());
-	_session->RouteAdded.connect (_session_connections, invalidator (*this), boost::bind (&Editor::handle_new_route, this, _1), gui_context());
+	_session->RouteAdded.connect (_session_connections, invalidator (*this), boost::bind (&Editor::add_routes, this, _1), gui_context());
 	_session->DirtyChanged.connect (_session_connections, invalidator (*this), boost::bind (&Editor::update_title, this), gui_context());
 	_session->tempo_map().PropertyChanged.connect (_session_connections, invalidator (*this), boost::bind (&Editor::tempo_map_changed, this, _1), gui_context());
 	_session->Located.connect (_session_connections, invalidator (*this), boost::bind (&Editor::located, this), gui_context());
@@ -4785,9 +4785,8 @@ Editor::axis_views_from_routes (boost::shared_ptr<RouteList> r) const
 	return t;
 }
 
-
 void
-Editor::handle_new_route (RouteList& routes)
+Editor::add_routes (RouteList& routes)
 {
 	ENSURE_GUI_THREAD (*this, &Editor::handle_new_route, routes)
 
@@ -4797,7 +4796,7 @@ Editor::handle_new_route (RouteList& routes)
 	for (RouteList::iterator x = routes.begin(); x != routes.end(); ++x) {
 		boost::shared_ptr<Route> route = (*x);
 
-		if (route->is_hidden() || route->is_monitor()) {
+		if (route->is_hidden()) {
 			continue;
 		}
 

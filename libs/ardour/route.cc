@@ -247,116 +247,84 @@ uint32_t
 Route::remote_control_id() const
 {
 	switch (Config->get_remote_model()) {
-	case MixerOrdered:
-		return order_key (MixerSort) + 1;
-	case EditorOrdered:
-		return order_key (EditorSort) + 1;
 	case UserOrdered:
 		if (_remote_control_id) {
 			return *_remote_control_id;
 		}
+		break;
+	default:
+		break;
 	}
 
-	/* fall back to MixerSort as the default */
+	if (is_master()) {
+		return MasterBusRemoteControlID;
+	} 
 
-	return order_key (MixerSort) + 1;
+	if (is_monitor()) {
+		return MonitorBusRemoteControlID;
+	}
+
+	/* order keys are zero-based, remote control ID's are one-based
+	 */
+
+	switch (Config->get_remote_model()) {
+	case EditorOrdered:
+		return order_key (EditorSort) + 1;
+	case MixerOrdered:
+	default:
+		return order_key (MixerSort) + 1;
+	}
 }
 
-int32_t
+bool
+Route::has_order_key (RouteSortOrderKey key) const
+{
+	return (order_keys.find (key) != order_keys.end());
+}
+
+uint32_t
 Route::order_key (RouteSortOrderKey key) const
 {
 	OrderKeys::const_iterator i = order_keys.find (key);
 
 	if (i == order_keys.end()) {
-		return -1;
+		return 0;
 	}
 
 	return i->second;
 }
 
 void
-Route::set_order_key (RouteSortOrderKey key, int32_t n)
-{
-	bool changed = false;
-
-	/* This method looks more complicated than it should, but
-	   it's important that we don't emit order_key_changed unless
-	   it actually has, as expensive things happen on receipt of that
-	   signal.
-	*/
-
-	if (order_keys.find (key) == order_keys.end() || order_keys[key] != n) {
-		order_keys[key] = n;
-		changed = true;
-	}
-
-	if (Config->get_sync_all_route_ordering()) {
-		for (OrderKeys::iterator x = order_keys.begin(); x != order_keys.end(); ++x) {
-
-			/* we do not sync the signal order keys for mixer +
-			 * monitor because they are considered "external" to
-			 * the ordering of other routes.
-			 */
-
-			if ((!is_master() && !is_monitor()) || x->first != MixerSort) {
-				if (x->second != n) {
-					x->second = n;
-					changed = true;
-				}
-			}
-		}
-	}
-
-	if (changed) {
-		order_key_changed (); /* EMIT SIGNAL */
-		_session.set_dirty ();
-	}
-}
-
-/** Set all order keys to be the same as that for `base', if such a key
- *  exists in this route.
- *  @param base Base key.
- */
-void
 Route::sync_order_keys (RouteSortOrderKey base)
 {
-	if (order_keys.empty()) {
+	OrderKeys::iterator i = order_keys.find (base);
+
+	if (i == order_keys.end()) {
 		return;
 	}
 
-	OrderKeys::iterator i;
-	int32_t key;
+	for (OrderKeys::iterator k = order_keys.begin(); k != order_keys.end(); ++k) {
 
-	if ((i = order_keys.find (base)) == order_keys.end()) {
-		/* key doesn't exist, use the first existing key (during session initialization) */
-		i = order_keys.begin();
-		key = i->second;
-		++i;
-	} else {
-		/* key exists - use it and reset all others (actually, itself included) */
-		key = i->second;
-		i = order_keys.begin();
-	}
-
-	bool changed = false;
-
-	for (; i != order_keys.end(); ++i) {
-
-		/* we do not sync the signal order keys for mixer +
-		 * monitor because they are considered "external" to
-		 * the ordering of other routes.
-		 */
-
-		if ((!is_master() && !is_monitor()) || i->first != MixerSort) {
-			if (i->second != key) {
-				i->second = key;
-				changed = true;
-			}
+		if (k->first == MixerSort && (is_master() || is_monitor())) {
+			/* don't sync the mixer sort keys for master/monitor,
+			 * since they are not part of the normal ordering.
+			 */
+			 
+			continue;
+		}
+		
+		if (k->first != base) {
+			k->second = i->second;
 		}
 	}
+}
 
-	if (changed) {
-		order_key_changed (); /* EMIT SIGNAL */
+void
+Route::set_order_key (RouteSortOrderKey key, uint32_t n)
+{
+	if (order_keys.find (key) == order_keys.end() || order_keys[key] != n) {
+		order_keys[key] = n;
+		_session.set_dirty ();
 	}
 }
 

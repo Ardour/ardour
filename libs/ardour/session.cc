@@ -2103,6 +2103,7 @@ Session::add_routes (RouteList& new_routes, bool input_auto_connect, bool output
 {
         ChanCount existing_inputs;
         ChanCount existing_outputs;
+	uint32_t order = next_control_id();
 
         count_existing_track_channels (existing_inputs, existing_outputs);
 
@@ -2133,7 +2134,6 @@ Session::add_routes (RouteList& new_routes, bool input_auto_connect, bool output
 		r->mute_changed.connect_same_thread (*this, boost::bind (&Session::route_mute_changed, this, _1));
 		r->output()->changed.connect_same_thread (*this, boost::bind (&Session::set_worst_io_latencies_x, this, _1, _2));
 		r->processors_changed.connect_same_thread (*this, boost::bind (&Session::route_processors_changed, this, _1));
-		r->order_key_changed.connect_same_thread (*this, boost::bind (&Session::route_order_key_changed, this));
 
 		if (r->is_master()) {
 			_master_out = r;
@@ -2158,6 +2158,24 @@ Session::add_routes (RouteList& new_routes, bool input_auto_connect, bool output
 
 		if (input_auto_connect || output_auto_connect) {
 			auto_connect_route (r, existing_inputs, existing_outputs, true, input_auto_connect);
+		}
+
+		/* order keys are a GUI responsibility but we need to set up
+		   reasonable defaults because they also affect the remote control
+		   ID in most situations.
+		*/
+		
+		if (!r->has_order_key (EditorSort)) {
+			if (r->is_hidden()) {
+				/* use an arbitrarily high value */
+				r->set_order_key (EditorSort, UINT_MAX);
+				r->set_order_key (MixerSort, UINT_MAX);
+			} else {
+				DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("while adding, set %1 to order key %2\n", r->name(), order));
+				r->set_order_key (EditorSort, order);
+				r->set_order_key (MixerSort, order);
+				order++;
+			}
 		}
 	}
 
@@ -2354,8 +2372,6 @@ Session::remove_route (boost::shared_ptr<Route> route)
 	/* try to cause everyone to drop their references */
 
 	route->drop_references ();
-
-	sync_order_keys (UndefinedSort);
 
 	Route::RemoteControlIDChange(); /* EMIT SIGNAL */
 
@@ -4096,27 +4112,6 @@ Session::add_automation_list(AutomationList *al)
 	automation_lists[al->id()] = al;
 }
 
-void
-Session::sync_order_keys (RouteSortOrderKey base)
-{
-	if (deletion_in_progress()) {
-		return;
-	}
-
-	if (!Config->get_sync_all_route_ordering()) {
-		/* leave order keys as they are */
-		return;
-	}
-
-	boost::shared_ptr<RouteList> r = routes.reader ();
-
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		(*i)->sync_order_keys (base);
-	}
-
-	Route::SyncOrderKeys (base); // EMIT SIGNAL
-}
-
 /** @return true if there is at least one record-enabled track, otherwise false */
 bool
 Session::have_rec_enabled_track () const
@@ -4266,13 +4261,6 @@ Session::add_session_range_location (framepos_t start, framepos_t end)
 {
 	_session_range_location = new Location (*this, start, end, _("session"), Location::IsSessionRange);
 	_locations->add (_session_range_location);
-}
-
-/** Called when one of our routes' order keys has changed */
-void
-Session::route_order_key_changed ()
-{
-	RouteOrderKeyChanged (); /* EMIT SIGNAL */
 }
 
 void
@@ -4694,30 +4682,41 @@ Session::next_control_id () const
 {
 	int subtract = 0;
 
-	/* the master and monitor bus remote ID's occupy a different
-	 * "namespace" than regular routes. their existence doesn't
+	/* the monitor bus remote ID is in a different
+	 * "namespace" than regular routes. its existence doesn't
 	 * affect normal (low) numbered routes.
 	 */
-
-	if (_master_out) {
-		subtract++;
-	}
 
 	if (_monitor_out) {
 		subtract++;
 	}
 
-	/* remote control IDs are based either on this
-	   value, or signal order, which is zero-based. so we have
-	   to ensure consistency of zero-based-ness for both
-	   sources of the number.
-	   
-	   we actually add 1 to the value to form an actual
-	   remote control ID, which is 1-based.
+	return nroutes() - subtract;
+}
+
+void
+Session::sync_order_keys (RouteSortOrderKey sort_key_changed)
+{
+	if (deletion_in_progress()) {
+		return;
+	}
+
+	switch (Config->get_remote_model()) {
+	case MixerSort:
+	case EditorSort:
+		Route::RemoteControlIDChange (); /* EMIT SIGNAL */
+		break;
+	default:
+		break;
+	}
+
+	/* tell everyone that something has happened to the sort keys
+	   and let them sync up with the change(s)
 	*/
 
-	cerr << "Next control ID will be " << ntracks() + (nbusses() - subtract) << endl;
-	return ntracks() + (nbusses() - subtract);
+	DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("Sync Order Keys, based on %1\n", enum_2_string (sort_key_changed)));
+
+	Route::SyncOrderKeys (sort_key_changed); /* EMIT SIGNAL */
 }
 
 bool

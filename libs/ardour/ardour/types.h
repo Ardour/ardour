@@ -352,7 +352,6 @@ namespace ARDOUR {
 	};
 
         enum RouteSortOrderKey { 
-		UndefinedSort,
 		EditorSort,
 		MixerSort
 	};

@@ -192,5 +192,5 @@ MixerGroupTabs::selected_routes () const
 void
 MixerGroupTabs::sync_order_keys ()
 {
-	_mixer->sync_order_keys (UndefinedSort);
+	_mixer->sync_order_keys_from_model ();
 }

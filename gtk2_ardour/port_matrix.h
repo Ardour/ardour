@@ -188,7 +188,7 @@ private:
 	void disassociate_all_on_channel (boost::weak_ptr<ARDOUR::Bundle>, uint32_t, int);
 	void disassociate_all_on_bundle (boost::weak_ptr<ARDOUR::Bundle>, int);
 	void setup_global_ports ();
-	void setup_global_ports_proxy ();
+        void setup_global_ports_proxy (ARDOUR::RouteSortOrderKey);
 	void toggle_show_only_bundles ();
 	bool on_scroll_event (GdkEventScroll *);
 	boost::shared_ptr<ARDOUR::IO> io_from_bundle (boost::shared_ptr<ARDOUR::Bundle>) const;

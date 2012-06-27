@@ -568,11 +568,12 @@ AUPluginUI::parent_carbon_window ()
 
 	int packing_extra = 6; // this is the total vertical packing in our top level window
 
-	MoveWindow (carbon_window, x, y + titlebar_height + top_box.get_height() + packing_extra, false);
-	ShowWindow (carbon_window);
-
 	// create the cocoa window for the carbon one and make it visible
 	cocoa_parent = [[NSWindow alloc] initWithWindowRef: carbon_window];
+
+        PositionWindow (carbon_window, [cocoa_parent windowRef], kWindowCascadeStartAtParentWindowScreen);
+	MoveWindow (carbon_window, x, y + titlebar_height + top_box.get_height() + packing_extra, false);
+	ShowWindow (carbon_window);
 
 	SetWindowActivationScope (carbon_window, kWindowActivationScopeNone);
 

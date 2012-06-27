@@ -3060,13 +3060,11 @@ Session::controllable_by_descriptor (const ControllableDescriptor& desc)
 	}
 
 	case ControllableDescriptor::RemoteControlID:
-		cerr << "RID " << desc.rid() << endl;
 		r = route_by_remote_id (desc.rid());
 		break;
 	}
 
 	if (!r) {
-		cerr << "no controllable with no route\n";
 		return c;
 	}
 
@@ -3149,16 +3147,12 @@ Session::controllable_by_descriptor (const ControllableDescriptor& desc)
 			--send;
 		}
 
-		cerr << "Look for send " << send << endl;
-
 		boost::shared_ptr<Processor> p = r->nth_send (send);
 
 		if (p) {
 			boost::shared_ptr<Send> s = boost::dynamic_pointer_cast<Send>(p);
 			boost::shared_ptr<Amp> a = s->amp();
 			
-			cerr << " looked for send " << send << " got " << s << " amp = " << a << endl;
-
 			if (a) {
 				c = s->amp()->gain_control();
 			}
@@ -3513,7 +3507,7 @@ Session::config_changed (std::string p, bool ours)
 	} else if (p == "history-depth") {
 		set_history_depth (Config->get_history_depth());
 	} else if (p == "sync-all-route-ordering") {
-		sync_order_keys (UndefinedSort);
+		/* XXX sync_order_keys (UndefinedSort); */
 	} else if (p == "initial-program-change") {
 
 		if (MIDI::Manager::instance()->mmc()->output_port() && Config->get_initial_program_change() >= 0) {
