@@ -59,7 +59,6 @@ public:
 	std::list<TimeAxisView*> views () const;
 	void hide_all_tracks (bool);
 	void clear ();
-        uint32_t count_displayed_non_special_routes () const;
         void sync_order_keys_from_model ();
 private:
 

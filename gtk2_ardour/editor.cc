@@ -4796,7 +4796,7 @@ Editor::add_routes (RouteList& routes)
 	for (RouteList::iterator x = routes.begin(); x != routes.end(); ++x) {
 		boost::shared_ptr<Route> route = (*x);
 
-		if (route->is_hidden()) {
+		if (route->is_hidden() || route->is_monitor()) {
 			continue;
 		}
 

@@ -1595,26 +1595,3 @@ EditorRoutes::show_tracks_with_regions_at_playhead ()
 	resume_redisplay ();
 }
 
-uint32_t
-EditorRoutes::count_displayed_non_special_routes () const
-{
-	if (!_model) {
-		return 0;
-	}
-	uint32_t cnt = 0;
-	TreeModel::Children rows = _model->children ();
-	for (TreeModel::Children::iterator i = rows.begin(); i != rows.end(); ++i) {
-		bool visible = (*i)[_columns.visible];
-		if (visible) {
-			boost::shared_ptr<Route> route = (*i)[_columns.route];
-			if (route) {
-				if (route->is_master() || route->is_monitor()) {
-					continue;
-				}
-				cnt++;
-			}
-		}
-	}
-
-	return cnt;
-}
