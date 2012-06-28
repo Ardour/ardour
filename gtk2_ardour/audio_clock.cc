@@ -1455,15 +1455,6 @@ AudioClock::on_button_press_event (GdkEventButton *ev)
 	switch (ev->button) {
 	case 1:
 		if (editable && !_off) {
-			dragging = true;
-			/* make absolutely sure that the pointer is grabbed */
-			gdk_pointer_grab(ev->window,false ,
-					 GdkEventMask( Gdk::POINTER_MOTION_MASK | Gdk::BUTTON_PRESS_MASK |Gdk::BUTTON_RELEASE_MASK),
-					 NULL,NULL,ev->time);
-			drag_accum = 0;
-			drag_start_y = ev->y;
-			drag_y = ev->y;
-			
 			int index;
 			int trailing;
 			int y;
@@ -1476,10 +1467,16 @@ AudioClock::on_button_press_event (GdkEventButton *ev)
 			y = ev->y - ((upper_height - layout_height)/2);
 			x = ev->x - layout_x_offset;
 			
-			if (_layout->xy_to_index (x * PANGO_SCALE, y * PANGO_SCALE, index, trailing)) {			
+			if (_layout->xy_to_index (x * PANGO_SCALE, y * PANGO_SCALE, index, trailing)) {
 				drag_field = index_to_field (index);
-			} else {
-				drag_field = Field (0);
+				dragging = true;
+				/* make absolutely sure that the pointer is grabbed */
+				gdk_pointer_grab(ev->window,false ,
+						 GdkEventMask( Gdk::POINTER_MOTION_MASK | Gdk::BUTTON_PRESS_MASK |Gdk::BUTTON_RELEASE_MASK),
+						 NULL,NULL,ev->time);
+				drag_accum = 0;
+				drag_start_y = ev->y;
+				drag_y = ev->y;
 			}
 		}
 		break;
@@ -1660,7 +1657,7 @@ AudioClock::on_motion_notify_event (GdkEventMotion *ev)
 		int dir;
 		dir = (drag_accum < 0 ? 1:-1);
 		pos = current_time();
-		frames = get_frame_step (drag_field,pos,dir);
+		frames = get_frame_step (drag_field, pos, dir);
 
 		if (frames  != 0 &&  frames * drag_accum < current_time()) {
 			set ((framepos_t) floor (pos - drag_accum * frames), false); // minus because up is negative in GTK
