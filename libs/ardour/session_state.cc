@@ -3506,8 +3506,33 @@ Session::config_changed (std::string p, bool ours)
 		setup_fpu ();
 	} else if (p == "history-depth") {
 		set_history_depth (Config->get_history_depth());
+	} else if (p == "remote-model") {
+		switch (Config->get_remote_model()) {
+		case UserOrdered:
+			break;
+		case MixerOrdered:
+			sync_remote_id_from_order_keys (MixerSort);
+			break;
+		case EditorOrdered:
+			sync_remote_id_from_order_keys (EditorSort);
+			break;
+		}
 	} else if (p == "sync-all-route-ordering") {
-		/* XXX sync_order_keys (UndefinedSort); */
+
+		/* sync to editor order unless mixer is used for remote IDs 
+		 */
+
+		switch (Config->get_remote_model()) {
+		case UserOrdered:
+			sync_order_keys (EditorSort);
+			break;
+		case EditorOrdered:
+			sync_order_keys (EditorSort);
+			break;
+		case MixerOrdered:
+			sync_order_keys (MixerSort);
+		}
+			
 	} else if (p == "initial-program-change") {
 
 		if (MIDI::Manager::instance()->mmc()->output_port() && Config->get_initial_program_change() >= 0) {

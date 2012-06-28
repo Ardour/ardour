@@ -817,25 +817,14 @@ EditorRoutes::sync_order_keys_from_model ()
 	bool changed = false;
 	uint32_t order = 0;
 
-	for (ri = rows.begin(); ri != rows.end(); ++ri) {
+	for (ri = rows.begin(); ri != rows.end(); ++ri, ++order) {
 		boost::shared_ptr<Route> route = (*ri)[_columns.route];
-		bool visible = (*ri)[_columns.visible];
-
 		uint32_t old_key = route->order_key (EditorSort);
-		uint32_t new_key;
 
-		if (!visible) {
-			new_key = UINT_MAX;
-		} else {
-			new_key = order;
-		}
-
-		if (old_key != new_key) {
-			route->set_order_key (EditorSort, new_key);
+		if (order != old_key) {
+			route->set_order_key (EditorSort, order);
 			changed = true;
 		}
-
-		order++;
 	}
 	
 	if (changed) {
@@ -847,6 +836,10 @@ EditorRoutes::sync_order_keys_from_model ()
 void
 EditorRoutes::sync_model_from_order_keys (RouteSortOrderKey src)
 {
+	/* Some route order key(s) for `src' has been changed, make sure that 
+	   we update out tree/list model and GUI to reflect the change.
+	*/
+
 	if (!_session || _session->deletion_in_progress()) {
 		return;
 	}
@@ -880,7 +873,8 @@ EditorRoutes::sync_model_from_order_keys (RouteSortOrderKey src)
 
 	vector<int> neworder;
 	TreeModel::Children rows = _model->children();
-	uint32_t n = 0;
+	uint32_t old_order = 0;
+	bool changed = false;
 
 	if (rows.empty()) {
 		return;
@@ -888,14 +882,22 @@ EditorRoutes::sync_model_from_order_keys (RouteSortOrderKey src)
 
 	neworder.assign (rows.size(), 0);
 
-	for (TreeModel::Children::iterator ri = rows.begin(); ri != rows.end(); ++ri, ++n) {
+	for (TreeModel::Children::iterator ri = rows.begin(); ri != rows.end(); ++ri, ++old_order) {
 		boost::shared_ptr<Route> route = (*ri)[_columns.route];
-		neworder[route->order_key (EditorSort)] = n;
-		DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("editor change order for %1 to %2\n",
-							       route->name(), route->order_key (MixerSort)));
+		uint32_t new_order = route->order_key (EditorSort);
+		
+		DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("editor change order for %1 from %2 to %3\n",
+							       route->name(), old_order, new_order));
+
+		neworder[new_order] = old_order;
+
+		if (old_order != new_order) {
+			changed = true;
+		}
+
 	}
 
-	{
+	if (changed) {
 		Unwinder<bool> uw (_ignore_reorder, true);
 		_model->reorder (neworder);
 	}

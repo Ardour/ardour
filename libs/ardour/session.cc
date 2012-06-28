@@ -2205,7 +2205,22 @@ Session::add_routes (RouteList& new_routes, bool input_auto_connect, bool output
 	}
 
 	RouteAdded (new_routes); /* EMIT SIGNAL */
-	Route::RemoteControlIDChange (); /* EMIT SIGNAL */
+
+	/* we added at least one new route, and everyone who needs to has now
+	 * handled this event. This means that route order keys are correctly
+	 * set and we can now ensure that remote control IDs are set.
+	 */
+
+	switch (Config->get_remote_model()) {
+	case UserOrdered:
+		break;
+	case MixerOrdered:
+		sync_remote_id_from_order_keys (MixerSort);
+		break;
+	case EditorOrdered:
+		sync_remote_id_from_order_keys (EditorSort);
+		break;
+	}
 }
 
 void
@@ -4714,11 +4729,54 @@ Session::sync_order_keys (RouteSortOrderKey sort_key_changed)
 
 	/* tell everyone that something has happened to the sort keys
 	   and let them sync up with the change(s)
+	   this will give objects that manage the sort order keys the
+	   opportunity to keep them in sync if they wish to.
 	*/
 
 	DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("Sync Order Keys, based on %1\n", enum_2_string (sort_key_changed)));
 
 	Route::SyncOrderKeys (sort_key_changed); /* EMIT SIGNAL */
+
+	/* ensure that remote control IDs are in sync with the relevant
+	   order keys.
+	*/
+
+	sync_remote_id_from_order_keys (sort_key_changed);
+}
+
+void
+Session::sync_remote_id_from_order_keys (RouteSortOrderKey sort_key_changed)
+{
+	/* update remote control IDs if that makes sense */
+
+	bool do_update = false;
+
+	DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("sync RID to order key %1\n", enum_2_string (sort_key_changed)));
+
+	switch (Config->get_remote_model()) {
+	case UserOrdered:
+		break;
+	case EditorOrdered:
+		if (sort_key_changed == EditorSort) {
+			do_update = true;
+		}
+		break;
+	case MixerOrdered:
+		if (sort_key_changed == MixerSort) {
+			do_update = true;
+		}
+		break;
+	}
+
+	if (do_update) {
+		DEBUG_TRACE (DEBUG::OrderKeys, "\tactually update + signal\n");
+		boost::shared_ptr<RouteList> r = routes.reader();
+		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+			(*i)->set_remote_control_id_from_order_key (sort_key_changed);
+		}
+
+		Route::RemoteControlIDChange (); /* EMIT SIGNAL - static */
+	}
 }
 
 bool

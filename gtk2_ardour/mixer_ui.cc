@@ -413,25 +413,14 @@ Mixer_UI::sync_order_keys_from_model ()
 	bool changed = false;
 	uint32_t order = 0;
 
-	for (ri = rows.begin(); ri != rows.end(); ++ri) {
+	for (ri = rows.begin(); ri != rows.end(); ++ri, ++order) {
 		boost::shared_ptr<Route> route = (*ri)[track_columns.route];
-		bool visible = (*ri)[track_columns.visible];
-
 		uint32_t old_key = route->order_key (MixerSort);
-		uint32_t new_key;
 
-		if (!visible) {
-			new_key = UINT_MAX;
-		} else {
-			new_key = order;
-		}
-
-		if (old_key != new_key) {
-			route->set_order_key (MixerSort, new_key);
+		if (old_key != order) {
+			route->set_order_key (MixerSort, order);
 			changed = true;
 		}
-
-		order++;
 	}
 	
 	if (changed) {
@@ -477,6 +466,7 @@ Mixer_UI::sync_model_from_order_keys (RouteSortOrderKey src)
 	vector<int> neworder;
 	TreeModel::Children rows = track_model->children();
 	uint32_t n = 0;
+	bool changed = false;
 
 	if (rows.empty()) {
 		return;
@@ -486,12 +476,19 @@ Mixer_UI::sync_model_from_order_keys (RouteSortOrderKey src)
 	
 	for (TreeModel::Children::iterator ri = rows.begin(); ri != rows.end(); ++ri, ++n) {
 		boost::shared_ptr<Route> route = (*ri)[track_columns.route];
-		neworder[route->order_key (MixerSort)] = n;
+		uint32_t o = route->order_key (MixerSort);
+
+		neworder[o] = n;
+
+		if (o != n) {
+			changed = true;
+		}
+
 		DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("mixer change order for %1 to %2\n",
 							       route->name(), route->order_key (MixerSort)));
 	}
 
-	{
+	if (changed) {
 		Unwinder<bool> uw (ignore_reorder, true);
 		track_model->reorder (neworder);
 	}
@@ -985,6 +982,8 @@ Mixer_UI::initial_track_display ()
 		track_model->clear ();
 		add_strips (copy);
 	}
+	
+	_session->sync_order_keys (MixerSort);
 
 	redisplay_track_list ();
 }
