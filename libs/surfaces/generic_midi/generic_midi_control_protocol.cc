@@ -22,6 +22,7 @@
 #include <sstream>
 #include <algorithm>
 
+#include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 
 #include "pbd/controllable_descriptor.h"
@@ -105,11 +106,11 @@ static const char * const midimap_env_variable_name = "ARDOUR_MIDIMAPS_PATH";
 static const char* const midi_map_dir_name = "midi_maps";
 static const char* const midi_map_suffix = ".map";
 
-static sys::path
+static std::string
 system_midi_map_search_path ()
 {
 	bool midimap_path_defined = false;
-        sys::path spath_env (Glib::getenv (midimap_env_variable_name, midimap_path_defined));
+	std::string spath_env (Glib::getenv (midimap_env_variable_name, midimap_path_defined));
 
 	if (midimap_path_defined) {
 		return spath_env;
@@ -119,20 +120,18 @@ system_midi_map_search_path ()
 	spath.add_subdirectory_to_paths(midi_map_dir_name);
 
 	// just return the first directory in the search path that exists
-	SearchPath::const_iterator i = std::find_if(spath.begin(), spath.end(), sys::exists);
-
-	if (i == spath.end()) return sys::path();
-
-	return *i;
+	for (SearchPath::const_iterator i = spath.begin(); i != spath.end(); ++i) {
+		if (Glib::file_test (*i, Glib::FILE_TEST_EXISTS)) {
+			return *i;
+		}
+	}
+	return std::string();
 }
 
-static sys::path
+static std::string
 user_midi_map_directory ()
 {
-	sys::path p(user_config_directory());
-	p /= midi_map_dir_name;
-
-	return p;
+	return Glib::build_filename (user_config_directory(), midi_map_dir_name);
 }
 
 static bool
@@ -639,7 +638,7 @@ GenericMidiControlProtocol::load_bindings (const string& xmlpath)
 				_current_bank = 0;
 			}
 
-			if ((prop = (*citer)->property ("motorised")) != 0) {
+			if ((prop = (*citer)->property ("motorised")) != 0 || ((prop = (*citer)->property ("motorized")) != 0)) {
 				_motorised = string_is_affirmative (prop->value ());
 			} else {
 				_motorised = false;
@@ -774,20 +773,25 @@ GenericMidiControlProtocol::reset_controllables ()
 
 			/* its entirely possible that the session doesn't have
 			 * the specified controllable (e.g. it has too few
-			 * tracks). if we find this to be the case, drop any
-			 * bindings that would be left without controllables.
+			 * tracks). if we find this to be the case, we just leave
+			 * the binding around, unbound, and it will do "late
+			 * binding" (or "lazy binding") if/when any data arrives.
 			 */
 
 			boost::shared_ptr<Controllable> c = session->controllable_by_descriptor (desc);
 			if (c) {
 				existingBinding->set_controllable (c.get());
-			} else {
-				controllables.erase (iter);
-			}
+			} 
 		}
 
 		iter = next;
 	}
+}
+
+boost::shared_ptr<Controllable>
+GenericMidiControlProtocol::lookup_controllable (const ControllableDescriptor& desc) const
+{
+	return session->controllable_by_descriptor (desc);
 }
 
 MIDIFunction*

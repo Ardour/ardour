@@ -109,7 +109,7 @@ Session::no_roll (pframes_t nframes)
 	
 	framepos_t end_frame = _transport_frame + nframes; // FIXME: varispeed + no_roll ??
 	int ret = 0;
-	bool declick = get_transport_declick_required();
+	int declick = get_transport_declick_required();
 	boost::shared_ptr<RouteList> r = routes.reader ();
 
 	if (_click_io) {
@@ -158,7 +158,7 @@ Session::process_routes (pframes_t nframes, bool& need_butler)
 
 	const framepos_t start_frame = _transport_frame;
 	const framepos_t end_frame = _transport_frame + floor (nframes * _transport_speed);
-
+	
 	if (_process_graph) {
 		DEBUG_TRACE(DEBUG::ProcessThreads,"calling graph/process-routes\n");
 		_process_graph->process_routes (nframes, start_frame, end_frame, declick, need_butler);
@@ -1015,7 +1015,21 @@ Session::process_event (SessionEvent* ev)
 
 	case SessionEvent::AutoLoop:
 		if (play_loop) {
+			/* roll after locate, do not flush, set "with loop"
+			   true only if we are seamless looping
+			*/
 			start_locate (ev->target_frame, true, false, Config->get_seamless_loop());
+		}
+		remove = false;
+		del = false;
+		break;
+
+	case SessionEvent::AutoLoopDeclick:
+		if (play_loop) {
+			/* Request a declick fade-out and a fade-in; the fade-out will happen
+			   at the end of the loop, and the fade-in at the start.
+			*/
+			transport_sub_state |= (PendingLoopDeclickOut | PendingLoopDeclickIn);
 		}
 		remove = false;
 		del = false;
@@ -1023,10 +1037,10 @@ Session::process_event (SessionEvent* ev)
 
 	case SessionEvent::Locate:
 		if (ev->yes_or_no) {
-			// cerr << "forced locate to " << ev->target_frame << endl;
+			/* args: do not roll after locate, do flush, not with loop */
 			locate (ev->target_frame, false, true, false);
 		} else {
-			// cerr << "soft locate to " << ev->target_frame << endl;
+			/* args: do not roll after locate, do flush, not with loop */
 			start_locate (ev->target_frame, false, true, false);
 		}
 		_send_timecode_update = true;
@@ -1034,10 +1048,10 @@ Session::process_event (SessionEvent* ev)
 
 	case SessionEvent::LocateRoll:
 		if (ev->yes_or_no) {
-			// cerr << "forced locate to+roll " << ev->target_frame << endl;
+			/* args: roll after locate, do flush, not with loop */
 			locate (ev->target_frame, true, true, false);
 		} else {
-			// cerr << "soft locate to+roll " << ev->target_frame << endl;
+			/* args: roll after locate, do flush, not with loop */
 			start_locate (ev->target_frame, true, true, false);
 		}
 		_send_timecode_update = true;
@@ -1051,7 +1065,7 @@ Session::process_event (SessionEvent* ev)
 
 
 	case SessionEvent::SetTransportSpeed:
-		set_transport_speed (ev->speed, ev->yes_or_no, ev->second_yes_or_no);
+		set_transport_speed (ev->speed, ev->yes_or_no, ev->second_yes_or_no, ev->third_yes_or_no);
 		break;
 
 	case SessionEvent::PunchIn:
@@ -1090,6 +1104,7 @@ Session::process_event (SessionEvent* ev)
 		break;
 
 	case SessionEvent::RangeLocate:
+		/* args: roll after locate, do flush, not with loop */
 		start_locate (ev->target_frame, true, true, false);
 		remove = false;
 		del = false;

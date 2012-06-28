@@ -2,44 +2,27 @@
 <ArdourMIDIBindings version="1.0.0" name="Korg nanoKONTROL">
 
 <!-- 2010-11-26 Chooch Schubert: Map file creation -->
-  <DeviceInfo bank-size="9"/>
+  <DeviceInfo bank-size="9" motorized="no" threshold="15"/>
 
 <!-- Transport Controls -->
-  <Binding channel="1" ctl="44" function="rec-enable"/>
-  <Binding channel="1" ctl="44" function="rec-disable"/>
+  <Binding channel="1" ctl="44" action="Transport/Record"/>
   <Binding channel="1" ctl="45" function="transport-roll"/>
   <Binding channel="1" ctl="46" function="transport-stop"/>
   <Binding channel="1" ctl="47" function="transport-start"/>
   <Binding channel="1" ctl="48" function="transport-end"/>
   <Binding channel="1" ctl="49" function="loop-toggle"/>
 
-<!-- The "Scene" button toggles between four banks. It implements this by   -->
-<!-- changing the midi codes that are sent on each channel control, so when -->
-<!-- you hit the Scene button the nanKONTROL will send different midi codes -->
-<!-- for each button. Scene 1 is faders 1-9, Scene 2 is faders 10-19, etc.  -->
-<!-- This essentially duplicates Ardours Bank feature. Because Ardour is    -->
-<!-- more flexible, I have chosen to map all of the Scene button states to  -->
-<!-- Ardours "next-bank" function.                                          -->
-<!--                                                                        -->
-<!-- The drawback is that the indicator LED may be incorrect in the Scene   -->
-<!-- or Bank number indicated (ie: you could be on Ardour Bank 5, but the   -->
-<!-- LED for Scene 1 will be lit up). If this bother you, then you can      -->
-<!-- comment out the following four lines. This will enable you to use the  -->
-<!-- controllers built in Scenes (possibility of 36 tracks), but you will   -->
-<!-- have to use a mouse to change banks in the Ardour GUI                  -->
-<Binding sysex="f0 42 40 0 1 4 0 5f 4f 0 f7" function="next-bank"/>
-<Binding sysex="f0 42 40 0 1 4 0 5f 4f 1 f7" function="next-bank"/>
-<Binding sysex="f0 42 40 0 1 4 0 5f 4f 2 f7" function="next-bank"/>
-<Binding sysex="f0 42 40 0 1 4 0 5f 4f 3 f7" function="next-bank"/>
+<!-- The "Scene" button toggles between four banks. For this to work as     -->
+<!-- intended, you have to configure all four scenes to be identical.       -->
+<Binding sysex="f0 42 40 0 1 4 0 5f 4f 0 f7" function="set-bank" argument="0"/>
+<Binding sysex="f0 42 40 0 1 4 0 5f 4f 1 f7" function="set-bank" argument="1"/>
+<Binding sysex="f0 42 40 0 1 4 0 5f 4f 2 f7" function="set-bank" argument="2"/>
+<Binding sysex="f0 42 40 0 1 4 0 5f 4f 3 f7" function="set-bank" argument="3"/>
 
 <!--  Channel controls:                                                     -->
 <!--  - The two buttons on each channel are unmarked. I decided to use them -->
 <!--    as "Solo" and "Record Enable".                                      -->
-<!--  - Channel pan is not yet implemented in Ardour-3, so I chose to map   -->
-<!--    the rotary controls as "Send Gain" which will adjust the volume of  -->
-<!--    the first send on each channel, if one exists. When Ardour          -->
-<!--    impliments panning this will likely be changed, since I feel        -->
-<!--    panning is more useful.                                             -->
+<!--  - The rotary controls are bound to pandirection.                      -->
   <Binding channel="1" ctl="2" uri="/route/gain B1"/>
   <Binding channel="1" ctl="3" uri="/route/gain B2"/>
   <Binding channel="1" ctl="4" uri="/route/gain B3"/>
@@ -69,14 +52,14 @@
   <Binding channel="1" ctl="31" uri="/route/solo B9"/>
   <Binding channel="1" ctl="41" uri="/route/recenable B9"/>
 
-  <Binding channel="1" ctl="14" uri="/route/send/gain B1"/>
-  <Binding channel="1" ctl="15" uri="/route/send/gain B2"/>
-  <Binding channel="1" ctl="16" uri="/route/send/gain B3"/>
-  <Binding channel="1" ctl="17" uri="/route/send/gain B4"/>
-  <Binding channel="1" ctl="18" uri="/route/send/gain B5"/>
-  <Binding channel="1" ctl="19" uri="/route/send/gain B6"/>
-  <Binding channel="1" ctl="20" uri="/route/send/gain B7"/>
-  <Binding channel="1" ctl="21" uri="/route/send/gain B8"/>
-  <Binding channel="1" ctl="22" uri="/route/send/gain B9"/>
+  <Binding channel="1" ctl="14" uri="/route/pandirection B1"/>
+  <Binding channel="1" ctl="15" uri="/route/pandirection B2"/>
+  <Binding channel="1" ctl="16" uri="/route/pandirection B3"/>
+  <Binding channel="1" ctl="17" uri="/route/pandirection B4"/>
+  <Binding channel="1" ctl="18" uri="/route/pandirection B5"/>
+  <Binding channel="1" ctl="19" uri="/route/pandirection B6"/>
+  <Binding channel="1" ctl="20" uri="/route/pandirection B7"/>
+  <Binding channel="1" ctl="21" uri="/route/pandirection B8"/>
+  <Binding channel="1" ctl="22" uri="/route/pandirection B9"/>
 
 </ArdourMIDIBindings>

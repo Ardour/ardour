@@ -48,9 +48,15 @@ class AddRouteDialog : public ArdourDialog
 	AddRouteDialog (ARDOUR::Session*);
 	~AddRouteDialog ();
 
-	bool audio_tracks_wanted ();
-	bool midi_tracks_wanted ();
-	int channels ();
+        enum TypeWanted { 
+		AudioTrack,
+		MidiTrack,
+		MixedTrack,
+		AudioBus
+	};
+        TypeWanted type_wanted() const;
+       
+        ARDOUR::ChanCount channels ();
 	int count ();
 
 	std::string name_template ();

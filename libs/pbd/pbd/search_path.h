@@ -23,8 +23,6 @@
 #include <string>
 #include <vector>
 
-#include "pbd/filesystem.h"
-
 namespace PBD {
 
 /**
@@ -36,7 +34,7 @@ namespace PBD {
  * The SearchPath class does not test whether the paths exist
  * or are directories. It is basically just a container.
  */
-class SearchPath : public std::vector<sys::path>
+class SearchPath : public std::vector<std::string>
 {
 public:
 	/**
@@ -58,19 +56,12 @@ public:
 	SearchPath (const std::string& search_path);
 
 	/**
-	 * Initialize SearchPath from a sys::path.
-	 *
-	 * @param directory_path A directory path.
-	 */
-	SearchPath (const PBD::sys::path& directory_path);
-
-	/**
 	 * Initialize SearchPath from a vector of paths that may or may
 	 * not exist.
 	 *
 	 * @param paths A vector of paths.
 	 */
-	SearchPath (const std::vector<PBD::sys::path>& paths);
+	SearchPath (const std::vector<std::string>& paths);
 
 	/**
 	 * @return a search path string.
@@ -88,7 +79,7 @@ public:
 	/**
 	 * Add another directory path to the search path.
 	 */
-	SearchPath& operator+= (const PBD::sys::path& directory_path);
+	SearchPath& operator+= (const std::string& directory_path);
 	
 	/**
 	 * Concatenate another SearchPath onto this.
@@ -98,7 +89,7 @@ public:
 	/**
 	 * Add another path to the search path.
 	 */
-	SearchPath& operator+ (const PBD::sys::path& directory_path);
+	SearchPath& operator+ (const std::string& directory_path);
 
 	/**
 	 * Add a sub-directory to each path in the search path.
@@ -108,8 +99,9 @@ public:
 	SearchPath& add_subdirectory_to_paths (const std::string& subdir);
 
 protected:
-	void add_directory (const sys::path& directory_path);
-	void add_directories (const std::vector<PBD::sys::path>& paths);
+
+	void add_directory (const std::string& directory_path);
+	void add_directories (const std::vector<std::string>& paths);
 };
 
 } // namespace PBD

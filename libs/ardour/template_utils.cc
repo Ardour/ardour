@@ -3,7 +3,6 @@
 
 #include <glibmm.h>
 
-#include "pbd/filesystem.h"
 #include "pbd/basename.h"
 #include "pbd/pathscanner.h"
 #include "pbd/xml++.h"
@@ -35,22 +34,16 @@ route_template_search_path ()
 	return spath;
 }
 
-sys::path
+std::string
 user_template_directory ()
 {
-	sys::path p(user_config_directory());
-	p /= templates_dir_name;
-
-	return p;
+	return Glib::build_filename (user_config_directory(), templates_dir_name);
 }
 
-sys::path
+std::string
 user_route_template_directory ()
 {
-	sys::path p(user_config_directory());
-	p /= route_templates_dir_name;
-	
-	return p;
+	return Glib::build_filename (user_config_directory(), route_templates_dir_name);
 }
 
 static bool
@@ -76,10 +69,7 @@ route_template_filter (const string &str, void */*arg*/)
 string
 session_template_dir_to_file (string const & dir)
 {
-	sys::path dir_path = dir;
-	sys::path file_path = dir;
-	file_path /= dir_path.leaf() + template_suffix;
-	return file_path.to_string ();
+	return Glib::build_filename (dir, Glib::path_get_basename(dir) + template_suffix);
 }
 
 

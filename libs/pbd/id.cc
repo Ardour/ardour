@@ -18,7 +18,6 @@
 */
 
 #include <ostream>
-#include <iostream>
 #include <stdio.h>
 
 #ifndef __STDC_FORMAT_MACROS

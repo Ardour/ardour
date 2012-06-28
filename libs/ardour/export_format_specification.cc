@@ -38,6 +38,7 @@ namespace ARDOUR
 
 using namespace PBD;
 using std::string;
+using std::list;
 
 ExportFormatSpecification::Time &
 ExportFormatSpecification::Time::operator= (AnyTime const & other)
@@ -524,64 +525,73 @@ ExportFormatSpecification::set_format (boost::shared_ptr<ExportFormat> format)
 }
 
 string
-ExportFormatSpecification::description ()
+ExportFormatSpecification::description (bool include_name)
 {
-	string desc;
-
-	desc = _name + ": ";
+	list<string> components;
 
 	if (_normalize) {
-		desc += _("normalize, ");
+		components.push_back (_("normalize"));
 	}
 
 	if (_trim_beginning && _trim_end) {
-		desc += _("trim, ");
+		components.push_back ( _("trim"));
 	} else if (_trim_beginning) {
-		desc += _("trim start, ");
+		components.push_back (_("trim start"));
 	} else if (_trim_end) {
-		desc += _("trim end, ");
+		components.push_back (_("trim end"));
 	}
 
-	desc += _format_name + ", ";
+	if (_format_name != "") {
+		components.push_back (_format_name);
+	}
 
 	if (has_sample_format) {
-		desc += HasSampleFormat::get_sample_format_name (sample_format())  + ", ";
+		components.push_back (HasSampleFormat::get_sample_format_name (sample_format()));
 	}
 
 	switch (sample_rate()) {
-	  case SR_22_05:
-		desc += "22,5 kHz";
+	case SR_22_05:
+		components.push_back ("22,5 kHz");
 		break;
-	  case SR_44_1:
-		desc += "44,1 kHz";
+	case SR_44_1:
+		components.push_back ("44,1 kHz");
 		break;
-	  case SR_48:
-		desc += "48 kHz";
+	case SR_48:
+		components.push_back ("48 kHz");
 		break;
-	  case SR_88_2:
-		desc += "88,2 kHz";
+	case SR_88_2:
+		components.push_back ("88,2 kHz");
 		break;
-	  case SR_96:
-		desc += "96 kHz";
+	case SR_96:
+		components.push_back ("96 kHz");
 		break;
-	  case SR_192:
-		desc += "192 kHz";
+	case SR_192:
+		components.push_back ("192 kHz");
 		break;
-	  case SR_Session:
-		desc += _("Session rate");
+	case SR_Session:
+		components.push_back (_("Session rate"));
 		break;
-	  case SR_None:
+	case SR_None:
 		break;
 	}
 
 	if (_with_toc) {
-		desc += ", TOC";
+		components.push_back ("TOC");
 	}
 
 	if (_with_cue) {
-		desc += ", CUE";
+		components.push_back ("CUE");
 	}
 
+	string desc;
+	if (include_name) {
+		desc = _name + ": ";
+	}
+
+	for (list<string>::const_iterator it = components.begin(); it != components.end(); ++it) {
+		if (it != components.begin()) { desc += ", "; }
+		desc += *it;
+	}
 	return desc;
 }
 

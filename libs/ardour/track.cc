@@ -119,18 +119,22 @@ Track::state (bool full)
 int
 Track::set_state (const XMLNode& node, int version)
 {
-	if (Route::set_state (node, version)) {
-		return -1;
-	}
-
 	XMLNode* child;
 
+	/* Create the diskstream before calling Route::set_state, as MidiTrack
+	   needs it if the track is muted (it ends up calling MidiTrack::get_channel_mask)
+	*/
+	   
 	if (version >= 3000) {
 		if ((child = find_named_node (node, X_("Diskstream"))) != 0) {
 			boost::shared_ptr<Diskstream> ds = diskstream_factory (*child);
 			ds->do_refill_with_alloc ();
 			set_diskstream (ds);
 		}
+	}
+
+	if (Route::set_state (node, version)) {
+		return -1;
 	}
 
 	if (_diskstream) {

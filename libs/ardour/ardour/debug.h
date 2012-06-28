@@ -61,6 +61,7 @@ namespace PBD {
 		extern uint64_t TempoMap;
 		extern uint64_t SoundGrid;
 		extern uint64_t SGSurface;
+		extern uint64_t OrderKeys;
 	}
 }
 

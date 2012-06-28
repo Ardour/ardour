@@ -1327,14 +1327,30 @@ Editor::tav_zoom_smooth (bool coarser, bool force_all)
 	_routes->resume_redisplay ();
 }
 
+bool
+Editor::clamp_frames_per_unit (double& fpu) const
+{
+	bool clamped = false;
+	
+	if (fpu < 2.0) {
+		fpu = 2.0;
+		clamped = true;
+	}
+
+	if (max_framepos / fpu < 800) {
+		fpu = max_framepos / 800.0;
+		clamped = true;
+	}
+
+	return clamped;
+}
+
 void
 Editor::temporal_zoom_step (bool coarser)
 {
 	ENSURE_GUI_THREAD (*this, &Editor::temporal_zoom_step, coarser)
 
-	double nfpu;
-
-	nfpu = frames_per_unit;
+	double nfpu = frames_per_unit;
 
 	if (coarser) {
 		nfpu = min (9e6, nfpu * 1.61803399);
@@ -1346,9 +1362,11 @@ Editor::temporal_zoom_step (bool coarser)
 }
 
 void
-Editor::temporal_zoom (gdouble fpu)
+Editor::temporal_zoom (double fpu)
 {
-	if (!_session) return;
+	if (!_session) {
+		return;
+	}
 
 	framepos_t current_page = current_page_frames();
 	framepos_t current_leftmost = leftmost_frame;
@@ -1362,9 +1380,8 @@ Editor::temporal_zoom (gdouble fpu)
 	double nfpu;
 	double l;
 
-	/* XXX this limit is also in ::set_frames_per_unit() */
-
-	if (frames_per_unit <= 1.0 && fpu <= frames_per_unit) {
+	clamp_frames_per_unit (fpu);
+	if (fpu == frames_per_unit) {
 		return;
 	}
 
@@ -5394,8 +5411,7 @@ Editor::split_region ()
 
 struct EditorOrderRouteSorter {
     bool operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
-	    /* use of ">" forces the correct sort order */
-	    return a->order_key ("editor") < b->order_key ("editor");
+	    return a->order_key (EditorSort) < b->order_key (EditorSort);
     }
 };
 

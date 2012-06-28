@@ -62,26 +62,26 @@ AudioEngine* AudioEngine::_instance = 0;
 #define GET_PRIVATE_JACK_POINTER_RET(j,r) jack_client_t* _priv_jack = (jack_client_t*) (j); if (!_priv_jack) { return r; }
 
 AudioEngine::AudioEngine (string client_name, string session_uuid)
-	: ports (new Ports)
+	: _jack (0)
+	, session_remove_pending (false)
+	, session_removal_countdown (-1)
+	, _running (false)
+	, _has_run (false)
+	, _buffer_size (0)
+	, _frame_rate (0)
+	, monitor_check_interval (INT32_MAX)
+	, last_monitor_check (0)
+	, _processed_frames (0)
+	, _freewheeling (false)
+	, _pre_freewheel_mmc_enabled (false)
+	, _usecs_per_cycle (0)
+	, port_remove_in_progress (false)
+	, m_meter_thread (0)
+	, _main_thread (0)
+	, ports (new Ports)
 {
 	_instance = this; /* singleton */
 
-	session_remove_pending = false;
-	_running = false;
-	_has_run = false;
-	last_monitor_check = 0;
-	monitor_check_interval = INT32_MAX;
-	_processed_frames = 0;
-	_usecs_per_cycle = 0;
-	_jack = 0;
-	_frame_rate = 0;
-	_buffer_size = 0;
-	_freewheeling = false;
-	_pre_freewheel_mmc_enabled = false;
-        _main_thread = 0;
-	port_remove_in_progress = false;
-
-	m_meter_thread = 0;
 	g_atomic_int_set (&m_meter_exit, 0);
 
 	if (connect_to_jack (client_name, session_uuid)) {
@@ -475,21 +475,51 @@ AudioEngine::process_callback (pframes_t nframes)
 		return 0;
 	}
 
+	if (session_remove_pending) {
+
+		/* perform the actual session removal */
+
+		if (session_removal_countdown < 0) {
+
+			/* fade out over 1 second */
+			session_removal_countdown = _frame_rate/2;
+			session_removal_gain = 1.0;
+			session_removal_gain_step = 1.0/session_removal_countdown;
+
+		} else if (session_removal_countdown > 0) {
+
+			/* we'll be fading audio out.
+			   
+			   if this is the last time we do this as part 
+			   of session removal, do a MIDI panic now
+			   to get MIDI stopped. This relies on the fact
+			   that "immediate data" (aka "out of band data") from
+			   MIDI tracks is *appended* after any other data, 
+			   so that it emerges after any outbound note ons, etc.
+			*/
+
+			if (session_removal_countdown <= nframes) {
+				_session->midi_panic ();
+			}
+
+		} else {
+			/* fade out done */
+			_session = 0;
+			session_removal_countdown = -1; // reset to "not in progress"
+			session_remove_pending = false;
+			session_removed.signal(); // wakes up thread that initiated session removal
+		}
+	}
+
 	if (_session == 0) {
+
 		if (!_freewheeling) {
 			MIDI::Manager::instance()->cycle_start(nframes);
 			MIDI::Manager::instance()->cycle_end();
 		}
-		_processed_frames = next_processed_frames;
-		return 0;
-	}
 
-	if (session_remove_pending) {
-		/* perform the actual session removal */
-		_session = 0;
-		session_remove_pending = false;
-		session_removed.signal();
 		_processed_frames = next_processed_frames;
+
 		return 0;
 	}
 
@@ -559,14 +589,40 @@ AudioEngine::process_callback (pframes_t nframes)
 
 	if (_session->silent()) {
 
-		boost::shared_ptr<Ports> p = ports.reader();
-
 		for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
 
 			if (i->second->sends_output()) {
 				i->second->get_buffer(nframes).silence(nframes);
 			}
 		}
+	}
+
+	if (session_remove_pending && session_removal_countdown) {
+
+		for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
+
+			if (i->second->sends_output()) {
+
+				boost::shared_ptr<AudioPort> ap = boost::dynamic_pointer_cast<AudioPort> (i->second);
+				if (ap) {
+					Sample* s = ap->engine_get_whole_audio_buffer ();
+					gain_t g = session_removal_gain;
+					
+					for (pframes_t n = 0; n < nframes; ++n) {
+						*s++ *= g;
+						g -= session_removal_gain_step;
+					}
+				}
+			}
+		}
+		
+		if (session_removal_countdown > nframes) {
+			session_removal_countdown -= nframes;
+		} else {
+			session_removal_countdown = 0;
+		}
+
+		session_removal_gain -= (nframes * session_removal_gain_step);
 	}
 
 	// Finalize ports

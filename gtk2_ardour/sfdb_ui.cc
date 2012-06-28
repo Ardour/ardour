@@ -1301,8 +1301,7 @@ SoundFileOmega::check_info (const vector<string>& paths, bool& same_size, bool& 
 bool
 SoundFileOmega::check_link_status (const Session* s, const vector<string>& paths)
 {
-	sys::path path = s->session_directory().sound_path() / "linktest";
-	string tmpdir = path.to_string();
+	std::string tmpdir(Glib::build_filename (s->session_directory().sound_path(), "linktest"));
 	bool ret = false;
 
 	if (mkdir (tmpdir.c_str(), 0744)) {

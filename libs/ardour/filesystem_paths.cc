@@ -21,7 +21,6 @@
 
 #include "pbd/error.h"
 #include "pbd/compose.h"
-#include "pbd/strsplit.h"
 
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>
@@ -37,15 +36,15 @@ namespace ARDOUR {
 
 using std::string;
 
-sys::path
+std::string
 user_config_directory ()
 {
-	sys::path p;
+	static std::string p;
+
+	if (!p.empty()) return p;
 
 #ifdef __APPLE__
-	p = Glib::get_home_dir();
-	p /= "Library/Preferences";
-
+	p = Glib::build_filename (Glib::get_home_dir(), "Library/Preferences");
 #else
 	const char* c = 0;
 
@@ -58,39 +57,33 @@ user_config_directory ()
 		const string home_dir = Glib::get_home_dir();
 
 		if (home_dir.empty ()) {
-			const string error_msg = "Unable to determine home directory";
-
-			// log the error
-			error << error_msg << endmsg;
-
-			throw sys::filesystem_error(error_msg);
+			error << "Unable to determine home directory" << endmsg;
+			exit (1);
 		}
 
 		p = home_dir;
-		p /= ".config";
+		p = Glib::build_filename (p, ".config");
 	}
 #endif
 
-	p /= user_config_dir_name;
+	p = Glib::build_filename (p, user_config_dir_name);
 
-	std::string ps (p.to_string());
-
-	if (!Glib::file_test (ps, Glib::FILE_TEST_EXISTS)) {
-		if (g_mkdir_with_parents (ps.c_str(), 0755)) {
+	if (!Glib::file_test (p, Glib::FILE_TEST_EXISTS)) {
+		if (g_mkdir_with_parents (p.c_str(), 0755)) {
 			error << string_compose (_("Cannot create Configuration directory %1 - cannot run"),
-						   ps) << endmsg;
+						   p) << endmsg;
 			exit (1);
 		}
-	} else if (!Glib::file_test (ps, Glib::FILE_TEST_IS_DIR)) {
+	} else if (!Glib::file_test (p, Glib::FILE_TEST_IS_DIR)) {
 		error << string_compose (_("Configuration directory %1 already exists and is not a directory/folder - cannot run"),
-					   ps) << endmsg;
+					   p) << endmsg;
 		exit (1);
 	}
 
 	return p;
 }
 
-sys::path
+std::string
 ardour_dll_directory ()
 {
 	std::string s = Glib::getenv("ARDOUR_DLL_PATH");
@@ -98,17 +91,16 @@ ardour_dll_directory ()
 		std::cerr << _("ARDOUR_DLL_PATH not set in environment - exiting\n");
 		::exit (1);
 	}	
-	return sys::path (s);
+	return s;
 }
 
 SearchPath
 ardour_config_search_path ()
 {
-	static bool have_path = false;
 	static SearchPath search_path;
 
-	if (!have_path) {
-		SearchPath sp (user_config_directory());
+	if (search_path.empty()) {
+		search_path += user_config_directory();
 		
 		std::string s = Glib::getenv("ARDOUR_CONFIG_PATH");
 		if (s.empty()) {
@@ -116,14 +108,7 @@ ardour_config_search_path ()
 			::exit (1);
 		}
 		
-		std::vector<string> ss;
-		split (s, ss, ':');
-		for (std::vector<string>::iterator i = ss.begin(); i != ss.end(); ++i) {
-			sp += sys::path (*i);
-		}
-		
-		search_path = sp;
-		have_path = true;
+		search_path += SearchPath (s);
 	}
 
 	return search_path;
@@ -132,11 +117,10 @@ ardour_config_search_path ()
 SearchPath
 ardour_data_search_path ()
 {
-	static bool have_path = false;
 	static SearchPath search_path;
 
-	if (!have_path) {
-		SearchPath sp (user_config_directory());
+	if (search_path.empty()) {
+		search_path += user_config_directory();
 		
 		std::string s = Glib::getenv("ARDOUR_DATA_PATH");
 		if (s.empty()) {
@@ -144,14 +128,7 @@ ardour_data_search_path ()
 			::exit (1);
 		}
 		
-		std::vector<string> ss;
-		split (s, ss, ':');
-		for (std::vector<string>::iterator i = ss.begin(); i != ss.end(); ++i) {
-			sp += sys::path (*i);
-		}
-		
-		search_path = sp;
-		have_path = true;
+		search_path += SearchPath (s);
 	}
 
 	return search_path;

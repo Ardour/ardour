@@ -46,16 +46,16 @@ static const char* TAG = "http://ardour.org/ontology/Tag";
 
 AudioLibrary::AudioLibrary ()
 {
-	sys::path sfdb_file_path(user_config_directory ());
+	std::string sfdb_file_path(user_config_directory ());
 
-	sfdb_file_path /= sfdb_file_name;
+	sfdb_file_path = Glib::build_filename (sfdb_file_path, sfdb_file_name);
 
-	src = Glib::filename_to_uri (sfdb_file_path.to_string ());
+	src = Glib::filename_to_uri (sfdb_file_path);
 
 	// workaround for possible bug in raptor that crashes when saving to a
 	// non-existant file.
 
-	touch_file(sfdb_file_path.to_string());
+	touch_file(sfdb_file_path);
 
 	lrdf_read_file(src.c_str());
 }

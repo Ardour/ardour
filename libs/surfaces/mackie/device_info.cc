@@ -445,7 +445,7 @@ static SearchPath
 devinfo_search_path ()
 {
 	bool devinfo_path_defined = false;
-        sys::path spath_env (Glib::getenv (devinfo_env_variable_name, devinfo_path_defined));
+        std::string spath_env (Glib::getenv (devinfo_env_variable_name, devinfo_path_defined));
 
 	if (devinfo_path_defined) {
 		return spath_env;

@@ -130,6 +130,9 @@ public:
 
 	PortMatrixNode::State get_association (PortMatrixNode) const;
 
+	void flip ();
+	bool key_press (GdkEventKey *);
+
 	/** @param c Channels; where c[0] is from _ports[0] and c[1] is from _ports[1].
 	 *  @param s New state.
 	 */
@@ -185,7 +188,7 @@ private:
 	void disassociate_all_on_channel (boost::weak_ptr<ARDOUR::Bundle>, uint32_t, int);
 	void disassociate_all_on_bundle (boost::weak_ptr<ARDOUR::Bundle>, int);
 	void setup_global_ports ();
-	void setup_global_ports_proxy ();
+        void setup_global_ports_proxy (ARDOUR::RouteSortOrderKey);
 	void toggle_show_only_bundles ();
 	bool on_scroll_event (GdkEventScroll *);
 	boost::shared_ptr<ARDOUR::IO> io_from_bundle (boost::shared_ptr<ARDOUR::Bundle>) const;
@@ -199,10 +202,12 @@ private:
 	void add_disassociate_option (Gtk::Menu_Helpers::MenuList &, boost::weak_ptr<ARDOUR::Bundle>, int, int);
 	void port_connected_or_disconnected ();
 	void update_tab_highlighting ();
+	std::pair<int, int> check_flip () const;
+	bool can_flip () const;
 
 	Gtk::Window* _parent;
 
-	/// port type that we are working with, or NIL if we are working with all of them
+	/** port type that we are working with, or NIL if we are working with all of them */
 	ARDOUR::DataType _type;
 	PBD::ScopedConnectionList _route_connections;
 	PBD::ScopedConnectionList _changed_connections;

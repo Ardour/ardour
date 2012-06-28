@@ -29,7 +29,6 @@
 
 #include "pbd/failed_constructor.h"
 #include "pbd/file_utils.h"
-#include "pbd/filesystem.h"
 #include "pbd/replace_all.h"
 #include "pbd/whitespace.h"
 
@@ -38,6 +37,7 @@
 #include "ardour/session.h"
 #include "ardour/session_state_utils.h"
 #include "ardour/template_utils.h"
+#include "ardour/filename_extensions.h"
 
 #include "ardour_ui.h"
 #include "startup.h"
@@ -122,23 +122,13 @@ Ardour will play NO role in monitoring"))
 		set_default_icon_list (window_icons);
 	}
 
-	new_user = !exists (been_here_before_path ());
+	new_user = !Glib::file_test(been_here_before_path(), Glib::FILE_TEST_EXISTS);
 
 	bool need_audio_setup = !EngineControl::engine_running();
 
         // setup_prerelease_page ();
 
 	if (new_user) {
-
-		/* Create the config directory so that we have somewhere to put the
-		   been_here_before file.
-		*/
-		try {
-			sys::create_directories (user_config_directory ());
-		}
-		catch (const sys::filesystem_error& ex) {
-			error << "Could not create user configuration directory" << endmsg;
-		}
 		
 		setup_new_user_page ();
 		setup_first_time_config_page ();
@@ -246,8 +236,8 @@ std::string
 ArdourStartup::session_template_name ()
 {
 	if (!load_template_override.empty()) {
-		string the_path = (ARDOUR::user_template_directory()/ (load_template_override + ".template")).to_string();
-		return the_path;
+		string the_path(ARDOUR::user_template_directory());
+		return Glib::build_filename (the_path, load_template_override + ARDOUR::template_suffix);
 	}
 
 	if (ic_existing_session_button.get_active()) {
@@ -651,7 +641,7 @@ ArdourStartup::on_apply ()
 		Config->set_use_monitor_bus (use_monitor_section_button.get_active());
 
 		/* "touch" the been-here-before path now that we're about to save Config */
-		ofstream fout (been_here_before_path().to_string().c_str());
+		ofstream fout (been_here_before_path().c_str());
 		
 		Config->save_state ();
 	}
@@ -910,7 +900,7 @@ ArdourStartup::new_name_changed ()
 int
 ArdourStartup::redisplay_recent_sessions ()
 {
-	std::vector<sys::path> session_directories;
+	std::vector<std::string> session_directories;
 	RecentSessionsSorter cmp;
 
 	recent_session_display.set_model (Glib::RefPtr<TreeModel>(0));
@@ -931,9 +921,9 @@ ArdourStartup::redisplay_recent_sessions ()
 		session_directories.push_back ((*i).second);
 	}
 
-	for (vector<sys::path>::const_iterator i = session_directories.begin(); i != session_directories.end(); ++i)
+	for (vector<std::string>::const_iterator i = session_directories.begin(); i != session_directories.end(); ++i)
 	{
-		std::vector<sys::path> state_file_paths;
+		std::vector<std::string> state_file_paths;
 
 		// now get available states for this session
 
@@ -941,7 +931,7 @@ ArdourStartup::redisplay_recent_sessions ()
 
 		vector<string*>* states;
 		vector<const gchar*> item;
-		string fullpath = (*i).to_string();
+		string fullpath = *i;
 
 		/* remove any trailing / */
 
@@ -1402,11 +1392,9 @@ ArdourStartup::existing_session_selected ()
 	move_along_now ();
 }
 
-sys::path
+std::string
 ArdourStartup::been_here_before_path () const
 {
-	sys::path b = user_config_directory();
-	b /= ".a3"; // XXXX use more specific version so we can catch upgrades
-	return b;
+	// XXXX use more specific version so we can catch upgrades
+	return Glib::build_filename (user_config_directory (), ".a3");
 }
-

@@ -25,7 +25,6 @@
 #include <glibmm/miscutils.h>
 
 #include "pbd/xml++.h"
-#include "pbd/filesystem.h"
 #include "pbd/file_utils.h"
 
 #include "midi++/manager.h"
@@ -77,13 +76,12 @@ RCConfiguration::~RCConfiguration ()
 int
 RCConfiguration::load_state ()
 {
-	sys::path system_rc_file;
+	std::string rcfile;
 	struct stat statbuf;
 
 	/* load system configuration first */
 
-	if (find_file_in_search_path (ardour_config_search_path(), "ardour_system.rc", system_rc_file)) {
-		string rcfile = system_rc_file.to_string();
+	if (find_file_in_search_path (ardour_config_search_path(), "ardour_system.rc", rcfile)) {
 
 		/* stupid XML Parser hates empty files */
 
@@ -111,10 +109,7 @@ RCConfiguration::load_state ()
 
 	/* now load configuration file for user */
 
-	sys::path user_rc_file;
-
-	if (find_file_in_search_path (ardour_config_search_path(), "ardour.rc", user_rc_file)) {
-		string rcfile = user_rc_file.to_string();
+	if (find_file_in_search_path (ardour_config_search_path(), "ardour.rc", rcfile)) {
 
 		/* stupid XML parser hates empty files */
 
@@ -146,20 +141,7 @@ RCConfiguration::load_state ()
 int
 RCConfiguration::save_state()
 {
-	try
-	{
-		sys::create_directories (user_config_directory ());
-	}
-	catch (const sys::filesystem_error& ex)
-	{
-		error << "Could not create user configuration directory" << endmsg;
-		return -1;
-	}
-
-	sys::path rcfile_path(user_config_directory());
-
-	rcfile_path /= "ardour.rc";
-	const string rcfile = rcfile_path.to_string();
+	const std::string rcfile = Glib::build_filename (user_config_directory(), "ardour.rc");
 
 	// this test seems bogus?
 	if (!rcfile.empty()) {

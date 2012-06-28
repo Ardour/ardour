@@ -29,6 +29,7 @@
 #include <algorithm>
 
 #include <glibmm/fileutils.h>
+#include <glibmm/miscutils.h>
 
 #include "pbd/xml++.h"
 #include "pbd/pthread_utils.h"
@@ -339,8 +340,7 @@ MidiSource::clone (const string& path, Evoral::MusicalTime begin, Evoral::Musica
 		
 		do {
 			newname = bump_name_once (newname, '-');
-			/* XXX build path safely */
-			newpath = _session.session_directory().midi_path().to_string() +"/"+ newname + ".mid";
+			newpath = Glib::build_filename (_session.session_directory().midi_path(), newname + ".mid");
 			
 		} while (Glib::file_test (newpath, Glib::FILE_TEST_EXISTS));
 	} else {

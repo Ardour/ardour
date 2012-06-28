@@ -22,8 +22,6 @@
 #include <string>
 #include <vector>
 
-#include "pbd/filesystem.h"
-
 namespace ARDOUR {
 
 class SessionDirectory
@@ -33,7 +31,7 @@ public:
 	/**
 	 * @param session_path An absolute path to a session directory.
 	 */
-	SessionDirectory (const PBD::sys::path& session_path);
+	SessionDirectory (const std::string& session_path);
 
 	/**
 	 * Change the root path of this SessionDirectory object
@@ -43,7 +41,7 @@ public:
 	/**
 	 * @return the absolute path to the root directory of the session
 	 */
-	const PBD::sys::path root_path() const { return m_root_path; }
+	const std::string root_path() const { return m_root_path; }
 
 	/**
 	 * @return the absolute path to the directory in which
@@ -54,40 +52,40 @@ public:
 	 * directory otherwise it will return the new location
 	 * of root_path()/interchange/session_name/audiofiles
 	 */
-	const PBD::sys::path sound_path () const;
+	const std::string sound_path () const;
 
 	/**
 	 * @return the absolute path to the directory in which
 	 * the session stores MIDI files, ie
 	 * root_path()/interchange/session_name/midifiles
 	 */
-	const PBD::sys::path midi_path () const;
+	const std::string midi_path () const;
 
 	/**
 	 * @return the absolute path to the directory in which
 	 * the session stores MIDNAM patch files, ie
 	 * root_path()/interchange/session_name/patchfiles
 	 */
-	const PBD::sys::path midi_patch_path () const;
+	const std::string midi_patch_path () const;
 
 	/**
 	 * @return The absolute path to the directory in which all
 	 * peak files are stored for a session.
 	 */
-	const PBD::sys::path peak_path () const;
+	const std::string peak_path () const;
 
 	/**
 	 * @return The absolute path to the directory that source
 	 * files are moved to when they are no longer part of the
 	 * session.
 	 */
-	const PBD::sys::path dead_path () const;
+	const std::string dead_path () const;
 
 	/**
 	 * @return The absolute path to the directory that audio
 	 * files are created in by default when exporting.
 	 */
-	const PBD::sys::path export_path () const;
+	const std::string export_path () const;
 
 	/**
 	 * @return true if session directory and all the required
@@ -98,11 +96,8 @@ public:
 	/**
 	 * Create the session directory and all the subdirectories.
 	 *
-	 * @throw PBD::sys::filesystem_error if the directories were
-	 * not able to be created.
-	 *
-	 * @return true If a new session directory was created, otherwise
-	 * (if it already existed) false.
+	 * @return true If a new session directory and subdirectories were
+	 * created, otherwise false.
 	 *
 	 * @post is_valid ()
 	 */
@@ -113,7 +108,7 @@ public:
 	 * are created for different source types.
 	 * i.e root_path()/interchange/session_name
 	 */
-	const PBD::sys::path sources_root() const;
+	const std::string sources_root() const;
 
 private:
 
@@ -121,15 +116,15 @@ private:
 	 * @return The path to the old style sound directory.
 	 * It isn't created by create().
 	 */
-	const PBD::sys::path old_sound_path () const;
+	const std::string old_sound_path () const;
 
 	/**
 	 * @return a vector containing the fullpath of all subdirectories.
 	 */
-	const std::vector<PBD::sys::path> sub_directories () const;
+	const std::vector<std::string> sub_directories () const;
 
 	/// The path to the root of the session directory.
-	PBD::sys::path m_root_path;
+	std::string m_root_path;
 };
 
 } // namespace ARDOUR

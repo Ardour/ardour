@@ -38,6 +38,7 @@ using namespace ARDOUR;
 using namespace PBD;
 
 PBD::Signal2<void,boost::shared_ptr<Port>, boost::shared_ptr<Port> > Port::PostDisconnect;
+PBD::Signal0<void> Port::PortDrop;
 
 AudioEngine* Port::_engine = 0;
 bool         Port::_connecting_blocked = false;
@@ -71,13 +72,24 @@ Port::Port (std::string const & n, DataType t, Flags f)
 		cerr << "Failed to register JACK port \"" << _name << "\", reason is unknown from here\n";
 		throw failed_constructor ();
 	}
+
+	PortDrop.connect_same_thread (drop_connection, boost::bind (&Port::drop, this));
 }
 
 /** Port destructor */
 Port::~Port ()
 {
-	if (_engine->jack ()) {
-		jack_port_unregister (_engine->jack (), _jack_port);
+	drop ();
+}
+
+void
+Port::drop ()
+{
+	if (_jack_port) {
+		if (_engine->jack ()) {
+			jack_port_unregister (_engine->jack (), _jack_port);
+		}
+		_jack_port = 0;
 	}
 }
 

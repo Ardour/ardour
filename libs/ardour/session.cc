@@ -45,7 +45,6 @@
 #include "pbd/file_utils.h"
 #include "pbd/convert.h"
 #include "pbd/strsplit.h"
-#include "pbd/strsplit.h"
 #include "pbd/unwind.h"
 
 #include "ardour/amp.h"
@@ -69,7 +68,6 @@
 #include "ardour/graph.h"
 #include "ardour/midi_track.h"
 #include "ardour/midi_ui.h"
-#include "ardour/named_selection.h"
 #include "ardour/operations.h"
 #include "ardour/playlist.h"
 #include "ardour/plugin.h"
@@ -234,6 +232,12 @@ Session::destroy ()
 
 	_engine.remove_session ();
 
+	/* deregister all ports - there will be no process or any other
+	 * callbacks from the engine any more.
+	 */
+
+	Port::PortDrop (); /* EMIT SIGNAL */
+
 	/* clear history so that no references to objects are held any more */
 
 	_history.clear ();
@@ -274,9 +278,6 @@ Session::destroy ()
 	drop_references ();
 
 	/* tell everyone to drop references and delete objects as we go */
-
-	DEBUG_TRACE (DEBUG::Destruction, "delete named selections\n");
-	named_selections.clear ();
 
 	DEBUG_TRACE (DEBUG::Destruction, "delete regions\n");
 	RegionFactory::delete_all_regions ();
@@ -929,10 +930,25 @@ Session::auto_punch_changed (Location* location)
 	replace_event (SessionEvent::PunchOut, when_to_stop);
 }
 
+/** @param loc A loop location.
+ *  @param pos Filled in with the start time of the required fade-out (in session frames).
+ *  @param length Filled in with the length of the required fade-out.
+ */
+void
+Session::auto_loop_declick_range (Location* loc, framepos_t & pos, framepos_t & length)
+{
+	pos = max (loc->start(), loc->end() - 64);
+	length = loc->end() - pos;
+}
+
 void
 Session::auto_loop_changed (Location* location)
 {
 	replace_event (SessionEvent::AutoLoop, location->end(), location->start());
+	framepos_t dcp;
+	framecnt_t dcl;
+	auto_loop_declick_range (location, dcp, dcl);
+	replace_event (SessionEvent::AutoLoopDeclick, dcp, dcl);
 
 	if (transport_rolling() && play_loop) {
 
@@ -1010,6 +1026,10 @@ Session::set_auto_loop_location (Location* location)
 		loop_connections.drop_connections ();
 		existing->set_auto_loop (false, this);
 		remove_event (existing->end(), SessionEvent::AutoLoop);
+		framepos_t dcp;
+		framecnt_t dcl;
+		auto_loop_declick_range (existing, dcp, dcl);
+		remove_event (dcp, SessionEvent::AutoLoopDeclick);
 		auto_loop_location_changed (0);
 	}
 
@@ -1239,7 +1259,7 @@ Session::audible_frame () const
 		   of audible frames, we have not moved yet.
 
 		   `Start position' in this context means the time we last
-		   either started or changed transport direction.
+		   either started, located, or changed transport direction.
 		*/
 
 		if (_transport_speed > 0.0f) {
@@ -1491,7 +1511,7 @@ Session::resort_routes_using (boost::shared_ptr<RouteList> r)
 		DEBUG_TRACE (DEBUG::Graph, "Routes resorted, order follows:\n");
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 			DEBUG_TRACE (DEBUG::Graph, string_compose ("\t%1 signal order %2\n",
-								   (*i)->name(), (*i)->order_key ("signal")));
+								   (*i)->name(), (*i)->order_key (MixerSort)));
 		}
 #endif
 
@@ -1570,16 +1590,16 @@ Session::count_existing_track_channels (ChanCount& in, ChanCount& out)
  *  @param instrument plugin info for the instrument to insert pre-fader, if any
  */
 list<boost::shared_ptr<MidiTrack> >
-Session::new_midi_track (boost::shared_ptr<PluginInfo> instrument, TrackMode mode, RouteGroup* route_group, uint32_t how_many, string name_template)
+Session::new_midi_track (const ChanCount& input, const ChanCount& output, boost::shared_ptr<PluginInfo> instrument, 
+			 TrackMode mode, RouteGroup* route_group, uint32_t how_many, string name_template)
 {
 	char track_name[32];
 	uint32_t track_id = 0;
 	string port;
 	RouteList new_routes;
 	list<boost::shared_ptr<MidiTrack> > ret;
-	uint32_t control_id;
 
-	control_id = next_control_id ();
+	cerr << "Adding MIDI track with in = " << input << " out = " << output << endl;
 
 	bool const use_number = (how_many != 1) || name_template.empty () || name_template == _("MIDI");
 
@@ -1605,13 +1625,13 @@ Session::new_midi_track (boost::shared_ptr<PluginInfo> instrument, TrackMode mod
 #endif
 			{
 				Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
-				if (track->input()->ensure_io (ChanCount(DataType::MIDI, 1), false, this)) {
-					error << "cannot configure 1 in/1 out configuration for new midi track" << endmsg;
+				if (track->input()->ensure_io (input, false, this)) {
+					error << "cannot configure " << input << " out configuration for new midi track" << endmsg;	
 					goto failed;
 				}
 
-				if (track->output()->ensure_io (ChanCount(DataType::MIDI, 1), false, this)) {
-					error << "cannot configure 1 in/1 out configuration for new midi track" << endmsg;
+				if (track->output()->ensure_io (output, false, this)) {
+					error << "cannot configure " << output << " out configuration for new midi track" << endmsg;
 					goto failed;
 				}
 			}
@@ -1623,7 +1643,10 @@ Session::new_midi_track (boost::shared_ptr<PluginInfo> instrument, TrackMode mod
 			}
 
 			track->DiskstreamChanged.connect_same_thread (*this, boost::bind (&Session::resort_routes, this));
-			track->set_remote_control_id (control_id);
+
+			if (Config->get_remote_model() == UserOrdered) {
+				track->set_remote_control_id (next_control_id());
+			}
 
 			new_routes.push_back (track);
 			ret.push_back (track);
@@ -1812,9 +1835,6 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 	string port;
 	RouteList new_routes;
 	list<boost::shared_ptr<AudioTrack> > ret;
-	uint32_t control_id;
-
-	control_id = next_control_id ();
 
 	bool const use_number = (how_many != 1) || name_template.empty () || name_template == _("Audio");
 
@@ -1865,8 +1885,9 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 			track->non_realtime_input_change();
 
 			track->DiskstreamChanged.connect_same_thread (*this, boost::bind (&Session::resort_routes, this));
-			track->set_remote_control_id (control_id);
-			++control_id;
+			if (Config->get_remote_model() == UserOrdered) {
+				track->set_remote_control_id (next_control_id());
+			}
 
 			new_routes.push_back (track);
 			ret.push_back (track);
@@ -1894,33 +1915,6 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 	return ret;
 }
 
-void
-Session::set_remote_control_ids ()
-{
-	RemoteModel m = Config->get_remote_model();
-	bool emit_signal = false;
-
-	boost::shared_ptr<RouteList> r = routes.reader ();
-
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		if (MixerOrdered == m) {
-			int32_t order = (*i)->order_key(N_("signal"));
-			(*i)->set_remote_control_id (order+1, false);
-			emit_signal = true;
-		} else if (EditorOrdered == m) {
-			int32_t order = (*i)->order_key(N_("editor"));
-			(*i)->set_remote_control_id (order+1, false);
-			emit_signal = true;
-		} else if (UserOrdered == m) {
-			//do nothing ... only changes to remote id's are initiated by user
-		}
-	}
-
-	if (emit_signal) {
-		Route::RemoteControlIDChange();
-	}
-}
-
 /** Caller must not hold process lock.
  *  @param name_template string to use for the start of the name, or "" to use "Bus".
  */
@@ -1931,9 +1925,6 @@ Session::new_audio_route (int input_channels, int output_channels, RouteGroup* r
 	uint32_t bus_id = 0;
 	string port;
 	RouteList ret;
-	uint32_t control_id;
-
-	control_id = next_control_id ();
 
 	bool const use_number = (how_many != 1) || name_template.empty () || name_template == _("Bus");
 	
@@ -1975,8 +1966,9 @@ Session::new_audio_route (int input_channels, int output_channels, RouteGroup* r
 			if (route_group) {
 				route_group->add (bus);
 			}
-			bus->set_remote_control_id (control_id);
-			++control_id;
+			if (Config->get_remote_model() == UserOrdered) {
+				bus->set_remote_control_id (next_control_id());
+			}
 
 			bus->add_internal_return ();
 
@@ -2111,6 +2103,7 @@ Session::add_routes (RouteList& new_routes, bool input_auto_connect, bool output
 {
         ChanCount existing_inputs;
         ChanCount existing_outputs;
+	uint32_t order = next_control_id();
 
         count_existing_track_channels (existing_inputs, existing_outputs);
 
@@ -2141,7 +2134,6 @@ Session::add_routes (RouteList& new_routes, bool input_auto_connect, bool output
 		r->mute_changed.connect_same_thread (*this, boost::bind (&Session::route_mute_changed, this, _1));
 		r->output()->changed.connect_same_thread (*this, boost::bind (&Session::set_worst_io_latencies_x, this, _1, _2));
 		r->processors_changed.connect_same_thread (*this, boost::bind (&Session::route_processors_changed, this, _1));
-		r->order_key_changed.connect_same_thread (*this, boost::bind (&Session::route_order_key_changed, this));
 
 		if (r->is_master()) {
 			_master_out = r;
@@ -2166,6 +2158,24 @@ Session::add_routes (RouteList& new_routes, bool input_auto_connect, bool output
 
 		if (input_auto_connect || output_auto_connect) {
 			auto_connect_route (r, existing_inputs, existing_outputs, true, input_auto_connect);
+		}
+
+		/* order keys are a GUI responsibility but we need to set up
+		   reasonable defaults because they also affect the remote control
+		   ID in most situations.
+		*/
+		
+		if (!r->has_order_key (EditorSort)) {
+			if (r->is_hidden()) {
+				/* use an arbitrarily high value */
+				r->set_order_key (EditorSort, UINT_MAX);
+				r->set_order_key (MixerSort, UINT_MAX);
+			} else {
+				DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("while adding, set %1 to order key %2\n", r->name(), order));
+				r->set_order_key (EditorSort, order);
+				r->set_order_key (MixerSort, order);
+				order++;
+			}
 		}
 	}
 
@@ -2362,8 +2372,6 @@ Session::remove_route (boost::shared_ptr<Route> route)
 	/* try to cause everyone to drop their references */
 
 	route->drop_references ();
-
-	sync_order_keys (N_("session"));
 
 	Route::RemoteControlIDChange(); /* EMIT SIGNAL */
 
@@ -3171,7 +3179,7 @@ Session::new_source_path_from_name (DataType type, const string& name)
 
 	SessionDirectory sdir(get_best_session_directory_for_new_source());
 
-	sys::path p;
+	std::string p;
 	if (type == DataType::AUDIO) {
 		p = sdir.sound_path();
 	} else if (type == DataType::MIDI) {
@@ -3181,16 +3189,13 @@ Session::new_source_path_from_name (DataType type, const string& name)
 		return "";
 	}
 
-	p /= name;
-	return p.to_string();
+	return Glib::build_filename (p, name);
 }
 
 string
 Session::peak_path (string base) const
 {
-	sys::path peakfile_path(_session_dir->peak_path());
-	peakfile_path /= base + peakfile_suffix;
-	return peakfile_path.to_string();
+	return Glib::build_filename (_session_dir->peak_path(), base + peakfile_suffix);
 }
 
 /** Return a unique name based on \a base for a new internal audio source */
@@ -3254,7 +3259,7 @@ Session::new_audio_source_name (const string& base, uint32_t nchan, uint32_t cha
 
 			SessionDirectory sdir((*i).path);
 
-			string spath = sdir.sound_path().to_string();
+			string spath = sdir.sound_path();
 
 			/* note that we search *without* the extension so that
 			   we don't end up both "Audio 1-1.wav" and "Audio 1-1.caf"
@@ -3317,12 +3322,11 @@ Session::new_midi_source_name (const string& base)
 
 			SessionDirectory sdir((*i).path);
 
-			sys::path p = sdir.midi_path();
-			p /= legalized;
+			std::string p = Glib::build_filename (sdir.midi_path(), legalized);
 
-			snprintf (buf, sizeof(buf), "%s-%u.mid", p.to_string().c_str(), cnt);
+			snprintf (buf, sizeof(buf), "%s-%u.mid", p.c_str(), cnt);
 
-			if (sys::exists (buf)) {
+			if (Glib::file_test (buf, Glib::FILE_TEST_EXISTS)) {
 				existing++;
 			}
 		}
@@ -3458,7 +3462,7 @@ Session::RoutePublicOrderSorter::operator() (boost::shared_ptr<Route> a, boost::
 	if (b->is_monitor()) {
 		return false;
 	}
-	return a->order_key(N_("signal")) < b->order_key(N_("signal"));
+	return a->order_key (MixerSort) < b->order_key (MixerSort);
 }
 
 bool
@@ -3794,56 +3798,6 @@ Session::unmark_insert_id (uint32_t id)
 	}
 }
 
-
-/* Named Selection management */
-
-boost::shared_ptr<NamedSelection>
-Session::named_selection_by_name (string name)
-{
-	Glib::Mutex::Lock lm (named_selection_lock);
-	for (NamedSelectionList::iterator i = named_selections.begin(); i != named_selections.end(); ++i) {
-		if ((*i)->name == name) {
-			return *i;
-		}
-	}
-	return boost::shared_ptr<NamedSelection>();
-}
-
-void
-Session::add_named_selection (boost::shared_ptr<NamedSelection> named_selection)
-{
-	{
-		Glib::Mutex::Lock lm (named_selection_lock);
-		named_selections.insert (named_selections.begin(), named_selection);
-	}
-
-	set_dirty();
-
-	NamedSelectionAdded (); /* EMIT SIGNAL */
-}
-
-void
-Session::remove_named_selection (boost::shared_ptr<NamedSelection> named_selection)
-{
-	bool removed = false;
-
-	{
-		Glib::Mutex::Lock lm (named_selection_lock);
-
-		NamedSelectionList::iterator i = find (named_selections.begin(), named_selections.end(), named_selection);
-
-		if (i != named_selections.end()) {
-			named_selections.erase (i);
-			set_dirty();
-			removed = true;
-		}
-	}
-
-	if (removed) {
-		 NamedSelectionRemoved (); /* EMIT SIGNAL */
-	}
-}
-
 void
 Session::reset_native_file_format ()
 {
@@ -3927,7 +3881,7 @@ Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
 	framepos_t to_do;
 	BufferSet buffers;
 	SessionDirectory sdir(get_best_session_directory_for_new_source ());
-	const string sound_dir = sdir.sound_path().to_string();
+	const string sound_dir = sdir.sound_path();
 	framepos_t len = end - start;
 	bool need_block_size_reset = false;
 	string ext;
@@ -4158,31 +4112,6 @@ Session::add_automation_list(AutomationList *al)
 	automation_lists[al->id()] = al;
 }
 
-void
-Session::sync_order_keys (std::string const & base)
-{
-	if (deletion_in_progress()) {
-		return;
-	}
-
-	if (!Config->get_sync_all_route_ordering()) {
-		/* leave order keys as they are */
-		return;
-	}
-
-	boost::shared_ptr<RouteList> r = routes.reader ();
-
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		(*i)->sync_order_keys (base);
-	}
-
-	Route::SyncOrderKeys (base); // EMIT SIGNAL
-
-	/* this might not do anything */
-
-	set_remote_control_ids ();
-}
-
 /** @return true if there is at least one record-enabled track, otherwise false */
 bool
 Session::have_rec_enabled_track () const
@@ -4334,13 +4263,6 @@ Session::add_session_range_location (framepos_t start, framepos_t end)
 	_locations->add (_session_range_location);
 }
 
-/** Called when one of our routes' order keys has changed */
-void
-Session::route_order_key_changed ()
-{
-	RouteOrderKeyChanged (); /* EMIT SIGNAL */
-}
-
 void
 Session::step_edit_status_change (bool yn)
 {
@@ -4413,10 +4335,10 @@ Session::source_search_path (DataType type) const
 	if (session_dirs.size() == 1) {
 		switch (type) {
 		case DataType::AUDIO:
-			s.push_back ( _session_dir->sound_path().to_string());
+			s.push_back ( _session_dir->sound_path());
 			break;
 		case DataType::MIDI:
-			s.push_back (_session_dir->midi_path().to_string());
+			s.push_back (_session_dir->midi_path());
 			break;
 		}
 	} else {
@@ -4424,10 +4346,10 @@ Session::source_search_path (DataType type) const
 			SessionDirectory sdir (i->path);
 			switch (type) {
 			case DataType::AUDIO:
-				s.push_back (sdir.sound_path().to_string());
+				s.push_back (sdir.sound_path());
 				break;
 			case DataType::MIDI:
-			        s.push_back (sdir.midi_path().to_string());
+			        s.push_back (sdir.midi_path());
 				break;
 			}
 		}
@@ -4502,7 +4424,7 @@ Session::ensure_search_path_includes (const string& path, DataType type)
 
 		   On Windows, I think we could just do if (*i == path) here.
 		*/
-		if (PBD::sys::inodes_same (*i, path)) {
+		if (PBD::equivalent_paths (*i, path)) {
 			return;
 		}
 	}
@@ -4758,7 +4680,43 @@ Session::session_name_is_legal (const string& path)
 uint32_t 
 Session::next_control_id () const
 {
-	return ntracks() + nbusses() + 1;
+	int subtract = 0;
+
+	/* the monitor bus remote ID is in a different
+	 * "namespace" than regular routes. its existence doesn't
+	 * affect normal (low) numbered routes.
+	 */
+
+	if (_monitor_out) {
+		subtract++;
+	}
+
+	return nroutes() - subtract;
+}
+
+void
+Session::sync_order_keys (RouteSortOrderKey sort_key_changed)
+{
+	if (deletion_in_progress()) {
+		return;
+	}
+
+	switch (Config->get_remote_model()) {
+	case MixerSort:
+	case EditorSort:
+		Route::RemoteControlIDChange (); /* EMIT SIGNAL */
+		break;
+	default:
+		break;
+	}
+
+	/* tell everyone that something has happened to the sort keys
+	   and let them sync up with the change(s)
+	*/
+
+	DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("Sync Order Keys, based on %1\n", enum_2_string (sort_key_changed)));
+
+	Route::SyncOrderKeys (sort_key_changed); /* EMIT SIGNAL */
 }
 
 bool

@@ -202,7 +202,7 @@ ThemeManager::button_press_event (GdkEventButton* ev)
 void
 load_rc_file (const string& filename, bool themechange)
 {
-	sys::path rc_file_path;
+	std::string rc_file_path;
 
 	if (!find_file_in_search_path (ardour_config_search_path(), filename, rc_file_path)) {
 		warning << string_compose (_("Unable to find UI style file %1 in search path %2. %3 will look strange"),
@@ -211,9 +211,9 @@ load_rc_file (const string& filename, bool themechange)
 		return;
 	}
 
-	info << "Loading ui configuration file " << rc_file_path.to_string() << endmsg;
+	info << "Loading ui configuration file " << rc_file_path << endmsg;
 
-	Gtkmm2ext::UI::instance()->load_rcfile (rc_file_path.to_string(), themechange);
+	Gtkmm2ext::UI::instance()->load_rcfile (rc_file_path, themechange);
 }
 
 /* hmm, this is a problem. the profile doesn't

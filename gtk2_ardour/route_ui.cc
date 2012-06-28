@@ -1628,14 +1628,14 @@ RouteUI::adjust_latency ()
 void
 RouteUI::save_as_template ()
 {
-	sys::path path;
+	std::string path;
 	std::string safe_name;
 	string name;
 
 	path = ARDOUR::user_route_template_directory ();
 
-	if (g_mkdir_with_parents (path.to_string().c_str(), 0755)) {
-		error << string_compose (_("Cannot create route template directory %1"), path.to_string()) << endmsg;
+	if (g_mkdir_with_parents (path.c_str(), 0755)) {
+		error << string_compose (_("Cannot create route template directory %1"), path) << endmsg;
 		return;
 	}
 
@@ -1657,9 +1657,9 @@ RouteUI::save_as_template ()
 	safe_name = legalize_for_path (name);
 	safe_name += template_suffix;
 
-	path /= safe_name;
+	path = Glib::build_filename (path, safe_name);
 
-	_route->save_as_template (path.to_string(), name);
+	_route->save_as_template (path, name);
 }
 
 void
@@ -1716,27 +1716,42 @@ void
 RouteUI::open_remote_control_id_dialog ()
 {
 	ArdourDialog dialog (_("Remote Control ID"));
+	SpinButton* spin = 0;
 
-	uint32_t const limit = _session->ntracks() + _session->nbusses () + 4;
+	dialog.get_vbox()->set_border_width (18);
 
-	HBox* hbox = manage (new HBox);
-	hbox->set_spacing (6);
-	hbox->pack_start (*manage (new Label (_("Remote control ID:"))));
-	SpinButton* spin = manage (new SpinButton);
-	spin->set_digits (0);
-	spin->set_increments (1, 10);
-	spin->set_range (0, limit);
-	spin->set_value (_route->remote_control_id());
-	hbox->pack_start (*spin);
-	dialog.get_vbox()->pack_start (*hbox);
-
-	dialog.add_button (Stock::CANCEL, RESPONSE_CANCEL);
-	dialog.add_button (Stock::APPLY, RESPONSE_ACCEPT);
+	if (Config->get_remote_model() == UserOrdered) {
+		uint32_t const limit = _session->ntracks() + _session->nbusses () + 4;
+		
+		HBox* hbox = manage (new HBox);
+		hbox->set_spacing (6);
+		hbox->pack_start (*manage (new Label (_("Remote control ID:"))));
+		spin = manage (new SpinButton);
+		spin->set_digits (0);
+		spin->set_increments (1, 10);
+		spin->set_range (0, limit);
+		spin->set_value (_route->remote_control_id());
+		hbox->pack_start (*spin);
+		dialog.get_vbox()->pack_start (*hbox);
+		
+		dialog.add_button (Stock::CANCEL, RESPONSE_CANCEL);
+		dialog.add_button (Stock::APPLY, RESPONSE_ACCEPT);
+	} else {
+		Label* l = manage (new Label());
+		l->set_markup (string_compose (_("Remote Control IDs are currently determined by track/bus ordering in %1\n\n"
+						 "This %2 has remote control ID %3\n\n\n"
+						 "<span size=\"small\" style=\"italic\">Use the User Interaction tab of the Preferences window if you want to change this</span>"),
+					       (Config->get_remote_model() == MixerOrdered ? _("the mixer") : ("the editor")),
+					       (is_track() ? _("track") : _("bus")),
+					       _route->remote_control_id()));
+		dialog.get_vbox()->pack_start (*l);
+		dialog.add_button (Stock::OK, RESPONSE_CANCEL);
+	}
 
 	dialog.show_all ();
 	int const r = dialog.run ();
 
-	if (r == RESPONSE_ACCEPT) {
+	if (r == RESPONSE_ACCEPT && spin) {
 		_route->set_remote_control_id (spin->get_value_as_int ());
 	}
 }

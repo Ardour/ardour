@@ -152,7 +152,7 @@ SndfileHandle::SNDFILE_ref::SNDFILE_ref (void)
 
 inline
 SndfileHandle::SNDFILE_ref::~SNDFILE_ref (void)
-{	if (sf != NULL) { 		std::cerr << "sf_closing " << sf << std::endl; sf_close (sf) ; } }
+{	if (sf != NULL) { sf_close (sf) ; } }
 
 inline
 SndfileHandle::SndfileHandle (const char *path, int mode, int fmt, int chans, int srate)

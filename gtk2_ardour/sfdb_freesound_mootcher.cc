@@ -41,7 +41,7 @@
 #include "sfdb_freesound_mootcher.h"
 
 #include "pbd/xml++.h"
-#include "pbd/filesystem.h"
+#include "pbd/error.h"
 
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -91,10 +91,12 @@ void Mootcher::changeWorkingDir(const char *saveLocation)
 
 void Mootcher::ensureWorkingDir ()
 {
-	PBD::sys::path p = basePath;
-	p /= "snd";
-	if (!PBD::sys::is_directory (p)) {
-		PBD::sys::create_directories (p);
+	std::string p = Glib::build_filename (basePath, "snd");
+
+	if (!Glib::file_test (p, Glib::FILE_TEST_IS_DIR)) {
+		if (g_mkdir_with_parents (p.c_str(), 0775) != 0) {
+			PBD::error << "Unable to create Mootcher working dir" << endmsg;
+		}
 	}
 }
 	

@@ -58,5 +58,6 @@ uint64_t PBD::DEBUG::TempoMath = PBD::new_debug_bit ("tempomath");
 uint64_t PBD::DEBUG::TempoMap = PBD::new_debug_bit ("tempomap");
 uint64_t PBD::DEBUG::SoundGrid = PBD::new_debug_bit ("soundgrid");
 uint64_t PBD::DEBUG::SGSurface = PBD::new_debug_bit ("sgsurface");
+uint64_t PBD::DEBUG::OrderKeys = PBD::new_debug_bit ("orderkeys");
 
 

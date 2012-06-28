@@ -73,10 +73,18 @@ AudioBuffer&
 AudioPort::get_audio_buffer (pframes_t nframes)
 {
 	/* caller must hold process lock */
-       _buffer->set_data ((Sample *) jack_port_get_buffer (_jack_port, _cycle_nframes) +
-                          _global_port_buffer_offset + _port_buffer_offset, nframes);
+	_buffer->set_data ((Sample *) jack_port_get_buffer (_jack_port, _cycle_nframes) +
+			   _global_port_buffer_offset + _port_buffer_offset, nframes);
 	return *_buffer;
 }
+
+Sample* 
+AudioPort::engine_get_whole_audio_buffer ()
+{
+	/* caller must hold process lock */
+	return (Sample *) jack_port_get_buffer (_jack_port, _cycle_nframes);
+}
+
 
 
 

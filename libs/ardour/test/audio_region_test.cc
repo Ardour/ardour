@@ -16,7 +16,6 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "pbd/filesystem.h"
 #include "pbd/compose.h"
 #include "ardour/playlist_factory.h"
 #include "ardour/source_factory.h"

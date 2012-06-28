@@ -85,6 +85,7 @@ class ExportFormatManager : public PBD::ScopedConnectionList
 	/* Signals */
 
 	PBD::Signal1<void,bool> CompleteChanged;
+	PBD::Signal0<void> DescriptionChanged;
 
 	/* Access to lists */
 
@@ -142,6 +143,7 @@ class ExportFormatManager : public PBD::ScopedConnectionList
 
 	bool pending_selection_change;
 	void selection_changed ();
+	void check_for_description_change ();
 
 	/* Formats and compatibilities */
 
@@ -154,12 +156,14 @@ class ExportFormatManager : public PBD::ScopedConnectionList
 	ExportFormatBasePtr get_compatibility_intersection ();
 
 	ExportFormatBasePtr   universal_set;
-	ExportFormatSpecPtr         current_selection;
+	ExportFormatSpecPtr   current_selection;
 
 	CompatList      compatibilities;
 	QualityList     qualities;
 	FormatList      formats;
 	SampleRateList  sample_rates;
+
+	std::string     prev_description;
 
 };
 

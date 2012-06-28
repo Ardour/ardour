@@ -43,6 +43,7 @@
 #include "ardour/filesystem_paths.h"
 #include "ardour/io.h"
 #include "ardour/audio_unit.h"
+#include "ardour/route.h"
 #include "ardour/session.h"
 #include "ardour/tempo.h"
 #include "ardour/utils.h"
@@ -809,7 +810,7 @@ AUPlugin::get_parameter (uint32_t which) const
 	float val = 0.0;
 	if (which < descriptors.size()) {
 		const AUParameterDescriptor& d (descriptors[which]);
-		DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("get value of parameter %1 in scope %2 element %3\n", d.id, d.scope, d.element));
+		// DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("get value of parameter %1 in scope %2 element %3\n", d.id, d.scope, d.element));
 		unit->GetParameter(d.id, d.scope, d.element, val);
 	}
 	return val;
@@ -1079,8 +1080,21 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out) con
 				audio_out = 2;
 				found = true;
 			} else if (possible_out < -2) {
-				/* explicitly variable number of outputs, pick maximum */
-				audio_out = -possible_out;
+				/* explicitly variable number of outputs. 
+
+                                   Since Ardour can handle any configuration,
+                                   we have to somehow pick a number. 
+
+                                   We'll use the number of inputs
+                                   to the master bus, or 2 if there
+                                   is no master bus.
+                                */
+                                boost::shared_ptr<Route> master = _session.master_out();
+                                if (master) {
+                                        audio_out = master->input()->n_ports().n_audio();
+                                } else {
+                                        audio_out = 2;
+                                }
 				found = true;
 			} else {
 				/* exact number of outputs */
@@ -1143,6 +1157,7 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out) con
 				/* request is too large */
 			}
 
+
 			if (possible_out == -1) {
 				/* any output configuration possible, provide stereo out */
 				audio_out = 2;
@@ -1154,8 +1169,21 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out) con
 				audio_out = 2;
 				found = true;
 			} else if (possible_out < -2) {
-				/* explicitly variable number of outputs, pick maximum */
-				audio_out = -possible_out;
+				/* explicitly variable number of outputs. 
+
+                                   Since Ardour can handle any configuration,
+                                   we have to somehow pick a number. 
+
+                                   We'll use the number of inputs
+                                   to the master bus, or 2 if there
+                                   is no master bus.
+                                */
+                                boost::shared_ptr<Route> master = _session.master_out();
+                                if (master) {
+                                        audio_out = master->input()->n_ports().n_audio();
+                                } else {
+                                        audio_out = 2;
+                                }
 				found = true;
 			} else {
 				/* exact number of outputs */
@@ -1329,8 +1357,10 @@ AUPlugin::connect_and_run (BufferSet& bufs, ChanMapping in_map, ChanMapping out_
 		buffers->mBuffers[i].mDataByteSize = nframes * sizeof (Sample);
 		/* setting this to 0 indicates to the AU that it can provide buffers here
 		   if necessary. if it can process in-place, it will use the buffers provided
-		   as input by ::render_callback() above. no documentation on what setting it
-		   to a non-null value means.
+		   as input by ::render_callback() above. 
+                   
+                   a non-null values tells the plugin to render into the buffer pointed
+                   at by the value.
 		*/
 		buffers->mBuffers[i].mData = 0;
 	}
@@ -1365,8 +1395,8 @@ AUPlugin::connect_and_run (BufferSet& bufs, ChanMapping in_map, ChanMapping out_
 	ts.mSampleTime = frames_processed;
 	ts.mFlags = kAudioTimeStampSampleTimeValid;
 
-	// DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("%1 render flags=%2 time=%3 nframes=%4 buffers=%5\n",
-	// name(), flags, frames_processed, nframes, buffers->mNumberBuffers));
+	DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("%1 render flags=%2 time=%3 nframes=%4 buffers=%5\n",
+                                                        name(), flags, frames_processed, nframes, buffers->mNumberBuffers));
 
 	if ((err = unit->Render (&flags, &ts, 0, nframes, buffers)) == noErr) {
 
@@ -2163,7 +2193,7 @@ AUPluginInfo::load (Session& session)
 Glib::ustring
 AUPluginInfo::au_cache_path ()
 {
-	return Glib::build_filename (ARDOUR::user_config_directory().to_string(), "au_cache");
+	return Glib::build_filename (ARDOUR::user_config_directory(), "au_cache");
 }
 
 PluginInfoList*

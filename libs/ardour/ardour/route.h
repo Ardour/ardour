@@ -101,8 +101,10 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	bool set_name (const std::string& str);
 	static void set_name_in_state (XMLNode &, const std::string &);
 
-	int32_t order_key (std::string const &) const;
-	void set_order_key (std::string const &, int32_t);
+        uint32_t order_key (RouteSortOrderKey) const;
+        bool has_order_key (RouteSortOrderKey) const;
+	void set_order_key (RouteSortOrderKey, uint32_t);
+        void sync_order_keys (RouteSortOrderKey);
 
 	bool is_hidden() const { return _flags & Hidden; }
 	bool is_master() const { return _flags & MasterOut; }
@@ -286,7 +288,6 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	PBD::Signal0<void>       meter_change;
 	PBD::Signal0<void>       signal_latency_changed;
 	PBD::Signal0<void>       initial_delay_changed;
-	PBD::Signal0<void>       order_key_changed;
 
 	/** Emitted with the process lock held */
 	PBD::Signal0<void>       io_changed;
@@ -420,19 +421,17 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 		MonitorBusRemoteControlID = 319,
 	};
 
-	void set_remote_control_id (uint32_t id, bool notify_class_listeners = true);
+	void     set_remote_control_id (uint32_t id, bool notify_class_listeners = true);
 	uint32_t remote_control_id () const;
 
 	/* for things concerned about *this* route's RID */
 
 	PBD::Signal0<void> RemoteControlIDChanged;
 
-	/* for things concerned about any route's RID changes */
+	/* for things concerned about *any* route's RID changes */
 
 	static PBD::Signal0<void> RemoteControlIDChange;
-
-	void sync_order_keys (std::string const &);
-	static PBD::Signal1<void,std::string const &> SyncOrderKeys;
+	static PBD::Signal1<void,RouteSortOrderKey> SyncOrderKeys;
 
 	bool has_external_redirects() const;
 
@@ -518,7 +517,6 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	void silence_unlocked (framecnt_t);
 
 	ChanCount processor_max_streams;
-	uint32_t _remote_control_id;
 
 	uint32_t pans_required() const;
 	ChanCount n_process_buffers ();
@@ -534,8 +532,9 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 
 	static uint32_t order_key_cnt;
 
-	typedef std::map<std::string, long> OrderKeys;
-	OrderKeys order_keys;
+	typedef std::map<RouteSortOrderKey,uint32_t> OrderKeys;
+ 	OrderKeys order_keys;
+	uint32_t* _remote_control_id;
 
 	void input_change_handler (IOChange, void *src);
 	void output_change_handler (IOChange, void *src);

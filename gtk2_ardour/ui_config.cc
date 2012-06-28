@@ -25,7 +25,6 @@
 
 #include "pbd/failed_constructor.h"
 #include "pbd/xml++.h"
-#include "pbd/filesystem.h"
 #include "pbd/file_utils.h"
 #include "pbd/error.h"
 
@@ -65,7 +64,7 @@ UIConfiguration::load_defaults ()
 {
 	int found = 0;
 
-	sys::path default_ui_rc_file;
+	std::string default_ui_rc_file;
 	std::string rcfile;
 
 	if (getenv ("ARDOUR_SAE")) {
@@ -78,7 +77,7 @@ UIConfiguration::load_defaults ()
 		XMLTree tree;
 		found = 1;
 
-		string rcfile = default_ui_rc_file.to_string();
+		string rcfile = default_ui_rc_file;
 
 		info << string_compose (_("Loading default ui configuration file %1"), rcfile) << endl;
 
@@ -103,13 +102,13 @@ UIConfiguration::load_state ()
 {
 	bool found = false;
 
-	sys::path default_ui_rc_file;
+	std::string default_ui_rc_file;
 
 	if ( find_file_in_search_path (ardour_config_search_path(), "ardour3_ui_default.conf", default_ui_rc_file)) {
 		XMLTree tree;
 		found = true;
 
-		string rcfile = default_ui_rc_file.to_string();
+		string rcfile = default_ui_rc_file;
 
 		info << string_compose (_("Loading default ui configuration file %1"), rcfile) << endl;
 
@@ -124,13 +123,13 @@ UIConfiguration::load_state ()
 		}
 	}
 
-	sys::path user_ui_rc_file;
+	std::string user_ui_rc_file;
 
 	if (find_file_in_search_path (ardour_config_search_path(), "ardour3_ui.conf", user_ui_rc_file)) {
 		XMLTree tree;
 		found = true;
 
-		string rcfile = user_ui_rc_file.to_string();
+		string rcfile = user_ui_rc_file;
 
 		info << string_compose (_("Loading user ui configuration file %1"), rcfile) << endmsg;
 
@@ -160,18 +159,8 @@ UIConfiguration::save_state()
 {
 	XMLTree tree;
 
-	try {
-		sys::create_directories (user_config_directory ());
-	}
-	catch (const sys::filesystem_error& ex) {
-		error << "Could not create user configuration directory" << endmsg;
-		return -1;
-	}
-
-	sys::path rcfile_path(user_config_directory());
-
-	rcfile_path /= "ardour3_ui.conf";
-	const string rcfile = rcfile_path.to_string();
+	std::string rcfile(user_config_directory());
+	rcfile = Glib::build_filename (rcfile, "ardour3_ui.conf");
 
 	// this test seems bogus?
 	if (rcfile.length()) {

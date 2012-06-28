@@ -767,10 +767,9 @@ void
 PluginManager::save_statuses ()
 {
 	ofstream ofs;
-	sys::path path = user_config_directory();
-	path /= "plugin_statuses";
+	std::string path = Glib::build_filename (user_config_directory(), "plugin_statuses");
 
-	ofs.open (path.to_string().c_str(), ios_base::openmode (ios::out|ios::trunc));
+	ofs.open (path.c_str(), ios_base::openmode (ios::out|ios::trunc));
 
 	if (!ofs) {
 		return;
@@ -820,9 +819,8 @@ PluginManager::save_statuses ()
 void
 PluginManager::load_statuses ()
 {
-	sys::path path = user_config_directory();
-	path /= "plugin_statuses";
-	ifstream ifs (path.to_string().c_str());
+	std::string path = Glib::build_filename (user_config_directory(), "plugin_statuses");
+	ifstream ifs (path.c_str());
 
 	if (!ifs) {
 		return;

@@ -17,6 +17,8 @@
 
 */
 
+#include <glibmm/miscutils.h>
+
 #include "pbd/tokenizer.h"
 #include "pbd/search_path.h"
 #include "pbd/error.h"
@@ -42,34 +44,30 @@ SearchPath::SearchPath ()
 
 SearchPath::SearchPath (const string& path)
 {
-	vector<sys::path> tmp;
+	vector<std::string> tmp;
 
 	if (tokenize (path, string(path_delimiter), std::back_inserter (tmp))) {
 		add_directories (tmp);
 	}
 }
 
-SearchPath::SearchPath (const sys::path& directory_path)
-{
-	add_directory (directory_path);
-}
-
-SearchPath::SearchPath (const vector<sys::path>& paths)
+SearchPath::SearchPath (const vector<std::string>& paths)
 {
 	add_directories (paths);
 }
 
 void
-SearchPath::add_directory (const sys::path& directory_path)
+SearchPath::add_directory (const std::string& directory_path)
 {
-	// test for existance and warn etc?
-	push_back(directory_path);
+	if (!directory_path.empty()) {
+		push_back(directory_path);
+	}
 }
 
 void
-SearchPath::add_directories (const vector<sys::path>& paths)
+SearchPath::add_directories (const vector<std::string>& paths)
 {
-	for(vector<sys::path>::const_iterator i = paths.begin(); i != paths.end(); ++i) {
+	for(vector<std::string>::const_iterator i = paths.begin(); i != paths.end(); ++i) {
 		add_directory (*i);
 	}
 }
@@ -79,8 +77,8 @@ SearchPath::to_string () const
 {
 	string path;
 
-	for (vector<sys::path>::const_iterator i = begin(); i != end(); ++i) {
-		path += (*i).to_string();
+	for (vector<std::string>::const_iterator i = begin(); i != end(); ++i) {
+		path += *i;
 		path += path_delimiter;
 	}
 
@@ -97,14 +95,14 @@ SearchPath::operator+= (const SearchPath& spath)
 }
 
 SearchPath& 
-SearchPath::operator+= (const sys::path& directory_path)
+SearchPath::operator+= (const std::string& directory_path)
 {
 	add_directory (directory_path);
 	return *this;
 }
 
 SearchPath& 
-SearchPath::operator+ (const sys::path& directory_path)
+SearchPath::operator+ (const std::string& directory_path)
 {
 	add_directory (directory_path);
 	return *this;
@@ -121,10 +119,10 @@ SearchPath::operator+ (const SearchPath& spath)
 SearchPath&
 SearchPath::add_subdirectory_to_paths (const string& subdir)
 {
-	for (vector<sys::path>::iterator i = begin(); i != end(); ++i) {
+	for (vector<std::string>::iterator i = begin(); i != end(); ++i) {
 		// should these new paths just be added to the end of 
 		// the search path rather than replace?
-		*i /= subdir;
+		*i = Glib::build_filename (*i, subdir);
 	}
 	
 	return *this;

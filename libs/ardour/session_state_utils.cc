@@ -18,6 +18,11 @@
 
 #include <algorithm>
 
+#include <glibmm/fileutils.h>
+
+#include <giomm/file.h>
+
+#include "pbd/basename.h"
 #include "pbd/compose.h"
 #include "pbd/error.h"
 #include "pbd/file_utils.h"
@@ -33,29 +38,14 @@ using namespace PBD;
 namespace ARDOUR {
 
 bool
-create_backup_file (const sys::path & file_path)
+create_backup_file (const std::string & file_path)
 {
-	if (!sys::exists (file_path)) return false;
-
-	sys::path backup_path(file_path.to_string() + backup_suffix);
-
-	try
-	{
-		sys::copy_file (file_path, backup_path);
-	}
-	catch(sys::filesystem_error& ex)
-	{
-		error << string_compose (_("Unable to create a backup copy of file %1 (%2)"),
-				file_path.to_string(), ex.what())
-			<< endmsg;
-		return false;
-	}
-	return true;
+	return copy_file (file_path, file_path + backup_suffix);
 }
 
 void
-get_state_files_in_directory (const sys::path & directory_path,
-			      vector<sys::path> & result)
+get_state_files_in_directory (const std::string & directory_path,
+			      vector<std::string> & result)
 {
 	Glib::PatternSpec state_file_pattern('*' + string(statefile_suffix));
 
@@ -64,12 +54,12 @@ get_state_files_in_directory (const sys::path & directory_path,
 }
 
 vector<string>
-get_file_names_no_extension (const vector<sys::path> & file_paths)
+get_file_names_no_extension (const vector<std::string> & file_paths)
 {
 	vector<string> result;
 
 	std::transform (file_paths.begin(), file_paths.end(),
-			std::back_inserter(result), sys::basename);
+			std::back_inserter(result), PBD::basename_nosuffix);
 
 	sort (result.begin(), result.end(), std::less<string>());
 

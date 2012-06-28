@@ -177,10 +177,10 @@ EditorGroupTabs::default_properties () const
 	return plist;
 }
 
-string
+RouteSortOrderKey
 EditorGroupTabs::order_key () const
 {
-	return X_("editor");
+	return EditorSort;
 }
 
 RouteList
@@ -201,5 +201,5 @@ EditorGroupTabs::selected_routes () const
 void
 EditorGroupTabs::sync_order_keys ()
 {
-	_editor->_routes->sync_order_keys ("");
+	_editor->_routes->sync_order_keys_from_model ();
 }

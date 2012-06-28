@@ -22,8 +22,6 @@
 
 #include "ardour/export_format_specification.h"
 
-#include "pbd/filesystem.h"
-
 #include "gui_thread.h"
 #include "utils.h"
 #include "i18n.h"
@@ -37,7 +35,7 @@ ExportFileNotebook::ExportFileNotebook () :
 	/* Last page */
 
 	new_file_button.set_image (*Gtk::manage (new Gtk::Image (::get_icon("add"))));
-	new_file_button.set_label (_(" Click here to add another format"));
+	new_file_button.set_label (_("Add another format"));
 	new_file_button.set_alignment (0, 0.5);
 	new_file_button.set_relief (Gtk::RELIEF_NONE);
 
@@ -281,8 +279,7 @@ ExportFileNotebook::FilePage::update_example_filename()
 		}
 		
 		if (example != "") {
-			sys::path path(example);
-			filename_selector.set_example_filename(path.leaf());
+			filename_selector.set_example_filename(Glib::path_get_basename (example));
 		} else {
 			filename_selector.set_example_filename("");
 		}

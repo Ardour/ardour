@@ -29,7 +29,6 @@
 
 #include "pbd/xml++.h"
 #include "pbd/id.h"
-#include "pbd/filesystem.h"
 #include "ardour/element_importer.h"
 #include "ardour/element_import_handler.h"
 #include "ardour/import_status.h"
@@ -100,7 +99,7 @@ class AudioRegionImporter : public ElementImporter
 
 	bool parse_xml_region ();
 	bool parse_source_xml ();
-	PBD::sys::path get_sound_dir (XMLTree const & tree);
+	std::string get_sound_dir (XMLTree const & tree);
 
 	void prepare_region ();
 	void prepare_sources ();

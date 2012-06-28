@@ -24,7 +24,6 @@
 #include <glibmm/convert.h>
 
 #include "pbd/convert.h"
-#include "pbd/filesystem.h"
 
 #include "ardour/export_graph_builder.h"
 #include "ardour/export_timespan.h"

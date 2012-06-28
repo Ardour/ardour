@@ -19,7 +19,6 @@
 
 #include <iostream>
 
-#include "pbd/filesystem.h"
 #include "pbd/file_utils.h"
 
 #include "gtkmm2ext/keyboard.h"
@@ -708,10 +707,10 @@ StepEntry::load_bindings ()
 
         bindings.set_action_map (myactions);
 
-	sys::path binding_file;
+	std::string binding_file;
 
 	if (find_file_in_search_path (ardour_config_search_path(), "step_editing.bindings", binding_file)) {
-                bindings.load (binding_file.to_string());
+                bindings.load (binding_file);
         }
 }
 

@@ -21,8 +21,6 @@
 
 #include <sigc++/signal.h>
 
-#include "pbd/filesystem.h"
-
 #include "ardour/audioregion.h"
 #include "ardour/export_status.h"
 #include "ardour/export_handler.h"
@@ -185,7 +183,7 @@ ExportDialog::init_gui ()
 	get_vbox()->pack_start (warning_widget, false, false, 0);
 	get_vbox()->pack_start (progress_widget, false, false, 0);
 
-	advanced = Gtk::manage (new Gtk::Expander (_("Advanced options")));
+	advanced = Gtk::manage (new Gtk::Expander (_("Time span and channel options")));
 	advanced->property_expanded().signal_changed().connect(
 		sigc::mem_fun(*this, &ExportDialog::expanded_changed));
 	advanced->add (*advanced_paned);

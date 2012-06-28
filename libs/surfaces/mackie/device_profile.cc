@@ -59,7 +59,7 @@ static SearchPath
 devprofile_search_path ()
 {
 	bool devprofile_path_defined = false;
-        sys::path spath_env (Glib::getenv (devprofile_env_variable_name, devprofile_path_defined));
+        std::string spath_env (Glib::getenv (devprofile_env_variable_name, devprofile_path_defined));
 
 	if (devprofile_path_defined) {
 		return spath_env;
@@ -71,13 +71,10 @@ devprofile_search_path ()
 	return spath;
 }
 
-static sys::path
+static std::string
 user_devprofile_directory ()
 {
-	sys::path p(user_config_directory());
-	p /= devprofile_dir_name;
-
-	return p;
+	return Glib::build_filename (user_config_directory(), devprofile_dir_name);
 }
 
 static bool
@@ -339,20 +336,20 @@ legalize_for_path (const string& str)
 void
 DeviceProfile::save ()
 {
-	sys::path fullpath = user_devprofile_directory();
+	std::string fullpath = user_devprofile_directory();
 
-	if (g_mkdir_with_parents (fullpath.to_string().c_str(), 0755) < 0) {
-		error << string_compose(_("Session: cannot create user MCP profile folder \"%1\" (%2)"), fullpath.to_string(), strerror (errno)) << endmsg;
+	if (g_mkdir_with_parents (fullpath.c_str(), 0755) < 0) {
+		error << string_compose(_("Session: cannot create user MCP profile folder \"%1\" (%2)"), fullpath, strerror (errno)) << endmsg;
 		return;
 	}
 
-	fullpath /= legalize_for_path (_name) + ".profile";
+	fullpath = Glib::build_filename (fullpath, legalize_for_path (_name) + ".profile");
 	
 	XMLTree tree;
 	tree.set_root (&get_state());
 
-	if (!tree.write (fullpath.to_string())) {
-		error << string_compose ("MCP profile not saved to %1", fullpath.to_string()) << endmsg;
+	if (!tree.write (fullpath)) {
+		error << string_compose ("MCP profile not saved to %1", fullpath) << endmsg;
 	}
 }
 

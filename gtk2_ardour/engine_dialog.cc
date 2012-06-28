@@ -71,31 +71,29 @@ using namespace Glib;
 using ARDOUR::SoundGrid;
 
 EngineControl::EngineControl ()
-	: periods_adjustment (2, 2, 16, 1, 2)
-	, periods_spinner (periods_adjustment)
-	, priority_adjustment (60, 10, 90, 1, 10)
-	, priority_spinner (priority_adjustment)
-	, ports_adjustment (128, 8, 1024, 1, 16)
-	, ports_spinner (ports_adjustment)
-	, input_latency_adjustment (0, 0, 99999, 1)
-	, input_latency (input_latency_adjustment)
-	, output_latency_adjustment (0, 0, 99999, 1)
-	, output_latency (output_latency_adjustment)
-	, realtime_button (_("Realtime"))
-	, no_memory_lock_button (_("Do not lock memory"))
-	, unlock_memory_button (_("Unlock memory"))
-	, soft_mode_button (_("No zombies"))
-	, monitor_button (_("Provide monitor ports"))
-	, force16bit_button (_("Force 16 bit"))
-	, hw_monitor_button (_("H/W monitoring"))
-	, hw_meter_button (_("H/W metering"))
-	, verbose_output_button (_("Verbose output"))
-	, start_button (_("Start"))
-	, stop_button (_("Stop"))
-#ifdef __APPLE_
-	, basic_packer (5, 2)
-	, options_packer (4, 2)
-	, device_packer (4, 2)
+	: periods_adjustment (2, 2, 16, 1, 2),
+	  periods_spinner (periods_adjustment),
+	  ports_adjustment (128, 8, 1024, 1, 16),
+	  ports_spinner (ports_adjustment),
+	  input_latency_adjustment (0, 0, 99999, 1),
+	  input_latency (input_latency_adjustment),
+	  output_latency_adjustment (0, 0, 99999, 1),
+	  output_latency (output_latency_adjustment),
+	  realtime_button (_("Realtime")),
+	  no_memory_lock_button (_("Do not lock memory")),
+	  unlock_memory_button (_("Unlock memory")),
+	  soft_mode_button (_("No zombies")),
+	  monitor_button (_("Provide monitor ports")),
+	  force16bit_button (_("Force 16 bit")),
+	  hw_monitor_button (_("H/W monitoring")),
+	  hw_meter_button (_("H/W metering")),
+	  verbose_output_button (_("Verbose output")),
+	  start_button (_("Start")),
+	  stop_button (_("Stop")),
+#ifdef __APPLE__
+	  basic_packer (5, 2),
+	  options_packer (4, 2),
+	  device_packer (4, 2)
 #else
 	, basic_packer (8, 2)
 	, options_packer (14, 2)
@@ -261,19 +259,10 @@ EngineControl::EngineControl ()
 	++row;
 
 	realtime_button.set_active (true);
-	realtime_button.signal_toggled().connect (sigc::mem_fun (*this, &EngineControl::realtime_changed));
-	realtime_changed ();
 
 #if PROVIDE_TOO_MANY_OPTIONS
 
 #ifndef __APPLE__
-	label = manage (new Label (_("Realtime Priority")));
-	label->set_alignment (1.0, 0.5);
-	options_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
-	options_packer.attach (priority_spinner, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
-	++row;
-	priority_spinner.set_value (60);
-
 	options_packer.attach (no_memory_lock_button, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	++row;
 	options_packer.attach (unlock_memory_button, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
@@ -434,8 +423,6 @@ EngineControl::build_command_line (vector<string>& cmd)
 
 	if (realtime_button.get_active()) {
 		cmd.push_back ("-R");
-		cmd.push_back ("-P");
-		cmd.push_back (to_string ((uint32_t) floor (priority_spinner.get_value()), std::dec));
 	} else {
 		cmd.push_back ("-r"); /* override jackd's default --realtime */
 	}
@@ -676,14 +663,6 @@ EngineControl::setup_engine ()
 	_used = true;
 
 	return 0;
-}
-
-void
-EngineControl::realtime_changed ()
-{
-#ifndef __APPLE__
-	priority_spinner.set_sensitive (realtime_button.get_active());
-#endif
 }
 
 void
@@ -1167,10 +1146,6 @@ EngineControl::get_state ()
 	child->add_property ("val", to_string (periods_adjustment.get_value(), std::dec));
 	root->add_child_nocopy (*child);
 
-	child = new XMLNode ("priority");
-	child->add_property ("val", to_string (priority_adjustment.get_value(), std::dec));
-	root->add_child_nocopy (*child);
-
 	child = new XMLNode ("ports");
 	child->add_property ("val", to_string (ports_adjustment.get_value(), std::dec));
 	root->add_child_nocopy (*child);
@@ -1317,9 +1292,6 @@ EngineControl::set_state (const XMLNode& root)
 		if (child->name() == "periods") {
 			val = atoi (strval);
 			periods_adjustment.set_value(val);
-		} else if (child->name() == "priority") {
-			val = atoi (strval);
-			priority_adjustment.set_value(val);
 		} else if (child->name() == "ports") {
 			val = atoi (strval);
 			ports_adjustment.set_value(val);

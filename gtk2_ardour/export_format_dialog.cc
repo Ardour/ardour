@@ -36,6 +36,7 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog) :
   applying_changes_from_engine (0),
 
   name_label (_("Label: "), Gtk::ALIGN_LEFT),
+  name_generated_part ("", Gtk::ALIGN_LEFT),
 
   normalize_checkbox (_("Normalize to:")),
   normalize_adjustment (0.00, -90.00, 0.00, 0.1, 0.2),
@@ -72,16 +73,22 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog) :
 
 	/* Pack containers in dialog */
 
-	get_vbox()->pack_start (name_hbox, false, false, 0);
 	get_vbox()->pack_start (silence_table, false, false, 6);
 	get_vbox()->pack_start (format_table, false, false, 6);
 	get_vbox()->pack_start (encoding_options_vbox, false, false, 0);
 	get_vbox()->pack_start (cue_toc_vbox, false, false, 0);
+	get_vbox()->pack_start (name_hbox, false, false, 6);
 
 	/* Name, new and remove */
 
 	name_hbox.pack_start (name_label, false, false, 0);
-	name_hbox.pack_start (name_entry, true, true, 0);
+	name_hbox.pack_start (name_entry, false, false, 0);
+	name_hbox.pack_start (name_generated_part, true, true, 0);
+	name_entry.set_width_chars(20);
+	update_description();
+	manager.DescriptionChanged.connect(
+		*this, invalidator (*this),
+		boost::bind (&ExportFormatDialog::update_description, this), gui_context());
 
 	/* Normalize */
 
@@ -708,6 +715,13 @@ void
 ExportFormatDialog::update_with_toc ()
 {
 	manager.select_with_toc (with_toc.get_active());
+}
+
+void
+ExportFormatDialog::update_description()
+{
+	std::string text = ": " + format->description(false);
+	name_generated_part.set_text(text);
 }
 
 void

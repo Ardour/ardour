@@ -1201,7 +1201,7 @@ FFT::FFT(int size, int debugLevel)
     switch (m_method) {
 
     case 0:
-        std::cerr << "FFT::FFT(" << size << "): WARNING: Selected implemention not available" << std::endl;
+        std::cerr << "FFT::FFT(" << size << "): WARNING: Selected implementation not available" << std::endl;
 #ifdef USE_BUILTIN_FFT
         d = new FFTs::D_Cross(size);
 #else
@@ -1218,7 +1218,7 @@ FFT::FFT(int size, int debugLevel)
         }
         d = new FFTs::D_FFTW(size);
 #else
-        std::cerr << "FFT::FFT(" << size << "): WARNING: Selected implemention not available" << std::endl;
+        std::cerr << "FFT::FFT(" << size << "): WARNING: Selected implementation not available" << std::endl;
 #ifdef USE_BUILTIN_FFT
         d = new FFTs::D_Cross(size);
 #else
@@ -1236,7 +1236,7 @@ FFT::FFT(int size, int debugLevel)
         }
         d = new FFTs::D_KISSFFT(size);
 #else
-        std::cerr << "FFT::FFT(" << size << "): WARNING: Selected implemention not available" << std::endl;
+        std::cerr << "FFT::FFT(" << size << "): WARNING: Selected implementation not available" << std::endl;
 #ifdef USE_BUILTIN_FFT
         d = new FFTs::D_Cross(size);
 #else

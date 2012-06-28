@@ -34,18 +34,11 @@ namespace ARDOUR {
 SearchPath
 panner_search_path ()
 {
-	SearchPath spath (user_config_directory ());
-
+	SearchPath spath(user_config_directory ());
 	spath += ardour_dll_directory ();
 	spath.add_subdirectory_to_paths(panner_dir_name);
 
-	bool panner_path_defined = false;
-	SearchPath spath_env (Glib::getenv(panner_env_variable_name, panner_path_defined));
-
-	if (panner_path_defined) {
-		spath += spath_env;
-	}
-
+	spath += SearchPath(Glib::getenv(panner_env_variable_name));
 	return spath;
 }
 

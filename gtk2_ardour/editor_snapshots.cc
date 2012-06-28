@@ -173,7 +173,7 @@ EditorSnapshots::redisplay ()
 		return;
 	}
 
-	vector<sys::path> state_file_paths;
+	vector<std::string> state_file_paths;
 
 	get_state_files_in_directory (_session->session_directory().root_path(),
 				      state_file_paths);

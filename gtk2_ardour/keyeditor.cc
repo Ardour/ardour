@@ -32,7 +32,6 @@
 #include "gtkmm2ext/utils.h"
 
 #include "pbd/strsplit.h"
-#include "pbd/replace_all.h"
 
 #include "ardour/profile.h"
 

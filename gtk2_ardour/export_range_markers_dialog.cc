@@ -22,8 +22,6 @@
 
 #include <sstream>
 
-#include "pbd/filesystem.h"
-
 #include "ardour/audioengine.h"
 #include "ardour/sndfile_helpers.h"
 
@@ -157,7 +155,7 @@ ExportRangeMarkersDialog::is_filepath_valid(string &filepath)
 
  	// directory needs to exist and be writable
  	string dirpath = Glib::path_get_dirname (filepath);
- 	if (!exists_and_writable (sys::path (dirpath))) {
+	if (!exists_and_writable (dirpath)) {
  		string txt = _("Cannot write file in: ") + dirpath;
 		MessageDialog msg (*this, txt, false, MESSAGE_ERROR, BUTTONS_OK, true);
 		msg.run();

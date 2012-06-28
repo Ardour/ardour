@@ -67,8 +67,8 @@ class ExportProfileManager
   private:
 	typedef boost::shared_ptr<ExportHandler> HandlerPtr;
 
-	typedef std::pair<PBD::UUID, PBD::sys::path> FilePair;
-	typedef std::map<PBD::UUID, PBD::sys::path> FileMap;
+	typedef std::pair<PBD::UUID, std::string> FilePair;
+	typedef std::map<PBD::UUID, std::string> FileMap;
 
 	std::string const xml_node_name;
 	HandlerPtr  handler;
@@ -76,7 +76,7 @@ class ExportProfileManager
 
 	std::string preset_filename (std::string const & preset_name);
 	void load_presets ();
-	void load_preset_from_disk (PBD::sys::path const & path);
+	void load_preset_from_disk (std::string const & path);
 
 	bool set_state (XMLNode const & root);
 	bool set_global_state (XMLNode const & root);
@@ -90,9 +90,9 @@ class ExportProfileManager
 	ExportPresetPtr current_preset;
 	FileMap         preset_file_map;
 
-	std::vector<PBD::sys::path> find_file (std::string const & pattern);
+	std::vector<std::string> find_file (std::string const & pattern);
 
-	PBD::sys::path  export_config_dir;
+	std::string  export_config_dir;
 	PBD::SearchPath search_path;
 
 /* Timespans */
@@ -195,7 +195,7 @@ class ExportProfileManager
 	FormatStatePtr duplicate_format_state (FormatStatePtr state);
 	void remove_format_state (FormatStatePtr state);
 
-	PBD::sys::path save_format_to_disk (ExportFormatSpecPtr format);
+	std::string save_format_to_disk (ExportFormatSpecPtr format);
 	void remove_format_profile (ExportFormatSpecPtr format);
 	ExportFormatSpecPtr get_new_format (ExportFormatSpecPtr original);
 
@@ -212,7 +212,7 @@ class ExportProfileManager
 	void load_formats ();
 
 	ExportFormatSpecPtr load_format (XMLNode & node);
-	void load_format_from_disk (PBD::sys::path const & path);
+	void load_format_from_disk (std::string const & path);
 
 	boost::shared_ptr<FormatList> format_list;
 	FileMap                       format_file_map;

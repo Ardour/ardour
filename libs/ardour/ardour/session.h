@@ -111,7 +111,6 @@ class MidiControlUI;
 class MidiRegion;
 class MidiSource;
 class MidiTrack;
-class NamedSelection;
 class Playlist;
 class PluginInsert;
 class PluginInfo;
@@ -235,7 +234,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 		bool operator() (boost::shared_ptr<Route>, boost::shared_ptr<Route> b);
 	};
 
-	void sync_order_keys (std::string const &);
+        void sync_order_keys (RouteSortOrderKey);
 
 	template<class T> void foreach_route (T *obj, void (T::*func)(Route&));
 	template<class T> void foreach_route (T *obj, void (T::*func)(boost::shared_ptr<Route>));
@@ -329,8 +328,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void goto_start ();
 	void use_rf_shuttle_speed ();
 	void allow_auto_play (bool yn);
-	void request_transport_speed (double speed);
-	void request_transport_speed_nonzero (double);
+        void request_transport_speed (double speed, bool as_default = false);
+        void request_transport_speed_nonzero (double, bool as_default = false);
 	void request_overwrite_buffer (Track *);
 	void adjust_playback_buffering();
 	void adjust_capture_buffering();
@@ -454,6 +453,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 		);
 
 	std::list<boost::shared_ptr<MidiTrack> > new_midi_track (
+		const ChanCount& input, const ChanCount& output,
 		boost::shared_ptr<PluginInfo> instrument = boost::shared_ptr<PluginInfo>(),
 		TrackMode mode = Normal, 
 		RouteGroup* route_group = 0, uint32_t how_many = 1, std::string name_template = ""
@@ -462,8 +462,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void   remove_route (boost::shared_ptr<Route>);
 	void   resort_routes ();
 	void   resort_routes_using (boost::shared_ptr<RouteList>);
-
-	void   set_remote_control_ids();
 
 	AudioEngine & engine() { return _engine; }
 	AudioEngine const & engine () const { return _engine; }
@@ -578,16 +576,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	uint32_t count_sources_by_origin (const std::string&);
 
 	void add_playlist (boost::shared_ptr<Playlist>, bool unused = false);
-
-	/* named selections */
-
-	boost::shared_ptr<NamedSelection> named_selection_by_name (std::string name);
-	void add_named_selection (boost::shared_ptr<NamedSelection>);
-	void remove_named_selection (boost::shared_ptr<NamedSelection>);
-
-	template<class T> void foreach_named_selection (T& obj, void (T::*func)(boost::shared_ptr<NamedSelection>));
-	PBD::Signal0<void> NamedSelectionAdded;
-	PBD::Signal0<void> NamedSelectionRemoved;
 
 	/* Curves and AutomationLists (TODO when they go away) */
 	void add_automation_list(AutomationList*);
@@ -818,8 +806,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void send_mmc_locate (framepos_t);
 	int send_full_time_code (framepos_t);
 
-	PBD::Signal0<void> RouteOrderKeyChanged;
-
 	bool step_editing() const { return (_step_editors > 0); }
 
 	void request_suspend_timecode_transmission ();
@@ -871,10 +857,12 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void destroy ();
 
 	enum SubState {
-		PendingDeclickIn   = 0x1,
-		PendingDeclickOut  = 0x2,
-		StopPendingCapture = 0x4,
-		PendingLocate      = 0x20,
+		PendingDeclickIn      = 0x1,  ///< pending de-click fade-in for start
+		PendingDeclickOut     = 0x2,  ///< pending de-click fade-out for stop
+		StopPendingCapture    = 0x4,
+		PendingLoopDeclickIn  = 0x8,  ///< pending de-click fade-in at the start of a loop
+		PendingLoopDeclickOut = 0x10, ///< pending de-click fade-out at the end of a loop
+		PendingLocate         = 0x20,
 	};
 
 	/* stuff used in process() should be close together to
@@ -902,6 +890,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	// varispeed playback
 	double                  _transport_speed;
+	double                  _default_transport_speed;
 	double                  _last_transport_speed;
 	double                  _target_transport_speed;
 	CubicInterpolation       interpolation;
@@ -990,12 +979,25 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	int  process_routes (pframes_t, bool& need_butler);
 	int  silent_process_routes (pframes_t, bool& need_butler);
 
+	/** @return 1 if there is a pending declick fade-in,
+	           -1 if there is a pending declick fade-out,
+		    0 if there is no pending declick.
+	*/
 	int get_transport_declick_required () {
 		if (transport_sub_state & PendingDeclickIn) {
 			transport_sub_state &= ~PendingDeclickIn;
 			return 1;
 		} else if (transport_sub_state & PendingDeclickOut) {
+			/* XXX: not entirely sure why we don't clear this */
 			return -1;
+		} else if (transport_sub_state & PendingLoopDeclickOut) {
+			/* Return the declick out first ... */
+			transport_sub_state &= ~PendingLoopDeclickOut;
+			return -1;
+		} else if (transport_sub_state & PendingLoopDeclickIn) {
+			/* ... then the declick in on the next call */
+			transport_sub_state &= ~PendingLoopDeclickIn;
+			return 1;
 		} else {
 			return 0;
 		}
@@ -1037,6 +1039,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	int      load_state (std::string snapshot_name);
 
 	framepos_t _last_roll_location;
+	/** the session frame time at which we last rolled, located, or changed transport direction */
 	framepos_t _last_roll_or_reversal_location;
 	framepos_t _last_record_location;
 
@@ -1085,6 +1088,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	PBD::ScopedConnectionList loop_connections;
 	void             auto_loop_changed (Location *);
+	void             auto_loop_declick_range (Location *, framepos_t &, framepos_t &);
 
 	void first_stage_init (std::string path, std::string snapshot_name);
 	int  second_stage_init ();
@@ -1193,7 +1197,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void start_locate (framepos_t, bool with_roll, bool with_flush, bool with_loop=false, bool force=false);
 	void force_locate (framepos_t frame, bool with_roll = false);
 	void set_track_speed (Track *, double speed);
-	void set_transport_speed (double speed, bool abort = false, bool clear_state = false);
+        void set_transport_speed (double speed, bool abort = false, bool clear_state = false, bool as_default = false);
 	void stop_transport (bool abort = false, bool clear_state = false);
 	void start_transport ();
 	void realtime_stop (bool abort, bool clear_state);
@@ -1288,17 +1292,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void playlist_region_added (boost::weak_ptr<Region>);
 	void playlist_ranges_moved (std::list<Evoral::RangeMove<framepos_t> > const &);
 	void playlist_regions_extended (std::list<Evoral::Range<framepos_t> > const &);
-
-	/* NAMED SELECTIONS */
-
-	mutable Glib::Mutex named_selection_lock;
-	typedef std::set<boost::shared_ptr<NamedSelection> > NamedSelectionList;
-	NamedSelectionList named_selections;
-
-	int load_named_selections (const XMLNode&);
-
-	NamedSelection *named_selection_factory (std::string name);
-	NamedSelection *XMLNamedSelectionFactory (const XMLNode&);
 
 	/* CURVES and AUTOMATION LISTS */
 	std::map<PBD::ID, AutomationList*> automation_lists;
@@ -1470,7 +1463,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	XMLNode& get_control_protocol_state ();
 
 	void set_history_depth (uint32_t depth);
-	void sync_order_keys ();
 
 	static bool _disable_all_loaded_plugins;
 
@@ -1508,8 +1500,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void add_session_range_location (framepos_t, framepos_t);
 
 	void setup_midi_machine_control ();
-
-	void route_order_key_changed ();
 
 	void step_edit_status_change (bool);
 	uint32_t _step_editors;

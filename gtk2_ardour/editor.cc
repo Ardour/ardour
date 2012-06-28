@@ -214,18 +214,22 @@ show_me_the_size (Requisition* r, const char* what)
 	cerr << "size of " << what << " = " << r->width << " x " << r->height << endl;
 }
 
-#ifdef GTKOSX
 static void
 pane_size_watcher (Paned* pane)
 {
 	/* if the handle of a pane vanishes into (at least) the tabs of a notebook,
-	   it is no longer accessible. so stop that. this doesn't happen on X11,
-	   just the quartz backend.
+	   it is:
+
+	      X: hard to access
+	      Quartz: impossible to access
+	      
+	   so stop that by preventing it from ever getting too narrow. 35
+	   pixels is basically a rough guess at the tab width.
 
 	   ugh.
 	*/
 
-	int max_width_of_lhs = GTK_WIDGET(pane->gobj())->allocation.width - 25;
+	int max_width_of_lhs = GTK_WIDGET(pane->gobj())->allocation.width - 35;
 
 	gint pos = pane->get_position ();
 
@@ -233,7 +237,6 @@ pane_size_watcher (Paned* pane)
 		pane->set_position (max_width_of_lhs);
 	}
 }
-#endif
 
 Editor::Editor ()
 	: _join_object_range_state (JOIN_OBJECT_RANGE_NONE)
@@ -602,13 +605,13 @@ Editor::Editor ()
 
 	editor_summary_pane.signal_size_allocate().connect (sigc::bind (sigc::mem_fun (*this, &Editor::pane_allocation_handler), static_cast<Paned*> (&editor_summary_pane)));
 
-	/* XXX: editor_summary_pane might need similar special OS X treatment to the edit_pane */
+	/* XXX: editor_summary_pane might need similar to the edit_pane */
 
 	edit_pane.signal_size_allocate().connect (sigc::bind (sigc::mem_fun(*this, &Editor::pane_allocation_handler), static_cast<Paned*> (&edit_pane)));
-#ifdef GTKOSX
+
 	Glib::PropertyProxy<int> proxy = edit_pane.property_position();
 	proxy.signal_changed().connect (bind (sigc::ptr_fun (pane_size_watcher), static_cast<Paned*> (&edit_pane)));
-#endif
+
 	top_hbox.pack_start (toolbar_frame);
 
 	HBox *hbox = manage (new HBox);
@@ -917,12 +920,9 @@ Editor::zoom_adjustment_changed ()
 	}
 
 	double fpu = zoom_range_clock->current_duration() / _canvas_width;
-
-	if (fpu < 1.0) {
-		fpu = 1.0;
-		zoom_range_clock->set ((framepos_t) floor (fpu * _canvas_width));
-	} else if (fpu > _session->current_end_frame() / _canvas_width) {
-		fpu = _session->current_end_frame() / _canvas_width;
+	bool clamped = clamp_frames_per_unit (fpu);
+	
+	if (clamped) {
 		zoom_range_clock->set ((framepos_t) floor (fpu * _canvas_width));
 	}
 
@@ -1271,7 +1271,7 @@ Editor::set_session (Session *t)
 	_session->StepEditStatusChange.connect (_session_connections, invalidator (*this), boost::bind (&Editor::step_edit_status_change, this, _1), gui_context());
 	_session->TransportStateChange.connect (_session_connections, invalidator (*this), boost::bind (&Editor::map_transport_state, this), gui_context());
 	_session->PositionChanged.connect (_session_connections, invalidator (*this), boost::bind (&Editor::map_position_change, this, _1), gui_context());
-	_session->RouteAdded.connect (_session_connections, invalidator (*this), boost::bind (&Editor::handle_new_route, this, _1), gui_context());
+	_session->RouteAdded.connect (_session_connections, invalidator (*this), boost::bind (&Editor::add_routes, this, _1), gui_context());
 	_session->DirtyChanged.connect (_session_connections, invalidator (*this), boost::bind (&Editor::update_title, this), gui_context());
 	_session->tempo_map().PropertyChanged.connect (_session_connections, invalidator (*this), boost::bind (&Editor::tempo_map_changed, this, _1), gui_context());
 	_session->Located.connect (_session_connections, invalidator (*this), boost::bind (&Editor::located, this), gui_context());
@@ -4048,19 +4048,31 @@ Editor::on_key_release_event (GdkEventKey* ev)
 void
 Editor::reset_x_origin (framepos_t frame)
 {
-	queue_visual_change (frame);
+	pending_visual_change.add (VisualChange::TimeOrigin);
+	pending_visual_change.time_origin = frame;
+	ensure_visual_change_idle_handler ();
 }
 
 void
 Editor::reset_y_origin (double y)
 {
-	queue_visual_change_y (y);
+	pending_visual_change.add (VisualChange::YOrigin);
+	pending_visual_change.y_origin = y;
+	ensure_visual_change_idle_handler ();
 }
 
 void
 Editor::reset_zoom (double fpu)
 {
-	queue_visual_change (fpu);
+	clamp_frames_per_unit (fpu);
+
+	if (fpu == frames_per_unit) {
+		return;
+	}
+
+	pending_visual_change.add (VisualChange::ZoomLevel);
+	pending_visual_change.frames_per_unit = fpu;
+	ensure_visual_change_idle_handler ();
 }
 
 void
@@ -4165,41 +4177,20 @@ Editor::use_visual_state (VisualState& vs)
 	_routes->resume_redisplay ();
 }
 
+/** This is the core function that controls the zoom level of the canvas. It is called
+ *  whenever one or more calls are made to reset_zoom().  It executes in an idle handler.
+ *  @param fpu New frames per unit; should already have been clamped so that it is sensible.
+ */
 void
 Editor::set_frames_per_unit (double fpu)
 {
-	/* this is the core function that controls the zoom level of the canvas. it is called
-	   whenever one or more calls are made to reset_zoom(). it executes in an idle handler.
-	*/
-
-	if (fpu == frames_per_unit) {
-		return;
-	}
-
-	if (fpu < 2.0) {
-		fpu = 2.0;
-	}
-
-
-	/* don't allow zooms that fit more than the maximum number
-	   of frames into an 800 pixel wide space.
-	*/
-
-	if (max_framepos / fpu < 800.0) {
-		return;
-	}
-
-	if (tempo_lines)
+	if (tempo_lines) {
 		tempo_lines->tempo_map_changed();
+	}
 
 	frames_per_unit = fpu;
-	post_zoom ();
-}
 
-void
-Editor::post_zoom ()
-{
-	// convert fpu to frame count
+	/* convert fpu to frame count */
 
 	framepos_t frames = (framepos_t) floor (frames_per_unit * _canvas_width);
 
@@ -4234,32 +4225,6 @@ Editor::post_zoom ()
 }
 
 void
-Editor::queue_visual_change (framepos_t where)
-{
-	pending_visual_change.add (VisualChange::TimeOrigin);
-	pending_visual_change.time_origin = where;
-	ensure_visual_change_idle_handler ();
-}
-
-void
-Editor::queue_visual_change (double fpu)
-{
-	pending_visual_change.add (VisualChange::ZoomLevel);
-	pending_visual_change.frames_per_unit = fpu;
-
-	ensure_visual_change_idle_handler ();
-}
-
-void
-Editor::queue_visual_change_y (double y)
-{
-	pending_visual_change.add (VisualChange::YOrigin);
-	pending_visual_change.y_origin = y;
-
-	ensure_visual_change_idle_handler ();
-}
-
-void
 Editor::ensure_visual_change_idle_handler ()
 {
 	if (pending_visual_change.idle_handler_id < 0) {
@@ -4276,6 +4241,18 @@ Editor::_idle_visual_changer (void* arg)
 int
 Editor::idle_visual_changer ()
 {
+	/* set_horizontal_position() below (and maybe other calls) call
+	   gtk_main_iteration(), so it's possible that a signal will be handled
+	   half-way through this method.  If this signal wants an
+	   idle_visual_changer we must schedule another one after this one, so
+	   mark the idle_handler_id as -1 here to allow that.  Also make a note
+	   that we are doing the visual change, so that changes in response to
+	   super-rapid-screen-update can be dropped if we are still processing
+	   the last one.
+	*/
+	pending_visual_change.idle_handler_id = -1;
+	pending_visual_change.being_handled = true;
+	
 	VisualChange::Type p = pending_visual_change.pending;
 	pending_visual_change.pending = (VisualChange::Type) 0;
 
@@ -4304,7 +4281,7 @@ Editor::idle_visual_changer ()
 
 	_summary->set_overlays_dirty ();
 
-	pending_visual_change.idle_handler_id = -1;
+	pending_visual_change.being_handled = false;
 	return 0; /* this is always a one-shot call */
 }
 
@@ -4808,9 +4785,8 @@ Editor::axis_views_from_routes (boost::shared_ptr<RouteList> r) const
 	return t;
 }
 
-
 void
-Editor::handle_new_route (RouteList& routes)
+Editor::add_routes (RouteList& routes)
 {
 	ENSURE_GUI_THREAD (*this, &Editor::handle_new_route, routes)
 
@@ -4820,7 +4796,7 @@ Editor::handle_new_route (RouteList& routes)
 	for (RouteList::iterator x = routes.begin(); x != routes.end(); ++x) {
 		boost::shared_ptr<Route> route = (*x);
 
-		if (route->is_hidden() || route->is_monitor()) {
+		if (route->is_hidden()) {
 			continue;
 		}
 
@@ -5226,7 +5202,14 @@ Editor::super_rapid_screen_update ()
 
 		if (!_stationary_playhead) {
 
-			if (!_dragging_playhead && _follow_playhead && _session->requested_return_frame() < 0) {
+			if (!_dragging_playhead && _follow_playhead && _session->requested_return_frame() < 0 && !pending_visual_change.being_handled) {
+				/* We only do this if we aren't already
+				   handling a visual change (ie if
+				   pending_visual_change.being_handled is
+				   false) so that these requests don't stack
+				   up there are too many of them to handle in
+				   time.
+				*/
 				reset_x_origin_to_follow_playhead ();
 			}
 

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002 Paul Davis
+    Copyright (C) 2012 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,26 +14,16 @@
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 */
 
-#ifndef __ardour_session_named_selection_h__
-#define __ardour_session_named_selection_h__
+#include "audio_region_test.h"
 
-#include "ardour/session.h"
-#include "ardour/named_selection.h"
-
-namespace ARDOUR {
-
-template<class T> void
-Session::foreach_named_selection (T& obj, void (T::*func)(NamedSelection&))
+class LoadSessionsTest : public CppUnit::TestFixture
 {
-	Glib::Mutex::Lock lm (named_selection_lock);
-	for (NamedSelectionList::iterator i = named_selections.begin(); i != named_selections.end(); i++) {
-		(obj.*func) (**i);
-	}
-}
+	CPPUNIT_TEST_SUITE (LoadSessionsTest);
+	CPPUNIT_TEST (loadSessions);
+	CPPUNIT_TEST_SUITE_END ();
 
-} /* namespace */
-
-#endif /* __ardour_session_named_selection_h__ */
+public:
+	void loadSessions ();
+};

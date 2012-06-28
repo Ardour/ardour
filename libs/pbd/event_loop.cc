@@ -1,4 +1,3 @@
-#include <iostream>
 #include "pbd/event_loop.h"
 #include "pbd/stacktrace.h"
 

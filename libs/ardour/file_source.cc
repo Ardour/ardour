@@ -28,12 +28,11 @@
 
 #include "pbd/convert.h"
 #include "pbd/basename.h"
-#include "pbd/mountpoint.h"
 #include "pbd/stl_delete.h"
 #include "pbd/strsplit.h"
 #include "pbd/shortpath.h"
 #include "pbd/enumwriter.h"
-#include "pbd/filesystem.h"
+#include "pbd/file_utils.h"
 
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>
@@ -278,7 +277,7 @@ FileSource::find (Session& s, DataType type, const string& path, bool must_exist
 			++j;
 			
 			while (j != hits.end()) {
-				if (PBD::sys::inodes_same (*i, *j)) {
+				if (PBD::equivalent_paths (*i, *j)) {
 					/* *i and *j are the same file; break out of the loop early */
 					break;
 				}

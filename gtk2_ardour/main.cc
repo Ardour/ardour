@@ -144,7 +144,7 @@ fixup_bundle_environment (int, char* [])
 	std::string path;
 	std::string exec_dir = Glib::path_get_dirname (execpath);
 	std::string bundle_dir;
-	std::string userconfigdir = user_config_directory().to_string();
+	std::string userconfigdir = user_config_directory();
 
 	bundle_dir = Glib::path_get_dirname (exec_dir);
 
@@ -228,7 +228,7 @@ fixup_bundle_environment (int /*argc*/, char* argv[])
 
 	std::string path;
 	std::string dir_path = Glib::path_get_dirname (Glib::path_get_dirname (argv[0]));
-	std::string userconfigdir = user_config_directory().to_string();
+	std::string userconfigdir = user_config_directory();
 
 	/* note that this function is POSIX/Linux specific, so using / as
 	   a dir separator in this context is just fine.

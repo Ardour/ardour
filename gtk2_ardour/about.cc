@@ -164,6 +164,7 @@ static const char* authors[] = {
 	N_("Taybin Rutkin"),
 	N_("Andreas Ruge"),
 	N_("Sampo Savolainen"),
+	N_("Rodrigo Severo"),
 	N_("Per Sigmond"),
 	N_("Lincoln Spiteri"),
 	N_("Mike Start"),
@@ -201,7 +202,7 @@ static const char* translators[] = {
 
 static const char* gpl = X_("\n\
 Ardour comes with NO WARRANTY. It is free software, and you are welcome to redistribute it\n\
-under the terms of the GNU Public License, shown below.\n\
+under the terms of the GNU General Public License, shown below.\n\
 \n\
 		    GNU GENERAL PUBLIC LICENSE\n\
 		       Version 2, June 1991\n\
@@ -553,15 +554,14 @@ About::About ()
 {
 	// set_type_hint(Gdk::WINDOW_TYPE_HINT_SPLASHSCREEN);
 
-	string path;
 	string t;
 
-	sys::path splash_file;
+	std::string splash_file;
 
 	SearchPath spath(ardour_data_search_path());
 
 	if (find_file_in_search_path (spath, "splash.png", splash_file)) {
-		set_logo (Gdk::Pixbuf::create_from_file (splash_file.to_string()));
+		set_logo (Gdk::Pixbuf::create_from_file (splash_file));
 	} else {
 		error << "Could not find splash file" << endmsg;
 	}

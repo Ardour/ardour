@@ -37,6 +37,7 @@
 #include "pbd/signals.h"
 
 #include "ardour/ardour.h"
+#include "ardour/types.h"
 #include "ardour/session_handle.h"
 
 #include "enums.h"
@@ -129,7 +130,7 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 	void scroll_left ();
 	void scroll_right ();
 
-	void add_strip (ARDOUR::RouteList&);
+	void add_strips (ARDOUR::RouteList&);
 	void remove_strip (MixerStrip *);
 
 	MixerStrip* strip_by_route (boost::shared_ptr<ARDOUR::Route>);
@@ -160,7 +161,6 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 	bool track_display_button_press (GdkEventButton*);
 	void strip_width_changed ();
 
-	void track_list_change (const Gtk::TreeModel::Path&,const Gtk::TreeModel::iterator&);
 	void track_list_delete (const Gtk::TreeModel::Path&);
 	void track_list_reorder (const Gtk::TreeModel::Path& path, const Gtk::TreeModel::iterator& iter, int* new_order);
 
@@ -244,10 +244,9 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 
 	Width _strip_width;
 
-	void sync_order_keys (std::string const &);
-	bool strip_redisplay_does_not_reset_order_keys;
-	bool strip_redisplay_does_not_sync_order_keys;
-	bool ignore_sync;
+        void sync_order_keys_from_model ();
+        void sync_model_from_order_keys (ARDOUR::RouteSortOrderKey);
+        bool ignore_reorder;
 
 	void parameter_changed (std::string const &);
 	void set_route_group_activation (ARDOUR::RouteGroup *, bool);

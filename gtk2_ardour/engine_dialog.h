@@ -53,8 +53,6 @@ class EngineControl : public Gtk::VBox {
   private:
 	Gtk::Adjustment periods_adjustment;
 	Gtk::SpinButton periods_spinner;
-	Gtk::Adjustment priority_adjustment;
-	Gtk::SpinButton priority_spinner;
 	Gtk::Adjustment ports_adjustment;
 	Gtk::SpinButton ports_spinner;
 	Gtk::Adjustment input_latency_adjustment;
@@ -163,7 +161,6 @@ class EngineControl : public Gtk::VBox {
 
 	bool _used;
 
-	void realtime_changed ();
 	void driver_changed ();
         void interface_changed ();
 	void build_command_line (std::vector<std::string>&);

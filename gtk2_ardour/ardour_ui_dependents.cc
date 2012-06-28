@@ -133,25 +133,21 @@ ARDOUR_UI::toggle_mixer_window ()
 void
 ARDOUR_UI::toggle_mixer_on_top ()
 {
-	/* Only called if the editor window received the shortcut key or if selected
-	   from the editor window menu, so the mixer is definitely not on top, and
-	   we can unconditionally make it so here.
-	   
-	   XXX this might not work so well where there is a global menu bar, e.g.
-	   on OS X.
-	*/
 
-	/* Toggle the mixer to `visible' if required */
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("toggle-mixer"));
-	if (act) {
-		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+	if (gtk_window_is_active(Mixer_UI::instance()->gobj())) {
+		goto_editor_window ();
+	} else {
+		Glib::RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("toggle-mixer"));
+		if (act) {
+			Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
 
-		if (!tact->get_active()) {
-			tact->set_active (true);
+			/* Toggle the mixer to `visible' if required */
+			if (!tact->get_active ()) {
+				tact->set_active (true);
+			}
 		}
+		goto_mixer_window ();
 	}
-	
-	goto_mixer_window ();
 }
 
 /** The main editor window has been closed */

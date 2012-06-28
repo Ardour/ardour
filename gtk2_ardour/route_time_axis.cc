@@ -91,11 +91,11 @@ Glib::RefPtr<Gdk::Pixbuf> RouteTimeAxisView::slider_desensitised;
 void
 RouteTimeAxisView::setup_slider_pix ()
 {
-	if ((slider = ::get_icon ("fader_belt_h")) == 0) {
+	if ((slider = ::get_icon ("fader_belt_h_medium")) == 0) {
 		throw failed_constructor ();
 	}
 
-	if ((slider_desensitised = ::get_icon ("fader_belt_h_desensitised")) == 0) {
+	if ((slider_desensitised = ::get_icon ("fader_belt_h_medium_desensitised")) == 0) {
 		throw failed_constructor ();
 	}
 }
@@ -205,7 +205,11 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
         }
 
 	controls_table.attach (route_group_button, 7, 8, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
-	controls_table.attach (gm.get_gain_slider(), 0, 5, 1, 2, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+	Gtk::VBox* pad = manage (new Gtk::VBox);
+	pad->pack_start (gm.get_gain_slider(), false, false);
+	pad->pack_start (*manage (new Gtk::Label), true, true);
+	pad->show_all ();
+	controls_table.attach (*pad, 0, 5, 1, 2, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
 
 	ARDOUR_UI::instance()->set_tip(*solo_button,_("Solo"));
 	ARDOUR_UI::instance()->set_tip(*mute_button,_("Mute"));

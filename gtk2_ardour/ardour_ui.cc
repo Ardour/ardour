@@ -753,12 +753,6 @@ void
 ARDOUR_UI::finish()
 {
 	if (_session) {
-		int tries = 0;
-
-		if (_session->transport_rolling() && (++tries < 8)) {
-			_session->request_stop (false, true);
-			usleep (10000);
-		}
 
 		if (_session->dirty()) {
 			vector<string> actions;
@@ -1116,7 +1110,7 @@ ARDOUR_UI::update_wall_clock ()
 void
 ARDOUR_UI::redisplay_recent_sessions ()
 {
-	std::vector<sys::path> session_directories;
+	std::vector<std::string> session_directories;
 	RecentSessionsSorter cmp;
 
 	recent_session_display.set_model (Glib::RefPtr<TreeModel>(0));
@@ -1137,10 +1131,10 @@ ARDOUR_UI::redisplay_recent_sessions ()
 		session_directories.push_back ((*i).second);
 	}
 
-	for (vector<sys::path>::const_iterator i = session_directories.begin();
+	for (vector<std::string>::const_iterator i = session_directories.begin();
 			i != session_directories.end(); ++i)
 	{
-		std::vector<sys::path> state_file_paths;
+		std::vector<std::string> state_file_paths;
 
 		// now get available states for this session
 
@@ -1148,7 +1142,7 @@ ARDOUR_UI::redisplay_recent_sessions ()
 
 		vector<string*>* states;
 		vector<const gchar*> item;
-		string fullpath = i->to_string();
+		string fullpath = *i;
 
 		/* remove any trailing / */
 
@@ -1366,7 +1360,8 @@ ARDOUR_UI::open_session ()
 
 
 void
-ARDOUR_UI::session_add_midi_route (bool disk, RouteGroup* route_group, uint32_t how_many, const string& name_template, PluginInfoPtr instrument)
+ARDOUR_UI::session_add_mixed_track (const ChanCount& input, const ChanCount& output, RouteGroup* route_group, 
+				    uint32_t how_many, const string& name_template, PluginInfoPtr instrument)
 {
 	list<boost::shared_ptr<MidiTrack> > tracks;
 
@@ -1376,18 +1371,14 @@ ARDOUR_UI::session_add_midi_route (bool disk, RouteGroup* route_group, uint32_t 
 	}
 
 	try {
-		if (disk) {
-
-			tracks = _session->new_midi_track (instrument, ARDOUR::Normal, route_group, how_many, name_template);
-
-			if (tracks.size() != how_many) {
-				if (how_many == 1) {
-					error << _("could not create a new midi track") << endmsg;
-				} else {
-					error << string_compose (_("could not create %1 new midi tracks"), how_many) << endmsg;
-				}
+		tracks = _session->new_midi_track (input, output, instrument, ARDOUR::Normal, route_group, how_many, name_template);
+		
+		if (tracks.size() != how_many) {
+			if (how_many == 1) {
+				error << _("could not create a new mixed track") << endmsg;
+			} else {
+				error << string_compose (_("could not create %1 new mixed tracks"), how_many) << endmsg;
 			}
-			
 		}
 	}
 
@@ -1400,7 +1391,18 @@ restart JACK with more ports."), PROGRAM_NAME));
 		msg.run ();
 	}
 }
+	
 
+void
+ARDOUR_UI::session_add_midi_route (bool disk, RouteGroup* route_group, uint32_t how_many, const string& name_template, PluginInfoPtr instrument)
+{
+	ChanCount one_midi_channel;
+	one_midi_channel.set (DataType::MIDI, 1);
+
+	if (disk) {
+		session_add_mixed_track (one_midi_channel, one_midi_channel, route_group, how_many, name_template, instrument);
+	}
+}
 
 void
 ARDOUR_UI::session_add_audio_route (
@@ -2072,7 +2074,7 @@ ARDOUR_UI::snapshot_session (bool switch_to_it)
 			}
 		}
 
-		vector<sys::path> p;
+		vector<std::string> p;
 		get_state_files_in_directory (_session->session_directory().root_path(), p);
 		vector<string> n = get_file_names_no_extension (p);
 		if (find (n.begin(), n.end(), snapname) != n.end()) {
@@ -2911,7 +2913,7 @@ require some unused files to continue to exist."));
 
 	dimage->set_alignment(ALIGN_LEFT, ALIGN_TOP);
 
-	const string dead_directory = _session->session_directory().dead_path().to_string();
+	const string dead_directory = _session->session_directory().dead_path();
 
 	/* subst:
 	   %1 - number of files removed
@@ -3125,8 +3127,8 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 		return;
 	}
 
-	uint32_t input_chan = add_route_dialog->channels ();
-	uint32_t output_chan;
+	ChanCount input_chan= add_route_dialog->channels ();
+	ChanCount output_chan;
 	string name_template = add_route_dialog->name_template ();
 	PluginInfoPtr instrument = add_route_dialog->requested_instrument ();
 	RouteGroup* route_group = add_route_dialog->route_group ();
@@ -3134,19 +3136,27 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 	AutoConnectOption oac = Config->get_output_auto_connect();
 
 	if (oac & AutoConnectMaster) {
-		output_chan = (_session->master_out() ? _session->master_out()->n_inputs().n_audio() : input_chan);
+		output_chan.set (DataType::AUDIO, (_session->master_out() ? _session->master_out()->n_inputs().n_audio() : input_chan.n_audio()));
+		output_chan.set (DataType::MIDI, 0);
 	} else {
 		output_chan = input_chan;
 	}
 
 	/* XXX do something with name template */
 
-	if (add_route_dialog->midi_tracks_wanted()) {
+	switch (add_route_dialog->type_wanted()) {
+	case AddRouteDialog::AudioTrack:
+		session_add_audio_track (input_chan.n_audio(), output_chan.n_audio(), add_route_dialog->mode(), route_group, count, name_template);
+		break;
+	case AddRouteDialog::MidiTrack:
 		session_add_midi_track (route_group, count, name_template, instrument);
-	} else if (add_route_dialog->audio_tracks_wanted()) {
-		session_add_audio_track (input_chan, output_chan, add_route_dialog->mode(), route_group, count, name_template);
-	} else {
-		session_add_audio_bus (input_chan, output_chan, route_group, count, name_template);
+		break;
+	case AddRouteDialog::MixedTrack:
+		session_add_mixed_track (input_chan, output_chan, route_group, count, name_template, instrument);
+		break;
+	case AddRouteDialog::AudioBus:
+		session_add_audio_bus (input_chan.n_audio(), output_chan.n_audio(), route_group, count, name_template);
+		break;
 	}
 }
 

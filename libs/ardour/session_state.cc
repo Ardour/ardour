@@ -51,6 +51,7 @@
 #endif
 
 #include <glib.h>
+#include <glib/gstdio.h>
 
 #include <glibmm.h>
 #include <glibmm/thread.h>
@@ -68,9 +69,9 @@
 #include "pbd/controllable_descriptor.h"
 #include "pbd/enumwriter.h"
 #include "pbd/error.h"
+#include "pbd/file_utils.h"
 #include "pbd/pathscanner.h"
 #include "pbd/pthread_utils.h"
-#include "pbd/search_path.h"
 #include "pbd/stacktrace.h"
 #include "pbd/convert.h"
 #include "pbd/clear_dir.h"
@@ -92,7 +93,6 @@
 #include "ardour/midi_region.h"
 #include "ardour/midi_source.h"
 #include "ardour/midi_track.h"
-#include "ardour/named_selection.h"
 #include "ardour/pannable.h"
 #include "ardour/playlist_factory.h"
 #include "ardour/port.h"
@@ -107,7 +107,6 @@
 #include "ardour/session_metadata.h"
 #include "ardour/session_playlists.h"
 #include "ardour/session_state_utils.h"
-#include "ardour/session_utils.h"
 #include "ardour/silentfilesource.h"
 #include "ardour/sndfilesource.h"
 #include "ardour/source_factory.h"
@@ -169,6 +168,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	_solo_isolated_cnt = 0;
 	g_atomic_int_set (&processing_prohibited, 0);
 	_transport_speed = 0;
+	_default_transport_speed = 1.0;
 	_last_transport_speed = 0;
 	_target_transport_speed = 0;
 	auto_play_legal = false;
@@ -287,7 +287,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 int
 Session::second_stage_init ()
 {
-	AudioFileSource::set_peak_dir (_session_dir->peak_path().to_string());
+	AudioFileSource::set_peak_dir (_session_dir->peak_path());
 
 	if (!_is_new) {
 		if (load_state (_current_snapshot_name)) {
@@ -391,7 +391,7 @@ Session::raid_path () const
 	SearchPath raid_search_path;
 
 	for (vector<space_and_path>::const_iterator i = session_dirs.begin(); i != session_dirs.end(); ++i) {
-		raid_search_path += sys::path((*i).path);
+		raid_search_path += (*i).path;
 	}
 
 	return raid_search_path.to_string ();
@@ -414,7 +414,7 @@ Session::setup_raid_path (string path)
 	SearchPath midi_search_path;
 
 	for (SearchPath::const_iterator i = search_path.begin(); i != search_path.end(); ++i) {
-		sp.path = (*i).to_string ();
+		sp.path = *i;
 		sp.blocks = 0; // not needed
 		session_dirs.push_back (sp);
 
@@ -432,7 +432,7 @@ bool
 Session::path_is_within_session (const std::string& path)
 {
 	for (vector<space_and_path>::const_iterator i = session_dirs.begin(); i != session_dirs.end(); ++i) {
-		if (PBD::sys::path_is_within (i->path, path)) {
+		if (PBD::path_is_within (i->path, path)) {
 			return true;
 		}
 	}
@@ -444,35 +444,35 @@ Session::ensure_subdirs ()
 {
 	string dir;
 
-	dir = session_directory().peak_path().to_string();
+	dir = session_directory().peak_path();
 
 	if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
 		error << string_compose(_("Session: cannot create session peakfile folder \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
 		return -1;
 	}
 
-	dir = session_directory().sound_path().to_string();
+	dir = session_directory().sound_path();
 
 	if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
 		error << string_compose(_("Session: cannot create session sounds dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
 		return -1;
 	}
 
-	dir = session_directory().midi_path().to_string();
+	dir = session_directory().midi_path();
 
 	if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
 		error << string_compose(_("Session: cannot create session midi dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
 		return -1;
 	}
 
-	dir = session_directory().dead_path().to_string();
+	dir = session_directory().dead_path();
 
 	if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
 		error << string_compose(_("Session: cannot create session dead sounds folder \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
 		return -1;
 	}
 
-	dir = session_directory().export_path().to_string();
+	dir = session_directory().export_path();
 
 	if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
 		error << string_compose(_("Session: cannot create session export folder \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
@@ -518,7 +518,7 @@ Session::create (const string& session_template, BusProfile* bus_profile)
 		return -1;
 	}
 
-	_writable = exists_and_writable (sys::path (_path));
+	_writable = exists_and_writable (_path);
 
 	if (!session_template.empty()) {
 		std::string in_path = session_template_dir_to_file (session_template);
@@ -537,9 +537,8 @@ Session::create (const string& session_template, BusProfile* bus_profile)
                                 _is_new = false;
 
 				/* Copy plugin state files from template to new session */
-				sys::path template_plugins = session_template;
-				template_plugins /= X_("plugins");
-				sys::copy_files (template_plugins, plugins_dir ());
+				std::string template_plugins = Glib::build_filename (session_template, X_("plugins"));
+				copy_files (template_plugins, plugins_dir ());
 				
 				return 0;
 
@@ -625,18 +624,15 @@ Session::maybe_write_autosave()
 void
 Session::remove_pending_capture_state ()
 {
-	sys::path pending_state_file_path(_session_dir->root_path());
+	std::string pending_state_file_path(_session_dir->root_path());
 
-	pending_state_file_path /= legalize_for_path (_current_snapshot_name) + pending_suffix;
+	pending_state_file_path = Glib::build_filename (pending_state_file_path, legalize_for_path (_current_snapshot_name) + pending_suffix);
 
-	try
-	{
-		sys::remove (pending_state_file_path);
-	}
-	catch(sys::filesystem_error& ex)
-	{
-		error << string_compose(_("Could remove pending capture state at path \"%1\" (%2)"),
-				pending_state_file_path.to_string(), ex.what()) << endmsg;
+	if (!Glib::file_test (pending_state_file_path, Glib::FILE_TEST_EXISTS)) return;
+
+	if (g_remove (pending_state_file_path.c_str()) != 0) {
+		error << string_compose(_("Could not remove pending capture state at path \"%1\" (%2)"),
+				pending_state_file_path, g_strerror (errno)) << endmsg;
 	}
 }
 
@@ -655,17 +651,12 @@ Session::rename_state (string old_name, string new_name)
 	const string old_xml_filename = legalize_for_path (old_name) + statefile_suffix;
 	const string new_xml_filename = legalize_for_path (new_name) + statefile_suffix;
 
-	const sys::path old_xml_path = _session_dir->root_path() / old_xml_filename;
-	const sys::path new_xml_path = _session_dir->root_path() / new_xml_filename;
+	const std::string old_xml_path(Glib::build_filename (_session_dir->root_path(), old_xml_filename));
+	const std::string new_xml_path(Glib::build_filename (_session_dir->root_path(), new_xml_filename));
 
-	try
-	{
-		sys::rename (old_xml_path, new_xml_path);
-	}
-	catch (const sys::filesystem_error& err)
-	{
+	if (::g_rename (old_xml_path.c_str(), new_xml_path.c_str()) != 0) {
 		error << string_compose(_("could not rename snapshot %1 to %2 (%3)"),
-				old_name, new_name, err.what()) << endmsg;
+				old_name, new_name, g_strerror(errno)) << endmsg;
 	}
 }
 
@@ -680,9 +671,9 @@ Session::remove_state (string snapshot_name)
 		return;
 	}
 
-	sys::path xml_path(_session_dir->root_path());
+	std::string xml_path(_session_dir->root_path());
 
-	xml_path /= legalize_for_path (snapshot_name) + statefile_suffix;
+	xml_path = Glib::build_filename (xml_path, legalize_for_path (snapshot_name) + statefile_suffix);
 
 	if (!create_backup_file (xml_path)) {
 		// don't remove it if a backup can't be made
@@ -691,7 +682,10 @@ Session::remove_state (string snapshot_name)
 	}
 
 	// and delete it
-	sys::remove (xml_path);
+	if (g_remove (xml_path.c_str()) != 0) {
+		error << string_compose(_("Could not remove state file at path \"%1\" (%2)"),
+				xml_path, g_strerror (errno)) << endmsg;
+	}
 }
 
 #ifdef HAVE_JACK_SESSION
@@ -724,13 +718,14 @@ Session::jack_session_event (jack_session_event_t * event)
                 if (save_state (timebuf)) {
                         event->flags = JackSessionSaveError;
                 } else {
-                        sys::path xml_path (_session_dir->root_path());
-                        xml_path /= legalize_for_path (timebuf) + statefile_suffix;
+			std::string xml_path (_session_dir->root_path());
+			std::string legalized_filename = legalize_for_path (timebuf) + statefile_suffix;
+			xml_path = Glib::build_filename (xml_path, legalized_filename);
 
                         string cmd ("ardour3 -P -U ");
                         cmd += event->client_uuid;
                         cmd += " \"";
-                        cmd += xml_path.to_string();
+                        cmd += xml_path;
                         cmd += '\"';
 
                         event->command_line = strdup (cmd.c_str());
@@ -752,7 +747,7 @@ int
 Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot)
 {
 	XMLTree tree;
-	sys::path xml_path(_session_dir->root_path());
+	std::string xml_path(_session_dir->root_path());
 
 	if (!_writable || (_state_of_the_state & CannotSave)) {
 		return 1;
@@ -787,11 +782,11 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 
 		/* proper save: use statefile_suffix (.ardour in English) */
 
-		xml_path /= legalize_for_path (snapshot_name) + statefile_suffix;
+		xml_path = Glib::build_filename (xml_path, legalize_for_path (snapshot_name) + statefile_suffix);
 
 		/* make a backup copy of the old file */
 
-		if (sys::exists(xml_path) && !create_backup_file (xml_path)) {
+		if (Glib::file_test (xml_path, Glib::FILE_TEST_EXISTS) && !create_backup_file (xml_path)) {
 			// create_backup_file will log the error
 			return -1;
 		}
@@ -799,26 +794,31 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 	} else {
 
 		/* pending save: use pending_suffix (.pending in English) */
-		xml_path /= legalize_for_path (snapshot_name) + pending_suffix;
+		xml_path = Glib::build_filename (xml_path, legalize_for_path (snapshot_name) + pending_suffix);
 	}
 
-	sys::path tmp_path(_session_dir->root_path());
+	std::string tmp_path(_session_dir->root_path());
+	tmp_path = Glib::build_filename (tmp_path, legalize_for_path (snapshot_name) + temp_suffix);
 
-	tmp_path /= legalize_for_path (snapshot_name) + temp_suffix;
+	// cerr << "actually writing state to " << xml_path << endl;
 
-	// cerr << "actually writing state to " << xml_path.to_string() << endl;
-
-	if (!tree.write (tmp_path.to_string())) {
-		error << string_compose (_("state could not be saved to %1"), tmp_path.to_string()) << endmsg;
-		sys::remove (tmp_path);
+	if (!tree.write (tmp_path)) {
+		error << string_compose (_("state could not be saved to %1"), tmp_path) << endmsg;
+		if (g_remove (tmp_path.c_str()) != 0) {
+			error << string_compose(_("Could not remove temporary state file at path \"%1\" (%2)"),
+					tmp_path, g_strerror (errno)) << endmsg;
+		}
 		return -1;
 
 	} else {
 
-		if (::rename (tmp_path.to_string().c_str(), xml_path.to_string().c_str()) != 0) {
+		if (::rename (tmp_path.c_str(), xml_path.c_str()) != 0) {
 			error << string_compose (_("could not rename temporary session file %1 to %2"),
-					tmp_path.to_string(), xml_path.to_string()) << endmsg;
-			sys::remove (tmp_path);
+					tmp_path, xml_path) << endmsg;
+			if (g_remove (tmp_path.c_str()) != 0) {
+				error << string_compose(_("Could not remove temporary state file at path \"%1\" (%2)"),
+						tmp_path, g_strerror (errno)) << endmsg;
+			}
 			return -1;
 		}
 	}
@@ -861,10 +861,10 @@ Session::load_state (string snapshot_name)
 
 	/* check for leftover pending state from a crashed capture attempt */
 
-	sys::path xmlpath(_session_dir->root_path());
-	xmlpath /= legalize_for_path (snapshot_name) + pending_suffix;
+	std::string xmlpath(_session_dir->root_path());
+	xmlpath = Glib::build_filename (xmlpath, legalize_for_path (snapshot_name) + pending_suffix);
 
-	if (sys::exists (xmlpath)) {
+	if (Glib::file_test (xmlpath, Glib::FILE_TEST_EXISTS)) {
 
 		/* there is pending state from a crashed capture attempt */
 
@@ -875,15 +875,13 @@ Session::load_state (string snapshot_name)
 	}
 
 	if (!state_was_pending) {
-		xmlpath = _session_dir->root_path();
-		xmlpath /= snapshot_name;
+		xmlpath = Glib::build_filename (_session_dir->root_path(), snapshot_name);
 	}
 
-        if (!sys::exists (xmlpath)) {
-                xmlpath = _session_dir->root_path();
-                xmlpath /= legalize_for_path (snapshot_name) + statefile_suffix;
-                if (!sys::exists (xmlpath)) {
-                        error << string_compose(_("%1: session state information file \"%2\" doesn't exist!"), _name, xmlpath.to_string()) << endmsg;
+	if (!Glib::file_test (xmlpath, Glib::FILE_TEST_EXISTS)) {
+		xmlpath = Glib::build_filename (_session_dir->root_path(), legalize_for_path (snapshot_name) + statefile_suffix);
+		if (!Glib::file_test (xmlpath, Glib::FILE_TEST_EXISTS)) {
+                        error << string_compose(_("%1: session state information file \"%2\" doesn't exist!"), _name, xmlpath) << endmsg;
                         return 1;
                 }
         }
@@ -894,8 +892,8 @@ Session::load_state (string snapshot_name)
 
 	_writable = exists_and_writable (xmlpath);
 
-	if (!state_tree->read (xmlpath.to_string())) {
-		error << string_compose(_("Could not understand ardour file %1"), xmlpath.to_string()) << endmsg;
+	if (!state_tree->read (xmlpath)) {
+		error << string_compose(_("Could not understand ardour file %1"), xmlpath) << endmsg;
 		delete state_tree;
 		state_tree = 0;
 		return -1;
@@ -904,7 +902,7 @@ Session::load_state (string snapshot_name)
 	XMLNode& root (*state_tree->root());
 
 	if (root.name() != X_("Session")) {
-		error << string_compose (_("Session file %1 is not a session"), xmlpath.to_string()) << endmsg;
+		error << string_compose (_("Session file %1 is not a session"), xmlpath) << endmsg;
 		delete state_tree;
 		state_tree = 0;
 		return -1;
@@ -928,28 +926,21 @@ Session::load_state (string snapshot_name)
 		}
 	}
 
-	if (Stateful::loading_state_version < CURRENT_SESSION_FILE_VERSION) {
+	if (Stateful::loading_state_version < CURRENT_SESSION_FILE_VERSION && _writable) {
 
-		sys::path backup_path(_session_dir->root_path());
-
-		backup_path /= string_compose ("%1-%2%3", legalize_for_path (snapshot_name), Stateful::loading_state_version, statefile_suffix);
+		std::string backup_path(_session_dir->root_path());
+		std::string backup_filename = string_compose ("%1-%2%3", legalize_for_path (snapshot_name), Stateful::loading_state_version, statefile_suffix);
+		backup_path = Glib::build_filename (backup_path, backup_filename);
 
 		// only create a backup for a given statefile version once
 
-		if (!sys::exists (backup_path)) {
+		if (!Glib::file_test (backup_path, Glib::FILE_TEST_EXISTS)) {
 			
 			info << string_compose (_("Copying old session file %1 to %2\nUse %2 with %3 versions before 2.0 from now on"),
-						xmlpath.to_string(), backup_path.to_string(), PROGRAM_NAME)
+						xmlpath, backup_path, PROGRAM_NAME)
 			     << endmsg;
 			
-			try {
-				sys::copy_file (xmlpath, backup_path);
-				
-			} catch (sys::filesystem_error& ex) {
-				
-				error << string_compose (_("Unable to make backup of state file %1 (%2)"),
-							 xmlpath.to_string(), ex.what())
-				      << endmsg;
+			if (!copy_file (xmlpath, backup_path)) {;
 				return -1;
 			}
 		}
@@ -1167,15 +1158,6 @@ Session::state (bool full_state)
 		gain_child->add_child_nocopy (_click_gain->state (full_state));
 	}
 
-	if (full_state) {
-		XMLNode* ns_child = node->add_child ("NamedSelections");
-		for (NamedSelectionList::iterator i = named_selections.begin(); i != named_selections.end(); ++i) {
-			if (full_state) {
-				ns_child->add_child_nocopy ((*i)->get_state());
-			}
-		}
-	}
-
         node->add_child_nocopy (_speakers->get_state());
 	node->add_child_nocopy (_tempo_map->get_state());
 	node->add_child_nocopy (get_control_protocol_state());
@@ -1225,7 +1207,7 @@ Session::set_state (const XMLNode& node, int version)
 		}
 	}
 
-	setup_raid_path(_session_dir->root_path().to_string());
+	setup_raid_path(_session_dir->root_path());
 
 	if ((prop = node.property (X_("id-counter"))) != 0) {
 		uint64_t x;
@@ -1331,12 +1313,6 @@ Session::set_state (const XMLNode& node, int version)
 
 	if ((child = find_named_node (node, "CompoundAssociations")) != 0) {
 		if (load_compounds (*child)) {
-			goto out;
-		}
-	}
-
-	if ((child = find_named_node (node, "NamedSelections")) != 0) {
-		if (load_named_selections (*child)) {
 			goto out;
 		}
 	}
@@ -1918,7 +1894,7 @@ Session::path_from_region_name (DataType type, string name, string identifier)
 	char buf[PATH_MAX+1];
 	uint32_t n;
 	SessionDirectory sdir(get_best_session_directory_for_new_source());
-	sys::path source_dir = ((type == DataType::AUDIO)
+	std::string source_dir = ((type == DataType::AUDIO)
 		? sdir.sound_path() : sdir.midi_path());
 
         string ext = native_header_format_extension (config.get_native_file_header_format(), type);
@@ -1932,10 +1908,10 @@ Session::path_from_region_name (DataType type, string name, string identifier)
 					n, ext.c_str());
 		}
 
-		sys::path source_path = source_dir / buf;
+		std::string source_path = Glib::build_filename (source_dir, buf);
 
-		if (!sys::exists (source_path)) {
-			return source_path.to_string();
+		if (!Glib::file_test (source_path, Glib::FILE_TEST_EXISTS)) {
+			return source_path;
 		}
 	}
 
@@ -2033,49 +2009,54 @@ Session::save_template (string template_name)
 		return -1;
 	}
 
-	sys::path user_template_dir(user_template_directory());
+	std::string user_template_dir(user_template_directory());
 
-	try
-	{
-		sys::create_directories (user_template_dir);
-	}
-	catch(sys::filesystem_error& ex)
-	{
+	if (g_mkdir_with_parents (user_template_dir.c_str(), 0755) != 0) {
 		error << string_compose(_("Could not create templates directory \"%1\" (%2)"),
-				user_template_dir.to_string(), ex.what()) << endmsg;
+				user_template_dir, g_strerror (errno)) << endmsg;
 		return -1;
 	}
 
 	tree.set_root (&get_template());
 
-	sys::path template_dir_path(user_template_dir);
+	std::string template_dir_path(user_template_dir);
 	
 	/* directory to put the template in */
-	template_dir_path /= template_name;
-	if (sys::exists (template_dir_path))
-	{
+	template_dir_path = Glib::build_filename (template_dir_path, template_name);
+
+	if (Glib::file_test (template_dir_path, Glib::FILE_TEST_EXISTS)) {
 		warning << string_compose(_("Template \"%1\" already exists - new version not created"),
-				template_dir_path.to_string()) << endmsg;
+				template_dir_path) << endmsg;
 		return -1;
 	}
 	
-	sys::create_directories (template_dir_path);
+	if (g_mkdir_with_parents (template_dir_path.c_str(), 0755) != 0) {
+		error << string_compose(_("Could not create directory for Session template\"%1\" (%2)"),
+				template_dir_path, g_strerror (errno)) << endmsg;
+		return -1;
+	}
 
 	/* file to write */
-	sys::path template_file_path = template_dir_path;
-	template_file_path /= template_name + template_suffix;
+	std::string template_file_path(template_dir_path);
+	template_file_path = Glib::build_filename (template_file_path, template_name + template_suffix);
 
-	if (!tree.write (template_file_path.to_string())) {
+	if (!tree.write (template_file_path)) {
 		error << _("template not saved") << endmsg;
 		return -1;
 	}
 
 	/* copy plugin state directory */
 
-	sys::path template_plugin_state_path = template_dir_path;
-	template_plugin_state_path /= X_("plugins");
-	sys::create_directories (template_plugin_state_path);
-	sys::copy_files (plugins_dir(), template_plugin_state_path);
+	std::string template_plugin_state_path(template_dir_path);
+	template_plugin_state_path = Glib::build_filename (template_plugin_state_path, X_("plugins"));
+
+	if (g_mkdir_with_parents (template_plugin_state_path.c_str(), 0755) != 0) {
+		error << string_compose(_("Could not create directory for Session template plugin state\"%1\" (%2)"),
+				template_plugin_state_path, g_strerror (errno)) << endmsg;
+		return -1;
+	}
+
+	copy_files (plugins_dir(), template_plugin_state_path);
 
 	return 0;
 }
@@ -2133,7 +2114,7 @@ string
 Session::get_best_session_directory_for_new_source ()
 {
 	vector<space_and_path>::iterator i;
-	string result = _session_dir->root_path().to_string();
+	string result = _session_dir->root_path();
 
 	/* handle common case without system calls */
 
@@ -2192,7 +2173,8 @@ Session::get_best_session_directory_for_new_source ()
 			}
 
 			if ((*i).blocks * 4096 >= Config->get_disk_choice_space_threshold()) {
-				if (create_session_directory ((*i).path)) {
+				SessionDirectory sdir(i->path);
+				if (sdir.create ()) {
 					result = (*i).path;
 					last_rr_session_dir = i;
 					return result;
@@ -2214,7 +2196,8 @@ Session::get_best_session_directory_for_new_source ()
 		sort (sorted.begin(), sorted.end(), cmp);
 
 		for (i = sorted.begin(); i != sorted.end(); ++i) {
-			if (create_session_directory ((*i).path)) {
+			SessionDirectory sdir(i->path);
+			if (sdir.create ()) {
 				result = (*i).path;
 				last_rr_session_dir = i;
 				return result;
@@ -2223,39 +2206,6 @@ Session::get_best_session_directory_for_new_source ()
 	}
 
 	return result;
-}
-
-int
-Session::load_named_selections (const XMLNode& node)
-{
-	XMLNodeList nlist;
-	XMLNodeConstIterator niter;
-	NamedSelection *ns;
-
-	nlist = node.children();
-
-	set_dirty();
-
-	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-
-		if ((ns = XMLNamedSelectionFactory (**niter)) == 0) {
-			error << _("Session: cannot create Named Selection from XML description.") << endmsg;
-		}
-	}
-
-	return 0;
-}
-
-NamedSelection *
-Session::XMLNamedSelectionFactory (const XMLNode& node)
-{
-	try {
-		return new NamedSelection (*this, node);
-	}
-
-	catch (failed_constructor& err) {
-		return 0;
-	}
 }
 
 string
@@ -2749,7 +2699,7 @@ Session::cleanup_sources (CleanupReport& rep)
 		++nexti;
 
 		SessionDirectory sdir ((*i).path);
-		audio_path += sdir.sound_path().to_string();
+		audio_path += sdir.sound_path();
 
 		if (nexti != session_dirs.end()) {
 			audio_path += ':';
@@ -2767,7 +2717,7 @@ Session::cleanup_sources (CleanupReport& rep)
 		++nexti;
 
 		SessionDirectory sdir ((*i).path);
-		midi_path += sdir.midi_path().to_string();
+		midi_path += sdir.midi_path();
 
 		if (nexti != session_dirs.end()) {
 			midi_path += ':';
@@ -3202,7 +3152,7 @@ Session::controllable_by_descriptor (const ControllableDescriptor& desc)
 		if (p) {
 			boost::shared_ptr<Send> s = boost::dynamic_pointer_cast<Send>(p);
 			boost::shared_ptr<Amp> a = s->amp();
-
+			
 			if (a) {
 				c = s->amp()->gain_control();
 			}
@@ -3251,16 +3201,11 @@ Session::save_history (string snapshot_name)
 
 	const string history_filename = legalize_for_path (snapshot_name) + history_suffix;
 	const string backup_filename = history_filename + backup_suffix;
-	const sys::path xml_path = _session_dir->root_path() / history_filename;
-	const sys::path backup_path = _session_dir->root_path() / backup_filename;
+	const std::string xml_path(Glib::build_filename (_session_dir->root_path(), history_filename));
+	const std::string backup_path(Glib::build_filename (_session_dir->root_path(), backup_filename));
 
-	if (sys::exists (xml_path)) {
-		try
-		{
-			sys::rename (xml_path, backup_path);
-		}
-		catch (const sys::filesystem_error& err)
-		{
+	if (Glib::file_test (xml_path, Glib::FILE_TEST_EXISTS)) {
+		if (::g_rename (xml_path.c_str(), backup_path.c_str()) != 0) {
 			error << _("could not backup old history file, current history not saved") << endmsg;
 			return -1;
 		}
@@ -3272,19 +3217,17 @@ Session::save_history (string snapshot_name)
 
 	tree.set_root (&_history.get_state (Config->get_saved_history_depth()));
 
-	if (!tree.write (xml_path.to_string()))
+	if (!tree.write (xml_path))
 	{
-		error << string_compose (_("history could not be saved to %1"), xml_path.to_string()) << endmsg;
+		error << string_compose (_("history could not be saved to %1"), xml_path) << endmsg;
 
-		try
-		{
-			sys::remove (xml_path);
-			sys::rename (backup_path, xml_path);
+		if (g_remove (xml_path.c_str()) != 0) {
+			error << string_compose(_("Could not remove history file at path \"%1\" (%2)"),
+					xml_path, g_strerror (errno)) << endmsg;
 		}
-		catch (const sys::filesystem_error& err)
-		{
+		if (::g_rename (backup_path.c_str(), xml_path.c_str()) != 0) {
 			error << string_compose (_("could not restore history file from backup %1 (%2)"),
-					backup_path.to_string(), err.what()) << endmsg;
+					backup_path, g_strerror (errno)) << endmsg;
 		}
 
 		return -1;
@@ -3302,20 +3245,20 @@ Session::restore_history (string snapshot_name)
 		snapshot_name = _current_snapshot_name;
 	}
 
-	const string xml_filename = legalize_for_path (snapshot_name) + history_suffix;
-	const sys::path xml_path = _session_dir->root_path() / xml_filename;
+	const std::string xml_filename = legalize_for_path (snapshot_name) + history_suffix;
+	const std::string xml_path(Glib::build_filename (_session_dir->root_path(), xml_filename));
 
-	info << "Loading history from " << xml_path.to_string() << endmsg;
+	info << "Loading history from " << xml_path << endmsg;
 
-	if (!sys::exists (xml_path)) {
+	if (!Glib::file_test (xml_path, Glib::FILE_TEST_EXISTS)) {
 		info << string_compose (_("%1: no history file \"%2\" for this session."),
-				_name, xml_path.to_string()) << endmsg;
+				_name, xml_path) << endmsg;
 		return 1;
 	}
 
-	if (!tree.read (xml_path.to_string())) {
+	if (!tree.read (xml_path)) {
 		error << string_compose (_("Could not understand session history file \"%1\""),
-				xml_path.to_string()) << endmsg;
+				xml_path) << endmsg;
 		return -1;
 	}
 
@@ -3559,14 +3502,12 @@ Session::config_changed (std::string p, bool ours)
 		} else {
 			switch_to_sync_source (config.get_sync_source());
 		}
-	} else if (p == "remote-model") {
-		set_remote_control_ids ();
 	}  else if (p == "denormal-model") {
 		setup_fpu ();
 	} else if (p == "history-depth") {
 		set_history_depth (Config->get_history_depth());
 	} else if (p == "sync-all-route-ordering") {
-		sync_order_keys ("session");
+		/* XXX sync_order_keys (UndefinedSort); */
 	} else if (p == "initial-program-change") {
 
 		if (MIDI::Manager::instance()->mmc()->output_port() && Config->get_initial_program_change() >= 0) {
@@ -3680,7 +3621,7 @@ Session::rename (const std::string& new_name)
 	string newstr;
 	bool first = true;
 
-	string const old_sources_root = _session_dir->sources_root().to_string ();
+	string const old_sources_root = _session_dir->sources_root();
 
 #define RENAME ::rename
 
@@ -3809,7 +3750,7 @@ Session::rename (const std::string& new_name)
 		boost::shared_ptr<FileSource> fs = boost::dynamic_pointer_cast<FileSource> (i->second);
 		if (fs) {
 			string p = fs->path ();
-			boost::replace_all (p, old_sources_root, _session_dir->sources_root().to_string ());
+			boost::replace_all (p, old_sources_root, _session_dir->sources_root());
 			fs->set_path (p);
 		}
 	}

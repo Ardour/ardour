@@ -38,7 +38,7 @@ namespace PBD {
  * @param result A vector of filenames.
  */
 void
-get_files_in_directory (const sys::path& path,
+get_files_in_directory (const std::string& path,
                         std::vector<std::string>& result);
 
 /**
@@ -50,9 +50,9 @@ get_files_in_directory (const sys::path& path,
  * @param result A vector in which to place the resulting matches.
  */
 void
-find_matching_files_in_directory (const sys::path& directory,
+find_matching_files_in_directory (const std::string& directory,
                                   const Glib::PatternSpec& pattern,
-                                  std::vector<sys::path>& result);
+                                  std::vector<std::string>& result);
 
 /**
  * Takes a number of directory paths and returns all the files matching
@@ -63,9 +63,9 @@ find_matching_files_in_directory (const sys::path& directory,
  * @param result A vector in which to place the resulting matches.
  */
 void
-find_matching_files_in_directories (const std::vector<sys::path>& directory_paths,
+find_matching_files_in_directories (const std::vector<std::string>& directory_paths,
                                     const Glib::PatternSpec& pattern,
-                                    std::vector<sys::path>& result);
+                                    std::vector<std::string>& result);
 
 /**
  * Takes a SearchPath and puts a list of all the files in the search path
@@ -78,7 +78,7 @@ find_matching_files_in_directories (const std::vector<sys::path>& directory_path
 void
 find_matching_files_in_search_path (const SearchPath& search_path,
                                     const Glib::PatternSpec& pattern,
-                                    std::vector<sys::path>& result);
+                                    std::vector<std::string>& result);
 
 /**
  * Takes a search path and a file name and place the full path
@@ -89,8 +89,47 @@ find_matching_files_in_search_path (const SearchPath& search_path,
 bool
 find_file_in_search_path (const SearchPath& search_path,
                           const std::string& filename,
-                          sys::path& result);
-			
+                          std::string& result);
+
+/**
+ * Attempt to copy the contents of the file from_path to a new file
+ * at path to_path. If to_path exists it is overwritten.
+ *
+ * @return true if file was successfully copied
+ */
+bool copy_file(const std::string & from_path, const std::string & to_path);
+
+/**
+ * Attempt to copy all regular files from from_path to a new directory.
+ * This method does not recurse.
+ */
+void copy_files(const std::string & from_path, const std::string & to_dir);
+
+/**
+ * Take a (possibly) relative path and make it absolute
+ * @return An absolute path
+ */
+std::string get_absolute_path (const std::string &);
+
+/**
+ * Find out if `needle' is a file or directory within the
+ * directory `haystack'.
+ * @return true if it is.
+ */
+bool path_is_within (const std::string &, std::string);
+
+/**
+ * @return true if p1 and p2 both resolve to the same file
+ * @param p1 a file path.
+ * @param p2 a file path.
+ *
+ * Uses g_stat to check for identical st_dev and st_ino values.
+ */
+bool equivalent_paths (const std::string &p1, const std::string &p2);
+
+/// @return true if path at p exists and is writable, false otherwise
+bool exists_and_writable(const std::string & p);
+
 } // namespace PBD
 
 #endif

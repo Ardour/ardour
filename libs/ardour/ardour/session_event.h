@@ -42,7 +42,8 @@ public:
 		/* only one of each of these events can be queued at any one time */
 
 		StopOnce,
-		AutoLoop
+		AutoLoop,
+		AutoLoopDeclick,
 	};
 
 	enum Action {
@@ -70,6 +71,10 @@ public:
 		bool second_yes_or_no;
 	};
 
+	union {
+		bool third_yes_or_no;
+	};
+
 	/* 4 members to handle a multi-group event handled in RT context */
 
 	typedef boost::function<void (SessionEvent*)> RTeventCallback;
@@ -84,7 +89,7 @@ public:
 
 	boost::shared_ptr<Region> region;
 
-	SessionEvent (Type t, Action a, framepos_t when, framepos_t where, double spd, bool yn = false, bool yn2 = false)
+    SessionEvent (Type t, Action a, framepos_t when, framepos_t where, double spd, bool yn = false, bool yn2 = false, bool yn3 = false)
 		: type (t)
 		, action (a)
 		, action_frame (when)
@@ -92,6 +97,7 @@ public:
 		, speed (spd)
 		, yes_or_no (yn)
 		, second_yes_or_no (yn2)
+		, third_yes_or_no (yn3)
 		, event_loop (0) {}
 
 	void set_ptr (void* p) {

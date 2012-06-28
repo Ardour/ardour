@@ -278,7 +278,7 @@ ShuttleControl::on_button_release_event (GdkEventButton* ev)
 
 	case 2:
 		if (_session->transport_rolling()) {
-			_session->request_transport_speed (1.0);
+			_session->request_transport_speed (1.0, Config->get_shuttle_behaviour() == Wheel);
 		}
 		return true;
 
@@ -479,7 +479,7 @@ ShuttleControl::use_shuttle_fract (bool force)
 		speed = shuttle_max_speed * shuttle_fract;
 	}
 
-	_session->request_transport_speed_nonzero (speed);
+	_session->request_transport_speed_nonzero (speed, true);
 }
 
 bool
@@ -648,6 +648,9 @@ ShuttleControl::parameter_changed (std::string p)
 					if (_session->transport_speed() == 1.0) {
 						queue_draw ();
 					} else {
+						/* reset current speed and
+						   revert to 1.0 as the default
+						*/
 						_session->request_transport_speed (1.0);
 						/* redraw when speed changes */
 					}

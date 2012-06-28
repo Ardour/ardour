@@ -45,17 +45,21 @@
 #include <xmmintrin.h>
 #endif
 
+#include <giomm.h>
+
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 
 #include <lrdf.h>
 
+#include "pbd/cpus.h"
 #include "pbd/error.h"
 #include "pbd/id.h"
 #include "pbd/strsplit.h"
 #include "pbd/fpu.h"
 #include "pbd/file_utils.h"
 #include "pbd/enumwriter.h"
+#include "pbd/basename.h"
 
 #include "midi++/port.h"
 #include "midi++/manager.h"
@@ -135,8 +139,7 @@ setup_hardware_optimization (bool try_optimization)
 			compute_peak          = x86_sse_compute_peak;
 			find_peaks            = x86_sse_find_peaks;
 			apply_gain_to_buffer  = x86_sse_apply_gain_to_buffer;
-			// mix_buffers_with_gain = x86_sse_mix_buffers_with_gain;
-			mix_buffers_with_gain = default_mix_buffers_with_gain;
+			mix_buffers_with_gain = x86_sse_mix_buffers_with_gain;
 			mix_buffers_no_gain   = x86_sse_mix_buffers_no_gain;
 
 			generic_mix_functions = false;
@@ -215,6 +218,9 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization)
 	if (!Glib::thread_supported()) {
 		Glib::thread_init();
 	}
+
+	// this really should be in PBD::init..if there was one
+	Gio::init ();
 
 	(void) bindtextdomain(PACKAGE, LOCALEDIR);
 
@@ -297,7 +303,7 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization)
 	(void) PluginManager::instance();
 
         ProcessThread::init ();
-        BufferManager::init (10); // XX should be num_processors_for_dsp + 1 for the GUI thread
+        BufferManager::init (hardware_concurrency() + 1); 
 
         PannerManager::instance().discover_panners();
 
@@ -360,7 +366,7 @@ ARDOUR::cleanup ()
 void
 ARDOUR::find_bindings_files (map<string,string>& files)
 {
-	vector<sys::path> found;
+	vector<std::string> found;
 	SearchPath spath = ardour_config_search_path();
 
 	if (getenv ("ARDOUR_SAE")) {
@@ -375,11 +381,11 @@ ARDOUR::find_bindings_files (map<string,string>& files)
 		return;
 	}
 
-	for (vector<sys::path>::iterator x = found.begin(); x != found.end(); ++x) {
-		sys::path path = *x;
+	for (vector<std::string>::iterator x = found.begin(); x != found.end(); ++x) {
+		std::string path(*x);
 		pair<string,string> namepath;
-		namepath.second = path.to_string();
-		namepath.first = path.leaf().substr (0, path.leaf().find_first_of ('.'));
+		namepath.second = path;
+		namepath.first = PBD::basename_nosuffix (path);
 		files.insert (namepath);
 	}
 }
@@ -457,7 +463,7 @@ ARDOUR::setup_fpu ()
 string
 ARDOUR::translation_kill_path ()
 {
-        return Glib::build_filename (user_config_directory().to_string(), ".love_is_the_language_of_audio");
+        return Glib::build_filename (user_config_directory(), ".love_is_the_language_of_audio");
 }
 
 bool

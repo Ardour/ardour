@@ -231,6 +231,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 		session_add_midi_route (true, route_group, how_many, name_template, instrument);
 	}
 
+        void session_add_mixed_track (const ARDOUR::ChanCount& input, const ARDOUR::ChanCount& output, ARDOUR::RouteGroup* route_group, uint32_t how_many, std::string const & name_template,
+				      ARDOUR::PluginInfoPtr instrument);
+
 	/*void session_add_midi_bus () {
 		session_add_midi_route (false);
 	}*/
@@ -256,8 +259,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void get_process_buffers ();
 	void drop_process_buffers ();
 
-	void goto_editor_window ();
-	
   protected:
 	friend class PublicEditor;
 
@@ -283,9 +284,10 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	ARDOUR::AudioEngine *engine;
 	Gtk::Tooltips        _tooltips;
 
-	void                goto_mixer_window ();
-	void                toggle_mixer_window ();
-	void                toggle_mixer_on_top ();
+	void goto_editor_window ();
+	void goto_mixer_window ();
+	void toggle_mixer_window ();
+	void toggle_mixer_on_top ();
 
 	int  setup_windows ();
 	void setup_transport ();

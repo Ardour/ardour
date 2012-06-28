@@ -41,14 +41,14 @@ Splash::Splash ()
 {
 	assert (the_splash == 0);
 	
-	sys::path splash_file;
+	std::string splash_file;
 
 	if (!find_file_in_search_path (ardour_data_search_path(), "splash.png", splash_file)) {
 		throw failed_constructor();
 	}
 
 	try {
-		pixbuf = Gdk::Pixbuf::create_from_file (splash_file.to_string());
+		pixbuf = Gdk::Pixbuf::create_from_file (splash_file);
 	}
 
 	catch (...) {

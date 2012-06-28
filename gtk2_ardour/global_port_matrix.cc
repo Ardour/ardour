@@ -160,6 +160,8 @@ GlobalPortMatrixWindow::GlobalPortMatrixWindow (Session* s, DataType t)
 		break;
 	}
 
+	signal_key_press_event().connect (sigc::mem_fun (_port_matrix, &PortMatrix::key_press));
+
 	add (_port_matrix);
 	_port_matrix.show ();
 }

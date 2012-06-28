@@ -32,7 +32,6 @@
 
 #include <pbd/pthread_utils.h>
 #include <pbd/file_utils.h>
-#include <pbd/filesystem.h>
 #include <pbd/failed_constructor.h>
 
 #include "ardour/session.h"
@@ -189,11 +188,11 @@ OSC::start ()
 	
 	PBD::info << "OSC @ " << get_server_url () << endmsg;
 
-	PBD::sys::path url_file;
+	std::string url_file;
 
 	if (find_file_in_search_path (ardour_config_search_path(), "osc_url", url_file)) {
 		
-		_osc_url_file = url_file.to_string();
+		_osc_url_file = url_file;
 		ofstream urlfile;
 		urlfile.open(_osc_url_file.c_str(), ios::trunc);
 		

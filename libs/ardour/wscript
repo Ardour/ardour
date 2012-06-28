@@ -138,7 +138,6 @@ libardour_sources = [
         'mtc_slave.cc',
         'mtdm.cc',
         'mute_master.cc',
-        'named_selection.cc',
         'onset_detector.cc',
         'operations.cc',
         'pan_controllable.cc',
@@ -194,7 +193,6 @@ libardour_sources = [
         'session_state_utils.cc',
         'session_time.cc',
         'session_transport.cc',
-        'session_utils.cc',
         'sg_plugin.cc',
         'sg_rack.cc',
         'slave.cc',
@@ -449,6 +447,7 @@ def build(bld):
                 test/control_surfaces_test.cc
                 test/combine_regions_test.cc
                 test/region_naming_test.cc
+                test/load_sessions_test.cc
                 test/mtdm_test.cc
                 test/testrunner.cc
         '''.split()

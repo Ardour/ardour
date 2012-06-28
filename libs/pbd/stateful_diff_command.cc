@@ -17,8 +17,6 @@
 
 */
 
-#include <iostream>
-
 #include "pbd/stateful_diff_command.h"
 #include "pbd/property_list.h"
 #include "pbd/demangle.h"

@@ -56,7 +56,7 @@ ExportFilename::ExportFilename (Session & session) :
 	std::time (&rawtime);
 	time_struct = localtime (&rawtime);
 
-	folder = session.session_directory().export_path().to_string();
+	folder = session.session_directory().export_path();
 
 	XMLNode * instant_node = session.instant_xml ("ExportFilename");
 	if (instant_node) {
@@ -102,7 +102,7 @@ ExportFilename::set_state (const XMLNode & node)
 
 	if ((prop = child->property ("relative"))) {
 		if (!prop->value().compare ("true")) {
-			folder = session.session_directory().root_path().to_string();
+			folder = session.session_directory().root_path();
 		}
 	}
 
@@ -345,7 +345,7 @@ ExportFilename::analyse_folder ()
 {
 	FieldPair pair;
 
-	string session_dir = session.session_directory().root_path().to_string();
+	string session_dir = session.session_directory().root_path();
 	string::size_type session_dir_len = session_dir.length();
 
 	string folder_beginning = folder.substr (0, session_dir_len);

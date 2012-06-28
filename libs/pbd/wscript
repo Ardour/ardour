@@ -78,7 +78,6 @@ def build(bld):
             enums.cc
             epa.cc
             error.cc
-            filesystem.cc
             file_manager.cc
             file_utils.cc
             fpu.cc

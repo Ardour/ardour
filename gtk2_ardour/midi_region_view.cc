@@ -337,7 +337,12 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 	}
 
 	if (ev->type == GDK_2BUTTON_PRESS) {
-		return trackview.editor().toggle_internal_editing_from_double_click (ev);
+		// cannot use double-click to exit internal mode if single-click is being used
+		MouseMode m = trackview.editor().current_mouse_mode();
+
+		if ((m != MouseObject || !Keyboard::modifier_state_contains (ev->button.state, Keyboard::insert_note_modifier())) && (m != MouseDraw)) {
+			return trackview.editor().toggle_internal_editing_from_double_click (ev);
+		}
 	}
 
 	if ((!trackview.editor().internal_editing() && trackview.editor().current_mouse_mode() != MouseGain) ||
@@ -680,7 +685,11 @@ MidiRegionView::scroll (GdkEventScroll* ev)
 		change_velocities (true, fine, false, together);
 	} else if (ev->direction == GDK_SCROLL_DOWN) {
 		change_velocities (false, fine, false, together);
+	} else {
+		/* left, right: we don't use them */
+		return false;
 	}
+
 	return true;
 }
 
@@ -3733,6 +3742,9 @@ void
 MidiRegionView::edit_patch_change (ArdourCanvas::CanvasPatchChange* pc)
 {
 	PatchChangeDialog d (&_source_relative_time_converter, trackview.session(), *pc->patch (), instrument_info(), Gtk::Stock::APPLY);
+
+        d.set_position (Gtk::WIN_POS_MOUSE);
+
 	if (d.run () != Gtk::RESPONSE_ACCEPT) {
 		return;
 	}

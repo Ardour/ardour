@@ -83,7 +83,6 @@ namespace ARDOUR {
 	class Region;
 	class Location;
 	class TempoSection;
-	class NamedSelection;
 	class Session;
 	class Filter;
 	class ChanCount;
@@ -525,7 +524,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Editing::ZoomFocus zoom_focus;
 
 	void set_frames_per_unit (double);
-	void post_zoom ();
+	bool clamp_frames_per_unit (double &) const;
 
 	Editing::MouseMode mouse_mode;
 	Editing::MouseMode pre_internal_mouse_mode;
@@ -705,7 +704,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void popup_control_point_context_menu (ArdourCanvas::Item *, GdkEvent *);
 	Gtk::Menu _control_point_context_menu;
 
-	void handle_new_route (ARDOUR::RouteList&);
+	void add_routes (ARDOUR::RouteList&);
 	void timeaxisview_deleted (TimeAxisView *);
 
 	Gtk::HBox           global_hpacker;
@@ -1029,22 +1028,19 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 		double y_origin;
 
 		int idle_handler_id;
+		/** true if we are currently in the idle handler */
+		bool being_handled;
 
-		VisualChange() : pending ((VisualChange::Type) 0), time_origin (0), frames_per_unit (0), idle_handler_id (-1) {}
+		VisualChange() : pending ((VisualChange::Type) 0), time_origin (0), frames_per_unit (0), idle_handler_id (-1), being_handled (false) {}
 		void add (Type t) {
 			pending = Type (pending | t);
 		}
 	};
 
-
 	VisualChange pending_visual_change;
 
 	static int _idle_visual_changer (void *arg);
 	int idle_visual_changer ();
-
-	void queue_visual_change (framepos_t);
-	void queue_visual_change (double);
-	void queue_visual_change_y (double);
 	void ensure_visual_change_idle_handler ();
 
 	/* track views */
@@ -1213,7 +1209,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void temporal_zoom_region (bool both_axes);
 	void zoom_to_region (bool both_axes);
 	void temporal_zoom_session ();
-	void temporal_zoom (gdouble scale);
+	void temporal_zoom (double scale);
 	void temporal_zoom_by_frame (framepos_t start, framepos_t end);
 	void temporal_zoom_to_frame (bool coarser, framepos_t frame);
 

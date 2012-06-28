@@ -170,10 +170,10 @@ MixerGroupTabs::default_properties () const
 	return plist;
 }
 
-string
+RouteSortOrderKey
 MixerGroupTabs::order_key () const
 {
-	return X_("signal");
+	return MixerSort;
 }
 
 RouteList
@@ -192,5 +192,5 @@ MixerGroupTabs::selected_routes () const
 void
 MixerGroupTabs::sync_order_keys ()
 {
-	_mixer->sync_order_keys ("");
+	_mixer->sync_order_keys_from_model ();
 }

@@ -420,7 +420,7 @@ struct EditorOrderTimeAxisViewSorter {
 	    RouteTimeAxisView* ra = dynamic_cast<RouteTimeAxisView*> (a);
 	    RouteTimeAxisView* rb = dynamic_cast<RouteTimeAxisView*> (b);
 	    assert (ra && rb);
-	    return ra->route()->order_key (N_ ("editor")) < rb->route()->order_key (N_ ("editor"));
+	    return ra->route()->order_key (EditorSort) < rb->route()->order_key (EditorSort);
     }
 };
 
