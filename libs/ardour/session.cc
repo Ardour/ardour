@@ -3514,6 +3514,8 @@ Session::graph_reordered ()
 boost::optional<framecnt_t>
 Session::available_capture_duration ()
 {
+	Glib::Mutex::Lock lm (space_lock);
+
 	if (_total_free_4k_blocks_uncertain) {
 		return boost::optional<framecnt_t> ();
 	}
