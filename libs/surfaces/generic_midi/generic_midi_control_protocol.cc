@@ -24,6 +24,7 @@
 
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
+#include <glibmm/thread.h>
 
 #include "pbd/controllable_descriptor.h"
 #include "pbd/error.h"
@@ -284,6 +285,12 @@ GenericMidiControlProtocol::_send_feedback ()
 	   in a single jack_midi_event_write then some bridges will only pass the
 	   first on to ALSA.
 	*/
+
+	Glib::Mutex::Lock lm (controllables_lock, Glib::TRY_LOCK);
+	if (!lm.locked ()) {
+		return;
+	}
+	
 	for (MIDIControllables::iterator r = controllables.begin(); r != controllables.end(); ++r) {
 		MIDI::byte* end = (*r)->write_feedback (buf, bsize);
 		if (end != buf) {
