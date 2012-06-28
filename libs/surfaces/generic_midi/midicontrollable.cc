@@ -61,11 +61,12 @@ MIDIControllable::MIDIControllable (GenericMidiControlProtocol* s, Port& p, bool
 
 MIDIControllable::MIDIControllable (GenericMidiControlProtocol* s, Port& p, Controllable& c, bool m)
 	: _surface (s)
-	, controllable (&c)
 	, _descriptor (0)
 	, _port (p)
 	, _momentary (m)
 {
+	set_controllable (&c);
+	
 	_learned = true; /* from controllable */
 	setting = false;
 	last_value = 0; // got a better idea ?
@@ -113,7 +114,19 @@ MIDIControllable::drop_external_control ()
 void
 MIDIControllable::set_controllable (Controllable* c)
 {
+	if (c == controllable) {
+		return;
+	}
+	
+	controllable_death_connection.disconnect ();
+
 	controllable = c;
+
+	if (controllable) {
+		controllable->Destroyed.connect (controllable_death_connection, MISSING_INVALIDATOR,
+						 boost::bind (&MIDIControllable::drop_controllable, this), 
+						 MidiControlUI::instance());
+	}
 }
 
 void
@@ -199,10 +212,7 @@ MIDIControllable::lookup_controllable()
 		return -1;
 	}
 
-	controllable = c.get();
-	controllable->Destroyed.connect (controllable_death_connection, MISSING_INVALIDATOR,
-					 boost::bind (&MIDIControllable::drop_controllable, this), 
-					 MidiControlUI::instance());
+	set_controllable (c.get ());
 
 	return 0;
 }
@@ -210,9 +220,8 @@ MIDIControllable::lookup_controllable()
 void
 MIDIControllable::drop_controllable ()
 {
-	cerr << "removed controllable\n";
-	controllable_death_connection.disconnect ();
-	controllable = 0;
+	cerr << "removed controllable " << controllable << "\n";
+	set_controllable (0);
 }
 
 void
