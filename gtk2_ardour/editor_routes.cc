@@ -27,14 +27,14 @@
 #include "pbd/unknown_type.h"
 #include "pbd/unwind.h"
 
-#include "gtkmm2ext/cell_renderer_pixbuf_multi.h"
-#include "gtkmm2ext/cell_renderer_pixbuf_toggle.h"
-#include "gtkmm2ext/treeutils.h"
-
 #include "ardour/debug.h"
 #include "ardour/route.h"
 #include "ardour/midi_track.h"
 #include "ardour/session.h"
+
+#include "gtkmm2ext/cell_renderer_pixbuf_multi.h"
+#include "gtkmm2ext/cell_renderer_pixbuf_toggle.h"
+#include "gtkmm2ext/treeutils.h"
 
 #include "editor.h"
 #include "keyboard.h"
