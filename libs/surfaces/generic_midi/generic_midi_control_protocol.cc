@@ -778,10 +778,7 @@ GenericMidiControlProtocol::reset_controllables ()
 			 * binding" (or "lazy binding") if/when any data arrives.
 			 */
 
-			boost::shared_ptr<Controllable> c = session->controllable_by_descriptor (desc);
-			if (c) {
-				existingBinding->set_controllable (c.get());
-			} 
+			existingBinding->lookup_controllable ();
 		}
 
 		iter = next;
