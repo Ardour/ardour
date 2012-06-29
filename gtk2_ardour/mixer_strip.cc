@@ -1409,6 +1409,7 @@ MixerStrip::map_frozen ()
 			pre_redirect_box.set_sensitive (false);
 			post_redirect_box.set_sensitive (false);
 			speed_spinner.set_sensitive (false);
+			hide_redirect_editors ();
 			break;
 		default:
 			pre_redirect_box.set_sensitive (true);
@@ -1418,8 +1419,6 @@ MixerStrip::map_frozen ()
 			break;
 		}
 	}
-	
-	hide_redirect_editors ();
 }
 
 void
