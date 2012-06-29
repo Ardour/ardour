@@ -46,7 +46,7 @@ using namespace PBD;
 void
 showmecf (Gtk::FileChooserButton* fcb)
 {
-        cerr << "current folder changed, now " << fcb->get_current_folder() << endl;
+        cerr << fcb << " current folder changed, now " << fcb->get_current_folder() << endl;
 }
 
 NewSessionDialog::NewSessionDialog()
@@ -675,7 +675,7 @@ NewSessionDialog::session_folder() const
 
 	switch (which_page()) {
 	case NewPage:
-                cerr << "mfolder says " << m_folder->get_current_folder() << endl;
+                cerr << "mfolder " << m_folder << " says " << m_folder->get_current_folder() << endl;
 	        return Glib::filename_from_utf8(m_folder->get_current_folder());
 		
 	case EnginePage:
