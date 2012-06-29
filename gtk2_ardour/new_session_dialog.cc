@@ -43,6 +43,12 @@ using namespace PBD;
 #include "i18n.h"
 #include "new_session_dialog.h"
 
+void
+showmecf (Gtk::FileChooserButton* fcb)
+{
+        cerr << "current folder changed, now " << fcb->get_current_folder() << endl;
+}
+
 NewSessionDialog::NewSessionDialog()
 	: ArdourDialog ("session control")
 {
@@ -83,6 +89,8 @@ NewSessionDialog::NewSessionDialog()
 	m_template = new Gtk::FileChooserButton();
 	m_create_control_bus = new Gtk::CheckButton(_("Create Monitor Bus"));
 	
+        m_folder->signal_current_folder_changed().connect (sigc::bind (sigc::ptr_fun (showmecf), m_folder));
+
 	Gtk::Adjustment *m_control_bus_channel_count_adj = Gtk::manage(new Gtk::Adjustment(2, 0, 100, 1, 10));
 	m_control_bus_channel_count = new Gtk::SpinButton(*m_control_bus_channel_count_adj, 1, 0);
 	
