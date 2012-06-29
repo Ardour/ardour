@@ -663,15 +663,20 @@ NewSessionDialog::session_name() const
 std::string
 NewSessionDialog::session_folder() const
 {
+        cerr << "Determining session folder, current page = " << which_page() << endl;
+
 	switch (which_page()) {
 	case NewPage:
+                cerr << "mfolder says " << m_folder->get_filename() << endl;
 	        return Glib::filename_from_utf8(m_folder->get_filename());
 		
 	case EnginePage:
 		if (!(page_set & (OpenPage|NewPage))) {
+                        cerr << "engine page session folder says " << engine_page_session_folder << endl;
 			return Glib::filename_from_utf8(engine_page_session_folder);
 		} else if (last_name_page == NewPage) {
 			/* use m_folder since it should be set */
+                        cerr << "mfolder2 says " << m_folder->get_filename() << endl;
 			return Glib::filename_from_utf8(m_folder->get_filename());
 		} else {
 			/* relax and use the open page stuff at the end */
@@ -683,11 +688,14 @@ NewSessionDialog::session_folder() const
 	}
 	       
 	if (m_treeview->get_selection()->count_selected_rows() == 0) {
+                cerr << "open filechooser says " << m_open_filechooser->get_filename() << endl;
 		const string filename(Glib::filename_from_utf8(m_open_filechooser->get_filename()));
 		return Glib::path_get_dirname(filename);
 	}
 
 	Gtk::TreeModel::iterator i = m_treeview->get_selection()->get_selected();
+        string x = (*i)[recent_columns.fullpath];
+        cerr << "recent says " << x << endl;
 	return (*i)[recent_columns.fullpath];
 }
 
