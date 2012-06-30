@@ -676,6 +676,8 @@ NewSessionDialog::session_folder() const
 	switch (which_page()) {
 	case NewPage:
                 cerr << "mfolder " << m_folder << " says " << m_folder->get_current_folder() << endl;
+                cerr << "C API says " << gtk_file_chooser_get_current_folder (GTK_FILE_CHOOSER(m_folder->gobj())) << endl;
+
 	        return Glib::filename_from_utf8(m_folder->get_current_folder());
 		
 	case EnginePage:
