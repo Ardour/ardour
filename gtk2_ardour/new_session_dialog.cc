@@ -675,10 +675,8 @@ NewSessionDialog::session_folder() const
 
 	switch (which_page()) {
 	case NewPage:
-                cerr << "mfolder " << m_folder << " says " << m_folder->get_current_folder() << endl;
-                cerr << "C API says " << gtk_file_chooser_get_current_folder (GTK_FILE_CHOOSER(m_folder->gobj())) << endl;
-
-	        return Glib::filename_from_utf8(m_folder->get_current_folder());
+                cerr << "mfolder " << m_folder << " says " << m_folder->get_filename() << endl;
+	        return Glib::filename_from_utf8(m_folder->get_filename());
 		
 	case EnginePage:
 		if (!(page_set & (OpenPage|NewPage))) {
@@ -686,8 +684,8 @@ NewSessionDialog::session_folder() const
 			return Glib::filename_from_utf8(engine_page_session_folder);
 		} else if (last_name_page == NewPage) {
 			/* use m_folder since it should be set */
-                        cerr << "mfolder2 says " << m_folder->get_current_folder() << endl;
-			return Glib::filename_from_utf8(m_folder->get_current_folder());
+                        cerr << "mfolder2 says " << m_folder->get_filename() << endl;
+			return Glib::filename_from_utf8(m_folder->get_filename());
 		} else {
 			/* relax and use the open page stuff at the end */
 		}
