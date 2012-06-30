@@ -46,7 +46,8 @@ using namespace PBD;
 void
 showmecf (Gtk::FileChooserButton* fcb)
 {
-        cerr << fcb << " current folder changed, now " << fcb->get_current_folder() << endl;
+        cerr << fcb << " current folder changed, now " << fcb->get_current_folder() 
+             << " and the filename is " << fcb->get_filename() << endl;
 }
 
 NewSessionDialog::NewSessionDialog()
