@@ -50,6 +50,13 @@ showmecf (Gtk::FileChooserButton* fcb)
              << " and the filename is " << fcb->get_filename() << endl;
 }
 
+void
+showmefs (Gtk::FileChooserButton* fcb)
+{
+        cerr << fcb << " file set, now " << fcb->get_current_folder() 
+             << " and the filename is " << fcb->get_filename() << endl;
+}
+
 NewSessionDialog::NewSessionDialog()
 	: ArdourDialog ("session control")
 {
@@ -91,6 +98,7 @@ NewSessionDialog::NewSessionDialog()
 	m_create_control_bus = new Gtk::CheckButton(_("Create Monitor Bus"));
 	
         m_folder->signal_current_folder_changed().connect (sigc::bind (sigc::ptr_fun (showmecf), m_folder));
+        m_folder->signal_file_set().connect (sigc::bind (sigc::ptr_fun (showmefs), m_folder));
 
 	Gtk::Adjustment *m_control_bus_channel_count_adj = Gtk::manage(new Gtk::Adjustment(2, 0, 100, 1, 10));
 	m_control_bus_channel_count = new Gtk::SpinButton(*m_control_bus_channel_count_adj, 1, 0);
