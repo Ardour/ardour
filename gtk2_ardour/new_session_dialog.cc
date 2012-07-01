@@ -446,7 +446,7 @@ NewSessionDialog::NewSessionDialog()
 	m_template->set_filter (*template_filter);
 
 	m_folder->set_current_folder(getenv ("HOME"));
-	m_folder->set_title(_("select directory"));
+	m_folder->set_title(_("select folder"));
 
 #ifdef GTKOSX
 	m_folder->add_shortcut_folder("/Volumes");

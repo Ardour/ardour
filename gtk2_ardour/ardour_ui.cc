@@ -2441,8 +2441,10 @@ ARDOUR_UI::get_session_parameters (bool backend_audio_is_running, bool should_be
 		new_session_dialog->present ();
 		response = new_session_dialog->run ();
 		
+                cerr << "NSD response " << response << " folder = " << new_session_dialog->session_folder() << endl;
+
 		_session_is_new = false;
-		
+                
 		/* handle possible negative responses */
 
 		switch (response) {
