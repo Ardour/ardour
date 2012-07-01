@@ -23,6 +23,8 @@
 #include <ardour/session.h>
 #include <ardour/profile.h>
 
+#include "pbd/stacktrace.h"
+
 #include <gtkmm/entry.h>
 #include <gtkmm/filechooserbutton.h>
 #include <gtkmm/spinbutton.h>
@@ -55,6 +57,7 @@ showmefs (Gtk::FileChooserButton* fcb)
 {
         cerr << fcb << " file set, now " << fcb->get_current_folder() 
              << " and the filename is " << fcb->get_filename() << endl;
+        PBD::stacktrace (cerr, 40);
 }
 
 NewSessionDialog::NewSessionDialog()
