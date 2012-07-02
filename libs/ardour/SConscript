@@ -344,7 +344,7 @@ if ardour['LV2']:
 	ardour.Merge ([ libraries['lilv'] ])
 
 if ardour['LIBLO']:
-	ardour.Merge ([ libraries['lo'] ])
+	ardour.Merge ([ libraries['liblo'] ])
 
 if ardour['COREAUDIO'] or ardour['AUDIOUNITS']:
 	ardour.Merge ([ libraries['appleutility'] ])

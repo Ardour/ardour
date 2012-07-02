@@ -37,7 +37,8 @@ opts.AddVariables(
     ('DIST_LIBDIR', 'Explicitly set library dir. If not set, Fedora-style defaults are used (typically lib or lib64)', ''),
     PathVariable('DESTDIR', 'Set the intermediate install "prefix"', '/'),
     PathVariable('PREFIX', 'Set the install "prefix"', '/usr/local'),
-    EnumVariable('DIST_TARGET', 'Build target for cross compiling packagers', 'auto', allowed_values=('auto', 'i386', 'i686', 'x86_64', 'powerpc', 'tiger', 'osx', 'none' ), ignorecase=2),
+    EnumVariable('DIST_TARGET', 'Build target for cross compiling packagers', 'auto', 
+          allowed_values=('auto', 'i386', 'i686', 'x86_64', 'powerpc', 'tiger', 'panther', 'leopard', 'none' ), ignorecase=2),
     BoolVariable('AUDIOUNITS', 'Compile with Apple\'s AudioUnit library. (experimental)', 0),
     BoolVariable('COREAUDIO', 'Compile with Apple\'s CoreAudio library', 0),
     BoolVariable('GTKOSX', 'Compile for use with GTK-OSX, not GTK-X11', 0),
@@ -47,7 +48,7 @@ opts.AddVariables(
     BoolVariable('DMALLOC', 'Compile and link using the dmalloc library', 0),
     BoolVariable('EXTRA_WARN', 'Compile with -Wextra, -ansi, and -pedantic.  Might break compilation.  For pedants', 0),
     BoolVariable('FFT_ANALYSIS', 'Include FFT analysis window', 1),
-    BoolVariable('FREESOUND', 'Include Freesound database lookup', 0),
+    BoolVariable('FREESOUND', 'Include Freesound database lookup', 1),
     BoolVariable('FPU_OPTIMIZATION', 'Build runtime checked assembler code', 1),
     BoolVariable('LIBLO', 'Compile with support for liblo library', 1),
     BoolVariable('NLS', 'Set to turn on i18n support', 1),
@@ -440,11 +441,13 @@ deps = \
 	'gtk+-2.0'             : '2.8.1',
 	'libxml-2.0'           : '2.6.0',
 	'samplerate'           : '0.1.0',
+	'raptor2'              : '2.0.0',
 	'lrdf'                 : '0.4.0',
 	'jack'                 : '0.120.0',
 	'libgnomecanvas-2.0'   : '2.0',
 	'sndfile'              : '1.0.18',
-        'aubio'                : '0.3.0'
+        'aubio'                : '0.3.0',
+	'liblo'                : '0.24'
 }
 
 def DependenciesRequiredMessage():
@@ -512,22 +515,6 @@ if conf.CheckPKGExists ('aubio'):
     libraries['aubio'] = LibraryInfo()
     libraries['aubio'].ParseConfig('pkg-config --cflags --libs aubio')
 
-raptorOK = 0
-
-if conf.CheckPKGExists ('raptor2'):
-    libraries['raptor'] = LibraryInfo()
-    libraries['raptor'].ParseConfig('pkg-config --cflags --libs raptor2')
-    raptorOK = 1
-else:
-    if conf.CheckPKGExists ('raptor') and conf.CheckPKGVersion (pkg, '1.4.2'):
-        libraries['raptor'] = LibraryInfo()
-        libraries['raptor'].ParseConfig('pkg-config --cflags --libs raptor')
-        raptorOK = 1
-            
-if raptorOK == 0:
-    print "Ardour requires either raptor or raptor2 to be available at build time"
-    Exit (1)
-
 env = conf.Finish ()
 
 if env['FFT_ANALYSIS']:
@@ -563,16 +550,16 @@ else:
 if env['LV2']:
 	conf = env.Configure(custom_tests = { 'CheckPKGVersion' : CheckPKGVersion})
 	
-	if conf.CheckPKGVersion('lilv-0', '0.4.0'):
+	if conf.CheckPKGVersion('lilv-0', '0.5.0'):
 		libraries['lilv'] = LibraryInfo()
 		libraries['lilv'].ParseConfig('pkg-config --cflags --libs lilv-0')
 		env.Append (CCFLAGS="-DHAVE_LV2")
-		if conf.CheckPKGVersion('lilv-0', '0.14.0'):
-			env.Append (CCFLAGS="-DHAVE_NEW_LILV")
-
 	else:
 		print 'LV2 support is not enabled (Lilv not found or older than 0.4.0)'
 		env['LV2'] = 0
+
+	if conf.CheckPKGVersion('lilv-0', '0.14.0'):
+		env.Append (CCFLAGS="-DHAVE_NEW_LILV")
 
 	if env['LV2_UI']:
 		if conf.CheckPKGVersion('suil-0', '0.4.0'):
@@ -603,6 +590,12 @@ libraries['xslt'].ParseConfig('pkg-config --cflags --libs libxslt')
 
 libraries['lrdf'] = LibraryInfo()
 libraries['lrdf'].ParseConfig('pkg-config --cflags --libs lrdf')
+
+libraries['liblo'] = LibraryInfo()
+libraries['liblo'].ParseConfig('pkg-config --cflags --libs liblo')
+
+libraries['raptor'] = LibraryInfo()
+libraries['raptor'].ParseConfig('pkg-config --cflags --libs raptor2')
 
 libraries['sndfile'] = LibraryInfo()
 libraries['sndfile'].ParseConfig ('pkg-config --cflags --libs sndfile')
@@ -682,9 +675,14 @@ print "system triple: " + config_guess
 # Autodetect
 print 'dist target: ', env['DIST_TARGET'], '\n'
 if env['DIST_TARGET'] == 'auto':
-    print '\n\n\n\n\n', 'kernel is ', config[config_kernel], '\n'
     if config[config_arch] == 'apple':
-            env['DIST_TARGET'] = 'osx'
+        # The [.] matches to the dot after the major version, "." would match any character
+        if re.search ("darwin[0-7][.]", config[config_kernel]) != None:
+            env['DIST_TARGET'] = 'panther'
+        if re.search ("darwin8[.]", config[config_kernel]) != None:
+            env['DIST_TARGET'] = 'tiger'
+        else:
+            env['DIST_TARGET'] = 'leopard'
     else:
         if re.search ("x86_64", config[config_cpu]) != None:
             env['DIST_TARGET'] = 'x86_64'
@@ -698,7 +696,7 @@ if env['DIST_TARGET'] == 'auto':
     print "detected DIST_TARGET = " + env['DIST_TARGET']
     print "*******************************\n"
 
-if re.search ("darwin[0-9]", config[config_kernel]) == None:
+if env['DIST_TARGET'] != 'tiger' and env['DIST_TARGET'] != 'leopard':
 	# make sure this is all disabled for non-OS X builds
 	env['GTKOSX'] = 0
 	env['COREAUDIO'] = 0
@@ -707,10 +705,21 @@ if re.search ("darwin[0-9]", config[config_kernel]) == None:
 	env['WITH_CARBON'] = 0
 
 if config[config_cpu] == 'powerpc' and env['DIST_TARGET'] != 'none':
+    # Apple/PowerPC optimization options
     #
-    # PowerPC options
-    # 
-    opt_flags.extend ([ "-mcpu=7450", "-mcpu=7450" ])
+    # -mcpu=7450 does not reliably work with gcc 3.*
+    #
+    if env['DIST_TARGET'] == 'panther' or env['DIST_TARGET'] == 'tiger':
+        if config[config_arch] == 'apple':
+            ## opt_flags.extend ([ "-mcpu=7450", "-faltivec"])
+            # to support g3s but still have some optimization for above
+            opt_flags.extend ([ "-mcpu=G3", "-mtune=7450"])
+        else:
+            opt_flags.extend ([ "-mcpu=7400", "-maltivec", "-mabi=altivec"])
+    else:
+        opt_flags.extend([ "-mcpu=750", "-mmultiple" ])
+    opt_flags.extend (["-mhard-float", "-mpowerpc-gfxopt"])
+    #opt_flags.extend (["-Os"])
 
 elif ((re.search ("i[0-9]86", config[config_cpu]) != None) or (re.search ("x86_64", config[config_cpu]) != None)) and env['DIST_TARGET'] != 'none':
     print 'Config CPU is', config[config_cpu], '\n'
@@ -739,14 +748,18 @@ elif ((re.search ("i[0-9]86", config[config_cpu]) != None) or (re.search ("x86_6
                 build_host_supports_sse = 1
             if "3dnow" in x86_flags:
                 opt_flags.append ("-m3dnow")
-            
+            if config[config_cpu] == "i586":
+                opt_flags.append ("-march=i586")
+            elif config[config_cpu] == "i686":
+                opt_flags.append ("-march=i686")
+    
     if ((env['DIST_TARGET'] == 'i686') or (env['DIST_TARGET'] == 'x86_64')) and build_host_supports_sse:
         opt_flags.extend (["-msse", "-mfpmath=sse", "-DUSE_XMMINTRIN"])
         debug_flags.extend (["-msse", "-mfpmath=sse", "-DUSE_XMMINTRIN"])
 
     if config[config_cpu] == "i586":
         opt_flags.append ("-march=i586")
-    elif config[config_cpu] == "i686":
+    elif config[config_cpu] == "i686" and config[config_arch] != 'apple':
         opt_flags.append ("-march=i686")
 
     if (env['VST']):
@@ -760,12 +773,9 @@ elif ((re.search ("i[0-9]86", config[config_cpu]) != None) or (re.search ("x86_6
 
 # optimization section
 if env['FPU_OPTIMIZATION']:
-    if env['DIST_TARGET'] in [ 'tiger', 'osx' ]:
+    if env['DIST_TARGET'] == 'tiger' or env['DIST_TARGET'] == 'leopard':
         opt_flags.append ("-DBUILD_VECLIB_OPTIMIZATIONS");
         debug_flags.append ("-DBUILD_VECLIB_OPTIMIZATIONS");
-        if config[config_cpu] == 'x86_64':
-            opt_flags.append ("-DUSE_X86_64_ASM")
-            debug_flags.append ("-DUSE_X86_64_ASM")
         libraries['core'].Append(LINKFLAGS= '-framework Accelerate')
     elif env['DIST_TARGET'] == 'i686' or env['DIST_TARGET'] == 'x86_64':
         opt_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
@@ -802,7 +812,7 @@ if env['DIST_TARGET'] == 'x86_64' and env['VST']:
 # a single way to test if we're on OS X
 #
 
-if env['DIST_TARGET'] in [ 'tiger', 'osx' ]:
+if env['DIST_TARGET'] in [ 'panther','tiger','leopard' ]:
     env['IS_OSX'] = 1
     # force tiger or later, to avoid issues on PPC which defaults
     # back to 10.1 if we don't tell it otherwise.
@@ -995,13 +1005,6 @@ if conf.CheckHeader ('boost/shared_ptr.hpp', language='CXX') == False:
         sys.exit (1)
     
 libraries['boost'] = conf.Finish ()
-
-#
-# Check for liblo
-
-if env['LIBLO']:
-    libraries['lo'] = LibraryInfo ()
-    libraries['lo'].ParseConfig ('pkg-config --cflags --libs liblo')
 
 #
 # Check for dmalloc
@@ -1329,8 +1332,12 @@ if env['NLS']:
     if env['NLS'] == 0:
         print nls_error
     else:
-        libraries['intl'] = LibraryInfo (LIBS='intl')
+	if config[config_arch] == 'apple':
+	   libraries['intl'] = LibraryInfo (LIBS='intl')
+        else:
+	   libraries['intl'] = LibraryInfo ()
         print "International version will be built."
+
 env = conf.Finish()
 
 if env['NLS'] == 1:
