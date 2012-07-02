@@ -530,22 +530,12 @@ if env['FFT_ANALYSIS']:
         conf.Finish()
 
 if env['FREESOUND']:
-        #
-        # Check for curl header as well as the library
-        #
-
+    if conf.CheckPKGVersion('libcurl', '7.0.0'):
+        print 'FREESOUND support cannot be built without the development libraries for CURL 7.X.X or later'
+        env['FREESOUND'] = 0;
+    else:
 	libraries['curl'] = LibraryInfo()
-
-	conf = Configure(libraries['curl'])
-
-	if conf.CheckHeader ('curl/curl.h') == False:
-		print ('Ardour cannot be compiled without the curl headers, which do not seem to be installed')
-		sys.exit (1)            
-	else:
-		libraries['curl'].ParseConfig('pkg-config --cflags --libs libcurl')
-	conf.Finish()
-else:
-	print 'FREESOUND support is not enabled.  Build with \'scons FREESOUND=1\' to enable.'
+        libraries['curl'].ParseConfig('pkg-config --cflags --libs libcurl')
 
 if env['LV2']:
 	conf = env.Configure(custom_tests = { 'CheckPKGVersion' : CheckPKGVersion})
