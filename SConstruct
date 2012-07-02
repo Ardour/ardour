@@ -534,10 +534,11 @@ if env['FREESOUND']:
     conf = env.Configure(custom_tests = { 'CheckPKGVersion' : CheckPKGVersion})
 
     if conf.CheckPKGVersion('libcurl', '7.0.0'):
+        libraries['curl'].ParseConfig('pkg-config --cflags --libs libcurl')
+    else:
         print 'FREESOUND support cannot be built without the development libraries for CURL 7.X.X or later'
         env['FREESOUND'] = 0;
-    else:
-        libraries['curl'].ParseConfig('pkg-config --cflags --libs libcurl')
+
     conf.Finish ()
 
 if env['LV2']:
