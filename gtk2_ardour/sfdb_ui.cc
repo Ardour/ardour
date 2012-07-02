@@ -226,7 +226,11 @@ SoundFileBox::setup_labels (const string& filename)
 	}
 
 	path = filename;
-
+	
+	if (filename.empty()) {
+		return false;
+	}
+	
 	string error_msg;
 
 	if(!AudioFileSource::get_soundfile_info (filename, sf_info, error_msg)) {
@@ -484,21 +488,19 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 #ifdef FREESOUND
 	{
 		VBox* vbox;
-		HBox* passbox;
 		Label* label;
 
-		passbox = manage(new HBox);
-		passbox->set_border_width (12);
-		passbox->set_spacing (6);
+		freesound_entry_box.set_border_width (12);
+		freesound_entry_box.set_spacing (6);
 		label = manage (new Label);
 		label->set_text (_("Tags:"));
-		passbox->pack_start (*label, false, false);
-		passbox->pack_start (freesound_entry, false, false);
+		freesound_entry_box.pack_start (*label, false, false);
+		freesound_entry_box.pack_start (freesound_entry, false, false);
 
 		label = manage (new Label);
 		label->set_text (_("Sort:"));
-		passbox->pack_start (*label, false, false);
-		passbox->pack_start (freesound_sort, false, false);
+		freesound_entry_box.pack_start (*label, false, false);
+		freesound_entry_box.pack_start (freesound_sort, false, false);
 //		freesound_sort.clear_items();
 		
 		// Order of the following must correspond with enum sortMethod
@@ -514,10 +516,7 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 		freesound_sort.append_text(_("Lowest rated"));
 		freesound_sort.set_active(0);
 
-		passbox->pack_start (freesound_search_btn, false, false);
-		
-		passbox->pack_start (freesound_progress_bar);
-		passbox->pack_end   (freesound_stop_btn, false, false);
+		freesound_entry_box.pack_start (freesound_search_btn, false, false);
 		freesound_stop_btn.set_label(_("Stop"));
 
 		Gtk::ScrolledWindow *scroll = manage(new ScrolledWindow);
@@ -525,7 +524,15 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 		scroll->set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 
 		vbox = manage(new VBox);
-		vbox->pack_start (*passbox, PACK_SHRINK);
+		vbox->pack_start (freesound_entry_box, PACK_SHRINK);
+
+		freesound_progress_box.set_border_width (12);
+		freesound_progress_box.set_spacing (4);
+		
+		freesound_progress_box.pack_start (freesound_progress_bar);
+		freesound_progress_box.pack_end   (freesound_stop_btn, false, false);
+
+		vbox->pack_start (freesound_progress_box, PACK_SHRINK);
 		vbox->pack_start(*scroll);
 		
 		//vbox->pack_start (freesound_list_view);
@@ -545,6 +552,9 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 		freesound_entry.signal_activate().connect(mem_fun(*this, &SoundFileBrowser::freesound_search_clicked));
 
 		notebook.append_page (*vbox, _("Search Freesound"));
+
+		freesound_downloading = false;
+		freesound_download_cancel = false;
 	}
 
 #endif
@@ -557,7 +567,6 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);
 	add_button (Stock::APPLY, RESPONSE_APPLY);
 	add_button (Stock::OK, RESPONSE_OK);
-	
 }
 
 SoundFileBrowser::~SoundFileBrowser ()
@@ -570,6 +579,10 @@ void
 SoundFileBrowser::on_show ()
 {
 	ArdourDialog::on_show ();
+
+	//dont show progress bar and stop button unless search is underway
+	freesound_progress_box.hide();
+
 	start_metering ();
 }
 
@@ -595,6 +608,9 @@ SoundFileBrowser::found_list_view_activated (const TreeModel::Path& path, TreeVi
 void
 SoundFileBrowser::freesound_list_view_activated (const TreeModel::Path& path, TreeViewColumn* col)
 {
+	if (freesound_downloading)  //user clicked again
+		return;
+
 	preview.audition ();
 }
 
@@ -700,8 +716,9 @@ SoundFileBrowser::found_list_view_selected ()
 void
 SoundFileBrowser::freesound_list_view_selected ()
 {
-	freesound_download_cancel = false;
-
+	if (freesound_downloading)  //user clicked again
+		return;
+	
 #ifdef FREESOUND
 	if (!reset_options ()) {
 		set_response_sensitive (RESPONSE_OK, false);
@@ -724,7 +741,10 @@ SoundFileBrowser::freesound_list_view_selected ()
 			gdk_window_set_cursor (get_window()->gobj(), gdk_cursor_new(GDK_WATCH));
 			gdk_flush();
 
+			freesound_download_cancel = false;
+			freesound_downloading = true;
 			file = mootcher->getAudioFile(ofn, id, uri, this);
+			freesound_downloading = false;
 
 			gdk_window_set_cursor (get_window()->gobj(), prev_cursor);
 
@@ -768,15 +788,19 @@ SoundFileBrowser::found_search_clicked ()
 void
 SoundFileBrowser::freesound_search_clicked ()
 {
-	freesound_search_cancel = false;
+	if (freesound_downloading)  //already downloading, bail out here
+		return;
+
+	freesound_download_cancel = false;
+	freesound_downloading = true;
 	freesound_search();
+	freesound_downloading = false;	
 }
 
 void
 SoundFileBrowser::freesound_stop_clicked ()
 {
 	freesound_download_cancel = true;
-	freesound_search_cancel = true;
 }
 
 void
@@ -791,12 +815,20 @@ SoundFileBrowser::freesound_search()
 	GdkCursor *prev_cursor;
 	prev_cursor = gdk_window_get_cursor (get_window()->gobj());
 	gdk_window_set_cursor (get_window()->gobj(), gdk_cursor_new(GDK_WATCH));
-	gdk_flush();
-	for (int page = 1; page <= 99; page++ ) {
+	while (Glib::MainContext::get_default()->iteration (false)) {}  //make sure cursor gets set before continuing
+	freesound_entry_box.hide();
+	freesound_progress_box.show();
+
+	freesound_n_pages = 1;  //note:  this gets set correctly after the first iteration
+	for (int page = 1; page <= 99 && page <= freesound_n_pages; page++ ) {
 		
 		string prog;
-		prog = string_compose (_("Searching Page %1, click Stop to cancel -->"), page);
+		if (freesound_n_pages > 1)
+			prog = string_compose (_("Searching Page %1 of %2, click Stop to cancel -->"), page, freesound_n_pages);
+		else
+			prog = _("Searching, click Stop to cancel -->");
 		freesound_progress_bar.set_text(prog);
+
 		while (Glib::MainContext::get_default()->iteration (false)) {
 			/* do nothing */
 		}
@@ -804,7 +836,11 @@ SoundFileBrowser::freesound_search()
 		string theString = mootcher->searchText(
 			search_string, 
 			page,
-			"", // filter, could do, e.g. "type:wav"
+#ifdef GTKOSX
+			"", // OSX can load mp3's
+#else
+			"type:wav", //linux and windows, only show wav's  ( wish I could show flac and aiff also... )
+#endif
 			sort_method
 		);
 
@@ -822,6 +858,13 @@ SoundFileBrowser::freesound_search()
 			break;
 		}
 
+		//find out how many pages are available to search
+		XMLNode *res = root->child("num_results");
+		if (res) {
+			string result = res->child("text")->content();
+			freesound_n_pages = atoi( result.c_str() ) / NUM_RESULTS_PER_PAGE;
+		} 
+
 		XMLNode *sounds_root = root->child("sounds");
 		
 		if (!sounds_root) {
@@ -836,7 +879,7 @@ SoundFileBrowser::freesound_search()
 			node = *niter;
 			if( strcmp( node->name().c_str(), "resource") != 0 ){
 				cerr << "node->name()=" << node->name() << ",!= \"resource\"!" << endl;
-				freesound_search_cancel = true;
+				freesound_download_cancel = true;
 				break;
 			}
 
@@ -881,14 +924,16 @@ SoundFileBrowser::freesound_search()
 			}
 		}
 	
-		if (freesound_search_cancel)
+		if (freesound_download_cancel)
 			break;
 
 	}  //page "for" loop
 
+	freesound_progress_bar.set_text("");
+	freesound_progress_box.hide();
+	freesound_entry_box.show();
 	gdk_window_set_cursor (get_window()->gobj(), prev_cursor);
 
-	freesound_progress_bar.set_text("");
 
 #endif
 }
@@ -938,7 +983,10 @@ SoundFileBrowser::get_paths ()
 			gdk_window_set_cursor (get_window()->gobj(), gdk_cursor_new(GDK_WATCH));
 			gdk_flush();
 
+			freesound_download_cancel = false;
+			freesound_downloading = true;
 			string str = mootcher->getAudioFile(ofn, id, uri, this);
+			freesound_downloading = false;
 			if (str != "") {
 				results.push_back (str);
 			}
@@ -958,6 +1006,7 @@ SoundFileOmega::reset_options_noret ()
 	if (!resetting_ourselves) {
 		(void) reset_options ();
 	}
+
 }
 
 bool

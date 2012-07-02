@@ -162,6 +162,8 @@ class SoundFileBrowser : public ArdourDialog
 	Gtk::Button found_search_btn;
 	Gtk::TreeView found_list_view;
 
+	Gtk::HBox freesound_entry_box;
+	Gtk::HBox freesound_progress_box;
 	Gtk::Entry freesound_entry;
 	Gtk::Button freesound_search_btn;
 	Gtk::ComboBoxText freesound_sort;
@@ -169,14 +171,18 @@ class SoundFileBrowser : public ArdourDialog
 	Gtk::TreeView freesound_list_view;
 	Gtk::ProgressBar freesound_progress_bar;
 
-	bool freesound_search_cancel;
+	bool freesound_downloading;
 	bool freesound_download_cancel;
+
+	int freesound_n_pages;
 
 	void freesound_search();
 	
 #ifdef FREESOUND
 	Mootcher *mootcher;
 #endif
+
+	std::string dlFileName;
 
   protected:
 	bool resetting_ourselves;

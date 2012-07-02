@@ -27,6 +27,8 @@
 
 #include "curl/curl.h"
 
+#define NUM_RESULTS_PER_PAGE 30  //as defined in Freesound docs, May 2012
+
 //--- struct to store XML file
 struct MemoryStruct {
 	char *memory;

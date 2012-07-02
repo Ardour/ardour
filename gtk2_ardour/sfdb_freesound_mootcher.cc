@@ -63,7 +63,12 @@ Mootcher::Mootcher()
 	: curl(curl_easy_init())
 {
 	std::string path;
-	path = Glib::get_home_dir() + "/Freesound/";
+#ifdef __WIN32__
+	path = Glib::build_filename (Glib::get_user_special_dir( G_USER_DIRECTORY_DOCUMENTS ), "Freesound");
+#else
+	path = Glib::build_filename (Glib::get_home_dir(), "Freesound");
+#endif
+	path = Glib::build_filename ( path, G_DIR_SEPARATOR_S );
 	changeWorkingDir ( path.c_str() );
 };
 //------------------------------------------------------------------------
@@ -76,25 +81,11 @@ Mootcher:: ~Mootcher()
 void Mootcher::changeWorkingDir(const char *saveLocation)
 {
 	basePath = saveLocation;
-#ifdef __WIN32__
-	std::string replace = "/";
-	size_t pos = basePath.find("\\");
-	while( pos != std::string::npos ){
-		basePath.replace(pos, 1, replace);
-		pos = basePath.find("\\");
-	}
-#endif
-	//
-	size_t pos2 = basePath.find_last_of("/");
-	if(basePath.length() != (pos2+1)) basePath += "/";
 }
 
 void Mootcher::ensureWorkingDir ()
 {
-	std::string sndLocation = basePath;
-	g_mkdir(sndLocation.c_str(), 0777);        
-	sndLocation += "snd";
-	g_mkdir(sndLocation.c_str(), 0777);        
+	g_mkdir(basePath.c_str(), 0777);        
 }
 	
 
@@ -210,7 +201,11 @@ std::string Mootcher::searchText(std::string query, int page, std::string filter
 		params += buf;
 	}
 	
-	params += "q=" + query;	
+	//replace spaces with %20 so multiple-tag search will work
+	while (query.find(" ") != std::string::npos)
+		query.replace(query.find(" "), 1, "%20");
+	
+	params += "q=\"" + query + "\";";	
 
 	if (filter != "")
 		params += "&f=" + filter;
@@ -253,12 +248,11 @@ std::string Mootcher::getSoundResourceFile(std::string ID)
 		return "";
 	}
 
-	XMLNode *name = freesound->child("original_filename");
-
 	// get the file name and size from xml file
+	XMLNode *name = freesound->child("original_filename");
 	if (name) {
 
-		audioFileName = basePath + "snd/" + ID + "-" + name->child("text")->content();
+		audioFileName = basePath + ID + "-" + name->child("text")->content();
 
 		//store all the tags in the database
 		XMLNode *tags = freesound->child("tags");
@@ -292,8 +286,9 @@ int audioFileWrite(void *buffer, size_t size, size_t nmemb, void *file)
 //------------------------------------------------------------------------
 std::string Mootcher::getAudioFile(std::string originalFileName, std::string ID, std::string audioURL, SoundFileBrowser *caller)
 {
+	caller->dlFileName = originalFileName;
 	ensureWorkingDir();
-	std::string audioFileName = basePath + "snd/" + ID + "-" + originalFileName;
+	std::string audioFileName = basePath + ID + "-" + originalFileName;
 
 	// check to see if audio file already exists
 	FILE *testFile = g_fopen(audioFileName.c_str(), "r");
@@ -336,9 +331,8 @@ std::string Mootcher::getAudioFile(std::string originalFileName, std::string ID,
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, theFile);
 
 	std::cerr << "downloading " << audioFileName << " from " << audioURL << "..." << std::endl;
-	/* hack to get rid of the barber-pole stripes */
-	caller->freesound_progress_bar.hide();
-	caller->freesound_progress_bar.show();
+	caller->freesound_entry_box.hide();
+	caller->freesound_progress_box.show();
 
 	string prog;
 	prog = string_compose (_("%1: click Stop to cancel -->"), originalFileName);
@@ -350,6 +344,9 @@ std::string Mootcher::getAudioFile(std::string originalFileName, std::string ID,
 
 	CURLcode res = curl_easy_perform(curl);
 	fclose(theFile);
+
+	caller->freesound_progress_box.hide();
+	caller->freesound_entry_box.show();
 
 	curl_easy_setopt (curl, CURLOPT_NOPROGRESS, 1); // turn off the progress bar
 	caller->freesound_progress_bar.set_fraction(0.0);
@@ -379,6 +376,9 @@ int Mootcher::progress_callback(void *caller, double dltotal, double dlnow, doub
 	}
 	
 	sfb->freesound_progress_bar.set_fraction(dlnow/dltotal);
+	string prog;
+	prog = string_compose (_("%1: %2 of %3 bytes downloaded, click Stop to cancel -->"), sfb->dlFileName, dlnow, dltotal);
+	sfb->freesound_progress_bar.set_text( prog );
 
 	/* Make sure the progress widget gets updated */
 	while (Glib::MainContext::get_default()->iteration (false)) {
