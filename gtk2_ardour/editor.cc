@@ -2743,7 +2743,10 @@ Editor::snap_to_internal (framepos_t& start, int32_t direction, bool for_mark)
 
 		_session->locations()->marks_either_side (start, before, after);
 
-		if (before == max_framepos) {
+		if (before == max_framepos && after == max_framepos) {
+			/* No marks to snap to, so just don't snap */
+			return;
+		} else if (before == max_framepos) {
 			start = after;
 		} else if (after == max_framepos) {
 			start = before;
