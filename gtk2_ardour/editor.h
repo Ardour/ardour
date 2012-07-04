@@ -1838,7 +1838,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	/* duplication */
 
-	void duplicate_dialog (bool with_dialog);
+	void duplicate_range (bool with_dialog);
 
 	framepos_t event_frame (GdkEvent const *, double* px = 0, double* py = 0) const;
 

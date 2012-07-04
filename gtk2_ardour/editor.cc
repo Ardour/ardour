@@ -1909,7 +1909,7 @@ Editor::add_selection_context_items (Menu_Helpers::MenuList& edit_items)
 	edit_items.push_back (SeparatorElem());
 	edit_items.push_back (MenuElem (_("Crop Region to Range"), sigc::mem_fun(*this, &Editor::crop_region_to_selection)));
 	edit_items.push_back (MenuElem (_("Fill Range with Region"), sigc::mem_fun(*this, &Editor::region_fill_selection)));
-	edit_items.push_back (MenuElem (_("Duplicate Range"), sigc::bind (sigc::mem_fun(*this, &Editor::duplicate_dialog), false)));
+	edit_items.push_back (MenuElem (_("Duplicate Range"), sigc::bind (sigc::mem_fun(*this, &Editor::duplicate_range), false)));
 
 	edit_items.push_back (SeparatorElem());
 	edit_items.push_back (MenuElem (_("Consolidate Range"), sigc::bind (sigc::mem_fun(*this, &Editor::bounce_range_selection), true, false)));
@@ -3251,7 +3251,7 @@ Editor::history_changed ()
 }
 
 void
-Editor::duplicate_dialog (bool with_dialog)
+Editor::duplicate_range (bool with_dialog)
 {
 	float times = 1.0f;
 
