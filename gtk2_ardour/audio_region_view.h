@@ -119,7 +119,19 @@ class AudioRegionView : public RegionView
 	void redraw_end_xfade ();
 	
 	void hide_xfades ();
+	void hide_start_xfade ();
+	void hide_end_xfade ();
 	void show_xfades ();
+	void show_start_xfade ();
+	void show_end_xfade ();
+
+	bool start_xfade_visible () const {
+		return _start_xfade_visible;
+	}
+
+	bool end_xfade_visible () const {
+		return _end_xfade_visible;
+	}
 
   protected:
 
@@ -149,10 +161,12 @@ class AudioRegionView : public RegionView
 	ArdourCanvas::Line *start_xfade_in;
 	ArdourCanvas::Line *start_xfade_out;
 	ArdourCanvas::SimpleRect* start_xfade_rect;
+	bool _start_xfade_visible;
 
 	ArdourCanvas::Line *end_xfade_in;
 	ArdourCanvas::Line *end_xfade_out;
 	ArdourCanvas::SimpleRect* end_xfade_rect;
+	bool _end_xfade_visible;
 
 	boost::shared_ptr<AudioRegionGainLine> gain_line;
 
@@ -203,8 +217,10 @@ private:
 	 */
 	std::vector<PBD::ScopedConnection*> _data_ready_connections;
 
-	/** RegionViews that we hid the xfades for at the start of the current drag */
-	std::list<AudioRegionView*> _hidden_xfades;
+	/** RegionViews that we hid the xfades for at the start of the current drag;
+	 *  first list is for start xfades, second list is for end xfades.
+	 */
+	std::pair<std::list<AudioRegionView*>, std::list<AudioRegionView*> > _hidden_xfades;
 };
 
 #endif /* __gtk_ardour_audio_region_view_h__ */

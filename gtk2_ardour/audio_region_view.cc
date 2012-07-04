@@ -79,9 +79,11 @@ AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView
 	, start_xfade_in (0)
 	, start_xfade_out (0)
 	, start_xfade_rect (0)
+	, _start_xfade_visible (false)
 	, end_xfade_in (0)
 	, end_xfade_out (0)
 	, end_xfade_rect (0)
+	, _end_xfade_visible (false)
 	, _amplitude_above_axis(1.0)
 	, fade_color(0)
 {
@@ -100,9 +102,11 @@ AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView
 	, start_xfade_in (0)
 	, start_xfade_out (0)
 	, start_xfade_rect (0)
+	, _start_xfade_visible (false)
 	, end_xfade_in (0)
 	, end_xfade_out (0)
 	, end_xfade_rect (0)
+	, _end_xfade_visible (false)
 	, _amplitude_above_axis(1.0)
 	, fade_color(0)
 {
@@ -119,9 +123,11 @@ AudioRegionView::AudioRegionView (const AudioRegionView& other, boost::shared_pt
 	, start_xfade_in (0)
 	, start_xfade_out (0)
 	, start_xfade_rect (0)
+	, _start_xfade_visible (false)
 	, end_xfade_in (0)
 	, end_xfade_out (0)
 	, end_xfade_rect (0)
+	, _end_xfade_visible (false)
 	, _amplitude_above_axis (other._amplitude_above_axis)
 	, fade_color(0)
 {
@@ -559,6 +565,7 @@ AudioRegionView::reset_fade_in_shape_width (framecnt_t width)
 			start_xfade_in->hide ();
 			start_xfade_out->hide ();
 			start_xfade_rect->hide ();
+			_start_xfade_visible = false;
 		}
 	}
 
@@ -668,6 +675,7 @@ AudioRegionView::reset_fade_out_shape_width (framecnt_t width)
 			end_xfade_in->hide ();
 			end_xfade_out->hide ();
 			end_xfade_rect->hide ();
+			_end_xfade_visible = false;
 		}
 	}
 
@@ -1455,6 +1463,7 @@ AudioRegionView::redraw_start_xfade ()
 			start_xfade_in->hide ();
 			start_xfade_out->hide ();
 			start_xfade_rect->hide ();
+			_start_xfade_visible = false;
 		}
 		return;
 	}
@@ -1544,6 +1553,8 @@ AudioRegionView::redraw_start_xfade_to (boost::shared_ptr<AudioRegion> ar, frame
 	start_xfade_out->show ();
 	start_xfade_out->raise_to_top ();
 
+	_start_xfade_visible = true;
+
 	delete points;
 }
 
@@ -1561,6 +1572,7 @@ AudioRegionView::redraw_end_xfade ()
 			end_xfade_in->hide ();
 			end_xfade_out->hide ();
 			end_xfade_rect->hide ();
+			_end_xfade_visible = false;
 		}
 		return;
 	}
@@ -1652,12 +1664,20 @@ AudioRegionView::redraw_end_xfade_to (boost::shared_ptr<AudioRegion> ar, framecn
 	end_xfade_out->show ();
 	end_xfade_out->raise_to_top ();
 
+	_end_xfade_visible = true;
 
 	delete points;
 }
 
 void
 AudioRegionView::hide_xfades ()
+{
+	hide_start_xfade ();
+	hide_end_xfade ();
+}
+
+void
+AudioRegionView::hide_start_xfade ()
 {
 	if (start_xfade_in) {
 		start_xfade_in->hide();
@@ -1668,6 +1688,13 @@ AudioRegionView::hide_xfades ()
 	if (start_xfade_rect) {
 		start_xfade_rect->hide ();
 	}
+
+	_start_xfade_visible = false;
+}
+
+void
+AudioRegionView::hide_end_xfade ()
+{
 	if (end_xfade_in) {
 		end_xfade_in->hide();
 	}
@@ -1677,10 +1704,12 @@ AudioRegionView::hide_xfades ()
 	if (end_xfade_rect) {
 		end_xfade_rect->hide ();
 	}
+
+	_end_xfade_visible = false;
 }
 
 void
-AudioRegionView::show_xfades ()
+AudioRegionView::show_start_xfade ()
 {
 	if (start_xfade_in) {
 		start_xfade_in->show();
@@ -1691,6 +1720,13 @@ AudioRegionView::show_xfades ()
 	if (start_xfade_rect) {
 		start_xfade_rect->show ();
 	}
+
+	_start_xfade_visible = true;
+}
+
+void
+AudioRegionView::show_end_xfade ()
+{
 	if (end_xfade_in) {
 		end_xfade_in->show();
 	}
@@ -1700,6 +1736,15 @@ AudioRegionView::show_xfades ()
 	if (end_xfade_rect) {
 		end_xfade_rect->show ();
 	}
+
+	_end_xfade_visible = true;
+}
+
+void
+AudioRegionView::show_xfades ()
+{
+	show_start_xfade ();
+	show_end_xfade ();
 }
 
 void
@@ -1722,11 +1767,16 @@ AudioRegionView::drag_end ()
 {
 	TimeAxisViewItem::drag_end ();
 
-	for (list<AudioRegionView*>::iterator i = _hidden_xfades.begin(); i != _hidden_xfades.end(); ++i) {
-		(*i)->show_xfades ();
+	for (list<AudioRegionView*>::iterator i = _hidden_xfades.first.begin(); i != _hidden_xfades.first.end(); ++i) {
+		(*i)->show_start_xfade ();
 	}
 
-	_hidden_xfades.clear ();
+	for (list<AudioRegionView*>::iterator i = _hidden_xfades.second.begin(); i != _hidden_xfades.second.end(); ++i) {
+		(*i)->show_end_xfade ();
+	}
+	
+	_hidden_xfades.first.clear ();
+	_hidden_xfades.second.clear ();
 }
 
 void
