@@ -722,6 +722,13 @@ MidiTrack::act_on_mute ()
 	   XXX we should should also stop all relevant note trackers.
 	*/
 
+	/* If we haven't got a diskstream yet, there's nothing to worry about,
+	   and we can't call get_channel_mask() anyway.
+	*/
+	if (!midi_diskstream()) {
+		return;
+	}
+
 	if (muted()) {
 		/* only send messages for channels we are using */
 
