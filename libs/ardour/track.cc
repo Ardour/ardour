@@ -28,6 +28,7 @@
 #include "ardour/processor.h"
 #include "ardour/route_group_specialized.h"
 #include "ardour/session.h"
+#include "ardour/session_playlists.h"
 #include "ardour/track.h"
 #include "ardour/utils.h"
 
@@ -329,12 +330,18 @@ Track::set_name (const string& str)
 		return false;
 	}
 
-	if (_diskstream->playlist()->all_regions_empty ()) {
+	boost::shared_ptr<Track> me = boost::dynamic_pointer_cast<Track> (shared_from_this ());
+	if (_diskstream->playlist()->all_regions_empty () && _session.playlists->playlists_for_track (me).size() == 1) {
 		/* Only rename the diskstream (and therefore the playlist) if
-		   the playlist has never had a region added to it.  Otherwise
-		   people can get confused if, say, they have notes about a
-		   playlist with a given name and then it changes (see mantis
-		   #4759).
+		   a) the playlist has never had a region added to it and
+		   b) there is only one playlist for this track.
+
+		   If (a) is not followed, people can get confused if, say,
+		   they have notes about a playlist with a given name and then
+		   it changes (see mantis #4759).
+
+		   If (b) is not followed, we rename the current playlist and not
+		   the other ones, which is a bit confusing (see mantis #4977).
 		*/
 		_diskstream->set_name (str);
 	}
