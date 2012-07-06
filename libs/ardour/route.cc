@@ -309,10 +309,34 @@ void
 Route::set_remote_control_id_from_order_key (RouteSortOrderKey key)
 {
 	if (is_master() || is_monitor() || is_hidden()) {
+		/* hard-coded remote IDs, or no remote ID */
 		return;
 	}
 
 	uint32_t n = order_keys[key];
+
+	/* we have a nasty glitch in an otherwise fairly clean system here.
+
+	   in theory, a route's remote control ID is determined by the order
+	   key matching the current remote model (for UserOrdered, the user
+	   controls everything). its one greater, because order keys are zero
+	   based and remote control IDs start at one.
+
+	   but ... an order key for the master bus may place it before or even
+	   within normal routes, yet its remote control ID (like the monitor
+	   bus) is hardcoded to MasterBusRemoteControlID. this means that all
+	   routes ordered after it (in whatever controls the EditorSort or
+	   MixerSort ordering) will end up with a remote control ID that is one
+	   too large.
+
+	   we therefore check on the master bus ordering, and adjust
+	   later-sorted routes remote control ID to avoid this "off by one"
+	   error, which keeps remote control ID's contiguous and "right".
+
+	   ideally, this would be done in a UI layer, where this logic
+	   is really understood and has meaning, rather than in libardour where
+	   its fundamentally meaningless.
+	*/
 
 	switch (Config->get_remote_model()) {
 	case UserOrdered:
@@ -344,10 +368,13 @@ Route::set_remote_control_id_from_order_key (RouteSortOrderKey key)
 		break;
 	}
 
-	/* don't emit class-level RID signals here, leave that to the entity
-	   that changed the order key, so that we don't get lots
-	   of emissions for no good reasons (e.g. when changing all
-	   route order keys)
+	/* don't emit the class-level RID signal RemoteControlIDChange here,
+	   leave that to the entity that changed the order key, so that we
+	   don't get lots of emissions for no good reasons (e.g. when changing
+	   all route order keys).
+
+	   See Session::sync_remote_id_from_order_keys() for the (primary|only)
+	   spot where that is emitted.
 	*/
 }
 
