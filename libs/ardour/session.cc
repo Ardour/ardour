@@ -574,6 +574,7 @@ Session::when_engine_running ()
 
 	BootMessage (_("Connect to engine"));
 	_engine.set_session (this);
+	_engine.reset_timebase ();
 }
 
 void
