@@ -1022,7 +1022,6 @@ Mixer_UI::track_display_button_press (GdkEventButton* ev)
 		return false;
 
 	case 1: /* visibility */
-
 		if ((iter = track_model->get_iter (path))) {
 			MixerStrip* strip = (*iter)[track_columns.strip];
 			if (strip) {
@@ -1030,10 +1029,8 @@ Mixer_UI::track_display_button_press (GdkEventButton* ev)
 				if (!strip->route()->is_master() && !strip->route()->is_monitor()) {
 					bool visible = (*iter)[track_columns.visible];
 					(*iter)[track_columns.visible] = !visible;
+					redisplay_track_list ();
 				}
-#ifdef GTKOSX
-				track_display.queue_draw();
-#endif
 			}
 		}
 		return true;
