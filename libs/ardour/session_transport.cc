@@ -798,6 +798,14 @@ Session::start_locate (framepos_t target_frame, bool with_roll, bool with_flush,
 
 		if (target_frame != pos) {
 
+			if (config.get_jack_time_master()) {
+				/* actually locate now, since otherwise jack_timebase_callback
+				   will use the incorrect _transport_frame and report an old
+				   and incorrect time to Jack transport
+				*/
+				locate (target_frame, with_roll, with_flush, with_loop, force);
+			}
+
 			/* tell JACK to change transport position, and we will
 			   follow along later in ::follow_slave()
 			*/
