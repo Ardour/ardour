@@ -291,10 +291,12 @@ protected:
 		EventList events;
 		double start_time;
 		double end_time;
-
+   	        double same_value_cnt;
+	    
 		NascentInfo (double start = -1.0)
 			: start_time (start)
 			, end_time (-1.0)
+			, same_value_cnt (0)
 		{}
 	};
 
