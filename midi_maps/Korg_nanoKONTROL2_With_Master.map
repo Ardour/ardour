@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ArdourMIDIBindings version="1.1.0" name="Korg nanoKONTROL2 With Master">
+
+<!-- This NanoKontrol2 map have some special feature. I use 7 channel for the tracks		-->
+<!-- and the Nº 8 for the master fader, for that reason, the "bank-size" is set to 7.		-->
+<!-- Some advice: In the Korg control editor utility (Work fine under wine):        		-->
+<!-- 1 : Set the main "RECORD", "loop" and the track "Solo" "Mute" and "Record" button to toggle-->
+<!-- (normally they are on momentary)            						-->
+<!-- 2012-07.03 Philippe Demartin inspired from the original NanoKontrol map by			-->
+<!-- 2010-11-26 Chooch Schubert: Map file creation 						-->
+
+  <DeviceInfo bank-size="7"/>
+	
+  <Binding msg="B0 2d 7f" function="rec-enable"/>
+  <Binding msg="B0 2d 00" function="rec-disable"/>
+  <Binding channel="1" ctl="41" function="transport-roll"/>
+  <Binding channel="1" ctl="42" function="transport-stop"/>
+  <Binding channel="1" ctl="43" function="transport-start"/>
+  <Binding channel="1" ctl="44" function="transport-end"/>
+  <Binding channel="1" ctl="46" function="loop-toggle"/>
+  <Binding msg="B0 3c 7f" action="Editor/add-location-from-playhead"/>
+  <Binding msg="B0 3d 7f" action="Editor/jump-backward-to-mark"/>
+  <Binding msg="B0 3e 7f" action="Editor/jump-forward-to-mark"/>
+  <Binding msg="B0 3a 7f" function="prev-bank"/>
+  <Binding msg="B0 3b 7f" function="next-bank"/>
+
+
+<!--  Channel controls:                         	 		--> 
+<!--  - There is 3 buttons on each tarck. Assigned to 			-->
+<!--    "Solo" "Mute" and "Record Enable".        	 		-->
+<!--  - Channel pan is implemented now in Ardour-3, 			-->
+
+ 
+
+
+  <Binding channel="1" ctl="16" uri="/route/pandirection B1"/>	
+  <Binding channel="1" ctl="32" uri="/route/solo B1"/>
+  <Binding channel="1" ctl="48" uri="/route/mute B1"/>
+  <Binding channel="1" ctl="64" uri="/route/recenable B1"/>
+  <Binding channel="1" ctl="0" uri="/route/gain B1"/>
+  
+  <Binding channel="1" ctl="17" uri="/route/pandirection B2"/>
+  <Binding channel="1" ctl="33" uri="/route/solo B2"/>
+  <Binding channel="1" ctl="49" uri="/route/mute B2"/>
+  <Binding channel="1" ctl="65" uri="/route/recenable B2"/>
+  <Binding channel="1" ctl="1" uri="/route/gain B2"/>
+  
+  <Binding channel="1" ctl="18" uri="/route/pandirection B3"/>
+  <Binding channel="1" ctl="34" uri="/route/solo B3"/>
+  <Binding channel="1" ctl="50" uri="/route/mute B3"/>
+  <Binding channel="1" ctl="66" uri="/route/recenable B3"/>
+  <Binding channel="1" ctl="2" uri="/route/gain B3"/>
+  
+  <Binding channel="1" ctl="19" uri="/route/pandirection B4"/>
+  <Binding channel="1" ctl="35" uri="/route/solo B4"/>
+  <Binding channel="1" ctl="51" uri="/route/mute B4"/>
+  <Binding channel="1" ctl="67" uri="/route/recenable B4"/>
+  <Binding channel="1" ctl="3" uri="/route/gain B4"/>
+  
+  <Binding channel="1" ctl="20" uri="/route/pandirection B5"/>
+  <Binding channel="1" ctl="36" uri="/route/solo B5"/>
+  <Binding channel="1" ctl="52" uri="/route/mute B5"/>
+  <Binding channel="1" ctl="68" uri="/route/recenable B5"/>
+  <Binding channel="1" ctl="4" uri="/route/gain B5"/>
+  
+  <Binding channel="1" ctl="21" uri="/route/pandirection B6"/>
+  <Binding channel="1" ctl="37" uri="/route/solo B6"/>
+  <Binding channel="1" ctl="53" uri="/route/mute B6"/>
+  <Binding channel="1" ctl="69" uri="/route/recenable B6"/>
+  <Binding channel="1" ctl="5" uri="/route/gain B6"/>
+  
+  <Binding channel="1" ctl="22" uri="/route/pandirection B7"/>
+  <Binding channel="1" ctl="38" uri="/route/solo B7"/>
+  <Binding channel="1" ctl="54" uri="/route/mute B7"/>
+  <Binding channel="1" ctl="70" uri="/route/recenable B7"/>
+  <Binding channel="1" ctl="6" uri="/route/gain B7"/>
+  
+  <!--  -Master section I use the pan pot as pan width,		 -->
+  <!--practical to listen to your mix in mono,			 -->
+  <!--the "Solo" button to enable and disable the mixer windows	 -->
+  <!--the "Mute" as intended and the "REC" is not used 		 -->
+  
+  
+  <Binding channel="1" ctl="23" uri="/bus/panwidth master"/>
+  <Binding channel="1" ctl="39" action="Common/toggle-mixer-on-top"/>
+  <Binding channel="1" ctl="55" uri="/bus/mute master"/>
+  <Binding channel="1" ctl="7"  uri="/bus/gain master"/>
+
+
+</ArdourMIDIBindings>
