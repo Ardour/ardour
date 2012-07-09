@@ -8,12 +8,12 @@
   <DeviceInfo bank-size="8" motorized="no" threshold="15"/>
 
 <!-- Transport Controls -->
-  <Binding channel="1" ctl="44" action="Transport/Record"/>
-  <Binding channel="1" ctl="45" action="Transport/TransitionToRoll"/>
-  <Binding channel="1" ctl="46" function="transport-stop"/>
-  <Binding channel="1" ctl="47" action="Transport/GotoStart"/>
-  <Binding channel="1" ctl="48" action="Transport/GotoEnd"/>
-  <Binding channel="1" ctl="49" action="Transport/Loop"/>
+  <Binding msg="B0 2c 7f" function="rec-enable"/>
+  <Binding msg="B0 2d 7f" function="transport-roll"/>
+  <Binding msg="B0 2e 7f" function="transport-stop"/>
+  <Binding msg="B0 2f 7f" function="transport-start"/>
+  <Binding msg="B0 30 7f" function="transport-end"/>
+  <Binding msg="B0 31 7f" function="loop-toggle"/>
 
 <!-- The "Scene" button toggles between four banks. It implements this by   -->
 <!-- sending a bank assignment # corresponding to the current korg "Scene"  -->

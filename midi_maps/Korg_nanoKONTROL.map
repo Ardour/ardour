@@ -5,12 +5,12 @@
   <DeviceInfo bank-size="9" motorized="no" threshold="15"/>
 
 <!-- Transport Controls -->
-  <Binding channel="1" ctl="44" action="Transport/Record"/>
-  <Binding channel="1" ctl="45" function="transport-roll"/>
-  <Binding channel="1" ctl="46" function="transport-stop"/>
-  <Binding channel="1" ctl="47" function="transport-start"/>
-  <Binding channel="1" ctl="48" function="transport-end"/>
-  <Binding channel="1" ctl="49" function="loop-toggle"/>
+  <Binding msg="B0 2c 7f" function="rec-enable"/>
+  <Binding msg="B0 2d 7f" function="transport-roll"/>
+  <Binding msg="B0 2e 7f" function="transport-stop"/>
+  <Binding msg="B0 2f 7f" function="transport-start"/>
+  <Binding msg="B0 30 7f" function="transport-end"/>
+  <Binding msg="B0 31 7f" function="loop-toggle"/>
 
 <!-- The "Scene" button toggles between four banks. For this to work as     -->
 <!-- intended, you have to configure all four scenes to be identical.       -->
