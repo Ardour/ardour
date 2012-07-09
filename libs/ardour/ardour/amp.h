@@ -81,6 +81,7 @@ public:
 			: AutomationControl (session, param, al, name)
 			, _amp (a) {
 			set_flags (Controllable::Flag (flags() | Controllable::GainLike));
+			alist()->reset_default (1.0);
 		}
 
 		void set_value (double val);

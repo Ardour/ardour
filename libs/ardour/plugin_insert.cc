@@ -1155,7 +1155,11 @@ PluginInsert::PluginControl::PluginControl (PluginInsert* p, const Evoral::Param
 	, _plugin (p)
 {
 	Plugin::ParameterDescriptor desc;
-	p->plugin(0)->get_parameter_descriptor (param.id(), desc);
+	boost::shared_ptr<Plugin> plugin = p->plugin (0);
+	
+	alist()->reset_default (plugin->default_value (param.id()));
+
+	plugin->get_parameter_descriptor (param.id(), desc);
 	_logarithmic = desc.logarithmic;
 	_sr_dependent = desc.sr_dependent;
 	_toggled = desc.toggled;
