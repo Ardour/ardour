@@ -611,6 +611,12 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	About* about;
 	Splash* splash;
+        bool    splash_done_visible;
+        static bool wakeup_from_splash_sleep (void *);
+        void _wakeup_from_splash_sleep ();
+        bool splash_visible (GdkEventAny*);
+        sigc::connection splash_expose;
+
 	void pop_back_splash (Gtk::Window&);
 
 	/* cleanup */

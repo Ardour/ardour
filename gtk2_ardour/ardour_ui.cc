@@ -2830,9 +2830,34 @@ ARDOUR_UI::about_signal_response (int /*response*/)
 	hide_about();
 }
 
+bool
+ARDOUR_UI::wakeup_from_splash_sleep (void* arg)
+{
+	cerr << "idle after splash\n";
+	((ARDOUR_UI*)arg)->_wakeup_from_splash_sleep ();
+	return false;
+}
+
+void
+ARDOUR_UI::_wakeup_from_splash_sleep ()
+{
+	splash_done_visible = true;
+	cerr << "Set sdv to " << splash_done_visible << endl;
+}
+
+bool
+ARDOUR_UI::splash_visible (GdkEventAny*)
+{
+	cerr << "Splash now mapped\n";
+	g_idle_add ((gboolean (*)(void*))ARDOUR_UI::wakeup_from_splash_sleep, this);
+	return false;
+}
+
 void
 ARDOUR_UI::show_splash ()
 {
+	cerr << "Show splash!\n";
+
 	if (splash == 0) {
 		try {
 			splash = new Splash;
@@ -2841,11 +2866,24 @@ ARDOUR_UI::show_splash ()
 		}
 	}
 
-	splash->present ();
+	bool was_mapped = splash->is_mapped ();
+	
+	if (!was_mapped) {
+		splash_expose = splash->signal_map_event().connect (sigc::mem_fun (this, &ARDOUR_UI::splash_visible), false);
+		splash_done_visible = false;
+	}
+
 	splash->pop_front ();
-	splash->queue_draw ();
-	splash->get_window()->process_updates (true);
-	flush_pending ();
+	splash->present ();
+
+	if (!was_mapped) {
+		while (!splash_done_visible) {
+			cerr << "nested iteration. sdv = " << splash_done_visible << endl;
+			gtk_main_iteration ();
+		}
+	}
+
+	cerr << "show splash done\n";
 }
 
 void
