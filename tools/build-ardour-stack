@@ -337,8 +337,8 @@ tar xf sratom-0.2.0.tar.bz2 && \
     (set -e && cd sratom-0.2.0 && ./waf configure --prefix=$PREFIX && ./waf build && ./waf install) || die "sratom build failed"
 tar xf lilv-0.14.2.tar.bz2 && \
     (set -e && cd lilv-0.14.2 && ./waf configure --prefix=$PREFIX && ./waf build && ./waf install) || die "lilv build failed"
-tar xf suil-0.6.0.tar.bz2 && \
-    (set -e && cd suil-0.6.0 && CFLAGS="-I$PREFIX/include" ./waf configure --prefix=$PREFIX && ./waf && ./waf install) || die "suil build failed"
+tar xf suil-0.6.2.tar.bz2 && \
+    (set -e && cd suil-0.6.2 && CFLAGS="-I$PREFIX/include" ./waf configure --prefix=$PREFIX && ./waf && ./waf install) || die "suil build failed"
 
 # two post-install hacks
 
