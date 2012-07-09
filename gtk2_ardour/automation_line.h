@@ -179,8 +179,8 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 	ArdourCanvas::Points        line_points; /* coordinates for canvas line */
 	std::vector<ControlPoint*>  control_points; /* visible control points */
 
-	void sync_model_with_view_point (ControlPoint&, ARDOUR::framecnt_t);
-	void sync_model_with_view_points (std::list<ControlPoint*>, ARDOUR::framecnt_t);
+	void sync_model_with_view_point (ControlPoint&);
+	void sync_model_with_view_points (std::list<ControlPoint*>);
 	void start_drag_common (double, float);
 
 	virtual void change_model (ARDOUR::AutomationList::iterator, double x, double y);

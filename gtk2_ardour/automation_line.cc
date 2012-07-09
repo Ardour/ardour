@@ -266,7 +266,7 @@ AutomationLine::modify_point_y (ControlPoint& cp, double y)
 	}
 
 	alist->freeze ();
-	sync_model_with_view_point (cp, 0);
+	sync_model_with_view_point (cp);
 	alist->thaw ();
 
 	update_pending = false;
@@ -289,12 +289,12 @@ AutomationLine::reset_line_coords (ControlPoint& cp)
 }
 
 void
-AutomationLine::sync_model_with_view_points (list<ControlPoint*> cp, int64_t distance)
+AutomationLine::sync_model_with_view_points (list<ControlPoint*> cp)
 {
 	update_pending = true;
 
 	for (list<ControlPoint*>::iterator i = cp.begin(); i != cp.end(); ++i) {
-		sync_model_with_view_point (**i, distance);
+		sync_model_with_view_point (**i);
 	}
 }
 
@@ -586,7 +586,7 @@ AutomationLine::end_drag ()
 		points.sort (ControlPointSorter ());
 	}
 
-	sync_model_with_view_points (points, trackview.editor().unit_to_frame (_drag_distance));
+	sync_model_with_view_points (points);
 
 	alist->thaw ();
 
@@ -601,7 +601,7 @@ AutomationLine::end_drag ()
 }
 
 void
-AutomationLine::sync_model_with_view_point (ControlPoint& cp, framecnt_t distance)
+AutomationLine::sync_model_with_view_point (ControlPoint& cp)
 {
 	/* find out where the visual control point is.
 	   initial results are in canvas units. ask the
