@@ -1404,7 +1404,7 @@ Editor::fill_xfade_menu (Menu_Helpers::MenuList& items, bool start)
 
 /** Pop up a context menu for when the user clicks on a start crossfade */
 void
-Editor::popup_xfade_in_context_menu (int button, int32_t time, ArdourCanvas::Item* item, ItemType item_type)
+Editor::popup_xfade_in_context_menu (int button, int32_t time, ArdourCanvas::Item* /*item*/, ItemType /*item_type*/)
 {
 	using namespace Menu_Helpers;
 
@@ -1419,7 +1419,7 @@ Editor::popup_xfade_in_context_menu (int button, int32_t time, ArdourCanvas::Ite
 
 /** Pop up a context menu for when the user clicks on an end crossfade */
 void
-Editor::popup_xfade_out_context_menu (int button, int32_t time, ArdourCanvas::Item* item, ItemType item_type)
+Editor::popup_xfade_out_context_menu (int button, int32_t time, ArdourCanvas::Item* /*item*/, ItemType /*item_type*/)
 {
 	using namespace Menu_Helpers;
 
