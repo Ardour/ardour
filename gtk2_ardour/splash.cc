@@ -85,6 +85,40 @@ Splash::~Splash ()
 	the_splash = 0;
 }
 
+bool
+Splash::wakeup_from_splash_sleep ()
+{
+	splash_done_visible = true;
+	return false;
+}
+
+bool
+Splash::splash_mapped (GdkEventAny*)
+{
+	Glib::signal_idle().connect (sigc::mem_fun (this, &Splash::wakeup_from_splash_sleep));
+	return false;
+}
+
+void
+Splash::display ()
+{
+	bool was_mapped = is_mapped ();
+	
+	if (!was_mapped) {
+		signal_map_event().connect (sigc::mem_fun (this, &Splash::splash_mapped), false);
+		splash_done_visible = false;
+	}
+
+	pop_front ();
+	present ();
+	
+	if (!was_mapped) {
+		while (!splash_done_visible) {
+			gtk_main_iteration ();
+		}
+	}
+}
+
 void
 Splash::pop_back_for (Gtk::Window& win)
 {
