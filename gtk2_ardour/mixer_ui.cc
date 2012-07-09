@@ -690,6 +690,7 @@ Mixer_UI::show_strip (MixerStrip* ms)
 		MixerStrip* strip = (*i)[track_columns.strip];
 		if (strip == ms) {
 			(*i)[track_columns.visible] = true;
+			redisplay_track_list ();
 			break;
 		}
 	}
@@ -706,6 +707,7 @@ Mixer_UI::hide_strip (MixerStrip* ms)
 		MixerStrip* strip = (*i)[track_columns.strip];
 		if (strip == ms) {
 			(*i)[track_columns.visible] = false;
+			redisplay_track_list ();
 			break;
 		}
 	}
