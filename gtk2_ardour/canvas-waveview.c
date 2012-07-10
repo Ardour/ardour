@@ -121,6 +121,9 @@ static guint32 gnome_canvas_waveview_ensure_cache (GnomeCanvasWaveView *waveview
 						   gulong               start_sample,
 						   gulong               end_sample);
 
+
+static int _gradient_rendering = 0;
+
 static GnomeCanvasItemClass *parent_class;
 
 GType
@@ -326,6 +329,12 @@ gnome_canvas_waveview_class_init (GnomeCanvasWaveViewClass *class)
 	 item_class->point = gnome_canvas_waveview_point;
 	 item_class->render = gnome_canvas_waveview_render;
 	 item_class->draw = gnome_canvas_waveview_draw;
+}
+
+void 
+gnome_canvas_waveview_set_gradient_waveforms (int yn)
+{
+	_gradient_rendering = yn;
 }
 
 GnomeCanvasWaveViewCache*
@@ -1094,8 +1103,8 @@ gnome_canvas_waveview_update (GnomeCanvasItem *item, double *affine, ArtSVP *cli
 }
 
 static void
-gnome_canvas_waveview_render (GnomeCanvasItem *item,
-			    GnomeCanvasBuf *buf)
+gnome_canvas_waveview_gradient_render (GnomeCanvasItem *item,
+				       GnomeCanvasBuf *buf)
 {
 	GnomeCanvasWaveView *waveview;
 	gulong s1, s2;
@@ -1349,9 +1358,10 @@ gnome_canvas_waveview_render (GnomeCanvasItem *item,
 					if(pymax == fill_max) {
 						PAINT_DOTA(buf, waveview->wave_r, waveview->wave_g, waveview->wave_b, waveview->wave_a, x, pymax);
 						++fill_max;
+					} else {
+						PAINT_VERTA_GR(buf, waveview->wave_r, waveview->wave_g, waveview->wave_b, waveview->wave_a, x, pymax, fill_max, wave_middle, wave_top);
 					}
-					else {
-						PAINT_VERTA_GR(buf, waveview->wave_r, waveview->wave_g, waveview->wave_b, waveview->wave_a, x, pymax, fill_max, wave_middle, wave_top);					}
+					
 				}
 
 				if((prev_pymin > pymin && next_pymin > pymin) ||
@@ -1638,6 +1648,549 @@ gnome_canvas_waveview_render (GnomeCanvasItem *item,
 	}
 #undef origin
 
+}
+
+static void
+gnome_canvas_waveview_flat_render (GnomeCanvasItem *item,
+				   GnomeCanvasBuf *buf)
+{
+	GnomeCanvasWaveView *waveview;
+	gulong s1, s2;
+	int clip_length = 0;
+	int pymin, pymax;
+	guint cache_index;
+	double half_height;
+	int x;
+	char rectify;
+
+	waveview = GNOME_CANVAS_WAVEVIEW (item);
+
+//	check_cache (waveview, "start of render");
+
+	if (parent_class->render) {
+		(*parent_class->render) (item, buf);
+	}
+
+	if (buf->is_bg) {
+		gnome_canvas_buf_ensure_buf (buf);
+		buf->is_bg = FALSE;
+	}
+
+	/* a "unit" means a pixel */
+
+	/* begin: render start x (units) */
+	int const begin = MAX (waveview->bbox_ulx, buf->rect.x0);
+
+        /* zbegin: start x for zero line (units) */
+	int const zbegin = (begin == waveview->bbox_ulx) ? (begin + 1) : begin;
+
+	/* end: render end x (units) */
+	int const end = (waveview->bbox_lrx >= 0) ? MIN (waveview->bbox_lrx,buf->rect.x1) : buf->rect.x1;
+
+	/* zend: end x for zero-line (units) */
+	int const zend = (end == waveview->bbox_lrx) ? (end - 1) : end;
+
+	if (begin == end) {
+		return;
+	}
+
+	/* s1: start sample
+	   s2: end sample
+	*/
+
+	s1 = floor ((begin - waveview->bbox_ulx) * waveview->samples_per_unit);
+
+	// fprintf (stderr, "0x%x begins at sample %f\n", waveview, waveview->bbox_ulx * waveview->samples_per_unit);
+
+	if (end == waveview->bbox_lrx) {
+		/* This avoids minor rounding errors when we have the
+		   entire region visible.
+		*/
+		s2 = waveview->samples;
+	} else {
+		s2 = s1 + floor ((end - begin) * waveview->samples_per_unit);
+	}
+
+#if 0
+	printf ("0x%x r (%d..%d)(%d..%d) bbox (%d..%d)(%d..%d)"
+		" b/e %d..%d s= %lu..%lu @ %f\n",
+		waveview,
+		buf->rect.x0,
+		buf->rect.x1,
+		buf->rect.y0,
+		buf->rect.y1,
+		waveview->bbox_ulx,
+		waveview->bbox_lrx,
+		waveview->bbox_uly,
+		waveview->bbox_lry,
+		begin, end, s1, s2,
+		waveview->samples_per_unit);
+#endif
+
+	/* now ensure that the cache is full and properly
+	   positioned.
+	*/
+
+//	check_cache (waveview, "pre-ensure");
+
+	if (waveview->cache_updater && waveview->reload_cache_in_render) {
+		waveview->cache->start = 0;
+		waveview->cache->end = 0;
+		waveview->reload_cache_in_render = FALSE;
+	}
+
+//	check_cache (waveview, "post-ensure");
+
+	/* don't rectify at single-sample zoom */
+	if (waveview->rectified && waveview->samples_per_unit > 1) {
+		rectify = TRUE;
+	}
+	else {
+		rectify = FALSE;
+	}
+
+	clip_length = MIN(5,(waveview->height/4));
+
+	/*
+	   Now draw each line, clipping it appropriately. The clipping
+	   is done by the macros PAINT_FOO().
+	*/
+
+	half_height = waveview->half_height;
+
+/* this makes it slightly easier to comprehend whats going on */
+#define origin half_height
+
+	if (waveview->filled && !rectify) {
+		int prev_pymin = 1;
+		int prev_pymax = 0;
+		int last_pymin = 1;
+		int last_pymax = 0;
+		int next_pymin, next_pymax;
+		double max, min;
+		int next_clip_max = 0;
+		int next_clip_min = 0;
+
+		if (s1 < waveview->samples_per_unit) {
+			/* we haven't got a prev vars to compare with, so outline the whole line here */
+			prev_pymax = (int) rint ((item->y1 + origin) * item->canvas->pixels_per_unit);
+			prev_pymin = prev_pymax;
+		}
+		else {
+			s1 -= waveview->samples_per_unit;
+		}
+
+		if(end == waveview->bbox_lrx) {
+			/* we don't have the NEXT vars for the last sample */
+			last_pymax = (int) rint ((item->y1 + origin) * item->canvas->pixels_per_unit);
+			last_pymin = last_pymax;
+		}
+		else {
+			s2 += waveview->samples_per_unit;
+		}
+
+		cache_index = gnome_canvas_waveview_ensure_cache (waveview, s1, s2);
+
+		/*
+		 * Compute the variables outside the rendering rect
+		 */
+		if(prev_pymax != prev_pymin) {
+
+			prev_pymax = (int) rint ((item->y1 + origin - MIN(waveview->cache->data[cache_index].max, 1.0) * half_height) * item->canvas->pixels_per_unit);
+			prev_pymin = (int) rint ((item->y1 + origin - MAX(waveview->cache->data[cache_index].min, -1.0) * half_height) * item->canvas->pixels_per_unit);
+			++cache_index;
+		}
+		if(last_pymax != last_pymin) {
+			/* take the index of one sample right of what we render */
+			guint index = cache_index + (end - begin);
+
+			if (index >= waveview->cache->data_size) {
+
+				/* the data we want is off the end of the cache, which must mean its beyond
+				   the end of the region's source; hence the peak values are 0 */
+				last_pymax = (int) rint ((item->y1 + origin) * item->canvas->pixels_per_unit);
+				last_pymin = (int) rint ((item->y1 + origin) * item->canvas->pixels_per_unit);
+
+			} else {
+
+				last_pymax = (int) rint ((item->y1 + origin - MIN(waveview->cache->data[index].max, 1.0) * half_height) * item->canvas->pixels_per_unit);
+				last_pymin = (int) rint ((item->y1 + origin - MAX(waveview->cache->data[index].min, -1.0) * half_height) * item->canvas->pixels_per_unit);
+
+			}
+
+		}
+
+		/*
+		 * initialize NEXT* variables for the first run, duplicated in the loop for speed
+		 */
+		max = waveview->cache->data[cache_index].max;
+		min = waveview->cache->data[cache_index].min;
+
+		if (max >= 1.0) {
+			max = 1.0;
+			next_clip_max = 1;
+		}
+
+		if (min <= -1.0) {
+			min = -1.0;
+			next_clip_min = 1;
+		}
+
+		max *= half_height;
+		min *= half_height;
+
+		next_pymax = (int) rint ((item->y1 + origin - max) * item->canvas->pixels_per_unit);
+		next_pymin = (int) rint ((item->y1 + origin - min) * item->canvas->pixels_per_unit);
+
+		/*
+		 * And now the loop
+		 */
+		for(x = begin; x < end; ++x) {
+			int clip_max = next_clip_max;
+			int clip_min = next_clip_min;
+			int fill_max, fill_min;
+
+			pymax = next_pymax;
+			pymin = next_pymin;
+
+			/* compute next */
+			if(x == end - 1) {
+				/*next is now the last column, which is outside the rendering rect, and possibly outside the region*/
+				next_pymax = last_pymax;
+				next_pymin = last_pymin;
+			}
+			else {
+				++cache_index;
+
+				if (cache_index < waveview->cache->data_size) {
+					max = waveview->cache->data[cache_index].max;
+					min = waveview->cache->data[cache_index].min;
+				} else {
+					max = min = 0;
+				}
+
+				next_clip_max = 0;
+				next_clip_min = 0;
+
+				if (max >= 1.0) {
+					max = 1.0;
+					next_clip_max = 1;
+				}
+
+				if (min <= -1.0) {
+					min = -1.0;
+					next_clip_min = 1;
+				}
+
+				max *= half_height;
+				min *= half_height;
+
+				next_pymax = (int) rint ((item->y1 + origin - max) * item->canvas->pixels_per_unit);
+				next_pymin = (int) rint ((item->y1 + origin - min) * item->canvas->pixels_per_unit);
+			}
+
+			/* render */
+			if (pymax == pymin) {
+				PAINT_DOTA(buf, waveview->wave_r, waveview->wave_g, waveview->wave_b, waveview->wave_a, x, pymin);
+			} else {
+				if((prev_pymax < pymax && next_pymax < pymax) ||
+				   (prev_pymax == pymax && next_pymax == pymax)) {
+					fill_max = pymax + 1;
+					PAINT_DOTA(buf, waveview->wave_r, waveview->wave_g, waveview->wave_b, waveview->wave_a, x, pymax);
+				}
+				else {
+					fill_max = MAX(prev_pymax, next_pymax);
+					if(pymax == fill_max) {
+						PAINT_DOTA(buf, waveview->wave_r, waveview->wave_g, waveview->wave_b, waveview->wave_a, x, pymax);
+						++fill_max;
+					}
+					else {
+						PAINT_VERTA(buf, waveview->wave_r, waveview->wave_g, waveview->wave_b, waveview->wave_a, x, pymax, fill_max);
+					}
+				}
+
+				if((prev_pymin > pymin && next_pymin > pymin) ||
+				   (prev_pymin == pymin && next_pymin == pymin)) {
+					fill_min = pymin - 1;
+					PAINT_DOTA(buf, waveview->wave_r, waveview->wave_g, waveview->wave_b, waveview->wave_a, x, pymin-1);
+				}
+				else {
+					fill_min = MIN(prev_pymin, next_pymin);
+					if(pymin == fill_min) {
+						PAINT_DOTA(buf, waveview->wave_r, waveview->wave_g, waveview->wave_b, waveview->wave_a, x, pymin);
+					}
+					else {
+						PAINT_VERTA(buf, waveview->wave_r, waveview->wave_g, waveview->wave_b, waveview->wave_a, x, fill_min, pymin);
+					}
+				}
+
+				if(fill_max < fill_min) {
+					PAINT_VERTA(buf, waveview->fill_r, waveview->fill_g, waveview->fill_b, waveview->fill_a, x, fill_max, fill_min);
+				}
+				else if(fill_max == fill_min) {
+					PAINT_DOTA(buf, waveview->fill_r, waveview->fill_g, waveview->fill_b, waveview->fill_a, x, fill_max);
+				}
+			}
+
+			if (clip_max) {
+				PAINT_VERTA(buf, waveview->clip_r, waveview->clip_g, waveview->clip_b, waveview->clip_a, x, pymax, pymax+clip_length);
+			}
+
+			if (clip_min) {
+				PAINT_VERTA(buf, waveview->clip_r, waveview->clip_g, waveview->clip_b, waveview->clip_a, x, pymin-clip_length, pymin);
+			}
+
+			prev_pymax = pymax;
+			prev_pymin = pymin;
+		}
+
+	} else if (waveview->filled && rectify) {
+
+		int prev_pymax = -1;
+		int last_pymax = -1;
+		int next_pymax;
+		double max, min;
+		int next_clip_max = 0;
+		int next_clip_min = 0;
+
+		// for rectified, this stays constant throughout the loop
+		pymin = (int) rint ((item->y1 + waveview->height) * item->canvas->pixels_per_unit);
+
+		if(s1 < waveview->samples_per_unit) {
+			/* we haven't got a prev vars to compare with, so outline the whole line here */
+			prev_pymax = pymin;
+		}
+		else {
+			s1 -= waveview->samples_per_unit;
+		}
+
+		if(end == waveview->bbox_lrx) {
+			/* we don't have the NEXT vars for the last sample */
+			last_pymax = pymin;
+		}
+		else {
+			s2 += waveview->samples_per_unit;
+		}
+
+		cache_index = gnome_canvas_waveview_ensure_cache (waveview, s1, s2);
+
+		/*
+		 * Compute the variables outside the rendering rect
+		 */
+		if(prev_pymax < 0) {
+			max = MIN(waveview->cache->data[cache_index].max, 1.0);
+			min = MAX(waveview->cache->data[cache_index].min, -1.0);
+
+			if (fabs (min) > fabs (max)) {
+				max = fabs (min);
+			}
+
+			prev_pymax = (int) rint ((item->y1 + waveview->height - max * waveview->height) * item->canvas->pixels_per_unit);
+			++cache_index;
+		}
+		if(last_pymax < 0) {
+			/* take the index of one sample right of what we render */
+			int index = cache_index + (end - begin);
+
+			max = MIN(waveview->cache->data[index].max, 1.0);
+			min = MAX(waveview->cache->data[index].min, -1.0);
+
+			if (fabs (min) > fabs (max)) {
+				max = fabs (min);
+			}
+
+			last_pymax = (int) rint ((item->y1 + waveview->height - max * waveview->height) * item->canvas->pixels_per_unit);
+		}
+
+		/*
+		 * initialize NEXT* variables for the first run, duplicated in the loop for speed
+		 */
+		max = waveview->cache->data[cache_index].max;
+		min = waveview->cache->data[cache_index].min;
+
+		if (max >= 1.0) {
+			max = 1.0;
+			next_clip_max = 1;
+		}
+
+		if (min <= -1.0) {
+			min = -1.0;
+			next_clip_min = 1;
+		}
+
+		if (fabs (min) > fabs (max)) {
+			max = fabs (min);
+		}
+
+		next_pymax = (int) rint ((item->y1 + waveview->height - max * waveview->height) * item->canvas->pixels_per_unit);
+
+		/*
+		 * And now the loop
+		 */
+		for(x = begin; x < end; ++x) {
+			int clip_max = next_clip_max;
+			int clip_min = next_clip_min;
+			int fill_max;
+
+			pymax = next_pymax;
+
+			/* compute next */
+			if(x == end - 1) {
+				/*next is now the last column, which is outside the rendering rect, and possibly outside the region*/
+				next_pymax = last_pymax;
+			}
+			else {
+				++cache_index;
+
+				max = waveview->cache->data[cache_index].max;
+				min = waveview->cache->data[cache_index].min;
+
+				if (max >= 1.0) {
+					max = 1.0;
+					next_clip_max = 1;
+				}
+
+				if (min <= -1.0) {
+					min = -1.0;
+					next_clip_min = 1;
+				}
+
+				if (fabs (min) > fabs (max)) {
+					max = fabs (min);
+				}
+
+				next_pymax = (int) rint ((item->y1 + waveview->height - max * waveview->height) * item->canvas->pixels_per_unit);
+			}
+
+			/* render */
+			if (pymax == pymin) {
+				PAINT_DOTA(buf, waveview->wave_r, waveview->wave_g, waveview->wave_b, waveview->wave_a, x, pymin);
+			} else {
+				if((prev_pymax < pymax && next_pymax < pymax) ||
+				   (prev_pymax == pymax && next_pymax == pymax)) {
+					fill_max = pymax + 1;
+					PAINT_DOTA(buf, waveview->wave_r, waveview->wave_g, waveview->wave_b, waveview->wave_a, x, pymax);
+				}
+				else {
+					fill_max = MAX(prev_pymax, next_pymax);
+					if(pymax == fill_max) {
+						PAINT_DOTA(buf, waveview->wave_r, waveview->wave_g, waveview->wave_b, waveview->wave_a, x, pymax);
+						++fill_max;
+					}
+					else {
+						PAINT_VERTA(buf, waveview->wave_r, waveview->wave_g, waveview->wave_b, waveview->wave_a, x, pymax, fill_max);
+					}
+				}
+
+				if(fill_max < pymin) {
+					PAINT_VERTA(buf, waveview->fill_r, waveview->fill_g, waveview->fill_b, waveview->fill_a, x, fill_max, pymin);
+				}
+				else if(fill_max == pymin) {
+					PAINT_DOTA(buf, waveview->fill_r, waveview->fill_g, waveview->fill_b, waveview->fill_a, x, pymin);
+				}
+			}
+
+			if (clip_max) {
+				PAINT_VERTA(buf, waveview->clip_r, waveview->clip_g, waveview->clip_b, waveview->clip_a, x, pymax, pymax+clip_length);
+			}
+
+			if (clip_min) {
+				PAINT_VERTA(buf, waveview->clip_r, waveview->clip_g, waveview->clip_b, waveview->clip_a, x, pymin-clip_length, pymin);
+			}
+
+			prev_pymax = pymax;
+		}
+	}
+	else {
+		cache_index = gnome_canvas_waveview_ensure_cache (waveview, s1, s2);
+
+		for (x = begin; x < end; x++) {
+
+			double max, min;
+			int clip_max, clip_min;
+
+			clip_max = 0;
+			clip_min = 0;
+
+			max = waveview->cache->data[cache_index].max;
+			min = waveview->cache->data[cache_index].min;
+
+			if (max >= 1.0) {
+				max = 1.0;
+				clip_max = 1;
+			}
+
+			if (min <= -1.0) {
+				min = -1.0;
+				clip_min = 1;
+			}
+
+			if (rectify) {
+
+				if (fabs (min) > fabs (max)) {
+					max = fabs (min);
+				}
+
+				max = max * waveview->height;
+
+				pymax = (int) rint ((item->y1 + waveview->height - max) * item->canvas->pixels_per_unit);
+				pymin = (int) rint ((item->y1 + waveview->height) * item->canvas->pixels_per_unit);
+
+			} else {
+
+				max = max * half_height;
+				min = min * half_height;
+
+				pymax = (int) rint ((item->y1 + origin - max) * item->canvas->pixels_per_unit);
+				pymin = (int) rint ((item->y1 + origin - min) * item->canvas->pixels_per_unit);
+			}
+
+			/* OK, now fill the RGB buffer at x=i with a line between pymin and pymax,
+			   or, if samples_per_unit == 1, then a dot at each location.
+			*/
+
+			if (pymax == pymin) {
+				PAINT_DOTA(buf, waveview->wave_r, waveview->wave_g, waveview->wave_b, waveview->wave_a, x, pymin);
+			} else {
+				PAINT_VERTA(buf, waveview->wave_r, waveview->wave_g, waveview->wave_b, waveview->wave_a, x, pymax, pymin);
+			}
+
+			/* show clipped waveforms with small red lines */
+
+			if (clip_max) {
+				PAINT_VERTA(buf, waveview->clip_r, waveview->clip_g, waveview->clip_b, waveview->clip_a, x, pymax, pymax+clip_length);
+			}
+
+			if (clip_min) {
+				PAINT_VERTA(buf, waveview->clip_r, waveview->clip_g, waveview->clip_b, waveview->clip_a, x, pymin-clip_length, pymin);
+			}
+
+			/* presto, we're done */
+
+			cache_index++;
+		}
+	}
+
+	if (!waveview->rectified && waveview->zero_line && waveview->height >= 100) {
+		// Paint zeroline.
+
+		unsigned char zero_r, zero_g, zero_b, zero_a;
+		UINT_TO_RGBA( waveview->zero_color, &zero_r, &zero_g, &zero_b, &zero_a);
+		int zeroline_y = (int) rint ((item->y1 + origin) * item->canvas->pixels_per_unit);
+		PAINT_HORIZA(buf, zero_r, zero_g, zero_b, zero_a, zbegin, zend, zeroline_y);
+	}
+#undef origin
+}
+
+static void
+gnome_canvas_waveview_render (GnomeCanvasItem *item,
+			      GnomeCanvasBuf *buf)
+{
+	if (_gradient_rendering) {
+		gnome_canvas_waveview_gradient_render (item, buf);
+	} else {
+		gnome_canvas_waveview_flat_render (item, buf);
+	}
 }
 
 static void
