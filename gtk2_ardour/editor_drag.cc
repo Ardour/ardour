@@ -2171,7 +2171,16 @@ CursorDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
 			s->cancel_audition ();
 		}
 
+
 		if (AudioEngine::instance()->connected()) {
+			
+			/* do this only if we're the engine is connected
+			 * because otherwise this request will never be
+			 * serviced and we'll busy wait forever. likewise,
+			 * notice if we are disconnected while waiting for the
+			 * request to be serviced.
+			 */
+
 			s->request_suspend_timecode_transmission ();
 			while (AudioEngine::instance()->connected() && !s->timecode_transmission_suspended ()) {
 				/* twiddle our thumbs */
