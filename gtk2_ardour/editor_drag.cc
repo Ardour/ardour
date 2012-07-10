@@ -4106,7 +4106,7 @@ AutomationRangeDrag::AutomationRangeDrag (Editor* editor, AutomationTimeAxisView
 	, _nothing_to_drag (false)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New AutomationRangeDrag\n");
-	track_view = atv;
+	y_origin = atv->y_position();
 	setup (atv->lines ());
 }
 
@@ -4120,7 +4120,7 @@ AutomationRangeDrag::AutomationRangeDrag (Editor* editor, AudioRegionView* rv, l
 
 	list<boost::shared_ptr<AutomationLine> > lines;
 	lines.push_back (rv->get_gain_line ());
-	track_view = &rv->get_time_axis_view();
+	y_origin = rv->get_time_axis_view().y_position();
 	setup (lines);
 }
 
@@ -4162,6 +4162,12 @@ AutomationRangeDrag::setup (list<boost::shared_ptr<AutomationLine> > const & lin
 	/* Now ::lines contains the AutomationLines that somehow overlap our drag */
 }
 
+double
+AutomationRangeDrag::y_fraction (boost::shared_ptr<AutomationLine> line, double global_y) const
+{
+	return 1.0 - ((global_y - y_origin) / line->height());
+}
+
 void
 AutomationRangeDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
@@ -4170,7 +4176,7 @@ AutomationRangeDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	/* Get line states before we start changing things */
 	for (list<Line>::iterator i = _lines.begin(); i != _lines.end(); ++i) {
 		i->state = &i->line->get_state ();
-		i->original_fraction = 1 - ((_drags->current_pointer_y() - track_view->y_position()) / i->line->height());
+		i->original_fraction = y_fraction (i->line, _drags->current_pointer_y());
 	}
 
 	if (_ranges.empty()) {
@@ -4276,7 +4282,7 @@ AutomationRangeDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	}
 
 	for (list<Line>::iterator i = _lines.begin(); i != _lines.end(); ++i) {
-		i->line->start_drag_multiple (i->points, 1 - ((_drags->current_pointer_y() - track_view->y_position()) / i->line->height ()), i->state);
+		i->line->start_drag_multiple (i->points, y_fraction (i->line, _drags->current_pointer_y()), i->state);
 	}
 }
 
@@ -4288,7 +4294,7 @@ AutomationRangeDrag::motion (GdkEvent*, bool /*first_move*/)
 	}
 
 	for (list<Line>::iterator l = _lines.begin(); l != _lines.end(); ++l) {
-		float const f = 1 - ((_drags->current_pointer_y() - track_view->y_position()) / l->line->height());
+		float const f = y_fraction (l->line, _drags->current_pointer_y());
 
 		/* we are ignoring x position for this drag, so we can just pass in anything */
 		l->line->drag_motion (0, f, true, false);

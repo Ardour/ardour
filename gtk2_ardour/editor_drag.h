@@ -957,7 +957,8 @@ public:
 
 private:
 	void setup (std::list<boost::shared_ptr<AutomationLine> > const &);
-	
+        double y_fraction (boost::shared_ptr<AutomationLine>, double global_y_position) const;
+
 	std::list<ARDOUR::AudioRange> _ranges;
 
 	/** A line that is part of the drag */
@@ -970,7 +971,7 @@ private:
 	};
 
 	std::list<Line> _lines;
-        TimeAxisView* track_view;
+        double y_origin;
 	bool _nothing_to_drag;
 };
 
