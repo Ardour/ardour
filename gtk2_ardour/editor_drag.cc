@@ -4106,7 +4106,7 @@ AutomationRangeDrag::AutomationRangeDrag (Editor* editor, AutomationTimeAxisView
 	, _nothing_to_drag (false)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New AutomationRangeDrag\n");
-
+	track_view = atv;
 	setup (atv->lines ());
 }
 
@@ -4120,6 +4120,7 @@ AutomationRangeDrag::AutomationRangeDrag (Editor* editor, AudioRegionView* rv, l
 
 	list<boost::shared_ptr<AutomationLine> > lines;
 	lines.push_back (rv->get_gain_line ());
+	track_view = &rv->get_time_axis_view();
 	setup (lines);
 }
 
@@ -4169,6 +4170,7 @@ AutomationRangeDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	/* Get line states before we start changing things */
 	for (list<Line>::iterator i = _lines.begin(); i != _lines.end(); ++i) {
 		i->state = &i->line->get_state ();
+		i->original_fraction = 1 - ((_drags->current_pointer_y() - track_view->y_position()) / i->line->height());
 	}
 
 	if (_ranges.empty()) {
@@ -4274,7 +4276,7 @@ AutomationRangeDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	}
 
 	for (list<Line>::iterator i = _lines.begin(); i != _lines.end(); ++i) {
-		i->line->start_drag_multiple (i->points, 1 - (_drags->current_pointer_y() / i->line->height ()), i->state);
+		i->line->start_drag_multiple (i->points, 1 - ((_drags->current_pointer_y() - track_view->y_position()) / i->line->height ()), i->state);
 	}
 }
 
@@ -4285,11 +4287,12 @@ AutomationRangeDrag::motion (GdkEvent*, bool /*first_move*/)
 		return;
 	}
 
-	for (list<Line>::iterator i = _lines.begin(); i != _lines.end(); ++i) {
-		float const f = 1 - (_drags->current_pointer_y() / i->line->height());
+	for (list<Line>::iterator l = _lines.begin(); l != _lines.end(); ++l) {
+		float const f = 1 - ((_drags->current_pointer_y() - track_view->y_position()) / l->line->height());
 
 		/* we are ignoring x position for this drag, so we can just pass in anything */
-		i->line->drag_motion (0, f, true, false);
+		l->line->drag_motion (0, f, true, false);
+		show_verbose_cursor_text (l->line->get_verbose_cursor_relative_string (l->original_fraction, f));
 	}
 }
 

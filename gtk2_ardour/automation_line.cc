@@ -309,6 +309,31 @@ AutomationLine::get_verbose_cursor_string (double fraction) const
 	return s;
 }
 
+string
+AutomationLine::get_verbose_cursor_relative_string (double original, double fraction) const
+{
+	std::string s = fraction_to_string (fraction);
+	if (_uses_gain_mapping) {
+		s += " dB";
+	}
+
+	std::string d = fraction_to_relative_string (original, fraction);
+
+	if (!d.empty()) {
+
+		s += " (\u0394";
+		s += d;
+
+		if (_uses_gain_mapping) {
+			s += " dB";
+		}
+
+		s += ')';
+	}
+
+	return s;
+}
+
 /**
  *  @param fraction y fraction
  *  @return string representation of this value, using dB if appropriate.
@@ -336,6 +361,45 @@ AutomationLine::fraction_to_string (double fraction) const
 	return buf;
 }
 
+/**
+ *  @param original an old y-axis fraction
+ *  @param fraction the new y fraction
+ *  @return string representation of the difference between original and fraction, using dB if appropriate.
+ */
+string
+AutomationLine::fraction_to_relative_string (double original, double fraction) const
+{
+	char buf[32];
+
+	if (original == fraction) {
+		return "0";
+	}
+
+	if (_uses_gain_mapping) {
+		if (original == 0.0) {
+			/* there is no sensible representation of a relative
+			   change from -inf dB, so return an empty string.
+			*/
+			return "";
+		} else if (fraction == 0.0) {
+			snprintf (buf, sizeof (buf), "-inf");
+		} else {
+			double old_db = accurate_coefficient_to_dB (slider_position_to_gain_with_max (original, Config->get_max_gain()));
+			double new_db = accurate_coefficient_to_dB (slider_position_to_gain_with_max (fraction, Config->get_max_gain()));
+			snprintf (buf, sizeof (buf), "%.1f", new_db - old_db);
+		}
+	} else {
+		view_to_model_coord_y (original);
+		view_to_model_coord_y (fraction);
+		if (EventTypeMap::instance().is_integer (alist->parameter())) {
+			snprintf (buf, sizeof (buf), "%d", (int)fraction - (int)original);
+		} else {
+			snprintf (buf, sizeof (buf), "%.2f", fraction - original);
+		}
+	}
+
+	return buf;
+}
 
 /**
  *  @param s Value string in the form as returned by fraction_to_string.

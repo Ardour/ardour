@@ -113,7 +113,9 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 	ArdourCanvas::Item&  grab_item() const { return *line; }
 
 	std::string get_verbose_cursor_string (double) const;
+        std::string get_verbose_cursor_relative_string (double, double) const;
 	std::string fraction_to_string (double) const;
+        std::string fraction_to_relative_string (double, double) const;
 	double string_to_fraction (std::string const &) const;
 	void   view_to_model_coord (double& x, double& y) const;
 	void   view_to_model_coord_y (double &) const;
