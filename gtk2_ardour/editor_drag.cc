@@ -29,6 +29,7 @@
 
 #include "gtkmm2ext/utils.h"
 
+#include "ardour/audioengine.h"
 #include "ardour/audioregion.h"
 #include "ardour/dB.h"
 #include "ardour/midi_region.h"
@@ -2170,9 +2171,11 @@ CursorDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
 			s->cancel_audition ();
 		}
 
-		s->request_suspend_timecode_transmission ();
-		while (!s->timecode_transmission_suspended ()) {
-			/* twiddle our thumbs */
+		if (AudioEngine::instance()->connected()) {
+			s->request_suspend_timecode_transmission ();
+			while (AudioEngine::instance()->connected() && !s->timecode_transmission_suspended ()) {
+				/* twiddle our thumbs */
+			}
 		}
 	}
 
