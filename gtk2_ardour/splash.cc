@@ -21,6 +21,7 @@
 
 #include "pbd/failed_constructor.h"
 #include "pbd/file_utils.h"
+
 #include "ardour/ardour.h"
 #include "ardour/filesystem_paths.h"
 
@@ -44,6 +45,7 @@ Splash::Splash ()
 	std::string splash_file;
 
 	if (!find_file_in_search_path (ardour_data_search_path(), "splash.png", splash_file)) {
+                cerr << "Cannot find splash screen image file\n";
 		throw failed_constructor();
 	}
 
@@ -52,6 +54,7 @@ Splash::Splash ()
 	}
 
 	catch (...) {
+                cerr << "Cannot construct splash screen image\n";
 		throw failed_constructor();
 	}
 
@@ -77,46 +80,14 @@ Splash::Splash ()
 	set_default_size (pixbuf->get_width(), pixbuf->get_height());
 	the_splash = this;
 
+        expose_done = false;
+
 	ARDOUR::BootMessage.connect (msg_connection, invalidator (*this), boost::bind (&Splash::boot_message, this, _1), gui_context());
 }
 
 Splash::~Splash ()
 {
 	the_splash = 0;
-}
-
-bool
-Splash::wakeup_from_splash_sleep ()
-{
-	splash_done_visible = true;
-	return false;
-}
-
-bool
-Splash::splash_mapped (GdkEventAny*)
-{
-	Glib::signal_idle().connect (sigc::mem_fun (this, &Splash::wakeup_from_splash_sleep));
-	return false;
-}
-
-void
-Splash::display ()
-{
-	bool was_mapped = is_mapped ();
-	
-	if (!was_mapped) {
-		signal_map_event().connect (sigc::mem_fun (this, &Splash::splash_mapped), false);
-		splash_done_visible = false;
-	}
-
-	pop_front ();
-	present ();
-	
-	if (!was_mapped) {
-		while (!splash_done_visible) {
-			gtk_main_iteration ();
-		}
-	}
 }
 
 void
@@ -141,10 +112,15 @@ Splash::on_realize ()
 	layout->set_font_description (get_style()->get_font());
 }
 
-
 bool
-Splash::on_button_release_event (GdkEventButton*)
+Splash::on_button_release_event (GdkEventButton* ev)
 {
+	RefPtr<Gdk::Window> window = get_window();
+        
+        if (!window || ev->window != window->gobj()) {
+                return false;
+        }
+        
 	hide ();
 	return true;
 }
@@ -169,6 +145,8 @@ Splash::expose (GdkEventExpose* ev)
 	Glib::RefPtr<Gdk::GC> white = style->get_white_gc();
 
 	window->draw_layout (white, 10, pixbuf->get_height() - 30, layout);
+       
+	Glib::signal_idle().connect (sigc::mem_fun (this, &Splash::idle_after_expose));
 
 	return true;
 }
@@ -177,6 +155,32 @@ void
 Splash::boot_message (std::string msg)
 {
 	message (msg);
+}
+
+bool
+Splash::idle_after_expose ()
+{
+        expose_done = true;
+	return false;
+}
+
+void
+Splash::display ()
+{
+	bool was_mapped = is_mapped ();
+	
+	if (!was_mapped) {
+		expose_done = false;
+	}
+
+	pop_front ();
+	present ();
+	
+	if (!was_mapped) {
+		while (!expose_done) {
+			gtk_main_iteration ();
+		}
+	}
 }
 
 void
@@ -190,9 +194,12 @@ Splash::message (const string& msg)
 	Glib::RefPtr<Gdk::Window> win = darea.get_window();
 
 	if (win) {
-		win->invalidate_rect (Gdk::Rectangle (0, darea.get_height() - 30,
-						      darea.get_width(), 30), true);
-		win->process_updates (true);
-		gdk_flush ();
+                expose_done = false;
+                
+		win->invalidate_rect (Gdk::Rectangle (0, darea.get_height() - 30, darea.get_width(), 30), true);
+
+                while (!expose_done) {
+                        gtk_main_iteration ();
+                }
 	}
 }

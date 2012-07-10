@@ -2396,20 +2396,6 @@ ARDOUR_UI::idle_load (const std::string& path)
 	}
 }
 
-void
-ARDOUR_UI::loading_message (const std::string& msg)
-{
-	if (ARDOUR_COMMAND_LINE::no_splash) {
-		return;
-	}
-
-	if (!splash) {
-		show_splash ();
-	}
-
-	splash->message (msg);
-}
-
 /** @param quit_on_cancel true if exit() should be called if the user clicks `cancel' in the new session dialog */
 int
 ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, string load_template)
@@ -2814,7 +2800,7 @@ ARDOUR_UI::launch_manual ()
 void
 ARDOUR_UI::launch_reference ()
 {
-	PBD::open_uri("http://ardour.org/refmanual");
+	PBD::open_uri ("http://ardour.org/refmanual");
 }
 
 void
@@ -2830,6 +2816,20 @@ void
 ARDOUR_UI::about_signal_response (int /*response*/)
 {
 	hide_about();
+}
+
+void
+ARDOUR_UI::loading_message (const std::string& msg)
+{
+	if (ARDOUR_COMMAND_LINE::no_splash) {
+		return;
+	}
+
+	if (!splash) {
+		show_splash ();
+	}
+
+	splash->message (msg);
 }
 
 void

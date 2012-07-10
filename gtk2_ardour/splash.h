@@ -58,9 +58,8 @@ class Splash : public Gtk::Window
 	void boot_message (std::string);
 	PBD::ScopedConnection msg_connection;
 
-        bool splash_done_visible;
-        bool wakeup_from_splash_sleep ();
-        bool splash_mapped (GdkEventAny*);
+        bool expose_done;
+        bool idle_after_expose ();
 };
 
 #endif /* __ardour_gtk_splash_h__ */
