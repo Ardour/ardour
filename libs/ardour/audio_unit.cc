@@ -2790,6 +2790,11 @@ AUPlugin::parameter_change_listener (void* /*arg*/, void* /*src*/, const AudioUn
 	ParameterMap::iterator i = parameter_map.find (event->mArgument.mParameter.mParameterID);
 
 	if (i != parameter_map.end()) {
+		boost::shared_ptr<AutomationControl> ac = automation_control (Evoral::Parameter (PluginAutomation, 0, i->second));
+		if (ac) {
+			cerr << "updating " << ac->name() << " to << new_value << endl;
+			ac->set_double (new_value);
+		}
 		ParameterChanged (i->second, new_value);
 	}
 }
