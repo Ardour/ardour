@@ -137,12 +137,12 @@ class PluginInsert : public Processor
 		Split,       ///< we copy one of our insert's inputs to multiple plugin inputs
 		Hide,        ///< we `hide' some of the plugin's inputs by feeding them silence
 	};
-	
+
   private:
 	/* disallow copy construction */
 	PluginInsert (const PluginInsert&);
 
-	void parameter_changed (Evoral::Parameter, float);
+	void parameter_changed (uint32_t, float);
 
 	void  set_parameter (Evoral::Parameter param, float val);
 	float get_parameter (Evoral::Parameter param);

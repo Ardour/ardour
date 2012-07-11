@@ -2787,9 +2787,21 @@ AUPlugin::_parameter_change_listener (void* arg, void* src, const AudioUnitEvent
 void
 AUPlugin::parameter_change_listener (void* /*arg*/, void* /*src*/, const AudioUnitEvent* event, UInt64 /*host_time*/, Float32 new_value)
 {
-	ParameterMap::iterator i = parameter_map.find (event->mArgument.mParameter.mParameterID);
+        ParameterMap::iterator i;
 
-	if (i != parameter_map.end()) {
-		ParameterChanged (i->second, new_value);
-	}
+        switch (event->mEventType) {
+        case kAudioUnitEvent_BeginParameterChangeGesture:
+                break;
+        case kAudioUnitEvent_EndParameterChangeGesture:
+                break;
+        case kAudioUnitEvent_ParameterValueChange:
+                i = parameter_map.find (event->mArgument.mParameter.mParameterID);
+
+                if (i != parameter_map.end()) {
+                        ParameterChanged (i->second, new_value);
+                }
+                break;
+        default:
+                break;
+        }
 }
