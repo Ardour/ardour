@@ -2753,6 +2753,26 @@ AUPlugin::listen_to_parameter (uint32_t param_id)
 		return -1;
 	} 
 
+	event.mEventType = kAudioUnitEvent_BeginParameterChangeGesture;
+	event.mArgument.mParameter.mAudioUnit = unit->AU();
+	event.mArgument.mParameter.mParameterID = descriptors[param_id].id;
+	event.mArgument.mParameter.mScope = descriptors[param_id].scope;
+	event.mArgument.mParameter.mElement = descriptors[param_id].element;
+
+	if (AUEventListenerAddEventType (_parameter_listener, _parameter_listener_arg, &event) != noErr) {
+		return -1;
+	} 
+
+	event.mEventType = kAudioUnitEvent_EndParameterChangeGesture;
+	event.mArgument.mParameter.mAudioUnit = unit->AU();
+	event.mArgument.mParameter.mParameterID = descriptors[param_id].id;
+	event.mArgument.mParameter.mScope = descriptors[param_id].scope;
+	event.mArgument.mParameter.mElement = descriptors[param_id].element;
+
+	if (AUEventListenerAddEventType (_parameter_listener, _parameter_listener_arg, &event) != noErr) {
+		return -1;
+	} 
+
 	return 0;
 }
 
@@ -2766,6 +2786,26 @@ AUPlugin::end_listen_to_parameter (uint32_t param_id)
 	}
 
 	event.mEventType = kAudioUnitEvent_ParameterValueChange;
+	event.mArgument.mParameter.mAudioUnit = unit->AU();
+	event.mArgument.mParameter.mParameterID = descriptors[param_id].id;
+	event.mArgument.mParameter.mScope = descriptors[param_id].scope;
+	event.mArgument.mParameter.mElement = descriptors[param_id].element;
+
+	if (AUEventListenerRemoveEventType (_parameter_listener, _parameter_listener_arg, &event) != noErr) {
+		return -1;
+	} 
+
+	event.mEventType = kAudioUnitEvent_BeginParameterChangeGesture;
+	event.mArgument.mParameter.mAudioUnit = unit->AU();
+	event.mArgument.mParameter.mParameterID = descriptors[param_id].id;
+	event.mArgument.mParameter.mScope = descriptors[param_id].scope;
+	event.mArgument.mParameter.mElement = descriptors[param_id].element;
+
+	if (AUEventListenerRemoveEventType (_parameter_listener, _parameter_listener_arg, &event) != noErr) {
+		return -1;
+	} 
+
+	event.mEventType = kAudioUnitEvent_EndParameterChangeGesture;
 	event.mArgument.mParameter.mAudioUnit = unit->AU();
 	event.mArgument.mParameter.mParameterID = descriptors[param_id].id;
 	event.mArgument.mParameter.mScope = descriptors[param_id].scope;
@@ -2789,17 +2829,19 @@ AUPlugin::parameter_change_listener (void* /*arg*/, void* /*src*/, const AudioUn
 {
         ParameterMap::iterator i;
 
+        if ((i = parameter_map.find (event->mArgument.mParameter.mParameterID)) == parameter_map.end()) {
+                return;
+        }
+        
         switch (event->mEventType) {
         case kAudioUnitEvent_BeginParameterChangeGesture:
+                StartTouch (i->second);
                 break;
         case kAudioUnitEvent_EndParameterChangeGesture:
+                EndTouch (i->second);
                 break;
         case kAudioUnitEvent_ParameterValueChange:
-                i = parameter_map.find (event->mArgument.mParameter.mParameterID);
-
-                if (i != parameter_map.end()) {
-                        ParameterChanged (i->second, new_value);
-                }
+                ParameterChanged (i->second, new_value);
                 break;
         default:
                 break;

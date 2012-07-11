@@ -138,6 +138,9 @@ class PluginInsert : public Processor
 		Hide,        ///< we `hide' some of the plugin's inputs by feeding them silence
 	};
 
+        PBD::Signal1<void,uint32_t> StartTouch;
+        PBD::Signal1<void,uint32_t> EndTouch;
+	
   private:
 	/* disallow copy construction */
 	PluginInsert (const PluginInsert&);
@@ -185,6 +188,9 @@ class PluginInsert : public Processor
 
 	boost::shared_ptr<Plugin> plugin_factory (boost::shared_ptr<Plugin>);
 	void add_plugin (boost::shared_ptr<Plugin>);
+
+        void start_touch (uint32_t param_id);
+        void end_touch (uint32_t param_id);
 };
 
 } // namespace ARDOUR

@@ -1263,7 +1263,12 @@ PluginInsert::add_plugin (boost::shared_ptr<Plugin> plugin)
 	plugin->set_insert_info (this);
 	
 	if (_plugins.empty()) {
+                /* first (and probably only) plugin instance - connect to relevant signals 
+                 */
+
 		plugin->ParameterChanged.connect_same_thread (*this, boost::bind (&PluginInsert::parameter_changed, this, _1, _2));
+                plugin->StartTouch.connect_same_thread (*this, boost::bind (&PluginInsert::start_touch, this, _1));
+                plugin->EndTouch.connect_same_thread (*this, boost::bind (&PluginInsert::end_touch, this, _1));
 	}
 
 	_plugins.push_back (plugin);
@@ -1291,4 +1296,22 @@ PluginInsert::monitoring_changed ()
 	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
 		(*i)->monitoring_changed ();
 	}
+}
+
+void
+PluginInsert::start_touch (uint32_t param_id)
+{
+        boost::shared_ptr<AutomationControl> ac = automation_control (Evoral::Parameter (PluginAutomation, 0, param_id));
+        if (ac) {
+                ac->start_touch (session().audible_frame());
+        }
+}
+
+void
+PluginInsert::end_touch (uint32_t param_id)
+{
+        boost::shared_ptr<AutomationControl> ac = automation_control (Evoral::Parameter (PluginAutomation, 0, param_id));
+        if (ac) {
+                ac->stop_touch (true, session().audible_frame());
+        }
 }
