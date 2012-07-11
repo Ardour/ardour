@@ -264,8 +264,18 @@ PluginInsert::create_automatable_parameters ()
 void
 PluginInsert::parameter_changed (Evoral::Parameter which, float val)
 {
-	if (which.type() != PluginAutomation)
+	if (which.type() != PluginAutomation) {
 		return;
+	}
+
+	cerr << "Param change: " << which << endl;
+
+	boost::shared_ptr<AutomationControl> ac = automation_control (which);
+		
+	if (ac) {
+		cerr << "updating " << ac->name() << " to " << val << endl;
+		ac->set_double (val);
+	}
 
 	Plugins::iterator i = _plugins.begin();
 
@@ -1258,6 +1268,11 @@ void
 PluginInsert::add_plugin (boost::shared_ptr<Plugin> plugin)
 {
 	plugin->set_insert_info (this);
+	
+	if (_plugins.empty()) {
+		plugin->ParameterChanged.connect_same_thread (*this, boost::bind (&PluginInsert::parameter_changed, this, _1, _2));
+	}
+
 	_plugins.push_back (plugin);
 }
 
