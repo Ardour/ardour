@@ -31,9 +31,6 @@ RingBufferNPT<ThreadBuffers*>* BufferManager::thread_buffers = 0;
 std::list<ThreadBuffers*>* BufferManager::thread_buffers_list = 0;
 Glib::StaticMutex BufferManager::rb_mutex = GLIBMM_STATIC_MUTEX_INIT;
 
-using std::cerr;
-using std::endl;
-
 void
 BufferManager::init (uint32_t size)
 {
@@ -48,7 +45,6 @@ BufferManager::init (uint32_t size)
                 thread_buffers->write (&ts, 1);
 		thread_buffers_list->push_back (ts);
         }
-	cerr << "Initialized thread buffers, readable count now " << thread_buffers->read_space() << endl;
 
 }
 
@@ -59,7 +55,6 @@ BufferManager::get_thread_buffers ()
         ThreadBuffers* tbp;
 
         if (thread_buffers->read (&tbp, 1) == 1) {
-		cerr << "Got thread buffers, readable count now " << thread_buffers->read_space() << endl;
                 return tbp;
         }
 
@@ -71,7 +66,6 @@ BufferManager::put_thread_buffers (ThreadBuffers* tbp)
 {
 	Glib::Mutex::Lock em (rb_mutex);
         thread_buffers->write (&tbp, 1);
-	cerr << "Put back thread buffers, readable count now " << thread_buffers->read_space() << endl;
 }
 
 void
