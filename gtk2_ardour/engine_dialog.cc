@@ -1053,6 +1053,7 @@ EngineControl::get_device_name (const string& driver, const string& human_readab
 		   another computer system in it
 		*/
 		MessageDialog msg (_("You need to choose an audio device first."));
+                msg.set_position (WIN_POS_MOUSE);
 		msg.run ();
 		return string();
 	}
