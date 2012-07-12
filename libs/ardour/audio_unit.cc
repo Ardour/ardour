@@ -784,6 +784,10 @@ AUPlugin::set_parameter (uint32_t which, float val)
 		return;
 	}
 
+	if (get_parameter() == val) {
+		return;
+	}
+
 	const AUParameterDescriptor& d (descriptors[which]);
 	DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("set parameter %1 in scope %2 element %3 to %4\n", d.id, d.scope, d.element, val));
 	unit->SetParameter (d.id, d.scope, d.element, val);
