@@ -279,6 +279,11 @@ void
 LadspaPlugin::set_parameter (uint32_t which, float val)
 {
 	if (which < _descriptor->PortCount) {
+
+		if (get_parameter (which) == val) {
+			return;
+		}
+
 		_shadow_data[which] = (LADSPA_Data) val;
 
 #if 0
