@@ -621,6 +621,11 @@ AutomationTimeAxisView::paste_one (AutomationLine& line, framepos_t pos, float t
 	AutomationSelection::iterator p;
 	boost::shared_ptr<AutomationList> alist(line.the_list());
 
+	if (_session->transport_rolling() && alist->automation_write()) {
+		/* do not paste if this control is in write mode and we're rolling */
+		return false;
+	}
+
 	for (p = selection.lines.begin(); p != selection.lines.end() && nth; ++p, --nth) {}
 
 	if (p == selection.lines.end()) {

@@ -267,7 +267,7 @@ PluginInsert::parameter_changed (uint32_t which, float val)
 	boost::shared_ptr<AutomationControl> ac = automation_control (Evoral::Parameter (PluginAutomation, 0, which));
 
 	if (ac) {
-		ac->set_double (val);
+		ac->set_value (val);
                 
                 Plugins::iterator i = _plugins.begin();
                 

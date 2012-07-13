@@ -52,6 +52,7 @@ namespace PBD {
 	namespace DEBUG {
 		extern uint64_t Sequence;
 		extern uint64_t Note;
+		extern uint64_t ControlList;
 	}
 }
 

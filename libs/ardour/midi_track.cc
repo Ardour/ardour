@@ -283,8 +283,6 @@ MidiTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame
 
 	boost::shared_ptr<MidiDiskstream> diskstream = midi_diskstream();
 
-	automation_snapshot (start_frame);
-
 	if (n_outputs().n_total() == 0 && _processors.empty()) {
 		return 0;
 	}

@@ -299,8 +299,8 @@ Session::butler_transport_work ()
 			if (tr) {
 				tr->adjust_playback_buffering ();
 				/* and refill those buffers ... */
-				tr->non_realtime_locate (_transport_frame);
 			}
+			(*i)->non_realtime_locate (_transport_frame);
 		}
 
 	}
@@ -344,10 +344,8 @@ Session::butler_transport_work ()
 		if (!(ptw & PostTransportLocate)) {
 
 			for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-				boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
-				if (tr && !tr->hidden()) {
-					tr->non_realtime_locate (_transport_frame);
-				}
+				(*i)->non_realtime_locate (_transport_frame);
+
 				if (on_entry != g_atomic_int_get (&_butler->should_do_transport_work)) {
 					/* new request, stop seeking, and start again */
 					g_atomic_int_dec_and_test (&_butler->should_do_transport_work);
@@ -420,10 +418,7 @@ Session::non_realtime_locate ()
 {
 	boost::shared_ptr<RouteList> rl = routes.reader();
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
-		if (tr) {
-			tr->non_realtime_locate (_transport_frame);
-		}
+		(*i)->non_realtime_locate (_transport_frame);
 	}
 
 	/* XXX: it would be nice to generate the new clicks here (in the non-RT thread)
@@ -601,10 +596,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	DEBUG_TRACE (DEBUG::Transport, X_("Butler PTW: locate\n"));
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		DEBUG_TRACE (DEBUG::Transport, string_compose ("Butler PTW: locate on %1\n", (*i)->name()));
-		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
-		if (tr && !tr->hidden()) {
-			tr->non_realtime_locate (_transport_frame);
-		}
+		(*i)->non_realtime_locate (_transport_frame);
 
 		if (on_entry != g_atomic_int_get (&_butler->should_do_transport_work)) {
 			finished = false;
@@ -1236,7 +1228,6 @@ Session::start_transport ()
 		if (tr) {
 			tr->realtime_set_speed (tr->speed(), true);
 		}
-		(*i)->automation_snapshot (_transport_frame, true);
 	}
 
 	if (!_engine.freewheeling()) {

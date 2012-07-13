@@ -57,5 +57,6 @@ uint64_t PBD::DEBUG::Layering = PBD::new_debug_bit ("layering");
 uint64_t PBD::DEBUG::TempoMath = PBD::new_debug_bit ("tempomath");
 uint64_t PBD::DEBUG::TempoMap = PBD::new_debug_bit ("tempomap");
 uint64_t PBD::DEBUG::OrderKeys = PBD::new_debug_bit ("orderkeys");
+uint64_t PBD::DEBUG::Automation = PBD::new_debug_bit ("automation");
 
 

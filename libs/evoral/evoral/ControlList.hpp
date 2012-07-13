@@ -124,10 +124,8 @@ public:
 
 	virtual bool clamp_value (double& /*when*/, double& /*value*/) const { return true; }
 
-	void rt_add (double when, double value);
-	void add (double when, double value);
+        void add (double when, double value, bool erase_since_last_add = false);
 	void fast_simple_add (double when, double value);
-	void merge_nascent (double when);
 
 	void erase_range (double start, double end);
 	void erase (iterator);
@@ -245,6 +243,7 @@ public:
 	virtual bool touching() const { return false; }
 	virtual bool writing() const { return false; }
 	virtual bool touch_enabled() const { return false; }
+        void start_write_pass (double time);
 	void write_pass_finished (double when);
 
 	/** Emitted when mark_dirty() is called on this object */
@@ -256,6 +255,8 @@ public:
         static double thinning_factor() { return _thinning_factor; }
 
 	bool operator!= (ControlList const &) const;
+
+        void invalidate_insert_iterator ();
 
 protected:
 
@@ -287,21 +288,14 @@ protected:
 
 	Curve* _curve;
 
-	struct NascentInfo {
-		EventList events;
-		double start_time;
-		double end_time;
-   	        double same_value_cnt;
-	    
-		NascentInfo (double start = -1.0)
-			: start_time (start)
-			, end_time (-1.0)
-			, same_value_cnt (0)
-		{}
-	};
-
-	std::list<NascentInfo*> nascent;
         static double _thinning_factor;
+
+  private:
+    iterator   insert_iterator;
+    double     insert_position;
+    bool       new_write_pass;
+    bool       did_write_during_pass;
+    void unlocked_invalidate_insert_iterator ();
 };
 
 } // namespace Evoral

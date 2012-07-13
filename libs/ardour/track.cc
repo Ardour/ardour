@@ -620,7 +620,14 @@ Track::non_realtime_input_change ()
 void
 Track::non_realtime_locate (framepos_t p)
 {
-	_diskstream->non_realtime_locate (p);
+	Route::non_realtime_locate (p);
+
+	if (!hidden()) {
+		/* don't waste i/o cycles and butler calls
+		   for hidden (secret) tracks
+		*/
+		_diskstream->non_realtime_locate (p);
+	}
 }
 
 void

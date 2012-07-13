@@ -321,8 +321,6 @@ AudioTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_fram
 	framepos_t transport_frame;
 	boost::shared_ptr<AudioDiskstream> diskstream = audio_diskstream();
 
-	automation_snapshot (start_frame, false);
-
 	if (n_outputs().n_total() == 0 && _processors.empty()) {
 		return 0;
 	}

@@ -28,6 +28,8 @@
 
 #include "ardour/automation_list.h"
 #include "ardour/dB.h"
+#include "ardour/debug.h"
+
 #include "evoral/Curve.hpp"
 
 #include "simplerect.h"
@@ -79,6 +81,7 @@ AutomationLine::AutomationLine (const string& name, TimeAxisView& tv, ArdourCanv
 	_visible = Line;
 
 	update_pending = false;
+	have_timeout = false;
 	_uses_gain_mapping = false;
 	no_draw = false;
 	_is_boolean = false;
@@ -121,15 +124,6 @@ bool
 AutomationLine::event_handler (GdkEvent* event)
 {
 	return PublicEditor::instance().canvas_line_event (event, line, this);
-}
-
-void
-AutomationLine::queue_reset ()
-{
-	if (!update_pending) {
-		update_pending = true;
-		Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&AutomationLine::reset, this));
-	}
 }
 
 void
@@ -829,7 +823,12 @@ void AutomationLine::set_colors ()
 void
 AutomationLine::list_changed ()
 {
-	queue_reset ();
+	DEBUG_TRACE (DEBUG::Automation, string_compose ("\tline changed, existing update pending? %1\n", update_pending));
+
+	if (!update_pending) {
+		update_pending = true;
+		Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&AutomationLine::queue_reset, this));
+	}
 }
 
 void
@@ -936,13 +935,36 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 void
 AutomationLine::reset ()
 {
+	DEBUG_TRACE (DEBUG::Automation, "\t\tLINE RESET\n");
 	update_pending = false;
+	have_timeout = false;
 
 	if (no_draw) {
 		return;
 	}
 
 	alist->apply_to_points (*this, &AutomationLine::reset_callback);
+}
+
+void
+AutomationLine::queue_reset ()
+{
+	/* this must be called from the GUI thread
+	 */
+
+	if (trackview.editor().session()->transport_rolling() && alist->automation_write()) {
+		/* automation write pass ... defer to a timeout */
+		/* redraw in 1/4 second */
+		if (!have_timeout) {
+			DEBUG_TRACE (DEBUG::Automation, "\tqueue timeout\n");
+			Glib::signal_timeout().connect (sigc::bind_return (sigc::mem_fun (*this, &AutomationLine::reset), false), 250);
+			have_timeout = true;
+		} else {
+			DEBUG_TRACE (DEBUG::Automation, "\ttimeout already queued, change ignored\n");
+		}
+	} else {
+		reset ();
+	}
 }
 
 void

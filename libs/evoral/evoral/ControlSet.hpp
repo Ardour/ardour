@@ -38,7 +38,7 @@ class ControlSet : public boost::noncopyable {
 public:
 	ControlSet();
 	ControlSet (const ControlSet&);
-	virtual ~ControlSet() {}
+        virtual ~ControlSet() {}
 
 	virtual boost::shared_ptr<Evoral::Control>
 	control_factory(const Evoral::Parameter& id) = 0;

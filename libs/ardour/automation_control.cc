@@ -21,6 +21,7 @@
 #include <iostream>
 
 #include "ardour/automation_control.h"
+#include "ardour/automation_watch.h"
 #include "ardour/event_type_map.h"
 #include "ardour/session.h"
 
@@ -39,6 +40,10 @@ AutomationControl::AutomationControl(
 {
 }
 
+AutomationControl::~AutomationControl ()
+{
+}
+
 /** Get the current effective `user' value based on automation state */
 double
 AutomationControl::get_value() const
@@ -52,17 +57,18 @@ AutomationControl::get_value() const
  *  @param value `user' value
  */
 void
-AutomationControl::set_value(double value)
+AutomationControl::set_value (double value)
 {
-	bool to_list = _list && _session.transport_stopped()
-		&& ((AutomationList*)_list.get())->automation_write();
+	bool to_list = _list && ((AutomationList*)_list.get())->automation_write();
 
         if (to_list && parameter().toggled()) {
 
                 // store the previous value just before this so any
                 // interpolation works right
 
-                _list->add (get_double(), _session.transport_frame()-1);
+		bool erase_since_last = _session.transport_rolling();
+
+                _list->add (get_double(), _session.transport_frame()-1, erase_since_last);
         }
 
 	Control::set_double (value, to_list, _session.transport_frame());
@@ -72,9 +78,51 @@ AutomationControl::set_value(double value)
 
 
 void
-AutomationControl::set_list(boost::shared_ptr<Evoral::ControlList> list)
+AutomationControl::set_list (boost::shared_ptr<Evoral::ControlList> list)
 {
-	Control::set_list(list);
+	Control::set_list (list);
 	Changed();  /* EMIT SIGNAL */
 }
 
+void
+AutomationControl::set_automation_state (AutoState as)
+{
+	if (as != alist()->automation_state()) {
+
+		cerr << name() << " setting automation state to " << enum_2_string (as) << endl;
+
+		if (as == Write) {
+			AutomationWatch::instance().add_automation_watch (shared_from_this());
+		} else if (as == Touch) {
+			if (!touching()) {
+				AutomationWatch::instance().remove_automation_watch (shared_from_this());
+			}
+		} else {
+			AutomationWatch::instance().remove_automation_watch (shared_from_this());
+		}
+		
+		alist()->set_automation_state (as);
+	}
+}
+
+void
+AutomationControl::set_automation_style (AutoStyle as)
+{
+	alist()->set_automation_style (as);
+}
+
+void
+AutomationControl::start_touch(double when)
+{
+	set_touching (true);
+	AutomationWatch::instance().add_automation_watch (shared_from_this());
+	alist()->start_touch(when);
+}
+
+void
+AutomationControl::stop_touch(bool mark, double when)
+{
+	set_touching (false);
+	AutomationWatch::instance().remove_automation_watch (shared_from_this());
+	alist()->stop_touch (mark, when);
+}

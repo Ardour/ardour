@@ -180,11 +180,6 @@ AutomationList::set_automation_state (AutoState s)
 {
 	if (s != _state) {
 		_state = s;
-
-                if (_state == Write) {
-                        Glib::Mutex::Lock lm (ControlList::_lock);
-                        nascent.push_back (new NascentInfo ());
-                }
 		automation_state_changed (s); /* EMIT SIGNAL */
 	}
 }
@@ -202,8 +197,7 @@ void
 AutomationList::start_touch (double when)
 {
         if (_state == Touch) {
-                Glib::Mutex::Lock lm (ControlList::_lock);
-                nascent.push_back (new NascentInfo (when));
+		start_write_pass (when);
         }
 
 	g_atomic_int_set (&_touching, 1);
@@ -223,22 +217,11 @@ AutomationList::stop_touch (bool mark, double when)
 
         if (_state == Touch) {
 
-		assert (!nascent.empty ());
-
-                Glib::Mutex::Lock lm (ControlList::_lock);
-
                 if (mark) {
-
-			nascent.back()->end_time = when;
-
-                } else {
-
-                        /* nascent info created in start touch but never used. just get rid of it.
-                         */
-
-                        NascentInfo* ninfo = nascent.back ();
-                        nascent.erase (nascent.begin());
-                        delete ninfo;
+			
+			/* XXX need to mark the last added point with the
+			 * current time 
+			 */
                 }
         }
 }

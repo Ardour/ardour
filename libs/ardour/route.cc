@@ -2930,10 +2930,6 @@ Route::nonrealtime_handle_transport_stopped (bool /*abort_ignored*/, bool did_lo
 	{
 		Glib::RWLock::ReaderLock lm (_processor_lock);
 
-		if (!did_locate) {
-			automation_snapshot (now, true);
-		}
-
 		Automatable::transport_stopped (now);
 
 		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
@@ -3060,8 +3056,6 @@ Route::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, in
 	if (!lm.locked()) {
 		return 0;
 	}
-
-	automation_snapshot (_session.transport_frame(), false);
 
 	if (n_outputs().n_total() == 0) {
 		return 0;
@@ -3271,18 +3265,6 @@ Route::set_latency_compensation (framecnt_t longest_session_latency)
 
 	if (_session.transport_stopped()) {
 		_roll_delay = _initial_delay;
-	}
-}
-
-void
-Route::automation_snapshot (framepos_t now, bool force)
-{
-	if (_pannable) {
-		_pannable->automation_snapshot (now, force);
-	}
-
-	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		(*i)->automation_snapshot (now, force);
 	}
 }
 
@@ -4173,4 +4155,20 @@ Route::the_instrument () const
 		}
 	}
 	return boost::shared_ptr<Processor>();
+}
+
+void
+Route::non_realtime_locate (framepos_t pos)
+{
+	if (_pannable) {
+		_pannable->transport_located (pos);
+	}
+
+	{
+		Glib::RWLock::WriterLock lm (_processor_lock);
+		
+		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+			(*i)->transport_located (pos);
+		}
+	}
 }

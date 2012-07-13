@@ -62,6 +62,7 @@
 #include "ardour/ardour.h"
 #include "ardour/audioengine.h"
 #include "ardour/audiofilesource.h"
+#include "ardour/automation_watch.h"
 #include "ardour/diskstream.h"
 #include "ardour/filename_extensions.h"
 #include "ardour/port.h"
@@ -877,6 +878,7 @@ ARDOUR_UI::ask_about_saving_session (const vector<string>& actions)
 
 	return -1;
 }
+
 
 gint
 ARDOUR_UI::every_second ()

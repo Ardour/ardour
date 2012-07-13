@@ -131,6 +131,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	virtual void nonrealtime_handle_transport_stopped (bool abort, bool did_locate, bool flush_processors);
 	virtual void realtime_handle_transport_stopped () {}
 	virtual void realtime_locate () {}
+        virtual void non_realtime_locate (framepos_t);
 	virtual void set_pending_declick (int);
 
 	/* end of vfunc-based API */
@@ -409,7 +410,6 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	boost::shared_ptr<Processor> the_instrument() const;
         InstrumentInfo& instrument_info() { return _instrument_info; }
 
-	void automation_snapshot (framepos_t now, bool force=false);
 	void protect_automation ();
 
 	enum { 
