@@ -784,7 +784,7 @@ AUPlugin::set_parameter (uint32_t which, float val)
 		return;
 	}
 
-	if (get_parameter() == val) {
+	if (get_parameter(which) == val) {
 		return;
 	}
 
