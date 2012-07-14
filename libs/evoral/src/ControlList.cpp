@@ -545,17 +545,13 @@ ControlList::start_write_pass (double when)
 	new_write_pass = true;
 	did_write_during_pass = false;
 	insert_position = when;
+	
+	/* leave the insert iterator invalid, so that we will do the lookup
+	   of where it should be in a "lazy" way - deferring it until
+	   we actually add the first point (which may never happen).
+	*/
 
-	ControlEvent cp (when, 0.0);
-	insert_iterator = lower_bound (_events.begin(), _events.end(), &cp, time_comparator);
-
-	if ((*insert_iterator)->when != when) {
-		/* doesn't point at a control point at precisely this time,
-		   so reset it to the end and we'll find where to insert
-		   if/when a new control event is added.
-		*/
-		unlocked_invalidate_insert_iterator ();
-	}
+	unlocked_invalidate_insert_iterator ();
 }
 
 void
@@ -590,8 +586,7 @@ ControlList::add (double when, double value, bool erase_since_last_add)
 
 		if (new_write_pass) {
 
-			DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 new write pass, insert pos = %2, iter @ end ? %3\n",
-									 this, insert_position, (insert_iterator == _events.end())));
+			DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 new write pass, insert pos = %2\n", this, insert_position));
 			
 			/* The first addition of a new control event during a
 			 * write pass.
@@ -600,21 +595,18 @@ ControlList::add (double when, double value, bool erase_since_last_add)
 			 * corresponding the value there. 
 			 */
 
-			if (insert_iterator == _events.end()) {
-				/* the insert_iterator is not set, figure out where
-				 * it needs to be.
-				 */
-
-				ControlEvent cp (insert_position, 0.0);
-				insert_iterator = lower_bound (_events.begin(), _events.end(), &cp, time_comparator);
-				DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 looked up insert iterator for new write pass\n", this));
-			}
+			/* the insert_iterator is not set, figure out where
+			 * it needs to be.
+			 */
+			
+			ControlEvent cp (insert_position, 0.0);
+			insert_iterator = lower_bound (_events.begin(), _events.end(), &cp, time_comparator);
+			DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 looked up insert iterator for new write pass\n", this));
 
 			double eval_value = unlocked_eval (insert_position);
 			
 			if (insert_iterator == _events.end()) {
 				DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 insert iterator at end, adding eval-value there %2\n", this, eval_value));
-
 				_events.push_back (new ControlEvent (insert_position, eval_value));
 				/* leave insert iterator at the end */
 
@@ -698,14 +690,9 @@ ControlList::add (double when, double value, bool erase_since_last_add)
 
 			} else {
 
-				DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 find based on lower bound, erase = %2\n", this, erase_since_last_add));
-
-				/* the new point is somewhere within the list,
-				 * so figure out where to insert 
-				 */
-
-				ControlEvent cp (when, 0.0);
-				insert_iterator = lower_bound (_events.begin(), _events.end(), &cp, time_comparator);
+				DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 erase %2 from existing iterator (@end ? %3\n", 
+										 this, erase_since_last_add,
+										 (insert_iterator == _events.end())));
 
 				while (insert_iterator != _events.end()) {
 					if ((*insert_iterator)->when < when) {

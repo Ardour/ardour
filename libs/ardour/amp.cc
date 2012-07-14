@@ -383,7 +383,7 @@ Amp::set_gain (gain_t val, void *src)
 		return;
 	}
 
-	_gain_control->set_double(val, false);
+	_gain_control->set_double (val);
 	_session.set_dirty();
 }
 

@@ -46,12 +46,12 @@ Control::get_double (bool from_list, double frame) const
 
 
 void
-Control::set_double (double value, bool to_list, double frame)
+Control::set_double (double value, double frame, bool to_list, bool erase_since_last)
 {
 	_user_value = value;
 
 	if (to_list) {
-		_list->add (frame, value);
+		_list->add (frame, value, erase_since_last);
 	}
 }
 

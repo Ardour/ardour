@@ -60,18 +60,18 @@ void
 AutomationControl::set_value (double value)
 {
 	bool to_list = _list && ((AutomationList*)_list.get())->automation_write();
+	bool erase_since_last = _session.transport_rolling();
 
         if (to_list && parameter().toggled()) {
 
                 // store the previous value just before this so any
                 // interpolation works right
 
-		bool erase_since_last = _session.transport_rolling();
 
                 _list->add (get_double(), _session.transport_frame()-1, erase_since_last);
         }
 
-	Control::set_double (value, to_list, _session.transport_frame());
+	Control::set_double (value, _session.transport_frame(), to_list, erase_since_last);
 
 	Changed(); /* EMIT SIGNAL */
 }

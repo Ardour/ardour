@@ -109,9 +109,9 @@ SequenceTest::controlInterpolationTest ()
 	MIDI::controller_range(min, max, normal);
 
 	// Make a ramp like /\ from min to max and back to min
-	c->set_double(min, true, 0);
-	c->set_double(max, true, delay);
-	c->set_double(min, true, 2*delay);
+	c->set_double(min, 0, true);
+	c->set_double(max, delay, true);
+	c->set_double(min, 2*delay, true);
 
 	CCTestSink<Time> sink(cc_type);
 
