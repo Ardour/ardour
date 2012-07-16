@@ -555,6 +555,15 @@ FileSource::mark_immutable ()
 }
 
 void
+FileSource::mark_immutable_except_write ()
+{
+	/* destructive sources stay writable, and their other flags don't change.  */
+	if (!(_flags & Destructive)) {
+		_flags = Flag (_flags & ~(Removable|RemovableIfEmpty|RemoveAtDestroy|CanRename));
+	}
+}
+
+void
 FileSource::mark_nonremovable ()
 {
         _flags = Flag (_flags & ~(Removable|RemovableIfEmpty|RemoveAtDestroy));
