@@ -20,6 +20,8 @@
 #include "pbd/enumwriter.h"
 #include "midi++/types.h"
 
+#include "evoral/Range.hpp" // shouldn't Evoral have its own enum registration?
+
 #include "ardour/delivery.h"
 #include "ardour/diskstream.h"
 #include "ardour/export_channel.h"
@@ -122,6 +124,7 @@ setup_enum_writer ()
 	Session::PostTransportWork _Session_PostTransportWork;
 	Session::SlaveState _Session_SlaveState;
 	MTC_Status _MIDI_MTC_Status;
+	Evoral::OverlapType _OverlapType;
 
 #define REGISTER(e) enum_writer.register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_BITS(e) enum_writer.register_bits (typeid(e).name(), i, s); i.clear(); s.clear()
@@ -578,6 +581,13 @@ setup_enum_writer ()
 	REGISTER_ENUM(AudioTime);
 	REGISTER_ENUM(MusicTime);
 	REGISTER(_PositionLockStyle);
+
+	REGISTER_ENUM (Evoral::OverlapNone);
+	REGISTER_ENUM (Evoral::OverlapInternal);
+	REGISTER_ENUM (Evoral::OverlapStart);
+	REGISTER_ENUM (Evoral::OverlapEnd);
+	REGISTER_ENUM (Evoral::OverlapExternal);
+	REGISTER(_OverlapType);
 }
 
 } /* namespace ARDOUR */
@@ -849,6 +859,20 @@ std::istream& operator>>(std::istream& o, PositionLockStyle& var)
 }
 
 std::ostream& operator<<(std::ostream& o, const PositionLockStyle& var)
+{
+	std::string s = enum_2_string (var);
+	return o << s;
+}
+
+std::istream& operator>>(std::istream& o, Evoral::OverlapType& var)
+{
+	std::string s;
+	o >> s;
+	var = (Evoral::OverlapType) string_2_enum (s, var);
+	return o;
+}
+
+std::ostream& operator<<(std::ostream& o, const Evoral::OverlapType& var)
 {
 	std::string s = enum_2_string (var);
 	return o << s;
