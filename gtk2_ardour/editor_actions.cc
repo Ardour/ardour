@@ -1692,7 +1692,7 @@ Editor::register_region_actions ()
 	reg_sens (_region_actions, "quantize-region", _("Quantize..."), sigc::mem_fun (*this, &Editor::quantize_region));
 	reg_sens (_region_actions, "insert-patch-change", _("Insert Patch Change..."), sigc::bind (sigc::mem_fun (*this, &Editor::insert_patch_change), false));
 	reg_sens (_region_actions, "insert-patch-change-context", _("Insert Patch Change..."), sigc::bind (sigc::mem_fun (*this, &Editor::insert_patch_change), true));
-	reg_sens (_region_actions, "fork-region", _("Fork"), sigc::mem_fun (*this, &Editor::fork_region));
+	reg_sens (_region_actions, "fork-region", _("Unlink from other copies"), sigc::mem_fun (*this, &Editor::fork_region));
 	reg_sens (_region_actions, "strip-region-silence", _("Strip Silence..."), sigc::mem_fun (*this, &Editor::strip_region_silence));
 	reg_sens (_region_actions, "set-selection-from-region", _("Set Range Selection"), sigc::mem_fun (*this, &Editor::set_selection_from_region));
 
