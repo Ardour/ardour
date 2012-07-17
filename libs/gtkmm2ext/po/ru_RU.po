@@ -1,28 +1,32 @@
 # Copyright (C) 2004 Paul Davis
 # This file is distributed under the same license as the gtkmm2ext package.
 # Igor Blinov pitstop@nm.ru, 2004.
+# п░п╩п╣п╨я│п╟п╫п╢я─ п÷я─п╬п╨я┐п╢п╦п╫ <alexandre.prokoudine@gmail.com>, 2012.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: gtkmm2ext\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-11-21 16:11-0500\n"
-"PO-Revision-Date: 2004-02-13 00:35+0300\n"
-"Last-Translator: Igor Blinov pitstop@nm.ru\n"
-"Language-Team: Russian\n"
+"POT-Creation-Date: 2012-07-15 09:17+0400\n"
+"PO-Revision-Date: 2012-07-15 14:08+0400\n"
+"Last-Translator: п░п╩п╣п╨я│п╟п╫п╢я─ п÷я─п╬п╨я┐п╢п╦п╫ <alexandre.prokoudine@gmail.com>\n"
+"Language-Team: я─я┐я│я│п╨п╦п╧ <>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=koi8-r\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2); 10<=4 && (n%100<10 || n"
+"%100>=20) ? 1 : 2);\n"
 
-#: actions.cc:327
+#: actions.cc:386
 msgid "Unknown action name: %1"
-msgstr ""
+msgstr "п²п╣п╦п╥п╡п╣я│я┌п╫п╬п╣ п╫п╟п╥п╡п╟п╫п╦п╣ п╢п╣п╧я│я┌п╡п╦я▐: %1"
 
 #: binding_proxy.cc:84
 #, fuzzy
 msgid "operate controller now"
-msgstr "включить MIDI-контроллер"
+msgstr "п╡п╨п╩я▌я┤п╦я┌я▄ MIDI-п╨п╬п╫я┌я─п╬п╩п╩п╣я─"
 
 #: bindable_button.cc:48
 msgid "button cannot watch state of non-existing Controllable\n"
@@ -30,45 +34,55 @@ msgstr ""
 
 #: gtk_ui.cc:105
 msgid "Log"
-msgstr ""
+msgstr "п√я┐я─п╫п╟п╩"
 
-#: gtk_ui.cc:624
+#: gtk_ui.cc:361
+msgid ""
+"\n"
+"\n"
+"Key: "
+msgstr ""
+"\n"
+"\n"
+"п п╩п╟п╡п╦я┬п╟: "
+
+#: gtk_ui.cc:634
 msgid "Press To Exit"
-msgstr ""
+msgstr "п²п╟п╤п╪п╦я┌п╣ п╢п╩я▐ п╡я▀я┘п╬п╢п╟"
 
-#: gtk_ui.cc:660
+#: gtk_ui.cc:670
 msgid "I'm sorry %1, I can't do that"
 msgstr ""
 
 #: keyboard.cc:68
 msgid "Command"
-msgstr ""
+msgstr "п п╬п╪п╟п╫п╢п╟"
 
 #: keyboard.cc:69 keyboard.cc:72 keyboard.cc:85 keyboard.cc:89
 msgid "Control"
-msgstr ""
+msgstr "Ctrl"
 
 #: keyboard.cc:70 keyboard.cc:73 keyboard.cc:87 keyboard.cc:90
-msgid "Shift"
-msgstr ""
+msgid "Key|Shift"
+msgstr "Shift"
 
 #: keyboard.cc:71
 msgid "Option"
-msgstr ""
+msgstr "Option"
 
 #: keyboard.cc:86
 msgid "Alt"
-msgstr ""
+msgstr "Alt"
 
 #: keyboard.cc:88
 msgid "Meta"
-msgstr ""
+msgstr "Meta"
 
-#: keyboard.cc:131 keyboard.cc:506
+#: keyboard.cc:134 keyboard.cc:523
 msgid "Unknown"
-msgstr ""
+msgstr "п²п╣п╦п╥п╡п╣я│я┌п╫п╬"
 
-#: keyboard.cc:517
+#: keyboard.cc:534
 msgid "Ardour key bindings file not found at \"%1\" or contains errors."
 msgstr ""
 
@@ -82,34 +96,34 @@ msgstr ""
 
 #: textviewer.cc:34
 msgid "Close"
-msgstr "Закрыть"
+msgstr "п≈п╟п╨я─я▀я┌я▄"
 
 #~ msgid "OK"
-#~ msgstr "ОК"
+#~ msgstr "п·п "
 
 #~ msgid "Location:"
-#~ msgstr "Путь:"
+#~ msgstr "п÷я┐я┌я▄:"
 
 #~ msgid "Browse ..."
-#~ msgstr "Обзор ..."
+#~ msgstr "п·п╠п╥п╬я─ ..."
 
 #~ msgid "Cancel"
-#~ msgstr "Отмена"
+#~ msgstr "п·я┌п╪п╣п╫п╟"
 
 #~ msgid "New folder"
-#~ msgstr "Новая папка"
+#~ msgstr "п²п╬п╡п╟я▐ п©п╟п©п╨п╟"
 
 #~ msgid "Add to favorites"
-#~ msgstr "Добавить в избранное"
+#~ msgstr "п■п╬п╠п╟п╡п╦я┌я▄ п╡ п╦п╥п╠я─п╟п╫п╫п╬п╣"
 
 #~ msgid "Remove from favorites"
-#~ msgstr "Исключить из избранного"
+#~ msgstr "п≤я│п╨п╩я▌я┤п╦я┌я▄ п╦п╥ п╦п╥п╠я─п╟п╫п╫п╬пЁп╬"
 
 #~ msgid "Show Hidden"
-#~ msgstr "Показывать скрытые файлы"
+#~ msgstr "п÷п╬п╨п╟п╥я▀п╡п╟я┌я▄ я│п╨я─я▀я┌я▀п╣ я└п╟п╧п╩я▀"
 
 #~ msgid "Hide browser"
-#~ msgstr "Скрыть область обзора"
+#~ msgstr "п║п╨я─я▀я┌я▄ п╬п╠п╩п╟я│я┌я▄ п╬п╠п╥п╬я─п╟"
 
 #~ msgid "Rescan"
-#~ msgstr "Обновить"
+#~ msgstr "п·п╠п╫п╬п╡п╦я┌я▄"
