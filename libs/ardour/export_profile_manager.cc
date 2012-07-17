@@ -613,7 +613,7 @@ ExportProfileManager::get_new_format (ExportFormatSpecPtr original)
 		format.reset (new ExportFormatSpecification (*original));
 	} else {
 		format = handler->add_format();
-		format->set_name ("empty format");
+		format->set_name (_("empty format"));
 	}
 
 	std::string path = save_format_to_disk (format);

@@ -52,7 +52,7 @@ TempoDialog::TempoDialog (TempoMap& map, framepos_t frame, const string&)
 }
 
 TempoDialog::TempoDialog (TempoSection& section, const string&)
-	: ArdourDialog ("Edit Tempo")
+	: ArdourDialog (_("Edit Tempo"))
 	, bpm_adjustment (60.0, 1.0, 999.9, 0.1, 1.0)
 	, bpm_spinner (bpm_adjustment)
 	, when_bar_label (_("bar:"), ALIGN_LEFT, ALIGN_CENTER)
@@ -252,7 +252,7 @@ TempoDialog::pulse_change ()
 
 
 MeterDialog::MeterDialog (TempoMap& map, framepos_t frame, const string&)
-	: ArdourDialog ("New Meter")
+	: ArdourDialog (_("New Meter"))
 {
 	Timecode::BBT_Time when;
 	frame = map.round_to_bar(frame,0);
@@ -263,7 +263,7 @@ MeterDialog::MeterDialog (TempoMap& map, framepos_t frame, const string&)
 }
 
 MeterDialog::MeterDialog (MeterSection& section, const string&)
-	: ArdourDialog ("Edit Meter")
+	: ArdourDialog (_("Edit Meter"))
 {
 	init (section.start(), section.divisions_per_bar(), section.note_divisor(), section.movable());
 }
