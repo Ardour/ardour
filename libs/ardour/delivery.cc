@@ -71,7 +71,7 @@ Delivery::Delivery (Session& s, boost::shared_ptr<IO> io, boost::shared_ptr<Pann
 /* deliver to a new IO object */
 
 Delivery::Delivery (Session& s, boost::shared_ptr<Pannable> pannable, boost::shared_ptr<MuteMaster> mm, const string& name, Role r)
-	: IOProcessor(s, false, (role_requires_output_ports (r) ? true : false), name)
+	: IOProcessor(s, false, (role_requires_output_ports (r) ? true : false), name, "", DataType::AUDIO, (r == Send))
 	, _role (r)
 	, _output_buffers (new BufferSet())
 	, _current_gain (1.0)

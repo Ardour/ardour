@@ -58,10 +58,11 @@ PBD::Signal1<void,ChanCount> IO::PortCountChanged;
 /** @param default_type The type of port that will be created by ensure_io
  * and friends if no type is explicitly requested (to avoid breakage).
  */
-IO::IO (Session& s, const string& name, Direction dir, DataType default_type)
+IO::IO (Session& s, const string& name, Direction dir, DataType default_type, bool sendish)
 	: SessionObject (s, name)
 	, _direction (dir)
 	, _default_type (default_type)
+	, _sendish (sendish)
 {
 	_active = true;
 	Port::PostDisconnect.connect_same_thread (*this, boost::bind (&IO::disconnect_check, this, _1, _2));
@@ -69,10 +70,11 @@ IO::IO (Session& s, const string& name, Direction dir, DataType default_type)
 	setup_bundle ();
 }
 
-IO::IO (Session& s, const XMLNode& node, DataType dt)
+IO::IO (Session& s, const XMLNode& node, DataType dt, bool sendish)
 	: SessionObject(s, "unnamed io")
 	, _direction (Input)
 	, _default_type (dt)
+	, _sendish (sendish)
 {
 	_active = true;
 	pending_state_node = 0;
@@ -1347,10 +1349,18 @@ IO::build_legal_port_name (DataType type)
 	   use the (new) translated name.
 	*/
 
-	if (_direction == Input) {
-		suffix += X_("_in");
+	if (_sendish) {
+		if (_direction == Input) {
+			suffix += X_("_return");
+		} else {
+			suffix += X_("_send");
+		}
 	} else {
-		suffix += X_("_out");
+		if (_direction == Input) {
+			suffix += X_("_in");
+		} else {
+			suffix += X_("_out");
+		}
 	}
 
 	// allow up to 4 digits for the output port number, plus the slash, suffix and extra space

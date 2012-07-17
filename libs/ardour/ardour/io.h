@@ -74,8 +74,8 @@ class IO : public SessionObject, public Latent
 		Output
 	};
 
-	IO (Session&, const std::string& name, Direction, DataType default_type = DataType::AUDIO);
-	IO (Session&, const XMLNode&, DataType default_type = DataType::AUDIO);
+        IO (Session&, const std::string& name, Direction, DataType default_type = DataType::AUDIO, bool sendish = false);
+        IO (Session&, const XMLNode&, DataType default_type = DataType::AUDIO, bool sendish = false);
 
 	virtual ~IO();
 
@@ -207,6 +207,7 @@ class IO : public SessionObject, public Latent
 	Direction _direction;
 	DataType _default_type;
 	bool     _active;
+        bool     _sendish;
 
   private:
 	int connecting_became_legal ();

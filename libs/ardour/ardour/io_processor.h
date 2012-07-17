@@ -44,10 +44,10 @@ class IOProcessor : public Processor
 {
   public:
 	IOProcessor (Session&, bool with_input, bool with_output,
-			  const std::string& proc_name, const std::string io_name="",
-			  ARDOUR::DataType default_type = DataType::AUDIO);
-	IOProcessor (Session&, boost::shared_ptr<IO> input, boost::shared_ptr<IO> output,
-			const std::string& proc_name, ARDOUR::DataType default_type = DataType::AUDIO);
+		     const std::string& proc_name, const std::string io_name="",
+  		     ARDOUR::DataType default_type = DataType::AUDIO, bool sendish=false);
+        IOProcessor (Session&, boost::shared_ptr<IO> input, boost::shared_ptr<IO> output,
+		     const std::string& proc_name, ARDOUR::DataType default_type = DataType::AUDIO);
 	virtual ~IOProcessor ();
 
 	bool set_name (const std::string& str);
