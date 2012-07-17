@@ -25,7 +25,8 @@ class EditorCursor {
 public:
 	Editor&              editor;
 	ArdourCanvas::Points points;
-	ArdourCanvas::Line   canvas_item;
+	ArdourCanvas::Line   shade;	
+        ArdourCanvas::Line   canvas_item;
 	framepos_t           current_frame;
 	double               length;
 

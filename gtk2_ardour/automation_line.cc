@@ -93,7 +93,7 @@ AutomationLine::AutomationLine (const string& name, TimeAxisView& tv, ArdourCanv
 	group->property_y() = 0.0;
 
 	line = new ArdourCanvas::Line (*group);
-	line->property_width_pixels() = (guint)1;
+	line->property_width_pixels() = (guint)3;
 	line->set_data ("line", this);
 
 	line->signal_event().connect (sigc::mem_fun (*this, &AutomationLine::event_handler));
