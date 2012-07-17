@@ -565,6 +565,15 @@ AutomationTimeAxisView::add_automation_event (GdkEvent* event, framepos_t when, 
 		return;
 	}
 
+	boost::shared_ptr<AutomationList> list = _line->the_list ();
+	
+	if (list->in_write_pass()) {
+		/* do not allow the GUI to add automation events during an
+		   automation write pass.
+		*/
+		return;
+	}
+
 	double x = 0;
 
 	_canvas_display->w2i (x, y);
@@ -577,7 +586,6 @@ AutomationTimeAxisView::add_automation_event (GdkEvent* event, framepos_t when, 
 
 	_line->view_to_model_coord (x, y);
 
-	boost::shared_ptr<AutomationList> list = _line->the_list ();
 
 	_editor.snap_to_with_modifier (when, event);
 

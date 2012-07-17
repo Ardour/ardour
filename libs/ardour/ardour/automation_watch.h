@@ -51,7 +51,9 @@ class AutomationWatch : public sigc::trackable, public ARDOUR::SessionHandlePtr,
     bool                    _run_thread;
     AutomationWatches        automation_watches;
     Glib::Mutex              automation_watch_lock;
+    PBD::ScopedConnection    transport_connection;
 
+    void transport_state_change ();
     void remove_weak_automation_watch (boost::weak_ptr<ARDOUR::AutomationControl>);
     void thread ();
 };

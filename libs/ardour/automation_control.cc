@@ -60,7 +60,6 @@ void
 AutomationControl::set_value (double value)
 {
 	bool to_list = _list && ((AutomationList*)_list.get())->automation_write();
-	bool erase_since_last = _session.transport_rolling();
 
         if (to_list && parameter().toggled()) {
 
@@ -68,14 +67,13 @@ AutomationControl::set_value (double value)
                 // interpolation works right
 
 
-                _list->add (get_double(), _session.transport_frame()-1, erase_since_last);
+                _list->add (get_double(), _session.transport_frame()-1);
         }
 
-	Control::set_double (value, _session.transport_frame(), to_list, erase_since_last);
+	Control::set_double (value, _session.transport_frame(), to_list);
 
 	Changed(); /* EMIT SIGNAL */
 }
-
 
 void
 AutomationControl::set_list (boost::shared_ptr<Evoral::ControlList> list)
@@ -91,17 +89,24 @@ AutomationControl::set_automation_state (AutoState as)
 
 		cerr << name() << " setting automation state to " << enum_2_string (as) << endl;
 
+		alist()->set_automation_state (as);
+
 		if (as == Write) {
 			AutomationWatch::instance().add_automation_watch (shared_from_this());
 		} else if (as == Touch) {
 			if (!touching()) {
 				AutomationWatch::instance().remove_automation_watch (shared_from_this());
+			} else {
+				/* this seems unlikely, but the combination of
+				 * a control surface and the mouse could make
+				 * it possible to put the control into Touch
+				 * mode *while* touching it.
+				 */
+				AutomationWatch::instance().add_automation_watch (shared_from_this());
 			}
 		} else {
 			AutomationWatch::instance().remove_automation_watch (shared_from_this());
 		}
-		
-		alist()->set_automation_state (as);
 	}
 }
 

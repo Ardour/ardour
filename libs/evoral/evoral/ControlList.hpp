@@ -124,7 +124,7 @@ public:
 
 	virtual bool clamp_value (double& /*when*/, double& /*value*/) const { return true; }
 
-        void add (double when, double value, bool erase_since_last_add = false);
+        virtual void add (double when, double value);
 	void fast_simple_add (double when, double value);
 
 	void erase_range (double start, double end);
@@ -245,6 +245,8 @@ public:
 	virtual bool touch_enabled() const { return false; }
         void start_write_pass (double time);
 	void write_pass_finished (double when);
+        void set_in_write_pass (bool);
+        bool in_write_pass () const;
 
 	/** Emitted when mark_dirty() is called on this object */
 	mutable PBD::Signal0<void> Dirty;
@@ -291,10 +293,11 @@ protected:
         static double _thinning_factor;
 
   private:
-    iterator   insert_iterator;
+    iterator   most_recent_insert_iterator;
     double     insert_position;
     bool       new_write_pass;
     bool       did_write_during_pass;
+    bool       _in_write_pass;
     void unlocked_invalidate_insert_iterator ();
 };
 

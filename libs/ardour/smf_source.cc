@@ -281,7 +281,7 @@ SMFSource::write_unlocked (MidiRingBuffer<framepos_t>& source, framepos_t positi
 		append_event_unlocked_frames(ev, position);
 	}
 
-	Evoral::SMF::flush();
+	Evoral::SMF::flush ();
 	free (buf);
 
 	return duration;
@@ -338,9 +338,9 @@ SMFSource::append_event_unlocked_frames (const Evoral::Event<framepos_t>& ev, fr
 		return;
 	}
 
-	/* printf("SMFSource: %s - append_event_unlocked_frames ID = %d time = %u, size = %u, data = ",
-               name().c_str(), ev.id(), ev.time(), ev.size());
-	   for (size_t i=0; i < ev.size(); ++i) printf("%X ", ev.buffer()[i]); printf("\n");*/
+	// printf("SMFSource: %s - append_event_unlocked_frames ID = %d time = %u, size = %u, data = ",
+	// name().c_str(), ev.id(), ev.time(), ev.size());
+	// for (size_t i=0; i < ev.size(); ++i) printf("%X ", ev.buffer()[i]); printf("\n");
 
 	if (ev.time() < _last_ev_time_frames) {
 		cerr << "SMFSource: Warning: Skipping event with non-monotonic time" << endl;
@@ -431,6 +431,7 @@ SMFSource::mark_midi_streaming_write_completed (Evoral::Sequence<Evoral::Musical
 	MidiSource::mark_midi_streaming_write_completed (stuck_notes_option, when);
 
 	if (!writable()) {
+		warning << string_compose ("attempt to write to unwritable SMF file %1", _path) << endmsg;
 		return;
 	}
 

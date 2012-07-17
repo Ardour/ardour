@@ -300,8 +300,6 @@ MidiSource::mark_write_starting_now ()
 
 	set_timeline_position (_session.transport_frame ());
 	_last_write_end = _session.transport_frame ();
-	cerr << name() << " last write set to " << _last_write_end << endl;
-
 }
 
 void
@@ -388,7 +386,7 @@ MidiSource::session_saved()
 	*/
 
 	if (_model && _model->edited()) {
-
+		
 		// if the model is edited, write its contents into
 		// the current source file (overwiting previous contents.
 

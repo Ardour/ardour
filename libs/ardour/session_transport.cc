@@ -638,6 +638,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	}
 
 	PositionChanged (_transport_frame); /* EMIT SIGNAL */
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("send TSC with speed = %1\n", _transport_speed));
 	TransportStateChange (); /* EMIT SIGNAL */
 
 	/* and start it up again if relevant */
@@ -766,6 +767,7 @@ Session::set_play_loop (bool yn)
 		unset_play_loop ();
 	}
 
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("send TSC2 with speed = %1\n", _transport_speed));
 	TransportStateChange ();
 }
 void
@@ -1117,6 +1119,7 @@ Session::set_transport_speed (double speed, bool abort, bool clear_state, bool a
 			_butler->schedule_transport_work ();
 		}
 
+		DEBUG_TRACE (DEBUG::Transport, string_compose ("send TSC3 with speed = %1\n", _transport_speed));
 		TransportStateChange (); /* EMIT SIGNAL */
 	}
 }
@@ -1238,6 +1241,7 @@ Session::start_transport ()
 		}
 	}
 
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("send TSC4 with speed = %1\n", _transport_speed));
 	TransportStateChange (); /* EMIT SIGNAL */
 }
 
@@ -1486,6 +1490,7 @@ Session::set_play_range (list<AudioRange>& range, bool leave_rolling)
 	ev = new SessionEvent (SessionEvent::LocateRoll, SessionEvent::Add, SessionEvent::Immediate, range.front().start, 0.0f, false);
 	merge_event (ev);
 
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("send TSC5 with speed = %1\n", _transport_speed));
 	TransportStateChange ();
 }
 
@@ -1528,6 +1533,7 @@ Session::engine_halted ()
 	non_realtime_stop (false, 0, ignored);
 	transport_sub_state = 0;
 
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("send TSC6 with speed = %1\n", _transport_speed));
 	TransportStateChange (); /* EMIT SIGNAL */
 }
 

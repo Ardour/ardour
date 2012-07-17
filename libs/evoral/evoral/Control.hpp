@@ -44,7 +44,7 @@ public:
 	Control(const Parameter& parameter, boost::shared_ptr<ControlList>);
 	virtual ~Control() {}
 
-        virtual void   set_double (double val, double frame=0, bool to_list=false, bool erase_since_last=false);
+        virtual void   set_double (double val, double frame=0, bool to_list=false);
 	virtual double get_double (bool from_list=false, double frame=0) const;
 
 	/** Get the latest user-set value
