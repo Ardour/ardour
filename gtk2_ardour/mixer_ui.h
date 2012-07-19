@@ -166,9 +166,11 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 
 	void initial_track_display ();
 	void show_track_list_menu ();
-
+      
 	void set_all_strips_visibility (bool yn);
 	void set_all_audio_visibility (int tracks, bool yn);
+        void track_visibility_changed (std::string const & path);
+        void update_track_visibility ();
 
 	void hide_all_routes ();
 	void show_all_routes ();
@@ -244,8 +246,9 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 
 	Width _strip_width;
 
-        void sync_order_keys_from_model ();
-        void sync_model_from_order_keys (ARDOUR::RouteSortOrderKey);
+        void sync_order_keys_from_treeview ();
+        void sync_treeview_from_order_keys (ARDOUR::RouteSortOrderKey);
+        void reset_remote_control_ids ();
         bool ignore_reorder;
 
 	void parameter_changed (std::string const &);

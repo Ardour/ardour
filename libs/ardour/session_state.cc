@@ -3507,16 +3507,9 @@ Session::config_changed (std::string p, bool ours)
 	} else if (p == "history-depth") {
 		set_history_depth (Config->get_history_depth());
 	} else if (p == "remote-model") {
-		switch (Config->get_remote_model()) {
-		case UserOrdered:
-			break;
-		case MixerOrdered:
-			sync_remote_id_from_order_keys (MixerSort);
-			break;
-		case EditorOrdered:
-			sync_remote_id_from_order_keys (EditorSort);
-			break;
-		}
+		/* XXX DO SOMETHING HERE TO TELL THE GUI THAT WE NEED
+		   TO SET REMOTE ID'S
+		*/
 	} else if (p == "sync-all-route-ordering") {
 
 		/* sync to editor order unless mixer is used for remote IDs 

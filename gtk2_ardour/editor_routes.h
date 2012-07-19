@@ -59,9 +59,10 @@ public:
 	std::list<TimeAxisView*> views () const;
 	void hide_all_tracks (bool);
 	void clear ();
-        void sync_order_keys_from_model ();
-private:
+        void sync_order_keys_from_treeview ();
+        void reset_remote_control_ids ();
 
+private:
 	void initial_display ();
 	void on_input_active_changed (std::string const &);
 	void on_tv_rec_enable_changed (std::string const &);
@@ -71,7 +72,7 @@ private:
 	void on_tv_solo_safe_toggled (std::string const &);
 	void build_menu ();
 	void show_menu ();
-        void sync_model_from_order_keys (ARDOUR::RouteSortOrderKey);
+        void sync_treeview_from_order_keys (ARDOUR::RouteSortOrderKey);
 	void route_deleted (Gtk::TreeModel::Path const &);
 	void visible_changed (std::string const &);
 	void active_changed (std::string const &);

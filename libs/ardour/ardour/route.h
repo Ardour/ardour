@@ -423,7 +423,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 
 	void     set_remote_control_id (uint32_t id, bool notify_class_listeners = true);
 	uint32_t remote_control_id () const;
-        void     set_remote_control_id_from_order_key (RouteSortOrderKey);
+        void     set_remote_control_id_from_order_key (RouteSortOrderKey, uint32_t order_key);
 
 	/* for things concerned about *this* route's RID */
 
@@ -530,8 +530,6 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
   private:
 	int set_state_2X (const XMLNode&, int);
 	void set_processor_state_2X (XMLNodeList const &, int);
-
-	static uint32_t order_key_cnt;
 
 	typedef std::map<RouteSortOrderKey,uint32_t> OrderKeys;
  	OrderKeys order_keys;

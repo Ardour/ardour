@@ -66,7 +66,6 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-uint32_t Route::order_key_cnt = 0;
 PBD::Signal1<void,RouteSortOrderKey> Route::SyncOrderKeys;
 PBD::Signal0<void> Route::RemoteControlIDChange;
 
@@ -286,19 +285,12 @@ Route::sync_order_keys (RouteSortOrderKey base)
 
 	for (OrderKeys::iterator k = order_keys.begin(); k != order_keys.end(); ++k) {
 
-		if (is_master() || is_monitor()) {
-			/* don't sync the sort keys for master/monitor,
-			 * since they are not part of the normal ordering.
-			 */
-			continue;
-		}
-		
 		if (k->first != base) {
 			DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("%1 set key for %2 to %3 from %4\n",
 								       name(),
 								       enum_2_string (k->first),
 								       i->second,
-								       base));
+								       enum_2_string (base)));
 								       
 			k->second = i->second;
 		}
@@ -306,66 +298,17 @@ Route::sync_order_keys (RouteSortOrderKey base)
 }
 
 void
-Route::set_remote_control_id_from_order_key (RouteSortOrderKey key)
+Route::set_remote_control_id_from_order_key (RouteSortOrderKey key, uint32_t rid)
 {
 	if (is_master() || is_monitor() || is_hidden()) {
 		/* hard-coded remote IDs, or no remote ID */
 		return;
 	}
 
-	uint32_t n = order_keys[key];
-
-	/* we have a nasty glitch in an otherwise fairly clean system here.
-
-	   in theory, a route's remote control ID is determined by the order
-	   key matching the current remote model (for UserOrdered, the user
-	   controls everything). its one greater, because order keys are zero
-	   based and remote control IDs start at one.
-
-	   but ... an order key for the master bus may place it before or even
-	   within normal routes, yet its remote control ID (like the monitor
-	   bus) is hardcoded to MasterBusRemoteControlID. this means that all
-	   routes ordered after it (in whatever controls the EditorSort or
-	   MixerSort ordering) will end up with a remote control ID that is one
-	   too large.
-
-	   we therefore check on the master bus ordering, and adjust
-	   later-sorted routes remote control ID to avoid this "off by one"
-	   error, which keeps remote control ID's contiguous and "right".
-
-	   ideally, this would be done in a UI layer, where this logic
-	   is really understood and has meaning, rather than in libardour where
-	   its fundamentally meaningless.
-	*/
-
-	switch (Config->get_remote_model()) {
-	case UserOrdered:
-		break;
-	case EditorOrdered:
-		if (key == EditorSort) {
-			boost::shared_ptr<Route> master = _session.master_out();
-			if (master && n > 0 && n > master->order_key (EditorSort)) {
-				--n;
-			}
-			_remote_control_id = n + 1;
-			DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("%1: from order key %2, set edit-based RID to %3\n", 
-								       name(), n, _remote_control_id));
-			RemoteControlIDChanged (); /* EMIT SIGNAL * (per-route) */
-		}
-		break;
-		
-	case MixerOrdered:
-		if (key == MixerSort) {
-			boost::shared_ptr<Route> master = _session.master_out();
-			if (master && n > 0 && n > master->order_key (MixerSort)) {
-				--n;
-			}
-			_remote_control_id = n + 1;
-			DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("%1: from order key %2, set mix-based RID to %3\n", 
-								       name(), n, _remote_control_id));
-			RemoteControlIDChanged (); /* EMIT SIGNAL (per-route) */
-		}
-		break;
+	if (_remote_control_id != rid) {
+		DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("%1: set edit-based RID to %2\n", name(), rid));
+		_remote_control_id = rid;
+		RemoteControlIDChanged (); /* EMIT SIGNAL (per-route) */
 	}
 
 	/* don't emit the class-level RID signal RemoteControlIDChange here,
@@ -389,8 +332,8 @@ Route::set_order_key (RouteSortOrderKey key, uint32_t n)
 
 	order_keys[key] = n;
 
-	DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("%1 order key %2 set to %3 (chk=%4)\n",
-						       name(), enum_2_string (key), n, order_key (key)));
+	DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("%1 order key %2 set to %3\n",
+						       name(), enum_2_string (key), order_key (key)));
 
 	_session.set_dirty ();
 }
