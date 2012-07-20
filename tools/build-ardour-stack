@@ -209,12 +209,12 @@ if [ ! -f lilv-0.14.2.tar.bz2 ] ; then
     echo Lilv
     fetch_as_is http://download.drobilla.net/lilv-0.14.2.tar.bz2
 fi
-if [ ! -f suil-0.6.2.tar.bz2 ] ; then
+if [ ! -f suil-0.6.4.tar.bz2 ] ; then
     echo Suil
-    fetch_as_is http://download.drobilla.net/suil-0.6.2.tar.bz2
+    fetch_as_is http://download.drobilla.net/suil-0.6.4.tar.bz2
 fi
 if [ ! -f curl-7.25.0.tar.bz2 ] ; then
-    echo Suil
+    echo curl
     fetch_as_is http://curl.haxx.se/download/curl-7.25.0.tar.bz2
 fi
 
@@ -337,8 +337,8 @@ tar xf sratom-0.2.0.tar.bz2 && \
     (set -e && cd sratom-0.2.0 && ./waf configure --prefix=$PREFIX && ./waf build && ./waf install) || die "sratom build failed"
 tar xf lilv-0.14.2.tar.bz2 && \
     (set -e && cd lilv-0.14.2 && ./waf configure --prefix=$PREFIX && ./waf build && ./waf install) || die "lilv build failed"
-tar xf suil-0.6.2.tar.bz2 && \
-    (set -e && cd suil-0.6.2 && CFLAGS="-I$PREFIX/include" ./waf configure --prefix=$PREFIX && ./waf && ./waf install) || die "suil build failed"
+tar xf suil-0.6.4.tar.bz2 && \
+    (set -e && cd suil-0.6.4 && CFLAGS="-I$PREFIX/include" ./waf configure --prefix=$PREFIX && ./waf && ./waf install) || die "suil build failed"
 
 # two post-install hacks
 
