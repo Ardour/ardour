@@ -128,7 +128,9 @@ void
 MIDIControllable::midi_sense_note (Parser &p, EventTwoBytes *msg, bool is_on)
 {
 	if (!bistate) {
-		controllable.set_value (msg->note_number/127.0);
+		if (msg->note_number == control_additional) {
+			controllable.set_value (msg->velocity/127.0);
+		}
 	} else {
 
 		/* Note: parser handles the use of zero velocity to
