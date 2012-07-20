@@ -121,7 +121,7 @@ Mixer_UI::Mixer_UI ()
 	group_display.get_column (1)->set_data (X_("colnum"), GUINT_TO_POINTER(1));
 	group_display.get_column (0)->set_expand(true);
 	group_display.get_column (1)->set_expand(false);
-	group_display.set_name ("MixerGroupList");
+	group_display.set_name ("LHSList");
 	group_display.get_selection()->set_mode (Gtk::SELECTION_SINGLE);
 	group_display.set_reorderable (true);
 	group_display.set_headers_visible (true);
@@ -1773,7 +1773,7 @@ Mixer_UI::setup_track_display ()
 	track_display.get_column (1)->set_data (X_("colnum"), GUINT_TO_POINTER(1));
 	track_display.get_column (0)->set_expand(true);
 	track_display.get_column (1)->set_expand(false);
-	track_display.set_name (X_("MixerTrackDisplayList"));
+	track_display.set_name (X_("LHSList"));
 	track_display.get_selection()->set_mode (Gtk::SELECTION_NONE);
 	track_display.set_reorderable (true);
 	track_display.set_headers_visible (true);

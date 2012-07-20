@@ -221,7 +221,7 @@ EditorRoutes::EditorRoutes (Editor* e)
 	_display.get_selection()->set_mode (SELECTION_SINGLE);
 	_display.get_selection()->set_select_function (sigc::mem_fun (*this, &EditorRoutes::selection_filter));
 	_display.set_reorderable (true);
-	_display.set_name (X_("MixerTrackDisplayList"));
+	_display.set_name (X_("LHSList"));
 	_display.set_rules_hint (true);
 	_display.set_size_request (100, -1);
 	_display.add_object_drag (_columns.route.index(), "routes");
