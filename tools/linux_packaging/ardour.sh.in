@@ -1,13 +1,18 @@
 #!/bin/sh
 
+# This is Linux-specific startup script for a bundled version of Ardour
+
+ARGS=""
+
 while [ $# -gt 0 ] ; do
-	echo "arg = $1"
 	case $1 in
 
-	-d)
+	--debug)
 		DEBUG="T";
 		shift ;;
-	*)      break;;
+	*)
+		ARGS=$ARGS$1" ";
+		shift; ;;
 	esac
 done
 
@@ -45,11 +50,20 @@ export LD_LIBRARY_PATH=$INSTALL_DIR/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 sed "s?@ROOTDIR@/modules?$LIB_DIR/modules?" < $ETC_DIR/pango.modules.in > $USER_ARDOUR_DIR/pango.modules
 sed "s?@ROOTDIR@/loaders?$LIB_DIR/loaders?" < $ETC_DIR/gdk-pixbuf.loaders.in > $USER_ARDOUR_DIR/gdk-pixbuf.loaders
 
+
+# Hack to fix i18n issue where the grid button gets translated even when translations are disabled.
+
+if [ ! -e $USER_ARDOUR_DIR/.love_is_the_language_of_audio ]; then
+	# Translations are disabled. Force english
+	export LANG=C
+fi
+
+
 if [ "T" = "$DEBUG" ]; then
 	export ARDOUR_INSIDE_GDB=1
-	exec gdb $INSTALL_DIR/bin/ardour-%VER% "$@"
+	exec gdb $INSTALL_DIR/bin/ardour-%VER%
 else
-	exec $INSTALL_DIR/bin/ardour-%VER% "$@"
+	exec $INSTALL_DIR/bin/ardour-%VER% $ARGS
 fi
 
 
