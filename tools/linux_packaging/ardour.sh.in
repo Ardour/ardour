@@ -2,14 +2,17 @@
 
 # This is Linux-specific startup script for a bundled version of Ardour
 
+ARGS=""
+
 while [ $# -gt 0 ] ; do
-	echo "arg = $1"
 	case $1 in
 
-	-d)
+	--debug)
 		DEBUG="T";
 		shift ;;
-	*)      break;;
+	*)
+		ARGS=$ARGS$1" ";
+		shift; ;;
 	esac
 done
 
@@ -43,16 +46,25 @@ export GTK_MODULES=""
 export LD_LIBRARY_PATH=$INSTALL_DIR/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 
 # create install-location-dependent config files for Pango and GDK image loaders
-# We have to do this every time because its possible that LIB_DIR has changed
+# We have to do this every time because its possible that BIN_DIR has changed
 
 sed "s?@ROOTDIR@/modules?$LIB_DIR/modules?" < $ETC_DIR/pango.modules.in > $USER_ARDOUR_DIR/pango.modules
 sed "s?@ROOTDIR@/loaders?$LIB_DIR/loaders?" < $ETC_DIR/gdk-pixbuf.loaders.in > $USER_ARDOUR_DIR/gdk-pixbuf.loaders
 
+
+# Hack to fix i18n issue where the grid button gets translated even when translations are disabled.
+
+if [ ! -e $USER_ARDOUR_DIR/.love_is_the_language_of_audio ]; then
+	# Translations are disabled. Force english
+	export LANG=C
+fi
+
+
 if [ "T" = "$DEBUG" ]; then
 	export ARDOUR_INSIDE_GDB=1
-	exec gdb $INSTALL_DIR/bin/ardour-3.0 "$@"
+	exec gdb $INSTALL_DIR/bin/ardour-3.0
 else
-	exec $INSTALL_DIR/bin/ardour-3.0 "$@"
+	exec $INSTALL_DIR/bin/ardour-3.0 $ARGS
 fi
 
 
