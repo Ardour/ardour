@@ -60,6 +60,9 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
 
          remove_button.set_image (*manage (new Image (Stock::REMOVE, Gtk::ICON_SIZE_MENU)));
 
+	 start_to_playhead_button.set_name ("LocationEditCdButton");
+	 end_to_playhead_button.set_name ("LocationEditCdButton");
+
          number_label.set_name ("LocationEditNumberLabel");
          name_label.set_name ("LocationEditNameLabel");
          name_entry.set_name ("LocationEditNameEntry");
