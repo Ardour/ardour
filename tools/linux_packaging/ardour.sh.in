@@ -50,23 +50,6 @@ export LD_LIBRARY_PATH=$INSTALL_DIR/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 sed "s?@ROOTDIR@/modules?$LIB_DIR/modules?" < $ETC_DIR/pango.modules.in > $USER_ARDOUR_DIR/pango.modules
 sed "s?@ROOTDIR@/loaders?$LIB_DIR/loaders?" < $ETC_DIR/gdk-pixbuf.loaders.in > $USER_ARDOUR_DIR/gdk-pixbuf.loaders
 
-
-# Hack to fix i18n issue where the grid button gets translated even when translations are disabled.
-
-if [ ! -e $USER_ARDOUR_DIR/.love_is_the_language_of_audio ]; then
-	# Translations are disabled. Force english, except for numerics and time/date
-        if [ x$LANG != x ] ; then 
-            if [ x$LC_NUMERIC = x ] ; then
-                export LC_NUMERIC=$LANG
-            fi
-            if [ x$LC_TIME = x ] ; then
-                export LC_TIME=$LANG
-            fi
-        fi
-	export LANG=C
-fi
-
-
 if [ "T" = "$DEBUG" ]; then
 	export ARDOUR_INSIDE_GDB=1
 	exec gdb $INSTALL_DIR/bin/ardour-%VER%
