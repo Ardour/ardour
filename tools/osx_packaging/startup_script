@@ -15,7 +15,9 @@ end tell'
    exit 1
 fi
 
-#
+# this needs to be set so that we can restore the environment when we want to find JACK (or similar)
+export PREBUNDLE_ENV="$(env)"
+
 # all clear, lets go
 # this quoting is all needed to handle installation
 # in folders likes /home/user/Frank's Wild Years
