@@ -87,9 +87,6 @@ if test x$STRIP != xall -a x$STRIP != xnone -a x$STRIP != xsome ; then
     exit 1
 fi
 
-# Error out whenever possible
-set -e
-
 release_version=`grep -m 1 '^VERSION' ../../wscript | awk '{print $3}' | sed "s/'//g"`
 svn_version=`grep -m 1 'svn_revision =' ../../libs/ardour/svn_revision.cc | cut -d"'" -f 2`
 echo "Version is $release_version / $svn_version"
@@ -450,7 +447,7 @@ while [ true ] ; do
                                 # reset RPATH so that the runtime linker never looks
                                 # in places we don't want it to
                                 #
-                                patchelf --set-rpath $Libraries $Libraries/`basename $dep`
+                                chrpath -r foo $Libraries/`basename $dep`
                                 if echo $dep | grep -sq '^/' ; then
                                     # absolute path, candidate for stripping
                                     deplibs="$deplibs $base"
