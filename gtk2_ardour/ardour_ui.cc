@@ -3521,16 +3521,16 @@ ARDOUR_UI::TransportControllable::set_value (double val)
 		action = X_("Stop");
 		break;
 	case GotoStart:
-		action = X_("Goto Start");
+		action = X_("GotoStart");
 		break;
 	case GotoEnd:
-		action = X_("Goto End");
+		action = X_("GotoEnd");
 		break;
 	case AutoLoop:
 		action = X_("Loop");
 		break;
 	case PlaySelection:
-		action = X_("Play Selection");
+		action = X_("PlaySelection");
 		break;
 	case RecordEnable:
 		action = X_("Record");
