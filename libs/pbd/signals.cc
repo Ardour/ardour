@@ -34,14 +34,14 @@ ScopedConnectionList::~ScopedConnectionList()
 void
 ScopedConnectionList::add_connection (const UnscopedConnection& c)
 {
-	Glib::Mutex::Lock lm (_lock);
+	Glib::Threads::Mutex::Lock lm (_lock);
 	_list.push_back (new ScopedConnection (c));
 }
 
 void
 ScopedConnectionList::drop_connections ()
 {
-	Glib::Mutex::Lock lm (_lock);
+	Glib::Threads::Mutex::Lock lm (_lock);
 
 	for (ConnectionList::iterator i = _list.begin(); i != _list.end(); ++i) {
 		delete *i;

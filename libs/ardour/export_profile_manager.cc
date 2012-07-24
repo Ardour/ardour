@@ -20,6 +20,7 @@
 
 #include <cassert>
 #include <stdexcept>
+#include <cerrno>
 
 #include <glib.h>
 #include <glib/gstdio.h>

@@ -110,7 +110,7 @@ def signal(f, n, v):
     print("", file=f)
     print("\t~Signal%d () {" % n, file=f)
 
-    print("\t\tboost::mutex::scoped_lock lm (_mutex);", file=f)
+    print("\t\tGlib::Threads::Mutex::Lock lm (_mutex);", file=f)
     print("\t\t/* Tell our connection objects that we are going away, so they don't try to call us */", file=f)
     print("\t\tfor (%sSlots::iterator i = _slots.begin(); i != _slots.end(); ++i) {" % typename, file=f)
 
@@ -234,7 +234,7 @@ def signal(f, n, v):
     print("", file=f)
     print("\t\tSlots s;", file=f)
     print("\t\t{", file=f)
-    print("\t\t\tboost::mutex::scoped_lock lm (_mutex);", file=f)
+    print("\t\t\tGlib::Threads::Mutex::Lock lm (_mutex);", file=f)
     print("\t\t\ts = _slots;", file=f)
     print("\t\t}", file=f)
     print("", file=f)
@@ -249,7 +249,7 @@ def signal(f, n, v):
 			*/
 			bool still_there = false;
 			{
-				boost::mutex::scoped_lock lm (_mutex);
+				Glib::Threads::Mutex::Lock lm (_mutex);
 				still_there = _slots.find (i->first) != _slots.end ();
 			}
 
@@ -269,7 +269,7 @@ def signal(f, n, v):
 
     print("""
 	bool empty () {
-		boost::mutex::scoped_lock lm (_mutex);
+		Glib::Threads::Mutex::Lock lm (_mutex);
 		return _slots.empty ();
 	}
 """, file=f)
@@ -287,7 +287,7 @@ def signal(f, n, v):
 	boost::shared_ptr<Connection> _connect (slot_function_type f)
 	{
 		boost::shared_ptr<Connection> c (new Connection (this));
-		boost::mutex::scoped_lock lm (_mutex);
+		Glib::Threads::Mutex::Lock lm (_mutex);
 		_slots[c] = f;
 		return c;
 	}""", file=f)
@@ -295,7 +295,7 @@ def signal(f, n, v):
     print("""
 	void disconnect (boost::shared_ptr<Connection> c)
 	{
-		boost::mutex::scoped_lock lm (_mutex);
+		Glib::Threads::Mutex::Lock lm (_mutex);
 		_slots.erase (c);
 	}
 };    
