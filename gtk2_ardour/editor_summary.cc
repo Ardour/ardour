@@ -293,15 +293,16 @@ EditorSummary::on_enter_notify_event (GdkEventCrossing*)
 {
 	grab_focus ();
 	Keyboard::magic_widget_grab_focus ();
-	cerr << "ES enter, grabbed focus\n";
 	return false;
 }
 
 bool 
 EditorSummary::on_leave_notify_event (GdkEventCrossing*)
 {
+	/* there are no inferior/child windows, so any leave event means that
+	   we're gone.
+	*/
 	Keyboard::magic_widget_drop_focus ();
-	cerr << "ES leave\n";
 	return false;
 }
 
