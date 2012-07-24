@@ -39,6 +39,7 @@
 #include "ardour/audioregion.h"
 #include "ardour/session.h"
 #include "ardour/dB.h"
+#include "ardour/debug.h"
 #include "ardour/playlist.h"
 #include "ardour/audiofilesource.h"
 #include "ardour/region_factory.h"
@@ -712,6 +713,8 @@ AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 	framecnt_t const N = to_read - fade_in_limit - fade_out_limit;
 	if (N > 0) {
 		if (opaque ()) {
+			DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("Region %1 memcpy into buf @ %2 + %3, from mixdown buffer @ %4 + %5, len = %6 cnt was %7\n",
+									   name(), buf, fade_in_limit, mixdown_buffer, fade_in_limit, N, cnt));
 			memcpy (buf + fade_in_limit, mixdown_buffer + fade_in_limit, N * sizeof (Sample));
 		} else {
 			mix_buffers_no_gain (buf + fade_in_limit, mixdown_buffer + fade_in_limit, N);
