@@ -18,6 +18,7 @@
 */
 
 #include "ardour/session.h"
+
 #include "time_axis_view.h"
 #include "streamview.h"
 #include "editor_summary.h"
@@ -56,7 +57,8 @@ EditorSummary::EditorSummary (Editor* e)
 	Region::RegionPropertyChanged.connect (region_property_connection, invalidator (*this), boost::bind (&CairoWidget::set_dirty, this), gui_context());
 	_editor->playhead_cursor->PositionChanged.connect (position_connection, invalidator (*this), boost::bind (&EditorSummary::playhead_position_changed, this, _1), gui_context());
 
-	add_events (Gdk::POINTER_MOTION_MASK);
+	add_events (Gdk::POINTER_MOTION_MASK|Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK);
+	set_flags (get_flags() | Gtk::CAN_FOCUS);
 }
 
 /** Connect to a session.
@@ -78,57 +80,6 @@ EditorSummary::set_session (Session* s)
 		_session->StartTimeChanged.connect (_session_connections, invalidator (*this), boost::bind (&CairoWidget::set_dirty, this), gui_context());
 		_session->EndTimeChanged.connect (_session_connections, invalidator (*this), boost::bind (&CairoWidget::set_dirty, this), gui_context());
 	}
-}
-
-/** Handle an expose event.
- *  @param event Event from GTK.
- */
-bool
-EditorSummary::on_expose_event (GdkEventExpose* event)
-{
-	CairoWidget::on_expose_event (event);
-
-	if (_session == 0) {
-		return false;
-	}
-
-	cairo_t* cr = gdk_cairo_create (get_window()->gobj());
-
-	/* Render the view rectangle.  If there is an editor visual pending, don't update
-	   the view rectangle now --- wait until the expose event that we'll get after
-	   the visual change.  This prevents a flicker.
-	*/
-
-	if (_editor->pending_visual_change.idle_handler_id < 0) {
-		get_editor (&_view_rectangle_x, &_view_rectangle_y);
-	}
-
-	cairo_move_to (cr, _view_rectangle_x.first, _view_rectangle_y.first);
-	cairo_line_to (cr, _view_rectangle_x.second, _view_rectangle_y.first);
-	cairo_line_to (cr, _view_rectangle_x.second, _view_rectangle_y.second);
-	cairo_line_to (cr, _view_rectangle_x.first, _view_rectangle_y.second);
-	cairo_line_to (cr, _view_rectangle_x.first, _view_rectangle_y.first);
-	cairo_set_source_rgba (cr, 1, 1, 1, 0.25);
-	cairo_fill_preserve (cr);
-	cairo_set_line_width (cr, 1);
-	cairo_set_source_rgba (cr, 1, 1, 1, 0.5);
-	cairo_stroke (cr);
-
-	/* Playhead */
-
-	cairo_set_line_width (cr, 1);
-	/* XXX: colour should be set from configuration file */
-	cairo_set_source_rgba (cr, 1, 0, 0, 1);
-
-	double const p = playhead_frame_to_position (_editor->playhead_cursor->current_frame);
-	cairo_move_to (cr, p, 0);
-	cairo_line_to (cr, p, get_height());
-	cairo_stroke (cr);
-	_last_playhead = p;
-
-	cairo_destroy (cr);
-
-	return true;
 }
 
 /** Render the required regions to a cairo context.
@@ -212,7 +163,7 @@ EditorSummary::render (cairo_t* cr)
 	cairo_set_line_width (cr, 1);
 	cairo_set_source_rgb (cr, 1, 1, 0);
 
-	double const p = (_session->current_start_frame() - _start) * _x_scale;
+	const double p = (_session->current_start_frame() - _start) * _x_scale;
 	cairo_move_to (cr, p, 0);
 	cairo_line_to (cr, p, get_height());
 	cairo_stroke (cr);
@@ -221,6 +172,39 @@ EditorSummary::render (cairo_t* cr)
 	cairo_move_to (cr, q, 0);
 	cairo_line_to (cr, q, get_height());
 	cairo_stroke (cr);
+
+	/* Render the view rectangle.  If there is an editor visual pending, don't update
+	   the view rectangle now --- wait until the expose event that we'll get after
+	   the visual change.  This prevents a flicker.
+	*/
+
+	if (_editor->pending_visual_change.idle_handler_id < 0) {
+		get_editor (&_view_rectangle_x, &_view_rectangle_y);
+	}
+
+	cairo_move_to (cr, _view_rectangle_x.first, _view_rectangle_y.first);
+	cairo_line_to (cr, _view_rectangle_x.second, _view_rectangle_y.first);
+	cairo_line_to (cr, _view_rectangle_x.second, _view_rectangle_y.second);
+	cairo_line_to (cr, _view_rectangle_x.first, _view_rectangle_y.second);
+	cairo_line_to (cr, _view_rectangle_x.first, _view_rectangle_y.first);
+	cairo_set_source_rgba (cr, 1, 1, 1, 0.25);
+	cairo_fill_preserve (cr);
+	cairo_set_line_width (cr, 1);
+	cairo_set_source_rgba (cr, 1, 1, 1, 0.5);
+	cairo_stroke (cr);
+
+	/* Playhead */
+
+	cairo_set_line_width (cr, 1);
+	/* XXX: colour should be set from configuration file */
+	cairo_set_source_rgba (cr, 1, 0, 0, 1);
+
+	const double ph= playhead_frame_to_position (_editor->playhead_cursor->current_frame);
+	cairo_move_to (cr, ph, 0);
+	cairo_line_to (cr, ph, get_height());
+	cairo_stroke (cr);
+	_last_playhead = ph;
+
 }
 
 /** Render a region for the summary.
@@ -302,6 +286,55 @@ EditorSummary::centre_on_click (GdkEventButton* ev)
 	}
 
 	set_editor (ex, ey);
+}
+
+bool 
+EditorSummary::on_enter_notify_event (GdkEventCrossing*)
+{
+	grab_focus ();
+	Keyboard::magic_widget_grab_focus ();
+	cerr << "ES enter, grabbed focus\n";
+	return false;
+}
+
+bool 
+EditorSummary::on_leave_notify_event (GdkEventCrossing*)
+{
+	Keyboard::magic_widget_drop_focus ();
+	cerr << "ES leave\n";
+	return false;
+}
+
+bool
+EditorSummary::on_key_press_event (GdkEventKey* key)
+{
+	gint x, y;
+
+	switch (key->keyval) {
+	case GDK_p:
+		if (_session) {
+			get_pointer (x, y);
+			_session->request_locate ((framepos_t) x / _x_scale, _session->transport_rolling());
+			return true;
+		}
+		break;
+	default:
+		break;
+	}
+
+	return false;
+}
+
+bool
+EditorSummary::on_key_release_event (GdkEventKey* key)
+{
+	switch (key->keyval) {
+	case GDK_p:
+		return true;
+	default:
+		break;
+	}
+	return false;
 }
 
 /** Handle a button press.
@@ -952,4 +985,10 @@ double
 EditorSummary::playhead_frame_to_position (framepos_t t) const
 {
 	return (t - _start) * _x_scale;
+}
+
+framepos_t
+EditorSummary::position_to_playhead_frame_to_position (double pos) const
+{
+	return _start  + (pos * _x_scale);
 }

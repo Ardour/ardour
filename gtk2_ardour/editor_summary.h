@@ -57,13 +57,16 @@ private:
 		TO_LEFT_OR_RIGHT,
 		OTHERWISE_OUTSIDE
 	};
-
-	bool on_expose_event (GdkEventExpose *);
+      
 	void on_size_request (Gtk::Requisition *);
 	bool on_button_press_event (GdkEventButton *);
 	bool on_button_release_event (GdkEventButton *);
 	bool on_motion_notify_event (GdkEventMotion *);
 	bool on_scroll_event (GdkEventScroll *);
+        bool on_key_press_event (GdkEventKey*);
+        bool on_key_release_event (GdkEventKey*);
+        bool on_enter_notify_event (GdkEventCrossing*); 
+        bool on_leave_notify_event (GdkEventCrossing*); 
 
 	void centre_on_click (GdkEventButton *);
 	void render (cairo_t *);
@@ -84,6 +87,7 @@ private:
 	void route_gui_changed (std::string);
 	bool suspending_editor_updates () const;
 	double playhead_frame_to_position (framepos_t) const;
+        framepos_t position_to_playhead_frame_to_position (double pos) const;
 	void set_overlays_dirty (int, int, int, int);
 
 	framepos_t _start; ///< start frame of the overview
