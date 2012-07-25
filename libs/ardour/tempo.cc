@@ -1012,6 +1012,7 @@ TempoMap::_extend_map (TempoSection* tempo, MeterSection* meter,
 					*/
 					goto set_metrics;
 				}
+
 			}
 		} 
 
@@ -1643,6 +1644,28 @@ TempoMap::set_state (const XMLNode& node, int /*version*/)
 		if (niter == nlist.end()) {
 			MetricSectionSorter cmp;
 			metrics.sort (cmp);
+		}
+
+		/* check for multiple tempo/meters at the same location, which
+		   ardour2 somehow allowed.
+		*/
+
+		Metrics::iterator prev = metrics.end();
+		for (Metrics::iterator i = metrics.begin(); i != metrics.end(); ++i) {
+			if (prev != metrics.end()) {
+				if (dynamic_cast<MeterSection*>(*prev) && dynamic_cast<MeterSection*>(*i)) {
+					if ((*prev)->start() == (*i)->start()) {
+						error << string_compose (_("Multiple meter definitions found at %1"), (*prev)->start()) << endmsg;
+						return -1;
+					}
+				} else if (dynamic_cast<TempoSection*>(*prev) && dynamic_cast<TempoSection*>(*i)) {
+					if ((*prev)->start() == (*i)->start()) {
+						error << string_compose (_("Multiple tempo definitions found at %1"), (*prev)->start()) << endmsg;
+						return -1;
+					}
+				}
+			}
+			prev = i;
 		}
 
 		recompute_map (true, -1);
