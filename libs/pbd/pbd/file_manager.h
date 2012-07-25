@@ -24,7 +24,7 @@
 #include <string>
 #include <map>
 #include <list>
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 #include "pbd/signals.h"
 
 namespace PBD {
@@ -145,7 +145,7 @@ private:
 	void close (FileDescriptor *);
 
 	std::list<FileDescriptor*> _files; ///< files we know about
-	Glib::Mutex _mutex; ///< mutex for _files, _open and FileDescriptor contents
+	Glib::Threads::Mutex _mutex; ///< mutex for _files, _open and FileDescriptor contents
 	int _open; ///< number of open files
 	int _max_open; ///< maximum number of open files
 };

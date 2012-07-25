@@ -34,7 +34,7 @@ PBD::Signal1<void,Controllable*> Controllable::StopLearning;
 PBD::Signal3<void,Controllable*,int,int> Controllable::CreateBinding;
 PBD::Signal1<void,Controllable*> Controllable::DeleteBinding;
 
-Glib::StaticRWLock Controllable::registry_lock = GLIBMM_STATIC_RW_LOCK_INIT;
+Glib::Threads::RWLock Controllable::registry_lock;
 Controllable::Controllables Controllable::registry;
 PBD::ScopedConnectionList* registry_connections = 0;
 const std::string Controllable::xml_node_name = X_("Controllable");
@@ -52,7 +52,7 @@ Controllable::add (Controllable& ctl)
 {
 	using namespace boost;
 
-	Glib::RWLock::WriterLock lm (registry_lock);
+	Glib::Threads::RWLock::WriterLock lm (registry_lock);
 	registry.insert (&ctl);
 
 	if (!registry_connections) {
@@ -67,7 +67,7 @@ Controllable::add (Controllable& ctl)
 void
 Controllable::remove (Controllable* ctl)
 {
-	Glib::RWLock::WriterLock lm (registry_lock);
+	Glib::Threads::RWLock::WriterLock lm (registry_lock);
 
 	for (Controllables::iterator i = registry.begin(); i != registry.end(); ++i) {
 		if ((*i) == ctl) {
@@ -80,7 +80,7 @@ Controllable::remove (Controllable* ctl)
 Controllable*
 Controllable::by_id (const ID& id)
 {
-	Glib::RWLock::ReaderLock lm (registry_lock);
+	Glib::Threads::RWLock::ReaderLock lm (registry_lock);
 
 	for (Controllables::iterator i = registry.begin(); i != registry.end(); ++i) {
 		if ((*i)->id() == id) {
@@ -93,7 +93,7 @@ Controllable::by_id (const ID& id)
 Controllable*
 Controllable::by_name (const string& str)
 {
-	Glib::RWLock::ReaderLock lm (registry_lock);
+	Glib::Threads::RWLock::ReaderLock lm (registry_lock);
 
 	for (Controllables::iterator i = registry.begin(); i != registry.end(); ++i) {
 		if ((*i)->_name == str) {

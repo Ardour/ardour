@@ -53,7 +53,7 @@ ControlSet::add_control(boost::shared_ptr<Control> ac)
 void
 ControlSet::what_has_data (set<Parameter>& s) const
 {
-	Glib::Mutex::Lock lm (_control_lock);
+	Glib::Threads::Mutex::Lock lm (_control_lock);
 
 	for (Controls::const_iterator li = _controls.begin(); li != _controls.end(); ++li) {
 		if (li->second->list() && !li->second->list()->empty()) {
@@ -116,7 +116,7 @@ ControlSet::find_next_event (double now, double end, ControlEvent& next_event) c
 void
 ControlSet::clear_controls ()
 {
-	Glib::Mutex::Lock lm (_control_lock);
+	Glib::Threads::Mutex::Lock lm (_control_lock);
 
 	_control_connections.drop_connections ();
 	_list_connections.drop_connections ();

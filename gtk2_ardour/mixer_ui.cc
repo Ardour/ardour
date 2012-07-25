@@ -30,7 +30,7 @@
 #include "pbd/convert.h"
 #include "pbd/unwind.h"
 
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/utils.h>

@@ -30,7 +30,7 @@
 #include <unistd.h>
 #include <limits.h>
 
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>
 
@@ -560,7 +560,7 @@ Session::when_engine_running ()
 	ControlProtocolManager::instance().midi_connectivity_established ();
 
 	if (_is_new && !no_auto_connect()) {
-		Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock());
+		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock());
 		auto_connect_master_bus ();
 	}
 
@@ -626,7 +626,7 @@ Session::remove_monitor_section ()
 		 * pieces of audio as we work on each route.
 		 */
 		
-		Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 		
 		/* Connect tracks to monitor section. Note that in an
 		   existing session, the internal sends will already exist, but we want the
@@ -672,7 +672,7 @@ Session::add_monitor_section ()
 	// boost_debug_shared_ptr_mark_interesting (r.get(), "Route");
 #endif
 	{
-		Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 		r->input()->ensure_io (_master_out->output()->n_ports(), false, this);
 		r->output()->ensure_io (_master_out->output()->n_ports(), false, this);
 	}
@@ -773,7 +773,7 @@ Session::add_monitor_section ()
 	 * pieces of audio as we work on each route.
 	 */
 	 
-	Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+	Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 
 	/* Connect tracks to monitor section. Note that in an
 	   existing session, the internal sends will already exist, but we want the
@@ -1625,7 +1625,7 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output, boost:
 			// boost_debug_shared_ptr_mark_interesting (track.get(), "Track");
 #endif
 			{
-				Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+				Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 				if (track->input()->ensure_io (input, false, this)) {
 					error << "cannot configure " << input << " out configuration for new midi track" << endmsg;	
 					goto failed;
@@ -1725,7 +1725,7 @@ Session::auto_connect_route (boost::shared_ptr<Route> route, ChanCount& existing
 		return;
 	}
 
-	Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock (), Glib::NOT_LOCK);
+	Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock (), Glib::Threads::NOT_LOCK);
 
 	if (with_lock) {
 		lm.acquire ();
@@ -1860,7 +1860,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 			// boost_debug_shared_ptr_mark_interesting (track.get(), "Track");
 #endif
 			{
-				Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+				Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 
 				if (track->input()->ensure_io (ChanCount(DataType::AUDIO, input_channels), false, this)) {
 					error << string_compose (
@@ -1946,7 +1946,7 @@ Session::new_audio_route (int input_channels, int output_channels, RouteGroup* r
 			// boost_debug_shared_ptr_mark_interesting (bus.get(), "Route");
 #endif
 			{
-				Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+				Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 
 				if (bus->input()->ensure_io (ChanCount(DataType::AUDIO, input_channels), false, this)) {
 					error << string_compose (_("cannot configure %1 in/%2 out configuration for new audio track"),
@@ -2062,7 +2062,7 @@ Session::new_route_from_template (uint32_t how_many, const std::string& template
 				   loading this normally happens in a different way.
 				*/
 
-				Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+				Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 
 				IOChange change (IOChange::Type (IOChange::ConfigurationChanged | IOChange::ConnectionsChanged));
 				change.after = route->input()->n_ports();
@@ -2183,7 +2183,7 @@ Session::add_routes (RouteList& new_routes, bool input_auto_connect, bool output
 	if (_monitor_out && IO::connecting_legal) {
 
 		{
-			Glib::Mutex::Lock lm (_engine.process_lock());		
+			Glib::Threads::Mutex::Lock lm (_engine.process_lock());		
 			
 			for (RouteList::iterator x = new_routes.begin(); x != new_routes.end(); ++x) {
 				if ((*x)->is_monitor()) {
@@ -2854,7 +2854,7 @@ Session::find_whole_file_parent (boost::shared_ptr<Region const> child) const
 	RegionFactory::RegionMap::const_iterator i;
 	boost::shared_ptr<Region> region;
 
-	Glib::Mutex::Lock lm (region_lock);
+	Glib::Threads::Mutex::Lock lm (region_lock);
 
 	for (i = regions.begin(); i != regions.end(); ++i) {
 
@@ -2900,7 +2900,7 @@ Session::destroy_sources (list<boost::shared_ptr<Source> > srcs)
 	for (list<boost::shared_ptr<Source> >::iterator s = srcs.begin(); s != srcs.end(); ) {
 
 		{
-			Glib::Mutex::Lock ls (source_lock);
+			Glib::Threads::Mutex::Lock ls (source_lock);
 			/* remove from the main source list */
 			sources.erase ((*s)->id());
 		}
@@ -2953,7 +2953,7 @@ Session::add_source (boost::shared_ptr<Source> source)
 	entry.second = source;
 
 	{
-		Glib::Mutex::Lock lm (source_lock);
+		Glib::Threads::Mutex::Lock lm (source_lock);
 		result = sources.insert (entry);
 	}
 
@@ -2998,7 +2998,7 @@ Session::remove_source (boost::weak_ptr<Source> src)
 	}
 
 	{
-		Glib::Mutex::Lock lm (source_lock);
+		Glib::Threads::Mutex::Lock lm (source_lock);
 
 		if ((i = sources.find (source->id())) != sources.end()) {
 			sources.erase (i);
@@ -3018,7 +3018,7 @@ Session::remove_source (boost::weak_ptr<Source> src)
 boost::shared_ptr<Source>
 Session::source_by_id (const PBD::ID& id)
 {
-	Glib::Mutex::Lock lm (source_lock);
+	Glib::Threads::Mutex::Lock lm (source_lock);
 	SourceMap::iterator i;
 	boost::shared_ptr<Source> source;
 
@@ -3032,7 +3032,7 @@ Session::source_by_id (const PBD::ID& id)
 boost::shared_ptr<Source>
 Session::source_by_path_and_channel (const string& path, uint16_t chn)
 {
-	Glib::Mutex::Lock lm (source_lock);
+	Glib::Threads::Mutex::Lock lm (source_lock);
 
 	for (SourceMap::iterator i = sources.begin(); i != sources.end(); ++i) {
 		boost::shared_ptr<AudioFileSource> afs
@@ -3049,7 +3049,7 @@ uint32_t
 Session::count_sources_by_origin (const string& path)
 {
 	uint32_t cnt = 0;
-	Glib::Mutex::Lock lm (source_lock);
+	Glib::Threads::Mutex::Lock lm (source_lock);
 
 	for (SourceMap::iterator i = sources.begin(); i != sources.end(); ++i) {
 		boost::shared_ptr<FileSource> fs
@@ -3514,7 +3514,7 @@ Session::graph_reordered ()
 boost::optional<framecnt_t>
 Session::available_capture_duration ()
 {
-	Glib::Mutex::Lock lm (space_lock);
+	Glib::Threads::Mutex::Lock lm (space_lock);
 
 	if (_total_free_4k_blocks_uncertain) {
 		return boost::optional<framecnt_t> ();
@@ -4562,7 +4562,7 @@ void
 Session::initialize_latencies ()
 {
         {
-                Glib::Mutex::Lock lm (_engine.process_lock());
+                Glib::Threads::Mutex::Lock lm (_engine.process_lock());
                 update_latency (false);
                 update_latency (true);
         }

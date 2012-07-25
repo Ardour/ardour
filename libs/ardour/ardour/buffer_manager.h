@@ -7,7 +7,7 @@
 
 #include "ardour/chan_count.h"
 #include <list>
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 
 namespace ARDOUR {
 
@@ -24,7 +24,7 @@ public:
 	static void ensure_buffers (ChanCount howmany = ChanCount::ZERO);
 
 private:
-	static Glib::StaticMutex rb_mutex;
+        static Glib::Threads::Mutex rb_mutex;
 
 	typedef PBD::RingBufferNPT<ThreadBuffers*> ThreadBufferFIFO;
 	typedef std::list<ThreadBuffers*> ThreadBufferList;

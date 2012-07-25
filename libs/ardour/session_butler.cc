@@ -25,7 +25,7 @@
 #include <fcntl.h>
 #include <poll.h>
 
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 
 #include "pbd/error.h"
 #include "pbd/pthread_utils.h"

@@ -22,7 +22,7 @@
 
 #include <boost/function.hpp>
 #include <boost/bind.hpp> /* we don't need this here, but anything calling call_slot() probably will, so this is convenient */
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 
 namespace PBD
 {
@@ -69,13 +69,13 @@ class EventLoop
 	};
 
 	virtual void call_slot (InvalidationRecord*, const boost::function<void()>&) = 0;
-        virtual Glib::Mutex& slot_invalidation_mutex() = 0;
+        virtual Glib::Threads::Mutex& slot_invalidation_mutex() = 0;
 
 	static EventLoop* get_event_loop_for_thread();
 	static void set_event_loop_for_thread (EventLoop* ui);
 
   private:
-	static Glib::StaticPrivate<EventLoop> thread_event_loop;
+        static Glib::Threads::Private<EventLoop> thread_event_loop;
 
 };
 

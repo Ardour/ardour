@@ -23,7 +23,7 @@
 #include <list>
 #include <boost/pool/pool.hpp>
 #include <boost/pool/pool_alloc.hpp>
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 #include "pbd/signals.h"
 #include "evoral/types.hpp"
 #include "evoral/Range.hpp"
@@ -107,7 +107,7 @@ public:
 
 	EventList::size_type size() const { return _events.size(); }
         double length() const { 		
-		Glib::Mutex::Lock lm (_lock);
+		Glib::Threads::Mutex::Lock lm (_lock);
 		return _events.empty() ? 0.0 : _events.back()->when;
 	}
 	bool empty() const { return _events.empty(); }
@@ -165,18 +165,18 @@ public:
 	std::pair<ControlList::iterator,ControlList::iterator> control_points_adjacent (double when);
 
 	template<class T> void apply_to_points (T& obj, void (T::*method)(const ControlList&)) {
-		Glib::Mutex::Lock lm (_lock);
+		Glib::Threads::Mutex::Lock lm (_lock);
 		(obj.*method)(*this);
 	}
 
 	double eval (double where) {
-		Glib::Mutex::Lock lm (_lock);
+		Glib::Threads::Mutex::Lock lm (_lock);
 		return unlocked_eval (where);
 	}
 
 	double rt_safe_eval (double where, bool& ok) {
 
-		Glib::Mutex::Lock lm (_lock, Glib::TRY_LOCK);
+		Glib::Threads::Mutex::Lock lm (_lock, Glib::Threads::TRY_LOCK);
 
 		if ((ok = lm.locked())) {
 			return unlocked_eval (where);
@@ -207,7 +207,7 @@ public:
 	double default_value() const { return _parameter.normal(); }
 
 	// FIXME: const violations for Curve
-	Glib::Mutex& lock()         const { return _lock; }
+	Glib::Threads::Mutex& lock()         const { return _lock; }
 	LookupCache& lookup_cache() const { return _lookup_cache; }
 	SearchCache& search_cache() const { return _search_cache; }
 
@@ -280,7 +280,7 @@ protected:
 	Parameter             _parameter;
 	InterpolationStyle    _interpolation;
 	EventList             _events;
-	mutable Glib::Mutex   _lock;
+	mutable Glib::Threads::Mutex   _lock;
 	int8_t                _frozen;
 	bool                  _changed_when_thawed;
 	double                _min_yval;

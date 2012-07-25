@@ -22,7 +22,7 @@
 
 #include <map>
 #include <set>
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 
 #include "pbd/id.h"
 #include "pbd/property_list.h"
@@ -124,11 +124,11 @@ public:
 
 	static void region_changed (PBD::PropertyChange const &, boost::weak_ptr<Region>);
 
-	static Glib::StaticMutex region_map_lock;
+        static Glib::Threads::Mutex region_map_lock;
 
 	static RegionMap region_map;
 
-	static Glib::StaticMutex region_name_maps_mutex;
+	static Glib::Threads::Mutex region_name_maps_mutex;
 	/** map of partial region names and suffix numbers */
 	static std::map<std::string, uint32_t> region_name_number_map;
 	/** map of complete region names with their region ID */

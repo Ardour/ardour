@@ -23,7 +23,7 @@
 #include <string>
 #include <set>
 
-#include <glib.h>
+#include <glibmm/threads.h>
 
 #include <boost/utility.hpp>
 #include "pbd/statefuldestructible.h"
@@ -99,7 +99,7 @@ class Source : public SessionObject
 
 	void set_allow_remove_if_empty (bool yn);
 
-	Glib::Mutex& mutex()       { return _lock; }
+        Glib::Threads::Mutex& mutex() { return _lock; }
 	Flag         flags() const { return _flags; }
 
 	virtual void inc_use_count ();
@@ -114,8 +114,8 @@ class Source : public SessionObject
 	time_t              _timestamp;
 	framepos_t          _timeline_position;
 	bool                _analysed;
-	mutable Glib::Mutex _lock;
-	mutable Glib::Mutex _analysis_lock;
+        mutable Glib::Threads::Mutex _lock;
+        mutable Glib::Threads::Mutex _analysis_lock;
 	gint                _use_count; /* atomic */
 	uint32_t            _level; /* how deeply nested is this source w.r.t a disk file */
 

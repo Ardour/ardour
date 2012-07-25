@@ -220,7 +220,7 @@ JackMIDIPort::write (const byte * msg, size_t msglen, timestamp_t timestamp)
 	
 	if (!is_process_thread()) {
 
-		Glib::Mutex::Lock lm (output_fifo_lock);
+		Glib::Threads::Mutex::Lock lm (output_fifo_lock);
 		RingBuffer< Evoral::Event<double> >::rw_vector vec = { { 0, 0 }, { 0, 0} };
 		
 		output_fifo.get_write_vector (&vec);

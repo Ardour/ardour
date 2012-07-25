@@ -83,7 +83,7 @@ BaseUI::main_thread ()
 bool
 BaseUI::signal_running ()
 {
-	Glib::Mutex::Lock lm (_run_lock);
+	Glib::Threads::Mutex::Lock lm (_run_lock);
 	_running.signal ();
 	
 	return false; // don't call it again
@@ -101,8 +101,8 @@ BaseUI::run ()
 	/* glibmm hack - drop the refptr to the IOSource now before it can hurt */
 	request_channel.drop_ios ();
 
-	Glib::Mutex::Lock lm (_run_lock);
-	run_loop_thread = Thread::create (mem_fun (*this, &BaseUI::main_thread), true);
+	Glib::Threads::Mutex::Lock lm (_run_lock);
+	run_loop_thread = Glib::Threads::Thread::create (mem_fun (*this, &BaseUI::main_thread));
 	_running.wait (_run_lock);
 }
 

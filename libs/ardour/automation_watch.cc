@@ -57,14 +57,14 @@ AutomationWatch::~AutomationWatch ()
 		_thread = 0;
 	}
 
-	Glib::Mutex::Lock lm (automation_watch_lock);
+	Glib::Threads::Mutex::Lock lm (automation_watch_lock);
 	automation_watches.clear ();
 }
 
 void
 AutomationWatch::add_automation_watch (boost::shared_ptr<AutomationControl> ac)
 {
-	Glib::Mutex::Lock lm (automation_watch_lock);
+	Glib::Threads::Mutex::Lock lm (automation_watch_lock);
 	DEBUG_TRACE (DEBUG::Automation, string_compose ("now watching control %1 for automation\n", ac->name()));
 	automation_watches.push_back (ac);
 
@@ -102,7 +102,7 @@ AutomationWatch::remove_weak_automation_watch (boost::weak_ptr<AutomationControl
 void
 AutomationWatch::remove_automation_watch (boost::shared_ptr<AutomationControl> ac)
 {
-	Glib::Mutex::Lock lm (automation_watch_lock);
+	Glib::Threads::Mutex::Lock lm (automation_watch_lock);
 	DEBUG_TRACE (DEBUG::Automation, string_compose ("remove control %1 from automation watch\n", ac->name()));
 	automation_watches.remove (ac);
 	ac->list()->set_in_write_pass (false);
@@ -116,7 +116,7 @@ AutomationWatch::timer ()
 	}
 
 	{
-		Glib::Mutex::Lock lm (automation_watch_lock);
+		Glib::Threads::Mutex::Lock lm (automation_watch_lock);
 		
 		framepos_t time = _session->audible_frame ();
 
@@ -154,8 +154,7 @@ AutomationWatch::set_session (Session* s)
 
 	if (_session) {
 		_run_thread = true;
-		_thread = Glib::Thread::create (boost::bind (&AutomationWatch::thread, this),
-						500000, true, true, Glib::THREAD_PRIORITY_NORMAL);
+		_thread = Glib::Threads::Thread::create (boost::bind (&AutomationWatch::thread, this));
 		
 		_session->TransportStateChange.connect_same_thread (transport_connection, boost::bind (&AutomationWatch::transport_state_change, this));
 	}
@@ -171,7 +170,7 @@ AutomationWatch::transport_state_change ()
 	bool rolling = _session->transport_rolling();
 
 	{
-		Glib::Mutex::Lock lm (automation_watch_lock);
+		Glib::Threads::Mutex::Lock lm (automation_watch_lock);
 
 		for (AutomationWatches::iterator aw = automation_watches.begin(); aw != automation_watches.end(); ++aw) {
 			DEBUG_TRACE (DEBUG::Automation, string_compose ("%1: transport state changed, speed %2, in write pass ? %3 writing ? %4\n", 

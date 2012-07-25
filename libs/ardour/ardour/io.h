@@ -25,7 +25,7 @@
 #include <cmath>
 #include <jack/jack.h>
 
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 
 #include "pbd/fastlog.h"
 #include "pbd/undo.h"
@@ -200,7 +200,7 @@ class IO : public SessionObject, public Latent
 	int set_ports (const std::string& str);
 
   private:
-	mutable Glib::Mutex io_lock;
+	mutable Glib::Threads::Mutex io_lock;
 
   protected:
 	PortSet   _ports;

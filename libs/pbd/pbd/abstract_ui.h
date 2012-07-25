@@ -24,7 +24,7 @@
 #include <string>
 #include <pthread.h>
 
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 
 #include "pbd/receiver.h"
 #include "pbd/ringbufferNPT.h"
@@ -42,9 +42,9 @@ class AbstractUI : public BaseUI
 
 	void register_thread (std::string, pthread_t, std::string, uint32_t num_requests);
 	void call_slot (EventLoop::InvalidationRecord*, const boost::function<void()>&);
-        Glib::Mutex& slot_invalidation_mutex() { return request_buffer_map_lock; }
+        Glib::Threads::Mutex& slot_invalidation_mutex() { return request_buffer_map_lock; }
 
-	Glib::Mutex request_buffer_map_lock;
+	Glib::Threads::Mutex request_buffer_map_lock;
 
   protected:
 	struct RequestBuffer : public PBD::RingBufferNPT<RequestObject> {
@@ -60,9 +60,9 @@ class AbstractUI : public BaseUI
 	typedef std::map<pthread_t,RequestBuffer*> RequestBufferMap;
 
 	RequestBufferMap request_buffers;
-	static Glib::StaticPrivate<RequestBuffer> per_thread_request_buffer;
+        static Glib::Threads::Private<RequestBuffer> per_thread_request_buffer;
 	
-	Glib::Mutex               request_list_lock;
+	Glib::Threads::Mutex               request_list_lock;
 	std::list<RequestObject*> request_list;
 	
 	RequestObject* get_request (RequestType);

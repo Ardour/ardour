@@ -276,7 +276,7 @@ MidiTrack::set_state_part_two ()
 int
 MidiTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick, bool& need_butler)
 {
-	Glib::RWLock::ReaderLock lm (_processor_lock, Glib::TRY_LOCK);
+	Glib::Threads::RWLock::ReaderLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
 	if (!lm.locked()) {
 		return 0;
 	}
@@ -401,7 +401,7 @@ MidiTrack::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_fr
 void
 MidiTrack::realtime_locate ()
 {
-	Glib::RWLock::ReaderLock lm (_processor_lock, Glib::TRY_LOCK);
+	Glib::Threads::RWLock::ReaderLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
 
 	if (!lm.locked ()) {
 		return;
@@ -417,7 +417,7 @@ MidiTrack::realtime_locate ()
 void
 MidiTrack::realtime_handle_transport_stopped ()
 {
-	Glib::RWLock::ReaderLock lm (_processor_lock, Glib::TRY_LOCK);
+	Glib::Threads::RWLock::ReaderLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
 
 	if (!lm.locked ()) {
 		return;

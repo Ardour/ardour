@@ -24,7 +24,7 @@
 #include <string>
 #include <map>
 #include <sndfile.h>
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 #include "pbd/signals.h"
 #include "pbd/file_manager.h"
 

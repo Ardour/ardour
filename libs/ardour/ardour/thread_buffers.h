@@ -1,7 +1,7 @@
 #ifndef __libardour_thread_buffers__
 #define __libardour_thread_buffers__
 
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 
 #include "ardour/chan_count.h"
 #include "ardour/types.h"

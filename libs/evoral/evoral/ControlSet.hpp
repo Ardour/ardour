@@ -23,7 +23,7 @@
 #include <map>
 #include <boost/shared_ptr.hpp>
 #include <boost/utility.hpp>
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 #include "pbd/signals.h"
 #include "evoral/types.hpp"
 #include "evoral/Parameter.hpp"
@@ -65,13 +65,13 @@ public:
 
 	void what_has_data(std::set<Parameter>&) const;
 
-	Glib::Mutex& control_lock() const { return _control_lock; }
+	Glib::Threads::Mutex& control_lock() const { return _control_lock; }
 
 protected:
 	virtual void control_list_marked_dirty () {}
 	virtual void control_list_interpolation_changed (Parameter, ControlList::InterpolationStyle) {}
 
-	mutable Glib::Mutex _control_lock;
+	mutable Glib::Threads::Mutex _control_lock;
 	Controls            _controls;
 
 	PBD::ScopedConnectionList _list_connections;

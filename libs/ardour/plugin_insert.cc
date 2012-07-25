@@ -552,7 +552,7 @@ PluginInsert::automation_run (BufferSet& bufs, pframes_t nframes)
 	framepos_t end = now + nframes;
 	framecnt_t offset = 0;
 
-	Glib::Mutex::Lock lm (control_lock(), Glib::TRY_LOCK);
+	Glib::Threads::Mutex::Lock lm (control_lock(), Glib::Threads::TRY_LOCK);
 
 	if (!lm.locked()) {
 		connect_and_run (bufs, nframes, offset, false);

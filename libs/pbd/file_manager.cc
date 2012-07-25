@@ -57,7 +57,7 @@ FileManager::FileManager ()
 void
 FileManager::add (FileDescriptor* d)
 {
-	Glib::Mutex::Lock lm (_mutex);
+	Glib::Threads::Mutex::Lock lm (_mutex);
 	_files.push_back (d);
 }
 
@@ -65,7 +65,7 @@ FileManager::add (FileDescriptor* d)
 bool
 FileManager::allocate (FileDescriptor* d)
 {
-	Glib::Mutex::Lock lm (_mutex);
+	Glib::Threads::Mutex::Lock lm (_mutex);
 
 	if (!d->is_open()) {
 		
@@ -131,7 +131,7 @@ FileManager::allocate (FileDescriptor* d)
 void
 FileManager::release (FileDescriptor* d)
 {
-	Glib::Mutex::Lock lm (_mutex);
+	Glib::Threads::Mutex::Lock lm (_mutex);
 
 	d->_refcount--;
 	assert (d->_refcount >= 0);
@@ -141,7 +141,7 @@ FileManager::release (FileDescriptor* d)
 void
 FileManager::remove (FileDescriptor* d)
 {
-	Glib::Mutex::Lock lm (_mutex);
+	Glib::Threads::Mutex::Lock lm (_mutex);
 
 	if (d->is_open ()) {
 		close (d);

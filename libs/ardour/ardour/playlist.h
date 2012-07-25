@@ -230,16 +230,16 @@ public:
 	friend class Session;
 
   protected:
-    class RegionReadLock : public Glib::RWLock::ReaderLock {
+    class RegionReadLock : public Glib::Threads::RWLock::ReaderLock {
     public:
-        RegionReadLock (Playlist *pl) : Glib::RWLock::ReaderLock (pl->region_lock) {}
+        RegionReadLock (Playlist *pl) : Glib::Threads::RWLock::ReaderLock (pl->region_lock) {}
         ~RegionReadLock() {}
     };
 
-    class RegionWriteLock : public Glib::RWLock::WriterLock {
+    class RegionWriteLock : public Glib::Threads::RWLock::WriterLock {
     public:
 	    RegionWriteLock (Playlist *pl, bool do_block_notify = true) 
-                    : Glib::RWLock::WriterLock (pl->region_lock)
+                    : Glib::Threads::RWLock::WriterLock (pl->region_lock)
                     , playlist (pl)
                     , block_notify (do_block_notify) {
                     if (block_notify) {
@@ -248,7 +248,7 @@ public:
             }
 
         ~RegionWriteLock() {
-                Glib::RWLock::WriterLock::release ();
+                Glib::Threads::RWLock::WriterLock::release ();
                 if (block_notify) {
                         playlist->release_notifications ();
                 }
@@ -375,7 +375,7 @@ public:
   private:
 	friend class RegionReadLock;
 	friend class RegionWriteLock;
-	mutable Glib::RWLock region_lock;
+	mutable Glib::Threads::RWLock region_lock;
 
   private:
 	void setup_layering_indices (RegionList const &);

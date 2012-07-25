@@ -20,7 +20,7 @@
 #ifndef __ardour_butler_h__
 #define __ardour_butler_h__
 
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 
 #include "pbd/ringbuffer.h"
 #include "pbd/pool.h"
@@ -67,8 +67,8 @@ class Butler : public SessionHandleRef
 	};
 
 	pthread_t    thread;
-	Glib::Mutex  request_lock;
-	Glib::Cond   paused;
+	Glib::Threads::Mutex  request_lock;
+        Glib::Threads::Cond   paused;
 	bool         should_run;
 	mutable gint should_do_transport_work;
 	int          request_pipe[2];

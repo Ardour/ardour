@@ -195,7 +195,7 @@ MidiSource::midi_read (Evoral::EventSink<framepos_t>& dst, framepos_t source_sta
                        MidiStateTracker* tracker,
                        std::set<Evoral::Parameter> const & filtered) const
 {
-	Glib::Mutex::Lock lm (_lock);
+	Glib::Threads::Mutex::Lock lm (_lock);
 
 	BeatsFramesConverter converter(_session.tempo_map(), source_start);
 
@@ -260,7 +260,7 @@ MidiSource::midi_read (Evoral::EventSink<framepos_t>& dst, framepos_t source_sta
 framecnt_t
 MidiSource::midi_write (MidiRingBuffer<framepos_t>& source, framepos_t source_start, framecnt_t duration)
 {
-	Glib::Mutex::Lock lm (_lock);
+	Glib::Threads::Mutex::Lock lm (_lock);
 
 	const framecnt_t ret = write_unlocked (source, source_start, duration);
 

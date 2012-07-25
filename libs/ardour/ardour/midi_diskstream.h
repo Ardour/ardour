@@ -199,7 +199,7 @@ class MidiDiskstream : public Diskstream
 	    the GUI to read (so that it can update itself).
 	*/
 	MidiBuffer                   _gui_feed_buffer;
-	mutable Glib::Mutex          _gui_feed_buffer_mutex;
+	mutable Glib::Threads::Mutex          _gui_feed_buffer_mutex;
 };
 
 }; /* namespace ARDOUR */

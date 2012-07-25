@@ -22,7 +22,7 @@
 
 #include <vector>
 
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 
 #include <jack/jack.h>
 
@@ -262,7 +262,7 @@ class MTC_Slave : public Slave {
 	size_t         speed_accumulator_cnt;
 	bool           have_first_speed_accumulator;
 	double         average_speed;
-	Glib::Mutex    reset_lock;
+	Glib::Threads::Mutex    reset_lock;
 	uint32_t       reset_pending;
 	bool           reset_position;
 

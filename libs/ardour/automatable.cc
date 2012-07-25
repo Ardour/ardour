@@ -54,7 +54,7 @@ Automatable::Automatable (const Automatable& other)
         : ControlSet (other)
         , _a_session (other._a_session)
 {
-        Glib::Mutex::Lock lm (other._control_lock);
+        Glib::Threads::Mutex::Lock lm (other._control_lock);
 
         for (Controls::const_iterator i = other._controls.begin(); i != other._controls.end(); ++i) {
                 boost::shared_ptr<Evoral::Control> ac (control_factory (i->first));
@@ -65,7 +65,7 @@ Automatable::Automatable (const Automatable& other)
 Automatable::~Automatable ()
 {
 	{
-		Glib::Mutex::Lock lm (_control_lock);
+		Glib::Threads::Mutex::Lock lm (_control_lock);
 		
 		for (Controls::const_iterator li = _controls.begin(); li != _controls.end(); ++li) {
 			boost::dynamic_pointer_cast<AutomationControl>(li->second)->drop_references ();
@@ -106,7 +106,7 @@ Automatable::load_automation (const string& path)
 		return 1;
 	}
 
-	Glib::Mutex::Lock lm (control_lock());
+	Glib::Threads::Mutex::Lock lm (control_lock());
 	set<Evoral::Parameter> tosave;
 	controls().clear ();
 
@@ -186,7 +186,7 @@ Automatable::can_automate (Evoral::Parameter what)
 int
 Automatable::set_automation_xml_state (const XMLNode& node, Evoral::Parameter legacy_param)
 {
-	Glib::Mutex::Lock lm (control_lock());
+	Glib::Threads::Mutex::Lock lm (control_lock());
 
 	/* Don't clear controls, since some may be special derived Controllable classes */
 
@@ -240,7 +240,7 @@ Automatable::set_automation_xml_state (const XMLNode& node, Evoral::Parameter le
 XMLNode&
 Automatable::get_automation_xml_state ()
 {
-	Glib::Mutex::Lock lm (control_lock());
+	Glib::Threads::Mutex::Lock lm (control_lock());
 	XMLNode* node = new XMLNode (Automatable::xml_node_name);
 
 	if (controls().empty()) {
@@ -260,7 +260,7 @@ Automatable::get_automation_xml_state ()
 void
 Automatable::set_parameter_automation_state (Evoral::Parameter param, AutoState s)
 {
-	Glib::Mutex::Lock lm (control_lock());
+	Glib::Threads::Mutex::Lock lm (control_lock());
 
 	boost::shared_ptr<AutomationControl> c = automation_control (param, true);
 
@@ -287,7 +287,7 @@ Automatable::get_parameter_automation_state (Evoral::Parameter param)
 void
 Automatable::set_parameter_automation_style (Evoral::Parameter param, AutoStyle s)
 {
-	Glib::Mutex::Lock lm (control_lock());
+	Glib::Threads::Mutex::Lock lm (control_lock());
 
 	boost::shared_ptr<AutomationControl> c = automation_control(param, true);
 
@@ -300,7 +300,7 @@ Automatable::set_parameter_automation_style (Evoral::Parameter param, AutoStyle 
 AutoStyle
 Automatable::get_parameter_automation_style (Evoral::Parameter param)
 {
-	Glib::Mutex::Lock lm (control_lock());
+	Glib::Threads::Mutex::Lock lm (control_lock());
 
 	boost::shared_ptr<Evoral::Control> c = control(param);
 	boost::shared_ptr<AutomationList> l = boost::dynamic_pointer_cast<AutomationList>(c->list());

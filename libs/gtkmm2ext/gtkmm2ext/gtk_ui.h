@@ -117,8 +117,6 @@ class UI : public AbstractUI<UIRequest>
 
 	bool caller_is_ui_thread ();
 
-	static Glib::Thread* thread_id() { return gui_thread; }
-
 	/* Gtk-UI specific interfaces */
 
 	bool running ();
@@ -161,8 +159,6 @@ class UI : public AbstractUI<UIRequest>
 
 	static bool just_hide_it (GdkEventAny *, Gtk::Window *);
 
-	static Glib::Thread* the_gui_thread() { return gui_thread; }
-
   protected:
 	virtual void handle_fatal (const char *);
 	virtual void display_message (const char *prefix, gint prefix_len,
@@ -171,7 +167,7 @@ class UI : public AbstractUI<UIRequest>
 
   private:
 	static UI *theGtkUI;
-	static Glib::Thread* gui_thread;
+
 	bool _active;
 	Gtk::Main *theMain;
 #ifndef GTK_NEW_TOOLTIP_API

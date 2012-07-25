@@ -26,7 +26,7 @@
 
 #include <boost/scoped_array.hpp>
 
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 
 #include "pbd/basename.h"
 #include "pbd/xml++.h"

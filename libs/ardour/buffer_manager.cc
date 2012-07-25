@@ -29,7 +29,7 @@ using namespace PBD;
 
 RingBufferNPT<ThreadBuffers*>* BufferManager::thread_buffers = 0;
 std::list<ThreadBuffers*>* BufferManager::thread_buffers_list = 0;
-Glib::StaticMutex BufferManager::rb_mutex = GLIBMM_STATIC_MUTEX_INIT;
+Glib::Threads::Mutex BufferManager::rb_mutex;
 
 using std::cerr;
 using std::endl;
@@ -55,7 +55,7 @@ BufferManager::init (uint32_t size)
 ThreadBuffers*
 BufferManager::get_thread_buffers ()
 {
-	Glib::Mutex::Lock em (rb_mutex);
+	Glib::Threads::Mutex::Lock em (rb_mutex);
         ThreadBuffers* tbp;
 
         if (thread_buffers->read (&tbp, 1) == 1) {
@@ -69,7 +69,7 @@ BufferManager::get_thread_buffers ()
 void
 BufferManager::put_thread_buffers (ThreadBuffers* tbp)
 {
-	Glib::Mutex::Lock em (rb_mutex);
+	Glib::Threads::Mutex::Lock em (rb_mutex);
         thread_buffers->write (&tbp, 1);
 	// cerr << "Put back thread buffers, readable count now " << thread_buffers->read_space() << endl;
 }

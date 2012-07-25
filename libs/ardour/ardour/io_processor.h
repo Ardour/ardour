@@ -23,7 +23,7 @@
 #include <string>
 #include <boost/shared_ptr.hpp>
 
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 
 #include "pbd/undo.h"
 

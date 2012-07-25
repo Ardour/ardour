@@ -1,7 +1,7 @@
 #ifndef __libardour_process_thread__
 #define __libardour_process_thread__
 
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 
 #include "ardour/chan_count.h"
 #include "ardour/types.h"
@@ -36,7 +36,7 @@ protected:
 	void session_going_away ();
 
 private:
-	static Glib::Private<ThreadBuffers>* _private_thread_buffers;
+    static Glib::Threads::Private<ThreadBuffers> _private_thread_buffers;
 };
 
 } // namespace

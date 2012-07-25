@@ -22,7 +22,7 @@
 
 #include <string>
 #include <vector>
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 #include <boost/shared_ptr.hpp>
 
 #include "pbd/signals.h"
@@ -134,7 +134,7 @@ class Bundle : public PBD::ScopedConnectionList
 
 	/// mutex for _channel_ports and _channel_names
 	/// XXX: is this necessary?
-	mutable Glib::Mutex _channel_mutex;
+	mutable Glib::Threads::Mutex _channel_mutex;
 	std::vector<Channel> _channel;
 
   private:

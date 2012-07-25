@@ -921,7 +921,7 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
 
 		/* this is functionally what clear_clicks() does but with a tentative lock */
 
-		Glib::RWLock::WriterLock clickm (click_lock, Glib::TRY_LOCK);
+		Glib::Threads::RWLock::WriterLock clickm (click_lock, Glib::Threads::TRY_LOCK);
 
 		if (clickm.locked()) {
 

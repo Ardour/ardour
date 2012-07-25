@@ -28,8 +28,6 @@
 #include <pthread.h>
 #include <boost/smart_ptr.hpp>
 
-#include <glibmm/thread.h>
-
 #include "pbd/abstract_ui.h"
 #include "midi++/types.h"
 #include "ardour/types.h"

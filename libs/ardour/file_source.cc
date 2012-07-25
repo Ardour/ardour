@@ -36,7 +36,7 @@
 
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 
 #include "ardour/data_type.h"
 #include "ardour/file_source.h"
@@ -519,7 +519,7 @@ out:
 int
 FileSource::set_source_name (const string& newname, bool destructive)
 {
-	Glib::Mutex::Lock lm (_lock);
+	Glib::Threads::Mutex::Lock lm (_lock);
 	string oldpath = _path;
 	string newpath = _session.change_source_path_by_name (oldpath, _name, newname, destructive);
 

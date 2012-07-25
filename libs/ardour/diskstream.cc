@@ -31,7 +31,7 @@
 #include <sys/stat.h>
 #include <sys/mman.h>
 
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 
 #include "pbd/error.h"
 #include "pbd/basename.h"
@@ -171,7 +171,7 @@ Diskstream::set_track (Track* t)
 void
 Diskstream::handle_input_change (IOChange change, void * /*src*/)
 {
-	Glib::Mutex::Lock lm (state_lock);
+	Glib::Threads::Mutex::Lock lm (state_lock);
 
         if (change.type & (IOChange::ConfigurationChanged|IOChange::ConnectionsChanged)) {
 
@@ -193,7 +193,7 @@ Diskstream::non_realtime_set_speed ()
 {
 	if (_buffer_reallocation_required)
 	{
-		Glib::Mutex::Lock lm (state_lock);
+		Glib::Threads::Mutex::Lock lm (state_lock);
 		allocate_temporary_buffers ();
 
 		_buffer_reallocation_required = false;
@@ -315,7 +315,7 @@ Diskstream::set_loop (Location *location)
 ARDOUR::framepos_t
 Diskstream::get_capture_start_frame (uint32_t n) const
 {
-	Glib::Mutex::Lock lm (capture_info_lock);
+	Glib::Threads::Mutex::Lock lm (capture_info_lock);
 
 	if (capture_info.size() > n) {
 		/* this is a completed capture */
@@ -329,7 +329,7 @@ Diskstream::get_capture_start_frame (uint32_t n) const
 ARDOUR::framecnt_t
 Diskstream::get_captured_frames (uint32_t n) const
 {
-	Glib::Mutex::Lock lm (capture_info_lock);
+	Glib::Threads::Mutex::Lock lm (capture_info_lock);
 
 	if (capture_info.size() > n) {
 		/* this is a completed capture */
@@ -356,7 +356,7 @@ Diskstream::use_playlist (boost::shared_ptr<Playlist> playlist)
         bool prior_playlist = false;
 
 	{
-		Glib::Mutex::Lock lm (state_lock);
+		Glib::Threads::Mutex::Lock lm (state_lock);
 
 		if (playlist == _playlist) {
 			return 0;

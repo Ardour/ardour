@@ -33,7 +33,7 @@ using namespace std;
 typedef std::set<pthread_t> ThreadMap;
 static ThreadMap all_threads;
 static pthread_mutex_t thread_map_lock = PTHREAD_MUTEX_INITIALIZER;
-static Glib::StaticPrivate<char> thread_name;
+static Glib::Threads::Private<char> thread_name (free);
 
 namespace PBD {
 	PBD::Signal4<void,std::string, pthread_t,std::string,uint32_t> ThreadCreatedWithRequestSize;
@@ -108,7 +108,7 @@ pthread_set_name (const char *str)
 {
 	/* copy string and delete it when exiting */
 	
-	thread_name.set (strdup (str), free);
+	thread_name.set (strdup (str));
 }
 
 const char *

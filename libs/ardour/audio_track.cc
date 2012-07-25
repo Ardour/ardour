@@ -310,7 +310,7 @@ AudioTrack::set_state_part_two ()
 int
 AudioTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick, bool& need_butler)
 {
-	Glib::RWLock::ReaderLock lm (_processor_lock, Glib::TRY_LOCK);
+	Glib::Threads::RWLock::ReaderLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
 
 	if (!lm.locked()) {
 		return 0;
@@ -483,7 +483,7 @@ AudioTrack::export_stuff (BufferSet& buffers, framepos_t start, framecnt_t nfram
 	boost::scoped_array<Sample> mix_buffer (new Sample[nframes]);
 	boost::shared_ptr<AudioDiskstream> diskstream = audio_diskstream();
 
-	Glib::RWLock::ReaderLock rlock (_processor_lock);
+	Glib::Threads::RWLock::ReaderLock rlock (_processor_lock);
 
 	boost::shared_ptr<AudioPlaylist> apl = boost::dynamic_pointer_cast<AudioPlaylist>(diskstream->playlist());
 
@@ -557,7 +557,7 @@ AudioTrack::bounceable (boost::shared_ptr<Processor> endpoint, bool include_endp
 		return true;
 	}
 
-	Glib::RWLock::ReaderLock lm (_processor_lock);
+	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 	uint32_t naudio = n_inputs().n_audio();
 
 	for (ProcessorList::const_iterator r = _processors.begin(); r != _processors.end(); ++r) {
@@ -666,7 +666,7 @@ AudioTrack::freeze_me (InterThreadInfo& itt)
 	_freeze_record.processor_info.clear ();
 
 	{
-		Glib::RWLock::ReaderLock lm (_processor_lock);
+		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 
 		for (ProcessorList::iterator r = _processors.begin(); r != _processors.end(); ++r) {
 
@@ -729,7 +729,7 @@ AudioTrack::unfreeze ()
 		audio_diskstream()->use_playlist (_freeze_record.playlist);
 
 		{
-			Glib::RWLock::ReaderLock lm (_processor_lock); // should this be a write lock? jlc
+			Glib::Threads::RWLock::ReaderLock lm (_processor_lock); // should this be a write lock? jlc
 			for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 				for (vector<FreezeRecordProcessorInfo*>::iterator ii = _freeze_record.processor_info.begin(); ii != _freeze_record.processor_info.end(); ++ii) {
 					if ((*ii)->id == (*i)->id()) {

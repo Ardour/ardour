@@ -31,7 +31,7 @@
 
 #include "pbd/error.h"
 #include "pbd/basename.h"
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 #include "pbd/xml++.h"
 #include "pbd/memento_command.h"
 #include "pbd/enumwriter.h"
@@ -131,7 +131,7 @@ MidiDiskstream::init ()
 
 MidiDiskstream::~MidiDiskstream ()
 {
-	Glib::Mutex::Lock lm (state_lock);
+	Glib::Threads::Mutex::Lock lm (state_lock);
 }
 
 
@@ -149,7 +149,7 @@ void
 MidiDiskstream::non_realtime_input_change ()
 {
 	{
-		Glib::Mutex::Lock lm (state_lock);
+		Glib::Threads::Mutex::Lock lm (state_lock);
 
 		if (input_change_pending.type == IOChange::NoChange) {
 			return;
@@ -326,7 +326,7 @@ MidiDiskstream::process (framepos_t transport_frame, pframes_t nframes, framecnt
 		return 1;
 	}
 
-	Glib::Mutex::Lock sm (state_lock, Glib::TRY_LOCK);
+	Glib::Threads::Mutex::Lock sm (state_lock, Glib::Threads::TRY_LOCK);
 
 	if (!sm.locked()) {
 		return 1;
@@ -376,7 +376,7 @@ MidiDiskstream::process (framepos_t transport_frame, pframes_t nframes, framecnt
 		}
 
 		if (buf.size() != 0) {
-			Glib::Mutex::Lock lm (_gui_feed_buffer_mutex, Glib::TRY_LOCK);
+			Glib::Threads::Mutex::Lock lm (_gui_feed_buffer_mutex, Glib::Threads::TRY_LOCK);
 
 			if (lm.locked ()) {
 				/* Copy this data into our GUI feed buffer and tell the GUI
@@ -503,7 +503,7 @@ MidiDiskstream::overwrite_existing_buffers ()
 int
 MidiDiskstream::seek (framepos_t frame, bool complete_refill)
 {
-	Glib::Mutex::Lock lm (state_lock);
+	Glib::Threads::Mutex::Lock lm (state_lock);
 	int ret = -1;
 
 	if (g_atomic_int_get (&_frames_read_from_ringbuffer) == 0) {
@@ -789,7 +789,7 @@ MidiDiskstream::transport_stopped_wallclock (struct tm& /*when*/, time_t /*twhen
 	}
 
 	/* XXX is there anything we can do if err != 0 ? */
-	Glib::Mutex::Lock lm (capture_info_lock);
+	Glib::Threads::Mutex::Lock lm (capture_info_lock);
 
 	if (capture_info.empty()) {
 		goto no_capture_stuff_to_do;
@@ -1330,7 +1330,7 @@ MidiDiskstream::get_gui_feed_buffer () const
 {
 	boost::shared_ptr<MidiBuffer> b (new MidiBuffer (AudioEngine::instance()->raw_buffer_size (DataType::MIDI)));
 	
-	Glib::Mutex::Lock lm (_gui_feed_buffer_mutex);
+	Glib::Threads::Mutex::Lock lm (_gui_feed_buffer_mutex);
 	b->copy (_gui_feed_buffer);
 	return b;
 }

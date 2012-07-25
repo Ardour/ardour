@@ -19,7 +19,6 @@
 #define surface_port_h
 
 #include <midi++/types.h>
-#include <glibmm/thread.h>
 
 #include "pbd/signals.h"
 #include "midi_byte_array.h"

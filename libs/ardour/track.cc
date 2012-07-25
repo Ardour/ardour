@@ -255,7 +255,7 @@ void
 Track::deactivate_visible_processors ()
 {
 	_deactivated_processors.clear ();
-	Glib::RWLock::ReaderLock lm (_processor_lock);
+	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 	
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		if ((*i)->active() && (*i)->display_to_user() && boost::dynamic_pointer_cast<Amp> (*i) == 0) {
@@ -365,7 +365,7 @@ Track::set_latency_compensation (framecnt_t longest_session_latency)
 int
 Track::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, bool session_state_changing)
 {
-	Glib::RWLock::ReaderLock lm (_processor_lock, Glib::TRY_LOCK);
+	Glib::Threads::RWLock::ReaderLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
 	if (!lm.locked()) {
 		return 0;
 	}
@@ -448,7 +448,7 @@ Track::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 int
 Track::silent_roll (pframes_t nframes, framepos_t /*start_frame*/, framepos_t /*end_frame*/, bool& need_butler)
 {
-	Glib::RWLock::ReaderLock lm (_processor_lock, Glib::TRY_LOCK);
+	Glib::Threads::RWLock::ReaderLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
 	if (!lm.locked()) {
 		return 0;
 	}
@@ -908,7 +908,7 @@ Track::check_initial_delay (framecnt_t nframes, framepos_t& transport_frame)
 		   to reflect that we just wrote _roll_delay frames of silence.
 		*/
 
-		Glib::RWLock::ReaderLock lm (_processor_lock);
+		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 			boost::shared_ptr<IOProcessor> iop = boost::dynamic_pointer_cast<IOProcessor> (*i);
 			if (iop) {

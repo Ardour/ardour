@@ -24,7 +24,7 @@
 #include <list>
 #include <cmath>
 
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 
 #include "pbd/undo.h"
 #include "pbd/xml++.h"

@@ -24,7 +24,7 @@
 #include <list>
 
 
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 
 #include "pbd/stateful.h"
 #include "ardour/session_handle.h"
@@ -81,7 +81,7 @@ class ControlProtocolManager : public PBD::Stateful, public ARDOUR::SessionHandl
 	ControlProtocolManager ();
 	static ControlProtocolManager* _instance;
 
-	Glib::Mutex protocols_lock;
+	Glib::Threads::Mutex protocols_lock;
 	std::list<ControlProtocol*>    control_protocols;
 
 	void session_going_away ();

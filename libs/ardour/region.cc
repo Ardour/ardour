@@ -23,7 +23,7 @@
 #include <algorithm>
 #include <sstream>
 
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 #include "pbd/xml++.h"
 
 #include "ardour/debug.h"

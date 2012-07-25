@@ -449,7 +449,7 @@ Amp::GainControl::internal_to_user (double v) const
 void
 Amp::setup_gain_automation (framepos_t start_frame, framepos_t end_frame, framecnt_t nframes)
 {
-	Glib::Mutex::Lock am (control_lock(), Glib::TRY_LOCK);
+	Glib::Threads::Mutex::Lock am (control_lock(), Glib::Threads::TRY_LOCK);
 
 	if (am.locked() && _session.transport_rolling() && _gain_control->automation_playback()) {
 		assert (_gain_automation_buffer);

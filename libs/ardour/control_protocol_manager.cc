@@ -46,7 +46,7 @@ ControlProtocolManager::ControlProtocolManager ()
 
 ControlProtocolManager::~ControlProtocolManager()
 {
-	Glib::Mutex::Lock lm (protocols_lock);
+	Glib::Threads::Mutex::Lock lm (protocols_lock);
 
 	for (list<ControlProtocol*>::iterator i = control_protocols.begin(); i != control_protocols.end(); ++i) {
 		delete (*i);
@@ -68,7 +68,7 @@ ControlProtocolManager::set_session (Session* s)
 	SessionHandlePtr::set_session (s);
 
 	if (_session) {
-		Glib::Mutex::Lock lm (protocols_lock);
+		Glib::Threads::Mutex::Lock lm (protocols_lock);
 
 		for (list<ControlProtocolInfo*>::iterator i = control_protocol_info.begin(); i != control_protocol_info.end(); ++i) {
 			if ((*i)->requested || (*i)->mandatory) {
@@ -97,7 +97,7 @@ ControlProtocolManager::session_going_away()
 	SessionHandlePtr::session_going_away ();
 
 	{
-		Glib::Mutex::Lock lm (protocols_lock);
+		Glib::Threads::Mutex::Lock lm (protocols_lock);
 
 		for (list<ControlProtocol*>::iterator p = control_protocols.begin(); p != control_protocols.end(); ++p) {
 			delete *p;
@@ -160,7 +160,7 @@ ControlProtocolManager::teardown (ControlProtocolInfo& cpi)
 	cpi.descriptor->destroy (cpi.descriptor, cpi.protocol);
 
 	{
-		Glib::Mutex::Lock lm (protocols_lock);
+		Glib::Threads::Mutex::Lock lm (protocols_lock);
 		list<ControlProtocol*>::iterator p = find (control_protocols.begin(), control_protocols.end(), cpi.protocol);
 		if (p != control_protocols.end()) {
 			control_protocols.erase (p);
@@ -183,7 +183,7 @@ ControlProtocolManager::load_mandatory_protocols ()
 		return;
 	}
 
-	Glib::Mutex::Lock lm (protocols_lock);
+	Glib::Threads::Mutex::Lock lm (protocols_lock);
 
 	for (list<ControlProtocolInfo*>::iterator i = control_protocol_info.begin(); i != control_protocol_info.end(); ++i) {
 		if ((*i)->mandatory && ((*i)->protocol == 0)) {
@@ -319,7 +319,7 @@ ControlProtocolManager::set_state (const XMLNode& node, int /*version*/)
 	XMLNodeConstIterator citer;
 	XMLProperty* prop;
 
-	Glib::Mutex::Lock lm (protocols_lock);
+	Glib::Threads::Mutex::Lock lm (protocols_lock);
 
 	clist = node.children();
 
@@ -357,7 +357,7 @@ XMLNode&
 ControlProtocolManager::get_state ()
 {
 	XMLNode* root = new XMLNode (state_node_name);
-	Glib::Mutex::Lock lm (protocols_lock);
+	Glib::Threads::Mutex::Lock lm (protocols_lock);
 
 	for (list<ControlProtocolInfo*>::iterator i = control_protocol_info.begin(); i != control_protocol_info.end(); ++i) {
 
@@ -426,7 +426,7 @@ ControlProtocolManager::instance ()
 void
 ControlProtocolManager::midi_connectivity_established ()
 {
-	Glib::Mutex::Lock lm (protocols_lock);
+	Glib::Threads::Mutex::Lock lm (protocols_lock);
 
 	for (list<ControlProtocol*>::iterator p = control_protocols.begin(); p != control_protocols.end(); ++p) {
 		(*p)->midi_connectivity_established ();

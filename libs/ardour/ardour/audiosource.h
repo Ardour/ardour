@@ -25,7 +25,7 @@
 
 #include <time.h>
 
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 #include <boost/function.hpp>
 
 #include "ardour/source.h"
@@ -118,7 +118,7 @@ class AudioSource : virtual public Source,
 
 	static std::vector<boost::shared_ptr<Sample> > _mixdown_buffers;
 	static std::vector<boost::shared_ptr<gain_t> > _gain_buffers;
-	static Glib::StaticMutex    _level_buffer_lock;
+        static Glib::Threads::Mutex    _level_buffer_lock;
 
 	static void ensure_buffers_for_level (uint32_t, framecnt_t);
 	static void ensure_buffers_for_level_locked (uint32_t, framecnt_t);
@@ -157,7 +157,7 @@ class AudioSource : virtual public Source,
 	 *  PeaksReady means that _peaks_built cannot be changed
 	 *  during the handling of the signal.
 	 */
-	mutable Glib::Mutex _peaks_ready_lock;
+        mutable Glib::Threads::Mutex _peaks_ready_lock;
 
 	PBD::FdFileDescriptor* _peakfile_descriptor;
 	int        _peakfile_fd;

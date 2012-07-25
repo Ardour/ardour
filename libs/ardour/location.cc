@@ -573,7 +573,7 @@ Locations::set_current (Location *loc, bool want_lock)
 	int ret;
 
 	if (want_lock) {
-		Glib::Mutex::Lock lm (lock);
+		Glib::Threads::Mutex::Lock lm (lock);
 		ret = set_current_unlocked (loc);
 	} else {
 		ret = set_current_unlocked (loc);
@@ -635,7 +635,7 @@ void
 Locations::clear ()
 {
 	{
-		Glib::Mutex::Lock lm (lock);
+		Glib::Threads::Mutex::Lock lm (lock);
 
 		for (LocationList::iterator i = locations.begin(); i != locations.end(); ) {
 
@@ -660,7 +660,7 @@ void
 Locations::clear_markers ()
 {
 	{
-		Glib::Mutex::Lock lm (lock);
+		Glib::Threads::Mutex::Lock lm (lock);
 		LocationList::iterator tmp;
 
 		for (LocationList::iterator i = locations.begin(); i != locations.end(); ) {
@@ -682,7 +682,7 @@ void
 Locations::clear_ranges ()
 {
 	{
-		Glib::Mutex::Lock lm (lock);
+		Glib::Threads::Mutex::Lock lm (lock);
 		LocationList::iterator tmp;
 
 		for (LocationList::iterator i = locations.begin(); i != locations.end(); ) {
@@ -711,7 +711,7 @@ Locations::add (Location *loc, bool make_current)
 	assert (loc);
 
 	{
-		Glib::Mutex::Lock lm (lock);
+		Glib::Threads::Mutex::Lock lm (lock);
 		locations.push_back (loc);
 
 		if (make_current) {
@@ -743,7 +743,7 @@ Locations::remove (Location *loc)
 	}
 
 	{
-		Glib::Mutex::Lock lm (lock);
+		Glib::Threads::Mutex::Lock lm (lock);
 
 		for (i = locations.begin(); i != locations.end(); ++i) {
 			if ((*i) == loc) {
@@ -781,7 +781,7 @@ Locations::get_state ()
 {
 	XMLNode *node = new XMLNode ("Locations");
 	LocationList::iterator iter;
-	Glib::Mutex::Lock lm (lock);
+	Glib::Threads::Mutex::Lock lm (lock);
 
 	for (iter = locations.begin(); iter != locations.end(); ++iter) {
 		node->add_child_nocopy ((*iter)->get_state ());
@@ -812,7 +812,7 @@ Locations::set_state (const XMLNode& node, int version)
 	}
 
 	{
-		Glib::Mutex::Lock lm (lock);
+		Glib::Threads::Mutex::Lock lm (lock);
 
 		XMLNodeConstIterator niter;
 		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
@@ -910,7 +910,7 @@ Locations::first_location_before (framepos_t frame, bool include_special_ranges)
 	LocationList locs;
 
 	{
-		Glib::Mutex::Lock lm (lock);
+		Glib::Threads::Mutex::Lock lm (lock);
 		locs = locations;
 	}
 
@@ -937,7 +937,7 @@ Locations::first_location_after (framepos_t frame, bool include_special_ranges)
 	LocationList locs;
 
 	{
-		Glib::Mutex::Lock lm (lock);
+		Glib::Threads::Mutex::Lock lm (lock);
 		locs = locations;
 	}
 
@@ -973,7 +973,7 @@ Locations::marks_either_side (framepos_t const frame, framepos_t& before, framep
 	LocationList locs;
 
 	{
-		Glib::Mutex::Lock lm (lock);
+		Glib::Threads::Mutex::Lock lm (lock);
 		locs = locations;
 	}
 
@@ -1067,7 +1067,7 @@ uint32_t
 Locations::num_range_markers () const
 {
 	uint32_t cnt = 0;
-	Glib::Mutex::Lock lm (lock);
+	Glib::Threads::Mutex::Lock lm (lock);
 	for (LocationList::const_iterator i = locations.begin(); i != locations.end(); ++i) {
 		if ((*i)->is_range_marker()) {
 			++cnt;
@@ -1090,7 +1090,7 @@ Locations::get_location_by_id(PBD::ID id)
 void
 Locations::find_all_between (framepos_t start, framepos_t end, LocationList& ll, Location::Flags flags)
 {
-	Glib::Mutex::Lock lm (lock);
+	Glib::Threads::Mutex::Lock lm (lock);
 
 	for (LocationList::const_iterator i = locations.begin(); i != locations.end(); ++i) {
 		if ((flags == 0 || (*i)->matches (flags)) &&

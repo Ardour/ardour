@@ -427,7 +427,7 @@ SMFSource::mark_streaming_write_completed ()
 void
 SMFSource::mark_midi_streaming_write_completed (Evoral::Sequence<Evoral::MusicalTime>::StuckNoteOption stuck_notes_option, Evoral::MusicalTime when)
 {
-	Glib::Mutex::Lock lm (_lock);
+	Glib::Threads::Mutex::Lock lm (_lock);
 	MidiSource::mark_midi_streaming_write_completed (stuck_notes_option, when);
 
 	if (!writable()) {
@@ -459,9 +459,9 @@ SMFSource::load_model (bool lock, bool force_reload)
 		return;
 	}
 
-	boost::shared_ptr<Glib::Mutex::Lock> lm;
+	boost::shared_ptr<Glib::Threads::Mutex::Lock> lm;
 	if (lock)
-		lm = boost::shared_ptr<Glib::Mutex::Lock>(new Glib::Mutex::Lock(_lock));
+		lm = boost::shared_ptr<Glib::Threads::Mutex::Lock>(new Glib::Threads::Mutex::Lock(_lock));
 
 	if (_model && !force_reload) {
 		return;

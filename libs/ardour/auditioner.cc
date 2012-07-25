@@ -17,7 +17,7 @@
 
 */
 
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 
 #include "pbd/error.h"
 
@@ -136,7 +136,7 @@ Auditioner::audition_region (boost::shared_ptr<Region> region)
 		return;
 	}
 
-	Glib::Mutex::Lock lm (lock);
+	Glib::Threads::Mutex::Lock lm (lock);
 
 	/* copy it */
 
@@ -154,7 +154,7 @@ Auditioner::audition_region (boost::shared_ptr<Region> region)
 
         ProcessorStreams ps;
 	{
-		Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 
 		if (configure_processors (&ps)) {
 			error << string_compose (_("Cannot setup auditioner processing flow for %1 channels"),

@@ -21,7 +21,7 @@
 #define __ardour_auto_bundle_h__
 
 #include <vector>
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 #include "ardour/bundle.h"
 
 namespace ARDOUR {

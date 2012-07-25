@@ -23,7 +23,7 @@
 #include <stdint.h>
 #include <string>
 
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 
 namespace PBD {
 
@@ -63,7 +63,7 @@ class ID {
 	uint64_t _id;
 	int string_assign (std::string);
 
-	static Glib::Mutex* counter_lock;
+	static Glib::Threads::Mutex* counter_lock;
 	static uint64_t _counter;
 };
 

@@ -32,7 +32,7 @@
 #include <boost/dynamic_bitset.hpp>
 #include <boost/enable_shared_from_this.hpp>
 
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 #include "pbd/fastlog.h"
 #include "pbd/xml++.h"
 #include "pbd/undo.h"
@@ -191,7 +191,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	void flush_processors ();
 
 	void foreach_processor (boost::function<void(boost::weak_ptr<Processor>)> method) {
-		Glib::RWLock::ReaderLock lm (_processor_lock);
+		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 			if (boost::dynamic_pointer_cast<UnknownProcessor> (*i)) {
 				break;
@@ -201,7 +201,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	}
 
 	boost::shared_ptr<Processor> nth_processor (uint32_t n) {
-		Glib::RWLock::ReaderLock lm (_processor_lock);
+		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 		ProcessorList::iterator i;
 		for (i = _processors.begin(); i != _processors.end() && n; ++i, --n) {}
 		if (i == _processors.end()) {
@@ -468,7 +468,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	framecnt_t     _roll_delay;
 
 	ProcessorList  _processors;
-	mutable Glib::RWLock   _processor_lock;
+	mutable Glib::Threads::RWLock   _processor_lock;
 	boost::shared_ptr<Delivery> _main_outs;
 	boost::shared_ptr<InternalSend> _monitor_send;
 	boost::shared_ptr<InternalReturn> _intreturn;

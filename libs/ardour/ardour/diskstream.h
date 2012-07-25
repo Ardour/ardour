@@ -250,7 +250,7 @@ class Diskstream : public SessionObject, public PublicDiskstream
 
 	static framecnt_t disk_io_chunk_frames;
 	std::vector<CaptureInfo*> capture_info;
-	mutable Glib::Mutex capture_info_lock;
+	mutable Glib::Threads::Mutex capture_info_lock;
 
 	uint32_t i_am_the_modifier;
 
@@ -301,7 +301,7 @@ class Diskstream : public SessionObject, public PublicDiskstream
 
 	bool          in_set_state;
 
-	Glib::Mutex state_lock;
+	Glib::Threads::Mutex state_lock;
 
 	PBD::ScopedConnectionList playlist_connections;
 

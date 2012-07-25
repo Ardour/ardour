@@ -24,7 +24,7 @@
 
 #include <set>
 
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 
 #include "pbd/xml++.h"
 #include "pbd/basename.h"
@@ -407,7 +407,7 @@ MidiRegion::model_automation_state_changed (Evoral::Parameter const & p)
 	   for a given set of filtered_parameters, so now that we've changed that list we must invalidate
 	   the iterator.
 	*/
-	Glib::Mutex::Lock lm (midi_source(0)->mutex());
+	Glib::Threads::Mutex::Lock lm (midi_source(0)->mutex());
 	midi_source(0)->invalidate ();
 }
 

@@ -20,7 +20,7 @@
 #include <algorithm>
 #include <inttypes.h>
 
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/window_title.h>
 

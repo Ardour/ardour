@@ -46,7 +46,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-Glib::StaticMutex AudioSource::_level_buffer_lock = GLIBMM_STATIC_MUTEX_INIT;
+Glib::Threads::Mutex AudioSource::_level_buffer_lock;
 vector<boost::shared_ptr<Sample> > AudioSource::_mixdown_buffers;
 vector<boost::shared_ptr<gain_t> > AudioSource::_gain_buffers;
 size_t AudioSource::_working_buffers_size = 0;
@@ -160,7 +160,7 @@ bool
 AudioSource::peaks_ready (boost::function<void()> doThisWhenReady, ScopedConnection** connect_here_if_not, EventLoop* event_loop) const
 {
 	bool ret;
-	Glib::Mutex::Lock lm (_peaks_ready_lock);
+	Glib::Threads::Mutex::Lock lm (_peaks_ready_lock);
 
 	if (!(ret = _peaks_built)) {
 		*connect_here_if_not = new ScopedConnection;
@@ -281,14 +281,14 @@ AudioSource::read (Sample *dst, framepos_t start, framecnt_t cnt, int /*channel*
 {
 	assert (cnt >= 0);
 	
-	Glib::Mutex::Lock lm (_lock);
+	Glib::Threads::Mutex::Lock lm (_lock);
 	return read_unlocked (dst, start, cnt);
 }
 
 framecnt_t
 AudioSource::write (Sample *dst, framecnt_t cnt)
 {
-	Glib::Mutex::Lock lm (_lock);
+	Glib::Threads::Mutex::Lock lm (_lock);
 	/* any write makes the fill not removable */
 	_flags = Flag (_flags & ~Removable);
 	return write_unlocked (dst, cnt);
@@ -308,7 +308,7 @@ int
 AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t start, framecnt_t cnt,
 				  double samples_per_visual_peak, framecnt_t samples_per_file_peak) const
 {
-	Glib::Mutex::Lock lm (_lock);
+	Glib::Threads::Mutex::Lock lm (_lock);
 	double scale;
 	double expected_peaks;
 	PeakData::PeakDatum xmax;
@@ -646,7 +646,7 @@ AudioSource::build_peaks_from_scratch ()
 	{
 		/* hold lock while building peaks */
 
-		Glib::Mutex::Lock lp (_lock);
+		Glib::Threads::Mutex::Lock lp (_lock);
 
 		if (prepare_for_peakfile_writes ()) {
 			goto out;
@@ -717,7 +717,7 @@ AudioSource::done_with_peakfile_writes (bool done)
 	}
 
 	if (done) {
-		Glib::Mutex::Lock lm (_peaks_ready_lock);
+		Glib::Threads::Mutex::Lock lm (_peaks_ready_lock);
 		_peaks_built = true;
 		PeaksReady (); /* EMIT SIGNAL */
 	}
@@ -777,7 +777,7 @@ AudioSource::compute_and_write_peaks (Sample* buf, framecnt_t first_frame, frame
 			_peak_byte_max = max (_peak_byte_max, (off_t) (byte + sizeof(PeakData)));
 
 			{
-				Glib::Mutex::Lock lm (_peaks_ready_lock);
+				Glib::Threads::Mutex::Lock lm (_peaks_ready_lock);
 				PeakRangeReady (peak_leftover_frame, peak_leftover_cnt); /* EMIT SIGNAL */
 				if (intermediate_peaks_ready) {
 					PeaksReady (); /* EMIT SIGNAL */
@@ -890,7 +890,7 @@ AudioSource::compute_and_write_peaks (Sample* buf, framecnt_t first_frame, frame
 	_peak_byte_max = max (_peak_byte_max, (off_t) (first_peak_byte + sizeof(PeakData)*peaks_computed));
 
 	if (frames_done) {
-		Glib::Mutex::Lock lm (_peaks_ready_lock);
+		Glib::Threads::Mutex::Lock lm (_peaks_ready_lock);
 		PeakRangeReady (first_frame, frames_done); /* EMIT SIGNAL */
 		if (intermediate_peaks_ready) {
 			PeaksReady (); /* EMIT SIGNAL */
@@ -948,7 +948,7 @@ AudioSource::available_peaks (double zoom_factor) const
 void
 AudioSource::mark_streaming_write_completed ()
 {
-	Glib::Mutex::Lock lm (_peaks_ready_lock);
+	Glib::Threads::Mutex::Lock lm (_peaks_ready_lock);
 
 	if (_peaks_built) {
 		PeaksReady (); /* EMIT SIGNAL */
@@ -958,7 +958,7 @@ AudioSource::mark_streaming_write_completed ()
 void
 AudioSource::allocate_working_buffers (framecnt_t framerate)
 {
-	Glib::Mutex::Lock lm (_level_buffer_lock);
+	Glib::Threads::Mutex::Lock lm (_level_buffer_lock);
 
 
 	/* Note: we don't need any buffers allocated until
@@ -975,7 +975,7 @@ AudioSource::allocate_working_buffers (framecnt_t framerate)
 void
 AudioSource::ensure_buffers_for_level (uint32_t level, framecnt_t frame_rate)
 {
-	Glib::Mutex::Lock lm (_level_buffer_lock);
+	Glib::Threads::Mutex::Lock lm (_level_buffer_lock);
 	ensure_buffers_for_level_locked (level, frame_rate);
 }
 

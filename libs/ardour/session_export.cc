@@ -19,7 +19,7 @@
 
 
 #include "pbd/error.h"
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 
 #include <midi++/manager.h>
 #include <midi++/mmc.h>

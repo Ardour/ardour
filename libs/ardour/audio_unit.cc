@@ -31,7 +31,7 @@
 #include "pbd/pathscanner.h"
 #include "pbd/locale_guard.h"
 
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 

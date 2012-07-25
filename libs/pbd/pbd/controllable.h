@@ -25,7 +25,7 @@
 #include <map>
 
 #include "pbd/signals.h"
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 
 #include "pbd/statefuldestructible.h"
 
@@ -105,7 +105,7 @@ class Controllable : public PBD::StatefulDestructible {
 	static void remove (Controllable*);
 
 	typedef std::set<PBD::Controllable*> Controllables;
-	static Glib::StaticRWLock registry_lock;
+        static Glib::Threads::RWLock registry_lock;
 	static Controllables registry;
 };
 

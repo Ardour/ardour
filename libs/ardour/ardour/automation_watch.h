@@ -19,7 +19,7 @@
 
 #include <list>
 #include <boost/shared_ptr.hpp>
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 #include <sigc++/signal.h>
 
 #include "pbd/signals.h"
@@ -47,10 +47,10 @@ class AutomationWatch : public sigc::trackable, public ARDOUR::SessionHandlePtr,
     ~AutomationWatch();
 
     static AutomationWatch* _instance;
-    Glib::Thread*           _thread;
+    Glib::Threads::Thread*  _thread;
     bool                    _run_thread;
     AutomationWatches        automation_watches;
-    Glib::Mutex              automation_watch_lock;
+    Glib::Threads::Mutex              automation_watch_lock;
     PBD::ScopedConnection    transport_connection;
 
     void transport_state_change ();
