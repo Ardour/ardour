@@ -341,6 +341,8 @@ def set_compiler_flags (conf,opt):
     # more boilerplate
     #
 
+    conf.env.append_value('CFLAGS', '-DBOOST_SYSTEM_NO_DEPRECATED')
+    conf.env.append_value('CXXFLAGS', '-DBOOST_SYSTEM_NO_DEPRECATED')
     conf.env.append_value('CFLAGS', '-D_LARGEFILE64_SOURCE')
     conf.env.append_value('CFLAGS', '-D_FILE_OFFSET_BITS=64')
     conf.env.append_value('CXXFLAGS', '-D_LARGEFILE64_SOURCE')
