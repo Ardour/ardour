@@ -27,7 +27,7 @@
 using namespace ARDOUR;
 
 ExportFilenameSelector::ExportFilenameSelector () :
-	include_label (_("Include in Filename(s):"), Gtk::ALIGN_LEFT),
+	include_label ("", Gtk::ALIGN_LEFT),
 
 	label_label (_("Label:"), Gtk::ALIGN_LEFT),
 	session_checkbox (_("Session Name")),
@@ -38,10 +38,12 @@ ExportFilenameSelector::ExportFilenameSelector () :
 
 	example_filename_label ("", Gtk::ALIGN_LEFT)
 {
+	include_label.set_markup (_("<i>Build filename(s) from these components:</i>"));
+
+	pack_start (path_hbox, false, false, 12);
 	pack_start (include_label, false, false, 6);
 	pack_start (include_hbox, false, false, 0);
-	pack_start (path_hbox, false, false, 12);
-	pack_start (example_filename_label, false, false, 0);
+	pack_start (example_filename_label, false, false, 12);
 
 	include_hbox.pack_start (label_label, false, false, 3);
 	include_hbox.pack_start (label_entry, false, false, 3);
@@ -207,10 +209,9 @@ void
 ExportFilenameSelector::set_example_filename (std::string filename)
 {
 	if (filename == "") {
-		example_filename_label.set_text (_("Sorry, no example filename can be shown at the moment"));
+		example_filename_label.set_markup (_("<small><i>Sorry, no example filename can be shown at the moment</i></small>"));
 	} else {
-		example_filename_label.set_text (string_compose(_("Example filename: \"%1\""),
-		                                                filename));
+		example_filename_label.set_markup (string_compose(_("<small><i>Current (approximate) filename: \"%1\"</i></small>"), filename));
 	}
 }
 
