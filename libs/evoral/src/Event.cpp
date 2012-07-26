@@ -38,7 +38,7 @@ init_event_id_counter(event_id_t n)
 event_id_t
 next_event_id ()
 {
-	return g_atomic_int_exchange_and_add (&_event_id_counter, 1);
+	return g_atomic_int_add (&_event_id_counter, 1);
 }
 
 #ifdef EVORAL_EVENT_ALLOC
