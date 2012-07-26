@@ -1001,10 +1001,13 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
 void
 Session::set_transport_speed (double speed, bool abort, bool clear_state, bool as_default)
 {
-	DEBUG_TRACE (DEBUG::Transport, string_compose ("@ %5 Set transport speed to %1, abort = %2 clear_state = %3, current = %4 as_default %5\n", 
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("@ %5 Set transport speed to %1, abort = %2 clear_state = %3, current = %4 as_default %6\n", 
 						       speed, abort, clear_state, _transport_speed, _transport_frame, as_default));
 
 	if (_transport_speed == speed) {
+		if (as_default && speed == 0.0) { // => reset default transport speed. hacky or what?
+			_default_transport_speed = 1.0;
+		}
 		return;
 	}
 
