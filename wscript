@@ -75,6 +75,7 @@ def fetch_git_revision (path):
             if "git-svn-id" in line:
                 line = line.split('@')[1].split(' ')
                 rev = line[0]
+                break
         except:
             pass
     return rev
