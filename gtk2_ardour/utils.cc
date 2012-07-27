@@ -461,7 +461,9 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
                 DEBUG_TRACE (DEBUG::Accelerators, "\tactivate, then propagate\n");
 
 		if (allow_activating) {
+			DEBUG_TRACE (DEBUG::Accelerators, "\tsending to window\n");
 			if (gtk_window_activate_key (win, ev)) {
+				DEBUG_TRACE (DEBUG::Accelerators, "\t\thandled\n");
 				return true;
 			}
 		} else {
