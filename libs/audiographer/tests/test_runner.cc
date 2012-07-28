@@ -1,5 +1,6 @@
 #include <cppunit/extensions/TestFactoryRegistry.h>
 #include <cppunit/ui/text/TestRunner.h>
+#include <glibmm/thread.h>
 
 int main()
 {

@@ -1,4 +1,5 @@
 #include <getopt.h>
+#include <glibmm/thread.h>
 
 #include <cppunit/CompilerOutputter.h>
 #include <cppunit/extensions/TestFactoryRegistry.h>
