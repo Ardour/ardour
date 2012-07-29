@@ -46,6 +46,10 @@ namespace Properties {
 	extern PBD::PropertyDescriptor<bool> fade_in_active;
 	extern PBD::PropertyDescriptor<bool> fade_out_active;
 	extern PBD::PropertyDescriptor<float> scale_amplitude;
+	extern PBD::PropertyDescriptor<bool> fade_out_is_xfade;
+	extern PBD::PropertyDescriptor<bool> fade_out_is_short;
+	extern PBD::PropertyDescriptor<bool> fade_in_is_xfade;
+	extern PBD::PropertyDescriptor<bool> fade_in_is_short;
 	extern PBD::PropertyDescriptor<boost::shared_ptr<AutomationList> > fade_in;
 	extern PBD::PropertyDescriptor<boost::shared_ptr<AutomationList> > inverse_fade_in;
 	extern PBD::PropertyDescriptor<boost::shared_ptr<AutomationList> > fade_out;
