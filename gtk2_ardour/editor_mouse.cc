@@ -2081,7 +2081,6 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 			ArdourCanvas::SimpleRect *rect = dynamic_cast<ArdourCanvas::SimpleRect *> (item);
 			if (rect) {
 				rect->property_fill_color_rgba() = rv->get_fill_color();
-				rect->property_outline_pixels() = 0;
 			}
 		}
 		set_canvas_cursor (current_canvas_cursor);

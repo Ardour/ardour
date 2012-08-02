@@ -38,6 +38,7 @@ class Splash : public Gtk::Window
 
 	static Splash* instance() { return the_splash; }
 
+        void display ();
 	void pop_back_for (Gtk::Window&);
 	void pop_front ();
 
@@ -56,6 +57,9 @@ class Splash : public Gtk::Window
 
 	void boot_message (std::string);
 	PBD::ScopedConnection msg_connection;
+
+        bool expose_done;
+        bool idle_after_expose ();
 };
 
 #endif /* __ardour_gtk_splash_h__ */

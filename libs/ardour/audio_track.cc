@@ -672,7 +672,7 @@ AudioTrack::freeze_me (InterThreadInfo& itt)
 
 		for (ProcessorList::iterator r = _processors.begin(); r != _processors.end(); ++r) {
 
-			if (!(*r)->does_routing()) {
+			if (!(*r)->does_routing() && !boost::dynamic_pointer_cast<PeakMeter>(*r)) {
 
 				FreezeRecordProcessorInfo* frii  = new FreezeRecordProcessorInfo ((*r)->get_state(), (*r));
 

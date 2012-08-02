@@ -66,6 +66,7 @@ using namespace Editing;
 using namespace ArdourCanvas;
 
 static const int32_t sync_mark_width = 9;
+static double const handle_size = 6; /* height of fade handles */
 
 AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv, boost::shared_ptr<AudioRegion> r, double spu,
 				  Gdk::Color const & basic_color)
@@ -79,9 +80,11 @@ AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView
 	, start_xfade_in (0)
 	, start_xfade_out (0)
 	, start_xfade_rect (0)
+	, _start_xfade_visible (false)
 	, end_xfade_in (0)
 	, end_xfade_out (0)
 	, end_xfade_rect (0)
+	, _end_xfade_visible (false)
 	, _amplitude_above_axis(1.0)
 	, fade_color(0)
 {
@@ -100,9 +103,11 @@ AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView
 	, start_xfade_in (0)
 	, start_xfade_out (0)
 	, start_xfade_rect (0)
+	, _start_xfade_visible (false)
 	, end_xfade_in (0)
 	, end_xfade_out (0)
 	, end_xfade_rect (0)
+	, _end_xfade_visible (false)
 	, _amplitude_above_axis(1.0)
 	, fade_color(0)
 {
@@ -119,9 +124,11 @@ AudioRegionView::AudioRegionView (const AudioRegionView& other, boost::shared_pt
 	, start_xfade_in (0)
 	, start_xfade_out (0)
 	, start_xfade_rect (0)
+	, _start_xfade_visible (false)
 	, end_xfade_in (0)
 	, end_xfade_out (0)
 	, end_xfade_rect (0)
+	, _end_xfade_visible (false)
 	, _amplitude_above_axis (other._amplitude_above_axis)
 	, fade_color(0)
 {
@@ -161,13 +168,13 @@ AudioRegionView::init (Gdk::Color const & basic_color, bool wfd)
 	if (!_recregion) {
 		fade_in_handle = new ArdourCanvas::SimpleRect (*group);
 		fade_in_handle->property_fill_color_rgba() = UINT_RGBA_CHANGE_A (fill_color, 0);
-		fade_in_handle->property_outline_pixels() = 0;
+		fade_in_handle->property_outline_color_rgba() = RGBA_TO_UINT (0, 0, 0, 0);
 
 		fade_in_handle->set_data ("regionview", this);
 
 		fade_out_handle = new ArdourCanvas::SimpleRect (*group);
 		fade_out_handle->property_fill_color_rgba() = UINT_RGBA_CHANGE_A (fill_color, 0);
-		fade_out_handle->property_outline_pixels() = 0;
+		fade_out_handle->property_outline_color_rgba() = RGBA_TO_UINT (0, 0, 0, 0);
 
 		fade_out_handle->set_data ("regionview", this);
 
@@ -448,17 +455,15 @@ AudioRegionView::setup_fade_handle_positions()
 {
 	/* position of fade handle offset from the top of the region view */
 	double const handle_pos = 2;
-	/* height of fade handles */
-	double const handle_height = 5;
 
 	if (fade_in_handle) {
 		fade_in_handle->property_y1() = handle_pos;
-		fade_in_handle->property_y2() = handle_pos + handle_height;
+		fade_in_handle->property_y2() = handle_pos + handle_size;
 	}
 
 	if (fade_out_handle) {
 		fade_out_handle->property_y1() = handle_pos;
-		fade_out_handle->property_y2() = handle_pos + handle_height;
+		fade_out_handle->property_y2() = handle_pos + handle_size;
 	}
 }
 
@@ -559,6 +564,7 @@ AudioRegionView::reset_fade_in_shape_width (framecnt_t width)
 			start_xfade_in->hide ();
 			start_xfade_out->hide ();
 			start_xfade_rect->hide ();
+			_start_xfade_visible = false;
 		}
 	}
 
@@ -589,7 +595,7 @@ AudioRegionView::reset_fade_in_shape_width (framecnt_t width)
 
 	/* Put the fade in handle so that its left side is at the end-of-fade line */
 	fade_in_handle->property_x1() = handle_center;
-	fade_in_handle->property_x2() = handle_center + 6;
+	fade_in_handle->property_x2() = handle_center + handle_size;
 
 	if (pwidth < 5) {
 		fade_in_shape->hide();
@@ -668,6 +674,7 @@ AudioRegionView::reset_fade_out_shape_width (framecnt_t width)
 			end_xfade_in->hide ();
 			end_xfade_out->hide ();
 			end_xfade_rect->hide ();
+			_end_xfade_visible = false;
 		}
 	}
 
@@ -1140,7 +1147,9 @@ AudioRegionView::entered (bool internal_editing)
 	}
 
 	if (fade_in_handle && !internal_editing) {
+		fade_in_handle->property_outline_color_rgba() = RGBA_TO_UINT (0, 0, 0, 255);
 		fade_in_handle->property_fill_color_rgba() = UINT_RGBA_CHANGE_A (fade_color, 255);
+		fade_out_handle->property_outline_color_rgba() = RGBA_TO_UINT (0, 0, 0, 255);
 		fade_out_handle->property_fill_color_rgba() = UINT_RGBA_CHANGE_A (fade_color, 255);
 	}
 }
@@ -1156,7 +1165,9 @@ AudioRegionView::exited ()
 	}
 
 	if (fade_in_handle) {
+		fade_in_handle->property_outline_color_rgba() = RGBA_TO_UINT (0, 0, 0, 0);
 		fade_in_handle->property_fill_color_rgba() = UINT_RGBA_CHANGE_A (fade_color, 0);
+		fade_out_handle->property_outline_color_rgba() = RGBA_TO_UINT (0, 0, 0, 0);
 		fade_out_handle->property_fill_color_rgba() = UINT_RGBA_CHANGE_A (fade_color, 0);
 	}
 }
@@ -1455,6 +1466,7 @@ AudioRegionView::redraw_start_xfade ()
 			start_xfade_in->hide ();
 			start_xfade_out->hide ();
 			start_xfade_rect->hide ();
+			_start_xfade_visible = false;
 		}
 		return;
 	}
@@ -1544,6 +1556,8 @@ AudioRegionView::redraw_start_xfade_to (boost::shared_ptr<AudioRegion> ar, frame
 	start_xfade_out->show ();
 	start_xfade_out->raise_to_top ();
 
+	_start_xfade_visible = true;
+
 	delete points;
 }
 
@@ -1561,6 +1575,7 @@ AudioRegionView::redraw_end_xfade ()
 			end_xfade_in->hide ();
 			end_xfade_out->hide ();
 			end_xfade_rect->hide ();
+			_end_xfade_visible = false;
 		}
 		return;
 	}
@@ -1652,12 +1667,20 @@ AudioRegionView::redraw_end_xfade_to (boost::shared_ptr<AudioRegion> ar, framecn
 	end_xfade_out->show ();
 	end_xfade_out->raise_to_top ();
 
+	_end_xfade_visible = true;
 
 	delete points;
 }
 
 void
 AudioRegionView::hide_xfades ()
+{
+	hide_start_xfade ();
+	hide_end_xfade ();
+}
+
+void
+AudioRegionView::hide_start_xfade ()
 {
 	if (start_xfade_in) {
 		start_xfade_in->hide();
@@ -1668,6 +1691,13 @@ AudioRegionView::hide_xfades ()
 	if (start_xfade_rect) {
 		start_xfade_rect->hide ();
 	}
+
+	_start_xfade_visible = false;
+}
+
+void
+AudioRegionView::hide_end_xfade ()
+{
 	if (end_xfade_in) {
 		end_xfade_in->hide();
 	}
@@ -1677,10 +1707,12 @@ AudioRegionView::hide_xfades ()
 	if (end_xfade_rect) {
 		end_xfade_rect->hide ();
 	}
+
+	_end_xfade_visible = false;
 }
 
 void
-AudioRegionView::show_xfades ()
+AudioRegionView::show_start_xfade ()
 {
 	if (start_xfade_in) {
 		start_xfade_in->show();
@@ -1691,6 +1723,13 @@ AudioRegionView::show_xfades ()
 	if (start_xfade_rect) {
 		start_xfade_rect->show ();
 	}
+
+	_start_xfade_visible = true;
+}
+
+void
+AudioRegionView::show_end_xfade ()
+{
 	if (end_xfade_in) {
 		end_xfade_in->show();
 	}
@@ -1700,6 +1739,15 @@ AudioRegionView::show_xfades ()
 	if (end_xfade_rect) {
 		end_xfade_rect->show ();
 	}
+
+	_end_xfade_visible = true;
+}
+
+void
+AudioRegionView::show_xfades ()
+{
+	show_start_xfade ();
+	show_end_xfade ();
 }
 
 void
@@ -1722,11 +1770,16 @@ AudioRegionView::drag_end ()
 {
 	TimeAxisViewItem::drag_end ();
 
-	for (list<AudioRegionView*>::iterator i = _hidden_xfades.begin(); i != _hidden_xfades.end(); ++i) {
-		(*i)->show_xfades ();
+	for (list<AudioRegionView*>::iterator i = _hidden_xfades.first.begin(); i != _hidden_xfades.first.end(); ++i) {
+		(*i)->show_start_xfade ();
 	}
 
-	_hidden_xfades.clear ();
+	for (list<AudioRegionView*>::iterator i = _hidden_xfades.second.begin(); i != _hidden_xfades.second.end(); ++i) {
+		(*i)->show_end_xfade ();
+	}
+	
+	_hidden_xfades.first.clear ();
+	_hidden_xfades.second.clear ();
 }
 
 void

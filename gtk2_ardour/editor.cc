@@ -1404,7 +1404,7 @@ Editor::fill_xfade_menu (Menu_Helpers::MenuList& items, bool start)
 
 /** Pop up a context menu for when the user clicks on a start crossfade */
 void
-Editor::popup_xfade_in_context_menu (int button, int32_t time, ArdourCanvas::Item* item, ItemType item_type)
+Editor::popup_xfade_in_context_menu (int button, int32_t time, ArdourCanvas::Item* /*item*/, ItemType /*item_type*/)
 {
 	using namespace Menu_Helpers;
 
@@ -1419,7 +1419,7 @@ Editor::popup_xfade_in_context_menu (int button, int32_t time, ArdourCanvas::Ite
 
 /** Pop up a context menu for when the user clicks on an end crossfade */
 void
-Editor::popup_xfade_out_context_menu (int button, int32_t time, ArdourCanvas::Item* item, ItemType item_type)
+Editor::popup_xfade_out_context_menu (int button, int32_t time, ArdourCanvas::Item* /*item*/, ItemType /*item_type*/)
 {
 	using namespace Menu_Helpers;
 
@@ -1909,7 +1909,7 @@ Editor::add_selection_context_items (Menu_Helpers::MenuList& edit_items)
 	edit_items.push_back (SeparatorElem());
 	edit_items.push_back (MenuElem (_("Crop Region to Range"), sigc::mem_fun(*this, &Editor::crop_region_to_selection)));
 	edit_items.push_back (MenuElem (_("Fill Range with Region"), sigc::mem_fun(*this, &Editor::region_fill_selection)));
-	edit_items.push_back (MenuElem (_("Duplicate Range"), sigc::bind (sigc::mem_fun(*this, &Editor::duplicate_dialog), false)));
+	edit_items.push_back (MenuElem (_("Duplicate Range"), sigc::bind (sigc::mem_fun(*this, &Editor::duplicate_range), false)));
 
 	edit_items.push_back (SeparatorElem());
 	edit_items.push_back (MenuElem (_("Consolidate Range"), sigc::bind (sigc::mem_fun(*this, &Editor::bounce_range_selection), true, false)));
@@ -2743,7 +2743,10 @@ Editor::snap_to_internal (framepos_t& start, int32_t direction, bool for_mark)
 
 		_session->locations()->marks_either_side (start, before, after);
 
-		if (before == max_framepos) {
+		if (before == max_framepos && after == max_framepos) {
+			/* No marks to snap to, so just don't snap */
+			return;
+		} else if (before == max_framepos) {
 			start = after;
 		} else if (after == max_framepos) {
 			start = before;
@@ -3251,7 +3254,7 @@ Editor::history_changed ()
 }
 
 void
-Editor::duplicate_dialog (bool with_dialog)
+Editor::duplicate_range (bool with_dialog)
 {
 	float times = 1.0f;
 

@@ -413,21 +413,12 @@ Mixer_UI::sync_order_keys_from_model ()
 	bool changed = false;
 	uint32_t order = 0;
 
-	for (ri = rows.begin(); ri != rows.end(); ++ri) {
+	for (ri = rows.begin(); ri != rows.end(); ++ri, ++order) {
 		boost::shared_ptr<Route> route = (*ri)[track_columns.route];
-		bool visible = (*ri)[track_columns.visible];
-
 		uint32_t old_key = route->order_key (MixerSort);
-		uint32_t new_key;
 
-		if (!visible) {
-			new_key = UINT_MAX;
-		} else {
-			new_key = order;
-		}
-
-		if (old_key != new_key) {
-			route->set_order_key (MixerSort, new_key);
+		if (old_key != order) {
+			route->set_order_key (MixerSort, order);
 			changed = true;
 		}
 
@@ -477,6 +468,7 @@ Mixer_UI::sync_model_from_order_keys (RouteSortOrderKey src)
 	vector<int> neworder;
 	TreeModel::Children rows = track_model->children();
 	uint32_t n = 0;
+	bool changed = false;
 
 	if (rows.empty()) {
 		return;
@@ -486,12 +478,19 @@ Mixer_UI::sync_model_from_order_keys (RouteSortOrderKey src)
 	
 	for (TreeModel::Children::iterator ri = rows.begin(); ri != rows.end(); ++ri, ++n) {
 		boost::shared_ptr<Route> route = (*ri)[track_columns.route];
-		neworder[route->order_key (MixerSort)] = n;
+		uint32_t o = route->order_key (MixerSort);
+
+		neworder[o] = n;
+
+		if (o != n) {
+			changed = true;
+		}
+
 		DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("mixer change order for %1 to %2\n",
 							       route->name(), route->order_key (MixerSort)));
 	}
 
-	{
+	if (changed) {
 		Unwinder<bool> uw (ignore_reorder, true);
 		track_model->reorder (neworder);
 	}
@@ -693,6 +692,7 @@ Mixer_UI::show_strip (MixerStrip* ms)
 		MixerStrip* strip = (*i)[track_columns.strip];
 		if (strip == ms) {
 			(*i)[track_columns.visible] = true;
+			redisplay_track_list ();
 			break;
 		}
 	}
@@ -709,6 +709,7 @@ Mixer_UI::hide_strip (MixerStrip* ms)
 		MixerStrip* strip = (*i)[track_columns.strip];
 		if (strip == ms) {
 			(*i)[track_columns.visible] = false;
+			redisplay_track_list ();
 			break;
 		}
 	}
@@ -985,6 +986,8 @@ Mixer_UI::initial_track_display ()
 		track_model->clear ();
 		add_strips (copy);
 	}
+	
+	_session->sync_order_keys (MixerSort);
 
 	redisplay_track_list ();
 }
@@ -1023,7 +1026,6 @@ Mixer_UI::track_display_button_press (GdkEventButton* ev)
 		return false;
 
 	case 1: /* visibility */
-
 		if ((iter = track_model->get_iter (path))) {
 			MixerStrip* strip = (*iter)[track_columns.strip];
 			if (strip) {
@@ -1031,10 +1033,8 @@ Mixer_UI::track_display_button_press (GdkEventButton* ev)
 				if (!strip->route()->is_master() && !strip->route()->is_monitor()) {
 					bool visible = (*iter)[track_columns.visible];
 					(*iter)[track_columns.visible] = !visible;
+					redisplay_track_list ();
 				}
-#ifdef GTKOSX
-				track_display.queue_draw();
-#endif
 			}
 		}
 		return true;

@@ -88,6 +88,8 @@ class MIDIControllable : public PBD::Stateful
 	MIDI::channel_t get_control_channel () { return control_channel; }
 	MIDI::eventType get_control_type () { return control_type; }
 	MIDI::byte get_control_additional () { return control_additional; }
+
+        int lookup_controllable();
 	
   private:
 
@@ -118,7 +120,6 @@ class MIDIControllable : public PBD::Stateful
 	std::string     _what;
 	bool            _bank_relative;
 
-        int lookup_controllable();
         void drop_controllable();
 
 	void midi_receiver (MIDI::Parser &p, MIDI::byte *, size_t);

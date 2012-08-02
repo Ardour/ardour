@@ -957,7 +957,8 @@ public:
 
 private:
 	void setup (std::list<boost::shared_ptr<AutomationLine> > const &);
-	
+        double y_fraction (boost::shared_ptr<AutomationLine>, double global_y_position) const;
+
 	std::list<ARDOUR::AudioRange> _ranges;
 
 	/** A line that is part of the drag */
@@ -966,10 +967,11 @@ private:
 		std::list<ControlPoint*> points; ///< points to drag on the line
 		std::pair<ARDOUR::framepos_t, ARDOUR::framepos_t> range; ///< the range of all points on the line, in session frames
 		XMLNode* state; ///< the XML state node before the drag
+      	        double original_fraction; ///< initial y-fraction before the drag
 	};
 
 	std::list<Line> _lines;
-
+        double y_origin;
 	bool _nothing_to_drag;
 };
 

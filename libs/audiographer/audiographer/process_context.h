@@ -15,6 +15,7 @@
 namespace AudioGrapher
 {
 
+
 /**
  * Processing context. Constness only applies to data, not flags
  */
@@ -23,6 +24,9 @@ template <typename T = DefaultSampleType>
 class ProcessContext
   : public Throwing<>
 {
+	// Support older compilers that don't support template base class initialization without template parameters
+	// This will need to be modified if if it's modified above
+	static const ThrowLevel throwLevel = DEFAULT_THROW_LEVEL;
 
 	BOOST_STATIC_ASSERT (boost::has_trivial_destructor<T>::value);
 
@@ -43,25 +47,25 @@ public:
 	
 	/// Normal copy constructor
 	ProcessContext (ProcessContext<T> const & other)
-	: _data (other._data), _frames (other._frames), _channels (other._channels), _flags (other._flags)
+		: Throwing<throwLevel>(), _data (other._data), _frames (other._frames), _channels (other._channels), _flags (other._flags)
 	{ /* No need to validate data */ }
 	
 	/// "Copy constructor" with unique data, frame and channel count, but copies flags
 	template<typename Y>
 	ProcessContext (ProcessContext<Y> const & other, T * data, framecnt_t frames, ChannelCount channels)
-		: _data (data), _frames (frames), _channels (channels), _flags (other.flags())
+		: Throwing<throwLevel>(), _data (data), _frames (frames), _channels (channels), _flags (other.flags())
 	{ validate_data(); }
 	
 	/// "Copy constructor" with unique data and frame count, but copies channel count and flags
 	template<typename Y>
 	ProcessContext (ProcessContext<Y> const & other, T * data, framecnt_t frames)
-		: _data (data), _frames (frames), _channels (other.channels()), _flags (other.flags())
+		: Throwing<throwLevel>(), _data (data), _frames (frames), _channels (other.channels()), _flags (other.flags())
 	{ validate_data(); }
 	
 	/// "Copy constructor" with unique data, but copies frame and channel count + flags
 	template<typename Y>
 	ProcessContext (ProcessContext<Y> const & other, T * data)
-		: _data (data), _frames (other.frames()), _channels (other.channels()), _flags (other.flags())
+		: Throwing<throwLevel>(), _data (data), _frames (other.frames()), _channels (other.channels()), _flags (other.flags())
 	{ /* No need to validate data */ }
 	
 	/// Make new Context out of the beginning of this context

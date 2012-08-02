@@ -195,8 +195,6 @@ Route::~Route ()
 	}
 
 	_processors.clear ();
-
-	delete _remote_control_id;
 }
 
 void
@@ -232,11 +230,9 @@ Route::set_remote_control_id (uint32_t id, bool notify_class_listeners)
 	}
 
 	if (id != remote_control_id()) {
-		if (!_remote_control_id) {
-			_remote_control_id = new uint32_t;
-		}
-		*_remote_control_id = id;
+		_remote_control_id = id;
 		RemoteControlIDChanged ();
+
 		if (notify_class_listeners) {
 			RemoteControlIDChange ();
 		}
@@ -246,16 +242,6 @@ Route::set_remote_control_id (uint32_t id, bool notify_class_listeners)
 uint32_t
 Route::remote_control_id() const
 {
-	switch (Config->get_remote_model()) {
-	case UserOrdered:
-		if (_remote_control_id) {
-			return *_remote_control_id;
-		}
-		break;
-	default:
-		break;
-	}
-
 	if (is_master()) {
 		return MasterBusRemoteControlID;
 	} 
@@ -264,16 +250,7 @@ Route::remote_control_id() const
 		return MonitorBusRemoteControlID;
 	}
 
-	/* order keys are zero-based, remote control ID's are one-based
-	 */
-
-	switch (Config->get_remote_model()) {
-	case EditorOrdered:
-		return order_key (EditorSort) + 1;
-	case MixerOrdered:
-	default:
-		return order_key (MixerSort) + 1;
-	}
+	return _remote_control_id;
 }
 
 bool
@@ -291,12 +268,25 @@ Route::order_key (RouteSortOrderKey key) const
 		return 0;
 	}
 
-	return i->second;
+	/* order keys are zero-based, remote control ID's are one-based
+	 */
+
+	switch (Config->get_remote_model()) {
+	case EditorOrdered:
+		return order_key (EditorSort) + 1;
+	case MixerOrdered:
+	default:
+		return order_key (MixerSort) + 1;
+	}
 }
 
 void
 Route::sync_order_keys (RouteSortOrderKey base)
 {
+	/* this is called after changes to 1 or more route order keys have been
+	 * made, and we want to sync up.
+	 */
+
 	OrderKeys::iterator i = order_keys.find (base);
 
 	if (i == order_keys.end()) {
@@ -305,27 +295,113 @@ Route::sync_order_keys (RouteSortOrderKey base)
 
 	for (OrderKeys::iterator k = order_keys.begin(); k != order_keys.end(); ++k) {
 
-		if (k->first == MixerSort && (is_master() || is_monitor())) {
-			/* don't sync the mixer sort keys for master/monitor,
+		if (is_master() || is_monitor()) {
+			/* don't sync the sort keys for master/monitor,
 			 * since they are not part of the normal ordering.
 			 */
-			 
 			continue;
 		}
 		
 		if (k->first != base) {
+			DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("%1 set key for %2 to %3 from %4\n",
+								       name(),
+								       enum_2_string (k->first),
+								       i->second,
+								       base));
+								       
 			k->second = i->second;
 		}
 	}
 }
 
 void
+Route::set_remote_control_id_from_order_key (RouteSortOrderKey key)
+{
+	if (is_master() || is_monitor() || is_hidden()) {
+		/* hard-coded remote IDs, or no remote ID */
+		return;
+	}
+
+	uint32_t n = order_keys[key];
+
+	/* we have a nasty glitch in an otherwise fairly clean system here.
+
+	   in theory, a route's remote control ID is determined by the order
+	   key matching the current remote model (for UserOrdered, the user
+	   controls everything). its one greater, because order keys are zero
+	   based and remote control IDs start at one.
+
+	   but ... an order key for the master bus may place it before or even
+	   within normal routes, yet its remote control ID (like the monitor
+	   bus) is hardcoded to MasterBusRemoteControlID. this means that all
+	   routes ordered after it (in whatever controls the EditorSort or
+	   MixerSort ordering) will end up with a remote control ID that is one
+	   too large.
+
+	   we therefore check on the master bus ordering, and adjust
+	   later-sorted routes remote control ID to avoid this "off by one"
+	   error, which keeps remote control ID's contiguous and "right".
+
+	   ideally, this would be done in a UI layer, where this logic
+	   is really understood and has meaning, rather than in libardour where
+	   its fundamentally meaningless.
+	*/
+
+	switch (Config->get_remote_model()) {
+	case UserOrdered:
+		break;
+	case EditorOrdered:
+		if (key == EditorSort) {
+			boost::shared_ptr<Route> master = _session.master_out();
+			if (master && n > 0 && n > master->order_key (EditorSort)) {
+				--n;
+			}
+			_remote_control_id = n + 1;
+			DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("%1: from order key %2, set edit-based RID to %3\n", 
+								       name(), n, _remote_control_id));
+			RemoteControlIDChanged (); /* EMIT SIGNAL * (per-route) */
+		}
+		break;
+		
+	case MixerOrdered:
+		if (key == MixerSort) {
+			boost::shared_ptr<Route> master = _session.master_out();
+			if (master && n > 0 && n > master->order_key (MixerSort)) {
+				--n;
+			}
+			_remote_control_id = n + 1;
+			DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("%1: from order key %2, set mix-based RID to %3\n", 
+								       name(), n, _remote_control_id));
+			RemoteControlIDChanged (); /* EMIT SIGNAL (per-route) */
+		}
+		break;
+	}
+
+	/* don't emit the class-level RID signal RemoteControlIDChange here,
+	   leave that to the entity that changed the order key, so that we
+	   don't get lots of emissions for no good reasons (e.g. when changing
+	   all route order keys).
+
+	   See Session::sync_remote_id_from_order_keys() for the (primary|only)
+	   spot where that is emitted.
+	*/
+}
+
+void
 Route::set_order_key (RouteSortOrderKey key, uint32_t n)
 {
-	if (order_keys.find (key) == order_keys.end() || order_keys[key] != n) {
-		order_keys[key] = n;
-		_session.set_dirty ();
+	OrderKeys::iterator i = order_keys.find (key);
+
+	if (i != order_keys.end() && i->second == n) {
+		return;
 	}
+
+	order_keys[key] = n;
+
+	DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("%1 order key %2 set to %3 (chk=%4)\n",
+						       name(), enum_2_string (key), n, order_key (key)));
+
+	_session.set_dirty ();
 }
 
 string
@@ -1894,12 +1970,10 @@ Route::state(bool full_state)
 	node->add_child_nocopy (_mute_control->get_state ());
 	node->add_child_nocopy (_mute_master->get_state ());
 
-	if (_remote_control_id) {
-		XMLNode* remote_control_node = new XMLNode (X_("RemoteControl"));
-		snprintf (buf, sizeof (buf), "%d", *_remote_control_id);
-		remote_control_node->add_property (X_("id"), buf);
-		node->add_child_nocopy (*remote_control_node);
-	}
+        XMLNode* remote_control_node = new XMLNode (X_("RemoteControl"));
+        snprintf (buf, sizeof (buf), "%d", _remote_control_id);
+        remote_control_node->add_property (X_("id"), buf);
+        node->add_child_nocopy (*remote_control_node);
 
 	if (_comment.length()) {
 		XMLNode *cmt = node->add_child ("Comment");

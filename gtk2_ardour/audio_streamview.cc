@@ -493,12 +493,14 @@ AudioStreamView::hide_all_fades ()
 }
 
 /** Hide xfades for regions that overlap ar.
- *  @return AudioRegionViews that xfades were hidden for.
+ *  @return Pair of lists; first is the AudioRegionViews that start xfades were hidden for,
+ *  second is the AudioRegionViews that end xfades were hidden for.
  */
-list<AudioRegionView*>
+pair<list<AudioRegionView*>, list<AudioRegionView*> >
 AudioStreamView::hide_xfades_with (boost::shared_ptr<AudioRegion> ar)
 {
-	list<AudioRegionView*> hidden;
+	list<AudioRegionView*> start_hidden;
+	list<AudioRegionView*> end_hidden;
 	
 	for (list<RegionView*>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
 		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
@@ -507,14 +509,19 @@ AudioStreamView::hide_xfades_with (boost::shared_ptr<AudioRegion> ar)
 			case Evoral::OverlapNone:
 				break;
 			default:
+				if (arv->start_xfade_visible ()) {
+					start_hidden.push_back (arv);
+				}
+				if (arv->end_xfade_visible ()) {
+					end_hidden.push_back (arv);
+				}
 				arv->hide_xfades ();
-				hidden.push_back (arv);
 				break;
 			}
 		}
 	}
 
-	return hidden;
+	return make_pair (start_hidden, end_hidden);
 }
 
 void

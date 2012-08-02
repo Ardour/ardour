@@ -197,7 +197,7 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, framepos_t start, framepos_t end, frame
 
 template<typename T>
 void
-MidiRingBuffer<T>::flush (framepos_t start, framepos_t end)
+MidiRingBuffer<T>::flush (framepos_t /*start*/, framepos_t end)
 {
 	const size_t prefix_size = sizeof(T) + sizeof(Evoral::EventType) + sizeof(uint32_t);
 

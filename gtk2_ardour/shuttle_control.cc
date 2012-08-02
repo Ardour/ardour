@@ -241,10 +241,16 @@ ShuttleControl::on_button_press_event (GdkEventButton* ev)
 
 	switch (ev->button) {
 	case 1:
-		add_modal_grab ();
-		shuttle_grabbed = true;
-		shuttle_speed_on_grab = _session->transport_speed ();
-		mouse_shuttle (ev->x, true);
+		if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
+			if (_session->transport_rolling()) {
+				_session->request_transport_speed (1.0);
+			}
+		} else {
+			add_modal_grab ();
+			shuttle_grabbed = true;
+			shuttle_speed_on_grab = _session->transport_speed ();
+			mouse_shuttle (ev->x, true);
+		}
 		break;
 
 	case 2:
@@ -265,15 +271,16 @@ ShuttleControl::on_button_release_event (GdkEventButton* ev)
 
 	switch (ev->button) {
 	case 1:
-		shuttle_grabbed = false;
-		remove_modal_grab ();
-
-		if (Config->get_shuttle_behaviour() == Sprung) {
-			_session->request_transport_speed (shuttle_speed_on_grab);
-		} else {
-			mouse_shuttle (ev->x, true);
+		if (shuttle_grabbed) {
+			shuttle_grabbed = false;
+			remove_modal_grab ();
+			
+			if (Config->get_shuttle_behaviour() == Sprung) {
+				_session->request_transport_speed (shuttle_speed_on_grab);
+			} else {
+				mouse_shuttle (ev->x, true);
+			}
 		}
-
 		return true;
 
 	case 2:

@@ -623,7 +623,10 @@ void
 ArdourStartup::on_apply ()
 {
 	if (engine_dialog) {
-		engine_dialog->setup_engine ();
+		if (engine_dialog->setup_engine ()) {
+                        set_current_page (audio_page_index);
+                        return;
+                }
 	}
 
 	if (config_modified) {

@@ -27,7 +27,6 @@ using namespace std;
 
 namespace Evoral {
 
-
 inline bool event_time_less_than (ControlEvent* a, ControlEvent* b)
 {
 	return a->when < b->when;
@@ -254,12 +253,15 @@ ControlList::merge_nascent (double when)
 			return;
 		}
 
+		bool was_empty = _events.empty();
+			
 		for (list<NascentInfo*>::iterator n = nascent.begin(); n != nascent.end(); ++n) {
 
 			NascentInfo* ninfo = *n;
 			EventList& nascent_events (ninfo->events);
 			bool need_adjacent_start_clamp;
 			bool need_adjacent_end_clamp;
+			EventList::iterator at;
 
 			if (nascent_events.empty()) {
 				delete ninfo;
@@ -276,21 +278,60 @@ ControlList::merge_nascent (double when)
 				ninfo->end_time = when;
 			}
 
-			bool preexisting = !_events.empty();
+			if (_events.empty()) {
 
-			if (!preexisting) {
+				/* add an initial point just before
+				   the nascent data, unless nascent_events
+				   contains a point at zero or one
+				*/
 
-				_events = nascent_events;
+				if (ninfo->start_time > 0) {
+					nascent_events.insert (nascent_events.begin(), new ControlEvent (ninfo->start_time - 1, _default_value));
+				}
 
-			} else if (ninfo->end_time < _events.front()->when) {
+				/* add closing "clamp" point before we insert */
 
-				/* all points in nascent are before the first existing point */
+				nascent_events.insert (nascent_events.end(), new ControlEvent (ninfo->end_time + 1, _default_value));
+
+				/* insert - front or back doesn't matter since
+				 * _events is empty
+				 */
 
 				_events.insert (_events.begin(), nascent_events.begin(), nascent_events.end());
+
+			} else if (ninfo->end_time < _events.front()->when) {
+				
+				/* all points in nascent are before the first existing point */
+
+				if (ninfo->start_time > (_events.front()->when + 1)) {
+					nascent_events.insert (nascent_events.begin(), new ControlEvent (ninfo->start_time - 1, _default_value));
+				}
+
+				/* add closing "clamp" point before we insert */
+
+				nascent_events.insert (nascent_events.end(), new ControlEvent (ninfo->end_time + 1, _default_value));
+
+				/* insert at front */
+
+				_events.insert (_events.begin(), nascent_events.begin(), nascent_events.end());
+				
+				/* now add another default control point right
+				   after the inserted nascent data 
+				*/
 
 			} else if (ninfo->start_time > _events.back()->when) {
 
 				/* all points in nascent are after the last existing point */
+
+				if (ninfo->start_time > (_events.back()->when + 1)) {
+					nascent_events.insert (nascent_events.begin(), new ControlEvent (ninfo->start_time - 1, _default_value));
+				}
+
+				/* add closing "clamp" point before we insert */
+
+				nascent_events.insert (nascent_events.end(), new ControlEvent (ninfo->end_time + 1, _default_value));
+
+				/* insert */
 
 				_events.insert (_events.end(), nascent_events.begin(), nascent_events.end());
 
@@ -350,7 +391,7 @@ ControlList::merge_nascent (double when)
 				   range_begin is the first event on our list after the first nascent event
 				   range_end   is the first event on our list after the last  nascent event
 
-				   range_begin may be equal to _events.end() iff the last event on our list
+				   range_begin may be equal to _events.end() if the last event on our list
 				   was at the same time as the first nascent event.
 				*/
 
@@ -376,6 +417,12 @@ ControlList::merge_nascent (double when)
 			delete ninfo;
 		}
 
+		if (was_empty && !_events.empty()) {
+			if (_events.front()->when != 0) {
+				_events.insert (_events.begin(), new ControlEvent (0, _default_value));
+			}
+		}
+
 		nascent.clear ();
 
 		if (writing()) {
@@ -394,8 +441,8 @@ ControlList::rt_add (double when, double value)
 	if (touch_enabled() && !touching()) {
 		return;
 	}
-
-	//cerr << "RT: alist " << this << " add " << value << " @ " << when << endl;
+	
+	// cerr << "RT: alist " << this << " add " << value << " @ " << when << endl;
 
 	Glib::Mutex::Lock lm (_lock, Glib::TRY_LOCK);
 
@@ -405,18 +452,28 @@ ControlList::rt_add (double when, double value)
 		   sort them in merge_nascent.
 		*/
 
-		EventList& el (nascent.back()->events);
+		NascentInfo* ni (nascent.back());
+		EventList& el (ni->events);
 
-		if (el.size() > 1 && (when >= el.back()->when) && (value == el.back()->value)) {
+		if (!el.empty() && (when >= el.back()->when) && (value == el.back()->value)) {
+
 			/* same value, later timestamp, effective slope is
 			 * zero, so just move the last point in nascent to our
 			 * new time position. this avoids storing an unlimited
 			 * number of points to represent a flat line.
 			 */
-			el.back()->when = when;
+
+			ni->same_value_cnt++;
+
+			if (ni->same_value_cnt > 1) {
+				el.back()->when = when;
+				return;
+			}
 		} else {
-			nascent.back()->events.push_back (new ControlEvent (when, value));
+			ni->same_value_cnt = 0;
 		}
+
+		el.push_back (new ControlEvent (when, value));
 	}
 }
 
@@ -489,6 +546,12 @@ ControlList::add (double when, double value)
 		bool insert = true;
 		iterator insertion_point;
 
+		if (_events.empty()) {
+			if (when > 1) {
+				_events.insert (_events.end(), new ControlEvent (0, _default_value));
+			}
+		}
+
 		for (insertion_point = lower_bound (_events.begin(), _events.end(), &cp, time_comparator); insertion_point != _events.end(); ++insertion_point) {
 
 			/* only one point allowed per time point */
@@ -505,9 +568,7 @@ ControlList::add (double when, double value)
 		}
 
 		if (insert) {
-
 			_events.insert (insertion_point, new ControlEvent (when, value));
-
 		}
 
 		mark_dirty ();

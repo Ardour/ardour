@@ -255,6 +255,9 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 	void set_cycles (uint32_t c) { _cycles = c; }
 	cycles_t cycles() const { return _cycles; }
 
+        PBD::Signal1<void,uint32_t> StartTouch;
+        PBD::Signal1<void,uint32_t> EndTouch;
+
 protected:
 
 	friend class PluginInsert;

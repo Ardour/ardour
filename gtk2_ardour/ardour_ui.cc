@@ -794,6 +794,8 @@ If you still wish to quit, please use the\n\n\
 	*/
 	save_ardour_state ();
 
+	loading_message (_("Please wait while Ardour cleans up..."));
+
 	if (_session) {
 		// _session->set_deletion_in_progress ();
 		_session->set_clean ();
@@ -2394,20 +2396,6 @@ ARDOUR_UI::idle_load (const std::string& path)
 	}
 }
 
-void
-ARDOUR_UI::loading_message (const std::string& msg)
-{
-	if (ARDOUR_COMMAND_LINE::no_splash) {
-		return;
-	}
-
-	show_splash ();
-	if (splash) {
-		splash->message (msg);
-		flush_pending ();
-	}
-}
-
 /** @param quit_on_cancel true if exit() should be called if the user clicks `cancel' in the new session dialog */
 int
 ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, string load_template)
@@ -2812,7 +2800,7 @@ ARDOUR_UI::launch_manual ()
 void
 ARDOUR_UI::launch_reference ()
 {
-	PBD::open_uri("http://ardour.org/refmanual");
+	PBD::open_uri ("http://ardour.org/refmanual");
 }
 
 void
@@ -2831,6 +2819,20 @@ ARDOUR_UI::about_signal_response (int /*response*/)
 }
 
 void
+ARDOUR_UI::loading_message (const std::string& msg)
+{
+	if (ARDOUR_COMMAND_LINE::no_splash) {
+		return;
+	}
+
+	if (!splash) {
+		show_splash ();
+	}
+
+	splash->message (msg);
+}
+
+void
 ARDOUR_UI::show_splash ()
 {
 	if (splash == 0) {
@@ -2841,11 +2843,7 @@ ARDOUR_UI::show_splash ()
 		}
 	}
 
-	splash->present ();
-	splash->pop_front ();
-	splash->queue_draw ();
-	splash->get_window()->process_updates (true);
-	flush_pending ();
+	splash->display ();
 }
 
 void

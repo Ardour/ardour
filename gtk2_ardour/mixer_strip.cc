@@ -772,6 +772,8 @@ MixerStrip::edit_output_configuration ()
 	} else {
 		output_selector->present ();
 	}
+
+	output_selector->set_keep_above (true);
 }
 
 void
@@ -786,6 +788,8 @@ MixerStrip::edit_input_configuration ()
 	} else {
 		input_selector->present ();
 	}
+
+	input_selector->set_keep_above (true);
 }
 
 gint

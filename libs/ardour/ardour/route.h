@@ -423,6 +423,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 
 	void     set_remote_control_id (uint32_t id, bool notify_class_listeners = true);
 	uint32_t remote_control_id () const;
+        void     set_remote_control_id_from_order_key (RouteSortOrderKey);
 
 	/* for things concerned about *this* route's RID */
 
@@ -534,7 +535,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 
 	typedef std::map<RouteSortOrderKey,uint32_t> OrderKeys;
  	OrderKeys order_keys;
-	uint32_t* _remote_control_id;
+        uint32_t _remote_control_id;
 
 	void input_change_handler (IOChange, void *src);
 	void output_change_handler (IOChange, void *src);

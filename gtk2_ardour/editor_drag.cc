@@ -29,6 +29,7 @@
 
 #include "gtkmm2ext/utils.h"
 
+#include "ardour/audioengine.h"
 #include "ardour/audioregion.h"
 #include "ardour/dB.h"
 #include "ardour/midi_region.h"
@@ -2170,9 +2171,20 @@ CursorDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
 			s->cancel_audition ();
 		}
 
-		s->request_suspend_timecode_transmission ();
-		while (!s->timecode_transmission_suspended ()) {
-			/* twiddle our thumbs */
+
+		if (AudioEngine::instance()->connected()) {
+			
+			/* do this only if we're the engine is connected
+			 * because otherwise this request will never be
+			 * serviced and we'll busy wait forever. likewise,
+			 * notice if we are disconnected while waiting for the
+			 * request to be serviced.
+			 */
+
+			s->request_suspend_timecode_transmission ();
+			while (AudioEngine::instance()->connected() && !s->timecode_transmission_suspended ()) {
+				/* twiddle our thumbs */
+			}
 		}
 	}
 
@@ -4094,7 +4106,7 @@ AutomationRangeDrag::AutomationRangeDrag (Editor* editor, AutomationTimeAxisView
 	, _nothing_to_drag (false)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New AutomationRangeDrag\n");
-
+	y_origin = atv->y_position();
 	setup (atv->lines ());
 }
 
@@ -4108,6 +4120,7 @@ AutomationRangeDrag::AutomationRangeDrag (Editor* editor, AudioRegionView* rv, l
 
 	list<boost::shared_ptr<AutomationLine> > lines;
 	lines.push_back (rv->get_gain_line ());
+	y_origin = rv->get_time_axis_view().y_position();
 	setup (lines);
 }
 
@@ -4149,6 +4162,12 @@ AutomationRangeDrag::setup (list<boost::shared_ptr<AutomationLine> > const & lin
 	/* Now ::lines contains the AutomationLines that somehow overlap our drag */
 }
 
+double
+AutomationRangeDrag::y_fraction (boost::shared_ptr<AutomationLine> line, double global_y) const
+{
+	return 1.0 - ((global_y - y_origin) / line->height());
+}
+
 void
 AutomationRangeDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
@@ -4157,6 +4176,7 @@ AutomationRangeDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	/* Get line states before we start changing things */
 	for (list<Line>::iterator i = _lines.begin(); i != _lines.end(); ++i) {
 		i->state = &i->line->get_state ();
+		i->original_fraction = y_fraction (i->line, _drags->current_pointer_y());
 	}
 
 	if (_ranges.empty()) {
@@ -4262,7 +4282,7 @@ AutomationRangeDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	}
 
 	for (list<Line>::iterator i = _lines.begin(); i != _lines.end(); ++i) {
-		i->line->start_drag_multiple (i->points, 1 - (_drags->current_pointer_y() / i->line->height ()), i->state);
+		i->line->start_drag_multiple (i->points, y_fraction (i->line, _drags->current_pointer_y()), i->state);
 	}
 }
 
@@ -4273,11 +4293,12 @@ AutomationRangeDrag::motion (GdkEvent*, bool /*first_move*/)
 		return;
 	}
 
-	for (list<Line>::iterator i = _lines.begin(); i != _lines.end(); ++i) {
-		float const f = 1 - (_drags->current_pointer_y() / i->line->height());
+	for (list<Line>::iterator l = _lines.begin(); l != _lines.end(); ++l) {
+		float const f = y_fraction (l->line, _drags->current_pointer_y());
 
 		/* we are ignoring x position for this drag, so we can just pass in anything */
-		i->line->drag_motion (0, f, true, false);
+		l->line->drag_motion (0, f, true, false);
+		show_verbose_cursor_text (l->line->get_verbose_cursor_relative_string (l->original_fraction, f));
 	}
 }
 

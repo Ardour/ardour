@@ -52,8 +52,6 @@
 #ifndef SNDFILE_HH
 #define SNDFILE_HH
 
-#include <iostream>
-
 #include <sndfile.h>
 
 #include <string>
@@ -171,7 +169,6 @@ SndfileHandle::SndfileHandle (const char *path, int mode, int fmt, int chans, in
 		p->sfinfo.seekable = 0 ;
 
 		p->sf = sf_open (path, mode, &p->sfinfo) ;
-		std::cerr << "3 attempted to open " << path << " got " << p->sf << std::endl;
 		} ;
 
 	return ;
@@ -194,7 +191,6 @@ SndfileHandle::SndfileHandle (std::string const & path, int mode, int fmt, int c
 		p->sfinfo.seekable = 0 ;
 
 		p->sf = sf_open (path.c_str (), mode, &p->sfinfo) ;
-		std::cerr << "attempted to open " << path << " got " << p->sf << std::endl;
 		} ;
 
 	return ;
@@ -220,7 +216,6 @@ SndfileHandle::SndfileHandle (int fd, bool close_desc, int mode, int fmt, int ch
 		p->sfinfo.seekable = 0 ;
 
 		p->sf = sf_open_fd (fd, mode, &p->sfinfo, close_desc) ;
-		std::cerr << "2 attempted to open via fd " <<  fd << " got " << p->sf << std::endl;
 		} ;
 
 	return ;

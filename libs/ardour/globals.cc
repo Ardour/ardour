@@ -303,7 +303,11 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization)
 	(void) PluginManager::instance();
 
         ProcessThread::init ();
-        BufferManager::init (hardware_concurrency() + 1); 
+	/* the + 4 is a bit of a handwave. i don't actually know
+	   how many more per-thread buffer sets we need above
+	   the h/w concurrency, but its definitely > 1 more.
+	*/
+        BufferManager::init (hardware_concurrency() + 4); 
 
         PannerManager::instance().discover_panners();
 

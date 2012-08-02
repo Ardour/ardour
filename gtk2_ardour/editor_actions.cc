@@ -285,7 +285,7 @@ Editor::register_actions ()
 	reg_sens (editor_actions, "set-playhead", _("Playhead to Mouse"), sigc::mem_fun(*this, &Editor::set_playhead_cursor));
 	reg_sens (editor_actions, "set-edit-point", _("Active Marker to Mouse"), sigc::mem_fun(*this, &Editor::set_edit_point));
 
-	reg_sens (editor_actions, "duplicate-range", _("Duplicate Range"), sigc::bind (sigc::mem_fun(*this, &Editor::duplicate_dialog), false));
+	reg_sens (editor_actions, "duplicate-range", _("Duplicate Range"), sigc::bind (sigc::mem_fun(*this, &Editor::duplicate_range), false));
 
 	undo_action = reg_sens (editor_actions, "undo", S_("Command|Undo"), sigc::bind (sigc::mem_fun(*this, &Editor::undo), 1U));
 	redo_action = reg_sens (editor_actions, "redo", _("Redo"), sigc::bind (sigc::mem_fun(*this, &Editor::redo), 1U));
@@ -1597,15 +1597,15 @@ Editor::register_region_actions ()
 		_region_actions, "toggle-region-fades", _("Fades"), sigc::bind (sigc::mem_fun(*this, &Editor::toggle_region_fades), 0)
 		);
 
-	/* Open the dialogue to duplicate selected regions */
-	reg_sens (_region_actions, "duplicate-region", _("Duplicate"), sigc::bind (sigc::mem_fun (*this, &Editor::duplicate_dialog), false));
+	/* Duplicate selected regions */
+	reg_sens (_region_actions, "duplicate-region", _("Duplicate"), sigc::bind (sigc::mem_fun (*this, &Editor::duplicate_range), false));
 
 	/* Open the dialogue to duplicate selected regions multiple times */
 	reg_sens (
 		_region_actions,
 		"multi-duplicate-region",
 		_("Multi-Duplicate..."),
-		sigc::bind (sigc::mem_fun(*this, &Editor::duplicate_dialog), true)
+		sigc::bind (sigc::mem_fun(*this, &Editor::duplicate_range), true)
 		);
 
 	/* Fill tracks with selected regions */

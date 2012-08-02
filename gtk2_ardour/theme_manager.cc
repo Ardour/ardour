@@ -35,6 +35,7 @@
 #include "ardour/filesystem_paths.h"
 
 #include "ardour_button.h"
+#include "canvas-waveview.h"
 #include "theme_manager.h"
 #include "rgb_macros.h"
 #include "ardour_ui.h"
@@ -56,6 +57,7 @@ ThemeManager::ThemeManager()
 	, light_button (_("Light Theme"))
 	, reset_button (_("Restore Defaults"))
 	, flat_buttons (_("Draw \"flat\" buttons"))
+	, gradient_waveforms (_("Draw waveforms with color gradient"))
 {
 	set_title (_("Theme Manager"));
 
@@ -91,6 +93,7 @@ ThemeManager::ThemeManager()
 	vbox->pack_start (theme_selection_hbox, PACK_SHRINK);
 	vbox->pack_start (reset_button, PACK_SHRINK);
 	vbox->pack_start (flat_buttons, PACK_SHRINK);
+	vbox->pack_start (gradient_waveforms, PACK_SHRINK);
 	vbox->pack_start (scroller);
 	add (*vbox);
 
@@ -105,6 +108,7 @@ ThemeManager::ThemeManager()
 	light_button.signal_toggled().connect (sigc::mem_fun (*this, &ThemeManager::on_light_theme_button_toggled));
 	reset_button.signal_clicked().connect (sigc::mem_fun (*this, &ThemeManager::reset_canvas_colors));
 	flat_buttons.signal_toggled().connect (sigc::mem_fun (*this, &ThemeManager::on_flat_buttons_toggled));
+	gradient_waveforms.signal_toggled().connect (sigc::mem_fun (*this, &ThemeManager::on_gradient_waveforms_toggled));
 
 	set_size_request (-1, 400);
 	setup_theme ();
@@ -239,6 +243,18 @@ ThemeManager::on_flat_buttons_toggled ()
 }
 
 void
+ThemeManager::on_gradient_waveforms_toggled ()
+{
+	ARDOUR_UI::config()->gradient_waveforms.set (gradient_waveforms.get_active());
+	ARDOUR_UI::config()->set_dirty ();
+	
+	gnome_canvas_waveview_set_gradient_waveforms (gradient_waveforms.get_active());
+
+	/* force a redraw */
+	gtk_rc_reset_styles (gtk_settings_get_default());
+}
+
+void
 ThemeManager::on_dark_theme_button_toggled()
 {
 	if (!dark_button.get_active()) return;
@@ -347,6 +363,7 @@ ThemeManager::setup_theme ()
 	}
 	
 	flat_buttons.set_active (ARDOUR_UI::config()->flat_buttons.get());
+	gradient_waveforms.set_active (ARDOUR_UI::config()->gradient_waveforms.get());
 	
 	load_rc_file(rcfile, false);
 }

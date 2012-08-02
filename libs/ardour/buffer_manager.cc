@@ -45,6 +45,7 @@ BufferManager::init (uint32_t size)
                 thread_buffers->write (&ts, 1);
 		thread_buffers_list->push_back (ts);
         }
+
 }
 
 ThreadBuffers*
