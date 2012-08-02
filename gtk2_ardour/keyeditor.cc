@@ -76,7 +76,10 @@ KeyEditor::KeyEditor ()
 	scroller.add (view);
 	scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
-	add (scroller);
+	add (vpacker);
+
+	vpacker.set_spacing (6);
+	vpacker.pack_start (scroller);
 
 	if (!ARDOUR::Profile->get_sae()) {
 
@@ -87,14 +90,17 @@ KeyEditor::KeyEditor ()
 		unbind_box.pack_start (unbind_button, false, false);
 		unbind_button.signal_clicked().connect (sigc::mem_fun (*this, &KeyEditor::unbind));
 
-		add (unbind_box);
+		vpacker.pack_start (unbind_box, false, false);
 		unbind_box.show ();
 		unbind_button.show ();
 
 	}
 
+	vpacker.set_border_width (12);
+
 	view.show ();
 	scroller.show ();
+	vpacker.show ();
 
 	unbind_button.set_sensitive (false);
 }

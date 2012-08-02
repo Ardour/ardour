@@ -24,6 +24,8 @@
 #include <stdint.h>
 #include <boost/shared_ptr.hpp>
 
+#include <glibmm/threads.h>
+
 #include "ardour/source.h"
 
 class XMLNode;
@@ -59,8 +61,8 @@ class SourceFactory {
 		(DataType type, Session& s, boost::shared_ptr<Playlist> p, const PBD::ID& orig, const std::string& name,
 		 uint32_t chn, frameoffset_t start, framecnt_t len, bool copy, bool defer_peaks);
 
-	static Glib::Cond*                               PeaksToBuild;
-	static Glib::StaticMutex                         peak_building_lock;
+        static Glib::Threads::Cond                       PeaksToBuild;
+        static Glib::Threads::Mutex                      peak_building_lock;
 	static std::list< boost::weak_ptr<AudioSource> > files_with_peaks;
 
 	static int setup_peakfile (boost::shared_ptr<Source>, bool async);

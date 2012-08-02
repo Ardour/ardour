@@ -25,7 +25,7 @@
 #include <deque>
 #include <utility>
 #include <boost/utility.hpp>
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 #include "pbd/command.h"
 #include "ardour/types.h"
 #include "ardour/midi_buffer.h"
@@ -267,14 +267,14 @@ protected:
 
 private:
 	struct WriteLockImpl : public AutomatableSequence<TimeType>::WriteLockImpl {
-		WriteLockImpl(Glib::Mutex::Lock* source_lock, Glib::RWLock& s, Glib::Mutex& c)
+		WriteLockImpl(Glib::Threads::Mutex::Lock* slock, Glib::Threads::RWLock& s, Glib::Threads::Mutex& c)
 			: AutomatableSequence<TimeType>::WriteLockImpl(s, c)
-			, source_lock(source_lock)
+			, source_lock (slock)
 		{}
 		~WriteLockImpl() {
 			delete source_lock;
 		}
-		Glib::Mutex::Lock* source_lock;
+		Glib::Threads::Mutex::Lock* source_lock;
 	};
 
 public:

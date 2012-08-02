@@ -42,7 +42,7 @@
 
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 
 #include "ardour/audiofilesource.h"
 #include "ardour/debug.h"
@@ -86,7 +86,7 @@ struct SizedSampleBuffer {
 	}
 };
 
-Glib::StaticPrivate<SizedSampleBuffer> thread_interleave_buffer = GLIBMM_STATIC_PRIVATE_INIT;
+Glib::Threads::Private<SizedSampleBuffer> thread_interleave_buffer;
 
 /** Constructor used for existing external-to-session files. */
 AudioFileSource::AudioFileSource (Session& s, const string& path, Source::Flag flags)

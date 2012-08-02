@@ -23,7 +23,7 @@
 #include <set>
 #include <vector>
 #include <string>
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 #include <boost/shared_ptr.hpp>
 #include <boost/function.hpp>
 
@@ -78,7 +78,7 @@ private:
 	int load_unused (Session &, const XMLNode&);
 	boost::shared_ptr<Playlist> XMLPlaylistFactory (Session &, const XMLNode&);
 
-	mutable Glib::Mutex lock;
+	mutable Glib::Threads::Mutex lock;
 	typedef std::set<boost::shared_ptr<Playlist> > List;
 	List playlists;
 	List unused_playlists;

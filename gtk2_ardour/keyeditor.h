@@ -35,6 +35,7 @@ class KeyEditor : public ArdourWindow
 	    Gtk::TreeModelColumn<bool> bindable;
 	};
 
+        Gtk::VBox vpacker;
 	Gtk::ScrolledWindow scroller;
 	Gtk::TreeView view;
 	Glib::RefPtr<Gtk::TreeStore> model;

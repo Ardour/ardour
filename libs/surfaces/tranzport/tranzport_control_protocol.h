@@ -33,7 +33,7 @@
 #include <usb.h>
 #endif
 
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 #include "ardour/types.h"
 
 #include "control_protocol/control_protocol.h"
@@ -170,7 +170,7 @@ private:
 
 	ARDOUR::gain_t  gain_fraction;
 
-	Glib::Mutex update_lock;
+        Glib::Threads::Mutex update_lock;
 
         std::bitset<ROWS*COLUMNS> screen_invalid;
 	char screen_current[ROWS][COLUMNS];

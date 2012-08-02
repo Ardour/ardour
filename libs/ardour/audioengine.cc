@@ -94,7 +94,7 @@ AudioEngine::AudioEngine (string client_name, string session_uuid)
 AudioEngine::~AudioEngine ()
 {
 	{
-		Glib::Mutex::Lock tm (_process_lock);
+		Glib::Threads::Mutex::Lock tm (_process_lock);
 		session_removed.signal ();
 
 		if (_running) {
@@ -453,7 +453,7 @@ int
 AudioEngine::process_callback (pframes_t nframes)
 {
 	GET_PRIVATE_JACK_POINTER_RET(_jack,0);
-	Glib::Mutex::Lock tm (_process_lock, Glib::TRY_LOCK);
+	Glib::Threads::Mutex::Lock tm (_process_lock, Glib::Threads::TRY_LOCK);
 
 	PT_TIMING_REF;
 	PT_TIMING_CHECK (1);
@@ -714,7 +714,7 @@ AudioEngine::jack_bufsize_callback (pframes_t nframes)
         }
 
 	{
-		Glib::Mutex::Lock lm (_process_lock);
+		Glib::Threads::Mutex::Lock lm (_process_lock);
 
 		boost::shared_ptr<Ports> p = ports.reader();
 
@@ -745,8 +745,7 @@ AudioEngine::start_metering_thread ()
 {
 	if (m_meter_thread == 0) {
 		g_atomic_int_set (&m_meter_exit, 0);
-		m_meter_thread = Glib::Thread::create (boost::bind (&AudioEngine::meter_thread, this),
-						       500000, true, true, Glib::THREAD_PRIORITY_NORMAL);
+		m_meter_thread = Glib::Threads::Thread::create (boost::bind (&AudioEngine::meter_thread, this));
 	}
 }
 
@@ -767,7 +766,7 @@ AudioEngine::meter_thread ()
 void
 AudioEngine::set_session (Session *s)
 {
-	Glib::Mutex::Lock pl (_process_lock);
+	Glib::Threads::Mutex::Lock pl (_process_lock);
 
 	SessionHandlePtr::set_session (s);
 
@@ -805,7 +804,7 @@ AudioEngine::set_session (Session *s)
 void
 AudioEngine::remove_session ()
 {
-	Glib::Mutex::Lock lm (_process_lock);
+	Glib::Threads::Mutex::Lock lm (_process_lock);
 
 	if (_running) {
 
@@ -1391,7 +1390,7 @@ AudioEngine::disconnect_from_jack ()
 	}
 
 	{
-		Glib::Mutex::Lock lm (_process_lock);
+		Glib::Threads::Mutex::Lock lm (_process_lock);
 		jack_client_close (_priv_jack);
 		_jack = 0;
 	}

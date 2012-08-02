@@ -187,7 +187,7 @@ CanvasPatchChange::on_event (GdkEvent* ev)
 		case GDK_Up:
 		case GDK_KP_Up:
 		case GDK_uparrow:
-			if (Keyboard::modifier_state_contains (ev->scroll.state, Keyboard::PrimaryModifier)) {
+			if (Keyboard::modifier_state_contains (ev->key.state, Keyboard::PrimaryModifier)) {
 				_region.previous_bank (*this);
 			} else {
 				_region.previous_patch (*this);
@@ -196,7 +196,7 @@ CanvasPatchChange::on_event (GdkEvent* ev)
 		case GDK_Down:
 		case GDK_KP_Down:
 		case GDK_downarrow:
-			if (Keyboard::modifier_state_contains (ev->scroll.state, Keyboard::PrimaryModifier)) {
+			if (Keyboard::modifier_state_contains (ev->key.state, Keyboard::PrimaryModifier)) {
 				_region.next_bank (*this);
 			} else {
 				_region.next_patch (*this);

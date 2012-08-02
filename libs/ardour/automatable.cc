@@ -47,22 +47,32 @@ const string Automatable::xml_node_name = X_("Automation");
 
 Automatable::Automatable(Session& session)
 	: _a_session(session)
-	, _last_automation_snapshot(0)
 {
 }
 
 Automatable::Automatable (const Automatable& other)
         : ControlSet (other)
         , _a_session (other._a_session)
-        , _last_automation_snapshot (0)
 {
-        Glib::Mutex::Lock lm (other._control_lock);
+        Glib::Threads::Mutex::Lock lm (other._control_lock);
 
         for (Controls::const_iterator i = other._controls.begin(); i != other._controls.end(); ++i) {
                 boost::shared_ptr<Evoral::Control> ac (control_factory (i->first));
 		add_control (ac);
         }
 }
+
+Automatable::~Automatable ()
+{
+	{
+		Glib::Threads::Mutex::Lock lm (_control_lock);
+		
+		for (Controls::const_iterator li = _controls.begin(); li != _controls.end(); ++li) {
+			boost::dynamic_pointer_cast<AutomationControl>(li->second)->drop_references ();
+		}
+	}
+}
+
 int
 Automatable::old_set_automation_state (const XMLNode& node)
 {
@@ -73,8 +83,6 @@ Automatable::old_set_automation_state (const XMLNode& node)
 	} else {
 		warning << _("Automation node has no path property") << endmsg;
 	}
-
-	_last_automation_snapshot = 0;
 
 	return 0;
 }
@@ -98,11 +106,9 @@ Automatable::load_automation (const string& path)
 		return 1;
 	}
 
-	Glib::Mutex::Lock lm (control_lock());
+	Glib::Threads::Mutex::Lock lm (control_lock());
 	set<Evoral::Parameter> tosave;
 	controls().clear ();
-
-	_last_automation_snapshot = 0;
 
 	while (in) {
 		double when;
@@ -180,7 +186,7 @@ Automatable::can_automate (Evoral::Parameter what)
 int
 Automatable::set_automation_xml_state (const XMLNode& node, Evoral::Parameter legacy_param)
 {
-	Glib::Mutex::Lock lm (control_lock());
+	Glib::Threads::Mutex::Lock lm (control_lock());
 
 	/* Don't clear controls, since some may be special derived Controllable classes */
 
@@ -228,15 +234,13 @@ Automatable::set_automation_xml_state (const XMLNode& node, Evoral::Parameter le
 		}
 	}
 
-	_last_automation_snapshot = 0;
-
 	return 0;
 }
 
 XMLNode&
 Automatable::get_automation_xml_state ()
 {
-	Glib::Mutex::Lock lm (control_lock());
+	Glib::Threads::Mutex::Lock lm (control_lock());
 	XMLNode* node = new XMLNode (Automatable::xml_node_name);
 
 	if (controls().empty()) {
@@ -256,13 +260,12 @@ Automatable::get_automation_xml_state ()
 void
 Automatable::set_parameter_automation_state (Evoral::Parameter param, AutoState s)
 {
-	Glib::Mutex::Lock lm (control_lock());
+	Glib::Threads::Mutex::Lock lm (control_lock());
 
-	boost::shared_ptr<Evoral::Control> c = control (param, true);
-	boost::shared_ptr<AutomationList> l = boost::dynamic_pointer_cast<AutomationList>(c->list());
+	boost::shared_ptr<AutomationControl> c = automation_control (param, true);
 
-	if (s != l->automation_state()) {
-		l->set_automation_state (s);
+	if (c && (s != c->automation_state())) {
+		c->set_automation_state (s);
 		_a_session.set_dirty ();
 	}
 }
@@ -272,11 +275,10 @@ Automatable::get_parameter_automation_state (Evoral::Parameter param)
 {
 	AutoState result = Off;
 
-	boost::shared_ptr<Evoral::Control> c = control(param);
-	boost::shared_ptr<AutomationList> l = boost::dynamic_pointer_cast<AutomationList>(c->list());
-
+	boost::shared_ptr<AutomationControl> c = automation_control(param);
+	
 	if (c) {
-		result = l->automation_state();
+		result = c->automation_state();
 	}
 
 	return result;
@@ -285,13 +287,12 @@ Automatable::get_parameter_automation_state (Evoral::Parameter param)
 void
 Automatable::set_parameter_automation_style (Evoral::Parameter param, AutoStyle s)
 {
-	Glib::Mutex::Lock lm (control_lock());
+	Glib::Threads::Mutex::Lock lm (control_lock());
 
-	boost::shared_ptr<Evoral::Control> c = control(param, true);
-	boost::shared_ptr<AutomationList> l = boost::dynamic_pointer_cast<AutomationList>(c->list());
+	boost::shared_ptr<AutomationControl> c = automation_control(param, true);
 
-	if (s != l->automation_style()) {
-		l->set_automation_style (s);
+	if (c && (s != c->automation_style())) {
+		c->set_automation_style (s);
 		_a_session.set_dirty ();
 	}
 }
@@ -299,7 +300,7 @@ Automatable::set_parameter_automation_style (Evoral::Parameter param, AutoStyle 
 AutoStyle
 Automatable::get_parameter_automation_style (Evoral::Parameter param)
 {
-	Glib::Mutex::Lock lm (control_lock());
+	Glib::Threads::Mutex::Lock lm (control_lock());
 
 	boost::shared_ptr<Evoral::Control> c = control(param);
 	boost::shared_ptr<AutomationList> l = boost::dynamic_pointer_cast<AutomationList>(c->list());
@@ -336,19 +337,20 @@ Automatable::protect_automation ()
 }
 
 void
-Automatable::automation_snapshot (framepos_t now, bool force)
+Automatable::transport_located (framepos_t now)
 {
-	if (force || _last_automation_snapshot > now || (now - _last_automation_snapshot) > _automation_interval) {
+	for (Controls::iterator li = controls().begin(); li != controls().end(); ++li) {
 
-		for (Controls::iterator i = controls().begin(); i != controls().end(); ++i) {
-			boost::shared_ptr<AutomationControl> c
-					= boost::dynamic_pointer_cast<AutomationControl>(i->second);
-			if (_a_session.transport_rolling() && c->automation_write()) {
-				c->list()->rt_add (now, i->second->user_double());
+		boost::shared_ptr<AutomationControl> c
+				= boost::dynamic_pointer_cast<AutomationControl>(li->second);
+		if (c) {
+                        boost::shared_ptr<AutomationList> l
+				= boost::dynamic_pointer_cast<AutomationList>(c->list());
+
+			if (l) {
+				l->start_write_pass (now);
 			}
 		}
-
-		_last_automation_snapshot = now;
 	}
 }
 

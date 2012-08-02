@@ -82,7 +82,7 @@ UI::UI (string namestr, int *argc, char ***argv)
 	   which is assumed to have called this.
 	*/
 
-	run_loop_thread = Thread::self();
+	run_loop_thread = Threads::Thread::self();
 	
 	/* store "this" as the UI-for-thread of this thread, same argument
 	   as for previous line.
@@ -124,7 +124,7 @@ UI::~UI ()
 bool
 UI::caller_is_ui_thread ()
 {
-	return Thread::self() == run_loop_thread;
+	return Threads::Thread::self() == run_loop_thread;
 }
 
 int

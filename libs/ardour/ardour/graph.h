@@ -122,8 +122,8 @@ private:
 	bool _graph_empty;
 
 	// chain swapping
-	Glib::Mutex  _swap_mutex;
-	Glib::Cond   _cleanup_cond;
+	Glib::Threads::Mutex  _swap_mutex;
+        Glib::Threads::Cond   _cleanup_cond;
 	volatile int _current_chain;
 	volatile int _pending_chain;
 	volatile int _setup_chain;

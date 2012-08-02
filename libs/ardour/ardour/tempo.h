@@ -24,7 +24,7 @@
 #include <string>
 #include <vector>
 #include <cmath>
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 
 #include "pbd/undo.h"
 #include "pbd/stateful.h"
@@ -218,7 +218,7 @@ class TempoMap : public PBD::StatefulDestructible
 	typedef std::vector<BBTPoint> BBTPointList;
 
 	template<class T> void apply_with_metrics (T& obj, void (T::*method)(const Metrics&)) {
-		Glib::RWLock::ReaderLock lm (lock);
+		Glib::Threads::RWLock::ReaderLock lm (lock);
 		(obj.*method)(metrics);
 	}
 
@@ -314,7 +314,7 @@ class TempoMap : public PBD::StatefulDestructible
 
 	Metrics              metrics;
 	framecnt_t          _frame_rate;
-	mutable Glib::RWLock lock;
+	mutable Glib::Threads::RWLock lock;
 	BBTPointList        _map;
 
 	void recompute_map (bool reassign_tempo_bbt, framepos_t end = -1);

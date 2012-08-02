@@ -25,7 +25,7 @@
 #include "pbd/error.h"
 #include "pbd/enumwriter.h"
 
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 
 #include "ardour/audioengine.h"
 #include "ardour/auditioner.h"

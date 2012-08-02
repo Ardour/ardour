@@ -299,8 +299,8 @@ Session::butler_transport_work ()
 			if (tr) {
 				tr->adjust_playback_buffering ();
 				/* and refill those buffers ... */
-				tr->non_realtime_locate (_transport_frame);
 			}
+			(*i)->non_realtime_locate (_transport_frame);
 		}
 
 	}
@@ -344,10 +344,8 @@ Session::butler_transport_work ()
 		if (!(ptw & PostTransportLocate)) {
 
 			for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-				boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
-				if (tr && !tr->hidden()) {
-					tr->non_realtime_locate (_transport_frame);
-				}
+				(*i)->non_realtime_locate (_transport_frame);
+
 				if (on_entry != g_atomic_int_get (&_butler->should_do_transport_work)) {
 					/* new request, stop seeking, and start again */
 					g_atomic_int_dec_and_test (&_butler->should_do_transport_work);
@@ -420,10 +418,7 @@ Session::non_realtime_locate ()
 {
 	boost::shared_ptr<RouteList> rl = routes.reader();
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
-		if (tr) {
-			tr->non_realtime_locate (_transport_frame);
-		}
+		(*i)->non_realtime_locate (_transport_frame);
 	}
 
 	/* XXX: it would be nice to generate the new clicks here (in the non-RT thread)
@@ -601,10 +596,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	DEBUG_TRACE (DEBUG::Transport, X_("Butler PTW: locate\n"));
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		DEBUG_TRACE (DEBUG::Transport, string_compose ("Butler PTW: locate on %1\n", (*i)->name()));
-		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
-		if (tr && !tr->hidden()) {
-			tr->non_realtime_locate (_transport_frame);
-		}
+		(*i)->non_realtime_locate (_transport_frame);
 
 		if (on_entry != g_atomic_int_get (&_butler->should_do_transport_work)) {
 			finished = false;
@@ -646,6 +638,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	}
 
 	PositionChanged (_transport_frame); /* EMIT SIGNAL */
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("send TSC with speed = %1\n", _transport_speed));
 	TransportStateChange (); /* EMIT SIGNAL */
 
 	/* and start it up again if relevant */
@@ -774,6 +767,7 @@ Session::set_play_loop (bool yn)
 		unset_play_loop ();
 	}
 
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("send TSC2 with speed = %1\n", _transport_speed));
 	TransportStateChange ();
 }
 void
@@ -927,7 +921,7 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
 
 		/* this is functionally what clear_clicks() does but with a tentative lock */
 
-		Glib::RWLock::WriterLock clickm (click_lock, Glib::TRY_LOCK);
+		Glib::Threads::RWLock::WriterLock clickm (click_lock, Glib::Threads::TRY_LOCK);
 
 		if (clickm.locked()) {
 
@@ -1007,10 +1001,13 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
 void
 Session::set_transport_speed (double speed, bool abort, bool clear_state, bool as_default)
 {
-	DEBUG_TRACE (DEBUG::Transport, string_compose ("@ %5 Set transport speed to %1, abort = %2 clear_state = %3, current = %4 as_default %5\n", 
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("@ %5 Set transport speed to %1, abort = %2 clear_state = %3, current = %4 as_default %6\n", 
 						       speed, abort, clear_state, _transport_speed, _transport_frame, as_default));
 
 	if (_transport_speed == speed) {
+		if (as_default && speed == 0.0) { // => reset default transport speed. hacky or what?
+			_default_transport_speed = 1.0;
+		}
 		return;
 	}
 
@@ -1125,6 +1122,7 @@ Session::set_transport_speed (double speed, bool abort, bool clear_state, bool a
 			_butler->schedule_transport_work ();
 		}
 
+		DEBUG_TRACE (DEBUG::Transport, string_compose ("send TSC3 with speed = %1\n", _transport_speed));
 		TransportStateChange (); /* EMIT SIGNAL */
 	}
 }
@@ -1236,7 +1234,6 @@ Session::start_transport ()
 		if (tr) {
 			tr->realtime_set_speed (tr->speed(), true);
 		}
-		(*i)->automation_snapshot (_transport_frame, true);
 	}
 
 	if (!_engine.freewheeling()) {
@@ -1247,6 +1244,7 @@ Session::start_transport ()
 		}
 	}
 
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("send TSC4 with speed = %1\n", _transport_speed));
 	TransportStateChange (); /* EMIT SIGNAL */
 }
 
@@ -1495,6 +1493,7 @@ Session::set_play_range (list<AudioRange>& range, bool leave_rolling)
 	ev = new SessionEvent (SessionEvent::LocateRoll, SessionEvent::Add, SessionEvent::Immediate, range.front().start, 0.0f, false);
 	merge_event (ev);
 
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("send TSC5 with speed = %1\n", _transport_speed));
 	TransportStateChange ();
 }
 
@@ -1537,6 +1536,7 @@ Session::engine_halted ()
 	non_realtime_stop (false, 0, ignored);
 	transport_sub_state = 0;
 
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("send TSC6 with speed = %1\n", _transport_speed));
 	TransportStateChange (); /* EMIT SIGNAL */
 }
 

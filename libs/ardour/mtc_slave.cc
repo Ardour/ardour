@@ -482,7 +482,7 @@ MTC_Slave::resolution () const
 void
 MTC_Slave::queue_reset (bool reset_pos)
 {
-	Glib::Mutex::Lock lm (reset_lock);
+	Glib::Threads::Mutex::Lock lm (reset_lock);
 	reset_pending++;
 	if (reset_pos) {
 		reset_position = true;
@@ -492,7 +492,7 @@ MTC_Slave::queue_reset (bool reset_pos)
 void
 MTC_Slave::maybe_reset ()
 {
-	Glib::Mutex::Lock lm (reset_lock);
+	Glib::Threads::Mutex::Lock lm (reset_lock);
 
 	if (reset_pending) {
 		reset (reset_position);

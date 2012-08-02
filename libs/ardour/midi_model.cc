@@ -1555,7 +1555,7 @@ MidiModel::edit_lock()
 	boost::shared_ptr<MidiSource> ms = _midi_source.lock ();
 	assert (ms);
 
-	Glib::Mutex::Lock* source_lock = new Glib::Mutex::Lock (ms->mutex());
+	Glib::Threads::Mutex::Lock* source_lock = new Glib::Threads::Mutex::Lock (ms->mutex());
 	ms->invalidate(); // Release cached iterator's read lock on model
 	return WriteLock(new WriteLockImpl(source_lock, _lock, _control_lock));
 }
@@ -1807,7 +1807,7 @@ MidiModel::set_midi_source (boost::shared_ptr<MidiSource> s)
 void
 MidiModel::source_interpolation_changed (Evoral::Parameter p, Evoral::ControlList::InterpolationStyle s)
 {
-	Glib::Mutex::Lock lm (_control_lock);
+	Glib::Threads::Mutex::Lock lm (_control_lock);
 	control(p)->list()->set_interpolation (s);
 }
 
@@ -1826,7 +1826,7 @@ MidiModel::control_list_interpolation_changed (Evoral::Parameter p, Evoral::Cont
 void
 MidiModel::source_automation_state_changed (Evoral::Parameter p, AutoState s)
 {
-	Glib::Mutex::Lock lm (_control_lock);
+	Glib::Threads::Mutex::Lock lm (_control_lock);
 	boost::shared_ptr<AutomationList> al = boost::dynamic_pointer_cast<AutomationList> (control(p)->list ());
 	al->set_automation_state (s);
 }

@@ -22,6 +22,8 @@
 
 #include <libgnomecanvas/libgnomecanvas.h>
 
+#include "gtkmm2ext/rgb_macros.h"
+
 #include "utils.h"
 #include "editor_cursors.h"
 #include "editor.h"
@@ -32,6 +34,7 @@ using namespace Gtk;
 
 EditorCursor::EditorCursor (Editor& ed, bool (Editor::*callbck)(GdkEvent*,ArdourCanvas::Item*))
 	: editor (ed),
+	  shade (*editor.cursor_group),
 	  canvas_item (*editor.cursor_group),
 	  length(1.0)
 {
@@ -45,6 +48,10 @@ EditorCursor::EditorCursor (Editor& ed, bool (Editor::*callbck)(GdkEvent*,Ardour
 	canvas_item.property_arrow_shape_a() = 11.0;
 	canvas_item.property_arrow_shape_b() = 0.0;
 	canvas_item.property_arrow_shape_c() = 9.0;
+
+	shade.property_points() = points;
+	shade.property_width_pixels() = 7;
+	shade.property_fill_color_rgba() = RGBA_TO_UINT (255, 255, 255, 75);
 
 	canvas_item.set_data ("cursor", this);
 	canvas_item.signal_event().connect (sigc::bind (sigc::mem_fun (ed, callbck), &canvas_item));
@@ -69,6 +76,7 @@ EditorCursor::set_position (framepos_t frame)
 		points.back().set_x (new_pos);
 
 		canvas_item.property_points() = points;
+		shade.property_points() = points;
 	}
 	current_frame = frame;
 }
@@ -79,6 +87,7 @@ EditorCursor::set_length (double units)
 	length = units;
 	points.back().set_y (points.front().get_y() + length);
 	canvas_item.property_points() = points;
+	shade.property_points() = points;
 }
 
 void
@@ -87,4 +96,5 @@ EditorCursor::set_y_axis (double position)
 	points.front().set_y (position);
 	points.back().set_y (position + length);
 	canvas_item.property_points() = points;
+	shade.property_points() = points;
 }

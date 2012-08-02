@@ -29,20 +29,17 @@ using namespace ARDOUR;
 using namespace Glib;
 using namespace std;
 
-Private<ThreadBuffers>* ProcessThread::_private_thread_buffers = 0;
-
 static void
 release_thread_buffer (void* arg)
 {
         BufferManager::put_thread_buffers ((ThreadBuffers*) arg);
 }
 
+Glib::Threads::Private<ThreadBuffers> ProcessThread::_private_thread_buffers (release_thread_buffer);
+
 void
 ProcessThread::init ()
 {
-	if (_private_thread_buffers == 0) {
-		_private_thread_buffers = new Private<ThreadBuffers> (release_thread_buffer);
-	}
 }
 
 ProcessThread::ProcessThread ()
@@ -59,22 +56,22 @@ ProcessThread::get_buffers ()
         ThreadBuffers* tb = BufferManager::get_thread_buffers ();
 
         assert (tb);
-        _private_thread_buffers->set (tb);
+        _private_thread_buffers.set (tb);
 }
 
 void
 ProcessThread::drop_buffers ()
 {
-        ThreadBuffers* tb = _private_thread_buffers->get();
+        ThreadBuffers* tb = _private_thread_buffers.get();
         assert (tb);
         BufferManager::put_thread_buffers (tb);
-        _private_thread_buffers->set (0);
+        _private_thread_buffers.set (0);
 }
 
 BufferSet&
 ProcessThread::get_silent_buffers (ChanCount count)
 {
-        ThreadBuffers* tb = _private_thread_buffers->get();
+        ThreadBuffers* tb = _private_thread_buffers.get();
         assert (tb);
 
         BufferSet* sb = tb->silent_buffers;
@@ -95,7 +92,7 @@ ProcessThread::get_silent_buffers (ChanCount count)
 BufferSet&
 ProcessThread::get_scratch_buffers (ChanCount count)
 {
-        ThreadBuffers* tb = _private_thread_buffers->get();
+        ThreadBuffers* tb = _private_thread_buffers.get();
         assert (tb);
 
         BufferSet* sb = tb->scratch_buffers;
@@ -114,7 +111,7 @@ ProcessThread::get_scratch_buffers (ChanCount count)
 BufferSet&
 ProcessThread::get_mix_buffers (ChanCount count)
 {
-        ThreadBuffers* tb = _private_thread_buffers->get();
+        ThreadBuffers* tb = _private_thread_buffers.get();
         assert (tb);
 
         BufferSet* mb = tb->mix_buffers;
@@ -128,7 +125,7 @@ ProcessThread::get_mix_buffers (ChanCount count)
 gain_t*
 ProcessThread::gain_automation_buffer()
 {
-        ThreadBuffers* tb = _private_thread_buffers->get();
+        ThreadBuffers* tb = _private_thread_buffers.get();
         assert (tb);
 
         gain_t *g =  tb->gain_automation_buffer;
@@ -139,7 +136,7 @@ ProcessThread::gain_automation_buffer()
 gain_t*
 ProcessThread::send_gain_automation_buffer()
 {
-        ThreadBuffers* tb = _private_thread_buffers->get();
+        ThreadBuffers* tb = _private_thread_buffers.get();
         assert (tb);
 
         gain_t* g = tb->send_gain_automation_buffer;
@@ -150,7 +147,7 @@ ProcessThread::send_gain_automation_buffer()
 pan_t**
 ProcessThread::pan_automation_buffer()
 {
-        ThreadBuffers* tb = _private_thread_buffers->get();
+        ThreadBuffers* tb = _private_thread_buffers.get();
         assert (tb);
 
         pan_t** p = tb->pan_automation_buffer;

@@ -46,7 +46,7 @@ Control::get_double (bool from_list, double frame) const
 
 
 void
-Control::set_double (double value, bool to_list, double frame)
+Control::set_double (double value, double frame, bool to_list)
 {
 	_user_value = value;
 

@@ -44,7 +44,7 @@ PortInsert::name_and_id_new_insert (Session& s, uint32_t& bitslot)
 }
 
 PortInsert::PortInsert (Session& s, boost::shared_ptr<Pannable> pannable, boost::shared_ptr<MuteMaster> mm)
-	: IOProcessor (s, true, true, name_and_id_new_insert (s, _bitslot), "")
+	: IOProcessor (s, true, true, name_and_id_new_insert (s, _bitslot), "", DataType::AUDIO, true)
 	, _out (new Delivery (s, _output, pannable, mm, _name, Delivery::Insert))
 {
         _mtdm = 0;

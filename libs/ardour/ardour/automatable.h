@@ -45,7 +45,7 @@ public:
 	Automatable(Session&);
 	Automatable (const Automatable& other);
 
-	virtual ~Automatable() {}
+        virtual ~Automatable();
 
 	boost::shared_ptr<Evoral::Control>
 	control_factory(const Evoral::Parameter& id);
@@ -59,7 +59,7 @@ public:
 	virtual void add_control(boost::shared_ptr<Evoral::Control>);
 	void clear_controls ();
 
-	virtual void automation_snapshot (framepos_t now, bool force);
+        virtual void transport_located (framepos_t now);
 	virtual void transport_stopped (framepos_t now);
 
 	virtual std::string describe_parameter(Evoral::Parameter param);

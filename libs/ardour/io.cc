@@ -25,7 +25,7 @@
 #include <errno.h>
 
 #include <glibmm.h>
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 
 #include "pbd/xml++.h"
 #include "pbd/replace_all.h"
@@ -44,7 +44,7 @@
 
 #include "i18n.h"
 
-#define BLOCK_PROCESS_CALLBACK() Glib::Mutex::Lock em (AudioEngine::instance()->process_lock())
+#define BLOCK_PROCESS_CALLBACK() Glib::Threads::Mutex::Lock em (AudioEngine::instance()->process_lock())
 
 using namespace std;
 using namespace ARDOUR;
@@ -58,10 +58,11 @@ PBD::Signal1<void,ChanCount> IO::PortCountChanged;
 /** @param default_type The type of port that will be created by ensure_io
  * and friends if no type is explicitly requested (to avoid breakage).
  */
-IO::IO (Session& s, const string& name, Direction dir, DataType default_type)
+IO::IO (Session& s, const string& name, Direction dir, DataType default_type, bool sendish)
 	: SessionObject (s, name)
 	, _direction (dir)
 	, _default_type (default_type)
+	, _sendish (sendish)
 {
 	_active = true;
 	Port::PostDisconnect.connect_same_thread (*this, boost::bind (&IO::disconnect_check, this, _1, _2));
@@ -69,10 +70,11 @@ IO::IO (Session& s, const string& name, Direction dir, DataType default_type)
 	setup_bundle ();
 }
 
-IO::IO (Session& s, const XMLNode& node, DataType dt)
+IO::IO (Session& s, const XMLNode& node, DataType dt, bool sendish)
 	: SessionObject(s, "unnamed io")
 	, _direction (Input)
 	, _default_type (dt)
+	, _sendish (sendish)
 {
 	_active = true;
 	pending_state_node = 0;
@@ -84,7 +86,7 @@ IO::IO (Session& s, const XMLNode& node, DataType dt)
 
 IO::~IO ()
 {
-	Glib::Mutex::Lock lm (io_lock);
+	Glib::Threads::Mutex::Lock lm (io_lock);
 
 	BLOCK_PROCESS_CALLBACK ();
 
@@ -102,7 +104,7 @@ IO::disconnect_check (boost::shared_ptr<Port> a, boost::shared_ptr<Port> b)
 	   we assume that its safely locked by our own ::disconnect().
 	*/
 
-	Glib::Mutex::Lock tm (io_lock, Glib::TRY_LOCK);
+	Glib::Threads::Mutex::Lock tm (io_lock, Glib::Threads::TRY_LOCK);
 
 	if (tm.locked()) {
 		/* we took the lock, so we cannot be here from inside
@@ -192,7 +194,7 @@ IO::disconnect (boost::shared_ptr<Port> our_port, string other_port, void* src)
 	}
 
         {
-                Glib::Mutex::Lock lm (io_lock);
+                Glib::Threads::Mutex::Lock lm (io_lock);
 
                 /* check that our_port is really one of ours */
 
@@ -225,7 +227,7 @@ IO::connect (boost::shared_ptr<Port> our_port, string other_port, void* src)
 	}
 
 	{
-		Glib::Mutex::Lock lm (io_lock);
+		Glib::Threads::Mutex::Lock lm (io_lock);
 
 		/* check that our_port is really one of ours */
 
@@ -262,7 +264,7 @@ IO::remove_port (boost::shared_ptr<Port> port, void* src)
 		BLOCK_PROCESS_CALLBACK ();
 
 		{
-			Glib::Mutex::Lock lm (io_lock);
+			Glib::Threads::Mutex::Lock lm (io_lock);
 
 			if (_ports.remove(port)) {
 				change.type = IOChange::Type (change.type | IOChange::ConfigurationChanged);
@@ -330,7 +332,7 @@ IO::add_port (string destination, void* src, DataType type)
 
 
 		{
-			Glib::Mutex::Lock lm (io_lock);
+			Glib::Threads::Mutex::Lock lm (io_lock);
 
 			/* Create a new port */
 
@@ -375,7 +377,7 @@ int
 IO::disconnect (void* src)
 {
 	{
-		Glib::Mutex::Lock lm (io_lock);
+		Glib::Threads::Mutex::Lock lm (io_lock);
 
 		for (PortSet::iterator i = _ports.begin(); i != _ports.end(); ++i) {
 			i->disconnect_all ();
@@ -477,7 +479,7 @@ IO::ensure_ports (ChanCount count, bool clear, void* src)
 	change.before = _ports.count ();
 
 	{
-		Glib::Mutex::Lock im (io_lock);
+		Glib::Threads::Mutex::Lock im (io_lock);
 		if (ensure_ports_locked (count, clear, changed)) {
 			return -1;
 		}
@@ -519,7 +521,7 @@ IO::state (bool /*full_state*/)
 	vector<string>::iterator ci;
 	int n;
 	LocaleGuard lg (X_("POSIX"));
-	Glib::Mutex::Lock lm (io_lock);
+	Glib::Threads::Mutex::Lock lm (io_lock);
 
 	node->add_property("name", _name);
 	id().print (buf, sizeof (buf));
@@ -881,7 +883,7 @@ IO::create_ports (const XMLNode& node, int version)
 	get_port_counts (node, version, n, c);
 
 	{
-		Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 
 		if (ensure_ports (n, true, this)) {
 			error << string_compose(_("%1: cannot create I/O ports"), _name) << endmsg;
@@ -1097,7 +1099,7 @@ IO::set_ports (const string& str)
 	}
 
 	{
-		Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 
 		// FIXME: audio-only
 		if (ensure_ports (ChanCount(DataType::AUDIO, nports), true, this)) {
@@ -1244,7 +1246,7 @@ IO::connect_ports_to_bundle (boost::shared_ptr<Bundle> c, void* src)
 	BLOCK_PROCESS_CALLBACK ();
 
 	{
-		Glib::Mutex::Lock lm2 (io_lock);
+		Glib::Threads::Mutex::Lock lm2 (io_lock);
 
 		c->connect (_bundle, _session.engine());
 
@@ -1276,7 +1278,7 @@ IO::disconnect_ports_from_bundle (boost::shared_ptr<Bundle> c, void* src)
 	BLOCK_PROCESS_CALLBACK ();
 
 	{
-		Glib::Mutex::Lock lm2 (io_lock);
+		Glib::Threads::Mutex::Lock lm2 (io_lock);
 
 		c->disconnect (_bundle, _session.engine());
 
@@ -1312,7 +1314,7 @@ IO::disable_connecting ()
 int
 IO::enable_connecting ()
 {
-	Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock());
+	Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock());
 	connecting_legal = true;
 	boost::optional<int> r = ConnectingLegal ();
 	return r.get_value_or (0);
@@ -1347,10 +1349,18 @@ IO::build_legal_port_name (DataType type)
 	   use the (new) translated name.
 	*/
 
-	if (_direction == Input) {
-		suffix += X_("_in");
+	if (_sendish) {
+		if (_direction == Input) {
+			suffix += X_("_return");
+		} else {
+			suffix += X_("_send");
+		}
 	} else {
-		suffix += X_("_out");
+		if (_direction == Input) {
+			suffix += X_("_in");
+		} else {
+			suffix += X_("_out");
+		}
 	}
 
 	// allow up to 4 digits for the output port number, plus the slash, suffix and extra space
@@ -1710,6 +1720,6 @@ IO::physically_connected () const
 bool
 IO::has_port (boost::shared_ptr<Port> p) const
 {
-	Glib::Mutex::Lock lm (io_lock);
+	Glib::Threads::Mutex::Lock lm (io_lock);
 	return _ports.contains (p);
 }

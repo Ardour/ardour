@@ -22,7 +22,7 @@
 
 #include <stdint.h>
 
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 
 #include "pbd/ringbuffer.h"
 #include "pbd/semaphore.h"
@@ -76,13 +76,13 @@ public:
 private:
 	void run();
 
-	Workee*              _workee;
-	Glib::Thread*        _thread;
-	RingBuffer<uint8_t>* _requests;
-	RingBuffer<uint8_t>* _responses;
-	uint8_t*             _response;
-	PBD::Semaphore       _sem;
-	bool                 _exit;
+	Workee*                _workee;
+        Glib::Threads::Thread* _thread;
+	RingBuffer<uint8_t>*   _requests;
+	RingBuffer<uint8_t>*   _responses;
+	uint8_t*               _response;
+	PBD::Semaphore         _sem;
+	bool                   _exit;
 };
 
 } // namespace ARDOUR

@@ -79,7 +79,7 @@ private:
 	timestamp_t       _last_write_timestamp;
 	RingBuffer< Evoral::Event<double> > output_fifo;
 	Evoral::EventRingBuffer<timestamp_t> input_fifo;
-	Glib::Mutex output_fifo_lock;
+        Glib::Threads::Mutex output_fifo_lock;
 	CrossThreadChannel xthread;
 
 	int create_port ();

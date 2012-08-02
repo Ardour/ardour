@@ -23,7 +23,7 @@
 #include <vector>
 #include <string>
 
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 
 #include "pbd/ringbuffer.h"
 
@@ -59,7 +59,7 @@ class SingleAllocMultiReleasePool : public Pool
 	virtual void release (void *);
 
   private:
-    Glib::Mutex* m_lock;
+        Glib::Threads::Mutex m_lock;
 };
 
 
@@ -73,7 +73,7 @@ class MultiAllocSingleReleasePool : public Pool
 	virtual void release (void *);
 
   private:
-    Glib::Mutex* m_lock;
+        Glib::Threads::Mutex m_lock;
 };
 
 class PerThreadPool;
@@ -106,7 +106,7 @@ class PerThreadPool
   public:
 	PerThreadPool ();
 
-	GPrivate* key() const { return _key; }
+        const Glib::Threads::Private<CrossThreadPool>& key() const { return _key; }
 
 	void  create_per_thread_pool (std::string name, unsigned long item_size, unsigned long nitems);
 	CrossThreadPool* per_thread_pool ();
@@ -115,13 +115,13 @@ class PerThreadPool
 	void add_to_trash (CrossThreadPool *);
 
   private:
-	GPrivate* _key;
+        Glib::Threads::Private<CrossThreadPool> _key;
 	std::string _name;
 	unsigned long _item_size;
 	unsigned long _nitems;
 
 	/** mutex to protect either changes to the _trash variable, or writes to the RingBuffer */
-	Glib::Mutex _trash_mutex;
+        Glib::Threads::Mutex _trash_mutex;
 	RingBuffer<CrossThreadPool*>* _trash;
 };
 

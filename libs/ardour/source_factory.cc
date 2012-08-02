@@ -50,8 +50,8 @@ using namespace std;
 using namespace PBD;
 
 PBD::Signal1<void,boost::shared_ptr<Source> > SourceFactory::SourceCreated;
-Glib::Cond* SourceFactory::PeaksToBuild;
-Glib::StaticMutex SourceFactory::peak_building_lock = GLIBMM_STATIC_MUTEX_INIT;
+Glib::Threads::Cond SourceFactory::PeaksToBuild;
+Glib::Threads::Mutex SourceFactory::peak_building_lock;
 std::list<boost::weak_ptr<AudioSource> > SourceFactory::files_with_peaks;
 
 static void
@@ -65,7 +65,7 @@ peak_thread_work ()
 
 	  wait:
 		if (SourceFactory::files_with_peaks.empty()) {
-			SourceFactory::PeaksToBuild->wait (SourceFactory::peak_building_lock);
+			SourceFactory::PeaksToBuild.wait (SourceFactory::peak_building_lock);
 		}
 
 		if (SourceFactory::files_with_peaks.empty()) {
@@ -87,10 +87,8 @@ peak_thread_work ()
 void
 SourceFactory::init ()
 {
-	PeaksToBuild = new Glib::Cond();
-
 	for (int n = 0; n < 2; ++n) {
-		Glib::Thread::create (sigc::ptr_fun (::peak_thread_work), false);
+		Glib::Threads::Thread::create (sigc::ptr_fun (::peak_thread_work));
 	}
 }
 
@@ -103,9 +101,9 @@ SourceFactory::setup_peakfile (boost::shared_ptr<Source> s, bool async)
 
 		if (async) {
 
-			Glib::Mutex::Lock lm (peak_building_lock);
+			Glib::Threads::Mutex::Lock lm (peak_building_lock);
 			files_with_peaks.push_back (boost::weak_ptr<AudioSource> (as));
-			PeaksToBuild->broadcast ();
+			PeaksToBuild.broadcast ();
 
 		} else {
 

@@ -62,6 +62,7 @@ namespace PBD {
 		extern uint64_t SoundGrid;
 		extern uint64_t SGSurface;
 		extern uint64_t OrderKeys;
+		extern uint64_t Automation;
 	}
 }
 

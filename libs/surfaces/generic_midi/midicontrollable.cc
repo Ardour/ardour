@@ -234,7 +234,9 @@ MIDIControllable::midi_sense_note (Parser &, EventTwoBytes *msg, bool /*is_on*/)
 	}
 
 	if (!controllable->is_toggle()) {
-		controllable->set_value (midi_to_control (msg->note_number));
+		if (control_additional == msg->note_number) {
+			controllable->set_value (midi_to_control (msg->velocity));
+		}
 	} else {
 		if (control_additional == msg->note_number) {
 			controllable->set_value (controllable->get_value() > 0.5f ? 0.0f : 1.0f);

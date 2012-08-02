@@ -151,7 +151,7 @@ AudioPlaylistSource::read_unlocked (Sample* dst, framepos_t start, framecnt_t cn
 		   with any changes to the list of buffers caused
 		   by creating new nested playlists/sources
 		*/
-		Glib::Mutex::Lock lm (_level_buffer_lock);
+		Glib::Threads::Mutex::Lock lm (_level_buffer_lock);
 		sbuf = _mixdown_buffers[_level-1];
 		gbuf = _gain_buffers[_level-1];
 	}

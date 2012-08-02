@@ -31,7 +31,7 @@
 #include <exception>
 #include <string>
 
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 
 #include "pbd/rcu.h"
 #include "pbd/signals.h"
@@ -85,7 +85,7 @@ public:
 	int start ();
 	bool running() const { return _running; }
 
-	Glib::Mutex& process_lock() { return _process_lock; }
+	Glib::Threads::Mutex& process_lock() { return _process_lock; }
 
 	framecnt_t frame_rate () const;
 	pframes_t frames_per_cycle () const;
@@ -265,8 +265,8 @@ private:
 
 	jack_client_t* volatile   _jack; /* could be reset to null by SIGPIPE or another thread */
 	std::string                jack_client_name;
-	Glib::Mutex               _process_lock;
-	Glib::Cond                 session_removed;
+	Glib::Threads::Mutex      _process_lock;
+        Glib::Threads::Cond        session_removed;
 	bool                       session_remove_pending;
         frameoffset_t              session_removal_countdown;
         gain_t                     session_removal_gain;
@@ -286,7 +286,7 @@ private:
 	bool                      _pre_freewheel_mmc_enabled;
 	int                       _usecs_per_cycle;
 	bool                       port_remove_in_progress;
-	Glib::Thread*              m_meter_thread;
+        Glib::Threads::Thread*     m_meter_thread;
 	ProcessThread*            _main_thread;
 
 	SerializedRCUManager<Ports> ports;

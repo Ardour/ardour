@@ -27,7 +27,7 @@
 
 #include <sys/types.h>
 
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 
 #include "pbd/undo.h"
 #include "pbd/stateful.h"
@@ -181,12 +181,12 @@ class Locations : public SessionHandleRef, public PBD::StatefulDestructible
 	PBD::Signal1<void,const PBD::PropertyChange&>    StateChanged;
 
 	template<class T> void apply (T& obj, void (T::*method)(LocationList&)) {
-		Glib::Mutex::Lock lm (lock);
+		Glib::Threads::Mutex::Lock lm (lock);
 		(obj.*method)(locations);
 	}
 
 	template<class T1, class T2> void apply (T1& obj, void (T1::*method)(LocationList&, T2& arg), T2& arg) {
-		Glib::Mutex::Lock lm (lock);
+		Glib::Threads::Mutex::Lock lm (lock);
 		(obj.*method)(locations, arg);
 	}
 
@@ -194,7 +194,7 @@ class Locations : public SessionHandleRef, public PBD::StatefulDestructible
 
 	LocationList         locations;
 	Location            *current_location;
-	mutable Glib::Mutex  lock;
+	mutable Glib::Threads::Mutex  lock;
 
 	int set_current_unlocked (Location *);
 	void location_changed (Location*);

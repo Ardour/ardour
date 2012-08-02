@@ -51,7 +51,7 @@ Session::click (framepos_t start, framecnt_t nframes)
 		return;
 	}
 
-	Glib::RWLock::WriterLock clickm (click_lock, Glib::TRY_LOCK);
+	Glib::Threads::RWLock::WriterLock clickm (click_lock, Glib::Threads::TRY_LOCK);
 
 	/* how far have we moved since the last time the clicks got cleared
 	 */
@@ -225,7 +225,7 @@ Session::setup_click_sounds (int which)
 void
 Session::clear_clicks ()
 {
-	Glib::RWLock::WriterLock lm (click_lock);
+	Glib::Threads::RWLock::WriterLock lm (click_lock);
 
 	for (Clicks::iterator i = clicks.begin(); i != clicks.end(); ++i) {
 		delete *i;

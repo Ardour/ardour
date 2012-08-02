@@ -85,7 +85,7 @@ MidiStretch::run (boost::shared_ptr<Region> r, Progress*)
 	boost::shared_ptr<MidiSource> new_src = boost::dynamic_pointer_cast<MidiSource>(nsrcs[0]);
 	assert(new_src);
 
-	Glib::Mutex::Lock sl (new_src->mutex ());
+	Glib::Threads::Mutex::Lock sl (new_src->mutex ());
 
 	new_src->load_model(false, true);
 	boost::shared_ptr<MidiModel> new_model = new_src->model();

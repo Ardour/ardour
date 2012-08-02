@@ -582,7 +582,15 @@ Session::import_files (ImportStatus& status)
 
 			boost::shared_ptr<FileSource> fs = boost::dynamic_pointer_cast<FileSource>(*x);
 			if (fs) {
-				fs->mark_immutable ();
+				/* Only audio files should be marked as
+				   immutable - we may need to rewrite MIDI
+				   files at any time.
+				*/
+				if (boost::dynamic_pointer_cast<AudioFileSource> (fs)) {
+					fs->mark_immutable ();
+				} else {
+					fs->mark_immutable_except_write ();
+				}
 				fs->mark_nonremovable ();
 			}
 

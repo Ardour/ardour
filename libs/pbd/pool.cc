@@ -87,37 +87,27 @@ Pool::release (void *ptr)
 
 MultiAllocSingleReleasePool::MultiAllocSingleReleasePool (string n, unsigned long isize, unsigned long nitems) 
 	: Pool (n, isize, nitems)
-	, m_lock(0)
 {
 }
 
 MultiAllocSingleReleasePool::~MultiAllocSingleReleasePool ()
 {
-    delete m_lock;
 }
 
 SingleAllocMultiReleasePool::SingleAllocMultiReleasePool (string n, unsigned long isize, unsigned long nitems) 
 	: Pool (n, isize, nitems)
-	, m_lock(0)
 {
 }
 
 SingleAllocMultiReleasePool::~SingleAllocMultiReleasePool ()
 {
-    delete m_lock;
 }
 
 void*
 MultiAllocSingleReleasePool::alloc ()
 {
 	void *ptr;
-    if(!m_lock) {
-        m_lock = new Glib::Mutex();
-        // umm, I'm not sure that this doesn't also allocate memory.
-        if(!m_lock) error << "cannot create Glib::Mutex in pool.cc" << endmsg;
-    }
-    
-    Glib::Mutex::Lock guard(*m_lock);
+	Glib::Threads::Mutex::Lock guard (m_lock);
 	ptr = Pool::alloc ();
 	return ptr;
 }
@@ -137,12 +127,7 @@ SingleAllocMultiReleasePool::alloc ()
 void
 SingleAllocMultiReleasePool::release (void* ptr)
 {
-    if(!m_lock) {
-        m_lock = new Glib::Mutex();
-        // umm, I'm not sure that this doesn't also allocate memory.
-        if(!m_lock) error << "cannot create Glib::Mutex in pool.cc" << endmsg;
-    }
-    Glib::Mutex::Lock guard(*m_lock);
+	Glib::Threads::Mutex::Lock guard (m_lock);
 	Pool::release (ptr);
 }
 
@@ -173,14 +158,9 @@ free_per_thread_pool (void* ptr)
 }
  
 PerThreadPool::PerThreadPool ()
-	: _trash (0)
+	: _key (free_per_thread_pool)
+	, _trash (0)
 {
-	{
-		/* for some reason this appears necessary to get glib's thread private stuff to work */
-		g_private_new (NULL);
-	}
-
-	_key = g_private_new (free_per_thread_pool);
 }
 
 /** Create a new CrossThreadPool and set the current thread's private _key to point to it.
@@ -191,8 +171,7 @@ PerThreadPool::PerThreadPool ()
 void
 PerThreadPool::create_per_thread_pool (string n, unsigned long isize, unsigned long nitems)
 {
-	CrossThreadPool* p = new CrossThreadPool (n, isize, nitems, this);
-	g_private_set (_key, p);
+	_key.set (new CrossThreadPool (n, isize, nitems, this));
 }
 
 /** @return CrossThreadPool for the current thread, which must previously have been created by
@@ -201,7 +180,7 @@ PerThreadPool::create_per_thread_pool (string n, unsigned long isize, unsigned l
 CrossThreadPool*
 PerThreadPool::per_thread_pool ()
 {
-	CrossThreadPool* p = static_cast<CrossThreadPool*> (g_private_get (_key));
+	CrossThreadPool* p = _key.get();
 	if (!p) {
 		fatal << "programming error: no per-thread pool \"" << _name << "\" for thread " << pthread_self() << endmsg;
 		/*NOTREACHED*/
@@ -212,7 +191,7 @@ PerThreadPool::per_thread_pool ()
 void
 PerThreadPool::set_trash (RingBuffer<CrossThreadPool*>* t)
 {
-	Glib::Mutex::Lock lm (_trash_mutex);
+	Glib::Threads::Mutex::Lock lm (_trash_mutex);
 	_trash = t;
 }
 
@@ -220,7 +199,7 @@ PerThreadPool::set_trash (RingBuffer<CrossThreadPool*>* t)
 void
 PerThreadPool::add_to_trash (CrossThreadPool* p)
 {
-	Glib::Mutex::Lock lm (_trash_mutex);
+	Glib::Threads::Mutex::Lock lm (_trash_mutex);
 	
 	if (!_trash) {
 		warning << "Pool " << p->name() << " has no trash collector; a memory leak has therefore occurred" << endmsg;

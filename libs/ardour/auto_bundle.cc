@@ -16,7 +16,7 @@ ARDOUR::AutoBundle::AutoBundle (std::string const & n, bool i)
 ARDOUR::ChanCount
 ARDOUR::AutoBundle::nchannels () const
 {
-	Glib::Mutex::Lock lm (_ports_mutex);
+	Glib::Threads::Mutex::Lock lm (_ports_mutex);
 	return ChanCount (type(), _ports.size ());
 }
 
@@ -25,14 +25,14 @@ ARDOUR::AutoBundle::channel_ports (uint32_t c) const
 {
 	assert (c < nchannels().get (type()));
 
-	Glib::Mutex::Lock lm (_ports_mutex);
+	Glib::Threads::Mutex::Lock lm (_ports_mutex);
 	return _ports[c];
 }
 
 void
 ARDOUR::AutoBundle::set_channels (uint32_t n)
 {
-	Glib::Mutex::Lock lm (_ports_mutex);
+	Glib::Threads::Mutex::Lock lm (_ports_mutex);
 	_ports.resize (n);
 }
 
@@ -41,7 +41,7 @@ ARDOUR::AutoBundle::set_port (uint32_t c, std::string const & p)
 {
 	assert (c < nchannels ().get (type()));
 
-	Glib::Mutex::Lock lm (_ports_mutex);
+	Glib::Threads::Mutex::Lock lm (_ports_mutex);
 	_ports[c].resize (1);
 	_ports[c][0] = p;
 }

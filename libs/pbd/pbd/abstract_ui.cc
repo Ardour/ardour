@@ -11,9 +11,6 @@
 
 using namespace std;
 
-template<typename R>
-Glib::StaticPrivate<typename AbstractUI<R>::RequestBuffer> AbstractUI<R>::per_thread_request_buffer;
-
 template<typename RequestBuffer> void 
 cleanup_request_buffer (void* ptr)
 {
@@ -28,10 +25,13 @@ cleanup_request_buffer (void* ptr)
 	 
 
         {
-                Glib::Mutex::Lock lm (rb->ui.request_buffer_map_lock);
+                Glib::Threads::Mutex::Lock lm (rb->ui.request_buffer_map_lock);
                 rb->dead = true;
         }
 }
+
+template<typename R>
+Glib::Threads::Private<typename AbstractUI<R>::RequestBuffer> AbstractUI<R>::per_thread_request_buffer (cleanup_request_buffer<AbstractUI<R>::RequestBuffer>);
 
 template <typename RequestObject>
 AbstractUI<RequestObject>::AbstractUI (const string& name)
@@ -87,7 +87,7 @@ AbstractUI<RequestObject>::register_thread (string target_gui, pthread_t thread_
 		   only at thread initialization time, not repeatedly, 
 		   and so this is of little consequence.
 		*/
-		Glib::Mutex::Lock lm (request_buffer_map_lock);
+		Glib::Threads::Mutex::Lock lm (request_buffer_map_lock);
 		request_buffers[thread_id] = b;
 	}
 
@@ -100,7 +100,7 @@ AbstractUI<RequestObject>::register_thread (string target_gui, pthread_t thread_
 	   dead. it will then be deleted during a call to handle_ui_requests()
 	*/
 	
-	per_thread_request_buffer.set (b, cleanup_request_buffer<RequestBuffer>);
+	per_thread_request_buffer.set (b);
 }
 
 template <typename RequestObject> RequestObject*
@@ -209,7 +209,7 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 
 	/* and now, the generic request buffer. same rules as above apply */
 
-	Glib::Mutex::Lock lm (request_list_lock);
+	Glib::Threads::Mutex::Lock lm (request_list_lock);
 
 	while (!request_list.empty()) {
 		RequestObject* req = request_list.front ();
@@ -322,7 +322,7 @@ AbstractUI<RequestObject>::send_request (RequestObject *req)
 			   single-reader/single-writer semantics
 			*/
 			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 send heap request type %3\n", name(), pthread_self(), req->type));
-			Glib::Mutex::Lock lm (request_list_lock);
+			Glib::Threads::Mutex::Lock lm (request_list_lock);
 			request_list.push_back (req);
 		}
 

@@ -8,7 +8,7 @@ import subprocess
 import sys
 
 # Variables for 'waf dist'
-VERSION = '3.0beta4a'
+VERSION = '3.0beta5'
 APPNAME = 'Ardour3'
 
 # Mandatory variables
@@ -76,6 +76,7 @@ def fetch_git_revision (path):
             if "git-svn-id" in line:
                 line = line.split('@')[1].split(' ')
                 rev = line[0]
+                break
         except:
             pass
     return rev
@@ -342,6 +343,8 @@ def set_compiler_flags (conf,opt):
     # more boilerplate
     #
 
+    conf.env.append_value('CFLAGS', '-DBOOST_SYSTEM_NO_DEPRECATED')
+    conf.env.append_value('CXXFLAGS', '-DBOOST_SYSTEM_NO_DEPRECATED')
     conf.env.append_value('CFLAGS', '-D_LARGEFILE64_SOURCE')
     conf.env.append_value('CFLAGS', '-D_FILE_OFFSET_BITS=64')
     conf.env.append_value('CXXFLAGS', '-D_LARGEFILE64_SOURCE')
@@ -440,14 +443,6 @@ def sub_config_and_use(conf, name, has_objects = True):
 def configure(conf):
     conf.load('compiler_c')
     conf.load('compiler_cxx')
-    if not Options.options.noconfirm:
-        print ('\n\nThis is a beta version of Ardour 3.0.\n\n' +
-               'You are respectfully requested NOT to ask for assistance with build issues\n' +
-               'and not to report issues with Ardour 3.0 on the forums at ardour.org.\n\n' +
-               'Please use IRC, the bug tracker and/or the ardour mailing lists (-dev or -user)\n\n' +
-               'Thanks for your co-operation with our development process.\n\n' +
-               'Press Enter to continue.\n')
-        sys.stdin.readline()
     conf.env['VERSION'] = VERSION
     conf.line_just = 52
     autowaf.set_recursive()
@@ -590,7 +585,7 @@ def configure(conf):
 
     autowaf.check_pkg(conf, 'glib-2.0', uselib_store='GLIB', atleast_version='2.2')
     autowaf.check_pkg(conf, 'gthread-2.0', uselib_store='GTHREAD', atleast_version='2.2')
-    autowaf.check_pkg(conf, 'glibmm-2.4', uselib_store='GLIBMM', atleast_version='2.14.0')
+    autowaf.check_pkg(conf, 'glibmm-2.4', uselib_store='GLIBMM', atleast_version='2.32.0')
     autowaf.check_pkg(conf, 'sndfile', uselib_store='SNDFILE', atleast_version='1.0.18')
     autowaf.check_pkg(conf, 'giomm-2.4', uselib_store='GIOMM', atleast_version='2.2')
     autowaf.check_pkg(conf, 'libcurl', uselib_store='CURL', atleast_version='7.0.0')

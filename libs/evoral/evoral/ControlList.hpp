@@ -23,7 +23,7 @@
 #include <list>
 #include <boost/pool/pool.hpp>
 #include <boost/pool/pool_alloc.hpp>
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 #include "pbd/signals.h"
 #include "evoral/types.hpp"
 #include "evoral/Range.hpp"
@@ -107,7 +107,7 @@ public:
 
 	EventList::size_type size() const { return _events.size(); }
         double length() const { 		
-		Glib::Mutex::Lock lm (_lock);
+		Glib::Threads::Mutex::Lock lm (_lock);
 		return _events.empty() ? 0.0 : _events.back()->when;
 	}
 	bool empty() const { return _events.empty(); }
@@ -124,10 +124,8 @@ public:
 
 	virtual bool clamp_value (double& /*when*/, double& /*value*/) const { return true; }
 
-	void rt_add (double when, double value);
-	void add (double when, double value);
+        virtual void add (double when, double value);
 	void fast_simple_add (double when, double value);
-	void merge_nascent (double when);
 
 	void erase_range (double start, double end);
 	void erase (iterator);
@@ -167,18 +165,18 @@ public:
 	std::pair<ControlList::iterator,ControlList::iterator> control_points_adjacent (double when);
 
 	template<class T> void apply_to_points (T& obj, void (T::*method)(const ControlList&)) {
-		Glib::Mutex::Lock lm (_lock);
+		Glib::Threads::Mutex::Lock lm (_lock);
 		(obj.*method)(*this);
 	}
 
 	double eval (double where) {
-		Glib::Mutex::Lock lm (_lock);
+		Glib::Threads::Mutex::Lock lm (_lock);
 		return unlocked_eval (where);
 	}
 
 	double rt_safe_eval (double where, bool& ok) {
 
-		Glib::Mutex::Lock lm (_lock, Glib::TRY_LOCK);
+		Glib::Threads::Mutex::Lock lm (_lock, Glib::Threads::TRY_LOCK);
 
 		if ((ok = lm.locked())) {
 			return unlocked_eval (where);
@@ -209,7 +207,7 @@ public:
 	double default_value() const { return _parameter.normal(); }
 
 	// FIXME: const violations for Curve
-	Glib::Mutex& lock()         const { return _lock; }
+	Glib::Threads::Mutex& lock()         const { return _lock; }
 	LookupCache& lookup_cache() const { return _lookup_cache; }
 	SearchCache& search_cache() const { return _search_cache; }
 
@@ -245,7 +243,10 @@ public:
 	virtual bool touching() const { return false; }
 	virtual bool writing() const { return false; }
 	virtual bool touch_enabled() const { return false; }
+        void start_write_pass (double time);
 	void write_pass_finished (double when);
+        void set_in_write_pass (bool);
+        bool in_write_pass () const;
 
 	/** Emitted when mark_dirty() is called on this object */
 	mutable PBD::Signal0<void> Dirty;
@@ -256,6 +257,8 @@ public:
         static double thinning_factor() { return _thinning_factor; }
 
 	bool operator!= (ControlList const &) const;
+
+        void invalidate_insert_iterator ();
 
 protected:
 
@@ -277,7 +280,7 @@ protected:
 	Parameter             _parameter;
 	InterpolationStyle    _interpolation;
 	EventList             _events;
-	mutable Glib::Mutex   _lock;
+	mutable Glib::Threads::Mutex   _lock;
 	int8_t                _frozen;
 	bool                  _changed_when_thawed;
 	double                _min_yval;
@@ -287,21 +290,15 @@ protected:
 
 	Curve* _curve;
 
-	struct NascentInfo {
-		EventList events;
-		double start_time;
-		double end_time;
-   	        double same_value_cnt;
-	    
-		NascentInfo (double start = -1.0)
-			: start_time (start)
-			, end_time (-1.0)
-			, same_value_cnt (0)
-		{}
-	};
-
-	std::list<NascentInfo*> nascent;
         static double _thinning_factor;
+
+  private:
+    iterator   most_recent_insert_iterator;
+    double     insert_position;
+    bool       new_write_pass;
+    bool       did_write_during_pass;
+    bool       _in_write_pass;
+    void unlocked_invalidate_insert_iterator ();
 };
 
 } // namespace Evoral

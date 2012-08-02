@@ -23,7 +23,10 @@
 #include "evoral/ControlList.hpp"
 #include "evoral/Curve.hpp"
 
+#include "pbd/compose.h"
+
 using namespace std;
+using namespace PBD;
 
 namespace Evoral {
 
@@ -63,6 +66,11 @@ ControlList::ControlList (const Parameter& id)
 	_search_cache.left = -1;
 	_search_cache.first = _events.end();
 	_sort_pending = false;
+	new_write_pass = true;
+	_in_write_pass = false;
+	did_write_during_pass = false;
+	insert_position = -1;
+	most_recent_insert_iterator = _events.end();
 }
 
 ControlList::ControlList (const ControlList& other)
@@ -78,6 +86,11 @@ ControlList::ControlList (const ControlList& other)
 	_lookup_cache.range.first = _events.end();
 	_search_cache.first = _events.end();
 	_sort_pending = false;
+	new_write_pass = true;
+	_in_write_pass = false;
+	did_write_during_pass = false;
+	insert_position = -1;
+	most_recent_insert_iterator = _events.end();
 
 	copy_events (other);
 
@@ -106,6 +119,12 @@ ControlList::ControlList (const ControlList& other, double start, double end)
 		copy_events (*(section.get()));
 	}
 
+	new_write_pass = false;
+	_in_write_pass = false;
+	did_write_during_pass = false;
+	insert_position = -1;
+	most_recent_insert_iterator = _events.end();
+
 	mark_dirty ();
 }
 
@@ -113,13 +132,6 @@ ControlList::~ControlList()
 {
 	for (EventList::iterator x = _events.begin(); x != _events.end(); ++x) {
 		delete (*x);
-	}
-
-	for (list<NascentInfo*>::iterator n = nascent.begin(); n != nascent.end(); ++n) {
-		for (EventList::iterator x = (*n)->events.begin(); x != (*n)->events.end(); ++x) {
-			delete *x;
-		}
-		delete (*n);
 	}
 
 	delete _curve;
@@ -156,11 +168,12 @@ void
 ControlList::copy_events (const ControlList& other)
 {
 	{
-		Glib::Mutex::Lock lm (_lock);
+		Glib::Threads::Mutex::Lock lm (_lock);
 		_events.clear ();
 		for (const_iterator i = other.begin(); i != other.end(); ++i) {
 			_events.push_back (new ControlEvent ((*i)->when, (*i)->value));
 		}
+		unlocked_invalidate_insert_iterator ();
 		mark_dirty ();
 	}
 	maybe_signal_changed ();
@@ -193,8 +206,9 @@ void
 ControlList::clear ()
 {
 	{
-		Glib::Mutex::Lock lm (_lock);
+		Glib::Threads::Mutex::Lock lm (_lock);
 		_events.clear ();
+		unlocked_invalidate_insert_iterator ();
 		mark_dirty ();
 	}
 
@@ -204,14 +218,14 @@ ControlList::clear ()
 void
 ControlList::x_scale (double factor)
 {
-	Glib::Mutex::Lock lm (_lock);
+	Glib::Threads::Mutex::Lock lm (_lock);
 	_x_scale (factor);
 }
 
 bool
 ControlList::extend_to (double when)
 {
-	Glib::Mutex::Lock lm (_lock);
+	Glib::Threads::Mutex::Lock lm (_lock);
 	if (_events.empty() || _events.back()->when == when) {
 		return false;
 	}
@@ -230,24 +244,19 @@ ControlList::_x_scale (double factor)
 	mark_dirty ();
 }
 
-void
-ControlList::write_pass_finished (double when)
-{
-	merge_nascent (when);
-}
-
-
 struct ControlEventTimeComparator {
 	bool operator() (ControlEvent* a, ControlEvent* b) {
 		return a->when < b->when;
 	}
 };
 
+#if 0
+
 void
 ControlList::merge_nascent (double when)
 {
 	{
-		Glib::Mutex::Lock lm (_lock);
+		Glib::Threads::Mutex::Lock lm (_lock);
 
 		if (nascent.empty()) {
 			return;
@@ -432,101 +441,133 @@ ControlList::merge_nascent (double when)
 
 	maybe_signal_changed ();
 }
-
-void
-ControlList::rt_add (double when, double value)
-{
-	// this is for automation recording
-
-	if (touch_enabled() && !touching()) {
-		return;
-	}
-	
-	// cerr << "RT: alist " << this << " add " << value << " @ " << when << endl;
-
-	Glib::Mutex::Lock lm (_lock, Glib::TRY_LOCK);
-
-	if (lm.locked()) {
-		assert (!nascent.empty());
-		/* we don't worry about adding events out of time order as we will
-		   sort them in merge_nascent.
-		*/
-
-		NascentInfo* ni (nascent.back());
-		EventList& el (ni->events);
-
-		if (!el.empty() && (when >= el.back()->when) && (value == el.back()->value)) {
-
-			/* same value, later timestamp, effective slope is
-			 * zero, so just move the last point in nascent to our
-			 * new time position. this avoids storing an unlimited
-			 * number of points to represent a flat line.
-			 */
-
-			ni->same_value_cnt++;
-
-			if (ni->same_value_cnt > 1) {
-				el.back()->when = when;
-				return;
-			}
-		} else {
-			ni->same_value_cnt = 0;
-		}
-
-		el.push_back (new ControlEvent (when, value));
-	}
-}
+#endif
 
 void
 ControlList::thin ()
 {
-	Glib::Mutex::Lock lm (_lock);
+	bool changed = false;
 
-	ControlEvent* prevprev = 0;
-	ControlEvent* cur = 0;
-	ControlEvent* prev = 0;
-	iterator pprev;
-	int counter = 0;
-
-	for (iterator i = _events.begin(); i != _events.end(); ++i) {
-
-		cur = *i;
-		counter++;
-
-		if (counter > 2) {
+	{
+		Glib::Threads::Mutex::Lock lm (_lock);
+		
+		ControlEvent* prevprev = 0;
+		ControlEvent* cur = 0;
+		ControlEvent* prev = 0;
+		iterator pprev;
+		int counter = 0;
+		
+		DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 thin from %2 events\n", this, _events.size()));
+		
+		for (iterator i = _events.begin(); i != _events.end(); ++i) {
 			
-			double area = fabs ((prevprev->when * (prev->value - cur->value)) + 
-					    (prev->when * (cur->value - prevprev->value)) + 
-					    (cur->when * (prevprev->value - prev->value)));
+			cur = *i;
+			counter++;
 			
-			if (area < _thinning_factor) {
-				iterator tmp = pprev;
-
-				/* pprev will change to current
-				   i is incremented to the next event
-				*/
-
-				pprev = i;
-				_events.erase (tmp);
-
-				continue;
+			if (counter > 2) {
+				
+				/* compute the area of the triangle formed by 3 points
+				 */
+				
+				double area = fabs ((prevprev->when * (prev->value - cur->value)) + 
+						    (prev->when * (cur->value - prevprev->value)) + 
+						    (cur->when * (prevprev->value - prev->value)));
+				
+				if (area < _thinning_factor) {
+					iterator tmp = pprev;
+					
+					/* pprev will change to current
+					   i is incremented to the next event
+					   as we loop.
+					*/
+					
+					pprev = i;
+					_events.erase (tmp);
+					changed = true;
+					continue;
+				}
 			}
+			
+			prevprev = prev;
+			prev = cur;
+			pprev = i;
 		}
+		
+		DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 thin => %2 events\n", this, _events.size()));
 
-		prevprev = prev;
-		prev = cur;
-		pprev = i;
+		if (changed) {
+			unlocked_invalidate_insert_iterator ();
+			mark_dirty ();
+		}
+	}
+
+	if (changed) {
+		maybe_signal_changed ();
 	}
 }
 
 void
 ControlList::fast_simple_add (double when, double value)
 {
+	Glib::Threads::Mutex::Lock lm (_lock);
 	/* to be used only for loading pre-sorted data from saved state */
 	_events.insert (_events.end(), new ControlEvent (when, value));
 	assert(_events.back());
 
 	mark_dirty ();
+}
+
+void
+ControlList::invalidate_insert_iterator ()
+{
+	Glib::Threads::Mutex::Lock lm (_lock);
+	unlocked_invalidate_insert_iterator ();
+}
+
+void
+ControlList::unlocked_invalidate_insert_iterator ()
+{
+	most_recent_insert_iterator = _events.end();
+}
+
+void
+ControlList::start_write_pass (double when)
+{
+	Glib::Threads::Mutex::Lock lm (_lock);
+
+	new_write_pass = true;
+	did_write_during_pass = false;
+	insert_position = when;
+
+	/* leave the insert iterator invalid, so that we will do the lookup
+	   of where it should be in a "lazy" way - deferring it until
+	   we actually add the first point (which may never happen).
+	*/
+
+	unlocked_invalidate_insert_iterator ();
+}
+
+void
+ControlList::write_pass_finished (double when)
+{
+	if (did_write_during_pass) {
+		thin ();
+		did_write_during_pass = false;
+	}
+	new_write_pass = true;
+	_in_write_pass = false;
+}
+
+void
+ControlList::set_in_write_pass (bool yn)
+{
+	_in_write_pass = yn;
+}
+
+bool
+ControlList::in_write_pass () const
+{
+	return _in_write_pass;
 }
 
 void
@@ -540,35 +581,260 @@ ControlList::add (double when, double value)
 		return;
 	}
 
+	DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 add %2 at %3 w/erase = %4 at end ? %5\n", 
+							 this, value, when, _in_write_pass, (most_recent_insert_iterator == _events.end())));
+
 	{
-		Glib::Mutex::Lock lm (_lock);
+		Glib::Threads::Mutex::Lock lm (_lock);
 		ControlEvent cp (when, 0.0f);
-		bool insert = true;
 		iterator insertion_point;
 
 		if (_events.empty()) {
+			
+			/* as long as the point we're adding is not at zero,
+			 * add an "anchor" point there.
+			 */
+
 			if (when > 1) {
 				_events.insert (_events.end(), new ControlEvent (0, _default_value));
+				DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 added default value %2 at zero\n", this, _default_value));
 			}
 		}
 
-		for (insertion_point = lower_bound (_events.begin(), _events.end(), &cp, time_comparator); insertion_point != _events.end(); ++insertion_point) {
+		if (_in_write_pass && new_write_pass) {
 
-			/* only one point allowed per time point */
+			DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 new write pass, insert pos = %2\n", this, insert_position));
+			
+			/* The first addition of a new control event during a
+			 * write pass.
+			 *
+			 * We need to add a new point at insert_position
+			 * corresponding the value there. 
+			 */
 
-			if ((*insertion_point)->when == when) {
-				(*insertion_point)->value = value;
-				insert = false;
-				break;
+			/* the insert_iterator is not set, figure out where
+			 * it needs to be.
+			 */
+			
+			ControlEvent cp (insert_position, 0.0);
+			most_recent_insert_iterator = lower_bound (_events.begin(), _events.end(), &cp, time_comparator);
+			DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 looked up insert iterator for new write pass\n", this));
+
+			double eval_value = unlocked_eval (insert_position);
+			
+			if (most_recent_insert_iterator == _events.end()) {
+
+				DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 insert iterator at end, adding eval-value there %2\n", this, eval_value));
+				_events.push_back (new ControlEvent (insert_position, eval_value));
+				/* leave insert iterator at the end */
+
+			} else if ((*most_recent_insert_iterator)->when == when) {
+
+				DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 insert iterator at existing point, setting eval-value there %2\n", this, eval_value));
+
+				/* most_recent_insert_iterator points to a control event
+				   already at the insert position, so there is
+				   nothing to do.
+
+				   ... except ... 
+
+				   advance most_recent_insert_iterator so that the "real"
+				   insert occurs in the right place, since it 
+				   points to the control event just inserted.
+				 */
+
+				++most_recent_insert_iterator;
+			} else {
+
+				/* insert a new control event at the right spot
+				 */
+
+				DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 insert eval-value %2 just before iterator @ %3\n", 
+										 this, eval_value, (*most_recent_insert_iterator)->when));
+
+				most_recent_insert_iterator = _events.insert (most_recent_insert_iterator, new ControlEvent (insert_position, eval_value));
+
+				/* advance most_recent_insert_iterator so that the "real"
+				 * insert occurs in the right place, since it 
+				 * points to the control event just inserted.
+				 */
+
+				++most_recent_insert_iterator;
 			}
 
-			if ((*insertion_point)->when >= when) {
-				break;
-			}
-		}
+			/* don't do this again till the next write pass */
+			
+			new_write_pass = false;
+			did_write_during_pass = true;
 
-		if (insert) {
-			_events.insert (insertion_point, new ControlEvent (when, value));
+		} else if (most_recent_insert_iterator == _events.end() || when > (*most_recent_insert_iterator)->when) {
+
+			/* this is NOT the first point to be added after the
+			   start of a write pass, and we have a bit of work to
+			   do figuring out where to add the new point, as well
+			   as potentially erasing existing data between the
+			   most recently added point and wherever this one
+			   will end up.
+			*/
+				
+			DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 need to discover insert iterator (@end ? %2)\n", 
+									 this, (most_recent_insert_iterator == _events.end())));
+
+			/* this means that we either *know* we want to insert
+			 * at the end, or that we don't know where to insert.
+			 * 
+			 * so ... lets perform some quick checks before we
+			 * go doing binary search to figure out where to
+			 * insert.
+			 */
+
+			if (_events.back()->when == when) {
+
+				/* we need to modify the final point, so 
+				   make most_recent_insert_iterator point to it.
+				*/
+
+				DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 modify final value\n", this));
+				
+				most_recent_insert_iterator = _events.end();
+				--most_recent_insert_iterator;
+
+			} else if (_events.back()->when < when) {
+
+				/* the new point is beyond the end of the
+				 * current list
+				 */
+
+				DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 plan to append to list\n", this));
+
+				if (_in_write_pass) {
+					/* remove the final point, because
+					   we're adding one beyond it.
+					*/
+					delete _events.back();
+					_events.pop_back();
+				}
+				
+				/* leaving this here will force an append */
+
+				most_recent_insert_iterator = _events.end();
+
+			} else {
+
+				DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 erase %2 from existing iterator (@end ? %3\n", 
+										 this, _in_write_pass,
+										 (most_recent_insert_iterator == _events.end())));
+
+				if (_in_write_pass) {
+					while (most_recent_insert_iterator != _events.end()) {
+						if ((*most_recent_insert_iterator)->when < when) {
+							if (_in_write_pass) {
+								DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 erase existing @ %2\n", this, (*most_recent_insert_iterator)));
+								delete *most_recent_insert_iterator;
+								most_recent_insert_iterator = _events.erase (most_recent_insert_iterator);
+								continue;
+							}
+						} else if ((*most_recent_insert_iterator)->when >= when) {
+							break;
+						}
+						++most_recent_insert_iterator;
+					}
+				} else {
+					
+					/* not in a write pass: figure out the iterator we should insert in front of */
+
+					ControlEvent cp (when, 0.0f);
+					most_recent_insert_iterator = lower_bound (_events.begin(), _events.end(), &cp, time_comparator);
+				}
+			}
+		} 
+		
+		/* OK, now we're really ready to add a new point
+		 */
+
+		if (most_recent_insert_iterator == _events.end()) {
+			DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 appending new point at end\n", this));
+			
+			bool done = false;
+
+			/* check if would just be adding to a straight line,
+			 * and don't add another point if so
+			 */
+
+			if (!_events.empty()) { // avoid O(N) _events.size() here
+				if (_events.back()->value == value) {
+					EventList::iterator b = _events.end();
+					--b; // last point, which we know exists
+					if (b != _events.begin()) { // step back again, which may not be possible
+						--b; // next-to-last-point
+						if ((*b)->value == value) {
+							/* straight line - just move the last
+							 * point to the new time
+							 */
+							_events.back()->when = when;
+							done = true;
+						}
+					}
+				}
+			}
+
+			if (!done) {
+				_events.push_back (new ControlEvent (when, value));
+			}
+
+			if (!_in_write_pass) {
+				most_recent_insert_iterator = _events.end();
+				--most_recent_insert_iterator;
+			}
+
+		} else if ((*most_recent_insert_iterator)->when == when) {
+			DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 reset existing point to new value %2\n", this, value));
+
+			/* only one point allowed per time point, so just
+			 * reset the value here.
+			 */
+
+			(*most_recent_insert_iterator)->value = value;
+
+		} else {
+			DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 insert new point at %2 at iterator at %3\n", this, when, (*most_recent_insert_iterator)->when));
+			
+			bool done;
+			
+			/* check if would just be adding to a straight line,
+			 * and don't add another point if so
+			 */
+
+			if (most_recent_insert_iterator != _events.begin()) {
+				EventList::iterator b = most_recent_insert_iterator;
+				--b; // prior point, which we know exists
+				if ((*b)->value == value) { // same value as the point we plan to insert
+					if (b != _events.begin()) { // step back again, which may not be possible
+						EventList::iterator bb = b;
+						--bb; // next-to-prior-point
+						if ((*bb)->value == value) {
+							/* straight line - just move the prior
+							 * point to the new time
+							 */
+							(*b)->when = when;
+							
+							if (!_in_write_pass) {
+								most_recent_insert_iterator = b;
+							}
+
+							done = true;
+						}
+					}
+				}
+			}
+			
+			if (!done) {
+				EventList::iterator x = _events.insert (most_recent_insert_iterator, new ControlEvent (when, value));
+
+				if (!_in_write_pass) {
+					most_recent_insert_iterator = x;
+				}
+			}
 		}
 
 		mark_dirty ();
@@ -581,7 +847,10 @@ void
 ControlList::erase (iterator i)
 {
 	{
-		Glib::Mutex::Lock lm (_lock);
+		Glib::Threads::Mutex::Lock lm (_lock);
+		if (most_recent_insert_iterator == i) {
+			unlocked_invalidate_insert_iterator ();
+		}
 		_events.erase (i);
 		mark_dirty ();
 	}
@@ -592,8 +861,9 @@ void
 ControlList::erase (iterator start, iterator end)
 {
 	{
-		Glib::Mutex::Lock lm (_lock);
+		Glib::Threads::Mutex::Lock lm (_lock);
 		_events.erase (start, end);
+		unlocked_invalidate_insert_iterator ();
 		mark_dirty ();
 	}
 	maybe_signal_changed ();
@@ -604,7 +874,7 @@ void
 ControlList::erase (double when, double value)
 {
 	{
-		Glib::Mutex::Lock lm (_lock);
+		Glib::Threads::Mutex::Lock lm (_lock);
 
 		iterator i = begin ();
 		while (i != end() && ((*i)->when != when || (*i)->value != value)) {
@@ -613,6 +883,9 @@ ControlList::erase (double when, double value)
 
 		if (i != end ()) {
 			_events.erase (i);
+			if (most_recent_insert_iterator == i) {
+				unlocked_invalidate_insert_iterator ();
+			}
 		}
 
 		mark_dirty ();
@@ -627,7 +900,7 @@ ControlList::erase_range (double start, double endt)
 	bool erased = false;
 
 	{
-		Glib::Mutex::Lock lm (_lock);
+		Glib::Threads::Mutex::Lock lm (_lock);
 		erased = erase_range_internal (start, endt, _events);
 
 		if (erased) {
@@ -654,6 +927,7 @@ ControlList::erase_range_internal (double start, double endt, EventList & events
 		e = upper_bound (events.begin(), events.end(), &cp, time_comparator);
 		events.erase (s, e);
 		if (s != e) {
+			unlocked_invalidate_insert_iterator ();
 			erased = true;
 		}
 	}
@@ -665,7 +939,7 @@ void
 ControlList::slide (iterator before, double distance)
 {
 	{
-		Glib::Mutex::Lock lm (_lock);
+		Glib::Threads::Mutex::Lock lm (_lock);
 
 		if (before == _events.end()) {
 			return;
@@ -686,7 +960,7 @@ void
 ControlList::shift (double pos, double frames)
 {
 	{
-		Glib::Mutex::Lock lm (_lock);
+		Glib::Threads::Mutex::Lock lm (_lock);
 
 		for (iterator i = _events.begin(); i != _events.end(); ++i) {
 			if ((*i)->when >= pos) {
@@ -709,7 +983,7 @@ ControlList::modify (iterator iter, double when, double val)
 	*/
 
 	{
-		Glib::Mutex::Lock lm (_lock);
+		Glib::Threads::Mutex::Lock lm (_lock);
 
 		(*iter)->when = when;
 		(*iter)->value = val;
@@ -720,6 +994,7 @@ ControlList::modify (iterator iter, double when, double val)
 
 		if (!_frozen) {
 			_events.sort (event_time_less_than);
+			unlocked_invalidate_insert_iterator ();
 		} else {
 			_sort_pending = true;
 		}
@@ -733,7 +1008,7 @@ ControlList::modify (iterator iter, double when, double val)
 std::pair<ControlList::iterator,ControlList::iterator>
 ControlList::control_points_adjacent (double xval)
 {
-	Glib::Mutex::Lock lm (_lock);
+	Glib::Threads::Mutex::Lock lm (_lock);
 	iterator i;
 	ControlEvent cp (xval, 0.0f);
 	std::pair<iterator,iterator> ret;
@@ -779,10 +1054,11 @@ ControlList::thaw ()
 	}
 
 	{
-		Glib::Mutex::Lock lm (_lock);
+		Glib::Threads::Mutex::Lock lm (_lock);
 
 		if (_sort_pending) {
 			_events.sort (event_time_less_than);
+			unlocked_invalidate_insert_iterator ();
 			_sort_pending = false;
 		}
 	}
@@ -805,7 +1081,7 @@ void
 ControlList::truncate_end (double last_coordinate)
 {
 	{
-		Glib::Mutex::Lock lm (_lock);
+		Glib::Threads::Mutex::Lock lm (_lock);
 		ControlEvent cp (last_coordinate, 0);
 		ControlList::reverse_iterator i;
 		double last_val;
@@ -896,7 +1172,8 @@ ControlList::truncate_end (double last_coordinate)
 			_events.back()->when = last_coordinate;
 			_events.back()->value = last_val;
 		}
-
+		
+		unlocked_invalidate_insert_iterator ();
 		mark_dirty();
 	}
 
@@ -907,7 +1184,7 @@ void
 ControlList::truncate_start (double overall_length)
 {
 	{
-		Glib::Mutex::Lock lm (_lock);
+		Glib::Threads::Mutex::Lock lm (_lock);
 		iterator i;
 		double first_legal_value;
 		double first_legal_coordinate;
@@ -996,6 +1273,7 @@ ControlList::truncate_start (double overall_length)
 			_events.push_front (new ControlEvent (0, first_legal_value));
 		}
 
+		unlocked_invalidate_insert_iterator ();
 		mark_dirty();
 	}
 
@@ -1161,7 +1439,7 @@ bool
 ControlList::rt_safe_earliest_event (double start, double& x, double& y, bool inclusive) const
 {
 	// FIXME: It would be nice if this was unnecessary..
-	Glib::Mutex::Lock lm(_lock, Glib::TRY_LOCK);
+	Glib::Threads::Mutex::Lock lm(_lock, Glib::Threads::TRY_LOCK);
 	if (!lm.locked()) {
 		return false;
 	}
@@ -1360,7 +1638,7 @@ ControlList::cut_copy_clear (double start, double end, int op)
 	ControlEvent cp (start, 0.0);
 
 	{
-		Glib::Mutex::Lock lm (_lock);
+		Glib::Threads::Mutex::Lock lm (_lock);
 
 		/* first, determine s & e, two iterators that define the range of points
 		   affected by this operation
@@ -1437,6 +1715,7 @@ ControlList::cut_copy_clear (double start, double end, int op)
 			}
 		}
 
+		unlocked_invalidate_insert_iterator ();
 		mark_dirty ();
 	}
 
@@ -1475,7 +1754,7 @@ ControlList::paste (ControlList& alist, double pos, float /*times*/)
 	}
 
 	{
-		Glib::Mutex::Lock lm (_lock);
+		Glib::Threads::Mutex::Lock lm (_lock);
 		iterator where;
 		iterator prev;
 		double end = 0;
@@ -1506,6 +1785,7 @@ ControlList::paste (ControlList& alist, double pos, float /*times*/)
 			}
 		}
 
+		unlocked_invalidate_insert_iterator ();
 		mark_dirty ();
 	}
 
@@ -1522,7 +1802,7 @@ ControlList::move_ranges (const list< RangeMove<double> >& movements)
 	typedef list< RangeMove<double> > RangeMoveList;
 
 	{
-		Glib::Mutex::Lock lm (_lock);
+		Glib::Threads::Mutex::Lock lm (_lock);
 
 		/* a copy of the events list before we started moving stuff around */
 		EventList old_events = _events;
@@ -1562,6 +1842,7 @@ ControlList::move_ranges (const list< RangeMove<double> >& movements)
 
 		if (!_frozen) {
 			_events.sort (event_time_less_than);
+			unlocked_invalidate_insert_iterator ();
 		} else {
 			_sort_pending = true;
 		}

@@ -34,7 +34,7 @@
 #include <boost/weak_ptr.hpp>
 #include <boost/utility.hpp>
 
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 
 #include "pbd/error.h"
 #include "pbd/event_loop.h"
@@ -234,8 +234,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 		bool operator() (boost::shared_ptr<Route>, boost::shared_ptr<Route> b);
 	};
 
+        void notify_remote_id_change ();
         void sync_order_keys (RouteSortOrderKey);
-        void sync_remote_id_from_order_keys (RouteSortOrderKey);
 
 	template<class T> void foreach_route (T *obj, void (T::*func)(Route&));
 	template<class T> void foreach_route (T *obj, void (T::*func)(boost::shared_ptr<Route>));
@@ -1258,7 +1258,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	/* REGION MANAGEMENT */
 
-	mutable Glib::Mutex region_lock;
+	mutable Glib::Threads::Mutex region_lock;
 
 	int load_regions (const XMLNode& node);
 	int load_compounds (const XMLNode& node);
@@ -1269,7 +1269,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	/* SOURCES */
 
-	mutable Glib::Mutex source_lock;
+	mutable Glib::Threads::Mutex source_lock;
 
   public:
 	typedef std::map<PBD::ID,boost::shared_ptr<Source> > SourceMap;
@@ -1354,7 +1354,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	    could not report free space.
 	*/
 	bool _total_free_4k_blocks_uncertain;
-	Glib::Mutex space_lock;
+	Glib::Threads::Mutex space_lock;
 
 	bool no_questions_about_missing_files;
 
@@ -1397,7 +1397,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	Sample*                 click_emphasis_data;
 	framecnt_t              click_length;
 	framecnt_t              click_emphasis_length;
-	mutable Glib::RWLock    click_lock;
+	mutable Glib::Threads::RWLock    click_lock;
 
 	static const Sample     default_click[];
 	static const framecnt_t default_click_length;
@@ -1450,7 +1450,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	int find_all_sources_across_snapshots (std::set<std::string>& result, bool exclude_this_snapshot);
 
 	typedef std::set<boost::shared_ptr<PBD::Controllable> > Controllables;
-	Glib::Mutex controllables_lock;
+	Glib::Threads::Mutex controllables_lock;
 	Controllables controllables;
 
 	boost::shared_ptr<PBD::Controllable> _solo_cut_control;

@@ -32,7 +32,7 @@
 #include <boost/dynamic_bitset.hpp>
 #include <boost/enable_shared_from_this.hpp>
 
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 #include "pbd/fastlog.h"
 #include "pbd/xml++.h"
 #include "pbd/undo.h"
@@ -131,6 +131,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	virtual void nonrealtime_handle_transport_stopped (bool abort, bool did_locate, bool flush_processors);
 	virtual void realtime_handle_transport_stopped () {}
 	virtual void realtime_locate () {}
+        virtual void non_realtime_locate (framepos_t);
 	virtual void set_pending_declick (int);
 
 	/* end of vfunc-based API */
@@ -190,7 +191,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	void flush_processors ();
 
 	void foreach_processor (boost::function<void(boost::weak_ptr<Processor>)> method) {
-		Glib::RWLock::ReaderLock lm (_processor_lock);
+		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 			if (boost::dynamic_pointer_cast<UnknownProcessor> (*i)) {
 				break;
@@ -200,7 +201,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	}
 
 	boost::shared_ptr<Processor> nth_processor (uint32_t n) {
-		Glib::RWLock::ReaderLock lm (_processor_lock);
+		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 		ProcessorList::iterator i;
 		for (i = _processors.begin(); i != _processors.end() && n; ++i, --n) {}
 		if (i == _processors.end()) {
@@ -409,7 +410,6 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	boost::shared_ptr<Processor> the_instrument() const;
         InstrumentInfo& instrument_info() { return _instrument_info; }
 
-	void automation_snapshot (framepos_t now, bool force=false);
 	void protect_automation ();
 
 	enum { 
@@ -423,7 +423,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 
 	void     set_remote_control_id (uint32_t id, bool notify_class_listeners = true);
 	uint32_t remote_control_id () const;
-        void     set_remote_control_id_from_order_key (RouteSortOrderKey);
+        void     set_remote_control_id_from_order_key (RouteSortOrderKey, uint32_t order_key);
 
 	/* for things concerned about *this* route's RID */
 
@@ -468,7 +468,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	framecnt_t     _roll_delay;
 
 	ProcessorList  _processors;
-	mutable Glib::RWLock   _processor_lock;
+	mutable Glib::Threads::RWLock   _processor_lock;
 	boost::shared_ptr<Delivery> _main_outs;
 	boost::shared_ptr<InternalSend> _monitor_send;
 	boost::shared_ptr<InternalReturn> _intreturn;
@@ -530,8 +530,6 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
   private:
 	int set_state_2X (const XMLNode&, int);
 	void set_processor_state_2X (XMLNodeList const &, int);
-
-	static uint32_t order_key_cnt;
 
 	typedef std::map<RouteSortOrderKey,uint32_t> OrderKeys;
  	OrderKeys order_keys;

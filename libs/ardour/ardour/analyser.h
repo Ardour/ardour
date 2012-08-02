@@ -1,7 +1,7 @@
 #ifndef __ardour_analyser_h__
 #define __ardour_analyser_h__
 
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 #include <boost/shared_ptr.hpp>
 
 namespace ARDOUR {
@@ -22,8 +22,8 @@ class Analyser {
 
   private:
 	static Analyser* the_analyser;
-	static Glib::StaticMutex analysis_queue_lock;
-	static Glib::Cond* SourcesToAnalyse;
+        static Glib::Threads::Mutex analysis_queue_lock;
+        static Glib::Threads::Cond  SourcesToAnalyse;
 	static std::list<boost::weak_ptr<Source> > analysis_queue;
 
 	static void analyse_audio_file_source (boost::shared_ptr<AudioFileSource>);

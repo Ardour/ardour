@@ -2,6 +2,7 @@
 #define AUDIOGRAPHER_THREADER_H
 
 #include <glibmm/threadpool.h>
+#include <glibmm/timeval.h>
 #include <sigc++/slot.h>
 #include <boost/format.hpp>
 
@@ -86,11 +87,8 @@ class Threader : public Source<T>, public Sink<T>
 	void wait()
 	{
 		while (g_atomic_int_get (&readers) != 0) {
-			Glib::TimeVal wait_time;
-			wait_time.assign_current_time();
-			wait_time.add_milliseconds(wait_timeout);
-		
-			wait_cond.timed_wait(wait_mutex, wait_time);
+			gint64 end_time = g_get_monotonic_time () + (wait_timeout * G_TIME_SPAN_MILLISECOND);
+			wait_cond.wait_until(wait_mutex, end_time);
 		}
 
 		wait_mutex.unlock();
@@ -119,12 +117,12 @@ class Threader : public Source<T>, public Sink<T>
 	OutputVec outputs;
 
 	Glib::ThreadPool & thread_pool;
-	Glib::Mutex wait_mutex;
-	Glib::Cond  wait_cond;
+        Glib::Threads::Mutex wait_mutex;
+        Glib::Threads::Cond  wait_cond;
 	gint        readers;
 	long        wait_timeout;
 	
-	Glib::Mutex exception_mutex;
+        Glib::Threads::Mutex exception_mutex;
 	boost::shared_ptr<ThreaderException> exception;
 
 };

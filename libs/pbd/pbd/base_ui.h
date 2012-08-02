@@ -26,7 +26,7 @@
 #include <sigc++/slot.h>
 #include <sigc++/trackable.h>
 
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 #include <glibmm/main.h>
 
 #include "pbd/crossthread.h"
@@ -50,8 +50,8 @@ class BaseUI : public sigc::trackable, public PBD::EventLoop
 	BaseUI* base_instance() { return base_ui_instance; }
 
 	Glib::RefPtr<Glib::MainLoop> main_loop() const { return _main_loop; }
-	Glib::Thread* event_loop_thread() const { return run_loop_thread; }
-	bool caller_is_self () const { return Glib::Thread::self() == run_loop_thread; }
+        Glib::Threads::Thread* event_loop_thread() const { return run_loop_thread; }
+        bool caller_is_self () const { return Glib::Threads::Thread::self() == run_loop_thread; }
 
 	std::string name() const { return _name; }
 
@@ -75,9 +75,9 @@ class BaseUI : public sigc::trackable, public PBD::EventLoop
 	bool _ok; 
 
 	Glib::RefPtr<Glib::MainLoop> _main_loop;
-	Glib::Thread*                 run_loop_thread;
-	Glib::Mutex                  _run_lock;
-	Glib::Cond                   _running;
+        Glib::Threads::Thread*       run_loop_thread;
+	Glib::Threads::Mutex        _run_lock;
+        Glib::Threads::Cond         _running;
 
 	/* this signals _running from within the event loop,
 	   from an idle callback 

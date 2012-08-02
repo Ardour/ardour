@@ -21,7 +21,7 @@
 #define ardour_generic_midi_control_protocol_h
 
 #include <list>
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 #include "ardour/types.h"
 
 #include "control_protocol/control_protocol.h"
@@ -118,8 +118,8 @@ class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
 	typedef std::pair<MIDIControllable*,PBD::ScopedConnection> MIDIPendingControllable;
 	typedef std::list<MIDIPendingControllable* > MIDIPendingControllables;
 	MIDIPendingControllables pending_controllables;
-	Glib::Mutex controllables_lock;
-	Glib::Mutex pending_lock;
+        Glib::Threads::Mutex controllables_lock;
+        Glib::Threads::Mutex pending_lock;
 
 	bool start_learning (PBD::Controllable*);
 	void stop_learning (PBD::Controllable*);

@@ -22,7 +22,7 @@
 
 #include <string>
 #include <time.h>
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 #include <boost/enable_shared_from_this.hpp>
 #include "pbd/stateful.h"
 #include "pbd/xml++.h"

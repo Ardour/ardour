@@ -26,7 +26,7 @@ namespace ARDOUR {
 
 Worker::Worker(Workee* workee, uint32_t ring_size)
 	: _workee(workee)
-	, _thread(Glib::Thread::create(sigc::mem_fun(*this, &Worker::run), true))
+	, _thread (Glib::Threads::Thread::create(sigc::mem_fun(*this, &Worker::run)))
 	, _requests(new RingBuffer<uint8_t>(ring_size))
 	, _responses(new RingBuffer<uint8_t>(ring_size))
 	, _response((uint8_t*)malloc(ring_size))

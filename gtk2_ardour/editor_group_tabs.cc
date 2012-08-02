@@ -201,5 +201,5 @@ EditorGroupTabs::selected_routes () const
 void
 EditorGroupTabs::sync_order_keys ()
 {
-	_editor->_routes->sync_order_keys_from_model ();
+	_editor->_routes->sync_order_keys_from_treeview ();
 }

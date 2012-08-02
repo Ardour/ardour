@@ -772,16 +772,6 @@ Sequence<Time>::remove_note_unlocked(const constNotePtr note)
 
 template<typename Time>
 void
-Sequence<Time>::add_patch_change_unlocked (PatchChangePtr p)
-{
-	_patch_changes.insert (p);
-	if (p->id () < 0) {
-		p->set_id (Evoral::next_event_id ());
-	}
-}
-
-template<typename Time>
-void
 Sequence<Time>::remove_patch_change_unlocked (const constPatchChangePtr p)
 {
 	typename Sequence<Time>::PatchChanges::iterator i = patch_change_lower_bound (p->time ());
@@ -1005,6 +995,17 @@ Sequence<Time>::append_patch_change_unlocked (const PatchChange<Time>& ev, event
 
 	if (p->id() < 0) {
 		p->set_id (id);
+	}
+
+	_patch_changes.insert (p);
+}
+
+template<typename Time>
+void
+Sequence<Time>::add_patch_change_unlocked (PatchChangePtr p)
+{
+	if (p->id () < 0) {
+		p->set_id (Evoral::next_event_id ());
 	}
 
 	_patch_changes.insert (p);

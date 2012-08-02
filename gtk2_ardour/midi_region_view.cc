@@ -1972,7 +1972,7 @@ MidiRegionView::next_patch (CanvasPatchChange& patch)
 }
 
 void
-MidiRegionView::previous_bank (CanvasPatchChange& patch)
+MidiRegionView::next_bank (CanvasPatchChange& patch)
 {
 	if (patch.patch()->program() < 127) {
 		MIDI::Name::PatchPrimaryKey key = patch_change_to_patch_key (patch.patch());
@@ -1984,7 +1984,7 @@ MidiRegionView::previous_bank (CanvasPatchChange& patch)
 }
 
 void
-MidiRegionView::next_bank (CanvasPatchChange& patch)
+MidiRegionView::previous_bank (CanvasPatchChange& patch)
 {
 	if (patch.patch()->program() > 0) {
 		MIDI::Name::PatchPrimaryKey key = patch_change_to_patch_key (patch.patch());

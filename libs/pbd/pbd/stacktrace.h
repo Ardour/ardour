@@ -26,7 +26,7 @@
 
 #include <iostream>
 #include <ostream>
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 #include <list>
 
 #ifdef HAVE_EXECINFO
@@ -50,7 +50,7 @@ class thing_with_backtrace
 #else 
 	    allocation_backtrace_size = 0;
 #endif
-	    Glib::Mutex::Lock lm (all_mutex);
+	    Glib::Threads::Mutex::Lock lm (all_mutex);
 	    all.push_back (this);
     }
 
@@ -62,7 +62,7 @@ class thing_with_backtrace
 #else 
 	    allocation_backtrace_size = 0;
 #endif
-	    Glib::Mutex::Lock lm (all_mutex);
+	    Glib::Threads::Mutex::Lock lm (all_mutex);
 	    all.push_back (this);
     }
 
@@ -70,7 +70,7 @@ class thing_with_backtrace
 	    if (allocation_backtrace_size) {
 		    delete [] allocation_backtrace;
 	    }
-	    Glib::Mutex::Lock lm (all_mutex);
+	    Glib::Threads::Mutex::Lock lm (all_mutex);
 	    all.remove (this);
     }
 
@@ -105,11 +105,11 @@ private:
     void** allocation_backtrace;
     int allocation_backtrace_size;
     static std::list<thing_with_backtrace<T>* > all;
-    static Glib::StaticMutex all_mutex;
+    static Glib::Threads::Mutex all_mutex;
 };
 
 template<typename T> std::list<PBD::thing_with_backtrace<T> *> PBD::thing_with_backtrace<T>::all;
-template<typename T> Glib::StaticMutex PBD::thing_with_backtrace<T>::all_mutex = GLIBMM_STATIC_MUTEX_INIT;
+template<typename T> Glib::Threads::Mutex PBD::thing_with_backtrace<T>::all_mutex;
 
 } // namespace PBD
 

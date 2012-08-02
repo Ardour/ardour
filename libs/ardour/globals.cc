@@ -45,6 +45,10 @@
 #include <xmmintrin.h>
 #endif
 
+#ifdef check
+#undef check /* stupid Apple and their un-namespaced, generic Carbon macros */
+#endif 
+
 #include <giomm.h>
 
 #include <glibmm/fileutils.h>

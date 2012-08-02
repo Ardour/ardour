@@ -27,8 +27,8 @@ using namespace ARDOUR;
 using namespace PBD;
 
 Analyser* Analyser::the_analyser = 0;
-Glib::StaticMutex Analyser::analysis_queue_lock = GLIBMM_STATIC_MUTEX_INIT;
-Glib::Cond* Analyser::SourcesToAnalyse = 0;
+Glib::Threads::Mutex Analyser::analysis_queue_lock;
+Glib::Threads::Cond  Analyser::SourcesToAnalyse;
 list<boost::weak_ptr<Source> > Analyser::analysis_queue;
 
 Analyser::Analyser ()
@@ -49,8 +49,7 @@ analyser_work ()
 void
 Analyser::init ()
 {
-	SourcesToAnalyse = new Glib::Cond();
-	Glib::Thread::create (sigc::ptr_fun (analyser_work), false);
+	Glib::Threads::Thread::create (sigc::ptr_fun (analyser_work));
 }
 
 void
@@ -64,9 +63,9 @@ Analyser::queue_source_for_analysis (boost::shared_ptr<Source> src, bool force)
 		return;
 	}
 
-	Glib::Mutex::Lock lm (analysis_queue_lock);
+	Glib::Threads::Mutex::Lock lm (analysis_queue_lock);
 	analysis_queue.push_back (boost::weak_ptr<Source>(src));
-	SourcesToAnalyse->broadcast ();
+	SourcesToAnalyse.broadcast ();
 }
 
 void
@@ -79,7 +78,7 @@ Analyser::work ()
 
 	  wait:
 		if (analysis_queue.empty()) {
-			SourcesToAnalyse->wait (analysis_queue_lock);
+			SourcesToAnalyse.wait (analysis_queue_lock);
 		}
 
 		if (analysis_queue.empty()) {

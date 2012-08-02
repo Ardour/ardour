@@ -166,12 +166,13 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 	bool _our_time_converter;
 
 	VisibleAspects _visible;
-
-	bool    _uses_gain_mapping        : 1;
-	bool    terminal_points_can_slide : 1;
-	bool    update_pending            : 1;
-	bool    no_draw                   : 1;
-	bool    _is_boolean               : 1;
+ 
+        bool    _uses_gain_mapping;
+        bool    terminal_points_can_slide;
+        bool    update_pending;
+        bool    have_timeout;
+        bool    no_draw;
+        bool    _is_boolean;
 	/** true if we did a push at any point during the current drag */
 	bool    did_push;
 

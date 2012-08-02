@@ -54,7 +54,7 @@
 #include <glib/gstdio.h>
 
 #include <glibmm.h>
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 
 #include <boost/algorithm/string.hpp>
 
@@ -576,7 +576,7 @@ Session::create (const string& session_template, BusProfile* bus_profile)
 			// boost_debug_shared_ptr_mark_interesting (r.get(), "Route");
 #endif
 			{
-				Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+				Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 				r->input()->ensure_io (count, false, this);
 				r->output()->ensure_io (count, false, this);
 			}
@@ -1043,7 +1043,7 @@ Session::state (bool full_state)
 	child = node->add_child ("Sources");
 
 	if (full_state) {
-		Glib::Mutex::Lock sl (source_lock);
+		Glib::Threads::Mutex::Lock sl (source_lock);
 
 		for (SourceMap::iterator siter = sources.begin(); siter != sources.end(); ++siter) {
 
@@ -1070,7 +1070,7 @@ Session::state (bool full_state)
 	child = node->add_child ("Regions");
 
 	if (full_state) {
-		Glib::Mutex::Lock rl (region_lock);
+		Glib::Threads::Mutex::Lock rl (region_lock);
                 const RegionFactory::RegionMap& region_map (RegionFactory::all_regions());
                 for (RegionFactory::RegionMap::const_iterator i = region_map.begin(); i != region_map.end(); ++i) {
                         boost::shared_ptr<Region> r = i->second;
@@ -1879,7 +1879,7 @@ Session::get_sources_as_xml ()
 
 {
 	XMLNode* node = new XMLNode (X_("Sources"));
-	Glib::Mutex::Lock lm (source_lock);
+	Glib::Threads::Mutex::Lock lm (source_lock);
 
 	for (SourceMap::iterator i = sources.begin(); i != sources.end(); ++i) {
 		node->add_child_nocopy (i->second->get_state());
@@ -2066,7 +2066,7 @@ Session::refresh_disk_space ()
 {
 #if HAVE_SYS_VFS_H && HAVE_SYS_STATVFS_H
 	
-	Glib::Mutex::Lock lm (space_lock);
+	Glib::Threads::Mutex::Lock lm (space_lock);
 
 	/* get freespace on every FS that is part of the session path */
 
@@ -3003,7 +3003,7 @@ Session::add_controllable (boost::shared_ptr<Controllable> c)
 	   as part of the session.
 	*/
 
-	Glib::Mutex::Lock lm (controllables_lock);
+	Glib::Threads::Mutex::Lock lm (controllables_lock);
 	controllables.insert (c);
 }
 
@@ -3016,7 +3016,7 @@ Session::remove_controllable (Controllable* c)
 		return;
 	}
 
-	Glib::Mutex::Lock lm (controllables_lock);
+	Glib::Threads::Mutex::Lock lm (controllables_lock);
 
 	Controllables::iterator x = controllables.find (boost::shared_ptr<Controllable>(c, null_deleter()));
 
@@ -3028,7 +3028,7 @@ Session::remove_controllable (Controllable* c)
 boost::shared_ptr<Controllable>
 Session::controllable_by_id (const PBD::ID& id)
 {
-	Glib::Mutex::Lock lm (controllables_lock);
+	Glib::Threads::Mutex::Lock lm (controllables_lock);
 
 	for (Controllables::iterator i = controllables.begin(); i != controllables.end(); ++i) {
 		if ((*i)->id() == id) {
@@ -3387,7 +3387,7 @@ Session::config_changed (std::string p, bool ours)
 
 	} else if (p == "edit-mode") {
 
-		Glib::Mutex::Lock lm (playlists->lock);
+		Glib::Threads::Mutex::Lock lm (playlists->lock);
 
 		for (SessionPlaylists::List::iterator i = playlists->playlists.begin(); i != playlists->playlists.end(); ++i) {
 			(*i)->set_edit_mode (Config->get_edit_mode ());
@@ -3507,16 +3507,9 @@ Session::config_changed (std::string p, bool ours)
 	} else if (p == "history-depth") {
 		set_history_depth (Config->get_history_depth());
 	} else if (p == "remote-model") {
-		switch (Config->get_remote_model()) {
-		case UserOrdered:
-			break;
-		case MixerOrdered:
-			sync_remote_id_from_order_keys (MixerSort);
-			break;
-		case EditorOrdered:
-			sync_remote_id_from_order_keys (EditorSort);
-			break;
-		}
+		/* XXX DO SOMETHING HERE TO TELL THE GUI THAT WE NEED
+		   TO SET REMOTE ID'S
+		*/
 	} else if (p == "sync-all-route-ordering") {
 
 		/* sync to editor order unless mixer is used for remote IDs 

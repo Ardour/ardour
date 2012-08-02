@@ -278,7 +278,7 @@ Stateful::send_change (const PropertyChange& what_changed)
 	}
 
 	{
-		Glib::Mutex::Lock lm (_lock);
+		Glib::Threads::Mutex::Lock lm (_lock);
 		if (property_changes_suspended ()) {
 			_pending_changed.add (what_changed);
 			return;
@@ -300,7 +300,7 @@ Stateful::resume_property_changes ()
 	PropertyChange what_changed;
 
 	{
-		Glib::Mutex::Lock lm (_lock);
+		Glib::Threads::Mutex::Lock lm (_lock);
 
 		if (property_changes_suspended() && g_atomic_int_dec_and_test (&_stateful_frozen) == FALSE) {
 			return;

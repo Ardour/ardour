@@ -267,7 +267,7 @@ void
 AudioRegionView::region_changed (const PropertyChange& what_changed)
 {
 	ENSURE_GUI_THREAD (*this, &AudioRegionView::region_changed, what_changed);
-	// cerr << "AudioRegionView::region_changed() called" << endl;
+	cerr << "AudioRegionView::region_changed() called" << endl;
 
 	RegionView::region_changed (what_changed);
 
@@ -275,16 +275,29 @@ AudioRegionView::region_changed (const PropertyChange& what_changed)
 		region_scale_amplitude_changed ();
 	}
 	if (what_changed.contains (ARDOUR::Properties::fade_in)) {
+		cerr << region()->name() << " in changed\n";
+		stacktrace (cerr, 40);
 		fade_in_changed ();
 	}
 	if (what_changed.contains (ARDOUR::Properties::fade_out)) {
+		cerr << region()->name() << " out changed\n";
 		fade_out_changed ();
 	}
 	if (what_changed.contains (ARDOUR::Properties::fade_in_active)) {
+		cerr << region()->name() << " in active changed\n";
 		fade_in_active_changed ();
 	}
 	if (what_changed.contains (ARDOUR::Properties::fade_out_active)) {
+		cerr << region()->name() << " out active changed\n";
 		fade_out_active_changed ();
+	}
+	if (what_changed.contains (ARDOUR::Properties::fade_in_is_xfade)) {
+		cerr << region()->name() << " in is xfade changed\n";
+		fade_in_changed ();
+	}
+	if (what_changed.contains (ARDOUR::Properties::fade_out_is_xfade)) {
+		cerr << region()->name() << " out is xfade changed\n";
+		fade_out_changed ();
 	}
 	if (what_changed.contains (ARDOUR::Properties::envelope_active)) {
 		envelope_active_changed ();

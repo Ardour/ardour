@@ -24,7 +24,6 @@
 
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
-#include <glibmm/thread.h>
 
 #include "pbd/controllable_descriptor.h"
 #include "pbd/error.h"
@@ -186,8 +185,8 @@ GenericMidiControlProtocol::reload_maps ()
 void
 GenericMidiControlProtocol::drop_all ()
 {
-	Glib::Mutex::Lock lm (pending_lock);
-	Glib::Mutex::Lock lm2 (controllables_lock);
+	Glib::Threads::Mutex::Lock lm (pending_lock);
+	Glib::Threads::Mutex::Lock lm2 (controllables_lock);
 
 	for (MIDIControllables::iterator i = controllables.begin(); i != controllables.end(); ++i) {
 		delete *i;
@@ -213,7 +212,7 @@ GenericMidiControlProtocol::drop_all ()
 void
 GenericMidiControlProtocol::drop_bindings ()
 {
-	Glib::Mutex::Lock lm2 (controllables_lock);
+	Glib::Threads::Mutex::Lock lm2 (controllables_lock);
 
 	for (MIDIControllables::iterator i = controllables.begin(); i != controllables.end(); ) {
 		if (!(*i)->learned()) {
@@ -286,7 +285,7 @@ GenericMidiControlProtocol::_send_feedback ()
 	   first on to ALSA.
 	*/
 
-	Glib::Mutex::Lock lm (controllables_lock, Glib::TRY_LOCK);
+	Glib::Threads::Mutex::Lock lm (controllables_lock, Glib::Threads::TRY_LOCK);
 	if (!lm.locked ()) {
 		return;
 	}
@@ -306,7 +305,7 @@ GenericMidiControlProtocol::start_learning (Controllable* c)
 		return false;
 	}
 
-	Glib::Mutex::Lock lm2 (controllables_lock);
+	Glib::Threads::Mutex::Lock lm2 (controllables_lock);
 
 	MIDIControllables::iterator tmp;
 	for (MIDIControllables::iterator i = controllables.begin(); i != controllables.end(); ) {
@@ -320,7 +319,7 @@ GenericMidiControlProtocol::start_learning (Controllable* c)
 	}
 
 	{
-		Glib::Mutex::Lock lm (pending_lock);
+		Glib::Threads::Mutex::Lock lm (pending_lock);
 		
 		MIDIPendingControllables::iterator ptmp;
 		for (MIDIPendingControllables::iterator i = pending_controllables.begin(); i != pending_controllables.end(); ) {
@@ -350,7 +349,7 @@ GenericMidiControlProtocol::start_learning (Controllable* c)
 	}
 	
 	{
-		Glib::Mutex::Lock lm (pending_lock);
+		Glib::Threads::Mutex::Lock lm (pending_lock);
 
 		MIDIPendingControllable* element = new MIDIPendingControllable;
 		element->first = mc;
@@ -366,8 +365,8 @@ GenericMidiControlProtocol::start_learning (Controllable* c)
 void
 GenericMidiControlProtocol::learning_stopped (MIDIControllable* mc)
 {
-	Glib::Mutex::Lock lm (pending_lock);
-	Glib::Mutex::Lock lm2 (controllables_lock);
+	Glib::Threads::Mutex::Lock lm (pending_lock);
+	Glib::Threads::Mutex::Lock lm2 (controllables_lock);
 	
 	MIDIPendingControllables::iterator tmp;
 
@@ -390,8 +389,8 @@ GenericMidiControlProtocol::learning_stopped (MIDIControllable* mc)
 void
 GenericMidiControlProtocol::stop_learning (Controllable* c)
 {
-	Glib::Mutex::Lock lm (pending_lock);
-	Glib::Mutex::Lock lm2 (controllables_lock);
+	Glib::Threads::Mutex::Lock lm (pending_lock);
+	Glib::Threads::Mutex::Lock lm2 (controllables_lock);
 	MIDIControllable* dptr = 0;
 
 	/* learning timed out, and we've been told to consider this attempt to learn to be cancelled. find the
@@ -417,7 +416,7 @@ void
 GenericMidiControlProtocol::delete_binding (PBD::Controllable* control)
 {
 	if (control != 0) {
-		Glib::Mutex::Lock lm2 (controllables_lock);
+		Glib::Threads::Mutex::Lock lm2 (controllables_lock);
 		
 		for (MIDIControllables::iterator iter = controllables.begin(); iter != controllables.end();) {
 			MIDIControllable* existingBinding = (*iter);
@@ -437,7 +436,7 @@ void
 GenericMidiControlProtocol::create_binding (PBD::Controllable* control, int pos, int control_number)
 {
 	if (control != NULL) {
-		Glib::Mutex::Lock lm2 (controllables_lock);
+		Glib::Threads::Mutex::Lock lm2 (controllables_lock);
 		
 		MIDI::channel_t channel = (pos & 0xf);
 		MIDI::byte value = control_number;
@@ -489,7 +488,7 @@ GenericMidiControlProtocol::get_state ()
 
 	node->add_child_nocopy (*children);
 
-	Glib::Mutex::Lock lm2 (controllables_lock);
+	Glib::Threads::Mutex::Lock lm2 (controllables_lock);
 	for (MIDIControllables::iterator i = controllables.begin(); i != controllables.end(); ++i) {
 
 		/* we don't care about bindings that come from a bindings map, because
@@ -529,7 +528,7 @@ GenericMidiControlProtocol::set_state (const XMLNode& node, int version)
 	boost::shared_ptr<Controllable> c;
 	
 	{
-		Glib::Mutex::Lock lm (pending_lock);
+		Glib::Threads::Mutex::Lock lm (pending_lock);
 		for (MIDIPendingControllables::iterator i = pending_controllables.begin(); i != pending_controllables.end(); ++i) {
 			delete *i;
 		}
@@ -537,7 +536,7 @@ GenericMidiControlProtocol::set_state (const XMLNode& node, int version)
 	}
 
 	{
-		Glib::Mutex::Lock lm2 (controllables_lock);
+		Glib::Threads::Mutex::Lock lm2 (controllables_lock);
 		controllables.clear ();
 		nlist = node.children(); // "Controls"
 		
@@ -666,7 +665,7 @@ GenericMidiControlProtocol::load_bindings (const string& xmlpath)
 				/* controllable */
 				
 				if ((mc = create_binding (*child)) != 0) {
-					Glib::Mutex::Lock lm2 (controllables_lock);
+					Glib::Threads::Mutex::Lock lm2 (controllables_lock);
 					controllables.push_back (mc);
 				}
 
@@ -764,7 +763,7 @@ GenericMidiControlProtocol::create_binding (const XMLNode& node)
 void
 GenericMidiControlProtocol::reset_controllables ()
 {
-	Glib::Mutex::Lock lm2 (controllables_lock);
+	Glib::Threads::Mutex::Lock lm2 (controllables_lock);
 
 	for (MIDIControllables::iterator iter = controllables.begin(); iter != controllables.end(); ) {
 		MIDIControllable* existingBinding = (*iter);

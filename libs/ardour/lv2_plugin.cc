@@ -558,7 +558,14 @@ LV2Plugin::set_parameter(uint32_t which, float val)
 		            "%1 set parameter %2 to %3\n", name(), which, val));
 
 	if (which < lilv_plugin_get_num_ports(_impl->plugin)) {
+		
+		if (get_parameter (which) == val) {
+			return;
+		}
+		
 		_shadow_data[which] = val;
+		
+
 	} else {
 		warning << string_compose(
 		    _("Illegal parameter number used with plugin \"%1\". "

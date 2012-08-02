@@ -21,7 +21,7 @@
 #define __pbd_rcu_h__
 
 #include "boost/shared_ptr.hpp"
-#include "glibmm/thread.h"
+#include "glibmm/threads.h"
 
 #include <list>
 
@@ -187,12 +187,12 @@ public:
 	}
 
 	void flush () {
-		Glib::Mutex::Lock lm (m_lock);
+		Glib::Threads::Mutex::Lock lm (m_lock);
 		m_dead_wood.clear ();
 	}
 
 private:
-	Glib::Mutex                      m_lock;
+	Glib::Threads::Mutex                      m_lock;
 	boost::shared_ptr<T>*            current_write_old;
 	std::list<boost::shared_ptr<T> > m_dead_wood;
 };

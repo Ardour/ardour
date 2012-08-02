@@ -90,7 +90,7 @@ ARDOUR::UserBundle::get_state ()
 	node->add_property ("name", name ());
 
 	{
-		Glib::Mutex::Lock lm (_channel_mutex);
+		Glib::Threads::Mutex::Lock lm (_channel_mutex);
 
 		for (std::vector<Channel>::iterator i = _channel.begin(); i != _channel.end(); ++i) {
 			XMLNode* c = new XMLNode ("Channel");

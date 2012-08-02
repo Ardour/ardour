@@ -267,7 +267,7 @@ PluginInsert::parameter_changed (uint32_t which, float val)
 	boost::shared_ptr<AutomationControl> ac = automation_control (Evoral::Parameter (PluginAutomation, 0, which));
 
 	if (ac) {
-		ac->set_double (val);
+		ac->set_value (val);
                 
                 Plugins::iterator i = _plugins.begin();
                 
@@ -552,7 +552,7 @@ PluginInsert::automation_run (BufferSet& bufs, pframes_t nframes)
 	framepos_t end = now + nframes;
 	framecnt_t offset = 0;
 
-	Glib::Mutex::Lock lm (control_lock(), Glib::TRY_LOCK);
+	Glib::Threads::Mutex::Lock lm (control_lock(), Glib::Threads::TRY_LOCK);
 
 	if (!lm.locked()) {
 		connect_and_run (bufs, nframes, offset, false);

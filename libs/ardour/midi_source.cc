@@ -195,7 +195,7 @@ MidiSource::midi_read (Evoral::EventSink<framepos_t>& dst, framepos_t source_sta
                        MidiStateTracker* tracker,
                        std::set<Evoral::Parameter> const & filtered) const
 {
-	Glib::Mutex::Lock lm (_lock);
+	Glib::Threads::Mutex::Lock lm (_lock);
 
 	BeatsFramesConverter converter(_session.tempo_map(), source_start);
 
@@ -260,7 +260,7 @@ MidiSource::midi_read (Evoral::EventSink<framepos_t>& dst, framepos_t source_sta
 framecnt_t
 MidiSource::midi_write (MidiRingBuffer<framepos_t>& source, framepos_t source_start, framecnt_t duration)
 {
-	Glib::Mutex::Lock lm (_lock);
+	Glib::Threads::Mutex::Lock lm (_lock);
 
 	const framecnt_t ret = write_unlocked (source, source_start, duration);
 
@@ -300,8 +300,6 @@ MidiSource::mark_write_starting_now ()
 
 	set_timeline_position (_session.transport_frame ());
 	_last_write_end = _session.transport_frame ();
-	cerr << name() << " last write set to " << _last_write_end << endl;
-
 }
 
 void
@@ -388,7 +386,7 @@ MidiSource::session_saved()
 	*/
 
 	if (_model && _model->edited()) {
-
+		
 		// if the model is edited, write its contents into
 		// the current source file (overwiting previous contents.
 

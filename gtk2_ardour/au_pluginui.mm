@@ -542,7 +542,7 @@ AUPluginUI::parent_carbon_window ()
 {
 #ifdef WITH_CARBON
 	NSWindow* win = get_nswindow ();
-	int x, y;
+	Rect windowStructureBoundsRect;
 
 	if (!win) {
 		return -1;
@@ -555,7 +555,11 @@ AUPluginUI::parent_carbon_window ()
 		return -1;
 	}
 	
-	toplevel->get_window()->get_root_origin (x, y);
+	/* figure out where the cocoa parent window is in carbon-coordinate space, which
+	   differs from both cocoa-coordinate space and GTK-coordinate space
+	*/
+
+	GetWindowBounds((WindowRef) [win windowRef], kWindowStructureRgn, &windowStructureBoundsRect);
 
 	/* compute how tall the title bar is, because we have to offset the position of the carbon window
 	   by that much.
@@ -568,12 +572,15 @@ AUPluginUI::parent_carbon_window ()
 
 	int packing_extra = 6; // this is the total vertical packing in our top level window
 
+	/* move into position, based on parent window position */
+	MoveWindow (carbon_window, 
+		    windowStructureBoundsRect.left, 
+		    windowStructureBoundsRect.top + titlebar_height + top_box.get_height() + packing_extra, 
+		    false);
+	ShowWindow (carbon_window);
+
 	// create the cocoa window for the carbon one and make it visible
 	cocoa_parent = [[NSWindow alloc] initWithWindowRef: carbon_window];
-
-        PositionWindow (carbon_window, [cocoa_parent windowRef], kWindowCascadeStartAtParentWindowScreen);
-	MoveWindow (carbon_window, x, y + titlebar_height + top_box.get_height() + packing_extra, false);
-	ShowWindow (carbon_window);
 
 	SetWindowActivationScope (carbon_window, kWindowActivationScopeNone);
 

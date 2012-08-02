@@ -311,7 +311,7 @@ restart:
 
 
 		{
-			Glib::Mutex::Lock lm (request_lock);
+			Glib::Threads::Mutex::Lock lm (request_lock);
 
 			if (should_run && (disk_work_outstanding || transport_work_requested())) {
 //				for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
@@ -349,7 +349,7 @@ Butler::summon ()
 void
 Butler::stop ()
 {
-	Glib::Mutex::Lock lm (request_lock);
+	Glib::Threads::Mutex::Lock lm (request_lock);
 	char c = Request::Pause;
 	(void) ::write (request_pipe[1], &c, 1);
 	paused.wait(request_lock);
@@ -358,7 +358,7 @@ Butler::stop ()
 void
 Butler::wait_until_finished ()
 {
-	Glib::Mutex::Lock lm (request_lock);
+	Glib::Threads::Mutex::Lock lm (request_lock);
 	char c = Request::Pause;
 	(void) ::write (request_pipe[1], &c, 1);
 	paused.wait(request_lock);

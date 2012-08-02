@@ -43,7 +43,7 @@ namespace ARDOUR { class Session; }
 /* create an IOProcessor that proxies to a new IO object */
 
 IOProcessor::IOProcessor (Session& s, bool with_input, bool with_output,
-			  const string& proc_name, const string io_name, DataType dtype)
+			  const string& proc_name, const string io_name, DataType dtype, bool sendish)
 	: Processor(s, proc_name)
 {
 	/* these are true in this constructor whether we actually create the associated
@@ -54,11 +54,11 @@ IOProcessor::IOProcessor (Session& s, bool with_input, bool with_output,
 	_own_output = true;
 
 	if (with_input) {
-		_input.reset (new IO(s, io_name.empty() ? proc_name : io_name, IO::Input, dtype));
+		_input.reset (new IO(s, io_name.empty() ? proc_name : io_name, IO::Input, dtype, sendish));
 	}
 
 	if (with_output) {
-		_output.reset (new IO(s, io_name.empty() ? proc_name : io_name, IO::Output, dtype));
+		_output.reset (new IO(s, io_name.empty() ? proc_name : io_name, IO::Output, dtype, sendish));
 	}
 }
 

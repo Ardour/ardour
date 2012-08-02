@@ -22,7 +22,7 @@
 
 #include <string>
 
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 
 #include "ardour/ardour.h"
 #include "ardour/audio_track.h"
@@ -62,7 +62,7 @@ class Auditioner : public AudioTrack
 	boost::shared_ptr<AudioRegion> the_region;
 	framepos_t current_frame;
 	mutable gint _auditioning;
-	Glib::Mutex lock;
+	Glib::Threads::Mutex lock;
 	framecnt_t length;
 	bool via_monitor;
 

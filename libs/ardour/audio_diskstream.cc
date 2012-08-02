@@ -151,7 +151,7 @@ void
 AudioDiskstream::non_realtime_input_change ()
 {
 	{
-		Glib::Mutex::Lock lm (state_lock);
+		Glib::Threads::Mutex::Lock lm (state_lock);
 
 		if (input_change_pending.type == IOChange::NoChange) {
 			return;
@@ -430,7 +430,7 @@ AudioDiskstream::process (framepos_t transport_frame, pframes_t nframes, framecn
 		return 0;
 	}
 
-	Glib::Mutex::Lock sm (state_lock, Glib::TRY_LOCK);
+	Glib::Threads::Mutex::Lock sm (state_lock, Glib::Threads::TRY_LOCK);
 
 	if (!sm.locked()) {
 		return 1;
@@ -812,7 +812,7 @@ AudioDiskstream::seek (framepos_t frame, bool complete_refill)
 	ChannelList::iterator chan;
 	boost::shared_ptr<ChannelList> c = channels.reader();
 
-	Glib::Mutex::Lock lm (state_lock);
+	Glib::Threads::Mutex::Lock lm (state_lock);
 
 	for (n = 0, chan = c->begin(); chan != c->end(); ++chan, ++n) {
 		(*chan)->playback_buf->reset ();
@@ -1379,7 +1379,7 @@ AudioDiskstream::transport_stopped_wallclock (struct tm& when, time_t twhen, boo
 	}
 
 	/* XXX is there anything we can do if err != 0 ? */
-	Glib::Mutex::Lock lm (capture_info_lock);
+	Glib::Threads::Mutex::Lock lm (capture_info_lock);
 
 	if (capture_info.empty()) {
 		return;

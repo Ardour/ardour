@@ -101,7 +101,7 @@ Graph::reset_thread_list ()
                 return;
         }
 
-        Glib::Mutex::Lock lm (_session.engine().process_lock());
+        Glib::Threads::Mutex::Lock lm (_session.engine().process_lock());
 	pthread_t a_thread;
 
         if (!_thread_list.empty()) {
@@ -162,7 +162,7 @@ Graph::drop_threads ()
 void
 Graph::clear_other_chain ()
 {
-        Glib::Mutex::Lock ls (_swap_mutex);
+        Glib::Threads::Mutex::Lock ls (_swap_mutex);
 
         while (1) {
                 if (_setup_chain != _pending_chain) {
@@ -275,7 +275,7 @@ Graph::restart_cycle()
 void
 Graph::rechain (boost::shared_ptr<RouteList> routelist, GraphEdges const & edges)
 {
-        Glib::Mutex::Lock ls (_swap_mutex);
+        Glib::Threads::Mutex::Lock ls (_swap_mutex);
 
         int chain = _setup_chain;
         DEBUG_TRACE (DEBUG::Graph, string_compose ("============== setup %1\n", chain));

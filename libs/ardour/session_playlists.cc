@@ -69,7 +69,7 @@ SessionPlaylists::~SessionPlaylists ()
 bool
 SessionPlaylists::add (boost::shared_ptr<Playlist> playlist)
 {
-	Glib::Mutex::Lock lm (lock);
+	Glib::Threads::Mutex::Lock lm (lock);
 
 	bool const existing = find (playlists.begin(), playlists.end(), playlist) != playlists.end();
 
@@ -96,7 +96,7 @@ SessionPlaylists::remove_weak (boost::weak_ptr<Playlist> playlist)
 void
 SessionPlaylists::remove (boost::shared_ptr<Playlist> playlist)
 {
-	Glib::Mutex::Lock lm (lock);
+	Glib::Threads::Mutex::Lock lm (lock);
 
 	List::iterator i;
 
@@ -129,7 +129,7 @@ SessionPlaylists::track (bool inuse, boost::weak_ptr<Playlist> wpl)
 	}
 
 	{
-		Glib::Mutex::Lock lm (lock);
+		Glib::Threads::Mutex::Lock lm (lock);
 
 		if (!inuse) {
 
@@ -154,14 +154,14 @@ SessionPlaylists::track (bool inuse, boost::weak_ptr<Playlist> wpl)
 uint32_t
 SessionPlaylists::n_playlists () const
 {
-	Glib::Mutex::Lock lm (lock);
+	Glib::Threads::Mutex::Lock lm (lock);
 	return playlists.size();
 }
 
 boost::shared_ptr<Playlist>
 SessionPlaylists::by_name (string name)
 {
-	Glib::Mutex::Lock lm (lock);
+	Glib::Threads::Mutex::Lock lm (lock);
 
 	for (List::iterator i = playlists.begin(); i != playlists.end(); ++i) {
 		if ((*i)->name() == name) {
@@ -181,7 +181,7 @@ SessionPlaylists::by_name (string name)
 boost::shared_ptr<Playlist>
 SessionPlaylists::by_id (const PBD::ID& id)
 {
-	Glib::Mutex::Lock lm (lock);
+	Glib::Threads::Mutex::Lock lm (lock);
 
 	for (List::iterator i = playlists.begin(); i != playlists.end(); ++i) {
 		if ((*i)->id() == id) {
@@ -201,7 +201,7 @@ SessionPlaylists::by_id (const PBD::ID& id)
 void
 SessionPlaylists::unassigned (std::list<boost::shared_ptr<Playlist> > & list)
 {
-	Glib::Mutex::Lock lm (lock);
+	Glib::Threads::Mutex::Lock lm (lock);
 
 	for (List::iterator i = playlists.begin(); i != playlists.end(); ++i) {
 		if (!(*i)->get_orig_track_id().to_s().compare ("0")) {
@@ -219,7 +219,7 @@ SessionPlaylists::unassigned (std::list<boost::shared_ptr<Playlist> > & list)
 void
 SessionPlaylists::get (vector<boost::shared_ptr<Playlist> >& s) const
 {
-	Glib::Mutex::Lock lm (lock);
+	Glib::Threads::Mutex::Lock lm (lock);
 
 	for (List::iterator i = playlists.begin(); i != playlists.end(); ++i) {
 		s.push_back (*i);
@@ -233,7 +233,7 @@ SessionPlaylists::get (vector<boost::shared_ptr<Playlist> >& s) const
 void
 SessionPlaylists::destroy_region (boost::shared_ptr<Region> r)
 {
-	Glib::Mutex::Lock lm (lock);
+	Glib::Threads::Mutex::Lock lm (lock);
 
 	for (List::iterator i = playlists.begin(); i != playlists.end(); ++i) {
                 (*i)->destroy_region (r);
@@ -270,7 +270,7 @@ SessionPlaylists::source_use_count (boost::shared_ptr<const Source> src) const
 void
 SessionPlaylists::sync_all_regions_with_regions ()
 {
-	Glib::Mutex::Lock lm (lock);
+	Glib::Threads::Mutex::Lock lm (lock);
 
 	for (List::const_iterator p = playlists.begin(); p != playlists.end(); ++p) {
                 (*p)->sync_all_regions_with_regions ();
@@ -411,7 +411,7 @@ SessionPlaylists::XMLPlaylistFactory (Session& session, const XMLNode& node)
 boost::shared_ptr<Crossfade>
 SessionPlaylists::find_crossfade (const PBD::ID& id)
 {
-	Glib::Mutex::Lock lm (lock);
+	Glib::Threads::Mutex::Lock lm (lock);
 
 	boost::shared_ptr<Crossfade> c;
 
@@ -435,7 +435,7 @@ SessionPlaylists::find_crossfade (const PBD::ID& id)
 uint32_t
 SessionPlaylists::region_use_count (boost::shared_ptr<Region> region) const
 {
-	Glib::Mutex::Lock lm (lock);
+	Glib::Threads::Mutex::Lock lm (lock);
         uint32_t cnt = 0;
 
 	for (List::iterator i = playlists.begin(); i != playlists.end(); ++i) {

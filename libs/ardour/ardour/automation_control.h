@@ -22,6 +22,8 @@
 #define __ardour_automation_control_h__
 
 #include <boost/shared_ptr.hpp>
+#include <boost/enable_shared_from_this.hpp>
+
 #include "pbd/controllable.h"
 #include "evoral/Control.hpp"
 #include "ardour/automation_list.h"
@@ -34,7 +36,7 @@ class Automatable;
 
 /** A PBD::Controllable with associated automation data (AutomationList)
  */
-class AutomationControl : public PBD::Controllable, public Evoral::Control
+class AutomationControl : public PBD::Controllable, public Evoral::Control, public boost::enable_shared_from_this<AutomationControl>
 {
 public:
 	AutomationControl(ARDOUR::Session&,
@@ -42,37 +44,34 @@ public:
 			  boost::shared_ptr<ARDOUR::AutomationList> l=boost::shared_ptr<ARDOUR::AutomationList>(),
 			  const std::string& name="");
 
+        ~AutomationControl ();
+
 	boost::shared_ptr<AutomationList> alist() const {
 		return boost::dynamic_pointer_cast<AutomationList>(_list);
 	}
 
-	void set_list(boost::shared_ptr<Evoral::ControlList>);
+	void set_list (boost::shared_ptr<Evoral::ControlList>);
 
 	inline bool automation_playback() const {
-		return ((ARDOUR::AutomationList*)_list.get())->automation_playback();
+		return alist()->automation_playback();
 	}
 
 	inline bool automation_write() const {
-		return ((ARDOUR::AutomationList*)_list.get())->automation_write();
+		return alist()->automation_write();
 	}
 
 	inline AutoState automation_state() const {
-		return ((ARDOUR::AutomationList*)_list.get())->automation_state();
+		return alist()->automation_state();
 	}
 
-	inline void set_automation_state(AutoState as) {
-		return ((ARDOUR::AutomationList*)_list.get())->set_automation_state(as);
+	inline AutoStyle automation_style() const {
+		return alist()->automation_style();
 	}
 
-	inline void start_touch(double when) {
-		set_touching (true);
-		return ((ARDOUR::AutomationList*)_list.get())->start_touch(when);
-	}
-
-	inline void stop_touch(bool mark, double when) {
-		set_touching (false);
-		return ((ARDOUR::AutomationList*)_list.get())->stop_touch(mark, when);
-	}
+        void set_automation_state(AutoState as);
+        void set_automation_style(AutoStyle as);
+        void start_touch (double when);
+        void stop_touch (bool mark, double when);
 
 	void set_value (double);
 	double get_value () const;

@@ -36,10 +36,10 @@ using namespace PBD;
 using namespace std;
 
 PBD::Signal1<void,boost::shared_ptr<Region> > RegionFactory::CheckNewRegion;
-Glib::StaticMutex                             RegionFactory::region_map_lock;
+Glib::Threads::Mutex                          RegionFactory::region_map_lock;
 RegionFactory::RegionMap                      RegionFactory::region_map;
 PBD::ScopedConnectionList*                    RegionFactory::region_list_connections = 0;
-Glib::StaticMutex                             RegionFactory::region_name_maps_mutex;
+Glib::Threads::Mutex                          RegionFactory::region_name_maps_mutex;
 std::map<std::string, uint32_t>               RegionFactory::region_name_number_map;
 std::map<std::string, PBD::ID>                RegionFactory::region_name_map;
 RegionFactory::CompoundAssociations           RegionFactory::_compound_associations;
@@ -310,7 +310,7 @@ RegionFactory::map_add (boost::shared_ptr<Region> r)
 	p.second = r;
 
 	{
-		Glib::Mutex::Lock lm (region_map_lock);
+		Glib::Threads::Mutex::Lock lm (region_map_lock);
 		region_map.insert (p);
 	}
 
@@ -332,7 +332,7 @@ RegionFactory::map_remove (boost::weak_ptr<Region> w)
 		return;
 	}
 	
-	Glib::Mutex::Lock lm (region_map_lock);
+	Glib::Threads::Mutex::Lock lm (region_map_lock);
 	RegionMap::iterator i = region_map.find (r->id());
 
 	if (i != region_map.end()) {
@@ -383,7 +383,7 @@ RegionFactory::clear_map ()
 	}
 
 	{
-		Glib::Mutex::Lock lm (region_map_lock);
+		Glib::Threads::Mutex::Lock lm (region_map_lock);
 		region_map.clear ();
 		_compound_associations.clear ();
 		region_name_map.clear ();
@@ -397,7 +397,7 @@ RegionFactory::delete_all_regions ()
 
 	/* copy region list */
 	{
-		Glib::Mutex::Lock lm (region_map_lock);
+		Glib::Threads::Mutex::Lock lm (region_map_lock);
 		copy = region_map;
 	}
 
@@ -417,7 +417,7 @@ RegionFactory::delete_all_regions ()
 uint32_t
 RegionFactory::nregions ()
 {
-	Glib::Mutex::Lock lm (region_map_lock);
+	Glib::Threads::Mutex::Lock lm (region_map_lock);
 	return region_map.size ();
 }
 
@@ -427,7 +427,7 @@ RegionFactory::add_to_region_name_maps (boost::shared_ptr<Region> region)
 {
 	update_region_name_number_map (region);
 
-	Glib::Mutex::Lock lm (region_name_maps_mutex);
+	Glib::Threads::Mutex::Lock lm (region_name_maps_mutex);
 	region_name_map[region->name()] = region->id ();
 }
 
@@ -437,7 +437,7 @@ RegionFactory::rename_in_region_name_maps (boost::shared_ptr<Region> region)
 {
 	update_region_name_number_map (region);
 
-	Glib::Mutex::Lock lm (region_name_maps_mutex);
+	Glib::Threads::Mutex::Lock lm (region_name_maps_mutex);
 	
 	map<string, PBD::ID>::iterator i = region_name_map.begin();
 	while (i != region_name_map.end() && i->second != region->id ()) {
@@ -476,7 +476,7 @@ RegionFactory::update_region_name_number_map (boost::shared_ptr<Region> region)
 		   which is just fine
 		*/
 
-		Glib::Mutex::Lock lm (region_name_maps_mutex);
+		Glib::Threads::Mutex::Lock lm (region_name_maps_mutex);
 		region_name_number_map[base] = atoi (number.c_str ());
 	}
 }
@@ -526,7 +526,7 @@ RegionFactory::region_name (string& result, string base, bool newlevel)
 		}
 
 		{
-			Glib::Mutex::Lock lm (region_name_maps_mutex);
+			Glib::Threads::Mutex::Lock lm (region_name_maps_mutex);
 
 			map<string,uint32_t>::iterator x;
 
@@ -622,7 +622,7 @@ RegionFactory::new_region_name (string old)
 void
 RegionFactory::get_regions_using_source (boost::shared_ptr<Source> s, std::set<boost::shared_ptr<Region> >& r)
 {
-	Glib::Mutex::Lock lm (region_map_lock);
+	Glib::Threads::Mutex::Lock lm (region_map_lock);
 
 	for (RegionMap::iterator i = region_map.begin(); i != region_map.end(); ++i) {
 		if (i->second->uses_source (s)) {
@@ -634,7 +634,7 @@ RegionFactory::get_regions_using_source (boost::shared_ptr<Source> s, std::set<b
 void
 RegionFactory::remove_regions_using_source (boost::shared_ptr<Source> src)
 {
-	Glib::Mutex::Lock lm (region_map_lock);
+	Glib::Threads::Mutex::Lock lm (region_map_lock);
 
 	RegionMap::iterator i = region_map.begin();
 	while (i != region_map.end()) {
@@ -654,6 +654,6 @@ RegionFactory::remove_regions_using_source (boost::shared_ptr<Source> src)
 void
 RegionFactory::add_compound_association (boost::shared_ptr<Region> orig, boost::shared_ptr<Region> copy)
 {
-	Glib::Mutex::Lock lm (region_map_lock);
+	Glib::Threads::Mutex::Lock lm (region_map_lock);
 	_compound_associations[copy] = orig;
 }

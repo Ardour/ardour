@@ -95,7 +95,6 @@ Ardour will play NO role in monitoring"))
 	use_session_as_template_button.set_group (session_template_group);
 
 	set_keep_above (true);
-	set_resizable (false);
 	set_position (WIN_POS_CENTER);
 	set_border_width (12);
 

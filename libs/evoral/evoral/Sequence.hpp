@@ -25,7 +25,7 @@
 #include <list>
 #include <utility>
 #include <boost/shared_ptr.hpp>
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 #include "evoral/types.hpp"
 #include "evoral/Note.hpp"
 #include "evoral/Parameter.hpp"
@@ -67,16 +67,16 @@ public:
 
 protected:
 	struct WriteLockImpl {
-		WriteLockImpl(Glib::RWLock& s, Glib::Mutex& c)
-			: sequence_lock(new Glib::RWLock::WriterLock(s))
-			, control_lock(new Glib::Mutex::Lock(c))
+		WriteLockImpl(Glib::Threads::RWLock& s, Glib::Threads::Mutex& c)
+			: sequence_lock(new Glib::Threads::RWLock::WriterLock(s))
+			, control_lock(new Glib::Threads::Mutex::Lock(c))
 		{ }
 		~WriteLockImpl() {
 			delete sequence_lock;
 			delete control_lock;
 		}
-		Glib::RWLock::WriterLock* sequence_lock;
-		Glib::Mutex::Lock*        control_lock;
+		Glib::Threads::RWLock::WriterLock* sequence_lock;
+		Glib::Threads::Mutex::Lock*        control_lock;
 	};
 
 public:
@@ -84,10 +84,10 @@ public:
 	typedef typename boost::shared_ptr<Evoral::Note<Time> >  NotePtr;
 	typedef typename boost::shared_ptr<const Evoral::Note<Time> >  constNotePtr;
 
-	typedef boost::shared_ptr<Glib::RWLock::ReaderLock> ReadLock;
+	typedef boost::shared_ptr<Glib::Threads::RWLock::ReaderLock> ReadLock;
 	typedef boost::shared_ptr<WriteLockImpl>            WriteLock;
 
-	virtual ReadLock  read_lock() const { return ReadLock(new Glib::RWLock::ReaderLock(_lock)); }
+	virtual ReadLock  read_lock() const { return ReadLock(new Glib::Threads::RWLock::ReaderLock(_lock)); }
 	virtual WriteLock write_lock()      { return WriteLock(new WriteLockImpl(_lock, _control_lock)); }
 
 	void clear();
@@ -287,7 +287,7 @@ protected:
 	bool                   _edited;
 	bool                   _overlapping_pitches_accepted;
 	OverlapPitchResolution _overlap_pitch_resolution;
-	mutable Glib::RWLock   _lock;
+	mutable Glib::Threads::RWLock   _lock;
 	bool                   _writing;
 
 	virtual int resolve_overlaps_unlocked (const NotePtr, void* /* arg */ = 0) {

@@ -344,10 +344,15 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 	}
 
 #ifdef GTKOSX
-	/* should this be universally true? */
+        /* at one time this appeared to be necessary. As of July 2012, it does not
+           appear to be. if it ever is necessar, figure out if it should apply
+           to all platforms.
+        */
+#if 0 
 	if (Keyboard::some_magic_widget_has_focus ()) {
-		allow_activating = false;
+                allow_activating = false;
 	}
+#endif
 #endif
 
 
@@ -456,7 +461,9 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
                 DEBUG_TRACE (DEBUG::Accelerators, "\tactivate, then propagate\n");
 
 		if (allow_activating) {
+			DEBUG_TRACE (DEBUG::Accelerators, "\tsending to window\n");
 			if (gtk_window_activate_key (win, ev)) {
+				DEBUG_TRACE (DEBUG::Accelerators, "\t\thandled\n");
 				return true;
 			}
 		} else {

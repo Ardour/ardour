@@ -21,13 +21,13 @@
 #define __pbd_signals_h__
 
 #include <list>
-#include <glibmm/thread.h>
+#include <map>
+#include <glibmm/threads.h>
 
 #include <boost/noncopyable.hpp>
 #include <boost/bind.hpp>
 #include <boost/bind/protect.hpp>
 #include <boost/function.hpp>
-#include <boost/thread/mutex.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/optional.hpp>
 
@@ -44,7 +44,7 @@ public:
 	virtual void disconnect (boost::shared_ptr<Connection>) = 0;
 
 protected:
-	boost::mutex _mutex;
+        Glib::Threads::Mutex _mutex;
 };
 
 class Connection : public boost::enable_shared_from_this<Connection>
@@ -54,7 +54,7 @@ public:
 
 	void disconnect ()
 	{
-		boost::mutex::scoped_lock lm (_mutex);
+		Glib::Threads::Mutex::Lock lm (_mutex);
 		if (_signal) {
 			_signal->disconnect (shared_from_this ());
 			_signal = 0;
@@ -63,12 +63,12 @@ public:
 
 	void signal_going_away ()
 	{
-		boost::mutex::scoped_lock lm (_mutex);
+		Glib::Threads::Mutex::Lock lm (_mutex);
 		_signal = 0;
 	}
 
 private:
-	boost::mutex _mutex;
+        Glib::Threads::Mutex _mutex;
 	SignalBase* _signal;
 };
 
@@ -147,7 +147,7 @@ class ScopedConnectionList  : public boost::noncopyable
 	       one from another.
 	 */
 
-	Glib::Mutex _lock;
+	Glib::Threads::Mutex _lock;
 
 	typedef std::list<ScopedConnection*> ConnectionList;
 	ConnectionList _list;

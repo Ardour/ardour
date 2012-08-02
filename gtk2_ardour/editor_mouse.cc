@@ -421,6 +421,12 @@ Editor::mouse_mode_toggled (MouseMode m)
 	default:
 		break;
 	}
+	
+	if (_session && mouse_mode == MouseAudition) {
+		/* stop transport and reset default speed to avoid oddness with
+		   auditioning */
+		_session->request_transport_speed (0.0, true);
+	}
 
 	mouse_mode = m;
 

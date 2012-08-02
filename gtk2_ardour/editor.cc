@@ -4394,7 +4394,7 @@ Editor::set_punch_range (framepos_t start, framepos_t end, string cmd)
 	Location* tpl;
 
 	if ((tpl = transport_punch_location()) == 0) {
-		Location* loc = new Location (*_session, start, end, _("Loop"),  Location::IsAutoPunch);
+		Location* loc = new Location (*_session, start, end, _("Punch"),  Location::IsAutoPunch);
 		XMLNode &before = _session->locations()->get_state();
 		_session->locations()->add (loc, true);
 		_session->set_auto_loop_location (loc);

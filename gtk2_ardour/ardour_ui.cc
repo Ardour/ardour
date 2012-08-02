@@ -62,6 +62,7 @@
 #include "ardour/ardour.h"
 #include "ardour/audioengine.h"
 #include "ardour/audiofilesource.h"
+#include "ardour/automation_watch.h"
 #include "ardour/diskstream.h"
 #include "ardour/filename_extensions.h"
 #include "ardour/port.h"
@@ -794,7 +795,7 @@ If you still wish to quit, please use the\n\n\
 	*/
 	save_ardour_state ();
 
-	loading_message (_("Please wait while Ardour cleans up..."));
+	loading_message (string_compose (_("Please wait while %1 cleans up..."), PROGRAM_NAME));
 
 	if (_session) {
 		// _session->set_deletion_in_progress ();
@@ -877,6 +878,7 @@ ARDOUR_UI::ask_about_saving_session (const vector<string>& actions)
 
 	return -1;
 }
+
 
 gint
 ARDOUR_UI::every_second ()
@@ -3519,16 +3521,16 @@ ARDOUR_UI::TransportControllable::set_value (double val)
 		action = X_("Stop");
 		break;
 	case GotoStart:
-		action = X_("Goto Start");
+		action = X_("GotoStart");
 		break;
 	case GotoEnd:
-		action = X_("Goto End");
+		action = X_("GotoEnd");
 		break;
 	case AutoLoop:
 		action = X_("Loop");
 		break;
 	case PlaySelection:
-		action = X_("Play Selection");
+		action = X_("PlaySelection");
 		break;
 	case RecordEnable:
 		action = X_("Record");

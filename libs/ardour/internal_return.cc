@@ -16,7 +16,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 
 #include "ardour/internal_return.h"
 #include "ardour/internal_send.h"
@@ -37,7 +37,7 @@ InternalReturn::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*e
 		return;
 	}
 
-	Glib::Mutex::Lock lm (_sends_mutex, Glib::TRY_LOCK);
+	Glib::Threads::Mutex::Lock lm (_sends_mutex, Glib::Threads::TRY_LOCK);
 	
 	if (lm.locked ()) {
 		for (list<InternalSend*>::iterator i = _sends.begin(); i != _sends.end(); ++i) {
@@ -53,14 +53,14 @@ InternalReturn::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*e
 void
 InternalReturn::add_send (InternalSend* send)
 {
-	Glib::Mutex::Lock lm (_sends_mutex);
+	Glib::Threads::Mutex::Lock lm (_sends_mutex);
 	_sends.push_back (send);
 }
 
 void
 InternalReturn::remove_send (InternalSend* send)
 {
-	Glib::Mutex::Lock lm (_sends_mutex);
+	Glib::Threads::Mutex::Lock lm (_sends_mutex);
 	_sends.remove (send);
 }
 

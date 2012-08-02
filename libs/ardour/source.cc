@@ -29,7 +29,7 @@
 #include <algorithm>
 #include <fstream>
 
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>
 #include "pbd/xml++.h"
@@ -162,7 +162,7 @@ Source::set_state (const XMLNode& node, int version)
 bool
 Source::has_been_analysed() const
 {
-	Glib::Mutex::Lock lm (_analysis_lock);
+	Glib::Threads::Mutex::Lock lm (_analysis_lock);
 	return _analysed;
 }
 
@@ -170,7 +170,7 @@ void
 Source::set_been_analysed (bool yn)
 {
 	{
-		Glib::Mutex::Lock lm (_analysis_lock);
+		Glib::Threads::Mutex::Lock lm (_analysis_lock);
 		_analysed = yn;
 	}
 
@@ -299,7 +299,7 @@ Source::dec_use_count ()
         }
         assert (oldval > 0);
 #else
-        g_atomic_int_exchange_and_add (&_use_count, -1);
+        g_atomic_int_add (&_use_count, -1);
 #endif
 }
 

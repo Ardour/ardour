@@ -25,7 +25,7 @@
 #include <cmath>
 #include <jack/jack.h>
 
-#include <glibmm/thread.h>
+#include <glibmm/threads.h>
 
 #include "pbd/fastlog.h"
 #include "pbd/undo.h"
@@ -74,8 +74,8 @@ class IO : public SessionObject, public Latent
 		Output
 	};
 
-	IO (Session&, const std::string& name, Direction, DataType default_type = DataType::AUDIO);
-	IO (Session&, const XMLNode&, DataType default_type = DataType::AUDIO);
+        IO (Session&, const std::string& name, Direction, DataType default_type = DataType::AUDIO, bool sendish = false);
+        IO (Session&, const XMLNode&, DataType default_type = DataType::AUDIO, bool sendish = false);
 
 	virtual ~IO();
 
@@ -200,13 +200,14 @@ class IO : public SessionObject, public Latent
 	int set_ports (const std::string& str);
 
   private:
-	mutable Glib::Mutex io_lock;
+	mutable Glib::Threads::Mutex io_lock;
 
   protected:
 	PortSet   _ports;
 	Direction _direction;
 	DataType _default_type;
 	bool     _active;
+        bool     _sendish;
 
   private:
 	int connecting_became_legal ();

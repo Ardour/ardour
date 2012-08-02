@@ -25,6 +25,7 @@
 
 #include "ardour/session.h"
 #include "ardour/audioengine.h"
+#include "ardour/automation_watch.h"
 
 #include "actions.h"
 #include "add_route_dialog.h"
@@ -76,6 +77,8 @@ ARDOUR_UI::set_session (Session *s)
 			}
 		}
 	}
+
+	AutomationWatch::instance().set_session (s);
 
 	if (location_ui->get()) {
 		location_ui->get()->set_session(s);
