@@ -227,7 +227,7 @@ def set_compiler_flags (conf,opt):
         if sys.platform == 'darwin':
             optimization_flags.append ("-DBUILD_VECLIB_OPTIMIZATIONS");
             debug_flags.append ("-DBUILD_VECLIB_OPTIMIZATIONS");
-            conf.env.append_value('LINKFLAGS', "-framework Accelerate")
+            conf.env.append_value('LINKFLAGS', [ '-framework', 'Accelerate' ])
         elif conf.env['build_target'] == 'i686' or conf.env['build_target'] == 'x86_64':
             optimization_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
             debug_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
@@ -544,18 +544,25 @@ def configure(conf):
         conf.env.append_value ('CXXFLAGS_SOUNDGRID', 
                                [ '-D__MACOS__', 
                                  '-DUSE_SOUNDGRID', 
-                                 '-I/Volumes/Work/paul/ardour/3.0-SG/soundgrid', 
-                                 '-I/Volumes/Work/paul/ardour/3.0-SG/soundgrid/WavesPublicAPI/WavesMixerAPI/1.0',
+                                 '-I/Volumes/Work/paul/ardour/3.0-SG/soundgrid',
+                                 '-I/Volumes/Work/paul/ardour/3.0-SG/soundgrid/WavesMixerAPI/1.0',
                                  '-I/Volumes/Work/paul/ardour/3.0-SG/soundgrid/WavesPublicAPI/1.0',
+                                 '-I/Volumes/Work/paul/ardour/3.0-SG/soundgrid/WavesPublicAPIs/',
                                  ])
         conf.env.append_value ('CFLAGS_SOUNDGRID', 
                                [ '-D__MACOS__', 
                                  '-DUSE_SOUNDGRID', 
-                                 '-I/Volumes/Work/paul/ardour/3.0-SG/soundgrid', 
-                                 '-I/Volumes/Work/paul/ardour/3.0-SG/soundgrid/WavesPublicAPI/WavesMixerAPI/1.0',
+                                 '-I/Volumes/Work/paul/ardour/3.0-SG/soundgrid',
+                                 '-I/Volumes/Work/paul/ardour/3.0-SG/soundgrid/WavesMixerAPI/1.0',
                                  '-I/Volumes/Work/paul/ardour/3.0-SG/soundgrid/WavesPublicAPI/1.0',
+                                 '-I/Volumes/Work/paul/ardour/3.0-SG/soundgrid/WavesPublicAPIs/',
                                  ])
-        conf.check_cxx (header_name='WavesPublicAPI/WavesMixerAPI/1.0/WavesMixerAPI.h', 
+        conf.env.append_value ('LINKFLAGS_SOUNDGRID',
+                               [ '-Xlinker', '-rpath', '-Xlinker', '/Volumes/Work/paul/ardour/3.0-SG/soundgrid/WavesMixerCore',
+                                 '-F/Volumes/Work/paul/ardour/3.0-SG/soundgrid/WavesMixerCore',
+                                 '-framework', 'MixerCoreSG' 
+                                 ])                               
+        conf.check_cxx (header_name='WavesMixerAPI/1.0/WavesMixerAPI.h', 
                         mandatory=True, use='SOUNDGRID')
         conf.define('HAVE_SOUNDGRID', 1)
 

@@ -29,7 +29,7 @@
 #include <boost/function.hpp>
 
 #include <WavesPublicAPI/WTErr.h>
-#include <WavesPublicAPI/WavesMixerAPI/1.0/WavesMixerAPI.h>
+#include <WavesMixerAPI/1.0/WavesMixerAPI.h>
 
 #include "pbd/signals.h"
 
@@ -104,8 +104,8 @@ class SoundGrid : public boost::noncopyable
         void _finalize (void* ecc, int state);
         void event_completed (int);
 
-        static WTErr _sg_callback (const WSControlID* pControlID);
-        static WTErr sg_callback (const WSControlID* pControlID);
+        static WTErr _sg_callback (void*, const WSControlID* pControlID);
+        WTErr sg_callback (const WSControlID* pControlID);
 
         WTErr get (WSControlID*, WSControlInfo*);
         WTErr set (WSEvent*, const std::string&);

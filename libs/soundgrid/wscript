@@ -35,7 +35,9 @@ def build(bld):
             linkflags    = '-bundle',
             use          = [ 'libardour' ],
             install_path = os.path.join(bld.env['LIBDIR'], 'ardour3'),
-            defines      = ['PACKAGE="' + I18N_PACKAGE + '"']
+            defines      = ['PACKAGE="' + I18N_PACKAGE + '"',
+                            'PROGRAM_NAME="' + bld.env['PROGRAM_NAME'] + '"' 
+                           ]
             )
         bld (rule='mkdir -p ${TGT}', 
              target=bld.path.get_bld().make_node ('SurfaceDriver_App.bundle/Contents/MacOS'))

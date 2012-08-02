@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#include <WavesPublicAPI/WavesMixerAPI/1.0/WavesMixerAPI.h>
+#include <WavesMixerAPI/1.0/WavesMixerAPI.h>
 #include <WavesPublicAPI/WTErr.h>
 
 #include <pbd/compose.h>
@@ -22,7 +22,7 @@ struct WSCoreCallbackTable
  /* This API is really a C API, but we want to be able to use C++ objects within it, so ... */
 extern "C" {
 
-static const char* surface_type = "ArdourSurface";
+static const char* surface_type = PROGRAM_NAME;
 
 uint32_t 
 WMSD_QueryInterfaceVersion()
@@ -117,9 +117,6 @@ WMSD_SurfaceDisplayUpdate (const WSDSurfaceHandle /*surfaceHandle*/,
                         break;
                 case eClusterType_Global_RequestTimeout:
                         DEBUG_TRACE (DEBUG::SGSurface, "RequestTimeout\n");
-                        break;
-                case eClusterType_Global_NetworkLatency:
-                        DEBUG_TRACE (DEBUG::SGSurface, "NetworkLatency\n");
                         break;
                 case eClusterType_Global_SurfacesSetup:
                         DEBUG_TRACE (DEBUG::SGSurface, "SurfacesSetup\n");

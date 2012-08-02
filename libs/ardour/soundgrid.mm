@@ -22,7 +22,7 @@
 #include <dlfcn.h>
 #include <iostream>
 
-#include <WavesPublicAPI/WCMixerCore_API.h>
+#include <WavesMixerCore/API/WCMixerCore_API.h>
 
 #include "pbd/compose.h"
 #include "pbd/stacktrace.h"
@@ -59,6 +59,9 @@ SoundGrid::SoundGrid ()
         , _host_handle (0)
         , _pool (0)
 {
+#if 0
+        /* we link against the framework now */
+
         const char *s;
         string path;
 
@@ -83,6 +86,8 @@ SoundGrid::SoundGrid ()
                 DEBUG_TRACE (DEBUG::SoundGrid, "\tfailed\n");
 		return;
 	}
+#endif
+
 }
 
 SoundGrid::~SoundGrid()
@@ -116,7 +121,20 @@ SoundGrid::initialize (void* window_handle)
         if (!_sg) {
                 WTErr ret;
                 DEBUG_TRACE (DEBUG::SoundGrid, "Initializing SG core...\n");
-                if ((ret = InitializeMixerCoreDLL (window_handle, sg_callback, &_sg)) != eNoErr) {
+
+                WSMixerConfig mixer_limits;
+                Init_WSMixerConfig (&mixer_limits);
+                //the following two are for physical input and output representations
+                mixer_limits.m_clusterConfigs[eClusterType_Inputs].m_uiIndexNum = 1;
+                mixer_limits.m_clusterConfigs[eClusterType_Outputs].m_uiIndexNum = 1;
+                
+                //the following is for the tracks that this app will create.
+                //This will probably be changed to eClusterType_Group in future.
+                mixer_limits.m_clusterConfigs[eClusterType_Input].m_uiIndexNum = 64;
+
+                string driver_path = "build/libs/soundgrid/SurfaceDriverApp.bundle";
+                
+                if ((ret = InitializeMixerCoreDLL (&mixer_limits, driver_path.c_str(), window_handle, _sg_callback, this, &_sg)) != eNoErr) {
                         DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Initialized SG core, ret = %1 core handle %2\n", ret, _sg));
                         return -1;
                 }
@@ -367,9 +385,9 @@ SoundGrid::current_network_buffer_size ()
 
 /* callback */
 WTErr 
-SoundGrid::_sg_callback (const WSControlID* cid)
+SoundGrid::_sg_callback (void* arg, const WSControlID* cid)
 {
-        return SoundGrid::instance().sg_callback (cid);
+        return ((SoundGrid*) arg)->sg_callback (cid);
 }
 
 WTErr
