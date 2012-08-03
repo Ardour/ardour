@@ -678,11 +678,8 @@ EngineControl::enumerate_devices (const string& driver)
 		devices[driver] = enumerate_coreaudio_devices ();
 	} else if (driver == "SoundGrid") {
 
-                cerr << "calling soundgrid_init()\n";
                 soundgrid_init ();
-                cerr << "done with soundgrid_init()\n";
-
-		devices[driver] = SoundGrid::lan_port_names ();
+		devices[driver] = vector<string>();
 
 #else
 
@@ -918,6 +915,19 @@ EngineControl::driver_changed ()
 
 	enumerate_devices (driver);
 
+        if (driver == "SoundGrid") {
+                device_label.hide ();
+                interface_combo.hide ();
+                input_device_combo.hide ();
+                output_device_combo.hide ();
+                return;
+        } else {
+                device_label.show ();
+                interface_combo.show ();
+                input_device_combo.show ();
+                output_device_combo.show ();
+        }
+
 	vector<string>& strings = devices[driver];
 
 	if (strings.empty() && driver != "FreeBoB" && driver != "FFADO" && driver != "Dummy") {
@@ -930,14 +940,7 @@ EngineControl::driver_changed ()
 		}
 	}
 
-	if (driver == _("SoundGrid")) {
-		device_label.set_text (_("LAN Port"));
-                interface_changed ();
-		notebook.insert_page (soundgrid_vbox, _("SoundGrid Inventory"), 1);
-	} else {
-		device_label.set_text (_("Audio Interface"));
-		notebook.remove_page (soundgrid_vbox);
-	}
+        device_label.set_text (_("Audio Interface"));
 	
 	set_popdown_strings (interface_combo, strings);
 	set_popdown_strings (input_device_combo, strings);

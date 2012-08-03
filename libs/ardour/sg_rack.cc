@@ -17,9 +17,12 @@
 
 */
 
+#include "pbd/failed_constructor.h"
+
 #include "ardour/ardour.h"
 #include "ardour/session.h"
 #include "ardour/sg_rack.h"
+#include "ardour/soundgrid.h"
 #include "ardour/debug.h"
 
 using namespace ARDOUR;
@@ -28,6 +31,9 @@ SoundGridRack::SoundGridRack (Session& s, Route& r, const std::string& name)
         : SessionObject (s, name)
         , _route (r)
 {
+        if (SoundGrid::instance().add_rack_synchronous (eClusterType_Input, _rack_id)) { 
+                throw failed_constructor();
+        }
 }
 
 SoundGridRack::~SoundGridRack ()

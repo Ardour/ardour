@@ -66,6 +66,7 @@ class MonitorProcessor;
 class Pannable;
 class CapturingProcessor;
 class InternalSend;
+class SoundGridRack;
 
 class Route : public SessionObject, public Automatable, public RouteGroupMember, public GraphNode, public boost::enable_shared_from_this<Route>
 {
@@ -603,6 +604,10 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	bool _last_custom_meter_was_at_end;
 
         void reset_instrument_info ();
+
+        /* */
+        SoundGridRack* _sg_rack;
+           
 };
 
 } // namespace ARDOUR

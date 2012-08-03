@@ -57,6 +57,7 @@
 #include "ardour/route_group.h"
 #include "ardour/send.h"
 #include "ardour/session.h"
+#include "ardour/sg_rack.h"
 #include "ardour/unknown_processor.h"
 #include "ardour/utils.h"
 
@@ -96,6 +97,7 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	, _in_configure_processors (false)
 	, _custom_meter_position_noted (false)
 	, _last_custom_meter_was_at_end (false)
+        , _sg_rack (new SoundGridRack (sess, *this, name))
 {
 	processor_max_streams.reset();
 }
@@ -261,22 +263,13 @@ Route::has_order_key (RouteSortOrderKey key) const
 uint32_t
 Route::order_key (RouteSortOrderKey key) const
 {
-	OrderKeys::const_iterator i = order_keys.find (key);
+        OrderKeys::const_iterator i = order_keys.find (key);
 
-	if (i == order_keys.end()) {
-		return 0;
-	}
+        if (i == order_keys.end()) {
+                return 0;
+        }
 
-	/* order keys are zero-based, remote control ID's are one-based
-	 */
-
-	switch (Config->get_remote_model()) {
-	case EditorOrdered:
-		return order_key (EditorSort) + 1;
-	case MixerOrdered:
-	default:
-		return order_key (MixerSort) + 1;
-	}
+        return i->second;
 }
 
 void
@@ -307,7 +300,7 @@ Route::sync_order_keys (RouteSortOrderKey base)
 }
 
 void
-Route::set_remote_control_id_from_order_key (RouteSortOrderKey key, uint32_t rid)
+Route::set_remote_control_id_from_order_key (RouteSortOrderKey /*key*/, uint32_t rid)
 {
 	if (is_master() || is_monitor() || is_hidden()) {
 		/* hard-coded remote IDs, or no remote ID */
@@ -2875,7 +2868,7 @@ Route::direct_feeds_according_to_graph (boost::shared_ptr<Route> other, bool* vi
 
 /** Called from the (non-realtime) butler thread when the transport is stopped */
 void
-Route::nonrealtime_handle_transport_stopped (bool /*abort_ignored*/, bool did_locate, bool can_flush_processors)
+Route::nonrealtime_handle_transport_stopped (bool /*abort_ignored*/, bool /*did_locate*/, bool can_flush_processors)
 {
 	framepos_t now = _session.transport_frame();
 

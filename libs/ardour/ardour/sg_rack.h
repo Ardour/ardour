@@ -44,8 +44,12 @@ class SoundGridRack : public SessionObject {
     void set_gain (gain_t);
     void set_input_gain (gain_t);
 
+    XMLNode& get_state() { return *(new XMLNode ("SGRack")); }
+    int set_state (const XMLNode&, int /* version*/) { return 0; }
+
   private:
     Route& _route;
+    uint32_t _rack_id;
 
     typedef std::list<boost::shared_ptr<SoundGridPlugin> > PluginList;
     PluginList _plugins;

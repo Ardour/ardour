@@ -92,10 +92,25 @@ WMSD_SetPreset (const WSDSurfaceHandle /*surfaceHandle*/, void* /*pPresetChunk*/
 }
 
 WMSDErr 
-WMSD_SurfaceDisplayUpdate (const WSDSurfaceHandle /*surfaceHandle*/, 
+WMSD_CommandStatusUpdate(const WSDSurfaceHandle controllerHandle, struct WSCommand* pCommand )
+{
+        DEBUG_TRACE (DEBUG::SGSurface, string_compose ("CommandStatusUpdate, controllerHandle = %1, commandStatus = %2\n",
+                                                       controllerHandle, pCommand->out_status));
+        SoundGrid* sg = (SoundGrid *)controllerHandle;
+
+        if (sg) {
+                sg->command_status_update (pCommand);
+        }
+
+        return eNoErr;
+}
+
+WMSDErr 
+WMSD_SurfaceDisplayUpdate (const WSDSurfaceHandle surfaceHandle, 
                            const struct WSControlID* pControlID)
 {
-        
+        SoundGrid* sg = (SoundGrid*) surfaceHandle;
+
         switch (pControlID->clusterID.clusterType) {
 
         case eClusterType_Global:
@@ -140,8 +155,10 @@ WMSD_SurfaceDisplayUpdate (const WSDSurfaceHandle /*surfaceHandle*/,
                         DEBUG_TRACE (DEBUG::SGSurface, string_compose ("Surface Update, notification event %1 state %2\n",
                                                                        ((WSControlIDNotification*) pControlID)->pEventTicket,
                                                                        ((WSControlIDNotification*) pControlID)->eventState));
-                        SoundGrid::finalize (((WSControlIDNotification*) pControlID)->pEventTicket, 
-                                             ((WSControlIDNotification*) pControlID)->eventState);
+                        if (sg) {
+                                sg->finalize (((WSControlIDNotification*) pControlID)->pEventTicket, 
+                                              ((WSControlIDNotification*) pControlID)->eventState);
+                        }
 
                         break;
                 default:

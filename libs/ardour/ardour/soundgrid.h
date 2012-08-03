@@ -83,10 +83,23 @@ class SoundGrid : public boost::noncopyable
 
         static void set_pool (void* pool);
         
-        static void finalize (void* ecc, int state);
+        void finalize (void* ecc, int state);
+        void command_status_update (struct WSCommand*);
 
         static PBD::Signal0<void> Shutdown;
         
+        bool add_rack_synchronous (uint32_t clusterType, uint32_t &trackHandle);
+        bool add_rack_asynchronous (uint32_t clusterType);
+        bool remove_rack_synchronous (uint32_t clusterType, uint32_t trackHandle);
+        bool remove_all_racks_synchronous ();
+        void connect (uint32_t clusterType, uint32_t trackHandle,
+                      uint32_t inputChannel, uint32_t outputChannel);
+        void disconnect (uint32_t clusterType, uint32_t trackHandle,
+                         uint32_t inputChannel, uint32_t outputChannel);
+        int set_gain (uint32_t in_clusterType, uint32_t in_trackHandle, double in_gainValue);
+        bool get_gain (uint32_t in_clusterType, uint32_t in_trackHandle, double &out_gainValue);
+
+
   private:
 	SoundGrid ();
 	static SoundGrid* _instance;
@@ -109,6 +122,7 @@ class SoundGrid : public boost::noncopyable
 
         WTErr get (WSControlID*, WSControlInfo*);
         WTErr set (WSEvent*, const std::string&);
+        WTErr command (WSCommand*);
 
         struct EventCompletionClosure {
             std::string name;
@@ -118,6 +132,17 @@ class SoundGrid : public boost::noncopyable
             EventCompletionClosure (const std::string& n, boost::function<void(int)> f) 
             : name (n), func (f), id (g_atomic_int_add (&id_counter, 1) + 1) {}
 
+            static int id_counter; 
+        };
+
+        struct CommandStatusClosure {
+            std::string name;
+            boost::function<void(WSCommand*)> func;
+            uint64_t id;
+            
+            CommandStatusClosure (const std::string& n, boost::function<void(WSCommand*)> f) 
+            : name (n), func (f), id (g_atomic_int_add (&id_counter, 1) + 1) {}
+            
             static int id_counter; 
         };
 };
