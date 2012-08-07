@@ -78,6 +78,7 @@ Splash::Splash ()
 	add (darea);
 
 	set_default_size (pixbuf->get_width(), pixbuf->get_height());
+	set_resizable (false);
 	the_splash = this;
 
         expose_done = false;
