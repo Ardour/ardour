@@ -101,6 +101,10 @@ VSTPlugin::get_parameter (uint32_t which) const
 void 
 VSTPlugin::set_parameter (uint32_t which, float val)
 {
+	float v = get_parameter (which);
+
+	cerr << name() << " setting parameter #" << which << " to " << val << " current " << v << " == ? " << (v == val) << endl;
+
 	if (get_parameter (which) == val) {
 		return;
 	}
