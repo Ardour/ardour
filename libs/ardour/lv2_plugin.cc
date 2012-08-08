@@ -190,7 +190,7 @@ struct LV2Plugin::Impl {
 	       , work_iface(0)
 	       , state(0)
 	{}
-	
+
 	/** Find the LV2 input port with the given designation.
 	 * If found, bufptrs[port_index] will be set to bufptr.
 	 */
@@ -611,14 +611,11 @@ LV2Plugin::set_parameter(uint32_t which, float val)
 		            "%1 set parameter %2 to %3\n", name(), which, val));
 
 	if (which < lilv_plugin_get_num_ports(_impl->plugin)) {
-		
 		if (get_parameter (which) == val) {
 			return;
 		}
-		
-		_shadow_data[which] = val;
-		
 
+		_shadow_data[which] = val;
 	} else {
 		warning << string_compose(
 		    _("Illegal parameter number used with plugin \"%1\". "
@@ -652,7 +649,7 @@ LV2Plugin::get_docs() const
 
 	return "";
 }
-	
+
 std::string
 LV2Plugin::get_parameter_docs(uint32_t which) const
 {
@@ -895,7 +892,6 @@ LV2Plugin::find_presets()
 bool
 LV2Plugin::load_preset(PresetRecord r)
 {
-
 	std::map<std::string,uint32_t>::iterator it;
 
 	LilvNode* lv2_port   = lilv_new_uri(_world.world, LILV_NS_LV2 "port");
@@ -909,9 +905,10 @@ LV2Plugin::load_preset(PresetRecord r)
 		const LilvNode* symbol = get_value(_world.world, port, lv2_symbol);
 		const LilvNode* value  = get_value(_world.world, port, pset_value);
 		if (value && lilv_node_is_float(value)) {
-		        it = _port_indices.find(lilv_node_as_string(symbol));
-			if (it != _port_indices.end())
-			        set_parameter(it->second,lilv_node_as_float(value));
+			it = _port_indices.find(lilv_node_as_string(symbol));
+			if (it != _port_indices.end()) {
+				set_parameter(it->second,lilv_node_as_float(value));
+			}
 		}
 	}
 	lilv_nodes_free(ports);
@@ -965,34 +962,33 @@ LV2Plugin::do_save_preset(string name)
 	pset_uri += name;
 
 	string save_dir = Glib::build_filename(
-		Glib::get_home_dir(), 
-		Glib::build_filename(".lv2", "presets") 
+		Glib::get_home_dir(),
+		Glib::build_filename(".lv2", "presets")
 	);
 
 	LilvState* state = lilv_state_new_from_instance(
 		_impl->plugin,
 		_impl->instance,
 		_uri_map.urid_map(),
-		scratch_dir().c_str(),			// file_dir
-		NULL, 					// copy_dir
-		NULL, 					// link_dir
-		save_dir.c_str(),			// save_dir
-		lv2plugin_get_port_value,		// get_value
-		(void*) this,				// user_data
+		scratch_dir().c_str(),                  // file_dir
+		NULL,                                   // copy_dir
+		NULL,                                   // link_dir
+		save_dir.c_str(),                       // save_dir
+		lv2plugin_get_port_value,               // get_value
+		(void*) this,                           // user_data
 		LV2_STATE_IS_POD|LV2_STATE_IS_PORTABLE,	// flags
-		_features				// features
+		_features                               // features
 	);
 
 	lilv_state_set_label(state, name.c_str());
 	lilv_state_save(
-		_world.world,		// world
+		_world.world,           // world
 		_uri_map.urid_map(),	// map
 		_uri_map.urid_unmap(),	// unmap
-		state,			// state
-		pset_uri.c_str(),	// uri
-		save_dir.c_str(),	// dir
+		state,                  // state
+		pset_uri.c_str(),       // uri
+		save_dir.c_str(),       // dir
 		(name + ".ttl").c_str()	// filename
-
 	);
 
 	lilv_state_free(state);
@@ -1003,14 +999,13 @@ void
 LV2Plugin::do_remove_preset(string name)
 {
 	string preset_file = Glib::build_filename(
-		Glib::get_home_dir(), 
+		Glib::get_home_dir(),
 		Glib::build_filename(
 			Glib::build_filename(".lv2", "presets"),
 			name + ".ttl"
 		)
 	);
 	unlink(preset_file.c_str());
-
 }
 
 bool
