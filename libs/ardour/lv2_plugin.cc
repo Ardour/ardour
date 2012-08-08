@@ -56,6 +56,9 @@
 #include "lv2/lv2plug.in/ns/ext/time/time.h"
 #include "lv2/lv2plug.in/ns/ext/worker/worker.h"
 #include "lv2/lv2plug.in/ns/extensions/ui/ui.h"
+#ifdef HAVE_NEW_LV2
+#include "lv2/lv2plug.in/ns/ext/buf-size/buf-size.h"
+#endif
 
 #include "lv2_evbuf.h"
 
@@ -144,6 +147,44 @@ work_respond(LV2_Worker_Respond_Handle handle,
 	}
 }
 
+#ifdef HAVE_NEW_LV2
+/** Called by the plugin to discover properties of the block length. */
+static LV2_Buf_Size_Status
+get_sample_count(LV2_Buf_Size_Access_Handle handle,
+                 uint32_t*                  min,
+                 uint32_t*                  max,
+                 uint32_t*                  multiple_of,
+                 uint32_t*                  power_of)
+{
+	AudioEngine* engine = (AudioEngine*)handle;
+	*min         = 1;
+	*max         = engine->frames_per_cycle();
+	*multiple_of = 1;
+	*power_of    = 0;
+	return LV2_BUF_SIZE_SUCCESS;
+}
+
+/** Called by the plugin to get the size required for some buffer type. */
+static LV2_Buf_Size_Status
+get_buf_size(LV2_Buf_Size_Access_Handle handle,
+             uint32_t*                  buf_size,
+             LV2_URID                   type,
+             uint32_t                   sample_count)
+{
+	AudioEngine* engine = (AudioEngine*)handle;
+	if (type == LV2Plugin::_sequence_type) {
+		*buf_size = engine->raw_buffer_size(DataType::MIDI);
+		return LV2_BUF_SIZE_SUCCESS;
+	}
+	*buf_size = 0;
+	return LV2_BUF_SIZE_ERR_BAD_TYPE;
+}
+
+static LV2_Buf_Size_Access buf_size_access = {
+	NULL, sizeof(LV2_Buf_Size_Access), get_sample_count, get_buf_size
+};
+#endif
+
 struct LV2Plugin::Impl {
 	Impl() : plugin(0), ui(0), ui_type(0), name(0), author(0), instance(0)
 	       , work_iface(0)
@@ -221,6 +262,12 @@ LV2Plugin::init(void* c_plugin, framecnt_t rate)
 	_work_schedule_feature.URI   = LV2_WORKER__schedule;
 	_work_schedule_feature.data  = NULL;
 
+#ifdef HAVE_NEW_LV2
+	_buf_size_feature.URI  = LV2_BUF_SIZE__access;
+	_buf_size_feature.data = &buf_size_access;
+	buf_size_access.handle = &_engine;
+#endif
+
 	LilvPlugin* plugin = _impl->plugin;
 
 	LilvNode* state_iface_uri = lilv_new_uri(_world.world, LV2_STATE__interface);
@@ -233,15 +280,21 @@ LV2Plugin::init(void* c_plugin, framecnt_t rate)
 	lilv_node_free(state_uri);
 	lilv_node_free(state_iface_uri);
 
-	_features    = (LV2_Feature**)malloc(sizeof(LV2_Feature*) * 8);
+	_features    = (LV2_Feature**)calloc(8, sizeof(LV2_Feature*));
 	_features[0] = &_instance_access_feature;
 	_features[1] = &_data_access_feature;
 	_features[2] = &_make_path_feature;
 	_features[3] = _uri_map.uri_map_feature();
 	_features[4] = _uri_map.urid_map_feature();
 	_features[5] = _uri_map.urid_unmap_feature();
-	_features[6] = NULL;
-	_features[7] = NULL;
+
+	unsigned n_features = 6;
+#ifdef HAVE_NEW_LV2
+	_buf_size_feature.URI  = LV2_BUF_SIZE__access;
+	_buf_size_feature.data = &buf_size_access;
+	buf_size_access.handle = &_engine;
+	_features[n_features++] = &_buf_size_feature;
+#endif
 
 	LV2_State_Make_Path* make_path = (LV2_State_Make_Path*)malloc(
 		sizeof(LV2_State_Make_Path));
@@ -257,7 +310,7 @@ LV2Plugin::init(void* c_plugin, framecnt_t rate)
 		schedule->handle            = this;
 		schedule->schedule_work     = work_schedule;
 		_work_schedule_feature.data = schedule;
-		_features[6]                = &_work_schedule_feature;
+		_features[n_features++]     = &_work_schedule_feature;
 	}
 	lilv_node_free(worker_schedule);
 

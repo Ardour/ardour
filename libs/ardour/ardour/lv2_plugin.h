@@ -216,6 +216,7 @@ class LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	LV2_Feature    _instance_access_feature;
 	LV2_Feature    _make_path_feature;
 	LV2_Feature    _work_schedule_feature;
+	LV2_Feature    _buf_size_feature;
 
 	mutable unsigned _state_version;
 
