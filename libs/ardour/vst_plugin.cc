@@ -106,7 +106,7 @@ VSTPlugin::set_parameter (uint32_t which, float val)
 
 	cerr << name() << " setting parameter #" << which << " to " << val << " current " << v << " == ? " << (v == val) << " delta " << std::setprecision(15) << (v - val) << endl;
 
-	if (PBD::floateq (get_parameter (which), val, 2)) {
+	if (PBD::floateq (get_parameter (which), val, 1)) {
 		return;
 	}
 
