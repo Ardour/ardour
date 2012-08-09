@@ -7,6 +7,8 @@
 #ifndef __libpbd__floating_h__
 #define __libpbd__floating_h__
 
+#include <cmath>
+
 namespace PBD {
 
 union Float_t
@@ -26,18 +28,18 @@ union Float_t
 
 static inline bool floateq (float a, float b, int max_ulps_diff)
 {
-    Float_t ua(a);
-    Float_t ub(b);
+    Float_t ua (a);
+    Float_t ub (b);
  
+    if (a == b) {
+            return true;
+    }
+
     // Different signs means they do not match.
     if (ua.negative() != ub.negative()) {
-        // Check for equality to make sure +0==-0
-	    if (a == b) {
-		    return true;
-	    }
 	    return false;
     }
- 
+
     // Find the difference in ULPs.
     int ulps_diff = abs (ua.i - ub.i);
 
