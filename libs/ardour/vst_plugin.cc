@@ -100,24 +100,22 @@ VSTPlugin::get_parameter (uint32_t which) const
 }
 
 void 
-VSTPlugin::set_parameter (uint32_t which, float val)
+VSTPlugin::set_parameter (uint32_t which, float newval)
 {
-	float v = get_parameter (which);
+	float oldval = get_parameter (which);
 
-	cerr << name() << " setting parameter #" << which << " to " << val << " current " << v << " == ? " 
-	     << (v == val) << " floateq ? " << floateq (v, val, 1) << " delta " 
-	     << std::setprecision(15) 
-	     << (v - val) << endl;
-
-	if (PBD::floateq (get_parameter (which), val, 1)) {
+	if (PBD::floateq (oldval, newval, 1)) {
 		return;
 	}
 
-	_plugin->setParameter (_plugin, which, val);
+	_plugin->setParameter (_plugin, which, newval);
+	
+	float curval = get_parameter (which);
 
-	cerr << "\thaving set parameter to " << val << " new value is " << get_parameter (which) << endl;
-
-	Plugin::set_parameter (which, val);
+	if (!PBD::floateq (curval, oldval, 1)) {
+		/* value has changed, follow rest of the notification path */
+		Plugin::set_parameter (which, newval);
+	}
 }
 
 uint32_t
