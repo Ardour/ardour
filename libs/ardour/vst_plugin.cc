@@ -114,6 +114,9 @@ VSTPlugin::set_parameter (uint32_t which, float val)
 	}
 
 	_plugin->setParameter (_plugin, which, val);
+
+	cerr << "\thaving set parameter to " << val << " new value is " << get_parameter (which) << endl;
+
 	Plugin::set_parameter (which, val);
 }
 
