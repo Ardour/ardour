@@ -23,6 +23,7 @@
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 
+#include "pbd/floating.h"
 #include "pbd/locale_guard.h"
 #include "pbd/pathscanner.h"
 
@@ -105,7 +106,7 @@ VSTPlugin::set_parameter (uint32_t which, float val)
 
 	cerr << name() << " setting parameter #" << which << " to " << val << " current " << v << " == ? " << (v == val) << " delta " << std::setprecision(15) << (v - val) << endl;
 
-	if (get_parameter (which) == val) {
+	if (PBD::floateq (get_parameter (which), val, 2)) {
 		return;
 	}
 
