@@ -19,11 +19,15 @@
 
 #include <gtkmm/stock.h>
 
+#include "pbd/compose.h"
+
 #include "ardour/directory_names.h"
 #include "ardour/midi_region.h"
 #include "ardour/session.h"
 
 #include "midi_export_dialog.h"
+
+#include "i18n.h"
 
 using namespace ARDOUR;
 
