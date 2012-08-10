@@ -299,7 +299,6 @@ def configure(conf):
 
     conf.check_cc(fragment = '''
 #include <jack/jack.h>
-void callback(jack_status_t code, const char* reason, void* arg);
 void callback(jack_status_t code, const char* reason, void* arg) { return; }
 int main(int argc, char **argv) {
     jack_client_t* c;
