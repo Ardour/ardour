@@ -203,7 +203,7 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 		_external_ui_feature.URI  = LV2_EXTERNAL_UI_URI;
 		_external_ui_feature.data = &_external_ui_host;
 
-		features_src = features = (LV2_Feature**)_lv2->features();
+		features_src = features = const_cast<LV2_Feature**>(_lv2->features());
 		features_count = 2;
 		while (*features++) {
 			features_count++;
@@ -216,7 +216,7 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 			*features++ = *features_src++;
 		}
 	} else {
-		features_dst = (LV2_Feature**)_lv2->features();
+		features_dst = const_cast<LV2_Feature**>(_lv2->features());
 	}
 
 	if (!ui_host) {

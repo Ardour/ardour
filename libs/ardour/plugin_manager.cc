@@ -452,7 +452,7 @@ PluginManager::get_ladspa_category (uint32_t plugin_id)
 
 	snprintf(buf, sizeof(buf), "%s%" PRIu32, LADSPA_BASE, plugin_id);
 	pattern.subject = buf;
-	pattern.predicate = (char*)RDF_TYPE;
+	pattern.predicate = const_cast<char*>(RDF_TYPE);
 	pattern.object = 0;
 	pattern.object_type = lrdf_uri;
 
@@ -463,7 +463,7 @@ PluginManager::get_ladspa_category (uint32_t plugin_id)
 	}
 
 	pattern.subject = matches1->object;
-	pattern.predicate = (char*)(LADSPA_BASE "hasLabel");
+	pattern.predicate = const_cast<char*>(LADSPA_BASE "hasLabel");
 	pattern.object = 0;
 	pattern.object_type = lrdf_literal;
 

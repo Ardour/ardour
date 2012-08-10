@@ -334,8 +334,20 @@ def set_compiler_flags (conf,opt):
     # warnings flags
     #
 
-    conf.env.append_value('CFLAGS', "-Wall")
-    conf.env.append_value('CXXFLAGS', [ '-Wall', '-Woverloaded-virtual'])
+    conf.env.append_value('CFLAGS', [ '-Wall',
+                                      '-Wpointer-arith',
+                                      '-Wcast-qual',
+                                      '-Wcast-align',
+                                      '-Wstrict-prototypes',
+                                      '-Wmissing-prototypes'
+                                      ])
+
+    conf.env.append_value('CXXFLAGS', [ '-Wall', 
+                                        '-Wpointer-arith',
+                                        '-Wcast-qual',
+                                        '-Wcast-align', 
+                                        '-Woverloaded-virtual'
+                                        ])
 
 
     #

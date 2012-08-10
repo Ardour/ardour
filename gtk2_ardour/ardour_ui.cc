@@ -1957,7 +1957,7 @@ JACK, reconnect and save the session."), PROGRAM_NAME);
 	msg.run ();
 
 	if (free_reason) {
-		free ((char*) reason);
+		free (const_cast<char*> (reason));
 	}
 }
 

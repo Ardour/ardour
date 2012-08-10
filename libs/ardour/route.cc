@@ -2313,7 +2313,7 @@ Route::set_state_2X (const XMLNode& node, int version)
 					} else if (keyname == "editor") {
 						sk = EditorSort;
 					} else {
-						RouteSortOrderKey sk = (RouteSortOrderKey) string_2_enum (remaining.substr (0, equal), sk);
+						sk = (RouteSortOrderKey) string_2_enum (remaining.substr (0, equal), sk);
 					}
 
 					set_order_key (sk, n);

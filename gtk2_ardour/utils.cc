@@ -226,13 +226,13 @@ get_font_for_style (string widgetname)
 
 	Glib::RefPtr<const Pango::Layout> layout = foobar.get_layout();
 
-	PangoFontDescription *pfd = (PangoFontDescription *)pango_layout_get_font_description((PangoLayout *)layout->gobj());
+	PangoFontDescription *pfd = (PangoFontDescription *)pango_layout_get_font_description(const_cast<PangoLayout *>(layout->gobj()));
 
 	if (!pfd) {
 
 		/* layout inherited its font description from a PangoContext */
 
-		PangoContext* ctxt = (PangoContext*) pango_layout_get_context ((PangoLayout*) layout->gobj());
+		PangoContext* ctxt = (PangoContext*) pango_layout_get_context (const_cast<PangoLayout*>(layout->gobj()));
 		pfd =  pango_context_get_font_description (ctxt);
 		return Pango::FontDescription (pfd); /* make a copy */
 	}

@@ -3112,8 +3112,8 @@ Editor::convert_drop_to_paths (
 		const char* q;
 
 		p = (const char *) malloc (txt.length() + 1);
-		txt.copy ((char *) p, txt.length(), 0);
-		((char*)p)[txt.length()] = '\0';
+		txt.copy (const_cast<char *> (p), txt.length(), 0);
+		const_cast<char*>(p)[txt.length()] = '\0';
 
 		while (p)
 		{
