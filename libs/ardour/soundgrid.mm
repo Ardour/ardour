@@ -273,12 +273,21 @@ SoundGrid::command (WSCommand* cmd)
                 return -1;
         }
 
-        DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Deliver command type %1 (\"%2\") @ %3 synchronous %4\n", 
+        DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Deliver command type %1 (\"%2\") @ %3 synchronous %4 from thread %5\n", 
                                                        cmd->in_commandType, command_name (cmd->in_commandType),
-                                                       cmd, (cmd->in_commandTicket == 0)));
+                                                       cmd, (cmd->in_commandTicket == 0), pthread_self()));
+
+        WTErr err;
+        WTErr expected_result;
+
+        if (cmd->in_commandTicket) {
+                expected_result = WMSD_Pending;
+        } else {
+                expected_result = eNoErr;
+        }
         
-        if (_callback_table.sendCommandProc (_host_handle, cmd) != eNoErr) {
-                DEBUG_TRACE (DEBUG::SoundGrid, "\tfailed\n");
+        if ((err = _callback_table.sendCommandProc (_host_handle, cmd)) != expected_result) {
+                DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("\tfailed, code = %1 vs. expected %2\n", err, expected_result));
                 return -1;
         }
 
@@ -290,10 +299,20 @@ void
 SoundGrid::command_status_update (WSCommand *cmd)
 {
         CommandStatusClosure* ecc = (CommandStatusClosure*) cmd->in_commandTicket;
-        cerr << "Command " << ecc->id << ": " 
-             << ecc->name << " finished, status = " << cmd->out_status 
-             << " prog " << cmd->out_progress << endl;
+
+        DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Command %1: %2 finished, status = %3 progress %4 (in thread %5)\n",
+                                                       ecc->id,
+                                                       ecc->name,
+                                                       cmd->out_status,
+                                                       cmd->out_progress,
+                                                       pthread_self()));
+
+        /* Execute the closure we wanted to run when the command completed */
+
         ecc->func (cmd);
+
+        delete ecc;
+        delete cmd;
 }
 
 #undef str
@@ -659,26 +678,43 @@ SoundGrid::get_gain (uint32_t in_clusterType, uint32_t in_trackHandle, double &o
     return false;
 }
 
+void
+SoundGrid::assignment_complete (WSCommand* cmd)
+{
+        WSAssignmentsCommand* acmd = (WSAssignmentsCommand*) cmd;
+        WSAudioAssignment& assignment (acmd->in_Assignments.m_aAssignments[0]);
+        DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("assignment complete for %1:%2:%3 to %4:%5:%6\n",
+                                                       assignment.m_asgnSrc.m_chainerID.clusterType,
+                                                       assignment.m_asgnSrc.m_chainerID.clusterHandle,
+                                                       assignment.m_asgnSrc.m_uiMixMtxSubIndex,
+                                                       assignment.m_asgnDest.m_chainerID.clusterType,
+                                                       assignment.m_asgnDest.m_chainerID.clusterHandle,
+                                                       assignment.m_asgnDest.m_uiMixMtxSubIndex));
+}
+
 int
 SoundGrid::connect_input_channel_to_driver (uint32_t physical_input, uint32_t driver_channel)
 {
-    WSAssignmentsCommand myCommand;
+        CommandStatusClosure* csc = new CommandStatusClosure ("connect input chn to driver", boost::bind (&SoundGrid::assignment_complete, this, _1));
+        WSAssignmentsCommand* myCommand = new WSAssignmentsCommand;
     
-    Init_WSAddAssignmentsCommand(&myCommand, 1, (WSDControllerHandle)this, 0);
+        Init_WSAddAssignmentsCommand(myCommand, 1, (WSDControllerHandle)this, csc);
 
-    //From Physical Input to the Driver
-    WSAudioAssignment &inputAssignment (myCommand.in_Assignments.m_aAssignments[0]);
-    inputAssignment.m_asgnSrc.m_chainerID.clusterType = eClusterType_Inputs;
-    inputAssignment.m_asgnSrc.m_chainerID.clusterHandle = eClusterHandle_Physical_IO;
-    inputAssignment.m_asgnSrc.m_eChainerSubIndex = eChainerSub_NoSub; // Physical and Driver inputs have no sub index, because they are always mono
-    inputAssignment.m_asgnSrc.m_uiMixMtxSubIndex = physical_input; // Mix Matrix Sub Index for Physical and IO represent the io or driver channel number.
-    
-    inputAssignment.m_asgnDest.m_chainerID.clusterType = eClusterType_Outputs;
-    inputAssignment.m_asgnDest.m_chainerID.clusterHandle = eClusterHandle_Physical_Driver;
-    inputAssignment.m_asgnDest.m_eChainerSubIndex = eChainerSub_NoSub; // Physical and Driver inputs have no sub index, because they are always mono
-    inputAssignment.m_asgnDest.m_uiMixMtxSubIndex = driver_channel; // Mix Matrix Sub Index for Physical and IO represent the io or driver channel number.
-
-    return command (&myCommand.m_command);    
+        //From Physical Input to the Driver
+        WSAudioAssignment &inputAssignment (myCommand->in_Assignments.m_aAssignments[0]);
+        inputAssignment.m_asgnSrc.m_chainerID.clusterType = eClusterType_Inputs;
+        inputAssignment.m_asgnSrc.m_chainerID.clusterHandle = eClusterHandle_Physical_IO;
+        inputAssignment.m_asgnSrc.m_eChainerSubIndex = eChainerSub_NoSub; // Physical and Driver inputs have no sub index, because they are always mono
+        inputAssignment.m_asgnSrc.m_uiMixMtxSubIndex = physical_input; // Mix Matrix Sub Index for Physical and IO represent the io or driver channel number.
+        
+        inputAssignment.m_asgnDest.m_chainerID.clusterType = eClusterType_Outputs;
+        inputAssignment.m_asgnDest.m_chainerID.clusterHandle = eClusterHandle_Physical_Driver;
+        inputAssignment.m_asgnDest.m_eChainerSubIndex = eChainerSub_NoSub; // Physical and Driver inputs have no sub index, because they are always mono
+        inputAssignment.m_asgnDest.m_uiMixMtxSubIndex = driver_channel; // Mix Matrix Sub Index for Physical and IO represent the io or driver channel number.
+        
+        DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Connect physical input %1 to driver %2\n", physical_input, driver_channel));
+        
+        return command (&myCommand->m_command);    
 }
 
 int
@@ -771,7 +807,7 @@ SoundGrid::map_chainer_input_as_jack_port (uint32_t chainer_id, uint32_t channel
 }
 
 void
-SoundGrid::remove_chainer_input (uint32_t chainer_id, uint32_t channel)
+SoundGrid::remove_chainer_input (uint32_t /*chainer_id*/, uint32_t /*channel*/)
 {
         
 }

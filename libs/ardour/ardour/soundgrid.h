@@ -152,6 +152,8 @@ class SoundGrid : public boost::noncopyable
             static int id_counter; 
         };
 
+        void assignment_complete (WSCommand* cmd);
+
         uint32_t          _driver_ports; // how many total channels we tell the SG driver to allocate
         std::vector<bool> _driver_ports_in_use;
 };
