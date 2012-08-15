@@ -58,7 +58,6 @@ SoundGrid::SoundGrid ()
 	: dl_handle (0)
         , _sg (0)
         , _host_handle (0)
-        , _pool (0)
 {
 #if 0
         /* we link against the framework now */
@@ -101,24 +100,31 @@ SoundGrid::~SoundGrid()
 	if (dl_handle) {
 		dlclose (dl_handle);
 	}
-
-#ifdef __APPLE__
-        if (_pool) {
-                NSAutoreleasePool* p = (NSAutoreleasePool*) _pool;
-                [p release];
-                _pool = 0;
-        }
-#endif
-}
-
-void
-SoundGrid::set_pool (void* pool)
-{
-        instance()._pool = pool;
 }
 
 int
-SoundGrid::initialize (void* window_handle)
+SoundGrid::configure_driver (uint32_t inputs, uint32_t outputs) 
+{
+    WSConfigSGDriverCommand myCommand;
+
+    Init_WSConfigSGDriverCommand (&myCommand, inputs, outputs, (WSDControllerHandle)this, 0);
+
+    DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Initializing SG driver to use %1 inputs + %2 outputs\n",
+                                                   inputs, outputs));
+    if (command (&myCommand.m_command)) {
+            return -1;
+    }
+
+    /* set up the in-use bool vector */
+
+    _driver_ports_in_use.assign (outputs, false);
+
+    return 0;
+}
+
+int
+SoundGrid::initialize (void* window_handle, uint32_t max_track_inputs, uint32_t max_track_outputs, 
+                       uint32_t max_phys_inputs, uint32_t max_phys_outputs)
 {
         if (!_sg) {
                 WTErr ret;
@@ -127,12 +133,12 @@ SoundGrid::initialize (void* window_handle)
                 WSMixerConfig mixer_limits;
                 Init_WSMixerConfig (&mixer_limits);
                 //the following two are for physical input and output representations
-                mixer_limits.m_clusterConfigs[eClusterType_Inputs].m_uiIndexNum = 1;
-                mixer_limits.m_clusterConfigs[eClusterType_Outputs].m_uiIndexNum = 1;
+                mixer_limits.m_clusterConfigs[eClusterType_Inputs].m_uiIndexNum = 2;  // 1 for Ardour stuff, 1 for the coreaudio driver/JACK
+                mixer_limits.m_clusterConfigs[eClusterType_Outputs].m_uiIndexNum = 2; // 1 for Ardour stuff, 1 for the coreaudio driver/JACK
                 
                 //the following is for the tracks that this app will create.
                 //This will probably be changed to eClusterType_Group in future.
-                mixer_limits.m_clusterConfigs[eClusterType_Input].m_uiIndexNum = 64;
+                mixer_limits.m_clusterConfigs[eClusterType_Input].m_uiIndexNum = max_track_inputs;
 
                 char b[PATH_MAX+1];
                 
@@ -146,6 +152,7 @@ SoundGrid::initialize (void* window_handle)
                         DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Initialized SG core, ret = %1 core handle %2\n", ret, _sg));
                         return -1;
                 }
+
                 DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Initialized SG core, core handle %2\n", _sg));
         } else {
                 DEBUG_TRACE (DEBUG::SoundGrid, "SG core already initialized...\n");
@@ -227,7 +234,7 @@ SoundGrid::set (WSEvent* ev, const std::string& what)
                 return -1;
         }
 
-        ev->sourceSurface = (WSDSurfaceHandle) this;
+        ev->sourceController = (WSDControllerHandle) this;
         ev->eventTicket = new EventCompletionClosure (what, boost::bind (&SoundGrid::event_completed, this, _1));
 
         if (_callback_table.setEventProc (_host_handle, this, ev) != eNoErr) {
@@ -237,6 +244,28 @@ SoundGrid::set (WSEvent* ev, const std::string& what)
         return 0;
 }
 
+static string
+command_name (uint32_t type)
+{
+        switch (type) {
+        case eCommandType_AddTrack:
+                return "AddTrack";
+        case eCommandType_RemoveTrack:
+                return "RemoveTrack";
+        case eCommandType_RemoveAllTracks:
+                return "RemoveAllTracks";
+        case eCommandType_AddAssignments:
+                return "AddAssignments";
+        case eCommandType_RemoveAssignments:
+                return "RemoveAssignments";
+        case eCommandType_ConfigSGDRiver:
+                return "ConfigSGDRiver";
+        default:
+                break;
+        }
+        return "Unknown Command";
+}
+                        
 int
 SoundGrid::command (WSCommand* cmd)
 {
@@ -244,10 +273,10 @@ SoundGrid::command (WSCommand* cmd)
                 return -1;
         }
 
-        DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Deliver command type %1 @ %2 async %3\n", 
-                                                       cmd->in_commandType, cmd, (cmd->in_commandTicket == 0)));
-
-
+        DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Deliver command type %1 (\"%2\") @ %3 synchronous %4\n", 
+                                                       cmd->in_commandType, command_name (cmd->in_commandType),
+                                                       cmd, (cmd->in_commandTicket == 0)));
+        
         if (_callback_table.sendCommandProc (_host_handle, cmd) != eNoErr) {
                 DEBUG_TRACE (DEBUG::SoundGrid, "\tfailed\n");
                 return -1;
@@ -436,7 +465,7 @@ WTErr
 SoundGrid::sg_callback (const WSControlID* cid)
 {
         cerr << "SG Callback, cluster " << cid->clusterID.clusterType << " (index " 
-             << cid->clusterID.clusterIndex
+             << cid->clusterID.clusterHandle
              << ") control " << cid->sectionControlID.sectionType
              << " (index " << cid->sectionControlID.sectionIndex << ')'
              << endl;
@@ -460,20 +489,21 @@ SoundGrid::add_rack_synchronous (uint32_t clusterType, uint32_t &trackHandle)
 {
     WSAddTrackCommand myCommand;
 
-    command (Init_WSAddTrackCommand (&myCommand, clusterType, 1, (WSDSurfaceHandle)this, 0));
+    command (Init_WSAddTrackCommand (&myCommand, clusterType, 1, (WSDControllerHandle)this, 0));
     
     if (0 == myCommand.m_command.out_status) {
-        trackHandle = myCommand.out_trackHandle;
+            trackHandle = myCommand.out_trackID.clusterHandle;
+            return 0;
     }
     
-    return (0 == myCommand.m_command.out_status);
+    return -1;
 }
 
 bool
 SoundGrid::add_rack_asynchronous (uint32_t clusterType)
 {
     WSAddTrackCommand *pMyCommand = new WSAddTrackCommand;
-    WMSDErr errCode = command (Init_WSAddTrackCommand (pMyCommand, clusterType, 1, (WSDSurfaceHandle)this, pMyCommand));
+    WMSDErr errCode = command (Init_WSAddTrackCommand (pMyCommand, clusterType, 1, (WSDControllerHandle)this, pMyCommand));
     
     printf ("AddRack Command result = %d, command status = %d\n", errCode, pMyCommand->m_command.out_status);
     
@@ -485,7 +515,7 @@ SoundGrid::remove_rack_synchronous (uint32_t clusterType, uint32_t trackHandle)
 {
     WSRemoveTrackCommand myCommand;
     
-    command (Init_WSRemoveTrackCommand (&myCommand, clusterType, trackHandle, (WSDSurfaceHandle)this, 0));
+    command (Init_WSRemoveTrackCommand (&myCommand, clusterType, trackHandle, (WSDControllerHandle)this, 0));
     
     return (0 == myCommand.m_command.out_status);
 }
@@ -496,88 +526,92 @@ SoundGrid::remove_all_racks_synchronous ()
     WSCommand myCommand;
     
     command (Init_WSCommand (&myCommand, sizeof(myCommand), eCommandType_RemoveAllTracks,
-                                               (WSDSurfaceHandle)this, 0));
+                                               (WSDControllerHandle)this, 0));
     
     return (0 == myCommand.out_status);
 }
 
-void
-SoundGrid::connect (uint32_t clusterType, uint32_t trackHandle,
-                                             uint32_t inputChannel, uint32_t outputChannel)
+int
+SoundGrid::connect_input (uint32_t trackHandle, uint32_t chn, uint32_t phys_chn)
 {
     WSAssignmentsCommand myCommand;
     
-    Init_WSAddAssignmentsCommand(&myCommand, 1, (WSDSurfaceHandle)this, 0);
+    Init_WSAddAssignmentsCommand(&myCommand, 1, (WSDControllerHandle)this, 0);
     WSAudioAssignment &inputAssignment (myCommand.in_Assignments.m_aAssignments[0]);
     
     inputAssignment.m_asgnSrc.m_chainerID.clusterType = eClusterType_Inputs;
-    inputAssignment.m_asgnSrc.m_chainerID.clusterIndex = 0;
+    inputAssignment.m_asgnSrc.m_chainerID.clusterHandle = 0;
     inputAssignment.m_asgnSrc.m_eChainerSubIndex = eChainerSub_NoSub;
-    inputAssignment.m_asgnSrc.m_uiMixMtxSubIndex = inputChannel;
+    inputAssignment.m_asgnSrc.m_uiMixMtxSubIndex = chn;
     
-    inputAssignment.m_asgnDest.m_chainerID.clusterType = clusterType;
-    inputAssignment.m_asgnDest.m_chainerID.clusterIndex = trackHandle;
+    inputAssignment.m_asgnDest.m_chainerID.clusterType = eClusterType_Inputs;
+    inputAssignment.m_asgnDest.m_chainerID.clusterHandle = trackHandle;
     inputAssignment.m_asgnDest.m_eChainerSubIndex = eChainerSub_NoSub;
     inputAssignment.m_asgnDest.m_uiMixMtxSubIndex = (uint32_t)-1;
 
-    command (&myCommand.m_command);    
+    return command (&myCommand.m_command);
+}
     
+int
+SoundGrid::connect_output (uint32_t trackHandle, uint32_t chn, uint32_t phys_chn)
+{
+    WSAssignmentsCommand myCommand;
     //we can reuse the same command object
-    Init_WSAddAssignmentsCommand(&myCommand, 1, (WSDSurfaceHandle)this, 0);
+    Init_WSAddAssignmentsCommand(&myCommand, 1, (WSDControllerHandle)this, 0);
     WSAudioAssignment &outputAssignment (myCommand.in_Assignments.m_aAssignments[0]);
  
-    outputAssignment.m_asgnSrc.m_chainerID.clusterType = clusterType;
-    outputAssignment.m_asgnSrc.m_chainerID.clusterIndex = trackHandle;
+    outputAssignment.m_asgnSrc.m_chainerID.clusterType = eClusterType_Inputs;
+    outputAssignment.m_asgnSrc.m_chainerID.clusterHandle = trackHandle;
     outputAssignment.m_asgnSrc.m_eChainerSubIndex = eChainerSub_Left;
     outputAssignment.m_asgnSrc.m_uiMixMtxSubIndex = eMixMatrixSub_PostFader;
     
     outputAssignment.m_asgnDest.m_chainerID.clusterType = eClusterType_Outputs;
-    outputAssignment.m_asgnDest.m_chainerID.clusterIndex = 0;
-    outputAssignment.m_asgnDest.m_eChainerSubIndex = eChainerSub_Left;
-    outputAssignment.m_asgnDest.m_uiMixMtxSubIndex = outputChannel;
+    outputAssignment.m_asgnDest.m_chainerID.clusterHandle = 0;
+    outputAssignment.m_asgnDest.m_eChainerSubIndex = eChainerSub_NoSub;
+    outputAssignment.m_asgnDest.m_uiMixMtxSubIndex = (uint32_t) -1;
     
-    command (&myCommand.m_command);    
-    
-    return;
+    return command (&myCommand.m_command);    
 }
 
-
-void
-SoundGrid::disconnect (uint32_t clusterType, uint32_t trackHandle,
-                       uint32_t inputChannel, uint32_t outputChannel)
+int
+SoundGrid::disconnect_input (uint32_t trackHandle, uint32_t chn, uint32_t phys_chn)
 {
     WSAssignmentsCommand myCommand;
     
-    Init_WSRemoveAssignmentsCommand(&myCommand, 1, (WSDSurfaceHandle)this, 0);
+    Init_WSRemoveAssignmentsCommand(&myCommand, 1, (WSDControllerHandle)this, 0);
     WSAudioAssignment &inputAssignment (myCommand.in_Assignments.m_aAssignments[0]);
     
     inputAssignment.m_asgnSrc.m_chainerID.clusterType = eClusterType_Inputs;
-    inputAssignment.m_asgnSrc.m_chainerID.clusterIndex = 0;
+    inputAssignment.m_asgnSrc.m_chainerID.clusterHandle = 0;
     inputAssignment.m_asgnSrc.m_eChainerSubIndex = eChainerSub_NoSub;
-    inputAssignment.m_asgnSrc.m_uiMixMtxSubIndex = inputChannel;
+    inputAssignment.m_asgnSrc.m_uiMixMtxSubIndex = chn;
     
-    inputAssignment.m_asgnDest.m_chainerID.clusterType = clusterType;
-    inputAssignment.m_asgnDest.m_chainerID.clusterIndex = trackHandle;
+    inputAssignment.m_asgnDest.m_chainerID.clusterType = eClusterType_Inputs;
+    inputAssignment.m_asgnDest.m_chainerID.clusterHandle = trackHandle;
     inputAssignment.m_asgnDest.m_eChainerSubIndex = eChainerSub_NoSub;
     inputAssignment.m_asgnDest.m_uiMixMtxSubIndex = (uint32_t)-1;
     
-    (void) command (&myCommand.m_command);    
-    
-    //we can reuse the same command object
-    Init_WSRemoveAssignmentsCommand(&myCommand, 1, (WSDSurfaceHandle)this, 0);
+    return command (&myCommand.m_command);
+}    
+
+int
+SoundGrid::disconnect_output (uint32_t trackHandle, uint32_t chn, uint32_t phys_chn)
+{
+    WSAssignmentsCommand myCommand;
+    Init_WSRemoveAssignmentsCommand(&myCommand, 1, (WSDControllerHandle)this, 0);
     WSAudioAssignment &outputAssignment (myCommand.in_Assignments.m_aAssignments[0]);
     
-    outputAssignment.m_asgnSrc.m_chainerID.clusterType = clusterType;
-    outputAssignment.m_asgnSrc.m_chainerID.clusterIndex = trackHandle;
+    outputAssignment.m_asgnSrc.m_chainerID.clusterType = eClusterType_Outputs;
+    outputAssignment.m_asgnSrc.m_chainerID.clusterHandle = trackHandle;
     outputAssignment.m_asgnSrc.m_eChainerSubIndex = eChainerSub_Left;
     outputAssignment.m_asgnSrc.m_uiMixMtxSubIndex = eMixMatrixSub_PostFader;
     
     outputAssignment.m_asgnDest.m_chainerID.clusterType = eClusterType_Outputs;
-    outputAssignment.m_asgnDest.m_chainerID.clusterIndex = 0;
+    outputAssignment.m_asgnDest.m_chainerID.clusterHandle = 0;
     outputAssignment.m_asgnDest.m_eChainerSubIndex = eChainerSub_Left;
-    outputAssignment.m_asgnDest.m_uiMixMtxSubIndex = outputChannel;
+    outputAssignment.m_asgnDest.m_uiMixMtxSubIndex = chn;
     
-    (void) command (&myCommand.m_command);    
+    return command (&myCommand.m_command);    
 }
 
 int
@@ -591,7 +625,7 @@ SoundGrid::set_gain (uint32_t in_clusterType, uint32_t in_trackHandle, double in
 
     Init_WSControlID(&faderEvent.controlID);
     faderEvent.controlID.clusterID.clusterType = in_clusterType;
-    faderEvent.controlID.clusterID.clusterIndex = in_trackHandle;
+    faderEvent.controlID.clusterID.clusterHandle = in_trackHandle;
     
     faderEvent.controlID.sectionControlID.sectionType = eControlType_Output;
     faderEvent.controlID.sectionControlID.sectionIndex = eControlType_Output_Local;
@@ -610,7 +644,7 @@ SoundGrid::get_gain (uint32_t in_clusterType, uint32_t in_trackHandle, double &o
     
     Init_WSControlID(&faderInfo.m_controlID);
     faderInfo.m_controlID.clusterID.clusterType = in_clusterType;
-    faderInfo.m_controlID.clusterID.clusterIndex = in_trackHandle;
+    faderInfo.m_controlID.clusterID.clusterHandle = in_trackHandle;
     
     faderInfo.m_controlID.sectionControlID.sectionType = eControlType_Output;
     faderInfo.m_controlID.sectionControlID.sectionIndex = eControlType_Output_Local;
@@ -624,3 +658,123 @@ SoundGrid::get_gain (uint32_t in_clusterType, uint32_t in_trackHandle, double &o
 
     return false;
 }
+
+int
+SoundGrid::connect_input_channel_to_driver (uint32_t physical_input, uint32_t driver_channel)
+{
+    WSAssignmentsCommand myCommand;
+    
+    Init_WSAddAssignmentsCommand(&myCommand, 1, (WSDControllerHandle)this, 0);
+
+    //From Physical Input to the Driver
+    WSAudioAssignment &inputAssignment (myCommand.in_Assignments.m_aAssignments[0]);
+    inputAssignment.m_asgnSrc.m_chainerID.clusterType = eClusterType_Inputs;
+    inputAssignment.m_asgnSrc.m_chainerID.clusterHandle = eClusterHandle_Physical_IO;
+    inputAssignment.m_asgnSrc.m_eChainerSubIndex = eChainerSub_NoSub; // Physical and Driver inputs have no sub index, because they are always mono
+    inputAssignment.m_asgnSrc.m_uiMixMtxSubIndex = physical_input; // Mix Matrix Sub Index for Physical and IO represent the io or driver channel number.
+    
+    inputAssignment.m_asgnDest.m_chainerID.clusterType = eClusterType_Outputs;
+    inputAssignment.m_asgnDest.m_chainerID.clusterHandle = eClusterHandle_Physical_Driver;
+    inputAssignment.m_asgnDest.m_eChainerSubIndex = eChainerSub_NoSub; // Physical and Driver inputs have no sub index, because they are always mono
+    inputAssignment.m_asgnDest.m_uiMixMtxSubIndex = driver_channel; // Mix Matrix Sub Index for Physical and IO represent the io or driver channel number.
+
+    return command (&myCommand.m_command);    
+}
+
+int
+SoundGrid::disconnect_input_channel_to_driver (uint32_t physical_input, uint32_t driver_channel)
+{
+    WSAssignmentsCommand myCommand;
+    
+    Init_WSRemoveAssignmentsCommand(&myCommand, 1, (WSDControllerHandle)this, 0);
+    
+    //From Physical Input to the Driver
+    WSAudioAssignment &inputAssignment (myCommand.in_Assignments.m_aAssignments[0]);
+    inputAssignment.m_asgnSrc.m_chainerID.clusterType = eClusterType_Inputs;
+    inputAssignment.m_asgnSrc.m_chainerID.clusterHandle = eClusterHandle_Physical_IO;
+    inputAssignment.m_asgnSrc.m_eChainerSubIndex = eChainerSub_NoSub;
+    inputAssignment.m_asgnSrc.m_uiMixMtxSubIndex = physical_input;
+    
+    inputAssignment.m_asgnDest.m_chainerID.clusterType = eClusterType_Outputs;
+    inputAssignment.m_asgnDest.m_chainerID.clusterHandle = eClusterHandle_Physical_Driver;
+    inputAssignment.m_asgnDest.m_eChainerSubIndex = eChainerSub_NoSub;
+    inputAssignment.m_asgnDest.m_uiMixMtxSubIndex = driver_channel;
+
+    return command (&myCommand.m_command);
+}
+
+int
+SoundGrid::map_inputs_as_jack_ports (uint32_t ninputs)
+{
+        DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("map %1 SG inputs to coreaudio/jack driver\n", ninputs));
+        for (uint32_t n = 0; n < ninputs; ++n) {
+                if (connect_input_channel_to_driver (n, n)) {
+                        return -1;
+                }
+        }
+        return 0;
+}
+
+std::string
+SoundGrid::map_chainer_input_as_jack_port (uint32_t chainer_id, uint32_t channel)
+{
+    WSAssignmentsCommand myCommand;
+
+    /* this takes a given chainer ID and its input channel, figures out a spare device driver channel, and
+       connects that driver channel to the specified chainer input. if successful, it returns the name
+       of the jack port that can be used to deliver input to the chainer. if unsuccessful, it returns
+       an empty string.
+    */
+
+    DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Try to map input %1 of track %2 to driver port\n",
+                                                   channel, chainer_id));
+
+    /* Find next free driver channel to use to represent chainer input.
+       Note that we search backwards. This doesn't eliminate the issues that
+       will arise if we end up overlapping with the ports used for normal
+       physical output, but makes it less likely.
+     */
+
+    uint32_t driver_output_channel;
+    bool found = false;
+    uint32_t n = _driver_ports_in_use.size () - 1;
+
+    for (vector<bool>::reverse_iterator x = _driver_ports_in_use.rbegin(); x != _driver_ports_in_use.rend(); ++x) {
+            if (!(*x)) {
+
+                    DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Found unused driver channel %1 to map input %2 of chainer %3\n",
+                                                                   n, channel, chainer_id));
+                    driver_output_channel = n;
+                    found = true;
+                    break;
+            }
+            --n;
+    }
+
+    Init_WSAddAssignmentsCommand(&myCommand, 1, (WSDControllerHandle)this, 0);
+    WSAudioAssignment &trackAssignment (myCommand.in_Assignments.m_aAssignments[0]);
+    trackAssignment.m_asgnSrc.m_chainerID.clusterType = eClusterType_Inputs;
+    trackAssignment.m_asgnSrc.m_chainerID.clusterHandle = eClusterHandle_Physical_Driver;
+    trackAssignment.m_asgnSrc.m_eChainerSubIndex = eChainerSub_NoSub; // Physical and Driver inputs have no sub index, because they are always mono
+    trackAssignment.m_asgnSrc.m_uiMixMtxSubIndex = driver_output_channel; // Mix Matrix Sub Index for Physical and IO represent the io or driver channel number.
+
+    trackAssignment.m_asgnDest.m_chainerID.clusterType = eClusterType_Input;
+    trackAssignment.m_asgnDest.m_chainerID.clusterHandle = chainer_id;
+    trackAssignment.m_asgnDest.m_eChainerSubIndex = eChainerSub_NoSub;
+    trackAssignment.m_asgnDest.m_uiMixMtxSubIndex = (uint32_t) -1; // XXX this should be the channel parameter passed in
+
+    if (command (&myCommand.m_command) == 0) {
+            return string_compose ("system:playback_%1", driver_output_channel+1);
+    } else {
+            return string();
+    }
+}
+
+void
+SoundGrid::remove_chainer_input (uint32_t chainer_id, uint32_t channel)
+{
+        
+}
+
+
+

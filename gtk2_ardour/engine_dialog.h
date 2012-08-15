@@ -186,6 +186,16 @@ class EngineControl : public Gtk::VBox {
 	std::vector<std::string> server_strings;
 	void find_jack_servers (std::vector<std::string>&);
 	std::string get_device_name (const std::string& driver, const std::string& human_readable_name);
+
+#ifdef HAVE_SOUNDGRID
+        Gtk::Label*     inputs_label;
+        Gtk::Adjustment inputs_adjustment;
+        Gtk::SpinButton inputs_spinner;
+
+        Gtk::Label*     outputs_label;
+        Gtk::Adjustment outputs_adjustment;
+        Gtk::SpinButton outputs_spinner;
+#endif
 };
 
 #endif /* __gtk2_ardour_engine_dialog_h__ */

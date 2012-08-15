@@ -53,6 +53,7 @@
 #include "ardour/port.h"
 #include "ardour/port_insert.h"
 #include "ardour/processor.h"
+#include "ardour/profile.h"
 #include "ardour/route.h"
 #include "ardour/route_group.h"
 #include "ardour/send.h"
@@ -97,7 +98,7 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	, _in_configure_processors (false)
 	, _custom_meter_position_noted (false)
 	, _last_custom_meter_was_at_end (false)
-        , _sg_rack (new SoundGridRack (sess, *this, name))
+        , _sg_rack (0)
 {
 	processor_max_streams.reset();
 }
@@ -131,6 +132,10 @@ Route::init ()
 	_input->PortCountChanging.connect_same_thread (*this, boost::bind (&Route::input_port_count_changing, this, _1));
 
 	_output->changed.connect_same_thread (*this, boost::bind (&Route::output_change_handler, this, _1, _2));
+
+        if (Profile->get_soundgrid()) {
+                _sg_rack = new SoundGridRack (_session, *this, name());
+        }
 
 	/* add amp processor  */
 
@@ -190,12 +195,18 @@ Route::~Route ()
 	   be half-destroyed by now
 	*/
 
-	Glib::Threads::RWLock::WriterLock lm (_processor_lock);
-	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		(*i)->drop_references ();
-	}
+        {
+                Glib::Threads::RWLock::WriterLock lm (_processor_lock);
+                for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+                        (*i)->drop_references ();
+                }
+                
+                _processors.clear ();
+        }
 
-	_processors.clear ();
+        if (_sg_rack) {
+                delete _sg_rack;
+        }
 }
 
 void

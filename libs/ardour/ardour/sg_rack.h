@@ -21,8 +21,11 @@
 #define __ardour_sg_rack_h__
 
 #include <list>
+#include <map>
 #include <string>
 #include <boost/shared_ptr.hpp>
+
+#include <glibmm/threads.h>
 
 #include "ardour/types.h"
 #include "ardour/session_object.h"
@@ -47,7 +50,18 @@ class SoundGridRack : public SessionObject {
     XMLNode& get_state() { return *(new XMLNode ("SGRack")); }
     int set_state (const XMLNode&, int /* version*/) { return 0; }
 
+    int32_t jack_port_as_input (const std::string& port_name);
+    std::string input_as_jack_port (uint32_t chn);
+
+    int make_connections ();
+    
   private:
+    typedef std::map<uint32_t,std::string> ChannelJackMap;
+    ChannelJackMap channel_jack_map;
+    typedef std::map<std::string,uint32_t> JackChannelMap;
+    JackChannelMap jack_channel_map;
+    Glib::Threads::Mutex map_lock;
+
     Route& _route;
     uint32_t _rack_id;
 

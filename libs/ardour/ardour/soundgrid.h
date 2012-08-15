@@ -42,7 +42,8 @@ class SoundGrid : public boost::noncopyable
   public:
 	~SoundGrid ();
 
-        int initialize (void* window_handle);
+        int initialize (void* window_handle, uint32_t max_track_inputs, uint32_t max_track_ouputs,
+                        uint32_t max_phys_inputs, uint32_t max_phys_outputs);
         int teardown ();
 
 	static SoundGrid& instance();
@@ -81,8 +82,6 @@ class SoundGrid : public boost::noncopyable
 
         static void driver_register (const WSDCoreHandle, const WSCoreCallbackTable*, const WSMixerConfig*);
 
-        static void set_pool (void* pool);
-        
         void finalize (void* ecc, int state);
         void command_status_update (struct WSCommand*);
 
@@ -92,13 +91,21 @@ class SoundGrid : public boost::noncopyable
         bool add_rack_asynchronous (uint32_t clusterType);
         bool remove_rack_synchronous (uint32_t clusterType, uint32_t trackHandle);
         bool remove_all_racks_synchronous ();
-        void connect (uint32_t clusterType, uint32_t trackHandle,
-                      uint32_t inputChannel, uint32_t outputChannel);
-        void disconnect (uint32_t clusterType, uint32_t trackHandle,
-                         uint32_t inputChannel, uint32_t outputChannel);
+        int connect_input (uint32_t trackHandle, uint32_t chn, uint32_t phys_chn);
+        int connect_output (uint32_t trackHandle, uint32_t chn, uint32_t phys_chn);
+        int disconnect_input (uint32_t trackHandle, uint32_t chn, uint32_t phys_chn);
+        int disconnect_output (uint32_t trackHandle, uint32_t chn, uint32_t phys_chn);
         int set_gain (uint32_t in_clusterType, uint32_t in_trackHandle, double in_gainValue);
         bool get_gain (uint32_t in_clusterType, uint32_t in_trackHandle, double &out_gainValue);
 
+        int configure_driver (uint32_t physical_inputs, uint32_t physical_outputs);
+        int connect_input_channel_to_driver (uint32_t physical_input, uint32_t driver_channel);
+        int disconnect_input_channel_to_driver (uint32_t physical_input, uint32_t driver_channel);
+
+        std::string map_chainer_input_as_jack_port (uint32_t chainer_id, uint32_t channel);
+        void remove_chainer_input (uint32_t chainer_id, uint32_t channel);
+
+        int map_inputs_as_jack_ports (uint32_t ninputs);
 
   private:
 	SoundGrid ();
@@ -109,7 +116,6 @@ class SoundGrid : public boost::noncopyable
         WSDCoreHandle        _host_handle;
         WSCoreCallbackTable  _callback_table;
         WSMixerConfig        _mixer_config;
-        void* _pool;
 
 	void display_update ();
 	static void _display_update ();
@@ -145,6 +151,9 @@ class SoundGrid : public boost::noncopyable
             
             static int id_counter; 
         };
+
+        uint32_t          _driver_ports; // how many total channels we tell the SG driver to allocate
+        std::vector<bool> _driver_ports_in_use;
 };
 
 } // namespace ARDOUR

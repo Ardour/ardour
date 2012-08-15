@@ -17,6 +17,8 @@
 
 */
 
+#include "gtk2ardour-config.h"
+
 #include <vector>
 #include <cmath>
 #include <fstream>
@@ -91,7 +93,7 @@ EngineControl::EngineControl ()
 	  start_button (_("Start")),
 	  stop_button (_("Stop")),
 #ifdef __APPLE__
-	  basic_packer (5, 2),
+	  basic_packer (7, 2),
 	  options_packer (4, 2),
 	  device_packer (4, 2)
 #else
@@ -99,6 +101,16 @@ EngineControl::EngineControl ()
 	, options_packer (14, 2)
 	, device_packer (6, 2)
 #endif
+
+#ifdef HAVE_SOUNDGRID
+        , inputs_label (0)
+        , inputs_adjustment (32, 1, 32, 1)
+        , inputs_spinner (inputs_adjustment)
+        , outputs_label (0)
+        , outputs_adjustment (32, 1, 32, 1)
+        , outputs_spinner (inputs_adjustment)
+#endif
+
 {
 	using namespace Notebook_Helpers;
 	Label* label;
@@ -158,7 +170,6 @@ EngineControl::EngineControl ()
 	driver_combo.set_active_text (strings.front());
 
 	driver_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::driver_changed));
-	driver_changed ();
 
 	strings.clear ();
 	strings.push_back (_("Playback/recording on 1 device"));
@@ -187,8 +198,9 @@ EngineControl::EngineControl ()
 	basic_packer.attach (driver_combo, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	row++;
 
-	label = manage (left_aligned_label (_("Audio Interface:")));
-	basic_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+        device_label.set_text (_("Audio Interface:"));
+        device_label.set_alignment (0, 0.5);
+	basic_packer.attach (device_label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	basic_packer.attach (interface_combo, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	row++;
 
@@ -201,6 +213,18 @@ EngineControl::EngineControl ()
 	basic_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	basic_packer.attach (period_size_combo, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	row++;
+
+#ifdef HAVE_SOUNDGRID
+	inputs_label = manage (left_aligned_label (_("Physical input channels:")));
+	basic_packer.attach (*inputs_label, 0, 1, row, row+1, FILL|EXPAND, (AttachOptions) 0);
+	basic_packer.attach (inputs_spinner, 1, 2, row, row+1, FILL|EXPAND, (AttachOptions) 0);
+        cerr << "Packed inputs spinner on row " << row << endl;
+	++row;
+	outputs_label = manage (left_aligned_label (_("Physical output channels:")));
+	basic_packer.attach (*outputs_label, 0, 1, row, row+1, FILL|EXPAND, (AttachOptions) 0);
+	basic_packer.attach (outputs_spinner, 1, 2, row, row+1, FILL|EXPAND, (AttachOptions) 0);
+	++row;
+#endif
 
 #ifndef __APPLE__
 	label = manage (left_aligned_label (_("Number of buffers:")));
@@ -249,6 +273,10 @@ EngineControl::EngineControl ()
 	button_box.pack_start (stop_button, false, false);
 
 	// basic_packer.attach (button_box, 0, 2, 8, 9, FILL|EXPAND, (AttachOptions) 0);
+
+        /* get the initial display right */
+        
+	driver_changed ();
 
 	/* options */
 
@@ -349,6 +377,7 @@ EngineControl::EngineControl ()
 	device_packer.attach (output_device_combo, 1, 2, row, row+1, FILL|EXPAND, (AttachOptions) 0);
 	++row;
 #endif
+
 	label = manage (left_aligned_label (_("Hardware input latency:")));
 	device_packer.attach (*label, 0, 1, row, row+1, FILL|EXPAND, (AttachOptions) 0);
 	device_packer.attach (input_latency, 1, 2, row, row+1, FILL|EXPAND, (AttachOptions) 0);
@@ -678,7 +707,7 @@ EngineControl::enumerate_devices (const string& driver)
 		devices[driver] = enumerate_coreaudio_devices ();
 	} else if (driver == "SoundGrid") {
 
-                soundgrid_init ();
+                soundgrid_init (64, 64, inputs_adjustment.get_value(), outputs_adjustment.get_value());
 		devices[driver] = vector<string>();
 
 #else
@@ -915,18 +944,35 @@ EngineControl::driver_changed ()
 
 	enumerate_devices (driver);
 
+#ifdef HAVE_SOUNDGRID
         if (driver == "SoundGrid") {
+
                 device_label.hide ();
                 interface_combo.hide ();
                 input_device_combo.hide ();
                 output_device_combo.hide ();
+
+                inputs_label->show ();
+                inputs_spinner.show ();
+                outputs_label->show ();
+                outputs_spinner.show ();
+
                 return;
+
         } else {
+
+                inputs_label->hide ();
+                inputs_spinner.hide ();
+                outputs_label->hide ();
+                outputs_spinner.hide ();
+
                 device_label.show ();
                 interface_combo.show ();
                 input_device_combo.show ();
                 output_device_combo.show ();
+
         }
+#endif
 
 	vector<string>& strings = devices[driver];
 

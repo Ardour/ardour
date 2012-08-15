@@ -22,79 +22,79 @@ struct WSCoreCallbackTable
  /* This API is really a C API, but we want to be able to use C++ objects within it, so ... */
 extern "C" {
 
-static const char* surface_type = PROGRAM_NAME;
+static const char* controller_type = PROGRAM_NAME;
 
 uint32_t 
 WMSD_QueryInterfaceVersion()
 {
-        DEBUG_TRACE (DEBUG::SGSurface, string_compose ("SurfaceDriver:%1\n", __FUNCTION__));
+        DEBUG_TRACE (DEBUG::SGDriver, string_compose ("ControllerDriver:%1\n", __FUNCTION__));
         return WMSD_INTERFACE_VERSION;
 }
 
-WSDSurfaceHandle 
-WMSD_CreateSurfaceFromPreset (const WSDCoreHandle hostHandle, 
+WSDControllerHandle 
+WMSD_CreateControllerFromPreset (const WSDCoreHandle hostHandle, 
                               const WSCoreCallbackTable* pCallbackTable, const WSMixerConfig* pMixerConfig, 
                               const void*, WSDSize)
 {
-        DEBUG_TRACE (DEBUG::SGSurface, string_compose ("SurfaceDriver:%1\n", __FUNCTION__));
+        DEBUG_TRACE (DEBUG::SGDriver, string_compose ("ControllerDriver:%1\n", __FUNCTION__));
         SoundGrid::driver_register (hostHandle, pCallbackTable, pMixerConfig);
-        return (WSDSurfaceHandle) &SoundGrid::instance();
+        return (WSDControllerHandle) &SoundGrid::instance();
 }
 
 WMSDErr 
-WMSD_GetAvailableSurfaceInfo (struct WMSD_SURFACEINFO *p)
+WMSD_GetAvailableControllerInfo (struct WMSD_CONTROLLERINFO *p)
 {
-        DEBUG_TRACE (DEBUG::SGSurface, string_compose ("SurfaceDriver:%1\n", __FUNCTION__));
-        strncpy (p->surfaceDriverName, "ArdourSurfaceDriver", WMSD_MAX_SURFACEDRIVERNAME_LENGTH);
-        strncpy (p->surfaceDriverCategory, "Ardour", WMSD_MAX_SURFACEDRIVERCATEGORY_LENGTH);
-        strncpy (p->surfaceType, surface_type, WMSD_MAX_SURFACETYPE_LENGTH);
+        DEBUG_TRACE (DEBUG::SGDriver, string_compose ("ControllerDriver:%1\n", __FUNCTION__));
+        strncpy (p->mixerDriverName, "ArdourControllerDriver", WMSD_MAX_MIXERDRIVERNAME_LENGTH);
+        strncpy (p->mixerDriverCategory, "Ardour", WMSD_MAX_MIXERDRIVERCATEGORY_LENGTH);
+        strncpy (p->controllerType, controller_type, WMSD_MAX_CONTROLLERTYPE_LENGTH);
 
         return eNoErr;
 }
 
-WSDSurfaceHandle 
-WMSD_CreateSurfaceForType (const char* /* pSurfaceType */, 
+WSDControllerHandle 
+WMSD_CreateControllerForType (const char* /* pControllerType */, 
                            const WSDCoreHandle hostHandle, const WSCoreCallbackTable* pCallbackTable, 
                            const WSMixerConfig* pMixerConfig)
 {
-        DEBUG_TRACE (DEBUG::SGSurface, string_compose ("SurfaceDriver:%1\n", __FUNCTION__));
+        DEBUG_TRACE (DEBUG::SGDriver, string_compose ("ControllerDriver:%1\n", __FUNCTION__));
         SoundGrid::driver_register (hostHandle, pCallbackTable, pMixerConfig);
-        return (WSDSurfaceHandle) &SoundGrid::instance();
+        return (WSDControllerHandle) &SoundGrid::instance();
 }
 
 WMSDErr 
-WMSD_ShowConfigWindow (const WSDSurfaceHandle /* surfaceHandle */)
+WMSD_ShowConfigWindow (const WSDControllerHandle /* controllerHandle */)
 {
-        DEBUG_TRACE (DEBUG::SGSurface, string_compose ("SurfaceDriver:%1\n", __FUNCTION__));
+        DEBUG_TRACE (DEBUG::SGDriver, string_compose ("ControllerDriver:%1\n", __FUNCTION__));
         return eNoErr;
 }
 
 WMSDErr 
-WMSD_IdentifySurface (const WSDSurfaceHandle /*surfaceHandle*/, const bool /*turnOnLed*/)
+WMSD_IdentifyController (const WSDControllerHandle /*controllerHandle*/, const bool /*turnOnLed*/)
 {
-        DEBUG_TRACE (DEBUG::SGSurface, string_compose ("SurfaceDriver:%1\n", __FUNCTION__));
+        DEBUG_TRACE (DEBUG::SGDriver, string_compose ("ControllerDriver:%1\n", __FUNCTION__));
         return eNoErr;
 }
 
 WMSDErr 
-WMSD_GetPreset (const WSDSurfaceHandle /*surfaceHandle*/, void* /*pPresetChunk*/, WSDSize *pPresetSize)
+WMSD_GetPreset (const WSDControllerHandle /*controllerHandle*/, void* /*pPresetChunk*/, WSDSize *pPresetSize)
 {
-        DEBUG_TRACE (DEBUG::SGSurface, string_compose ("SurfaceDriver:%1\n", __FUNCTION__));
+        DEBUG_TRACE (DEBUG::SGDriver, string_compose ("ControllerDriver:%1\n", __FUNCTION__));
         *pPresetSize = 0;
         return eNoErr;
 }
 
 WMSDErr 
-WMSD_SetPreset (const WSDSurfaceHandle /*surfaceHandle*/, void* /*pPresetChunk*/, WSDSize /*presetSize*/)
+WMSD_SetPreset (const WSDControllerHandle /*controllerHandle*/, void* /*pPresetChunk*/, WSDSize /*presetSize*/)
 {
-        DEBUG_TRACE (DEBUG::SGSurface, string_compose ("SurfaceDriver:%1\n", __FUNCTION__));
+        DEBUG_TRACE (DEBUG::SGDriver, string_compose ("ControllerDriver:%1\n", __FUNCTION__));
         return eNoErr;
 }
 
 WMSDErr 
-WMSD_CommandStatusUpdate(const WSDSurfaceHandle controllerHandle, struct WSCommand* pCommand )
+WMSD_CommandStatusUpdate(const WSDControllerHandle controllerHandle, struct WSCommand* pCommand )
 {
-        DEBUG_TRACE (DEBUG::SGSurface, string_compose ("CommandStatusUpdate, controllerHandle = %1, commandStatus = %2\n",
+        DEBUG_TRACE (DEBUG::SGDriver, string_compose ("CommandStatusUpdate, controllerHandle = %1, commandStatus = %2\n",
                                                        controllerHandle, pCommand->out_status));
         SoundGrid* sg = (SoundGrid *)controllerHandle;
 
@@ -106,53 +106,53 @@ WMSD_CommandStatusUpdate(const WSDSurfaceHandle controllerHandle, struct WSComma
 }
 
 WMSDErr 
-WMSD_SurfaceDisplayUpdate (const WSDSurfaceHandle surfaceHandle, 
+WMSD_ControllerDisplayUpdate (const WSDControllerHandle controllerHandle, 
                            const struct WSControlID* pControlID)
 {
-        SoundGrid* sg = (SoundGrid*) surfaceHandle;
+        SoundGrid* sg = (SoundGrid*) controllerHandle;
 
         switch (pControlID->clusterID.clusterType) {
 
         case eClusterType_Global:
-                switch (pControlID->clusterID.clusterIndex) {
+                switch (pControlID->clusterID.clusterHandle) {
                 case eClusterType_Global_AudioSetup:
-                        DEBUG_TRACE (DEBUG::SGSurface, "AudioSetup\n");
+                        DEBUG_TRACE (DEBUG::SGDriver, "AudioSetup\n");
                         break;
                 case eClusterType_Global_SGSetup:
-                        DEBUG_TRACE (DEBUG::SGSurface, "SGSetup\n");
+                        DEBUG_TRACE (DEBUG::SGDriver, "SGSetup\n");
                         break;
                 case eClusterType_Global_DoIdleEvents:
-                        DEBUG_TRACE (DEBUG::SGSurface, "DoIdleEvents\n");
+                        DEBUG_TRACE (DEBUG::SGDriver, "DoIdleEvents\n");
                         break;
                 case eClusterType_Global_AudioDevicePanel:
-                        DEBUG_TRACE (DEBUG::SGSurface, "AudioDevicePanel\n");
+                        DEBUG_TRACE (DEBUG::SGDriver, "AudioDevicePanel\n");
                         break;
                 case eClusterType_Global_Channel:
-                        DEBUG_TRACE (DEBUG::SGSurface, "Channel\n");
+                        DEBUG_TRACE (DEBUG::SGDriver, "Channel\n");
                         break;
                 case eClusterType_Global_RequestTimeout:
-                        DEBUG_TRACE (DEBUG::SGSurface, "RequestTimeout\n");
+                        DEBUG_TRACE (DEBUG::SGDriver, "RequestTimeout\n");
                         break;
                 case eClusterType_Global_SurfacesSetup:
-                        DEBUG_TRACE (DEBUG::SGSurface, "SurfacesSetup\n");
+                        DEBUG_TRACE (DEBUG::SGDriver, "SurfacesSetup\n");
                         break;
                 case eClusterType_Global_TimerReason:
-                        DEBUG_TRACE (DEBUG::SGSurface, "TimerReason\n");
+                        DEBUG_TRACE (DEBUG::SGDriver, "TimerReason\n");
                         break;
                 case eClusterType_Global_SessionFile:
-                        DEBUG_TRACE (DEBUG::SGSurface, "SessionFile\n");
+                        DEBUG_TRACE (DEBUG::SGDriver, "SessionFile\n");
                         break;
                 case eClusterType_Global_PreviewMode:
-                        DEBUG_TRACE (DEBUG::SGSurface, "PreviewMode\n");
+                        DEBUG_TRACE (DEBUG::SGDriver, "PreviewMode\n");
                         break;
                 case eClusterType_Global_Assignment:
-                        DEBUG_TRACE (DEBUG::SGSurface, "Assignment\n");
+                        DEBUG_TRACE (DEBUG::SGDriver, "Assignment\n");
                         break;
                 case eClusterType_Global_Scene:
-                        DEBUG_TRACE (DEBUG::SGSurface, "Scene\n");
+                        DEBUG_TRACE (DEBUG::SGDriver, "Scene\n");
                         break;
                 case eClusterType_Global_Notification:
-                        DEBUG_TRACE (DEBUG::SGSurface, string_compose ("Surface Update, notification event %1 state %2\n",
+                        DEBUG_TRACE (DEBUG::SGDriver, string_compose ("Controller Update, notification event %1 state %2\n",
                                                                        ((WSControlIDNotification*) pControlID)->pEventTicket,
                                                                        ((WSControlIDNotification*) pControlID)->eventState));
                         if (sg) {
@@ -162,8 +162,8 @@ WMSD_SurfaceDisplayUpdate (const WSDSurfaceHandle surfaceHandle,
 
                         break;
                 default:
-                        DEBUG_TRACE (DEBUG::SGSurface, string_compose ("Surface Update, global index %1 ctype %2 cindex %3 cid %4\n",
-                                                               pControlID->clusterID.clusterIndex,
+                        DEBUG_TRACE (DEBUG::SGDriver, string_compose ("Controller Update, global index %1 ctype %2 cindex %3 cid %4\n",
+                                                               pControlID->clusterID.clusterHandle,
                                                                pControlID->sectionControlID.sectionType,
                                                                pControlID->sectionControlID.sectionIndex,
                                                                pControlID->sectionControlID.controlID));
@@ -171,34 +171,34 @@ WMSD_SurfaceDisplayUpdate (const WSDSurfaceHandle surfaceHandle,
                 }
                 break;
         case eClusterType_Input:
-                // DEBUG_TRACE (DEBUG::SGSurface, "update, InputChannel\n");
+                // DEBUG_TRACE (DEBUG::SGDriver, "update, InputChannel\n");
                 break;
         case eClusterType_Group:
-                // DEBUG_TRACE (DEBUG::SGSurface, "update, GroupChannel\n");
+                // DEBUG_TRACE (DEBUG::SGDriver, "update, GroupChannel\n");
                 break;
         case eClusterType_Aux:
-                // DEBUG_TRACE (DEBUG::SGSurface, "update, AuxChannel\n");
+                // DEBUG_TRACE (DEBUG::SGDriver, "update, AuxChannel\n");
                 break;
         case eClusterType_Matrix:
-                // DEBUG_TRACE (DEBUG::SGSurface, "update, MatrixChannel\n");
+                // DEBUG_TRACE (DEBUG::SGDriver, "update, MatrixChannel\n");
                 break;
         case eClusterType_LCRM:
-                // DEBUG_TRACE (DEBUG::SGSurface, "update, LCRMChannel\n");
+                // DEBUG_TRACE (DEBUG::SGDriver, "update, LCRMChannel\n");
                 break;
         case eClusterType_DCA:
-                // DEBUG_TRACE (DEBUG::SGSurface, "update, DCAChannel\n");
+                // DEBUG_TRACE (DEBUG::SGDriver, "update, DCAChannel\n");
                 break;
         case eClusterType_Cue:
-                // DEBUG_TRACE (DEBUG::SGSurface, "update, CueChannel\n");
+                // DEBUG_TRACE (DEBUG::SGDriver, "update, CueChannel\n");
                 break;
         case eClusterType_TB:
-                // DEBUG_TRACE (DEBUG::SGSurface, "update, TBChannel\n");
+                // DEBUG_TRACE (DEBUG::SGDriver, "update, TBChannel\n");
                 break;
         case eClusterType_Inputs:
-                // DEBUG_TRACE (DEBUG::SGSurface, "update, Inputs\n");
+                // DEBUG_TRACE (DEBUG::SGDriver, "update, Inputs\n");
                 break;
         case eClusterType_Outputs:
-                // DEBUG_TRACE (DEBUG::SGSurface, "update, Outputs\n");
+                // DEBUG_TRACE (DEBUG::SGDriver, "update, Outputs\n");
                 break;
 
         default:
@@ -209,18 +209,18 @@ WMSD_SurfaceDisplayUpdate (const WSDSurfaceHandle surfaceHandle,
 }
 
 WMSDErr 
-WMSD_DestroySurface (const WSDSurfaceHandle /*surfaceHandle*/)
+WMSD_DestroyController (const WSDControllerHandle /*controllerHandle*/)
 {
-        DEBUG_TRACE (DEBUG::SGSurface, string_compose ("SurfaceDriver:%1\n", __FUNCTION__));
+        DEBUG_TRACE (DEBUG::SGDriver, string_compose ("ControllerDriver:%1\n", __FUNCTION__));
         SoundGrid::driver_register (0, 0, 0);
         return eNoErr;
 }
 
 WMSDErr 
-WMSD_GetTypeForSurface (const WSDSurfaceHandle /*surfaceHandle*/, char *out_surfaceType)
+WMSD_GetTypeForController (const WSDControllerHandle /*controllerHandle*/, char *out_controllerType)
 {
-        DEBUG_TRACE (DEBUG::SGSurface, string_compose ("SurfaceDriver:%1\n", __FUNCTION__));
-        strncpy (out_surfaceType, surface_type, WMSD_MAX_SURFACETYPE_LENGTH);
+        DEBUG_TRACE (DEBUG::SGDriver, string_compose ("ControllerDriver:%1\n", __FUNCTION__));
+        strncpy (out_controllerType, controller_type, WMSD_MAX_CONTROLLERTYPE_LENGTH);
         return eNoErr;
 }
 
