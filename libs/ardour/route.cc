@@ -1021,7 +1021,7 @@ Route::add_processor (boost::shared_ptr<Processor> processor, boost::shared_ptr<
 
 		}
 
-		if (activation_allowed) {
+		if (activation_allowed && !_session.get_disable_all_loaded_plugins()) {
 			processor->activate ();
 		}
 
