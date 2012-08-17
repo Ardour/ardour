@@ -149,6 +149,9 @@ class LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	static uint32_t _sequence_type;
 	static uint32_t _event_transfer_type;
 	static uint32_t _path_type;
+	static uint32_t _log_Error;
+	static uint32_t _log_Warning;
+	static uint32_t _log_Note;
 
   private:
 	struct Impl;
@@ -215,6 +218,7 @@ class LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	LV2_Feature    _data_access_feature;
 	LV2_Feature    _instance_access_feature;
 	LV2_Feature    _make_path_feature;
+	LV2_Feature    _log_feature;
 	LV2_Feature    _work_schedule_feature;
 	LV2_Feature    _buf_size_feature;
 

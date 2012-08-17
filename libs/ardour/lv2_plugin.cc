@@ -24,8 +24,9 @@
 #include <cstdlib>
 #include <cstring>
 
-#include <glibmm.h>
 #include <giomm/file.h>
+#include <glib/gprintf.h>
+#include <glibmm.h>
 
 #include <boost/utility.hpp>
 
@@ -50,6 +51,7 @@
 #include <lilv/lilv.h>
 
 #include "lv2/lv2plug.in/ns/ext/atom/atom.h"
+#include "lv2/lv2plug.in/ns/ext/log/log.h"
 #include "lv2/lv2plug.in/ns/ext/port-props/port-props.h"
 #include "lv2/lv2plug.in/ns/ext/presets/presets.h"
 #include "lv2/lv2plug.in/ns/ext/state/state.h"
@@ -81,6 +83,12 @@ uint32_t LV2Plugin::_event_transfer_type = _uri_map.uri_to_id(
 	LV2_ATOM__eventTransfer);
 uint32_t LV2Plugin::_path_type = _uri_map.uri_to_id(
 	LV2_ATOM__Path);
+uint32_t LV2Plugin::_log_Error = _uri_map.uri_to_id(
+	LV2_LOG__Error);
+uint32_t LV2Plugin::_log_Warning = _uri_map.uri_to_id(
+	LV2_LOG__Warning);
+uint32_t LV2Plugin::_log_Note = _uri_map.uri_to_id(
+	LV2_LOG__Note);
 
 class LV2World : boost::noncopyable {
 public:
@@ -112,6 +120,8 @@ public:
 };
 
 static LV2World _world;
+
+/* worker extension */
 
 /** Called by the plugin to schedule non-RT work. */
 static LV2_Worker_Status
@@ -146,6 +156,8 @@ work_respond(LV2_Worker_Respond_Handle handle,
 			LV2_WORKER_SUCCESS : LV2_WORKER_ERR_UNKNOWN;
 	}
 }
+
+/* buf-size extension */
 
 #ifdef HAVE_NEW_LV2
 /** Called by the plugin to discover properties of the block length. */
@@ -184,6 +196,39 @@ static LV2_Buf_Size_Access buf_size_access = {
 	NULL, sizeof(LV2_Buf_Size_Access), get_sample_count, get_buf_size
 };
 #endif
+
+/* log extension */
+
+static int
+log_vprintf(LV2_Log_Handle handle,
+            LV2_URID       type,
+            const char*    fmt,
+            va_list        args)
+{
+	char* str = NULL;
+	const int ret = g_vasprintf(&str, fmt, args);
+	if (type == LV2Plugin::_log_Error) {
+		error << str << endmsg;
+	} else if (type == LV2Plugin::_log_Warning) {
+		warning << str << endmsg;
+	} else if (type == LV2Plugin::_log_Note) {
+		info << str << endmsg;
+	}
+	// TODO: Togglable log:Trace message support
+	return ret;
+}
+
+static int
+log_printf(LV2_Log_Handle handle,
+           LV2_URID       type,
+           const char*    fmt, ...)
+{
+	va_list args;
+	va_start(args, fmt);
+	const int ret = log_vprintf(handle, type, fmt, args);
+	va_end(args);
+	return ret;
+}
 
 struct LV2Plugin::Impl {
 	Impl() : plugin(0), ui(0), ui_type(0), name(0), author(0), instance(0)
@@ -259,6 +304,7 @@ LV2Plugin::init(void* c_plugin, framecnt_t rate)
 	_instance_access_feature.URI = "http://lv2plug.in/ns/ext/instance-access";
 	_data_access_feature.URI     = "http://lv2plug.in/ns/ext/data-access";
 	_make_path_feature.URI       = LV2_STATE__makePath;
+	_log_feature.URI             = LV2_LOG__log;
 	_work_schedule_feature.URI   = LV2_WORKER__schedule;
 	_work_schedule_feature.data  = NULL;
 
@@ -280,15 +326,16 @@ LV2Plugin::init(void* c_plugin, framecnt_t rate)
 	lilv_node_free(state_uri);
 	lilv_node_free(state_iface_uri);
 
-	_features    = (LV2_Feature**)calloc(8, sizeof(LV2_Feature*));
+	_features    = (LV2_Feature**)calloc(10, sizeof(LV2_Feature*));
 	_features[0] = &_instance_access_feature;
 	_features[1] = &_data_access_feature;
 	_features[2] = &_make_path_feature;
 	_features[3] = _uri_map.uri_map_feature();
 	_features[4] = _uri_map.urid_map_feature();
 	_features[5] = _uri_map.urid_unmap_feature();
+	_features[6] = &_log_feature;
 
-	unsigned n_features = 6;
+	unsigned n_features = 7;
 #ifdef HAVE_NEW_LV2
 	_buf_size_feature.URI  = LV2_BUF_SIZE__access;
 	_buf_size_feature.data = &buf_size_access;
@@ -301,6 +348,12 @@ LV2Plugin::init(void* c_plugin, framecnt_t rate)
 	make_path->handle = this;
 	make_path->path = &lv2_state_make_path;
 	_make_path_feature.data = make_path;
+
+	LV2_Log_Log* log = (LV2_Log_Log*)malloc(sizeof(LV2_Log_Log));
+	log->handle  = this;
+	log->printf  = &log_printf;
+	log->vprintf = &log_vprintf;
+	_log_feature.data = log;
 
 	LilvNode* worker_schedule = lilv_new_uri(_world.world, LV2_WORKER__schedule);
 	if (lilv_plugin_has_feature(plugin, worker_schedule)) {
