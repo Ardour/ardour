@@ -241,19 +241,19 @@ struct LV2Plugin::Impl {
 	 */
 	LilvPort* designated_input (const char* uri, void** bufptrs[], void** bufptr);
 
-	LilvPlugin*           plugin;
-	const LilvUI*         ui;
-	const LilvNode*       ui_type;
-	LilvNode*             name;
-	LilvNode*             author;
-	LilvInstance*         instance;
-	LV2_Worker_Interface* work_iface;
-	LilvState*            state;
+	const LilvPlugin*           plugin;
+	const LilvUI*               ui;
+	const LilvNode*             ui_type;
+	LilvNode*                   name;
+	LilvNode*                   author;
+	LilvInstance*               instance;
+	const LV2_Worker_Interface* work_iface;
+	LilvState*                  state;
 };
 
 LV2Plugin::LV2Plugin (AudioEngine& engine,
                       Session&     session,
-                      void*        c_plugin,
+                      const void*  c_plugin,
                       framecnt_t   rate)
 	: Plugin (engine, session)
 	, Workee ()
@@ -282,11 +282,11 @@ LV2Plugin::LV2Plugin (const LV2Plugin& other)
 }
 
 void
-LV2Plugin::init(void* c_plugin, framecnt_t rate)
+LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 {
 	DEBUG_TRACE(DEBUG::LV2, "init\n");
 
-	_impl->plugin           = (LilvPlugin*)c_plugin;
+	_impl->plugin           = (const LilvPlugin*)c_plugin;
 	_impl->ui               = NULL;
 	_impl->ui_type          = NULL;
 	_to_ui                  = NULL;
@@ -314,7 +314,7 @@ LV2Plugin::init(void* c_plugin, framecnt_t rate)
 	buf_size_access.handle = &_engine;
 #endif
 
-	LilvPlugin* plugin = _impl->plugin;
+	const LilvPlugin* plugin = _impl->plugin;
 
 	LilvNode* state_iface_uri = lilv_new_uri(_world.world, LV2_STATE__interface);
 	LilvNode* state_uri       = lilv_new_uri(_world.world, LV2_STATE_URI);
@@ -380,7 +380,8 @@ LV2Plugin::init(void* c_plugin, framecnt_t rate)
 	_data_access_extension_data.extension_data = _impl->instance->lv2_descriptor->extension_data;
 	_data_access_feature.data                  = &_data_access_extension_data;
 
-	_impl->work_iface = (LV2_Worker_Interface*)extension_data(LV2_WORKER__interface);
+	_impl->work_iface = (const LV2_Worker_Interface*)extension_data(
+		LV2_WORKER__interface);
 
 	if (lilv_plugin_has_feature(plugin, _world.lv2_inPlaceBroken)) {
 		error << string_compose(
@@ -742,22 +743,22 @@ LV2Plugin::extension_data (const char* uri) const
 	return lilv_instance_get_extension_data(_impl->instance, uri);
 }
 
-void*
+const void*
 LV2Plugin::c_plugin ()
 {
 	return _impl->plugin;
 }
 
-void*
+const void*
 LV2Plugin::c_ui ()
 {
-	return (void*)_impl->ui;
+	return (const void*)_impl->ui;
 }
 
-void*
+const void*
 LV2Plugin::c_ui_type ()
 {
-	return (void*)_impl->ui_type;
+	return (const void*)_impl->ui_type;
 }
 
 /** Directory for all plugin state. */
@@ -1460,7 +1461,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 				break;
 			}
 			if (msg.protocol == _event_transfer_type) {
-				LV2_Evbuf*            buf = _ev_buffers[msg.index];
+				LV2_Evbuf*            buf  = _ev_buffers[msg.index];
 				LV2_Evbuf_Iterator    i    = lv2_evbuf_end(buf);
 				const LV2_Atom* const atom = (const LV2_Atom*)body;
 				lv2_evbuf_write(&i, nframes, 0, atom->type, atom->size,
@@ -1706,7 +1707,7 @@ LV2World::~LV2World()
 	lilv_node_free(atom_AtomPort);
 }
 
-LV2PluginInfo::LV2PluginInfo (void* c_plugin)
+LV2PluginInfo::LV2PluginInfo (const void* c_plugin)
 	: _c_plugin(c_plugin)
 {
 	type = ARDOUR::LV2;
@@ -1722,7 +1723,7 @@ LV2PluginInfo::load(Session& session)
 		PluginPtr plugin;
 
 		plugin.reset(new LV2Plugin(session.engine(), session,
-		                           (LilvPlugin*)_c_plugin,
+		                           (const LilvPlugin*)_c_plugin,
 		                           session.frame_rate()));
 
 		plugin->set_info(PluginInfoPtr(new LV2PluginInfo(*this)));
@@ -1744,7 +1745,7 @@ LV2PluginInfo::discover()
 
 	LILV_FOREACH(plugins, i, plugins) {
 		const LilvPlugin* p = lilv_plugins_get(plugins, i);
-		LV2PluginInfoPtr  info(new LV2PluginInfo((void*)p));
+		LV2PluginInfoPtr  info(new LV2PluginInfo((const void*)p));
 
 		LilvNode* name = lilv_plugin_get_name(p);
 		if (!name) {
