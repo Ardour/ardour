@@ -510,6 +510,7 @@ PluginManager::get_ladspa_category (uint32_t plugin_id)
 void
 PluginManager::lv2_refresh ()
 {
+	DEBUG_TRACE (DEBUG::PluginManager, "LV2: refresh\n");
 	delete _lv2_plugin_info;
 	_lv2_plugin_info = LV2PluginInfo::discover();
 }
