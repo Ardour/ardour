@@ -1090,7 +1090,7 @@ LV2Plugin::write_to(RingBuffer<uint8_t>* dest,
                     uint32_t             index,
                     uint32_t             protocol,
                     uint32_t             size,
-                    uint8_t*             body)
+                    const uint8_t*       body)
 {
 	const uint32_t buf_size = sizeof(UIMessage) + size;
 	uint8_t        buf[buf_size];
@@ -1107,10 +1107,10 @@ LV2Plugin::write_to(RingBuffer<uint8_t>* dest,
 }
 
 void
-LV2Plugin::write_from_ui(uint32_t index,
-                         uint32_t protocol,
-                         uint32_t size,
-                         uint8_t* body)
+LV2Plugin::write_from_ui(uint32_t       index,
+                         uint32_t       protocol,
+                         uint32_t       size,
+                         const uint8_t* body)
 {
 	if (!_from_ui) {
 		_from_ui = new RingBuffer<uint8_t>(4096);
@@ -1120,12 +1120,11 @@ LV2Plugin::write_from_ui(uint32_t index,
 }
 
 void
-LV2Plugin::write_to_ui(uint32_t index,
-                       uint32_t protocol,
-                       uint32_t size,
-                       uint8_t* body)
+LV2Plugin::write_to_ui(uint32_t       index,
+                       uint32_t       protocol,
+                       uint32_t       size,
+                       const uint8_t* body)
 {
-	std::cerr << "WRITE TO UI" << std::endl;
 	write_to(_to_ui, index, protocol, size, body);
 }
 
@@ -1465,7 +1464,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 				LV2_Evbuf_Iterator    i    = lv2_evbuf_end(buf);
 				const LV2_Atom* const atom = (const LV2_Atom*)body;
 				lv2_evbuf_write(&i, nframes, 0, atom->type, atom->size,
-				                (const uint8_t*)LV2_ATOM_BODY(atom));
+				                (const uint8_t*)(atom + 1));
 			} else {
 				error << "Received unknown message type from UI" << endmsg;
 			}

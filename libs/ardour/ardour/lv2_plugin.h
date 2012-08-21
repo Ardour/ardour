@@ -126,7 +126,10 @@ class LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 
 	uint32_t atom_eventTransfer() const;
 
-	void write_from_ui(uint32_t index, uint32_t protocol, uint32_t size, uint8_t* body);
+	void write_from_ui(uint32_t       index,
+	                   uint32_t       protocol,
+	                   uint32_t       size,
+	                   const uint8_t* body);
 
 	typedef void UIMessageSink(void*       controller,
 	                           uint32_t    index,
@@ -195,16 +198,16 @@ class LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 		uint32_t size;
 	};
 
-	void write_to_ui(uint32_t index,
-	                 uint32_t protocol,
-	                 uint32_t size,
-	                 uint8_t* body);
+	void write_to_ui(uint32_t       index,
+	                 uint32_t       protocol,
+	                 uint32_t       size,
+	                 const uint8_t* body);
 
 	void write_to(RingBuffer<uint8_t>* dest,
 	              uint32_t             index,
 	              uint32_t             protocol,
 	              uint32_t             size,
-	              uint8_t*             body);
+	              const uint8_t*       body);
 
 	// Created on demand so the space is only consumed if necessary
 	RingBuffer<uint8_t>* _to_ui;
