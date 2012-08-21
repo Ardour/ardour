@@ -100,7 +100,7 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 		{ "bindings", 0, 0, 'b' },
 		{ "disable-plugins", 1, 0, 'd' },
 		{ "debug", 1, 0, 'D' },
-		{ "show-splash", 0, 0, 'n' },
+		{ "no-splash", 0, 0, 'n' },
 		{ "menus", 1, 0, 'm' },
 		{ "name", 1, 0, 'c' },
 		{ "novst", 0, 0, 'V' },
