@@ -183,7 +183,8 @@ class LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 		PORT_AUDIO   = 1 << 2,
 		PORT_CONTROL = 1 << 3,
 		PORT_EVENT   = 1 << 4,
-		PORT_MESSAGE = 1 << 5
+		PORT_MESSAGE = 1 << 5,
+		PORT_ATOM    = 1 << 6
 	} PortFlag;
 
 	typedef unsigned PortFlags;

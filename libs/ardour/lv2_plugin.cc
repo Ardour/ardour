@@ -101,6 +101,7 @@ public:
 	LilvNode* atom_Chunk;
 	LilvNode* atom_Sequence;
 	LilvNode* atom_bufferType;
+	LilvNode* atom_supports;
 	LilvNode* atom_eventTransfer;
 	LilvNode* ev_EventPort;
 	LilvNode* ext_logarithmic;
@@ -419,10 +420,18 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 		} else if (lilv_port_is_a(_impl->plugin, port, _world.atom_AtomPort)) {
 			LilvNodes* buffer_types = lilv_port_get_value(
 				_impl->plugin, port, _world.atom_bufferType);
-				if (lilv_nodes_contains(buffer_types, _world.atom_Sequence)) {
+			LilvNodes* atom_supports = lilv_port_get_value(
+				_impl->plugin, port, _world.atom_supports);
+
+				if (lilv_nodes_contains(buffer_types, _world.atom_Sequence)
+						&& lilv_nodes_contains(atom_supports, _world.midi_MidiEvent)
+						) {
 					flags |= PORT_MESSAGE;
+				} else {
+					flags |= PORT_ATOM;
 				}
 			lilv_nodes_free(buffer_types);
+			lilv_nodes_free(atom_supports);
 		} else {
 			error << string_compose(
 				"LV2: \"%1\" port %2 has no known data type",
@@ -1072,7 +1081,7 @@ bool
 LV2Plugin::has_message_output() const
 {
 	for (uint32_t i = 0; i < num_ports(); ++i) {
-		if ((_port_flags[i] & PORT_MESSAGE) && _port_flags[i] & PORT_OUTPUT) {
+		if ((_port_flags[i] & (PORT_MESSAGE|PORT_ATOM)) && _port_flags[i] & PORT_OUTPUT) {
 			return true;
 		}
 	}
@@ -1397,7 +1406,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 	bufs_count.set(DataType::AUDIO, 1);
 	bufs_count.set(DataType::MIDI, 1);
 	BufferSet& silent_bufs  = _session.get_silent_buffers(bufs_count);
-	BufferSet& scratch_bufs = _session.get_silent_buffers(bufs_count);
+	BufferSet& scratch_bufs = _session.get_scratch_buffers(bufs_count);
 	uint32_t const num_ports = parameter_count();
 
 	uint32_t audio_in_index  = 0;
@@ -1439,6 +1448,14 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 					: scratch_bufs.get_lv2_midi(false, 0, flags & PORT_EVENT);
 				buf = lv2_evbuf_get_buffer(_ev_buffers[port_index]);
 			}
+		} else if (flags & (PORT_ATOM)) {
+			if (flags & PORT_INPUT) {
+				_ev_buffers[port_index] = silent_bufs.get_lv2_midi(true, 0, false);
+				buf = lv2_evbuf_get_buffer(_ev_buffers[port_index]);
+			} else {
+				_ev_buffers[port_index] = scratch_bufs.get_lv2_midi(false, 0, false);
+				buf = lv2_evbuf_get_buffer(_ev_buffers[port_index]);
+			}
 		} else {
 			continue;  // Control port, leave buffer alone
 		}
@@ -1463,8 +1480,10 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 				LV2_Evbuf*            buf  = _ev_buffers[msg.index];
 				LV2_Evbuf_Iterator    i    = lv2_evbuf_end(buf);
 				const LV2_Atom* const atom = (const LV2_Atom*)body;
-				lv2_evbuf_write(&i, nframes, 0, atom->type, atom->size,
-				                (const uint8_t*)(atom + 1));
+				if (!lv2_evbuf_write(&i, nframes, 0, atom->type, atom->size,
+				                (const uint8_t*)(atom + 1))) {
+					cerr << "LV2: failed to write data to event buffer\n";
+				}
 			} else {
 				error << "Received unknown message type from UI" << endmsg;
 			}
@@ -1488,7 +1507,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 		}
 
 		// Write messages to UI
-		if (_to_ui && (flags & PORT_OUTPUT) && (flags & PORT_MESSAGE)) {
+		if (_to_ui && (flags & PORT_OUTPUT) && (flags & (PORT_MESSAGE|PORT_ATOM))) {
 			LV2_Evbuf* buf = _ev_buffers[port_index];
 			for (LV2_Evbuf_Iterator i = lv2_evbuf_begin(buf);
 			     lv2_evbuf_is_valid(i);
@@ -1666,6 +1685,7 @@ LV2World::LV2World()
 	atom_Chunk         = lilv_new_uri(world, LV2_ATOM__Chunk);
 	atom_Sequence      = lilv_new_uri(world, LV2_ATOM__Sequence);
 	atom_bufferType    = lilv_new_uri(world, LV2_ATOM__bufferType);
+	atom_supports      = lilv_new_uri(world, LV2_ATOM__supports);
 	atom_eventTransfer = lilv_new_uri(world, LV2_ATOM__eventTransfer);
 	ev_EventPort       = lilv_new_uri(world, LILV_URI_EVENT_PORT);
 	ext_logarithmic    = lilv_new_uri(world, LV2_PORT_PROPS__logarithmic);
@@ -1767,14 +1787,37 @@ LV2PluginInfo::discover()
 
 		info->path = "/NOPATH"; // Meaningless for LV2
 
+		int count_midi_out = 0;
+		int count_midi_in = 0;
+		for (uint32_t i = 0; i < lilv_plugin_get_num_ports(p); ++i) {
+			const LilvPort* port  = lilv_plugin_get_port_by_index(p, i);
+			if (lilv_port_is_a(p, port, _world.atom_AtomPort)) {
+				LilvNodes* buffer_types = lilv_port_get_value(
+					p, port, _world.atom_bufferType);
+				LilvNodes* atom_supports = lilv_port_get_value(
+					p, port, _world.atom_supports);
+
+				if (lilv_nodes_contains(buffer_types, _world.atom_Sequence)
+						&& lilv_nodes_contains(atom_supports, _world.midi_MidiEvent)) {
+					if (lilv_port_is_a(p, port, _world.lv2_InputPort)) {
+						count_midi_in++;
+					}
+					if (lilv_port_is_a(p, port, _world.lv2_OutputPort)) {
+						count_midi_out++;
+					}
+				}
+				lilv_nodes_free(buffer_types);
+				lilv_nodes_free(atom_supports);
+			}
+		}
+
 		info->n_inputs.set_audio(
 			lilv_plugin_get_num_ports_of_class(
 				p, _world.lv2_InputPort, _world.lv2_AudioPort, NULL));
 		info->n_inputs.set_midi(
 			lilv_plugin_get_num_ports_of_class(
 				p, _world.lv2_InputPort, _world.ev_EventPort, NULL)
-			+ lilv_plugin_get_num_ports_of_class(
-				p, _world.lv2_InputPort, _world.atom_AtomPort, NULL));
+			+ count_midi_in);
 
 		info->n_outputs.set_audio(
 			lilv_plugin_get_num_ports_of_class(
@@ -1782,8 +1825,7 @@ LV2PluginInfo::discover()
 		info->n_outputs.set_midi(
 			lilv_plugin_get_num_ports_of_class(
 				p, _world.lv2_OutputPort, _world.ev_EventPort, NULL)
-			+ lilv_plugin_get_num_ports_of_class(
-				p, _world.lv2_OutputPort, _world.atom_AtomPort, NULL));
+			+ count_midi_out);
 
 		info->unique_id = lilv_node_as_uri(lilv_plugin_get_uri(p));
 		info->index     = 0; // Meaningless for LV2
