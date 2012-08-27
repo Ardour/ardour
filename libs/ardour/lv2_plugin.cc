@@ -560,6 +560,7 @@ LV2Plugin::~LV2Plugin ()
 
 	delete _to_ui;
 	delete _from_ui;
+	delete _worker;
 
 	delete [] _control_data;
 	delete [] _shadow_data;

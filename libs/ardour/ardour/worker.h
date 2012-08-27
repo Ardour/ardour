@@ -77,12 +77,12 @@ private:
 	void run();
 
 	Workee*                _workee;
-        Glib::Threads::Thread* _thread;
 	RingBuffer<uint8_t>*   _requests;
 	RingBuffer<uint8_t>*   _responses;
 	uint8_t*               _response;
 	PBD::Semaphore         _sem;
 	bool                   _exit;
+        Glib::Threads::Thread* _thread;
 };
 
 } // namespace ARDOUR
