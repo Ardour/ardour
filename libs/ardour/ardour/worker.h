@@ -75,6 +75,16 @@ public:
 
 private:
 	void run();
+	/**
+	   Peek in RB, get size and check if a block of 'size' is available.
+
+	   Handle the unlikley edge-case, if we're called in between the
+	   responder writing 'size' and 'data'.
+
+		 @param rb the ringbuffer to check
+		 @return true if the message is complete, false otherwise
+	 */
+	bool verify_message_completeness(RingBuffer<uint8_t>* rb);
 
 	Workee*                _workee;
 	RingBuffer<uint8_t>*   _requests;
@@ -82,7 +92,8 @@ private:
 	uint8_t*               _response;
 	PBD::Semaphore         _sem;
 	bool                   _exit;
-        Glib::Threads::Thread* _thread;
+	Glib::Threads::Thread* _thread;
+
 };
 
 } // namespace ARDOUR
