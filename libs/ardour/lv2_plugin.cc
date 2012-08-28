@@ -541,6 +541,7 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 		}
 	}
 
+	allocate_atom_event_buffers();
 	latency_compute_run();
 }
 
@@ -1393,8 +1394,8 @@ LV2Plugin::cleanup()
 	_impl->instance = NULL;
 }
 
-bool
-LV2Plugin::configure_io (ChanCount in, ChanCount out) {
+void
+LV2Plugin::allocate_atom_event_buffers () {
 	/* reserve local scratch buffers for ATOM event-queues */
 	const LilvPlugin* p = _impl->plugin;
 
@@ -1430,7 +1431,7 @@ LV2Plugin::configure_io (ChanCount in, ChanCount out) {
 
 	const int total_atom_buffers = (count_atom_in + count_atom_out);
 	if (_atom_ev_buffers || total_atom_buffers == 0) {
-		return true;
+		return;
 	}
 
 	DEBUG_TRACE(DEBUG::LV2, string_compose("allocate %1 atom_ev_buffers\n", total_atom_buffers));
@@ -1440,7 +1441,7 @@ LV2Plugin::configure_io (ChanCount in, ChanCount out) {
 				LV2Plugin::_chunk_type, LV2Plugin::_sequence_type);
 	}
 	_atom_ev_buffers[total_atom_buffers] = 0;
-	return true;
+	return;
 }
 
 int
@@ -1511,16 +1512,15 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 				buf = lv2_evbuf_get_buffer(_ev_buffers[port_index]);
 			}
 		} else if (flags & (PORT_ATOM)) {
+			assert(_atom_ev_buffers && _atom_ev_buffers[atom_port_index]);
 			if (flags & PORT_INPUT) {
 				lv2_evbuf_reset(_atom_ev_buffers[atom_port_index], true);
 				_ev_buffers[port_index] = _atom_ev_buffers[atom_port_index++];
-				buf = lv2_evbuf_get_buffer(_ev_buffers[port_index]);
 			} else {
 				lv2_evbuf_reset(_atom_ev_buffers[atom_port_index], false);
 				_ev_buffers[port_index] = _atom_ev_buffers[atom_port_index++];
-				buf = lv2_evbuf_get_buffer(_ev_buffers[port_index]);
 			}
-			assert(_ev_buffers[port_index]);
+			buf = lv2_evbuf_get_buffer(_ev_buffers[port_index]);
 			assert(buf);
 		} else {
 			continue;  // Control port, leave buffer alone

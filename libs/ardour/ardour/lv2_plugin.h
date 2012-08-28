@@ -89,7 +89,6 @@ class LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	void cleanup ();
 
 	int set_block_size (pframes_t /*nframes*/) { return 0; }
-	bool configure_io (ChanCount in, ChanCount out);
 
 	int connect_and_run (BufferSet& bufs,
 	                     ChanMapping in, ChanMapping out,
@@ -242,6 +241,7 @@ class LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	                                  const char* path);
 
 	void init (const void* c_plugin, framecnt_t rate);
+	void allocate_atom_event_buffers ();
 	void run (pframes_t nsamples);
 
 	void latency_compute_run ();
