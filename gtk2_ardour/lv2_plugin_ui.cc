@@ -57,8 +57,12 @@ LV2PluginUI::write_from_ui(void*       controller,
 			ac->set_value(*(const float*)buffer);
 		}
 	} else if (format == me->_lv2->atom_eventTransfer()) {
-		me->_lv2->write_from_ui(port_index, format, buffer_size,
-		                        (const uint8_t*)buffer);
+
+		const int cnt = me->_pi->get_count();
+		for (int i=0; i < cnt; i++ ) {
+			boost::shared_ptr<LV2Plugin> lv2i = boost::dynamic_pointer_cast<LV2Plugin> (me->_pi->plugin(i));
+			lv2i->write_from_ui(port_index, format, buffer_size, (const uint8_t*)buffer);
+		}
 	}
 }
 
@@ -177,6 +181,7 @@ LV2PluginUI::output_update()
 LV2PluginUI::LV2PluginUI(boost::shared_ptr<PluginInsert> pi,
                          boost::shared_ptr<LV2Plugin>    lv2p)
 	: PlugUIBase(pi)
+	, _pi(pi)
 	, _lv2(lv2p)
 	, _gui_widget(NULL)
 	, _ardour_buttons_box(NULL)
