@@ -89,6 +89,7 @@ class LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	void cleanup ();
 
 	int set_block_size (pframes_t /*nframes*/) { return 0; }
+	bool configure_io (ChanCount in, ChanCount out);
 
 	int connect_and_run (BufferSet& bufs,
 	                     ChanMapping in, ChanMapping out,
@@ -167,6 +168,7 @@ class LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	float*        _shadow_data;
 	float*        _defaults;
 	LV2_Evbuf**   _ev_buffers;
+	LV2_Evbuf**   _atom_ev_buffers;
 	float*        _bpm_control_port;  ///< Special input set by ardour
 	float*        _freewheel_control_port;  ///< Special input set by ardour
 	float*        _latency_control_port;  ///< Special output set by ardour

@@ -294,6 +294,7 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 	_from_ui                = NULL;
 	_control_data           = 0;
 	_shadow_data            = 0;
+	_atom_ev_buffers        = 0;
 	_ev_buffers             = 0;
 	_bpm_control_port       = 0;
 	_freewheel_control_port = 0;
@@ -561,6 +562,15 @@ LV2Plugin::~LV2Plugin ()
 	delete _to_ui;
 	delete _from_ui;
 	delete _worker;
+
+	if (_atom_ev_buffers) {
+		LV2_Evbuf**  b = _atom_ev_buffers;
+		while (*b) {
+			free(*b);
+			b++;
+		}
+		free(_atom_ev_buffers);
+	}
 
 	delete [] _control_data;
 	delete [] _shadow_data;
@@ -1383,6 +1393,56 @@ LV2Plugin::cleanup()
 	_impl->instance = NULL;
 }
 
+bool
+LV2Plugin::configure_io (ChanCount in, ChanCount out) {
+	/* reserve local scratch buffers for ATOM event-queues */
+	const LilvPlugin* p = _impl->plugin;
+
+	/* count non-MIDI atom event-ports
+	 * TODO: nicely ask drobilla to make a lilv_ call for that
+	 */
+	int count_atom_out = 0;
+	int count_atom_in = 0;
+	for (uint32_t i = 0; i < lilv_plugin_get_num_ports(p); ++i) {
+		const LilvPort* port  = lilv_plugin_get_port_by_index(p, i);
+		if (lilv_port_is_a(p, port, _world.atom_AtomPort)) {
+			LilvNodes* buffer_types = lilv_port_get_value(
+				p, port, _world.atom_bufferType);
+			LilvNodes* atom_supports = lilv_port_get_value(
+				p, port, _world.atom_supports);
+
+			if (!lilv_nodes_contains(buffer_types, _world.atom_Sequence)
+					|| !lilv_nodes_contains(atom_supports, _world.midi_MidiEvent)) {
+				if (lilv_port_is_a(p, port, _world.lv2_InputPort)) {
+					count_atom_in++;
+				}
+				if (lilv_port_is_a(p, port, _world.lv2_OutputPort)) {
+					count_atom_out++;
+				}
+			}
+			lilv_nodes_free(buffer_types);
+			lilv_nodes_free(atom_supports);
+		}
+	}
+
+	DEBUG_TRACE(DEBUG::LV2, string_compose("%1 need buffers for %2 atom-in and %3 atom-out event-ports\n",
+				name(), count_atom_in, count_atom_out));
+
+	const int total_atom_buffers = (count_atom_in + count_atom_out);
+	if (_atom_ev_buffers || total_atom_buffers == 0) {
+		return true;
+	}
+
+	DEBUG_TRACE(DEBUG::LV2, string_compose("allocate %1 atom_ev_buffers\n", total_atom_buffers));
+	_atom_ev_buffers = (LV2_Evbuf**) malloc((total_atom_buffers + 1) * sizeof(LV2_Evbuf*));
+	for (int i = 0; i < total_atom_buffers; ++i ) {
+		_atom_ev_buffers[i] = lv2_evbuf_new(32768, LV2_EVBUF_ATOM,
+				LV2Plugin::_chunk_type, LV2Plugin::_sequence_type);
+	}
+	_atom_ev_buffers[total_atom_buffers] = 0;
+	return true;
+}
+
 int
 LV2Plugin::connect_and_run(BufferSet& bufs,
 	ChanMapping in_map, ChanMapping out_map,
@@ -1414,6 +1474,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 	uint32_t audio_out_index = 0;
 	uint32_t midi_in_index   = 0;
 	uint32_t midi_out_index  = 0;
+	uint32_t atom_port_index = 0;
 	bool valid;
 	for (uint32_t port_index = 0; port_index < num_ports; ++port_index) {
 		void*     buf   = NULL;
@@ -1451,12 +1512,16 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 			}
 		} else if (flags & (PORT_ATOM)) {
 			if (flags & PORT_INPUT) {
-				_ev_buffers[port_index] = silent_bufs.get_lv2_midi(true, 0, false);
+				lv2_evbuf_reset(_atom_ev_buffers[atom_port_index], true);
+				_ev_buffers[port_index] = _atom_ev_buffers[atom_port_index++];
 				buf = lv2_evbuf_get_buffer(_ev_buffers[port_index]);
 			} else {
-				_ev_buffers[port_index] = scratch_bufs.get_lv2_midi(false, 0, false);
+				lv2_evbuf_reset(_atom_ev_buffers[atom_port_index], false);
+				_ev_buffers[port_index] = _atom_ev_buffers[atom_port_index++];
 				buf = lv2_evbuf_get_buffer(_ev_buffers[port_index]);
 			}
+			assert(_ev_buffers[port_index]);
+			assert(buf);
 		} else {
 			continue;  // Control port, leave buffer alone
 		}
@@ -1788,6 +1853,11 @@ LV2PluginInfo::discover()
 
 		info->path = "/NOPATH"; // Meaningless for LV2
 
+		/* count atom-event-ports that feature
+		 * atom:supports <http://lv2plug.in/ns/ext/midi#MidiEvent>
+		 *
+		 * TODO: nicely ask drobilla to make a lilv_ call for that
+		 */
 		int count_midi_out = 0;
 		int count_midi_in = 0;
 		for (uint32_t i = 0; i < lilv_plugin_get_num_ports(p); ++i) {
