@@ -52,6 +52,7 @@
 
 #include "lv2/lv2plug.in/ns/ext/atom/atom.h"
 #include "lv2/lv2plug.in/ns/ext/log/log.h"
+#include "lv2/lv2plug.in/ns/ext/options/options.h"
 #include "lv2/lv2plug.in/ns/ext/port-props/port-props.h"
 #include "lv2/lv2plug.in/ns/ext/presets/presets.h"
 #include "lv2/lv2plug.in/ns/ext/state/state.h"
@@ -158,46 +159,6 @@ work_respond(LV2_Worker_Respond_Handle handle,
 	}
 }
 
-/* buf-size extension */
-
-#ifdef HAVE_NEW_LV2
-/** Called by the plugin to discover properties of the block length. */
-static LV2_Buf_Size_Status
-get_sample_count(LV2_Buf_Size_Access_Handle handle,
-                 uint32_t*                  min,
-                 uint32_t*                  max,
-                 uint32_t*                  multiple_of,
-                 uint32_t*                  power_of)
-{
-	AudioEngine* engine = (AudioEngine*)handle;
-	*min         = 1;
-	*max         = engine->frames_per_cycle();
-	*multiple_of = 1;
-	*power_of    = 0;
-	return LV2_BUF_SIZE_SUCCESS;
-}
-
-/** Called by the plugin to get the size required for some buffer type. */
-static LV2_Buf_Size_Status
-get_buf_size(LV2_Buf_Size_Access_Handle handle,
-             uint32_t*                  buf_size,
-             LV2_URID                   type,
-             uint32_t                   sample_count)
-{
-	AudioEngine* engine = (AudioEngine*)handle;
-	if (type == LV2Plugin::_sequence_type) {
-		*buf_size = engine->raw_buffer_size(DataType::MIDI);
-		return LV2_BUF_SIZE_SUCCESS;
-	}
-	*buf_size = 0;
-	return LV2_BUF_SIZE_ERR_BAD_TYPE;
-}
-
-static LV2_Buf_Size_Access buf_size_access = {
-	NULL, sizeof(LV2_Buf_Size_Access), get_sample_count, get_buf_size
-};
-#endif
-
 /* log extension */
 
 static int
@@ -299,6 +260,8 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 	_bpm_control_port       = 0;
 	_freewheel_control_port = 0;
 	_latency_control_port   = 0;
+	_block_length           = _engine.frames_per_cycle();
+	_seq_size               = _engine.raw_buffer_size(DataType::MIDI);
 	_state_version          = 0;
 	_was_activated          = false;
 	_has_state_interface    = false;
@@ -309,12 +272,6 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 	_log_feature.URI             = LV2_LOG__log;
 	_work_schedule_feature.URI   = LV2_WORKER__schedule;
 	_work_schedule_feature.data  = NULL;
-
-#ifdef HAVE_NEW_LV2
-	_buf_size_feature.URI  = LV2_BUF_SIZE__access;
-	_buf_size_feature.data = &buf_size_access;
-	buf_size_access.handle = &_engine;
-#endif
 
 	const LilvPlugin* plugin = _impl->plugin;
 
@@ -339,10 +296,20 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 
 	unsigned n_features = 7;
 #ifdef HAVE_NEW_LV2
-	_buf_size_feature.URI  = LV2_BUF_SIZE__access;
-	_buf_size_feature.data = &buf_size_access;
-	buf_size_access.handle = &_engine;
-	_features[n_features++] = &_buf_size_feature;
+	LV2_URID atom_Int = _uri_map.uri_to_id(LV2_ATOM__Int);
+	LV2_Options_Option options[] = {
+		{ _uri_map.uri_to_id(LV2_BUF_SIZE__minBlockLength),
+		  sizeof(int32_t), atom_Int, &_block_length },
+		{ _uri_map.uri_to_id(LV2_BUF_SIZE__maxBlockLength),
+		  sizeof(int32_t), atom_Int, &_block_length },
+		{ _uri_map.uri_to_id(LV2_BUF_SIZE__sequenceSize),
+		  sizeof(int32_t), atom_Int, &_seq_size },
+		{ 0, 0, 0, NULL }
+	};
+
+	_options_feature.URI    = LV2_OPTIONS__options;
+	_options_feature.data   = options;
+	_features[n_features++] = &_options_feature;
 #endif
 
 	LV2_State_Make_Path* make_path = (LV2_State_Make_Path*)malloc(
