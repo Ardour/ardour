@@ -18,6 +18,7 @@
 */
 
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "ardour/worker.h"
 #include "pbd/error.h"
