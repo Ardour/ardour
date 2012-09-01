@@ -1250,10 +1250,11 @@ ArdourStartup::setup_more_options_page ()
 	_limit_output_ports.signal_clicked().connect (sigc::mem_fun (*this, &ArdourStartup::limit_outputs_clicked));
 	_create_master_bus.signal_clicked().connect (sigc::mem_fun (*this, &ArdourStartup::master_bus_button_clicked));
 
-	/* note that more_options_vbox is NOT visible by
-	 * default. this is entirely by design - this page
-	 * should be skipped unless explicitly requested.
+	/* note that more_options_vbox is "visible" by default even
+	 * though it may not be displayed to the user, this is so the dialog
+	 * doesn't resize.
 	 */
+	more_options_vbox.show_all ();
 
 	session_options_page_index = append_page (more_options_vbox);
 	set_page_title (more_options_vbox, _("Advanced Session Options"));
