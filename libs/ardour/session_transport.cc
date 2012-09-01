@@ -645,8 +645,12 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 
 	if ((ptw & PostTransportLocate) && !config.get_external_sync() && pending_locate_roll) {
 		request_transport_speed (1.0);
-		pending_locate_roll = false;
 	}
+
+	/* Even if we didn't do a pending locate roll this time, we don't want it hanging
+	   around for next time.
+	*/
+	pending_locate_roll = false;
 }
 
 void
@@ -850,7 +854,7 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
 	 * though, is all the housekeeping that is associated with non-linear
 	 * changes in the value of _transport_frame. 
 	 */
-	 
+
 	if (actively_recording() && !for_seamless_loop) {
 		return;
 	}
