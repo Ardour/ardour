@@ -259,6 +259,9 @@ class SilenceTrimmer
 			}
 			ListedSource<T>::output (c_out);
 		}
+
+		// Add the flag back if it was removed
+		if (end_of_input) { c.set_flag (ProcessContext<T>::EndOfInput); }
 	}
 
 
