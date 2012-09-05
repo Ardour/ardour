@@ -104,10 +104,10 @@ EngineControl::EngineControl ()
 
 #ifdef HAVE_SOUNDGRID
         , inputs_label (0)
-        , inputs_adjustment (32, 1, 32, 1)
+        , inputs_adjustment (8, 1, 32, 1)
         , inputs_spinner (inputs_adjustment)
         , outputs_label (0)
-        , outputs_adjustment (32, 1, 32, 1)
+        , outputs_adjustment (8, 1, 32, 1)
         , outputs_spinner (inputs_adjustment)
 #endif
 
@@ -707,7 +707,10 @@ EngineControl::enumerate_devices (const string& driver)
 		devices[driver] = enumerate_coreaudio_devices ();
 	} else if (driver == "SoundGrid") {
 
-                soundgrid_init (64, 64, inputs_adjustment.get_value(), outputs_adjustment.get_value());
+                /* XXX hard code 16 track estimate... takes no account of stereo, sends, busses, etc.
+                 */
+                
+                soundgrid_init (16, 16, inputs_adjustment.get_value(), outputs_adjustment.get_value());
 		devices[driver] = vector<string>();
 
 #else

@@ -111,20 +111,22 @@ SoundGrid::configure_driver (uint32_t inputs, uint32_t outputs)
 
     DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Initializing SG driver to use %1 inputs + %2 outputs\n",
                                                    inputs, outputs));
+
     if (command (&myCommand.m_command)) {
             return -1;
     }
 
     /* set up the in-use bool vector */
 
-    _driver_ports_in_use.assign (outputs, false);
+    _driver_output_ports_in_use.assign (outputs, false);
+    _driver_input_ports_in_use.assign (inputs, false);
 
     return 0;
 }
 
 int
-SoundGrid::initialize (void* window_handle, uint32_t max_track_inputs, uint32_t max_track_outputs, 
-                       uint32_t max_phys_inputs, uint32_t max_phys_outputs)
+SoundGrid::initialize (void* window_handle, uint32_t max_track_inputs, uint32_t /*max_track_outputs*/, 
+                       uint32_t /*max_phys_inputs*/, uint32_t /*max_phys_outputs*/)
 {
         if (!_sg) {
                 WTErr ret;
@@ -501,6 +503,23 @@ SoundGrid::driver_register (const WSDCoreHandle ch, const WSCoreCallbackTable* c
         }
 }
 
+void
+SoundGrid::assignment_complete (WSCommand* cmd)
+{
+        /* callback from SoundGrid core whenever an async assignment (connection) is completed
+         */
+
+        WSAssignmentsCommand* acmd = (WSAssignmentsCommand*) cmd;
+        WSAudioAssignment& assignment (acmd->in_Assignments.m_aAssignments[0]);
+        DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("assignment complete for %1:%2:%3 to %4:%5:%6\n",
+                                                       assignment.m_asgnSrc.m_chainerID.clusterType,
+                                                       assignment.m_asgnSrc.m_chainerID.clusterHandle,
+                                                       assignment.m_asgnSrc.m_uiMixMtxSubIndex,
+                                                       assignment.m_asgnDest.m_chainerID.clusterType,
+                                                       assignment.m_asgnDest.m_chainerID.clusterHandle,
+                                                       assignment.m_asgnDest.m_uiMixMtxSubIndex));
+}
+
 /* Actually do stuff */
 
 bool
@@ -551,89 +570,6 @@ SoundGrid::remove_all_racks_synchronous ()
 }
 
 int
-SoundGrid::connect_input (uint32_t trackHandle, uint32_t chn, uint32_t phys_chn)
-{
-    WSAssignmentsCommand myCommand;
-    
-    Init_WSAddAssignmentsCommand(&myCommand, 1, (WSDControllerHandle)this, 0);
-    WSAudioAssignment &inputAssignment (myCommand.in_Assignments.m_aAssignments[0]);
-    
-    inputAssignment.m_asgnSrc.m_chainerID.clusterType = eClusterType_Inputs;
-    inputAssignment.m_asgnSrc.m_chainerID.clusterHandle = 0;
-    inputAssignment.m_asgnSrc.m_eChainerSubIndex = eChainerSub_NoSub;
-    inputAssignment.m_asgnSrc.m_uiMixMtxSubIndex = chn;
-    
-    inputAssignment.m_asgnDest.m_chainerID.clusterType = eClusterType_Inputs;
-    inputAssignment.m_asgnDest.m_chainerID.clusterHandle = trackHandle;
-    inputAssignment.m_asgnDest.m_eChainerSubIndex = eChainerSub_NoSub;
-    inputAssignment.m_asgnDest.m_uiMixMtxSubIndex = (uint32_t)-1;
-
-    return command (&myCommand.m_command);
-}
-    
-int
-SoundGrid::connect_output (uint32_t trackHandle, uint32_t chn, uint32_t phys_chn)
-{
-    WSAssignmentsCommand myCommand;
-    //we can reuse the same command object
-    Init_WSAddAssignmentsCommand(&myCommand, 1, (WSDControllerHandle)this, 0);
-    WSAudioAssignment &outputAssignment (myCommand.in_Assignments.m_aAssignments[0]);
- 
-    outputAssignment.m_asgnSrc.m_chainerID.clusterType = eClusterType_Inputs;
-    outputAssignment.m_asgnSrc.m_chainerID.clusterHandle = trackHandle;
-    outputAssignment.m_asgnSrc.m_eChainerSubIndex = eChainerSub_Left;
-    outputAssignment.m_asgnSrc.m_uiMixMtxSubIndex = eMixMatrixSub_PostFader;
-    
-    outputAssignment.m_asgnDest.m_chainerID.clusterType = eClusterType_Outputs;
-    outputAssignment.m_asgnDest.m_chainerID.clusterHandle = 0;
-    outputAssignment.m_asgnDest.m_eChainerSubIndex = eChainerSub_NoSub;
-    outputAssignment.m_asgnDest.m_uiMixMtxSubIndex = (uint32_t) -1;
-    
-    return command (&myCommand.m_command);    
-}
-
-int
-SoundGrid::disconnect_input (uint32_t trackHandle, uint32_t chn, uint32_t phys_chn)
-{
-    WSAssignmentsCommand myCommand;
-    
-    Init_WSRemoveAssignmentsCommand(&myCommand, 1, (WSDControllerHandle)this, 0);
-    WSAudioAssignment &inputAssignment (myCommand.in_Assignments.m_aAssignments[0]);
-    
-    inputAssignment.m_asgnSrc.m_chainerID.clusterType = eClusterType_Inputs;
-    inputAssignment.m_asgnSrc.m_chainerID.clusterHandle = 0;
-    inputAssignment.m_asgnSrc.m_eChainerSubIndex = eChainerSub_NoSub;
-    inputAssignment.m_asgnSrc.m_uiMixMtxSubIndex = chn;
-    
-    inputAssignment.m_asgnDest.m_chainerID.clusterType = eClusterType_Inputs;
-    inputAssignment.m_asgnDest.m_chainerID.clusterHandle = trackHandle;
-    inputAssignment.m_asgnDest.m_eChainerSubIndex = eChainerSub_NoSub;
-    inputAssignment.m_asgnDest.m_uiMixMtxSubIndex = (uint32_t)-1;
-    
-    return command (&myCommand.m_command);
-}    
-
-int
-SoundGrid::disconnect_output (uint32_t trackHandle, uint32_t chn, uint32_t phys_chn)
-{
-    WSAssignmentsCommand myCommand;
-    Init_WSRemoveAssignmentsCommand(&myCommand, 1, (WSDControllerHandle)this, 0);
-    WSAudioAssignment &outputAssignment (myCommand.in_Assignments.m_aAssignments[0]);
-    
-    outputAssignment.m_asgnSrc.m_chainerID.clusterType = eClusterType_Outputs;
-    outputAssignment.m_asgnSrc.m_chainerID.clusterHandle = trackHandle;
-    outputAssignment.m_asgnSrc.m_eChainerSubIndex = eChainerSub_Left;
-    outputAssignment.m_asgnSrc.m_uiMixMtxSubIndex = eMixMatrixSub_PostFader;
-    
-    outputAssignment.m_asgnDest.m_chainerID.clusterType = eClusterType_Outputs;
-    outputAssignment.m_asgnDest.m_chainerID.clusterHandle = 0;
-    outputAssignment.m_asgnDest.m_eChainerSubIndex = eChainerSub_Left;
-    outputAssignment.m_asgnDest.m_uiMixMtxSubIndex = chn;
-    
-    return command (&myCommand.m_command);    
-}
-
-int
 SoundGrid::set_gain (uint32_t in_clusterType, uint32_t in_trackHandle, double in_gainValue)
 {
     WSEvent faderEvent;
@@ -678,139 +614,236 @@ SoundGrid::get_gain (uint32_t in_clusterType, uint32_t in_trackHandle, double &o
     return false;
 }
 
-void
-SoundGrid::assignment_complete (WSCommand* cmd)
+bool
+SoundGrid::jack_port_as_sg_port (const string& jack_port, Port& result)
 {
-        WSAssignmentsCommand* acmd = (WSAssignmentsCommand*) cmd;
-        WSAudioAssignment& assignment (acmd->in_Assignments.m_aAssignments[0]);
-        DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("assignment complete for %1:%2:%3 to %4:%5:%6\n",
-                                                       assignment.m_asgnSrc.m_chainerID.clusterType,
-                                                       assignment.m_asgnSrc.m_chainerID.clusterHandle,
-                                                       assignment.m_asgnSrc.m_uiMixMtxSubIndex,
-                                                       assignment.m_asgnDest.m_chainerID.clusterType,
-                                                       assignment.m_asgnDest.m_chainerID.clusterHandle,
-                                                       assignment.m_asgnDest.m_uiMixMtxSubIndex));
-}
+        JACK_SGMap::iterator x = jack_soundgrid_map.find (jack_port);
 
-int
-SoundGrid::connect_input_channel_to_driver (uint32_t physical_input, uint32_t driver_channel)
-{
-        CommandStatusClosure* csc = new CommandStatusClosure ("connect input chn to driver", boost::bind (&SoundGrid::assignment_complete, this, _1));
-        WSAssignmentsCommand* myCommand = new WSAssignmentsCommand;
-    
-        Init_WSAddAssignmentsCommand(myCommand, 1, (WSDControllerHandle)this, csc);
-
-        //From Physical Input to the Driver
-        WSAudioAssignment &inputAssignment (myCommand->in_Assignments.m_aAssignments[0]);
-        inputAssignment.m_asgnSrc.m_chainerID.clusterType = eClusterType_Inputs;
-        inputAssignment.m_asgnSrc.m_chainerID.clusterHandle = eClusterHandle_Physical_IO;
-        inputAssignment.m_asgnSrc.m_eChainerSubIndex = eChainerSub_NoSub; // Physical and Driver inputs have no sub index, because they are always mono
-        inputAssignment.m_asgnSrc.m_uiMixMtxSubIndex = physical_input; // Mix Matrix Sub Index for Physical and IO represent the io or driver channel number.
-        
-        inputAssignment.m_asgnDest.m_chainerID.clusterType = eClusterType_Outputs;
-        inputAssignment.m_asgnDest.m_chainerID.clusterHandle = eClusterHandle_Physical_Driver;
-        inputAssignment.m_asgnDest.m_eChainerSubIndex = eChainerSub_NoSub; // Physical and Driver inputs have no sub index, because they are always mono
-        inputAssignment.m_asgnDest.m_uiMixMtxSubIndex = driver_channel; // Mix Matrix Sub Index for Physical and IO represent the io or driver channel number.
-        
-        DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Connect physical input %1 to driver %2\n", physical_input, driver_channel));
-        
-        return command (&myCommand->m_command);    
-}
-
-int
-SoundGrid::disconnect_input_channel_to_driver (uint32_t physical_input, uint32_t driver_channel)
-{
-    WSAssignmentsCommand myCommand;
-    
-    Init_WSRemoveAssignmentsCommand(&myCommand, 1, (WSDControllerHandle)this, 0);
-    
-    //From Physical Input to the Driver
-    WSAudioAssignment &inputAssignment (myCommand.in_Assignments.m_aAssignments[0]);
-    inputAssignment.m_asgnSrc.m_chainerID.clusterType = eClusterType_Inputs;
-    inputAssignment.m_asgnSrc.m_chainerID.clusterHandle = eClusterHandle_Physical_IO;
-    inputAssignment.m_asgnSrc.m_eChainerSubIndex = eChainerSub_NoSub;
-    inputAssignment.m_asgnSrc.m_uiMixMtxSubIndex = physical_input;
-    
-    inputAssignment.m_asgnDest.m_chainerID.clusterType = eClusterType_Outputs;
-    inputAssignment.m_asgnDest.m_chainerID.clusterHandle = eClusterHandle_Physical_Driver;
-    inputAssignment.m_asgnDest.m_eChainerSubIndex = eChainerSub_NoSub;
-    inputAssignment.m_asgnDest.m_uiMixMtxSubIndex = driver_channel;
-
-    return command (&myCommand.m_command);
-}
-
-int
-SoundGrid::map_inputs_as_jack_ports (uint32_t ninputs)
-{
-        DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("map %1 SG inputs to coreaudio/jack driver\n", ninputs));
-        for (uint32_t n = 0; n < ninputs; ++n) {
-                if (connect_input_channel_to_driver (n, n)) {
-                        return -1;
-                }
+        if (x != jack_soundgrid_map.end()) {
+                result = x->second;
+                return true;
         }
-        return 0;
+
+        return false;
 }
 
 std::string
-SoundGrid::map_chainer_input_as_jack_port (uint32_t chainer_id, uint32_t channel)
+SoundGrid::sg_port_as_jack_port (const Port& sgport)
 {
-    WSAssignmentsCommand myCommand;
+    SG_JACKMap::iterator x = soundgrid_jack_map.find (sgport);
 
-    /* this takes a given chainer ID and its input channel, figures out a spare device driver channel, and
-       connects that driver channel to the specified chainer input. if successful, it returns the name
-       of the jack port that can be used to deliver input to the chainer. if unsuccessful, it returns
-       an empty string.
+    if (x != soundgrid_jack_map.end()) {
+            return x->second;
+    }
+
+    /* OK, so this SG port has never been connected (and thus mapped) to
+       a JACK port. We need to find a free driver channel and connect it
+       to the specified sgport.
     */
 
-    DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Try to map input %1 of track %2 to driver port\n",
-                                                   channel, chainer_id));
+    DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Try to map SG port as JACK port\n", sgport));
 
-    /* Find next free driver channel to use to represent chainer input.
-       Note that we search backwards. This doesn't eliminate the issues that
-       will arise if we end up overlapping with the ports used for normal
-       physical output, but makes it less likely.
-     */
-
-    uint32_t driver_output_channel;
+    uint32_t driver_channel;
     bool found = false;
-    uint32_t n = _driver_ports_in_use.size () - 1;
+    bool inputs = false;
 
-    for (vector<bool>::reverse_iterator x = _driver_ports_in_use.rbegin(); x != _driver_ports_in_use.rend(); ++x) {
-            if (!(*x)) {
+    if (sgport.type == eClusterType_Input || sgport.type == eClusterType_Inputs) {
 
-                    DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Found unused driver channel %1 to map input %2 of chainer %3\n",
-                                                                   n, channel, chainer_id));
-                    driver_output_channel = n;
-                    found = true;
-                    break;
+            inputs = true;
+
+            uint32_t n = _driver_output_ports_in_use.size () - 1;
+
+            /* Find next free driver channel to use to represent the given SG port.
+               
+               Note that we search backwards. This doesn't eliminate the issues that
+               will arise if we end up overlapping with the ports used for normal
+               physical output, but makes it less likely.
+            */
+            
+            for (vector<bool>::reverse_iterator x = _driver_output_ports_in_use.rbegin(); x != _driver_output_ports_in_use.rend(); ++x) {
+                    if (!(*x)) {
+                            
+                            DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Found unused driver output channel %1 to map %2\n", n, sgport));
+                            driver_channel = n;
+                            found = true;
+                            break;
+                    }
+                    --n;
             }
-            --n;
-    }
 
-    Init_WSAddAssignmentsCommand(&myCommand, 1, (WSDControllerHandle)this, 0);
-    WSAudioAssignment &trackAssignment (myCommand.in_Assignments.m_aAssignments[0]);
-    trackAssignment.m_asgnSrc.m_chainerID.clusterType = eClusterType_Inputs;
-    trackAssignment.m_asgnSrc.m_chainerID.clusterHandle = eClusterHandle_Physical_Driver;
-    trackAssignment.m_asgnSrc.m_eChainerSubIndex = eChainerSub_NoSub; // Physical and Driver inputs have no sub index, because they are always mono
-    trackAssignment.m_asgnSrc.m_uiMixMtxSubIndex = driver_output_channel; // Mix Matrix Sub Index for Physical and IO represent the io or driver channel number.
-
-    trackAssignment.m_asgnDest.m_chainerID.clusterType = eClusterType_Input;
-    trackAssignment.m_asgnDest.m_chainerID.clusterHandle = chainer_id;
-    trackAssignment.m_asgnDest.m_eChainerSubIndex = eChainerSub_NoSub;
-    trackAssignment.m_asgnDest.m_uiMixMtxSubIndex = (uint32_t) -1; // XXX this should be the channel parameter passed in
-
-    if (command (&myCommand.m_command) == 0) {
-            return string_compose ("system:playback_%1", driver_output_channel+1);
     } else {
-            return string();
+
+            uint32_t n = _driver_input_ports_in_use.size () - 1;
+
+            /* Find next free driver channel to use to represent the given SG port.
+               
+               Note that we search backwards. This doesn't eliminate the issues that
+               will arise if we end up overlapping with the ports used for normal
+               physical output, but makes it less likely.
+            */
+            
+            for (vector<bool>::reverse_iterator x = _driver_input_ports_in_use.rbegin(); x != _driver_input_ports_in_use.rend(); ++x) {
+                    if (!(*x)) {
+                            
+                            DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Found unused driver input channel %1 to map %2\n", n, sgport));
+                            driver_channel = n;
+                            found = true;
+                            break;
+                    }
+                    --n;
+            }
     }
+    
+    if (found) {
+            if (inputs) {
+                    Port driverport = DriverOutputPort (driver_channel);
+                    if (connect (driverport, sgport) != 0) {
+                            return string();
+                    }
+            } else {
+                    Port driverport = DriverInputPort (driver_channel);
+                    if (connect (sgport, driverport) != 0) {
+                            return string();
+                    }
+            }
+    }
+
+    /* successfully connected SG physical IO to SG driver: do record keeping */
+    
+    string jack_port;
+    
+    if (inputs) {
+            _driver_output_ports_in_use[driver_channel] = true;
+            jack_port = string_compose ("system:playback_%1", driver_channel+1);
+    } else {
+            _driver_input_ports_in_use[driver_channel] = true;
+            jack_port = string_compose ("system:capture_%1", driver_channel+1);
+    }
+
+    jack_soundgrid_map.insert (make_pair (jack_port, sgport));
+    soundgrid_jack_map.insert (make_pair (sgport, jack_port));
+
+    DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("map SG port %1 as %2\n", sgport, jack_port));
+    
+    return jack_port;
 }
 
-void
-SoundGrid::remove_chainer_input (uint32_t /*chainer_id*/, uint32_t /*channel*/)
+int
+SoundGrid::connect (const Port& src, const Port& dst)
 {
+        WSAssignmentsCommand myCommand;
+
+        Init_WSAddAssignmentsCommand(&myCommand, 1, (WSDControllerHandle)this, 0);
+        WSAudioAssignment &assignment (myCommand.in_Assignments.m_aAssignments[0]);
+
+        assignment.m_asgnSrc.m_chainerID.clusterType = src.type;
+        assignment.m_asgnSrc.m_chainerID.clusterHandle = src.id;
+        assignment.m_asgnSrc.m_eChainerSubIndex = (WEChainerSub) src.channel;
+        assignment.m_asgnSrc.m_uiMixMtxSubIndex = src.matrix_sub;
+
+        assignment.m_asgnDest.m_chainerID.clusterType = dst.type;
+        assignment.m_asgnDest.m_chainerID.clusterHandle = dst.id;
+        assignment.m_asgnDest.m_eChainerSubIndex = (WEChainerSub) dst.channel;
+        assignment.m_asgnDest.m_uiMixMtxSubIndex = dst.matrix_sub;
+
+        DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("connect %1 => %2\n", src, dst));
         
+        return command (&myCommand.m_command);
 }
 
+int
+SoundGrid::disconnect (const Port& src, const Port& dst)
+{
+        WSAssignmentsCommand myCommand;
 
+        Init_WSRemoveAssignmentsCommand(&myCommand, 1, (WSDControllerHandle)this, 0);
+        WSAudioAssignment &assignment (myCommand.in_Assignments.m_aAssignments[0]);
+
+        assignment.m_asgnSrc.m_chainerID.clusterType = src.type;
+        assignment.m_asgnSrc.m_chainerID.clusterHandle = src.id;
+        assignment.m_asgnSrc.m_eChainerSubIndex = (WEChainerSub) src.channel;
+        assignment.m_asgnSrc.m_uiMixMtxSubIndex = src.matrix_sub;
+
+        assignment.m_asgnDest.m_chainerID.clusterType = dst.type;
+        assignment.m_asgnDest.m_chainerID.clusterHandle = dst.id;
+        assignment.m_asgnDest.m_eChainerSubIndex = (WEChainerSub) dst.channel;
+        assignment.m_asgnDest.m_uiMixMtxSubIndex = dst.matrix_sub;
+        
+        DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("DIS-connect %1 ... %2\n", src, dst));
+
+        return command (&myCommand.m_command);
+
+}
+
+int
+SoundGrid::map_io_as_jack_ports (uint32_t ninputs, uint32_t noutputs)
+{
+        /* the JACK ports for the native OS audio driver already exist, 
+           because JACK will have created them based on the native
+           driver will have told JACK how many there are.
+
+           but we still need to connect the SG ports so that signal
+           does actually flow between the physical IO ports and the
+           native driver (thus enabling JACK to read/write data)
+
+           this is a special case that benefits from not calling connect() many times.
+        */
+
+        WSAssignmentsCommand inputsCommand;
+        Init_WSAddAssignmentsCommand(&inputsCommand, ninputs, (WSDControllerHandle)this, 0);
+
+        for (uint32_t n = 0; n < ninputs; ++n) {
+
+                WSAudioAssignment &assignment (inputsCommand.in_Assignments.m_aAssignments[n]);
+                ARDOUR::SoundGrid::DriverOutputPort dst (n);  // readable driver/JACK port
+                ARDOUR::SoundGrid::PhysicalInputPort src (n); // where the signal should come from
+
+                assignment.m_asgnSrc.m_chainerID.clusterType = src.type;
+                assignment.m_asgnSrc.m_chainerID.clusterHandle = src.id;
+                assignment.m_asgnSrc.m_eChainerSubIndex = (WEChainerSub) src.channel;
+                assignment.m_asgnSrc.m_uiMixMtxSubIndex = src.matrix_sub;
+                
+                assignment.m_asgnDest.m_chainerID.clusterType = dst.type;
+                assignment.m_asgnDest.m_chainerID.clusterHandle = dst.id;
+                assignment.m_asgnDest.m_eChainerSubIndex = (WEChainerSub) dst.channel;
+                assignment.m_asgnDest.m_uiMixMtxSubIndex = dst.matrix_sub;
+        }
+
+        if (command (&inputsCommand.m_command) != 0) {
+                return -1;
+        }
+
+        WSAssignmentsCommand outputsCommand;
+        Init_WSAddAssignmentsCommand(&outputsCommand, noutputs, (WSDControllerHandle)this, 0);
+
+        for (uint32_t n = 0; n < noutputs; ++n) {
+
+                WSAudioAssignment &assignment (outputsCommand.in_Assignments.m_aAssignments[n]);
+                ARDOUR::SoundGrid::DriverInputPort src (n);     // writable driver/JACK port
+                ARDOUR::SoundGrid::PhysicalOutputPort dst (n);  // physical channel where the signal should go
+
+                assignment.m_asgnSrc.m_chainerID.clusterType = src.type;
+                assignment.m_asgnSrc.m_chainerID.clusterHandle = src.id;
+                assignment.m_asgnSrc.m_eChainerSubIndex = (WEChainerSub) src.channel;
+                assignment.m_asgnSrc.m_uiMixMtxSubIndex = src.matrix_sub;
+                
+                assignment.m_asgnDest.m_chainerID.clusterType = dst.type;
+                assignment.m_asgnDest.m_chainerID.clusterHandle = dst.id;
+                assignment.m_asgnDest.m_eChainerSubIndex = (WEChainerSub) dst.channel;
+                assignment.m_asgnDest.m_uiMixMtxSubIndex = dst.matrix_sub;
+        }
+
+        if (command (&outputsCommand.m_command) != 0) {
+                return -1;
+        }
+
+        return 0;
+}
+
+std::ostream&
+operator<< (std::ostream& out, const SoundGrid::Port& p)
+{
+        out << p.type << ':' << p.id << ':' << p.channel << ':' << p.matrix_sub;
+        return out;
+}
 

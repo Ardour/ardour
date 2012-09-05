@@ -59,16 +59,22 @@ SoundGridRack::make_connections ()
 {
         DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Mapping input for %1\n", _route.name()));
 
-        string portname = SoundGrid::instance().map_chainer_input_as_jack_port (_rack_id, 0);
+        /* input */
+
+        string portname;
+
+        portname = SoundGrid::instance().sg_port_as_jack_port (SoundGrid::TrackInputPort (_rack_id, 0, eMixMatrixSub_Input));
         
         if (portname.empty()) {
                 return -1;
         }
 
-        {
-                Glib::Threads::Mutex::Lock lm (map_lock);
-                jack_channel_map.insert (make_pair (portname, 0));
-                channel_jack_map.insert (make_pair (0, portname));
+        /* output */
+
+        portname = SoundGrid::instance().sg_port_as_jack_port (SoundGrid::TrackOutputPort (_rack_id, 0, eMixMatrixSub_PostPan));
+
+        if (portname.empty()) {
+                return -1;
         }
 
         return 0;
