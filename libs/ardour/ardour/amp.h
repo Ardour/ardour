@@ -19,6 +19,8 @@
 #ifndef __ardour_amp_h__
 #define __ardour_amp_h__
 
+#include "libardour-config.h"
+
 #include "ardour/types.h"
 #include "ardour/chan_count.h"
 #include "ardour/processor.h"
@@ -29,12 +31,20 @@ namespace ARDOUR {
 class BufferSet;
 class IO;
 
+#if HAVE_SOUNDGRID
+class SoundGridRack;
+#endif
+
 /** Applies a declick operation to all audio inputs, passing the same number of
  * audio outputs, and passing through any other types unchanged.
  */
 class Amp : public Processor {
 public:
-	Amp(Session& s);
+	Amp(Session& s
+#if HAVE_SOUNDGRID
+            , SoundGridRack* sr = 0
+#endif
+                );
 
 	std::string display_name() const;
 
@@ -85,6 +95,7 @@ public:
 		}
 
 		void set_value (double val);
+                double get_value() const;
 
 		double internal_to_interface (double) const;
 		double interface_to_internal (double) const;
@@ -102,6 +113,10 @@ public:
 	}
 
 	std::string value_as_string (boost::shared_ptr<AutomationControl>) const;
+
+#if HAVE_SOUNDGRID
+        SoundGridRack* soundgrid_rack() const { return _rack; }
+#endif
 	
 private:
 	bool   _denormal_protection;
@@ -113,6 +128,10 @@ private:
 
 	/** Buffer that we should use for gain automation */
 	gain_t* _gain_automation_buffer;
+
+#if HAVE_SOUNDGRID
+        SoundGridRack* _rack;
+#endif
 };
 
 

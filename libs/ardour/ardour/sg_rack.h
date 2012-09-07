@@ -44,26 +44,23 @@ class SoundGridRack : public SessionObject {
     void add_plugin (boost::shared_ptr<SoundGridPlugin>);
     void remove_plugin (boost::shared_ptr<SoundGridPlugin>);
     
-    void set_gain (gain_t);
     void set_input_gain (gain_t);
+    
+    void set_fader (gain_t);
+    double get_fader() const;
 
     XMLNode& get_state() { return *(new XMLNode ("SGRack")); }
     int set_state (const XMLNode&, int /* version*/) { return 0; }
 
-    int32_t jack_port_as_input (const std::string& port_name);
-    std::string input_as_jack_port (uint32_t chn);
-
     int make_connections ();
+
+    uint32_t id() const { return _rack_id; }
+    uint32_t type() const { return _cluster_type; }
     
   private:
-    typedef std::map<uint32_t,std::string> ChannelJackMap;
-    ChannelJackMap channel_jack_map;
-    typedef std::map<std::string,uint32_t> JackChannelMap;
-    JackChannelMap jack_channel_map;
-    Glib::Threads::Mutex map_lock;
-
     Route& _route;
     uint32_t _rack_id;
+    uint32_t _cluster_type;
 
     typedef std::list<boost::shared_ptr<SoundGridPlugin> > PluginList;
     PluginList _plugins;

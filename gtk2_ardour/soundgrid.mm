@@ -116,11 +116,11 @@ soundgrid_init (uint32_t max_track_inputs, uint32_t max_track_outputs,
                 return -1;
         }
 
-        /* as of early August 2012, we need to wait 2 seconds before configuring the CoreAudio driver */
+        /* as of early August 2012, we need to wait 5 seconds before configuring the CoreAudio driver */
 
         Glib::signal_timeout().connect (sigc::bind (sigc::ptr_fun (soundgrid_driver_init), 
                                                     max_track_inputs, max_track_outputs,
-                                                    max_phys_inputs, max_phys_outputs), 2000);
+                                                    max_phys_inputs, max_phys_outputs), 5000);
 
         /* tell everyone/everything that we're using soundgrid */
 

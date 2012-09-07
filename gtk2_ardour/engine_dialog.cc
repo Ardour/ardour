@@ -46,6 +46,7 @@
 #endif
 
 #include "ardour/soundgrid.h"
+#include "ardour/debug.h"
 
 #include <jack/jack.h>
 
@@ -711,7 +712,7 @@ EngineControl::enumerate_devices (const string& driver)
                  */
                 
                 soundgrid_init (16, 16, inputs_adjustment.get_value(), outputs_adjustment.get_value());
-		devices[driver] = vector<string>();
+		devices[driver] = SoundGrid::lan_port_names();
 
 #else
 
@@ -1617,13 +1618,16 @@ EngineControl::refill_soundgrid_inventory ()
 void
 EngineControl::set_soundgrid_parameters ()
 {
+#if 0
         string lan_port = interface_combo.get_active_text ();
         int sr = atoi (sample_rate_combo.get_active_text());
         int bufsize = atoi (period_size_combo.get_active_text());
- 
-        cerr << "Calling soundgrid::set_parmeter...\n";
-        int ret = SoundGrid::set_parameters (lan_port, sr, bufsize);
-        cerr << "\treturned " << ret << endl;
+
+        DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("setting parameters to lanport:%1 sr:%2 bufsize:3\n",
+                                                       lan_port, sr, bufsize));
+
+        SoundGrid::set_parameters (lan_port, sr, bufsize);
+#endif
 }
 
 void

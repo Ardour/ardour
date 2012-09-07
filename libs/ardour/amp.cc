@@ -16,6 +16,8 @@
     675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include "libardour-config.h"
+
 #include <iostream>
 #include <cstring>
 #include <cmath>
@@ -28,18 +30,28 @@
 #include "ardour/buffer_set.h"
 #include "ardour/midi_buffer.h"
 #include "ardour/session.h"
+#if HAVE_SOUNDGRID
+#include "ardour/sg_rack.h"
+#endif
 
 #include "i18n.h"
 
 using namespace ARDOUR;
 using namespace PBD;
 
-Amp::Amp (Session& s)
+Amp::Amp (Session& s
+#if HAVE_SOUNDGRID
+          , SoundGridRack* sr
+#endif
+        )
 	: Processor(s, "Amp")
 	, _apply_gain(true)
 	, _apply_gain_automation(false)
 	, _current_gain(1.0)
 	, _gain_automation_buffer(0)
+#if HAVE_SOUNDGRID
+        , _rack (sr)
+#endif
 {
 	Evoral::Parameter p (GainAutomation);
 	/* gain range of -inf to +6dB, default 0dB */
@@ -77,6 +89,11 @@ Amp::configure_io (ChanCount in, ChanCount out)
 void
 Amp::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_frame*/, pframes_t nframes, bool)
 {
+#if HAVE_SOUNDGRID
+        _active = _pending_active;
+        return;
+#endif
+
 	if (!_active && !_pending_active) {
 		return;
 	}
@@ -385,6 +402,8 @@ Amp::set_gain (gain_t val, void *src)
 
 	_gain_control->set_double (val);
 	_session.set_dirty();
+
+
 }
 
 XMLNode&
@@ -419,9 +438,26 @@ Amp::GainControl::set_value (double val)
 		val = 1.99526231;
 	}
 
+#if HAVE_SOUNDGRID
+        if (_amp->soundgrid_rack()) {
+                return _amp->soundgrid_rack()->set_fader (val);
+        } 
+#endif
+
 	_amp->set_gain (val, this);
 
 	AutomationControl::set_value(val);
+}
+
+double
+Amp::GainControl::get_value () const
+{
+#if HAVE_SOUNDGRID
+        if (_amp->soundgrid_rack()) {
+                return _amp->soundgrid_rack()->get_fader();
+        } 
+#endif
+        return AutomationControl::get_value();
 }
 
 double

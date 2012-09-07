@@ -73,6 +73,7 @@
 #include "ardour/session_route.h"
 #include "ardour/session_state_utils.h"
 #include "ardour/session_utils.h"
+#include "ardour/soundgrid.h"
 
 typedef uint64_t microseconds_t;
 
@@ -644,6 +645,9 @@ ARDOUR_UI::startup ()
 	app->ready ();
 
 	if (get_session_parameters (true, ARDOUR_COMMAND_LINE::new_session, ARDOUR_COMMAND_LINE::load_template)) {
+                if (Profile->get_soundgrid()) {
+                        SoundGrid::instance().teardown();
+                }
 		exit (1);
 	}
 
@@ -807,6 +811,11 @@ If you still wish to quit, please use the\n\n\
 
 	ArdourDialog::close_all_dialogs ();
 	engine->stop (true);
+
+        if (Profile->get_soundgrid()) {
+                SoundGrid::instance().teardown ();
+        }
+
 	quit ();
 }
 
@@ -2439,6 +2448,9 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 
 			if (!apply) {
 				if (quit_on_cancel) {
+                                        if (Profile->get_soundgrid()) {
+                                                SoundGrid::instance().teardown();
+                                        }
 					exit (1);
 				} else {
 					return ret;

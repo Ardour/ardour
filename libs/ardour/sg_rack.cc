@@ -23,6 +23,7 @@
 #include "ardour/ardour.h"
 #include "ardour/debug.h"
 #include "ardour/route.h"
+#include "ardour/track.h"
 #include "ardour/session.h"
 #include "ardour/sg_rack.h"
 #include "ardour/soundgrid.h"
@@ -37,7 +38,24 @@ SoundGridRack::SoundGridRack (Session& s, Route& r, const std::string& name)
 {
         DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Creating SG Chainer for %1\n", r.name()));
 
-        if (SoundGrid::instance().add_rack_synchronous (eClusterType_Input, _rack_id)) { 
+        if (r.is_hidden()) {
+                return;
+        }
+
+        if (dynamic_cast<Track*> (&r) != 0) {
+                _cluster_type = eClusterType_Input;
+        } else {
+                /* bus */
+                if (r.is_master()) {
+                        _cluster_type = eClusterType_Input;
+                } else if (r.is_monitor()) {
+                        _cluster_type = eClusterType_Input;
+                } else {
+                        _cluster_type = eClusterType_Input;
+                }
+        }
+
+        if (SoundGrid::instance().add_rack_synchronous (_cluster_type, _rack_id)) { 
                 throw failed_constructor();
         }
 
@@ -51,7 +69,7 @@ SoundGridRack::SoundGridRack (Session& s, Route& r, const std::string& name)
 SoundGridRack::~SoundGridRack ()
 {
         DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Destroying SG Chainer for %1\n", _route.name()));
-        (void) SoundGrid::instance().remove_rack_synchronous (eClusterType_Input, _rack_id);
+        (void) SoundGrid::instance().remove_rack_synchronous (_cluster_type, _rack_id);
 }
 
 int
@@ -59,23 +77,37 @@ SoundGridRack::make_connections ()
 {
         DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Mapping input for %1\n", _route.name()));
 
-        /* input */
+        /* we need to deliver out output (essentially at the fader) to the SG server, which will
+           happen via the native OS audio driver (and thus via JACK). the output needs to get to 
+           our chainer, so we map its input(s) to one or more unused JACK ports. we then connect
+           our output JACK ports to these JACK ports, thus establishing signal flow into the chainer.
+        */
 
+#if 0
         string portname;
-
-        portname = SoundGrid::instance().sg_port_as_jack_port (SoundGrid::TrackInputPort (_rack_id, 0, eMixMatrixSub_Input));
+        
+        portname = SoundGrid::instance().sg_port_as_jack_port (SoundGrid::TrackInputPort (_rack_id, eChainerSub_NoSub, (uint32_t) -1));
         
         if (portname.empty()) {
                 return -1;
         }
+#endif        
 
-        /* output */
+        _route.input()->disconnect (this);
+        _route.output()->disconnect (this);
 
-        portname = SoundGrid::instance().sg_port_as_jack_port (SoundGrid::TrackOutputPort (_rack_id, 0, eMixMatrixSub_PostPan));
+        /* wire up the driver input to the chainer input, thus allowing us to pick up data from the native OS driver
+           (where JACK will deliver it)
+        */
 
-        if (portname.empty()) {
-                return -1;
-        }
+        SoundGrid::instance().connect (SoundGrid::PhysicalInputPort (0),
+                                       SoundGrid::DriverOutputPort (0));
+
+        SoundGrid::instance().connect (SoundGrid::DriverInputPort (0),
+                                       SoundGrid::TrackInputPort (_rack_id, eChainerSub_NoSub, (uint32_t) -1));
+
+        SoundGrid::instance().connect (SoundGrid::TrackOutputPort (_rack_id, eChainerSub_Left, eMixMatrixSub_PostFader),
+                                       SoundGrid::PhysicalOutputPort (0));
 
         return 0;
 }
@@ -91,8 +123,18 @@ SoundGridRack::remove_plugin (boost::shared_ptr<SoundGridPlugin>)
 }
 
 void
-SoundGridRack::set_gain (gain_t)
+SoundGridRack::set_fader (gain_t v)
 {
+        /* convert to SoundGrid value range */
+
+        v *= 1000.0;
+
+        if (SoundGrid::instance().set_gain (_cluster_type, _rack_id, v) != 0) {
+                return;
+        }
+
+        DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("fader level for %1:%2 set to %3\n",
+                                                       _cluster_type, _rack_id, v));
 }
 
 void
@@ -100,28 +142,18 @@ SoundGridRack::set_input_gain (gain_t)
 {
 }
 
-int32_t
-SoundGridRack::jack_port_as_input (const std::string& port_name)
+double
+SoundGridRack::get_fader() const
 {
-        JackChannelMap::iterator x;
-        Glib::Threads::Mutex::Lock lm (map_lock);
-        
-        if ((x = jack_channel_map.find (port_name)) != jack_channel_map.end()) {
-                return x->second;
+        double v;
+
+        if (!SoundGrid::instance().get_gain (_cluster_type, _rack_id, v)) {
+                /* failure, return 0dB gain coefficient */
+                return 1.0;
         }
 
-        return -1;
-}
+        /* convert soundgrid value to our range (0..2.0)
+         */
 
-string
-SoundGridRack::input_as_jack_port (uint32_t channel)
-{
-        ChannelJackMap::iterator x;
-        Glib::Threads::Mutex::Lock lm (map_lock);
-        
-        if ((x = channel_jack_map.find (channel)) != channel_jack_map.end()) {
-                return x->second;
-        }
-
-        return string ();
+        return v / 1000.0;
 }

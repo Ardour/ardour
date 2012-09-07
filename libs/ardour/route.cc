@@ -139,7 +139,7 @@ Route::init ()
 
 	/* add amp processor  */
 
-	_amp.reset (new Amp (_session));
+        _amp.reset (new Amp (_session, _sg_rack));
 	add_processor (_amp, PostFader);
 
 	/* create standard processors: meter, main outs, monitor out;
