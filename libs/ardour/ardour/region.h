@@ -167,7 +167,7 @@ class Region
 	bool automatic ()        const { return _automatic; }
 	bool whole_file ()       const { return _whole_file; }
 	bool captured ()         const { return !(_import || _external); }
-	bool can_move ()         const { return !_position_locked; }
+	bool can_move ()         const { return !_position_locked && !_locked; }
 	bool sync_marked ()      const { return _sync_marked; }
 	bool external ()         const { return _external; }
 	bool import ()           const { return _import; }
