@@ -726,25 +726,25 @@ LV2Plugin::nth_parameter(uint32_t n, bool& ok) const
 }
 
 const void*
-LV2Plugin::extension_data (const char* uri) const
+LV2Plugin::extension_data(const char* uri) const
 {
 	return lilv_instance_get_extension_data(_impl->instance, uri);
 }
 
 const void*
-LV2Plugin::c_plugin ()
+LV2Plugin::c_plugin()
 {
 	return _impl->plugin;
 }
 
 const void*
-LV2Plugin::c_ui ()
+LV2Plugin::c_ui()
 {
 	return (const void*)_impl->ui;
 }
 
 const void*
-LV2Plugin::c_ui_type ()
+LV2Plugin::c_ui_type()
 {
 	return (const void*)_impl->ui_type;
 }
@@ -1362,7 +1362,8 @@ LV2Plugin::cleanup()
 }
 
 void
-LV2Plugin::allocate_atom_event_buffers () {
+LV2Plugin::allocate_atom_event_buffers()
+{
 	/* reserve local scratch buffers for ATOM event-queues */
 	const LilvPlugin* p = _impl->plugin;
 
