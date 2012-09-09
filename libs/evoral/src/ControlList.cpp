@@ -571,11 +571,12 @@ ControlList::add (double when, double value)
 			if (!_events.empty()) { // avoid O(N) _events.size() here
 				if (_events.back()->value == value) {
 					EventList::iterator b = _events.end();
-					--b; // last point, which we know exists
-					if (b != _events.begin()) { // step back again, which may not be possible
-						--b; // next-to-last-point
+					--b; // final point, which we know exists
+					if (b != _events.begin()) { // step back again, but check first that it is legal
+						--b; // penultimate-point
 						if ((*b)->value == value) {
-							/* straight line - just move the last
+							/* there are at least two points with the exact same value ...
+							 * straight line - just move the final
 							 * point to the new time
 							 */
 							_events.back()->when = when;
