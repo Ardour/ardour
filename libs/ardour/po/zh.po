@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ardour 3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-10-28 19:20+0800\n"
+"POT-Creation-Date: 2012-09-12 17:28-0400\n"
 "PO-Revision-Date: 2012-08-26 13:43+0800\n"
 "Last-Translator: Rui-huai Zhang <zrhzrh>\n"
 "Language-Team: zrhzrh <zrhzrh@mail.ustc.edu.cn>\n"
@@ -17,15 +17,124 @@ msgstr ""
 "X-Poedit-SourceCharset: utf-8\n"
 "X-Poedit-SearchPath-0: ardour\n"
 
-#: ardour/audio_region_importer.cc:74
+#: amp.cc:57 automatable.cc:161
+msgid "Fader"
+msgstr ""
+
+#: audio_diskstream.cc:244
+msgid "AudioDiskstream: Playlist \"%1\" isn't an audio playlist"
+msgstr ""
+
+#: audio_diskstream.cc:296
+msgid "AudioDiskstream %1: there is no existing playlist to make a copy of!"
+msgstr ""
+
+#: audio_diskstream.cc:781 audio_diskstream.cc:791
+msgid ""
+"AudioDiskstream %1: when refilling, cannot read %2 from playlist at frame %3"
+msgstr ""
+
+#: audio_diskstream.cc:947
+msgid "AudioDiskstream %1: cannot read %2 from playlist at frame %3"
+msgstr ""
+
+#: audio_diskstream.cc:1316 audio_diskstream.cc:1333
+msgid "AudioDiskstream %1: cannot write to disk"
+msgstr "音频磁盘流 %1: 无法吸入到硬盘"
+
+#: audio_diskstream.cc:1376
+msgid "AudioDiskstream \"%1\": cannot flush captured data to disk!"
+msgstr ""
+
+#: audio_diskstream.cc:1470
+msgid "%1: could not create region for complete audio file"
+msgstr ""
+
+#: audio_diskstream.cc:1504
+msgid "AudioDiskstream: could not create region for captured audio!"
+msgstr ""
+
+#: audio_diskstream.cc:1612
+msgid "programmer error: %1"
+msgstr "程序错误: %1"
+
+#: audio_diskstream.cc:1827
+msgid "AudioDiskstream: channel %1 out of range"
+msgstr "音频磁盘流: 声道 %1 超出范围"
+
+#: audio_diskstream.cc:1841 midi_diskstream.cc:1174
+msgid "%1:%2 new capture file not initialized correctly"
+msgstr ""
+
+#: audio_diskstream.cc:2122
+msgid "%1: cannot restore pending capture source file %2"
+msgstr ""
+
+#: audio_diskstream.cc:2144
+msgid "%1: incorrect number of pending sources listed - ignoring them all"
+msgstr ""
+
+#: audio_diskstream.cc:2168
+msgid "%1: cannot create whole-file region from pending capture sources"
+msgstr ""
+
+#: audio_library.cc:71
+msgid "Could not open %1.  Audio Library not saved"
+msgstr "无法打开 %1. 音频库未保存"
+
+#: audio_playlist.cc:692
+msgid ""
+"Legacy crossfade involved an incoming region not present in playlist \"%1\" "
+"- crossfade discarded"
+msgstr ""
+
+#: audio_playlist.cc:708
+msgid ""
+"Legacy crossfade involved an outgoing region not present in playlist \"%1\" "
+"- crossfade discarded"
+msgstr ""
+
+#: audio_playlist_importer.cc:68
+msgid "Audio Playlists"
+msgstr "音频播放列表"
+
+#: audio_playlist_importer.cc:161
+msgid "region"
+msgstr ""
+
+#: audio_playlist_importer.cc:163
+msgid "regions"
+msgstr ""
+
+#: audio_playlist_importer.cc:174 audio_track_importer.cc:245
+msgid "A playlist with this name already exists, please rename it."
+msgstr "此名称的播放列表已存在，请重命名"
+
+#: audio_playlist_importer.cc:183
+msgid "badly-formed XML in imported playlist"
+msgstr ""
+
+#: audio_playlist_importer.cc:265
+msgid "Audio Playlists (unused)"
+msgstr "音频播放列表(未使用)"
+
+#: audio_playlist_source.cc:171 audiosource.cc:913 file_source.cc:527
+#: midi_playlist_source.cc:144 midi_playlist_source.cc:152
+#: midi_playlist_source.cc:159 midi_source.cc:365 plugin_insert.cc:644
+#: session.cc:2396 session.cc:2429 session.cc:3540 session_handle.cc:87
+#: sndfilesource.cc:121
+msgid "programming error: %1"
+msgstr "程序错误: %1"
+
+#: audio_region_importer.cc:75
 msgid "Audio Regions"
 msgstr "音频区域"
 
-#: ardour/audio_region_importer.cc:144
+#: audio_region_importer.cc:145
 msgid "Length: "
 msgstr "长度:"
 
-#: ardour/audio_region_importer.cc:146
+#: audio_region_importer.cc:147
 msgid ""
 "\n"
 "Position: "
@@ -33,7 +142,7 @@ msgstr ""
 "\n"
 "位置:"
 
-#: ardour/audio_region_importer.cc:148
+#: audio_region_importer.cc:149
 msgid ""
 "\n"
 "Channels: "
@@ -41,2449 +150,2389 @@ msgstr ""
 "\n"
 "声道:"
 
-#: ardour/midi_model.cc:620
-msgid "No NoteID found for note property change - ignored"
-msgstr ""
-
-#: ardour/midi_model.cc:862
-msgid "No SysExID found for sys-ex property change - ignored"
-msgstr ""
-
-#: ardour/midi_model.cc:1928
-msgid "transpose"
-msgstr ""
-
-#: ardour/processor.cc:210
-msgid "No %1 property flag in element %2"
-msgstr ""
-
-#: ardour/processor.cc:219
-msgid "No child node with active property"
-msgstr ""
-
-#: ardour/crossfade.cc:137
-msgid "Crossfade: no \"in\" region in state"
-msgstr "淡入淡出: 没有 \"入\" 区域"
-
-#: ardour/crossfade.cc:153
-msgid "Crossfade: no \"in\" region %1 found in playlist %2 nor in region map"
-msgstr ""
-
-#: ardour/crossfade.cc:163
-msgid "Crossfade: no \"out\" region in state"
-msgstr ""
-
-#: ardour/crossfade.cc:176
-msgid "Crossfade: no \"out\" region %1 found in playlist %2 nor in region map"
-msgstr ""
-
-#: ardour/crossfade.cc:789
-msgid "old-style crossfade information - no position information"
-msgstr "旧样式淡入淡出信息 - 没有位置信息"
-
-#: ardour/io.cc:184
-msgid "IO: cannot disconnect port %1 from %2"
-msgstr "IO: 无法失去从 %2 的连接端口 %1"
-
-#: ardour/io.cc:310
-#: ardour/io.cc:395
-msgid "IO: cannot register input port %1"
-msgstr "IO: 无法注册输入端口 %1"
-
-#: ardour/io.cc:315
-#: ardour/io.cc:400
-msgid "IO: cannot register output port %1"
-msgstr "无法注册输出端口 %1"
-
-#: ardour/io.cc:558
-#: ardour/io.cc:614
-msgid "incorrect XML node \"%1\" passed to IO object"
-msgstr "不正确的XML符号  \"%1\" 通过IO对象"
-
-#: ardour/io.cc:673
-msgid "in"
-msgstr ""
-
-#: ardour/io.cc:673
-msgid "out"
-msgstr ""
-
-#: ardour/io.cc:674
-msgid "input"
-msgstr "输入"
-
-#: ardour/io.cc:674
-msgid "output"
-msgstr "输出"
-
-#: ardour/io.cc:684
-msgid "Unknown bundle \"%1\" listed for %2 of %3"
-msgstr ""
-
-#: ardour/io.cc:750
-msgid "Bundle %1 was not available - \"%2\" used instead"
-msgstr ""
-
-#: ardour/io.cc:753
-msgid "No %1 bundles available as a replacement"
-msgstr ""
-
-#: ardour/io.cc:856
-msgid "%1: cannot create I/O ports"
-msgstr "%1: 无法创建I/O端口"
-
-#: ardour/io.cc:946
-#: ardour/io.cc:1050
-msgid "IO: badly formed string in XML node for inputs \"%1\""
-msgstr ""
-
-#: ardour/io.cc:951
-#: ardour/io.cc:1055
-msgid "bad input string in XML node \"%1\""
-msgstr ""
-
-#: ardour/io.cc:989
-msgid "IO: badly formed string in XML node for outputs \"%1\""
-msgstr ""
-
-#: ardour/io.cc:994
-msgid "IO: bad output string in XML node \"%1\""
-msgstr ""
-
-#: ardour/io.cc:1267
-msgid "audio"
-msgstr "音频"
-
-#: ardour/io.cc:1269
-msgid "midi"
-msgstr ""
-
-#: ardour/io.cc:1324
-#, c-format
-msgid "%s %u"
-msgstr ""
-
-#: ardour/io.cc:1371
-#, c-format
-msgid "%s in"
-msgstr ""
-
-#: ardour/io.cc:1373
-#, c-format
-msgid "%s out"
-msgstr ""
-
-#: ardour/io.cc:1448
-msgid "mono"
-msgstr "单声道"
-
-#: ardour/io.cc:1450
-msgid "L"
-msgstr ""
-
-#: ardour/io.cc:1450
-msgid "R"
-msgstr ""
-
-#: ardour/io.cc:1452
-#: ardour/io.cc:1458
-#, c-format
-msgid "%d"
-msgstr ""
-
-#: ardour/smf_source.cc:254
-msgid "Unable to read event prefix, corrupt MIDI ring buffer"
-msgstr ""
-
-#: ardour/smf_source.cc:265
-msgid "Read time/size but not buffer, corrupt MIDI ring buffer"
-msgstr ""
-
-#: ardour/smf_source.cc:413
-msgid "cannot open MIDI file %1 for write"
-msgstr "无法打开MIDI文件 %1 用于写入"
-
-#: ardour/control_protocol_manager.cc:123
-msgid "control protocol name \"%1\" has no descriptor"
-msgstr "控制协议名称 \"%1\" 没有描述符"
-
-#: ardour/control_protocol_manager.cc:128
-msgid "control protocol name \"%1\" could not be initialized"
-msgstr "控制协议名称 \"%1\" 无法初始化"
-
-#: ardour/control_protocol_manager.cc:181
-msgid "Instantiating mandatory control protocol %1"
-msgstr "实例强制性控制协议 %1"
-
-#: ardour/control_protocol_manager.cc:202
-msgid "looking for control protocols in %1"
-msgstr "寻找控制协议, 在 %1"
-
-#: ardour/control_protocol_manager.cc:218
-msgid "Control protocol %1 not usable"
-msgstr ""
-
-#: ardour/control_protocol_manager.cc:235
-msgid "Control surface protocol discovered: \"%1\""
-msgstr ""
-
-#: ardour/control_protocol_manager.cc:253
-msgid "ControlProtocolManager: cannot load module \"%1\" (%2)"
-msgstr ""
-
-#: ardour/control_protocol_manager.cc:261
-msgid "ControlProtocolManager: module \"%1\" has no descriptor function."
-msgstr "控制协议管理器: 模块 \"%1\" 没有描述符函数"
-
-#: ardour/control_protocol_manager.cc:378
-msgid "control protocol XML node has no name property. Ignored."
-msgstr "控制协议XML符号没有名称属性. 忽略之"
-
-#: ardour/control_protocol_manager.cc:385
-msgid "control protocol \"%1\" is not known. Ignored"
-msgstr "控制协议 \"%1\" 未知. 忽略之"
-
-#: ardour/recent_sessions.cc:60
-msgid "cannot open recent session file %1 (%2)"
-msgstr "无法打开最近会话文件%1 (%2)"
-
-#: ardour/session_playlists.cc:371
-#: ardour/session_playlists.cc:390
-msgid "Session: cannot create Playlist from XML description."
-msgstr "会话: 无法从XML描述符创建播放列表."
-
-#: ardour/user_bundle.cc:32
-msgid "Node for Bundle has no \"name\" property"
-msgstr "绑定的符号没有名称属性"
-
-#: ardour/user_bundle.cc:44
-#: ardour/user_bundle.cc:65
-#, c-format
-msgid "Unknown node \"%s\" in Bundle"
-msgstr ""
-
-#: ardour/user_bundle.cc:49
-msgid "Node for Channel has no \"name\" property"
-msgstr "声道的符号没有名称属性"
-
-#: ardour/user_bundle.cc:55
-msgid "Node for Channel has no \"type\" property"
-msgstr "声道的符号没有类型属性"
-
-#: ardour/user_bundle.cc:70
-msgid "Node for Port has no \"name\" property"
-msgstr "端口的符号没有名称属性"
-
-#: ardour/route_group.cc:468
-msgid "You cannot subgroup MIDI tracks at this time"
-msgstr "此时你无法子分组MIDI声道"
-
-#: ardour/return.cc:42
-#: ardour/return.cc:169
-msgid "return %1"
-msgstr "返回 %1"
-
-#: ardour/export_filename.cc:210
-msgid "No Time"
-msgstr "没时间"
-
-#: ardour/export_filename.cc:219
-msgid "Invalid time format"
-msgstr "非法时间格式"
-
-#: ardour/export_filename.cc:228
-msgid "No Date"
-msgstr "无日期"
-
-#: ardour/export_filename.cc:243
-msgid "Invalid date format"
-msgstr "非法日期格式"
-
-#: ardour/export_channel.cc:107
-msgid "Could not get port for export channel \"%1\", dropping the channel"
-msgstr "无法得到输出声道 \"%1\" 的端口, 丢弃此声道"
-
-#: ardour/data_type.cc:28
-msgid "MIDI"
-msgstr "MIDI"
-
-#: ardour/data_type.cc:29
-msgid "unknown"
-msgstr "未知"
-
-#: ardour/filter.cc:65
-msgid "filter: error creating name for new file based on %1"
-msgstr ""
-
-#: ardour/filter.cc:77
-msgid "filter: error creating new file %1 (%2)"
-msgstr ""
-
-#: ardour/route.cc:1019
-#: ardour/route.cc:2418
-msgid "unknown Processor type \"%1\"; ignored"
-msgstr ""
-
-#: ardour/route.cc:1031
-msgid "processor could not be created. Ignored."
-msgstr ""
-
-#: ardour/route.cc:1903
-#: ardour/route.cc:2090
-msgid "Bad node sent to Route::set_state() [%1]"
-msgstr "损坏的符号发送至 Route::set_state() [%1]"
-
-#: ardour/route.cc:1963
-msgid "Pannable state found for route (%1) without a panner!"
-msgstr ""
-
-#: ardour/route.cc:2024
-#: ardour/route.cc:2028
-#: ardour/route.cc:2198
-#: ardour/route.cc:2202
-msgid "badly formed order key string in state file! [%1] ... ignored."
-msgstr ""
-
-#: ardour/session_directory.cc:62
-msgid "Cannot create Session directory at path %1 Error: %2"
-msgstr "无法创建会话目录在路径 %1 错误: %2"
-
-#: ardour/session_directory.cc:81
-msgid "Session subdirectory does not exist at path %1"
-msgstr "会话子目录不存在于路径 %1"
-
-#: ardour/ladspa_plugin.cc:89
-msgid "LADSPA: module has no descriptor function."
-msgstr "LADSPA: 模块没有描述符函数."
-
-#: ardour/ladspa_plugin.cc:94
-msgid "LADSPA: plugin has gone away since discovery!"
-msgstr "LADSPA: 当发现插件时, 插件已经不见了."
-
-#: ardour/ladspa_plugin.cc:101
-msgid "LADSPA: \"%1\" cannot be used, since it cannot do inplace processing"
-msgstr ""
-
-#: ardour/ladspa_plugin.cc:293
-msgid "illegal parameter number used with plugin \"%1\". This mayindicate a change in the plugin design, and presets may beinvalid"
-msgstr "插件\"%1\"使用非法参数数量. 这可能意味着插件的设计有所变动, 而且预设失效了."
-
-#: ardour/ladspa_plugin.cc:370
-#: ardour/ladspa_plugin.cc:415
-msgid "Bad node sent to LadspaPlugin::set_state"
-msgstr "坏的符号发送至 LadspaPlugin::set_state"
-
-#: ardour/ladspa_plugin.cc:383
-#: ardour/ladspa_plugin.cc:428
-msgid "LADSPA: no ladspa port number"
-msgstr "LADSPA: 没有 ladspa 端口数量"
-
-#: ardour/ladspa_plugin.cc:389
-#: ardour/ladspa_plugin.cc:434
-msgid "LADSPA: no ladspa port data"
-msgstr "LADSPA: 没有LADSPA端口数据"
-
-#: ardour/ladspa_plugin.cc:704
-msgid "LADSPA: cannot load module from \"%1\""
-msgstr "LADSPA: 无法从 \"%1\" 载入模块"
-
-#: ardour/ladspa_plugin.cc:814
-msgid "Could not locate HOME.  Preset not removed."
-msgstr "无法定位HOME. 预设没被移除."
-
-#: ardour/ladspa_plugin.cc:851
-#: ardour/ladspa_plugin.cc:857
-msgid "Could not create %1.  Preset not saved. (%2)"
-msgstr "不能创建 %1. 预设没保存. (%2)"
-
-#: ardour/ladspa_plugin.cc:864
-msgid "Error saving presets file %1."
-msgstr ""
-
-#: ardour/ladspa_plugin.cc:902
-msgid "Could not locate HOME.  Preset not saved."
-msgstr "无法定位HOME. 预设没保存."
-
-#: ardour/audiosource.cc:203
-msgid "cannot rename peakfile for %1 from %2 to %3 (%4)"
-msgstr "无法为 %1 重命名峰文件(peakfile), 从 %2 到 %3 (%4)"
-
-#: ardour/audiosource.cc:230
-msgid "AudioSource: cannot stat peakfile \"%1\""
-msgstr ""
-
-#: ardour/audiosource.cc:370
-msgid "cannot read sample data for unscaled peak computation"
-msgstr "无法为无标度的峰计算读取采样数据"
-
-#: ardour/audiosource.cc:391
-msgid "AudioSource: cannot open peakpath (a) \"%1\" (%2)"
-msgstr ""
-
-#: ardour/audiosource.cc:468
-msgid "AudioSource: cannot open peakpath (b) \"%1\" (%2)"
-msgstr ""
-
-#: ardour/audiosource.cc:592
-msgid "AudioSource[%1]: peak read - cannot read %2 samples at offset %3 of %4 (%5)"
-msgstr ""
-
-#: ardour/audiosource.cc:672
-msgid "%1: could not write read raw data for peak computation (%2)"
-msgstr ""
-
-#: ardour/audiosource.cc:711
-msgid "AudioSource: cannot open peakpath (c) \"%1\" (%2)"
-msgstr ""
-
-#: ardour/audiosource.cc:778
-#: ardour/audiosource.cc:890
-msgid "%1: could not write peak file data (%2)"
-msgstr ""
-
-#: ardour/audiosource.cc:917
-msgid "programming error: %1"
-msgstr "程序错误: %1"
-
-#: ardour/midi_ui.cc:48
-msgid "midiui"
-msgstr ""
-
-#: ardour/globals.cc:227
-msgid "Could not set system open files limit to \"unlimited\""
-msgstr ""
-
-#: ardour/globals.cc:229
-msgid "Could not set system open files limit to %1"
-msgstr ""
-
-#: ardour/globals.cc:233
-msgid "Removed open file count limit. Excellent!"
-msgstr ""
-
-#: ardour/globals.cc:235
-msgid "%1 will be limited to %2 open files"
-msgstr ""
-
-#: ardour/globals.cc:239
-msgid "Could not get system open files limit (%1)"
-msgstr ""
-
-#: ardour/globals.cc:288
-msgid "Loading configuration"
-msgstr "载入配置"
-
-#: ardour/export_handler.cc:290
-msgid "Editor: cannot open \"%1\" as export file for CD marker file"
-msgstr ""
-
-#: ardour/audio_unit.cc:150
-#: ardour/audio_unit.cc:1654
-msgid "Could not create XML version of property list"
-msgstr ""
-
-#: ardour/audio_unit.cc:159
-msgid "Preset file %1 exists; not overwriting"
-msgstr "预设文件 %1 已存在; 不覆盖"
-
-#: ardour/audio_unit.cc:162
-msgid "Cannot open preset file %1 (%2)"
-msgstr "无法打开预设文件 %1 (%2)"
-
-#: ardour/audio_unit.cc:422
-msgid "cannot get factory preset info: errcode %1"
-msgstr ""
-
-#: ardour/audio_unit.cc:458
-msgid "Exception thrown during AudioUnit plugin loading - plugin ignored"
-msgstr ""
-
-#: ardour/audio_unit.cc:463
-msgid "AudioUnit: Could not convert CAComponent to CAAudioUnit"
-msgstr ""
-
-#: ardour/audio_unit.cc:509
-msgid "AUPlugin: cannot set processing block size"
-msgstr ""
-
-#: ardour/audio_unit.cc:845
-msgid "AUPlugin: %1 cannot initialize plugin (err = %2)"
-msgstr ""
-
-#: ardour/audio_unit.cc:973
-msgid "AUPlugin: %1 input_streams() called without any format set!"
-msgstr ""
-
-#: ardour/audio_unit.cc:992
-msgid "AUPlugin: %1 output_streams() called without any format set!"
-msgstr ""
-
-#: ardour/audio_unit.cc:1053
-msgid "AU %1 has zero outputs - configuration ignored"
-msgstr ""
-
-#: ardour/audio_unit.cc:1238
-msgid "AUPlugin: could not set stream format for %1/%2 (err = %3)"
-msgstr ""
-
-#: ardour/audio_unit.cc:1266
-msgid "AUPlugin: render callback called illegally!"
-msgstr ""
-
-#: ardour/audio_unit.cc:1674
-msgid "Saving AudioUnit settings is not supported in this build of %1. Consider paying for a newer version"
-msgstr ""
-
-#: ardour/audio_unit.cc:1691
-msgid "Bad node sent to AUPlugin::set_state"
-msgstr ""
-
-#: ardour/audio_unit.cc:1735
-msgid "Restoring AudioUnit settings is not supported in this build of %1. Consider paying for a newer version"
-msgstr ""
-
-#: ardour/audio_unit.cc:1798
-msgid "Loading AudioUnit presets is not supported in this build of %1. Consider paying for a newer version"
-msgstr ""
-
-#: ardour/audio_unit.cc:1837
-msgid "Cannot create user plugin presets folder (%1)"
-msgstr ""
-
-#: ardour/audio_unit.cc:1857
-msgid "Saving plugin state to %1 failed"
-msgstr ""
-
-#: ardour/audio_unit.cc:1866
-msgid "Saving AudioUnit presets is not supported in this build of %1. Consider paying for a newer version"
-msgstr ""
-
-#: ardour/audio_unit.cc:2166
-msgid "Discovering AudioUnit plugins (could take some time ...)"
-msgstr ""
-
-#: ardour/audio_unit.cc:2263
-msgid "AudioUnit Outputs"
-msgstr "音频单元输出"
-
-#: ardour/audio_unit.cc:2266
-msgid "AudioUnit Instruments"
-msgstr ""
-
-#: ardour/audio_unit.cc:2269
-msgid "AudioUnit MusicEffects"
-msgstr ""
-
-#: ardour/audio_unit.cc:2272
-msgid "AudioUnit Effects"
-msgstr "音频单元效果"
-
-#: ardour/audio_unit.cc:2275
-msgid "AudioUnit Mixers"
-msgstr ""
-
-#: ardour/audio_unit.cc:2278
-msgid "AudioUnit Generators"
-msgstr ""
-
-#: ardour/audio_unit.cc:2281
-msgid "AudioUnit (Unknown)"
-msgstr "音频单元(未知)"
-
-#: ardour/audio_unit.cc:2335
-msgid "Cannot get I/O configuration info for AU %1"
-msgstr ""
-
-#: ardour/audio_unit.cc:2374
-msgid "Checking AudioUnit: %1"
-msgstr "检查音频单元 %1"
-
-#: ardour/audio_unit.cc:2384
-msgid "Could not load AU plugin %1 - ignored"
-msgstr ""
-
-#: ardour/audio_unit.cc:2461
-msgid "could not save AU cache to %1"
-msgstr ""
-
-#: ardour/audio_unit.cc:2527
-msgid "Your AudioUnit configuration cache contains an AU plugin whose ID cannot be understood - ignored (%1)"
-msgstr ""
-
-#: ardour/playlist.cc:2245
-msgid "region state node has no ID, ignored"
-msgstr ""
-
-#: ardour/playlist.cc:2263
-msgid "Playlist: cannot create region from XML"
-msgstr ""
-
-#: ardour/export_format_specification.cc:514
-msgid "normalize, "
-msgstr ""
-
-#: ardour/export_format_specification.cc:518
-msgid "trim, "
-msgstr ""
-
-#: ardour/export_format_specification.cc:520
-msgid "trim start, "
-msgstr ""
-
-#: ardour/export_format_specification.cc:522
-msgid "trim end, "
-msgstr ""
-
-#: ardour/export_format_specification.cc:551
-msgid "Session rate"
-msgstr ""
-
-#: ardour/monitor_processor.cc:53
-msgid "monitor dim"
-msgstr ""
-
-#: ardour/monitor_processor.cc:54
-msgid "monitor cut"
-msgstr ""
-
-#: ardour/monitor_processor.cc:55
-msgid "monitor mono"
-msgstr ""
-
-#: ardour/monitor_processor.cc:58
-msgid "monitor dim level"
-msgstr ""
-
-#: ardour/monitor_processor.cc:62
-msgid "monitor solo boost level"
-msgstr ""
-
-#: ardour/monitor_processor.cc:512
-msgid "cut control %1"
-msgstr ""
-
-#: ardour/monitor_processor.cc:513
-msgid "dim control"
-msgstr ""
-
-#: ardour/monitor_processor.cc:514
-msgid "polarity control"
-msgstr ""
-
-#: ardour/monitor_processor.cc:515
-msgid "solo control"
-msgstr ""
-
-#: ardour/rc_configuration.cc:102
-msgid "Loading system configuration file %1"
-msgstr "载入系统配置文件 %1"
-
-#: ardour/rc_configuration.cc:106
-msgid "%1: cannot read system configuration file \"%2\""
-msgstr "%1: 无法读取系统配置文件\"%2\""
-
-#: ardour/rc_configuration.cc:111
-msgid "%1: system configuration file \"%2\" not loaded successfully."
-msgstr "%1: 系统配置文件 \"%2\" 载入不成功"
-
-#: ardour/rc_configuration.cc:115
-msgid "your system %1 configuration file is empty. This probably means that there as an error installing %1"
-msgstr ""
-
-#: ardour/rc_configuration.cc:137
-msgid "Loading user configuration file %1"
-msgstr "载入用户配置文件 %1"
-
-#: ardour/rc_configuration.cc:141
-msgid "%1: cannot read configuration file \"%2\""
-msgstr "%1: 无法读取配置文件 \"%2\""
-
-#: ardour/rc_configuration.cc:146
-msgid "%1: user configuration file \"%2\" not loaded successfully."
-msgstr "%1: 用户配置文件 \"%2\" 载入不成功"
-
-#: ardour/rc_configuration.cc:150
-msgid "your %1 configuration file is empty. This is not normal."
-msgstr ""
-
-#: ardour/rc_configuration.cc:155
-msgid "%1: could not find configuration file (ardour.rc), canvas will look broken."
-msgstr "%1: 无法找到配置文件(ardour.rc), 话不看起来会破破的."
-
-#: ardour/rc_configuration.cc:183
-msgid "Config file %1 not saved"
-msgstr "配置文件 %1 没有保存"
-
-#: ardour/automatable.cc:79
-msgid "Automation node has no path property"
-msgstr ""
-
-#: ardour/automatable.cc:101
-msgid "cannot open %2 to load automation data (%3)"
-msgstr ""
-
-#: ardour/automatable.cc:131
-msgid "cannot load automation data from %2"
-msgstr "无法从 %2 载入自动数据"
-
-#: ardour/automatable.cc:160
-msgid "Fader"
-msgstr ""
-
-#: ardour/session_utils.cc:29
-msgid "Unable to create session directory at path %1 : %2"
-msgstr ""
-
-#: ardour/port_insert.cc:45
-msgid "insert %1"
-msgstr "插入 %1"
-
-#: ardour/port_insert.cc:198
-msgid "XML node describing port insert is missing the `type' field"
-msgstr ""
-
-#: ardour/port_insert.cc:203
-msgid "non-port insert XML used for port plugin insert"
-msgstr ""
-
-#: ardour/pannable.cc:204
-msgid "Pannable given XML data for %1 - ignored"
-msgstr ""
-
-#: ardour/playlist_source.cc:102
-msgid "No playlist ID in PlaylistSource XML!"
-msgstr ""
-
-#: ardour/playlist_source.cc:121
-msgid "Could not construct playlist for PlaylistSource from session data!"
-msgstr ""
-
-#: ardour/session_time.cc:463
-msgid "Unknown JACK transport state %1 in sync callback"
-msgstr ""
-
-#: ardour/midi_source.cc:123
-msgid "Missing parameter property on InterpolationStyle"
-msgstr ""
-
-#: ardour/midi_source.cc:130
-msgid "Missing style property on InterpolationStyle"
-msgstr ""
-
-#: ardour/midi_source.cc:142
-msgid "Missing parameter property on AutomationState"
-msgstr ""
-
-#: ardour/midi_source.cc:149
-msgid "Missing state property on AutomationState"
-msgstr ""
-
-#: ardour/tape_file_matcher.cc:46
-msgid "Cannot compile tape track regexp for use (%1)"
-msgstr ""
-
-#: ardour/vst_plugin.cc:233
-msgid "Bad node sent to VSTPlugin::set_state"
-msgstr ""
-
-#: ardour/vst_plugin.cc:699
-msgid "VST: cannot load module from \"%1\""
-msgstr "VST: 无法从 %1 载入模块"
-
-#: ardour/vst_plugin.cc:704
-msgid "You asked ardour to not use any VST plugins"
-msgstr "您要求Ardour不要使用任何VST插件"
-
-#: ardour/vst_plugin.cc:731
-#: ardour/vst_plugin.cc:734
-msgid "Preset %1"
-msgstr "预设 %1"
-
-#: ardour/export_failed.cc:32
-msgid "Export failed: %1"
-msgstr "导出失败: %1"
-
-#: ardour/audio_playlist.cc:369
-msgid "programming error: non-audio Region passed to remove_overlap in audio playlist"
-msgstr ""
-
-#: ardour/audio_playlist.cc:500
-msgid "programming error: non-audio Region tested for overlap in audio playlist"
-msgstr ""
-
-#: ardour/butler.cc:94
-msgid "Cannot create transport request signal pipe (%1)"
-msgstr ""
-
-#: ardour/butler.cc:100
-#: ardour/butler.cc:106
-msgid "UI: cannot set O_NONBLOCK on butler request pipe (%1)"
-msgstr ""
-
-#: ardour/butler.cc:112
-msgid "Session: could not create butler thread"
-msgstr "会话：无法创建管家线程"
-
-#: ardour/butler.cc:159
-msgid "poll on butler request pipe failed (%1)"
-msgstr ""
-
-#: ardour/butler.cc:166
-msgid "Error on butler thread request pipe: fd=%1 err=%2"
-msgstr ""
-
-#: ardour/butler.cc:207
-msgid "Error reading from butler request pipe"
-msgstr ""
-
-#: ardour/butler.cc:254
-msgid "Butler read ahead failure on dstream %1"
-msgstr ""
-
-#: ardour/butler.cc:291
-msgid "Butler write-behind failure on dstream %1"
-msgstr ""
-
-#: ardour/panner_shell.cc:184
-msgid "Unknown panner plugin \"%1\" found in pan state - ignored"
-msgstr ""
-
-#: ardour/panner_shell.cc:190
-msgid "panner plugin node has no type information!"
-msgstr ""
-
-#: ardour/audio_playlist_importer.cc:69
-msgid "Audio Playlists"
-msgstr "音频播放列表"
-
-#: ardour/audio_playlist_importer.cc:162
-msgid "region"
-msgstr ""
-
-#: ardour/audio_playlist_importer.cc:164
-msgid "regions"
-msgstr ""
-
-#: ardour/audio_playlist_importer.cc:175
-msgid "A playlist with this name already exists, please rename it."
-msgstr "此名称的播放列表已存在，请重命名"
-
-#: ardour/audio_playlist_importer.cc:260
-msgid "Audio Playlists (unused)"
-msgstr "音频播放列表(未使用)"
-
-#: ardour/mtc_slave.cc:165
-msgid "Unknown rate/drop value %1 in incoming MTC stream, session values used instead"
-msgstr ""
-
-#: ardour/mtc_slave.cc:371
-msgid "MTC Slave: atomic read of current time failed, sleeping!"
-msgstr ""
-
-#: ardour/panner_manager.cc:53
-msgid "looking for panners in %1"
-msgstr ""
-
-#: ardour/panner_manager.cc:66
-msgid "Panner discovered: \"%1\""
-msgstr ""
-
-#: ardour/panner_manager.cc:82
-msgid "PannerManager: cannot load module \"%1\" (%2)"
-msgstr ""
-
-#: ardour/panner_manager.cc:89
-msgid "PannerManager: module \"%1\" has no descriptor function."
-msgstr ""
-
-#: ardour/panner_manager.cc:152
-msgid "no panner discovered for in/out = %1/%2"
-msgstr ""
-
-#: ardour/audio_library.cc:71
-msgid "Could not open %1.  Audio Library not saved"
-msgstr "无法打开 %1. 音频库未保存"
-
-#: ardour/find_session.cc:31
-msgid "Could not resolve path: %1 (%2)"
-msgstr "无法解决路径: %1 (%2)"
-
-#: ardour/find_session.cc:43
-msgid "cannot check session path %1 (%2)"
-msgstr "无法检查会话路径 %1 (%2)"
-
-#: ardour/find_session.cc:69
-msgid "cannot check statefile %1 (%2)"
-msgstr ""
-
-#: ardour/find_session.cc:105
-msgid "%1 is not a snapshot file"
-msgstr "%1 不是一个快照文件"
-
-#: ardour/find_session.cc:122
-msgid "cannot determine current working directory (%1)"
-msgstr ""
-
-#: ardour/find_session.cc:139
-msgid "unknown file type for session %1"
-msgstr ""
-
-#: ardour/st_stretch.cc:127
-msgid "tempoize: error reading data from %1"
-msgstr ""
-
-#: ardour/st_stretch.cc:140
-#: ardour/st_stretch.cc:152
-msgid "error writing tempo-adjusted data to %1"
-msgstr ""
-
-#: ardour/st_stretch.cc:159
-msgid "timefx code failure. please notify ardour-developers."
-msgstr ""
-
-#: ardour/region_factory.cc:69
-#: ardour/region_factory.cc:106
-#: ardour/region_factory.cc:143
-#: ardour/region_factory.cc:181
-msgid "programming error: RegionFactory::create() called with unknown Region type"
-msgstr ""
-
-#: ardour/region_factory.cc:499
-msgid "%1 compound-%2 (%3)"
-msgstr ""
-
-#: ardour/region_factory.cc:501
-msgid "%1 compound-%2.1 (%3)"
-msgstr ""
-
-#: ardour/region_factory.cc:571
-msgid "cannot create new name for region \"%1\""
-msgstr ""
-
-#: ardour/session_state.cc:150
-msgid "Could not use path %1 (%s)"
-msgstr "无法使用路径 %1 (%s)"
-
-#: ardour/session_state.cc:274
-msgid "solo cut control (dB)"
-msgstr ""
-
-#: ardour/session_state.cc:364
-msgid "Reset Remote Controls"
-msgstr ""
-
-#: ardour/session_state.cc:389
-msgid "Session loading complete"
-msgstr "会话载入完成"
-
-#: ardour/session_state.cc:456
-msgid "Session: cannot create session peakfile folder \"%1\" (%2)"
-msgstr "会话: 无法创建会话峰文件的文件夹 \"%1\" (%2)"
-
-#: ardour/session_state.cc:463
-msgid "Session: cannot create session sounds dir \"%1\" (%2)"
-msgstr ""
-
-#: ardour/session_state.cc:470
-msgid "Session: cannot create session midi dir \"%1\" (%2)"
-msgstr ""
-
-#: ardour/session_state.cc:477
-msgid "Session: cannot create session dead sounds folder \"%1\" (%2)"
-msgstr ""
-
-#: ardour/session_state.cc:484
-msgid "Session: cannot create session export folder \"%1\" (%2)"
-msgstr "会话: 无法创建会话导出文件夹 \"%1\" (%2)"
-
-#: ardour/session_state.cc:491
-msgid "Session: cannot create session analysis folder \"%1\" (%2)"
-msgstr "会话: 无法创建会话分析文件夹 \"%1\" (%2)"
-
-#: ardour/session_state.cc:498
-msgid "Session: cannot create session plugins folder \"%1\" (%2)"
-msgstr "会话: 无法创建会话插件文件夹 \"%1\" (%2)"
-
-#: ardour/session_state.cc:510
-msgid "Session: cannot create session folder \"%1\" (%2)"
-msgstr "会话: 无法创建会话文件夹 \"%1\" (%2)"
-
-#: ardour/session_state.cc:538
-msgid "Could not open %1 for writing mix template"
-msgstr "无法打开 %1 用于写入混音模板"
-
-#: ardour/session_state.cc:544
-msgid "Could not open mix template %1 for reading"
-msgstr "无法打开混音模板 %1 用于读取"
-
-#: ardour/session_state.cc:568
-msgid "master"
-msgstr "主控"
-
-#: ardour/session_state.cc:585
-msgid "monitor"
-msgstr ""
-
-#: ardour/session_state.cc:649
-msgid "Could remove pending capture state at path \"%1\" (%2)"
-msgstr ""
-
-#: ardour/session_state.cc:678
-msgid "could not rename snapshot %1 to %2 (%3)"
-msgstr "无法重命名快照 %1 到 %2 (%3)"
-
-#: ardour/session_state.cc:773
-msgid "the %1 audio engine is not connected and state saving would lose all I/O connections. Session not saved"
-msgstr ""
-
-#: ardour/session_state.cc:819
-msgid "state could not be saved to %1"
-msgstr ""
-
-#: ardour/session_state.cc:826
-msgid "could not rename temporary session file %1 to %2"
-msgstr ""
-
-#: ardour/session_state.cc:893
-msgid "%1: session state information file \"%2\" doesn't exist!"
-msgstr ""
-
-#: ardour/session_state.cc:905
-msgid "Could not understand ardour file %1"
-msgstr "无法理解ardour文件 %1"
-
-#: ardour/session_state.cc:914
-msgid "Session file %1 is not a session"
-msgstr "会话文件 %1 不是一个会话"
-
-#: ardour/session_state.cc:945
-msgid ""
-"Copying old session file %1 to %2\n"
-"Use %2 with %3 versions before 2.0 from now on"
-msgstr ""
-
-#: ardour/session_state.cc:955
-msgid "Unable to make backup of state file %1 (%2)"
-msgstr "无法备份状态文件%1 (%2)"
-
-#: ardour/session_state.cc:1120
-#: ardour/session.cc:4142
-msgid "session"
-msgstr "会话"
-
-#: ardour/session_state.cc:1212
-msgid "programming error: Session: incorrect XML node sent to set_state()"
-msgstr ""
-
-#: ardour/session_state.cc:1265
-msgid "Session: XML state has no options section"
-msgstr ""
-
-#: ardour/session_state.cc:1270
-msgid "Session: XML state has no metadata section"
-msgstr ""
-
-#: ardour/session_state.cc:1281
-msgid "Session: XML state has no sources section"
-msgstr ""
-
-#: ardour/session_state.cc:1288
-msgid "Session: XML state has no Tempo Map section"
-msgstr ""
-
-#: ardour/session_state.cc:1295
-msgid "Session: XML state has no locations section"
-msgstr ""
-
-#: ardour/session_state.cc:1321
-msgid "Session: XML state has no Regions section"
-msgstr ""
-
-#: ardour/session_state.cc:1328
-msgid "Session: XML state has no playlists section"
-msgstr ""
-
-#: ardour/session_state.cc:1354
-msgid "Session: XML state has no bundles section"
-msgstr ""
-
-#: ardour/session_state.cc:1366
-msgid "Session: XML state has no diskstreams section"
-msgstr ""
-
-#: ardour/session_state.cc:1374
-msgid "Session: XML state has no routes section"
-msgstr ""
-
-#: ardour/session_state.cc:1386
-msgid "Session: XML state has no route groups section"
-msgstr ""
-
-#: ardour/session_state.cc:1395
-msgid "Session: XML state has no edit groups section"
-msgstr ""
-
-#: ardour/session_state.cc:1402
-msgid "Session: XML state has no mix groups section"
-msgstr ""
-
-#: ardour/session_state.cc:1410
-msgid "Session: XML state has no click section"
-msgstr ""
-
-#: ardour/session_state.cc:1450
-msgid "Session: cannot create Route from XML description."
-msgstr ""
-
-#: ardour/session_state.cc:1454
-msgid "Loaded track/bus %1"
-msgstr "载入音轨/总线 %1"
-
-#: ardour/session_state.cc:1552
-msgid "Could not find diskstream for route"
-msgstr ""
-
-#: ardour/session_state.cc:1606
-msgid "Session: cannot create Region from XML description."
-msgstr ""
-
-#: ardour/session_state.cc:1610
-msgid "Can not load state for region '%1'"
-msgstr ""
-
-#: ardour/session_state.cc:1646
-msgid "Regions in compound description not found (ID's %1 and %2): ignored"
-msgstr ""
-
-#: ardour/session_state.cc:1674
-msgid "Nested source has no ID info in session state file! (ignored)"
-msgstr ""
-
-#: ardour/session_state.cc:1686
-msgid "Cannot reconstruct nested source for region %1"
-msgstr ""
-
-#: ardour/session_state.cc:1748
-msgid "Session: XMLNode describing a AudioRegion is incomplete (no source)"
-msgstr ""
-
-#: ardour/session_state.cc:1756
-#: ardour/session_state.cc:1777
-#: ardour/session_state.cc:1797
-msgid "Session: XMLNode describing a AudioRegion references an unknown source id =%1"
-msgstr ""
-
-#: ardour/session_state.cc:1762
-#: ardour/session_state.cc:1783
-#: ardour/session_state.cc:1803
-msgid "Session: XMLNode describing a AudioRegion references a non-audio source id =%1"
-msgstr ""
-
-#: ardour/session_state.cc:1826
-msgid "Session: XMLNode describing an AudioRegion is missing some master sources; ignored"
-msgstr ""
-
-#: ardour/session_state.cc:1860
-msgid "Session: XMLNode describing a MidiRegion is incomplete (no source)"
-msgstr ""
-
-#: ardour/session_state.cc:1868
-msgid "Session: XMLNode describing a MidiRegion references an unknown source id =%1"
-msgstr ""
-
-#: ardour/session_state.cc:1874
-msgid "Session: XMLNode describing a MidiRegion references a non-midi source id =%1"
-msgstr ""
-
-#: ardour/session_state.cc:1942
-msgid "cannot create new file from region name \"%1\" with ident = \"%2\": too many existing files with similar names"
-msgstr ""
-
-#: ardour/session_state.cc:1965
-msgid "Session: cannot create Source from XML description."
-msgstr ""
-
-#: ardour/session_state.cc:1999
-msgid "A sound file is missing. It will be replaced by silence."
-msgstr ""
-
-#: ardour/session_state.cc:2022
-msgid "Found a sound file that cannot be used by %1. Talk to the progammers."
-msgstr ""
-
-#: ardour/session_state.cc:2044
-msgid "Could not create mix templates directory \"%1\" (%2)"
-msgstr "无法创建混音模板目录 \"%1\" (%2)"
-
-#: ardour/session_state.cc:2056
-msgid "Template \"%1\" already exists - new version not created"
-msgstr ""
-
-#: ardour/session_state.cc:2062
-msgid "template not saved"
-msgstr "模板没保存"
-
-#: ardour/session_state.cc:2079
-msgid "Template \"%1\" already exists - template not renamed"
-msgstr "模板 \"%1\" 已存在 - 模板没被重命名"
-
-#: ardour/session_state.cc:2240
-msgid "Session: cannot create Named Selection from XML description."
-msgstr ""
-
-#: ardour/session_state.cc:2291
-msgid "Unknown node \"%1\" found in Bundles list from state file"
-msgstr ""
-
-#: ardour/session_state.cc:2839
-#: ardour/session_state.cc:2845
-msgid "Cannot expand path %1 (%2)"
-msgstr "无法扩展路径 %1 (%2)"
-
-#: ardour/session_state.cc:2898
-msgid "Session: cannot create dead file folder \"%1\" (%2)"
-msgstr ""
-
-#: ardour/session_state.cc:2921
-msgid "there are already 1000 files with names like %1; versioning discontinued"
-msgstr ""
-
-#: ardour/session_state.cc:2937
-msgid "cannot rename unused file source from %1 to %2 (%3)"
-msgstr ""
-
-#: ardour/session_state.cc:2955
-msgid "cannot remove peakfile %1 for %2 (%3)"
-msgstr ""
-
-#: ardour/session_state.cc:3262
-msgid "could not backup old history file, current history not saved"
-msgstr ""
-
-#: ardour/session_state.cc:3275
-msgid "history could not be saved to %1"
-msgstr "历史无法被保存到 %1"
-
-#: ardour/session_state.cc:3284
-msgid "could not restore history file from backup %1 (%2)"
-msgstr ""
-
-#: ardour/session_state.cc:3309
-msgid "%1: no history file \"%2\" for this session."
-msgstr ""
-
-#: ardour/session_state.cc:3315
-msgid "Could not understand session history file \"%1\""
-msgstr "无法理解会话历史文件 \"%1\""
-
-#: ardour/session_state.cc:3357
-msgid "Failed to downcast MidiSource for NoteDiffCommand"
-msgstr ""
-
-#: ardour/session_state.cc:3368
-msgid "Failed to downcast MidiSource for SysExDiffCommand"
-msgstr ""
-
-#: ardour/session_state.cc:3379
-msgid "Failed to downcast MidiSource for PatchChangeDiffCommand"
-msgstr ""
-
-#: ardour/session_state.cc:3387
-msgid "Couldn't figure out how to make a Command out of a %1 XMLNode."
-msgstr ""
-
-#: ardour/session_state.cc:3609
-msgid "Session: unknown diskstream type in XML"
-msgstr ""
-
-#: ardour/session_state.cc:3614
-msgid "Session: could not load diskstream via XML state"
-msgstr ""
-
-#: ardour/session_midi.cc:400
-msgid "Session: could not send full MIDI time code"
-msgstr ""
-
-#: ardour/session_midi.cc:477
-msgid "Session: cannot send quarter-frame MTC message (%1)"
-msgstr ""
-
-#: ardour/audio_track.cc:177
+#: audio_track.cc:167
 msgid "Unknown bundle \"%1\" listed for input of %2"
 msgstr ""
 
-#: ardour/audio_track.cc:179
+#: audio_track.cc:169
 msgid "in 1"
 msgstr ""
 
-#: ardour/audio_track.cc:180
+#: audio_track.cc:170
 msgid "No input bundles available as a replacement"
 msgstr ""
 
-#: ardour/audio_track.cc:184
+#: audio_track.cc:174
 msgid "Bundle %1 was not available - \"in 1\" used instead"
 msgstr ""
 
-#: ardour/audio_track.cc:193
+#: audio_track.cc:183
 msgid "improper input channel list in XML node (%1)"
 msgstr ""
 
-#: ardour/session.cc:335
-msgid "Set block size and sample rate"
+#: audio_track_importer.cc:69
+msgid "Audio Tracks"
+msgstr "音频音轨"
+
+#: audio_track_importer.cc:254 audio_track_importer.cc:260
+msgid "badly-formed XML in imported track"
 msgstr ""
 
-#: ardour/session.cc:340
-msgid "Using configuration"
-msgstr "使用配置"
-
-#: ardour/session.cc:384
-msgid "could not setup Click I/O"
+#: audio_track_importer.cc:288
+msgid "Error Importing Audio track %1"
 msgstr ""
 
-#: ardour/session.cc:411
-msgid "cannot setup Click I/O"
-msgstr ""
+#: audioanalyser.cc:31
+msgid "cannot load VAMP plugin \"%1\""
+msgstr "无法载入VAMP插件 \"%1\""
 
-#: ardour/session.cc:414
-msgid "Compute I/O Latencies"
-msgstr ""
+#: audioanalyser.cc:51
+msgid "VAMP Plugin \"%1\" could not be loaded"
+msgstr "无法载入VAMP插件 \"%1\""
 
-#: ardour/session.cc:420
-msgid "Set up standard connections"
-msgstr "设置标准连接"
-
-#: ardour/session.cc:441
-#, c-format
-msgid "out %<PRIu32>"
-msgstr ""
-
-#: ardour/session.cc:455
-#, c-format
-msgid "out %<PRIu32>+%<PRIu32>"
-msgstr ""
-
-#: ardour/session.cc:470
-#, c-format
-msgid "in %<PRIu32>"
-msgstr ""
-
-#: ardour/session.cc:484
-#, c-format
-msgid "in %<PRIu32>+%<PRIu32>"
-msgstr ""
-
-#: ardour/session.cc:520
-msgid "Setup signal flow and plugins"
-msgstr ""
-
-#: ardour/session.cc:557
-msgid "cannot connect master output %1 to %2"
-msgstr ""
-
-#: ardour/session.cc:585
-msgid "cannot connect control input %1 to %2"
-msgstr ""
-
-#: ardour/session.cc:605
-msgid "The preferred I/O for the monitor bus (%1) cannot be found"
-msgstr ""
-
-#: ardour/session.cc:629
-msgid "cannot connect control output %1 to %2"
-msgstr ""
-
-#: ardour/session.cc:650
-msgid "Connect to engine"
-msgstr "连接到引擎"
-
-#: ardour/session.cc:679
-msgid "cannot create Auditioner: no auditioning of regions possible"
-msgstr ""
-
-#: ardour/session.cc:881
-msgid "Session: you can't use that location for auto punch (start <= end)"
-msgstr ""
-
-#: ardour/session.cc:917
-msgid "Session: you can't use a mark for auto loop"
-msgstr ""
-
-#: ardour/session.cc:1282
-msgid "feedback loop setup between %1 and %2"
-msgstr ""
-
-#: ardour/session.cc:1480
-#: ardour/session.cc:1483
-msgid "Midi"
-msgstr "MIDI"
-
-#: ardour/session.cc:1529
-msgid "Session: could not create new midi track."
-msgstr ""
-
-#: ardour/session.cc:1535
-msgid "No more JACK ports are available. You will need to stop %1 and restart JACK with ports if you need this many tracks."
-msgstr ""
-
-#: ardour/session.cc:1707
-#: ardour/session.cc:1710
-msgid "Audio"
-msgstr "音频"
-
-#: ardour/session.cc:1734
-#: ardour/session.cc:1742
-#: ardour/session.cc:1848
-#: ardour/session.cc:1856
-msgid "cannot configure %1 in/%2 out configuration for new audio track"
-msgstr ""
-
-#: ardour/session.cc:1764
-msgid "Session: could not create new audio track."
-msgstr ""
-
-#: ardour/session.cc:1826
-#: ardour/session.cc:1829
-msgid "Bus"
-msgstr "总线"
-
-#: ardour/session.cc:1876
-msgid "Session: could not create new audio route."
-msgstr ""
-
-#: ardour/session.cc:1923
-msgid "Session: UINT_MAX routes? impossible!"
-msgstr ""
-
-#: ardour/session.cc:1941
-msgid "Session: cannot create track/bus from template description"
-msgstr ""
-
-#: ardour/session.cc:1967
-msgid "Session: could not create new route from template"
-msgstr ""
-
-#: ardour/session.cc:3003
-msgid "FATAL ERROR! Could not find a suitable version of %1 for a rename"
-msgstr ""
-
-#: ardour/session.cc:3126
-#: ardour/session.cc:3185
-msgid "There are already %1 recordings for %2, which I consider too many."
-msgstr ""
-
-#: ardour/session.cc:3556
-msgid "send ID %1 appears to be in use already"
-msgstr ""
-
-#: ardour/session.cc:3568
-msgid "return ID %1 appears to be in use already"
-msgstr ""
-
-#: ardour/session.cc:3580
-msgid "insert ID %1 appears to be in use already"
-msgstr ""
-
-#: ardour/session.cc:3747
-msgid "Cannot write a range where end <= start (e.g. %1 <= %2)"
-msgstr ""
-
-#: ardour/session.cc:3782
-msgid "too many bounced versions of playlist \"%1\""
-msgstr ""
-
-#: ardour/session.cc:3792
-msgid "cannot create new audio file \"%1\" for %2"
-msgstr ""
-
-#: ardour/delivery.cc:117
-msgid "main outs"
-msgstr ""
-
-#: ardour/delivery.cc:120
-msgid "listen"
-msgstr ""
-
-#: ardour/location_importer.cc:61
-msgid "Locations"
-msgstr ""
-
-#: ardour/location_importer.cc:123
-msgid "Location: "
-msgstr ""
-
-#: ardour/location_importer.cc:125
+#: audioengine.cc:184
 msgid ""
-"Range\n"
-"start: "
+"This version of JACK is old - you should upgrade to a newer version that "
+"supports jack_port_type_get_buffer_size()"
 msgstr ""
 
-#: ardour/location_importer.cc:126
-msgid ""
-"\n"
-"end: "
-msgstr ""
-
-#: ardour/location_importer.cc:146
-msgid ""
-"The location is the Punch range. It will be imported as a normal range.\n"
-"You may rename the imported location:"
-msgstr ""
-
-#: ardour/location_importer.cc:157
-msgid ""
-"The location is a Loop range. It will be imported as a normal range.\n"
-"You may rename the imported location:"
-msgstr ""
-
-#: ardour/location_importer.cc:168
-msgid ""
-"A location with that name already exists.\n"
-"You may rename the imported location:"
-msgstr ""
-
-#: ardour/named_selection.cc:88
-msgid "Chunk %1 uses an unknown playlist \"%2\""
-msgstr ""
-
-#: ardour/named_selection.cc:91
-msgid "Chunk %1 contains misformed playlist information"
-msgstr ""
-
-#: ardour/import.cc:206
-msgid "Could not find a source for %1 even though we are updating this file!"
-msgstr ""
-
-#: ardour/import.cc:237
-msgid "Unable to create file %1 during import"
-msgstr "在导入期间无法创建文件 %1"
-
-#: ardour/import.cc:263
-msgid "Resampling %1 from %2kHz to %3kHz"
-msgstr ""
-
-#: ardour/import.cc:269
-msgid "Copying %1"
-msgstr "复制 %1 中"
-
-#: ardour/import.cc:446
-msgid "Track %1 of %2 contained no usable MIDI data"
-msgstr ""
-
-#: ardour/import.cc:453
-msgid "MIDI file %1 was not readable (no reason available"
-msgstr ""
-
-#: ardour/import.cc:499
-msgid "Import: cannot open input sound file \"%1\""
-msgstr ""
-
-#: ardour/import.cc:510
-msgid "Import: error opening MIDI file"
-msgstr "导入: 错误打开MIDI文件"
-
-#: ardour/import.cc:549
-msgid "Loading MIDI file %1"
-msgstr "载入MIDI文件 %1"
-
-#: ardour/session_click.cc:156
-msgid "cannot open click soundfile %1 (%2)"
-msgstr "无法打开click声音文件 %1 (%2)"
-
-#: ardour/session_click.cc:169
-msgid "cannot read data from click soundfile"
-msgstr ""
-
-#: ardour/lv2_plugin_lilv.cc:187
-msgid "LV2: Failed to instantiate plugin "
-msgstr ""
-
-#: ardour/lv2_plugin_lilv.cc:197
-msgid "LV2: \"%1\" cannot be used, since it cannot do inplace processing"
-msgstr ""
-
-#: ardour/lv2_plugin_lilv.cc:387
-msgid "Illegal parameter number used with plugin \"%1\". This is a bug in either %2 or the LV2 plugin <%3>"
-msgstr ""
-
-#: ardour/lv2_plugin_lilv.cc:600
-#: ardour/lv2_plugin_lilv.cc:779
-msgid "Plugin \"%1\\% failed to return LV2 persist data"
-msgstr ""
-
-#: ardour/lv2_plugin_lilv.cc:644
-msgid "Plugin \"%1\\% preset \"%2%\" is missing a dc:title\n"
-msgstr ""
-
-#: ardour/lv2_plugin_lilv.cc:719
-msgid "Bad node sent to LV2Plugin::set_state"
-msgstr ""
-
-#: ardour/lv2_plugin_lilv.cc:736
-msgid "LV2: port has no symbol, ignored"
-msgstr ""
-
-#: ardour/lv2_plugin_lilv.cc:745
-msgid "LV2: port has unknown index, ignored"
-msgstr ""
-
-#: ardour/lv2_plugin_lilv.cc:752
-msgid "LV2: port has no value, ignored"
-msgstr ""
-
-#: ardour/audio_diskstream.cc:249
-msgid "AudioDiskstream: Playlist \"%1\" isn't an audio playlist"
-msgstr ""
-
-#: ardour/audio_diskstream.cc:302
-msgid "AudioDiskstream %1: there is no existing playlist to make a copy of!"
-msgstr ""
-
-#: ardour/audio_diskstream.cc:777
-#: ardour/audio_diskstream.cc:788
-msgid "AudioDiskstream %1: when refilling, cannot read %2 from playlist at frame %3"
-msgstr ""
-
-#: ardour/audio_diskstream.cc:938
-msgid "AudioDiskstream %1: cannot read %2 from playlist at frame %3"
-msgstr ""
-
-#: ardour/audio_diskstream.cc:1303
-#: ardour/audio_diskstream.cc:1320
-msgid "AudioDiskstream %1: cannot write to disk"
-msgstr "音频磁盘流 %1: 无法吸入到硬盘"
-
-#: ardour/audio_diskstream.cc:1363
-msgid "AudioDiskstream \"%1\": cannot flush captured data to disk!"
-msgstr ""
-
-#: ardour/audio_diskstream.cc:1457
-msgid "%1: could not create region for complete audio file"
-msgstr ""
-
-#: ardour/audio_diskstream.cc:1490
-msgid "AudioDiskstream: could not create region for captured audio!"
-msgstr ""
-
-#: ardour/audio_diskstream.cc:1604
-msgid "programmer error: %1"
-msgstr "程序错误: %1"
-
-#: ardour/audio_diskstream.cc:1819
-msgid "AudioDiskstream: channel %1 out of range"
-msgstr "音频磁盘流: 声道 %1 超出范围"
-
-#: ardour/audio_diskstream.cc:1833
-msgid "%1:%2 new capture file not initialized correctly"
-msgstr ""
-
-#: ardour/audio_diskstream.cc:2112
-msgid "%1: cannot restore pending capture source file %2"
-msgstr ""
-
-#: ardour/audio_diskstream.cc:2134
-msgid "%1: incorrect number of pending sources listed - ignoring them all"
-msgstr ""
-
-#: ardour/audio_diskstream.cc:2158
-msgid "%1: cannot create whole-file region from pending capture sources"
-msgstr ""
-
-#: ardour/session_state_utils.cc:48
-msgid "Unable to create a backup copy of file %1 (%2)"
-msgstr "无法创建 %1 (%2) 的备份文件"
-
-#: ardour/session_events.cc:188
-msgid "Session: cannot have two events of type %1 at the same frame (%2)."
-msgstr ""
-
-#: ardour/coreaudiosource.cc:84
-msgid "CoreAudioSource: cannot open file \"%1\" for %2"
-msgstr "核心音频源: 无法打开文件 \"%1\" 用于 %2"
-
-#: ardour/cycle_timer.cc:36
-msgid "CycleTimer::get_mhz(): can't open /proc/cpuinfo"
-msgstr ""
-
-#: ardour/cycle_timer.cc:48
-msgid "CycleTimer::get_mhz(): cannot locate cpu MHz in /proc/cpuinfo"
-msgstr ""
-
-#: ardour/cycle_timer.cc:71
-msgid "cannot locate cpu MHz in /proc/cpuinfo"
-msgstr ""
-
-#: ardour/diskstream.cc:320
-msgid "Location \"%1\" not valid for track loop (start >= end)"
-msgstr ""
-
-#: ardour/utils.cc:292
-msgid "illegal or badly-formed string used for path (%1)"
-msgstr ""
-
-#: ardour/utils.cc:297
-msgid "path (%1) is ambiguous"
-msgstr "路径 (%1) 有歧义"
-
-#: ardour/utils.cc:359
-#: ardour/utils.cc:383
-msgid "Splice"
-msgstr ""
-
-#: ardour/utils.cc:361
-#: ardour/utils.cc:376
-msgid "Slide"
-msgstr ""
-
-#: ardour/utils.cc:363
-#: ardour/utils.cc:379
-msgid "Lock"
-msgstr ""
-
-#: ardour/utils.cc:366
-msgid "programming error: unknown edit mode string \"%1\""
-msgstr "程序错误: 无法识别编辑模式字符串 \"%1\""
-
-#: ardour/utils.cc:390
-#: ardour/utils.cc:419
-msgid "MIDI Timecode"
-msgstr "MIDI时间码"
-
-#: ardour/utils.cc:390
-#: ardour/utils.cc:417
-msgid "MTC"
-msgstr "MTC"
-
-#: ardour/utils.cc:394
-#: ardour/utils.cc:423
-msgid "MIDI Clock"
-msgstr "MIDI时钟"
-
-#: ardour/utils.cc:398
-#: ardour/utils.cc:413
-#: ardour/utils.cc:426
-msgid "JACK"
-msgstr ""
-
-#: ardour/utils.cc:402
-msgid "programming error: unknown sync source string \"%1\""
-msgstr "程序错误: 无法识别同步源字符串 \"%1\""
-
-#: ardour/utils.cc:491
-#: ardour/utils.cc:515
-#: ardour/utils.cc:529
-#: ardour/utils.cc:548
-msgid "programming error: %1 %2"
-msgstr "程序错误: %1 %2"
-
-#: ardour/utils.cc:602
-msgid "programming error: unknown native header format: %1"
-msgstr ""
-
-#: ardour/utils.cc:617
-msgid "cannot open directory %1 (%2)"
-msgstr "无法打开目录 %1 (%2)"
-
-#: ardour/audioengine.cc:190
-msgid "This version of JACK is old - you should upgrade to a newer version that supports jack_port_type_get_buffer_size()"
-msgstr ""
-
-#: ardour/audioengine.cc:194
+#: audioengine.cc:188
 msgid "Connect session to engine"
 msgstr "连接会话到引擎"
 
-#: ardour/audioengine.cc:775
-msgid "a port with the name \"%1\" already exists: check for duplicated track/bus names"
+#: audioengine.cc:838
+msgid ""
+"a port with the name \"%1\" already exists: check for duplicated track/bus "
+"names"
 msgstr ""
 
-#: ardour/audioengine.cc:780
+#: audioengine.cc:840
+msgid ""
+"No more JACK ports are available. You will need to stop %1 and restart JACK "
+"with more ports if you need this many tracks."
+msgstr ""
+
+#: audioengine.cc:843
 msgid "AudioEngine: cannot register port \"%1\": %2"
 msgstr ""
 
-#: ardour/audioengine.cc:810
+#: audioengine.cc:873
 msgid "unable to create port: %1"
 msgstr "无法创建端口: %1"
 
-#: ardour/audioengine.cc:865
+#: audioengine.cc:927
 msgid "connect called before engine was started"
 msgstr ""
 
-#: ardour/audioengine.cc:891
+#: audioengine.cc:953
 msgid "AudioEngine: cannot connect %1 (%2) to %3 (%4)"
 msgstr "音频引擎: 无法连接 %1 (%2) 到 %3 (%4)"
 
-#: ardour/audioengine.cc:906
-#: ardour/audioengine.cc:937
+#: audioengine.cc:968 audioengine.cc:999
 msgid "disconnect called before engine was started"
 msgstr ""
 
-#: ardour/audioengine.cc:985
+#: audioengine.cc:1047
 msgid "get_port_by_name() called before engine was started"
 msgstr ""
 
-#: ardour/audioengine.cc:1016
+#: audioengine.cc:1099
 msgid "get_ports called before engine was started"
 msgstr ""
 
-#: ardour/audioengine.cc:1353
+#: audioengine.cc:1421
 msgid "failed to connect to JACK"
 msgstr "连接JACK失败"
 
-#: ardour/session_export.cc:119
-msgid "%1: cannot seek to %2 for export"
+#: audioregion.cc:1710
+msgid ""
+"You have requested an operation that requires audio analysis.\n"
+"\n"
+"You currently have \"auto-analyse-audio\" disabled, which means that "
+"transient data must be generated every time it is required.\n"
+"\n"
+"If you are doing work that will require transient data on a regular basis, "
+"you should probably enable \"auto-analyse-audio\" then quit ardour and "
+"restart.\n"
+"\n"
+"This dialog will not display again.  But you may notice a slight delay in "
+"this and future transient-detection operations.\n"
 msgstr ""
 
-#: ardour/session_command.cc:90
-msgid "Tried to reconstitute a MementoCommand with no contents, failing. id="
+#: audiosource.cc:199
+msgid "cannot rename peakfile for %1 from %2 to %3 (%4)"
+msgstr "无法为 %1 重命名峰文件(peakfile), 从 %2 到 %3 (%4)"
+
+#: audiosource.cc:226
+msgid "AudioSource: cannot stat peakfile \"%1\""
 msgstr ""
 
-#: ardour/session_command.cc:164
-msgid "could not reconstitute MementoCommand from XMLNode. object type = %1 id = %2"
+#: audiosource.cc:366
+msgid "cannot read sample data for unscaled peak computation"
+msgstr "无法为无标度的峰计算读取采样数据"
+
+#: audiosource.cc:387
+msgid "AudioSource: cannot open peakpath (a) \"%1\" (%2)"
 msgstr ""
 
-#: ardour/session_command.cc:193
-msgid "could not reconstitute StatefulDiffCommand from XMLNode. object type = %1 id = %2"
+#: audiosource.cc:463
+msgid "AudioSource: cannot open peakpath (b) \"%1\" (%2)"
 msgstr ""
 
-#: ardour/file_source.cc:210
+#: audiosource.cc:587
+msgid ""
+"AudioSource[%1]: peak read - cannot read %2 samples at offset %3 of %4 (%5)"
+msgstr ""
+
+#: audiosource.cc:667
+msgid "%1: could not write read raw data for peak computation (%2)"
+msgstr ""
+
+#: audiosource.cc:706
+msgid "AudioSource: cannot open peakpath (c) \"%1\" (%2)"
+msgstr ""
+
+#: audiosource.cc:773 audiosource.cc:886
+msgid "%1: could not write peak file data (%2)"
+msgstr ""
+
+#: audiosource.cc:924
+#, fuzzy
+msgid "could not truncate peakfile %1 to %2 (error: %3)"
+msgstr "无法重命名文件 %1 到 %2 (%3)"
+
+#: auditioner.cc:87
+msgid "no outputs available for auditioner - manual connection required"
+msgstr ""
+
+#: auditioner.cc:135
+msgid "Auditioning of non-audio regions not yet supported"
+msgstr ""
+
+#: auditioner.cc:160
+msgid "Cannot setup auditioner processing flow for %1 channels"
+msgstr ""
+
+#: automatable.cc:84
+msgid "Automation node has no path property"
+msgstr ""
+
+#: automatable.cc:104
+msgid "cannot open %2 to load automation data (%3)"
+msgstr ""
+
+#: automatable.cc:132
+msgid "cannot load automation data from %2"
+msgstr "无法从 %2 载入自动数据"
+
+#: automation_list.cc:353
+msgid "automation list: cannot load coordinates from XML, all points ignored"
+msgstr ""
+
+#: automation_list.cc:399
+msgid ""
+"automation list: no x-coordinate stored for control point (point ignored)"
+msgstr ""
+
+#: automation_list.cc:405
+msgid ""
+"automation list: no y-coordinate stored for control point (point ignored)"
+msgstr ""
+
+#: automation_list.cc:421
+msgid ""
+"AutomationList: passed XML node called %1, not \"AutomationList\" - ignored"
+msgstr ""
+
+#: butler.cc:91
+msgid "Cannot create transport request signal pipe (%1)"
+msgstr ""
+
+#: butler.cc:97 butler.cc:103
+msgid "UI: cannot set O_NONBLOCK on butler request pipe (%1)"
+msgstr ""
+
+#: butler.cc:109
+msgid "Session: could not create butler thread"
+msgstr "会话：无法创建管家线程"
+
+#: butler.cc:156
+msgid "poll on butler request pipe failed (%1)"
+msgstr ""
+
+#: butler.cc:163
+msgid "Error on butler thread request pipe: fd=%1 err=%2"
+msgstr ""
+
+#: butler.cc:201
+msgid "Error reading from butler request pipe"
+msgstr ""
+
+#: butler.cc:248
+msgid "Butler read ahead failure on dstream %1"
+msgstr ""
+
+#: butler.cc:285
+msgid "Butler write-behind failure on dstream %1"
+msgstr ""
+
+#: control_protocol_manager.cc:131
+msgid "control protocol name \"%1\" has no descriptor"
+msgstr "控制协议名称 \"%1\" 没有描述符"
+
+#: control_protocol_manager.cc:136
+msgid "control protocol name \"%1\" could not be initialized"
+msgstr "控制协议名称 \"%1\" 无法初始化"
+
+#: control_protocol_manager.cc:191
+msgid "Instantiating mandatory control protocol %1"
+msgstr "实例强制性控制协议 %1"
+
+#: control_protocol_manager.cc:212
+#, fuzzy
+msgid "looking for control protocols in %1\n"
+msgstr "寻找控制协议, 在 %1\n"
+
+#: control_protocol_manager.cc:237
+msgid "Control protocol %1 not usable"
+msgstr ""
+
+#: control_protocol_manager.cc:254
+msgid "Control surface protocol discovered: \"%1\""
+msgstr ""
+
+#: control_protocol_manager.cc:272
+msgid "ControlProtocolManager: cannot load module \"%1\" (%2)"
+msgstr ""
+
+#: control_protocol_manager.cc:280
+msgid "ControlProtocolManager: module \"%1\" has no descriptor function."
+msgstr "控制协议管理器: 模块 \"%1\" 没有描述符函数"
+
+#: control_protocol_manager.cc:399
+msgid "control protocol XML node has no name property. Ignored."
+msgstr "控制协议XML符号没有名称属性. 忽略之"
+
+#: control_protocol_manager.cc:406
+msgid "control protocol \"%1\" is not known. Ignored"
+msgstr "控制协议 \"%1\" 未知. 忽略之"
+
+#: cycle_timer.cc:38
+msgid "CycleTimer::get_mhz(): can't open /proc/cpuinfo"
+msgstr ""
+
+#: cycle_timer.cc:50
+msgid "CycleTimer::get_mhz(): cannot locate cpu MHz in /proc/cpuinfo"
+msgstr ""
+
+#: cycle_timer.cc:73
+msgid "cannot locate cpu MHz in /proc/cpuinfo"
+msgstr ""
+
+#: data_type.cc:27 io.cc:1339
+msgid "audio"
+msgstr "音频"
+
+#: data_type.cc:28 session.cc:1605 session.cc:1608
+msgid "MIDI"
+msgstr "MIDI"
+
+#: data_type.cc:29
+msgid "unknown"
+msgstr "未知"
+
+#: delivery.cc:114
+msgid "main outs"
+msgstr ""
+
+#: delivery.cc:117 send.cc:61
+msgid "listen"
+msgstr ""
+
+#: diskstream.cc:303
+msgid "Location \"%1\" not valid for track loop (start >= end)"
+msgstr ""
+
+#: export_channel.cc:110
+msgid "Could not get port for export channel \"%1\", dropping the channel"
+msgstr "无法得到输出声道 \"%1\" 的端口, 丢弃此声道"
+
+#: export_failed.cc:32
+msgid "Export failed: %1"
+msgstr "导出失败: %1"
+
+#: export_filename.cc:209
+msgid "No Time"
+msgstr "没时间"
+
+#: export_filename.cc:218
+msgid "Invalid time format"
+msgstr "非法时间格式"
+
+#: export_filename.cc:227
+msgid "No Date"
+msgstr "无日期"
+
+#: export_filename.cc:242
+msgid "Invalid date format"
+msgstr "非法日期格式"
+
+#: export_format_manager.cc:57
+msgid "CD"
+msgstr "CD"
+
+#: export_format_manager.cc:66
+msgid "DVD-A"
+msgstr "DVD-A"
+
+#: export_format_manager.cc:80
+msgid "iPod"
+msgstr ""
+
+#: export_format_manager.cc:91
+msgid "Something else"
+msgstr "其他的"
+
+#: export_format_manager.cc:110
+msgid "Any"
+msgstr "任何"
+
+#: export_format_manager.cc:111
+msgid "Lossless (linear PCM)"
+msgstr "无损的 (线性PCM)"
+
+#: export_format_manager.cc:112
+msgid "Lossy compression"
+msgstr "有损压缩"
+
+#: export_format_manager.cc:113
+msgid "Lossless compression"
+msgstr "无损压缩"
+
+#: export_format_manager.cc:207 export_format_specification.cc:572
+msgid "Session rate"
+msgstr ""
+
+#: export_format_specification.cc:533
+msgid "normalize"
+msgstr ""
+
+#: export_format_specification.cc:537
+msgid "trim"
+msgstr ""
+
+#: export_format_specification.cc:539
+msgid "trim start"
+msgstr ""
+
+#: export_format_specification.cc:541
+msgid "trim end"
+msgstr ""
+
+#: export_formats.cc:49
+msgid "Shaped Noise"
+msgstr ""
+
+#: export_formats.cc:50
+msgid "Triangular"
+msgstr "三角形"
+
+#: export_formats.cc:51
+msgid "Rectangular"
+msgstr "长方形"
+
+#: export_formats.cc:52
+msgid "None"
+msgstr ""
+
+#: export_formats.cc:159
+msgid "8bit"
+msgstr "8位"
+
+#: export_formats.cc:161
+msgid "16bit"
+msgstr ""
+
+#: export_formats.cc:163
+msgid "24bit"
+msgstr ""
+
+#: export_formats.cc:165
+msgid "32bit"
+msgstr ""
+
+#: export_formats.cc:167
+msgid "float"
+msgstr ""
+
+#: export_formats.cc:169
+msgid "double"
+msgstr "(2:1)(_D"
+
+#: export_formats.cc:171
+msgid "8bit unsigned"
+msgstr "无标号8位"
+
+#: export_formats.cc:173
+msgid "Vorbis sample format"
+msgstr "Vorbis采样格式"
+
+#: export_formats.cc:175
+msgid "No sample format"
+msgstr "无采样格式"
+
+#: export_handler.cc:313
+msgid "Editor: cannot open \"%1\" as export file for CD marker file"
+msgstr ""
+
+#: export_handler.cc:395 export_handler.cc:398
+msgid "an error occured while writing a TOC/CUE file: %1"
+msgstr ""
+
+#: export_handler.cc:620 export_handler.cc:678
+msgid "Cannot convert %1 to Latin-1 text"
+msgstr ""
+
+#: export_profile_manager.cc:76
+msgid "Searching for export formats in %1"
+msgstr ""
+
+#: export_profile_manager.cc:82
+#, fuzzy
+msgid "Unable to create export format directory %1: %2"
+msgstr "无法创建混音模板目录 \"%1\" (%2)"
+
+#: export_profile_manager.cc:239
+#, fuzzy
+msgid "Unable to remove export preset %1: %2"
+msgstr "无法创建端口: %1"
+
+#: export_profile_manager.cc:329
+msgid "Selection"
+msgstr "选取"
+
+#: export_profile_manager.cc:447
+msgid "Session"
+msgstr "会话"
+
+#: export_profile_manager.cc:568
+#, fuzzy
+msgid "Unable to rename export format %1 to %2: %3"
+msgstr "无法重命名快照 %1 到 %2 (%3)"
+
+#: export_profile_manager.cc:600
+#, fuzzy
+msgid "Unable to remove export profile %1: %2"
+msgstr "无法备份状态文件%1 (%2)"
+
+#: export_profile_manager.cc:617
+#, fuzzy
+msgid "empty format"
+msgstr "无采样格式"
+
+#: export_profile_manager.cc:786
+msgid "No timespan has been selected!"
+msgstr ""
+
+#: export_profile_manager.cc:790
+msgid "No channels have been selected!"
+msgstr "没有选中任何声道"
+
+#: export_profile_manager.cc:794
+msgid "Some channels are empty"
+msgstr "一些声道是空的"
+
+#: export_profile_manager.cc:827
+msgid "No format selected!"
+msgstr "没有选中格式!"
+
+#: export_profile_manager.cc:829
+msgid "All channels are empty!"
+msgstr "所有声道都是空的!"
+
+#: export_profile_manager.cc:831
+msgid "One or more of the selected formats is not compatible with this system!"
+msgstr ""
+
+#: export_profile_manager.cc:834
+msgid ""
+"%1 supports only %2 channels, but you have %3 channels in your channel "
+"configuration"
+msgstr ""
+
+#: file_source.cc:196 session_state.cc:2873
+msgid ""
+"there are already 1000 files with names like %1; versioning discontinued"
+msgstr ""
+
+#: file_source.cc:205
 msgid "cannot rename file source from %1 to %2 (%3)"
 msgstr ""
 
-#: ardour/file_source.cc:253
-#: ardour/file_source.cc:385
+#: file_source.cc:248 file_source.cc:376
 msgid "FileSource: search path not set"
 msgstr "文件源: 没设置搜索路径"
 
-#: ardour/file_source.cc:320
-#: ardour/file_source.cc:455
+#: file_source.cc:311 file_source.cc:446
 msgid "Filesource: cannot find required file (%1): while searching %2"
 msgstr ""
 
-#: ardour/file_source.cc:447
+#: file_source.cc:438
 msgid ""
 "FileSource: \"%1\" is ambigous when searching %2\n"
 "\t"
 msgstr ""
 
-#: ardour/file_source.cc:501
+#: file_source.cc:492
 msgid "Filesource: cannot find required file (%1): %2"
 msgstr "文件源: 无法找到要求的文件 (%1): %2"
 
-#: ardour/file_source.cc:508
+#: file_source.cc:499
 msgid "Filesource: cannot check for existing file (%1): %2"
 msgstr ""
 
-#: ardour/file_source.cc:542
-msgid "Programming error! %1 tried to rename a file over another file! It's safe to continue working, but please report this to the developers."
+#: file_source.cc:533
+msgid ""
+"Programming error! %1 tried to rename a file over another file! It's safe to "
+"continue working, but please report this to the developers."
 msgstr ""
 
-#: ardour/file_source.cc:547
+#: file_source.cc:538
 msgid "cannot rename file %1 to %2 (%3)"
 msgstr "无法重命名文件 %1 到 %2 (%3)"
 
-#: ardour/location.cc:296
+#: filesystem_paths.cc:73
+#, fuzzy
+msgid "Cannot create Configuration directory %1 - cannot run"
+msgstr "无法创建会话目录在路径 %1 错误: %2"
+
+#: filesystem_paths.cc:78
+msgid ""
+"Configuration directory %1 already exists and is not a directory/folder - "
+"cannot run"
+msgstr ""
+
+#: filesystem_paths.cc:91
+msgid "ARDOUR_DLL_PATH not set in environment - exiting\n"
+msgstr ""
+
+#: filesystem_paths.cc:107
+msgid "ARDOUR_CONFIG_PATH not set in environment - exiting\n"
+msgstr ""
+
+#: filesystem_paths.cc:127
+msgid "ARDOUR_DATA_PATH not set in environment - exiting\n"
+msgstr ""
+
+#: filter.cc:66
+msgid "filter: error creating name for new file based on %1"
+msgstr ""
+
+#: filter.cc:78
+msgid "filter: error creating new file %1 (%2)"
+msgstr ""
+
+#: find_session.cc:32
+msgid "Could not resolve path: %1 (%2)"
+msgstr "无法解决路径: %1 (%2)"
+
+#: find_session.cc:44
+msgid "cannot check session path %1 (%2)"
+msgstr "无法检查会话路径 %1 (%2)"
+
+#: find_session.cc:70
+msgid "cannot check statefile %1 (%2)"
+msgstr ""
+
+#: find_session.cc:106
+msgid "%1 is not a snapshot file"
+msgstr "%1 不是一个快照文件"
+
+#: find_session.cc:123
+msgid "cannot determine current working directory (%1)"
+msgstr ""
+
+#: find_session.cc:140
+msgid "unknown file type for session %1"
+msgstr ""
+
+#: globals.cc:202
+msgid "Could not set system open files limit to \"unlimited\""
+msgstr ""
+
+#: globals.cc:204
+msgid "Could not set system open files limit to %1"
+msgstr ""
+
+#: globals.cc:208
+msgid "Removed open file count limit. Excellent!"
+msgstr ""
+
+#: globals.cc:210
+msgid "%1 will be limited to %2 open files"
+msgstr ""
+
+#: globals.cc:214
+msgid "Could not get system open files limit (%1)"
+msgstr ""
+
+#: globals.cc:265
+msgid "Loading configuration"
+msgstr "载入配置"
+
+#: import.cc:207
+msgid "Could not find a source for %1 even though we are updating this file!"
+msgstr ""
+
+#: import.cc:238
+msgid "Unable to create file %1 during import"
+msgstr "在导入期间无法创建文件 %1"
+
+#: import.cc:264
+msgid "Resampling %1 from %2kHz to %3kHz"
+msgstr ""
+
+#: import.cc:270
+msgid "Copying %1"
+msgstr "复制 %1 中"
+
+#: import.cc:447
+msgid "Track %1 of %2 contained no usable MIDI data"
+msgstr ""
+
+#: import.cc:454
+msgid "MIDI file %1 was not readable (no reason available"
+msgstr ""
+
+#: import.cc:500
+msgid "Import: cannot open input sound file \"%1\""
+msgstr ""
+
+#: import.cc:511
+msgid "Import: error opening MIDI file"
+msgstr "导入: 错误打开MIDI文件"
+
+#: import.cc:550
+msgid "Loading MIDI file %1"
+msgstr "载入MIDI文件 %1"
+
+#: import.cc:615
+msgid "Failed to remove some files after failed/cancelled import operation"
+msgstr ""
+
+#: instrument_info.cc:40 instrument_info.cc:61
+#, fuzzy
+msgid "Unknown"
+msgstr "未知"
+
+#: instrument_info.cc:200
+msgid "preset %1 (bank %2)"
+msgstr ""
+
+#: internal_send.cc:278 internal_send.cc:279
+msgid "%1 - cannot find any track/bus with the ID %2 to connect to"
+msgstr ""
+
+#: io.cc:208
+msgid "IO: cannot disconnect port %1 from %2"
+msgstr "IO: 无法失去从 %2 的连接端口 %1"
+
+#: io.cc:343 io.cc:428
+msgid "IO: cannot register input port %1"
+msgstr "IO: 无法注册输入端口 %1"
+
+#: io.cc:348 io.cc:433
+msgid "IO: cannot register output port %1"
+msgstr "无法注册输出端口 %1"
+
+#: io.cc:591 io.cc:647
+msgid "incorrect XML node \"%1\" passed to IO object"
+msgstr "不正确的XML符号  \"%1\" 通过IO对象"
+
+#: io.cc:706
+msgid "in"
+msgstr ""
+
+#: io.cc:706
+msgid "out"
+msgstr ""
+
+#: io.cc:707
+msgid "input"
+msgstr "输入"
+
+#: io.cc:707
+msgid "output"
+msgstr "输出"
+
+#: io.cc:717
+msgid "Unknown bundle \"%1\" listed for %2 of %3"
+msgstr ""
+
+#: io.cc:783
+msgid "Bundle %1 was not available - \"%2\" used instead"
+msgstr ""
+
+#: io.cc:786
+msgid "No %1 bundles available as a replacement"
+msgstr ""
+
+#: io.cc:889
+msgid "%1: cannot create I/O ports"
+msgstr "%1: 无法创建I/O端口"
+
+#: io.cc:1017 io.cc:1121
+msgid "IO: badly formed string in XML node for inputs \"%1\""
+msgstr ""
+
+#: io.cc:1022 io.cc:1126
+msgid "bad input string in XML node \"%1\""
+msgstr ""
+
+#: io.cc:1060
+msgid "IO: badly formed string in XML node for outputs \"%1\""
+msgstr ""
+
+#: io.cc:1065
+msgid "IO: bad output string in XML node \"%1\""
+msgstr ""
+
+#: io.cc:1341
+msgid "midi"
+msgstr ""
+
+#: io.cc:1404
+#, c-format
+msgid "%s %u"
+msgstr ""
+
+#: io.cc:1451
+#, c-format
+msgid "%s in"
+msgstr ""
+
+#: io.cc:1453
+#, c-format
+msgid "%s out"
+msgstr ""
+
+#: io.cc:1528 session.cc:455 session.cc:484
+msgid "mono"
+msgstr "单声道"
+
+#: io.cc:1530 session.cc:468 session.cc:498
+msgid "L"
+msgstr ""
+
+#: io.cc:1530 session.cc:470 session.cc:500
+msgid "R"
+msgstr ""
+
+#: io.cc:1532 io.cc:1538
+#, c-format
+msgid "%d"
+msgstr ""
+
+#: ladspa_plugin.cc:87
+msgid "LADSPA: module has no descriptor function."
+msgstr "LADSPA: 模块没有描述符函数."
+
+#: ladspa_plugin.cc:92
+msgid "LADSPA: plugin has gone away since discovery!"
+msgstr "LADSPA: 当发现插件时, 插件已经不见了."
+
+#: ladspa_plugin.cc:99
+msgid "LADSPA: \"%1\" cannot be used, since it cannot do inplace processing"
+msgstr ""
+
+#: ladspa_plugin.cc:296
+msgid ""
+"illegal parameter number used with plugin \"%1\". This mayindicate a change "
+"in the plugin design, and presets may beinvalid"
+msgstr ""
+"插件\"%1\"使用非法参数数量. 这可能意味着插件的设计有所变动, 而且预设失效了."
+
+#: ladspa_plugin.cc:373 ladspa_plugin.cc:418
+msgid "Bad node sent to LadspaPlugin::set_state"
+msgstr "坏的符号发送至 LadspaPlugin::set_state"
+
+#: ladspa_plugin.cc:386 ladspa_plugin.cc:431
+msgid "LADSPA: no ladspa port number"
+msgstr "LADSPA: 没有 ladspa 端口数量"
+
+#: ladspa_plugin.cc:392 ladspa_plugin.cc:437
+msgid "LADSPA: no ladspa port data"
+msgstr "LADSPA: 没有LADSPA端口数据"
+
+#: ladspa_plugin.cc:707
+msgid "LADSPA: cannot load module from \"%1\""
+msgstr "LADSPA: 无法从 \"%1\" 载入模块"
+
+#: ladspa_plugin.cc:817
+msgid "Could not locate HOME.  Preset not removed."
+msgstr "无法定位HOME. 预设没被移除."
+
+#: ladspa_plugin.cc:854 ladspa_plugin.cc:860
+msgid "Could not create %1.  Preset not saved. (%2)"
+msgstr "不能创建 %1. 预设没保存. (%2)"
+
+#: ladspa_plugin.cc:867
+msgid "Error saving presets file %1."
+msgstr ""
+
+#: ladspa_plugin.cc:905
+msgid "Could not locate HOME.  Preset not saved."
+msgstr "无法定位HOME. 预设没保存."
+
+#: location.cc:296
 msgid "You cannot put a CD marker at this position"
 msgstr "你不可以把CD标签放在这个位置"
 
-#: ardour/location.cc:418
+#: location.cc:418
 msgid "incorrect XML node passed to Location::set_state"
 msgstr ""
 
-#: ardour/location.cc:423
+#: location.cc:423
 msgid "XML node for Location has no ID information"
 msgstr ""
 
-#: ardour/location.cc:427
+#: location.cc:427
 msgid "XML node for Location has no name information"
 msgstr ""
 
-#: ardour/location.cc:434
+#: location.cc:434
 msgid "XML node for Location has no start information"
 msgstr ""
 
-#: ardour/location.cc:445
+#: location.cc:445
 msgid "XML node for Location has no end information"
 msgstr ""
 
-#: ardour/location.cc:452
+#: location.cc:452
 msgid "XML node for Location has no flags information"
 msgstr ""
 
-#: ardour/location.cc:626
+#: location.cc:626
 msgid "Locations: attempt to use unknown location as selected location"
 msgstr ""
 
-#: ardour/location.cc:797
+#: location.cc:797
 msgid "incorrect XML mode passed to Locations::set_state"
 msgstr ""
 
-#: ardour/location.cc:875
+#: location.cc:810 session.cc:4264 session_state.cc:1106
+msgid "session"
+msgstr "会话"
+
+#: location.cc:875
 msgid "could not load location from session file - ignored"
 msgstr ""
 
-#: ardour/plugin_manager.cc:152
-msgid "Discovering Plugins"
-msgstr "发现插件"
-
-#: ardour/plugin_manager.cc:325
-msgid "Could not parse rdf file: %1"
-msgstr "无法传递 rdf文件: %1"
-
-#: ardour/plugin_manager.cc:364
-msgid "LADSPA: cannot load module \"%1\" (%2)"
-msgstr "LADSPA: 无法载入模块 \"%1\" (%2)"
-
-#: ardour/plugin_manager.cc:371
-msgid "LADSPA: module \"%1\" has no descriptor function."
+#: location_importer.cc:61
+msgid "Locations"
 msgstr ""
 
-#: ardour/plugin_manager.cc:589
-msgid "VST plugin %1 does not support processReplacing, and so cannot be used in ardour at this time"
+#: location_importer.cc:123
+msgid "Location: "
 msgstr ""
 
-#: ardour/plugin_manager.cc:694
-msgid "linuxVST plugin %1 does not support processReplacing, and so cannot be used in ardour at this time"
+#: location_importer.cc:125
+msgid ""
+"Range\n"
+"start: "
 msgstr ""
 
-#: ardour/plugin_manager.cc:856
-msgid "unknown plugin status type \"%1\" - all entries ignored"
-msgstr ""
-
-#: ardour/plugin_manager.cc:873
-msgid "unknown plugin type \"%1\" - ignored"
-msgstr "位置插件类型 \"%1\" - 忽略之"
-
-#: ardour/tempo_map_importer.cc:53
-msgid "Tempo map"
-msgstr "节奏映射"
-
-#: ardour/tempo_map_importer.cc:61
-msgid "Tempo Map"
-msgstr "节奏映射"
-
-#: ardour/tempo_map_importer.cc:81
-msgid "Tempo marks: "
-msgstr "节奏标签"
-
-#: ardour/tempo_map_importer.cc:81
+#: location_importer.cc:126
 msgid ""
 "\n"
-"Meter marks: "
+"end: "
 msgstr ""
-"\n"
-"Meter marks: "
 
-#: ardour/tempo_map_importer.cc:90
+#: location_importer.cc:146
 msgid ""
-"This will replace the current tempo map!\n"
-"Are you shure you want to do this?"
+"The location is the Punch range. It will be imported as a normal range.\n"
+"You may rename the imported location:"
 msgstr ""
 
-#: ardour/export_format_manager.cc:56
-msgid "CD"
-msgstr "CD"
-
-#: ardour/export_format_manager.cc:65
-msgid "DVD-A"
-msgstr "DVD-A"
-
-#: ardour/export_format_manager.cc:79
-msgid "iPod"
+#: location_importer.cc:157
+msgid ""
+"The location is a Loop range. It will be imported as a normal range.\n"
+"You may rename the imported location:"
 msgstr ""
 
-#: ardour/export_format_manager.cc:90
-msgid "Something else"
-msgstr "其他的"
-
-#: ardour/export_format_manager.cc:109
-msgid "Any"
-msgstr "任何"
-
-#: ardour/export_format_manager.cc:110
-msgid "Lossless (linear PCM)"
-msgstr "无损的 (线性PCM)"
-
-#: ardour/export_format_manager.cc:111
-msgid "Lossy compression"
-msgstr "有损压缩"
-
-#: ardour/export_format_manager.cc:112
-msgid "Lossless compression"
-msgstr "无损压缩"
-
-#: ardour/speakers.cc:239
-msgid "Speaker information is missing azimuth - speaker ignored"
+#: location_importer.cc:168
+msgid ""
+"A location with that name already exists.\n"
+"You may rename the imported location:"
 msgstr ""
 
-#: ardour/speakers.cc:245
-msgid "Speaker information is missing elevation - speaker ignored"
+#: midi_diskstream.cc:162
+msgid ""
+"%1: I/O configuration change %4 requested to use %2, but channel setup is %3"
 msgstr ""
 
-#: ardour/speakers.cc:251
-msgid "Speaker information is missing distance - speaker ignored"
-msgstr ""
-
-#: ardour/rb_effect.cc:232
-#: ardour/rb_effect.cc:273
-msgid "tempoize: error reading data from %1 at %2 (wanted %3, got %4)"
-msgstr ""
-
-#: ardour/session_process.cc:123
-msgid "Session: error in no roll for %1"
-msgstr ""
-
-#: ardour/session_process.cc:1119
-msgid "Programming error: illegal event type in process_event (%1)"
-msgstr ""
-
-#: ardour/export_profile_manager.cc:71
-msgid "Searching for export formats in %1"
-msgstr ""
-
-#: ardour/export_profile_manager.cc:322
-msgid "Selection"
-msgstr "选取"
-
-#: ardour/export_profile_manager.cc:440
-msgid "Session"
-msgstr "会话"
-
-#: ardour/export_profile_manager.cc:760
-msgid "No timespan has been selected!"
-msgstr ""
-
-#: ardour/export_profile_manager.cc:764
-msgid "No channels have been selected!"
-msgstr "没有选中任何声道"
-
-#: ardour/export_profile_manager.cc:768
-msgid "Some channels are empty"
-msgstr "一些声道是空的"
-
-#: ardour/export_profile_manager.cc:801
-msgid "No format selected!"
-msgstr "没有选中格式!"
-
-#: ardour/export_profile_manager.cc:803
-msgid "All channels are empty!"
-msgstr "所有声道都是空的!"
-
-#: ardour/export_profile_manager.cc:805
-msgid "One or more of the selected formats is not compatible with this system!"
-msgstr ""
-
-#: ardour/export_profile_manager.cc:808
-msgid "%1 supports only %2 channels, but you have %3 channels in your channel configuration"
-msgstr ""
-
-#: ardour/midi_diskstream.cc:166
-msgid "%1: I/O configuration change %4 requested to use %2, but channel setup is %3"
-msgstr ""
-
-#: ardour/midi_diskstream.cc:219
+#: midi_diskstream.cc:215
 msgid "MidiDiskstream: Playlist \"%1\" isn't an midi playlist"
 msgstr ""
 
-#: ardour/midi_diskstream.cc:273
+#: midi_diskstream.cc:268
 msgid "MidiDiskstream %1: there is no existing playlist to make a copy of!"
 msgstr ""
 
-#: ardour/midi_diskstream.cc:765
+#: midi_diskstream.cc:612
 msgid "MidiDiskstream %1: cannot read %2 from playlist at frame %3"
 msgstr ""
 
-#: ardour/midi_diskstream.cc:906
+#: midi_diskstream.cc:753
 msgid "MidiDiskstream %1: cannot write to disk"
 msgstr "MIDI磁盘流 %1: 无法写入硬盘"
 
-#: ardour/midi_diskstream.cc:939
+#: midi_diskstream.cc:786
 msgid "MidiDiskstream \"%1\": cannot flush captured data to disk!"
 msgstr ""
 
-#: ardour/midi_diskstream.cc:1028
+#: midi_diskstream.cc:875
 msgid "%1: could not create region for complete midi file"
 msgstr ""
 
-#: ardour/midi_diskstream.cc:1065
+#: midi_diskstream.cc:912
 msgid "MidiDiskstream: could not create region for captured midi!"
 msgstr ""
 
-#: ardour/midi_diskstream.cc:1284
+#: midi_diskstream.cc:1137
 msgid "MidiDiskstream: XML property channel-mask out of range"
 msgstr ""
 
-#: ardour/resampled_source.cc:98
-msgid "Import: %1"
-msgstr "导入: %1"
+#: midi_model.cc:619
+msgid "No NoteID found for note property change - ignored"
+msgstr ""
 
-#: ardour/resampled_source.cc:128
-msgid "Import: src_new() failed : %1"
-msgstr "导入: src_new() 失败 : %1"
+#: midi_model.cc:861
+msgid "No SysExID found for sys-ex property change - ignored"
+msgstr ""
 
-#: ardour/plugin_insert.cc:584
+#: midi_model.cc:1939
+msgid "transpose"
+msgstr ""
+
+#: midi_source.cc:123
+msgid "Missing parameter property on InterpolationStyle"
+msgstr ""
+
+#: midi_source.cc:130
+msgid "Missing style property on InterpolationStyle"
+msgstr ""
+
+#: midi_source.cc:142
+msgid "Missing parameter property on AutomationState"
+msgstr ""
+
+#: midi_source.cc:149
+msgid "Missing state property on AutomationState"
+msgstr ""
+
+#: monitor_processor.cc:53
+msgid "monitor dim"
+msgstr ""
+
+#: monitor_processor.cc:54
+msgid "monitor cut"
+msgstr ""
+
+#: monitor_processor.cc:55
+msgid "monitor mono"
+msgstr ""
+
+#: monitor_processor.cc:58
+msgid "monitor dim level"
+msgstr ""
+
+#: monitor_processor.cc:62
+msgid "monitor solo boost level"
+msgstr ""
+
+#: monitor_processor.cc:512
+msgid "cut control %1"
+msgstr ""
+
+#: monitor_processor.cc:513
+msgid "dim control"
+msgstr ""
+
+#: monitor_processor.cc:514
+msgid "polarity control"
+msgstr ""
+
+#: monitor_processor.cc:515
+msgid "solo control"
+msgstr ""
+
+#: mtc_slave.cc:162
+msgid ""
+"Unknown rate/drop value %1 in incoming MTC stream, session values used "
+"instead"
+msgstr ""
+
+#: mtc_slave.cc:368
+msgid "MTC Slave: atomic read of current time failed, sleeping!"
+msgstr ""
+
+#: operations.cc:24
+msgid "capture"
+msgstr "录音"
+
+#: operations.cc:25
+msgid "paste"
+msgstr "粘贴"
+
+#: operations.cc:26
+msgid "duplicate region"
+msgstr "复制区域"
+
+#: operations.cc:27
+msgid "insert file"
+msgstr "插入文件"
+
+#: operations.cc:28
+msgid "insert region"
+msgstr "插入选取"
+
+#: operations.cc:29
+msgid "drag region brush"
+msgstr ""
+
+#: operations.cc:30
+msgid "region drag"
+msgstr ""
+
+#: operations.cc:31
+msgid "selection grab"
+msgstr ""
+
+#: operations.cc:32
+msgid "region fill"
+msgstr ""
+
+#: operations.cc:33
+msgid "fill selection"
+msgstr "填充选区"
+
+#: operations.cc:34
+msgid "create region"
+msgstr "创建选区"
+
+#: operations.cc:35
+msgid "region copy"
+msgstr ""
+
+#: operations.cc:36
+msgid "fixed time region copy"
+msgstr ""
+
+#: pannable.cc:207
+msgid "Pannable given XML data for %1 - ignored"
+msgstr ""
+
+#: panner_manager.cc:76
+msgid "looking for panners in %1"
+msgstr ""
+
+#: panner_manager.cc:99
+msgid "Panner discovered: \"%1\" in %2"
+msgstr ""
+
+#: panner_manager.cc:116
+msgid "PannerManager: cannot load module \"%1\" (%2)"
+msgstr ""
+
+#: panner_manager.cc:123
+msgid "PannerManager: module \"%1\" has no descriptor function."
+msgstr ""
+
+#: panner_manager.cc:186
+msgid "no panner discovered for in/out = %1/%2"
+msgstr ""
+
+#: panner_shell.cc:179
+msgid "Unknown panner plugin \"%1\" found in pan state - ignored"
+msgstr ""
+
+#: panner_shell.cc:185
+msgid "panner plugin node has no type information!"
+msgstr ""
+
+#: playlist.cc:2069
+msgid "region state node has no ID, ignored"
+msgstr ""
+
+#: playlist.cc:2087
+msgid "Playlist: cannot create region from XML"
+msgstr ""
+
+#: playlist_source.cc:99
+msgid "No playlist ID in PlaylistSource XML!"
+msgstr ""
+
+#: playlist_source.cc:118
+msgid "Could not construct playlist for PlaylistSource from session data!"
+msgstr ""
+
+#: plugin_insert.cc:599
 msgid "programming error: "
 msgstr "程序错误:"
 
-#: ardour/plugin_insert.cc:891
+#: plugin_insert.cc:908
 msgid "XML node describing plugin is missing the `type' field"
 msgstr ""
 
-#: ardour/plugin_insert.cc:906
+#: plugin_insert.cc:923
 msgid "unknown plugin type %1 in plugin insert state"
 msgstr ""
 
-#: ardour/plugin_insert.cc:934
+#: plugin_insert.cc:951
 msgid "Plugin has no unique ID field"
 msgstr ""
 
-#: ardour/plugin_insert.cc:943
+#: plugin_insert.cc:960
 msgid ""
 "Found a reference to a plugin (\"%1\") that is unknown.\n"
 "Perhaps it was removed or moved since it was last used."
 msgstr ""
 
-#: ardour/plugin_insert.cc:1059
+#: plugin_insert.cc:1076
 msgid "PluginInsert: Auto: no ladspa port number"
 msgstr ""
 
-#: ardour/plugin_insert.cc:1066
+#: plugin_insert.cc:1083
 msgid "PluginInsert: Auto: port id out of range"
 msgstr ""
 
-#: ardour/plugin_insert.cc:1102
+#: plugin_insert.cc:1119
 msgid "PluginInsert: automatable control %1 not found - ignored"
 msgstr ""
 
-#: ardour/automation_list.cc:371
-msgid "automation list: cannot load coordinates from XML, all points ignored"
+#: plugin_manager.cc:161
+msgid "Discovering Plugins"
+msgstr "发现插件"
+
+#: plugin_manager.cc:334
+msgid "Could not parse rdf file: %1"
+msgstr "无法传递 rdf文件: %1"
+
+#: plugin_manager.cc:373
+msgid "LADSPA: cannot load module \"%1\" (%2)"
+msgstr "LADSPA: 无法载入模块 \"%1\" (%2)"
+
+#: plugin_manager.cc:380
+msgid "LADSPA: module \"%1\" has no descriptor function."
 msgstr ""
 
-#: ardour/automation_list.cc:416
-msgid "automation list: no x-coordinate stored for control point (point ignored)"
+#: plugin_manager.cc:600
+msgid ""
+"VST plugin %1 does not support processReplacing, and so cannot be used in "
+"ardour at this time"
 msgstr ""
 
-#: ardour/automation_list.cc:422
-msgid "automation list: no y-coordinate stored for control point (point ignored)"
+#: plugin_manager.cc:704
+msgid ""
+"linuxVST plugin %1 does not support processReplacing, and so cannot be used "
+"in ardour at this time"
 msgstr ""
 
-#: ardour/automation_list.cc:436
-msgid "AutomationList: passed XML node called %1, not \"AutomationList\" - ignored"
+#: plugin_manager.cc:865
+msgid "unknown plugin status type \"%1\" - all entries ignored"
 msgstr ""
 
-#: ardour/session_transport.cc:168
+#: plugin_manager.cc:882
+msgid "unknown plugin type \"%1\" - ignored"
+msgstr "位置插件类型 \"%1\" - 忽略之"
+
+#: port.cc:367
+msgid "get_connected_latency_range() called while disconnected from JACK"
+msgstr ""
+
+#: port.cc:450
+msgid "could not reregister %1"
+msgstr "无法注册 %1."
+
+#: port_insert.cc:43
+msgid "insert %1"
+msgstr "插入 %1"
+
+#: port_insert.cc:198
+msgid "XML node describing port insert is missing the `type' field"
+msgstr ""
+
+#: port_insert.cc:203
+msgid "non-port insert XML used for port plugin insert"
+msgstr ""
+
+#: processor.cc:207
+msgid "No %1 property flag in element %2"
+msgstr ""
+
+#: processor.cc:216
+msgid "No child node with active property"
+msgstr ""
+
+#: rc_configuration.cc:93
+msgid "Loading system configuration file %1"
+msgstr "载入系统配置文件 %1"
+
+#: rc_configuration.cc:97
+msgid "%1: cannot read system configuration file \"%2\""
+msgstr "%1: 无法读取系统配置文件\"%2\""
+
+#: rc_configuration.cc:102
+msgid "%1: system configuration file \"%2\" not loaded successfully."
+msgstr "%1: 系统配置文件 \"%2\" 载入不成功"
+
+#: rc_configuration.cc:106
+msgid ""
+"your system %1 configuration file is empty. This probably means that there "
+"as an error installing %1"
+msgstr ""
+
+#: rc_configuration.cc:121
+msgid "Loading user configuration file %1"
+msgstr "载入用户配置文件 %1"
+
+#: rc_configuration.cc:125
+msgid "%1: cannot read configuration file \"%2\""
+msgstr "%1: 无法读取配置文件 \"%2\""
+
+#: rc_configuration.cc:130
+msgid "%1: user configuration file \"%2\" not loaded successfully."
+msgstr "%1: 用户配置文件 \"%2\" 载入不成功"
+
+#: rc_configuration.cc:134
+msgid "your %1 configuration file is empty. This is not normal."
+msgstr ""
+
+#: rc_configuration.cc:151
+msgid "Config file %1 not saved"
+msgstr "配置文件 %1 没有保存"
+
+#: recent_sessions.cc:54
+msgid "cannot open recent session file %1 (%2)"
+msgstr "无法打开最近会话文件%1 (%2)"
+
+#: region_factory.cc:67 region_factory.cc:109 region_factory.cc:150
+#: region_factory.cc:192
+msgid ""
+"programming error: RegionFactory::create() called with unknown Region type"
+msgstr ""
+
+#: region_factory.cc:554
+msgid "%1 compound-%2 (%3)"
+msgstr ""
+
+#: region_factory.cc:556
+msgid "%1 compound-%2.1 (%3)"
+msgstr ""
+
+#: region_factory.cc:618
+msgid "cannot create new name for region \"%1\""
+msgstr ""
+
+#: resampled_source.cc:98
+msgid "Import: %1"
+msgstr "导入: %1"
+
+#: resampled_source.cc:128
+msgid "Import: src_new() failed : %1"
+msgstr "导入: src_new() 失败 : %1"
+
+#: return.cc:41
+msgid "return %1"
+msgstr "返回 %1"
+
+#: route.cc:207
+msgid "Remote Control ID's start at one, not zero"
+msgstr ""
+
+#: route.cc:1092 route.cc:2534
+msgid "unknown Processor type \"%1\"; ignored"
+msgstr ""
+
+#: route.cc:1104
+msgid "processor could not be created. Ignored."
+msgstr ""
+
+#: route.cc:1973 route.cc:2191
+msgid "Bad node sent to Route::set_state() [%1]"
+msgstr "损坏的符号发送至 Route::set_state() [%1]"
+
+#: route.cc:2033
+msgid "Pannable state found for route (%1) without a panner!"
+msgstr ""
+
+#: route.cc:2094 route.cc:2098 route.cc:2301 route.cc:2305
+msgid "badly formed order key string in state file! [%1] ... ignored."
+msgstr ""
+
+#: route_group.cc:476
+msgid "You cannot subgroup MIDI tracks at this time"
+msgstr "此时你无法子分组MIDI声道"
+
+#: rb_effect.cc:233 rb_effect.cc:274
+msgid "tempoize: error reading data from %1 at %2 (wanted %3, got %4)"
+msgstr ""
+
+#: rb_effect.cc:303 rb_effect.cc:325
+msgid "error writing tempo-adjusted data to %1"
+msgstr ""
+
+#: rb_effect.cc:332
+msgid "timefx code failure. please notify ardour-developers."
+msgstr ""
+
+#: send.cc:59
+msgid "aux %1"
+msgstr ""
+
+#: send.cc:63
+msgid "send %1"
+msgstr "发送 %1"
+
+#: send.cc:65
+#, fuzzy
+msgid "programming error: send created using role %1"
+msgstr "程序错误: 无法识别编辑模式字符串 \"%1\""
+
+#: session.cc:338
+msgid "Set block size and sample rate"
+msgstr ""
+
+#: session.cc:343
+msgid "Using configuration"
+msgstr "使用配置"
+
+#: session.cc:395
+msgid "could not setup Click I/O"
+msgstr ""
+
+#: session.cc:422
+msgid "cannot setup Click I/O"
+msgstr ""
+
+#: session.cc:425
+msgid "Compute I/O Latencies"
+msgstr ""
+
+#: session.cc:431
+msgid "Set up standard connections"
+msgstr "设置标准连接"
+
+#: session.cc:452
+#, c-format
+msgid "out %<PRIu32>"
+msgstr ""
+
+#: session.cc:466
+#, c-format
+msgid "out %<PRIu32>+%<PRIu32>"
+msgstr ""
+
+#: session.cc:481
+#, c-format
+msgid "in %<PRIu32>"
+msgstr ""
+
+#: session.cc:495
+#, c-format
+msgid "in %<PRIu32>+%<PRIu32>"
+msgstr ""
+
+#: session.cc:531
+msgid "Setup signal flow and plugins"
+msgstr ""
+
+#: session.cc:575
+msgid "Connect to engine"
+msgstr "连接到引擎"
+
+#: session.cc:606
+msgid "cannot connect master output %1 to %2"
+msgstr ""
+
+#: session.cc:665
+msgid "monitor"
+msgstr ""
+
+#: session.cc:710
+msgid "cannot connect control input %1 to %2"
+msgstr ""
+
+#: session.cc:730
+msgid "The preferred I/O for the monitor bus (%1) cannot be found"
+msgstr ""
+
+#: session.cc:761
+msgid "cannot connect control output %1 to %2"
+msgstr ""
+
+#: session.cc:825
+msgid "cannot create Auditioner: no auditioning of regions possible"
+msgstr ""
+
+#: session.cc:1004
+msgid "Session: you can't use that location for auto punch (start <= end)"
+msgstr ""
+
+#: session.cc:1044
+msgid "Session: you can't use a mark for auto loop"
+msgstr ""
+
+#: session.cc:1359
+msgid "feedback loop setup between %1 and %2"
+msgstr ""
+
+#: session.cc:1657
+msgid "Session: could not create new midi track."
+msgstr ""
+
+#: session.cc:1663
+msgid ""
+"No more JACK ports are available. You will need to stop %1 and restart JACK "
+"with ports if you need this many tracks."
+msgstr ""
+
+#: session.cc:1840 session.cc:1843
+msgid "Audio"
+msgstr "音频"
+
+#: session.cc:1867 session.cc:1875 session.cc:1952 session.cc:1960
+msgid "cannot configure %1 in/%2 out configuration for new audio track"
+msgstr ""
+
+#: session.cc:1898
+msgid "Session: could not create new audio track."
+msgstr ""
+
+#: session.cc:1930 session.cc:1933
+msgid "Bus"
+msgstr "总线"
+
+#: session.cc:1981
+msgid "Session: could not create new audio route."
+msgstr ""
+
+#: session.cc:2034
+msgid "Session: UINT_MAX routes? impossible!"
+msgstr ""
+
+#: session.cc:2055
+msgid "Session: cannot create track/bus from template description"
+msgstr ""
+
+#: session.cc:2081
+msgid "Session: could not create new route from template"
+msgstr ""
+
+#: session.cc:3162
+msgid "FATAL ERROR! Could not find a suitable version of %1 for a rename"
+msgstr ""
+
+#: session.cc:3282 session.cc:3340
+msgid "There are already %1 recordings for %2, which I consider too many."
+msgstr ""
+
+#: session.cc:3730
+msgid "send ID %1 appears to be in use already"
+msgstr ""
+
+#: session.cc:3742
+msgid "aux send ID %1 appears to be in use already"
+msgstr ""
+
+#: session.cc:3754
+msgid "return ID %1 appears to be in use already"
+msgstr ""
+
+#: session.cc:3766
+msgid "insert ID %1 appears to be in use already"
+msgstr ""
+
+#: session.cc:3893
+msgid "Cannot write a range where end <= start (e.g. %1 <= %2)"
+msgstr ""
+
+#: session.cc:3922
+msgid "too many bounced versions of playlist \"%1\""
+msgstr ""
+
+#: session.cc:3932
+msgid "cannot create new audio file \"%1\" for %2"
+msgstr ""
+
+#: session_click.cc:161
+msgid "cannot open click soundfile %1 (%2)"
+msgstr "无法打开click声音文件 %1 (%2)"
+
+#: session_click.cc:174
+msgid "cannot read data from click soundfile"
+msgstr ""
+
+#: session_command.cc:87
+msgid "Tried to reconstitute a MementoCommand with no contents, failing. id="
+msgstr ""
+
+#: session_command.cc:148
+msgid ""
+"could not reconstitute MementoCommand from XMLNode. object type = %1 id = %2"
+msgstr ""
+
+#: session_command.cc:177
+msgid ""
+"could not reconstitute StatefulDiffCommand from XMLNode. object type = %1 id "
+"= %2"
+msgstr ""
+
+#: session_directory.cc:59
+msgid "Cannot create Session directory at path %1 Error: %2"
+msgstr "无法创建会话目录在路径 %1 错误: %2"
+
+#: session_directory.cc:76
+msgid "Session subdirectory does not exist at path %1"
+msgstr "会话子目录不存在于路径 %1"
+
+#: session_events.cc:184
+msgid "Session: cannot have two events of type %1 at the same frame (%2)."
+msgstr ""
+
+#: session_export.cc:126
+msgid "%1: cannot seek to %2 for export"
+msgstr ""
+
+#: session_export.cc:188
+msgid "Export ended unexpectedly: %1"
+msgstr ""
+
+#: session_midi.cc:397
+msgid "Session: could not send full MIDI time code"
+msgstr ""
+
+#: session_midi.cc:474
+msgid "Session: cannot send quarter-frame MTC message (%1)"
+msgstr ""
+
+#: session_playlists.cc:368 session_playlists.cc:387
+msgid "Session: cannot create Playlist from XML description."
+msgstr "会话: 无法从XML描述符创建播放列表."
+
+#: session_process.cc:133
+msgid "Session: error in no roll for %1"
+msgstr ""
+
+#: session_process.cc:1158
+msgid "Programming error: illegal event type in process_event (%1)"
+msgstr ""
+
+#: session_state.cc:139
+msgid "Could not use path %1 (%s)"
+msgstr "无法使用路径 %1 (%s)"
+
+#: session_state.cc:266
+msgid "solo cut control (dB)"
+msgstr ""
+
+#: session_state.cc:359
+msgid "Reset Remote Controls"
+msgstr ""
+
+#: session_state.cc:383
+msgid "Session loading complete"
+msgstr "会话载入完成"
+
+#: session_state.cc:450
+msgid "Session: cannot create session peakfile folder \"%1\" (%2)"
+msgstr "会话: 无法创建会话峰文件的文件夹 \"%1\" (%2)"
+
+#: session_state.cc:457
+msgid "Session: cannot create session sounds dir \"%1\" (%2)"
+msgstr ""
+
+#: session_state.cc:464
+msgid "Session: cannot create session midi dir \"%1\" (%2)"
+msgstr ""
+
+#: session_state.cc:471
+msgid "Session: cannot create session dead sounds folder \"%1\" (%2)"
+msgstr ""
+
+#: session_state.cc:478
+msgid "Session: cannot create session export folder \"%1\" (%2)"
+msgstr "会话: 无法创建会话导出文件夹 \"%1\" (%2)"
+
+#: session_state.cc:485
+msgid "Session: cannot create session analysis folder \"%1\" (%2)"
+msgstr "会话: 无法创建会话分析文件夹 \"%1\" (%2)"
+
+#: session_state.cc:492
+msgid "Session: cannot create session plugins folder \"%1\" (%2)"
+msgstr "会话: 无法创建会话插件文件夹 \"%1\" (%2)"
+
+#: session_state.cc:499
+#, fuzzy
+msgid "Session: cannot create session externals folder \"%1\" (%2)"
+msgstr "会话: 无法创建会话分析文件夹 \"%1\" (%2)"
+
+#: session_state.cc:513
+msgid "Session: cannot create session folder \"%1\" (%2)"
+msgstr "会话: 无法创建会话文件夹 \"%1\" (%2)"
+
+#: session_state.cc:546
+#, fuzzy
+msgid "Could not open %1 for writing session template"
+msgstr "无法打开 %1 用于写入混音模板"
+
+#: session_state.cc:552
+#, fuzzy
+msgid "Could not open session template %1 for reading"
+msgstr "无法打开混音模板 %1 用于读取"
+
+#: session_state.cc:571
+msgid "master"
+msgstr "主控"
+
+#: session_state.cc:634
+#, fuzzy
+msgid "Could not remove pending capture state at path \"%1\" (%2)"
+msgstr "无法解决路径: %1 (%2)"
+
+#: session_state.cc:658
+msgid "could not rename snapshot %1 to %2 (%3)"
+msgstr "无法重命名快照 %1 到 %2 (%3)"
+
+#: session_state.cc:686
+#, fuzzy
+msgid "Could not remove state file at path \"%1\" (%2)"
+msgstr "无法解决路径: %1 (%2)"
+
+#: session_state.cc:757
+msgid ""
+"the %1 audio engine is not connected and state saving would lose all I/O "
+"connections. Session not saved"
+msgstr ""
+
+#: session_state.cc:806
+msgid "state could not be saved to %1"
+msgstr ""
+
+#: session_state.cc:808 session_state.cc:819
+#, fuzzy
+msgid "Could not remove temporary state file at path \"%1\" (%2)"
+msgstr "无法创建混音模板目录 \"%1\" (%2)"
+
+#: session_state.cc:816
+msgid "could not rename temporary session file %1 to %2"
+msgstr ""
+
+#: session_state.cc:884
+msgid "%1: session state information file \"%2\" doesn't exist!"
+msgstr ""
+
+#: session_state.cc:896
+msgid "Could not understand ardour file %1"
+msgstr "无法理解ardour文件 %1"
+
+#: session_state.cc:905
+msgid "Session file %1 is not a session"
+msgstr "会话文件 %1 不是一个会话"
+
+#: session_state.cc:939
+msgid ""
+"Copying old session file %1 to %2\n"
+"Use %2 with %3 versions before 2.0 from now on"
+msgstr ""
+
+#: session_state.cc:1190
+msgid "programming error: Session: incorrect XML node sent to set_state()"
+msgstr ""
+
+#: session_state.cc:1239
+msgid "Session: XML state has no options section"
+msgstr ""
+
+#: session_state.cc:1244
+msgid "Session: XML state has no metadata section"
+msgstr ""
+
+#: session_state.cc:1255
+msgid "Session: XML state has no sources section"
+msgstr ""
+
+#: session_state.cc:1262
+msgid "Session: XML state has no Tempo Map section"
+msgstr ""
+
+#: session_state.cc:1269
+msgid "Session: XML state has no locations section"
+msgstr ""
+
+#: session_state.cc:1295
+msgid "Session: XML state has no Regions section"
+msgstr ""
+
+#: session_state.cc:1302
+msgid "Session: XML state has no playlists section"
+msgstr ""
+
+#: session_state.cc:1322
+msgid "Session: XML state has no bundles section"
+msgstr ""
+
+#: session_state.cc:1334
+msgid "Session: XML state has no diskstreams section"
+msgstr ""
+
+#: session_state.cc:1342
+msgid "Session: XML state has no routes section"
+msgstr ""
+
+#: session_state.cc:1354
+msgid "Session: XML state has no route groups section"
+msgstr ""
+
+#: session_state.cc:1363
+msgid "Session: XML state has no edit groups section"
+msgstr ""
+
+#: session_state.cc:1370
+msgid "Session: XML state has no mix groups section"
+msgstr ""
+
+#: session_state.cc:1378
+msgid "Session: XML state has no click section"
+msgstr ""
+
+#: session_state.cc:1426
+msgid "Session: cannot create Route from XML description."
+msgstr ""
+
+#: session_state.cc:1430
+msgid "Loaded track/bus %1"
+msgstr "载入音轨/总线 %1"
+
+#: session_state.cc:1528
+msgid "Could not find diskstream for route"
+msgstr ""
+
+#: session_state.cc:1582
+msgid "Session: cannot create Region from XML description."
+msgstr ""
+
+#: session_state.cc:1586
+msgid "Can not load state for region '%1'"
+msgstr ""
+
+#: session_state.cc:1622
+msgid "Regions in compound description not found (ID's %1 and %2): ignored"
+msgstr ""
+
+#: session_state.cc:1650
+msgid "Nested source has no ID info in session state file! (ignored)"
+msgstr ""
+
+#: session_state.cc:1662
+msgid "Cannot reconstruct nested source for region %1"
+msgstr ""
+
+#: session_state.cc:1724
+msgid "Session: XMLNode describing a AudioRegion is incomplete (no source)"
+msgstr ""
+
+#: session_state.cc:1732 session_state.cc:1753 session_state.cc:1773
+msgid ""
+"Session: XMLNode describing a AudioRegion references an unknown source id =%1"
+msgstr ""
+
+#: session_state.cc:1738 session_state.cc:1759 session_state.cc:1779
+msgid ""
+"Session: XMLNode describing a AudioRegion references a non-audio source id ="
+"%1"
+msgstr ""
+
+#: session_state.cc:1802
+msgid ""
+"Session: XMLNode describing an AudioRegion is missing some master sources; "
+"ignored"
+msgstr ""
+
+#: session_state.cc:1836
+msgid "Session: XMLNode describing a MidiRegion is incomplete (no source)"
+msgstr ""
+
+#: session_state.cc:1844
+msgid ""
+"Session: XMLNode describing a MidiRegion references an unknown source id =%1"
+msgstr ""
+
+#: session_state.cc:1850
+msgid ""
+"Session: XMLNode describing a MidiRegion references a non-midi source id =%1"
+msgstr ""
+
+#: session_state.cc:1918
+msgid ""
+"cannot create new file from region name \"%1\" with ident = \"%2\": too many "
+"existing files with similar names"
+msgstr ""
+
+#: session_state.cc:1941
+msgid "Session: cannot create Source from XML description."
+msgstr ""
+
+#: session_state.cc:1975
+msgid "A sound file is missing. It will be replaced by silence."
+msgstr ""
+
+#: session_state.cc:1998
+msgid "Found a sound file that cannot be used by %1. Talk to the progammers."
+msgstr ""
+
+#: session_state.cc:2015
+#, fuzzy
+msgid "Could not create templates directory \"%1\" (%2)"
+msgstr "无法创建混音模板目录 \"%1\" (%2)"
+
+#: session_state.cc:2028
+msgid "Template \"%1\" already exists - new version not created"
+msgstr ""
+
+#: session_state.cc:2034
+#, fuzzy
+msgid "Could not create directory for Session template\"%1\" (%2)"
+msgstr "无法创建混音模板目录 \"%1\" (%2)"
+
+#: session_state.cc:2044
+msgid "template not saved"
+msgstr "模板没保存"
+
+#: session_state.cc:2054
+#, fuzzy
+msgid "Could not create directory for Session template plugin state\"%1\" (%2)"
+msgstr "无法创建混音模板目录 \"%1\" (%2)"
+
+#: session_state.cc:2249
+msgid "Unknown node \"%1\" found in Bundles list from state file"
+msgstr ""
+
+#: session_state.cc:2791 session_state.cc:2797
+msgid "Cannot expand path %1 (%2)"
+msgstr "无法扩展路径 %1 (%2)"
+
+#: session_state.cc:2850
+msgid "Session: cannot create dead file folder \"%1\" (%2)"
+msgstr ""
+
+#: session_state.cc:2889
+msgid "cannot rename unused file source from %1 to %2 (%3)"
+msgstr ""
+
+#: session_state.cc:2907
+msgid "cannot remove peakfile %1 for %2 (%3)"
+msgstr ""
+
+#: session_state.cc:3209
+msgid "could not backup old history file, current history not saved"
+msgstr ""
+
+#: session_state.cc:3222
+msgid "history could not be saved to %1"
+msgstr "历史无法被保存到 %1"
+
+#: session_state.cc:3225
+#, fuzzy
+msgid "Could not remove history file at path \"%1\" (%2)"
+msgstr "无法解决路径: %1 (%2)"
+
+#: session_state.cc:3229
+msgid "could not restore history file from backup %1 (%2)"
+msgstr ""
+
+#: session_state.cc:3254
+msgid "%1: no history file \"%2\" for this session."
+msgstr ""
+
+#: session_state.cc:3260
+msgid "Could not understand session history file \"%1\""
+msgstr "无法理解会话历史文件 \"%1\""
+
+#: session_state.cc:3302
+msgid "Failed to downcast MidiSource for NoteDiffCommand"
+msgstr ""
+
+#: session_state.cc:3313
+msgid "Failed to downcast MidiSource for SysExDiffCommand"
+msgstr ""
+
+#: session_state.cc:3324
+msgid "Failed to downcast MidiSource for PatchChangeDiffCommand"
+msgstr ""
+
+#: session_state.cc:3332
+msgid "Couldn't figure out how to make a Command out of a %1 XMLNode."
+msgstr ""
+
+#: session_state.cc:3578
+msgid "Session: unknown diskstream type in XML"
+msgstr ""
+
+#: session_state.cc:3583
+msgid "Session: could not load diskstream via XML state"
+msgstr ""
+
+#: session_time.cc:460
+msgid "Unknown JACK transport state %1 in sync callback"
+msgstr ""
+
+#: session_transport.cc:167
 msgid "Cannot loop - no loop range defined"
 msgstr ""
 
-#: ardour/session_transport.cc:711
+#: session_transport.cc:715
 msgid ""
 "Seamless looping cannot be supported while %1 is using JACK transport.\n"
 "Recommend changing the configured options"
 msgstr ""
 
-#: ardour/session_transport.cc:1028
-msgid "Global varispeed cannot be supported while %1 is connected to JACK transport control"
-msgstr ""
-
-#: ardour/operations.cc:24
-msgid "capture"
-msgstr "录音"
-
-#: ardour/operations.cc:25
-msgid "paste"
-msgstr "粘贴"
-
-#: ardour/operations.cc:26
-msgid "duplicate region"
-msgstr "复制区域"
-
-#: ardour/operations.cc:27
-msgid "insert file"
-msgstr "插入文件"
-
-#: ardour/operations.cc:28
-msgid "insert region"
-msgstr "插入选取"
-
-#: ardour/operations.cc:29
-msgid "drag region brush"
-msgstr ""
-
-#: ardour/operations.cc:30
-msgid "region drag"
-msgstr ""
-
-#: ardour/operations.cc:31
-msgid "selection grab"
-msgstr ""
-
-#: ardour/operations.cc:32
-msgid "region fill"
-msgstr ""
-
-#: ardour/operations.cc:33
-msgid "fill selection"
-msgstr "填充选区"
-
-#: ardour/operations.cc:34
-msgid "create region"
-msgstr "创建选区"
-
-#: ardour/operations.cc:35
-msgid "region copy"
-msgstr ""
-
-#: ardour/operations.cc:36
-msgid "fixed time region copy"
-msgstr ""
-
-#: ardour/tempo.cc:73
-msgid "TempoSection XML node has no \"start\" property"
-msgstr ""
-
-#: ardour/tempo.cc:81
-msgid "TempoSection XML node has an illegal \"start\" value"
-msgstr ""
-
-#: ardour/tempo.cc:88
-msgid "TempoSection XML node has no \"beats-per-minute\" property"
-msgstr ""
-
-#: ardour/tempo.cc:93
-msgid "TempoSection XML node has an illegal \"beats_per_minute\" value"
-msgstr ""
-
-#: ardour/tempo.cc:102
-msgid "TempoSection XML node has an illegal \"note-type\" value"
-msgstr ""
-
-#: ardour/tempo.cc:108
-msgid "TempoSection XML node has no \"movable\" property"
-msgstr ""
-
-#: ardour/tempo.cc:149
-msgid "MeterSection XML node has no \"start\" property"
-msgstr ""
-
-#: ardour/tempo.cc:157
-msgid "MeterSection XML node has an illegal \"start\" value"
-msgstr ""
-
-#: ardour/tempo.cc:164
-msgid "MeterSection XML node has no \"beats-per-bar\" property"
-msgstr ""
-
-#: ardour/tempo.cc:169
-msgid "MeterSection XML node has an illegal \"beats-per-bar\" value"
-msgstr ""
-
-#: ardour/tempo.cc:174
-msgid "MeterSection XML node has no \"note-type\" property"
-msgstr ""
-
-#: ardour/tempo.cc:179
-msgid "MeterSection XML node has an illegal \"note-type\" value"
-msgstr ""
-
-#: ardour/tempo.cc:184
-msgid "MeterSection XML node has no \"movable\" property"
-msgstr ""
-
-#: ardour/tempo.cc:591
-msgid "no tempo sections defined in tempo map - cannot change tempo @ %1"
-msgstr ""
-
-#: ardour/tempo.cc:615
-#: ardour/tempo.cc:631
-msgid "programming error: no tempo section in tempo map!"
-msgstr ""
-
-#: ardour/tempo.cc:674
-#: ardour/tempo.cc:733
-msgid "programming error: unhandled MetricSection type"
-msgstr ""
-
-#: ardour/tempo.cc:1591
-#: ardour/tempo.cc:1603
-msgid "Tempo map: could not set new state, restoring old one."
-msgstr ""
-
-#: ardour/port.cc:337
-msgid "get_connected_latency_range() called while disconnected from JACK"
-msgstr ""
-
-#: ardour/port.cc:420
-msgid "could not reregister %1"
-msgstr "无法注册 %1."
-
-#: ardour/audioanalyser.cc:31
-msgid "cannot load VAMP plugin \"%1\""
-msgstr "无法载入VAMP插件 \"%1\""
-
-#: ardour/audioanalyser.cc:51
-msgid "VAMP Plugin \"%1\" could not be loaded"
-msgstr "无法载入VAMP插件 \"%1\""
-
-#: ardour/audioregion.cc:1460
+#: session_transport.cc:1078
 msgid ""
-"You have requested an operation that requires audio analysis.\n"
-"\n"
-"You currently have \"auto-analyse-audio\" disabled, which means that transient data must be generated every time it is required.\n"
-"\n"
-"If you are doing work that will require transient data on a regular basis, you should probably enable \"auto-analyse-audio\" then quit ardour and restart.\n"
-"\n"
-"This dialog will not display again.  But you may notice a slight delay in this and future transient-detection operations.\n"
+"Global varispeed cannot be supported while %1 is connected to JACK transport "
+"control"
 msgstr ""
 
-#: ardour/audio_track_importer.cc:69
-msgid "Audio Tracks"
-msgstr "音频音轨"
-
-#: ardour/audio_track_importer.cc:273
-msgid "Error Importing Audio track %1"
+#: smf_source.cc:252
+msgid "Unable to read event prefix, corrupt MIDI ring buffer"
 msgstr ""
 
-#: ardour/send.cc:42
-#: ardour/send.cc:250
-msgid "send %1"
-msgstr "发送 %1"
+#: smf_source.cc:263
+msgid "Read time/size but not buffer, corrupt MIDI ring buffer"
+msgstr ""
 
-#: ardour/sndfilesource.cc:197
+#: smf_source.cc:410
+msgid "cannot open MIDI file %1 for write"
+msgstr "无法打开MIDI文件 %1 用于写入"
+
+#: sndfile_helpers.cc:32
+msgid "WAV"
+msgstr ""
+
+#: sndfile_helpers.cc:33
+msgid "AIFF"
+msgstr ""
+
+#: sndfile_helpers.cc:34
+msgid "CAF"
+msgstr ""
+
+#: sndfile_helpers.cc:35
+msgid "W64 (64 bit WAV)"
+msgstr ""
+
+#: sndfile_helpers.cc:36
+msgid "FLAC"
+msgstr ""
+
+#: sndfile_helpers.cc:37
+msgid "Ogg/Vorbis"
+msgstr ""
+
+#: sndfile_helpers.cc:38
+msgid "raw (no header)"
+msgstr ""
+
+#: sndfile_helpers.cc:43
+msgid ".wav"
+msgstr ""
+
+#: sndfile_helpers.cc:44
+msgid ".aiff"
+msgstr ""
+
+#: sndfile_helpers.cc:45
+msgid ".caf"
+msgstr ""
+
+#: sndfile_helpers.cc:46
+msgid ".w64"
+msgstr ""
+
+#: sndfile_helpers.cc:47
+msgid ".flac"
+msgstr ""
+
+#: sndfile_helpers.cc:48
+msgid ".ogg"
+msgstr ""
+
+#: sndfile_helpers.cc:49
+msgid ".raw"
+msgstr ""
+
+#: sndfile_helpers.cc:64
+msgid "Signed 16 bit PCM"
+msgstr ""
+
+#: sndfile_helpers.cc:65
+msgid "Signed 24 bit PCM"
+msgstr ""
+
+#: sndfile_helpers.cc:66
+msgid "Signed 32 bit PCM"
+msgstr ""
+
+#: sndfile_helpers.cc:67
+msgid "Signed 8 bit PCM"
+msgstr ""
+
+#: sndfile_helpers.cc:68
+msgid "32 bit float"
+msgstr ""
+
+#: sndfile_helpers.cc:81
+msgid "Little-endian (Intel)"
+msgstr ""
+
+#: sndfile_helpers.cc:82
+msgid "Big-endian (PowerPC)"
+msgstr ""
+
+#: sndfilesource.cc:201
 msgid "SndFileSource: cannot open file \"%1\" for %2 (%3)"
 msgstr ""
 
-#: ardour/sndfilesource.cc:205
-msgid "SndFileSource: file only contains %1 channels; %2 is invalid as a channel number"
+#: sndfilesource.cc:209
+msgid ""
+"SndFileSource: file only contains %1 channels; %2 is invalid as a channel "
+"number"
 msgstr ""
 
-#: ardour/sndfilesource.cc:241
-#: ardour/sndfilesource.cc:559
-#: ardour/sndfilesource.cc:583
-msgid "cannot set broadcast info for audio file %1 (%2); dropping broadcast info for this file"
+#: sndfilesource.cc:248 sndfilesource.cc:564 sndfilesource.cc:588
+msgid ""
+"cannot set broadcast info for audio file %1 (%2); dropping broadcast info "
+"for this file"
 msgstr ""
 
-#: ardour/sndfilesource.cc:288
+#: sndfilesource.cc:295
 msgid "could not allocate file %1 for reading."
 msgstr "无法分配文件 %1 用于读入"
 
-#: ardour/sndfilesource.cc:323
+#: sndfilesource.cc:330
 msgid "SndFileSource: could not seek to frame %1 within %2 (%3)"
 msgstr ""
 
-#: ardour/sndfilesource.cc:333
-msgid "SndFileSource: @ %1 could not read %2 within %3 (%4) (len = %5)"
+#: sndfilesource.cc:340
+msgid ""
+"SndFileSource: @ %1 could not read %2 within %3 (%4) (len = %5, ret was %6)"
 msgstr ""
 
-#: ardour/sndfilesource.cc:377
-#: ardour/sndfilesource.cc:408
+#: sndfilesource.cc:384 sndfilesource.cc:413
 msgid "attempt to write a non-writable audio file source (%1)"
 msgstr ""
 
-#: ardour/sndfilesource.cc:511
+#: sndfilesource.cc:389 utils.cc:522 utils.cc:546 utils.cc:560 utils.cc:579
+msgid "programming error: %1 %2"
+msgstr "程序错误: %1 %2"
+
+#: sndfilesource.cc:516
 msgid "attempt to flush a non-writable audio file source (%1)"
 msgstr ""
 
-#: ardour/sndfilesource.cc:516
+#: sndfilesource.cc:521
 msgid "attempt to flush an un-opened audio file source (%1)"
 msgstr ""
 
-#: ardour/sndfilesource.cc:522
+#: sndfilesource.cc:527
 msgid "could not allocate file %1 to write header"
 msgstr ""
 
-#: ardour/sndfilesource.cc:536
-msgid "attempt to store broadcast info in a non-writable audio file source (%1)"
+#: sndfilesource.cc:541
+msgid ""
+"attempt to store broadcast info in a non-writable audio file source (%1)"
 msgstr ""
 
-#: ardour/sndfilesource.cc:541
+#: sndfilesource.cc:546
 msgid "attempt to set BWF info for an un-opened audio file source (%1)"
 msgstr ""
 
-#: ardour/sndfilesource.cc:602
+#: sndfilesource.cc:607
 msgid "%1: cannot seek to %2 (libsndfile error: %3"
 msgstr ""
 
-#: ardour/sndfilesource.cc:715
+#: sndfilesource.cc:720
 msgid "SndFileSource: \"%1\" bad read retval: %2 of %5 (%3: %4)"
 msgstr ""
 
-#: ardour/sndfilesource.cc:728
-#: ardour/sndfilesource.cc:778
-#: ardour/sndfilesource.cc:785
+#: sndfilesource.cc:733 sndfilesource.cc:783 sndfilesource.cc:790
 msgid "SndFileSource: \"%1\" bad write (%2)"
 msgstr ""
 
-#: ardour/sndfilesource.cc:808
-msgid "Filesource: start time is already set for existing file (%1): Cannot change start time."
+#: sndfilesource.cc:813
+msgid ""
+"Filesource: start time is already set for existing file (%1): Cannot change "
+"start time."
 msgstr ""
 
-#: ardour/export_formats.cc:49
-msgid "Shaped Noise"
+#: speakers.cc:239
+msgid "Speaker information is missing azimuth - speaker ignored"
 msgstr ""
 
-#: ardour/export_formats.cc:50
-msgid "Triangular"
-msgstr "三角形"
-
-#: ardour/export_formats.cc:51
-msgid "Rectangular"
-msgstr "长方形"
-
-#: ardour/export_formats.cc:52
-msgid "None"
+#: speakers.cc:245
+msgid "Speaker information is missing elevation - speaker ignored"
 msgstr ""
 
-#: ardour/export_formats.cc:159
-msgid "8bit"
-msgstr "8位"
-
-#: ardour/export_formats.cc:161
-msgid "16bit"
+#: speakers.cc:251
+msgid "Speaker information is missing distance - speaker ignored"
 msgstr ""
 
-#: ardour/export_formats.cc:163
-msgid "24bit"
+#: tape_file_matcher.cc:46
+msgid "Cannot compile tape track regexp for use (%1)"
 msgstr ""
 
-#: ardour/export_formats.cc:165
-msgid "32bit"
+#: tempo.cc:85
+msgid "TempoSection XML node has no \"start\" property"
 msgstr ""
 
-#: ardour/export_formats.cc:167
-msgid "float"
+#: tempo.cc:93
+msgid "TempoSection XML node has an illegal \"start\" value"
 msgstr ""
 
-#: ardour/export_formats.cc:169
-msgid "double"
-msgstr "(2:1)(_D"
-
-#: ardour/export_formats.cc:171
-msgid "8bit unsigned"
-msgstr "无标号8位"
-
-#: ardour/export_formats.cc:173
-msgid "Vorbis sample format"
-msgstr "Vorbis采样格式"
-
-#: ardour/export_formats.cc:175
-msgid "No sample format"
-msgstr "无采样格式"
-
-#: ardour/auditioner.cc:89
-msgid "no outputs available for auditioner - manual connection required"
+#: tempo.cc:100
+msgid "TempoSection XML node has no \"beats-per-minute\" property"
 msgstr ""
 
-#: ardour/auditioner.cc:160
-msgid "Auditioning of non-audio regions not yet supported"
+#: tempo.cc:105
+msgid "TempoSection XML node has an illegal \"beats_per_minute\" value"
 msgstr ""
 
-#: ardour/auditioner.cc:185
-msgid "Cannot setup auditioner processing flow for %1 channels"
+#: tempo.cc:114
+msgid "TempoSection XML node has an illegal \"note-type\" value"
 msgstr ""
 
-#: ardour/lxvst_plugin.cc:644
-msgid "LXVST: cannot load module from \"%1\""
-msgstr "LXVST: 无法从 \"%1\" 载入载入模块"
-
-#: ardour/lxvst_plugin.cc:651
-msgid "You asked ardour to not use any LXVST plugins"
+#: tempo.cc:120
+msgid "TempoSection XML node has no \"movable\" property"
 msgstr ""
 
+#: tempo.cc:130
+msgid "TempoSection XML node has an illegal \"bar-offset\" value"
+msgstr ""
+
+#: tempo.cc:207
+msgid "MeterSection XML node has no \"start\" property"
+msgstr ""
+
+#: tempo.cc:215
+msgid "MeterSection XML node has an illegal \"start\" value"
+msgstr ""
+
+#: tempo.cc:225
+msgid ""
+"MeterSection XML node has no \"beats-per-bar\" or \"divisions-per-bar\" "
+"property"
+msgstr ""
+
+#: tempo.cc:231
+msgid ""
+"MeterSection XML node has an illegal \"beats-per-bar\" or \"divisions-per-bar"
+"\" value"
+msgstr ""
+
+#: tempo.cc:236
+msgid "MeterSection XML node has no \"note-type\" property"
+msgstr ""
+
+#: tempo.cc:241
+msgid "MeterSection XML node has an illegal \"note-type\" value"
+msgstr ""
+
+#: tempo.cc:246
+msgid "MeterSection XML node has no \"movable\" property"
+msgstr ""
+
+#: tempo.cc:393
+msgid ""
+"Meter changes can only be positioned on the first beat of a bar. Moving from "
+"%1 to %2"
+msgstr ""
+
+#: tempo.cc:655
+msgid "no tempo sections defined in tempo map - cannot change tempo @ %1"
+msgstr ""
+
+#: tempo.cc:685 tempo.cc:701
+msgid "programming error: no tempo section in tempo map!"
+msgstr ""
+
+#: tempo.cc:815 tempo.cc:1808
+msgid "programming error: unhandled MetricSection type"
+msgstr ""
+
+#: tempo.cc:1120
+msgid "tempo map asked for BBT time at frame %1\n"
+msgstr ""
+
+#: tempo.cc:1163
+msgid "tempo map asked for frame time at bar < 1  (%1)\n"
+msgstr ""
+
+#: tempo.cc:1623 tempo.cc:1637
+msgid "Tempo map: could not set new state, restoring old one."
+msgstr ""
+
+#: tempo.cc:1658
+msgid "Multiple meter definitions found at %1"
+msgstr ""
+
+#: tempo.cc:1663
+msgid "Multiple tempo definitions found at %1"
+msgstr ""
+
+#: tempo_map_importer.cc:52
+msgid "Tempo map"
+msgstr "节奏映射"
+
+#: tempo_map_importer.cc:60
+msgid "Tempo Map"
+msgstr "节奏映射"
+
+#: tempo_map_importer.cc:80
+msgid "Tempo marks: "
+msgstr "节奏标签"
+
+#: tempo_map_importer.cc:80
+msgid ""
+"\n"
+"Meter marks: "
+msgstr ""
+"\n"
+"Meter marks: "
+
+#: tempo_map_importer.cc:89
+msgid ""
+"This will replace the current tempo map!\n"
+"Are you shure you want to do this?"
+msgstr ""
+
+#: user_bundle.cc:28
+msgid "Node for Bundle has no \"name\" property"
+msgstr "绑定的符号没有名称属性"
+
+#: user_bundle.cc:40 user_bundle.cc:61
+#, c-format
+msgid "Unknown node \"%s\" in Bundle"
+msgstr ""
+
+#: user_bundle.cc:45
+msgid "Node for Channel has no \"name\" property"
+msgstr "声道的符号没有名称属性"
+
+#: user_bundle.cc:51
+msgid "Node for Channel has no \"type\" property"
+msgstr "声道的符号没有类型属性"
+
+#: user_bundle.cc:66
+msgid "Node for Port has no \"name\" property"
+msgstr "端口的符号没有名称属性"
+
+#: utils.cc:390 utils.cc:414
+msgid "Splice"
+msgstr ""
+
+#: utils.cc:392 utils.cc:407
+msgid "Slide"
+msgstr ""
+
+#: utils.cc:394 utils.cc:410
+msgid "Lock"
+msgstr ""
+
+#: utils.cc:397
+msgid "programming error: unknown edit mode string \"%1\""
+msgstr "程序错误: 无法识别编辑模式字符串 \"%1\""
+
+#: utils.cc:421 utils.cc:450
+msgid "MIDI Timecode"
+msgstr "MIDI时间码"
+
+#: utils.cc:421 utils.cc:448
+msgid "MTC"
+msgstr "MTC"
+
+#: utils.cc:425 utils.cc:454
+msgid "MIDI Clock"
+msgstr "MIDI时钟"
+
+#: utils.cc:429 utils.cc:444 utils.cc:457
+msgid "JACK"
+msgstr ""
+
+#: utils.cc:433
+msgid "programming error: unknown sync source string \"%1\""
+msgstr "程序错误: 无法识别同步源字符串 \"%1\""
+
+#: utils.cc:614
+msgid "programming error: unknown native header format: %1"
+msgstr ""
+
+#: utils.cc:629
+msgid "cannot open directory %1 (%2)"
+msgstr "无法打开目录 %1 (%2)"
+
+#~ msgid "Crossfade: no \"in\" region in state"
+#~ msgstr "淡入淡出: 没有 \"入\" 区域"
+
+#~ msgid "old-style crossfade information - no position information"
+#~ msgstr "旧样式淡入淡出信息 - 没有位置信息"
+
+#~ msgid "Preset file %1 exists; not overwriting"
+#~ msgstr "预设文件 %1 已存在; 不覆盖"
+
+#~ msgid "Cannot open preset file %1 (%2)"
+#~ msgstr "无法打开预设文件 %1 (%2)"
+
+#~ msgid "AudioUnit Outputs"
+#~ msgstr "音频单元输出"
+
+#~ msgid "AudioUnit Effects"
+#~ msgstr "音频单元效果"
+
+#~ msgid "AudioUnit (Unknown)"
+#~ msgstr "音频单元(未知)"
+
+#~ msgid "Checking AudioUnit: %1"
+#~ msgstr "检查音频单元 %1"
+
+#~ msgid ""
+#~ "%1: could not find configuration file (ardour.rc), canvas will look "
+#~ "broken."
+#~ msgstr "%1: 无法找到配置文件(ardour.rc), 话不看起来会破破的."
+
+#~ msgid "VST: cannot load module from \"%1\""
+#~ msgstr "VST: 无法从 %1 载入模块"
+
+#~ msgid "You asked ardour to not use any VST plugins"
+#~ msgstr "您要求Ardour不要使用任何VST插件"
+
+#~ msgid "Preset %1"
+#~ msgstr "预设 %1"
+
+#~ msgid "Template \"%1\" already exists - template not renamed"
+#~ msgstr "模板 \"%1\" 已存在 - 模板没被重命名"
+
+#~ msgid "Midi"
+#~ msgstr "MIDI"
+
+#~ msgid "Unable to create a backup copy of file %1 (%2)"
+#~ msgstr "无法创建 %1 (%2) 的备份文件"
+
+#~ msgid "CoreAudioSource: cannot open file \"%1\" for %2"
+#~ msgstr "核心音频源: 无法打开文件 \"%1\" 用于 %2"
+
+#~ msgid "path (%1) is ambiguous"
+#~ msgstr "路径 (%1) 有歧义"
+
+#~ msgid "LXVST: cannot load module from \"%1\""
+#~ msgstr "LXVST: 无法从 \"%1\" 载入载入模块"

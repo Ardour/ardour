@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtk-ardour 0.347.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-08-29 01:53+0400\n"
+"POT-Creation-Date: 2012-09-12 17:28-0400\n"
 "PO-Revision-Date: 2012-08-29 14:10+0200\n"
 "Last-Translator: Pavel Fric <pavelfric@seznam.cz>\n"
 "Language-Team: Czech <kde-i18n-doc@kde.org>\n"
@@ -362,15 +362,21 @@ msgstr ""
 "Norština:\n"
 "\t Eivind Ødegård\n"
 
-#: about.cc:577
+#: about.cc:200
+msgid ""
+"Chinese:\n"
+"\t Rui-huai Zhang <zrhzrh@mail.ustc.edu.cn>\n"
+msgstr ""
+
+#: about.cc:578
 msgid "Copyright (C) 1999-2012 Paul Davis\n"
 msgstr "Autorské právo (C) 1999-2012 Paul Davis\n"
 
-#: about.cc:581
+#: about.cc:582
 msgid "http://ardour.org/"
 msgstr "http://www.ardour.org"
 
-#: about.cc:582
+#: about.cc:583
 msgid ""
 "%1\n"
 "(built from revision %2)"
@@ -378,7 +384,7 @@ msgstr ""
 "%1\n"
 "(Sestaveno na základě revize %2)"
 
-#: about.cc:586
+#: about.cc:587
 msgid "Config"
 msgstr "Nastavení"
 
@@ -686,7 +692,8 @@ msgid ""
 "\n"
 "\"Just quit\" option."
 msgstr ""
-"%1 nemohl uložit sezení.\n \n"
+"%1 nemohl uložit sezení.\n"
+" \n"
 "Pokud stále ještě chcete skončit, zvolte, prosím, volbu\n"
 "\n"
 "\"Pouze ukončit\"."
@@ -4729,8 +4736,7 @@ msgstr ""
 "Tuto stopu/sběrnici nelze zmrazit, protože signál před dosažením výstupů "
 "přidává nebo ztrácí kanály.\n"
 "Obvykle je to způsobeno přídavnými moduly, jež vytvářejí stereo výstup z "
-"monofonního "
-"vstupu nebo naopak."
+"monofonního vstupu nebo naopak."
 
 #: editor_ops.cc:3444
 msgid "Cannot freeze"
@@ -5910,8 +5916,8 @@ msgstr "<i>Názvy souborů sestavit z těchto součástí:</i>"
 msgid ""
 "<small><i>Sorry, no example filename can be shown at the moment</i></small>"
 msgstr ""
-"<small><i>Promiňte. Právě teď nelze ukázat žádný příklad názvu souboru</i><"
-"/small>"
+"<small><i>Promiňte. Právě teď nelze ukázat žádný příklad názvu souboru</i></"
+"small>"
 
 #: export_filename_selector.cc:214
 msgid "<small><i>Current (approximate) filename: \"%1\"</i></small>"
@@ -7931,8 +7937,8 @@ msgid ""
 "It is not possible to add a port here, as the first processor in the track "
 "or buss cannot support the new configuration."
 msgstr ""
-"Přípojku zde nelze přidat, protože první procesor ve stopě nebo "
-"sběrnici nedokáže podporovat nové nastavení."
+"Přípojku zde nelze přidat, protože první procesor ve stopě nebo sběrnici "
+"nedokáže podporovat nové nastavení."
 
 #: port_matrix.cc:705
 msgid "Cannot add port"
@@ -9463,8 +9469,7 @@ msgstr ""
 "\n"
 "\n"
 "<span size=\"small\" style=\"italic\">Použijte kartu Uživatelská interakce "
-"okna "
-"Nastavení, pokud to chcete změnit</span>"
+"okna Nastavení, pokud to chcete změnit</span>"
 
 #: route_ui.cc:1744
 msgid "the mixer"
@@ -9828,8 +9833,8 @@ msgstr "Nastavení přesun/čas pro JACK"
 msgid ""
 "%1 is JACK Time Master (provides Bar|Beat|Tick and other information to JACK)"
 msgstr ""
-"%1 je řízení času pro JACK (poskytuje takt|doba|tiknutí a další "
-"informace pro JACK)"
+"%1 je řízení času pro JACK (poskytuje takt|doba|tiknutí a další informace "
+"pro JACK)"
 
 #: session_option_editor.cc:143
 msgid "Crossfades are created"
@@ -10360,12 +10365,10 @@ msgid ""
 "There are a few things that need to be configured before you start using the "
 "program.</span> "
 msgstr ""
-"<span size=\"larger\">%1 je digitální pracovní stanicí pro práci se "
-"zvukem. Můžete jej použít k nahrávání, úpravám a míchání vícestopého záznamu "
-"zvuku. Můžete s "
-"ním dělat své vlastní kompaktní disky (CD), míchat videonahrávky, nebo si je "
-"zkoušet nové "
-"myšlenky související s hudbou a zvukem obecně.\n"
+"<span size=\"larger\">%1 je digitální pracovní stanicí pro práci se zvukem. "
+"Můžete jej použít k nahrávání, úpravám a míchání vícestopého záznamu zvuku. "
+"Můžete s ním dělat své vlastní kompaktní disky (CD), míchat videonahrávky, "
+"nebo si je zkoušet nové myšlenky související s hudbou a zvukem obecně.\n"
 "\n"
 "Předtím než program začnete používat, je tu jen několik věcí, které je třeba "
 "nastavit.</span>"
@@ -10437,8 +10440,7 @@ msgid ""
 "for simple usage."
 msgstr ""
 "Spojit hlavní sběrnici přímo s výstupy vašeho technického vybavení. To je "
-"vhodnější "
-"pro jednoduché použití."
+"vhodnější pro jednoduché použití."
 
 #: startup.cc:478
 msgid "Use an additional Monitor bus"
@@ -10461,8 +10463,8 @@ msgid ""
 "<i>If you do not understand what this is about, just accept the default.</i>"
 msgstr ""
 "<i>Toto nastavení můžete kdykoli prostřednictvím dialogu Nastavení změnit.\n"
-"Také můžete část pro sledování přidat nebo odstranit u kteréhokoli sezení</i>"
-"\n"
+"Také můžete část pro sledování přidat nebo odstranit u kteréhokoli sezení</"
+"i>\n"
 "\n"
 "<i>Pokud nevíte, o čem to je, prostě přijměte výchozí nastavení.</i>"
 
@@ -10562,7 +10564,7 @@ msgstr "... s hlavní sběrnicí"
 msgid "... to physical outputs"
 msgstr "... s fyzickými výstupy"
 
-#: startup.cc:1259
+#: startup.cc:1260
 msgid "Advanced Session Options"
 msgstr "Pokročilé volby pro sezení"
 

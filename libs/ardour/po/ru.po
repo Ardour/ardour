@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: libardour 3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-07-15 14:26+0400\n"
+"POT-Creation-Date: 2012-09-12 17:28-0400\n"
 "PO-Revision-Date: 2012-07-15 15:36+0400\n"
 "Last-Translator: Александр Прокудин <alexandre.prokoudine@gmail.com>\n"
 "Language-Team: русский <>\n"
@@ -122,8 +122,8 @@ msgstr ""
 
 #: audio_playlist_source.cc:171 audiosource.cc:913 file_source.cc:527
 #: midi_playlist_source.cc:144 midi_playlist_source.cc:152
-#: midi_playlist_source.cc:159 midi_source.cc:366 plugin_insert.cc:644
-#: session.cc:2412 session.cc:2445 session.cc:3556 session_handle.cc:87
+#: midi_playlist_source.cc:159 midi_source.cc:365 plugin_insert.cc:644
+#: session.cc:2396 session.cc:2429 session.cc:3540 session_handle.cc:87
 #: sndfilesource.cc:121
 msgid "programming error: %1"
 msgstr "programming error: %1"
@@ -202,51 +202,51 @@ msgstr ""
 msgid "Connect session to engine"
 msgstr ""
 
-#: audioengine.cc:839
+#: audioengine.cc:838
 msgid ""
 "a port with the name \"%1\" already exists: check for duplicated track/bus "
 "names"
 msgstr ""
 
-#: audioengine.cc:841
+#: audioengine.cc:840
 msgid ""
 "No more JACK ports are available. You will need to stop %1 and restart JACK "
 "with more ports if you need this many tracks."
 msgstr ""
 
-#: audioengine.cc:844
+#: audioengine.cc:843
 msgid "AudioEngine: cannot register port \"%1\": %2"
 msgstr "AudioEngine: cannot register port \"%1\": %2"
 
-#: audioengine.cc:874
+#: audioengine.cc:873
 msgid "unable to create port: %1"
 msgstr ""
 
-#: audioengine.cc:928
+#: audioengine.cc:927
 msgid "connect called before engine was started"
 msgstr ""
 
-#: audioengine.cc:954
+#: audioengine.cc:953
 msgid "AudioEngine: cannot connect %1 (%2) to %3 (%4)"
 msgstr ""
 
-#: audioengine.cc:969 audioengine.cc:1000
+#: audioengine.cc:968 audioengine.cc:999
 msgid "disconnect called before engine was started"
 msgstr ""
 
-#: audioengine.cc:1048
+#: audioengine.cc:1047
 msgid "get_port_by_name() called before engine was started"
 msgstr ""
 
-#: audioengine.cc:1100
+#: audioengine.cc:1099
 msgid "get_ports called before engine was started"
 msgstr ""
 
-#: audioengine.cc:1422
+#: audioengine.cc:1421
 msgid "failed to connect to JACK"
 msgstr ""
 
-#: audioregion.cc:1707
+#: audioregion.cc:1710
 msgid ""
 "You have requested an operation that requires audio analysis.\n"
 "\n"
@@ -432,7 +432,7 @@ msgstr ""
 msgid "cannot locate cpu MHz in /proc/cpuinfo"
 msgstr ""
 
-#: data_type.cc:27 io.cc:1337
+#: data_type.cc:27 io.cc:1339
 msgid "audio"
 msgstr ""
 
@@ -596,63 +596,63 @@ msgstr ""
 msgid "Cannot convert %1 to Latin-1 text"
 msgstr ""
 
-#: export_profile_manager.cc:75
+#: export_profile_manager.cc:76
 msgid "Searching for export formats in %1"
 msgstr ""
 
-#: export_profile_manager.cc:81
+#: export_profile_manager.cc:82
 msgid "Unable to create export format directory %1: %2"
 msgstr ""
 
-#: export_profile_manager.cc:238
+#: export_profile_manager.cc:239
 msgid "Unable to remove export preset %1: %2"
 msgstr "Невозможно удалить профиль экспорта %1: %2"
 
-#: export_profile_manager.cc:328
+#: export_profile_manager.cc:329
 msgid "Selection"
 msgstr "Выделение"
 
-#: export_profile_manager.cc:446
+#: export_profile_manager.cc:447
 msgid "Session"
 msgstr "Сеанс"
 
-#: export_profile_manager.cc:567
+#: export_profile_manager.cc:568
 msgid "Unable to rename export format %1 to %2: %3"
 msgstr "Невозможно переименовать профиль экспорта %1 в %2: %3"
 
-#: export_profile_manager.cc:599
+#: export_profile_manager.cc:600
 msgid "Unable to remove export profile %1: %2"
 msgstr "Невозможно удалить профиль экспорта %1: %2"
 
-#: export_profile_manager.cc:616
+#: export_profile_manager.cc:617
 msgid "empty format"
 msgstr "неопределённый формат"
 
-#: export_profile_manager.cc:785
+#: export_profile_manager.cc:786
 msgid "No timespan has been selected!"
 msgstr "отрезок времени не указан!"
 
-#: export_profile_manager.cc:789
+#: export_profile_manager.cc:790
 msgid "No channels have been selected!"
 msgstr "нет выбранных каналов!"
 
-#: export_profile_manager.cc:793
+#: export_profile_manager.cc:794
 msgid "Some channels are empty"
 msgstr "некоторые каналы пусты"
 
-#: export_profile_manager.cc:826
+#: export_profile_manager.cc:827
 msgid "No format selected!"
 msgstr "формат не выбран!"
 
-#: export_profile_manager.cc:828
+#: export_profile_manager.cc:829
 msgid "All channels are empty!"
 msgstr "все каналы пусты!"
 
-#: export_profile_manager.cc:830
+#: export_profile_manager.cc:831
 msgid "One or more of the selected formats is not compatible with this system!"
 msgstr ""
 
-#: export_profile_manager.cc:833
+#: export_profile_manager.cc:834
 msgid ""
 "%1 supports only %2 channels, but you have %3 channels in your channel "
 "configuration"
@@ -753,27 +753,27 @@ msgstr ""
 msgid "unknown file type for session %1"
 msgstr ""
 
-#: globals.cc:198
+#: globals.cc:202
 msgid "Could not set system open files limit to \"unlimited\""
 msgstr ""
 
-#: globals.cc:200
+#: globals.cc:204
 msgid "Could not set system open files limit to %1"
 msgstr ""
 
-#: globals.cc:204
+#: globals.cc:208
 msgid "Removed open file count limit. Excellent!"
 msgstr ""
 
-#: globals.cc:206
+#: globals.cc:210
 msgid "%1 will be limited to %2 open files"
 msgstr ""
 
-#: globals.cc:210
+#: globals.cc:214
 msgid "Could not get system open files limit (%1)"
 msgstr ""
 
-#: globals.cc:261
+#: globals.cc:265
 msgid "Loading configuration"
 msgstr ""
 
@@ -813,7 +813,7 @@ msgstr ""
 msgid "Loading MIDI file %1"
 msgstr ""
 
-#: import.cc:607
+#: import.cc:615
 msgid "Failed to remove some files after failed/cancelled import operation"
 msgstr ""
 
@@ -829,102 +829,102 @@ msgstr ""
 msgid "%1 - cannot find any track/bus with the ID %2 to connect to"
 msgstr ""
 
-#: io.cc:206
+#: io.cc:208
 msgid "IO: cannot disconnect port %1 from %2"
 msgstr ""
 
-#: io.cc:341 io.cc:426
+#: io.cc:343 io.cc:428
 msgid "IO: cannot register input port %1"
 msgstr ""
 
-#: io.cc:346 io.cc:431
+#: io.cc:348 io.cc:433
 msgid "IO: cannot register output port %1"
 msgstr ""
 
-#: io.cc:589 io.cc:645
+#: io.cc:591 io.cc:647
 msgid "incorrect XML node \"%1\" passed to IO object"
 msgstr ""
 
-#: io.cc:704
+#: io.cc:706
 msgid "in"
 msgstr ""
 
-#: io.cc:704
+#: io.cc:706
 msgid "out"
 msgstr ""
 
-#: io.cc:705
+#: io.cc:707
 msgid "input"
 msgstr ""
 
-#: io.cc:705
+#: io.cc:707
 msgid "output"
 msgstr ""
 
-#: io.cc:715
+#: io.cc:717
 msgid "Unknown bundle \"%1\" listed for %2 of %3"
 msgstr ""
 
-#: io.cc:781
+#: io.cc:783
 msgid "Bundle %1 was not available - \"%2\" used instead"
 msgstr ""
 
-#: io.cc:784
+#: io.cc:786
 msgid "No %1 bundles available as a replacement"
 msgstr ""
 
-#: io.cc:887
+#: io.cc:889
 msgid "%1: cannot create I/O ports"
 msgstr ""
 
-#: io.cc:1015 io.cc:1119
+#: io.cc:1017 io.cc:1121
 msgid "IO: badly formed string in XML node for inputs \"%1\""
 msgstr ""
 
-#: io.cc:1020 io.cc:1124
+#: io.cc:1022 io.cc:1126
 msgid "bad input string in XML node \"%1\""
 msgstr ""
 
-#: io.cc:1058
+#: io.cc:1060
 msgid "IO: badly formed string in XML node for outputs \"%1\""
 msgstr ""
 
-#: io.cc:1063
+#: io.cc:1065
 msgid "IO: bad output string in XML node \"%1\""
 msgstr ""
 
-#: io.cc:1339
+#: io.cc:1341
 msgid "midi"
 msgstr ""
 
-#: io.cc:1394
+#: io.cc:1404
 #, c-format
 msgid "%s %u"
 msgstr ""
 
-#: io.cc:1441
+#: io.cc:1451
 #, c-format
 msgid "%s in"
 msgstr ""
 
-#: io.cc:1443
+#: io.cc:1453
 #, c-format
 msgid "%s out"
 msgstr ""
 
-#: io.cc:1518 session.cc:455 session.cc:484
+#: io.cc:1528 session.cc:455 session.cc:484
 msgid "mono"
 msgstr ""
 
-#: io.cc:1520 session.cc:468 session.cc:498
+#: io.cc:1530 session.cc:468 session.cc:498
 msgid "L"
 msgstr ""
 
-#: io.cc:1520 session.cc:470 session.cc:500
+#: io.cc:1530 session.cc:470 session.cc:500
 msgid "R"
 msgstr ""
 
-#: io.cc:1522 io.cc:1528
+#: io.cc:1532 io.cc:1538
 #, c-format
 msgid "%d"
 msgstr ""
@@ -1015,7 +1015,7 @@ msgstr ""
 msgid "incorrect XML mode passed to Locations::set_state"
 msgstr ""
 
-#: location.cc:810 session.cc:4280 session_state.cc:1106
+#: location.cc:810 session.cc:4264 session_state.cc:1106
 msgid "session"
 msgstr ""
 
@@ -1324,23 +1324,23 @@ msgstr "LADSPA: не удалось загрузить модуль \"%1\" (%2)"
 msgid "LADSPA: module \"%1\" has no descriptor function."
 msgstr ""
 
-#: plugin_manager.cc:599
+#: plugin_manager.cc:600
 msgid ""
 "VST plugin %1 does not support processReplacing, and so cannot be used in "
 "ardour at this time"
 msgstr ""
 
-#: plugin_manager.cc:703
+#: plugin_manager.cc:704
 msgid ""
 "linuxVST plugin %1 does not support processReplacing, and so cannot be used "
 "in ardour at this time"
 msgstr ""
 
-#: plugin_manager.cc:864
+#: plugin_manager.cc:865
 msgid "unknown plugin status type \"%1\" - all entries ignored"
 msgstr ""
 
-#: plugin_manager.cc:881
+#: plugin_manager.cc:882
 msgid "unknown plugin type \"%1\" - ignored"
 msgstr ""
 
@@ -1446,27 +1446,27 @@ msgstr ""
 msgid "return %1"
 msgstr ""
 
-#: route.cc:208
+#: route.cc:207
 msgid "Remote Control ID's start at one, not zero"
 msgstr ""
 
-#: route.cc:1149 route.cc:2591
+#: route.cc:1092 route.cc:2534
 msgid "unknown Processor type \"%1\"; ignored"
 msgstr ""
 
-#: route.cc:1161
+#: route.cc:1104
 msgid "processor could not be created. Ignored."
 msgstr ""
 
-#: route.cc:2030 route.cc:2248
+#: route.cc:1973 route.cc:2191
 msgid "Bad node sent to Route::set_state() [%1]"
 msgstr ""
 
-#: route.cc:2090
+#: route.cc:2033
 msgid "Pannable state found for route (%1) without a panner!"
 msgstr ""
 
-#: route.cc:2151 route.cc:2155 route.cc:2358 route.cc:2362
+#: route.cc:2094 route.cc:2098 route.cc:2301 route.cc:2305
 msgid "badly formed order key string in state file! [%1] ... ignored."
 msgstr ""
 
@@ -1628,39 +1628,39 @@ msgstr ""
 msgid "Session: could not create new route from template"
 msgstr ""
 
-#: session.cc:3178
+#: session.cc:3162
 msgid "FATAL ERROR! Could not find a suitable version of %1 for a rename"
 msgstr ""
 
-#: session.cc:3298 session.cc:3356
+#: session.cc:3282 session.cc:3340
 msgid "There are already %1 recordings for %2, which I consider too many."
 msgstr ""
 
-#: session.cc:3746
+#: session.cc:3730
 msgid "send ID %1 appears to be in use already"
 msgstr ""
 
-#: session.cc:3758
+#: session.cc:3742
 msgid "aux send ID %1 appears to be in use already"
 msgstr ""
 
-#: session.cc:3770
+#: session.cc:3754
 msgid "return ID %1 appears to be in use already"
 msgstr ""
 
-#: session.cc:3782
+#: session.cc:3766
 msgid "insert ID %1 appears to be in use already"
 msgstr ""
 
-#: session.cc:3909
+#: session.cc:3893
 msgid "Cannot write a range where end <= start (e.g. %1 <= %2)"
 msgstr ""
 
-#: session.cc:3938
+#: session.cc:3922
 msgid "too many bounced versions of playlist \"%1\""
 msgstr ""
 
-#: session.cc:3948
+#: session.cc:3932
 msgid "cannot create new audio file \"%1\" for %2"
 msgstr ""
 
@@ -1687,11 +1687,11 @@ msgid ""
 "= %2"
 msgstr ""
 
-#: session_directory.cc:57
+#: session_directory.cc:59
 msgid "Cannot create Session directory at path %1 Error: %2"
 msgstr ""
 
-#: session_directory.cc:74
+#: session_directory.cc:76
 msgid "Session subdirectory does not exist at path %1"
 msgstr ""
 
@@ -2064,11 +2064,11 @@ msgstr ""
 msgid "Couldn't figure out how to make a Command out of a %1 XMLNode."
 msgstr ""
 
-#: session_state.cc:3585
+#: session_state.cc:3578
 msgid "Session: unknown diskstream type in XML"
 msgstr ""
 
-#: session_state.cc:3590
+#: session_state.cc:3583
 msgid "Session: could not load diskstream via XML state"
 msgstr ""
 
@@ -2080,13 +2080,13 @@ msgstr ""
 msgid "Cannot loop - no loop range defined"
 msgstr ""
 
-#: session_transport.cc:710
+#: session_transport.cc:715
 msgid ""
 "Seamless looping cannot be supported while %1 is using JACK transport.\n"
 "Recommend changing the configured options"
 msgstr ""
 
-#: session_transport.cc:1069
+#: session_transport.cc:1078
 msgid ""
 "Global varispeed cannot be supported while %1 is connected to JACK transport "
 "control"
@@ -2354,20 +2354,28 @@ msgstr ""
 msgid "programming error: no tempo section in tempo map!"
 msgstr ""
 
-#: tempo.cc:815 tempo.cc:1785
+#: tempo.cc:815 tempo.cc:1808
 msgid "programming error: unhandled MetricSection type"
 msgstr ""
 
-#: tempo.cc:1119
+#: tempo.cc:1120
 msgid "tempo map asked for BBT time at frame %1\n"
 msgstr ""
 
-#: tempo.cc:1162
+#: tempo.cc:1163
 msgid "tempo map asked for frame time at bar < 1  (%1)\n"
 msgstr ""
 
-#: tempo.cc:1622 tempo.cc:1636
+#: tempo.cc:1623 tempo.cc:1637
 msgid "Tempo map: could not set new state, restoring old one."
+msgstr ""
+
+#: tempo.cc:1658
+msgid "Multiple meter definitions found at %1"
+msgstr ""
+
+#: tempo.cc:1663
+msgid "Multiple tempo definitions found at %1"
 msgstr ""
 
 #: tempo_map_importer.cc:52
