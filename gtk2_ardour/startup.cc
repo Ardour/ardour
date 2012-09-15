@@ -1336,9 +1336,12 @@ ArdourStartup::connect_inputs_clicked ()
 void
 ArdourStartup::connect_outputs_clicked ()
 {
-	_limit_output_ports.set_sensitive(_connect_outputs.get_active());
+	bool const co = _connect_outputs.get_active ();
+	_limit_output_ports.set_sensitive(co);
+	_connect_outputs_to_master.set_sensitive(co);
+	_connect_outputs_to_physical.set_sensitive(co);
 
-	if (_connect_outputs.get_active() && _limit_output_ports.get_active()) {
+	if (co && _limit_output_ports.get_active()) {
 		_output_limit_count.set_sensitive(true);
 	} else {
 		_output_limit_count.set_sensitive(false);
@@ -1360,9 +1363,10 @@ ArdourStartup::limit_outputs_clicked ()
 void
 ArdourStartup::master_bus_button_clicked ()
 {
-	bool yn = _create_master_bus.get_active();
+	bool const yn = _create_master_bus.get_active();
 
 	_master_bus_channel_count.set_sensitive(yn);
+	_connect_outputs_to_master.set_sensitive(yn);
 }
 
 void
