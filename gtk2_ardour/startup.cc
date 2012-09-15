@@ -1115,7 +1115,7 @@ ArdourStartup::setup_more_options_page ()
 	advanced_table.set_row_spacings(0);
 	advanced_table.set_col_spacings(0);
 
-	_connect_inputs.set_label (_("Automatically connect to physical_inputs"));
+	_connect_inputs.set_label (_("Automatically connect to physical inputs"));
 	_connect_inputs.set_flags(Gtk::CAN_FOCUS);
 	_connect_inputs.set_relief(Gtk::RELIEF_NORMAL);
 	_connect_inputs.set_mode(true);
