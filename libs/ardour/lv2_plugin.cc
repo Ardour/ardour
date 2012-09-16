@@ -298,13 +298,13 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 #ifdef HAVE_NEW_LV2
 	LV2_URID atom_Int = _uri_map.uri_to_id(LV2_ATOM__Int);
 	LV2_Options_Option options[] = {
-		{ _uri_map.uri_to_id(LV2_BUF_SIZE__minBlockLength),
+		{ LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id(LV2_BUF_SIZE__minBlockLength),
 		  sizeof(int32_t), atom_Int, &_block_length },
-		{ _uri_map.uri_to_id(LV2_BUF_SIZE__maxBlockLength),
+		{ LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id(LV2_BUF_SIZE__maxBlockLength),
 		  sizeof(int32_t), atom_Int, &_block_length },
-		{ _uri_map.uri_to_id(LV2_BUF_SIZE__sequenceSize),
+		{ LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id(LV2_BUF_SIZE__sequenceSize),
 		  sizeof(int32_t), atom_Int, &_seq_size },
-		{ 0, 0, 0, NULL }
+		{ LV2_OPTIONS_INSTANCE, 0, 0, 0, 0, NULL }
 	};
 
 	_options_feature.URI    = LV2_OPTIONS__options;
