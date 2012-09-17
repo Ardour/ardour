@@ -607,7 +607,7 @@ ControlList::add (double when, double value)
 		} else {
 			DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 insert new point at %2 at iterator at %3\n", this, when, (*most_recent_insert_iterator)->when));
 			
-			bool done;
+			bool done = false;
 			
 			/* check if would just be adding to a straight line,
 			 * and don't add another point if so
