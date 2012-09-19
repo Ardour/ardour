@@ -3541,6 +3541,7 @@ Route::set_active (bool yn, void* src)
 		_input->set_active (yn);
 		_output->set_active (yn);
 		active_changed (); // EMIT SIGNAL
+		_session.set_dirty ();
 	}
 }
 
