@@ -22,6 +22,8 @@
 
 #include "ardour/ardour.h"
 #include "ardour/debug.h"
+#include "ardour/port.h"
+#include "ardour/port_set.h"
 #include "ardour/route.h"
 #include "ardour/track.h"
 #include "ardour/session.h"
@@ -43,19 +45,19 @@ SoundGridRack::SoundGridRack (Session& s, Route& r, const std::string& name)
         }
 
         if (dynamic_cast<Track*> (&r) != 0) {
-                _cluster_type = eClusterType_Input;
+                _cluster_type = eClusterType_InputTrack;
         } else {
                 /* bus */
                 if (r.is_master()) {
-                        _cluster_type = eClusterType_Input;
+                        _cluster_type = eClusterType_InputTrack;
                 } else if (r.is_monitor()) {
-                        _cluster_type = eClusterType_Input;
+                        _cluster_type = eClusterType_InputTrack;
                 } else {
-                        _cluster_type = eClusterType_Input;
+                        _cluster_type = eClusterType_InputTrack;
                 }
         }
 
-        if (SoundGrid::instance().add_rack_synchronous (_cluster_type, _rack_id)) { 
+        if (SoundGrid::instance().add_rack_synchronous (_cluster_type, 0, _rack_id)) { 
                 throw failed_constructor();
         }
 
@@ -83,32 +85,40 @@ SoundGridRack::make_connections ()
            our output JACK ports to these JACK ports, thus establishing signal flow into the chainer.
         */
 
-#if 0
-        string portname;
-        
-        portname = SoundGrid::instance().sg_port_as_jack_port (SoundGrid::TrackInputPort (_rack_id, eChainerSub_NoSub, (uint32_t) -1));
-        
-        if (portname.empty()) {
-                return -1;
-        }
-#endif        
-
-        _route.input()->disconnect (this);
         _route.output()->disconnect (this);
 
-        /* wire up the driver input to the chainer input, thus allowing us to pick up data from the native OS driver
-           (where JACK will deliver it)
-        */
+//        SoundGrid::instance().connect (SoundGrid::PhysicalInputPort (0),
+//                                       SoundGrid::DriverOutputPort (0));
+        
+        PortSet& ports (_route.output()->ports());
+        uint32_t channel = 0;
 
-        SoundGrid::instance().connect (SoundGrid::PhysicalInputPort (0),
-                                       SoundGrid::DriverOutputPort (0));
+        for (PortSet::iterator p = ports.begin(); p != ports.end(); ++p, ++channel) {
 
-        SoundGrid::instance().connect (SoundGrid::DriverInputPort (0),
-                                       SoundGrid::TrackInputPort (_rack_id, eChainerSub_NoSub, (uint32_t) -1));
+                if (p->type() != DataType::AUDIO) {
+                        continue;
+                }
 
-        SoundGrid::instance().connect (SoundGrid::TrackOutputPort (_rack_id, eChainerSub_Left, eMixMatrixSub_PostFader),
-                                       SoundGrid::PhysicalOutputPort (0));
+                /* find a JACK port that will be used to deliver data to the chainer input */
 
+                string portname = SoundGrid::instance().sg_port_as_jack_port (SoundGrid::TrackInputPort (_rack_id, channel));
+                
+                if (portname.empty()) {
+                        continue;
+                }
+
+                /* connect this port to it */
+                
+                p->connect (portname);
+
+                /* Now wire up the output of our SG chainer to ... yes, to what precisely ? 
+                   
+                   For now, wire it up to physical outputs 1 ( + 2, etc)
+                */
+
+                SoundGrid::instance().connect (SoundGrid::TrackOutputPort (_rack_id, channel), SoundGrid::PhysicalOutputPort (channel));
+        }
+                
         return 0;
 }
 

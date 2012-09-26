@@ -27,7 +27,7 @@ static const char* controller_type = PROGRAM_NAME;
 uint32_t 
 WMSD_QueryInterfaceVersion()
 {
-        DEBUG_TRACE (DEBUG::SGDriver, string_compose ("ControllerDriver:%1\n", __FUNCTION__));
+        DEBUG_TRACE (DEBUG::SGDriver, string_compose ("ControllerDriver:%1 - response = %2\n", __FUNCTION__, WMSD_INTERFACE_VERSION));
         return WMSD_INTERFACE_VERSION;
 }
 
@@ -130,9 +130,6 @@ WMSD_ControllerDisplayUpdate (const WSDControllerHandle controllerHandle,
                 case eClusterType_Global_Channel:
                         DEBUG_TRACE (DEBUG::SGDriver, "Channel\n");
                         break;
-                case eClusterType_Global_RequestTimeout:
-                        DEBUG_TRACE (DEBUG::SGDriver, "RequestTimeout\n");
-                        break;
                 case eClusterType_Global_SurfacesSetup:
                         DEBUG_TRACE (DEBUG::SGDriver, "SurfacesSetup\n");
                         break;
@@ -170,29 +167,11 @@ WMSD_ControllerDisplayUpdate (const WSDControllerHandle controllerHandle,
                         break;
                 }
                 break;
-        case eClusterType_Input:
+        case eClusterType_InputTrack:
                 // DEBUG_TRACE (DEBUG::SGDriver, "update, InputChannel\n");
                 break;
-        case eClusterType_Group:
+        case eClusterType_GroupTrack:
                 // DEBUG_TRACE (DEBUG::SGDriver, "update, GroupChannel\n");
-                break;
-        case eClusterType_Aux:
-                // DEBUG_TRACE (DEBUG::SGDriver, "update, AuxChannel\n");
-                break;
-        case eClusterType_Matrix:
-                // DEBUG_TRACE (DEBUG::SGDriver, "update, MatrixChannel\n");
-                break;
-        case eClusterType_LCRM:
-                // DEBUG_TRACE (DEBUG::SGDriver, "update, LCRMChannel\n");
-                break;
-        case eClusterType_DCA:
-                // DEBUG_TRACE (DEBUG::SGDriver, "update, DCAChannel\n");
-                break;
-        case eClusterType_Cue:
-                // DEBUG_TRACE (DEBUG::SGDriver, "update, CueChannel\n");
-                break;
-        case eClusterType_TB:
-                // DEBUG_TRACE (DEBUG::SGDriver, "update, TBChannel\n");
                 break;
         case eClusterType_Inputs:
                 // DEBUG_TRACE (DEBUG::SGDriver, "update, Inputs\n");
@@ -221,6 +200,20 @@ WMSD_GetTypeForController (const WSDControllerHandle /*controllerHandle*/, char 
 {
         DEBUG_TRACE (DEBUG::SGDriver, string_compose ("ControllerDriver:%1\n", __FUNCTION__));
         strncpy (out_controllerType, controller_type, WMSD_MAX_CONTROLLERTYPE_LENGTH);
+        return eNoErr;
+}
+
+WMSDErr 
+WMSD_ControllerParamUpdate (const WSDControllerHandle controllerHandle, WEParamType paramID)
+{
+        SoundGrid* sg = (SoundGrid*) controllerHandle;
+
+        DEBUG_TRACE (DEBUG::SGDriver, string_compose ("ControllerDriver:%1\n", __FUNCTION__));
+
+        if (sg) {
+                sg->parameter_updated (paramID);
+        }
+
         return eNoErr;
 }
 

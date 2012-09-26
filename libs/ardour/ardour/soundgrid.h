@@ -42,8 +42,7 @@ class SoundGrid : public boost::noncopyable
   public:
 	~SoundGrid ();
 
-        int initialize (void* window_handle, uint32_t max_track_inputs, uint32_t max_track_ouputs,
-                        uint32_t max_phys_inputs, uint32_t max_phys_outputs);
+        int initialize (void* window_handle, uint32_t max_tracks);
         int teardown ();
 
 	static SoundGrid& instance();
@@ -87,74 +86,127 @@ class SoundGrid : public boost::noncopyable
 
         static PBD::Signal0<void> Shutdown;
         
-        bool add_rack_synchronous (uint32_t clusterType, uint32_t &trackHandle);
-        bool add_rack_asynchronous (uint32_t clusterType);
+        bool add_rack_synchronous (uint32_t clusterType, int32_t process_group, uint32_t &trackHandle);
+        bool add_rack_asynchronous (uint32_t clusterType, int32_t process_group);
         bool remove_rack_synchronous (uint32_t clusterType, uint32_t trackHandle);
         bool remove_all_racks_synchronous ();
 
         int set_gain (uint32_t in_clusterType, uint32_t in_trackHandle, double in_gainValue);
         bool get_gain (uint32_t in_clusterType, uint32_t in_trackHandle, double &out_gainValue);
 
-        int configure_driver (uint32_t physical_inputs, uint32_t physical_outputs);
+        int configure_driver (uint32_t physical_inputs, uint32_t physical_outputs, uint32_t tracks);
 
         struct Port {
-            uint32_t type;
-            uint32_t id;
-            uint32_t channel;
-            uint32_t matrix_sub;
             
-            Port (uint32_t t, uint32_t i, uint32_t c, uint32_t ms) 
-                    : type (t)
-                    , id (i)
-                    , channel (c)
-                    , matrix_sub (ms) {}
+            enum Position {
+                    Pre,
+                    Post
+            };
+
+            uint32_t ctype;
+            uint32_t cid;
+            uint32_t stype;
+            uint32_t sindex;
+            uint32_t sid;
+            uint32_t channel;
+            Position position;
+
+            void set_source (WSAudioAssignment& assignment) const;
+            void set_destination (WSAudioAssignment& assignment) const;
 
             /* control sorting and use in STL containers */
             bool operator<(const Port& other) const {
-                    return type < other.type && id < other.id && channel < other.channel && matrix_sub < other.matrix_sub;
+                    return ctype < other.ctype && 
+                            stype < other.stype && 
+                            cid < other.cid && 
+                            sid < other.sid && 
+                            sindex < other.sindex && 
+                            channel < other.channel && 
+                            position < other.position;
             }
+            
+            bool accepts_input () const {
+                    if (ctype == eClusterType_Inputs) {
+                            return true;
+                    } else if (ctype == eClusterType_Outputs) {
+                            return false;
+                    } else {
+                            if (position == Post) {
+                                    return false;
+                            }
+                    }
+                    return true;
+            }
+
+            EASGNSource sg_source () const { 
+                    switch (position) {
+                    case Pre:
+                            return kASGNPre;
+                    default:
+                    case Post:
+                            return kASGNPost;
+                    }
+            }
+
+          protected:
+            Port (uint32_t ct, uint32_t ci, uint32_t st, uint32_t si, uint32_t sd, uint32_t c, Position p) 
+                    : ctype (ct)
+                    , cid (ci)
+                    , stype (st)
+                    , sindex (si)
+                    , sid (sd)
+                    , channel (c)
+                    , position (p) {}
         };
 
         struct DriverInputPort : public Port {
                 DriverInputPort (uint32_t channel) 
-                        : Port (eClusterType_Inputs, eClusterHandle_Physical_Driver, eChainerSub_NoSub, channel) {}
+                        : Port (eClusterType_Inputs, eClusterHandle_Physical_Driver, 
+                                wvEnum_Unknown, wvEnum_Unknown, wvEnum_Unknown, channel, Port::Pre) {}
         };
         
         struct DriverOutputPort : public Port {
                 DriverOutputPort (uint32_t channel) 
-                        : Port (eClusterType_Outputs, eClusterHandle_Physical_Driver, eChainerSub_NoSub, channel) {}
+                        : Port (eClusterType_Outputs, eClusterHandle_Physical_Driver, 
+                                wvEnum_Unknown, wvEnum_Unknown, wvEnum_Unknown, channel, Port::Post) {}
         };
         
         struct PhysicalInputPort : public Port {
                 PhysicalInputPort (uint32_t channel) 
-                        : Port (eClusterType_Inputs, eClusterHandle_Physical_IO, eChainerSub_NoSub, channel) {}
+                        : Port (eClusterType_Inputs, eClusterHandle_Physical_IO, 
+                                wvEnum_Unknown, wvEnum_Unknown, wvEnum_Unknown, channel, Port::Pre) {}
         };
         
         struct PhysicalOutputPort : public Port {
                 PhysicalOutputPort (uint32_t channel) 
-                        : Port (eClusterType_Outputs, eClusterHandle_Physical_IO, eChainerSub_NoSub, channel) {}
+                        : Port (eClusterType_Outputs, eClusterHandle_Physical_IO, 
+                                wvEnum_Unknown, wvEnum_Unknown, wvEnum_Unknown, channel, Port::Post) {}
         };
         
         struct TrackInputPort : public Port {
-                TrackInputPort (uint32_t chainer_id, uint32_t channel, uint32_t position) 
-                        : Port (eClusterType_Input, chainer_id, channel, position) {}
+                TrackInputPort (uint32_t chainer_id, uint32_t channel) 
+                        : Port (eClusterType_InputTrack, chainer_id, 
+                                eControlType_Input, 0, eControlID_Input_Digital_Trim, channel, Port::Pre) {}
         };
 
         struct TrackOutputPort : public Port {
-                TrackOutputPort (uint32_t chainer_id, uint32_t channel, uint32_t position) 
-                        : Port (eClusterType_Input, chainer_id, channel, position) {}
+                TrackOutputPort (uint32_t chainer_id, uint32_t channel) 
+                        : Port (eClusterType_InputTrack, chainer_id,
+                                eControlType_Output, 0, eControlID_Output_Gain, channel, Port::Pre) {}
         };
-        
+
         struct BusInputPort : public Port {
-                BusInputPort (uint32_t chainer_id, uint32_t channel, uint32_t position) 
-                        : Port (eClusterType_Group, chainer_id, channel, position) {}
+                BusInputPort (uint32_t chainer_id, uint32_t channel) 
+                        : Port (eClusterType_GroupTrack, chainer_id, 
+                                eControlType_Input, 0, eControlID_Input_Digital_Trim, channel, Port::Pre) {}
         };
-        
 
         struct BusOutputPort : public Port {
-                BusOutputPort (uint32_t chainer_id, uint32_t channel, uint32_t position) 
-                        : Port (eClusterType_Group, chainer_id, channel, position) {}
+                BusOutputPort (uint32_t chainer_id, uint32_t channel) 
+                        : Port (eClusterType_GroupTrack, chainer_id,
+                                eControlType_Output, 0, eControlID_Output_Gain, channel, Port::Pre) {}
         };
+        
         
         int connect (const Port& src, const Port& dst);
         int disconnect (const Port& src, const Port& dst);
@@ -162,8 +214,8 @@ class SoundGrid : public boost::noncopyable
         std::string sg_port_as_jack_port (const Port& port);
         bool        jack_port_as_sg_port (const std::string& jack_port, Port& result);
 
-        int map_io_as_jack_ports (uint32_t ninputs, uint32_t noutputs);
-        
+        void parameter_updated (WEParamType paramID);
+
   private:
 	SoundGrid ();
 	static SoundGrid* _instance;
@@ -216,7 +268,12 @@ class SoundGrid : public boost::noncopyable
         };
 
         void assignment_complete (WSCommand* cmd);
-
+        bool get_driver_config (uint32_t& max_inputs, 
+                                uint32_t& max_outputs,
+                                uint32_t& current_inputs,
+                                uint32_t& current_outputs);
+        int connect_io_to_driver (uint32_t ninputs, uint32_t noutputs);
+                
         uint32_t          _driver_ports; // how many total channels we tell the SG driver to allocate
         std::vector<bool> _driver_input_ports_in_use;
         std::vector<bool> _driver_output_ports_in_use;

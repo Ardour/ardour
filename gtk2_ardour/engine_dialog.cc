@@ -711,7 +711,7 @@ EngineControl::enumerate_devices (const string& driver)
                 /* XXX hard code 16 track estimate... takes no account of stereo, sends, busses, etc.
                  */
                 
-                soundgrid_init (16, 16, inputs_adjustment.get_value(), outputs_adjustment.get_value());
+                soundgrid_init (inputs_adjustment.get_value(), outputs_adjustment.get_value(), 16);
 		devices[driver] = SoundGrid::lan_port_names();
 
 #else

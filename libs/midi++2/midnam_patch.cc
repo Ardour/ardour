@@ -423,7 +423,7 @@ MasterDeviceNames::find_patch(std::string mode, uint8_t channel, PatchPrimaryKey
 }
 
 int
-MasterDeviceNames::set_state(const XMLTree& tree, const XMLNode& a_node)
+MasterDeviceNames::set_state(const XMLTree& tree, const XMLNode& /*a_node*/)
 {
 	// Manufacturer
 	boost::shared_ptr<XMLSharedNodeList> manufacturer = tree.find("//Manufacturer");
@@ -540,7 +540,7 @@ MIDINameDocument::MIDINameDocument (const string& filename)
 }
 
 int
-MIDINameDocument::set_state (const XMLTree& tree, const XMLNode& a_node)
+MIDINameDocument::set_state (const XMLTree& tree, const XMLNode& /*a_node*/)
 {
 	// Author
 

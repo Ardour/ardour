@@ -74,23 +74,14 @@ soundgrid_shutdown ()
 }
 
 static bool
-soundgrid_driver_init (uint32_t max_track_inputs, uint32_t max_track_outputs,
-                       uint32_t max_phys_inputs, uint32_t max_phys_outputs)
+soundgrid_driver_init (uint32_t max_phys_inputs, uint32_t max_phys_outputs, uint32_t max_tracks)
 {
-        if (ARDOUR::SoundGrid::instance().configure_driver (max_track_inputs + max_phys_inputs, max_track_outputs + max_phys_outputs) == 0) {
-                if (ARDOUR::SoundGrid::instance().map_io_as_jack_ports (max_phys_inputs, max_phys_inputs)) {
-                        error << "Failed to map " << max_phys_inputs << " inputs and " 
-                              << max_phys_outputs << " outputs as JACK ports"
-                              << endmsg;
-                }
-        }
-
+        ARDOUR::SoundGrid::instance().configure_driver (max_phys_inputs, max_phys_outputs, max_tracks);
         return false; /* do not call again */
 }
 
 int
-soundgrid_init (uint32_t max_track_inputs, uint32_t max_track_outputs,
-                uint32_t max_phys_inputs, uint32_t max_phys_outputs)
+soundgrid_init (uint32_t max_phys_inputs, uint32_t max_phys_outputs, uint32_t max_tracks)
 {
         /* create a new window that we don't display (at least not as
            of August 2012, but we can give it to the SoundGrid library
@@ -107,8 +98,7 @@ soundgrid_init (uint32_t max_track_inputs, uint32_t max_track_outputs,
 
         ARDOUR::SoundGrid::Shutdown.connect (sg_connection, MISSING_INVALIDATOR, soundgrid_shutdown, gui_context());
 
-        if (ARDOUR::SoundGrid::instance().initialize ([sg_window contentView], max_track_inputs, max_track_outputs,
-                                                      max_phys_inputs, max_phys_inputs)) {
+        if (ARDOUR::SoundGrid::instance().initialize ([sg_window contentView], max_tracks)) {
         
                 [sg_window release];
                 sg_window = 0;
@@ -119,8 +109,7 @@ soundgrid_init (uint32_t max_track_inputs, uint32_t max_track_outputs,
         /* as of early August 2012, we need to wait 5 seconds before configuring the CoreAudio driver */
 
         Glib::signal_timeout().connect (sigc::bind (sigc::ptr_fun (soundgrid_driver_init), 
-                                                    max_track_inputs, max_track_outputs,
-                                                    max_phys_inputs, max_phys_outputs), 5000);
+                                                    max_phys_inputs, max_phys_outputs, max_tracks), 5000);
 
         /* tell everyone/everything that we're using soundgrid */
 

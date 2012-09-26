@@ -266,7 +266,7 @@ CoreAudioSource::get_soundfile_info (string path, SoundFileInfo& _info, string&)
 		}
 
 		char buf[32];
-		snprintf (buf, sizeof (buf), " %" PRIu32 " bit", absd.mBitsPerChannel);
+		snprintf (buf, sizeof (buf), " %" PRIu32 " bit", (uint32_t) absd.mBitsPerChannel);
 		_info.format_name += buf;
 		_info.format_name += '\n';
 
