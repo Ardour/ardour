@@ -832,7 +832,7 @@ Track::monitoring_state () const
 
 	bool const roll = _session.transport_rolling ();
 	bool const track_rec = _diskstream->record_enabled ();
-	bool const session_rec = _session.get_record_enabled ();
+	bool const session_rec = _session.actively_recording ();
 	bool const auto_input = _session.config.get_auto_input ();
 	bool const software_monitor = Config->get_monitoring_model() == SoftwareMonitoring;
 	bool const tape_machine_mode = Config->get_tape_machine_mode ();
