@@ -1203,16 +1203,9 @@ TempoMap::bbt_duration_at_unlocked (const BBT_Time& when, const BBT_Time& bbt, i
 	/* round back to the previous precise beat */
 	BBTPointList::const_iterator wi = bbt_before_or_at (BBT_Time (when.bars, when.beats, 0));
 	BBTPointList::const_iterator start (wi);
-	double tick_frames = 0;
 
 	assert (wi != _map.end());
 
-	/* compute how much rounding we did because of non-zero ticks */
-
-	if (when.ticks != 0) {
-		tick_frames = (*wi).tempo->frames_per_beat (_frame_rate) * (when.ticks/BBT_Time::ticks_per_beat);
-	}
-	
 	uint32_t bars = 0;
 	uint32_t beats = 0;
 
@@ -1233,10 +1226,11 @@ TempoMap::bbt_duration_at_unlocked (const BBT_Time& when, const BBT_Time& bbt, i
 	/* add any additional frames related to ticks in the added value */
 
 	if (bbt.ticks != 0) {
-		tick_frames += (*wi).tempo->frames_per_beat (_frame_rate) * (bbt.ticks/BBT_Time::ticks_per_beat);
+		return ((*wi).frame - (*start).frame) + 
+			(*wi).tempo->frames_per_beat (_frame_rate) * (bbt.ticks/BBT_Time::ticks_per_beat);
+	} else {
+		return ((*wi).frame - (*start).frame);
 	}
-
-	return ((*wi).frame - (*start).frame) + llrint (tick_frames);
 }
 
 framepos_t
