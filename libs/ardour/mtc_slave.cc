@@ -70,6 +70,8 @@ MTC_Slave::MTC_Slave (Session& s, MIDI::Port& p)
 
 MTC_Slave::~MTC_Slave()
 {
+	port_connections.drop_connections ();
+
 	if (did_reset_tc_format) {
 		session.config.set_timecode_format (saved_tc_format);
 	}
