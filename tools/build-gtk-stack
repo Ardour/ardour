@@ -180,9 +180,9 @@ if [ ! -f readline-6.2.tar.gz ] ; then
     echo readline
     fetch_as_is ftp://ftp.cwru.edu/pub/bash/readline-6.2.tar.gz
 fi
-if [ ! -f zlib-1.2.6.tar.bz2 ] ; then
+if [ ! -f zlib-1.2.7.tar.bz2 ] ; then
     echo zlib
-    fetch_as_is http://zlib.net/zlib-1.2.6.tar.bz2
+    fetch_as_is http://zlib.net/zlib-1.2.7.tar.bz2
 fi
 if [ ! -f libiconv-1.14.tar.gz ] ; then
     echo libiconv
@@ -208,9 +208,9 @@ if [ ! -f tiff-4.0.1.tar.gz ] ; then
     echo tiff
     fetch_as_is ftp://ftp.remotesensing.org/pub/libtiff/tiff-4.0.1.tar.gz
 fi
-if [ ! -f libpng-1.5.10.tar.xz ] ; then
+if [ ! -f libpng-1.5.13.tar.xz ] ; then
     echo png
-    fetch_as_is ftp://ftp.simplesystems.org/pub/libpng/png/src/libpng-1.5.10.tar.xz
+    fetch_as_is ftp://ftp.simplesystems.org/pub/libpng/png/src/libpng-1.5.13.tar.xz
 fi
 if [ ! -f jpegsrc.v8d.tar.gz ] ; then
     echo jpeg
@@ -329,7 +329,7 @@ hash tar
 #
 tar xf m4-1.4.16.tar.bz2 && (cd m4-1.4.16 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "m4 build failed"
 tar xf make-3.82.tar.bz2 && (cd make-3.82 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "make build failed"
-tar xf zlib-1.2.6.tar.bz2 && (cd zlib-1.2.6 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && PATH=/usr/bin:$PATH make && make install) || die "zlib build failed"
+tar xf zlib-1.2.7.tar.bz2 && (cd zlib-1.2.7 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && PATH=/usr/bin:$PATH make && make install) || die "zlib build failed"
 tar xf autoconf-2.68.tar.bz2 && (cd autoconf-2.68 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "autoconf build failed"
 tar  xf automake-1.11.3.tar.gz && (cd automake-1.11.3 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "automake build failed"
 tar  xf libtool-2.4.2.tar.gz && (cd libtool-2.4.2 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "libtool build failed"
@@ -343,7 +343,7 @@ tar  xf expat-2.1.0.tar.gz && (cd expat-2.1.0  && CFLAGS=$GLOBAL_CFLAGS LDFLAGS=
 # 
 tar  xf libxml2-2.7.8.tar.gz && (cd libxml2-2.7.8 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF --with-zlib=$PREFIX ${PYTHON:+--with-python=$PYTHON} && make && sudo make install && sudo chown -R `whoami` $PREFIX) || die "libxml2 build failed"
 tar  xf libxslt-1.1.26.tar.gz && (cd libxslt-1.1.26 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "libxslt build failed"
-tar  xf readline-6.2.tar.gz && (cd readline-6.2  && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "readline build failed"
+tar  xf readline-6.2.tar.gz && (cd readline-6.2  && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS -lncurses" ./configure $GLOBAL_CONF && make && make install) || die "readline build failed"
 
 #
 # Don't build and install libiconv on systems where it is part of glibc
@@ -360,7 +360,7 @@ else
 fi
 
 tar  xf tiff-4.0.1.tar.gz && (cd tiff-4.0.1 && CFLAGS="$GLOBAL_CFLAGS -DHAVE_APPLE_OPENGL_FRAMEWORK" LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "tiff build failed"
-tar  xf libpng-1.5.10.tar.xz && (cd libpng-1.5.10 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "libpng build failed"
+tar  xf libpng-1.5.13.tar.xz && (cd libpng-1.5.13 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "libpng build failed"
 tar  xf jpegsrc.v8d.tar.gz && (cd jpeg-8d && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "jpegsrc build failed"
 tar xf XML-Parser-2.41.tar.gz && (cd XML-Parser-2.41 && unset MACOSX_DEPLOYMENT_TARGET && perl Makefile.PL EXPATINCPATH=$PREFIX/include EXPATLIBPATH=$PREFIX/lib PREFIX=$PREFIX && make && make install) || die "XML-Parser build failed"
 tar xf XML-Simple-2.18.tar.gz && (cd XML-Simple-2.18 && unset MACOSX_DEPLOYMENT_TARGET && perl Makefile.PL PREFIX=$PREFIX && make && make install) || die "XML-Simple build failed"
@@ -420,7 +420,7 @@ if [ x$OSX = x ] ; then
     # to the issue.
     #
     cairo_gradient_patch=$this_script_dir/misc-patches/cairo-gradients.patch
-    tar xf cairo-1.10.2.tar.gz && (cd cairo-1.10.2 && patch -p0 < $cairo_gradient_patch && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF $CAIRO_CONF && make && make install) || die "cairo build failed"
+    tar xf cairo-1.10.2.tar.gz && (cd cairo-1.10.2 && patch -p4 < $cairo_gradient_patch && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF $CAIRO_CONF && make && make install) || die "cairo build failed"
 else 
     tar xf cairo-1.10.2.tar.gz && (cd cairo-1.10.2 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF $CAIRO_CONF && make && make install) || die "cairo build failed"
 fi
