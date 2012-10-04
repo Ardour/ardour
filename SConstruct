@@ -245,8 +245,7 @@ def i18n (buildenv, sources, installenv):
     # on glibc systems, libintl is part of libc. not true on OS X
     #
     
-    if re.search ("darwin[0-9]", config[config_kernel]):
-        buildenv.Merge ([ libraries['intl'] ])
+    buildenv.Merge ([ libraries['intl'] ])
 
     installenv.Alias ('potupdate', buildenv.PotBuild (potfile, sources))
     
@@ -907,11 +906,9 @@ def prep_libcheck(topenv, libinfo):
         # things need to build with this in mind
         #
         GTKROOT = os.path.expanduser ('~/gtk/inst')
-        libinfo.Append(CPPPATH= GTKROOT + "/include", LIBPATH= GTKROOT + "/lib")
-        libinfo.Append(CXXFLAGS="-I" + GTKROOT + "/include", LINKFLAGS="-L" + GTKROOT + "/lib")
         ARDOURDEP_ROOT = os.path.expanduser ('~/a3/inst')
-        libinfo.Append(CPPPATH= ARDOURDEP_ROOT + "/include", LIBPATH= ARDOURDEP_ROOT + "/lib")
-        libinfo.Append(CXXFLAGS="-I" + ARDOURDEP_ROOT + "/include", LINKFLAGS="-L" + ARDOURDEP_ROOT + "/lib")
+        libinfo.Append(CPPPATH= GTKROOT + "/include", LINKFLAGS= "-L" + GTKROOT + "/lib")
+        libinfo.Append(CPPPATH= ARDOURDEP_ROOT + "/include", LINKFLAGS= "-L" + ARDOURDEP_ROOT + "/lib")
 	    
 prep_libcheck(env, env)
 
@@ -1326,8 +1323,9 @@ if env['NLS']:
     if env['NLS'] == 0:
         print nls_error
     else:
-	if config[config_arch] == 'apple':
+	if env['SYSLIBS'] or config[config_arch] == 'apple':
 	   libraries['intl'] = LibraryInfo (LIBS='intl')
+           print 'Libintl will be explicitly included'
         else:
 	   libraries['intl'] = LibraryInfo ()
         print "International version will be built."
