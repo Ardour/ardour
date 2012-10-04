@@ -1143,14 +1143,18 @@ void
 Session::midi_thread_work ()
 {
 	MIDIRequest* request;
-	struct pollfd pfd[4];
-	int nfds = 0;
+	struct pollfd *pfd = 0;
+        size_t pfd_size = 0;
+	size_t nfds = 0;
 	int timeout;
 	int fds_ready;
 	struct sched_param rtparam;
 	int x;
 	bool restart;
-	vector<MIDI::Port*> ports;
+        set<int> fds_used;
+        vector<MIDI::Port*> ports;
+        bool port_assign_required = true;
+        size_t n;
 
 	PBD::notify_gui_about_thread_creation (pthread_self(), X_("MIDI"), 2048);
 
@@ -1158,56 +1162,54 @@ Session::midi_thread_work ()
 	rtparam.sched_priority = 9; /* XXX should be relative to audio (JACK) thread */
 	
 	if ((x = pthread_setschedparam (pthread_self(), SCHED_FIFO, &rtparam)) != 0) {
-		// do we care? not particularly.
+		// failure ... do we care? not particularly.
 	} 
-
-	/* set up the port vector; 4 is the largest possible size for now */
-
-	ports.push_back (0);
-	ports.push_back (0);
-	ports.push_back (0);
-	ports.push_back (0);
 
 	while (1) {
 
+                const MIDI::Manager::PortMap& pm = MIDI::Manager::instance()->get_midi_ports ();
+                        
+                if (port_assign_required || (pm.size() != (pfd_size - 1))) {
+                        
+                        delete [] pfd;
+
+                        ports.clear ();
+
+                        for (MIDI::Manager::PortMap::const_iterator i = pm.begin(); i != pm.end(); ++i) {
+                                ports.push_back (i->second);
+                        }
+                        
+                        pfd_size = ports.size() + 1;
+                        pfd = new pollfd[pfd_size];
+                        port_assign_required = false;
+                }
+                
 		nfds = 0;
+                fds_used.clear ();
 
 		pfd[nfds].fd = midi_request_pipe[0];
 		pfd[nfds].events = POLLIN|POLLHUP|POLLERR;
 		nfds++;
 
-		/* if we are using MMC control, we obviously have to listen
-		   on the appropriate port.
-		*/
+                /* only poll ports if we're meant to be busy */
+                
+                vector<MIDI::Port*>::const_iterator p;
+                size_t n;
 
-		if (Config->get_mmc_control() && _mmc_port && _mmc_port->selectable() >= 0) {
-			pfd[nfds].fd = _mmc_port->selectable();
-			pfd[nfds].events = POLLIN|POLLHUP|POLLERR;
-			ports[nfds] = _mmc_port;
-			//cerr << "MIDI port " << nfds << " = MMC @ " << _mmc_port << endl;
-			nfds++;
-		}
-
-		/* if MTC is being handled on a different port from MMC
-		   or we are not handling MMC at all, poll
-		   the relevant port.
-		*/
-
-		if (_mtc_port && (_mtc_port != _mmc_port || !Config->get_mmc_control()) && _mtc_port->selectable() >= 0) {
-			pfd[nfds].fd = _mtc_port->selectable();
-			pfd[nfds].events = POLLIN|POLLHUP|POLLERR;
-			ports[nfds] = _mtc_port;
-			//cerr << "MIDI port " << nfds << " = MTC @ " << _mtc_port << endl;
-			nfds++;
-		}
-
-		if (_midi_port && (_midi_port != _mmc_port || !Config->get_mmc_control()) && (_midi_port != _mtc_port) && _midi_port->selectable() >= 0) {
-			pfd[nfds].fd = _midi_port->selectable();
-			pfd[nfds].events = POLLIN|POLLHUP|POLLERR;
-			ports[nfds] = _midi_port;
-			// cerr << "MIDI port " << nfds << " = MIDI @ " << _midi_port << endl;
-			nfds++;
-		}
+                for (p = ports.begin(), n = 1; p != ports.end() && n < pfd_size; ++n, ++p) {
+                        
+                        int fd = (*p)->selectable();
+                        
+                        if (fds_used.find (fd) != fds_used.end()) {
+                                continue;
+                        }
+                        
+                        fds_used.insert (fd);
+                        
+                        pfd[n].fd = fd;
+                        pfd[n].events = POLLIN|POLLHUP|POLLERR;
+                        nfds++;
+                }
 		
 		if (!midi_timeouts.empty()) {
 			timeout = 100; /* 10msecs */
@@ -1305,6 +1307,7 @@ Session::midi_thread_work ()
 					/* restart poll with new ports */
 					// cerr << "rebind\n";
 					restart = true;
+                                        port_assign_required = true;
 					break;
 						
 				case MIDIRequest::Quit:
@@ -1327,17 +1330,26 @@ Session::midi_thread_work ()
 			continue;
 		}
 
-		/* now read the rest of the ports */
+                /* now check all sequencer related fds, and do port i/o if any data is necessary.
+                 */
 
-		for (int p = 1; p < nfds; ++p) {
-			if ((pfd[p].revents & ~POLLIN)) {
-				// error << string_compose(_("Transport: error polling MIDI port %1 (revents =%2%3%4"), p, &hex, pfd[p].revents, &dec) << endmsg;
-				break;
-			}
-			
-			if (pfd[p].revents & POLLIN) {
-				fds_ready++;
-				midi_read (ports[p]);
+                MIDI::Manager::PreRead(); /* EMIT SIGNAL */
+                
+                for (n = 1; n < nfds; ++n) {
+                        
+			if (pfd[n].revents & ~POLLIN) {
+                                // error << string_compose(_("Transport: error polling MIDI port %1 (revents =%2%3%4"), p, &hex, pfd[p].revents, &dec) << endmsg;
+                                break;
+
+			} else if (pfd[n].revents & POLLIN) {
+
+                                /* note for ALSA sequencer ports, this can be wierd, since there may only
+                                   be 1 selectable/pollable fd for multiple ports. this will catch the "data 
+                                   ready" condition for all of them, and then the ALSA specific port
+                                   code will figure out how to demux it across the relevant ports.
+                                */
+                                
+                                midi_read (ports[n]);
 			}
 		}
 
@@ -1359,5 +1371,7 @@ Session::midi_thread_work ()
 			}
 		}
 	}
+
+        delete [] pfd;
 }
 
