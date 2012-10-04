@@ -69,6 +69,8 @@ class Manager {
 
 	int get_known_ports (std::vector<PortSet>&);
 
+        static sigc::signal0<void> PreRead;
+
   private:
 	/* This is a SINGLETON pattern */
 	

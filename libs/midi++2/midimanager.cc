@@ -36,8 +36,9 @@ using namespace PBD;
 
 Manager *Manager::theManager = 0;
 
+sigc::signal0<void> Manager::PreRead;
+
 Manager::Manager () 
-      
 {
 	inputPort = 0;
 	outputPort = 0;

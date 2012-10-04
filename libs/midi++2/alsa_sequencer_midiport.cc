@@ -27,6 +27,7 @@
 
 #include <midi++/types.h>
 #include <midi++/alsa_sequencer.h>
+#include <midi++/manager.h>
 
 #include "i18n.h"
 
@@ -45,6 +46,9 @@ using namespace MIDI;
 using namespace PBD;
 
 snd_seq_t* ALSA_SequencerMidiPort::seq = 0;
+ALSA_SequencerMidiPort::AllPorts ALSA_SequencerMidiPort::_all_ports;
+bool ALSA_SequencerMidiPort::_read_done = false;
+bool ALSA_SequencerMidiPort::_read_signal_connected = false;
 
 ALSA_SequencerMidiPort::ALSA_SequencerMidiPort (const XMLNode& node)
 	: Port (node)
@@ -67,6 +71,13 @@ ALSA_SequencerMidiPort::ALSA_SequencerMidiPort (const XMLNode& node)
 			snd_midi_event_init (decoder);
 			snd_midi_event_init (encoder);
 			_ok = true;
+
+                        if (!_read_signal_connected) {
+                                /* we need to do some magic just before a read is initiated
+                                 */
+                                Manager::PreRead.connect (sigc::ptr_fun (ALSA_SequencerMidiPort::prepare_read));
+                                _read_signal_connected = true;
+                        }
 		} 
 	}
 
@@ -75,6 +86,8 @@ ALSA_SequencerMidiPort::ALSA_SequencerMidiPort (const XMLNode& node)
 
 ALSA_SequencerMidiPort::~ALSA_SequencerMidiPort ()
 {
+        _all_ports.erase (port_id);
+
 	if (decoder) {
 		snd_midi_event_free (decoder);
 	}
@@ -136,29 +149,63 @@ ALSA_SequencerMidiPort::write (byte *msg, size_t msglen)
 	return totwritten;
 }
 
+void
+ALSA_SequencerMidiPort::prepare_read ()
+{
+        _read_done = false;
+}
+
 int 
 ALSA_SequencerMidiPort::read (byte *buf, size_t max)
+{
+        if (!_read_done) {
+                read_all_ports (buf, max);
+                _read_done = true;
+        }
+        return 0;
+}
+
+int 
+ALSA_SequencerMidiPort::read_all_ports (byte *buf, size_t max)
 {
 	TR_FN();
 	int err;
 	snd_seq_event_t *ev;
-	if (0 <= (err = snd_seq_event_input (seq, &ev))) {
-		TR_VAL(err);
-		err = snd_midi_event_decode (decoder, buf, max, ev);
-	}
+
+	err = snd_seq_event_input (seq, &ev);
 
 	if (err > 0) {
-		bytes_read += err;
 
-		if (input_parser) {
-			input_parser->raw_preparse (*input_parser, buf, err);
-			for (int i = 0; i < err; i++) {
-				input_parser->scanner (buf[i]);
-			}	
-			input_parser->raw_postparse (*input_parser, buf, err);
-		}
-	}
+                AllPorts::iterator p = _all_ports.find (ev->dest.port);
+                
+                if (p == _all_ports.end()) {
+                        /* no error reading but port does not exist */
+                        return 0;
+                }
+                
+                return p->second->read_self (buf, max, ev);
+        } 
+
 	return -ENOENT == err ? 0 : err;
+}
+
+int
+ALSA_SequencerMidiPort::read_self (byte* buf, size_t max, snd_seq_event_t* ev)
+{
+        int evsize = snd_midi_event_decode (decoder, buf, max, ev);
+
+        bytes_read += evsize;
+
+        if (input_parser) {
+                input_parser->raw_preparse (*input_parser, buf, evsize);
+
+                for (int i = 0; i < evsize; i++) {
+                        input_parser->scanner (buf[i]);
+                }	
+                input_parser->raw_postparse (*input_parser, buf, evsize);
+        }
+
+        return 0;
 }
 
 int 
@@ -184,6 +231,8 @@ ALSA_SequencerMidiPort::create_ports (const Port::Descriptor& desc)
 		snd_seq_ev_set_subs (&SEv);
 		snd_seq_ev_set_direct (&SEv);
 		
+                _all_ports.insert (make_pair (port_id, this));
+
 		return 0;
 	}
 
@@ -311,16 +360,12 @@ ALSA_SequencerMidiPort::get_connections (vector<SequencerPortAddress>& connectio
 
 	while (snd_seq_query_port_subscribers(seq, subs) >= 0) {
 
-		if (snd_seq_query_subscribe_get_time_real (subs)) {
-			/* interesting connection */
-
-			seq_addr = *snd_seq_query_subscribe_get_addr (subs);
-			
-			connections.push_back (SequencerPortAddress (seq_addr.client,
+                seq_addr = *snd_seq_query_subscribe_get_addr (subs);
+		
+                connections.push_back (SequencerPortAddress (seq_addr.client,
 								     seq_addr.port));
-		}
 
-		snd_seq_query_subscribe_set_index(subs, snd_seq_query_subscribe_get_index(subs) + 1);
+		snd_seq_query_subscribe_set_index (subs, snd_seq_query_subscribe_get_index(subs) + 1);
 	}
 }
 

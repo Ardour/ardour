@@ -47,6 +47,11 @@ class ALSA_SequencerMidiPort : public Port
 	XMLNode& get_state() const;
 	void set_state (const XMLNode&);
 
+        static int read_all_ports (byte* buf, size_t max);
+        static void prepare_read ();
+
+        int read_self (byte* buf, size_t max, snd_seq_event_t* ev);
+
   protected:
 	/* Direct I/O */
 	
@@ -63,6 +68,11 @@ class ALSA_SequencerMidiPort : public Port
 	snd_seq_event_t SEv;
 
 	int create_ports (const Port::Descriptor&);
+
+        typedef std::map<int,ALSA_SequencerMidiPort*> AllPorts;
+        static AllPorts _all_ports;
+        static bool _read_done;
+        static bool _read_signal_connected;
 
 	static int init_client (std::string name);
 	static snd_seq_t* seq;
