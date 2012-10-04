@@ -418,21 +418,24 @@ def build(bld):
 
     if bld.is_defined('HAVE_SUIL'):
         obj.source += [ 'lv2_plugin_ui.cc' ]
-        obj.uselib += ' SUIL '
+        obj.use += [ 'SUIL' ]
 
     if bld.is_defined('FREESOUND'):
         obj.source +=  [ 'sfdb_freesound_mootcher.cc' ]
         obj.defines += [ 'FREESOUND' ]
 
+    if bld.is_defined('NEED_INTL'):
+        obj.linkflags = ' -lintl'
+
     if bld.is_defined('WINDOWS_VST_SUPPORT'):
         obj.source += [ 'windows_vst_plugin_ui.cc' ]
         obj.defines += [ 'WINDOWS_VST_SUPPORT' ]
-        obj.uselib += ' X11 '
-
+        obj.use += [ 'X11' ]
+        
     if bld.is_defined('LXVST_SUPPORT'):
         obj.source += [ 'linux_vst_gui_support.cc', 'lxvst_plugin_ui.cc' ]
         obj.defines += [ 'LXVST_SUPPORT' ]
-        obj.uselib += ' X11 '
+        obj.use += [ 'X11' ]
 
     if bld.is_defined('WINDOWS_VST_SUPPORT') or bld.is_defined('LXVST_SUPPORT'):
         obj.source += [ 'vst_plugin_ui.cc' ]
