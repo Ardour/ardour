@@ -4,6 +4,11 @@ cd `dirname "$0"`/..
 
 export ARDOUR_PATH=gtk2_ardour/icons:gtk2_ardour/pixmaps:gtk2_ardour:.
 export ARDOUR_DATA_PATH=gtk2_ardour:.
+
+for s in libs/surfaces/* ; do 
+    export ARDOUR_CONTROL_SURFACE_PATH=$s${ARDOUR_CONTROL_SURFACE_PATH:+:$ARDOUR_CONTROL_SURFACE_PATH}
+done
+
 if test -d $HOME/gtk/inst ; then
     echo USING NEW CLEARLOOKS
     export GTK_PATH=~/.ardour2:libs/clearlooks-newer
