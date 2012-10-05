@@ -471,7 +471,8 @@ def configure(conf):
     # where we need to pick it up from the GTK dependency stack.
     #
     user_gtk_root = os.path.expanduser ('~/gtk/inst')
-    if not os.path.isfile ('/usr/include/libintl.h') or os.getenv('PKG_CONFIG_PATH').find (user_gtk_root) >= 0:
+    pkg_config_path = os.getenv('PKG_CONFIG_PATH')
+    if not os.path.isfile ('/usr/include/libintl.h') or (pkg_config_path is not None and pkg_config_path.find (user_gtk_root) >= 0):
         # XXXX hack hack hack
         prefinclude = ''.join ([ '-I', user_gtk_root + '/include'])
         preflib = ''.join ([ '-L', user_gtk_root + '/lib'])
@@ -484,7 +485,7 @@ def configure(conf):
         autowaf.display_msg(conf, 'Will use explicit linkage against libintl in ', 'no')
 
     user_ardour_root = os.path.expanduser ('~/a3/inst')
-    if os.getenv('PKG_CONFIG_PATH').find (user_ardour_root) >= 0:
+    if pkg_config_path is not None and os.getenv('PKG_CONFIG_PATH').find (user_ardour_root) >= 0:
         # XXXX hack hack hack
         prefinclude = ''.join ([ '-I', user_ardour_root + '/include'])
         preflib = ''.join ([ '-L', user_ardour_root + '/lib'])
