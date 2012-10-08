@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ExportFormatSpecification name="Ring Tone" id="6c86b4d9-cd50-43b4-be58-526c9cbb090f" with-cue="false" with-toc="false">
+  <Encoding id="F_WAV" type="T_Sndfile" extension="wav" name="WAV" has-sample-format="true" channel-limit="256"/>
+  <SampleRate rate="8000"/>
+  <SRCQuality quality="SRC_SincBest"/>
+  <EncodingOptions>
+    <Option name="sample-format" value="SF_16"/>
+    <Option name="dithering" value="D_Shaped"/>
+    <Option name="tag-metadata" value="false"/>
+    <Option name="tag-support" value="false"/>
+    <Option name="broadcast-info" value="false"/>
+  </EncodingOptions>
+  <Processing>
+    <Normalize enabled="true" target="-0"/>
+    <Silence>
+      <Start>
+        <Trim enabled="false"/>
+        <Add enabled="false">
+          <Duration format="Timecode" hours="0" minutes="0" seconds="0" frames="0"/>
+        </Add>
+      </Start>
+      <End>
+        <Trim enabled="false"/>
+        <Add enabled="false">
+          <Duration format="Timecode" hours="0" minutes="0" seconds="0" frames="0"/>
+        </Add>
+      </End>
+    </Silence>
+  </Processing>
+</ExportFormatSpecification>
