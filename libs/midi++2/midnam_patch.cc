@@ -404,7 +404,8 @@ CustomDeviceMode::get_state(void)
 boost::shared_ptr<CustomDeviceMode> 
 MasterDeviceNames::custom_device_mode_by_name(std::string mode_name)
 {
-	assert(mode_name != "");
+	// can't assert this, since in many of the patch files the mode name is empty
+	//assert(mode_name != "");
 	return _custom_device_modes[mode_name];
 }
 
@@ -428,7 +429,7 @@ MasterDeviceNames::set_state(const XMLTree& tree, const XMLNode& a_node)
 	// Manufacturer
 	boost::shared_ptr<XMLSharedNodeList> manufacturer = tree.find("//Manufacturer");
 	assert(manufacturer->size() == 1);
-	_manufacturer = manufacturer->front()->content();
+	_manufacturer = manufacturer->front()->children().front()->content();
 
 	// Models
 	boost::shared_ptr<XMLSharedNodeList> models = tree.find("//Model");
@@ -549,7 +550,10 @@ MIDINameDocument::set_state (const XMLTree& tree, const XMLNode& a_node)
 		error << "No author information in MIDNAM file" << endmsg;
 		return -1;
 	}
-	_author = author->front()->content();
+	
+	if (author->front()->children().size() > 0) {
+		_author = author->front()->children().front()->content();
+	}
 
 	// MasterDeviceNames
 

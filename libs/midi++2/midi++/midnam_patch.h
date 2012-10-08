@@ -1,5 +1,6 @@
 /*
-    Copyright (C) 2008 Hans Baier 
+    Copyright (C) 2012 Paul Davis
+    Author: Hans Baier
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -267,6 +268,7 @@ public:
 	XMLNode& get_state (void);
 	int      set_state (const XMLTree&, const XMLNode&);
 	
+	/// Note: channel here is 0-based while in the MIDNAM-file it's 1-based
 	std::string channel_name_set_name_by_channel(uint8_t channel) {
 		assert(channel <= 15);
 		return _channel_name_set_assignments[channel]; 
