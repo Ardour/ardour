@@ -191,7 +191,7 @@ ExportFormatBase::nearest_sample_rate (framecnt_t sample_rate)
 		best_match = (rate); \
 	}
 
-	DO_SR_COMPARISON(SR_22_05);
+	DO_SR_COMPARISON(SR_8);
 	DO_SR_COMPARISON(SR_22_05);
 	DO_SR_COMPARISON(SR_44_1);
 	DO_SR_COMPARISON(SR_48);

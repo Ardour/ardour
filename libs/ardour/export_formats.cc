@@ -186,6 +186,7 @@ ExportFormatLinear::ExportFormatLinear (string name, FormatId format_id) :
 	set_name (name);
 	set_format_id (format_id);
 
+	add_sample_rate (SR_8);
 	add_sample_rate (SR_22_05);
 	add_sample_rate (SR_44_1);
 	add_sample_rate (SR_48);

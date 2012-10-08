@@ -511,6 +511,7 @@ setup_enum_writer ()
 
 	REGISTER_CLASS_ENUM (ExportFormatBase, SR_None);
 	REGISTER_CLASS_ENUM (ExportFormatBase, SR_Session);
+	REGISTER_CLASS_ENUM (ExportFormatBase, SR_8);
 	REGISTER_CLASS_ENUM (ExportFormatBase, SR_22_05);
 	REGISTER_CLASS_ENUM (ExportFormatBase, SR_44_1);
 	REGISTER_CLASS_ENUM (ExportFormatBase, SR_48);
