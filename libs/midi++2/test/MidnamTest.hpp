@@ -27,8 +27,9 @@
 class MidnamTest : public CppUnit::TestFixture
 {
 	CPPUNIT_TEST_SUITE(MidnamTest);
-	CPPUNIT_TEST(protoolsPatchFileTest);
-	CPPUNIT_TEST(loadAllMidnamsTest);
+	CPPUNIT_TEST(protools_patchfile_test);
+	CPPUNIT_TEST(yamaha_PSRS900_patchfile_test);
+	CPPUNIT_TEST(load_all_midnams_test);
 	CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -40,8 +41,9 @@ public:
 	void tearDown() {
 	}
 
-	void protoolsPatchFileTest();
-	void loadAllMidnamsTest();
+	void protools_patchfile_test();
+	void yamaha_PSRS900_patchfile_test();
+	void load_all_midnams_test();
 
 private:
 };

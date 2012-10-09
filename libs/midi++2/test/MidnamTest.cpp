@@ -4,6 +4,7 @@
 
 #include "pbd/xml++.h"
 #include "pbd/file_utils.h"
+#include "pbd/compose.h"
 #include "midi++/midnam_patch.h"
 
 using namespace std;
@@ -13,7 +14,9 @@ CPPUNIT_TEST_SUITE_REGISTRATION( MidnamTest );
 
 static string const prefix = "../../../patchfiles/";
 
-void MidnamTest::protoolsPatchFileTest() {
+void
+MidnamTest::protools_patchfile_test()
+{
     XMLTree xmldoc(prefix + "ProtoolsPatchFile.midnam");
     boost::shared_ptr<XMLSharedNodeList> result = xmldoc.find(
             "//MIDINameDocument");
@@ -78,8 +81,82 @@ void MidnamTest::protoolsPatchFileTest() {
     CPPUNIT_ASSERT(plist2.size() == 49);
 }
 
+void
+MidnamTest::yamaha_PSRS900_patchfile_test()
+{
+    XMLTree xmldoc(prefix + "Yamaha-PSR-S900.midnam");
+    boost::shared_ptr<XMLSharedNodeList> result = xmldoc.find(
+            "//MIDINameDocument");
+    CPPUNIT_ASSERT(result->size() == 1);
+
+    result = xmldoc.find("//ChannelNameSet");
+    CPPUNIT_ASSERT(result->size() == 3);
+
+    MIDINameDocument doc(prefix + "Yamaha-PSR-S900.midnam");
+    CPPUNIT_ASSERT(doc.all_models().size() == 1);
+    CPPUNIT_ASSERT(doc.author().find("Hans Baier") == 0);
+
+    const string model = doc.all_models().front();
+    CPPUNIT_ASSERT_EQUAL(string("PSR-S900"), model);
+    boost::shared_ptr<MasterDeviceNames> masterDeviceNames =
+            doc.master_device_names_by_model().find(model)->second;
+    CPPUNIT_ASSERT_EQUAL(string("YAMAHA"), masterDeviceNames->manufacturer());
+
+    const MasterDeviceNames::CustomDeviceModeNames& modes = masterDeviceNames->custom_device_mode_names();
+    CPPUNIT_ASSERT(masterDeviceNames->custom_device_mode_names().size() == 3);
+
+    string modename = modes.front();
+    CPPUNIT_ASSERT_EQUAL(string("Standard"), modename);
+
+    modename = (*(++modes.begin()));
+    CPPUNIT_ASSERT_EQUAL(string("GM+XG"), modename);
+
+    modename = modes.back();
+    CPPUNIT_ASSERT_EQUAL(string("GM2"), modename);
+
+    for (list<string>::const_iterator modename = modes.begin(); modename != modes.end(); ++modename) {
+        boost::shared_ptr<CustomDeviceMode> mode =
+                masterDeviceNames->custom_device_mode_by_name(*modename);
+
+        CPPUNIT_ASSERT_EQUAL(*modename, mode->name());
+
+        string ns = mode->name();
+
+        if (ns != string("Standard"))
+        for (uint8_t i = 0; i <= 15; i++) {
+                CPPUNIT_ASSERT_EQUAL(ns,
+                        mode->channel_name_set_name_by_channel(i));
+                boost::shared_ptr<ChannelNameSet> nameSet =
+                        masterDeviceNames->channel_name_set_by_device_mode_and_channel(
+                                ns, 1);
+
+                CPPUNIT_ASSERT_EQUAL(ns, nameSet->name());
+
+                const ChannelNameSet::PatchBanks& banks1 = nameSet->patch_banks();
+                CPPUNIT_ASSERT(banks1.size() > 1);
+
+                boost::shared_ptr<PatchBank> bank = banks1.front();
+                const PatchBank::PatchNameList& list = bank->patch_name_list();
+
+                for(PatchBank::PatchNameList::const_iterator p = list.begin(); p != list.end(); ++p) {
+
+                if (ns == string("GM+XG")) {
+                    cerr << "got Patch with name " << (*p)->name() << " bank " << (*p)->bank_number() << " program " << (int)(*p)->program_number() << endl;
+                    uint8_t msb = (((*p)->bank_number()) >> 7) & 0x7f;
+                    CPPUNIT_ASSERT( msb == 0 || msb == 64);
+                }
+
+                if (ns == string("GM2")) {
+                    cerr << "got Patch with name " << (*p)->name() << " bank " << (*p)->bank_number() << " program " << (int)(*p)->program_number() << endl;
+                    CPPUNIT_ASSERT((*p)->bank_number() >= (uint16_t(120) << 7));
+                }
+                }
+        }
+    }
+}
+
 void 
-MidnamTest::loadAllMidnamsTest ()
+MidnamTest::load_all_midnams_test ()
 {
     assert (Glib::file_test (prefix, Glib::FILE_TEST_IS_DIR));
 
@@ -105,7 +182,7 @@ MidnamTest::loadAllMidnamsTest ()
         CPPUNIT_ASSERT(result->size() >= 1);
 
         result = xmldoc.find("//PatchBank");
-        int banks = result->size();
+        //int banks = result->size();
 
 
         result = xmldoc.find("//CustomDeviceMode[1]");
