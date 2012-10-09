@@ -57,9 +57,11 @@ public:
 	inline uint8_t  type()                  const { return (this->_buf[0] & 0xF0); }
 	inline void     set_type(uint8_t type)        { this->_buf[0] =   (0x0F & this->_buf[0])
 	                                                                | (0xF0 & type); }
+
 	inline uint8_t  channel()               const { return (this->_buf[0] & 0x0F); }
 	inline void     set_channel(uint8_t channel)  { this->_buf[0] =   (0xF0 & this->_buf[0])
 	                                                                | (0x0F & channel); }
+
 	inline bool     is_note_on()            const { return (type() == MIDI_CMD_NOTE_ON); }
 	inline bool     is_note_off()           const { return (type() == MIDI_CMD_NOTE_OFF); }
 	inline bool     is_cc()                 const { return (type() == MIDI_CMD_CONTROL); }
@@ -80,24 +82,24 @@ public:
 	inline uint8_t  cc_number()             const { return (this->_buf[1]); }
 	inline void     set_cc_number(uint8_t number) { this->_buf[1] = number; }
 	inline uint8_t  cc_value()              const { return (this->_buf[2]); }
-	inline void     set_cc_value(uint8_t value)   { this->_buf[2] = value; }
+	inline void     set_cc_value(uint8_t value)   { this->_buf[2] = value;  }
 	inline uint8_t  pitch_bender_lsb()      const { return (this->_buf[1]); }
 	inline uint8_t  pitch_bender_msb()      const { return (this->_buf[2]); }
 	inline uint16_t pitch_bender_value()    const { return ( ((0x7F & this->_buf[2]) << 7)
 	                                                        | (0x7F & this->_buf[1]) ); }
-	inline uint8_t  pgm_number()            const { return (this->_buf[1]); }
-	inline void     set_pgm_number(uint8_t number){ this->_buf[1] = number; }
-	inline uint8_t  aftertouch()            const { return (this->_buf[1]); }
-	inline uint8_t  channel_pressure()      const { return (this->_buf[1]); }
-	inline bool     is_channel_event()      const { return (0x80 <= type()) && (type() <= 0xE0); }
-	inline bool     is_smf_meta_event()     const { return this->_buf[0] == 0xFF; }
-	inline bool     is_sysex()              const { return this->_buf[0] == 0xF0
-	                                                    || this->_buf[0] == 0xF7; }
-        inline bool     is_spp()                const { return this->_buf[0] == 0xF2 && this->size() == 1; }
-        inline bool     is_mtc_quarter()        const { return this->_buf[0] == 0xF1 && this->size() == 1; }
-        inline bool     is_mtc_full()           const { 
-		return this->size() == 10 && this->_buf[0] == 0xf0 && this->_buf[1] == 0x7f && 
-			this->_buf[3] == 0x01 && this->_buf[4] == 0x01;
+	inline uint8_t  pgm_number()              const { return (this->_buf[1]); }
+	inline void     set_pgm_number(uint8_t number)  { this->_buf[1] = number; }
+	inline uint8_t  aftertouch()              const { return (this->_buf[1]); }
+	inline uint8_t  channel_pressure()        const { return (this->_buf[1]); }
+	inline bool     is_channel_event()        const { return (0x80 <= type()) && (type() <= 0xE0); }
+	inline bool     is_smf_meta_event()       const { return this->_buf[0] == 0xFF; }
+	inline bool     is_sysex()                const { return this->_buf[0] == 0xF0
+	                                                      || this->_buf[0] == 0xF7; }
+	inline bool     is_spp()                  const { return this->_buf[0] == 0xF2 && this->size() == 1; }
+	inline bool     is_mtc_quarter()          const { return this->_buf[0] == 0xF1 && this->size() == 1; }
+	inline bool     is_mtc_full()             const {
+		return this->size() == 10    && this->_buf[0] == 0xf0 && this->_buf[1] == 0x7f && 
+		       this->_buf[3] == 0x01 && this->_buf[4] == 0x01;
 	}
 };
 
