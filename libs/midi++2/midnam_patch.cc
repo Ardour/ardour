@@ -44,8 +44,11 @@ Patch::Patch (std::string name, uint8_t p_number, uint16_t b_number)
 
 int initialize_primary_key_from_commands (PatchPrimaryKey& id, const XMLNode* node)
 {
+	id.bank_number = 0;
+
 	const XMLNodeList events = node->children();
 	for (XMLNodeList::const_iterator i = events.begin(); i != events.end(); ++i) {
+
 		XMLNode* node = *i;
 		if (node->name() == "ControlChange") {
 			string control = node->property("Control")->value();
@@ -53,13 +56,12 @@ int initialize_primary_key_from_commands (PatchPrimaryKey& id, const XMLNode* no
 			string value = node->property("Value")->value();
 			assert(value != "");
 
-			id.bank_number = 0;
-
 			if (control == "0") {
-				id.bank_number |= (PBD::atoi (value)<<7);
+				id.bank_number |= (PBD::atoi (value)) << 7;
 			} else if (control == "32") {
 				id.bank_number |= PBD::atoi (value);
 			}
+
 		} else if (node->name() == "ProgramChange") {
 			string number = node->property("Number")->value();
 			assert(number != "");
@@ -333,13 +335,14 @@ ChannelNameSet::set_state (const XMLTree& tree, const XMLNode& node)
 {
 	assert(node.name() == "ChannelNameSet");
 	_name   = node.property("Name")->value();
+
 	const XMLNodeList children = node.children();
 	for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
 		XMLNode* node = *i;
 		assert(node);
 		if (node->name() == "AvailableForChannels") {
 			boost::shared_ptr<XMLSharedNodeList> channels =
-				tree.find("//AvailableChannel[@Available = 'true']/@Channel");
+				tree.find("//AvailableChannel[@Available = 'true']/@Channel", node);
 			for(XMLSharedNodeList::const_iterator i = channels->begin();
 			    i != channels->end();
 			    ++i) {
@@ -372,7 +375,7 @@ CustomDeviceMode::set_state(const XMLTree& tree, const XMLNode& a_node)
 	_name = a_node.property("Name")->value();
 
 	boost::shared_ptr<XMLSharedNodeList> channel_name_set_assignments =
-		tree.find("//ChannelNameSetAssign");
+		tree.find("//ChannelNameSetAssign", (XMLNode *)&a_node);
 	for(XMLSharedNodeList::const_iterator i = channel_name_set_assignments->begin();
 	    i != channel_name_set_assignments->end();
 	    ++i) {
