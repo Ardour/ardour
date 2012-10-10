@@ -26,6 +26,7 @@
 #include <gtkmm/scale.h>
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/slider_controller.h>
+#include <gtkmm2ext/gtk_ui.h>
 
 #include "pbd/fpu.h"
 #include "pbd/cpus.h"
@@ -837,6 +838,8 @@ public:
 		add_widget_to_page (p, _visibility_group->list_view ());
 	}
 
+        Gtk::Widget& tip_widget() { return *_visibility_group->list_view (); }
+
 private:
 	void changed ()
 	{
@@ -1016,19 +1019,23 @@ RCOptionEditor::RCOptionEditor ()
 
 	BoolOption* tsf = new BoolOption (
 		     "timecode-sync-frame-rate",
-		     _("Force Ardour's timecode rate to match an external source"),
+		     _("Force Ardour's timecode rate to match an external timecode source"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_timecode_sync_frame_rate),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_timecode_sync_frame_rate)
 		     );
-	tsf->set_note (_("If off, slaving to timecode will cause Ardour to chase the external sync source\nbut it will use its own timecode frame rate"));
+	tsf->set_note (_("If off, slaving to timecode will cause Ardour to chase the external timecode\nsource but it will use its own timecode frame rate"));
 	add_option (_("Transport"), tsf);
 
-	add_option (_("Transport"), new BoolOption (
-			    "timecode-source-is-synced",
-			    _("Timecode source shares sample clock with audio interface"),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_timecode_source_is_synced),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_timecode_source_is_synced)
-			    ));
+	tsf = new BoolOption (
+		"timecode-source-is-synced",
+		_("Timecode source shares sample clock with audio interface"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_timecode_source_is_synced),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_timecode_source_is_synced)
+		);
+	Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(), 
+				    _("If on, Ardour will assume that the timecode source shares an external sync\nsource (Blackburst, Word Clock, etc.) with your audio interface."
+				      "\nThis is a preferable configuration but may not match your equipment"));
+	add_option (_("Transport"), tsf);
 
 	/* EDITOR */
 

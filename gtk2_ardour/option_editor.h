@@ -74,6 +74,8 @@ public:
 
 	void set_note (std::string const &);
 
+        virtual Gtk::Widget& tip_widget() = 0;
+
 private:
 	void maybe_add_note (OptionEditorPage *, int);
 	
@@ -89,6 +91,8 @@ public:
 	void parameter_changed (std::string const &) {}
 	void set_state_from_config () {}
 	void add_to_page (OptionEditorPage *);
+
+        Gtk::Widget& tip_widget() { return *_label; }
 
 private:
 	Gtk::Label* _label; ///< the label used for the heading
@@ -109,6 +113,8 @@ public:
 	void parameter_changed (std::string const &) = 0;
 	void set_state_from_config () = 0;
 	void add_to_page (OptionEditorPage *);
+
+        Gtk::Widget& tip_widget() { return *_box->children().front().get_widget(); }
 
 protected:
 
@@ -163,6 +169,8 @@ public:
 		_button->set_sensitive (yn);
 	}
 
+        Gtk::Widget& tip_widget() { return *_button; }
+
 private:
 
 	void toggled ();
@@ -180,6 +188,8 @@ public:
 	EntryOption (std::string const &, std::string const &, sigc::slot<std::string>, sigc::slot<bool, std::string>);
 	void set_state_from_config ();
 	void add_to_page (OptionEditorPage*);
+
+        Gtk::Widget& tip_widget() { return *_entry; }
 
 private:
 
@@ -263,6 +273,8 @@ public:
 		_combo->set_sensitive (yn);
 	}
 
+        Gtk::Widget& tip_widget() { return *_combo; }
+
 private:
 
 	sigc::slot<T> _get;
@@ -293,6 +305,8 @@ public:
 	void add_to_page (OptionEditorPage *);
 	void changed ();
 	void set_sensitive (bool);
+
+        Gtk::Widget& tip_widget() { return *_combo; }
 
 private:
 
@@ -370,6 +384,8 @@ public:
 		_set (static_cast<T> (_spin->get_value ()) * _scale);
 	}
 
+        Gtk::Widget& tip_widget() { return *_spin; }
+
 private:
 	sigc::slot<T> _get;
 	sigc::slot<bool, T> _set;
@@ -386,6 +402,8 @@ public:
 	FaderOption (std::string const &, std::string const &, sigc::slot<ARDOUR::gain_t> g, sigc::slot<bool, ARDOUR::gain_t> s);
 	void set_state_from_config ();
 	void add_to_page (OptionEditorPage *);
+
+        Gtk::Widget& tip_widget() { return *_db_slider; }
 
 private:
 	void db_changed ();
@@ -410,6 +428,8 @@ public:
 	void add_to_page (OptionEditorPage *);
 	void set_session (ARDOUR::Session *);
 
+        Gtk::Widget& tip_widget() { return _clock; }
+
 private:
 	Gtk::Label _label;
 	AudioClock _clock;
@@ -424,6 +444,8 @@ public:
 
 	void set_state_from_config ();
 	void add_to_page (OptionEditorPage *);
+
+        Gtk::Widget& tip_widget() { return _file_chooser; }
 
 private:
 	void file_set ();

@@ -40,6 +40,8 @@ class SearchPathOption : public Option
         void add_to_page (OptionEditorPage*);
         void clear ();
 
+        Gtk::Widget& tip_widget() { return add_chooser; }
+
   protected:
 	sigc::slot<std::string> _get; ///< slot to get the configuration variable's value
 	sigc::slot<bool, std::string> _set;  ///< slot to set the configuration variable's value
