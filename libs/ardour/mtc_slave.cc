@@ -561,8 +561,8 @@ MTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 
 	if (last.timestamp == 0) {
 		speed = 0;
-		pos = last.position;
-		DEBUG_TRACE (DEBUG::MTC, string_compose ("first call to MTC_Slave::speed_and_position, pos = %1\n", last.position));
+		pos = session.transport_frame() ; // last.position;
+		DEBUG_TRACE (DEBUG::MTC, string_compose ("first call to MTC_Slave::speed_and_position, pos = %1\n", pos));
 		return true;
 	}
 
