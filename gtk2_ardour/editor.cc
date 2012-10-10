@@ -1178,6 +1178,8 @@ Editor::update_title ()
 		WindowTitle title(session_name);
 		title += Glib::get_application_name();
 		set_title (title.get_string());
+	} else {
+		/* ::session_going_away() will have taken care of it */
 	}
 }
 
@@ -3194,7 +3196,7 @@ Editor::new_tempo_section ()
 void
 Editor::map_transport_state ()
 {
-	ENSURE_GUI_THREAD (*this, &Editor::map_transport_state)
+	ENSURE_GUI_THREAD (*this, &Editor::map_transport_state);
 
 	if (_session && _session->transport_stopped()) {
 		have_pending_keyboard_selection = false;
@@ -4736,9 +4738,11 @@ Editor::located ()
 {
 	ENSURE_GUI_THREAD (*this, &Editor::located);
 
-	playhead_cursor->set_position (_session->audible_frame ());
-	if (_follow_playhead && !_pending_initial_locate) {
-		reset_x_origin_to_follow_playhead ();
+	if (_session) {
+		playhead_cursor->set_position (_session->audible_frame ());
+		if (_follow_playhead && !_pending_initial_locate) {
+			reset_x_origin_to_follow_playhead ();
+		}
 	}
 
 	_pending_locate_request = false;
@@ -5300,6 +5304,8 @@ Editor::session_going_away ()
 	hide_measures ();
 	clear_marker_display ();
 
+	stop_step_editing ();
+	
 	current_bbt_points_begin = current_bbt_points_end;
 
 	/* get rid of any existing editor mixer strip */
