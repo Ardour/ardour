@@ -32,8 +32,6 @@
 #include "midi++/parser.h"
 #include "midi++/types.h"
 
-class PIChaser;
-
 namespace MIDI {
 	class Port;
 }
@@ -243,7 +241,6 @@ class MTC_Slave : public Slave {
 	MIDI::Port* port;
 	PBD::ScopedConnectionList port_connections;
 	bool        can_notify_on_unknown_rate;
-	PIChaser* pic;
 
 	static const int frame_tolerance;
 
@@ -253,18 +250,28 @@ class MTC_Slave : public Slave {
 	MIDI::byte     last_mtc_fps_byte;
 	framepos_t     window_begin;
 	framepos_t     window_end;
-	framepos_t     last_mtc_timestamp;
-	framepos_t     last_mtc_frame;
+	framepos_t     first_mtc_timestamp;
 	bool           did_reset_tc_format;
 	TimecodeFormat saved_tc_format;
-	size_t         speed_accumulator_size;
-	double*        speed_accumulator;
-	size_t         speed_accumulator_cnt;
-	bool           have_first_speed_accumulator;
-	double         average_speed;
 	Glib::Threads::Mutex    reset_lock;
 	uint32_t       reset_pending;
 	bool           reset_position;
+	int            transport_direction;
+	int            busy_guard1;
+	int            busy_guard2;
+
+	/* DLL - chase MTC */
+	double t0; ///< time at the beginning of the MTC quater frame
+	double t1; ///< calculated end of the MTC quater frame
+	double e2; ///< second order loop error
+	double b, c, omega; ///< DLL filter coefficients
+
+	/* DLL - sync engine */
+	int    engine_dll_initstate;
+	double te0; ///< time at the beginning of the engine process
+	double te1; ///< calculated sync time
+	double ee2; ///< second order loop error
+	double be, ce, oe; ///< DLL filter coefficients
 
 	void reset (bool with_pos);
 	void queue_reset (bool with_pos);
@@ -276,7 +283,8 @@ class MTC_Slave : public Slave {
 	void read_current (SafeTime *) const;
 	void reset_window (framepos_t);
 	bool outside_window (framepos_t) const;
-	void process_apparent_speed (double);
+	void init_mtc_dll(framepos_t, double);
+	void init_engine_dll (framepos_t, framepos_t);
 };
 
 class MIDIClock_Slave : public Slave {
