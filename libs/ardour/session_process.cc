@@ -583,7 +583,7 @@ Session::follow_slave (pframes_t nframes)
 			}
 
 #if 1
-			if ((framecnt_t) abs(average_slave_delta) > _slave->resolution()) {
+			if (!actively_recording() && (framecnt_t) abs(average_slave_delta) > _slave->resolution()) {
 				cerr << "average slave delta greater than slave resolution (" << _slave->resolution() << "), going to silent motion\n";
 				goto silent_motion;
 			}
