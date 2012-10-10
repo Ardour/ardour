@@ -61,6 +61,10 @@ MTC_Slave::MTC_Slave (Session& s, MIDI::Port& p)
 
 	last_mtc_fps_byte = session.get_mtc_timecode_bits ();
 
+	mtc_timecode = timecode_60; // track changes of MTC timecode
+	a3e_timecode = timecode_60; // track canges of Ardour's timecode
+	printed_timecode_warning = false;
+
 	reset (true);
 	rebind (p);
 }
@@ -332,11 +336,29 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full, framepos_t now)
 	}
 
 	if (reset_tc) {
-		if (!did_reset_tc_format) {
-			saved_tc_format = session.config.get_timecode_format();
-			did_reset_tc_format = true;
+		TimecodeFormat cur_timecode = session.config.get_timecode_format();
+		if (0 /* TODO preferences  */) {
+			/* enforce time-code */
+			if (!did_reset_tc_format) {
+				saved_tc_format = cur_timecode;
+				did_reset_tc_format = true;
+			}
+			if (cur_timecode != tc_format) {
+				warning << _("Session and MTC framerate mismatch.") << endmsg;
+			}
+			session.config.set_timecode_format (tc_format);
+		} else {
+			/* only warn about TC mismatch */
+			if (mtc_timecode != tc_format) printed_timecode_warning = false;
+			if (a3e_timecode != cur_timecode) printed_timecode_warning = false;
+
+			if (cur_timecode != tc_format && ! printed_timecode_warning) {
+				warning << _("Session and MTC framerate mismatch.") << endmsg;
+				printed_timecode_warning = true;
+			}
 		}
-		session.config.set_timecode_format (tc_format);
+		mtc_timecode = tc_format;
+		a3e_timecode = cur_timecode;
 	}
 
 	DEBUG_TRACE (DEBUG::MTC, string_compose ("MTC at %1 TC %2 = mtc_frame %3 (from full message ? %4)\n",

@@ -260,6 +260,10 @@ class MTC_Slave : public Slave {
 	int            busy_guard1;
 	int            busy_guard2;
 
+	TimecodeFormat mtc_timecode;
+	TimecodeFormat a3e_timecode;
+	bool           printed_timecode_warning;
+
 	/* DLL - chase MTC */
 	double t0; ///< time at the beginning of the MTC quater frame
 	double t1; ///< calculated end of the MTC quater frame
