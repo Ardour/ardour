@@ -1017,6 +1017,8 @@ Session::set_transport_speed (double speed, bool abort, bool clear_state, bool a
 
 	if (actively_recording() && speed != 1.0 && speed != 0.0) {
 		/* no varispeed during recording */
+		DEBUG_TRACE (DEBUG::Transport, string_compose ("No varispeed during recording cur_speed %1, frame %2\n", 
+						       _transport_speed, _transport_frame));
 		return;
 	}
 
