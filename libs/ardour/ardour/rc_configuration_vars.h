@@ -44,6 +44,7 @@ CONFIG_VARIABLE (int32_t, mmc_receive_device_id, "mmc-receive-device-id", 0x7f)
 CONFIG_VARIABLE (int32_t, mmc_send_device_id, "mmc-send-device-id", 0)
 CONFIG_VARIABLE (int32_t, initial_program_change, "initial-program-change", -1)
 CONFIG_VARIABLE (int, mtc_qf_speed_tolerance, "mtc-qf-speed-tolerance", 5)
+CONFIG_VARIABLE (bool, timecode_sync_frame_rate, "timecode-sync-frame-rate", true)
 CONFIG_VARIABLE (bool, first_midi_bank_is_zero, "diplay-first-midi-bank-as-zero", false)
 
 /* control surfaces */

@@ -885,6 +885,17 @@ RCOptionEditor::RCOptionEditor ()
                 add_option (_("Misc"), procs);
         }
 
+	add_option (_("Misc"), new OptionEditorHeading (S_("Sync/Slave")));
+
+	BoolOption* tsf = new BoolOption (
+		     "timecode-sync-frame-rate",
+		     _("Force Ardour's timecode rate to match timecode master"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_timecode_sync_frame_rate),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_timecode_sync_frame_rate)
+		     );
+	tsf->set_note (_("If off, Ardour will chase the master but will use its own timecode frame rate"));
+	add_option (_("Misc"), tsf);
+
 	add_option (_("Misc"), new OptionEditorHeading (S_("Options|Undo")));
 
 	add_option (_("Misc"), new UndoOptions (_rc_config));

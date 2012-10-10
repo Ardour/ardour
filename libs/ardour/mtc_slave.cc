@@ -337,7 +337,7 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full, framepos_t now)
 
 	if (reset_tc) {
 		TimecodeFormat cur_timecode = session.config.get_timecode_format();
-		if (0 /* TODO preferences  */) {
+		if (Config->get_timecode_sync_frame_rate()) {
 			/* enforce time-code */
 			if (!did_reset_tc_format) {
 				saved_tc_format = cur_timecode;
