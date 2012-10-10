@@ -2943,70 +2943,7 @@
       </PatchBank>
       <PatchBank Name="Organ Flutes ">
         <PatchNameList>
-          <Patch Number="1" Name="JazzDraw! (Organ Flutes)">
-            <PatchMIDICommands>
-              <ControlChange Control="0" Value="0"/>
-              <ControlChange Control="32" Value="126"/>
-              <ProgramChange Number="16"/>
-            </PatchMIDICommands>
-          </Patch>
-          <Patch Number="2" Name="BluesOrgan! (Organ Flutes)">
-            <PatchMIDICommands>
-              <ControlChange Control="0" Value="0"/>
-              <ControlChange Control="32" Value="126"/>
-              <ProgramChange Number="16"/>
-            </PatchMIDICommands>
-          </Patch>
-          <Patch Number="3" Name="SixteenOne! (Organ Flutes)">
-            <PatchMIDICommands>
-              <ControlChange Control="0" Value="0"/>
-              <ControlChange Control="32" Value="126"/>
-              <ProgramChange Number="16"/>
-            </PatchMIDICommands>
-          </Patch>
-          <Patch Number="4" Name="EvenBars! (Organ Flutes)">
-            <PatchMIDICommands>
-              <ControlChange Control="0" Value="0"/>
-              <ControlChange Control="32" Value="126"/>
-              <ProgramChange Number="16"/>
-            </PatchMIDICommands>
-          </Patch>
-          <Patch Number="5" Name="PopOrgan! (Organ Flutes)">
-            <PatchMIDICommands>
-              <ControlChange Control="0" Value="0"/>
-              <ControlChange Control="32" Value="126"/>
-              <ProgramChange Number="16"/>
-            </PatchMIDICommands>
-          </Patch>
-          <Patch Number="6" Name="RockingOrg! (Organ Flutes)">
-            <PatchMIDICommands>
-              <ControlChange Control="0" Value="0"/>
-              <ControlChange Control="32" Value="126"/>
-              <ProgramChange Number="16"/>
-            </PatchMIDICommands>
-          </Patch>
-          <Patch Number="7" Name="Percussive! (Organ Flutes)">
-            <PatchMIDICommands>
-              <ControlChange Control="0" Value="0"/>
-              <ControlChange Control="32" Value="126"/>
-              <ProgramChange Number="16"/>
-            </PatchMIDICommands>
-          </Patch>
-          <Patch Number="8" Name="GospelOrg! (Organ Flutes)">
-            <PatchMIDICommands>
-              <ControlChange Control="0" Value="0"/>
-              <ControlChange Control="32" Value="126"/>
-              <ProgramChange Number="16"/>
-            </PatchMIDICommands>
-          </Patch>
-          <Patch Number="9" Name="PadOrgan! (Organ Flutes)">
-            <PatchMIDICommands>
-              <ControlChange Control="0" Value="0"/>
-              <ControlChange Control="32" Value="126"/>
-              <ProgramChange Number="16"/>
-            </PatchMIDICommands>
-          </Patch>
-          <Patch Number="10" Name="FullRanks! (Organ Flutes)">
+          <Patch Number="1" Name="Organ Flutes">
             <PatchMIDICommands>
               <ControlChange Control="0" Value="0"/>
               <ControlChange Control="32" Value="126"/>
