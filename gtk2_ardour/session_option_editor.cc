@@ -83,13 +83,6 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 
 	add_option (_("Timecode"), spf);
 
-	add_option (_("Timecode"), new BoolOption (
-			    "timecode-source-is-synced",
-			    _("Timecode source shares sample clock with audio interface"),
-			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_timecode_source_is_synced),
-			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_timecode_source_is_synced)
-			    ));
-
 	ComboOption<float>* vpu = new ComboOption<float> (
 		"video-pullup",
 		_("Pull-up / pull-down"),

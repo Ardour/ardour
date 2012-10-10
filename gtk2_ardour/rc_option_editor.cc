@@ -1016,12 +1016,19 @@ RCOptionEditor::RCOptionEditor ()
 
 	BoolOption* tsf = new BoolOption (
 		     "timecode-sync-frame-rate",
-		     _("Force Ardour's timecode rate to match timecode master"),
+		     _("Force Ardour's timecode rate to match an external source"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_timecode_sync_frame_rate),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_timecode_sync_frame_rate)
 		     );
-	tsf->set_note (_("If off, Ardour will chase the master but will use its own timecode frame rate"));
+	tsf->set_note (_("If off, slaving to timecode will cause Ardour to chase the external sync source\nbut it will use its own timecode frame rate"));
 	add_option (_("Transport"), tsf);
+
+	add_option (_("Transport"), new BoolOption (
+			    "timecode-source-is-synced",
+			    _("Timecode source shares sample clock with audio interface"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_timecode_source_is_synced),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_timecode_source_is_synced)
+			    ));
 
 	/* EDITOR */
 
