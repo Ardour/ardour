@@ -98,7 +98,7 @@ def build(bld):
     obj.use            = 'libsmf libpbd'
     obj.vnum           = EVORAL_LIB_VERSION
     obj.install_path   = os.path.join(bld.env['LIBDIR'], 'ardour3')
-    obj.defines = ['PACKAGE="libevoral"' ]
+    obj.defines = ['PACKAGE="libevoral"', 'EVORAL_MIDI_XML=1' ]
 
     if bld.env['BUILD_TESTS'] and bld.is_defined('HAVE_CPPUNIT'):
         # Static library (for unit test code coverage)
@@ -117,7 +117,7 @@ def build(bld):
             obj.linkflags      = '-lgcov'
             obj.cflags         = [ '-fprofile-arcs',  '-ftest-coverage' ]
             obj.cxxflags       = [ '-fprofile-arcs',  '-ftest-coverage' ]
-        obj.defines        = ['PACKAGE="libevoral"' ]
+        obj.defines        = ['PACKAGE="libevoral"', 'EVORAL_MIDI_XML=1' ]
 
         # Unit tests
         obj              = bld(features = 'cxx cxxprogram')
