@@ -4189,18 +4189,6 @@ Session::route_removed_from_route_group (RouteGroup* rg, boost::weak_ptr<Route> 
 	RouteRemovedFromRouteGroup (rg, r);
 }
 
-vector<SyncSource>
-Session::get_available_sync_options () const
-{
-	vector<SyncSource> ret;
-
-	ret.push_back (JACK);
-	ret.push_back (MTC);
-	ret.push_back (MIDIClock);
-
-	return ret;
-}
-
 boost::shared_ptr<RouteList>
 Session::get_routes_with_regions_at (framepos_t const p) const
 {

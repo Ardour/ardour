@@ -34,10 +34,13 @@ class RCOptionEditor : public OptionEditor
 public:
 	RCOptionEditor ();
 
+	void populate_sync_options ();
+
 private:
 	void parameter_changed (std::string const &);
 	ARDOUR::RCConfiguration* _rc_config;
 	BoolOption* _solo_control_is_listen_control;
 	ComboOption<ARDOUR::ListenPosition>* _listen_position;
 	VisibilityGroup _mixer_strip_visibility;
+	ComboOption<ARDOUR::SyncSource>* _sync_source;
 };

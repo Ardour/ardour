@@ -1019,23 +1019,44 @@ RCOptionEditor::RCOptionEditor ()
 
 	BoolOption* tsf = new BoolOption (
 		     "timecode-sync-frame-rate",
-		     _("Force Ardour's timecode rate to match an external timecode source"),
+		     _("Match session video frame rate to external timecode (when slaved to timecode)"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_timecode_sync_frame_rate),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_timecode_sync_frame_rate)
 		     );
-	tsf->set_note (_("If off, slaving to timecode will cause Ardour to chase the external timecode\nsource but it will use its own timecode frame rate"));
+	Gtkmm2ext::UI::instance()->set_tip 
+		(tsf->tip_widget(),
+		 _("This option controls the value of the video frame rate <i>while chasing</i> an external timecode source.\n\n"
+		   "When enabled, the session video frame rate will be changed to match that of the selected external timecode source.\n\n"
+		   "When not enabled, the session video frame rate will not be changed to match that of the selected external timecode source."
+		   "Instead the frame rate indication in the main clock will flash red and Ardour will convert between the external "
+		   "timecode standard and the session standard"));
+
 	add_option (_("Transport"), tsf);
 
 	tsf = new BoolOption (
 		"timecode-source-is-synced",
-		_("Timecode source shares sample clock with audio interface"),
+		_("External timecode is sync locked"),
 		sigc::mem_fun (*_rc_config, &RCConfiguration::get_timecode_source_is_synced),
 		sigc::mem_fun (*_rc_config, &RCConfiguration::set_timecode_source_is_synced)
 		);
-	Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(), 
-				    _("If on, Ardour will assume that the timecode source shares an external sync\nsource (Blackburst, Word Clock, etc.) with your audio interface."
-				      "\nThis is a preferable configuration but may not match your equipment"));
+	Gtkmm2ext::UI::instance()->set_tip 
+		(tsf->tip_widget(), 
+		 _("When enabled, indicates that the selected external timecode source shares sync (Black &amp; Burst, Wordclock, etc) with the audio interface"));
+
 	add_option (_("Transport"), tsf);
+
+	_sync_source = new ComboOption<SyncSource> (
+		"sync-source",
+		_("External timecode source"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_sync_source),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_sync_source)
+		);
+
+	populate_sync_options ();
+	parameter_changed (string ("external-sync"));
+
+	add_option (_("Timecode"), _sync_source);
+
 
 	/* EDITOR */
 
@@ -1674,5 +1695,23 @@ RCOptionEditor::parameter_changed (string const & p)
 		}
 		_solo_control_is_listen_control->set_sensitive (s);
 		_listen_position->set_sensitive (s);
+	} else if (p == "external-sync") {
+		if (_session) {
+			_sync_source->set_sensitive (!_session->config.get_external_sync ());
+		} else {
+			_sync_source->set_sensitive (false);
+		}
+	}
+}
+
+void
+RCOptionEditor::populate_sync_options ()
+{
+	vector<SyncSource> sync_opts = ARDOUR::get_available_sync_options ();
+
+	_sync_source->clear ();
+
+	for (vector<SyncSource>::iterator i = sync_opts.begin(); i != sync_opts.end(); ++i) {
+		_sync_source->add (*i, sync_source_to_string (*i));
 	}
 }

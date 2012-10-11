@@ -37,18 +37,6 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 
 	/* TIMECODE*/
 
-	_sync_source = new ComboOption<SyncSource> (
-		"sync-source",
-		_("External timecode source"),
-		sigc::mem_fun (*_session_config, &SessionConfiguration::get_sync_source),
-		sigc::mem_fun (*_session_config, &SessionConfiguration::set_sync_source)
-		);
-
-	populate_sync_options ();
-	parameter_changed (string ("external-sync"));
-
-	add_option (_("Timecode"), _sync_source);
-
 	add_option (_("Timecode"), new OptionEditorHeading (_("Timecode Settings")));
 
 	ComboOption<TimecodeFormat>* smf = new ComboOption<TimecodeFormat> (
@@ -300,25 +288,9 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 }
 
 void
-SessionOptionEditor::populate_sync_options ()
-{
-	vector<SyncSource> sync_opts = _session->get_available_sync_options ();
-
-	_sync_source->clear ();
-
-	for (vector<SyncSource>::iterator i = sync_opts.begin(); i != sync_opts.end(); ++i) {
-		_sync_source->add (*i, sync_source_to_string (*i));
-	}
-}
-
-void
 SessionOptionEditor::parameter_changed (std::string const & p)
 {
 	OptionEditor::parameter_changed (p);
-
-	if (p == "external-sync") {
-		_sync_source->set_sensitive (!_session->config.get_external_sync ());
-	}
 }
 
 /* the presence of absence of a monitor section is not really a regular session

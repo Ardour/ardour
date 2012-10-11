@@ -3500,7 +3500,7 @@ Session::config_changed (std::string p, bool ours)
 		if (!config.get_external_sync()) {
 			drop_sync_source ();
 		} else {
-			switch_to_sync_source (config.get_sync_source());
+			switch_to_sync_source (Config->get_sync_source());
 		}
 	}  else if (p == "denormal-model") {
 		setup_fpu ();

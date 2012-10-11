@@ -2106,7 +2106,7 @@ Editor::transition_to_rolling (bool fwd)
 	}
 
 	if (_session->config.get_external_sync()) {
-		switch (_session->config.get_sync_source()) {
+		switch (Config->get_sync_source()) {
 		case JACK:
 			break;
 		default:

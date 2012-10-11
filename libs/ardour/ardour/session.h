@@ -503,9 +503,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	static PBD::Signal1<void, framepos_t> StartTimeChanged;
 	static PBD::Signal1<void, framepos_t> EndTimeChanged;
 
-	std::vector<SyncSource> get_available_sync_options() const;
 	void   request_sync_source (Slave*);
-	bool   synced_to_jack() const { return config.get_external_sync() && config.get_sync_source() == JACK; }
+	bool   synced_to_jack() const { return config.get_external_sync() && Config->get_sync_source() == JACK; }
 
 	double transport_speed() const { return _transport_speed; }
 	bool   transport_stopped() const { return _transport_speed == 0.0f; }

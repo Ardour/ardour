@@ -1083,7 +1083,7 @@ AudioClock::set_timecode (framepos_t when, bool /*force*/)
 	if (_left_layout) {
 
 		if (_session->config.get_external_sync()) {
-			switch (_session->config.get_sync_source()) {
+			switch (Config->get_sync_source()) {
 			case JACK:
 				_left_layout->set_text ("JACK");
 				break;
