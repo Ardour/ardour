@@ -116,6 +116,13 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	_note_group->raise_to_top();
 	PublicEditor::DropDownKeys.connect (sigc::mem_fun (*this, &MidiRegionView::drop_down_keys));
 
+
+	MidiTimeAxisView *time_axis = dynamic_cast<MidiTimeAxisView *>(&tv);
+	if (time_axis) {
+		_last_channel_mode = time_axis->channel_selector().get_channel_mode();
+		_last_channel_selection = time_axis->channel_selector().get_selected_channels();
+	}
+
 	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&MidiRegionView::parameter_changed, this, _1), gui_context());
 	connect_to_diskstream ();
 
@@ -152,6 +159,12 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 {
 	_note_group->raise_to_top();
 	PublicEditor::DropDownKeys.connect (sigc::mem_fun (*this, &MidiRegionView::drop_down_keys));
+
+	MidiTimeAxisView *time_axis = dynamic_cast<MidiTimeAxisView *>(&tv);
+	if (time_axis) {
+		_last_channel_mode = time_axis->channel_selector().get_channel_mode();
+		_last_channel_selection = time_axis->channel_selector().get_selected_channels();
+	}
 
 	connect_to_diskstream ();
 
@@ -3247,6 +3260,7 @@ MidiRegionView::midi_channel_mode_changed(ChannelMode mode, uint16_t mask)
 	}
 
 	_last_channel_selection = mask;
+	_last_channel_mode = mode;
 
 	_patch_changes.clear ();
 	display_patch_changes ();
@@ -3700,6 +3714,14 @@ MidiRegionView::data_recorded (boost::weak_ptr<MidiSource> w)
 	for (MidiBuffer::iterator i = buf->begin(); i != buf->end(); ++i) {
 		Evoral::MIDIEvent<MidiBuffer::TimeType> const ev (*i, false);
 		assert (ev.buffer ());
+
+		if(ev.is_channel_event()) {
+			if (_last_channel_mode == FilterChannels) {
+				if(((uint16_t(1) << ev.channel()) & _last_channel_selection) == 0) {
+					continue;
+				}
+			}
+		}
 
 		/* ev.time() is in session frames, so (ev.time() - converter.origin_b()) is
 		   frames from the start of the source, and so time_beats is in terms of the

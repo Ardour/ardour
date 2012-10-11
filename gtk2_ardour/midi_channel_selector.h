@@ -81,6 +81,7 @@ public:
 	sigc::signal<void, ARDOUR::ChannelMode, uint16_t> mode_changed;
 
 	void set_channel_mode(ARDOUR::ChannelMode mode, uint16_t mask);
+	ARDOUR::ChannelMode get_channel_mode () const { return _channel_mode; }
 
 	/**
 	 * @return each bit in the returned word represents a midi channel, eg.
