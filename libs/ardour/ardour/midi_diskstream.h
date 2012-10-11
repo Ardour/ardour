@@ -105,8 +105,8 @@ class MidiDiskstream : public Diskstream
 
 	ChannelMode get_channel_mode() {
 		ChannelMode playback_mode = _playback_buf->get_channel_mode();
-		ChannelMode capture_mode  = _capture_buf->get_channel_mode();
 #ifndef NDEBUG
+		ChannelMode capture_mode  = _capture_buf->get_channel_mode();
 		assert(playback_mode == capture_mode);
 #endif
 		return playback_mode;
