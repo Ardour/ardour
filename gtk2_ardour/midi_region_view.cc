@@ -1292,7 +1292,7 @@ MidiRegionView::display_sysexes()
 		}
 		string text = str.str();
 
-		const double x = trackview.editor().frame_to_pixel(source_beats_to_absolute_frames(time));
+		const double x = trackview.editor().frame_to_pixel(source_beats_to_region_frames(time));
 
 		double height = midi_stream_view()->contents_height();
 
