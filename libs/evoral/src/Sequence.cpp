@@ -494,7 +494,7 @@ Sequence<Time>::Sequence(const Sequence<Time>& other)
 
 	for (typename SysExes::const_iterator i = other._sysexes.begin(); i != other._sysexes.end(); ++i) {
 		boost::shared_ptr<Event<Time> > n (new Event<Time> (**i, true));
-		_sysexes.push_back (n);
+		_sysexes.insert (n);
 	}
 
 	for (typename PatchChanges::const_iterator i = other._patch_changes.begin(); i != other._patch_changes.end(); ++i) {
@@ -788,6 +788,24 @@ Sequence<Time>::remove_patch_change_unlocked (const constPatchChangePtr p)
 	}
 }
 
+template<typename Time>
+void
+Sequence<Time>::remove_sysex_unlocked (const SysExPtr sysex)
+{
+	typename Sequence<Time>::SysExes::iterator i = sysex_lower_bound (sysex->time ());
+	while (i != _sysexes.end() && (*i)->time() == sysex->time()) {
+
+		typename Sequence<Time>::SysExes::iterator tmp = i;
+		++tmp;
+
+		if (*i == sysex) {
+			_sysexes.erase (i);
+		}
+
+		i = tmp;
+	}
+}
+
 /** Append \a ev to model.  NOT realtime safe.
  *
  * The timestamp of event is expected to be relative to
@@ -984,7 +1002,7 @@ Sequence<Time>::append_sysex_unlocked(const MIDIEvent<Time>& ev, event_id_t /* e
 
 	boost::shared_ptr<MIDIEvent<Time> > event(new MIDIEvent<Time>(ev, true));
 	/* XXX sysex events should use IDs */
-	_sysexes.push_back(event);
+	_sysexes.insert(event);
 }
 
 template<typename Time>
@@ -1009,6 +1027,17 @@ Sequence<Time>::add_patch_change_unlocked (PatchChangePtr p)
 	}
 
 	_patch_changes.insert (p);
+}
+
+template<typename Time>
+void
+Sequence<Time>::add_sysex_unlocked (SysExPtr s)
+{
+	if (s->id () < 0) {
+		s->set_id (Evoral::next_event_id ());
+	}
+
+	_sysexes.insert (s);
 }
 
 template<typename Time>
@@ -1102,6 +1131,17 @@ Sequence<Time>::patch_change_lower_bound (Time t) const
 	PatchChangePtr search (new PatchChange<Time> (t, 0, 0, 0));
 	typename Sequence<Time>::PatchChanges::const_iterator i = _patch_changes.lower_bound (search);
 	assert (i == _patch_changes.end() || (*i)->time() >= t);
+	return i;
+}
+
+/** Return the earliest sysex with time >= t */
+template<typename Time>
+typename Sequence<Time>::SysExes::const_iterator
+Sequence<Time>::sysex_lower_bound (Time t) const
+{
+	SysExPtr search (new Event<Time> (0, t));
+	typename Sequence<Time>::SysExes::const_iterator i = _sysexes.lower_bound (search);
+	assert (i == _sysexes.end() || (*i)->time() >= t);
 	return i;
 }
 

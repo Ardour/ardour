@@ -21,6 +21,7 @@
 
 #include "ardour_ui.h"
 
+#include "midi_region_view.h"
 #include "canvas-sysex.h"
 
 using namespace Gnome::Canvas;
@@ -32,7 +33,8 @@ CanvasSysEx::CanvasSysEx(
 		string&         text,
 		double          height,
 		double          x,
-		double          y)
+		double          y,
+		const ARDOUR::MidiModel::SysExPtr sysex)
 	: CanvasFlag(
 			region,
 			parent,
@@ -40,7 +42,8 @@ CanvasSysEx::CanvasSysEx(
 			ARDOUR_UI::config()->canvasvar_MidiSysExOutline.get(),
 			ARDOUR_UI::config()->canvasvar_MidiSysExFill.get(),
 			x,
-			y)
+			y),
+	_sysex(sysex)
 {
 	set_text(text);
 }
@@ -66,6 +69,29 @@ CanvasSysEx::on_event(GdkEvent* ev)
 			return true;
 		}
 		break;
+
+	case GDK_KEY_PRESS:
+		switch (ev->key.keyval) {
+
+		case GDK_Delete:
+		case GDK_BackSpace:
+			_region.delete_sysex (this);
+			break;
+		default:
+			break;
+		}
+		break;
+
+	case GDK_ENTER_NOTIFY:
+		grab_focus();
+		return true;
+		break;
+
+	case GDK_LEAVE_NOTIFY:
+	/* focus will transfer back via the enter-notify
+	 * event sent to the midi region view.
+	 */
+	break;
 
 	default:
 		break;

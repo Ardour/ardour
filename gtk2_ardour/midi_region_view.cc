@@ -48,6 +48,7 @@
 #include "canvas-hit.h"
 #include "canvas-note.h"
 #include "canvas_patch_change.h"
+#include "canvas-sysex.h"
 #include "debug.h"
 #include "editor.h"
 #include "editor_drag.h"
@@ -1296,7 +1297,7 @@ MidiRegionView::display_sysexes()
 		double height = midi_stream_view()->contents_height();
 
 		boost::shared_ptr<CanvasSysEx> sysex = boost::shared_ptr<CanvasSysEx>(
-			new CanvasSysEx(*this, *_note_group, text, height, x, 1.0));
+			new CanvasSysEx(*this, *_note_group, text, height, x, 1.0, (*i)));
 
 		// Show unless message is beyond the region bounds
 		if (time - _region->start() >= _region->length() || time < _region->start()) {
@@ -3752,6 +3753,18 @@ MidiRegionView::edit_patch_change (ArdourCanvas::CanvasPatchChange* pc)
 	change_patch_change (pc->patch(), d.patch ());
 }
 
+void
+MidiRegionView::delete_sysex (CanvasSysEx* sysex)
+{
+	cerr << "about to delete sysex " << sysex->sysex() << endl;
+
+	MidiModel::SysExDiffCommand* c = _model->new_sysex_diff_command (_("delete sysex"));
+	c->remove (sysex->sysex());
+	_model->apply_command (*trackview.session(), c);
+
+	_sys_exes.clear ();
+	display_sysexes();
+}
 
 void
 MidiRegionView::show_verbose_cursor (boost::shared_ptr<NoteType> n) const

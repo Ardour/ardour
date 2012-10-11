@@ -19,27 +19,27 @@ class CanvasFlag : public Group
 {
 public:
 	CanvasFlag (MidiRegionView& region,
-		    Group&          parent,
-		    double          height,
-		    guint           outline_color_rgba = 0xc0c0c0ff,
-		    guint           fill_color_rgba = 0x07070707,
-		    double          x = 0.0,
-		    double          y = 0.0);
+	            Group&          parent,
+	            double         height,
+	            guint           outline_color_rgba = 0xc0c0c0ff,
+	            guint           fill_color_rgba = 0x07070707,
+	            double         x = 0.0,
+	            double         y = 0.0);
 
 	virtual ~CanvasFlag();
 
 	virtual void set_text(const std::string& a_text);
 	virtual void set_height (double);
 
-        int width () const { return name_pixbuf_width + 10.0; }
-    
+	int width () const { return name_pixbuf_width + 10.0; }
+
 protected:
 	ArdourCanvas::Pixbuf* _name_pixbuf;
 	double           _height;
 	guint            _outline_color_rgba;
 	guint            _fill_color_rgba;
 	MidiRegionView&  _region;
-        int name_pixbuf_width;
+	int name_pixbuf_width;
 
 private:
 	void delete_allocated_objects();

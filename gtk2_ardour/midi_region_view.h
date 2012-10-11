@@ -145,6 +145,8 @@ public:
 	void delete_patch_change (ArdourCanvas::CanvasPatchChange *);
 	void edit_patch_change (ArdourCanvas::CanvasPatchChange *);
 
+	void delete_sysex (ArdourCanvas::CanvasSysEx*);
+
 	/** Alter a given patch to be its predecessor in the MIDNAM file.
 	 */
 	void previous_patch (ArdourCanvas::CanvasPatchChange &);
