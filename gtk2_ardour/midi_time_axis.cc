@@ -222,17 +222,23 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	ARDOUR_UI::instance()->set_tip (_custom_device_mode_selector, _("External Device Mode"));
 
 	_midi_controls_box.set_homogeneous(false);
-
+	_midi_controls_box.set_border_width (10);
 	if (!patch_manager.all_models().empty()) {
-		_midi_controls_box.resize(3, 3);
-		_midi_controls_box.set_border_width (5);
-		_midi_controls_box.attach(_channel_selector, 1, 2, 0, 1);
-		_midi_controls_box.attach(*(new Label("  ", false)), 0, 1, 1, 2);
-		_midi_controls_box.attach(*(new Label("  ", false)), 2, 3, 1, 2);
-		_midi_controls_box.attach(_model_selector, 1, 2, 1, 2);
+		_channel_selector.set_border_width(2);
+		_midi_controls_box.resize(3, 2);
+		_midi_controls_box.attach(_channel_selector, 0, 2, 0, 1);
+
+		_midi_controls_box.attach(*manage(new HSeparator()), 0, 2, 1, 2);
+
+		_model_selector.set_size_request(22, 30);
+		_model_selector.set_border_width(2);
+		_midi_controls_box.attach(_model_selector, 0, 1, 2, 3);
+
+		_custom_device_mode_selector.set_size_request(10, 30);
+		_custom_device_mode_selector.set_border_width(2);
 		_midi_controls_box.attach(_custom_device_mode_selector, 1, 2, 2, 3);
 	} else {
-		_midi_controls_box.attach(_channel_selector, 1, 2, 0, 1);
+		_midi_controls_box.attach(_channel_selector, 0, 1, 0, 1);
 	}
 
 	controls_vbox.pack_start(_midi_controls_box, false, false);
