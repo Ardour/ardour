@@ -45,6 +45,7 @@ CanvasSysEx::CanvasSysEx(
 			y),
 	_sysex(sysex)
 {
+	_text = text;
 	set_text(text);
 }
 
@@ -83,14 +84,13 @@ CanvasSysEx::on_event(GdkEvent* ev)
 		break;
 
 	case GDK_ENTER_NOTIFY:
-		grab_focus();
+		_region.sysex_entered (this);
 		return true;
 		break;
 
 	case GDK_LEAVE_NOTIFY:
-	/* focus will transfer back via the enter-notify
-	 * event sent to the midi region view.
-	 */
+		_region.sysex_left (this);
+		return true;
 	break;
 
 	default:

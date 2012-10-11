@@ -3173,6 +3173,24 @@ MidiRegionView::patch_left (ArdourCanvas::CanvasPatchChange *)
 }
 
 void
+MidiRegionView::sysex_entered (ArdourCanvas::CanvasSysEx* p)
+{
+	ostringstream s;
+	s << p->text();
+	show_verbose_cursor (s.str(), 10, 20);
+	p->grab_focus();
+}
+
+void
+MidiRegionView::sysex_left (ArdourCanvas::CanvasSysEx *)
+{
+	trackview.editor().verbose_cursor()->hide ();
+	/* focus will transfer back via the enter-notify event sent to this
+	 * midi region view.
+	 */
+}
+
+void
 MidiRegionView::note_mouse_position (float x_fraction, float /*y_fraction*/, bool can_set_cursor)
 {
 	Editor* editor = dynamic_cast<Editor*>(&trackview.editor());
@@ -3756,8 +3774,6 @@ MidiRegionView::edit_patch_change (ArdourCanvas::CanvasPatchChange* pc)
 void
 MidiRegionView::delete_sysex (CanvasSysEx* sysex)
 {
-	cerr << "about to delete sysex " << sysex->sysex() << endl;
-
 	MidiModel::SysExDiffCommand* c = _model->new_sysex_diff_command (_("delete sysex"));
 	c->remove (sysex->sysex());
 	_model->apply_command (*trackview.session(), c);

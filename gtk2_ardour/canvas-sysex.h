@@ -45,11 +45,14 @@ public:
 	virtual ~CanvasSysEx();
 
 	const ARDOUR::MidiModel::SysExPtr sysex() const { return _sysex; }
+	const string text() const { return _text; }
 
 	virtual bool on_event(GdkEvent* ev);
 
 private:
 	const ARDOUR::MidiModel::SysExPtr _sysex;
+
+	string _text;
 };
 
 } // namespace Canvas

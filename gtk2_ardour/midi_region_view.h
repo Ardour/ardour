@@ -185,6 +185,8 @@ public:
 	void   note_left(ArdourCanvas::CanvasNoteEvent* ev);
 	void   patch_entered (ArdourCanvas::CanvasPatchChange *);
 	void   patch_left (ArdourCanvas::CanvasPatchChange *);
+	void   sysex_entered (ArdourCanvas::CanvasSysEx* p);
+	void   sysex_left (ArdourCanvas::CanvasSysEx* p);
 	void   note_mouse_position (float xfraction, float yfraction, bool can_set_cursor=true);
 	void   unique_select(ArdourCanvas::CanvasNoteEvent* ev);
 	void   note_selected(ArdourCanvas::CanvasNoteEvent* ev, bool add, bool extend=false);
