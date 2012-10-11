@@ -43,4 +43,8 @@ private:
 	ComboOption<ARDOUR::ListenPosition>* _listen_position;
 	VisibilityGroup _mixer_strip_visibility;
 	ComboOption<ARDOUR::SyncSource>* _sync_source;
+        BoolOption* _sync_framerate;
+        BoolOption* _sync_genlock;
+
+        PBD::ScopedConnection parameter_change_connection;
 };

@@ -959,91 +959,78 @@ RCOptionEditor::RCOptionEditor ()
 
 	/* TRANSPORT */
 
-	add_option (_("Transport"),
-	     new BoolOption (
+	BoolOption* tsf;
+
+	tsf = new BoolOption (
 		     "latched-record-enable",
 		     _("Keep record-enable engaged on stop"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_latched_record_enable),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_latched_record_enable)
-		     ));
+		     );
+	// Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(), _(""));
+	add_option (_("Transport"), tsf);
 
-	add_option (_("Transport"),
-	     new BoolOption (
+	tsf = new BoolOption (
 		     "stop-recording-on-xrun",
 		     _("Stop recording when an xrun occurs"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_stop_recording_on_xrun),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_stop_recording_on_xrun)
-		     ));
+		     );
+	Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(), _("<b>When enabled</b> Ardour will stop recording if an over- or underrun is detected by the audio engine"));
+	add_option (_("Transport"), tsf);
 
-	add_option (_("Transport"),
-	     new BoolOption (
+	tsf = new BoolOption (
 		     "create-xrun-marker",
 		     _("Create markers where xruns occur"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_create_xrun_marker),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_create_xrun_marker)
-		     ));
+		     );
+	// Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(), _(""));
+	add_option (_("Transport"), tsf);
 
-	add_option (_("Transport"),
-	     new BoolOption (
+	tsf = new BoolOption (
 		     "stop-at-session-end",
 		     _("Stop at the end of the session"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_stop_at_session_end),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_stop_at_session_end)
-		     ));
+		     );
+	Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(), _("<b>When enabled</b> if Ardour is <b>not recording</b>, it will stop the transport "
+						   "when it reaches the current session end marker\n\n"
+						   "<b>When disabled</b> Ardour will continue to roll past the session end marker at all times"));
+	add_option (_("Transport"), tsf);
 
-	add_option (_("Transport"),
-	     new BoolOption (
+	tsf = new BoolOption (
 		     "seamless-loop",
 		     _("Do seamless looping (not possible when slaved to MTC, JACK etc)"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_seamless_loop),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_seamless_loop)
-		     ));
+		     );
+	Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(), _("<b>When enabled</b> this will loop by reading ahead and wrapping around at the loop point, "
+						   "preventing any need to do a transport locate at the end of the loop\n\n"
+						   "<b>When disabled</b> looping is done by locating back to the start of the loop when Ardour reaches the end "
+						   "which will often cause a small click or delay"));
+	add_option (_("Transport"), tsf);
 
-	add_option (_("Transport"),
-	     new BoolOption (
+	tsf = new BoolOption (
 		     "disable-disarm-during-roll",
 		     _("Disable per-track record disarm while rolling"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_disable_disarm_during_roll),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_disable_disarm_during_roll)
-		     ));
+		     );
+	Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(), _("<b>When enabled</b> this will prevent you from accidentally stopping specific tracks recording during a take"));
+	add_option (_("Transport"), tsf);
 
-	add_option (_("Transport"),
-	     new BoolOption (
+	tsf = new BoolOption (
 		     "quieten_at_speed",
 		     _("12dB gain reduction during fast-forward and fast-rewind"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_quieten_at_speed),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_quieten_at_speed)
-		     ));
+		     );
+	Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(), _("This will reduce the unpleasant increase in perceived volume "
+						   "that occurs when fast-forwarding or rewinding through some kinds of audio"));
+	add_option (_("Transport"), tsf);
 
 	add_option (_("Transport"), new OptionEditorHeading (S_("Sync/Slave")));
-
-	BoolOption* tsf = new BoolOption (
-		     "timecode-sync-frame-rate",
-		     _("Match session video frame rate to external timecode (when slaved to timecode)"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_timecode_sync_frame_rate),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_timecode_sync_frame_rate)
-		     );
-	Gtkmm2ext::UI::instance()->set_tip 
-		(tsf->tip_widget(),
-		 _("This option controls the value of the video frame rate <i>while chasing</i> an external timecode source.\n\n"
-		   "When enabled, the session video frame rate will be changed to match that of the selected external timecode source.\n\n"
-		   "When not enabled, the session video frame rate will not be changed to match that of the selected external timecode source."
-		   "Instead the frame rate indication in the main clock will flash red and Ardour will convert between the external "
-		   "timecode standard and the session standard"));
-
-	add_option (_("Transport"), tsf);
-
-	tsf = new BoolOption (
-		"timecode-source-is-synced",
-		_("External timecode is sync locked"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_timecode_source_is_synced),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_timecode_source_is_synced)
-		);
-	Gtkmm2ext::UI::instance()->set_tip 
-		(tsf->tip_widget(), 
-		 _("When enabled, indicates that the selected external timecode source shares sync (Black &amp; Burst, Wordclock, etc) with the audio interface"));
-
-	add_option (_("Transport"), tsf);
 
 	_sync_source = new ComboOption<SyncSource> (
 		"sync-source",
@@ -1053,10 +1040,37 @@ RCOptionEditor::RCOptionEditor ()
 		);
 
 	populate_sync_options ();
-	parameter_changed (string ("external-sync"));
+	add_option (_("Transport"), _sync_source);
 
-	add_option (_("Timecode"), _sync_source);
+	_sync_framerate = new BoolOption (
+		     "timecode-sync-frame-rate",
+		     _("Match session video frame rate to external timecode"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_timecode_sync_frame_rate),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_timecode_sync_frame_rate)
+		     );
+	Gtkmm2ext::UI::instance()->set_tip 
+		(_sync_framerate->tip_widget(),
+		 _("This option controls the value of the video frame rate <i>while chasing</i> an external timecode source.\n\n"
+		   "<b>When enabled</b>, the session video frame rate will be changed to match that of the selected external timecode source.\n\n"
+		   "<b>When disabled</b>, the session video frame rate will not be changed to match that of the selected external timecode source."
+		   "Instead the frame rate indication in the main clock will flash red and Ardour will convert between the external "
+		   "timecode standard and the session standard"));
 
+	add_option (_("Transport"), _sync_framerate);
+
+	_sync_genlock = new BoolOption (
+		"timecode-source-is-synced",
+		_("External timecode is sync locked"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_timecode_source_is_synced),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_timecode_source_is_synced)
+		);
+	Gtkmm2ext::UI::instance()->set_tip 
+		(_sync_genlock->tip_widget(), 
+		 _("<b>When enabled</b>, indicates that the selected external timecode source shares sync (Black &amp; Burst, Wordclock, etc) with the audio interface"));
+
+	add_option (_("Transport"), _sync_genlock);
+
+	parameter_changed ("sync-source");
 
 	/* EDITOR */
 
@@ -1695,11 +1709,13 @@ RCOptionEditor::parameter_changed (string const & p)
 		}
 		_solo_control_is_listen_control->set_sensitive (s);
 		_listen_position->set_sensitive (s);
-	} else if (p == "external-sync") {
-		if (_session) {
-			_sync_source->set_sensitive (!_session->config.get_external_sync ());
+	} else if (p == "sync-source") {
+		if (Config->get_sync_source() != ARDOUR::MTC) {
+			_sync_genlock->set_sensitive (false);
+			_sync_framerate->set_sensitive (false);
 		} else {
-			_sync_source->set_sensitive (false);
+			_sync_genlock->set_sensitive (true);
+			_sync_framerate->set_sensitive (true);
 		}
 	}
 }
