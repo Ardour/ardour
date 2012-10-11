@@ -201,7 +201,6 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		}
 	}
 
-	HBox* midi_controls_hbox = manage(new HBox());
 
 	MIDI::Name::MidiPatchManager& patch_manager = MIDI::Name::MidiPatchManager::instance();
 
@@ -222,14 +221,19 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	ARDOUR_UI::instance()->set_tip (_model_selector, _("External MIDI Device"));
 	ARDOUR_UI::instance()->set_tip (_custom_device_mode_selector, _("External Device Mode"));
 
-	midi_controls_hbox->pack_start(_channel_selector, true, false);
-	if (!patch_manager.all_models().empty()) {
-		_midi_controls_box.set_border_width (5);
-		_midi_controls_box.pack_start(_model_selector, true, false);
-		_midi_controls_box.pack_start(_custom_device_mode_selector, true, false);
-	}
+	_midi_controls_box.set_homogeneous(false);
 
-	_midi_controls_box.pack_start(*midi_controls_hbox, true, true);
+	if (!patch_manager.all_models().empty()) {
+		_midi_controls_box.resize(3, 3);
+		_midi_controls_box.set_border_width (5);
+		_midi_controls_box.attach(_channel_selector, 1, 2, 0, 1);
+		_midi_controls_box.attach(*(new Label("  ", false)), 0, 1, 1, 2);
+		_midi_controls_box.attach(*(new Label("  ", false)), 2, 3, 1, 2);
+		_midi_controls_box.attach(_model_selector, 1, 2, 1, 2);
+		_midi_controls_box.attach(_custom_device_mode_selector, 1, 2, 2, 3);
+	} else {
+		_midi_controls_box.attach(_channel_selector, 1, 2, 0, 1);
+	}
 
 	controls_vbox.pack_start(_midi_controls_box, false, false);
 
