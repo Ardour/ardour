@@ -253,3 +253,9 @@ LTC_Slave::apparent_timecode_format () const
 	/* XXX to be computed, determined from incoming stream */
 	return timecode_25;
 }
+
+std::string 
+LTC_Slave::approximate_current_position() const
+{
+	return "88:88:88:88";
+}

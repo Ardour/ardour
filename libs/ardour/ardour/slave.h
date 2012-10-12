@@ -230,6 +230,13 @@ class TimecodeSlave : public Slave {
     TimecodeSlave () {}
 
     virtual Timecode::TimecodeFormat apparent_timecode_format() const = 0;
+
+    /* this is intended to be used by a UI and polled from a timeout. it should
+       return a string describing the current position of the TC source. it 
+       should NOT do any computation, but should use a cached value
+       of the TC source position.
+    */
+    virtual std::string approximate_current_position() const = 0;
 };
 
 class MTC_Slave : public TimecodeSlave {
@@ -250,6 +257,7 @@ class MTC_Slave : public TimecodeSlave {
 	bool give_slave_full_control_over_transport_speed() const;
 
         Timecode::TimecodeFormat apparent_timecode_format() const;
+        std::string approximate_current_position() const;
 
   private:
 	Session&    session;
@@ -325,6 +333,7 @@ public:
 	bool give_slave_full_control_over_transport_speed() const;
 
         Timecode::TimecodeFormat apparent_timecode_format() const;
+        std::string approximate_current_position() const;
 
   private:
 	int parse_ltc(const jack_nframes_t, const jack_default_audio_sample_t * const, const framecnt_t);

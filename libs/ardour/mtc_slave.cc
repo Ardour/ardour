@@ -626,3 +626,9 @@ MTC_Slave::apparent_timecode_format () const
 {
 	return mtc_timecode;
 }
+
+std::string 
+MTC_Slave::approximate_current_position() const
+{
+	return "88:88:88:88";
+}

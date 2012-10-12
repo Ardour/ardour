@@ -73,6 +73,7 @@
 #include "ardour/session_route.h"
 #include "ardour/session_state_utils.h"
 #include "ardour/session_utils.h"
+#include "ardour/slave.h"
 
 #include "timecode/time.h"
 
@@ -1105,8 +1106,17 @@ ARDOUR_UI::update_timecode_format ()
 	char buf[64];
 
 	if (_session) {
+		bool matching;
+		TimecodeSlave* tcslave;
+
+		if ((tcslave = dynamic_cast<TimecodeSlave*>(_session->slave())) != 0) {
+			matching = (tcslave->apparent_timecode_format() == _session->config.get_timecode_format());
+		} else {
+			matching = true;
+		}
+			
 		snprintf (buf, sizeof (buf), S_("Timecode|TC: <span foreground=\"%s\">%sfps</span>"), 
-			  rand() % 2 ? X_("red") : X_("green"), 
+			  matching ? X_("red") : X_("green"),
 			  Timecode::timecode_format_name (_session->config.get_timecode_format()).c_str());
 	} else {
 		snprintf (buf, sizeof (buf), "TC: n/a");

@@ -1119,6 +1119,7 @@ Session::process_event (SessionEvent* ev)
 		break;
 
 	case SessionEvent::SetSyncSource:
+		DEBUG_TRACE (DEBUG::Slave, "seen request for new slave\n");
 		use_sync_source (ev->slave);
 		break;
 

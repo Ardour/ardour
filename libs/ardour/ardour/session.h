@@ -800,6 +800,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	};
 
 	SlaveState slave_state() const { return _slave_state; }
+        Slave* slave() const { return _slave; }
 
 	boost::shared_ptr<SessionPlaylists> playlists;
 

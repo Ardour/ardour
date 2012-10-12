@@ -30,10 +30,11 @@
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/rgb_macros.h"
 
-#include "ardour/types.h"
-#include "ardour/session.h"
-#include "ardour/tempo.h"
 #include "ardour/profile.h"
+#include "ardour/session.h"
+#include "ardour/slave.h"
+#include "ardour/tempo.h"
+#include "ardour/types.h"
 
 #include "ardour_ui.h"
 #include "audio_clock.h"
@@ -150,6 +151,7 @@ AudioClock::set_font ()
 	Glib::RefPtr<Gtk::Style> style = get_style ();
 	Pango::FontDescription font; 
 	Pango::AttrFontDesc* font_attr;
+	uint32_t font_size;
 
 	if (!is_realized()) {
 		font = get_font_for_style (get_name());
@@ -157,19 +159,30 @@ AudioClock::set_font ()
 		font = style->get_font();
 	}
 
-	font_attr = new Pango::AttrFontDesc (Pango::Attribute::create_attr_font_desc (font));
+	font_size = font.get_size();
 
+	font_attr = new Pango::AttrFontDesc (Pango::Attribute::create_attr_font_desc (font));
+	
 	normal_attributes.change (*font_attr);
 	editing_attributes.change (*font_attr);
 
 	/* now a smaller version of the same font */
 
 	delete font_attr;
-	font.set_size ((int) lrint (font.get_size() * info_font_scale_factor));
+	font.set_size ((int) lrint (font_size * info_font_scale_factor));
 	font.set_weight (Pango::WEIGHT_NORMAL);
 	font_attr = new Pango::AttrFontDesc (Pango::Attribute::create_attr_font_desc (font));
  
 	info_attributes.change (*font_attr);
+
+	/* and an even smaller one */
+
+	delete font_attr;
+	font.set_size ((int) lrint (font_size * info_font_scale_factor * 0.75));
+	font.set_weight (Pango::WEIGHT_BOLD);
+	font_attr = new Pango::AttrFontDesc (Pango::Attribute::create_attr_font_desc (font));
+ 
+	small_info_attributes.change (*font_attr);
 	
 	delete font_attr;
 
@@ -250,6 +263,7 @@ AudioClock::set_colors ()
 	
 	normal_attributes.change (*foreground_attr);
 	info_attributes.change (*foreground_attr);
+	small_info_attributes.change (*foreground_attr);
 	editing_attributes.change (*foreground_attr);
 	editing_attributes.change (*editing_attr);
 
@@ -260,8 +274,13 @@ AudioClock::set_colors ()
 	}
 
 	if (_left_layout) {
-		_left_layout->set_attributes (info_attributes);
-		_right_layout->set_attributes (info_attributes);
+		if (_mode == Timecode) {
+			_left_layout->set_attributes (small_info_attributes);
+			_right_layout->set_attributes (small_info_attributes);
+		} else {
+			_left_layout->set_attributes (info_attributes);
+			_right_layout->set_attributes (info_attributes);
+		}
 	}
 
 	queue_draw ();
@@ -919,7 +938,12 @@ AudioClock::set (framepos_t when, bool force, framecnt_t offset)
 	} 
 
 	if (when == last_when && !force) {
-		return;
+		if (_mode != Timecode) {
+			/* timecode may need to force display of TC source
+			 * time, so don't return early.
+			 */
+			return;
+		}
 	}
 
 	if (!editing) {
@@ -1083,25 +1107,35 @@ AudioClock::set_timecode (framepos_t when, bool /*force*/)
 	if (_left_layout) {
 
 		if (_session->config.get_external_sync()) {
+			Slave* slave = _session->slave();
+
 			switch (Config->get_sync_source()) {
 			case JACK:
 				_left_layout->set_text ("JACK");
 				break;
 			case MTC:
-				_left_layout->set_text ("MTC");
+				if (slave) {
+					_left_layout->set_text (string_compose ("MTC %1", dynamic_cast<TimecodeSlave*>(slave)->approximate_current_position()));
+				} else {
+					_left_layout->set_text ("MTC --pending--");
+				}
 				break;
 			case MIDIClock:
 				_left_layout->set_text ("M-Clock");
 				break;
 			case LTC:
-				_left_layout->set_text ("LTC");
+				if (slave) {
+					_left_layout->set_text (string_compose ("LTC %1", dynamic_cast<TimecodeSlave*>(slave)->approximate_current_position()));
+				} else {
+					_left_layout->set_text ("LTC --pending--");
+				}
 				break;
 			}
 		} else {
 			_left_layout->set_text ("INT");
 		}
 
-		_right_layout->set_text ("TBDiscussed");
+		_right_layout->set_text ("77:77:77:77");
 	}
 }
 
@@ -1984,7 +2018,7 @@ AudioClock::set_mode (Mode m)
 
 	switch (_mode) {
 	case Timecode:
-		mode_based_info_ratio = 0.5;
+		mode_based_info_ratio = 0.57; // trial and error, could be affected by font metrics
 		insert_map.push_back (11);
 		insert_map.push_back (10);
 		insert_map.push_back (8);
@@ -2024,6 +2058,16 @@ AudioClock::set_mode (Mode m)
 	case Frames:
 		mode_based_info_ratio = 0.5;
 		break;
+	}
+
+	if (_left_layout) {
+		if (_mode == Timecode) {
+			_left_layout->set_attributes (small_info_attributes);
+			_right_layout->set_attributes (small_info_attributes);
+		} else {
+			_left_layout->set_attributes (info_attributes);
+			_right_layout->set_attributes (info_attributes);
+		}
 	}
 
 	set (last_when, true);

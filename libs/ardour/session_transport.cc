@@ -99,6 +99,7 @@ Session::request_sync_source (Slave* new_slave)
 	_was_seamless = seamless;
 
 	ev->slave = new_slave;
+	DEBUG_TRACE (DEBUG::Slave, "sent request for new slave\n");
 	queue_event (ev);
 }
 
@@ -1322,6 +1323,8 @@ Session::use_sync_source (Slave* new_slave)
 
 	delete _slave;
 	_slave = new_slave;
+
+	DEBUG_TRACE (DEBUG::Slave, string_compose ("set new slave to %1\n", _slave));
 
 	send_full_time_code (_transport_frame);
 
