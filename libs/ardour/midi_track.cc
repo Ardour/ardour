@@ -196,10 +196,8 @@ MidiTrack::state(bool full_state)
 		root.add_child_nocopy (*freeze_node);
 	}
 
-	root.add_property (X_("note-mode"), enum_2_string (_note_mode));
-
-	root.add_property ("step-editing", (_step_editing ? "yes" : "no"));
 	root.add_property ("note-mode", enum_2_string (_note_mode));
+	root.add_property ("step-editing", (_step_editing ? "yes" : "no"));
 	root.add_property ("input-active", (_input_active ? "yes" : "no"));
 
 	return root;
