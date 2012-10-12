@@ -30,7 +30,6 @@
 #include "ardour/slave.h"
 #include "ardour/session.h"
 #include "ardour/audioengine.h"
-#include "ardour/pi_controller.h"
 
 #include "i18n.h"
 
@@ -561,6 +560,7 @@ MTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 		pos = last.position;
 		session.request_locate (pos, false);
 		session.request_transport_speed (0);
+		engine_dll_initstate = 0;
 		queue_reset (false);
 		DEBUG_TRACE (DEBUG::MTC, "MTC not seen for 2 frames - reset pending\n");
 		return false;
@@ -608,7 +608,12 @@ MTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 	 * engine-DLL can oscillate back before 0.
 	 * also see note in MTC_Slave::init_engine_dll
 	 */
-	if (pos <0) queue_reset(true);
+	if (!session.actively_recording()
+	    && ( (pos < 0) || (labs(pos - sess_pos) > 4 * resolution()) )
+	    ) {
+		engine_dll_initstate = 0;
+		queue_reset (false);
+	}
 
 	DEBUG_TRACE (DEBUG::MTC, string_compose ("MTCsync spd: %1 pos: %2 | last-pos: %3 elapsed: %4 delta: %5\n",
 						 speed, pos, last.position, elapsed,  pos - sess_pos));
