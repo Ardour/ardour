@@ -100,6 +100,10 @@ Session::sync_time_vars ()
 void
 Session::timecode_to_sample( Timecode::Time& timecode, framepos_t& sample, bool use_offset, bool use_subframes ) const
 {
+	double my_frames_per_timecode_frame = _frames_per_timecode_frame;
+	if (timecode.rate > 0) {
+		my_frames_per_timecode_frame = (double) _current_frame_rate / (double) timecode.rate;
+	}
 
 	if (timecode.drop) {
 		// The drop frame format was created to better approximate the 30000/1001 = 29.97002997002997....
@@ -142,13 +146,13 @@ Session::timecode_to_sample( Timecode::Time& timecode, framepos_t& sample, bool 
 		//  Per Sigmond <per@sigmond.no>
 
 		// Samples inside time dividable by 10 minutes (real time accurate)
-		framecnt_t base_samples = (framecnt_t) (((timecode.hours * 107892) + ((timecode.minutes / 10) * 17982)) * _frames_per_timecode_frame);
+		framecnt_t base_samples = (framecnt_t) (((timecode.hours * 107892) + ((timecode.minutes / 10) * 17982)) * my_frames_per_timecode_frame);
 
 		// Samples inside time exceeding the nearest 10 minutes (always offset, see above)
 		int32_t exceeding_df_minutes = timecode.minutes % 10;
 		int32_t exceeding_df_seconds = (exceeding_df_minutes * 60) + timecode.seconds;
 		int32_t exceeding_df_frames = (30 * exceeding_df_seconds) + timecode.frames - (2 * exceeding_df_minutes);
-		framecnt_t exceeding_samples = (framecnt_t) rint(exceeding_df_frames * _frames_per_timecode_frame);
+		framecnt_t exceeding_samples = (framecnt_t) rint(exceeding_df_frames * my_frames_per_timecode_frame);
 		sample = base_samples + exceeding_samples;
 	} else {
 		/*
@@ -158,11 +162,11 @@ Session::timecode_to_sample( Timecode::Time& timecode, framepos_t& sample, bool 
 		   frame_rate() in the non-integer Timecode rate case.
 		*/
 
-		sample = (framecnt_t)rint((((timecode.hours * 60 * 60) + (timecode.minutes * 60) + timecode.seconds) * (rint(timecode.rate) * _frames_per_timecode_frame)) + (timecode.frames * _frames_per_timecode_frame));
+		sample = (framecnt_t)rint((((timecode.hours * 60 * 60) + (timecode.minutes * 60) + timecode.seconds) * (rint(timecode.rate) * my_frames_per_timecode_frame)) + (timecode.frames * my_frames_per_timecode_frame));
 	}
 
 	if (use_subframes) {
-		sample += (int32_t) (((double)timecode.subframes * _frames_per_timecode_frame) / config.get_subframes_per_frame());
+		sample += (int32_t) (((double)timecode.subframes * my_frames_per_timecode_frame) / config.get_subframes_per_frame());
 	}
 
 	if (use_offset) {

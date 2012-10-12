@@ -260,6 +260,8 @@ class MTC_Slave : public Slave {
 	int            busy_guard1;
 	int            busy_guard2;
 
+	double         speedup_due_to_tc_mismatch;
+	double         quarter_frame_duration;
 	Timecode::TimecodeFormat mtc_timecode;
 	Timecode::TimecodeFormat a3e_timecode;
 	bool           printed_timecode_warning;
