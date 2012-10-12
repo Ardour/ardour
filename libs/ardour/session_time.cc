@@ -50,105 +50,19 @@ Session::bbt_time (framepos_t when, Timecode::BBT_Time& bbt)
 }
 
 /* Timecode TIME */
+
 float
 Session::timecode_frames_per_second() const
 {
-	switch (config.get_timecode_format()) {
-		case timecode_23976:
-			return 23.976;
-
-			break;
-		case timecode_24:
-			return 24;
-
-			break;
-		case timecode_24976:
-			return 24.976;
-
-			break;
-		case timecode_25:
-			return 25;
-
-			break;
-		case timecode_2997:
-			return 29.97;
-
-			break;
-		case timecode_2997drop:
-			return 29.97;
-
-			break;
-		case timecode_30:
-			return 30;
-
-			break;
-		case timecode_30drop:
-			return 30;
-
-			break;
-		case timecode_5994:
-			return 59.94;
-
-			break;
-		case timecode_60:
-			return 60;
-
-			break;
-	        default:
-		  cerr << "Editor received unexpected timecode type" << endl;
-	}
-	return 30.0;
+	return Timecode::timecode_to_frames_per_second (config.get_timecode_format());
 }
+
 bool
 Session::timecode_drop_frames() const
 {
-	switch (config.get_timecode_format()) {
-		case timecode_23976:
-			return false;
-
-			break;
-		case timecode_24:
-			return false;
-
-			break;
-		case timecode_24976:
-			return false;
-
-			break;
-		case timecode_25:
-			return false;
-
-			break;
-		case timecode_2997:
-			return false;
-
-			break;
-		case timecode_2997drop:
-			return true;
-
-			break;
-		case timecode_30:
-			return false;
-
-			break;
-		case timecode_30drop:
-			return true;
-
-			break;
-		case timecode_5994:
-			return false;
-
-			break;
-		case timecode_60:
-			return false;
-
-			break;
-	        default:
-			error << "Editor received unexpected timecode type" << endmsg;
-	}
-
-	return false;
+	return Timecode::timecode_has_drop_frames(config.get_timecode_format());
 }
+
 void
 Session::sync_time_vars ()
 {

@@ -252,7 +252,7 @@ class MTC_Slave : public Slave {
 	framepos_t     window_end;
 	framepos_t     first_mtc_timestamp;
 	bool           did_reset_tc_format;
-	TimecodeFormat saved_tc_format;
+	Timecode::TimecodeFormat saved_tc_format;
 	Glib::Threads::Mutex    reset_lock;
 	uint32_t       reset_pending;
 	bool           reset_position;
@@ -260,8 +260,8 @@ class MTC_Slave : public Slave {
 	int            busy_guard1;
 	int            busy_guard2;
 
-	TimecodeFormat mtc_timecode;
-	TimecodeFormat a3e_timecode;
+	Timecode::TimecodeFormat mtc_timecode;
+	Timecode::TimecodeFormat a3e_timecode;
 	bool           printed_timecode_warning;
 
 	/* DLL - chase MTC */

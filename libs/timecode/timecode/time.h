@@ -32,6 +32,19 @@ enum Wrap {
 	HOURS
 };
 
+enum TimecodeFormat {
+	timecode_23976,
+	timecode_24,
+	timecode_24976,
+	timecode_25,
+	timecode_2997,
+	timecode_2997drop,
+	timecode_30,
+	timecode_30drop,
+	timecode_5994,
+	timecode_60
+};
+
 struct Time {
 	bool         negative;
 	uint32_t     hours;
@@ -83,6 +96,9 @@ void frames_floor (Time& timecode);
 void seconds_floor (Time& timecode);
 void minutes_floor (Time& timecode);
 void hours_floor (Time& timecode);
+
+float timecode_to_frames_per_second(TimecodeFormat const t);
+bool timecode_has_drop_frames(TimecodeFormat const t);
 
 } // namespace Timecode
 

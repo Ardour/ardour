@@ -423,6 +423,108 @@ hours_floor(Time& timecode)
 	}
 }
 
+float
+timecode_to_frames_per_second(TimecodeFormat t)
+{
+	switch (t) {
+		case timecode_23976:
+			return (24000.0/1001.0); //23.976;
+
+			break;
+		case timecode_24:
+			return 24;
+
+			break;
+		case timecode_24976:
+			return (25000.0/1001.0); //24.976;
+
+			break;
+		case timecode_25:
+			return 25;
+
+			break;
+		case timecode_2997:
+			return 29.97;
+
+			break;
+		case timecode_2997drop:
+			return (30000.0/1001.0); //29.97;
+
+			break;
+		case timecode_30:
+			return 30;
+
+			break;
+		case timecode_30drop:
+			return 30;
+
+			break;
+		case timecode_5994:
+			return (60000.0/1001.0); //59.94;
+
+			break;
+		case timecode_60:
+			return 60;
+
+			break;
+	        default:
+			//std::cerr << "Editor received unexpected timecode type" << std::endl;
+			break;
+	}
+	return 30.0;
+}
+
+bool
+timecode_has_drop_frames(TimecodeFormat t)
+{
+	switch (t) {
+		case timecode_23976:
+			return false;
+
+			break;
+		case timecode_24:
+			return false;
+
+			break;
+		case timecode_24976:
+			return false;
+
+			break;
+		case timecode_25:
+			return false;
+
+			break;
+		case timecode_2997:
+			return false;
+
+			break;
+		case timecode_2997drop:
+			return true;
+
+			break;
+		case timecode_30:
+			return false;
+
+			break;
+		case timecode_30drop:
+			return true;
+
+			break;
+		case timecode_5994:
+			return false;
+
+			break;
+		case timecode_60:
+			return false;
+
+			break;
+	        default:
+			//error << "Editor received unexpected timecode type" << endmsg;
+			break;
+	}
+
+	return false;
+}
 
 } // namespace Timecode
 

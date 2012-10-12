@@ -38,6 +38,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace MIDI;
 using namespace PBD;
+using namespace Timecode;
 
 /* length (in timecode frames) of the "window" that we consider legal given receipt of
    a given timecode position. Ardour will try to chase within this window, and will
@@ -280,7 +281,7 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full, framepos_t now)
 	*/
 
 	//DEBUG_TRACE (DEBUG::MTC, string_compose ("MTC::update_mtc_time - TID:%1\n", ::pthread_self()));
-	Timecode::Time timecode;
+	Time timecode;
 	TimecodeFormat tc_format;
 	bool reset_tc = true;
 

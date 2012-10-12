@@ -200,19 +200,6 @@ namespace ARDOUR {
 		TrackColor
 	};
 
-	enum TimecodeFormat {
-		timecode_23976,
-		timecode_24,
-		timecode_24976,
-		timecode_25,
-		timecode_2997,
-		timecode_2997drop,
-		timecode_30,
-		timecode_30drop,
-		timecode_5994,
-		timecode_60
-	};
-
 	class AnyTime {
 	public:
 		enum Type {
@@ -589,7 +576,7 @@ std::istream& operator>>(std::istream& o, ARDOUR::CrossfadeChoice& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::SyncSource& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::ShuttleBehaviour& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::ShuttleUnits& sf);
-std::istream& operator>>(std::istream& o, ARDOUR::TimecodeFormat& sf);
+std::istream& operator>>(std::istream& o, Timecode::TimecodeFormat& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::DenormalModel& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::WaveformScale& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::WaveformShape& sf);
@@ -610,7 +597,7 @@ std::ostream& operator<<(std::ostream& o, const ARDOUR::CrossfadeChoice& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::SyncSource& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::ShuttleBehaviour& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::ShuttleUnits& sf);
-std::ostream& operator<<(std::ostream& o, const ARDOUR::TimecodeFormat& sf);
+std::ostream& operator<<(std::ostream& o, const Timecode::TimecodeFormat& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::DenormalModel& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::WaveformScale& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::WaveformShape& sf);
