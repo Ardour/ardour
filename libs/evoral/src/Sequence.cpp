@@ -339,6 +339,8 @@ Sequence<Time>::const_iterator::operator++()
 
 	// Use the next note off iff it's earlier or the same time as the note on
 #ifdef PERCUSSIVE_IGNORE_NOTE_OFFS
+	// issue 0005121 When in Percussive mode, all note offs go missing, which jams all MIDI instruments that they stop playing
+	// remove this code since it drowns MIDI instruments by stealing all voices and crashes LinuxSampler
 	if (!_seq->percussive() && (!_active_notes.empty())) {
 #else
 	if ((!_active_notes.empty())) {
