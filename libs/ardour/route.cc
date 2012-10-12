@@ -1594,7 +1594,9 @@ void
 Route::reset_instrument_info ()
 {
 	boost::shared_ptr<Processor> instr = the_instrument();
-	_instrument_info.set_internal_instrument (instr);
+	if (instr) {
+		_instrument_info.set_internal_instrument (instr);
+	}
 }
 
 /** Caller must hold process lock */
@@ -2025,7 +2027,6 @@ Route::set_state (const XMLNode& node, int version)
 			processor_state.add_child_copy (*child);
 		}
 
-
 		if (child->name() == X_("Pannable")) {
 			if (_pannable) {
 				_pannable->set_state (*child, version);
@@ -2044,6 +2045,9 @@ Route::set_state (const XMLNode& node, int version)
 	}
 
 	set_processor_state (processor_state);
+
+	// this looks up the internal instrument in processors
+	reset_instrument_info();
 
 	if ((prop = node.property ("self-solo")) != 0) {
 		set_self_solo (string_is_affirmative (prop->value()));
