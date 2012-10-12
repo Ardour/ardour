@@ -338,7 +338,11 @@ Sequence<Time>::const_iterator::operator++()
 	}
 
 	// Use the next note off iff it's earlier or the same time as the note on
+#ifdef PERCUSSIVE_IGNORE_NOTE_OFFS
 	if (!_seq->percussive() && (!_active_notes.empty())) {
+#else
+	if ((!_active_notes.empty())) {
+#endif
 		if (_type == NIL || _active_notes.top()->end_time() <= earliest_t) {
 			_type = NOTE_OFF;
 			earliest_t = _active_notes.top()->end_time();
@@ -636,8 +640,9 @@ Sequence<Time>::end_write (StuckNoteOption option, Time when)
 
 	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 : end_write (%2 notes) delete stuck option %3 @ %4\n", this, _notes.size(), option, when));
 
+	#ifdef PERCUSSIVE_IGNORE_NOTE_OFFS
 	if (!_percussive) {
-
+	#endif
 		for (typename Notes::iterator n = _notes.begin(); n != _notes.end() ;) {
 			typename Notes::iterator next = n;
 			++next;
@@ -665,7 +670,9 @@ Sequence<Time>::end_write (StuckNoteOption option, Time when)
 
 			n = next;
 		}
+	#ifdef PERCUSSIVE_IGNORE_NOTE_OFFS
 	}
+	#endif
 
 	for (int i = 0; i < 16; ++i) {
 		_write_notes[i].clear();
@@ -907,13 +914,20 @@ Sequence<Time>::append_note_on_unlocked (NotePtr note, event_id_t evid)
 
 	add_note_unlocked (note);
 
+	#ifdef PERCUSSIVE_IGNORE_NOTE_OFFS
 	if (!_percussive) {
+	#endif
+
 		DEBUG_TRACE (DEBUG::Sequence, string_compose ("Sustained: Appending active note on %1 channel %2\n",
 		                                              (unsigned)(uint8_t)note->note(), note->channel()));
 		_write_notes[note->channel()].insert (note);
+
+	#ifdef PERCUSSIVE_IGNORE_NOTE_OFFS
 	} else {
 		DEBUG_TRACE(DEBUG::Sequence, "Percussive: NOT appending active note on\n");
 	}
+	#endif
+
 }
 
 template<typename Time>
@@ -936,10 +950,12 @@ Sequence<Time>::append_note_off_unlocked (NotePtr note)
 
 	_edited = true;
 
+	#ifdef PERCUSSIVE_IGNORE_NOTE_OFFS
 	if (_percussive) {
 		DEBUG_TRACE(DEBUG::Sequence, "Sequence Ignoring note off (percussive mode)\n");
 		return;
 	}
+	#endif
 
 	bool resolved = false;
 
