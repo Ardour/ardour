@@ -281,6 +281,8 @@ def configure(conf):
                       atleast_version='1.2.1')
     autowaf.check_pkg(conf, 'libcurl', uselib_store='CURL',
                       atleast_version='7.0.0')
+    autowaf.check_pkg(conf, 'ltc', uselib_store='LTC',
+                      atleast_version='0.3.2', mandatory=False)
 
     # we don't try to detect this, since its part of our source tree
 
@@ -380,6 +382,10 @@ def build(bld):
     #obj.source += ' st_stretch.cc st_pitch.cc '
     #obj.uselib += ' SOUNDTOUCH '
     #obj.add_objects = 'default/libs/surfaces/control_protocol/smpte_1.o'
+
+    if bld.is_defined('HAVE_LTC') :
+        obj.source += ['ltc_slave.cc']
+        obj.uselib += ['LTC']
 
     if bld.is_defined('HAVE_LILV') :
         obj.source += ['lv2_plugin.cc', 'lv2_evbuf.c', 'uri_map.cc'] 

@@ -89,6 +89,9 @@ AudioEngine::AudioEngine (string client_name, string session_uuid)
 	}
 
 	Port::set_engine (this);
+#ifdef HAVE_LTC
+	_ltc_input = new AudioPort ("LTC in", Port::IsInput);
+#endif
 }
 
 AudioEngine::~AudioEngine ()

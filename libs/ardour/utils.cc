@@ -452,6 +452,9 @@ sync_source_to_string (SyncSource src, bool sh)
 
 	case MIDIClock:
 		return _("MIDI Clock");
+
+	case LTC:
+		return _("LTC");
 	}
 	/* GRRRR .... stupid, stupid gcc - you can't get here from there, all enum values are handled */
 	return _("JACK");

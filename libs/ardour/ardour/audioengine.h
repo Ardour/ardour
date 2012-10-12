@@ -260,6 +260,10 @@ _	   the regular process() call to session->process() is not made.
 
 	int create_process_thread (boost::function<void()>, pthread_t*, size_t stacksize);
 
+#ifdef HAVE_LTC
+	Port *ltc_input_port() const { return _ltc_input; }
+#endif
+
 private:
 	static AudioEngine*       _instance;
 
@@ -288,6 +292,10 @@ private:
 	bool                       port_remove_in_progress;
         Glib::Threads::Thread*     m_meter_thread;
 	ProcessThread*            _main_thread;
+
+#ifdef HAVE_LTC
+	Port*                     _ltc_input;
+#endif
 
 	SerializedRCUManager<Ports> ports;
 

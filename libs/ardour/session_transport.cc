@@ -1372,6 +1372,24 @@ Session::switch_to_sync_source (SyncSource src)
 		}
 		break;
 
+	case LTC:
+#ifdef HAVE_LTC
+		if (_slave && dynamic_cast<LTC_Slave*>(_slave)) {
+			return;
+		}
+
+		try {
+			new_slave = new LTC_Slave (*this);
+		}
+
+		catch (failed_constructor& err) {
+			return;
+		}
+#else
+		return;
+#endif
+		break;
+
 	case MIDIClock:
 		if (_slave && dynamic_cast<MIDIClock_Slave*>(_slave)) {
 			return;

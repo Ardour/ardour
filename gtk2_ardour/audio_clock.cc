@@ -1093,6 +1093,9 @@ AudioClock::set_timecode (framepos_t when, bool /*force*/)
 			case MIDIClock:
 				_left_layout->set_text ("M-Clock");
 				break;
+			case LTC:
+				_left_layout->set_text ("LTC");
+				break;
 			}
 		} else {
 			_left_layout->set_text ("INT");

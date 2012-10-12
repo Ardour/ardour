@@ -462,7 +462,8 @@ namespace ARDOUR {
 	enum SyncSource {
 		JACK,
 		MTC,
-		MIDIClock
+		MIDIClock,
+		LTC
 	};
 
 	enum ShuttleBehaviour {

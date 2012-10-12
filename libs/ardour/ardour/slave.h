@@ -32,6 +32,10 @@
 #include "midi++/parser.h"
 #include "midi++/types.h"
 
+#ifdef HAVE_LTC
+#include <ltc.h>
+#endif
+
 namespace MIDI {
 	class Port;
 }
@@ -292,6 +296,39 @@ class MTC_Slave : public Slave {
 	void init_mtc_dll(framepos_t, double);
 	void init_engine_dll (framepos_t, framepos_t);
 };
+
+#ifdef HAVE_LTC
+class LTC_Slave : public Slave {
+  public:
+	LTC_Slave (Session&);
+	~LTC_Slave ();
+
+	bool speed_and_position (double&, framepos_t&);
+
+	bool locked() const;
+	bool ok() const;
+
+	framecnt_t resolution () const;
+	bool requires_seekahead () const { return true; }
+	framecnt_t seekahead_distance() const;
+	bool give_slave_full_control_over_transport_speed() const;
+
+  private:
+  int parse_ltc(const jack_nframes_t nframes, const jack_default_audio_sample_t * const in, const framecnt_t posinfo);
+	void process_ltc();
+
+	Session&    session;
+	bool        did_reset_tc_format;
+	Timecode::TimecodeFormat saved_tc_format;
+
+  LTCDecoder *decoder;
+	framecnt_t  current_frames_per_ltc_frame;
+	framecnt_t  monotonic_fcnt;
+
+	framepos_t  ltc_transport_pos;
+	double      ltc_speed;
+};
+#endif
 
 class MIDIClock_Slave : public Slave {
   public:

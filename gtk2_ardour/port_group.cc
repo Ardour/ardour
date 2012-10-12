@@ -445,6 +445,7 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 		boost::shared_ptr<Bundle> sync (new Bundle (_("Sync"), inputs));
 		MIDI::MachineControl* mmc = midi_manager->mmc ();
 		AudioEngine& ae = session->engine ();
+
 		if (inputs) {
 			sync->add_channel (
 				_("MTC in"), DataType::MIDI, ae.make_port_name_non_relative (midi_manager->mtc_input_port()->name())
@@ -458,6 +459,11 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 			sync->add_channel (
 				_("MMC in"), DataType::MIDI, ae.make_port_name_non_relative (mmc->input_port()->name())
 				);
+#ifdef HAVE_LIBLTC
+			sync->add_channel (
+				_("LTC in"), DataType::AUDIO, ae.make_port_name_non_relative (ae->ltc_input_port()->name())
+				);
+#endif
 		} else {
 			sync->add_channel (
 				_("MTC out"), DataType::MIDI, ae.make_port_name_non_relative (midi_manager->mtc_output_port()->name())
