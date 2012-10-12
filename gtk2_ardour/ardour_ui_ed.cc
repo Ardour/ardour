@@ -551,6 +551,8 @@ ARDOUR_UI::build_menu_bar ()
 	wall_clock_label.set_use_markup ();
 	disk_space_label.set_name ("WallClock");
 	disk_space_label.set_use_markup ();
+	timecode_format_label.set_name ("WallClock");
+	timecode_format_label.set_use_markup ();
 	cpu_load_label.set_name ("CPULoad");
 	cpu_load_label.set_use_markup ();
 	buffer_load_label.set_name ("BufferLoad");
@@ -582,6 +584,7 @@ ARDOUR_UI::build_menu_bar ()
 	hbox->pack_end (cpu_load_label, false, false, 4);
 	hbox->pack_end (buffer_load_label, false, false, 4);
 	hbox->pack_end (sample_rate_label, false, false, 4);
+	hbox->pack_end (timecode_format_label, false, false, 4);
 	hbox->pack_end (format_label, false, false, 4);
 
 	menu_hbox.pack_end (*ev, false, false, 6);
@@ -589,12 +592,13 @@ ARDOUR_UI::build_menu_bar ()
 	menu_bar_base.set_name ("MainMenuBar");
 	menu_bar_base.add (menu_hbox);
 
-	_status_bar_visibility.add (&wall_clock_label,  X_("WallClock"), _("Wall Clock"), wall_clock);
-	_status_bar_visibility.add (&disk_space_label,  X_("Disk"),      _("Disk Space"), disk_space);
-	_status_bar_visibility.add (&cpu_load_label,    X_("DSP"),       _("DSP"), true);
-	_status_bar_visibility.add (&buffer_load_label, X_("Buffers"),   _("Buffers"), true);
-	_status_bar_visibility.add (&sample_rate_label, X_("JACK"),      _("JACK Sampling Rate and Latency"), true);
-	_status_bar_visibility.add (&format_label,      X_("Format"),    _("File Format"), true);
+	_status_bar_visibility.add (&wall_clock_label,      X_("WallClock"), _("Wall Clock"), wall_clock);
+	_status_bar_visibility.add (&disk_space_label,      X_("Disk"),      _("Disk Space"), disk_space);
+	_status_bar_visibility.add (&cpu_load_label,        X_("DSP"),       _("DSP"), true);
+	_status_bar_visibility.add (&buffer_load_label,     X_("Buffers"),   _("Buffers"), true);
+	_status_bar_visibility.add (&sample_rate_label,     X_("JACK"),      _("JACK Sampling Rate and Latency"), true);
+	_status_bar_visibility.add (&timecode_format_label, X_("TCFormat"),  _("Timecode Format"), true);
+	_status_bar_visibility.add (&format_label,          X_("Format"),    _("File Format"), true);
 
 	ev->signal_button_press_event().connect (sigc::mem_fun (_status_bar_visibility, &VisibilityGroup::button_press_event));
 }

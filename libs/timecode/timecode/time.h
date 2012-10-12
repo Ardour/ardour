@@ -100,6 +100,8 @@ void hours_floor (Time& timecode);
 float timecode_to_frames_per_second(TimecodeFormat const t);
 bool timecode_has_drop_frames(TimecodeFormat const t);
 
+std::string timecode_format_name (TimecodeFormat const t);
+
 } // namespace Timecode
 
 std::ostream& operator<< (std::ostream& ostr, const Timecode::Time& t);

@@ -1051,8 +1051,8 @@ RCOptionEditor::RCOptionEditor ()
 	Gtkmm2ext::UI::instance()->set_tip 
 		(_sync_framerate->tip_widget(),
 		 _("This option controls the value of the video frame rate <i>while chasing</i> an external timecode source.\n\n"
-		   "<b>When enabled</b>, the session video frame rate will be changed to match that of the selected external timecode source.\n\n"
-		   "<b>When disabled</b>, the session video frame rate will not be changed to match that of the selected external timecode source."
+		   "<b>When enabled</b> the session video frame rate will be changed to match that of the selected external timecode source.\n\n"
+		   "<b>When disabled</b> the session video frame rate will not be changed to match that of the selected external timecode source."
 		   "Instead the frame rate indication in the main clock will flash red and Ardour will convert between the external "
 		   "timecode standard and the session standard"));
 
@@ -1066,7 +1066,7 @@ RCOptionEditor::RCOptionEditor ()
 		);
 	Gtkmm2ext::UI::instance()->set_tip 
 		(_sync_genlock->tip_widget(), 
-		 _("<b>When enabled</b>, indicates that the selected external timecode source shares sync (Black &amp; Burst, Wordclock, etc) with the audio interface"));
+		 _("<b>When enabled</b> indicates that the selected external timecode source shares sync (Black &amp; Burst, Wordclock, etc) with the audio interface"));
 
 	add_option (_("Transport"), _sync_genlock);
 

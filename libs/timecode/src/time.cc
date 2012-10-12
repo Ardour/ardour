@@ -526,6 +526,57 @@ timecode_has_drop_frames(TimecodeFormat t)
 	return false;
 }
 
+std::string
+timecode_format_name (TimecodeFormat const t)
+{
+	switch (t) {
+		case timecode_23976:
+			return "23.98";
+
+			break;
+		case timecode_24:
+			return "24";
+
+			break;
+		case timecode_24976:
+			return "24.98";
+
+			break;
+		case timecode_25:
+			return "25";
+
+			break;
+		case timecode_2997:
+			return "29.97";
+
+			break;
+		case timecode_2997drop:
+			return "29.97 drop";
+
+			break;
+		case timecode_30:
+			return "30";
+
+			break;
+		case timecode_30drop:
+			return "30 drop";
+
+			break;
+		case timecode_5994:
+			return "59.94";
+
+			break;
+		case timecode_60:
+			return "60";
+
+			break;
+	        default:
+			break;
+	}
+
+	return "??";
+}
+
 } // namespace Timecode
 
 std::ostream& 

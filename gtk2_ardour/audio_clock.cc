@@ -1101,15 +1101,7 @@ AudioClock::set_timecode (framepos_t when, bool /*force*/)
 			_left_layout->set_text ("INT");
 		}
 
-		double timecode_frames = _session->timecode_frames_per_second();
-	
-		if (fmod(timecode_frames, 1.0) == 0.0) {
-			sprintf (buf, "FPS %u %s", int (timecode_frames), (_session->timecode_drop_frames() ? "D" : ""));
-		} else {
-			sprintf (buf, "%.2f %s", timecode_frames, (_session->timecode_drop_frames() ? "D" : ""));
-		}
-
-		_right_layout->set_text (buf);
+		_right_layout->set_text ("TBDiscussed");
 	}
 }
 

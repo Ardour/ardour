@@ -74,6 +74,8 @@
 #include "ardour/session_state_utils.h"
 #include "ardour/session_utils.h"
 
+#include "timecode/time.h"
+
 typedef uint64_t microseconds_t;
 
 #include "about.h"
@@ -463,6 +465,7 @@ ARDOUR_UI::post_engine ()
 	update_disk_space ();
 	update_cpu_load ();
 	update_sample_rate (engine->frame_rate());
+	update_timecode_format ();
 
 	Config->ParameterChanged.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::parameter_changed, this, _1), gui_context());
 	boost::function<void (string)> pc (boost::bind (&ARDOUR_UI::parameter_changed, this, _1));
@@ -886,6 +889,7 @@ ARDOUR_UI::every_second ()
 	update_cpu_load ();
 	update_buffer_load ();
 	update_disk_space ();
+	update_timecode_format ();
 	return TRUE;
 }
 
@@ -1094,6 +1098,22 @@ ARDOUR_UI::update_disk_space()
 
 	disk_space_label.set_markup (buf);
 }
+
+void
+ARDOUR_UI::update_timecode_format ()
+{
+	char buf[64];
+
+	if (_session) {
+		snprintf (buf, sizeof (buf), S_("Timecode|TC: <span foreground=\"%s\">%sfps</span>"), 
+			  rand() % 2 ? X_("red") : X_("green"), 
+			  Timecode::timecode_format_name (_session->config.get_timecode_format()).c_str());
+	} else {
+		snprintf (buf, sizeof (buf), "TC: n/a");
+	}
+
+	timecode_format_label.set_markup (buf);
+}	
 
 gint
 ARDOUR_UI::update_wall_clock ()
