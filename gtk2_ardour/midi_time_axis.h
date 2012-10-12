@@ -132,8 +132,8 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	Gtk::RadioMenuItem*          _track_color_mode_item;
 	Gtk::Table                   _midi_controls_box;
 	MidiMultipleChannelSelector  _channel_selector;
-	Gtk::ComboBoxText            _model_selector;
-	Gtk::ComboBoxText            _custom_device_mode_selector;
+	Gtk::ComboBoxText            _midnam_model_selector;
+	Gtk::ComboBoxText            _midnam_custom_device_mode_selector;
 
 	Gtk::CheckMenuItem*          _step_edit_item;
 	Gtk::Menu*                    default_channel_menu;

@@ -206,20 +206,19 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
 	MIDI::Name::MasterDeviceNames::Models::const_iterator m = patch_manager.all_models().begin();
 	for (; m != patch_manager.all_models().end(); ++m) {
-		_model_selector.append_text(m->c_str());
+		_midnam_model_selector.append_text(m->c_str());
 	}
 
+	_midnam_model_selector.set_active_text (gui_property (X_("midnam-model-name")));
+	model_changed();
+	_midnam_custom_device_mode_selector.set_active_text (gui_property (X_("midnam-custom-device-mode")));
 
-	_model_selector.signal_changed().connect(sigc::mem_fun(*this, &MidiTimeAxisView::model_changed));
-
-	_custom_device_mode_selector.signal_changed().connect(
+	_midnam_model_selector.signal_changed().connect(sigc::mem_fun(*this, &MidiTimeAxisView::model_changed));
+	_midnam_custom_device_mode_selector.signal_changed().connect(
 			sigc::mem_fun(*this, &MidiTimeAxisView::custom_device_mode_changed));
 
-	_model_selector.set_active_text (gui_property (X_("midnam-model-name")));
-	_custom_device_mode_selector.set_active_text (gui_property (X_("midnam-custom-device-mode")));
-
-	ARDOUR_UI::instance()->set_tip (_model_selector, _("External MIDI Device"));
-	ARDOUR_UI::instance()->set_tip (_custom_device_mode_selector, _("External Device Mode"));
+	ARDOUR_UI::instance()->set_tip (_midnam_model_selector, _("External MIDI Device"));
+	ARDOUR_UI::instance()->set_tip (_midnam_custom_device_mode_selector, _("External Device Mode"));
 
 	_midi_controls_box.set_homogeneous(false);
 	_midi_controls_box.set_border_width (10);
@@ -230,13 +229,13 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
 		_midi_controls_box.attach(*manage(new HSeparator()), 0, 2, 1, 2);
 
-		_model_selector.set_size_request(22, 30);
-		_model_selector.set_border_width(2);
-		_midi_controls_box.attach(_model_selector, 0, 1, 2, 3);
+		_midnam_model_selector.set_size_request(22, 30);
+		_midnam_model_selector.set_border_width(2);
+		_midi_controls_box.attach(_midnam_model_selector, 0, 1, 2, 3);
 
-		_custom_device_mode_selector.set_size_request(10, 30);
-		_custom_device_mode_selector.set_border_width(2);
-		_midi_controls_box.attach(_custom_device_mode_selector, 1, 2, 2, 3);
+		_midnam_custom_device_mode_selector.set_size_request(10, 30);
+		_midnam_custom_device_mode_selector.set_border_width(2);
+		_midi_controls_box.attach(_midnam_custom_device_mode_selector, 1, 2, 2, 3);
 	} else {
 		_midi_controls_box.attach(_channel_selector, 0, 1, 0, 1);
 	}
@@ -331,25 +330,30 @@ MidiTimeAxisView::check_step_edit ()
 void
 MidiTimeAxisView::model_changed()
 {
-	std::list<std::string> device_modes = MIDI::Name::MidiPatchManager::instance()
-		.custom_device_mode_names_by_model(_model_selector.get_active_text());
+	string model = _midnam_model_selector.get_active_text();
+	set_gui_property (X_("midnam-model-name"), model);
 
-	_custom_device_mode_selector.clear_items();
+	std::list<std::string> device_modes = MIDI::Name::MidiPatchManager::instance()
+		.custom_device_mode_names_by_model(model);
+
+	_midnam_custom_device_mode_selector.clear_items();
 
 	for (std::list<std::string>::const_iterator i = device_modes.begin();
 			i != device_modes.end(); ++i) {
-		_custom_device_mode_selector.append_text(*i);
+		_midnam_custom_device_mode_selector.append_text(*i);
 	}
 
-	_custom_device_mode_selector.set_active(0);
+	_midnam_custom_device_mode_selector.set_active(0);
 	
-	_route->instrument_info().set_external_instrument (_model_selector.get_active_text(), _custom_device_mode_selector.get_active_text());
+	_route->instrument_info().set_external_instrument (_midnam_model_selector.get_active_text(), _midnam_custom_device_mode_selector.get_active_text());
 }
 
 void
 MidiTimeAxisView::custom_device_mode_changed()
 {
-	_route->instrument_info().set_external_instrument (_model_selector.get_active_text(), _custom_device_mode_selector.get_active_text());
+	string mode = _midnam_custom_device_mode_selector.get_active_text();
+	set_gui_property (X_("midnam-custom-device-mode"), mode);
+	_route->instrument_info().set_external_instrument (_midnam_model_selector.get_active_text(), mode);
 }
 
 MidiStreamView*
