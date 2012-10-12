@@ -172,4 +172,13 @@ LTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 	speed = ltc_speed;
 
 	monotonic_fcnt += nframes;
+
+	return true;
+}
+
+Timecode::TimecodeFormat
+LTC_Slave::apparent_timecode_format () const
+{
+	/* XXX to be computed, determined from incoming stream */
+	return timecode_30;
 }

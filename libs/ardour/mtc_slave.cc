@@ -615,3 +615,10 @@ MTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 
 	return true;
 }
+
+Timecode::TimecodeFormat
+MTC_Slave::apparent_timecode_format () const
+{
+	/* XXX to be computed, determined from incoming stream */
+	return timecode_30;
+}

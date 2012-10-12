@@ -28,6 +28,8 @@
 
 #include "pbd/signals.h"
 
+#include "timecode/time.h"
+
 #include "ardour/types.h"
 #include "midi++/parser.h"
 #include "midi++/types.h"
@@ -223,7 +225,14 @@ struct SafeTime {
 	}
 };
 
-class MTC_Slave : public Slave {
+class TimecodeSlave : public Slave {
+  public:
+    TimecodeSlave () {}
+
+    virtual Timecode::TimecodeFormat apparent_timecode_format() const = 0;
+};
+
+class MTC_Slave : public TimecodeSlave {
   public:
 	MTC_Slave (Session&, MIDI::Port&);
 	~MTC_Slave ();
@@ -239,6 +248,8 @@ class MTC_Slave : public Slave {
 	bool requires_seekahead () const { return true; }
 	framecnt_t seekahead_distance() const;
 	bool give_slave_full_control_over_transport_speed() const;
+
+        Timecode::TimecodeFormat apparent_timecode_format() const;
 
   private:
 	Session&    session;
@@ -298,7 +309,7 @@ class MTC_Slave : public Slave {
 };
 
 #ifdef HAVE_LTC
-class LTC_Slave : public Slave {
+class LTC_Slave : public TimecodeSlave {
   public:
 	LTC_Slave (Session&);
 	~LTC_Slave ();
@@ -312,6 +323,8 @@ class LTC_Slave : public Slave {
 	bool requires_seekahead () const { return true; }
 	framecnt_t seekahead_distance() const;
 	bool give_slave_full_control_over_transport_speed() const;
+
+        Timecode::TimecodeFormat apparent_timecode_format() const;
 
   private:
   int parse_ltc(const jack_nframes_t nframes, const jack_default_audio_sample_t * const in, const framecnt_t posinfo);
