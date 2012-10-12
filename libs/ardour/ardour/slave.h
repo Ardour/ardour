@@ -310,7 +310,7 @@ class MTC_Slave : public TimecodeSlave {
 
 #ifdef HAVE_LTC
 class LTC_Slave : public TimecodeSlave {
-  public:
+public:
 	LTC_Slave (Session&);
 	~LTC_Slave ();
 
@@ -327,19 +327,27 @@ class LTC_Slave : public TimecodeSlave {
         Timecode::TimecodeFormat apparent_timecode_format() const;
 
   private:
-  int parse_ltc(const jack_nframes_t nframes, const jack_default_audio_sample_t * const in, const framecnt_t posinfo);
-	void process_ltc();
+	int parse_ltc(const jack_nframes_t, const jack_default_audio_sample_t * const, const framecnt_t);
+	bool process_ltc(framepos_t, framecnt_t);
+	void init_ltc_dll(framepos_t, double);
 
 	Session&    session;
 	bool        did_reset_tc_format;
 	Timecode::TimecodeFormat saved_tc_format;
 
-  LTCDecoder *decoder;
-	framecnt_t  current_frames_per_ltc_frame;
-	framecnt_t  monotonic_fcnt;
+	LTCDecoder *decoder;
+	double      frames_per_ltc_frame;
 
+	framecnt_t  last_timestamp;
+	framecnt_t  last_ltc_frame;
 	framepos_t  ltc_transport_pos;
 	double      ltc_speed;
+
+	/* DLL - chase MTC */
+	double t0; ///< time at the beginning of the MTC quater frame
+	double t1; ///< calculated end of the MTC quater frame
+	double e2; ///< second order loop error
+	double b, c, omega; ///< DLL filter coefficients
 };
 #endif
 

@@ -36,6 +36,7 @@ uint64_t PBD::DEBUG::ProcessThreads = PBD::new_debug_bit ("processthreads");
 uint64_t PBD::DEBUG::Graph = PBD::new_debug_bit ("graph");
 uint64_t PBD::DEBUG::Destruction = PBD::new_debug_bit ("destruction");
 uint64_t PBD::DEBUG::MTC = PBD::new_debug_bit ("mtc");
+uint64_t PBD::DEBUG::LTC = PBD::new_debug_bit ("ltc");
 uint64_t PBD::DEBUG::Transport = PBD::new_debug_bit ("transport");
 uint64_t PBD::DEBUG::Slave = PBD::new_debug_bit ("slave");
 uint64_t PBD::DEBUG::SessionEvents = PBD::new_debug_bit ("sessionevents");
