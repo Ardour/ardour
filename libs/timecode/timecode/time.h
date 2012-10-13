@@ -102,6 +102,38 @@ bool timecode_has_drop_frames(TimecodeFormat const t);
 
 std::string timecode_format_name (TimecodeFormat const t);
 
+std::string timecode_format_time (Timecode::Time& timecode);
+
+std::string timecode_format_sampletime (
+		int64_t sample,
+		double sample_frame_rate,
+		double timecode_frames_per_second, bool timecode_drop_frames
+		);
+
+void
+timecode_to_sample(
+		Timecode::Time& timecode, int64_t& sample,
+		bool use_offset, bool use_subframes,
+    /* Note - framerate info is taken from Timecode::Time& */
+		double sample_frame_rate /**< may include pull up/down */,
+		int32_t subframes_per_frame /**< must not be 0 if use_subframes==true */,
+    /* optional offset  - can be improved: function pointer to lazily query this*/
+		bool offset_is_negative, int64_t offset_samples
+		);
+
+void sample_to_timecode (
+		int64_t sample, Timecode::Time& timecode,
+		bool use_offset, bool use_subframes,
+    /* framerate info */
+		double timecode_frames_per_second,
+		bool   timecode_drop_frames,
+		double sample_frame_rate/**< can include pull up/down */,
+		int32_t subframes_per_frame,
+    /* optional offset  - can be improved: function pointer to lazily query this*/
+		bool offset_is_negative, int64_t offset_samples
+		);
+
+
 } // namespace Timecode
 
 std::ostream& operator<< (std::ostream& ostr, const Timecode::Time& t);

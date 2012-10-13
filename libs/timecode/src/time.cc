@@ -20,6 +20,7 @@
 #define Timecode_IS_ZERO(sm) (!(sm).frames && !(sm).seconds && !(sm).minutes && !(sm).hours && !(sm.subframes))
 
 #include <math.h>
+#include <stdio.h>
 
 #include "timecode/time.h"
 
@@ -575,6 +576,248 @@ timecode_format_name (TimecodeFormat const t)
 	}
 
 	return "??";
+}
+
+std::string timecode_format_time (Timecode::Time& TC)
+{
+	char buf[32];
+	if (TC.negative) {
+		snprintf (buf, sizeof (buf), "-%02" PRIu32 ":%02" PRIu32 ":%02" PRIu32 ":%02" PRIu32, TC.hours, TC.minutes, TC.seconds, TC.frames);
+	} else {
+		snprintf (buf, sizeof (buf), " %02" PRIu32 ":%02" PRIu32 ":%02" PRIu32 ":%02" PRIu32, TC.hours, TC.minutes, TC.seconds, TC.frames);
+	}
+	return std::string(buf);
+}
+
+std::string timecode_format_sampletime (
+		int64_t sample,
+		double sample_frame_rate,
+		double timecode_frames_per_second, bool timecode_drop_frames)
+{
+	Time t;
+	sample_to_timecode(
+			sample, t, false, false,
+			timecode_frames_per_second, timecode_drop_frames,
+			sample_frame_rate,
+			80, false, 0);
+	return timecode_format_time(t);
+}
+
+void
+timecode_to_sample(
+		Timecode::Time& timecode, int64_t& sample,
+		bool use_offset, bool use_subframes,
+    /* Note - framerate info is taken from Timecode::Time& */
+		double sample_frame_rate /**< may include pull up/down */,
+		int32_t subframes_per_frame,
+    /* optional offset  - can be improved: function pointer to lazily query this*/
+		bool offset_is_negative, int64_t offset_samples
+		)
+{
+	const double frames_per_timecode_frame = (double) sample_frame_rate / (double) timecode.rate;
+
+	if (timecode.drop) {
+		// The drop frame format was created to better approximate the 30000/1001 = 29.97002997002997....
+		// framerate of NTSC color TV. The used frame rate of drop frame is 29.97, which drifts by about
+		// 0.108 frame per hour, or about 1.3 frames per 12 hours. This is not perfect, but a lot better
+		// than using 30 non drop, which will drift with about 1.8 frame per minute.
+		// Using 29.97, drop frame real time can be accurate only every 10th minute (10 minutes of 29.97 fps
+		// is exactly 17982 frames). One minute is 1798.2 frames, but we count 30 frames per second
+		// (30 * 60 = 1800). This means that at the first minute boundary (at the end of 0:0:59:29) we
+		// are 1.8 frames too late relative to real time. By dropping 2 frames (jumping to 0:1:0:2) we are
+		// approx. 0.2 frames too early. This adds up with 0.2 too early for each minute until we are 1.8
+		// frames too early at 0:9:0:2 (9 * 0.2 = 1.8). The 10th minute brings us 1.8 frames later again
+		// (at end of 0:9:59:29), which sums up to 0 (we are back to zero at 0:10:0:0 :-).
+		//
+		// In table form:
+		//
+		// Timecode value    frames offset   subframes offset   seconds (rounded)  44100 sample (rounded)
+		//  0:00:00:00        0.0             0                     0.000                0 (accurate)
+		//  0:00:59:29        1.8           144                    60.027          2647177
+		//  0:01:00:02       -0.2           -16                    60.060          2648648
+		//  0:01:59:29        1.6           128                   120.020          5292883
+		//  0:02:00:02       -0.4           -32                   120.053          5294354
+		//  0:02:59:29        1.4           112                   180.013          7938588
+		//  0:03:00:02       -0.6           -48                   180.047          7940060
+		//  0:03:59:29        1.2            96                   240.007         10584294
+		//  0:04:00:02       -0.8           -64                   240.040         10585766
+		//  0:04:59:29        1.0            80                   300.000         13230000
+		//  0:05:00:02       -1.0           -80                   300.033         13231471
+		//  0:05:59:29        0.8            64                   359.993         15875706
+		//  0:06:00:02       -1.2           -96                   360.027         15877177
+		//  0:06:59:29        0.6            48                   419.987         18521411
+		//  0:07:00:02       -1.4          -112                   420.020         18522883
+		//  0:07:59:29        0.4            32                   478.980         21167117
+		//  0:08:00:02       -1.6          -128                   480.013         21168589
+		//  0:08:59:29        0.2            16                   539.973         23812823
+		//  0:09:00:02       -1.8          -144                   540.007         23814294
+		//  0:09:59:29        0.0+            0+                  599.967         26458529
+		//  0:10:00:00        0.0             0                   600.000         26460000 (accurate)
+		//
+		//  Per Sigmond <per@sigmond.no>
+
+		// Samples inside time dividable by 10 minutes (real time accurate)
+		int64_t base_samples = (int64_t) (((timecode.hours * 107892) + ((timecode.minutes / 10) * 17982)) * frames_per_timecode_frame);
+
+		// Samples inside time exceeding the nearest 10 minutes (always offset, see above)
+		int32_t exceeding_df_minutes = timecode.minutes % 10;
+		int32_t exceeding_df_seconds = (exceeding_df_minutes * 60) + timecode.seconds;
+		int32_t exceeding_df_frames = (30 * exceeding_df_seconds) + timecode.frames - (2 * exceeding_df_minutes);
+		int64_t exceeding_samples = (int64_t) rint(exceeding_df_frames * frames_per_timecode_frame);
+		sample = base_samples + exceeding_samples;
+	} else {
+		/*
+		   Non drop is easy.. just note the use of
+		   rint(timecode.rate) * frames_per_timecode_frame
+		   (frames per Timecode second), which is larger than
+		   frame_rate() in the non-integer Timecode rate case.
+		*/
+
+		sample = (int64_t)rint((((timecode.hours * 60 * 60) + (timecode.minutes * 60) + timecode.seconds) * (rint(timecode.rate) * frames_per_timecode_frame)) + (timecode.frames * frames_per_timecode_frame));
+	}
+
+	if (use_subframes) {
+		sample += (int64_t) (((double)timecode.subframes * frames_per_timecode_frame) / subframes_per_frame);
+	}
+
+	if (use_offset) {
+		if (offset_is_negative) {
+			if (sample >= offset_samples) {
+				sample -= offset_samples;
+			} else {
+				/* Prevent song-time from becoming negative */
+				sample = 0;
+			}
+		} else {
+			if (timecode.negative) {
+				if (sample <= offset_samples) {
+					sample = offset_samples - sample;
+				} else {
+					sample = 0;
+				}
+			} else {
+				sample += offset_samples;
+			}
+		}
+	}
+}
+
+
+void
+sample_to_timecode (
+		int64_t sample, Timecode::Time& timecode,
+		bool use_offset, bool use_subframes,
+    /* framerate info */
+		double timecode_frames_per_second,
+		bool   timecode_drop_frames,
+		double sample_frame_rate/**< can include pull up/down */,
+		int32_t subframes_per_frame,
+    /* optional offset  - can be improved: function pointer to lazily query this*/
+		bool offset_is_negative, int64_t offset_samples
+		)
+{
+	const double frames_per_timecode_frame = (double) sample_frame_rate / (double) timecode_frames_per_second;
+	int32_t frames_per_hour;
+
+	if (timecode_drop_frames) {
+	  frames_per_hour = (int32_t)(107892 * frames_per_timecode_frame);
+	} else {
+	  frames_per_hour = (int32_t)(3600 * rint(timecode_frames_per_second) * frames_per_timecode_frame);
+	}
+
+  /* do the work */
+	int64_t offset_sample;
+
+	if (!use_offset) {
+		offset_sample = sample;
+		timecode.negative = false;
+	} else {
+		if (offset_is_negative) {
+			offset_sample = sample + offset_samples;
+			timecode.negative = false;
+		} else {
+			if (sample < offset_samples) {
+				offset_sample = (offset_samples - sample);
+				timecode.negative = true;
+			} else {
+				offset_sample =  sample - offset_samples;
+				timecode.negative = false;
+			}
+		}
+	}
+
+	double timecode_frames_left_exact;
+	double timecode_frames_fraction;
+	uint64_t timecode_frames_left;
+
+	// Extract whole hours. Do this to prevent rounding errors with
+	// high sample numbers in the calculations that follow.
+	timecode.hours = offset_sample / frames_per_hour;
+	offset_sample = offset_sample % frames_per_hour;
+
+	// Calculate exact number of (exceeding) timecode frames and fractional frames
+	timecode_frames_left_exact = (double) offset_sample / frames_per_timecode_frame;
+	timecode_frames_fraction = timecode_frames_left_exact - floor( timecode_frames_left_exact );
+	timecode.subframes = (int32_t) floor(timecode_frames_fraction * subframes_per_frame);
+
+	// XXX Not sure if this is necessary anymore...
+	if (timecode.subframes == subframes_per_frame) {
+		// This can happen with 24 fps (and 29.97 fps ?)
+		timecode_frames_left_exact = ceil( timecode_frames_left_exact );
+		timecode.subframes = 0;
+	}
+
+	// Extract hour-exceeding frames for minute, second and frame calculations
+	timecode_frames_left = (uint64_t) floor (timecode_frames_left_exact);
+
+	if (timecode_drop_frames) {
+		// See int32_t explanation in timecode_to_sample()...
+
+		// Number of 10 minute chunks
+		timecode.minutes = (timecode_frames_left / 17982) * 10; // exactly 17982 frames in 10 minutes
+		// frames exceeding the nearest 10 minute barrier
+		int32_t exceeding_df_frames = timecode_frames_left % 17982;
+
+		// Find minutes exceeding the nearest 10 minute barrier
+		if (exceeding_df_frames >= 1800) { // nothing to do if we are inside the first minute (0-1799)
+			exceeding_df_frames -= 1800; // take away first minute (different number of frames than the others)
+			int32_t extra_minutes_minus_1 = exceeding_df_frames / 1798; // how many minutes after the first one
+			exceeding_df_frames -= extra_minutes_minus_1 * 1798; // take away the (extra) minutes just found
+			timecode.minutes += extra_minutes_minus_1 + 1; // update with exceeding minutes
+		}
+
+		// Adjust frame numbering for dropped frames (frame 0 and 1 skipped at start of every minute except every 10th)
+		if (timecode.minutes % 10) {
+			// Every minute except every 10th
+			if (exceeding_df_frames < 28) {
+				// First second, frames 0 and 1 are skipped
+				timecode.seconds = 0;
+				timecode.frames = exceeding_df_frames + 2;
+			} else {
+				// All other seconds, all 30 frames are counted
+				exceeding_df_frames -= 28;
+				timecode.seconds = (exceeding_df_frames / 30) + 1;
+				timecode.frames = exceeding_df_frames % 30;
+			}
+		} else {
+			// Every 10th minute, all 30 frames counted in all seconds
+			timecode.seconds = exceeding_df_frames / 30;
+			timecode.frames = exceeding_df_frames % 30;
+		}
+	} else {
+		// Non drop is easy
+		timecode.minutes = timecode_frames_left / ((int32_t) rint (timecode_frames_per_second) * 60);
+		timecode_frames_left = timecode_frames_left % ((int32_t) rint (timecode_frames_per_second) * 60);
+		timecode.seconds = timecode_frames_left / (int32_t) rint(timecode_frames_per_second);
+		timecode.frames = timecode_frames_left % (int32_t) rint(timecode_frames_per_second);
+	}
+
+	if (!use_subframes) {
+		timecode.subframes = 0;
+	}
+	/* set frame rate and drop frame */
+	timecode.rate = timecode_frames_per_second;
+	timecode.drop = timecode_drop_frames;
 }
 
 } // namespace Timecode
