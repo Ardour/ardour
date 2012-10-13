@@ -609,7 +609,7 @@ timecode_to_sample(
 		bool use_offset, bool use_subframes,
     /* Note - framerate info is taken from Timecode::Time& */
 		double sample_frame_rate /**< may include pull up/down */,
-		int32_t subframes_per_frame,
+		uint32_t subframes_per_frame,
     /* optional offset  - can be improved: function pointer to lazily query this*/
 		bool offset_is_negative, int64_t offset_samples
 		)
@@ -711,7 +711,7 @@ sample_to_timecode (
 		double timecode_frames_per_second,
 		bool   timecode_drop_frames,
 		double sample_frame_rate/**< can include pull up/down */,
-		int32_t subframes_per_frame,
+		uint32_t subframes_per_frame,
     /* optional offset  - can be improved: function pointer to lazily query this*/
 		bool offset_is_negative, int64_t offset_samples
 		)
