@@ -281,7 +281,6 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full, framepos_t now)
 	*/
 
 	//DEBUG_TRACE (DEBUG::MTC, string_compose ("MTC::update_mtc_time - TID:%1\n", ::pthread_self()));
-	Time timecode;
 	TimecodeFormat tc_format;
 	bool reset_tc = true;
 
@@ -370,7 +369,12 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full, framepos_t now)
 	*/
 
 	quarter_frame_duration = (double(session.frame_rate()) / (double) timecode.rate / 4.0);
-	session.timecode_to_sample (timecode, mtc_frame, true, false); // audio-frame according to Ardour's FPS
+
+	Timecode::timecode_to_sample (timecode, mtc_frame, true, false,
+		double(session.frame_rate()),
+		session.config.get_subframes_per_frame(),
+		session.config.get_timecode_offset_negative(), session.config.get_timecode_offset()
+		);
 
 	DEBUG_TRACE (DEBUG::MTC, string_compose ("MTC at %1 TC %2 = mtc_frame %3 (from full message ? %4) tc-ratio %5\n",
 						 now, timecode, mtc_frame, was_full, speedup_due_to_tc_mismatch));
@@ -630,5 +634,10 @@ MTC_Slave::apparent_timecode_format () const
 std::string 
 MTC_Slave::approximate_current_position() const
 {
-	return "88:88:88:88";
+	SafeTime last;
+	read_current (&last);
+	return Timecode::timecode_format_sampletime(
+		last.position,
+		double(session.frame_rate()),
+		25, false);
 }

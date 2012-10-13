@@ -287,6 +287,7 @@ class MTC_Slave : public TimecodeSlave {
 	double         quarter_frame_duration;
 	Timecode::TimecodeFormat mtc_timecode;
 	Timecode::TimecodeFormat a3e_timecode;
+	Timecode::Time timecode;
 	bool           printed_timecode_warning;
 
 	/* DLL - chase MTC */
