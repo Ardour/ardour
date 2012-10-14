@@ -102,7 +102,7 @@ bool timecode_has_drop_frames(TimecodeFormat const t);
 
 std::string timecode_format_name (TimecodeFormat const t);
 
-std::string timecode_format_time (Timecode::Time& timecode);
+std::string timecode_format_time (Timecode::Time const timecode);
 
 std::string timecode_format_sampletime (
 		int64_t sample,

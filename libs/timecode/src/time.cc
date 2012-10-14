@@ -578,13 +578,15 @@ timecode_format_name (TimecodeFormat const t)
 	return "??";
 }
 
-std::string timecode_format_time (Timecode::Time& TC)
+std::string timecode_format_time (Timecode::Time TC)
 {
 	char buf[32];
 	if (TC.negative) {
-		snprintf (buf, sizeof (buf), "-%02" PRIu32 ":%02" PRIu32 ":%02" PRIu32 ":%02" PRIu32, TC.hours, TC.minutes, TC.seconds, TC.frames);
+		snprintf (buf, sizeof (buf), "-%02" PRIu32 ":%02" PRIu32 ":%02" PRIu32 "%c%02" PRIu32,
+				TC.hours, TC.minutes, TC.seconds, TC.drop ? ';' : ':', TC.frames);
 	} else {
-		snprintf (buf, sizeof (buf), " %02" PRIu32 ":%02" PRIu32 ":%02" PRIu32 ":%02" PRIu32, TC.hours, TC.minutes, TC.seconds, TC.frames);
+		snprintf (buf, sizeof (buf), " %02" PRIu32 ":%02" PRIu32 ":%02" PRIu32 "%c%02" PRIu32,
+				TC.hours, TC.minutes, TC.seconds, TC.drop ? ';' : ':', TC.frames);
 	}
 	return std::string(buf);
 }
