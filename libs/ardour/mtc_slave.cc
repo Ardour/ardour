@@ -635,9 +635,13 @@ std::string
 MTC_Slave::approximate_current_position() const
 {
 	SafeTime last;
+	if (last.timestamp == 0) {
+		return "--:--:--:--";
+	}
 	read_current (&last);
 	return Timecode::timecode_format_sampletime(
 		last.position,
 		double(session.frame_rate()),
-		25, false);
+		Timecode::timecode_to_frames_per_second(mtc_timecode),
+		Timecode::timecode_has_drop_frames(mtc_timecode));
 }
