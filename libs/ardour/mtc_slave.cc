@@ -311,9 +311,9 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full, framepos_t now)
 		can_notify_on_unknown_rate = true;
 		break;
 	case MTC_30_FPS_DROP:
-		timecode.rate = 30;
+		timecode.rate = (30000.0/1001.0);
 		timecode.drop = true;
-		tc_format = timecode_30drop;
+		tc_format = timecode_2997drop;
 		can_notify_on_unknown_rate = true;
 		break;
 	case MTC_30_FPS:
