@@ -183,6 +183,7 @@ MTC_Slave::reset (bool with_position)
 	window_begin = 0;
 	window_end = 0;
 	transport_direction = 1;
+	current_delta = 0;
 }
 
 void
@@ -629,6 +630,8 @@ MTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 	DEBUG_TRACE (DEBUG::MTC, string_compose ("MTCsync spd: %1 pos: %2 | last-pos: %3 elapsed: %4 delta: %5\n",
 						 speed, pos, last.position, elapsed,  pos - sess_pos));
 
+	current_delta = (pos - sess_pos);
+
 	return true;
 }
 
@@ -651,4 +654,12 @@ MTC_Slave::approximate_current_position() const
 		double(session.frame_rate()),
 		Timecode::timecode_to_frames_per_second(mtc_timecode),
 		Timecode::timecode_has_drop_frames(mtc_timecode));
+}
+
+std::string
+MTC_Slave::approximate_current_delta() const
+{
+	char delta[24];
+	snprintf(delta, sizeof(delta), "%+" PRIi64, current_delta); // XXX TODO unit, refine
+	return std::string(delta);
 }

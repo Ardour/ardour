@@ -171,6 +171,12 @@ class Slave {
 	 * @return - whether ARDOUR should use the slave speed without any adjustments
 	 */
 	virtual bool give_slave_full_control_over_transport_speed() const { return false; }
+
+	/**
+	 * @return - current time-delta between engine and sync-source
+	 */
+	virtual std::string approximate_current_delta() const { return ""; }
+
 };
 
 /// We need this wrapper for testability, it's just too hard to mock up a session class
@@ -255,6 +261,7 @@ class MTC_Slave : public TimecodeSlave {
 	bool requires_seekahead () const { return true; }
 	framecnt_t seekahead_distance() const;
 	bool give_slave_full_control_over_transport_speed() const;
+	std::string approximate_current_delta() const;
 
         Timecode::TimecodeFormat apparent_timecode_format() const;
         std::string approximate_current_position() const;
@@ -289,6 +296,7 @@ class MTC_Slave : public TimecodeSlave {
 	Timecode::TimecodeFormat a3e_timecode;
 	Timecode::Time timecode;
 	bool           printed_timecode_warning;
+	frameoffset_t  current_delta;
 
 	/* DLL - chase MTC */
 	double t0; ///< time at the beginning of the MTC quater frame
