@@ -451,7 +451,11 @@ sync_source_to_string (SyncSource src, bool sh)
 		}
 
 	case MIDIClock:
-		return _("MIDI Clock");
+		if (sh) {
+			return _("M-Clock");
+		} else {
+			return _("MIDI Clock");
+		}
 
 	case LTC:
 		return _("LTC");

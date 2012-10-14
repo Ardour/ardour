@@ -1108,34 +1108,49 @@ AudioClock::set_timecode (framepos_t when, bool /*force*/)
 
 		if (_session->config.get_external_sync()) {
 			Slave* slave = _session->slave();
+			SyncSource sync_src = Config->get_sync_source();
 
-			switch (Config->get_sync_source()) {
+			switch (sync_src) {
 			case JACK:
-				_left_layout->set_text ("JACK");
+				_left_layout->set_text (string_compose ("%1",
+							sync_source_to_string(sync_src, true)));
+				_right_layout->set_text ("");
 				break;
 			case MTC:
 				if (slave) {
-					_left_layout->set_text (string_compose ("MTC %1", dynamic_cast<TimecodeSlave*>(slave)->approximate_current_position()));
+					_left_layout->set_text (string_compose ("%1 %2",
+								sync_source_to_string(sync_src, true),
+								dynamic_cast<TimecodeSlave*>(slave)->approximate_current_position()));
+					_right_layout->set_text ("+- 0"); // XXX
 				} else {
-					_left_layout->set_text ("MTC --pending--");
+					_left_layout->set_text (string_compose ("%1 --pending--",
+								sync_source_to_string(sync_src, true)));
+					_right_layout->set_text ("");
 				}
 				break;
 			case MIDIClock:
-				_left_layout->set_text ("M-Clock");
+				_left_layout->set_text (string_compose ("%1",
+							sync_source_to_string(sync_src, true)));
+				_right_layout->set_text ("");
 				break;
 			case LTC:
 				if (slave) {
-					_left_layout->set_text (string_compose ("LTC %1", dynamic_cast<TimecodeSlave*>(slave)->approximate_current_position()));
+					_left_layout->set_text (string_compose ("%1 %2",
+								sync_source_to_string(sync_src, true),
+								dynamic_cast<TimecodeSlave*>(slave)->approximate_current_position()));
+					_right_layout->set_text ("+- 0"); // XXX
 				} else {
-					_left_layout->set_text ("LTC --pending--");
+					_left_layout->set_text (string_compose ("%1 --pending--",
+								sync_source_to_string(sync_src, true)));
+					_right_layout->set_text ("");
 				}
 				break;
 			}
 		} else {
 			_left_layout->set_text ("INT");
+			_right_layout->set_text ("");
 		}
 
-		_right_layout->set_text ("77:77:77:77");
 	}
 }
 
@@ -2018,7 +2033,7 @@ AudioClock::set_mode (Mode m)
 
 	switch (_mode) {
 	case Timecode:
-		mode_based_info_ratio = 0.57; // trial and error, could be affected by font metrics
+		mode_based_info_ratio = 0.62; // trial and error, could be affected by font metrics
 		insert_map.push_back (11);
 		insert_map.push_back (10);
 		insert_map.push_back (8);
