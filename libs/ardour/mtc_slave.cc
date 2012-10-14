@@ -645,10 +645,10 @@ std::string
 MTC_Slave::approximate_current_position() const
 {
 	SafeTime last;
+	read_current (&last);
 	if (last.timestamp == 0) {
 		return "--:--:--:--";
 	}
-	read_current (&last);
 	return Timecode::timecode_format_sampletime(
 		last.position,
 		double(session.frame_rate()),
