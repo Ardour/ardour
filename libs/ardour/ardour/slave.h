@@ -340,18 +340,26 @@ public:
 	int parse_ltc(const jack_nframes_t, const jack_default_audio_sample_t * const, const framecnt_t);
 	bool process_ltc(framepos_t, framecnt_t);
 	void init_ltc_dll(framepos_t, double);
+	void detect_ltc_fps(int, bool);
 
 	Session&    session;
 	bool        did_reset_tc_format;
 	Timecode::TimecodeFormat saved_tc_format;
 
 	LTCDecoder *decoder;
+	Timecode::Time timecode;
 	double      frames_per_ltc_frame;
 
 	framecnt_t  last_timestamp;
 	framecnt_t  last_ltc_frame;
 	framepos_t  ltc_transport_pos;
 	double      ltc_speed;
+
+	int         ltc_detect_fps_cnt;
+	int         ltc_detect_fps_max;
+	Timecode::TimecodeFormat ltc_timecode;
+	Timecode::TimecodeFormat a3e_timecode;
+	bool           printed_timecode_warning;
 
 	/* DLL - chase MTC */
 	double t0; ///< time at the beginning of the MTC quater frame
