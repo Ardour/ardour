@@ -165,7 +165,10 @@ LTC_Slave::detect_ltc_fps(int frameno, bool df)
 				did_reset_tc_format = true;
 			}
 			if (cur_timecode != tc_format) {
-				warning << _("Session and LTC framerate mismatch.") << endmsg;
+				warning << string_compose(_("Session framerate adjusted from %1 TO: LTC's %2."),
+						Timecode::timecode_format_name(cur_timecode),
+						Timecode::timecode_format_name(tc_format))
+					<< endmsg;
 			}
 			session.config.set_timecode_format (tc_format);
 		} else {
@@ -174,7 +177,10 @@ LTC_Slave::detect_ltc_fps(int frameno, bool df)
 			if (a3e_timecode != cur_timecode) printed_timecode_warning = false;
 
 			if (cur_timecode != tc_format && ! printed_timecode_warning) {
-				warning << _("Session and LTC framerate mismatch.") << endmsg;
+				warning << string_compose(_("Session and LTC framerate mismatch: LTC:%1 Session:%2."),
+						Timecode::timecode_format_name(tc_format),
+						Timecode::timecode_format_name(cur_timecode))
+					<< endmsg;
 				printed_timecode_warning = true;
 			}
 		}
