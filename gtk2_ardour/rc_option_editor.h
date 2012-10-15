@@ -45,6 +45,7 @@ private:
 	ComboOption<ARDOUR::SyncSource>* _sync_source;
         BoolOption* _sync_framerate;
         BoolOption* _sync_genlock;
+        ComboStringOption* _ltc_port;
 
         PBD::ScopedConnection parameter_change_connection;
 };

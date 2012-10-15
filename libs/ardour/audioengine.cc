@@ -89,13 +89,24 @@ AudioEngine::AudioEngine (string client_name, string session_uuid)
 	}
 
 	Port::set_engine (this);
+
 #ifdef HAVE_LTC
-	_ltc_input = new AudioPort ("LTC in", Port::IsInput);
+	_ltc_input = register_port (DataType::AUDIO, _("LTC in"), Port::IsInput);
+
+	/* As of October 2012, the LTC source port is the only thing that needs
+	 * to care about Config parameters, so don't bother to listen if we're
+	 * not doing LTC stuff. This might change if other parameters show up
+	 * in the future that we need to care about with or without LTC.
+	 */
+
+	Config->ParameterChanged.connect_same_thread (config_connection, boost::bind (&AudioEngine::parameter_changed, this, _1));
 #endif
 }
 
 AudioEngine::~AudioEngine ()
 {
+	config_connection.disconnect ();
+
 	{
 		Glib::Threads::Mutex::Lock tm (_process_lock);
 		session_removed.signal ();
@@ -210,6 +221,9 @@ AudioEngine::start ()
 			_running = true;
 			_has_run = true;
 			Running(); /* EMIT SIGNAL */
+
+			reconnect_ltc ();
+
 		} else {
 			// error << _("cannot activate JACK client") << endmsg;
 		}
@@ -377,31 +391,38 @@ void
 AudioEngine::_connect_callback (jack_port_id_t id_a, jack_port_id_t id_b, int conn, void* arg)
 {
 	AudioEngine* ae = static_cast<AudioEngine*> (arg);
+	ae->connect_callback (id_a, id_b, conn);
+}
 
-	if (ae->port_remove_in_progress) {
+void
+AudioEngine::connect_callback (jack_port_id_t id_a, jack_port_id_t id_b, int conn)
+{
+	if (port_remove_in_progress) {
 		return;
 	}
 
-	GET_PRIVATE_JACK_POINTER (ae->_jack);
+	GET_PRIVATE_JACK_POINTER (_jack);
 
 	jack_port_t* jack_port_a = jack_port_by_id (_priv_jack, id_a);
 	jack_port_t* jack_port_b = jack_port_by_id (_priv_jack, id_b);
 
 	boost::shared_ptr<Port> port_a;
 	boost::shared_ptr<Port> port_b;
+	Ports::iterator x;
+	boost::shared_ptr<Ports> pr = ports.reader ();
 
-	boost::shared_ptr<Ports> pr = ae->ports.reader ();
-	Ports::iterator i = pr->begin ();
-	while (i != pr->end() && (port_a == 0 || port_b == 0)) {
-		if (jack_port_a == i->second->jack_port()) {
-			port_a = i->second;
-		} else if (jack_port_b == i->second->jack_port()) {
-			port_b = i->second;
-		}
-		++i;
+
+	x = pr->find (make_port_name_relative (jack_port_name (jack_port_a)));
+	if (x != pr->end()) {
+		port_a = x->second;
 	}
 
-	ae->PortConnectedOrDisconnected (
+	x = pr->find (make_port_name_relative (jack_port_name (jack_port_b)));
+	if (x != pr->end()) {
+		port_b = x->second;
+	}
+
+	PortConnectedOrDisconnected (
 		port_a, jack_port_name (jack_port_a),
 		port_b, jack_port_name (jack_port_b),
 		conn == 0 ? false : true
@@ -1470,6 +1491,8 @@ AudioEngine::reconnect_to_jack ()
 
 	MIDI::Manager::instance()->reconnect ();
 
+	reconnect_ltc ();
+
 	Running (); /* EMIT SIGNAL*/
 
 	start_metering_thread ();
@@ -1612,4 +1635,28 @@ AudioEngine::destroy ()
 {
 	delete _instance;
 	_instance = 0;
+}
+
+void
+AudioEngine::parameter_changed (const std::string& s)
+{
+	if (s == "ltc-source-port") {
+		reconnect_ltc ();
+	}
+
+}
+
+void
+AudioEngine::reconnect_ltc ()
+{
+	if (_ltc_input) {
+
+		string src = Config->get_ltc_source_port();
+
+		_ltc_input->disconnect_all ();
+
+		if (src != _("None") && !src.empty())  {
+			_ltc_input->connect (src);
+		}
+	}
 }

@@ -1068,7 +1068,22 @@ RCOptionEditor::RCOptionEditor ()
 		(_sync_genlock->tip_widget(), 
 		 _("<b>When enabled</b> indicates that the selected external timecode source shares sync (Black &amp; Burst, Wordclock, etc) with the audio interface"));
 
+
 	add_option (_("Transport"), _sync_genlock);
+
+	_ltc_port = new ComboStringOption (
+		"ltc-source-port",
+		_("LTC incoming port"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_ltc_source_port),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_ltc_source_port)
+		);
+
+	vector<string> physical_inputs;
+	physical_inputs.push_back (_("None"));
+	AudioEngine::instance()->get_physical_inputs (DataType::AUDIO, physical_inputs);
+	_ltc_port->set_popdown_strings (physical_inputs);
+
+	add_option (_("Transport"), _ltc_port);
 
 	parameter_changed ("sync-source");
 

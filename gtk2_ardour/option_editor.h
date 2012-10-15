@@ -285,6 +285,76 @@ private:
 };
 
 
+/** Component which provides the UI to handle an enumerated option using a GTK ComboBox.
+ *  The template parameter is the enumeration.
+ */
+class ComboStringOption : public Option
+{
+public:
+
+	/** Construct an ComboOption.
+	 *  @param i id
+	 *  @param n User-visible name.
+	 *  @param g Slot to get the variable's value.
+	 *  @param s Slot to set the variable's value.
+	 */
+	ComboStringOption (
+		std::string const & i,
+		std::string const & n,
+		sigc::slot<std::string> g,
+		sigc::slot<bool, std::string> s
+		)
+		: Option (i, n),
+		  _get (g),
+		  _set (s)
+	{
+		_label = manage (new Gtk::Label (n + ":"));
+		_label->set_alignment (0, 0.5);
+		_combo = manage (new Gtk::ComboBoxText);
+		_combo->signal_changed().connect (sigc::mem_fun (*this, &ComboStringOption::changed));
+	}
+
+	void set_state_from_config () {
+		_combo->set_active_text (_get());
+	}
+
+	void add_to_page (OptionEditorPage* p)
+	{
+		add_widgets_to_page (p, _label, _combo);
+	}
+
+	/** Set the allowed strings for this option
+	 *  @param strings a vector of allowed strings
+	 */
+        void set_popdown_strings (const std::vector<std::string>& strings) {
+		_combo->clear_items ();
+		for (std::vector<std::string>::const_iterator i = strings.begin(); i != strings.end(); ++i) {
+			_combo->append_text (*i);
+		}
+	}
+
+	void clear () {
+		_combo->clear_items();
+	}
+
+	void changed () {
+		_set (_combo->get_active_text ());
+	}
+
+	void set_sensitive (bool yn) {
+		_combo->set_sensitive (yn);
+	}
+
+        Gtk::Widget& tip_widget() { return *_combo; }
+
+private:
+        sigc::slot<std::string> _get;
+        sigc::slot<bool, std::string> _set;
+	Gtk::Label* _label;
+	Gtk::ComboBoxText* _combo;
+};
+
+
 /** Component which provides the UI to handle a boolean option which needs
  *  to be represented as a ComboBox to be clear to the user.
  */

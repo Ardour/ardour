@@ -260,9 +260,7 @@ _	   the regular process() call to session->process() is not made.
 
 	int create_process_thread (boost::function<void()>, pthread_t*, size_t stacksize);
 
-#ifdef HAVE_LTC
-	Port *ltc_input_port() const { return _ltc_input; }
-#endif
+        boost::shared_ptr<Port> ltc_input_port() const { return _ltc_input; }
 
 private:
 	static AudioEngine*       _instance;
@@ -293,9 +291,8 @@ private:
         Glib::Threads::Thread*     m_meter_thread;
 	ProcessThread*            _main_thread;
 
-#ifdef HAVE_LTC
-	Port*                     _ltc_input;
-#endif
+        boost::shared_ptr<Port>   _ltc_input;
+        void reconnect_ltc ();
 
 	SerializedRCUManager<Ports> ports;
 
@@ -329,6 +326,7 @@ private:
 	int  jack_bufsize_callback (pframes_t);
 	int  jack_sample_rate_callback (pframes_t);
 	void freewheel_callback (int);
+        void connect_callback (jack_port_id_t, jack_port_id_t, int);
 
 	void set_jack_callbacks ();
 
@@ -356,6 +354,8 @@ private:
 	};
 
 	static void* _start_process_thread (void*);
+        void parameter_changed (const std::string&);
+        PBD::ScopedConnection config_connection;
 };
 
 } // namespace ARDOUR
