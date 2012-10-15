@@ -646,8 +646,8 @@ MTC_Slave::approximate_current_position() const
 {
 	SafeTime last;
 	read_current (&last);
-	if (last.timestamp == 0) {
-		return "--:--:--:--";
+	if (last.timestamp == 0 || reset_pending) {
+		return " --:--:--:--";
 	}
 	return Timecode::timecode_format_sampletime(
 		last.position,
@@ -660,6 +660,13 @@ std::string
 MTC_Slave::approximate_current_delta() const
 {
 	char delta[24];
-	snprintf(delta, sizeof(delta), "%+" PRIi64, current_delta); // XXX TODO unit, refine
+	SafeTime last;
+	read_current (&last);
+	if (last.timestamp == 0 || reset_pending) {
+		snprintf(delta, sizeof(delta), "---");
+	} else {
+		// TODO if current_delta > 1 frame -> display timecode.
+		snprintf(delta, sizeof(delta), "%+" PRIi64 " sm", current_delta);
+	}
 	return std::string(delta);
 }
