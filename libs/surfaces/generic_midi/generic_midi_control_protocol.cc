@@ -43,14 +43,11 @@ GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s)
 {
 	MIDI::Manager* mm = MIDI::Manager::instance();
 
-	/* XXX it might be nice to run "control" through i18n, but thats a bit tricky because
-	   the name is defined in ardour.rc which is likely not internationalized.
-	*/
-	
-	_port = mm->port (X_("control"));
+        _port = mm->port (Config->get_midi_port_name());
 
 	if (_port == 0) {
-		error << _("no MIDI port named \"control\" exists - generic MIDI control disabled") << endmsg;
+                error << string_compose (_("no MIDI port named \"%1\" exists - generic MIDI control disabled"), Config->get_midi_port_name())
+                      << endmsg;
 		throw failed_constructor();
 	}
 
