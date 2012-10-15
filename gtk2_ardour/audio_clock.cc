@@ -1071,7 +1071,6 @@ AudioClock::set_minsec (framepos_t when, bool /*force*/)
 void
 AudioClock::set_timecode (framepos_t when, bool /*force*/)
 {
-	char buf[32];
 	Timecode::Time TC;
 	bool negative = false;
 
@@ -1095,14 +1094,10 @@ AudioClock::set_timecode (framepos_t when, bool /*force*/)
 	} else {
 		_session->timecode_time (when, TC);
 	}
-	
-	if (TC.negative || negative) {
-		snprintf (buf, sizeof (buf), "-%02" PRIu32 ":%02" PRIu32 ":%02" PRIu32 ":%02" PRIu32, TC.hours, TC.minutes, TC.seconds, TC.frames);
-	} else {
-		snprintf (buf, sizeof (buf), " %02" PRIu32 ":%02" PRIu32 ":%02" PRIu32 ":%02" PRIu32, TC.hours, TC.minutes, TC.seconds, TC.frames);
-	}
 
-	_layout->set_text (buf);
+	TC.negative = TC.negative || negative;
+
+	_layout->set_text (Timecode::timecode_format_time(TC));
 
 	if (_left_layout) {
 
