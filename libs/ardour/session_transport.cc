@@ -618,9 +618,19 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	}
 
 	if ((ptw & PostTransportLocate) && get_record_enabled()) {
-		/* capture start has been changed, so save pending state */
-		save_state ("", true);
-		saved = true;
+		/* This is scheduled by realtime_stop(), which is also done
+		 * when a slave requests /locate/ for an initial sync.
+		 * We can't hold up the slave for long with a save() here,
+		 * without breaking its initial sync cycle.
+		 *
+		 * save state only if there's no slave or if it's not yet locked.
+		 */
+		if (!_slave || !_slave->locked()) {
+			DEBUG_TRACE (DEBUG::Transport, X_("Butler PTW: pending save\n"));
+			/* capture start has been changed, so save pending state */
+			save_state ("", true);
+			saved = true;
+		}
 	}
 
 	/* always try to get rid of this */
