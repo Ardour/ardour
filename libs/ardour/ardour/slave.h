@@ -261,10 +261,10 @@ class MTC_Slave : public TimecodeSlave {
 	bool requires_seekahead () const { return true; }
 	framecnt_t seekahead_distance() const;
 	bool give_slave_full_control_over_transport_speed() const;
-	std::string approximate_current_delta() const;
 
         Timecode::TimecodeFormat apparent_timecode_format() const;
         std::string approximate_current_position() const;
+	std::string approximate_current_delta() const;
 
   private:
 	Session&    session;
@@ -337,18 +337,22 @@ public:
 	bool ok() const;
 
 	framecnt_t resolution () const;
-	bool requires_seekahead () const { return true; }
+	bool requires_seekahead () const { return false; }
 	framecnt_t seekahead_distance() const;
 	bool give_slave_full_control_over_transport_speed() const;
 
         Timecode::TimecodeFormat apparent_timecode_format() const;
         std::string approximate_current_position() const;
+	std::string approximate_current_delta() const;
 
   private:
 	int parse_ltc(const jack_nframes_t, const jack_default_audio_sample_t * const, const framecnt_t);
-	bool process_ltc(framepos_t, framecnt_t);
-	void init_ltc_dll(framepos_t, double);
-	void detect_ltc_fps(int, bool);
+	bool process_ltc(framepos_t const, framepos_t const, framecnt_t);
+	void init_ltc_dll(framepos_t const, double const);
+	void init_engine_dll (framepos_t, framepos_t);
+	bool detect_ltc_fps(int, bool);
+	bool detect_ltc_discontinuity(LTCFrameExt *);
+	void reset();
 
 	Session&    session;
 	bool        did_reset_tc_format;
@@ -357,11 +361,14 @@ public:
 	LTCDecoder *decoder;
 	Timecode::Time timecode;
 	double      frames_per_ltc_frame;
+	bool        ltc_discontinuity;
 
+	framecnt_t  monotonic_cnt;
 	framecnt_t  last_timestamp;
 	framecnt_t  last_ltc_frame;
 	framepos_t  ltc_transport_pos;
 	double      ltc_speed;
+	frameoffset_t current_delta;
 
 	int         ltc_detect_fps_cnt;
 	int         ltc_detect_fps_max;
@@ -369,11 +376,26 @@ public:
 	Timecode::TimecodeFormat a3e_timecode;
 	bool           printed_timecode_warning;
 
-	/* DLL - chase MTC */
+	LTCFrame prev_ltc_frame;
+	uint64_t frames_in_sequence;
+	int      delayedlocked;
+
+
+	/* DLL - chase LTC */
 	double t0; ///< time at the beginning of the MTC quater frame
 	double t1; ///< calculated end of the MTC quater frame
 	double e2; ///< second order loop error
 	double b, c, omega; ///< DLL filter coefficients
+
+	/* DLL - sync engine */
+	int    transport_direction;
+	int    engine_dll_initstate;
+	double te0; ///< time at the beginning of the engine process
+	double te1; ///< calculated sync time
+	double ee2; ///< second order loop error
+	double be, ce, oe; ///< DLL filter coefficients
+
+
 };
 #endif
 
