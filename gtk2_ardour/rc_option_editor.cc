@@ -1725,12 +1725,16 @@ RCOptionEditor::parameter_changed (string const & p)
 		_solo_control_is_listen_control->set_sensitive (s);
 		_listen_position->set_sensitive (s);
 	} else if (p == "sync-source") {
-		if (Config->get_sync_source() != ARDOUR::MTC) {
-			_sync_genlock->set_sensitive (false);
-			_sync_framerate->set_sensitive (false);
-		} else {
+		switch(Config->get_sync_source()) {
+		case ARDOUR::MTC:
+		case ARDOUR::LTC:
 			_sync_genlock->set_sensitive (true);
 			_sync_framerate->set_sensitive (true);
+			break;
+		default:
+			_sync_genlock->set_sensitive (false);
+			_sync_framerate->set_sensitive (false);
+			break;
 		}
 	}
 }
