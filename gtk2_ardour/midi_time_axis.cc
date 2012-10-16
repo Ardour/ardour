@@ -128,6 +128,9 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	if (is_track ()) {
 		_piano_roll_header = new PianoRollHeader(*midi_view());
 		_range_scroomer = new MidiScroomer(midi_view()->note_range_adjustment);
+		_range_scroomer->DoubleClicked.connect (sigc::bind (
+				sigc::mem_fun(*this, &MidiTimeAxisView::set_note_range),
+				MidiStreamView::ContentsRange, false));
 	}
 
 	/* This next call will result in our height being set up, so it must come after

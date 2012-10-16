@@ -251,6 +251,10 @@ Scroomer::on_button_press_event (GdkEventButton* ev)
 		DragStarting (); /* EMIT SIGNAL */
 	}
 	
+	if (ev->type == GDK_2BUTTON_PRESS && ev->button == 1) {
+		DoubleClicked();
+	}
+
 	return false;
 }
 
