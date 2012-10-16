@@ -653,7 +653,10 @@ Session::track_slave_state (float slave_speed, framepos_t slave_transport_frame,
 
 			} else {
 
-				_slave_state = Running;
+				DEBUG_TRACE (DEBUG::Slave, string_compose ("slave stopped -> running at %1\n", slave_transport_frame));
+
+				memset (delta_accumulator, 0, sizeof (int32_t) * delta_accumulator_size);
+				average_slave_delta = 0L;
 
 				Location* al = _locations->auto_loop_location();
 
@@ -665,6 +668,7 @@ Session::track_slave_state (float slave_speed, framepos_t slave_transport_frame,
 				if (slave_transport_frame != _transport_frame) {
 					locate (slave_transport_frame, false, false);
 				}
+				_slave_state = Running;
 			}
 			break;
 
@@ -713,9 +717,6 @@ Session::track_slave_state (float slave_speed, framepos_t slave_transport_frame,
 					cerr << "cannot micro-seek\n";
 					/* XXX what? */
 				}
-
-				memset (delta_accumulator, 0, sizeof (int32_t) * delta_accumulator_size);
-				average_slave_delta = 0L;
 			}
 		}
 
@@ -738,7 +739,7 @@ Session::track_slave_state (float slave_speed, framepos_t slave_transport_frame,
 			force_locate (slave_transport_frame, false);
 		}
 
-		_slave_state = Stopped;
+		reset_slave_state();
 	}
 }
 
