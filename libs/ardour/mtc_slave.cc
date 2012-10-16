@@ -621,7 +621,8 @@ MTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 	 * also see note in MTC_Slave::init_engine_dll
 	 */
 	if (!session.actively_recording()
-	    && ( (pos < 0) || (labs(pos - sess_pos) > 4 * resolution()) )
+	    && speed != 0
+			&& ( (pos < 0) || (labs(pos - sess_pos) > 3 * session.frame_rate()) )
 	    ) {
 		engine_dll_initstate = 0;
 		queue_reset (false);
@@ -666,7 +667,7 @@ MTC_Slave::approximate_current_delta() const
 		snprintf(delta, sizeof(delta), "---");
 	} else {
 		// TODO if current_delta > 1 frame -> display timecode.
-		snprintf(delta, sizeof(delta), "%+" PRIi64 " sm", current_delta);
+		snprintf(delta, sizeof(delta), "%+4" PRIi64 " sm", current_delta);
 	}
 	return std::string(delta);
 }
