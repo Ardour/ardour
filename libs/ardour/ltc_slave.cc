@@ -225,7 +225,7 @@ LTC_Slave::detect_ltc_discontinuity(LTCFrameExt *frame) {
 
 	/* notfify about discontinuities */
 	if (frames_in_sequence > 0 && discontinuity_detected) {
-		fprintf(stdout, "# LTC DISCONTINUITY\n");
+		DEBUG_TRACE (DEBUG::LTC, "# LTC DISCONTINUITY\n");
 		frames_in_sequence=0;
 		return true;
 	}
@@ -271,13 +271,16 @@ LTC_Slave::process_ltc(framepos_t const now, framepos_t const sess_pos, framecnt
 
 		if (frames_in_sequence < 1) {
 			fprintf(stdout, " ####### FIRST LTC FRAME in SEQ #######\n");
-			continue;
 		}
 
 		if (ltc_discontinuity) {
 			fprintf(stdout, " ####### LTC DISCONTINUITY #######\n");
 		}
 #endif
+
+		if (frames_in_sequence < 1) {
+			continue;
+		}
 
 		/* when a full LTC frame is decoded, the timecode the LTC frame
 		 * is referring has just passed.
@@ -545,8 +548,10 @@ std::string
 LTC_Slave::approximate_current_delta() const
 {
 	char delta[24];
-	if (last_timestamp == 0 || frames_in_sequence < 3) {
+	if (last_timestamp == 0 || frames_in_sequence < 2) {
 		snprintf(delta, sizeof(delta), "---");
+	} else if ((monotonic_cnt - last_timestamp) > 2 * frames_per_ltc_frame) {
+		snprintf(delta, sizeof(delta), "flywheel");
 	} else {
 		// TODO if current_delta > 1 frame -> display timecode.
 		// delta >0 if A3's transport is _behind_ LTC
