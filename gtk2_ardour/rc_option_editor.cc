@@ -670,7 +670,11 @@ public:
 		_box->pack_start (*label, false, false);
 		label->show ();
 
-		_store->signal_row_changed().connect (sigc::mem_fun (*this, &ControlSurfacesOptions::model_changed));
+		ControlProtocolManager& m = ControlProtocolManager::instance ();
+		m.ProtocolStatusChange.connect (protocol_status_connection, MISSING_INVALIDATOR,
+						boost::bind (&ControlSurfacesOptions::protocol_status_changed, this, _1), gui_context());
+
+		_store->signal_row_changed().connect (sigc::mem_fun (*this, &ControlSurfacesOptions::view_changed));
 		_view.signal_button_press_event().connect_notify (sigc::mem_fun(*this, &ControlSurfacesOptions::edit_clicked));
 	}
 
@@ -698,7 +702,18 @@ public:
 
 private:
 
-	void model_changed (TreeModel::Path const &, TreeModel::iterator const & i)
+        void protocol_status_changed (ControlProtocolInfo* cpi) {
+		/* find the row */
+		TreeModel::Children rows = _store->children();
+		for (TreeModel::Children::iterator x = rows.begin(); x != rows.end(); ++x) {
+			if ((*x)[_model.protocol_info] == cpi) {
+				(*x)[_model.enabled] = (cpi->protocol || cpi->requested);
+				break;
+			}
+		}
+	}
+
+	void view_changed (TreeModel::Path const &, TreeModel::iterator const & i)
 	{
 		TreeModel::Row r = *i;
 
@@ -794,6 +809,7 @@ private:
 	ControlSurfacesModelColumns _model;
 	TreeView _view;
         Gtk::Window& _parent;
+        PBD::ScopedConnection protocol_status_connection;
 };
 
 /** A class which allows control of visibility of some editor components usign

@@ -75,7 +75,7 @@ class ControlProtocolManager : public PBD::Stateful, public ARDOUR::SessionHandl
 	int set_state (const XMLNode&, int version);
 	XMLNode& get_state (void);
 
-        sigc::signal<void,ControlProtocolInfo*> ProtocolStatusChange;
+        PBD::Signal1<void,ControlProtocolInfo*> ProtocolStatusChange;
 
   private:
 	ControlProtocolManager ();
