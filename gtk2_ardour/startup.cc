@@ -922,6 +922,8 @@ ArdourStartup::redisplay_recent_sessions ()
 	for (ARDOUR::RecentSessions::iterator i = rs.begin(); i != rs.end(); ++i) {
 		session_directories.push_back ((*i).second);
 	}
+	
+	int session_snapshot_count = 0;
 
 	for (vector<std::string>::const_iterator i = session_directories.begin(); i != session_directories.end(); ++i)
 	{
@@ -960,6 +962,8 @@ ArdourStartup::redisplay_recent_sessions ()
 
 		row[recent_session_columns.visible_name] = Glib::path_get_basename (fullpath);
 		row[recent_session_columns.fullpath] = fullpath;
+		
+		++session_snapshot_count;
 
 		if (state_file_names.size() > 1) {
 
@@ -973,13 +977,15 @@ ArdourStartup::redisplay_recent_sessions ()
 
 				child_row[recent_session_columns.visible_name] = *i2;
 				child_row[recent_session_columns.fullpath] = fullpath;
+				++session_snapshot_count;
 			}
 		}
 	}
 
 	recent_session_display.set_tooltip_column(1); // recent_session_columns.fullpath 
 	recent_session_display.set_model (recent_session_model);
-	return rs.size();
+	return session_snapshot_count;
+	// return rs.size();
 }
 
 void
