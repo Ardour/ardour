@@ -964,6 +964,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	framepos_t post_export_position;
 
 	bool _exporting;
+	bool _export_started;
 	bool _export_rolling;
 
 	boost::shared_ptr<ExportHandler> export_handler;
