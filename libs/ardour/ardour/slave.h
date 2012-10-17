@@ -38,6 +38,9 @@
 #include <ltc.h>
 #endif
 
+// used for approximate_current_delta():
+#define PLUSMINUS(A) ( ((A)<0) ? "\u2012" : (((A)>0) ? "+" : "\u00B1") )
+
 namespace MIDI {
 	class Port;
 }
@@ -419,6 +422,7 @@ class MIDIClock_Slave : public Slave {
 	bool give_slave_full_control_over_transport_speed() const { return true; }
 
 	void set_bandwidth (double a_bandwith) { bandwidth = a_bandwith; }
+	std::string approximate_current_delta() const;
 
   protected:
 	ISlaveSessionProxy* session;
@@ -461,6 +465,8 @@ class MIDIClock_Slave : public Slave {
 
 	/// DLL filter coefficients
 	double b, c, omega;
+
+	frameoffset_t  current_delta;
 
 	void reset ();
 	void start (MIDI::Parser& parser, framepos_t timestamp);

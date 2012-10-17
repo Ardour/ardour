@@ -549,13 +549,14 @@ LTC_Slave::approximate_current_delta() const
 {
 	char delta[24];
 	if (last_timestamp == 0 || frames_in_sequence < 2) {
-		snprintf(delta, sizeof(delta), "---");
+		snprintf(delta, sizeof(delta), "\u2012\u2012\u2012\u2012");
 	} else if ((monotonic_cnt - last_timestamp) > 2 * frames_per_ltc_frame) {
 		snprintf(delta, sizeof(delta), "flywheel");
 	} else {
 		// TODO if current_delta > 1 frame -> display timecode.
 		// delta >0 if A3's transport is _behind_ LTC
-		snprintf(delta, sizeof(delta), "%+4" PRIi64 " sm", current_delta);
+		snprintf(delta, sizeof(delta), "%s%4" PRIi64 " sm",
+				PLUSMINUS(-current_delta), abs(current_delta));
 	}
 	return std::string(delta);
 }

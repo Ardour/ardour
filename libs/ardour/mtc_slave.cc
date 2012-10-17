@@ -664,10 +664,11 @@ MTC_Slave::approximate_current_delta() const
 	SafeTime last;
 	read_current (&last);
 	if (last.timestamp == 0 || reset_pending) {
-		snprintf(delta, sizeof(delta), "---");
+		snprintf(delta, sizeof(delta), "\u2012\u2012\u2012\u2012");
 	} else {
 		// TODO if current_delta > 1 frame -> display timecode.
-		snprintf(delta, sizeof(delta), "%+4" PRIi64 " sm", current_delta);
+		snprintf(delta, sizeof(delta), "%s%4" PRIi64 " sm",
+				PLUSMINUS(-current_delta), abs(current_delta));
 	}
 	return std::string(delta);
 }
