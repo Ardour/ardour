@@ -1386,8 +1386,8 @@ Session::set_state (const XMLNode& node, int version)
 		}
 	}
 
-	if ((child = find_named_node (node, "ControlProtocols")) != 0) {
-		ControlProtocolManager::instance().set_protocol_states (*child);
+	if ((child = find_named_node (node, ControlProtocolManager::state_node_name)) != 0) {
+		ControlProtocolManager::instance().set_state (*child, version);
 	}
 
 	update_have_rec_enabled_track ();
