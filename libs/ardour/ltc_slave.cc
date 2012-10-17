@@ -39,7 +39,7 @@ using namespace MIDI;
 using namespace PBD;
 using namespace Timecode;
 
-#define FLYWHEEL_TIMEOUT ( 3 * session.frame_rate() )
+#define FLYWHEEL_TIMEOUT ( 1 * session.frame_rate() )
 
 LTC_Slave::LTC_Slave (Session& s)
 	: session (s)
@@ -337,7 +337,7 @@ LTC_Slave::process_ltc(framepos_t const now, framepos_t const sess_pos, framecnt
 
 		if (last_timestamp == 0
 			|| ((now - last_timestamp) > FLYWHEEL_TIMEOUT)
-			|| (abs(current_delta) >  FLYWHEEL_TIMEOUT) // TODO LTC-delta not engine delta
+			|| (abs(ltc_transport_pos - sess_pos) >  frames_per_ltc_frame)
 			|| (frame.reverse && transport_direction != -1)
 			|| (!frame.reverse && transport_direction != 1)
 			) {
@@ -367,7 +367,7 @@ LTC_Slave::process_ltc(framepos_t const now, framepos_t const sess_pos, framecnt
 			e2 += c * e;
 
 			ltc_speed = (t1 - t0) / frames_per_ltc_frame;
-			current_delta = (ltc_transport_pos - sess_pos);
+			//current_delta = (ltc_transport_pos - sess_pos);
 			DEBUG_TRACE (DEBUG::LTC, string_compose ("LTC DLL t0:%1 t1:%2 err:%3 spd:%4 ddt:%5\n", t0, t1, e, ltc_speed, e2 - frames_per_ltc_frame));
 
 		}
@@ -393,7 +393,7 @@ LTC_Slave::process_ltc(framepos_t const now, framepos_t const sess_pos, framecnt
 void
 LTC_Slave::init_ltc_dll(framepos_t const tme, double const dt)
 {
-	omega = 2.0 * M_PI * dt / double(session.frame_rate());
+	omega = 2.0 * M_PI * (2.0 * dt) / double(session.frame_rate());
 	b = 1.4142135623730950488 * omega;
 	c = omega * omega;
 
@@ -413,7 +413,7 @@ LTC_Slave::init_engine_dll (framepos_t pos, framepos_t inc)
 	 * But this is only really a problem if the user performs manual
 	 * seeks while transport is running and slaved to LTC.
 	 */
-	oe = 2.0 * M_PI * double(inc/2.0) / double(session.frame_rate());
+	oe = 2.0 * M_PI * double(inc) / double(session.frame_rate());
 	be = 1.4142135623730950488 * oe;
 	ce = oe * oe;
 
