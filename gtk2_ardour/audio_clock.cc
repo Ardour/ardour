@@ -1124,9 +1124,15 @@ AudioClock::set_timecode (framepos_t when, bool /*force*/)
 				}
 				break;
 			case MIDIClock:
-				_left_layout->set_text (string_compose ("%1",
-							sync_source_to_string(sync_src, true)));
-				_right_layout->set_text (slave->approximate_current_delta());
+				if (slave) {
+					_left_layout->set_text (string_compose ("%1",
+								sync_source_to_string(sync_src, true)));
+					_right_layout->set_text (slave->approximate_current_delta());
+				} else {
+					_left_layout->set_text (string_compose ("%1 --pending--",
+								sync_source_to_string(sync_src, true)));
+					_right_layout->set_text ("");
+				}
 				break;
 			case LTC:
 				if (slave) {
