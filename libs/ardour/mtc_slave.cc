@@ -628,6 +628,12 @@ MTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 		queue_reset (false);
 	}
 
+#if 1
+	/* provide a 1% deadzone to lock the speed */
+	if (fabs(speed - 1.0) <= 0.01)
+	        speed = 1.0;
+#endif
+
 	DEBUG_TRACE (DEBUG::MTC, string_compose ("MTCsync spd: %1 pos: %2 | last-pos: %3 elapsed: %4 delta: %5\n",
 						 speed, pos, last.position, elapsed,  pos - sess_pos));
 
