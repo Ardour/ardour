@@ -628,7 +628,7 @@ MTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 		queue_reset (false);
 	}
 
-#if 1
+#if 0
 	/* provide a 1% deadzone to lock the speed */
 	if (fabs(speed - 1.0) <= 0.01)
 	        speed = 1.0;
