@@ -1356,7 +1356,7 @@ Session::set_state (const XMLNode& node)
 	}
 	
 	if ((child = find_named_node (node, "ControlProtocols")) != 0) {
-		ControlProtocolManager::instance().set_protocol_states (*child);
+		ControlProtocolManager::instance().set_state (*child);
 	}
 
 	/* here beginneth the second phase ... */

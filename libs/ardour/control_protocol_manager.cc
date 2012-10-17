@@ -126,6 +126,8 @@ ControlProtocolManager::instantiate (ControlProtocolInfo& cpi)
 	Glib::Mutex::Lock lm (protocols_lock);
 	control_protocols.push_back (cpi.protocol);
 
+	ProtocolStatusChange (&cpi); // EMIT SIGNAL
+
 	return cpi.protocol;
 }
 
@@ -154,17 +156,13 @@ ControlProtocolManager::teardown (ControlProtocolInfo& cpi)
 		} else {
 			cerr << "Programming error: ControlProtocolManager::teardown() called for " << cpi.name << ", but it was not found in control_protocols" << endl;
 		}
-
-		list<ControlProtocolInfo*>::iterator p2 = find (control_protocol_info.begin(), control_protocol_info.end(), &cpi);
-		if (p2 != control_protocol_info.end()) {
-			control_protocol_info.erase (p2);
-		} else {
-			cerr << "Programming error: ControlProtocolManager::teardown() called for " << cpi.name << ", but it was not found in control_protocol_info" << endl;
-		}
 	}
 	
 	cpi.protocol = 0;
 	dlclose (cpi.descriptor->module);
+
+	ProtocolStatusChange (&cpi); // EMIT SIGNAL
+
 	return 0;
 }
 
@@ -307,28 +305,43 @@ ControlProtocolManager::set_state (const XMLNode& node)
 	for (citer = clist.begin(); citer != clist.end(); ++citer) {
 		if ((*citer)->name() == X_("Protocol")) {
 
-			prop = (*citer)->property (X_("active"));
+			if ((prop = (*citer)->property (X_("active"))) == 0) {
+				continue;
+			}
 
-			if (prop && string_is_affirmative (prop->value())) {
-				if ((prop = (*citer)->property (X_("name"))) != 0) {
-					ControlProtocolInfo* cpi = cpi_by_name (prop->value());
-					if (cpi) {
-						if (!(*citer)->children().empty()) {
-							cpi->state = (*citer)->children().front ();
-						} else {
-							cpi->state = 0;
-						}
-						
-						if (_session) {
-							instantiate (*cpi);
-						} else {
-							cpi->requested = true;
-						}
+			bool active = string_is_affirmative (prop->value());
+			
+			if ((prop = (*citer)->property (X_("name"))) == 0) {
+				continue;
+			}
+
+			ControlProtocolInfo* cpi = cpi_by_name (prop->value());
+			
+			if (cpi) {
+				
+				if (!(*citer)->children().empty()) {
+					cpi->state = new XMLNode (*((*citer)->children().front ()));
+				} else {
+					cpi->state = 0;
+				}
+				
+				if (active) {
+					if (_session) {
+						instantiate (*cpi);
+					} else {
+						cpi->requested = true;
+					}
+				} else {
+					if (_session) {
+						teardown (*cpi);
+					} else {
+						cpi->requested = false;
 					}
 				}
 			}
-		}    
+		}
 	}
+
 	return 0;
 }
 
@@ -363,33 +376,3 @@ ControlProtocolManager::get_state (void)
 	return *root;
 }
 
-void
-ControlProtocolManager::set_protocol_states (const XMLNode& node)
-{
-	XMLNodeList nlist;
-	XMLNodeConstIterator niter;
-	XMLProperty* prop;
-
-	nlist = node.children();
-
-	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-
-		XMLNode* child = (*niter);
-
-		if ((prop = child->property ("name")) == 0) {
-			error << _("control protocol XML node has no name property. Ignored.") << endmsg;
-			continue;
-		}
-
-		ControlProtocolInfo* cpi = cpi_by_name (prop->value());
-
-		if (!cpi) {
-			warning << string_compose (_("control protocol \"%1\" is not known. Ignored"), prop->value()) << endmsg;
-			continue;
-		}
-
-		/* copy the node so that ownership is clear */
-
-		cpi->state = new XMLNode (*child);
-	}
-}

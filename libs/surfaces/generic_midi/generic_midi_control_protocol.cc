@@ -70,12 +70,17 @@ GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s)
 
 GenericMidiControlProtocol::~GenericMidiControlProtocol ()
 {
+	Glib::Mutex::Lock lm2 (controllables_lock);
+	
+	for (MIDIControllables::iterator iter = controllables.begin(); iter != controllables.end(); ++iter) {
+		MIDIControllable* existingBinding = (*iter);
+		delete existingBinding;
+	}
 }
 
 int
 GenericMidiControlProtocol::set_active (bool yn)
 {
-	/* start/stop delivery/outbound thread */
 	return 0;
 }
 
@@ -339,7 +344,6 @@ GenericMidiControlProtocol::set_state (const XMLNode& node)
 		_feedback_interval = 10000;
 	}
 
-	// Are we using the autobinding feature?  If so skip this part
 	if ( !auto_binding ) {
 		
 		Controllable* c;
@@ -350,14 +354,13 @@ GenericMidiControlProtocol::set_state (const XMLNode& node)
 		}
 		
 		Glib::Mutex::Lock lm2 (controllables_lock);
-		controllables.clear ();
 		nlist = node.children(); // "controls"
 		
+		controllables.clear ();
+
 		if (nlist.empty()) {
 			return 0;
 		}
-		
-		nlist = nlist.front()->children ();
 		
 		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 			

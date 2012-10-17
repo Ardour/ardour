@@ -641,12 +641,60 @@ ARDOUR_UI::install_actions ()
 }
 
 void
+ARDOUR_UI::control_protocol_status_change (ControlProtocolInfo* cpi)
+{
+	string action_name = "Toggle";
+	action_name += legalize_for_path (cpi->name);
+	action_name += "Surface";
+
+	Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (X_("Editor"), action_name.c_str());
+	
+	if (!act) {
+		return;
+	}
+
+	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+	
+	if (!tact) {
+		return;
+	}
+
+	if (tact->get_active() == (cpi->protocol != 0)) {
+		/* action state matches current protocol state, ignore this
+		   bogus toggle (e.g. caused by initial ::set_active() call
+		*/
+		return;
+	}
+
+	if (cpi->protocol == 0) {
+		tact->set_active (false);
+	} else {
+		tact->set_active (true);
+	}
+}
+
+void
 ARDOUR_UI::toggle_control_protocol (ControlProtocolInfo* cpi)
 {
-	if (!session) {
-		/* this happens when we build the menu bar when control protocol support
-		   has been used in the past for some given protocol - the item needs
-		   to be made active, but there is no session yet.
+	string action_name = "Toggle";
+	action_name += legalize_for_path (cpi->name);
+	action_name += "Surface";
+
+	Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (X_("Editor"), action_name.c_str());
+	
+	if (!act) {
+		return;
+	}
+
+	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+	
+	if (!tact) {
+		return;
+	}
+
+	if (tact->get_active() == (cpi->protocol != 0)) {
+		/* action state matches current protocol state, ignore this
+		   bogus toggle (e.g. caused by initial ::set_active() call
 		*/
 		return;
 	}
@@ -790,7 +838,7 @@ ARDOUR_UI::build_control_surface_menu ()
 													 *i, 
 													 "Editor",
 													 action_name)));
-				
+
 				ui += "<menu action='";
 				ui += submenu_name;
 				ui += "'>\n<menuitem action='";

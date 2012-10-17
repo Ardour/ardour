@@ -69,10 +69,10 @@ struct ControlProtocolInfo {
 
 	static const std::string state_node_name;
 
-	void set_protocol_states (const XMLNode&);
-
 	int set_state (const XMLNode&);
 	XMLNode& get_state (void);
+
+	sigc::signal<void,ControlProtocolInfo*> ProtocolStatusChange;
 
   private:
 	static ControlProtocolManager* _instance;

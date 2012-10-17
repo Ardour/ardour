@@ -745,6 +745,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void map_meter_falloff ();
 
 	void toggle_control_protocol (ARDOUR::ControlProtocolInfo*);
+	void control_protocol_status_change (ARDOUR::ControlProtocolInfo*);
 	void toggle_control_protocol_feedback (ARDOUR::ControlProtocolInfo*, const char* group_name, std::string action_name);
 
 	bool first_idle ();
