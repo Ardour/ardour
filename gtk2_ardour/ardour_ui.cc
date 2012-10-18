@@ -2438,6 +2438,19 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 	int ret = -1;
 	bool likely_new = false;
 
+	/* deal with any existing DIRTY session now, rather than later. don't
+	 * treat a non-dirty session this way, so that it stays visible 
+	 * as we bring up the new session dialog.
+	 */
+
+	if (_session && _session->dirty()) {
+		if (unload_session (false)) {
+			/* unload cancelled by user */
+			return 0;
+		}
+		ARDOUR_COMMAND_LINE::session_name = "";
+	}
+
 	if (!load_template.empty()) {
 		should_be_new = true;
 		template_name = load_template;
