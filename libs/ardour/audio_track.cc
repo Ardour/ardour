@@ -176,7 +176,7 @@ AudioTrack::deprecated_use_diskstream_connections ()
 			}
 		}
 
-		_input->connect_ports_to_bundle (c, this);
+		_input->connect_ports_to_bundle (c, true, this);
 
 	} else if ((prop = node.property ("inputs")) != 0) {
 		if (_input->set_ports (prop->value())) {

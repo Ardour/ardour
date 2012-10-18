@@ -219,8 +219,8 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	std::list<boost::shared_ptr<ARDOUR::Bundle> > output_menu_bundles;
 	void maybe_add_bundle_to_output_menu (boost::shared_ptr<ARDOUR::Bundle>, ARDOUR::BundleList const &);
 
-	void bundle_input_toggled (boost::shared_ptr<ARDOUR::Bundle>);
-	void bundle_output_toggled (boost::shared_ptr<ARDOUR::Bundle>);
+	void bundle_input_chosen (boost::shared_ptr<ARDOUR::Bundle>);
+	void bundle_output_chosen (boost::shared_ptr<ARDOUR::Bundle>);
 
 	void edit_input_configuration ();
 	void edit_output_configuration ();

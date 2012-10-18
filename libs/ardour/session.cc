@@ -725,7 +725,7 @@ Session::add_monitor_section ()
 			boost::shared_ptr<Bundle> b = bundle_by_name (Config->get_monitor_bus_preferred_bundle());
 			
 			if (b) {
-				_monitor_out->output()->connect_ports_to_bundle (b, this);
+				_monitor_out->output()->connect_ports_to_bundle (b, true, this);
 			} else {
 				warning << string_compose (_("The preferred I/O for the monitor bus (%1) cannot be found"),
 							   Config->get_monitor_bus_preferred_bundle())

@@ -502,7 +502,7 @@ RouteGroup::make_subgroup (bool aux, Placement placement)
 
 		for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
 			(*i)->output()->disconnect (this);
-			(*i)->output()->connect_ports_to_bundle (bundle, this);
+			(*i)->output()->connect_ports_to_bundle (bundle, false, this);
 		}
 	}
 }
