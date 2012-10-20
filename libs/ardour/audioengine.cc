@@ -91,7 +91,7 @@ AudioEngine::AudioEngine (string client_name, string session_uuid)
 	Port::set_engine (this);
 
 #ifdef HAVE_LTC
-	_ltc_input = register_port (DataType::AUDIO, _("LTC in"), Port::IsInput);
+	_ltc_input = register_port (DataType::AUDIO, _("LTC in"), true);
 
 	/* As of October 2012, the LTC source port is the only thing that needs
 	 * to care about Config parameters, so don't bother to listen if we're

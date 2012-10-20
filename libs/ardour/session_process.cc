@@ -666,6 +666,7 @@ Session::track_slave_state (float slave_speed, framepos_t slave_transport_frame,
 				}
 
 				if (slave_transport_frame != _transport_frame) {
+					DEBUG_TRACE (DEBUG::Slave, string_compose ("require locate to run. eng: %1 -> sl: %2\n", _transport_frame, slave_transport_frame));
 					locate (slave_transport_frame, false, false);
 				}
 				_slave_state = Running;
