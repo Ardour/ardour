@@ -78,6 +78,7 @@ AudioEngine::AudioEngine (string client_name, string session_uuid)
 	, port_remove_in_progress (false)
 	, m_meter_thread (0)
 	, _main_thread (0)
+	, _ltc_input ()
 	, ports (new Ports)
 {
 	_instance = this; /* singleton */

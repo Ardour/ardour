@@ -76,12 +76,6 @@ LTC_Slave::resolution () const
 	return (framecnt_t) (frames_per_ltc_frame);
 }
 
-ARDOUR::framecnt_t
-LTC_Slave::seekahead_distance () const
-{
-	return 0;
-}
-
 bool
 LTC_Slave::locked () const
 {
@@ -135,7 +129,7 @@ LTC_Slave::detect_ltc_fps(int frameno, bool df)
 	}
 	ltc_detect_fps_cnt++;
 
-	if (ltc_detect_fps_cnt > 60)
+	if (ltc_detect_fps_cnt > 40)
 	{
 		if (ltc_detect_fps_cnt > ltc_detect_fps_max
 		    && (   ceil(timecode.rate) != (ltc_detect_fps_max + 1)

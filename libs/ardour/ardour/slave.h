@@ -341,7 +341,7 @@ public:
 
 	framecnt_t resolution () const;
 	bool requires_seekahead () const { return false; }
-	framecnt_t seekahead_distance() const;
+	framecnt_t seekahead_distance () const { return 0; }
 	bool give_slave_full_control_over_transport_speed() const { return true; }
 
 	Timecode::TimecodeFormat apparent_timecode_format() const;
