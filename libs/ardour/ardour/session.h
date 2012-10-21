@@ -64,6 +64,10 @@
 #include <jack/session.h>
 #endif
 
+#ifdef HAVE_LTC
+#include <ltc.h>
+#endif
+
 class XMLTree;
 class XMLNode;
 struct _AEffect;
@@ -1177,6 +1181,23 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	bool _send_timecode_update; ///< Flag to send a full frame (Timecode) MTC message this cycle
 
 	int send_midi_time_code_for_cycle (framepos_t, framepos_t, pframes_t nframes);
+
+#ifdef HAVE_LTC
+	LTCEncoder*       ltc_encoder;
+	ltcsnd_sample_t*  ltc_enc_buf;
+
+	Timecode::TimecodeFormat ltc_enc_tcformat;
+	framepos_t        ltc_enc_pos;
+	int32_t           ltc_buf_off;
+	int32_t           ltc_buf_len;
+	int32_t           ltc_enc_byte;
+	double            ltc_speed;
+
+	void ltc_tx_initialize();
+	void ltc_tx_cleanup();
+	void ltc_tx_reset();
+	int  ltc_tx_send_time_code_for_cycle (framepos_t, framepos_t, double, double, pframes_t nframes);
+#endif
 
 	void reset_record_status ();
 

@@ -79,6 +79,7 @@ AudioEngine::AudioEngine (string client_name, string session_uuid)
 	, m_meter_thread (0)
 	, _main_thread (0)
 	, _ltc_input ()
+	, _ltc_output ()
 	, ports (new Ports)
 {
 	_instance = this; /* singleton */
@@ -94,6 +95,12 @@ AudioEngine::AudioEngine (string client_name, string session_uuid)
 #ifdef HAVE_LTC
 	_ltc_input = register_port (DataType::AUDIO, _("LTC in"), true);
 
+	/* register_port() would allocate buffers and pass a shadow copy
+	 * which is subject to ardour's route buffering behavioud and
+	 * not suitable for generating LTC independent of transport state.
+	 */
+	_ltc_output.reset(new AudioPort ("LTC out", Port::IsOutput));
+
 	/* As of October 2012, the LTC source port is the only thing that needs
 	 * to care about Config parameters, so don't bother to listen if we're
 	 * not doing LTC stuff. This might change if other parameters show up
@@ -107,6 +114,11 @@ AudioEngine::AudioEngine (string client_name, string session_uuid)
 AudioEngine::~AudioEngine ()
 {
 	config_connection.disconnect ();
+#ifdef HAVE_LTC
+	if (_ltc_output && _ltc_output->jack_port()) {
+		jack_port_disconnect (_jack, _ltc_output->jack_port());
+	}
+#endif
 
 	{
 		Glib::Threads::Mutex::Lock tm (_process_lock);
@@ -537,6 +549,15 @@ AudioEngine::process_callback (pframes_t nframes)
 	}
 
 	if (_session == 0) {
+#ifdef HAVE_LTC
+		// silence LTC
+		jack_default_audio_sample_t *out;
+		boost::shared_ptr<Port> ltcport = ltc_output_port();
+		if (ltcport && ltcport->jack_port()) {
+			out = (jack_default_audio_sample_t*) jack_port_get_buffer (ltcport->jack_port(), nframes);
+			if (out) memset(out, 0, nframes * sizeof(jack_default_audio_sample_t));
+		}
+#endif
 
 		if (!_freewheeling) {
 			MIDI::Manager::instance()->cycle_start(nframes);
@@ -1643,6 +1664,9 @@ AudioEngine::parameter_changed (const std::string& s)
 {
 	if (s == "ltc-source-port") {
 		reconnect_ltc ();
+	}
+	else if (s == "ltc-sink-port") {
+		// TODO
 	}
 
 }

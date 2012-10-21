@@ -153,6 +153,9 @@ Session::Session (AudioEngine &eng,
 	, _suspend_timecode_transmission (0)
 {
 	_locations = new Locations (*this);
+#ifdef HAVE_LTC
+	ltc_encoder = NULL;
+#endif
 
 	if (how_many_dsp_threads () > 1) {
 		/* For now, only create the graph if we are using >1 DSP threads, as
@@ -237,6 +240,10 @@ Session::destroy ()
 	 */
 
 	Port::PortDrop (); /* EMIT SIGNAL */
+
+#ifdef HAVE_LTC
+	ltc_tx_cleanup();
+#endif
 
 	/* clear history so that no references to objects are held any more */
 

@@ -282,7 +282,7 @@ def configure(conf):
     autowaf.check_pkg(conf, 'libcurl', uselib_store='CURL',
                       atleast_version='7.0.0')
     autowaf.check_pkg(conf, 'ltc', uselib_store='LTC',
-                      atleast_version='0.3.2', mandatory=False)
+                      atleast_version='0.7.0', mandatory=False)
 
     # we don't try to detect this, since its part of our source tree
 
@@ -385,6 +385,7 @@ def build(bld):
 
     if bld.is_defined('HAVE_LTC') :
         obj.source += ['ltc_slave.cc']
+        obj.source += ['session_ltc.cc']
         obj.uselib += ['LTC']
 
     if bld.is_defined('HAVE_LILV') :

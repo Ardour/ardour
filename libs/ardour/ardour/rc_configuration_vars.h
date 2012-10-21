@@ -52,6 +52,8 @@ CONFIG_VARIABLE (bool, timecode_sync_frame_rate, "timecode-sync-frame-rate", tru
 CONFIG_VARIABLE (bool, timecode_source_is_synced, "timecode-source-is-synced", true)
 CONFIG_VARIABLE (SyncSource, sync_source, "sync-source", JACK)
 CONFIG_VARIABLE (std::string, ltc_source_port, "ltc-source-port", "system:capture_1")
+CONFIG_VARIABLE (bool, send_ltc, "send-ltc", false)
+CONFIG_VARIABLE (std::string, ltc_output_port, "ltc-sink-port", "")
 
 /* control surfaces */
 

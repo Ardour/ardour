@@ -261,6 +261,7 @@ _	   the regular process() call to session->process() is not made.
 	int create_process_thread (boost::function<void()>, pthread_t*, size_t stacksize);
 
         boost::shared_ptr<Port> ltc_input_port() const { return _ltc_input; }
+        boost::shared_ptr<Port> ltc_output_port() const { return _ltc_output; }
 
 private:
 	static AudioEngine*       _instance;
@@ -292,6 +293,7 @@ private:
 	ProcessThread*            _main_thread;
 
         boost::shared_ptr<Port>   _ltc_input;
+        boost::shared_ptr<Port>   _ltc_output;
         void reconnect_ltc ();
 
 	SerializedRCUManager<Ports> ports;

@@ -1101,6 +1101,17 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Transport"), _ltc_port);
 
+#ifdef HAVE_LTC
+	// TODO; rather disable this button than not compile it..
+	add_option (_("Transport"),
+		    new BoolOption (
+			    "send-ltc",
+			    _("Generate Linear/Longitudinal Time Code"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_send_ltc),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_send_ltc)
+			    ));
+#endif
+
 	parameter_changed ("sync-source");
 
 	/* EDITOR */

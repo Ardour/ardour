@@ -366,6 +366,9 @@ Session::second_stage_init ()
 
 	MIDI::Name::MidiPatchManager::instance().set_session (this);
 
+#ifdef HAVE_LTC
+	ltc_tx_initialize();
+#endif
 	/* initial program change will be delivered later; see ::config_changed() */
 
 	_state_of_the_state = Clean;
