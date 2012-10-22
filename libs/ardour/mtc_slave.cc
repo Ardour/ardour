@@ -243,6 +243,7 @@ MTC_Slave::update_mtc_qtr (Parser& /*p*/, int which_qtr, framepos_t now)
 	mtc_frame += qtr * transport_direction;
 
 	DEBUG_TRACE (DEBUG::MTC, string_compose ("qtr frame %1 at %2 -> mtc_frame: %3\n", which_qtr, now, mtc_frame));
+	framepos_t ts = 0;
 
 	double mtc_speed = 0;
 	if (first_mtc_timestamp != 0) {
@@ -253,12 +254,13 @@ MTC_Slave::update_mtc_qtr (Parser& /*p*/, int which_qtr, framepos_t now)
 		e2 += c * e;
 
 		mtc_speed = (t1 - t0) / qtr_d;
+		ts = now;
 		DEBUG_TRACE (DEBUG::MTC, string_compose ("qtr frame DLL t0:%1 t1:%2 err:%3 spd:%4 ddt:%5\n", t0, t1, e, mtc_speed, e2 - qtr_d));
 	}
 
 	current.guard1++;
 	current.position = mtc_frame;
-	current.timestamp = now;
+	current.timestamp = ts;
 	current.speed = mtc_speed;
 	current.guard2++;
 
