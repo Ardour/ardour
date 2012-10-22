@@ -1400,16 +1400,16 @@ SoundFileOmega::SoundFileOmega (Gtk::Window& parent, string title, ARDOUR::Sessi
 	where_combo.set_active_text (str.front());
 
 	Label* l = manage (new Label);
-	l->set_text (_("Add files:"));
+	l->set_markup (_("<b>Add files as ...</b>"));
 
-	hbox = manage (new HBox);
-	hbox->set_border_width (12);
-	hbox->set_spacing (6);
-	hbox->pack_start (*l, false, false);
-	hbox->pack_start (action_combo, false, false);
 	vbox = manage (new VBox);
-	vbox->pack_start (*hbox, false, false);
-	options.pack_start (*vbox, false, false);
+	vbox->set_border_width (12);
+	vbox->set_spacing (6);
+	vbox->pack_start (*l, false, false);
+	vbox->pack_start (action_combo, false, false);
+	hbox = manage (new HBox);
+	hbox->pack_start (*vbox, false, false);
+	options.pack_start (*hbox, false, false);
 
 	/* dummy entry for action combo so that it doesn't look odd if we
 	   come up with no tracks selected.
@@ -1422,29 +1422,29 @@ SoundFileOmega::SoundFileOmega (Gtk::Window& parent, string title, ARDOUR::Sessi
 	action_combo.set_sensitive (false);
 
 	l = manage (new Label);
-	l->set_text (_("Insert at:"));
+	l->set_markup (_("<b>Insert at</b>"));
 
-	hbox = manage (new HBox);
-	hbox->set_border_width (12);
-	hbox->set_spacing (6);
-	hbox->pack_start (*l, false, false);
-	hbox->pack_start (where_combo, false, false);
 	vbox = manage (new VBox);
-	vbox->pack_start (*hbox, false, false);
-	options.pack_start (*vbox, false, false);
+	vbox->set_border_width (12);
+	vbox->set_spacing (6);
+	vbox->pack_start (*l, false, false);
+	vbox->pack_start (where_combo, false, false);
+	hbox = manage (new HBox);
+	hbox->pack_start (*vbox, false, false);
+	options.pack_start (*hbox, false, false);
 
 
 	l = manage (new Label);
-	l->set_text (_("Mapping:"));
+	l->set_markup (_("<b>Mapping</b>"));
 
-	hbox = manage (new HBox);
-	hbox->set_border_width (12);
-	hbox->set_spacing (6);
-	hbox->pack_start (*l, false, false);
-	hbox->pack_start (channel_combo, false, false);
 	vbox = manage (new VBox);
-	vbox->pack_start (*hbox, false, false);
-	options.pack_start (*vbox, false, false);
+	vbox->set_border_width (12);
+	vbox->set_spacing (6);
+	vbox->pack_start (*l, false, false);
+	vbox->pack_start (channel_combo, false, false);
+	hbox = manage (new HBox);
+	hbox->pack_start (*vbox, false, false);
+	options.pack_start (*hbox, false, false);
 
 	str.clear ();
 	str.push_back (_("one track per file"));
@@ -1453,16 +1453,16 @@ SoundFileOmega::SoundFileOmega (Gtk::Window& parent, string title, ARDOUR::Sessi
 	channel_combo.set_sensitive (false);
 
 	l = manage (new Label);
-	l->set_text (_("Conversion quality:"));
+	l->set_markup (_("<b>Conversion quality</b>"));
 
-	hbox = manage (new HBox);
-	hbox->set_border_width (12);
-	hbox->set_spacing (6);
-	hbox->pack_start (*l, false, false);
-	hbox->pack_start (src_combo, false, false);
 	vbox = manage (new VBox);
-	vbox->pack_start (*hbox, false, false);
-	options.pack_start (*vbox, false, false);
+	vbox->set_border_width (12);
+	vbox->set_spacing (6);
+	vbox->pack_start (*l, false, false);
+	vbox->pack_start (src_combo, false, false);
+	hbox = manage (new HBox);
+	hbox->pack_start (*vbox, false, false);
+	options.pack_start (*hbox, false, false);
 
 	str.clear ();
 	str.push_back (_("Best"));
@@ -1481,6 +1481,13 @@ SoundFileOmega::SoundFileOmega (Gtk::Window& parent, string title, ARDOUR::Sessi
 	channel_combo.signal_changed().connect (sigc::mem_fun (*this, &SoundFileOmega::reset_options_noret));
 
 	copy_files_btn.set_active (true);
+
+	Gtk::Label* copy_label = dynamic_cast<Gtk::Label*>(copy_files_btn.get_child());
+
+	if (copy_label) {
+		copy_label->set_size_request (175, -1);
+		copy_label->set_line_wrap (true);
+	}
 
 	block_four.pack_start (copy_files_btn, false, false);
 
