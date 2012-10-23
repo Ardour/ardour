@@ -221,7 +221,7 @@ MTC_Slave::read_current (SafeTime *st) const
 void
 MTC_Slave::init_mtc_dll(framepos_t tme, double qtr)
 {
-	omega = 2.0 * M_PI * qtr / double(session.frame_rate());
+	omega = 2.0 * M_PI * qtr / 2.0 / double(session.frame_rate());
 	b = 1.4142135623730950488 * omega;
 	c = omega * omega;
 
@@ -243,26 +243,25 @@ MTC_Slave::update_mtc_qtr (Parser& /*p*/, int which_qtr, framepos_t now)
 	mtc_frame += qtr * transport_direction;
 
 	DEBUG_TRACE (DEBUG::MTC, string_compose ("qtr frame %1 at %2 -> mtc_frame: %3\n", which_qtr, now, mtc_frame));
-	framepos_t ts = 0;
 
 	double mtc_speed = 0;
 	if (first_mtc_timestamp != 0) {
 		/* update MTC DLL and calculate speed */
-		const double e = double(transport_direction) * (double(now) - double(current.timestamp) - qtr_d);
+		const double e = mtc_frame - (double(transport_direction) * (double(now) - double(current.timestamp) + t0));
 		t0 = t1;
 		t1 += b * e + e2;
 		e2 += c * e;
 
 		mtc_speed = (t1 - t0) / qtr_d;
-		ts = now;
 		DEBUG_TRACE (DEBUG::MTC, string_compose ("qtr frame DLL t0:%1 t1:%2 err:%3 spd:%4 ddt:%5\n", t0, t1, e, mtc_speed, e2 - qtr_d));
-	}
 
-	current.guard1++;
-	current.position = mtc_frame;
-	current.timestamp = ts;
-	current.speed = mtc_speed;
-	current.guard2++;
+		current.guard1++;
+		current.position = mtc_frame;
+		current.timestamp = now;
+		current.speed = mtc_speed;
+		current.guard2++;
+
+	}
 
 	maybe_reset ();
 	last_inbound_frame = now;
@@ -530,7 +529,7 @@ MTC_Slave::init_engine_dll (framepos_t pos, framepos_t inc)
 	 * But this is only really a problem if the user performs manual
 	 * seeks while transport is running and slaved to MTC.
 	 */
-	oe = 2.0 * M_PI * double(inc/6.0) / double(session.frame_rate());
+	oe = 2.0 * M_PI * double(inc) / 2.0 / double(session.frame_rate());
 	be = 1.4142135623730950488 * oe;
 	ce = oe * oe;
 
@@ -581,8 +580,7 @@ MTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 	}
 
 
-
-	DEBUG_TRACE (DEBUG::MTC, string_compose ("MTC::speed_and_position mtc-tme: %1 mtc-pos: %2\n", last.timestamp, last.position));
+	DEBUG_TRACE (DEBUG::MTC, string_compose ("MTC::speed_and_position mtc-tme: %1 mtc-pos: %2 mtc-spd: %3\n", last.timestamp, last.position, last.speed));
 	DEBUG_TRACE (DEBUG::MTC, string_compose ("MTC::speed_and_position eng-tme: %1 eng-pos: %2\n", now, sess_pos));
 
 	double speed_flt = last.speed; ///< MTC speed from MTC-quarter-frame DLL
@@ -630,9 +628,9 @@ MTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 		queue_reset (false);
 	}
 
-#if 0
-	/* provide a 1% deadzone to lock the speed */
-	if (fabs(speed - 1.0) <= 0.01)
+#if 1
+	/* provide a .1% deadzone to lock the speed */
+	if (fabs(speed - 1.0) <= 0.001)
 	        speed = 1.0;
 #endif
 
