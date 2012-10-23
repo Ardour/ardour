@@ -341,8 +341,8 @@ Session::process_with_events (pframes_t nframes)
 	if (_transport_speed == 1.0) {
 		frames_moved = (framecnt_t) nframes;
 	} else {
-		interpolation.set_target_speed (fabs(_target_transport_speed));
-		interpolation.set_speed (fabs(_transport_speed));
+		interpolation.set_target_speed (_target_transport_speed);
+		interpolation.set_speed (_transport_speed);
 		frames_moved = (framecnt_t) interpolation.interpolate (0, nframes, 0, 0);
 	}
 
@@ -813,8 +813,8 @@ Session::process_without_events (pframes_t nframes)
 	if (_transport_speed == 1.0) {
 		frames_moved = (framecnt_t) nframes;
 	} else {
-		interpolation.set_target_speed (fabs(_target_transport_speed));
-		interpolation.set_speed (fabs(_transport_speed));
+		interpolation.set_target_speed (_target_transport_speed);
+		interpolation.set_speed (_transport_speed);
 		frames_moved = (framecnt_t) interpolation.interpolate (0, nframes, 0, 0);
 	}
 
@@ -847,16 +847,6 @@ Session::process_without_events (pframes_t nframes)
 	}
 
 	get_track_statistics ();
-
-	/* XXX: I'm not sure whether this is correct, but at least it
-	   matches process_with_events, so that this new frames_moved
-	   is -ve when transport speed is -ve.  This means that the
-	   transport position is updated correctly when we are in
-	   reverse.  It seems a bit wrong that we're not using the
-	   interpolator to compute this.
-	*/
-
-	frames_moved = (framecnt_t) floor (_transport_speed * nframes);
 
 	if (frames_moved < 0) {
 		decrement_transport_position (-frames_moved);
