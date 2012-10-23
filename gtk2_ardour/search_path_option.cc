@@ -74,7 +74,7 @@ SearchPathOption::add_to_page (OptionEditorPage* p)
 
         Label* label = manage (new Label);
         label->set_alignment (0.0, 0.0);
-        label->set_markup (string_compose ("%1", _name));
+        label->set_text (string_compose ("%1", _name));
 
 	p->table.attach (*label, 1, 2, n, n + 1, FILL | EXPAND);
 	p->table.attach (vbox, 2, 3, n, n + 1, FILL | EXPAND);
