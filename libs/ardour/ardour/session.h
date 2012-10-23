@@ -1187,15 +1187,19 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	ltcsnd_sample_t*  ltc_enc_buf;
 
 	Timecode::TimecodeFormat ltc_enc_tcformat;
-	framepos_t        ltc_enc_pos;
 	int32_t           ltc_buf_off;
 	int32_t           ltc_buf_len;
-	int32_t           ltc_enc_byte;
+
 	double            ltc_speed;
+	int32_t           ltc_enc_byte;
+	framepos_t        ltc_enc_pos;
+	double            ltc_enc_cnt;
+	framepos_t        ltc_enc_off;
 
 	void ltc_tx_initialize();
 	void ltc_tx_cleanup();
 	void ltc_tx_reset();
+	void ltc_tx_recalculate_position();
 	int  ltc_tx_send_time_code_for_cycle (framepos_t, framepos_t, double, double, pframes_t nframes);
 #endif
 

@@ -31,7 +31,9 @@ using namespace MIDI;
 using namespace PBD;
 using namespace Timecode;
 
+/* really verbose timing debug */
 //#define LTC_GEN_FRAMEDBUG
+//#define LTC_GEN_TXDBUG
 
 void
 Session::ltc_tx_initialize()
@@ -67,21 +69,41 @@ void
 Session::ltc_tx_reset()
 {
 	DEBUG_TRACE (DEBUG::LTC, "LTC TX reset\n");
-	ltc_enc_pos = -1; // force re-start
+	ltc_enc_pos = -9999; // force re-start
 	ltc_buf_len = 0;
 	ltc_buf_off = 0;
 	ltc_enc_byte = 0;
+	ltc_enc_cnt = 0;
+}
+
+void
+Session::ltc_tx_recalculate_position()
+{
+	SMPTETimecode enctc;
+	Timecode::Time a3tc;
+	ltc_encoder_get_timecode(ltc_encoder, &enctc);
+
+	a3tc.hours   = enctc.hours;
+	a3tc.minutes = enctc.mins;
+	a3tc.seconds = enctc.secs;
+	a3tc.frames  = enctc.frame;
+	a3tc.rate = timecode_to_frames_per_second(ltc_enc_tcformat);
+	a3tc.drop = timecode_has_drop_frames(ltc_enc_tcformat);
+
+	Timecode::timecode_to_sample (a3tc, ltc_enc_pos, true, false,
+		double(frame_rate()),
+		config.get_subframes_per_frame(),
+		config.get_timecode_offset_negative(), config.get_timecode_offset()
+		);
 }
 
 int
-Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end_frame, 
+Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end_frame,
 		double target_speed, double current_speed,
 		pframes_t nframes)
 {
 	assert(nframes > 0);
 
-	const float smult = 2.0/(3.0*255.0);
-	SMPTETimecode tc;
 	jack_default_audio_sample_t *out;
 	pframes_t txf = 0;
 	boost::shared_ptr<Port> ltcport = engine().ltc_output_port();
@@ -91,7 +113,14 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 	out = (jack_default_audio_sample_t*) jack_port_get_buffer (ltcport->jack_port(), nframes);
 	if (!out) return 0;
 
-	if (engine().freewheeling() || !Config->get_send_ltc()) {
+	if (engine().freewheeling()|| !Config->get_send_ltc()
+			/* TODO
+			 * we can relax this a bit, JACK or sample-synced slaves should be fine.
+			 * test before allowing it, do the same for MTC generator in
+			 * libs/ardour/session_midi.cc
+			 * */
+		//	|| config.get_external_sync()  // XXX XXX
+			) {
 		memset(out, 0, nframes * sizeof(jack_default_audio_sample_t));
 		return nframes;
 	}
@@ -99,10 +128,14 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 	/* range from libltc (38..218) || - 128.0  -> (-90..90) */
 	const float ltcvol = Config->get_ltc_output_volume()/(90.0); // pow(10, db/20.0)/(90.0);
 
+	jack_latency_range_t ltc_latency;
+	ltcport->get_connected_latency_range(ltc_latency, true);
+	DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX %1 to %2 / %3 | lat: %4\n", start_frame, end_frame, nframes, ltc_latency.max));
+
 	/* all systems go. Now here's the plan:
 	 *
 	 *  1) check if fps has changed
-	 *  2) check direction of encoding, calc speed
+	 *  2) check direction of encoding, calc speed, resample existing buffer
 	 *  3) calculate frame and byte to send aligned to jack-period size
 	 *  4) check if it's the frame/byte that is already in the queue
 	 *  5) if (4) mismatch, re-calculate offset of LTC frame relative to period size
@@ -113,7 +146,7 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 	 *  7) done
 	 */
 
-	// (1)
+	// (1) check fps
 	TimecodeFormat cur_timecode = config.get_timecode_format();
 	if (cur_timecode != ltc_enc_tcformat) {
 		DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX1: TC format mismatch - reinit sr: %1 fps: %2\n", nominal_frame_rate(), timecode_to_frames_per_second(cur_timecode)));
@@ -132,29 +165,36 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 		return nframes;
 	}
 
-	// (2)
+	// (2) speed & direction
 #define SIGNUM(a) ( (a) < 0 ? -1 : 1)
+	bool speed_changed = false;
 
-	framepos_t cycle_start_frame = (current_speed < 0) ? end_frame :start_frame;
+	// XXX
+	//framepos_t cycle_start_frame = (current_speed < 0) ? (start_frame - ltc_latency.max) : (start_frame + ltc_latency.max);
+	framepos_t cycle_start_frame = start_frame;
+
+	/* cycle-start may become negative due to latency comensation */
+	if (cycle_start_frame < 0) { cycle_start_frame = 0; }
+
 	double new_ltc_speed = double(labs(end_frame - start_frame) * SIGNUM(current_speed)) / double(nframes);
 
 	if (SIGNUM(new_ltc_speed) != SIGNUM (ltc_speed)) {
-		// transport changed direction
-		DEBUG_TRACE (DEBUG::LTC, "LTC TX2: transport direction changed\n");
+		DEBUG_TRACE (DEBUG::LTC, "LTC TX2: transport changed direction\n");
 		ltc_tx_reset();
 	}
 
-	if (ltc_speed != current_speed || target_speed != fabs(current_speed)) {
-		/* TODO check ./libs/ardour/interpolation.cc  CubicInterpolation::interpolate
+	if (ltc_speed != new_ltc_speed) {
+		/* check ./libs/ardour/interpolation.cc  CubicInterpolation::interpolate
 		 * if target_speed != current_speed we should interpolate, too.
 		 *
 		 * However, currenly in A3 target_speed == current_speed for each process cycle
-		 * (except for the sign). Besides, above speed calulation uses the
-		 * difference (end_frame - start_frame).
+		 * (except for the sign and if target_speed > 8.0).
+		 * Besides, above speed calulation uses the difference (end_frame - start_frame).
 		 * end_frame is calculated from 'frames_moved' which includes the interpolation.
-		 * so we're good, except for the fact that each LTC byte is sent at fixed speed.
+		 * so we're good.
 		 */
 		DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX2: speed change old: %1 cur: %2 tgt: %3 ctd: %4\n", ltc_speed, current_speed, target_speed, fabs(current_speed) - target_speed));
+		speed_changed = true;
 	}
 
 	if (end_frame == start_frame || fabs(current_speed) < 0.1 ) {
@@ -168,36 +208,104 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 		 * If LTC keeps arriving they remain in a stop position with the tape on the playhead.
 		 */
 		new_ltc_speed = 0;
+		if (!Config->get_ltc_send_continuously()) {
+			ltc_speed = new_ltc_speed;
+			memset(out, 0, nframes * sizeof(jack_default_audio_sample_t));
+			return nframes;
+		}
 	}
 
-	ltc_speed = new_ltc_speed;
-	DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX2: transport speed %1.\n", ltc_speed));
-
-	if (fabs(ltc_speed) > 10.0) {
+	if (fabs(new_ltc_speed) > 10.0) {
 		DEBUG_TRACE (DEBUG::LTC, "LTC TX2: speed is out of bounds.\n");
 		ltc_tx_reset();
 		memset(out, 0, nframes * sizeof(jack_default_audio_sample_t));
 		return nframes;
 	}
 
-	// (3)
+	if (ltc_speed == 0 && new_ltc_speed != 0) {
+		DEBUG_TRACE (DEBUG::LTC, "LTC TX2: transport started rolling - reset\n");
+		ltc_tx_reset();
+	}
+
+	/* the timecode duration corresponding to the samples still in the buffer
+	 * here we use prev. speed to match the begining of this cycle for aligment.
+	 */
+	double poff = (ltc_buf_len - ltc_buf_off) * ltc_speed;
+
+	if (speed_changed && new_ltc_speed != 0) {
+		/* we need to re-sample the existing buffer.
+		 * "make space for the en-coder to catch up to the new speed"
+		 *
+		 * since the LTC signal is a rect waveform we can simply squeeze it
+		 * by removing samples or duplicating /here and there/.
+		 *
+		 * There may be a more elegant way to do this, in fact one could
+		 * simply re-render the buffer using ltc_encoder_encode_byte()
+		 * but that'd require some timecode offset buffer magic,
+		 * which is left for later..
+		 */
+
+		double oldbuflen = double(ltc_buf_len - ltc_buf_off);
+		double newbuflen = double(ltc_buf_len - ltc_buf_off) * fabs(ltc_speed / new_ltc_speed);
+
+		DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX2: bufOld %1 bufNew %2 | diff %3\n",
+					(ltc_buf_len - ltc_buf_off), newbuflen, newbuflen - oldbuflen
+					));
+
+		double bufrspdiff = rint(newbuflen - oldbuflen);
+
+		if (abs(bufrspdiff) > newbuflen || abs(bufrspdiff) > oldbuflen) {
+			DEBUG_TRACE (DEBUG::LTC, "LTC TX2: resampling buffer would destroy information.\n");
+			ltc_tx_reset();
+			poff = 0;
+		} else if (bufrspdiff != 0 && newbuflen > oldbuflen) {
+			int incnt = 0;
+			double samples_to_insert = ceil(newbuflen - oldbuflen);
+			double avg_distance = newbuflen / samples_to_insert;
+			DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX2: resample buffer insert: %1\n", samples_to_insert));
+
+			for (int rp = ltc_buf_off; rp < ltc_buf_len - 1; ++rp) {
+				const int ro = rp - ltc_buf_off;
+				if (ro < (incnt*avg_distance)) continue;
+				const ltcsnd_sample_t v1 = ltc_enc_buf[rp];
+				const ltcsnd_sample_t v2 = ltc_enc_buf[rp+1];
+				if (v1 != v2 && ro < ((incnt+1)*avg_distance)) continue;
+				memmove(&ltc_enc_buf[rp+1], &ltc_enc_buf[rp], ltc_buf_len-rp);
+				incnt++;
+				ltc_buf_len++;
+			}
+		} else if (bufrspdiff != 0 && newbuflen < oldbuflen) {
+			double samples_to_remove = ceil(oldbuflen - newbuflen);
+			DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX2: resample buffer - remove: %1\n", samples_to_remove));
+			if (oldbuflen <= samples_to_remove) {
+				ltc_buf_off = ltc_buf_len= 0;
+			} else {
+				double avg_distance = newbuflen / samples_to_remove;
+				int rmcnt = 0;
+				for (int rp = ltc_buf_off; rp < ltc_buf_len - 1; ++rp) {
+					const int ro = rp - ltc_buf_off;
+					if (ro < (rmcnt*avg_distance)) continue;
+					const ltcsnd_sample_t v1 = ltc_enc_buf[rp];
+					const ltcsnd_sample_t v2 = ltc_enc_buf[rp+1];
+					if (v1 != v2 && ro < ((rmcnt+1)*avg_distance)) continue;
+					memmove(&ltc_enc_buf[rp], &ltc_enc_buf[rp+1], ltc_buf_len-rp-1);
+					ltc_buf_len--;
+					rmcnt++;
+				}
+			}
+		}
+	}
+
+	ltc_speed = new_ltc_speed;
+	DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX2: transport speed %1.\n", ltc_speed));
+
+
+	// (3) bit/sample aligment
 	Timecode::Time tc_start;
 	framepos_t tc_sample_start;
 
 	/* calc timecode frame from current position - round down to nearest timecode */
-	int boff;
-	if (ltc_speed == 0) {
-		boff = 0;
-	}	else if (ltc_speed < 0) {
-		boff = (ltc_enc_byte - 9) * frames_per_timecode_frame() / 10;
-	} else {
-		boff = ltc_enc_byte * frames_per_timecode_frame() / 10;
-	}
-
-	sample_to_timecode(cycle_start_frame
-			- boff
-			- ltc_speed * (ltc_buf_len - ltc_buf_off),
-			tc_start, true, false);
+	sample_to_timecode(cycle_start_frame, tc_start, true, false);
 
 	/* convert timecode back to sample-position */
 	Timecode::timecode_to_sample (tc_start, tc_sample_start, true, false,
@@ -208,29 +316,46 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 
 	/* difference between current frame and TC frame in samples */
 	frameoffset_t soff = cycle_start_frame - tc_sample_start;
-	DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX3: now: %1 tra: %2 eoff %3\n", cycle_start_frame, tc_sample_start, soff));
+	DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX3: A3cycle: %1 = A3tc: %2 +off: %3\n",
+				cycle_start_frame, tc_sample_start, soff));
 
-	// (4)
-	DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX4: enc: %1 boff: %2 || enc-byte:%3\n", ltc_enc_pos, boff, ltc_enc_byte));
-	if (ltc_enc_pos != tc_sample_start) {
 
-		/* re-calc timecode w/o buffer offset */
-		sample_to_timecode(cycle_start_frame, tc_start, true, false);
-		Timecode::timecode_to_sample (tc_start, tc_sample_start, true, false,
-			double(frame_rate()),
-			config.get_subframes_per_frame(),
-			config.get_timecode_offset_negative(), config.get_timecode_offset()
-			);
-		soff = cycle_start_frame - tc_sample_start;
-		DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX4: now: %1 trs: %2 toff %3\n", cycle_start_frame, tc_sample_start, soff));
+	// (4) check if aligment matches
+	const double fptcf = frames_per_timecode_frame(); // convenient, used a lot below.
+	double maxdiff;
 
+	/* due to rounding error and variations in LTC-bit duration depending
+	 * on the speed, we can be off by +- speed samples.
+	 * during speed-changes we can acually ready += 2*speed audio-samples
+	 * in the cycle after the speed change.  The average delta however is 0.
+	 */
+	if (config.get_external_sync()) {
+		maxdiff = fptcf; // TODO get slave max delta
+	} else {
+		maxdiff = ceil(fabs(ltc_speed))*2.0;
+	}
+
+	DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX4: enc: %1 + %2 - %3 || buf-bytes: %4 enc-byte: %5\n",
+				ltc_enc_pos, ltc_enc_cnt, poff, (ltc_buf_len - ltc_buf_off), poff, ltc_enc_byte));
+
+	DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX4: enc-pos: %1  | d: %2\n",
+				ltc_enc_pos + ltc_enc_cnt - poff,
+				rint(ltc_enc_pos + ltc_enc_cnt - poff) - cycle_start_frame
+				));
+
+	if (fabs(ceil(ltc_enc_pos + ltc_enc_cnt - poff) - cycle_start_frame) > maxdiff)
+	{
+		// (5) re-align
+		ltc_tx_reset();
+
+		/* set frame to encode */
+		SMPTETimecode tc;
 		tc.hours = tc_start.hours;
 		tc.mins = tc_start.minutes;
 		tc.secs = tc_start.seconds;
 		tc.frame = tc_start.frames;
 		ltc_encoder_set_timecode(ltc_encoder, &tc);
 
-#if 1
 		/* workaround for libltc recognizing 29.97 and 30000/1001 as drop-frame TC.
 		 * in A3 only 30000/1001 is drop-frame and there are also other questionable
 		 * DF timecodes  such as 24k/1001 and 25k/1001.
@@ -239,102 +364,89 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 		ltc_encoder_get_frame(ltc_encoder, &ltcframe);
 		ltcframe.dfbit = timecode_has_drop_frames(cur_timecode)?1:0;
 		ltc_encoder_set_frame(ltc_encoder, &ltcframe);
-#endif
 
-		// (5)
-		int fdiff = 0;
-		if (soff < 0) {
-			fdiff = ceil(-soff / frames_per_timecode_frame());
-			soff += fdiff * frames_per_timecode_frame();
-			for (int i=0; i < fdiff; ++i) {
+
+		DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX4: now: %1 trs: %2 toff %3\n", cycle_start_frame, tc_sample_start, soff));
+
+		uint32_t cyc_off;
+		assert(soff >= 0 && soff < fptcf);
+
+		if (ltc_speed < 0 ) {
+			/* calculate the byte that starts at or after the current position */
+			ltc_enc_byte = floor((10.0 * soff) / (fptcf));
+			ltc_enc_cnt = double(ltc_enc_byte * fptcf / 10.0);
+
+			/* calculate difference between the current position and the byte to send */
+			cyc_off = soff- ceil(ltc_enc_cnt);
+
+		} else {
+			/* calculate the byte that starts at or after the current position */
+			ltc_enc_byte = ceil((10.0 * soff) / fptcf);
+			ltc_enc_cnt = double(ltc_enc_byte * fptcf / 10.0);
+
+			/* calculate difference between the current position and the byte to send */
+			cyc_off = ceil(ltc_enc_cnt) - soff;
+
+			if (ltc_enc_byte == 10) {
+				ltc_enc_byte = 0;
 				ltc_encoder_inc_timecode(ltc_encoder);
 			}
 		}
-		else if (soff >= frames_per_timecode_frame()) {
-			fdiff = floor(soff / frames_per_timecode_frame());
-			soff -= fdiff * frames_per_timecode_frame();
-			for (int i=0; i < fdiff; ++i) {
-				ltc_encoder_dec_timecode(ltc_encoder);
-			}
-		}
 
-		assert(soff >= 0 && soff < frames_per_timecode_frame());
-
-		DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX5 restart encoder fdiff %1 sdiff %2\n", fdiff, soff));
-		ltc_tx_reset();
+		DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX5 restart encoder: soff %1 byte %2 cycoff %3\n",
+					soff, ltc_enc_byte, cyc_off));
 
 		if (ltc_speed == 0) {
-			// offset is irrelevant when not rolling
-			soff = 0;
-		}
-		if (soff > 0 && soff <= nframes) {
-			txf=soff;
-			memset(out, 0, soff * sizeof(jack_default_audio_sample_t));
-		} else if (soff > 0) {
+			/* don't bother to align non-moving loops */
+		} else if (cyc_off > 0 && cyc_off <= nframes) {
+			/* offset in this cycle */
+			txf= rint(cyc_off / fabs(ltc_speed));
+			memset(out, 0, cyc_off * sizeof(jack_default_audio_sample_t));
+		} else if (cyc_off > 0) {
 			/* resync next cycle */
-			memset(out, 0, soff * sizeof(jack_default_audio_sample_t));
+			memset(out, 0, cyc_off * sizeof(jack_default_audio_sample_t));
 			return nframes;
 		}
 
-		ltc_enc_byte = soff * 10 / frames_per_timecode_frame();
-
-		if (ltc_speed < 0 ) {
-			ltc_enc_byte = 9 - ltc_enc_byte;
-		}
-
 		ltc_enc_pos = tc_sample_start;
-		DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX5 restart @ %1 byte %2\n", ltc_enc_pos, ltc_enc_byte));
+
+		DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX5 restart @ %1 + %2 - %3 |  byte %4\n",
+					ltc_enc_pos, ltc_enc_cnt, cyc_off, ltc_enc_byte));
 	}
 
-	// (6)
+
+	// (6) encode and output
 	while (1) {
-#ifdef LTC_GEN_FRAMEDBUG
+#ifdef LTC_GEN_TXDBUG
 		DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX6.1 @%1  [ %2 / %3 ]\n", txf, ltc_buf_off, ltc_buf_len));
 #endif
-		// (6a)
+		// (6a) send remaining buffer
 		while ((ltc_buf_off < ltc_buf_len) && (txf < nframes)) {
 			const float v1 = ltc_enc_buf[ltc_buf_off++] - 128.0;
 			const jack_default_audio_sample_t val = (jack_default_audio_sample_t) (v1*ltcvol);
 			out[txf++] = val;
 		}
-#ifdef LTC_GEN_FRAMEDBUG
+#ifdef LTC_GEN_TXDBUG
 		DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX6.2 @%1  [ %2 / %3 ]\n", txf, ltc_buf_off, ltc_buf_len));
 #endif
 
 		if (txf >= nframes) {
-			DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX7 txf = %1 nframes = %2\n", txf, nframes));
+			DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX7 enc: %1 [ %2 / %3 ] byte: %4 spd %5 fpp %6 || nf: %7\n",
+						ltc_enc_pos, ltc_buf_off, ltc_buf_len, ltc_enc_byte, ltc_speed, nframes, txf));
 			return nframes;
 		}
 
 		ltc_buf_len = 0;
 		ltc_buf_off = 0;
 
-		// (6b)
+		// (6b) encode LTC, bump timecode
 
-		if (SIGNUM(ltc_speed) == -1) {
+		if (ltc_speed < 0) {
 			ltc_enc_byte = (ltc_enc_byte + 9)%10;
 			if (ltc_enc_byte == 9) {
 				ltc_encoder_dec_timecode(ltc_encoder);
-#if 0 // this does not work for fractional or drop-frame TC
-				ltc_enc_pos -= frames_per_timecode_frame();
-#else // TODO make this a function
-				SMPTETimecode enctc;
-				Timecode::Time a3tc;
-				ltc_encoder_get_timecode(ltc_encoder, &enctc);
-
-				a3tc.hours   = enctc.hours ;
-				a3tc.minutes = enctc.mins  ;
-				a3tc.seconds = enctc.secs  ;
-				a3tc.frames  = enctc.frame ;
-				a3tc.rate = timecode_to_frames_per_second(cur_timecode);
-				a3tc.drop = timecode_has_drop_frames(cur_timecode);
-
-				Timecode::timecode_to_sample (a3tc, ltc_enc_pos, true, false,
-					double(frame_rate()),
-					config.get_subframes_per_frame(),
-					config.get_timecode_offset_negative(), config.get_timecode_offset()
-					);
-#endif
+				ltc_tx_recalculate_position();
+				ltc_enc_cnt = fptcf;
 			}
 		}
 
@@ -347,7 +459,7 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 		}
 		int enc_frames = ltc_encoder_get_buffer(ltc_encoder, &(ltc_enc_buf[ltc_buf_len]));
 #ifdef LTC_GEN_FRAMEDBUG
-		DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX6.3 encoded %1 bytes LTC-byte %2 at spd %3\n", enc_frames, ltc_enc_byte, ltc_speed));
+		DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX6.3 encoded %1 bytes for LTC-byte %2 at spd %3\n", enc_frames, ltc_enc_byte, ltc_speed));
 #endif
 		if (enc_frames <=0) {
 			DEBUG_TRACE (DEBUG::LTC, "LTC TX6.3 encoder empty buffer.\n");
@@ -358,35 +470,23 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 		}
 
 		ltc_buf_len += enc_frames;
+		if (ltc_speed < 0)
+			ltc_enc_cnt -= fptcf/10.0; //enc_frames * ltc_speed;
+		else
+			ltc_enc_cnt += fptcf/10.0; //enc_frames * ltc_speed;
 
-		if (SIGNUM(ltc_speed) == 1) {
+		if (ltc_speed >= 0) {
 			ltc_enc_byte = (ltc_enc_byte + 1)%10;
 			if (ltc_enc_byte == 0 && ltc_speed != 0) {
 				ltc_encoder_inc_timecode(ltc_encoder);
-#if 0 // this does not work for fractional or drop-frame TC
-				ltc_enc_pos += frames_per_timecode_frame();
-#else // TODO make this a function
-				SMPTETimecode enctc;
-				Timecode::Time a3tc;
-				ltc_encoder_get_timecode(ltc_encoder, &enctc);
-
-				a3tc.hours   = enctc.hours ;
-				a3tc.minutes = enctc.mins  ;
-				a3tc.seconds = enctc.secs  ;
-				a3tc.frames  = enctc.frame ;
-				a3tc.rate = timecode_to_frames_per_second(cur_timecode);
-				a3tc.drop = timecode_has_drop_frames(cur_timecode);
-
-				Timecode::timecode_to_sample (a3tc, ltc_enc_pos, true, false,
-					double(frame_rate()),
-					config.get_subframes_per_frame(),
-					config.get_timecode_offset_negative(), config.get_timecode_offset()
-					);
-#endif
+				ltc_tx_recalculate_position();
+				ltc_enc_cnt = 0;
+			} else if (ltc_enc_byte == 0) {
+				ltc_enc_cnt = 0;
 			}
 		}
 #ifdef LTC_GEN_FRAMEDBUG
-		DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX6.4 fno: %1  [ %2 / %3 ] spd %4\n", ltc_enc_pos, ltc_buf_off, ltc_buf_len, ltc_speed));
+		DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX6.4 enc-pos: %1 + %2 [ %4 / %5 ] spd %6\n", ltc_enc_pos, ltc_enc_cnt, ltc_buf_off, ltc_buf_len, ltc_speed));
 #endif
 	}
 
