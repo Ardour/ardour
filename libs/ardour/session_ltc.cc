@@ -96,7 +96,8 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 		return nframes;
 	}
 
-	DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX %1 to %2 / %3\n", start_frame, end_frame, nframes));
+	/* range from libltc (38..218) || - 128.0  -> (-90..90) */
+	const float ltcvol = Config->get_ltc_output_volume()/(90.0); // pow(10, db/20.0)/(90.0);
 
 	/* all systems go. Now here's the plan:
 	 *
@@ -293,7 +294,7 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 		// (6a)
 		while ((ltc_buf_off < ltc_buf_len) && (txf < nframes)) {
 			const float v1 = ltc_enc_buf[ltc_buf_off++] - 128.0;
-			const jack_default_audio_sample_t val = (jack_default_audio_sample_t) (v1*smult);
+			const jack_default_audio_sample_t val = (jack_default_audio_sample_t) (v1*ltcvol);
 			out[txf++] = val;
 		}
 #ifdef LTC_GEN_FRAMEDBUG

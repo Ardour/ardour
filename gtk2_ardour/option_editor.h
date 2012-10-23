@@ -285,6 +285,48 @@ private:
 };
 
 
+/** Component which provides the UI for a GTK HScale.
+ */
+class HSliderOption : public Option
+{
+public:
+
+	/** Construct an ComboOption.
+	 *  @param i id
+	 *  @param n User-visible name.
+	 *  @param g Slot to get the variable's value.
+	 *  @param s Slot to set the variable's value.
+	 */
+	HSliderOption (
+		std::string const & i,
+		std::string const & n,
+		Gtk::Adjustment &adj
+		)
+		: Option (i, n)
+	{
+		_label = manage (new Gtk::Label (n + ":"));
+		_label->set_alignment (0, 0.5);
+		_hscale = manage (new Gtk::HScale(adj));
+	}
+
+	void set_state_from_config () { }
+
+	void add_to_page (OptionEditorPage* p)
+	{
+		add_widgets_to_page (p, _label, _hscale);
+	}
+
+	void set_sensitive (bool yn) {
+		_hscale->set_sensitive (yn);
+	}
+
+	Gtk::Widget& tip_widget() { return *_hscale; }
+
+private:
+	Gtk::Label* _label;
+	Gtk::HScale* _hscale;
+};
+
 /** Component which provides the UI to handle an enumerated option using a GTK ComboBox.
  *  The template parameter is the enumeration.
  */

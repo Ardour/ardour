@@ -53,7 +53,9 @@ CONFIG_VARIABLE (bool, timecode_source_is_synced, "timecode-source-is-synced", t
 CONFIG_VARIABLE (SyncSource, sync_source, "sync-source", JACK)
 CONFIG_VARIABLE (std::string, ltc_source_port, "ltc-source-port", "system:capture_1")
 CONFIG_VARIABLE (bool, send_ltc, "send-ltc", false)
-CONFIG_VARIABLE (std::string, ltc_output_port, "ltc-sink-port", "")
+CONFIG_VARIABLE (bool, ltc_send_continuously, "ltc-send-continuously", true)
+CONFIG_VARIABLE (std::string, ltc_output_port, "ltc-output-port", "")
+CONFIG_VARIABLE (float, ltc_output_volume, "ltc-output-volume", 0.125893)
 
 /* control surfaces */
 

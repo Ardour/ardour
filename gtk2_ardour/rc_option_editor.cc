@@ -1106,13 +1106,36 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Transport"),
 		    new BoolOption (
 			    "send-ltc",
-			    _("Generate Linear/Longitudinal Time Code"),
+			    _("Enable LTC generator"),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_send_ltc),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_send_ltc)
 			    ));
+
+	_ltc_send_continuously = new BoolOption (
+			    "ltc-send-continuously",
+			    _("send LTC while stopped"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_ltc_send_continuously),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_ltc_send_continuously)
+			    );
+	Gtkmm2ext::UI::instance()->set_tip
+		(_ltc_send_continuously->tip_widget(),
+		 _("If enabled, Ardour will continue to send LTC information even when the transport (playhead) is not moving."));
+	add_option (_("Transport"), _ltc_send_continuously);
+
+  _ltc_volume_adjustment = new Gtk::Adjustment(-18, -50, 0, .5, 3);
+	_ltc_volume_adjustment->set_value (20 * log10(_rc_config->get_ltc_output_volume()));
+	_ltc_volume_adjustment->signal_value_changed().connect (sigc::mem_fun (*this, &RCOptionEditor::ltc_generator_volume_changed));
+	_ltc_volume_slider = new HSliderOption("ltcvol", ("LTC generator level:"), *_ltc_volume_adjustment);
+
+	Gtkmm2ext::UI::instance()->set_tip
+		(_ltc_volume_slider->tip_widget(),
+		 _("Specify the Peak Volume of the generated LTC signal in dbFS. A good value is  0dBu ^= -18dbFS in an EBU calibrated system."));
+
+	add_option (_("Transport"), _ltc_volume_slider);
 #endif
 
 	parameter_changed ("sync-source");
+	parameter_changed ("send-ltc");
 
 	/* EDITOR */
 
@@ -1763,7 +1786,15 @@ RCOptionEditor::parameter_changed (string const & p)
 			_sync_framerate->set_sensitive (false);
 			break;
 		}
+	} else if (p == "send-ltc") {
+		bool const s = Config->get_send_ltc ();
+		_ltc_send_continuously->set_sensitive (s);
+		_ltc_volume_slider->set_sensitive (s);
 	}
+}
+
+void RCOptionEditor::ltc_generator_volume_changed () {
+	_rc_config->set_ltc_output_volume (pow(10, _ltc_volume_adjustment->get_value() / 20));
 }
 
 void
