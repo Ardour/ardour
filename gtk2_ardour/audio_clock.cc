@@ -1099,11 +1099,11 @@ AudioClock::set_timecode (framepos_t when, bool /*force*/)
 
 	_layout->set_text (Timecode::timecode_format_time(TC));
 
-	if (_left_layout) {
+	if (_left_layout && _right_layout) {
+		SyncSource sync_src = Config->get_sync_source();
 
 		if (_session->config.get_external_sync()) {
 			Slave* slave = _session->slave();
-			SyncSource sync_src = Config->get_sync_source();
 
 			switch (sync_src) {
 			case JACK:
@@ -1113,12 +1113,11 @@ AudioClock::set_timecode (framepos_t when, bool /*force*/)
 				break;
 			case MTC:
 				if (slave) {
-					_left_layout->set_text (string_compose ("%1 %2",
-								sync_source_to_string(sync_src, true),
+					_left_layout->set_text (string_compose ("%1",
 								dynamic_cast<TimecodeSlave*>(slave)->approximate_current_position()));
 					_right_layout->set_text (slave->approximate_current_delta());
 				} else {
-					_left_layout->set_text (string_compose ("%1 --pending--",
+					_left_layout->set_text (string_compose ("--pending--",
 								sync_source_to_string(sync_src, true)));
 					_right_layout->set_text ("");
 				}
@@ -1136,8 +1135,7 @@ AudioClock::set_timecode (framepos_t when, bool /*force*/)
 				break;
 			case LTC:
 				if (slave) {
-					_left_layout->set_text (string_compose ("%1 %2",
-								sync_source_to_string(sync_src, true),
+					_left_layout->set_text (string_compose ("%1",
 								dynamic_cast<TimecodeSlave*>(slave)->approximate_current_position()));
 					_right_layout->set_text (slave->approximate_current_delta());
 				} else {
@@ -1148,10 +1146,10 @@ AudioClock::set_timecode (framepos_t when, bool /*force*/)
 				break;
 			}
 		} else {
-			_left_layout->set_text ("INT");
+			_left_layout->set_text (string_compose (_("INT/%1"),
+						sync_source_to_string(sync_src, true)));
 			_right_layout->set_text ("");
 		}
-
 	}
 }
 
@@ -2034,7 +2032,7 @@ AudioClock::set_mode (Mode m)
 
 	switch (_mode) {
 	case Timecode:
-		mode_based_info_ratio = 0.62; // trial and error, could be affected by font metrics
+		mode_based_info_ratio = 0.5;
 		insert_map.push_back (11);
 		insert_map.push_back (10);
 		insert_map.push_back (8);
