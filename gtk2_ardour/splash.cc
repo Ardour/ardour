@@ -188,7 +188,7 @@ void
 Splash::message (const string& msg)
 {
 	string str ("<b>");
-	str += msg;
+	str += Glib::Markup::escape_text (msg);
 	str += "</b>";
 
 	layout->set_markup (str);

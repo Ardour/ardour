@@ -248,7 +248,7 @@ SoundFileBox::setup_labels (const string& filename)
 		return false;
 	}
 
-	preview_label.set_markup (string_compose ("<b>%1</b>", Glib::path_get_basename (filename)));
+	preview_label.set_markup (string_compose ("<b>%1</b>", Glib::Markup::escape_text (Glib::path_get_basename (filename))));
 	std::string n = sf_info.format_name;
 	if (n.substr (0, 8) == X_("Format: ")) {
 		n = n.substr (8);
