@@ -56,6 +56,17 @@ public:
 
 	/**
 	 * @return the absolute path to the directory in which
+	 * the session stores audio files for Ardour 2.X.
+	 *
+	 * If the session is an older session with an existing
+	 * "sounds" directory then it will return a path to that
+	 * directory otherwise it will return the new location
+	 * of root_path()/interchange/session_name/audiofiles
+	 */
+	const std::string sound_path_2X () const;
+
+	/**
+	 * @return the absolute path to the directory in which
 	 * the session stores MIDI files, ie
 	 * root_path()/interchange/session_name/midifiles
 	 */
@@ -109,6 +120,13 @@ public:
 	 * i.e root_path()/interchange/session_name
 	 */
 	const std::string sources_root() const;
+
+	/**
+	 * @return The path to the directory under which source directories
+	 * are created for different source types in Ardour 2.X
+	 * i.e root_path()/interchange/session_name
+	 */
+	const std::string sources_root_2X() const;
 
 private:
 

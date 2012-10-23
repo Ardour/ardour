@@ -4352,6 +4352,13 @@ Session::source_search_path (DataType type) const
 		}
 	}
 
+	if (type == DataType::AUDIO) {
+		const string sound_path_2X = _session_dir->sound_path_2X();
+		if (Glib::file_test (sound_path_2X, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_DIR)) {
+			s.push_back (sound_path_2X);
+		}
+	}
+
 	/* now check the explicit (possibly user-specified) search path
 	 */
 

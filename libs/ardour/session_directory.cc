@@ -103,12 +103,34 @@ SessionDirectory::sources_root () const
 }
 
 const std::string
+SessionDirectory::sources_root_2X () const
+{
+	std::string p = m_root_path;
+	std::string filename = Glib::path_get_basename(p);
+
+	if (filename == ".") {
+		p = PBD::get_absolute_path (m_root_path);
+	}
+
+	const string legalized_root (legalize_for_path_2X (Glib::path_get_basename(p)));
+
+	std::string sources_root_path = Glib::build_filename (m_root_path, interchange_dir_name);
+	return Glib::build_filename (sources_root_path, legalized_root);
+}
+
+const std::string
 SessionDirectory::sound_path () const
 {
 	if (Glib::file_test (old_sound_path (), Glib::FILE_TEST_IS_DIR)) return old_sound_path();
 
 	// the new style sound directory
 	return Glib::build_filename (sources_root(), sound_dir_name);
+}
+
+const std::string
+SessionDirectory::sound_path_2X () const
+{
+	return Glib::build_filename (sources_root_2X(), sound_dir_name);
 }
 
 const std::string
