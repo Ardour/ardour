@@ -22,6 +22,7 @@
 #include "ardour/session.h"
 #include "ardour/audioengine.h"
 #include "ardour/audio_port.h"
+#include "ardour/slave.h"
 
 #include "i18n.h"
 
@@ -113,13 +114,18 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 	out = (jack_default_audio_sample_t*) jack_port_get_buffer (ltcport->jack_port(), nframes);
 	if (!out) return 0;
 
-	if (engine().freewheeling()|| !Config->get_send_ltc()
+	SyncSource sync_src = Config->get_sync_source();
+	if (engine().freewheeling()
+			|| !Config->get_send_ltc()
 			/* TODO
-			 * we can relax this a bit, JACK or sample-synced slaves should be fine.
-			 * test before allowing it, do the same for MTC generator in
-			 * libs/ardour/session_midi.cc
-			 * */
-		//	|| config.get_external_sync()  // XXX XXX
+			 * decide which time-sources we can generated LTC from.
+			 * Internal, JACK or sample-synced slaves should be fine.
+			 *
+			 *
+			 || (config.get_external_sync() && sync_src == LTC)
+			 || (config.get_external_sync() && sync_src == MTC)
+			 */
+			 || (config.get_external_sync() && sync_src == MIDIClock)
 			) {
 		memset(out, 0, nframes * sizeof(jack_default_audio_sample_t));
 		return nframes;
@@ -135,7 +141,7 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 	/* all systems go. Now here's the plan:
 	 *
 	 *  1) check if fps has changed
-	 *  2) check direction of encoding, calc speed, resample existing buffer
+	 *  2) check direction of encoding, calc speed, re-sample existing buffer
 	 *  3) calculate frame and byte to send aligned to jack-period size
 	 *  4) check if it's the frame/byte that is already in the queue
 	 *  5) if (4) mismatch, re-calculate offset of LTC frame relative to period size
@@ -169,11 +175,20 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 #define SIGNUM(a) ( (a) < 0 ? -1 : 1)
 	bool speed_changed = false;
 
-	// XXX
-	//framepos_t cycle_start_frame = (current_speed < 0) ? (start_frame - ltc_latency.max) : (start_frame + ltc_latency.max);
+	/* use port latency compensation */
+#if 1
+	/* The generated timecode is offset by the port-latency,
+	 * therefore the offset depends on the direction of transport.
+	 */
+	framepos_t cycle_start_frame = (current_speed < 0) ? (start_frame + ltc_latency.max) : (start_frame - ltc_latency.max);
+#else
+	/* This comes in handy when testing sync - record output on an A3 track
+	 * see also http://tracker.ardour.org/view.php?id=5073
+	 */
 	framepos_t cycle_start_frame = start_frame;
+#endif
 
-	/* cycle-start may become negative due to latency comensation */
+	/* cycle-start may become negative due to latency compensation */
 	if (cycle_start_frame < 0) { cycle_start_frame = 0; }
 
 	double new_ltc_speed = double(labs(end_frame - start_frame) * SIGNUM(current_speed)) / double(nframes);
@@ -187,9 +202,9 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 		/* check ./libs/ardour/interpolation.cc  CubicInterpolation::interpolate
 		 * if target_speed != current_speed we should interpolate, too.
 		 *
-		 * However, currenly in A3 target_speed == current_speed for each process cycle
+		 * However, currency in A3 target_speed == current_speed for each process cycle
 		 * (except for the sign and if target_speed > 8.0).
-		 * Besides, above speed calulation uses the difference (end_frame - start_frame).
+		 * Besides, above speed calculation uses the difference (end_frame - start_frame).
 		 * end_frame is calculated from 'frames_moved' which includes the interpolation.
 		 * so we're good.
 		 */
@@ -227,8 +242,9 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 		ltc_tx_reset();
 	}
 
-	/* the timecode duration corresponding to the samples still in the buffer
-	 * here we use prev. speed to match the begining of this cycle for aligment.
+	/* the timecode duration corresponding to the samples that are still
+	 * in the buffer. Here, the speed of previous cycle is used to calculate
+	 * the alignment at the beginning of this cycle later.
 	 */
 	double poff = (ltc_buf_len - ltc_buf_off) * ltc_speed;
 
@@ -236,8 +252,8 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 		/* we need to re-sample the existing buffer.
 		 * "make space for the en-coder to catch up to the new speed"
 		 *
-		 * since the LTC signal is a rect waveform we can simply squeeze it
-		 * by removing samples or duplicating /here and there/.
+		 * since the LTC signal is a rectangular waveform we can simply squeeze it
+		 * by removing samples or duplicating samples /here and there/.
 		 *
 		 * There may be a more elegant way to do this, in fact one could
 		 * simply re-render the buffer using ltc_encoder_encode_byte()
@@ -300,7 +316,7 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 	DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX2: transport speed %1.\n", ltc_speed));
 
 
-	// (3) bit/sample aligment
+	// (3) bit/sample alignment
 	Timecode::Time tc_start;
 	framepos_t tc_sample_start;
 
@@ -320,17 +336,23 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 				cycle_start_frame, tc_sample_start, soff));
 
 
-	// (4) check if aligment matches
+	// (4) check if alignment matches
 	const double fptcf = frames_per_timecode_frame(); // convenient, used a lot below.
+
+	/* maximum difference of bit alignment in audio-samples.
+	 *
+	 * if transport and LTC generator differs more than this, the LTC
+	 * generator will be re-initialized
+	 *
+	 * due to rounding error and variations in LTC-bit duration depending
+	 * on the speed, it can be off by +- ltc_speed audio-samples.
+	 * When the playback speed changes, it can actually reach +- 2 * ltc_speed
+	 * in the cycle _after_ the speed changed. The average delta however is 0.
+	 */
 	double maxdiff;
 
-	/* due to rounding error and variations in LTC-bit duration depending
-	 * on the speed, we can be off by +- speed samples.
-	 * during speed-changes we can acually ready += 2*speed audio-samples
-	 * in the cycle after the speed change.  The average delta however is 0.
-	 */
-	if (config.get_external_sync()) {
-		maxdiff = fptcf; // TODO get slave max delta
+	if (config.get_external_sync() && slave()) {
+		maxdiff = slave()->resolution();
 	} else {
 		maxdiff = ceil(fabs(ltc_speed))*2.0;
 	}
@@ -357,8 +379,7 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 		ltc_encoder_set_timecode(ltc_encoder, &tc);
 
 		/* workaround for libltc recognizing 29.97 and 30000/1001 as drop-frame TC.
-		 * in A3 only 30000/1001 is drop-frame and there are also other questionable
-		 * DF timecodes  such as 24k/1001 and 25k/1001.
+		 * In A3 30000/1001 or 30 fps can be drop-frame.
 		 */
 		LTCFrame ltcframe;
 		ltc_encoder_get_frame(ltc_encoder, &ltcframe);
@@ -393,16 +414,16 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 			}
 		}
 
+		assert (cyc_off >= 0);
+
 		DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX5 restart encoder: soff %1 byte %2 cycoff %3\n",
 					soff, ltc_enc_byte, cyc_off));
 
-		if (ltc_speed == 0) {
-			/* don't bother to align non-moving loops */
-		} else if (cyc_off > 0 && cyc_off <= nframes) {
+		if (cyc_off > 0 && cyc_off <= nframes) {
 			/* offset in this cycle */
 			txf= rint(cyc_off / fabs(ltc_speed));
 			memset(out, 0, cyc_off * sizeof(jack_default_audio_sample_t));
-		} else if (cyc_off > 0) {
+		} else {
 			/* resync next cycle */
 			memset(out, 0, cyc_off * sizeof(jack_default_audio_sample_t));
 			return nframes;
@@ -471,9 +492,9 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 
 		ltc_buf_len += enc_frames;
 		if (ltc_speed < 0)
-			ltc_enc_cnt -= fptcf/10.0; //enc_frames * ltc_speed;
+			ltc_enc_cnt -= fptcf/10.0;
 		else
-			ltc_enc_cnt += fptcf/10.0; //enc_frames * ltc_speed;
+			ltc_enc_cnt += fptcf/10.0;
 
 		if (ltc_speed >= 0) {
 			ltc_enc_byte = (ltc_enc_byte + 1)%10;
