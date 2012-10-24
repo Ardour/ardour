@@ -1119,7 +1119,7 @@ RCOptionEditor::RCOptionEditor ()
 			    );
 	Gtkmm2ext::UI::instance()->set_tip
 		(_ltc_send_continuously->tip_widget(),
-		 _("If enabled, Ardour will continue to send LTC information even when the transport (playhead) is not moving."));
+		 _("When enabled, Ardour will continue to send LTC information even when the transport (playhead) is not moving."));
 	add_option (_("Transport"), _ltc_send_continuously);
 
   _ltc_volume_adjustment = new Gtk::Adjustment(-18, -50, 0, .5, 3);
