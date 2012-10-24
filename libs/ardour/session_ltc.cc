@@ -343,7 +343,7 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 				rint(ltc_enc_pos + ltc_enc_cnt - poff) - cycle_start_frame
 				));
 
-	if (fabs(ceil(ltc_enc_pos + ltc_enc_cnt - poff) - cycle_start_frame) > maxdiff)
+	if (ltc_speed != 0 && fabs(ceil(ltc_enc_pos + ltc_enc_cnt - poff) - cycle_start_frame) > maxdiff)
 	{
 		// (5) re-align
 		ltc_tx_reset();
