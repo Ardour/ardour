@@ -352,6 +352,7 @@ public:
 	void parse_ltc(const jack_nframes_t, const jack_default_audio_sample_t * const, const framecnt_t);
 	void process_ltc(framepos_t const);
 	void init_engine_dll (framepos_t, int32_t);
+	bool detect_discontinuity(LTCFrameExt *, int, bool);
 	bool detect_ltc_fps(int, bool);
 	void reset();
 
@@ -362,6 +363,8 @@ public:
 	LTCDecoder *   decoder;
 	double         frames_per_ltc_frame;
 	Timecode::Time timecode;
+	LTCFrameExt    prev_frame;
+	bool           fps_detected;
 
 	framecnt_t     monotonic_cnt;
 	framecnt_t     last_timestamp;

@@ -52,10 +52,11 @@ LTC_Slave::LTC_Slave (Session& s)
 	delayedlocked = 10;
 	monotonic_cnt = 0;
 
-	ltc_timecode = timecode_60; // track changes of LTC timecode
-	a3e_timecode = timecode_60; // track canges of Ardour's timecode
+	ltc_timecode = timecode_60; // track changes of LTC fps
+	a3e_timecode = timecode_60; // track changes of Ardour's fps
 	printed_timecode_warning = false;
 	ltc_detect_fps_cnt = ltc_detect_fps_max = 0;
+	memset(&prev_frame, 0, sizeof(LTCFrameExt));
 
 	decoder = ltc_decoder_create((int) frames_per_ltc_frame, 128 /*queue size*/);
 	reset();
@@ -97,6 +98,7 @@ LTC_Slave::reset()
 	transport_direction = 0;
 	ltc_speed = 0;
 	engine_dll_initstate = 0;
+	fps_detected=false;
 }
 
 void
@@ -106,7 +108,7 @@ LTC_Slave::parse_ltc(const jack_nframes_t nframes, const jack_default_audio_samp
 	unsigned char sound[8192];
 	if (nframes > 8192) {
 		/* TODO warn once or wrap, loop conversion below
-		 * does A3 support > 8192 spp anyway?
+		 * does jack/A3 support > 8192 spp anyway?
 		 */
 		return;
 	}
@@ -117,6 +119,45 @@ LTC_Slave::parse_ltc(const jack_nframes_t nframes, const jack_default_audio_samp
 	}
 	ltc_decoder_write(decoder, sound, nframes, posinfo);
 	return;
+}
+
+bool
+LTC_Slave::detect_discontinuity(LTCFrameExt *frame, int fps, bool fuzzy) {
+	bool discontinuity_detected = false;
+
+	if (fuzzy && (
+		  (frame->reverse  && prev_frame.ltc.frame_units == 0)
+		||(!frame->reverse && frame->ltc.frame_units == 0)
+		))
+	{
+		memcpy(&prev_frame, frame, sizeof(LTCFrameExt));
+		return false;
+	}
+
+	if (frame->reverse) {
+		ltc_frame_decrement(&prev_frame.ltc, fps , 0);
+	} else {
+		ltc_frame_increment(&prev_frame.ltc, fps , 0);
+	}
+
+	LTCFrame *a = &prev_frame.ltc;
+	LTCFrame *b = &frame->ltc;
+	if (       a->frame_units != b->frame_units
+		|| a->frame_tens  != b->frame_tens
+		|| a->dfbit       != b->dfbit
+		|| a->secs_units  != b->secs_units
+		|| a->secs_tens   != b->secs_tens
+		|| a->mins_units  != b->mins_units
+		|| a->mins_tens   != b->mins_tens
+		|| a->hours_units != b->hours_units
+		|| a->hours_tens  != b->hours_tens
+	     )
+	{
+		discontinuity_detected = true;
+	}
+
+    memcpy(&prev_frame, frame, sizeof(LTCFrameExt));
+    return discontinuity_detected;
 }
 
 bool
@@ -170,7 +211,7 @@ LTC_Slave::detect_ltc_fps(int frameno, bool df)
 				did_reset_tc_format = true;
 			}
 			if (cur_timecode != tc_format) {
-				warning << string_compose(_("Session framerate adjusted from %1 TO: LTC's %2."),
+				warning << string_compose(_("Session framerate adjusted from %1 to LTC's %2."),
 						Timecode::timecode_format_name(cur_timecode),
 						Timecode::timecode_format_name(tc_format))
 					<< endmsg;
@@ -207,9 +248,16 @@ LTC_Slave::process_ltc(framepos_t const now)
 		timecode.subframes  = 0;
 
 		/* set timecode.rate and timecode.drop: */
+
+		if (detect_discontinuity(&frame, ceil(timecode.rate), !fps_detected)) {
+			ltc_detect_fps_cnt = ltc_detect_fps_max = 0;
+			fps_detected=false;
+		}
+
 		if (detect_ltc_fps(stime.frame, (frame.ltc.dfbit)? true : false)) {
 			reset();
 			last_timestamp = 0;
+			fps_detected=true;
 		}
 
 #if 0 // Devel/Debug
@@ -362,7 +410,7 @@ LTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 
 	/* it take 2 cycles from naught to rolling.
 	 * during these to initial cycles the speed == 0
-	 * 
+	 *
 	 * the first cycle:
 	 * DEBUG::Slave: slave stopped, move to NNN
 	 * DEBUG::Transport: Request forced locate to NNN
