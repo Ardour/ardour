@@ -350,7 +350,7 @@ LTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 	jack_default_audio_sample_t *in;
 	jack_latency_range_t ltc_latency;
 
-	boost::shared_ptr<Port> ltcport = session.engine().ltc_input_port();
+	boost::shared_ptr<Port> ltcport = session.ltc_input_port();
 	ltcport->get_connected_latency_range(ltc_latency, false);
 	in = (jack_default_audio_sample_t*) jack_port_get_buffer (ltcport->jack_port(), nframes);
 

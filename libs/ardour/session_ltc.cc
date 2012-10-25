@@ -107,7 +107,7 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 
 	jack_default_audio_sample_t *out;
 	pframes_t txf = 0;
-	boost::shared_ptr<Port> ltcport = engine().ltc_output_port();
+	boost::shared_ptr<Port> ltcport = ltc_output_port();
 
 	if (!ltc_encoder || !ltc_enc_buf || !ltcport || ! ltcport->jack_port()) return 0;
 

@@ -521,15 +521,6 @@ AudioEngine::process_callback (pframes_t nframes)
 	}
 
 	if (_session == 0) {
-#ifdef HAVE_LTC
-		// silence LTC
-		jack_default_audio_sample_t *out;
-		boost::shared_ptr<Port> ltcport = ltc_output_port();
-		if (ltcport && ltcport->jack_port()) {
-			out = (jack_default_audio_sample_t*) jack_port_get_buffer (ltcport->jack_port(), nframes);
-			if (out) memset(out, 0, nframes * sizeof(jack_default_audio_sample_t));
-		}
-#endif
 
 		if (!_freewheeling) {
 			MIDI::Manager::instance()->cycle_start(nframes);
