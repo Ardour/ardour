@@ -1161,6 +1161,16 @@ Session::state (bool full_state)
 		gain_child->add_child_nocopy (_click_gain->state (full_state));
 	}
 
+	if (_ltc_input) {
+		XMLNode* ltc_input_child = node->add_child ("LTC-In");
+		ltc_input_child->add_child_nocopy (_ltc_input->state (full_state));
+	}
+
+	if (_ltc_input) {
+		XMLNode* ltc_output_child = node->add_child ("LTC-Out");
+		ltc_output_child->add_child_nocopy (_ltc_output->state (full_state));
+	}
+
         node->add_child_nocopy (_speakers->get_state());
 	node->add_child_nocopy (_tempo_map->get_state());
 	node->add_child_nocopy (get_control_protocol_state());
@@ -3551,6 +3561,10 @@ Session::config_changed (std::string p, bool ours)
 		AudioSource::allocate_working_buffers (frame_rate());
 	} else if (p == "automation-thinning-factor") {
 		Evoral::ControlList::set_thinning_factor (Config->get_automation_thinning_factor());
+	} else if (p == "ltc-source-port") {
+		reconnect_ltc_input ();
+	} else if (p == "ltc-sink-port") {
+		reconnect_ltc_output ();
 	}
 
 	set_dirty ();

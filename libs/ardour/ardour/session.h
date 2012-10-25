@@ -847,6 +847,9 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	/** Emitted when the session wants Ardour to quit */
 	static PBD::Signal0<void> Quit;
 
+        boost::shared_ptr<Port> ltc_input_port() const;
+        boost::shared_ptr<Port> ltc_output_port() const;
+
   protected:
 	friend class AudioEngine;
 	void set_block_size (pframes_t nframes);
@@ -1554,6 +1557,12 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	bool ignore_route_processor_changes;
 
 	MidiClockTicker* midi_clock;
+
+        boost::shared_ptr<IO>   _ltc_input;
+        boost::shared_ptr<IO>   _ltc_output;
+
+        void reconnect_ltc_input ();
+        void reconnect_ltc_output ();
 };
 
 } // namespace ARDOUR

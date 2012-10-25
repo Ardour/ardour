@@ -78,8 +78,6 @@ AudioEngine::AudioEngine (string client_name, string session_uuid)
 	, port_remove_in_progress (false)
 	, m_meter_thread (0)
 	, _main_thread (0)
-	, _ltc_input ()
-	, _ltc_output ()
 	, ports (new Ports)
 {
 	_instance = this; /* singleton */
@@ -91,34 +89,11 @@ AudioEngine::AudioEngine (string client_name, string session_uuid)
 	}
 
 	Port::set_engine (this);
-
-#ifdef HAVE_LTC
-	_ltc_input = register_port (DataType::AUDIO, _("LTC in"), true);
-
-	/* register_port() would allocate buffers and pass a shadow copy
-	 * which is subject to ardour's route buffering behavioud and
-	 * not suitable for generating LTC independent of transport state.
-	 */
-	_ltc_output.reset(new AudioPort ("LTC out", Port::IsOutput));
-
-	/* As of October 2012, the LTC source port is the only thing that needs
-	 * to care about Config parameters, so don't bother to listen if we're
-	 * not doing LTC stuff. This might change if other parameters show up
-	 * in the future that we need to care about with or without LTC.
-	 */
-
-	Config->ParameterChanged.connect_same_thread (config_connection, boost::bind (&AudioEngine::parameter_changed, this, _1));
-#endif
 }
 
 AudioEngine::~AudioEngine ()
 {
 	config_connection.disconnect ();
-#ifdef HAVE_LTC
-	if (_ltc_output && _ltc_output->jack_port()) {
-		jack_port_disconnect (_jack, _ltc_output->jack_port());
-	}
-#endif
 
 	{
 		Glib::Threads::Mutex::Lock tm (_process_lock);
@@ -234,9 +209,6 @@ AudioEngine::start ()
 			_running = true;
 			_has_run = true;
 			Running(); /* EMIT SIGNAL */
-
-			reconnect_ltc ();
-
 		} else {
 			// error << _("cannot activate JACK client") << endmsg;
 		}
@@ -1513,8 +1485,6 @@ AudioEngine::reconnect_to_jack ()
 
 	MIDI::Manager::instance()->reconnect ();
 
-	reconnect_ltc ();
-
 	Running (); /* EMIT SIGNAL*/
 
 	start_metering_thread ();
@@ -1659,29 +1629,3 @@ AudioEngine::destroy ()
 	_instance = 0;
 }
 
-void
-AudioEngine::parameter_changed (const std::string& s)
-{
-	if (s == "ltc-source-port") {
-		reconnect_ltc ();
-	}
-	else if (s == "ltc-sink-port") {
-		// TODO
-	}
-
-}
-
-void
-AudioEngine::reconnect_ltc ()
-{
-	if (_ltc_input) {
-
-		string src = Config->get_ltc_source_port();
-
-		_ltc_input->disconnect_all ();
-
-		if (src != _("None") && !src.empty())  {
-			_ltc_input->connect (src);
-		}
-	}
-}

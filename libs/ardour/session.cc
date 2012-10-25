@@ -145,7 +145,6 @@ Session::Session (AudioEngine &eng,
 	, _bundles (new BundleList)
 	, _bundle_xml_node (0)
 	, _current_trans (0)
-	, _click_io ((IO*) 0)
 	, click_data (0)
 	, click_emphasis_data (0)
 	, main_outs (0)
@@ -371,7 +370,30 @@ Session::when_engine_running ()
 
 	try {
 		XMLNode* child = 0;
+		
+		_ltc_input.reset (new IO (*this, _("LTC In"), IO::Input));
+		_ltc_output.reset (new IO (*this, _("LTC Out"), IO::Output));
+		
+		if (state_tree && (child = find_named_node (*state_tree->root(), "LTC-In")) != 0) {
+			_ltc_input->set_state (*(child->children().front()), Stateful::loading_state_version);
+		} else {
+			{
+				Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+				_ltc_input->ensure_io (ChanCount (DataType::AUDIO, 1), true, this);
+			}
+			reconnect_ltc_input ();
+		}
 
+		if (state_tree && (child = find_named_node (*state_tree->root(), "LTC-Out")) != 0) {
+			_ltc_output->set_state (*(child->children().front()), Stateful::loading_state_version);
+		} else {
+			{
+				Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+				_ltc_output->ensure_io (ChanCount (DataType::AUDIO, 1), true, this);
+			}
+			reconnect_ltc_output ();
+		}
+						
 		_click_io.reset (new ClickIO (*this, "click"));
 		_click_gain.reset (new Amp (*this));
 		_click_gain->activate ();
@@ -4739,4 +4761,48 @@ bool
 Session::operation_in_progress (GQuark op) const
 {
 	return (find (_current_trans_quarks.begin(), _current_trans_quarks.end(), op) != _current_trans_quarks.end());
+}
+
+boost::shared_ptr<Port>
+Session::ltc_input_port () const
+{
+	return _ltc_input->nth (0);
+}
+
+boost::shared_ptr<Port>
+Session::ltc_output_port () const
+{
+	return _ltc_output->nth (0);
+}
+
+void
+Session::reconnect_ltc_input ()
+{
+	if (_ltc_input) {
+
+		string src = Config->get_ltc_source_port();
+
+		_ltc_input->disconnect (this);
+
+		if (src != _("None") && !src.empty())  {
+			_ltc_input->nth (0)->connect (src);
+		}
+	}
+}
+
+void
+Session::reconnect_ltc_output ()
+{
+	if (_ltc_output) {
+
+#if 0
+		string src = Config->get_ltc_sink_port();
+
+		_ltc_output->disconnect (this);
+
+		if (src != _("None") && !src.empty())  {
+			_ltc_output->nth (0)->connect (src);
+		}
+#endif
+	}
 }
