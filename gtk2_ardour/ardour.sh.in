@@ -47,6 +47,12 @@ export ARDOUR_DATA_PATH=@DATADIR@/ardour3
 export ARDOUR_CONFIG_PATH=@SYSCONFDIR@/ardour3
 export ARDOUR_DLL_PATH=@LIBDIR@/ardour3
 
-exec @LIBDIR@/ardour3/ardour-@VERSION@ "$@"
+if [ $# -gt 0 ] ; then
+    case $1 in
+        -g|--gdb) GDB=gdb; shift ;;
+    esac
+fi
+
+exec $GDB @LIBDIR@/ardour3/ardour-@VERSION@ "$@"
 
 
