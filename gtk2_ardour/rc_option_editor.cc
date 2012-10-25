@@ -1786,10 +1786,12 @@ RCOptionEditor::parameter_changed (string const & p)
 			_sync_framerate->set_sensitive (false);
 			break;
 		}
+#ifdef HAVE_LTC
 	} else if (p == "send-ltc") {
 		bool const s = Config->get_send_ltc ();
 		_ltc_send_continuously->set_sensitive (s);
 		_ltc_volume_slider->set_sensitive (s);
+#endif /*HAVE_LTC*/
 	}
 }
 
