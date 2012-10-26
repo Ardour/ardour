@@ -31,6 +31,7 @@
 #include "ardour/io_processor.h"
 #include "ardour/session.h"
 #include "ardour/user_bundle.h"
+#include "ardour/port.h"
 #include "control_protocol/control_protocol.h"
 
 #include "gui_thread.h"
@@ -422,6 +423,17 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 	if (!inputs) {
 		ardour->add_bundle (session->the_auditioner()->output()->bundle());
 		ardour->add_bundle (session->click_io()->bundle());
+		/* Note: the LTC ports do not have the usual ":audio_out 1" postfix, so
+		 *  ardour->add_bundle (session->ltc_output_io()->bundle());
+		 *  won't work
+		 */
+		boost::shared_ptr<Bundle> ltc (new Bundle (_("LTC Out"), inputs));
+		ltc->add_channel (_("LTC Out"), DataType::AUDIO, session->engine().make_port_name_non_relative (session->ltc_output_port()->name()));
+		ardour->add_bundle (ltc);
+	} else {
+		boost::shared_ptr<Bundle> ltc (new Bundle (_("LTC In"), inputs));
+		ltc->add_channel (_("LTC In"), DataType::AUDIO, session->engine().make_port_name_non_relative (session->ltc_input_port()->name()));
+		ardour->add_bundle (ltc);
 	}
 
 	/* Ardour's surfaces */
@@ -459,11 +471,6 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 			sync->add_channel (
 				_("MMC in"), DataType::MIDI, ae.make_port_name_non_relative (mmc->input_port()->name())
 				);
-#ifdef HAVE_LIBLTC
-			sync->add_channel (
-				_("LTC in"), DataType::AUDIO, ae.make_port_name_non_relative (ae->ltc_input_port()->name())
-				);
-#endif
 		} else {
 			sync->add_channel (
 				_("MTC out"), DataType::MIDI, ae.make_port_name_non_relative (midi_manager->mtc_output_port()->name())
