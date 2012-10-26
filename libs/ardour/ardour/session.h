@@ -1203,7 +1203,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void ltc_tx_cleanup();
 	void ltc_tx_reset();
 	void ltc_tx_recalculate_position();
-	int  ltc_tx_send_time_code_for_cycle (framepos_t, framepos_t, double, double, pframes_t nframes);
+	void ltc_tx_send_time_code_for_cycle (framepos_t, framepos_t, double, double, pframes_t nframes);
 #endif
 
 	void reset_record_status ();
