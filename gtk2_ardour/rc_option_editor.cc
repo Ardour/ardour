@@ -1103,6 +1103,8 @@ RCOptionEditor::RCOptionEditor ()
 
 #ifdef HAVE_LTC
 	// TODO; rather disable this button than not compile it..
+	add_option (_("Transport"), new OptionEditorHeading (S_("LTC Generator")));
+
 	add_option (_("Transport"),
 		    new BoolOption (
 			    "send-ltc",
