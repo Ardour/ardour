@@ -119,16 +119,16 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 	}
 
 	SyncSource sync_src = Config->get_sync_source();
-	if (engine().freewheeling() || !Config->get_send_ltc() ||
+	if (engine().freewheeling() || !Config->get_send_ltc()
 	    /* TODO
 	     * decide which time-sources we can generated LTC from.
 	     * Internal, JACK or sample-synced slaves should be fine.
-	     *
+	     * talk to oofus.
 	     *
 	     || (config.get_external_sync() && sync_src == LTC)
 	     || (config.get_external_sync() && sync_src == MTC)
 	    */
-	    (config.get_external_sync() && sync_src == MIDIClock)
+	     ||(config.get_external_sync() && sync_src == MIDIClock)
 		) {
 		return;
 	}
@@ -337,7 +337,7 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 
 
 	// (4) check if alignment matches
-	const double fptcf = frames_per_timecode_frame(); // convenient, used a lot below.
+	const double fptcf = frames_per_timecode_frame();
 
 	/* maximum difference of bit alignment in audio-samples.
 	 *
@@ -390,7 +390,11 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 		DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX4: now: %1 trs: %2 toff %3\n", cycle_start_frame, tc_sample_start, soff));
 
 		uint32_t cyc_off;
-		assert(soff >= 0 && soff < fptcf);
+		if (soff < 0 || soff >= fptcf) {
+			/* session framerate change between (2) and now */
+			ltc_tx_reset();
+			return;
+		}
 
 		if (ltc_speed < 0 ) {
 			/* calculate the byte that starts at or after the current position */
