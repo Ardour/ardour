@@ -58,6 +58,8 @@ Session::ltc_tx_initialize()
 	ltc_enc_buf = (ltcsnd_sample_t*) calloc((nominal_frame_rate() / 23), sizeof(ltcsnd_sample_t));
 	ltc_speed = 0;
 	ltc_tx_reset();
+	Xrun.connect_same_thread (*this, boost::bind (&Session::ltc_tx_reset, this));
+	engine().GraphReordered.connect_same_thread (*this, boost::bind (&Session::ltc_tx_reset, this));
 }
 
 void
@@ -78,6 +80,11 @@ Session::ltc_tx_reset()
 	ltc_buf_off = 0;
 	ltc_enc_byte = 0;
 	ltc_enc_cnt = 0;
+
+	boost::shared_ptr<Port> ltcport = ltc_output_port();
+	if (ltcport) {
+		ltcport->get_connected_latency_range(ltc_out_latency, true);
+	}
 }
 
 void
@@ -113,7 +120,7 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 	boost::shared_ptr<Port> ltcport = ltc_output_port();
 
 	Buffer& buf (ltcport->get_buffer (nframes));
-	
+
 	if (!ltc_encoder || !ltc_enc_buf) {
 		return;
 	}
@@ -138,9 +145,17 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 	/* range from libltc (38..218) || - 128.0  -> (-90..90) */
 	const float ltcvol = Config->get_ltc_output_volume()/(90.0); // pow(10, db/20.0)/(90.0);
 
-	jack_latency_range_t ltc_latency;
-	ltcport->get_connected_latency_range(ltc_latency, true);
-	DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX %1 to %2 / %3 | lat: %4\n", start_frame, end_frame, nframes, ltc_latency.max));
+#if 1
+	/* TODO read layency only on demand -> ::ltc_tx_reset()
+	 * this is already prepared.
+	 *
+	 * ..but first fix jack2 issue with re-computing latency
+	 * in the correct order. Until then, querying it in the
+	 * process-callback is the only way to get the current value
+	 */
+	ltcport->get_connected_latency_range(ltc_out_latency, true);
+#endif
+	DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX %1 to %2 / %3 | lat: %4\n", start_frame, end_frame, nframes, ltc_out_latency.max));
 
 	/* all systems go. Now here's the plan:
 	 *
@@ -175,6 +190,10 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 	}
 
 	// (2) speed & direction
+
+	/* speed 0 aka transport stopped is interpreted as rolling forward.
+	 * keep repeating current frame
+	 */
 #define SIGNUM(a) ( (a) < 0 ? -1 : 1)
 	bool speed_changed = false;
 
@@ -183,7 +202,7 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 	/* The generated timecode is offset by the port-latency,
 	 * therefore the offset depends on the direction of transport.
 	 */
-	framepos_t cycle_start_frame = (current_speed < 0) ? (start_frame + ltc_latency.max) : (start_frame - ltc_latency.max);
+	framepos_t cycle_start_frame = (current_speed < 0) ? (start_frame + ltc_out_latency.max) : (start_frame - ltc_out_latency.max);
 #else
 	/* This comes in handy when testing sync - record output on an A3 track
 	 * see also http://tracker.ardour.org/view.php?id=5073
@@ -510,7 +529,7 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 		DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX6.4 enc-pos: %1 + %2 [ %4 / %5 ] spd %6\n", ltc_enc_pos, ltc_enc_cnt, ltc_buf_off, ltc_buf_len, ltc_speed));
 #endif
 	}
-	
+
 	dynamic_cast<AudioBuffer*>(&buf)->set_written (true);
 	return;
 }
