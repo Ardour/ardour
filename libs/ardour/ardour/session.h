@@ -850,6 +850,9 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
         boost::shared_ptr<Port> ltc_input_port() const;
         boost::shared_ptr<Port> ltc_output_port() const;
 
+	boost::shared_ptr<IO> ltc_input_io() { return _ltc_input; }
+	boost::shared_ptr<IO> ltc_output_io() { return _ltc_output; }
+
   protected:
 	friend class AudioEngine;
 	void set_block_size (pframes_t nframes);

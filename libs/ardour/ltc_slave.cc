@@ -61,10 +61,14 @@ LTC_Slave::LTC_Slave (Session& s)
 
 	decoder = ltc_decoder_create((int) frames_per_ltc_frame, 128 /*queue size*/);
 	reset();
+	session.Xrun.connect_same_thread (port_connections, boost::bind (&LTC_Slave::reset, this));
+	session.engine().GraphReordered.connect_same_thread (port_connections, boost::bind (&LTC_Slave::reset, this));
 }
 
 LTC_Slave::~LTC_Slave()
 {
+	port_connections.drop_connections();
+
 	if (did_reset_tc_format) {
 		session.config.set_timecode_format (saved_tc_format);
 	}
@@ -99,6 +103,11 @@ LTC_Slave::reset()
 	transport_direction = 0;
 	ltc_speed = 0;
 	engine_dll_initstate = 0;
+
+	if (session.ltc_output_io()) { /* check if Port exits */
+		boost::shared_ptr<Port> ltcport = session.ltc_input_port();
+		ltcport->get_connected_latency_range(ltc_slave_latency, false);
+	}
 }
 
 void
@@ -351,15 +360,24 @@ LTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 	framecnt_t nframes = session.engine().frames_per_cycle();
 
 	jack_default_audio_sample_t *in;
-	jack_latency_range_t ltc_latency;
 
 	boost::shared_ptr<Port> ltcport = session.ltc_input_port();
-	ltcport->get_connected_latency_range(ltc_latency, false);
+
+#if 1
+	/* TODO read layency only on demand -> ::reset()
+	 * this is already prepared.
+	 *
+	 * ..but first fix jack2 issue with re-computing latency
+	 * in the correct order. Until then, querying it in the
+	 * process-callback is the only way to get the current value
+	 */
+	ltcport->get_connected_latency_range(ltc_slave_latency, false);
+#endif
 	in = (jack_default_audio_sample_t*) jack_port_get_buffer (ltcport->jack_port(), nframes);
 
 	frameoffset_t skip = now - (monotonic_cnt + nframes);
 	monotonic_cnt = now;
-	DEBUG_TRACE (DEBUG::LTC, string_compose ("speed_and_position - TID:%1 | latency: %2 | skip %3\n", ::pthread_self(), ltc_latency.max, skip));
+	DEBUG_TRACE (DEBUG::LTC, string_compose ("speed_and_position - TID:%1 | latency: %2 | skip %3\n", ::pthread_self(), ltc_slave_latency.max, skip));
 
 	if (last_timestamp == 0) {
 		engine_dll_initstate = 0;
@@ -390,7 +408,7 @@ LTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 			reset();
 		}
 
-		parse_ltc(nframes, in, now + ltc_latency.max );
+		parse_ltc(nframes, in, now + ltc_slave_latency.max );
 		process_ltc(now);
 	}
 

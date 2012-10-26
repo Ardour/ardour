@@ -380,6 +380,9 @@ public:
 	Timecode::TimecodeFormat ltc_timecode;
 	Timecode::TimecodeFormat a3e_timecode;
 
+	PBD::ScopedConnectionList port_connections;
+	jack_latency_range_t      ltc_slave_latency;
+
 	/* DLL - chase LTC */
 	int    transport_direction;
 	int    engine_dll_initstate;
