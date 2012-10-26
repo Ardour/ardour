@@ -51,6 +51,7 @@ LTC_Slave::LTC_Slave (Session& s)
 	did_reset_tc_format = false;
 	delayedlocked = 10;
 	monotonic_cnt = 0;
+	fps_detected=false;
 
 	ltc_timecode = timecode_60; // track changes of LTC fps
 	a3e_timecode = timecode_60; // track changes of Ardour's fps
@@ -98,7 +99,6 @@ LTC_Slave::reset()
 	transport_direction = 0;
 	ltc_speed = 0;
 	engine_dll_initstate = 0;
-	fps_detected=false;
 }
 
 void
@@ -122,26 +122,7 @@ LTC_Slave::parse_ltc(const jack_nframes_t nframes, const jack_default_audio_samp
 }
 
 bool
-LTC_Slave::detect_discontinuity(LTCFrameExt *frame, int fps, bool fuzzy) {
-	bool discontinuity_detected = false;
-
-	if (fuzzy && (
-		  (frame->reverse  && prev_frame.ltc.frame_units == 0)
-		||(!frame->reverse && frame->ltc.frame_units == 0)
-		))
-	{
-		memcpy(&prev_frame, frame, sizeof(LTCFrameExt));
-		return false;
-	}
-
-	if (frame->reverse) {
-		ltc_frame_decrement(&prev_frame.ltc, fps , 0);
-	} else {
-		ltc_frame_increment(&prev_frame.ltc, fps , 0);
-	}
-
-	LTCFrame *a = &prev_frame.ltc;
-	LTCFrame *b = &frame->ltc;
+LTC_Slave::equal_ltc_frame_time(LTCFrame *a, LTCFrame *b) {
 	if (       a->frame_units != b->frame_units
 		|| a->frame_tens  != b->frame_tens
 		|| a->dfbit       != b->dfbit
@@ -151,8 +132,30 @@ LTC_Slave::detect_discontinuity(LTCFrameExt *frame, int fps, bool fuzzy) {
 		|| a->mins_tens   != b->mins_tens
 		|| a->hours_units != b->hours_units
 		|| a->hours_tens  != b->hours_tens
-	     )
-	{
+	     ) {
+		return false;
+	}
+	return true;
+}
+
+bool
+LTC_Slave::detect_discontinuity(LTCFrameExt *frame, int fps, bool fuzzy) {
+	bool discontinuity_detected = false;
+
+	if (fuzzy && (
+		  ( frame->reverse && prev_frame.ltc.frame_units == 0)
+		||(!frame->reverse && frame->ltc.frame_units == 0)
+		)) {
+		memcpy(&prev_frame, frame, sizeof(LTCFrameExt));
+		return false;
+	}
+
+	if (frame->reverse) {
+		ltc_frame_decrement(&prev_frame.ltc, fps , 0);
+	} else {
+		ltc_frame_increment(&prev_frame.ltc, fps , 0);
+	}
+	if (!equal_ltc_frame_time(&prev_frame.ltc, &frame->ltc)) {
 		discontinuity_detected = true;
 	}
 
@@ -163,6 +166,7 @@ LTC_Slave::detect_discontinuity(LTCFrameExt *frame, int fps, bool fuzzy) {
 bool
 LTC_Slave::detect_ltc_fps(int frameno, bool df)
 {
+	bool fps_changed = false;
 	double detected_fps = 0;
 	if (frameno > ltc_detect_fps_max)
 	{
@@ -197,43 +201,42 @@ LTC_Slave::detect_ltc_fps(int frameno, bool df)
 		frames_per_ltc_frame = double(session.frame_rate()) / timecode.rate;
 		DEBUG_TRACE (DEBUG::LTC, string_compose ("LTC reset to FPS: %1%2 ; audio-frames per LTC: %3\n",
 				detected_fps, df?"df":"ndf", frames_per_ltc_frame));
-		return true; // reset()
+		fps_changed=true;
 	}
 
 	/* poll and check session TC */
-	if (1) {
-		TimecodeFormat tc_format = apparent_timecode_format();
-		TimecodeFormat cur_timecode = session.config.get_timecode_format();
-		if (Config->get_timecode_sync_frame_rate()) {
-			/* enforce time-code */
-			if (!did_reset_tc_format) {
-				saved_tc_format = cur_timecode;
-				did_reset_tc_format = true;
-			}
-			if (cur_timecode != tc_format) {
-				warning << string_compose(_("Session framerate adjusted from %1 to LTC's %2."),
-						Timecode::timecode_format_name(cur_timecode),
-						Timecode::timecode_format_name(tc_format))
-					<< endmsg;
-				session.config.set_timecode_format (tc_format);
-			}
-		} else {
-			/* only warn about TC mismatch */
-			if (ltc_timecode != tc_format) printed_timecode_warning = false;
-			if (a3e_timecode != cur_timecode) printed_timecode_warning = false;
-
-			if (cur_timecode != tc_format && ! printed_timecode_warning) {
-				warning << string_compose(_("Session and LTC framerate mismatch: LTC:%1 Session:%2."),
-						Timecode::timecode_format_name(tc_format),
-						Timecode::timecode_format_name(cur_timecode))
-					<< endmsg;
-				printed_timecode_warning = true;
-			}
+	TimecodeFormat tc_format = apparent_timecode_format();
+	TimecodeFormat cur_timecode = session.config.get_timecode_format();
+	if (Config->get_timecode_sync_frame_rate()) {
+		/* enforce time-code */
+		if (!did_reset_tc_format) {
+			saved_tc_format = cur_timecode;
+			did_reset_tc_format = true;
 		}
-		ltc_timecode = tc_format;
-		a3e_timecode = cur_timecode;
+		if (cur_timecode != tc_format) {
+			warning << string_compose(_("Session framerate adjusted from %1 to LTC's %2."),
+					Timecode::timecode_format_name(cur_timecode),
+					Timecode::timecode_format_name(tc_format))
+				<< endmsg;
+			session.config.set_timecode_format (tc_format);
+		}
+	} else {
+		/* only warn about TC mismatch */
+		if (ltc_timecode != tc_format) printed_timecode_warning = false;
+		if (a3e_timecode != cur_timecode) printed_timecode_warning = false;
+
+		if (cur_timecode != tc_format && ! printed_timecode_warning) {
+			warning << string_compose(_("Session and LTC framerate mismatch: LTC:%1 Session:%2."),
+					Timecode::timecode_format_name(tc_format),
+					Timecode::timecode_format_name(cur_timecode))
+				<< endmsg;
+			printed_timecode_warning = true;
+		}
 	}
-	return false;
+	ltc_timecode = tc_format;
+	a3e_timecode = cur_timecode;
+
+	return fps_changed;
 }
 
 void
@@ -248,15 +251,15 @@ LTC_Slave::process_ltc(framepos_t const now)
 		timecode.subframes  = 0;
 
 		/* set timecode.rate and timecode.drop: */
+		bool ltc_is_static = equal_ltc_frame_time(&prev_frame.ltc, &frame.ltc);
 
 		if (detect_discontinuity(&frame, ceil(timecode.rate), !fps_detected)) {
-			ltc_detect_fps_cnt = ltc_detect_fps_max = 0;
+			if (fps_detected) { ltc_detect_fps_cnt = ltc_detect_fps_max = 0; }
 			fps_detected=false;
 		}
 
-		if (detect_ltc_fps(stime.frame, (frame.ltc.dfbit)? true : false)) {
+		if (!ltc_is_static && detect_ltc_fps(stime.frame, (frame.ltc.dfbit)? true : false)) {
 			reset();
-			last_timestamp = 0;
 			fps_detected=true;
 		}
 

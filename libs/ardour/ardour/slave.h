@@ -354,6 +354,7 @@ public:
 	void init_engine_dll (framepos_t, int32_t);
 	bool detect_discontinuity(LTCFrameExt *, int, bool);
 	bool detect_ltc_fps(int, bool);
+	bool equal_ltc_frame_time(LTCFrame *a, LTCFrame *b);
 	void reset();
 
 	Session&       session;
