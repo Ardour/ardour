@@ -418,6 +418,14 @@ Session::send_midi_time_code_for_cycle (framepos_t start_frame, framepos_t end_f
 		return 0;
 	}
 
+	/* MTC is max. 30 fps - assert() below will fail
+	 * TODO actually limit it to 24,25,29df,30fps
+	 * talk to oofus, first.
+	 */
+	if (Timecode::timecode_to_frames_per_second(config.get_timecode_format()) > 30) {
+		return 0;
+	}
+
 	assert (next_quarter_frame_to_send >= 0);
 	assert (next_quarter_frame_to_send <= 7);
 
