@@ -373,7 +373,7 @@ Session::when_engine_running ()
 		
 		_ltc_input.reset (new IO (*this, _("LTC In"), IO::Input));
 		_ltc_output.reset (new IO (*this, _("LTC Out"), IO::Output));
-		
+
 		if (state_tree && (child = find_named_node (*state_tree->root(), "LTC-In")) != 0) {
 			_ltc_input->set_state (*(child->children().front()), Stateful::loading_state_version);
 		} else {
@@ -394,6 +394,13 @@ Session::when_engine_running ()
 			reconnect_ltc_output ();
 		}
 						
+		/* fix up names of LTC ports because we don't want the normal
+		 * IO style of NAME/TYPE-{in,out}N
+		 */
+		
+		_ltc_input->nth (0)->set_name (_("LTC-in"));
+		_ltc_output->nth (0)->set_name (_("LTC-out"));
+
 		_click_io.reset (new ClickIO (*this, "click"));
 		_click_gain.reset (new Amp (*this));
 		_click_gain->activate ();

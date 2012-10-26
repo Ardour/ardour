@@ -17,11 +17,14 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
-#include "ardour/debug.h"
+
 #include "timecode/time.h"
-#include "ardour/session.h"
+
 #include "ardour/audioengine.h"
 #include "ardour/audio_port.h"
+#include "ardour/debug.h"
+#include "ardour/io.h"
+#include "ardour/session.h"
 #include "ardour/slave.h"
 
 #include "i18n.h"
@@ -100,36 +103,40 @@ Session::ltc_tx_recalculate_position()
 
 int
 Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end_frame,
-		double target_speed, double current_speed,
-		pframes_t nframes)
+					  double target_speed, double current_speed,
+					  pframes_t nframes)
 {
-	assert(nframes > 0);
+	assert (nframes > 0);
 
-	jack_default_audio_sample_t *out;
+	Sample *out;
 	pframes_t txf = 0;
 	boost::shared_ptr<Port> ltcport = ltc_output_port();
+	int ret = -1;
 
-	if (!ltc_encoder || !ltc_enc_buf || !ltcport || ! ltcport->jack_port()) return 0;
-
-	out = (jack_default_audio_sample_t*) jack_port_get_buffer (ltcport->jack_port(), nframes);
-	if (!out) return 0;
+	Buffer& buf (ltcport->get_buffer (nframes));
+	
+	if (!ltc_encoder || !ltc_enc_buf) {
+		ret = nframes;
+		goto out;
+	}
 
 	SyncSource sync_src = Config->get_sync_source();
-	if (engine().freewheeling()
-			|| !Config->get_send_ltc()
-			/* TODO
-			 * decide which time-sources we can generated LTC from.
-			 * Internal, JACK or sample-synced slaves should be fine.
-			 *
-			 *
-			 || (config.get_external_sync() && sync_src == LTC)
-			 || (config.get_external_sync() && sync_src == MTC)
-			 */
-			 || (config.get_external_sync() && sync_src == MIDIClock)
-			) {
-		memset(out, 0, nframes * sizeof(jack_default_audio_sample_t));
-		return nframes;
+	if (engine().freewheeling() || !Config->get_send_ltc() ||
+	    /* TODO
+	     * decide which time-sources we can generated LTC from.
+	     * Internal, JACK or sample-synced slaves should be fine.
+	     *
+	     *
+	     || (config.get_external_sync() && sync_src == LTC)
+	     || (config.get_external_sync() && sync_src == MTC)
+	    */
+	    (config.get_external_sync() && sync_src == MIDIClock)
+		) {
+		ret = nframes;
+		goto out;
 	}
+
+	out = dynamic_cast<AudioBuffer*>(&buf)->data ();
 
 	/* range from libltc (38..218) || - 128.0  -> (-90..90) */
 	const float ltcvol = Config->get_ltc_output_volume()/(90.0); // pow(10, db/20.0)/(90.0);
@@ -159,7 +166,8 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 		if (ltc_encoder_reinit(ltc_encoder, nominal_frame_rate(), timecode_to_frames_per_second(cur_timecode), 0)) {
 			PBD::error << _("LTC encoder: invalid framerate - LTC encoding is disabled for the remainder of this session.") << endmsg;
 			ltc_tx_cleanup();
-			return 0;
+			ret = 0;
+			goto out;
 		}
 		ltc_enc_tcformat = cur_timecode;
 		ltc_tx_reset();
@@ -167,8 +175,8 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 
 	/* LTC is max. 30 fps */
 	if (timecode_to_frames_per_second(cur_timecode) > 30) {
-		memset(out, 0, nframes * sizeof(jack_default_audio_sample_t));
-		return nframes;
+		ret = nframes;
+		goto out;
 	}
 
 	// (2) speed & direction
@@ -225,16 +233,16 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 		new_ltc_speed = 0;
 		if (!Config->get_ltc_send_continuously()) {
 			ltc_speed = new_ltc_speed;
-			memset(out, 0, nframes * sizeof(jack_default_audio_sample_t));
-			return nframes;
+			ret = nframes;
+			goto out;
 		}
 	}
 
 	if (fabs(new_ltc_speed) > 10.0) {
 		DEBUG_TRACE (DEBUG::LTC, "LTC TX2: speed is out of bounds.\n");
 		ltc_tx_reset();
-		memset(out, 0, nframes * sizeof(jack_default_audio_sample_t));
-		return nframes;
+		ret = nframes;
+		goto out;
 	}
 
 	if (ltc_speed == 0 && new_ltc_speed != 0) {
@@ -315,7 +323,6 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 	ltc_speed = new_ltc_speed;
 	DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX2: transport speed %1.\n", ltc_speed));
 
-
 	// (3) bit/sample alignment
 	Timecode::Time tc_start;
 	framepos_t tc_sample_start;
@@ -365,8 +372,8 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 				rint(ltc_enc_pos + ltc_enc_cnt - poff) - cycle_start_frame
 				));
 
-	if (ltc_speed != 0 && fabs(ceil(ltc_enc_pos + ltc_enc_cnt - poff) - cycle_start_frame) > maxdiff)
-	{
+	if (ltc_speed != 0 && fabs(ceil(ltc_enc_pos + ltc_enc_cnt - poff) - cycle_start_frame) > maxdiff) {
+
 		// (5) re-align
 		ltc_tx_reset();
 
@@ -414,19 +421,18 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 			}
 		}
 
-		assert (cyc_off >= 0);
-
 		DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX5 restart encoder: soff %1 byte %2 cycoff %3\n",
 					soff, ltc_enc_byte, cyc_off));
 
 		if (cyc_off > 0 && cyc_off <= nframes) {
 			/* offset in this cycle */
 			txf= rint(cyc_off / fabs(ltc_speed));
-			memset(out, 0, cyc_off * sizeof(jack_default_audio_sample_t));
+			memset(out, 0, cyc_off * sizeof(Sample));
 		} else {
 			/* resync next cycle */
-			memset(out, 0, cyc_off * sizeof(jack_default_audio_sample_t));
-			return nframes;
+			memset(out, 0, cyc_off * sizeof(Sample));
+			ret = frames;
+			goto done;
 		}
 
 		ltc_enc_pos = tc_sample_start;
@@ -444,7 +450,7 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 		// (6a) send remaining buffer
 		while ((ltc_buf_off < ltc_buf_len) && (txf < nframes)) {
 			const float v1 = ltc_enc_buf[ltc_buf_off++] - 128.0;
-			const jack_default_audio_sample_t val = (jack_default_audio_sample_t) (v1*ltcvol);
+			const Sample val = (Sample) (v1*ltcvol);
 			out[txf++] = val;
 		}
 #ifdef LTC_GEN_TXDBUG
@@ -454,7 +460,8 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 		if (txf >= nframes) {
 			DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX7 enc: %1 [ %2 / %3 ] byte: %4 spd %5 fpp %6 || nf: %7\n",
 						ltc_enc_pos, ltc_buf_off, ltc_buf_len, ltc_enc_byte, ltc_speed, nframes, txf));
-			return nframes;
+			ret = nframes;
+			goto done;
 		}
 
 		ltc_buf_len = 0;
@@ -475,8 +482,7 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 			DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX6.3 encoder error byte %1\n", ltc_enc_byte));
 			ltc_encoder_buffer_flush(ltc_encoder);
 			ltc_tx_reset();
-			memset(out, 0, nframes * sizeof(jack_default_audio_sample_t));
-			return -1;
+			goto out;
 		}
 		int enc_frames = ltc_encoder_get_buffer(ltc_encoder, &(ltc_enc_buf[ltc_buf_len]));
 #ifdef LTC_GEN_FRAMEDBUG
@@ -486,8 +492,7 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 			DEBUG_TRACE (DEBUG::LTC, "LTC TX6.3 encoder empty buffer.\n");
 			ltc_encoder_buffer_flush(ltc_encoder);
 			ltc_tx_reset();
-			memset(out, 0, nframes * sizeof(jack_default_audio_sample_t));
-			return -1;
+			goto out;;
 		}
 
 		ltc_buf_len += enc_frames;
@@ -510,6 +515,11 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 		DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX6.4 enc-pos: %1 + %2 [ %4 / %5 ] spd %6\n", ltc_enc_pos, ltc_enc_cnt, ltc_buf_off, ltc_buf_len, ltc_speed));
 #endif
 	}
+	
+  done:
+	dynamic_cast<AudioBuffer*>(&buf)->set_written (true);
+	ret = nframes;
 
-	return nframes;
+  out:
+	return ret;
 }

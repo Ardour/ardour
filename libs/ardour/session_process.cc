@@ -116,6 +116,12 @@ Session::no_roll (pframes_t nframes)
 		_click_io->silence (nframes);
 	}
 
+#ifdef HAVE_LTC
+	if (!_engine.freewheeling()) {
+		ltc_tx_send_time_code_for_cycle (_transport_frame, end_frame, _target_transport_speed, _transport_speed, nframes);
+	}
+#endif
+
 	if (_process_graph) {
 		DEBUG_TRACE(DEBUG::ProcessThreads,"calling graph/no-roll\n");
 		_process_graph->routes_no_roll( nframes, _transport_frame, end_frame, non_realtime_work_pending(), declick);
@@ -347,10 +353,6 @@ Session::process_with_events (pframes_t nframes)
 	}
 
 	end_frame = _transport_frame + frames_moved;
-
-#ifdef HAVE_LTC
-	ltc_tx_send_time_code_for_cycle (_transport_frame, end_frame, _target_transport_speed, _transport_speed, nframes);
-#endif
 
 	{
 		SessionEvent* this_event;
@@ -802,11 +804,6 @@ Session::process_without_events (pframes_t nframes)
 
 	if (_transport_speed == 0) {
 		fail_roll (nframes);
-#ifdef HAVE_LTC
-		if (!_exporting) {
-			ltc_tx_send_time_code_for_cycle (_transport_frame, _transport_frame, 0, 0 , nframes);
-		}
-#endif
 		return;
 	}
 
