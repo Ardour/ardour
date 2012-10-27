@@ -81,9 +81,11 @@ Session::ltc_tx_reset()
 	ltc_enc_byte = 0;
 	ltc_enc_cnt = 0;
 
-	boost::shared_ptr<Port> ltcport = ltc_output_port();
-	if (ltcport) {
-		ltcport->get_connected_latency_range(ltc_out_latency, true);
+	if (!deletion_in_progress()) {
+		boost::shared_ptr<Port> ltcport = ltc_output_port();
+		if (ltcport) {
+			ltcport->get_connected_latency_range(ltc_out_latency, true);
+		}
 	}
 }
 
