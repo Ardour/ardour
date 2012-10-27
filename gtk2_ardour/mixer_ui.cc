@@ -51,6 +51,7 @@
 #include "ardour_ui.h"
 #include "prompter.h"
 #include "utils.h"
+#include "route_sorter.h"
 #include "actions.h"
 #include "gui_thread.h"
 #include "mixer_group_tabs.h"
@@ -543,20 +544,30 @@ Mixer_UI::sync_treeview_from_order_keys (RouteSortOrderKey src)
 		return;
 	}
 
-	neworder.assign (rows.size(), 0);
-	
+	OrderKeySortedRoutes sorted_routes;
+
 	for (TreeModel::Children::iterator ri = rows.begin(); ri != rows.end(); ++ri, ++old_order) {
 		boost::shared_ptr<Route> route = (*ri)[track_columns.route];
-		uint32_t new_order = route->order_key (MixerSort);
+		sorted_routes.push_back (RoutePlusOrderKey (route, old_order, route->order_key (MixerSort)));
+	}
 
-		neworder[new_order] = old_order;
+	SortByNewDisplayOrder cmp;
 
-		if (old_order != new_order) {
+	sort (sorted_routes.begin(), sorted_routes.end(), cmp);
+	neworder.assign (sorted_routes.size(), 0);
+
+	uint32_t n = 0;
+	
+	for (OrderKeySortedRoutes::iterator sr = sorted_routes.begin(); sr != sorted_routes.end(); ++sr, ++n) {
+
+		neworder[n] = sr->old_display_order;
+
+		if (sr->old_display_order != n) {
 			changed = true;
 		}
 
 		DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("MIXER change order for %1 from %2 to %3\n",
-							       route->name(), old_order, new_order));
+							       sr->route->name(), sr->old_display_order, n));
 	}
 
 	if (changed) {

@@ -249,6 +249,8 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
         void sync_order_keys_from_treeview ();
         void sync_treeview_from_order_keys (ARDOUR::RouteSortOrderKey);
         void reset_remote_control_ids ();
+        void reset_order_keys (ARDOUR::RouteSortOrderKey);
+
         bool ignore_reorder;
 
 	void parameter_changed (std::string const &);
