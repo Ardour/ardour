@@ -20,6 +20,7 @@
 #include <cassert>
 #include <algorithm>
 
+#include <boost/scoped_array.hpp>
 #include <boost/scoped_ptr.hpp>
 
 #include <gtkmm.h>
@@ -1520,7 +1521,7 @@ AudioRegionView::redraw_start_xfade_to (boost::shared_ptr<AudioRegion> ar, frame
 	}
 
 	Points* points = get_canvas_points ("xfade edit redraw", npoints);
-	boost::scoped_ptr<float> vec (new float[npoints]);
+	boost::scoped_array<float> vec (new float[npoints]);
 	double effective_height = _height - NAME_HIGHLIGHT_SIZE - 1.0;
 
 	ar->fade_in()->curve().get_vector (0, ar->fade_in()->back()->when, vec.get(), npoints);
