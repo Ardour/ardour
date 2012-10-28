@@ -356,6 +356,7 @@ public:
 	bool detect_ltc_fps(int, bool);
 	bool equal_ltc_frame_time(LTCFrame *a, LTCFrame *b);
 	void reset();
+	void resync_latency();
 
 	Session&       session;
 	bool           did_reset_tc_format;

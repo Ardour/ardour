@@ -1207,6 +1207,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void ltc_tx_initialize();
 	void ltc_tx_cleanup();
 	void ltc_tx_reset();
+	void ltc_tx_resync_latency();
 	void ltc_tx_recalculate_position();
 	void ltc_tx_send_time_code_for_cycle (framepos_t, framepos_t, double, double, pframes_t nframes);
 #endif

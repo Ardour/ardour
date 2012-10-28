@@ -58,8 +58,8 @@ Session::ltc_tx_initialize()
 	ltc_enc_buf = (ltcsnd_sample_t*) calloc((nominal_frame_rate() / 23), sizeof(ltcsnd_sample_t));
 	ltc_speed = 0;
 	ltc_tx_reset();
-	Xrun.connect_same_thread (*this, boost::bind (&Session::ltc_tx_reset, this));
-	engine().GraphReordered.connect_same_thread (*this, boost::bind (&Session::ltc_tx_reset, this));
+	Xrun.connect_same_thread (*this, boost::bind (&Session::ltc_tx_resync_latency, this));
+	engine().GraphReordered.connect_same_thread (*this, boost::bind (&Session::ltc_tx_resync_latency, this));
 }
 
 void
@@ -72,6 +72,18 @@ Session::ltc_tx_cleanup()
 }
 
 void
+Session::ltc_tx_resync_latency()
+{
+	DEBUG_TRACE (DEBUG::LTC, "LTC TX resync latency\n");
+	if (!deletion_in_progress()) {
+		boost::shared_ptr<Port> ltcport = ltc_output_port();
+		if (ltcport) {
+			ltcport->get_connected_latency_range(ltc_out_latency, true);
+		}
+	}
+}
+
+void
 Session::ltc_tx_reset()
 {
 	DEBUG_TRACE (DEBUG::LTC, "LTC TX reset\n");
@@ -80,13 +92,7 @@ Session::ltc_tx_reset()
 	ltc_buf_off = 0;
 	ltc_enc_byte = 0;
 	ltc_enc_cnt = 0;
-
-	if (!deletion_in_progress()) {
-		boost::shared_ptr<Port> ltcport = ltc_output_port();
-		if (ltcport) {
-			ltcport->get_connected_latency_range(ltc_out_latency, true);
-		}
-	}
+	ltc_tx_resync_latency();
 }
 
 void

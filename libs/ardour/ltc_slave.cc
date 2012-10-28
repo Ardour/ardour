@@ -61,8 +61,8 @@ LTC_Slave::LTC_Slave (Session& s)
 
 	decoder = ltc_decoder_create((int) frames_per_ltc_frame, 128 /*queue size*/);
 	reset();
-	session.Xrun.connect_same_thread (port_connections, boost::bind (&LTC_Slave::reset, this));
-	session.engine().GraphReordered.connect_same_thread (port_connections, boost::bind (&LTC_Slave::reset, this));
+	session.Xrun.connect_same_thread (port_connections, boost::bind (&LTC_Slave::resync_latency, this));
+	session.engine().GraphReordered.connect_same_thread (port_connections, boost::bind (&LTC_Slave::resync_latency, this));
 }
 
 LTC_Slave::~LTC_Slave()
@@ -95,6 +95,18 @@ LTC_Slave::ok() const
 }
 
 void
+LTC_Slave::resync_latency()
+{
+	DEBUG_TRACE (DEBUG::LTC, "LTC resync()\n");
+	engine_dll_initstate = 0;
+
+	if (session.ltc_output_io()) { /* check if Port exits */
+		boost::shared_ptr<Port> ltcport = session.ltc_input_port();
+		ltcport->get_connected_latency_range(ltc_slave_latency, false);
+	}
+}
+
+void
 LTC_Slave::reset()
 {
 	DEBUG_TRACE (DEBUG::LTC, "LTC reset()\n");
@@ -103,11 +115,7 @@ LTC_Slave::reset()
 	transport_direction = 0;
 	ltc_speed = 0;
 	engine_dll_initstate = 0;
-
-	if (session.ltc_output_io()) { /* check if Port exits */
-		boost::shared_ptr<Port> ltcport = session.ltc_input_port();
-		ltcport->get_connected_latency_range(ltc_slave_latency, false);
-	}
+	resync_latency();
 }
 
 void
