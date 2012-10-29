@@ -86,8 +86,8 @@ class SoundGrid : public boost::noncopyable
 
         static PBD::Signal0<void> Shutdown;
         
-        bool add_rack_synchronous (uint32_t clusterType, int32_t process_group, uint32_t &trackHandle);
-        bool add_rack_asynchronous (uint32_t clusterType, int32_t process_group);
+        bool add_rack_synchronous (uint32_t clusterType, int32_t process_group, uint32_t channels, uint32_t& trackHandle);
+        bool add_rack_asynchronous (uint32_t clusterType, int32_t process_group, uint32_t channels);
         bool remove_rack_synchronous (uint32_t clusterType, uint32_t trackHandle);
         bool remove_all_racks_synchronous ();
 

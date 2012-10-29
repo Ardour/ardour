@@ -17,6 +17,8 @@
 
 */
 
+#include <climits>
+
 #include "pbd/compose.h"
 #include "pbd/failed_constructor.h"
 
@@ -37,12 +39,13 @@ using std::string;
 SoundGridRack::SoundGridRack (Session& s, Route& r, const std::string& name)
         : SessionObject (s, name)
         , _route (r)
+        , _rack_id (UINT32_MAX)
 {
-        DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Creating SG Chainer for %1\n", r.name()));
-
         if (r.is_hidden()) {
                 return;
         }
+
+        DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Creating SG Chainer for %1\n", r.name()));
 
         if (dynamic_cast<Track*> (&r) != 0) {
                 _cluster_type = eClusterType_InputTrack;
@@ -57,7 +60,9 @@ SoundGridRack::SoundGridRack (Session& s, Route& r, const std::string& name)
                 }
         }
 
-        if (SoundGrid::instance().add_rack_synchronous (_cluster_type, 0, _rack_id)) { 
+        const int32_t process_group = 0;
+
+        if (SoundGrid::instance().add_rack_synchronous (_cluster_type, process_group, r.n_outputs().n_audio(), _rack_id)) { 
                 throw failed_constructor();
         }
 
@@ -70,8 +75,10 @@ SoundGridRack::SoundGridRack (Session& s, Route& r, const std::string& name)
 
 SoundGridRack::~SoundGridRack ()
 {
-        DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Destroying SG Chainer for %1\n", _route.name()));
-        (void) SoundGrid::instance().remove_rack_synchronous (_cluster_type, _rack_id);
+        if (_rack_id != UINT32_MAX) {
+                DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Destroying SG Chainer for %1\n", _route.name()));
+                (void) SoundGrid::instance().remove_rack_synchronous (_cluster_type, _rack_id);
+        }
 }
 
 int

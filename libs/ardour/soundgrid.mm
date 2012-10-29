@@ -313,9 +313,11 @@ SoundGrid::set (WSEvent* ev, const std::string& /*what*/)
         ev->sourceController = (WSDControllerHandle) this;
 
         if (_callback_table.setEventProc (_host_handle, this, ev) != eNoErr) {
+                DEBUG_TRACE (DEBUG::SoundGrid, "Set failure\n");
                 return -1;
         }
 
+        DEBUG_TRACE (DEBUG::SoundGrid, "Set success\n");
         return 0;
 }
 
@@ -657,11 +659,13 @@ SoundGrid::assignment_complete (WSCommand* cmd)
 /* Actually do stuff */
 
 bool
-SoundGrid::add_rack_synchronous (uint32_t clusterType, int32_t process_group, uint32_t &trackHandle)
+SoundGrid::add_rack_synchronous (uint32_t clusterType, int32_t process_group, uint32_t channels, uint32_t &trackHandle)
 {
     WSAddTrackCommand myCommand;
 
-    command (Init_WSAddTrackCommand (&myCommand, clusterType, 1, process_group, (WSDControllerHandle)this, 0));
+    channels = 1;
+
+    command (Init_WSAddTrackCommand (&myCommand, clusterType, channels, process_group, (WSDControllerHandle)this, 0));
     
     if (0 == myCommand.m_command.out_status) {
             trackHandle = myCommand.out_trackID.clusterHandle;
@@ -672,12 +676,13 @@ SoundGrid::add_rack_synchronous (uint32_t clusterType, int32_t process_group, ui
 }
 
 bool
-SoundGrid::add_rack_asynchronous (uint32_t clusterType, int32_t process_group)
+SoundGrid::add_rack_asynchronous (uint32_t clusterType, int32_t process_group, uint32_t channels)
 {
     WSAddTrackCommand *pMyCommand = new WSAddTrackCommand;
-    WMSDErr errCode = command (Init_WSAddTrackCommand (pMyCommand, clusterType, 1, process_group, (WSDControllerHandle)this, pMyCommand));
-    
-    printf ("AddRack Command result = %d, command status = %d\n", errCode, pMyCommand->m_command.out_status);
+
+    channels = 1;
+
+    WMSDErr errCode = command (Init_WSAddTrackCommand (pMyCommand, clusterType, channels, process_group, (WSDControllerHandle)this, pMyCommand));
     
     return (WMSD_Pending == errCode);
 }
@@ -718,7 +723,7 @@ SoundGrid::set_gain (uint32_t in_clusterType, uint32_t in_trackHandle, double in
     
     faderEvent.controlID.sectionControlID.sectionType = eControlType_Output;
     faderEvent.controlID.sectionControlID.sectionIndex = eControlType_Output_Local;
-    faderEvent.controlID.sectionControlID.channelIndex = 0;
+    faderEvent.controlID.sectionControlID.channelIndex = wvEnum_Unknown;
     faderEvent.controlID.sectionControlID.controlID = eControlID_Output_Gain;
     
     return set (&faderEvent, "fader level");
@@ -865,6 +870,20 @@ SoundGrid::sg_port_as_jack_port (const Port& sgport)
     
     return jack_port;
 }
+
+#if 0
+void
+SoundGrid::drop_sg_jack_mapping (const string& jack_port)
+{
+        jack_soundgrid_map.remove (jack_port);
+
+        for (SG_JACKMap::iterator i = soundgrid_jack_map.begin(); i != soundgrid_jack_map.end(); ++i) {
+                if (i->second == jack_port) {
+                        soundgrid_jack_map.erase (i);
+                }
+        }
+}
+#endif
 
 int
 SoundGrid::connect (const Port& src, const Port& dst)
