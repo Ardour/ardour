@@ -375,7 +375,7 @@ CustomDeviceMode::set_state(const XMLTree& tree, const XMLNode& a_node)
 	_name = a_node.property("Name")->value();
 
 	boost::shared_ptr<XMLSharedNodeList> channel_name_set_assignments =
-		tree.find("//ChannelNameSetAssign", (XMLNode *)&a_node);
+		tree.find("//ChannelNameSetAssign", const_cast<XMLNode *>(&a_node));
 	for(XMLSharedNodeList::const_iterator i = channel_name_set_assignments->begin();
 	    i != channel_name_set_assignments->end();
 	    ++i) {
