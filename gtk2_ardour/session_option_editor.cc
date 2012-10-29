@@ -49,7 +49,7 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 
 	smf->add (timecode_23976, _("23.976"));
 	smf->add (timecode_24, _("24"));
-	smf->add (timecode_24976, _("24.976"));
+	smf->add (timecode_24976, _("24.975"));
 	smf->add (timecode_25, _("25"));
 	smf->add (timecode_2997, _("29.97"));
 	smf->add (timecode_2997drop, _("29.97 drop"));
