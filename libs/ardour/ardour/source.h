@@ -104,7 +104,7 @@ class Source : public SessionObject
 
 	virtual void inc_use_count ();
 	virtual void dec_use_count ();
-	int  use_count() const { return g_atomic_int_get (&_use_count); }
+        int  use_count() const { return g_atomic_int_get (const_cast<gint*>(&_use_count)); }
 	bool used() const { return use_count() > 0; }
 	uint32_t level() const { return _level; }
 
