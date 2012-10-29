@@ -310,17 +310,15 @@ bool
 EditorSummary::on_key_press_event (GdkEventKey* key)
 {
 	gint x, y;
-
-	switch (key->keyval) {
-	case GDK_p:
-		if (_session) {
-			get_pointer (x, y);
-			_session->request_locate ((framepos_t) x / _x_scale, _session->transport_rolling());
-			return true;
+	GtkAccelKey set_playhead_accel;
+	if (gtk_accel_map_lookup_entry ("<Actions>/Editor/set-playhead", &set_playhead_accel)) {
+		if (key->keyval == set_playhead_accel.accel_key && (int) key->state == set_playhead_accel.accel_mods) {
+			if (_session) {
+				get_pointer (x, y);
+				_session->request_locate ((framepos_t) x / _x_scale, _session->transport_rolling());
+				return true;
+			}
 		}
-		break;
-	default:
-		break;
 	}
 
 	return false;
@@ -329,11 +327,12 @@ EditorSummary::on_key_press_event (GdkEventKey* key)
 bool
 EditorSummary::on_key_release_event (GdkEventKey* key)
 {
-	switch (key->keyval) {
-	case GDK_p:
-		return true;
-	default:
-		break;
+
+	GtkAccelKey set_playhead_accel;
+	if (gtk_accel_map_lookup_entry ("<Actions>/Editor/set-playhead", &set_playhead_accel)) {
+		if (key->keyval == set_playhead_accel.accel_key && (int) key->state == set_playhead_accel.accel_mods) {
+			return true;
+		}
 	}
 	return false;
 }

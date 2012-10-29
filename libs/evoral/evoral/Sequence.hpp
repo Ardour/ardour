@@ -181,7 +181,16 @@ public:
 
 	void set_notes (const Sequence<Time>::Notes& n);
 
-	typedef std::vector< boost::shared_ptr< Event<Time> > > SysExes;
+	typedef boost::shared_ptr< Event<Time> > SysExPtr;
+	typedef boost::shared_ptr<const Event<Time> > constSysExPtr;
+
+	struct EarlierSysExComparator {
+		inline bool operator() (constSysExPtr a, constSysExPtr b) const {
+			return a->time() < b->time();
+		}
+	};
+
+	typedef std::multiset<SysExPtr, EarlierSysExComparator> SysExes;
 	inline       SysExes& sysexes()       { return _sysexes; }
 	inline const SysExes& sysexes() const { return _sysexes; }
 
@@ -262,6 +271,7 @@ public:
 
 	typename Notes::const_iterator note_lower_bound (Time t) const;
 	typename PatchChanges::const_iterator patch_change_lower_bound (Time t) const;
+	typename SysExes::const_iterator sysex_lower_bound (Time t) const;
 
 	bool control_to_midi_event(boost::shared_ptr< Event<Time> >& ev,
 	                           const ControlIterator&            iter) const;
@@ -278,6 +288,9 @@ public:
 
 	void add_patch_change_unlocked (const PatchChangePtr);
 	void remove_patch_change_unlocked (const constPatchChangePtr);
+
+	void add_sysex_unlocked (const SysExPtr);
+	void remove_sysex_unlocked (const SysExPtr);
 
 	uint8_t lowest_note()  const { return _lowest_note; }
 	uint8_t highest_note() const { return _highest_note; }

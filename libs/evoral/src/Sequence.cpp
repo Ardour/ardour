@@ -338,7 +338,13 @@ Sequence<Time>::const_iterator::operator++()
 	}
 
 	// Use the next note off iff it's earlier or the same time as the note on
+#ifdef PERCUSSIVE_IGNORE_NOTE_OFFS
+	// issue 0005121 When in Percussive mode, all note offs go missing, which jams all MIDI instruments that they stop playing
+	// remove this code since it drowns MIDI instruments by stealing all voices and crashes LinuxSampler
 	if (!_seq->percussive() && (!_active_notes.empty())) {
+#else
+	if ((!_active_notes.empty())) {
+#endif
 		if (_type == NIL || _active_notes.top()->end_time() <= earliest_t) {
 			_type = NOTE_OFF;
 			earliest_t = _active_notes.top()->end_time();
@@ -494,7 +500,7 @@ Sequence<Time>::Sequence(const Sequence<Time>& other)
 
 	for (typename SysExes::const_iterator i = other._sysexes.begin(); i != other._sysexes.end(); ++i) {
 		boost::shared_ptr<Event<Time> > n (new Event<Time> (**i, true));
-		_sysexes.push_back (n);
+		_sysexes.insert (n);
 	}
 
 	for (typename PatchChanges::const_iterator i = other._patch_changes.begin(); i != other._patch_changes.end(); ++i) {
@@ -636,8 +642,9 @@ Sequence<Time>::end_write (StuckNoteOption option, Time when)
 
 	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 : end_write (%2 notes) delete stuck option %3 @ %4\n", this, _notes.size(), option, when));
 
+	#ifdef PERCUSSIVE_IGNORE_NOTE_OFFS
 	if (!_percussive) {
-
+	#endif
 		for (typename Notes::iterator n = _notes.begin(); n != _notes.end() ;) {
 			typename Notes::iterator next = n;
 			++next;
@@ -665,7 +672,9 @@ Sequence<Time>::end_write (StuckNoteOption option, Time when)
 
 			n = next;
 		}
+	#ifdef PERCUSSIVE_IGNORE_NOTE_OFFS
 	}
+	#endif
 
 	for (int i = 0; i < 16; ++i) {
 		_write_notes[i].clear();
@@ -788,6 +797,24 @@ Sequence<Time>::remove_patch_change_unlocked (const constPatchChangePtr p)
 	}
 }
 
+template<typename Time>
+void
+Sequence<Time>::remove_sysex_unlocked (const SysExPtr sysex)
+{
+	typename Sequence<Time>::SysExes::iterator i = sysex_lower_bound (sysex->time ());
+	while (i != _sysexes.end() && (*i)->time() == sysex->time()) {
+
+		typename Sequence<Time>::SysExes::iterator tmp = i;
+		++tmp;
+
+		if (*i == sysex) {
+			_sysexes.erase (i);
+		}
+
+		i = tmp;
+	}
+}
+
 /** Append \a ev to model.  NOT realtime safe.
  *
  * The timestamp of event is expected to be relative to
@@ -889,13 +916,20 @@ Sequence<Time>::append_note_on_unlocked (NotePtr note, event_id_t evid)
 
 	add_note_unlocked (note);
 
+	#ifdef PERCUSSIVE_IGNORE_NOTE_OFFS
 	if (!_percussive) {
+	#endif
+
 		DEBUG_TRACE (DEBUG::Sequence, string_compose ("Sustained: Appending active note on %1 channel %2\n",
 		                                              (unsigned)(uint8_t)note->note(), note->channel()));
 		_write_notes[note->channel()].insert (note);
+
+	#ifdef PERCUSSIVE_IGNORE_NOTE_OFFS
 	} else {
 		DEBUG_TRACE(DEBUG::Sequence, "Percussive: NOT appending active note on\n");
 	}
+	#endif
+
 }
 
 template<typename Time>
@@ -918,10 +952,12 @@ Sequence<Time>::append_note_off_unlocked (NotePtr note)
 
 	_edited = true;
 
+	#ifdef PERCUSSIVE_IGNORE_NOTE_OFFS
 	if (_percussive) {
 		DEBUG_TRACE(DEBUG::Sequence, "Sequence Ignoring note off (percussive mode)\n");
 		return;
 	}
+	#endif
 
 	bool resolved = false;
 
@@ -984,7 +1020,7 @@ Sequence<Time>::append_sysex_unlocked(const MIDIEvent<Time>& ev, event_id_t /* e
 
 	boost::shared_ptr<MIDIEvent<Time> > event(new MIDIEvent<Time>(ev, true));
 	/* XXX sysex events should use IDs */
-	_sysexes.push_back(event);
+	_sysexes.insert(event);
 }
 
 template<typename Time>
@@ -1009,6 +1045,17 @@ Sequence<Time>::add_patch_change_unlocked (PatchChangePtr p)
 	}
 
 	_patch_changes.insert (p);
+}
+
+template<typename Time>
+void
+Sequence<Time>::add_sysex_unlocked (SysExPtr s)
+{
+	if (s->id () < 0) {
+		s->set_id (Evoral::next_event_id ());
+	}
+
+	_sysexes.insert (s);
 }
 
 template<typename Time>
@@ -1102,6 +1149,17 @@ Sequence<Time>::patch_change_lower_bound (Time t) const
 	PatchChangePtr search (new PatchChange<Time> (t, 0, 0, 0));
 	typename Sequence<Time>::PatchChanges::const_iterator i = _patch_changes.lower_bound (search);
 	assert (i == _patch_changes.end() || (*i)->time() >= t);
+	return i;
+}
+
+/** Return the earliest sysex with time >= t */
+template<typename Time>
+typename Sequence<Time>::SysExes::const_iterator
+Sequence<Time>::sysex_lower_bound (Time t) const
+{
+	SysExPtr search (new Event<Time> (0, t));
+	typename Sequence<Time>::SysExes::const_iterator i = _sysexes.lower_bound (search);
+	assert (i == _sysexes.end() || (*i)->time() >= t);
 	return i;
 }
 

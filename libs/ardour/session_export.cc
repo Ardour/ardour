@@ -106,6 +106,7 @@ Session::start_audio_export (framepos_t position)
 {
 	if (!_exporting) {
 		pre_export ();
+		_export_started = false;
 	}
 
 	/* We're about to call Track::seek, so the butler must have finished everything
@@ -144,11 +145,6 @@ Session::start_audio_export (framepos_t position)
 	   what it was doing earlier in Session::pre_export() and nothing
 	   since then has re-awakened it.
 	 */
-
-	set_transport_speed (1.0, false);
-	butler_transport_work ();
-	g_atomic_int_set (&_butler->should_do_transport_work, 0);
-	post_transport ();
 
 	/* we are ready to go ... */
 
@@ -193,6 +189,16 @@ Session::process_export (pframes_t nframes)
 int
 Session::process_export_fw (pframes_t nframes)
 {
+
+	if (!_export_started) {
+		_export_started=true;
+		set_transport_speed (1.0, false);
+		butler_transport_work ();
+		g_atomic_int_set (&_butler->should_do_transport_work, 0);
+		post_transport ();
+		return 0;
+	}
+
         _engine.main_thread()->get_buffers ();
 	process_export (nframes);
         _engine.main_thread()->drop_buffers ();

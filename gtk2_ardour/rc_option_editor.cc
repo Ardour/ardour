@@ -26,6 +26,7 @@
 #include <gtkmm/scale.h>
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/slider_controller.h>
+#include <gtkmm2ext/gtk_ui.h>
 
 #include "pbd/fpu.h"
 #include "pbd/cpus.h"
@@ -669,7 +670,11 @@ public:
 		_box->pack_start (*label, false, false);
 		label->show ();
 
-		_store->signal_row_changed().connect (sigc::mem_fun (*this, &ControlSurfacesOptions::model_changed));
+		ControlProtocolManager& m = ControlProtocolManager::instance ();
+		m.ProtocolStatusChange.connect (protocol_status_connection, MISSING_INVALIDATOR,
+						boost::bind (&ControlSurfacesOptions::protocol_status_changed, this, _1), gui_context());
+
+		_store->signal_row_changed().connect (sigc::mem_fun (*this, &ControlSurfacesOptions::view_changed));
 		_view.signal_button_press_event().connect_notify (sigc::mem_fun(*this, &ControlSurfacesOptions::edit_clicked));
 	}
 
@@ -697,7 +702,18 @@ public:
 
 private:
 
-	void model_changed (TreeModel::Path const &, TreeModel::iterator const & i)
+        void protocol_status_changed (ControlProtocolInfo* cpi) {
+		/* find the row */
+		TreeModel::Children rows = _store->children();
+		for (TreeModel::Children::iterator x = rows.begin(); x != rows.end(); ++x) {
+			if ((*x)[_model.protocol_info] == cpi) {
+				(*x)[_model.enabled] = (cpi->protocol || cpi->requested);
+				break;
+			}
+		}
+	}
+
+	void view_changed (TreeModel::Path const &, TreeModel::iterator const & i)
 	{
 		TreeModel::Row r = *i;
 
@@ -793,6 +809,7 @@ private:
 	ControlSurfacesModelColumns _model;
 	TreeView _view;
         Gtk::Window& _parent;
+        PBD::ScopedConnection protocol_status_connection;
 };
 
 /** A class which allows control of visibility of some editor components usign
@@ -836,6 +853,8 @@ public:
 		_heading.add_to_page (p);
 		add_widget_to_page (p, _visibility_group->list_view ());
 	}
+
+        Gtk::Widget& tip_widget() { return *_visibility_group->list_view (); }
 
 private:
 	void changed ()
@@ -956,61 +975,169 @@ RCOptionEditor::RCOptionEditor ()
 
 	/* TRANSPORT */
 
-	add_option (_("Transport"),
-	     new BoolOption (
+	BoolOption* tsf;
+
+	tsf = new BoolOption (
 		     "latched-record-enable",
 		     _("Keep record-enable engaged on stop"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_latched_record_enable),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_latched_record_enable)
-		     ));
+		     );
+	// Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(), _(""));
+	add_option (_("Transport"), tsf);
 
-	add_option (_("Transport"),
-	     new BoolOption (
+	tsf = new BoolOption (
 		     "stop-recording-on-xrun",
 		     _("Stop recording when an xrun occurs"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_stop_recording_on_xrun),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_stop_recording_on_xrun)
-		     ));
+		     );
+	Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(), _("<b>When enabled</b> Ardour will stop recording if an over- or underrun is detected by the audio engine"));
+	add_option (_("Transport"), tsf);
 
-	add_option (_("Transport"),
-	     new BoolOption (
+	tsf = new BoolOption (
 		     "create-xrun-marker",
 		     _("Create markers where xruns occur"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_create_xrun_marker),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_create_xrun_marker)
-		     ));
+		     );
+	// Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(), _(""));
+	add_option (_("Transport"), tsf);
 
-	add_option (_("Transport"),
-	     new BoolOption (
+	tsf = new BoolOption (
 		     "stop-at-session-end",
 		     _("Stop at the end of the session"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_stop_at_session_end),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_stop_at_session_end)
-		     ));
+		     );
+	Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(), _("<b>When enabled</b> if Ardour is <b>not recording</b>, it will stop the transport "
+						   "when it reaches the current session end marker\n\n"
+						   "<b>When disabled</b> Ardour will continue to roll past the session end marker at all times"));
+	add_option (_("Transport"), tsf);
 
-	add_option (_("Transport"),
-	     new BoolOption (
+	tsf = new BoolOption (
 		     "seamless-loop",
 		     _("Do seamless looping (not possible when slaved to MTC, JACK etc)"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_seamless_loop),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_seamless_loop)
-		     ));
+		     );
+	Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(), _("<b>When enabled</b> this will loop by reading ahead and wrapping around at the loop point, "
+						   "preventing any need to do a transport locate at the end of the loop\n\n"
+						   "<b>When disabled</b> looping is done by locating back to the start of the loop when Ardour reaches the end "
+						   "which will often cause a small click or delay"));
+	add_option (_("Transport"), tsf);
 
-	add_option (_("Transport"),
-	     new BoolOption (
+	tsf = new BoolOption (
 		     "disable-disarm-during-roll",
 		     _("Disable per-track record disarm while rolling"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_disable_disarm_during_roll),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_disable_disarm_during_roll)
-		     ));
+		     );
+	Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(), _("<b>When enabled</b> this will prevent you from accidentally stopping specific tracks recording during a take"));
+	add_option (_("Transport"), tsf);
 
-	add_option (_("Transport"),
-	     new BoolOption (
+	tsf = new BoolOption (
 		     "quieten_at_speed",
 		     _("12dB gain reduction during fast-forward and fast-rewind"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_quieten_at_speed),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_quieten_at_speed)
-		     ));
+		     );
+	Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(), _("This will reduce the unpleasant increase in perceived volume "
+						   "that occurs when fast-forwarding or rewinding through some kinds of audio"));
+	add_option (_("Transport"), tsf);
+
+	add_option (_("Transport"), new OptionEditorHeading (S_("Sync/Slave")));
+
+	_sync_source = new ComboOption<SyncSource> (
+		"sync-source",
+		_("External timecode source"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_sync_source),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_sync_source)
+		);
+
+	populate_sync_options ();
+	add_option (_("Transport"), _sync_source);
+
+	_sync_framerate = new BoolOption (
+		     "timecode-sync-frame-rate",
+		     _("Match session video frame rate to external timecode"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_timecode_sync_frame_rate),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_timecode_sync_frame_rate)
+		     );
+	Gtkmm2ext::UI::instance()->set_tip 
+		(_sync_framerate->tip_widget(),
+		 _("This option controls the value of the video frame rate <i>while chasing</i> an external timecode source.\n\n"
+		   "<b>When enabled</b> the session video frame rate will be changed to match that of the selected external timecode source.\n\n"
+		   "<b>When disabled</b> the session video frame rate will not be changed to match that of the selected external timecode source."
+		   "Instead the frame rate indication in the main clock will flash red and Ardour will convert between the external "
+		   "timecode standard and the session standard"));
+
+	add_option (_("Transport"), _sync_framerate);
+
+	_sync_genlock = new BoolOption (
+		"timecode-source-is-synced",
+		_("External timecode is sync locked"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_timecode_source_is_synced),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_timecode_source_is_synced)
+		);
+	Gtkmm2ext::UI::instance()->set_tip 
+		(_sync_genlock->tip_widget(), 
+		 _("<b>When enabled</b> indicates that the selected external timecode source shares sync (Black &amp; Burst, Wordclock, etc) with the audio interface"));
+
+
+	add_option (_("Transport"), _sync_genlock);
+
+	_ltc_port = new ComboStringOption (
+		"ltc-source-port",
+		_("LTC incoming port"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_ltc_source_port),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_ltc_source_port)
+		);
+
+	vector<string> physical_inputs;
+	physical_inputs.push_back (_("None"));
+	AudioEngine::instance()->get_physical_inputs (DataType::AUDIO, physical_inputs);
+	_ltc_port->set_popdown_strings (physical_inputs);
+
+	add_option (_("Transport"), _ltc_port);
+
+#ifdef HAVE_LTC
+	// TODO; rather disable this button than not compile it..
+	add_option (_("Transport"), new OptionEditorHeading (S_("LTC Generator")));
+
+	add_option (_("Transport"),
+		    new BoolOption (
+			    "send-ltc",
+			    _("Enable LTC generator"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_send_ltc),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_send_ltc)
+			    ));
+
+	_ltc_send_continuously = new BoolOption (
+			    "ltc-send-continuously",
+			    _("send LTC while stopped"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_ltc_send_continuously),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_ltc_send_continuously)
+			    );
+	Gtkmm2ext::UI::instance()->set_tip
+		(_ltc_send_continuously->tip_widget(),
+		 _("<b>When enabled</b> Ardour will continue to send LTC information even when the transport (playhead) is not moving"));
+	add_option (_("Transport"), _ltc_send_continuously);
+
+  _ltc_volume_adjustment = new Gtk::Adjustment(-18, -50, 0, .5, 5);
+	_ltc_volume_adjustment->set_value (20 * log10(_rc_config->get_ltc_output_volume()));
+	_ltc_volume_adjustment->signal_value_changed().connect (sigc::mem_fun (*this, &RCOptionEditor::ltc_generator_volume_changed));
+	_ltc_volume_slider = new HSliderOption("ltcvol", ("LTC generator level:"), *_ltc_volume_adjustment);
+
+	Gtkmm2ext::UI::instance()->set_tip
+		(_ltc_volume_slider->tip_widget(),
+		 _("Specify the Peak Volume of the generated LTC signal in dbFS. A good value is  0dBu ^= -18dbFS in an EBU calibrated system"));
+
+	add_option (_("Transport"), _ltc_volume_slider);
+#endif
+
+	parameter_changed ("sync-source");
+	parameter_changed ("send-ltc");
 
 	/* EDITOR */
 
@@ -1554,7 +1681,7 @@ RCOptionEditor::RCOptionEditor ()
 
 	/* INTERFACE */
 
-	add_option (S_("Visual|Interface"),
+	add_option (S_("GUI"),
 	     new BoolOption (
 		     "widget-prelight",
 		     _("Graphically indicate mouse pointer hovering over various widgets"),
@@ -1564,9 +1691,9 @@ RCOptionEditor::RCOptionEditor ()
 
 #ifndef GTKOSX
 	/* font scaling does nothing with GDK/Quartz */
-	add_option (S_("Visual|Interface"), new FontScalingOptions (_rc_config));
+	add_option (S_("GUI"), new FontScalingOptions (_rc_config));
 #endif
-	add_option (S_("Visual|Interface"),
+	add_option (S_("GUI"),
 		    new BoolOption (
 			    "use-own-plugin-gui",
 			    _("Use plugins' own interfaces instead of Ardour's"),
@@ -1585,7 +1712,7 @@ RCOptionEditor::RCOptionEditor ()
 	_mixer_strip_visibility.add (0, X_("MeterPoint"), _("Meter Point"));
 	
 	add_option (
-		S_("Visual|Interface"),
+		S_("GUI"),
 		new VisibilityOption (
 			_("Mixer Strip"),
 			&_mixer_strip_visibility,
@@ -1594,7 +1721,7 @@ RCOptionEditor::RCOptionEditor ()
 			)
 		);
 
-	add_option (S_("Visual|Interface"),
+	add_option (S_("GUI"),
 	     new BoolOption (
 		     "default-narrow_ms",
 		     _("Use narrow strips in the mixer by default"),
@@ -1602,7 +1729,7 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_default_narrow_ms)
 		     ));
 
-	add_option (S_("Visual|Interface"), new OptionEditorHeading (_("Metering")));
+	add_option (S_("GUI"), new OptionEditorHeading (_("Metering")));
 
 	ComboOption<float>* mht = new ComboOption<float> (
 		"meter-hold",
@@ -1616,7 +1743,7 @@ RCOptionEditor::RCOptionEditor ()
 	mht->add (MeterHoldMedium, _("medium"));
 	mht->add (MeterHoldLong, _("long"));
 
-	add_option (S_("Visual|Interface"), mht);
+	add_option (S_("GUI"), mht);
 
 	ComboOption<float>* mfo = new ComboOption<float> (
 		"meter-falloff",
@@ -1633,7 +1760,7 @@ RCOptionEditor::RCOptionEditor ()
 	mfo->add (METER_FALLOFF_FASTER, _("faster"));
 	mfo->add (METER_FALLOFF_FASTEST, _("fastest"));
 
-	add_option (S_("Visual|Interface"), mfo);
+	add_option (S_("GUI"), mfo);
 }
 
 void
@@ -1649,5 +1776,39 @@ RCOptionEditor::parameter_changed (string const & p)
 		}
 		_solo_control_is_listen_control->set_sensitive (s);
 		_listen_position->set_sensitive (s);
+	} else if (p == "sync-source") {
+		switch(Config->get_sync_source()) {
+		case ARDOUR::MTC:
+		case ARDOUR::LTC:
+			_sync_genlock->set_sensitive (true);
+			_sync_framerate->set_sensitive (true);
+			break;
+		default:
+			_sync_genlock->set_sensitive (false);
+			_sync_framerate->set_sensitive (false);
+			break;
+		}
+#ifdef HAVE_LTC
+	} else if (p == "send-ltc") {
+		bool const s = Config->get_send_ltc ();
+		_ltc_send_continuously->set_sensitive (s);
+		_ltc_volume_slider->set_sensitive (s);
+#endif /*HAVE_LTC*/
+	}
+}
+
+void RCOptionEditor::ltc_generator_volume_changed () {
+	_rc_config->set_ltc_output_volume (pow(10, _ltc_volume_adjustment->get_value() / 20));
+}
+
+void
+RCOptionEditor::populate_sync_options ()
+{
+	vector<SyncSource> sync_opts = ARDOUR::get_available_sync_options ();
+
+	_sync_source->clear ();
+
+	for (vector<SyncSource>::iterator i = sync_opts.begin(); i != sync_opts.end(); ++i) {
+		_sync_source->add (*i, sync_source_to_string (*i));
 	}
 }

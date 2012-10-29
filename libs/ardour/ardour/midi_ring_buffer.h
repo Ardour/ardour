@@ -54,8 +54,10 @@ public:
 	inline bool read_contents(uint32_t size, uint8_t* buf);
 
 	size_t read(MidiBuffer& dst, framepos_t start, framepos_t end, framecnt_t offset=0, bool stop_on_overflow_in_destination=false);
+	inline uint32_t write(T  time, Evoral::EventType  type, uint32_t  size, const uint8_t* buf);
+
 	void dump(std::ostream& dst);
-        void flush (framepos_t start, framepos_t end); 
+	void flush (framepos_t start, framepos_t end);
 
 	/** Set the channel filtering mode.
 	 * @param mask If mode is FilterChannels, each bit represents a midi channel:
@@ -133,6 +135,37 @@ inline bool
 MidiRingBuffer<T>::read_contents(uint32_t size, uint8_t* buf)
 {
 	return PBD::RingBufferNPT<uint8_t>::read(buf, size) == size;
+}
+
+template<typename T>
+inline uint32_t
+MidiRingBuffer<T>::write(T time, Evoral::EventType type, uint32_t size, const uint8_t* buf)
+{
+	assert(size > 0);
+	uint8_t status = buf[0];
+
+	// Ignore event if it doesn't match channel filter
+	if (is_channel_event(status)) {
+		ChannelMode mode = get_channel_mode();
+		if (mode == FilterChannels) {
+			const uint8_t channel = status & 0x0F;
+			if (!(get_channel_mask() & (1L << channel))) {
+				return 0;
+			}
+		} else if (mode == ForceChannel) {
+			uint8_t* tmpbuf = (uint8_t*) malloc(size);
+			assert(tmpbuf);
+			memcpy(tmpbuf, buf, size);
+
+			tmpbuf[0] = (tmpbuf[0] & 0xF0) | (get_channel_mask() & 0x0F);
+
+			uint32_t bytes_written = Evoral::EventRingBuffer<T>::write(time, type, size, tmpbuf);
+			free(tmpbuf);
+			return bytes_written;
+		}
+	}
+
+	return Evoral::EventRingBuffer<T>::write(time, type, size, buf);
 }
 
 

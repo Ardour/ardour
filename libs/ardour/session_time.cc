@@ -50,105 +50,19 @@ Session::bbt_time (framepos_t when, Timecode::BBT_Time& bbt)
 }
 
 /* Timecode TIME */
+
 float
 Session::timecode_frames_per_second() const
 {
-	switch (config.get_timecode_format()) {
-		case timecode_23976:
-			return 23.976;
-
-			break;
-		case timecode_24:
-			return 24;
-
-			break;
-		case timecode_24976:
-			return 24.976;
-
-			break;
-		case timecode_25:
-			return 25;
-
-			break;
-		case timecode_2997:
-			return 29.97;
-
-			break;
-		case timecode_2997drop:
-			return 29.97;
-
-			break;
-		case timecode_30:
-			return 30;
-
-			break;
-		case timecode_30drop:
-			return 30;
-
-			break;
-		case timecode_5994:
-			return 59.94;
-
-			break;
-		case timecode_60:
-			return 60;
-
-			break;
-	        default:
-		  cerr << "Editor received unexpected timecode type" << endl;
-	}
-	return 30.0;
+	return Timecode::timecode_to_frames_per_second (config.get_timecode_format());
 }
+
 bool
 Session::timecode_drop_frames() const
 {
-	switch (config.get_timecode_format()) {
-		case timecode_23976:
-			return false;
-
-			break;
-		case timecode_24:
-			return false;
-
-			break;
-		case timecode_24976:
-			return false;
-
-			break;
-		case timecode_25:
-			return false;
-
-			break;
-		case timecode_2997:
-			return false;
-
-			break;
-		case timecode_2997drop:
-			return true;
-
-			break;
-		case timecode_30:
-			return false;
-
-			break;
-		case timecode_30drop:
-			return true;
-
-			break;
-		case timecode_5994:
-			return false;
-
-			break;
-		case timecode_60:
-			return false;
-
-			break;
-	        default:
-			error << "Editor received unexpected timecode type" << endmsg;
-	}
-
-	return false;
+	return Timecode::timecode_has_drop_frames(config.get_timecode_format());
 }
+
 void
 Session::sync_time_vars ()
 {
@@ -186,190 +100,30 @@ Session::sync_time_vars ()
 void
 Session::timecode_to_sample( Timecode::Time& timecode, framepos_t& sample, bool use_offset, bool use_subframes ) const
 {
+	timecode.rate = timecode_frames_per_second();
 
-	if (timecode.drop) {
-		// The drop frame format was created to better approximate the 30000/1001 = 29.97002997002997....
-		// framerate of NTSC color TV. The used frame rate of drop frame is 29.97, which drifts by about
-		// 0.108 frame per hour, or about 1.3 frames per 12 hours. This is not perfect, but a lot better
-		// than using 30 non drop, which will drift with about 1.8 frame per minute.
-		// Using 29.97, drop frame real time can be accurate only every 10th minute (10 minutes of 29.97 fps
-		// is exactly 17982 frames). One minute is 1798.2 frames, but we count 30 frames per second
-		// (30 * 60 = 1800). This means that at the first minute boundary (at the end of 0:0:59:29) we
-		// are 1.8 frames too late relative to real time. By dropping 2 frames (jumping to 0:1:0:2) we are
-		// approx. 0.2 frames too early. This adds up with 0.2 too early for each minute until we are 1.8
-		// frames too early at 0:9:0:2 (9 * 0.2 = 1.8). The 10th minute brings us 1.8 frames later again
-		// (at end of 0:9:59:29), which sums up to 0 (we are back to zero at 0:10:0:0 :-).
-		//
-		// In table form:
-		//
-		// Timecode value    frames offset   subframes offset   seconds (rounded)  44100 sample (rounded)
-		//  0:00:00:00        0.0             0                     0.000                0 (accurate)
-		//  0:00:59:29        1.8           144                    60.027          2647177
-		//  0:01:00:02       -0.2           -16                    60.060          2648648
-		//  0:01:59:29        1.6           128                   120.020          5292883
-		//  0:02:00:02       -0.4           -32                   120.053          5294354
-		//  0:02:59:29        1.4           112                   180.013          7938588
-		//  0:03:00:02       -0.6           -48                   180.047          7940060
-		//  0:03:59:29        1.2            96                   240.007         10584294
-		//  0:04:00:02       -0.8           -64                   240.040         10585766
-		//  0:04:59:29        1.0            80                   300.000         13230000
-		//  0:05:00:02       -1.0           -80                   300.033         13231471
-		//  0:05:59:29        0.8            64                   359.993         15875706
-		//  0:06:00:02       -1.2           -96                   360.027         15877177
-		//  0:06:59:29        0.6            48                   419.987         18521411
-		//  0:07:00:02       -1.4          -112                   420.020         18522883
-		//  0:07:59:29        0.4            32                   478.980         21167117
-		//  0:08:00:02       -1.6          -128                   480.013         21168589
-		//  0:08:59:29        0.2            16                   539.973         23812823
-		//  0:09:00:02       -1.8          -144                   540.007         23814294
-		//  0:09:59:29        0.0+            0+                  599.967         26458529
-		//  0:10:00:00        0.0             0                   600.000         26460000 (accurate)
-		//
-		//  Per Sigmond <per@sigmond.no>
-
-		// Samples inside time dividable by 10 minutes (real time accurate)
-		framecnt_t base_samples = (framecnt_t) (((timecode.hours * 107892) + ((timecode.minutes / 10) * 17982)) * _frames_per_timecode_frame);
-
-		// Samples inside time exceeding the nearest 10 minutes (always offset, see above)
-		int32_t exceeding_df_minutes = timecode.minutes % 10;
-		int32_t exceeding_df_seconds = (exceeding_df_minutes * 60) + timecode.seconds;
-		int32_t exceeding_df_frames = (30 * exceeding_df_seconds) + timecode.frames - (2 * exceeding_df_minutes);
-		framecnt_t exceeding_samples = (framecnt_t) rint(exceeding_df_frames * _frames_per_timecode_frame);
-		sample = base_samples + exceeding_samples;
-	} else {
-		/*
-		   Non drop is easy.. just note the use of
-		   rint(timecode.rate) * _frames_per_timecode_frame
-		   (frames per Timecode second), which is larger than
-		   frame_rate() in the non-integer Timecode rate case.
-		*/
-
-		sample = (framecnt_t)rint((((timecode.hours * 60 * 60) + (timecode.minutes * 60) + timecode.seconds) * (rint(timecode.rate) * _frames_per_timecode_frame)) + (timecode.frames * _frames_per_timecode_frame));
-	}
-
-	if (use_subframes) {
-		sample += (int32_t) (((double)timecode.subframes * _frames_per_timecode_frame) / config.get_subframes_per_frame());
-	}
-
-	if (use_offset) {
-		if (config.get_timecode_offset_negative()) {
-			if (sample >= config.get_timecode_offset()) {
-				sample -= config.get_timecode_offset();
-			} else {
-				/* Prevent song-time from becoming negative */
-				sample = 0;
-			}
-		} else {
-			if (timecode.negative) {
-				if (sample <= config.get_timecode_offset()) {
-					sample = config.get_timecode_offset() - sample;
-				} else {
-					sample = 0;
-				}
-			} else {
-				sample += config.get_timecode_offset();
-			}
-		}
-	}
+	Timecode::timecode_to_sample(
+		timecode, sample, use_offset, use_subframes,
+		_current_frame_rate,
+		config.get_subframes_per_frame(),
+		config.get_timecode_offset_negative(), config.get_timecode_offset()
+		);
 
 }
-
 
 void
 Session::sample_to_timecode (framepos_t sample, Timecode::Time& timecode, bool use_offset, bool use_subframes ) const
 {
-	framepos_t offset_sample;
+	Timecode::sample_to_timecode (
+		sample, timecode, use_offset, use_subframes,
 
-	if (!use_offset) {
-		offset_sample = sample;
-		timecode.negative = false;
-	} else {
-		if (config.get_timecode_offset_negative()) {
-			offset_sample = sample + config.get_timecode_offset ();
-			timecode.negative = false;
-		} else {
-			if (sample < config.get_timecode_offset()) {
-				offset_sample = (config.get_timecode_offset() - sample);
-				timecode.negative = true;
-			} else {
-				offset_sample =  sample - config.get_timecode_offset();
-				timecode.negative = false;
-			}
-		}
-	}
+		timecode_frames_per_second(),
+		timecode_drop_frames(),
+		double(_current_frame_rate),
 
-	double timecode_frames_left_exact;
-	double timecode_frames_fraction;
-	uint32_t timecode_frames_left;
-
-	// Extract whole hours. Do this to prevent rounding errors with
-	// high sample numbers in the calculations that follow.
-	timecode.hours = offset_sample / _frames_per_hour;
-	offset_sample = offset_sample % _frames_per_hour;
-
-	// Calculate exact number of (exceeding) timecode frames and fractional frames
-	timecode_frames_left_exact = (double) offset_sample / _frames_per_timecode_frame;
-	timecode_frames_fraction = timecode_frames_left_exact - floor( timecode_frames_left_exact );
-	timecode.subframes = (int32_t) rint(timecode_frames_fraction * config.get_subframes_per_frame());
-
-	// XXX Not sure if this is necessary anymore...
-	if (timecode.subframes == config.get_subframes_per_frame()) {
-		// This can happen with 24 fps (and 29.97 fps ?)
-		timecode_frames_left_exact = ceil( timecode_frames_left_exact );
-		timecode.subframes = 0;
-	}
-
-	// Extract hour-exceeding frames for minute, second and frame calculations
-	timecode_frames_left = (uint32_t) floor (timecode_frames_left_exact);
-
-	if (timecode_drop_frames()) {
-		// See int32_t explanation in timecode_to_sample()...
-
-		// Number of 10 minute chunks
-		timecode.minutes = (timecode_frames_left / 17982) * 10; // exactly 17982 frames in 10 minutes
-		// frames exceeding the nearest 10 minute barrier
-		int32_t exceeding_df_frames = timecode_frames_left % 17982;
-
-		// Find minutes exceeding the nearest 10 minute barrier
-		if (exceeding_df_frames >= 1800) { // nothing to do if we are inside the first minute (0-1799)
-			exceeding_df_frames -= 1800; // take away first minute (different number of frames than the others)
-			int32_t extra_minutes_minus_1 = exceeding_df_frames / 1798; // how many minutes after the first one
-			exceeding_df_frames -= extra_minutes_minus_1 * 1798; // take away the (extra) minutes just found
-			timecode.minutes += extra_minutes_minus_1 + 1; // update with exceeding minutes
-		}
-
-		// Adjust frame numbering for dropped frames (frame 0 and 1 skipped at start of every minute except every 10th)
-		if (timecode.minutes % 10) {
-			// Every minute except every 10th
-			if (exceeding_df_frames < 28) {
-				// First second, frames 0 and 1 are skipped
-				timecode.seconds = 0;
-				timecode.frames = exceeding_df_frames + 2;
-			} else {
-				// All other seconds, all 30 frames are counted
-				exceeding_df_frames -= 28;
-				timecode.seconds = (exceeding_df_frames / 30) + 1;
-				timecode.frames = exceeding_df_frames % 30;
-			}
-		} else {
-			// Every 10th minute, all 30 frames counted in all seconds
-			timecode.seconds = exceeding_df_frames / 30;
-			timecode.frames = exceeding_df_frames % 30;
-		}
-	} else {
-		// Non drop is easy
-		timecode.minutes = timecode_frames_left / ((int32_t) rint (timecode_frames_per_second ()) * 60);
-		timecode_frames_left = timecode_frames_left % ((int32_t) rint (timecode_frames_per_second ()) * 60);
-		timecode.seconds = timecode_frames_left / (int32_t) rint(timecode_frames_per_second ());
-		timecode.frames = timecode_frames_left % (int32_t) rint(timecode_frames_per_second ());
-	}
-
-	if (!use_subframes) {
-		timecode.subframes = 0;
-	}
-	/* set frame rate and drop frame */
-	timecode.rate = timecode_frames_per_second ();
-	timecode.drop = timecode_drop_frames();
+		config.get_subframes_per_frame(),
+		config.get_timecode_offset_negative(), config.get_timecode_offset()
+		);
 }
 
 void
@@ -380,7 +134,7 @@ Session::timecode_time (framepos_t when, Timecode::Time& timecode)
 		return;
 	}
 
-	sample_to_timecode( when, timecode, true /* use_offset */, false /* use_subframes */ );
+	this->sample_to_timecode( when, timecode, true /* use_offset */, false /* use_subframes */ );
 
 	last_timecode_when = when;
 	last_timecode = timecode;
@@ -395,7 +149,7 @@ Session::timecode_time_subframes (framepos_t when, Timecode::Time& timecode)
 		return;
 	}
 
-	sample_to_timecode( when, timecode, true /* use_offset */, true /* use_subframes */ );
+	this->sample_to_timecode( when, timecode, true /* use_offset */, true /* use_subframes */ );
 
 	last_timecode_when = when;
 	last_timecode = timecode;
@@ -405,7 +159,7 @@ Session::timecode_time_subframes (framepos_t when, Timecode::Time& timecode)
 void
 Session::timecode_duration (framecnt_t when, Timecode::Time& timecode) const
 {
-	sample_to_timecode( when, timecode, false /* use_offset */, true /* use_subframes */ );
+	this->sample_to_timecode( when, timecode, false /* use_offset */, true /* use_subframes */ );
 }
 
 void

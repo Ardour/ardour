@@ -250,199 +250,6 @@ struct ControlEventTimeComparator {
 	}
 };
 
-#if 0
-
-void
-ControlList::merge_nascent (double when)
-{
-	{
-		Glib::Threads::Mutex::Lock lm (_lock);
-
-		if (nascent.empty()) {
-			return;
-		}
-
-		bool was_empty = _events.empty();
-			
-		for (list<NascentInfo*>::iterator n = nascent.begin(); n != nascent.end(); ++n) {
-
-			NascentInfo* ninfo = *n;
-			EventList& nascent_events (ninfo->events);
-			bool need_adjacent_start_clamp;
-			bool need_adjacent_end_clamp;
-			EventList::iterator at;
-
-			if (nascent_events.empty()) {
-				delete ninfo;
-				continue;
-			}
-
-			nascent_events.sort (ControlEventTimeComparator ());
-
-			if (ninfo->start_time < 0.0) {
-				ninfo->start_time = nascent_events.front()->when;
-			}
-
-			if (ninfo->end_time < 0.0) {
-				ninfo->end_time = when;
-			}
-
-			if (_events.empty()) {
-
-				/* add an initial point just before
-				   the nascent data, unless nascent_events
-				   contains a point at zero or one
-				*/
-
-				if (ninfo->start_time > 0) {
-					nascent_events.insert (nascent_events.begin(), new ControlEvent (ninfo->start_time - 1, _default_value));
-				}
-
-				/* add closing "clamp" point before we insert */
-
-				nascent_events.insert (nascent_events.end(), new ControlEvent (ninfo->end_time + 1, _default_value));
-
-				/* insert - front or back doesn't matter since
-				 * _events is empty
-				 */
-
-				_events.insert (_events.begin(), nascent_events.begin(), nascent_events.end());
-
-			} else if (ninfo->end_time < _events.front()->when) {
-				
-				/* all points in nascent are before the first existing point */
-
-				if (ninfo->start_time > (_events.front()->when + 1)) {
-					nascent_events.insert (nascent_events.begin(), new ControlEvent (ninfo->start_time - 1, _default_value));
-				}
-
-				/* add closing "clamp" point before we insert */
-
-				nascent_events.insert (nascent_events.end(), new ControlEvent (ninfo->end_time + 1, _default_value));
-
-				/* insert at front */
-
-				_events.insert (_events.begin(), nascent_events.begin(), nascent_events.end());
-				
-				/* now add another default control point right
-				   after the inserted nascent data 
-				*/
-
-			} else if (ninfo->start_time > _events.back()->when) {
-
-				/* all points in nascent are after the last existing point */
-
-				if (ninfo->start_time > (_events.back()->when + 1)) {
-					nascent_events.insert (nascent_events.begin(), new ControlEvent (ninfo->start_time - 1, _default_value));
-				}
-
-				/* add closing "clamp" point before we insert */
-
-				nascent_events.insert (nascent_events.end(), new ControlEvent (ninfo->end_time + 1, _default_value));
-
-				/* insert */
-
-				_events.insert (_events.end(), nascent_events.begin(), nascent_events.end());
-
-			} else {
-
-				/* find the range that overlaps with nascent events,
-				   and insert the contents of nascent events.
-				*/
-
-				iterator i;
-				iterator range_begin = _events.end();
-				iterator range_end = _events.end();
-				double end_value = unlocked_eval (ninfo->end_time);
-				double start_value = unlocked_eval (ninfo->start_time - 1);
-
-				need_adjacent_end_clamp = true;
-				need_adjacent_start_clamp = true;
-
-				for (i = _events.begin(); i != _events.end(); ++i) {
-
-					if ((*i)->when == ninfo->start_time) {
-						/* existing point at same time, remove it
-						   and the consider the next point instead.
-						*/
-						i = _events.erase (i);
-
-						if (i == _events.end()) {
-							break;
-						}
-
-						if (range_begin == _events.end()) {
-							range_begin = i;
-							need_adjacent_start_clamp = false;
-						} else {
-							need_adjacent_end_clamp = false;
-						}
-
-						if ((*i)->when > ninfo->end_time) {
-							range_end = i;
-							break;
-						}
-
-					} else if ((*i)->when > ninfo->start_time) {
-
-						if (range_begin == _events.end()) {
-							range_begin = i;
-						}
-
-						if ((*i)->when > ninfo->end_time) {
-							range_end = i;
-							break;
-						}
-					}
-				}
-
-				/* Now:
-				   range_begin is the first event on our list after the first nascent event
-				   range_end   is the first event on our list after the last  nascent event
-
-				   range_begin may be equal to _events.end() if the last event on our list
-				   was at the same time as the first nascent event.
-				*/
-
-				if (range_begin != _events.begin()) {
-					/* clamp point before */
-					if (need_adjacent_start_clamp) {
-						_events.insert (range_begin, new ControlEvent (ninfo->start_time, start_value));
-					}
-				}
-
-				_events.insert (range_begin, nascent_events.begin(), nascent_events.end());
-
-				if (range_end != _events.end()) {
-					/* clamp point after */
-					if (need_adjacent_end_clamp) {
-						_events.insert (range_begin, new ControlEvent (ninfo->end_time, end_value));
-					}
-				}
-
-				_events.erase (range_begin, range_end);
-			}
-
-			delete ninfo;
-		}
-
-		if (was_empty && !_events.empty()) {
-			if (_events.front()->when != 0) {
-				_events.insert (_events.begin(), new ControlEvent (0, _default_value));
-			}
-		}
-
-		nascent.clear ();
-
-		if (writing()) {
-			nascent.push_back (new NascentInfo ());
-		}
-	}
-
-	maybe_signal_changed ();
-}
-#endif
-
 void
 ControlList::thin ()
 {
@@ -548,7 +355,7 @@ ControlList::start_write_pass (double when)
 }
 
 void
-ControlList::write_pass_finished (double /*when*/)
+ControlList::write_pass_finished (double when)
 {
 	if (did_write_during_pass) {
 		thin ();
@@ -764,11 +571,12 @@ ControlList::add (double when, double value)
 			if (!_events.empty()) { // avoid O(N) _events.size() here
 				if (_events.back()->value == value) {
 					EventList::iterator b = _events.end();
-					--b; // last point, which we know exists
-					if (b != _events.begin()) { // step back again, which may not be possible
-						--b; // next-to-last-point
+					--b; // final point, which we know exists
+					if (b != _events.begin()) { // step back again, but check first that it is legal
+						--b; // penultimate-point
 						if ((*b)->value == value) {
-							/* straight line - just move the last
+							/* there are at least two points with the exact same value ...
+							 * straight line - just move the final
 							 * point to the new time
 							 */
 							_events.back()->when = when;
@@ -799,7 +607,7 @@ ControlList::add (double when, double value)
 		} else {
 			DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 insert new point at %2 at iterator at %3\n", this, when, (*most_recent_insert_iterator)->when));
 			
-			bool done;
+			bool done = false;
 			
 			/* check if would just be adding to a straight line,
 			 * and don't add another point if so

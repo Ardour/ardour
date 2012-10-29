@@ -48,6 +48,7 @@
 #include "canvas-hit.h"
 #include "canvas-note.h"
 #include "canvas_patch_change.h"
+#include "canvas-sysex.h"
 #include "debug.h"
 #include "editor.h"
 #include "editor_drag.h"
@@ -115,6 +116,13 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	_note_group->raise_to_top();
 	PublicEditor::DropDownKeys.connect (sigc::mem_fun (*this, &MidiRegionView::drop_down_keys));
 
+
+	MidiTimeAxisView *time_axis = dynamic_cast<MidiTimeAxisView *>(&tv);
+	if (time_axis) {
+		_last_channel_mode = time_axis->channel_selector().get_channel_mode();
+		_last_channel_selection = time_axis->channel_selector().get_selected_channels();
+	}
+
 	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&MidiRegionView::parameter_changed, this, _1), gui_context());
 	connect_to_diskstream ();
 
@@ -151,6 +159,12 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 {
 	_note_group->raise_to_top();
 	PublicEditor::DropDownKeys.connect (sigc::mem_fun (*this, &MidiRegionView::drop_down_keys));
+
+	MidiTimeAxisView *time_axis = dynamic_cast<MidiTimeAxisView *>(&tv);
+	if (time_axis) {
+		_last_channel_mode = time_axis->channel_selector().get_channel_mode();
+		_last_channel_selection = time_axis->channel_selector().get_selected_channels();
+	}
 
 	connect_to_diskstream ();
 
@@ -1291,12 +1305,12 @@ MidiRegionView::display_sysexes()
 		}
 		string text = str.str();
 
-		const double x = trackview.editor().frame_to_pixel(source_beats_to_absolute_frames(time));
+		const double x = trackview.editor().frame_to_pixel(source_beats_to_region_frames(time));
 
 		double height = midi_stream_view()->contents_height();
 
 		boost::shared_ptr<CanvasSysEx> sysex = boost::shared_ptr<CanvasSysEx>(
-			new CanvasSysEx(*this, *_note_group, text, height, x, 1.0));
+			new CanvasSysEx(*this, *_note_group, text, height, x, 1.0, (*i)));
 
 		// Show unless message is beyond the region bounds
 		if (time - _region->start() >= _region->length() || time < _region->start()) {
@@ -3172,6 +3186,24 @@ MidiRegionView::patch_left (ArdourCanvas::CanvasPatchChange *)
 }
 
 void
+MidiRegionView::sysex_entered (ArdourCanvas::CanvasSysEx* p)
+{
+	ostringstream s;
+	s << p->text();
+	show_verbose_cursor (s.str(), 10, 20);
+	p->grab_focus();
+}
+
+void
+MidiRegionView::sysex_left (ArdourCanvas::CanvasSysEx *)
+{
+	trackview.editor().verbose_cursor()->hide ();
+	/* focus will transfer back via the enter-notify event sent to this
+	 * midi region view.
+	 */
+}
+
+void
 MidiRegionView::note_mouse_position (float x_fraction, float /*y_fraction*/, bool can_set_cursor)
 {
 	Editor* editor = dynamic_cast<Editor*>(&trackview.editor());
@@ -3228,6 +3260,7 @@ MidiRegionView::midi_channel_mode_changed(ChannelMode mode, uint16_t mask)
 	}
 
 	_last_channel_selection = mask;
+	_last_channel_mode = mode;
 
 	_patch_changes.clear ();
 	display_patch_changes ();
@@ -3682,6 +3715,14 @@ MidiRegionView::data_recorded (boost::weak_ptr<MidiSource> w)
 		Evoral::MIDIEvent<MidiBuffer::TimeType> const ev (*i, false);
 		assert (ev.buffer ());
 
+		if(ev.is_channel_event()) {
+			if (_last_channel_mode == FilterChannels) {
+				if(((uint16_t(1) << ev.channel()) & _last_channel_selection) == 0) {
+					continue;
+				}
+			}
+		}
+
 		/* ev.time() is in session frames, so (ev.time() - converter.origin_b()) is
 		   frames from the start of the source, and so time_beats is in terms of the
 		   source.
@@ -3752,6 +3793,16 @@ MidiRegionView::edit_patch_change (ArdourCanvas::CanvasPatchChange* pc)
 	change_patch_change (pc->patch(), d.patch ());
 }
 
+void
+MidiRegionView::delete_sysex (CanvasSysEx* sysex)
+{
+	MidiModel::SysExDiffCommand* c = _model->new_sysex_diff_command (_("delete sysex"));
+	c->remove (sysex->sysex());
+	_model->apply_command (*trackview.session(), c);
+
+	_sys_exes.clear ();
+	display_sysexes();
+}
 
 void
 MidiRegionView::show_verbose_cursor (boost::shared_ptr<NoteType> n) const

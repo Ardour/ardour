@@ -270,6 +270,8 @@ lv2_evbuf_write(LV2_Evbuf_Iterator* iter,
 		aseq->atom.size += size;
 		iter->offset    += size;
 		break;
+	default:
+		return false;
 	}
 
 	return true;

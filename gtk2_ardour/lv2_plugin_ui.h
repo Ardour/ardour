@@ -36,6 +36,7 @@
 #include "plugin_ui.h"
 
 #ifdef LV2_SUPPORT
+#include "ardour/plugin_insert.h"
 
 #include "lv2_external_ui.h"
 
@@ -66,6 +67,7 @@ class LV2PluginUI : public PlugUIBase, public Gtk::VBox
 
 	typedef boost::shared_ptr<ARDOUR::AutomationControl> ControllableRef;
 
+	boost::shared_ptr<ARDOUR::PluginInsert> _pi;
 	boost::shared_ptr<ARDOUR::LV2Plugin> _lv2;
 	std::vector<int>                     _output_ports;
 	sigc::connection                     _screen_update_connection;
@@ -77,6 +79,7 @@ class LV2PluginUI : public PlugUIBase, public Gtk::VBox
 	struct lv2_external_ui_host          _external_ui_host;
 	LV2_Feature                          _external_ui_feature;
 	struct lv2_external_ui*              _external_ui_ptr;
+	LV2_Feature                          _parent_feature;
 	Gtk::Window*                         _win_ptr;
 	void*                                _inst;
 

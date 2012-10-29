@@ -60,19 +60,40 @@ MIDIEvent<Time>::to_xml() const
 	switch (type()) {
 	case MIDI_CMD_CONTROL:
 		result = new XMLNode("ControlChange");
-		result->add_property("Channel", channel());
-		result->add_property("Control", cc_number());
-		result->add_property("Value",   cc_value());
+		result->add_property("Channel", long(channel()));
+		result->add_property("Control", long(cc_number()));
+		result->add_property("Value",   long(cc_value()));
 		break;
 
 	case MIDI_CMD_PGM_CHANGE:
 		result = new XMLNode("ProgramChange");
-		result->add_property("Channel", channel());
-		result->add_property("Number",  pgm_number());
+		result->add_property("Channel", long(channel()));
+		result->add_property("Number",  long(pgm_number()));
+		break;
+
+	case MIDI_CMD_NOTE_ON:
+		result = new XMLNode("NoteOn");
+		result->add_property("Channel", long(channel()));
+		result->add_property("Note",  long(note()));
+		result->add_property("Velocity",  long(velocity()));
+		break;
+
+	case MIDI_CMD_NOTE_OFF:
+		result = new XMLNode("NoteOff");
+		result->add_property("Channel", long(channel()));
+		result->add_property("Note",  long(note()));
+		result->add_property("Velocity",  long(velocity()));
+		break;
+
+	case MIDI_CMD_BENDER:
+		result = new XMLNode("PitchBendChange");
+		result->add_property("Channel", long(channel()));
+		result->add_property("Value",  long(pitch_bender_value()));
 		break;
 
 	default:
 		// The implementation is continued as needed
+		result = new XMLNode("NotImplemented");
 		break;
 	}
 

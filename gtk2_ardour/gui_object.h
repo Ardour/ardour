@@ -28,8 +28,6 @@
 #include "pbd/xml++.h"
 #include "pbd/id.h"
 
-#include "i18n.h"
-
 class GUIObjectState
 {
 public:

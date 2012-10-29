@@ -989,7 +989,12 @@ OSC::route_plugin_parameter_print (int rid, int piid, int par)
 XMLNode& 
 OSC::get_state () 
 {
-	return *(new XMLNode ("OSC"));
+	XMLNode* node = new XMLNode ("Protocol"); 
+
+	node->add_property (X_("name"), "Open Sound Control (OSC)");
+	node->add_property (X_("feedback"), _send_route_changes ? "1" : "0");
+
+	return *node;
 }
 
 int 

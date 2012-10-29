@@ -105,7 +105,7 @@ AudioTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		create_automation_child (GainAutomation, false);
 	}
 
-	if (_route->panner()) {
+	if (_route->panner_shell()) {
 		_route->panner_shell()->Changed.connect (*this, invalidator (*this),
                                                          boost::bind (&AudioTimeAxisView::ensure_pan_views, this, false), gui_context());
 	}

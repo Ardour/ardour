@@ -539,13 +539,11 @@ GenericMidiControlProtocol::set_state (const XMLNode& node, int version)
 		Glib::Threads::Mutex::Lock lm2 (controllables_lock);
 		controllables.clear ();
 		nlist = node.children(); // "Controls"
-		
+
 		if (nlist.empty()) {
 			return 0;
 		}
-		
-		nlist = nlist.front()->children ();
-		
+
 		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 			
 			if ((prop = (*niter)->property ("id")) != 0) {

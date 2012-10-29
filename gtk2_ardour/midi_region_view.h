@@ -145,6 +145,8 @@ public:
 	void delete_patch_change (ArdourCanvas::CanvasPatchChange *);
 	void edit_patch_change (ArdourCanvas::CanvasPatchChange *);
 
+	void delete_sysex (ArdourCanvas::CanvasSysEx*);
+
 	/** Alter a given patch to be its predecessor in the MIDNAM file.
 	 */
 	void previous_patch (ArdourCanvas::CanvasPatchChange &);
@@ -183,6 +185,8 @@ public:
 	void   note_left(ArdourCanvas::CanvasNoteEvent* ev);
 	void   patch_entered (ArdourCanvas::CanvasPatchChange *);
 	void   patch_left (ArdourCanvas::CanvasPatchChange *);
+	void   sysex_entered (ArdourCanvas::CanvasSysEx* p);
+	void   sysex_left (ArdourCanvas::CanvasSysEx* p);
 	void   note_mouse_position (float xfraction, float yfraction, bool can_set_cursor=true);
 	void   unique_select(ArdourCanvas::CanvasNoteEvent* ev);
 	void   note_selected(ArdourCanvas::CanvasNoteEvent* ev, bool add, bool extend=false);
@@ -375,7 +379,9 @@ private:
 	void show_verbose_cursor (std::string const &, double, double) const;
 	void show_verbose_cursor (boost::shared_ptr<NoteType>) const;
 
+	ARDOUR::ChannelMode _last_channel_mode;
 	uint16_t _last_channel_selection;
+
 	uint8_t  _current_range_min;
 	uint8_t  _current_range_max;
 

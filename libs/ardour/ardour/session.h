@@ -64,6 +64,10 @@
 #include <jack/session.h>
 #endif
 
+#ifdef HAVE_LTC
+#include <ltc.h>
+#endif
+
 class XMLTree;
 class XMLNode;
 struct _AEffect;
@@ -503,9 +507,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	static PBD::Signal1<void, framepos_t> StartTimeChanged;
 	static PBD::Signal1<void, framepos_t> EndTimeChanged;
 
-	std::vector<SyncSource> get_available_sync_options() const;
 	void   request_sync_source (Slave*);
-	bool   synced_to_jack() const { return config.get_external_sync() && config.get_sync_source() == JACK; }
+	bool   synced_to_jack() const { return config.get_external_sync() && Config->get_sync_source() == JACK; }
 
 	double transport_speed() const { return _transport_speed; }
 	bool   transport_stopped() const { return _transport_speed == 0.0f; }
@@ -801,6 +804,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	};
 
 	SlaveState slave_state() const { return _slave_state; }
+        Slave* slave() const { return _slave; }
 
 	boost::shared_ptr<SessionPlaylists> playlists;
 
@@ -842,6 +846,12 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	/** Emitted when the session wants Ardour to quit */
 	static PBD::Signal0<void> Quit;
+
+        boost::shared_ptr<Port> ltc_input_port() const;
+        boost::shared_ptr<Port> ltc_output_port() const;
+
+	boost::shared_ptr<IO> ltc_input_io() { return _ltc_input; }
+	boost::shared_ptr<IO> ltc_output_io() { return _ltc_output; }
 
   protected:
 	friend class AudioEngine;
@@ -964,6 +974,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	framepos_t post_export_position;
 
 	bool _exporting;
+	bool _export_started;
 	bool _export_rolling;
 
 	boost::shared_ptr<ExportHandler> export_handler;
@@ -1064,7 +1075,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 				PostTransportClearSubstate);
 
 	gint _post_transport_work; /* accessed only atomic ops */
-	PostTransportWork post_transport_work() const        { return (PostTransportWork) g_atomic_int_get (&_post_transport_work); }
+        PostTransportWork post_transport_work() const        { return (PostTransportWork) g_atomic_int_get (const_cast<gint*>(&_post_transport_work)); }
 	void set_post_transport_work (PostTransportWork ptw) { g_atomic_int_set (&_post_transport_work, (gint) ptw); }
 	void add_post_transport_work (PostTransportWork ptw);
 
@@ -1176,6 +1187,30 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	bool _send_timecode_update; ///< Flag to send a full frame (Timecode) MTC message this cycle
 
 	int send_midi_time_code_for_cycle (framepos_t, framepos_t, pframes_t nframes);
+
+#ifdef HAVE_LTC
+	LTCEncoder*       ltc_encoder;
+	ltcsnd_sample_t*  ltc_enc_buf;
+
+	Timecode::TimecodeFormat ltc_enc_tcformat;
+	int32_t           ltc_buf_off;
+	int32_t           ltc_buf_len;
+
+	double            ltc_speed;
+	int32_t           ltc_enc_byte;
+	framepos_t        ltc_enc_pos;
+	double            ltc_enc_cnt;
+	framepos_t        ltc_enc_off;
+
+	jack_latency_range_t ltc_out_latency;
+
+	void ltc_tx_initialize();
+	void ltc_tx_cleanup();
+	void ltc_tx_reset();
+	void ltc_tx_resync_latency();
+	void ltc_tx_recalculate_position();
+	void ltc_tx_send_time_code_for_cycle (framepos_t, framepos_t, double, double, pframes_t nframes);
+#endif
 
 	void reset_record_status ();
 
@@ -1528,6 +1563,12 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	bool ignore_route_processor_changes;
 
 	MidiClockTicker* midi_clock;
+
+        boost::shared_ptr<IO>   _ltc_input;
+        boost::shared_ptr<IO>   _ltc_output;
+
+        void reconnect_ltc_input ();
+        void reconnect_ltc_output ();
 };
 
 } // namespace ARDOUR

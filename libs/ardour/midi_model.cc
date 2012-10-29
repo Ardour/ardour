@@ -786,6 +786,10 @@ MidiModel::SysExDiffCommand::operator() ()
 	{
 		MidiModel::WriteLock lock (_model->edit_lock ());
 
+		for (list<SysExPtr>::iterator i = _removed.begin(); i != _removed.end(); ++i) {
+			_model->remove_sysex_unlocked (*i);
+		}
+
 		for (ChangeList::iterator i = _changes.begin(); i != _changes.end(); ++i) {
 			switch (i->property) {
 			case Time:
@@ -803,6 +807,10 @@ MidiModel::SysExDiffCommand::undo ()
 	{
 		MidiModel::WriteLock lock (_model->edit_lock ());
 
+		for (list<SysExPtr>::iterator i = _removed.begin(); i != _removed.end(); ++i) {
+			_model->add_sysex_unlocked (*i);
+		}
+
 		for (ChangeList::iterator i = _changes.begin(); i != _changes.end(); ++i) {
 			switch (i->property) {
 			case Time:
@@ -814,6 +822,12 @@ MidiModel::SysExDiffCommand::undo ()
 	}
 
 	_model->ContentsChanged(); /* EMIT SIGNAL */
+}
+
+void
+MidiModel::SysExDiffCommand::remove (SysExPtr sysex)
+{
+	_removed.push_back(sysex);
 }
 
 XMLNode&

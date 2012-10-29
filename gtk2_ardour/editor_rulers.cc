@@ -818,6 +818,8 @@ Editor::update_fixed_rulers ()
 		return;
 	}
 
+	compute_fixed_ruler_scale ();
+
 	ruler_metrics[ruler_metric_timecode].units_per_pixel = frames_per_unit;
 	ruler_metrics[ruler_metric_samples].units_per_pixel = frames_per_unit;
 	ruler_metrics[ruler_metric_minsec].units_per_pixel = frames_per_unit;
@@ -1083,6 +1085,7 @@ Editor::metric_get_timecode (GtkCustomRulerMark **marks, gdouble lower, gdouble 
 			}
 			(*marks)[n].label = g_strdup (buf);
 			(*marks)[n].position = pos;
+
 			Timecode::increment_minutes( timecode, _session->config.get_subframes_per_frame() );
 		}
 

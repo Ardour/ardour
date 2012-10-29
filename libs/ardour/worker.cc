@@ -18,6 +18,7 @@
 */
 
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "ardour/worker.h"
 #include "pbd/error.h"
@@ -26,12 +27,12 @@ namespace ARDOUR {
 
 Worker::Worker(Workee* workee, uint32_t ring_size)
 	: _workee(workee)
-	, _thread (Glib::Threads::Thread::create(sigc::mem_fun(*this, &Worker::run)))
 	, _requests(new RingBuffer<uint8_t>(ring_size))
 	, _responses(new RingBuffer<uint8_t>(ring_size))
 	, _response((uint8_t*)malloc(ring_size))
 	, _sem(0)
 	, _exit(false)
+	, _thread (Glib::Threads::Thread::create(sigc::mem_fun(*this, &Worker::run)))
 {}
 
 Worker::~Worker()
@@ -44,11 +45,14 @@ Worker::~Worker()
 bool
 Worker::schedule(uint32_t size, const void* data)
 {
+	if (_requests->write_space() < size + sizeof(size)) {
+		return false;
+	}
 	if (_requests->write((const uint8_t*)&size, sizeof(size)) != sizeof(size)) {
 		return false;
 	}
 	if (_requests->write((const uint8_t*)data, size) != size) {
-		return false;  // FIXME: corruption
+		return false;
 	}
 	_sem.post();
 	return true;
@@ -57,11 +61,34 @@ Worker::schedule(uint32_t size, const void* data)
 bool
 Worker::respond(uint32_t size, const void* data)
 {
+	if (_requests->write_space() < size + sizeof(size)) {
+		return false;
+	}
 	if (_responses->write((const uint8_t*)&size, sizeof(size)) != sizeof(size)) {
 		return false;
 	}
 	if (_responses->write((const uint8_t*)data, size) != size) {
-		return false;  // FIXME: corruption
+		return false;
+	}
+	return true;
+}
+
+bool
+Worker::verify_message_completeness(RingBuffer<uint8_t>* rb)
+{
+	uint32_t read_space = rb->read_space();
+	uint32_t size;
+	RingBuffer<uint8_t>::rw_vector vec;
+	rb->get_read_vector (&vec);
+	if (vec.len[0] >= sizeof(size)) {
+		memcpy (&size, vec.buf[0], sizeof (size));
+	} else {
+		memcpy (&size, vec.buf[0], vec.len[0]);
+		memcpy (&size + vec.len[0], vec.buf[1], sizeof(size) - vec.len[0]);
+	}
+	if (read_space < size+sizeof(size)) {
+		/* message from writer is yet incomplete. respond next cycle */
+		return false;
 	}
 	return true;
 }
@@ -71,7 +98,12 @@ Worker::emit_responses()
 {
 	uint32_t read_space = _responses->read_space();
 	uint32_t size       = 0;
-	while (read_space > sizeof(size)) {
+	while (read_space >= sizeof(size)) {
+		if (!verify_message_completeness(_responses)) {
+			/* message from writer is yet incomplete. respond next cycle */
+			return;
+		}
+		/* read and send response */
 		_responses->read((uint8_t*)&size, sizeof(size));
 		_responses->read(_response, size);
 		_workee->work_response(size, _response);
@@ -90,7 +122,17 @@ Worker::run()
 			return;
 		}
 
-		uint32_t size = 0;
+		uint32_t size = _requests->read_space();
+		if (size < sizeof(size)) {
+			PBD::error << "Worker: no work-data on ring buffer" << endmsg;
+			continue;
+		}
+		while (!verify_message_completeness(_requests)) {
+			::usleep(2000);
+			if (_exit) {
+				return;
+			}
+		}
 		if (_requests->read((uint8_t*)&size, sizeof(size)) < sizeof(size)) {
 			PBD::error << "Worker: Error reading size from request ring"
 			           << endmsg;

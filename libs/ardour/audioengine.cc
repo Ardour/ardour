@@ -93,6 +93,8 @@ AudioEngine::AudioEngine (string client_name, string session_uuid)
 
 AudioEngine::~AudioEngine ()
 {
+	config_connection.disconnect ();
+
 	{
 		Glib::Threads::Mutex::Lock tm (_process_lock);
 		session_removed.signal ();
@@ -374,31 +376,38 @@ void
 AudioEngine::_connect_callback (jack_port_id_t id_a, jack_port_id_t id_b, int conn, void* arg)
 {
 	AudioEngine* ae = static_cast<AudioEngine*> (arg);
+	ae->connect_callback (id_a, id_b, conn);
+}
 
-	if (ae->port_remove_in_progress) {
+void
+AudioEngine::connect_callback (jack_port_id_t id_a, jack_port_id_t id_b, int conn)
+{
+	if (port_remove_in_progress) {
 		return;
 	}
 
-	GET_PRIVATE_JACK_POINTER (ae->_jack);
+	GET_PRIVATE_JACK_POINTER (_jack);
 
 	jack_port_t* jack_port_a = jack_port_by_id (_priv_jack, id_a);
 	jack_port_t* jack_port_b = jack_port_by_id (_priv_jack, id_b);
 
 	boost::shared_ptr<Port> port_a;
 	boost::shared_ptr<Port> port_b;
+	Ports::iterator x;
+	boost::shared_ptr<Ports> pr = ports.reader ();
 
-	boost::shared_ptr<Ports> pr = ae->ports.reader ();
-	Ports::iterator i = pr->begin ();
-	while (i != pr->end() && (port_a == 0 || port_b == 0)) {
-		if (jack_port_a == i->second->jack_port()) {
-			port_a = i->second;
-		} else if (jack_port_b == i->second->jack_port()) {
-			port_b = i->second;
-		}
-		++i;
+
+	x = pr->find (make_port_name_relative (jack_port_name (jack_port_a)));
+	if (x != pr->end()) {
+		port_a = x->second;
 	}
 
-	ae->PortConnectedOrDisconnected (
+	x = pr->find (make_port_name_relative (jack_port_name (jack_port_b)));
+	if (x != pr->end()) {
+		port_b = x->second;
+	}
+
+	PortConnectedOrDisconnected (
 		port_a, jack_port_name (jack_port_a),
 		port_b, jack_port_name (jack_port_b),
 		conn == 0 ? false : true
@@ -1610,3 +1619,4 @@ AudioEngine::destroy ()
 	delete _instance;
 	_instance = 0;
 }
+

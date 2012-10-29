@@ -205,6 +205,7 @@ MIDIClock_Slave::reset ()
 	_started  = true;
 
 	// session->request_locate(0, false);
+	current_delta = 0;
 }
 
 void
@@ -343,6 +344,7 @@ MIDIClock_Slave::speed_and_position (double& speed, framepos_t& pos)
 	}
 
 	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("speed_and_position: %1 & %2 <-> %3 (transport)\n", speed, pos, session->transport_frame()));
+	current_delta = pos - session->transport_frame();
 
 	return true;
 }
@@ -352,5 +354,18 @@ MIDIClock_Slave::resolution() const
 {
 	// one beat
 	return (framecnt_t) one_ppqn_in_frames * ppqn;
+}
+
+std::string
+MIDIClock_Slave::approximate_current_delta() const
+{
+	char delta[24];
+	if (last_timestamp == 0 || _starting) {
+		snprintf(delta, sizeof(delta), "\u2012\u2012\u2012\u2012");
+	} else {
+		snprintf(delta, sizeof(delta), "%s%4" PRIi64 " sm",
+				PLUSMINUS(-current_delta), abs(current_delta));
+	}
+	return std::string(delta);
 }
 

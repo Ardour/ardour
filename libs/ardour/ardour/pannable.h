@@ -72,7 +72,7 @@ class Pannable : public PBD::Stateful, public Automatable, public SessionHandleR
 
 	void start_touch (double when);
 	void stop_touch (bool mark, double when);
-	bool touching() const { return g_atomic_int_get (&_touching); }
+        bool touching() const { return g_atomic_int_get (const_cast<gint*>(&_touching)); }
 	bool writing() const { return _auto_state == Write; }
 	bool touch_enabled() const { return _auto_state == Touch; }
 

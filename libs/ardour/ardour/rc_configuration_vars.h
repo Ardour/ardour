@@ -43,8 +43,19 @@ CONFIG_VARIABLE (bool, midi_feedback, "midi-feedback", false)
 CONFIG_VARIABLE (int32_t, mmc_receive_device_id, "mmc-receive-device-id", 0x7f)
 CONFIG_VARIABLE (int32_t, mmc_send_device_id, "mmc-send-device-id", 0)
 CONFIG_VARIABLE (int32_t, initial_program_change, "initial-program-change", -1)
-CONFIG_VARIABLE (int, mtc_qf_speed_tolerance, "mtc-qf-speed-tolerance", 5)
 CONFIG_VARIABLE (bool, first_midi_bank_is_zero, "diplay-first-midi-bank-as-zero", false)
+
+/* Timecode and related */
+
+CONFIG_VARIABLE (int, mtc_qf_speed_tolerance, "mtc-qf-speed-tolerance", 5)
+CONFIG_VARIABLE (bool, timecode_sync_frame_rate, "timecode-sync-frame-rate", true)
+CONFIG_VARIABLE (bool, timecode_source_is_synced, "timecode-source-is-synced", true)
+CONFIG_VARIABLE (SyncSource, sync_source, "sync-source", JACK)
+CONFIG_VARIABLE (std::string, ltc_source_port, "ltc-source-port", "system:capture_1")
+CONFIG_VARIABLE (bool, send_ltc, "send-ltc", false)
+CONFIG_VARIABLE (bool, ltc_send_continuously, "ltc-send-continuously", true)
+CONFIG_VARIABLE (std::string, ltc_output_port, "ltc-output-port", "")
+CONFIG_VARIABLE (float, ltc_output_volume, "ltc-output-volume", 0.125893)
 
 /* control surfaces */
 

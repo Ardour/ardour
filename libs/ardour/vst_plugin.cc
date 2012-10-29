@@ -23,6 +23,7 @@
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 
+#include "pbd/floating.h"
 #include "pbd/locale_guard.h"
 #include "pbd/pathscanner.h"
 
@@ -99,14 +100,22 @@ VSTPlugin::get_parameter (uint32_t which) const
 }
 
 void 
-VSTPlugin::set_parameter (uint32_t which, float val)
+VSTPlugin::set_parameter (uint32_t which, float newval)
 {
-	if (get_parameter (which) == val) {
+	float oldval = get_parameter (which);
+
+	if (PBD::floateq (oldval, newval, 1)) {
 		return;
 	}
 
-	_plugin->setParameter (_plugin, which, val);
-	Plugin::set_parameter (which, val);
+	_plugin->setParameter (_plugin, which, newval);
+	
+	float curval = get_parameter (which);
+
+	if (!PBD::floateq (curval, oldval, 1)) {
+		/* value has changed, follow rest of the notification path */
+		Plugin::set_parameter (which, newval);
+	}
 }
 
 uint32_t

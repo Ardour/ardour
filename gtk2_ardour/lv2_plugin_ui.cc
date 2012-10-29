@@ -54,10 +54,15 @@ LV2PluginUI::write_from_ui(void*       controller,
 
 		boost::shared_ptr<AutomationControl> ac = me->_controllables[port_index];
 		if (ac) {
-			ac->set_value(*(float*)buffer);
+			ac->set_value(*(const float*)buffer);
 		}
 	} else if (format == me->_lv2->atom_eventTransfer()) {
-		me->_lv2->write_from_ui(port_index, format, buffer_size, (uint8_t*)buffer);
+
+		const int cnt = me->_pi->get_count();
+		for (int i=0; i < cnt; i++ ) {
+			boost::shared_ptr<LV2Plugin> lv2i = boost::dynamic_pointer_cast<LV2Plugin> (me->_pi->plugin(i));
+			lv2i->write_from_ui(port_index, format, buffer_size, (const uint8_t*)buffer);
+		}
 	}
 }
 
@@ -176,6 +181,7 @@ LV2PluginUI::output_update()
 LV2PluginUI::LV2PluginUI(boost::shared_ptr<PluginInsert> pi,
                          boost::shared_ptr<LV2Plugin>    lv2p)
 	: PlugUIBase(pi)
+	, _pi(pi)
 	, _lv2(lv2p)
 	, _gui_widget(NULL)
 	, _ardour_buttons_box(NULL)
@@ -188,14 +194,15 @@ LV2PluginUI::LV2PluginUI(boost::shared_ptr<PluginInsert> pi,
 void
 LV2PluginUI::lv2ui_instantiate(const std::string& title)
 {
-	LV2_Feature** features;
-	LV2_Feature** features_src;
-	LV2_Feature** features_dst;
-	size_t        features_count;
-	bool          is_external_ui;
+	bool          is_external_ui = _lv2->is_external_ui();
+	LV2_Feature** features_src   = const_cast<LV2_Feature**>(_lv2->features());
+	LV2_Feature** features       = const_cast<LV2_Feature**>(_lv2->features());
+	size_t        features_count = 0;
+	while (*features++) {
+		features_count++;
+	}
 
-	is_external_ui = _lv2->is_external_ui();
-
+	Gtk::Alignment* container = NULL;
 	if (is_external_ui) {
 		_external_ui_host.ui_closed       = LV2PluginUI::on_external_ui_closed;
 		_external_ui_host.plugin_human_id = strdup(title.c_str());
@@ -203,20 +210,43 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 		_external_ui_feature.URI  = LV2_EXTERNAL_UI_URI;
 		_external_ui_feature.data = &_external_ui_host;
 
-		features_src = features = (LV2_Feature**)_lv2->features();
-		features_count = 2;
-		while (*features++) {
-			features_count++;
+		++features_count;
+		features = (LV2_Feature**)malloc(
+			sizeof(LV2_Feature*) * (features_count + 1));
+		for (size_t i = 0; i < features_count - 1; ++i) {
+			features[i] = features_src[i];
 		}
-		features_dst = features = (LV2_Feature**)malloc(
-			sizeof(LV2_Feature*) * features_count);
-		features_dst[--features_count] = NULL;
-		features_dst[--features_count] = &_external_ui_feature;
-		while (features_count--) {
-			*features++ = *features_src++;
-		}
+		features[features_count - 1] = &_external_ui_feature;
+		features[features_count]     = NULL;
 	} else {
-		features_dst = (LV2_Feature**)_lv2->features();
+		_ardour_buttons_box = manage (new Gtk::HBox);
+		_ardour_buttons_box->set_spacing (6);
+		_ardour_buttons_box->set_border_width (6);
+		_ardour_buttons_box->pack_end (focus_button, false, false);
+		_ardour_buttons_box->pack_end (bypass_button, false, false, 10);
+		_ardour_buttons_box->pack_end (delete_button, false, false);
+		_ardour_buttons_box->pack_end (save_button, false, false);
+		_ardour_buttons_box->pack_end (add_button, false, false);
+		_ardour_buttons_box->pack_end (_preset_combo, false, false);
+		_ardour_buttons_box->pack_end (_preset_modified, false, false);
+		_ardour_buttons_box->show_all();
+		pack_start(*_ardour_buttons_box, false, false);
+
+		_gui_widget = Gtk::manage((container = new Gtk::Alignment()));
+		pack_start(*_gui_widget, true, true);
+		_gui_widget->show();
+
+		_parent_feature.URI  = LV2_UI__parent;
+		_parent_feature.data = _gui_widget->gobj();
+
+		++features_count;
+		features = (LV2_Feature**)malloc(
+			sizeof(LV2_Feature*) * (features_count + 1));
+		for (size_t i = 0; i < features_count - 1; ++i) {
+			features[i] = features_src[i];
+		}
+		features[features_count - 1] = &_parent_feature;
+		features[features_count]     = NULL;
 	}
 
 	if (!ui_host) {
@@ -229,7 +259,7 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 		? NS_UI "external"
 		: NS_UI "GtkUI";
 
-	LilvUI* ui = (LilvUI*)_lv2->c_ui();
+	const LilvUI* ui = (const LilvUI*)_lv2->c_ui();
 	_inst = suil_instance_new(
 		ui_host,
 		this,
@@ -239,11 +269,9 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 		lilv_node_as_uri((const LilvNode*)_lv2->c_ui_type()),
 		lilv_uri_to_path(lilv_node_as_uri(lilv_ui_get_bundle_uri(ui))),
 		lilv_uri_to_path(lilv_node_as_uri(lilv_ui_get_binary_uri(ui))),
-		features_dst);
+		features);
 
-	if (is_external_ui) {
-		free(features_dst);
-	}
+	free(features);
 
 #define GET_WIDGET(inst) suil_instance_get_widget((SuilInstance*)inst);
 
@@ -259,19 +287,6 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 	_external_ui_ptr = NULL;
 	if (_inst) {
 		if (!is_external_ui) {
-			_ardour_buttons_box = manage (new Gtk::HBox);
-			_ardour_buttons_box->set_spacing (6);
-			_ardour_buttons_box->set_border_width (6);
-			_ardour_buttons_box->pack_end (focus_button, false, false);
-			_ardour_buttons_box->pack_end (bypass_button, false, false, 10);
-			_ardour_buttons_box->pack_end (delete_button, false, false);
-			_ardour_buttons_box->pack_end (save_button, false, false);
-			_ardour_buttons_box->pack_end (add_button, false, false);
-			_ardour_buttons_box->pack_end (_preset_combo, false, false);
-			_ardour_buttons_box->pack_end (_preset_modified, false, false);
-			_ardour_buttons_box->show_all();
-			pack_start(*_ardour_buttons_box, false, false);
-
 			GtkWidget* c_widget = (GtkWidget*)GET_WIDGET(_inst);
 			if (!c_widget) {
 				error << _("failed to get LV2 UI widget") << endmsg;
@@ -279,9 +294,11 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 				_inst = NULL;
 				return;
 			}
-			_gui_widget = Gtk::manage(Glib::wrap(c_widget));
-			_gui_widget->show_all();
-			pack_start(*_gui_widget, true, true);
+			if (!container->get_child()) {
+				// Suil didn't add the UI to the container for us, so do it now
+				container->add(*Gtk::manage(Glib::wrap(c_widget)));
+			}
+			container->show_all();
 		} else {
 			_external_ui_ptr = (struct lv2_external_ui*)GET_WIDGET(_inst);
 		}

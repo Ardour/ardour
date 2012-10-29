@@ -116,6 +116,10 @@ Session::no_roll (pframes_t nframes)
 		_click_io->silence (nframes);
 	}
 
+#ifdef HAVE_LTC
+	ltc_tx_send_time_code_for_cycle (_transport_frame, end_frame, _target_transport_speed, _transport_speed, nframes);
+#endif
+
 	if (_process_graph) {
 		DEBUG_TRACE(DEBUG::ProcessThreads,"calling graph/no-roll\n");
 		_process_graph->routes_no_roll( nframes, _transport_frame, end_frame, non_realtime_work_pending(), declick);
@@ -341,8 +345,8 @@ Session::process_with_events (pframes_t nframes)
 	if (_transport_speed == 1.0) {
 		frames_moved = (framecnt_t) nframes;
 	} else {
-		interpolation.set_target_speed (fabs(_target_transport_speed));
-		interpolation.set_speed (fabs(_transport_speed));
+		interpolation.set_target_speed (_target_transport_speed);
+		interpolation.set_speed (_transport_speed);
 		frames_moved = (framecnt_t) interpolation.interpolate (0, nframes, 0, 0);
 	}
 
@@ -513,7 +517,7 @@ Session::follow_slave (pframes_t nframes)
 		slave_speed = 0.0f;
 	}
 
-	if (_slave->is_always_synced() || config.get_timecode_source_is_synced()) {
+	if (_slave->is_always_synced() || Config->get_timecode_source_is_synced()) {
 
 		/* if the TC source is synced, then we assume that its
 		   speed is binary: 0.0 or 1.0
@@ -541,7 +545,7 @@ Session::follow_slave (pframes_t nframes)
 						   _slave_state, slave_transport_frame, slave_speed, this_delta, average_slave_delta));
 
 
-	if (_slave_state == Running && !_slave->is_always_synced() && !config.get_timecode_source_is_synced()) {
+	if (_slave_state == Running && !_slave->is_always_synced() && !Config->get_timecode_source_is_synced()) {
 
 		if (_transport_speed != 0.0f) {
 
@@ -583,7 +587,7 @@ Session::follow_slave (pframes_t nframes)
 			}
 
 #if 1
-			if ((framecnt_t) abs(average_slave_delta) > _slave->resolution()) {
+			if (!actively_recording() && (framecnt_t) abs(average_slave_delta) > _slave->resolution()) {
 				cerr << "average slave delta greater than slave resolution (" << _slave->resolution() << "), going to silent motion\n";
 				goto silent_motion;
 			}
@@ -653,7 +657,10 @@ Session::track_slave_state (float slave_speed, framepos_t slave_transport_frame,
 
 			} else {
 
-				_slave_state = Running;
+				DEBUG_TRACE (DEBUG::Slave, string_compose ("slave stopped -> running at %1\n", slave_transport_frame));
+
+				memset (delta_accumulator, 0, sizeof (int32_t) * delta_accumulator_size);
+				average_slave_delta = 0L;
 
 				Location* al = _locations->auto_loop_location();
 
@@ -663,8 +670,10 @@ Session::track_slave_state (float slave_speed, framepos_t slave_transport_frame,
 				}
 
 				if (slave_transport_frame != _transport_frame) {
+					DEBUG_TRACE (DEBUG::Slave, string_compose ("require locate to run. eng: %1 -> sl: %2\n", _transport_frame, slave_transport_frame));
 					locate (slave_transport_frame, false, false);
 				}
+				_slave_state = Running;
 			}
 			break;
 
@@ -713,9 +722,6 @@ Session::track_slave_state (float slave_speed, framepos_t slave_transport_frame,
 					cerr << "cannot micro-seek\n";
 					/* XXX what? */
 				}
-
-				memset (delta_accumulator, 0, sizeof (int32_t) * delta_accumulator_size);
-				average_slave_delta = 0L;
 			}
 		}
 
@@ -738,7 +744,7 @@ Session::track_slave_state (float slave_speed, framepos_t slave_transport_frame,
 			force_locate (slave_transport_frame, false);
 		}
 
-		_slave_state = Stopped;
+		reset_slave_state();
 	}
 }
 
@@ -787,6 +793,9 @@ Session::process_without_events (pframes_t nframes)
 
 	if (!_exporting && _slave) {
 		if (!follow_slave (nframes)) {
+#ifdef HAVE_LTC
+			ltc_tx_send_time_code_for_cycle (_transport_frame, _transport_frame, 0, 0 , nframes);
+#endif
 			return;
 		}
 	}
@@ -799,14 +808,18 @@ Session::process_without_events (pframes_t nframes)
 	if (_transport_speed == 1.0) {
 		frames_moved = (framecnt_t) nframes;
 	} else {
-		interpolation.set_target_speed (fabs(_target_transport_speed));
-		interpolation.set_speed (fabs(_transport_speed));
+		interpolation.set_target_speed (_target_transport_speed);
+		interpolation.set_speed (_transport_speed);
 		frames_moved = (framecnt_t) interpolation.interpolate (0, nframes, 0, 0);
 	}
 
 	if (!_exporting && !timecode_transmission_suspended()) {
 		send_midi_time_code_for_cycle (_transport_frame, _transport_frame + frames_moved, nframes);
 	}
+
+#ifdef HAVE_LTC
+	ltc_tx_send_time_code_for_cycle (_transport_frame, _transport_frame + frames_moved, _target_transport_speed, _transport_speed, nframes);
+#endif
 
 	framepos_t const stop_limit = compute_stop_limit ();
 
@@ -827,16 +840,6 @@ Session::process_without_events (pframes_t nframes)
 	}
 
 	get_track_statistics ();
-
-	/* XXX: I'm not sure whether this is correct, but at least it
-	   matches process_with_events, so that this new frames_moved
-	   is -ve when transport speed is -ve.  This means that the
-	   transport position is updated correctly when we are in
-	   reverse.  It seems a bit wrong that we're not using the
-	   interpolator to compute this.
-	*/
-
-	frames_moved = (framecnt_t) floor (_transport_speed * nframes);
 
 	if (frames_moved < 0) {
 		decrement_transport_position (-frames_moved);
@@ -1119,6 +1122,7 @@ Session::process_event (SessionEvent* ev)
 		break;
 
 	case SessionEvent::SetSyncSource:
+		DEBUG_TRACE (DEBUG::Slave, "seen request for new slave\n");
 		use_sync_source (ev->slave);
 		break;
 

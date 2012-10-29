@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtkmm2ext\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-11-21 16:11-0500\n"
+"POT-Creation-Date: 2012-09-12 17:28-0400\n"
 "PO-Revision-Date: 2004-05-17 20:36+0200\n"
 "Last-Translator: Chris Ross <chris.ross@tebibyte.org>\n"
 "Language-Team: Portuguese\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=ISO-8859-15\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: actions.cc:327
+#: actions.cc:386
 msgid "Unknown action name: %1"
 msgstr ""
 
@@ -33,11 +33,18 @@ msgstr ""
 msgid "Log"
 msgstr ""
 
-#: gtk_ui.cc:624
+#: gtk_ui.cc:361
+msgid ""
+"\n"
+"\n"
+"Key: "
+msgstr ""
+
+#: gtk_ui.cc:634
 msgid "Press To Exit"
 msgstr ""
 
-#: gtk_ui.cc:660
+#: gtk_ui.cc:670
 msgid "I'm sorry %1, I can't do that"
 msgstr ""
 
@@ -50,7 +57,7 @@ msgid "Control"
 msgstr ""
 
 #: keyboard.cc:70 keyboard.cc:73 keyboard.cc:87 keyboard.cc:90
-msgid "Shift"
+msgid "Key|Shift"
 msgstr ""
 
 #: keyboard.cc:71
@@ -65,11 +72,11 @@ msgstr ""
 msgid "Meta"
 msgstr ""
 
-#: keyboard.cc:131 keyboard.cc:506
+#: keyboard.cc:134 keyboard.cc:523
 msgid "Unknown"
 msgstr ""
 
-#: keyboard.cc:517
+#: keyboard.cc:534
 msgid "Ardour key bindings file not found at \"%1\" or contains errors."
 msgstr ""
 

@@ -22,6 +22,7 @@
 
 #include <map>
 #include <string>
+#include <vector>
 
 #include <limits.h>
 #include <signal.h>
@@ -68,6 +69,7 @@ namespace ARDOUR {
 	}
 
 	void setup_fpu ();
+	std::vector<SyncSource> get_available_sync_options();
 }
 
 #endif /* __ardour_ardour_h__ */

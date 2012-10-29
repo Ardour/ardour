@@ -922,6 +922,8 @@ ArdourStartup::redisplay_recent_sessions ()
 	for (ARDOUR::RecentSessions::iterator i = rs.begin(); i != rs.end(); ++i) {
 		session_directories.push_back ((*i).second);
 	}
+	
+	int session_snapshot_count = 0;
 
 	for (vector<std::string>::const_iterator i = session_directories.begin(); i != session_directories.end(); ++i)
 	{
@@ -960,6 +962,8 @@ ArdourStartup::redisplay_recent_sessions ()
 
 		row[recent_session_columns.visible_name] = Glib::path_get_basename (fullpath);
 		row[recent_session_columns.fullpath] = fullpath;
+		
+		++session_snapshot_count;
 
 		if (state_file_names.size() > 1) {
 
@@ -973,13 +977,15 @@ ArdourStartup::redisplay_recent_sessions ()
 
 				child_row[recent_session_columns.visible_name] = *i2;
 				child_row[recent_session_columns.fullpath] = fullpath;
+				++session_snapshot_count;
 			}
 		}
 	}
 
 	recent_session_display.set_tooltip_column(1); // recent_session_columns.fullpath 
 	recent_session_display.set_model (recent_session_model);
-	return rs.size();
+	return session_snapshot_count;
+	// return rs.size();
 }
 
 void
@@ -1115,7 +1121,7 @@ ArdourStartup::setup_more_options_page ()
 	advanced_table.set_row_spacings(0);
 	advanced_table.set_col_spacings(0);
 
-	_connect_inputs.set_label (_("Automatically connect to physical_inputs"));
+	_connect_inputs.set_label (_("Automatically connect to physical inputs"));
 	_connect_inputs.set_flags(Gtk::CAN_FOCUS);
 	_connect_inputs.set_relief(Gtk::RELIEF_NORMAL);
 	_connect_inputs.set_mode(true);
@@ -1250,10 +1256,11 @@ ArdourStartup::setup_more_options_page ()
 	_limit_output_ports.signal_clicked().connect (sigc::mem_fun (*this, &ArdourStartup::limit_outputs_clicked));
 	_create_master_bus.signal_clicked().connect (sigc::mem_fun (*this, &ArdourStartup::master_bus_button_clicked));
 
-	/* note that more_options_vbox is NOT visible by
-	 * default. this is entirely by design - this page
-	 * should be skipped unless explicitly requested.
+	/* note that more_options_vbox is "visible" by default even
+	 * though it may not be displayed to the user, this is so the dialog
+	 * doesn't resize.
 	 */
+	more_options_vbox.show_all ();
 
 	session_options_page_index = append_page (more_options_vbox);
 	set_page_title (more_options_vbox, _("Advanced Session Options"));
@@ -1335,9 +1342,12 @@ ArdourStartup::connect_inputs_clicked ()
 void
 ArdourStartup::connect_outputs_clicked ()
 {
-	_limit_output_ports.set_sensitive(_connect_outputs.get_active());
+	bool const co = _connect_outputs.get_active ();
+	_limit_output_ports.set_sensitive(co);
+	_connect_outputs_to_master.set_sensitive(co);
+	_connect_outputs_to_physical.set_sensitive(co);
 
-	if (_connect_outputs.get_active() && _limit_output_ports.get_active()) {
+	if (co && _limit_output_ports.get_active()) {
 		_output_limit_count.set_sensitive(true);
 	} else {
 		_output_limit_count.set_sensitive(false);
@@ -1359,9 +1369,10 @@ ArdourStartup::limit_outputs_clicked ()
 void
 ArdourStartup::master_bus_button_clicked ()
 {
-	bool yn = _create_master_bus.get_active();
+	bool const yn = _create_master_bus.get_active();
 
 	_master_bus_channel_count.set_sensitive(yn);
+	_connect_outputs_to_master.set_sensitive(yn);
 }
 
 void

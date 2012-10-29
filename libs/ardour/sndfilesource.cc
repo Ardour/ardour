@@ -858,7 +858,7 @@ SndFileSource::get_soundfile_info (const string& path, SoundFileInfo& info, stri
 
 	sf_info.format = 0; // libsndfile says to clear this before sf_open().
 
-	if ((sf = sf_open ((char*) path.c_str(), SFM_READ, &sf_info)) == 0) {
+	if ((sf = sf_open (const_cast<char*>(path.c_str()), SFM_READ, &sf_info)) == 0) {
 		char errbuf[256];
 		error_msg = sf_error_str (0, errbuf, sizeof (errbuf) - 1);
 		return false;

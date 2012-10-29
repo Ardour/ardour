@@ -46,7 +46,7 @@ class LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
   public:
 	LV2Plugin (ARDOUR::AudioEngine& engine,
 	           ARDOUR::Session&     session,
-	           void*                c_plugin,
+	           const void*          c_plugin,
 	           framecnt_t           sample_rate);
 	LV2Plugin (const LV2Plugin &);
 	~LV2Plugin ();
@@ -70,9 +70,9 @@ class LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 
 	const void* extension_data (const char* uri) const;
 
-	void* c_plugin();
-	void* c_ui();
-	void* c_ui_type();
+	const void* c_plugin();
+	const void* c_ui();
+	const void* c_ui_type();
 
 	bool is_external_ui () const;
 	bool ui_is_resizable () const;
@@ -126,7 +126,10 @@ class LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 
 	uint32_t atom_eventTransfer() const;
 
-	void write_from_ui(uint32_t index, uint32_t protocol, uint32_t size, uint8_t* body);
+	void write_from_ui(uint32_t       index,
+	                   uint32_t       protocol,
+	                   uint32_t       size,
+	                   const uint8_t* body);
 
 	typedef void UIMessageSink(void*       controller,
 	                           uint32_t    index,
@@ -149,6 +152,9 @@ class LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	static uint32_t _sequence_type;
 	static uint32_t _event_transfer_type;
 	static uint32_t _path_type;
+	static uint32_t _log_Error;
+	static uint32_t _log_Warning;
+	static uint32_t _log_Note;
 
   private:
 	struct Impl;
@@ -161,6 +167,7 @@ class LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	float*        _shadow_data;
 	float*        _defaults;
 	LV2_Evbuf**   _ev_buffers;
+	LV2_Evbuf**   _atom_ev_buffers;
 	float*        _bpm_control_port;  ///< Special input set by ardour
 	float*        _freewheel_control_port;  ///< Special input set by ardour
 	float*        _latency_control_port;  ///< Special output set by ardour
@@ -177,7 +184,8 @@ class LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 		PORT_AUDIO   = 1 << 2,
 		PORT_CONTROL = 1 << 3,
 		PORT_EVENT   = 1 << 4,
-		PORT_MESSAGE = 1 << 5
+		PORT_MESSAGE = 1 << 5,
+		PORT_ATOM    = 1 << 6
 	} PortFlag;
 
 	typedef unsigned PortFlags;
@@ -192,16 +200,16 @@ class LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 		uint32_t size;
 	};
 
-	void write_to_ui(uint32_t index,
-	                 uint32_t protocol,
-	                 uint32_t size,
-	                 uint8_t* body);
+	void write_to_ui(uint32_t       index,
+	                 uint32_t       protocol,
+	                 uint32_t       size,
+	                 const uint8_t* body);
 
 	void write_to(RingBuffer<uint8_t>* dest,
 	              uint32_t             index,
 	              uint32_t             protocol,
 	              uint32_t             size,
-	              uint8_t*             body);
+	              const uint8_t*       body);
 
 	// Created on demand so the space is only consumed if necessary
 	RingBuffer<uint8_t>* _to_ui;
@@ -215,7 +223,13 @@ class LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	LV2_Feature    _data_access_feature;
 	LV2_Feature    _instance_access_feature;
 	LV2_Feature    _make_path_feature;
+	LV2_Feature    _log_feature;
 	LV2_Feature    _work_schedule_feature;
+	LV2_Feature    _options_feature;
+
+	// Options passed to plugin
+	int32_t _block_length;
+	int32_t _seq_size;
 
 	mutable unsigned _state_version;
 
@@ -230,7 +244,8 @@ class LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	static char* lv2_state_make_path (void*       host_data,
 	                                  const char* path);
 
-	void init (void* c_plugin, framecnt_t rate);
+	void init (const void* c_plugin, framecnt_t rate);
+	void allocate_atom_event_buffers ();
 	void run (pframes_t nsamples);
 
 	void latency_compute_run ();
@@ -243,14 +258,14 @@ class LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 
 class LV2PluginInfo : public PluginInfo {
 public:
-	LV2PluginInfo (void* c_plugin);
+	LV2PluginInfo (const void* c_plugin);
 	~LV2PluginInfo ();
 
 	static PluginInfoList* discover ();
 
 	PluginPtr load (Session& session);
 
-	void* _c_plugin;
+	const void* _c_plugin;
 };
 
 typedef boost::shared_ptr<LV2PluginInfo> LV2PluginInfoPtr;

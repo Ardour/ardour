@@ -912,7 +912,7 @@ IO::make_connections (const XMLNode& node, int version, bool in)
 			if (prop) {
 				boost::shared_ptr<Bundle> b = find_possible_bundle (prop->value());
 				if (b) {
-					connect_ports_to_bundle (b, this);
+					connect_ports_to_bundle (b, true, this);
 				}
 			}
 
@@ -1241,12 +1241,18 @@ IO::latency () const
 }
 
 int
-IO::connect_ports_to_bundle (boost::shared_ptr<Bundle> c, void* src)
+IO::connect_ports_to_bundle (boost::shared_ptr<Bundle> c, bool exclusive, void* src)
 {
 	BLOCK_PROCESS_CALLBACK ();
 
 	{
 		Glib::Threads::Mutex::Lock lm2 (io_lock);
+
+		if (exclusive) {
+			for (PortSet::iterator i = _ports.begin(); i != _ports.end(); ++i) {
+				i->disconnect_all ();
+			}
+		}
 
 		c->connect (_bundle, _session.engine());
 

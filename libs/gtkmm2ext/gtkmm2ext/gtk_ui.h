@@ -83,7 +83,7 @@ struct UIRequest : public BaseUI::BaseRequestObject {
     ~UIRequest () { 
 	    if (type == ErrorMessage && msg) {
 		    /* msg was strdup()'ed */
-		    free ((char *)msg);
+		    free (const_cast<char *>(msg));
 	    }
     }
 };

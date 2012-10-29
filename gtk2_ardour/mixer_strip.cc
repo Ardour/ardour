@@ -874,7 +874,7 @@ MixerStrip::input_press (GdkEventButton *ev)
 }
 
 void
-MixerStrip::bundle_input_toggled (boost::shared_ptr<ARDOUR::Bundle> c)
+MixerStrip::bundle_input_chosen (boost::shared_ptr<ARDOUR::Bundle> c)
 {
 	if (ignore_toggle) {
 		return;
@@ -883,14 +883,14 @@ MixerStrip::bundle_input_toggled (boost::shared_ptr<ARDOUR::Bundle> c)
 	ARDOUR::BundleList current = _route->input()->bundles_connected ();
 
 	if (std::find (current.begin(), current.end(), c) == current.end()) {
-		_route->input()->connect_ports_to_bundle (c, this);
+		_route->input()->connect_ports_to_bundle (c, true, this);
 	} else {
 		_route->input()->disconnect_ports_from_bundle (c, this);
 	}
 }
 
 void
-MixerStrip::bundle_output_toggled (boost::shared_ptr<ARDOUR::Bundle> c)
+MixerStrip::bundle_output_chosen (boost::shared_ptr<ARDOUR::Bundle> c)
 {
 	if (ignore_toggle) {
 		return;
@@ -899,7 +899,7 @@ MixerStrip::bundle_output_toggled (boost::shared_ptr<ARDOUR::Bundle> c)
 	ARDOUR::BundleList current = _route->output()->bundles_connected ();
 
 	if (std::find (current.begin(), current.end(), c) == current.end()) {
-		_route->output()->connect_ports_to_bundle (c, this);
+		_route->output()->connect_ports_to_bundle (c, true, this);
 	} else {
 		_route->output()->disconnect_ports_from_bundle (c, this);
 	}
@@ -930,13 +930,7 @@ MixerStrip::maybe_add_bundle_to_input_menu (boost::shared_ptr<Bundle> b, ARDOUR:
 	std::string n = b->name ();
 	replace_all (n, "_", " ");
 
-	citems.push_back (CheckMenuElem (n, sigc::bind (sigc::mem_fun(*this, &MixerStrip::bundle_input_toggled), b)));
-
-	if (std::find (current.begin(), current.end(), b) != current.end()) {
-		ignore_toggle = true;
-		dynamic_cast<CheckMenuItem *> (&citems.back())->set_active (true);
-		ignore_toggle = false;
-	}
+	citems.push_back (MenuElem (n, sigc::bind (sigc::mem_fun(*this, &MixerStrip::bundle_input_chosen), b)));
 }
 
 void
@@ -964,13 +958,7 @@ MixerStrip::maybe_add_bundle_to_output_menu (boost::shared_ptr<Bundle> b, ARDOUR
 	std::string n = b->name ();
 	replace_all (n, "_", " ");
 
-	citems.push_back (CheckMenuElem (n, sigc::bind (sigc::mem_fun(*this, &MixerStrip::bundle_output_toggled), b)));
-
-	if (std::find (current.begin(), current.end(), b) != current.end()) {
-		ignore_toggle = true;
-		dynamic_cast<CheckMenuItem *> (&citems.back())->set_active (true);
-		ignore_toggle = false;
-	}
+	citems.push_back (MenuElem (n, sigc::bind (sigc::mem_fun(*this, &MixerStrip::bundle_output_chosen), b)));
 }
 
 void

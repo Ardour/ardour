@@ -44,10 +44,11 @@ public:
 
 protected:
 	virtual void button_toggled(Gtk::ToggleButton* button, uint8_t button_nr) = 0;
-	Gtk::Label        _button_labels[4][4];
+	Gtk::Label                      _button_labels[4][4];
 	Gtkmm2ext::StatefulToggleButton _buttons[4][4];
-	int               _recursion_counter;
-        bool              was_clicked (GdkEventButton*);
+	int                             _recursion_counter;
+
+	bool              was_clicked (GdkEventButton*);
 };
 
 class SingleMidiChannelSelector : public MidiChannelSelector
@@ -81,6 +82,7 @@ public:
 	sigc::signal<void, ARDOUR::ChannelMode, uint16_t> mode_changed;
 
 	void set_channel_mode(ARDOUR::ChannelMode mode, uint16_t mask);
+	ARDOUR::ChannelMode get_channel_mode () const { return _channel_mode; }
 
 	/**
 	 * @return each bit in the returned word represents a midi channel, eg.

@@ -335,8 +335,20 @@ def set_compiler_flags (conf,opt):
     # warnings flags
     #
 
-    conf.env.append_value('CFLAGS', "-Wall")
-    conf.env.append_value('CXXFLAGS', [ '-Wall', '-Woverloaded-virtual'])
+    conf.env.append_value('CFLAGS', [ '-Wall',
+                                      '-Wpointer-arith',
+                                      '-Wcast-qual',
+                                      '-Wcast-align',
+                                      '-Wstrict-prototypes',
+                                      '-Wmissing-prototypes'
+                                      ])
+
+    conf.env.append_value('CXXFLAGS', [ '-Wall', 
+                                        '-Wpointer-arith',
+                                        '-Wcast-qual',
+                                        '-Wcast-align', 
+                                        '-Woverloaded-virtual'
+                                        ])
 
 
     #
@@ -461,13 +473,31 @@ def configure(conf):
     # the library itself is part of glibc, or on a bare-bones build system
     # where we need to pick it up from the GTK dependency stack.
     #
-    if not os.path.isfile ('/usr/include/libintl.h'):
+    user_gtk_root = os.path.expanduser ('~/gtk/inst')
+    pkg_config_path = os.getenv('PKG_CONFIG_PATH')
+    if not os.path.isfile ('/usr/include/libintl.h') or (pkg_config_path is not None and pkg_config_path.find (user_gtk_root) >= 0):
         # XXXX hack hack hack
-        prefinclude = ''.join ([ '-I', os.path.expanduser ('~/gtk/inst/include') ])
-        preflib = ''.join ([ '-L', os.path.expanduser ('~/gtk/inst/lib') ])
+        prefinclude = ''.join ([ '-I', user_gtk_root + '/include'])
+        preflib = ''.join ([ '-L', user_gtk_root + '/lib'])
         conf.env.append_value('CFLAGS', [ prefinclude ])
         conf.env.append_value('CXXFLAGS',  [prefinclude ])
         conf.env.append_value('LINKFLAGS', [ preflib ])
+        conf.define ('NEED_INTL', 1)
+        autowaf.display_msg(conf, 'Will use explicit linkage against libintl in ' + user_gtk_root, 'yes')
+    else:
+        autowaf.display_msg(conf, 'Will use explicit linkage against libintl in ', 'no')
+
+    user_ardour_root = os.path.expanduser ('~/a3/inst')
+    if pkg_config_path is not None and os.getenv('PKG_CONFIG_PATH').find (user_ardour_root) >= 0:
+        # XXXX hack hack hack
+        prefinclude = ''.join ([ '-I', user_ardour_root + '/include'])
+        preflib = ''.join ([ '-L', user_ardour_root + '/lib'])
+        conf.env.append_value('CFLAGS', [ prefinclude ])
+        conf.env.append_value('CXXFLAGS',  [prefinclude ])
+        conf.env.append_value('LINKFLAGS', [ preflib ])
+        autowaf.display_msg(conf, 'Will build against private Ardour dependency stack in ' + user_ardour_root, 'yes')
+    else:
+        autowaf.display_msg(conf, 'Will build against private Ardour dependency stack', 'no')
 
     if sys.platform == 'darwin':
 
@@ -703,6 +733,7 @@ const char* const ardour_config_info = "\\n\\
 
     write_config_text('C compiler flags',      conf.env['CFLAGS'])
     write_config_text('C++ compiler flags',    conf.env['CXXFLAGS'])
+    write_config_text('Linker flags',           conf.env['LINKFLAGS'])
 
     config_text.write ('";\n}\n')
     config_text.close ()

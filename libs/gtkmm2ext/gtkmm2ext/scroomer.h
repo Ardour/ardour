@@ -60,6 +60,8 @@ public:
 	sigc::signal0<void> DragStarting;
 	sigc::signal0<void> DragFinishing;
 
+	sigc::signal0<void> DoubleClicked;
+
 protected:
 	Gtk::Adjustment& adj;
 

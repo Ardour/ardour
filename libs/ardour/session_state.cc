@@ -366,6 +366,9 @@ Session::second_stage_init ()
 
 	MIDI::Name::MidiPatchManager::instance().set_session (this);
 
+#ifdef HAVE_LTC
+	ltc_tx_initialize();
+#endif
 	/* initial program change will be delivered later; see ::config_changed() */
 
 	_state_of_the_state = Clean;
@@ -1158,6 +1161,16 @@ Session::state (bool full_state)
 		gain_child->add_child_nocopy (_click_gain->state (full_state));
 	}
 
+	if (_ltc_input) {
+		XMLNode* ltc_input_child = node->add_child ("LTC-In");
+		ltc_input_child->add_child_nocopy (_ltc_input->state (full_state));
+	}
+
+	if (_ltc_input) {
+		XMLNode* ltc_output_child = node->add_child ("LTC-Out");
+		ltc_output_child->add_child_nocopy (_ltc_output->state (full_state));
+	}
+
         node->add_child_nocopy (_speakers->get_state());
 	node->add_child_nocopy (_tempo_map->get_state());
 	node->add_child_nocopy (get_control_protocol_state());
@@ -1386,8 +1399,8 @@ Session::set_state (const XMLNode& node, int version)
 		}
 	}
 
-	if ((child = find_named_node (node, "ControlProtocols")) != 0) {
-		ControlProtocolManager::instance().set_protocol_states (*child);
+	if ((child = find_named_node (node, ControlProtocolManager::state_node_name)) != 0) {
+		ControlProtocolManager::instance().set_state (*child, version);
 	}
 
 	update_have_rec_enabled_track ();
@@ -3500,7 +3513,7 @@ Session::config_changed (std::string p, bool ours)
 		if (!config.get_external_sync()) {
 			drop_sync_source ();
 		} else {
-			switch_to_sync_source (config.get_sync_source());
+			switch_to_sync_source (Config->get_sync_source());
 		}
 	}  else if (p == "denormal-model") {
 		setup_fpu ();
@@ -3548,6 +3561,10 @@ Session::config_changed (std::string p, bool ours)
 		AudioSource::allocate_working_buffers (frame_rate());
 	} else if (p == "automation-thinning-factor") {
 		Evoral::ControlList::set_thinning_factor (Config->get_automation_thinning_factor());
+	} else if (p == "ltc-source-port") {
+		reconnect_ltc_input ();
+	} else if (p == "ltc-sink-port") {
+		reconnect_ltc_output ();
 	}
 
 	set_dirty ();

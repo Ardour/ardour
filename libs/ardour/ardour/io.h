@@ -94,7 +94,7 @@ class IO : public SessionObject, public Latent
 
 	int ensure_io (ChanCount cnt, bool clear, void *src);
 
-	int connect_ports_to_bundle (boost::shared_ptr<Bundle>, void *);
+        int connect_ports_to_bundle (boost::shared_ptr<Bundle>, bool exclusive, void *);
 	int disconnect_ports_from_bundle (boost::shared_ptr<Bundle>, void *);
 
 	BundleList bundles_connected ();

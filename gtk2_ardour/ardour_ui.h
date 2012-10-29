@@ -502,6 +502,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	Gtk::Label   disk_space_label;
 	void update_disk_space ();
 
+	Gtk::Label   timecode_format_label;
+	void update_timecode_format ();
+
 	Gtk::Label   cpu_load_label;
 	void update_cpu_load ();
 

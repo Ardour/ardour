@@ -91,7 +91,7 @@ class Stateful {
 	virtual void suspend_property_changes ();
 	virtual void resume_property_changes ();
 
-        bool property_changes_suspended() const { return g_atomic_int_get (&_stateful_frozen) > 0; }
+        bool property_changes_suspended() const { return g_atomic_int_get (const_cast<gint*>(&_stateful_frozen)) > 0; }
         
   protected:
 
@@ -123,7 +123,7 @@ class Stateful {
 
   private:
 	PBD::ID  _id;
-        int32_t  _stateful_frozen;
+        gint     _stateful_frozen;
 };
 
 } // namespace PBD

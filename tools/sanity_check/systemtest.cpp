@@ -295,7 +295,7 @@ long long unsigned int system_available_physical_mem() {
 	char buf[256];
 	long long unsigned int res = 0;
 
-	if (0<read_string((char*)"/proc/meminfo", buf, sizeof (buf))) {
+	if (0<read_string(const_cast<char*>("/proc/meminfo"), buf, sizeof (buf))) {
 		if (strncmp (buf, "MemTotal:", 9) == 0) {
 			if (sscanf (buf, "%*s %llu", &res) != 1) {
 				perror ("parse error in /proc/meminfo");

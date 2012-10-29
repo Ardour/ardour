@@ -94,7 +94,7 @@ AudioLibrary::get_tags (string member)
 
 	lrdf_statement pattern;
 	pattern.subject = strdup(Glib::filename_to_uri(member).c_str());
-	pattern.predicate = (char*)TAG;
+	pattern.predicate = const_cast<char*>(TAG);
 	pattern.object = 0;
 	pattern.object_type = lrdf_literal;
 
@@ -126,8 +126,8 @@ AudioLibrary::search_members_and (vector<string>& members, const vector<string>&
 	vector<string>::const_iterator i;
 	for (i = tags.begin(); i != tags.end(); ++i){
 		pattern = new lrdf_statement;
-		pattern->subject = (char*)"?";
-		pattern->predicate = (char*)TAG;
+		pattern->subject = const_cast<char*>("?");
+		pattern->predicate = const_cast<char*>(TAG);
 		pattern->object = strdup((*i).c_str());
 		pattern->next = old;
 

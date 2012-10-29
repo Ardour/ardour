@@ -550,6 +550,9 @@ ExportFormatSpecification::description (bool include_name)
 	}
 
 	switch (sample_rate()) {
+	case SR_8:
+		components.push_back ("8 kHz");
+		break;
 	case SR_22_05:
 		components.push_back ("22,5 kHz");
 		break;

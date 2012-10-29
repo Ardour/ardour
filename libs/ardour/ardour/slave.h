@@ -28,11 +28,18 @@
 
 #include "pbd/signals.h"
 
+#include "timecode/time.h"
+
 #include "ardour/types.h"
 #include "midi++/parser.h"
 #include "midi++/types.h"
 
-class PIChaser;
+#ifdef HAVE_LTC
+#include <ltc.h>
+#endif
+
+// used for approximate_current_delta():
+#define PLUSMINUS(A) ( ((A)<0) ? "\u2012" : (((A)>0) ? "+" : "\u00B1") )
 
 namespace MIDI {
 	class Port;
@@ -167,6 +174,12 @@ class Slave {
 	 * @return - whether ARDOUR should use the slave speed without any adjustments
 	 */
 	virtual bool give_slave_full_control_over_transport_speed() const { return false; }
+
+	/**
+	 * @return - current time-delta between engine and sync-source
+	 */
+	virtual std::string approximate_current_delta() const { return ""; }
+
 };
 
 /// We need this wrapper for testability, it's just too hard to mock up a session class
@@ -221,7 +234,21 @@ struct SafeTime {
 	}
 };
 
-class MTC_Slave : public Slave {
+class TimecodeSlave : public Slave {
+  public:
+    TimecodeSlave () {}
+
+    virtual Timecode::TimecodeFormat apparent_timecode_format() const = 0;
+
+    /* this is intended to be used by a UI and polled from a timeout. it should
+       return a string describing the current position of the TC source. it 
+       should NOT do any computation, but should use a cached value
+       of the TC source position.
+    */
+    virtual std::string approximate_current_position() const = 0;
+};
+
+class MTC_Slave : public TimecodeSlave {
   public:
 	MTC_Slave (Session&, MIDI::Port&);
 	~MTC_Slave ();
@@ -238,12 +265,15 @@ class MTC_Slave : public Slave {
 	framecnt_t seekahead_distance() const;
 	bool give_slave_full_control_over_transport_speed() const;
 
+        Timecode::TimecodeFormat apparent_timecode_format() const;
+        std::string approximate_current_position() const;
+	std::string approximate_current_delta() const;
+
   private:
 	Session&    session;
 	MIDI::Port* port;
 	PBD::ScopedConnectionList port_connections;
 	bool        can_notify_on_unknown_rate;
-	PIChaser* pic;
 
 	static const int frame_tolerance;
 
@@ -253,18 +283,36 @@ class MTC_Slave : public Slave {
 	MIDI::byte     last_mtc_fps_byte;
 	framepos_t     window_begin;
 	framepos_t     window_end;
-	framepos_t     last_mtc_timestamp;
-	framepos_t     last_mtc_frame;
+	framepos_t     first_mtc_timestamp;
 	bool           did_reset_tc_format;
-	TimecodeFormat saved_tc_format;
-	size_t         speed_accumulator_size;
-	double*        speed_accumulator;
-	size_t         speed_accumulator_cnt;
-	bool           have_first_speed_accumulator;
-	double         average_speed;
+	Timecode::TimecodeFormat saved_tc_format;
 	Glib::Threads::Mutex    reset_lock;
 	uint32_t       reset_pending;
 	bool           reset_position;
+	int            transport_direction;
+	int            busy_guard1;
+	int            busy_guard2;
+
+	double         speedup_due_to_tc_mismatch;
+	double         quarter_frame_duration;
+	Timecode::TimecodeFormat mtc_timecode;
+	Timecode::TimecodeFormat a3e_timecode;
+	Timecode::Time timecode;
+	bool           printed_timecode_warning;
+	frameoffset_t  current_delta;
+
+	/* DLL - chase MTC */
+	double t0; ///< time at the beginning of the MTC quater frame
+	double t1; ///< calculated end of the MTC quater frame
+	double e2; ///< second order loop error
+	double b, c, omega; ///< DLL filter coefficients
+
+	/* DLL - sync engine */
+	int    engine_dll_initstate;
+	double te0; ///< time at the beginning of the engine process
+	double te1; ///< calculated sync time
+	double ee2; ///< second order loop error
+	double be, ce, oe; ///< DLL filter coefficients
 
 	void reset (bool with_pos);
 	void queue_reset (bool with_pos);
@@ -276,8 +324,75 @@ class MTC_Slave : public Slave {
 	void read_current (SafeTime *) const;
 	void reset_window (framepos_t);
 	bool outside_window (framepos_t) const;
-	void process_apparent_speed (double);
+	void init_mtc_dll(framepos_t, double);
+	void init_engine_dll (framepos_t, framepos_t);
 };
+
+#ifdef HAVE_LTC
+class LTC_Slave : public TimecodeSlave {
+public:
+	LTC_Slave (Session&);
+	~LTC_Slave ();
+
+	bool speed_and_position (double&, framepos_t&);
+
+	bool locked() const;
+	bool ok() const;
+
+	framecnt_t resolution () const;
+	bool requires_seekahead () const { return false; }
+	framecnt_t seekahead_distance () const { return 0; }
+	bool give_slave_full_control_over_transport_speed() const { return true; }
+
+	Timecode::TimecodeFormat apparent_timecode_format() const;
+	std::string approximate_current_position() const;
+	std::string approximate_current_delta() const;
+
+  private:
+	void parse_ltc(const jack_nframes_t, const jack_default_audio_sample_t * const, const framecnt_t);
+	void process_ltc(framepos_t const);
+	void init_engine_dll (framepos_t, int32_t);
+	bool detect_discontinuity(LTCFrameExt *, int, bool);
+	bool detect_ltc_fps(int, bool);
+	bool equal_ltc_frame_time(LTCFrame *a, LTCFrame *b);
+	void reset();
+	void resync_latency();
+
+	Session&       session;
+	bool           did_reset_tc_format;
+	Timecode::TimecodeFormat saved_tc_format;
+
+	LTCDecoder *   decoder;
+	double         frames_per_ltc_frame;
+	Timecode::Time timecode;
+	LTCFrameExt    prev_frame;
+	bool           fps_detected;
+
+	framecnt_t     monotonic_cnt;
+	framecnt_t     last_timestamp;
+	framecnt_t     last_ltc_frame;
+	double         ltc_speed;
+	frameoffset_t  current_delta;
+	int            delayedlocked;
+
+	int            ltc_detect_fps_cnt;
+	int            ltc_detect_fps_max;
+	bool           printed_timecode_warning;
+	Timecode::TimecodeFormat ltc_timecode;
+	Timecode::TimecodeFormat a3e_timecode;
+
+	PBD::ScopedConnectionList port_connections;
+	jack_latency_range_t      ltc_slave_latency;
+
+	/* DLL - chase LTC */
+	int    transport_direction;
+	int    engine_dll_initstate;
+	double t0; ///< time at the beginning of the MTC quater frame
+	double t1; ///< calculated end of the MTC quater frame
+	double e2; ///< second order loop error
+	double b, c; ///< DLL filter coefficients
+};
+#endif
 
 class MIDIClock_Slave : public Slave {
   public:
@@ -299,6 +414,7 @@ class MIDIClock_Slave : public Slave {
 	bool give_slave_full_control_over_transport_speed() const { return true; }
 
 	void set_bandwidth (double a_bandwith) { bandwidth = a_bandwith; }
+	std::string approximate_current_delta() const;
 
   protected:
 	ISlaveSessionProxy* session;
@@ -341,6 +457,8 @@ class MIDIClock_Slave : public Slave {
 
 	/// DLL filter coefficients
 	double b, c, omega;
+
+	frameoffset_t  current_delta;
 
 	void reset ();
 	void start (MIDI::Parser& parser, framepos_t timestamp);

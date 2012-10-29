@@ -261,6 +261,8 @@ def configure(conf):
     if Options.options.lv2:
         autowaf.check_pkg(conf, 'lv2', uselib_store='LV2',
                           atleast_version='1.0.0', mandatory=True)
+        autowaf.check_pkg(conf, 'lv2', uselib_store='NEW_LV2',
+                          atleast_version='1.0.15', mandatory=False)
         autowaf.check_pkg(conf, 'serd-0', uselib_store='SERD',
                           atleast_version='0.14.0', mandatory=True)
         autowaf.check_pkg(conf, 'sord-0', uselib_store='SORD',
@@ -282,6 +284,8 @@ def configure(conf):
                       atleast_version='1.2.1')
     autowaf.check_pkg(conf, 'libcurl', uselib_store='CURL',
                       atleast_version='7.0.0')
+    autowaf.check_pkg(conf, 'ltc', uselib_store='LTC',
+                      atleast_version='0.7.0', mandatory=False)
 
     # we don't try to detect this, since its part of our source tree
 
@@ -376,12 +380,18 @@ def build(bld):
         'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
         'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
         'LOCALEDIR="' + os.path.join(os.path.normpath(bld.env['DATADIR']), 'locale') + '"',
-        'PROGRAM_NAME="' + bld.env['PROGRAM_NAME'] + '"'
+        'PROGRAM_NAME="' + bld.env['PROGRAM_NAME'] + '"',
+        'EVORAL_MIDI_XML=1' 
         ]
 
     #obj.source += ' st_stretch.cc st_pitch.cc '
     #obj.uselib += ' SOUNDTOUCH '
     #obj.add_objects = 'default/libs/surfaces/control_protocol/smpte_1.o'
+
+    if bld.is_defined('HAVE_LTC') :
+        obj.source += ['ltc_slave.cc']
+        obj.source += ['session_ltc.cc']
+        obj.uselib += ['LTC']
 
     if bld.is_defined('HAVE_LILV') :
         obj.source += ['lv2_plugin.cc', 'lv2_evbuf.c', 'uri_map.cc'] 

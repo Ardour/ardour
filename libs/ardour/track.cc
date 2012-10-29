@@ -120,22 +120,18 @@ Track::state (bool full)
 int
 Track::set_state (const XMLNode& node, int version)
 {
+	if (Route::set_state (node, version)) {
+		return -1;
+	}
+
 	XMLNode* child;
 
-	/* Create the diskstream before calling Route::set_state, as MidiTrack
-	   needs it if the track is muted (it ends up calling MidiTrack::get_channel_mask)
-	*/
-	   
 	if (version >= 3000) {
 		if ((child = find_named_node (node, X_("Diskstream"))) != 0) {
 			boost::shared_ptr<Diskstream> ds = diskstream_factory (*child);
 			ds->do_refill_with_alloc ();
 			set_diskstream (ds);
 		}
-	}
-
-	if (Route::set_state (node, version)) {
-		return -1;
 	}
 
 	if (_diskstream) {
@@ -836,10 +832,22 @@ Track::monitoring_state () const
 
 	bool const roll = _session.transport_rolling ();
 	bool const track_rec = _diskstream->record_enabled ();
-	bool const session_rec = _session.get_record_enabled ();
 	bool const auto_input = _session.config.get_auto_input ();
 	bool const software_monitor = Config->get_monitoring_model() == SoftwareMonitoring;
 	bool const tape_machine_mode = Config->get_tape_machine_mode ();
+	bool session_rec;
+
+	/* I suspect that just use actively_recording() is good enough all the
+	 * time, but just to keep the semantics the same as they were before
+	 * sept 26th 2012, we differentiate between the cases where punch is
+	 * enabled and those where it is not.
+	 */
+
+	if (_session.config.get_punch_in() || _session.config.get_punch_out()) {
+		session_rec = _session.actively_recording ();
+	} else {
+		session_rec = _session.get_record_enabled();
+	}
 
 	if (track_rec) {
 

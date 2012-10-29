@@ -45,6 +45,7 @@ InstrumentInfo::~InstrumentInfo ()
 {
 }
 
+
 void
 InstrumentInfo::set_external_instrument (const string& model, const string& mode)
 {
@@ -114,10 +115,14 @@ InstrumentInfo::get_patches (uint8_t channel)
 		return plugin_programs_to_channel_name_set (p);
 	}
 
-	return MidiPatchManager::instance().find_channel_name_set (external_instrument_model,
-								   external_instrument_mode,
-								   channel);
-								   
+	boost::shared_ptr<MIDI::Name::ChannelNameSet> channel_name_set =
+		MidiPatchManager::instance().find_channel_name_set (external_instrument_model,
+														    external_instrument_mode,
+														    channel);
+
+	//std::cerr << "got channel name set with name '" << channel_name_set->name() << std::endl;
+
+	return channel_name_set;
 }
 
 boost::shared_ptr<MIDI::Name::ChannelNameSet>

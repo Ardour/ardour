@@ -1,5 +1,6 @@
 /*
-    Copyright (C) 2008 Hans Baier 
+    Copyright (C) 2012 Paul Davis
+    Author: Hans Baier
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -42,10 +43,10 @@ namespace Name
 struct PatchPrimaryKey
 {
 public:
-        int bank_number;
+	int bank_number;
 	int program_number;
-    
-        PatchPrimaryKey (uint8_t a_program_number = 0, uint16_t a_bank_number = 0) {
+
+		PatchPrimaryKey (uint8_t a_program_number = 0, uint16_t a_bank_number = 0) {
 		bank_number = std::min (a_bank_number, (uint16_t) 16384);
 		program_number = std::min (a_program_number, (uint8_t) 127);
 	}
@@ -85,7 +86,7 @@ class Patch
 {
 public:
 
-        Patch (std::string a_name = std::string(), uint8_t a_number = 0, uint16_t bank_number = 0);
+	Patch (std::string a_name = std::string(), uint8_t a_number = 0, uint16_t bank_number = 0);
 	virtual ~Patch() {};
 
 	const std::string& name() const          { return _name; }
@@ -95,11 +96,11 @@ public:
 	void set_program_number(uint8_t n)   { _id.program_number = n; }
 
 	uint16_t bank_number() const       { return _id.bank_number; }
-        void set_bank_number (uint16_t n) { _id.bank_number = n; }
+	void set_bank_number (uint16_t n) { _id.bank_number = n; }
 
 	const PatchPrimaryKey&   patch_primary_key()   const { return _id; }
 
-        XMLNode& get_state (void);
+	XMLNode& get_state (void);
 	int      set_state (const XMLTree&, const XMLNode&);
 
 private:
@@ -112,25 +113,25 @@ class PatchBank
 public:
 	typedef std::list<boost::shared_ptr<Patch> > PatchNameList;
 
-        PatchBank (uint16_t n = 0, std::string a_name = std::string()) : _name(a_name), _number (n) {};
-        virtual ~PatchBank() { }
+	PatchBank (uint16_t n = 0, std::string a_name = std::string()) : _name(a_name), _number (n) {};
+	virtual ~PatchBank() { }
 
 	const std::string& name() const               { return _name; }
 	void set_name(const std::string a_name)       { _name = a_name; }
 
-        int number() const { return _number; }
+	int number() const { return _number; }
 
 	const PatchNameList& patch_name_list() const { return _patch_name_list; }
 	const std::string& patch_list_name() const { return _patch_list_name; }
 
 	int set_patch_name_list (const PatchNameList&);
 
-        XMLNode& get_state (void);
+	XMLNode& get_state (void);
 	int      set_state (const XMLTree&, const XMLNode&);
 
 private:
 	std::string       _name;
-        uint16_t          _number;
+	uint16_t          _number;
 	PatchNameList     _patch_name_list;
 	std::string       _patch_list_name;
 };
@@ -197,11 +198,11 @@ public:
 	XMLNode& get_state (void);
 	int      set_state (const XMLTree&, const XMLNode&);
 
-        void set_patch_banks (const PatchBanks&);
-        void use_patch_name_list (const PatchBank::PatchNameList&);
+	void set_patch_banks (const PatchBanks&);
+	void use_patch_name_list (const PatchBank::PatchNameList&);
 
 private:
-        friend std::ostream& operator<< (std::ostream&, const ChannelNameSet&);
+	friend std::ostream& operator<< (std::ostream&, const ChannelNameSet&);
 	std::string _name;
 	AvailableForChannels _available_for_channels;
 	PatchBanks           _patch_banks;
@@ -267,6 +268,7 @@ public:
 	XMLNode& get_state (void);
 	int      set_state (const XMLTree&, const XMLNode&);
 	
+	/// Note: channel here is 0-based while in the MIDNAM-file it's 1-based
 	std::string channel_name_set_name_by_channel(uint8_t channel) {
 		assert(channel <= 15);
 		return _channel_name_set_assignments[channel]; 
@@ -302,9 +304,9 @@ public:
 	
 	const CustomDeviceModeNames& custom_device_mode_names() const { return _custom_device_mode_names; }
 	
-        boost::shared_ptr<CustomDeviceMode> custom_device_mode_by_name(std::string mode_name);
-        boost::shared_ptr<ChannelNameSet> channel_name_set_by_device_mode_and_channel(std::string mode, uint8_t channel);
-        boost::shared_ptr<Patch> find_patch(std::string mode, uint8_t channel, PatchPrimaryKey& key);
+	boost::shared_ptr<CustomDeviceMode> custom_device_mode_by_name(std::string mode_name);
+	boost::shared_ptr<ChannelNameSet> channel_name_set_by_device_mode_and_channel(std::string mode, uint8_t channel);
+	boost::shared_ptr<Patch> find_patch(std::string mode, uint8_t channel, PatchPrimaryKey& key);
 	
 	XMLNode& get_state (void);
 	int      set_state (const XMLTree&, const XMLNode&);
@@ -326,7 +328,7 @@ public:
 	typedef std::map<std::string, boost::shared_ptr<MasterDeviceNames> > MasterDeviceNamesList;
 	
 	MIDINameDocument() {}
-        MIDINameDocument(const std::string &filename);
+	MIDINameDocument(const std::string &filename);
 	virtual ~MIDINameDocument() {};
 
 	const std::string& author() const { return _author; }

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtkmm2ext\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-06-06 18:02+0200\n"
+"POT-Creation-Date: 2012-09-12 17:28-0400\n"
 "PO-Revision-Date: 2012-06-06 19:00+0100\n"
 "Last-Translator: Pablo Fernández <pablo.fbus@gmail.com>\n"
 "Language-Team: Spanish\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=ISO-8859-1\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: actions.cc:374
+#: actions.cc:386
 msgid "Unknown action name: %1"
 msgstr ""
 
@@ -50,17 +50,11 @@ msgstr "Lo siento %1, no puedo hacer eso"
 msgid "Command"
 msgstr ""
 
-#: keyboard.cc:69
-#: keyboard.cc:72
-#: keyboard.cc:85
-#: keyboard.cc:89
+#: keyboard.cc:69 keyboard.cc:72 keyboard.cc:85 keyboard.cc:89
 msgid "Control"
 msgstr ""
 
-#: keyboard.cc:70
-#: keyboard.cc:73
-#: keyboard.cc:87
-#: keyboard.cc:90
+#: keyboard.cc:70 keyboard.cc:73 keyboard.cc:87 keyboard.cc:90
 msgid "Key|Shift"
 msgstr ""
 
@@ -76,14 +70,15 @@ msgstr ""
 msgid "Meta"
 msgstr ""
 
-#: keyboard.cc:134
-#: keyboard.cc:515
+#: keyboard.cc:134 keyboard.cc:523
 msgid "Unknown"
 msgstr ""
 
-#: keyboard.cc:526
+#: keyboard.cc:534
 msgid "Ardour key bindings file not found at \"%1\" or contains errors."
-msgstr "El archivo de Ardour combinaciones de teclas de ardour no se encontró en \"%1\" o contiene errores."
+msgstr ""
+"El archivo de Ardour combinaciones de teclas de ardour no se encontró en "
+"\"%1\" o contiene errores."
 
 #: tearoff.cc:57
 msgid "Click to tear this into its own window"

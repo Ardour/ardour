@@ -412,8 +412,17 @@ Session::send_full_time_code (framepos_t const t)
 int
 Session::send_midi_time_code_for_cycle (framepos_t start_frame, framepos_t end_frame, pframes_t nframes)
 {
+	// XXX only if _slave == MTC_slave; we could generate MTC from jack or LTC
 	if (_engine.freewheeling() || _slave || !_send_qf_mtc || transmitting_timecode_time.negative || (next_quarter_frame_to_send < 0)) {
 		// cerr << "(MTC) Not sending MTC\n";
+		return 0;
+	}
+
+	/* MTC is max. 30 fps - assert() below will fail
+	 * TODO actually limit it to 24,25,29df,30fps
+	 * talk to oofus, first.
+	 */
+	if (Timecode::timecode_to_frames_per_second(config.get_timecode_format()) > 30) {
 		return 0;
 	}
 

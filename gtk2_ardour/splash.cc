@@ -78,6 +78,7 @@ Splash::Splash ()
 	add (darea);
 
 	set_default_size (pixbuf->get_width(), pixbuf->get_height());
+	set_resizable (false);
 	the_splash = this;
 
         expose_done = false;
@@ -187,7 +188,7 @@ void
 Splash::message (const string& msg)
 {
 	string str ("<b>");
-	str += msg;
+	str += Glib::Markup::escape_text (msg);
 	str += "</b>";
 
 	layout->set_markup (str);

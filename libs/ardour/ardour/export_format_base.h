@@ -94,6 +94,7 @@ class ExportFormatBase {
 	enum SampleRate {
 		SR_None = 0,
 		SR_Session = 1,
+		SR_8 = 8000,
 		SR_22_05 = 220500,
 		SR_44_1 = 44100,
 		SR_48 = 48000,

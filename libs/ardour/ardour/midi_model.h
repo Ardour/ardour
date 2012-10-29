@@ -152,6 +152,7 @@ public:
 		int set_state (const XMLNode&, int version);
 		XMLNode & get_state ();
 
+		void remove (SysExPtr sysex);
 		void operator() ();
 		void undo ();
 
@@ -167,6 +168,8 @@ public:
 
 		typedef std::list<Change> ChangeList;
 		ChangeList _changes;
+
+		std::list<SysExPtr> _removed;
 
 		XMLNode & marshal_change (const Change &);
 		Change unmarshal_change (XMLNode *);

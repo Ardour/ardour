@@ -232,7 +232,8 @@ MidiSource::midi_read (Evoral::EventSink<framepos_t>& dst, framepos_t source_sta
                                                                                   _name, time_frames + source_start, i->event_type(), i->size()));
 
 				if (tracker) {
-					Evoral::MIDIEvent<Evoral::MusicalTime>& ev (*(Evoral::MIDIEvent<Evoral::MusicalTime>*) (&(*i)));
+					Evoral::MIDIEvent<Evoral::MusicalTime>& ev (*(reinterpret_cast<Evoral::MIDIEvent<Evoral::MusicalTime>*> 
+										      (const_cast<Evoral::Event<Evoral::MusicalTime>*> (&(*i)))));
 					if (ev.is_note_on()) {
 						DEBUG_TRACE (DEBUG::MidiSourceIO, string_compose ("\t%1 track note on %2 @ %3 velocity %4\n", _name, (int) ev.note(), time_frames, (int) ev.velocity()));
 						tracker->add (ev.note(), ev.channel());

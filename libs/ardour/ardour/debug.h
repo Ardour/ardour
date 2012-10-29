@@ -39,6 +39,7 @@ namespace PBD {
 		extern uint64_t Graph;
 		extern uint64_t Destruction;
 		extern uint64_t MTC;
+		extern uint64_t LTC;
 		extern uint64_t Transport;
 		extern uint64_t Slave;
 		extern uint64_t SessionEvents;

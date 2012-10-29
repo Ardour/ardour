@@ -145,7 +145,6 @@ Session::Session (AudioEngine &eng,
 	, _bundles (new BundleList)
 	, _bundle_xml_node (0)
 	, _current_trans (0)
-	, _click_io ((IO*) 0)
 	, click_data (0)
 	, click_emphasis_data (0)
 	, main_outs (0)
@@ -153,6 +152,9 @@ Session::Session (AudioEngine &eng,
 	, _suspend_timecode_transmission (0)
 {
 	_locations = new Locations (*this);
+#ifdef HAVE_LTC
+	ltc_encoder = NULL;
+#endif
 
 	if (how_many_dsp_threads () > 1) {
 		/* For now, only create the graph if we are using >1 DSP threads, as
@@ -237,6 +239,10 @@ Session::destroy ()
 	 */
 
 	Port::PortDrop (); /* EMIT SIGNAL */
+
+#ifdef HAVE_LTC
+	ltc_tx_cleanup();
+#endif
 
 	/* clear history so that no references to objects are held any more */
 
@@ -364,6 +370,36 @@ Session::when_engine_running ()
 
 	try {
 		XMLNode* child = 0;
+		
+		_ltc_input.reset (new IO (*this, _("LTC In"), IO::Input));
+		_ltc_output.reset (new IO (*this, _("LTC Out"), IO::Output));
+
+		if (state_tree && (child = find_named_node (*state_tree->root(), "LTC-In")) != 0) {
+			_ltc_input->set_state (*(child->children().front()), Stateful::loading_state_version);
+		} else {
+			{
+				Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+				_ltc_input->ensure_io (ChanCount (DataType::AUDIO, 1), true, this);
+			}
+			reconnect_ltc_input ();
+		}
+
+		if (state_tree && (child = find_named_node (*state_tree->root(), "LTC-Out")) != 0) {
+			_ltc_output->set_state (*(child->children().front()), Stateful::loading_state_version);
+		} else {
+			{
+				Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+				_ltc_output->ensure_io (ChanCount (DataType::AUDIO, 1), true, this);
+			}
+			reconnect_ltc_output ();
+		}
+						
+		/* fix up names of LTC ports because we don't want the normal
+		 * IO style of NAME/TYPE-{in,out}N
+		 */
+		
+		_ltc_input->nth (0)->set_name (_("LTC-in"));
+		_ltc_output->nth (0)->set_name (_("LTC-out"));
 
 		_click_io.reset (new ClickIO (*this, "click"));
 		_click_gain.reset (new Amp (*this));
@@ -725,7 +761,7 @@ Session::add_monitor_section ()
 			boost::shared_ptr<Bundle> b = bundle_by_name (Config->get_monitor_bus_preferred_bundle());
 			
 			if (b) {
-				_monitor_out->output()->connect_ports_to_bundle (b, this);
+				_monitor_out->output()->connect_ports_to_bundle (b, true, this);
 			} else {
 				warning << string_compose (_("The preferred I/O for the monitor bus (%1) cannot be found"),
 							   Config->get_monitor_bus_preferred_bundle())
@@ -4189,18 +4225,6 @@ Session::route_removed_from_route_group (RouteGroup* rg, boost::weak_ptr<Route> 
 	RouteRemovedFromRouteGroup (rg, r);
 }
 
-vector<SyncSource>
-Session::get_available_sync_options () const
-{
-	vector<SyncSource> ret;
-
-	ret.push_back (JACK);
-	ret.push_back (MTC);
-	ret.push_back (MIDIClock);
-
-	return ret;
-}
-
 boost::shared_ptr<RouteList>
 Session::get_routes_with_regions_at (framepos_t const p) const
 {
@@ -4354,6 +4378,13 @@ Session::source_search_path (DataType type) const
 			        s.push_back (sdir.midi_path());
 				break;
 			}
+		}
+	}
+
+	if (type == DataType::AUDIO) {
+		const string sound_path_2X = _session_dir->sound_path_2X();
+		if (Glib::file_test (sound_path_2X, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_DIR)) {
+			s.push_back (sound_path_2X);
 		}
 	}
 
@@ -4737,4 +4768,48 @@ bool
 Session::operation_in_progress (GQuark op) const
 {
 	return (find (_current_trans_quarks.begin(), _current_trans_quarks.end(), op) != _current_trans_quarks.end());
+}
+
+boost::shared_ptr<Port>
+Session::ltc_input_port () const
+{
+	return _ltc_input->nth (0);
+}
+
+boost::shared_ptr<Port>
+Session::ltc_output_port () const
+{
+	return _ltc_output->nth (0);
+}
+
+void
+Session::reconnect_ltc_input ()
+{
+	if (_ltc_input) {
+
+		string src = Config->get_ltc_source_port();
+
+		_ltc_input->disconnect (this);
+
+		if (src != _("None") && !src.empty())  {
+			_ltc_input->nth (0)->connect (src);
+		}
+	}
+}
+
+void
+Session::reconnect_ltc_output ()
+{
+	if (_ltc_output) {
+
+#if 0
+		string src = Config->get_ltc_sink_port();
+
+		_ltc_output->disconnect (this);
+
+		if (src != _("None") && !src.empty())  {
+			_ltc_output->nth (0)->connect (src);
+		}
+#endif
+	}
 }

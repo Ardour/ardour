@@ -63,7 +63,7 @@ public:
 	void on_patch_menu_selected(const MIDI::Name::PatchPrimaryKey& key);
 
 private:
-        ARDOUR::InstrumentInfo& _info;
+	ARDOUR::InstrumentInfo& _info;
 	ARDOUR::MidiModel::PatchChangePtr _patch;
 	Gtk::Menu     _popup;
 	bool          _popup_initialized;

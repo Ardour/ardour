@@ -1009,10 +1009,10 @@ PortMatrix::update_tab_highlighting ()
 			string c = label->get_label ();
 			if (c.length() && c[0] == '<' && !has_connection) {
 				/* this label is marked up with <b> but shouldn't be */
-				label->set_markup ((*j)->name);
+				label->set_text ((*j)->name);
 			} else if (c.length() && c[0] != '<' && has_connection) {
 				/* this label is not marked up with <b> but should be */
-				label->set_markup (string_compose ("<b>%1</b>", (*j)->name));
+				label->set_markup (string_compose ("<b>%1</b>", Glib::Markup::escape_text ((*j)->name)));
 			}
 
 			++p;

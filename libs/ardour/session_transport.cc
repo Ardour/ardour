@@ -99,6 +99,7 @@ Session::request_sync_source (Slave* new_slave)
 	_was_seamless = seamless;
 
 	ev->slave = new_slave;
+	DEBUG_TRACE (DEBUG::Slave, "sent request for new slave\n");
 	queue_event (ev);
 }
 
@@ -617,9 +618,19 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	}
 
 	if ((ptw & PostTransportLocate) && get_record_enabled()) {
-		/* capture start has been changed, so save pending state */
-		save_state ("", true);
-		saved = true;
+		/* This is scheduled by realtime_stop(), which is also done
+		 * when a slave requests /locate/ for an initial sync.
+		 * We can't hold up the slave for long with a save() here,
+		 * without breaking its initial sync cycle.
+		 *
+		 * save state only if there's no slave or if it's not yet locked.
+		 */
+		if (!_slave || !_slave->locked()) {
+			DEBUG_TRACE (DEBUG::Transport, X_("Butler PTW: pending save\n"));
+			/* capture start has been changed, so save pending state */
+			save_state ("", true);
+			saved = true;
+		}
 	}
 
 	/* always try to get rid of this */
@@ -645,8 +656,12 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 
 	if ((ptw & PostTransportLocate) && !config.get_external_sync() && pending_locate_roll) {
 		request_transport_speed (1.0);
-		pending_locate_roll = false;
 	}
+
+	/* Even if we didn't do a pending locate roll this time, we don't want it hanging
+	   around for next time.
+	*/
+	pending_locate_roll = false;
 }
 
 void
@@ -850,7 +865,7 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
 	 * though, is all the housekeeping that is associated with non-linear
 	 * changes in the value of _transport_frame. 
 	 */
-	 
+
 	if (actively_recording() && !for_seamless_loop) {
 		return;
 	}
@@ -1013,6 +1028,8 @@ Session::set_transport_speed (double speed, bool abort, bool clear_state, bool a
 
 	if (actively_recording() && speed != 1.0 && speed != 0.0) {
 		/* no varispeed during recording */
+		DEBUG_TRACE (DEBUG::Transport, string_compose ("No varispeed during recording cur_speed %1, frame %2\n", 
+						       _transport_speed, _transport_frame));
 		return;
 	}
 
@@ -1317,6 +1334,8 @@ Session::use_sync_source (Slave* new_slave)
 	delete _slave;
 	_slave = new_slave;
 
+	DEBUG_TRACE (DEBUG::Slave, string_compose ("set new slave to %1\n", _slave));
+
 	send_full_time_code (_transport_frame);
 
 	boost::shared_ptr<RouteList> rl = routes.reader();
@@ -1364,6 +1383,24 @@ Session::switch_to_sync_source (SyncSource src)
 		catch (failed_constructor& err) {
 			return;
 		}
+		break;
+
+	case LTC:
+#ifdef HAVE_LTC
+		if (_slave && dynamic_cast<LTC_Slave*>(_slave)) {
+			return;
+		}
+
+		try {
+			new_slave = new LTC_Slave (*this);
+		}
+
+		catch (failed_constructor& err) {
+			return;
+		}
+#else
+		return;
+#endif
 		break;
 
 	case MIDIClock:

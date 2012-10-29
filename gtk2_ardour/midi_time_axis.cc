@@ -128,6 +128,9 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	if (is_track ()) {
 		_piano_roll_header = new PianoRollHeader(*midi_view());
 		_range_scroomer = new MidiScroomer(midi_view()->note_range_adjustment);
+		_range_scroomer->DoubleClicked.connect (sigc::bind (
+				sigc::mem_fun(*this, &MidiTimeAxisView::set_note_range),
+				MidiStreamView::ContentsRange, false));
 	}
 
 	/* This next call will result in our height being set up, so it must come after
@@ -201,35 +204,44 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		}
 	}
 
-	HBox* midi_controls_hbox = manage(new HBox());
 
 	MIDI::Name::MidiPatchManager& patch_manager = MIDI::Name::MidiPatchManager::instance();
 
 	MIDI::Name::MasterDeviceNames::Models::const_iterator m = patch_manager.all_models().begin();
 	for (; m != patch_manager.all_models().end(); ++m) {
-		_model_selector.append_text(m->c_str());
+		_midnam_model_selector.append_text(m->c_str());
 	}
 
+	_midnam_model_selector.set_active_text (gui_property (X_("midnam-model-name")));
+	model_changed();
+	_midnam_custom_device_mode_selector.set_active_text (gui_property (X_("midnam-custom-device-mode")));
 
-	_model_selector.signal_changed().connect(sigc::mem_fun(*this, &MidiTimeAxisView::model_changed));
-
-	_custom_device_mode_selector.signal_changed().connect(
+	_midnam_model_selector.signal_changed().connect(sigc::mem_fun(*this, &MidiTimeAxisView::model_changed));
+	_midnam_custom_device_mode_selector.signal_changed().connect(
 			sigc::mem_fun(*this, &MidiTimeAxisView::custom_device_mode_changed));
 
-	_model_selector.set_active_text (gui_property (X_("midnam-model-name")));
-	_custom_device_mode_selector.set_active_text (gui_property (X_("midnam-custom-device-mode")));
+	ARDOUR_UI::instance()->set_tip (_midnam_model_selector, _("External MIDI Device"));
+	ARDOUR_UI::instance()->set_tip (_midnam_custom_device_mode_selector, _("External Device Mode"));
 
-	ARDOUR_UI::instance()->set_tip (_model_selector, _("External MIDI Device"));
-	ARDOUR_UI::instance()->set_tip (_custom_device_mode_selector, _("External Device Mode"));
-
-	midi_controls_hbox->pack_start(_channel_selector, true, false);
+	_midi_controls_box.set_homogeneous(false);
+	_midi_controls_box.set_border_width (10);
 	if (!patch_manager.all_models().empty()) {
-		_midi_controls_box.set_border_width (5);
-		_midi_controls_box.pack_start(_model_selector, true, false);
-		_midi_controls_box.pack_start(_custom_device_mode_selector, true, false);
-	}
+		_channel_selector.set_border_width(2);
+		_midi_controls_box.resize(3, 2);
+		_midi_controls_box.attach(_channel_selector, 0, 2, 0, 1);
 
-	_midi_controls_box.pack_start(*midi_controls_hbox, true, true);
+		_midi_controls_box.attach(*manage(new HSeparator()), 0, 2, 1, 2);
+
+		_midnam_model_selector.set_size_request(22, 30);
+		_midnam_model_selector.set_border_width(2);
+		_midi_controls_box.attach(_midnam_model_selector, 0, 1, 2, 3);
+
+		_midnam_custom_device_mode_selector.set_size_request(10, 30);
+		_midnam_custom_device_mode_selector.set_border_width(2);
+		_midi_controls_box.attach(_midnam_custom_device_mode_selector, 1, 2, 2, 3);
+	} else {
+		_midi_controls_box.attach(_channel_selector, 0, 1, 0, 1);
+	}
 
 	controls_vbox.pack_start(_midi_controls_box, false, false);
 
@@ -321,25 +333,30 @@ MidiTimeAxisView::check_step_edit ()
 void
 MidiTimeAxisView::model_changed()
 {
-	std::list<std::string> device_modes = MIDI::Name::MidiPatchManager::instance()
-		.custom_device_mode_names_by_model(_model_selector.get_active_text());
+	string model = _midnam_model_selector.get_active_text();
+	set_gui_property (X_("midnam-model-name"), model);
 
-	_custom_device_mode_selector.clear_items();
+	std::list<std::string> device_modes = MIDI::Name::MidiPatchManager::instance()
+		.custom_device_mode_names_by_model(model);
+
+	_midnam_custom_device_mode_selector.clear_items();
 
 	for (std::list<std::string>::const_iterator i = device_modes.begin();
 			i != device_modes.end(); ++i) {
-		_custom_device_mode_selector.append_text(*i);
+		_midnam_custom_device_mode_selector.append_text(*i);
 	}
 
-	_custom_device_mode_selector.set_active(0);
+	_midnam_custom_device_mode_selector.set_active(0);
 	
-	_route->instrument_info().set_external_instrument (_model_selector.get_active_text(), _custom_device_mode_selector.get_active_text());
+	_route->instrument_info().set_external_instrument (_midnam_model_selector.get_active_text(), _midnam_custom_device_mode_selector.get_active_text());
 }
 
 void
 MidiTimeAxisView::custom_device_mode_changed()
 {
-	_route->instrument_info().set_external_instrument (_model_selector.get_active_text(), _custom_device_mode_selector.get_active_text());
+	string mode = _midnam_custom_device_mode_selector.get_active_text();
+	set_gui_property (X_("midnam-custom-device-mode"), mode);
+	_route->instrument_info().set_external_instrument (_midnam_model_selector.get_active_text(), mode);
 }
 
 MidiStreamView*

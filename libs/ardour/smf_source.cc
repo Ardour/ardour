@@ -361,7 +361,7 @@ SMFSource::append_event_unlocked_frames (const Evoral::Event<framepos_t>& ev, fr
 		const Evoral::Event<double> beat_ev (ev.event_type(),
 		                                     ev_time_beats,
 		                                     ev.size(),
-		                                     (uint8_t*)ev.buffer());
+		                                     const_cast<uint8_t*>(ev.buffer()));
 		_model->append (beat_ev, event_id);
 	}
 

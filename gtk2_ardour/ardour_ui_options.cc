@@ -60,7 +60,7 @@ ARDOUR_UI::toggle_external_sync()
 {
 	if (_session) {
 		if (_session->config.get_video_pullup() != 0.0f) {
-			if (_session->config.get_sync_source() == JACK) {
+			if (Config->get_sync_source() == JACK) {
 				MessageDialog msg (
 					_("It is not possible to use JACK as the the sync source\n\
 when the pull up/down setting is non-zero."));
@@ -311,7 +311,7 @@ ARDOUR_UI::parameter_changed (std::string p)
 			ActionManager::get_action ("Transport", "ToggleAutoPlay")->set_sensitive (true);
 			ActionManager::get_action ("Transport", "ToggleAutoReturn")->set_sensitive (true);
 		} else {
-			sync_button.set_text (sync_source_to_string (_session->config.get_sync_source(), true));
+			sync_button.set_text (sync_source_to_string (Config->get_sync_source(), true));
 			/* XXX need to make auto-play is off as well as insensitive */
 			ActionManager::get_action ("Transport", "ToggleAutoPlay")->set_sensitive (false);
 			ActionManager::get_action ("Transport", "ToggleAutoReturn")->set_sensitive (false);
@@ -439,7 +439,7 @@ ARDOUR_UI::synchronize_sync_source_and_video_pullup ()
 		act->set_sensitive (true);
 	} else {
 		/* can't sync to JACK if video pullup != 0.0 */
-		if (_session->config.get_sync_source() == JACK) {
+		if (Config->get_sync_source() == JACK) {
 			act->set_sensitive (false);
 		} else {
 			act->set_sensitive (true);

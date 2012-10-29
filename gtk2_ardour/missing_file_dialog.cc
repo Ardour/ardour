@@ -63,7 +63,7 @@ MissingFileDialog::MissingFileDialog (Session* s, const std::string& path, DataT
 
         msg.set_justify (JUSTIFY_CENTER);
         msg.set_markup (string_compose (_("%1 cannot find the %2 file\n\n<i>%3</i>\n\nin any of these folders:\n\n\
-<tt>%4</tt>\n\n"), PROGRAM_NAME, typestr, path, dirstr));
+<tt>%4</tt>\n\n"), PROGRAM_NAME, typestr, Glib::Markup::escape_text(path), Glib::Markup::escape_text (dirstr)));
 
         HBox* hbox = manage (new HBox);
         hbox->pack_start (msg, false, true);

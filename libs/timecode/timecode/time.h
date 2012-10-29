@@ -32,6 +32,19 @@ enum Wrap {
 	HOURS
 };
 
+enum TimecodeFormat {
+	timecode_23976,
+	timecode_24,
+	timecode_24976,
+	timecode_25,
+	timecode_2997,
+	timecode_2997drop,
+	timecode_30,
+	timecode_30drop,
+	timecode_5994,
+	timecode_60
+};
+
 struct Time {
 	bool         negative;
 	uint32_t     hours;
@@ -83,6 +96,43 @@ void frames_floor (Time& timecode);
 void seconds_floor (Time& timecode);
 void minutes_floor (Time& timecode);
 void hours_floor (Time& timecode);
+
+float timecode_to_frames_per_second(TimecodeFormat const t);
+bool timecode_has_drop_frames(TimecodeFormat const t);
+
+std::string timecode_format_name (TimecodeFormat const t);
+
+std::string timecode_format_time (Timecode::Time const timecode);
+
+std::string timecode_format_sampletime (
+		int64_t sample,
+		double sample_frame_rate,
+		double timecode_frames_per_second, bool timecode_drop_frames
+		);
+
+void
+timecode_to_sample(
+		Timecode::Time& timecode, int64_t& sample,
+		bool use_offset, bool use_subframes,
+    /* Note - framerate info is taken from Timecode::Time& */
+		double sample_frame_rate /**< may include pull up/down */,
+		uint32_t subframes_per_frame /**< must not be 0 if use_subframes==true */,
+    /* optional offset  - can be improved: function pointer to lazily query this*/
+		bool offset_is_negative, int64_t offset_samples
+		);
+
+void sample_to_timecode (
+		int64_t sample, Timecode::Time& timecode,
+		bool use_offset, bool use_subframes,
+    /* framerate info */
+		double timecode_frames_per_second,
+		bool   timecode_drop_frames,
+		double sample_frame_rate/**< can include pull up/down */,
+		uint32_t subframes_per_frame,
+    /* optional offset  - can be improved: function pointer to lazily query this*/
+		bool offset_is_negative, int64_t offset_samples
+		);
+
 
 } // namespace Timecode
 

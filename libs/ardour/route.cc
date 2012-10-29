@@ -311,7 +311,7 @@ Route::sync_order_keys (RouteSortOrderKey base)
 }
 
 void
-Route::set_remote_control_id_from_order_key (RouteSortOrderKey /*key*/, uint32_t rid)
+Route::set_remote_control_id_from_order_key (RouteSortOrderKey key, uint32_t rid)
 {
 	if (is_master() || is_monitor() || is_hidden()) {
 		/* hard-coded remote IDs, or no remote ID */
@@ -1034,7 +1034,7 @@ Route::add_processor (boost::shared_ptr<Processor> processor, boost::shared_ptr<
 
 		}
 
-		if (activation_allowed) {
+		if (activation_allowed && !_session.get_disable_all_loaded_plugins()) {
 			processor->activate ();
 		}
 
@@ -1083,7 +1083,7 @@ Route::add_processor_from_xml_2X (const XMLNode& node, int version)
 
 				if (prop->value() == "ladspa" || prop->value() == "Ladspa" ||
 						prop->value() == "lv2" ||
-						prop->value() == "vst" ||
+						prop->value() == "windows-vst" ||
 						prop->value() == "lxvst" ||
 						prop->value() == "audiounit") {
 
@@ -1607,7 +1607,9 @@ void
 Route::reset_instrument_info ()
 {
 	boost::shared_ptr<Processor> instr = the_instrument();
-	_instrument_info.set_internal_instrument (instr);
+	if (instr) {
+		_instrument_info.set_internal_instrument (instr);
+	}
 }
 
 /** Caller must hold process lock */
@@ -1917,10 +1919,10 @@ Route::state(bool full_state)
 	node->add_child_nocopy (_mute_control->get_state ());
 	node->add_child_nocopy (_mute_master->get_state ());
 
-        XMLNode* remote_control_node = new XMLNode (X_("RemoteControl"));
-        snprintf (buf, sizeof (buf), "%d", _remote_control_id);
-        remote_control_node->add_property (X_("id"), buf);
-        node->add_child_nocopy (*remote_control_node);
+	XMLNode* remote_control_node = new XMLNode (X_("RemoteControl"));
+	snprintf (buf, sizeof (buf), "%d", _remote_control_id);
+	remote_control_node->add_property (X_("id"), buf);
+	node->add_child_nocopy (*remote_control_node);
 
 	if (_comment.length()) {
 		XMLNode *cmt = node->add_child ("Comment");
@@ -2038,7 +2040,6 @@ Route::set_state (const XMLNode& node, int version)
 			processor_state.add_child_copy (*child);
 		}
 
-
 		if (child->name() == X_("Pannable")) {
 			if (_pannable) {
 				_pannable->set_state (*child, version);
@@ -2057,6 +2058,9 @@ Route::set_state (const XMLNode& node, int version)
 	}
 
 	set_processor_state (processor_state);
+
+	// this looks up the internal instrument in processors
+	reset_instrument_info();
 
 	if ((prop = node.property ("self-solo")) != 0) {
 		set_self_solo (string_is_affirmative (prop->value()));
@@ -2326,7 +2330,7 @@ Route::set_state_2X (const XMLNode& node, int version)
 					} else if (keyname == "editor") {
 						sk = EditorSort;
 					} else {
-						RouteSortOrderKey sk = (RouteSortOrderKey) string_2_enum (remaining.substr (0, equal), sk);
+						sk = (RouteSortOrderKey) string_2_enum (remaining.substr (0, equal), sk);
 					}
 
 					set_order_key (sk, n);
@@ -2529,7 +2533,7 @@ Route::set_processor_state (const XMLNode& node)
 
 				} else if (prop->value() == "ladspa" || prop->value() == "Ladspa" ||
 				           prop->value() == "lv2" ||
-				           prop->value() == "vst" ||
+				           prop->value() == "windows-vst" ||
 					   prop->value() == "lxvst" ||
 				           prop->value() == "audiounit") {
 
@@ -3554,6 +3558,7 @@ Route::set_active (bool yn, void* src)
 		_input->set_active (yn);
 		_output->set_active (yn);
 		active_changed (); // EMIT SIGNAL
+		_session.set_dirty ();
 	}
 }
 

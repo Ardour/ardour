@@ -321,6 +321,7 @@ private:
 	int  jack_bufsize_callback (pframes_t);
 	int  jack_sample_rate_callback (pframes_t);
 	void freewheel_callback (int);
+        void connect_callback (jack_port_id_t, jack_port_id_t, int);
 
 	void set_jack_callbacks ();
 
@@ -348,6 +349,8 @@ private:
 	};
 
 	static void* _start_process_thread (void*);
+        void parameter_changed (const std::string&);
+        PBD::ScopedConnection config_connection;
 };
 
 } // namespace ARDOUR

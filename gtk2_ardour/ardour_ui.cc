@@ -73,7 +73,10 @@
 #include "ardour/session_route.h"
 #include "ardour/session_state_utils.h"
 #include "ardour/session_utils.h"
+#include "ardour/slave.h"
 #include "ardour/soundgrid.h"
+
+#include "timecode/time.h"
 
 typedef uint64_t microseconds_t;
 
@@ -464,6 +467,7 @@ ARDOUR_UI::post_engine ()
 	update_disk_space ();
 	update_cpu_load ();
 	update_sample_rate (engine->frame_rate());
+	update_timecode_format ();
 
 	Config->ParameterChanged.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::parameter_changed, this, _1), gui_context());
 	boost::function<void (string)> pc (boost::bind (&ARDOUR_UI::parameter_changed, this, _1));
@@ -895,6 +899,7 @@ ARDOUR_UI::every_second ()
 	update_cpu_load ();
 	update_buffer_load ();
 	update_disk_space ();
+	update_timecode_format ();
 	return TRUE;
 }
 
@@ -1103,6 +1108,31 @@ ARDOUR_UI::update_disk_space()
 
 	disk_space_label.set_markup (buf);
 }
+
+void
+ARDOUR_UI::update_timecode_format ()
+{
+	char buf[64];
+
+	if (_session) {
+		bool matching;
+		TimecodeSlave* tcslave;
+
+		if ((tcslave = dynamic_cast<TimecodeSlave*>(_session->slave())) != 0) {
+			matching = (tcslave->apparent_timecode_format() == _session->config.get_timecode_format());
+		} else {
+			matching = true;
+		}
+			
+		snprintf (buf, sizeof (buf), S_("Timecode|TC: <span foreground=\"%s\">%sfps</span>"), 
+			  matching ? X_("green") : X_("red"),
+			  Timecode::timecode_format_name (_session->config.get_timecode_format()).c_str());
+	} else {
+		snprintf (buf, sizeof (buf), "TC: n/a");
+	}
+
+	timecode_format_label.set_markup (buf);
+}	
 
 gint
 ARDOUR_UI::update_wall_clock ()
@@ -1610,7 +1640,7 @@ ARDOUR_UI::transport_roll ()
 
 #if 0
 	if (_session->config.get_external_sync()) {
-		switch (_session->config.get_sync_source()) {
+		switch (Config->get_sync_source()) {
 		case JACK:
 			break;
 		default:
@@ -1657,7 +1687,7 @@ ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 	}
 
 	if (_session->config.get_external_sync()) {
-		switch (_session->config.get_sync_source()) {
+		switch (Config->get_sync_source()) {
 		case JACK:
 			break;
 		default:
@@ -1966,7 +1996,7 @@ JACK, reconnect and save the session."), PROGRAM_NAME);
 	msg.run ();
 
 	if (free_reason) {
-		free ((char*) reason);
+		free (const_cast<char*> (reason));
 	}
 }
 
@@ -2416,6 +2446,19 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 	string template_name;
 	int ret = -1;
 	bool likely_new = false;
+
+	/* deal with any existing DIRTY session now, rather than later. don't
+	 * treat a non-dirty session this way, so that it stays visible 
+	 * as we bring up the new session dialog.
+	 */
+
+	if (_session && _session->dirty()) {
+		if (unload_session (false)) {
+			/* unload cancelled by user */
+			return 0;
+		}
+		ARDOUR_COMMAND_LINE::session_name = "";
+	}
 
 	if (!load_template.empty()) {
 		should_be_new = true;

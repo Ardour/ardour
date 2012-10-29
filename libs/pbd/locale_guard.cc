@@ -23,7 +23,7 @@ LocaleGuard::~LocaleGuard ()
 	setlocale (LC_NUMERIC, old);
 
         if (old) {
-                free ((char*)old);
+                free (const_cast<char*>(old));
         }
 }
 
