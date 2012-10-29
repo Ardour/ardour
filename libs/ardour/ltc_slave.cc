@@ -61,7 +61,8 @@ LTC_Slave::LTC_Slave (Session& s)
 
 	decoder = ltc_decoder_create((int) frames_per_ltc_frame, 128 /*queue size*/);
 	reset();
-	session.Xrun.connect_same_thread (port_connections, boost::bind (&LTC_Slave::resync_latency, this));
+	resync_latency();
+	session.Xrun.connect_same_thread (port_connections, boost::bind (&LTC_Slave::resync_xrun, this));
 	session.engine().GraphReordered.connect_same_thread (port_connections, boost::bind (&LTC_Slave::resync_latency, this));
 }
 
@@ -95,9 +96,16 @@ LTC_Slave::ok() const
 }
 
 void
+LTC_Slave::resync_xrun()
+{
+	DEBUG_TRACE (DEBUG::LTC, "LTC resync_xrun()\n");
+	engine_dll_initstate = 0;
+}
+
+void
 LTC_Slave::resync_latency()
 {
-	DEBUG_TRACE (DEBUG::LTC, "LTC resync()\n");
+	DEBUG_TRACE (DEBUG::LTC, "LTC resync_latency()\n");
 	engine_dll_initstate = 0;
 
 	if (session.ltc_output_io()) { /* check if Port exits */
@@ -115,7 +123,6 @@ LTC_Slave::reset()
 	transport_direction = 0;
 	ltc_speed = 0;
 	engine_dll_initstate = 0;
-	resync_latency();
 }
 
 void
@@ -378,6 +385,9 @@ LTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 	 * ..but first fix jack2 issue with re-computing latency
 	 * in the correct order. Until then, querying it in the
 	 * process-callback is the only way to get the current value
+	 *
+	 * update: fix for this issue is known -- common/JackEngine.cpp
+	 * but not yet applied to jack2 git.
 	 */
 	ltcport->get_connected_latency_range(ltc_slave_latency, false);
 #endif

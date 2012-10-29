@@ -58,7 +58,8 @@ Session::ltc_tx_initialize()
 	ltc_enc_buf = (ltcsnd_sample_t*) calloc((nominal_frame_rate() / 23), sizeof(ltcsnd_sample_t));
 	ltc_speed = 0;
 	ltc_tx_reset();
-	Xrun.connect_same_thread (*this, boost::bind (&Session::ltc_tx_resync_latency, this));
+	ltc_tx_resync_latency();
+	Xrun.connect_same_thread (*this, boost::bind (&Session::ltc_tx_reset, this));
 	engine().GraphReordered.connect_same_thread (*this, boost::bind (&Session::ltc_tx_resync_latency, this));
 }
 
@@ -92,7 +93,6 @@ Session::ltc_tx_reset()
 	ltc_buf_off = 0;
 	ltc_enc_byte = 0;
 	ltc_enc_cnt = 0;
-	ltc_tx_resync_latency();
 }
 
 void
@@ -160,6 +160,9 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 	 * ..but first fix jack2 issue with re-computing latency
 	 * in the correct order. Until then, querying it in the
 	 * process-callback is the only way to get the current value
+	 *
+	 * update: fix for this issue is known -- common/JackEngine.cpp
+	 * but not yet applied to jack2 git.
 	 */
 	ltcport->get_connected_latency_range(ltc_out_latency, true);
 #endif
