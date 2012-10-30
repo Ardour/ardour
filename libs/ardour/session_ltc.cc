@@ -153,19 +153,6 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 	/* range from libltc (38..218) || - 128.0  -> (-90..90) */
 	const float ltcvol = Config->get_ltc_output_volume()/(90.0); // pow(10, db/20.0)/(90.0);
 
-#if 1
-	/* TODO read layency only on demand -> ::ltc_tx_reset()
-	 * this is already prepared.
-	 *
-	 * ..but first fix jack2 issue with re-computing latency
-	 * in the correct order. Until then, querying it in the
-	 * process-callback is the only way to get the current value
-	 *
-	 * update: fix for this issue is known -- common/JackEngine.cpp
-	 * but not yet applied to jack2 git.
-	 */
-	ltcport->get_connected_latency_range(ltc_out_latency, true);
-#endif
 	DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX %1 to %2 / %3 | lat: %4\n", start_frame, end_frame, nframes, ltc_out_latency.max));
 
 	/* all systems go. Now here's the plan:

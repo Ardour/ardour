@@ -378,19 +378,6 @@ LTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 
 	boost::shared_ptr<Port> ltcport = session.ltc_input_port();
 
-#if 1
-	/* TODO read layency only on demand -> ::reset()
-	 * this is already prepared.
-	 *
-	 * ..but first fix jack2 issue with re-computing latency
-	 * in the correct order. Until then, querying it in the
-	 * process-callback is the only way to get the current value
-	 *
-	 * update: fix for this issue is known -- common/JackEngine.cpp
-	 * but not yet applied to jack2 git.
-	 */
-	ltcport->get_connected_latency_range(ltc_slave_latency, false);
-#endif
 	in = (jack_default_audio_sample_t*) jack_port_get_buffer (ltcport->jack_port(), nframes);
 
 	frameoffset_t skip = now - (monotonic_cnt + nframes);
