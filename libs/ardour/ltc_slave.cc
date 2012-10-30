@@ -494,10 +494,10 @@ LTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 	DEBUG_TRACE (DEBUG::LTC, string_compose ("LTCsync spd: %1 pos: %2 | last-pos: %3 elapsed: %4 delta: %5\n",
 						 speed, pos, last_ltc_frame, elapsed, current_delta));
 
-#if 1 /* provide a .1% deadzone to lock the speed */
-	if (fabs(speed - 1.0) <= 0.001)
+	/* provide a .1% deadzone to lock the speed */
+	if (fabs(speed - 1.0) <= 0.001) {
 	        speed = 1.0;
-#endif
+	}
 
 	return true;
 }
