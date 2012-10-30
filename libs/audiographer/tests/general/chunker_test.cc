@@ -14,6 +14,7 @@ class ChunkerTest : public CppUnit::TestFixture
   CPPUNIT_TEST (testSynchronousProcess);
   CPPUNIT_TEST (testAsynchronousProcess);
   CPPUNIT_TEST (testChoppingProcess);
+  CPPUNIT_TEST (testEndOfInputFlagHandling);
   CPPUNIT_TEST_SUITE_END ();
 
   public:
@@ -134,6 +135,36 @@ class ChunkerTest : public CppUnit::TestFixture
 		CPPUNIT_ASSERT (TestUtils::array_equals (random_data, sink->get_array(), frames / 2));
 		CPPUNIT_ASSERT (TestUtils::array_equals (random_data, &sink->get_array()[frames / 2], frames));
 		CPPUNIT_ASSERT (TestUtils::array_equals (random_data, &sink->get_array()[ 3 * frames / 2], frames / 2));
+	}
+
+	void testEndOfInputFlagHandling()
+	{
+		boost::shared_ptr<ProcessContextGrabber<float> > grabber(new ProcessContextGrabber<float>());
+		
+		assert (frames % 2 == 0);
+		chunker.reset (new Chunker<float>(frames));
+		chunker->add_output (grabber);
+		
+		ProcessContext<float> const half_context (random_data, frames / 2, 1);
+		ProcessContext<float> const context (random_data, frames, 1);
+		context.set_flag(ProcessContext<>::EndOfInput);
+		
+		// Process 0.5 then 1.0
+		chunker->process (half_context);
+		chunker->process (context);
+
+		// Should output two contexts
+		CPPUNIT_ASSERT_EQUAL((int)grabber->contexts.size(), 2);
+		ProcessContextGrabber<float>::ContextList::iterator it = grabber->contexts.begin();
+
+		// first 1.0 not end of input
+		CPPUNIT_ASSERT_EQUAL(it->frames(), frames);
+		CPPUNIT_ASSERT(!it->has_flag(ProcessContext<>::EndOfInput));
+
+		// Then 0.5 with end of input
+		++it;
+		CPPUNIT_ASSERT_EQUAL(it->frames(), frames / 2);
+		CPPUNIT_ASSERT(it->has_flag(ProcessContext<>::EndOfInput));
 	}
 
   private:

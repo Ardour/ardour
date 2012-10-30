@@ -49,14 +49,15 @@ class Chunker
 			framecnt_t const frames_to_copy = chunk_size - position;
 			TypeUtils<T>::copy (&context.data()[input_position], &buffer[position], frames_to_copy);
 			
-			// Output whole buffer
-			ProcessContext<T> c_out (context, buffer, chunk_size);
-			ListedSource<T>::output (c_out);
-			
 			// Update counters
 			position = 0;
 			input_position += frames_to_copy;
 			frames_left -= frames_to_copy;
+
+			// Output whole buffer
+			ProcessContext<T> c_out (context, buffer, chunk_size);
+			if (frames_left) { c_out.remove_flag(ProcessContext<T>::EndOfInput); }
+			ListedSource<T>::output (c_out);
 		}
 		
 		if (frames_left) {
