@@ -43,6 +43,9 @@ class SoundGridRack : public SessionObject {
     
     void add_plugin (boost::shared_ptr<SoundGridPlugin>);
     void remove_plugin (boost::shared_ptr<SoundGridPlugin>);
+
+    int reconfigure (uint32_t channels);
+    int set_process_group (uint32_t channels);
     
     void set_input_gain (gain_t);
     

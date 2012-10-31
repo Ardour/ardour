@@ -134,7 +134,11 @@ Route::init ()
 	_output->changed.connect_same_thread (*this, boost::bind (&Route::output_change_handler, this, _1, _2));
 
         if (Profile->get_soundgrid()) {
-                _sg_rack = new SoundGridRack (_session, *this, name());
+                try {
+                        _sg_rack = new SoundGridRack (_session, *this, name());
+                } catch (...) {
+                        _sg_rack = 0;
+                }
         }
 
 	/* add amp processor  */
@@ -204,9 +208,7 @@ Route::~Route ()
                 _processors.clear ();
         }
 
-        if (_sg_rack) {
-                delete _sg_rack;
-        }
+        delete _sg_rack;
 }
 
 void
@@ -311,7 +313,7 @@ Route::sync_order_keys (RouteSortOrderKey base)
 }
 
 void
-Route::set_remote_control_id_from_order_key (RouteSortOrderKey key, uint32_t rid)
+Route::set_remote_control_id_from_order_key (RouteSortOrderKey /*key*/, uint32_t rid)
 {
 	if (is_master() || is_monitor() || is_hidden()) {
 		/* hard-coded remote IDs, or no remote ID */
@@ -2939,6 +2941,11 @@ Route::output_change_handler (IOChange change, void * /*src*/)
 		   contains ConfigurationChanged 
 		*/
 		need_to_queue_solo_change = false;
+                
+                if (_sg_rack) {
+                        _sg_rack->reconfigure (_output->ports().num_ports (DataType::AUDIO));
+                        _sg_rack->make_connections ();
+                }
 	}
 
 	if (!_output->connected() && _soloed_by_others_downstream) {
@@ -4132,4 +4139,14 @@ Route::non_realtime_locate (framepos_t pos)
 			(*i)->transport_located (pos);
 		}
 	}
+}
+
+uint32_t
+Route::rack_id() const 
+{
+        if (_sg_rack) {
+                return _sg_rack->id();
+        }
+
+        return UINT32_MAX;
 }

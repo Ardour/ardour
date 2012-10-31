@@ -20,6 +20,7 @@
 #ifndef __ardour_soundgrid_h__
 #define __ardour_soundgrid_h__
 
+#include <iostream>
 #include <vector>
 #include <string>
 
@@ -42,7 +43,7 @@ class SoundGrid : public boost::noncopyable
   public:
 	~SoundGrid ();
 
-        int initialize (void* window_handle, uint32_t max_tracks);
+        int initialize (void* window_handle, uint32_t max_tracks, uint32_t max_busses, uint32_t physical_inputs, uint32_t physical_outputs);
         int teardown ();
 
 	static SoundGrid& instance();
@@ -91,8 +92,10 @@ class SoundGrid : public boost::noncopyable
         bool remove_rack_synchronous (uint32_t clusterType, uint32_t trackHandle);
         bool remove_all_racks_synchronous ();
 
-        int set_gain (uint32_t in_clusterType, uint32_t in_trackHandle, double in_gainValue);
-        bool get_gain (uint32_t in_clusterType, uint32_t in_trackHandle, double &out_gainValue);
+        int set_gain (uint32_t clusterType, uint32_t trackHandle, double in_gainValue);
+        bool get_gain (uint32_t clusterType, uint32_t trackHandle, double &out_gainValue);
+
+        int configure_io (uint32_t clusterType, uint32_t trackHandle, uint32_t channels);
 
         int configure_driver (uint32_t physical_inputs, uint32_t physical_outputs, uint32_t tracks);
 
@@ -116,15 +119,46 @@ class SoundGrid : public boost::noncopyable
 
             /* control sorting and use in STL containers */
             bool operator<(const Port& other) const {
-                    return ctype < other.ctype && 
-                            stype < other.stype && 
-                            cid < other.cid && 
-                            sid < other.sid && 
-                            sindex < other.sindex && 
-                            channel < other.channel && 
-                            position < other.position;
+
+                    if (ctype < other.ctype) {
+                            return true;
+                    } else if (ctype > other.ctype) {
+                            return false;
+                    }
+
+                    if (cid < other.cid) {
+                            return true;
+                    } else if (cid > other.cid) {
+                            return false;
+                    }
+
+                    if (stype < other.stype) {
+                            return true;
+                    } else if (stype > other.stype) {
+                            return false;
+                    }
+
+                    if (sid < other.sid) {
+                            return true;
+                    } else if (sid > other.sid) {
+                            return false;
+                    }
+
+                    if (sindex < other.sindex) {
+                            return true;
+                    } else if (sindex > other.sindex) {
+                            return false;
+                    }
+
+                    if (channel < other.channel) {
+                            return true;
+                    } else if (channel > other.channel) {
+                            return false;
+                    }
+                    
+                    return position < other.position;
             }
-            
+
             bool accepts_input () const {
                     if (ctype == eClusterType_Inputs) {
                             return true;
@@ -170,7 +204,7 @@ class SoundGrid : public boost::noncopyable
                         : Port (eClusterType_Outputs, eClusterHandle_Physical_Driver, 
                                 wvEnum_Unknown, wvEnum_Unknown, wvEnum_Unknown, channel, Port::Post) {}
         };
-        
+
         struct PhysicalInputPort : public Port {
                 PhysicalInputPort (uint32_t channel) 
                         : Port (eClusterType_Inputs, eClusterHandle_Physical_IO, 
@@ -181,6 +215,18 @@ class SoundGrid : public boost::noncopyable
                 PhysicalOutputPort (uint32_t channel) 
                         : Port (eClusterType_Outputs, eClusterHandle_Physical_IO, 
                                 wvEnum_Unknown, wvEnum_Unknown, wvEnum_Unknown, channel, Port::Post) {}
+        };
+        
+        /** 
+         * this is a special port type that describes the GroupTrack chainers we create to
+         * mix multiple signals assigned to the same physical output. They are always mono,
+         * because they manage the signal to a single physical output.
+         */
+
+        struct PseudoPhysicalOutputPort : public Port {
+            PseudoPhysicalOutputPort (uint32_t channel) 
+                    : Port (eClusterType_GroupTrack, channel,
+                            eControlType_Input, 0, eControlID_Input_Assignment_Left, 0, Port::Pre) {}
         };
         
         struct TrackInputPort : public Port {
@@ -272,7 +318,6 @@ class SoundGrid : public boost::noncopyable
                                 uint32_t& max_outputs,
                                 uint32_t& current_inputs,
                                 uint32_t& current_outputs);
-        int connect_io_to_driver (uint32_t ninputs, uint32_t noutputs);
                 
         uint32_t          _driver_ports; // how many total channels we tell the SG driver to allocate
         std::vector<bool> _driver_input_ports_in_use;

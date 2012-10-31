@@ -85,6 +85,8 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 
 	virtual int init ();
 
+        uint32_t rack_id() const;
+
 	boost::shared_ptr<IO> input() const { return _input; }
 	boost::shared_ptr<IO> output() const { return _output; }
 

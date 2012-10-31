@@ -110,6 +110,12 @@ EngineControl::EngineControl ()
         , outputs_label (0)
         , outputs_adjustment (8, 1, 32, 1)
         , outputs_spinner (inputs_adjustment)
+        , tracks_label (0)
+        , tracks_adjustment (8, 1, 64, 1)
+        , tracks_spinner (tracks_adjustment)
+        , busses_label (0)
+        , busses_adjustment (8, 1, 64, 1)
+        , busses_spinner (busses_adjustment)
 #endif
 
 {
@@ -224,6 +230,14 @@ EngineControl::EngineControl ()
 	outputs_label = manage (left_aligned_label (_("Physical output channels:")));
 	basic_packer.attach (*outputs_label, 0, 1, row, row+1, FILL|EXPAND, (AttachOptions) 0);
 	basic_packer.attach (outputs_spinner, 1, 2, row, row+1, FILL|EXPAND, (AttachOptions) 0);
+	++row;
+	tracks_label = manage (left_aligned_label (_("Maximum track count:")));
+	basic_packer.attach (*tracks_label, 0, 1, row, row+1, FILL|EXPAND, (AttachOptions) 0);
+	basic_packer.attach (tracks_spinner, 1, 2, row, row+1, FILL|EXPAND, (AttachOptions) 0);
+	++row;
+	busses_label = manage (left_aligned_label (_("Maximum bus count:")));
+	basic_packer.attach (*busses_label, 0, 1, row, row+1, FILL|EXPAND, (AttachOptions) 0);
+	basic_packer.attach (busses_spinner, 1, 2, row, row+1, FILL|EXPAND, (AttachOptions) 0);
 	++row;
 #endif
 
@@ -708,10 +722,10 @@ EngineControl::enumerate_devices (const string& driver)
 		devices[driver] = enumerate_coreaudio_devices ();
 	} else if (driver == "SoundGrid") {
 
-                /* XXX hard code 16 track estimate... takes no account of stereo, sends, busses, etc.
-                 */
-                
-                soundgrid_init (inputs_adjustment.get_value(), outputs_adjustment.get_value(), 16);
+                soundgrid_init (inputs_adjustment.get_value(), outputs_adjustment.get_value(), 
+                                16, /* max tracks */
+                                16  /* max busses */
+                        );
 		devices[driver] = SoundGrid::lan_port_names();
 
 #else

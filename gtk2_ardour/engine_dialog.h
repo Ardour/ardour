@@ -195,6 +195,14 @@ class EngineControl : public Gtk::VBox {
         Gtk::Label*     outputs_label;
         Gtk::Adjustment outputs_adjustment;
         Gtk::SpinButton outputs_spinner;
+
+        Gtk::Label*     tracks_label;
+        Gtk::Adjustment tracks_adjustment;
+        Gtk::SpinButton tracks_spinner;
+
+        Gtk::Label*     busses_label;
+        Gtk::Adjustment busses_adjustment;
+        Gtk::SpinButton busses_spinner;
 #endif
 };
 

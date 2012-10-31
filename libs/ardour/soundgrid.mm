@@ -104,104 +104,8 @@ SoundGrid::~SoundGrid()
 }
 
 int
-SoundGrid::connect_io_to_driver (uint32_t ninputs, uint32_t noutputs)
-{
-        /* the JACK ports for the native OS audio driver already exist, 
-           because JACK will have created them based on the native
-           driver will have told JACK how many there are.
-
-           but we still need to connect the SG ports so that signal
-           does actually flow between the physical IO ports and the
-           native driver (thus enabling JACK to read/write data)
-
-           this is a special case that benefits from not calling connect() many times.
-        */
-
-        DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("setting up wiring for %1 inputs and %2 outputs\n", ninputs, noutputs));
-
-        if (ninputs) {
-
-                WSAssignmentsCommand inputsCommand;
-                Init_WSAddAssignmentsCommand(&inputsCommand, ninputs, (WSDControllerHandle)this, 0);
-                
-                for (uint32_t n = 0; n < ninputs; ++n) {
-                        
-                        ARDOUR::SoundGrid::DriverOutputPort dst (n);  // readable driver/JACK port
-                        ARDOUR::SoundGrid::PhysicalInputPort src (n); // where the signal should come from
-                        WSAudioAssignment &assignment (inputsCommand.in_Assignments.m_aAssignments[n]);
-
-                        src.set_source (assignment);
-                        dst.set_destination (assignment);
-                }
-                
-                int ret = command (&inputsCommand.m_command);
-
-                Dispose_WSAudioAssignmentBatch (&inputsCommand.in_Assignments);
-
-                if (ret != 0) {
-                        return -1;
-                }
-        }
-
-        if (noutputs) {
-
-                WSAssignmentsCommand outputsCommand;
-                Init_WSAddAssignmentsCommand(&outputsCommand, noutputs, (WSDControllerHandle)this, 0);
-                
-                for (uint32_t n = 0; n < noutputs; ++n) {
-                        
-                        ARDOUR::SoundGrid::DriverInputPort src (n);     // writable driver/JACK port
-                        ARDOUR::SoundGrid::PhysicalOutputPort dst (n);  // physical channel where the signal should go
-                        WSAudioAssignment &assignment (outputsCommand.in_Assignments.m_aAssignments[n]);
-
-                        src.set_source (assignment);
-                        dst.set_destination (assignment);
-                }
-
-                int ret = command (&outputsCommand.m_command);
-
-                Dispose_WSAudioAssignmentBatch (&outputsCommand.in_Assignments);
-
-                if (ret != 0) {
-                        return -1;
-                }
-        }
-
-        return 0;
-}
-
-int
-SoundGrid::configure_driver (uint32_t inputs, uint32_t outputs, uint32_t tracks) 
-{
-    WSConfigSGDriverCommand myCommand;
-    uint32_t in = inputs+tracks;
-    uint32_t out = outputs+tracks;
-
-    in = std::min (in, 32U);
-    out = std::min (out, 32U);
-
-    Init_WSConfigSGDriverCommand (&myCommand, in, out, (WSDControllerHandle)this, 0);
-
-    DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Initializing SG driver to use %1 inputs + %2 outputs\n", in, out));
-
-    if (command (&myCommand.m_command)) {
-            return -1;
-    }
-
-    /* wire up inputs and outputs */
-
-    connect_io_to_driver (inputs, outputs);
-
-    /* set up the in-use bool vector */
-
-    _driver_output_ports_in_use.assign (outputs, false);
-    _driver_input_ports_in_use.assign (inputs, false);
-
-    return 0;
-}
-
-int
-SoundGrid::initialize (void* window_handle, uint32_t max_tracks)
+SoundGrid::initialize (void* window_handle, uint32_t max_tracks, uint32_t max_busses, 
+                       uint32_t /*physical_inputs*/, uint32_t physical_outputs)
 {
         if (!_sg) {
                 WTErr ret;
@@ -218,6 +122,11 @@ SoundGrid::initialize (void* window_handle, uint32_t max_tracks)
                 //the following is for the tracks that this app will create.
                 //This will probably be changed to eClusterType_GroupTrack in future.
                 mixer_limits.m_clusterConfigs[eClusterType_InputTrack].m_uiIndexNum = max_tracks;
+
+                // number of group (mixing) tracks needs to match the number of physical outputs, plus
+                // the number of busses we expect
+
+                mixer_limits.m_clusterConfigs[eClusterType_GroupTrack].m_uiIndexNum = max_busses + physical_outputs;
 
                 DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Initializing SG Core with %1 tracks\n", max_tracks));
 
@@ -272,6 +181,142 @@ bool
 SoundGrid::available ()
 {
 	return instance().dl_handle != 0;
+}
+
+int
+SoundGrid::configure_driver (uint32_t inputs, uint32_t outputs, uint32_t tracks) 
+{
+    WSConfigSGDriverCommand myCommand;
+    uint32_t in = inputs+tracks;
+    uint32_t out = outputs+tracks;
+
+    in = std::min (in, 32U);
+    out = std::min (out, 32U);
+
+    Init_WSConfigSGDriverCommand (&myCommand, in, out, (WSDControllerHandle)this, 0);
+
+    DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Initializing SG driver to use %1 inputs + %2 outputs\n", in, out));
+
+    if (command (&myCommand.m_command)) {
+            return -1;
+    }
+
+    /* set up the in-use bool vector */
+
+    _driver_output_ports_in_use.assign (out, false);
+    _driver_input_ports_in_use.assign (in, false);
+
+    /* reserve the actual inputs and outputs */
+
+    for (uint32_t n = 0; n < inputs; ++n) {
+            _driver_input_ports_in_use[n] = true;
+    }
+
+    for (uint32_t n = 0; n < outputs; ++n) {
+            _driver_output_ports_in_use[n] = true;
+    }
+
+    /* Create mono GroupTracks for mixing inputs sent to each driver input.
+
+       These are the ONLY chainers that talk to the physical outputs, anything
+       else that wants to route to a physical output must go via the corresponding
+       PseudoPhysicalOutputPort (which corresponds to one of these GroupTracks).
+     */
+
+    for (uint32_t n = 0; n < outputs; ++n) {
+            uint32_t handle; 
+
+            /* process group is set to 7, because these should run last no matter what
+             */
+
+            if (add_rack_synchronous (eClusterType_GroupTrack, 7, 1, handle)) {
+                    error << string_compose (_("Cannot create mixing channel for driver output %1"), n) << endmsg;
+                    return -1;
+            }
+            if (set_gain (eClusterType_GroupTrack, handle, 1000.0)) {
+                    error << string_compose (_("Cannot set gain for mixing channel for driver output %1"), n) << endmsg;
+                    return -1;
+            }
+    }
+
+    if (outputs) {
+            WSAssignmentsCommand outputsCommand;
+            Init_WSAddAssignmentsCommand(&outputsCommand, outputs, (WSDControllerHandle)this, 0);
+            
+            for (uint32_t n = 0; n < outputs; ++n) {
+                    
+                    ARDOUR::SoundGrid::BusOutputPort src (n, 0); // single output of the group track
+                    ARDOUR::SoundGrid::PhysicalOutputPort dst (n);  // real physical channel where the signal should go
+                    WSAudioAssignment &assignment (outputsCommand.in_Assignments.m_aAssignments[n]);
+                    
+                    src.set_source (assignment);
+                    dst.set_destination (assignment);
+            }
+            
+            int ret = command (&outputsCommand.m_command);
+            
+            Dispose_WSAudioAssignmentBatch (&outputsCommand.in_Assignments);
+            
+            if (ret != 0) {
+                    return -1;
+            }
+    }
+
+    /* wire up inputs and outputs */
+    
+    if (inputs) {
+            
+            DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("setting up wiring for %1 inputs\n", inputs));
+
+            WSAssignmentsCommand inputsCommand;
+            Init_WSAddAssignmentsCommand(&inputsCommand, inputs, (WSDControllerHandle)this, 0);
+            
+            for (uint32_t n = 0; n < inputs; ++n) {
+                    
+                    ARDOUR::SoundGrid::PhysicalInputPort src (n); // physical channel where the signal should come from
+                    ARDOUR::SoundGrid::DriverOutputPort dst (n);  // driver channel/JACK port where it should be readable from
+                    WSAudioAssignment &assignment (inputsCommand.in_Assignments.m_aAssignments[n]);
+                    
+                    src.set_source (assignment);
+                    dst.set_destination (assignment);
+            }
+            
+            int ret = command (&inputsCommand.m_command);
+            
+            Dispose_WSAudioAssignmentBatch (&inputsCommand.in_Assignments);
+            
+            if (ret != 0) {
+                    return -1;
+            }
+    }
+
+    if (outputs) {
+            
+            DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("setting up wiring for %1 outputs\n", outputs));
+
+            WSAssignmentsCommand outputsCommand;
+            Init_WSAddAssignmentsCommand(&outputsCommand, outputs, (WSDControllerHandle)this, 0);
+            
+            for (uint32_t n = 0; n < outputs; ++n) {
+                    
+                    ARDOUR::SoundGrid::DriverInputPort src (n);   // writable driver/JACK port
+                    ARDOUR::SoundGrid::PseudoPhysicalOutputPort dst (n);  // physical channel where the signal should go
+                    WSAudioAssignment &assignment (outputsCommand.in_Assignments.m_aAssignments[n]);
+                    
+                    src.set_source (assignment);
+                    dst.set_destination (assignment);
+            }
+            
+            int ret = command (&outputsCommand.m_command);
+            
+            Dispose_WSAudioAssignmentBatch (&outputsCommand.in_Assignments);
+            
+            if (ret != 0) {
+                    return -1;
+            }
+    }
+
+    return 0;
 }
 
 int
@@ -665,6 +710,9 @@ SoundGrid::add_rack_synchronous (uint32_t clusterType, int32_t process_group, ui
 
     channels = 1;
 
+    DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("add rack sync, type %1 channels %2 pgroup %3\n",
+                                                   clusterType, channels, process_group));
+
     command (Init_WSAddTrackCommand (&myCommand, clusterType, channels, process_group, (WSDControllerHandle)this, 0));
     
     if (0 == myCommand.m_command.out_status) {
@@ -766,44 +814,51 @@ SoundGrid::jack_port_as_sg_port (const string& jack_port, Port& result)
         return false;
 }
 
-std::string
+string
 SoundGrid::sg_port_as_jack_port (const Port& sgport)
 {
-    SG_JACKMap::iterator x = soundgrid_jack_map.find (sgport);
+        string jack_port;
+        SG_JACKMap::iterator x = soundgrid_jack_map.find (sgport);
+        
+        if (x != soundgrid_jack_map.end()) {
+                DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("sgport %1 found in SG/Jack map as %2\n", sgport, x->second));
 
-    if (x != soundgrid_jack_map.end()) {
-            return x->second;
-    }
+                for (SG_JACKMap::iterator nn = soundgrid_jack_map.begin(); nn != soundgrid_jack_map.end(); ++nn) {
+                        cerr << "SG_JACKMAP " << nn->first << " => " << nn->second << endl;
+                }
 
-    /* OK, so this SG port has never been connected (and thus mapped) to
-       a JACK port. We need to find a free driver channel and connect it
-       to the specified sgport.
-    */
-
-    DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Try to map SG port as JACK port\n", sgport));
-
-    uint32_t driver_channel;
-    bool found = false;
-    bool inputs = false;
-
-    if (sgport.accepts_input()) {
-
-            inputs = true;
-
-            uint32_t n = _driver_output_ports_in_use.size () - 1;
-
-            /* Find next free driver channel to use to represent the given SG port.
-               
-               Note that we search backwards. This doesn't eliminate the issues that
-               will arise if we end up overlapping with the ports used for normal
-               physical output, but makes it less likely.
-            */
-            
-            for (vector<bool>::reverse_iterator x = _driver_output_ports_in_use.rbegin(); x != _driver_output_ports_in_use.rend(); ++x) {
-                    if (!(*x)) {
-                            
-                            DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Found unused driver output channel %1 to map %2\n", n, sgport));
-                            driver_channel = n;
+                return x->second;
+        }
+        
+        /* OK, so this SG port has never been connected (and thus mapped) to
+           a JACK port. We need to find a free driver channel and connect it
+           to the specified sgport.
+        */
+        
+        DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Try to map SG port %1 as JACK port\n", sgport));
+        
+        uint32_t driver_channel;
+        bool found = false;
+        bool inputs = false;
+        
+        if (sgport.accepts_input()) {
+                
+                inputs = true;
+                
+                uint32_t n = _driver_output_ports_in_use.size () - 1;
+                
+                /* Find next free driver channel to use to represent the given SG port.
+                   
+                   Note that we search backwards. This doesn't eliminate the issues that
+                   will arise if we end up overlapping with the ports used for normal
+                   physical output, but makes it less likely.
+                */
+                
+                for (vector<bool>::reverse_iterator x = _driver_output_ports_in_use.rbegin(); x != _driver_output_ports_in_use.rend(); ++x) {
+                        if (!(*x)) {
+                                
+                                DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Found unused driver output channel %1 to map %2\n", n, sgport));
+                                driver_channel = n;
                             found = true;
                             break;
                     }
@@ -836,37 +891,36 @@ SoundGrid::sg_port_as_jack_port (const Port& sgport)
     if (found) {
             if (inputs) {
                     Port driverport = DriverInputPort (driver_channel);
-                    DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("connecting driver_channel %2 to sgport %1\n",
-                                                                   sgport, driver_channel));
                     if (connect (driverport, sgport) != 0) {
                             return string();
                     }
             } else {
                     Port driverport = DriverOutputPort (driver_channel);
-                    DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("connecting sgport %1 to driver channel %2\n",
-                                                                   sgport, driver_channel));
                     if (connect (sgport, driverport) != 0) {
                             return string();
                     }
             }
-    }
 
-    /* successfully connected SG physical IO to SG driver: do record keeping */
+            /* do record keeping */
+            
+            if (inputs) {
+                    _driver_output_ports_in_use[driver_channel] = true;
+                    jack_port = string_compose ("system:playback_%1", driver_channel+1);
+            } else {
+                    _driver_input_ports_in_use[driver_channel] = true;
+                    jack_port = string_compose ("system:capture_%1", driver_channel+1);
+            }
+
+            jack_soundgrid_map.insert (make_pair (jack_port, sgport));
+            soundgrid_jack_map.insert (make_pair (sgport, jack_port));
     
-    string jack_port;
-    
-    if (inputs) {
-            _driver_output_ports_in_use[driver_channel] = true;
-            jack_port = string_compose ("system:playback_%1", driver_channel+1);
+            
+            DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("map SG port %1 as %2\n", sgport, jack_port));
+
     } else {
-            _driver_input_ports_in_use[driver_channel] = true;
-            jack_port = string_compose ("system:capture_%1", driver_channel+1);
+            DEBUG_TRACE (DEBUG::SoundGrid, "no spare driver channels/JACK ports were found to use for routing to SG\n");
     }
 
-    jack_soundgrid_map.insert (make_pair (jack_port, sgport));
-    soundgrid_jack_map.insert (make_pair (sgport, jack_port));
-
-    DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("map SG port %1 as %2\n", sgport, jack_port));
     
     return jack_port;
 }
@@ -955,12 +1009,241 @@ SoundGrid::Port::set_destination (WSAudioAssignment& assignment) const
         assignment.m_asgnDest.m_PrePost = sg_source();
 }
 
+int
+SoundGrid::configure_io (uint32_t cluster_type, uint32_t rack_id, uint32_t channels)
+{
+    WSEvent configEvent;
+    Init_WSEvent(&configEvent);
+
+    /* XXX not sure how this works for multichannel as of oct 30th 2012 */
+
+    configEvent.eventID = eEventID_MoveTo;
+    configEvent.controllerValue = (channels == 2) ? 1 : 0;
+    
+    Init_WSControlID(&configEvent.controlID);
+    configEvent.controlID.clusterID.clusterType  = cluster_type;
+    configEvent.controlID.clusterID.clusterHandle  = rack_id;
+
+    configEvent.controlID.sectionControlID.sectionType = eControlType_Input;
+    configEvent.controlID.sectionControlID.sectionIndex = eControlType_Input_Local;
+    configEvent.controlID.sectionControlID.channelIndex = wvEnum_Unknown;
+    configEvent.controlID.sectionControlID.controlID = eControlID_Input_MonoStereo;
+
+    if (set (&configEvent, "I/O configure")) {
+            return -1;
+    }
+    
+    return 0;
+}
+
 std::ostream&
 operator<< (std::ostream& out, const SoundGrid::Port& p)
 {
-        out << p.ctype << ':' << p.cid 
-            << ':' << p.stype << ':' << p.sindex << ':' << p.sid
-            << ':' << p.channel << ':' << p.position;
+        switch (p.ctype) {
+        case eClusterType_Inputs:
+                out << "inputs";
+                switch (p.cid) {
+                case eClusterHandle_Physical_Driver:
+                        out << ":driver";
+                        break;
+                case eClusterHandle_Physical_IO:
+                        out << ":IO";
+                        break;
+                default:
+                        out << ":unknown";
+                }
+                break;
+        case eClusterType_Outputs:
+                out << "outputs";
+                switch (p.cid) {
+                case eClusterHandle_Physical_Driver:
+                        out << ":driver";
+                        break;
+                case eClusterHandle_Physical_IO:
+                        out << ":IO";
+                        break;
+                default:
+                        out << ":unknown";
+                }
+                break;
+        case eClusterType_InputTrack:
+                out << "InputTrack";
+                break;
+        case eClusterType_GroupTrack:
+                out << "GroupTrack";
+                break;
+        case eClusterType_AuxTrack:
+                out << "AuxTrack";
+                break;
+        case eClusterType_MatrixTrack:
+                out << "MatrixTrack";
+                break;
+        case eClusterType_LCRMTrack:
+                out << "LCRMTrack";
+                break;
+        case eClusterType_DCATrack:
+                out << "DCATrack";
+                break;
+        case eClusterType_CueTrack:
+                out << "CueTrack";
+                break;
+        case eClusterType_TBTrack:
+                out << "TBTrack";
+                break;
+        default:
+                out << "unknown";
+                break;
+        }
+         
+        if (p.ctype != eClusterType_Inputs && p.ctype != eClusterType_Outputs) {
+
+                out << ":ID " << p.cid << ':';
+                
+                switch (p.stype) {
+
+                case eControlType_Input:
+                        out << "input " << p.sindex << ':';
+                        switch (p.sid) {
+                        case eControlID_Input_Assignment_Left:
+                                out << "assignment_left";
+                                break;
+                        case eControlID_Input_Assignment_Right:
+                                out << "assignment_right";
+                                break;
+                        case eControlID_Input_MonoStereo:
+                                out << "monostereo";
+                                break;
+                        case eControlID_Input_Choose_Left_Right:
+                                out << "choose_left_right";
+                                break;
+                        case eControlID_Input_Choose_Link_UnLink:
+                                out << "choose_link_unlink";
+                                break;
+                        case eControlID_Input_Trim:
+                                out << "trim";
+                                break;
+                        case eControlID_Input_Phase_On_Off:
+                                out << "phase_on_off";
+                                break;
+                        case eControlID_Input_Pad_On_Off:
+                                out << "pad_on_off";
+                                break;
+                        case eControlID_Input_48V_On_Off:
+                                out << "48v_on_off";
+                                break;
+                        case eControlID_Input_Digital_Trim:
+                                out << "digital_trim";
+                                break;
+                        case eControlID_Input_Digital_Delay:
+                                out << "digital_delay";
+                                break;
+                        case eControlID_Input_Direct:
+                                out << "direct";
+                                break;
+                        case eControlID_Input_Choose_In_Pre_Post:
+                                out << "choose_in_pre_post";
+                                break;
+                        case eControlID_Input_VU_Left:
+                                out << "vu_left";
+                                break;
+                        case eControlID_Input_VU_Right:
+                                out << "vu_right";
+                                break;
+                        default:
+                                out << "unknown";
+                        }
+                        break;
+                case eControlType_Output:
+                        out << "output " << p.sindex << ':';
+                        switch (p.sid) {
+                        case eControlID_Output_Gain:
+                                out << "gain";
+                                break;
+                        case eControlID_Output_Pan:
+                                out << "pan";
+                                break;
+                        case eControlID_Output_Arm_On_Off:
+                                out << "arm_on_off";
+                                break;
+                        case eControlID_Output_Assign_On_Off:
+                                out << "assign_on_off";
+                                break;
+                        case eControlID_Output_Select_On_Off:
+                                out << "select_on_off";
+                                break;
+                        case eControlID_Output_Cue_On_Off:
+                                out << "cue_on_off";
+                                break;
+                        case eControlID_Output_Mute_On_Off:
+                                out << "mute_on_off";
+                                break;
+                        case eControlID_Output_VU_Left:
+                                out << "vu_left";
+                                break;
+                        case eControlID_Output_VU_Right:
+                                out << "vu_right";
+                                break;
+                        case eControlID_Output_MonoStereoPreFader:
+                                out << "monostereoprefader";
+                                break;
+                        case eControlID_Output_MonoStereoPostFader:
+                                out << "monostereopostfader";
+                                break;
+                        case eControlID_Output_MonoStereoPostPan:
+                                out << "monostereopostpan";
+                                break;
+                        case eControlID_Output_DirectMixMtxSrc:
+                                out << "directmixmtxsrc";
+                                break;
+                        case eControlID_Output_DirectLeft:
+                                out << "directleft";
+                                break;
+                        case eControlID_Output_DirectRight:
+                                out << "directright";
+                                break;
+                        default:
+                                out << "unknown";
+                                break;
+                        }
+                        break;
+                case eControlType_Filter:
+                        out << "filter";
+                        break;
+                case eControlType_Dynamics:
+                        out << "dynamics";
+                        break;
+                case eControlType_EQ:
+                        out << "eq";
+                        break;
+                case eControlType_UserPlugins:
+                        out << "userplugins";
+                        break;
+                case eControlType_AuxSend:
+                        out << "auxsend";
+                        break;
+                case eControlType_AuxReturn:
+                        out << "auxreturn";
+                        break;
+                case eControlType_Name:
+                        out << "name";
+                        break;
+                case eControlType_Display:
+                        out << "display";
+                        break;
+                }
+        }
+
+        out << ":chn " << p.channel << ':';
+
+        switch (p.position) {
+        case SoundGrid::Port::Post:
+                out << "post";
+                break;
+        case SoundGrid::Port::Pre:
+                out << "pre";
+                break;
+        }
+
         return out;
 }
 

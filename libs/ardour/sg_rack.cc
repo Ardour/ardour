@@ -41,26 +41,33 @@ SoundGridRack::SoundGridRack (Session& s, Route& r, const std::string& name)
         , _route (r)
         , _rack_id (UINT32_MAX)
 {
-        if (r.is_hidden()) {
-                return;
-        }
-
         DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Creating SG Chainer for %1\n", r.name()));
 
-        if (dynamic_cast<Track*> (&r) != 0) {
+        if (dynamic_cast<Track*> (&r) != 0 && !_route.is_hidden()) {
                 _cluster_type = eClusterType_InputTrack;
         } else {
                 /* bus */
-                if (r.is_master()) {
-                        _cluster_type = eClusterType_InputTrack;
-                } else if (r.is_monitor()) {
-                        _cluster_type = eClusterType_InputTrack;
-                } else {
-                        _cluster_type = eClusterType_InputTrack;
-                }
+                _cluster_type = eClusterType_GroupTrack;
         }
 
-        const int32_t process_group = 0;
+        int32_t process_group;
+
+        /* XXX eventually these need to be discovered from the route which sets them during a graph sort 
+         */
+
+        if (_route.is_monitor()) {
+                /* monitor runs last */
+                process_group = 6;
+        } else if (_route.is_monitor()) {
+                /* master runs before monitor */
+                process_group = 5;
+        } else if (dynamic_cast<Track*>(&_route)) {
+                /* tracks run before busses */
+                process_group = 1;
+        } else {
+                /* busses run after tracks */
+                process_group = 2;
+        }
 
         if (SoundGrid::instance().add_rack_synchronous (_cluster_type, process_group, r.n_outputs().n_audio(), _rack_id)) { 
                 throw failed_constructor();
@@ -82,10 +89,20 @@ SoundGridRack::~SoundGridRack ()
 }
 
 int
+SoundGridRack::reconfigure (uint32_t channels)
+{
+        return SoundGrid::instance().configure_io (_cluster_type, _rack_id, channels);
+}
+
+int 
+SoundGridRack::set_process_group (uint32_t /*pg*/)
+{
+        return 0;
+}
+
+int
 SoundGridRack::make_connections ()
 {
-        DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Mapping input for %1\n", _route.name()));
-
         /* we need to deliver out output (essentially at the fader) to the SG server, which will
            happen via the native OS audio driver (and thus via JACK). the output needs to get to 
            our chainer, so we map its input(s) to one or more unused JACK ports. we then connect
@@ -93,37 +110,86 @@ SoundGridRack::make_connections ()
         */
 
         _route.output()->disconnect (this);
-
-//        SoundGrid::instance().connect (SoundGrid::PhysicalInputPort (0),
-//                                       SoundGrid::DriverOutputPort (0));
         
         PortSet& ports (_route.output()->ports());
         uint32_t channel = 0;
+        boost::shared_ptr<Route> master_out = _route.session().master_out();
+        bool is_track = (dynamic_cast<Track*>(&_route) != 0) && !_route.is_hidden();
+
+        DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Mapping input for %1 (track ? %2) with %3 outputs\n", 
+                                                       _route.name(), is_track, ports.num_ports()));
 
         for (PortSet::iterator p = ports.begin(); p != ports.end(); ++p, ++channel) {
+
+                DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Looking at output %1\n", p->name()));
 
                 if (p->type() != DataType::AUDIO) {
                         continue;
                 }
 
-                /* find a JACK port that will be used to deliver data to the chainer input */
+                if (is_track) {
 
-                string portname = SoundGrid::instance().sg_port_as_jack_port (SoundGrid::TrackInputPort (_rack_id, channel));
-                
-                if (portname.empty()) {
-                        continue;
+                        /* find a JACK port that will be used to deliver data to the track's chainer's input */
+
+                        string portname;
+                        
+                        if (dynamic_cast<Track*> (&_route) != 0) {
+                                portname = SoundGrid::instance().sg_port_as_jack_port (SoundGrid::TrackInputPort (_rack_id, channel));
+                        } else {
+                                /* bus */
+                                portname = SoundGrid::instance().sg_port_as_jack_port (SoundGrid::BusInputPort (_rack_id, channel));
+                        }
+                        
+                        if (portname.empty()) {
+                                DEBUG_TRACE (DEBUG::SoundGrid, "no JACK port found to route track audio to SG\n");
+                                continue;
+                        }
+                        
+                        /* connect this port to it */
+                        
+                        p->connect (portname);
                 }
-
-                /* connect this port to it */
-                
-                p->connect (portname);
 
                 /* Now wire up the output of our SG chainer to ... yes, to what precisely ? 
                    
-                   For now, wire it up to physical outputs 1 ( + 2, etc)
+                   For now:
+
+                    - if its the master or monitor bus, wire it up to physical outputs 1 ( + 2, etc)
+                    - otherwise, wire it up to the master bus.
                 */
 
-                SoundGrid::instance().connect (SoundGrid::TrackOutputPort (_rack_id, channel), SoundGrid::PhysicalOutputPort (channel));
+
+                if (_route.is_master()) {
+                        
+                        SoundGrid::instance().connect (SoundGrid::BusOutputPort (_rack_id, channel), 
+                                                       SoundGrid::PseudoPhysicalOutputPort (channel));
+
+                        /* how to wire to the monitor bus ? */
+
+                } else if (_route.is_monitor()) {
+
+                        /* XXX force different physical wiring for the monitor bus just so that it shows up
+                           differently in any wiring graphs.
+                        */
+
+                        SoundGrid::instance().connect (SoundGrid::BusOutputPort (_rack_id, channel), 
+                                                       SoundGrid::PseudoPhysicalOutputPort (channel+4));
+                        
+
+                } else if (_route.is_hidden()) {
+
+                        /* auditioner - wire it directly to the "outputs" */
+                        
+                        SoundGrid::instance().connect (SoundGrid::BusOutputPort (_rack_id, channel), 
+                                                       SoundGrid::PseudoPhysicalOutputPort (channel));
+                        
+                } else {
+
+                        /* wire normal tracks and busses to the master bus */
+
+                        SoundGrid::instance().connect (SoundGrid::TrackOutputPort (_rack_id, channel), 
+                                                       SoundGrid::BusInputPort (master_out->rack_id(), channel));
+                }
         }
                 
         return 0;
