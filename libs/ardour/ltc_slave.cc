@@ -413,7 +413,7 @@ LTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 			reset();
 		}
 
-		parse_ltc(nframes, in, now + ltc_slave_latency.max );
+		parse_ltc(nframes, in, now - ltc_slave_latency.max );
 		process_ltc(now);
 	}
 
