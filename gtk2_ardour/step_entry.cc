@@ -470,6 +470,9 @@ StepEntry::StepEntry (StepEditor& seditor)
 	r = RefPtr<RadioAction>::cast_dynamic (act);
 	assert (r);
 	r->set_active (true);
+
+	set_keep_above(true);
+	set_type_hint(Gdk::WINDOW_TYPE_HINT_DIALOG);
 }
 
 StepEntry::~StepEntry()
