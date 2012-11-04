@@ -261,7 +261,7 @@ class MTC_Slave : public TimecodeSlave {
 	void handle_locate (const MIDI::byte*);
 
 	framecnt_t resolution () const;
-	bool requires_seekahead () const { return true; }
+	bool requires_seekahead () const { return false; }
 	framecnt_t seekahead_distance() const;
 	bool give_slave_full_control_over_transport_speed() const;
 

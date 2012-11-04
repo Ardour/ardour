@@ -130,7 +130,7 @@ MTC_Slave::outside_window (framepos_t pos) const
 bool
 MTC_Slave::locked () const
 {
-	return port->parser()->mtc_locked();
+	return port->parser()->mtc_locked() && last_inbound_frame !=0 && engine_dll_initstate !=0;
 }
 
 bool
@@ -261,10 +261,10 @@ MTC_Slave::update_mtc_qtr (Parser& /*p*/, int which_qtr, framepos_t now)
 		current.speed = mtc_speed;
 		current.guard2++;
 
+		last_inbound_frame = now;
 	}
 
 	maybe_reset ();
-	last_inbound_frame = now;
 
 	busy_guard2++;
 }
@@ -549,15 +549,17 @@ MTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 	//sess_pos -= session.engine().frames_since_cycle_start();
 
 	SafeTime last;
-	framecnt_t elapsed;
+	frameoffset_t elapsed;
+	bool engine_dll_reinitialized = false;
 
 	read_current (&last);
 
 	/* re-init engine DLL here when state changed (direction, first_mtc_timestamp) */
 	if (last.timestamp == 0) { engine_dll_initstate = 0; }
-	else if (engine_dll_initstate != transport_direction) { 
+	else if (engine_dll_initstate != transport_direction && last.speed != 0) {
 		engine_dll_initstate = transport_direction;
 		init_engine_dll(last.position, session.engine().frames_per_cycle());
+		engine_dll_reinitialized = true;
 	}
 
 	if (last.timestamp == 0) {
@@ -592,15 +594,13 @@ MTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 	else
 	{
 		/* scale elapsed time by the current MTC speed */
-		if (last.timestamp && (now > last.timestamp)) {
-			elapsed = (framecnt_t) rint (speed_flt * (now - last.timestamp));
-		} else {
-			elapsed = 0;
-		}
-		if (give_slave_full_control_over_transport_speed()) {
-			/* there is a frame-delta engine vs MTC position
-			 * mostly due to quantization and rounding of (speed * nframes)
-			 * thus we use an other DLL..
+		elapsed = (framecnt_t) rint (speed_flt * (now - last.timestamp));
+		if (give_slave_full_control_over_transport_speed() && !engine_dll_reinitialized) {
+			/* there is an engine vs MTC position frame-delta.
+			 * This mostly due to quantization and rounding of (speed * nframes)
+			 * but can also due to the session-process not calling
+			 * speed_and_position() every cycle under some circumstances.
+			 * Thus we use an other DLL to align the engine and the MTC
 			 */
 
 			/* update engine DLL and calculate speed */
@@ -628,11 +628,9 @@ MTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 		queue_reset (false);
 	}
 
-#if 1
 	/* provide a .1% deadzone to lock the speed */
 	if (fabs(speed - 1.0) <= 0.001)
 	        speed = 1.0;
-#endif
 
 	DEBUG_TRACE (DEBUG::MTC, string_compose ("MTCsync spd: %1 pos: %2 | last-pos: %3 elapsed: %4 delta: %5\n",
 						 speed, pos, last.position, elapsed,  pos - sess_pos));
@@ -648,7 +646,7 @@ MTC_Slave::apparent_timecode_format () const
 	return mtc_timecode;
 }
 
-std::string 
+std::string
 MTC_Slave::approximate_current_position() const
 {
 	SafeTime last;
