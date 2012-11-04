@@ -195,18 +195,11 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 #define SIGNUM(a) ( (a) < 0 ? -1 : 1)
 	bool speed_changed = false;
 
-	/* use port latency compensation */
-#if 1
-	/* The generated timecode is offset by the port-latency,
+	/* port latency compensation:
+	 * The _generated timecode_ is offset by the port-latency,
 	 * therefore the offset depends on the direction of transport.
 	 */
-	framepos_t cycle_start_frame = (current_speed < 0) ? (start_frame + ltc_out_latency.max) : (start_frame - ltc_out_latency.max);
-#else
-	/* This comes in handy when testing sync - record output on an A3 track
-	 * see also http://tracker.ardour.org/view.php?id=5073
-	 */
-	framepos_t cycle_start_frame = start_frame;
-#endif
+	framepos_t cycle_start_frame = (current_speed < 0) ? (start_frame - ltc_out_latency.max) : (start_frame + ltc_out_latency.max);
 
 	/* cycle-start may become negative due to latency compensation */
 	if (cycle_start_frame < 0) { cycle_start_frame = 0; }
