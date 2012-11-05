@@ -80,7 +80,7 @@ LTC_Slave::~LTC_Slave()
 ARDOUR::framecnt_t
 LTC_Slave::resolution () const
 {
-	return (framecnt_t) (frames_per_ltc_frame);
+	return (framecnt_t) (session.frame_rate() / 1000);
 }
 
 bool
