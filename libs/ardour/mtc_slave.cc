@@ -62,8 +62,8 @@ MTC_Slave::MTC_Slave (Session& s, MIDI::Port& p)
 	last_mtc_fps_byte = session.get_mtc_timecode_bits ();
 	quarter_frame_duration = (double(session.frames_per_timecode_frame()) / 4.0);
 
-	mtc_timecode = timecode_60; // track changes of MTC timecode
-	a3e_timecode = timecode_60; // track canges of Ardour's timecode
+	mtc_timecode = session.config.get_timecode_format();
+	a3e_timecode = session.config.get_timecode_format();
 	printed_timecode_warning = false;
 
 	reset (true);
