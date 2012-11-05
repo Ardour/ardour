@@ -48,15 +48,15 @@ using namespace Timecode;
 
 /* LTC signal should have a rise time of 25 us +/- 5 us.
  * yet with most sound-cards a square-wave of 1-2 sample
- * introduces rather some ringing and small oscillations.
- * so we low-pass filter the signal a bit, depending
- * on the sample-rate.
+ * introduces ringing and small oscillations.
+ * https://en.wikipedia.org/wiki/Gibbs_phenomenon
+ * A low-pass filter in libltc can reduce this at
+ * the cost of being slightly out of spec WRT to rise-time.
  *
- * TODO: this should become an adaptive value, when
- * the playback speed is increases so that 1 bit < 3-4
- * audio samples, we should fall back to 25 us.
+ * This filter is adaptive so that fast vari-speed signals
+ * will not be affected by it.
  */
-#define LTC_RISE_TIME MIN (100, MAX(25, (2000000 / engine().frame_rate())))
+#define LTC_RISE_TIME(speed) MIN (100, MAX(25, (4000000 / ((speed==0)?1:speed) / engine().frame_rate())))
 
 void
 Session::ltc_tx_initialize()
@@ -69,7 +69,7 @@ Session::ltc_tx_initialize()
 			0);
 
 	ltc_encoder_set_bufsize(ltc_encoder, nominal_frame_rate(), 23.0);
-	ltc_encoder_set_filter(ltc_encoder, LTC_RISE_TIME);
+	ltc_encoder_set_filter(ltc_encoder, LTC_RISE_TIME(1.0));
 
 	/* buffersize for 1 LTC frame: (1 + sample-rate / fps) bytes
 	 * usually returned by ltc_encoder_get_buffersize(encoder)
@@ -198,9 +198,7 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 			ltc_tx_cleanup();
 			return;
 		}
-		if (nominal_frame_rate() <= 48000) {
-			ltc_encoder_set_filter(ltc_encoder, LTC_RISE_TIME);
-		}
+		ltc_encoder_set_filter(ltc_encoder, LTC_RISE_TIME(ltc_speed));
 		ltc_enc_tcformat = cur_timecode;
 		ltc_tx_reset();
 	}
@@ -246,6 +244,7 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 		 */
 		DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX2: speed change old: %1 cur: %2 tgt: %3 ctd: %4\n", ltc_speed, current_speed, target_speed, fabs(current_speed) - target_speed));
 		speed_changed = true;
+		ltc_encoder_set_filter(ltc_encoder, LTC_RISE_TIME(new_ltc_speed));
 	}
 
 	if (end_frame == start_frame || fabs(current_speed) < 0.1 ) {
