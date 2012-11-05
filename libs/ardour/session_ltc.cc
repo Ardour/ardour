@@ -130,7 +130,7 @@ Session::ltc_tx_recalculate_position()
 	a3tc.drop = timecode_has_drop_frames(ltc_enc_tcformat);
 
 	Timecode::timecode_to_sample (a3tc, ltc_enc_pos, true, false,
-		double(frame_rate()),
+		(double)frame_rate(),
 		config.get_subframes_per_frame(),
 		config.get_timecode_offset_negative(), config.get_timecode_offset()
 		);
@@ -297,8 +297,8 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 		 * which is left for later..
 		 */
 
-		double oldbuflen = double(ltc_buf_len - ltc_buf_off);
-		double newbuflen = double(ltc_buf_len - ltc_buf_off) * fabs(ltc_speed / new_ltc_speed);
+		double oldbuflen = (double)(ltc_buf_len - ltc_buf_off);
+		double newbuflen = (double)(ltc_buf_len - ltc_buf_off) * fabs(ltc_speed / new_ltc_speed);
 
 		DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX2: bufOld %1 bufNew %2 | diff %3\n",
 					(ltc_buf_len - ltc_buf_off), newbuflen, newbuflen - oldbuflen
@@ -366,7 +366,7 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 
 	/* convert timecode back to sample-position */
 	Timecode::timecode_to_sample (tc_start, tc_sample_start, true, false,
-		double(frame_rate()),
+		(double)frame_rate(),
 		config.get_subframes_per_frame(),
 		config.get_timecode_offset_negative(), config.get_timecode_offset()
 		);
@@ -442,7 +442,7 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 		if (ltc_speed < 0 ) {
 			/* calculate the byte that starts at or after the current position */
 			ltc_enc_byte = floor((10.0 * soff) / (fptcf));
-			ltc_enc_cnt = double(ltc_enc_byte * fptcf / 10.0);
+			ltc_enc_cnt = ltc_enc_byte * fptcf / 10.0;
 
 			/* calculate difference between the current position and the byte to send */
 			cyc_off = soff- ceil(ltc_enc_cnt);
@@ -450,7 +450,7 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 		} else {
 			/* calculate the byte that starts at or after the current position */
 			ltc_enc_byte = ceil((10.0 * soff) / fptcf);
-			ltc_enc_cnt = double(ltc_enc_byte * fptcf / 10.0);
+			ltc_enc_cnt = ltc_enc_byte * fptcf / 10.0;
 
 			/* calculate difference between the current position and the byte to send */
 			cyc_off = ceil(ltc_enc_cnt) - soff;
