@@ -39,6 +39,21 @@ using namespace Timecode;
 //#define LTC_GEN_FRAMEDBUG
 //#define LTC_GEN_TXDBUG
 
+#ifndef MAX
+#define MAX(a,b) ( (a) > (b) ? (a) : (b) )
+#endif
+#ifndef MIN
+#define MIN(a,b) ( (a) < (b) ? (a) : (b) )
+#endif
+
+/* LTC signal should have a rise time of 25 us +/- 5 us.
+ * yet with most sound-cards a square-wave of 1-2 sample
+ * introduces rather some ringing and small oscillations.
+ * so we low-pass filter the signal a bit, depending
+ * on the sample-rate
+ */
+#define LTC_RISE_TIME MIN (150, MAX(25, (4000000 / engine().frame_rate())))
+
 void
 Session::ltc_tx_initialize()
 {
@@ -50,6 +65,7 @@ Session::ltc_tx_initialize()
 			0);
 
 	ltc_encoder_set_bufsize(ltc_encoder, nominal_frame_rate(), 23.0);
+	ltc_encoder_set_filter(ltc_encoder, LTC_RISE_TIME);
 
 	/* buffersize for 1 LTC frame: (1 + sample-rate / fps) bytes
 	 * usually returned by ltc_encoder_get_buffersize(encoder)
@@ -177,6 +193,9 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 			PBD::error << _("LTC encoder: invalid framerate - LTC encoding is disabled for the remainder of this session.") << endmsg;
 			ltc_tx_cleanup();
 			return;
+		}
+		if (nominal_frame_rate() <= 48000) {
+			ltc_encoder_set_filter(ltc_encoder, LTC_RISE_TIME);
 		}
 		ltc_enc_tcformat = cur_timecode;
 		ltc_tx_reset();
