@@ -225,7 +225,10 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 	/* cycle-start may become negative due to latency compensation */
 	if (cycle_start_frame < 0) { cycle_start_frame = 0; }
 
-	double new_ltc_speed = double(labs(end_frame - start_frame) * SIGNUM(current_speed)) / double(nframes);
+	double new_ltc_speed = (double)(labs(end_frame - start_frame) * SIGNUM(current_speed)) / (double)nframes;
+	if (nominal_frame_rate() != frame_rate()) {
+		new_ltc_speed *= (double)nominal_frame_rate() / (double)frame_rate();
+	}
 
 	if (SIGNUM(new_ltc_speed) != SIGNUM (ltc_speed)) {
 		DEBUG_TRACE (DEBUG::LTC, "LTC TX2: transport changed direction\n");
@@ -353,7 +356,13 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 	framepos_t tc_sample_start;
 
 	/* calc timecode frame from current position - round down to nearest timecode */
-	sample_to_timecode(cycle_start_frame, tc_start, true, false);
+	Timecode::sample_to_timecode(cycle_start_frame, tc_start, true, false,
+			timecode_frames_per_second(),
+			timecode_drop_frames(),
+			(double)frame_rate(),
+			config.get_subframes_per_frame(),
+			config.get_timecode_offset_negative(), config.get_timecode_offset()
+			);
 
 	/* convert timecode back to sample-position */
 	Timecode::timecode_to_sample (tc_start, tc_sample_start, true, false,
@@ -397,7 +406,9 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 				rint(ltc_enc_pos + ltc_enc_cnt - poff) - cycle_start_frame
 				));
 
-	if (ltc_speed != 0 && fabs(ceil(ltc_enc_pos + ltc_enc_cnt - poff) - cycle_start_frame) > maxdiff) {
+	if (ltc_enc_pos < 0
+			|| (ltc_speed != 0 && fabs(ceil(ltc_enc_pos + ltc_enc_cnt - poff) - cycle_start_frame) > maxdiff)
+			) {
 
 		// (5) re-align
 		ltc_tx_reset();
