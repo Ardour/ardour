@@ -44,6 +44,10 @@
 
 #include <glibmm/thread.h>
 #include <gtkmm/label.h>
+#include <gtkmm/messagedialog.h>
+#include <gtkmm/progressbar.h>
+
+#include "gtkmm2ext/gtk_ui.h"
 
 #include "pbd/compose.h"
 
@@ -54,10 +58,14 @@
 #include "gui_thread.h"
 #include "soundgrid.h"
 
+#include "i18n.h"
+
 using namespace PBD;
 using std::cerr;
 
 static NSWindow* sg_window = 0;
+static Gtk::MessageDialog* wait_dialog = 0;
+static Gtk::ProgressBar* pbar = 0;
 static PBD::ScopedConnection sg_connection;
 
 static void
@@ -76,14 +84,24 @@ soundgrid_shutdown ()
 static bool
 soundgrid_driver_init (uint32_t max_phys_inputs, uint32_t max_phys_outputs, uint32_t max_tracks)
 {
+        wait_dialog->set_secondary_text (_("Nearly ready..."), true);
+        pbar->hide ();
+
+        Gtkmm2ext::UI::instance()->flush_pending ();
+
         ARDOUR::SoundGrid::instance().configure_driver (max_phys_inputs, max_phys_outputs, max_tracks);
+
+        /* end the wait dialog */
+
+        wait_dialog->response (0);
+
         return false; /* do not call again */
 }
 
-int
-soundgrid_init (uint32_t max_phys_inputs, uint32_t max_phys_outputs, 
-                uint32_t max_tracks, uint32_t max_busses,
-                uint32_t max_plugins)
+static bool
+soundgrid_initialize (uint32_t max_tracks, uint32_t max_busses, 
+                      uint32_t max_phys_inputs, uint32_t max_phys_outputs,
+                      uint32_t max_plugins)
 {
         /* create a new window that we don't display (at least not as
            of August 2012, but we can give it to the SoundGrid library
@@ -99,27 +117,73 @@ soundgrid_init (uint32_t max_phys_inputs, uint32_t max_phys_outputs,
         [sg_window retain];
 
         ARDOUR::SoundGrid::Shutdown.connect (sg_connection, MISSING_INVALIDATOR, soundgrid_shutdown, gui_context());
-
+        
         if (ARDOUR::SoundGrid::instance().initialize ([sg_window contentView], 
                                                       max_tracks, max_busses, 
                                                       max_phys_inputs,
-                                                      max_phys_inputs,
+                                                      max_phys_outputs,
                                                       max_plugins)) {
                 
                 [sg_window release];
                 sg_window = 0;
 
-                return -1;
+        } else {
+
+                /* as of early August 2012, we need to wait 5 seconds before configuring the CoreAudio driver */
+                
+                Glib::signal_timeout().connect (sigc::bind (sigc::ptr_fun (soundgrid_driver_init), 
+                                                            max_phys_inputs, max_phys_outputs, max_tracks), 5000);
+                
+                /* tell everyone/everything that we're using soundgrid */
+                
+                ARDOUR::Profile->set_soundgrid ();
         }
 
-        /* as of early August 2012, we need to wait 5 seconds before configuring the CoreAudio driver */
+        return false; /* do not call again */
+}
 
-        Glib::signal_timeout().connect (sigc::bind (sigc::ptr_fun (soundgrid_driver_init), 
-                                                    max_phys_inputs, max_phys_outputs, max_tracks), 5000);
+static bool
+pulse_pbar ()
+{
+        pbar->pulse();
+        return true;
+}
 
-        /* tell everyone/everything that we're using soundgrid */
+int
+soundgrid_init (uint32_t max_phys_inputs, uint32_t max_phys_outputs, 
+                uint32_t max_tracks, uint32_t max_busses,
+                uint32_t max_plugins)
+{
+        Glib::signal_idle().connect (sigc::bind (sigc::ptr_fun (soundgrid_initialize), 
+                                                 max_tracks, max_busses, 
+                                                 max_phys_inputs,
+                                                 max_phys_outputs,
+                                                 max_plugins));
 
-        ARDOUR::Profile->set_soundgrid ();
+        
+        wait_dialog = new Gtk::MessageDialog (_("<b>Please wait while SoundGrid is initialized (approx 6 seconds)</b>"),
+                                              true, /* use markup */
+                                              Gtk::MESSAGE_WARNING,
+                                              Gtk::BUTTONS_NONE, 
+                                              true); /* modal */
+
+        wait_dialog->set_position (Gtk::WIN_POS_CENTER);
+        wait_dialog->set_title (_("SoundGrid Initializing ..."));
+
+        pbar = manage (new Gtk::ProgressBar);
+        sigc::connection pulse_connection;
+
+        pbar->set_size_request (100, -1);
+        wait_dialog->get_vbox()->pack_start (*pbar, false, false);
+        pbar->show ();
+
+        pulse_connection = Glib::signal_timeout().connect (sigc::ptr_fun (pulse_pbar), 250);
+
+        wait_dialog->run ();
+        
+        pulse_connection.disconnect ();
+
+        delete wait_dialog;
 
         return 0;
 }

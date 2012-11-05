@@ -655,7 +655,18 @@ ArdourStartup::on_apply ()
 void
 ArdourStartup::on_prepare (Gtk::Widget* page)
 {
-	if (page == &session_vbox) {
+        if (page == &ic_vbox) {
+
+                /* need to check with engine dialog and see if something needs to be done
+                   before we move on (SoundGrid)
+                */
+
+                if (engine_dialog) {
+                        if (engine_dialog->prepare ()) {
+                                /* failure - do not proceed to new page */
+                        }
+                }
+        } else if (page == &session_vbox) {
 
 		if (ic_new_session_button.get_active()) {
 			/* new session requested */
@@ -684,7 +695,7 @@ ArdourStartup::on_prepare (Gtk::Widget* page)
 				}
 			}
 		}
-	}
+        }
 }
 
 void

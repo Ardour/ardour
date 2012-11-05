@@ -671,10 +671,27 @@ EngineControl::engine_running ()
 }
 
 int
+EngineControl::prepare ()
+{
+	string driver = driver_combo.get_active_text();
+
+        if (driver == "SoundGrid") {
+                return soundgrid_init (inputs_adjustment.get_value(), outputs_adjustment.get_value(), 
+                                       16, /* max tracks */
+                                       16, /* max busses */
+                                       8   /* max plugins per track */
+                        );
+        }
+
+        return 0;
+}
+
+int
 EngineControl::setup_engine ()
 {
 	vector<string> args;
 	std::string cwd = "/tmp";
+	string driver = driver_combo.get_active_text();
 
 	build_command_line (args);
 
@@ -699,7 +716,6 @@ EngineControl::setup_engine ()
 	jackdrc << endl;
 	jackdrc.close ();
 
-	string driver = driver_combo.get_active_text();
 	if (driver == "SoundGrid") {
 		soundgrid_configure ();
 	}
@@ -721,13 +737,7 @@ EngineControl::enumerate_devices (const string& driver)
 	} else if (driver == "CoreAudio") {
 		devices[driver] = enumerate_coreaudio_devices ();
 	} else if (driver == "SoundGrid") {
-
-                soundgrid_init (inputs_adjustment.get_value(), outputs_adjustment.get_value(), 
-                                16, /* max tracks */
-                                16, /* max busses */
-                                8   /* max plugins per track */
-                        );
-		devices[driver] = SoundGrid::lan_port_names();
+		devices[driver].clear ();
 
 #else
 

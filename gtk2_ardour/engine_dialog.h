@@ -43,6 +43,7 @@ class EngineControl : public Gtk::VBox {
 
 	static bool engine_running ();
 	int setup_engine ();
+        int prepare ();
 
 	bool was_used() const { return _used; }
 	XMLNode& get_state ();
