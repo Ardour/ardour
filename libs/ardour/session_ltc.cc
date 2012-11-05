@@ -50,9 +50,13 @@ using namespace Timecode;
  * yet with most sound-cards a square-wave of 1-2 sample
  * introduces rather some ringing and small oscillations.
  * so we low-pass filter the signal a bit, depending
- * on the sample-rate
+ * on the sample-rate.
+ *
+ * TODO: this should become an adaptive value, when
+ * the playback speed is increases so that 1 bit < 3-4
+ * audio samples, we should fall back to 25 us.
  */
-#define LTC_RISE_TIME MIN (150, MAX(25, (4000000 / engine().frame_rate())))
+#define LTC_RISE_TIME MIN (100, MAX(25, (2000000 / engine().frame_rate())))
 
 void
 Session::ltc_tx_initialize()
@@ -465,6 +469,24 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 		DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX5 restart @ %1 + %2 - %3 |  byte %4\n",
 					ltc_enc_pos, ltc_enc_cnt, cyc_off, ltc_enc_byte));
 	}
+#if 1 /* experimental sample bit alignment */
+	else if (ltc_speed != 0 && (fptcf / ltc_speed / 80) > 3 ) {
+		/* We may get away without a DLL if speed-changes are uniform enough and
+		 * no oscillation takes place, the linear approx here should reduce the
+		 * jitter sufficiently when generating LTC from another LTC source or
+		 * JACK-transport or ardour internal clock.
+		 *
+		 * Note that the granularity of the LTC encoder speed is 1 byte =
+		 * (frames-per-timecode-frame / 10) audio-samples.
+		 *
+		 * Thus, tiny speed changes won't have any effect and larger ones
+		 * may lead to oscillations.
+		 * To be better than that, resampling (or a rewrite of the encoder) is
+		 * required.
+		 */
+		ltc_speed -= ((ltc_enc_pos + ltc_enc_cnt - poff) - cycle_start_frame) / engine().frame_rate();
+	}
+#endif
 
 
 	// (6) encode and output
@@ -529,6 +551,12 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 			ltc_enc_byte = (ltc_enc_byte + 1)%10;
 			if (ltc_enc_byte == 0 && ltc_speed != 0) {
 				ltc_encoder_inc_timecode(ltc_encoder);
+#if 0 /* force fixed parity -- scope debug */
+				LTCFrame f;
+				ltc_encoder_get_frame(ltc_encoder, &f);
+				f.biphase_mark_phase_correction=0;
+				ltc_encoder_set_frame(ltc_encoder, &f);
+#endif
 				ltc_tx_recalculate_position();
 				ltc_enc_cnt = 0;
 			} else if (ltc_enc_byte == 0) {
