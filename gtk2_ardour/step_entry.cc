@@ -471,7 +471,6 @@ StepEntry::StepEntry (StepEditor& seditor)
 	assert (r);
 	r->set_active (true);
 
-	set_keep_above(true);
 	set_type_hint(Gdk::WINDOW_TYPE_HINT_DIALOG);
 }
 
