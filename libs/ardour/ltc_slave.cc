@@ -108,7 +108,7 @@ LTC_Slave::resync_latency()
 	DEBUG_TRACE (DEBUG::LTC, "LTC resync_latency()\n");
 	engine_dll_initstate = 0;
 
-	if (session.ltc_output_io()) { /* check if Port exits */
+	if (!session.deletion_in_progress() && session.ltc_output_io()) { /* check if Port exits */
 		boost::shared_ptr<Port> ltcport = session.ltc_input_port();
 		ltcport->get_connected_latency_range(ltc_slave_latency, false);
 	}
