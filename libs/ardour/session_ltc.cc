@@ -479,24 +479,26 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 		DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX5 restart @ %1 + %2 - %3 |  byte %4\n",
 					ltc_enc_pos, ltc_enc_cnt, cyc_off, ltc_enc_byte));
 	}
-#if 1 /* experimental sample bit alignment */
 	else if (ltc_speed != 0 && (fptcf / ltc_speed / 80) > 3 ) {
-		/* We may get away without a DLL if speed-changes are uniform enough and
-		 * no oscillation takes place, the linear approx here should reduce the
-		 * jitter sufficiently when generating LTC from another LTC source or
-		 * JACK-transport or ardour internal clock.
-		 *
-		 * Note that the granularity of the LTC encoder speed is 1 byte =
+		/* reduce (low freq) jitter.
+		 * The granularity of the LTC encoder speed is 1 byte =
 		 * (frames-per-timecode-frame / 10) audio-samples.
+		 * Thus, tiny speed changes [as produced by the slave]
+		 * may not have any effect in the cycle when they occur,
+		 * but they will add up over time.
 		 *
-		 * Thus, tiny speed changes won't have any effect and larger ones
-		 * may lead to oscillations.
-		 * To be better than that, resampling (or a rewrite of the encoder) is
-		 * required.
+		 * This is a linear approx to compensate for this drift
+		 * and prempt re-sync when the drift builds up.
+		 *
+		 * However, for very fast speeds - when 1 LTC bit is
+		 * <= 3 audio-sample - adjusting speed may lead to
+		 * invalid frames.
+		 *
+		 * To do better than this, resampling (or a rewrite of the
+		 * encoder) is required.
 		 */
 		ltc_speed -= ((ltc_enc_pos + ltc_enc_cnt - poff) - cycle_start_frame) / engine().frame_rate();
 	}
-#endif
 
 
 	// (6) encode and output
