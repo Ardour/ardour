@@ -724,7 +724,8 @@ EngineControl::enumerate_devices (const string& driver)
 
                 soundgrid_init (inputs_adjustment.get_value(), outputs_adjustment.get_value(), 
                                 16, /* max tracks */
-                                16  /* max busses */
+                                16, /* max busses */
+                                8   /* max plugins per track */
                         );
 		devices[driver] = SoundGrid::lan_port_names();
 
@@ -948,7 +949,6 @@ EngineControl::interface_changed ()
         }
 
         set_soundgrid_parameters ();
-        refill_soundgrid_inventory ();
 }
 
 void
@@ -1452,181 +1452,6 @@ EngineControl::set_state (const XMLNode& root)
 			midi_driver_combo.set_active_text(strval);
 		}
 	}
-}
-
-void
-EngineControl::create_soundgrid_inventory ()
-{
-	vector<uint32_t> latencies = SoundGrid::possible_network_buffer_sizes ();
-	vector<string> latency_strings;
-	stringstream s;
-
-	for (vector<uint32_t>::iterator i = latencies.begin(); i != latencies.end(); ++i) {
-		s.str (std::string());
-		s << *i;
-		latency_strings.push_back (s.str());
-	}
-
-	Gtk::ComboBoxText* latency_combo;
-	latency_combo = manage (new Gtk::ComboBoxText);
-	set_popdown_strings (*latency_combo, latency_strings);
-	s.str (std::string());
-	s << SoundGrid::current_network_buffer_size();
-	latency_combo->set_active_text (s.str());
-
-	Gtk::HBox* hb = manage (new HBox);
-	Label* l;
-	l = manage (new Label (_("AUDIO PARAMETERS")));
-	l->set_alignment (0, 0.5);
-	hb->pack_start (*l, false, false, 10);
-	hb->pack_end (*latency_combo, false, true);
-
-	soundgrid_vbox.set_spacing (10);
-	soundgrid_vbox.set_border_width (6);
-	soundgrid_vbox.pack_start (*hb, false, false);
-
-	soundgrid_iobox_model = TreeStore::create (sg_iobox_columns);
-	soundgrid_iobox_display.set_model (soundgrid_iobox_model);
-
-	soundgrid_server_model = TreeStore::create (sg_server_columns);
-	soundgrid_server_display.set_model (soundgrid_server_model);
-
-	/* IO Boxes etc. */
-	
-	l = manage (new Label (_("Input/Output Devices")));
-	l->set_alignment (0.0, 0.5);
-	soundgrid_vbox.pack_start (*l, false, false);
-
-	sg_assignment_model = TreeStore::create (sg_assignment_columns);
-	TreeModel::Row r;
-	for (uint32_t i = 0; i < 5; ++i) {
-		r = *(sg_assignment_model->append());
-		r[sg_assignment_columns.number] = i;
-	}
-
-	CellRendererCombo* assign_renderer = manage (new CellRendererCombo);
-	assign_renderer->property_model() = sg_assignment_model;
-	assign_renderer->property_editable() = true;
-	assign_renderer->property_text_column() = 0;
-	TreeViewColumn* cc = manage (new TreeViewColumn (_("Assign"), *assign_renderer));
-	cc->add_attribute (assign_renderer->property_text(), sg_iobox_columns.assign);
-	soundgrid_iobox_display.append_column (*cc);
-
-	soundgrid_iobox_display.append_column (_("Device"), sg_iobox_columns.device);
-
-	CellRendererSpin* channel_renderer = manage (new CellRendererSpin);
-	Gtk::Adjustment* adj = manage (new Adjustment (0, 0, 512, 1, 1));
-	channel_renderer->property_adjustment() = adj;
-	channel_renderer->property_editable() = true;
-	cc = manage (new TreeViewColumn (_("Channels"), *channel_renderer));
-	cc->add_attribute (channel_renderer->property_text(), sg_iobox_columns.channels);
-	soundgrid_iobox_display.append_column (*cc);
-
-	soundgrid_iobox_display.append_column (_("Name"), sg_iobox_columns.name);
-	soundgrid_iobox_display.append_column (_("MAC Address/\nComputer Name"), sg_iobox_columns.mac);
-	soundgrid_iobox_display.append_column (_("Status"), sg_iobox_columns.status);
-
-	l = manage (new Label (_("ID")));
-	Gtkmm2ext::UI::instance()->set_tip (*l, _("Click to identify physical I/O box"));
-
-	soundgrid_iobox_display.append_column ("", sg_iobox_columns.id);
-	TreeViewColumn* col = soundgrid_iobox_display.get_column (6);
-	col->set_widget (*l);
-	l->show ();
-
-	soundgrid_iobox_display.set_rules_hint (true);
-
-	soundgrid_vbox.pack_start (soundgrid_iobox_display);
-
-	/* Server Display */
-	
-	l = manage (new Label (_("SoundGrid Servers")));
-	l->set_alignment (0.0, 0.5);
-	soundgrid_vbox.pack_start (*l, false, false);
-	
-	assign_renderer = manage (new CellRendererCombo);
-	assign_renderer->property_model() = sg_assignment_model;
-	assign_renderer->property_editable() = true;
-	assign_renderer->property_text_column() = 0;
-	cc = manage (new TreeViewColumn (_("Assign"), *assign_renderer));
-	cc->add_attribute (assign_renderer->property_text(), sg_server_columns.assign);
-	soundgrid_server_display.append_column (*cc);
-	soundgrid_server_display.append_column (_("Name"), sg_server_columns.name);
-
-	channel_renderer = manage (new CellRendererSpin);
-	adj = manage (new Adjustment (0, 0, 512, 1, 1));
-	channel_renderer->property_adjustment() = adj;
-	channel_renderer->property_editable() = true;
-	cc = manage (new TreeViewColumn (_("Channels"), *channel_renderer));
-	cc->add_attribute (channel_renderer->property_text(), sg_server_columns.channels);
-	soundgrid_server_display.append_column (*cc);
-
-	soundgrid_server_display.append_column (_("MAC Address/\nComputer Name"), sg_server_columns.mac);
-
-	soundgrid_vbox.pack_start (soundgrid_server_display);
-	soundgrid_vbox.show_all ();
-}
-
-void
-EngineControl::refill_soundgrid_inventory ()
-{
-        if (soundgrid_vbox.children().empty()) {
-                create_soundgrid_inventory ();
-        }
-
-	SoundGrid::Inventory inventory;
-	SoundGrid::update_inventory (inventory);
-
-	soundgrid_iobox_display.set_model (Glib::RefPtr<TreeModel>(0));
-	soundgrid_iobox_model->clear ();
-
-	soundgrid_server_display.set_model (Glib::RefPtr<TreeModel>(0));
-	soundgrid_server_model->clear ();
-
-	for (SoundGrid::Inventory::iterator i = inventory.begin(); i != inventory.end(); ++i) {
-		TreeModel::Row row;
-		SoundGrid::IOInventoryItem* ii = dynamic_cast<SoundGrid::IOInventoryItem*> (*i);
-		SoundGrid::SGSInventoryItem* is = dynamic_cast<SoundGrid::SGSInventoryItem*> (*i);
-
-		if (ii) {
-			row = *(soundgrid_iobox_model->append());
-			
-			stringstream s;
-			s << ii->assign;
-			row[sg_iobox_columns.assign] = s.str();
-			
-			row[sg_iobox_columns.device] = ii->device;
-			
-			s.str (std::string());
-			s << ii->channels;
-			row[sg_iobox_columns.channels] = s.str();
-			
-			row[sg_iobox_columns.name] = ii->name;
-			row[sg_iobox_columns.mac] = ii->mac;
-			row[sg_iobox_columns.status] = ii->status;
-			row[sg_iobox_columns.id] = "?";
-
-		} else if (is) {
-
-			row = *(soundgrid_server_model->append());
-			
-			stringstream s;
-			s << is->assign;
-			row[sg_server_columns.assign] = s.str();
-
-			s.str (std::string());
-			s << is->channels;
-			row[sg_server_columns.channels] = s.str();
-
-			row[sg_server_columns.name] = is->name;
-			row[sg_server_columns.mac] = is->mac;
-		}
-	}
-	
-	soundgrid_iobox_display.set_model (soundgrid_iobox_model);
-	soundgrid_server_display.set_model (soundgrid_server_model);
-
-	SoundGrid::clear_inventory (inventory);
 }
 
 void

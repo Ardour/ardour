@@ -81,7 +81,9 @@ soundgrid_driver_init (uint32_t max_phys_inputs, uint32_t max_phys_outputs, uint
 }
 
 int
-soundgrid_init (uint32_t max_phys_inputs, uint32_t max_phys_outputs, uint32_t max_tracks, uint32_t max_busses)
+soundgrid_init (uint32_t max_phys_inputs, uint32_t max_phys_outputs, 
+                uint32_t max_tracks, uint32_t max_busses,
+                uint32_t max_plugins)
 {
         /* create a new window that we don't display (at least not as
            of August 2012, but we can give it to the SoundGrid library
@@ -100,8 +102,10 @@ soundgrid_init (uint32_t max_phys_inputs, uint32_t max_phys_outputs, uint32_t ma
 
         if (ARDOUR::SoundGrid::instance().initialize ([sg_window contentView], 
                                                       max_tracks, max_busses, 
-                                                      max_phys_inputs, max_phys_inputs)) {
-        
+                                                      max_phys_inputs,
+                                                      max_phys_inputs,
+                                                      max_plugins)) {
+                
                 [sg_window release];
                 sg_window = 0;
 

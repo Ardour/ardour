@@ -44,13 +44,16 @@ SoundGridRack::SoundGridRack (Session& s, Route& r, const std::string& name)
         DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Creating SG Chainer for %1\n", r.name()));
 
         if (dynamic_cast<Track*> (&r) != 0 && !_route.is_hidden()) {
+                /* only real tracks use an InputTrack. the auditioner is a track, but
+                   it doesn't need any input
+                */
                 _cluster_type = eClusterType_InputTrack;
         } else {
                 /* bus */
                 _cluster_type = eClusterType_GroupTrack;
         }
 
-        int32_t process_group;
+        int32_t process_group = 0;
 
         /* XXX eventually these need to be discovered from the route which sets them during a graph sort 
          */
@@ -58,18 +61,15 @@ SoundGridRack::SoundGridRack (Session& s, Route& r, const std::string& name)
         if (_route.is_monitor()) {
                 /* monitor runs last */
                 process_group = 6;
-        } else if (_route.is_monitor()) {
+        } else if (_route.is_master()) {
                 /* master runs before monitor */
                 process_group = 5;
-        } else if (dynamic_cast<Track*>(&_route)) {
-                /* tracks run before busses */
+        } else if (dynamic_cast<Track*>(&_route) == 0) {
+                /* busses run before tracks */
                 process_group = 1;
-        } else {
-                /* busses run after tracks */
-                process_group = 2;
         }
 
-        if (SoundGrid::instance().add_rack_synchronous (_cluster_type, process_group, r.n_outputs().n_audio(), _rack_id)) { 
+        if (SoundGrid::instance().add_rack (_cluster_type, process_group, r.n_outputs().n_audio(), _rack_id)) { 
                 throw failed_constructor();
         }
 
@@ -82,10 +82,12 @@ SoundGridRack::SoundGridRack (Session& s, Route& r, const std::string& name)
 
 SoundGridRack::~SoundGridRack ()
 {
-        if (_rack_id != UINT32_MAX) {
-                DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Destroying SG Chainer for %1\n", _route.name()));
-                (void) SoundGrid::instance().remove_rack_synchronous (_cluster_type, _rack_id);
+        if (_rack_id == UINT32_MAX) {
+                return;
         }
+
+        DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Destroying SG Chainer for %1\n", _route.name()));
+        (void) SoundGrid::instance().remove_rack (_cluster_type, _rack_id);
 }
 
 int
@@ -188,6 +190,7 @@ SoundGridRack::make_connections ()
                         /* wire normal tracks and busses to the master bus */
 
                         SoundGrid::instance().connect (SoundGrid::TrackOutputPort (_rack_id, channel), 
+                                                       //SoundGrid::PseudoPhysicalOutputPort (channel)
                                                        SoundGrid::BusInputPort (master_out->rack_id(), channel));
                 }
         }

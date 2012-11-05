@@ -22,6 +22,13 @@
 #include <dlfcn.h>
 #include <iostream>
 #include <algorithm>
+#include <unistd.h>
+#include <cstdlib>
+
+#ifdef __APPLE__
+#include <mach-o/dyld.h>
+#include <sys/param.h>
+#endif
 
 #include <WavesMixerCore/API/WCMixerCore_API.h>
 
@@ -29,6 +36,7 @@
 #include "pbd/stacktrace.h"
 
 #include "ardour/debug.h"
+#include "ardour/filesystem_paths.h"
 #include "ardour/soundgrid.h"
 
 #include "i18n.h"
@@ -59,42 +67,14 @@ SoundGrid::SoundGrid ()
 	: dl_handle (0)
         , _sg (0)
         , _host_handle (0)
+        , _max_plugins (8)
 {
-#if 0
-        /* we link against the framework now */
-
-        const char *s;
-        string path;
-
-        s =  getenv ("SOUNDGRID_PATH");
-        
-        /* Load from some defined location */
-        
-        if (!s) {
-                cerr << "SOUNDGRID_PATH not defined - exiting\n";
-                ::exit (1);
-        }
-        
-        vector<string> p;
-        p.push_back (s);
-        p.push_back (sndgrid_dll_name);
-        
-        path = Glib::build_filename (p);
-        
-        DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Loading dylib %1\n", path));
-
-	if ((dl_handle = dlopen (path.c_str(), RTLD_NOW)) == 0) {
-                DEBUG_TRACE (DEBUG::SoundGrid, "\tfailed\n");
-		return;
-	}
-#endif
-
 }
 
 SoundGrid::~SoundGrid()
 {
         if (_sg) {
-                remove_all_racks_synchronous ();
+                remove_all_racks ();
                 UnInitializeMixerCoreDLL (_sg);
         }
 
@@ -105,7 +85,8 @@ SoundGrid::~SoundGrid()
 
 int
 SoundGrid::initialize (void* window_handle, uint32_t max_tracks, uint32_t max_busses, 
-                       uint32_t /*physical_inputs*/, uint32_t physical_outputs)
+                       uint32_t /*physical_inputs*/, uint32_t physical_outputs,
+                       uint32_t max_plugins_per_rack)
 {
         if (!_sg) {
                 WTErr ret;
@@ -113,35 +94,45 @@ SoundGrid::initialize (void* window_handle, uint32_t max_tracks, uint32_t max_bu
 
                 WSMixerConfig mixer_limits;
                 Init_WSMixerConfig (&mixer_limits);
-                //the following two are for physical input and output representations
-                mixer_limits.m_clusterConfigs[eClusterType_Inputs].m_uiIndexNum = 2;  // 1 for Ardour stuff, 1 for the coreaudio driver/JACK
-                mixer_limits.m_clusterConfigs[eClusterType_Outputs].m_uiIndexNum = 2; // 1 for Ardour stuff, 1 for the coreaudio driver/JACK
-                
+
                 max_tracks = 64;
 
-                //the following is for the tracks that this app will create.
-                //This will probably be changed to eClusterType_GroupTrack in future.
+                mixer_limits.m_clusterConfigs[eClusterType_Inputs].m_uiIndexNum = 2; // Physical IO + Device Driver
+                mixer_limits.m_clusterConfigs[eClusterType_Outputs].m_uiIndexNum = 2; // Physical IO + Device Driver
                 mixer_limits.m_clusterConfigs[eClusterType_InputTrack].m_uiIndexNum = max_tracks;
-
-                // number of group (mixing) tracks needs to match the number of physical outputs, plus
-                // the number of busses we expect
-
                 mixer_limits.m_clusterConfigs[eClusterType_GroupTrack].m_uiIndexNum = max_busses + physical_outputs;
 
                 DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Initializing SG Core with %1 tracks\n", max_tracks));
 
-                // XXX use portable, installable technique for this
+                char execpath[MAXPATHLEN+1];
+                uint32_t pathsz = sizeof (execpath);
+                string driver_path;
 
-                char b[PATH_MAX+1];
-                
-                getcwd (b, PATH_MAX);
-                string driver_path = b;
-                driver_path += "/../build/libs/soundgrid/SurfaceDriver_App.bundle";
-                
+                if (getenv ("ARDOUR_BUNDLED") == 0) {
+#ifdef __APPLE__
+                        _NSGetExecutablePath (execpath, &pathsz);
+#else 
+                        readlink ("/proc/self/exe", execpath, sizeof(execpath));
+#endif        
+                        vector<string> s;
+                        s.push_back (Glib::path_get_dirname (execpath));
+                        s.push_back ("..");
+                        s.push_back ("libs");
+                        s.push_back ("soundgrid");
+                        s.push_back ("SurfaceDriver_App.bundle");
+                        driver_path = Glib::build_filename (s);
+                } else {
+                        driver_path = Glib::build_filename (ardour_dll_directory(), "SurfaceDriver_App.bundle");
+                }
+
+                DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("driver path: %1\n", driver_path));
+
                 if ((ret = InitializeMixerCoreDLL (&mixer_limits, driver_path.c_str(), window_handle, _sg_callback, this, &_sg)) != eNoErr) {
                         DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Failed to initialize SG core, ret = %1 core handle %2\n", ret, _sg));
                         return -1;
                 }
+
+                _max_plugins = max_plugins_per_rack;
 
                 DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Initialized SG core, core handle %1\n", _sg));
         } else {
@@ -229,12 +220,8 @@ SoundGrid::configure_driver (uint32_t inputs, uint32_t outputs, uint32_t tracks)
             /* process group is set to 7, because these should run last no matter what
              */
 
-            if (add_rack_synchronous (eClusterType_GroupTrack, 7, 1, handle)) {
+            if (add_rack (eClusterType_GroupTrack, 0, 1, handle)) {
                     error << string_compose (_("Cannot create mixing channel for driver output %1"), n) << endmsg;
-                    return -1;
-            }
-            if (set_gain (eClusterType_GroupTrack, handle, 1000.0)) {
-                    error << string_compose (_("Cannot set gain for mixing channel for driver output %1"), n) << endmsg;
                     return -1;
             }
     }
@@ -247,12 +234,12 @@ SoundGrid::configure_driver (uint32_t inputs, uint32_t outputs, uint32_t tracks)
                     
                     ARDOUR::SoundGrid::BusOutputPort src (n, 0); // single output of the group track
                     ARDOUR::SoundGrid::PhysicalOutputPort dst (n);  // real physical channel where the signal should go
+
                     WSAudioAssignment &assignment (outputsCommand.in_Assignments.m_aAssignments[n]);
-                    
                     src.set_source (assignment);
                     dst.set_destination (assignment);
             }
-            
+
             int ret = command (&outputsCommand.m_command);
             
             Dispose_WSAudioAssignmentBatch (&outputsCommand.in_Assignments);
@@ -263,7 +250,7 @@ SoundGrid::configure_driver (uint32_t inputs, uint32_t outputs, uint32_t tracks)
     }
 
     /* wire up inputs and outputs */
-    
+
     if (inputs) {
             
             DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("setting up wiring for %1 inputs\n", inputs));
@@ -299,14 +286,17 @@ SoundGrid::configure_driver (uint32_t inputs, uint32_t outputs, uint32_t tracks)
             
             for (uint32_t n = 0; n < outputs; ++n) {
                     
-                    ARDOUR::SoundGrid::DriverInputPort src (n);   // writable driver/JACK port
+                    ARDOUR::SoundGrid::DriverInputPort src (n);   // writable driver/JACK channel/port
                     ARDOUR::SoundGrid::PseudoPhysicalOutputPort dst (n);  // physical channel where the signal should go
+                    connect (src, dst);
+#if 0
                     WSAudioAssignment &assignment (outputsCommand.in_Assignments.m_aAssignments[n]);
                     
                     src.set_source (assignment);
                     dst.set_destination (assignment);
+#endif
             }
-            
+#if 0            
             int ret = command (&outputsCommand.m_command);
             
             Dispose_WSAudioAssignmentBatch (&outputsCommand.in_Assignments);
@@ -314,6 +304,7 @@ SoundGrid::configure_driver (uint32_t inputs, uint32_t outputs, uint32_t tracks)
             if (ret != 0) {
                     return -1;
             }
+#endif
     }
 
     return 0;
@@ -704,16 +695,21 @@ SoundGrid::assignment_complete (WSCommand* cmd)
 /* Actually do stuff */
 
 bool
-SoundGrid::add_rack_synchronous (uint32_t clusterType, int32_t process_group, uint32_t channels, uint32_t &trackHandle)
+SoundGrid::add_rack (uint32_t clusterType, int32_t process_group, uint32_t channels, uint32_t &trackHandle)
 {
     WSAddTrackCommand myCommand;
 
-    channels = 1;
+    if (channels == 0) {
+            /* we can change it later, but we can get here during initial setup when
+               a route has no outputs.
+            */
+            channels = 1;
+    }
 
     DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("add rack sync, type %1 channels %2 pgroup %3\n",
                                                    clusterType, channels, process_group));
 
-    command (Init_WSAddTrackCommand (&myCommand, clusterType, channels, process_group, (WSDControllerHandle)this, 0));
+    command (Init_WSAddTrackCommand (&myCommand, clusterType, channels, process_group, _max_plugins, (WSDControllerHandle)this, 0));
     
     if (0 == myCommand.m_command.out_status) {
             trackHandle = myCommand.out_trackID.clusterHandle;
@@ -724,19 +720,7 @@ SoundGrid::add_rack_synchronous (uint32_t clusterType, int32_t process_group, ui
 }
 
 bool
-SoundGrid::add_rack_asynchronous (uint32_t clusterType, int32_t process_group, uint32_t channels)
-{
-    WSAddTrackCommand *pMyCommand = new WSAddTrackCommand;
-
-    channels = 1;
-
-    WMSDErr errCode = command (Init_WSAddTrackCommand (pMyCommand, clusterType, channels, process_group, (WSDControllerHandle)this, pMyCommand));
-    
-    return (WMSD_Pending == errCode);
-}
-
-bool
-SoundGrid::remove_rack_synchronous (uint32_t clusterType, uint32_t trackHandle)
+SoundGrid::remove_rack (uint32_t clusterType, uint32_t trackHandle)
 {
     WSRemoveTrackCommand myCommand;
     
@@ -746,7 +730,7 @@ SoundGrid::remove_rack_synchronous (uint32_t clusterType, uint32_t trackHandle)
 }
 
 bool
-SoundGrid::remove_all_racks_synchronous ()
+SoundGrid::remove_all_racks ()
 {
     WSCommand myCommand;
     
@@ -757,7 +741,7 @@ SoundGrid::remove_all_racks_synchronous ()
 }
 
 int
-SoundGrid::set_gain (uint32_t in_clusterType, uint32_t in_trackHandle, double in_gainValue)
+SoundGrid::set_gain (uint32_t clusterType, uint32_t trackHandle, double in_gainValue)
 {
     WSEvent faderEvent;
     Init_WSEvent(&faderEvent);
@@ -766,8 +750,8 @@ SoundGrid::set_gain (uint32_t in_clusterType, uint32_t in_trackHandle, double in
     faderEvent.controllerValue = in_gainValue;
 
     Init_WSControlID(&faderEvent.controlID);
-    faderEvent.controlID.clusterID.clusterType = in_clusterType;
-    faderEvent.controlID.clusterID.clusterHandle = in_trackHandle;
+    faderEvent.controlID.clusterID.clusterType = clusterType;
+    faderEvent.controlID.clusterID.clusterHandle = trackHandle;
     
     faderEvent.controlID.sectionControlID.sectionType = eControlType_Output;
     faderEvent.controlID.sectionControlID.sectionIndex = eControlType_Output_Local;
@@ -1118,9 +1102,6 @@ operator<< (std::ostream& out, const SoundGrid::Port& p)
                                 break;
                         case eControlID_Input_Choose_Link_UnLink:
                                 out << "choose_link_unlink";
-                                break;
-                        case eControlID_Input_Trim:
-                                out << "trim";
                                 break;
                         case eControlID_Input_Phase_On_Off:
                                 out << "phase_on_off";

@@ -571,7 +571,7 @@ def configure(conf):
                                  '-DUSE_SOUNDGRID', 
                                  '-I/Volumes/Work/paul/ardour/3.0-SG/soundgrid',
                                  '-I/Volumes/Work/paul/ardour/3.0-SG/soundgrid/WavesMixerAPI/1.0',
-                                 '-I/Volumes/Work/paul/ardour/3.0-SG/soundgrid/WavesPublicAPI/1.0',
+                                 '-I/Volumes/Work/paul/ardour/3.0-SG/soundgrid/WavesPublicAPI/1.1',
                                  '-I/Volumes/Work/paul/ardour/3.0-SG/soundgrid/WavesPublicAPIs/',
                                  ])
         conf.env.append_value ('CFLAGS_SOUNDGRID', 
@@ -579,7 +579,7 @@ def configure(conf):
                                  '-DUSE_SOUNDGRID', 
                                  '-I/Volumes/Work/paul/ardour/3.0-SG/soundgrid',
                                  '-I/Volumes/Work/paul/ardour/3.0-SG/soundgrid/WavesMixerAPI/1.0',
-                                 '-I/Volumes/Work/paul/ardour/3.0-SG/soundgrid/WavesPublicAPI/1.0',
+                                 '-I/Volumes/Work/paul/ardour/3.0-SG/soundgrid/WavesPublicAPI/1.1',
                                  '-I/Volumes/Work/paul/ardour/3.0-SG/soundgrid/WavesPublicAPIs/',
                                  ])
         conf.env.append_value ('LINKFLAGS_SOUNDGRID',

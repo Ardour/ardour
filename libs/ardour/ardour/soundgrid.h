@@ -43,7 +43,8 @@ class SoundGrid : public boost::noncopyable
   public:
 	~SoundGrid ();
 
-        int initialize (void* window_handle, uint32_t max_tracks, uint32_t max_busses, uint32_t physical_inputs, uint32_t physical_outputs);
+        int initialize (void* window_handle, uint32_t max_tracks, uint32_t max_busses, 
+                        uint32_t physical_inputs, uint32_t physical_outputs, uint32_t max_plugins_per_rack);
         int teardown ();
 
 	static SoundGrid& instance();
@@ -87,10 +88,9 @@ class SoundGrid : public boost::noncopyable
 
         static PBD::Signal0<void> Shutdown;
         
-        bool add_rack_synchronous (uint32_t clusterType, int32_t process_group, uint32_t channels, uint32_t& trackHandle);
-        bool add_rack_asynchronous (uint32_t clusterType, int32_t process_group, uint32_t channels);
-        bool remove_rack_synchronous (uint32_t clusterType, uint32_t trackHandle);
-        bool remove_all_racks_synchronous ();
+        bool add_rack (uint32_t clusterType, int32_t process_group, uint32_t channels, uint32_t& trackHandle);
+        bool remove_rack (uint32_t clusterType, uint32_t trackHandle);
+        bool remove_all_racks ();
 
         int set_gain (uint32_t clusterType, uint32_t trackHandle, double in_gainValue);
         bool get_gain (uint32_t clusterType, uint32_t trackHandle, double &out_gainValue);
@@ -277,6 +277,8 @@ class SoundGrid : public boost::noncopyable
         WSDCoreHandle        _host_handle;
         WSCoreCallbackTable  _callback_table;
         WSMixerConfig        _mixer_config;
+
+        uint32_t _max_plugins;
 
 	void display_update ();
 	static void _display_update ();

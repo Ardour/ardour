@@ -152,8 +152,7 @@ class EngineControl : public Gtk::VBox {
 	Gtk::TreeView soundgrid_iobox_display;
 	Gtk::TreeView soundgrid_server_display;
 	Gtk::VBox soundgrid_vbox;
-	void create_soundgrid_inventory ();
-	void refill_soundgrid_inventory ();
+
         void set_soundgrid_parameters ();
 	void soundgrid_configure ();
 
