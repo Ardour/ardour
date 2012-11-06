@@ -1534,17 +1534,19 @@ AudioClock::on_button_press_event (GdkEventButton *ev)
 			y = ev->y - ((upper_height - layout_height)/2);
 			x = ev->x - layout_x_offset;
 			
-			if (_layout->xy_to_index (x * PANGO_SCALE, y * PANGO_SCALE, index, trailing)) {
-				drag_field = index_to_field (index);
-				dragging = true;
-				/* make absolutely sure that the pointer is grabbed */
-				gdk_pointer_grab(ev->window,false ,
-						 GdkEventMask( Gdk::POINTER_MOTION_MASK | Gdk::BUTTON_PRESS_MASK |Gdk::BUTTON_RELEASE_MASK),
-						 NULL,NULL,ev->time);
-				drag_accum = 0;
-				drag_start_y = ev->y;
-				drag_y = ev->y;
+			if (!_layout->xy_to_index (x * PANGO_SCALE, y * PANGO_SCALE, index, trailing)) {
+				/* pretend it is a character on the far right */
+				index = 99;
 			}
+			drag_field = index_to_field (index);
+			dragging = true;
+			/* make absolutely sure that the pointer is grabbed */
+			gdk_pointer_grab(ev->window,false ,
+					 GdkEventMask( Gdk::POINTER_MOTION_MASK | Gdk::BUTTON_PRESS_MASK |Gdk::BUTTON_RELEASE_MASK),
+					 NULL,NULL,ev->time);
+			drag_accum = 0;
+			drag_start_y = ev->y;
+			drag_y = ev->y;
 		}
 		break;
 		
