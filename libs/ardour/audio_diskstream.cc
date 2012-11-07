@@ -578,7 +578,7 @@ AudioDiskstream::process (framepos_t transport_frame, pframes_t nframes, framecn
 		/* no varispeed playback if we're recording, because the output .... TBD */
 
 		if (rec_nframes == 0 && _actual_speed != 1.0f) {
-			necessary_samples = (framecnt_t) floor ((nframes * fabs (_actual_speed))) + 1;
+			necessary_samples = (framecnt_t) ceil ((nframes * fabs (_actual_speed))) + 2;
 		} else {
 			necessary_samples = nframes;
 		}
