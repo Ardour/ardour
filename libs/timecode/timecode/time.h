@@ -39,6 +39,8 @@ enum TimecodeFormat {
 	timecode_25,
 	timecode_2997,
 	timecode_2997drop,
+	timecode_2997000,
+	timecode_2997000drop,
 	timecode_30,
 	timecode_30drop,
 	timecode_5994,

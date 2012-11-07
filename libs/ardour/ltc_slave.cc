@@ -231,6 +231,15 @@ LTC_Slave::detect_ltc_fps(int frameno, bool df)
 	/* poll and check session TC */
 	TimecodeFormat tc_format = apparent_timecode_format();
 	TimecodeFormat cur_timecode = session.config.get_timecode_format();
+
+	if (Config->get_timecode_source_2997() && tc_format == Timecode::timecode_2997drop) {
+		tc_format = Timecode::timecode_2997000drop;
+	}
+	else
+	if (Config->get_timecode_source_2997() && tc_format == Timecode::timecode_2997) {
+		tc_format = Timecode::timecode_2997000;
+	}
+
 	if (Config->get_timecode_sync_frame_rate()) {
 		/* enforce time-code */
 		if (!did_reset_tc_format) {

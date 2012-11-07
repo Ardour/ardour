@@ -1087,6 +1087,18 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Transport"), _sync_genlock);
 
+	_sync_source_2997 = new BoolOption (
+		"timecode-source-2997",
+		_("Lock to 29.9700 fps instead of 30000/1001"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_timecode_source_2997),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_timecode_source_2997)
+		);
+	Gtkmm2ext::UI::instance()->set_tip
+		(_sync_genlock->tip_widget(),
+		 _("<b>When enabled</b> the external timecode source is assumed to use 29.97 fps instead of 30000/1001"));
+
+	add_option (_("Transport"), _sync_source_2997);
+
 	_ltc_port = new ComboStringOption (
 		"ltc-source-port",
 		_("LTC incoming port"),
@@ -1782,10 +1794,12 @@ RCOptionEditor::parameter_changed (string const & p)
 		case ARDOUR::LTC:
 			_sync_genlock->set_sensitive (true);
 			_sync_framerate->set_sensitive (true);
+			_sync_source_2997->set_sensitive (true);
 			break;
 		default:
 			_sync_genlock->set_sensitive (false);
 			_sync_framerate->set_sensitive (false);
+			_sync_source_2997->set_sensitive (false);
 			break;
 		}
 #ifdef HAVE_LTC
