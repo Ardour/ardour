@@ -63,7 +63,7 @@ void
 PortInsert::start_latency_detection ()
 {
 	delete _mtdm;
-        _mtdm = new MTDM;
+        _mtdm = new MTDM (_session.frame_rate());
         _latency_flush_frames = false;
         _latency_detect = true;
         _measured_latency = 0;
