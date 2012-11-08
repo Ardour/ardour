@@ -47,7 +47,9 @@
 #include "ardour/midi_port.h"
 #include "ardour/port.h"
 #include "ardour/process_thread.h"
+#include "ardour/profile.h"
 #include "ardour/session.h"
+#include "ardour/soundgrid.h"
 
 #include "i18n.h"
 
@@ -1111,7 +1113,8 @@ AudioEngine::get_ports (const string& port_name_pattern, const string& type_name
 			return 0;
 		}
 	}
-	return jack_get_ports (_priv_jack, port_name_pattern.c_str(), type_name_pattern.c_str(), flags);
+	const char** p = jack_get_ports (_priv_jack, port_name_pattern.c_str(), type_name_pattern.c_str(), flags);
+        return p;
 }
 
 void
@@ -1200,9 +1203,15 @@ AudioEngine::n_physical (unsigned long flags) const
 {
 	ChanCount c;
 
+        if (Profile->get_soundgrid()) {
+                c.set (DataType::AUDIO, SoundGrid::instance().physical_inputs() + SoundGrid::instance().physical_outputs());
+                return c;
+        }
+
 	GET_PRIVATE_JACK_POINTER_RET (_jack, c);
 
 	const char ** ports = jack_get_ports (_priv_jack, NULL, NULL, JackPortIsPhysical | flags);
+
 	if (ports == 0) {
 		return c;
 	}
@@ -1222,12 +1231,24 @@ AudioEngine::n_physical (unsigned long flags) const
 ChanCount
 AudioEngine::n_physical_inputs () const
 {
+        if (Profile->get_soundgrid()) {
+                ChanCount c;
+                c.set (DataType::AUDIO, SoundGrid::instance().physical_inputs());
+                return c;
+        }
+
 	return n_physical (JackPortIsInput);
 }
 
 ChanCount
 AudioEngine::n_physical_outputs () const
 {
+        if (Profile->get_soundgrid()) {
+                ChanCount c;
+                c.set (DataType::AUDIO, SoundGrid::instance().physical_outputs());
+                return c;
+        }
+
 	return n_physical (JackPortIsOutput);
 }
 
@@ -1242,12 +1263,29 @@ AudioEngine::get_physical (DataType type, unsigned long flags, vector<string>& p
 	}
 
 	if (ports) {
-		for (uint32_t i = 0; ports[i]; ++i) {
+                for (uint32_t i = 0; ports[i]; ++i) {
                         if (strstr (ports[i], "Midi-Through")) {
                                 continue;
                         }
-			phy.push_back (ports[i]);
-		}
+                        phy.push_back (ports[i]);
+                }
+
+                if (Profile->get_soundgrid()) {
+                        uint32_t limit;
+                        if (flags & JackPortIsOutput) {
+                                limit = SoundGrid::instance().physical_outputs();
+                        } else {
+                                limit = SoundGrid::instance().physical_inputs();
+                        }
+
+                        while (phy.size() > limit) {
+                                phy.pop_back ();
+                        }
+
+                        cerr << "\n\n\n\n returned " << phy.size() << " physical ports\n";
+
+                }
+
 		free (ports);
 	}
 }

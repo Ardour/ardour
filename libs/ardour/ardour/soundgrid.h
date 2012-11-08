@@ -47,6 +47,9 @@ class SoundGrid : public boost::noncopyable
                         uint32_t physical_inputs, uint32_t physical_outputs, uint32_t max_plugins_per_rack);
         int teardown ();
 
+        bool initialized () const;
+        bool driver_configured() const;
+
 	static SoundGrid& instance();
 	static bool available ();
 	static std::vector<std::string> lan_port_names();
@@ -56,31 +59,6 @@ class SoundGrid : public boost::noncopyable
 	static std::vector<uint32_t> possible_network_buffer_sizes ();
 
         static int set_parameters (const std::string& device, int sr, int bufsize);
-
-	struct InventoryItem {
-	    virtual ~InventoryItem() {}; /* force virtual so that we can use dynamic_cast<> */
-
-	    uint32_t    assign;
-	    std::string name;
-	    std::string mac;
-            std::string hostname;
-	    uint32_t    channels;
-	    std::string device;
-	    std::string status;
-	};
-
-	struct SGSInventoryItem : public InventoryItem {
-	};
-
-	struct IOInventoryItem : public InventoryItem {
-                int32_t sample_rate;
-                int32_t output_channels;
-	};
-
-	typedef std::vector<InventoryItem*> Inventory;
-	static void update_inventory (Inventory&);
-	static void clear_inventory (Inventory&);
-
         static void driver_register (const WSDCoreHandle, const WSCoreCallbackTable*, const WSMixerConfig*);
 
         void finalize (void* ecc, int state);
@@ -96,8 +74,10 @@ class SoundGrid : public boost::noncopyable
         bool get_gain (uint32_t clusterType, uint32_t trackHandle, double &out_gainValue);
 
         int configure_io (uint32_t clusterType, uint32_t trackHandle, uint32_t channels);
-
         int configure_driver (uint32_t physical_inputs, uint32_t physical_outputs, uint32_t tracks);
+
+        uint32_t physical_inputs() const { return _physical_inputs; }
+        uint32_t physical_outputs() const { return _physical_outputs; }
 
         struct Port {
             
@@ -238,7 +218,7 @@ class SoundGrid : public boost::noncopyable
         struct TrackOutputPort : public Port {
                 TrackOutputPort (uint32_t chainer_id, uint32_t channel) 
                         : Port (eClusterType_InputTrack, chainer_id,
-                                eControlType_Output, 0, eControlID_Output_Gain, channel, Port::Pre) {}
+                                eControlType_Output, 0, eControlID_Output_Gain, channel, Port::Post) {}
         };
 
         struct BusInputPort : public Port {
@@ -250,7 +230,7 @@ class SoundGrid : public boost::noncopyable
         struct BusOutputPort : public Port {
                 BusOutputPort (uint32_t chainer_id, uint32_t channel) 
                         : Port (eClusterType_GroupTrack, chainer_id,
-                                eControlType_Output, 0, eControlID_Output_Gain, channel, Port::Pre) {}
+                                eControlType_Output, 0, eControlID_Output_Gain, channel, Port::Post) {}
         };
         
         
@@ -278,6 +258,10 @@ class SoundGrid : public boost::noncopyable
         WSCoreCallbackTable  _callback_table;
         WSMixerConfig        _mixer_config;
 
+        bool _driver_configured;
+
+        uint32_t _physical_inputs;
+        uint32_t _physical_outputs;
         uint32_t _max_plugins;
 
 	void display_update ();

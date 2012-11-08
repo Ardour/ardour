@@ -4154,7 +4154,7 @@ Session::add_automation_list(AutomationList *al)
 bool
 Session::have_rec_enabled_track () const
 {
-	return g_atomic_int_get (&_have_rec_enabled_track) == 1;
+	return g_atomic_int_get (const_cast<gint*>(&_have_rec_enabled_track)) == 1;
 }
 
 /** Update the state of our rec-enabled tracks flag */

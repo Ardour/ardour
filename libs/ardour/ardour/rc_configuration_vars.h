@@ -202,3 +202,11 @@ CONFIG_VARIABLE (bool, widget_prelight, "widget-prelight", true)
 CONFIG_VARIABLE (std::string, mixer_strip_visibility, "mixer-strip-visibility", "PhaseInvert,SoloSafe,SoloIsolated,Group,MeterPoint")
 CONFIG_VARIABLE (bool, allow_non_quarter_pulse, "allow-non-quarter-pulse", false)
 CONFIG_VARIABLE (bool, show_region_gain, "show-region-gain", false)
+
+/* SoundGrid specific */
+
+CONFIG_VARIABLE (uint32_t, sg_physical_inputs, "soundgrid-physical-inputs", 8)
+CONFIG_VARIABLE (uint32_t, sg_physical_outputs, "soundgrid-physical-inputs", 8)
+CONFIG_VARIABLE (uint32_t, sg_tracks, "soundgrid-tracks", 24)
+CONFIG_VARIABLE (uint32_t, sg_busses, "soundgrid-tracks", 8)
+CONFIG_VARIABLE (uint32_t, sg_plugins_per_track, "soundgrid-plugins-per-track", 8)
