@@ -39,7 +39,7 @@ class EngineControl : public Gtk::VBox {
 	EngineControl ();
 	~EngineControl ();
 
-	static bool engine_running ();
+	static bool need_setup ();
 	int setup_engine ();
 
 	bool was_used() const { return _used; }
@@ -94,6 +94,8 @@ class EngineControl : public Gtk::VBox {
 	Gtk::Notebook notebook;
 
 	bool _used;
+
+        static bool engine_running ();
 
 	void driver_changed ();
 	void build_command_line (std::vector<std::string>&);

@@ -329,37 +329,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	DPIReset.connect (sigc::mem_fun (*this, &ARDOUR_UI::resize_text_widgets));
 }
 
-/** @return true if a session was chosen and `apply' clicked, otherwise false if `cancel' was clicked */
-bool
-ARDOUR_UI::run_startup (bool should_be_new, std::string load_template)
-{
-	delete _startup;
-	_startup = new ArdourStartup ();
-
-	XMLNode* audio_setup = Config->extra_xml ("AudioSetup");
-
-	if (audio_setup && _startup->engine_control()) {
-		_startup->engine_control()->set_state (*audio_setup);
-	}
-
-	_startup->set_new_only (should_be_new);
-	if (!load_template.empty()) {
-		_startup->set_load_template (load_template);
-	}
-	_startup->present ();
-
-	main().run();
-
-	_startup->hide ();
-
-	switch (_startup->response()) {
-	case RESPONSE_OK:
-		return true;
-	default:
-		return false;
-	}
-}
-
 int
 ARDOUR_UI::create_engine ()
 {
@@ -2458,7 +2427,7 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 
 	while (ret != 0) {
 
-		if (!should_be_new && !ARDOUR_COMMAND_LINE::session_name.empty()) {
+		if (!ARDOUR_COMMAND_LINE::session_name.empty()) {
 
 			/* if they named a specific statefile, use it, otherwise they are
 			   just giving a session folder, and we want to use it as is
@@ -2475,71 +2444,79 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 				session_path = ARDOUR_COMMAND_LINE::session_name;
 				session_name = Glib::path_get_basename (ARDOUR_COMMAND_LINE::session_name);
 			}
+		}
 
-		} else {
-
-			bool const apply = run_startup (should_be_new, load_template);
-
-			if (!apply) {
-				if (quit_on_cancel) {
-					exit (1);
-				} else {
-					return ret;
-				}
-			}
-
-			/* if we run the startup dialog again, offer more than just "new session" */
-
-			should_be_new = false;
-
-			session_name = _startup->session_name (likely_new);
-
-			string::size_type suffix = session_name.find (statefile_suffix);
-
-			if (suffix != string::npos) {
-				session_name = session_name.substr (0, suffix);
-			}
-
-			/* this shouldn't happen, but we catch it just in case it does */
-
-			if (session_name.empty()) {
-				continue;
-			}
-
-			if (_startup->use_session_template()) {
-				template_name = _startup->session_template_name();
-				_session_is_new = true;
-			}
-
-			if (session_name[0] == G_DIR_SEPARATOR ||
-			    (session_name.length() > 2 && session_name[0] == '.' && session_name[1] == G_DIR_SEPARATOR) ||
-			    (session_name.length() > 3 && session_name[0] == '.' && session_name[1] == '.' && session_name[2] == G_DIR_SEPARATOR)) {
-
-				/* absolute path or cwd-relative path specified for session name: infer session folder
-				   from what was given.
-				*/
-
-				session_path = Glib::path_get_dirname (session_name);
-				session_name = Glib::path_get_basename (session_name);
-
+		delete _startup;
+		_startup = new ArdourStartup (should_be_new, session_name, session_path, load_template);
+		
+		if (!_startup->ready_without_display()) {
+			_startup->present ();
+			main().run();
+			_startup->hide ();
+		}
+		
+		switch (_startup->response()) {
+		case RESPONSE_OK:
+			break;
+		default:
+			if (quit_on_cancel) {
+				exit (1);
 			} else {
-
-				session_path = _startup->session_folder();
-
-				char illegal = Session::session_name_is_legal (session_name);
-
-				if (illegal) {
-					MessageDialog msg (*_startup,
-							   string_compose (_("To ensure compatibility with various systems\n"
-									     "session names may not contain a '%1' character"),
-									   illegal));
-					msg.run ();
-					ARDOUR_COMMAND_LINE::session_name = ""; // cancel that
-					continue;
-				}
+				return ret;
 			}
 		}
 
+		/* if we run the startup dialog again, offer more than just "new session" */
+		
+		should_be_new = false;
+		
+		session_name = _startup->session_name (likely_new);
+		
+		string::size_type suffix = session_name.find (statefile_suffix);
+		
+		if (suffix != string::npos) {
+			session_name = session_name.substr (0, suffix);
+		}
+		
+		/* this shouldn't happen, but we catch it just in case it does */
+		
+		if (session_name.empty()) {
+			continue;
+		}
+		
+		if (_startup->use_session_template()) {
+			template_name = _startup->session_template_name();
+			_session_is_new = true;
+		}
+		
+		if (session_name[0] == G_DIR_SEPARATOR ||
+		    (session_name.length() > 2 && session_name[0] == '.' && session_name[1] == G_DIR_SEPARATOR) ||
+		    (session_name.length() > 3 && session_name[0] == '.' && session_name[1] == '.' && session_name[2] == G_DIR_SEPARATOR)) {
+			
+			/* absolute path or cwd-relative path specified for session name: infer session folder
+			   from what was given.
+			*/
+			
+			session_path = Glib::path_get_dirname (session_name);
+			session_name = Glib::path_get_basename (session_name);
+			
+		} else {
+
+			session_path = _startup->session_folder();
+			
+			char illegal = Session::session_name_is_legal (session_name);
+			
+			if (illegal) {
+				MessageDialog msg (*_startup,
+						   string_compose (_("To ensure compatibility with various systems\n"
+								     "session names may not contain a '%1' character"),
+								   illegal));
+				msg.run ();
+				ARDOUR_COMMAND_LINE::session_name = ""; // cancel that
+				continue;
+			}
+		}
+	
 		if (create_engine ()) {
 			break;
 		}
