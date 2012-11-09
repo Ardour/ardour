@@ -351,10 +351,12 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full, framepos_t now)
 				did_reset_tc_format = true;
 			}
 			if (cur_timecode != tc_format) {
-				warning << string_compose(_("Session framerate adjusted from %1 TO: MTC's %2."),
-						Timecode::timecode_format_name(cur_timecode),
-						Timecode::timecode_format_name(tc_format))
-					<< endmsg;
+				if (ceil(Timecode::timecode_to_frames_per_second(cur_timecode)) != ceil(Timecode::timecode_to_frames_per_second(tc_format))) {
+					warning << string_compose(_("Session framerate adjusted from %1 TO: MTC's %2."),
+							Timecode::timecode_format_name(cur_timecode),
+							Timecode::timecode_format_name(tc_format))
+						<< endmsg;
+				}
 			}
 			session.config.set_timecode_format (tc_format);
 		} else {
@@ -363,10 +365,12 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full, framepos_t now)
 			if (a3e_timecode != cur_timecode) printed_timecode_warning = false;
 
 			if (cur_timecode != tc_format && ! printed_timecode_warning) {
-				warning << string_compose(_("Session and MTC framerate mismatch: MTC:%1 Ardour:%2."),
-						Timecode::timecode_format_name(tc_format),
-						Timecode::timecode_format_name(cur_timecode))
-					<< endmsg;
+				if (ceil(Timecode::timecode_to_frames_per_second(cur_timecode)) != ceil(Timecode::timecode_to_frames_per_second(tc_format))) {
+					warning << string_compose(_("Session and MTC framerate mismatch: MTC:%1 Ardour:%2."),
+							Timecode::timecode_format_name(tc_format),
+							Timecode::timecode_format_name(cur_timecode))
+						<< endmsg;
+				}
 				printed_timecode_warning = true;
 			}
 		}

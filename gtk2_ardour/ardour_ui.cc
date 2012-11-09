@@ -1084,7 +1084,7 @@ ARDOUR_UI::update_timecode_format ()
 			matching = true;
 		}
 			
-		snprintf (buf, sizeof (buf), S_("Timecode|TC: <span foreground=\"%s\">%sfps</span>"), 
+		snprintf (buf, sizeof (buf), S_("Timecode|TC: <span foreground=\"%s\">%s</span>"),
 			  matching ? X_("green") : X_("red"),
 			  Timecode::timecode_format_name (_session->config.get_timecode_format()).c_str());
 	} else {
