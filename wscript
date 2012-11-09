@@ -759,28 +759,7 @@ def build(bld):
     for i in children:
         bld.recurse(i)
 
-    # ideally, we'd like to use the OS-provided MIDI API
-    # for default ports. that doesn't work on at least
-    # Fedora (Nov 9th, 2009) so use JACK MIDI on linux.
-
-    if sys.platform == 'darwin':
-        rc_subst_dict = {
-                'MIDITAG'    : 'control',
-                'MIDITYPE'   : 'coremidi',
-                'JACK_INPUT' : 'auditioner'
-                }
-    else:
-        rc_subst_dict = {
-                'MIDITAG'    : 'control',
-                'MIDITYPE'   : 'jack',
-                'JACK_INPUT' : 'auditioner'
-                }
-
-    obj              = bld(features = 'subst')
-    obj.source       = 'ardour.rc.in'
-    obj.target       = 'ardour_system.rc'
-    obj.dict         = rc_subst_dict
-    obj.install_path = '${SYSCONFDIR}/ardour3'
+    bld.install_files (os.path.join(bld.env['SYSCONFDIR'], 'ardour3', ), 'ardour_system.rc')
 
 def i18n(bld):
     bld.recurse (i18n_children)

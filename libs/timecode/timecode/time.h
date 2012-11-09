@@ -48,17 +48,17 @@ enum TimecodeFormat {
 };
 
 struct Time {
-	bool         negative;
-	uint32_t     hours;
-	uint32_t     minutes;
-	uint32_t     seconds;
-	uint32_t     frames;        ///< Timecode frames (not audio samples)
-	uint32_t     subframes;     ///< Typically unused
-	float        rate;          ///< Frame rate of this Time
-	static float default_rate;  ///< Rate to use for default constructor
-	bool         drop;          ///< Whether this Time uses dropframe Timecode
+	bool          negative;
+	uint32_t      hours;
+	uint32_t      minutes;
+	uint32_t      seconds;
+	uint32_t      frames;        ///< Timecode frames (not audio samples)
+	uint32_t      subframes;     ///< Typically unused
+	double        rate;          ///< Frame rate of this Time
+	static double default_rate;  ///< Rate to use for default constructor
+	bool          drop;          ///< Whether this Time uses dropframe Timecode
 
-	Time (float a_rate = default_rate) {
+	Time (double a_rate = default_rate) {
 		negative = false;
 		hours = 0;
 		minutes = 0;
@@ -99,7 +99,7 @@ void seconds_floor (Time& timecode);
 void minutes_floor (Time& timecode);
 void hours_floor (Time& timecode);
 
-float timecode_to_frames_per_second(TimecodeFormat const t);
+double timecode_to_frames_per_second(TimecodeFormat const t);
 bool timecode_has_drop_frames(TimecodeFormat const t);
 
 std::string timecode_format_name (TimecodeFormat const t);

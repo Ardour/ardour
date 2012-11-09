@@ -1070,7 +1070,7 @@ RCOptionEditor::RCOptionEditor ()
 		   "<b>When enabled</b> the session video frame rate will be changed to match that of the selected external timecode source.\n\n"
 		   "<b>When disabled</b> the session video frame rate will not be changed to match that of the selected external timecode source."
 		   "Instead the frame rate indication in the main clock will flash red and Ardour will convert between the external "
-		   "timecode standard and the session standard"));
+		   "timecode standard and the session standard."));
 
 	add_option (_("Transport"), _sync_framerate);
 
@@ -1082,7 +1082,7 @@ RCOptionEditor::RCOptionEditor ()
 		);
 	Gtkmm2ext::UI::instance()->set_tip 
 		(_sync_genlock->tip_widget(), 
-		 _("<b>When enabled</b> indicates that the selected external timecode source shares sync (Black &amp; Burst, Wordclock, etc) with the audio interface"));
+		 _("<b>When enabled</b> indicates that the selected external timecode source shares sync (Black &amp; Burst, Wordclock, etc) with the audio interface."));
 
 
 	add_option (_("Transport"), _sync_genlock);
@@ -1094,8 +1094,14 @@ RCOptionEditor::RCOptionEditor ()
 		sigc::mem_fun (*_rc_config, &RCConfiguration::set_timecode_source_2997)
 		);
 	Gtkmm2ext::UI::instance()->set_tip
-		(_sync_genlock->tip_widget(),
-		 _("<b>When enabled</b> the external timecode source is assumed to use 29.97 fps instead of 30000/1001"));
+		(_sync_source_2997->tip_widget(),
+		 _("<b>When enabled</b> the external timecode source is assumed to use 29.97 fps instead of 30000/1001.\n"
+			 "SMPTE 12M-1999 specifies 29.97df as 30000/1001. The spec further mentions that "
+			 "drop-frame timecode has an accumulated error of -86ms over a 24-hour period.\n"
+			 "Drop-frame timecode would compensate exactly for a NTSC color frame rate of 30 * 0.9990 (ie 29.970000). "
+			 "That is not the actual rate, however some vendor use that rate - despite it being against the specs - "
+			 "because the variant of using exactly 29.97 fps has zero timecode drift.\n"
+			 ));
 
 	add_option (_("Transport"), _sync_source_2997);
 

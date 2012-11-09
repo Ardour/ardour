@@ -10,9 +10,9 @@
     <Option name="mute-affects-main-outs" value="1"/>
     <Option name="monitoring-model" value="ExternalMonitoring"/>
     <Option name="solo-latch" value="1"/>
-    <Option name="mtc-port" value="@MIDITAG@"/>
-    <Option name="mmc-port" value="@MIDITAG@"/>
-    <Option name="midi-port" value="@MIDITAG@"/>
+    <Option name="mtc-port" value="mtc"/>
+    <Option name="mmc-port" value="mmc"/>
+    <Option name="midi-port" value="control"/>
     <Option name="jack-time-master" value="1"/>
     <Option name="trace-midi-input" value="0"/>
     <Option name="trace-midi-output" value="0"/>
@@ -27,8 +27,8 @@
     <Option name="xfade-model" value="FullCrossfade"/>
     <Option name="no-new-session-dialog" value="1"/>
     <Option name="timecode-source-is-synced" value="1"/>
-    <Option name="auditioner-left-out" value="@JACK_INPUT@1"/>
-    <Option name="auditioner-right-out" value="@JACK_INPUT@2"/>
+    <Option name="auditioner-left-out" value="default"/>
+    <Option name="auditioner-right-out" value="default"/>
     <Option name="quieten-at-speed" value="1.000000"/>
     <Option name="use-vst" value="1"/>
     <Option name="use-tranzport" value="1"/>

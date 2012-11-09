@@ -66,7 +66,7 @@ Session::ltc_tx_initialize()
 	DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX init sr: %1 fps: %2\n", nominal_frame_rate(), timecode_to_frames_per_second(ltc_enc_tcformat)));
 	ltc_encoder = ltc_encoder_create(nominal_frame_rate(),
 			timecode_to_frames_per_second(ltc_enc_tcformat),
-			0);
+			-2);
 
 	ltc_encoder_set_bufsize(ltc_encoder, nominal_frame_rate(), 23.0);
 	ltc_encoder_set_filter(ltc_encoder, LTC_RISE_TIME(1.0));
@@ -81,6 +81,7 @@ Session::ltc_tx_initialize()
 	ltc_tx_resync_latency();
 	Xrun.connect_same_thread (*this, boost::bind (&Session::ltc_tx_reset, this));
 	engine().GraphReordered.connect_same_thread (*this, boost::bind (&Session::ltc_tx_resync_latency, this));
+	restarting = false;
 }
 
 void
@@ -113,6 +114,8 @@ Session::ltc_tx_reset()
 	ltc_buf_off = 0;
 	ltc_enc_byte = 0;
 	ltc_enc_cnt = 0;
+
+	ltc_encoder_reset(ltc_encoder);
 }
 
 void
@@ -134,6 +137,7 @@ Session::ltc_tx_recalculate_position()
 		config.get_subframes_per_frame(),
 		config.get_timecode_offset_negative(), config.get_timecode_offset()
 		);
+	restarting = false;
 }
 
 void
@@ -193,7 +197,7 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 	TimecodeFormat cur_timecode = config.get_timecode_format();
 	if (cur_timecode != ltc_enc_tcformat) {
 		DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX1: TC format mismatch - reinit sr: %1 fps: %2\n", nominal_frame_rate(), timecode_to_frames_per_second(cur_timecode)));
-		if (ltc_encoder_reinit(ltc_encoder, nominal_frame_rate(), timecode_to_frames_per_second(cur_timecode), 0)) {
+		if (ltc_encoder_reinit(ltc_encoder, nominal_frame_rate(), timecode_to_frames_per_second(cur_timecode), -2)) {
 			PBD::error << _("LTC encoder: invalid framerate - LTC encoding is disabled for the remainder of this session.") << endmsg;
 			ltc_tx_cleanup();
 			return;
@@ -396,6 +400,12 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 		maxdiff = slave()->resolution();
 	} else {
 		maxdiff = ceil(fabs(ltc_speed))*2.0;
+		if (nominal_frame_rate() != frame_rate()) {
+			maxdiff *= 3.0;
+		}
+		if (ltc_enc_tcformat == Timecode::timecode_23976 || ltc_enc_tcformat == Timecode::timecode_24976) {
+			maxdiff *= 15.0;
+		}
 	}
 
 	DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX4: enc: %1 + %2 - %3 || buf-bytes: %4 enc-byte: %5\n",
@@ -464,6 +474,10 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 		DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX5 restart encoder: soff %1 byte %2 cycoff %3\n",
 					soff, ltc_enc_byte, cyc_off));
 
+		if ( (ltc_speed < 0 && ltc_enc_byte !=9 ) || (ltc_speed >= 0 && ltc_enc_byte !=0 ) ) {
+			restarting = true;
+		}
+
 		if (cyc_off > 0 && cyc_off <= nframes) {
 			/* offset in this cycle */
 			txf= rint(cyc_off / fabs(ltc_speed));
@@ -483,11 +497,11 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 		/* reduce (low freq) jitter.
 		 * The granularity of the LTC encoder speed is 1 byte =
 		 * (frames-per-timecode-frame / 10) audio-samples.
-		 * Thus, tiny speed changes [as produced by the slave]
+		 * Thus, tiny speed changes [as produced by some slaves]
 		 * may not have any effect in the cycle when they occur,
 		 * but they will add up over time.
 		 *
-		 * This is a linear approx to compensate for this drift
+		 * This is a linear approx to compensate for this jitter
 		 * and prempt re-sync when the drift builds up.
 		 *
 		 * However, for very fast speeds - when 1 LTC bit is
@@ -536,13 +550,24 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 			}
 		}
 
-		if (ltc_encoder_encode_byte(ltc_encoder, ltc_enc_byte, (ltc_speed==0)?1.0:(1.0/ltc_speed))) {
-			DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX6.3 encoder error byte %1\n", ltc_enc_byte));
-			ltc_encoder_buffer_flush(ltc_encoder);
-			ltc_tx_reset();
-			return;
+		int enc_frames;
+
+		if (restarting) {
+			/* write zero bytes -- don't touch encoder until we're at a frame-boundary
+			 * otherwise the biphase polarity may be inverted.
+			 */
+			enc_frames = fptcf / 10.0;
+			memset(&ltc_enc_buf[ltc_buf_len], 127, enc_frames * sizeof(ltcsnd_sample_t));
+		} else {
+			if (ltc_encoder_encode_byte(ltc_encoder, ltc_enc_byte, (ltc_speed==0)?1.0:(1.0/ltc_speed))) {
+				DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX6.3 encoder error byte %1\n", ltc_enc_byte));
+				ltc_encoder_buffer_flush(ltc_encoder);
+				ltc_tx_reset();
+				return;
+			}
+			enc_frames = ltc_encoder_get_buffer(ltc_encoder, &(ltc_enc_buf[ltc_buf_len]));
 		}
-		int enc_frames = ltc_encoder_get_buffer(ltc_encoder, &(ltc_enc_buf[ltc_buf_len]));
+
 #ifdef LTC_GEN_FRAMEDBUG
 		DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX6.3 encoded %1 bytes for LTC-byte %2 at spd %3\n", enc_frames, ltc_enc_byte, ltc_speed));
 #endif
@@ -573,6 +598,7 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 				ltc_enc_cnt = 0;
 			} else if (ltc_enc_byte == 0) {
 				ltc_enc_cnt = 0;
+				restarting=false;
 			}
 		}
 #ifdef LTC_GEN_FRAMEDBUG
