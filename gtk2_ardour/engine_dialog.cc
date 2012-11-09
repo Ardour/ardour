@@ -53,6 +53,8 @@
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/gtk_ui.h"
 
+#include "ardour/rc_configuration.h"
+
 #include "pbd/convert.h"
 #include "pbd/error.h"
 #include "pbd/pathscanner.h"
@@ -420,6 +422,14 @@ EngineControl::EngineControl ()
 
 	set_border_width (12);
 	pack_start (notebook);
+
+	/* Pick up any existing audio setup configuration, if appropriate */
+
+	XMLNode* audio_setup = ARDOUR::Config->extra_xml ("AudioSetup");
+	
+	if (audio_setup) {
+		set_state (*audio_setup);
+	}
 }
 
 EngineControl::~EngineControl ()
@@ -647,12 +657,54 @@ EngineControl::build_command_line (vector<string>& cmd)
 }
 
 bool
+EngineControl::soundgrid_requested ()
+{
+        bool ret = false;
+
+#ifdef HAVE_SOUNDGRID
+        /* we have to determine if we plan to use SoundGrid and if so, initialize it.
+         * 
+         * this is really crude: we need to check for a .jackdrc file, read it and
+         * see if it appears to involve SoundGrid.
+         */
+
+        string path = Glib::build_filename (Glib::get_home_dir(), ".jackdrc");
+
+        ifstream jackdrc (path.c_str());
+        
+        if (jackdrc) {
+                char buf[2048];
+                string str;
+
+                jackdrc.getline (buf, sizeof (buf));
+                str = buf;
+
+                if (str.find (SoundGrid::coreaudio_device_name()) != string::npos) {
+                        /* SoundGrid is involved */
+                        ret = true;
+                }
+                jackdrc.close ();
+        }
+#endif        
+
+        return ret;
+}
+
+bool
+EngineControl::need_setup ()
+{
+	return soundgrid_requested() || !engine_running();
+}
+
+bool
 EngineControl::engine_running ()
 {
         EnvironmentalProtectionAgency* global_epa = EnvironmentalProtectionAgency::get_global_epa ();
         boost::scoped_ptr<EnvironmentalProtectionAgency> current_epa;
 
-        /* revert all environment settings back to whatever they were when ardour started
+        /* revert all environment settings back to whatever they were when
+	 * ardour started, because ardour's startup script may have reset
+	 * something in ways that interfere with finding/starting JACK.
          */
 
         if (global_epa) {

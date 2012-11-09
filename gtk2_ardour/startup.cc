@@ -63,97 +63,119 @@ static string poor_mans_glob (string path)
 }
 
 
-ArdourStartup::ArdourStartup ()
+ArdourStartup::ArdourStartup (bool require_new, 
+                              const std::string& session_name, 
+                              const std::string& session_path, 
+                              const std::string& template_name)
 	: _response (RESPONSE_OK)
+	, config_modified (false)
+	, new_only (require_new)
+	, default_dir_chooser (0)
 	, ic_new_session_button (_("Create a new session"))
 	, ic_existing_session_button (_("Open an existing session"))
-	, monitor_via_hardware_button (_("Use an external mixer or the hardware mixer of your audio interface.\n\
-Ardour will play NO role in monitoring"))
+	, monitor_via_hardware_button (_("Use an external mixer or the hardware mixer of your audio interface.\n"
+                                         "Ardour will play NO role in monitoring"))
 	, monitor_via_ardour_button (string_compose (_("Ask %1 to play back material as it is being recorded"), PROGRAM_NAME))
+	, engine_dialog (0)
 	, new_folder_chooser (FILE_CHOOSER_ACTION_SELECT_FOLDER)
 	, more_new_session_options_button (_("I'd like more options for this session"))
 	, _output_limit_count_adj (1, 0, 100, 1, 10, 0)
 	, _input_limit_count_adj (1, 0, 100, 1, 10, 0)
 	, _master_bus_channel_count_adj (2, 0, 100, 1, 10, 0)
+	, audio_page_index (-1)
+	, new_user_page_index (-1)
+	, default_folder_page_index (-1)
+	, monitoring_page_index (-1)
+	, session_page_index (-1)
+	, initial_choice_index (-1)
+	, final_page_index (-1)
+	, session_options_page_index (-1)
 	, _existing_session_chooser_used (false)
 {
-	audio_page_index = -1;
-	initial_choice_index = -1;
-	new_user_page_index = -1;
-	default_folder_page_index = -1;
-	monitoring_page_index = -1;
-	session_page_index = -1;
-	final_page_index = -1;
-	session_options_page_index = -1;
-	new_only = false;
+	new_user = !Glib::file_test (been_here_before_path(), Glib::FILE_TEST_EXISTS);
+	need_audio_setup = EngineControl::need_setup ();
+	need_session_info = (session_name.empty() || require_new);
 
-	engine_dialog = 0;
-	config_modified = false;
-	default_dir_chooser = 0;
+	_provided_session_name = session_name;
+	_provided_session_path = session_path;
+	
+	if (need_audio_setup || need_session_info || new_user) {
 
-	use_template_button.set_group (session_template_group);
-	use_session_as_template_button.set_group (session_template_group);
-
-	set_keep_above (true);
-	set_position (WIN_POS_CENTER);
-	set_border_width (12);
-
-	if ((icon_pixbuf = ::get_icon ("ardour_icon_48px")) == 0) {
-		throw failed_constructor();
-	}
-
-	list<Glib::RefPtr<Gdk::Pixbuf> > window_icons;
-	Glib::RefPtr<Gdk::Pixbuf> icon;
-
-	if ((icon = ::get_icon ("ardour_icon_16px")) != 0) {
-		window_icons.push_back (icon);
-	}
-	if ((icon = ::get_icon ("ardour_icon_22px")) != 0) {
-		window_icons.push_back (icon);
-	}
-	if ((icon = ::get_icon ("ardour_icon_32px")) != 0) {
-		window_icons.push_back (icon);
-	}
-	if ((icon = ::get_icon ("ardour_icon_48px")) != 0) {
-		window_icons.push_back (icon);
-	}
-	if (!window_icons.empty ()) {
-		set_default_icon_list (window_icons);
-	}
-
-	new_user = !Glib::file_test(been_here_before_path(), Glib::FILE_TEST_EXISTS);
-
-	bool need_audio_setup = !EngineControl::engine_running();
-
-        // setup_prerelease_page ();
-
-	if (new_user) {
+		use_template_button.set_group (session_template_group);
+		use_session_as_template_button.set_group (session_template_group);
 		
-		setup_new_user_page ();
-		setup_first_time_config_page ();
-		setup_monitoring_choice_page ();
-		setup_monitor_section_choice_page ();
-
-		if (need_audio_setup) {
-			setup_audio_page ();
+		set_keep_above (true);
+		set_position (WIN_POS_CENTER);
+		set_border_width (12);
+		
+		if ((icon_pixbuf = ::get_icon ("ardour_icon_48px")) == 0) {
+			throw failed_constructor();
+		}
+		
+		list<Glib::RefPtr<Gdk::Pixbuf> > window_icons;
+		Glib::RefPtr<Gdk::Pixbuf> icon;
+		
+		if ((icon = ::get_icon ("ardour_icon_16px")) != 0) {
+			window_icons.push_back (icon);
+		}
+		if ((icon = ::get_icon ("ardour_icon_22px")) != 0) {
+			window_icons.push_back (icon);
+		}
+		if ((icon = ::get_icon ("ardour_icon_32px")) != 0) {
+			window_icons.push_back (icon);
+		}
+		if ((icon = ::get_icon ("ardour_icon_48px")) != 0) {
+			window_icons.push_back (icon);
+		}
+		if (!window_icons.empty ()) {
+			set_default_icon_list (window_icons);
+		}
+		
+		// setup_prerelease_page ();
+		
+		if (new_user) {
+			
+			setup_new_user_page ();
+			setup_first_time_config_page ();
+			setup_monitoring_choice_page ();
+			setup_monitor_section_choice_page ();
+			
+			if (need_audio_setup) {
+				setup_audio_page ();
+			}
+			
+			ic_new_session_button.set_active (true); // always create new session on first run
+			
+		} else {
+			
+			if (need_audio_setup) {
+				setup_audio_page ();
+			}
+			
+                        if (need_session_info) {
+                                setup_initial_choice_page ();
+                        }
 		}
 
-		ic_new_session_button.set_active (true); // always create new session on first run
+                if (need_session_info) {
+                        setup_session_page ();
+                        setup_more_options_page ();
+                }
 
-	} else {
-
-		if (need_audio_setup) {
-			setup_audio_page ();
+		if (new_user) {
+			setup_final_page ();
 		}
 
-		setup_initial_choice_page ();
-	}
+		if (new_only) {
+			ic_vbox.hide ();
+		} else {
+			ic_vbox.show ();
+		}
 
-	setup_session_page ();
-	setup_more_options_page ();
-
-	if (new_user) {
-		setup_final_page ();
+		if (!template_name.empty()) {
+			use_template_button.set_active (false);
+			load_template_override = template_name;
+		}
 	}
 
 	the_startup = this;
@@ -161,6 +183,12 @@ Ardour will play NO role in monitoring"))
 
 ArdourStartup::~ArdourStartup ()
 {
+}
+
+bool
+ArdourStartup::ready_without_display () const
+{
+	return !new_user && !need_audio_setup && !need_session_info;
 }
 
 void
@@ -198,25 +226,6 @@ Full information on all the above can be found on the support page at\n\
 	set_page_complete (*vbox, true);
 }
 
-void
-ArdourStartup::set_new_only (bool yn)
-{
-	new_only = yn;
-
-	if (new_only) {
-		ic_vbox.hide ();
-	} else {
-		ic_vbox.show ();
-	}
-}
-
-void
-ArdourStartup::set_load_template (string load_template)
-{
-	use_template_button.set_active (false);
-	load_template_override = load_template;
-}
-
 bool
 ArdourStartup::use_session_template ()
 {
@@ -235,7 +244,7 @@ std::string
 ArdourStartup::session_template_name ()
 {
 	if (!load_template_override.empty()) {
-		string the_path(ARDOUR::user_template_directory());
+		string the_path (ARDOUR::user_template_directory());
 		return Glib::build_filename (the_path, load_template_override + ARDOUR::template_suffix);
 	}
 
@@ -257,6 +266,10 @@ ArdourStartup::session_template_name ()
 std::string
 ArdourStartup::session_name (bool& should_be_new)
 {
+	if (!need_session_info) {
+		return _provided_session_name;
+	}
+
 	if (ic_new_session_button.get_active()) {
 		should_be_new = true;
 		string val = new_name_entry.get_text ();
@@ -283,6 +296,10 @@ ArdourStartup::session_name (bool& should_be_new)
 std::string
 ArdourStartup::session_folder ()
 {
+	if (!need_session_info) {
+		return _provided_session_path;
+	}
+
 	if (ic_new_session_button.get_active()) {
 		std::string legal_session_folder_name = legalize_for_path (new_name_entry.get_text());
 		return Glib::build_filename (new_folder_chooser.get_current_folder(), legal_session_folder_name);
@@ -310,7 +327,7 @@ ArdourStartup::setup_audio_page ()
 	engine_dialog->show_all ();
 
 	audio_page_index = append_page (*engine_dialog);
-	set_page_type (*engine_dialog, ASSISTANT_PAGE_CONTENT);
+	set_page_type (*engine_dialog, (need_session_info ? ASSISTANT_PAGE_CONTENT : ASSISTANT_PAGE_CONFIRM));
 	set_page_title (*engine_dialog, _("Audio / MIDI Setup"));
 
 	/* the default parameters should work, so the page is potentially complete */
@@ -622,6 +639,11 @@ void
 ArdourStartup::on_apply ()
 {
 	if (engine_dialog) {
+                if (engine_dialog->prepare ()) {
+                        /* failure - do not proceed to new page */
+                        set_current_page (audio_page_index);
+                        return;
+                }
 		if (engine_dialog->setup_engine ()) {
                         set_current_page (audio_page_index);
                         return;

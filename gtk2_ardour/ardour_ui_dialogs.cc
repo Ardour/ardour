@@ -62,6 +62,13 @@ ARDOUR_UI::set_session (Session *s)
 {
 	SessionHandlePtr::set_session (s);
 
+	for (ARDOUR::DataType::iterator i = ARDOUR::DataType::begin(); i != ARDOUR::DataType::end(); ++i) {
+		GlobalPortMatrixWindow* w;
+		if ((w = _global_port_matrix[*i]->get()) != 0) {
+			w->set_session (s);
+		}
+	}
+
 	if (!_session) {
 		return;
 	}

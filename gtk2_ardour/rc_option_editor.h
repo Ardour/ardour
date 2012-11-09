@@ -46,6 +46,7 @@ private:
 	ComboOption<ARDOUR::SyncSource>* _sync_source;
 	BoolOption* _sync_framerate;
 	BoolOption* _sync_genlock;
+	BoolOption* _sync_source_2997;
 	ComboStringOption* _ltc_port;
 	HSliderOption* _ltc_volume_slider;
 	Gtk::Adjustment* _ltc_volume_adjustment;

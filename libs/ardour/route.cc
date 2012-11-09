@@ -2944,7 +2944,9 @@ Route::output_change_handler (IOChange change, void * /*src*/)
                 
                 if (_sg_rack) {
                         _sg_rack->reconfigure (_output->ports().num_ports (DataType::AUDIO));
-                        _sg_rack->make_connections ();
+                        if (IO::connecting_legal) {
+                                _sg_rack->make_connections ();
+                        }
                 }
 	}
 

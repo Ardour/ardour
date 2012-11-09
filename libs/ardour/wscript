@@ -343,6 +343,19 @@ int main(int argc, char **argv) {
                   mandatory = True,
                   errmsg = missing_jack_message)
 
+    conf.check_cc(fragment = '''
+#include <jack/transport.h>
+int main(int argc, char** argv) {
+  jack_position_t pos;
+  pos.valid & JackVideoFrameOffset;
+  return 0;
+}''',
+                  uselib= [ 'JACK' ],
+                  msg = 'Checking for JackVideoFrameOffset',
+                  define_name = 'HAVE_JACK_VIDEO_SUPPORT',
+                  mandatory = False,
+                  okmsg = 'present')
+
     if flac_supported():
         conf.define ('HAVE_FLAC', 1)
     if ogg_supported():

@@ -345,7 +345,25 @@ AudioClock::render (cairo_t* cr)
 				cairo_fill (cr);	
 			}
 
-			cairo_move_to (cr, x_leading_padding + left_rect_width + separator_height, upper_height + separator_height + ((h - info_height)/2.0));
+
+			if (_right_layout->get_alignment() == Pango::ALIGN_RIGHT) {
+				/* right-align does not work per se beacuse layout width is unset.
+				 * Using _right_layout->set_width([value >=0]) would also enable
+				 * word-wrapping which is not wanted here.
+				 * The solution is to custom align the layout depending on its size.
+				 * if it is larger than the available space it will be cropped on the
+				 * right edge rather than override text on the left side.
+				 */
+				int x, rw, rh;
+				_right_layout->get_pixel_size(rw, rh);
+				x = get_width() - rw- separator_height - x_leading_padding;
+				if (x < x_leading_padding + left_rect_width + separator_height) {
+					x = x_leading_padding + left_rect_width + separator_height;
+				}
+				cairo_move_to (cr, x, upper_height + separator_height + ((h - info_height)/2.0));
+			} else {
+				cairo_move_to (cr, x_leading_padding + left_rect_width + separator_height, upper_height + separator_height + ((h - info_height)/2.0));
+			}
 			pango_cairo_show_layout (cr, _right_layout->gobj());
 
 		} else {
@@ -947,9 +965,15 @@ AudioClock::set (framepos_t when, bool force, framecnt_t offset)
 	}
 
 	if (!editing) {
+		if (_right_layout) {
+			_right_layout->set_alignment(Pango::ALIGN_LEFT);
+		}
 
 		switch (_mode) {
 		case Timecode:
+			if (_right_layout) {
+				_right_layout->set_alignment(Pango::ALIGN_RIGHT);
+			}
 			set_timecode (when, force);
 			break;
 			
@@ -1017,7 +1041,7 @@ AudioClock::set_frames (framepos_t when, bool /*force*/)
 		if (vid_pullup == 0.0) {
 			_right_layout->set_text (_("pullup: \u2012"));
 		} else {
-			sprintf (buf, _("pullup %-6.4f"), vid_pullup);
+			sprintf (buf, _("%+-6.4f%%"), vid_pullup);
 			_right_layout->set_text (buf);
 		}
 	}
@@ -1510,17 +1534,19 @@ AudioClock::on_button_press_event (GdkEventButton *ev)
 			y = ev->y - ((upper_height - layout_height)/2);
 			x = ev->x - layout_x_offset;
 			
-			if (_layout->xy_to_index (x * PANGO_SCALE, y * PANGO_SCALE, index, trailing)) {
-				drag_field = index_to_field (index);
-				dragging = true;
-				/* make absolutely sure that the pointer is grabbed */
-				gdk_pointer_grab(ev->window,false ,
-						 GdkEventMask( Gdk::POINTER_MOTION_MASK | Gdk::BUTTON_PRESS_MASK |Gdk::BUTTON_RELEASE_MASK),
-						 NULL,NULL,ev->time);
-				drag_accum = 0;
-				drag_start_y = ev->y;
-				drag_y = ev->y;
+			if (!_layout->xy_to_index (x * PANGO_SCALE, y * PANGO_SCALE, index, trailing)) {
+				/* pretend it is a character on the far right */
+				index = 99;
 			}
+			drag_field = index_to_field (index);
+			dragging = true;
+			/* make absolutely sure that the pointer is grabbed */
+			gdk_pointer_grab(ev->window,false ,
+					 GdkEventMask( Gdk::POINTER_MOTION_MASK | Gdk::BUTTON_PRESS_MASK |Gdk::BUTTON_RELEASE_MASK),
+					 NULL,NULL,ev->time);
+			drag_accum = 0;
+			drag_start_y = ev->y;
+			drag_y = ev->y;
 		}
 		break;
 		
@@ -2026,6 +2052,20 @@ AudioClock::set_mode (Mode m)
 	_layout->set_text ("");
 
 	if (_left_layout) {
+
+		if (_mode == Timecode) {
+			_left_layout->set_attributes (small_info_attributes);
+			_right_layout->set_attributes (small_info_attributes);
+		} else {
+			_left_layout->set_attributes (info_attributes);
+			_right_layout->set_attributes (info_attributes);
+		}
+		/* adjust info_height according to font size */
+		int ignored;
+		_left_layout->set_text (" 1234567890");
+		_left_layout->get_pixel_size (ignored, info_height);
+		info_height += 4;
+
 		_left_layout->set_text ("");
 		_right_layout->set_text ("");
 	}
@@ -2072,16 +2112,6 @@ AudioClock::set_mode (Mode m)
 	case Frames:
 		mode_based_info_ratio = 0.5;
 		break;
-	}
-
-	if (_left_layout) {
-		if (_mode == Timecode) {
-			_left_layout->set_attributes (small_info_attributes);
-			_right_layout->set_attributes (small_info_attributes);
-		} else {
-			_left_layout->set_attributes (info_attributes);
-			_right_layout->set_attributes (info_attributes);
-		}
 	}
 
 	set (last_when, true);

@@ -1,5 +1,7 @@
 #include "ardour/export_graph_builder.h"
 
+#include <glibmm/miscutils.h>
+
 #include "audiographer/process_context.h"
 #include "audiographer/general/chunker.h"
 #include "audiographer/general/interleaver.h"
@@ -17,6 +19,7 @@
 #include "ardour/export_filename.h"
 #include "ardour/export_format_specification.h"
 #include "ardour/export_timespan.h"
+#include "ardour/session_directory.h"
 #include "ardour/sndfile_helpers.h"
 
 #include "pbd/file_utils.h"
@@ -292,6 +295,12 @@ ExportGraphBuilder::SFC::operator== (FileSpec const & other_config) const
 ExportGraphBuilder::Normalizer::Normalizer (ExportGraphBuilder & parent, FileSpec const & new_config, framecnt_t /*max_frames*/)
   : parent (parent)
 {
+	std::string tmpfile_path = parent.session.session_directory().export_path();
+	tmpfile_path = Glib::build_filename(tmpfile_path, "XXXXXX");
+	char tmpfile_path_buf[tmpfile_path.size() + 1];
+	std::copy(tmpfile_path.begin(), tmpfile_path.end(), tmpfile_path_buf);
+	tmpfile_path_buf[tmpfile_path.size()] = '\0';
+
 	config = new_config;
 	uint32_t const channels = config.channel_config->get_n_chans();
 	max_frames_out = 4086 - (4086 % channels); // TODO good chunk size
@@ -305,7 +314,7 @@ ExportGraphBuilder::Normalizer::Normalizer (ExportGraphBuilder & parent, FileSpe
 	normalizer->add_output (threader);
 
 	int format = ExportFormatBase::F_RAW | ExportFormatBase::SF_Float;
-	tmp_file.reset (new TmpFile<float> (format, channels, config.format->sample_rate()));
+	tmp_file.reset (new TmpFile<float> (tmpfile_path_buf, format, channels, config.format->sample_rate()));
 	tmp_file->FileWritten.connect_same_thread (post_processing_connection,
 	                                           boost::bind (&Normalizer::start_post_processing, this));
 

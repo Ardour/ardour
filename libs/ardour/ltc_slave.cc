@@ -61,7 +61,8 @@ LTC_Slave::LTC_Slave (Session& s)
 
 	decoder = ltc_decoder_create((int) frames_per_ltc_frame, 128 /*queue size*/);
 	reset();
-	session.Xrun.connect_same_thread (port_connections, boost::bind (&LTC_Slave::resync_latency, this));
+	resync_latency();
+	session.Xrun.connect_same_thread (port_connections, boost::bind (&LTC_Slave::resync_xrun, this));
 	session.engine().GraphReordered.connect_same_thread (port_connections, boost::bind (&LTC_Slave::resync_latency, this));
 }
 
@@ -79,7 +80,7 @@ LTC_Slave::~LTC_Slave()
 ARDOUR::framecnt_t
 LTC_Slave::resolution () const
 {
-	return (framecnt_t) (frames_per_ltc_frame);
+	return (framecnt_t) (session.frame_rate() / 1000);
 }
 
 bool
@@ -95,12 +96,19 @@ LTC_Slave::ok() const
 }
 
 void
+LTC_Slave::resync_xrun()
+{
+	DEBUG_TRACE (DEBUG::LTC, "LTC resync_xrun()\n");
+	engine_dll_initstate = 0;
+}
+
+void
 LTC_Slave::resync_latency()
 {
-	DEBUG_TRACE (DEBUG::LTC, "LTC resync()\n");
+	DEBUG_TRACE (DEBUG::LTC, "LTC resync_latency()\n");
 	engine_dll_initstate = 0;
 
-	if (session.ltc_output_io()) { /* check if Port exits */
+	if (!session.deletion_in_progress() && session.ltc_output_io()) { /* check if Port exits */
 		boost::shared_ptr<Port> ltcport = session.ltc_input_port();
 		ltcport->get_connected_latency_range(ltc_slave_latency, false);
 	}
@@ -115,7 +123,6 @@ LTC_Slave::reset()
 	transport_direction = 0;
 	ltc_speed = 0;
 	engine_dll_initstate = 0;
-	resync_latency();
 }
 
 void
@@ -224,6 +231,15 @@ LTC_Slave::detect_ltc_fps(int frameno, bool df)
 	/* poll and check session TC */
 	TimecodeFormat tc_format = apparent_timecode_format();
 	TimecodeFormat cur_timecode = session.config.get_timecode_format();
+
+	if (Config->get_timecode_source_2997() && tc_format == Timecode::timecode_2997drop) {
+		tc_format = Timecode::timecode_2997000drop;
+	}
+	else
+	if (Config->get_timecode_source_2997() && tc_format == Timecode::timecode_2997) {
+		tc_format = Timecode::timecode_2997000;
+	}
+
 	if (Config->get_timecode_sync_frame_rate()) {
 		/* enforce time-code */
 		if (!did_reset_tc_format) {
@@ -371,16 +387,6 @@ LTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 
 	boost::shared_ptr<Port> ltcport = session.ltc_input_port();
 
-#if 1
-	/* TODO read layency only on demand -> ::reset()
-	 * this is already prepared.
-	 *
-	 * ..but first fix jack2 issue with re-computing latency
-	 * in the correct order. Until then, querying it in the
-	 * process-callback is the only way to get the current value
-	 */
-	ltcport->get_connected_latency_range(ltc_slave_latency, false);
-#endif
 	in = (jack_default_audio_sample_t*) jack_port_get_buffer (ltcport->jack_port(), nframes);
 
 	frameoffset_t skip = now - (monotonic_cnt + nframes);
@@ -416,7 +422,7 @@ LTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 			reset();
 		}
 
-		parse_ltc(nframes, in, now + ltc_slave_latency.max );
+		parse_ltc(nframes, in, now - ltc_slave_latency.max );
 		process_ltc(now);
 	}
 
@@ -497,10 +503,10 @@ LTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 	DEBUG_TRACE (DEBUG::LTC, string_compose ("LTCsync spd: %1 pos: %2 | last-pos: %3 elapsed: %4 delta: %5\n",
 						 speed, pos, last_ltc_frame, elapsed, current_delta));
 
-#if 1 /* provide a .1% deadzone to lock the speed */
-	if (fabs(speed - 1.0) <= 0.001)
+	/* provide a .1% deadzone to lock the speed */
+	if (fabs(speed - 1.0) <= 0.001) {
 	        speed = 1.0;
-#endif
+	}
 
 	return true;
 }

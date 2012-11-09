@@ -42,6 +42,10 @@ GlobalPortMatrix::GlobalPortMatrix (Gtk::Window* p, Session* s, DataType t)
 void
 GlobalPortMatrix::setup_ports (int dim)
 {
+	if (!_session) {
+		return;
+	}
+
 	_ports[dim].suspend_signals ();
 	_ports[dim].gather (_session, type(), dim == IN, false, show_only_bundles ());
 	_ports[dim].resume_signals ();
@@ -50,6 +54,10 @@ GlobalPortMatrix::setup_ports (int dim)
 void
 GlobalPortMatrix::set_state (BundleChannel c[2], bool s)
 {
+	if (!_session) {
+		return;
+	}
+
 	Bundle::PortList const & in_ports = c[IN].bundle->channel_ports (c[IN].channel);
 	Bundle::PortList const & out_ports = c[OUT].bundle->channel_ports (c[OUT].channel);
 
@@ -178,6 +186,10 @@ void
 GlobalPortMatrixWindow::set_session (Session* s)
 {
 	_port_matrix.set_session (s);
+
+	if (!s) {
+		hide ();
+	}
 }
 
 string

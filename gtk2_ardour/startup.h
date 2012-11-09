@@ -45,11 +45,10 @@ class EngineControl;
 
 class ArdourStartup : public Gtk::Assistant {
   public:
-	ArdourStartup ();
+        ArdourStartup (bool require_new, const std::string& session_name, const std::string& session_path, const std::string& template_name);
 	~ArdourStartup ();
 
-	void set_new_only (bool);
-        void set_load_template( std::string load_template );
+        bool ready_without_display () const;
 
 	std::string session_name (bool& should_be_new);
 	std::string session_folder ();
@@ -83,7 +82,11 @@ class ArdourStartup : public Gtk::Assistant {
 	gint _response;
 	bool config_modified;
 	bool new_user;
+        bool need_audio_setup;
+        bool need_session_info;
 	bool new_only;
+        std::string _provided_session_name;
+        std::string _provided_session_path;
 
 	std::string been_here_before_path () const;
 

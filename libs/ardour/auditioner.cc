@@ -55,17 +55,20 @@ Auditioner::init ()
                 return -1;
         }
 
-	string left = _session.config.get_auditioner_output_left();
-	string right = _session.config.get_auditioner_output_right();
+	string left = Config->get_auditioner_output_left();
+	string right = Config->get_auditioner_output_right();
 
 	vector<string> outputs;
 	_session.engine().get_physical_outputs (DataType::AUDIO, outputs);
+
+        cerr << "we have " << outputs.size() <<  " for auditioning, L/R = " << left << " + " << right << endl;
 
 	if (left == "default") {
                 if (_session.monitor_out()) {
                         left = _session.monitor_out()->input()->audio (0)->name();
                         via_monitor = true;
                 } else {
+                        cerr << "here!\n";
 			if (outputs.size() > 0) {
 				left = outputs[0];
 			}
@@ -77,6 +80,7 @@ Auditioner::init ()
                         right = _session.monitor_out()->input()->audio (1)->name();
                         via_monitor = true;
                 } else {
+                        cerr << "there!\n";
 			if (outputs.size() > 1) {
 				right = outputs[1];
 			}

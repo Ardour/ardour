@@ -118,6 +118,8 @@ SoundGridRack::make_connections ()
         boost::shared_ptr<Route> master_out = _route.session().master_out();
         bool is_track = (dynamic_cast<Track*>(&_route) != 0) && !_route.is_hidden();
 
+        assert (master_out);
+
         DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Mapping input for %1 (track ? %2) with %3 outputs\n", 
                                                        _route.name(), is_track, ports.num_ports()));
 

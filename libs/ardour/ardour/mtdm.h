@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2003-2008 Fons Adriaensen <fons@kokkinizita.net>
+    Copyright (C) 2003-2012 Fons Adriaensen <fons@kokkinizita.net>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,35 +21,37 @@
 
 #include <stddef.h>
 
-class MTDM {
+class MTDM
+{
 public:
 
-	MTDM ();
-
-	int process (size_t len, float *inp, float *out);
-	int resolve ();
-	void invert () { _inv ^= 1; }
-	int    inv () { return _inv; }
-	double del () { return _del; }
-	double err () { return _err; }
+    MTDM (int fsamp);
+    int process (size_t len, float *inp, float *out);
+    int resolve (void);
+    void invert (void) { _inv ^= 1; }
+    int    inv (void) { return _inv; }
+    double del (void) { return _del; }
+    double err (void) { return _err; }
 
 private:
-	class Freq {
-		public:
-			int   p;
-			int   f;
-			float a;
-			float xa;
-			float ya;
-			float xf;
-			float yf;
-	};
+    class Freq {
+      public:
+	int   p;
+	int   f;
+	float xa;
+	float ya;
+	float x1;
+	float y1;
+	float x2;
+	float y2;
+    };
 
-	double  _del;
-	double  _err;
-	int     _cnt;
-	int     _inv;
-	Freq    _freq [5];
+    double  _del;
+    double  _err;
+    float   _wlp;
+    int     _cnt;
+    int     _inv;
+    Freq    _freq [13];
 };
 
 #endif /* __libardour_mtdm_h__ */

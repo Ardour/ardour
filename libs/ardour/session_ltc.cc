@@ -39,6 +39,25 @@ using namespace Timecode;
 //#define LTC_GEN_FRAMEDBUG
 //#define LTC_GEN_TXDBUG
 
+#ifndef MAX
+#define MAX(a,b) ( (a) > (b) ? (a) : (b) )
+#endif
+#ifndef MIN
+#define MIN(a,b) ( (a) < (b) ? (a) : (b) )
+#endif
+
+/* LTC signal should have a rise time of 25 us +/- 5 us.
+ * yet with most sound-cards a square-wave of 1-2 sample
+ * introduces ringing and small oscillations.
+ * https://en.wikipedia.org/wiki/Gibbs_phenomenon
+ * A low-pass filter in libltc can reduce this at
+ * the cost of being slightly out of spec WRT to rise-time.
+ *
+ * This filter is adaptive so that fast vari-speed signals
+ * will not be affected by it.
+ */
+#define LTC_RISE_TIME(speed) MIN (100, MAX(25, (4000000 / ((speed==0)?1:speed) / engine().frame_rate())))
+
 void
 Session::ltc_tx_initialize()
 {
@@ -50,6 +69,7 @@ Session::ltc_tx_initialize()
 			0);
 
 	ltc_encoder_set_bufsize(ltc_encoder, nominal_frame_rate(), 23.0);
+	ltc_encoder_set_filter(ltc_encoder, LTC_RISE_TIME(1.0));
 
 	/* buffersize for 1 LTC frame: (1 + sample-rate / fps) bytes
 	 * usually returned by ltc_encoder_get_buffersize(encoder)
@@ -58,7 +78,8 @@ Session::ltc_tx_initialize()
 	ltc_enc_buf = (ltcsnd_sample_t*) calloc((nominal_frame_rate() / 23), sizeof(ltcsnd_sample_t));
 	ltc_speed = 0;
 	ltc_tx_reset();
-	Xrun.connect_same_thread (*this, boost::bind (&Session::ltc_tx_resync_latency, this));
+	ltc_tx_resync_latency();
+	Xrun.connect_same_thread (*this, boost::bind (&Session::ltc_tx_reset, this));
 	engine().GraphReordered.connect_same_thread (*this, boost::bind (&Session::ltc_tx_resync_latency, this));
 }
 
@@ -92,7 +113,6 @@ Session::ltc_tx_reset()
 	ltc_buf_off = 0;
 	ltc_enc_byte = 0;
 	ltc_enc_cnt = 0;
-	ltc_tx_resync_latency();
 }
 
 void
@@ -110,7 +130,7 @@ Session::ltc_tx_recalculate_position()
 	a3tc.drop = timecode_has_drop_frames(ltc_enc_tcformat);
 
 	Timecode::timecode_to_sample (a3tc, ltc_enc_pos, true, false,
-		double(frame_rate()),
+		(double)frame_rate(),
 		config.get_subframes_per_frame(),
 		config.get_timecode_offset_negative(), config.get_timecode_offset()
 		);
@@ -153,16 +173,6 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 	/* range from libltc (38..218) || - 128.0  -> (-90..90) */
 	const float ltcvol = Config->get_ltc_output_volume()/(90.0); // pow(10, db/20.0)/(90.0);
 
-#if 1
-	/* TODO read layency only on demand -> ::ltc_tx_reset()
-	 * this is already prepared.
-	 *
-	 * ..but first fix jack2 issue with re-computing latency
-	 * in the correct order. Until then, querying it in the
-	 * process-callback is the only way to get the current value
-	 */
-	ltcport->get_connected_latency_range(ltc_out_latency, true);
-#endif
 	DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX %1 to %2 / %3 | lat: %4\n", start_frame, end_frame, nframes, ltc_out_latency.max));
 
 	/* all systems go. Now here's the plan:
@@ -188,6 +198,7 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 			ltc_tx_cleanup();
 			return;
 		}
+		ltc_encoder_set_filter(ltc_encoder, LTC_RISE_TIME(ltc_speed));
 		ltc_enc_tcformat = cur_timecode;
 		ltc_tx_reset();
 	}
@@ -205,23 +216,19 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 #define SIGNUM(a) ( (a) < 0 ? -1 : 1)
 	bool speed_changed = false;
 
-	/* use port latency compensation */
-#if 1
-	/* The generated timecode is offset by the port-latency,
+	/* port latency compensation:
+	 * The _generated timecode_ is offset by the port-latency,
 	 * therefore the offset depends on the direction of transport.
 	 */
-	framepos_t cycle_start_frame = (current_speed < 0) ? (start_frame + ltc_out_latency.max) : (start_frame - ltc_out_latency.max);
-#else
-	/* This comes in handy when testing sync - record output on an A3 track
-	 * see also http://tracker.ardour.org/view.php?id=5073
-	 */
-	framepos_t cycle_start_frame = start_frame;
-#endif
+	framepos_t cycle_start_frame = (current_speed < 0) ? (start_frame - ltc_out_latency.max) : (start_frame + ltc_out_latency.max);
 
 	/* cycle-start may become negative due to latency compensation */
 	if (cycle_start_frame < 0) { cycle_start_frame = 0; }
 
-	double new_ltc_speed = double(labs(end_frame - start_frame) * SIGNUM(current_speed)) / double(nframes);
+	double new_ltc_speed = (double)(labs(end_frame - start_frame) * SIGNUM(current_speed)) / (double)nframes;
+	if (nominal_frame_rate() != frame_rate()) {
+		new_ltc_speed *= (double)nominal_frame_rate() / (double)frame_rate();
+	}
 
 	if (SIGNUM(new_ltc_speed) != SIGNUM (ltc_speed)) {
 		DEBUG_TRACE (DEBUG::LTC, "LTC TX2: transport changed direction\n");
@@ -240,6 +247,7 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 		 */
 		DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX2: speed change old: %1 cur: %2 tgt: %3 ctd: %4\n", ltc_speed, current_speed, target_speed, fabs(current_speed) - target_speed));
 		speed_changed = true;
+		ltc_encoder_set_filter(ltc_encoder, LTC_RISE_TIME(new_ltc_speed));
 	}
 
 	if (end_frame == start_frame || fabs(current_speed) < 0.1 ) {
@@ -289,8 +297,8 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 		 * which is left for later..
 		 */
 
-		double oldbuflen = double(ltc_buf_len - ltc_buf_off);
-		double newbuflen = double(ltc_buf_len - ltc_buf_off) * fabs(ltc_speed / new_ltc_speed);
+		double oldbuflen = (double)(ltc_buf_len - ltc_buf_off);
+		double newbuflen = (double)(ltc_buf_len - ltc_buf_off) * fabs(ltc_speed / new_ltc_speed);
 
 		DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX2: bufOld %1 bufNew %2 | diff %3\n",
 					(ltc_buf_len - ltc_buf_off), newbuflen, newbuflen - oldbuflen
@@ -348,11 +356,17 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 	framepos_t tc_sample_start;
 
 	/* calc timecode frame from current position - round down to nearest timecode */
-	sample_to_timecode(cycle_start_frame, tc_start, true, false);
+	Timecode::sample_to_timecode(cycle_start_frame, tc_start, true, false,
+			timecode_frames_per_second(),
+			timecode_drop_frames(),
+			(double)frame_rate(),
+			config.get_subframes_per_frame(),
+			config.get_timecode_offset_negative(), config.get_timecode_offset()
+			);
 
 	/* convert timecode back to sample-position */
 	Timecode::timecode_to_sample (tc_start, tc_sample_start, true, false,
-		double(frame_rate()),
+		(double)frame_rate(),
 		config.get_subframes_per_frame(),
 		config.get_timecode_offset_negative(), config.get_timecode_offset()
 		);
@@ -392,7 +406,9 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 				rint(ltc_enc_pos + ltc_enc_cnt - poff) - cycle_start_frame
 				));
 
-	if (ltc_speed != 0 && fabs(ceil(ltc_enc_pos + ltc_enc_cnt - poff) - cycle_start_frame) > maxdiff) {
+	if (ltc_enc_pos < 0
+			|| (ltc_speed != 0 && fabs(ceil(ltc_enc_pos + ltc_enc_cnt - poff) - cycle_start_frame) > maxdiff)
+			) {
 
 		// (5) re-align
 		ltc_tx_reset();
@@ -426,7 +442,7 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 		if (ltc_speed < 0 ) {
 			/* calculate the byte that starts at or after the current position */
 			ltc_enc_byte = floor((10.0 * soff) / (fptcf));
-			ltc_enc_cnt = double(ltc_enc_byte * fptcf / 10.0);
+			ltc_enc_cnt = ltc_enc_byte * fptcf / 10.0;
 
 			/* calculate difference between the current position and the byte to send */
 			cyc_off = soff- ceil(ltc_enc_cnt);
@@ -434,7 +450,7 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 		} else {
 			/* calculate the byte that starts at or after the current position */
 			ltc_enc_byte = ceil((10.0 * soff) / fptcf);
-			ltc_enc_cnt = double(ltc_enc_byte * fptcf / 10.0);
+			ltc_enc_cnt = ltc_enc_byte * fptcf / 10.0;
 
 			/* calculate difference between the current position and the byte to send */
 			cyc_off = ceil(ltc_enc_cnt) - soff;
@@ -462,6 +478,26 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 
 		DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX5 restart @ %1 + %2 - %3 |  byte %4\n",
 					ltc_enc_pos, ltc_enc_cnt, cyc_off, ltc_enc_byte));
+	}
+	else if (ltc_speed != 0 && (fptcf / ltc_speed / 80) > 3 ) {
+		/* reduce (low freq) jitter.
+		 * The granularity of the LTC encoder speed is 1 byte =
+		 * (frames-per-timecode-frame / 10) audio-samples.
+		 * Thus, tiny speed changes [as produced by the slave]
+		 * may not have any effect in the cycle when they occur,
+		 * but they will add up over time.
+		 *
+		 * This is a linear approx to compensate for this drift
+		 * and prempt re-sync when the drift builds up.
+		 *
+		 * However, for very fast speeds - when 1 LTC bit is
+		 * <= 3 audio-sample - adjusting speed may lead to
+		 * invalid frames.
+		 *
+		 * To do better than this, resampling (or a rewrite of the
+		 * encoder) is required.
+		 */
+		ltc_speed -= ((ltc_enc_pos + ltc_enc_cnt - poff) - cycle_start_frame) / engine().frame_rate();
 	}
 
 
@@ -527,6 +563,12 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 			ltc_enc_byte = (ltc_enc_byte + 1)%10;
 			if (ltc_enc_byte == 0 && ltc_speed != 0) {
 				ltc_encoder_inc_timecode(ltc_encoder);
+#if 0 /* force fixed parity -- scope debug */
+				LTCFrame f;
+				ltc_encoder_get_frame(ltc_encoder, &f);
+				f.biphase_mark_phase_correction=0;
+				ltc_encoder_set_frame(ltc_encoder, &f);
+#endif
 				ltc_tx_recalculate_position();
 				ltc_enc_cnt = 0;
 			} else if (ltc_enc_byte == 0) {

@@ -41,7 +41,7 @@ class EngineControl : public Gtk::VBox {
 	EngineControl ();
 	~EngineControl ();
 
-	static bool engine_running ();
+	static bool need_setup ();
 	int setup_engine ();
         int prepare ();
 
@@ -160,6 +160,9 @@ class EngineControl : public Gtk::VBox {
 	Gtk::Notebook notebook;
 
 	bool _used;
+
+        static bool engine_running ();
+        static bool soundgrid_requested ();
 
 	void driver_changed ();
         void interface_changed ();

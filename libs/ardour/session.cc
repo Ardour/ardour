@@ -848,6 +848,8 @@ Session::hookup_io ()
 		   it makes its own connections to ports.
 		*/
 
+                cerr << "CREATING AUDITIONER\n";
+
 		try {
 			boost::shared_ptr<Auditioner> a (new Auditioner (*this));
 			if (a->init()) {
@@ -858,6 +860,7 @@ Session::hookup_io ()
 		}
 
 		catch (failed_constructor& err) {
+			cerr << _("cannot create Auditioner: no auditioning of regions possible") << endl;
 			warning << _("cannot create Auditioner: no auditioning of regions possible") << endmsg;
 		}
 	}
@@ -2171,6 +2174,8 @@ Session::add_routes (RouteList& new_routes, bool input_auto_connect, bool output
 		r->mute_changed.connect_same_thread (*this, boost::bind (&Session::route_mute_changed, this, _1));
 		r->output()->changed.connect_same_thread (*this, boost::bind (&Session::set_worst_io_latencies_x, this, _1, _2));
 		r->processors_changed.connect_same_thread (*this, boost::bind (&Session::route_processors_changed, this, _1));
+
+                cerr << "\n\nLOADING route " << r->name() << " master ? " << r->is_master() << endl;
 
 		if (r->is_master()) {
 			_master_out = r;
