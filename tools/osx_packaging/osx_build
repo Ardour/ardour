@@ -344,7 +344,7 @@ cp ../../gtk2_ardour/mixer.bindings $Resources
 cp ../../gtk2_ardour/step_editing.bindings $Resources
 cp $BUILD_ROOT/gtk2_ardour/ardour.menus $Resources
 
-# cp $BUILD_ROOT/ardour_system.rc $Resources/ardour_system.rc
+cp ../../ardour_system.rc $Resources/ardour_system.rc
 cp ../../instant.xml $Resources/instant.xml
 cp ../../gtk2_ardour/ardour3_ui_default.conf $Resources
 cp ../../gtk2_ardour/ardour3_ui_default.conf $Resources/ardour3_ui.conf

@@ -563,20 +563,14 @@ timecode_format_name (TimecodeFormat const t)
 			return "25";
 
 			break;
+		case timecode_2997000:
 		case timecode_2997:
 			return "29.97";
 
 			break;
+		case timecode_2997000drop:
 		case timecode_2997drop:
 			return "29.97 drop";
-
-			break;
-		case timecode_2997000:
-			return "29.97000";
-
-			break;
-		case timecode_2997000drop:
-			return "29.97000 drop";
 
 			break;
 		case timecode_30:
