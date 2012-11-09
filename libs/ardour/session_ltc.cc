@@ -400,6 +400,12 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 		maxdiff = slave()->resolution();
 	} else {
 		maxdiff = ceil(fabs(ltc_speed))*2.0;
+		if (nominal_frame_rate() != frame_rate()) {
+			maxdiff *= 3.0;
+		}
+		if (ltc_enc_tcformat == Timecode::timecode_23976 || ltc_enc_tcformat == Timecode::timecode_24976) {
+			maxdiff *= 15.0;
+		}
 	}
 
 	DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX4: enc: %1 + %2 - %3 || buf-bytes: %4 enc-byte: %5\n",
