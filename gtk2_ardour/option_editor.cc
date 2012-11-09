@@ -293,12 +293,19 @@ ClockOption::ClockOption (string const & i, string const & n, sigc::slot<framecn
 	_label.set_text (n + ":");
 	_label.set_alignment (0, 0.5);
 	_label.set_name (X_("OptionsLabel"));
+	_clock.ValueChanged.connect (sigc::mem_fun (*this, &ClockOption::save_clock_time));
 }
 
 void
 ClockOption::set_state_from_config ()
 {
-	_clock.set (_get ());
+	_clock.set (_get (), true);
+}
+
+void
+ClockOption::save_clock_time ()
+{
+	_set (_clock.current_time());
 }
 
 void

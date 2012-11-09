@@ -543,6 +543,7 @@ public:
         Gtk::Widget& tip_widget() { return _clock; }
 
 private:
+	void save_clock_time ();
 	Gtk::Label _label;
 	AudioClock _clock;
 	sigc::slot<ARDOUR::framecnt_t> _get;

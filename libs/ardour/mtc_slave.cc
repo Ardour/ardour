@@ -387,7 +387,7 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full, framepos_t now)
 
 	quarter_frame_duration = (double(session.frame_rate()) / (double) timecode.rate / 4.0);
 
-	Timecode::timecode_to_sample (timecode, mtc_frame, true, false,
+	Timecode::timecode_to_sample (timecode, mtc_frame, false, false,
 		double(session.frame_rate()),
 		session.config.get_subframes_per_frame(),
 		session.config.get_timecode_offset_negative(), session.config.get_timecode_offset()

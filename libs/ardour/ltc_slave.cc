@@ -331,7 +331,7 @@ LTC_Slave::process_ltc(framepos_t const now)
 
 		/* map LTC timecode to session TC setting */
 		framepos_t ltc_frame; ///< audio-frame corresponding to LTC frame
-		Timecode::timecode_to_sample (timecode, ltc_frame, true, false,
+		Timecode::timecode_to_sample (timecode, ltc_frame, false, false,
 			double(session.frame_rate()),
 			session.config.get_subframes_per_frame(),
 			session.config.get_timecode_offset_negative(), session.config.get_timecode_offset()
