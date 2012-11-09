@@ -55,8 +55,8 @@ Auditioner::init ()
                 return -1;
         }
 
-	string left = _session.config.get_auditioner_output_left();
-	string right = _session.config.get_auditioner_output_right();
+	string left = Config->get_auditioner_output_left();
+	string right = Config->get_auditioner_output_right();
 
 	vector<string> outputs;
 	_session.engine().get_physical_outputs (DataType::AUDIO, outputs);
@@ -83,23 +83,23 @@ Auditioner::init ()
                 }
 	}
 
-	if ((left.length() == 0) && (right.length() == 0)) {
+	if (left.empty() && right.empty()) {
 		warning << _("no outputs available for auditioner - manual connection required") << endmsg;
-		return -1;
+	} else {
+
+		_main_outs->defer_pan_reset ();
+		
+		if (left.length()) {
+			_output->add_port (left, this, DataType::AUDIO);
+		}
+		
+		if (right.length()) {
+			_output->add_port (right, this, DataType::AUDIO);
+		}
+		
+		_main_outs->allow_pan_reset ();
+		_main_outs->reset_panner ();
 	}
-
-	_main_outs->defer_pan_reset ();
-
-	if (left.length()) {
-		_output->add_port (left, this, DataType::AUDIO);
-	}
-
-	if (right.length()) {
-		_output->add_port (right, this, DataType::AUDIO);
-	}
-
-	_main_outs->allow_pan_reset ();
-	_main_outs->reset_panner ();
 
 	_output->changed.connect_same_thread (*this, boost::bind (&Auditioner::output_changed, this, _1, _2));
 
@@ -226,12 +226,12 @@ Auditioner::output_changed (IOChange change, void* /*src*/)
 				phys = outputs[0];
 			}
 			if (phys != connections[0]) {
-				_session.config.set_auditioner_output_left (connections[0]);
+				Config->set_auditioner_output_left (connections[0]);
 			} else {
-				_session.config.set_auditioner_output_left ("default");
+				Config->set_auditioner_output_left ("default");
 			}
 		} else {
-			_session.config.set_auditioner_output_left ("");
+			Config->set_auditioner_output_left ("");
 		}
 
 		connections.clear ();
@@ -241,12 +241,12 @@ Auditioner::output_changed (IOChange change, void* /*src*/)
 				phys = outputs[1];
 			}
 			if (phys != connections[0]) {
-				_session.config.set_auditioner_output_right (connections[0]);
+				Config->set_auditioner_output_right (connections[0]);
 			} else {
-				_session.config.set_auditioner_output_right ("default");
+				Config->set_auditioner_output_right ("default");
 			}
 		} else {
-			_session.config.set_auditioner_output_right ("");
+			Config->set_auditioner_output_right ("");
 		}
 	}
 }

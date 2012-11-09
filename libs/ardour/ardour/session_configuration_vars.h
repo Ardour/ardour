@@ -44,8 +44,6 @@ CONFIG_VARIABLE (Timecode::TimecodeFormat, timecode_format, "timecode-format", T
 CONFIG_VARIABLE_SPECIAL(std::string, raid_path, "raid-path", "", path_expand)
 CONFIG_VARIABLE_SPECIAL(std::string, audio_search_path, "audio-search-path", "", search_path_expand)
 CONFIG_VARIABLE_SPECIAL(std::string, midi_search_path, "midi-search-path", "", search_path_expand)
-CONFIG_VARIABLE (std::string, auditioner_output_left, "auditioner-output-left", "default")
-CONFIG_VARIABLE (std::string, auditioner_output_right, "auditioner-output-right", "default")
 CONFIG_VARIABLE (bool, jack_time_master, "jack-time-master", true)
 CONFIG_VARIABLE (bool, use_video_sync, "use-video-sync", false)
 CONFIG_VARIABLE (float, video_pullup, "video-pullup", 0.0f)
