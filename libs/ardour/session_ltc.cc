@@ -66,7 +66,7 @@ Session::ltc_tx_initialize()
 	DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX init sr: %1 fps: %2\n", nominal_frame_rate(), timecode_to_frames_per_second(ltc_enc_tcformat)));
 	ltc_encoder = ltc_encoder_create(nominal_frame_rate(),
 			timecode_to_frames_per_second(ltc_enc_tcformat),
-			0);
+			-2);
 
 	ltc_encoder_set_bufsize(ltc_encoder, nominal_frame_rate(), 23.0);
 	ltc_encoder_set_filter(ltc_encoder, LTC_RISE_TIME(1.0));
@@ -113,6 +113,8 @@ Session::ltc_tx_reset()
 	ltc_buf_off = 0;
 	ltc_enc_byte = 0;
 	ltc_enc_cnt = 0;
+
+	ltc_encoder_reset(ltc_encoder);
 }
 
 void
@@ -193,7 +195,7 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 	TimecodeFormat cur_timecode = config.get_timecode_format();
 	if (cur_timecode != ltc_enc_tcformat) {
 		DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX1: TC format mismatch - reinit sr: %1 fps: %2\n", nominal_frame_rate(), timecode_to_frames_per_second(cur_timecode)));
-		if (ltc_encoder_reinit(ltc_encoder, nominal_frame_rate(), timecode_to_frames_per_second(cur_timecode), 0)) {
+		if (ltc_encoder_reinit(ltc_encoder, nominal_frame_rate(), timecode_to_frames_per_second(cur_timecode), -2)) {
 			PBD::error << _("LTC encoder: invalid framerate - LTC encoding is disabled for the remainder of this session.") << endmsg;
 			ltc_tx_cleanup();
 			return;
