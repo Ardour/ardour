@@ -26,7 +26,7 @@
 
 namespace Timecode {
 
-float Time::default_rate = 30.0;
+double Time::default_rate = 30.0;
 
 
 /** Increment @a timecode by exactly one frame (keep subframes value).
@@ -424,7 +424,7 @@ hours_floor(Time& timecode)
 	}
 }
 
-float
+double
 timecode_to_frames_per_second(TimecodeFormat t)
 {
 	switch (t) {
