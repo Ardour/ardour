@@ -848,8 +848,6 @@ Session::hookup_io ()
 		   it makes its own connections to ports.
 		*/
 
-                cerr << "CREATING AUDITIONER\n";
-
 		try {
 			boost::shared_ptr<Auditioner> a (new Auditioner (*this));
 			if (a->init()) {
