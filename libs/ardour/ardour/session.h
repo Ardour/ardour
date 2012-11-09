@@ -1201,6 +1201,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	framepos_t        ltc_enc_pos;
 	double            ltc_enc_cnt;
 	framepos_t        ltc_enc_off;
+	bool              restarting;
 
 	jack_latency_range_t ltc_out_latency;
 
