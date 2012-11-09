@@ -65,7 +65,7 @@ SoundGridRack::SoundGridRack (Session& s, Route& r, const std::string& name)
                 /* master runs before monitor */
                 process_group = 5;
         } else if (dynamic_cast<Track*>(&_route) == 0) {
-                /* busses run before tracks */
+                /* this is a bus, and busses run after tracks */
                 process_group = 1;
         }
 
@@ -131,28 +131,25 @@ SoundGridRack::make_connections ()
                         continue;
                 }
 
+                /* find a JACK port that will be used to deliver data to the track's chainer's input */
+                
+                string portname;
+                
                 if (is_track) {
-
-                        /* find a JACK port that will be used to deliver data to the track's chainer's input */
-
-                        string portname;
-                        
-                        if (dynamic_cast<Track*> (&_route) != 0) {
-                                portname = SoundGrid::instance().sg_port_as_jack_port (SoundGrid::TrackInputPort (_rack_id, channel));
-                        } else {
-                                /* bus */
-                                portname = SoundGrid::instance().sg_port_as_jack_port (SoundGrid::BusInputPort (_rack_id, channel));
-                        }
-                        
-                        if (portname.empty()) {
-                                DEBUG_TRACE (DEBUG::SoundGrid, "no JACK port found to route track audio to SG\n");
-                                continue;
-                        }
-                        
-                        /* connect this port to it */
-                        
-                        p->connect (portname);
+                        portname = SoundGrid::instance().sg_port_as_jack_port (SoundGrid::TrackInputPort (_rack_id, channel));
+                } else {
+                        /* bus or auditioner */
+                        portname = SoundGrid::instance().sg_port_as_jack_port (SoundGrid::BusInputPort (_rack_id, channel));
                 }
+                
+                if (portname.empty()) {
+                        DEBUG_TRACE (DEBUG::SoundGrid, "no JACK port found to route track audio to SG\n");
+                        continue;
+                }
+                
+                /* connect this port to it */
+                
+                p->connect (portname);
 
                 /* Now wire up the output of our SG chainer to ... yes, to what precisely ? 
                    
