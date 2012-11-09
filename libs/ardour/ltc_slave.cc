@@ -53,8 +53,8 @@ LTC_Slave::LTC_Slave (Session& s)
 	monotonic_cnt = 0;
 	fps_detected=false;
 
-	ltc_timecode = timecode_60; // track changes of LTC fps
-	a3e_timecode = timecode_60; // track changes of Ardour's fps
+	ltc_timecode = session.config.get_timecode_format();
+	a3e_timecode = session.config.get_timecode_format();
 	printed_timecode_warning = false;
 	ltc_detect_fps_cnt = ltc_detect_fps_max = 0;
 	memset(&prev_frame, 0, sizeof(LTCFrameExt));
