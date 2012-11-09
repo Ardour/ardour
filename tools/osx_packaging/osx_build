@@ -376,8 +376,7 @@ if test x$SAE != x ; then
     cp $BUILD_ROOT/instant.xml.sae $Resources/instant.xml
     echo cp $BUILD_ROOT/instant.xml.sae $Resources/instant.xml
 else
-#    cp $BUILD_ROOT/ardour_system.rc $Resources/ardour_system.rc
-#    echo FOO cp $BUILD_ROOT/ardour_system.rc $Resources/ardour_system.rc
+    cp ../../ardour_system.rc $Resources/ardour_system.rc
     cp ../../instant.xml $Resources/instant.xml
     echo cp ../../instant.xml $Resources/instant.xml
 fi
