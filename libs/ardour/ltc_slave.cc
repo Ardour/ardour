@@ -198,22 +198,23 @@ LTC_Slave::detect_ltc_fps(int frameno, bool df)
 	}
 	ltc_detect_fps_cnt++;
 
-	if (ltc_detect_fps_cnt > 40)
-	{
-		if (ltc_detect_fps_cnt > ltc_detect_fps_max
-		    && (   ceil(timecode.rate) != (ltc_detect_fps_max + 1)
-			|| timecode.drop != df
-			)
-		    )
-		{
-			DEBUG_TRACE (DEBUG::LTC, string_compose ("LTC detected FPS %1%2",
-					ltc_detect_fps_max + 1, timecode.drop ? "df" : ""));
+	if (ltc_detect_fps_cnt > 40) {
+		if (ltc_detect_fps_cnt > ltc_detect_fps_max) {
 			detected_fps = ltc_detect_fps_max + 1;
 			if (df) {
 				/* LTC df -> indicates fractional framerate */
-				detected_fps = detected_fps * 1000.0 / 1001.0;
+				if (Config->get_timecode_source_2997()) {
+					detected_fps = detected_fps * 999.0 / 1000.0;
+				} else {
+					detected_fps = detected_fps * 1000.0 / 1001.0;
+				}
 			}
-			DEBUG_TRACE (DEBUG::LTC, string_compose ("LTC detected FPS: %1%2\n", detected_fps, df?"df":"ndf"));
+
+			if (timecode.rate != detected_fps || timecode.drop != df) {
+				DEBUG_TRACE (DEBUG::LTC, string_compose ("LTC detected FPS: %1%2\n", detected_fps, df?"df":"ndf"));
+			} else {
+				detected_fps = 0; /* no cange */
+			}
 		}
 		ltc_detect_fps_cnt = ltc_detect_fps_max = 0;
 	}
@@ -231,14 +232,6 @@ LTC_Slave::detect_ltc_fps(int frameno, bool df)
 	/* poll and check session TC */
 	TimecodeFormat tc_format = apparent_timecode_format();
 	TimecodeFormat cur_timecode = session.config.get_timecode_format();
-
-	if (Config->get_timecode_source_2997() && tc_format == Timecode::timecode_2997drop) {
-		tc_format = Timecode::timecode_2997000drop;
-	}
-	else
-	if (Config->get_timecode_source_2997() && tc_format == Timecode::timecode_2997) {
-		tc_format = Timecode::timecode_2997000;
-	}
 
 	if (Config->get_timecode_sync_frame_rate()) {
 		/* enforce time-code */
@@ -519,9 +512,9 @@ LTC_Slave::apparent_timecode_format () const
 	else if (timecode.rate == 25 && !timecode.drop)
 		return timecode_25;
 	else if (rint(timecode.rate * 100) == 2997 && !timecode.drop)
-		return timecode_2997;
+		return (Config->get_timecode_source_2997() ? timecode_2997000 : timecode_2997);
 	else if (rint(timecode.rate * 100) == 2997 &&  timecode.drop)
-		return timecode_2997drop;
+		return (Config->get_timecode_source_2997() ? timecode_2997000drop : timecode_2997drop);
 	else if (timecode.rate == 30 &&  timecode.drop)
 		return timecode_2997drop; // timecode_30drop; // LTC counting to 30 frames w/DF *means* 29.97 df
 	else if (timecode.rate == 30 && !timecode.drop)
