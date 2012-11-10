@@ -680,7 +680,7 @@ MTC_Slave::approximate_current_delta() const
 		snprintf(delta, sizeof(delta), "\u2012\u2012\u2012\u2012");
 	} else {
 		// TODO if current_delta > 1 frame -> display timecode.
-		snprintf(delta, sizeof(delta), "%s%4" PRIi64 " sm",
+		snprintf(delta, sizeof(delta), "\u0394 %s%4" PRIi64 " sm",
 				PLUSMINUS(-current_delta), abs(current_delta));
 	}
 	return std::string(delta);
