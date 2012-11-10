@@ -532,7 +532,7 @@ std::string
 LTC_Slave::approximate_current_position() const
 {
 	if (last_timestamp == 0) {
-		return " --:--:--:--";
+		return " \u2012\u2012:\u2012\u2012:\u2012\u2012:\u2012\u2012";
 	}
 	return Timecode::timecode_format_time(timecode);
 }
