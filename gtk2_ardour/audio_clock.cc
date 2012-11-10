@@ -54,7 +54,7 @@ using Gtkmm2ext::Keyboard;
 sigc::signal<void> AudioClock::ModeChanged;
 vector<AudioClock*> AudioClock::clocks;
 const double AudioClock::info_font_scale_factor = 0.6;
-const double AudioClock::separator_height = 2.0;
+const double AudioClock::separator_height = 0.0;
 const double AudioClock::x_leading_padding = 6.0;
 
 #define BBT_BAR_CHAR "|"
@@ -294,7 +294,11 @@ AudioClock::render (cairo_t* cr)
 	if (_need_bg) {
 		cairo_set_source_rgba (cr, bg_r, bg_g, bg_b, bg_a);
 		if (corner_radius) {
-			Gtkmm2ext::rounded_rectangle (cr, 0, 0, get_width(), upper_height, corner_radius);
+			if (_left_layout) {
+				Gtkmm2ext::rounded_top_half_rectangle (cr, 0, 0, get_width(), upper_height, corner_radius);
+			} else {
+				Gtkmm2ext::rounded_rectangle (cr, 0, 0, get_width(), upper_height, corner_radius);
+			}
 		} else {
 			cairo_rectangle (cr, 0, 0, get_width(), upper_height);
 		}
@@ -323,7 +327,7 @@ AudioClock::render (cairo_t* cr)
 
 			if (_need_bg) {
 				if (corner_radius) {
-					Gtkmm2ext::rounded_rectangle (cr, 0, upper_height + separator_height, left_rect_width, h, corner_radius);
+					Gtkmm2ext::rounded_bottom_half_rectangle (cr, 0, upper_height + separator_height, left_rect_width, h, corner_radius);
 				} else {
 					cairo_rectangle (cr, 0, upper_height + separator_height, left_rect_width, h);
 				}
@@ -335,9 +339,9 @@ AudioClock::render (cairo_t* cr)
 			
 			if (_need_bg) {
 				if (corner_radius) {
-					Gtkmm2ext::rounded_rectangle (cr, left_rect_width + separator_height, upper_height + separator_height, 
-								      get_width() - separator_height - left_rect_width, h, 
-								      corner_radius);
+					Gtkmm2ext::rounded_bottom_half_rectangle (cr, left_rect_width + separator_height, upper_height + separator_height, 
+										  get_width() - separator_height - left_rect_width, h, 
+										  corner_radius);
 				} else {
 					cairo_rectangle (cr, left_rect_width + separator_height, upper_height + separator_height, 
 							 get_width() - separator_height - left_rect_width, h);
@@ -371,7 +375,7 @@ AudioClock::render (cairo_t* cr)
 
 			if (_need_bg) {
 				if (corner_radius) {
-					Gtkmm2ext::rounded_rectangle (cr, 0, upper_height + separator_height, get_width(), h, corner_radius);
+					Gtkmm2ext::rounded_bottom_half_rectangle (cr, 0, upper_height + separator_height, get_width(), h, corner_radius);
 				} else {
 					cairo_rectangle (cr, 0, upper_height + separator_height, get_width(), h);
 				}
