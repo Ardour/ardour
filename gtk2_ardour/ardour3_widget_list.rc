@@ -119,7 +119,7 @@ widget "*FatalMessage" style:highest "fatal_message"
 widget "*InfoMessage" style:highest "info_message"
 widget "*WarningMessage" style:highest "warning_message"
 
-widget "*big clock" style:highest "massive_text"
+widget "*big clock" style:highest "monospace massive_text"
 widget "*selection clock" style:highest "small_text"
 widget "*punch clock" style:highest "small_text"
 widget "*transport clock" style:highest "large_bold_mono_text"
