@@ -1027,8 +1027,16 @@ AudioClock::set_slave_info ()
 		case MTC:
 		case MIDIClock:
 			if (slave) {
-				_left_layout->set_markup (string_compose ("<span size=\"%1\" foreground=\"green\">%2</span>",
-							INFO_FONT_SIZE, dynamic_cast<TimecodeSlave*>(slave)->approximate_current_position()));
+				bool matching;
+				TimecodeSlave* tcslave;
+				if ((tcslave = dynamic_cast<TimecodeSlave*>(_session->slave())) != 0) {
+					matching = (tcslave->apparent_timecode_format() == _session->config.get_timecode_format());
+				} else {
+					matching = true;
+				}
+				_left_layout->set_markup (string_compose ("<span size=\"%1\" foreground=\"%2\">%3</span>",
+							INFO_FONT_SIZE, (matching?"green":"red"),
+							dynamic_cast<TimecodeSlave*>(slave)->approximate_current_position()));
 				_right_layout->set_markup (string_compose ("<span size=\"%1\" foreground=\"white\">%2</span>",
 							INFO_FONT_SIZE, slave->approximate_current_delta()));
 			} else {
