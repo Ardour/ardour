@@ -483,7 +483,7 @@ AudioClock::on_size_request (Gtk::Requisition* req)
 		int ignored;
 		tmp->set_text ("-88:88:88:88");
 		tmp->get_pixel_size (_mode_width[Timecode], ignored);
-		tmp->set_text (" 8888|88|8888");
+		tmp->set_text (" 88888|88|8888");
 		tmp->get_pixel_size (_mode_width[BBT], ignored);
 		tmp->set_text (" 88:88:88,888");
 		tmp->get_pixel_size (_mode_width[MinSec], ignored);
@@ -497,14 +497,14 @@ AudioClock::on_size_request (Gtk::Requisition* req)
 			 not be sufficient for 24h worth of BBT
 		*/
 
-		tmp->set_text (" 8888888888::,");
+		tmp->set_text (" 88888888888::,");
 	} else {
 		switch (_mode) {
 		case Timecode:
 			tmp->set_text ("-88:88:88:88");
 			break;
 		case BBT:
-			tmp->set_text (" 8888|88|8888");
+			tmp->set_text (" 88888|88|8888");
 			break;
 		case MinSec:
 			tmp->set_text (" 88:88:88,888");
