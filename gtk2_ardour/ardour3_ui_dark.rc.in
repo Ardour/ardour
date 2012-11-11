@@ -345,6 +345,11 @@ style "time_info_box"
         bg[NORMAL] = { 0.149, 0.149, 0.149 }
 }
 
+style "status_bar_box" 
+{
+        bg[NORMAL] = { 0.149, 0.149, 0.149 }
+}
+
 ##include ardour3_dark_fonts.rc
 ##include ardour3_dark_styles.rc
 ##include ardour3_widgets.rc

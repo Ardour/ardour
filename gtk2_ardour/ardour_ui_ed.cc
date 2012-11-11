@@ -538,6 +538,7 @@ ARDOUR_UI::build_menu_bar ()
 	EventBox* ev = manage (new EventBox);
 	ev->show ();
 	CairoHPacker* hbox = manage (new CairoHPacker);
+	hbox->set_name (X_("StatusBarBox"));
 	hbox->show ();
 	hbox->set_border_width (3);
 
