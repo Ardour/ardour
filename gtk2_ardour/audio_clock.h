@@ -103,6 +103,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	int              layout_x_offset;
 	int              em_width;
 	bool             _edit_by_click_field;
+	int              _mode_width[4]; /* enum Mode entries */
 
 	Glib::RefPtr<Pango::Layout> _layout;
 	Glib::RefPtr<Pango::Layout> _left_layout;

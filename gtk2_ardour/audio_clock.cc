@@ -295,7 +295,8 @@ AudioClock::render (cairo_t* cr)
 	if (!_fixed_width) {
 		cairo_move_to (cr, layout_x_offset, 0);
 	} else {
-		cairo_move_to (cr, layout_x_offset, (upper_height - layout_height) / 2.0);
+		int xcenter = layout_x_offset != 0 ? 0 : (get_width() - _mode_width[_mode]) /2;
+		cairo_move_to (cr, layout_x_offset + xcenter, (upper_height - layout_height) / 2.0);
 	}
 
 	pango_cairo_show_layout (cr, _layout->gobj());
@@ -374,6 +375,7 @@ AudioClock::render (cairo_t* cr)
 	if (editing) {
 		if (!insert_map.empty()) {
 
+			int xcenter = layout_x_offset != 0 ? 0 : (get_width() - _mode_width[_mode]) /2;
 
 			if (input_string.length() < insert_map.size()) {
 				Pango::Rectangle cursor;
@@ -391,12 +393,12 @@ AudioClock::render (cairo_t* cr)
 				if (!_fixed_width) {
 					cairo_rectangle (cr, 
 							 min (get_width() - 2.0, 
-							      (double) cursor.get_x()/PANGO_SCALE + layout_x_offset + em_width), 0,
+							      (double) cursor.get_x()/PANGO_SCALE + layout_x_offset + xcenter + em_width), 0,
 							 2.0, cursor.get_height()/PANGO_SCALE);
 				} else {
 					cairo_rectangle (cr, 
 							 min (get_width() - 2.0, 
-							      (double) layout_x_offset + cursor.get_x()/PANGO_SCALE + em_width),
+							      (double) layout_x_offset + xcenter + cursor.get_x()/PANGO_SCALE + em_width),
 							 (upper_height - layout_height)/2.0, 
 							 2.0, cursor.get_height()/PANGO_SCALE);
 				}
@@ -437,7 +439,10 @@ AudioClock::on_size_allocate (Gtk::Allocation& alloc)
 	}
 
 	if (_fixed_width) {
-		/* center display in available space */
+		/* center display in available space
+		 * NB. this only works if the containing widget is not the
+		 * layout itself (eg. the session->property dialog)
+		 */
 		layout_x_offset = (get_width() - layout_width)/2.0;
 	} else {
 		/* left justify */
@@ -474,6 +479,16 @@ AudioClock::on_size_request (Gtk::Requisition* req)
 	tmp->set_font_description (font);
 
 	if (_fixed_width) {
+		int ignored;
+		tmp->set_text ("-88:88:88:88");
+		tmp->get_pixel_size (_mode_width[Timecode], ignored);
+		tmp->set_text (" 8888|88|8888");
+		tmp->get_pixel_size (_mode_width[BBT], ignored);
+		tmp->set_text (" 88:88:88,888");
+		tmp->get_pixel_size (_mode_width[MinSec], ignored);
+		tmp->set_text (" 8888888888");
+		tmp->get_pixel_size (_mode_width[Frames], ignored);
+
 		/* this string is the longest thing we will ever display,
 		   and also includes the BBT bar char that may descends below
 		   the baseline a bit, and a comma for the minsecs mode
@@ -484,10 +499,10 @@ AudioClock::on_size_request (Gtk::Requisition* req)
 	} else {
 		switch (_mode) {
 		case Timecode:
-			tmp->set_text (" 88:88:88:88");
+			tmp->set_text ("-88:88:88:88");
 			break;
 		case BBT:
-			tmp->set_text (" 888|88|8888");
+			tmp->set_text (" 8888|88|8888");
 			break;
 		case MinSec:
 			tmp->set_text (" 88:88:88,888");
@@ -2130,6 +2145,8 @@ void
 AudioClock::on_style_changed (const Glib::RefPtr<Gtk::Style>& old_style)
 {
 	CairoWidget::on_style_changed (old_style);
+	first_width = 0;
+	first_height = 0;
 	set_font ();
 	set_colors ();
 }
