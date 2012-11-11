@@ -59,6 +59,7 @@ const double AudioClock::x_leading_padding = 6.0;
 
 #define BBT_BAR_CHAR "|"
 #define BBT_SCANF_FORMAT "%" PRIu32 "%*c%" PRIu32 "%*c%" PRIu32
+#define INFO_FONT_SIZE ((int)round(font_size * info_font_scale_factor))
 
 AudioClock::AudioClock (const string& clock_name, bool transient, const string& widget_name,
 			bool allow_edit, bool follows_playhead, bool duration, bool with_info)
@@ -352,7 +353,7 @@ AudioClock::render (cairo_t* cr)
 				if (x < x_leading_padding + left_rect_width + separator_height) {
 					x = x_leading_padding + left_rect_width + separator_height;
 				}
-				cairo_move_to (cr, x, upper_height + separator_height + ((h - rh)/2.0));
+				cairo_move_to (cr, x, upper_height + separator_height + ((h - info_height)/2.0));
 			} else {
 				cairo_move_to (cr, x_leading_padding + left_rect_width + separator_height, upper_height + separator_height + ((h - info_height)/2.0));
 			}
@@ -490,12 +491,13 @@ AudioClock::on_size_request (Gtk::Requisition* req)
 		tmp->get_pixel_size (_mode_width[Frames], ignored);
 
 		/* this string is the longest thing we will ever display,
-		   and also includes the BBT bar char that may descends below
-		   the baseline a bit, and a comma for the minsecs mode
-		   where we printf a fractional value (XXX or should)
+		   it does not include the BBT bar char that may descend
+			 below the baseline.
+			 note; depending on BPM setting this may actually
+			 not be sufficient for 24h worth of BBT
 		*/
 		
-		tmp->set_text (" 8888888888:,|"); 
+		tmp->set_text (" 8888888888::,");
 	} else {
 		switch (_mode) {
 		case Timecode:
@@ -540,8 +542,6 @@ AudioClock::on_size_request (Gtk::Requisition* req)
 		/* silly extra padding that seems necessary to correct the info
 		 * that pango just gave us. I have no idea why.
 		 */
-
-		info_height += 4;
 
 		req->height += info_height;
 		req->height += separator_height;
@@ -1035,20 +1035,23 @@ AudioClock::set_frames (framepos_t when, bool /*force*/)
 		framecnt_t rate = _session->frame_rate();
 
 		if (fmod (rate, 100.0) == 0.0) {
-			sprintf (buf, "SR %.1fkHz", rate/1000.0);
+			sprintf (buf, "%.1fkHz", rate/1000.0);
 		} else {
-			sprintf (buf, "SR %" PRId64, rate);
+			sprintf (buf, "%" PRId64 "Hz", rate);
 		}
 
-		_left_layout->set_text (buf);
+		_left_layout->set_markup (string_compose ("<span size=\"%1\"><span foreground=\"white\">%2 </span><span foreground=\"green\">%3</span></span>",
+				INFO_FONT_SIZE, _("SR"), buf));
 
 		float vid_pullup = _session->config.get_video_pullup();
 
 		if (vid_pullup == 0.0) {
-			_right_layout->set_text (_("pullup: \u2012"));
+			_right_layout->set_markup (string_compose ("<span size=\"%1\" foreground=\"white\">%2</span>",
+					INFO_FONT_SIZE, _("pullup: \u2012")));
 		} else {
 			sprintf (buf, _("%+-6.4f%%"), vid_pullup);
-			_right_layout->set_text (buf);
+			_right_layout->set_markup (string_compose ("<span size=\"%1\" foreground=\"green\">%2</span>",
+					INFO_FONT_SIZE, buf));
 		}
 	}
 }
@@ -1138,50 +1141,28 @@ AudioClock::set_timecode (framepos_t when, bool /*force*/)
 
 			switch (sync_src) {
 			case JACK:
-				_left_layout->set_text (string_compose ("%1",
-							sync_source_to_string(sync_src, true)));
+				_left_layout->set_markup (string_compose ("<span size=\"%1\" foreground=\"white\">%2</span>",
+							INFO_FONT_SIZE, sync_source_to_string(sync_src, true)));
 				_right_layout->set_text ("");
 				break;
+			case LTC:
 			case MTC:
-				if (slave) {
-					_left_layout->set_text (string_compose ("%1",
-								dynamic_cast<TimecodeSlave*>(slave)->approximate_current_position()));
-					_right_layout->set_markup (string_compose ("<span size=\"%1\" foreground=\"white\">%2</span>",
-								(int)round(font_size * info_font_scale_factor * .9), slave->approximate_current_delta()));
-				} else {
-					_left_layout->set_text (string_compose ("--pending--",
-								sync_source_to_string(sync_src, true)));
-					_right_layout->set_text ("");
-				}
-				break;
 			case MIDIClock:
 				if (slave) {
-					_left_layout->set_text (string_compose ("%1",
-								sync_source_to_string(sync_src, true)));
+					_left_layout->set_markup (string_compose ("<span size=\"%1\" foreground=\"green\">%2</span>",
+								INFO_FONT_SIZE, dynamic_cast<TimecodeSlave*>(slave)->approximate_current_position()));
 					_right_layout->set_markup (string_compose ("<span size=\"%1\" foreground=\"white\">%2</span>",
-								(int)round(font_size * info_font_scale_factor * .9), slave->approximate_current_delta()));
+								INFO_FONT_SIZE, slave->approximate_current_delta()));
 				} else {
-					_left_layout->set_text (string_compose ("%1 --pending--",
-								sync_source_to_string(sync_src, true)));
-					_right_layout->set_text ("");
-				}
-				break;
-			case LTC:
-				if (slave) {
-					_left_layout->set_text (string_compose ("%1",
-								dynamic_cast<TimecodeSlave*>(slave)->approximate_current_position()));
-					_right_layout->set_markup (string_compose ("<span size=\"%1\" foreground=\"white\">%2</span>",
-								(int)round(font_size * info_font_scale_factor * .9), slave->approximate_current_delta()));
-				} else {
-					_left_layout->set_text (string_compose ("%1 --pending--",
-								sync_source_to_string(sync_src, true)));
+					_left_layout->set_markup (string_compose ("<span size=\"%1\" foreground=\"white\">%2</span>",
+								INFO_FONT_SIZE, _("--pending--")));
 					_right_layout->set_text ("");
 				}
 				break;
 			}
 		} else {
-			_left_layout->set_text (string_compose (_("INT/%1"),
-						sync_source_to_string(sync_src, true)));
+			_left_layout->set_markup (string_compose ("<span size=\"%1\" foreground=\"white\">INT/%2</span>",
+						INFO_FONT_SIZE, sync_source_to_string(sync_src, true)));
 			_right_layout->set_text ("");
 		}
 	}
@@ -1245,10 +1226,12 @@ AudioClock::set_bbt (framepos_t when, bool /*force*/)
 		TempoMetric m (_session->tempo_map().metric_at (pos));
 
 		sprintf (buf, "%-5.2f", m.tempo().beats_per_minute());
-		_left_layout->set_text (buf);
+		_left_layout->set_markup (string_compose ("<span size=\"%1\" foreground=\"green\">%2</span>",
+					INFO_FONT_SIZE, buf));
 
 		sprintf (buf, "%g/%g", m.meter().divisions_per_bar(), m.meter().note_divisor());
-		_right_layout->set_text (buf);
+		_right_layout->set_markup (string_compose ("<span size=\"%1\" foreground=\"green\">%2</span>",
+					INFO_FONT_SIZE, buf));
 	}
 }
 
