@@ -1028,9 +1028,20 @@ AudioClock::set_slave_info ()
 						INFO_FONT_SIZE, sync_source_to_string(sync_src, true)));
 			_right_layout->set_text ("");
 			break;
+		case MIDIClock:
+			if (slave) {
+				_left_layout->set_markup (string_compose ("<span size=\"%1\" foreground=\"white\">%2</span>",
+							INFO_FONT_SIZE, sync_source_to_string(sync_src, true)));
+				_right_layout->set_markup (string_compose ("<span size=\"%1\" foreground=\"white\">%2</span>",
+							INFO_FONT_SIZE, slave->approximate_current_delta()));
+			} else {
+				_left_layout->set_markup (string_compose ("<span size=\"%1\" foreground=\"white\">%2</span>",
+							INFO_FONT_SIZE, _("--pending--")));
+				_right_layout->set_text ("");
+			}
+			break;
 		case LTC:
 		case MTC:
-		case MIDIClock:
 			if (slave) {
 				bool matching;
 				TimecodeSlave* tcslave;

@@ -1077,8 +1077,9 @@ ARDOUR_UI::update_timecode_format ()
 	if (_session) {
 		bool matching;
 		TimecodeSlave* tcslave;
+		SyncSource sync_src = Config->get_sync_source();
 
-		if ((tcslave = dynamic_cast<TimecodeSlave*>(_session->slave())) != 0) {
+		if ((sync_src == LTC || sync_src == MTC) && (tcslave = dynamic_cast<TimecodeSlave*>(_session->slave())) != 0) {
 			matching = (tcslave->apparent_timecode_format() == _session->config.get_timecode_format());
 		} else {
 			matching = true;
