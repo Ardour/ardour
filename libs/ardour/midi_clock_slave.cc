@@ -363,7 +363,7 @@ MIDIClock_Slave::approximate_current_delta() const
 	if (last_timestamp == 0 || _starting) {
 		snprintf(delta, sizeof(delta), "\u2012\u2012\u2012\u2012");
 	} else {
-		snprintf(delta, sizeof(delta), "\u0394<span foreground=\"green\" face=\"monospace\" >%s%5" PRIi64 "</span>sm",
+		snprintf(delta, sizeof(delta), "\u0394<span foreground=\"green\" face=\"monospace\" >%s%5" PRIi64 "</span> sm",
 				PLUSMINUS(-current_delta), abs(current_delta));
 	}
 	return std::string(delta);
