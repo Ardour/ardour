@@ -291,7 +291,7 @@ AudioClock::render (cairo_t* cr)
 	if (!_fixed_width) {
 		cairo_move_to (cr, layout_x_offset, 0);
 	} else {
-		int xcenter = layout_x_offset != 0 ? 0 : (get_width() - _mode_width[_mode]) /2;
+		int xcenter = layout_x_offset > corner_radius/4.0 ? 0 : (get_width() - _mode_width[_mode]) /2;
 		cairo_move_to (cr, layout_x_offset + xcenter, (upper_height - layout_height) / 2.0);
 	}
 
@@ -374,7 +374,7 @@ AudioClock::render (cairo_t* cr)
 	if (editing) {
 		if (!insert_map.empty()) {
 
-			int xcenter = layout_x_offset != 0 ? 0 : (get_width() - _mode_width[_mode]) /2;
+			int xcenter = layout_x_offset > corner_radius/4.0 ? 0 : (get_width() - _mode_width[_mode]) /2;
 
 			if (input_string.length() < insert_map.size()) {
 				Pango::Rectangle cursor;
@@ -1535,9 +1535,10 @@ AudioClock::on_button_press_event (GdkEventButton *ev)
 			/* the text has been centered vertically, so adjust
 			 * x and y.
 			 */
+			int xcenter = !_fixed_width || layout_x_offset > corner_radius/4.0 ? 0 : (get_width() - _mode_width[_mode]) /2;
 
 			y = ev->y - ((upper_height - layout_height)/2);
-			x = ev->x - layout_x_offset;
+			x = ev->x - layout_x_offset - xcenter;
 
 			if (!_layout->xy_to_index (x * PANGO_SCALE, y * PANGO_SCALE, index, trailing)) {
 				/* pretend it is a character on the far right */
@@ -1579,10 +1580,11 @@ AudioClock::on_button_release_event (GdkEventButton *ev)
 
 					if (_edit_by_click_field) {
 
+						int xcenter = !_fixed_width || layout_x_offset > corner_radius/4.0 ? 0 : (get_width() - _mode_width[_mode]) /2;
 						int index = 0;
 						int trailing;
 						int y = ev->y - ((upper_height - layout_height)/2);
-						int x = ev->x - layout_x_offset;
+						int x = ev->x - layout_x_offset - xcenter;
 						Field f;
 
 						if (!_layout->xy_to_index (x * PANGO_SCALE, y * PANGO_SCALE, index, trailing)) {
@@ -1649,8 +1651,9 @@ AudioClock::on_scroll_event (GdkEventScroll *ev)
 	 * x and y.
 	 */
 
+	int xcenter = !_fixed_width || layout_x_offset > corner_radius/4.0 ? 0 : (get_width() - _mode_width[_mode]) /2;
 	y = ev->y - ((upper_height - layout_height)/2);
-	x = ev->x - layout_x_offset;
+	x = ev->x - layout_x_offset - xcenter;
 
 	if (!_layout->xy_to_index (x * PANGO_SCALE, y * PANGO_SCALE, index, trailing)) {
 		/* not in the main layout */
