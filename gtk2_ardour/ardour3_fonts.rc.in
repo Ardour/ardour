@@ -13,6 +13,11 @@ style "small_text"
  	font_name = "@FONT_SMALL@"
 }
 
+style "small_mono_text"
+{
+ 	font_name = "monospace @FONT_SMALL@"
+}
+
 style "small_italic_text"
 {
 	font_name = "italic @FONT_SMALL@"
