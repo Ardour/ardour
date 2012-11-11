@@ -114,7 +114,6 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	Pango::AttrList normal_attributes;
 	Pango::AttrList editing_attributes;
 	Pango::AttrList info_attributes;
-	Pango::AttrList small_info_attributes;
 
 	int first_height;
 	int first_width;
@@ -124,6 +123,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	int upper_height;
 	double mode_based_info_ratio;
 	double corner_radius;
+	uint32_t font_size;
 
 	static const double info_font_scale_factor;
 	static const double separator_height;

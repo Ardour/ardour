@@ -39,7 +39,7 @@
 #endif
 
 // used for approximate_current_delta():
-#define PLUSMINUS(A) ( ((A)<0) ? "\u2012" : (((A)>0) ? "+" : "\u00B1") )
+#define PLUSMINUS(A) ( ((A)<0) ? "-" : (((A)>0) ? "+" : "\u00B1") )
 
 namespace MIDI {
 	class Port;

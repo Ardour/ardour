@@ -673,14 +673,13 @@ MTC_Slave::approximate_current_position() const
 std::string
 MTC_Slave::approximate_current_delta() const
 {
-	char delta[24];
+	char delta[80];
 	SafeTime last;
 	read_current (&last);
 	if (last.timestamp == 0 || reset_pending) {
 		snprintf(delta, sizeof(delta), "\u2012\u2012\u2012\u2012");
 	} else {
-		// TODO if current_delta > 1 frame -> display timecode.
-		snprintf(delta, sizeof(delta), "\u0394 %s%4" PRIi64 " sm",
+		snprintf(delta, sizeof(delta), "\u0394<span foreground=\"green\" face=\"monospace\">%s%5" PRIi64 "</span>sm",
 				PLUSMINUS(-current_delta), abs(current_delta));
 	}
 	return std::string(delta);

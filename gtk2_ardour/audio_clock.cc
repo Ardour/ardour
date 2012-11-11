@@ -53,7 +53,7 @@ using Gtkmm2ext::Keyboard;
 
 sigc::signal<void> AudioClock::ModeChanged;
 vector<AudioClock*> AudioClock::clocks;
-const double AudioClock::info_font_scale_factor = 0.6;
+const double AudioClock::info_font_scale_factor = 0.5;
 const double AudioClock::separator_height = 0.0;
 const double AudioClock::x_leading_padding = 6.0;
 
@@ -83,6 +83,7 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	, upper_height (0)
 	, mode_based_info_ratio (1.0)
 	, corner_radius (9)
+	, font_size (10240)
 	, editing (false)
 	, bbt_reference_time (-1)
 	, last_when(0)
@@ -151,7 +152,6 @@ AudioClock::set_font ()
 	Glib::RefPtr<Gtk::Style> style = get_style ();
 	Pango::FontDescription font; 
 	Pango::AttrFontDesc* font_attr;
-	uint32_t font_size;
 
 	if (!is_realized()) {
 		font = get_font_for_style (get_name());
@@ -177,13 +177,6 @@ AudioClock::set_font ()
 
 	/* and an even smaller one */
 
-	delete font_attr;
-	font.set_size ((int) lrint (font_size * info_font_scale_factor * 0.75));
-	font.set_weight (Pango::WEIGHT_BOLD);
-	font_attr = new Pango::AttrFontDesc (Pango::Attribute::create_attr_font_desc (font));
- 
-	small_info_attributes.change (*font_attr);
-	
 	delete font_attr;
 
 	/* get the figure width for the font. This doesn't have to super
@@ -263,7 +256,6 @@ AudioClock::set_colors ()
 	
 	normal_attributes.change (*foreground_attr);
 	info_attributes.change (*foreground_attr);
-	small_info_attributes.change (*foreground_attr);
 	editing_attributes.change (*foreground_attr);
 	editing_attributes.change (*editing_attr);
 
@@ -274,13 +266,8 @@ AudioClock::set_colors ()
 	}
 
 	if (_left_layout) {
-		if (_mode == Timecode) {
-			_left_layout->set_attributes (small_info_attributes);
-			_right_layout->set_attributes (small_info_attributes);
-		} else {
-			_left_layout->set_attributes (info_attributes);
-			_right_layout->set_attributes (info_attributes);
-		}
+		_left_layout->set_attributes (info_attributes);
+		_right_layout->set_attributes (info_attributes);
 	}
 
 	queue_draw ();
@@ -364,7 +351,7 @@ AudioClock::render (cairo_t* cr)
 				if (x < x_leading_padding + left_rect_width + separator_height) {
 					x = x_leading_padding + left_rect_width + separator_height;
 				}
-				cairo_move_to (cr, x, upper_height + separator_height + ((h - info_height)/2.0));
+				cairo_move_to (cr, x, upper_height + separator_height + ((h - rh)/2.0));
 			} else {
 				cairo_move_to (cr, x_leading_padding + left_rect_width + separator_height, upper_height + separator_height + ((h - info_height)/2.0));
 			}
@@ -1128,6 +1115,7 @@ AudioClock::set_timecode (framepos_t when, bool /*force*/)
 	_layout->set_text (Timecode::timecode_format_time(TC));
 
 	if (_left_layout && _right_layout) {
+
 		SyncSource sync_src = Config->get_sync_source();
 
 		if (_session->config.get_external_sync()) {
@@ -1143,7 +1131,8 @@ AudioClock::set_timecode (framepos_t when, bool /*force*/)
 				if (slave) {
 					_left_layout->set_text (string_compose ("%1",
 								dynamic_cast<TimecodeSlave*>(slave)->approximate_current_position()));
-					_right_layout->set_text (slave->approximate_current_delta());
+					_right_layout->set_markup (string_compose ("<span size=\"%1\" foreground=\"white\">%2</span>",
+								(int)round(font_size * info_font_scale_factor * .9), slave->approximate_current_delta()));
 				} else {
 					_left_layout->set_text (string_compose ("--pending--",
 								sync_source_to_string(sync_src, true)));
@@ -1154,7 +1143,8 @@ AudioClock::set_timecode (framepos_t when, bool /*force*/)
 				if (slave) {
 					_left_layout->set_text (string_compose ("%1",
 								sync_source_to_string(sync_src, true)));
-					_right_layout->set_text (slave->approximate_current_delta());
+					_right_layout->set_markup (string_compose ("<span size=\"%1\" foreground=\"white\">%2</span>",
+								(int)round(font_size * info_font_scale_factor * .9), slave->approximate_current_delta()));
 				} else {
 					_left_layout->set_text (string_compose ("%1 --pending--",
 								sync_source_to_string(sync_src, true)));
@@ -1165,7 +1155,8 @@ AudioClock::set_timecode (framepos_t when, bool /*force*/)
 				if (slave) {
 					_left_layout->set_text (string_compose ("%1",
 								dynamic_cast<TimecodeSlave*>(slave)->approximate_current_position()));
-					_right_layout->set_text (slave->approximate_current_delta());
+					_right_layout->set_markup (string_compose ("<span size=\"%1\" foreground=\"white\">%2</span>",
+								(int)round(font_size * info_font_scale_factor * .9), slave->approximate_current_delta()));
 				} else {
 					_left_layout->set_text (string_compose ("%1 --pending--",
 								sync_source_to_string(sync_src, true)));
@@ -2057,13 +2048,8 @@ AudioClock::set_mode (Mode m)
 
 	if (_left_layout) {
 
-		if (_mode == Timecode) {
-			_left_layout->set_attributes (small_info_attributes);
-			_right_layout->set_attributes (small_info_attributes);
-		} else {
-			_left_layout->set_attributes (info_attributes);
-			_right_layout->set_attributes (info_attributes);
-		}
+		_left_layout->set_attributes (info_attributes);
+		_right_layout->set_attributes (info_attributes);
 		/* adjust info_height according to font size */
 		int ignored;
 		_left_layout->set_text (" 1234567890");

@@ -540,13 +540,13 @@ LTC_Slave::approximate_current_position() const
 std::string
 LTC_Slave::approximate_current_delta() const
 {
-	char delta[24];
+	char delta[80];
 	if (last_timestamp == 0 || engine_dll_initstate == 0) {
 		snprintf(delta, sizeof(delta), "\u2012\u2012\u2012\u2012");
 	} else if ((monotonic_cnt - last_timestamp) > 2 * frames_per_ltc_frame) {
-		snprintf(delta, sizeof(delta), "flywheel");
+		snprintf(delta, sizeof(delta), _("flywheel"));
 	} else {
-		snprintf(delta, sizeof(delta), "\u0394 %s%4" PRIi64 " sm",
+		snprintf(delta, sizeof(delta), "\u0394<span foreground=\"green\" face=\"monospace\" >%s%5" PRIi64 "</span>sm",
 				PLUSMINUS(-current_delta), abs(current_delta));
 	}
 	return std::string(delta);
