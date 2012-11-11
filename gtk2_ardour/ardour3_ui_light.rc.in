@@ -351,6 +351,11 @@ style "inspector_processor_list" = "processor_list"
  	base[SELECTED] = { 0.3, 0.3, 0.3 }
 }
 
+style "time_info_box" 
+{
+        bg[NORMAL] = { 0.149, 0.149, 0.149 }
+}
+
 ##include ardour3_light_fonts.rc
 ##include ardour3_light_styles.rc
 ##include ardour3_widgets.rc

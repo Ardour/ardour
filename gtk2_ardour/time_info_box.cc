@@ -48,6 +48,8 @@ TimeInfoBox::TimeInfoBox ()
 	, syncing_selection (false)
 	, syncing_punch (false)
 {
+	set_name (X_("TimeInfoBox"));
+
 	selection_start = new AudioClock ("selection-start", false, "selection", false, false, false, false);
 	selection_end = new AudioClock ("selection-end", false, "selection", false, false, false, false);
 	selection_length = new AudioClock ("selection-length", false, "selection", false, false, true, false);
