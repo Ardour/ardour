@@ -266,11 +266,6 @@ AudioClock::set_colors ()
 		_layout->set_attributes (editing_attributes);
 	}
 
-	if (_left_layout) {
-		_left_layout->set_attributes (info_attributes);
-		_right_layout->set_attributes (info_attributes);
-	}
-
 	queue_draw ();
 }
 
