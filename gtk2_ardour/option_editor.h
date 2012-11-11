@@ -541,6 +541,7 @@ public:
 	void set_session (ARDOUR::Session *);
 
         Gtk::Widget& tip_widget() { return _clock; }
+        AudioClock& clock() { return _clock; }
 
 private:
 	void save_clock_time ();

@@ -99,6 +99,7 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 		);
 
 	co->set_session (_session);
+	co->clock().set_negative_allowed (true);
 
 	add_option (_("Timecode"), co);
 

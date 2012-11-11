@@ -74,6 +74,8 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	, layout_x_offset (0)
 	, em_width (0)
 	, _edit_by_click_field (false)
+	, _negative_allowed (false)
+	, edit_is_negative (false)
 	, editing_attr (0)
 	, foreground_attr (0)
 	, first_height (0)
@@ -574,8 +576,10 @@ AudioClock::start_edit (Field f)
 		edit_string.clear ();
 		_layout->set_text ("");
 	}
+
 	input_string.clear ();
 	editing = true;
+	edit_is_negative = false;
 
 	if (f) {
 		input_string = get_field (f);
@@ -698,6 +702,7 @@ AudioClock::end_edit (bool modify)
 	} else {
 
 		editing = false;
+		edit_is_negative = false;
 		_layout->set_attributes (normal_attributes);
 		_layout->set_text (pre_edit_string);
 	}
@@ -1344,12 +1349,15 @@ AudioClock::on_key_press_event (GdkEventKey* ev)
 
 	case GDK_minus:
 	case GDK_KP_Subtract:
-		end_edit_relative (false);
+		if (_negative_allowed && input_string.empty()) {
+				edit_is_negative = true;
+		} else {
+			end_edit_relative (false);
+		}
 		return true;
 		break;
 
 	case GDK_plus:
-	case GDK_KP_Add:
 		end_edit_relative (true);
 		return true;
 		break;
@@ -1933,6 +1941,7 @@ AudioClock::frames_from_timecode_string (const string& str) const
 		return 0;
 	}
 
+	TC.negative = edit_is_negative;
 	TC.rate = _session->timecode_frames_per_second();
 	TC.drop= _session->timecode_drop_frames();
 
@@ -2219,4 +2228,10 @@ AudioClock::dpi_reset ()
 	first_width = 0;
 	first_height = 0;
 	queue_resize ();
+}
+
+void
+AudioClock::set_negative_allowed (bool yn)
+{
+	_negative_allowed = yn;
 }
