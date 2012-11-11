@@ -387,10 +387,10 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full, framepos_t now)
 
 	quarter_frame_duration = (double(session.frame_rate()) / (double) timecode.rate / 4.0);
 
-	Timecode::timecode_to_sample (timecode, mtc_frame, false, false,
+	Timecode::timecode_to_sample (timecode, mtc_frame, true, false,
 		double(session.frame_rate()),
 		session.config.get_subframes_per_frame(),
-		session.config.get_timecode_offset_negative(), session.config.get_timecode_offset()
+		session.config.get_slave_timecode_offset_negative(), session.config.get_slave_timecode_offset()
 		);
 
 	DEBUG_TRACE (DEBUG::MTC, string_compose ("MTC at %1 TC %2 = mtc_frame %3 (from full message ? %4) tc-ratio %5\n",

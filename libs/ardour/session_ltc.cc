@@ -135,7 +135,7 @@ Session::ltc_tx_recalculate_position()
 	Timecode::timecode_to_sample (a3tc, ltc_enc_pos, true, false,
 		(double)frame_rate(),
 		config.get_subframes_per_frame(),
-		config.get_timecode_offset_negative(), config.get_timecode_offset()
+		config.get_timecode_generator_offset_negative(), config.get_timecode_generator_offset()
 		);
 	restarting = false;
 }
@@ -365,14 +365,14 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 			timecode_drop_frames(),
 			(double)frame_rate(),
 			config.get_subframes_per_frame(),
-			config.get_timecode_offset_negative(), config.get_timecode_offset()
+			config.get_timecode_generator_offset_negative(), config.get_timecode_generator_offset()
 			);
 
 	/* convert timecode back to sample-position */
 	Timecode::timecode_to_sample (tc_start, tc_sample_start, true, false,
 		(double)frame_rate(),
 		config.get_subframes_per_frame(),
-		config.get_timecode_offset_negative(), config.get_timecode_offset()
+		config.get_timecode_generator_offset_negative(), config.get_timecode_generator_offset()
 		);
 
 	/* difference between current frame and TC frame in samples */
