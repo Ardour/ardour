@@ -283,7 +283,7 @@ AudioClock::render (cairo_t* cr)
 		cairo_set_source_rgba (cr, bg_r, bg_g, bg_b, bg_a);
 		if (corner_radius) {
 			if (_left_layout) {
-				Gtkmm2ext::rounded_top_half_rectangle (cr, 0, 0, get_width(), upper_height, corner_radius);
+				Gtkmm2ext::rounded_top_half_rectangle (cr, 0, 0, get_width() - corner_radius/2.0, upper_height, corner_radius);
 			} else {
 				Gtkmm2ext::rounded_rectangle (cr, 0, 0, get_width(), upper_height, corner_radius);
 			}
@@ -316,7 +316,9 @@ AudioClock::render (cairo_t* cr)
 
 			if (_need_bg) {
 				if (corner_radius) {
-					Gtkmm2ext::rounded_bottom_half_rectangle (cr, 0, upper_height + separator_height, left_rect_width, h, corner_radius);
+					Gtkmm2ext::rounded_bottom_half_rectangle (cr, 0, upper_height + separator_height,
+							left_rect_width + (separator_height == 0 ? corner_radius : 0),
+							h - corner_radius/2.0, corner_radius);
 				} else {
 					cairo_rectangle (cr, 0, upper_height + separator_height, left_rect_width, h);
 				}
@@ -328,9 +330,10 @@ AudioClock::render (cairo_t* cr)
 
 			if (_need_bg) {
 				if (corner_radius) {
-					Gtkmm2ext::rounded_bottom_half_rectangle (cr, left_rect_width + separator_height, upper_height + separator_height,
-										  get_width() - separator_height - left_rect_width, h,
-										  corner_radius);
+					Gtkmm2ext::rounded_bottom_half_rectangle (cr, left_rect_width + separator_height,
+							upper_height + separator_height,
+							get_width() - separator_height - left_rect_width - corner_radius/2.0,
+							h - corner_radius/2.0, corner_radius);
 				} else {
 					cairo_rectangle (cr, left_rect_width + separator_height, upper_height + separator_height,
 							 get_width() - separator_height - left_rect_width, h);
@@ -546,6 +549,9 @@ AudioClock::on_size_request (Gtk::Requisition* req)
 		req->height += info_height;
 		req->height += separator_height;
 	}
+
+	req->height += corner_radius/2.0;
+	req->width += corner_radius/2.0;
 
 	first_height = req->height;
 	first_width = req->width;
@@ -2177,7 +2183,9 @@ void
 AudioClock::set_corner_radius (double r)
 {
 	corner_radius = r;
-	queue_draw ();
+	first_width = 0;
+	first_height = 0;
+	queue_resize ();
 }
 
 void
