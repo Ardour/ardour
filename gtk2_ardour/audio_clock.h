@@ -183,6 +183,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	void on_size_allocate (Gtk::Allocation&);
 	bool on_focus_out_event (GdkEventFocus*);
 
+	void set_slave_info ();
 	void set_timecode (framepos_t, bool);
 	void set_bbt (framepos_t, bool);
 	void set_minsec (framepos_t, bool);

@@ -963,8 +963,8 @@ AudioClock::set (framepos_t when, bool force, framecnt_t offset)
 	}
 
 	if (when == last_when && !force) {
-		if (_mode != Timecode) {
-			/* timecode may need to force display of TC source
+		if (_mode != Timecode && _mode != MinSec) {
+			/* may need to force display of TC source
 			 * time, so don't return early.
 			 */
 			return;
@@ -989,6 +989,9 @@ AudioClock::set (framepos_t when, bool force, framecnt_t offset)
 			break;
 
 		case MinSec:
+			if (_right_layout) {
+				_right_layout->set_alignment(Pango::ALIGN_RIGHT);
+			}
 			set_minsec (when, force);
 			break;
 
@@ -1000,6 +1003,46 @@ AudioClock::set (framepos_t when, bool force, framecnt_t offset)
 
 	queue_draw ();
 	last_when = when;
+}
+
+void
+AudioClock::set_slave_info ()
+{
+	if (!_left_layout || !_right_layout) {
+		return;
+	}
+
+	SyncSource sync_src = Config->get_sync_source();
+
+	if (_session->config.get_external_sync()) {
+		Slave* slave = _session->slave();
+
+		switch (sync_src) {
+		case JACK:
+			_left_layout->set_markup (string_compose ("<span size=\"%1\" foreground=\"white\">%2</span>",
+						INFO_FONT_SIZE, sync_source_to_string(sync_src, true)));
+			_right_layout->set_text ("");
+			break;
+		case LTC:
+		case MTC:
+		case MIDIClock:
+			if (slave) {
+				_left_layout->set_markup (string_compose ("<span size=\"%1\" foreground=\"green\">%2</span>",
+							INFO_FONT_SIZE, dynamic_cast<TimecodeSlave*>(slave)->approximate_current_position()));
+				_right_layout->set_markup (string_compose ("<span size=\"%1\" foreground=\"white\">%2</span>",
+							INFO_FONT_SIZE, slave->approximate_current_delta()));
+			} else {
+				_left_layout->set_markup (string_compose ("<span size=\"%1\" foreground=\"white\">%2</span>",
+							INFO_FONT_SIZE, _("--pending--")));
+				_right_layout->set_text ("");
+			}
+			break;
+		}
+	} else {
+		_left_layout->set_markup (string_compose ("<span size=\"%1\" foreground=\"white\">INT/%2</span>",
+					INFO_FONT_SIZE, sync_source_to_string(sync_src, true)));
+		_right_layout->set_text ("");
+	}
 }
 
 void
@@ -1100,6 +1143,7 @@ AudioClock::set_minsec (framepos_t when, bool /*force*/)
 	}
 
 	_layout->set_text (buf);
+	set_slave_info();
 }
 
 void
@@ -1133,40 +1177,7 @@ AudioClock::set_timecode (framepos_t when, bool /*force*/)
 
 	_layout->set_text (Timecode::timecode_format_time(TC));
 
-	if (_left_layout && _right_layout) {
-
-		SyncSource sync_src = Config->get_sync_source();
-
-		if (_session->config.get_external_sync()) {
-			Slave* slave = _session->slave();
-
-			switch (sync_src) {
-			case JACK:
-				_left_layout->set_markup (string_compose ("<span size=\"%1\" foreground=\"white\">%2</span>",
-							INFO_FONT_SIZE, sync_source_to_string(sync_src, true)));
-				_right_layout->set_text ("");
-				break;
-			case LTC:
-			case MTC:
-			case MIDIClock:
-				if (slave) {
-					_left_layout->set_markup (string_compose ("<span size=\"%1\" foreground=\"green\">%2</span>",
-								INFO_FONT_SIZE, dynamic_cast<TimecodeSlave*>(slave)->approximate_current_position()));
-					_right_layout->set_markup (string_compose ("<span size=\"%1\" foreground=\"white\">%2</span>",
-								INFO_FONT_SIZE, slave->approximate_current_delta()));
-				} else {
-					_left_layout->set_markup (string_compose ("<span size=\"%1\" foreground=\"white\">%2</span>",
-								INFO_FONT_SIZE, _("--pending--")));
-					_right_layout->set_text ("");
-				}
-				break;
-			}
-		} else {
-			_left_layout->set_markup (string_compose ("<span size=\"%1\" foreground=\"white\">INT/%2</span>",
-						INFO_FONT_SIZE, sync_source_to_string(sync_src, true)));
-			_right_layout->set_text ("");
-		}
-	}
+	set_slave_info();
 }
 
 void
@@ -2086,7 +2097,7 @@ AudioClock::set_mode (Mode m)
 		break;
 
 	case MinSec:
-		mode_based_info_ratio = 1.0;
+		mode_based_info_ratio = 0.5;
 		insert_map.push_back (12);
 		insert_map.push_back (11);
 		insert_map.push_back (10);
