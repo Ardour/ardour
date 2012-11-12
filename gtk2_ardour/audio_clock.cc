@@ -1044,14 +1044,12 @@ AudioClock::set_slave_info ()
 				TimecodeSlave* tcslave;
 				if ((tcslave = dynamic_cast<TimecodeSlave*>(_session->slave())) != 0) {
 					matching = (tcslave->apparent_timecode_format() == _session->config.get_timecode_format());
-				} else {
-					matching = true;
+					_left_layout->set_markup (string_compose ("<span size=\"%1\" foreground=\"%2\">%3</span>",
+										  INFO_FONT_SIZE, (matching?X_("green"):X_("red")),
+										  dynamic_cast<TimecodeSlave*>(slave)->approximate_current_position()));
+					_right_layout->set_markup (string_compose ("<span size=\"%1\" foreground=\"white\">%2</span>",
+										   INFO_FONT_SIZE, slave->approximate_current_delta()));
 				}
-				_left_layout->set_markup (string_compose ("<span size=\"%1\" foreground=\"%2\">%3</span>",
-							INFO_FONT_SIZE, (matching?"green":"red"),
-							dynamic_cast<TimecodeSlave*>(slave)->approximate_current_position()));
-				_right_layout->set_markup (string_compose ("<span size=\"%1\" foreground=\"white\">%2</span>",
-							INFO_FONT_SIZE, slave->approximate_current_delta()));
 			} else {
 				_left_layout->set_markup (string_compose ("<span size=\"%1\" foreground=\"white\">%2</span>",
 							INFO_FONT_SIZE, _("--pending--")));
