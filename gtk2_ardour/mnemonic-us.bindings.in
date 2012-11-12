@@ -211,7 +211,7 @@ This mode provides many different operations on both regions and control points,
 @rop|Region/set-region-sync-position|v|set region sync point
 @edit|Editor/editor-paste|<@PRIMARY@>v|paste
 @-group|Editor/brush-at-mouse|<@PRIMARY@>b|some text
-@trans|Editor/track-record-enable-toggle|<@SECONDARY@>b|toggle track rec-enable 
+@trans|Editor/track-record-enable-toggle|<@TERTIARY@>b|toggle track rec-enable 
 @wvis|Common/ToggleBigClock|<@WINDOW@>b|toggle big clock
 @rop|Region/normalize-region|n|normalize
 @sess|Main/AddTrackBus|<@PRIMARY@><@TERTIARY@>n|add track(s) or bus(ses)
