@@ -2947,23 +2947,23 @@ require some unused files to continue to exist."));
 	double space_adjusted = 0;
 
 	if (rep.space < 1000) {
-		bprefix = X_("");
+		bprefix = _("");
 		space_adjusted = rep.space;
 	} else if (rep.space < 1000000) {
-		bprefix = X_("kilo");
+		bprefix = _("kilo");
 		space_adjusted = truncf((float)rep.space / 1000.0);
 	} else if (rep.space < 1000000 * 1000) {
-		bprefix = X_("mega");
+		bprefix = _("mega");
 		space_adjusted = truncf((float)rep.space / (1000.0 * 1000.0));
 	} else {
-		bprefix = X_("giga");
+		bprefix = _("giga");
 		space_adjusted = truncf((float)rep.space / (1000.0 * 1000 * 1000.0));
 	}
 
 	if (removed > 1) {
-		txt.set_text (string_compose (plural_msg, removed, dead_directory, space_adjusted, bprefix, PROGRAM_NAME));
+		txt.set_markup (string_compose (plural_msg, removed, Glib::Markup::escape_text (dead_directory), space_adjusted, bprefix, PROGRAM_NAME));
 	} else {
-		txt.set_text (string_compose (singular_msg, removed, dead_directory, space_adjusted, bprefix, PROGRAM_NAME));
+		txt.set_markup (string_compose (singular_msg, removed, Glib::Markup::escape_text (dead_directory), space_adjusted, bprefix, PROGRAM_NAME));
 	}
 
 	dhbox.pack_start (*dimage, true, false, 5);
@@ -3061,20 +3061,16 @@ Clean-up will move all unused files to a \"dead\" location."));
 				 _("Cleaned Files"),
 				 _("\
 The following %1 files were not in use and \n\
-have been moved to:\n\n\
-%2\n\n\
-After a restart of %5,\n\n\
-Session -> Clean-up -> Flush Wastebasket\n\n\
-will release an additional\n\
-%3 %4bytes of disk space.\n"),
+have been moved to: %2\n\n\
+After a restart of %5\n\n\
+<span face=\"mono\">Session -> Clean-up -> Flush Wastebasket</span>\n\n\
+will release an additional %3 %4bytes of disk space.\n"),
 				 _("\
 The following file was not in use and \n\
-has been moved to:\n				\
-%2\n\n\
-After a restart of %5,\n\n\
-Session -> Clean-up -> Flush Wastebasket\n\n\
-will release an additional\n\
-%3 %4bytes of disk space.\n"
+has been moved to: %2\n\n\
+After a restart of %5\n\n\
+<span face=\"mono\">Session -> Clean-up -> Flush Wastebasket</span>\n\n\
+will release an additional %3 %4bytes of disk space.\n"
 					 ));
 
 }
@@ -3095,11 +3091,9 @@ ARDOUR_UI::flush_trash ()
 
 	display_cleanup_results (rep,
 				 _("deleted file"),
-				 _("The following %1 files were deleted from\n\
-%2,\n\
+				 _("The following %1 files were deleted from %2,\n\
 releasing %3 %4bytes of disk space"),
-				 _("The following file was deleted from\n\
-%2,\n\
+				 _("The following file was deleted from %2,\n\
 releasing %3 %4bytes of disk space"));
 }
 
