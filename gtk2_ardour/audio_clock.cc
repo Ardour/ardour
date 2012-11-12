@@ -1048,8 +1048,8 @@ AudioClock::set_slave_info ()
 				TimecodeSlave* tcslave;
 				if ((tcslave = dynamic_cast<TimecodeSlave*>(_session->slave())) != 0) {
 					matching = (tcslave->apparent_timecode_format() == _session->config.get_timecode_format());
-					_left_layout->set_markup (string_compose ("<span size=\"%1\" foreground=\"%2\">%3</span>",
-										  INFO_FONT_SIZE, (matching?X_("green"):X_("red")),
+					_left_layout->set_markup (string_compose ("<span size=\"%1\"><span foreground=\"white\">%2</span><span foreground=\"%3\">%4</span></span>",
+										  INFO_FONT_SIZE, sync_source_to_string(sync_src, true)[0], (matching?"green":"red"),
 										  dynamic_cast<TimecodeSlave*>(slave)->approximate_current_position()));
 					_right_layout->set_markup (string_compose ("<span size=\"%1\" foreground=\"white\">%2</span>",
 										   INFO_FONT_SIZE, slave->approximate_current_delta()));
