@@ -414,10 +414,13 @@ RouteTimeAxisView::build_automation_action_menu (bool for_selection)
 	items.push_back (SeparatorElem ());
 
 	/* Attach the plugin submenu. It may have previously been used elsewhere,
-	   so it was detached above */
-
-	items.push_back (MenuElem (_("Plugins"), subplugin_menu));
-	items.back().set_sensitive (!subplugin_menu.items().empty() && (!for_selection || _editor.get_selection().tracks.size() == 1));;
+	   so it was detached above 
+	*/
+	
+	if (!subplugin_menu.items().empty()) {
+		items.push_back (MenuElem (_("Plugins"), subplugin_menu));
+		items.back().set_sensitive (!for_selection || _editor.get_selection().tracks.size() == 1);;
+	}
 }
 
 void
