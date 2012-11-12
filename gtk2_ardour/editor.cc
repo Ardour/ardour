@@ -3028,7 +3028,7 @@ Editor::setup_toolbar ()
 	toolbar_hbox.pack_start (*_tools_tearoff, false, false);
 
 	hbox->pack_start (snap_box, false, false);
-        if (!Profile->get_small_screen()) {
+        if (Profile->get_small_screen()) {
                 hbox->pack_start (*nudge_box, false, false);
         } else {
                 ARDOUR_UI::instance()->editor_transport_box().pack_start (*nudge_box, false, false);
