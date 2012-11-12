@@ -57,7 +57,7 @@ style "large_bold_text"
 
 style "large_bold_mono_text"
 {
- 	font_name = "bold monospace @FONT_LARGE@"
+ 	font_name = "bold monospace @FONT_BIGGER@"
 }
 
 style "larger_text"
