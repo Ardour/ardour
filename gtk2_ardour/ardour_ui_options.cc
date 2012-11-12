@@ -69,6 +69,17 @@ when the pull up/down setting is non-zero."));
 			}
 		}
 
+		/* activating a slave is a session-property.
+		 * The slave type is a RC property.
+		 * When the slave is active is must not be reconfigured.
+		 * This is a UI limitation, imposed by audio-clock and
+		 * status displays which combine RC-config & session-properties.
+		 *
+		 * Notficy RCOptionEditor by emitting a signal if the active
+		 * status changed:
+		 */
+		Config->ParameterChanged("sync-source");
+
 		ActionManager::toggle_config_state_foo ("Transport", "ToggleExternalSync", sigc::mem_fun (_session->config, &SessionConfiguration::set_external_sync), sigc::mem_fun (_session->config, &SessionConfiguration::get_external_sync));
 	}
 }

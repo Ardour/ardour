@@ -1152,10 +1152,10 @@ RCOptionEditor::RCOptionEditor ()
 		 _("Specify the Peak Volume of the generated LTC signal in dbFS. A good value is  0dBu ^= -18dbFS in an EBU calibrated system"));
 
 	add_option (_("Transport"), _ltc_volume_slider);
+	parameter_changed ("send-ltc");
 #endif
 
 	parameter_changed ("sync-source");
-	parameter_changed ("send-ltc");
 
 	/* EDITOR */
 
@@ -1795,6 +1795,10 @@ RCOptionEditor::parameter_changed (string const & p)
 		_solo_control_is_listen_control->set_sensitive (s);
 		_listen_position->set_sensitive (s);
 	} else if (p == "sync-source") {
+		_sync_source->set_sensitive (true);
+		if (_session) {
+			_sync_source->set_sensitive (_session->config.get_external_sync());
+		}
 		switch(Config->get_sync_source()) {
 		case ARDOUR::MTC:
 		case ARDOUR::LTC:
