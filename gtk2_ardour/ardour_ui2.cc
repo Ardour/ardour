@@ -257,7 +257,7 @@ ARDOUR_UI::setup_transport ()
 
 	/* these have to provide a clear indication of active state */
 
-	click_button.set_name ("transport active option button");
+	click_button.set_name ("transport button");
 	sync_button.set_name ("transport active option button");
 
 	stop_button.set_active (true);
@@ -364,6 +364,7 @@ ARDOUR_UI::setup_transport ()
 	tbox1->pack_start (goto_start_button, false, false);
 	tbox1->pack_start (goto_end_button, false, false);
 	tbox1->pack_start (auto_loop_button, false, false);
+	tbox1->pack_start (click_button, false, false);
 
 	play_selection_button.set_rounded_corner_mask (0x1); /* upper left only */
 	roll_button.set_rounded_corner_mask (0x2); /* upper right only */
@@ -420,7 +421,6 @@ ARDOUR_UI::setup_transport ()
 
 	transport_tearoff_hbox.pack_start (*auto_box, false, false);
 	transport_tearoff_hbox.pack_start (*clock_box, false, false);
-	transport_tearoff_hbox.pack_start (click_button, false, false);
 
 	time_info_box = manage (new TimeInfoBox);
 	transport_tearoff_hbox.pack_start (*time_info_box, false, false);
