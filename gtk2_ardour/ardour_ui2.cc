@@ -360,11 +360,11 @@ ARDOUR_UI::setup_transport ()
 	tbox3->set_spacing (2);
 	tbox->set_spacing (2);
 
+	tbox1->pack_start (click_button, false, false, 5);
 	tbox1->pack_start (midi_panic_button, false, false);
 	tbox1->pack_start (goto_start_button, false, false);
 	tbox1->pack_start (goto_end_button, false, false);
 	tbox1->pack_start (auto_loop_button, false, false);
-	tbox1->pack_start (click_button, false, false);
 
 	play_selection_button.set_rounded_corner_mask (0x1); /* upper left only */
 	roll_button.set_rounded_corner_mask (0x2); /* upper right only */
