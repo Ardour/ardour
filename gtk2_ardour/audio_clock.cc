@@ -547,9 +547,6 @@ AudioClock::on_size_request (Gtk::Requisition* req)
 		req->height += separator_height;
 	}
 
-	req->height += corner_radius/2.0;
-	req->width += corner_radius/2.0;
-
 	first_height = req->height;
 	first_width = req->width;
 }
