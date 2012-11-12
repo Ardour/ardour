@@ -2586,7 +2586,7 @@ Session::find_all_sources_across_snapshots (set<string>& result, bool exclude_th
 		ripped = ripped.substr (0, ripped.length() - 1);
 	}
 
-	state_files = scanner (ripped, accept_all_state_files, (void *) 0, false, true);
+	state_files = scanner (ripped, accept_all_state_files, (void *) 0, true, true);
 
 	if (state_files == 0) {
 		/* impossible! */
