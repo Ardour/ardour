@@ -252,7 +252,9 @@ SessionPlaylists::find_equivalent_playlist_regions (boost::shared_ptr<Region> re
 		(*i)->get_region_list_equivalent_regions (region, result);
 }
 
-/** Return the number of playlists (not regions) that contain @a src */
+/** Return the number of playlists (not regions) that contain @a src
+ *  Important: this counts usage in both used and not-used playlists.
+ */
 uint32_t
 SessionPlaylists::source_use_count (boost::shared_ptr<const Source> src) const
 {
@@ -264,6 +266,14 @@ SessionPlaylists::source_use_count (boost::shared_ptr<const Source> src) const
                         break;
                 }
 	}
+
+	for (List::const_iterator p = unused_playlists.begin(); p != unused_playlists.end(); ++p) {
+                if ((*p)->uses_source (src)) {
+                        ++count;
+                        break;
+                }
+	}
+
 	return count;
 }
 
