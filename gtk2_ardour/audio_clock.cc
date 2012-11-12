@@ -192,6 +192,7 @@ AudioClock::set_font ()
 
 	tmp->set_text ("8");
 	tmp->get_pixel_size (em_width, ignore_height);
+	set (last_when, true); /* force redraw of markup with new font-size */
 }
 
 void
