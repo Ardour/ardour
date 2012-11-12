@@ -192,7 +192,9 @@ AudioClock::set_font ()
 
 	tmp->set_text ("8");
 	tmp->get_pixel_size (em_width, ignore_height);
-	set (last_when, true); /* force redraw of markup with new font-size */
+
+	/* force redraw of markup with new font-size */
+	set (last_when, true);
 }
 
 void
@@ -2092,7 +2094,6 @@ AudioClock::set_mode (Mode m)
 		int ignored;
 		_left_layout->set_text (" 1234567890");
 		_left_layout->get_pixel_size (ignored, info_height);
-		info_height += 4;
 
 		_left_layout->set_text ("");
 		_right_layout->set_text ("");
