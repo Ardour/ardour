@@ -36,4 +36,6 @@ private:
 
 	bool set_use_monitor_section (bool);
 	bool get_use_monitor_section ();
+
+	ComboOption<float>* _vpu;
 };

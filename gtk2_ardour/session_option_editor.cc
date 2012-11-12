@@ -72,24 +72,24 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 
 	add_option (_("Timecode"), spf);
 
-	ComboOption<float>* vpu = new ComboOption<float> (
+	_vpu = new ComboOption<float> (
 		"video-pullup",
 		_("Pull-up / pull-down"),
 		sigc::mem_fun (*_session_config, &SessionConfiguration::get_video_pullup),
 		sigc::mem_fun (*_session_config, &SessionConfiguration::set_video_pullup)
 		);
 
-	vpu->add (4.1667 + 0.1, _("4.1667 + 0.1%"));
-	vpu->add (4.1667, _("4.1667"));
-	vpu->add (4.1667 - 0.1, _("4.1667 - 0.1%"));
-	vpu->add (0.1, _("0.1"));
-	vpu->add (0, _("none"));
-	vpu->add (-0.1, _("-0.1"));
-	vpu->add (-4.1667 + 0.1, _("-4.1667 + 0.1%"));
-	vpu->add (-4.1667, _("-4.1667"));
-	vpu->add (-4.1667 - 0.1, _("-4.1667 - 0.1%"));
+	_vpu->add (4.1667 + 0.1, _("4.1667 + 0.1%"));
+	_vpu->add (4.1667, _("4.1667"));
+	_vpu->add (4.1667 - 0.1, _("4.1667 - 0.1%"));
+	_vpu->add (0.1, _("0.1"));
+	_vpu->add (0, _("none"));
+	_vpu->add (-0.1, _("-0.1"));
+	_vpu->add (-4.1667 + 0.1, _("-4.1667 + 0.1%"));
+	_vpu->add (-4.1667, _("-4.1667"));
+	_vpu->add (-4.1667 - 0.1, _("-4.1667 - 0.1%"));
 
-	add_option (_("Timecode"), vpu);
+	add_option (_("Timecode"), _vpu);
 
 	ClockOption* co = new ClockOption (
 		"timecode-offset",
@@ -293,6 +293,14 @@ void
 SessionOptionEditor::parameter_changed (std::string const & p)
 {
 	OptionEditor::parameter_changed (p);
+	if (p == "external-sync") {
+		if (Config->get_sync_source() == JACK) {
+			_vpu->set_sensitive(!_session_config->get_external_sync());
+		} else {
+			_vpu->set_sensitive(true);
+		}
+	}
+
 }
 
 /* the presence of absence of a monitor section is not really a regular session
