@@ -350,8 +350,9 @@ AudioClock::render (cairo_t* cr)
 				 */
 				int x, rw, rh;
 				_right_layout->get_pixel_size(rw, rh);
-				x = get_width() - rw- separator_height - x_leading_padding;
+				x = get_width() - rw - separator_height - x_leading_padding - corner_radius/2.0;
 				if (x < x_leading_padding + left_rect_width + separator_height) {
+					/* rather cut off the right end than overlap with the text on the left */
 					x = x_leading_padding + left_rect_width + separator_height;
 				}
 				cairo_move_to (cr, x, upper_height + separator_height + ((h - info_height)/2.0));
