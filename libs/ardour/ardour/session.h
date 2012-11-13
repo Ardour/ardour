@@ -361,7 +361,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 		return mtc_timecode_bits;   /* encoding of SMTPE type for MTC */
 	}
 
-	float timecode_frames_per_second() const;
+	double timecode_frames_per_second() const;
 	bool timecode_drop_frames() const;
 
 	/* Locations */
