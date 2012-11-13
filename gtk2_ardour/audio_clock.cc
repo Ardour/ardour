@@ -1113,12 +1113,12 @@ AudioClock::set_frames (framepos_t when, bool /*force*/)
 		float vid_pullup = _session->config.get_video_pullup();
 
 		if (vid_pullup == 0.0) {
-			_right_layout->set_markup (string_compose ("<span size=\"%1\" foreground=\"white\">%2</span>",
-					INFO_FONT_SIZE, _("<s>pull up/down</s>")));
+			_right_layout->set_markup (string_compose ("<span size=\"%1\"><span foreground=\"white\">%2 </span><span foreground=\"green\">off</span></span>",
+					INFO_FONT_SIZE, _("Pull")));
 		} else {
-			sprintf (buf, _("%+-6.4f%%"), vid_pullup);
-			_right_layout->set_markup (string_compose ("<span size=\"%1\" foreground=\"green\">%2</span>",
-					INFO_FONT_SIZE, buf));
+			sprintf (buf, _("%+.4f%%"), vid_pullup);
+			_right_layout->set_markup (string_compose ("<span size=\"%1\"><span foreground=\"white\">%2 </span><span foreground=\"green\">%3</span></span>",
+					INFO_FONT_SIZE, _("Pull"), buf));
 		}
 	}
 }
