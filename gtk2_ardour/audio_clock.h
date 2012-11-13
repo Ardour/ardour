@@ -205,6 +205,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	framepos_t frames_from_audioframes_string (const std::string&) const;
 
 	void session_configuration_changed (std::string);
+	void session_property_changed (const PBD::PropertyChange&);
 
 	Field index_to_field () const;
 

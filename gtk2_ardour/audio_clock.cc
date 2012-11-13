@@ -930,6 +930,12 @@ AudioClock::end_edit_relative (bool add)
 }
 
 void
+AudioClock::session_property_changed (const PropertyChange& p)
+{
+	set (last_when, true);
+}
+
+void
 AudioClock::session_configuration_changed (std::string p)
 {
 	if (_negative_allowed) {
@@ -1266,11 +1272,11 @@ AudioClock::set_bbt (framepos_t when, bool /*force*/)
 		TempoMetric m (_session->tempo_map().metric_at (pos));
 
 		sprintf (buf, "%-5.2f", m.tempo().beats_per_minute());
-		_left_layout->set_markup (string_compose ("<span size=\"%1\" foreground=\"white\">Tmp <span foreground=\"green\">%2</span></span>",
+		_left_layout->set_markup (string_compose ("<span size=\"%1\" foreground=\"white\">Tempo <span foreground=\"green\">%2</span></span>",
 					INFO_FONT_SIZE, buf));
 
 		sprintf (buf, "%g/%g", m.meter().divisions_per_bar(), m.meter().note_divisor());
-		_right_layout->set_markup (string_compose ("<span size=\"%1\" foreground=\"white\">Mtr <span foreground=\"green\">%2</span></span>",
+		_right_layout->set_markup (string_compose ("<span size=\"%1\" foreground=\"white\">Meter <span foreground=\"green\">%2</span></span>",
 					INFO_FONT_SIZE, buf));
 	}
 }
@@ -1283,6 +1289,7 @@ AudioClock::set_session (Session *s)
 	if (_session) {
 
 		_session->config.ParameterChanged.connect (_session_connections, invalidator (*this), boost::bind (&AudioClock::session_configuration_changed, this, _1), gui_context());
+		_session->tempo_map().PropertyChanged.connect (_session_connections, invalidator (*this), boost::bind (&AudioClock::session_property_changed, this, _1), gui_context());
 
 		const XMLProperty* prop;
 		XMLNode* node = _session->extra_xml (X_("ClockModes"));
