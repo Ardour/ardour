@@ -4746,8 +4746,6 @@ Editor::insert_patch_change (bool from_context)
 
 	const framepos_t p = get_preferred_edit_position (false, from_context);
 
-	cerr << "Got " << rs.size() << " regions to add patch change to\n";
-
 	/* XXX: bit of a hack; use the MIDNAM from the first selected region;
 	   there may be more than one, but the PatchChangeDialog can only offer
 	   one set of patch menus.

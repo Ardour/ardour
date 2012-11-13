@@ -3718,7 +3718,7 @@ RangeMarkerBarDrag::motion (GdkEvent* event, bool first_move)
 		crect = _editor->cd_marker_bar_drag_rect;
 		break;
 	default:
-		cerr << "Error: unknown range marker op passed to Editor::drag_range_markerbar_op ()" << endl;
+		error << string_compose (_("programming_error: %1"), "Error: unknown range marker op passed to Editor::drag_range_markerbar_op ()") << endmsg;
 		return;
 		break;
 	}

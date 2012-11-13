@@ -549,7 +549,7 @@ get_icon (const char* cname)
 	} catch (const Gdk::PixbufError &e) {
 		cerr << "Caught PixbufError: " << e.what() << endl;
 	} catch (...) {
-		g_message("Caught ... ");
+		error << string_compose (_("Caught exception while loading icon named %1"), cname) << endmsg;
 	}
 
 	return img;

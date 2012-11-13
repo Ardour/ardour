@@ -401,7 +401,7 @@ ARDOUR_UI::post_engine ()
 		vector<string>::iterator n;
 		vector<string>::iterator k;
 		for (n = names.begin(), k = keys.begin(); n != names.end(); ++n, ++k) {
-			cerr << "Action: " << (*n) << " bound to " << (*k) << endl;
+			cout << "Action: " << (*n) << " bound to " << (*k) << endl;
 		}
 
 		exit (0);

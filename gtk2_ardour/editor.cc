@@ -208,12 +208,6 @@ static const gchar *_rb_opt_strings[] = {
 };
 #endif
 
-void
-show_me_the_size (Requisition* r, const char* what)
-{
-	cerr << "size of " << what << " = " << r->width << " x " << r->height << endl;
-}
-
 static void
 pane_size_watcher (Paned* pane)
 {

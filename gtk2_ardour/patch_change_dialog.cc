@@ -305,10 +305,9 @@ PatchChangeDialog::patch_combo_changed ()
 	for (MIDI::Name::PatchBank::PatchNameList::const_iterator j = patches.begin(); j != patches.end(); ++j) {
 		string n = (*j)->name ();
 		boost::replace_all (n, "_", " ");
-		std::cerr << "Looking for " << n << " vs " << _patch_combo.get_active_text() << std::endl;
+
 		if (n == _patch_combo.get_active_text ()) {
 			_ignore_signals = true;
-			std::cerr << " reset pgm number to " << (int) (*j)->program_number() << std::endl;
 			_program.set_value ((*j)->program_number() + 1);
 			_ignore_signals = false;
 			break;
