@@ -675,16 +675,20 @@ timecode_to_sample(
 		//  0:10:00:00        0.0             0                   600.000         26460000 (accurate)
 		//
 		//  Per Sigmond <per@sigmond.no>
+		//
+		//  This schma would compensate exactly for a frame-rate of 30 * 0.999. but the
+		//  actual rate is 30000/1001 - which results in an offset of -3.6ms per hour or
+		//  about -86ms over a 24-hour period. (SMPTE 12M-1999)
+		//
+		//  Robin Gareus <robin@gareus.org>
 
-		// Samples inside time dividable by 10 minutes (real time accurate)
-		int64_t base_samples = (int64_t) (((timecode.hours * 107892) + ((timecode.minutes / 10) * 17982)) * frames_per_timecode_frame);
-
-		// Samples inside time exceeding the nearest 10 minutes (always offset, see above)
-		int32_t exceeding_df_minutes = timecode.minutes % 10;
-		int32_t exceeding_df_seconds = (exceeding_df_minutes * 60) + timecode.seconds;
-		int32_t exceeding_df_frames = (30 * exceeding_df_seconds) + timecode.frames - (2 * exceeding_df_minutes);
-		int64_t exceeding_samples = (int64_t) rint(exceeding_df_frames * frames_per_timecode_frame);
-		sample = base_samples + exceeding_samples;
+		const int64_t fps_i = ceil(timecode.rate);
+		int64_t totalMinutes = 60 * timecode.hours + timecode.minutes;
+		int64_t frameNumber  = fps_i * 3600 * timecode.hours
+			+ fps_i * 60 * timecode.minutes
+			+ fps_i * timecode.seconds + timecode.frames
+			- 2 * (totalMinutes - totalMinutes / 10);
+		sample = frameNumber * sample_frame_rate / (double) timecode.rate;
 	} else {
 		/*
 		   Non drop is easy.. just note the use of
@@ -697,7 +701,7 @@ timecode_to_sample(
 	}
 
 	if (use_subframes) {
-		sample += (int64_t) (((double)timecode.subframes * frames_per_timecode_frame) / subframes_per_frame);
+		sample += (int64_t) rint(((double)timecode.subframes * frames_per_timecode_frame) / (double)subframes_per_frame);
 	}
 
 	if (use_offset) {
@@ -736,16 +740,6 @@ sample_to_timecode (
 		bool offset_is_negative, int64_t offset_samples
 		)
 {
-	const double frames_per_timecode_frame = (double) sample_frame_rate / (double) timecode_frames_per_second;
-	int32_t frames_per_hour;
-
-	if (timecode_drop_frames) {
-	  frames_per_hour = (int32_t)(107892 * frames_per_timecode_frame);
-	} else {
-	  frames_per_hour = (int32_t)(3600 * rint(timecode_frames_per_second) * frames_per_timecode_frame);
-	}
-
-  /* do the work */
 	int64_t offset_sample;
 
 	if (!use_offset) {
@@ -766,66 +760,45 @@ sample_to_timecode (
 		}
 	}
 
-	double timecode_frames_left_exact;
-	double timecode_frames_fraction;
-	uint64_t timecode_frames_left;
-
-	// Extract whole hours. Do this to prevent rounding errors with
-	// high sample numbers in the calculations that follow.
-	timecode.hours = offset_sample / frames_per_hour;
-	offset_sample = offset_sample % frames_per_hour;
-
-	// Calculate exact number of (exceeding) timecode frames and fractional frames
-	timecode_frames_left_exact = (double) offset_sample / frames_per_timecode_frame;
-	timecode_frames_fraction = timecode_frames_left_exact - floor( timecode_frames_left_exact );
-	timecode.subframes = (int32_t) floor(timecode_frames_fraction * subframes_per_frame);
-
-	// XXX Not sure if this is necessary anymore...
-	if (timecode.subframes == subframes_per_frame) {
-		// This can happen with 24 fps (and 29.97 fps ?)
-		timecode_frames_left_exact = ceil( timecode_frames_left_exact );
-		timecode.subframes = 0;
-	}
-
-	// Extract hour-exceeding frames for minute, second and frame calculations
-	timecode_frames_left = (uint64_t) floor (timecode_frames_left_exact);
-
 	if (timecode_drop_frames) {
-		// See int32_t explanation in timecode_to_sample()...
+		int64_t frameNumber = floor( (double)offset_sample * timecode_frames_per_second / sample_frame_rate);
 
-		// Number of 10 minute chunks
-		timecode.minutes = (timecode_frames_left / 17982) * 10; // exactly 17982 frames in 10 minutes
-		// frames exceeding the nearest 10 minute barrier
-		int32_t exceeding_df_frames = timecode_frames_left % 17982;
+		/* there are 17982 frames in 10 min @ 29.97df */
+		const int64_t D = frameNumber / 17982;
+		const int64_t M = frameNumber % 17982;
 
-		// Find minutes exceeding the nearest 10 minute barrier
-		if (exceeding_df_frames >= 1800) { // nothing to do if we are inside the first minute (0-1799)
-			exceeding_df_frames -= 1800; // take away first minute (different number of frames than the others)
-			int32_t extra_minutes_minus_1 = exceeding_df_frames / 1798; // how many minutes after the first one
-			exceeding_df_frames -= extra_minutes_minus_1 * 1798; // take away the (extra) minutes just found
-			timecode.minutes += extra_minutes_minus_1 + 1; // update with exceeding minutes
-		}
+		timecode.subframes = floor(subframes_per_frame
+				* ((double)offset_sample * timecode_frames_per_second / sample_frame_rate - (double)frameNumber));
 
-		// Adjust frame numbering for dropped frames (frame 0 and 1 skipped at start of every minute except every 10th)
-		if (timecode.minutes % 10) {
-			// Every minute except every 10th
-			if (exceeding_df_frames < 28) {
-				// First second, frames 0 and 1 are skipped
-				timecode.seconds = 0;
-				timecode.frames = exceeding_df_frames + 2;
-			} else {
-				// All other seconds, all 30 frames are counted
-				exceeding_df_frames -= 28;
-				timecode.seconds = (exceeding_df_frames / 30) + 1;
-				timecode.frames = exceeding_df_frames % 30;
-			}
-		} else {
-			// Every 10th minute, all 30 frames counted in all seconds
-			timecode.seconds = exceeding_df_frames / 30;
-			timecode.frames = exceeding_df_frames % 30;
-		}
+		frameNumber +=  18*D + 2*((M - 2) / 1798);
+
+		timecode.frames  =    frameNumber % 30;
+		timecode.seconds =   (frameNumber / 30) % 60;
+		timecode.minutes =  ((frameNumber / 30) / 60) % 60;
+		timecode.hours   = (((frameNumber / 30) / 60) / 60);
+
 	} else {
-		// Non drop is easy
+		double timecode_frames_left_exact;
+		double timecode_frames_fraction;
+		int64_t timecode_frames_left;
+		const double frames_per_timecode_frame = sample_frame_rate / timecode_frames_per_second;
+		const int64_t frames_per_hour = (int32_t)(3600 * rint(timecode_frames_per_second) * frames_per_timecode_frame);
+
+		timecode.hours = offset_sample / frames_per_hour;
+
+		// Extract whole hours. Do this to prevent rounding errors with
+		// high sample numbers in the calculations that follow.
+		timecode_frames_left_exact = (double)(offset_sample % frames_per_hour) / frames_per_timecode_frame;
+		timecode_frames_fraction = timecode_frames_left_exact - floor( timecode_frames_left_exact );
+
+		timecode.subframes = (int32_t) rint(timecode_frames_fraction * subframes_per_frame);
+		timecode_frames_left = (int64_t) floor (timecode_frames_left_exact);
+
+		if (timecode.subframes == subframes_per_frame) {
+			timecode_frames_left++;
+			timecode.subframes = 0;
+		}
+
 		timecode.minutes = timecode_frames_left / ((int32_t) rint (timecode_frames_per_second) * 60);
 		timecode_frames_left = timecode_frames_left % ((int32_t) rint (timecode_frames_per_second) * 60);
 		timecode.seconds = timecode_frames_left / (int32_t) rint(timecode_frames_per_second);
