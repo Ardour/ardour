@@ -1114,7 +1114,7 @@ AudioClock::set_frames (framepos_t when, bool /*force*/)
 
 		if (vid_pullup == 0.0) {
 			_right_layout->set_markup (string_compose ("<span size=\"%1\" foreground=\"white\">%2</span>",
-					INFO_FONT_SIZE, _("pullup: \u2012")));
+					INFO_FONT_SIZE, _("<s>pull up/down</s>")));
 		} else {
 			sprintf (buf, _("%+-6.4f%%"), vid_pullup);
 			_right_layout->set_markup (string_compose ("<span size=\"%1\" foreground=\"green\">%2</span>",
@@ -1900,7 +1900,7 @@ AudioClock::timecode_validate_edit (const string&)
 	char ignored[2];
 
 	if (sscanf (_layout->get_text().c_str(), "%" PRId32 ":%" PRId32 ":%" PRId32 "%[:;]%" PRId32,
-		    &TC.hours, &TC.minutes, &TC.seconds, &ignored, &TC.frames) != 5) {
+		    &TC.hours, &TC.minutes, &TC.seconds, ignored, &TC.frames) != 5) {
 		return false;
 	}
 
@@ -1948,7 +1948,7 @@ AudioClock::frames_from_timecode_string (const string& str) const
 	framepos_t sample;
 	char ignored[2];
 
-	if (sscanf (str.c_str(), "%d:%d:%d%[:;]%d", &TC.hours, &TC.minutes, &TC.seconds, &ignored, &TC.frames) != 4) {
+	if (sscanf (str.c_str(), "%d:%d:%d%[:;]%d", &TC.hours, &TC.minutes, &TC.seconds, ignored, &TC.frames) != 5) {
 		error << string_compose (_("programming error: %1 %2"), "badly formatted timecode clock string", str) << endmsg;
 		return 0;
 	}
