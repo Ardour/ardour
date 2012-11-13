@@ -263,10 +263,10 @@ GainMeterBase::setup_gain_adjustment ()
 	} else {
 		_data_type = DataType::MIDI;
 		gain_adjustment.set_lower (0.0);
-		gain_adjustment.set_upper (2.0);
-		gain_adjustment.set_step_increment (0.05);
-		gain_adjustment.set_page_increment (0.1);
-		gain_slider->set_default_value (1);
+		gain_adjustment.set_upper (1.0);
+		gain_adjustment.set_step_increment (1.0/128.0);
+		gain_adjustment.set_page_increment (10.0/128.0);
+		gain_slider->set_default_value (1.0);
 	}
 
 	ignore_toggle = false;
@@ -396,17 +396,29 @@ GainMeterBase::gain_activated ()
 {
 	float f;
 
-	if (sscanf (gain_display.get_text().c_str(), "%f", &f) == 1) {
+	{
+		// Switch to user's preferred locale so that
+		// if they use different LC_NUMERIC conventions,
+		// we will honor them.
 
-		/* clamp to displayable values */
-
-		f = min (f, 6.0f);
-
-		_amp->set_gain (dB_to_coefficient(f), this);
-
-		if (gain_display.has_focus()) {
-			PublicEditor::instance().reset_focus();
+		PBD::LocaleGuard lg ("");
+		if (sscanf (gain_display.get_text().c_str(), "%f", &f) != 1) {
+			return;
 		}
+	}
+
+	/* clamp to displayable values */
+	if (_data_type == DataType::AUDIO) {
+		f = min (f, 6.0f);
+		_amp->set_gain (dB_to_coefficient(f), this);
+	} else {
+		f = min (fabs (f), 127.0f);
+		f = Amp::midi_velocity_factor_to_gain_coefficient (f/127.0f);
+		_amp->set_gain (f, this);
+	}
+
+	if (gain_display.has_focus()) {
+		PublicEditor::instance().reset_focus();
 	}
 }
 
@@ -426,7 +438,7 @@ GainMeterBase::show_gain ()
 		}
 		break;
 	case DataType::MIDI:
-		snprintf (buf, sizeof (buf), "%.1f", v);
+		snprintf (buf, sizeof (buf), "%.0f", v * 127.0f);
 		break;
 	}
 
@@ -436,15 +448,14 @@ GainMeterBase::show_gain ()
 void
 GainMeterBase::gain_adjusted ()
 {
-	gain_t value = 0;
+	gain_t value;
 
-	switch (_data_type) {
-	case DataType::AUDIO:
+	/* convert from adjustment range (0..1) to gain coefficient */
+
+	if (_data_type == DataType::AUDIO) {
 		value = slider_position_to_gain_with_max (gain_adjustment.get_value(), Config->get_max_gain());
-		break;
-	case DataType::MIDI:
-		value = gain_adjustment.get_value ();
-		break;
+	} else {
+		value = Amp::midi_velocity_factor_to_gain_coefficient (gain_adjustment.get_value());
 	}
 	
 	if (!ignore_toggle) {
@@ -468,7 +479,7 @@ GainMeterBase::effective_gain_display ()
 		value = gain_to_slider_position_with_max (_amp->gain(), Config->get_max_gain());
 		break;
 	case DataType::MIDI:
-		value = _amp->gain ();
+		value = Amp::gain_coefficient_to_midi_velocity_factor (_amp->gain ());
 		break;
 	}
 

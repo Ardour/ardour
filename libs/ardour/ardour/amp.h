@@ -102,7 +102,17 @@ public:
 	}
 
 	std::string value_as_string (boost::shared_ptr<AutomationControl>) const;
-	
+
+        static const float max_gain_coefficient;
+
+        inline static float gain_coefficient_to_midi_velocity_factor (gain_t v) { 
+		return (v/max_gain_coefficient);
+	}
+
+        inline static gain_t midi_velocity_factor_to_gain_coefficient (float v) {
+		return v * max_gain_coefficient;
+	}
+
 private:
 	bool   _denormal_protection;
 	bool   _apply_gain;
