@@ -21,6 +21,7 @@
 
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "timecode/time.h"
 
@@ -761,8 +762,8 @@ sample_to_timecode (
 	int64_t offset_sample;
 
 	if (!use_offset) {
-		offset_sample = sample;
-		timecode.negative = false;
+		timecode.negative = (sample < 0);
+		offset_sample = llabs(sample);
 	} else {
 		if (offset_is_negative) {
 			offset_sample = sample + offset_samples;

@@ -91,24 +91,32 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 
 	add_option (_("Timecode"), _vpu);
 
-	ClockOption* co = new ClockOption (
-		"timecode-offset",
-		_("Timecode offset"),
-		sigc::mem_fun (*_session_config, &SessionConfiguration::get_timecode_offset),
-		sigc::mem_fun (*_session_config, &SessionConfiguration::set_timecode_offset)
+
+	add_option (_("Timecode"), new OptionEditorHeading (_("Ext Timecode Offsets")));
+
+	ClockOption* sco = new ClockOption (
+		"slave-timecode-offset",
+		_("Slave Timecode offset"),
+		sigc::mem_fun (*_session_config, &SessionConfiguration::get_slave_timecode_offset),
+		sigc::mem_fun (*_session_config, &SessionConfiguration::set_slave_timecode_offset)
 		);
 
-	co->set_session (_session);
-	co->clock().set_negative_allowed (true);
+	sco->set_session (_session);
+	sco->clock().set_negative_allowed (true);
 
-	add_option (_("Timecode"), co);
+	add_option (_("Timecode"), sco);
 
-	add_option (_("Timecode"), new BoolOption (
-			    "timecode-offset-negative",
-			    _("Timecode Offset Negative"),
-			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_timecode_offset_negative),
-			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_timecode_offset_negative)
-			    ));
+	ClockOption* gco = new ClockOption (
+		"timecode-generator-offset",
+		_("Timecode Generator offset"),
+		sigc::mem_fun (*_session_config, &SessionConfiguration::get_timecode_generator_offset),
+		sigc::mem_fun (*_session_config, &SessionConfiguration::set_timecode_generator_offset)
+		);
+
+	gco->set_session (_session);
+	gco->clock().set_negative_allowed (true);
+
+	add_option (_("Timecode"), gco);
 
 	add_option (_("Timecode"), new OptionEditorHeading (_("JACK Transport/Time Settings")));
 
@@ -300,7 +308,11 @@ SessionOptionEditor::parameter_changed (std::string const & p)
 			_vpu->set_sensitive(true);
 		}
 	}
-
+	if (p == "timecode-format") {
+		/* update offset clocks */
+		parameter_changed("timecode-generator-offset");
+		parameter_changed("slave-timecode-offset");
+	}
 }
 
 /* the presence of absence of a monitor section is not really a regular session

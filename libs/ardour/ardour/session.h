@@ -1203,6 +1203,9 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	framepos_t        ltc_enc_off;
 	bool              restarting;
 
+	framepos_t        ltc_timecode_offset;
+	bool              ltc_timecode_negative_offset;
+
 	jack_latency_range_t ltc_out_latency;
 
 	void ltc_tx_initialize();
@@ -1210,6 +1213,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void ltc_tx_reset();
 	void ltc_tx_resync_latency();
 	void ltc_tx_recalculate_position();
+	void ltc_tx_parse_offset();
 	void ltc_tx_send_time_code_for_cycle (framepos_t, framepos_t, double, double, pframes_t nframes);
 #endif
 

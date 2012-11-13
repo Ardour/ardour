@@ -60,6 +60,9 @@ LTC_Slave::LTC_Slave (Session& s)
 	memset(&prev_frame, 0, sizeof(LTCFrameExt));
 
 	decoder = ltc_decoder_create((int) frames_per_ltc_frame, 128 /*queue size*/);
+
+	session.config.ParameterChanged.connect_same_thread (config_connection, boost::bind (&LTC_Slave::parameter_changed, this, _1));
+	parse_timecode_offset();
 	reset();
 	resync_latency();
 	session.Xrun.connect_same_thread (port_connections, boost::bind (&LTC_Slave::resync_xrun, this));
@@ -69,12 +72,34 @@ LTC_Slave::LTC_Slave (Session& s)
 LTC_Slave::~LTC_Slave()
 {
 	port_connections.drop_connections();
+	config_connection.disconnect();
 
 	if (did_reset_tc_format) {
 		session.config.set_timecode_format (saved_tc_format);
 	}
 
 	ltc_decoder_free(decoder);
+}
+
+void
+LTC_Slave::parse_timecode_offset() {
+	Timecode::Time offset_tc;
+	Timecode::parse_timecode_format(session.config.get_slave_timecode_offset(), offset_tc);
+	offset_tc.rate = session.timecode_frames_per_second();
+	offset_tc.drop = session.timecode_drop_frames();
+	session.timecode_to_sample(offset_tc, timecode_offset, false, false);
+	timecode_negative_offset = offset_tc.negative;
+}
+
+void
+LTC_Slave::parameter_changed (std::string const & p)
+{
+	if (p == "slave-timecode-offset"
+			|| p == "subframes-per-frame"
+			|| p == "timecode-format"
+			) {
+		parse_timecode_offset();
+	}
 }
 
 ARDOUR::framecnt_t
@@ -334,7 +359,7 @@ LTC_Slave::process_ltc(framepos_t const now)
 		Timecode::timecode_to_sample (timecode, ltc_frame, true, false,
 			double(session.frame_rate()),
 			session.config.get_subframes_per_frame(),
-			session.config.get_slave_timecode_offset_negative(), session.config.get_slave_timecode_offset()
+			timecode_negative_offset, timecode_offset
 			);
 
 		framepos_t cur_timestamp = frame.off_end + 1;

@@ -25,6 +25,7 @@
 #include "ardour/rc_configuration.h"
 #include "ardour/utils.h"
 #include "ardour/dB.h"
+#include "ardour/session.h"
 
 #include "option_editor.h"
 #include "gui_thread.h"
@@ -284,7 +285,7 @@ FaderOption::add_to_page (OptionEditorPage* p)
 	add_widgets_to_page (p, &_label, &_box);
 }
 
-ClockOption::ClockOption (string const & i, string const & n, sigc::slot<framecnt_t> g, sigc::slot<bool, framecnt_t> s)
+ClockOption::ClockOption (string const & i, string const & n, sigc::slot<std::string> g, sigc::slot<bool, std::string> s)
 	: Option (i, n)
 	, _clock (X_("timecode-offset"), false, X_(""), true, false, true, false)
 	, _get (g)
@@ -299,13 +300,24 @@ ClockOption::ClockOption (string const & i, string const & n, sigc::slot<framecn
 void
 ClockOption::set_state_from_config ()
 {
-	_clock.set (_get (), true);
+	Timecode::Time TC;
+	framepos_t when;
+	if (!Timecode::parse_timecode_format(_get(), TC)) {
+		_clock.set (0, true);
+	}
+	TC.rate = _session->frames_per_timecode_frame();
+	TC.drop = _session->timecode_drop_frames();
+	_session->timecode_to_sample(TC, when, false, false);
+	if (TC.negative) { when=-when; }
+	_clock.set (when, true);
 }
 
 void
 ClockOption::save_clock_time ()
 {
-	_set (_clock.current_time());
+	Timecode::Time TC;
+	_session->sample_to_timecode(_clock.current_time(), TC, false, false);
+	_set (Timecode::timecode_format_time(TC));
 }
 
 void
@@ -317,6 +329,7 @@ ClockOption::add_to_page (OptionEditorPage* p)
 void
 ClockOption::set_session (Session* s)
 {
+	_session = s;
 	_clock.set_session (s);
 }
 

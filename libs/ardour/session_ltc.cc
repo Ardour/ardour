@@ -63,6 +63,7 @@ Session::ltc_tx_initialize()
 {
 	ltc_enc_tcformat = config.get_timecode_format();
 
+	ltc_tx_parse_offset();
 	DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX init sr: %1 fps: %2\n", nominal_frame_rate(), timecode_to_frames_per_second(ltc_enc_tcformat)));
 	ltc_encoder = ltc_encoder_create(nominal_frame_rate(),
 			timecode_to_frames_per_second(ltc_enc_tcformat),
@@ -119,6 +120,16 @@ Session::ltc_tx_reset()
 }
 
 void
+Session::ltc_tx_parse_offset() {
+	Timecode::Time offset_tc;
+	Timecode::parse_timecode_format(config.get_timecode_generator_offset(), offset_tc);
+	offset_tc.rate = timecode_frames_per_second();
+	offset_tc.drop = timecode_drop_frames();
+	timecode_to_sample(offset_tc, ltc_timecode_offset, false, false);
+	ltc_timecode_negative_offset = !offset_tc.negative;
+}
+
+void
 Session::ltc_tx_recalculate_position()
 {
 	SMPTETimecode enctc;
@@ -135,7 +146,7 @@ Session::ltc_tx_recalculate_position()
 	Timecode::timecode_to_sample (a3tc, ltc_enc_pos, true, false,
 		(double)frame_rate(),
 		config.get_subframes_per_frame(),
-		config.get_timecode_generator_offset_negative(), config.get_timecode_generator_offset()
+		ltc_timecode_negative_offset, ltc_timecode_offset
 		);
 	restarting = false;
 }
@@ -204,6 +215,7 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 		}
 		ltc_encoder_set_filter(ltc_encoder, LTC_RISE_TIME(ltc_speed));
 		ltc_enc_tcformat = cur_timecode;
+		ltc_tx_parse_offset();
 		ltc_tx_reset();
 	}
 
@@ -365,14 +377,14 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 			timecode_drop_frames(),
 			(double)frame_rate(),
 			config.get_subframes_per_frame(),
-			config.get_timecode_generator_offset_negative(), config.get_timecode_generator_offset()
+			ltc_timecode_negative_offset, ltc_timecode_offset
 			);
 
 	/* convert timecode back to sample-position */
 	Timecode::timecode_to_sample (tc_start, tc_sample_start, true, false,
 		(double)frame_rate(),
 		config.get_subframes_per_frame(),
-		config.get_timecode_generator_offset_negative(), config.get_timecode_generator_offset()
+		ltc_timecode_negative_offset, ltc_timecode_offset
 		);
 
 	/* difference between current frame and TC frame in samples */

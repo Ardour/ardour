@@ -66,6 +66,8 @@ MTC_Slave::MTC_Slave (Session& s, MIDI::Port& p)
 	a3e_timecode = session.config.get_timecode_format();
 	printed_timecode_warning = false;
 
+	session.config.ParameterChanged.connect_same_thread (config_connection, boost::bind (&MTC_Slave::parameter_changed, this, _1));
+	parse_timecode_offset();
 	reset (true);
 	rebind (p);
 }
@@ -73,6 +75,7 @@ MTC_Slave::MTC_Slave (Session& s, MIDI::Port& p)
 MTC_Slave::~MTC_Slave()
 {
 	port_connections.drop_connections();
+	config_connection.disconnect();
 
 	while (busy_guard1 != busy_guard2) {
 		/* make sure MIDI parser is not currently calling any callbacks in here,
@@ -99,6 +102,27 @@ MTC_Slave::rebind (MIDI::Port& p)
 	port->parser()->mtc_time.connect_same_thread (port_connections,  boost::bind (&MTC_Slave::update_mtc_time, this, _1, _2, _3));
 	port->parser()->mtc_qtr.connect_same_thread (port_connections, boost::bind (&MTC_Slave::update_mtc_qtr, this, _1, _2, _3));
 	port->parser()->mtc_status.connect_same_thread (port_connections, boost::bind (&MTC_Slave::update_mtc_status, this, _1));
+}
+
+void
+MTC_Slave::parse_timecode_offset() {
+	Timecode::Time offset_tc;
+	Timecode::parse_timecode_format(session.config.get_slave_timecode_offset(), offset_tc);
+	offset_tc.rate = session.timecode_frames_per_second();
+	offset_tc.drop = session.timecode_drop_frames();
+	session.timecode_to_sample(offset_tc, timecode_offset, false, false);
+	timecode_negative_offset = offset_tc.negative;
+}
+
+void
+MTC_Slave::parameter_changed (std::string const & p)
+{
+	if (p == "slave-timecode-offset"
+			|| p == "subframes-per-frame"
+			|| p == "timecode-format"
+			) {
+		parse_timecode_offset();
+	}
 }
 
 bool
@@ -390,7 +414,7 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full, framepos_t now)
 	Timecode::timecode_to_sample (timecode, mtc_frame, true, false,
 		double(session.frame_rate()),
 		session.config.get_subframes_per_frame(),
-		session.config.get_slave_timecode_offset_negative(), session.config.get_slave_timecode_offset()
+		timecode_negative_offset, timecode_offset
 		);
 
 	DEBUG_TRACE (DEBUG::MTC, string_compose ("MTC at %1 TC %2 = mtc_frame %3 (from full message ? %4) tc-ratio %5\n",

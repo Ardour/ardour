@@ -915,7 +915,7 @@ AudioClock::end_edit_relative (bool add)
 		} else {
 			framepos_t c = current_time();
 
-			if (c > frames) {
+			if (c > frames || _negative_allowed) {
 				set (c - frames, true);
 			} else {
 				set (0, true);
@@ -932,6 +932,11 @@ AudioClock::end_edit_relative (bool add)
 void
 AudioClock::session_configuration_changed (std::string p)
 {
+	if (_negative_allowed) {
+		/* session option editor clock */
+		return;
+	}
+
 	if (p == "sync-source" || p == "external-sync") {
 		set (current_time(), true);
 		return;
@@ -1897,10 +1902,23 @@ bool
 AudioClock::timecode_validate_edit (const string&)
 {
 	Timecode::Time TC;
+	int hours;
 	char ignored[2];
 
 	if (sscanf (_layout->get_text().c_str(), "%" PRId32 ":%" PRId32 ":%" PRId32 "%[:;]%" PRId32,
-		    &TC.hours, &TC.minutes, &TC.seconds, ignored, &TC.frames) != 5) {
+		    &hours, &TC.minutes, &TC.seconds, ignored, &TC.frames) != 5) {
+		return false;
+	}
+
+	if (hours < 0) {
+		TC.hours = hours * -1;
+		TC.negative = true;
+	} else {
+		TC.hours = hours;
+		TC.negative = false;
+	}
+
+	if (TC.negative && !_negative_allowed) {
 		return false;
 	}
 
@@ -1947,19 +1965,22 @@ AudioClock::frames_from_timecode_string (const string& str) const
 	Timecode::Time TC;
 	framepos_t sample;
 	char ignored[2];
+	int hours;
 
-	if (sscanf (str.c_str(), "%d:%d:%d%[:;]%d", &TC.hours, &TC.minutes, &TC.seconds, ignored, &TC.frames) != 5) {
+	if (sscanf (str.c_str(), "%d:%d:%d%[:;]%d", &hours, &TC.minutes, &TC.seconds, ignored, &TC.frames) != 5) {
 		error << string_compose (_("programming error: %1 %2"), "badly formatted timecode clock string", str) << endmsg;
 		return 0;
 	}
-
-	TC.negative = edit_is_negative;
+	TC.hours = abs(hours);
 	TC.rate = _session->timecode_frames_per_second();
 	TC.drop= _session->timecode_drop_frames();
 
 	_session->timecode_to_sample (TC, sample, false /* use_offset */, false /* use_subframes */ );
 
 	// timecode_tester ();
+	if (edit_is_negative) {
+		sample = - sample;
+	}
 
 	return sample;
 }
