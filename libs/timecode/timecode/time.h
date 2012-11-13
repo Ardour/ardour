@@ -112,6 +112,8 @@ std::string timecode_format_sampletime (
 		double timecode_frames_per_second, bool timecode_drop_frames
 		);
 
+bool parse_timecode_format(std::string tc, Timecode::Time &TC);
+
 void
 timecode_to_sample(
 		Timecode::Time& timecode, int64_t& sample,
