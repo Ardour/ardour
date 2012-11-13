@@ -117,12 +117,11 @@ Amp::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_frame*/,
 				for (BufferSet::midi_iterator i = bufs.midi_begin(); i != bufs.midi_end(); ++i) {
 
 					MidiBuffer& mb (*i);
-					const float midi_velocity_factor = gain_coefficient_to_midi_velocity_factor (_current_gain);
 					
 					for (MidiBuffer::iterator m = mb.begin(); m != mb.end(); ++m) {
 						Evoral::MIDIEvent<MidiBuffer::TimeType> ev = *m;
 						if (ev.is_note_on()) {
-							ev.scale_velocity (midi_velocity_factor);
+							ev.scale_velocity (_current_gain);
 						}
 					}
 				}
@@ -177,7 +176,7 @@ Amp::apply_gain (BufferSet& bufs, framecnt_t nframes, gain_t initial, gain_t tar
 
 			if (ev.is_note_on()) {
 				const gain_t scale = delta * (ev.time()/(double) nframes);
-				ev.scale_velocity (gain_coefficient_to_midi_velocity_factor (initial+scale));
+				ev.scale_velocity (initial+scale);
 			}
 		}
 	}
@@ -335,12 +334,11 @@ Amp::apply_simple_gain (BufferSet& bufs, framecnt_t nframes, gain_t target)
 
 		for (BufferSet::midi_iterator i = bufs.midi_begin(); i != bufs.midi_end(); ++i) {
 			MidiBuffer& mb (*i);
-			const float midi_velocity_factor = gain_coefficient_to_midi_velocity_factor (target);
 
 			for (MidiBuffer::iterator m = mb.begin(); m != mb.end(); ++m) {
 				Evoral::MIDIEvent<MidiBuffer::TimeType> ev = *m;
 				if (ev.is_note_on()) {
-					ev.scale_velocity (midi_velocity_factor);
+					ev.scale_velocity (target);
 				}
 			}
 		}

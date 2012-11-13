@@ -263,7 +263,7 @@ GainMeterBase::setup_gain_adjustment ()
 	} else {
 		_data_type = DataType::MIDI;
 		gain_adjustment.set_lower (0.0);
-		gain_adjustment.set_upper (1.0);
+		gain_adjustment.set_upper (2.0);
 		gain_adjustment.set_step_increment (1.0/128.0);
 		gain_adjustment.set_page_increment (10.0/128.0);
 		gain_slider->set_default_value (1.0);
@@ -412,8 +412,7 @@ GainMeterBase::gain_activated ()
 		f = min (f, 6.0f);
 		_amp->set_gain (dB_to_coefficient(f), this);
 	} else {
-		f = min (fabs (f), 127.0f);
-		f = Amp::midi_velocity_factor_to_gain_coefficient (f/127.0f);
+		f = min (fabs (f), 2.0f);
 		_amp->set_gain (f, this);
 	}
 
@@ -438,7 +437,7 @@ GainMeterBase::show_gain ()
 		}
 		break;
 	case DataType::MIDI:
-		snprintf (buf, sizeof (buf), "%.0f", v * 127.0f);
+		snprintf (buf, sizeof (buf), "%.1f", v);
 		break;
 	}
 
@@ -455,7 +454,7 @@ GainMeterBase::gain_adjusted ()
 	if (_data_type == DataType::AUDIO) {
 		value = slider_position_to_gain_with_max (gain_adjustment.get_value(), Config->get_max_gain());
 	} else {
-		value = Amp::midi_velocity_factor_to_gain_coefficient (gain_adjustment.get_value());
+		value = gain_adjustment.get_value();
 	}
 	
 	if (!ignore_toggle) {
@@ -479,7 +478,7 @@ GainMeterBase::effective_gain_display ()
 		value = gain_to_slider_position_with_max (_amp->gain(), Config->get_max_gain());
 		break;
 	case DataType::MIDI:
-		value = Amp::gain_coefficient_to_midi_velocity_factor (_amp->gain ());
+		value = _amp->gain ();
 		break;
 	}
 
