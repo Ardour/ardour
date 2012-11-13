@@ -1247,6 +1247,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	boost::shared_ptr<ARDOUR::AudioTrack> get_nth_selected_audio_track (int nth) const;
 	boost::shared_ptr<ARDOUR::MidiTrack> get_nth_selected_midi_track (int nth) const;
 
+        void toggle_midi_input_active (bool flip_others);
+
 	ARDOUR::InterThreadInfo* current_interthread_info;
 
 	AnalysisWindow* analysis_window;

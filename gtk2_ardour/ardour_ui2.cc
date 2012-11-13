@@ -419,7 +419,7 @@ ARDOUR_UI::setup_transport ()
 	auto_box->pack_start (auto_return_button, false, false);
 
 	transport_tearoff_hbox.pack_start (*auto_box, false, false);
-	transport_tearoff_hbox.pack_start (*clock_box, false, false);
+	transport_tearoff_hbox.pack_start (*clock_box, true, true);
 
 	time_info_box = manage (new TimeInfoBox);
 	transport_tearoff_hbox.pack_start (*time_info_box, false, false);

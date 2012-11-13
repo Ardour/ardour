@@ -623,6 +623,9 @@ Editor::register_actions ()
 	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
 	tact->set_active (true);
 
+	ActionManager::register_action (editor_actions, X_("toggle-midi-input-active"), _("Toggle MIDI Input Active for Editor-Selected Tracks/Busses"), 
+				   sigc::bind (sigc::mem_fun (*this, &Editor::toggle_midi_input_active), false));
+
 	ActionManager::add_action_group (rl_actions);
 	ActionManager::add_action_group (ruler_actions);
 	ActionManager::add_action_group (zoom_actions);

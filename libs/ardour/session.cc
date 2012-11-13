@@ -2686,44 +2686,68 @@ Session::io_name_is_legal (const std::string& name)
 }
 
 void
-Session::set_exclusive_input_active (boost::shared_ptr<Route> rt, bool /*others_on*/)
+Session::set_exclusive_input_active (boost::shared_ptr<RouteList> rl, bool onoff, bool flip_others)
 {
-	RouteList rl;
+	RouteList rl2;
 	vector<string> connections;
 
-	PortSet& ps (rt->input()->ports());
+	/* if we are passed only a single route and we're not told to turn
+	 * others off, then just do the simple thing.
+	 */
 
-	for (PortSet::iterator p = ps.begin(); p != ps.end(); ++p) {
-		p->get_connections (connections);
-	}
-
-	for (vector<string>::iterator s = connections.begin(); s != connections.end(); ++s) {
-		routes_using_input_from (*s, rl);
-	}
-
-	/* scan all relevant routes to see if others are on or off */
-
-	bool others_are_already_on = false;
-
-	for (RouteList::iterator r = rl.begin(); r != rl.end(); ++r) {
-		if ((*r) != rt) {
-			boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (*r);
-			if (mt) {
-				if (mt->input_active()) {
-					others_are_already_on = true;
-					break;
-				}
-			}
+	if (flip_others == false && rl->size() == 1) {
+		boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (rl->front());
+		if (mt) {
+			mt->set_input_active (onoff);
+			return;
 		}
 	}
 
-	/* globally reverse other routes */
+	for (RouteList::iterator rt = rl->begin(); rt != rl->end(); ++rt) {
 
-	for (RouteList::iterator r = rl.begin(); r != rl.end(); ++r) {
-		if ((*r) != rt) {
+		PortSet& ps ((*rt)->input()->ports());
+		
+		for (PortSet::iterator p = ps.begin(); p != ps.end(); ++p) {
+			p->get_connections (connections);
+		}
+		
+		for (vector<string>::iterator s = connections.begin(); s != connections.end(); ++s) {
+			routes_using_input_from (*s, rl2);
+		}
+		
+		/* scan all relevant routes to see if others are on or off */
+		
+		bool others_are_already_on = false;
+		
+		for (RouteList::iterator r = rl2.begin(); r != rl2.end(); ++r) {
+
 			boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (*r);
-			if (mt) {
-				mt->set_input_active (!others_are_already_on);
+
+			if (!mt) {
+				continue;
+			}
+
+			if ((*r) != (*rt)) {
+				if (mt->input_active()) {
+					others_are_already_on = true;
+				}
+			} else {
+				/* this one needs changing */
+				mt->set_input_active (onoff);
+			}
+		}
+		
+		if (flip_others) {
+
+			/* globally reverse other routes */
+			
+			for (RouteList::iterator r = rl2.begin(); r != rl2.end(); ++r) {
+				if ((*r) != (*rt)) {
+					boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (*r);
+					if (mt) {
+						mt->set_input_active (!others_are_already_on);
+					}
+				}
 			}
 		}
 	}
@@ -2732,7 +2756,7 @@ Session::set_exclusive_input_active (boost::shared_ptr<Route> rt, bool /*others_
 void
 Session::routes_using_input_from (const string& str, RouteList& rl)
 {
-	boost::shared_ptr<RouteList> r = routes.reader ();
+	boost::shared_ptr<RouteList> r = routes.reader();
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if ((*i)->input()->connected_to (str)) {

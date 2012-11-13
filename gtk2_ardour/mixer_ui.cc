@@ -38,6 +38,7 @@
 #include <gtkmm2ext/window_title.h>
 
 #include "ardour/debug.h"
+#include "ardour/midi_track.h"
 #include "ardour/plugin_manager.h"
 #include "ardour/route_group.h"
 #include "ardour/session.h"
@@ -1888,7 +1889,7 @@ Mixer_UI::set_route_targets_for_operation ()
 		return;
 	}
 
-	/* try to get mixer strip at mouse */
+	/* nothing selected ... try to get mixer strip at mouse */
 
 	int x, y;
 	get_pointer (x, y);
@@ -1907,4 +1908,24 @@ Mixer_UI::monitor_section_going_away ()
 		out_packer.remove (_monitor_section->tearoff());
 		_monitor_section->set_session (0);
 	}
+}
+
+void
+Mixer_UI::toggle_midi_input_active (bool flip_others)
+{
+	boost::shared_ptr<RouteList> rl (new RouteList);
+	bool onoff;
+
+	set_route_targets_for_operation ();
+
+	for (RouteUISelection::iterator r = _route_targets.begin(); r != _route_targets.end(); ++r) {
+		boost::shared_ptr<MidiTrack> mt = (*r)->midi_track();
+
+		if (mt) {
+			rl->push_back ((*r)->route());
+			onoff = !mt->input_active();
+		}
+	}
+	
+	_session->set_exclusive_input_active (rl, onoff, flip_others);
 }

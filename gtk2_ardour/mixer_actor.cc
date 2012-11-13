@@ -71,6 +71,9 @@ MixerActor::register_actions ()
 
 	myactions.register_action ("Mixer", "scroll-left", _("Scroll Mixer Window to the left"), sigc::mem_fun (*this, &MixerActor::scroll_left));
 	myactions.register_action ("Mixer", "scroll-right", _("Scroll Mixer Window to the left"), sigc::mem_fun (*this, &MixerActor::scroll_right));
+
+	myactions.register_action ("Mixer", "toggle-midi-input-active", _("Toggle MIDI Input Active for Mixer-Selected Tracks/Busses"), 
+				   sigc::bind (sigc::mem_fun (*this, &MixerActor::toggle_midi_input_active), false));
 }
 
 void
@@ -261,3 +264,4 @@ MixerActor::ab_plugins ()
 		}
 	}
 }
+

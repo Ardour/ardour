@@ -6828,3 +6828,26 @@ Editor::uncombine_regions ()
 	commit_reversible_command ();
 }
 
+void
+Editor::toggle_midi_input_active (bool flip_others)
+{
+	bool onoff;
+	boost::shared_ptr<RouteList> rl (new RouteList);
+
+	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
+		RouteTimeAxisView *rtav = dynamic_cast<RouteTimeAxisView *>(*i);
+
+		if (!rtav) {
+			continue;
+		}
+
+		boost::shared_ptr<MidiTrack> mt = rtav->midi_track();
+
+		if (mt) {
+			rl->push_back (rtav->route());
+			onoff = !mt->input_active();
+		}
+	}
+	
+	_session->set_exclusive_input_active (rl, onoff, flip_others);
+}

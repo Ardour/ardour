@@ -63,10 +63,14 @@ class MixerActor : virtual public sigc::trackable
 	void toggle_processors ();
 	void ab_plugins ();
 
+        /* these actions need access to a Session, do defer to
+	   a derived class
+	*/
+        virtual void toggle_midi_input_active (bool flip_others) = 0;
+
 	/* these actions don't apply to the selection, so defer to
 	   a derived class.
 	*/
-
 	virtual void scroll_left () {}
 	virtual void scroll_right () {}
 };

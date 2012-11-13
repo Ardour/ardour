@@ -1915,22 +1915,12 @@ MixerStrip::input_active_button_release (GdkEventButton* ev)
 		return true;
 	}
 
-	if (mt->input_active()) {
-		if (Keyboard::modifier_state_contains (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::SecondaryModifier))) {
-			/* turn all other tracks using this input off */
-			_session->set_exclusive_input_active (mt, false);
-		} else {
-			mt->set_input_active (false);
-		}
+	boost::shared_ptr<RouteList> rl (new RouteList);
 
-	} else {
-		if (Keyboard::modifier_state_contains (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::SecondaryModifier))) {
-			/* turn all other tracks using this input on */
-			_session->set_exclusive_input_active (mt, true);
-		} else {
-			mt->set_input_active (true);
-		}
-	}
+	rl->push_back (route());
+
+	_session->set_exclusive_input_active (rl, !mt->input_active(),
+					      Keyboard::modifier_state_contains (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::SecondaryModifier)));
 
 	return true;
 }

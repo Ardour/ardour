@@ -129,6 +129,7 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 	bool strip_scroller_button_release (GdkEventButton*);
 	void scroll_left ();
 	void scroll_right ();
+        void toggle_midi_input_active (bool flip_others);
 
 	void add_strips (ARDOUR::RouteList&);
 	void remove_strip (MixerStrip *);
