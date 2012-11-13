@@ -283,7 +283,7 @@ AudioClock::render (cairo_t* cr)
 		cairo_set_source_rgba (cr, bg_r, bg_g, bg_b, bg_a);
 		if (corner_radius) {
 			if (_left_layout) {
-				Gtkmm2ext::rounded_top_half_rectangle (cr, 0, 0, get_width() - corner_radius/2.0, upper_height, corner_radius);
+				Gtkmm2ext::rounded_top_half_rectangle (cr, 0, 0, get_width(), upper_height, corner_radius);
 			} else {
 				Gtkmm2ext::rounded_rectangle (cr, 0, 0, get_width(), upper_height, corner_radius);
 			}
@@ -296,7 +296,7 @@ AudioClock::render (cairo_t* cr)
 	if (!_fixed_width) {
 		cairo_move_to (cr, layout_x_offset, 0);
 	} else {
-		int xcenter = layout_x_offset > corner_radius/4.0 ? 0 : (get_width() - _mode_width[_mode]) /2;
+		int xcenter = layout_x_offset > 0 ? 0 : (get_width() - _mode_width[_mode]) /2;
 		cairo_move_to (cr, layout_x_offset + xcenter, (upper_height - layout_height) / 2.0);
 	}
 
@@ -318,7 +318,7 @@ AudioClock::render (cairo_t* cr)
 				if (corner_radius) {
 					Gtkmm2ext::rounded_bottom_half_rectangle (cr, 0, upper_height + separator_height,
 							left_rect_width + (separator_height == 0 ? corner_radius : 0),
-							h - corner_radius/2.0, corner_radius);
+							h, corner_radius);
 				} else {
 					cairo_rectangle (cr, 0, upper_height + separator_height, left_rect_width, h);
 				}
@@ -332,8 +332,8 @@ AudioClock::render (cairo_t* cr)
 				if (corner_radius) {
 					Gtkmm2ext::rounded_bottom_half_rectangle (cr, left_rect_width + separator_height,
 							upper_height + separator_height,
-							get_width() - separator_height - left_rect_width - corner_radius/2.0,
-							h - corner_radius/2.0, corner_radius);
+							get_width() - separator_height - left_rect_width,
+							h, corner_radius);
 				} else {
 					cairo_rectangle (cr, left_rect_width + separator_height, upper_height + separator_height,
 							 get_width() - separator_height - left_rect_width, h);
@@ -352,7 +352,7 @@ AudioClock::render (cairo_t* cr)
 				 */
 				int x, rw, rh;
 				_right_layout->get_pixel_size(rw, rh);
-				x = get_width() - rw - separator_height - x_leading_padding - corner_radius/2.0;
+				x = get_width() - rw - separator_height - x_leading_padding;
 				if (x < x_leading_padding + left_rect_width + separator_height) {
 					/* rather cut off the right end than overlap with the text on the left */
 					x = x_leading_padding + left_rect_width + separator_height;
@@ -380,7 +380,7 @@ AudioClock::render (cairo_t* cr)
 	if (editing) {
 		if (!insert_map.empty()) {
 
-			int xcenter = layout_x_offset > corner_radius/4.0 ? 0 : (get_width() - _mode_width[_mode]) /2;
+			int xcenter = layout_x_offset > 0 ? 0 : (get_width() - _mode_width[_mode]) /2;
 
 			if (input_string.length() < insert_map.size()) {
 				Pango::Rectangle cursor;
@@ -1561,7 +1561,7 @@ AudioClock::on_button_press_event (GdkEventButton *ev)
 			/* the text has been centered vertically, so adjust
 			 * x and y.
 			 */
-			int xcenter = !_fixed_width || layout_x_offset > corner_radius/4.0 ? 0 : (get_width() - _mode_width[_mode]) /2;
+			int xcenter = !_fixed_width || layout_x_offset > 0 ? 0 : (get_width() - _mode_width[_mode]) /2;
 
 			y = ev->y - ((upper_height - layout_height)/2);
 			x = ev->x - layout_x_offset - xcenter;
@@ -1606,7 +1606,7 @@ AudioClock::on_button_release_event (GdkEventButton *ev)
 
 					if (_edit_by_click_field) {
 
-						int xcenter = !_fixed_width || layout_x_offset > corner_radius/4.0 ? 0 : (get_width() - _mode_width[_mode]) /2;
+						int xcenter = !_fixed_width || layout_x_offset > 0 ? 0 : (get_width() - _mode_width[_mode]) /2;
 						int index = 0;
 						int trailing;
 						int y = ev->y - ((upper_height - layout_height)/2);
@@ -1677,7 +1677,7 @@ AudioClock::on_scroll_event (GdkEventScroll *ev)
 	 * x and y.
 	 */
 
-	int xcenter = !_fixed_width || layout_x_offset > corner_radius/4.0 ? 0 : (get_width() - _mode_width[_mode]) /2;
+	int xcenter = !_fixed_width || layout_x_offset > 0 ? 0 : (get_width() - _mode_width[_mode]) /2;
 	y = ev->y - ((upper_height - layout_height)/2);
 	x = ev->x - layout_x_offset - xcenter;
 
