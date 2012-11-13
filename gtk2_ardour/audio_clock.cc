@@ -1261,11 +1261,11 @@ AudioClock::set_bbt (framepos_t when, bool /*force*/)
 		TempoMetric m (_session->tempo_map().metric_at (pos));
 
 		sprintf (buf, "%-5.2f", m.tempo().beats_per_minute());
-		_left_layout->set_markup (string_compose ("<span size=\"%1\" foreground=\"white\">Tempo: <span foreground=\"green\">%2</span></span>",
+		_left_layout->set_markup (string_compose ("<span size=\"%1\" foreground=\"white\">Tmp <span foreground=\"green\">%2</span></span>",
 					INFO_FONT_SIZE, buf));
 
 		sprintf (buf, "%g/%g", m.meter().divisions_per_bar(), m.meter().note_divisor());
-		_right_layout->set_markup (string_compose ("<span size=\"%1\" foreground=\"white\">Meter: <span foreground=\"green\">%2</span></span>",
+		_right_layout->set_markup (string_compose ("<span size=\"%1\" foreground=\"white\">Mtr <span foreground=\"green\">%2</span></span>",
 					INFO_FONT_SIZE, buf));
 	}
 }
