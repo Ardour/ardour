@@ -1446,10 +1446,11 @@ AudioClock::on_key_press_event (GdkEventKey* ev)
 	if (edit_is_negative) {
 		edit_string.replace(0,1,"-");
 	} else {
-		/* TODO think about this case.
-		 * The TC will be positive unless the edit is relative.
-		 */
-		edit_string.replace(0,1," ");
+		if (pre_edit_string.at(0) == '-') {
+			edit_string.replace(0,1,"_");
+		} else {
+			edit_string.replace(0,1," ");
+		}
 	}
 
 	show_edit_status (highlight_length);
