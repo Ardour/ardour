@@ -120,14 +120,14 @@ void
 AutomationControl::start_touch(double when)
 {
 	set_touching (true);
-	AutomationWatch::instance().add_automation_watch (shared_from_this());
 	alist()->start_touch(when);
+	AutomationWatch::instance().add_automation_watch (shared_from_this());
 }
 
 void
 AutomationControl::stop_touch(bool mark, double when)
 {
 	set_touching (false);
-	AutomationWatch::instance().remove_automation_watch (shared_from_this());
 	alist()->stop_touch (mark, when);
+	AutomationWatch::instance().remove_automation_watch (shared_from_this());
 }
