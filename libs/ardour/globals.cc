@@ -204,10 +204,8 @@ lotsa_files_please ()
 				error << string_compose (_("Could not set system open files limit to %1"), rl.rlim_cur) << endmsg;
 			}
 		} else {
-			if (rl.rlim_cur == RLIM_INFINITY) {
-				info << _("Removed open file count limit. Excellent!") << endmsg;
-			} else {
-				info << string_compose (_("%1 will be limited to %2 open files"), PROGRAM_NAME, rl.rlim_cur) << endmsg;
+			if (rl.rlim_cur != RLIM_INFINITY) {
+				info << string_compose (_("Your system is configured to limit %1 to only %2 open files"), PROGRAM_NAME, rl.rlim_cur) << endmsg;
 			}
 		}
 	} else {
