@@ -79,6 +79,7 @@ Splash::Splash ()
 
 	set_default_size (pixbuf->get_width(), pixbuf->get_height());
 	set_resizable (false);
+	set_type_hint(Gdk::WINDOW_TYPE_HINT_SPLASHSCREEN);
 	the_splash = this;
 
         expose_done = false;
