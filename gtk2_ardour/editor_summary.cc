@@ -906,9 +906,9 @@ EditorSummary::playhead_position_changed (framepos_t p)
 	int const o = int (_last_playhead);
 	int const n = int (playhead_frame_to_position (p));
 	if (_session && o != n) {
-		int a = min (o, n);
+		int a = max(2, min (o, n));
 		int b = max (o, n);
-		set_overlays_dirty (a - 1, 0, b + 1, get_height ());
+		set_overlays_dirty (a - 2, 0, b + 2, get_height ());
 	}
 }
 
