@@ -1373,6 +1373,9 @@ AudioClock::on_key_press_event (GdkEventKey* ev)
 	case GDK_KP_Subtract:
 		if (_negative_allowed && input_string.empty()) {
 				edit_is_negative = true;
+				edit_string.replace(0,1,"-");
+				_layout->set_text (edit_string);
+				queue_draw ();
 		} else {
 			end_edit_relative (false);
 		}
@@ -1438,6 +1441,15 @@ AudioClock::on_key_press_event (GdkEventKey* ev)
 
 	default:
 		highlight_length = merge_input_and_edit_string ();
+	}
+
+	if (edit_is_negative) {
+		edit_string.replace(0,1,"-");
+	} else {
+		/* TODO think about this case.
+		 * The TC will be positive unless the edit is relative.
+		 */
+		edit_string.replace(0,1," ");
 	}
 
 	show_edit_status (highlight_length);
@@ -1721,7 +1733,7 @@ AudioClock::on_scroll_event (GdkEventScroll *ev)
 				frames *= 10;
 			}
 
-			if ((double)current_time() - (double)frames < 0.0) {
+			if (!_negative_allowed && (double)current_time() - (double)frames < 0.0) {
 				set (0, true);
 			} else {
 				set (current_time() - frames, true);
