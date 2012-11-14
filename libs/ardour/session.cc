@@ -4385,7 +4385,7 @@ Session::source_search_path (DataType type) const
 	if (session_dirs.size() == 1) {
 		switch (type) {
 		case DataType::AUDIO:
-			s.push_back ( _session_dir->sound_path());
+			s.push_back (_session_dir->sound_path());
 			break;
 		case DataType::MIDI:
 			s.push_back (_session_dir->midi_path());
@@ -4408,7 +4408,9 @@ Session::source_search_path (DataType type) const
 	if (type == DataType::AUDIO) {
 		const string sound_path_2X = _session_dir->sound_path_2X();
 		if (Glib::file_test (sound_path_2X, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_DIR)) {
-			s.push_back (sound_path_2X);
+			if (find (s.begin(), s.end(), sound_path_2X) == s.end()) {
+				s.push_back (sound_path_2X);
+			}
 		}
 	}
 
@@ -4427,16 +4429,7 @@ Session::source_search_path (DataType type) const
 	}
 
 	for (vector<string>::iterator i = dirs.begin(); i != dirs.end(); ++i) {
-
-		vector<string>::iterator si;
-
-		for (si = s.begin(); si != s.end(); ++si) {
-			if ((*si) == *i) {
-				break;
-			}
-		}
-
-		if (si == s.end()) {
+		if (find (s.begin(), s.end(), *i) == s.end()) {
 			s.push_back (*i);
 		}
 	}
