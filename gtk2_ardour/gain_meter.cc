@@ -119,8 +119,8 @@ GainMeterBase::GainMeterBase (Session* s,
 	meter_metric_area.signal_button_press_event().connect (sigc::mem_fun (*this, &GainMeterBase::level_meter_button_press));
 	meter_metric_area.add_events (Gdk::BUTTON_PRESS_MASK);
 
-	gain_slider->signal_button_press_event().connect (sigc::mem_fun(*this, &GainMeter::gain_slider_button_press));
-	gain_slider->signal_button_release_event().connect (sigc::mem_fun(*this, &GainMeter::gain_slider_button_release));
+	gain_slider->signal_button_press_event().connect (sigc::mem_fun(*this, &GainMeter::gain_slider_button_press), false);
+	gain_slider->signal_button_release_event().connect (sigc::mem_fun(*this, &GainMeter::gain_slider_button_release), false);
 	gain_slider->set_name ("GainFader");
 
 	gain_display.set_name ("MixerStripGainDisplay");
@@ -662,14 +662,14 @@ GainMeterBase::gain_slider_button_press (GdkEventButton* ev)
 		return false;
 	}
 
-	return true;
+	return false;
 }
 
 bool
 GainMeterBase::gain_slider_button_release (GdkEventButton*)
 {
 	_amp->gain_control()->stop_touch (false, _amp->session().transport_frame());
-	return true;
+	return false;
 }
 
 gint
