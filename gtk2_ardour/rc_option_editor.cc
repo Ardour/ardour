@@ -1707,6 +1707,14 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_widget_prelight)
 		     ));
 
+	add_option (S_("GUI"),
+	     new BoolOption (
+		     "use-tooltips",
+		     _("Show tooltips if mouse hovers over a control"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_use_tooltips),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_use_tooltips)
+		     ));
+
 #ifndef GTKOSX
 	/* font scaling does nothing with GDK/Quartz */
 	add_option (S_("GUI"), new FontScalingOptions (_rc_config));

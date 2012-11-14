@@ -23,6 +23,7 @@
 #include "pbd/file_utils.h"
 
 #include "gtkmm2ext/tearoff.h"
+#include "gtkmm2ext/utils.h"
 
 #include "ardour/filesystem_paths.h"
 #include "ardour/profile.h"
@@ -1488,6 +1489,15 @@ Editor::parameter_changed (std::string p)
 	} else if (p == "remote-model") {
 		if (_routes) {
 			_routes->reset_remote_control_ids ();
+		}
+	} else if (p == "use-tooltips") {
+
+		/* this doesn't really belong here but it has to go somewhere */
+
+		if (Config->get_use_tooltips()) {
+			Gtkmm2ext::enable_tooltips ();
+		} else {
+			Gtkmm2ext::disable_tooltips ();
 		}
 	}
 }

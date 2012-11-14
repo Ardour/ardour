@@ -650,3 +650,15 @@ Gtkmm2ext::set_no_tooltip_whatsoever (Gtk::Widget& w)
 	w.property_has_tooltip() = true;
 	w.signal_query_tooltip().connect (sigc::ptr_fun (make_null_tooltip));
 }
+
+void
+Gtkmm2ext::enable_tooltips ()
+{
+	gtk_rc_parse_string ("gtk-enable-tooltips = 1");
+}
+
+void
+Gtkmm2ext::disable_tooltips ()
+{
+	gtk_rc_parse_string ("gtk-enable-tooltips = 0");
+}
