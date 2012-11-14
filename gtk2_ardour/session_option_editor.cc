@@ -103,6 +103,7 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 
 	sco->set_session (_session);
 	sco->clock().set_negative_allowed (true);
+	Gtkmm2ext::UI::instance()->set_tip (sco->tip_widget(), _("The specified offset is added to the received timecode (MTC or LTC)."));
 
 	add_option (_("Timecode"), sco);
 
@@ -115,6 +116,7 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 
 	gco->set_session (_session);
 	gco->clock().set_negative_allowed (true);
+	Gtkmm2ext::UI::instance()->set_tip (gco->tip_widget(), _("Specify an offset which is added to the generated timecode (so far only LTC)."));
 
 	add_option (_("Timecode"), gco);
 
