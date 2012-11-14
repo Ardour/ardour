@@ -87,8 +87,6 @@ AutomationControl::set_automation_state (AutoState as)
 {
 	if (as != alist()->automation_state()) {
 
-		cerr << name() << " setting automation state to " << enum_2_string (as) << endl;
-
 		alist()->set_automation_state (as);
 
 		if (as == Write) {
