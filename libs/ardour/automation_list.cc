@@ -430,7 +430,7 @@ AutomationList::set_state (const XMLNode& node, int version)
 	if ((prop = node.property (X_("automation-id"))) != 0){
 		_parameter = EventTypeMap::instance().new_parameter(prop->value());
 	} else {
-		warning << "Legacy session: automation list has no automation-id property.";
+		warning << "Legacy session: automation list has no automation-id property." << endmsg;
 	}
 
 	if ((prop = node.property (X_("interpolation-style"))) != 0) {
