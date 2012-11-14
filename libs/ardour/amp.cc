@@ -414,9 +414,8 @@ Amp::set_state (const XMLNode& node, int version)
 void
 Amp::GainControl::set_value (double val)
 {
-	// max gain at about +6dB (10.0 ^ ( 6 dB * 0.05))
-	if (val > 1.99526231) {
-		val = 1.99526231;
+	if (val > max_gain_coefficient) {
+		val = max_gain_coefficient;
 	}
 
 	_amp->set_gain (val, this);
