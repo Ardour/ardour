@@ -55,6 +55,7 @@ EditorSummary::EditorSummary (Editor* e)
 	  _old_follow_playhead (false)
 {
 	Region::RegionPropertyChanged.connect (region_property_connection, invalidator (*this), boost::bind (&CairoWidget::set_dirty, this), gui_context());
+	Route::RemoteControlIDChange.connect (route_ctrl_id_connection, invalidator (*this), boost::bind (&CairoWidget::set_dirty, this), gui_context());
 	_editor->playhead_cursor->PositionChanged.connect (position_connection, invalidator (*this), boost::bind (&EditorSummary::playhead_position_changed, this, _1), gui_context());
 
 	add_events (Gdk::POINTER_MOTION_MASK|Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK);
