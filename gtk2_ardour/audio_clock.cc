@@ -1925,8 +1925,8 @@ AudioClock::timecode_validate_edit (const string&)
 	int hours;
 	char ignored[2];
 
-	if (sscanf (_layout->get_text().c_str(), "%" PRId32 ":%" PRId32 ":%" PRId32 "%[:;]%" PRId32,
-		    &hours, &TC.minutes, &TC.seconds, ignored, &TC.frames) != 5) {
+	if (sscanf (_layout->get_text().c_str(), "%[- _]%" PRId32 ":%" PRId32 ":%" PRId32 "%[:;]%" PRId32,
+		    ignored, &hours, &TC.minutes, &TC.seconds, ignored, &TC.frames) != 6) {
 		return false;
 	}
 
@@ -1987,7 +1987,7 @@ AudioClock::frames_from_timecode_string (const string& str) const
 	char ignored[2];
 	int hours;
 
-	if (sscanf (str.c_str(), "%d:%d:%d%[:;]%d", &hours, &TC.minutes, &TC.seconds, ignored, &TC.frames) != 5) {
+	if (sscanf (str.c_str(), "%[- _]%d:%d:%d%[:;]%d", ignored, &hours, &TC.minutes, &TC.seconds, ignored, &TC.frames) != 6) {
 		error << string_compose (_("programming error: %1 %2"), "badly formatted timecode clock string", str) << endmsg;
 		return 0;
 	}
