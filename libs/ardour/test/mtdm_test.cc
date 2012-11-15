@@ -14,7 +14,7 @@ MTDMTest::basicTest ()
 	float out[256];
 
 	memset (in, 0, 256 * sizeof (float));
-	MTDM* mtdm = new MTDM;
+	MTDM* mtdm = new MTDM (44100);
 	mtdm->process (256, in, out);
 	memcpy (in, out, 256 * sizeof (float));
 	
