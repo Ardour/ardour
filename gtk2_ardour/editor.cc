@@ -2854,7 +2854,7 @@ Editor::setup_toolbar ()
 	mouse_mode_hbox2->pack_start (mouse_timefx_button, false, false);
 	mouse_mode_hbox2->pack_start (mouse_audition_button, false, false);
 	mouse_mode_hbox2->pack_start (mouse_draw_button, false, false);
-	mouse_mode_hbox2->pack_start (internal_edit_button, false, false);
+	mouse_mode_hbox2->pack_start (internal_edit_button, false, false, 8);
 
 	mouse_mode_vbox1->pack_start (*mouse_mode_hbox1, false, false);
 	mouse_mode_vbox2->pack_start (*mouse_mode_hbox2, false, false);
@@ -3054,7 +3054,7 @@ Editor::setup_tooltips ()
 	ARDOUR_UI::instance()->set_tip (mouse_timefx_button, _("Stretch/Shrink Regions and MIDI Notes"));
 	ARDOUR_UI::instance()->set_tip (mouse_audition_button, _("Listen to Specific Regions"));
 	ARDOUR_UI::instance()->set_tip (smart_mode_joiner, _("Smart Mode (Select/Move Objects + Ranges)"));
-	ARDOUR_UI::instance()->set_tip (internal_edit_button, _("Edit Region Contents (e.g. notes)"));
+	ARDOUR_UI::instance()->set_tip (internal_edit_button, _("Note Level Editing"));
 	ARDOUR_UI::instance()->set_tip (*_group_tabs, _("Groups: click to (de)activate\nContext-click for other operations"));
 	ARDOUR_UI::instance()->set_tip (nudge_forward_button, _("Nudge Region/Selection Later"));
 	ARDOUR_UI::instance()->set_tip (nudge_backward_button, _("Nudge Region/Selection Earlier"));
