@@ -1562,9 +1562,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void editor_list_button_toggled ();
 
 	AudioClock*               zoom_range_clock;
-	ArdourButton              zoom_in_button;
-	ArdourButton              zoom_out_button;
-	ArdourButton              zoom_out_full_button;
+	Gtk::Button              zoom_in_button;
+	Gtk::Button              zoom_out_button;
+	Gtk::Button              zoom_out_full_button;
 
 	Gtk::Button              tav_expand_button;
 	Gtk::Button              tav_shrink_button;

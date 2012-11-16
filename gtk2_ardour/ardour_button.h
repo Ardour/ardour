@@ -116,9 +116,12 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 	float _corner_radius;
 	int   _corner_mask;
 
-	cairo_pattern_t* edge_pattern;
-	cairo_pattern_t* active_pattern;
-	cairo_pattern_t* inactive_pattern;
+	uint32_t border_color;
+	uint32_t fill_color_active;
+	uint32_t fill_color_inactive;
+	cairo_pattern_t* fill_pattern;
+	cairo_pattern_t* fill_pattern_active;
+	cairo_pattern_t* shine_pattern;
 	cairo_pattern_t* led_inset_pattern;
 	cairo_pattern_t* reflection_pattern;
 

@@ -2905,22 +2905,19 @@ Editor::setup_toolbar ()
 	RefPtr<Action> act;
 
 	zoom_in_button.set_name ("zoom button");
-	zoom_in_button.set_image (::get_icon ("zoom_in"));
-	zoom_in_button.set_tweaks (ArdourButton::ShowClick);
+	zoom_in_button.add (*(manage (new Image (::get_icon ("zoom_in")))));
 	act = ActionManager::get_action (X_("Editor"), X_("temporal-zoom-in"));
-	zoom_in_button.set_related_action (act);
+	act->connect_proxy (zoom_in_button);
 
 	zoom_out_button.set_name ("zoom button");
-	zoom_out_button.set_image (::get_icon ("zoom_out"));
-	zoom_out_button.set_tweaks (ArdourButton::ShowClick);
+	zoom_out_button.add (*(manage (new Image (::get_icon ("zoom_out")))));
 	act = ActionManager::get_action (X_("Editor"), X_("temporal-zoom-out"));
-	zoom_out_button.set_related_action (act);
+	act->connect_proxy (zoom_out_button);
 
 	zoom_out_full_button.set_name ("zoom button");
-	zoom_out_full_button.set_image (::get_icon ("zoom_full"));
-	zoom_out_full_button.set_tweaks (ArdourButton::ShowClick);
+	zoom_out_full_button.add (*(manage (new Image (::get_icon ("zoom_full")))));
 	act = ActionManager::get_action (X_("Editor"), X_("zoom-to-session"));
-	zoom_out_full_button.set_related_action (act);
+	act->connect_proxy (zoom_out_full_button);
 
 	zoom_focus_selector.set_name ("ZoomFocusSelector");
 	set_popdown_strings (zoom_focus_selector, zoom_focus_strings);

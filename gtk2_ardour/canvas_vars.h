@@ -141,11 +141,8 @@ CANVAS_VARIABLE(canvasvar_ZeroLine, "zero line")
 CANVAS_VARIABLE(canvasvar_ZoomRect, "zoom rect")
 CANVAS_VARIABLE(canvasvar_MonitorSectionKnob, "monitor knob")
 
+CANVAS_VARIABLE(canvasvar_ButtonBorder, "border color")
 #define BUTTON_VARS(root,name) \
-CANVAS_VARIABLE(canvasvar_ ## root ## BorderStart, name ": border start") \
-CANVAS_VARIABLE(canvasvar_ ## root ## BorderEnd, name ": border end") \
-CANVAS_VARIABLE(canvasvar_ ## root ## BorderStartSelected, name ": border start selected") \
-CANVAS_VARIABLE(canvasvar_ ## root ## BorderEndSelected, name ": border end selected") \
 CANVAS_VARIABLE(canvasvar_ ## root ## FillStart, name ": fill start") \
 CANVAS_VARIABLE(canvasvar_ ## root ## FillEnd, name ": fill end") \
 CANVAS_VARIABLE(canvasvar_ ## root ## FillStartActive, name ": fill start active") \
