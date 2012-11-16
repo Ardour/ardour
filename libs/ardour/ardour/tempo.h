@@ -34,17 +34,17 @@
 
 #include "ardour/ardour.h"
 
-class XMLNode;
-
 class BBTTest;
 class FrameposPlusBeatsTest;
 class TempoTest;
+class XMLNode;
 
 namespace ARDOUR {
 
 class Meter;
 class TempoMap;
 
+/** Tempo, the speed at which musical time progresses (BPM). */
 class Tempo {
   public:
 	Tempo (double bpm, double type=4.0) // defaulting to quarter note
@@ -52,13 +52,16 @@ class Tempo {
 
 	double beats_per_minute () const { return _beats_per_minute;}
 	double note_type () const { return _note_type;}
-	double frames_per_beat (framecnt_t sr) const;
+	double frames_per_beat (framecnt_t sr) const {
+		return (60.0 * sr) / _beats_per_minute;
+	}
 
   protected:
 	double _beats_per_minute;
 	double _note_type;
 };
 
+/** Meter, or time signature (beats per bar, and which note type is a beat). */
 class Meter {
   public:
 	Meter (double dpb, double bt)
@@ -83,6 +86,7 @@ class Meter {
 	double _note_type;
 };
 
+/** A section of timeline with a certain Tempo or Meter. */
 class MetricSection {
   public:
 	MetricSection (const Timecode::BBT_Time& start)
@@ -118,6 +122,7 @@ class MetricSection {
 	bool               _movable;
 };
 
+/** A section of timeline with a certain Meter. */
 class MeterSection : public MetricSection, public Meter {
   public:
 	MeterSection (const Timecode::BBT_Time& start, double bpb, double note_type)
@@ -131,6 +136,7 @@ class MeterSection : public MetricSection, public Meter {
 	XMLNode& get_state() const;
 };
 
+/** A section of timeline with a certain Tempo. */
 class TempoSection : public MetricSection, public Tempo {
   public:
 	TempoSection (const Timecode::BBT_Time& start, double qpm, double note_type)
@@ -161,21 +167,22 @@ class TempoSection : public MetricSection, public Tempo {
 
 typedef std::list<MetricSection*> Metrics;
 
-/** Helper class that we use to be able to keep track of which
-    meter *AND* tempo are in effect at a given point in time.
+/** Helper class to keep track of the Meter *AND* Tempo in effect
+    at a given point in time.
 */
 class TempoMetric {
   public:
-	TempoMetric (const Meter& m, const Tempo& t) : _meter (&m), _tempo (&t), _frame (0) {}
+	TempoMetric (const Meter& m, const Tempo& t)
+		: _meter (&m), _tempo (&t), _frame (0) {}
 
-	void set_tempo (const Tempo& t)    { _tempo = &t; }
-	void set_meter (const Meter& m)    { _meter = &m; }
-	void set_frame (framepos_t f)      { _frame = f; }
+	void set_tempo (const Tempo& t)              { _tempo = &t; }
+	void set_meter (const Meter& m)              { _meter = &m; }
+	void set_frame (framepos_t f)                { _frame = f; }
 	void set_start (const Timecode::BBT_Time& t) { _start = t; }
 
-	const Meter&    meter() const { return *_meter; }
-	const Tempo&    tempo() const { return *_tempo; }
-	framepos_t      frame() const { return _frame; }
+	const Meter&              meter() const { return *_meter; }
+	const Tempo&              tempo() const { return *_tempo; }
+	framepos_t                frame() const { return _frame; }
 	const Timecode::BBT_Time& start() const { return _start; }
 
   private:
@@ -199,20 +206,20 @@ class TempoMap : public PBD::StatefulDestructible
 	};
 
 	struct BBTPoint {
-            framepos_t  frame;
-            const MeterSection* meter;
-            const TempoSection* tempo;
-            uint32_t bar;
-            uint32_t beat;
+		framepos_t          frame;
+		const MeterSection* meter;
+		const TempoSection* tempo;
+		uint32_t            bar;
+		uint32_t            beat;
             
-            BBTPoint (const MeterSection& m, const TempoSection& t, framepos_t f,
-                      uint32_t b, uint32_t e)
-                    : frame (f), meter (&m), tempo (&t), bar (b), beat (e) {}
-
-            Timecode::BBT_Time bbt() const { return Timecode::BBT_Time (bar, beat, 0); }
-            operator Timecode::BBT_Time() const { return bbt(); }
-            operator framepos_t() const { return frame; }
-	    bool is_bar() const { return beat == 1; }
+		BBTPoint (const MeterSection& m, const TempoSection& t, framepos_t f,
+		          uint32_t b, uint32_t e)
+			: frame (f), meter (&m), tempo (&t), bar (b), beat (e) {}
+		
+		Timecode::BBT_Time bbt() const { return Timecode::BBT_Time (bar, beat, 0); }
+		operator Timecode::BBT_Time() const { return bbt(); }
+		operator framepos_t() const { return frame; }
+		bool is_bar() const { return beat == 1; }
 	};
 
 	typedef std::vector<BBTPoint> BBTPointList;
@@ -223,7 +230,7 @@ class TempoMap : public PBD::StatefulDestructible
 	}
 
 	void get_grid (BBTPointList::const_iterator&, BBTPointList::const_iterator&, 
-		       framepos_t start, framepos_t end);
+	               framepos_t start, framepos_t end);
 	
 	/* TEMPO- AND METER-SENSITIVE FUNCTIONS 
 
@@ -235,13 +242,14 @@ class TempoMap : public PBD::StatefulDestructible
 	   whose location is canonically defined in beats.
 	*/
 
-	void       bbt_time (framepos_t when, Timecode::BBT_Time&);
+	void bbt_time (framepos_t when, Timecode::BBT_Time&);
+
 	/* realtime safe variant of ::bbt_time(), will throw 
 	   std::logic_error if the map is not large enough
 	   to provide an answer.
 	*/
 	void       bbt_time_rt (framepos_t when, Timecode::BBT_Time&);
-        framepos_t frame_time (const Timecode::BBT_Time&);
+	framepos_t frame_time (const Timecode::BBT_Time&);
 	framecnt_t bbt_duration_at (framepos_t, const Timecode::BBT_Time&, int dir);
 
 	/* TEMPO-SENSITIVE FUNCTIONS
@@ -267,11 +275,11 @@ class TempoMap : public PBD::StatefulDestructible
 
 	const TempoSection& tempo_section_at (framepos_t) const;
 
-	void add_tempo(const Tempo&, Timecode::BBT_Time where);
-	void add_meter(const Meter&, Timecode::BBT_Time where);
+	void add_tempo (const Tempo&, Timecode::BBT_Time where);
+	void add_meter (const Meter&, Timecode::BBT_Time where);
 
-	void remove_tempo(const TempoSection&, bool send_signal);
-	void remove_meter(const MeterSection&, bool send_signal);
+	void remove_tempo (const TempoSection&, bool send_signal);
+	void remove_meter (const MeterSection&, bool send_signal);
 
 	void replace_tempo (const TempoSection&, const Tempo&, const Timecode::BBT_Time& where);
 	void replace_meter (const MeterSection&, const Meter&, const Timecode::BBT_Time& where);
@@ -292,7 +300,6 @@ class TempoMap : public PBD::StatefulDestructible
 	TempoMetric metric_at (Timecode::BBT_Time bbt) const;
 	TempoMetric metric_at (framepos_t) const;
 
-
 	void change_existing_tempo_at (framepos_t, double bpm, double note_type);
 	void change_initial_tempo (double bpm, double note_type);
 
@@ -312,25 +319,25 @@ class TempoMap : public PBD::StatefulDestructible
 	static Tempo    _default_tempo;
 	static Meter    _default_meter;
 
-	Metrics              metrics;
-	framecnt_t          _frame_rate;
+	Metrics                       metrics;
+	framecnt_t                    _frame_rate;
 	mutable Glib::Threads::RWLock lock;
-	BBTPointList        _map;
+	BBTPointList                  _map;
 
 	void recompute_map (bool reassign_tempo_bbt, framepos_t end = -1);
 	void extend_map (framepos_t end);
-        void require_map_to (framepos_t pos);
-        void require_map_to (const Timecode::BBT_Time&);
+	void require_map_to (framepos_t pos);
+	void require_map_to (const Timecode::BBT_Time&);
 	void _extend_map (TempoSection* tempo, MeterSection* meter, 
-			  Metrics::iterator next_metric,
-			  Timecode::BBT_Time current, framepos_t current_frame, framepos_t end);
+	                  Metrics::iterator next_metric,
+	                  Timecode::BBT_Time current, framepos_t current_frame, framepos_t end);
 
 	BBTPointList::const_iterator bbt_before_or_at (framepos_t);
 	BBTPointList::const_iterator bbt_before_or_at (const Timecode::BBT_Time&);
 	BBTPointList::const_iterator bbt_after_or_at (framepos_t);
 	
 	framepos_t round_to_type (framepos_t fr, int dir, BBTPointType);
-        void bbt_time (framepos_t, Timecode::BBT_Time&, const BBTPointList::const_iterator&);
+	void bbt_time (framepos_t, Timecode::BBT_Time&, const BBTPointList::const_iterator&);
 	framecnt_t bbt_duration_at_unlocked (const Timecode::BBT_Time& when, const Timecode::BBT_Time& bbt, int dir);
 	
 	const MeterSection& first_meter() const;
