@@ -56,7 +56,7 @@ LV2PluginUI::write_from_ui(void*       controller,
 		if (ac) {
 			ac->set_value(*(const float*)buffer);
 		}
-	} else if (format == me->_lv2->atom_eventTransfer()) {
+	} else if (format == me->_lv2->urids.atom_eventTransfer) {
 
 		const int cnt = me->_pi->get_count();
 		for (int i=0; i < cnt; i++ ) {

@@ -111,8 +111,6 @@ class LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	boost::shared_ptr<Plugin::ScalePoints>
 	get_scale_points(uint32_t port_index) const;
 
-	static uint32_t midi_event_type() { return _midi_event_type; }
-
 	void set_insert_info(const PluginInsert* insert);
 
 	int      set_state (const XMLNode& node, int version);
@@ -123,8 +121,6 @@ class LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 
 	bool has_editor () const;
 	bool has_message_output () const;
-
-	uint32_t atom_eventTransfer() const;
 
 	void write_from_ui(uint32_t       index,
 	                   uint32_t       protocol,
@@ -147,14 +143,26 @@ class LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 
 	static URIMap _uri_map;
 
-	static uint32_t _midi_event_type;
-	static uint32_t _chunk_type;
-	static uint32_t _sequence_type;
-	static uint32_t _event_transfer_type;
-	static uint32_t _path_type;
-	static uint32_t _log_Error;
-	static uint32_t _log_Warning;
-	static uint32_t _log_Note;
+	struct URIDs {
+		uint32_t atom_Chunk;
+		uint32_t atom_Path;
+		uint32_t atom_Sequence;
+		uint32_t atom_eventTransfer;
+		uint32_t log_Error;
+		uint32_t log_Note;
+		uint32_t log_Warning;
+		uint32_t midi_MidiEvent;
+		uint32_t time_Position;
+		uint32_t time_bar;
+		uint32_t time_barBeat;
+		uint32_t time_beatUnit;
+		uint32_t time_beatsPerBar;
+		uint32_t time_beatsPerMinute;
+		uint32_t time_frame;
+		uint32_t time_speed;
+	};
+
+	static URIDs urids;
 
   private:
 	struct Impl;
@@ -171,6 +179,9 @@ class LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	float*        _bpm_control_port;  ///< Special input set by ardour
 	float*        _freewheel_control_port;  ///< Special input set by ardour
 	float*        _latency_control_port;  ///< Special output set by ardour
+	uint32_t      _position_seq_port_idx;  ///< Index of Sequence port for position
+	framepos_t    _next_cycle_start;  ///< Expected start frame of next run cycle
+	double        _next_cycle_speed;  ///< Expected start frame of next run cycle
 	PBD::ID       _insert_id;
 
 	friend const void* lv2plugin_get_port_value(const char* port_symbol,

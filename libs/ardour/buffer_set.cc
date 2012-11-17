@@ -192,8 +192,8 @@ BufferSet::ensure_buffers(DataType type, size_t num_buffers, size_t buffer_capac
 			_lv2_buffers.push_back(
 				std::make_pair(false, lv2_evbuf_new(buffer_capacity,
 				                                    LV2_EVBUF_EVENT,
-				                                    LV2Plugin::_chunk_type,
-				                                    LV2Plugin::_sequence_type)));
+				                                    LV2Plugin::urids.atom_Chunk,
+				                                    LV2Plugin::urids.atom_Sequence)));
 		}
 	}
 #endif
@@ -269,7 +269,7 @@ BufferSet::get_lv2_midi(bool input, size_t i, bool old_api)
 		                           mbuf.size(), (void*) mbuf.data()));
 		
 		LV2_Evbuf_Iterator i    = lv2_evbuf_begin(evbuf);
-		const uint32_t     type = LV2Plugin::midi_event_type();
+		const uint32_t     type = LV2Plugin::urids.midi_MidiEvent;
 		for (MidiBuffer::iterator e = mbuf.begin(); e != mbuf.end(); ++e) {
 			const Evoral::MIDIEvent<framepos_t> ev(*e, false);
 #ifndef NDEBUG

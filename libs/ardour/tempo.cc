@@ -1031,12 +1031,10 @@ TempoMap::_extend_map (TempoSection* tempo, MeterSection* meter,
 }
 
 TempoMetric
-TempoMap::metric_at (framepos_t frame) const
+TempoMap::metric_at (framepos_t frame, Metrics::const_iterator* last) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 	TempoMetric m (first_meter(), first_tempo());
-	const Meter* meter;
-	const Tempo* tempo;
 
 	/* at this point, we are *guaranteed* to have m.meter and m.tempo pointing
 	   at something, because we insert the default tempo and meter during
@@ -1051,14 +1049,11 @@ TempoMap::metric_at (framepos_t frame) const
 			break;
 		}
 
-		if ((tempo = dynamic_cast<const TempoSection*>(*i)) != 0) {
-			m.set_tempo (*tempo);
-		} else if ((meter = dynamic_cast<const MeterSection*>(*i)) != 0) {
-			m.set_meter (*meter);
-		}
+		m.set_metric(*i);
 
-		m.set_frame ((*i)->frame ());
-		m.set_start ((*i)->start ());
+		if (last) {
+			*last = i;
+		}
 	}
 	
 	return m;
@@ -1069,8 +1064,6 @@ TempoMap::metric_at (BBT_Time bbt) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 	TempoMetric m (first_meter(), first_tempo());
-	const Meter* meter;
-	const Tempo* tempo;
 
 	/* at this point, we are *guaranteed* to have m.meter and m.tempo pointing
 	   at something, because we insert the default tempo and meter during
@@ -1087,14 +1080,7 @@ TempoMap::metric_at (BBT_Time bbt) const
 			break;
 		}
 
-		if ((tempo = dynamic_cast<const TempoSection*>(*i)) != 0) {
-			m.set_tempo (*tempo);
-		} else if ((meter = dynamic_cast<const MeterSection*>(*i)) != 0) {
-			m.set_meter (*meter);
-		}
-
-		m.set_frame ((*i)->frame ());
-		m.set_start (section_start);
+		m.set_metric (*i);
 	}
 
 	return m;

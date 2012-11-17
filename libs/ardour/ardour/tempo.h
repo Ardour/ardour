@@ -180,6 +180,19 @@ class TempoMetric {
 	void set_frame (framepos_t f)                { _frame = f; }
 	void set_start (const Timecode::BBT_Time& t) { _start = t; }
 
+	void set_metric (const MetricSection* section) {
+		const MeterSection* meter;
+		const TempoSection* tempo;
+		if ((meter = dynamic_cast<const MeterSection*>(section))) {
+			set_meter(*meter);
+		} else if ((tempo = dynamic_cast<const TempoSection*>(section))) {
+			set_tempo(*tempo);
+		}
+
+		set_frame(section->frame());
+		set_start(section->start());
+	}
+
 	const Meter&              meter() const { return *_meter; }
 	const Tempo&              tempo() const { return *_tempo; }
 	framepos_t                frame() const { return _frame; }
@@ -298,7 +311,13 @@ class TempoMap : public PBD::StatefulDestructible
 	void clear ();
 
 	TempoMetric metric_at (Timecode::BBT_Time bbt) const;
-	TempoMetric metric_at (framepos_t) const;
+
+	/** Return the TempoMetric at frame @p t, and point @p last to the latest
+	 * metric change <= t, if it is non-NULL.
+	 */
+	TempoMetric metric_at (framepos_t, Metrics::const_iterator* last=NULL) const;
+
+	Metrics::const_iterator metrics_end() { return metrics.end(); }
 
 	void change_existing_tempo_at (framepos_t, double bpm, double note_type);
 	void change_initial_tempo (double bpm, double note_type);
