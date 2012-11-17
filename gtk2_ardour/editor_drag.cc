@@ -2884,7 +2884,6 @@ ControlPointDrag::motion (GdkEvent* event, bool)
 	cx_frames = min (cx_frames, _point->line().maximum_time());
 
 	float const fraction = 1.0 - (cy / _point->line().height());
-
 	bool const push = Keyboard::modifier_state_contains (event->button.state, Keyboard::PrimaryModifier);
 
 	_point->line().drag_motion (_editor->frame_to_unit_unrounded (cx_frames), fraction, false, push);
@@ -4295,7 +4294,6 @@ AutomationRangeDrag::motion (GdkEvent*, bool /*first_move*/)
 
 	for (list<Line>::iterator l = _lines.begin(); l != _lines.end(); ++l) {
 		float const f = y_fraction (l->line, _drags->current_pointer_y());
-
 		/* we are ignoring x position for this drag, so we can just pass in anything */
 		l->line->drag_motion (0, f, true, false);
 		show_verbose_cursor_text (l->line->get_verbose_cursor_relative_string (l->original_fraction, f));

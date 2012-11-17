@@ -22,8 +22,11 @@
 #include <vector>
 #include <fstream>
 
-#include "pbd/stl_delete.h"
+#include "boost/shared_ptr.hpp"
+
+#include "pbd/floating.h"
 #include "pbd/memento_command.h"
+#include "pbd/stl_delete.h"
 #include "pbd/stacktrace.h"
 
 #include "ardour/automation_list.h"
@@ -462,6 +465,7 @@ AutomationLine::start_drag_line (uint32_t i1, uint32_t i2, float fraction)
 		);
 
 	_drag_points.clear ();
+
 	for (uint32_t i = i1; i <= i2; i++) {
 		_drag_points.push_back (nth (i));
 	}
@@ -485,13 +489,74 @@ AutomationLine::start_drag_multiple (list<ControlPoint*> cp, float fraction, XML
 	start_drag_common (0, fraction);
 }
 
-
 struct ControlPointSorter
 {
-	bool operator() (ControlPoint const * a, ControlPoint const * b) {
+	bool operator() (ControlPoint const * a, ControlPoint const * b) const {
+		if (floateq (a->get_x(), b->get_x(), 1)) {
+			return a->view_index() < b->view_index();
+		} 
 		return a->get_x() < b->get_x();
 	}
 };
+
+AutomationLine::ContiguousControlPoints::ContiguousControlPoints (AutomationLine& al)
+	: line (al), before_x (0), after_x (DBL_MAX) 
+{
+}
+
+void
+AutomationLine::ContiguousControlPoints::compute_x_bounds ()
+{
+	if (!empty()) {
+		/* determine the limits on x-axis motion for this 
+		   contiguous range of control points
+		*/
+		
+		if (front()->view_index() > 0) {
+			before_x = line.nth (front()->view_index() - 1)->get_x();
+		}
+		
+		if (back()->view_index() < (line.npoints() - 2)) {
+			after_x = line.nth (back()->view_index() + 1)->get_x();
+		}
+	}
+}
+
+double 
+AutomationLine::ContiguousControlPoints::clamp_dx (double dx) 
+{
+	if (empty()) {
+		return dx;
+	}
+
+	/* get the maximum distance we can move any of these points along the x-axis
+	 */
+	
+	double tx; /* possible position a point would move to, given dx */
+	ControlPoint* cp;
+	
+	if (dx > 0) {
+		/* check the last point, since we're moving later in time */
+		cp = back();
+	} else {
+		/* check the first point, since we're moving earlier in time */
+		cp = front();
+	}
+
+	tx = cp->get_x() + dx; // new possible position if we just add the motion 
+	tx = max (tx, before_x); // can't move later than following point
+	tx = min (tx, after_x);  // can't move earlier than preceeding point
+	return  tx - cp->get_x (); 
+}
+
+void 
+AutomationLine::ContiguousControlPoints::move (double dx, double dy) 
+{
+	for (std::list<ControlPoint*>::iterator i = begin(); i != end(); ++i) {
+		(*i)->move_to ((*i)->get_x() + dx, (*i)->get_y() - line.height() * dy, ControlPoint::Full);
+		line.reset_line_coords (**i);
+	}
+}
 
 /** Common parts of starting a drag.
  *  @param x Starting x position in units, or 0 if x is being ignored.
@@ -506,20 +571,11 @@ AutomationLine::start_drag_common (double x, float fraction)
 	_drag_had_movement = false;
 	did_push = false;
 
-	_drag_points.sort (ControlPointSorter ());
+	/* they are probably ordered already, but we have to make sure */
 
-	/* find the additional points that will be dragged when the user is holding
-	   the "push" modifier
-	*/
-
-	uint32_t i = _drag_points.back()->view_index () + 1;
-	ControlPoint* p = 0;
-	_push_points.clear ();
-	while ((p = nth (i)) != 0 && p->can_slide()) {
-		_push_points.push_back (p);
-		++i;
-	}
+	_drag_points.sort (ControlPointSorter());
 }
+
 
 /** Should be called to indicate motion during a drag.
  *  @param x New x position of the drag in canvas units, or undefined if ignore_x == true.
@@ -529,65 +585,67 @@ AutomationLine::start_drag_common (double x, float fraction)
 pair<double, float>
 AutomationLine::drag_motion (double const x, float fraction, bool ignore_x, bool with_push)
 {
-	/* setup the points that are to be moved this time round */
-	list<ControlPoint*> points = _drag_points;
-	if (with_push) {
-		copy (_push_points.begin(), _push_points.end(), back_inserter (points));
-		points.sort (ControlPointSorter ());
+	if (_drag_points.empty()) {
+		return pair<double,float> (x,fraction);
 	}
+
 
 	double dx = ignore_x ? 0 : (x - _drag_x);
 	double dy = fraction - _last_drag_fraction;
 
-	for (list<ControlPoint*>::iterator i = points.begin(); i != points.end(); ++i) {
-		/* Find the points that aren't being moved before and after
-		   this one on the control_points list
+	if (!_drag_had_movement) {
+
+		/* "first move" ... do some stuff that we don't want to do if 
+		   no motion ever took place, but need to do before we handle
+		   motion.
 		*/
-
-		ControlPoint* before = 0;
-		ControlPoint* after = 0;
-
-		ControlPoint* last = 0;
-		for (vector<ControlPoint*>::iterator j = control_points.begin(); j != control_points.end(); ++j) {
-
-			if (*j == *i) {
-				
-				before = last;
-				
-				vector<ControlPoint*>::iterator k = j;
-
-				/* Next point */
-				++k;
-
-				/* Now move past any points that are being moved this time */
-				while (find (points.begin(), points.end(), *k) != points.end() && k != control_points.end ()) {
-					++k;
-				}
-				
-				if (k != control_points.end()) {
-					after = *k;
-				}
-				break;
+	
+		/* partition the points we are dragging into (potentially several)
+		 * set(s) of contiguous points. this will not happen with a normal
+		 * drag, but if the user does a discontiguous selection, it can.
+		 */
+		
+		uint32_t expected_view_index = 0;
+		CCP contig;
+		
+		for (list<ControlPoint*>::iterator i = _drag_points.begin(); i != _drag_points.end(); ++i) {
+			if (i == _drag_points.begin() || (*i)->view_index() != expected_view_index) {
+				contig.reset (new ContiguousControlPoints (*this));
+				contiguous_points.push_back (contig);
 			}
-
-			if (find (points.begin(), points.end(), *j) == points.end ()) {
-				/* This point isn't being moved, so it's the `last' point we've seen */
-				last = *j;
-			}
+			contig->push_back (*i);
+			expected_view_index = (*i)->view_index() + 1;
 		}
 
-		/* Clamp dx for this point */
-		double const before_x = before ? before->get_x() : 0;
-		double const after_x = after ? after->get_x() : DBL_MAX;
+		if (contiguous_points.back()->empty()) {
+			contiguous_points.pop_back ();
+		}
 
-		double tx = (*i)->get_x() + dx;
-		tx = max (tx, before_x);
-		tx = min (tx, after_x);
-		dx = tx - (*i)->get_x ();
+		for (vector<CCP>::iterator ccp = contiguous_points.begin(); ccp != contiguous_points.end(); ++ccp) {
+			(*ccp)->compute_x_bounds ();
+		}
+	}	
+
+	/* OK, now on to the stuff related to *this* motion event. First, for
+	 * each contiguous range, figure out the maximum x-axis motion we are
+	 * allowed (because of neighbouring points that are not moving.
+	 * 
+	 * if we are moving forwards with push, we don't need to do this, 
+	 * since all later points will move too.
+	 */
+
+	if (dx < 0 || ((dx > 0) && !with_push)) {
+		for (vector<CCP>::iterator ccp = contiguous_points.begin(); ccp != contiguous_points.end(); ++ccp) {
+			double dxt = (*ccp)->clamp_dx (dx);
+			if (fabs (dxt) < fabs (dx)) {
+				dx = dxt;
+			}
+		}
 	}
 
 	/* clamp y */
-	for (list<ControlPoint*>::iterator i = points.begin(); i != points.end(); ++i) {
+	
+	for (list<ControlPoint*>::iterator i = _drag_points.begin(); i != _drag_points.end(); ++i) {
 		double const y = ((_height - (*i)->get_y()) / _height) + dy;
 		if (y < 0) {
 			dy -= y;
@@ -597,34 +655,35 @@ AutomationLine::drag_motion (double const x, float fraction, bool ignore_x, bool
 		}
 	}
 
-	pair<double, float> const clamped (_drag_x + dx, _last_drag_fraction + dy);
+	if (dx || dy) {
+
+		/* and now move each section */
+		
+		for (vector<CCP>::iterator ccp = contiguous_points.begin(); ccp != contiguous_points.end(); ++ccp) {
+			(*ccp)->move (dx, dy);
+		}
+		if (with_push) {
+			uint32_t i = contiguous_points.back()->back()->view_index () + 1;
+			ControlPoint* p;
+			while ((p = nth (i)) != 0 && p->can_slide()) {
+				p->move_to (p->get_x() + dx, p->get_y(), ControlPoint::Full);
+				reset_line_coords (*p);
+				++i;
+			}
+		}
+		
+		if (line_points.size() > 1) {
+			line->property_points() = line_points;
+		}
+	}
+	
 	_drag_distance += dx;
 	_drag_x += dx;
 	_last_drag_fraction = fraction;
-
-	for (list<ControlPoint*>::iterator i = _drag_points.begin(); i != _drag_points.end(); ++i) {
-		(*i)->move_to ((*i)->get_x() + dx, (*i)->get_y() - _height * dy, ControlPoint::Full);
-		reset_line_coords (**i);
-	}
-
-	if (with_push) {
-		/* move push points, preserving their y */
-		for (list<ControlPoint*>::iterator i = _push_points.begin(); i != _push_points.end(); ++i) {
-			(*i)->move_to ((*i)->get_x() + dx, (*i)->get_y(), ControlPoint::Full);
-			reset_line_coords (**i);
-		}
-	}
-
-	if (line_points.size() > 1) {
-		line->property_points() = line_points;
-	}
-
 	_drag_had_movement = true;
-	if (with_push) {
-		did_push = with_push;
-	}
+	did_push = with_push;
 
-	return clamped;
+	return pair<double, float> (_drag_x + dx, _last_drag_fraction + dy);
 }
 
 /** Should be called to indicate the end of a drag */
@@ -636,16 +695,7 @@ AutomationLine::end_drag ()
 	}
 
 	alist->freeze ();
-
-	/* set up the points that were moved this time round */
-	list<ControlPoint*> points = _drag_points;
-	if (did_push) {
-		copy (_push_points.begin(), _push_points.end(), back_inserter (points));
-		points.sort (ControlPointSorter ());
-	}
-
-	sync_model_with_view_points (points);
-
+	sync_model_with_view_points (_drag_points);
 	alist->thaw ();
 
 	update_pending = false;
@@ -656,6 +706,8 @@ AutomationLine::end_drag ()
 
 	trackview.editor().session()->set_dirty ();
 	did_push = false;
+
+	contiguous_points.clear ();
 }
 
 void
