@@ -200,9 +200,9 @@ LTC_Slave::detect_discontinuity(LTCFrameExt *frame, int fps, bool fuzzy) {
 	}
 
 	if (frame->reverse) {
-		ltc_frame_decrement(&prev_frame.ltc, fps , 0);
+		ltc_frame_decrement(&prev_frame.ltc, fps, LTC_TV_525_60, 0);
 	} else {
-		ltc_frame_increment(&prev_frame.ltc, fps , 0);
+		ltc_frame_increment(&prev_frame.ltc, fps, LTC_TV_525_60, 0);
 	}
 	if (!equal_ltc_frame_time(&prev_frame.ltc, &frame->ltc)) {
 		discontinuity_detected = true;
@@ -298,6 +298,7 @@ void
 LTC_Slave::process_ltc(framepos_t const now)
 {
 	LTCFrameExt frame;
+	enum LTC_TV_STANDARD tv_standard = LTC_TV_625_50;
 	while (ltc_decoder_read(decoder, &frame)) {
 		SMPTETimecode stime;
 
@@ -337,15 +338,34 @@ LTC_Slave::process_ltc(framepos_t const now)
 		 * is expected to start at the end of the current frame
 		 */
 		int fps_i = ceil(timecode.rate);
+
+		switch(fps_i) {
+			case 30:
+				if (timecode.drop) {
+					tv_standard = LTC_TV_525_60;
+				} else {
+					tv_standard = LTC_TV_1125_60;
+				}
+				break;
+			case 25:
+				tv_standard = LTC_TV_625_50;
+				break;
+			default:
+				tv_standard = LTC_TV_FILM_24; /* == LTC_TV_1125_60 == no offset, 24,30fps BGF */
+				break;
+		}
+
 		if (!frame.reverse) {
-			ltc_frame_increment(&frame.ltc, fps_i , 0);
+			ltc_frame_increment(&frame.ltc, fps_i, tv_standard, 0);
 			ltc_frame_to_time(&stime, &frame.ltc, 0);
 			transport_direction = 1;
+			frame.off_start -= ltc_frame_alignment(session.frame_rate(), tv_standard);
+			frame.off_end -= ltc_frame_alignment(session.frame_rate(), tv_standard);
 		} else {
-			ltc_frame_decrement(&frame.ltc, fps_i , 0);
+			ltc_frame_decrement(&frame.ltc, fps_i, tv_standard, 0);
 			int off = frame.off_end - frame.off_start;
-			frame.off_start += off;
-			frame.off_end += off;
+			frame.off_start += off - ltc_frame_alignment(session.frame_rate(), tv_standard);
+			frame.off_end += off - ltc_frame_alignment(session.frame_rate(), tv_standard);
 			transport_direction = -1;
 		}
 
