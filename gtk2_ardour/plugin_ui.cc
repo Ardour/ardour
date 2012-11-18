@@ -182,7 +182,7 @@ PluginUIWindow::on_map ()
 	Window::on_map ();
 #ifdef __APPLE__
 	set_keep_above (true);
-#endif __APPLE__
+#endif // __APPLE__
 }
 
 bool
