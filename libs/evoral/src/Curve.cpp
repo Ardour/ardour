@@ -226,7 +226,7 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen)
 		double frac = (min_x - x0) / (x1 - x0);
 		int64_t subveclen = (int64_t) floor (veclen * frac);
 
-		subveclen = min (subveclen, veclen);
+		subveclen = min (subveclen, (int64_t)veclen);
 
 		for (i = 0; i < subveclen; ++i) {
 			vec[i] = _list.events().front()->value;
@@ -246,7 +246,7 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen)
 
 		float val;
 
-		subveclen = min (subveclen, veclen);
+		subveclen = min (subveclen, (int64_t)veclen);
 
 		val = _list.events().back()->value;
 
