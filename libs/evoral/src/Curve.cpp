@@ -224,7 +224,7 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen)
 		*/
 
 		double frac = (min_x - x0) / (x1 - x0);
-		int32_t subveclen = (int32_t) floor (veclen * frac);
+		int64_t subveclen = (int64_t) floor (veclen * frac);
 
 		subveclen = min (subveclen, veclen);
 
@@ -242,7 +242,7 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen)
 
 		double frac = (x1 - max_x) / (x1 - x0);
 
-		int32_t subveclen = (int32_t) floor (original_veclen * frac);
+		int64_t subveclen = (int64_t) floor (original_veclen * frac);
 
 		float val;
 
