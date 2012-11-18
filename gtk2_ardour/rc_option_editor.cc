@@ -1105,6 +1105,8 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Transport"), _sync_source_2997);
 
+	add_option (_("Transport"), new OptionEditorHeading (S_("LTC Reader")));
+
 	_ltc_port = new ComboStringOption (
 		"ltc-source-port",
 		_("LTC incoming port"),
