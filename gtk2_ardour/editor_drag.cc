@@ -3456,10 +3456,15 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 		framepos_t grab = grab_frame ();
 
 		if (first_move) {
-			_editor->snap_to (grab);
+			grab = adjusted_current_frame (event, false);
+			if (grab < pending_position) {
+				_editor->snap_to (grab, -1);
+			}  else {
+				_editor->snap_to (grab, 1);
+			}
 		}
 
-		if (pending_position < grab_frame()) {
+		if (pending_position < grab) {
 			start = pending_position;
 			end = grab;
 		} else {
