@@ -822,9 +822,6 @@ LV2Plugin::lv2_state_make_path(LV2_State_Make_Path_Handle handle,
 	DEBUG_TRACE(DEBUG::LV2, string_compose("new file path %1 => %2\n",
 	                                       path, abs_path));
 
-	std::cerr << "MAKE PATH " << path
-	          << " => " << g_strndup(abs_path.c_str(), abs_path.length())
-	          << std::endl;
 	return g_strndup(abs_path.c_str(), abs_path.length());
 }
 
@@ -869,12 +866,9 @@ LV2Plugin::add_state(XMLNode* root) const
 	}
 
 	if (_has_state_interface) {
-		cout << "LV2 " << name() << " has state interface" << endl;
 		// Provisionally increment state version and create directory
 		const std::string new_dir = state_dir(++_state_version);
 		g_mkdir_with_parents(new_dir.c_str(), 0744);
-
-		cout << "NEW DIR: " << new_dir << endl;
 
 		LilvState* state = lilv_state_new_from_instance(
 			_impl->plugin,
@@ -900,19 +894,14 @@ LV2Plugin::add_state(XMLNode* root) const
 
 			lilv_state_free(_impl->state);
 			_impl->state = state;
-
-			cout << "Saved LV2 state to " << state_dir(_state_version) << endl;
 		} else {
 			// State is identical, decrement version and nuke directory
-			cout << "LV2 state identical, not saving" << endl;
 			lilv_state_free(state);
 			remove_directory(new_dir);
 			--_state_version;
 		}
 
 		root->add_property("state-dir", string_compose("state%1", _state_version));
-	} else {
-		cout << "LV2 " << name() << " has no state interface." << endl;
 	}
 }
 
@@ -994,7 +983,6 @@ ARDOUR::lv2plugin_get_port_value(const char* port_symbol,
                                  uint32_t*   size,
                                  uint32_t*   type)
 {
-	// cerr << "get_port_value(" << port_symbol << ", ...) ... ";
 	LV2Plugin *plugin = (LV2Plugin *) user_data;
 
 	uint32_t index = plugin->port_index(port_symbol);
@@ -1004,14 +992,11 @@ ARDOUR::lv2plugin_get_port_value(const char* port_symbol,
 			*size = sizeof(float);
 			*type = plugin->_uri_map.uri_to_id(LV2_ATOM__Float);
 			value = &plugin->_shadow_data[index];
-			// cerr << "index="<< index << ",*size=" << *size << ",*type=" << *type << ",*value=" << *value << endl;
 
 			return value;
 		}
-		// cerr << "port is not input control port! ";
 	}
 
-	// cerr << "returning NULL!" << endl;
 	*size = *type = 0;
 	return NULL;
 }
@@ -1020,8 +1005,6 @@ ARDOUR::lv2plugin_get_port_value(const char* port_symbol,
 std::string
 LV2Plugin::do_save_preset(string name)
 {
-	// cerr << "LV2Plugin::do_save_preset(" << name << ")" << endl;
-
 	string pset_uri = uri();
 	pset_uri += "#";
 	pset_uri += name;
@@ -1260,7 +1243,6 @@ LV2Plugin::set_state(const XMLNode& node, int version)
 			plugin_dir(),
 			Glib::build_filename(prop->value(), "state.ttl"));
 
-		cout << "Loading LV2 state from " << state_file << endl;
 		LilvState* state = lilv_state_new_from_file(
 			_world.world, _uri_map.urid_map(), NULL, state_file.c_str());
 
@@ -1605,7 +1587,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 				const LV2_Atom* const atom = (const LV2_Atom*)body;
 				if (!lv2_evbuf_write(&i, nframes, 0, atom->type, atom->size,
 				                (const uint8_t*)(atom + 1))) {
-					cerr << "LV2: failed to write data to event buffer\n";
+					error << "Failed to write data to LV2 event buffer\n";
 				}
 			} else {
 				error << "Received unknown message type from UI" << endmsg;
@@ -1895,8 +1877,10 @@ LV2PluginInfo::discover()
 		LV2PluginInfoPtr  info(new LV2PluginInfo((const void*)p));
 
 		LilvNode* name = lilv_plugin_get_name(p);
-		if (!name) {
-			cerr << "LV2: invalid plugin\n";
+		if (!name || !lilv_plugin_get_port_by_index(p, 0)) {
+			warning << "Ignoring invalid LV2 plugin "
+			        << lilv_node_as_string(lilv_plugin_get_uri(p))
+			        << endmsg;
 			continue;
 		}
 
