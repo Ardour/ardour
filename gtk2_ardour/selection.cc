@@ -1016,8 +1016,10 @@ void
 Selection::add (vector<ControlPoint*> const & cps)
 {
 	for (vector<ControlPoint*>::const_iterator i = cps.begin(); i != cps.end(); ++i) {
-		add (*i);
+		(*i)->set_selected (true);
+		points.push_back (*i);
 	}
+	PointsChanged (); /* EMIT SIGNAL */
 }
 
 void
