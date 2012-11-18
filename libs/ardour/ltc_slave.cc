@@ -359,13 +359,13 @@ LTC_Slave::process_ltc(framepos_t const now)
 			ltc_frame_increment(&frame.ltc, fps_i, tv_standard, 0);
 			ltc_frame_to_time(&stime, &frame.ltc, 0);
 			transport_direction = 1;
-			frame.off_start += ltc_frame_alignment(session.frames_per_timecode_frame(), tv_standard);
-			frame.off_end += ltc_frame_alignment(session.frames_per_timecode_frame(), tv_standard);
+			frame.off_start -= ltc_frame_alignment(session.frames_per_timecode_frame(), tv_standard);
+			frame.off_end -= ltc_frame_alignment(session.frames_per_timecode_frame(), tv_standard);
 		} else {
 			ltc_frame_decrement(&frame.ltc, fps_i, tv_standard, 0);
 			int off = frame.off_end - frame.off_start;
-			frame.off_start += off + ltc_frame_alignment(session.frames_per_timecode_frame(), tv_standard);
-			frame.off_end += off + ltc_frame_alignment(session.frames_per_timecode_frame(), tv_standard);
+			frame.off_start += off - ltc_frame_alignment(session.frames_per_timecode_frame(), tv_standard);
+			frame.off_end += off - ltc_frame_alignment(session.frames_per_timecode_frame(), tv_standard);
 			transport_direction = -1;
 		}
 
