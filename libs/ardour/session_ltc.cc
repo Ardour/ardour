@@ -246,7 +246,7 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 	framepos_t cycle_start_frame = (current_speed < 0) ? (start_frame - ltc_out_latency.max) : (start_frame + ltc_out_latency.max);
 
 	/* LTC TV standard offset */
-	cycle_start_frame += ltc_frame_alignment(nominal_frame_rate(), TV_STANDARD(cur_timecode));
+	cycle_start_frame += ltc_frame_alignment(frames_per_timecode_frame(), TV_STANDARD(cur_timecode));
 
 	/* cycle-start may become negative due to latency compensation */
 	if (cycle_start_frame < 0) { cycle_start_frame = 0; }
