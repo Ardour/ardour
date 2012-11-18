@@ -179,7 +179,6 @@ class LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	float*        _bpm_control_port;  ///< Special input set by ardour
 	float*        _freewheel_control_port;  ///< Special input set by ardour
 	float*        _latency_control_port;  ///< Special output set by ardour
-	uint32_t      _position_seq_port_idx;  ///< Index of Sequence port for position
 	framepos_t    _next_cycle_start;  ///< Expected start frame of next run cycle
 	double        _next_cycle_speed;  ///< Expected start frame of next run cycle
 	PBD::ID       _insert_id;
@@ -190,13 +189,14 @@ class LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	                                            uint32_t*   type);
 
 	typedef enum {
-		PORT_INPUT   = 1,
-		PORT_OUTPUT  = 1 << 1,
-		PORT_AUDIO   = 1 << 2,
-		PORT_CONTROL = 1 << 3,
-		PORT_EVENT   = 1 << 4,
-		PORT_MESSAGE = 1 << 5,
-		PORT_ATOM    = 1 << 6
+		PORT_INPUT    = 1,       ///< Input port
+		PORT_OUTPUT   = 1 << 1,  ///< Output port
+		PORT_AUDIO    = 1 << 2,  ///< Audio (buffer of float)
+		PORT_CONTROL  = 1 << 3,  ///< Control (single float)
+		PORT_EVENT    = 1 << 4,  ///< Old event API event port
+		PORT_SEQUENCE = 1 << 5,  ///< New atom API event port
+		PORT_MIDI     = 1 << 6,  ///< Event port understands MIDI
+		PORT_POSITION = 1 << 7   ///< Event port understands position
 	} PortFlag;
 
 	typedef unsigned PortFlags;
