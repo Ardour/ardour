@@ -72,6 +72,12 @@
 #include <suil/suil.h>
 #endif
 
+/** The number of MIDI buffers that will fit in a UI/worker comm buffer.
+    This needs to be roughly the number of cycles the UI will get around to
+    actually processing the traffic.  Lower values are flakier but save memory.
+*/
+static const size_t NBUFS = 4;
+
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
@@ -341,7 +347,8 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 	if (lilv_plugin_has_feature(plugin, worker_schedule)) {
 		LV2_Worker_Schedule* schedule = (LV2_Worker_Schedule*)malloc(
 			sizeof(LV2_Worker_Schedule));
-		_worker                     = new Worker(this, 4096);
+		size_t buf_size = _session.engine().raw_buffer_size(DataType::MIDI) * NBUFS;
+		_worker                     = new Worker(this, buf_size);
 		schedule->handle            = this;
 		schedule->schedule_work     = work_schedule;
 		_work_schedule_feature.data = schedule;
@@ -1083,7 +1090,7 @@ LV2Plugin::has_message_output() const
 	return false;
 }
 
-void
+bool
 LV2Plugin::write_to(RingBuffer<uint8_t>* dest,
                     uint32_t             index,
                     uint32_t             protocol,
@@ -1099,38 +1106,46 @@ LV2Plugin::write_to(RingBuffer<uint8_t>* dest,
 	msg->size     = size;
 	memcpy(msg + 1, body, size);
 
-	if (dest->write(buf, buf_size) != buf_size) {
-		error << "Error writing to UI=>Plugin RingBuffer" << endmsg;
-	}
+	return (dest->write(buf, buf_size) == buf_size);
 }
 
-void
+bool
 LV2Plugin::write_from_ui(uint32_t       index,
                          uint32_t       protocol,
                          uint32_t       size,
                          const uint8_t* body)
 {
 	if (!_from_ui) {
-		_from_ui = new RingBuffer<uint8_t>(4096);
+		_from_ui = new RingBuffer<uint8_t>(
+			_session.engine().raw_buffer_size(DataType::MIDI) * NBUFS);
 	}
 
-	write_to(_from_ui, index, protocol, size, body);
+	if (!write_to(_from_ui, index, protocol, size, body)) {
+		error << "Error writing from UI to plugin" << endmsg;
+		return false;
+	}
+	return true;
 }
 
-void
+bool
 LV2Plugin::write_to_ui(uint32_t       index,
                        uint32_t       protocol,
                        uint32_t       size,
                        const uint8_t* body)
 {
-	write_to(_to_ui, index, protocol, size, body);
+	if (!write_to(_to_ui, index, protocol, size, body)) {
+		error << "Error writing from plugin to UI" << endmsg;
+		return false;
+	}
+	return true;
 }
 
 void
 LV2Plugin::enable_ui_emmission()
 {
 	if (!_to_ui) {
-		_to_ui = new RingBuffer<uint8_t>(4096);
+		_to_ui = new RingBuffer<uint8_t>(
+			_session.engine().raw_buffer_size(DataType::MIDI) * NBUFS);
 	}
 }
 

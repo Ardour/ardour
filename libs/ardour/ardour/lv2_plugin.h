@@ -122,7 +122,7 @@ class LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	bool has_editor () const;
 	bool has_message_output () const;
 
-	void write_from_ui(uint32_t       index,
+	bool write_from_ui(uint32_t       index,
 	                   uint32_t       protocol,
 	                   uint32_t       size,
 	                   const uint8_t* body);
@@ -211,12 +211,12 @@ class LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 		uint32_t size;
 	};
 
-	void write_to_ui(uint32_t       index,
+	bool write_to_ui(uint32_t       index,
 	                 uint32_t       protocol,
 	                 uint32_t       size,
 	                 const uint8_t* body);
 
-	void write_to(RingBuffer<uint8_t>* dest,
+	bool write_to(RingBuffer<uint8_t>* dest,
 	              uint32_t             index,
 	              uint32_t             protocol,
 	              uint32_t             size,
