@@ -786,8 +786,13 @@ sample_to_timecode (
 		const int64_t D = frameNumber / 17982;
 		const int64_t M = frameNumber % 17982;
 
-		timecode.subframes = floor(subframes_per_frame
+		timecode.subframes = rint(subframes_per_frame
 				* ((double)offset_sample * timecode_frames_per_second / sample_frame_rate - (double)frameNumber));
+
+		if (timecode.subframes == subframes_per_frame) {
+			timecode.subframes = 0;
+			frameNumber++;
+		}
 
 		frameNumber +=  18*D + 2*((M - 2) / 1798);
 
