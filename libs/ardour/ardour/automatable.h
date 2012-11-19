@@ -76,19 +76,6 @@ public:
 	const std::set<Evoral::Parameter>& what_can_be_automated() const { return _can_automate_list; }
 	void what_has_existing_automation (std::set<Evoral::Parameter>&) const;
 
-	inline bool should_snapshot (framepos_t now) {
-		return (_last_automation_snapshot > now
-				|| (now - _last_automation_snapshot) > _automation_interval);
-	}
-
-	static void set_automation_interval (framecnt_t frames) {
-		_automation_interval = frames;
-	}
-
-	static framecnt_t automation_interval() {
-		return _automation_interval;
-	}
-
 	static const std::string xml_node_name;
 
 	int set_automation_xml_state (const XMLNode&, Evoral::Parameter default_param);
@@ -107,7 +94,6 @@ public:
 	std::set<Evoral::Parameter> _can_automate_list;
 
 	framepos_t _last_automation_snapshot;
-	static framecnt_t _automation_interval;
 
 private:
 	PBD::ScopedConnectionList _control_connections; ///< connections to our controls' signals

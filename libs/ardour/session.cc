@@ -1341,8 +1341,6 @@ Session::set_frame_rate (framecnt_t frames_per_second)
 
 	sync_time_vars();
 
-	Automatable::set_automation_interval (ceil ((double) frames_per_second * 0.001 * Config->get_automation_interval_msecs()));
-
 	clear_clicks ();
 
 	// XXX we need some equivalent to this, somehow

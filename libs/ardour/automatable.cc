@@ -42,7 +42,6 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-framecnt_t Automatable::_automation_interval = 0;
 const string Automatable::xml_node_name = X_("Automation");
 
 Automatable::Automatable(Session& session)
