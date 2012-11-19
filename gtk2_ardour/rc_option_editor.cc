@@ -973,6 +973,15 @@ RCOptionEditor::RCOptionEditor ()
 		     0, 1000, 1, 20
 		     ));
 
+	add_option (_("Misc"),
+	     new SpinOption<double> (
+		     "automation-interval-msecs",
+		     _("Automation sampling interval (milliseconds)"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_automation_interval_msecs),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_automation_interval_msecs),
+		     1, 1000, 1, 20
+		     ));
+
 	/* TRANSPORT */
 
 	BoolOption* tsf;
