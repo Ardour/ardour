@@ -589,7 +589,6 @@ AutomationLine::drag_motion (double const x, float fraction, bool ignore_x, bool
 		return pair<double,float> (x,fraction);
 	}
 
-
 	double dx = ignore_x ? 0 : (x - _drag_x);
 	double dy = fraction - _last_drag_fraction;
 
@@ -671,10 +670,11 @@ AutomationLine::drag_motion (double const x, float fraction, bool ignore_x, bool
 				++i;
 			}
 		}
+
+		/* update actual line coordinates (will queue a redraw)
+		 */
 		
-		if (line_points.size() > 1) {
-			line->property_points() = line_points;
-		}
+		line->property_points() = line_points;
 	}
 	
 	_drag_distance += dx;
@@ -821,9 +821,7 @@ AutomationLine::remove_point (ControlPoint& cp)
  *  @param result Filled in with selectable things; in this case, ControlPoints.
  */
 void
-AutomationLine::get_selectables (
-	framepos_t start, framepos_t end, double botfrac, double topfrac, list<Selectable*>& results
-	)
+AutomationLine::get_selectables (framepos_t start, framepos_t end, double botfrac, double topfrac, list<Selectable*>& results)
 {
 	/* convert fractions to display coordinates with 0 at the top of the track */
 	double const bot_track = (1 - topfrac) * trackview.current_height ();
