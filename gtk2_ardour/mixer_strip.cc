@@ -1069,10 +1069,10 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width widt
 
 	if (for_input) {
 		io_count = route->n_inputs().n_total();
-		tooltip << string_compose (_("<b>INPUT</b> to %1"), route->name());
+		tooltip << string_compose (_("<b>INPUT</b> to %1"), Glib::Markup::escape_text(route->name()));
 	} else {
 		io_count = route->n_outputs().n_total();
-		tooltip << string_compose (_("<b>OUTPUT</b> from %1"), route->name());
+		tooltip << string_compose (_("<b>OUTPUT</b> from %1"), Glib::Markup::escape_text(route->name()));
 	}
 
 
@@ -1092,9 +1092,9 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width widt
 				string& connection_name (*i);
 
 				if (io_connection_count == 0) {
-					tooltip << endl << port->name().substr(port->name().find("/") + 1) << " -> " << connection_name;
+					tooltip << endl << Glib::Markup::escape_text(port->name().substr(port->name().find("/") + 1)) << " -> " << Glib::Markup::escape_text(connection_name);
 				} else {
-					tooltip << ", " << connection_name;
+					tooltip << ", " << Glib::Markup::escape_text(connection_name);
 				}
 
 				if (connection_name.find("ardour:") == 0) {
