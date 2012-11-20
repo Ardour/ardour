@@ -603,7 +603,12 @@ Editor::timeaxis_item_drag_finished_callback(ArdourCanvas::Item*, GdkEvent* even
 		//where = tavi->get_position() ;
 	}
 
-
+/*
+ 	//locate so user can audition the edit
+	if ( !session->transport_rolling() && Config->get_always_play_range()) {
+		locate_with_edit_preroll ( arv->region()->position() );
+	}
+*/
 }
 
 

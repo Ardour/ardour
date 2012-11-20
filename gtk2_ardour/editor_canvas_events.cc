@@ -468,6 +468,7 @@ Editor::canvas_fade_in_handle_event (GdkEvent *event, ArdourCanvas::Item* item, 
 
 	case GDK_BUTTON_RELEASE:
 		ret = button_release_handler (item, event, FadeInHandleItem);
+		maybe_locate_with_edit_preroll ( rv->region()->position() );
 		break;
 
 	case GDK_MOTION_NOTIFY:
@@ -549,6 +550,7 @@ Editor::canvas_fade_out_handle_event (GdkEvent *event, ArdourCanvas::Item* item,
 
 	case GDK_BUTTON_RELEASE:
 		ret = button_release_handler (item, event, FadeOutHandleItem);
+		maybe_locate_with_edit_preroll ( rv->region()->last_frame() - rv->get_fade_out_shape_width() );
 		break;
 
 	case GDK_MOTION_NOTIFY:

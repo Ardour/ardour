@@ -60,6 +60,7 @@
         <menuitem action='main-menu-play-selected-regions'/>
         <menuitem action='play-edit-range'/>
         <menuitem action='PlaySelection'/>
+        <menuitem action='PlayPreroll'/>
         <menuitem action='play-from-edit-point-and-return'/>
         <menuitem action='Loop'/>
       </menu>
@@ -144,6 +145,7 @@
       <menuitem action='TogglePunchIn'/>
       <menuitem action='TogglePunchOut'/>
       <menuitem action='ToggleAutoInput'/>
+      <menuitem action='ToggleFollowEdits'/>
       <menuitem action='ToggleAutoPlay'/>
       <menuitem action='ToggleAutoReturn'/>
       <menuitem action='ToggleClick'/>

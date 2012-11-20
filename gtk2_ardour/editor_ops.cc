@@ -2169,6 +2169,55 @@ Editor::play_selection ()
 	_session->request_play_range (&selection->time, true);
 }
 
+framepos_t
+Editor::get_preroll ()
+{
+	return 1.0 /*Config->get_edit_preroll_seconds()*/ * _session->frame_rate();
+}
+
+
+void
+Editor::maybe_locate_with_edit_preroll ( framepos_t location )
+{
+	if ( _session->transport_rolling() || !Config->get_always_play_range() )
+		return;
+
+	location -= get_preroll();
+	
+	//don't try to locate before the beginning of time
+	if ( location < 0 ) 
+		location = 0;
+		
+	//if follow_playhead is on, keep the playhead on the screen
+	if ( _follow_playhead )
+		if ( location < leftmost_frame ) 
+			location = leftmost_frame;
+
+	_session->request_locate( location );
+}
+
+void
+Editor::play_with_preroll ()
+{
+	if (selection->time.empty()) {
+		return;
+	} else {
+		framepos_t preroll = get_preroll();
+		
+		framepos_t start = 0;
+		if (selection->time[clicked_selection].start > preroll)
+			start = selection->time[clicked_selection].start - preroll;
+		
+		framepos_t end = selection->time[clicked_selection].end + preroll;
+		
+		AudioRange ar (start, end, 0);
+		list<AudioRange> lar;
+		lar.push_back (ar);
+
+		_session->request_play_range (&lar, true);
+	}
+}
+
 void
 Editor::play_location (Location& location)
 {
@@ -3237,8 +3286,10 @@ Editor::trim_region (bool front)
 
 			if (front) {
 				(*i)->region()->trim_front (where);
+				maybe_locate_with_edit_preroll ( where );
 			} else {
 				(*i)->region()->trim_end (where);
+				maybe_locate_with_edit_preroll ( where );
 			}
 
 			_session->add_command (new StatefulDiffCommand ((*i)->region()));
@@ -5384,6 +5435,9 @@ Editor::set_playhead_cursor ()
 			_session->request_locate (where, _session->transport_rolling());
 		}
 	}
+
+	if ( Config->get_always_play_range() )
+		cancel_time_selection();
 }
 
 void

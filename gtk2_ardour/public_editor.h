@@ -210,6 +210,8 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 	virtual void track_mixer_selection () = 0;
 	virtual bool extend_selection_to_track (TimeAxisView&) = 0;
 	virtual void play_selection () = 0;
+	virtual void play_with_preroll () = 0;
+	virtual void maybe_locate_with_edit_preroll (framepos_t location) = 0;
 	virtual void set_show_measures (bool yn) = 0;
 	virtual bool show_measures () const = 0;
 	virtual bool redraw_measures () = 0;
@@ -389,6 +391,8 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 
 	virtual MouseCursors const * cursors () const = 0;
 	virtual VerboseCursor * verbose_cursor () const = 0;
+
+	virtual bool get_smart_mode () const = 0;
 
 	virtual void get_pointer_position (double &, double &) const = 0;
 

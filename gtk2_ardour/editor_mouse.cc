@@ -361,6 +361,25 @@ Editor::set_mouse_mode (MouseMode m, bool force)
 	tact->set_active (true);
 
 	MouseModeChanged (); /* EMIT SIGNAL */
+
+	if ( (mouse_mode != MouseRange) && (mouse_mode != MouseGain) ) {
+
+		cancel_time_selection();  //disable the range, because an invisible operating range can cause confusing operation
+
+	} else {
+
+		/* 
+		   in range mode,show the range selection.
+		*/
+
+		cancel_selection();
+		
+		for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
+			if ((*i)->get_selected()) {
+				(*i)->show_selection (selection->time);
+			}
+		}
+	}
 }
 
 void
@@ -1290,8 +1309,6 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 		return true;
 	}
 
-
-
 	if (internal_editing()) {
 		bool leave_internal_edit_mode = false;
 
@@ -1342,6 +1359,13 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 
 		/* handled by button release */
 		return true;
+	}
+
+	//not rolling, range mode click + join_play_range :  locate the PH here
+	if ( !_drags->active () && !_session->transport_rolling() && ( (mouse_mode == MouseRange) || _join_object_range_state == JOIN_OBJECT_RANGE_RANGE ) && Config->get_always_play_range() ) {
+		framepos_t where = event_frame (event, 0, 0);
+		snap_to(where);
+		_session->request_locate (where, false);
 	}
 
 	switch (event->button.button) {
@@ -1415,7 +1439,17 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		were_dragging = true;
 	}
 
-        update_region_layering_order_editor ();
+	//a mouse click (no drag) in the range area of an audio track.  maybe locate the playhead here
+	if ( !_drags->active () && (effective_mouse_mode() == MouseRange) && Config->get_always_play_range() && (item_type != AutomationTrackItem) && !Keyboard::is_context_menu_event (&event->button)) {
+		if ( _join_object_range_state == JOIN_OBJECT_RANGE_RANGE ) {
+			framepos_t pos = event_frame (event, 0, 0);
+			snap_to(pos);
+			_session->request_locate (pos, false);
+			return true;
+		}
+	}
+
+    update_region_layering_order_editor ();
 
 	/* edit events get handled here */
 
@@ -2412,6 +2446,15 @@ Editor::cancel_selection ()
 	clicked_selection = 0;
 }
 
+void
+Editor::cancel_time_selection ()
+{
+    for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+		(*i)->hide_selection ();
+	}
+	selection->time.clear ();
+	clicked_selection = 0;
+}	
 
 void
 Editor::point_trim (GdkEvent* event, framepos_t new_bound)
@@ -2795,10 +2838,8 @@ Editor::update_join_object_range_location (double /*x*/, double y)
 			rtv->canvas_display()->w2i (cx, cy);
 
 			double const c = cy / (rtv->view()->child_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE);
-			double d;
-			double const f = modf (c, &d);
 
-			_join_object_range_state = f < 0.5 ? JOIN_OBJECT_RANGE_RANGE : JOIN_OBJECT_RANGE_OBJECT;
+			_join_object_range_state = c <= 0.5 ? JOIN_OBJECT_RANGE_RANGE : JOIN_OBJECT_RANGE_OBJECT;
 		}
 	}
 }

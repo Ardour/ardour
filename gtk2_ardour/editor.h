@@ -286,6 +286,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	bool extend_selection_to_track (TimeAxisView&);
 
 	void play_selection ();
+	framepos_t get_preroll ();
+	void maybe_locate_with_edit_preroll (framepos_t);
+	void play_with_preroll ();
 	void select_all_in_track (Selection::Operation op);
 	void select_all (Selection::Operation op);
 	void invert_selection_in_track ();
@@ -1673,6 +1676,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void marker_selection_changed ();
 
 	void cancel_selection ();
+	void cancel_time_selection ();
+
+	bool get_smart_mode() const;
 
 	bool audio_region_selection_covers (framepos_t where);
 

@@ -1792,6 +1792,13 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 			}
 		}
 
+		if (_operation == StartTrim) {
+			_editor->maybe_locate_with_edit_preroll ( _views.begin()->view->region()->position() );
+		}
+		if (_operation == EndTrim) {
+			_editor->maybe_locate_with_edit_preroll ( _views.begin()->view->region()->position() + _views.begin()->view->region()->length() );
+		}
+	
 		if (!_editor->selection->selected (_primary)) {
 			_primary->thaw_after_trim ();
 		} else {
@@ -3641,11 +3648,6 @@ SelectionDrag::finished (GdkEvent* event, bool movement_occurred)
 			s->request_stop (false, false);
 		}
 
-		if (Config->get_always_play_range()) {
-			if (_editor->doing_range_stuff()) {
-				s->request_locate (_editor->get_selection().time.start());
-			} 
-		}
 	}
 
 	_editor->stop_canvas_autoscroll ();

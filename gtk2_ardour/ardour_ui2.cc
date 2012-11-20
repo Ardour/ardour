@@ -133,9 +133,8 @@ ARDOUR_UI::setup_tooltips ()
 	set_tip (goto_end_button, _("Go to end of session"));
 	set_tip (auto_loop_button, _("Play loop range"));
 	set_tip (midi_panic_button, _("MIDI Panic\nSend note off and reset controller messages on all MIDI channels"));
-	set_tip (*transport_joiner, _("Always Play Range Selection (if any)"));
 	set_tip (auto_return_button, _("Return to last playback start when stopped"));
-	set_tip (auto_play_button, _("Start playback after any locate"));
+	set_tip (follow_edits_button, _("Playhead follows Range Selections and Edits"));
 	set_tip (auto_input_button, _("Be sensible about input monitoring"));
 	set_tip (click_button, _("Enable/Disable audio click"));
 	set_tip (solo_alert_button, _("When active, something is soloed.\nClick to de-solo everything"));
@@ -243,7 +242,7 @@ ARDOUR_UI::setup_transport ()
 						  static_cast<Widget*> (&transport_frame), 1));
 
 	auto_return_button.set_text(_("Auto Return"));
-	auto_play_button.set_text(_("Auto Play"));
+	follow_edits_button.set_text(_("Follow Edits"));
 	auto_input_button.set_text (_("Auto Input"));
 
 	click_button.set_image (get_icon (X_("metronome")));
@@ -252,7 +251,7 @@ ARDOUR_UI::setup_transport ()
 	click_button.signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::click_button_clicked), false);
 
 	auto_return_button.set_name ("transport option button");
-	auto_play_button.set_name ("transport option button");
+	follow_edits_button.set_name ("transport option button");
 	auto_input_button.set_name ("transport option button");
 
 	/* these have to provide a clear indication of active state */
@@ -293,11 +292,6 @@ ARDOUR_UI::setup_transport ()
 	act = ActionManager::get_action (X_("Transport"), X_("ToggleExternalSync"));
 	sync_button.set_related_action (act);
 
-	transport_joiner = manage (new ButtonJoiner ("transport button", play_selection_button, roll_button));
-
-	act = ActionManager::get_action (X_("Transport"), X_("AlwaysPlayRange"));
-	transport_joiner->set_related_action (act);
-
 	/* clocks, etc. */
 
 	ARDOUR_UI::Clock.connect (sigc::mem_fun (primary_clock, &AudioClock::set));
@@ -309,8 +303,8 @@ ARDOUR_UI::setup_transport ()
 
 	act = ActionManager::get_action ("Transport", "ToggleAutoReturn");
 	auto_return_button.set_related_action (act);
-	act = ActionManager::get_action ("Transport", "ToggleAutoPlay");
-	auto_play_button.set_related_action (act);
+	act = ActionManager::get_action (X_("Transport"), X_("ToggleFollowEdits"));
+	follow_edits_button.set_related_action (act);
 	act = ActionManager::get_action ("Transport", "ToggleAutoInput");
 	auto_input_button.set_related_action (act);
 
@@ -344,20 +338,16 @@ ARDOUR_UI::setup_transport ()
 
 	HBox* tbox1 = manage (new HBox);
 	HBox* tbox2 = manage (new HBox);
-	HBox* tbox3 = manage (new HBox);
 	HBox* tbox = manage (new HBox);
 
 	VBox* vbox1 = manage (new VBox);
 	VBox* vbox2 = manage (new VBox);
-	VBox* vbox3 = manage (new VBox);
 
 	Alignment* a1 = manage (new Alignment);
 	Alignment* a2 = manage (new Alignment);
-	Alignment* a3 = manage (new Alignment);
 
 	tbox1->set_spacing (2);
 	tbox2->set_spacing (2);
-	tbox3->set_spacing (2);
 	tbox->set_spacing (2);
 
 	tbox1->pack_start (click_button, false, false, 5);
@@ -369,25 +359,21 @@ ARDOUR_UI::setup_transport ()
 	play_selection_button.set_rounded_corner_mask (0x1); /* upper left only */
 	roll_button.set_rounded_corner_mask (0x2); /* upper right only */
 
-	tbox2->pack_start (*transport_joiner, false, false);
-
-	tbox3->pack_start (stop_button, false, false);
-	tbox3->pack_start (rec_button, false, false, 6);
+	tbox2->pack_start (play_selection_button, false, false);
+	tbox2->pack_start (roll_button, false, false);
+	tbox2->pack_start (stop_button, false, false);
+	tbox2->pack_start (rec_button, false, false, 5);
 
 	vbox1->pack_start (*tbox1, false, false);
 	vbox2->pack_start (*tbox2, false, false);
-	vbox3->pack_start (*tbox3, false, false);
 
 	a1->add (*vbox1);
 	a1->set (0.5, 1.0, 0.0, 0.0);
 	a2->add (*vbox2);
 	a2->set (0.5, 1.0, 0.0, 0.0);
-	a3->add (*vbox3);
-	a3->set (0.5, 1.0, 0.0, 0.0);
 
 	tbox->pack_start (*a1, false, false);
 	tbox->pack_start (*a2, false, false);
-	tbox->pack_start (*a3, false, false);
 
 	HBox* clock_box = manage (new HBox);
 
@@ -415,7 +401,7 @@ ARDOUR_UI::setup_transport ()
 	auto_box->set_homogeneous (true);
 	auto_box->set_spacing (2);
 	auto_box->pack_start (sync_button, false, false);
-	auto_box->pack_start (auto_play_button, false, false);
+	auto_box->pack_start (follow_edits_button, false, false);
 	auto_box->pack_start (auto_return_button, false, false);
 
 	transport_tearoff_hbox.pack_start (*auto_box, false, false);
@@ -649,7 +635,7 @@ ARDOUR_UI::click_button_clicked (GdkEventButton* ev)
 void
 ARDOUR_UI::toggle_always_play_range ()
 {
-	RefPtr<Action> act = ActionManager::get_action (X_("Transport"), X_("AlwaysPlayRange"));
+	RefPtr<Action> act = ActionManager::get_action (X_("Transport"), X_("ToggleFollowEdits"));
 	assert (act);
 
 	RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic (act);

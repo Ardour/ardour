@@ -330,7 +330,7 @@ ARDOUR_UI::parameter_changed (std::string p)
 
 	} else if (p == "always-play-range") {
 
-		ActionManager::map_some_state ("Transport", "AlwaysPlayRange", &RCConfiguration::get_always_play_range);
+		ActionManager::map_some_state ("Transport", "ToggleFollowEdits", &RCConfiguration::get_always_play_range);
 
 	} else if (p == "send-mtc") {
 

@@ -768,6 +768,19 @@ AudioRegionView::reset_fade_out_shape_width (framecnt_t width)
 	}
 }
 
+framepos_t
+AudioRegionView::get_fade_in_shape_width ()
+{
+	return audio_region()->fade_in()->back()->when;
+}
+
+framepos_t
+AudioRegionView::get_fade_out_shape_width ()
+{
+	return audio_region()->fade_out()->back()->when;
+}
+
+
 void
 AudioRegionView::set_samples_per_unit (gdouble spu)
 {

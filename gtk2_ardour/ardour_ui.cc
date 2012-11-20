@@ -151,7 +151,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	, rec_controllable (new TransportControllable ("transport rec-enable", *this, TransportControllable::RecordEnable))
 
 	, auto_return_button (ArdourButton::led_default_elements)
-	, auto_play_button (ArdourButton::led_default_elements)
+	, follow_edits_button (ArdourButton::led_default_elements)
 	, auto_input_button (ArdourButton::led_default_elements)
 
 	, auditioning_alert_button (_("audition"))
@@ -204,9 +204,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	original_big_clock_height = -1;
 	original_big_clock_font_size = 0;
 
-	roll_button.set_elements (ArdourButton::Element (ArdourButton::Body|ArdourButton::Text));
-	play_selection_button.set_elements (ArdourButton::Element (ArdourButton::Body|ArdourButton::Text));
-	
 	roll_button.set_controllable (roll_controllable);
 	stop_button.set_controllable (stop_controllable);
 	goto_start_button.set_controllable (goto_start_controllable);
@@ -1625,7 +1622,7 @@ ARDOUR_UI::transport_roll ()
 		_session->request_play_range (0, true);
 	}
 
-	if (Config->get_always_play_range()) {
+	if ( ((editor->current_mouse_mode() == Editing::MouseRange) || get_smart_mode()) && Config->get_always_play_range()) {
 		_session->request_play_range (&editor->get_selection().time, true);
 	}
 
@@ -1633,6 +1630,13 @@ ARDOUR_UI::transport_roll ()
 		_session->request_transport_speed (1.0f);
 	}
 }
+
+bool
+ARDOUR_UI::get_smart_mode() const
+{
+	return ( editor->get_smart_mode() );
+}
+
 
 void
 ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
@@ -1684,7 +1688,7 @@ ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 		if (rolling) {
 			_session->request_stop (with_abort, true);
 		} else {
-			if (Config->get_always_play_range ()) {
+			if ( ((editor->current_mouse_mode() == Editing::MouseRange) || editor->get_smart_mode()) && Config->get_always_play_range()) {
 				_session->request_play_range (&editor->get_selection().time, true);
 			}
 
@@ -1728,6 +1732,15 @@ ARDOUR_UI::transport_play_selection ()
 	}
 
 	editor->play_selection ();
+}
+
+void
+ARDOUR_UI::transport_play_preroll ()
+{
+	if (!_session) {
+		return;
+	}
+	editor->play_with_preroll ();
 }
 
 void

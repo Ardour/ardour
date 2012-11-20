@@ -794,6 +794,12 @@ Editor::add_toplevel_controls (Container& cont)
 	cont.show_all ();
 }
 
+bool
+Editor::get_smart_mode () const
+{
+	return ( (current_mouse_mode() == Editing::MouseObject) && smart_mode_action->get_active() );
+}
+
 void
 Editor::catch_vanishing_regionview (RegionView *rv)
 {
