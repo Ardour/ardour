@@ -1602,8 +1602,8 @@ RouteTimeAxisView::update_playlist_tip ()
 			ARDOUR_UI::instance()->set_tip (
 				playlist_button,
 				string_compose(_("Take: %1.%2"),
-					escape_angled_brackets (Glib::Markup::escape_text(rg->name())),
-					escape_angled_brackets (Glib::Markup::escape_text(take_name)))
+					Glib::Markup::escape_text(rg->name()),
+					Glib::Markup::escape_text(take_name))
 				);
 			
 			return;
@@ -1611,7 +1611,7 @@ RouteTimeAxisView::update_playlist_tip ()
 	}
 
 	/* set the playlist button tooltip to the playlist name */
-	ARDOUR_UI::instance()->set_tip (playlist_button, _("Playlist") + std::string(": ") + escape_angled_brackets (Glib::Markup::escape_text(track()->playlist()->name())));
+	ARDOUR_UI::instance()->set_tip (playlist_button, _("Playlist") + std::string(": ") + Glib::Markup::escape_text(track()->playlist()->name()));
 }
 
 
