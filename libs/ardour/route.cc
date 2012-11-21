@@ -202,12 +202,13 @@ Route::set_remote_control_id (uint32_t id, bool notify_class_listeners)
 	if (Config->get_remote_model() != UserOrdered) {
 		return;
 	}
-	
-	if (id < 1) {
-		error << _("Remote Control ID's start at one, not zero") << endmsg;
-		return;
-	}
 
+	set_remote_control_id_internal (id, notify_class_listeners);
+}
+
+void
+Route::set_remote_control_id_internal (uint32_t id, bool notify_class_listeners)
+{
 	/* force IDs for master/monitor busses and prevent 
 	   any other route from accidentally getting these IDs
 	   (i.e. legacy sessions)
@@ -219,6 +220,11 @@ Route::set_remote_control_id (uint32_t id, bool notify_class_listeners)
 
 	if (is_monitor() && id != MonitorBusRemoteControlID) {
 		id = MonitorBusRemoteControlID;
+	}
+
+	if (id < 1) {
+		error << _("Remote Control ID's start at one, not zero") << endmsg;
+		return;
 	}
 
 	/* don't allow it to collide */
@@ -661,6 +667,7 @@ void
 Route::set_solo (bool yn, void *src)
 {
 	if (_solo_safe) {
+		DEBUG_TRACE (DEBUG::Solo, string_compose ("%1 ignore solo change due to solo-safe\n", name()));
 		return;
 	}
 
@@ -668,6 +675,9 @@ Route::set_solo (bool yn, void *src)
 		_route_group->foreach_route (boost::bind (&Route::set_solo, _1, yn, _route_group));
 		return;
 	}
+
+	DEBUG_TRACE (DEBUG::Solo, string_compose ("%1: set solo => %2, src: %3 grp ? %4 currently self-soloed ? %5\n", 
+						  name(), yn, src, (src == _route_group), self_soloed()));
 
 	if (self_soloed() != yn) {
 		set_self_solo (yn);
@@ -680,6 +690,7 @@ Route::set_solo (bool yn, void *src)
 void
 Route::set_self_solo (bool yn)
 {
+	DEBUG_TRACE (DEBUG::Solo, string_compose ("%1: set SELF solo => %2\n", name(), yn));
 	_self_solo = yn;
 }
 
@@ -687,8 +698,12 @@ void
 Route::mod_solo_by_others_upstream (int32_t delta)
 {
 	if (_solo_safe) {
+		DEBUG_TRACE (DEBUG::Solo, string_compose ("%1 ignore solo-by-upstream due to solo-safe\n", name()));
 		return;
 	}
+
+	DEBUG_TRACE (DEBUG::Solo, string_compose ("%1 mod solo-by-upstream by %2, current up = %3 down = %4\n", 
+						  name(), delta, _soloed_by_others_upstream, _soloed_by_others_downstream));
 
 	uint32_t old_sbu = _soloed_by_others_upstream;
 
@@ -743,8 +758,12 @@ void
 Route::mod_solo_by_others_downstream (int32_t delta)
 {
 	if (_solo_safe) {
+		DEBUG_TRACE (DEBUG::Solo, string_compose ("%1 ignore solo-by-downstream due to solo safe\n", name()));
 		return;
 	}
+
+	DEBUG_TRACE (DEBUG::Solo, string_compose ("%1 mod solo-by-downstream by %2, current up = %3 down = %4\n", 
+						  name(), delta, _soloed_by_others_upstream, _soloed_by_others_downstream));
 
 	if (delta < 0) {
 		if (_soloed_by_others_downstream >= (uint32_t) abs (delta)) {
@@ -2166,7 +2185,7 @@ Route::set_state (const XMLNode& node, int version)
 			if ((prop = child->property (X_("id"))) != 0) {
 				int32_t x;
 				sscanf (prop->value().c_str(), "%d", &x);
-				set_remote_control_id (x);
+				set_remote_control_id_internal (x);
 			}
 
 		} else if (child->name() == X_("MuteMaster")) {
@@ -2427,7 +2446,7 @@ Route::set_state_2X (const XMLNode& node, int version)
 			if ((prop = child->property (X_("id"))) != 0) {
 				int32_t x;
 				sscanf (prop->value().c_str(), "%d", &x);
-				set_remote_control_id (x);
+				set_remote_control_id_internal (x);
 			}
 
 		}

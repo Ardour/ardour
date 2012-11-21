@@ -603,6 +603,8 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	bool _last_custom_meter_was_at_end;
 
         void reset_instrument_info ();
+
+        void set_remote_control_id_internal (uint32_t id, bool notify_class_listeners = true);
 };
 
 } // namespace ARDOUR

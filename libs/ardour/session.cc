@@ -2549,14 +2549,17 @@ Session::route_solo_changed (bool self_solo_change, void* /*src*/, boost::weak_p
 		DEBUG_TRACE (DEBUG::Solo, string_compose ("check feed from %1\n", (*i)->name()));
 		
 		if ((*i)->feeds (route, &via_sends_only)) {
+			DEBUG_TRACE (DEBUG::Solo, string_compose ("\tthere is a feed from %1\n", (*i)->name()));
 			if (!via_sends_only) {
 				if (!route->soloed_by_others_upstream()) {
 					(*i)->mod_solo_by_others_downstream (delta);
 				}
+			} else {
+				DEBUG_TRACE (DEBUG::Solo, string_compose ("\tthere is a send-only feed from %1\n", (*i)->name()));
 			}
 			in_signal_flow = true;
 		} else {
-			DEBUG_TRACE (DEBUG::Solo, "\tno feed from\n");
+			DEBUG_TRACE (DEBUG::Solo, string_compose ("\tno feed from %1\n", (*i)->name()));
 		}
 		
 		DEBUG_TRACE (DEBUG::Solo, string_compose ("check feed to %1\n", (*i)->name()));
@@ -2577,7 +2580,11 @@ Session::route_solo_changed (bool self_solo_change, void* /*src*/, boost::weak_p
 				if (!route->soloed_by_others_downstream()) {
 					DEBUG_TRACE (DEBUG::Solo, string_compose ("\tmod %1 by %2\n", (*i)->name(), delta));
 					(*i)->mod_solo_by_others_upstream (delta);
+				} else {
+					DEBUG_TRACE (DEBUG::Solo, "\talready soloed by others downstream\n");
 				}
+			} else {
+				DEBUG_TRACE (DEBUG::Solo, string_compose ("\tfeed to %1 ignored, sends-only\n", (*i)->name()));
 			}
 			in_signal_flow = true;
 		} else {
@@ -2599,7 +2606,7 @@ Session::route_solo_changed (bool self_solo_change, void* /*src*/, boost::weak_p
 	*/
 
 	for (RouteList::iterator i = uninvolved.begin(); i != uninvolved.end(); ++i) {
-		DEBUG_TRACE (DEBUG::Solo, string_compose ("mute change for %1\n", (*i)->name()));
+		DEBUG_TRACE (DEBUG::Solo, string_compose ("mute change for %1, which neither feeds or is fed by %2\n", (*i)->name(), route->name()));
 		(*i)->mute_changed (this);
 	}
 
@@ -2649,6 +2656,9 @@ Session::update_route_solo_state (boost::shared_ptr<RouteList> r)
 		_solo_isolated_cnt = isolated;
 		IsolatedChanged (); /* EMIT SIGNAL */
 	}
+
+	DEBUG_TRACE (DEBUG::Solo, string_compose ("solo state updated by session, soloed? %1 listeners %2 isolated %3\n",
+						  something_soloed, listeners, isolated));
 }
 
 boost::shared_ptr<RouteList>
