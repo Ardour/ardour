@@ -223,7 +223,6 @@ Route::set_remote_control_id_internal (uint32_t id, bool notify_class_listeners)
 	}
 
 	if (id < 1) {
-		error << _("Remote Control ID's start at one, not zero") << endmsg;
 		return;
 	}
 
@@ -2221,6 +2220,10 @@ Route::set_state_2X (const XMLNode& node, int version)
 		_flags = Flag (string_2_enum (f, _flags));
 	} else {
 		_flags = Flag (0);
+	}
+
+	if (is_master() || is_monitor() || is_hidden()) {
+		_mute_master->set_solo_ignore (true);
 	}
 
 	if ((prop = node.property (X_("phase-invert"))) != 0) {
