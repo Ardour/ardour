@@ -1738,12 +1738,23 @@ RouteUI::open_remote_control_id_dialog ()
 		dialog.add_button (Stock::APPLY, RESPONSE_ACCEPT);
 	} else {
 		Label* l = manage (new Label());
-		l->set_markup (string_compose (_("Remote Control IDs are currently determined by track/bus ordering in %1\n\n"
-						 "This %2 has remote control ID %3\n\n\n"
-						 "<span size=\"small\" style=\"italic\">Use the User Interaction tab of the Preferences window if you want to change this</span>"),
-					       (Config->get_remote_model() == MixerOrdered ? _("the mixer") : ("the editor")),
-					       (is_track() ? _("track") : _("bus")),
-					       _route->remote_control_id()));
+		if (_route->is_master() || _route->is_monitor()) {
+			l->set_markup (string_compose (_("The remote control ID of %1 is: %2\n\n\n"
+							 "The remote control ID of %3 cannot be changed."),
+						       Glib::Markup::escape_text (_route->name()),
+						       _route->remote_control_id(),
+						       (_route->is_master() ? _("the master bus") : _("the monitor bus"))));
+		} else {
+			l->set_markup (string_compose (_("The remote control ID of %6 is: %3\n\n\n"
+							 "Remote Control IDs are currently determined by track/bus ordering in %1\n\n"
+							 "%4Use the User Interaction tab of the Preferences window if you want to change this%5"),
+						       (Config->get_remote_model() == MixerOrdered ? _("the mixer") : ("the editor")),
+						       (is_track() ? _("track") : _("bus")),
+						       _route->remote_control_id(),
+						       "<span size=\"small\" style=\"italic\">",
+						       "</span>",
+						       Glib::Markup::escape_text (_route->name())));
+		}
 		dialog.get_vbox()->pack_start (*l);
 		dialog.add_button (Stock::OK, RESPONSE_CANCEL);
 	}
