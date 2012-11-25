@@ -907,8 +907,8 @@ def prep_libcheck(topenv, libinfo):
         #
         GTKROOT = os.path.expanduser ('~/gtk/inst')
         ARDOURDEP_ROOT = os.path.expanduser ('~/a3/inst')
-        libinfo.Append(CPPPATH= GTKROOT + "/include", LINKFLAGS= "-L" + GTKROOT + "/lib")
-        libinfo.Append(CPPPATH= ARDOURDEP_ROOT + "/include", LINKFLAGS= "-L" + ARDOURDEP_ROOT + "/lib")
+        libinfo.Append(CPPPATH= [ GTKROOT + "/include" ], LINKFLAGS= "-L" + GTKROOT + "/lib")
+        libinfo.Append(CPPPATH= [ ARDOURDEP_ROOT + "/include" ] , LINKFLAGS= "-L" + ARDOURDEP_ROOT + "/lib")
 	    
 prep_libcheck(env, env)
 
