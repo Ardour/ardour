@@ -186,9 +186,22 @@ class Selection : public sigc::trackable, public PBD::ScopedConnectionList
 
 	void replace (uint32_t time_index, framepos_t start, framepos_t end);
 
+/*
+ * A note about items in an editing Selection:
+ * At a high level, selections can include Tracks, Objects, or Time Ranges
+ * Range and Object selections are mutually exclusive.
+ * Selecting a Range will deselect all Objects, and vice versa.
+ * This is done to avoid confusion over what will happen in an operation such as Delete
+ * Tracks are somewhat orthogonal b/c editing operations don't apply to tracks.
+ * The Track selection isn't affected when ranges or objects are added.
+ */
+
+	void clear_time();  //clears any time selection  ( i.e. Range )
+	void clear_tracks ();  //clears the track header selections
+	void clear_objects();  //clears the items listed below
+
+	// these items get cleared wholesale in clear_objects
 	void clear_regions();
-	void clear_tracks ();
-	void clear_time();
 	void clear_lines ();
 	void clear_playlists ();
 	void clear_points ();
