@@ -216,6 +216,8 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 	virtual bool show_measures () const = 0;
 	virtual bool redraw_measures () = 0;
 
+	virtual Editing::MouseMode effective_mouse_mode () const = 0;
+
 	/** Open main export dialog */
 	virtual void export_audio () = 0;
 

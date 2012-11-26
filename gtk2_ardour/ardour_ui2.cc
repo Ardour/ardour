@@ -46,7 +46,6 @@
 #include "public_editor.h"
 #include "audio_clock.h"
 #include "actions.h"
-#include "button_joiner.h"
 #include "main_clock.h"
 #include "utils.h"
 #include "theme_manager.h"

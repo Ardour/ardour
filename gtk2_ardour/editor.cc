@@ -80,7 +80,6 @@
 #include "audio_time_axis.h"
 #include "automation_time_axis.h"
 #include "bundle_manager.h"
-#include "button_joiner.h"
 #include "canvas-noevent-text.h"
 #include "canvas_impl.h"
 #include "crossfade_edit.h"
@@ -2317,7 +2316,13 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 	}
 
 	if ((prop = node.property ("join-object-range"))) {
-		ActionManager::set_toggle_action ("MouseMode", "set-mouse-mode-object-range", string_is_affirmative (prop->value ()));
+		RefPtr<Action> act = ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-object-range"));
+		if (act) {
+			RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
+			tact->set_active (!yn);
+			tact->set_active (yn);
+		}
+		set_mouse_mode(mouse_mode, true);
 	}
 
 	if ((prop = node.property ("edit-point"))) {
@@ -2828,14 +2833,12 @@ Editor::setup_toolbar ()
 	mode_box->set_spacing(4);
 
 	HBox* mouse_mode_box = manage (new HBox);
-	HBox* mouse_mode_hbox1 = manage (new HBox);
-	HBox* mouse_mode_hbox2 = manage (new HBox);
-	VBox* mouse_mode_vbox1 = manage (new VBox);
-	VBox* mouse_mode_vbox2 = manage (new VBox);
-	Alignment* mouse_mode_align1 = manage (new Alignment);
-	Alignment* mouse_mode_align2 = manage (new Alignment);
+	HBox* mouse_mode_hbox = manage (new HBox);
+	VBox* mouse_mode_vbox = manage (new VBox);
+	Alignment* mouse_mode_align = manage (new Alignment);
 
 	Glib::RefPtr<SizeGroup> mouse_mode_size_group = SizeGroup::create (SIZE_GROUP_BOTH);
+//	mouse_mode_size_group->add_widget (smart_mode_button);
 	mouse_mode_size_group->add_widget (mouse_move_button);
 	mouse_mode_size_group->add_widget (mouse_select_button);
 	mouse_mode_size_group->add_widget (mouse_zoom_button);
@@ -2848,30 +2851,24 @@ Editor::setup_toolbar ()
 	/* make them just a bit bigger */
 	mouse_move_button.set_size_request (-1, 25);
 
-	smart_mode_joiner = manage (new ButtonJoiner ("mouse mode button", mouse_move_button, mouse_select_button, true));
-	smart_mode_joiner->set_related_action (smart_mode_action);
+	mouse_mode_hbox->set_spacing (2);
 
-	mouse_mode_hbox2->set_spacing (2);
-	mouse_mode_box->set_spacing (2);
+	mouse_mode_hbox->pack_start (smart_mode_button, false, false);
+	mouse_mode_hbox->pack_start (mouse_move_button, false, false);
+	mouse_mode_hbox->pack_start (mouse_select_button, false, false);
+	mouse_mode_hbox->pack_start (mouse_zoom_button, false, false);
+	mouse_mode_hbox->pack_start (mouse_gain_button, false, false);
+	mouse_mode_hbox->pack_start (mouse_timefx_button, false, false);
+	mouse_mode_hbox->pack_start (mouse_audition_button, false, false);
+	mouse_mode_hbox->pack_start (mouse_draw_button, false, false);
+	mouse_mode_hbox->pack_start (internal_edit_button, false, false, 8);
 
-	mouse_mode_hbox1->pack_start (*smart_mode_joiner, false, false);
-	mouse_mode_hbox2->pack_start (mouse_zoom_button, false, false);
-	mouse_mode_hbox2->pack_start (mouse_gain_button, false, false);
-	mouse_mode_hbox2->pack_start (mouse_timefx_button, false, false);
-	mouse_mode_hbox2->pack_start (mouse_audition_button, false, false);
-	mouse_mode_hbox2->pack_start (mouse_draw_button, false, false);
-	mouse_mode_hbox2->pack_start (internal_edit_button, false, false, 8);
+	mouse_mode_vbox->pack_start (*mouse_mode_hbox);
 
-	mouse_mode_vbox1->pack_start (*mouse_mode_hbox1, false, false);
-	mouse_mode_vbox2->pack_start (*mouse_mode_hbox2, false, false);
+	mouse_mode_align->add (*mouse_mode_vbox);
+	mouse_mode_align->set (0.5, 1.0, 0.0, 0.0);
 
-	mouse_mode_align1->add (*mouse_mode_vbox1);
-	mouse_mode_align1->set (0.5, 1.0, 0.0, 0.0);
-	mouse_mode_align2->add (*mouse_mode_vbox2);
-	mouse_mode_align2->set (0.5, 1.0, 0.0, 0.0);
-
-	mouse_mode_box->pack_start (*mouse_mode_align1, false, false);
-	mouse_mode_box->pack_start (*mouse_mode_align2, false, false);
+	mouse_mode_box->pack_start (*mouse_mode_align, false, false);
 
 	edit_mode_strings.push_back (edit_mode_to_string (Slide));
 	if (!Profile->get_sae()) {
@@ -3049,14 +3046,14 @@ Editor::setup_toolbar ()
 void
 Editor::setup_tooltips ()
 {
-	ARDOUR_UI::instance()->set_tip (mouse_move_button, _("Select/Move Objects"));
-	ARDOUR_UI::instance()->set_tip (mouse_select_button, _("Select/Move Ranges"));
+	ARDOUR_UI::instance()->set_tip (smart_mode_button, _("Smart Mode (add Range functions to Object mode)"));
+	ARDOUR_UI::instance()->set_tip (mouse_move_button, _("Object Mode (select/move Objects)"));
+	ARDOUR_UI::instance()->set_tip (mouse_select_button, _("Range Mode (select/move Ranges)"));
 	ARDOUR_UI::instance()->set_tip (mouse_draw_button, _("Draw/Edit MIDI Notes"));
 	ARDOUR_UI::instance()->set_tip (mouse_gain_button, _("Draw Region Gain"));
 	ARDOUR_UI::instance()->set_tip (mouse_zoom_button, _("Select Zoom Range"));
 	ARDOUR_UI::instance()->set_tip (mouse_timefx_button, _("Stretch/Shrink Regions and MIDI Notes"));
 	ARDOUR_UI::instance()->set_tip (mouse_audition_button, _("Listen to Specific Regions"));
-	ARDOUR_UI::instance()->set_tip (smart_mode_joiner, _("Smart Mode (Select/Move Objects + Ranges)"));
 	ARDOUR_UI::instance()->set_tip (internal_edit_button, _("Note Level Editing"));
 	ARDOUR_UI::instance()->set_tip (*_group_tabs, _("Groups: click to (de)activate\nContext-click for other operations"));
 	ARDOUR_UI::instance()->set_tip (nudge_forward_button, _("Nudge Region/Selection Later"));
@@ -4200,9 +4197,7 @@ Editor::set_frames_per_unit (double fpu)
 		zoom_range_clock->set (frames);
 	}
 
-	bool const showing_time_selection =
-		mouse_mode == MouseRange ||
-		(mouse_mode == MouseObject && _join_object_range_state != JOIN_OBJECT_RANGE_NONE);
+	bool const showing_time_selection = selection->time.length() > 0;
 
 	if (showing_time_selection && selection->time.start () != selection->time.end_frame ()) {
 		for (TrackViewList::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {

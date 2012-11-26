@@ -1622,10 +1622,6 @@ ARDOUR_UI::transport_roll ()
 		_session->request_play_range (0, true);
 	}
 
-	if ( ((editor->current_mouse_mode() == Editing::MouseRange) || get_smart_mode()) && Config->get_always_play_range()) {
-		_session->request_play_range (&editor->get_selection().time, true);
-	}
-
 	if (!rolling) {
 		_session->request_transport_speed (1.0f);
 	}
@@ -1688,7 +1684,7 @@ ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 		if (rolling) {
 			_session->request_stop (with_abort, true);
 		} else {
-			if ( ((editor->current_mouse_mode() == Editing::MouseRange) || editor->get_smart_mode()) && Config->get_always_play_range()) {
+			if ( Config->get_always_play_range() ) {
 				_session->request_play_range (&editor->get_selection().time, true);
 			}
 

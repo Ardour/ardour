@@ -404,6 +404,12 @@ Editor::register_actions ()
 	Glib::RefPtr<ActionGroup> mouse_mode_actions = ActionGroup::create (X_("MouseMode"));
 	RadioAction::Group mouse_mode_group;
 
+	act = ActionManager::register_toggle_action (mouse_mode_actions, "set-mouse-mode-object-range", _("Smart Object Mode"), sigc::mem_fun (*this, &Editor::mouse_mode_object_range_toggled));	
+	smart_mode_action = Glib::RefPtr<ToggleAction>::cast_static (act);
+	smart_mode_button.set_related_action (smart_mode_action);
+	smart_mode_button.set_text (_("Smart"));
+	smart_mode_button.set_name ("mouse mode button");
+
 	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-object", _("Object Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseObject));
 	mouse_move_button.set_related_action (act);
 	mouse_move_button.set_image (::get_icon("tool_object"));
@@ -418,9 +424,6 @@ Editor::register_actions ()
 	mouse_draw_button.set_related_action (act);
 	mouse_draw_button.set_image (::get_icon("midi_tool_pencil"));
 	mouse_draw_button.set_name ("mouse mode button");
-
-	act = ActionManager::register_toggle_action (mouse_mode_actions, "set-mouse-mode-object-range", _("Link Object / Range Tools"), sigc::mem_fun (*this, &Editor::mouse_mode_object_range_toggled));	
-	smart_mode_action = Glib::RefPtr<ToggleAction>::cast_static (act);
 
 	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-gain", _("Gain Tool"), sigc::bind (mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseGain));	
 	mouse_gain_button.set_related_action (act);

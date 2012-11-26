@@ -3641,7 +3641,7 @@ Editor::copy ()
 bool
 Editor::can_cut_copy () const
 {
-	switch (current_mouse_mode()) {
+	switch (effective_mouse_mode()) {
 
 	case MouseObject:
 		if (!selection->regions.empty() || !selection->points.empty()) {
@@ -3700,7 +3700,8 @@ Editor::cut_copy (CutCopyOp op)
 		}
 	}
 
-	cut_buffer->clear ();
+	if ( op != Clear )  //"Delete" doesn't change copy/paste buf
+		cut_buffer->clear ();
 
 	if (entered_marker) {
 
@@ -3719,7 +3720,7 @@ Editor::cut_copy (CutCopyOp op)
 
 	if (internal_editing()) {
 
-		switch (current_mouse_mode()) {
+		switch (effective_mouse_mode()) {
 		case MouseObject:
 		case MouseRange:
 			cut_copy_midi (op);
@@ -3730,19 +3731,62 @@ Editor::cut_copy (CutCopyOp op)
 
 	} else {
 
-		RegionSelection rs;
+	RegionSelection rs; 
 
-		/* we only want to cut regions if some are selected */
+	/* we only want to cut regions if some are selected */
 
-		if (doing_object_stuff()) {
-			rs = get_regions_from_selection ();
+	if (!selection->regions.empty()) {
+		rs = get_regions_from_selection ();
+	}
+
+	switch (effective_mouse_mode()) {
+/*
+ * 		case MouseGain: {
+			//find regions's gain line
+			AudioRegionView *rview = dynamic_cast<AudioRegionView*>(clicked_regionview);
+				AutomationTimeAxisView *tview = dynamic_cast<AutomationTimeAxisView*>(clicked_trackview);
+			if (rview) {
+				AudioRegionGainLine *line = rview->get_gain_line();
+				if (!line) break;
+				
+				//cut region gain points in the selection
+				AutomationList& alist (line->the_list());
+				XMLNode &before = alist.get_state();
+				AutomationList* what_we_got = 0;
+				if ((what_we_got = alist.cut (selection->time.front().start - rview->audio_region()->position(), selection->time.front().end - rview->audio_region()->position())) != 0) {
+					session->add_command(new MementoCommand<AutomationList>(alist, &before, &alist.get_state()));
+					delete what_we_got;
+					what_we_got = 0;
+				}
+				
+				rview->set_envelope_visible(true);
+				rview->audio_region()->set_envelope_active(true);
+				
+			} else if (tview) {
+				AutomationLine *line = *(tview->lines.begin());
+				if (!line) break;
+				
+				//cut auto points in the selection
+				AutomationList& alist (line->the_list());
+				XMLNode &before = alist.get_state();
+				AutomationList* what_we_got = 0;
+				if ((what_we_got = alist.cut (selection->time.front().start, selection->time.front().end)) != 0) {
+					session->add_command(new MementoCommand<AutomationList>(alist, &before, &alist.get_state()));
+					delete what_we_got;
+					what_we_got = 0;
+				}		
+			} else
+				break;
+		} break;
+*/			
+		case MouseObject: 
+		case MouseRange:
 			if (!rs.empty() || !selection->points.empty()) {
-
 				begin_reversible_command (opname + _(" objects"));
 
 				if (!rs.empty()) {
 					cut_copy_regions (op, rs);
-
+					
 					if (op == Cut || op == Delete) {
 						selection->clear_regions ();
 					}
@@ -3755,16 +3799,11 @@ Editor::cut_copy (CutCopyOp op)
 						selection->clear_points ();
 					}
 				}
-				commit_reversible_command ();
-				goto out;
-			}
-			if (!selection->time.empty() && (_join_object_range_state == JOIN_OBJECT_RANGE_NONE)) {
-				/* don't cause suprises */
-				goto out;
-			}
-		}
 
-		if (doing_range_stuff()) {
+				commit_reversible_command ();	
+				break;
+			} 
+			
 			if (selection->time.empty()) {
 				framepos_t start, end;
 				if (!get_edit_op_range (start, end)) {
@@ -3772,18 +3811,22 @@ Editor::cut_copy (CutCopyOp op)
 				}
 				selection->set (start, end);
 			}
-
+				
 			begin_reversible_command (opname + _(" range"));
 			cut_copy_ranges (op);
 			commit_reversible_command ();
-
+			
 			if (op == Cut || op == Delete) {
 				selection->clear_time ();
 			}
+
+			break;
+			
+		default:
+			break;
 		}
 	}
 
-  out:
 	if (op == Delete || op == Cut || op == Clear) {
 		_drags->abort ();
 	}
@@ -5443,9 +5486,7 @@ Editor::set_playhead_cursor ()
 void
 Editor::split_region ()
 {
-	if (((mouse_mode == MouseRange) ||
-	     (mouse_mode != MouseObject && _join_object_range_state == JOIN_OBJECT_RANGE_RANGE)) &&
-	    !selection->time.empty()) {
+	if ( !selection->time.empty()) {
 		separate_regions_between (selection->time);
 		return;
 	}

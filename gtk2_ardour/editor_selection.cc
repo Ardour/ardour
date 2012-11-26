@@ -962,9 +962,7 @@ Editor::track_selection_changed ()
 			(*j)->set_selected (find (selection->tracks.begin(), selection->tracks.end(), j->get()) != selection->tracks.end());
 		}
 
-		if (yn &&
-		    ((mouse_mode == MouseRange) ||
-		     ((mouse_mode == MouseObject) && (_join_object_range_state == JOIN_OBJECT_RANGE_OBJECT)))) {
+		if (yn) {
 			(*i)->reshow_selection (selection->time);
 		} else {
 			(*i)->hide_selection ();
@@ -1801,7 +1799,7 @@ Editor::select_range_between ()
 	framepos_t start;
 	framepos_t end;
 
-	if (mouse_mode == MouseRange && !selection->time.empty()) {
+	if ( !selection->time.empty() ) {
 		selection->clear_time ();
 	}
 

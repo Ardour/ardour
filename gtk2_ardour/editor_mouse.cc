@@ -293,7 +293,7 @@ Editor::set_canvas_cursor ()
 	}
 
 	/* up-down cursor as a cue that automation can be dragged up and down when in join object/range mode */
-	if (smart_mode_action->get_active()) {
+	if ( get_smart_mode() ) {
 		double x, y;
 		get_pointer_position (x, y);
 		ArdourCanvas::Item* i = track_canvas->get_item_at (x, y);
@@ -306,6 +306,21 @@ Editor::set_canvas_cursor ()
 	}
 
 	set_canvas_cursor (current_canvas_cursor, true);
+}
+
+void
+Editor::mouse_mode_object_range_toggled()
+{
+	MouseMode m = mouse_mode;
+	
+	Glib::RefPtr<Action> act = ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-range"));
+	assert (act);
+	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+	assert (tact);
+	if (tact->get_active())
+		m = MouseObject;  //Smart mode turned to ON, force editing to Object mode
+	
+	set_mouse_mode(m, true);  //call this so the button styles can get updated
 }
 
 void
@@ -360,26 +375,7 @@ Editor::set_mouse_mode (MouseMode m, bool force)
 	tact->set_active (false);
 	tact->set_active (true);
 
-	MouseModeChanged (); /* EMIT SIGNAL */
-
-	if ( (mouse_mode != MouseRange) && (mouse_mode != MouseGain) ) {
-
-		cancel_time_selection();  //disable the range, because an invisible operating range can cause confusing operation
-
-	} else {
-
-		/* 
-		   in range mode,show the range selection.
-		*/
-
-		cancel_selection();
-		
-		for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
-			if ((*i)->get_selected()) {
-				(*i)->show_selection (selection->time);
-			}
-		}
-	}
+	//NOTE:  this will result in a call to mouse_mode_toggled which does the heavy lifting
 }
 
 void
@@ -451,29 +447,25 @@ Editor::mouse_mode_toggled (MouseMode m)
 
 	instant_save ();
 
-	if (!internal_editing()) {
-		if (mouse_mode != MouseRange && mouse_mode != MouseGain && _join_object_range_state == JOIN_OBJECT_RANGE_NONE) {
-
-			/* in all modes except range, gain and joined object/range, hide the range selection,
-			   show the object (region) selection.
-			*/
-
-			for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-				(*i)->hide_selection ();
-			}
-
-		} else {
-
-			/*
-			  in range or object/range mode, show the range selection.
-			*/
-
-			for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
-				(*i)->show_selection (selection->time);
-			}
+	//TODO:  set button styles for smart buttons
+/*
+	if ( smart_mode_action->get_active() ) {
+		if( mouse_mode == MouseObject ) { //smart active and object active
+			smart_mode_button.set_active(1);
+			smart_mode_button.set_name("smart mode button");
+			mouse_move_button.set_name("smart mode button");
+		} else {  //smart active but object inactive
+			smart_mode_button.set_active(0);
+			smart_mode_button.set_name("smart mode button");
+			mouse_move_button.set_name("mouse mode button");
 		}
+	} else {
+		smart_mode_button.set_active(0);
+		smart_mode_button.set_name("mouse mode button");
+		mouse_move_button.set_name("mouse mode button");
 	}
-
+*/
+	
 	set_canvas_cursor ();
 	set_gain_envelope_visibility ();
 
@@ -579,11 +571,9 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 	*/
 
 	if (((mouse_mode != MouseObject) &&
-	     (_join_object_range_state != JOIN_OBJECT_RANGE_OBJECT) &&
 	     (mouse_mode != MouseAudition || item_type != RegionItem) &&
 	     (mouse_mode != MouseTimeFX || item_type != RegionItem) &&
 	     (mouse_mode != MouseGain) &&
-	     (mouse_mode != MouseRange) &&
 	     (mouse_mode != MouseDraw)) ||
 	    ((event->type != GDK_BUTTON_PRESS && event->type != GDK_BUTTON_RELEASE) || event->button.button > 3) ||
 	    (internal_editing() && mouse_mode != MouseTimeFX)) {
@@ -608,12 +598,10 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 
 	switch (item_type) {
 	case RegionItem:
-		if (!doing_range_stuff()) {
-			set_selected_regionview_from_click (press, op);
-		}
-		
 		if (press) {
-			if (doing_range_stuff()) {
+			if ( mouse_mode != MouseRange ) {
+				set_selected_regionview_from_click (press, op);
+			} else {
 				/* don't change the selection unless the
 				   clicked track is not currently selected. if
 				   so, "collapse" the selection to just this
@@ -630,7 +618,7 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
  	case RegionViewName:
 	case LeftFrameHandle:
 	case RightFrameHandle:
-		if (doing_object_stuff() || (mouse_mode != MouseRange && mouse_mode != MouseObject)) {
+		if ( mouse_mode != MouseRange ) {
 			set_selected_regionview_from_click (press, op);
 		} else if (event->type == GDK_BUTTON_PRESS) {
 			set_selected_track_as_side_effect (op);
@@ -643,7 +631,7 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 	case FadeOutItem:
 	case StartCrossFadeItem:
 	case EndCrossFadeItem:
-		if (doing_object_stuff() || (mouse_mode != MouseRange && mouse_mode != MouseObject)) {
+		if ( mouse_mode != MouseRange ) {
 			set_selected_regionview_from_click (press, op);
 		} else if (event->type == GDK_BUTTON_PRESS) {
 			set_selected_track_as_side_effect (op);
@@ -652,7 +640,7 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 
 	case ControlPointItem:
 		set_selected_track_as_side_effect (op);
-		if (doing_object_stuff() || (mouse_mode != MouseRange && mouse_mode != MouseObject)) {
+		if ( mouse_mode != MouseRange ) {
 			set_selected_control_point_from_click (press, op);
 		}
 		break;
@@ -820,7 +808,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				pair<TimeAxisView*, int> tvp = trackview_by_y_position (y);
 				if (tvp.first) {
 					AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*> (tvp.first);
-					if (smart_mode_action->get_active() && atv) {
+					if ( get_smart_mode() && atv) {
 						/* smart "join" mode: drag automation */
 						_drags->set (new AutomationRangeDrag (this, atv, selection->time), event, _cursors->up_down);
 					} else {
@@ -854,7 +842,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 		case LeftFrameHandle:
 		case RightFrameHandle:
-			if (!internal_editing() && doing_object_stuff() && !clicked_regionview->region()->locked()) {
+			if (!internal_editing() && !clicked_regionview->region()->locked()) {
 				RegionSelection s = get_equivalent_regions (selection->regions, Properties::edit.property_id);
 				_drags->set (new TrimDrag (this, item, clicked_regionview, s.by_layer()), event);
 				return true;
@@ -975,9 +963,9 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				}
 
 
-				if (!internal_editing() && (_join_object_range_state == JOIN_OBJECT_RANGE_RANGE && !selection->regions.empty())) {
-					_drags->add (new SelectionDrag (this, clicked_axisview->get_selection_rect (clicked_selection)->rect, SelectionDrag::SelectionMove));
-				}
+//				if (!internal_editing() && (_join_object_range_state == JOIN_OBJECT_RANGE_RANGE && !selection->regions.empty())) {
+//					_drags->add (new SelectionDrag (this, clicked_axisview->get_selection_rect (clicked_selection)->rect, SelectionDrag::SelectionMove));
+//				}
 
 				_drags->start_grab (event);
 				break;
@@ -1054,7 +1042,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 			case SelectionItem:
 			{
-				if (smart_mode_action->get_active()) {
+				if ( get_smart_mode() ) {
 					/* we're in "smart" joined mode, and we've clicked on a Selection */
 					double const y = event->button.y + vertical_adjustment.get_value() - canvas_timebars_vsize;
 					pair<TimeAxisView*, int> tvp = trackview_by_y_position (y);
@@ -1068,7 +1056,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 						/* if we're over a track and a region, and in the `object' part of a region,
 						   put a selection around the region and drag both
 						*/
-						RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tvp.first);
+/*						RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tvp.first);
 						if (rtv && _join_object_range_state == JOIN_OBJECT_RANGE_OBJECT) {
 							boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (rtv->route ());
 							if (t) {
@@ -1089,6 +1077,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 								}
 							}
 						}
+*/
 					}
 				}
 				break;
@@ -1362,7 +1351,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 	}
 
 	//not rolling, range mode click + join_play_range :  locate the PH here
-	if ( !_drags->active () && !_session->transport_rolling() && ( (mouse_mode == MouseRange) || _join_object_range_state == JOIN_OBJECT_RANGE_RANGE ) && Config->get_always_play_range() ) {
+	if ( !_drags->active () && !_session->transport_rolling() && ( effective_mouse_mode() == MouseRange ) && Config->get_always_play_range() ) {
 		framepos_t where = event_frame (event, 0, 0);
 		snap_to(where);
 		_session->request_locate (where, false);
@@ -1439,16 +1428,6 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		were_dragging = true;
 	}
 
-	//a mouse click (no drag) in the range area of an audio track.  maybe locate the playhead here
-	if ( !_drags->active () && (effective_mouse_mode() == MouseRange) && Config->get_always_play_range() && (item_type != AutomationTrackItem) && !Keyboard::is_context_menu_event (&event->button)) {
-		if ( _join_object_range_state == JOIN_OBJECT_RANGE_RANGE ) {
-			framepos_t pos = event_frame (event, 0, 0);
-			snap_to(pos);
-			_session->request_locate (pos, false);
-			return true;
-		}
-	}
-
     update_region_layering_order_editor ();
 
 	/* edit events get handled here */
@@ -1492,7 +1471,6 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 	}
 
 	/* context menu events get handled here */
-
 	if (Keyboard::is_context_menu_event (&event->button)) {
 
 		context_click_event = *event;
@@ -1847,7 +1825,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		break;
 
 	case RegionViewNameHighlight:
-		if (is_drawable() && doing_object_stuff() && entered_regionview) {
+		if (is_drawable() && effective_mouse_mode() == MouseObject && entered_regionview) {
 			set_canvas_cursor_for_region_view (event->crossing.x, entered_regionview);
 			_over_region_trim_target = true;
 		}
@@ -1855,7 +1833,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 
 	case LeftFrameHandle:
 	case RightFrameHandle:
-		if (is_drawable() && doing_object_stuff() && !internal_editing() && entered_regionview) {
+		if (is_drawable() && effective_mouse_mode() == MouseObject && !internal_editing() && entered_regionview) {
 			set_canvas_cursor_for_region_view (event->crossing.x, entered_regionview);
 		}
                 break;
@@ -1981,7 +1959,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		}
 		break;
 	case SelectionItem:
-		if (smart_mode_action->get_active()) {
+		if ( get_smart_mode() ) {
 			set_canvas_cursor ();
 		}
 		break;
@@ -2814,7 +2792,7 @@ Editor::update_join_object_range_location (double /*x*/, double y)
 	   that we're over requires searching the playlist.
 	*/
 
-	if (!smart_mode_action->get_active() || (mouse_mode != MouseRange && mouse_mode != MouseObject)) {
+	if ( !get_smart_mode() ) {
 		_join_object_range_state = JOIN_OBJECT_RANGE_NONE;
 		return;
 	}

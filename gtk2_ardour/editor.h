@@ -1586,11 +1586,11 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	ArdourButton mouse_timefx_button;
 	ArdourButton mouse_audition_button;
 
-	ButtonJoiner* smart_mode_joiner;
+	ArdourButton smart_mode_button;
 	Glib::RefPtr<Gtk::ToggleAction> smart_mode_action;
 
 	void                     mouse_mode_toggled (Editing::MouseMode m);
-	void			 mouse_mode_object_range_toggled () {}
+	void			 mouse_mode_object_range_toggled ();
 	bool                     ignore_mouse_mode_toggle;
 
 	ArdourButton internal_edit_button;
@@ -2099,16 +2099,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	bool _following_mixer_selection;
 
 	int time_fx (ARDOUR::RegionList&, float val, bool pitching);
-
-	bool doing_range_stuff() const {
-		return (mouse_mode == Editing::MouseRange && (_join_object_range_state == JOIN_OBJECT_RANGE_NONE)) ||
-			_join_object_range_state == JOIN_OBJECT_RANGE_RANGE;
-	}
-	
-	bool doing_object_stuff() const {
-		return (mouse_mode == Editing::MouseObject && (_join_object_range_state == JOIN_OBJECT_RANGE_NONE)) ||
-			_join_object_range_state == JOIN_OBJECT_RANGE_OBJECT;
-	}
 
 	void toggle_sound_midi_notes ();
 

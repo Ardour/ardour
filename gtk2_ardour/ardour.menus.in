@@ -151,7 +151,7 @@
       <menuitem action='ToggleClick'/>
       <menuitem action='toggle-follow-playhead'/>
       <menuitem action='panic'/>
-      <separator/>
+     <separator/>
     </menu>
 
     <menu name='Edit' action='Edit'>
@@ -222,6 +222,7 @@
         <menuitem action='set-tempo-from-region'/>
         <menuitem action='set-tempo-from-edit-range'/>
       </menu>
+      <menuitem action='set-mouse-mode-object-range'/>
 #ifndef GTKOSX
       <separator/>
       <menuitem action='ToggleRCOptionsEditor'/>

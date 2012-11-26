@@ -3607,9 +3607,7 @@ SelectionDrag::finished (GdkEvent* event, bool movement_occurred)
 				s->request_play_range (&_editor->selection->time, true);
 			} else {
 				if (Config->get_always_play_range()) {
-					if (_editor->doing_range_stuff()) {
-						s->request_locate (_editor->get_selection().time.start());
-					} 
+					s->request_locate (_editor->get_selection().time.start());
 				}
 			}
 		}
@@ -3617,28 +3615,7 @@ SelectionDrag::finished (GdkEvent* event, bool movement_occurred)
 	} else {
 		/* just a click, no pointer movement.
 		 */
-
-		if (Keyboard::no_modifier_keys_pressed (&event->button)) {
-			if (!_time_selection_at_start) {
-				if (_editor->clicked_regionview) {
-					if (_editor->get_selection().selected (_editor->clicked_regionview)) {
-						/* range select the entire current
-						   region selection
-						*/
-						_editor->select_range (_editor->get_selection().regions.start(), 
-								       _editor->get_selection().regions.end_frame());
-					} else {
-						/* range select this (unselected)
-						 * region
-						 */
-						_editor->select_range (_editor->clicked_regionview->region()->position(), 
-								       _editor->clicked_regionview->region()->last_frame());
-					}
-				}
-			} else {
-				_editor->selection->clear_time();
-			}
-		}
+		_editor->selection->clear_time();
 
 		if (_editor->clicked_axisview && !_editor->selection->selected (_editor->clicked_axisview)) {
 			_editor->selection->set (_editor->clicked_axisview);
