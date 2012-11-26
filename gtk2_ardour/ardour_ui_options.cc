@@ -321,11 +321,13 @@ ARDOUR_UI::parameter_changed (std::string p)
 			sync_button.set_text (_("Internal"));
 			ActionManager::get_action ("Transport", "ToggleAutoPlay")->set_sensitive (true);
 			ActionManager::get_action ("Transport", "ToggleAutoReturn")->set_sensitive (true);
+			ActionManager::get_action ("Transport", "ToggleFollowEdits")->set_sensitive (true);
 		} else {
 			sync_button.set_text (sync_source_to_string (Config->get_sync_source(), true));
 			/* XXX need to make auto-play is off as well as insensitive */
 			ActionManager::get_action ("Transport", "ToggleAutoPlay")->set_sensitive (false);
 			ActionManager::get_action ("Transport", "ToggleAutoReturn")->set_sensitive (false);
+			ActionManager::get_action ("Transport", "ToggleFollowEdits")->set_sensitive (false);
 		}
 
 	} else if (p == "always-play-range") {
