@@ -899,9 +899,7 @@ RegionMoveDrag::finished (GdkEvent* ev, bool movement_occurred)
 
 	}
 
-	if (_editor->session() && Config->get_always_play_range()) {
-		_editor->session()->request_locate (_editor->get_selection().regions.start());
-	}
+	_editor->maybe_locate_with_edit_preroll (_editor->get_selection().regions.start());
 }
 
 void

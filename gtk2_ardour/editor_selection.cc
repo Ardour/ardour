@@ -1296,8 +1296,8 @@ Editor::region_selection_changed ()
 		sensitize_all_region_actions (true);
 	}
 
-	if (_session && Config->get_always_play_range() && !_session->transport_rolling() && !selection->regions.empty()) {
-		_session->request_locate (selection->regions.start());
+	if (_session && !_session->transport_rolling() && !selection->regions.empty()) {
+		maybe_locate_with_edit_preroll (selection->regions.start());
 	}
 }
 
