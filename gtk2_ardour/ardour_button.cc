@@ -262,7 +262,7 @@ ArdourButton::render (cairo_t* cr)
 	int text_margin;
 
 	if (get_width() < 75) {
-		text_margin = 3;
+		text_margin = 5;
 	} else {
 		text_margin = 10;
 	}

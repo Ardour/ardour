@@ -314,7 +314,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void set_meter_point (ARDOUR::MeterPoint);
 	PBD::ScopedConnection _level_meter_connection;
 
-	static std::string meter_point_string (ARDOUR::MeterPoint);
+	std::string meter_point_string (ARDOUR::MeterPoint);
 };
 
 #endif /* __ardour_mixer_strip__ */

@@ -161,7 +161,7 @@ MixerStrip::init ()
 	output_button.set_name ("mixer strip button");
 	Gtkmm2ext::set_size_request_to_display_given_text (output_button, longest_label.c_str(), 4, 4);
 
-	ARDOUR_UI::instance()->set_tip (&meter_point_button, _("Select metering point"), "");
+	ARDOUR_UI::instance()->set_tip (&meter_point_button, _("Click to select metering point"), "");
 	meter_point_button.set_name ("mixer strip button");
 
 	/* TRANSLATORS: this string should be longest of the strings
@@ -632,8 +632,8 @@ MixerStrip::set_width_enum (Width w, void* owner)
 			panners.short_astate_string(_route->panner()->automation_state()));
 		}
 		
-		solo_isolated_led->set_text (_("i"));
-		solo_safe_led->set_text (_("L"));
+		solo_isolated_led->set_text (_("iso"));
+		solo_safe_led->set_text (_("Lck"));
 
 		Gtkmm2ext::set_size_request_to_display_given_text (name_button, "long", 2, 2);
 		set_size_request (max (50, gpm.get_gm_width()), -1);
@@ -1680,28 +1680,57 @@ MixerStrip::engine_running ()
 string
 MixerStrip::meter_point_string (MeterPoint mp)
 {
-	switch (mp) {
-	case MeterInput:
-		return _("in");
+	switch (_width) {
+	case Wide:
+		switch (mp) {
+		case MeterInput:
+			return _("in");
+			break;
+			
+		case MeterPreFader:
+			return _("pre");
+			break;
+			
+		case MeterPostFader:
+			return _("post");
+			break;
+			
+		case MeterOutput:
+			return _("out");
+			break;
+			
+		case MeterCustom:
+		default:
+			return _("custom");
+			break;
+		}
 		break;
-
-	case MeterPreFader:
-		return _("pre");
-		break;
-
-	case MeterPostFader:
-		return _("post");
-		break;
-
-	case MeterOutput:
-		return _("out");
-		break;
-
-	case MeterCustom:
-	default:
-		return _("custom");
+	case Narrow:
+		switch (mp) {
+		case MeterInput:
+			return _("in");
+			break;
+			
+		case MeterPreFader:
+			return _("pr");
+			break;
+			
+		case MeterPostFader:
+			return _("po");
+			break;
+			
+		case MeterOutput:
+			return _("o");
+			break;
+			
+		case MeterCustom:
+		default:
+			return _("c");
+			break;
+		}
 		break;
 	}
+
 }
 
 /** Called when the metering point has changed */
@@ -1884,8 +1913,9 @@ MixerStrip::set_button_names ()
 		break;
 
 	}
-}
 
+	meter_point_button.set_text (meter_point_string (_route->meter_point()));
+}
 
 PluginSelector*
 MixerStrip::plugin_selector()
