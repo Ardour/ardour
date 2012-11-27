@@ -1731,6 +1731,7 @@ MixerStrip::meter_point_string (MeterPoint mp)
 		break;
 	}
 
+	return string();
 }
 
 /** Called when the metering point has changed */

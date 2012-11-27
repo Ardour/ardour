@@ -4247,6 +4247,8 @@ Editor::idle_visual_changer ()
 	   super-rapid-screen-update can be dropped if we are still processing
 	   the last one.
 	*/
+	cerr << "EDITOR:: IDLE VISUAL CHANGE\n";
+
 	pending_visual_change.idle_handler_id = -1;
 	pending_visual_change.being_handled = true;
 	
