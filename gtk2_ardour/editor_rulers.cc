@@ -847,7 +847,8 @@ Editor::update_fixed_rulers ()
 }
 
 void
-Editor::update_tempo_based_rulers ()
+Editor::update_tempo_based_rulers (ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
+				    ARDOUR::TempoMap::BBTPointList::const_iterator& end)
 {
 	if (_session == 0) {
 		return;
@@ -1146,7 +1147,9 @@ Editor::metric_get_timecode (GtkCustomRulerMark **marks, gdouble lower, gdouble 
 
 
 void
-Editor::compute_bbt_ruler_scale (framepos_t lower, framepos_t upper)
+Editor::compute_bbt_ruler_scale (framepos_t lower, framepos_t upper,
+				 ARDOUR::TempoMap::BBTPointList::const_iterator begin,
+				 ARDOUR::TempoMap::BBTPointList::const_iterator end)
 {
 	if (_session == 0) {
 		return;
@@ -1237,18 +1240,18 @@ Editor::compute_bbt_ruler_scale (framepos_t lower, framepos_t upper)
 		break;
 	}
 
-	if (distance (current_bbt_points_begin, current_bbt_points_end) == 0) {
+	if (distance (begin, end) == 0) {
 		return;
 	}
 
-	i = current_bbt_points_end;
+	i = end;
 	i--;
-	if ((*i).beat >= (*current_bbt_points_begin).beat) {
-		bbt_bars = (*i).bar - (*current_bbt_points_begin).bar;
+	if ((*i).beat >= (*begin).beat) {
+		bbt_bars = (*i).bar - (*begin).bar;
 	} else {
-		bbt_bars = (*i).bar - (*current_bbt_points_begin).bar - 1;
+		bbt_bars = (*i).bar - (*begin).bar - 1;
 	}
-	beats = distance (current_bbt_points_begin, current_bbt_points_end) - bbt_bars;
+	beats = distance (begin, end) - bbt_bars;
 
 	/* Only show the bar helper if there aren't many bars on the screen */
 	if ((bbt_bars < 2) || (beats < 5)) {
@@ -1279,7 +1282,7 @@ Editor::compute_bbt_ruler_scale (framepos_t lower, framepos_t upper)
 }
 
 gint
-Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upper*/, gint /*maxchars*/)
+Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble upper, gint /*maxchars*/)
 {
 	if (_session == 0) {
 		return 0;
@@ -1304,14 +1307,19 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upp
 	bool i_am_accented = false;
 	bool helper_active = false;
 
-	if (distance (current_bbt_points_begin, current_bbt_points_end) == 0) {
+	ARDOUR::TempoMap::BBTPointList::const_iterator begin;
+	ARDOUR::TempoMap::BBTPointList::const_iterator end;
+
+	compute_current_bbt_points (lower, upper, begin, end);
+
+	if (distance (begin, end) == 0) {
 		return 0;
 	}
 
 	switch (bbt_ruler_scale) {
 
 	case bbt_show_beats:
-		beats = distance (current_bbt_points_begin, current_bbt_points_end);
+		beats = distance (begin, end);
 		bbt_nmarks = beats + 2;
 
 		*marks = (GtkCustomRulerMark *) g_malloc (sizeof(GtkCustomRulerMark) * bbt_nmarks);
@@ -1320,7 +1328,7 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upp
 		(*marks)[0].position = lower;
 		(*marks)[0].style = GtkCustomRulerMarkMicro;
 		
-		for (n = 1, i = current_bbt_points_begin; n < bbt_nmarks && i != current_bbt_points_end; ++i) {
+		for (n = 1, i = begin; n < bbt_nmarks && i != end; ++i) {
 
 			if ((*i).frame < lower && (bbt_bar_helper_on)) {
 				snprintf (buf, sizeof(buf), "<%" PRIu32 "|%" PRIu32, (*i).bar, (*i).beat);
@@ -1347,7 +1355,7 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upp
 
 	case bbt_show_ticks:
 
-		beats = distance (current_bbt_points_begin, current_bbt_points_end);
+		beats = distance (begin, end);
 		bbt_nmarks = (beats + 2) * bbt_beat_subdivision;
 
 		bbt_position_of_helper = lower + (30 * Editor::get_current_zoom ());
@@ -1357,7 +1365,7 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upp
 		(*marks)[0].position = lower;
 		(*marks)[0].style = GtkCustomRulerMarkMicro;
 
-		for (n = 1, i = current_bbt_points_begin; n < bbt_nmarks && i != current_bbt_points_end; ++i) {
+		for (n = 1, i = begin; n < bbt_nmarks && i != end; ++i) {
 
 			if ((*i).frame < lower && (bbt_bar_helper_on)) {
 				snprintf (buf, sizeof(buf), "<%" PRIu32 "|%" PRIu32, (*i).bar, (*i).beat);
@@ -1437,7 +1445,7 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upp
 
 	case bbt_show_ticks_detail:
 
-		beats = distance (current_bbt_points_begin, current_bbt_points_end);
+		beats = distance (begin, end);
 		bbt_nmarks = (beats + 2) * bbt_beat_subdivision;
 
 		bbt_position_of_helper = lower + (30 * Editor::get_current_zoom ());
@@ -1447,7 +1455,7 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upp
 		(*marks)[0].position = lower;
 		(*marks)[0].style = GtkCustomRulerMarkMicro;
 
-		for (n = 1,   i = current_bbt_points_begin; n < bbt_nmarks && i != current_bbt_points_end; ++i) {
+		for (n = 1,   i = begin; n < bbt_nmarks && i != end; ++i) {
 
 			if ((*i).frame < lower && (bbt_bar_helper_on)) {
 			        snprintf (buf, sizeof(buf), "<%" PRIu32 "|%" PRIu32, (*i).bar, (*i).beat);
@@ -1532,7 +1540,7 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upp
 
 	case bbt_show_ticks_super_detail:
 
-		beats = distance (current_bbt_points_begin, current_bbt_points_end);
+		beats = distance (begin, end);
 		bbt_nmarks = (beats + 2) * bbt_beat_subdivision;
 
 		bbt_position_of_helper = lower + (30 * Editor::get_current_zoom ());
@@ -1542,7 +1550,7 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upp
 		(*marks)[0].position = lower;
 		(*marks)[0].style = GtkCustomRulerMarkMicro;
 
-		for (n = 1,   i = current_bbt_points_begin; n < bbt_nmarks && i != current_bbt_points_end; ++i) {
+		for (n = 1,   i = begin; n < bbt_nmarks && i != end; ++i) {
 
 			if ((*i).frame < lower && (bbt_bar_helper_on)) {
 				  snprintf (buf, sizeof(buf), "<%" PRIu32 "|%" PRIu32, (*i).bar, (*i).beat);
@@ -1639,7 +1647,7 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upp
 	case bbt_show_64:
         		bbt_nmarks = (gint) (bbt_bars / 64) + 1;
 			*marks = (GtkCustomRulerMark *) g_malloc (sizeof(GtkCustomRulerMark) * bbt_nmarks);
-			for (n = 0,   i = current_bbt_points_begin; i != current_bbt_points_end && n < bbt_nmarks; i++) {
+			for (n = 0,   i = begin; i != end && n < bbt_nmarks; i++) {
 				if ((*i).is_bar()) {
 					if ((*i).bar % 64 == 1) {
 						if ((*i).bar % 256 == 1) {
@@ -1664,7 +1672,7 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upp
 	case bbt_show_16:
        		bbt_nmarks = (bbt_bars / 16) + 1;
 	        *marks = (GtkCustomRulerMark *) g_malloc (sizeof(GtkCustomRulerMark) * bbt_nmarks);
-		for (n = 0,  i = current_bbt_points_begin; i != current_bbt_points_end && n < bbt_nmarks; i++) {
+		for (n = 0,  i = begin; i != end && n < bbt_nmarks; i++) {
 		        if ((*i).is_bar()) {
 			  if ((*i).bar % 16 == 1) {
 			        if ((*i).bar % 64 == 1) {
@@ -1689,7 +1697,7 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upp
 	case bbt_show_4:
 		bbt_nmarks = (bbt_bars / 4) + 1;
  		*marks = (GtkCustomRulerMark *) g_malloc (sizeof(GtkCustomRulerMark) * bbt_nmarks);
-		for (n = 0,   i = current_bbt_points_begin; i != current_bbt_points_end && n < bbt_nmarks; ++i) {
+		for (n = 0,   i = begin; i != end && n < bbt_nmarks; ++i) {
 		        if ((*i).is_bar()) {
 			  if ((*i).bar % 4 == 1) {
 			        if ((*i).bar % 16 == 1) {
@@ -1715,7 +1723,7 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upp
   //	default:
 	        bbt_nmarks = bbt_bars + 2;
 	        *marks = (GtkCustomRulerMark *) g_malloc (sizeof(GtkCustomRulerMark) * bbt_nmarks );
-		for (n = 0,  i = current_bbt_points_begin; i != current_bbt_points_end && n < bbt_nmarks; i++) {
+		for (n = 0,  i = begin; i != end && n < bbt_nmarks; i++) {
 		        if ((*i).is_bar()) {
 			  if ((*i).bar % 4 == 1) {
 				        snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bar);

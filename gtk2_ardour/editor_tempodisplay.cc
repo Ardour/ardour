@@ -114,10 +114,13 @@ Editor::tempo_map_changed (const PropertyChange& /*ignored*/)
 		tempo_lines->tempo_map_changed();
 	}
 
-	compute_current_bbt_points (leftmost_frame, leftmost_frame + current_page_frames());
+	ARDOUR::TempoMap::BBTPointList::const_iterator begin;
+	ARDOUR::TempoMap::BBTPointList::const_iterator end;
+
+	compute_current_bbt_points (leftmost_frame, leftmost_frame + current_page_frames(), begin, end);
 	_session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks); // redraw metric markers
 	redraw_measures ();
-	update_tempo_based_rulers ();
+	update_tempo_based_rulers (begin, end);
 }
 
 void
@@ -127,7 +130,12 @@ Editor::redisplay_tempo (bool immediate_redraw)
 		return;
 	}
 
-	compute_current_bbt_points (leftmost_frame, leftmost_frame + current_page_frames()); // redraw rulers and measures
+	ARDOUR::TempoMap::BBTPointList::const_iterator current_bbt_points_begin;
+	ARDOUR::TempoMap::BBTPointList::const_iterator current_bbt_points_end;
+
+	compute_current_bbt_points (leftmost_frame, leftmost_frame + current_page_frames(),
+				    current_bbt_points_begin, current_bbt_points_begin);
+	
 
 	if (immediate_redraw) {
 		redraw_measures ();
@@ -138,11 +146,13 @@ Editor::redisplay_tempo (bool immediate_redraw)
 		Glib::signal_idle().connect (sigc::mem_fun (*this, &Editor::redraw_measures));
 #endif
 	}
-	update_tempo_based_rulers (); // redraw rulers and measures
+	update_tempo_based_rulers (current_bbt_points_begin, current_bbt_points_end); // redraw rulers and measures
 }
 
 void
-Editor::compute_current_bbt_points (framepos_t leftmost, framepos_t rightmost)
+Editor::compute_current_bbt_points (framepos_t leftmost, framepos_t rightmost,
+				    ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
+				    ARDOUR::TempoMap::BBTPointList::const_iterator& end)
 {
 	if (!_session) {
 		return;
@@ -151,7 +161,7 @@ Editor::compute_current_bbt_points (framepos_t leftmost, framepos_t rightmost)
 	/* prevent negative values of leftmost from creeping into tempomap
 	 */
 
-	_session->tempo_map().get_grid (current_bbt_points_begin, current_bbt_points_end, max (leftmost, (framepos_t) 0), rightmost);
+	_session->tempo_map().get_grid (begin, end, max (leftmost, (framepos_t) 0), rightmost);
 }
 
 void
@@ -164,14 +174,20 @@ Editor::hide_measures ()
 bool
 Editor::redraw_measures ()
 {
-	draw_measures ();
+	ARDOUR::TempoMap::BBTPointList::const_iterator begin;
+	ARDOUR::TempoMap::BBTPointList::const_iterator end;
+
+	compute_current_bbt_points (leftmost_frame, leftmost_frame + current_page_frames(), begin, end);
+        draw_measures (begin, end);
+
 	return false;
 }
 
 void
-Editor::draw_measures ()
+Editor::draw_measures (ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
+		       ARDOUR::TempoMap::BBTPointList::const_iterator& end)
 {
-	if (_session == 0 || _show_measures == false || distance (current_bbt_points_begin, current_bbt_points_end) == 0) {
+	if (_session == 0 || _show_measures == false || distance (begin, end) == 0) {
 		return;
 	}
 
@@ -179,7 +195,7 @@ Editor::draw_measures ()
 		tempo_lines = new TempoLines(*track_canvas, time_line_group, physical_screen_height(get_window()));
 	}
 
-	tempo_lines->draw (current_bbt_points_begin, current_bbt_points_end, frames_per_unit);
+	tempo_lines->draw (begin, end, frames_per_unit);
 }
 
 void

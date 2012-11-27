@@ -2107,10 +2107,17 @@ Editor::set_snap_to (SnapType st)
 	case SnapToBeatDiv5:
 	case SnapToBeatDiv4:
 	case SnapToBeatDiv3:
-	case SnapToBeatDiv2:
-		compute_bbt_ruler_scale (leftmost_frame, leftmost_frame + current_page_frames());
-		update_tempo_based_rulers ();
+	case SnapToBeatDiv2: {
+		ARDOUR::TempoMap::BBTPointList::const_iterator current_bbt_points_begin;
+		ARDOUR::TempoMap::BBTPointList::const_iterator current_bbt_points_end;
+		
+		compute_current_bbt_points (leftmost_frame, leftmost_frame + current_page_frames(),
+					    current_bbt_points_begin, current_bbt_points_end);
+		compute_bbt_ruler_scale (leftmost_frame, leftmost_frame + current_page_frames(),
+					 current_bbt_points_begin, current_bbt_points_end);
+		update_tempo_based_rulers (current_bbt_points_begin, current_bbt_points_end);
 		break;
+	}
 
 	case SnapToRegionStart:
 	case SnapToRegionEnd:
@@ -2317,6 +2324,7 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 
 	if ((prop = node.property ("join-object-range"))) {
 		RefPtr<Action> act = ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-object-range"));
+		bool yn = string_is_affirmative (prop->value());
 		if (act) {
 			RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
 			tact->set_active (!yn);
@@ -3653,9 +3661,10 @@ Editor::set_show_measures (bool yn)
 		hide_measures ();
 
 		if ((_show_measures = yn) == true) {
-			if (tempo_lines)
+			if (tempo_lines) {
 				tempo_lines->show();
-			draw_measures ();
+			}
+			(void) redraw_measures ();
 		}
 		instant_save ();
 	}
@@ -4261,9 +4270,15 @@ Editor::idle_visual_changer ()
 		set_frames_per_unit (pending_visual_change.frames_per_unit);
 
 		compute_fixed_ruler_scale ();
-		compute_current_bbt_points(pending_visual_change.time_origin, pending_visual_change.time_origin + current_page_frames());
-		compute_bbt_ruler_scale (pending_visual_change.time_origin, pending_visual_change.time_origin + current_page_frames());
-		update_tempo_based_rulers ();
+
+		ARDOUR::TempoMap::BBTPointList::const_iterator current_bbt_points_begin;
+		ARDOUR::TempoMap::BBTPointList::const_iterator current_bbt_points_end;
+		
+		compute_current_bbt_points (pending_visual_change.time_origin, pending_visual_change.time_origin + current_page_frames(),
+					    current_bbt_points_begin, current_bbt_points_end);
+		compute_bbt_ruler_scale (pending_visual_change.time_origin, pending_visual_change.time_origin + current_page_frames(),
+					 current_bbt_points_begin, current_bbt_points_end);
+		update_tempo_based_rulers (current_bbt_points_end, current_bbt_points_begin);
 	}
 	if (p & VisualChange::TimeOrigin) {
 		set_horizontal_position (pending_visual_change.time_origin / frames_per_unit);
@@ -5300,8 +5315,6 @@ Editor::session_going_away ()
 
 	stop_step_editing ();
 	
-	current_bbt_points_begin = current_bbt_points_end;
-
 	/* get rid of any existing editor mixer strip */
 
 	WindowTitle title(Glib::get_application_name());
