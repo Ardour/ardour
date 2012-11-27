@@ -1914,7 +1914,11 @@ MixerStrip::set_button_names ()
 
 	}
 
-	meter_point_button.set_text (meter_point_string (_route->meter_point()));
+	if (_route) {
+		meter_point_button.set_text (meter_point_string (_route->meter_point()));
+	} else {
+		meter_point_button.set_text ("");
+	}
 }
 
 PluginSelector*
