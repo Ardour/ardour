@@ -66,7 +66,11 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 	switch (direction) {
 	case GDK_SCROLL_UP:
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+			//for mouse-wheel zoom, force zoom-focus to mouse
+			Editing::ZoomFocus temp_focus = zoom_focus;
+			zoom_focus = Editing::ZoomFocusMouse;
 			temporal_zoom_step (false);
+			zoom_focus = temp_focus;
 			return true;
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
 			direction = GDK_SCROLL_LEFT;
@@ -91,7 +95,11 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 
 	case GDK_SCROLL_DOWN:
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+			//for mouse-wheel zoom, force zoom-focus to mouse
+			Editing::ZoomFocus temp_focus = zoom_focus;
+			zoom_focus = Editing::ZoomFocusMouse;
 			temporal_zoom_step (true);
+			zoom_focus = temp_focus;
 			return true;
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
 			direction = GDK_SCROLL_RIGHT;
