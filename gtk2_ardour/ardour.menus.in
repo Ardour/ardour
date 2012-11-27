@@ -150,6 +150,7 @@
       <menuitem action='ToggleAutoReturn'/>
       <menuitem action='ToggleClick'/>
       <menuitem action='toggle-follow-playhead'/>
+      <menuitem action='ToggleFollowEdits'/>
       <menuitem action='panic'/>
      <separator/>
     </menu>
