@@ -881,6 +881,7 @@ RCOptionEditor::RCOptionEditor ()
 	/* MISC */
 
         uint32_t hwcpus = hardware_concurrency ();
+	BoolOption* bo;
 
         if (hwcpus > 1) {
                 add_option (_("Misc"), new OptionEditorHeading (_("DSP CPU Utilization")));
@@ -1194,13 +1195,19 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_show_track_meters)
 		     ));
 
-	add_option (_("Editor"),
-	     new BoolOption (
+	bo = new BoolOption (
 		     "use-overlap-equivalency",
 		     _("Use overlap equivalency for regions"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_use_overlap_equivalency),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_use_overlap_equivalency)
-		     ));
+		     );
+
+	add_option (_("Editor"), bo);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(), 
+					    string_compose (_("When extending region selection across a group, %1 must decide which regions are equivalent"
+							      "\n\nIf enabled, regions are considered \"equivalent\" if they overlap on the timeline."
+							      "\n\nIf disabled, regions are considered \"equivalent\" only if have the same start time, length and position"),
+							    PROGRAM_NAME));
 
 	add_option (_("Editor"),
 	     new BoolOption (
@@ -1300,13 +1307,16 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_link_editor_and_mixer_selection)
 		     ));
 
-	add_option (_("Editor"),
-	     new BoolOption (
+	bo = new BoolOption (
 		     "name-new-markers",
 		     _("Name new markers"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_name_new_markers),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_name_new_markers)
-		     ));
+		);
+	
+	add_option (_("Editor"), bo);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(), _("If enabled, popup a dialog when a new marker is created to allow its name to be set as it is created."
+								"\n\nYou can always rename markers by right-clicking on them"));
 
 	add_option (_("Editor"),
 	    new BoolOption (
