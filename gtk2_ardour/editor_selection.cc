@@ -1817,9 +1817,9 @@ Editor::get_edit_op_range (framepos_t& start, framepos_t& end) const
 	framepos_t m;
 	bool ignored;
 
-	/* in range mode, use any existing selection */
+	/* if an explicit range exists, use it */
 
-	if (mouse_mode == MouseRange && !selection->time.empty()) {
+	if (!selection->time.empty()) {
 		/* we know that these are ordered */
 		start = selection->time.start();
 		end = selection->time.end_frame();

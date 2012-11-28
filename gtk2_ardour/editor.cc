@@ -3262,15 +3262,9 @@ Editor::duplicate_range (bool with_dialog)
 {
 	float times = 1.0f;
 
-	if (mouse_mode == MouseRange) {
-		if (selection->time.length() == 0) {
-			return;
-		}
-	}
-
 	RegionSelection rs = get_regions_from_selection_and_entered ();
 
-	if (mouse_mode != MouseRange && rs.empty()) {
+	if ( selection->time.length() == 0 && rs.empty()) {
 		return;
 	}
 
@@ -3317,7 +3311,7 @@ Editor::duplicate_range (bool with_dialog)
 		times = adjustment.get_value();
 	}
 
-	if (mouse_mode == MouseRange) {
+	if (selection->time.length() != 0) {
 		duplicate_selection (times);
 	} else {
 		duplicate_some_regions (rs, times);

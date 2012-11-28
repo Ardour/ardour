@@ -2725,7 +2725,7 @@ Editor::separate_region_from_selection ()
 	   returns a single range.
 	*/
 
-	if (mouse_mode == MouseRange && !selection->time.empty()) {
+	if (!selection->time.empty()) {
 
 		separate_regions_between (selection->time);
 
