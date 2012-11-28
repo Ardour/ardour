@@ -343,8 +343,11 @@ mv $Surfaces/libardour_cp*.dylib $Frameworks
 # VAMP plugins that we use
 cp $BUILD_ROOT/libs/vamp-plugins/libardourvampplugins.dylib $Frameworks
 
-# Suil modules
-cp $ARDOURSTACK_ROOT/lib/suil-0/lib* $Frameworks
+# SUIL modules are all dynamically loaded, but on OS X there may or may not
+# be any (as of November 2012, there are none for OS X)
+if [ -d $ARDOURSTACKROOT/lib/suil-0 -a `ls $ARDOURSACK_ROOT/lib/suil-0/lib* 2>/dev/null | wc -l` -gt 0 ] ; then
+    cp $ARDOURSTACK_ROOT/lib/suil-0/lib* $Frameworks
+fi
 
 while [ true ] ; do 
     missing=false
