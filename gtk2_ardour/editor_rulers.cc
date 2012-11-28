@@ -854,6 +854,9 @@ Editor::update_tempo_based_rulers (ARDOUR::TempoMap::BBTPointList::const_iterato
 		return;
 	}
 
+	compute_bbt_ruler_scale (leftmost_frame, leftmost_frame+current_page_frames(),
+				 begin, end);
+
 	ruler_metrics[ruler_metric_bbt].units_per_pixel = frames_per_unit;
 
 	if (ruler_bbt_action->get_active()) {

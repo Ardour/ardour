@@ -134,8 +134,7 @@ Editor::redisplay_tempo (bool immediate_redraw)
 	ARDOUR::TempoMap::BBTPointList::const_iterator current_bbt_points_end;
 
 	compute_current_bbt_points (leftmost_frame, leftmost_frame + current_page_frames(),
-				    current_bbt_points_begin, current_bbt_points_begin);
-	
+				    current_bbt_points_begin, current_bbt_points_end);
 
 	if (immediate_redraw) {
 		redraw_measures ();
