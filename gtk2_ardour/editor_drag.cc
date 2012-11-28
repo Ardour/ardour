@@ -3601,10 +3601,10 @@ SelectionDrag::finished (GdkEvent* event, bool movement_occurred)
 
 		/* XXX what if its a music time selection? */
 		if (s) {
-			if ((s->config.get_auto_play() || (s->get_play_range() && s->transport_rolling()))) {
+			if ( s->get_play_range() && s->transport_rolling() ) {
 				s->request_play_range (&_editor->selection->time, true);
 			} else {
-				if (Config->get_always_play_range()) {
+				if (Config->get_always_play_range() && !s->transport_rolling()) {
 					s->request_locate (_editor->get_selection().time.start());
 				}
 			}
