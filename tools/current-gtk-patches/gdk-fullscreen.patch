@@ -1,0 +1,84 @@
+diff --git a/gdk/quartz/gdkwindow-quartz.c b/gdk/quartz/gdkwindow-quartz.c
+index 8e12ae6..41a391a 100644
+--- a/gdk/quartz/gdkwindow-quartz.c
++++ b/gdk/quartz/gdkwindow-quartz.c
+@@ -2674,17 +2674,31 @@ gdk_window_set_decorations (GdkWindow       *window,
+         }
+       else
+         {
++     	  NSString* title = [impl->toplevel title]; 		
++	  int has_shadow = [impl->toplevel hasShadow];
++	  int level = [impl->toplevel level];
++	  NSColor* bg = [impl->toplevel backgroundColor];
++	  NSScreen* the_screen = [impl->toplevel screen];
++
+           [impl->toplevel release];
++
+           impl->toplevel = [[GdkQuartzWindow alloc] initWithContentRect:rect
+-                                                                styleMask:new_mask
+-                                                                  backing:NSBackingStoreBuffered
+-                                                                    defer:NO];
+-          [impl->toplevel setHasShadow: window_type_hint_to_shadow (impl->type_hint)];
+-          [impl->toplevel setLevel: window_type_hint_to_level (impl->type_hint)];
++                                                              styleMask:new_mask
++                                                                backing:NSBackingStoreBuffered
++                                                                  defer:YES
++                             			                 screen:the_screen];
++          [impl->toplevel setHasShadow:has_shadow];
++          [impl->toplevel setLevel:level];
++          [impl->toplevel setTitle:title];
++          [impl->toplevel setBackgroundColor:bg];
++
+           [impl->toplevel setContentView:old_view];
+         }
+ 
+-      [impl->toplevel setFrame:rect display:YES];
++      if (new_mask == NSBorderlessWindowMask)
++        [impl->toplevel setContentSize:rect.size];
++      else
++        [impl->toplevel setFrame:rect display:TRUE];
+ 
+       /* Invalidate the window shadow for non-opaque views that have shadow
+        * enabled, to get the shadow shape updated.
+@@ -2880,6 +2894,7 @@ gdk_window_fullscreen (GdkWindow *window)
+ {
+   FullscreenSavedGeometry *geometry;
+   GdkWindowObject *private = (GdkWindowObject *) window;
++  GdkWindowImplQuartz *impl = GDK_WINDOW_IMPL_QUARTZ (private->impl);
+   NSRect frame;
+ 
+   if (GDK_WINDOW_DESTROYED (window) ||
+@@ -2905,10 +2920,14 @@ gdk_window_fullscreen (GdkWindow *window)
+ 
+       gdk_window_set_decorations (window, 0);
+ 
+-      frame = [[NSScreen mainScreen] frame];
++      frame = [[impl->toplevel screen] frame];
+       move_resize_window_internal (window,
+                                    0, 0, 
+                                    frame.size.width, frame.size.height);
++      [impl->toplevel setContentSize:frame.size];
++      [impl->toplevel makeKeyAndOrderFront:impl->toplevel];
++
++      clear_toplevel_order ();
+     }
+ 
+   SetSystemUIMode (kUIModeAllHidden, kUIOptionAutoShowMenuBar);
+@@ -2919,6 +2938,8 @@ gdk_window_fullscreen (GdkWindow *window)
+ void
+ gdk_window_unfullscreen (GdkWindow *window)
+ {
++  GdkWindowObject *private = (GdkWindowObject *) window;
++  GdkWindowImplQuartz *impl = GDK_WINDOW_IMPL_QUARTZ (private->impl);
+   FullscreenSavedGeometry *geometry;
+ 
+   if (GDK_WINDOW_DESTROYED (window) ||
+@@ -2940,6 +2961,8 @@ gdk_window_unfullscreen (GdkWindow *window)
+ 
+       g_object_set_data (G_OBJECT (window), FULLSCREEN_DATA, NULL);
+ 
++      [impl->toplevel makeKeyAndOrderFront:impl->toplevel];
++
+       gdk_synthesize_window_state (window, GDK_WINDOW_STATE_FULLSCREEN, 0);
+     }
+ }
