@@ -1,0 +1,46 @@
+--- libgnomecanvas/gnome-canvas.c	2011-01-31 07:19:30.000000000 -0500
++++ ../../libgnomecanvas-2.30.3/libgnomecanvas/gnome-canvas.c	2012-11-19 13:10:20.552383069 -0500
+@@ -75,6 +75,7 @@
+ 
+ #include <config.h>
+ 
++#include <sys/time.h>
+ #include <math.h>
+ #include <string.h>
+ #include <stdio.h>
+@@ -3202,16 +3203,34 @@
+ idle_handler (gpointer data)
+ {
+ 	GnomeCanvas *canvas;
++	struct timeval enter, leave, diff;
+ 
+ 	GDK_THREADS_ENTER ();
+ 
+ 	canvas = GNOME_CANVAS (data);
+ 
++	gettimeofday (&enter, NULL);
+ 	do_update (canvas);
++	gettimeofday (&leave, NULL);
+ 
+-	/* Reset idle id */
++	/* Reset idle id*/
+ 	canvas->idle_id = 0;
+ 
++	timersub (&leave, &enter, &diff);
++
++	/* GnomeCanvas can be REALLY REALLY slow at updating/recomputing
++	 * lines. During motion handling this can lead to situations where the
++	 * next motion event arrives before the update is complete, and
++	 * as a result, GTK never gets to run the redraw/expose cycle.
++	 *
++	 * This cannot be fixed until we replace the canvas, so for 
++	 * force an actual redraw 
++	 */
++	
++	if (diff.tv_sec > 0 || diff.tv_usec > 30000) {
++		gdk_window_process_updates (canvas->layout.bin_window, 1);
++	}
++
+ 	GDK_THREADS_LEAVE ();
+ 
+ 	return FALSE;
