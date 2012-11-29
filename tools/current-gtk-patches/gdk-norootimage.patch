@@ -1,0 +1,20 @@
+--- a/gdk/quartz/gdkimage-quartz.c
++++ b/gdk/quartz/gdkimage-quartz.c
+@@ -137,6 +137,9 @@ _gdk_quartz_image_copy_to_image (GdkDrawable *drawable,
+ 
+       if (GDK_WINDOW_IMPL_QUARTZ (drawable) == GDK_WINDOW_IMPL_QUARTZ (GDK_WINDOW_OBJECT (_gdk_root)->impl))
+         {
++#if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_4
++         return image;
++#else
+           /* Special case for the root window. */
+          CGRect rect = CGRectMake (src_x, src_y, width, height);
+           CGImageRef root_image_ref = CGWindowListCreateImage (rect,
+@@ -145,6 +148,7 @@ _gdk_quartz_image_copy_to_image (GdkDrawable *drawable,
+                                                                kCGWindowImageDefault);
+           rep = [[NSBitmapImageRep alloc] initWithCGImage: root_image_ref];
+           CGImageRelease (root_image_ref);
++#endif
+         }
+       else
+         {

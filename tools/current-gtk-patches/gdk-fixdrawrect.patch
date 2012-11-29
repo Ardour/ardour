@@ -1,0 +1,14 @@
+diff --git a/gdk/quartz/GdkQuartzView.c b/gdk/quartz/GdkQuartzView.c
+index 77ff5d7..3997a7e 100644
+--- a/gdk/quartz/GdkQuartzView.c
++++ b/gdk/quartz/GdkQuartzView.c
+@@ -86,7 +86,7 @@
+   if (NSEqualRects (rect, NSZeroRect))
+     return;
+ 
+-  if (!GDK_WINDOW_IS_MAPPED (gdk_window))
++  if (!GDK_WINDOW_IS_MAPPED (gdk_window) && ((gdk_quartz_osx_version() >= GDK_OSX_LEOPARD) && [self wantsLayer]))
+     {
+       /* If the window is not yet mapped, clip_region_with_children
+        * will be empty causing the usual code below to draw nothing.
+
