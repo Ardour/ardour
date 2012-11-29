@@ -21,6 +21,19 @@ function fetch_as () {
     fi
 }
 
+function fix_install_name () {
+    #
+    # this is a temporary hack to deal with the fact that the
+    # version of waf used by the LV2 stack does not correctly
+    # set the install name of those libraries. Once that is
+    # fixed in a release version, this function and its
+    # uses can be removed.
+    # 
+    if uname -a | grep --silent arwin ; then
+	install_name_tool -id $1 $1
+    fi
+}
+
 clean=
 makespace=
 parallel=2
@@ -197,7 +210,7 @@ if [ ! -f serd-0.18.0.tar.bz2 ] ; then
     echo Serd
     fetch_as_is http://download.drobilla.net/serd-0.18.0.tar.bz2
 fi
-if [ ! -f sord-10.4.tar.bz2 ] ; then
+if [ ! -f sord-0.10.4.tar.bz2 ] ; then
     echo Sord
     fetch_as_is http://download.drobilla.net/sord-0.10.4.tar.bz2
 fi
@@ -228,6 +241,7 @@ if [ x$OSX = x ] ; then
         (set -e && cd util-linux-2.21 && ./configure --prefix=$PREFIX --enable-shared --disable-most-builds --without-ncurses --enable-libuuid && cd libuuid && make && make install) || die "uuid build failed"
 fi
 
+
 tar xf boost_1_49_0.tar.bz2 && \
   (set -e && cd boost_1_49_0 && ./bootstrap.sh --prefix=$PREFIX --with-libraries=exception && ./b2 && ./b2 install) || die "boost build failed"
 
@@ -252,8 +266,11 @@ tar xf gtkmm-2.24.2.tar.xz && \
    (set -e && cd gtkmm-2.24.2 && CXXFLAGS="$GLOBAL_CFLAGS" CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX --disable-documentation && make && make install) || die "gtkmm build failed"
 tar xf libart_lgpl-2.3.21.tar.bz2 && \
     (set -e && cd libart_lgpl-2.3.21 && CXXFLAGS="$GLOBAL_CFLAGS" CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install) || die "libart build failed"
+
+gnomecanvas_patch=$this_script_dir/misc-patches/gnome-canvas-slow-idle.patch
+
 tar xf libgnomecanvas-2.30.3.tar.bz2 && \
-    (set -e && cd libgnomecanvas-2.30.3 && CXXFLAGS="$GLOBAL_CFLAGS" CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install) || die "gnomecanvas build failed"
+    (set -e && cd libgnomecanvas-2.30.3 && patch -p0 < $gnomecanvas_patch && CXXFLAGS="$GLOBAL_CFLAGS" CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install) || die "gnomecanvas build failed"
 tar xf libgnomecanvasmm-2.26.0.tar.bz2 && \
     (set -e && cd libgnomecanvasmm-2.26.0 && CXXFLAGS="$GLOBAL_CFLAGS" CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install) || die "gnomecanvasmm build failed"
 
@@ -330,15 +347,15 @@ tar xf isodate-0.4.0.tar.gz && \
 tar xf lv2-1.2.0.tar.bz2 && \
     (set -e && cd lv2-1.2.0 && unset MACOSX_DEPLOYMENT_TARGET && ./waf configure --prefix=$PREFIX --copy-headers && ./waf build && sudo ./waf install) || die "LV2 build failed"
 tar xf serd-0.18.0.tar.bz2 && \
-    (set -e && cd serd-0.18.0 && ./waf configure --prefix=$PREFIX && ./waf build && ./waf install) || die "serd build failed"
+    (set -e && cd serd-0.18.0 && ./waf configure --prefix=$PREFIX && ./waf build && ./waf install && fix_install_name $PREFIX/lib/libserd-0.dylib) || die "serd build failed"
 tar xf sord-0.10.4.tar.bz2 && \
-    (set -e && cd sord-0.10.4 && ./waf configure --prefix=$PREFIX  && ./waf build && ./waf install) || die "sord build failed"
+    (set -e && cd sord-0.10.4 && ./waf configure --prefix=$PREFIX  && ./waf build && ./waf install && fix_install_name $PREFIX/lib/libsord-0.dylib) || die "sord build failed"
 tar xf sratom-0.4.0.tar.bz2 && \
-    (set -e && cd sratom-0.4.0 && ./waf configure --prefix=$PREFIX && ./waf build && ./waf install) || die "sratom build failed"
+    (set -e && cd sratom-0.4.0 && ./waf configure --prefix=$PREFIX && ./waf build && ./waf install  && fix_install_name $PREFIX/lib/libsratom-0.dylib) || die "sratom build failed"
 tar xf lilv-0.14.4.tar.bz2 && \
-    (set -e && cd lilv-0.14.4 && ./waf configure --prefix=$PREFIX --default-lv2-path='~/.lv2:/usr/local/lib/lv2:/usr/local/lib64/lv2:/usr/lib/lv2:/usr/lib64/lv2' && ./waf build && ./waf install) || die "lilv build failed"
+    (set -e && cd lilv-0.14.4 && ./waf configure --prefix=$PREFIX --default-lv2-path='~/.lv2:/usr/local/lib/lv2:/usr/local/lib64/lv2:/usr/lib/lv2:/usr/lib64/lv2' && ./waf build && ./waf install && fix_install_name $PREFIX/lib/liblilv-0.dylib) || die "lilv build failed"
 tar xf suil-0.6.6.tar.bz2 && \
-    (set -e && cd suil-0.6.6 && CFLAGS="-I$PREFIX/include" ./waf configure --prefix=$PREFIX && ./waf && ./waf install) || die "suil build failed"
+    (set -e && cd suil-0.6.6 && CFLAGS="-I$PREFIX/include" ./waf configure --prefix=$PREFIX && ./waf && ./waf install && fix_install_name $PREFIX/lib/libsuil-0.dylib) || die "suil build failed"
 
 # two post-install hacks
 
