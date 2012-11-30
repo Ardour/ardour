@@ -232,13 +232,19 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen)
 		double frac = (min_x - x0) / (x1 - x0);
 		int64_t subveclen = (int64_t) floor (veclen * frac);
 
+		cerr << "subveclen = " << subveclen << endl;
+
 		subveclen = min (subveclen, (int64_t)veclen);
+		
+		cerr << "subveclen2 = " << subveclen << endl;
 
 		for (i = 0; i < subveclen; ++i) {
 			vec[i] = _list.events().front()->value;
 		}
 
+		cerr << "adjust veclen from " << veclen << " to ";
 		veclen -= subveclen;
+		cerr << veclen << endl;
 		vec += subveclen;
 	}
 
@@ -254,8 +260,10 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen)
 
 		float val;
 
+		cerr << "subveclen3 = " << subveclen << endl;
 		subveclen = min (subveclen, (int64_t)veclen);
 
+		cerr << "subveclen4 = " << subveclen << endl;
 		val = _list.events().back()->value;
 
 		i = veclen - subveclen;
@@ -264,7 +272,9 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen)
 			vec[i] = val;
 		}
 
+		cerr << "adjust veclen2 from " << veclen << " to ";
 		veclen -= subveclen;
+		cerr << veclen << endl;
 	}
 
 	cerr << "Check5: veclen = " << veclen << endl;
