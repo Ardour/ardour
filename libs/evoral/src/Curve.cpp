@@ -255,6 +255,10 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen)
 		/* fill some end section of the array with the default or final value */
 
 		double frac = (x1 - max_x) / (x1 - x0);
+		
+		cerr << "compute subveclen from " << original_veclen << " * " << frac
+		     << " taken from " << x0 << " .. " << x0 
+		     << endl;
 
 		int64_t subveclen = (int64_t) floor (original_veclen * frac);
 
