@@ -82,9 +82,8 @@ static void
 reverse_curve (boost::shared_ptr<Evoral::ControlList> dst, boost::shared_ptr<const Evoral::ControlList> src)
 {
 	size_t len = src->back()->when;
-	
-	for (Evoral::ControlList::const_iterator it = src->begin(); it!=src->end(); it++) {
-		dst->add (len - (*it)->when, (*it)->value);
+	for (Evoral::ControlList::const_reverse_iterator it = src->rbegin(); it!=src->rend(); it++) {
+		dst->fast_simple_add (len - (*it)->when, (*it)->value);
 	}
 }
 
@@ -141,7 +140,7 @@ merge_curves (boost::shared_ptr<Evoral::ControlList> dst,
 		interp += v2 * ( (double)count / (double)size );
 
 		interp = dB_to_coefficient(interp);
-		dst->add ( (*c1)->when, interp );
+		dst->fast_simple_add ( (*c1)->when, interp );
 		c1++;
 		count++;
 	}
