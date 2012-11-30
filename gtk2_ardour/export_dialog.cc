@@ -27,6 +27,7 @@
 
 #include "export_dialog.h"
 #include "gui_thread.h"
+#include "nag.h"
 
 #include "i18n.h"
 
@@ -331,6 +332,14 @@ ExportDialog::show_progress ()
 	}
 
 	if (!status->aborted()) {
+
+		NagScreen* ns = NagScreen::maybe_nag (_("export"));
+		
+		if (ns) {
+			ns->nag ();
+			delete ns;
+		}
+		
 		status->finish ();
 	}
 }
