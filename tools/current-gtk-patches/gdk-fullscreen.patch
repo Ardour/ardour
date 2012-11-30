@@ -1,34 +1,29 @@
 diff --git a/gdk/quartz/gdkwindow-quartz.c b/gdk/quartz/gdkwindow-quartz.c
-index 8e12ae6..41a391a 100644
+index 792092e..3f7cd77 100644
 --- a/gdk/quartz/gdkwindow-quartz.c
 +++ b/gdk/quartz/gdkwindow-quartz.c
-@@ -2674,17 +2674,31 @@ gdk_window_set_decorations (GdkWindow       *window,
+@@ -2714,18 +2714,30 @@ gdk_window_set_decorations (GdkWindow       *window,
          }
        else
          {
-+     	  NSString* title = [impl->toplevel title]; 		
-+	  int has_shadow = [impl->toplevel hasShadow];
-+	  int level = [impl->toplevel level];
-+	  NSColor* bg = [impl->toplevel backgroundColor];
-+	  NSScreen* the_screen = [impl->toplevel screen];
-+
++      	  NSString* title = [impl->toplevel title]; 		
++ 	  NSColor* bg = [impl->toplevel backgroundColor];
++ 	  NSScreen* the_screen = [impl->toplevel screen];
++ 
            [impl->toplevel release];
-+
++ 
            impl->toplevel = [[GdkQuartzWindow alloc] initWithContentRect:rect
--                                                                styleMask:new_mask
--                                                                  backing:NSBackingStoreBuffered
+                                                                 styleMask:new_mask
+                                                                   backing:NSBackingStoreBuffered
 -                                                                    defer:NO];
--          [impl->toplevel setHasShadow: window_type_hint_to_shadow (impl->type_hint)];
--          [impl->toplevel setLevel: window_type_hint_to_level (impl->type_hint)];
-+                                                              styleMask:new_mask
-+                                                                backing:NSBackingStoreBuffered
-+                                                                  defer:YES
-+                             			                 screen:the_screen];
-+          [impl->toplevel setHasShadow:has_shadow];
-+          [impl->toplevel setLevel:level];
++                                                                    defer:YES
++                                                                   screen:the_screen];
+           [impl->toplevel setHasShadow: window_type_hint_to_shadow (impl->type_hint)];
+           [impl->toplevel setLevel: window_type_hint_to_level (impl->type_hint)];
 +          [impl->toplevel setTitle:title];
 +          [impl->toplevel setBackgroundColor:bg];
-+
++ 
+           [impl->toplevel setHidesOnDeactivate: window_type_hint_to_hides_on_deactivate (impl->type_hint)];
            [impl->toplevel setContentView:old_view];
          }
  
@@ -36,11 +31,11 @@ index 8e12ae6..41a391a 100644
 +      if (new_mask == NSBorderlessWindowMask)
 +        [impl->toplevel setContentSize:rect.size];
 +      else
-+        [impl->toplevel setFrame:rect display:TRUE];
++        [impl->toplevel setFrame:rect display:YES];
  
        /* Invalidate the window shadow for non-opaque views that have shadow
         * enabled, to get the shadow shape updated.
-@@ -2880,6 +2894,7 @@ gdk_window_fullscreen (GdkWindow *window)
+@@ -2921,6 +2933,7 @@ gdk_window_fullscreen (GdkWindow *window)
  {
    FullscreenSavedGeometry *geometry;
    GdkWindowObject *private = (GdkWindowObject *) window;
@@ -48,7 +43,7 @@ index 8e12ae6..41a391a 100644
    NSRect frame;
  
    if (GDK_WINDOW_DESTROYED (window) ||
-@@ -2905,10 +2920,14 @@ gdk_window_fullscreen (GdkWindow *window)
+@@ -2946,10 +2959,14 @@ gdk_window_fullscreen (GdkWindow *window)
  
        gdk_window_set_decorations (window, 0);
  
@@ -64,7 +59,7 @@ index 8e12ae6..41a391a 100644
      }
  
    SetSystemUIMode (kUIModeAllHidden, kUIOptionAutoShowMenuBar);
-@@ -2919,6 +2938,8 @@ gdk_window_fullscreen (GdkWindow *window)
+@@ -2960,6 +2977,8 @@ gdk_window_fullscreen (GdkWindow *window)
  void
  gdk_window_unfullscreen (GdkWindow *window)
  {
@@ -73,7 +68,7 @@ index 8e12ae6..41a391a 100644
    FullscreenSavedGeometry *geometry;
  
    if (GDK_WINDOW_DESTROYED (window) ||
-@@ -2940,6 +2961,8 @@ gdk_window_unfullscreen (GdkWindow *window)
+@@ -2981,6 +3000,8 @@ gdk_window_unfullscreen (GdkWindow *window)
  
        g_object_set_data (G_OBJECT (window), FULLSCREEN_DATA, NULL);
  
