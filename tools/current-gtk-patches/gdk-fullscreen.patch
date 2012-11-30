@@ -1,8 +1,34 @@
 diff --git a/gdk/quartz/gdkwindow-quartz.c b/gdk/quartz/gdkwindow-quartz.c
-index 792092e..3f7cd77 100644
+index 792092e..3455461 100644
 --- a/gdk/quartz/gdkwindow-quartz.c
 +++ b/gdk/quartz/gdkwindow-quartz.c
-@@ -2714,18 +2714,30 @@ gdk_window_set_decorations (GdkWindow       *window,
+@@ -2704,28 +2704,53 @@ gdk_window_set_decorations (GdkWindow       *window,
+           rect = [NSWindow contentRectForFrameRect:rect styleMask:old_mask];
+         }
+ 
+-      /* Note, before OS 10.6 there doesn't seem to be a way to change this without
+-       * recreating the toplevel. There might be bad side-effects of doing
+-       * that, but it seems alright.
++      /* Before OS 10.6 there doesn't seem to be a way to change this without
++       * recreating the toplevel. From 10.6 onward, a simple call to setStyleMask
++       * takes care of most of this, except for ensuring that the title is set.
+        */
+       if ([impl->toplevel respondsToSelector:@selector(setStyleMask:)])
+         {
++      	  NSString* title = [impl->toplevel title]; 		
++
+           [(id<CanSetStyleMask>)impl->toplevel setStyleMask:new_mask];
++
++	  /* It appears that unsetting and then resetting NSTitleMask does
++	     not reset the title in the title bar as might be expected.
++
++	     In theory we only need set this if new_mask includes NSTitledMask. 
++	     This behaved extremely oddly when conditionalized upon that
++	     and since it has no side effects (i.e. if NSTitleMask is not
++	     requested, the title will not be displayed, just do it
++	     unconditionally.
++	  */
++	  [impl->toplevel setTitle:title];
          }
        else
          {
@@ -35,7 +61,7 @@ index 792092e..3f7cd77 100644
  
        /* Invalidate the window shadow for non-opaque views that have shadow
         * enabled, to get the shadow shape updated.
-@@ -2921,6 +2933,7 @@ gdk_window_fullscreen (GdkWindow *window)
+@@ -2921,6 +2946,7 @@ gdk_window_fullscreen (GdkWindow *window)
  {
    FullscreenSavedGeometry *geometry;
    GdkWindowObject *private = (GdkWindowObject *) window;
@@ -43,7 +69,7 @@ index 792092e..3f7cd77 100644
    NSRect frame;
  
    if (GDK_WINDOW_DESTROYED (window) ||
-@@ -2946,10 +2959,14 @@ gdk_window_fullscreen (GdkWindow *window)
+@@ -2946,10 +2972,14 @@ gdk_window_fullscreen (GdkWindow *window)
  
        gdk_window_set_decorations (window, 0);
  
@@ -59,7 +85,7 @@ index 792092e..3f7cd77 100644
      }
  
    SetSystemUIMode (kUIModeAllHidden, kUIOptionAutoShowMenuBar);
-@@ -2960,6 +2977,8 @@ gdk_window_fullscreen (GdkWindow *window)
+@@ -2960,6 +2990,8 @@ gdk_window_fullscreen (GdkWindow *window)
  void
  gdk_window_unfullscreen (GdkWindow *window)
  {
@@ -68,7 +94,7 @@ index 792092e..3f7cd77 100644
    FullscreenSavedGeometry *geometry;
  
    if (GDK_WINDOW_DESTROYED (window) ||
-@@ -2981,6 +3000,8 @@ gdk_window_unfullscreen (GdkWindow *window)
+@@ -2981,6 +3013,8 @@ gdk_window_unfullscreen (GdkWindow *window)
  
        g_object_set_data (G_OBJECT (window), FULLSCREEN_DATA, NULL);
  
