@@ -195,12 +195,16 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen)
 	int32_t original_veclen;
 	int32_t npoints;
 
+	cerr << "Check1: veclen = " << veclen << endl;
+
 	if ((npoints = _list.events().size()) == 0) {
 		for (i = 0; i < veclen; ++i) {
 			vec[i] = _list.default_value();
 		}
 		return;
 	}
+
+	cerr << "Check2: veclen = " << veclen << endl;
 
 	/* events is now known not to be empty */
 
@@ -216,6 +220,8 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen)
 	hx = min (max_x, x1);
 
 	original_veclen = veclen;
+
+	cerr << "Check3: veclen = " << veclen << endl;
 
 	if (x0 < min_x) {
 
@@ -235,6 +241,8 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen)
 		veclen -= subveclen;
 		vec += subveclen;
 	}
+
+	cerr << "Check4: veclen = " << veclen << endl;
 
 	if (veclen && x1 > max_x) {
 
@@ -259,6 +267,8 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen)
 		veclen -= subveclen;
 	}
 
+	cerr << "Check5: veclen = " << veclen << endl;
+
 	if (veclen == 0) {
 		return;
 	}
@@ -271,6 +281,7 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen)
 		return;
 	}
 
+	cerr << "Check6: veclen = " << veclen << endl;
 
 	if (npoints == 2) {
 
@@ -307,9 +318,13 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen)
 		return;
 	}
 
+	cerr << "Check7: veclen = " << veclen << endl;
+	
 	if (_dirty) {
 		solve ();
 	}
+
+	cerr << "Check8: veclen = " << veclen << endl;
 
 	rx = lx;
 
@@ -317,6 +332,8 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen)
 	if (veclen > 1) {
 		dx = (hx - lx) / (veclen - 1);
 	}
+
+	cerr << "Check9: veclen = " << veclen << endl;
 
 	for (i = 0; i < veclen; ++i, rx += dx) {
 		vec[i] = multipoint_eval (rx);
