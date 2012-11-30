@@ -74,12 +74,14 @@
 (gtk_accel_path "<Actions>/Editor/align-regions-start" "<%PRIMARY%><%SECONDARY%>a")
 (gtk_accel_path "<Actions>/Editor/align-regions-start-relative" "<%SECONDARY%><%TERTIARY%>a")
 (gtk_accel_path "<Actions>/Editor/split-region" "s")
+(gtk_accel_path "<Actions>/Editor/editor-separate" "<%SECONDARY%>s")
 (gtk_accel_path "<Actions>/Common/Save" "<%PRIMARY%>s")
 (gtk_accel_path "<Actions>/Main/Snapshot" "<%PRIMARY%><%TERTIARY%>s")
 (gtk_accel_path "<Actions>/Editor/duplicate-region" "d")
 (gtk_accel_path "<Actions>/Editor/multi-duplicate-region" "<%TERTIARY%>d")
 (gtk_accel_path "<Actions>/Editor/select-all-in-punch-range" "<%PRIMARY%>d")
 (gtk_accel_path "<Actions>/Editor/fit-tracks" "f")
+(gtk_accel_path "<Actions>/Common/ToggleMaximalEditor" "<%PRIMARY%><%TERTIARY%>f")
 (gtk_accel_path "<Actions>/Editor/toggle-follow-playhead" "<%PRIMARY%>f")
 (gtk_accel_path "<Actions>/Editor/toggle-rhythm-ferret" "<%WINDOW%>f")
 (gtk_accel_path "<Actions>/MouseMode/set-mouse-mode-gain" "g")
@@ -92,10 +94,14 @@
 (gtk_accel_path "<Actions>/Common/ToggleLocations" "<%WINDOW%>l")
 (gtk_accel_path "<Actions>/Editor/zoom-to-region" "<%PRIMARY%><%SECONDARY%>z")
 (gtk_accel_path "<Actions>/Editor/zoom-to-region-both-axes" "<%SECONDARY%>z")
+
+;; BOTTOM ROW
+
 (gtk_accel_path "<Actions>/Editor/undo" "<%PRIMARY%>z")
 (gtk_accel_path "<Actions>/Editor/toggle-zoom" "<%TERTIARY%>z")
 (gtk_accel_path "<Actions>/MouseMode/set-mouse-mode-zoom" "z")
 (gtk_accel_path "<Actions>/Editor/editor-cut" "<%PRIMARY%>x")
+(gtk_accel_path "<Actions>/Editor/crop" "c")
 (gtk_accel_path "<Actions>/Editor/editor-copy" "<%PRIMARY%>c")
 (gtk_accel_path "<Actions>/Common/ToggleColorManager" "<%WINDOW%>c")
 (gtk_accel_path "<Actions>/Editor/set-region-sync-position" "v")
@@ -172,15 +178,6 @@
 (gtk_accel_path "<Actions>/Editor/goto-mark-9" "KP_9")
 
 ;; F-N keys
-
-(gtk_accel_path "<Actions>/Editor/edit-cursor-to-range-start" "F1")
-(gtk_accel_path "<Actions>/Editor/edit-cursor-to-range-end" "F2")
-(gtk_accel_path "<Actions>/Editor/crop" "F3")
-(gtk_accel_path "<Actions>/Editor/editor-separate" "F4")
-(gtk_accel_path "<Actions>/Editor/pitch-<%TERTIARY%>-region" "F5")
-(gtk_accel_path "<Actions>/Editor/select-range-between-cursors" "F6")
-(gtk_accel_path "<Actions>/Common/ToggleMaximalEditor" "F11")
-
 
 (gtk_accel_path "<Actions>/Editor/save-visual-state-1" "<%PRIMARY%>F1")
 (gtk_accel_path "<Actions>/Editor/save-visual-state-2" "<%PRIMARY%>F2")
