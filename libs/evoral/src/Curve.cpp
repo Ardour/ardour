@@ -230,22 +230,22 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen)
 		*/
 
 		double frac = (min_x - x0) / (x1 - x0);
-		int64_t subveclen = (int64_t) floor (veclen * frac);
+		int64_t fill_len = (int64_t) floor (veclen * frac);
 
-		cerr << "subveclen = " << subveclen << endl;
+		cerr << "fill_len = " << fill_len << endl;
 
-		subveclen = min (subveclen, (int64_t)veclen);
+		fill_len = min (fill_len, (int64_t)veclen);
 		
-		cerr << "subveclen2 = " << subveclen << endl;
+		cerr << "fill_len2 = " << fill_len << endl;
 
-		for (i = 0; i < subveclen; ++i) {
+		for (i = 0; i < fill_len; ++i) {
 			vec[i] = _list.events().front()->value;
 		}
 
 		cerr << "adjust veclen from " << veclen << " to ";
-		veclen -= subveclen;
+		veclen -= fill_len;
 		cerr << veclen << endl;
-		vec += subveclen;
+		vec += fill_len;
 	}
 
 	cerr << "Check4: veclen = " << veclen << endl;
@@ -256,28 +256,29 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen)
 
 		double frac = (x1 - max_x) / (x1 - x0);
 		
-		cerr << "compute subveclen from " << original_veclen << " * " << frac
+		cerr << "compute fill_len from " << original_veclen << " * " << frac
 		     << " taken from " << (int64_t) x0 << " .. " << (int64_t) x0 
+		     << " min_x = " << (int64_t) min_x << " max_x = " << (int64_t) max_x
 		     << endl;
 
-		int64_t subveclen = (int64_t) floor (original_veclen * frac);
+		int64_t fill_len = (int64_t) floor (original_veclen * frac);
 
 		float val;
 
-		cerr << "subveclen3 = " << subveclen << endl;
-		subveclen = min (subveclen, (int64_t)veclen);
+		cerr << "fill_len3 = " << fill_len << endl;
+		fill_len = min (fill_len, (int64_t)veclen);
 
-		cerr << "subveclen4 = " << subveclen << endl;
+		cerr << "fill_len4 = " << fill_len << endl;
 		val = _list.events().back()->value;
 
-		i = veclen - subveclen;
+		i = veclen - fill_len;
 
-		for (i = veclen - subveclen; i < veclen; ++i) {
+		for (i = veclen - fill_len; i < veclen; ++i) {
 			vec[i] = val;
 		}
 
 		cerr << "adjust veclen2 from " << veclen << " to ";
-		veclen -= subveclen;
+		veclen -= fill_len;
 		cerr << veclen << endl;
 	}
 
