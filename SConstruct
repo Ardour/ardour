@@ -909,7 +909,10 @@ def prep_libcheck(topenv, libinfo):
         ARDOURDEP_ROOT = os.path.expanduser ('~/a3/inst')
         libinfo.Append(CPPPATH= [ GTKROOT + "/include" ], LINKFLAGS= "-L" + GTKROOT + "/lib")
         libinfo.Append(CPPPATH= [ ARDOURDEP_ROOT + "/include" ] , LINKFLAGS= "-L" + ARDOURDEP_ROOT + "/lib")
-	    
+        topenv['NEED_LIBINTL'] = True
+    else:
+        topenv['NEED_LIBINTL'] = False
+        
 prep_libcheck(env, env)
 
 
@@ -1323,11 +1326,12 @@ if env['NLS']:
     if env['NLS'] == 0:
         print nls_error
     else:
-	if env['SYSLIBS'] or config[config_arch] == 'apple':
+	if env['NEED_LIBINTL'] or config[config_arch] == 'apple':
 	   libraries['intl'] = LibraryInfo (LIBS='intl')
            print 'Libintl will be explicitly included'
         else:
 	   libraries['intl'] = LibraryInfo ()
+           print 'Libintl will be assumed to be part of the C library'
         print "International version will be built."
 
 env = conf.Finish()
