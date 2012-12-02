@@ -85,6 +85,7 @@ class LibraryInfo(Environment):
             self.Append (CPPPATH = other.get('CPPPATH', []))
             self.Append (LINKFLAGS = other.get('LINKFLAGS', []))
             self.Append (CCFLAGS = other.get('CCFLAGS', []))
+            self.Append (CXXFLAGS = other.get('CXXFLAGS', []))
 	self.Replace(LIBPATH = list(Set(self.get('LIBPATH', []))))
 	self.Replace(CPPPATH = list(Set(self.get('CPPPATH',[]))))
         #doing LINKFLAGS breaks -framework
@@ -992,7 +993,7 @@ if env['WIIMOTE']:
 
 libraries['boost'] = LibraryInfo ()
 prep_libcheck(env, libraries['boost'])
-libraries['boost'].Append(CPPPATH="/usr/local/include", LIBPATH="/usr/local/lib")
+libraries['boost'].Append(CPPPATH="/usr/local/include", LIBPATH="/usr/local/lib",CCFLAGS="-DBOOST_SYSTEM_NO_DEPRECATED",CXXFLAGS="-DBOOST_SYSTEM_NO_DEPRECATED")
 conf = Configure (libraries['boost'])
 if conf.CheckHeader ('boost/shared_ptr.hpp', language='CXX') == False:
         print "Boost header files do not appear to be installed. You also might be running a buggy version of scons. Try scons 0.97 if you can."

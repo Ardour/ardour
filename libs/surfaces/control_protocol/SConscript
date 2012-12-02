@@ -40,7 +40,8 @@ cp.Merge ([
     libraries['midi++2'],
     libraries['xml'],
     libraries['glib2'],
-    libraries['glibmm2']
+    libraries['glibmm2'],
+    libraries['boost']
 	])
 
 libardour_cp = cp.SharedLibrary('ardour_cp', cp_files)

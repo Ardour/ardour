@@ -333,7 +333,8 @@ ardour.Merge ([
 	     libraries['sndfile'],
 	     libraries['vamp'],
 	     libraries['vamphost'],
-	     libraries['xml']
+	     libraries['xml'],
+             libraries['boost']
 	     ])
 
 if ardour['RUBBERBAND']:

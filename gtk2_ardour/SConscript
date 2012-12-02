@@ -54,7 +54,8 @@ gtkardour.Merge ([
     libraries['vamphost'],
     libraries['vamp'],
     libraries['xml'],
-    libraries['xslt']
+    libraries['xslt'],
+    libraries['boost']
 ])
 
 gtkmmtests.Append(CXXFLAGS="-DLIBSIGC_DISABLE_DEPRECATED")
@@ -67,7 +68,8 @@ gtkmmtests.Merge ([
     libraries['gtk2'],
     libraries['gtkmm2'],
     libraries['pangomm'],
-    libraries['sigc2']
+    libraries['sigc2'],
+    libraries['boost']
 ])
 
 if gtkardour['DMALLOC']:
