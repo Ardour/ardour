@@ -599,7 +599,7 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 	switch (item_type) {
 	case RegionItem:
 		if (press) {
-			if ( mouse_mode != MouseRange ) {
+			if (mouse_mode != MouseRange) {
 				set_selected_regionview_from_click (press, op);
 			} else {
 				/* don't change the selection unless the
@@ -610,6 +610,10 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 				if (!selection->selected (clicked_axisview)) {
 					set_selected_track_as_side_effect (Selection::Set);
 				}
+			}
+		} else {
+			if (mouse_mode != MouseRange) {
+				set_selected_regionview_from_click (press, op);
 			}
 		}
 		break;
