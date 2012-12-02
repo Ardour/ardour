@@ -438,7 +438,7 @@ EngineControl::build_command_line (vector<string>& cmd)
 		cmd.push_back ("netjack");
 	} else if (driver == X_("FFADO")) {
 		using_ffado = true;
-                cmd.push_back ("ffado");
+                cmd.push_back ("firewire");
 	} else if (driver == X_("Freebob")) {
                 cmd.push_back ("freebob");
 	} else if ( driver == X_("Dummy")) {
