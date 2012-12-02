@@ -562,7 +562,6 @@ EditorSummary::on_motion_notify_event (GdkEventMotion* ev)
 			y = 0;
 		}
 
-		cerr << "Motion notify => " << x << ", " << y << endl;
 		set_editor (x, y);
 		// set_cursor (_start_position);
 
