@@ -385,6 +385,8 @@ def options(opt):
                     help='Compile without support for AU Plugins with only CARBON UI (needed for 64bit)')
     opt.add_option('--boost-sp-debug', action='store_true', default=False, dest='boost_sp_debug',
                     help='Compile with Boost shared pointer debugging')
+    opt.add_option('--depstack-root', type='string', default='~', dest='depstack_root',
+                    help='Directory/folder where dependency stack trees (gtk, a3) can be found (defaults to ~)')
     opt.add_option('--soundgrid', action='store_true', default=True, dest='soundgrid',
                     help='Compile with support for Waves SoundGrid')
     opt.add_option('--dist-target', type='string', default='auto', dest='dist_target',
@@ -473,7 +475,7 @@ def configure(conf):
     # the library itself is part of glibc, or on a bare-bones build system
     # where we need to pick it up from the GTK dependency stack.
     #
-    user_gtk_root = os.path.expanduser ('~/gtk/inst')
+    user_gtk_root = os.path.expanduser (Options.options.depstack_root + '/gtk/inst')
     pkg_config_path = os.getenv('PKG_CONFIG_PATH')
     if not os.path.isfile ('/usr/include/libintl.h') or (pkg_config_path is not None and pkg_config_path.find (user_gtk_root) >= 0):
         # XXXX hack hack hack
@@ -487,7 +489,7 @@ def configure(conf):
     else:
         autowaf.display_msg(conf, 'Will use explicit linkage against libintl in ', 'no')
 
-    user_ardour_root = os.path.expanduser ('~/a3/inst')
+    user_ardour_root = os.path.expanduser (Options.options.depstack_root  + '/a3/inst')
     if pkg_config_path is not None and os.getenv('PKG_CONFIG_PATH').find (user_ardour_root) >= 0:
         # XXXX hack hack hack
         prefinclude = ''.join ([ '-I', user_ardour_root + '/include'])
@@ -498,6 +500,8 @@ def configure(conf):
         autowaf.display_msg(conf, 'Will build against private Ardour dependency stack in ' + user_ardour_root, 'yes')
     else:
         autowaf.display_msg(conf, 'Will build against private Ardour dependency stack', 'no')
+
+    sg_tree = os.path.expanduser (Options.options.depstack_root + '/ardour/3.0-SG/soundgrid')
 
     if sys.platform == 'darwin':
 
@@ -569,22 +573,22 @@ def configure(conf):
         conf.env.append_value ('CXXFLAGS_SOUNDGRID', 
                                [ '-D__MACOS__', 
                                  '-DUSE_SOUNDGRID', 
-                                 '-I/Volumes/Work/paul/ardour/3.0-SG/soundgrid',
-                                 '-I/Volumes/Work/paul/ardour/3.0-SG/soundgrid/WavesMixerAPI/1.0',
-                                 '-I/Volumes/Work/paul/ardour/3.0-SG/soundgrid/WavesPublicAPI/1.1',
-                                 '-I/Volumes/Work/paul/ardour/3.0-SG/soundgrid/WavesPublicAPIs/',
+                                 '-I' + sg_tree,
+                                 '-I' + sg_tree + '/WavesMixerAPI/1.0',
+                                 '-I' + sg_tree + '/WavesPublicAPI/1.1',
+                                 '-I' + sg_tree + '/WavesPublicAPIs/',
                                  ])
         conf.env.append_value ('CFLAGS_SOUNDGRID', 
                                [ '-D__MACOS__', 
                                  '-DUSE_SOUNDGRID', 
-                                 '-I/Volumes/Work/paul/ardour/3.0-SG/soundgrid',
-                                 '-I/Volumes/Work/paul/ardour/3.0-SG/soundgrid/WavesMixerAPI/1.0',
-                                 '-I/Volumes/Work/paul/ardour/3.0-SG/soundgrid/WavesPublicAPI/1.1',
-                                 '-I/Volumes/Work/paul/ardour/3.0-SG/soundgrid/WavesPublicAPIs/',
+                                 '-I' + sg_tree,
+                                 '-I' + sg_tree + '/WavesMixerAPI/1.0',
+                                 '-I' + sg_tree + '/WavesPublicAPI/1.1',
+                                 '-I' + sg_tree + '/WavesPublicAPIs/',
                                  ])
         conf.env.append_value ('LINKFLAGS_SOUNDGRID',
-                               [ '-Xlinker', '-rpath', '-Xlinker', '/Volumes/Work/paul/ardour/3.0-SG/soundgrid/WavesMixerCore',
-                                 '-F/Volumes/Work/paul/ardour/3.0-SG/soundgrid/WavesMixerCore',
+                               [ '-Xlinker', '-rpath', '-Xlinker', sg_tree + '/WavesMixerCore',
+                                 '-F' + sg_tree + '/WavesMixerCore',
                                  '-framework', 'MixerCoreSG' 
                                  ])                               
         conf.check_cxx (header_name='WavesMixerAPI/1.0/WavesMixerAPI.h', 
