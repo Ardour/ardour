@@ -214,6 +214,13 @@ JackMIDIPort::write (const byte * msg, size_t msglen, timestamp_t timestamp)
 {
 	int ret = 0;
 
+	if (!_jack_client || !_jack_port) {
+		/* poof ! make it just vanish into thin air, since we are no
+		   longer connected to JACK.
+		*/
+		return msglen;
+	}
+
 	if (!sends_output()) {
 		return ret;
 	}
