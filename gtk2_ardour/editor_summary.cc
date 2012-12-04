@@ -689,8 +689,6 @@ EditorSummary::set_editor (double const x, double const y)
 		   is merely pending but not executing.  But c'est la vie.
 		*/
 		
-		cerr << "Editor pending idle already queued\n";
-
 		return;
 	}
 

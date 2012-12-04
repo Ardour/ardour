@@ -206,6 +206,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	_play_range = false;
 	_exporting = false;
 	pending_abort = false;
+	_adding_routes_in_progress = false;
 	destructive_index = 0;
 	first_file_data_format_reset = true;
 	first_file_header_format_reset = true;

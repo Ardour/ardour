@@ -2136,6 +2136,31 @@ Session::new_route_from_template (uint32_t how_many, const std::string& template
 void
 Session::add_routes (RouteList& new_routes, bool input_auto_connect, bool output_auto_connect, bool save)
 {
+	try {
+		PBD::Unwinder<bool> aip (_adding_routes_in_progress, true);
+		add_routes_inner (new_routes, input_auto_connect, output_auto_connect);
+
+	} catch (...) {
+		error << _("Adding new tracks/busses failed") << endmsg;
+	}
+
+	graph_reordered ();
+
+	update_latency (true);
+	update_latency (false);
+		
+	set_dirty();
+	
+	if (save) {
+		save_state (_current_snapshot_name);
+	}
+	
+	RouteAdded (new_routes); /* EMIT SIGNAL */
+}
+
+void
+Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool output_auto_connect)
+{
         ChanCount existing_inputs;
         ChanCount existing_outputs;
 	uint32_t order = next_control_id();
@@ -2191,6 +2216,7 @@ Session::add_routes (RouteList& new_routes, bool input_auto_connect, bool output
 			}
 		}
 
+
 		if (input_auto_connect || output_auto_connect) {
 			auto_connect_route (r, existing_inputs, existing_outputs, true, input_auto_connect);
 		}
@@ -2199,7 +2225,7 @@ Session::add_routes (RouteList& new_routes, bool input_auto_connect, bool output
 		   reasonable defaults because they also affect the remote control
 		   ID in most situations.
 		*/
-		
+
 		if (!r->has_order_key (EditorSort)) {
 			if (r->is_hidden()) {
 				/* use an arbitrarily high value */
@@ -2215,31 +2241,18 @@ Session::add_routes (RouteList& new_routes, bool input_auto_connect, bool output
 	}
 
 	if (_monitor_out && IO::connecting_legal) {
-
-		{
-			Glib::Threads::Mutex::Lock lm (_engine.process_lock());		
-			
-			for (RouteList::iterator x = new_routes.begin(); x != new_routes.end(); ++x) {
-				if ((*x)->is_monitor()) {
+		Glib::Threads::Mutex::Lock lm (_engine.process_lock());		
+		
+		for (RouteList::iterator x = new_routes.begin(); x != new_routes.end(); ++x) {
+			if ((*x)->is_monitor()) {
+				/* relax */
+			} else if ((*x)->is_master()) {
 					/* relax */
-				} else if ((*x)->is_master()) {
-					/* relax */
-				} else {
-					(*x)->enable_monitor_send ();
-				}
+			} else {
+				(*x)->enable_monitor_send ();
 			}
 		}
-
-		resort_routes ();
 	}
-
-	set_dirty();
-
-	if (save) {
-		save_state (_current_snapshot_name);
-	}
-
-	RouteAdded (new_routes); /* EMIT SIGNAL */
 }
 
 void
@@ -3551,7 +3564,7 @@ Session::graph_reordered ()
 	   from a set_state() call or creating new tracks. Ditto for deletion.
 	*/
 
-	if (_state_of_the_state & (InitialConnecting|Deletion)) {
+	if ((_state_of_the_state & (InitialConnecting|Deletion)) || _adding_routes_in_progress) {
 		return;
 	}
 
@@ -4531,7 +4544,7 @@ Session::update_latency (bool playback)
 {
 	DEBUG_TRACE (DEBUG::Latency, string_compose ("JACK latency callback: %1\n", (playback ? "PLAYBACK" : "CAPTURE")));
 
-	if (_state_of_the_state & (InitialConnecting|Deletion)) {
+	if ((_state_of_the_state & (InitialConnecting|Deletion)) || _adding_routes_in_progress) {
 		return;
 	}
 

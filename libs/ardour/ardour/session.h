@@ -1269,6 +1269,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	SerializedRCUManager<RouteList>  routes;
 
 	void add_routes (RouteList&, bool input_auto_connect, bool output_auto_connect, bool save);
+        void add_routes_inner (RouteList&, bool input_auto_connect, bool output_auto_connect);
+        bool _adding_routes_in_progress;
 	uint32_t destructive_index;
 
 	boost::shared_ptr<Route> XMLRouteFactory (const XMLNode&, int);

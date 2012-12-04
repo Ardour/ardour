@@ -311,9 +311,10 @@ Mixer_UI::add_strips (RouteList& routes)
 {
 	MixerStrip* strip;
 
-	{
-		Unwinder<bool> uw (no_track_list_redisplay, true);
-		
+	try {
+		no_track_list_redisplay = true;
+		track_display.set_model (Glib::RefPtr<ListStore>());
+
 		for (RouteList::iterator x = routes.begin(); x != routes.end(); ++x) {
 			boost::shared_ptr<Route> route = (*x);
 			
@@ -345,7 +346,7 @@ Mixer_UI::add_strips (RouteList& routes)
 			
 			strip = new MixerStrip (*this, _session, route);
 			strips.push_back (strip);
-			
+
 			Config->get_default_narrow_ms() ? _strip_width = Narrow : _strip_width = Wide;
 			
 			if (strip->width_owner() != strip) {
@@ -365,8 +366,13 @@ Mixer_UI::add_strips (RouteList& routes)
 			strip->WidthChanged.connect (sigc::mem_fun(*this, &Mixer_UI::strip_width_changed));
 			strip->signal_button_release_event().connect (sigc::bind (sigc::mem_fun(*this, &Mixer_UI::strip_button_release_event), strip));
 		}
+
+	} catch (...) {
 	}
 
+	no_track_list_redisplay = false;
+	track_display.set_model (track_model);
+	
 	sync_order_keys_from_treeview ();
 	redisplay_track_list ();
 }
