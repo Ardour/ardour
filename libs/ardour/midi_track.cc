@@ -775,6 +775,8 @@ MidiTrack::set_monitoring (MonitorChoice mc)
 MonitorState
 MidiTrack::monitoring_state () const
 {
+	return Track::monitoring_state();
+
 	/* Explicit requests */
 	
 	if (_monitoring & MonitorInput) {
