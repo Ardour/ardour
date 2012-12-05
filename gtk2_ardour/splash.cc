@@ -147,8 +147,12 @@ Splash::expose (GdkEventExpose* ev)
 	Glib::RefPtr<Gdk::GC> white = style->get_white_gc();
 
 	window->draw_layout (white, 10, pixbuf->get_height() - 30, layout);
+
+	/* this must execute AFTER the GDK idle update mechanism 
+	 */
        
-	Glib::signal_idle().connect (sigc::mem_fun (this, &Splash::idle_after_expose));
+	Glib::signal_idle().connect (sigc::mem_fun (this, &Splash::idle_after_expose),
+				     GDK_PRIORITY_REDRAW+2);
 
 	return true;
 }
@@ -197,7 +201,7 @@ Splash::message (const string& msg)
 
 	if (win) {
                 expose_done = false;
-                
+
 		win->invalidate_rect (Gdk::Rectangle (0, darea.get_height() - 30, darea.get_width(), 30), true);
 
                 while (!expose_done) {
